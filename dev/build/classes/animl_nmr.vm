@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AnIML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xsi:noNamespaceSchemaLocation="http://animl.sourceforge.net/schema/animl-core.xsd" version="1.0">
+
+<!--from Velocity template file for construction of AnIML XML file from JCAMP-DX file -->
+<!--Based on JCAMP-DX, using IR protocol 4.24 but updated for 5.01 with LONGDATE  -->
+<!--AniML UV-Vis Technique Definition (http://animl.sf.net/schema/techniques/UV%20base%20instance%20document.atid) dated 2004/08/30 -->
+<!--AniML IR Technique Definition (http://animl.sf.net/schema/techniques/IR%20base%20instance%20document.atid) dated 2004/09/01 -->
+<!--AniML NMR Technique Definition (http://animl.sf.net/schema/techniques/NMR%20base%20instance%20document.atid) dated 2004/08/30 -->
+<!--AniML Sample Schema (http://animl.sf.net/schema/techniques/Sample%20Parameters%20base%20instance%20document.atid) dated 2004/09/01 -->
+<!--AniML Core Schema (http://animl.sourceforge.net/schema/animl-core.xsd) dated 2004/04/20 -->
+<!--JCAMP-DX v4.24 (http://www.jcamp.org/protocols/dxir01.pdf) accessed 02/19/06 -->
+<!--JCAMP/AnIML crosswalk XL spreadsheet (http://animl.sourceforge.net/IUPAC/All%20JCAMP-DX%20and%20netCDF%20Labels%20version%2028%20August%202003.xls) 02/19/06 -->
+
+<!--Stuart J. Chalk February 19, 2006 -->
+<!--Robert J. Lancashire June 09, 2006 -->
+<!--Version 0.2 -->
+
+<!--Notes -->
+<!--Originally used as an include file in jcamp2animl.php -->
+<!--Originally written using a template AnIML file JCAMP_UV_Template.xml -->
+
+    <SampleSet>
+        <Sample sampleID="sample" derived="false">
+            <ParameterCategorySet>
+                <ParameterCategory name="SampleDescription">
+                    <ParameterSet>
+                        <Parameter name="SampleName">
+                            <string>$title</string>
+                        </Parameter>
+#if($CASNo !="")
+                        <Parameter name="Name">
+                            <string>$CASNo</string>
+                        </Parameter>
+#end
+#if($state !="")
+                        <Parameter name="SampleState">
+                            <string>$state</string>
+                        </Parameter>
+#end
+#if($samplingproc !="")
+                        <Parameter name="SamplePreparationProcedure">
+                            <string>$samplingproc</string>
+                        </Parameter>
+#end
+                        <Parameter name="SampleOwner">
+                            <string>$owner</string>
+                        </Parameter>
+#if($temp !="")
+                        <Parameter name="Temperature">
+                            <float32>$temp</float32>
+                        </Parameter>
+#end
+#if($bp !="")
+                        <ParameterCategory name="BP">
+                            <Parameter name="Max">
+                                <float32>$bp</float32>
+                            </Parameter>
+                            <Parameter name="AtPressure">
+                                <float32>101325.01</float32>
+                                <Unit label="Pa">
+                                    <SIUnit exponent="-1">m</SIUnit>
+                                    <SIUnit exponent="1">kg</SIUnit>
+                                    <SIUnit exponent="-2">s</SIUnit>
+                                </Unit>
+                            </Parameter>
+                        </ParameterCategory>
+#end
+#if($mp !="")
+                        <ParameterCategory name="MP">
+                            <Parameter name="Max">
+                                <float32>$mp</float32>
+                            </Parameter>
+                            <Parameter name="AtPressure">
+                                <float32>101325.01</float32>
+                                <Unit label="Pa">
+                                    <SIUnit exponent="-1">m</SIUnit>
+                                    <SIUnit exponent="1">kg</SIUnit>
+                                    <SIUnit exponent="-2">s</SIUnit>
+                                </Unit>
+                            </Parameter>
+                        </ParameterCategory>
+#end
+                    </ParameterSet>
+                </ParameterCategory>
+            </ParameterCategorySet>
+        </Sample>
+    </SampleSet>
+    <Sample sampleID="solvent" derived="false">
+	<ParameterCategorySet>
+		<ParameterCategory name="SampleDescription">
+			<ParameterSet>
+				<Parameter name="SampleName">
+#if($SolvName =="")
+  #set($SolvName="unknown")
+#end
+					<String>$SolvName</String>
+				</Parameter>
+			        <Parameter name="SampleState">
+				         <String>Liquid?</String>
+			        </Parameter>
+		        </ParameterSet>
+	      </ParameterCategory>
+	</ParameterCategorySet>
+    </Sample>
+    <ExperimentStepSet>
+        <ExperimentStep name="$DataType">
+            <Author type="software">
+                <Name>$origin</Name>
+                <Location>$owner</Location>
+            </Author>
+	        <Timestamp>$timestamp</Timestamp>
+            <SamplesUsed>
+               <SampleRef sampleID="sample" role="SampleMeasurement" purpose="consumed"/>
+               <SampleRef sampleID="solvent" role="Solvent" purpose="consumed"/>
+            </SamplesUsed>
+            <Technique name="NMR" uri="http://animl.sf.net/schema/techniques/NMR%20base%20instance%20document.atid"/>
+            <PageSet>
+                <Page name="spectrum">
+                    <VectorSet length="$npoints">
+                        <Vector name="Intensity" dependency="dependent" vectorID="Itensity_ID" plotUse="attribute" type="$ydata_type">
+	                            <IndividualValueSet>
+	#foreach ($coord in $xyCoords)
+		                                <$ydata_type>$coord.getYString()</$ydata_type>
+	#end
+	                            </IndividualValueSet>
+	                            <Unit label="$yUnits" />
+                        </Vector>
+			<Vector name="ChemicalShift" dependency="independent" vectorID="Shift1" plotUse="dimension" visible="true" scale="linear" type="$xdata_type">
+	                            <AutoIncrementedValueSet>
+	                                <StartValue>
+	                                    <$xdata_type>$firstX</$xdata_type>
+	                                </StartValue>
+	                                <Increment>
+	                                    <$xdata_type>$deltaX</$xdata_type>
+	                                </Increment>
+	                            </AutoIncrementedValueSet>
+	                            <Unit label="Hz" />
+                        </Vector>
+                    </VectorSet>
+                    <ParameterCategorySet>
+                        <ParameterCategory name="MeasurementParameters">
+                            <ParameterSet>
+                                <Parameter name="Identifier">
+                                    <string>$title</string>
+                                </Parameter>
+				<Parameter name="Nucleus">
+					<String>$ObNucleus</String>
+				</Parameter>
+				<Parameter name="ObserveFrequency">
+					<float32>$ObFreq</float32>
+						<Unit label="Hz">
+				 		      <SIUnit exponent="-1">s</SIUnit>
+						</Unit>
+				</Parameter>
+				<Parameter name="SolventReference">
+					<float32>0</float32>
+						<Unit label="ppm"/>
+				</Parameter>
+				<Parameter name="ReferencePoint">
+					<float32>0</float32>
+						<Unit label="Hz">
+							<SIUnit exponent="-1">s</SIUnit>
+						</Unit>
+				</Parameter>
+				<Parameter name="NPointsOrigin">
+					<Int>0</Int>
+				</Parameter>
+				<Parameter name="PointOffset">
+					<Int>0</Int>
+				</Parameter>
+                            </ParameterSet>
+                        </ParameterCategory>
+			<ParameterCategory name="ProcessingParameters">
+			    <ParameterSet>
+				<Parameter name="LB">
+					<float32>1</float32>
+				</Parameter>
+				<Parameter name="PhaseCorr0">
+					<String>unknown</String>
+				</Parameter>
+				<Parameter name="PhaseCorr1">
+					<String>unknown</String>
+				</Parameter>
+			    </ParameterSet>
+			</ParameterCategory>
+                    </ParameterCategorySet>
+                </Page>
+            </PageSet>
+            <ParameterCategorySet>
+                <ParameterCategory name="Instrument">
+                    <ParameterSet>
+                        <Parameter name="Vendor">
+                            <string>$vendor</string>
+                        </Parameter>
+                        <Parameter name="Model">
+                            <string>$model</string>
+                        </Parameter>
+			<Parameter name="Magnet">
+			    <String>unknown</String>
+			</Parameter>
+                    </ParameterSet>
+                </ParameterCategory>
+            </ParameterCategorySet>
+        </ExperimentStep>
+    </ExperimentStepSet>
+    <AuditTrail>
+        <LogEntry>
+            <Timestamp>$timestamp</Timestamp>
+            <User type="software">
+                <Name>AnIML exporter 1.0 JSpecView http://jspecview.sf.net</Name>
+            </User>
+            <Action>created</Action>
+            <Reason>Conversion from JCAMP-DX file - $file</Reason>
+            <Reference>There may be additional header items in the JCAMP-DX file that have not been converted to XML</Reference>
+        </LogEntry>
+    </AuditTrail>
+</AnIML>

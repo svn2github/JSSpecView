@@ -1,0 +1,36 @@
+<html>
+<head>
+<title>
+HTML Test Page
+</title>
+<script language="javascript" type="text/javascript">
+
+function MyCallBack(x, y) {
+  alert("ESTIMATE-> " + x + " "+ y);
+}
+
+function MyPeakCallBack(x1, y1, x2, y2, index) {
+  alert("ACTUAL-> " + x1 + ", " + y1 + ", "+ x2 + ", "+ y2 + ", " + index);
+}
+
+</script>
+</head>
+<body>
+jspecview.applet.JSVApplet will appear below in a Java enabled browser.<br>
+<applet
+  code     = "jspecview.applet.JSVApplet.class"
+  codebase = "../"
+  archive = "../jspecview.jar"
+  name     = "JSVApplet"
+  width    = "600"
+  height   = "300"
+  hspace   = "0"
+  vspace   = "0"
+  align    = "middle"
+>
+  <param name="script" value="load ../../testdata/acetophenoneHNMR.dx; gridcolor 255,0,0; plotcolor 150,100,200">
+
+</applet>
+
+</body>
+</html>

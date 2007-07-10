@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AnIML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xsi:noNamespaceSchemaLocation="http://animl.sourceforge.net/schema/animl-core.xsd" version="1.0">
+
+<!--from Velocity template file for construction of AnIML XML file from JCAMP-DX file -->
+<!--Based on JCAMP-DX, using IR protocol 4.24 but updated for 5.01 with LONGDATE  -->
+<!--AniML UV-Vis Technique Definition (http://animl.sf.net/schema/techniques/UV%20base%20instance%20document.atid) dated 2004/08/30 -->
+<!--AniML IR Technique Definition (http://animl.sf.net/schema/techniques/IR%20base%20instance%20document.atid) dated 2004/09/01 -->
+<!--AniML Sample Schema (http://animl.sf.net/schema/techniques/Sample%20Parameters%20base%20instance%20document.atid) dated 2004/09/01 -->
+<!--AniML Core Schema (http://animl.sourceforge.net/schema/animl-core.xsd) dated 2004/04/20 -->
+<!--JCAMP-DX v4.24 (http://www.jcamp.org/protocols/dxir01.pdf) accessed 02/19/06 -->
+<!--JCAMP/AnIML crosswalk XL spreadsheet (http://animl.sourceforge.net/IUPAC/All%20JCAMP-DX%20and%20netCDF%20Labels%20version%2028%20August%202003.xls) 02/19/06 -->
+
+<!--Stuart J. Chalk February 19, 2006 -->
+<!--Robert J. Lancashire June 01, 2006 -->
+<!--Version 0.2 -->
+
+<!--Notes -->
+<!--Originally used as an include file in jcamp2animl.php -->
+<!--Originally written using a template AnIML file JCAMP_UV_Template.xml -->
+
+    <SampleSet>
+        <Sample sampleID="$file" derived="false">
+            <ParameterCategorySet>
+                <ParameterCategory name="SampleDescription">
+                    <ParameterSet>
+                        <Parameter name="SampleName">
+                            <string>$title</string>
+                        </Parameter>
+#if($molform !="")
+			<Parameter name="MolFormula">
+			    <string>$molform</string>
+			</Parameter>
+#end
+#if($CASrn !="")
+			<Parameter name="CASRegistryNo">
+			     <string>$CASrn</string>
+			</Parameter>
+#end
+#if($CASn !="")
+			<Parameter name="CASName">
+			     <string>$CASn</string>
+			</Parameter>
+#end
+#if($bp !="")
+                        <ParameterCategory name="BP">
+                            <Parameter name="Max">
+                                <float32>$bp</float32>
+                            </Parameter>
+                            <Parameter name="AtPressure">
+                                <float32>101325.01</float32>
+                                <Unit label="Pa">
+                                    <SIUnit exponent="-1">m</SIUnit>
+                                    <SIUnit exponent="1">kg</SIUnit>
+                                    <SIUnit exponent="-2">s</SIUnit>
+                                </Unit>
+                            </Parameter>
+                        </ParameterCategory>
+#end
+#if($mp !="")
+                        <ParameterCategory name="MP">
+                            <Parameter name="Max">
+                                <float32>$mp</float32>
+                            </Parameter>
+                            <Parameter name="AtPressure">
+                                <float32>101325.01</float32>
+                                <Unit label="Pa">
+                                    <SIUnit exponent="-1">m</SIUnit>
+                                    <SIUnit exponent="1">kg</SIUnit>
+                                    <SIUnit exponent="-2">s</SIUnit>
+                                </Unit>
+                            </Parameter>
+                        </ParameterCategory>
+#end
+                    </ParameterSet>
+                </ParameterCategory>
+            </ParameterCategorySet>
+        </Sample>
+    </SampleSet>
+    <ExperimentStepSet>
+        <ExperimentStep name="$DataType">
+            <Author type="software">
+                <Name>$origin</Name>
+                <Location>$owner</Location>
+            </Author>
+	        <Timestamp>$timestamp</Timestamp>
+            <SamplesUsed>
+               <SampleRef sampleID="$file" role="SampleMeasurement" purpose="consumed"/>
+            </SamplesUsed>
+            <Technique name="$specinits" uri="http://animl.sf.net/schema/techniques/$specinits%20base%20instance%20document.atid"/>
+            <PageSet>
+                <Page name="spectrum">
+                    <VectorSet length="$npoints">
+                        <Vector name="Intensity" dependency="dependent" vectorID="Itensity_ID" plotUse="attribute" type="$ydata_type">
+#if($yencode=="ivs")
+	                            <IndividualValueSet>
+	#foreach ($coord in $xyCoords)
+		                                <$ydata_type>$coord.getYString()</$ydata_type>
+	#end
+	                            </IndividualValueSet>
+#end
+#set($OK=0)
+#if(($yUnits=="A")||($yUnits=="ABS")||($yUnits=="ABSORBANCE")||($yUnits=="AU")||($yUnits=="AUFS")||($yUnits=="OPTICAL DENSITY"))
+#set($OK=1)
+	                            <Unit label="Absorbance">
+#end
+#if(($yUnits=="T")||($yUnits=="TRANSMITTANCE"))
+#set($OK=1)
+	                            <Unit label="Transmittance">
+#end
+#if(($yUnits=="COUNTS")||($yUnits=="CTS"))
+#set($OK=1)
+	                            <Unit label="Counts">
+#end
+#if(($yUnits=="ARBITRARY UNITS")||($OK==0))
+	                            <Unit label="Arb. Units">
+#end
+                                     <SIUnit exponent="1" factor="1">1</SIUnit>
+                                   </Unit>
+                        </Vector>
+                        <Vector name="Wavelength" dependency="independent" vectorID="Wavelength_ID" plotUse="dimension" type="$xdata_type">
+#if($xencode=="avs")
+	                            <AutoIncrementedValueSet>
+	                                <StartValue>
+	                                    <$xdata_type>$firstX</$xdata_type>
+	                                </StartValue>
+	                                <Increment>
+	                                    <$xdata_type>$deltaX</$xdata_type>
+	                                </Increment>
+	                            </AutoIncrementedValueSet>
+#end
+#set($OK=0)
+#if($xUnits=="1/CM")
+#set($OK=1)
+	                            <Unit label="1/cm">
+	                                <SIUnit factor="0.01" exponent="-1" offset="0">m</SIUnit>
+#end
+#if(($xUnits=="UM")||($xUnits=="MICROMETERS"))
+#set($OK=1)
+	                            <Unit label="um">
+	                                <SIUnit factor="0.000001" exponent="1" offset="0">m</SIUnit>
+#end
+#if(($xUnits=="NM")||($xUnits=="NANOMETERS")||($xUnits=="WAVELENGTH"))
+#set($OK=1)
+	                            <Unit label="nm">
+	                                <SIUnit factor="0.000000001" exponent="1" offset="0">m</SIUnit>
+#end
+#if(($xUnits=="PM")||($xUnits=="PICOMETERS"))
+#set($OK=1)
+	                            <Unit label="pm">
+	                                <SIUnit factor="0.000000000001" exponent="1" offset="0">m</SIUnit>
+#end
+#if(($xUnits=="ARBITRARY UNITS")||($OK==0))
+	                            <Unit label="Arb. Units">
+#end
+                                    </Unit>
+                        </Vector>
+                    </VectorSet>
+                    <ParameterCategorySet>
+                        <ParameterCategory name="MeasurementParameters">
+                            <ParameterSet>
+                                <Parameter name="Identifier">
+                                    <string>$title</string>
+                                </Parameter>
+#if(($specinits=="UV") && ($pathlength==""))
+   #set($pathlength="1.0")
+#else
+   #set($pathlength="-1")
+#end
+                                <Parameter name="Pathlength">
+                                    <float32>$pathlength</float32>
+                                    <Unit label="cm">
+                                        <SIUnit exponent="1" factor="0.01">m</SIUnit>
+                                    </Unit>
+                                </Parameter>
+                                <Parameter name="ScanMode">
+                                    <string>Spectrum</string>
+                                </Parameter>
+                            </ParameterSet>
+                        </ParameterCategory>
+                    </ParameterCategorySet>
+                </Page>
+            </PageSet>
+            <ParameterCategorySet>
+                <ParameterCategory name="Instrument">
+                    <ParameterSet>
+                        <Parameter name="Vendor">
+                            <string>$vendor</string>
+                        </Parameter>
+                        <Parameter name="Model">
+                            <string>$model</string>
+                        </Parameter>
+                        <Parameter name="Resolution">
+#if($resolution=="")
+#set($resolution="Not available in JCAMP-DX file")
+#end
+                            <string>$resolution</string>
+                        </Parameter>
+                    </ParameterSet>
+                </ParameterCategory>
+            </ParameterCategorySet>
+        </ExperimentStep>
+    </ExperimentStepSet>
+    <AuditTrail>
+        <LogEntry>
+            <Timestamp>$currenttime</Timestamp>
+            <User type="software">
+                <Name>AnIML exporter 1.0 JSpecView http://jspecview.sf.net</Name>
+            </User>
+            <Action>created</Action>
+            <Reason>Conversion from JCAMP-DX file to: $file</Reason>
+            <Reference>There may be additional header items in the JCAMP-DX file that have not been converted to XML</Reference>
+        </LogEntry>
+    </AuditTrail>
+</AnIML>

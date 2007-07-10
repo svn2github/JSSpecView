@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="src/" kind="src" path=""/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="lib" path="C:/JAVA/workspace/jspecview/include/xmlParserAPIs.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/JAVA/workspace/jspecview/include/sjsxp.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/JAVA/workspace/jspecview/include/velocity-dep-1.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/JAVA/workspace/jspecview/include/xercesImpl.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Program Files/Java/jdk1.6.0/jre/lib/plugin.jar"/>
+	<classpathentry kind="lib" path="C:/JAVA/workspace/jspecview/include/jsr173_1.0_api.jar"/>
+	<classpathentry kind="output" path="build/classes"/>
+</classpath>
