@@ -1,1 +1,0 @@
-jar cmf Manifest_Velocity.txt jspecview.jar jspecview mdidesktop icons html
