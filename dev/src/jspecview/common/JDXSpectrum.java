@@ -58,6 +58,7 @@ public class JDXSpectrum implements Graph{
    * specifies whether the spectrum is continuous
    */
   private boolean continuous;
+  
 
   /**
    * whether the x values were converted from HZ to PPM
@@ -181,6 +182,7 @@ public class JDXSpectrum implements Graph{
   public void setContinuous(boolean val){
     continuous = val;
   }
+  
 
   /**
    * Sets the parent source of this spectrum

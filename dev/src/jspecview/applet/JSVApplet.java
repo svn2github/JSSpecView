@@ -88,9 +88,6 @@ import jspecview.util.TransmittanceAbsorbanceConverter;
 import netscape.javascript.JSException;     // from plugin.jar
 import netscape.javascript.JSObject;
 
-/*
-
-*/
 /**
  * JSpecView Applet class.
  * For a list of parameters and scripting functionality see the file
@@ -101,7 +98,7 @@ import netscape.javascript.JSObject;
  */
 
 public class JSVApplet extends JApplet {
-  public static final String APPLET_VERSION = "1.0.20070709-1500";
+  public static final String APPLET_VERSION = "1.0.20070710-1230";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath, XMLImportfilePath;
@@ -112,7 +109,8 @@ public class JSVApplet extends JApplet {
   boolean coordinatesOn=true;
   boolean reversePlot=false;
   boolean menuOn=true;
-  boolean compoundMenuOn= false;
+  boolean compoundMenuOn=false;
+  boolean compoundMenuOn2=true;
   boolean enableZoom=true;
 
   int startIndex=-1;
@@ -144,8 +142,8 @@ public class JSVApplet extends JApplet {
   /*---------------------------------END PARAMETERS------------------------*/
 
 
-  boolean isStandalone = false;
-  boolean XMLImport = false;
+  boolean isStandalone=false;
+  boolean XMLImport=false;
   BorderLayout appletBorderLayout = new BorderLayout();
   JPanel statusPanel = new JPanel();
   JLabel statusTextLabel = new JLabel();
@@ -232,13 +230,13 @@ public class JSVApplet extends JApplet {
   /**
    * The index of the <code>JDXSpectrum</code> that is is focus.
    */
-  public int currentSpectrumIndex = 0;
+  public int currentSpectrumIndex=0;
 
   /**
    * Whether or not spectra should be overlayed
    */
   boolean overlay;
-
+  
   /**
    * Returns a parameter value
    * @param key the parameter name
@@ -309,8 +307,13 @@ public class JSVApplet extends JApplet {
         source = factory.createJDXSource();
         specs = source.getSpectra();
         continuous = source.getJDXSpectrum(0).isContinuous();
+        if(!compoundMenuOn2)
+            compoundMenuOn = false;
+        else compoundMenuOn = source instanceof CompoundSource;
         Yunits= source.getJDXSpectrum(0).getYUnits();
-      } else {
+      } 
+      
+       else {
         // Import an XML file
         URL  url = new URL(getCodeBase() , XMLImportfilePath);
         File file = new File(url.getFile());
@@ -335,7 +338,7 @@ public class JSVApplet extends JApplet {
             return;
         }
 
-        in2.close();;
+        in2.close();
         in.close();
         xmlSpec = xmlSource.getJDXSpectrum(0);
 
@@ -353,10 +356,10 @@ public class JSVApplet extends JApplet {
       if (continuous && JSpecViewUtils.isHNMR((JDXSpectrum)selectedJSVPanel.getSpectrumAt(0)))
         integrateMenuItem.setEnabled(true);
   //  Can only convert from T <-> A  if Absorbance or Transmittance and continuous
-      if ( (!continuous) && (!Yunits.toLowerCase().contains("abs")) && (!Yunits.toLowerCase().contains("trans")) )
-        transAbsMenuItem.setEnabled(false);
-      else
+      if ( (continuous) && (Yunits.toLowerCase().contains("abs")) || (Yunits.toLowerCase().contains("trans")) )
         transAbsMenuItem.setEnabled(true);
+      else
+        transAbsMenuItem.setEnabled(false);
     }
     catch(JSpecViewException jsve){
      this.writeStatus(jsve.getMessage());
@@ -523,7 +526,6 @@ public class JSVApplet extends JApplet {
         windowMenuItem_itemStateChanged(e);
       }
     });
-
     overlayKeyMenuItem.setEnabled(false);
     overlayKeyMenuItem.setText("Show Overlay Key...");
     overlayKeyMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -531,7 +533,6 @@ public class JSVApplet extends JApplet {
         overlayKeyMenuItem_actionPerformed(e);
       }
     });
-
     transAbsMenuItem.setEnabled(true);
     transAbsMenuItem.setText("Transmittance/Absorbance");
     transAbsMenuItem.addItemListener(new java.awt.event.ItemListener() {
@@ -611,19 +612,20 @@ public class JSVApplet extends JApplet {
     boolean showRange = false;
     JSVPanel jsvp;
 
-   if (!XMLImport)
+   if (!XMLImport){
     numberOfSpectra = specs.size();
-    else
-      numberOfSpectra=1;
     overlay = theInterface.equals("overlay") && numberOfSpectra > 1;
-
+   }
+    else{
+      numberOfSpectra=1;
+    }
     if(startIndex != -1 && endIndex != -1)
       showRange = true;
 
-    // Initialise JSVanels
+    // Initialise JSVpanels
 
     if(overlay){
-      // overlay all spectra on on panel
+      // overlay all spectra on a panel
       jsvPanels = new JSVPanel[1];
 
       try{
@@ -747,7 +749,7 @@ public class JSVApplet extends JApplet {
       appletPanel.add(splitPane,  BorderLayout.CENTER);
       //splitPane.setBackground(backgroundColor);
     }
-    else{ // Single && overlay
+    else{ // Single or overlay
 //      compoundMenuOn = true;
       int spectrumIndex;
       String title;
@@ -761,7 +763,6 @@ public class JSVApplet extends JApplet {
 
       // Global variable for single interface
       currentSpectrumIndex = spectrumIndex;
-
       if(overlay && source instanceof CompoundSource){
         title = ((CompoundSource)source).getTitle();
         jsvPanels[spectrumIndex].setTitle(title);
@@ -798,7 +799,6 @@ public class JSVApplet extends JApplet {
 
               mi.setActionCommand(""+i);
               compoundMenu.add(mi);
-
             }
             compoundMenu.setText("NTuples");
           }
@@ -834,7 +834,6 @@ public class JSVApplet extends JApplet {
           appletPopupMenu.add(compoundMenu, 3);
           if (compoundMenuOn)
             compoundMenu.setEnabled(true);
-
         }
         else{
           // open dialog box
@@ -1371,8 +1370,8 @@ public class JSVApplet extends JApplet {
           JSVApplet.this.validate();
           JSVApplet.this.repaint();
           integrateMenuItem.setEnabled(true);
-          if (compoundMenuOn)
-            compoundMenu.setEnabled(true);
+   //       if (compoundMenuOn)
+//             compoundMenu.setEnabled(true);
           frame.removeAll();
           frame.dispose();
           windowMenuItem.setSelected(false);
@@ -1458,11 +1457,11 @@ public class JSVApplet extends JApplet {
   }
 
 
-    /**
+  /**
      * Allows Integration of an HNMR spectrum
      * @param e the ItemEvent
      */
-    void integrateMenuItem_itemStateChanged(ItemEvent e) {
+  void integrateMenuItem_itemStateChanged(ItemEvent e) {
 
       if (e.getStateChange() == e.SELECTED) {
         tempJSVP = JSpecViewUtils.appletIntegrate(appletPanel, true);
@@ -1483,8 +1482,8 @@ public class JSVApplet extends JApplet {
       chooseContainer();
     }
 
-    // check which mode the spectrum is in (windowed or applet)
-    private void chooseContainer() {
+  // check which mode the spectrum is in (windowed or applet)
+  private void chooseContainer() {
       // check first if we have ever had a frame
       if (frame == null) {
         integrateMenuItem.setEnabled(true);
@@ -1505,7 +1504,7 @@ public class JSVApplet extends JApplet {
         else {
           integrateMenuItem.setEnabled(true);
           if (compoundMenuOn)
-            compoundMenu.setEnabled(true);
+          compoundMenu.setEnabled(true);
           JSVApplet.this.getContentPane().add(appletPanel);
           JSVApplet.this.validate();
           JSVApplet.this.repaint();
@@ -1832,7 +1831,7 @@ public class JSVApplet extends JApplet {
     }
  }
 
- /**
+  /**
    * Loads a new file into the existing applet window
    * @param tmpFilePath String
   */
@@ -1852,7 +1851,7 @@ public class JSVApplet extends JApplet {
      * Loads a new XML document into the existing applet window
      * @param tmpFilePath String
     */
-    public void setXMLPath(String tmpFilePath){
+  public void setXMLPath(String tmpFilePath){
        this.getContentPane().removeAll();
        appletPanel.removeAll();
        newFilePath = null;
@@ -1864,7 +1863,7 @@ public class JSVApplet extends JApplet {
        appletPanel.validate();
   }
 
- /**
+  /**
    * Method that can be called from another applet or from javascript
    * that adds a highlight to a portion of the plot area of a <code>JSVPanel</code>
    * @param x1 the starting x value
@@ -1987,7 +1986,7 @@ public class JSVApplet extends JApplet {
             menuOn = Boolean.parseBoolean(value);
             break;
           case 127 :
-            compoundMenuOn = Boolean.parseBoolean(value);
+            compoundMenuOn2 = Boolean.parseBoolean(value);
             break;
           case 142 :
             backgroundColor = JSpecViewUtils.getColorFromString(value);
