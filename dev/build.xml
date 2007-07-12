@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="jspecview" default="compile" basedir="." xmlns:j2seproject2="http://www.netbeans.org/ns/j2se-project/2" xmlns:j2seproject1="http://www.netbeans.org/ns/j2se-project/1">
+<project name="jspecview" default="default" basedir="." xmlns:j2seproject2="http://www.netbeans.org/ns/j2se-project/2" xmlns:j2seproject1="http://www.netbeans.org/ns/j2se-project/1">
     <description>Builds, tests, and runs the project jspecview.</description>
 
 <!--
@@ -233,8 +233,8 @@ is divided into following sections:
     <target name="-do-jar-without-manifest" depends="init,compile,-pre-jar" unless="manifest.available">
         <j2seproject1:jar>
         	<fileset dir="${dist.dir}">
-        	  <exclude name="/doc/**/*.*"/>	
-        	  <exclude name="${dist.dir}/javadoc/**/*.*"/>
+<!--        	  <exclude name="/doc/**/*.*"/>	   -->
+        	  <exclude name="javadoc/**/*.*"/>
         	  <include name="**/*.*"/>
         	</fileset>
         </j2seproject1:jar>
@@ -251,7 +251,7 @@ is divided into following sections:
     </target>
     <target name="applet_jar" depends="init,compile,-pre-jar,-do-jar-with-manifest,-do-jar-without-manifest,-do-jar-with-mainclass" description="Build JAR."/>
 
-    <target name="signed-applet" id="signed-applet" depends="applet_jar">
+    <target name="signed-applet" id="signed-applet">
     <signjar jar="${dist.dir}/jspecview.jar"
              signedjar="${dist.dir}/Sjspecview.jar"
              keystore="${certificate.dir}/JSVcertificate.store"

@@ -31,6 +31,8 @@
 // 25-06-2007 rjl - Close file now checks to see if any remaining files still open
 //                - if not, then remove a number of menu options
 // 05-07-2007 cw  - check menu options when changing the focus of panels
+// 06-07-2007 rjl -Close file closes spectrum and source
+
 
 package jspecview.application;
 
