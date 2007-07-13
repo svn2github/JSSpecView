@@ -31,7 +31,7 @@
 // 25-06-2007 rjl - Close file now checks to see if any remaining files still open
 //                - if not, then remove a number of menu options
 // 05-07-2007 cw  - check menu options when changing the focus of panels
-// 06-07-2007 rjl -Close file closes spectrum and source
+// 06-07-2007 rjl - close imported file closes spectrum and source and updates directory tree
 
 
 package jspecview.application;
@@ -1393,9 +1393,6 @@ public class MainFrame
           transAbsMenuItem.setEnabled(false);
         }
 
-//        desktopPane.add(frame);
-//        frame.setVisible(true);
-//        frame.setSize(550, 350);
         splitSpectra(xmlSource);
       }
       catch (IOException ex) {
@@ -1728,10 +1725,6 @@ public class MainFrame
     }
 
 // TODO: need to check that any remaining file on display is still continuous
-//    continuous=currentSelectedSource.getJDXSpectrum(0).isContinuous();
-//    if (continuous)
-//        exportJcampMenu.setEnabled(true);
-//    this is not working, so at present any spectrum set as enabled!!!
 //
 
     exportJcampMenu.setEnabled(true);
@@ -1900,7 +1893,6 @@ public class MainFrame
       jsvp.setGridOn(false);
     }
     repaint();
-
   }
 
   /**
