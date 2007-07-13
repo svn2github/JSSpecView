@@ -22,11 +22,71 @@ is divided into following sections:
     <target name="default" depends="clean,init,compile" description="Cleans and compiles project."/>
     <!--
     ======================
-    INITIALIZATION SECTION 
+    INITIALIZATION SECTION
     ======================
     -->
     <target name="-init-user" >
-    	<property file="JSVproject.properties"/>
+<!-- These directories are removed when the project is cleaned: -->
+             <property name="build.dir" value="build" />
+             <property name="dist.dir" value="dist" />
+
+             <property name="application.args" value="" />
+             <property name="build.classes.dir" value="${build.dir}/classes" />
+             <property name="build.classes.excludes" value="**/*.java,**/*.form" />
+
+             <property name="build.sysclasspath" value="ignore" />
+             <property name="build.test.classes.dir" value="${build.dir}/test/classes" />
+             <property name="build.test.results.dir" value="${build.dir}/test/results" />
+             <property name="debug.classpath" value="${run.classpath}" />
+             <property name="debug.test.classpath" value="${run.test.classpath}" />
+
+<!-- This directory is removed when the project is cleaned: -->
+             <property name="dist.jar" value="${dist.dir}/jspecview.jar" />
+             <property name="dist.javadoc.dir" value="javadoc" />
+             <property name="certificate.dir" value="certificate" />
+             <property name="extras.dir" value="extras" />
+             <property name="include.dir" value="include" />
+             <property name="work.dir" value="dist" />
+             <property name="applet.url" value="JSVApplet.html" />
+
+             <property name="libs.JSR173.classpath" value="include\\jsr173_api.jar" />
+             <property name="libs.Plugin.classpath" value="C:\\Program Files\\Java\\jdk1.6.0\\jre\\lib\\plugin.jar" />
+             <property name="libs.Stax.classpath" value="include\\sjsxp.jar" />
+             <property name="libs.Velocity.classpath" value="include\\velocity-dep-1.4.jar" />
+             <property name="libs.Xerces.classpath" value="include\\xercesImpl.jar;include\\xmlParserAPIs.jar" />
+
+ <!--            <property name="file.reference.plugin.jar" value="include/plugin.jar" />  -->
+             <property name="jar.compress" value="TRUE" />
+             <property name="javac.classpath" value="${libs.Xerces.classpath};${libs.JSR173.classpath};${libs.Stax.classpath};${libs.Velocity.classpath};${libs.Plugin.classpath}" />
+             <property name="javac.compilerargs" value="-Xlint:unchecked" />
+             <property name="javac.deprecation" value="TRUE" />
+             <property name="javac.includes" value="" />
+             <property name="default.javac.source" value="1.6" />
+             <property name="default.javac.target" value="1.6" />
+             <property name="javac.source" value="1.6" />
+             <property name="javac.target" value="1.6" />
+             <property name="javac.test.classpath" value="${build.classes.dir};${javac.classpath};${libs.junit.classpath}" />
+             <property name="javadoc.author" value="TRUE" />
+             <property name="javadoc.encoding" value="" />
+             <property name="javadoc.noindex" value="FALSE" />
+             <property name="javadoc.nonavbar" value="FALSE" />
+             <property name="javadoc.notree" value="FALSE" />
+             <property name="javadoc.private" value="FALSE" />
+             <property name="javadoc.splitindex" value="TRUE" />
+             <property name="javadoc.use" value="TRUE" />
+             <property name="javadoc.version" value="TRUE" />
+             <property name="javadoc.windowtitle" value="${build.dir}/classes" />
+             <property name="main.class" value="jspecview.application.MainFrame" />
+             <property name="manifest.file" value="manifest.mf" />
+             <property name="platform.active" value="default_platform" />
+             <property name="run.classpath" value="${javac.classpath};${build.classes.dir}" />
+<!-- Space-separated list of JVM arguments used when running the project
+ (you may also define separate properties like run-sys-prop.name=value instead of -Dname=value
+  or test-sys-prop.name=value to set system properties for unit tests): -->
+             <property name="run.jvmargs" value="-Djava.security.policy=applet.policy" />
+             <property name="run.test.classpath" value="${javac.test.classpath};${build.test.classes.dir}" />
+             <property name="src.dir" value="src" />
+             <property name="test.src.dir" value="test" />
     </target>
     <target name="-do-init" depends="-init-user,-init-macrodef-property">
         <available file="${manifest.file}" property="manifest.available"/>
@@ -249,9 +309,9 @@ is divided into following sections:
             </j2seproject1:manifest>
         </j2seproject1:jar>
     </target>
-    <target name="applet_jar" depends="init,compile,-pre-jar,-do-jar-with-manifest,-do-jar-without-manifest,-do-jar-with-mainclass" description="Build JAR."/>
+    <target name="applet_jar" depends="init,compile,-pre-jar,-do-jar-with-manifest,-do-jar-without-manifest,-do-jar-with-mainclass" description="Create applet."/>
 
-    <target name="signed-applet" id="signed-applet">
+    <target name="signed-applet" id="signed-applet" description="Create self-signed applet.">
     <signjar jar="${dist.dir}/jspecview.jar"
              signedjar="${dist.dir}/Sjspecview.jar"
              keystore="${certificate.dir}/JSVcertificate.store"
@@ -263,7 +323,7 @@ is divided into following sections:
      Build with External Files
      ======================
      -->
-     <target name="CreateApplicationJar" depends="init,compile,-do-jar-with-manifest,-do-jar-with-mainclass" description="Build Application" >
+     <target name="CreateApplicationJar" depends="init,compile,-do-jar-with-manifest,-do-jar-with-mainclass" description="Build Standalone Application." >
 	 <jar destfile="${dist.dir}/JSVApp.jar">
 		<zipfileset dir="${build.classes.dir}" prefix="" />
 		<zipfileset src="include/velocity-dep-1.4.jar" />
