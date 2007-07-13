@@ -22,7 +22,7 @@ package jspecview.common;
 import java.io.*;
 import java.nio.*;
 import javax.xml.stream.*;
-import javax.xml.stream.events.* ;
+import javax.xml.stream.events.*;
 import javax.xml.namespace.QName;
 import java.util.StringTokenizer;
 
@@ -171,7 +171,7 @@ public class CMLSource extends JDXSource {
                 processSample();
               }else if (tmpstr.toLowerCase().equals("spectrumdata")){
                 processSpectrum();
-         // if a spectrum is found ignore a peaklist if present as well
+         // if a spectrum is found, ignore a peaklist if present as well
          // since without intervention it is not possible to guess
          // which display is required and the spectrum is probably the
          // more critical ?!?
@@ -182,7 +182,7 @@ public class CMLSource extends JDXSource {
            } while (fer.hasNext());
 
 //test to see if we have any contiuous data to plot
-//if not then stop
+//if not, then stop
         if (continuous && npoints < 5 )
           return null;
 
@@ -194,7 +194,6 @@ public class CMLSource extends JDXSource {
       spectrum.setDataClass("XYDATA");
       spectrum.setDataType(techname);
       spectrum.setContinuous(continuous);
- //     spectrum.setzoomEnabled(true);
       spectrum.setIncreasing(increasing);
       spectrum.setXFactor(xFactor);
       spectrum.setYFactor(yFactor);
