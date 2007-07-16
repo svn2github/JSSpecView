@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2006 The University of the West Indies
+/* Copyright (c) 2002-2007 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -93,7 +93,7 @@ public class NTupleSource extends CompoundSource {
     NTupleSource ns = new NTupleSource();
 
     StringBuffer errorLog = new StringBuffer();
-
+    String errorSeparator="________________________________________________________";
     JDXSourceStringTokenizer t = new JDXSourceStringTokenizer(sourceContents);
 
     // Read Source Specific Header
@@ -115,6 +115,7 @@ public class NTupleSource extends CompoundSource {
         ns.setJcampdx(t.value);
         double version = Double.parseDouble(t.value);
         if(version >= 6.0){
+          errorLog.append("JCAMP-DX 6 Source Type is Unsupported\n");
           throw new SourceTypeUnsupportedException("JCAMP-DX Source Type is Unsupported");
         }else{
           continue;
@@ -378,7 +379,7 @@ public class NTupleSource extends CompoundSource {
           errorLog.append("deltaX from Header "+ deltaX  + "\n");
           errorLog.append("Number of points in Header "+ nPoints + " Found " + xyCoords.length  + "\n");
         }else{
-          errorLog.append("No Errors");
+          errorLog.append("No Errors\n");
         }
 
         if(JSpecViewUtils.DEBUG){
@@ -438,7 +439,7 @@ public class NTupleSource extends CompoundSource {
       label = JSpecViewUtils.cleanLabel(t.label);
       spectrum = new JDXSpectrum();
     }
-
+    errorLog.append(errorSeparator);
     ns.setErrorLog(errorLog.toString());
     return ns;
   }

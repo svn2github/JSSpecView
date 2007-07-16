@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2006 The University of the West Indies
+/* Copyright (c) 2002-2007 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -77,6 +77,7 @@ public class BlockSource extends CompoundSource {
     String xUnits = "";
     String yUnits = "";
     String tabularSpecData = null;
+    String errorSeparator="________________________________________________________";
 
     // Type of Shift Reference for NMR Files
     int shiftRefType = -1;
@@ -400,7 +401,7 @@ public class BlockSource extends CompoundSource {
                 errorLog.append("deltaX from Header "+ deltaX  + "\n");
                 errorLog.append("Number of points in Header "+ nPoints + " Found " + xyCoords.length  + "\n");
               }else{
-                //errorLog.append("No Errors");
+                errorLog.append("No Errors\n");
               }
 
               if(JSpecViewUtils.DEBUG){
@@ -478,7 +479,7 @@ public class BlockSource extends CompoundSource {
     catch(JSpecViewException jsve){
       throw jsve;
     }
-
+    errorLog.append(errorSeparator);
     bs.setErrorLog(errorLog.toString());
     return bs;
   }

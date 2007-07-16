@@ -67,6 +67,9 @@ public class CMLSource extends JDXSource {
   public static double[] xaxisData;
   public static XMLEvent e;
   public static XMLEventReader fer;
+  public static StringBuffer errorLog = new StringBuffer();
+  public static CMLSource xs;
+  public static String errorSeparator="________________________________________________________";
 
   /**
    * Constructs a new CMLSource from CML document
@@ -84,7 +87,7 @@ public class CMLSource extends JDXSource {
    */
   public static CMLSource getCMLInstance(InputStream in) throws JSpecViewException {
        // The CMLSource Instance
-    StringBuffer errorLog = new StringBuffer();
+//    StringBuffer errorLog = new StringBuffer();
     CMLSource xs = new CMLSource();
     HashMap<String,String> LDRTable = new HashMap<String,String>(20);
     Coordinate AMLpoint;
@@ -107,6 +110,7 @@ public class CMLSource extends JDXSource {
 //      System.out.println(e.toString());
       if (e.getEventType()!= XMLStreamConstants.START_DOCUMENT) {
         System.err.println("Error, not an XML document?");
+        errorLog.append("Error, not an XML document?");
         throw new IOException();
       }
 
@@ -116,7 +120,10 @@ public class CMLSource extends JDXSource {
             e= fer.peek();
         }catch (Exception e){
             System.err.println("Error, empty document?");
-            return null;
+            errorLog.append("Error, empty document?");
+            xs.setErrorLog(errorLog.toString());
+            xs.addJDXSpectrum(null);
+            return xs;
         }
 //find beginning of <spectrum>
          do {
@@ -183,8 +190,12 @@ public class CMLSource extends JDXSource {
 
 //test to see if we have any contiuous data to plot
 //if not, then stop
-        if (continuous && npoints < 5 )
-          return null;
+        if (continuous && npoints < 5 ){
+            System.err.println("Insufficient points to plot");
+            errorLog.append("Insufficient points to plot \n");
+            xs.setErrorLog(errorLog.toString());
+            return null;
+        }
 
 // end of import of CML document
 // now populate all the JSpecView spectrum variables.....
@@ -254,11 +265,19 @@ public class CMLSource extends JDXSource {
 
     catch (Exception pe) {
       System.err.println("Error: " + pe.getMessage());
-      pe.printStackTrace();
-      System.exit( -1);
+      errorLog.append("That file may be empty... \n");
+      errorLog.append("these errors were found in cml catch\n");
+//      pe.printStackTrace();
+//      System.exit( -1);
     }
-// if you reached this far then hopefully no errors?    
-    errorLog.append("No Errors");
+ 
+    if (errorLog.length()>0){
+        errorLog.append("these errors were found \n");
+    }else {
+// if you reached this far then hopefully no errors?   
+        errorLog.append("No Errors\n");
+    }
+    errorLog.append(errorSeparator);
     xs.setErrorLog(errorLog.toString());
     
     xs.addJDXSpectrum(spectrum);
@@ -273,6 +292,7 @@ public class CMLSource extends JDXSource {
  *@throws Exception
  */
 public static void processMetadata() throws Exception {
+//        StringBuffer errorLog = new StringBuffer();
  try{
    while ((fer.hasNext()) && (!tmpEnd.toLowerCase().equals("metadatalist")) ){
      e = fer.nextEvent();
@@ -312,6 +332,7 @@ public static void processMetadata() throws Exception {
    } // end while
  } catch (Exception ex){
    System.err.println("error reading metadataList section");
+   errorLog.append("error reading metadata List section\n");
    }
  } // end of processMetadata
 
@@ -368,6 +389,7 @@ public static void processParameters() throws Exception {
     } // end while
   } catch (Exception ex){
     System.err.println("error reading parameterList section");
+    errorLog.append("error reading Parameters\n");
     }
   } // end of processParameters
 
@@ -408,6 +430,7 @@ public static void processConditions() throws Exception {
     } // end while
   } catch (Exception ex){
     System.err.println("error reading conditionList section");
+    errorLog.append("error reading Conditions section\n");
     }
   } // end of processConditions
 
@@ -453,6 +476,7 @@ public static void processSample() throws Exception {
     } //end of while fer.hasNext
   }  catch (Exception ex) {
      System.err.println("error reading Sample section");
+     errorLog.append("error reading sample section\n");
   }
 }   // end of processSample()
 
@@ -681,6 +705,7 @@ try {
 
   } catch (Exception ex) {
       System.err.println("error reading SpectrumData section: "+ ex.toString());
+      errorLog.append("error reading Spectrum Data section\n");
    }
 
 } // end of processSpectrumData
@@ -778,6 +803,7 @@ public static void processPeaks() throws Exception {
 
    } catch (Exception ex) {
        System.err.println("error reading PeakList section: "+ ex.toString());
+       errorLog.append("error reading Peak List section\n");
     }
 
  } // end of processPeaks

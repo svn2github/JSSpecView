@@ -68,7 +68,9 @@ public class AnIMLSource extends JDXSource {
   public static  double obFreq= Graph.ERROR;
   public static  double refPoint=Graph.ERROR;
   public static String sampleID;
+  public static StringBuffer errorLog = new StringBuffer();
   private static XMLInputFactory factory;
+  public static String errorSeparator="________________________________________________________";
 
   /**
    * Constructs a new XMLSource from an AnIML or CML document
@@ -92,7 +94,7 @@ public class AnIMLSource extends JDXSource {
    */
   public static AnIMLSource getAniMLInstance(InputStream in) throws JSpecViewException {
        // The XMLSource Instance
-    StringBuffer errorLog = new StringBuffer();
+//    StringBuffer errorLog = new StringBuffer();
     AnIMLSource xs = new AnIMLSource();
     HashMap<String,String> LDRTable = new HashMap<String,String>(20);
     Coordinate AMLpoint;
@@ -215,11 +217,18 @@ public class AnIMLSource extends JDXSource {
 
     catch (Exception pe) {
       System.err.println("That file may be empty...");
+      errorLog.append("That file may be empty... \n");
+      errorLog.append("these errors were found catch animl \n");
     }
 
 // for ease of processing later, return a source rather than a spectrum
 //    return XMLSource.getXMLInstance(spectrum);
-    errorLog.append("No Errors");
+if (errorLog.length()>0){
+        errorLog.append("these errors were found animl \n");
+    }else {
+        errorLog.append("No Errors\n");
+    }
+    errorLog.append(errorSeparator);
     xs.setErrorLog(errorLog.toString());
     
     xs.addJDXSpectrum(spectrum);
@@ -298,6 +307,7 @@ public static void processSample() throws Exception {
 
   }  catch (Exception ex) {
      System.err.println("error reading Sample section");
+     errorLog.append("error reading Sample section\n");
   }
 }   // end of processSample()
 
@@ -595,6 +605,7 @@ try {
 
   }   catch (Exception ex) {
       System.err.println("error reading ExperimentStepSet section"+ ex.toString());
+      errorLog.append("error reading ExperimentStepSet section\n");
    }
 
 } // end of processMeasurement
@@ -631,6 +642,7 @@ public static void processAudit() throws Exception {
    } // end while
  } catch (Exception ex){
    System.err.println("error reading Audit section");
+   errorLog.append("error reading Audit section\n");
    }
  } // end of processaudit
 

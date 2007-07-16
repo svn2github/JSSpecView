@@ -180,7 +180,7 @@ public class MainFrame
   Vector<File> jdxSourceFiles = new Vector<File> ();
   int numRecent = 10;
   Vector<String> recentFilePaths = new Vector<String> (numRecent);
-  JDXSource currentSelectedSource;
+  JDXSource currentSelectedSource = null;
   Properties properties;
   DisplaySchemesProcessor dsp;
   String tempDS;
@@ -2173,6 +2173,7 @@ public class MainFrame
     File file = getFileForSource(source);
     jdxSourceFiles.removeElement(file);
     jdxSources.removeElement(source);
+    currentSelectedSource = null;
   }
 
   /**
@@ -3061,18 +3062,25 @@ public class MainFrame
    * @param e the ActionEvent
    */
   void errorLogMenuItem_actionPerformed(ActionEvent e) {
-    if (currentSelectedSource != null) {
-      String errorLog = currentSelectedSource.getErrorLog();
-      File file = getFileForSource(currentSelectedSource);
-      TextDialog source = new TextDialog(this, file.getAbsolutePath(), errorLog, true);
+      if(currentSelectedSource==null){ 
+        JOptionPane.showMessageDialog(null, "Please Select a Spectrum",
+                                      "Select Spectrum",
+                                      JOptionPane.WARNING_MESSAGE);
+             return;}
+     
+    System.out.println(currentSelectedSource.getErrorLog().length());
+      if (currentSelectedSource.getErrorLog().length()>0) {
+          String errorLog = currentSelectedSource.getErrorLog();
+          File file = getFileForSource(currentSelectedSource);
+          TextDialog source = new TextDialog(this, file.getAbsolutePath(), errorLog, true);
     }
-    else {
+/*    else {
       if (jdxSources.size() > 0) {
         JOptionPane.showMessageDialog(this, "Please Select a Spectrum",
                                       "Select Spectrum",
-                                      JOptionPane.ERROR_MESSAGE);
+                                      JOptionPane.WARNING_MESSAGE);
       }
-    }
+    }*/
   }
 
 //

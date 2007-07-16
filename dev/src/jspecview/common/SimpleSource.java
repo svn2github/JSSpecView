@@ -94,6 +94,7 @@ public class SimpleSource extends JDXSource {
     String currentTime =  formatter.format(now.getTime());
 
     String pathlength = "";
+    String errorSeparator="________________________________________________________";
 
     // The data Table
     String tabularSpecData = null;
@@ -388,17 +389,17 @@ public class SimpleSource extends JDXSource {
           xyCoords = JSpecViewUtils.parseDSV(tabularSpecData, xFactor, yFactor);
 
         if (decompressor.getErrorLog().length()>0 ) {
-          errorLog.append(decompressor.getErrorLog() + "\n");
-          errorLog.append("firstX: " + firstX + " Found " +
+          errorLog.append(decompressor.getErrorLog() +"\n");
+          errorLog.append("firstX: "+ firstX +" Found "+
                              (increasing ? xyCoords[0] : xyCoords[xyCoords.length -1]).getXVal()  + "\n");
-          errorLog.append("lastX from Header " + lastX + " Found " +
+          errorLog.append("lastX from Header "+ lastX +" Found " +
                              (increasing ? xyCoords[xyCoords.length -1] : xyCoords[0]).getXVal()  + "\n");
           errorLog.append("deltaX from Header "+ deltaX  + "\n");
-          errorLog.append("Number of points in Header "+ nPoints + " Found " + xyCoords.length  + "\n");
+          errorLog.append("Number of points in Header "+ nPoints +" Found "+ xyCoords.length  + "\n");
         }else{
-          errorLog.append("No Errors");
+          errorLog.append("No Errors\n");
         }
-
+        errorLog.append(errorSeparator);
         ss.setErrorLog(errorLog.toString());
 
         if(JSpecViewUtils.DEBUG){
