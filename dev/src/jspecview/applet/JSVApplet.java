@@ -98,7 +98,7 @@ import netscape.javascript.JSObject;
  */
 
 public class JSVApplet extends JApplet {
-  public static final String APPLET_VERSION = "1.0.20070712-1715";
+  public static final String APPLET_VERSION = "1.0.20070716-1930";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath, XMLImportfilePath;
