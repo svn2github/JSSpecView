@@ -61,10 +61,10 @@ is divided into following sections:
              <property name="javac.compilerargs" value="-Xlint:unchecked" />
              <property name="javac.deprecation" value="TRUE" />
              <property name="javac.includes" value="" />
-             <property name="default.javac.source" value="1.6" />
-             <property name="default.javac.target" value="1.6" />
-             <property name="javac.source" value="1.6" />
-             <property name="javac.target" value="1.6" />
+             <property name="default.javac.source" value="1.5" />
+             <property name="default.javac.target" value="1.5" />
+             <property name="javac.source" value="1.5" />
+             <property name="javac.target" value="1.5" />
              <property name="javac.test.classpath" value="${build.classes.dir};${javac.classpath};${libs.junit.classpath}" />
              <property name="javadoc.author" value="TRUE" />
              <property name="javadoc.encoding" value="" />
