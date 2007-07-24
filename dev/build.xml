@@ -40,7 +40,6 @@ is divided into following sections:
              <property name="debug.classpath" value="${run.classpath}" />
              <property name="debug.test.classpath" value="${run.test.classpath}" />
 
-<!-- This directory is removed when the project is cleaned: -->
              <property name="dist.jar" value="${dist.dir}/jspecview.jar" />
              <property name="dist.javadoc.dir" value="javadoc" />
              <property name="certificate.dir" value="certificate" />
@@ -49,24 +48,29 @@ is divided into following sections:
              <property name="work.dir" value="dist" />
              <property name="applet.url" value="JSVApplet.html" />
 
-             <property name="libs.JSR173.classpath" value="include\\jsr173_api.jar" />
+<!-- The following external JARS are required: -->
+             <property name="libs.JSR173.classpath" value="include\\jsr173_1.0_api.jar" />
              <property name="libs.Plugin.classpath" value="C:\\Program Files\\Java\\jdk1.6.0\\jre\\lib\\plugin.jar" />
              <property name="libs.Stax.classpath" value="include\\sjsxp.jar" />
              <property name="libs.Velocity.classpath" value="include\\velocity-dep-1.4.jar" />
-             <property name="libs.Xerces.classpath" value="include\\xercesImpl.jar;include\\xmlParserAPIs.jar" />
+         	 <property name="libs.Xerces.classpath" value="include\\xercesImpl.jar" />
+        	 <property name="libs.XMLParser.classpath" value="include\\xmlParserAPIs.jar" />
 
- <!--            <property name="file.reference.plugin.jar" value="include/plugin.jar" />  -->
-             <property name="jar.compress" value="TRUE" />
-             <property name="javac.classpath" value="${libs.Xerces.classpath};${libs.JSR173.classpath};${libs.Stax.classpath};${libs.Velocity.classpath};${libs.Plugin.classpath}" />
+    		 <property name="jar.compress" value="TRUE" />
+             <property name="javac.classpath" value="${libs.Xerces.classpath};${libs.XMLParser.classpath};${libs.JSR173.classpath};${libs.Stax.classpath};${libs.Velocity.classpath};${libs.Plugin.classpath}" />
              <property name="javac.compilerargs" value="-Xlint:unchecked" />
              <property name="javac.deprecation" value="TRUE" />
              <property name="javac.includes" value="" />
-             <property name="default.javac.source" value="1.5" />
+    	
+<!--  StAX routines require JDK 1.5+   -->    	
+    	     <property name="default.javac.source" value="1.5" />
              <property name="default.javac.target" value="1.5" />
              <property name="javac.source" value="1.5" />
              <property name="javac.target" value="1.5" />
              <property name="javac.test.classpath" value="${build.classes.dir};${javac.classpath};${libs.junit.classpath}" />
-             <property name="javadoc.author" value="TRUE" />
+
+<!-- JAVADOC properties: -->
+    		 <property name="javadoc.author" value="TRUE" />
              <property name="javadoc.encoding" value="" />
              <property name="javadoc.noindex" value="FALSE" />
              <property name="javadoc.nonavbar" value="FALSE" />
@@ -76,7 +80,8 @@ is divided into following sections:
              <property name="javadoc.use" value="TRUE" />
              <property name="javadoc.version" value="TRUE" />
              <property name="javadoc.windowtitle" value="${build.dir}/classes" />
-             <property name="main.class" value="jspecview.application.MainFrame" />
+
+    		 <property name="main.class" value="jspecview.application.MainFrame" />
              <property name="manifest.file" value="manifest.mf" />
              <property name="platform.active" value="default_platform" />
              <property name="run.classpath" value="${javac.classpath};${build.classes.dir}" />
@@ -293,12 +298,11 @@ is divided into following sections:
     <target name="-do-jar-without-manifest" depends="init,compile,-pre-jar" unless="manifest.available">
         <j2seproject1:jar>
         	<fileset dir="${dist.dir}">
-<!--        	  <exclude name="/doc/**/*.*"/>	   -->
         	  <exclude name="javadoc/**/*.*"/>
-        	  <include name="**/*.*"/>
+         	  <include name="**/*.*"/>
         	</fileset>
-        </j2seproject1:jar>
-    </target>	
+         </j2seproject1:jar>
+    </target>
     <target name="-do-jar-with-manifest" depends="init,compile,-pre-jar" if="manifest.available" unless="manifest.available+main.class">
         <j2seproject1:jar manifest="${manifest.file}"/>
     </target>
@@ -326,12 +330,12 @@ is divided into following sections:
      <target name="CreateApplicationJar" depends="init,compile,-do-jar-with-manifest,-do-jar-with-mainclass" description="Build Standalone Application." >
 	 <jar destfile="${dist.dir}/JSVApp.jar">
 		<zipfileset dir="${build.classes.dir}" prefix="" />
-		<zipfileset src="include/velocity-dep-1.4.jar" />
-		<zipfileset src="include/xercesImpl.jar" />
-		<zipfileset src="include/xmlParserAPIs.jar" />
-		<zipfileset src="include/jsr173_1.0_api.jar" />
-		<zipfileset src="include/sjsxp.jar" />
-        <manifest>
+		<zipfileset src="${libs.Velocity.classpath}" />
+		<zipfileset src="${libs.Xerces.classpath}" />
+		<zipfileset src="${libs.XMLParser.classpath}" />
+		<zipfileset src="${libs.JSR173.classpath}" />
+		<zipfileset src="${libs.Stax.classpath}" />
+        <manifest> 
 			<attribute name="Main-Class" value="${main.class}" />
 		</manifest>
 	 </jar>
