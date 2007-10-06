@@ -98,7 +98,7 @@ import netscape.javascript.JSObject;
  */
 
 public class JSVApplet extends JApplet {
-  public static final String APPLET_VERSION = "1.0.20070716-1930";
+  public static final String APPLET_VERSION = "1.0.20071005-1900";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath, XMLImportfilePath;
@@ -236,7 +236,7 @@ public class JSVApplet extends JApplet {
    * Whether or not spectra should be overlayed
    */
   boolean overlay;
-  
+
   /**
    * Returns a parameter value
    * @param key the parameter name
@@ -311,8 +311,8 @@ public class JSVApplet extends JApplet {
             compoundMenuOn = false;
         else compoundMenuOn = source instanceof CompoundSource;
         Yunits= source.getJDXSpectrum(0).getYUnits();
-      } 
-      
+      }
+
        else {
         // Import an XML file
         URL  url = new URL(getCodeBase() , XMLImportfilePath);
@@ -552,7 +552,7 @@ public class JSVApplet extends JApplet {
     compoundMenu.setEnabled(false);
     compoundMenu.setText("Blocks");
 
-    versionMenuItem.setText("<html><h2>JSpecView Version " + APPLET_VERSION + "</h2></html>");
+    versionMenuItem.setText("<html><h3>JSpecView Version " + APPLET_VERSION + "</h3></html>");
 
     appletPopupMenu.add(fileMenu);
     appletPopupMenu.add(viewMenu);
@@ -1229,8 +1229,11 @@ public class JSVApplet extends JApplet {
    * @param e ActionEvent
    */
   void printMenuItem_actionPerformed(ActionEvent e) {
-    if(frame == null)
+    if(frame == null) {
+      System.err.println("Use the View/Window menu to lift the spectrum off the page first.");
       return;
+    }
+
 
     JSVPanel jsvp = selectedJSVPanel;
 
