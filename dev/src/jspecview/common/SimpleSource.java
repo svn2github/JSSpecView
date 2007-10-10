@@ -397,7 +397,7 @@ public class SimpleSource extends JDXSource {
           errorLog.append("deltaX from Header "+ deltaX  + "\n");
           errorLog.append("Number of points in Header "+ nPoints +" Found "+ xyCoords.length  + "\n");
         }else{
-          errorLog.append("No Errors\n");
+          errorLog.append("No Errors detected \n");
         }
         errorLog.append(errorSeparator);
         ss.setErrorLog(errorLog.toString());

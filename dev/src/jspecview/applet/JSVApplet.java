@@ -17,6 +17,14 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+// CHANGES to 'JSVApplet.java' - Web Application GUI
+// University of the West Indies, Mona Campus
+//
+// 09-10-2007 commented out calls for exporting data
+//            this was causing security issues with JRE 1.6.0_02 and 03
+//
+
+
 package jspecview.applet;
 
 import java.awt.BorderLayout;
@@ -98,7 +106,7 @@ import netscape.javascript.JSObject;
  */
 
 public class JSVApplet extends JApplet {
-  public static final String APPLET_VERSION = "1.0.20071005-1900";
+  public static final String APPLET_VERSION = "1.0.20071009-2130";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath, XMLImportfilePath;
@@ -379,19 +387,27 @@ public class JSVApplet extends JApplet {
   else{
     this.writeStatus("Please set the 'filepath' or 'import file' parameter");
   }
-
+  
+/**
     if(continuous){
      try{
           exportAsMenu.setEnabled(true);
           jFileChooser = new JFileChooser();
+          if(JSpecViewUtils.DEBUG){
+             System.out.println("Either running in Sandbox or Applet signed: Export menu enabled");
+          }
      }
      catch(SecurityException se){
      // disable export menu
      exportAsMenu.setEnabled(false);
-     System.err.println("SecurityException");
+     System.err.println("Export menu disabled: You need the signed Applet to export files");
     }
-    }else exportAsMenu.setEnabled(false);
-
+    }else  {
+      exportAsMenu.setEnabled(false);
+      System.err.println("Export menu disabled for non-continuous spectra");
+    }
+*/
+  
   newFile = false;
 }
 
@@ -1934,6 +1950,10 @@ public class JSVApplet extends JApplet {
    */
   public void parseInitScript(String params) {
     StringTokenizer allParamTokens = new StringTokenizer(params, ";");
+
+    if (JSpecViewUtils.DEBUG) {
+        System.out.println("Running in DEBUG mode");
+    }
 
     while (allParamTokens.hasMoreTokens()) {
       String token = allParamTokens.nextToken();
