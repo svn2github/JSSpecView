@@ -106,7 +106,7 @@ import netscape.javascript.JSObject;
  */
 
 public class JSVApplet extends JApplet {
-  public static final String APPLET_VERSION = "1.0.20071009-2130";
+  public static final String APPLET_VERSION = "1.0.20071106-1000";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath, XMLImportfilePath;
@@ -387,7 +387,7 @@ public class JSVApplet extends JApplet {
   else{
     this.writeStatus("Please set the 'filepath' or 'import file' parameter");
   }
-  
+
 /**
     if(continuous){
      try{
@@ -399,15 +399,21 @@ public class JSVApplet extends JApplet {
      }
      catch(SecurityException se){
      // disable export menu
-     exportAsMenu.setEnabled(false);
-     System.err.println("Export menu disabled: You need the signed Applet to export files");
-    }
+         exportAsMenu.setEnabled(false);
+         System.err.println("Export menu disabled: You need the signed Applet to export files");
+     }
+     catch(Exception e) {
+         System.err.println("Exception found");
+          e.printStackTrace();
+     }
+
     }else  {
       exportAsMenu.setEnabled(false);
       System.err.println("Export menu disabled for non-continuous spectra");
     }
-*/
-  
+  */
+
+  exportAsMenu.setEnabled(false);
   newFile = false;
 }
 

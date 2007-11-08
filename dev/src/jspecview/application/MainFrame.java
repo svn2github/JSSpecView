@@ -32,7 +32,10 @@
 //                - if not, then remove a number of menu options
 // 05-07-2007 cw  - check menu options when changing the focus of panels
 // 06-07-2007 rjl - close imported file closes spectrum and source and updates directory tree
-
+// 06-11-2007 rjl - bug in reading displayschemes if folder name has a space in it
+//                  use a default scheme if the file can't be found or read properly,
+//                  but there will still be a problem if an attempt is made to
+//                  write out a new scheme under these circumstances!
 
 package jspecview.application;
 
@@ -396,13 +399,13 @@ public class MainFrame
    * Task to do when program starts
    */
   void onProgramStart() {
-
+    boolean loadedOk;
     //Set Default Properties
 
-    // Initalise application properties with defaults and load
-    // properties from file
+    // Initalise application properties with defaults
+    // and load properties from file
     properties = new Properties();
-    // sets the list of recently opened files property so be empty initially
+    // sets the list of recently opened files property to be initially empty
     properties.setProperty("recentFilePaths", "");
     properties.setProperty("confirmBeforeExit", "true");
     properties.setProperty("automaticallyOverlay", "false");
@@ -433,33 +436,30 @@ public class MainFrame
     catch (Exception e) {
     }
 
+// the thought was to have a set of displayschemes stored internally in JSVApp.jar
+// this is not yet functioning properly and getResource does not seem to find them
+
     dsp = new DisplaySchemesProcessor();
     try {
-      URL url = MainFrame.class.getClassLoader().getResource(
-          "/displaySchemes.xml");
+      URL url = MainFrame.class.getClassLoader().getResource("displaySchemes.xml");
       try {
-        InputStream in = (InputStream) (MainFrame.class.getResourceAsStream(
-            "displaySchemes.xml"));
-      }
-      catch (Exception jEX) {
-        //Error
-      }
-
-      boolean loadedOk = dsp.load("displaySchemes.xml");
-//      if(!loadedOk)
-//          dsp = null;
+          InputStream in = (InputStream) (MainFrame.class.getResourceAsStream("displaySchemes.xml"));
+        }
+        catch (Exception jEX) {
+          System.err.println("could not find displayschemes?");
+        }
+       loadedOk = dsp.load("displaySchemes.xml");
     }
     catch (Exception ex) {
-      dsp = null;
-      System.err.println("Warning, display schemes not properly loaded!");
+      loadedOk = dsp.loadDefault("missingDS.xml");
+      System.err.println("Warning, display schemes not properly loaded, using Default settings!");
     }
 
     setApplicationProperties();
-
     tempDS = defaultDisplaySchemeName;
 
     if (JSpecViewUtils.DEBUG) {
-      fc = new JFileChooser("C:/jcampdx");
+      fc = new JFileChooser("C:/temp");
     }
     else {
       if (useDirLastOpened) {
@@ -3062,12 +3062,12 @@ public class MainFrame
    * @param e the ActionEvent
    */
   void errorLogMenuItem_actionPerformed(ActionEvent e) {
-      if(currentSelectedSource==null){ 
+      if(currentSelectedSource==null){
         JOptionPane.showMessageDialog(null, "Please Select a Spectrum",
                                       "Select Spectrum",
                                       JOptionPane.WARNING_MESSAGE);
              return;}
-     
+
     System.out.println(currentSelectedSource.getErrorLog().length());
       if (currentSelectedSource.getErrorLog().length()>0) {
           String errorLog = currentSelectedSource.getErrorLog();

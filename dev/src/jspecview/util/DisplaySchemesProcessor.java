@@ -51,12 +51,39 @@ public class DisplaySchemesProcessor {
   /** The list of displaySchemes that is loaded from file */
   private TreeMap<String,DisplayScheme> displaySchemes;
 
+
   /**
    * Initialises the <code>DisplaySchemesProcessor</code>
    */
   public DisplaySchemesProcessor() {
     displaySchemes = new TreeMap<String,DisplayScheme>();
   }
+
+  /**
+   * Load a default DisplayScheme if xml file not found
+   * @param dispSchemeFileName String
+   * @return boolean
+   * @throws Exception
+   */
+
+public boolean loadDefault(String dispSchemeFileName) {
+    Color black = new Color(0,0,0);
+    Color white = new Color(255,255,255);
+
+    DisplayScheme dsdef = new DisplayScheme("Default");
+    dsdef.setFont("default");
+    dsdef.setColor("title", black);
+    dsdef.setColor("coordinates", black);
+    dsdef.setColor("scale", black);
+    dsdef.setColor("units", black);
+    dsdef.setColor("grid", black);
+    dsdef.setColor("plot", black);
+    dsdef.setColor("plotarea", white);
+    dsdef.setColor("background", white);
+    displaySchemes.put("Default", dsdef);
+    return true;
+  }
+
 
 
   /**

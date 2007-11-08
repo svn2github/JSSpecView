@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 /**
- * This a representation of the Display Scheme the spectral display.
+ * This a representation of the Display Scheme for the spectral display.
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
@@ -36,7 +36,7 @@ public class DisplayScheme {
   private String name;
   /** The name of the font */
   private String font;
-  /** A map of the name of the elements and thier colors*/
+  /** A map of the name of the elements and their colors*/
   private HashMap<String,Color> elementColors;
   /** Specifies if the display scheme is the default */
   private boolean isDefault = false;
@@ -84,15 +84,15 @@ public class DisplayScheme {
   }
 
   /**
-   * Sets the whether the <code>DisplayScheme</code> is the default
-   * @param val true if default, false otherwise
+   * Sets whether the <code>DisplayScheme</code> is the default
+   * @param val is true if default, otherwise false
    */
   public void setDefault(boolean val){
     isDefault = val;
   }
 
   /**
-   * Returns whether of not the <code>DisplayScheme</code> is the default
+   * Returns whether or not the <code>DisplayScheme</code> is the default
    * @return true if default, false otherwise
    */
   public boolean isDefault(){
