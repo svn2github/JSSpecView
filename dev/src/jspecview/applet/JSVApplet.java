@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2007 The University of the West Indies
+/* Copyright (c) 2002-2008 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -22,7 +22,7 @@
 //
 // 09-10-2007 commented out calls for exporting data
 //            this was causing security issues with JRE 1.6.0_02 and 03
-//
+// 13-01-2008 in-line load JCAMP-DX file routine added
 
 
 package jspecview.applet;
@@ -106,7 +106,7 @@ import netscape.javascript.JSObject;
  */
 
 public class JSVApplet extends JApplet {
-  public static final String APPLET_VERSION = "1.0.20071106-1000";
+  public static final String APPLET_VERSION = "1.0.20080113-1715";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath, XMLImportfilePath;
@@ -260,8 +260,13 @@ public class JSVApplet extends JApplet {
    * Initialises applet with parameters and load the <code>JDXSource</code>
    */
   public void init() {
+	  init(null);
+  }
 
-    if (!newFile) {
+  private void init(String data) {
+    if (data != null) {
+
+    } else if (!newFile) {
       JSVparams = getParameter("script");
       parseInitScript(JSVparams);
       if (XMLImportfilePath !=null)
@@ -302,17 +307,21 @@ public class JSVApplet extends JApplet {
   String Yunits="";
   JDXSource xmlSource;
 
-  if ((filePath != null)||(XMLImportfilePath !=null)) {
+  if (data != null || (filePath != null)||(XMLImportfilePath !=null)) {
     try{
       if (!XMLImport) {
+        JDXSourceFactory factory;
+    	if (data != null) {
+    		fileName = "inline data";
+            factory = new JDXSourceFactory(null);
+    	} else {
         // Load a JCAMP-DX file
-        URL url = new URL(getCodeBase() , filePath);
-//        System.out.println(url.toString());
-        InputStream in = url.openStream();
-        File file = new File(url.getFile());
-        fileName=file.getName();
-        JDXSourceFactory factory = new JDXSourceFactory(in);
-        source = factory.createJDXSource();
+	        URL url = new URL(getCodeBase() , filePath);
+	//        System.out.println(url.toString());
+	        fileName=(new File(url.getFile())).getName();
+	        factory = new JDXSourceFactory(url.openStream());
+    	}
+        source = factory.createJDXSource(data);
         specs = source.getSpectra();
         continuous = source.getJDXSpectrum(0).isContinuous();
         if(!compoundMenuOn2)
@@ -615,7 +624,7 @@ public class JSVApplet extends JApplet {
    * @return the String "JSpecView Applet"
    */
   public String getAppletInfo() {
-    return "JSpecView Applet";
+    return "JSpecView Applet " + APPLET_VERSION;
   }
 
   /**
@@ -1861,14 +1870,30 @@ public class JSVApplet extends JApplet {
    * @param tmpFilePath String
   */
   public void setFilePath(String tmpFilePath){
-     this.getContentPane().removeAll();
+     getContentPane().removeAll();
      appletPanel.removeAll();
      newFilePath = tmpFilePath;
      newFile = true;
      XMLImportfilePath =null;
      XMLImport=false;
      init();
-     this.getContentPane().validate();
+     getContentPane().validate();
+     appletPanel.validate();
+  }
+
+  /**
+   * Loads in-line JCAMP-DX data into the existing applet window
+   * @param data String
+  */
+  public void loadInline(String data){
+     getContentPane().removeAll();
+     appletPanel.removeAll();
+     newFilePath = null;
+     newFile = false;
+     XMLImportfilePath =null;
+     XMLImport=false;
+     init(data);
+     getContentPane().validate();
      appletPanel.validate();
   }
 

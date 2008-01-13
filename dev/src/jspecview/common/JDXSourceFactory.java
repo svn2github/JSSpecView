@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2007 The University of the West Indies
+/* Copyright (c) 2002-2008 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -78,51 +78,58 @@ public class JDXSourceFactory {
    * @throws JSpecViewException
    */
   public JDXSource createJDXSource() throws JSpecViewException{
-    String sourceContents;
-
-    // for debugging;
-    long time1, time2, totalTime;
-    time1 = 0;
-    // for debugging
-
-    if(JSpecViewUtils.DEBUG){
-      System.out.print("Started Reading Source at: ");
-      System.out.println(Calendar.getInstance().getTime());
-      time1 = Calendar.getInstance().getTimeInMillis();
-    }
-
-    sourceContents = getSourceContents();
-
-    if(JSpecViewUtils.DEBUG){
-      System.out.print("Finished Reading Source at: ");
-      System.out.println(Calendar.getInstance().getTime());
-      time2 = Calendar.getInstance().getTimeInMillis();
-      totalTime = time2 - time1;
-      System.out.println("Total time = " +  totalTime + "ms or " + ((double)totalTime/1000) + "s");
-    }
-
-    if(sourceContents == null)
-      throw new JDXSourceException("Unable to Read Source");
-
-    int sourceType = determineJDXSourceType(sourceContents);
-    if(sourceType == -1){
-      throw new JDXSourceException("JDX Source Type not Recognized");
-    }
-
-    switch(sourceType){
-      case SIMPLE: return SimpleSource.getInstance(sourceContents);
-      case BLOCK: return BlockSource.getInstance(sourceContents);
-      case NTUPLE: return NTupleSource.getInstance(sourceContents);
-        //return RestrictedNTupleSource.getInstance(sourceContents, 128);
-    }
-
-    return null;
+	  return createJDXSource(null);
   }
 
+  public JDXSource createJDXSource(String sourceContents)
+			throws JSpecViewException {
+		// for debugging;
+		long time1, time2, totalTime;
+		time1 = 0;
+		// for debugging
+
+		if (JSpecViewUtils.DEBUG) {
+			System.out.print("Started Reading Source at: ");
+			System.out.println(Calendar.getInstance().getTime());
+			time1 = Calendar.getInstance().getTimeInMillis();
+		}
+
+		if (sourceContents == null) {
+			sourceContents = getSourceContents();
+			if (JSpecViewUtils.DEBUG) {
+				System.out.print("Finished Reading Source at: ");
+				System.out.println(Calendar.getInstance().getTime());
+				time2 = Calendar.getInstance().getTimeInMillis();
+				totalTime = time2 - time1;
+				System.out.println("Total time = " + totalTime + "ms or "
+						+ ((double) totalTime / 1000) + "s");
+			}
+			if (sourceContents == null)
+				throw new JDXSourceException("Unable to Read Source");
+		}
+		int sourceType = determineJDXSourceType(sourceContents);
+		if (sourceType == -1) {
+			throw new JDXSourceException("JDX Source Type not Recognized");
+		}
+
+		switch (sourceType) {
+		case SIMPLE:
+			return SimpleSource.getInstance(sourceContents);
+		case BLOCK:
+			return BlockSource.getInstance(sourceContents);
+		case NTUPLE:
+			return NTupleSource.getInstance(sourceContents);
+			// return RestrictedNTupleSource.getInstance(sourceContents, 128);
+		}
+
+		return null;
+	}
+
   /**
-   * Returns the contents of the file as a string
-   * @return the contents of the file as a string
-   */
+	 * Returns the contents of the file as a string
+	 *
+	 * @return the contents of the file as a string
+	 */
   private String getSourceContents(){
     StringBuffer contents = new StringBuffer();
 
