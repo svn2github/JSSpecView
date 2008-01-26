@@ -50,7 +50,7 @@ is divided into following sections:
 
 <!-- The following external JARS are required: -->
              <property name="libs.JSR173.classpath" value="include\\jsr173_1.0_api.jar" />
-             <property name="libs.Plugin.classpath" value="C:\\Program Files\\Java\\jdk1.6.0\\jre\\lib\\plugin.jar" />
+             <property name="libs.Plugin.classpath" value="include\\plugin.jar" />
              <property name="libs.Stax.classpath" value="include\\sjsxp.jar" />
              <property name="libs.Velocity.classpath" value="include\\velocity-dep-1.4.jar" />
          	 <property name="libs.Xerces.classpath" value="include\\xercesImpl.jar" />
