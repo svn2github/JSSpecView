@@ -115,8 +115,8 @@ public class AnIMLExporter {
 
   int npoints=endDataPointIndex-startDataPointIndex+1;
     boolean increasing= spec.isIncreasing();
-    String xdata_type="float32";
-    String ydata_type="float32";
+    String xdata_type="Float32";
+    String ydata_type="Float32";
     String title = spec.getTitle();
     String xUnits= spec.getXUnits();
     String yUnits= spec.getYUnits();
@@ -141,7 +141,7 @@ public class AnIMLExporter {
     double ObFreq=spec.getObservedFreq();
     double deltaX= spec.getDeltaX();
     double amlFirstX= xyCoords[startDataPointIndex].getXVal();
-    
+
     String SolvRef="";
     String SolvName="";
     String AnIMLtemplate="animl_tmp.vm";
