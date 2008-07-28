@@ -11,43 +11,63 @@
 <!--JCAMP/AnIML crosswalk XL spreadsheet (http://animl.sourceforge.net/IUPAC/All%20JCAMP-DX%20and%20netCDF%20Labels%20version%2028%20August%202003.xls) 02/19/06 -->
 
 <!--Stuart J. Chalk February 19, 2006 -->
-<!--Robert J. Lancashire June 01, 2006 -->
-<!--Version 0.2 -->
+<!--Robert J. Lancashire February 11, 2007 -->
+<!--Version 0.3 -->
 
 <!--Notes -->
 <!--Originally used as an include file in jcamp2animl.php -->
 <!--Originally written using a template AnIML file JCAMP_UV_Template.xml -->
 
+<!-- SampleSet is defined in animl-core.xsd -->
     <SampleSet>
-        <Sample sampleID="$file" derived="false">
+        <Sample sampleID="$file" derived="false" parameterType="String">
             <ParameterCategorySet>
-                <ParameterCategory name="SampleDescription">
+                <ParameterCategory name="Description">
                     <ParameterSet>
-                        <Parameter name="SampleName">
-                            <string>$title</string>
+                        <Parameter name="Name" parameterType="String">
+                            <String>$title</String>
                         </Parameter>
 #if($molform !="")
-			<Parameter name="MolFormula">
-			    <string>$molform</string>
+			<Parameter name="Molecular Formula" parameterType="String">
+			    <String>$molform</String>
 			</Parameter>
 #end
 #if($CASrn !="")
-			<Parameter name="CASRegistryNo">
-			     <string>$CASrn</string>
+			<Parameter name="CAS Registry Number" parameterType="String">
+			     <String>$CASrn</String>
 			</Parameter>
 #end
 #if($CASn !="")
-			<Parameter name="CASName">
-			     <string>$CASn</string>
+			<Parameter name="CAS Name" parameterType="String">
+			     <String>$CASn</String>
 			</Parameter>
 #end
+#if($state !="")
+<!-- can be: solid | amorphous solid | crystalline solid | liquid | liquid crystal | gas | supercritical fluid | colloid | plasma | crystal -->
+                        <Parameter name="State" parameterType="String">
+                            <String>$state</String>
+                        </Parameter>
+#end
+#if($samplingproc !="")
+                        <Parameter name="Preparation Procedure" parameterType="String">
+                            <String>$samplingproc</String>
+                        </Parameter>
+#end
+                        <Parameter name="Owner" parameterType="String">
+                            <String>$owner</String>
+                        </Parameter>
+#if($temp !="")
+                        <Parameter name="Temperature" parameterType="Float32">
+                            <Float32>$temp</Float32>
+                        </Parameter>
+#end
 #if($bp !="")
-                        <ParameterCategory name="BP">
+                        <ParameterCategory name="BP" parameterType="Float32">
                             <Parameter name="Max">
-                                <float32>$bp</float32>
+                                <Float32>$bp</Float32>
                             </Parameter>
-                            <Parameter name="AtPressure">
-                                <float32>101325.01</float32>
+                            <Parameter name="Pressure" parameterType="Float32">
+                                <Float32>101325.01</Float32>
                                 <Unit label="Pa">
                                     <SIUnit exponent="-1">m</SIUnit>
                                     <SIUnit exponent="1">kg</SIUnit>
@@ -57,12 +77,12 @@
                         </ParameterCategory>
 #end
 #if($mp !="")
-                        <ParameterCategory name="MP">
+                        <ParameterCategory name="MP" parameterType="Float32">
                             <Parameter name="Max">
-                                <float32>$mp</float32>
+                                <Float32>$mp</Float32>
                             </Parameter>
-                            <Parameter name="AtPressure">
-                                <float32>101325.01</float32>
+                            <Parameter name="Pressure" parameterType="Float32">
+                                <Float32>101325.01</Float32>
                                 <Unit label="Pa">
                                     <SIUnit exponent="-1">m</SIUnit>
                                     <SIUnit exponent="1">kg</SIUnit>
@@ -76,9 +96,11 @@
             </ParameterCategorySet>
         </Sample>
     </SampleSet>
+
+    <!-- ExperimentStepSet is defined in animl-core.xsd -->
     <ExperimentStepSet>
         <ExperimentStep name="$DataType">
-            <Author type="software">
+            <Author usertype="software">
                 <Name>$origin</Name>
                 <Location>$owner</Location>
             </Author>
@@ -87,10 +109,22 @@
                <SampleRef sampleID="$file" role="SampleMeasurement" purpose="consumed"/>
             </SamplesUsed>
             <Technique name="$specinits" uri="http://animl.sf.net/schema/techniques/$specinits%20base%20instance%20document.atid"/>
+            <ParameterCategorySet>
+                <ParameterCategory name="Instrument Description" parameterType="String">
+                    <ParameterSet>
+                        <Parameter name="Manufacturer" parameterType="String">
+                            <String>$vendor</String>
+                        </Parameter>
+                        <Parameter name="Model Name" parameterType="String">
+                            <String>$model</String>
+                        </Parameter>
+                    </ParameterSet>
+                </ParameterCategory>
+            </ParameterCategorySet>
             <PageSet>
                 <Page name="spectrum">
                     <VectorSet length="$npoints">
-                        <Vector name="Intensity" dependency="dependent" vectorID="Itensity_ID" plotUse="attribute" type="$ydata_type">
+                        <Vector name="Intensity" dependency="dependent" vectorID="Itensity_ID" plotUse="attribute" vectorType="$ydata_type">
 #if($yencode=="ivs")
 	                            <IndividualValueSet>
 	#foreach ($coord in $xyCoords)
@@ -117,7 +151,7 @@
                                      <SIUnit exponent="1" factor="1">1</SIUnit>
                                    </Unit>
                         </Vector>
-                        <Vector name="Wavelength" dependency="independent" vectorID="Wavelength_ID" plotUse="dimension" type="$xdata_type">
+                        <Vector name="Wavelength" dependency="independent" vectorID="Wavelength_ID" plotUse="dimension" vectorType="$xdata_type">
 #if($xencode=="avs")
 	                            <AutoIncrementedValueSet>
 	                                <StartValue>
@@ -156,50 +190,46 @@
                         </Vector>
                     </VectorSet>
                     <ParameterCategorySet>
-                        <ParameterCategory name="MeasurementParameters">
+                        <ParameterCategory name="Measurement Description" parameterType="String">
                             <ParameterSet>
-                                <Parameter name="Identifier">
-                                    <string>$title</string>
+                                <Parameter name="Identifier" parameterType="String">
+                                    <String>$title</String>
                                 </Parameter>
 #if(($specinits=="UV") && ($pathlength==""))
    #set($pathlength="1.0")
 #else
    #set($pathlength="-1")
 #end
-                                <Parameter name="Pathlength">
-                                    <float32>$pathlength</float32>
+                                <Parameter name="Sample Path Length" parameterType="Float32">
+                                    <Float32>$pathlength</Float32>
                                     <Unit label="cm">
                                         <SIUnit exponent="1" factor="0.01">m</SIUnit>
                                     </Unit>
                                 </Parameter>
-                                <Parameter name="ScanMode">
-                                    <string>Spectrum</string>
+                                <Parameter name="ScanMode" parameterType="String">
+                                    <String>Spectrum</String>
                                 </Parameter>
                             </ParameterSet>
                         </ParameterCategory>
                     </ParameterCategorySet>
-                </Page>
-            </PageSet>
-            <ParameterCategorySet>
-                <ParameterCategory name="Instrument">
-                    <ParameterSet>
-                        <Parameter name="Vendor">
-                            <string>$vendor</string>
-                        </Parameter>
-                        <Parameter name="Model">
-                            <string>$model</string>
-                        </Parameter>
-                        <Parameter name="Resolution">
+                    <ParameterCategorySet>
+                        <ParameterCategory name="Instrument Properties" parameterType="String">
+                            <ParameterSet>
+                               <Parameter name="Resolution" parameterType="String">
 #if($resolution=="")
 #set($resolution="Not available in JCAMP-DX file")
 #end
-                            <string>$resolution</string>
-                        </Parameter>
-                    </ParameterSet>
-                </ParameterCategory>
-            </ParameterCategorySet>
+                                 <String>$resolution</String>
+                             </Parameter>
+                         </ParameterSet>
+                      </ParameterCategory>
+                    </ParameterCategorySet>
+                </Page>
+            </PageSet>
         </ExperimentStep>
     </ExperimentStepSet>
+
+    <!-- AuditTrial is defined in animl-core.xsd -->
     <AuditTrail>
         <LogEntry>
             <Timestamp>$currenttime</Timestamp>
@@ -211,4 +241,19 @@
             <Reference>There may be additional header items in the JCAMP-DX file that have not been converted to XML</Reference>
         </LogEntry>
     </AuditTrail>
+
+    <!-- SignatureSet is defined in xmldsig-core-schema.xsd via animl-core.xsd -->
+    <SignatureSet>
+        <Signature>
+            <SignedInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
+                <CanonicalizationMethod Algorithm=""/>
+                <SignatureMethod Algorithm=""/>
+                <Reference>
+                    <DigestMethod Algorithm=""/>
+                    <DigestValue/>
+                </Reference>
+            </SignedInfo>
+            <SignatureValue xmlns="http://www.w3.org/2000/09/xmldsig#"/>
+        </Signature>
+    </SignatureSet>
 </AnIML>
