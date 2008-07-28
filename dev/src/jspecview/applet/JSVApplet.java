@@ -23,7 +23,7 @@
 // 09-10-2007 commented out calls for exporting data
 //            this was causing security issues with JRE 1.6.0_02 and 03
 // 13-01-2008 in-line load JCAMP-DX file routine added
-
+// 25-07-2008 added module to predict colour of solution
 
 package jspecview.applet;
 
@@ -95,6 +95,7 @@ import jspecview.util.JSpecViewUtils;
 import jspecview.util.TransmittanceAbsorbanceConverter;
 import netscape.javascript.JSException;     // from plugin.jar
 import netscape.javascript.JSObject;
+import jspecview.common.Visible;
 
 /**
  * JSpecView Applet class.
@@ -106,7 +107,7 @@ import netscape.javascript.JSObject;
  */
 
 public class JSVApplet extends JApplet {
-  public static final String APPLET_VERSION = "1.0.20080113-1715";
+  public static final String APPLET_VERSION = "1.0.20080725-2100";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath, XMLImportfilePath;
@@ -129,15 +130,17 @@ public class JSVApplet extends JApplet {
   String theInterface="single"; // either tab, tile, single, overlay
   String coordCallbackFunctionName=null; // = "coordCallBack";
   String peakCallbackFunctionName=null; // peakCallback
+  String sltnclr="#FFFFFF"; //Colour of Solution
 
-  Color titleColor=Color.black;
-  Color gridColor=Color.lightGray;
-  Color unitsColor=Color.red;
-  Color scaleColor=Color.black;
-  Color coordinatesColor=Color.red;
-  Color plotAreaColor=Color.white;
+  Color titleColor=Color.BLACK;
+  Color gridColor=Color.LIGHT_GRAY;
+  Color unitsColor=Color.RED;
+  Color scaleColor=Color.BLACK;
+  Color coordinatesColor=Color.RED;
+  Color plotAreaColor=Color.WHITE;
   Color backgroundColor=new Color(192,192,192);
-  Color plotColor= Color.blue;
+  Color plotColor= Color.BLUE;
+
 
   Color[] plotColors= {Color.blue, Color.green, Color.red, Color.magenta, Color.yellow, Color.orange,  Color.pink, Color.cyan};
   String plotColorsStr;
@@ -182,7 +185,8 @@ public class JSVApplet extends JApplet {
   JMenuItem clearMenuItem = new JMenuItem();
   JCheckBoxMenuItem transAbsMenuItem = new JCheckBoxMenuItem();
   JCheckBoxMenuItem integrateMenuItem = new JCheckBoxMenuItem();
-  JMenuItem versionMenuItem = new JMenuItem();
+  JMenuItem solColMenuItem = new JMenuItem();
+ JMenuItem versionMenuItem = new JMenuItem();
   JMenuItem headerMenuItem = new JMenuItem();
   JCheckBoxMenuItem windowMenuItem = new JCheckBoxMenuItem();
   JMenuItem overlayKeyMenuItem = new JMenuItem();
@@ -304,8 +308,10 @@ public class JSVApplet extends JApplet {
   this.getContentPane().add(appletPanel);
   String fileName="";
   boolean continuous = false;
-  String Yunits="";
+  String Xunits="",Yunits="";
   JDXSource xmlSource;
+  double firstX = 0,lastX = 0;
+
 
   if (data != null || (filePath != null)||(XMLImportfilePath !=null)) {
     try{
@@ -326,8 +332,11 @@ public class JSVApplet extends JApplet {
         continuous = source.getJDXSpectrum(0).isContinuous();
         if(!compoundMenuOn2)
             compoundMenuOn = false;
-        else compoundMenuOn = source instanceof CompoundSource;
+        else {compoundMenuOn = source instanceof CompoundSource;}
         Yunits= source.getJDXSpectrum(0).getYUnits();
+        Xunits= source.getJDXSpectrum(0).getXUnits();
+        firstX= source.getJDXSpectrum(0).getFirstX();
+        lastX = source.getJDXSpectrum(0).getLastX();
       }
 
        else {
@@ -369,6 +378,16 @@ public class JSVApplet extends JApplet {
       initInterface();
 
       System.out.println("JSpecView vs: " + APPLET_VERSION + " File " + fileName + " Loaded Successfully");
+
+      // if Transmittance, visible 400-700 and nm then calc colour
+      if ((Xunits.toLowerCase().contains("nanometer"))&(firstX < 401)&(lastX > 699)&(Yunits.toLowerCase().contains("trans"))){
+//         sltnclr = Visible.Colour(source);
+        solColMenuItem.setEnabled(true);
+    }else{
+      solColMenuItem.setEnabled(false);
+    }
+
+
   //  Can only integrate a continuous H NMR spectrum
       if (continuous && JSpecViewUtils.isHNMR((JDXSpectrum)selectedJSVPanel.getSpectrumAt(0)))
         integrateMenuItem.setEnabled(true);
@@ -397,7 +416,7 @@ public class JSVApplet extends JApplet {
     this.writeStatus("Please set the 'filepath' or 'import file' parameter");
   }
 
-/**
+
     if(continuous){
      try{
           exportAsMenu.setEnabled(true);
@@ -420,9 +439,8 @@ public class JSVApplet extends JApplet {
       exportAsMenu.setEnabled(false);
       System.err.println("Export menu disabled for non-continuous spectra");
     }
-  */
 
-  exportAsMenu.setEnabled(false);
+  //exportAsMenu.setEnabled(true);
   newFile = false;
 }
 
@@ -551,6 +569,14 @@ public class JSVApplet extends JApplet {
       }
     });
 
+    solColMenuItem.setEnabled(false);
+    solColMenuItem.setText("Predict Solution Colour");
+    solColMenuItem.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        solColMenuItem_actionPerformed(e);
+      }
+    });
+
     windowMenuItem.setText("Window");
     windowMenuItem.addItemListener(new java.awt.event.ItemListener() {
       public void itemStateChanged(ItemEvent e) {
@@ -609,6 +635,7 @@ public class JSVApplet extends JApplet {
     viewMenu.add(overlayKeyMenuItem);
     viewMenu.addSeparator();
     viewMenu.add(transAbsMenuItem);
+    viewMenu.add(solColMenuItem);
     viewMenu.add(integrateMenuItem);
     viewMenu.addSeparator();
     viewMenu.add(windowMenuItem);
@@ -720,10 +747,10 @@ public class JSVApplet extends JApplet {
         jsvp.setUnitsColor(unitsColor);
         jsvp.setScaleColor(scaleColor);
         jsvp.setcoordinatesColor(coordinatesColor);
-//        jsvp.setPlotColor(plotColor);
+        //jsvp.setPlotColor(plotColor);
         jsvp.setIntegralPlotColor(integralPlotColor);
         jsvp.setBackground(backgroundColor);
-        getPlotColors();  // <======= Kind of sloppy
+        getPlotColors();  //<======= Kind of sloppy
         if(plotColors != null)
           jsvp.setPlotColors(plotColors);
   }
@@ -780,6 +807,7 @@ public class JSVApplet extends JApplet {
       appletPanel.add(splitPane,  BorderLayout.CENTER);
       //splitPane.setBackground(backgroundColor);
     }
+
     else{ // Single or overlay
 //      compoundMenuOn = true;
       int spectrumIndex;
@@ -913,8 +941,9 @@ public class JSVApplet extends JApplet {
 
     // shows the newly selected block
     int index = Integer.parseInt(txt.substring(0, txt.indexOf("-")));
+    //sltnclr = Visible.Colour(source);
     showSpectrum(index - 1);
-  }
+    }
 
   /**
    * Shows the </code>JSVPanel</code> at a certain index
@@ -1002,7 +1031,7 @@ public class JSVApplet extends JApplet {
     }
 
     /**
-     * Shows a popup menu is the right mouse button is clicked
+     * Shows a popup menu when the right mouse button is clicked
      * @param e MouseEvent
      */
     public void mousePressed(MouseEvent e) {
@@ -1010,7 +1039,7 @@ public class JSVApplet extends JApplet {
     }
 
     /**
-     * Shows a popup menu is the right mouse button is clicked
+     * Shows a popup menu when the right mouse button is clicked
      * @param e MouseEvent
      */
     public void mouseReleased(MouseEvent e) {
@@ -1256,6 +1285,16 @@ public class JSVApplet extends JApplet {
   }
 
   /**
+   * Calculates the predicted colour of the Spectrum
+   * @param e the ActionEvent
+   */
+  void solColMenuItem_actionPerformed(ActionEvent e) {
+    JDXSpectrum spectrum = (JDXSpectrum)selectedJSVPanel.getSpectrumAt(0);
+//    System.out.println(spectrum.getTitle());
+    sltnclr = Visible.Colour(spectrum.getXYCoords());
+  }
+
+  /**
    * Opens the print dialog to enable printing
    * @param e ActionEvent
    */
@@ -1264,7 +1303,6 @@ public class JSVApplet extends JApplet {
       System.err.println("Use the View/Window menu to lift the spectrum off the page first.");
       return;
     }
-
 
     JSVPanel jsvp = selectedJSVPanel;
 
@@ -1428,7 +1466,6 @@ public class JSVApplet extends JApplet {
     }
   }
 
-
   /**
    * Allows conversion between TRANSMITTANCE and ABSORBANCE
    * @param e ItemEvent
@@ -1443,7 +1480,6 @@ public class JSVApplet extends JApplet {
        TAConvert(IMPLIED);
     else
        TAConvert(IMPLIED);
-
   }
 
   /**
@@ -1489,7 +1525,6 @@ public class JSVApplet extends JApplet {
    }
 
   }
-
 
   /**
      * Allows Integration of an HNMR spectrum
@@ -1786,6 +1821,15 @@ public class JSVApplet extends JApplet {
    */
   public String getAppletVersion() {
     return this.APPLET_VERSION;
+  }
+
+  /**
+   * Returns the calculated colour of a visible spectrum (Transmittance)
+   * @return Color
+   */
+
+  public String getSolnColour(){
+    return this.sltnclr;
   }
 
   /**
