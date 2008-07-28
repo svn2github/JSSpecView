@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2007  The JSpecView Development Team
+/* Copyright (C) 2002-2008  The JSpecView Development Team
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -141,6 +141,7 @@ import jspecview.util.JSpecViewUtils;
 import jspecview.util.TransmittanceAbsorbanceConverter;
 import mdidesktop.ScrollableDesktopPane;
 import mdidesktop.WindowMenu;
+import jspecview.common.Visible;
 
 /**
  * The Main Class or Entry point of the JSpecView Application.
@@ -173,6 +174,7 @@ public class MainFrame
   String autoATConversion;
 
 //   ------------------------ Display Properties -------------------------
+  Color bgc= Color.WHITE;
   boolean gridOn;
   boolean coordinatesOn;
   boolean scaleOn;
@@ -329,7 +331,7 @@ public class MainFrame
   private JMenuItem transAbsMenuItem = new JMenuItem();
   private JMenuItem errorLogMenuItem = new JMenuItem();
 
-  private String aboutJSpec = "\nJSpecView is a graphical viewer for JCAMP-DX Spectra\nCopyright (c) 2007\nUniversity of the West Indies, Mona ";
+  private String aboutJSpec = "\nJSpecView is a graphical viewer for JCAMP-DX Spectra\nCopyright (c) 2008\nUniversity of the West Indies, Mona ";
 
   // Does certain tasks once regardless of how many instances of the program
   // are running
@@ -399,6 +401,7 @@ public class MainFrame
    * Task to do when program starts
    */
   void onProgramStart() {
+
     boolean loadedOk;
     //Set Default Properties
 
@@ -432,6 +435,7 @@ public class MainFrame
     try {
       FileInputStream fileIn = new FileInputStream(propertiesFileName);
       properties.load(fileIn);
+      //bgc = Visible.Colour();
     }
     catch (Exception e) {
     }
@@ -478,7 +482,6 @@ public class MainFrame
     filter.addExtension("dx");
     filter.setDescription("JCAMP-DX Files");
     fc.setFileFilter(filter);
-
   }
 
   /**
@@ -1560,7 +1563,8 @@ public class MainFrame
     jsvp.setcoordinatesColor(ds.getColor("coordinates"));
     jsvp.setGridColor(ds.getColor("grid"));
 //   jsvp.setPlotColor(ds.getColor("plot"));
-    jsvp.setPlotAreaColor(ds.getColor("plotarea"));
+//    jsvp.setPlotAreaColor(ds.getColor("plotarea"));
+    jsvp.setPlotAreaColor(bgc);
     jsvp.setBackground(ds.getColor("background"));
 
     jsvp.setDisplayFontName(ds.getFont());
