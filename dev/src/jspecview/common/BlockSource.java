@@ -107,12 +107,14 @@ public class BlockSource extends CompoundSource {
     // Get the LDRs up to the ##TITLE of the first block
     t.nextToken();
     label = JSpecViewUtils.cleanLabel(t.label);
-    if(!label.equals("##TITLE"))
+    if(!label.equals("##TITLE")){
       throw new JSpecViewException("Error Reading Source");
+    }
     if(t.value != null && !t.value.equals(""))
       bs.setTitle(t.value);
-    else
+    else{
       bs.setTitle("Unknown");
+    }
     t.nextToken();
     label = JSpecViewUtils.cleanLabel(t.label);
 
@@ -121,38 +123,40 @@ public class BlockSource extends CompoundSource {
       if(label.equals("##JCAMPDX")){
         bs.setJcampdx(t.value);
       }
-
       else if(label.equals("##ORIGIN")){
         if(t.value != null && !t.value.equals(""))
           bs.setOrigin(t.value);
-        else
+        else{
           bs.setOrigin("Unknown");
+        }
       }
 
       else if(label.equals("##OWNER")){
         if(t.value != null && !t.value.equals(""))
           bs.setOwner(t.value);
-        else
+        else{
           bs.setOwner("Unknown");
+        }
       }
 
       else if(label.equals("##DATATYPE")){
         bs.setDataType(t.value);
       }
 
-      else
-          sourceLDRTable.put(t.label, t.value);
+      else{
+        sourceLDRTable.put(t.label, t.value);
+      }
+        t.nextToken();
+        label = JSpecViewUtils.cleanLabel(t.label);
 
-      t.nextToken();
-      label = JSpecViewUtils.cleanLabel(t.label);
     }
 
     bs.setHeaderTable(sourceLDRTable);
 
     // If ##TITLE not found throw Exception
-    if(!label.equals("##TITLE"))
+    if(!label.equals("##TITLE")){
       throw new JSpecViewException("Unable to Read Block Source");
-
+    }
     spectrum = new JDXSpectrum();
     LDRTable = new HashMap<String,String>();
 
@@ -374,7 +378,7 @@ public class BlockSource extends CompoundSource {
                 throw new JSpecViewException("Error Reading Data Set: ##YFACTOR not found");
 
               if(firstX == Graph.ERROR)
-                throw new JSpecViewException("Error Reading Data Set: ##FIRST not found");
+                throw new JSpecViewException("Error Reading Data Set: ##FIRSTX not found");
 
               if(lastX == Graph.ERROR)
                 throw new JSpecViewException("Error Reading Data Set: ##LASTX not found");
