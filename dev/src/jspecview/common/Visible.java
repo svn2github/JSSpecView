@@ -18,7 +18,12 @@
  */
 
 // CHANGES to 'visible.java' - module to predict colour of visible spectrum
-// created July 2008 based on concept published in JChemEd Dec 2007
+// created July 2008 based on concept published by Darren L. Williams
+// in J. Chem. Educ., 84(11), 1873-1877, 2007
+//
+// The CIE standard observer functions were curve fitted
+// and the equations used for these calculations. The values obtained
+// do not vary appreciably from those published in the JChemEd article
 // University of the West Indies, Mona Campus
 
 package jspecview.common;
@@ -27,8 +32,12 @@ import java.lang.Math;
 import java.awt.Color;
 import jspecview.util.Coordinate;
 import jspecview.common.JDXSource;
-import java.util.Arrays;
 
+/**
+ * Visible class.
+ * @author Craig Walters
+ * @author Prof Robert J. Lancashire
+ */
 
 public class Visible {
   public static int blue = 399, red = 701, numVispoints;
@@ -168,7 +177,8 @@ public class Visible {
       YUP=0; YDWN=0;
       ZUP=0; ZDWN=0;
 
-      return ("#" + redv + greenv + bluev);
+      //return ("#" + redv + greenv + bluev);
+      return(""+RED+","+GREEN+","+BLUE);
     }
     else {
 
