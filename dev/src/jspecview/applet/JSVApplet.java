@@ -23,6 +23,7 @@
 // 09-10-2007 commented out calls for exporting data
 //            this was causing security issues with JRE 1.6.0_02 and 03
 // 13-01-2008 in-line load JCAMP-DX file routine added
+// 22-07-2008 reinstated calls for exporting since Ok with JRE 1.6.0_05
 // 25-07-2008 added module to predict colour of solution
 
 package jspecview.applet;
@@ -103,11 +104,12 @@ import jspecview.common.Visible;
  * JSpecView_Applet_Specification.html.
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
+ * @author Craig Walters
  * @author Prof Robert J. Lancashire
  */
 
 public class JSVApplet extends JApplet {
-  public static final String APPLET_VERSION = "1.0.20080725-2100";
+  public static final String APPLET_VERSION = "1.0.20080729-1830";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath, XMLImportfilePath;
@@ -130,7 +132,7 @@ public class JSVApplet extends JApplet {
   String theInterface="single"; // either tab, tile, single, overlay
   String coordCallbackFunctionName=null; // = "coordCallBack";
   String peakCallbackFunctionName=null; // peakCallback
-  String sltnclr="#FFFFFF"; //Colour of Solution
+  String sltnclr="255,255,255"; //Colour of Solution
 
   Color titleColor=Color.BLACK;
   Color gridColor=Color.LIGHT_GRAY;
@@ -186,7 +188,7 @@ public class JSVApplet extends JApplet {
   JCheckBoxMenuItem transAbsMenuItem = new JCheckBoxMenuItem();
   JCheckBoxMenuItem integrateMenuItem = new JCheckBoxMenuItem();
   JMenuItem solColMenuItem = new JMenuItem();
- JMenuItem versionMenuItem = new JMenuItem();
+  JMenuItem versionMenuItem = new JMenuItem();
   JMenuItem headerMenuItem = new JMenuItem();
   JCheckBoxMenuItem windowMenuItem = new JCheckBoxMenuItem();
   JMenuItem overlayKeyMenuItem = new JMenuItem();
@@ -570,7 +572,7 @@ public class JSVApplet extends JApplet {
     });
 
     solColMenuItem.setEnabled(false);
-    solColMenuItem.setText("Predict Solution Colour");
+    solColMenuItem.setText("Predict Solution Colour...");
     solColMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
         solColMenuItem_actionPerformed(e);
@@ -1292,6 +1294,13 @@ public class JSVApplet extends JApplet {
     JDXSpectrum spectrum = (JDXSpectrum)selectedJSVPanel.getSpectrumAt(0);
 //    System.out.println(spectrum.getTitle());
     sltnclr = Visible.Colour(spectrum.getXYCoords());
+
+
+    //JScrollPane scrollPane = new JScrollPane();
+
+    JOptionPane.showMessageDialog(this, "<HTML><body bgcolor=rgb("+sltnclr+")><br />Predicted Solution Colour- RGB("+sltnclr+")<br /><br /></body></HTML>"
+                                  , "Predicted Colour",
+                                    JOptionPane.INFORMATION_MESSAGE);
   }
 
   /**
@@ -1489,7 +1498,7 @@ public class JSVApplet extends JApplet {
    */
 
   private void TAConvert(int comm) {
-
+    //comm not used
    JSVPanel jsvp = (JSVPanel)appletPanel.getComponent(0);
     if(jsvp.getNumberOfSpectra() > 1)
       return;
@@ -1513,6 +1522,7 @@ public class JSVApplet extends JApplet {
     appletPanel.add(jsvp);
 
     initProperties(jsvp);
+    solColMenuItem.setEnabled(true);
     jsvp.addMouseListener(new JSVPanelMouseListener());
     jsvp.repaint();
 
@@ -1831,6 +1841,7 @@ public class JSVApplet extends JApplet {
   public String getSolnColour(){
     return this.sltnclr;
   }
+
 
   /**
    * Method that can be called from another applet or from javascript to
