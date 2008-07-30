@@ -142,6 +142,7 @@ import jspecview.util.TransmittanceAbsorbanceConverter;
 import mdidesktop.ScrollableDesktopPane;
 import mdidesktop.WindowMenu;
 import jspecview.common.Visible;
+import jspecview.util.Coordinate;
 
 /**
  * The Main Class or Entry point of the JSpecView Application.
@@ -188,7 +189,7 @@ public class MainFrame
   JDXSource currentSelectedSource = null;
   Properties properties;
   DisplaySchemesProcessor dsp;
-  String tempDS;
+  String tempDS,sltnclr;
 
 //   -------------------------- GUI Components  -------------------------
 
@@ -198,6 +199,7 @@ public class MainFrame
 
 //   ----------------------------------------------------------------------
 
+  JSVPanel selectedJSVPanel;
   URL iconURL;
   {
     iconURL = MainFrame.class.getClassLoader().getResource("icons/spec16.gif");
@@ -329,6 +331,7 @@ public class MainFrame
   JMenu processingMenu = new JMenu();
   private JMenuItem integrateMenuItem = new JMenuItem();
   private JMenuItem transAbsMenuItem = new JMenuItem();
+  private JMenuItem solColMenuItem = new JMenuItem();
   private JMenuItem errorLogMenuItem = new JMenuItem();
 
   private String aboutJSpec = "\nJSpecView is a graphical viewer for JCAMP-DX Spectra\nCopyright (c) 2008\nUniversity of the West Indies, Mona ";
@@ -1142,6 +1145,12 @@ public class MainFrame
         transAbsMenuItem_actionPerformed(e);
       }
     });
+    solColMenuItem.setText("Predicted Solution Colour");
+    solColMenuItem.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        solColMenuItem_actionPerformed(e);
+      }
+    });
     errorLogMenuItem.setText("Error Log ...");
     errorLogMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -1238,6 +1247,7 @@ public class MainFrame
     windowMenu.add(showMenuItem);
     processingMenu.add(integrateMenuItem).setEnabled(false);
     processingMenu.add(transAbsMenuItem).setEnabled(false);
+    processingMenu.add(solColMenuItem).setEnabled(false);
     windowMenu.addSeparator();
   }
 
@@ -1278,7 +1288,7 @@ public class MainFrame
    * Shows dialog to import a file
    */
   public void showFileImportDialog() {
-    String Yunits;
+    String Yunits,Xunits;
     boolean continuous;
 
     byte[] infile = new byte[400];
@@ -1395,6 +1405,13 @@ public class MainFrame
         else {
           transAbsMenuItem.setEnabled(false);
         }
+        Xunits = currentSelectedSource.getJDXSpectrum(0).getXUnits();
+        if(Yunits.toLowerCase().contains("trans") &
+           Xunits.toLowerCase().contains("nanometer")){
+          solColMenuItem.setEnabled(true);
+        }else{
+          solColMenuItem.setEnabled(false);
+        }
 
         splitSpectra(xmlSource);
       }
@@ -1427,7 +1444,7 @@ public class MainFrame
   public void openFile(File file) {
     String fileName = file.getName();
     String filePath = file.getAbsolutePath();
-    String Yunits;
+    String Yunits,Xunits;
 
     writeStatus(" ");
     if (jdxSourceFiles.contains(file)) {
@@ -1519,7 +1536,13 @@ public class MainFrame
       else {
         transAbsMenuItem.setEnabled(false);
       }
-
+      Xunits = currentSelectedSource.getJDXSpectrum(0).getXUnits();
+      if(Yunits.toLowerCase().contains("trans") &
+         Xunits.toLowerCase().contains("nanometer")){
+        solColMenuItem.setEnabled(true);
+      }else{
+        solColMenuItem.setEnabled(false);
+      }
       if (autoOverlay && source instanceof CompoundSource) {
         try {
           overlaySpectra(source);
@@ -2993,6 +3016,31 @@ public class MainFrame
     JInternalFrame frame = desktopPane.getSelectedFrame();
     TAConvert(frame, IMPLIED);
 
+  }
+
+  /**
+   * Predicts the colour of a solution containing the compound
+   * @param e the ActionEvent
+   */
+  void solColMenuItem_actionPerformed(ActionEvent e) {
+
+    JInternalFrame frame = desktopPane.getSelectedFrame();
+    Container contentPane = frame.getContentPane();
+    if (frame != null) {
+      //JSVPanel panel = (JSVPanel) frame.getContentPane().getComponent(0);
+      JSVPanel jsvp = (JSVPanel) contentPane.getComponent(0);
+      JDXSpectrum spectrum = (JDXSpectrum) jsvp.getSpectrumAt(0);
+      //jsvpPopupMenu.setSelectedJSVPanel(panel);
+      //jsvpPopupMenu.setSource(currentSelectedSource);
+      //jsvpPopupMenu.properties_actionPerformed(e);
+      //Coordinate[] source;
+      //source = currentSelectedSource.getJDXSpectrum(0).getXYCoords();
+      //JDXSpectrum spectrum = (JDXSpectrum)selectedJSVPanel.getSpectrumAt(0);
+      sltnclr = Visible.Colour(spectrum.getXYCoords());
+      JOptionPane.showMessageDialog(this, "<HTML><body bgcolor=rgb("+sltnclr+")><br />Predicted Solution Colour RGB("+sltnclr+")<br /><br /></body></HTML>"
+                                    , "Predicted Colour",
+                                    JOptionPane.INFORMATION_MESSAGE);
+    }
   }
 
   /**
