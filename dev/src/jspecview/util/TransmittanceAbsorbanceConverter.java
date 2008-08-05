@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2007 The University of the West Indies
+/* Copyright (c) 2002-2008 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -28,6 +28,7 @@ import jspecview.common.JDXSpectrum;
  * JDXSpectrum</code> from Transmittance to Absorbance and vice versa.
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
+ * @author Craig Walters
  * @author Prof Robert J. Lancashire
  */
 
@@ -35,7 +36,7 @@ public class TransmittanceAbsorbanceConverter {
 
   /**
    * Converts and returns a converted spectrum. If original was Absorbance then
-   * a Transmittance spectrum is returned and vice versa or null if spectrum was
+   * a Transmittance spectrum is returned and vice versa if spectrum was
    * neither Absorbance nor Transmittance then null is returned
    * @param spectrum the JDXSpectrum
    * @return the converted spectrum
@@ -61,6 +62,7 @@ public class TransmittanceAbsorbanceConverter {
     String newYInits;
 
     if(yUnits.toLowerCase().equals("absorbance") ||
+        yUnits.toLowerCase().contains("abs") ||
             yUnits.toLowerCase().equals("a")){
       double min = 0;
       double max = 4;
@@ -69,7 +71,11 @@ public class TransmittanceAbsorbanceConverter {
       }
       for(int i = 0; i < xyCoords.length; i++){
         y = xyCoords[i].getYVal();
-        y = toTransmittance(y);
+        if(y <= 0){
+         y = 1;
+        }else{
+          y = toTransmittance(y);
+        }
         newXYCoords.addElement(new Coordinate(xyCoords[i].getXVal(), y));
       }
 
@@ -104,6 +110,7 @@ public class TransmittanceAbsorbanceConverter {
     String newYInits;
 
     if(yUnits.toLowerCase().equals("transmittance") ||
+       yUnits.toLowerCase().contains("trans") ||
        yUnits.toLowerCase().equals("t")){
       if(isYInRange(spectrum, -2, 2)){
         for(int i = 0; i < xyCoords.length; i++){
@@ -177,7 +184,7 @@ public class TransmittanceAbsorbanceConverter {
   }
 
   /**
-   * Determines if a y values of a spectrum are in a certain range
+   * Determines if the y values of a spectrum are in a certain range
    * @param spectrum the spectrum
    * @param minRange the minimum of the range
    * @param maxRange the maximum of the range
