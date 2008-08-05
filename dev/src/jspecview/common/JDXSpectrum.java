@@ -58,7 +58,7 @@ public class JDXSpectrum implements Graph{
    * specifies whether the spectrum is continuous
    */
   private boolean continuous;
-  
+
 
   /**
    * whether the x values were converted from HZ to PPM
@@ -88,7 +88,7 @@ public class JDXSpectrum implements Graph{
   private String yUnits = "Arbitrary Units";
   private double xFactor = ERROR;
   private double yFactor = ERROR;
-  private double deltaX = ERROR;
+  //private double deltaX = ERROR;
   // For NMR Spectra
   private double observedFreq = ERROR;
 
@@ -182,7 +182,7 @@ public class JDXSpectrum implements Graph{
   public void setContinuous(boolean val){
     continuous = val;
   }
-  
+
 
   /**
    * Sets the parent source of this spectrum
@@ -579,6 +579,8 @@ public class JDXSpectrum implements Graph{
    */
   public String getHeaderString(String tmpDataClass, double tmpXFactor, double tmpYFactor, int startIndex, int endIndex){
 
+    final String CORE_STR = "TITLE,ORIGIN,OWNER,DATE,TIME,DATATYPE,JCAMPDX";
+
     DecimalFormat varFormatter = new DecimalFormat("0.########", new DecimalFormatSymbols(java.util.Locale.US ));
     DecimalFormat sciFormatter = new DecimalFormat("0.########E0", new DecimalFormatSymbols(java.util.Locale.US ));
 
@@ -611,12 +613,13 @@ public class JDXSpectrum implements Graph{
     // optional header
     for(Iterator iter = headerTable.keySet().iterator(); iter.hasNext();){
       String label = (String)iter.next();
- //     System.out.println(label);
+      //System.out.println(label);
       String dataSet = (String)headerTable.get(label);
       buffer.append(label + "= " + dataSet + JSpecViewUtils.newLine);
     }
     if(getObservedFreq() != ERROR)
       buffer.append("##.OBSERVE FREQUENCY= " + getObservedFreq() + JSpecViewUtils.newLine);
+    //now need to put pathlength here
 
     // last part of header
 

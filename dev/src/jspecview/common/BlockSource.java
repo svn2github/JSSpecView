@@ -173,7 +173,6 @@ public class BlockSource extends CompoundSource {
           spectrum = new JDXSpectrum();
           continue;
         }
-
         else if(label.equals("##TITLE")){
           if(t.value != null && !t.value.equals(""))
             spectrum.setTitle(t.value);
@@ -200,14 +199,14 @@ public class BlockSource extends CompoundSource {
           spectrum.setDataType(t.value);
         }
 
+        if (label.equals("##DATE"))  {
+//            notesLDRTable.put(label, t.value);
+              spectrum.setDate(t.value);
+        }
+
         if (label.equals("##LONGDATE")) {
             spectrum.setLongDate(t.value);
             longDateFound = true;
-       }
-
-       if (label.equals("##DATE"))  {
-//            notesLDRTable.put(label, t.value);
-             spectrum.setDate(t.value);
        }
 
        if (label.equals("##TIME")) {
