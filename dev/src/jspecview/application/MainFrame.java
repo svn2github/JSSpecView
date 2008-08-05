@@ -1405,9 +1405,12 @@ public class MainFrame
         else {
           transAbsMenuItem.setEnabled(false);
         }
+        Coordinate xyCoords[] = currentSelectedSource.getJDXSpectrum(0).getXYCoords();
         Xunits = currentSelectedSource.getJDXSpectrum(0).getXUnits();
-        if(Yunits.toLowerCase().contains("trans") &
-           Xunits.toLowerCase().contains("nanometer")){
+        if((Yunits.toLowerCase().contains("trans") || Yunits.toLowerCase().contains("abs"))&
+           (Xunits.toLowerCase().contains("nanometer"))
+           & (xyCoords[0].getXVal() < 401) & (xyCoords[(xyCoords.length - 1)].getXVal() > 699)
+           ){
           solColMenuItem.setEnabled(true);
         }else{
           solColMenuItem.setEnabled(false);
@@ -1536,9 +1539,12 @@ public class MainFrame
       else {
         transAbsMenuItem.setEnabled(false);
       }
+      Coordinate xyCoords[] = currentSelectedSource.getJDXSpectrum(0).getXYCoords();
       Xunits = currentSelectedSource.getJDXSpectrum(0).getXUnits();
-      if(Yunits.toLowerCase().contains("trans") &
-         Xunits.toLowerCase().contains("nanometer")){
+      if((Yunits.toLowerCase().contains("trans") || Yunits.toLowerCase().contains("abs"))&
+         (Xunits.toLowerCase().contains("nanometer"))
+          &(xyCoords[0].getXVal() < 401) & (xyCoords[(xyCoords.length -1)].getXVal() > 699)
+          ){
         solColMenuItem.setEnabled(true);
       }else{
         solColMenuItem.setEnabled(false);
@@ -1649,6 +1655,7 @@ public class MainFrame
     frame.setSize(550, 350);
     System.out.println("inside overlay");
     transAbsMenuItem.setEnabled(false);
+    solColMenuItem.setEnabled(false);
     try {
       frame.setMaximum(true);
     }
@@ -1793,6 +1800,7 @@ public class MainFrame
    * @param source the <code>JDXSource</code>
    */
   private void splitSpectra(JDXSource source) {
+
 
     File file = getFileForSource(source);
 
@@ -1962,7 +1970,7 @@ public class MainFrame
      * @param e the InternalFrameEvent
      */
     public void internalFrameActivated(InternalFrameEvent e) {
-      String Yunits = "";
+      String Yunits,Xunits;
       JInternalFrame frame = e.getInternalFrame();
       // Set Current Selected Source
       currentSelectedSource = source;
@@ -2019,6 +2027,16 @@ public class MainFrame
       else {
         transAbsMenuItem.setEnabled(false);
       }
+      Coordinate xyCoords[] = currentSelectedSource.getJDXSpectrum(0).getXYCoords();
+      Xunits = currentSelectedSource.getJDXSpectrum(0).getXUnits();
+      if((Yunits.toLowerCase().contains("trans") || Yunits.toLowerCase().contains("abs"))&
+         (Xunits.toLowerCase().contains("nanometer"))
+         & (xyCoords[0].getXVal() < 401) & (xyCoords[(xyCoords.length - 1)].getXVal() > 699)){
+        solColMenuItem.setEnabled(true);
+      }else{
+        solColMenuItem.setEnabled(false);
+      }
+
 
       // Update file|Close Menu
       closeMenuItem.setText("Close '" + file.getName() + "'");
@@ -3012,10 +3030,8 @@ public class MainFrame
    * @param e the ActionEvent
    */
   void transAbsMenuItem_actionPerformed(ActionEvent e) {
-
     JInternalFrame frame = desktopPane.getSelectedFrame();
     TAConvert(frame, IMPLIED);
-
   }
 
   /**
@@ -3023,12 +3039,23 @@ public class MainFrame
    * @param e the ActionEvent
    */
   void solColMenuItem_actionPerformed(ActionEvent e) {
+    String Yunits = currentSelectedSource.getJDXSpectrum(0).getYUnits();
+    String Yunits0 = Yunits;
 
     JInternalFrame frame = desktopPane.getSelectedFrame();
     Container contentPane = frame.getContentPane();
+
+
     if (frame != null) {
       //JSVPanel panel = (JSVPanel) frame.getContentPane().getComponent(0);
       JSVPanel jsvp = (JSVPanel) contentPane.getComponent(0);
+      int numcomp=contentPane.getComponentCount();
+       if ( (numcomp> 1)& Yunits.toLowerCase().contains("trans")) {
+         Yunits0 = "abs";
+       }
+       if ( (numcomp> 1)& Yunits.toLowerCase().contains("abs")) {
+         Yunits0 = "trans";
+       }
       JDXSpectrum spectrum = (JDXSpectrum) jsvp.getSpectrumAt(0);
       //jsvpPopupMenu.setSelectedJSVPanel(panel);
       //jsvpPopupMenu.setSource(currentSelectedSource);
@@ -3036,7 +3063,7 @@ public class MainFrame
       //Coordinate[] source;
       //source = currentSelectedSource.getJDXSpectrum(0).getXYCoords();
       //JDXSpectrum spectrum = (JDXSpectrum)selectedJSVPanel.getSpectrumAt(0);
-      sltnclr = Visible.Colour(spectrum.getXYCoords());
+      sltnclr = Visible.Colour(spectrum.getXYCoords(),Yunits0);
       JOptionPane.showMessageDialog(this, "<HTML><body bgcolor=rgb("+sltnclr+")><br />Predicted Solution Colour RGB("+sltnclr+")<br /><br /></body></HTML>"
                                     , "Predicted Colour",
                                     JOptionPane.INFORMATION_MESSAGE);
@@ -3190,5 +3217,4 @@ public class MainFrame
       dtde.rejectDrop();
     }
   }
-
 }
