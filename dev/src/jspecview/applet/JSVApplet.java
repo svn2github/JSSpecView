@@ -109,7 +109,7 @@ import jspecview.common.Visible;
  */
 
 public class JSVApplet extends JApplet {
-  public static final String APPLET_VERSION = "1.0.20080729-1830";
+  public static final String APPLET_VERSION = "1.0.20080804-2030";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath, XMLImportfilePath;
@@ -382,7 +382,8 @@ public class JSVApplet extends JApplet {
       System.out.println("JSpecView vs: " + APPLET_VERSION + " File " + fileName + " Loaded Successfully");
 
       // if Transmittance, visible 400-700 and nm then calc colour
-      if ((Xunits.toLowerCase().contains("nanometer"))&(firstX < 401)&(lastX > 699)&(Yunits.toLowerCase().contains("trans"))){
+      if ((Xunits.toLowerCase().contains("nanometer"))&(firstX < 401)&(lastX > 699)
+          &((Yunits.toLowerCase().contains("trans"))||Yunits.toLowerCase().contains("abs"))){
 //         sltnclr = Visible.Colour(source);
         solColMenuItem.setEnabled(true);
     }else{
@@ -1291,10 +1292,11 @@ public class JSVApplet extends JApplet {
    * @param e the ActionEvent
    */
   void solColMenuItem_actionPerformed(ActionEvent e) {
-    JDXSpectrum spectrum = (JDXSpectrum)selectedJSVPanel.getSpectrumAt(0);
-//    System.out.println(spectrum.getTitle());
-    sltnclr = Visible.Colour(spectrum.getXYCoords());
 
+    JDXSpectrum spectrum = (JDXSpectrum)selectedJSVPanel.getSpectrumAt(0);
+    String Yunits = spectrum.getYUnits();
+//    System.out.println(spectrum.getTitle());
+    sltnclr = Visible.Colour(spectrum.getXYCoords(),Yunits);
 
     //JScrollPane scrollPane = new JScrollPane();
 
