@@ -11,7 +11,7 @@
 <!--JCAMP/AnIML crosswalk XL spreadsheet (http://animl.sourceforge.net/IUPAC/All%20JCAMP-DX%20and%20netCDF%20Labels%20version%2028%20August%202003.xls) 02/19/06 -->
 
 <!--Stuart J. Chalk February 19, 2006 -->
-<!--Robert J. Lancashire February 11, 2007 -->
+<!--Robert J. Lancashire July 18, 2008 -->
 <!--Version 0.3 -->
 
 <!--Notes -->
@@ -62,8 +62,8 @@
                         </Parameter>
 #end
 #if($bp !="")
-                        <ParameterCategory name="BP" parameterType="Float32">
-                            <Parameter name="Max">
+                        <ParameterCategory name="BP">
+                            <Parameter name="Max" parameterType="Float32">
                                 <Float32>$bp</Float32>
                             </Parameter>
                             <Parameter name="Pressure" parameterType="Float32">
@@ -77,8 +77,8 @@
                         </ParameterCategory>
 #end
 #if($mp !="")
-                        <ParameterCategory name="MP" parameterType="Float32">
-                            <Parameter name="Max">
+                        <ParameterCategory name="MP">
+                            <Parameter name="Max" parameterType="Float32">
                                 <Float32>$mp</Float32>
                             </Parameter>
                             <Parameter name="Pressure" parameterType="Float32">
@@ -110,7 +110,7 @@
             </SamplesUsed>
             <Technique name="$specinits" uri="http://animl.sf.net/schema/techniques/$specinits%20base%20instance%20document.atid"/>
             <ParameterCategorySet>
-                <ParameterCategory name="Instrument Description" parameterType="String">
+                <ParameterCategory name="Instrument Description">
                     <ParameterSet>
                         <Parameter name="Manufacturer" parameterType="String">
                             <String>$vendor</String>
@@ -190,7 +190,7 @@
                         </Vector>
                     </VectorSet>
                     <ParameterCategorySet>
-                        <ParameterCategory name="Measurement Description" parameterType="String">
+                        <ParameterCategory name="Measurement Description">
                             <ParameterSet>
                                 <Parameter name="Identifier" parameterType="String">
                                     <String>$title</String>
@@ -213,7 +213,7 @@
                         </ParameterCategory>
                     </ParameterCategorySet>
                     <ParameterCategorySet>
-                        <ParameterCategory name="Instrument Properties" parameterType="String">
+                        <ParameterCategory name="Instrument Properties">
                             <ParameterSet>
                                <Parameter name="Resolution" parameterType="String">
 #if($resolution=="")
