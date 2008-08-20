@@ -164,11 +164,6 @@ is divided into following sections:
 			      <include name="*.jar"/>
 			   </fileset>
     	        </jar>
-    			<copy todir="${dist.dir}">
-					<fileset dir="${build.dir}">
-					    <include name="*.jar"/>
-					</fileset>
-	   			</copy>
             <mkdir dir="${dist.test.dir}"/>
   			<copy todir="${dist.test.dir}">
 			    <fileset dir="${build.dir}">
