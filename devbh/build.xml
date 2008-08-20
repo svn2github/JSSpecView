@@ -81,6 +81,7 @@ is divided into following sections:
              <property name="javadoc.version" value="TRUE" />
              <property name="javadoc.windowtitle" value="${build.dir}/classes" />
 
+		     <property name="applet.class" value="jspecview.applet.JSVApplet" />
     		 <property name="main.class" value="jspecview.application.MainFrame" />
              <property name="manifest.file" value="manifest.mf" />
              <property name="platform.active" value="default_platform" />
@@ -156,6 +157,7 @@ is divided into following sections:
             <attribute name="destdir" default="${build.classes.dir}"/>
             <attribute name="classpath" default="${javac.classpath}"/>
             <attribute name="debug" default="${javac.debug}"/>
+        	<attribute name="verbose" default="true"/>
             <element name="customize" optional="true"/>
             <sequential>
                 <javac srcdir="@{srcdir}" destdir="@{destdir}" debug="@{debug}" deprecation="${javac.deprecation}" source="${javac.source}" target="${javac.target}" includeantruntime="false">
@@ -313,7 +315,14 @@ is divided into following sections:
             </j2seproject1:manifest>
         </j2seproject1:jar>
     </target>
-    <target name="applet_jar" depends="init,compile,-pre-jar,-do-jar-with-manifest,-do-jar-without-manifest,-do-jar-with-mainclass" description="Create applet."/>
+    <target name="-do-jar-with-appletclass" depends="init,compile,-pre-jar" if="manifest.available+applet.class">
+        <j2seproject1:jar manifest="${manifest.file}">
+            <j2seproject1:manifest>
+                <j2seproject1:attribute name="Applet-Class" value="${applet.class}"/>
+            </j2seproject1:manifest>
+        </j2seproject1:jar>
+    </target>
+    <target name="applet_jar" depends="init,compile,-pre-jar,-do-jar-with-manifest,-do-jar-without-manifest,-do-jar-with-appletclass" description="Create applet."/>
 
     <target name="signed-applet" id="signed-applet" description="Create self-signed applet.">
     <signjar jar="${dist.dir}/jspecview.jar"
@@ -520,10 +529,10 @@ is divided into following sections:
     -->
     <target name="deps-clean" depends="init" unless="no.deps"/>
     <target name="-do-clean" depends="init">
-        <delete> 
+        <delete failonerror="false"> 
            <fileset dir ="${build.dir}" includes= "**/*.class" />
         </delete>
-        <delete>
+        <delete failonerror="false">
            <fileset dir="${dist.dir}" includes= "*.jar" />
         </delete>
     </target>
