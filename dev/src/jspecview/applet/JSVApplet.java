@@ -43,14 +43,15 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.Enum;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -70,28 +71,30 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
-import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import jspecview.api.ExporterInterface;
-import jspecview.api.Interface;
-import jspecview.common.AnIMLSource;
 import jspecview.common.BlockSource;
-import jspecview.common.CMLSource;
 import jspecview.common.CompoundSource;
-import jspecview.common.Coordinate;
 import jspecview.common.JDXSource;
+import jspecview.common.CMLSource;
+import jspecview.common.AnIMLSource;
 import jspecview.common.JDXSourceFactory;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVPanel;
-import jspecview.common.JSpecViewUtils;
 import jspecview.common.NTupleSource;
 import jspecview.common.OverlayLegendDialog;
 import jspecview.common.PrintLayoutDialog;
-import jspecview.common.TransmittanceAbsorbanceConverter;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
+import jspecview.xml.SVGExporter;
+import jspecview.xml.AnIMLExporter;
+import jspecview.xml.CMLExporter;
+import jspecview.util.Coordinate;
+import jspecview.util.JDXExporter;
+import jspecview.util.JSpecViewUtils;
+import jspecview.util.TransmittanceAbsorbanceConverter;
+import netscape.javascript.JSException;     // from plugin.jar
 import netscape.javascript.JSObject;
 import jspecview.common.Visible;
 
@@ -192,65 +195,8 @@ public class JSVApplet extends JApplet {
   JDXSpectrum xmlSpec;
   JSVPanel tempJSVP;
 
-  private static final String[] params = {
-     "LOAD", 
-     "REVERSEPLOT", 
-     "COORDINATESON", 
-     "GRIDON", 
-     "COORDCALLBACKFUNCTIONNAME", 
-     "SPECTRUMNUMBER", 
-     "INTERFACE", 
-     "ENDINDEX", 
-     "ENABLEZOOM", 
-     "STARTINDEX", 
-     "MENUON", 
-     "COMPOUNDMENUON", 
-     "BACKGROUNDCOLOR", 
-     "COORDINATESCOLOR", 
-     "GRIDCOLOR", 
-     "PLOTAREACOLOR", 
-     "PLOTCOLOR", 
-     "SCALECOLOR", 
-     "TITLECOLOR", 
-     "UNITSCOLOR", 
-     "PLOTCOLORS", 
-     "VERSION", 
-     "PEAKCALLBACKFUNCTIONNAME", 
-     "IMPORT",
-     "IRMODE"
-     };
-  
-  final private static int PARAM_LOAD = 0;
-  final private static int PARAM_REVERSEPLOT = 1;
-  final private static int PARAM_COORDINATESON = 2;
-  final private static int PARAM_GRIDON = 3;
-  final private static int PARAM_COORDCALLBACKFUNCTIONNAME = 4;
-  final private static int PARAM_SPECTRUMNUMBER = 5;
-  final private static int PARAM_INTERFACE = 6;
-  final private static int PARAM_ENDINDEX = 7;
-  final private static int PARAM_ENABLEZOOM = 8;
-  final private static int PARAM_STARTINDEX = 9;
-  final private static int PARAM_MENUON = 10;
-  final private static int PARAM_COMPOUNDMENUON = 11;
-  final private static int PARAM_BACKGROUNDCOLOR = 12;
-  final private static int PARAM_COORDINATESCOLOR = 13;
-  final private static int PARAM_GRIDCOLOR = 14;
-  final private static int PARAM_PLOTAREACOLOR = 15;
-  final private static int PARAM_PLOTCOLOR = 16;
-  final private static int PARAM_SCALECOLOR = 17;
-  final private static int PARAM_TITLECOLOR = 18;
-  final private static int PARAM_UNITSCOLOR = 19;
-  final private static int PARAM_PLOTCOLORS = 20;
-  final private static int PARAM_VERSION = 21;
-  final private static int PARAM_PEAKCALLBACKFUNCTIONNAME = 22;
-  final private static int PARAM_IMPORT = 23;
-  final private static int PARAM_IRMODE = 24;
-  
-  final private static Hashtable<String, Integer> htParams = new Hashtable<String, Integer>();
-  {
-    for (int i = 0; i < params.length; i++)
-      htParams.put(params[i], new Integer(i));
-  }
+  private static final String SCRIPT_PARAMS =
+     "LOAD REVERSEPLOT COORDINATESON GRIDON COORDCALLBACKFUNCTIONNAME SPECTRUMNUMBER INTERFACE ENDINDEX ENABLEZOOM STARTINDEX MENUON COMPOUNDMENUON BACKGROUNDCOLOR COORDINATESCOLOR GRIDCOLOR PLOTAREACOLOR PLOTCOLOR SCALECOLOR TITLECOLOR UNITSCOLOR PLOTCOLORS VERSION PEAKCALLBACKFUNCTIONNAME IMPORT";
   //"ADDHIGHLIGHT", "REMOVEHIGHLIGHT", "REMOVEALLHIGHTLIGHTS"
 
  /**
@@ -268,12 +214,12 @@ public class JSVApplet extends JApplet {
   /**
    * The panes of a tabbed display
    */
-  JTabbedPane spectraPane = new JTabbedPane();
+  private JTabbedPane spectraPane = new JTabbedPane();
 
   /**
    * A list of </code>JDXSpectrum</code> instances
    */
-  Vector<JDXSpectrum> specs;
+  Vector specs;
 
   /**
    * The <code>JSVPanel</code>s created for each </code>JDXSpectrum</code>
@@ -305,9 +251,6 @@ public class JSVApplet extends JApplet {
    */
   boolean overlay;
 
-  
-  String irMode;
-  
   /**
    * Returns a parameter value
    * @param key the parameter name
@@ -322,7 +265,6 @@ public class JSVApplet extends JApplet {
   /**
    * Initialises applet with parameters and load the <code>JDXSource</code>
    */
-  @Override
   public void init() {
 	  init(null);
   }
@@ -457,13 +399,7 @@ public class JSVApplet extends JApplet {
         transAbsMenuItem.setEnabled(true);
       else
         transAbsMenuItem.setEnabled(false);
-
-      System.out.println("irmode " + irMode);
-      setStringParameter("irmode", irMode);
-      
     }
-    
-    
     catch(JSpecViewException jsve){
      this.writeStatus(jsve.getMessage());
     }
@@ -717,7 +653,6 @@ public class JSVApplet extends JApplet {
    * Get Applet information
    * @return the String "JSpecView Applet"
    */
-  @Override
   public String getAppletInfo() {
     return "JSpecView Applet " + APPLET_VERSION;
   }
@@ -726,7 +661,6 @@ public class JSVApplet extends JApplet {
    * Returns null
    * @return null
    */
-  @Override
   public String[][] getParameterInfo() {
     return null;
   }
@@ -838,8 +772,8 @@ public class JSVApplet extends JApplet {
     //appletPanel.setBackground(backgroundColor);
 
     if(theInterface.equals("tab") && moreThanOnePanel){
-      spectraPane = new JTabbedPane(SwingConstants.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
-      appletPanel.add(new JLabel(((CompoundSource)source).getTitle(), SwingConstants.CENTER), BorderLayout.NORTH);
+      spectraPane = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
+      appletPanel.add(new JLabel(((CompoundSource)source).getTitle(), JLabel.CENTER), BorderLayout.NORTH);
       appletPanel.add(spectraPane,  BorderLayout.CENTER);
 
       for(int i = 0; i < numberOfPanels; i++){
@@ -866,7 +800,7 @@ public class JSVApplet extends JApplet {
       });
     }
     else if(theInterface.equals("tile") && canDoTile){
-      appletPanel.add(new JLabel(((CompoundSource)source).getTitle(), SwingConstants.CENTER), BorderLayout.NORTH);
+      appletPanel.add(new JLabel(((CompoundSource)source).getTitle(), JLabel.CENTER), BorderLayout.NORTH);
 
       for(int i = 0; i < numberOfPanels; i++){
         jsvPanels[i].setMinimumSize(new Dimension(250, 150));
@@ -1002,7 +936,7 @@ public class JSVApplet extends JApplet {
    * display from a drop-down menu
    * @param e the ItemEvent
    */
-  void compoundMenu_itemStateChanged(ItemEvent e) {
+  private void compoundMenu_itemStateChanged(ItemEvent e) {
 
     // gets the newly selected title
     JCheckBoxMenuItem selectedMenu = (JCheckBoxMenuItem) e.getSource();
@@ -1018,7 +952,7 @@ public class JSVApplet extends JApplet {
    * Shows the </code>JSVPanel</code> at a certain index
    * @param index the index
    */
-  void showSpectrum(int index){
+  private void showSpectrum(int index){
     JSVPanel jsvp = jsvPanels[index];
     appletPanel.remove(jsvPanels[currentSpectrumIndex]);
     appletPanel.add(jsvp, BorderLayout.CENTER);
@@ -1060,7 +994,6 @@ public class JSVApplet extends JApplet {
      * coordcallbackfunctionname parameter
      * @param e the MouseEvent
      */
-    @Override
     public void mouseClicked(MouseEvent e){
       JSVPanel jsvPanel = (JSVPanel)e.getSource();
       selectedJSVPanel = jsvPanel;
@@ -1104,7 +1037,6 @@ public class JSVApplet extends JApplet {
      * Shows a popup menu when the right mouse button is clicked
      * @param e MouseEvent
      */
-    @Override
     public void mousePressed(MouseEvent e) {
         maybeShowPopup(e);
     }
@@ -1113,7 +1045,6 @@ public class JSVApplet extends JApplet {
      * Shows a popup menu when the right mouse button is clicked
      * @param e MouseEvent
      */
-    @Override
     public void mouseReleased(MouseEvent e) {
         maybeShowPopup(e);
     }
@@ -1144,7 +1075,7 @@ public class JSVApplet extends JApplet {
    * @param e the ItemEvent
    */
   void gridMenuItem_itemStateChanged(ItemEvent e) {
-    selectedJSVPanel.setGridOn((e.getStateChange() == ItemEvent.SELECTED));
+    selectedJSVPanel.setGridOn((e.getStateChange() == e.SELECTED));
     selectedJSVPanel.repaint();
   }
 
@@ -1153,7 +1084,7 @@ public class JSVApplet extends JApplet {
      * @param e the ItemEvent
    */
   void coordinatesMenuItem_itemStateChanged(ItemEvent e) {
-    selectedJSVPanel.setCoordinatesOn((e.getStateChange() == ItemEvent.SELECTED));
+    selectedJSVPanel.setCoordinatesOn((e.getStateChange() == e.SELECTED));
     selectedJSVPanel.repaint();
   }
 
@@ -1162,7 +1093,7 @@ public class JSVApplet extends JApplet {
    * @param e the ItemEvent
    */
   void reversePlotMenuItem_itemStateChanged(ItemEvent e) {
-    selectedJSVPanel.setReversePlot((e.getStateChange() == ItemEvent.SELECTED));
+    selectedJSVPanel.setReversePlot((e.getStateChange() == e.SELECTED));
     selectedJSVPanel.repaint();
   }
 
@@ -1173,7 +1104,7 @@ public class JSVApplet extends JApplet {
   void headerMenuItem_actionPerformed(ActionEvent e) {
     if(overlay){
       // Show header of Source
-      HashMap<String, String> header = (HashMap<String, String>)((CompoundSource)source).getHeaderTable();
+      HashMap header = (HashMap)((CompoundSource)source).getHeaderTable();
       Object[] headerLabels = header.keySet().toArray();
       Object[] headerValues = header.values().toArray();
 
@@ -1236,7 +1167,7 @@ public class JSVApplet extends JApplet {
     else{
       JDXSpectrum spectrum = (JDXSpectrum)selectedJSVPanel.getSpectrumAt(0);
 
-      HashMap<String, String> header = spectrum.getHeaderTable();
+      HashMap header = spectrum.getHeaderTable();
       Object[] headerLabels = header.keySet().toArray();
       Object[] headerValues = header.values().toArray();
 
@@ -1494,7 +1425,7 @@ public class JSVApplet extends JApplet {
    * @param e the ActionEvent
    */
   void windowMenuItem_itemStateChanged(ItemEvent e) {
-    if (e.getStateChange() == ItemEvent.SELECTED) {
+    if (e.getStateChange() == e.SELECTED) {
       // disable some features when in Window mode
       integrateMenuItem.setEnabled(false);
       compoundMenu.setEnabled(false);
@@ -1515,7 +1446,6 @@ public class JSVApplet extends JApplet {
       frame.addMouseListener(new JSVPanelMouseListener());
       frame.addWindowListener(
           new WindowAdapter() {
-        @Override
         public void windowClosing(WindowEvent e) {
           appletPanel.setSize(d);
           JSVApplet.this.getContentPane().add(appletPanel);
@@ -1547,105 +1477,64 @@ public class JSVApplet extends JApplet {
     }
   }
 
-  public boolean setStringParameter(String key, String value) {
-    if (key == null)
-      return false;
-    if (key.equalsIgnoreCase("irMode")) {
-      if ("transmittance".equalsIgnoreCase(value))
-        TAConvert(TO_TRANS);
-      else if ("absorbance".equalsIgnoreCase(value))
-        TAConvert(TO_ABS);
-      else if ("switch".equalsIgnoreCase(value))
-        TAConvert(IMPLIED);
-      else
-        return false;
-      return true;
-    }
-    return false;
-  }
-  
   /**
    * Allows conversion between TRANSMITTANCE and ABSORBANCE
    * @param e ItemEvent
    */
 
   void transAbsMenuItem_itemStateChanged(ItemEvent e) {
-    // for some reason, at the the St. Olaf site, this is triggering twice
-    // when the user clicks the menu item. Why?
-    System.out.println("ta event " + e.getID() + " " + e.getStateChange() + " " + ItemEvent.SELECTED + " " + ItemEvent.DESELECTED + " " + e.toString());
-    if (e.getStateChange() == ItemEvent.SELECTED)
+// copied from mainframe but IMPLIED never used!
+// since we don't check to see if initial file is Abs or Trans
+// but do this in the TAConvert section....
+
+    if (e.getStateChange() == e.SELECTED)
        TAConvert(IMPLIED);
     else
        TAConvert(IMPLIED);
   }
 
-
-  private long msTrigger = -1;
-  
   /**
    * Allows Transmittance to Absorbance conversion or vice versa
    * depending on the value of comm.
    * @param comm the conversion command
    */
 
-  
   private void TAConvert(int comm) {
-    long time = System.currentTimeMillis();
-    System.out.println(time + " " + msTrigger + " " + (time-msTrigger));
-    if (msTrigger > 0 && time - msTrigger < 100)
+    //comm not used
+   JSVPanel jsvp = (JSVPanel)appletPanel.getComponent(0);
+    if(jsvp.getNumberOfSpectra() > 1)
       return;
-    msTrigger = time;
-    JSVPanel jsvp = (JSVPanel) appletPanel.getComponent(0);
-    if (jsvp.getNumberOfSpectra() > 1)
-      return;
-    JDXSpectrum spectrum = (JDXSpectrum) jsvp.getSpectrumAt(0);
-    if (!spectrum.isContinuous())
-      return;
-    switch (comm) {
-    case TO_ABS:
-      if (!spectrum.isTransmittance())
-        return;
-      break;
-    case TO_TRANS:
-      if (!spectrum.isAbsorbance())
-        return;
-      break;
-    case IMPLIED:
-      break;
-    default:
-      return;
-    }
 
-    try {
-      
-      
-      //  if successful, newSpec has the converted info
-      JDXSpectrum newSpec = TransmittanceAbsorbanceConverter.convert(spectrum);
+    JDXSpectrum spectrum = (JDXSpectrum)jsvp.getSpectrumAt(0);
+  try {
+//  if successful, newSpec has the converted info
+    JDXSpectrum newSpec = TransmittanceAbsorbanceConverter.convert(spectrum);
 
-      //  if not Abs or Trans data or if there is a problem, return null
-      if (newSpec == null)
-        return;
+//  if not Abs or Trans data or if there is a problem, return null
+    if(newSpec == null)
+     return;
 
-      jsvp = new JSVPanel(newSpec);
+    jsvp= new JSVPanel(newSpec);
 
-      //  not working after loading a second file
-      //  if grid turned off or zoom done first
-      //  this returns full spectrum anyway
+//  not working after loading a second file
+//  if grid turned off or zoom done first
+//  this returns full spectrum anyway
 
-      appletPanel.remove(0);
-      appletPanel.add(jsvp);
+    appletPanel.remove(0);
+    appletPanel.add(jsvp);
 
-      initProperties(jsvp);
-      solColMenuItem.setEnabled(true);
-      jsvp.addMouseListener(new JSVPanelMouseListener());
-      jsvp.repaint();
+    initProperties(jsvp);
+    solColMenuItem.setEnabled(true);
+    jsvp.addMouseListener(new JSVPanelMouseListener());
+    jsvp.repaint();
 
-      //  now need to validate and repaint
-      JSVApplet.this.validate();
-      JSVApplet.this.repaint();
+    //  now need to validate and repaint
+    JSVApplet.this.validate();
+    JSVApplet.this.repaint();
 
-    } catch (JSpecViewException ex) {
-    }
+ }
+   catch (JSpecViewException ex) {
+   }
 
   }
 
@@ -1655,7 +1544,7 @@ public class JSVApplet extends JApplet {
      */
   void integrateMenuItem_itemStateChanged(ItemEvent e) {
 
-      if (e.getStateChange() == ItemEvent.SELECTED) {
+      if (e.getStateChange() == e.SELECTED) {
         tempJSVP = JSpecViewUtils.appletIntegrate(appletPanel, true);
       }
       else {
@@ -1709,7 +1598,7 @@ public class JSVApplet extends JApplet {
    * @param e the ActionEvent
    */
   void overlayKeyMenuItem_actionPerformed(ActionEvent e) {
-    new OverlayLegendDialog(selectedJSVPanel);
+    OverlayLegendDialog legend = new OverlayLegendDialog(selectedJSVPanel);
   }
 
   /**
@@ -1717,7 +1606,6 @@ public class JSVApplet extends JApplet {
    * @param comm the format to export to
    */
   private void exportAsMenuItem_actionPerformed_aux(String comm){
-    String errMsg = null;
     if(jFileChooser != null){
       if(JSpecViewUtils.DEBUG){
         jFileChooser.setCurrentDirectory(new File("C:\\temp"));
@@ -1727,16 +1615,26 @@ public class JSVApplet extends JApplet {
         File file = jFileChooser.getSelectedFile();
         JDXSpectrum spec = (JDXSpectrum)selectedJSVPanel.getSpectrumAt(0);
         try{
-          ExporterInterface exporter = (ExporterInterface) Interface.getOptionInterface("jspecview.export.Exporter");
-          if (exporter == null)
-            return;
-          errMsg = exporter.export(spec, comm, file.getAbsolutePath(), 
-              0, spec.getXYCoords().length - 1);
+          if(comm.equals("XY"))
+            JDXExporter.exportXY(spec, new FileWriter(file.getAbsolutePath()));
+          else if(comm.equals("DIF"))
+            JDXExporter.exportDIF(spec, new FileWriter(file.getAbsolutePath()));
+          else if(comm.equals("FIX"))
+            JDXExporter.exportFIX(spec, new FileWriter(file.getAbsolutePath()));
+          else if(comm.equals("SQZ"))
+            JDXExporter.exportSQZ(spec, new FileWriter(file.getAbsolutePath()));
+          else if(comm.equals("PAC"))
+            JDXExporter.exportPAC(spec, new FileWriter(file.getAbsolutePath()));
+          else if(comm.equals("AML"))
+            AnIMLExporter.exportAsAnIML(spec, file.getAbsolutePath());
+          else if(comm.equals("CML"))
+            CMLExporter.exportAsCML(spec, file.getAbsolutePath());
+          else if(comm.equals("SVG"))
+            SVGExporter.exportAsSVG(file.getAbsolutePath(), spec);
         }
         catch(IOException ioe){
-          errMsg = "Error writing: " + file.getName();
+          this.writeStatus("Error writing: " + file.getName());
         }
-        this.writeStatus(errMsg);
       }
     }
     else
@@ -1851,7 +1749,7 @@ public class JSVApplet extends JApplet {
    * @param def the default value
    * @return a <code>Color</color> object from a parameter value
    */
-/*  private Color getColorParameter(String key, Color def){
+  private Color getColorParameter(String key, Color def){
     String param = getParameter(key);
     int r, g, b;
 
@@ -1868,24 +1766,24 @@ public class JSVApplet extends JApplet {
         return def;
       }
     }
-    StringTokenizer st = new StringTokenizer(param, ",;.- ");
-    try{
-      r = Integer.parseInt(st.nextToken().trim());
-      g = Integer.parseInt(st.nextToken().trim());
-      b = Integer.parseInt(st.nextToken().trim());
+    else{
+      StringTokenizer st = new StringTokenizer(param, ",;.- ");
+      try{
+        r = Integer.parseInt(st.nextToken().trim());
+        g = Integer.parseInt(st.nextToken().trim());
+        b = Integer.parseInt(st.nextToken().trim());
 
-      return new Color(r, g, b);
-    }
-    catch(NoSuchElementException nsee){
-      return def;
-    }
-    catch(NumberFormatException nfe){
-      return def;
+        return new Color(r, g, b);
+      }
+      catch(NoSuchElementException nsee){
+        return def;
+      }
+      catch(NumberFormatException nfe){
+        return def;
+      }
     }
   }
 
-*/
-  
   /**
    * Intialises the <code>plotColors</code> array from the
    * <i>plotColorsStr</i> variable
@@ -1934,7 +1832,7 @@ public class JSVApplet extends JApplet {
    * @return String
    */
   public String getAppletVersion() {
-    return JSVApplet.APPLET_VERSION;
+    return this.APPLET_VERSION;
   }
 
   /**
@@ -2126,7 +2024,10 @@ public class JSVApplet extends JApplet {
       JSObject win = JSObject.getWindow(this);
       win.eval(function + "(" + parameters + ")");
     }
-    catch (Exception npe) {
+    catch (JSException jse) {
+      System.out.println("EXCEPTION-> " + jse.getMessage());
+    }
+    catch (NullPointerException npe) {
       System.out.println("EXCEPTION-> " + npe.getMessage());
     }
   }
@@ -2139,7 +2040,7 @@ public class JSVApplet extends JApplet {
     StringTokenizer allParamTokens = new StringTokenizer(params, ";");
 
     if (JSpecViewUtils.DEBUG) {
-      System.out.println("Running in DEBUG mode");
+        System.out.println("Running in DEBUG mode");
     }
 
     while (allParamTokens.hasMoreTokens()) {
@@ -2149,8 +2050,6 @@ public class JSVApplet extends JApplet {
       StringTokenizer eachParam = new StringTokenizer(token);
 
       String key = eachParam.nextToken();
-      if (key.equalsIgnoreCase("SET"))
-        key = eachParam.nextToken();
       key = key.toUpperCase();
       String value = eachParam.nextToken();
 
@@ -2158,90 +2057,80 @@ public class JSVApplet extends JApplet {
         System.out.println("KEY-> " + key + " VALUE-> " + value);
       }
 
-      Integer iparam = (Integer) htParams.get(key);
+      int pos = SCRIPT_PARAMS.indexOf(key);
       try {
-        switch (iparam == null ? -1 : iparam.intValue()) {
-        case -1:
-          break;
-        case PARAM_LOAD:
-          filePath = value;
-          break;
-        case PARAM_REVERSEPLOT:
-          reversePlot = Boolean.parseBoolean(value);
-          break;
-        case PARAM_COORDINATESON:
-          coordinatesOn = Boolean.parseBoolean(value);
-          break;
-        case PARAM_GRIDON:
-          gridOn = Boolean.parseBoolean(value);
-          break;
-        case PARAM_COORDCALLBACKFUNCTIONNAME:
-          coordCallbackFunctionName = value;
-          break;
-
-        case PARAM_SPECTRUMNUMBER:
-          spectrumNumber = Integer.parseInt(value);
-        case PARAM_INTERFACE:
-          theInterface = value;
-          if (!theInterface.equals("tab") && !theInterface.equals("tile")
-              && !theInterface.equals("single")
-              && !theInterface.equals("overlay"))
-            theInterface = "single";
-          break;
-        case PARAM_ENDINDEX:
-          endIndex = Integer.parseInt(value);
-          break;
-        case PARAM_ENABLEZOOM:
-          enableZoom = Boolean.parseBoolean(value);
-          break;
-        case PARAM_STARTINDEX:
-          startIndex = Integer.parseInt(value);
-          break;
-        case PARAM_MENUON:
-          menuOn = Boolean.parseBoolean(value);
-          break;
-        case PARAM_COMPOUNDMENUON:
-          compoundMenuOn2 = Boolean.parseBoolean(value);
-          break;
-        case PARAM_BACKGROUNDCOLOR:
-          backgroundColor = JSpecViewUtils.getColorFromString(value);
-          break;
-        case PARAM_COORDINATESCOLOR:
-          coordinatesColor = JSpecViewUtils.getColorFromString(value);
-        case 175:
-        case PARAM_GRIDCOLOR:
-          gridColor = JSpecViewUtils.getColorFromString(value);
-          break;
-        case PARAM_PLOTAREACOLOR:
-          plotAreaColor = JSpecViewUtils.getColorFromString(value);
-          break;
-        case PARAM_PLOTCOLOR:
-          plotColor = JSpecViewUtils.getColorFromString(value);
-          break;
-        case PARAM_SCALECOLOR:
-          scaleColor = JSpecViewUtils.getColorFromString(value);
-          break;
-        case PARAM_TITLECOLOR:
-          titleColor = JSpecViewUtils.getColorFromString(value);
-          break;
-        case PARAM_UNITSCOLOR:
-          unitsColor = JSpecViewUtils.getColorFromString(value);
-          break;
-        case PARAM_PEAKCALLBACKFUNCTIONNAME:
-          peakCallbackFunctionName = value;
-          break;
-        case PARAM_IMPORT:
-          XMLImportfilePath = value;
-          break;
-        case PARAM_PLOTCOLORS:
-        case PARAM_VERSION:
-          break;
-        case PARAM_IRMODE:
-          irMode = value;
-          break;
+        switch (pos) {
+          case 0 :
+            filePath = value;
+            break;
+          case 5 :
+            reversePlot = Boolean.parseBoolean(value);
+            break;
+          case 17 :
+            coordinatesOn = Boolean.parseBoolean(value);
+            break;
+          case 31 :
+            gridOn = Boolean.parseBoolean(value);
+            break;
+          case 38 :
+            coordCallbackFunctionName = value;
+            break;
+          case 64 :
+            spectrumNumber = Integer.parseInt(value);
+            break;
+          case 79 :
+            theInterface = value;
+            if(!theInterface.equals("tab") && !theInterface.equals("tile") &&
+               !theInterface.equals("single") && !theInterface.equals("overlay"))
+              theInterface = "single";
+            break;
+          case 89 :
+            endIndex = Integer.parseInt(value);
+            break;
+          case 98 :
+            enableZoom = Boolean.parseBoolean(value);
+            break;
+          case 109 :
+            startIndex = Integer.parseInt(value);
+            break;
+          case 120 :
+            menuOn = Boolean.parseBoolean(value);
+            break;
+          case 127 :
+            compoundMenuOn2 = Boolean.parseBoolean(value);
+            break;
+          case 142 :
+            backgroundColor = JSpecViewUtils.getColorFromString(value);
+            break;
+          case 158 :
+            coordinatesColor = JSpecViewUtils.getColorFromString(value);
+          case 175 :
+            gridColor = JSpecViewUtils.getColorFromString(value);
+            break;
+          case 185 :
+            plotAreaColor = JSpecViewUtils.getColorFromString(value);
+            break;
+          case 199 :
+            plotColor = JSpecViewUtils.getColorFromString(value);
+            break;
+          case 209 :
+            scaleColor = JSpecViewUtils.getColorFromString(value);
+            break;
+          case 220 :
+            titleColor = JSpecViewUtils.getColorFromString(value);
+            break;
+          case 231 :
+            unitsColor = JSpecViewUtils.getColorFromString(value);
+            break;
+          case 261 :
+            peakCallbackFunctionName = value;
+            break;
+          case 286 :
+            XMLImportfilePath = value;
+            break;
         }
-      } catch (Exception e) {
       }
+      catch (Exception e) {}
     }
 
   }
