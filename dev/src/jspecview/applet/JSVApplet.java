@@ -52,6 +52,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -105,11 +106,12 @@ import jspecview.common.Visible;
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
  * @author Craig Walters
+ * @author Bob Hanson
  * @author Prof Robert J. Lancashire
  */
 
 public class JSVApplet extends JApplet {
-  public static final String APPLET_VERSION = "1.0.20080804-2030";
+  public static final String APPLET_VERSION = "1.0.20080820-0800";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath, XMLImportfilePath;
@@ -195,8 +197,65 @@ public class JSVApplet extends JApplet {
   JDXSpectrum xmlSpec;
   JSVPanel tempJSVP;
 
-  private static final String SCRIPT_PARAMS =
-     "LOAD REVERSEPLOT COORDINATESON GRIDON COORDCALLBACKFUNCTIONNAME SPECTRUMNUMBER INTERFACE ENDINDEX ENABLEZOOM STARTINDEX MENUON COMPOUNDMENUON BACKGROUNDCOLOR COORDINATESCOLOR GRIDCOLOR PLOTAREACOLOR PLOTCOLOR SCALECOLOR TITLECOLOR UNITSCOLOR PLOTCOLORS VERSION PEAKCALLBACKFUNCTIONNAME IMPORT";
+  private static final String[] params = {
+     "LOAD", 
+     "REVERSEPLOT", 
+     "COORDINATESON", 
+     "GRIDON", 
+     "COORDCALLBACKFUNCTIONNAME", 
+     "SPECTRUMNUMBER", 
+     "INTERFACE", 
+     "ENDINDEX", 
+     "ENABLEZOOM", 
+     "STARTINDEX", 
+     "MENUON", 
+     "COMPOUNDMENUON", 
+     "BACKGROUNDCOLOR", 
+     "COORDINATESCOLOR", 
+     "GRIDCOLOR", 
+     "PLOTAREACOLOR", 
+     "PLOTCOLOR", 
+     "SCALECOLOR", 
+     "TITLECOLOR", 
+     "UNITSCOLOR", 
+     "PLOTCOLORS", 
+     "VERSION", 
+     "PEAKCALLBACKFUNCTIONNAME", 
+     "IMPORT",
+     "IRMODE"
+     };
+  
+  final private static int PARAM_LOAD = 0;
+  final private static int PARAM_REVERSEPLOT = 1;
+  final private static int PARAM_COORDINATESON = 2;
+  final private static int PARAM_GRIDON = 3;
+  final private static int PARAM_COORDCALLBACKFUNCTIONNAME = 4;
+  final private static int PARAM_SPECTRUMNUMBER = 5;
+  final private static int PARAM_INTERFACE = 6;
+  final private static int PARAM_ENDINDEX = 7;
+  final private static int PARAM_ENABLEZOOM = 8;
+  final private static int PARAM_STARTINDEX = 9;
+  final private static int PARAM_MENUON = 10;
+  final private static int PARAM_COMPOUNDMENUON = 11;
+  final private static int PARAM_BACKGROUNDCOLOR = 12;
+  final private static int PARAM_COORDINATESCOLOR = 13;
+  final private static int PARAM_GRIDCOLOR = 14;
+  final private static int PARAM_PLOTAREACOLOR = 15;
+  final private static int PARAM_PLOTCOLOR = 16;
+  final private static int PARAM_SCALECOLOR = 17;
+  final private static int PARAM_TITLECOLOR = 18;
+  final private static int PARAM_UNITSCOLOR = 19;
+  final private static int PARAM_PLOTCOLORS = 20;
+  final private static int PARAM_VERSION = 21;
+  final private static int PARAM_PEAKCALLBACKFUNCTIONNAME = 22;
+  final private static int PARAM_IMPORT = 23;
+  final private static int PARAM_IRMODE = 24;
+  
+  final private static Hashtable<String,Integer> htParams = new Hashtable<String,Integer>();
+  {
+    for (int i = 0; i < params.length; i++)
+      htParams.put(params[i], new Integer(i));
+  }
   //"ADDHIGHLIGHT", "REMOVEHIGHLIGHT", "REMOVEALLHIGHTLIGHTS"
 
  /**
@@ -251,6 +310,9 @@ public class JSVApplet extends JApplet {
    */
   boolean overlay;
 
+  
+  String irMode;
+  
   /**
    * Returns a parameter value
    * @param key the parameter name
@@ -399,7 +461,15 @@ public class JSVApplet extends JApplet {
         transAbsMenuItem.setEnabled(true);
       else
         transAbsMenuItem.setEnabled(false);
+      
+      
+      setStringParameter("irmode", irMode);
+
+      
+      
     }
+    
+    
     catch(JSpecViewException jsve){
      this.writeStatus(jsve.getMessage());
     }
@@ -1477,6 +1547,23 @@ public class JSVApplet extends JApplet {
     }
   }
 
+  public boolean setStringParameter(String key, String value) {
+    if (key == null)
+      return false;
+    if (key.equalsIgnoreCase("irMode")) {
+      if ("transmittance".equalsIgnoreCase(value))
+        TAConvert(TO_TRANS);
+      else if ("absorbance".equalsIgnoreCase(value))
+        TAConvert(TO_ABS);
+      else if ("switch".equalsIgnoreCase(value))
+        TAConvert(IMPLIED);
+      else
+        return false;
+      return true;
+    }
+    return false;
+  }
+  
   /**
    * Allows conversion between TRANSMITTANCE and ABSORBANCE
    * @param e ItemEvent
@@ -1500,12 +1587,26 @@ public class JSVApplet extends JApplet {
    */
 
   private void TAConvert(int comm) {
-    //comm not used
    JSVPanel jsvp = (JSVPanel)appletPanel.getComponent(0);
     if(jsvp.getNumberOfSpectra() > 1)
       return;
-
     JDXSpectrum spectrum = (JDXSpectrum)jsvp.getSpectrumAt(0);
+    if (!spectrum.isContinuous())
+      return;
+    switch (comm) {
+    case TO_ABS:
+      if (!spectrum.getYUnits().equalsIgnoreCase("Transmittance"))
+        return;
+      break;
+    case TO_TRANS:
+      if (!spectrum.getYUnits().equalsIgnoreCase("Absorbance"))
+        return;
+      break;
+    case IMPLIED:
+      break;
+    default:
+      return;
+    }
   try {
 //  if successful, newSpec has the converted info
     JDXSpectrum newSpec = TransmittanceAbsorbanceConverter.convert(spectrum);
@@ -2024,10 +2125,7 @@ public class JSVApplet extends JApplet {
       JSObject win = JSObject.getWindow(this);
       win.eval(function + "(" + parameters + ")");
     }
-    catch (JSException jse) {
-      System.out.println("EXCEPTION-> " + jse.getMessage());
-    }
-    catch (NullPointerException npe) {
+    catch (Exception npe) {
       System.out.println("EXCEPTION-> " + npe.getMessage());
     }
   }
@@ -2040,7 +2138,7 @@ public class JSVApplet extends JApplet {
     StringTokenizer allParamTokens = new StringTokenizer(params, ";");
 
     if (JSpecViewUtils.DEBUG) {
-        System.out.println("Running in DEBUG mode");
+      System.out.println("Running in DEBUG mode");
     }
 
     while (allParamTokens.hasMoreTokens()) {
@@ -2050,6 +2148,8 @@ public class JSVApplet extends JApplet {
       StringTokenizer eachParam = new StringTokenizer(token);
 
       String key = eachParam.nextToken();
+      if (key.equalsIgnoreCase("SET"))
+        key = eachParam.nextToken();
       key = key.toUpperCase();
       String value = eachParam.nextToken();
 
@@ -2057,80 +2157,90 @@ public class JSVApplet extends JApplet {
         System.out.println("KEY-> " + key + " VALUE-> " + value);
       }
 
-      int pos = SCRIPT_PARAMS.indexOf(key);
+      Integer iparam = htParams.get(key);
       try {
-        switch (pos) {
-          case 0 :
-            filePath = value;
-            break;
-          case 5 :
-            reversePlot = Boolean.parseBoolean(value);
-            break;
-          case 17 :
-            coordinatesOn = Boolean.parseBoolean(value);
-            break;
-          case 31 :
-            gridOn = Boolean.parseBoolean(value);
-            break;
-          case 38 :
-            coordCallbackFunctionName = value;
-            break;
-          case 64 :
-            spectrumNumber = Integer.parseInt(value);
-            break;
-          case 79 :
-            theInterface = value;
-            if(!theInterface.equals("tab") && !theInterface.equals("tile") &&
-               !theInterface.equals("single") && !theInterface.equals("overlay"))
-              theInterface = "single";
-            break;
-          case 89 :
-            endIndex = Integer.parseInt(value);
-            break;
-          case 98 :
-            enableZoom = Boolean.parseBoolean(value);
-            break;
-          case 109 :
-            startIndex = Integer.parseInt(value);
-            break;
-          case 120 :
-            menuOn = Boolean.parseBoolean(value);
-            break;
-          case 127 :
-            compoundMenuOn2 = Boolean.parseBoolean(value);
-            break;
-          case 142 :
-            backgroundColor = JSpecViewUtils.getColorFromString(value);
-            break;
-          case 158 :
-            coordinatesColor = JSpecViewUtils.getColorFromString(value);
-          case 175 :
-            gridColor = JSpecViewUtils.getColorFromString(value);
-            break;
-          case 185 :
-            plotAreaColor = JSpecViewUtils.getColorFromString(value);
-            break;
-          case 199 :
-            plotColor = JSpecViewUtils.getColorFromString(value);
-            break;
-          case 209 :
-            scaleColor = JSpecViewUtils.getColorFromString(value);
-            break;
-          case 220 :
-            titleColor = JSpecViewUtils.getColorFromString(value);
-            break;
-          case 231 :
-            unitsColor = JSpecViewUtils.getColorFromString(value);
-            break;
-          case 261 :
-            peakCallbackFunctionName = value;
-            break;
-          case 286 :
-            XMLImportfilePath = value;
-            break;
+        switch (iparam == null ? -1 : iparam.intValue()) {
+        case -1:
+          break;
+        case PARAM_LOAD:
+          filePath = value;
+          break;
+        case PARAM_REVERSEPLOT:
+          reversePlot = Boolean.parseBoolean(value);
+          break;
+        case PARAM_COORDINATESON:
+          coordinatesOn = Boolean.parseBoolean(value);
+          break;
+        case PARAM_GRIDON:
+          gridOn = Boolean.parseBoolean(value);
+          break;
+        case PARAM_COORDCALLBACKFUNCTIONNAME:
+          coordCallbackFunctionName = value;
+          break;
+
+        case PARAM_SPECTRUMNUMBER:
+          spectrumNumber = Integer.parseInt(value);
+        case PARAM_INTERFACE:
+          theInterface = value;
+          if (!theInterface.equals("tab") && !theInterface.equals("tile")
+              && !theInterface.equals("single")
+              && !theInterface.equals("overlay"))
+            theInterface = "single";
+          break;
+        case PARAM_ENDINDEX:
+          endIndex = Integer.parseInt(value);
+          break;
+        case PARAM_ENABLEZOOM:
+          enableZoom = Boolean.parseBoolean(value);
+          break;
+        case PARAM_STARTINDEX:
+          startIndex = Integer.parseInt(value);
+          break;
+        case PARAM_MENUON:
+          menuOn = Boolean.parseBoolean(value);
+          break;
+        case PARAM_COMPOUNDMENUON:
+          compoundMenuOn2 = Boolean.parseBoolean(value);
+          break;
+        case PARAM_BACKGROUNDCOLOR:
+          backgroundColor = JSpecViewUtils.getColorFromString(value);
+          break;
+        case PARAM_COORDINATESCOLOR:
+          coordinatesColor = JSpecViewUtils.getColorFromString(value);
+        case 175:
+        case PARAM_GRIDCOLOR:
+          gridColor = JSpecViewUtils.getColorFromString(value);
+          break;
+        case PARAM_PLOTAREACOLOR:
+          plotAreaColor = JSpecViewUtils.getColorFromString(value);
+          break;
+        case PARAM_PLOTCOLOR:
+          plotColor = JSpecViewUtils.getColorFromString(value);
+          break;
+        case PARAM_SCALECOLOR:
+          scaleColor = JSpecViewUtils.getColorFromString(value);
+          break;
+        case PARAM_TITLECOLOR:
+          titleColor = JSpecViewUtils.getColorFromString(value);
+          break;
+        case PARAM_UNITSCOLOR:
+          unitsColor = JSpecViewUtils.getColorFromString(value);
+          break;
+        case PARAM_PEAKCALLBACKFUNCTIONNAME:
+          peakCallbackFunctionName = value;
+          break;
+        case PARAM_IMPORT:
+          XMLImportfilePath = value;
+          break;
+        case PARAM_PLOTCOLORS:
+        case PARAM_VERSION:
+          break;
+        case PARAM_IRMODE:
+          irMode = value;
+          break;
         }
+      } catch (Exception e) {
       }
-      catch (Exception e) {}
     }
 
   }
