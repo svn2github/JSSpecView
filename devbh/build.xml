@@ -19,7 +19,7 @@ is divided into following sections:
   - cleanup
 
 -->
-    <target name="default" depends="clean,init,compile" description="Cleans and compiles project."/>
+    <target name="default" depends="clean,init,compile,applet_jar,CreateApplicationJar" description="Cleans and compiles project."/>
     <!--
     ======================
     INITIALIZATION SECTION

@@ -47,7 +47,7 @@ The application will not function correctly if the displaySchemes can not be fou
 This can happen if you try to run the JAR from the desktop or a folder with a 
 space in its name. This is a bug in JSpecView that I am aware of but for which I have
 not yet found a permanent solution! A workaround is in place that uses a hard
-coded displayScheme but if you then try to save a new scheme this will not function properly.
+coded displayScheme but if you then tryvto save a new scheme this will not function properly.
 For the standalone application you should place the files listed above in a 
 directory (with no spaces) and make a shortcut to place on the desktop instead.
 
