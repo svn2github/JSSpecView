@@ -29,9 +29,6 @@
 package jspecview.common;
 
 import java.lang.Math;
-import jspecview.util.Coordinate;
-//import java.awt.Color;
-//import jspecview.common.JDXSource;
 
 /**
  * Visible class - for prediction of colour from visible spectrum

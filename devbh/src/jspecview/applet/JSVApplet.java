@@ -43,7 +43,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -75,26 +74,24 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import jspecview.common.BlockSource;
-import jspecview.common.CompoundSource;
-import jspecview.common.JDXSource;
-import jspecview.common.CMLSource;
+import jspecview.api.ExporterInterface;
+import jspecview.api.Interface;
 import jspecview.common.AnIMLSource;
+import jspecview.common.BlockSource;
+import jspecview.common.CMLSource;
+import jspecview.common.CompoundSource;
+import jspecview.common.Coordinate;
+import jspecview.common.JDXSource;
 import jspecview.common.JDXSourceFactory;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVPanel;
+import jspecview.common.JSpecViewUtils;
 import jspecview.common.NTupleSource;
 import jspecview.common.OverlayLegendDialog;
 import jspecview.common.PrintLayoutDialog;
+import jspecview.common.TransmittanceAbsorbanceConverter;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
-import jspecview.xml.SVGExporter;
-import jspecview.xml.AnIMLExporter;
-import jspecview.xml.CMLExporter;
-import jspecview.util.Coordinate;
-import jspecview.util.JDXExporter;
-import jspecview.util.JSpecViewUtils;
-import jspecview.util.TransmittanceAbsorbanceConverter;
 import netscape.javascript.JSObject;
 import jspecview.common.Visible;
 
@@ -1720,6 +1717,7 @@ public class JSVApplet extends JApplet {
    * @param comm the format to export to
    */
   private void exportAsMenuItem_actionPerformed_aux(String comm){
+    String errMsg = null;
     if(jFileChooser != null){
       if(JSpecViewUtils.DEBUG){
         jFileChooser.setCurrentDirectory(new File("C:\\temp"));
@@ -1729,26 +1727,16 @@ public class JSVApplet extends JApplet {
         File file = jFileChooser.getSelectedFile();
         JDXSpectrum spec = (JDXSpectrum)selectedJSVPanel.getSpectrumAt(0);
         try{
-          if(comm.equals("XY"))
-            JDXExporter.exportXY(spec, new FileWriter(file.getAbsolutePath()));
-          else if(comm.equals("DIF"))
-            JDXExporter.exportDIF(spec, new FileWriter(file.getAbsolutePath()));
-          else if(comm.equals("FIX"))
-            JDXExporter.exportFIX(spec, new FileWriter(file.getAbsolutePath()));
-          else if(comm.equals("SQZ"))
-            JDXExporter.exportSQZ(spec, new FileWriter(file.getAbsolutePath()));
-          else if(comm.equals("PAC"))
-            JDXExporter.exportPAC(spec, new FileWriter(file.getAbsolutePath()));
-          else if(comm.equals("AML"))
-            AnIMLExporter.exportAsAnIML(spec, file.getAbsolutePath());
-          else if(comm.equals("CML"))
-            CMLExporter.exportAsCML(spec, file.getAbsolutePath());
-          else if(comm.equals("SVG"))
-            SVGExporter.exportAsSVG(file.getAbsolutePath(), spec);
+          ExporterInterface exporter = (ExporterInterface) Interface.getOptionInterface("jspecview.export.Exporter");
+          if (exporter == null)
+            return;
+          errMsg = exporter.export(spec, comm, file.getAbsolutePath(), 
+              0, spec.getXYCoords().length - 1);
         }
         catch(IOException ioe){
-          this.writeStatus("Error writing: " + file.getName());
+          errMsg = "Error writing: " + file.getName();
         }
+        this.writeStatus(errMsg);
       }
     }
     else

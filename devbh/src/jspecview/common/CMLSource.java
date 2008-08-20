@@ -26,11 +26,7 @@ import javax.xml.stream.events.*;
 import javax.xml.namespace.QName;
 import java.util.StringTokenizer;
 
-import jspecview.common.Graph;
-import jspecview.common.JDXSpectrum;
-import jspecview.common.JDXSource;
 import jspecview.exception.JSpecViewException;
-import jspecview.util.Coordinate;
 import java.util.HashMap;
 import java.util.Vector;
 

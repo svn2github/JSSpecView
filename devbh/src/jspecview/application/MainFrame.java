@@ -71,7 +71,6 @@ import java.beans.PropertyVetoException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -118,32 +117,28 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import jspecview.common.AnIMLSource;
+import jspecview.common.CMLSource;
 import jspecview.common.CompoundSource;
+import jspecview.common.Coordinate;
 import jspecview.common.Graph;
 import jspecview.common.JDXSource;
-import jspecview.common.CMLSource;
-import jspecview.common.AnIMLSource;
 import jspecview.common.JDXSourceFactory;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelPopupListener;
 import jspecview.common.JSVPanelPopupMenu;
+import jspecview.common.JSpecViewUtils;
 import jspecview.common.OverlayLegendDialog;
 import jspecview.common.PrintLayoutDialog;
+import jspecview.common.TransmittanceAbsorbanceConverter;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
-import jspecview.xml.AnIMLExporter;
-import jspecview.xml.CMLExporter;
-import jspecview.xml.SVGExporter;
-import jspecview.util.DisplayScheme;
-import jspecview.util.DisplaySchemesProcessor;
-import jspecview.util.JDXExporter;
-import jspecview.util.JSpecViewUtils;
-import jspecview.util.TransmittanceAbsorbanceConverter;
+import jspecview.export.Exporter;
+import jspecview.export.SVGExporter;
 import mdidesktop.ScrollableDesktopPane;
 import mdidesktop.WindowMenu;
 import jspecview.common.Visible;
-import jspecview.util.Coordinate;
 
 /**
  * The Main Class or Entry point of the JSpecView Application.
@@ -1327,7 +1322,7 @@ public class MainFrame
             FileInputStream(file)));
         dis.read(infile);
 
-        String filecheck = new String(infile, 0, 400);
+        String filecheck = new  String(infile, 0, 400);
 //         System.out.println("FILE START = " + filecheck);
 
 // check for "<animl" in the first 400 chararcters
@@ -2584,38 +2579,7 @@ public class MainFrame
       endIndex = jsvp.getEndDataPointIndices()[index];
 
       try {
-        if (comm.equals("XY")) {
-          JDXExporter.exportXY(spec, new FileWriter(file.getAbsolutePath()),
-                               startIndex, endIndex);
-        }
-        else if (comm.equals("DIF")) {
-          JDXExporter.exportDIF(spec, new FileWriter(file.getAbsolutePath()),
-                                startIndex, endIndex);
-        }
-        else if (comm.equals("FIX")) {
-          JDXExporter.exportFIX(spec, new FileWriter(file.getAbsolutePath()),
-                                startIndex, endIndex);
-        }
-        else if (comm.equals("SQZ")) {
-          JDXExporter.exportSQZ(spec, new FileWriter(file.getAbsolutePath()),
-                                startIndex, endIndex);
-        }
-        else if (comm.equals("PAC")) {
-          JDXExporter.exportPAC(spec, new FileWriter(file.getAbsolutePath()),
-                                startIndex, endIndex);
-        }
-        else if (comm.equals("AnIML")) {
-          AnIMLExporter.exportAsAnIML(spec, file.getAbsolutePath(), startIndex,
-                                      endIndex);
-        }
-        else if (comm.equals("CML")) {
-          CMLExporter.exportAsCML(spec, file.getAbsolutePath(), startIndex,
-                                  endIndex);
-        }
-        else if (comm.equals("SVG")) {
-          SVGExporter.exportAsSVG(file.getAbsolutePath(), jsvp, index, true);
-        }
-        else if (comm.equals("PNG")) {
+        if (comm.equals("PNG")) {
           try {
             Rectangle r = jsvp.getBounds();
             Image image = jsvp.createImage(r.width, r.height);
@@ -2640,11 +2604,17 @@ public class MainFrame
           catch (IOException ioe) {
             ioe.printStackTrace();
           }
-        }
+        } else if (comm.equals("SVG")) {
+          SVGExporter.exportAsSVG(file.getAbsolutePath(), jsvp, index, true);
+        } else {
+          Exporter exporter = new Exporter();
+          exporter.export(spec, comm, file.getAbsolutePath(), startIndex, endIndex);
+        } 
       }
       catch (IOException ioe) {
         // STATUS --> "Error writing: " + file.getName()
       }
+
     }
   }
 
@@ -3022,9 +2992,13 @@ public class MainFrame
     JSVPanel newJsvPanel = (JSVPanel) frame.getContentPane().getComponent(0);
 
     if (JSpecViewUtils.hasIntegration(newJsvPanel)) {
-      newJsvPanel = JSpecViewUtils.removeIntegration(this, frame, true);
-    }
-    else {
+      Object errMsg = JSpecViewUtils.removeIntegration(frame.getContentPane());
+      if (errMsg != null) {
+        writeStatus((String) errMsg);
+      } else {
+        newJsvPanel = (JSVPanel)frame.getContentPane().getComponent(0);
+      }
+    } else {
       newJsvPanel = JSpecViewUtils.integrate(this, frame, true);
     }
 

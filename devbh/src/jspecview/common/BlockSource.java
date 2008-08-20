@@ -26,10 +26,6 @@ import java.util.StringTokenizer;
 
 import jspecview.exception.JDXSourceException;
 import jspecview.exception.JSpecViewException;
-import jspecview.util.Coordinate;
-import jspecview.util.JDXDecompressor;
-import jspecview.util.JDXSourceStringTokenizer;
-import jspecview.util.JSpecViewUtils;
 /**
  * <code>BlockSource</code> class is a representation of a JCAMP-DX Block file.
  * This class is not intialised directly. Instead <code>JDXSourceFactory</code>

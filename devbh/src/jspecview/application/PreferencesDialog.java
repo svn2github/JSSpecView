@@ -63,11 +63,9 @@ import javax.swing.event.ListSelectionListener;
 import jspecview.common.JDXSource;
 import jspecview.common.JDXSourceFactory;
 import jspecview.common.JSVPanel;
+import jspecview.common.JSpecViewUtils;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
-import jspecview.util.DisplayScheme;
-import jspecview.util.DisplaySchemesProcessor;
-import jspecview.util.JSpecViewUtils;
 
 /**
  * Dialog to change the preferences for the application.

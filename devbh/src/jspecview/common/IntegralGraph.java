@@ -21,8 +21,6 @@ package jspecview.common;
 
 import java.util.Vector;
 
-import jspecview.util.Coordinate;
-import jspecview.util.JSpecViewUtils;
 
 
 /**

@@ -31,10 +31,6 @@ import java.util.Vector;
 
 import jspecview.exception.JDXSourceException;
 import jspecview.exception.JSpecViewException;
-import jspecview.util.Coordinate;
-import jspecview.util.JDXDecompressor;
-import jspecview.util.JDXSourceStringTokenizer;
-import jspecview.util.JSpecViewUtils;
 
 /**
  * Representation of a JCAMP-DX nTuple source. Since these source files may

@@ -32,10 +32,6 @@ import java.util.StringTokenizer;
 import jspecview.exception.JDXSourceException;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.SourceTypeUnsupportedException;
-import jspecview.util.Coordinate;
-import jspecview.util.JDXDecompressor;
-import jspecview.util.JDXSourceStringTokenizer;
-import jspecview.util.JSpecViewUtils;
 
 /**
  * Representation of an JCAMP-DX NTuple Source.

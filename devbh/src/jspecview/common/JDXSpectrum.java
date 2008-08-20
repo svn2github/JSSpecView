@@ -22,14 +22,10 @@ package jspecview.common;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import jspecview.util.Coordinate;
-import jspecview.util.JDXCompressor;
-import jspecview.util.JSpecViewUtils;
 
 /**
  * <code>JDXSpectrum</code> implements the Interface Spectrum for the display of JDX Files.
@@ -91,14 +87,6 @@ public class JDXSpectrum implements Graph{
   //private double deltaX = ERROR;
   // For NMR Spectra
   private double observedFreq = ERROR;
-
-  // -------Compression Types -----------------//
-  private final int DIF = 0;
-  private final int FIX = 1;
-  private final int SQZ = 2;
-  private final int PAC = 3;
-  private final int XY  = 4;
-
 
   /**
    * Constructor
@@ -641,168 +629,6 @@ public class JDXSpectrum implements Graph{
     else
       buffer.append("##LASTX= " + varFormatter.format(xyCoords[endIndex].getXVal()) + JSpecViewUtils.newLine);
     buffer.append("##NPOINTS= " + (endIndex - startIndex + 1) + JSpecViewUtils.newLine);
-
-    return buffer.toString();
-  }
-
-  /**
-   * Returns the spectrum as a string with the data table in DIF compressed format
-   * @return the spectrum as a string with the data table in DIF compressed format
-   */
-  public String toDIF(){
-    return toStringAux(DIF);
-  }
-
-  /**
-   * Returns the spectrum as a string with the data table in DIF compressed format
-   * from startIndex to endIndex
-   * @param startIndex the start index
-   * @param endIndex the end index
-   * @return the spectrum as a string with the data table in DIF compressed format
-   */
-  public String toDIF(int startIndex, int endIndex){
-    return toStringAux(DIF, startIndex, endIndex);
-  }
-
-  /**
-   * Returns the spectrum as a string with the data table in FIX compressed format
-   * @return the spectrum as a string with the data table in FIX compressed format
-   */
-  public String toFIX(){
-    return toStringAux(FIX);
-  }
-
-  /**
-    * Returns the spectrum as a string with the data table in FIX compressed format
-    * from startIndex to endIndex
-    * @param startIndex the start index
-    * @param endIndex the end index
-    * @return the spectrum as a string with the data table in FIX compressed format
-   */
-  public String toFIX(int startIndex, int endIndex){
-    return toStringAux(FIX, startIndex, endIndex);
-  }
-
-
-  /**
-   * Returns the spectrum as a string with the data table in PAC compressed format
-   * @return the spectrum as a string with the data table in PAC compressed format
-   */
-  public String toPAC(){
-    return toStringAux(PAC);
-  }
-
-  /**
-   * Returns the spectrum as a string with the data table in PAC compressed format
-   * from startIndex to endIndex
-   * @param startIndex the start index
-   * @param endIndex the end index
-   * @return the spectrum as a string with the data table in PAC compressed format
-   */
-  public String toPAC(int startIndex, int endIndex){
-    return toStringAux(PAC, startIndex, endIndex);
-  }
-
-  /**
-   * Returns the spectrum as a string with the data table in SQZ compressed format
-   * @return the spectrum as a string with the data table in SQZ compressed format
-   */
-  public String toSQZ(){
-    return toStringAux(SQZ);
-  }
-
-
-  /**
-   * Returns the spectrum as a string with the data table in SQZ compressed format
-   * from startIndex to endIndex
-   * @param startIndex the start index
-   * @param endIndex the end index
-   * @return the spectrum as a string with the data table in SQZ compressed format
-   */
-  public String toSQZ(int startIndex, int endIndex){
-    return toStringAux(SQZ, startIndex, endIndex);
-  }
-
-  /**
-   * Returns the spectrum as a string with the data table un-compressed
-   * @return the spectrum as a string with the data table un-compressed
-   */
-  public String toXY(){
-    return toStringAux(XY);
-  }
-
-
-  /**
-   * Returns the spectrum as a string with the data table in X,Y compressed format
-   * from startIndex to endIndex
-   * @param startIndex the start index
-   * @param endIndex the end index
-   * @return the spectrum as a string with the data table in X,Y compressed format
-   */
-  public String toXY(int startIndex, int endIndex){
-    return toStringAux(XY, startIndex, endIndex);
-  }
-
-  /**
-   * Auxiliary method to convert the data table in a format specified by
-   * type
-   * @param type the data table format
-   * @return A string representation of the data table
-   */
-  private String toStringAux(int type){
-    return toStringAux(type, 0, xyCoords.length - 1);
-  }
-
-  /**
-   * Auxiliary function for the toString functions
-   * @param type the type of compression
-   * @param startIndex the start Coordinate Index
-   * @param endIndex the end Coordinate Index
-   * @return the spectrum string for the type of compression specified by <code>type</code>
-   */
-  private String toStringAux(int type, int startIndex, int endIndex){
-    StringBuffer buffer = new StringBuffer();
-    Coordinate[] newXYCoords = new Coordinate[xyCoords.length];
-    String tabDataSet = "", tmpDataClass = "XYDATA";
-    double xCompFactor, yCompFactor;
-
-    if (isHZtoPPM){
-      newXYCoords = JSpecViewUtils.copyCoordinateArray(xyCoords);
-      JSpecViewUtils.applyScale(newXYCoords, getObservedFreq(), 1);
-//       JSpecViewUtils.applyScale(newXYCoords, 1, 1);
-    }
-    else
-      newXYCoords = getXYCoords();
-
-    if(type != XY){
-      xCompFactor = JSpecViewUtils.getXFactorForCompression(newXYCoords, startIndex, endIndex);
-      yCompFactor = JSpecViewUtils.getYFactorForCompression(newXYCoords, startIndex, endIndex);
-    }
-    else{
-      xCompFactor = yCompFactor = 1;
-      tmpDataClass = "XYPOINTS";
-    }
-
-    switch(type){
-      case DIF:  tabDataSet = JDXCompressor.compressDIF(newXYCoords, startIndex, endIndex, xCompFactor, yCompFactor);
-                    break;
-      case FIX:  tabDataSet = JDXCompressor.compressFIX(newXYCoords, startIndex, endIndex, xCompFactor, yCompFactor);
-                    break;
-      case PAC:  tabDataSet = JDXCompressor.compressPAC(newXYCoords, startIndex, endIndex, xCompFactor, yCompFactor);
-                    break;
-      case SQZ:  tabDataSet = JDXCompressor.compressSQZ(newXYCoords, startIndex, endIndex, xCompFactor, yCompFactor);
-                    break;
-      case XY:   tabDataSet = JSpecViewUtils.coordinatesToString(newXYCoords, startIndex, endIndex, 1);
-                    break;
-    }
-
-    int index = Arrays.binarySearch(JDXSource.VAR_LIST_TABLE[0], tmpDataClass);
-    String varList = JDXSource.VAR_LIST_TABLE[1][index];
-
-    buffer.append(getHeaderString(tmpDataClass, xCompFactor, yCompFactor, startIndex, endIndex));
-    buffer.append("##" + tmpDataClass + "= " + varList + JSpecViewUtils.newLine);
-    buffer.append(tabDataSet);
-    buffer.append("##END=");
 
     return buffer.toString();
   }

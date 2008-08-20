@@ -26,11 +26,8 @@ import javax.xml.stream.*;
 import javax.xml.stream.events.* ;
 import javax.xml.namespace.QName;
 
-import jspecview.common.Graph;
-import jspecview.common.JDXSpectrum;
-import jspecview.common.JDXSource;
 import jspecview.exception.JSpecViewException;
-import jspecview.util.Coordinate;
+
 import java.util.HashMap;
 import java.util.Vector;
 
@@ -469,7 +466,7 @@ try {
             }
             if (tmpstr.toLowerCase().equals("encodedvalueset")) {
 
-              String base64String = "";
+              StringBuffer base64String = new StringBuffer();
               e=fer.peek();
               eventType = e.getEventType();
               while (eventType != XMLStreamConstants.CHARACTERS) {
@@ -484,11 +481,11 @@ try {
                 e = fer.nextEvent();
                 eventType = e.getEventType();
                 if (eventType == XMLStreamConstants.CHARACTERS)
-                  base64String += e.toString();
+                  base64String.append(e.toString());
               }
     //               System.out.println(base64String);
 
-              byte[] dataArray = Base64.decode(base64String);
+              byte[] dataArray = Base64.decodeBase64(base64String.toString());
               int ij = 0;
               if (dataArray.length != 0) {
                 ByteBuffer byte_buffer = ByteBuffer.wrap(dataArray).order(ByteOrder.
@@ -650,210 +647,3 @@ public static void processAudit() throws Exception {
   }
 }  // end of class AnIMLImporter
 
-  /** Decodes Base64 data from encoded AnIML Y values.
-   **
-   ** @author Peter J. Linstrom
-   **/
-  class Base64  extends Object {
-
- /** Table used for encoding data.
- **/
-    protected static final char[] aEncodeChars = {
-        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-        'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
-        'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
-        'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
-        'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
-        'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-        'w', 'x', 'y', 'z', '0', '1', '2', '3',
-        '4', '5', '6', '7', '8', '9', '+', '/',
-        '='
-    };
-
-    /** Table used for decoding data.
-     **/
-    protected static final int[] aDecodeValues = {
-        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-        0xFF, 0xFF, 0xFF, 0x3E, 0xFF, 0xFF, 0xFF, 0x3F,
-        0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3A, 0x3B,
-        0x3C, 0x3D, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-        0xFF, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
-        0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E,
-        0x0F, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16,
-        0x17, 0x18, 0x19, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-        0xFF, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20,
-        0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28,
-        0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F, 0x30,
-        0x31, 0x32, 0x33, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-    };
-
-    static byte[] decode(String sText) {
-      // Check for a bad argument.
-      if ( (sText == null) || (sText.length() == 0)) {
-        return null;
-      }
-
-      // Compute the number of characters to use.
-      int iUseChars = 0;
-
-      int iTextLength = sText.length();
-      int iTextIndex;
-
-      for (iTextIndex = 0; iTextIndex < iTextLength; iTextIndex++) {
-        char cChar = sText.charAt(iTextIndex);
-
-        if ( (cChar < 0x7F) && (aDecodeValues[cChar] < 0x40)) {
-          iUseChars++;
-        }
-      }
-
-      // Make sure we have data to use.
-      if (iUseChars == 0) {
-        return null;
-      }
-
-      // Compute the length of the data array.
-      int iDataLength = (iUseChars / 4) * 3;
-      int iExtraChars = (iUseChars % 4);
-
-      if (iExtraChars > 1) {
-        iDataLength += (iExtraChars - 1);
-      }
-
-      // Allocate memory.
-      byte aData[] = new byte[iDataLength];
-
-      // Initialize the decoding state.
-      int iDataIndex = 0;
-      int iBitsUsed = 0;
-      byte bNext = (byte) 0;
-
-      // Loop through the string
-      for (iTextIndex = 0; iTextIndex < iTextLength; iTextIndex++) {
-        // Get the next character.
-        char cChar = sText.charAt(iTextIndex);
-
-        // Skip over non-ascii characters.
-        if ( (cChar & 0x80) != 0) {
-          continue;
-        }
-
-        // Decode and check the character.
-        int iData = aDecodeValues[cChar];
-
-        if (iData >= 0x40) {
-          continue;
-        }
-
-        // Add bits.
-        int iShift = 2 - iBitsUsed;
-
-        if (iShift > 0) {
-          bNext |= (byte) (iData << iShift);
-        }
-        else {
-          bNext |= (byte) (iData >> ( -iShift));
-        }
-
-        // Increment the number of bits used.
-        iBitsUsed += 6;
-
-        // See if there is more to add.
-        if (iBitsUsed >= 8) {
-          // Advance to the next position in the data array.
-          aData[iDataIndex] = bNext;
-
-          iDataIndex++;
-
-          // Adjust the bit count for the next byte.
-          iBitsUsed -= 8;
-
-          // If appropriate, add additional bits.
-          if (iBitsUsed > 0) {
-            bNext = (byte) (iData << (8 - iBitsUsed));
-          }
-          else {
-            bNext = (byte) 0;
-          }
-        }
-      }
-
-      // Done, return the data array.
-      return aData;
-    }
-
-    static char[] encode(byte[] aData) {
-      // Make sure we have data.
-      if ( (aData == null) || (aData.length == 0)) {
-        return null;
-      }
-
-      // Get the data length.
-      int iDataLength = aData.length;
-
-      // Compute the encoded length.
-      int iTextLength = ( (iDataLength + 2) / 3) * 4;
-
-      // Allocate memory.
-      char aText[] = new char[iTextLength];
-
-      // Loop through the data.
-      int iDataIndex = 0;
-      int iTextIndex = 0;
-
-      while (iDataIndex < iDataLength) {
-        // Get the first byte.
-        byte bData = aData[iDataIndex];
-
-        iDataIndex++;
-
-        // Initialize the output.
-        int iOne = (bData & 0xFC) >> 2;
-        int iTwo = (bData & 0x3) << 4;
-        int iThree = 64;
-        int iFour = 64;
-
-        // If appropriate, process the second byte.
-        if (iDataIndex < iDataLength) {
-          // Get the second byte.
-          bData = aData[iDataIndex];
-
-          iDataIndex++;
-
-          // Add to the output.
-          iTwo |= (bData & 0xF0) >> 4;
-          iThree = (bData & 0xF) << 2;
-        }
-
-        // If appropriate, process the third byte.
-        if (iDataIndex < iDataLength) {
-          // Get the third byte.
-          bData = aData[iDataIndex];
-
-          iDataIndex++;
-
-          // Add to the output.
-          iThree |= (bData & 0xC0) >> 6;
-          iFour = (bData & 0x3F);
-        }
-
-        // Write out the output string.
-        aText[iTextIndex] = aEncodeChars[iOne];
-        aText[iTextIndex + 1] = aEncodeChars[iTwo];
-        aText[iTextIndex + 2] = aEncodeChars[iThree];
-        aText[iTextIndex + 3] = aEncodeChars[iFour];
-
-        // Advance the text index.
-        iTextIndex += 4;
-      }
-
-      // Return the encoded string.
-      return aText;
-    }    
-// if you reached this far then hopefully no errors?    
-
-  }

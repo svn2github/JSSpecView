@@ -50,11 +50,9 @@ import javax.print.attribute.standard.OrientationRequested;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
+import jspecview.common.JSpecViewUtils.MultiScaleData;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
-import jspecview.util.Coordinate;
-import jspecview.util.JSpecViewUtils;
-import jspecview.util.JSpecViewUtils.MultiScaleData;
 
 /*
 // Batik SVG Generator
