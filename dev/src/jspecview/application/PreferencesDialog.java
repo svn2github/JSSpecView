@@ -21,7 +21,6 @@ package jspecview.application;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GraphicsEnvironment;
@@ -63,9 +62,11 @@ import javax.swing.event.ListSelectionListener;
 import jspecview.common.JDXSource;
 import jspecview.common.JDXSourceFactory;
 import jspecview.common.JSVPanel;
-import jspecview.common.JSpecViewUtils;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
+import jspecview.util.DisplayScheme;
+import jspecview.util.DisplaySchemesProcessor;
+import jspecview.util.JSpecViewUtils;
 
 /**
  * Dialog to change the preferences for the application.
@@ -114,7 +115,7 @@ public class PreferencesDialog extends JDialog {
   private JButton customButton = new JButton();
   private GridBagLayout gridBagLayout3 = new GridBagLayout();
   private JScrollPane listScrollPane = new JScrollPane();
-  JList elementList = new JList();
+  private JList elementList = new JList();
   private JButton colorButton8 = new JButton();
   private JButton colorButton7 = new JButton();
   private JButton colorButton6 = new JButton();
@@ -123,7 +124,7 @@ public class PreferencesDialog extends JDialog {
   private JButton colorButton3 = new JButton();
   private JButton colorButton2 = new JButton();
   private JButton colorButton1 = new JButton();
-  JButton currentColorButton = new JButton();
+  private JButton currentColorButton = new JButton();
   private JPanel processingPanel = new JPanel();
   private GridBagLayout gridBagLayout4 = new GridBagLayout();
   private JButton saveButton = new JButton();
@@ -143,7 +144,7 @@ public class PreferencesDialog extends JDialog {
   private JTextField integOffsetTextField = new JTextField();
   private TitledBorder absTransTitledBorder;
   private JCheckBox separateWindowCheckBox = new JCheckBox();
-  //private ButtonGroup fontButtonGroup = new ButtonGroup();
+  private ButtonGroup fontButtonGroup = new ButtonGroup();
   private JLabel jLabel5 = new JLabel();
   private JLabel jLabel6 = new JLabel();
   private JLabel jLabel7 = new JLabel();
@@ -152,16 +153,16 @@ public class PreferencesDialog extends JDialog {
   private JRadioButton AtoTRadioButton = new JRadioButton();
   private ButtonGroup conversionButtonGroup = new ButtonGroup();
 
-  DisplayScheme currentDS = new DisplayScheme("Current");
+  private DisplayScheme currentDS = new DisplayScheme("Current");
   private DisplaySchemesProcessor dsp;
   private JSVPanel previewPanel = null;
   private String defaultDSName = "";
   private JLabel jLabel8 = new JLabel();
   private JLabel jLabel9 = new JLabel();
-  //private JColorChooser cc = new JColorChooser();
+  private JColorChooser cc = new JColorChooser();
   private JCheckBox AutoConvertCheckBox = new JCheckBox();
-  //private boolean clearRecentFiles = false;
-  JButton plotColorButton = new JButton();
+  private boolean clearRecentFiles = false;
+  private JButton plotColorButton = new JButton();
   private JPanel colorPanel1 = new JPanel();
   private JButton procColorButton8 = new JButton();
   private JButton procColorButton7 = new JButton();
@@ -247,12 +248,12 @@ public class PreferencesDialog extends JDialog {
    * Initialise the Display Tab, where display schemes are created or set
    */
   private void initDisplayTab(){
-    TreeMap<String, DisplayScheme> displaySchemes = dsp.getDisplaySchemes();
+    TreeMap displaySchemes = dsp.getDisplaySchemes();
 
     defaultDSName = preferences.getProperty("defaultDisplaySchemeName");
 
     // load names of schemes in schemeComboBox
-    for (Iterator<String> i = displaySchemes.keySet().iterator(); i.hasNext(); ) {
+    for (Iterator i = displaySchemes.keySet().iterator(); i.hasNext(); ) {
       Object item = i.next();
       schemeComboBox.addItem(item);
     }
@@ -356,7 +357,7 @@ public class PreferencesDialog extends JDialog {
    * class <code>ColorPanelActionListener</code> is the <code>ActionListener</code>
    * for the panel of color buttons
    */
-  class ColorPanelActionListener implements ActionListener{
+  private class ColorPanelActionListener implements ActionListener{
 
     /**
      * Sets the color of the selected element on the current color button
@@ -377,7 +378,7 @@ public class PreferencesDialog extends JDialog {
   /**
    * Listener for the element list
    */
-  class ElementListSelectionListener implements ListSelectionListener{
+  private class ElementListSelectionListener implements ListSelectionListener{
 
     /**
      * Sets the color of the currentColorButton to the color of the selected
@@ -402,7 +403,7 @@ public class PreferencesDialog extends JDialog {
     contentTitledBorder = new TitledBorder("");
     integratinTitledBorder = new TitledBorder("");
     absTransTitledBorder = new TitledBorder("");
-    generalContentBox.setAlignmentY(Component.LEFT_ALIGNMENT);
+    generalContentBox.setAlignmentY(Box.LEFT_ALIGNMENT);
     contentpanel.setLayout(contentBorderLayout);
     generalPanel.setLayout(generalBorderLayout);
     fontTitledBorder.setTitle("Font");
@@ -766,8 +767,8 @@ public class PreferencesDialog extends JDialog {
 
     //TreeMap<String,DisplayScheme> dispSchemes;
     if(currentDS.getName().equals("Current")){
-      //@SuppressWarnings("unchecked")
-      TreeMap<String, DisplayScheme> dispSchemes = dsp.getDisplaySchemes();
+      @SuppressWarnings("unchecked")
+      TreeMap<String,DisplayScheme> dispSchemes = dsp.getDisplaySchemes();
       dispSchemes.put("Current", currentDS);
     }
 
@@ -788,7 +789,7 @@ public class PreferencesDialog extends JDialog {
    * @param e the ActionEvent
    */
   void customButton_actionPerformed(ActionEvent e) {
-    Color color = JColorChooser.showDialog(this, "Choose Color", Color.black);
+    Color color = cc.showDialog(this, "Choose Color", Color.black);
     if(color != null){
       currentColorButton.setBackground(color);
       String element = (String)elementList.getSelectedValue();
@@ -824,7 +825,8 @@ public class PreferencesDialog extends JDialog {
       currentDS.setFont(fontName);
     }
 
-    TreeMap<String, DisplayScheme> dispSchemes = dsp.getDisplaySchemes();
+    @SuppressWarnings("unchecked")
+    TreeMap<String,DisplayScheme> dispSchemes = dsp.getDisplaySchemes();
 
     dispSchemes.put(input, currentDS);
 
@@ -860,8 +862,8 @@ public class PreferencesDialog extends JDialog {
     String schemeName = (String)schemeCB.getSelectedItem();
     DisplayScheme ds = null;
 
-    TreeMap<String, DisplayScheme> schemes = dsp.getDisplaySchemes();
-    for (Iterator<String> i = schemes.keySet().iterator(); i.hasNext(); ) {
+    TreeMap schemes = dsp.getDisplaySchemes();
+    for (Iterator i = schemes.keySet().iterator(); i.hasNext(); ) {
       Object item = i.next();
       ds = (DisplayScheme)schemes.get(item);
       if(ds.getName().equals(schemeName)){
@@ -884,7 +886,7 @@ public class PreferencesDialog extends JDialog {
   /**
    * Updates the preview panel with the values chosen in the dialog
    */
-  void updatePreviewPanel(){
+  private void updatePreviewPanel(){
     if(previewPanel != null){
       previewPanel.setTitleColor(currentDS.getColor("title"));
       previewPanel.setPlotColor(currentDS.getColor("plot"));
@@ -996,7 +998,7 @@ public class PreferencesDialog extends JDialog {
    * @param e ActionEvent
    */
   void processingCustomButton_actionPerformed(ActionEvent e) {
-    Color color = JColorChooser.showDialog(this, "Choose Color", Color.black);
+    Color color = cc.showDialog(this, "Choose Color", Color.black);
     if(color != null)
       plotColorButton.setBackground(color);
   }
@@ -1004,7 +1006,7 @@ public class PreferencesDialog extends JDialog {
   /**
    * Listener for the Panel of Color button of the processing tab
    */
-  class ProcColorPanelActionListener implements ActionListener{
+  private class ProcColorPanelActionListener implements ActionListener{
 
     /**
      * Sets the color plotColorButton to the color of the button pressed

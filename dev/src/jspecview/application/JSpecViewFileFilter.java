@@ -40,7 +40,7 @@ public class JSpecViewFileFilter extends FileFilter
   /**
    * A list of file extensions
    */
-  private Hashtable<String, JSpecViewFileFilter> filters = null;
+  private Hashtable<String,Object> filters = null;
 
   /**
    * Description of the filter
@@ -51,7 +51,7 @@ public class JSpecViewFileFilter extends FileFilter
    * Intialises a <code>JSpecViewFileFilter</code>
    */
   public JSpecViewFileFilter() {
-    filters = new Hashtable<String, JSpecViewFileFilter>();
+    this.filters = new Hashtable<String,Object>();
   }
 
   /**
@@ -82,7 +82,6 @@ public class JSpecViewFileFilter extends FileFilter
    * @param f the the file to be filtered
    * @return true if the file should be shown, otherwise false
    */
-  @Override
   public boolean accept(File f) {
 	if(f != null) {
 	    if(f.isDirectory()) {
@@ -102,14 +101,14 @@ public class JSpecViewFileFilter extends FileFilter
    * @return the extension of a file
    */
   public String getExtension(File f) {
-    if (f != null) {
-      String filename = f.getName();
-      int i = filename.lastIndexOf('.');
-      if (i > 0 && i < filename.length() - 1) {
-        return filename.substring(i + 1).toLowerCase();
-      }
-    }
-    return null;
+    if(f != null) {
+	    String filename = f.getName();
+	    int i = filename.lastIndexOf('.');
+	    if(i>0 && i<filename.length()-1) {
+		return filename.substring(i+1).toLowerCase();
+	    };
+	}
+	return null;
   }
 
   /**
@@ -118,7 +117,7 @@ public class JSpecViewFileFilter extends FileFilter
    */
   public void addExtension(String extension) {
 	if(filters == null) {
-	    filters = new Hashtable<String, JSpecViewFileFilter>(5);
+	    filters = new Hashtable<String,Object>(5);
 	}
 	filters.put(extension.toLowerCase(), this);
   }
@@ -127,7 +126,6 @@ public class JSpecViewFileFilter extends FileFilter
    * Returns the </code>JSpecViewFileFilter</code> description
    * @return the </code>JSpecViewFileFilter</code> description
    */
-  @Override
   public String getDescription() {
 	return description;
   }

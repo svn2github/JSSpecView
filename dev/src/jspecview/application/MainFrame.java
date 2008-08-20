@@ -62,7 +62,6 @@ import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -71,13 +70,14 @@ import java.beans.PropertyVetoException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
+import java.util.TreeMap;
 import java.util.Vector;
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
@@ -117,28 +117,32 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import jspecview.common.AnIMLSource;
-import jspecview.common.CMLSource;
 import jspecview.common.CompoundSource;
-import jspecview.common.Coordinate;
 import jspecview.common.Graph;
 import jspecview.common.JDXSource;
+import jspecview.common.CMLSource;
+import jspecview.common.AnIMLSource;
 import jspecview.common.JDXSourceFactory;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelPopupListener;
 import jspecview.common.JSVPanelPopupMenu;
-import jspecview.common.JSpecViewUtils;
 import jspecview.common.OverlayLegendDialog;
 import jspecview.common.PrintLayoutDialog;
-import jspecview.common.TransmittanceAbsorbanceConverter;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
-import jspecview.export.Exporter;
-import jspecview.export.SVGExporter;
+import jspecview.xml.AnIMLExporter;
+import jspecview.xml.CMLExporter;
+import jspecview.xml.SVGExporter;
+import jspecview.util.DisplayScheme;
+import jspecview.util.DisplaySchemesProcessor;
+import jspecview.util.JDXExporter;
+import jspecview.util.JSpecViewUtils;
+import jspecview.util.TransmittanceAbsorbanceConverter;
 import mdidesktop.ScrollableDesktopPane;
 import mdidesktop.WindowMenu;
 import jspecview.common.Visible;
+import jspecview.util.Coordinate;
 
 /**
  * The Main Class or Entry point of the JSpecView Application.
@@ -178,10 +182,10 @@ public class MainFrame
   boolean continuous;
   //  ----------------------- Application Attributes ---------------------
 
-  Vector<JDXSource> jdxSources = new Vector<JDXSource>();
-  Vector<File> jdxSourceFiles = new Vector<File>();
+  Vector<JDXSource> jdxSources = new Vector<JDXSource> ();
+  Vector<File> jdxSourceFiles = new Vector<File> ();
   int numRecent = 10;
-  Vector<String> recentFilePaths = new Vector<String>(numRecent);
+  Vector<String> recentFilePaths = new Vector<String> (numRecent);
   JDXSource currentSelectedSource = null;
   Properties properties;
   DisplaySchemesProcessor dsp;
@@ -325,12 +329,12 @@ public class MainFrame
   JButton overlayKeyButton = new JButton();
   OverlayLegendDialog legend;
   JMenu processingMenu = new JMenu();
-  JMenuItem integrateMenuItem = new JMenuItem();
-  JMenuItem transAbsMenuItem = new JMenuItem();
-  JMenuItem solColMenuItem = new JMenuItem();
-  JMenuItem errorLogMenuItem = new JMenuItem();
+  private JMenuItem integrateMenuItem = new JMenuItem();
+  private JMenuItem transAbsMenuItem = new JMenuItem();
+  private JMenuItem solColMenuItem = new JMenuItem();
+  private JMenuItem errorLogMenuItem = new JMenuItem();
 
-  //private String aboutJSpec = "\nJSpecView is a graphical viewer for JCAMP-DX Spectra\nCopyright (c) 2008\nUniversity of the West Indies, Mona ";
+  private String aboutJSpec = "\nJSpecView is a graphical viewer for JCAMP-DX Spectra\nCopyright (c) 2008\nUniversity of the West Indies, Mona ";
 
   // Does certain tasks once regardless of how many instances of the program
   // are running
@@ -360,7 +364,6 @@ public class MainFrame
 
     // When application exits ...
     this.addWindowListener(new WindowAdapter() {
-      @Override
       public void windowClosing(WindowEvent we) {
         try {
           onProgramExit();
@@ -402,7 +405,7 @@ public class MainFrame
    */
   void onProgramStart() {
 
-    //boolean loadedOk;
+    boolean loadedOk;
     //Set Default Properties
 
     // Initalise application properties with defaults
@@ -445,17 +448,17 @@ public class MainFrame
 
     dsp = new DisplaySchemesProcessor();
     try {
-      MainFrame.class.getClassLoader().getResource("displaySchemes.xml");
+      URL url = MainFrame.class.getClassLoader().getResource("displaySchemes.xml");
       try {
-        MainFrame.class.getResourceAsStream("displaySchemes.xml");
-      }
-      catch (Exception jEX) {
-        System.err.println("could not find displayschemes?");
-      }
-      dsp.load("displaySchemes.xml");
+          InputStream in = (InputStream) (MainFrame.class.getResourceAsStream("displaySchemes.xml"));
+        }
+        catch (Exception jEX) {
+          System.err.println("could not find displayschemes?");
+        }
+       loadedOk = dsp.load("displaySchemes.xml");
     }
     catch (Exception ex) {
-      dsp.loadDefault("missingDS.xml");
+      loadedOk = dsp.loadDefault("missingDS.xml");
       System.err.println("Warning, display schemes not properly loaded, using Default settings!");
     }
 
@@ -564,7 +567,7 @@ public class MainFrame
    * @param def the default value
    * @return a <code>Color</code> instance from a parameter
    */
-/*  private Color getColorProperty(String key, Color def) {
+  private Color getColorProperty(String key, Color def) {
     String param = properties.getProperty(key);
     Color color = JSpecViewUtils.getColorFromString(param);
     if (color == null) {
@@ -574,7 +577,7 @@ public class MainFrame
       return color;
     }
   }
-*/
+
   /**
    * Tasks to do when program exits
    * @throws Exception
@@ -676,7 +679,7 @@ public class MainFrame
     openMenuItem.setMnemonic('O');
     openMenuItem.setText("Open...");
     openMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(79,
-        InputEvent.CTRL_MASK, false));
+        java.awt.event.KeyEvent.CTRL_MASK, false));
     openMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
         open_actionPerformed(e);
@@ -685,7 +688,7 @@ public class MainFrame
     printMenuItem.setMnemonic('P');
     printMenuItem.setText("Print...");
     printMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(80,
-        InputEvent.CTRL_MASK, false));
+        java.awt.event.KeyEvent.CTRL_MASK, false));
     printMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
         printMenuItem_actionPerformed(e);
@@ -694,7 +697,7 @@ public class MainFrame
     closeMenuItem.setMnemonic('C');
     closeMenuItem.setText("Close");
     closeMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(115,
-        InputEvent.CTRL_MASK, false));
+        java.awt.event.KeyEvent.CTRL_MASK, false));
     closeMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
         closeMenuItem_actionPerformed(e);
@@ -710,7 +713,7 @@ public class MainFrame
     exitMenuItem.setMnemonic('X');
     exitMenuItem.setText("Exit");
     exitMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(115,
-        InputEvent.ALT_MASK, false));
+        java.awt.event.KeyEvent.ALT_MASK, false));
     exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
         exitMenuItem_actionPerformed(e);
@@ -740,7 +743,7 @@ public class MainFrame
     gridCheckBoxMenuItem.setMnemonic('G');
     gridCheckBoxMenuItem.setText("Grid");
     gridCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(71,
-        InputEvent.CTRL_MASK, false));
+        java.awt.event.KeyEvent.CTRL_MASK, false));
     gridCheckBoxMenuItem.addItemListener(new java.awt.event.ItemListener() {
       public void itemStateChanged(ItemEvent e) {
         gridCheckBoxMenuItem_itemStateChanged(e);
@@ -749,7 +752,7 @@ public class MainFrame
     coordsCheckBoxMenuItem.setMnemonic('C');
     coordsCheckBoxMenuItem.setText("Coordinates");
     coordsCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(67,
-        InputEvent.CTRL_MASK, false));
+        java.awt.event.KeyEvent.CTRL_MASK, false));
     coordsCheckBoxMenuItem.addItemListener(new java.awt.event.ItemListener() {
       public void itemStateChanged(ItemEvent e) {
         coordsCheckBoxMenuItem_itemStateChanged(e);
@@ -758,7 +761,7 @@ public class MainFrame
     revPlotCheckBoxMenuItem.setMnemonic('R');
     revPlotCheckBoxMenuItem.setText("Reverse Plot");
     revPlotCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(
-        82, InputEvent.CTRL_MASK, false));
+        82, java.awt.event.KeyEvent.CTRL_MASK, false));
     revPlotCheckBoxMenuItem.addItemListener(new java.awt.event.ItemListener() {
       public void itemStateChanged(ItemEvent e) {
         revPlotCheckBoxMenuItem_itemStateChanged(e);
@@ -767,7 +770,7 @@ public class MainFrame
     nextMenuItem.setMnemonic('N');
     nextMenuItem.setText("Next View");
     nextMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(78,
-        InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, false));
+        java.awt.event.KeyEvent.CTRL_MASK | java.awt.event.KeyEvent.SHIFT_MASK, false));
     nextMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
         nextMenuItem_actionPerformed(e);
@@ -776,7 +779,7 @@ public class MainFrame
     prevMenuItem.setMnemonic('P');
     prevMenuItem.setText("Previous View");
     prevMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(80,
-        InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, false));
+        java.awt.event.KeyEvent.CTRL_MASK | java.awt.event.KeyEvent.SHIFT_MASK, false));
     prevMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
         prevMenuItem_actionPerformed(e);
@@ -785,7 +788,7 @@ public class MainFrame
     fullMenuItem.setMnemonic('F');
     fullMenuItem.setText("Full View");
     fullMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(70,
-        InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, false));
+        java.awt.event.KeyEvent.CTRL_MASK | java.awt.event.KeyEvent.SHIFT_MASK, false));
     fullMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
         fullMenuItem_actionPerformed(e);
@@ -794,7 +797,7 @@ public class MainFrame
     clearMenuItem.setMnemonic('C');
     clearMenuItem.setText("Clear Views");
     clearMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(67,
-        InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, false));
+        java.awt.event.KeyEvent.CTRL_MASK | java.awt.event.KeyEvent.SHIFT_MASK, false));
     clearMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
         clearMenuItem_actionPerformed(e);
@@ -804,7 +807,7 @@ public class MainFrame
     preferencesMenuItem.setMnemonic('P');
     preferencesMenuItem.setText("Preferences...");
     preferencesMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(80,
-        InputEvent.SHIFT_MASK, false));
+        java.awt.event.KeyEvent.SHIFT_MASK, false));
     preferencesMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
         preferencesMenuItem_actionPerformed(e);
@@ -832,7 +835,7 @@ public class MainFrame
     importAnIML.setActionCommand("ImportAnIML");
     importAnIML.setMnemonic('I');
     importAnIML.setAccelerator(javax.swing.KeyStroke.getKeyStroke(73,
-        InputEvent.CTRL_MASK, false));
+        java.awt.event.KeyEvent.CTRL_MASK, false));
     importAnIML.setText("Import AnIML/CML...");
     importAnIML.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -917,7 +920,7 @@ public class MainFrame
     toolbarCheckBoxMenuItem.setText("Toolbar");
     toolbarCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(
         84,
-        InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, false));
+        java.awt.event.KeyEvent.ALT_MASK | java.awt.event.KeyEvent.SHIFT_MASK, false));
     toolbarCheckBoxMenuItem.addItemListener(new java.awt.event.ItemListener() {
       public void itemStateChanged(ItemEvent e) {
         toolbarCheckBoxMenuItem_itemStateChanged(e);
@@ -928,7 +931,7 @@ public class MainFrame
     sidePanelCheckBoxMenuItem.setText("Side Panel");
     sidePanelCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(
         83,
-        InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, false));
+        java.awt.event.KeyEvent.ALT_MASK | java.awt.event.KeyEvent.SHIFT_MASK, false));
     sidePanelCheckBoxMenuItem.addItemListener(new java.awt.event.ItemListener() {
       public void itemStateChanged(ItemEvent e) {
         sidePanelCheckBoxMenuItem_itemStateChanged(e);
@@ -938,7 +941,7 @@ public class MainFrame
     statusCheckBoxMenuItem.setSelected(true);
     statusCheckBoxMenuItem.setText("Status Bar");
     statusCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(66,
-        InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, false));
+        java.awt.event.KeyEvent.ALT_MASK | java.awt.event.KeyEvent.SHIFT_MASK, false));
     statusCheckBoxMenuItem.addItemListener(new java.awt.event.ItemListener() {
       public void itemStateChanged(ItemEvent e) {
         statusCheckBoxMenuItem_itemStateChanged(e);
@@ -954,7 +957,7 @@ public class MainFrame
     splitMenuItem.setMnemonic('P');
     splitMenuItem.setText("Split");
     splitMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(83,
-        InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, false));
+        java.awt.event.KeyEvent.CTRL_MASK | java.awt.event.KeyEvent.SHIFT_MASK, false));
     splitMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
         splitMenuItem_actionPerformed(e);
@@ -963,7 +966,7 @@ public class MainFrame
     overlayMenuItem.setMnemonic('O');
     overlayMenuItem.setText("Overlay");
     overlayMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(79,
-        InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, false));
+        java.awt.event.KeyEvent.CTRL_MASK | java.awt.event.KeyEvent.SHIFT_MASK, false));
     overlayMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
         overlayMenuItem_actionPerformed(e);
@@ -996,7 +999,7 @@ public class MainFrame
     sourceMenuItem.setMnemonic('S');
     sourceMenuItem.setText("Source ...");
     sourceMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(83,
-        InputEvent.CTRL_MASK, false));
+        java.awt.event.KeyEvent.CTRL_MASK, false));
     sourceMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
         sourceMenuItem_actionPerformed(e);
@@ -1005,7 +1008,7 @@ public class MainFrame
     propertiesMenuItem.setMnemonic('P');
     propertiesMenuItem.setText("Properties");
     propertiesMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(72,
-        InputEvent.CTRL_MASK, false));
+        java.awt.event.KeyEvent.CTRL_MASK, false));
     propertiesMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
         propertiesMenuItem_actionPerformed(e);
@@ -1320,9 +1323,9 @@ public class MainFrame
 
         DataInputStream dis = new DataInputStream(new BufferedInputStream(new
             FileInputStream(file)));
-        dis.read(infile);
+        int filelength = dis.read(infile);
 
-        String filecheck = new  String(infile, 0, 400);
+        String filecheck = new String(infile, 0, 400);
 //         System.out.println("FILE START = " + filecheck);
 
 // check for "<animl" in the first 400 chararcters
@@ -1348,7 +1351,7 @@ public class MainFrame
         setJSVPanelProperties(jsvp);
         JInternalFrame frame = new JInternalFrame(xmlSpec.getTitle(), true, true, true, true);
         frame.setFrameIcon(imageIcon);
-        frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        frame.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
         frame.setMinimumSize(new Dimension(365, 200));
         frame.setPreferredSize(new Dimension(365, 200));
         frame.getContentPane().add(jsvp);
@@ -1580,7 +1583,7 @@ public class MainFrame
     coordsCheckBoxMenuItem.setSelected(coordinatesOn);
     jsvp.setGridOn(gridOn);
     gridCheckBoxMenuItem.setSelected(gridOn);
-    //Color tmpcolour;
+    Color tmpcolour;
     jsvp.setScaleOn(scaleOn);
     jsvp.setUnitsOn(scaleOn);
     jsvp.setTitleColor(ds.getColor("title"));
@@ -1631,7 +1634,7 @@ public class MainFrame
       ScalesIncompatibleException {
 
     File file = getFileForSource(source);
-    Vector<JDXSpectrum> specs = source.getSpectra();
+    Vector specs = source.getSpectra();
     JSVPanel jsvp;
     jsvp = new JSVPanel(specs);
     jsvp.addMouseListener(new JSVPanelPopupListener(jsvpPopupMenu, jsvp, source));
@@ -1643,7 +1646,7 @@ public class MainFrame
         ( (CompoundSource) source).getTitle(),
         true, true, true, true);
     frame.setFrameIcon(imageIcon);
-    frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+    frame.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
     frame.addInternalFrameListener(new JSVInternalFrameListener(file, source));
     frame.setMinimumSize(new Dimension(365, 200));
     frame.setPreferredSize(new Dimension(365, 200));
@@ -1662,9 +1665,9 @@ public class MainFrame
     validate();
     repaint();
 
-    //OverlayLegendDialog legend;
+    OverlayLegendDialog legend;
     if (autoShowLegend) {
-      new OverlayLegendDialog(this, jsvp);
+      legend = new OverlayLegendDialog(this, jsvp);
     }
 
     overlaySplitButton.setIcon(splitIcon);
@@ -1725,7 +1728,6 @@ public class MainFrame
    * Closes the <code>JDXSource</code> specified by source
    * @param source the <code>JDXSource</code>
    */
-  @SuppressWarnings("unchecked")
   public void closeSource(JDXSource source) {
     // Remove nodes and dispose of frames
     Enumeration enume = rootNode.children();
@@ -1745,7 +1747,7 @@ public class MainFrame
       }
     }
 
-    Vector<JDXSpectrum> spectra = source.getSpectra();
+    Vector spectra = source.getSpectra();
     for (int i = 0; i < spectra.size(); i++) {
       String title = ( (Graph) spectra.elementAt(i)).getTitle();
       for (int j = 0; j < showMenu.getMenuComponentCount(); j++) {
@@ -1802,7 +1804,7 @@ public class MainFrame
 
     File file = getFileForSource(source);
 
-    Vector<JDXSpectrum> specs = source.getSpectra();
+    Vector specs = source.getSpectra();
     //JSVPanel[] panels = new JSVPanel[specs.size()];
     JInternalFrame[] frames = new JInternalFrame[specs.size()];
     JSVPanel jsvp;
@@ -1818,7 +1820,7 @@ public class MainFrame
         frame = new JInternalFrame(spec.getTitle(), true, true,
                                    true, true);
         frame.setFrameIcon(imageIcon);
-        frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        frame.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
         frame.setMinimumSize(new Dimension(365, 200));
         frame.setPreferredSize(new Dimension(365, 200));
         frame.getContentPane().add(jsvp);
@@ -1904,7 +1906,6 @@ public class MainFrame
      * String representation of the class
      * @return the string representation
      */
-    @Override
     public String toString() {
       return frame.getTitle();
     }
@@ -1968,7 +1969,6 @@ public class MainFrame
      * panel's properties. Also sets the frame title to the current file name.
      * @param e the InternalFrameEvent
      */
-    @Override
     public void internalFrameActivated(InternalFrameEvent e) {
       String Yunits,Xunits;
       JInternalFrame frame = e.getInternalFrame();
@@ -2053,7 +2053,6 @@ public class MainFrame
      * Called when <code>JInternalFrame</code> is closing
      * @param e the InternalFrameEvent
      */
-    @Override
     public void internalFrameClosing(InternalFrameEvent e) {
       final JInternalFrame frame = e.getInternalFrame();
 
@@ -2064,7 +2063,6 @@ public class MainFrame
      * Called when <code>JInternalFrame</code> has opened
      * @param e the InternalFrameEvent
      */
-    @Override
     public void internalFrameOpened(InternalFrameEvent e) {
 
       spectraTree.validate();
@@ -2077,13 +2075,13 @@ public class MainFrame
      * @param parent the parent node
      * @return the tree node that is associated with an internal frame
      */
-    @SuppressWarnings("unchecked")
     public DefaultMutableTreeNode getNodeForInternalFrame(JInternalFrame frame,
         DefaultMutableTreeNode parent) {
       Enumeration enume = parent.breadthFirstEnumeration();
 
       while (enume.hasMoreElements()) {
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode) enume.nextElement();
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode) enume.
+            nextElement();
         if (node.isLeaf()) {
           Object nodeInfo = node.getUserObject();
           if (nodeInfo instanceof SpecInfo) {
@@ -2112,7 +2110,6 @@ public class MainFrame
     public SpectraTreeCellRenderer() {
     }
 
-    @Override
     public Component getTreeCellRendererComponent(
         JTree tree,
         Object value,
@@ -2137,7 +2134,6 @@ public class MainFrame
      * Returns a font depending on whether a frame is hidden
      * @return the tree node that is associated with an internal frame
      */
-    @Override
     public Font getFont() {
       if (leaf && isFrameHidden(value)) {
         return new Font("Dialog", Font.ITALIC, 12);
@@ -2149,7 +2145,7 @@ public class MainFrame
       DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
       Object nodeInfo = node.getUserObject();
       if (nodeInfo instanceof SpecInfo) {
-        //JInternalFrame frame = ( (SpecInfo) nodeInfo).frame;
+        JInternalFrame frame = ( (SpecInfo) nodeInfo).frame;
         if (! ( (SpecInfo) nodeInfo).frame.isVisible()) {
           return true;
         }
@@ -2262,10 +2258,10 @@ public class MainFrame
     if (currentSelectedSource != null) {
       file = getFileForSource(currentSelectedSource);
       try {
-        new TextDialog(this, file.getAbsolutePath(), file, true);
+        TextDialog source = new TextDialog(this, file.getAbsolutePath(), file, true);
       }
       catch (IOException ex) {
-        new TextDialog(this, "File Not Found",
+        TextDialog source = new TextDialog(this, "File Not Found",
                                            "File Not Found", true);
       }
     }
@@ -2309,7 +2305,7 @@ public class MainFrame
       JSVPanel jsvp = (JSVPanel) frames[i].getContentPane().getComponent(0);
       setJSVPanelProperties(jsvp);
     }
-    dsp.getDisplaySchemes();
+    TreeMap dispSchemes = dsp.getDisplaySchemes();
     if (defaultDisplaySchemeName.equals("Current")) {
       properties.setProperty("defaultDisplaySchemeName", tempDS);
     }
@@ -2514,7 +2510,7 @@ public class MainFrame
         panel.add(button);
         dialog.getContentPane().setLayout(new BorderLayout());
         dialog.getContentPane().add(new JLabel("Choose Spectrum to export",
-                                               SwingConstants.CENTER),
+                                               JLabel.CENTER),
                                     BorderLayout.NORTH);
         dialog.getContentPane().add(panel);
         button.addActionListener(new ActionListener() {
@@ -2541,7 +2537,7 @@ public class MainFrame
    * @param comm the format to export in
    * @param index the index of the spectrum
    */
-  void exportSpectrum_aux(JDXSpectrum spec, JSVPanel jsvp, String comm,
+  private void exportSpectrum_aux(JDXSpectrum spec, JSVPanel jsvp, String comm,
                                   int index) {
     filter3.addExtension("xml");
     filter3.addExtension("aml");
@@ -2579,7 +2575,38 @@ public class MainFrame
       endIndex = jsvp.getEndDataPointIndices()[index];
 
       try {
-        if (comm.equals("PNG")) {
+        if (comm.equals("XY")) {
+          JDXExporter.exportXY(spec, new FileWriter(file.getAbsolutePath()),
+                               startIndex, endIndex);
+        }
+        else if (comm.equals("DIF")) {
+          JDXExporter.exportDIF(spec, new FileWriter(file.getAbsolutePath()),
+                                startIndex, endIndex);
+        }
+        else if (comm.equals("FIX")) {
+          JDXExporter.exportFIX(spec, new FileWriter(file.getAbsolutePath()),
+                                startIndex, endIndex);
+        }
+        else if (comm.equals("SQZ")) {
+          JDXExporter.exportSQZ(spec, new FileWriter(file.getAbsolutePath()),
+                                startIndex, endIndex);
+        }
+        else if (comm.equals("PAC")) {
+          JDXExporter.exportPAC(spec, new FileWriter(file.getAbsolutePath()),
+                                startIndex, endIndex);
+        }
+        else if (comm.equals("AnIML")) {
+          AnIMLExporter.exportAsAnIML(spec, file.getAbsolutePath(), startIndex,
+                                      endIndex);
+        }
+        else if (comm.equals("CML")) {
+          CMLExporter.exportAsCML(spec, file.getAbsolutePath(), startIndex,
+                                  endIndex);
+        }
+        else if (comm.equals("SVG")) {
+          SVGExporter.exportAsSVG(file.getAbsolutePath(), jsvp, index, true);
+        }
+        else if (comm.equals("PNG")) {
           try {
             Rectangle r = jsvp.getBounds();
             Image image = jsvp.createImage(r.width, r.height);
@@ -2604,30 +2631,24 @@ public class MainFrame
           catch (IOException ioe) {
             ioe.printStackTrace();
           }
-        } else if (comm.equals("SVG")) {
-          SVGExporter.exportAsSVG(file.getAbsolutePath(), jsvp, index, true);
-        } else {
-          Exporter exporter = new Exporter();
-          exporter.export(spec, comm, file.getAbsolutePath(), startIndex, endIndex);
-        } 
+        }
       }
       catch (IOException ioe) {
         // STATUS --> "Error writing: " + file.getName()
       }
-
     }
   }
 
   /**
    * Show dialog when there is an attempt to export overlaid spectra
    */
-/*  private void showCannotExportOverlaidOptionPane() {
+  private void showCannotExportOverlaidOptionPane() {
     JOptionPane.showMessageDialog(this, "Can't Export Overlaid Spectra.\n" +
                                   "Split Display then Export",
                                   "Can't Export",
                                   JOptionPane.ERROR_MESSAGE);
   }
-*/
+
   /**
    * Writes a message to the status bar
    * @param msg the message
@@ -2642,7 +2663,7 @@ public class MainFrame
    */
   void aboutMenuItem_actionPerformed(ActionEvent e) {
     //JOptionPane.showMessageDialog(MainFrame.this, "<html><img src=MainFrame.class.getClassLoader().getResource(\"icons/spec16.gif\")> JSpecView version</img> " + JSVApplet.APPLET_VERSION + aboutJSpec, "About JSpecView", JOptionPane.PLAIN_MESSAGE);
-    new AboutDialog(this);
+    AboutDialog ad = new AboutDialog(this);
   }
 
   /**
@@ -2705,7 +2726,7 @@ public class MainFrame
    * Does the necessary actions and cleaning up when  JInternalFrame closes
    * @param frame the JInternalFrame
    */
-  void doInternalFrameClosing(final JInternalFrame frame) {
+  private void doInternalFrameClosing(final JInternalFrame frame) {
 
     closeSource(currentSelectedSource);
     removeSource(currentSelectedSource);
@@ -2924,7 +2945,7 @@ public class MainFrame
    * @param e the ItemEvent
    */
   void toolbarCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-    if (e.getStateChange() == ItemEvent.SELECTED) {
+    if (e.getStateChange() == e.SELECTED) {
       this.getContentPane().add(jsvToolBar, BorderLayout.NORTH);
     }
     else {
@@ -2938,7 +2959,7 @@ public class MainFrame
    * @param e the ItemEvent
    */
   void sidePanelCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-    if (e.getStateChange() == ItemEvent.SELECTED) {
+    if (e.getStateChange() == e.SELECTED) {
       mainSplitPane.setDividerLocation(200);
     }
     else {
@@ -2951,7 +2972,7 @@ public class MainFrame
    * @param e the ItemEvent
    */
   void statusCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-    if (e.getStateChange() == ItemEvent.SELECTED) {
+    if (e.getStateChange() == e.SELECTED) {
       this.getContentPane().add(statusPanel, BorderLayout.SOUTH);
     }
     else {
@@ -2992,13 +3013,9 @@ public class MainFrame
     JSVPanel newJsvPanel = (JSVPanel) frame.getContentPane().getComponent(0);
 
     if (JSpecViewUtils.hasIntegration(newJsvPanel)) {
-      Object errMsg = JSpecViewUtils.removeIntegration(frame.getContentPane());
-      if (errMsg != null) {
-        writeStatus((String) errMsg);
-      } else {
-        newJsvPanel = (JSVPanel)frame.getContentPane().getComponent(0);
-      }
-    } else {
+      newJsvPanel = JSpecViewUtils.removeIntegration(this, frame, true);
+    }
+    else {
       newJsvPanel = JSpecViewUtils.integrate(this, frame, true);
     }
 
@@ -3134,7 +3151,7 @@ public class MainFrame
       if (currentSelectedSource.getErrorLog().length()>0) {
           String errorLog = currentSelectedSource.getErrorLog();
           File file = getFileForSource(currentSelectedSource);
-          new TextDialog(this, file.getAbsolutePath(), errorLog, true);
+          TextDialog source = new TextDialog(this, file.getAbsolutePath(), errorLog, true);
     }
 /*    else {
       if (jdxSources.size() > 0) {
@@ -3173,19 +3190,18 @@ public class MainFrame
   }
 
   // Called when the user finishes or cancels the drag operation.
-  @SuppressWarnings("unchecked")
   public void drop(DropTargetDropEvent dtde) {
     try {
       Transferable t = dtde.getTransferable();
 
       if (t.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
         dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
-        List list = (List) t.getTransferData(DataFlavor.
+        java.util.List list = (java.util.List) t.getTransferData(DataFlavor.
             javaFileListFlavor);
         dtde.getDropTargetContext().dropComplete(true);
-        File[] files = (File[]) list.toArray();
+
         for (int i = 0; i < list.size(); i++) {
-          openFile( files[i]);
+          openFile( (File) list.toArray()[i]);
         }
       }
       else {
