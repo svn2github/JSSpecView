@@ -17,12 +17,13 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package jspecview.util;
+package jspecview.common;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.StringTokenizer;
+
 
 /**
  * <code>JDXSourceStringTokenizer</code> breaks up the <code>JDXSource</code>

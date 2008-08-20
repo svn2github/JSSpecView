@@ -30,6 +30,7 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -43,7 +44,7 @@ import javax.swing.table.TableColumn;
  */
 public class OverlayLegendDialog extends JDialog {
 
-  private JSVPanel jsvp;
+  JSVPanel jsvp;
 
   /**
    * Initialises the <code>OverlayLegendDialog</code>
@@ -85,7 +86,7 @@ public class OverlayLegendDialog extends JDialog {
    */
   private void init(){
 
-    LegendTableModel tableModel = new LegendTableModel(jsvp);
+    LegendTableModel tableModel = new LegendTableModel();
     JTable table = new JTable(tableModel);
     table.setDefaultRenderer(Color.class, new ColorRenderer());
     table.setDefaultRenderer(String.class, new TitleRenderer());
@@ -110,11 +111,7 @@ public class OverlayLegendDialog extends JDialog {
         String[] columnNames = {"No.", "Plot Color", "Title"};
         Object[][] data;
 
-        private JSVPanel jsvp;
-
-
-        public LegendTableModel(JSVPanel jsvp){
-          this.jsvp = jsvp;
+        public LegendTableModel(){
           init();
         }
 
@@ -126,6 +123,7 @@ public class OverlayLegendDialog extends JDialog {
             return data.length;
         }
 
+        @Override
         public String getColumnName(int col) {
             return columnNames[col];
         }
@@ -135,7 +133,8 @@ public class OverlayLegendDialog extends JDialog {
         }
 
 
-        public Class getColumnClass(int c) {
+        @Override
+        public Class<?> getColumnClass(int c) {
             return getValueAt(0, c).getClass();
         }
 
@@ -209,7 +208,7 @@ public class OverlayLegendDialog extends JDialog {
                                 JTable table, Object title,
                                 boolean isSelected, boolean hasFocus,
                                 int row, int column) {
-            setHorizontalAlignment(JLabel.CENTER);
+            setHorizontalAlignment(SwingConstants.CENTER);
             setText(title.toString());
             //setText("   " + title.toString());
 

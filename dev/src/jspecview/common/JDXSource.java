@@ -51,7 +51,7 @@ public abstract class JDXSource {
 
 
   // Table of header variables specific to the jdx source
-  protected Map headerTable;
+  protected Map<String, String> headerTable;
 
   // List of JDXSpectra
   protected Vector<JDXSpectrum> jdxSpectra;
@@ -66,7 +66,7 @@ public abstract class JDXSource {
    * Constructor
    */
   public JDXSource(){
-    headerTable = new HashMap();
+    headerTable = new HashMap<String, String>();
     jdxSpectra = new Vector<JDXSpectrum>();
   }
 
@@ -100,7 +100,7 @@ public abstract class JDXSource {
    * Returns the Vector of Spectra
    * @return the Vector of Spectra
    */
-  public Vector getSpectra(){
+  public Vector<JDXSpectrum> getSpectra(){
     return jdxSpectra;
   }
 
@@ -108,7 +108,7 @@ public abstract class JDXSource {
    * Returns the header table of the JDXSource
    * @return the header table of the JDXSource
    */
-  public Map getHeaderTable(){
+  public Map<String, String> getHeaderTable(){
     return headerTable;
   }
 
@@ -117,7 +117,7 @@ public abstract class JDXSource {
    * Sets the headertable for this Source
    * @param table the header table
    */
-  public void setHeaderTable(Map table){
+  public void setHeaderTable(Map<String, String> table){
     headerTable = table;
   }
 

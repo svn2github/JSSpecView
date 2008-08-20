@@ -219,7 +219,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    * @param e the <code>ItemEvent</code
    */
   void gridCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-    selectedJSVPanel.setGridOn((e.getStateChange() == e.SELECTED));
+    selectedJSVPanel.setGridOn((e.getStateChange() == ItemEvent.SELECTED));
     selectedJSVPanel.repaint();
   }
 
@@ -228,7 +228,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    * @param e the <code>ItemEvent</code
    */
   void coordsCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-    selectedJSVPanel.setCoordinatesOn((e.getStateChange() == e.SELECTED));
+    selectedJSVPanel.setCoordinatesOn((e.getStateChange() == ItemEvent.SELECTED));
     selectedJSVPanel.repaint();
   }
 
@@ -237,7 +237,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    * @param e the <code>ItemEvent</code
    */
   void revPlotCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-    selectedJSVPanel.setReversePlot((e.getStateChange() == e.SELECTED));
+    selectedJSVPanel.setReversePlot((e.getStateChange() == ItemEvent.SELECTED));
     selectedJSVPanel.repaint();
   }
 
@@ -249,7 +249,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
 
     if(selectedJSVPanel.getNumberOfSpectra() > 1){
       // Show header of Source
-      HashMap header = (HashMap)((CompoundSource)source).getHeaderTable();
+      HashMap<String, String> header = (HashMap<String, String>)((CompoundSource)source).getHeaderTable();
       Object[] headerLabels = header.keySet().toArray();
       Object[] headerValues = header.values().toArray();
 
@@ -308,7 +308,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
 
       JDXSpectrum spectrum = (JDXSpectrum)selectedJSVPanel.getSpectrumAt(0);
 
-      HashMap header = spectrum.getHeaderTable();
+      HashMap<String, String> header = spectrum.getHeaderTable();
       Object[] headerLabels = header.keySet().toArray();
       Object[] headerValues = header.values().toArray();
 

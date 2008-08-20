@@ -23,7 +23,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Calendar;
+//import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -32,10 +32,6 @@ import java.util.StringTokenizer;
 import jspecview.exception.JDXSourceException;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.SourceTypeUnsupportedException;
-import jspecview.util.Coordinate;
-import jspecview.util.JDXDecompressor;
-import jspecview.util.JDXSourceStringTokenizer;
-import jspecview.util.JSpecViewUtils;
 
 /**
  * Representation of an JCAMP-DX NTuple Source.
@@ -65,7 +61,7 @@ public class NTupleSource extends CompoundSource {
     JDXSpectrum spectrum;
     HashMap<String,String> LDRTable;
     HashMap<String,String> sourceLDRTable = new HashMap<String,String>();
-    HashMap<String,ArrayList> nTupleTable = new HashMap<String,ArrayList>();
+    HashMap<String,ArrayList<String>> nTupleTable = new HashMap<String,ArrayList<String>>();
 
     double offset = Graph.ERROR;
     double obFreq = Graph.ERROR;
@@ -80,9 +76,9 @@ public class NTupleSource extends CompoundSource {
     int shiftRefType = -1;
 
     // True if we have a long date
-    boolean longDateFound = false;
-    String date = "";
-    String time = "";
+    //boolean longDateFound = false;
+    //String date = "";
+    //String time = "";
 
     String[] plotSymbols = new String[2];
 
@@ -117,9 +113,8 @@ public class NTupleSource extends CompoundSource {
         if(version >= 6.0){
           errorLog.append("JCAMP-DX 6 Source Type is Unsupported\n");
           throw new SourceTypeUnsupportedException("JCAMP-DX Source Type is Unsupported");
-        }else{
-          continue;
         }
+        continue;
       }
 
       if(label.equals("##ORIGIN")){
@@ -145,7 +140,7 @@ public class NTupleSource extends CompoundSource {
 
       if (label.equals("##LONGDATE")) {
           ns.setLongDate(t.value);
-          longDateFound = true;
+          //longDateFound = true;
      }
 
      if (label.equals("##DATE"))  {
@@ -262,7 +257,7 @@ public class NTupleSource extends CompoundSource {
         continue;
       }
 
-      LDRTable = new HashMap<String,String>();
+      LDRTable = new HashMap<String, String>();
       while(!label.equals("##DATATABLE")){
         LDRTable.put(t.label, t.value);
         t.nextToken();
@@ -287,7 +282,7 @@ public class NTupleSource extends CompoundSource {
             throw new JDXSourceException("Variable List not Found");
           String varList = line.substring(index1, index2+1);
 
-          ArrayList symbols = (ArrayList)nTupleTable.get("##SYMBOL");
+          ArrayList<String> symbols = (ArrayList<String>) nTupleTable.get("##SYMBOL");
           int countSyms = 0;
           for(int i = 0; i < symbols.size(); i++){
             String sym = ((String)symbols.get(i)).trim();
@@ -333,30 +328,30 @@ public class NTupleSource extends CompoundSource {
       }
       tabularSpecData = tmp;
 
-      ArrayList list;
+      ArrayList<String> list;
       if(spectrum.getDataClass().equals("XYDATA")){
         // Get Label Values
 
-        list = (ArrayList)nTupleTable.get("##SYMBOL");
+        list = (ArrayList<String>)nTupleTable.get("##SYMBOL");
         int index1 = list.indexOf(plotSymbols[0]);
         int index2 = list.indexOf(plotSymbols[1]);
 
-        list = (ArrayList)nTupleTable.get("##FACTOR");
+        list = (ArrayList<String>)nTupleTable.get("##FACTOR");
         xFactor = Double.parseDouble((String)list.get(index1));
         yFactor = Double.parseDouble((String)list.get(index2));
 
-        list = (ArrayList)nTupleTable.get("##LAST");
+        list = (ArrayList<String>)nTupleTable.get("##LAST");
         lastX = Double.parseDouble((String)list.get(index1));
         //lastY = Double.parseDouble((String)list.get(index1));
 
-        list = (ArrayList)nTupleTable.get("##FIRST");
+        list = (ArrayList<String>)nTupleTable.get("##FIRST");
         firstX = Double.parseDouble((String)list.get(index1));
         //firstY = Double.parseDouble((String)list.get(index2));
 
-        list = (ArrayList)nTupleTable.get("##VARDIM");
+        list = (ArrayList<String>)nTupleTable.get("##VARDIM");
         nPoints = Integer.parseInt((String)list.get(index1));
 
-        list = (ArrayList)nTupleTable.get("##UNITS");
+        list = (ArrayList<String>)nTupleTable.get("##UNITS");
         xUnits = (String)list.get(index1);
         yUnits = (String)list.get(index2);
 
@@ -400,11 +395,11 @@ public class NTupleSource extends CompoundSource {
         }
       }
       else if(spectrum.getDataClass().equals("PEAKTABLE") || spectrum.getDataClass().equals("XYPOINTS")){
-        list = (ArrayList)nTupleTable.get("##SYMBOL");
+        list = (ArrayList<String>)nTupleTable.get("##SYMBOL");
         int index1 = list.indexOf(plotSymbols[0]);
         int index2 = list.indexOf(plotSymbols[1]);
 
-        list = (ArrayList)nTupleTable.get("##UNITS");
+        list = (ArrayList<String>)nTupleTable.get("##UNITS");
         xUnits = (String)list.get(index1);
         yUnits = (String)list.get(index2);
         xyCoords = JSpecViewUtils.parseDSV(tabularSpecData, xFactor, yFactor);
@@ -423,7 +418,7 @@ public class NTupleSource extends CompoundSource {
       spectrum.setXFactor(xFactor);
       spectrum.setYFactor(yFactor);
 
-      for(Iterator iter = sourceLDRTable.keySet().iterator(); iter.hasNext();){
+      for(Iterator<String> iter = sourceLDRTable.keySet().iterator(); iter.hasNext();){
         String key = (String)iter.next();
         if(!JSpecViewUtils.cleanLabel(key).equals("##TITLE") &&
            !JSpecViewUtils.cleanLabel(key).equals("##DATACLASS") &&

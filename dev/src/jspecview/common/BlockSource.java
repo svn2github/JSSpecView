@@ -20,17 +20,12 @@
 package jspecview.common;
 
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
 import jspecview.exception.JDXSourceException;
 import jspecview.exception.JSpecViewException;
-import jspecview.util.Coordinate;
-import jspecview.util.JDXDecompressor;
-import jspecview.util.JDXSourceStringTokenizer;
-import jspecview.util.JSpecViewUtils;
 /**
  * <code>BlockSource</code> class is a representation of a JCAMP-DX Block file.
  * This class is not intialised directly. Instead <code>JDXSourceFactory</code>
@@ -68,7 +63,7 @@ public class BlockSource extends CompoundSource {
     double yFactor = Graph.ERROR;
     double firstX = Graph.ERROR;
     double lastX = Graph.ERROR;
-    double firstY = Graph.ERROR;
+    //double firstY = Graph.ERROR;
     double offset = Graph.ERROR;
     double obFreq = Graph.ERROR;
     int nPoints = -1;
@@ -84,14 +79,14 @@ public class BlockSource extends CompoundSource {
     int dataPointNum = -1;
 
     // True if we have a long date
-    boolean longDateFound = false;
-    String date = "";
-    String time = "";
+    //boolean longDateFound = false;
+    //String date = "";
+    //String time = "";
 
     Coordinate[] xyCoords;
 
-    HashMap<String,String> LDRTable;
-    HashMap<String,String> sourceLDRTable = new HashMap<String,String>();
+    HashMap<String, String> LDRTable;
+    HashMap<String, String> sourceLDRTable = new HashMap<String, String>();
     String label, tmp;
 
     StringBuffer errorLog = new StringBuffer();
@@ -158,7 +153,7 @@ public class BlockSource extends CompoundSource {
       throw new JSpecViewException("Unable to Read Block Source");
     }
     spectrum = new JDXSpectrum();
-    LDRTable = new HashMap<String,String>();
+    LDRTable = new HashMap<String, String>();
 
     try{
       while(t.hasMoreTokens()){
@@ -206,7 +201,7 @@ public class BlockSource extends CompoundSource {
 
         if (label.equals("##LONGDATE")) {
             spectrum.setLongDate(t.value);
-            longDateFound = true;
+            //longDateFound = true;
        }
 
        if (label.equals("##TIME")) {
@@ -248,7 +243,7 @@ public class BlockSource extends CompoundSource {
              || label.equals("##MAXX") || label.equals("##MAXY")
              || label.equals("##FIRSTY") || label.equals("##DELTAX")
              || label.equals("##DATACLASS")){
-          ;
+          // ignore
         }
 
         else if(label.equals("##XFACTOR")){
@@ -452,7 +447,7 @@ public class BlockSource extends CompoundSource {
           yFactor = Graph.ERROR;
           firstX = Graph.ERROR;
           lastX = Graph.ERROR;
-          firstY = Graph.ERROR;
+          //firstY = Graph.ERROR;
           offset = Graph.ERROR;
           obFreq = Graph.ERROR;
           nPoints = -1;
@@ -463,7 +458,7 @@ public class BlockSource extends CompoundSource {
           dataPointNum = -1;
           shiftRefType = -1;
           spectrum = new JDXSpectrum();
-          LDRTable = new HashMap<String,String>();
+          LDRTable = new HashMap<String, String>();
         } // End Process Block
 
         else

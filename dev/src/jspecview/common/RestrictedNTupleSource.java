@@ -23,7 +23,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -32,10 +31,6 @@ import java.util.Vector;
 
 import jspecview.exception.JDXSourceException;
 import jspecview.exception.JSpecViewException;
-import jspecview.util.Coordinate;
-import jspecview.util.JDXDecompressor;
-import jspecview.util.JDXSourceStringTokenizer;
-import jspecview.util.JSpecViewUtils;
 
 /**
  * Representation of a JCAMP-DX nTuple source. Since these source files may
@@ -67,9 +62,9 @@ public class RestrictedNTupleSource extends CompoundSource {
   /*  Ntuple header and Table data */
   private ArrayList<String> attrList;
 
-  private HashMap<String,ArrayList> nTupleTable;
+  private HashMap<String, ArrayList<String>> nTupleTable;
 
-  private HashMap<String,String> sourceLDRTable;
+  private HashMap<String, String> sourceLDRTable;
 
 
   /**
@@ -96,15 +91,15 @@ public class RestrictedNTupleSource extends CompoundSource {
 
     String tabularSpecData = null;
     JDXSpectrum spectrum;
-    HashMap<String,String> LDRTable;
-    ns.sourceLDRTable = new HashMap<String,String>();
-    ns.nTupleTable = new HashMap<String,ArrayList>();
+    HashMap<String, String> LDRTable;
+    ns.sourceLDRTable = new HashMap<String, String>();
+    ns.nTupleTable = new HashMap<String, ArrayList<String>>();
 
     double offset = Graph.ERROR;
     double obFreq = Graph.ERROR;
     double firstX, lastX, xFactor = 1;
     double deltaX = 0, yFactor = 1;
-    boolean increasing = true, continuous = true;
+    boolean continuous = true;
     int nPoints;
     String xUnits= "", title = "", yUnits = "";
     String page = "";
@@ -113,9 +108,6 @@ public class RestrictedNTupleSource extends CompoundSource {
     int shiftRefType = -1;
 
     // True if we have a long date
-    boolean longDateFound = false;
-    String date = "";
-    String time = "";
 
     String[] plotSymbols = new String[2];
 
@@ -152,7 +144,6 @@ public class RestrictedNTupleSource extends CompoundSource {
 
       if (label.equals("##LONGDATE")) {
            ns.setLongDate(t.value);
-           longDateFound = true;
            continue;
       }
 
@@ -280,7 +271,7 @@ public class RestrictedNTupleSource extends CompoundSource {
         continue;
       }
 
-      LDRTable = new HashMap<String,String>();
+      LDRTable = new HashMap<String, String>();
       while(!label.equals("##DATATABLE")){
         LDRTable.put(t.label, t.value);
         t.nextToken();
@@ -304,7 +295,7 @@ public class RestrictedNTupleSource extends CompoundSource {
             throw new JDXSourceException("Variable List not Found");
           String varList = line.substring(index1, index2+1);
 
-          ArrayList symbols = (ArrayList)ns.nTupleTable.get("##SYMBOL");
+          ArrayList<String> symbols = (ArrayList<String>)ns.nTupleTable.get("##SYMBOL");
           int countSyms = 0;
           for(int i = 0; i < symbols.size(); i++){
             String sym = ((String)symbols.get(i)).trim();
@@ -350,30 +341,30 @@ public class RestrictedNTupleSource extends CompoundSource {
       }
       tabularSpecData = tmp;
 
-      ArrayList list;
+      ArrayList<String> list;
       if(spectrum.getDataClass().equals("XYDATA")){
         // Get Label Values
 
-        list = (ArrayList)ns.nTupleTable.get("##SYMBOL");
+        list = (ArrayList<String>)ns.nTupleTable.get("##SYMBOL");
         int index1 = list.indexOf(plotSymbols[0]);
         int index2 = list.indexOf(plotSymbols[1]);
 
-        list = (ArrayList)ns.nTupleTable.get("##FACTOR");
+        list = (ArrayList<String>)ns.nTupleTable.get("##FACTOR");
         xFactor = Double.parseDouble((String)list.get(index1));
         yFactor = Double.parseDouble((String)list.get(index2));
 
-        list = (ArrayList)ns.nTupleTable.get("##LAST");
+        list = (ArrayList<String>)ns.nTupleTable.get("##LAST");
         lastX = Double.parseDouble((String)list.get(index1));
         //lastY = Double.parseDouble((String)list.get(index1));
 
-        list = (ArrayList)ns.nTupleTable.get("##FIRST");
+        list = (ArrayList<String>)ns.nTupleTable.get("##FIRST");
         firstX = Double.parseDouble((String)list.get(index1));
         //firstY = Double.parseDouble((String)list.get(index2));
 
-        list = (ArrayList)ns.nTupleTable.get("##VARDIM");
+        list = (ArrayList<String>)ns.nTupleTable.get("##VARDIM");
         nPoints = Integer.parseInt((String)list.get(index1));
 
-        list = (ArrayList)ns.nTupleTable.get("##UNITS");
+        list = (ArrayList<String>)ns.nTupleTable.get("##UNITS");
         xUnits = (String)list.get(index1);
         yUnits = (String)list.get(index2);
 
@@ -400,11 +391,11 @@ public class RestrictedNTupleSource extends CompoundSource {
         }
       }
       else if(spectrum.getDataClass().equals("PEAKTABLE") || spectrum.getDataClass().equals("XYPOINTS")){
-        list = (ArrayList)ns.nTupleTable.get("##SYMBOL");
+        list = (ArrayList<String>)ns.nTupleTable.get("##SYMBOL");
         int index1 = list.indexOf(plotSymbols[0]);
         int index2 = list.indexOf(plotSymbols[1]);
 
-        list = (ArrayList)ns.nTupleTable.get("##UNITS");
+        list = (ArrayList<String>)ns.nTupleTable.get("##UNITS");
         xUnits = (String)list.get(index1);
         yUnits = (String)list.get(index2);
         xyCoords = JSpecViewUtils.parseDSV(tabularSpecData, xFactor, yFactor);
@@ -416,7 +407,7 @@ public class RestrictedNTupleSource extends CompoundSource {
       spectrum.setYUnits(yUnits);
       spectrum.setTitle(title.substring(0, (title.length() >= 20 ? 21 : title.length())) + "..." + " : " + page);
 
-      for(Iterator iter = ns.sourceLDRTable.keySet().iterator(); iter.hasNext();){
+      for(Iterator<String> iter = ns.sourceLDRTable.keySet().iterator(); iter.hasNext();){
         String key = (String)iter.next();
         if(!JSpecViewUtils.cleanLabel(key).equals("##TITLE") &&
            !JSpecViewUtils.cleanLabel(key).equals("##DATACLASS") &&
@@ -439,8 +430,6 @@ public class RestrictedNTupleSource extends CompoundSource {
           spectrumIndex++;
           if((spectrumIndex % ns.numberOfSets) != setIndex)
             continue;
-          else
-            found = true;
         }
       }
 
@@ -458,20 +447,20 @@ public class RestrictedNTupleSource extends CompoundSource {
    */
   public void initNextSetOfSpectra() throws JSpecViewException{
 
-    Vector jdxSpectra = this.getSpectra();
+    Vector<JDXSpectrum> jdxSpectra = this.getSpectra();
     jdxSpectra.clear();
     jdxSpectra.ensureCapacity(MAX_NUMBER_SPECTRA);
 
 
     String tabularSpecData = null;
     JDXSpectrum spectrum;
-    HashMap<String,String> LDRTable;
+    HashMap<String, String> LDRTable;
 
     double offset = Graph.ERROR;
     double obFreq = Graph.ERROR;
     double firstX, lastX, xFactor = 1;
     double deltaX = 0, yFactor = 1;
-    boolean increasing = true, continuous = true;
+    boolean continuous = true;
     int nPoints;
     String xUnits= "", title = "", yUnits = "";
     String page = "";
@@ -503,8 +492,6 @@ public class RestrictedNTupleSource extends CompoundSource {
           label = JSpecViewUtils.cleanLabel(t.label);
           continue;
         }
-        else
-          found = true;
       }
       else{
         t.nextToken();
@@ -527,7 +514,7 @@ public class RestrictedNTupleSource extends CompoundSource {
         continue;
       }
 
-      LDRTable = new HashMap<String,String>();
+      LDRTable = new HashMap<String, String>();
       while(!label.equals("##DATATABLE")){
         LDRTable.put(t.label, t.value);
         t.nextToken();
@@ -551,7 +538,7 @@ public class RestrictedNTupleSource extends CompoundSource {
             throw new JDXSourceException("Variable List not Found");
           String varList = line.substring(index1, index2+1);
 
-          ArrayList symbols = (ArrayList)nTupleTable.get("##SYMBOL");
+          ArrayList<String> symbols = (ArrayList<String>)nTupleTable.get("##SYMBOL");
           int countSyms = 0;
           for(int i = 0; i < symbols.size(); i++){
             String sym = ((String)symbols.get(i)).trim();
@@ -597,30 +584,30 @@ public class RestrictedNTupleSource extends CompoundSource {
       }
       tabularSpecData = tmp;
 
-      ArrayList list;
+      ArrayList<String> list;
       if(spectrum.getDataClass().equals("XYDATA")){
         // Get Label Values
 
-        list = (ArrayList)nTupleTable.get("##SYMBOL");
+        list = (ArrayList<String>)nTupleTable.get("##SYMBOL");
         int index1 = list.indexOf(plotSymbols[0]);
         int index2 = list.indexOf(plotSymbols[1]);
 
-        list = (ArrayList)nTupleTable.get("##FACTOR");
+        list = (ArrayList<String>)nTupleTable.get("##FACTOR");
         xFactor = Double.parseDouble((String)list.get(index1));
         yFactor = Double.parseDouble((String)list.get(index2));
 
-        list = (ArrayList)nTupleTable.get("##LAST");
+        list = (ArrayList<String>)nTupleTable.get("##LAST");
         lastX = Double.parseDouble((String)list.get(index1));
         //lastY = Double.parseDouble((String)list.get(index1));
 
-        list = (ArrayList)nTupleTable.get("##FIRST");
+        list = (ArrayList<String>)nTupleTable.get("##FIRST");
         firstX = Double.parseDouble((String)list.get(index1));
         //firstY = Double.parseDouble((String)list.get(index2));
 
-        list = (ArrayList)nTupleTable.get("##VARDIM");
+        list = (ArrayList<String>)nTupleTable.get("##VARDIM");
         nPoints = Integer.parseInt((String)list.get(index1));
 
-        list = (ArrayList)nTupleTable.get("##UNITS");
+        list = (ArrayList<String>)nTupleTable.get("##UNITS");
         xUnits = (String)list.get(index1);
         yUnits = (String)list.get(index2);
 
@@ -647,11 +634,11 @@ public class RestrictedNTupleSource extends CompoundSource {
         }
       }
       else if(spectrum.getDataClass().equals("PEAKTABLE") || spectrum.getDataClass().equals("XYPOINTS")){
-        list = (ArrayList)nTupleTable.get("##SYMBOL");
+        list = (ArrayList<String>)nTupleTable.get("##SYMBOL");
         int index1 = list.indexOf(plotSymbols[0]);
         int index2 = list.indexOf(plotSymbols[1]);
 
-        list = (ArrayList)nTupleTable.get("##UNITS");
+        list = (ArrayList<String>)nTupleTable.get("##UNITS");
         xUnits = (String)list.get(index1);
         yUnits = (String)list.get(index2);
         xyCoords = JSpecViewUtils.parseDSV(tabularSpecData, xFactor, yFactor);
@@ -663,7 +650,7 @@ public class RestrictedNTupleSource extends CompoundSource {
       spectrum.setYUnits(yUnits);
       spectrum.setTitle(title.substring(0, (title.length() >= 20 ? 21 : title.length())) + "..." + " : " + page);
 
-      for(Iterator iter = sourceLDRTable.keySet().iterator(); iter.hasNext();){
+      for(Iterator<String> iter = sourceLDRTable.keySet().iterator(); iter.hasNext();){
         String key = (String)iter.next();
         if(!JSpecViewUtils.cleanLabel(key).equals("##TITLE") &&
            !JSpecViewUtils.cleanLabel(key).equals("##DATACLASS") &&
@@ -686,8 +673,6 @@ public class RestrictedNTupleSource extends CompoundSource {
           spectrumIndex++;
           if((spectrumIndex % numberOfSets) != setIndex)
             continue;
-          else
-            found = true;
         }
       }
 

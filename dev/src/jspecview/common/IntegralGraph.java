@@ -21,8 +21,6 @@ package jspecview.common;
 
 import java.util.Vector;
 
-import jspecview.util.Coordinate;
-import jspecview.util.JSpecViewUtils;
 
 
 /**
@@ -245,7 +243,7 @@ public class IntegralGraph implements Graph {
     double totalIntegral = 0;
     double integral = 0;
     Coordinate[] xyCoords = graph.getXYCoords();
-    double minY = JSpecViewUtils.getMinY(xyCoords);
+    //double minY = JSpecViewUtils.getMinY(xyCoords);
     double maxY = JSpecViewUtils.getMaxY(xyCoords);
     double minYForIntegral = percentMinY / 100 * maxY; // 0.1%
     Vector<Coordinate> integralCoords = new Vector<Coordinate>();

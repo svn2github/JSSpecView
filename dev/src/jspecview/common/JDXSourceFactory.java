@@ -28,8 +28,6 @@ import java.util.Calendar;
 
 import jspecview.exception.JDXSourceException;
 import jspecview.exception.JSpecViewException;
-import jspecview.util.JDXSourceStringTokenizer;
-import jspecview.util.JSpecViewUtils;
 
 /**
  * Class <code>JDXSourceFactory</code> creates an instance of a JDXSource from

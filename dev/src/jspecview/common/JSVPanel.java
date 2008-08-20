@@ -45,15 +45,14 @@ import java.util.Vector;
 
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
-import javax.print.attribute.standard.MediaSize;
+//import javax.print.attribute.standard.MediaSize;
 import javax.print.attribute.standard.OrientationRequested;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
+import jspecview.common.JSpecViewUtils.MultiScaleData;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
-import jspecview.util.Coordinate;
-import jspecview.util.JSpecViewUtils;
 
 /*
 // Batik SVG Generator
@@ -126,7 +125,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
   // The Current Coordinate to be drawn on the Panel
   private String coordStr = "";
 
-  private String coordClickedStr = null;
+  //private String coordClickedStr = null;
   private Coordinate coordClicked;
 
   // Is true if plot is reversed
@@ -182,7 +181,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
   protected double xFactorForScale, yFactorForScale;
 
   // List of Scale data for zoom
-  protected Vector<JSpecViewUtils.MultiScaleData> zoomInfoList;
+  protected Vector<MultiScaleData> zoomInfoList;
 
   // Current index of view in zoomInfoList
   protected int currentZoomIndex;
@@ -290,8 +289,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
    * @param spectra a <code>Vector</code> of spectra
    * @throws ScalesIncompatibleException
    */
-  @SuppressWarnings("unchecked")
-  public JSVPanel(Vector spectra)throws ScalesIncompatibleException{
+  public JSVPanel(Vector<JDXSpectrum> spectra)throws ScalesIncompatibleException{
     this((Graph[])spectra.toArray(new Graph[spectra.size()]));
   }
 
@@ -304,8 +302,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
   * @throws JSpecViewException
   * @throws ScalesIncompatibleException
   */
-  @SuppressWarnings("unchecked")
-  public JSVPanel(Vector spectra, int[] startIndices, int[] endIndices) throws JSpecViewException, ScalesIncompatibleException{
+  public JSVPanel(Vector<JDXSpectrum> spectra, int[] startIndices, int[] endIndices) throws JSpecViewException, ScalesIncompatibleException{
     this((Graph[])spectra.toArray(new Graph[spectra.size()]), startIndices, endIndices);
   }
 
@@ -341,7 +338,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
       plotColors = tmpPlotColors;
     }
 
-    zoomInfoList = new Vector<JSpecViewUtils.MultiScaleData>();
+    zoomInfoList = new Vector<MultiScaleData>();
     doZoomWithoutRepaint(startIndices, endIndices);
 
     setBorder(BorderFactory.createLineBorder(Color.lightGray));
@@ -361,7 +358,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
 
     int[] startIndices = new int[numOfSpectra];
     int[] endIndices = new int[numOfSpectra];
-    boolean[] plotIncreasing = new boolean[numOfSpectra];
+    //boolean[] plotIncreasing = new boolean[numOfSpectra];
 
     // test if all have same x and y units
     checkUnits();
@@ -388,7 +385,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
     scaleData = JSpecViewUtils.generateScaleData(xyCoordsList, startIndices, endIndices, 10, 10);
 
     //add data to zoomInfoList
-    zoomInfoList = new Vector<JSpecViewUtils.MultiScaleData>();
+    zoomInfoList = new Vector<MultiScaleData>();
     zoomInfoList.addElement(scaleData);
 
     setBorder(BorderFactory.createLineBorder(Color.lightGray));
@@ -410,10 +407,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
            !yUnit.equals(tempYUnit)){
           throw new ScalesIncompatibleException();
         }
-        else{
-          xUnit = tempXUnit;
-          yUnit = tempYUnit;
-        }
+        xUnit = tempXUnit;
+        yUnit = tempYUnit;
     }
   }
 
@@ -430,8 +425,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
 
     if(!randomColor.equals(Color.blue))
       return randomColor;
-    else
-      return generateRandomColor();
+    return generateRandomColor();
   }
 
   /* ------------------------------LISTENER METHODS-------------------------*/
@@ -924,7 +918,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
    * Overides paintComponent in class JPanel inorder to draw the spectrum
    * @param g the <code>Graphics</code> object
    */
-   public void paintComponent(Graphics g){
+   @Override
+  public void paintComponent(Graphics g){
       super.paintComponent(g);
       int width = getWidth();
       int height = getHeight();
@@ -1056,8 +1051,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
     if(pix >= leftPlotAreaPos && pix <= rightPlotAreaPos){
       return true;
     }
-    else
-      return false;
+    return false;
   }
 
   /**
@@ -1533,7 +1527,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
       if( xPixel >= leftPlotAreaPos && xPixel <= rightPlotAreaPos &&
           yPixel >= topPlotAreaPos && yPixel <= bottomPlotAreaPos){
 
-        double xPt, yPt, actualXPt, actualYPt;
+        double xPt, yPt;
 
         Coordinate coord = getCoordFromPoint(xPixel, yPixel);
 
@@ -1559,7 +1553,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
         xStr = displayXFormatter.format(xPt);
         yStr = displayYFormatter.format(yPt);
 
-        coordClickedStr = xStr + " "+ yStr;
+        //coordClickedStr = xStr + " "+ yStr;
 
         coordClicked = new Coordinate(Double.parseDouble(xStr), Double.parseDouble(yStr));
       }
@@ -1644,7 +1638,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
 
       int ptCount = 0;
       int numSpectraWithMinPointsForZoom = 0;
-      boolean isCounting = false;
 
       // swap points if init value > final value
       if(initX > finalX){
@@ -1848,8 +1841,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
   protected boolean isWithinRange(double x){
     if(x >= scaleData.minX && x <= scaleData.maxX)
       return true;
-    else
-      return false;
+    return false;
   }
 
 
@@ -1872,7 +1864,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
 
       if(graphPosition.equals("default")){
         g2D.translate(pf.getImageableX(), pf.getImageableY());
-        if(pf.getOrientation() == pf.PORTRAIT){
+        if(pf.getOrientation() == PageFormat.PORTRAIT){
           height = defaultHeight;
           width = defaultWidth;
         }else{
@@ -1889,7 +1881,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
         double paperWidth = paper.getWidth();
         int x, y;
 
-        if(pf.getOrientation() == pf.PORTRAIT){
+        if(pf.getOrientation() == PageFormat.PORTRAIT){
           height = defaultHeight;
           width = defaultWidth;
           x = (int)(paperWidth - width)/2;
@@ -1908,11 +1900,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
       isPrinting = false;
       return Printable.PAGE_EXISTS;
     }
-    else {
-      isPrinting = false;
-      return Printable.NO_SUCH_PAGE;
-    }
-
+    isPrinting = false;
+    return Printable.NO_SUCH_PAGE;
   }
   /*--------------------------------------------------------------------------*/
 
@@ -1932,7 +1921,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
 
     aset.add(pl.paper);
 
-    MediaSize size = MediaSize.getMediaSizeForName(pl.paper);
+    //MediaSize size = MediaSize.getMediaSizeForName(pl.paper);
 
     // Set Graph Properties
     printingFont = pl.font;
@@ -2046,6 +2035,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
      * @param obj the object that this <code>Hightlight<code> is compared to
      * @return true if equal
      */
+    @Override
     public boolean equals(Object obj){
       if(!(obj instanceof Highlight))
         return false;

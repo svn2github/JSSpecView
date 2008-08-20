@@ -17,23 +17,24 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package jspecview.util;
+package jspecview.common;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Vector;
 
+
 /**
  * JDXDecompressor contains static methods to decompress the data part of a
  * JCAMP-DX spectra that have been compressed using DIF, FIX, SQZ or PAC formats.
  * If you wish to parse the data from XY format see
- * {@link jspecview.util.JSpecViewUtils#parseDSV(java.lang.String, double, double)}
+ * {@link jspecview.common.JSpecViewUtils#parseDSV(java.lang.String, double, double)}
  * @author Christopher Muir
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
- * @see jspecview.util.JDXCompressor
+ * @see jspecview.export.JDXCompressor
  */
 public class JDXDecompressor {
 

@@ -17,7 +17,7 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package jspecview.util;
+package jspecview.application;
 
 import java.awt.Color;
 import java.io.BufferedWriter;
@@ -27,6 +27,8 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Iterator;
 import java.util.TreeMap;
+
+import jspecview.common.JSpecViewUtils;
 
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;

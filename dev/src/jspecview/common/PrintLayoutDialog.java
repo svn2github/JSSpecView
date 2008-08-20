@@ -27,7 +27,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 
-import javax.print.PrintService;
+//import javax.print.PrintService;
 import javax.print.attribute.standard.MediaSizeName;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
@@ -37,7 +37,7 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.SpinnerNumberModel;
+//import javax.swing.SpinnerNumberModel;
 import javax.swing.border.TitledBorder;
 
 /**
@@ -81,10 +81,8 @@ public class PrintLayoutDialog extends JDialog {
   private JButton printButton = new JButton();
   private TitledBorder titledBorder6;
   private TitledBorder titledBorder7;
-  private SpinnerNumberModel spinnerModel;
   private TitledBorder titledBorder8;
 
-  private PrintService[] services;
   private JPanel layoutPanel = new JPanel();
   private GridBagLayout gridBagLayout6 = new GridBagLayout();
   private GridBagLayout gridBagLayout5 = new GridBagLayout();

@@ -20,17 +20,13 @@
 package jspecview.common;
 
 import java.io.*;
-import java.nio.*;
+//import java.nio.*;
 import javax.xml.stream.*;
 import javax.xml.stream.events.*;
 import javax.xml.namespace.QName;
 import java.util.StringTokenizer;
 
-import jspecview.common.Graph;
-import jspecview.common.JDXSpectrum;
-import jspecview.common.JDXSource;
 import jspecview.exception.JSpecViewException;
-import jspecview.util.Coordinate;
 import java.util.HashMap;
 import java.util.Vector;
 
@@ -89,7 +85,7 @@ public class CMLSource extends JDXSource {
        // The CMLSource Instance
 //    StringBuffer errorLog = new StringBuffer();
     CMLSource xs = new CMLSource();
-    HashMap<String,String> LDRTable = new HashMap<String,String>(20);
+    HashMap<String, String> LDRTable = new HashMap<String, String>(20);
     Coordinate AMLpoint;
     Vector<Coordinate> xyCoords = new Vector<Coordinate>();
     JDXSpectrum spectrum = new JDXSpectrum();
@@ -352,7 +348,7 @@ public static void processParameters() throws Exception {
       if (eventType == XMLStreamConstants.START_ELEMENT) {
         se = e.asStartElement();
         tmpstr = se.getName().getLocalPart().trim();
-        String tempstr = se.toString();
+        //String tempstr = se.toString();
 
         if (tmpstr.toLowerCase().equals("parameter")) {
           Attribute tempName = se.getAttributeByName(new QName("title"));
@@ -409,7 +405,7 @@ public static void processConditions() throws Exception {
       if (eventType == XMLStreamConstants.START_ELEMENT) {
         se = e.asStartElement();
         tmpstr = se.getName().getLocalPart().trim();
-        String tempstr = se.toString();
+        //String tempstr = se.toString();
 
         if (tmpstr.toLowerCase().equals("scalar")) {
           Attribute tempName = se.getAttributeByName(new QName("dictRef"));
@@ -467,7 +463,7 @@ public static void processSample() throws Exception {
 //           System.out.println("MolForm= " + MolForm);
          }
          if (tmpstr.toLowerCase().equals("name")) {
-             Attribute tempName = se.getAttributeByName(new QName("convention"));
+             //Attribute tempName = se.getAttributeByName(new QName("convention"));
              e = fer.nextEvent();
              CASNo=e.toString().trim();
 //             System.out.println("CASNo= " + CASNo);
@@ -741,7 +737,7 @@ public static void processPeaks() throws Exception {
             if (tempstr.toLowerCase().contains("xvalue")) {
               jj ++;
               Attribute xValue = se.getAttributeByName(new QName("xValue"));
-              xaxisData[jj]=Double.parseDouble(xValue.getValue());;
+              xaxisData[jj]=Double.parseDouble(xValue.getValue());
 //              System.out.println(" xValue= " + xaxisData[jj]);
             }
 
@@ -757,7 +753,7 @@ public static void processPeaks() throws Exception {
 
             if (tempstr.toLowerCase().contains("yvalue")) {
               Attribute yValue = se.getAttributeByName(new QName("yValue"));
-              yaxisData[jj]=Double.parseDouble(yValue.getValue());;
+              yaxisData[jj]=Double.parseDouble(yValue.getValue());
 //              System.out.println(" yValue= " + yaxisData[jj]);
             }
 

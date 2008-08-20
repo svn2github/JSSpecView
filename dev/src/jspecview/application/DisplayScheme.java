@@ -17,7 +17,7 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package jspecview.util;
+package jspecview.application;
 
 import java.awt.Color;
 import java.util.HashMap;

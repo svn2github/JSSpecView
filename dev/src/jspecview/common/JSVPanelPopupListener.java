@@ -52,6 +52,7 @@ public class JSVPanelPopupListener extends MouseAdapter {
    * Oversides mousePressed in <code>MouseAdapter</code> class
    * @param e the <code>MouseEvent</code>
    */
+  @Override
   public void mousePressed(MouseEvent e) {
       maybeShowPopup(e);
   }
@@ -60,6 +61,7 @@ public class JSVPanelPopupListener extends MouseAdapter {
    * Overides mouseReleased in <code>MouseAdapter</code> class
    * @param e the <code>MouseEvent</code>
    */
+  @Override
   public void mouseReleased(MouseEvent e) {
       maybeShowPopup(e);
   }

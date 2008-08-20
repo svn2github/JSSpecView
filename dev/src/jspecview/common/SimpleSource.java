@@ -20,7 +20,6 @@
 package jspecview.common;
 
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
@@ -28,11 +27,6 @@ import java.util.StringTokenizer;
 import jspecview.exception.JDXSourceException;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.TabularDataSetException;
-import jspecview.util.Coordinate;
-import jspecview.util.JDXDecompressor;
-import jspecview.util.JDXSourceStringTokenizer;
-import jspecview.util.JSpecViewUtils;
-import java.text.SimpleDateFormat;
 
 /**
  * Representation of a JDX Simple Source.
@@ -79,21 +73,14 @@ public class SimpleSource extends JDXSource {
     // shiftRef = 0, bruker = 1, varian = 2
     int shiftRefType = -1;
     int dataPointNum = -1;
-    double shiftValue = 0.0;
 
     // Observed Frequency for NMR
     double obFreq = Graph.ERROR;
 
-    // True if we have a long date
-    boolean longDateFound = false;
-//    String date = "";
-    String time = "";
+    //Calendar now = Calendar.getInstance();
+    //SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSSS ZZZZ");
+    //String currentTime =  formatter.format(now.getTime());
 
-    Calendar now = Calendar.getInstance();
-    SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSSS ZZZZ");
-    String currentTime =  formatter.format(now.getTime());
-
-    String pathlength = "";
     String errorSeparator="________________________________________________________";
 
     // The data Table
@@ -103,7 +90,7 @@ public class SimpleSource extends JDXSource {
 
     JDXSpectrum spectrum = new JDXSpectrum();
     // Table for header information
-    HashMap<String,String> notesLDRTable = new HashMap<String,String>(20);
+    HashMap<String, String> notesLDRTable = new HashMap<String, String>(20);
 
     JDXSourceStringTokenizer t = new JDXSourceStringTokenizer(sourceContents);
     String label = "";
@@ -153,7 +140,6 @@ public class SimpleSource extends JDXSource {
 
       if (label.equals("##LONGDATE")) {
            spectrum.setLongDate(t.value);
-           longDateFound = true;
            continue;
       }
 
@@ -347,9 +333,7 @@ public class SimpleSource extends JDXSource {
         }
         continue;
       }
-
-      else
-        notesLDRTable.put(label, t.value);
+      notesLDRTable.put(label, t.value);
     }
 
     if(!label.equals("##END"))
@@ -420,7 +404,6 @@ public class SimpleSource extends JDXSource {
             spectrum.setObservedFreq(obFreq);
           }
           else {
-            double xScale = obFreq;
             JSpecViewUtils.applyScale(xyCoords, 1, 1);
             spectrum.setXUnits("PPM");
             spectrum.setHZtoPPM(true);
