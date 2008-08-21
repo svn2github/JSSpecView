@@ -148,7 +148,7 @@ public class ZipUtil {
   }
   
   private static String[] getZipDirectoryOrErrorAndClose(InputStream is, boolean addManifest) throws IOException {
-    Vector v = new Vector();
+    Vector<String> v = new Vector<String>();
     ZipInputStream zis = new ZipInputStream(is);
     ZipEntry ze;
     String manifest = null;
