@@ -24,7 +24,7 @@ public class Exporter implements ExporterInterface {
     } else if (type.equals("CML")) {
       (new CMLExporter()).exportAsCML(spec, path, startIndex, endIndex);
     } else if (type.equals("AnIML")) {
-      AnIMLExporter.exportAsAnIML(spec, path, startIndex, endIndex);
+      (new AnIMLExporter()).exportAsAnIML(spec, path, startIndex, endIndex);
     } else {
       int iType = (type.equals("XY") ? XY : type.equals("DIF") ? DIF : type
           .equals("FIX") ? FIX : type.equals("SQZ") ? SQZ

@@ -182,6 +182,7 @@ class VelocityContext {
             continue;
           }
           Coordinate c = vt.vc.elementAt(vt.velocityCount);
+          context.put("velocityCount", new Integer(vt.velocityCount));
           context.put(vt.var + ".xVal", new Double(c.getXVal()));
           context.put(vt.var + ".yVal", new Double(c.getYVal()));
           context.put(vt.var + ".getXString()", c.getXString());
@@ -222,18 +223,10 @@ class VelocityContext {
 
   }
 
-  private final static String[] ops = { "<=", ">=", "==", "!=", "<", ">", "=",
-      "!", "-", "+" };
-  private final static int OP_LE = 0;
-  private final static int OP_GE = 1;
-  private final static int OP_EEQ = 2;
-  private final static int OP_NE = 3;
-  private final static int OP_LT = 4;
-  private final static int OP_GT = 5;
-  private final static int OP_EQ = 6;
-  private final static int OP_NOT = 7;
-  private final static int OP_PLUS = 8;
-  private final static int OP_MINUS = 9;
+  private final static String[] ops = { "==", "!=", "=" };
+  private final static int OP_EEQ = 0;
+  private final static int OP_NE = 1;
+  private final static int OP_EQ = 2;
 
   private static int findOp(String op) {
     for (int i = ops.length; --i >= 0;)
@@ -324,7 +317,7 @@ class VelocityContext {
       int j = i;
       char ch;
       while (++j < ccData
-          && (Character.isLetterOrDigit(ch = data.charAt(j)) || ch == '.')) {
+          && (Character.isLetterOrDigit(ch = data.charAt(j)) || ch == '.' || ch == '_')) {
         // continue looking for end        
       }
       if (j < ccData && data.charAt(j) == '(')

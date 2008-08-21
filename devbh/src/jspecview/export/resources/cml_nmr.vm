@@ -44,7 +44,9 @@
         </xaxis>
         <yaxis multiplierToData="1.000">
             <array units="units:arbitrary" size="$npoints" dataType="xsd:double">
-#foreach ($coord in $xyCoords)$coord.getYString() #end
+#foreach ($coord in $xyCoords)
+	$coord.getYString() 
+#end
             </array>
         </yaxis>
     </spectrumData>

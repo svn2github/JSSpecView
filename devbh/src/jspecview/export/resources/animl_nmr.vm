@@ -102,9 +102,6 @@
 		<ParameterCategory name="SampleDescription">
 			<ParameterSet>
 				<Parameter name="Name">
-#if($SolvName =="")
-  #set($SolvName="unknown")
-#end
 					<String>$SolvName</String>
 				</Parameter>
 			        <Parameter name="State">

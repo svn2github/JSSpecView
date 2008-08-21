@@ -127,27 +127,11 @@
                         <Vector name="Intensity" dependency="dependent" vectorID="Itensity_ID" plotUse="attribute" vectorType="$ydata_type">
 #if($yencode=="ivs")
 	                            <IndividualValueSet>
-	#foreach ($coord in $xyCoords)
+#foreach ($coord in $xyCoords)
 		                                <$ydata_type>$coord.getYString()</$ydata_type>
-	#end
+#end
 	                            </IndividualValueSet>
-#end
-#set($OK=0)
-#if(($yUnits=="A")||($yUnits=="ABS")||($yUnits=="ABSORBANCE")||($yUnits=="AU")||($yUnits=="AUFS")||($yUnits=="OPTICAL DENSITY"))
-#set($OK=1)
-	                            <Unit label="Absorbance">
-#end
-#if(($yUnits=="T")||($yUnits=="TRANSMITTANCE"))
-#set($OK=1)
-	                            <Unit label="Transmittance">
-#end
-#if(($yUnits=="COUNTS")||($yUnits=="CTS"))
-#set($OK=1)
-	                            <Unit label="Counts">
-#end
-#if(($yUnits=="ARBITRARY UNITS")||($OK==0))
-	                            <Unit label="Arb. Units">
-#end
+ 	                              <Unit label="$unitLabel">
                                      <SIUnit exponent="1" factor="1">1</SIUnit>
                                    </Unit>
                         </Vector>

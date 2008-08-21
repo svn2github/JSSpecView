@@ -20,24 +20,8 @@
 package jspecview.export;
 
 
-import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Vector;
-
-import jspecview.common.Coordinate;
 import jspecview.common.JDXSpectrum;
-
-import org.apache.velocity.Template;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.Velocity;
-import org.apache.velocity.exception.MethodInvocationException;
-import org.apache.velocity.exception.ParseErrorException;
-import org.apache.velocity.exception.ResourceNotFoundException;
-import java.text.SimpleDateFormat;
-//import java.lang.Number;
-import java.util.Calendar;
-import java.util.Iterator;
 
 /**
  * class <code>AnIMLExporter</code> contains static methods to export a Graph as
@@ -47,9 +31,7 @@ import java.util.Iterator;
  * @see jspecview.common.Graph
  * @author Prof Robert J. Lancashire
  */
-class AnIMLExporter {
-
-  private static String amlFile;
+class AnIMLExporter extends XMLExporter {
 
   /**
    * Exports the Spectrum that is displayed by JSVPanel to a file given by fileName
@@ -60,170 +42,46 @@ class AnIMLExporter {
    * @param endIndex the end point
    * @throws IOException
    */
-  static void exportAsAnIML(JDXSpectrum spec, String fileName, int startIndex,
-                            int endIndex) throws IOException {
-    FileWriter writer;
-    writer = new FileWriter(fileName);
-    amlFile = fileName;
-    boolean continuous = spec.isContinuous();
+  void exportAsAnIML(JDXSpectrum spec, String fileName, int startIndex,
+                     int endIndex) throws IOException {
 
-    // no template ready for Peak Tables so exit
-    if (!continuous)
+    this.startIndex = startIndex;
+    this.endIndex = endIndex;
+
+    if (!setParameters(spec))
       return;
+    
+    setWriter(fileName);
 
-    Template template = null;
-    VelocityContext context = new VelocityContext();
-
-    Coordinate[] xyCoords = spec.getXYCoords();
-
-    int npoints = endIndex - startIndex + 1;
-    //boolean increasing= spec.isIncreasing();
-    String xdata_type = "Float32";
-    String ydata_type = "Float32";
-    String title = spec.getTitle();
-    String xUnits = spec.getXUnits().toUpperCase();
-    String yUnits = spec.getYUnits().toUpperCase();
-
-    String unitLabel = (yUnits.equals("A") || yUnits.equals("ABS")
-        || yUnits.equals("ABSORBANCE") || yUnits.equals("AU")
-        || yUnits.equals("AUFS") || yUnits.equals("OPTICAL DENSITY") ? "Absorbance"
-        : yUnits.equals("T") || yUnits.equals("TRANSMITTANCE") ? "Transmittance"
-            : yUnits.equals("COUNTS") || yUnits.equals("CTS") ? "Counts"
-                : "Arb. Units");
-
-    String datatype = spec.getDataType();
-    String owner = spec.getOwner();
-    String origin = spec.getOrigin();
-    String spectypeInitials = "";
-    String longdate = spec.getLongDate();
-    String date = spec.getDate();
-    String time = spec.getTime();
-    String vendor = "";
-    String model = "";
-    String resolution = "";
-    String pathlength = spec.getPathlength();
-    String molform = "";
-    String bp = "";
-    String mp = "";
-    String CASrn = "";
-    String CASn = "";
-    String ObNucleus = "";
-
-    double ObFreq = spec.getObservedFreq();
-    double deltaX = spec.getDeltaX();
     double amlFirstX = xyCoords[startIndex].getXVal();
 
-    String SolvRef = "";
-    String SolvName = "";
+    if (SolvName.equals(""))
+      SolvName = "unknown";
+
     String AnIMLtemplate = "animl_tmp.vm";
-
-    Calendar now = Calendar.getInstance();
-    SimpleDateFormat formatter = new SimpleDateFormat(
-        "yyyy/MM/dd HH:mm:ss.SSSS ZZZZ");
-    String currentTime = formatter.format(now.getTime());
-
-    HashMap<String, String> specHead = spec.getHeaderTable();
-    String amlHead = specHead.toString();
-
-    for (Iterator<String> iter = specHead.keySet().iterator(); iter.hasNext();) {
-      String label = (String) iter.next();
-      String dataSet = (String) specHead.get(label);
-      if (label.equals("##RESOLUTION"))
-        resolution = dataSet;
-      if (label.contains("##SPECTROMETER"))
-        model = dataSet;
-      if (label.equals("##$MANUFACTURER"))
-        vendor = dataSet;
-      if (label.equals("##MOLFORM"))
-        molform = dataSet;
-      if (label.equals("##CASREGISTRYNO"))
-        CASrn = dataSet;
-      if (label.equals("##CASNAME"))
-        CASn = dataSet;
-      if (label.equals("##MP"))
-        mp = dataSet;
-      if (label.equals("##BP"))
-        bp = dataSet;
-      if (label.equals("##.OBSERVENUCLEUS"))
-        ObNucleus = dataSet;
-      if (label.equals("##.SOLVENTNAME"))
-        SolvName = dataSet;
-      if (label.equals("##.SOLVENTREFERENCE")) // should really try to parse info from SHIFTREFERENCE
-        SolvRef = dataSet;
-    }
-
-    try {
-      Velocity.init();
-    } catch (Exception e) {
-    }
-
-    Vector<Coordinate> newXYCoords = new Vector<Coordinate>();
-    for (int i = startIndex; i <= endIndex; i++)
-      newXYCoords.addElement(xyCoords[i]);
-
-    if ((longdate.equals("")) || (date.equals("")))
-      longdate = currentTime;
-    if ((date.length() == 8) && (date.charAt(0) < '5'))
-      longdate = "20" + date + " " + time;
-    if ((date.length() == 8) && (date.charAt(0) > '5'))
-      longdate = "19" + date + " " + time;
-
     if (datatype.contains("MASS")) {
       spectypeInitials = "MS";
     } else if (datatype.contains("INFRARED")) {
       spectypeInitials = "IR";
     } else if (datatype.contains("UV") || (datatype.contains("VIS"))) {
       spectypeInitials = "UV";
-      pathlength = (pathlength.equals("") ? "1.0" : "-1");
     } else if (datatype.contains("NMR")) {
       amlFirstX = amlFirstX * ObFreq; // NMR stored internally as ppm
       deltaX = deltaX * ObFreq; // convert to Hz before exporting
       AnIMLtemplate = "animl_nmr.vm";
       spectypeInitials = "NMR";
     }
-    
-    if (spectypeInitials.equals("UV")) {
-      // changed logic here. alright? Was ignoring pathlength in file.
-      if (pathlength.equals(""))
-        pathlength = "1.0";
-    } else {
-      pathlength = "-1";
-    }
 
-    context.put("file", amlFile);
-    context.put("xdata_type", xdata_type);
-    context.put("ydata_type", ydata_type);
+    pathlength = (pathlength.equals("") && spectypeInitials.equals("UV")? "1.0" : "-1");
 
-    context.put("title", title);
-    context.put("xyCoords", newXYCoords);
-    context.put("amlHead", amlHead);
-    context.put("xUnits", xUnits);
-    context.put("yUnits", yUnits);
-    context.put("unitLabel", unitLabel);
+    setTemplate(AnIMLtemplate);
 
+    context.put("amlHead", head);
     context.put("firstX", new Double(amlFirstX));
-    context.put("npoints", Integer.valueOf(npoints));
-    context.put("xencode", "avs");
-    context.put("yencode", "ivs");
 
-    context.put("specinits", spectypeInitials);
-    context.put("deltaX", new Double(deltaX));
-    context.put("owner", owner);
-    context.put("origin", origin);
-    context.put("timestamp", longdate);
-    context.put("DataType", datatype);
-    context.put("currenttime", currentTime);
-    context.put("resolution", resolution);
-    context.put("pathlength", pathlength); //required for UV and IR
-    context.put("molform", molform);
-    context.put("CASrn", CASrn);
-    context.put("CASn", CASn);
-    context.put("mp", mp);
-    context.put("bp", bp);
-    context.put("ObFreq", new Double(ObFreq));
-    context.put("ObNucleus", ObNucleus);
-    context.put("SolvName", SolvName);
-    context.put("SolvRef", SolvRef);
+    context.put("xdata_type", "Float32");
+    context.put("ydata_type", "Float32");
+
 
     if (vendor.equals(""))
       vendor = "not available from JCAMP-DX file";
@@ -233,34 +91,7 @@ class AnIMLExporter {
     context.put("vendor", vendor);
     context.put("model", model);
 
-    // TODO Take out System.err.println's
-    // Throw exception instead
-    // set up a template type so that for
-    // each SpecType a different template is filled in
-
-    try {
-      template = Velocity.getTemplate(AnIMLtemplate);
-      template.merge(context, writer);
-    } catch (ResourceNotFoundException rnfe) {
-      // couldn't find the template
-      System.err.println("couldn't find the template");
-    } catch (ParseErrorException pee) {
-      // syntax error : problem parsing the template
-      System.err.println("syntax error : problem parsing the template");
-      pee.printStackTrace();
-    } catch (MethodInvocationException mie) {
-      // something invoked in the template
-      // threw an exception
-      System.err
-          .println("something invoked in the template threw an exception");
-    } catch (Exception e) {
-      System.err.println("exception!");
-    }
-
-    try {
-      writer.flush();
-      writer.close();
-    } catch (IOException ioe) {
-    }
+    writeXML();
   }
+
 }
