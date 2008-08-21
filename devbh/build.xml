@@ -106,8 +106,8 @@ is divided into following sections:
     	<target name="applet_jar" depends="init,compile" description="Create applet.">
             <delete file="${applet.jar}" quiet="true" />
             <jar jarfile="${applet.jar}" compress="${jar.compress}">
+        		<zipfileset src="${libs.JSR173.classpath}" /> <!-- for anIML, CML file reading -->
                 <fileset dir="${build.classes.dir}">
-           		  <zipfileset src="${libs.JSR173.classpath}" /> <!-- for anIML, CML file reading -->
                	  <exclude name="**/export/**"/>
               	  <exclude name="**/application/**"/>
                   <exclude name="**/mdidesktop/**"/>
