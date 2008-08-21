@@ -52,14 +52,14 @@ class AnIMLExporter {
   private static String amlFile;
 
   /**
-    * Exports the Spectrum that is displayed by JSVPanel to a file given by fileName
-    * If display is zoomed then export the current view
-    * @param spec the spectrum to export
-    * @param fileName the name of the file
-    * @param startIndex the starting point of the spectrum
-    * @param endIndex the end point
-    * @throws IOException
-    */
+   * Exports the Spectrum that is displayed by JSVPanel to a file given by fileName
+   * If display is zoomed then export the current view
+   * @param spec the spectrum to export
+   * @param fileName the name of the file
+   * @param startIndex the starting point of the spectrum
+   * @param endIndex the end point
+   * @throws IOException
+   */
   static void exportAsAnIML(JDXSpectrum spec, String fileName, int startIndex,
                             int endIndex) throws IOException {
     FileWriter writer;
@@ -81,8 +81,16 @@ class AnIMLExporter {
     String xdata_type = "Float32";
     String ydata_type = "Float32";
     String title = spec.getTitle();
-    String xUnits = spec.getXUnits();
-    String yUnits = spec.getYUnits();
+    String xUnits = spec.getXUnits().toUpperCase();
+    String yUnits = spec.getYUnits().toUpperCase();
+
+    String unitLabel = (yUnits.equals("A") || yUnits.equals("ABS")
+        || yUnits.equals("ABSORBANCE") || yUnits.equals("AU")
+        || yUnits.equals("AUFS") || yUnits.equals("OPTICAL DENSITY") ? "Absorbance"
+        : yUnits.equals("T") || yUnits.equals("TRANSMITTANCE") ? "Transmittance"
+            : yUnits.equals("COUNTS") || yUnits.equals("CTS") ? "Counts"
+                : "Arb. Units");
+
     String datatype = spec.getDataType();
     String owner = spec.getOwner();
     String origin = spec.getOrigin();
@@ -153,16 +161,6 @@ class AnIMLExporter {
     for (int i = startIndex; i <= endIndex; i++)
       newXYCoords.addElement(xyCoords[i]);
 
-    context.put("file", amlFile);
-    context.put("xdata_type", xdata_type);
-    context.put("ydata_type", ydata_type);
-
-    context.put("title", title);
-    context.put("xyCoords", newXYCoords);
-    context.put("amlHead", amlHead);
-    context.put("xUnits", xUnits.toUpperCase());
-    context.put("yUnits", yUnits.toUpperCase());
-
     if ((longdate.equals("")) || (date.equals("")))
       longdate = currentTime;
     if ((date.length() == 8) && (date.charAt(0) < '5'))
@@ -170,18 +168,38 @@ class AnIMLExporter {
     if ((date.length() == 8) && (date.charAt(0) > '5'))
       longdate = "19" + date + " " + time;
 
-    if (datatype.contains("MASS"))
+    if (datatype.contains("MASS")) {
       spectypeInitials = "MS";
-    if (datatype.contains("INFRARED"))
+    } else if (datatype.contains("INFRARED")) {
       spectypeInitials = "IR";
-    if (datatype.contains("UV") || (datatype.contains("VIS")))
+    } else if (datatype.contains("UV") || (datatype.contains("VIS"))) {
       spectypeInitials = "UV";
-    if (datatype.contains("NMR")) {
+      pathlength = (pathlength.equals("") ? "1.0" : "-1");
+    } else if (datatype.contains("NMR")) {
       amlFirstX = amlFirstX * ObFreq; // NMR stored internally as ppm
       deltaX = deltaX * ObFreq; // convert to Hz before exporting
       AnIMLtemplate = "animl_nmr.vm";
       spectypeInitials = "NMR";
     }
+    
+    if (spectypeInitials.equals("UV")) {
+      // changed logic here. alright? Was ignoring pathlength in file.
+      if (pathlength.equals(""))
+        pathlength = "1.0";
+    } else {
+      pathlength = "-1";
+    }
+
+    context.put("file", amlFile);
+    context.put("xdata_type", xdata_type);
+    context.put("ydata_type", ydata_type);
+
+    context.put("title", title);
+    context.put("xyCoords", newXYCoords);
+    context.put("amlHead", amlHead);
+    context.put("xUnits", xUnits);
+    context.put("yUnits", yUnits);
+    context.put("unitLabel", unitLabel);
 
     context.put("firstX", new Double(amlFirstX));
     context.put("npoints", Integer.valueOf(npoints));

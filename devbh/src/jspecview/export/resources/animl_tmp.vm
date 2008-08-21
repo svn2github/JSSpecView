@@ -195,11 +195,6 @@
                                 <Parameter name="Identifier" parameterType="String">
                                     <String>$title</String>
                                 </Parameter>
-#if(($specinits=="UV") && ($pathlength==""))
-   #set($pathlength="1.0")
-#else
-   #set($pathlength="-1")
-#end
                                 <Parameter name="Sample Path Length" parameterType="Float32">
                                     <Float32>$pathlength</Float32>
                                     <Unit label="cm">

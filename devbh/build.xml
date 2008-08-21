@@ -107,7 +107,7 @@ is divided into following sections:
             <delete file="${applet.jar}" quiet="true" />
             <jar jarfile="${applet.jar}" compress="${jar.compress}">
                 <fileset dir="${build.classes.dir}">
-                  <exclude name="**/org/apache/xml/**"/>
+           		  <zipfileset src="${libs.JSR173.classpath}" /> <!-- for anIML, CML file reading -->
                	  <exclude name="**/export/**"/>
               	  <exclude name="**/application/**"/>
                   <exclude name="**/mdidesktop/**"/>
@@ -126,8 +126,8 @@ is divided into following sections:
     		<zipfileset src="${libs.Velocity.classpath}" />
     		<zipfileset src="${libs.Xerces.classpath}" />
     		<zipfileset src="${libs.XMLParser.classpath}" />
-    		<zipfileset src="${libs.JSR173.classpath}" />
-    		<zipfileset src="${libs.Stax.classpath}" />
+    		<zipfileset src="${libs.JSR173.classpath}" /> <!-- for anIML, CML file reading -->
+    		<zipfileset src="${libs.Stax.classpath}" /> <!-- for ??? -->
             <manifest> 
     			<attribute name="Main-Class" value="${main.class}" />
     		</manifest>

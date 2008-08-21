@@ -43,9 +43,8 @@ public class BlockSource extends CompoundSource {
 
   /**
    * Creates a new Block Source
-   * @throws JSpecViewException
    */
-  protected BlockSource() throws JSpecViewException{
+  protected BlockSource() {
     super();
   }
 

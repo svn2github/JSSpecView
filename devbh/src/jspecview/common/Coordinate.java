@@ -123,7 +123,7 @@ public class Coordinate
      * @return true if the coordinates are equal, false otherwise
      */
     public boolean equals(Coordinate coord){
-      return ((coord.getXVal() == this.getXVal()) && (coord.getYVal() == this.getYVal()));
+      return (coord.xVal == xVal && coord.yVal == yVal);
     }
 
     /**
