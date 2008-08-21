@@ -23,7 +23,7 @@
  *  02110-1301, USA.
  */
 
-package org.jmol.util;
+package jspecview.util;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
