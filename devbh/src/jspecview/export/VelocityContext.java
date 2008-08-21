@@ -1,3 +1,22 @@
+/* Copyright (c) 2006-2007 The University of the West Indies
+ *
+ * Contact: robert.lancashire@uwimona.edu.jm
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
 package jspecview.export;
 
 import java.io.FileWriter;
@@ -9,6 +28,14 @@ import jspecview.common.Coordinate;
 import jspecview.util.Parser;
 import jspecview.util.TextFormat;
 
+/**
+ * A simple Velocity-like template filler
+ * -- Supports only "==" "=" "!=" and no SET
+ * -- # directives must be first character of the line 
+ * 
+ * @author Bob Hanson, hansonr@stolaf.edu
+ * 
+ */
 class VelocityContext {
 
   String[] tokens;
@@ -19,6 +46,8 @@ class VelocityContext {
   }
 
   void put(String key, Object value) {
+    if (value == null)
+      value = "";
     context.put(key, value);
   }
 
@@ -81,6 +110,14 @@ class VelocityContext {
           cmdType = VT_FOREACH;
           cmds.add(0, new Integer(ptr));
           cmdPtr = ptr;
+          if (token.indexOf("#end") > 0) {
+            int pt = token.indexOf(")") + 1;
+            data = token.substring(0, pt);
+            velocityTokens.add(this);
+            new VelocityToken(token.substring(pt, token.indexOf("#end")) + "\n");
+            new VelocityToken("#end");
+            return;
+          }
         } else if (token.startsWith("#elseif")) {
           cmdType = VT_ELSEIF;
           cmdPtr = cmds.get(0).intValue();
@@ -91,8 +128,6 @@ class VelocityContext {
           cmdPtr = cmds.get(0).intValue();
           velocityTokens.get(cmdPtr).endPtr = ptr;
           cmds.add(0, new Integer(ptr));
-        } else if (token.startsWith("#set")) {
-          cmdType = VT_SET;
         } else {
           System.out.println("??? " + token);
         }
@@ -103,10 +138,10 @@ class VelocityContext {
 
   private String getVeloctyTokens(String template) {
     velocityTokens = new Vector<VelocityToken>();
-    if (template.indexOf("\n\r") >= 0)
-      template = TextFormat.replaceAllCharacters(template, "\n\r", '\r');
-    template = template.replace('\n', '\r');
-    String[] lines = template.split("\r");
+    if (template.indexOf("\r\n") >= 0)
+      template = TextFormat.replaceAllCharacters(template, "\r\n", '\n');
+    template = template.replace('\r', '\n');
+    String[] lines = template.split("\n");
     String token = "";
     for (int i = 0; i < lines.length && strError == null; i++) {
       String line = TextFormat.rtrim(lines[i], " \n");
@@ -114,7 +149,7 @@ class VelocityContext {
         continue;
       if (line.indexOf("#") == 0) {
         if (token.length() > 0) {
-          new VelocityToken(token + "\r");
+          new VelocityToken(token + "\n");
           token = "";
         }
         if (strError != null)
@@ -122,7 +157,7 @@ class VelocityContext {
         new VelocityToken(line);
         continue;
       }
-      token += line + "\r";
+      token += line + "\n";
     }
     if (token.length() > 0 && strError == null) {
       new VelocityToken(token);
@@ -134,14 +169,14 @@ class VelocityContext {
     int ptr;
     for (int i = 0; i < velocityTokens.size() && strError == null; i++) {
       VelocityToken vt = velocityTokens.get(i);
-      System.out.println(i + " " + vt.cmdType + " " + vt.cmdPtr + " "
-          + vt.endPtr  + vt.data);
+      //System.out.println(i + " " + vt.cmdType + " " + vt.cmdPtr + " "
+        //  + vt.endPtr  + vt.data);
       try {
         switch (vt.cmdType) {
         case VT_DATA:
           String data = fillData(vt.data);
           writer.write(data);
-          System.out.println(data);
+          //System.out.println(data);
           continue;
         case VT_IF:
           if (evaluate(vt.data, true)) {
@@ -331,7 +366,7 @@ class VelocityContext {
         } else {
           strValue = value.toString();
         }
-        System.out.println(key + " = " + value);
+        //System.out.println(key + " = " + value);
         data = data.substring(0, i - 1) + strValue + data.substring(j);
         ccData = data.length();
         i += strValue.length();

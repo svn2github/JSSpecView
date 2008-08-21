@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Vector;
 
 import jspecview.common.Coordinate;
@@ -35,27 +34,22 @@ import jspecview.util.Logger;
 /**
  * The XMLExporter should be a totally generic exporter
  * 
- * AnIML and CML should be identical except for the templates. 
+ * no longer uses Velocity. 
  * 
- * I just don't have time to finish this now.  - Bob Hanson
+ * @author Bob Hanson, hansonr@stolaf.edu
  *
  */
 abstract class XMLExporter {
 
   Vector<Coordinate> newXYCoords = new Vector<Coordinate>();
-  String template;
   VelocityContext context = new VelocityContext();
   String errMsg;
   String theFile;
   FileWriter writer;
   int startIndex;
   int endIndex;
-  
-  protected void setWriter(String fileName) throws IOException {
-    writer = new FileWriter(fileName);
-    theFile = fileName;
-  }
 
+  boolean continuous;
   Calendar now;
   SimpleDateFormat formatter;
   String currentTime;
@@ -65,9 +59,12 @@ abstract class XMLExporter {
   int npoints;
 
   String title;
+  String ident;
+  String state;
   String xUnits;
   String yUnits;
-
+  String unitFactor = "";
+  String unitExponent = "1";
   String unitLabel;
   String datatype;
   String owner;
@@ -83,40 +80,53 @@ abstract class XMLExporter {
   String molform = "";
   String bp = "";
   String mp = "";
-  String CASrn = "";
-  String CASn = "";
-  String ObNucleus = "";
+  String casRN = "";
+  String casName = "";
+  String obNucleus = "";
 
-  double ObFreq;
+  double obFreq;
+  double firstX;
+  double lastX;
   double deltaX;
 
-  String SolvRef = "";
-  String SolvName = "";
+  String solvRef = "";
+  String solvName = "";
 
-  HashMap<String, String> specHead;
-  String head;
+  public boolean exportAsXML(JDXSpectrum spec, String fileName, int startIndex,
+                             int endIndex) throws IOException {
+    theFile = fileName;
+    this.startIndex = startIndex;
+    this.endIndex = endIndex;
+
+    if (!setParameters(spec))
+      return false;
+
+    writer = new FileWriter(fileName);
+    return true;
+  }
 
   protected boolean setParameters(JDXSpectrum spec) {
-    
-    boolean continuous = spec.isContinuous();
+
+    continuous = spec.isContinuous();
 
     // no template ready for Peak Tables so exit
     if (!continuous)
       return false;
 
-
     Calendar now = Calendar.getInstance();
     SimpleDateFormat formatter = new SimpleDateFormat(
         "yyyy/MM/dd HH:mm:ss.SSSS ZZZZ");
     currentTime = formatter.format(now.getTime());
-    
-    
+
     xyCoords = spec.getXYCoords();
     npoints = endIndex - startIndex + 1;
     for (int i = startIndex; i <= endIndex; i++)
       newXYCoords.addElement(xyCoords[i]);
-    
+
     title = spec.getTitle();
+
+    // QUESTION: OK to set units UpperCase for both AnIML and CML?
+
     xUnits = spec.getXUnits().toUpperCase();
     yUnits = spec.getYUnits().toUpperCase();
 
@@ -127,15 +137,12 @@ abstract class XMLExporter {
             : yUnits.equals("COUNTS") || yUnits.equals("CTS") ? "Counts"
                 : "Arb. Units");
 
-    
-    datatype = spec.getDataType();
     owner = spec.getOwner();
     origin = spec.getOrigin();
-    spectypeInitials = "";
-    longdate = spec.getLongDate();
-    date = spec.getDate();
     time = spec.getTime();
 
+    longdate = spec.getLongDate();
+    date = spec.getDate();
     if ((longdate.equals("")) || (date.equals("")))
       longdate = currentTime;
     if ((date.length() == 8) && (date.charAt(0) < '5'))
@@ -143,60 +150,41 @@ abstract class XMLExporter {
     if ((date.length() == 8) && (date.charAt(0) > '5'))
       longdate = "19" + date + " " + time;
 
-    vendor = "";
-    model = "";
-    resolution = "";
-    pathlength = spec.getPathlength();
-    molform = "";
-    bp = "";
-    mp = "";
-    CASrn = "";
-    CASn = "";
-    ObNucleus = "";
-
-    SolvRef = "";
-    SolvName = "";
-
-    HashMap<String, String> specHead = spec.getHeaderTable();
-    head = specHead.toString();
-    ObFreq = spec.getObservedFreq();
+    pathlength = spec.getPathlength(); // ignored
+    obFreq = spec.getObservedFreq();
+    firstX = xyCoords[startIndex].getXVal();
+    lastX = xyCoords[endIndex].getXVal();
     deltaX = spec.getDeltaX();
-
-    for (Iterator<String> iter = specHead.keySet().iterator(); iter.hasNext();) {
-      String label = (String) iter.next();
-      String dataSet = (String) specHead.get(label);
-      if (label.equals("##RESOLUTION"))
-        resolution = dataSet;
-      if (label.contains("##SPECTROMETER"))
-        model = dataSet;
-      if (label.equals("##$MANUFACTURER"))
-        vendor = dataSet;
-      if (label.equals("##MOLFORM"))
-        molform = dataSet;
-      if (label.equals("##CASREGISTRYNO"))
-        CASrn = dataSet;
-      if (label.equals("##CASNAME"))
-        CASn = dataSet;
-      if (label.equals("##MP"))
-        mp = dataSet;
-      if (label.equals("##BP"))
-        bp = dataSet;
-      if (label.equals("##.OBSERVENUCLEUS"))
-        ObNucleus = dataSet;
-      if (label.equals("##.SOLVENTNAME"))
-        SolvName = dataSet;
-      if (label.equals("##.SOLVENTREFERENCE")) // should really try to parse info from SHIFTREFERENCE
-        SolvRef = dataSet;
+    datatype = spec.getDataType();
+    if (datatype.contains("NMR")) {
+      firstX *= obFreq; // NMR stored internally as ppm
+      lastX *= obFreq;
+      deltaX *= obFreq; // convert to Hz before exporting
     }
-
     
+    // these may come back null, but context.put() turns that into ""
+    // still, one must check for == null in tests here.
     
+    HashMap<String, String> specHead = spec.getHeaderTable();
+    state = specHead.get("##STATE");
+    resolution = specHead.get("##RESOLUTION");
+    model = specHead.get("##SPECTROMETER");
+    vendor = specHead.get("##$MANUFACTURER");
+    molform = specHead.get("##MOLFORM");
+    casRN = specHead.get("##CASREGISTRYNO");
+    casName = specHead.get("##CASNAME");
+    mp = specHead.get("##MP");
+    bp = specHead.get("##BP");
+    obNucleus = specHead.get("##.OBSERVENUCLEUS");
+    solvName = specHead.get("##.SOLVENTNAME");
+    solvRef = specHead.get("##.SOLVENTREFERENCE"); // should really try to parse info from SHIFTREFERENCE
     return true;
   }
-  
-  
-  
-  protected void setTemplate(String templateFile) {
+
+  protected void setTemplate(String template) {
+    String templateFile = template += (datatype.contains("NMR") ? "_nmr"
+        : "_tmp")
+        + ".vm";
     FileManager fm = new FileManager(null);
     template = fm.getResourceString(this, templateFile, true);
     if (template == null) {
@@ -208,19 +196,23 @@ abstract class XMLExporter {
       Logger.error(errMsg);
       return;
     }
-    
+
+    context.put("continuous", Boolean.valueOf(continuous));
     context.put("file", theFile);
-
     context.put("title", title);
+    context.put("ident", ident);
+    context.put("state", state);
+    context.put("firstX", new Double(firstX));
+    context.put("lastX", new Double(lastX));
     context.put("xyCoords", newXYCoords);
-    context.put("xUnits", xUnits);
-    context.put("yUnits", yUnits);
-    context.put("unitLabel", unitLabel);
-
+    context.put("xdata_type", "Float32");
+    context.put("ydata_type", "Float32");
     context.put("npoints", Integer.valueOf(npoints));
     context.put("xencode", "avs");
     context.put("yencode", "ivs");
-
+    context.put("xUnits", xUnits);
+    context.put("yUnits", yUnits);
+    context.put("unitLabel", unitLabel);
     context.put("specinits", spectypeInitials);
     context.put("deltaX", new Double(deltaX));
     context.put("owner", owner);
@@ -231,16 +223,16 @@ abstract class XMLExporter {
     context.put("resolution", resolution);
     context.put("pathlength", pathlength); //required for UV and IR
     context.put("molform", molform);
-    context.put("CASrn", CASrn);
-    context.put("CASn", CASn);
+    context.put("CASrn", casRN);
+    context.put("CASn", casName);
     context.put("mp", mp);
     context.put("bp", bp);
-    context.put("ObFreq", new Double(ObFreq));
-    context.put("ObNucleus", ObNucleus);
-    context.put("SolvName", SolvName);
-    context.put("SolvRef", SolvRef);
-
-
+    context.put("ObFreq", new Double(obFreq));
+    context.put("ObNucleus", obNucleus);
+    context.put("SolvName", solvName);
+    context.put("SolvRef", solvRef);
+    context.put("vendor", vendor);
+    context.put("model", model);
   }
 
   protected void writeXML() throws IOException {
@@ -256,5 +248,4 @@ abstract class XMLExporter {
     } catch (IOException ioe) {
     }
   }
-
 }

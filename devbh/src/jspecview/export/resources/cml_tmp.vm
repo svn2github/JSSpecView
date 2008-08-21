@@ -43,18 +43,14 @@
         </xaxis>
         <yaxis multiplierToData="1.000">
             <array units="units:$yUnits" size="$npoints" dataType="xsd:double">
-#foreach ($coord in $xyCoords)
-	$coord.getYString() 
-#end
+#foreach ($coord in $xyCoords)$coord.getYString()#end
             </array>
         </yaxis>
     </spectrumData>
 #end
 #if (!$continuous)
      <peakList>
-#foreach ($coord in $xyCoords)
-       <peak id="peak$velocityCount" xUnits="units:$xUnits" xValue="$coord.getXString()" yUnits="units:$yUnits" yValue="$coord.getYString()"></peak>
-#end
+#foreach ($coord in $xyCoords)<peak id="peak$velocityCount" xUnits="units:$xUnits" xValue="$coord.getXString()" yUnits="units:$yUnits" yValue="$coord.getYString()"></peak>#end
       </peakList>
 #end
   </spectrum>

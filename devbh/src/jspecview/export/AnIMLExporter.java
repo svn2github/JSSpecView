@@ -19,7 +19,6 @@
 
 package jspecview.export;
 
-
 import java.io.IOException;
 import jspecview.common.JDXSpectrum;
 
@@ -30,6 +29,7 @@ import jspecview.common.JDXSpectrum;
  * be done in these files.
  * @see jspecview.common.Graph
  * @author Prof Robert J. Lancashire
+ * @author Bob Hanson, hansonr@stolaf.edu
  */
 class AnIMLExporter extends XMLExporter {
 
@@ -45,20 +45,12 @@ class AnIMLExporter extends XMLExporter {
   void exportAsAnIML(JDXSpectrum spec, String fileName, int startIndex,
                      int endIndex) throws IOException {
 
-    this.startIndex = startIndex;
-    this.endIndex = endIndex;
-
-    if (!setParameters(spec))
+    if (!super.exportAsXML(spec, fileName, startIndex, endIndex))
       return;
-    
-    setWriter(fileName);
 
-    double amlFirstX = xyCoords[startIndex].getXVal();
+    if (solvName == null || solvName.equals(""))
+      solvName = "unknown";
 
-    if (SolvName.equals(""))
-      SolvName = "unknown";
-
-    String AnIMLtemplate = "animl_tmp.vm";
     if (datatype.contains("MASS")) {
       spectypeInitials = "MS";
     } else if (datatype.contains("INFRARED")) {
@@ -66,31 +58,41 @@ class AnIMLExporter extends XMLExporter {
     } else if (datatype.contains("UV") || (datatype.contains("VIS"))) {
       spectypeInitials = "UV";
     } else if (datatype.contains("NMR")) {
-      amlFirstX = amlFirstX * ObFreq; // NMR stored internally as ppm
-      deltaX = deltaX * ObFreq; // convert to Hz before exporting
-      AnIMLtemplate = "animl_nmr.vm";
       spectypeInitials = "NMR";
     }
+    // QUESTION: Why is the file's pathlength data totally ignored?
 
-    pathlength = (pathlength.equals("") && spectypeInitials.equals("UV")? "1.0" : "-1");
+    pathlength = (pathlength.equals("") && spectypeInitials.equals("UV") ? "1.0"
+        : "-1");
 
-    setTemplate(AnIMLtemplate);
+    if (xUnits.equals("1/CM")) {
+      unitLabel = "1/cm";
+      unitFactor = "0.01";
+      unitExponent = "-1";
+    } else if (xUnits.equals("UM") || xUnits.equals("MICROMETERS")) {
+      unitLabel = "um";
+      unitFactor = "0.000001";
+    } else if (xUnits.equals("NM") || xUnits.equals("NANOMETERS")
+        || xUnits.equals("WAVELENGTH")) {
+      unitLabel = "nm";
+      unitFactor = "0.000000001";
+    } else if (xUnits.equals("PM") || xUnits.equals("PICOMETERS")) {
+      unitLabel = "pm";
+      unitFactor = "0.000000000001";
+    } else {
+      unitLabel = "Arb. Units";
+      unitFactor = "";
+    }
 
-    context.put("amlHead", head);
-    context.put("firstX", new Double(amlFirstX));
-
-    context.put("xdata_type", "Float32");
-    context.put("ydata_type", "Float32");
-
-
-    if (vendor.equals(""))
+    if (vendor == null || vendor.equals(""))
       vendor = "not available from JCAMP-DX file";
-    if (model.equals(""))
+    if (model == null || model.equals(""))
       model = "not available from JCAMP-DX file";
+    if (resolution == null || resolution.equals(""))
+      resolution="not available in JCAMP-DX file";
+    
 
-    context.put("vendor", vendor);
-    context.put("model", model);
-
+    setTemplate("animl");
     writeXML();
   }
 

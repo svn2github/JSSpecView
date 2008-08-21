@@ -82,6 +82,7 @@ public class JDXSourceStringTokenizer {
     // recontruct dataset
     l = st.nextToken("=");
     v = st.nextToken("##");
+    // TODO:  Not testing here for NON jdx format?
     dataSet = l + v + JSpecViewUtils.newLine;
 
     StringReader stringReader = new StringReader(dataSet);

@@ -127,9 +127,7 @@
                         <Vector name="Intensity" dependency="dependent" vectorID="Itensity_ID" plotUse="attribute" vectorType="$ydata_type">
 #if($yencode=="ivs")
 	                            <IndividualValueSet>
-#foreach ($coord in $xyCoords)
-		                                <$ydata_type>$coord.getYString()</$ydata_type>
-#end
+#foreach ($coord in $xyCoords)<$ydata_type>$coord.getYString()</$ydata_type>#end
 	                            </IndividualValueSet>
  	                              <Unit label="$unitLabel">
                                      <SIUnit exponent="1" factor="1">1</SIUnit>
@@ -146,29 +144,9 @@
 	                                </Increment>
 	                            </AutoIncrementedValueSet>
 #end
-#set($OK=0)
-#if($xUnits=="1/CM")
-#set($OK=1)
-	                            <Unit label="1/cm">
-	                                <SIUnit factor="0.01" exponent="-1" offset="0">m</SIUnit>
-#end
-#if(($xUnits=="UM")||($xUnits=="MICROMETERS"))
-#set($OK=1)
-	                            <Unit label="um">
-	                                <SIUnit factor="0.000001" exponent="1" offset="0">m</SIUnit>
-#end
-#if(($xUnits=="NM")||($xUnits=="NANOMETERS")||($xUnits=="WAVELENGTH"))
-#set($OK=1)
-	                            <Unit label="nm">
-	                                <SIUnit factor="0.000000001" exponent="1" offset="0">m</SIUnit>
-#end
-#if(($xUnits=="PM")||($xUnits=="PICOMETERS"))
-#set($OK=1)
-	                            <Unit label="pm">
-	                                <SIUnit factor="0.000000000001" exponent="1" offset="0">m</SIUnit>
-#end
-#if(($xUnits=="ARBITRARY UNITS")||($OK==0))
-	                            <Unit label="Arb. Units">
+	                            <Unit label="$unitLabel">
+#if($unitFactor != "")
+	                                <SIUnit factor="$unitFactor" exponent="$unitExponent" offset="0">m</SIUnit>
 #end
                                     </Unit>
                         </Vector>
@@ -195,9 +173,6 @@
                         <ParameterCategory name="Instrument Properties">
                             <ParameterSet>
                                <Parameter name="Resolution" parameterType="String">
-#if($resolution=="")
-#set($resolution="Not available in JCAMP-DX file")
-#end
                                  <String>$resolution</String>
                              </Parameter>
                          </ParameterSet>

@@ -19,7 +19,6 @@
 
 package jspecview.export;
 
-
 import java.io.IOException;
 import jspecview.common.JDXSpectrum;
 
@@ -30,6 +29,7 @@ import jspecview.common.JDXSpectrum;
  * be done in these files.
  * @see jspecview.common.Graph
  * @author Prof Robert J. Lancashire
+ * @author Bob Hanson, hansonr@stolaf.edu
  */
 class CMLExporter extends XMLExporter {
 
@@ -45,55 +45,32 @@ class CMLExporter extends XMLExporter {
   void exportAsCML(JDXSpectrum spec, String fileName, int startIndex,
                    int endIndex) throws IOException {
 
-    this.startIndex = startIndex;
-    this.endIndex = endIndex;
-
-    if (!setParameters(spec))
+    if (!super.exportAsXML(spec, fileName, startIndex, endIndex))
       return;
 
-
-    setWriter(fileName);
-
-    double cmlFirstX = xyCoords[startIndex].getXVal();
-    double cmlLastX = xyCoords[endIndex].getXVal();
-
-    if (model.equals(""))
+    if (model == null || model.equals(""))
       model = "unknown";
+    
+    if (datatype.contains("MASS"))
+      spectypeInitials = "massSpectrum";
+    else if (datatype.contains("INFRARED")) {
+      spectypeInitials = "infrared";
+    } else if (datatype.contains("UV") || (datatype.contains("VIS"))) {
+      spectypeInitials = "UV/VIS";
+    } else if (datatype.contains("NMR")) {
+      spectypeInitials = "NMR";
+    }
+    ident = spectypeInitials + "_"
+    + title.substring(0, Math.min(10, title.length()));
 
     if (xUnits.toLowerCase().equals("m/z"))
       xUnits = "moverz";
-    if (xUnits.toLowerCase().equals("1/cm"))
+    else if (xUnits.toLowerCase().equals("1/cm"))
       xUnits = "cm-1";
-    if (xUnits.toLowerCase().equals("nanometers"))
+    else if (xUnits.toLowerCase().equals("nanometers"))
       xUnits = "nm";
 
-    if (datatype.contains("MASS"))
-      spectypeInitials = "massSpectrum";
-    if (datatype.contains("INFRARED")) {
-      spectypeInitials = "infrared";
-      //         if (xUnits.toLowerCase().contains("cm") )
-      //            xUnits="cm-1";
-    }
-    if (datatype.contains("UV") || (datatype.contains("VIS")))
-      spectypeInitials = "UV/VIS";
-
-    String CMLtemplate = "cml_tmp.vm";
-    if (datatype.contains("NMR")) {
-      cmlFirstX *= ObFreq; // NMR stored internally as ppm
-      cmlLastX *= ObFreq;
-      deltaX *= ObFreq; // convert to Hz before exporting
-      CMLtemplate = "cml_nmr.vm";
-      spectypeInitials = "NMR";
-    }
-
-    setTemplate(CMLtemplate);
-
-    String ident = spectypeInitials + "_"
-        + title.substring(0, Math.min(10, title.length()));
-    context.put("ident", ident);
-    context.put("firstX", new Double(cmlFirstX));
-    context.put("lastX", new Double(cmlLastX));
-    context.put("continuous", Boolean.valueOf(spec.isContinuous()));
+    setTemplate("cml");
 
     writeXML();
   }
