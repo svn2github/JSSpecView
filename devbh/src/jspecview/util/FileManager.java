@@ -56,7 +56,7 @@ public class FileManager {
     String name = data[0];
     if (name == null)
       return false;
-    Object t = getBufferedReaderOrErrorMessageFromName(name, data, false);
+    Object t = getBufferedReaderOrErrorMessageFromName(name, data);
     if (t instanceof String) {
       data[1] = (String) t;
       return false;
@@ -79,8 +79,7 @@ public class FileManager {
   }
 
   Object getBufferedReaderOrErrorMessageFromName(String name,
-                                                 String[] fullPathNameReturn,
-                                                 boolean isBinary) {
+                                                 String[] fullPathNameReturn) {
     String[] names = classifyName(name);
     if (openErrorMessage != null)
       return openErrorMessage;
@@ -88,8 +87,7 @@ public class FileManager {
       return "cannot read file name: " + name;
     if (fullPathNameReturn != null)
       fullPathNameReturn[0] = names[0].replace('\\', '/');
-    return getUnzippedBufferedReaderOrErrorMessageFromName(names[0], false,
-        isBinary, false);
+    return getUnzippedBufferedReaderOrErrorMessageFromName(names[0], false, false);
   }
 
   private String[] classifyName(String name) {
@@ -147,7 +145,6 @@ public class FileManager {
   
   Object getUnzippedBufferedReaderOrErrorMessageFromName(String name,
                                                          boolean allowZipStream,
-                                                         boolean asInputStream,
                                                          boolean isTypeCheckOnly) {
     String[] subFileList = null;
     if (name.indexOf("|") >= 0) 
@@ -163,16 +160,12 @@ public class FileManager {
       } else if (ZipUtil.isZipFile(is)) {
         if (allowZipStream)
           return new ZipInputStream(bis);
-        if (asInputStream)
-          return (InputStream) ZipUtil.getZipFileContents(is, subFileList, 1, true);
         //danger -- converting bytes to String here. 
         //we lose 128-156 or so.
-        String s = (String) ZipUtil.getZipFileContents(is, subFileList, 1, false);
+        String s = (String) ZipUtil.getZipFileContents(is, subFileList, 1);
         is.close();
         return getBufferedReaderForString(s);
       }
-      if (asInputStream)
-        return is;
       return new BufferedReader(new InputStreamReader(is));
     } catch (Exception ioe) {
       return ioe.getMessage();
