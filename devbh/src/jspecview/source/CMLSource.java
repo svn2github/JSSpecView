@@ -46,7 +46,7 @@ public class CMLSource extends XMLSource {
 
       getFactory(in);
 
-      if (!checkStart(this))
+      if (!checkStart())
         return this;
 
       processXML();
@@ -65,7 +65,7 @@ public class CMLSource extends XMLSource {
     return this;
   }
 
-  private boolean checkStart(XMLSource xs) throws Exception {
+  private boolean checkStart() throws Exception {
     if (peek() != XMLStreamConstants.START_DOCUMENT) {
       System.err.println("Error, not an XML document?");
       errorLog.append("Error, not an XML document?");
@@ -79,8 +79,8 @@ public class CMLSource extends XMLSource {
     } catch (Exception e) {
       System.err.println("Error, empty document?");
       errorLog.append("Error, empty document?");
-      xs.setErrorLog(errorLog.toString());
-      xs.addJDXSpectrum(null);
+      setErrorLog(errorLog.toString());
+      addJDXSpectrum(null);
       return false;
     }
     return true;
@@ -89,7 +89,7 @@ public class CMLSource extends XMLSource {
   protected void processXML() throws Exception {
     //find beginning of <spectrum>
     tmpstr = "";
-    while (fer.hasNext() && !tmpstr.equals("spectrum")) {
+    while (haveMore() && !tmpstr.equals("spectrum")) {
       if (nextEvent()!= XMLStreamConstants.START_ELEMENT) {
         if (eventType == XMLStreamConstants.END_ELEMENT)
           tmpEnd = getEndTag();
@@ -115,7 +115,7 @@ public class CMLSource extends XMLSource {
       techname = getAttrValue("type").toUpperCase() + " SPECTRUM";
 
     // now start to process the remainder of the document
-    while (fer.hasNext()) {
+    while (haveMore()) {
       if (nextEvent() == XMLStreamConstants.START_ELEMENT) {
         tmpstr = getTagName();
         attrList = getAttributeList();
@@ -147,7 +147,7 @@ public class CMLSource extends XMLSource {
   public void processMetadata() throws Exception {
     //        StringBuffer errorLog = new StringBuffer();
     try {
-      while ((fer.hasNext()) && (!tmpEnd.equals("metadatalist"))) {
+      while ((haveMore()) && (!tmpEnd.equals("metadatalist"))) {
         if (nextEvent() != XMLStreamConstants.START_ELEMENT) {
           if (eventType == XMLStreamConstants.END_ELEMENT)
             tmpEnd = getEndTag();
@@ -182,7 +182,7 @@ public class CMLSource extends XMLSource {
    */
   public void processParameters() throws Exception {
     try {
-      while (fer.hasNext() && !tmpEnd.equals("parameterlist")) {
+      while (haveMore() && !tmpEnd.equals("parameterlist")) {
         if (nextEvent() != XMLStreamConstants.START_ELEMENT) {
           if (eventType == XMLStreamConstants.END_ELEMENT)
             tmpEnd = getEndTag();
@@ -216,7 +216,7 @@ public class CMLSource extends XMLSource {
    */
   public void processConditions() throws Exception {
     try {
-      while (fer.hasNext() && !tmpEnd.equals("conditionlist")) {
+      while (haveMore() && !tmpEnd.equals("conditionlist")) {
         if (nextEvent() != XMLStreamConstants.START_ELEMENT) {
           if (eventType == XMLStreamConstants.END_ELEMENT)
             tmpEnd = getEndTag();
@@ -246,7 +246,7 @@ public class CMLSource extends XMLSource {
    */
   public void processSample() throws Exception {
     try {
-      while ((fer.hasNext()) && (!tmpEnd.equals("sample"))) {
+      while ((haveMore()) && (!tmpEnd.equals("sample"))) {
         if (nextEvent() != XMLStreamConstants.START_ELEMENT) {
           if (eventType == XMLStreamConstants.END_ELEMENT)
             tmpEnd = getEndTag();
@@ -276,7 +276,7 @@ public class CMLSource extends XMLSource {
   public void processSpectrum() throws Exception {
     String Ydelim = "";
     try {
-      while (fer.hasNext() && !tmpEnd.equals("spectrumdata")) {
+      while (haveMore() && !tmpEnd.equals("spectrumdata")) {
         if (nextEvent() != XMLStreamConstants.START_ELEMENT) {
           if (eventType == XMLStreamConstants.END_ELEMENT)
             tmpEnd = getEndTag();
@@ -314,7 +314,7 @@ public class CMLSource extends XMLSource {
               int jj = -1;
               String tempX = "";
               Ydelim = " ";
-              attrList = getCharacters();
+              attrList = getCharacters().replace('\n',' ').replace('\r',' ').trim();
 
               // now that we have the full string should tokenise it to then process individual X values
               // for now using indexOf !!
@@ -372,7 +372,7 @@ public class CMLSource extends XMLSource {
             int posDelim = 0;
             int jj = -1;
             String tempY = "";
-            attrList = getCharacters();
+            attrList = getCharacters().replace('\n',' ').replace('\r',' ').trim();
 
             // now that we have the full string should tokenise it to then process individual Y values
             // for now using indexOf !!
@@ -430,7 +430,7 @@ public class CMLSource extends XMLSource {
     yaxisData = new double[arbsize];
 
     try {
-      while (fer.hasNext() && !tmpEnd.equals("peaklist")) {
+      while (haveMore() && !tmpEnd.equals("peaklist")) {
         if (nextEvent() != XMLStreamConstants.START_ELEMENT) {
           if (eventType == XMLStreamConstants.END_ELEMENT)
             tmpEnd = getEndTag();

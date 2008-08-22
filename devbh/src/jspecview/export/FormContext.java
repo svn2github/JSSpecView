@@ -127,7 +127,7 @@ class FormContext {
             return;
           }
           cmdType = VT_ELSEIF;
-          cmdPtr = cmds.get(0).intValue();
+          cmdPtr = cmds.remove(0).intValue();
           FormToken vt = formTokens.get(cmdPtr);
           checkIf = true;
           vt.endPtr = ptr;
@@ -139,7 +139,7 @@ class FormContext {
           }
           cmdType = VT_ELSE;
           checkIf = true;
-          cmdPtr = cmds.get(0).intValue();
+          cmdPtr = cmds.remove(0).intValue();
           formTokens.get(cmdPtr).endPtr = ptr;
           cmds.add(0, new Integer(ptr));
         } else {
@@ -195,7 +195,7 @@ class FormContext {
     int ptr;
     for (int i = 0; i < formTokens.size() && strError == null; i++) {
       FormToken vt = formTokens.get(i);
-      //System.out.println(i + " " + vt.cmdType + " " + vt.cmdPtr + " "
+      //System.out.println(i + " " + vt.ptr + " " + vt.cmdType + " " + vt.cmdPtr + " "
       //  + vt.endPtr  + vt.data);
       try {
         switch (vt.cmdType) {

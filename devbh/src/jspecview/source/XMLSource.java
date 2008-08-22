@@ -39,39 +39,39 @@ import jspecview.common.JDXSpectrum;
  * @author Prof. Robert J. Lancashire
  */
 
-abstract public class XMLSource extends JDXSource {
+abstract class XMLSource extends JDXSource {
   
-  public static XMLEventReader fer;
+  private XMLEventReader fer;
 
-  public String tmpstr="START",attrList="", title="identifier not found", owner="UNKNOWN",origin = "UNKNOWN";
-  public String tmpEnd="END", molForm="", techname="";
+  protected String tmpstr="START",attrList="", title="identifier not found", owner="UNKNOWN",origin = "UNKNOWN";
+  protected String tmpEnd="END", molForm="", techname="";
   private XMLEvent e;
-  public int eventType=-1;
-  public int npoints=-1, samplenum=-1;
-  public double[] yaxisData;
-  public double[] xaxisData;
-  public String xaxisLabel = "",  xaxisUnit = "", xaxisType = "";
-  public  String yaxisLabel = "",  yaxisUnit = "", yaxisType = "";
-  public  String vendor = "na", modelType = "MODEL UNKNOWN", LongDate = "";
-  public  String pathlength= "na", identifier="", plLabel="";
-  public  String resolution="na", resLabel="", LocName="";
-  public  String LocContact="", casName = "";
-  public  String sampleowner="", obNucleus="", StrObFreq="";
-  public  boolean increasing = false, continuous=false;
-  public  int ivspoints, evspoints, sampleRefNum=0;
-  public  double deltaX = Graph.ERROR;
-  public  double xFactor = Graph.ERROR;
-  public  double yFactor = Graph.ERROR;
-  public  double firstX = Graph.ERROR;
-  public  double lastX = Graph.ERROR;
-  public  double firstY = Graph.ERROR;
-  public  double obFreq= Graph.ERROR;
-  public  double refPoint=Graph.ERROR;
-  public String casRN = "";
-  public String sampleID;
-  public StringBuffer errorLog = new StringBuffer();
+  protected int eventType=-1;
+  protected int npoints=-1, samplenum=-1;
+  protected double[] yaxisData;
+  protected double[] xaxisData;
+  protected String xaxisLabel = "",  xaxisUnit = "", xaxisType = "";
+  protected  String yaxisLabel = "",  yaxisUnit = "", yaxisType = "";
+  protected  String vendor = "na", modelType = "MODEL UNKNOWN", LongDate = "";
+  protected  String pathlength= "na", identifier="", plLabel="";
+  protected  String resolution="na", resLabel="", LocName="";
+  protected  String LocContact="", casName = "";
+  protected  String sampleowner="", obNucleus="", StrObFreq="";
+  protected  boolean increasing = false, continuous=false;
+  protected  int ivspoints, evspoints, sampleRefNum=0;
+  protected  double deltaX = Graph.ERROR;
+  protected  double xFactor = Graph.ERROR;
+  protected  double yFactor = Graph.ERROR;
+  protected  double firstX = Graph.ERROR;
+  protected  double lastX = Graph.ERROR;
+  protected  double firstY = Graph.ERROR;
+  protected  double obFreq= Graph.ERROR;
+  protected  double refPoint=Graph.ERROR;
+  protected String casRN = "";
+  protected String sampleID;
+  protected StringBuffer errorLog = new StringBuffer();
   protected XMLInputFactory factory;
-  public String errorSeparator="________________________________________________________";
+  protected String errorSeparator="________________________________________________________";
 
   
   protected void getFactory(InputStream in) throws XMLStreamException {
@@ -172,6 +172,10 @@ abstract public class XMLSource extends JDXSource {
     return true;
   }
 
+  protected boolean haveMore() {
+    return fer.hasNext();
+  }
+  
   protected void nextTag() throws XMLStreamException {
     e = fer.nextTag();
   }

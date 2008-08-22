@@ -127,7 +127,9 @@
                         <Vector name="Intensity" dependency="dependent" vectorID="Itensity_ID" plotUse="attribute" vectorType="$ydata_type">
 #if($yencode=="ivs")
 	                            <IndividualValueSet>
-#foreach ($coord in $xyCoords)<$ydata_type>$coord.getYString()</$ydata_type>#end
+#foreach ($coord in $xyCoords)
+<$ydata_type>$coord.getYString()</$ydata_type>
+#end
 	                            </IndividualValueSet>
  	                              <Unit label="$unitLabel">
                                      <SIUnit exponent="1" factor="1">1</SIUnit>

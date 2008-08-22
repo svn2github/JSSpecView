@@ -71,7 +71,7 @@ public class AnIMLSource extends XMLSource {
   }
 
   protected void processXML() throws Exception {
-    while (fer.hasNext()) {
+    while (haveMore()) {
       //System.out.println(eventType + " " + XMLStreamConstants.START_ELEMENT);
       if (nextEvent() == XMLStreamConstants.START_ELEMENT) {
         tmpstr = getTagName();
@@ -93,7 +93,7 @@ public class AnIMLSource extends XMLSource {
    */
   public void processSample() throws Exception {
     try {
-      while (fer.hasNext() && !tmpEnd.equals("sampleset")) {
+      while (haveMore() && !tmpEnd.equals("sampleset")) {
         if (nextEvent() != XMLStreamConstants.START_ELEMENT) {
           if (eventType == XMLStreamConstants.END_ELEMENT)
             tmpEnd = getEndTag();
@@ -132,7 +132,7 @@ public class AnIMLSource extends XMLSource {
    */
 public void processMeasurement() throws Exception {
     try {
-      while (fer.hasNext() && !tmpEnd.equals("experimentstepset")) {
+      while (haveMore() && !tmpEnd.equals("experimentstepset")) {
         if (nextEvent()!= XMLStreamConstants.START_ELEMENT) {
           if (eventType == XMLStreamConstants.END_ELEMENT)
             tmpEnd = getEndTag();
@@ -265,7 +265,7 @@ public void processMeasurement() throws Exception {
    */
   public void processAudit() throws Exception {
     try {
-      while (fer.hasNext() && !tmpEnd.equals("audittrail")) {
+      while (haveMore() && !tmpEnd.equals("audittrail")) {
         if (nextEvent()!= XMLStreamConstants.START_ELEMENT) {
           if (eventType == XMLStreamConstants.END_ELEMENT)
             tmpEnd = getEndTag();
