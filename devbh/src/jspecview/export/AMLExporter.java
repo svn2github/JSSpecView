@@ -30,7 +30,7 @@ import jspecview.common.JDXSpectrum;
  * @author Prof Robert J. Lancashire
  * @author Bob Hanson, hansonr@stolaf.edu
  */
-class AnIMLExporter extends XMLExporter {
+class AMLExporter extends XMLExporter {
 
   /**
    * Exports the Spectrum that is displayed by JSVPanel to a file given by fileName

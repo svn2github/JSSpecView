@@ -1731,7 +1731,8 @@ public class JSVApplet extends JApplet {
         File file = jFileChooser.getSelectedFile();
         JDXSpectrum spec = (JDXSpectrum)selectedJSVPanel.getSpectrumAt(0);
         try{
-          ExporterInterface exporter = (ExporterInterface) Interface.getOptionInterface("jspecview.export.Exporter");
+          ExporterInterface exporter = (ExporterInterface) Interface
+              .getOptionInterface("jspecview.export.Exporter");
           if (exporter == null)
             return;
           errMsg = exporter.export(comm, file.getAbsolutePath(), spec, 
