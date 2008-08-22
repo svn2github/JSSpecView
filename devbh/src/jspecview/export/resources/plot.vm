@@ -132,9 +132,7 @@ x="$leftPlotArea" y="$topPlotArea" width="$plotAreaWidth" height="$plotAreaHeigh
 <rect id="Background" style="fill:$plotAreaColor; visibility:visible;"
 x="$leftPlotArea" y="$topPlotArea" width="$plotAreaWidth" height="$plotAreaHeight"/>
 
-#set($y = $bottomPlotArea + 60)
-
-<text id="titleText" x="$leftPlotArea" y="$y" style="stroke:$titleColor; font-size:12pt">$title</text>
+<text id="titleText" x="$leftPlotArea" y="$titlePosition" style="stroke:$titleColor; font-size:12pt">$title</text>
 
 <path id="Grid" style="fill:none; stroke:$gridColor ;stroke-width:0.1; visibility:visible;"
 d="
@@ -180,21 +178,31 @@ d="
 </text>
 </g>
 
+<!--
 
-#set($xPt1 = $rightPlotArea - 50)
-#set($yPt1 = $bottomPlotArea + 30)
+ one could construct one's own JavaScript here to do this differently
 
-
-<text id="xUnit" x='$xPt1' y='$yPt1' style="stroke:$unitsColor;">$xUnits</text>
-
-
-#set($xPt2 = $leftPlotArea - 80)
-#set($yPt2 = $bottomPlotArea / 2)
-#set($tempX = $xPt2)
-#set($xPt2 = -1 * $yPt2)
-#set($yPt2 = $tempX)
-
-<text id="yUnit" transform='rotate(-90)' x='$xPt2' y='$yPt2' style="stroke:$unitsColor;">$yUnits</text>
+ standard formula used here is:
+ 
+    int xUnitLabelX = rightPlotArea - 50;
+    int xUnitLabelY = bottomPlotArea + 30;
+    int yUnitLabelX = leftPlotArea - 80;
+    int yUnitLabelY = bottomPlotArea / 2;
+    int tempX = yUnitLabelX;
+    yUnitLabelX = -yUnitLabelY;
+    yUnitLabelY = tempX;
+    
+    WHERE
+    
+    rightPlotArea  = $rightPlotArea
+    bottomPlotArea = $bottomPlotArea
+    leftPlotArea   = $leftPlotArea
+    topPlotArea    = $topPlotArea
+    
+ 
+ -->
+<text id="xUnit" x='$xUnitLabelX' y='$xUnitLabelY' style="stroke:$unitsColor;">$xUnits</text>
+<text id="yUnit" transform='rotate(-90)' x='$yUnitLabelX' y='$yUnitLabelY' style="stroke:$unitsColor;">$yUnits</text>
 
 
 <g id="Plot" transform="translate($firstTranslateX,$firstTranslateY) scale($scaleX,$scaleY) translate($secondTranslateX,$secondTranslateY)">

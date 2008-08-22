@@ -24,9 +24,8 @@ import jspecview.common.JDXSpectrum;
 
 /**
  * class <code>AnIMLExporter</code> contains static methods to export a Graph as
- * as AnIML. <code>AnIMLExporter</code> uses <a href="http://jakarta.apache.org/velocity/">Velocity</a>
- * to write to a template file called 'animl_tmp.vm' or 'animl_nmr.vm'. So any changes in design should
- * be done in these files.
+ * as AnIML. <code>AnIMLExporter</code> uses a template file called 'animl_tmp.vm' 
+ * or 'animl_nmr.vm'. So any changes in design should be done in these files.
  * @see jspecview.common.Graph
  * @author Prof Robert J. Lancashire
  * @author Bob Hanson, hansonr@stolaf.edu
@@ -36,13 +35,13 @@ class AnIMLExporter extends XMLExporter {
   /**
    * Exports the Spectrum that is displayed by JSVPanel to a file given by fileName
    * If display is zoomed then export the current view
-   * @param spec the spectrum to export
    * @param fileName the name of the file
+   * @param spec the spectrum to export
    * @param startIndex the starting point of the spectrum
    * @param endIndex the end point
    * @throws IOException
    */
-  void exportAsAnIML(JDXSpectrum spec, String fileName, int startIndex,
+  void exportAsAnIML(String fileName, JDXSpectrum spec, int startIndex,
                      int endIndex) throws IOException {
 
     if (!super.exportAsXML(spec, fileName, startIndex, endIndex))
@@ -91,9 +90,8 @@ class AnIMLExporter extends XMLExporter {
     if (resolution == null || resolution.equals(""))
       resolution="not available in JCAMP-DX file";
     
-
-    setTemplate("animl");
-    writeXML();
+    setContext();
+    writeFormType("animl");
   }
 
 }

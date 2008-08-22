@@ -42,14 +42,14 @@ class JDXExporter {
   /**
    * Exports spectrum in X,Y format
    * @param type 
-   * @param spectrum the spectrum
    * @param path 
+   * @param spectrum the spectrum
    * @param startIndex 
    * @param endIndex 
    * @param writer the writer to export to
    * @throws IOException
    */
-  static void export(int type, JDXSpectrum spectrum, String path, int startIndex, int endIndex) throws IOException{
+  static void export(int type, String path, JDXSpectrum spectrum, int startIndex, int endIndex) throws IOException{
     FileWriter writer = new FileWriter(path);
     writer.write(toStringAux(type, spectrum, startIndex, endIndex));
     writer.close();

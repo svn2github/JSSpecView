@@ -20,9 +20,7 @@
 package jspecview.export;
 
 import java.awt.Color;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.HashMap;
@@ -33,25 +31,16 @@ import jspecview.common.Graph;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSpecViewUtils;
 
-import org.apache.velocity.Template;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.Velocity;
-import org.apache.velocity.exception.MethodInvocationException;
-import org.apache.velocity.exception.ParseErrorException;
-import org.apache.velocity.exception.ResourceNotFoundException;
-
-
 /**
  * class <code>SVGExporter</code> contains static methods to export a Graph as
- * as SVG. <code>SVGExporter</code> uses <a href="http://jakarta.apache.org/velocity/">Velocity</a>
- * to write to a template file called 'plot.vm'. So any changes in design should
+ * as SVG. Uses a template file called 'plot.vm'. So any changes in design should
  * be done in this file.
  * @see jspecview.common.Graph
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
  */
-public class SVGExporter {
+public class SVGExporter extends FormExporter {
 
   /**
    * The width of the SVG
@@ -83,7 +72,6 @@ public class SVGExporter {
    */
   private static int topInset = 20;
 
-
   /**
    * Export a Graph as SVG to a file given by fileName
    * @param fileName the name of the file
@@ -93,18 +81,18 @@ public class SVGExporter {
 
   /**
    * Export a Graph as SVG to a Writer given by writer
-   * @param graph the Graph
    * @param path the file path
+   * @param graph the Graph
    * @param startIndex 
    * @param endIndex 
    * @throws IOException
    */
-  static void exportAsSVG(Graph graph, String path, int startIndex, int endIndex) throws IOException {
-    exportAsSVG(new FileWriter(path), graph.getXYCoords(), "", startIndex, endIndex,
-                graph.getXUnits(), graph.getYUnits(),
-                graph.isContinuous(), graph.isIncreasing(),
-                Color.lightGray, Color.white, Color.black,
-                Color.gray, Color.black, Color.black, Color.black);
+  void exportAsSVG(String path, Graph graph, int startIndex, int endIndex)
+      throws IOException {
+    exportAsSVG(path, graph.getXYCoords(), "", startIndex,
+        endIndex, graph.getXUnits(), graph.getYUnits(), graph.isContinuous(),
+        graph.isIncreasing(), Color.lightGray, Color.white, Color.black,
+        Color.gray, Color.black, Color.black, Color.black);
   }
 
   /**
@@ -117,35 +105,29 @@ public class SVGExporter {
    * @param doZoom if true then if graph is zoomed then export the current view
    * @throws IOException
    */
-  public static void exportAsSVG(String fileName,  JSVPanel jsvp, int specIndex,
-                                 boolean doZoom) throws IOException{
-    FileWriter writer;
-    writer = new FileWriter(fileName);
-    Graph graph = (Graph)jsvp.getSpectrumAt(specIndex);
+  public void exportAsSVG(String fileName, JSVPanel jsvp, int specIndex,
+                          boolean doZoom) throws IOException {
+    Graph graph = (Graph) jsvp.getSpectrumAt(specIndex);
     int startIndex, endIndex;
 
-    if(doZoom){
+    if (doZoom) {
       startIndex = jsvp.getStartDataPointIndices()[specIndex];
       endIndex = jsvp.getEndDataPointIndices()[specIndex];
-    }
-    else{
+    } else {
       startIndex = 0;
-      endIndex = graph.getNumberOfPoints() -1;
+      endIndex = graph.getNumberOfPoints() - 1;
     }
 
-    exportAsSVG(writer, graph.getXYCoords(), graph.getTitle(),
-                startIndex, endIndex,
-                graph.getXUnits(), graph.getYUnits(),
-                graph.isContinuous(), graph.isIncreasing(),
-                jsvp.getPlotAreaColor(), jsvp.getBackground(),
-                jsvp.getPlotColor(0), jsvp.getGridColor(),
-                jsvp.getTitleColor(), jsvp.getScaleColor(), jsvp.getUnitsColor());
+    exportAsSVG(fileName, graph.getXYCoords(), graph.getTitle(), startIndex,
+        endIndex, graph.getXUnits(), graph.getYUnits(), graph.isContinuous(),
+        graph.isIncreasing(), jsvp.getPlotAreaColor(), jsvp.getBackground(),
+        jsvp.getPlotColor(0), jsvp.getGridColor(), jsvp.getTitleColor(), jsvp
+            .getScaleColor(), jsvp.getUnitsColor());
   }
-
 
   /**
    * Export a graph as SVG with specified Coordinates and Colors
-   * @param writer the Writer
+   * @param fileName 
    * @param xyCoords an array of Coordinates
    * @param title the title of the graph
    * @param startDataPointIndex the start index of the coordinates
@@ -161,21 +143,24 @@ public class SVGExporter {
    * @param titleColor the color of the title
    * @param scaleColor the color of the scales
    * @param unitsColor the color of the units
+   * @throws IOException 
    */
-  private static void exportAsSVG(Writer writer, Coordinate[] xyCoords, String title,
-                                  int startDataPointIndex, int endDataPointIndex,
-                                 String xUnits, String yUnits,
-                                 boolean continuous, boolean increasing,
-                                 Color plotAreaColor, Color backgroundColor,
-                                 Color plotColor, Color gridColor,
-                                 Color titleColor, Color scaleColor,
-                                 Color unitsColor){
+  private void exportAsSVG(String fileName, Coordinate[] xyCoords, String title,
+                           int startDataPointIndex, int endDataPointIndex,
+                           String xUnits, String yUnits, boolean continuous,
+                           boolean increasing, Color plotAreaColor,
+                           Color backgroundColor, Color plotColor,
+                           Color gridColor, Color titleColor, Color scaleColor,
+                           Color unitsColor) throws IOException {
 
+    initForm(fileName);
+    
     //DecimalFormat formatter = new DecimalFormat("0.000000", new DecimalFormatSymbols(java.util.Locale.US ));
-    DecimalFormat formatter2 = new DecimalFormat("0.######", new DecimalFormatSymbols(java.util.Locale.US ));
+    DecimalFormat formatter2 = new DecimalFormat("0.######",
+        new DecimalFormatSymbols(java.util.Locale.US));
 
-    JSpecViewUtils.ScaleData scaleData =
-      JSpecViewUtils.generateScaleData(xyCoords, startDataPointIndex, endDataPointIndex, 10, 10);
+    JSpecViewUtils.ScaleData scaleData = JSpecViewUtils.generateScaleData(
+        xyCoords, startDataPointIndex, endDataPointIndex, 10, 10);
 
     double maxXOnScale = scaleData.maxXOnScale;
     double minXOnScale = scaleData.minXOnScale;
@@ -188,34 +173,24 @@ public class SVGExporter {
 
     int plotAreaWidth = svgWidth - leftInset - rightInset;
     int plotAreaHeight = svgHeight - topInset - bottomInset;
-    double xScaleFactor = (plotAreaWidth/(maxXOnScale - minXOnScale));
-    double yScaleFactor = (plotAreaHeight/(maxYOnScale - minYOnScale));
+    double xScaleFactor = (plotAreaWidth / (maxXOnScale - minXOnScale));
+    double yScaleFactor = (plotAreaHeight / (maxYOnScale - minYOnScale));
     int leftPlotArea = leftInset;
     int rightPlotArea = leftInset + plotAreaWidth;
     int topPlotArea = topInset;
     int bottomPlotArea = topInset + plotAreaHeight;
+    int titlePosition = bottomPlotArea + 60;
+    context.put("titlePosition", new Integer(titlePosition));
 
-    //BufferedWriter buffWriter = null;
-    //buffWriter = new BufferedWriter(writer);
-
-    Template template = null;
-    VelocityContext context = new VelocityContext();
 
     double xPt, yPt;
     String xStr, yStr;
-
-
-    try{
-      Velocity.init();
-    }
-    catch(Exception e){
-    }
 
     //Grid
     Vector<HashMap<String, String>> vertGridCoords = new Vector<HashMap<String, String>>();
     Vector<HashMap<String, String>> horizGridCoords = new Vector<HashMap<String, String>>();
 
-    for(double i = minXOnScale; i < maxXOnScale + xStep/2 ; i += xStep){
+    for (double i = minXOnScale; i < maxXOnScale + xStep / 2; i += xStep) {
       xPt = leftPlotArea + ((i - minXOnScale) * xScaleFactor);
       yPt = topPlotArea;
       xStr = formatter2.format(xPt);
@@ -224,11 +199,10 @@ public class SVGExporter {
       HashMap<String, String> hash = new HashMap<String, String>();
       hash.put("xVal", xStr);
       hash.put("yVal", yStr);
-
       vertGridCoords.addElement(hash);
     }
 
-    for(double i = minYOnScale; i < maxYOnScale + yStep/2; i += yStep){
+    for (double i = minYOnScale; i < maxYOnScale + yStep / 2; i += yStep) {
       xPt = leftPlotArea;
       yPt = topPlotArea + ((i - minYOnScale) * yScaleFactor);
       xStr = formatter2.format(xPt);
@@ -252,48 +226,49 @@ public class SVGExporter {
     String hash1 = "0.00000000";
 
     if (hashNumX <= 0)
-      hashX = hash1.substring(0,Math.abs(hashNumX)+3);
+      hashX = hash1.substring(0, Math.abs(hashNumX) + 3);
 
-    DecimalFormat displayXFormatter = new DecimalFormat(hashX, new DecimalFormatSymbols(java.util.Locale.US ));
+    DecimalFormat displayXFormatter = new DecimalFormat(hashX,
+        new DecimalFormatSymbols(java.util.Locale.US));
 
     if (hashNumY <= 0)
-      hashY = hash1.substring(0,Math.abs(hashNumY)+3);
+      hashY = hash1.substring(0, Math.abs(hashNumY) + 3);
 
-    DecimalFormat displayYFormatter = new DecimalFormat(hashY, new DecimalFormatSymbols(java.util.Locale.US ));
+    DecimalFormat displayYFormatter = new DecimalFormat(hashY,
+        new DecimalFormatSymbols(java.util.Locale.US));
 
-    for(double i = minXOnScale; i < (maxXOnScale + xStep/2); i += xStep){
-        xPt = leftPlotArea + ((i - minXOnScale) * xScaleFactor);
-        xPt -= 10; // shift to left by 10
-        yPt = bottomPlotArea + 15; // shift down by 15
-        xStr = formatter2.format(xPt);
-        yStr = formatter2.format(yPt);
-        String iStr = displayXFormatter.format(i);
+    for (double i = minXOnScale; i < (maxXOnScale + xStep / 2); i += xStep) {
+      xPt = leftPlotArea + ((i - minXOnScale) * xScaleFactor);
+      xPt -= 10; // shift to left by 10
+      yPt = bottomPlotArea + 15; // shift down by 15
+      xStr = formatter2.format(xPt);
+      yStr = formatter2.format(yPt);
+      String iStr = displayXFormatter.format(i);
 
-        HashMap<String, String> hash = new HashMap<String, String>();
-        hash.put("xVal", xStr);
-        hash.put("yVal", yStr);
-        hash.put("number", iStr);
-        xScaleList.addElement(hash);
+      HashMap<String, String> hash = new HashMap<String, String>();
+      hash.put("xVal", xStr);
+      hash.put("yVal", yStr);
+      hash.put("number", iStr);
+      xScaleList.addElement(hash);
     }
 
-    for(double i = minXOnScale, j = maxXOnScale; i < (maxXOnScale + xStep/2); i += xStep, j -= xStep){
-        xPt = leftPlotArea + ((j - minXOnScale) * xScaleFactor);
-        xPt -= 10;
-        yPt = bottomPlotArea + 15; // shift down by 15
-        xStr = formatter2.format(xPt);
-        yStr = formatter2.format(yPt);
-        String iStr = displayXFormatter.format(i);
+    for (double i = minXOnScale, j = maxXOnScale; i < (maxXOnScale + xStep / 2); i += xStep, j -= xStep) {
+      xPt = leftPlotArea + ((j - minXOnScale) * xScaleFactor);
+      xPt -= 10;
+      yPt = bottomPlotArea + 15; // shift down by 15
+      xStr = formatter2.format(xPt);
+      yStr = formatter2.format(yPt);
+      String iStr = displayXFormatter.format(i);
 
-        HashMap<String, String> hash = new HashMap<String, String>();
-        hash.put("xVal", xStr);
-        hash.put("yVal", yStr);
-        hash.put("number", iStr);
-        xScaleListReversed.addElement(hash);
+      HashMap<String, String> hash = new HashMap<String, String>();
+      hash.put("xVal", xStr);
+      hash.put("yVal", yStr);
+      hash.put("number", iStr);
+      xScaleListReversed.addElement(hash);
 
     }
 
-
-    for(double i = minYOnScale; (i < maxYOnScale + yStep/2); i += yStep){
+    for (double i = minYOnScale; (i < maxYOnScale + yStep / 2); i += yStep) {
       xPt = leftPlotArea - 55;
       yPt = bottomPlotArea - ((i - minYOnScale) * yScaleFactor);
       yPt += 3; // shift down by three
@@ -308,19 +283,17 @@ public class SVGExporter {
       yScaleList.addElement(hash);
     }
 
-
     double firstTranslateX, firstTranslateY, secondTranslateX, secondTranslateY;
     double scaleX, scaleY;
 
-    if(increasing){
+    if (increasing) {
       firstTranslateX = leftPlotArea;
       firstTranslateY = bottomPlotArea;
       scaleX = xScaleFactor;
       scaleY = -yScaleFactor;
-      secondTranslateX = -1 *minXOnScale;
+      secondTranslateX = -1 * minXOnScale;
       secondTranslateY = -1 * minYOnScale;
-    }
-    else{
+    } else {
       firstTranslateX = rightPlotArea;
       firstTranslateY = bottomPlotArea;
       scaleX = -xScaleFactor;
@@ -329,8 +302,10 @@ public class SVGExporter {
       secondTranslateY = -minYOnScale;
     }
 
-    context.put("plotAreaColor", JSpecViewUtils.colorToHexString(plotAreaColor));
-    context.put("backgroundColor", JSpecViewUtils.colorToHexString(backgroundColor));
+    context
+        .put("plotAreaColor", JSpecViewUtils.colorToHexString(plotAreaColor));
+    context.put("backgroundColor", JSpecViewUtils
+        .colorToHexString(backgroundColor));
     context.put("plotColor", JSpecViewUtils.colorToHexString(plotColor));
     context.put("gridColor", JSpecViewUtils.colorToHexString(gridColor));
     context.put("titleColor", JSpecViewUtils.colorToHexString(titleColor));
@@ -355,13 +330,11 @@ public class SVGExporter {
 
     context.put("increasing", new Boolean(increasing));
 
-
     context.put("verticalGridCoords", vertGridCoords);
     context.put("horizontalGridCoords", horizGridCoords);
 
-
     Vector<Coordinate> newXYCoords = new Vector<Coordinate>();
-    for(int i = startDataPointIndex; i <= endDataPointIndex; i++)
+    for (int i = startDataPointIndex; i <= endDataPointIndex; i++)
       newXYCoords.addElement(xyCoords[i]);
 
     context.put("title", title);
@@ -374,12 +347,10 @@ public class SVGExporter {
     context.put("secondTranslateX", new Double(secondTranslateX));
     context.put("secondTranslateY", new Double(secondTranslateY));
 
-
-    if(increasing){
+    if (increasing) {
       context.put("xScaleList", xScaleList);
       context.put("xScaleListReversed", xScaleListReversed);
-    }
-    else{
+    } else {
       context.put("xScaleList", xScaleListReversed);
       context.put("xScaleListReversed", xScaleList);
     }
@@ -388,52 +359,28 @@ public class SVGExporter {
     context.put("xUnits", xUnits);
     context.put("yUnits", yUnits);
 
+    int xUnitLabelX = rightPlotArea - 50;
+    int xUnitLabelY = bottomPlotArea + 30;
+    int yUnitLabelX = leftPlotArea - 80;
+    int yUnitLabelY = bottomPlotArea / 2;
+    int tempX = yUnitLabelX;
+    yUnitLabelX = -yUnitLabelY;
+    yUnitLabelY = tempX;
+    context.put("xUnitLabelX", "" + xUnitLabelX);
+    context.put("xUnitLabelY", "" + xUnitLabelY);
+    context.put("yUnitLabelX", "" + yUnitLabelX);
+    context.put("yUnitLabelY", "" + yUnitLabelY);
+
     context.put("numDecimalPlacesX", new Integer(Math.abs(hashNumX)));
     context.put("numDecimalPlacesY", new Integer(Math.abs(hashNumY)));
 
-    // Take out System.out.println's
-    // Throw exception instead
-
-    try
-    {
-      template = Velocity.getTemplate("plot.vm");
-      template.merge( context, writer);
-    }
-    catch( ResourceNotFoundException rnfe )
-    {
-      // couldn't find the template
-      System.out.println("couldn't find the template");
-    }
-    catch( ParseErrorException pee )
-    {
-      // syntax error : problem parsing the template
-      System.out.println("syntax error : problem parsing the template");
-      pee.printStackTrace();
-    }
-    catch( MethodInvocationException mie )
-    {
-      // something invoked in the template
-      // threw an exception
-      System.out.println("something invoked in the template threw an exception");
-    }
-    catch( Exception e )
-    {
-      System.out.println("exception!");
-    }
-
-
-    try{
-      writer.flush();
-      writer.close();
-    }
-    catch(IOException ioe){
-    }
-
+    writeForm("plot.vm");
+    
   }
 
   /**
    * Export an overlayed graph as SVG with specified Coordinates and Colors
-   * @param writer the Writer
+   * @param fileName 
    * @param xyCoordsList an array of arrays of Coordinates
    * @param title the title of the graph
    * @param startDataPointIndices the start indices of the coordinates
@@ -449,20 +396,23 @@ public class SVGExporter {
    * @param titleColor the color of the title
    * @param scaleColor the color of the scales
    * @param unitsColor the color of the units
+   * @throws IOException 
    */
-  public static void exportAsSVG(Writer writer, Coordinate[][] xyCoordsList, String title,
-                                  int[] startDataPointIndices, int[] endDataPointIndices,
-                                 String xUnits, String yUnits,
-                                 boolean continuous, boolean increasing,
-                                 Color plotAreaColor, Color backgroundColor,
-                                 Color plotColor, Color gridColor,
-                                 Color titleColor, Color scaleColor,
-                                 Color unitsColor){
+  public void exportAsSVG(String fileName, Coordinate[][] xyCoordsList,
+                                 String title, int[] startDataPointIndices,
+                                 int[] endDataPointIndices, String xUnits,
+                                 String yUnits, boolean continuous,
+                                 boolean increasing, Color plotAreaColor,
+                                 Color backgroundColor, Color plotColor,
+                                 Color gridColor, Color titleColor,
+                                 Color scaleColor, Color unitsColor) throws IOException {    
+    initForm(fileName);
     //DecimalFormat formatter = new DecimalFormat("0.000000", new DecimalFormatSymbols(java.util.Locale.US ));
-    DecimalFormat formatter2 = new DecimalFormat("0.######", new DecimalFormatSymbols(java.util.Locale.US ));
+    DecimalFormat formatter2 = new DecimalFormat("0.######",
+        new DecimalFormatSymbols(java.util.Locale.US));
 
-    JSpecViewUtils.MultiScaleData scaleData =
-      JSpecViewUtils.generateScaleData(xyCoordsList, startDataPointIndices, endDataPointIndices, 10, 10);
+    JSpecViewUtils.MultiScaleData scaleData = JSpecViewUtils.generateScaleData(
+        xyCoordsList, startDataPointIndices, endDataPointIndices, 10, 10);
 
     double maxXOnScale = scaleData.maxXOnScale;
     double minXOnScale = scaleData.minXOnScale;
@@ -475,8 +425,8 @@ public class SVGExporter {
 
     int plotAreaWidth = svgWidth - leftInset - rightInset;
     int plotAreaHeight = svgHeight - topInset - bottomInset;
-    double xScaleFactor = (plotAreaWidth/(maxXOnScale - minXOnScale));
-    double yScaleFactor = (plotAreaHeight/(maxYOnScale - minYOnScale));
+    double xScaleFactor = (plotAreaWidth / (maxXOnScale - minXOnScale));
+    double yScaleFactor = (plotAreaHeight / (maxYOnScale - minYOnScale));
     int leftPlotArea = leftInset;
     int rightPlotArea = leftInset + plotAreaWidth;
     int topPlotArea = topInset;
@@ -485,24 +435,14 @@ public class SVGExporter {
     //BufferedWriter buffWriter = null;
     //buffWriter = new BufferedWriter(writer);
 
-    Template template = null;
-    VelocityContext context = new VelocityContext();
-
     double xPt, yPt;
     String xStr, yStr;
-
-
-    try{
-      Velocity.init();
-    }
-    catch(Exception e){
-    }
 
     //Grid
     Vector<HashMap<String, String>> vertGridCoords = new Vector<HashMap<String, String>>();
     Vector<HashMap<String, String>> horizGridCoords = new Vector<HashMap<String, String>>();
 
-    for(double i = minXOnScale; i < maxXOnScale + xStep/2 ; i += xStep){
+    for (double i = minXOnScale; i < maxXOnScale + xStep / 2; i += xStep) {
       xPt = leftPlotArea + ((i - minXOnScale) * xScaleFactor);
       yPt = topPlotArea;
       xStr = formatter2.format(xPt);
@@ -515,7 +455,7 @@ public class SVGExporter {
       vertGridCoords.addElement(hash);
     }
 
-    for(double i = minYOnScale; i < maxYOnScale + yStep/2; i += yStep){
+    for (double i = minYOnScale; i < maxYOnScale + yStep / 2; i += yStep) {
       xPt = leftPlotArea;
       yPt = topPlotArea + ((i - minYOnScale) * yScaleFactor);
       xStr = formatter2.format(xPt);
@@ -539,51 +479,49 @@ public class SVGExporter {
     String hash1 = "0.00000000";
 
     if (hashNumX <= 0)
-      hashX = hash1.substring(0,Math.abs(hashNumX)+3);
+      hashX = hash1.substring(0, Math.abs(hashNumX) + 3);
 
-    DecimalFormat displayXFormatter = new DecimalFormat(hashX, new DecimalFormatSymbols(java.util.Locale.US ));
+    DecimalFormat displayXFormatter = new DecimalFormat(hashX,
+        new DecimalFormatSymbols(java.util.Locale.US));
 
     if (hashNumY <= 0)
-      hashY = hash1.substring(0,Math.abs(hashNumY)+3);
+      hashY = hash1.substring(0, Math.abs(hashNumY) + 3);
 
-    DecimalFormat displayYFormatter = new DecimalFormat(hashY, new DecimalFormatSymbols(java.util.Locale.US ));
+    DecimalFormat displayYFormatter = new DecimalFormat(hashY,
+        new DecimalFormatSymbols(java.util.Locale.US));
 
+    for (double i = minXOnScale; i < (maxXOnScale + xStep / 2); i += xStep) {
+      xPt = leftPlotArea + ((i - minXOnScale) * xScaleFactor);
+      xPt -= 10; // shift to left by 10
+      yPt = bottomPlotArea + 15; // shift down by 15
+      xStr = formatter2.format(xPt);
+      yStr = formatter2.format(yPt);
+      String iStr = displayXFormatter.format(i);
 
-
-
-    for(double i = minXOnScale; i < (maxXOnScale + xStep/2); i += xStep){
-        xPt = leftPlotArea + ((i - minXOnScale) * xScaleFactor);
-        xPt -= 10; // shift to left by 10
-        yPt = bottomPlotArea + 15; // shift down by 15
-        xStr = formatter2.format(xPt);
-        yStr = formatter2.format(yPt);
-        String iStr = displayXFormatter.format(i);
-
-        HashMap<String, String> hash = new HashMap<String, String>();
-        hash.put("xVal", xStr);
-        hash.put("yVal", yStr);
-        hash.put("number", iStr);
-        xScaleList.addElement(hash);
+      HashMap<String, String> hash = new HashMap<String, String>();
+      hash.put("xVal", xStr);
+      hash.put("yVal", yStr);
+      hash.put("number", iStr);
+      xScaleList.addElement(hash);
     }
 
-    for(double i = minXOnScale, j = maxXOnScale; i < (maxXOnScale + xStep/2); i += xStep, j -= xStep){
-        xPt = leftPlotArea + ((j - minXOnScale) * xScaleFactor);
-        xPt -= 10;
-        yPt = bottomPlotArea + 15; // shift down by 15
-        xStr = formatter2.format(xPt);
-        yStr = formatter2.format(yPt);
-        String iStr = displayXFormatter.format(i);
+    for (double i = minXOnScale, j = maxXOnScale; i < (maxXOnScale + xStep / 2); i += xStep, j -= xStep) {
+      xPt = leftPlotArea + ((j - minXOnScale) * xScaleFactor);
+      xPt -= 10;
+      yPt = bottomPlotArea + 15; // shift down by 15
+      xStr = formatter2.format(xPt);
+      yStr = formatter2.format(yPt);
+      String iStr = displayXFormatter.format(i);
 
-        HashMap<String, String> hash = new HashMap<String, String>();
-        hash.put("xVal", xStr);
-        hash.put("yVal", yStr);
-        hash.put("number", iStr);
-        xScaleListReversed.addElement(hash);
+      HashMap<String, String> hash = new HashMap<String, String>();
+      hash.put("xVal", xStr);
+      hash.put("yVal", yStr);
+      hash.put("number", iStr);
+      xScaleListReversed.addElement(hash);
 
     }
 
-
-    for(double i = minYOnScale; (i < maxYOnScale + yStep/2); i += yStep){
+    for (double i = minYOnScale; (i < maxYOnScale + yStep / 2); i += yStep) {
       xPt = leftPlotArea - 55;
       yPt = bottomPlotArea - ((i - minYOnScale) * yScaleFactor);
       yPt += 3; // shift down by three
@@ -598,19 +536,17 @@ public class SVGExporter {
       yScaleList.addElement(hash);
     }
 
-
     double firstTranslateX, firstTranslateY, secondTranslateX, secondTranslateY;
     double scaleX, scaleY;
 
-    if(increasing){
+    if (increasing) {
       firstTranslateX = leftPlotArea;
       firstTranslateY = bottomPlotArea;
       scaleX = xScaleFactor;
       scaleY = -yScaleFactor;
-      secondTranslateX = -1 *minXOnScale;
+      secondTranslateX = -1 * minXOnScale;
       secondTranslateY = -1 * minYOnScale;
-    }
-    else{
+    } else {
       firstTranslateX = rightPlotArea;
       firstTranslateY = bottomPlotArea;
       scaleX = -xScaleFactor;
@@ -620,7 +556,8 @@ public class SVGExporter {
     }
 
     context.put("plotAreaColor", JSpecViewUtils.colorToHexString(plotAreaColor));
-    context.put("backgroundColor", JSpecViewUtils.colorToHexString(backgroundColor));
+    context.put("backgroundColor", JSpecViewUtils
+        .colorToHexString(backgroundColor));
     context.put("plotColor", JSpecViewUtils.colorToHexString(plotColor));
     context.put("gridColor", JSpecViewUtils.colorToHexString(gridColor));
     context.put("titleColor", JSpecViewUtils.colorToHexString(titleColor));
@@ -645,14 +582,13 @@ public class SVGExporter {
 
     context.put("increasing", new Boolean(increasing));
 
-
     context.put("verticalGridCoords", vertGridCoords);
     context.put("horizontalGridCoords", horizGridCoords);
 
     Vector<Vector<Coordinate>> newXYCoordsList = new Vector<Vector<Coordinate>>();
     Vector<Coordinate> coords = new Vector<Coordinate>();
-    for(int i = 0; i < xyCoordsList.length; i++) {
-      for(int j = startDataPointIndices[i]; j <= endDataPointIndices[i]; j++)
+    for (int i = 0; i < xyCoordsList.length; i++) {
+      for (int j = startDataPointIndices[i]; j <= endDataPointIndices[i]; j++)
         coords.addElement(xyCoordsList[i][j]);
       newXYCoordsList.addElement(coords);
     }
@@ -668,12 +604,10 @@ public class SVGExporter {
     context.put("secondTranslateX", new Double(secondTranslateX));
     context.put("secondTranslateY", new Double(secondTranslateY));
 
-
-    if(increasing){
+    if (increasing) {
       context.put("xScaleList", xScaleList);
       context.put("xScaleListReversed", xScaleListReversed);
-    }
-    else{
+    } else {
       context.put("xScaleList", xScaleListReversed);
       context.put("xScaleListReversed", xScaleList);
     }
@@ -685,42 +619,6 @@ public class SVGExporter {
     context.put("numDecimalPlacesX", new Integer(Math.abs(hashNumX)));
     context.put("numDecimalPlacesY", new Integer(Math.abs(hashNumY)));
 
-    // Take out System.out.println's
-    // Throw exception instead
-
-    try
-    {
-      template = Velocity.getTemplate("plot.vm");
-      template.merge( context, writer);
-    }
-    catch( ResourceNotFoundException rnfe )
-    {
-      // couldn't find the template
-      System.out.println("couldn't find the template");
-    }
-    catch( ParseErrorException pee )
-    {
-      // syntax error : problem parsing the template
-      System.out.println("syntax error : problem parsing the template");
-      pee.printStackTrace();
-    }
-    catch( MethodInvocationException mie )
-    {
-      // something invoked in the template
-      // threw an exception
-      System.out.println("something invoked in the template threw an exception");
-    }
-    catch( Exception e )
-    {
-      System.out.println("exception!");
-    }
-
-
-    try{
-      writer.flush();
-      writer.close();
-    }
-    catch(IOException ioe){
-    }
- }
+    writeForm("plot.vm");
+  }
 }

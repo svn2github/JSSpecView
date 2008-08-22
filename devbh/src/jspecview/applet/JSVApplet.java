@@ -76,9 +76,7 @@ import javax.swing.event.ChangeListener;
 
 import jspecview.api.ExporterInterface;
 import jspecview.api.Interface;
-import jspecview.common.AnIMLSource;
 import jspecview.common.BlockSource;
-import jspecview.common.CMLSource;
 import jspecview.common.CompoundSource;
 import jspecview.common.Coordinate;
 import jspecview.common.JDXSource;
@@ -92,6 +90,8 @@ import jspecview.common.PrintLayoutDialog;
 import jspecview.common.TransmittanceAbsorbanceConverter;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
+import jspecview.source.AnIMLSource;
+import jspecview.source.CMLSource;
 import netscape.javascript.JSObject;
 import jspecview.common.Visible;
 
@@ -1550,6 +1550,7 @@ public class JSVApplet extends JApplet {
   public boolean setStringParameter(String key, String value) {
     if (key == null)
       return false;
+    try {
     if (key.equalsIgnoreCase("irMode")) {
       if ("transmittance".equalsIgnoreCase(value))
         TAConvert(TO_TRANS);
@@ -1560,6 +1561,9 @@ public class JSVApplet extends JApplet {
       else
         return false;
       return true;
+    }
+    } catch (JSpecViewException jsve) {
+      
     }
     return false;
   }
@@ -1572,11 +1576,15 @@ public class JSVApplet extends JApplet {
   void transAbsMenuItem_itemStateChanged(ItemEvent e) {
     // for some reason, at the the St. Olaf site, this is triggering twice
     // when the user clicks the menu item. Why?
+    try {
     System.out.println("ta event " + e.getID() + " " + e.getStateChange() + " " + ItemEvent.SELECTED + " " + ItemEvent.DESELECTED + " " + e.toString());
     if (e.getStateChange() == ItemEvent.SELECTED)
        TAConvert(IMPLIED);
     else
        TAConvert(IMPLIED);
+    } catch (JSpecViewException jsve) {
+      
+    }
   }
 
 
@@ -1586,10 +1594,11 @@ public class JSVApplet extends JApplet {
    * Allows Transmittance to Absorbance conversion or vice versa
    * depending on the value of comm.
    * @param comm the conversion command
+   * @throws JSpecViewException 
    */
 
   
-  private void TAConvert(int comm) {
+  private void TAConvert(int comm) throws JSpecViewException {
     long time = System.currentTimeMillis();
     System.out.println(time + " " + msTrigger + " " + (time-msTrigger));
     if (msTrigger > 0 && time - msTrigger < 100)
@@ -1616,8 +1625,6 @@ public class JSVApplet extends JApplet {
       return;
     }
 
-    try {
-      
       
       //  if successful, newSpec has the converted info
       JDXSpectrum newSpec = TransmittanceAbsorbanceConverter.convert(spectrum);
@@ -1643,9 +1650,6 @@ public class JSVApplet extends JApplet {
       //  now need to validate and repaint
       JSVApplet.this.validate();
       JSVApplet.this.repaint();
-
-    } catch (JSpecViewException ex) {
-    }
 
   }
 
@@ -1730,7 +1734,7 @@ public class JSVApplet extends JApplet {
           ExporterInterface exporter = (ExporterInterface) Interface.getOptionInterface("jspecview.export.Exporter");
           if (exporter == null)
             return;
-          errMsg = exporter.export(spec, comm, file.getAbsolutePath(), 
+          errMsg = exporter.export(comm, file.getAbsolutePath(), spec, 
               0, spec.getXYCoords().length - 1);
         }
         catch(IOException ioe){

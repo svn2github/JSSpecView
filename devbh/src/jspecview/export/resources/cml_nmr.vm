@@ -51,7 +51,7 @@
 #end
 #if (!$continuous)
      <peakList size="$npoints">
-#foreach ($coord in $xyCoords)<peak id="peak$velocityCount" xUnits="units:$xUnits" xValue="$coord.getXString()" yUnits="units:$yUnits" yValue="$coord.getYString()"></peak>#end
+#foreach ($coord in $xyCoords)<peak id="peak$pointCount" xUnits="units:$xUnits" xValue="$coord.getXString()" yUnits="units:$yUnits" yValue="$coord.getYString()"></peak>#end
       </peakList>
 #end
 

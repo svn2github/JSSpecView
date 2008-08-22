@@ -117,8 +117,6 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import jspecview.common.AnIMLSource;
-import jspecview.common.CMLSource;
 import jspecview.common.CompoundSource;
 import jspecview.common.Coordinate;
 import jspecview.common.Graph;
@@ -136,6 +134,8 @@ import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
 import jspecview.export.Exporter;
 import jspecview.export.SVGExporter;
+import jspecview.source.AnIMLSource;
+import jspecview.source.CMLSource;
 import mdidesktop.ScrollableDesktopPane;
 import mdidesktop.WindowMenu;
 import jspecview.common.Visible;
@@ -1343,6 +1343,10 @@ public class MainFrame
         in.close();
         currentSelectedSource = xmlSource;
         xmlSpec = xmlSource.getJDXSpectrum(0);
+        if (xmlSpec.getNumberOfPoints() == 0) {
+          System.err.println("not a recognizable XML Document");
+          return;          
+        }
         JSVPanel jsvp = new JSVPanel(xmlSpec);
         jsvp.addMouseListener(new JSVPanelPopupListener(jsvpPopupMenu, jsvp, null));
         setJSVPanelProperties(jsvp);
@@ -1732,10 +1736,11 @@ public class MainFrame
     SpecInfo nodeInfo;
     DefaultMutableTreeNode childNode;
     while (enume.hasMoreElements()) {
-      DefaultMutableTreeNode node = (DefaultMutableTreeNode) enume.nextElement();
+      DefaultMutableTreeNode node = (DefaultMutableTreeNode) enume
+          .nextElement();
       String fileName = getFileNameForSource(source);
-      if ( ( (String) node.getUserObject()).equals(fileName)) {
-        for (Enumeration e = node.children(); e.hasMoreElements(); ) {
+      if (((String) node.getUserObject()).equals(fileName)) {
+        for (Enumeration e = node.children(); e.hasMoreElements();) {
           childNode = (DefaultMutableTreeNode) e.nextElement();
           nodeInfo = (SpecInfo) childNode.getUserObject();
           nodeInfo.frame.dispose();
@@ -1745,21 +1750,22 @@ public class MainFrame
       }
     }
 
-    Vector<JDXSpectrum> spectra = source.getSpectra();
-    for (int i = 0; i < spectra.size(); i++) {
-      String title = ( (Graph) spectra.elementAt(i)).getTitle();
-      for (int j = 0; j < showMenu.getMenuComponentCount(); j++) {
-        JMenuItem mi = (JMenuItem) showMenu.getMenuComponent(j);
-        if (mi.getText().equals(title)) {
-          showMenu.remove(mi);
+    if (source != null) {
+      Vector<JDXSpectrum> spectra = source.getSpectra();
+      for (int i = 0; i < spectra.size(); i++) {
+        String title = ((Graph) spectra.elementAt(i)).getTitle();
+        for (int j = 0; j < showMenu.getMenuComponentCount(); j++) {
+          JMenuItem mi = (JMenuItem) showMenu.getMenuComponent(j);
+          if (mi.getText().equals(title)) {
+            showMenu.remove(mi);
+          }
         }
       }
+      exportJcampMenu.setEnabled(true);
     }
 
-// TODO: need to check that any remaining file on display is still continuous
-//
-
-    exportJcampMenu.setEnabled(true);
+    // TODO: need to check that any remaining file on display is still continuous
+    //
 
     closeMenuItem.setText("Close");
     setTitle("JSpecView");
@@ -2605,10 +2611,9 @@ public class MainFrame
             ioe.printStackTrace();
           }
         } else if (comm.equals("SVG")) {
-          SVGExporter.exportAsSVG(file.getAbsolutePath(), jsvp, index, true);
+          (new SVGExporter()).exportAsSVG(file.getAbsolutePath(), jsvp, index, true);
         } else {
-          Exporter exporter = new Exporter();
-          exporter.export(spec, comm, file.getAbsolutePath(), startIndex, endIndex);
+          (new Exporter()).export(comm, file.getAbsolutePath(), spec, startIndex, endIndex);
         } 
       }
       catch (IOException ioe) {

@@ -25,7 +25,7 @@ import jspecview.common.JDXSpectrum;
 
 public interface ExporterInterface {
 
-  String export(JDXSpectrum spec, String comm, 
-                String path, int startIndex, int endIndex) throws IOException;
+  String export(String type, String path, 
+                JDXSpectrum spec, int startIndex, int endIndex) throws IOException;
 
 }

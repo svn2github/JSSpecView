@@ -21,7 +21,9 @@ package jspecview.export;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Vector;
 
 import jspecview.common.Coordinate;
@@ -29,20 +31,20 @@ import jspecview.util.Parser;
 import jspecview.util.TextFormat;
 
 /**
- * A simple Velocity-like template filler
+ * A simple Velocity-like template form filler
  * -- Supports only "==" "=" "!=" and no SET
- * -- # directives must be first character of the line 
+ * -- # directives must be first non-whitespace character of the line 
  * 
  * @author Bob Hanson, hansonr@stolaf.edu
  * 
  */
-class VelocityContext {
+class FormContext {
 
   String[] tokens;
   Hashtable<String, Object> context = new Hashtable<String, Object>();
-  Vector<VelocityToken> velocityTokens;
+  Vector<FormToken> formTokens;
 
-  VelocityContext() {
+  FormContext() {
   }
 
   void put(String key, Object value) {
@@ -52,7 +54,7 @@ class VelocityContext {
   }
 
   String setTemplate(String template) {
-    String errMsg = getVeloctyTokens(template);
+    String errMsg = getFormTokens(template);
     if (errMsg != null)
       return errMsg;
     return null;
@@ -70,7 +72,7 @@ class VelocityContext {
   final static int VT_FOREACH = 5;
   final static int VT_SET = 6;
 
-  class VelocityToken {
+  class FormToken {
 
     boolean hasVariable;
     int cmdType;
@@ -78,20 +80,21 @@ class VelocityContext {
     int endPtr = -1;
     int ptr;
     String var;
-    Vector<Coordinate> vc;
-    int velocityCount;
+    Vector<Object> vc;
+    int pointCount;
     String data;
 
-    VelocityToken(String token) {
+    FormToken(String token, int firstChar) {
       hasVariable = token.indexOf("$") >= 0;
       data = token;
-      if (token.indexOf("#") < 0) {
-        velocityTokens.add(this);
+      if (token.indexOf("#") != firstChar) {
+        formTokens.add(this);
         return;
       }
-      ptr = velocityTokens.size();
-
-      if (token.startsWith("#end")) {
+      //System.out.println(firstChar + " " + token);
+      ptr = formTokens.size();
+      boolean checkIf = false;
+      if (token.indexOf("#end") == firstChar) {
         cmdType = VT_END;
         endPtr = ptr;
         commandLevel--;
@@ -100,44 +103,62 @@ class VelocityContext {
           return;
         }
         cmdPtr = cmds.remove(0).intValue();
-        velocityTokens.get(cmdPtr).endPtr = ptr;
+        formTokens.get(cmdPtr).endPtr = ptr;
       } else {
         commandLevel++;
-        if (token.startsWith("#if")) {
+        if (token.indexOf("#if") == firstChar) {
           cmdType = VT_IF;
           cmds.add(0, new Integer(ptr));
-        } else if (token.startsWith("#foreach")) {
+        } else if (token.indexOf("#foreach") == firstChar) {
           cmdType = VT_FOREACH;
           cmds.add(0, new Integer(ptr));
           cmdPtr = ptr;
           if (token.indexOf("#end") > 0) {
             int pt = token.indexOf(")") + 1;
             data = token.substring(0, pt);
-            velocityTokens.add(this);
-            new VelocityToken(token.substring(pt, token.indexOf("#end")) + "\n");
-            new VelocityToken("#end");
+            formTokens.add(this);
+            new FormToken(token.substring(pt, token.indexOf("#end")), 0);
+            new FormToken("#end", 0);
             return;
           }
-        } else if (token.startsWith("#elseif")) {
+        } else if (token.indexOf("#elseif") == firstChar) {
+          if (cmds.size() == 0) {
+            strError = "misplaced #elseif";
+            return;
+          }
           cmdType = VT_ELSEIF;
           cmdPtr = cmds.get(0).intValue();
-          velocityTokens.get(cmdPtr).endPtr = ptr;
+          FormToken vt = formTokens.get(cmdPtr);
+          checkIf = true;
+          vt.endPtr = ptr;
           cmds.add(0, new Integer(ptr));
-        } else if (token.startsWith("#else")) {
+        } else if (token.indexOf("#else") == firstChar) {
+          if (cmds.size() == 0) {
+            strError = "misplaced #else";
+            return;
+          }
           cmdType = VT_ELSE;
+          checkIf = true;
           cmdPtr = cmds.get(0).intValue();
-          velocityTokens.get(cmdPtr).endPtr = ptr;
+          formTokens.get(cmdPtr).endPtr = ptr;
           cmds.add(0, new Integer(ptr));
         } else {
           System.out.println("??? " + token);
         }
+        if (checkIf) {
+          FormToken vt = formTokens.get(cmdPtr);
+          if (vt.cmdType != VT_IF && vt.cmdType != VT_ELSEIF) {
+            strError = "misplaced " + token.trim();
+            return;
+          }
+        }
       }
-      velocityTokens.add(this);
+      formTokens.add(this);
     }
   }
 
-  private String getVeloctyTokens(String template) {
-    velocityTokens = new Vector<VelocityToken>();
+  private String getFormTokens(String template) {
+    formTokens = new Vector<FormToken>();
     if (template.indexOf("\r\n") >= 0)
       template = TextFormat.replaceAllCharacters(template, "\r\n", '\n');
     template = template.replace('\r', '\n');
@@ -147,36 +168,40 @@ class VelocityContext {
       String line = TextFormat.rtrim(lines[i], " \n");
       if (line.length() == 0)
         continue;
-      if (line.indexOf("#") == 0) {
+      int firstChar = -1; 
+      int nChar = line.length();
+      while (++firstChar < nChar && Character.isWhitespace(line.charAt(firstChar))) {        
+      }
+      if (line.indexOf("#") == firstChar) {
         if (token.length() > 0) {
-          new VelocityToken(token + "\n");
+          new FormToken(token, 0);
           token = "";
         }
         if (strError != null)
           break;
-        new VelocityToken(line);
+        new FormToken(line, firstChar);
         continue;
       }
       token += line + "\n";
     }
     if (token.length() > 0 && strError == null) {
-      new VelocityToken(token);
+      new FormToken(token, 0);
     }
     return strError;
   }
 
+  @SuppressWarnings("unchecked")
   public String merge(FileWriter writer) {
     int ptr;
-    for (int i = 0; i < velocityTokens.size() && strError == null; i++) {
-      VelocityToken vt = velocityTokens.get(i);
+    for (int i = 0; i < formTokens.size() && strError == null; i++) {
+      FormToken vt = formTokens.get(i);
       //System.out.println(i + " " + vt.cmdType + " " + vt.cmdPtr + " "
-        //  + vt.endPtr  + vt.data);
+      //  + vt.endPtr  + vt.data);
       try {
         switch (vt.cmdType) {
         case VT_DATA:
           String data = fillData(vt.data);
           writer.write(data);
-          //System.out.println(data);
           continue;
         case VT_IF:
           if (evaluate(vt.data, true)) {
@@ -187,10 +212,10 @@ class VelocityContext {
           continue;
         case VT_ELSE:
         case VT_ELSEIF:
-          if ((ptr = velocityTokens.get(vt.cmdPtr).endPtr) < 0) {
+          if ((ptr = formTokens.get(vt.cmdPtr).endPtr) < 0) {
             // previous block was executed -- skip to end
-            velocityTokens.get(vt.cmdPtr).endPtr = -ptr;
-            while ((vt = velocityTokens.get(vt.endPtr)).cmdType != VT_END) {
+            formTokens.get(vt.cmdPtr).endPtr = -ptr;
+            while ((vt = formTokens.get(vt.endPtr)).cmdType != VT_END) {
               // skip 
             }
             i = vt.ptr;
@@ -208,24 +233,31 @@ class VelocityContext {
           foreach(vt);
         // fall through
         case VT_END:
-          if ((vt = velocityTokens.get(vt.cmdPtr)).cmdType != VT_FOREACH)
+          if ((vt = formTokens.get(vt.cmdPtr)).cmdType != VT_FOREACH)
             continue;
           if (vt.vc == null)
             continue;
-          if (++vt.velocityCount == vt.vc.size()) {
+          if (++vt.pointCount == vt.vc.size()) {
             i = vt.endPtr;
             continue;
           }
-          Coordinate c = vt.vc.elementAt(vt.velocityCount);
-          context.put("velocityCount", new Integer(vt.velocityCount));
-          context.put(vt.var + ".xVal", new Double(c.getXVal()));
-          context.put(vt.var + ".yVal", new Double(c.getYVal()));
-          context.put(vt.var + ".getXString()", c.getXString());
-          context.put(vt.var + ".getYString()", c.getYString());
+          Object varData = vt.vc.elementAt(vt.pointCount);
+          if (varData instanceof Coordinate) {
+            Coordinate c = (Coordinate) varData;
+            context.put("pointCount", new Integer(vt.pointCount));
+            context.put(vt.var + ".xVal", new Double(c.getXVal()));
+            context.put(vt.var + ".yVal", new Double(c.getYVal()));
+            context.put(vt.var + ".getXString()", c.getXString());
+            context.put(vt.var + ".getYString()", c.getYString());
+          } else if (varData instanceof HashMap) {
+            HashMap<String, String> h = (HashMap) varData;
+            Iterator<String> iter = h.keySet().iterator();
+            while (iter.hasNext()) {
+              String key = iter.next();
+              context.put(vt.var + "." + key, h.get(key));
+            }
+          }
           i = vt.cmdPtr;
-          continue;
-        case VT_SET:
-          set(vt.data);
           continue;
         }
       } catch (IOException e) {
@@ -236,7 +268,7 @@ class VelocityContext {
   }
 
   @SuppressWarnings("unchecked")
-  private void foreach(VelocityToken vt) {
+  private void foreach(FormToken vt) {
     String data = vt.data;
     data = data.replace('(', ' ');
     data = data.replace(')', ' ');
@@ -248,14 +280,9 @@ class VelocityContext {
     vt.var = tokens[1].substring(1);
     Object vc = context.get(tokens[3].substring(1));
     if (vc instanceof Vector)
-      vt.vc = (Vector<Coordinate>) vc;
+      vt.vc = (Vector<Object>) vc;
     vt.cmdPtr = vt.ptr;
-    vt.velocityCount = -1;
-  }
-
-  private void set(String data) {
-    // TODO
-
+    vt.pointCount = -1;
   }
 
   private final static String[] ops = { "==", "!=", "=" };

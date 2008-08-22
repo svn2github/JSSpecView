@@ -19,17 +19,12 @@
 
 package jspecview.export;
 
-import java.io.FileWriter;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Vector;
 
 import jspecview.common.Coordinate;
 import jspecview.common.JDXSpectrum;
-import jspecview.util.FileManager;
-import jspecview.util.Logger;
 
 /**
  * The XMLExporter should be a totally generic exporter
@@ -39,25 +34,9 @@ import jspecview.util.Logger;
  * @author Bob Hanson, hansonr@stolaf.edu
  *
  */
-abstract class XMLExporter {
-
-  Vector<Coordinate> newXYCoords = new Vector<Coordinate>();
-  VelocityContext context = new VelocityContext();
-  String errMsg;
-  String theFile;
-  FileWriter writer;
-  int startIndex;
-  int endIndex;
+abstract class XMLExporter extends FormExporter {
 
   boolean continuous;
-  Calendar now;
-  SimpleDateFormat formatter;
-  String currentTime;
-
-  Coordinate[] xyCoords;
-
-  int npoints;
-
   String title;
   String ident;
   String state;
@@ -92,17 +71,19 @@ abstract class XMLExporter {
   String solvRef = "";
   String solvName = "";
 
+  int startIndex;
+  int endIndex;
+  Coordinate[] xyCoords;
+  int npoints;
+
+  Vector<Coordinate> newXYCoords = new Vector<Coordinate>();
+
   public boolean exportAsXML(JDXSpectrum spec, String fileName, int startIndex,
-                             int endIndex) throws IOException {
-    theFile = fileName;
+                             int endIndex) {
     this.startIndex = startIndex;
     this.endIndex = endIndex;
-
-    if (!setParameters(spec))
-      return false;
-
-    writer = new FileWriter(fileName);
-    return true;
+    initForm(fileName);
+    return setParameters(spec);
   }
 
   protected boolean setParameters(JDXSpectrum spec) {
@@ -112,11 +93,6 @@ abstract class XMLExporter {
     // no template ready for Peak Tables so exit
     if (!continuous)
       return false;
-
-    Calendar now = Calendar.getInstance();
-    SimpleDateFormat formatter = new SimpleDateFormat(
-        "yyyy/MM/dd HH:mm:ss.SSSS ZZZZ");
-    currentTime = formatter.format(now.getTime());
 
     xyCoords = spec.getXYCoords();
     npoints = endIndex - startIndex + 1;
@@ -181,24 +157,9 @@ abstract class XMLExporter {
     return true;
   }
 
-  protected void setTemplate(String template) {
-    String templateFile = template += (datatype.contains("NMR") ? "_nmr"
-        : "_tmp")
-        + ".vm";
-    FileManager fm = new FileManager(null);
-    template = fm.getResourceString(this, templateFile, true);
-    if (template == null) {
-      Logger.error(fm.getErrorMessage());
-      return;
-    }
-    errMsg = context.setTemplate(template);
-    if (errMsg != null) {
-      Logger.error(errMsg);
-      return;
-    }
-
+  protected void setContext() {
     context.put("continuous", Boolean.valueOf(continuous));
-    context.put("file", theFile);
+    context.put("file", outputFile);
     context.put("title", title);
     context.put("ident", ident);
     context.put("state", state);
@@ -234,18 +195,9 @@ abstract class XMLExporter {
     context.put("vendor", vendor);
     context.put("model", model);
   }
-
-  protected void writeXML() throws IOException {
-    errMsg = context.merge(writer);
-    if (errMsg != null) {
-      Logger.error(errMsg);
-      throw new IOException(errMsg);
-    }
-
-    try {
-      writer.flush();
-      writer.close();
-    } catch (IOException ioe) {
-    }
+  
+  void writeFormType(String type) throws IOException {
+    writeForm(type + (datatype.contains("NMR") ? "_nmr" : "_tmp") + ".vm");
   }
+
 }

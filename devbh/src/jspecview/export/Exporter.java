@@ -17,20 +17,20 @@ public class Exporter implements ExporterInterface {
     // implemented via ExporterInterface
   }
 
-  public String export(JDXSpectrum spec, String type, String path, int startIndex, int endIndex)
+  public String export(String type, String path, JDXSpectrum spec, int startIndex, int endIndex)
       throws IOException {
     if (type.equals("SVG")) {
-      SVGExporter.exportAsSVG(spec, path, startIndex, endIndex);
+      (new SVGExporter()).exportAsSVG(path, spec, startIndex, endIndex);
     } else if (type.equals("CML")) {
-      (new CMLExporter()).exportAsCML(spec, path, startIndex, endIndex);
+      (new CMLExporter()).exportAsCML(path, spec, startIndex, endIndex);
     } else if (type.equals("AnIML")) {
-      (new AnIMLExporter()).exportAsAnIML(spec, path, startIndex, endIndex);
+      (new AnIMLExporter()).exportAsAnIML(path, spec, startIndex, endIndex);
     } else {
       int iType = (type.equals("XY") ? XY : type.equals("DIF") ? DIF : type
           .equals("FIX") ? FIX : type.equals("SQZ") ? SQZ
           : type.equals("PAC") ? PAC : -1);
       if (iType >= 0)
-        JDXExporter.export(iType, spec, path, startIndex, endIndex);
+        JDXExporter.export(iType, path, spec, startIndex, endIndex);
     }
     return null;
   }
