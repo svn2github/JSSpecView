@@ -1,4 +1,4 @@
-/* Copyright (c) 2006-2007 The University of the West Indies
+/* Copyright (c) 2006-2008 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -49,7 +49,7 @@ class CMLExporter extends XMLExporter {
 
     if (model == null || model.equals(""))
       model = "unknown";
-    
+
     if (datatype.contains("MASS"))
       spectypeInitials = "massSpectrum";
     else if (datatype.contains("INFRARED")) {
