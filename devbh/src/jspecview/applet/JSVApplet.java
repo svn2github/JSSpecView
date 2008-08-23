@@ -102,11 +102,12 @@ import jspecview.common.Visible;
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
  * @author Craig Walters
+ * @author Bob Hanson, hansonr@stolaf.edu
  * @author Prof Robert J. Lancashire
  */
 
 public class JSVApplet extends JApplet {
-  public static final String APPLET_VERSION = "1.0.20080804-2030";
+  public static final String APPLET_VERSION = "1.0.20080822-2000";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath, XMLImportfilePath;
@@ -193,33 +194,33 @@ public class JSVApplet extends JApplet {
   JSVPanel tempJSVP;
 
   private static final String[] params = {
-     "LOAD", 
-     "REVERSEPLOT", 
-     "COORDINATESON", 
-     "GRIDON", 
-     "COORDCALLBACKFUNCTIONNAME", 
-     "SPECTRUMNUMBER", 
-     "INTERFACE", 
-     "ENDINDEX", 
-     "ENABLEZOOM", 
-     "STARTINDEX", 
-     "MENUON", 
-     "COMPOUNDMENUON", 
-     "BACKGROUNDCOLOR", 
-     "COORDINATESCOLOR", 
-     "GRIDCOLOR", 
-     "PLOTAREACOLOR", 
-     "PLOTCOLOR", 
-     "SCALECOLOR", 
-     "TITLECOLOR", 
-     "UNITSCOLOR", 
-     "PLOTCOLORS", 
-     "VERSION", 
-     "PEAKCALLBACKFUNCTIONNAME", 
+     "LOAD",
+     "REVERSEPLOT",
+     "COORDINATESON",
+     "GRIDON",
+     "COORDCALLBACKFUNCTIONNAME",
+     "SPECTRUMNUMBER",
+     "INTERFACE",
+     "ENDINDEX",
+     "ENABLEZOOM",
+     "STARTINDEX",
+     "MENUON",
+     "COMPOUNDMENUON",
+     "BACKGROUNDCOLOR",
+     "COORDINATESCOLOR",
+     "GRIDCOLOR",
+     "PLOTAREACOLOR",
+     "PLOTCOLOR",
+     "SCALECOLOR",
+     "TITLECOLOR",
+     "UNITSCOLOR",
+     "PLOTCOLORS",
+     "VERSION",
+     "PEAKCALLBACKFUNCTIONNAME",
      "IMPORT",
      "IRMODE"
      };
-  
+
   final private static int PARAM_LOAD = 0;
   final private static int PARAM_REVERSEPLOT = 1;
   final private static int PARAM_COORDINATESON = 2;
@@ -245,7 +246,7 @@ public class JSVApplet extends JApplet {
   final private static int PARAM_PEAKCALLBACKFUNCTIONNAME = 22;
   final private static int PARAM_IMPORT = 23;
   final private static int PARAM_IRMODE = 24;
-  
+
   final private static Hashtable<String, Integer> htParams = new Hashtable<String, Integer>();
   {
     for (int i = 0; i < params.length; i++)
@@ -305,9 +306,9 @@ public class JSVApplet extends JApplet {
    */
   boolean overlay;
 
-  
+
   String irMode;
-  
+
   /**
    * Returns a parameter value
    * @param key the parameter name
@@ -460,10 +461,10 @@ public class JSVApplet extends JApplet {
 
       System.out.println("irmode " + irMode);
       setStringParameter("irmode", irMode);
-      
+
     }
-    
-    
+
+
     catch(JSpecViewException jsve){
      this.writeStatus(jsve.getMessage());
     }
@@ -1563,11 +1564,11 @@ public class JSVApplet extends JApplet {
       return true;
     }
     } catch (JSpecViewException jsve) {
-      
+
     }
     return false;
   }
-  
+
   /**
    * Allows conversion between TRANSMITTANCE and ABSORBANCE
    * @param e ItemEvent
@@ -1583,21 +1584,21 @@ public class JSVApplet extends JApplet {
     else
        TAConvert(IMPLIED);
     } catch (JSpecViewException jsve) {
-      
+
     }
   }
 
 
   private long msTrigger = -1;
-  
+
   /**
    * Allows Transmittance to Absorbance conversion or vice versa
    * depending on the value of comm.
    * @param comm the conversion command
-   * @throws JSpecViewException 
+   * @throws JSpecViewException
    */
 
-  
+
   private void TAConvert(int comm) throws JSpecViewException {
     long time = System.currentTimeMillis();
     System.out.println(time + " " + msTrigger + " " + (time-msTrigger));
@@ -1625,7 +1626,7 @@ public class JSVApplet extends JApplet {
       return;
     }
 
-      
+
       //  if successful, newSpec has the converted info
       JDXSpectrum newSpec = TransmittanceAbsorbanceConverter.convert(spectrum);
 
@@ -1735,7 +1736,7 @@ public class JSVApplet extends JApplet {
               .getOptionInterface("jspecview.export.Exporter");
           if (exporter == null)
             return;
-          errMsg = exporter.export(comm, file.getAbsolutePath(), spec, 
+          errMsg = exporter.export(comm, file.getAbsolutePath(), spec,
               0, spec.getXYCoords().length - 1);
         }
         catch(IOException ioe){
@@ -1890,7 +1891,7 @@ public class JSVApplet extends JApplet {
   }
 
 */
-  
+
   /**
    * Intialises the <code>plotColors</code> array from the
    * <i>plotColorsStr</i> variable
