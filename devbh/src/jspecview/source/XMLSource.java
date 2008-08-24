@@ -46,7 +46,7 @@ abstract class XMLSource extends JDXSource {
   //  private XMLEvent e;
 
   private SimpleXmlReader.Buffer fer;
-  private SimpleXmlReaderXmlEvent e;
+  private SimpleXmlReader.XmlEvent e;
 
   protected String tagName = "START", attrList = "",
       title = "identifier not found", owner = "UNKNOWN", origin = "UNKNOWN";
@@ -234,12 +234,12 @@ abstract class XMLSource extends JDXSource {
   }
 
   protected String getAttrValue(String name) {
-    SimpleXmlReaderAttribute a = e.getAttributeByName(name);
+    SimpleXmlReader.Attribute a = e.getAttributeByName(name);
     return (a == null ? "" : a.getValue());
   }
 
   protected String getFullAttribute(String name) {
-    SimpleXmlReaderAttribute a = e.getAttributeByName(name);
+    SimpleXmlReader.Attribute a = e.getAttributeByName(name);
     return (a == null ? "" : a.toString().toLowerCase());
   }
 
