@@ -32,6 +32,7 @@ import jspecview.common.Coordinate;
 import jspecview.common.Graph;
 import jspecview.common.JDXSource;
 import jspecview.common.JDXSpectrum;
+import jspecview.util.Logger;
 
 /**
  * Representation of a XML Source.
@@ -96,6 +97,14 @@ abstract class XMLSource extends JDXSource {
 
   protected String getBufferData() {
     return (fer == null ? null : fer.data.substring(0, fer.ptr));
+  }
+
+  protected void checkStart() throws Exception {
+    if (peek() == SimpleXmlReader.START_ELEMENT)
+      return;
+    String errMsg = "Error: XML <xxx> not found at beginning of file; not an XML document?";
+    errorLog.append(errMsg);
+    throw new IOException(errMsg);
   }
 
   protected void populateVariables() {
@@ -208,8 +217,35 @@ abstract class XMLSource extends JDXSource {
       e = fer.nextTag();
   }
 
+  /**
+   * for value without surrounding tag
+   * 
+   * @return value
+   * @throws IOException
+   */
+  protected String thisValue() throws IOException {
+    return fer.nextEvent().toString().trim();
+  }
+
+  /**
+   * for &lt;xxxx&gt; value &lt;/xxxx&gt;
+   * 
+   * @return value
+   * @throws IOException
+   */
+  protected String qualifiedValue() throws IOException {
+    fer.nextTag();
+    String value = fer.nextEvent().toString().trim();
+    fer.nextTag();
+    return value;
+  }
+
   protected String getTagName() {
     return e.getTagName();
+  }
+
+  protected int getTagType() {
+    return e.getTagType();
   }
 
   protected String getEndTag() {
@@ -220,27 +256,16 @@ abstract class XMLSource extends JDXSource {
     return e.toString().toLowerCase();
   }
 
-  protected String thisValue() throws IOException {
-    return fer.nextEvent().toString().trim();
-  }
-
-  protected String nextValue() throws IOException {
-    fer.nextTag();
-    return fer.nextEvent().toString().trim();
-  }
-
   protected String getAttrValueLC(String key) {
     return getAttrValue(key).toLowerCase();
   }
 
   protected String getAttrValue(String name) {
-    SimpleXmlReader.Attribute a = e.getAttributeByName(name);
-    return (a == null ? "" : a.getValue());
+    return e.getAttrValue(name);
   }
 
   protected String getFullAttribute(String name) {
-    SimpleXmlReader.Attribute a = e.getAttributeByName(name);
-    return (a == null ? "" : a.toString().toLowerCase());
+    return e.getFullAttribute(name);
   }
 
   protected String getCharacters() throws IOException {
@@ -361,7 +386,6 @@ abstract class XMLSource extends JDXSource {
   final static String[] tagNames = {
     // aml:
     "audittrail", 
-    "author",
     "experimentstepset", 
     "sampleset",
     // cml:  
@@ -372,27 +396,28 @@ abstract class XMLSource extends JDXSource {
     "sample",
     "spectrumdata",
     "peaklist",
-    // cml, but not here:
+    // not processed in XMLSource, only subclasses thereof
+    "author",
     "peaklist"
   };
 
   final static int AML_0 = 0;
   final static int AML_AUDITTRAIL = 0;
-  final static int AML_AUTHOR = 1;
-  final static int AML_EXPERIMENTSTEPSET = 2;
-  final static int AML_SAMPLESET = 3;
-  final static int AML_1 = 4;
+  final static int AML_EXPERIMENTSTEPSET = 1;
+  final static int AML_SAMPLESET = 2;
+  final static int AML_1 = 3;
   
-  final static int CML_0 = 4;
-  final static int CML_SPECTRUM = 4;
-  final static int CML_METADATALIST = 5;
-  final static int CML_CONDITIONLIST = 6;
-  final static int CML_PARAMETERLIST = 7;
-  final static int CML_SAMPLE = 8;
-  final static int CML_SPECTRUMDATA = 9;
-  final static int CML_PEAKLIST = 10;
-  final static int CML_1 = 11;
-
+  final static int CML_0 = 3;
+  final static int CML_SPECTRUM = 3;
+  final static int CML_METADATALIST = 4;
+  final static int CML_CONDITIONLIST = 5;
+  final static int CML_PARAMETERLIST = 6;
+  final static int CML_SAMPLE = 7;
+  final static int CML_SPECTRUMDATA = 8;
+  final static int CML_PEAKLIST = 9;
+  final static int CML_1 = 10;
+ 
+  final static int AML_AUTHOR = 10;
   final static int CML_PEAKLIST2 = 11;
 
   protected void processXML(int i0, int i1) throws Exception {
@@ -400,17 +425,54 @@ abstract class XMLSource extends JDXSource {
       if (nextEvent() != SimpleXmlReader.START_ELEMENT) 
         continue;
         String theTag = getTagName();
+        boolean requiresEndTag = (getTagType() != SimpleXmlReader.START_END_ELEMENT);
         //System.out.println(theTag);
         for (int i = i0; i < i1; i++)
           if (theTag.equals(tagNames[i])) {
-            process(i);
+            process(i, requiresEndTag);
             break;
           }
       }
   }
 
-  protected void process(int tagId) {
+  /**
+   * Process the audit XML events
+   * @param tagId 
+   * @param requiresEndTag 
+   */
+  protected void process(int tagId, boolean requiresEndTag) {
+    String thisTagName = tagNames[tagId];
+    try {
+      tagName = getTagName();
+      attrList = getAttributeList();
+      if (!processTag(tagId) || !requiresEndTag)
+        return;
+      while (haveMore()) {
+        switch (nextEvent()) {
+        default:
+          continue;
+        case SimpleXmlReader.END_ELEMENT:
+          if (getEndTag().equals(thisTagName))
+            return;
+          continue;
+        case SimpleXmlReader.START_ELEMENT:
+          break;
+        }
+        tagName = getTagName();
+        attrList = getAttributeList();
+        if (!processTag(tagId))
+          return;
+      }
+    } catch (Exception e) {
+      String msg = "error reading " + tagName + " section";
+      Logger.error(msg);
+      errorLog.append(msg + "\n");
+    }
+  }
+
+  protected boolean processTag(int tagId) throws Exception {
     // overridden
+    return true;
   }
 
 }

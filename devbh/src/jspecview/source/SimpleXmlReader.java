@@ -37,7 +37,7 @@ class SimpleXmlReader {
    */
   
   SimpleXmlReader() {  
-    System.out.println("SimpleXMLREADER");
+    //System.out.println("SimpleXMLREADER");
   }
   
   Buffer getBuffer(InputStream in) {
@@ -314,10 +314,25 @@ class SimpleXmlReader {
       return (tag == null ? null : tag.getName());
     }
 
+    public int getTagType() {
+      return (tag == null ? TAG_NONE : tag.tagType);
+    }
+
+    public String getFullAttribute(String name) {
+      Attribute a = getAttributeByName(name);
+      return (a == null ? "" : a.toString().toLowerCase());
+    }
+
+    public String getAttrValue(String name) {
+      Attribute a = getAttributeByName(name);
+      return (a == null ? "" : a.getValue());
+    }    
+
     public Attribute getAttributeByName(String name) {
       return (tag == null ? null : tag.getAttributeByName(name));
     }
-  }
+
+}
   
   class Tag {
     int tagType;

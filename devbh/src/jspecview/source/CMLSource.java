@@ -19,11 +19,10 @@
 
 package jspecview.source;
 
-import java.io.*;
-//import javax.xml.stream.*;
-import java.util.StringTokenizer;
+import java.io.InputStream;
 
-import jspecview.util.Logger;
+import jspecview.util.Parser;
+//import javax.xml.stream.*;
 
 /**
  * Representation of a XML Source.
@@ -46,11 +45,7 @@ public class CMLSource extends XMLSource {
   private CMLSource getXML(InputStream in) {
     try {
 
-      //getFactory(in);
       getSimpleXmlReader(in);
-      if (!checkStart())
-        return this;
-
       processXML(CML_0, CML_1);
 
       if (!checkPointCount())
@@ -61,88 +56,59 @@ public class CMLSource extends XMLSource {
     } catch (Exception pe) {
       //System.out.println(getBufferData());
       System.err.println("Error: " + pe.getMessage());
-      errorLog.append("That file may be empty... \n");
     }
 
     processErrors("CML");
     return this;
   }
 
-  private boolean checkStart() throws Exception {
-    if (peek() != SimpleXmlReader.START_ELEMENT) {
-      System.err.println("Error, not an XML document?");
-      errorLog.append("Error, not an XML document?");
-      throw new IOException();
-    }
-
-    nextEvent();
-    //check if document is empty
-    try {
-      peek();
-    } catch (Exception e) {
-      System.err.println("Error, empty document?");
-      errorLog.append("Error, empty document?");
-      setErrorLog(errorLog.toString());
-      addJDXSpectrum(null);
-      return false;
-    }
-    return true;
-  }
-
   String Ydelim = "";
 
   /**
-   * Process the audit XML events
+   * Process the XML events. The while() loop here
+   * iterates through XML tags until a </xxxx> tag
+   * is found. 
+   * 
+   * 
+   * 
    * @param tagId 
+   * @return true to continue with encapsulated tags
+   * @throws Exception 
    */
   @Override
-  protected void process(int tagId) {
-    String thisTagName = tagNames[tagId];
-    //System.out.println(thisTagName  + " "+ tagId);
-    try {
-      while (haveMore()) {
-        switch (nextEvent()) {
-        default:
-          continue;
-        case SimpleXmlReader.END_ELEMENT:
-          //System.out.println("ending " +  getEndTag());
-          if (getEndTag().equals(thisTagName))
-            return;
-          continue;
-        case SimpleXmlReader.START_ELEMENT:
-          break;
-        }
-        tagName = getTagName();
-        attrList = getAttributeList();
-        //System.out.println("  " + tagName + " " + attrList);
-        switch (tagId) {
-        case CML_SPECTRUM:
-          processSpectrum();
-          return; // once only
-        case CML_SPECTRUMDATA:
-          processSpectrumData();
-          break;
-        case CML_PEAKLIST:
-          processPeaks();
-          return; // only once
-        case CML_SAMPLE:
-          processSample();
-          break;
-        case CML_METADATALIST:
-          processMetadataList();
-          break;
-        case CML_CONDITIONLIST:
-          processConditionList();
-          break;
-        case CML_PARAMETERLIST:
-          processParameterList();
-          break;
-        }
-      }
-    } catch (Exception e) {
-      String msg = "error reading " + tagName + " section";
-      Logger.error(msg);
-      errorLog.append(msg + "\n");
+  protected boolean processTag(int tagId) throws Exception {
+    //System.out.println(tagId + " " + tagNames[tagId]);
+    switch (tagId) {
+    case CML_SPECTRUM:
+      processSpectrum();
+      return false; // once only
+    case CML_SPECTRUMDATA:
+      processSpectrumData();
+      return true;
+    case CML_PEAKLIST:
+      processPeaks();
+      return false; // only once
+    case CML_SAMPLE:
+      processSample();
+      return true;
+    case CML_METADATALIST:
+      processMetadataList();
+      return true;
+    case CML_CONDITIONLIST:
+      processConditionList();
+      return true;
+    case CML_PARAMETERLIST:
+      processParameterList();
+      return true;
+    case CML_PEAKLIST2:
+      // via CML_PEAKLIST
+      processPeakList();
+      return true;
+    default:
+      System.out.println("AnIMLSource not processing tag " + tagNames[tagId]
+          + "!");
+      // should not be here
+      return false;
     }
   }
 
@@ -152,7 +118,8 @@ public class CMLSource extends XMLSource {
       title = getAttrValue("title");
     else if (attrList.contains("id"))
       title = getAttrValue("id");
-
+    
+    // "type" is a required tag
     if (attrList.contains("type"))
       techname = getAttrValue("type").toUpperCase() + " SPECTRUM";
   }
@@ -186,14 +153,14 @@ public class CMLSource extends XMLSource {
     if (tagName.equals("parameter")) {
       String title = getAttrValueLC("title");
       if (title.equals("nmr.observe frequency")) {
-        StrObFreq = nextValue();
+        StrObFreq = qualifiedValue();
         obFreq = Double.parseDouble(StrObFreq);
       } else if (title.equals("nmr.observe nucleus")) {
         obNucleus = thisValue();
       } else if (title.equals("spectrometer/data system")) {
         modelType = thisValue();
       } else if (title.equals("resolution")) {
-        resolution = nextValue();
+        resolution = qualifiedValue();
       }
     }
   }
@@ -364,8 +331,8 @@ public class CMLSource extends XMLSource {
     
     // this method is run ONCE
     
-    if (!specfound)
-      return; // really????
+    if (specfound)
+      return;
 
     // don't know how many peaks to expect so set an arbitrary number of 100
     int nPeakData = -1;
@@ -373,7 +340,7 @@ public class CMLSource extends XMLSource {
     xaxisData = new double[arbsize];
     yaxisData = new double[arbsize];
 
-    process(CML_PEAKLIST2);
+    process(CML_PEAKLIST2, true);
 
     // now that we have X,Y pairs set JCAMP-DX equivalencies
     // FIRSTX, FIRSTY, LASTX, NPOINTS
@@ -420,8 +387,8 @@ public class CMLSource extends XMLSource {
         // of 50 for every atom referenced
 
         if (attrList.contains("atomrefs")) {
-          StringTokenizer srt = new StringTokenizer(getAttrValue("atomRefs"));
-          yaxisData[nPeakData] = 49 * (srt.countTokens());
+          String[] tokens = Parser.getTokens(getAttrValue("atomRefs"));
+          yaxisData[nPeakData] = 49 * (tokens.length);
         }
       } // end of peak
 
