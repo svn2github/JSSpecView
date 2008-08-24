@@ -106,9 +106,8 @@ is divided into following sections:
     	<target name="applet_jar" depends="init,compile" description="Create applet.">
             <delete file="${applet.jar}" quiet="true" />
             <jar jarfile="${applet.jar}" compress="${jar.compress}">
-        		<zipfileset src="${libs.JSR173.classpath}" /> <!-- for anIML, CML file reading -->
+        		<!-- zipfileset src="${libs.JSR173.classpath}" / --> 
                 <fileset dir="${build.classes.dir}">
-               	  <exclude name="**/export/**"/>
               	  <exclude name="**/application/**"/>
                   <exclude name="**/mdidesktop/**"/>
             	</fileset>
@@ -119,55 +118,47 @@ is divided into following sections:
             </jar>
         </target>
 
-         <target name="CreateApplicationJar" depends="init,compile" description="Build Standalone Application." >
-         <delete file="${application.jar}" quiet="true" />
-    	 <jar destfile="${application.jar}">
-    		<zipfileset dir="${build.classes.dir}" prefix="" />
-    		<zipfileset src="${libs.Xerces.classpath}" />
-    		<zipfileset src="${libs.XMLParser.classpath}" />
-    		<!-- zipfileset src="${libs.JSR173.classpath}" / --> <!-- for anIML, CML file reading -->
-    		<!-- zipfileset src="${libs.Stax.classpath}" / --> <!-- for ??? -->
-            <manifest> 
-    			<attribute name="Main-Class" value="${main.class}" />
-    		</manifest>
-    	 </jar>
-         </target>	
-	
     <target name="signed-applet" depends="init,compile,applet_jar" description="Create self-signed applet.">
-        <delete file="${signedapplet.jar}" quiet="true" />
-    	<delete file="${signedapplet.jar}.tmp" quiet="true"/>
-        <jar jarfile="${signedapplet.jar}.tmp" compress="${jar.compress}">
-    		<zipfileset dir="${build.classes.dir}" excludes="**/mdidesktop/**,**/application/**" prefix="" />
-    		<!-- zipfileset src="${libs.JSR173.classpath}" / -->
-        </jar>
-    	<signjar jar="${signedapplet.jar}.tmp"
+    	<signjar jar="${applet.jar}"
     	             signedjar="${signedapplet.jar}"
     	             keystore="${certificate.dir}/JSVcertificate.store"
     	             storepass="JSV2007" alias="JSVcertificate" />
-    	<delete file="${signedapplet.jar}.tmp" quiet="true"/>
 	 </target>
     
-    	<target name="make-distribution-zip-file" depends="applet_jar,CreateApplicationJar,signed-applet" description="Create JSpecView.zip">
-            <dirname property="dist.dir" file="${applet.jar}"/>
-            <mkdir dir="${dist.dir}"/>
-    		<delete quiet="true">
-        		<fileset dir="${dist.dir}" includes = "*.*"/>
-    	 	</delete>
-    	    <jar jarfile="${dist.zip}" compress="${jar.compress}">
-	           <fileset dir="${extras.dir}"/>
-			   <fileset dir="${build.dir}">
-			      <include name="*.jar"/>
-			   </fileset>
-    	        </jar>
-            <mkdir dir="${dist.test.dir}"/>
-  			<copy todir="${dist.test.dir}">
-			    <fileset dir="${build.dir}">
-			 	    <include name="*.jar"/>
+    <target name="CreateApplicationJar" depends="init,compile" description="Build Standalone Application." >
+    <delete file="${application.jar}" quiet="true" />
+	 <jar destfile="${application.jar}">
+		<zipfileset dir="${build.classes.dir}" prefix="" />
+		<zipfileset src="${libs.Xerces.classpath}" />
+		<zipfileset src="${libs.XMLParser.classpath}" />
+		<!-- zipfileset src="${libs.JSR173.classpath}" / --> <!-- for anIML, CML file reading -->
+		<!-- zipfileset src="${libs.Stax.classpath}" / --> <!-- for ??? -->
+       <manifest> 
+			<attribute name="Main-Class" value="${main.class}" />
+		</manifest>
+	 </jar>
+    </target>	
+	
+	<target name="make-distribution-zip-file" depends="applet_jar,CreateApplicationJar,signed-applet" description="Create JSpecView.zip">
+        <dirname property="dist.dir" file="${applet.jar}"/>
+        <mkdir dir="${dist.dir}"/>
+		<delete quiet="true">
+    		<fileset dir="${dist.dir}" includes = "*.*"/>
+	 	</delete>
+	    <jar jarfile="${dist.zip}" compress="${jar.compress}">
+           <fileset dir="${extras.dir}"/>
+		   <fileset dir="${build.dir}">
+		      <include name="*.jar"/>
+		   </fileset>
+	    </jar>
+        <mkdir dir="${dist.test.dir}"/>
+			<copy todir="${dist.test.dir}">
+		    	<fileset dir="${build.dir}">
+		 			<include name="*.jar"/>
 				</fileset>
-	            <fileset dir="${extras.dir}"/>
-   			</copy>
-
-    	</target>
+            	<fileset dir="${extras.dir}"/>
+			</copy>
+	</target>
 
     <target name="init" depends="-init-user,-do-init,-init-check,-init-macrodef-property,-init-macrodef-javac,-init-macrodef-junit,-init-macrodef-nbjpda,-init-macrodef-debug,-init-macrodef-java"/>
 		
