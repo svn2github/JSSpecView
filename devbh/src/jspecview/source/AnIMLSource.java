@@ -21,9 +21,10 @@ package jspecview.source;
 
 import java.io.*;
 import java.nio.*;
-import javax.xml.stream.*;
+//import javax.xml.stream.*;
 
 import jspecview.common.Base64;
+import jspecview.util.Logger;
 
 /**
  * Representation of a XML Source.
@@ -45,11 +46,13 @@ public class AnIMLSource extends XMLSource {
   private AnIMLSource getXML(InputStream in) {
     try {
 
-      getFactory(in);
+      //getFactory(in);
+
+      getSimpleXmlReader(in);
 
       nextEvent();
 
-      processXML();
+      processXML(AML_0, AML_1);
 
       if (!checkPointCount())
         return null;
@@ -70,218 +73,177 @@ public class AnIMLSource extends XMLSource {
     return this;
   }
 
-  protected void processXML() throws Exception {
-    while (haveMore()) {
-      //System.out.println(eventType + " " + XMLStreamConstants.START_ELEMENT);
-      if (nextEvent() == XMLStreamConstants.START_ELEMENT) {
-        tmpstr = getTagName();
-        attrList = getAttributeList();
-        System.out.println(tmpstr);
-        if (tmpstr.equals("sampleset")) {
-          processSample();
-        } else if (tmpstr.equals("experimentstepset")) {
-          processMeasurement();
-        } else if (tmpstr.equals("audittrail")) {
-          processAudit();
+  /**
+   * Process the audit XML events
+   * @param tagId 
+   */
+  @Override
+  protected void process(int tagId) {
+    String thisTagName = tagNames[tagId];
+    try {
+      while (haveMore()) {
+        switch (nextEvent()) {
+        default:
+          continue;
+        case SimpleXmlReader.END_ELEMENT:
+          if (getEndTag().equals(thisTagName))
+            return;
+          continue;
+        case SimpleXmlReader.START_ELEMENT:
+          break;
         }
+        tagName = getTagName();
+        attrList = getAttributeList();
+        switch (tagId) {
+        case AML_AUDITTRAIL:
+          processAuditTrail();
+          break;
+        case AML_AUTHOR:
+          processAuthor();
+          break;
+        case AML_EXPERIMENTSTEPSET:
+          processExperimentStepSet();
+          break;
+        case AML_SAMPLESET:
+          processSampleSet();
+          break;
+        }
+      }
+    } catch (Exception e) {
+      String msg = "error reading " + tagName + " section";
+      Logger.error(msg);
+      errorLog.append(msg + "\n");
+    }
+  }
+
+  private void processAuthor() throws IOException {
+    if (tagName.equals("name"))
+      owner = thisValue();
+    else if (tagName.contains("location"))
+      origin = thisValue();
+  }
+
+  private void processAuditTrail() throws Exception {
+    if (tagName.equals("user")) {
+      nextValue();
+    } else if (tagName.equals("timestamp")) {
+      nextValue();
+    }
+  }
+
+  private void processSampleSet() throws Exception {
+    if (tagName.equals("sample"))
+      samplenum++;
+    else if (tagName.equals("parameter")) {
+      attrList = getAttrValueLC("name");
+      if (attrList.equals("name")) {
+        nextValue();
+      } else if (attrList.equals("owner")) {
+        nextValue();
+      } else if (attrList.equals("molecular formula")) {
+        molForm = nextValue();
+      } else if (attrList.equals("cas registry number")) {
+        casRN = nextValue();
       }
     }
   }
-  /**
-   * Process the sample XML events
-   *@throws Exception
-   */
-  public void processSample() throws Exception {
-    try {
-      while (haveMore() && !tmpEnd.equals("sampleset")) {
-        if (nextEvent() != XMLStreamConstants.START_ELEMENT) {
-          if (eventType == XMLStreamConstants.END_ELEMENT)
-            tmpEnd = getEndTag();
-          continue;
-        }
 
-        // with no way to distinguish sample from reference until the experiment step
-        // this is not correct and values may get overwritten!!
-
-        tmpstr = getTagName();
-        if (tmpstr.equals("sample"))
-          samplenum++;
-        else if (tmpstr.equals("parameter")) {
-          attrList = getAttrValueLC("name");
-          if (attrList.equals("name")) {
-            nextValue();
-          } else if (attrList.equals("owner")) {
-            nextValue();
-          } else if (attrList.equals("molecular formula")) {
-            molForm = nextValue();
-          } else if (attrList.equals("cas registry number")) {
-            casRN = nextValue();
-          }
-          //  continue as above to collect information like Temp, BP etc
+  private void processExperimentStepSet() throws Exception {
+    if (tagName.equals("sampleref")) {
+      if (getFullAttribute("role").contains("samplemeasurement"))
+        sampleID = getAttrValue("sampleID");
+    } else if (tagName.equals("author")) {
+      process(AML_AUTHOR);
+    } else if (tagName.equals("timestamp")) {
+      LongDate = thisValue();
+    } else if (tagName.equals("technique")) {
+      techname = getAttrValue("name").toUpperCase() + " SPECTRUM";
+    } else if (tagName.equals("vectorset")) {
+      npoints = Integer.parseInt(getAttrValue("length"));
+      System.out.println("AnIML No. of points= " + npoints);
+      xaxisData = new double[npoints];
+      yaxisData = new double[npoints];
+    } else if (tagName.equals("vector")) {
+      String axisLabel = getAttrValue("name");
+      String dependency = getAttrValueLC("dependency");
+      String vectorType = getAttrValueLC("type");
+      if (vectorType.length() == 0)
+        vectorType = getAttrValueLC("vectorType");
+      if (dependency.equals("independent")) {
+        xaxisLabel = axisLabel;
+        nextTag();
+        if (getTagName().equals("autoincrementedvalueset")) {
+          nextTag();
+          if (getTagName().equals("startvalue"))
+            firstX = Double.parseDouble(nextValue());
+          nextStartTag();
+          if (getTagName().equals("increment"))
+            deltaX = Double.parseDouble(nextValue());
         }
-      }
-    } catch (Exception ex) {
-      System.err.println("error reading Sample section");
-      errorLog.append("error reading Sample section\n");
-    }
-  } // end of processSample()
-
-  /**
-   * Process the ExperimentStepSet XML events
-   *@throws Exception
-   */
-public void processMeasurement() throws Exception {
-    try {
-      while (haveMore() && !tmpEnd.equals("experimentstepset")) {
-        if (nextEvent()!= XMLStreamConstants.START_ELEMENT) {
-          if (eventType == XMLStreamConstants.END_ELEMENT)
-            tmpEnd = getEndTag();
-          continue;
-        }
-        tmpstr = getTagName();
-        if (tmpstr.equals("sampleref")) {
-          if (getFullAttribute("role").contains("samplemeasurement"))
-            sampleID = getAttrValue("sampleID");
-        } else if (tmpstr.equals("author")) {
-          
-          
-          while (!tmpEnd.equals("author")) {                        
-            if (nextEvent()!= XMLStreamConstants.START_ELEMENT) {
-              if (eventType == XMLStreamConstants.END_ELEMENT) {
-                tmpEnd = getEndTag();
-              }
-              continue;
+        nextStartTag();
+        xaxisUnit = getAttrValue("label");
+        increasing = (deltaX > 0 ? true : false);
+        continuous = true;
+        for (int j = 0; j < npoints; j++)
+          xaxisData[j] = firstX + (deltaX * j);
+        lastX = xaxisData[npoints - 1];
+      } else if (dependency.equals("dependent")) {
+        yaxisLabel = axisLabel;
+        nextTag();
+        tagName = getTagName();
+        if (tagName.equals("individualvalueset")) {
+          for (int ii = 0; ii < npoints; ii++, nextTag())
+            yaxisData[ii] = Double.parseDouble(nextValue());
+          System.out.println(npoints + " individual Y values now read");
+        } else if (tagName.equals("encodedvalueset")) {
+          attrList = getCharacters();
+          byte[] dataArray = Base64.decodeBase64(attrList);
+          int ij = 0;
+          if (dataArray.length != 0) {
+            ByteBuffer byte_buffer = ByteBuffer.wrap(dataArray).order(
+                ByteOrder.LITTLE_ENDIAN);
+            // float64
+            if (vectorType.equals("float64")) {
+              DoubleBuffer double_buffer = byte_buffer.asDoubleBuffer();
+              for (ij = 0; double_buffer.remaining() > 0; ij++)
+                yaxisData[ij] = double_buffer.get();
             }
-            tmpstr = getTagName();
-            if (tmpstr.equals("name"))
-              owner = thisValue();
-            else if (tmpstr.contains("location"))
-              origin = thisValue();
-          } 
-        } else if (tmpstr.equals("timestamp")) {
-          LongDate = thisValue();
-        } else if (tmpstr.equals("technique")) {
-          techname = getAttrValue("name").toUpperCase() + " SPECTRUM";
-        } else if (tmpstr.equals("vectorset")) {
-          npoints = Integer.parseInt(getAttrValue("length"));
-          System.out.println("AnIML No. of points= " + npoints);
-          xaxisData = new double[npoints];
-          yaxisData = new double[npoints];
-        } else if (tmpstr.equals("vector")) {
-          String axisLabel = getAttrValue("name");
-          String dependency = getAttrValueLC("dependency");
-          String vectorType = getAttrValueLC("type");
-          if (vectorType.length() == 0)
-            vectorType = getAttrValueLC("vectorType");
-
-          if (dependency.equals("independent")) {
-            xaxisLabel = axisLabel;
-            nextTag();
-            if (getTagName().equals("autoincrementedvalueset")) {
-              nextTag();
-              if (getTagName().equals("startvalue"))
-                firstX = Double.parseDouble(nextValue());
-              nextStartTag();
-              if (getTagName().equals("increment"))
-                deltaX = Double.parseDouble(nextValue());
+            // float32
+            else if (vectorType.equals("float32")) {
+              FloatBuffer float_buffer = byte_buffer.asFloatBuffer();
+              for (ij = 0; float_buffer.remaining() > 0; ij++)
+                yaxisData[ij] = float_buffer.get();
             }
-            nextStartTag();
-            xaxisUnit = getAttrValue("label");
-            increasing = (deltaX > 0 ? true : false);
-            continuous = true;
-            for (int j = 0; j < npoints; j++)
-              xaxisData[j] = firstX + (deltaX * j);
-            lastX = xaxisData[npoints - 1];
-          } else if (dependency.equals("dependent")) {
-            yaxisLabel = axisLabel;
-            nextTag();
-            tmpstr = getTagName();
-            if (tmpstr.equals("individualvalueset")) {
-              for (int ii = 0; ii < npoints; ii++, nextTag())
-                yaxisData[ii] = Double.parseDouble(nextValue());
-              System.out.println(npoints + " individual Y values now read");
-            } else if (tmpstr.equals("encodedvalueset")) {
-              attrList = getCharacters();
-              byte[] dataArray = Base64.decodeBase64(attrList);
-              int ij = 0;
-              if (dataArray.length != 0) {
-                ByteBuffer byte_buffer = ByteBuffer.wrap(dataArray).order(
-                    ByteOrder.LITTLE_ENDIAN);
-                // float64
-                if (vectorType.equals("float64")) {
-                  DoubleBuffer double_buffer = byte_buffer.asDoubleBuffer();
-                  for (ij = 0; double_buffer.remaining() > 0; ij++)
-                    yaxisData[ij] = double_buffer.get();
-                }
-                // float32
-                else if (vectorType.equals("float32")) {
-                  FloatBuffer float_buffer = byte_buffer.asFloatBuffer();
-                  for (ij = 0; float_buffer.remaining() > 0; ij++)
-                    yaxisData[ij] = float_buffer.get();
-                }
-              }
-            } // end of encoded Y values
-
-            nextStartTag();
-            tmpstr = getTagName();
-            yaxisUnit = getAttrValue("label");
-
-          } // end of Y information
-          firstY = yaxisData[0];
-        } else if (tmpstr.equals("parameter")) {
-          if ((attrList = getAttrValueLC("name")).equals("identifier")) {
-            title = nextValue();
-          } else if (attrList.equals("nucleus")) {
-            obNucleus = nextValue();
-          } else if (attrList.equals("observefrequency")) {
-            StrObFreq = nextValue();
-            obFreq = Double.parseDouble(StrObFreq);
-          } else if (attrList.equals("referencepoint")) {
-            refPoint = Double.parseDouble(nextValue());
-          } else if (attrList.equals("sample path length")) {
-            pathlength = nextValue();
-          } else if (attrList.equals("scanmode")) {
-            thisValue(); // ignore?
-          } else if (attrList.equals("manufacturer")) {
-            vendor = thisValue();
-          } else if (attrList.equals("model name")) {
-            modelType = thisValue();
-          } else if (attrList.equals("resolution")) {
-            resolution = nextValue();
           }
-        }
-      }
-    } catch (Exception ex) {
-      System.err.println("error reading ExperimentStepSet section"
-          + ex.toString());
-      errorLog.append("error reading ExperimentStepSet section\n");
-    }
+        } // end of encoded Y values
 
-  } // end of processMeasurement
+        nextStartTag();
+        tagName = getTagName();
+        yaxisUnit = getAttrValue("label");
 
-  /**
-   * Process the audit XML events
-   *@throws Exception
-   */
-  public void processAudit() throws Exception {
-    try {
-      while (haveMore() && !tmpEnd.equals("audittrail")) {
-        if (nextEvent()!= XMLStreamConstants.START_ELEMENT) {
-          if (eventType == XMLStreamConstants.END_ELEMENT)
-            tmpEnd = getEndTag();
-          continue;
-        }
-        tmpstr = getTagName();
-        if (tmpstr.equals("user")) {
-          nextValue();
-        } else if (tmpstr.equals("timestamp")) {
-          nextValue();
-        }
+      } // end of Y information
+      firstY = yaxisData[0];
+    } else if (tagName.equals("parameter")) {
+      if ((attrList = getAttrValueLC("name")).equals("identifier")) {
+        title = nextValue();
+      } else if (attrList.equals("nucleus")) {
+        obNucleus = nextValue();
+      } else if (attrList.equals("observefrequency")) {
+        StrObFreq = nextValue();
+        obFreq = Double.parseDouble(StrObFreq);
+      } else if (attrList.equals("referencepoint")) {
+        refPoint = Double.parseDouble(nextValue());
+      } else if (attrList.equals("sample path length")) {
+        pathlength = nextValue();
+      } else if (attrList.equals("scanmode")) {
+        thisValue(); // ignore?
+      } else if (attrList.equals("manufacturer")) {
+        vendor = thisValue();
+      } else if (attrList.equals("model name")) {
+        modelType = thisValue();
+      } else if (attrList.equals("resolution")) {
+        resolution = nextValue();
       }
-    } catch (Exception ex) {
-      System.err.println("error reading Audit section");
-      errorLog.append("error reading Audit section\n");
     }
   }
 }
-

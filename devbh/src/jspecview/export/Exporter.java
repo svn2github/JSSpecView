@@ -23,7 +23,7 @@ public class Exporter implements ExporterInterface {
       (new SVGExporter()).exportAsSVG(path, spec, startIndex, endIndex);
     } else if (type.equals("CML")) {
       (new CMLExporter()).exportAsCML(path, spec, startIndex, endIndex);
-    } else if (type.equals("AML")) {
+    } else if (type.equals("AML") || type.equals("AnIML")) {
       (new AMLExporter()).exportAsAnIML(path, spec, startIndex, endIndex);
     } else {
       int iType = (type.equals("XY") ? XY : type.equals("DIF") ? DIF : type

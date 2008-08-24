@@ -65,7 +65,6 @@ public class DisplaySchemesProcessor {
    * Load a default DisplayScheme if xml file not found
    * @param dispSchemeFileName String
    * @return boolean
-   * @throws Exception
    */
 
 public boolean loadDefault(String dispSchemeFileName) {

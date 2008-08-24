@@ -64,25 +64,6 @@ class AMLExporter extends XMLExporter {
     pathlength = (pathlength.equals("") && spectypeInitials.equals("UV") ? "1.0"
         : "-1");
 
-    if (xUnits.equals("1/CM")) {
-      unitLabel = "1/cm";
-      unitFactor = "0.01";
-      unitExponent = "-1";
-    } else if (xUnits.equals("UM") || xUnits.equals("MICROMETERS")) {
-      unitLabel = "um";
-      unitFactor = "0.000001";
-    } else if (xUnits.equals("NM") || xUnits.equals("NANOMETERS")
-        || xUnits.equals("WAVELENGTH")) {
-      unitLabel = "nm";
-      unitFactor = "0.000000001";
-    } else if (xUnits.equals("PM") || xUnits.equals("PICOMETERS")) {
-      unitLabel = "pm";
-      unitFactor = "0.000000000001";
-    } else {
-      unitLabel = "Arb. Units";
-      unitFactor = "";
-    }
-
     if (vendor == null || vendor.equals(""))
       vendor = "not available from JCAMP-DX file";
     if (model == null || model.equals(""))

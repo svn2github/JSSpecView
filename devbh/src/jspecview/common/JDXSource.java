@@ -76,7 +76,7 @@ public abstract class JDXSource {
    * @return the Spectrum at a given index in the list
    */
   public JDXSpectrum getJDXSpectrum(int index){
-    return (JDXSpectrum)jdxSpectra.elementAt(index);
+    return jdxSpectra.size() <= index ? null : (JDXSpectrum)jdxSpectra.elementAt(index);
   }
 
   /**

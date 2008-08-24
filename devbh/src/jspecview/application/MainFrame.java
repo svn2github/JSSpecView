@@ -357,6 +357,7 @@ public class MainFrame
     }
 
     setApplicationElements();
+    setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
     // When application exits ...
     this.addWindowListener(new WindowAdapter() {
@@ -700,7 +701,7 @@ public class MainFrame
         closeMenuItem_actionPerformed(e);
       }
     });
-    closeAllMenuItem.setMnemonic('A');
+    closeAllMenuItem.setMnemonic('L');
     closeAllMenuItem.setText("Close All");
     closeAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -876,15 +877,16 @@ public class MainFrame
         difMenuItem_actionPerformed(e);
       }
     });
-    exportAsMenu.setMnemonic('E');
+    exportAsMenu.setMnemonic('A');
     exportAsMenu.setText("Export As");
-    animlMenuItem.setMnemonic('X');
+    animlMenuItem.setMnemonic('A');
     animlMenuItem.setText("AnIML");
     animlMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
         animlMenuItem_actionPerformed(e);
       }
     });
+    cmlMenuItem.setMnemonic('C');
     cmlMenuItem.setText("CML");
     cmlMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -1343,7 +1345,7 @@ public class MainFrame
         in.close();
         currentSelectedSource = xmlSource;
         xmlSpec = xmlSource.getJDXSpectrum(0);
-        if (xmlSpec.getNumberOfPoints() == 0) {
+        if (xmlSpec == null || xmlSpec.getNumberOfPoints() == 0) {
           System.err.println("not a recognizable XML Document");
           return;          
         }

@@ -42,9 +42,10 @@ abstract class XMLExporter extends FormExporter {
   String state;
   String xUnits;
   String yUnits;
-  String unitFactor = "";
-  String unitExponent = "1";
-  String unitLabel;
+  String xUnitFactor = "";
+  String xUnitExponent = "1";
+  String xUnitLabel;
+  String yUnitLabel;
   String datatype;
   String owner;
   String origin;
@@ -106,7 +107,26 @@ abstract class XMLExporter extends FormExporter {
     xUnits = spec.getXUnits().toUpperCase();
     yUnits = spec.getYUnits().toUpperCase();
 
-    unitLabel = (yUnits.equals("A") || yUnits.equals("ABS")
+    if (xUnits.equals("1/CM")) {
+      xUnitLabel = "1/cm";
+      xUnitFactor = "0.01";
+      xUnitExponent = "-1";
+    } else if (xUnits.equals("UM") || xUnits.equals("MICROMETERS")) {
+      xUnitLabel = "um";
+      xUnitFactor = "0.000001";
+    } else if (xUnits.equals("NM") || xUnits.equals("NANOMETERS")
+        || xUnits.equals("WAVELENGTH")) {
+      xUnitLabel = "nm";
+      xUnitFactor = "0.000000001";
+    } else if (xUnits.equals("PM") || xUnits.equals("PICOMETERS")) {
+      xUnitLabel = "pm";
+      xUnitFactor = "0.000000000001";
+    } else {
+      xUnitLabel = "Arb. Units";
+      xUnitFactor = "";
+    }
+
+    yUnitLabel = (yUnits.equals("A") || yUnits.equals("ABS")
         || yUnits.equals("ABSORBANCE") || yUnits.equals("AU")
         || yUnits.equals("AUFS") || yUnits.equals("OPTICAL DENSITY") ? "Absorbance"
         : yUnits.equals("T") || yUnits.equals("TRANSMITTANCE") ? "Transmittance"
@@ -173,7 +193,8 @@ abstract class XMLExporter extends FormExporter {
     context.put("yencode", "ivs");
     context.put("xUnits", xUnits);
     context.put("yUnits", yUnits);
-    context.put("unitLabel", unitLabel);
+    context.put("xUnitLabel", xUnitLabel);
+    context.put("yUnitLabel", yUnitLabel);
     context.put("specinits", spectypeInitials);
     context.put("deltaX", new Double(deltaX));
     context.put("owner", owner);

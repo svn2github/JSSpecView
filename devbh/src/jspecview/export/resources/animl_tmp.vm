@@ -131,7 +131,7 @@
 <$ydata_type>$coord.getYString()</$ydata_type>
 #end
 	                            </IndividualValueSet>
- 	                              <Unit label="$unitLabel">
+ 	                              <Unit label="$yUnitLabel">
                                      <SIUnit exponent="1" factor="1">1</SIUnit>
                                    </Unit>
                         </Vector>
@@ -146,9 +146,9 @@
 	                                </Increment>
 	                            </AutoIncrementedValueSet>
 #end
-	                            <Unit label="$unitLabel">
-#if($unitFactor != "")
-	                                <SIUnit factor="$unitFactor" exponent="$unitExponent" offset="0">m</SIUnit>
+	                            <Unit label="$xUnitLabel">
+#if($xUnitFactor != "")
+	                                <SIUnit factor="$xUnitFactor" exponent="$xUnitExponent" offset="0">m</SIUnit>
 #end
                                     </Unit>
                         </Vector>

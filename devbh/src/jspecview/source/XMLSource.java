@@ -20,14 +20,14 @@
 package jspecview.source;
 
 //import java.util.Iterator;
-import javax.xml.namespace.QName;
-import javax.xml.stream.*;
-import javax.xml.stream.events.* ;
+//import javax.xml.namespace.QName;
+//import javax.xml.stream.*;
+//import javax.xml.stream.events.* ;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Vector;
-
 import jspecview.common.Coordinate;
 import jspecview.common.Graph;
 import jspecview.common.JDXSource;
@@ -40,50 +40,62 @@ import jspecview.common.JDXSpectrum;
  */
 
 abstract class XMLSource extends JDXSource {
-  
-  private XMLEventReader fer;
 
-  protected String tmpstr="START",attrList="", title="identifier not found", owner="UNKNOWN",origin = "UNKNOWN";
-  protected String tmpEnd="END", molForm="", techname="";
-  private XMLEvent e;
-  protected int eventType=-1;
-  protected int npoints=-1, samplenum=-1;
+  //  protected XMLInputFactory factory;
+  //  private XMLEventReader fer;
+  //  private XMLEvent e;
+
+  private SimpleXmlReader.Buffer fer;
+  private SimpleXmlReaderXmlEvent e;
+
+  protected String tagName = "START", attrList = "",
+      title = "identifier not found", owner = "UNKNOWN", origin = "UNKNOWN";
+  protected String tmpEnd = "END", molForm = "", techname = "";
+  protected int eventType = -1;
+  protected int npoints = -1, samplenum = -1;
   protected double[] yaxisData;
   protected double[] xaxisData;
-  protected String xaxisLabel = "",  xaxisUnit = "", xaxisType = "";
-  protected  String yaxisLabel = "",  yaxisUnit = "", yaxisType = "";
-  protected  String vendor = "na", modelType = "MODEL UNKNOWN", LongDate = "";
-  protected  String pathlength= "na", identifier="", plLabel="";
-  protected  String resolution="na", resLabel="", LocName="";
-  protected  String LocContact="", casName = "";
-  protected  String sampleowner="", obNucleus="", StrObFreq="";
-  protected  boolean increasing = false, continuous=false;
-  protected  int ivspoints, evspoints, sampleRefNum=0;
-  protected  double deltaX = Graph.ERROR;
-  protected  double xFactor = Graph.ERROR;
-  protected  double yFactor = Graph.ERROR;
-  protected  double firstX = Graph.ERROR;
-  protected  double lastX = Graph.ERROR;
-  protected  double firstY = Graph.ERROR;
-  protected  double obFreq= Graph.ERROR;
-  protected  double refPoint=Graph.ERROR;
+  protected String xaxisLabel = "", xaxisUnit = "", xaxisType = "";
+  protected String yaxisLabel = "", yaxisUnit = "", yaxisType = "";
+  protected String vendor = "na", modelType = "MODEL UNKNOWN", LongDate = "";
+  protected String pathlength = "na", identifier = "", plLabel = "";
+  protected String resolution = "na", resLabel = "", LocName = "";
+  protected String LocContact = "", casName = "";
+  protected String sampleowner = "", obNucleus = "", StrObFreq = "";
+  protected boolean increasing = false, continuous = false;
+  protected int ivspoints, evspoints, sampleRefNum = 0;
+  protected double deltaX = Graph.ERROR;
+  protected double xFactor = Graph.ERROR;
+  protected double yFactor = Graph.ERROR;
+  protected double firstX = Graph.ERROR;
+  protected double lastX = Graph.ERROR;
+  protected double firstY = Graph.ERROR;
+  protected double obFreq = Graph.ERROR;
+  protected double refPoint = Graph.ERROR;
   protected String casRN = "";
   protected String sampleID;
   protected StringBuffer errorLog = new StringBuffer();
-  protected XMLInputFactory factory;
-  protected String errorSeparator="________________________________________________________";
+  protected String errorSeparator = "________________________________________________________";
 
-  
-  protected void getFactory(InputStream in) throws XMLStreamException {
-    if (factory == null)
-      factory = XMLInputFactory.newInstance();
-    XMLEventReader nofr = factory.createXMLEventReader(in);
-    fer = factory.createFilteredReader(nofr, new EventFilter() {
-      public boolean accept(XMLEvent event) {
-        return ((event.isStartDocument()) || (event.isStartElement())
-            || (event.isCharacters()) || (event.isEndElement()));
-      }
-    });
+  /*  
+   protected void getFactory(InputStream in) throws XMLStreamException {
+   factory = XMLInputFactory.newInstance();
+   XMLEventReader nofr = factory.createXMLEventReader(in);
+   fer = factory.createFilteredReader(nofr, new EventFilter() {
+   public boolean accept(XMLEvent event) {
+   return ((event.isStartDocument()) || (event.isStartElement())
+   || (event.isCharacters()) || (event.isEndElement()));
+   }
+   });
+   }
+   */
+  protected void getSimpleXmlReader(InputStream in) {
+    SimpleXmlReader reader = new SimpleXmlReader();
+    fer = reader.getBuffer(in);
+  }
+
+  protected String getBufferData() {
+    return (fer == null ? null : fer.data.substring(0, fer.ptr));
   }
 
   protected void populateVariables() {
@@ -156,7 +168,7 @@ abstract class XMLSource extends JDXSource {
 
     Coordinate[] amlcoord = new Coordinate[npoints];
     xyCoords.toArray(amlcoord);
-    spectrum.setXYCoords(amlcoord);    
+    spectrum.setXYCoords(amlcoord);
     addJDXSpectrum(spectrum);
   }
 
@@ -172,48 +184,48 @@ abstract class XMLSource extends JDXSource {
     return true;
   }
 
+  protected int peek() throws IOException {
+    e = fer.peek();
+    return eventType = e.getEventType();
+  }
+
   protected boolean haveMore() {
     return fer.hasNext();
   }
-  
-  protected void nextTag() throws XMLStreamException {
+
+  protected void nextTag() throws IOException {
     e = fer.nextTag();
   }
-  
-  protected int peek() throws XMLStreamException {
-    e = fer.peek();
-    return eventType = e.getEventType();    
-  }
-  
-  protected int nextEvent() throws XMLStreamException {
+
+  protected int nextEvent() throws IOException {
     e = fer.nextEvent();
-    return eventType = e.getEventType();    
+    return eventType = e.getEventType();
   }
-  
-  protected void nextStartTag() throws XMLStreamException {
+
+  protected void nextStartTag() throws IOException {
     e = fer.nextTag();
     while (!e.isStartElement())
       e = fer.nextTag();
   }
 
   protected String getTagName() {
-    return e.asStartElement().getName().getLocalPart().toLowerCase().trim();
+    return e.getTagName();
   }
 
   protected String getEndTag() {
-    return e.asEndElement().getName().getLocalPart().toLowerCase().trim();
+    return e.getTagName();
   }
 
   protected String getAttributeList() {
-    return e.toString().toLowerCase();  
+    return e.toString().toLowerCase();
   }
 
-  protected String nextValue() throws XMLStreamException {
-    fer.nextTag();
+  protected String thisValue() throws IOException {
     return fer.nextEvent().toString().trim();
   }
 
-  protected String thisValue() throws XMLStreamException {
+  protected String nextValue() throws IOException {
+    fer.nextTag();
     return fer.nextEvent().toString().trim();
   }
 
@@ -221,42 +233,121 @@ abstract class XMLSource extends JDXSource {
     return getAttrValue(key).toLowerCase();
   }
 
-  protected Attribute getAttr(String name) {
-    return e.asStartElement().getAttributeByName(new QName(name));
-  }
   protected String getAttrValue(String name) {
-    Attribute a = getAttr(name);
+    SimpleXmlReaderAttribute a = e.getAttributeByName(name);
     return (a == null ? "" : a.getValue());
   }
 
   protected String getFullAttribute(String name) {
-    Attribute a = getAttr(name);
+    SimpleXmlReaderAttribute a = e.getAttributeByName(name);
     return (a == null ? "" : a.toString().toLowerCase());
   }
 
-  protected String getCharacters() throws XMLStreamException {
+  protected String getCharacters() throws IOException {
     StringBuffer sb = new StringBuffer();
     e = fer.peek();
     eventType = e.getEventType();
 
-    while (eventType != XMLStreamConstants.CHARACTERS) {
-      //                  System.out.println(e.toString()+ " "+ eventType);
-      e = fer.nextEvent();
-    }
-
-    while (eventType == XMLStreamConstants.CHARACTERS) {
+    while (eventType != SimpleXmlReader.CHARACTERS) {
       e = fer.nextEvent();
       eventType = e.getEventType();
-      if (eventType == XMLStreamConstants.CHARACTERS)
+    }
+
+    while (eventType == SimpleXmlReader.CHARACTERS) {
+      e = fer.nextEvent();
+      eventType = e.getEventType();
+      if (eventType == SimpleXmlReader.CHARACTERS)
         sb.append(e.toString());
     }
     return sb.toString();
   }
 
+  /*  protected int peek() throws XMLStreamException {
+   e = fer.peek();
+   return eventType = e.getEventType();    
+   }
+   
+   protected boolean haveMore() {
+   return fer.hasNext();
+   }
+   
+   protected void nextTag() throws XMLStreamException {
+   e = fer.nextTag();
+   }
+   
+   protected int nextEvent() throws XMLStreamException {
+   e = fer.nextEvent();
+   return eventType = e.getEventType();    
+   }
+   
+   protected void nextStartTag() throws XMLStreamException {
+   e = fer.nextTag();
+   while (!e.isStartElement())
+   e = fer.nextTag();
+   }
+
+   protected String getTagName() {
+   return e.asStartElement().getName().getLocalPart().toLowerCase().trim();
+   }
+
+   protected String getEndTag() {
+   return e.asEndElement().getName().getLocalPart().toLowerCase().trim();
+   }
+
+   protected String getAttributeList() {
+   return e.toString().toLowerCase();  
+   }
+
+   protected String thisValue() throws XMLStreamException {
+   return fer.nextEvent().toString().trim();
+   }
+
+   protected String nextValue() throws XMLStreamException {
+   fer.nextTag();
+   return fer.nextEvent().toString().trim();
+   }
+
+   protected String getAttrValueLC(String key) {
+   return getAttrValue(key).toLowerCase();
+   }
+
+   protected SimpleXmlReaderAttribute getAttr(String name) {
+   return e.asStartElement().getAttributeByName(new QName(name));
+   }
+   protected String getAttrValue(String name) {
+   SimpleXmlReaderAttribute a = getAttr(name);
+   return (a == null ? "" : a.getValue());
+   }
+
+   protected String getFullAttribute(String name) {
+   SimpleXmlReaderAttribute a = getAttr(name);
+   return (a == null ? "" : a.toString().toLowerCase());
+   }
+
+   protected String getCharacters() throws XMLStreamException {
+   StringBuffer sb = new StringBuffer();
+   e = fer.peek();
+   eventType = e.getEventType();
+
+   while (eventType != XMLStreamConstants.CHARACTERS) { 
+   e = fer.nextEvent();
+   eventType = e.getEventType();     
+   }
+
+   while (eventType == XMLStreamConstants.CHARACTERS) {
+   e = fer.nextEvent();
+   eventType = e.getEventType();
+   if (eventType == XMLStreamConstants.CHARACTERS)
+   sb.append(e.toString());
+   }
+   return sb.toString();
+   }
+   */
   protected void processErrors(String type) {
     // for ease of processing later, return a source rather than a spectrum
     //    return XMLSource.getXMLInstance(spectrum);
-    factory = null;
+    //factory = null;
+    fer = null;
     if (errorLog.length() > 0) {
       errorLog.append("these errors were found in " + type + " \n");
     } else {
@@ -266,6 +357,60 @@ abstract class XMLSource extends JDXSource {
     setErrorLog(errorLog.toString());
   }
 
+  
+  final static String[] tagNames = {
+    // aml:
+    "audittrail", 
+    "author",
+    "experimentstepset", 
+    "sampleset",
+    // cml:  
+    "spectrum",
+    "metadatalist",
+    "conditionlist",
+    "parameterlist",
+    "sample",
+    "spectrumdata",
+    "peaklist",
+    // cml, but not here:
+    "peaklist"
+  };
+
+  final static int AML_0 = 0;
+  final static int AML_AUDITTRAIL = 0;
+  final static int AML_AUTHOR = 1;
+  final static int AML_EXPERIMENTSTEPSET = 2;
+  final static int AML_SAMPLESET = 3;
+  final static int AML_1 = 4;
+  
+  final static int CML_0 = 4;
+  final static int CML_SPECTRUM = 4;
+  final static int CML_METADATALIST = 5;
+  final static int CML_CONDITIONLIST = 6;
+  final static int CML_PARAMETERLIST = 7;
+  final static int CML_SAMPLE = 8;
+  final static int CML_SPECTRUMDATA = 9;
+  final static int CML_PEAKLIST = 10;
+  final static int CML_1 = 11;
+
+  final static int CML_PEAKLIST2 = 11;
+
+  protected void processXML(int i0, int i1) throws Exception {
+    while (haveMore()) {
+      if (nextEvent() != SimpleXmlReader.START_ELEMENT) 
+        continue;
+        String theTag = getTagName();
+        //System.out.println(theTag);
+        for (int i = i0; i < i1; i++)
+          if (theTag.equals(tagNames[i])) {
+            process(i);
+            break;
+          }
+      }
+  }
+
+  protected void process(int tagId) {
+    // overridden
+  }
 
 }
-
