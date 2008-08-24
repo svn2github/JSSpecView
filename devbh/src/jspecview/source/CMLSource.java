@@ -331,6 +331,11 @@ public class CMLSource extends XMLSource {
     
     // this method is run ONCE
     
+    // if a spectrum is found, ignore a peaklist if present as well
+    // since without intervention it is not possible to guess
+    // which display is required and the spectrum is probably the
+    // more critical ?!?
+
     if (specfound)
       return;
 
