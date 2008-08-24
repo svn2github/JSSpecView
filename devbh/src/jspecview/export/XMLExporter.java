@@ -217,8 +217,8 @@ abstract class XMLExporter extends FormExporter {
     context.put("model", model);
   }
   
-  void writeFormType(String type) throws IOException {
-    writeForm(type + (datatype.contains("NMR") ? "_nmr" : "_tmp") + ".vm");
+  String writeFormType(String type) throws IOException {
+    return writeForm(type + (datatype.contains("NMR") ? "_nmr" : "_tmp") + ".vm");
   }
 
 }

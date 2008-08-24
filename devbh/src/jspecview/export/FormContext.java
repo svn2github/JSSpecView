@@ -192,6 +192,7 @@ class FormContext {
 
   @SuppressWarnings("unchecked")
   public String merge(FileWriter writer) {
+    StringBuffer sb = (writer == null ? new StringBuffer() : null);
     int ptr;
     for (int i = 0; i < formTokens.size() && strError == null; i++) {
       FormToken vt = formTokens.get(i);
@@ -201,7 +202,10 @@ class FormContext {
         switch (vt.cmdType) {
         case VT_DATA:
           String data = fillData(vt.data);
-          writer.write(data);
+          if (writer == null)
+            sb.append(data);
+          else 
+            writer.write(data);
           continue;
         case VT_IF:
           if (evaluate(vt.data, true)) {
@@ -264,7 +268,7 @@ class FormContext {
         return e.getMessage();
       }
     }
-    return strError;
+    return (strError != null ? strError : sb != null ? sb.toString() : null);
   }
 
   @SuppressWarnings("unchecked")

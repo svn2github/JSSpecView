@@ -1,4 +1,4 @@
-/* Copyright (c) 2006-2008 The University of the West Indies
+/* Copyright (c) 2006-2007 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -39,17 +39,18 @@ class CMLExporter extends XMLExporter {
    * @param spec the spectrum to export
    * @param startIndex the starting point of the spectrum
    * @param endIndex the end point
+   * @return data if fileName is null
    * @throws IOException
    */
-  void exportAsCML(String fileName, JDXSpectrum spec, int startIndex,
+  String exportAsCML(String fileName, JDXSpectrum spec, int startIndex,
                    int endIndex) throws IOException {
 
     if (!super.exportAsXML(spec, fileName, startIndex, endIndex))
-      return;
+      return null;
 
     if (model == null || model.equals(""))
       model = "unknown";
-
+    
     if (datatype.contains("MASS"))
       spectypeInitials = "massSpectrum";
     else if (datatype.contains("INFRARED")) {
@@ -71,6 +72,6 @@ class CMLExporter extends XMLExporter {
 
     setContext();
 
-    writeFormType("cml");
+    return writeFormType("cml");
   }
 }

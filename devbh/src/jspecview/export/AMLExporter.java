@@ -39,13 +39,14 @@ class AMLExporter extends XMLExporter {
    * @param spec the spectrum to export
    * @param startIndex the starting point of the spectrum
    * @param endIndex the end point
+   * @return data if fileName is null
    * @throws IOException
    */
-  void exportAsAnIML(String fileName, JDXSpectrum spec, int startIndex,
+  String exportAsAnIML(String fileName, JDXSpectrum spec, int startIndex,
                      int endIndex) throws IOException {
 
     if (!super.exportAsXML(spec, fileName, startIndex, endIndex))
-      return;
+      return null;
 
     if (solvName == null || solvName.equals(""))
       solvName = "unknown";
@@ -72,7 +73,7 @@ class AMLExporter extends XMLExporter {
       resolution="not available in JCAMP-DX file";
     
     setContext();
-    writeFormType("animl");
+    return writeFormType("animl");
   }
 
 }

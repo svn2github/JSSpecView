@@ -27,7 +27,7 @@ package jspecview.exception;
  * @author Prof Robert J. Lancashire
  */
 
-public class ScalesIncompatibleException extends Exception {
+public class ScalesIncompatibleException extends JSpecViewException {
 
   /**
    * Initialises the ScalesIncompatibleException

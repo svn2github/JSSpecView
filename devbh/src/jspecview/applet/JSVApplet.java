@@ -102,12 +102,11 @@ import jspecview.common.Visible;
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
  * @author Craig Walters
- * @author Bob Hanson, hansonr@stolaf.edu
  * @author Prof Robert J. Lancashire
  */
 
 public class JSVApplet extends JApplet {
-  public static final String APPLET_VERSION = "1.0.20080822-2000";
+  public static final String APPLET_VERSION = "1.0.20080804-2030";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath, XMLImportfilePath;
@@ -194,33 +193,33 @@ public class JSVApplet extends JApplet {
   JSVPanel tempJSVP;
 
   private static final String[] params = {
-     "LOAD",
-     "REVERSEPLOT",
-     "COORDINATESON",
-     "GRIDON",
-     "COORDCALLBACKFUNCTIONNAME",
-     "SPECTRUMNUMBER",
-     "INTERFACE",
-     "ENDINDEX",
-     "ENABLEZOOM",
-     "STARTINDEX",
-     "MENUON",
-     "COMPOUNDMENUON",
-     "BACKGROUNDCOLOR",
-     "COORDINATESCOLOR",
-     "GRIDCOLOR",
-     "PLOTAREACOLOR",
-     "PLOTCOLOR",
-     "SCALECOLOR",
-     "TITLECOLOR",
-     "UNITSCOLOR",
-     "PLOTCOLORS",
-     "VERSION",
-     "PEAKCALLBACKFUNCTIONNAME",
+     "LOAD", 
+     "REVERSEPLOT", 
+     "COORDINATESON", 
+     "GRIDON", 
+     "COORDCALLBACKFUNCTIONNAME", 
+     "SPECTRUMNUMBER", 
+     "INTERFACE", 
+     "ENDINDEX", 
+     "ENABLEZOOM", 
+     "STARTINDEX", 
+     "MENUON", 
+     "COMPOUNDMENUON", 
+     "BACKGROUNDCOLOR", 
+     "COORDINATESCOLOR", 
+     "GRIDCOLOR", 
+     "PLOTAREACOLOR", 
+     "PLOTCOLOR", 
+     "SCALECOLOR", 
+     "TITLECOLOR", 
+     "UNITSCOLOR", 
+     "PLOTCOLORS", 
+     "VERSION", 
+     "PEAKCALLBACKFUNCTIONNAME", 
      "IMPORT",
      "IRMODE"
      };
-
+  
   final private static int PARAM_LOAD = 0;
   final private static int PARAM_REVERSEPLOT = 1;
   final private static int PARAM_COORDINATESON = 2;
@@ -246,7 +245,7 @@ public class JSVApplet extends JApplet {
   final private static int PARAM_PEAKCALLBACKFUNCTIONNAME = 22;
   final private static int PARAM_IMPORT = 23;
   final private static int PARAM_IRMODE = 24;
-
+  
   final private static Hashtable<String, Integer> htParams = new Hashtable<String, Integer>();
   {
     for (int i = 0; i < params.length; i++)
@@ -306,9 +305,9 @@ public class JSVApplet extends JApplet {
    */
   boolean overlay;
 
-
+  
   String irMode;
-
+  
   /**
    * Returns a parameter value
    * @param key the parameter name
@@ -461,10 +460,10 @@ public class JSVApplet extends JApplet {
 
       System.out.println("irmode " + irMode);
       setStringParameter("irmode", irMode);
-
+      
     }
-
-
+    
+    
     catch(JSpecViewException jsve){
      this.writeStatus(jsve.getMessage());
     }
@@ -486,8 +485,8 @@ public class JSVApplet extends JApplet {
 
 
     if(continuous){
+     exportAsMenu.setEnabled(true);
      try{
-          exportAsMenu.setEnabled(true);
           jFileChooser = new JFileChooser();
           if(JSpecViewUtils.DEBUG){
              System.out.println("Either running in Sandbox or Applet signed: Export menu enabled");
@@ -495,8 +494,8 @@ public class JSVApplet extends JApplet {
      }
      catch(SecurityException se){
      // disable export menu
-         exportAsMenu.setEnabled(false);
-         System.err.println("Export menu disabled: You need the signed Applet to export files");
+         //exportAsMenu.setEnabled(false);
+         //System.err.println("Export menu disabled: You need the signed Applet to export files");
      }
      catch(Exception e) {
          System.err.println("Exception found");
@@ -736,28 +735,27 @@ public class JSVApplet extends JApplet {
    * Initalises the <code>JSVPanels</code> and adds them to the jsvPanels array
    * @throws JSpecViewException
    */
-  private void initPanels() throws JSpecViewException{
+  private void initPanels() throws JSpecViewException {
     boolean showRange = false;
     JSVPanel jsvp;
 
-   if (!XMLImport){
-    numberOfSpectra = specs.size();
-    overlay = theInterface.equals("overlay") && numberOfSpectra > 1;
-   }
-    else{
-      numberOfSpectra=1;
+    if (!XMLImport) {
+      numberOfSpectra = specs.size();
+      overlay = theInterface.equals("overlay") && numberOfSpectra > 1;
+    } else {
+      numberOfSpectra = 1;
     }
-    if(startIndex != -1 && endIndex != -1)
+    if (startIndex != -1 && endIndex != -1)
       showRange = true;
 
     // Initialise JSVpanels
 
-    if(overlay){
+    if (overlay) {
       // overlay all spectra on a panel
       jsvPanels = new JSVPanel[1];
 
-      try{
-        if(showRange){
+      try {
+        if (showRange) {
           int[] startIndices = new int[numberOfSpectra];
           int[] endIndices = new int[numberOfSpectra];
 
@@ -765,11 +763,9 @@ public class JSVApplet extends JApplet {
           Arrays.fill(endIndices, endIndex);
 
           jsvp = new JSVPanel(specs, startIndices, endIndices);
-        }
-        else
+        } else
           jsvp = new JSVPanel(specs);
-      }
-      catch(ScalesIncompatibleException sie){
+      } catch (ScalesIncompatibleException sie) {
         theInterface = "single";
         initPanels();
         return;
@@ -783,21 +779,25 @@ public class JSVApplet extends JApplet {
       jsvp.addMouseListener(new JSVPanelMouseListener());
       selectedJSVPanel = jsvp;
 
-    }
-    else{
+    } else {
       // initalise JSVPanels and add them to the array
       jsvPanels = new JSVPanel[numberOfSpectra];
-      for(int i = 0; i < numberOfSpectra; i++){
-        if(showRange)
-          jsvp = new JSVPanel((JDXSpectrum)specs.elementAt(i), startIndex, endIndex);
-        else
-          jsvp = new JSVPanel((JDXSpectrum)specs.elementAt(i));
-       jsvPanels[i] = jsvp;
+      try {
+        for (int i = 0; i < numberOfSpectra; i++) {
+          if (showRange)
+            jsvp = new JSVPanel((JDXSpectrum) specs.elementAt(i), startIndex,
+                endIndex);
+          else
+            jsvp = new JSVPanel((JDXSpectrum) specs.elementAt(i));
+          jsvPanels[i] = jsvp;
 
-        initProperties(jsvp);
+          initProperties(jsvp);
 
-        // add listeners
-        jsvp.addMouseListener(new JSVPanelMouseListener());
+          // add listeners
+          jsvp.addMouseListener(new JSVPanelMouseListener());
+        }
+      } catch (Exception e) {
+        // TODO
       }
     }
   }
@@ -1563,12 +1563,12 @@ public class JSVApplet extends JApplet {
         return false;
       return true;
     }
-    } catch (JSpecViewException jsve) {
-
+    } catch (Exception jsve) {
+      // 
     }
     return false;
   }
-
+  
   /**
    * Allows conversion between TRANSMITTANCE and ABSORBANCE
    * @param e ItemEvent
@@ -1583,23 +1583,23 @@ public class JSVApplet extends JApplet {
        TAConvert(IMPLIED);
     else
        TAConvert(IMPLIED);
-    } catch (JSpecViewException jsve) {
-
+    } catch (Exception jsve) {
+      // ignore? 
     }
   }
 
 
   private long msTrigger = -1;
-
+  
   /**
    * Allows Transmittance to Absorbance conversion or vice versa
    * depending on the value of comm.
    * @param comm the conversion command
-   * @throws JSpecViewException
+   * @throws Exception 
    */
 
-
-  private void TAConvert(int comm) throws JSpecViewException {
+  
+  private void TAConvert(int comm) throws Exception {
     long time = System.currentTimeMillis();
     System.out.println(time + " " + msTrigger + " " + (time-msTrigger));
     if (msTrigger > 0 && time - msTrigger < 100)
@@ -1626,7 +1626,7 @@ public class JSVApplet extends JApplet {
       return;
     }
 
-
+      
       //  if successful, newSpec has the converted info
       JDXSpectrum newSpec = TransmittanceAbsorbanceConverter.convert(spectrum);
 
@@ -1721,32 +1721,45 @@ public class JSVApplet extends JApplet {
    * Auxiliary method for exporting the spectrum
    * @param comm the format to export to
    */
-  private void exportAsMenuItem_actionPerformed_aux(String comm){
-    String errMsg = null;
-    if(jFileChooser != null){
-      if(JSpecViewUtils.DEBUG){
-        jFileChooser.setCurrentDirectory(new File("C:\\temp"));
-      }
-      int returnVal = jFileChooser.showSaveDialog(this);
-      if (returnVal == JFileChooser.APPROVE_OPTION) {
-        File file = jFileChooser.getSelectedFile();
-        JDXSpectrum spec = (JDXSpectrum)selectedJSVPanel.getSpectrumAt(0);
-        try{
-          ExporterInterface exporter = (ExporterInterface) Interface
-              .getOptionInterface("jspecview.export.Exporter");
-          if (exporter == null)
-            return;
-          errMsg = exporter.export(comm, file.getAbsolutePath(), spec,
-              0, spec.getXYCoords().length - 1);
-        }
-        catch(IOException ioe){
-          errMsg = "Error writing: " + file.getName();
-        }
-        this.writeStatus(errMsg);
-      }
+  private void exportAsMenuItem_actionPerformed_aux(String comm) {
+    if (jFileChooser == null) {
+      System.out.println(export(0, comm, null));
+      // for now -- just send to output
+      writeStatus("output sent to Java console");
+      return;
     }
-    else
-      this.writeStatus("You do not have permission to write to disk");
+    if (JSpecViewUtils.DEBUG) {
+      jFileChooser.setCurrentDirectory(new File("C:\\temp"));
+    }
+    int returnVal = jFileChooser.showSaveDialog(this);
+    if (returnVal == JFileChooser.APPROVE_OPTION) {
+      File file = jFileChooser.getSelectedFile();
+      if (file == null)
+        return;
+      writeStatus(export(0, comm, file));
+    }
+    //} else {
+    //writeStatus("You do not have permission to write to disk");
+    //}
+  }
+
+  private String export(int n, String comm, File file) {
+    if (n < 0 || selectedJSVPanel.getNumberOfSpectra() <= n)
+      return "only " + selectedJSVPanel.getNumberOfSpectra() + " spectra available.";
+    String errMsg = null;
+    try{
+      JDXSpectrum spec = (JDXSpectrum)selectedJSVPanel.getSpectrumAt(n);
+      ExporterInterface exporter = (ExporterInterface) Interface
+          .getOptionInterface("jspecview.export.Exporter");
+      if (exporter == null)
+        return null;
+      errMsg = exporter.export(comm, (file == null ? null : file.getAbsolutePath()), spec, 
+          0, spec.getXYCoords().length - 1);
+    }
+    catch(IOException ioe){
+      errMsg = "Error writing: " + file.getName();
+    }
+    return errMsg;
   }
 
   /**
@@ -1891,7 +1904,7 @@ public class JSVApplet extends JApplet {
   }
 
 */
-
+  
   /**
    * Intialises the <code>plotColors</code> array from the
    * <i>plotColorsStr</i> variable
@@ -2013,6 +2026,19 @@ public class JSVApplet extends JApplet {
     init();
   }
 
+  /**
+   * Delivers spectrum coded as desired: XY, SQZ, PAC, DIF, AML, CML, SVG
+   * @param type 
+   * @param n 
+   * @return data
+   * 
+   */
+  public String export(String type, int n) {
+    if (type == null)
+      type = "XY";
+    return export(n, type.toUpperCase(), null);
+  }
+  
   /**
     * Returns the spectrum at the specified block number
     * @param block int

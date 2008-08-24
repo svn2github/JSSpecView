@@ -46,13 +46,17 @@ class JDXExporter {
    * @param spectrum the spectrum
    * @param startIndex 
    * @param endIndex 
-   * @param writer the writer to export to
+   * @return data if path is null
    * @throws IOException
    */
-  static void export(int type, String path, JDXSpectrum spectrum, int startIndex, int endIndex) throws IOException{
+  static String export(int type, String path, JDXSpectrum spectrum, int startIndex, int endIndex) throws IOException{
+    String data = toStringAux(type, spectrum, startIndex, endIndex);
+    if (path == null)
+      return data;
     FileWriter writer = new FileWriter(path);
-    writer.write(toStringAux(type, spectrum, startIndex, endIndex));
+    writer.write(data);
     writer.close();
+    return null;
   }
 
   /**

@@ -65,7 +65,6 @@ import jspecview.common.JDXSourceFactory;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSpecViewUtils;
 import jspecview.exception.JSpecViewException;
-import jspecview.exception.ScalesIncompatibleException;
 
 /**
  * Dialog to change the preferences for the application.
@@ -278,7 +277,6 @@ public class PreferencesDialog extends JDialog {
       in.close();
     }
     catch (JSpecViewException ex) {
-    }catch (ScalesIncompatibleException ex) {
     }catch (IOException ex) {
     }
 

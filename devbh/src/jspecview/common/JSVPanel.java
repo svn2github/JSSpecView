@@ -224,17 +224,13 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
   /**
    * Constructs a new JSVPanel
    * @param spectrum the spectrum
-   * @throws JSpecViewException
+   * @throws ScalesIncompatibleException 
    */
-  public JSVPanel(Graph spectrum) throws JSpecViewException{
+  public JSVPanel(Graph spectrum) throws ScalesIncompatibleException {
     super();
     setDefaultMouseListener(this);
     setDefaultMouseMotionListener(this);
-    try{
-      initJSVPanel(new Graph[]{spectrum});
-    }
-    catch(ScalesIncompatibleException sie){
-    }
+    initJSVPanel(new Graph[]{spectrum});
   }
 
   /**

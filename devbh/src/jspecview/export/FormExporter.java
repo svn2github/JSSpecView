@@ -53,22 +53,24 @@ abstract class FormExporter {
     currentTime = formatter.format(now.getTime());
   }
 
-  protected void writeForm(String templateFile) throws IOException {
+  protected String writeForm(String templateFile) throws IOException {
     FileManager fm = new FileManager(null);
     String template = fm.getResourceString(this, templateFile, true);
     if (template == null) {
       Logger.error(fm.getErrorMessage());
-      return;
+      return fm.getErrorMessage();
     }
     errMsg = context.setTemplate(template);
     if (errMsg != null) {
       Logger.error(errMsg);
-      return;
+      return errMsg;
     }
 
-    FileWriter writer = new FileWriter(outputFile);
+    FileWriter writer = (outputFile == null ? null : new FileWriter(outputFile));
 
     errMsg = context.merge(writer);
+    if (writer == null)
+      return errMsg; 
     if (errMsg != null) {
       Logger.error(errMsg);
       throw new IOException(errMsg);
@@ -79,5 +81,7 @@ abstract class FormExporter {
       writer.close();
     } catch (IOException ioe) {
     }
+    
+    return null;
   }
 }

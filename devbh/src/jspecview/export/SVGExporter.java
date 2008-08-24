@@ -74,22 +74,16 @@ public class SVGExporter extends FormExporter {
 
   /**
    * Export a Graph as SVG to a file given by fileName
-   * @param fileName the name of the file
-   * @param graph the Graph
-   * @throws IOException
-   */
-
-  /**
-   * Export a Graph as SVG to a Writer given by writer
    * @param path the file path
    * @param graph the Graph
    * @param startIndex 
    * @param endIndex 
+   * @return data if fileName is null
    * @throws IOException
    */
-  void exportAsSVG(String path, Graph graph, int startIndex, int endIndex)
+  String exportAsSVG(String path, Graph graph, int startIndex, int endIndex)
       throws IOException {
-    exportAsSVG(path, graph.getXYCoords(), "", startIndex,
+    return exportAsSVG(path, graph.getXYCoords(), "", startIndex,
         endIndex, graph.getXUnits(), graph.getYUnits(), graph.isContinuous(),
         graph.isIncreasing(), Color.lightGray, Color.white, Color.black,
         Color.gray, Color.black, Color.black, Color.black);
@@ -143,9 +137,10 @@ public class SVGExporter extends FormExporter {
    * @param titleColor the color of the title
    * @param scaleColor the color of the scales
    * @param unitsColor the color of the units
+   * @return data if fileName is null
    * @throws IOException 
    */
-  private void exportAsSVG(String fileName, Coordinate[] xyCoords, String title,
+  private String exportAsSVG(String fileName, Coordinate[] xyCoords, String title,
                            int startDataPointIndex, int endDataPointIndex,
                            String xUnits, String yUnits, boolean continuous,
                            boolean increasing, Color plotAreaColor,
@@ -374,7 +369,7 @@ public class SVGExporter extends FormExporter {
     context.put("numDecimalPlacesX", new Integer(Math.abs(hashNumX)));
     context.put("numDecimalPlacesY", new Integer(Math.abs(hashNumY)));
 
-    writeForm("plot.vm");
+    return writeForm("plot.vm");
     
   }
 
@@ -396,9 +391,10 @@ public class SVGExporter extends FormExporter {
    * @param titleColor the color of the title
    * @param scaleColor the color of the scales
    * @param unitsColor the color of the units
+   * @return data if fileName is null
    * @throws IOException 
    */
-  public void exportAsSVG(String fileName, Coordinate[][] xyCoordsList,
+  public String exportAsSVG(String fileName, Coordinate[][] xyCoordsList,
                                  String title, int[] startDataPointIndices,
                                  int[] endDataPointIndices, String xUnits,
                                  String yUnits, boolean continuous,
@@ -619,6 +615,6 @@ public class SVGExporter extends FormExporter {
     context.put("numDecimalPlacesX", new Integer(Math.abs(hashNumX)));
     context.put("numDecimalPlacesY", new Integer(Math.abs(hashNumY)));
 
-    writeForm("plot.vm");
+    return writeForm("plot.vm");
   }
 }
