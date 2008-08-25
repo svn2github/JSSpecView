@@ -156,9 +156,9 @@ public class CMLSource extends XMLSource {
         StrObFreq = reader.qualifiedValue();
         obFreq = Double.parseDouble(StrObFreq);
       } else if (title.equals("nmr.observe nucleus")) {
-        obNucleus = reader.thisValue();
+        obNucleus = reader.getAttrValue("value");
       } else if (title.equals("spectrometer/data system")) {
-        modelType = reader.thisValue();
+        modelType = reader.getAttrValue("value");
       } else if (title.equals("resolution")) {
         resolution = reader.qualifiedValue();
       }

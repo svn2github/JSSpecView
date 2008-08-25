@@ -240,7 +240,7 @@ public class SimpleXmlReader {
       //System.out.println(data);
       ptr = 0;
       ptEnd = data.length();
-      System.out.println("flush " + ptEnd);
+      //System.out.println("flush " + ptEnd);
     }
 
     String substring(int i, int j) {
@@ -368,7 +368,7 @@ public class SimpleXmlReader {
     private Hashtable<String, Object> attributes;
 
     Tag() {
-      System.out.println("tag");
+      //System.out.println("tag");
     }
 
     Tag(String fulltag) {
