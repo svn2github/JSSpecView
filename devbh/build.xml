@@ -100,7 +100,6 @@ is divided into following sections:
     	<target name="applet_jar" depends="init,compile" description="Create applet.">
             <delete file="${applet.jar}" quiet="true" />
             <jar jarfile="${applet.jar}" compress="${jar.compress}">
-        		<!-- zipfileset src="${libs.JSR173.classpath}" / --> 
                 <fileset dir="${build.classes.dir}">
               	  <exclude name="**/application/**"/>
                   <exclude name="**/mdidesktop/**"/>
@@ -123,10 +122,6 @@ is divided into following sections:
     <delete file="${application.jar}" quiet="true" />
 	 <jar destfile="${application.jar}">
 		<zipfileset dir="${build.classes.dir}" prefix="" />
-		<!-- zipfileset src="${libs.Xerces.classpath}" / -->
-		<!--  zipfileset src="${libs.XMLParser.classpath}" / -->
-		<!-- zipfileset src="${libs.JSR173.classpath}" / --> <!-- for anIML, CML file reading -->
-		<!-- zipfileset src="${libs.Stax.classpath}" / --> <!-- for ??? -->
        <manifest> 
 			<attribute name="Main-Class" value="${main.class}" />
 		</manifest>
