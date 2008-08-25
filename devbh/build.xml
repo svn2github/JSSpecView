@@ -51,16 +51,10 @@ is divided into following sections:
              <property name="work.dir" value="dist" />
              <property name="applet.url" value="JSVApplet.html" />
 
-<!-- The following external JARS are required: -->
-             <property name="libs.JSR173.classpath" value="include\\jsr173_1.0_api.jar" />
-             <property name="libs.Plugin.classpath" value="include\\plugin.jar" />
-             <property name="libs.Stax.classpath" value="include\\sjsxp.jar" />
-             <property name="libs.Velocity.classpath" value="include\\velocity-dep-1.4.jar" />
-         	 <property name="libs.Xerces.classpath" value="include\\xercesImpl.jar" />
-        	 <property name="libs.XMLParser.classpath" value="include\\xmlParserAPIs.jar" />
-
+<!-- The following external JAR is required: --> 
+    	     <property name="libs.Plugin.classpath" value="include\\plugin.jar" />
+    	     <property name="javac.classpath" value="${libs.Plugin.classpath}" />
     		 <property name="jar.compress" value="TRUE" />
-             <property name="javac.classpath" value="${libs.Xerces.classpath};${libs.XMLParser.classpath};${libs.JSR173.classpath};${libs.Stax.classpath};${libs.Velocity.classpath};${libs.Plugin.classpath}" />
              <property name="javac.compilerargs" value="-Xlint:unchecked" />
              <property name="javac.deprecation" value="TRUE" />
              <property name="javac.includes" value="" />
