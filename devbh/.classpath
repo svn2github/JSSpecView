@@ -2,11 +2,6 @@
 <classpath>
 	<classpathentry path="src" kind="src"/>
 	<classpathentry path="org.eclipse.jdt.launching.JRE_CONTAINER" kind="con"/>
-	<classpathentry path="include/jsr173_1.0_api.jar" kind="lib"/>
 	<classpathentry path="include/plugin.jar" kind="lib"/>
-	<classpathentry path="include/sjsxp.jar" kind="lib"/>
-	<classpathentry path="include/velocity-dep-1.4.jar" kind="lib"/>
-	<classpathentry path="include/xercesImpl.jar" kind="lib"/>
-	<classpathentry path="include/xmlParserAPIs.jar" kind="lib"/>
 	<classpathentry path="bin" kind="output"/>
 </classpath>
