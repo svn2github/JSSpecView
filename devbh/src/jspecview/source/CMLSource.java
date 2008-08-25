@@ -115,13 +115,13 @@ public class CMLSource extends XMLSource {
   private void processSpectrum() throws Exception {
     // title OR id here
     if (attrList.contains("title"))
-      title = getAttrValue("title");
+      title = reader.getAttrValue("title");
     else if (attrList.contains("id"))
-      title = getAttrValue("id");
+      title = reader.getAttrValue("id");
     
     // "type" is a required tag
     if (attrList.contains("type"))
-      techname = getAttrValue("type").toUpperCase() + " SPECTRUM";
+      techname = reader.getAttrValue("type").toUpperCase() + " SPECTRUM";
   }
 
   /**
@@ -130,17 +130,17 @@ public class CMLSource extends XMLSource {
    */
   private void processMetadataList() throws Exception {
     if (tagName.equals("metadata")) {
-      tagName = getAttrValueLC("name");
+      tagName = reader.getAttrValueLC("name");
       if (tagName.contains(":origin")) {
         if (attrList.contains("content"))
-          origin = getAttrValue("content");
+          origin = reader.getAttrValue("content");
         else
-          origin = thisValue();
+          origin = reader.thisValue();
       } else if (tagName.contains(":owner")) {
         if (attrList.contains("content"))
-          owner = getAttrValue("content");
+          owner = reader.getAttrValue("content");
         else
-          owner = thisValue();
+          owner = reader.thisValue();
       }
     }
   }
@@ -151,16 +151,16 @@ public class CMLSource extends XMLSource {
    */
   private void processParameterList() throws Exception {
     if (tagName.equals("parameter")) {
-      String title = getAttrValueLC("title");
+      String title = reader.getAttrValueLC("title");
       if (title.equals("nmr.observe frequency")) {
-        StrObFreq = qualifiedValue();
+        StrObFreq = reader.qualifiedValue();
         obFreq = Double.parseDouble(StrObFreq);
       } else if (title.equals("nmr.observe nucleus")) {
-        obNucleus = thisValue();
+        obNucleus = reader.thisValue();
       } else if (title.equals("spectrometer/data system")) {
-        modelType = thisValue();
+        modelType = reader.thisValue();
       } else if (title.equals("resolution")) {
-        resolution = qualifiedValue();
+        resolution = reader.qualifiedValue();
       }
     }
   }
@@ -171,9 +171,9 @@ public class CMLSource extends XMLSource {
    */
   private void processConditionList() throws Exception {
     if (tagName.equals("scalar")) {
-      String dictRef = getAttrValueLC("dictRef");
+      String dictRef = reader.getAttrValueLC("dictRef");
       if (dictRef.contains(":field")) {
-        StrObFreq = thisValue();
+        StrObFreq = reader.thisValue();
         if (StrObFreq.charAt(0) > 47
             && StrObFreq.charAt(0) < 58)
           obFreq = Double.parseDouble(StrObFreq);
@@ -188,11 +188,11 @@ public class CMLSource extends XMLSource {
   private void processSample() throws Exception {
     if (tagName.equals("formula")) {
       if (attrList.contains("concise"))
-        molForm = getAttrValue("concise");
+        molForm = reader.getAttrValue("concise");
       else if (attrList.contains("inline"))
-        molForm = getAttrValue("inline");
+        molForm = reader.getAttrValue("inline");
     } else if (tagName.equals("name")) {
-      casName = thisValue();
+      casName = reader.thisValue();
     }
   }
 
@@ -203,12 +203,12 @@ public class CMLSource extends XMLSource {
   private void processSpectrumData() throws Exception {
     if (tagName.equals("xaxis")) {
       if (attrList.contains("multipliertodata"))
-        xFactor = Double.parseDouble(getAttrValue("multiplierToData"));
-      nextTag();
-      tagName = getTagName();
-      attrList = getAttributeList();
+        xFactor = Double.parseDouble(reader.getAttrValue("multiplierToData"));
+      reader.nextTag();
+      tagName = reader.getTagName();
+      attrList = reader.getAttributeList();
       if (tagName.equals("array")) {
-        xaxisUnit = getAttrValue("units");
+        xaxisUnit = reader.getAttrValue("units");
         Integer pos = Integer.valueOf(xaxisUnit.indexOf(":"));
         xaxisUnit = xaxisUnit.substring(pos.intValue() + 1, xaxisUnit.length())
             .toUpperCase();
@@ -216,11 +216,11 @@ public class CMLSource extends XMLSource {
           xaxisUnit = "1/CM";
         else if (xaxisUnit.toLowerCase().equals("nm"))
           xaxisUnit = "NANOMETERS";
-        npoints = Integer.parseInt(getAttrValue("size"));
+        npoints = Integer.parseInt(reader.getAttrValue("size"));
         xaxisData = new double[npoints];
         if (attrList.contains("start")) {
-          firstX = Double.parseDouble(getAttrValue("start"));
-          lastX = Double.parseDouble(getAttrValue("end"));
+          firstX = Double.parseDouble(reader.getAttrValue("start"));
+          lastX = Double.parseDouble(reader.getAttrValue("end"));
           deltaX = (lastX - firstX) / (npoints - 1);
           increasing = deltaX > 0 ? true : false;
           continuous = true;
@@ -231,7 +231,7 @@ public class CMLSource extends XMLSource {
           int jj = -1;
           String tempX = "";
           Ydelim = " ";
-          attrList = getCharacters().replace('\n', ' ').replace('\r', ' ')
+          attrList = reader.getCharacters().replace('\n', ' ').replace('\r', ' ')
               .trim();
 
           // now that we have the full string should tokenise it to then process individual X values
@@ -269,28 +269,28 @@ public class CMLSource extends XMLSource {
       //          System.out.println("finished with X");
     } else if (tagName.equals("yaxis")) {
       if (attrList.contains("multipliertodata"))
-        yFactor = Double.parseDouble(getAttrValue("multiplierToData"));
-      nextTag();
-      tagName = getTagName();
-      attrList = getAttributeList();
+        yFactor = Double.parseDouble(reader.getAttrValue("multiplierToData"));
+      reader.nextTag();
+      tagName = reader.getTagName();
+      attrList = reader.getAttributeList();
       if (tagName.equals("array")) {
-        yaxisUnit = getAttrValue("units");
+        yaxisUnit = reader.getAttrValue("units");
         Integer pos = Integer.valueOf(yaxisUnit.indexOf(":"));
         yaxisUnit = yaxisUnit.substring(pos.intValue() + 1, yaxisUnit.length())
             .toUpperCase();
         if (yaxisUnit.toLowerCase().contains("arbitrary"))
           yaxisUnit = "ARBITRARY UNITS";
-        Integer npointsY = Integer.valueOf(getAttrValue("size"));
+        Integer npointsY = Integer.valueOf(reader.getAttrValue("size"));
         if (npoints != npointsY.intValue())
           System.err.println("npoints variation between X and Y arrays");
         yaxisData = new double[npoints];
-        Ydelim = getAttrValue("delimeter");
+        Ydelim = reader.getAttrValue("delimeter");
         if (Ydelim.equals(""))
           Ydelim = " ";
         int posDelim = 0;
         int jj = -1;
         String tempY = "";
-        attrList = getCharacters().replace('\n', ' ').replace('\r', ' ').trim();
+        attrList = reader.getCharacters().replace('\n', ' ').replace('\r', ' ').trim();
 
         // now that we have the full string should tokenise it to then process individual Y values
         // for now using indexOf !!
@@ -364,9 +364,9 @@ public class CMLSource extends XMLSource {
   void processPeakList() {
     if (tagName.equals("peak")) {
       if (attrList.contains("xvalue")) {
-        xaxisData[++nPeakData] = Double.parseDouble(getAttrValue("xValue"));
+        xaxisData[++nPeakData] = Double.parseDouble(reader.getAttrValue("xValue"));
         if (attrList.contains("xunits")) {
-          xaxisUnit = getAttrValue("xUnits");
+          xaxisUnit = reader.getAttrValue("xUnits");
           Integer pos = Integer.valueOf(xaxisUnit.indexOf(":"));
           xaxisUnit = xaxisUnit.substring(pos.intValue() + 1,
               xaxisUnit.length()).toUpperCase();
@@ -374,9 +374,9 @@ public class CMLSource extends XMLSource {
             xaxisUnit = "M/Z";
         }
         if (attrList.contains("yvalue"))
-          yaxisData[nPeakData] = Double.parseDouble(getAttrValue("yValue"));
+          yaxisData[nPeakData] = Double.parseDouble(reader.getAttrValue("yValue"));
         if (attrList.contains("yunits")) {
-          yaxisUnit = getAttrValue("yUnits");
+          yaxisUnit = reader.getAttrValue("yUnits");
           Integer pos = Integer.valueOf(yaxisUnit.indexOf(":"));
           yaxisUnit = yaxisUnit.substring(pos.intValue() + 1,
               yaxisUnit.length()).toUpperCase();
@@ -392,7 +392,7 @@ public class CMLSource extends XMLSource {
         // of 50 for every atom referenced
 
         if (attrList.contains("atomrefs")) {
-          String[] tokens = Parser.getTokens(getAttrValue("atomRefs"));
+          String[] tokens = Parser.getTokens(reader.getAttrValue("atomRefs"));
           yaxisData[nPeakData] = 49 * (tokens.length);
         }
       } // end of peak

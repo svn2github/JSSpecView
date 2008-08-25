@@ -17,7 +17,7 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package jspecview.source;
+package jspecview.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,7 +25,7 @@ import java.io.InputStreamReader;
 import java.io.InputStream;
 import java.util.Hashtable;
 
-class SimpleXmlReader {
+public class SimpleXmlReader {
 
   /*
    * A simple very light-weight XML reader 
@@ -36,95 +36,123 @@ class SimpleXmlReader {
    * 
    */
   
-  SimpleXmlReader() {  
-    //System.out.println("SimpleXMLREADER");
+  private XmlEvent thisEvent = new XmlEvent(TAG_NONE);
+  private Buffer buffer;
+
+  public final static int TAG_NONE = 0;
+  public final static int START_ELEMENT = 1;
+  public final static int END_ELEMENT = 2;
+  public final static int START_END_ELEMENT = 3;
+  public final static int CHARACTERS = 4;
+  public final static int EOF = 8;
+
+
+  public SimpleXmlReader(InputStream in) {
+    buffer = new Buffer(in);
   }
   
-  Buffer getBuffer(InputStream in) {
-    return new Buffer(in);
-  }
-  
-  final static int TAG_NONE = 0;
-  final static int START_ELEMENT = 1;
-  final static int END_ELEMENT = 2;
-  final static int START_END_ELEMENT = 3;
-  final static int CHARACTERS = 4;
-  final static int EOF = 8;
-
-  private XmlEvent e = new XmlEvent(TAG_NONE);
-
-  private Buffer fer;
-
-  protected boolean haveMore() {
-    return fer.hasNext();
+  public String getBufferData() {
+    return (buffer == null ? null : buffer.data.substring(0, buffer.ptr));
   }
 
-  protected void nextTag() throws IOException {
-    e = fer.nextTag();
+  /**
+   * for value without surrounding tag
+   * 
+   * @return value
+   * @throws IOException
+   */
+  public String thisValue() throws IOException {
+    return buffer.nextEvent().toString().trim();
   }
 
-  protected int nextEvent() throws IOException {
-    e = fer.nextEvent();
-    return e.getEventType();
+  /**
+   * for &lt;xxxx&gt; value &lt;/xxxx&gt;
+   * 
+   * @return value
+   * @throws IOException
+   */
+  public String qualifiedValue() throws IOException {
+    buffer.nextTag();
+    String value = buffer.nextEvent().toString().trim();
+    buffer.nextTag();
+    return value;
   }
 
-  protected void nextStartTag() throws IOException {
-    e = fer.nextTag();
-    while (!e.isStartElement())
-      e = fer.nextTag();
+  public int peek() throws IOException {
+    thisEvent = buffer.peek();
+    return thisEvent.getEventType();
   }
 
-  protected String getTagName() {
-    return e.getTagName();
+  public boolean hasNext() {
+    return buffer.hasNext();
   }
 
-  protected String getEndTag() {
-    return e.getTagName();
+  public void nextTag() throws IOException {
+    thisEvent = buffer.nextTag();
   }
 
-  protected String thisValue() throws IOException {
-    return fer.nextEvent().toString().trim();
+  public int nextEvent() throws IOException {
+    thisEvent = buffer.nextEvent();
+    return thisEvent.getEventType();
   }
 
-  protected String nextValue() throws IOException {
-    fer.nextTag();
-    return fer.nextEvent().toString().trim();
+  public void nextStartTag() throws IOException {
+    thisEvent = buffer.nextTag();
+    while (!thisEvent.isStartElement())
+      thisEvent = buffer.nextTag();
   }
 
-  protected String getAttributeList() {
-    return e.toString().toLowerCase();
+  public String getTagName() {
+    return thisEvent.getTagName();
   }
 
-  protected String getAttrValueLC(String key) {
+  public int getTagType() {
+    return thisEvent.getTagType();
+  }
+
+  public String getEndTag() {
+    return thisEvent.getTagName();
+  }
+
+  public String nextValue() throws IOException {
+    buffer.nextTag();
+    return buffer.nextEvent().toString().trim();
+  }
+
+  public String getAttributeList() {
+    return thisEvent.toString().toLowerCase();
+  }
+
+  public String getAttrValueLC(String key) {
     return getAttrValue(key).toLowerCase();
   }
 
-  protected Attribute getAttr(String name) {
-    return e.getAttributeByName(name);
+  public Attribute getAttr(String name) {
+    return thisEvent.getAttributeByName(name);
   }
 
-  protected String getAttrValue(String name) {
+  public String getAttrValue(String name) {
     Attribute a = getAttr(name);
     return (a == null ? "" : a.getValue());
   }
 
-  protected String getFullAttribute(String name) {
+  public String getFullAttribute(String name) {
     Attribute a = getAttr(name);
     return (a == null ? "" : a.toString().toLowerCase());
   }
   
-  protected String getCharacters() throws IOException {
+  public String getCharacters() throws IOException {
     StringBuffer sb = new StringBuffer();
-    e = fer.peek();
-    int eventType = e.getEventType();
+    thisEvent = buffer.peek();
+    int eventType = thisEvent.getEventType();
 
     while (eventType != CHARACTERS)
-      e = fer.nextEvent();
+      thisEvent = buffer.nextEvent();
     while (eventType == CHARACTERS) {
-      e = fer.nextEvent();
-      eventType = e.getEventType();
+      thisEvent = buffer.nextEvent();
+      eventType = thisEvent.getEventType();
       if (eventType == CHARACTERS)
-        sb.append(e.toString());
+        sb.append(thisEvent.toString());
     }
     return sb.toString();
   }
@@ -135,42 +163,30 @@ class SimpleXmlReader {
     Buffer(InputStream in) {
       reader = new BufferedReader(new InputStreamReader(in));
     }
-    int nCharsRemaining;
 
     boolean hasNext() {
-      try {
-        readLine();
-      } catch (IOException e) {
-        return false;
-      }
-      return (nCharsRemaining != 0);
+      if (ptr == ptEnd)
+        try {
+          readLine();
+        } catch (IOException e) {
+          return false;
+        }
+      return ptr < ptEnd;
     }
 
     @Override
-    protected boolean readLine() throws IOException {
+    public boolean readLine() throws IOException {
       String s = reader.readLine();
       if (s == null) {
-        nCharsRemaining = ptEnd - ptr;
         return false;
       }
       data.append(s + "\n");
       ptEnd = data.length();
-      nCharsRemaining = ptEnd - ptr;
       return true;
     }
 
-    int getNCharactersRemaining() {
-      return nCharsRemaining = ptEnd - ptr;
-    }
-    
-    private void flush() {
-      data = new StringBuffer(data.substring(ptr));
-      ptEnd = nCharsRemaining = data.length();
-      ptr = 0;
-    }
-
     XmlEvent peek() throws IOException {
-      if (nCharsRemaining < 2)
+      if (ptEnd - ptr < 2)
         try {
           readLine();
         } catch (IOException e) {
@@ -200,7 +216,7 @@ class SimpleXmlReader {
   class DataString {
 
     StringBuffer data;
-    BufferedReader reader;
+    protected BufferedReader reader;
     int ptr;
     int ptEnd;
 
@@ -213,8 +229,18 @@ class SimpleXmlReader {
       ptEnd = data.length();
     }
 
-    String substring(int i) {
-      return data.substring(i);
+    int getNCharactersRemaining() {
+      return ptEnd - ptr;
+    }
+    
+    protected void flush() {
+      if (data.length() < 1000 || ptEnd - ptr > 100)
+        return;
+      data = new StringBuffer(data.substring(ptr));
+      //System.out.println(data);
+      ptr = 0;
+      ptEnd = data.length();
+      System.out.println("flush " + ptEnd);
     }
 
     String substring(int i, int j) {
@@ -222,8 +248,9 @@ class SimpleXmlReader {
     }
 
     int skipOver(char c, boolean inQuotes) throws IOException {
-      if (skipTo(c, inQuotes) > 0 && ptr != ptEnd)
+      if (skipTo(c, inQuotes) > 0 && ptr != ptEnd) {
         ptr++;
+      }
       return ptr;
     }
 
@@ -241,7 +268,7 @@ class SimpleXmlReader {
         if (inQuotes && ch == '\\' && ptr < ptEnd1) {
           // must escape \" by skipping the quote and 
           // must escape \\" by skipping the second \ 
-          if ((ch = data.charAt(ptr + 1)) == '"' || ch == '\\')
+          if ((ch = data.charAt(ptr + 1)) == '"' || ch == '\\') 
             ptr++;
         } else if (ch == '"') {
           ptr++;
@@ -258,7 +285,7 @@ class SimpleXmlReader {
     }
 
     @SuppressWarnings("unused")
-    protected boolean readLine() throws IOException {
+    public boolean readLine() throws IOException {
       return false;
     }
   }
@@ -281,18 +308,18 @@ class SimpleXmlReader {
 
     XmlEvent(Buffer b) throws IOException {
       ptr = b.ptr;
-      eventType = (b.getNCharactersRemaining() == 0 ? EOF : b.nCharsRemaining == 1
+      int n = b.getNCharactersRemaining();
+      eventType = (n == 0 ? EOF : n == 1
           || b.data.charAt(b.ptr) != '<' ? CHARACTERS
           : b.data.charAt(b.ptr + 1) != '/' ? START_ELEMENT : END_ELEMENT);
       if (eventType == EOF)
         return;
       if (eventType == CHARACTERS) {
         b.skipTo('<', false);
-        this.data = b.data.toString().substring(ptr, b.ptr);
+        data = b.data.toString().substring(ptr, b.ptr);
       } else {
         b.skipOver('>', false);
         String s = b.data.substring(ptr, b.ptr);
-        b.getNCharactersRemaining();
         //System.out.println("new tag: " + s);
         tag = new Tag(s);
       }

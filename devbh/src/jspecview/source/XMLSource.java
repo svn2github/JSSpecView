@@ -33,6 +33,7 @@ import jspecview.common.Graph;
 import jspecview.common.JDXSource;
 import jspecview.common.JDXSpectrum;
 import jspecview.util.Logger;
+import jspecview.util.SimpleXmlReader;
 
 /**
  * Representation of a XML Source.
@@ -46,13 +47,11 @@ abstract class XMLSource extends JDXSource {
   //  private XMLEventReader fer;
   //  private XMLEvent e;
 
-  private SimpleXmlReader.Buffer fer;
-  private SimpleXmlReader.XmlEvent e;
+  protected SimpleXmlReader reader;
 
   protected String tagName = "START", attrList = "",
       title = "identifier not found", owner = "UNKNOWN", origin = "UNKNOWN";
   protected String tmpEnd = "END", molForm = "", techname = "";
-  protected int eventType = -1;
   protected int npoints = -1, samplenum = -1;
   protected double[] yaxisData;
   protected double[] xaxisData;
@@ -78,29 +77,12 @@ abstract class XMLSource extends JDXSource {
   protected StringBuffer errorLog = new StringBuffer();
   protected String errorSeparator = "________________________________________________________";
 
-  /*  
-   protected void getFactory(InputStream in) throws XMLStreamException {
-   factory = XMLInputFactory.newInstance();
-   XMLEventReader nofr = factory.createXMLEventReader(in);
-   fer = factory.createFilteredReader(nofr, new EventFilter() {
-   public boolean accept(XMLEvent event) {
-   return ((event.isStartDocument()) || (event.isStartElement())
-   || (event.isCharacters()) || (event.isEndElement()));
-   }
-   });
-   }
-   */
   protected void getSimpleXmlReader(InputStream in) {
-    SimpleXmlReader reader = new SimpleXmlReader();
-    fer = reader.getBuffer(in);
-  }
-
-  protected String getBufferData() {
-    return (fer == null ? null : fer.data.substring(0, fer.ptr));
+    reader = new SimpleXmlReader(in);
   }
 
   protected void checkStart() throws Exception {
-    if (peek() == SimpleXmlReader.START_ELEMENT)
+    if (reader.peek() == SimpleXmlReader.START_ELEMENT)
       return;
     String errMsg = "Error: XML <xxx> not found at beginning of file; not an XML document?";
     errorLog.append(errMsg);
@@ -193,186 +175,11 @@ abstract class XMLSource extends JDXSource {
     return true;
   }
 
-  protected int peek() throws IOException {
-    e = fer.peek();
-    return eventType = e.getEventType();
-  }
-
-  protected boolean haveMore() {
-    return fer.hasNext();
-  }
-
-  protected void nextTag() throws IOException {
-    e = fer.nextTag();
-  }
-
-  protected int nextEvent() throws IOException {
-    e = fer.nextEvent();
-    return eventType = e.getEventType();
-  }
-
-  protected void nextStartTag() throws IOException {
-    e = fer.nextTag();
-    while (!e.isStartElement())
-      e = fer.nextTag();
-  }
-
-  /**
-   * for value without surrounding tag
-   * 
-   * @return value
-   * @throws IOException
-   */
-  protected String thisValue() throws IOException {
-    return fer.nextEvent().toString().trim();
-  }
-
-  /**
-   * for &lt;xxxx&gt; value &lt;/xxxx&gt;
-   * 
-   * @return value
-   * @throws IOException
-   */
-  protected String qualifiedValue() throws IOException {
-    fer.nextTag();
-    String value = fer.nextEvent().toString().trim();
-    fer.nextTag();
-    return value;
-  }
-
-  protected String getTagName() {
-    return e.getTagName();
-  }
-
-  protected int getTagType() {
-    return e.getTagType();
-  }
-
-  protected String getEndTag() {
-    return e.getTagName();
-  }
-
-  protected String getAttributeList() {
-    return e.toString().toLowerCase();
-  }
-
-  protected String getAttrValueLC(String key) {
-    return getAttrValue(key).toLowerCase();
-  }
-
-  protected String getAttrValue(String name) {
-    return e.getAttrValue(name);
-  }
-
-  protected String getFullAttribute(String name) {
-    return e.getFullAttribute(name);
-  }
-
-  protected String getCharacters() throws IOException {
-    StringBuffer sb = new StringBuffer();
-    e = fer.peek();
-    eventType = e.getEventType();
-
-    while (eventType != SimpleXmlReader.CHARACTERS) {
-      e = fer.nextEvent();
-      eventType = e.getEventType();
-    }
-
-    while (eventType == SimpleXmlReader.CHARACTERS) {
-      e = fer.nextEvent();
-      eventType = e.getEventType();
-      if (eventType == SimpleXmlReader.CHARACTERS)
-        sb.append(e.toString());
-    }
-    return sb.toString();
-  }
-
-  /*  protected int peek() throws XMLStreamException {
-   e = fer.peek();
-   return eventType = e.getEventType();    
-   }
-   
-   protected boolean haveMore() {
-   return fer.hasNext();
-   }
-   
-   protected void nextTag() throws XMLStreamException {
-   e = fer.nextTag();
-   }
-   
-   protected int nextEvent() throws XMLStreamException {
-   e = fer.nextEvent();
-   return eventType = e.getEventType();    
-   }
-   
-   protected void nextStartTag() throws XMLStreamException {
-   e = fer.nextTag();
-   while (!e.isStartElement())
-   e = fer.nextTag();
-   }
-
-   protected String getTagName() {
-   return e.asStartElement().getName().getLocalPart().toLowerCase().trim();
-   }
-
-   protected String getEndTag() {
-   return e.asEndElement().getName().getLocalPart().toLowerCase().trim();
-   }
-
-   protected String getAttributeList() {
-   return e.toString().toLowerCase();  
-   }
-
-   protected String thisValue() throws XMLStreamException {
-   return fer.nextEvent().toString().trim();
-   }
-
-   protected String nextValue() throws XMLStreamException {
-   fer.nextTag();
-   return fer.nextEvent().toString().trim();
-   }
-
-   protected String getAttrValueLC(String key) {
-   return getAttrValue(key).toLowerCase();
-   }
-
-   protected SimpleXmlReaderAttribute getAttr(String name) {
-   return e.asStartElement().getAttributeByName(new QName(name));
-   }
-   protected String getAttrValue(String name) {
-   SimpleXmlReaderAttribute a = getAttr(name);
-   return (a == null ? "" : a.getValue());
-   }
-
-   protected String getFullAttribute(String name) {
-   SimpleXmlReaderAttribute a = getAttr(name);
-   return (a == null ? "" : a.toString().toLowerCase());
-   }
-
-   protected String getCharacters() throws XMLStreamException {
-   StringBuffer sb = new StringBuffer();
-   e = fer.peek();
-   eventType = e.getEventType();
-
-   while (eventType != XMLStreamConstants.CHARACTERS) { 
-   e = fer.nextEvent();
-   eventType = e.getEventType();     
-   }
-
-   while (eventType == XMLStreamConstants.CHARACTERS) {
-   e = fer.nextEvent();
-   eventType = e.getEventType();
-   if (eventType == XMLStreamConstants.CHARACTERS)
-   sb.append(e.toString());
-   }
-   return sb.toString();
-   }
-   */
+  
   protected void processErrors(String type) {
     // for ease of processing later, return a source rather than a spectrum
     //    return XMLSource.getXMLInstance(spectrum);
     //factory = null;
-    fer = null;
     if (errorLog.length() > 0) {
       errorLog.append("these errors were found in " + type + " \n");
     } else {
@@ -421,11 +228,11 @@ abstract class XMLSource extends JDXSource {
   final static int CML_PEAKLIST2 = 11;
 
   protected void processXML(int i0, int i1) throws Exception {
-    while (haveMore()) {
-      if (nextEvent() != SimpleXmlReader.START_ELEMENT) 
+    while (reader.hasNext()) {
+      if (reader.nextEvent() != SimpleXmlReader.START_ELEMENT) 
         continue;
-        String theTag = getTagName();
-        boolean requiresEndTag = (getTagType() != SimpleXmlReader.START_END_ELEMENT);
+        String theTag = reader.getTagName();
+        boolean requiresEndTag = (reader.getTagType() != SimpleXmlReader.START_END_ELEMENT);
         //System.out.println(theTag);
         for (int i = i0; i < i1; i++)
           if (theTag.equals(tagNames[i])) {
@@ -443,23 +250,23 @@ abstract class XMLSource extends JDXSource {
   protected void process(int tagId, boolean requiresEndTag) {
     String thisTagName = tagNames[tagId];
     try {
-      tagName = getTagName();
-      attrList = getAttributeList();
+      tagName = reader.getTagName();
+      attrList = reader.getAttributeList();
       if (!processTag(tagId) || !requiresEndTag)
         return;
-      while (haveMore()) {
-        switch (nextEvent()) {
+      while (reader.hasNext()) {
+        switch (reader.nextEvent()) {
         default:
           continue;
         case SimpleXmlReader.END_ELEMENT:
-          if (getEndTag().equals(thisTagName))
+          if (reader.getEndTag().equals(thisTagName))
             return;
           continue;
         case SimpleXmlReader.START_ELEMENT:
           break;
         }
-        tagName = getTagName();
-        attrList = getAttributeList();
+        tagName = reader.getTagName();
+        attrList = reader.getAttributeList();
         if (!processTag(tagId))
           return;
       }

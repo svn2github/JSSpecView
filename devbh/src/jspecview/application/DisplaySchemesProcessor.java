@@ -23,19 +23,14 @@ import java.awt.Color;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.FileInputStream;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Iterator;
 import java.util.TreeMap;
 
 import jspecview.common.JSpecViewUtils;
-
-import org.apache.xerces.parsers.DOMParser;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import jspecview.util.SimpleXmlReader;
 
 /**
  * <code>DisplaySchemesProcessor</code> loads and saves the display schemes of
@@ -53,6 +48,7 @@ public class DisplaySchemesProcessor {
   /** The list of displaySchemes that is loaded from file */
   private TreeMap<String, DisplayScheme> displaySchemes;
 
+  private SimpleXmlReader reader;
 
   /**
    * Initialises the <code>DisplaySchemesProcessor</code>
@@ -88,23 +84,6 @@ public boolean loadDefault(String dispSchemeFileName) {
 
 
   /**
-   * Loads the display schemes into memory and stores them in a <code>Vector</code>
-   * @param dispSchemeFileName the name of the file to load
-   * @throws Exception
-   * @return true if loaded successfully
-   */
-  public boolean load(String dispSchemeFileName) throws Exception{
-    this.fileName = dispSchemeFileName;
-
-    DOMParser parser = new DOMParser();
-
-    // Get the DOM tree as a Document object
-    parser.parse(dispSchemeFileName);
-    Document doc = parser.getDocument();
-    return documentToDisplaySchemes(doc);
-  }
-
-  /**
    * Saves the display schemes to file in XML format
    * @throws IOException
    */
@@ -121,108 +100,91 @@ public boolean loadDefault(String dispSchemeFileName) {
   }
 
   /**
-   * Extacts the information from the Document tree and create a list of
-   * <code>DisplayScheme</code>s. Method returns true on success
-   * @param doc the DOM Document
-   * @return true if the conversion was a success
+   * Loads the display schemes into memory and stores them in a <code>Vector</code>
+   * @param dispSchemeFileName the name of the file to load
+   * @throws Exception
+   * @return true if loaded successfully
    */
-  private boolean documentToDisplaySchemes(Document doc){
-    // Get root element
-    Element rootElement = doc.getDocumentElement();
-    if(!rootElement.getNodeName().toLowerCase().equals("displayschemes"))
-      return false;
-
-    NamedNodeMap rootAttrs = rootElement.getAttributes();
-    String defaultDS = rootAttrs.getNamedItem("default").getNodeValue();
-
-    NodeList nodes = rootElement.getChildNodes();
-
-    if(nodes == null)
-      return false;
-
-    // Get all displayScheme elements
-    for (int i = 0; i < nodes.getLength(); i++) {
-      Node node = nodes.item(i);
-      if(node.getNodeType() != Node.ELEMENT_NODE)
+  public boolean load(String dispSchemeFileName) throws Exception {
+    fileName = dispSchemeFileName;
+    reader = new SimpleXmlReader(new FileInputStream(fileName));
+    String defaultDS = "Default";
+    DisplayScheme ds = null;
+    String attr;
+    while (reader.hasNext()) {
+      if (reader.nextEvent() != SimpleXmlReader.START_ELEMENT)
         continue;
-
-      NamedNodeMap dsAttr = node.getAttributes();
-
-      String name = dsAttr.getNamedItem("name").getNodeValue();
-      DisplayScheme ds = new DisplayScheme(name);
-      if(name.equals(defaultDS))
-        ds.setDefault(true);
-
-      NodeList childNodes = node.getChildNodes();
-      if(childNodes == null)
+      String theTag = reader.getTagName();
+      if (theTag.equals("displayschemes")) {
+        defaultDS = reader.getAttrValue("default");
+      }
+      if (theTag.equals("displayscheme")) {
+        String name = reader.getAttrValue("name");
+        ds = new DisplayScheme(name);
+        if (name.equals(defaultDS))
+          ds.setDefault(true);
+      } 
+      if (ds == null)
         continue;
-
-      for(int j = 0; j < childNodes.getLength(); j++){
-        Node childNode = childNodes.item(j);
-
-        // get attribues of each element
-        NamedNodeMap attrs = childNode.getAttributes();
-        if(attrs == null)
-          continue;
-
-        String nodeName = childNode.getNodeName();
-
-        if(nodeName.toLowerCase().equals("font")){
-          String font;
-          Node attrNode = attrs.getNamedItem("face");
-          if(attrNode != null){
-            font = attrNode.getNodeValue();
-            if(font == null)
-              font = "default"; // or some actual font name
-          }else{
-            font = "default";
-          }
-          ds.setFont(font);
-        }else if(nodeName.toLowerCase().equals("titlecolor")){
-          Color color = getColorFromAtrr(attrs);
-          if(color == null)
-               color= Color.decode("#0000ff");
-            ds.setColor("title", color);
-        }else if(nodeName.toLowerCase().equals("coordinatecolor")){
-          Color color = getColorFromAtrr(attrs);
-          if(color == null)
-            color=Color.decode("#ff0000");
-            ds.setColor("coordinates", color);
-        }else if(nodeName.toLowerCase().equals("scalecolor")){
-          Color color = getColorFromAtrr(attrs);
-          if(color == null)
-            color=Color.decode("#660000");
-            ds.setColor("scale", color);
-        }else if(nodeName.toLowerCase().equals("unitscolor")){
-          Color color = getColorFromAtrr(attrs);
-          if(color == null)
-            color=Color.decode("#ff0000");
-            ds.setColor("units", color);
-        }else if(nodeName.toLowerCase().equals("gridcolor")){
-          Color color = getColorFromAtrr(attrs);
-          if(color == null)
-            color=Color.decode("#4e4c4c");
-            ds.setColor("grid", color);
-        }else if(nodeName.toLowerCase().equals("plotcolor")){
-          Color color = getColorFromAtrr(attrs);
-          if(color == null)
-             Color.decode("#ff9900");
-            ds.setColor("plot", color);
-        }else if(nodeName.toLowerCase().equals("plotareacolor")){
-          Color color = getColorFromAtrr(attrs);
-          if(color == null)
-            color=Color.decode("#333333");
-            ds.setColor("plotarea", color);
-        }else if(nodeName.toLowerCase().equals("backgroundcolor")){
-          Color color = getColorFromAtrr(attrs);
-          if(color == null)
-            color=Color.decode("#c0c0c0");
-            ds.setColor("background", color);
-        }
+      if (theTag.equals("font")) {
+        attr = reader.getAttrValue("face");
+        if (attr.length() > 0 && ds != null)
+          ds.setFont(attr);
+      } else if (theTag.equals("titlecolor")) {
+        Color color = getColor();
+        if (color == null)
+          color = Color.decode("#0000ff");
+        ds.setColor("title", color);
+      } else if (theTag.equals("coordinatecolor")) {
+        Color color = getColor();
+        if (color == null)
+          color = Color.decode("#ff0000");
+        ds.setColor("coordinates", color);
+      } else if (theTag.equals("scalecolor")) {
+        Color color = getColor();
+        if (color == null)
+          color = Color.decode("#660000");
+        ds.setColor("scale", color);
+      } else if (theTag.equals("unitscolor")) {
+        Color color = getColor();
+        if (color == null)
+          color = Color.decode("#ff0000");
+        ds.setColor("units", color);
+      } else if (theTag.equals("gridcolor")) {
+        Color color = getColor();
+        if (color == null)
+          color = Color.decode("#4e4c4c");
+        ds.setColor("grid", color);
+      } else if (theTag.equals("plotcolor")) {
+        Color color = getColor();
+        if (color == null)
+          Color.decode("#ff9900");
+        ds.setColor("plot", color);
+      } else if (theTag.equals("plotareacolor")) {
+        Color color = getColor();
+        if (color == null)
+          color = Color.decode("#333333");
+        ds.setColor("plotarea", color);
+      } else if (theTag.equals("backgroundcolor")) {
+        Color color = getColor();
+        if (color == null)
+          color = Color.decode("#c0c0c0");
+        ds.setColor("background", color);
       }
       displaySchemes.put(ds.getName(), ds);
     }
     return true;
+  }
+
+  /**
+   * Gets a hex color value from the attribute of a tag and returns a
+   * <code>Color</code>
+   * @return Returns a <code>Color</code> from the attribute
+   */
+  private Color getColor(){
+    String value = reader.getAttrValueLC("hex");
+    return (value.length() == 0 || value.equals("default") ? null
+        : JSpecViewUtils.getColorFromString(value));
   }
 
   /**
@@ -300,21 +262,4 @@ public boolean loadDefault(String dispSchemeFileName) {
     writer.close();
   }
 
-  /**
-   * Gets a hex color value from the attribute of a tag and returns a
-   * <code>Color</code>
-   * @param attrs the collection of attributes
-   * @return Returns a <code>Color</code> from the attribute
-   */
-  private Color getColorFromAtrr(NamedNodeMap attrs){
-    Color color = null;
-    String value;
-    Node attrNode = attrs.getNamedItem("hex");
-    if(attrNode != null){
-      value = attrNode.getNodeValue();
-      if(value != null && !value.toLowerCase().equals("default"))
-        color = JSpecViewUtils.getColorFromString(value);
-    }
-    return color;
-  }
 }

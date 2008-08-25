@@ -445,6 +445,7 @@ public class MainFrame
 // this is not yet functioning properly and getResource does not seem to find them
 
     dsp = new DisplaySchemesProcessor();
+    String fname = new File("displaySchemes.xml").getAbsolutePath();
     try {
       MainFrame.class.getClassLoader().getResource("displaySchemes.xml");
       try {
@@ -453,11 +454,12 @@ public class MainFrame
       catch (Exception jEX) {
         System.err.println("could not find displayschemes?");
       }
-      dsp.load("displaySchemes.xml");
+      dsp.load(fname);
+      System.out.println("Display scheme loaded from " + fname);
     }
     catch (Exception ex) {
       dsp.loadDefault("missingDS.xml");
-      System.err.println("Warning, display schemes not properly loaded, using Default settings!");
+      System.err.println("Warning, display scheme file "  + fname + " was not found or not properly loaded -- using Default settings");
     }
 
     setApplicationProperties();
