@@ -418,29 +418,7 @@ public class JSVApplet extends JApplet {
       transAbsMenuItem.setEnabled(false);
     setStringParameter("irmode", irMode);
     exportAsMenu.setEnabled(true);
-    if (continuous) {
-      saveAsJDXMenu.setEnabled(true);
-      try {
-        jFileChooser = new JFileChooser();
-        if (JSpecViewUtils.DEBUG) {
-          System.out
-              .println("Either running in Sandbox or Applet signed: Export menu enabled");
-        }
-      } catch (SecurityException se) {
-        // disable export menu
-        //exportAsMenu.setEnabled(false);
-        //System.err.println("Export menu disabled: You need the signed Applet to export files");
-      } catch (Exception e) {
-        System.err.println("Exception found");
-        e.printStackTrace();
-      }
-
-    } else {
-      saveAsMenu.setEnabled(false);
-      System.err.println("Save menu disabled for non-continuous spectra");
-    }
-
-    //exportAsMenu.setEnabled(true);
+    saveAsJDXMenu.setEnabled(continuous);
     newFile = false;
   }
 
@@ -449,6 +427,12 @@ public class JSVApplet extends JApplet {
    * @throws Exception
    */
   private void jbInit() throws Exception {
+    try {
+      jFileChooser = new JFileChooser();
+    } catch (SecurityException se) {
+      //System.err.println("Export menu disabled: You need the signed Applet to export files");
+    }
+
     statusTextLabel.setText("Loading...");
     aboutMenu.setText("About");
 
@@ -563,7 +547,8 @@ public class JSVApplet extends JApplet {
     appletPopupMenu.add(aboutMenu);
     setMenus(saveAsMenu, exportAsMenu);
     fileMenu.add(saveAsMenu);
-    fileMenu.add(exportAsMenu);
+    if(jFileChooser != null)
+      fileMenu.add(exportAsMenu);
     fileMenu.add(printMenuItem);
 
     viewMenu.add(gridMenuItem);
