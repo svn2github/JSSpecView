@@ -1,0 +1,11 @@
+Robert -- Note:
+
+Files here may have datestamps 8/20/08, but really they are 
+versions from prior to Bob Hanson's involvement. He had problems
+with compilers and versions of Eclipse, over-wrote the files
+in jspecview.common, and then finally got them replaced again with
+their originals. "Revision 80" is the same as "Revision 71".
+
+Bob Hanson
+
+
