@@ -1,4 +1,4 @@
-/* Copyright (c) 2007 The University of the West Indies
+/* Copyright (c) 2007-2008 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -20,9 +20,7 @@
 package jspecview.source;
 
 import java.io.InputStream;
-
 import jspecview.util.Parser;
-//import javax.xml.stream.*;
 
 /**
  * Representation of a XML Source.
@@ -32,6 +30,7 @@ import jspecview.util.Parser;
 
 public class CMLSource extends XMLSource {
   private boolean specfound = false;
+  private int nPeakData = -1;
 
   /**
    * Does the actual work of initializing the CMLSource
@@ -67,13 +66,13 @@ public class CMLSource extends XMLSource {
   /**
    * Process the XML events. The while() loop here
    * iterates through XML tags until a </xxxx> tag
-   * is found. 
-   * 
-   * 
-   * 
-   * @param tagId 
+   * is found.
+   *
+   *
+   *
+   * @param tagId
    * @return true to continue with encapsulated tags
-   * @throws Exception 
+   * @throws Exception
    */
   @Override
   protected boolean processTag(int tagId) throws Exception {
@@ -105,9 +104,8 @@ public class CMLSource extends XMLSource {
       processPeakList();
       return true;
     default:
-      System.out.println("AnIMLSource not processing tag " + tagNames[tagId]
-          + "!");
-      // should not be here
+      System.out.println("CMLSource not processing tag " + tagNames[tagId] + "!");
+      // should not get here
       return false;
     }
   }
@@ -118,7 +116,7 @@ public class CMLSource extends XMLSource {
       title = reader.getAttrValue("title");
     else if (attrList.contains("id"))
       title = reader.getAttrValue("id");
-    
+
     // "type" is a required tag
     if (attrList.contains("type"))
       techname = reader.getAttrValue("type").toUpperCase() + " SPECTRUM";
@@ -321,16 +319,14 @@ public class CMLSource extends XMLSource {
     }
   }
 
-  int nPeakData;
-
   /**
    * Process the peakList CML events
    *@throws Exception
    */
-  private void processPeaks() throws Exception {
-    
+ private void processPeaks() throws Exception {
+
     // this method is run ONCE
-    
+
     // if a spectrum is found, ignore a peaklist if present as well
     // since without intervention it is not possible to guess
     // which display is required and the spectrum is probably the
@@ -340,7 +336,6 @@ public class CMLSource extends XMLSource {
       return;
 
     // don't know how many peaks to expect so set an arbitrary number of 100
-    int nPeakData = -1;
     int arbsize = 100;
     xaxisData = new double[arbsize];
     yaxisData = new double[arbsize];
@@ -350,7 +345,7 @@ public class CMLSource extends XMLSource {
     // now that we have X,Y pairs set JCAMP-DX equivalencies
     // FIRSTX, FIRSTY, LASTX, NPOINTS
     // determine if the data is in increasing or decreasing order
-    // since a PeakList the data is not continuous 
+    // since for a PeakList the data is not continuous
 
     npoints = nPeakData + 1;
     firstX = xaxisData[0];
@@ -361,7 +356,7 @@ public class CMLSource extends XMLSource {
 
   } // end of processPeaks
 
-  void processPeakList() {
+ private void processPeakList() {
     if (tagName.equals("peak")) {
       if (attrList.contains("xvalue")) {
         xaxisData[++nPeakData] = Double.parseDouble(reader.getAttrValue("xValue"));
@@ -395,8 +390,8 @@ public class CMLSource extends XMLSource {
           String[] tokens = Parser.getTokens(reader.getAttrValue("atomRefs"));
           yaxisData[nPeakData] = 49 * (tokens.length);
         }
-      } // end of peak
+      }
 
     }
-  }
+  }  // end of processPeakList
 }
