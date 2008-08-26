@@ -271,7 +271,7 @@ abstract class XMLSource extends JDXSource {
           return;
       }
     } catch (Exception e) {
-      String msg = "error reading " + tagName + " section";
+      String msg = "error reading " + tagName + " section: " + e.getMessage() + "\n" + e.getStackTrace();
       Logger.error(msg);
       errorLog.append(msg + "\n");
     }

@@ -32,8 +32,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Image;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -1501,28 +1499,25 @@ public class JSVApplet extends JApplet {
       compoundMenu.setEnabled(false);
       transAbsMenuItem.setEnabled(false);
       frame = new JFrame("JSpecView");
-      frame.setSize(JSVApplet.this.getSize());
+      frame.setSize(getSize());
       final Dimension d;
       d = appletPanel.getSize();
       frame.add(appletPanel);
-      Image icon = Toolkit.getDefaultToolkit().getImage(
-          JSVApplet.class.getClassLoader().getResource("icons/spec16.gif"));
-      frame.setIconImage(icon);
       frame.validate();
       frame.setVisible(true);
-      JSVApplet.this.remove(appletPanel);
-      JSVApplet.this.validate();
-      JSVApplet.this.repaint();
+      remove(appletPanel);
+      validate();
+      repaint();
       frame.addMouseListener(new JSVPanelMouseListener());
       frame.addWindowListener(
           new WindowAdapter() {
         @Override
         public void windowClosing(WindowEvent e) {
           appletPanel.setSize(d);
-          JSVApplet.this.getContentPane().add(appletPanel);
-          JSVApplet.this.setVisible(true);
-          JSVApplet.this.validate();
-          JSVApplet.this.repaint();
+          getContentPane().add(appletPanel);
+          setVisible(true);
+          validate();
+          repaint();
           integrateMenuItem.setEnabled(true);
    //       if (compoundMenuOn)
 //             compoundMenu.setEnabled(true);
@@ -1540,9 +1535,9 @@ public class JSVApplet extends JApplet {
       if (compoundMenuOn)
         compoundMenu.setEnabled(true);
 
-      JSVApplet.this.getContentPane().add(appletPanel);
-      JSVApplet.this.validate();
-      JSVApplet.this.repaint();
+      getContentPane().add(appletPanel);
+      validate();
+      repaint();
       frame.removeAll();
       frame.dispose();
     }
@@ -1649,8 +1644,8 @@ public class JSVApplet extends JApplet {
       jsvp.repaint();
 
       //  now need to validate and repaint
-      JSVApplet.this.validate();
-      JSVApplet.this.repaint();
+      validate();
+      repaint();
 
   }
 
@@ -1686,9 +1681,9 @@ public class JSVApplet extends JApplet {
         integrateMenuItem.setEnabled(true);
         if (compoundMenuOn)
           compoundMenu.setEnabled(true);
-        JSVApplet.this.getContentPane().add(appletPanel);
-        JSVApplet.this.validate();
-        JSVApplet.this.repaint();
+        getContentPane().add(appletPanel);
+        validate();
+        repaint();
       }
       else  {
         if (frame.getComponentCount() != 0) {
@@ -1702,9 +1697,9 @@ public class JSVApplet extends JApplet {
           integrateMenuItem.setEnabled(true);
           if (compoundMenuOn)
           compoundMenu.setEnabled(true);
-          JSVApplet.this.getContentPane().add(appletPanel);
-          JSVApplet.this.validate();
-          JSVApplet.this.repaint();
+          getContentPane().add(appletPanel);
+          validate();
+          repaint();
         }
       }
     }

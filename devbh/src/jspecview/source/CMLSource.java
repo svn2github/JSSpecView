@@ -1,4 +1,4 @@
-/* Copyright (c) 2007-2008 The University of the West Indies
+/* Copyright (c) 2007 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -20,7 +20,10 @@
 package jspecview.source;
 
 import java.io.InputStream;
+import java.util.Vector;
+
 import jspecview.util.Parser;
+//import javax.xml.stream.*;
 
 /**
  * Representation of a XML Source.
@@ -30,7 +33,6 @@ import jspecview.util.Parser;
 
 public class CMLSource extends XMLSource {
   private boolean specfound = false;
-  private int nPeakData = -1;
 
   /**
    * Does the actual work of initializing the CMLSource
@@ -66,13 +68,13 @@ public class CMLSource extends XMLSource {
   /**
    * Process the XML events. The while() loop here
    * iterates through XML tags until a </xxxx> tag
-   * is found.
-   *
-   *
-   *
-   * @param tagId
+   * is found. 
+   * 
+   * 
+   * 
+   * @param tagId 
    * @return true to continue with encapsulated tags
-   * @throws Exception
+   * @throws Exception 
    */
   @Override
   protected boolean processTag(int tagId) throws Exception {
@@ -104,8 +106,9 @@ public class CMLSource extends XMLSource {
       processPeakList();
       return true;
     default:
-      System.out.println("CMLSource not processing tag " + tagNames[tagId] + "!");
-      // should not get here
+      System.out.println("AnIMLSource not processing tag " + tagNames[tagId]
+          + "!");
+      // should not be here
       return false;
     }
   }
@@ -116,7 +119,7 @@ public class CMLSource extends XMLSource {
       title = reader.getAttrValue("title");
     else if (attrList.contains("id"))
       title = reader.getAttrValue("id");
-
+    
     // "type" is a required tag
     if (attrList.contains("type"))
       techname = reader.getAttrValue("type").toUpperCase() + " SPECTRUM";
@@ -319,14 +322,17 @@ public class CMLSource extends XMLSource {
     }
   }
 
+  Vector<double[]> peakData;
+  
+
   /**
    * Process the peakList CML events
    *@throws Exception
    */
- private void processPeaks() throws Exception {
-
+  private void processPeaks() throws Exception {
+    
     // this method is run ONCE
-
+    
     // if a spectrum is found, ignore a peaklist if present as well
     // since without intervention it is not possible to guess
     // which display is required and the spectrum is probably the
@@ -335,31 +341,45 @@ public class CMLSource extends XMLSource {
     if (specfound)
       return;
 
-    // don't know how many peaks to expect so set an arbitrary number of 100
-    int arbsize = 100;
-    xaxisData = new double[arbsize];
-    yaxisData = new double[arbsize];
+    peakData = new Vector<double[]>();
 
     process(CML_PEAKLIST2, true);
 
     // now that we have X,Y pairs set JCAMP-DX equivalencies
     // FIRSTX, FIRSTY, LASTX, NPOINTS
     // determine if the data is in increasing or decreasing order
-    // since for a PeakList the data is not continuous
+    // since a PeakList the data is not continuous 
 
-    npoints = nPeakData + 1;
+    npoints = peakData.size();
+    xaxisData = new double[npoints];
+    yaxisData = new double[npoints];
+    for (int i = 0; i < npoints; i++) {
+      double[] xy = peakData.get(i);
+      xaxisData[i] = xy[0];
+      yaxisData[i] = xy[1];
+    }
+    peakData = null;
     firstX = xaxisData[0];
-    lastX = xaxisData[nPeakData];
+    lastX = xaxisData[npoints - 1];
     firstY = yaxisData[0];
     increasing = lastX > firstX ? true : false;
     continuous = false;
 
-  } // end of processPeaks
+  }
 
- private void processPeakList() {
+  void processPeakList() {
+
     if (tagName.equals("peak")) {
       if (attrList.contains("xvalue")) {
-        xaxisData[++nPeakData] = Double.parseDouble(reader.getAttrValue("xValue"));
+
+        // for CML exports from NMRShiftDB there are no Y values or Y units
+        // given in the Peaks, just XValues
+        // to use the JCAMP-DX plot routines we assign a Yvalue
+        // of 50 for every atom referenced
+
+        double[] xy = new double[2];
+        xy[1] = 50;
+        xy[0] = Double.parseDouble(reader.getAttrValue("xValue"));
         if (attrList.contains("xunits")) {
           xaxisUnit = reader.getAttrValue("xUnits");
           Integer pos = Integer.valueOf(xaxisUnit.indexOf(":"));
@@ -369,7 +389,7 @@ public class CMLSource extends XMLSource {
             xaxisUnit = "M/Z";
         }
         if (attrList.contains("yvalue"))
-          yaxisData[nPeakData] = Double.parseDouble(reader.getAttrValue("yValue"));
+          xy[1] = Double.parseDouble(reader.getAttrValue("yValue"));
         if (attrList.contains("yunits")) {
           yaxisUnit = reader.getAttrValue("yUnits");
           Integer pos = Integer.valueOf(yaxisUnit.indexOf(":"));
@@ -380,18 +400,10 @@ public class CMLSource extends XMLSource {
           if (yaxisUnit.toLowerCase().contains("arbitrary"))
             yaxisUnit = "ARBITRARY UNITS";
         }
-
-        // for CML exports from NMRShiftDB there are no Y values or Y units
-        // given in the Peaks, just XValues
-        // to use the JCAMP-DX plot routines we assign a Yvalue
-        // of 50 for every atom referenced
-
-        if (attrList.contains("atomrefs")) {
-          String[] tokens = Parser.getTokens(reader.getAttrValue("atomRefs"));
-          yaxisData[nPeakData] = 49 * (tokens.length);
-        }
+        if (attrList.contains("atomrefs"))
+          xy[1] = 49 * Parser.getTokens(reader.getAttrValue("atomRefs")).length;
+        peakData.add(xy);
       }
-
     }
-  }  // end of processPeakList
+  }
 }
