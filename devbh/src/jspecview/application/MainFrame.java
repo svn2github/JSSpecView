@@ -136,6 +136,7 @@ import jspecview.export.Exporter;
 import jspecview.export.SVGExporter;
 import jspecview.source.AnIMLSource;
 import jspecview.source.CMLSource;
+import jspecview.util.TextFormat;
 import mdidesktop.ScrollableDesktopPane;
 import mdidesktop.WindowMenu;
 import jspecview.common.Visible;
@@ -164,6 +165,7 @@ public class MainFrame
   boolean useDirLastExported;
   String dirLastOpened;
   String dirLastExported;
+  String recentFileName;
 
   boolean autoIntegrate;
 
@@ -175,7 +177,6 @@ public class MainFrame
   boolean gridOn;
   boolean coordinatesOn;
   boolean scaleOn;
-  boolean continuous;
   //  ----------------------- Application Attributes ---------------------
 
   Vector<JDXSource> jdxSources = new Vector<JDXSource>();
@@ -204,6 +205,7 @@ public class MainFrame
   JMenuItem closeAllMenuItem = new JMenuItem();
   JMenu saveAsMenu = new JMenu();
   JMenu saveAsJDXMenu = new JMenu();
+  JMenu exportAsMenu = new JMenu();
   JMenuItem exitMenuItem = new JMenuItem();
   //JMenu windowMenu = new JMenu();
   JMenu helpMenu = new JMenu();
@@ -305,7 +307,7 @@ public class MainFrame
     setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
     // When application exits ...
-    this.addWindowListener(new WindowAdapter() {
+    addWindowListener(new WindowAdapter() {
       @Override
       public void windowClosing(WindowEvent we) {
         try {
@@ -351,7 +353,7 @@ public class MainFrame
   ImageIcon overlayKeyIcon;
 
   private void getIcons() {
-    Class cl = this.getClass();
+    Class cl = getClass();
     URL iconURL = cl.getResource("icons/spec16.gif"); //imageIcon
     icon = Toolkit.getDefaultToolkit().getImage(iconURL);
     frameIcon = new ImageIcon(iconURL);
@@ -451,22 +453,28 @@ public class MainFrame
         : useDirLastOpened ? new JFileChooser(dirLastOpened)
         : new JFileChooser());
 
-/*  
-    filter.addExtension("jpg");
-    filter.addExtension("png");
-    filter.setDescription("Image Files");
-*/
     JSpecViewFileFilter filter = new JSpecViewFileFilter();
-    fc.setFileFilter(filter);
     filter = new JSpecViewFileFilter();
     filter.addExtension("jdx");
     filter.addExtension("dx");
     filter.setDescription("JCAMP-DX Files");
+    fc.setFileFilter(filter);
+    
+    filter = new JSpecViewFileFilter();
+    filter.addExtension("aml");
+    filter.setDescription("anIML Files");
+    fc.setFileFilter(filter);
+
+    filter = new JSpecViewFileFilter();
+    filter.addExtension("cml");
+    filter.setDescription("CML Files");
+    fc.setFileFilter(filter);
+
     filter = new JSpecViewFileFilter();
     filter.addExtension("xml");
     filter.addExtension("aml");
     filter.addExtension("cml");
-    filter.setDescription("XML Files");
+    filter.setDescription("all XML Files");
     fc.setFileFilter(filter);
   }
 
@@ -646,11 +654,11 @@ public class MainFrame
    * @throws Exception
    */
   private void jbInit() throws Exception {
-    this.setIconImage(icon);
-    this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-    this.setJMenuBar(menuBar);
-    this.setTitle("JSpecView");
-    this.getContentPane().setLayout(mainborderLayout);
+    setIconImage(icon);
+    setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+    setJMenuBar(menuBar);
+    setTitle("JSpecView");
+    getContentPane().setLayout(mainborderLayout);
     fileMenu.setMnemonic('F');
     fileMenu.setText("File");
     openMenuItem.setActionCommand("Open");
@@ -814,6 +822,8 @@ public class MainFrame
     saveAsMenu.setText("Save As");
     saveAsJDXMenu.setMnemonic('J');
     saveAsJDXMenu.setText("JDX");
+    exportAsMenu.setMnemonic('X');
+    exportAsMenu.setText("Export As");
     JMenuItem xyMenuItem = new JMenuItem();
     JMenuItem fixMenuItem = new JMenuItem();
     JMenuItem sqzMenuItem = new JMenuItem();
@@ -1151,6 +1161,7 @@ public class MainFrame
     fileMenu.addSeparator();
     fileMenu.add(saveAsJDXMenu);
     fileMenu.add(saveAsMenu).setEnabled(false);
+    fileMenu.add(exportAsMenu).setEnabled(false);
     fileMenu.addSeparator();
     fileMenu.add(printMenuItem).setEnabled(false);
     fileMenu.addSeparator();
@@ -1185,13 +1196,13 @@ public class MainFrame
     saveAsMenu.add(saveAsJDXMenu);
     saveAsMenu.add(animlMenuItem);
     saveAsMenu.add(cmlMenuItem);
-    saveAsMenu.add(svgMenuItem);
-    saveAsMenu.add(pngMenuItem);
-    saveAsMenu.add(jpgMenuItem);
-    //this.getContentPane().add(toolBar, BorderLayout.NORTH);
-    this.getContentPane().add(statusPanel, BorderLayout.SOUTH);
+    exportAsMenu.add(jpgMenuItem);
+    exportAsMenu.add(pngMenuItem);
+    exportAsMenu.add(svgMenuItem);
+    //getContentPane().add(toolBar, BorderLayout.NORTH);
+    getContentPane().add(statusPanel, BorderLayout.SOUTH);
     statusPanel.add(statusLabel, BorderLayout.SOUTH);
-    this.getContentPane().add(jsvToolBar, BorderLayout.NORTH);
+    getContentPane().add(jsvToolBar, BorderLayout.NORTH);
     jsvToolBar.add(openButton, null);
     jsvToolBar.add(printButton, null);
     jsvToolBar.addSeparator();
@@ -1210,7 +1221,7 @@ public class MainFrame
     jsvToolBar.add(propertiesButton, null);
     jsvToolBar.addSeparator();
     jsvToolBar.add(aboutButton, null);
-    this.getContentPane().add(mainSplitPane, BorderLayout.CENTER);
+    getContentPane().add(mainSplitPane, BorderLayout.CENTER);
     mainSplitPane.setLeftComponent(spectraTreePane);
     //sideSplitPane.setDividerLocation(350);
     mainSplitPane.setDividerLocation(200);
@@ -1274,7 +1285,7 @@ public class MainFrame
    */
   public void openFile(File file) {
     InputStream in = null;
-    String fileName = file.getName();
+    String fileName = recentFileName = file.getName();
     String filePath = file.getAbsolutePath();
     writeStatus(" ");
     if (jdxSourceFiles.contains(file)) {
@@ -1320,28 +1331,8 @@ public class MainFrame
         return;
       }
       
-      saveAsMenu.setEnabled(true);
+      setMenuEnables(spec);
 
-
-      saveAsJDXMenu.setEnabled(spec.isContinuous());
-      integrateMenuItem.setEnabled(JSpecViewUtils.isHNMR(spec));
-      String Xunits = spec.getXUnits().toLowerCase();
-      String Yunits = spec.getYUnits().toLowerCase();
-      //  Can only convert from T <-> A  if Absorbance or Transmittance and continuous
-      if ((spec.isContinuous())
-          && (Yunits.contains("abs") || Yunits.contains("trans"))) {
-        transAbsMenuItem.setEnabled(true);
-      } else {
-        transAbsMenuItem.setEnabled(false);
-      }
-      Coordinate xyCoords[] = spec.getXYCoords();
-      if ((Yunits.contains("trans") || Yunits.contains("abs"))
-          & (Xunits.contains("nanometer")) & (xyCoords[0].getXVal() < 401)
-          & (xyCoords[(xyCoords.length - 1)].getXVal() > 699)) {
-        solColMenuItem.setEnabled(true);
-      } else {
-        solColMenuItem.setEnabled(false);
-      }
       if (autoOverlay && source instanceof CompoundSource) {
         try {
           overlaySpectra(source);
@@ -1351,6 +1342,7 @@ public class MainFrame
       } else {
         splitSpectra(source);
       }
+
 
       // ADD TO RECENT FILE PATHS
       if (recentFilePaths.size() >= numRecent) {
@@ -1397,6 +1389,42 @@ public class MainFrame
       } catch (Exception e) {
         //
       }
+  }
+
+  void setMenuEnables(JDXSpectrum spec) {
+
+    if (spec == null) {
+      saveAsMenu.setEnabled(false);
+      exportAsMenu.setEnabled(false);
+      closeMenuItem.setEnabled(false);
+      closeAllMenuItem.setEnabled(false);
+      displayMenu.setEnabled(false);
+      windowMenu.setEnabled(false);
+      processingMenu.setEnabled(false);
+      printMenuItem.setEnabled(false);
+      sourceMenuItem.setEnabled(false);
+      errorLogMenuItem.setEnabled(false);
+      return;
+    }
+    
+    saveAsMenu.setEnabled(true);
+    exportAsMenu.setEnabled(true);
+
+    //    jsvp.setZoomEnabled(true);
+    // update availability of Exporting JCAMP-DX file so that
+    // if a Peak Table is the current spectrum, disable the menu.
+    boolean continuous = spec.isContinuous();
+    saveAsJDXMenu.setEnabled(continuous);
+    integrateMenuItem.setEnabled(JSpecViewUtils.isHNMR(spec) && continuous);
+    //  Can only convert from T <-> A  if Absorbance or Transmittance and continuous
+    boolean isAbsTrans = (spec.isAbsorbance() || spec.isTransmittance());
+    transAbsMenuItem.setEnabled(continuous && isAbsTrans);
+    Coordinate xyCoords[] = spec.getXYCoords();
+    String Xunits = spec.getXUnits().toLowerCase();
+    solColMenuItem.setEnabled(isAbsTrans
+        && (Xunits.equals("nanometers") || Xunits.equals("nm"))
+        && xyCoords[0].getXVal() < 401
+        && xyCoords[(xyCoords.length - 1)].getXVal() > 699);
   }
 
   /**
@@ -1537,17 +1565,8 @@ public class MainFrame
     closeSource(currentSelectedSource);
     removeSource(currentSelectedSource);
 
-    if (jdxSources.size() < 1) {
-      saveAsMenu.setEnabled(false);
-      closeMenuItem.setEnabled(false);
-      closeAllMenuItem.setEnabled(false);
-      displayMenu.setEnabled(false);
-      windowMenu.setEnabled(false);
-      processingMenu.setEnabled(false);
-      printMenuItem.setEnabled(false);
-      sourceMenuItem.setEnabled(false);
-      errorLogMenuItem.setEnabled(false);
-    }
+    if (jdxSources.size() < 1)
+      setMenuEnables(null);
   }
 
   /**
@@ -1562,15 +1581,7 @@ public class MainFrame
     }
     // add calls to disable Menus while files not open.
 
-    saveAsMenu.setEnabled(false);
-    closeMenuItem.setEnabled(false);
-    closeAllMenuItem.setEnabled(false);
-    displayMenu.setEnabled(false);
-    windowMenu.setEnabled(false);
-    processingMenu.setEnabled(false);
-    printMenuItem.setEnabled(false);
-    sourceMenuItem.setEnabled(false);
-    errorLogMenuItem.setEnabled(false);
+    setMenuEnables(null);
 
     removeAllSources();
 
@@ -1818,8 +1829,7 @@ public class MainFrame
      */
     public JSVInternalFrameListener(File file, JDXSource source) {
       this.file = file;
-      this.source = source;
-
+      currentSelectedSource = source;
     }
 
     /**
@@ -1829,10 +1839,7 @@ public class MainFrame
      */
     @Override
     public void internalFrameActivated(InternalFrameEvent e) {
-      String Yunits,Xunits;
       JInternalFrame frame = e.getInternalFrame();
-      // Set Current Selected Source
-      currentSelectedSource = source;
       JDXSpectrum spec = currentSelectedSource.getJDXSpectrum(0);
 
       // Update the menu items for the display menu
@@ -1857,50 +1864,16 @@ public class MainFrame
         overlayKeyMenuItem.setEnabled(false);
       }
 
-//      jsvp.setZoomEnabled(true);
-      // update availability of Exporting JCAMP-DX file so that
-      // if a Peak Table is the current spectrum, disable the menu.
-      continuous = spec.isContinuous();
-      saveAsJDXMenu.setEnabled(continuous);
-      Yunits = spec.getYUnits();
-//        System.out.println(Yunits);
-
-      if (continuous &&
-          JSpecViewUtils.isHNMR(spec)) {
-        integrateMenuItem.setEnabled(true);
-      }
-      else {
-        integrateMenuItem.setEnabled(false);
-      }
-      //  Can only convert from T <-> A  if Absorbance or Transmittance and continuous
-      if ( (continuous) &&
-          (Yunits.toLowerCase().contains("abs") ||
-           Yunits.toLowerCase().contains("trans"))) {
-        transAbsMenuItem.setEnabled(true);
-      }
-      else {
-        transAbsMenuItem.setEnabled(false);
-      }
-      Coordinate xyCoords[] = spec.getXYCoords();
-      Xunits = spec.getXUnits();
-      if((Yunits.toLowerCase().contains("trans") || Yunits.toLowerCase().contains("abs"))&
-         (Xunits.toLowerCase().contains("nanometer"))
-         & (xyCoords[0].getXVal() < 401) & (xyCoords[(xyCoords.length - 1)].getXVal() > 699)){
-        solColMenuItem.setEnabled(true);
-      }else{
-        solColMenuItem.setEnabled(false);
-      }
-
-
+      setMenuEnables(spec);
+      
       // Update file|Close Menu
       closeMenuItem.setText("Close '" + file.getName() + "'");
-      MainFrame.this.setTitle("JSpecView - " + file.getAbsolutePath());
+      setTitle("JSpecView - " + file.getAbsolutePath());
 
       // Find Node in SpectraTree and select it
       DefaultMutableTreeNode node = getNodeForInternalFrame(frame, rootNode);
-      if (node != null) {
+      if (node != null) 
         spectraTree.setSelectionPath(new TreePath(node.getPath()));
-      }
     }
 
     /**
@@ -2328,64 +2301,64 @@ public class MainFrame
    * @param command the name of the format to export in
    */
   private void exportSpectrum(String command) {
-    final String comm = command;
+    final String type = command;
     JInternalFrame frame = desktopPane.getSelectedFrame();
     if (frame == null) {
       return;
     }
     final JSVPanel jsvp = (JSVPanel) frame.getContentPane().getComponent(0);
 
-    if (fc != null) {
-      if (JSpecViewUtils.DEBUG) {
-        fc.setCurrentDirectory(new File("C:\\JCAMPDX"));
-      }
-      else if (useDirLastExported) {
-        fc.setCurrentDirectory(new File(dirLastExported));
-      }
-
-      // if JSVPanel has more than one spectrum...Choose which one to export
-      int numOfSpectra = jsvp.getNumberOfSpectra();
-      if (numOfSpectra > 1 && (comm != "JPG" && comm != "PNG")) {
-        String[] items = new String[numOfSpectra];
-        for (int i = 0; i < numOfSpectra; i++) {
-          JDXSpectrum spectrum = (JDXSpectrum) jsvp.getSpectrumAt(i);
-          items[i] = spectrum.getTitle();
-        }
-
-        final JDialog dialog = new JDialog(this, "Choose Spectrum", true);
-        dialog.setResizable(false);
-        dialog.setSize(200, 100);
-        dialog.setLocation( (getLocation().x + getSize().width) / 2,
-                           (getLocation().y + getSize().height) / 2);
-        final JComboBox cb = new JComboBox(items);
-        Dimension d = new Dimension(120, 25);
-        cb.setPreferredSize(d);
-        cb.setMaximumSize(d);
-        cb.setMinimumSize(d);
-        JPanel panel = new JPanel(new FlowLayout());
-        JButton button = new JButton("OK");
-        panel.add(cb);
-        panel.add(button);
-        dialog.getContentPane().setLayout(new BorderLayout());
-        dialog.getContentPane().add(new JLabel("Choose Spectrum to export",
-                                               SwingConstants.CENTER),
-                                    BorderLayout.NORTH);
-        dialog.getContentPane().add(panel);
-        button.addActionListener(new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            int index = cb.getSelectedIndex();
-            JDXSpectrum spec = (JDXSpectrum) jsvp.getSpectrumAt(index);
-            dialog.dispose();
-            exportSpectrum_aux(spec, jsvp, comm, index);
-          }
-        });
-        dialog.setVisible(true);
-      }
-      else {
-        JDXSpectrum spec = (JDXSpectrum) jsvp.getSpectrumAt(0);
-        exportSpectrum_aux(spec, jsvp, comm, 0);
-      }
+    if (fc == null)
+      return;
+    if (JSpecViewUtils.DEBUG) {
+      fc.setCurrentDirectory(new File("C:\\JCAMPDX"));
+    } else if (useDirLastExported) {
+      fc.setCurrentDirectory(new File(dirLastExported));
     }
+
+    // if JSVPanel has more than one spectrum...Choose which one to export
+    int numOfSpectra = jsvp.getNumberOfSpectra();
+    if (numOfSpectra == 1 || type.equals("JPG") || type.equals("PNG")) {
+
+      JDXSpectrum spec = (JDXSpectrum) jsvp.getSpectrumAt(0);
+      exportSpectrum_aux(spec, jsvp, type, 0);
+      return;
+    }
+
+    String[] items = new String[numOfSpectra];
+    for (int i = 0; i < numOfSpectra; i++) {
+      JDXSpectrum spectrum = (JDXSpectrum) jsvp.getSpectrumAt(i);
+      items[i] = spectrum.getTitle();
+    }
+
+    final JDialog dialog = new JDialog(this, "Choose Spectrum", true);
+    dialog.setResizable(false);
+    dialog.setSize(200, 100);
+    dialog.setLocation((getLocation().x + getSize().width) / 2,
+        (getLocation().y + getSize().height) / 2);
+    final JComboBox cb = new JComboBox(items);
+    Dimension d = new Dimension(120, 25);
+    cb.setPreferredSize(d);
+    cb.setMaximumSize(d);
+    cb.setMinimumSize(d);
+    JPanel panel = new JPanel(new FlowLayout());
+    JButton button = new JButton("OK");
+    panel.add(cb);
+    panel.add(button);
+    dialog.getContentPane().setLayout(new BorderLayout());
+    dialog.getContentPane().add(
+        new JLabel("Choose Spectrum to export", SwingConstants.CENTER),
+        BorderLayout.NORTH);
+    dialog.getContentPane().add(panel);
+    button.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        int index = cb.getSelectedIndex();
+        JDXSpectrum spec = (JDXSpectrum) jsvp.getSpectrumAt(index);
+        dialog.dispose();
+        exportSpectrum_aux(spec, jsvp, type, index);
+      }
+    });
+    dialog.setVisible(true);
   }
 
   /**
@@ -2396,18 +2369,21 @@ public class MainFrame
    * @param index the index of the spectrum
    */
   void exportSpectrum_aux(JDXSpectrum spec, JSVPanel jsvp, String comm,
-                                  int index) {
+                          int index) {
     JSpecViewFileFilter filter = new JSpecViewFileFilter();
-    filter.addExtension("xml");
-    filter.addExtension("aml");
-    filter.addExtension("cml");
-    filter.setDescription("AnIML/CML Files");
+    String name = TextFormat.split(recentFileName, ".")[0];
+    if ("XY FIX PAC SQZ DIF".indexOf(comm) >= 0) {
+      filter.addExtension("jdx");
+      filter.addExtension("dx");
+      filter.setDescription("JCAMP-DX Files");
+      name += ".jdx";
+    } else {
+      filter.addExtension(comm);
+      filter.setDescription(comm + " Files");
+      name += "." + comm.toLowerCase();
+    }
     fc.setFileFilter(filter);
-    filter = new JSpecViewFileFilter();
-    filter.addExtension("jdx");
-    filter.addExtension("dx");
-    filter.setDescription("JCAMP-DX Files");
-    fc.setFileFilter(filter);
+    fc.setSelectedFile(new File(name));
 
     int returnVal = fc.showSaveDialog(this);
     if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -2419,9 +2395,8 @@ public class MainFrame
 
       if (file.exists()) {
         option = JOptionPane.showConfirmDialog(this, "Overwrite file?",
-                                               "Confirm Overwrite Existing File",
-                                               JOptionPane.YES_NO_OPTION,
-                                               JOptionPane.QUESTION_MESSAGE);
+            "Confirm Overwrite Existing File", JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE);
       }
 
       if (option != -1) {
@@ -2441,32 +2416,30 @@ public class MainFrame
             Image image = jsvp.createImage(r.width, r.height);
             Graphics g = image.getGraphics();
             jsvp.paint(g);
-            ImageIO.write( (RenderedImage) image, "png",
-                          new File(file.getAbsolutePath()));
-          }
-          catch (IOException ioe) {
+            ImageIO.write((RenderedImage) image, "png", new File(file
+                .getAbsolutePath()));
+          } catch (IOException ioe) {
             ioe.printStackTrace();
           }
-        }
-        else if (comm.equals("JPG")) {
+        } else if (comm.equals("JPG")) {
           try {
             Rectangle r = jsvp.getBounds();
             Image image = jsvp.createImage(r.width, r.height);
             Graphics g = image.getGraphics();
             jsvp.paint(g);
-            ImageIO.write( (RenderedImage) image, "jpg",
-                          new File(file.getAbsolutePath()));
-          }
-          catch (IOException ioe) {
+            ImageIO.write((RenderedImage) image, "jpg", new File(file
+                .getAbsolutePath()));
+          } catch (IOException ioe) {
             ioe.printStackTrace();
           }
         } else if (comm.equals("SVG")) {
-          (new SVGExporter()).exportAsSVG(file.getAbsolutePath(), jsvp, index, true);
+          (new SVGExporter()).exportAsSVG(file.getAbsolutePath(), jsvp, index,
+              true);
         } else {
-          (new Exporter()).export(comm, file.getAbsolutePath(), spec, startIndex, endIndex);
-        } 
-      }
-      catch (IOException ioe) {
+          (new Exporter()).export(comm, file.getAbsolutePath(), spec,
+              startIndex, endIndex);
+        }
+      } catch (IOException ioe) {
         // STATUS --> "Error writing: " + file.getName()
       }
 
@@ -2779,12 +2752,12 @@ public class MainFrame
    */
   void toolbarCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
     if (e.getStateChange() == ItemEvent.SELECTED) {
-      this.getContentPane().add(jsvToolBar, BorderLayout.NORTH);
+      getContentPane().add(jsvToolBar, BorderLayout.NORTH);
     }
     else {
-      this.getContentPane().remove(jsvToolBar);
+      getContentPane().remove(jsvToolBar);
     }
-    this.validate();
+    validate();
   }
 
   /**
@@ -2806,12 +2779,12 @@ public class MainFrame
    */
   void statusCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
     if (e.getStateChange() == ItemEvent.SELECTED) {
-      this.getContentPane().add(statusPanel, BorderLayout.SOUTH);
+      getContentPane().add(statusPanel, BorderLayout.SOUTH);
     }
     else {
-      this.getContentPane().remove(statusPanel);
+      getContentPane().remove(statusPanel);
     }
-    this.validate();
+    validate();
   }
 
   /**

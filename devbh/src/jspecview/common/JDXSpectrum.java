@@ -662,16 +662,12 @@ public class JDXSpectrum implements Graph{
   }
 
   public boolean isTransmittance() {
-    String s = yUnits.toLowerCase(); 
-    return (s.equals("transmittance") ||
-        s.toLowerCase().contains("trans") ||
-        s.toLowerCase().equals("t"));
+    String s = yUnits.toLowerCase();
+    return (s.equals("transmittance") || s.contains("trans") || s.equals("t"));
   }
 
   public boolean isAbsorbance() {
-    String s = yUnits.toLowerCase(); 
-    return (s.equals("absorbance") ||
-        s.contains("abs") ||
-        s.equals("a"));
+    String s = yUnits.toLowerCase();
+    return (s.equals("absorbance") || s.contains("abs") || s.equals("a"));
   }
 }
