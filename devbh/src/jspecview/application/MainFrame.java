@@ -64,6 +64,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.RenderedImage;
@@ -109,6 +110,7 @@ import javax.swing.WindowConstants;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -319,11 +321,11 @@ public class MainFrame
         int option;
         if (showExitDialog) {
           option = JOptionPane.showConfirmDialog(MainFrame.this,
-                                                 "Exit JSpecView", "Exit",
-                                                 JOptionPane.OK_CANCEL_OPTION,
+                                                 "Exit JSpecView? ", "Exit",
+                                                 JOptionPane.YES_NO_OPTION,
                                                  JOptionPane.QUESTION_MESSAGE);
 
-          if (option == JOptionPane.OK_OPTION) {
+          if (option == JOptionPane.YES_OPTION) {
             System.exit(0);
           }
         }
@@ -666,7 +668,7 @@ public class MainFrame
     openMenuItem.setText("Open...");
     openMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(79,
         InputEvent.CTRL_MASK, false));
-    openMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    openMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         open_actionPerformed(e);
       }
@@ -675,7 +677,7 @@ public class MainFrame
     printMenuItem.setText("Print...");
     printMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(80,
         InputEvent.CTRL_MASK, false));
-    printMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    printMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         printMenuItem_actionPerformed(e);
       }
@@ -684,14 +686,14 @@ public class MainFrame
     closeMenuItem.setText("Close");
     closeMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(115,
         InputEvent.CTRL_MASK, false));
-    closeMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    closeMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         closeMenuItem_actionPerformed(e);
       }
     });
     closeAllMenuItem.setMnemonic('L');
     closeAllMenuItem.setText("Close All");
-    closeAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    closeAllMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         closeAllMenuItem_actionPerformed(e);
       }
@@ -700,7 +702,7 @@ public class MainFrame
     exitMenuItem.setText("Exit");
     exitMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(115,
         InputEvent.ALT_MASK, false));
-    exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    exitMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         exitMenuItem_actionPerformed(e);
       }
@@ -713,7 +715,7 @@ public class MainFrame
     optionsMenu.setText("Options");
     displayMenu.setMnemonic('D');
     displayMenu.setText("Display");
-    displayMenu.addMenuListener(new javax.swing.event.MenuListener() {
+    displayMenu.addMenuListener(new MenuListener() {
       public void menuSelected(MenuEvent e) {
         displayMenu_menuSelected(e);
       }
@@ -730,7 +732,7 @@ public class MainFrame
     gridCheckBoxMenuItem.setText("Grid");
     gridCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(71,
         InputEvent.CTRL_MASK, false));
-    gridCheckBoxMenuItem.addItemListener(new java.awt.event.ItemListener() {
+    gridCheckBoxMenuItem.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
         gridCheckBoxMenuItem_itemStateChanged(e);
       }
@@ -739,7 +741,7 @@ public class MainFrame
     coordsCheckBoxMenuItem.setText("Coordinates");
     coordsCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(67,
         InputEvent.CTRL_MASK, false));
-    coordsCheckBoxMenuItem.addItemListener(new java.awt.event.ItemListener() {
+    coordsCheckBoxMenuItem.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
         coordsCheckBoxMenuItem_itemStateChanged(e);
       }
@@ -748,7 +750,7 @@ public class MainFrame
     revPlotCheckBoxMenuItem.setText("Reverse Plot");
     revPlotCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(
         82, InputEvent.CTRL_MASK, false));
-    revPlotCheckBoxMenuItem.addItemListener(new java.awt.event.ItemListener() {
+    revPlotCheckBoxMenuItem.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
         revPlotCheckBoxMenuItem_itemStateChanged(e);
       }
@@ -757,7 +759,7 @@ public class MainFrame
     nextMenuItem.setText("Next View");
     nextMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(78,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, false));
-    nextMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    nextMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         nextMenuItem_actionPerformed(e);
       }
@@ -766,7 +768,7 @@ public class MainFrame
     prevMenuItem.setText("Previous View");
     prevMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(80,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, false));
-    prevMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    prevMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         prevMenuItem_actionPerformed(e);
       }
@@ -775,7 +777,7 @@ public class MainFrame
     fullMenuItem.setText("Full View");
     fullMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(70,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, false));
-    fullMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    fullMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         fullMenuItem_actionPerformed(e);
       }
@@ -784,7 +786,7 @@ public class MainFrame
     clearMenuItem.setText("Clear Views");
     clearMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(67,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, false));
-    clearMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    clearMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         clearMenuItem_actionPerformed(e);
       }
@@ -794,7 +796,7 @@ public class MainFrame
     preferencesMenuItem.setText("Preferences...");
     preferencesMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(80,
         InputEvent.SHIFT_MASK, false));
-    preferencesMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    preferencesMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         preferencesMenuItem_actionPerformed(e);
       }
@@ -803,14 +805,14 @@ public class MainFrame
     contentsMenuItem.setMnemonic('C');
     contentsMenuItem.setText("Contents...");
     contentsMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(112, 0, false));
-    contentsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    contentsMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         contentsMenuItem_actionPerformed(e);
       }
     });
     aboutMenuItem.setMnemonic('A');
     aboutMenuItem.setText("About");
-    aboutMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    aboutMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         aboutMenuItem_actionPerformed(e);
       }
@@ -824,94 +826,14 @@ public class MainFrame
     saveAsJDXMenu.setText("JDX");
     exportAsMenu.setMnemonic('X');
     exportAsMenu.setText("Export As");
-    JMenuItem xyMenuItem = new JMenuItem();
-    JMenuItem fixMenuItem = new JMenuItem();
-    JMenuItem sqzMenuItem = new JMenuItem();
-    JMenuItem pacMenuItem = new JMenuItem();
-    JMenuItem difMenuItem = new JMenuItem();
-    JMenuItem svgMenuItem = new JMenuItem();
-    JMenuItem animlMenuItem = new JMenuItem();
-    JMenuItem cmlMenuItem = new JMenuItem();
-    JMenuItem pngMenuItem = new JMenuItem();
-    JMenuItem jpgMenuItem = new JMenuItem();
    
-    xyMenuItem.setMnemonic('X');
-    xyMenuItem.setText("XY");
-    xyMenuItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        xyMenuItem_actionPerformed(e);
-      }
-    });
-    fixMenuItem.setMnemonic('F');
-    fixMenuItem.setText("FIX");
-    fixMenuItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        fixMenuItem_actionPerformed(e);
-      }
-    });
-    pacMenuItem.setMnemonic('P');
-    pacMenuItem.setText("PAC");
-    pacMenuItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        pacMenuItem_actionPerformed(e);
-      }
-    });
-    sqzMenuItem.setMnemonic('S');
-    sqzMenuItem.setText("SQZ");
-    sqzMenuItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        sqzMenuItem_actionPerformed(e);
-      }
-    });
-    difMenuItem.setMnemonic('D');
-    difMenuItem.setText("DIF");
-    difMenuItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        difMenuItem_actionPerformed(e);
-      }
-    });
-    animlMenuItem.setMnemonic('A');
-    animlMenuItem.setText("AnIML");
-    animlMenuItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        animlMenuItem_actionPerformed(e);
-      }
-    });
-    cmlMenuItem.setMnemonic('C');
-    cmlMenuItem.setText("CML");
-    cmlMenuItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        animlMenuItem_actionPerformed(e);
-      }
-    });
-    svgMenuItem.setMnemonic('S');
-    svgMenuItem.setText("SVG");
-    svgMenuItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        svgMenuItem_actionPerformed(e);
-      }
-    });
-    pngMenuItem.setMnemonic('P');
-    pngMenuItem.setText("PNG");
-    pngMenuItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        pngMenuItem_actionPerformed(e);
-      }
-    });
-    jpgMenuItem.setMnemonic('J');
-    jpgMenuItem.setText("JPG");
-    jpgMenuItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        jpgMenuItem_actionPerformed(e);
-      }
-    });
     toolbarCheckBoxMenuItem.setMnemonic('T');
     toolbarCheckBoxMenuItem.setSelected(true);
     toolbarCheckBoxMenuItem.setText("Toolbar");
     toolbarCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(
         84,
         InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, false));
-    toolbarCheckBoxMenuItem.addItemListener(new java.awt.event.ItemListener() {
+    toolbarCheckBoxMenuItem.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
         toolbarCheckBoxMenuItem_itemStateChanged(e);
       }
@@ -922,7 +844,7 @@ public class MainFrame
     sidePanelCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(
         83,
         InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, false));
-    sidePanelCheckBoxMenuItem.addItemListener(new java.awt.event.ItemListener() {
+    sidePanelCheckBoxMenuItem.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
         sidePanelCheckBoxMenuItem_itemStateChanged(e);
       }
@@ -932,7 +854,7 @@ public class MainFrame
     statusCheckBoxMenuItem.setText("Status Bar");
     statusCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(66,
         InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, false));
-    statusCheckBoxMenuItem.addItemListener(new java.awt.event.ItemListener() {
+    statusCheckBoxMenuItem.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
         statusCheckBoxMenuItem_itemStateChanged(e);
       }
@@ -948,7 +870,7 @@ public class MainFrame
     splitMenuItem.setText("Split");
     splitMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(83,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, false));
-    splitMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    splitMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         splitMenuItem_actionPerformed(e);
       }
@@ -957,21 +879,21 @@ public class MainFrame
     overlayMenuItem.setText("Overlay");
     overlayMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(79,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, false));
-    overlayMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    overlayMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         overlayMenuItem_actionPerformed(e);
       }
     });
     hideMenuItem.setMnemonic('H');
     hideMenuItem.setText("Hide");
-    hideMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    hideMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         hideMenuItem_actionPerformed(e);
       }
     });
     hideAllMenuItem.setMnemonic('L');
     hideAllMenuItem.setText("Hide All");
-    hideAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    hideAllMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         hideAllMenuItem_actionPerformed(e);
       }
@@ -980,7 +902,7 @@ public class MainFrame
     showMenuItem.setText("Show All");
 //    showAllMenuItem.setMnemonic('A');
 //    showAllMenuItem.setText("Show All");
-    showMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    showMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         showMenuItem_actionPerformed(e);
       }
@@ -990,7 +912,7 @@ public class MainFrame
     sourceMenuItem.setText("Source ...");
     sourceMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(83,
         InputEvent.CTRL_MASK, false));
-    sourceMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    sourceMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         sourceMenuItem_actionPerformed(e);
       }
@@ -999,7 +921,7 @@ public class MainFrame
     propertiesMenuItem.setText("Properties");
     propertiesMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(72,
         InputEvent.CTRL_MASK, false));
-    propertiesMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    propertiesMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         propertiesMenuItem_actionPerformed(e);
       }
@@ -1008,7 +930,7 @@ public class MainFrame
     borderLayout1.setHgap(2);
     borderLayout1.setVgap(2);
 
-    clearButton.addActionListener(new java.awt.event.ActionListener() {
+    clearButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         clearButton_actionPerformed(e);
       }
@@ -1016,7 +938,7 @@ public class MainFrame
     previousButton.setBorder(null);
     previousButton.setToolTipText("Previous View");
     previousButton.setIcon(previousIcon);
-    previousButton.addActionListener(new java.awt.event.ActionListener() {
+    previousButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         previousButton_actionPerformed(e);
       }
@@ -1024,7 +946,7 @@ public class MainFrame
     nextButton.setBorder(null);
     nextButton.setToolTipText("Next View");
     nextButton.setIcon(nextIcon);
-    nextButton.addActionListener(new java.awt.event.ActionListener() {
+    nextButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         nextButton_actionPerformed(e);
       }
@@ -1032,7 +954,7 @@ public class MainFrame
     resetButton.setBorder(null);
     resetButton.setToolTipText("Reset ");
     resetButton.setIcon(resetIcon);
-    resetButton.addActionListener(new java.awt.event.ActionListener() {
+    resetButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         resetButton_actionPerformed(e);
       }
@@ -1043,7 +965,7 @@ public class MainFrame
     openButton.setBorder(null);
     openButton.setToolTipText("Open");
     openButton.setIcon(openIcon);
-    openButton.addActionListener(new java.awt.event.ActionListener() {
+    openButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         openButton_actionPerformed(e);
       }
@@ -1051,7 +973,7 @@ public class MainFrame
     propertiesButton.setBorder(null);
     propertiesButton.setToolTipText("Properties");
     propertiesButton.setIcon(informationIcon);
-    propertiesButton.addActionListener(new java.awt.event.ActionListener() {
+    propertiesButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         propertiesButton_actionPerformed(e);
       }
@@ -1059,7 +981,7 @@ public class MainFrame
     gridToggleButton.setBorder(null);
     gridToggleButton.setToolTipText("Toggle Grid");
     gridToggleButton.setIcon(gridIcon);
-    gridToggleButton.addActionListener(new java.awt.event.ActionListener() {
+    gridToggleButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         gridToggleButton_actionPerformed(e);
       }
@@ -1067,7 +989,7 @@ public class MainFrame
     coordsToggleButton.setBorder(null);
     coordsToggleButton.setToolTipText("Toggle Coordinates");
     coordsToggleButton.setIcon(coordinatesIcon);
-    coordsToggleButton.addActionListener(new java.awt.event.ActionListener() {
+    coordsToggleButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         coordsToggleButton_actionPerformed(e);
       }
@@ -1075,7 +997,7 @@ public class MainFrame
     printButton.setBorder(null);
     printButton.setToolTipText("Print");
     printButton.setIcon(printIcon);
-    printButton.addActionListener(new java.awt.event.ActionListener() {
+    printButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         printButton_actionPerformed(e);
       }
@@ -1083,7 +1005,7 @@ public class MainFrame
     revPlotToggleButton.setBorder(null);
     revPlotToggleButton.setToolTipText("Reverse Plot");
     revPlotToggleButton.setIcon(reverseIcon);
-    revPlotToggleButton.addActionListener(new java.awt.event.ActionListener() {
+    revPlotToggleButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         revPlotToggleButton_actionPerformed(e);
       }
@@ -1091,7 +1013,7 @@ public class MainFrame
     aboutButton.setBorder(null);
     aboutButton.setToolTipText("About JSpecView");
     aboutButton.setIcon(aboutIcon);
-    aboutButton.addActionListener(new java.awt.event.ActionListener() {
+    aboutButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         aboutButton_actionPerformed(e);
       }
@@ -1099,14 +1021,14 @@ public class MainFrame
     overlaySplitButton.setBorder(null);
     overlaySplitButton.setIcon(overlayIcon);
     overlaySplitButton.setToolTipText("Overlay Display");
-    overlaySplitButton.addActionListener(new java.awt.event.ActionListener() {
+    overlaySplitButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         overlaySplitButton_actionPerformed(e);
       }
     });
     overlayKeyMenuItem.setEnabled(false);
     overlayKeyMenuItem.setText("Overlay Key");
-    overlayKeyMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    overlayKeyMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         overlayKeyMenuItem_actionPerformed(e);
       }
@@ -1115,7 +1037,7 @@ public class MainFrame
     overlayKeyButton.setBorder(null);
     overlayKeyButton.setToolTipText("Display Key for Overlaid Spectra");
     overlayKeyButton.setIcon(overlayKeyIcon);
-    overlayKeyButton.addActionListener(new java.awt.event.ActionListener() {
+    overlayKeyButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         overlayKeyButton_actionPerformed(e);
       }
@@ -1124,25 +1046,25 @@ public class MainFrame
     processingMenu.setText("Processing");
     integrateMenuItem.setMnemonic('I');
     integrateMenuItem.setText("Integrate HNMR");
-    integrateMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    integrateMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         integrateMenuItem_actionPerformed(e);
       }
     });
     transAbsMenuItem.setText("Transmittance/Absorbance");
-    transAbsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    transAbsMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         transAbsMenuItem_actionPerformed(e);
       }
     });
     solColMenuItem.setText("Predicted Solution Colour");
-    solColMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    solColMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         solColMenuItem_actionPerformed(e);
       }
     });
     errorLogMenuItem.setText("Error Log ...");
-    errorLogMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    errorLogMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         errorLogMenuItem_actionPerformed(e);
       }
@@ -1188,17 +1110,17 @@ public class MainFrame
     optionsMenu.add(statusCheckBoxMenuItem);
     helpMenu.add(contentsMenuItem);
     helpMenu.add(aboutMenuItem);
-    saveAsJDXMenu.add(xyMenuItem);
-    saveAsJDXMenu.add(fixMenuItem);
-    saveAsJDXMenu.add(pacMenuItem);
-    saveAsJDXMenu.add(sqzMenuItem);
-    saveAsJDXMenu.add(difMenuItem);
+    addMenuItem(saveAsJDXMenu, "XY");
+    addMenuItem(saveAsJDXMenu, "FIX");
+    addMenuItem(saveAsJDXMenu, "PAC");
+    addMenuItem(saveAsJDXMenu, "SQZ");
+    addMenuItem(saveAsJDXMenu, "DIF");
     saveAsMenu.add(saveAsJDXMenu);
-    saveAsMenu.add(animlMenuItem);
-    saveAsMenu.add(cmlMenuItem);
-    exportAsMenu.add(jpgMenuItem);
-    exportAsMenu.add(pngMenuItem);
-    exportAsMenu.add(svgMenuItem);
+    addMenuItem(saveAsMenu, "AnIML");
+    addMenuItem(saveAsMenu, "CML");
+    addMenuItem(exportAsMenu, "JPG");
+    addMenuItem(exportAsMenu, "PNG");
+    addMenuItem(exportAsMenu, "SVG");
     //getContentPane().add(toolBar, BorderLayout.NORTH);
     getContentPane().add(statusPanel, BorderLayout.SOUTH);
     statusPanel.add(statusLabel, BorderLayout.SOUTH);
@@ -1240,6 +1162,20 @@ public class MainFrame
     processingMenu.add(transAbsMenuItem).setEnabled(false);
     processingMenu.add(solColMenuItem).setEnabled(false);
     windowMenu.addSeparator();
+  }
+
+  private ActionListener actionListener = new ActionListener() {
+    public void actionPerformed(ActionEvent e) {
+      exportSpectrum(e.getActionCommand());
+    }
+  };
+  
+  private void addMenuItem(JMenu m, String key) {
+    JMenuItem jmi = new JMenuItem();
+    jmi.setMnemonic(key.charAt(0));
+    jmi.setText(key);
+    jmi.addActionListener(actionListener);
+    m.add(jmi);
   }
 
   /**
@@ -2257,50 +2193,10 @@ public class MainFrame
   }
 
   /**
-   * Exports the spectrum in X,Y format
-   * @param e the ActionEvent
-   */
-  void xyMenuItem_actionPerformed(ActionEvent e) {
-    exportSpectrum(e.getActionCommand());
-  }
-
-  /**
-   * Exports the spectrum in FIX format
-   * @param e the ActionEvent
-   */
-  void fixMenuItem_actionPerformed(ActionEvent e) {
-    exportSpectrum(e.getActionCommand());
-  }
-
-  /**
-   * Exports the spectrum in SQZ format
-   * @param e the ActionEvent
-   */
-  void sqzMenuItem_actionPerformed(ActionEvent e) {
-    exportSpectrum(e.getActionCommand());
-  }
-
-  /**
-   * Exports the spectrum in PAC format
-   * @param e the ActionEvent
-   */
-  void pacMenuItem_actionPerformed(ActionEvent e) {
-    exportSpectrum(e.getActionCommand());
-  }
-
-  /**
-   * Exports the spectrum in DIF format
-   * @param e the ActionEvent
-   */
-  void difMenuItem_actionPerformed(ActionEvent e) {
-    exportSpectrum(e.getActionCommand());
-  }
-
-  /**
    * Export spectrum in a given format
    * @param command the name of the format to export in
    */
-  private void exportSpectrum(String command) {
+  void exportSpectrum(String command) {
     final String type = command;
     JInternalFrame frame = desktopPane.getSelectedFrame();
     if (frame == null) {
@@ -2574,39 +2470,6 @@ public class MainFrame
         });
      */
 
-  }
-
-  /**
-   * Exports the spectrum in AnIML format
-   * @param e the ActionEvent
-   */
-  void animlMenuItem_actionPerformed(ActionEvent e) {
-    exportSpectrum(e.getActionCommand());
-  }
-
-  /**
-   * Exports the current spectrum as SVG
-   * @param e the ActionEvent
-   */
-  void svgMenuItem_actionPerformed(ActionEvent e) {
-    exportSpectrum(e.getActionCommand());
-  }
-
-  /**
-   * Exports spectrum as PNG image.
-   * @param e the ActionEvent
-   */
-  void pngMenuItem_actionPerformed(ActionEvent e) {
-    exportSpectrum(e.getActionCommand());
-    //showNotImplementedOptionPane();
-  }
-
-  /**
-   * Exports spectrum as JPG image.
-   * @param e the ActionEvent
-   */
-  void jpgMenuItem_actionPerformed(ActionEvent e) {
-    exportSpectrum(e.getActionCommand());
   }
 
   /**
