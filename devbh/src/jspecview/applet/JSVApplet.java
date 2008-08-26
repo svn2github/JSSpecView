@@ -105,6 +105,7 @@ public class JSVApplet extends JApplet {
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath;
   String newFilePath = null;
+  String recentFileName = "";
   String fileURL;
 
   boolean gridOn=true;
@@ -360,6 +361,7 @@ public class JSVApplet extends JApplet {
         return;
       }
       fileName = url.getPath();
+      recentFileName = url.getFile();
     } else {
       writeStatus("Please set the 'filepath' or 'load file' parameter");
       return;
@@ -545,7 +547,7 @@ public class JSVApplet extends JApplet {
     appletPopupMenu.add(compoundMenu);
     appletPopupMenu.addSeparator();
     appletPopupMenu.add(aboutMenu);
-    setMenus(saveAsMenu, exportAsMenu);
+    JSVPanel.setMenus(saveAsMenu, saveAsJDXMenu, exportAsMenu, actionListener);
     fileMenu.add(saveAsMenu);
     if(jFileChooser != null)
       fileMenu.add(exportAsMenu);
@@ -576,28 +578,6 @@ public class JSVApplet extends JApplet {
     }
   };
   
-  private void setMenus(JMenu saveAsJDXMenu, JMenu exportAsMenu) {
-    addMenuItem(saveAsJDXMenu, "XY");
-    addMenuItem(saveAsJDXMenu, "FIX");
-    addMenuItem(saveAsJDXMenu, "PAC");
-    addMenuItem(saveAsJDXMenu, "SQZ");
-    addMenuItem(saveAsJDXMenu, "DIF");
-    addMenuItem(saveAsMenu, "AnIML");
-    addMenuItem(saveAsMenu, "CML");
-    addMenuItem(exportAsMenu, "JPG");
-    addMenuItem(exportAsMenu, "PNG");
-    addMenuItem(exportAsMenu, "SVG");
-  }
-  
-  private void addMenuItem(JMenu m, String key) {
-    JMenuItem jmi = new JMenuItem();
-    jmi.setMnemonic(key.charAt(0));
-    jmi.setText(key);
-    jmi.addActionListener(actionListener);
-    m.add(jmi);
-  }
-
-
   /**
    * Get Applet information
    * @return the String "JSpecView Applet"
@@ -1544,8 +1524,7 @@ public class JSVApplet extends JApplet {
       writeStatus("output sent to Java console");
       return;
     }
-    
-    dirLastExported = selectedJSVPanel.exportSpectra(frame, jFileChooser, comm, "", dirLastExported);
+    dirLastExported = selectedJSVPanel.exportSpectra(frame, jFileChooser, comm, recentFileName, dirLastExported);
 
   }
 

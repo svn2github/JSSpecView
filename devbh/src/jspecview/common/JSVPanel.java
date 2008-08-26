@@ -65,6 +65,8 @@ import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
@@ -2263,5 +2265,27 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
     dialog.setVisible(true);
     return this.dirLastExported;
   }
+
+  public static void setMenus(JMenu saveAsMenu, JMenu saveAsJDXMenu, JMenu exportAsMenu, ActionListener actionListener) {
+    addMenuItem(saveAsJDXMenu, "XY", actionListener);
+    addMenuItem(saveAsJDXMenu, "FIX", actionListener);
+    addMenuItem(saveAsJDXMenu, "PAC", actionListener);
+    addMenuItem(saveAsJDXMenu, "SQZ", actionListener);
+    addMenuItem(saveAsJDXMenu, "DIF", actionListener);
+    addMenuItem(saveAsMenu, "AnIML", actionListener);
+    addMenuItem(saveAsMenu, "CML", actionListener);
+    addMenuItem(exportAsMenu, "JPG", actionListener);
+    addMenuItem(exportAsMenu, "PNG", actionListener);
+    addMenuItem(exportAsMenu, "SVG", actionListener);
+  }
+  
+  private static void addMenuItem(JMenu m, String key, ActionListener actionListener) {
+    JMenuItem jmi = new JMenuItem();
+    jmi.setMnemonic(key.charAt(0));
+    jmi.setText(key);
+    jmi.addActionListener(actionListener);
+    m.add(jmi);
+  }
+
 
 }

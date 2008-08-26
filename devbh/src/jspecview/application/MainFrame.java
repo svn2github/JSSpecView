@@ -45,11 +45,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.Image;
-import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -67,7 +64,6 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.image.RenderedImage;
 import java.beans.PropertyVetoException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -79,13 +75,10 @@ import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
-import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
@@ -128,11 +121,8 @@ import jspecview.common.PrintLayoutDialog;
 import jspecview.common.TransmittanceAbsorbanceConverter;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
-import jspecview.export.Exporter;
-import jspecview.export.SVGExporter;
 import jspecview.source.CompoundSource;
 import jspecview.source.JDXSource;
-import jspecview.util.TextFormat;
 import mdidesktop.ScrollableDesktopPane;
 import mdidesktop.WindowMenu;
 import jspecview.common.Visible;
@@ -1104,7 +1094,7 @@ public class MainFrame
     optionsMenu.add(statusCheckBoxMenuItem);
     helpMenu.add(contentsMenuItem);
     helpMenu.add(aboutMenuItem);
-    setMenus(saveAsJDXMenu, exportAsMenu);
+    JSVPanel.setMenus(saveAsMenu, saveAsJDXMenu, exportAsMenu, actionListener);
     saveAsMenu.add(saveAsJDXMenu);
     //getContentPane().add(toolBar, BorderLayout.NORTH);
     getContentPane().add(statusPanel, BorderLayout.SOUTH);
@@ -1155,27 +1145,6 @@ public class MainFrame
     }
   };
   
-  private void setMenus(JMenu saveAsJDXMenu, JMenu exportAsMenu) {
-    addMenuItem(saveAsJDXMenu, "XY");
-    addMenuItem(saveAsJDXMenu, "FIX");
-    addMenuItem(saveAsJDXMenu, "PAC");
-    addMenuItem(saveAsJDXMenu, "SQZ");
-    addMenuItem(saveAsJDXMenu, "DIF");
-    addMenuItem(saveAsMenu, "AnIML");
-    addMenuItem(saveAsMenu, "CML");
-    addMenuItem(exportAsMenu, "JPG");
-    addMenuItem(exportAsMenu, "PNG");
-    addMenuItem(exportAsMenu, "SVG");
-  }
-  
-  private void addMenuItem(JMenu m, String key) {
-    JMenuItem jmi = new JMenuItem();
-    jmi.setMnemonic(key.charAt(0));
-    jmi.setText(key);
-    jmi.addActionListener(actionListener);
-    m.add(jmi);
-  }
-
   /**
    * Shows dialog to open a file
    * @param e the ActionEvent
