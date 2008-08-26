@@ -27,32 +27,54 @@
 
 package jspecview.common;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Insets;
+import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.image.RenderedImage;
 import java.awt.print.PageFormat;
 import java.awt.print.Paper;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
+import java.io.File;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Vector;
 
+import javax.imageio.ImageIO;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
 //import javax.print.attribute.standard.MediaSize;
 import javax.print.attribute.standard.OrientationRequested;
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 
 import jspecview.common.JSpecViewUtils.MultiScaleData;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
+import jspecview.export.Exporter;
+import jspecview.export.SVGExporter;
+import jspecview.util.TextFormat;
 
 /*
 // Batik SVG Generator
@@ -2070,31 +2092,176 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
 
     return newJSVPanel;
   }
-/*
-  public void generateSVG(){
-    // Get a DOMImplementation
-        DOMImplementation domImpl =
-            GenericDOMImplementation.getDOMImplementation();
 
-        // Create an instance of org.w3c.dom.Document
-        Document document = domImpl.createDocument(null, "svg", null);
+  /*
+   public void generateSVG(){
+   // Get a DOMImplementation
+   DOMImplementation domImpl =
+   GenericDOMImplementation.getDOMImplementation();
 
-        // Create an instance of the SVG Generator
-        SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
+   // Create an instance of org.w3c.dom.Document
+   Document document = domImpl.createDocument(null, "svg", null);
 
-        // Ask the test to render into the SVG Graphics2D implementation
-        this.paintComponent(svgGenerator);
+   // Create an instance of the SVG Generator
+   SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
 
-        // Finally, stream out SVG to the standard output using UTF-8
-        // character to byte encoding
-        boolean useCSS = true; // we want to use CSS style attribute
-        try{
-          Writer out = new FileWriter("testSvgGen.svg");
-          svgGenerator.stream(out, useCSS);
-          out.close();
+   // Ask the test to render into the SVG Graphics2D implementation
+   this.paintComponent(svgGenerator);
+
+   // Finally, stream out SVG to the standard output using UTF-8
+   // character to byte encoding
+   boolean useCSS = true; // we want to use CSS style attribute
+   try{
+   Writer out = new FileWriter("testSvgGen.svg");
+   svgGenerator.stream(out, useCSS);
+   out.close();
+   }
+   catch(Exception e){
+   }
+   }
+   */
+
+  
+  private String dirLastExported;
+  
+  /**
+   * Auxiliary Export method
+   * @param spec the spectrum to export
+   * @param fc file chooser to use
+   * @param comm the format to export in
+   * @param index the index of the spectrum
+   * @param recentFileName 
+   * @param dirLastExported 
+   * @return dirLastExported
+   */
+  public String exportSpectrum(JDXSpectrum spec, JFileChooser fc, String comm,
+                            int index, String recentFileName,
+                            String dirLastExported) {
+    JSpecViewFileFilter filter = new JSpecViewFileFilter();
+    String name = TextFormat.split(recentFileName, ".")[0];
+    if ("XY FIX PAC SQZ DIF".indexOf(comm) >= 0) {
+      filter.addExtension("jdx");
+      filter.addExtension("dx");
+      filter.setDescription("JCAMP-DX Files");
+      name += ".jdx";
+    } else {
+      if (comm.equals("AnIML"))
+        comm = "AML";
+      filter.addExtension(comm);
+      filter.setDescription(comm + " Files");
+      name += "." + comm.toLowerCase();
+    }
+    fc.setFileFilter(filter);
+    fc.setSelectedFile(new File(name));
+    int returnVal = fc.showSaveDialog(this);
+    if (returnVal != JFileChooser.APPROVE_OPTION)
+      return dirLastExported;
+    File file = fc.getSelectedFile();
+    this.dirLastExported = file.getParent();
+    int option = -1;
+    int startIndex, endIndex;
+    if (file.exists()) {
+      option = JOptionPane.showConfirmDialog(this, "Overwrite file?",
+          "Confirm Overwrite Existing File", JOptionPane.YES_NO_OPTION,
+          JOptionPane.QUESTION_MESSAGE);
+    }
+
+    if (option != -1) {
+      if (option == JOptionPane.NO_OPTION) {
+        return exportSpectrum(spec, fc, comm, index, recentFileName,
+            this.dirLastExported);
+      }
+    }
+
+    startIndex = getStartDataPointIndices()[index];
+    endIndex = getEndDataPointIndices()[index];
+
+    try {
+      if (comm.equals("PNG")) {
+        try {
+          Rectangle r = getBounds();
+          Image image = createImage(r.width, r.height);
+          Graphics g = image.getGraphics();
+          paint(g);
+          ImageIO.write((RenderedImage) image, "png", new File(file
+              .getAbsolutePath()));
+        } catch (IOException ioe) {
+          ioe.printStackTrace();
         }
-        catch(Exception e){
+      } else if (comm.equals("JPG")) {
+        try {
+          Rectangle r = getBounds();
+          Image image = createImage(r.width, r.height);
+          Graphics g = image.getGraphics();
+          paint(g);
+          ImageIO.write((RenderedImage) image, "jpg", new File(file
+              .getAbsolutePath()));
+        } catch (IOException ioe) {
+          ioe.printStackTrace();
         }
+      } else if (comm.equals("SVG")) {
+        (new SVGExporter()).exportAsSVG(file.getAbsolutePath(), this, index,
+            true);
+      } else {
+        (new Exporter()).export(comm, file.getAbsolutePath(), spec, startIndex,
+            endIndex);
+      }
+    } catch (IOException ioe) {
+      // STATUS --> "Error writing: " + file.getName()
+    }
+    return this.dirLastExported;
   }
-*/
+
+  public String exportSpectra(JFrame frame, JFileChooser fc, String type,
+                              String recentFileName, String dirLastExported) {
+    // if JSVPanel has more than one spectrum...Choose which one to export
+    int numOfSpectra = getNumberOfSpectra();
+    if (numOfSpectra == 1 || type.equals("JPG") || type.equals("PNG")) {
+
+      JDXSpectrum spec = (JDXSpectrum) getSpectrumAt(0);
+      return exportSpectrum(spec, fc, type, 0, recentFileName, dirLastExported);
+    }
+
+    String[] items = new String[numOfSpectra];
+    for (int i = 0; i < numOfSpectra; i++) {
+      JDXSpectrum spectrum = (JDXSpectrum) getSpectrumAt(i);
+      items[i] = spectrum.getTitle();
+    }
+
+    final JDialog dialog = new JDialog(frame, "Choose Spectrum", true);
+    dialog.setResizable(false);
+    dialog.setSize(200, 100);
+    dialog.setLocation((getLocation().x + getSize().width) / 2,
+        (getLocation().y + getSize().height) / 2);
+    final JComboBox cb = new JComboBox(items);
+    Dimension d = new Dimension(120, 25);
+    cb.setPreferredSize(d);
+    cb.setMaximumSize(d);
+    cb.setMinimumSize(d);
+    JPanel panel = new JPanel(new FlowLayout());
+    JButton button = new JButton("OK");
+    panel.add(cb);
+    panel.add(button);
+    dialog.getContentPane().setLayout(new BorderLayout());
+    dialog.getContentPane().add(
+        new JLabel("Choose Spectrum to export", SwingConstants.CENTER),
+        BorderLayout.NORTH);
+    dialog.getContentPane().add(panel);
+    this.dirLastExported = dirLastExported;
+    final String dl = dirLastExported;
+    final String t = type;
+    final String rfn = recentFileName;
+    final JFileChooser f = fc;
+    button.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        int index = cb.getSelectedIndex();
+        JDXSpectrum spec = (JDXSpectrum) getSpectrumAt(index);
+        dialog.dispose();
+        exportSpectrum(spec, f, t, index, rfn, dl);
+      }
+    });
+    dialog.setVisible(true);
+    return this.dirLastExported;
+  }
+
 }

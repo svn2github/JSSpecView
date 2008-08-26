@@ -37,6 +37,7 @@ import java.util.zip.ZipInputStream;
 
 public class FileManager {
 
+  
   private URL appletDocumentBase = null;
   private String openErrorMessage;
 
@@ -49,6 +50,14 @@ public class FileManager {
   
   public FileManager (URL appletDocumentBase) {
     this.appletDocumentBase = appletDocumentBase;
+  }
+  
+  public String getFileAsString(String name) {
+    String[] data = new String[2];
+    data[0] = name;
+    // ignore error completely
+    getFileDataOrErrorAsString(data);
+    return data[1];
   }
   
   public boolean getFileDataOrErrorAsString(String[] data) {
@@ -65,7 +74,9 @@ public class FileManager {
       BufferedReader br = (BufferedReader) t;
       StringBuffer sb = new StringBuffer(8192);
       String line;
+      int nBytesRead = 0;
       while ((line = br.readLine()) != null) {
+        nBytesRead += line.length();
         sb.append(line);
         sb.append('\n');
       }

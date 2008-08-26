@@ -19,9 +19,21 @@
 
 package jspecview.common;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
+
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+
+import jspecview.exception.JSpecViewException;
+import jspecview.util.FileManager;
 
 /**
  * <code>JDXSource</code> is representation of all the data in the JCAMP-DX file
@@ -77,6 +89,101 @@ public abstract class JDXSource {
    */
   public JDXSpectrum getJDXSpectrum(int index){
     return jdxSpectra.size() <= index ? null : (JDXSpectrum)jdxSpectra.elementAt(index);
+  }
+
+  /** Indicates a Simple Source */
+  public final static int SIMPLE = 0;
+  /** Indicates a Block Source */
+  public final static int BLOCK = 1;
+  /** Indicates a Ntuple Source */
+  public final static int NTUPLE = 2;
+
+  private static String getXmlType(String filecheck) {
+    return (filecheck.contains("<animl") ? "AML" : filecheck
+        .contains("xml-cml") ? "CML" : null);
+  }
+
+  public static Object createJDXSource(String sourceContents, String filePath,
+                                       URL appletDocumentBase) {
+    InputStream in = null;
+    if (filePath != null) {
+      Object ret = FileManager.getInputStream(filePath, true,
+          appletDocumentBase);
+      if (ret instanceof String)
+        return ret;
+      in = (InputStream) ret;
+      byte[] data = new byte[400];
+      try {
+        in.read(data, 0, 400);
+      } catch (IOException e) {
+        try {
+          in.close();
+        } catch (IOException e1) {
+          //
+        }
+        return "Unable to read source : " + e.getMessage();
+      }
+      try {
+        in.close();
+      } catch (IOException e1) {
+        //
+      }
+      sourceContents = (new String(data)).toLowerCase();
+      String xmlType = getXmlType(sourceContents);
+      if (xmlType != null) {
+        in = (InputStream) FileManager.getInputStream(filePath, true,
+            appletDocumentBase);
+        if (xmlType.equals("AML")) {
+          return AnIMLSource.getAniMLInstance(in);
+        }
+        return CMLSource.getCMLInstance(in);
+      }
+    }
+    if (filePath != null) {
+      FileManager fm = new FileManager(appletDocumentBase);
+      sourceContents = fm.getFileAsString(filePath);
+    }
+    int sourceType = determineJDXSourceType(sourceContents);
+    if (sourceType == -1) {
+      return "JDX Source Type not Recognized";
+    }
+
+    try {
+      switch (sourceType) {
+      case SIMPLE:
+        return SimpleSource.getInstance(sourceContents);
+      case BLOCK:
+        return BlockSource.getInstance(sourceContents);
+      case NTUPLE:
+        return NTupleSource.getInstance(sourceContents);
+      // return RestrictedNTupleSource.getInstance(sourceContents, 128);
+      }
+    } catch (JSpecViewException e) {
+      return "Error reading JDX format: " + e.getMessage();
+    }
+    return "Error reading file";
+  }
+
+  /**
+   * Determines the type of JDX Source
+   * @param sourceContents the contents of the source
+   * @return the JDX source type
+   */
+  private static int determineJDXSourceType(String sourceContents){
+    JDXSourceStringTokenizer t = new JDXSourceStringTokenizer(sourceContents);
+    String label;
+    while(t.hasMoreTokens()){
+      t.nextToken();
+      label = JSpecViewUtils.cleanLabel(t.label);
+      if (label.equals("##DATATYPE") && t.value.toUpperCase().equals("LINK"))
+        return BLOCK;
+      if (label.equals("##DATACLASS") && t.value.toUpperCase().equals("NTUPLES"))
+          return NTUPLE;
+      Arrays.sort(JDXSource.TABULAR_DATA_LABELS);
+      if(Arrays.binarySearch(JDXSource.TABULAR_DATA_LABELS, label) > 0)
+        return SIMPLE;
+      }
+    return -1;
   }
 
   /**

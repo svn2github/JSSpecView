@@ -39,9 +39,8 @@ public class SimpleSource extends JDXSource {
 
   /**
    * Constructs a new SimpleSource
-   * @throws JSpecViewException
    */
-  protected SimpleSource() throws JSpecViewException{
+  protected SimpleSource() {
     super();
   }
 

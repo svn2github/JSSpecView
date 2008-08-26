@@ -73,16 +73,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
-
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -123,11 +119,11 @@ import jspecview.common.CompoundSource;
 import jspecview.common.Coordinate;
 import jspecview.common.Graph;
 import jspecview.common.JDXSource;
-import jspecview.common.JDXSourceFactory;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelPopupListener;
 import jspecview.common.JSVPanelPopupMenu;
+import jspecview.common.JSpecViewFileFilter;
 import jspecview.common.JSpecViewUtils;
 import jspecview.common.OverlayLegendDialog;
 import jspecview.common.PrintLayoutDialog;
@@ -136,8 +132,6 @@ import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
 import jspecview.export.Exporter;
 import jspecview.export.SVGExporter;
-import jspecview.source.AnIMLSource;
-import jspecview.source.CMLSource;
 import jspecview.util.TextFormat;
 import mdidesktop.ScrollableDesktopPane;
 import mdidesktop.WindowMenu;
@@ -824,7 +818,7 @@ public class MainFrame
     saveAsMenu.setText("Save As");
     saveAsJDXMenu.setMnemonic('J');
     saveAsJDXMenu.setText("JDX");
-    exportAsMenu.setMnemonic('X');
+    exportAsMenu.setMnemonic('E');
     exportAsMenu.setText("Export As");
    
     toolbarCheckBoxMenuItem.setMnemonic('T');
@@ -1110,17 +1104,8 @@ public class MainFrame
     optionsMenu.add(statusCheckBoxMenuItem);
     helpMenu.add(contentsMenuItem);
     helpMenu.add(aboutMenuItem);
-    addMenuItem(saveAsJDXMenu, "XY");
-    addMenuItem(saveAsJDXMenu, "FIX");
-    addMenuItem(saveAsJDXMenu, "PAC");
-    addMenuItem(saveAsJDXMenu, "SQZ");
-    addMenuItem(saveAsJDXMenu, "DIF");
+    setMenus(saveAsJDXMenu, exportAsMenu);
     saveAsMenu.add(saveAsJDXMenu);
-    addMenuItem(saveAsMenu, "AnIML");
-    addMenuItem(saveAsMenu, "CML");
-    addMenuItem(exportAsMenu, "JPG");
-    addMenuItem(exportAsMenu, "PNG");
-    addMenuItem(exportAsMenu, "SVG");
     //getContentPane().add(toolBar, BorderLayout.NORTH);
     getContentPane().add(statusPanel, BorderLayout.SOUTH);
     statusPanel.add(statusLabel, BorderLayout.SOUTH);
@@ -1169,6 +1154,19 @@ public class MainFrame
       exportSpectrum(e.getActionCommand());
     }
   };
+  
+  private void setMenus(JMenu saveAsJDXMenu, JMenu exportAsMenu) {
+    addMenuItem(saveAsJDXMenu, "XY");
+    addMenuItem(saveAsJDXMenu, "FIX");
+    addMenuItem(saveAsJDXMenu, "PAC");
+    addMenuItem(saveAsJDXMenu, "SQZ");
+    addMenuItem(saveAsJDXMenu, "DIF");
+    addMenuItem(saveAsMenu, "AnIML");
+    addMenuItem(saveAsMenu, "CML");
+    addMenuItem(exportAsMenu, "JPG");
+    addMenuItem(exportAsMenu, "PNG");
+    addMenuItem(exportAsMenu, "SVG");
+  }
   
   private void addMenuItem(JMenu m, String key) {
     JMenuItem jmi = new JMenuItem();
@@ -1220,91 +1218,69 @@ public class MainFrame
    * @param file the file
    */
   public void openFile(File file) {
-    InputStream in = null;
+    writeStatus(" ");
     String fileName = recentFileName = file.getName();
     String filePath = file.getAbsolutePath();
-    writeStatus(" ");
     if (jdxSourceFiles.contains(file)) {
       writeStatus("File: '" + filePath + "' is already opened");
       return;
     }
-    JDXSource source = null;
-    try {
-      String xmlType = getXmlType(file);
-      in = new FileInputStream(file);
-      if (xmlType == null) {
-        JDXSourceFactory factory = new JDXSourceFactory(in);
-        source = factory.createJDXSource();
-      } else if (xmlType.equals("AML")) {
-        source = AnIMLSource.getAniMLInstance(in);
-      } else {
-        source = CMLSource.getCMLInstance(in);
+    Object source = source = JDXSource.createJDXSource(null, filePath, null);
+    if (source instanceof String) {
+      writeStatus((String) source);
+      return;
+    }
+    currentSelectedSource = (JDXSource) source;
+    jdxSources.addElement(currentSelectedSource);
+    jdxSourceFiles.addElement(file);
+    closeMenuItem.setEnabled(true);
+    closeMenuItem.setText("Close '" + fileName + "'");
+    setTitle("JSpecView - " + file.getAbsolutePath());
+
+    // add calls to enable Menus that were greyed out until a file is opened.
+
+    // if current spectrum is not a Peak Table then enable Menu to re-export
+
+    closeAllMenuItem.setEnabled(true);
+    displayMenu.setEnabled(true);
+    windowMenu.setEnabled(true);
+    processingMenu.setEnabled(true);
+    printMenuItem.setEnabled(true);
+    sourceMenuItem.setEnabled(true);
+    errorLogMenuItem.setEnabled(true);
+
+    JDXSpectrum spec = currentSelectedSource.getJDXSpectrum(0);
+    if (spec == null) {
+      return;
+    }
+
+    setMenuEnables(spec);
+
+    if (autoOverlay && source instanceof CompoundSource) {
+      try {
+        overlaySpectra(currentSelectedSource);
+      } catch (ScalesIncompatibleException ex) {
+        splitSpectra(currentSelectedSource);
       }
-      in.close();
-      in = null;
+    } else {
+      splitSpectra(currentSelectedSource);
+    }
 
-      currentSelectedSource = source;
-      jdxSources.addElement(source);
-      jdxSourceFiles.addElement(file);
-      closeMenuItem.setEnabled(true);
-      closeMenuItem.setText("Close '" + fileName + "'");
-      setTitle("JSpecView - " + file.getAbsolutePath());
+    // ADD TO RECENT FILE PATHS
+    if (recentFilePaths.size() >= numRecent) {
+      recentFilePaths.removeElementAt(numRecent - 1);
+    }
+    if (!recentFilePaths.contains(filePath)) {
+      recentFilePaths.insertElementAt(filePath, 0);
+    }
 
-      // add calls to enable Menus that were greyed out until a file is opened.
-
-      // if current spectrum is not a Peak Table then enable Menu to re-export
-
-      closeAllMenuItem.setEnabled(true);
-      displayMenu.setEnabled(true);
-      windowMenu.setEnabled(true);
-      processingMenu.setEnabled(true);
-      printMenuItem.setEnabled(true);
-      sourceMenuItem.setEnabled(true);
-      errorLogMenuItem.setEnabled(true);
-
-      JDXSpectrum spec = currentSelectedSource.getJDXSpectrum(0);
-      if (spec == null) {
-        return;
-      }
-      
-      setMenuEnables(spec);
-
-      if (autoOverlay && source instanceof CompoundSource) {
-        try {
-          overlaySpectra(source);
-        } catch (ScalesIncompatibleException ex) {
-          splitSpectra(source);
-        }
-      } else {
-        splitSpectra(source);
-      }
-
-
-      // ADD TO RECENT FILE PATHS
-      if (recentFilePaths.size() >= numRecent) {
-        recentFilePaths.removeElementAt(numRecent - 1);
-      }
-      if (!recentFilePaths.contains(filePath)) {
-        recentFilePaths.insertElementAt(filePath, 0);
-      }
-
-      String filePaths = "";
-      JMenuItem menuItem;
-      openRecentMenu.removeAll();
-      int index;
-      for (index = 0; index < recentFilePaths.size() - 1; index++) {
-        String path = (String) recentFilePaths.elementAt(index);
-        filePaths += path + ", ";
-        menuItem = new JMenuItem(path);
-        openRecentMenu.add(menuItem);
-        menuItem.addActionListener(new ActionListener() {
-          public void actionPerformed(ActionEvent ae) {
-            openRecent_actionPerformed(ae);
-          }
-        });
-      }
+    String filePaths = "";
+    JMenuItem menuItem;
+    openRecentMenu.removeAll();
+    int index;
+    for (index = 0; index < recentFilePaths.size() - 1; index++) {
       String path = (String) recentFilePaths.elementAt(index);
-      filePaths += path;
+      filePaths += path + ", ";
       menuItem = new JMenuItem(path);
       openRecentMenu.add(menuItem);
       menuItem.addActionListener(new ActionListener() {
@@ -1312,19 +1288,17 @@ public class MainFrame
           openRecent_actionPerformed(ae);
         }
       });
-      properties.setProperty("recentFilePaths", filePaths);
-
-    } catch (IOException ex) {
-      writeStatus(ex.getMessage());
-    } catch (JSpecViewException ex) {
-      writeStatus(ex.getMessage());
     }
-    if (in != null)
-      try {
-        in.close();
-      } catch (Exception e) {
-        //
+    String path = (String) recentFilePaths.elementAt(index);
+    filePaths += path;
+    menuItem = new JMenuItem(path);
+    openRecentMenu.add(menuItem);
+    menuItem.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent ae) {
+        openRecent_actionPerformed(ae);
       }
+    });
+    properties.setProperty("recentFilePaths", filePaths);
   }
 
   void setMenuEnables(JDXSpectrum spec) {
@@ -1369,25 +1343,6 @@ public class MainFrame
    * @return true if anIML or CML
    */
   
-  private String getXmlType(File file) {
-    byte[] infile = new byte[400];
-    String filecheck = null;
-    try {
-      InputStream in = new FileInputStream(file);
-      DataInputStream dis = new DataInputStream(new BufferedInputStream(
-          new FileInputStream(file)));
-      dis.read(infile);
-      in.close();
-      filecheck = new String(infile, 0, 400).toLowerCase();
-    } catch (IOException ex) {
-    }
-
-    return (filecheck.contains("<animl") ? "AML" : filecheck
-        .contains("xml-cml") ? "CML" : null);
-
-  }
-
-
   /**
    * Sets the display properties as specified from the preferences dialog
    * or the properties file
@@ -2046,13 +2001,7 @@ public class MainFrame
    * @param e the ActionEvent
    */
   void exitMenuItem_actionPerformed(ActionEvent e) {
-    int option = JOptionPane.showConfirmDialog(this, "Are you sure?", "Exit",
-                                               JOptionPane.OK_CANCEL_OPTION,
-                                               JOptionPane.QUESTION_MESSAGE);
-
-    if (option == JOptionPane.OK_OPTION) {
-      System.exit(0);
-    }
+    System.exit(0);
   }
 
   /**
@@ -2203,155 +2152,19 @@ public class MainFrame
       return;
     }
     final JSVPanel jsvp = (JSVPanel) frame.getContentPane().getComponent(0);
-
     if (fc == null)
       return;
+    
     if (JSpecViewUtils.DEBUG) {
       fc.setCurrentDirectory(new File("C:\\JCAMPDX"));
     } else if (useDirLastExported) {
       fc.setCurrentDirectory(new File(dirLastExported));
     }
+    
+    dirLastExported = jsvp.exportSpectra(this, fc, type, recentFileName, dirLastExported);
 
-    // if JSVPanel has more than one spectrum...Choose which one to export
-    int numOfSpectra = jsvp.getNumberOfSpectra();
-    if (numOfSpectra == 1 || type.equals("JPG") || type.equals("PNG")) {
-
-      JDXSpectrum spec = (JDXSpectrum) jsvp.getSpectrumAt(0);
-      exportSpectrum_aux(spec, jsvp, type, 0);
-      return;
-    }
-
-    String[] items = new String[numOfSpectra];
-    for (int i = 0; i < numOfSpectra; i++) {
-      JDXSpectrum spectrum = (JDXSpectrum) jsvp.getSpectrumAt(i);
-      items[i] = spectrum.getTitle();
-    }
-
-    final JDialog dialog = new JDialog(this, "Choose Spectrum", true);
-    dialog.setResizable(false);
-    dialog.setSize(200, 100);
-    dialog.setLocation((getLocation().x + getSize().width) / 2,
-        (getLocation().y + getSize().height) / 2);
-    final JComboBox cb = new JComboBox(items);
-    Dimension d = new Dimension(120, 25);
-    cb.setPreferredSize(d);
-    cb.setMaximumSize(d);
-    cb.setMinimumSize(d);
-    JPanel panel = new JPanel(new FlowLayout());
-    JButton button = new JButton("OK");
-    panel.add(cb);
-    panel.add(button);
-    dialog.getContentPane().setLayout(new BorderLayout());
-    dialog.getContentPane().add(
-        new JLabel("Choose Spectrum to export", SwingConstants.CENTER),
-        BorderLayout.NORTH);
-    dialog.getContentPane().add(panel);
-    button.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        int index = cb.getSelectedIndex();
-        JDXSpectrum spec = (JDXSpectrum) jsvp.getSpectrumAt(index);
-        dialog.dispose();
-        exportSpectrum_aux(spec, jsvp, type, index);
-      }
-    });
-    dialog.setVisible(true);
   }
 
-  /**
-   * Auxiliary Export method
-   * @param spec the spectrum to export
-   * @param jsvp the JSVPanel that displays the spectrum
-   * @param comm the format to export in
-   * @param index the index of the spectrum
-   */
-  void exportSpectrum_aux(JDXSpectrum spec, JSVPanel jsvp, String comm,
-                          int index) {
-    JSpecViewFileFilter filter = new JSpecViewFileFilter();
-    String name = TextFormat.split(recentFileName, ".")[0];
-    if ("XY FIX PAC SQZ DIF".indexOf(comm) >= 0) {
-      filter.addExtension("jdx");
-      filter.addExtension("dx");
-      filter.setDescription("JCAMP-DX Files");
-      name += ".jdx";
-    } else {
-      filter.addExtension(comm);
-      filter.setDescription(comm + " Files");
-      name += "." + comm.toLowerCase();
-    }
-    fc.setFileFilter(filter);
-    fc.setSelectedFile(new File(name));
-
-    int returnVal = fc.showSaveDialog(this);
-    if (returnVal == JFileChooser.APPROVE_OPTION) {
-      File file = fc.getSelectedFile();
-      dirLastExported = file.getParent();
-
-      int option = -1;
-      int startIndex, endIndex;
-
-      if (file.exists()) {
-        option = JOptionPane.showConfirmDialog(this, "Overwrite file?",
-            "Confirm Overwrite Existing File", JOptionPane.YES_NO_OPTION,
-            JOptionPane.QUESTION_MESSAGE);
-      }
-
-      if (option != -1) {
-        if (option == JOptionPane.NO_OPTION) {
-          exportSpectrum_aux(spec, jsvp, comm, index);
-          return;
-        }
-      }
-
-      startIndex = jsvp.getStartDataPointIndices()[index];
-      endIndex = jsvp.getEndDataPointIndices()[index];
-
-      try {
-        if (comm.equals("PNG")) {
-          try {
-            Rectangle r = jsvp.getBounds();
-            Image image = jsvp.createImage(r.width, r.height);
-            Graphics g = image.getGraphics();
-            jsvp.paint(g);
-            ImageIO.write((RenderedImage) image, "png", new File(file
-                .getAbsolutePath()));
-          } catch (IOException ioe) {
-            ioe.printStackTrace();
-          }
-        } else if (comm.equals("JPG")) {
-          try {
-            Rectangle r = jsvp.getBounds();
-            Image image = jsvp.createImage(r.width, r.height);
-            Graphics g = image.getGraphics();
-            jsvp.paint(g);
-            ImageIO.write((RenderedImage) image, "jpg", new File(file
-                .getAbsolutePath()));
-          } catch (IOException ioe) {
-            ioe.printStackTrace();
-          }
-        } else if (comm.equals("SVG")) {
-          (new SVGExporter()).exportAsSVG(file.getAbsolutePath(), jsvp, index,
-              true);
-        } else {
-          (new Exporter()).export(comm, file.getAbsolutePath(), spec,
-              startIndex, endIndex);
-        }
-      } catch (IOException ioe) {
-        // STATUS --> "Error writing: " + file.getName()
-      }
-
-    }
-  }
-
-  /**
-   * Show dialog when there is an attempt to export overlaid spectra
-   */
-/*  private void showCannotExportOverlaidOptionPane() {
-    JOptionPane.showMessageDialog(this, "Can't Export Overlaid Spectra.\n" +
-                                  "Split Display then Export",
-                                  "Can't Export",
-                                  JOptionPane.ERROR_MESSAGE);
-  }
-*/
   /**
    * Writes a message to the status bar
    * @param msg the message
