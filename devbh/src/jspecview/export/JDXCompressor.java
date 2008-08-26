@@ -35,7 +35,7 @@ import jspecview.common.JSpecViewUtils;
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
  * @see jspecview.common.Coordinate
- * @see jspecview.common.JDXDecompressor
+ * @see jspecview.source.JDXDecompressor
  */
 
 class JDXCompressor {

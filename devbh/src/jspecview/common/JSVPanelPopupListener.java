@@ -22,6 +22,8 @@ package jspecview.common;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import jspecview.source.JDXSource;
+
 /**
  * <code>JSVPanelPopupListener</code> shows the popup menu on <code>JSVPanel</code>s
  * when the right mouse button is clicked.

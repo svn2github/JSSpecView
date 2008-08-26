@@ -17,7 +17,7 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package jspecview.common;
+package jspecview.source;
 
 //import java.util.Iterator;
 //import javax.xml.namespace.QName;
@@ -28,6 +28,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Vector;
+
+import jspecview.common.Coordinate;
+import jspecview.common.Graph;
+import jspecview.common.JDXSpectrum;
 import jspecview.util.Logger;
 import jspecview.util.SimpleXmlReader;
 

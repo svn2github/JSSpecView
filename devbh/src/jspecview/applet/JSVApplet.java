@@ -73,19 +73,19 @@ import javax.swing.event.ChangeListener;
 
 import jspecview.api.ExporterInterface;
 import jspecview.api.Interface;
-import jspecview.common.BlockSource;
-import jspecview.common.CompoundSource;
 import jspecview.common.Coordinate;
-import jspecview.common.JDXSource;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSpecViewUtils;
-import jspecview.common.NTupleSource;
 import jspecview.common.OverlayLegendDialog;
 import jspecview.common.PrintLayoutDialog;
 import jspecview.common.TransmittanceAbsorbanceConverter;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
+import jspecview.source.BlockSource;
+import jspecview.source.CompoundSource;
+import jspecview.source.JDXSource;
+import jspecview.source.NTupleSource;
 import netscape.javascript.JSObject;
 import jspecview.common.Visible;
 

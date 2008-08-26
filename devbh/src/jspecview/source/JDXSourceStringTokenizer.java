@@ -17,12 +17,14 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package jspecview.common;
+package jspecview.source;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.StringTokenizer;
+
+import jspecview.common.JSpecViewUtils;
 
 
 /**
@@ -32,7 +34,7 @@ import java.util.StringTokenizer;
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
- * @see jspecview.common.JDXSource
+ * @see jspecview.source.JDXSource
  */
 public class JDXSourceStringTokenizer {
   /**

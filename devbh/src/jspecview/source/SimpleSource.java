@@ -17,13 +17,17 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package jspecview.common;
+package jspecview.source;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
+import jspecview.common.Coordinate;
+import jspecview.common.Graph;
+import jspecview.common.JDXSpectrum;
+import jspecview.common.JSpecViewUtils;
 import jspecview.exception.JDXSourceException;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.TabularDataSetException;

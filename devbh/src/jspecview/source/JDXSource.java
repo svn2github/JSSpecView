@@ -17,7 +17,7 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package jspecview.common;
+package jspecview.source;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -32,6 +32,8 @@ import java.util.Vector;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
+import jspecview.common.JDXSpectrum;
+import jspecview.common.JSpecViewUtils;
 import jspecview.exception.JSpecViewException;
 import jspecview.util.FileManager;
 

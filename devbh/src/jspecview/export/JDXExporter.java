@@ -24,9 +24,9 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import jspecview.common.Coordinate;
-import jspecview.common.JDXSource;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSpecViewUtils;
+import jspecview.source.JDXSource;
 
 /**
  * class <code>JDXExporter</code> contains static methods for exporting a

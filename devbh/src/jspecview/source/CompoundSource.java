@@ -17,15 +17,16 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package jspecview.common;
+package jspecview.source;
+
 
 /**
  * Abstract base class form which JCAMP-DX Compound Source are extended.
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
  * @author Prof. Robert J. Lancashire
- * @see jspecview.common.BlockSource
- * @see jspecview.common.NTupleSource
+ * @see jspecview.source.BlockSource
+ * @see jspecview.source.NTupleSource
  */
 public abstract class CompoundSource extends JDXSource {
 

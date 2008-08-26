@@ -32,6 +32,9 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
+import jspecview.source.CompoundSource;
+import jspecview.source.JDXSource;
+
 /**
  * Popup Menu for JSVPanel.
  * @author Debbie-Ann Facey

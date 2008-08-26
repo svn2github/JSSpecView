@@ -17,13 +17,17 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package jspecview.common;
+package jspecview.source;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
+import jspecview.common.Coordinate;
+import jspecview.common.Graph;
+import jspecview.common.JDXSpectrum;
+import jspecview.common.JSpecViewUtils;
 import jspecview.exception.JDXSourceException;
 import jspecview.exception.JSpecViewException;
 /**
@@ -34,10 +38,8 @@ import jspecview.exception.JSpecViewException;
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
- * @see jspecview.common.CompoundSource
- * @see jspecview.common.NTupleSource
- * @see jspecview.common.JDXSourceFactory
- * @see jspecview.common.JDXSourceFactory#createJDXSource()
+ * @see jspecview.source.CompoundSource
+ * @see jspecview.source.NTupleSource
  */
 public class BlockSource extends CompoundSource {
 

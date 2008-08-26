@@ -60,11 +60,10 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import jspecview.common.JDXSource;
-import jspecview.common.JDXSourceFactory;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSpecViewUtils;
 import jspecview.exception.JSpecViewException;
+import jspecview.source.JDXSource;
 
 /**
  * Dialog to change the preferences for the application.
