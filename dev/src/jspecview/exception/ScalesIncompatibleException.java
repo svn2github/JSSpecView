@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2007 The University of the West Indies
+/* Copyright (c) 2002-2008 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -27,7 +27,7 @@ package jspecview.exception;
  * @author Prof Robert J. Lancashire
  */
 
-public class ScalesIncompatibleException extends Exception {
+public class ScalesIncompatibleException extends JSpecViewException {
 
   /**
    * Initialises the ScalesIncompatibleException
