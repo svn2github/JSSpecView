@@ -147,6 +147,7 @@ public class JSVApplet extends JApplet {
   /*---------------------------------END PARAMETERS------------------------*/
 
 
+  boolean isSignedApplet = false;
   boolean isStandalone=false;
   BorderLayout appletBorderLayout = new BorderLayout();
   JPanel statusPanel = new JPanel();
@@ -239,6 +240,14 @@ public class JSVApplet extends JApplet {
   }
   //"ADDHIGHLIGHT", "REMOVEHIGHLIGHT", "REMOVEALLHIGHTLIGHTS"
 
+ @Override
+ public void destroy() {
+   if (commandWatcherThread != null) {
+     commandWatcherThread.interrupt();
+     commandWatcherThread = null;
+   }
+ }
+ 
  /**
    * Do we have new parameters passed from a javascript call?
    */
@@ -436,6 +445,8 @@ public class JSVApplet extends JApplet {
   private void jbInit() throws Exception {
     try {
       jFileChooser = new JFileChooser();
+      isSignedApplet = true;
+      startCommandThread();
     } catch (SecurityException se) {
       //System.err.println("Export menu disabled: You need the signed Applet to export files");
     }
@@ -552,7 +563,7 @@ public class JSVApplet extends JApplet {
     appletPopupMenu.add(aboutMenu);
     JSVPanel.setMenus(saveAsMenu, saveAsJDXMenu, exportAsMenu, actionListener);
     fileMenu.add(saveAsMenu);
-    if(jFileChooser != null)
+    if(isSignedApplet)
       fileMenu.add(exportAsMenu);
     fileMenu.add(printMenuItem);
 
@@ -1521,7 +1532,7 @@ public class JSVApplet extends JApplet {
    */
   void exportSpectrum(String command) {
     final String comm = command;
-    if (jFileChooser == null) {
+    if (!isSignedApplet) {
       System.out.println(export(0, comm, null));
       // for now -- just send to output
       writeStatus("output sent to Java console");
@@ -1842,7 +1853,10 @@ public class JSVApplet extends JApplet {
  }
 
   public void setFilePath(String tmpFilePath){
-    executeCommandAsThread("load " + tmpFilePath);
+    if (isSignedApplet)
+      scriptQueue.add(tmpFilePath);
+    else
+      setFilePathLocal(tmpFilePath);
   }
   
   /**
@@ -2045,37 +2059,53 @@ public class JSVApplet extends JApplet {
 
   }
 
-  class ExecuteCommandThread extends Thread {
+  private void startCommandThread() {
+    commandWatcherThread = new Thread(new CommandWatcher());
+    commandWatcherThread.setName("CommmandWatcherThread");
+    commandWatcherThread.start();
+  }
+  
+  // for the signed applet to load a remote file, it must 
+  // be using a thread started by the initiating thread;
+  
+  Vector<String> scriptQueue = new Vector<String>();
+  Thread commandWatcherThread;
 
-    String strCommand;
-    ExecuteCommandThread (String command) {
-      strCommand = command;
-      this.setName("ExecuteCommandThread");
-    }
-    
-    @Override
+  class CommandWatcher implements Runnable {
     public void run() {
-      System.out.println("command thread: " + strCommand);
-      try {
-        if (strCommand.startsWith("load "))
-        setFilePathLocal(strCommand.substring(5));
-      } catch (Exception ie) {
-        Logger.error("execution command interrupted!",ie);
+      Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+      int commandDelay = 200;
+      while (commandWatcherThread != null) {
+        try {
+          Thread.sleep(commandDelay);
+          if (commandWatcherThread != null) {
+            if (scriptQueue.size() > 0) {
+              String scriptItem = scriptQueue.remove(0);            
+              System.out.println("executing " + scriptItem);
+              if (scriptItem != null) {
+                setFilePathLocal(scriptItem);
+              }
+            }
+          }
+        } catch (InterruptedException ie) {
+          Logger.info("CommandWatcher InterruptedException!");
+          break;
+        } catch (Exception ie) {
+          String s = "script processing ERROR:\n\n" + ie.toString();
+          for (int i = 0; i < ie.getStackTrace().length; i++) {
+            s += "\n" + ie.getStackTrace()[i].toString();
+          }
+          Logger.info("CommandWatcher Exception! " + s);
+          break;
+        }
       }
-    }
-  }
-   
-  ExecuteCommandThread execThread;
-  void executeCommandAsThread(String strCommand){ 
-    if (strCommand.length() > 0) {
-      execThread = new ExecuteCommandThread(strCommand);
-      execThread.start();
-      //can't do this: 
-      //SwingUtilities.invokeLater(execThread);
-      //because then the thread runs from the event queue, and that 
-      //causes PAUSE to hang the application on refresh()
+      commandWatcherThread = null;
     }
   }
 
+  void interruptQueueThreads() {
+    if (commandWatcherThread != null)
+      commandWatcherThread.interrupt();
+  }
 
 }
