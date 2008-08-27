@@ -446,8 +446,6 @@ public class JSVApplet extends JApplet {
         printMenuItem_actionPerformed(e);
       }
     });
-    exportAsMenu.setText("Export As");
-    saveAsMenu.setText("Save As");
     viewMenu.setText("View");
     gridMenuItem.setText("Show Grid");
     gridMenuItem.addItemListener(new java.awt.event.ItemListener() {

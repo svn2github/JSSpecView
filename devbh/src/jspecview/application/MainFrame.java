@@ -805,11 +805,8 @@ public class MainFrame
     openRecentMenu.setMnemonic('R');
     openRecentMenu.setText("Open Recent");
     saveAsMenu.setMnemonic('A');
-    saveAsMenu.setText("Save As");
     saveAsJDXMenu.setMnemonic('J');
-    saveAsJDXMenu.setText("JDX");
     exportAsMenu.setMnemonic('E');
-    exportAsMenu.setText("Export As");
    
     toolbarCheckBoxMenuItem.setMnemonic('T');
     toolbarCheckBoxMenuItem.setSelected(true);
@@ -1065,7 +1062,6 @@ public class MainFrame
     fileMenu.add(closeMenuItem).setEnabled(false);
     fileMenu.add(closeAllMenuItem).setEnabled(false);
     fileMenu.addSeparator();
-    fileMenu.add(saveAsJDXMenu);
     fileMenu.add(saveAsMenu).setEnabled(false);
     fileMenu.add(exportAsMenu).setEnabled(false);
     fileMenu.addSeparator();
@@ -1095,7 +1091,6 @@ public class MainFrame
     helpMenu.add(contentsMenuItem);
     helpMenu.add(aboutMenuItem);
     JSVPanel.setMenus(saveAsMenu, saveAsJDXMenu, exportAsMenu, actionListener);
-    saveAsMenu.add(saveAsJDXMenu);
     //getContentPane().add(toolBar, BorderLayout.NORTH);
     getContentPane().add(statusPanel, BorderLayout.SOUTH);
     statusPanel.add(statusLabel, BorderLayout.SOUTH);
