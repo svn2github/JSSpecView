@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2007 The University of the West Indies
+/* Copyright (c) 2002-2008 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -21,6 +21,8 @@ package jspecview.common;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+
+import jspecview.source.JDXSource;
 
 /**
  * <code>JSVPanelPopupListener</code> shows the popup menu on <code>JSVPanel</code>s
@@ -52,6 +54,7 @@ public class JSVPanelPopupListener extends MouseAdapter {
    * Oversides mousePressed in <code>MouseAdapter</code> class
    * @param e the <code>MouseEvent</code>
    */
+  @Override
   public void mousePressed(MouseEvent e) {
       maybeShowPopup(e);
   }
@@ -60,6 +63,7 @@ public class JSVPanelPopupListener extends MouseAdapter {
    * Overides mouseReleased in <code>MouseAdapter</code> class
    * @param e the <code>MouseEvent</code>
    */
+  @Override
   public void mouseReleased(MouseEvent e) {
       maybeShowPopup(e);
   }
