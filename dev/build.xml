@@ -19,7 +19,7 @@ is divided into following sections:
   - cleanup
 
 -->
-    <target name="default" depends="clean,init,compile" description="Cleans and compiles project."/>
+    <target name="default" depends="clean,init,compile,applet_jar,CreateApplicationJar,signed-applet" description="Cleans and compiles project."/>
     <!--
     ======================
     INITIALIZATION SECTION
@@ -29,6 +29,7 @@ is divided into following sections:
 <!-- These directories are removed when the project is cleaned: -->
              <property name="build.dir" value="build" />
              <property name="dist.dir" value="dist" />
+             <property name="dist.test.dir" value="dist/test" />
 
              <property name="application.args" value="" />
              <property name="build.classes.dir" value="${build.dir}/classes" />
@@ -39,8 +40,10 @@ is divided into following sections:
              <property name="build.test.results.dir" value="${build.dir}/test/results" />
              <property name="debug.classpath" value="${run.classpath}" />
              <property name="debug.test.classpath" value="${run.test.classpath}" />
-
-             <property name="dist.jar" value="${dist.dir}/jspecview.jar" />
+             <property name="applet.jar" value="${build.dir}/jspecview.jar" />
+             <property name="application.jar" value="${build.dir}/JSVApp.jar" />
+             <property name="dist.zip" value="${dist.dir}/JSpecView.zip" />
+             <property name="signedapplet.jar" value="${build.dir}/Sjspecview.jar" />
              <property name="dist.javadoc.dir" value="javadoc" />
              <property name="certificate.dir" value="certificate" />
              <property name="extras.dir" value="extras" />
@@ -48,16 +51,10 @@ is divided into following sections:
              <property name="work.dir" value="dist" />
              <property name="applet.url" value="JSVApplet.html" />
 
-<!-- The following external JARS are required: -->
-             <property name="libs.JSR173.classpath" value="include\\jsr173_1.0_api.jar" />
-             <property name="libs.Plugin.classpath" value="include\\plugin.jar" />
-             <property name="libs.Stax.classpath" value="include\\sjsxp.jar" />
-             <property name="libs.Velocity.classpath" value="include\\velocity-dep-1.4.jar" />
-         	 <property name="libs.Xerces.classpath" value="include\\xercesImpl.jar" />
-        	 <property name="libs.XMLParser.classpath" value="include\\xmlParserAPIs.jar" />
-
+<!-- The following external JAR is required: --> 
+    	     <property name="libs.Plugin.classpath" value="include\\plugin.jar" />
+    	     <property name="javac.classpath" value="${libs.Plugin.classpath}" />
     		 <property name="jar.compress" value="TRUE" />
-             <property name="javac.classpath" value="${libs.Xerces.classpath};${libs.XMLParser.classpath};${libs.JSR173.classpath};${libs.Stax.classpath};${libs.Velocity.classpath};${libs.Plugin.classpath}" />
              <property name="javac.compilerargs" value="-Xlint:unchecked" />
              <property name="javac.deprecation" value="TRUE" />
              <property name="javac.includes" value="" />
@@ -93,6 +90,67 @@ is divided into following sections:
              <property name="src.dir" value="src" />
              <property name="test.src.dir" value="test" />
     </target>
+	
+        <!--
+        ====================
+        JAR BUILDING SECTION
+        ====================
+        -->
+        	
+    	<target name="applet_jar" depends="init,compile" description="Create applet.">
+            <delete file="${applet.jar}" quiet="true" />
+            <jar jarfile="${applet.jar}" compress="${jar.compress}">
+                <fileset dir="${build.classes.dir}">
+              	  <exclude name="**/application/**"/>
+                  <exclude name="**/mdidesktop/**"/>
+            	</fileset>
+            	<fileset dir="${dist.dir}">
+               	  <exclude name="**/*.*"/>
+               	  <include name="**/*.txt"/>
+            	</fileset>
+            </jar>
+        </target>
+
+    <target name="signed-applet" depends="init,compile,applet_jar" description="Create self-signed applet.">
+    	<signjar jar="${applet.jar}"
+    	             signedjar="${signedapplet.jar}"
+    	             keystore="${certificate.dir}/JSVcertificate.store"
+    	             storepass="JSV2007" alias="JSVcertificate" />
+	 </target>
+    
+    <target name="CreateApplicationJar" depends="init,compile" description="Build Standalone Application." >
+    <delete file="${application.jar}" quiet="true" />
+	 <jar destfile="${application.jar}">
+		<zipfileset dir="${build.classes.dir}" prefix="" />
+       <manifest> 
+			<attribute name="Main-Class" value="${main.class}" />
+		</manifest>
+	 </jar>
+    </target>	
+	
+	<target name="make-distribution-zip-file" depends="applet_jar,CreateApplicationJar,signed-applet" description="Create JSpecView.zip">
+        <dirname property="dist.dir" file="${applet.jar}"/>
+        <mkdir dir="${dist.dir}"/>
+		<delete quiet="true">
+    		<fileset dir="${dist.dir}" includes = "*.*"/>
+	 	</delete>
+	    <jar jarfile="${dist.zip}" compress="${jar.compress}">
+           <fileset dir="${extras.dir}"/>
+		   <fileset dir="${build.dir}">
+		      <include name="*.jar"/>
+		   </fileset>
+	    </jar>
+        <mkdir dir="${dist.test.dir}"/>
+			<copy todir="${dist.test.dir}">
+		    	<fileset dir="${build.dir}">
+		 			<include name="*.jar"/>
+				</fileset>
+            	<fileset dir="${extras.dir}"/>
+			</copy>
+	</target>
+
+    <target name="init" depends="-init-user,-do-init,-init-check,-init-macrodef-property,-init-macrodef-javac,-init-macrodef-junit,-init-macrodef-nbjpda,-init-macrodef-debug,-init-macrodef-java"/>
+		
     <target name="-do-init" depends="-init-user,-init-macrodef-property">
         <available file="${manifest.file}" property="manifest.available"/>
         <condition property="manifest.available+main.class">
@@ -138,7 +196,8 @@ is divided into following sections:
         <fail unless="build.test.classes.dir">Must set build.test.classes.dir</fail>
         <fail unless="build.test.results.dir">Must set build.test.results.dir</fail>
         <fail unless="build.classes.excludes">Must set build.classes.excludes</fail>
-        <fail unless="dist.jar">Must set dist.jar</fail>
+        <fail unless="applet.jar">Must set applet.jar</fail>
+        <fail unless="signedapplet.jar">Must set signedapplet.jar</fail>
         <fail unless="certificate.dir">Must set certificate.dir</fail>
     </target>
     <target name="-init-macrodef-property">
@@ -236,7 +295,7 @@ is divided into following sections:
     </target>
     <target name="-init-macrodef-java">
         <macrodef name="java" uri="http://www.netbeans.org/ns/j2se-project/1">
-            <attribute name="classname" default="${main.class}"/>
+	            <attribute name="classname" default="${main.class}"/>
             <element name="customize" optional="true"/>
             <sequential>
                 <java fork="true" classname="@{classname}" dir="${work.dir}">
@@ -253,14 +312,7 @@ is divided into following sections:
             </sequential>
         </macrodef>
     </target>
-    <target name="-init-presetdef-jar">
-        <presetdef name="jar" uri="http://www.netbeans.org/ns/j2se-project/1">
-            <jar jarfile="${dist.jar}" compress="${jar.compress}">
-                <j2seproject1:fileset dir="${build.classes.dir}"/>
-            </jar>
-        </presetdef>
-    </target>
-    <target name="init" depends="-init-user,-do-init,-init-check,-init-macrodef-property,-init-macrodef-javac,-init-macrodef-junit,-init-macrodef-nbjpda,-init-macrodef-debug,-init-macrodef-java,-init-presetdef-jar"/>
+	
     <!--
     ===================
     COMPILATION SECTION
@@ -286,64 +338,9 @@ is divided into following sections:
         </j2seproject2:javac>
     </target>
     <target name="compile-single" depends="init,deps-jar,-do-compile-single"/>
-    <!--
-    ====================
-    JAR BUILDING SECTION
-    ====================
-    -->
-    <target name="-pre-jar" depends="init">
-        <dirname property="dist.jar.dir" file="${dist.jar}"/>
-        <mkdir dir="${dist.jar.dir}"/>
-    </target>
-    <target name="-do-jar-without-manifest" depends="init,compile,-pre-jar" unless="manifest.available">
-        <j2seproject1:jar>
-        	<fileset dir="${dist.dir}">
-        	  <exclude name="javadoc/**/*.*"/>
-         	  <include name="**/*.*"/>
-        	</fileset>
-         </j2seproject1:jar>
-    </target>
-    <target name="-do-jar-with-manifest" depends="init,compile,-pre-jar" if="manifest.available" unless="manifest.available+main.class">
-        <j2seproject1:jar manifest="${manifest.file}"/>
-    </target>
-    <target name="-do-jar-with-mainclass" depends="init,compile,-pre-jar" if="manifest.available+main.class">
-        <j2seproject1:jar manifest="${manifest.file}">
-            <j2seproject1:manifest>
-                <j2seproject1:attribute name="Main-Class" value="${main.class}"/>
-            </j2seproject1:manifest>
-        </j2seproject1:jar>
-    </target>
-    <target name="applet_jar" depends="init,compile,-pre-jar,-do-jar-with-manifest,-do-jar-without-manifest,-do-jar-with-mainclass" description="Create applet."/>
+	
 
-    <target name="signed-applet" id="signed-applet" description="Create self-signed applet.">
-    <signjar jar="${dist.dir}/jspecview.jar"
-             signedjar="${dist.dir}/Sjspecview.jar"
-             keystore="${certificate.dir}/JSVcertificate.store"
-             storepass="JSV2007" alias="JSVcertificate" />
-      </target>
-    
-    <!---
-     ======================
-     Build with External Files
-     ======================
-     -->
-     <target name="CreateApplicationJar" depends="init,compile,-do-jar-with-manifest,-do-jar-with-mainclass" description="Build Standalone Application." >
-	 <jar destfile="${dist.dir}/JSVApp.jar">
-		<zipfileset dir="${build.classes.dir}" prefix="" />
-		<zipfileset src="${libs.Velocity.classpath}" />
-		<zipfileset src="${libs.Xerces.classpath}" />
-		<zipfileset src="${libs.XMLParser.classpath}" />
-		<zipfileset src="${libs.JSR173.classpath}" />
-		<zipfileset src="${libs.Stax.classpath}" />
-        <manifest> 
-			<attribute name="Main-Class" value="${main.class}" />
-		</manifest>
-	 </jar>
-        <copy todir="${dist.dir}">
-            <fileset dir="${extras.dir}"/>
-        </copy>
-     </target>
-    <!--
+   	<!--
     =================
     EXECUTION SECTION
     =================
@@ -406,7 +403,9 @@ is divided into following sections:
             <sourcepath>
                 <pathelement location="${src.dir}"/>
             </sourcepath>
-            <fileset dir="${src.dir}"/>
+            <fileset dir="${src.dir}">
+          	    <include name="**/*.java"/>
+             </fileset>
         </javadoc>
     </target>
     <target name="-javadoc-browse" if="netbeans.home" unless="no.javadoc.preview" depends="init,-javadoc-build">
@@ -520,12 +519,10 @@ is divided into following sections:
     -->
     <target name="deps-clean" depends="init" unless="no.deps"/>
     <target name="-do-clean" depends="init">
-        <delete> 
+        <delete quiet="true"> 
            <fileset dir ="${build.dir}" includes= "**/*.class" />
-        </delete>
-        <delete>
-           <fileset dir="${dist.dir}" includes= "*.jar" />
-        </delete>
+           <fileset dir="${build.dir}" includes= "*.jar" />
+         </delete>
     </target>
     <target name="clean" depends="init,deps-clean,-do-clean" description="Clean build products."/>
 </project>
