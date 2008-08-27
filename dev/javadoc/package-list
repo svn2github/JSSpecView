@@ -2,6 +2,7 @@ jspecview.applet
 jspecview.application
 jspecview.common
 jspecview.exception
+jspecview.export
+jspecview.source
 jspecview.util
-jspecview.xml
 mdidesktop
