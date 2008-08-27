@@ -2147,8 +2147,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
       filter.setDescription("JCAMP-DX Files");
       name += ".jdx";
     } else {
-      if (comm.equals("AnIML"))
-        comm = "AML";
+      if (comm.toLowerCase().indexOf("iml") >= 0 || comm.toLowerCase().indexOf("aml") >= 0)  
+        comm = "XML";
       filter.addExtension(comm);
       filter.setDescription(comm + " Files");
       name += "." + comm.toLowerCase();
@@ -2205,7 +2205,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
         (new SVGExporter()).exportAsSVG(file.getAbsolutePath(), this, index,
             true);
       } else {
-        (new Exporter()).export(comm, file.getAbsolutePath(), spec, startIndex,
+         Exporter.export(comm, file.getAbsolutePath(), spec, startIndex,
             endIndex);
       }
     } catch (IOException ioe) {
@@ -2271,13 +2271,13 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
     saveAsJDXMenu.setText("JDX");
     exportAsMenu.setText("Export As");
     addMenuItem(saveAsJDXMenu, "XY", actionListener);
+    addMenuItem(saveAsJDXMenu, "DIF", actionListener);
     addMenuItem(saveAsJDXMenu, "FIX", actionListener);
     addMenuItem(saveAsJDXMenu, "PAC", actionListener);
     addMenuItem(saveAsJDXMenu, "SQZ", actionListener);
-    addMenuItem(saveAsJDXMenu, "DIF", actionListener);
     saveAsMenu.add(saveAsJDXMenu);
-    addMenuItem(saveAsMenu, "AnIML", actionListener);
     addMenuItem(saveAsMenu, "CML", actionListener);
+    addMenuItem(saveAsMenu, "XML (AnIML)", actionListener);
     addMenuItem(exportAsMenu, "JPG", actionListener);
     addMenuItem(exportAsMenu, "PNG", actionListener);
     addMenuItem(exportAsMenu, "SVG", actionListener);

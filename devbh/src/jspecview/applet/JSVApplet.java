@@ -71,8 +71,6 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import jspecview.api.ExporterInterface;
-import jspecview.api.Interface;
 import jspecview.common.Coordinate;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVPanel;
@@ -82,6 +80,7 @@ import jspecview.common.PrintLayoutDialog;
 import jspecview.common.TransmittanceAbsorbanceConverter;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
+import jspecview.export.Exporter;
 import jspecview.source.BlockSource;
 import jspecview.source.CompoundSource;
 import jspecview.source.JDXSource;
@@ -1533,11 +1532,7 @@ public class JSVApplet extends JApplet {
     String errMsg = null;
     try{
       JDXSpectrum spec = (JDXSpectrum)selectedJSVPanel.getSpectrumAt(n);
-      ExporterInterface exporter = (ExporterInterface) Interface
-          .getOptionInterface("jspecview.export.Exporter");
-      if (exporter == null)
-        return null;
-      errMsg = exporter.export(comm, (file == null ? null : file.getAbsolutePath()), spec, 
+      errMsg = Exporter.export(comm, (file == null ? null : file.getAbsolutePath()), spec, 
           0, spec.getXYCoords().length - 1);
     }
     catch(IOException ioe){

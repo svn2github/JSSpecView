@@ -447,20 +447,10 @@ public class MainFrame
     fc.setFileFilter(filter);
     
     filter = new JSpecViewFileFilter();
-    filter.addExtension("aml");
-    filter.setDescription("anIML Files");
-    fc.setFileFilter(filter);
-
-    filter = new JSpecViewFileFilter();
-    filter.addExtension("cml");
-    filter.setDescription("CML Files");
-    fc.setFileFilter(filter);
-
-    filter = new JSpecViewFileFilter();
     filter.addExtension("xml");
     filter.addExtension("aml");
     filter.addExtension("cml");
-    filter.setDescription("all XML Files");
+    filter.setDescription("CML/XML Files");
     fc.setFileFilter(filter);
   }
 
