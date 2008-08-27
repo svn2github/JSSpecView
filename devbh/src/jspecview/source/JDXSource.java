@@ -19,8 +19,6 @@
 
 package jspecview.source;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -28,9 +26,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
-
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
 
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSpecViewUtils;
@@ -108,6 +103,7 @@ public abstract class JDXSource {
   public static Object createJDXSource(String sourceContents, String filePath,
                                        URL appletDocumentBase) {
     InputStream in = null;
+    System.out.println("createJDXSource " + filePath + " " + sourceContents + " " + appletDocumentBase);
     if (filePath != null) {
       Object ret = FileManager.getInputStream(filePath, true,
           appletDocumentBase);

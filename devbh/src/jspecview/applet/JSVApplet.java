@@ -85,6 +85,7 @@ import jspecview.source.BlockSource;
 import jspecview.source.CompoundSource;
 import jspecview.source.JDXSource;
 import jspecview.source.NTupleSource;
+import jspecview.util.Logger;
 import netscape.javascript.JSObject;
 import jspecview.common.Visible;
 
@@ -350,22 +351,27 @@ public class JSVApplet extends JApplet {
     boolean continuous = false;
     String Xunits = "", Yunits = "";
     double firstX = 0, lastX = 0;
+    System.out.println("applet: " + filePath);
+    URL base = null;
     if (data != null) {
     } else if (filePath != null) {
       URL url;
       try {
         url = new URL(getCodeBase(), filePath);
+        System.out.println("applet: " + url);
+        fileName = url.toString();
+        recentFileName = url.getFile();
+        base = getDocumentBase();
       } catch (MalformedURLException e) {
-        writeStatus(e.getMessage());
-        return;
+        System.out.println("problem: " + e.getMessage());
+        fileName = filePath;
       }
-      fileName = url.getPath();
-      recentFileName = url.getFile();
     } else {
       writeStatus("Please set the 'filepath' or 'load file' parameter");
       return;
     }
-    Object ret = JDXSource.createJDXSource(data, fileName, getDocumentBase());
+    Object ret = JDXSource.createJDXSource(data, fileName, base);
+    System.out.println(ret);
     if (ret instanceof String) {
       writeStatus((String) ret);
       return;
@@ -1835,11 +1841,15 @@ public class JSVApplet extends JApplet {
     }
  }
 
+  public void setFilePath(String tmpFilePath){
+    executeCommandAsThread("load " + tmpFilePath);
+  }
+  
   /**
    * Loads a new file into the existing applet window
    * @param tmpFilePath String
   */
-  public void setFilePath(String tmpFilePath){
+  void setFilePathLocal(String tmpFilePath){
      getContentPane().removeAll();
      appletPanel.removeAll();
      newFilePath = tmpFilePath;
@@ -2034,5 +2044,38 @@ public class JSVApplet extends JApplet {
     }
 
   }
+
+  class ExecuteCommandThread extends Thread {
+
+    String strCommand;
+    ExecuteCommandThread (String command) {
+      strCommand = command;
+      this.setName("ExecuteCommandThread");
+    }
+    
+    @Override
+    public void run() {
+      System.out.println("command thread: " + strCommand);
+      try {
+        if (strCommand.startsWith("load "))
+        setFilePathLocal(strCommand.substring(5));
+      } catch (Exception ie) {
+        Logger.error("execution command interrupted!",ie);
+      }
+    }
+  }
+   
+  ExecuteCommandThread execThread;
+  void executeCommandAsThread(String strCommand){ 
+    if (strCommand.length() > 0) {
+      execThread = new ExecuteCommandThread(strCommand);
+      execThread.start();
+      //can't do this: 
+      //SwingUtilities.invokeLater(execThread);
+      //because then the thread runs from the event queue, and that 
+      //causes PAUSE to hang the application on refresh()
+    }
+  }
+
 
 }

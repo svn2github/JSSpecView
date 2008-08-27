@@ -215,16 +215,18 @@ public class FileManager {
         URL url = (isApplet ? new URL(appletDocumentBase, name) : new URL(name));
         name = url.toString();
         if (showMsg)
-          Logger.info("FileIO opening " + url.toString());
+          Logger.info("FileManager opening URL " + url.toString());
         URLConnection conn = url.openConnection();
         length = conn.getContentLength();
         in = conn.getInputStream();
       } else {
         if (showMsg)
-          Logger.info("FileIO opening " + name);
+          Logger.info("FileManager opening file " + name);
         File file = new File(name);
+        System.out.println(file);
         length = (int) file.length();
         in = new FileInputStream(file);
+        System.out.println(in);
       }
       return new MonitorInputStream(in, length);
     } catch (Exception e) {
