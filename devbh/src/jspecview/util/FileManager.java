@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2007 The University of the West Indies
+/* Copyright (c) 2002-2008 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  * Author: Bob Hanson (hansonr@stolaf.edu) and Jmol developers -- 2008
@@ -37,21 +37,21 @@ import java.util.zip.ZipInputStream;
 
 public class FileManager {
 
-  
+
   private URL appletDocumentBase = null;
   private String openErrorMessage;
 
   /**
    * From org.jmol.viewer.FileManager
-   * 
-   * @param appletDocumentBase 
-   * 
+   *
+   * @param appletDocumentBase
+   *
    */
-  
+
   public FileManager (URL appletDocumentBase) {
     this.appletDocumentBase = appletDocumentBase;
   }
-  
+
   public String getFileAsString(String name) {
     String[] data = new String[2];
     data[0] = name;
@@ -59,7 +59,7 @@ public class FileManager {
     getFileDataOrErrorAsString(data);
     return data[1];
   }
-  
+
   public boolean getFileDataOrErrorAsString(String[] data) {
     data[1] = "";
     String name = data[0];
@@ -153,12 +153,12 @@ public class FileManager {
     }
     return -1;
   }
-  
+
   Object getUnzippedBufferedReaderOrErrorMessageFromName(String name,
                                                          boolean allowZipStream,
                                                          boolean isTypeCheckOnly) {
     String[] subFileList = null;
-    if (name.indexOf("|") >= 0) 
+    if (name.indexOf("|") >= 0)
       name = (subFileList = TextFormat.split(name, "|"))[0];
     Object t = getInputStreamOrErrorMessageFromName(name, true);
     if (t instanceof String)
@@ -171,7 +171,7 @@ public class FileManager {
       } else if (ZipUtil.isZipFile(is)) {
         if (allowZipStream)
           return new ZipInputStream(bis);
-        //danger -- converting bytes to String here. 
+        //danger -- converting bytes to String here.
         //we lose 128-156 or so.
         String s = (String) ZipUtil.getZipFileContents(is, subFileList, 1);
         is.close();
@@ -188,9 +188,9 @@ public class FileManager {
   }
 
   Object getInputStreamOrErrorMessageFromName(String name, boolean showMsg) {
-    return getInputStream(name, showMsg, appletDocumentBase);    
+    return getInputStream(name, showMsg, appletDocumentBase);
   }
-  
+
   static boolean isGzip(InputStream is) throws Exception {
     byte[] abMagic = new byte[4];
     is.mark(5);
@@ -247,7 +247,7 @@ public class FileManager {
     }
     return url;
   }
-  
+
   public String getResourceString(Object object, String name, boolean flagError) {
     URL url = getResource(object, name, flagError);
     if (url == null) {

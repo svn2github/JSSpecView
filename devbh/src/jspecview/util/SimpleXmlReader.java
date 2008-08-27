@@ -1,4 +1,4 @@
-/* Copyright (c) 2007 The University of the West Indies
+/* Copyright (c) 2007-2008 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -28,14 +28,14 @@ import java.util.Hashtable;
 public class SimpleXmlReader {
 
   /*
-   * A simple very light-weight XML reader 
+   * A simple very light-weight XML reader
    * See AnIMLSource.java and CMLSource.java for implementation.
-   * 
-   *  Bob Hanson hansonr@stolaf.edu  8/22/2008 
-   * 
-   * 
+   *
+   *  Bob Hanson hansonr@stolaf.edu  8/22/2008
+   *
+   *
    */
-  
+
   private XmlEvent thisEvent = new XmlEvent(TAG_NONE);
   private Buffer buffer;
 
@@ -50,14 +50,14 @@ public class SimpleXmlReader {
   public SimpleXmlReader(InputStream in) {
     buffer = new Buffer(in);
   }
-  
+
   public String getBufferData() {
     return (buffer == null ? null : buffer.data.substring(0, buffer.ptr));
   }
 
   /**
    * for value without surrounding tag
-   * 
+   *
    * @return value
    * @throws IOException
    */
@@ -67,7 +67,7 @@ public class SimpleXmlReader {
 
   /**
    * for &lt;xxxx&gt; value &lt;/xxxx&gt;
-   * 
+   *
    * @return value
    * @throws IOException
    */
@@ -140,7 +140,7 @@ public class SimpleXmlReader {
     Attribute a = getAttr(name);
     return (a == null ? "" : a.toString().toLowerCase());
   }
-  
+
   public String getCharacters() throws IOException {
     StringBuffer sb = new StringBuffer();
     thisEvent = buffer.peek();
@@ -156,7 +156,7 @@ public class SimpleXmlReader {
     }
     return sb.toString();
   }
-  
+
 
   class Buffer extends DataString {
 
@@ -232,7 +232,7 @@ public class SimpleXmlReader {
     int getNCharactersRemaining() {
       return ptEnd - ptr;
     }
-    
+
     protected void flush() {
       if (data.length() < 1000 || ptEnd - ptr > 100)
         return;
@@ -266,9 +266,9 @@ public class SimpleXmlReader {
       int ptEnd1 = ptEnd - 1;
       while (ptr < ptEnd && (ch = data.charAt(ptr)) != toWhat) {
         if (inQuotes && ch == '\\' && ptr < ptEnd1) {
-          // must escape \" by skipping the quote and 
-          // must escape \\" by skipping the second \ 
-          if ((ch = data.charAt(ptr + 1)) == '"' || ch == '\\') 
+          // must escape \" by skipping the quote and
+          // must escape \\" by skipping the second \
+          if ((ch = data.charAt(ptr + 1)) == '"' || ch == '\\')
             ptr++;
         } else if (ch == '"') {
           ptr++;
@@ -353,14 +353,14 @@ public class SimpleXmlReader {
     public String getAttrValue(String name) {
       Attribute a = getAttributeByName(name);
       return (a == null ? "" : a.getValue());
-    }    
+    }
 
     public Attribute getAttributeByName(String name) {
       return (tag == null ? null : tag.getAttributeByName(name));
     }
 
 }
-  
+
   class Tag {
     int tagType;
     String name;
