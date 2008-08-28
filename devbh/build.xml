@@ -403,7 +403,9 @@ is divided into following sections:
             <sourcepath>
                 <pathelement location="${src.dir}"/>
             </sourcepath>
-            <fileset dir="${src.dir}"/>
+            <fileset dir="${src.dir}">
+            	  <include name="**/*.java"/>
+             </fileset>
         </javadoc>
     </target>
     <target name="-javadoc-browse" if="netbeans.home" unless="no.javadoc.preview" depends="init,-javadoc-build">
