@@ -100,6 +100,12 @@ import jspecview.common.Visible;
  */
 
 public class JSVApplet extends JApplet {
+  
+  @Override
+  public void finalize() {
+    System.out.println("finalize JSpecView applet " + this);   
+  }
+
   public static final String APPLET_VERSION = "1.0.20080804-2030";
 
   /* --------------------set default-PARAMETERS -------------------------*/
@@ -240,13 +246,25 @@ public class JSVApplet extends JApplet {
   }
   //"ADDHIGHLIGHT", "REMOVEHIGHLIGHT", "REMOVEALLHIGHTLIGHTS"
 
- @Override
- public void destroy() {
-   if (commandWatcherThread != null) {
-     commandWatcherThread.interrupt();
-     commandWatcherThread = null;
-   }
- }
+  @Override
+  public void destroy() {
+    System.out.println("JSVApplet " + this + " destroy 1");
+    if (commandWatcherThread != null) {
+      commandWatcherThread.interrupt();
+      commandWatcherThread = null;
+    }
+    if (jsvPanels != null) {
+      for (int i = 0; i < jsvPanels.length; i++)
+        if (jsvPanels[i] != null) {
+          jsvPanels[i].destroy();
+          jsvPanels[i] = null;
+        }
+    }
+    if (tempJSVP != null)
+      tempJSVP.destroy();
+    tempJSVP = null;
+    System.out.println("JSVApplet " + this + " destroy 2");
+  }
  
  /**
    * Do we have new parameters passed from a javascript call?
@@ -652,7 +670,7 @@ public class JSVApplet extends JApplet {
       initProperties(jsvp);
 
       // add listeners
-      jsvp.addMouseListener(new JSVPanelMouseListener());
+      jsvp.addNewMouseListener(new JSVPanelMouseListener());
       selectedJSVPanel = jsvp;
 
     } else {
@@ -670,7 +688,7 @@ public class JSVApplet extends JApplet {
           initProperties(jsvp);
 
           // add listeners
-          jsvp.addMouseListener(new JSVPanelMouseListener());
+          jsvp.addNewMouseListener(new JSVPanelMouseListener());
         }
       } catch (Exception e) {
         // TODO
@@ -1454,7 +1472,7 @@ public class JSVApplet extends JApplet {
 
       initProperties(jsvp);
       solColMenuItem.setEnabled(true);
-      jsvp.addMouseListener(new JSVPanelMouseListener());
+      jsvp.addNewMouseListener(new JSVPanelMouseListener());
       jsvp.repaint();
 
       //  now need to validate and repaint
@@ -1462,6 +1480,8 @@ public class JSVApplet extends JApplet {
       repaint();
 
   }
+
+  JSVPanelMouseListener tempMouseListener;
 
   /**
      * Allows Integration of an HNMR spectrum
@@ -1483,8 +1503,7 @@ public class JSVApplet extends JApplet {
 
       initProperties(tempJSVP);
       tempJSVP.repaint();
-      tempJSVP.addMouseListener(new JSVPanelMouseListener());
-
+      tempJSVP.addNewMouseListener(new JSVPanelMouseListener());
       chooseContainer();
     }
 

@@ -96,6 +96,11 @@ import org.w3c.dom.DOMImplementation;
  */
 public class JSVPanel extends JPanel implements Printable, MouseListener, MouseMotionListener{
 
+  @Override
+  public void finalize() {
+    System.out.println("finalize JSVPanel " + this);  
+  }
+
   // The list of spectra
   private Graph[] spectra;
 
@@ -241,6 +246,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
 //  private int letter_pix_width = 468;
 
   public JSVPanel() {
+    System.out.println("initlize JSVPanel " + this);  
     setDefaultMouseListener(this);
     setDefaultMouseMotionListener(this);
   }
@@ -457,8 +463,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
   public void setDefaultMouseListener(MouseListener listener){
     if (defaultMouseListener != null)
       removeMouseListener(defaultMouseListener);
-    addMouseListener(listener);
-    defaultMouseListener = listener;
+    addMouseListener(defaultMouseListener = listener);
   }
 
   /**
@@ -468,8 +473,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
   public void setDefaultMouseMotionListener(MouseMotionListener listener){
     if (defaultMouseMotionListener != null)
       removeMouseMotionListener(defaultMouseMotionListener);
-    addMouseMotionListener(listener);
-    defaultMouseMotionListener = listener;
+    addMouseMotionListener(defaultMouseMotionListener = listener);
   }
 
   /**
@@ -478,6 +482,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
   public void removeDefaultMouseListener(){
     if (defaultMouseListener != null)
       removeMouseListener(defaultMouseListener);
+    defaultMouseListener = null;
   }
 
   /**
@@ -486,6 +491,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
   public void removeDefaultMouseMotionListener(){
     if (defaultMouseMotionListener != null)
       removeMouseMotionListener(defaultMouseMotionListener);
+    defaultMouseMotionListener = null;
   }
 
 
@@ -2291,5 +2297,18 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
     m.add(jmi);
   }
 
+  public void destroy() {
+    removeDefaultMouseListener();
+    removeDefaultMouseMotionListener();
+    if (thisMouseListener != null) {
+      removeMouseListener(thisMouseListener);
+      thisMouseListener = null;
+    }
+  }
 
+  private MouseListener thisMouseListener;
+  
+  public void addNewMouseListener(MouseListener listener) {
+   thisMouseListener = listener;
+  }
 }

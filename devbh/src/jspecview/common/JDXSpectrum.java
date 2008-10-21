@@ -34,6 +34,12 @@ import java.util.Iterator;
  * @author Prof Robert J. Lancashire
  */
 public class JDXSpectrum implements Graph{
+  
+  @Override
+  public void finalize() {
+    System.out.println("finalize JDXSPectrum " + this);  
+  }
+
   //private JDXSource parentSource;
   /**
    * HashMap of optional header values
@@ -92,6 +98,7 @@ public class JDXSpectrum implements Graph{
    * Constructor
    */
   public JDXSpectrum(){
+    System.out.println("initlize JDXSPectrum " + this);  
     headerTable = new HashMap<String, String>();
     xyCoords = new Coordinate[0];
   }
