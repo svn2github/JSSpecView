@@ -96,6 +96,10 @@ import org.w3c.dom.DOMImplementation;
  */
 public class JSVPanel extends JPanel implements Printable, MouseListener, MouseMotionListener{
 
+	  public void finalize() {
+			System.out.println("JSVPanel " + this + " finalized");  
+		  }
+
   // The list of spectra
   private Graph[] spectra;
 
@@ -241,6 +245,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
 //  private int letter_pix_width = 468;
 
   public JSVPanel() {
+    System.out.println("JSVPanel " + this + " initialized");  
     setDefaultMouseListener(this);
     setDefaultMouseMotionListener(this);
   }

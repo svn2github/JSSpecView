@@ -100,6 +100,12 @@ import jspecview.common.Visible;
  */
 
 public class JSVApplet extends JApplet {
+	
+	  public void finalize() {
+			System.out.println("JSpecView " + this + " finalized");  
+		  }
+		  
+
   public static final String APPLET_VERSION = "1.0.20080827-0600";
 
   /* --------------------set default-PARAMETERS -------------------------*/
@@ -319,6 +325,7 @@ public class JSVApplet extends JApplet {
    */
   @Override
   public void init() {
+      System.out.println("JSVApplet " + this + " initialized");  
 	  init(null);
   }
 
