@@ -2309,6 +2309,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
   private MouseListener thisMouseListener;
   
   public void addNewMouseListener(MouseListener listener) {
-   thisMouseListener = listener;
+    addMouseListener(thisMouseListener = listener);
   }
 }

@@ -73,6 +73,7 @@ import javax.swing.event.ChangeListener;
 
 import jspecview.common.Coordinate;
 import jspecview.common.JDXSpectrum;
+import jspecview.common.JSVConstants;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSpecViewUtils;
 import jspecview.common.OverlayLegendDialog;
@@ -128,8 +129,6 @@ public class JSVApplet extends JApplet {
   int numberOfSpectra;
 
   String theInterface="single"; // either tab, tile, single, overlay
-  String coordCallbackFunctionName=null; // = "coordCallBack";
-  String peakCallbackFunctionName=null; // peakCallback
   String sltnclr="255,255,255"; //Colour of Solution
 
   Color titleColor=Color.BLACK;
@@ -211,7 +210,8 @@ public class JSVApplet extends JApplet {
      "PLOTCOLORS", 
      "VERSION", 
      "PEAKCALLBACKFUNCTIONNAME", 
-     "IRMODE"
+     "IRMODE",
+     "CALLBACK"
      };
   
   final private static int PARAM_LOAD = 0;
@@ -238,13 +238,13 @@ public class JSVApplet extends JApplet {
   final private static int PARAM_VERSION = 21;
   final private static int PARAM_PEAKCALLBACKFUNCTIONNAME = 22;
   final private static int PARAM_IRMODE = 23;
+  final private static int PARAM_CALLBACK = 24;
   
   final private static Hashtable<String, Integer> htParams = new Hashtable<String, Integer>();
   {
     for (int i = 0; i < params.length; i++)
       htParams.put(params[i], new Integer(i));
   }
-  //"ADDHIGHLIGHT", "REMOVEHIGHLIGHT", "REMOVEALLHIGHTLIGHTS"
 
   @Override
   public void destroy() {
@@ -318,6 +318,12 @@ public class JSVApplet extends JApplet {
    */
   boolean overlay;
 
+  /**
+   * name parameter
+   */
+  
+  //private String htmlName;
+  private boolean mayScript;
   
   String irMode;
   
@@ -341,6 +347,10 @@ public class JSVApplet extends JApplet {
   }
 
   private void init(String data) {
+    //htmlName = getParameter("name");
+    String ms = getParameter("mayscript");
+    mayScript = (ms != null) && (!ms.equalsIgnoreCase("false"));
+
     if (data != null) {
 
     } else if (!newFile) {
@@ -381,6 +391,7 @@ public class JSVApplet extends JApplet {
     System.out.println("applet: " + filePath);
     URL base = null;
     if (data != null) {
+      fileName = "inline data";
     } else if (filePath != null) {
       URL url;
       try {
@@ -398,9 +409,9 @@ public class JSVApplet extends JApplet {
       return;
     }
     Object ret = JDXSource.createJDXSource(data, fileName, base);
-    System.out.println(ret);
     if (ret instanceof String) {
       writeStatus((String) ret);
+      notifyCallback(JSVConstants.CALLBACK_LOADSPECTRUM, new Object[] {"ERROR", ret});
       return;
     }
     source = (JDXSource) ret;
@@ -454,6 +465,8 @@ public class JSVApplet extends JApplet {
     exportAsMenu.setEnabled(true);
     saveAsJDXMenu.setEnabled(continuous);
     newFile = false;
+    notifyCallback(JSVConstants.CALLBACK_LOADSPECTRUM, new Object[] {"LOAD OK" , recentFileName});
+    notifyCallback(JSVConstants.CALLBACK_APPLETREADY, null);
   }
 
   /**
@@ -956,43 +969,10 @@ public class JSVApplet extends JApplet {
      * @param e the MouseEvent
      */
     @Override
-    public void mouseClicked(MouseEvent e){
-      JSVPanel jsvPanel = (JSVPanel)e.getSource();
-      selectedJSVPanel = jsvPanel;
-
-      if (peakCallbackFunctionName != null) {
-        Coordinate coord = jsvPanel.getClickedCoordinate();
-        int store = 0;
-        double xPt = coord.getXVal();
-
-        if(coord != null) {
-
-          JDXSpectrum spectrum = (JDXSpectrum)selectedJSVPanel.getSpectrumAt(0);
-          for (int i = 0; i < spectrum.getXYCoords().length; i++) {
-            if (spectrum.getXYCoords()[i].getXVal() > xPt) {
-              store = i;
-              break;
-            }
-          }
-
-          double actualXPt = spectrum.getXYCoords()[store].getXVal();
-          double actualYPt = spectrum.getXYCoords()[store].getYVal();
-
-          DecimalFormat displayXFormatter = new DecimalFormat("0.000000", new DecimalFormatSymbols(java.util.Locale.US ));
-          DecimalFormat displayYFormatter = new DecimalFormat("0.000000", new DecimalFormatSymbols(java.util.Locale.US ));
-
-          String actualXCoordStr = displayXFormatter.format(actualXPt);
-          String actualYCoordStr = displayYFormatter.format(actualYPt);
-          Coordinate actualCoord = new Coordinate(Double.parseDouble(actualXCoordStr), Double.parseDouble(actualYCoordStr) );
-
-          callToJavaScript(peakCallbackFunctionName, coord.getXVal() + ", " + coord.getYVal() + ", " + actualCoord.getXVal() + ", " + actualCoord.getYVal() + ", " + (currentSpectrumIndex + 1));
-        }
-      }
-      else if(coordCallbackFunctionName != null){
-        Coordinate coord = jsvPanel.getClickedCoordinate();
-        if(coord != null)
-          callToJavaScript(coordCallbackFunctionName, coord.getXVal() + ", " + coord.getYVal());
-      }
+    public void mouseClicked(MouseEvent e) {
+      selectedJSVPanel = (JSVPanel) e.getSource();
+      if (!notifyCallback(JSVConstants.CALLBACK_PEAK, null))
+      notifyCallback(JSVConstants.CALLBACK_COORD, null);
     }
 
     /**
@@ -1951,22 +1931,6 @@ public class JSVApplet extends JApplet {
   }
 
   /**
-   * Calls a javascript function given by the function name
-   * passing to it the string prarmeters as arguments
-   * @param function the javascript function name
-   * @param parameters the function arguments as a string in the form "x, y, z..."
-   */
-  public void callToJavaScript(String function, String parameters) {
-    try {
-      JSObject win = JSObject.getWindow(this);
-      win.eval(function + "(" + parameters + ")");
-    }
-    catch (Exception npe) {
-      System.out.println("EXCEPTION-> " + npe.getMessage());
-    }
-  }
-
-  /**
    * Parses the javascript call parameters and executes them accordingly
    * @param params String
    */
@@ -1988,15 +1952,29 @@ public class JSVApplet extends JApplet {
         key = eachParam.nextToken();
       key = key.toUpperCase();
       String value = eachParam.nextToken();
+      String key2 = null;
 
       if (JSpecViewUtils.DEBUG) {
         System.out.println("KEY-> " + key + " VALUE-> " + value);
       }
-
-      Integer iparam = (Integer) htParams.get(key);
+      int iparam = key.indexOf("CALLBACK");
+      if (iparam == 0) {
+        // set callback type value
+        key = "CALLBACK";
+        key2 = value;
+        value = eachParam.nextToken();
+      } else if (iparam > 0){
+        // set typeCallback value 
+        key2 = key;
+        key = "CALLBACK";
+      }
+      iparam = (htParams.containsKey(key) ? ((Integer) htParams.get(key)).intValue() : -1);
       try {
-        switch (iparam == null ? -1 : iparam.intValue()) {
+        switch (iparam) {
         case -1:
+          break;
+        case PARAM_CALLBACK:
+          setCallbackFunction(key2, value);
           break;
         case PARAM_LOAD:
           filePath = value;
@@ -2011,9 +1989,8 @@ public class JSVApplet extends JApplet {
           gridOn = Boolean.parseBoolean(value);
           break;
         case PARAM_COORDCALLBACKFUNCTIONNAME:
-          coordCallbackFunctionName = value;
+          setCallbackFunction("coordCallback", value);
           break;
-
         case PARAM_SPECTRUMNUMBER:
           spectrumNumber = Integer.parseInt(value);
         case PARAM_INTERFACE:
@@ -2063,8 +2040,7 @@ public class JSVApplet extends JApplet {
           unitsColor = JSpecViewUtils.getColorFromString(value);
           break;
         case PARAM_PEAKCALLBACKFUNCTIONNAME:
-          peakCallbackFunctionName = value;
-          break;
+          setCallbackFunction("peakCallback", value);
         case PARAM_PLOTCOLORS:
         case PARAM_VERSION:
           break;
@@ -2127,4 +2103,114 @@ public class JSVApplet extends JApplet {
       commandWatcherThread.interrupt();
   }
 
+  /// JSVStatusListener interface
+  
+  Hashtable<String,String> callbacks = new Hashtable<String,String>();
+  
+ String getCallback(int i) {
+    return callbacks.get(JSVConstants.getCallbackName(i));
+  }
+
+  public void setCallbackFunction(String callbackName, String callbackFunction) {
+    //also serves to change language for callbacks and menu
+    callbackName = JSVConstants.getCallbackName(callbackName);
+    if (callbackName == null) {
+      System.out.println("no such callback name: " + callbackName);
+      return;
+    }
+    if (callbackFunction == null || callbackFunction.length() == 0)
+      callbacks.remove(callbackName);
+    else          
+      callbacks.put(callbackName, callbackFunction);
+    System.out.println("setCallbackFunction " + callbackName + " "  + callbackFunction);
+    return;
+  }
+
+  boolean haveNotifiedError = false;
+  
+  public boolean notifyCallback(int type, Object[] data) {
+    Coordinate coord;
+    String callback = getCallback(type);
+    System.out.println("notifyCallback " + JSVConstants.getCallbackName(type) + " " + callback );
+    boolean doCallback = (callback != null);
+    if (!doCallback || !mayScript)
+      return false;
+    boolean isAlert = callback.equals("alert");
+    String strInfo = null;
+
+    //System.out.println("Jmol.java notifyCallback " + type + " " + callback
+    //  + " " + strInfo);
+    switch (type) {
+    case JSVConstants.CALLBACK_APPLETREADY:
+      strInfo = "JSpecView applet ready";
+      break;
+    case JSVConstants.CALLBACK_LOADSPECTRUM:
+      strInfo = recentFileName;
+      break;
+    case JSVConstants.CALLBACK_PEAK:
+      coord = selectedJSVPanel.getClickedCoordinate();
+      if (coord == null)
+        return doCallback;
+      int store = 0;
+      double xPt = coord.getXVal();
+      JDXSpectrum spectrum = (JDXSpectrum) selectedJSVPanel.getSpectrumAt(0);
+      for (int i = 0; i < spectrum.getXYCoords().length; i++) {
+        if (spectrum.getXYCoords()[i].getXVal() > xPt) {
+          store = i;
+          break;
+        }
+      }
+      double actualXPt = spectrum.getXYCoords()[store].getXVal();
+      double actualYPt = spectrum.getXYCoords()[store].getYVal();
+
+      DecimalFormat displayXFormatter = new DecimalFormat("0.000000",
+          new DecimalFormatSymbols(java.util.Locale.US));
+      DecimalFormat displayYFormatter = new DecimalFormat("0.000000",
+          new DecimalFormatSymbols(java.util.Locale.US));
+
+      String actualXCoordStr = displayXFormatter.format(actualXPt);
+      String actualYCoordStr = displayYFormatter.format(actualYPt);
+      Coordinate actualCoord = new Coordinate(Double
+          .parseDouble(actualXCoordStr), Double.parseDouble(actualYCoordStr));
+      data = new Object[] { 
+          new Double(coord.getXVal()),
+          new Double(coord.getYVal()), 
+          new Double(actualCoord.getXVal()),
+          new Double(actualCoord.getYVal()),
+          new Integer(currentSpectrumIndex + 1) };
+      strInfo = "" + data[0] + ","+ data[1] + ","+ data[2] + ","+ data[3] + ","+ data[4];
+      break;
+    case JSVConstants.CALLBACK_COORD:
+      if ((coord = selectedJSVPanel.getClickedCoordinate()) == null)
+        return false;
+      data = new Object[] { new Double(coord.getXVal()),
+          new Double(coord.getYVal()) };
+      strInfo = "" + data[0] + ","+ data[1];
+      break;
+    case JSVConstants.CALLBACK_RESIZE:
+      break;
+    }
+    try {
+      JSObject jsoWindow = JSObject.getWindow(this);
+      if (isAlert)
+        jsoWindow.call(callback, new Object[] { strInfo });
+      else if (callback.length() > 0)
+        jsoWindow.call(callback, data);
+    } catch (Exception e) {
+      if (!haveNotifiedError)
+        if (Logger.debugging) {
+          Logger.debug(JSVConstants.getCallbackName(type) + " call error to "
+              + callback + ": " + e);
+        }
+      haveNotifiedError = true;
+    } catch (Error err) {
+      //if (Logger.debugging)
+        Logger.debug(JSVConstants.getCallbackName(type) + " call error to "
+            + callback + ": " + err);
+    }
+    return true;
+  }
+
+
+  
 }

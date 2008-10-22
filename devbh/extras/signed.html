@@ -26,6 +26,10 @@ function MyPeakCallBack(x1, y1, x2, y2, index) {
   alert("ACTUAL-> " + x1 + ", " + y1 + ", "+ x2 + ", "+ y2 + ", " + index);
 }
 
+function getVersion() {
+ document.getElementById("ver").innerHTML = document.getElementById("JSVApplet").getAppletVersion()
+}
+
 //]]>
 </script>
 </head>
@@ -38,7 +42,7 @@ The signed applet will appear below in a Java enabled browser. Try RIGHT-CLICK .
 
 <script language="javascript" type="text/javascript">
 //<![CDATA[
-  jsvls="load pclanilIR.jdx; interface single; reverseplot false; coordcallbackfunctionname MyDXCallback;";
+  jsvls="load pclanilIR.jdx; interface single; reverseplot false; set coordCallback MyDXCallback;set appletReadyCallback getVersion";
   insertJSVObject("Sjspecview.jar","JSVApplet","600","400",jsvls);
 //]]>
 </script>
@@ -47,7 +51,7 @@ The signed applet will appear below in a Java enabled browser. Try RIGHT-CLICK .
 
 <script language="javascript" type="text/javascript">
 //<![CDATA[
-// document.write("JSpecView version number is "+document.getElementById("JSVApplet").getAppletVersion());
+ document.write("JSpecView version number is <span id='ver'></span>");
  document.write('<br /><p>Created and maintained by ');
  document.write(author + '<br />');
  document.write(address1+ '<br />');

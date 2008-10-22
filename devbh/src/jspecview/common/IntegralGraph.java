@@ -63,14 +63,14 @@ public class IntegralGraph implements Graph {
   /**
    * value of the x Units. Necessary for the implementation of the
    * Graph interface
-   * @see jspecview.Graph
+   * @see Graph
    */
   private String xUnits = "Arbitrary Units";
 
   /**
    * value of the y Units. Necessary for the implementation of the
    * Graph interface
-   * @see jspecview.Graph
+   * @see Graph
    */
   private String yUnits = "Arbitrary Units";
 
@@ -237,7 +237,7 @@ public class IntegralGraph implements Graph {
   /**
    * Calulates the integral from the input <code>Graph</code>
    * @return the array of coordinates of the Integral
-   * @see jspecview.IntegralGraph#recalculate()
+   * @see IntegralGraph#recalculate()
    */
   private Coordinate[] calculateIntegral(){
     double totalIntegral = 0;

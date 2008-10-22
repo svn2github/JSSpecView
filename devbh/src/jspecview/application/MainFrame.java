@@ -2658,4 +2658,5 @@ public class MainFrame
       dtde.rejectDrop();
     }
   }
+  
 }
