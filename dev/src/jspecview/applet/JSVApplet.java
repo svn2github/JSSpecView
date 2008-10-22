@@ -99,14 +99,15 @@ import jspecview.common.Visible;
  * @author Prof Robert J. Lancashire
  */
 
-public class JSVApplet extends JApplet {
-	
-	  public void finalize() {
-			System.out.println("JSpecView " + this + " finalized");  
-		  }
-		  
 
-  public static final String APPLET_VERSION = "1.0.20080827-0600";
+public class JSVApplet extends JApplet {
+ 
+   @Override	
+   public void finalize() {
+    System.out.println("JSpecView " + this + " finalized");
+   }
+ 
+ public static final String APPLET_VERSION = "1.0.20081021-0815";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath;
@@ -202,7 +203,7 @@ public class JSVApplet extends JApplet {
      "COMPOUNDMENUON", 
      "BACKGROUNDCOLOR", 
      "COORDINATESCOLOR", 
-     "GRIDCOLOR", 
+     "GRIDCOLOR",
      "PLOTAREACOLOR", 
      "PLOTCOLOR", 
      "SCALECOLOR", 
@@ -247,13 +248,25 @@ public class JSVApplet extends JApplet {
   //"ADDHIGHLIGHT", "REMOVEHIGHLIGHT", "REMOVEALLHIGHTLIGHTS"
 
  @Override
- public void destroy() {
-   if (commandWatcherThread != null) {
-     commandWatcherThread.interrupt();
-     commandWatcherThread = null;
-   }
- }
- 
+  public void destroy() {
+    System.out.println("JSVApplet " + this + " destroy 1");
+    if (commandWatcherThread != null) {
+      commandWatcherThread.interrupt();
+      commandWatcherThread = null;
+    }
+    if (jsvPanels != null) {
+      for (int i = 0; i < jsvPanels.length; i++)
+        if (jsvPanels[i] != null) {
+          jsvPanels[i].destroy();
+          jsvPanels[i] = null;
+        }
+    }
+    if (tempJSVP != null)
+      tempJSVP.destroy();
+    tempJSVP = null;
+    System.out.println("JSVApplet " + this + " destroy 2");
+  }
+
  /**
    * Do we have new parameters passed from a javascript call?
    */
@@ -308,7 +321,7 @@ public class JSVApplet extends JApplet {
 
   
   String irMode;
-  
+
   /**
    * Returns a parameter value
    * @param key the parameter name
@@ -325,7 +338,6 @@ public class JSVApplet extends JApplet {
    */
   @Override
   public void init() {
-      System.out.println("JSVApplet " + this + " initialized");  
 	  init(null);
   }
 
@@ -1469,6 +1481,8 @@ public class JSVApplet extends JApplet {
       repaint();
 
   }
+  
+  JSVPanelMouseListener tempMouseListener;
 
   /**
      * Allows Integration of an HNMR spectrum
@@ -1491,7 +1505,6 @@ public class JSVApplet extends JApplet {
       initProperties(tempJSVP);
       tempJSVP.repaint();
       tempJSVP.addMouseListener(new JSVPanelMouseListener());
-
       chooseContainer();
     }
 
@@ -2031,7 +2044,7 @@ public class JSVApplet extends JApplet {
           break;
         case PARAM_COORDINATESCOLOR:
           coordinatesColor = JSpecViewUtils.getColorFromString(value);
-        case 175:
+          break;
         case PARAM_GRIDCOLOR:
           gridColor = JSpecViewUtils.getColorFromString(value);
           break;
@@ -2087,7 +2100,7 @@ public class JSVApplet extends JApplet {
           Thread.sleep(commandDelay);
           if (commandWatcherThread != null) {
             if (scriptQueue.size() > 0) {
-              String scriptItem = scriptQueue.remove(0);            
+              String scriptItem = scriptQueue.remove(0);
               System.out.println("executing " + scriptItem);
               if (scriptItem != null) {
                 setFilePathLocal(scriptItem);
