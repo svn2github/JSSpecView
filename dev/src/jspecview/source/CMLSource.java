@@ -114,7 +114,7 @@ public class CMLSource extends XMLSource {
       processPeakList();
       return true;
     default:
-      System.out.println("AnIMLSource not processing tag " + tagNames[tagId]
+      System.out.println("CMLSource not processing tag " + tagNames[tagId]
           + "!");
       // should not be here
       return false;
