@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2008 The University of the West Indies
+/* Copyright (c) 2002-2009 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -95,7 +95,7 @@ import jspecview.common.Visible;
  * JSpecView_Applet_Specification.html.
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
- * @author Craig Walters
+ * @author Craig A. D. Walters
  * @author Prof Robert J. Lancashire
  */
 
@@ -107,7 +107,7 @@ public class JSVApplet extends JApplet {
     System.out.println("JSpecView " + this + " finalized");
    }
  
- public static final String APPLET_VERSION = "1.0.20081231-1215";
+ public static final String APPLET_VERSION = "1.0.20090101-2045";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath;

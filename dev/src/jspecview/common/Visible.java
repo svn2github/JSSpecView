@@ -1,4 +1,4 @@
-/* Copyright (c) 2008 The University of the West Indies
+/* Copyright (c) 2008-2009 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -21,10 +21,10 @@
 // created July 2008 based on concept published by Darren L. Williams
 // in J. Chem. Educ., 84(11), 1873-1877, 2007
 //
+// Judd-Vos-modified 1931 CIE 2-deg color matching functions (1978)
 // The CIE standard observer functions were curve fitted using FitYK
 // and the equations used for these calculations. The values obtained
 // do not seem to vary appreciably from those published in the JChemEd article
-// University of the West Indies, Mona Campus
 
 package jspecview.common;
 
@@ -73,15 +73,15 @@ public class Visible {
     if((ind700 - ind400) >30 & firstX < 401 & lastX > 699){
 // treat the x-bar and CIE D65 curves in two parts with the changeover at 499 nm
       for (int i = ind400; i < ind499; i++) { //change over at 505nm or 19800cm-1
-        matrixx[ (i - ind400)] = 0.398385 * Math.exp( -0.00122291 * (Math.pow( (xyCoords[i].getXVal() - 444.508), 2)));
-        matrixy[ (i - ind400)] = 1.01041 * Math.exp( -0.000235236 * (Math.pow( (xyCoords[i].getXVal() - 556.123), 2)));
-        matrixz[ (i - ind400)] = 2.06600 * Math.exp( -0.000991635 * (Math.pow( (xyCoords[i].getXVal() - 448.587), 2)));
+        matrixx[ (i - ind400)] = 0.335681 * Math.exp( -0.000998224 * (Math.pow( (xyCoords[i].getXVal() - 441.96), 2)));
+        matrixy[ (i - ind400)] = 1.01832 * Math.exp( -0.00028466 * (Math.pow( (xyCoords[i].getXVal() - 559.04), 2)));
+        matrixz[ (i - ind400)] = 1.61148 * Math.exp( -0.00074331 * (Math.pow( (xyCoords[i].getXVal() - 447.183), 2)));
         matrixcie[(i - ind400)]= 115.195 * Math.exp( -8.33988E-05 * (Math.pow( (xyCoords[i].getXVal() - 472.727), 2)));
             }
       for (int i = ind499; i < ind700; i++) {
-        matrixx[ (i - ind400)] = 1.13062 * Math.exp( -0.000421759 * (Math.pow( (xyCoords[i].getXVal() - 593.229), 2)));
-        matrixy[ (i - ind400)] = 1.01041 * Math.exp( -0.000235236 * (Math.pow( (xyCoords[i].getXVal() - 556.123), 2)));
-        matrixz[ (i - ind400)] = 2.06600 * Math.exp( -0.000991635 * (Math.pow( (xyCoords[i].getXVal() - 448.587), 2)));
+        matrixx[ (i - ind400)] = 1.05583 * Math.exp( -0.00044156 * (Math.pow( (xyCoords[i].getXVal() - 596.124), 2)));
+        matrixy[ (i - ind400)] = 1.01832 * Math.exp( -0.00028466 * (Math.pow( (xyCoords[i].getXVal() - 559.04), 2)));
+        matrixz[ (i - ind400)] = 1.61148 * Math.exp( -0.00074331 * (Math.pow( (xyCoords[i].getXVal() - 447.183), 2)));
         matrixcie[(i - ind400)]= 433.199 * Math.exp( -7.02052E-07 * (Math.pow( (xyCoords[i].getXVal() + 891.867), 2)));
           }
       }else{
