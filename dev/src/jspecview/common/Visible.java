@@ -40,7 +40,7 @@ public class Visible {
   public static int blue = 399, red = 701, numVispoints;
   public static String Xunits="",Yunits, redv, greenv, bluev;
   static int RED = 0, BLUE = 0, GREEN = 0;
-  private static int ind400=0, ind499=0, ind700=0;
+  private static int ind400=0, ind437=0, ind499=0, ind700=0;
   public static double xspacing, firstX, lastX;
   //public static JDXSource source;
   //public static Color c;
@@ -62,6 +62,9 @@ public class Visible {
         if (xyCoords[i].getXVal() < 401) {
           ind400 = i;
         }
+        if (xyCoords[i].getXVal() < 438) {
+          ind437 = i;
+        }
         if (xyCoords[i].getXVal() < 500) {
           ind499 = i;
         }
@@ -72,17 +75,23 @@ public class Visible {
 
     if((ind700 - ind400) >30 & firstX < 401 & lastX > 699){
 // treat the x-bar and CIE D65 curves in two parts with the changeover at 499 nm
-      for (int i = ind400; i < ind499; i++) { //change over at 505nm or 19800cm-1
+      for (int i = ind400; i < ind437; i++) { 
         matrixx[ (i - ind400)] = 0.335681 * Math.exp( -0.000998224 * (Math.pow( (xyCoords[i].getXVal() - 441.96), 2)));
-        matrixy[ (i - ind400)] = 1.01832 * Math.exp( -0.00028466 * (Math.pow( (xyCoords[i].getXVal() - 559.04), 2)));
-        matrixz[ (i - ind400)] = 1.61148 * Math.exp( -0.00074331 * (Math.pow( (xyCoords[i].getXVal() - 447.183), 2)));
+        matrixy[ (i - ind400)] = 1.01832 * Math.exp( -0.000284660 * (Math.pow( (xyCoords[i].getXVal() - 559.04), 2)));
+        matrixz[ (i - ind400)] = 1.63045 * Math.exp( -0.001586000 * (Math.pow( (xyCoords[i].getXVal() - 437.406), 2)));
         matrixcie[(i - ind400)]= 115.195 * Math.exp( -8.33988E-05 * (Math.pow( (xyCoords[i].getXVal() - 472.727), 2)));
             }
-      for (int i = ind499; i < ind700; i++) {
+      for (int i = ind437; i < ind499; i++) { //change over at 437nm for z
+        matrixx[ (i - ind400)] = 0.335681 * Math.exp( -0.000998224 * (Math.pow( (xyCoords[i].getXVal() - 441.96), 2)));
+        matrixy[ (i - ind400)] = 1.01832 * Math.exp( -0.00028466 * (Math.pow( (xyCoords[i].getXVal() - 559.04), 2)));
+        matrixz[ (i - ind400)] = 1.63045 * Math.exp( -0.00043647 * (Math.pow( (xyCoords[i].getXVal() - 437.406), 2)));
+        matrixcie[(i - ind400)]= 115.195 * Math.exp( -8.33988E-05 * (Math.pow( (xyCoords[i].getXVal() - 472.727), 2)));
+                  }
+      for (int i = ind499; i < ind700; i++) { //change over at 500nm for x and CIE-D65
         matrixx[ (i - ind400)] = 1.05583 * Math.exp( -0.00044156 * (Math.pow( (xyCoords[i].getXVal() - 596.124), 2)));
         matrixy[ (i - ind400)] = 1.01832 * Math.exp( -0.00028466 * (Math.pow( (xyCoords[i].getXVal() - 559.04), 2)));
-        matrixz[ (i - ind400)] = 1.61148 * Math.exp( -0.00074331 * (Math.pow( (xyCoords[i].getXVal() - 447.183), 2)));
-        matrixcie[(i - ind400)]= 433.199 * Math.exp( -7.02052E-07 * (Math.pow( (xyCoords[i].getXVal() + 891.867), 2)));
+        matrixz[ (i - ind400)] = 1.63045 * Math.exp( -0.00043647 * (Math.pow( (xyCoords[i].getXVal() - 437.406), 2)));
+        matrixcie[(i - ind400)]= 208.375 - (0.195278 * (xyCoords[i].getXVal()));
           }
       }else{
       return null;
