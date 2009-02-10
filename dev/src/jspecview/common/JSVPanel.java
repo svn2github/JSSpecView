@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2008 The University of the West Indies
+/* Copyright (c) 2002-2009 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -24,6 +24,7 @@
 // 25-06-2007 rjl - bug in ReversePlot for non-continuous spectra fixed
 //                - previously, one point less than npoints was displayed
 // 25-06-2007 cw  - show/hide/close modified
+// 10-02-2009 cw  - adjust for non zero baseline in North South plots
 
 package jspecview.common;
 
@@ -92,6 +93,7 @@ import org.w3c.dom.DOMImplementation;
  * @see jspecview.common.Graph
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
+ * @author Craig A.D. Walters
  * @author Prof Robert J. Lancashire
  */
 public class JSVPanel extends JPanel implements Printable, MouseListener, MouseMotionListener{
@@ -1112,15 +1114,19 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
 
     if(drawPlotIncreasing){
      if(!spectra[index].isContinuous()){
-        for(int i = scaleData.startDataPointIndices[index]; i <= scaleData.endDataPointIndices[index]; i++){
-          Coordinate point = xyCoords[i];
-          int x1 = (int) (leftPlotAreaPos + (((point.getXVal())-scaleData.minXOnScale)/xFactorForScale));
-          int y1 = (int) (topPlotAreaPos);
-          int x2 = (int) (leftPlotAreaPos + (((point.getXVal())-scaleData.minXOnScale)/xFactorForScale));
-          int y2 = (int) (topPlotAreaPos + (((point.getYVal())-scaleData.minYOnScale)/yFactorForScale));
-          g.drawLine(x1, invertY(height, y1), x2, invertY(height, y2));
-        }
-      }
+         for(int i = scaleData.startDataPointIndices[index]; i <= scaleData.endDataPointIndices[index]; i++){
+             Coordinate point = xyCoords[i];
+             int x1 = (int) (leftPlotAreaPos + (((point.getXVal())-scaleData.minXOnScale)/xFactorForScale));
+             int y1 = (int) (topPlotAreaPos -scaleData.minYOnScale/yFactorForScale);
+             int x2 = (int) (leftPlotAreaPos + (((point.getXVal())-scaleData.minXOnScale)/xFactorForScale));
+             int y2 = (int) (topPlotAreaPos + (((point.getYVal())-scaleData.minYOnScale)/yFactorForScale));
+             g.drawLine(x1, invertY(height, y1), x2, invertY(height, y2));
+           }
+           if(scaleData.minYOnScale < 0){
+             g.drawLine(leftPlotAreaPos, invertY(height,(int)(topPlotAreaPos - scaleData.minYOnScale/yFactorForScale)),
+                        rightPlotAreaPos,invertY(height,(int)(topPlotAreaPos -scaleData.minYOnScale / yFactorForScale)));
+           }
+          }
       else{
         for(int i = scaleData.startDataPointIndices[index]; i < scaleData.endDataPointIndices[index]; i++){
           Coordinate point1 = xyCoords[i];
@@ -1135,14 +1141,18 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
     }
     else{
       if(!spectra[index].isContinuous()){
-        for(int i = scaleData.endDataPointIndices[index]; i >= scaleData.startDataPointIndices[index]; i--){
-          Coordinate point = xyCoords[i];
-          int x1 = (int) (rightPlotAreaPos - (((point.getXVal())-scaleData.minXOnScale)/xFactorForScale));
-          int y1 = (int) (topPlotAreaPos);
-          int x2 = (int) (rightPlotAreaPos - (((point.getXVal())-scaleData.minXOnScale)/xFactorForScale));
-          int y2 = (int) (topPlotAreaPos + (((point.getYVal())-scaleData.minYOnScale)/yFactorForScale));
-          g.drawLine(x1, invertY(height, y1), x2, invertY(height, y2));
-        }
+          for(int i = scaleData.endDataPointIndices[index]; i >= scaleData.startDataPointIndices[index]; i--){
+              Coordinate point = xyCoords[i];
+              int x1 = (int) (rightPlotAreaPos - (((point.getXVal())-scaleData.minXOnScale)/xFactorForScale));
+              int y1 = (int) (topPlotAreaPos -scaleData.minYOnScale/yFactorForScale);
+              int x2 = (int) (rightPlotAreaPos - (((point.getXVal())-scaleData.minXOnScale)/xFactorForScale));
+              int y2 = (int) (topPlotAreaPos + (((point.getYVal())-scaleData.minYOnScale)/yFactorForScale));
+              g.drawLine(x1, invertY(height, y1), x2, invertY(height, y2));
+            }
+            if(scaleData.minYOnScale < 0){
+            g.drawLine(rightPlotAreaPos,invertY(height, (int)(topPlotAreaPos -scaleData.minYOnScale/yFactorForScale)),
+                       leftPlotAreaPos, invertY(height, (int)(topPlotAreaPos -scaleData.minYOnScale/yFactorForScale)));
+            }
       }
       else{
         for(int i = scaleData.endDataPointIndices[index]; i > scaleData.startDataPointIndices[index] ; i--){

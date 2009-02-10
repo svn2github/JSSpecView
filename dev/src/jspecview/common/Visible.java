@@ -98,15 +98,11 @@ public class Visible {
       }
       if (Yunits.toLowerCase().contains("trans")) {
         for (int i = ind400; i < ind700; i++) {
-          XUP += (xyCoords[i].getYVal() * matrixx[ (i - ind400)] *
-                  matrixcie[ (i - ind400)]);
+          XUP += (xyCoords[i].getYVal() * matrixx[ (i - ind400)] *  matrixcie[ (i - ind400)]);
           XDWN += (matrixy[ (i - ind400)] * matrixcie[ (i - ind400)]);
-//System.out.println("matrixx: "+matrixx[i]+"; matrixy: "+matrixy[i]+"\n"+"matrixz: "+matrixz[i]+"; matrixcie: "+matrixcie[i]);
-          YUP += (xyCoords[i].getYVal() * matrixy[ (i - ind400)] *
-                  matrixcie[ (i - ind400)]);
+          YUP += (xyCoords[i].getYVal() * matrixy[ (i - ind400)] *  matrixcie[ (i - ind400)]);
           YDWN += (matrixy[ (i - ind400)] * matrixcie[ (i - ind400)]);
-          ZUP += (xyCoords[i].getYVal() * matrixz[ (i - ind400)] *
-                  matrixcie[ (i - ind400)]);
+          ZUP += (xyCoords[i].getYVal() * matrixz[ (i - ind400)] *  matrixcie[ (i - ind400)]);
           ZDWN += (matrixy[ (i - ind400)] * matrixcie[ (i - ind400)]);
         }
       }else {
@@ -114,15 +110,11 @@ public class Visible {
           if(xyCoords[i].getYVal() < 0){
             xyCoords[i].setYVal(0.0);
           }
-        XUP  += (Math.pow(10, -xyCoords[i].getYVal())* matrixx[(i - ind400)] *
-                 matrixcie[ (i - ind400)]);
+        XUP  += (Math.pow(10, -xyCoords[i].getYVal())* matrixx[(i - ind400)] *  matrixcie[ (i - ind400)]);
         XDWN += (matrixy[ (i - ind400)] * matrixcie[(i - ind400)]);
-//System.out.println("matrixx: "+matrixx[i]+"; matrixy: "+matrixy[i]+"\n"+"matrixz: "+matrixz[i]+"; matrixcie: "+matrixcie[i]);
-        YUP  += (Math.pow(10, -xyCoords[i].getYVal())* matrixy[(i - ind400)] *
-                 matrixcie[ (i - ind400)]);
+        YUP  += (Math.pow(10, -xyCoords[i].getYVal())* matrixy[(i - ind400)] *  matrixcie[ (i - ind400)]);
         YDWN += (matrixy[ (i - ind400)] * matrixcie[(i - ind400)]);
-        ZUP  += (Math.pow(10, -xyCoords[i].getYVal())* matrixz[(i - ind400)] *
-                 matrixcie[ (i - ind400)]);
+        ZUP  += (Math.pow(10, -xyCoords[i].getYVal())* matrixz[(i - ind400)] *  matrixcie[ (i - ind400)]);
         ZDWN += (matrixy[ (i - ind400)] * matrixcie[ (i - ind400)]);
           }
         }
