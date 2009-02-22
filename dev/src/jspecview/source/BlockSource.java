@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2008 The University of the West Indies
+/* Copyright (c) 2002-2009 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -37,6 +37,7 @@ import jspecview.exception.JSpecViewException;
  * an instance of the appropriate class
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
+ * @author Craig A.D. Walters
  * @author Prof Robert J. Lancashire
  * @see jspecview.source.CompoundSource
  * @see jspecview.source.NTupleSource
@@ -106,8 +107,11 @@ public class BlockSource extends CompoundSource {
     if(!label.equals("##TITLE")){
       throw new JSpecViewException("Error Reading Source");
     }
-    if(t.value != null && !t.value.equals(""))
+    if(t.value != null && !t.value.equals("")){
+      if(JSpecViewUtils.obscure)
+        t.value="Unknown";
       bs.setTitle(t.value);
+    }
     else{
       bs.setTitle("Unknown");
     }
@@ -170,8 +174,11 @@ public class BlockSource extends CompoundSource {
           continue;
         }
         else if(label.equals("##TITLE")){
-          if(t.value != null && !t.value.equals(""))
-            spectrum.setTitle(t.value);
+          if(t.value != null && !t.value.equals("")){
+            if(JSpecViewUtils.obscure)
+              t.value="Unknown";
+              spectrum.setTitle(t.value);
+          }
           else
             spectrum.setTitle("Unknown");
         }

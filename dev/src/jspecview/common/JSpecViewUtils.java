@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2008 The University of the West Indies
+/* Copyright (c) 2002-2009 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -41,6 +41,7 @@ import java.text.DecimalFormatSymbols;
  * for display of spectra and other utility methods used in the application.
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
+ * @author Craig A.D. Walters
  * @author Prof. Robert J. Lancashire
  */
 public class JSpecViewUtils {
@@ -63,6 +64,11 @@ public class JSpecViewUtils {
    */
   public static final double FACTOR_DIVISOR = 1000000;
 
+  /**
+   * If the applet is needed for teaching , then we need to obscure
+   * the title of the spectrum
+   */
+  public static boolean obscure = false;
 
   public static String integralMinY = "0.1";
   public static String integralFactor = "50.0";
@@ -324,6 +330,15 @@ public class JSpecViewUtils {
     return getYFactorForCompression(xyCoords, startDataPointIndex, endDataPointIndex, FACTOR_DIVISOR);
   }
 
+  /**
+   *
+   * @param obscure boolean
+   * @return boolean
+   */
+  public static boolean setObscure(boolean obscure2){
+    obscure = obscure2;
+    return obscure;
+}
 
   /**
    * Calculates values that <code>JSVPanel</code> needs in order to render
@@ -645,18 +660,39 @@ public class JSpecViewUtils {
    DecimalFormat formatter = new DecimalFormat("0.000000");
     StringBuffer buffer = new StringBuffer();
 
-    for(int index = startDataPointIndex; index <= endDataPointIndex; index++){
-      Coordinate point = xyCoords[index];
-      if(numPerLine > 0){
-        buffer.append(formatter.format(point.getXVal()) + ", " + formatter.format(point.getYVal()) + " ");
-        if(((index + 1) % numPerLine) == 0)
-          buffer.append(JSpecViewUtils.newLine);
+    if(endDataPointIndex > startDataPointIndex){
+     for(int index = startDataPointIndex; index <= endDataPointIndex; index++){
+        Coordinate point = xyCoords[index];
+        if (numPerLine > 0) {
+          buffer.append(formatter.format(point.getXVal()) + ", " +
+                        formatter.format(point.getYVal()) + " ");
+          if ( ( (index + 1) % numPerLine) == 0)
+            buffer.append(JSpecViewUtils.newLine);
+        }
+        else {
+          buffer.append(formatter.format(point.getXVal()) + ", " +
+                        formatter.format(point.getYVal()));
+          if (index < endDataPointIndex)
+            buffer.append(JSpecViewUtils.newLine);
+        }
       }
-      else{
-        buffer.append(formatter.format(point.getXVal()) + ", " + formatter.format(point.getYVal()));
-        if(index < endDataPointIndex)
-          buffer.append(JSpecViewUtils.newLine);
+    }else{
+      for(int index = startDataPointIndex; index <= endDataPointIndex; index--){
+        Coordinate point = xyCoords[index];
+        if (numPerLine > 0) {
+          buffer.append(formatter.format(point.getXVal()) + ", " +
+                        formatter.format(point.getYVal()) + " ");
+          if ( ( (index + 1) % numPerLine) == 0)
+            buffer.append(JSpecViewUtils.newLine);
+        }
+        else {
+          buffer.append(formatter.format(point.getXVal()) + ", " +
+                        formatter.format(point.getYVal()));
+          if (index < endDataPointIndex)
+            buffer.append(JSpecViewUtils.newLine);
+        }
       }
+
     }
     return buffer.toString();
   }

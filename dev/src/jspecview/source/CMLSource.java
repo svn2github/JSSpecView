@@ -1,4 +1,4 @@
-/* Copyright (c) 2007-2008 The University of the West Indies
+/* Copyright (c) 2007-2009 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -28,7 +28,7 @@ import jspecview.util.Parser;
 
 /**
  * Representation of a XML Source.
- * @author Craig Walters
+ * @author Craig A.D. Walters
  * @author Prof. Robert J. Lancashire
  */
 
@@ -344,7 +344,7 @@ public class CMLSource extends XMLSource {
     // if a spectrum is found, ignore a peaklist if present as well
     // since without intervention it is not possible to guess
     // which display is required and the spectrum is probably the
-    // more critical ?!?
+    // more critical !?!
 
     if (specfound)
       return;

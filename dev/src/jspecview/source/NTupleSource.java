@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2008 The University of the West Indies
+/* Copyright (c) 2002-2009 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -41,6 +41,7 @@ import jspecview.exception.SourceTypeUnsupportedException;
  * Representation of an JCAMP-DX NTuple Source.
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
+ * @author Craig A.D. Walters
  * @author Prof Robert J. Lancashire
  */
 public class NTupleSource extends CompoundSource {
@@ -103,7 +104,9 @@ public class NTupleSource extends CompoundSource {
 
       if(label.equals("##TITLE")){
         if(t.value != null && !t.value.equals(""))
-          title = t.value;
+          {title = t.value;
+            if (JSpecViewUtils.obscure) title = "Unknown";
+          }
         else
           title = "Unknown";
         ns.setTitle(title);

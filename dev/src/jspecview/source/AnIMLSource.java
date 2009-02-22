@@ -1,4 +1,4 @@
-/* Copyright (c) 2007-2008 The University of the West Indies
+/* Copyright (c) 2007-2009 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -31,7 +31,7 @@ import jspecview.util.Base64;
 
 /**
  * Representation of a XML Source.
- * @author Craig Walters
+ * @author Craig A.D. Walters
  * @author Prof. Robert J. Lancashire
  */
 

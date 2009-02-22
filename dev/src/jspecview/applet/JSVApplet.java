@@ -95,19 +95,19 @@ import jspecview.common.Visible;
  * JSpecView_Applet_Specification.html.
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
- * @author Craig A. D. Walters
+ * @author Craig A.D. Walters
  * @author Prof Robert J. Lancashire
  */
 
 
 public class JSVApplet extends JApplet {
- 
-   @Override	
+
+   @Override
    public void finalize() {
     System.out.println("JSpecView " + this + " finalized");
    }
- 
- public static final String APPLET_VERSION = "1.0.20090210-1900";
+
+ public static final String APPLET_VERSION = "1.0.20090220-1900";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath;
@@ -189,32 +189,33 @@ public class JSVApplet extends JApplet {
   JSVPanel tempJSVP;
 
   private static final String[] params = {
-     "LOAD", 
-     "REVERSEPLOT", 
-     "COORDINATESON", 
-     "GRIDON", 
-     "COORDCALLBACKFUNCTIONNAME", 
-     "SPECTRUMNUMBER", 
-     "INTERFACE", 
-     "ENDINDEX", 
-     "ENABLEZOOM", 
-     "STARTINDEX", 
-     "MENUON", 
-     "COMPOUNDMENUON", 
-     "BACKGROUNDCOLOR", 
-     "COORDINATESCOLOR", 
+     "LOAD",
+     "REVERSEPLOT",
+     "COORDINATESON",
+     "GRIDON",
+     "COORDCALLBACKFUNCTIONNAME",
+     "SPECTRUMNUMBER",
+     "INTERFACE",
+     "ENDINDEX",
+     "ENABLEZOOM",
+     "STARTINDEX",
+     "MENUON",
+     "COMPOUNDMENUON",
+     "BACKGROUNDCOLOR",
+     "COORDINATESCOLOR",
      "GRIDCOLOR",
-     "PLOTAREACOLOR", 
-     "PLOTCOLOR", 
-     "SCALECOLOR", 
-     "TITLECOLOR", 
-     "UNITSCOLOR", 
-     "PLOTCOLORS", 
-     "VERSION", 
-     "PEAKCALLBACKFUNCTIONNAME", 
-     "IRMODE"
+     "PLOTAREACOLOR",
+     "PLOTCOLOR",
+     "SCALECOLOR",
+     "TITLECOLOR",
+     "UNITSCOLOR",
+     "PLOTCOLORS",
+     "VERSION",
+     "PEAKCALLBACKFUNCTIONNAME",
+     "IRMODE",
+     "OBSCURE"
      };
-  
+
   final private static int PARAM_LOAD = 0;
   final private static int PARAM_REVERSEPLOT = 1;
   final private static int PARAM_COORDINATESON = 2;
@@ -239,7 +240,8 @@ public class JSVApplet extends JApplet {
   final private static int PARAM_VERSION = 21;
   final private static int PARAM_PEAKCALLBACKFUNCTIONNAME = 22;
   final private static int PARAM_IRMODE = 23;
-  
+  final private static int PARAM_OBSCURE = 24;
+
   final private static Hashtable<String, Integer> htParams = new Hashtable<String, Integer>();
   {
     for (int i = 0; i < params.length; i++)
@@ -318,8 +320,8 @@ public class JSVApplet extends JApplet {
    * Whether or not spectra should be overlayed
    */
   boolean overlay;
+  boolean obscure;
 
-  
   String irMode;
 
   /**
@@ -610,7 +612,7 @@ public class JSVApplet extends JApplet {
       exportSpectrum(e.getActionCommand());
     }
   };
-  
+
   /**
    * Get Applet information
    * @return the String "JSpecView Applet"
@@ -1392,11 +1394,11 @@ public class JSVApplet extends JApplet {
       return true;
     }
     } catch (Exception jsve) {
-      // 
+      //
     }
     return false;
   }
-  
+
   /**
    * Allows conversion between TRANSMITTANCE and ABSORBANCE
    * @param e ItemEvent
@@ -1412,21 +1414,21 @@ public class JSVApplet extends JApplet {
     else
        TAConvert(IMPLIED);
     } catch (Exception jsve) {
-      // ignore? 
+      // ignore?
     }
   }
 
 
   private long msTrigger = -1;
-  
+
   /**
    * Allows Transmittance to Absorbance conversion or vice versa
    * depending on the value of comm.
    * @param comm the conversion command
-   * @throws Exception 
+   * @throws Exception
    */
 
-  
+
   private void TAConvert(int comm) throws Exception {
     long time = System.currentTimeMillis();
     System.out.println(time + " " + msTrigger + " " + (time-msTrigger));
@@ -1454,7 +1456,7 @@ public class JSVApplet extends JApplet {
       return;
     }
 
-      
+
       //  if successful, newSpec has the converted info
       JDXSpectrum newSpec = TransmittanceAbsorbanceConverter.convert(spectrum);
 
@@ -1481,7 +1483,7 @@ public class JSVApplet extends JApplet {
       repaint();
 
   }
-  
+
   JSVPanelMouseListener tempMouseListener;
 
   /**
@@ -1569,7 +1571,7 @@ public class JSVApplet extends JApplet {
     String errMsg = null;
     try{
       JDXSpectrum spec = (JDXSpectrum)selectedJSVPanel.getSpectrumAt(n);
-      errMsg = Exporter.export(comm, (file == null ? null : file.getAbsolutePath()), spec, 
+      errMsg = Exporter.export(comm, (file == null ? null : file.getAbsolutePath()), spec,
           0, spec.getXYCoords().length - 1);
     }
     catch(IOException ioe){
@@ -1720,7 +1722,7 @@ public class JSVApplet extends JApplet {
   }
 
 */
-  
+
   /**
    * Intialises the <code>plotColors</code> array from the
    * <i>plotColorsStr</i> variable
@@ -1844,17 +1846,17 @@ public class JSVApplet extends JApplet {
 
   /**
    * Delivers spectrum coded as desired: XY, SQZ, PAC, DIF, AML, CML, SVG
-   * @param type 
-   * @param n 
+   * @param type
+   * @param n
    * @return data
-   * 
+   *
    */
   public String export(String type, int n) {
     if (type == null)
       type = "XY";
     return export(n, type.toUpperCase(), null);
   }
-  
+
   /**
     * Returns the spectrum at the specified block number
     * @param block int
@@ -1878,7 +1880,7 @@ public class JSVApplet extends JApplet {
     else
       setFilePathLocal(tmpFilePath);
   }
-  
+
   /**
    * Loads a new file into the existing applet window
    * @param tmpFilePath String
@@ -2072,6 +2074,10 @@ public class JSVApplet extends JApplet {
         case PARAM_IRMODE:
           irMode = value;
           break;
+        case PARAM_OBSCURE:
+          obscure = Boolean.parseBoolean(value);
+          JSpecViewUtils.setObscure(obscure);
+          break;
         }
       } catch (Exception e) {
       }
@@ -2084,10 +2090,10 @@ public class JSVApplet extends JApplet {
     commandWatcherThread.setName("CommmandWatcherThread");
     commandWatcherThread.start();
   }
-  
-  // for the signed applet to load a remote file, it must 
+
+  // for the signed applet to load a remote file, it must
   // be using a thread started by the initiating thread;
-  
+
   Vector<String> scriptQueue = new Vector<String>();
   Thread commandWatcherThread;
 

@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2008 The University of the West Indies
+/* Copyright (c) 2002-2009 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -36,6 +36,7 @@ import jspecview.exception.TabularDataSetException;
  * Representation of a JDX Simple Source.
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
+ * @author Craig A.D. Walters
  * @author Prof. Robert J. Lancashire
  */
 
@@ -110,8 +111,11 @@ public class SimpleSource extends JDXSource {
         break;
 
       if(label.equals("##TITLE")){
-        if(t.value != null && !t.value.equals(""))
-          spectrum.setTitle(t.value);
+       if((t.value != null && !t.value.equals("")) & !(JSpecViewUtils.obscure)){
+            spectrum.setTitle(t.value);
+            if (JSpecViewUtils.obscure)
+               spectrum.setTitle("Unknown");
+        }
         else
           spectrum.setTitle("Unknown");
         continue;
