@@ -145,7 +145,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
   protected boolean scaleOn = true;
   protected boolean unitsOn = true;
 
-
   // highlight range
   protected double hlStart, hlEnd;
 
@@ -160,7 +159,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
   private Coordinate coordClicked;
 
   // Is true if plot is reversed
-  protected boolean plotReversed;
+  protected static boolean plotReversed;
 
 
   // background color of plot area
@@ -565,7 +564,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
    * Displays plot in reverse if val is true
    * @param val true or false
    */
-  public void setReversePlot(boolean val){
+  public static void setReversePlot(boolean val){
     plotReversed = val;
   }
 
@@ -1101,7 +1100,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
     else
       //drawPlotIncreasing = !plotReversed;
       drawPlotIncreasing = overlayIncreasing ^ plotReversed;
-
     // Draw a border
     if(!gridOn){
       g.setColor(gridColor);
@@ -1109,6 +1107,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
     }
 
     g.setColor(plotColors[index]);
+
 
     // Check if revPLot on
 

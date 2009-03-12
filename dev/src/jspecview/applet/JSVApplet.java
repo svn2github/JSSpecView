@@ -95,7 +95,7 @@ import jspecview.common.Visible;
  * JSpecView_Applet_Specification.html.
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
- * @author Craig A.D. Walters
+ * @author Craig A. D. Walters
  * @author Prof Robert J. Lancashire
  */
 
@@ -107,7 +107,7 @@ public class JSVApplet extends JApplet {
     System.out.println("JSpecView " + this + " finalized");
    }
 
- public static final String APPLET_VERSION = "1.0.20090220-1900";
+ public static final String APPLET_VERSION = "1.0.20090312-0530";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath;
@@ -143,7 +143,8 @@ public class JSVApplet extends JApplet {
   Color plotColor= Color.BLUE;
 
 
-  Color[] plotColors= {Color.blue, Color.green, Color.red, Color.magenta, Color.yellow, Color.orange,  Color.pink, Color.cyan};
+  Color[] plotColors= {Color.blue, Color.green, Color.red, Color.magenta,
+      Color.yellow, Color.orange,  Color.pink, Color.cyan};
   String plotColorsStr;
   Color integralPlotColor = Color.red;
 
@@ -242,8 +243,8 @@ public class JSVApplet extends JApplet {
   final private static int PARAM_IRMODE = 23;
   final private static int PARAM_OBSCURE = 24;
 
-  final private static Hashtable<String, Integer> htParams = new Hashtable<String, Integer>();
-  {
+  final private static Hashtable<String, Integer> htParams =
+      new Hashtable<String, Integer>(); {
     for (int i = 0; i < params.length; i++)
       htParams.put(params[i], new Integer(i));
   }
@@ -361,7 +362,6 @@ public class JSVApplet extends JApplet {
       saveAsMenu.setEnabled(false);
     }
     zoomMenu.setEnabled(enableZoom);
-
     //setBackground(backgroundColor);
 
     try {
@@ -369,7 +369,6 @@ public class JSVApplet extends JApplet {
     } catch (Exception e) {
       e.printStackTrace();
     }
-
     appletPanel = new JPanel(new BorderLayout());
     //appletPanel.add(statusPanel,  BorderLayout.SOUTH);
     Font statusFont = new Font(null, Font.PLAIN, 12);
@@ -441,13 +440,12 @@ public class JSVApplet extends JApplet {
     } else {
       solColMenuItem.setEnabled(false);
     }
-
     //  Can only integrate a continuous H NMR spectrum
     if (continuous
         && JSpecViewUtils.isHNMR((JDXSpectrum) selectedJSVPanel
             .getSpectrumAt(0)))
       integrateMenuItem.setEnabled(true);
-    //  Can only convert from T <-> A  if Absorbance or Transmittance and continuous
+ //Can only convert from T <-> A  if Absorbance or Transmittance and continuous
     if ((continuous) && (Yunits.toLowerCase().contains("abs"))
         || (Yunits.toLowerCase().contains("trans")))
       transAbsMenuItem.setEnabled(true);
@@ -469,7 +467,8 @@ public class JSVApplet extends JApplet {
       isSignedApplet = true;
       startCommandThread();
     } catch (SecurityException se) {
-      //System.err.println("Export menu disabled: You need the signed Applet to export files");
+//System.err.println("Export menu disabled:
+      //You need the signed Applet to export files");
     }
 
     statusTextLabel.setText("Loading...");
@@ -667,7 +666,6 @@ public class JSVApplet extends JApplet {
         initPanels();
         return;
       }
-
       jsvPanels[0] = jsvp;
 
       initProperties(jsvp);
@@ -700,12 +698,53 @@ public class JSVApplet extends JApplet {
   }
 
   public void initProperties(JSVPanel jsvp) {
-      // set JSVPanel properties from applet parameters
+       // set JSVPanel properties from applet parameters
         jsvp.setGridOn(gridOn);
         jsvp.setCoordinatesOn(coordinatesOn);
         jsvp.setReversePlot(reversePlot);
-        jsvp.setZoomEnabled(enableZoom);
+        if(!reversePlot){
+          String Xunits, datatype, dataclass;
+          double firstX,lastX;
+          Xunits = source.getJDXSpectrum(0).getXUnits();
+          firstX = source.getJDXSpectrum(0).getFirstX();
+          lastX = source.getJDXSpectrum(0).getLastX();
+          datatype = source.getJDXSpectrum(0).getDataType();
+          dataclass = source.getJDXSpectrum(0).getDataClass();
+          final boolean IR_CM = true;
+          final boolean NMR   = true;
 
+          if(firstX < lastX){
+            jsvp.setReversePlot(false);
+          } else jsvp.setReversePlot(true);
+          //check for the few anomalies
+          if (datatype.contains("NMR")&& !dataclass.contains("XYDATA")
+              &&(firstX < lastX)) {
+            jsvp.setReversePlot(NMR);
+          }else if (datatype.contains("NMR")&& !dataclass.contains("XYDATA")
+                    && (firstX > lastX)) {
+           jsvp.setReversePlot(!NMR);
+          }else if ((datatype.contains("NMR") && dataclass.contains("XYDATA"))
+                    && (firstX < lastX)) {
+            jsvp.setReversePlot(!NMR);
+          }else if ((datatype.contains("NMR") && dataclass.contains("XYDATA"))
+                    && (firstX > lastX)) {
+            jsvp.setReversePlot(NMR);
+          }else if ((datatype.contains("IR") || datatype.contains("INFRA"))&&
+                    (firstX < lastX) && Xunits.contains("CM")) {
+            jsvp.setReversePlot(IR_CM);
+          }else if ((datatype.contains("IR") ||datatype.contains("INFRA")) &&
+                    (firstX > lastX) && Xunits.contains("CM")) {
+            jsvp.setReversePlot(!IR_CM);
+          }else if(datatype.contains("LINK")&&  (firstX < lastX) &&
+                   Xunits.contains("CM")){
+            jsvp.setReversePlot(IR_CM);
+            reversePlot = true;
+          }else if(datatype.contains("LINK")&&  (firstX > lastX) &&
+                   Xunits.contains("CM")){
+            jsvp.setReversePlot(!IR_CM);
+          }
+        }
+        jsvp.setZoomEnabled(enableZoom);
         // other JSVPanel properties
         // Need to add to applet Parameters
         jsvp.setPlotAreaColor(plotAreaColor);
@@ -732,12 +771,12 @@ public class JSVApplet extends JApplet {
     boolean moreThanOnePanel = numberOfPanels > 1;
     boolean showSpectrumNumber = spectrumNumber != -1 &&
                                  spectrumNumber <= numberOfPanels;
-
     //appletPanel.setBackground(backgroundColor);
-
     if(theInterface.equals("tab") && moreThanOnePanel){
-      spectraPane = new JTabbedPane(SwingConstants.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
-      appletPanel.add(new JLabel(((CompoundSource)source).getTitle(), SwingConstants.CENTER), BorderLayout.NORTH);
+      spectraPane = new JTabbedPane(SwingConstants.TOP,
+                                    JTabbedPane.SCROLL_TAB_LAYOUT);
+      appletPanel.add(new JLabel(((CompoundSource)source).getTitle(),
+                                 SwingConstants.CENTER), BorderLayout.NORTH);
       appletPanel.add(spectraPane,  BorderLayout.CENTER);
 
       for(int i = 0; i < numberOfPanels; i++){
@@ -746,16 +785,14 @@ public class JSVApplet extends JApplet {
           title = title.substring(title.indexOf(':') + 1);
         else if (source instanceof BlockSource)
           //title = "block " + (i + 1);
-          title = title.substring(0, (title.length() >= 10 ? 10 : title.length())) +
-                        "... : ";
+          title = title.substring(0, (title.length() >= 10 ? 10 :
+                                      title.length())) + "... : ";
         spectraPane.addTab(title, jsvPanels[i]);
       }
-
       // Show the spectrum specified by the spectrumnumber parameter
       if(showSpectrumNumber){
         spectraPane.setSelectedIndex(spectrumNumber - 1);
       }
-
       selectedJSVPanel = (JSVPanel)spectraPane.getSelectedComponent();
       spectraPane.addChangeListener(new ChangeListener(){
         public void stateChanged(ChangeEvent e){
@@ -764,7 +801,8 @@ public class JSVApplet extends JApplet {
       });
     }
     else if(theInterface.equals("tile") && canDoTile){
-      appletPanel.add(new JLabel(((CompoundSource)source).getTitle(), SwingConstants.CENTER), BorderLayout.NORTH);
+      appletPanel.add(new JLabel(((CompoundSource)source).getTitle(),
+                                 SwingConstants.CENTER), BorderLayout.NORTH);
 
       for(int i = 0; i < numberOfPanels; i++){
         jsvPanels[i].setMinimumSize(new Dimension(250, 150));
@@ -774,19 +812,15 @@ public class JSVApplet extends JApplet {
       appletPanel.add(splitPane,  BorderLayout.CENTER);
       //splitPane.setBackground(backgroundColor);
     }
-
     else{ // Single or overlay
 //      compoundMenuOn = true;
       int spectrumIndex;
       String title;
-
       if(showSpectrumNumber)
         spectrumIndex = spectrumNumber - 1;
       else
         spectrumIndex = 0;
-
       selectedJSVPanel = jsvPanels[spectrumIndex];
-
       // Global variable for single interface
       currentSpectrumIndex = spectrumIndex;
       if(overlay && source instanceof CompoundSource){
@@ -795,34 +829,27 @@ public class JSVApplet extends JApplet {
         overlayKeyMenuItem.setEnabled(true);
       }
       appletPanel.add(jsvPanels[spectrumIndex], BorderLayout.CENTER);
-
       // else interface = single
       if(moreThanOnePanel && compoundMenuOn){
           if(numberOfPanels <= 20){
-
             // add Menus to navigate
             JCheckBoxMenuItem mi;
-
           if(source instanceof NTupleSource){
             for(int i = 0; i < numberOfPanels; i++){
               title = (i+1) + "- " + ((JDXSpectrum) specs.elementAt(i)).getTitle();
               mi = new JCheckBoxMenuItem(title);
               if (i == currentSpectrumIndex) mi.setSelected(true);
-
               mi.addItemListener(new java.awt.event.ItemListener() {
                 public void itemStateChanged(ItemEvent e) {
-
                   if (e.getStateChange() == ItemEvent.SELECTED) {
                     // deselects the previously selected menu item
                     JCheckBoxMenuItem deselectedMenu =
-                        (JCheckBoxMenuItem)((JCheckBoxMenuItem)e.getSource()).getParent().getComponent(currentSpectrumIndex);
+(JCheckBoxMenuItem)((JCheckBoxMenuItem)e.getSource()).getParent().getComponent(currentSpectrumIndex);
                     deselectedMenu.setSelected(false);
-
                     compoundMenu_itemStateChanged(e);
                   }
                 }
               });
-
               mi.setActionCommand(""+i);
               compoundMenu.add(mi);
             }
@@ -833,29 +860,22 @@ public class JSVApplet extends JApplet {
               title = (i+1) + "- " + ((JDXSpectrum)specs.elementAt(i)).getTitle();
               mi = new JCheckBoxMenuItem(title);
               if (i == currentSpectrumIndex) mi.setSelected(true);
-
               mi.addItemListener(new java.awt.event.ItemListener() {
                 public void itemStateChanged(ItemEvent e) {
-
                   if (e.getStateChange() == ItemEvent.SELECTED) {
                    // deselects the previously selected menu item
                    JCheckBoxMenuItem deselectedMenu =
-                       (JCheckBoxMenuItem)((JCheckBoxMenuItem)e.getSource()).getParent().getComponent(currentSpectrumIndex);
+(JCheckBoxMenuItem)((JCheckBoxMenuItem)e.getSource()).getParent().getComponent(currentSpectrumIndex);
                    deselectedMenu.setSelected(false);
-
                   compoundMenu_itemStateChanged(e);
                 }
               }
-
               });
-
               mi.setActionCommand(""+i);
               compoundMenu.add(mi);
             }
-
             compoundMenu.setText("Blocks");
           }
-
           // add compound menu to popup menu
           appletPopupMenu.add(compoundMenu, 3);
           if (compoundMenuOn)
@@ -981,21 +1001,25 @@ public class JSVApplet extends JApplet {
           double actualXPt = spectrum.getXYCoords()[store].getXVal();
           double actualYPt = spectrum.getXYCoords()[store].getYVal();
 
-          DecimalFormat displayXFormatter = new DecimalFormat("0.000000", new DecimalFormatSymbols(java.util.Locale.US ));
-          DecimalFormat displayYFormatter = new DecimalFormat("0.000000", new DecimalFormatSymbols(java.util.Locale.US ));
+          DecimalFormat displayXFormatter = new DecimalFormat("0.000000",
+              new DecimalFormatSymbols(java.util.Locale.US ));
+          DecimalFormat displayYFormatter = new DecimalFormat("0.000000",
+              new DecimalFormatSymbols(java.util.Locale.US ));
 
           String actualXCoordStr = displayXFormatter.format(actualXPt);
           String actualYCoordStr = displayYFormatter.format(actualYPt);
-          Coordinate actualCoord = new Coordinate(Double.parseDouble(actualXCoordStr), Double.parseDouble(actualYCoordStr) );
+          Coordinate actualCoord = new Coordinate(Double.parseDouble(actualXCoordStr)
+                                          , Double.parseDouble(actualYCoordStr) );
 
-          callToJavaScript(peakCallbackFunctionName, coord.getXVal() + ", " + coord.getYVal() + ", " + actualCoord.getXVal() + ", " + actualCoord.getYVal() + ", " + (currentSpectrumIndex + 1));
-        }
+          callToJavaScript(peakCallbackFunctionName, coord.getXVal() + ", " +
+                  coord.getYVal() + ", "+ actualCoord.getXVal() +", "+
+                  actualCoord.getYVal() + ", " + (currentSpectrumIndex + 1));}
       }
       else if(coordCallbackFunctionName != null){
         Coordinate coord = jsvPanel.getClickedCoordinate();
         if(coord != null)
-          callToJavaScript(coordCallbackFunctionName, coord.getXVal() + ", " + coord.getYVal());
-      }
+          callToJavaScript(coordCallbackFunctionName, coord.getXVal() + ", " +
+                           coord.getYVal());}
     }
 
     /**
@@ -1071,7 +1095,8 @@ public class JSVApplet extends JApplet {
   void headerMenuItem_actionPerformed(ActionEvent e) {
     if(overlay){
       // Show header of Source
-      HashMap<String, String> header = (HashMap<String, String>)((CompoundSource)source).getHeaderTable();
+      HashMap<String, String> header = (HashMap<String, String>)
+          ((CompoundSource)source).getHeaderTable();
       Object[] headerLabels = header.keySet().toArray();
       Object[] headerValues = header.values().toArray();
 
@@ -1267,9 +1292,10 @@ public class JSVApplet extends JApplet {
 
     //JScrollPane scrollPane = new JScrollPane();
 
-    JOptionPane.showMessageDialog(this, "<HTML><body bgcolor=rgb("+sltnclr+")><br />Predicted Solution Colour- RGB("+sltnclr+")<br /><br /></body></HTML>"
-                                  , "Predicted Colour",
-                                    JOptionPane.INFORMATION_MESSAGE);
+ JOptionPane.showMessageDialog(this,
+ "<HTML><body bgcolor=rgb("+sltnclr+")><br />Predicted Solution Colour- RGB("
++sltnclr+")<br /><br /></body></HTML>", "Predicted Colour",
+ JOptionPane.INFORMATION_MESSAGE);
   }
 
   /**
@@ -1408,7 +1434,8 @@ public class JSVApplet extends JApplet {
     // for some reason, at the the St. Olaf site, this is triggering twice
     // when the user clicks the menu item. Why?
     try {
-    System.out.println("ta event " + e.getID() + " " + e.getStateChange() + " " + ItemEvent.SELECTED + " " + ItemEvent.DESELECTED + " " + e.toString());
+    System.out.println("ta event " + e.getID() + " " + e.getStateChange() + " "
+    + ItemEvent.SELECTED + " " + ItemEvent.DESELECTED + " " + e.toString());
     if (e.getStateChange() == ItemEvent.SELECTED)
        TAConvert(IMPLIED);
     else
@@ -1560,8 +1587,8 @@ public class JSVApplet extends JApplet {
       writeStatus("output sent to Java console");
       return;
     }
-    dirLastExported = selectedJSVPanel.exportSpectra(frame, jFileChooser, comm, recentFileName, dirLastExported);
-
+    dirLastExported = selectedJSVPanel.exportSpectra(frame, jFileChooser, comm,
+        recentFileName, dirLastExported);
   }
 
 
@@ -1979,10 +2006,8 @@ public class JSVApplet extends JApplet {
     if (JSpecViewUtils.DEBUG) {
       System.out.println("Running in DEBUG mode");
     }
-
     while (allParamTokens.hasMoreTokens()) {
       String token = allParamTokens.nextToken();
-
       // now split the key/value pair
       StringTokenizer eachParam = new StringTokenizer(token);
 
@@ -1995,7 +2020,6 @@ public class JSVApplet extends JApplet {
       if (JSpecViewUtils.DEBUG) {
         System.out.println("KEY-> " + key + " VALUE-> " + value);
       }
-
       Integer iparam = (Integer) htParams.get(key);
       try {
         switch (iparam == null ? -1 : iparam.intValue()) {
@@ -2082,7 +2106,6 @@ public class JSVApplet extends JApplet {
       } catch (Exception e) {
       }
     }
-
   }
 
   private void startCommandThread() {
@@ -2093,7 +2116,6 @@ public class JSVApplet extends JApplet {
 
   // for the signed applet to load a remote file, it must
   // be using a thread started by the initiating thread;
-
   Vector<String> scriptQueue = new Vector<String>();
   Thread commandWatcherThread;
 
@@ -2128,7 +2150,6 @@ public class JSVApplet extends JApplet {
       commandWatcherThread = null;
     }
   }
-
   void interruptQueueThreads() {
     if (commandWatcherThread != null)
       commandWatcherThread.interrupt();

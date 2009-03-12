@@ -29,6 +29,7 @@ import java.util.Vector;
 
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSpecViewUtils;
+import jspecview.common.JSVPanel;
 import jspecview.exception.JSpecViewException;
 import jspecview.util.FileManager;
 
@@ -41,6 +42,11 @@ import jspecview.util.FileManager;
  * @author Prof. Robert J. Lancashire
  */
 public abstract class JDXSource {
+
+  //booleans to determine the plots orientation
+  public static final boolean IR_CM = true;
+  public static final boolean NMR   = true;
+
 
   /**
    * The labels for various tabular data
@@ -57,7 +63,6 @@ public abstract class JDXSource {
       {"PEAKTABLE", "XYDATA", "XYPOINTS"},
       {"(XY..XY)", "(X++(Y..Y))", "(XY..XY)"}
     };
-
 
   // Table of header variables specific to the jdx source
   protected Map<String, String> headerTable;
@@ -103,27 +108,31 @@ public abstract class JDXSource {
   public static Object createJDXSource(String sourceContents, String filePath,
                                        URL appletDocumentBase) {
     InputStream in = null;
-    System.out.println("createJDXSource " + filePath + " " + sourceContents + " " + appletDocumentBase);
+    System.out.println("createJDXSource " + filePath + " " + sourceContents + " " +
+                       appletDocumentBase);
     if (filePath != null) {
       Object ret = FileManager.getInputStream(filePath, true,
-          appletDocumentBase);
+                                              appletDocumentBase);
       if (ret instanceof String)
         return ret;
       in = (InputStream) ret;
       byte[] data = new byte[400];
       try {
         in.read(data, 0, 400);
-      } catch (IOException e) {
+      }
+      catch (IOException e) {
         try {
           in.close();
-        } catch (IOException e1) {
+        }
+        catch (IOException e1) {
           //
         }
         return "Unable to read source : " + e.getMessage();
       }
       try {
         in.close();
-      } catch (IOException e1) {
+      }
+      catch (IOException e1) {
         //
       }
       sourceContents = (new String(data)).toLowerCase();
@@ -142,10 +151,36 @@ public abstract class JDXSource {
       sourceContents = fm.getFileAsString(filePath);
     }
     int sourceType = determineJDXSourceType(sourceContents);
+    //////////////////////////////////////////////
+    double d1=0, d2=1;
+    String datatype="", xUnits="";
+    JDXSourceStringTokenizer t = new JDXSourceStringTokenizer(sourceContents);
+    String label;
+
+    while (t.hasMoreTokens()) {
+      t.nextToken();
+      label = JSpecViewUtils.cleanLabel(t.label);
+      if (label.contains("FIRSTX")) {
+        d1 = Double.parseDouble(t.value);
+      }
+      if (label.contains("LASTX")) {
+        d2 = Double.parseDouble(t.value);
+      } if (label.equals("##DATATYPE") &&
+            t.value.toUpperCase().contains("NMR")) {
+        datatype = "NMR";
+      }else if (label.equals("##DATATYPE") &&
+                (t.value.toUpperCase().contains("IR") ||
+                 t.value.toUpperCase().contains("INFRA"))) {
+        datatype = "IR";
+      }
+      if (label.contains("XUNITS") && t.value.toUpperCase().contains("CM")){
+        xUnits = "CM";
+      }////////////////////////////
+    }
+    determineRevPlot(d1, d2, datatype, xUnits);
     if (sourceType == -1) {
       return "JDX Source Type not Recognized";
     }
-
     try {
       switch (sourceType) {
       case SIMPLE:
@@ -173,15 +208,61 @@ public abstract class JDXSource {
     while(t.hasMoreTokens()){
       t.nextToken();
       label = JSpecViewUtils.cleanLabel(t.label);
-      if (label.equals("##DATATYPE") && t.value.toUpperCase().equals("LINK"))
+      if (label.equals("##DATATYPE") && t.value.toUpperCase().equals("LINK")){
+
         return BLOCK;
+      }
       if (label.equals("##DATACLASS") && t.value.toUpperCase().equals("NTUPLES"))
           return NTUPLE;
       Arrays.sort(JDXSource.TABULAR_DATA_LABELS);
       if(Arrays.binarySearch(JDXSource.TABULAR_DATA_LABELS, label) > 0)
         return SIMPLE;
-      }
+    }
     return -1;
+  }
+
+  /**
+   * Determines if the default plot should be reversed or not
+   * @param spectrum determineRevPlot
+   */
+  public static void determineRevPlot(double d1,double d2, String datatype, String xUnits){
+    //JDXSourceStringTokenizer t = new JDXSourceStringTokenizer(sourceContents);
+    //String label;
+
+    /*while (t.hasMoreTokens()) {
+      t.nextToken();
+      label = JSpecViewUtils.cleanLabel(t.label);
+      if (label.contains("FIRSTX")) {
+        d1 = Double.parseDouble(t.value);
+      }
+      if (label.contains("LASTX")) {
+        d2 = Double.parseDouble(t.value);
+      } if (label.equals("##DATATYPE") &&
+               t.value.toUpperCase().contains("NMR")) {
+        datatype = "NMR";
+      }else if (label.equals("##DATATYPE") &&
+               (t.value.toUpperCase().contains("IR") ||
+                t.value.toUpperCase().contains("INFRA"))) {
+        datatype = "IR";
+      }
+      if (label.contains("XUNITS") && t.value.toUpperCase().contains("CM")){
+        nm_or_cm = "CM";
+      }
+    }*/
+    //set reversePlot 'false' as default that is make plot increasing
+    if(d1 < d2){
+      JSVPanel.setReversePlot(false);
+    } else JSVPanel.setReversePlot(true);
+    //check for the few anomalies
+    if (datatype.contains("NMR") && (d1 < d2)) {
+      JSVPanel.setReversePlot(NMR);
+    }else if (datatype.contains("NMR") && (d2 < d1)) {
+      JSVPanel.setReversePlot(!NMR);
+    }else if (datatype.contains("IR") && (d1 < d2) && xUnits.contains("CM")) {
+      JSVPanel.setReversePlot(IR_CM);
+    }else if (datatype.contains("IR") && (d2 < d1) && xUnits.contains("CM")) {
+      JSVPanel.setReversePlot(!IR_CM);
+    }
   }
 
   /**

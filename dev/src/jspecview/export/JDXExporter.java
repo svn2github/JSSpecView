@@ -69,10 +69,20 @@ class JDXExporter {
    */
   private static String toStringAux(int type, JDXSpectrum spectrum,
                                     int startIndex, int endIndex) {
+
+    String dataType = spectrum.getDataType();
     StringBuffer buffer = new StringBuffer();
     Coordinate[] newXYCoords = spectrum.getXYCoords();
     String tabDataSet = "", tmpDataClass = "XYDATA";
     double xCompFactor, yCompFactor;
+
+    if((dataType.toLowerCase().contains("ir")) || (dataType.toLowerCase().contains("nmr"))){
+      if(startIndex < endIndex){
+        int newIndex = endIndex;
+        endIndex = startIndex;
+        startIndex = newIndex;
+      }
+    }
 
     if (spectrum.isHZtoPPM()) {
       Coordinate[] xyCoords = newXYCoords;
@@ -120,8 +130,7 @@ class JDXExporter {
 
     buffer.append(spectrum.getHeaderString(tmpDataClass, xCompFactor,
         yCompFactor, startIndex, endIndex));
-    buffer
-        .append("##" + tmpDataClass + "= " + varList + JSpecViewUtils.newLine);
+    buffer.append("##" + tmpDataClass + "= " + varList + JSpecViewUtils.newLine);
     buffer.append(tabDataSet);
     buffer.append("##END=");
 

@@ -163,6 +163,7 @@ public class MainFrame
   boolean gridOn;
   boolean coordinatesOn;
   boolean scaleOn;
+  boolean obscure;
   //  ----------------------- Application Attributes ---------------------
 
   Vector<JDXSource> jdxSources = new Vector<JDXSource>();
@@ -435,7 +436,7 @@ public class MainFrame
 
     setApplicationProperties();
     tempDS = defaultDisplaySchemeName;
-    fc = (JSpecViewUtils.DEBUG ? new JFileChooser("C:/temp") 
+    fc = (JSpecViewUtils.DEBUG ? new JFileChooser("C:/temp")
         : useDirLastOpened ? new JFileChooser(dirLastOpened)
         : new JFileChooser());
 
@@ -445,7 +446,7 @@ public class MainFrame
     filter.addExtension("dx");
     filter.setDescription("JCAMP-DX Files");
     fc.setFileFilter(filter);
-    
+
     filter = new JSpecViewFileFilter();
     filter.addExtension("xml");
     filter.addExtension("aml");
@@ -797,7 +798,7 @@ public class MainFrame
     saveAsMenu.setMnemonic('A');
     saveAsJDXMenu.setMnemonic('J');
     exportAsMenu.setMnemonic('E');
-   
+
     toolbarCheckBoxMenuItem.setMnemonic('T');
     toolbarCheckBoxMenuItem.setSelected(true);
     toolbarCheckBoxMenuItem.setText("Toolbar");
@@ -1129,7 +1130,7 @@ public class MainFrame
       exportSpectrum(e.getActionCommand());
     }
   };
-  
+
   /**
    * Shows dialog to open a file
    * @param e the ActionEvent
@@ -1270,7 +1271,7 @@ public class MainFrame
       errorLogMenuItem.setEnabled(false);
       return;
     }
-    
+
     saveAsMenu.setEnabled(true);
     exportAsMenu.setEnabled(true);
 
@@ -1293,10 +1294,10 @@ public class MainFrame
 
   /**
    * Checks to see if this is an XML file
-   * @param file 
+   * @param file
    * @return true if anIML or CML
    */
-  
+
   /**
    * Sets the display properties as specified from the preferences dialog
    * or the properties file
@@ -1710,14 +1711,14 @@ public class MainFrame
       }
 
       setMenuEnables(spec);
-      
+
       // Update file|Close Menu
       closeMenuItem.setText("Close '" + file.getName() + "'");
       setTitle("JSpecView - " + file.getAbsolutePath());
 
       // Find Node in SpectraTree and select it
       DefaultMutableTreeNode node = getNodeForInternalFrame(frame, rootNode);
-      if (node != null) 
+      if (node != null)
         spectraTree.setSelectionPath(new TreePath(node.getPath()));
     }
 
@@ -2108,13 +2109,13 @@ public class MainFrame
     final JSVPanel jsvp = (JSVPanel) frame.getContentPane().getComponent(0);
     if (fc == null)
       return;
-    
+
     if (JSpecViewUtils.DEBUG) {
       fc.setCurrentDirectory(new File("C:\\JCAMPDX"));
     } else if (useDirLastExported) {
       fc.setCurrentDirectory(new File(dirLastExported));
     }
-    
+
     dirLastExported = jsvp.exportSpectra(this, fc, type, recentFileName, dirLastExported);
 
   }
