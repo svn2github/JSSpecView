@@ -168,6 +168,9 @@ public abstract class JDXSource {
       } if (label.equals("##DATATYPE") &&
             t.value.toUpperCase().contains("NMR")) {
         datatype = "NMR";
+      } if (label.equals("##DATACLASS") &&
+             t.value.toUpperCase().contains("NTUPLE")) {
+        datatype = "NTUPLE";
       }else if (label.equals("##DATATYPE") &&
                 (t.value.toUpperCase().contains("IR") ||
                  t.value.toUpperCase().contains("INFRA"))) {
@@ -226,30 +229,7 @@ public abstract class JDXSource {
    * @param spectrum determineRevPlot
    */
   public static void determineRevPlot(double d1,double d2, String datatype, String xUnits){
-    //JDXSourceStringTokenizer t = new JDXSourceStringTokenizer(sourceContents);
-    //String label;
-
-    /*while (t.hasMoreTokens()) {
-      t.nextToken();
-      label = JSpecViewUtils.cleanLabel(t.label);
-      if (label.contains("FIRSTX")) {
-        d1 = Double.parseDouble(t.value);
-      }
-      if (label.contains("LASTX")) {
-        d2 = Double.parseDouble(t.value);
-      } if (label.equals("##DATATYPE") &&
-               t.value.toUpperCase().contains("NMR")) {
-        datatype = "NMR";
-      }else if (label.equals("##DATATYPE") &&
-               (t.value.toUpperCase().contains("IR") ||
-                t.value.toUpperCase().contains("INFRA"))) {
-        datatype = "IR";
-      }
-      if (label.contains("XUNITS") && t.value.toUpperCase().contains("CM")){
-        nm_or_cm = "CM";
-      }
-    }*/
-    //set reversePlot 'false' as default that is make plot increasing
+    //set reversePlot 'false' as default, i.e. make plot increasing
     if(d1 < d2){
       JSVPanel.setReversePlot(false);
     } else JSVPanel.setReversePlot(true);
@@ -258,6 +238,11 @@ public abstract class JDXSource {
       JSVPanel.setReversePlot(NMR);
     }else if (datatype.contains("NMR") && (d2 < d1)) {
       JSVPanel.setReversePlot(!NMR);
+      //NTUPLES are dealt with separately and should be reset to increasing
+    }else if (datatype.contains("NTUPLE") && (d1 < d2)) {
+        JSVPanel.setReversePlot(!NMR);
+      }else if (datatype.contains("NTUPLE") && (d2 < d1)) {
+        JSVPanel.setReversePlot(NMR);
     }else if (datatype.contains("IR") && (d1 < d2) && xUnits.contains("CM")) {
       JSVPanel.setReversePlot(IR_CM);
     }else if (datatype.contains("IR") && (d2 < d1) && xUnits.contains("CM")) {

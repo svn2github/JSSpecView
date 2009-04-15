@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2008 The University of the West Indies
+/* Copyright (c) 2002-2009 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -34,6 +34,7 @@ import jspecview.source.JDXSource;
  * as x, y values.
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
+ * @author Craig A.D. Walters
  * @author Prof Robert J. Lancashire
  */
 
@@ -76,14 +77,6 @@ class JDXExporter {
     String tabDataSet = "", tmpDataClass = "XYDATA";
     double xCompFactor, yCompFactor;
 
-    if((dataType.toLowerCase().contains("ir")) || (dataType.toLowerCase().contains("nmr"))){
-      if(startIndex < endIndex){
-        int newIndex = endIndex;
-        endIndex = startIndex;
-        startIndex = newIndex;
-      }
-    }
-
     if (spectrum.isHZtoPPM()) {
       Coordinate[] xyCoords = newXYCoords;
       newXYCoords = new Coordinate[xyCoords.length];
@@ -120,8 +113,7 @@ class JDXExporter {
           xCompFactor, yCompFactor);
       break;
     case Exporter.XY:
-      tabDataSet = JSpecViewUtils.coordinatesToString(newXYCoords, startIndex,
-          endIndex, 1);
+      tabDataSet = JSpecViewUtils.coordinatesToString(newXYCoords, startIndex, endIndex, 1);
       break;
     }
 
