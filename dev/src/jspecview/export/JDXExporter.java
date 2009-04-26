@@ -92,7 +92,8 @@ class JDXExporter {
           startIndex, endIndex);
     } else {
       xCompFactor = yCompFactor = 1;
-      tmpDataClass = "XYPOINTS";
+      if (spectrum.isContinuous()) tmpDataClass = "XYDATA";
+          else tmpDataClass="XYPOINTS";
     }
 
     switch (type) {
