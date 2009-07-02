@@ -175,6 +175,8 @@ public class PreferencesDialog extends JDialog {
   private JCheckBox gridCheckBox = new JCheckBox();
   private JCheckBox coordinatesCheckBox = new JCheckBox();
   private JCheckBox scaleCheckBox = new JCheckBox();
+  private JCheckBox svgCheckBox = new JCheckBox();
+  public static boolean inkscape = false;
 
   /**
    * Initialises the <code>PreferencesDialog</code>
@@ -346,6 +348,9 @@ public class PreferencesDialog extends JDialog {
         Boolean.valueOf(preferences.getProperty("showCoordinates")).booleanValue());
     scaleCheckBox.setSelected(
         Boolean.valueOf(preferences.getProperty("showScale")).booleanValue());
+    svgCheckBox.setSelected(
+        Boolean.valueOf(preferences.getProperty("svgExport")).booleanValue());
+
   }
 
   /**
@@ -580,6 +585,7 @@ public class PreferencesDialog extends JDialog {
     gridCheckBox.setText("Show Grid");
     coordinatesCheckBox.setText("Show Coordinates");
     scaleCheckBox.setText("Show Scale");
+    svgCheckBox.setText("SVG export for Inkscape");
     displayFontPanel.add(fontComboBox,                    new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0
             ,GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, new Insets(0, 5, 0, 0), 0, 0));
     displayFontPanel.add(defaultFontCheckBox,                  new GridBagConstraints(0, 2, 1, 1, 0.0, 1.0
@@ -640,6 +646,7 @@ public class PreferencesDialog extends JDialog {
     generalContentBox.add(gridCheckBox, null);
     generalContentBox.add(coordinatesCheckBox, null);
     generalContentBox.add(scaleCheckBox, null);
+    generalContentBox.add(svgCheckBox, null);
     generalContentBox.add(clearRecentButton, null);
     topPanel.add(saveButton,     new GridBagConstraints(0, 1, 3, 1, 0.0, 0.0
             ,GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 0, 5, 0), 0, 0));
@@ -734,6 +741,9 @@ public class PreferencesDialog extends JDialog {
         "showCoordinates", Boolean.toString(coordinatesCheckBox.isSelected()));
     preferences.setProperty(
         "showScale", Boolean.toString(scaleCheckBox.isSelected()));
+    preferences.setProperty(
+        "svgExport", Boolean.toString(svgCheckBox.isSelected()));
+    inkscape = Boolean.valueOf(preferences.getProperty("svgExport")).booleanValue();
 
     // Processing tab
     preferences.setProperty("automaticallyIntegrate", Boolean.toString(autoIntegrateCheckBox.isSelected()));

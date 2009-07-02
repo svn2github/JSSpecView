@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2008 The University of the West Indies
+/* Copyright (c) 2002-2009 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -30,6 +30,7 @@ import jspecview.common.Coordinate;
 import jspecview.common.Graph;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSpecViewUtils;
+import jspecview.application.PreferencesDialog;
 
 /**
  * class <code>SVGExporter</code> contains static methods to export a Graph as
@@ -38,6 +39,7 @@ import jspecview.common.JSpecViewUtils;
  * @see jspecview.common.Graph
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
+ * @author Craig A.D. Walters
  * @author Prof Robert J. Lancashire
  */
 public class SVGExporter extends FormExporter {
@@ -297,6 +299,9 @@ public class SVGExporter extends FormExporter {
       secondTranslateY = -minYOnScale;
     }
 
+ double yTickA= minYOnScale -(0.75 * yStep);
+ double yTickB= 0.5*yStep;
+ 
     context
         .put("plotAreaColor", JSpecViewUtils.colorToHexString(plotAreaColor));
     context.put("backgroundColor", JSpecViewUtils
@@ -320,6 +325,8 @@ public class SVGExporter extends FormExporter {
     context.put("maxXOnScale", new Double(maxXOnScale));
     context.put("minYOnScale", new Double(minYOnScale));
     context.put("maxYOnScale", new Double(maxYOnScale));
+    context.put("yTickA", new Double(yTickA));
+    context.put("yTickB", new Double(yTickB));
     context.put("xScaleFactor", new Double(xScaleFactor));
     context.put("yScaleFactor", new Double(yScaleFactor));
 
@@ -332,6 +339,10 @@ public class SVGExporter extends FormExporter {
     for (int i = startDataPointIndex; i <= endDataPointIndex; i++)
       newXYCoords.addElement(xyCoords[i]);
 
+    double firstX, firstY;
+    firstX=xyCoords[startDataPointIndex].getXVal();
+    firstY=xyCoords[startDataPointIndex].getYVal();
+    
     context.put("title", title);
     context.put("xyCoords", newXYCoords);
     context.put("continuous", new Boolean(continuous));
@@ -353,6 +364,8 @@ public class SVGExporter extends FormExporter {
 
     context.put("xUnits", xUnits);
     context.put("yUnits", yUnits);
+    context.put("firstX", firstX);
+    context.put("firstY", firstY);
 
     int xUnitLabelX = rightPlotArea - 50;
     int xUnitLabelY = bottomPlotArea + 30;
@@ -369,8 +382,13 @@ public class SVGExporter extends FormExporter {
     context.put("numDecimalPlacesX", new Integer(Math.abs(hashNumX)));
     context.put("numDecimalPlacesY", new Integer(Math.abs(hashNumY)));
 
-    return writeForm("plot.vm");
-
+    if (PreferencesDialog.inkscape){
+        System.out.println("inkscape is true ");
+        return writeForm("plot_ink.vm");
+    }else {
+        System.out.println("inkscape is false ");
+        return writeForm("plot.vm");
+    }
   }
 
   /**
@@ -615,6 +633,12 @@ public class SVGExporter extends FormExporter {
     context.put("numDecimalPlacesX", new Integer(Math.abs(hashNumX)));
     context.put("numDecimalPlacesY", new Integer(Math.abs(hashNumY)));
 
-    return writeForm("plot.vm");
+    if (PreferencesDialog.inkscape){
+        System.out.println("inkscape is true ");
+        return writeForm("plot_ink.vm");
+    }else {
+        System.out.println("inkscape is false ");
+        return writeForm("plot.vm");
+    }
   }
 }

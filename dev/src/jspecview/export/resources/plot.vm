@@ -1,7 +1,6 @@
-<?xml version='1.0' standalone='yes'?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20001102//EN"
-  "http://www.w3.org/TR/2000/CR-SVG-20001102/DTD/svg-20001102.dtd">
-<svg xml:space="preserve" width="850.0" height="400.0" viewBox="0 0 $svgWidth $svgHeight" preserveAspectRatio="none" onload="onload(evt)" onmousemove="getCoord(evt)">
+<?xml version='1.0' encoding="UTF-8" standalone='yes'?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" width="850.0" height="400.0" viewBox="0 0 $svgWidth $svgHeight" preserveAspectRatio="none" onload="onload(evt)" onmousemove="getCoord(evt)">
 <!-- Copyright (c) 2002 Dept. of Chemistry, University of the West Indies, Jamaica -->
 <script >
   <![CDATA[
