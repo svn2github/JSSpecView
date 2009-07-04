@@ -125,7 +125,7 @@ public class AboutDialog extends JDialog {
     txt = drawMessage(message, "Arial", Font.BOLD, 12);
     p.add(txt);
 
-    message = "Copyright (c) 2009, Dept. of Chemistry\nUniversity of the West Indies, Mona Campus\nJAMAICA";
+    message = "Copyright (c) 2009, Department of Chemistry\nUniversity of the West Indies, Mona Campus\nJAMAICA";
     txt = drawMessage(message, "Arial", Font.PLAIN, 12);
     p.add(txt);
 

@@ -48,7 +48,7 @@ is divided into following sections:
              <property name="certificate.dir" value="certificate" />
              <property name="extras.dir" value="extras" />
              <property name="include.dir" value="include" />
-             <property name="work.dir" value="dist" />
+             <property name="work.dir" value="dist/test" />
              <property name="applet.url" value="JSVApplet.html" />
 
 <!-- The following external JAR is required: --> 
