@@ -1069,8 +1069,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
       drawUnits(g, height, width);
     if(coords)
       drawCoordinates(g, height, width);
-    /*if(zoomEnabled)
-     drawZoomBox(g);*/
+    if(zoomEnabled)
+     drawZoomBox(g);
   }
 
 

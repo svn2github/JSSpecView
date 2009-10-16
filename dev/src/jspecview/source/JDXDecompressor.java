@@ -85,7 +85,7 @@ public class JDXDecompressor {
   /**
    * All Delimiters in a JCAMP-DX compressed file
    */
-  private static final String allDelim = "?+- %@ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrs\n";
+  private static final String allDelim = "?+- %@ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrs\t\n";
 
   /**
    * The current line index
