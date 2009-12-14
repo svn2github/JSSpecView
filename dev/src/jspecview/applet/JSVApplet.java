@@ -107,7 +107,7 @@ public class JSVApplet extends JApplet {
     System.out.println("JSpecView " + this + " finalized");
    }
 
- public static final String APPLET_VERSION = "1.0.20091015-1115";
+ public static final String APPLET_VERSION = "1.0.20091214-1000";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath;
@@ -2093,6 +2093,8 @@ public class JSVApplet extends JApplet {
           peakCallbackFunctionName = value;
           break;
         case PARAM_PLOTCOLORS:
+          plotColorsStr= value;
+          break;
         case PARAM_VERSION:
           break;
         case PARAM_IRMODE:
