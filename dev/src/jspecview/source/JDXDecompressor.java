@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2009 The University of the West Indies
+/* Copyright (c) 2002-2010 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -17,6 +17,11 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+// CHANGES to 'JDXDecompressor.java' - 
+// University of the West Indies, Mona Campus
+//
+// 23-08-2010 fix for DUP before DIF e.g. at start of line
+
 package jspecview.source;
 
 import java.io.BufferedReader;
@@ -29,9 +34,9 @@ import jspecview.common.JSpecViewUtils;
 
 
 /**
- * JDXDecompressor contains static methods to decompress the data part of a
+ * JDXDecompressor contains static methods to decompress the data part of 
  * JCAMP-DX spectra that have been compressed using DIF, FIX, SQZ or PAC formats.
- * If you wish to parse the data from XY format see
+ * If you wish to parse the data from XY formats see
  * {@link jspecview.common.JSpecViewUtils#parseDSV(java.lang.String, double, double)}
  * @author Christopher Muir
  * @author Debbie-Ann Facey
@@ -295,7 +300,7 @@ public class JDXDecompressor {
           point = new Coordinate();
           xval += deltaX;
           point.setXVal(xval);
-          difval = getYvalDIF(line,linenumber);
+          difval = getYvalDIF(line,linenumber);        
           yval += difval;
           point.setYVal(yval * yFactor);
           if (increasing)
@@ -341,6 +346,7 @@ public class JDXDecompressor {
       }
       try{
         line = dataReader.readLine();
+        difval=0;
       }
       catch(IOException ioe){
       }
