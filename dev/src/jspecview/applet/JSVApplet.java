@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2009 The University of the West Indies
+/* Copyright (c) 2002-2010 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -25,6 +25,8 @@
 // 13-01-2008 in-line load JCAMP-DX file routine added
 // 22-07-2008 reinstated calls for exporting since Ok with JRE 1.6.0_05
 // 25-07-2008 added module to predict colour of solution
+// 08-01-2010 need bugfix for protected static reverseplot
+// 17-03-2010 fix for NMRShiftDB CML files
 
 package jspecview.applet;
 
@@ -107,7 +109,7 @@ public class JSVApplet extends JApplet {
     System.out.println("JSpecView " + this + " finalized");
    }
 
- public static final String APPLET_VERSION = "1.0.20091214-1000";
+ public static final String APPLET_VERSION = "1.0.20100823-1515";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath;
@@ -696,8 +698,7 @@ public class JSVApplet extends JApplet {
       }
     }
   }
-
-  public void initProperties(JSVPanel jsvp) {
+   private void initProperties(JSVPanel jsvp) {
        // set JSVPanel properties from applet parameters
         jsvp.setGridOn(gridOn);
         jsvp.setCoordinatesOn(coordinatesOn);
@@ -1852,7 +1853,7 @@ public class JSVApplet extends JApplet {
 
   /**
      * Method that can be called from another applet or from javascript
-     * that toggles reverses the plot on a <code>JSVPanel</code>
+     * that toggles reversing the plot on a <code>JSVPanel</code>
    */
   public void reversePlot(){
     if (selectedJSVPanel != null){
@@ -1982,7 +1983,7 @@ public class JSVApplet extends JApplet {
 
   /**
    * Calls a javascript function given by the function name
-   * passing to it the string prarmeters as arguments
+   * passing to it the string parameters as arguments
    * @param function the javascript function name
    * @param parameters the function arguments as a string in the form "x, y, z..."
    */
