@@ -228,7 +228,7 @@ public abstract class JDXSource {
    * Determines if the default plot should be reversed or not
    * @param spectrum determineRevPlot
    */
-  public static void determineRevPlot(double d1,double d2, String datatype, String xUnits){
+  protected static void determineRevPlot(double d1,double d2, String datatype, String xUnits){
     //set reversePlot 'false' as default, i.e. make plot increasing
     if(d1 < d2){
       JSVPanel.setReversePlot(false);

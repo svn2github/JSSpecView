@@ -1,4 +1,4 @@
-/* Copyright (c) 2007-2009 The University of the West Indies
+/* Copyright (c) 2007-2010 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -150,8 +150,13 @@ public class CMLSource extends XMLSource {
           owner = reader.getAttrValue("content");
         else
           owner = reader.thisValue();
-      }
-    }
+       }else if (tagName.contains("observenucleus")) {
+        if (attrList.contains("content"))
+        	obNucleus = reader.getAttrValue("content");
+          else
+            obNucleus = reader.thisValue();
+        }
+     }    
   }
 
   /**

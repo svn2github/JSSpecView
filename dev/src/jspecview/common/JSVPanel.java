@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2009 The University of the West Indies
+/* Copyright (c) 2002-2010 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -25,6 +25,7 @@
 //                - previously, one point less than npoints was displayed
 // 25-06-2007 cw  - show/hide/close modified
 // 10-02-2009 cw  - adjust for non zero baseline in North South plots
+// 24-08-2010 rjl - check coord output is not Internationalised and uses decimal point not comma
 
 package jspecview.common;
 
@@ -52,6 +53,7 @@ import java.awt.print.PrinterJob;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Vector;
 
 import javax.imageio.ImageIO;
@@ -160,7 +162,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
 
   // Is true if plot is reversed
   protected static boolean plotReversed;
-
 
   // background color of plot area
   protected Color plotAreaColor = Color.white;
@@ -1215,13 +1216,13 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
     if (scaleData.hashNumX <= 0)
       hashX = hash1.substring(0,Math.abs(scaleData.hashNumX)+3);
 
-    DecimalFormat displayXFormatter = new DecimalFormat(hashX);
+    DecimalFormat displayXFormatter = new DecimalFormat(hashX, new DecimalFormatSymbols(java.util.Locale.US) );
 
     if (scaleData.hashNumY <= 0)
       hashY = hash1.substring(0,Math.abs(scaleData.hashNumY)+3);
 
 
-    DecimalFormat displayYFormatter = new DecimalFormat(hashY);
+    DecimalFormat displayYFormatter = new DecimalFormat(hashY, new DecimalFormatSymbols(java.util.Locale.US));
 
     Font font;
 
@@ -1576,19 +1577,20 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
         if (scaleData.hashNumX <= 0)
           hashX = hash1.substring(0,Math.abs(scaleData.hashNumX)+3);
 
-        DecimalFormat displayXFormatter = new DecimalFormat(hashX);
+        DecimalFormat displayXFormatter = new DecimalFormat(hashX, new DecimalFormatSymbols(java.util.Locale.US));
 
         if (scaleData.hashNumY <= 0)
         hashY = hash1.substring(0,Math.abs(scaleData.hashNumY)+3);
 
-        DecimalFormat displayYFormatter = new DecimalFormat(hashY);
+        DecimalFormat displayYFormatter = new DecimalFormat(hashY, new DecimalFormatSymbols(java.util.Locale.US));
 
         String xStr, yStr;
 
         xStr = displayXFormatter.format(xPt);
         yStr = displayYFormatter.format(yPt);
 
-        //coordClickedStr = xStr + " "+ yStr;
+        // coordClickedStr = xStr + " "+ yStr;
+        // System.out.println(xStr);        
 
         coordClicked = new Coordinate(Double.parseDouble(xStr), Double.parseDouble(yStr));
       }
@@ -1630,12 +1632,12 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
       if (scaleData.hashNumX <= 0)
         hashX = hash1.substring(0,Math.abs(scaleData.hashNumX)+3);
 
-      DecimalFormat displayXFormatter = new DecimalFormat(hashX);
+      DecimalFormat displayXFormatter = new DecimalFormat(hashX, new DecimalFormatSymbols(java.util.Locale.US));
 
       if (scaleData.hashNumY <= 0)
       hashY = hash1.substring(0,Math.abs(scaleData.hashNumY)+3);
 
-      DecimalFormat displayYFormatter = new DecimalFormat(hashY);
+      DecimalFormat displayYFormatter = new DecimalFormat(hashY, new DecimalFormatSymbols(java.util.Locale.US));
 
       coordStr = "(" +displayXFormatter.format(xPt) + ", " + displayYFormatter.format(yPt) + ")";
 
