@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2009 The University of the West Indies
+/* Copyright (c) 2002-2010 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -36,6 +36,10 @@ import jspecview.application.PreferencesDialog;
  * class <code>SVGExporter</code> contains static methods to export a Graph as
  * as SVG. Uses a template file called 'plot.vm'. So any changes in design should
  * be done in this file.
+ * 
+ * Modified 
+ * 6 Oct 2010  added lastX for Inkscape SVG export so baseline could be printed
+ * 
  * @see jspecview.common.Graph
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
@@ -299,8 +303,8 @@ public class SVGExporter extends FormExporter {
       secondTranslateY = -minYOnScale;
     }
 
- double yTickA= minYOnScale -(0.75 * yStep);
- double yTickB= 0.5*yStep;
+ double yTickA= minYOnScale -(yStep/2);
+ double yTickB= yStep/5;
  
     context
         .put("plotAreaColor", JSpecViewUtils.colorToHexString(plotAreaColor));
@@ -339,9 +343,10 @@ public class SVGExporter extends FormExporter {
     for (int i = startDataPointIndex; i <= endDataPointIndex; i++)
       newXYCoords.addElement(xyCoords[i]);
 
-    double firstX, firstY;
+    double firstX, firstY, lastX;
     firstX=xyCoords[startDataPointIndex].getXVal();
     firstY=xyCoords[startDataPointIndex].getYVal();
+    lastX=xyCoords[endDataPointIndex].getXVal();
     
     context.put("title", title);
     context.put("xyCoords", newXYCoords);
@@ -366,6 +371,7 @@ public class SVGExporter extends FormExporter {
     context.put("yUnits", yUnits);
     context.put("firstX", firstX);
     context.put("firstY", firstY);
+    context.put("lastX", lastX);
 
     int xUnitLabelX = rightPlotArea - 50;
     int xUnitLabelY = bottomPlotArea + 30;
