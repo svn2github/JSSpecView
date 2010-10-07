@@ -2,6 +2,7 @@
    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
    xmlns:siUnits="http://www.xml-cml.org/units/siUnits"
    xmlns:units="http://www.xml-cml.org/units/units"
+   xmlns:nmr="http://www.nmrshiftdb.org/dict"
    xmlns:jspecview="http://jspecview.sf.net/convention.html"
    xmlns:cmlDict="http://www.xml-cml.org/dict/cmlDict"
    xmlns:cml="http://www.xml-cml.org/dict/cml"
@@ -14,9 +15,13 @@
    http://www.xml-cml.org/units/units dict/unitsDict.xml 
    http://www.xml-cml.org/units/siUnits dict/siUnitsDict.xml">
   <spectrum id="$ident" title="$title" convention="JSpecView" type="$specinits">
+    <conditionList>
+       <scalar dataType="xsd:string" dictRef="cml:field" units="siUnits:hertz">$ObFreq</scalar>
+    </conditionList>
     <metadataList>
         <metadata name="jcamp:origin" content="$origin" />
         <metadata name="jcamp:owner" content="$owner" />
+        <metadata name="nmr:OBSERVENUCLEUS" content="$ObNucleus"/>
     </metadataList>
     <parameterList>
 #if($model !="")
