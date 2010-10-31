@@ -26,6 +26,7 @@
 // 25-06-2007 cw  - show/hide/close modified
 // 10-02-2009 cw  - adjust for non zero baseline in North South plots
 // 24-08-2010 rjl - check coord output is not Internationalised and uses decimal point not comma
+// 31-10-2010 rjl - bug fix for drawZoomBox line 1359 suggested by Tim te Beek
 
 package jspecview.common;
 
@@ -1355,8 +1356,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
       isMouseDragged = false;
     }
     if(isMouseReleased){
-      repaint();
+        isMouseReleased = false;   // bug fix suggested by Tim te Beek 29 Oct 2010    
+        repaint();
     }
+
   }
 
 
