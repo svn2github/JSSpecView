@@ -27,6 +27,7 @@
 // 10-02-2009 cw  - adjust for non zero baseline in North South plots
 // 24-08-2010 rjl - check coord output is not Internationalised and uses decimal point not comma
 // 31-10-2010 rjl - bug fix for drawZoomBox line 1359 suggested by Tim te Beek
+// 01-11-2010 rjl - bug fix for drawZoomBox
 
 package jspecview.common;
 
@@ -1344,15 +1345,18 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
   protected void drawZoomBox(Graphics g){
     g.setColor(zoomBoxColor);
 
-    if(isMousePressed){
-      g.drawLine(zoomBoxX, topPlotAreaPos, zoomBoxX, bottomPlotAreaPos);
-      isMousePressed = false;
-    }
+//    if(isMousePressed){
+//      g.drawLine(zoomBoxX, topPlotAreaPos, zoomBoxX, bottomPlotAreaPos);
+//      isMousePressed = false;
+//    }
+//  not needed if the following routine was working, since it draws from start to end point
+    
     if(isMouseDragged){
       g.drawLine(zoomBoxX, topPlotAreaPos, zoomBoxX, bottomPlotAreaPos);
       g.drawLine(zoomBoxX, topPlotAreaPos, currZoomBoxX, topPlotAreaPos);
       g.drawLine(zoomBoxX, bottomPlotAreaPos, currZoomBoxX, bottomPlotAreaPos);
       g.drawLine(currZoomBoxX, topPlotAreaPos, currZoomBoxX, bottomPlotAreaPos);
+ //     System.out.println(zoomBoxX + " " + currZoomBoxX);   //   
       isMouseDragged = false;
     }
     if(isMouseReleased){
@@ -1612,12 +1616,11 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
     int xPixel = x /*- getX()*/;
     int yPixel = y /*- getY()*/;
 
-    if( xPixel >= leftPlotAreaPos && xPixel <= rightPlotAreaPos &&
-        yPixel >= topPlotAreaPos && yPixel <= bottomPlotAreaPos &&
-        coordsOn){
-
+    if( xPixel >= leftPlotAreaPos && xPixel <= rightPlotAreaPos && 
+    		yPixel >= topPlotAreaPos && yPixel <= bottomPlotAreaPos ) {   	
+    	
       if(isMouseDraggedEvent){
-        isMouseDragged = true;
+        isMouseDragged = true;      
         currZoomBoxX = xPixel;
       }
 
@@ -1653,6 +1656,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
    * @param e the <code>MouseEvent</code>
    */
   protected void fireMouseDragged(MouseEvent e){
+	isMouseDraggedEvent = true;  // testing	  
     fireMouseMoved(e);
     if(mouseMovedOk)
       repaint();
