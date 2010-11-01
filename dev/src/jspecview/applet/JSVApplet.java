@@ -109,7 +109,7 @@ public class JSVApplet extends JApplet {
     System.out.println("JSpecView " + this + " finalized");
    }
 
- public static final String APPLET_VERSION = "1.0.20101006-2010";
+ public static final String APPLET_VERSION = "1.0.20101101-1830";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath;
