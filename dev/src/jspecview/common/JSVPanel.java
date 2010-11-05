@@ -26,8 +26,9 @@
 // 25-06-2007 cw  - show/hide/close modified
 // 10-02-2009 cw  - adjust for non zero baseline in North South plots
 // 24-08-2010 rjl - check coord output is not Internationalised and uses decimal point not comma
-// 31-10-2010 rjl - bug fix for drawZoomBox line 1359 suggested by Tim te Beek
+// 31-10-2010 rjl - bug fix for drawZoomBox suggested by Tim te Beek
 // 01-11-2010 rjl - bug fix for drawZoomBox
+// 05-11-2010 rjl - colour the drawZoomBox area suggested by Valery Tkachenko
 
 package jspecview.common;
 
@@ -194,7 +195,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
   // coordinate Color
   protected Color coordinatesColor = Color.red;
 
-  protected Color zoomBoxColor = Color.gray;
+  protected Color zoomBoxColor = new Color (0,0,0,30);
 
   private boolean isMousePressed, isMouseDragged, isMouseReleased;
   private int zoomBoxX, currZoomBoxX;
@@ -1339,31 +1340,20 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
   }
 
   /**
-   * Draws a box around the portion of the plot are to be zoomed
+   * Draws a light grey rectangle over the portion of the spectrum to be zoomed
    * @param g the Graphics object
    */
   protected void drawZoomBox(Graphics g){
-    g.setColor(zoomBoxColor);
-
-//    if(isMousePressed){
-//      g.drawLine(zoomBoxX, topPlotAreaPos, zoomBoxX, bottomPlotAreaPos);
-//      isMousePressed = false;
-//    }
-//  not needed if the following routine was working, since it draws from start to end point
-    
-    if(isMouseDragged){
-      g.drawLine(zoomBoxX, topPlotAreaPos, zoomBoxX, bottomPlotAreaPos);
-      g.drawLine(zoomBoxX, topPlotAreaPos, currZoomBoxX, topPlotAreaPos);
-      g.drawLine(zoomBoxX, bottomPlotAreaPos, currZoomBoxX, bottomPlotAreaPos);
-      g.drawLine(currZoomBoxX, topPlotAreaPos, currZoomBoxX, bottomPlotAreaPos);
- //     System.out.println(zoomBoxX + " " + currZoomBoxX);   //   
+   //  adapted from suggestion by Valery Tkachenko 5 Nov 2010 and previously implemented for ChemSpider 
+   if(isMouseDragged){
+      g.setColor(zoomBoxColor);
+      g.fillRect(zoomBoxX, topPlotAreaPos, currZoomBoxX - zoomBoxX, bottomPlotAreaPos - topPlotAreaPos);
       isMouseDragged = false;
     }
     if(isMouseReleased){
         isMouseReleased = false;   // bug fix suggested by Tim te Beek 29 Oct 2010    
         repaint();
     }
-
   }
 
 
