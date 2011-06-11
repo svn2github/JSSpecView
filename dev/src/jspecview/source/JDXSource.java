@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2009 The University of the West Indies
+/* Copyright (c) 2002-2011 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -241,12 +241,16 @@ public abstract class JDXSource {
       //NTUPLES are dealt with separately and should be reset to increasing
     }else if (datatype.contains("NTUPLE") && (d1 < d2)) {
         JSVPanel.setReversePlot(!NMR);
-      }else if (datatype.contains("NTUPLE") && (d2 < d1)) {
+    }else if (datatype.contains("NTUPLE") && (d2 < d1)) {
         JSVPanel.setReversePlot(NMR);
-    }else if (datatype.contains("IR") && (d1 < d2) && xUnits.contains("CM")) {
-      JSVPanel.setReversePlot(IR_CM);
-    }else if (datatype.contains("IR") && (d2 < d1) && xUnits.contains("CM")) {
-      JSVPanel.setReversePlot(!IR_CM);
+    }else if(datatype.contains("LINK") && (d1 < d2) && xUnits.contains("CM")){
+    	JSVPanel.setReversePlot(IR_CM);
+    }else if(datatype.contains("LINK") && (d1 > d2) && xUnits.contains("CM")){
+    	JSVPanel.setReversePlot(!IR_CM);        
+    }else if (datatype.contains("IR")  && (d1 < d2) && xUnits.contains("CM")) {
+        JSVPanel.setReversePlot(IR_CM);
+    }else if (datatype.contains("IR")  && (d2 < d1) && xUnits.contains("CM")) {
+        JSVPanel.setReversePlot(!IR_CM);
     }
   }
 

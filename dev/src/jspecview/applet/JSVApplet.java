@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2010 The University of the West Indies
+/* Copyright (c) 2002-2011 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -27,6 +27,7 @@
 // 25-07-2008 added module to predict colour of solution
 // 08-01-2010 need bugfix for protected static reverseplot
 // 17-03-2010 fix for NMRShiftDB CML files
+// 11-06-2011 fix for LINK files and reverseplot 
 
 package jspecview.applet;
 
@@ -109,7 +110,7 @@ public class JSVApplet extends JApplet {
     System.out.println("JSpecView " + this + " finalized");
    }
 
- public static final String APPLET_VERSION = "1.0.20101105-1830";
+ public static final String APPLET_VERSION = "1.0.20110611-1145";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath;
@@ -711,12 +712,20 @@ public class JSVApplet extends JApplet {
           lastX = source.getJDXSpectrum(0).getLastX();
           datatype = source.getJDXSpectrum(0).getDataType();
           dataclass = source.getJDXSpectrum(0).getDataClass();
+
           final boolean IR_CM = true;
           final boolean NMR   = true;
-
+          
+          if ((datatype.contains("IR") || datatype.contains("INFRA"))&&
+                  (firstX < lastX) && Xunits.contains("CM")) {
+          jsvp.setReversePlot(IR_CM);
+          }
+          
+/*
           if(firstX < lastX){
             jsvp.setReversePlot(false);
           } else jsvp.setReversePlot(true);
+ 
           //check for the few anomalies
           if (datatype.contains("NMR")&& !dataclass.contains("XYDATA")
               &&(firstX < lastX)) {
@@ -735,16 +744,19 @@ public class JSVApplet extends JApplet {
             jsvp.setReversePlot(IR_CM);
           }else if ((datatype.contains("IR") ||datatype.contains("INFRA")) &&
                     (firstX > lastX) && Xunits.contains("CM")) {
+            reversePlot = false;
             jsvp.setReversePlot(!IR_CM);
           }else if(datatype.contains("LINK")&&  (firstX < lastX) &&
-                   Xunits.contains("CM")){
-            jsvp.setReversePlot(IR_CM);
-            reversePlot = true;
-          }else if(datatype.contains("LINK")&&  (firstX > lastX) &&
-                   Xunits.contains("CM")){
-            jsvp.setReversePlot(!IR_CM);
+                  Xunits.contains("CM")){
+           jsvp.setReversePlot(IR_CM);
+           reversePlot = true;
+         }else if(datatype.contains("LINK")&&  (firstX > lastX) &&
+                  Xunits.contains("CM")){
+           jsvp.setReversePlot(!IR_CM);
           }
-        }
+ */
+       }
+ 
         jsvp.setZoomEnabled(enableZoom);
         // other JSVPanel properties
         // Need to add to applet Parameters
