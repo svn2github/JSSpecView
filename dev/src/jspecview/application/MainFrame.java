@@ -36,6 +36,7 @@
 //                  use a default scheme if the file can't be found or read properly,
 //                  but there will still be a problem if an attempt is made to
 //                  write out a new scheme under these circumstances!
+// 23-07-2011 jak - altered code to support drawing scales and units separately
 
 package jspecview.application;
 
@@ -162,7 +163,8 @@ public class MainFrame
   Color bgc= Color.WHITE;
   boolean gridOn;
   boolean coordinatesOn;
-  boolean scaleOn;
+  boolean xScaleOn;
+  boolean yScaleOn;
   boolean obscure;
   //  ----------------------- Application Attributes ---------------------
 
@@ -378,7 +380,7 @@ public class MainFrame
     //boolean loadedOk;
     //Set Default Properties
 
-    // Initalise application properties with defaults
+    // Initalize application properties with defaults
     // and load properties from file
     properties = new Properties();
     // sets the list of recently opened files property to be initially empty
@@ -396,7 +398,8 @@ public class MainFrame
     properties.setProperty("defaultDisplaySchemeName", "Default");
     properties.setProperty("showGrid", "false");
     properties.setProperty("showCoordinates", "false");
-    properties.setProperty("showScale", "true");
+    properties.setProperty("showXScale", "true");
+    properties.setProperty("showYScale", "true");
     properties.setProperty("svgExport", "false");
     properties.setProperty("automaticTAConversion", "false");
     properties.setProperty("AtoTSeparateWindow", "false");
@@ -510,7 +513,8 @@ public class MainFrame
     gridOn = Boolean.valueOf(properties.getProperty("showGrid")).booleanValue();
     coordinatesOn = Boolean.valueOf(properties.getProperty("showCoordinates")).
         booleanValue();
-    scaleOn = Boolean.valueOf(properties.getProperty("showScale")).booleanValue();
+    xScaleOn = Boolean.valueOf(properties.getProperty("showXScale")).booleanValue();
+    yScaleOn = Boolean.valueOf(properties.getProperty("showYScale")).booleanValue();
     // Need to apply Properties to all panels that are opened
     // and update coordinates and grid CheckBoxMenuItems
 
@@ -627,7 +631,7 @@ public class MainFrame
   }
 
   /**
-   * Intialises GUI components
+   * Initializes GUI components
    * @throws Exception
    */
   private void jbInit() throws Exception {
@@ -1339,8 +1343,10 @@ public class MainFrame
     jsvp.setGridOn(gridOn);
     gridCheckBoxMenuItem.setSelected(gridOn);
     //Color tmpcolour;
-    jsvp.setScaleOn(scaleOn);
-    jsvp.setUnitsOn(scaleOn);
+    jsvp.setXScaleOn(xScaleOn);
+    jsvp.setYScaleOn(yScaleOn);
+    jsvp.setXUnitsOn(xScaleOn);
+    jsvp.setYUnitsOn(yScaleOn);
     jsvp.setTitleColor(ds.getColor("title"));
     jsvp.setUnitsColor(ds.getColor("units"));
     jsvp.setScaleColor(ds.getColor("scale"));

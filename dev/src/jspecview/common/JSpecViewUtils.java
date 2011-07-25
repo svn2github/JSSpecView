@@ -17,6 +17,12 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+// CHANGES to 'JSpecViewUtils.java' - Application Utility Class
+// University of the West Indies, Mona Campus
+//
+// 23-07-2011 jak - altered appletIntegrate to support specifying
+//					the integration plot color.
+
 package jspecview.common;
 
 import java.awt.Color;
@@ -882,13 +888,16 @@ public class JSpecViewUtils {
           newJsvp.setTitle(integGraph.getTitle());
           newJsvp.setOverlayIncreasing(spectrum.isIncreasing());
 
+          newJsvp.setPlotColors(new Color[] {newJsvp.getPlotColor(0),
+        		  				jsvp.getIntegralPlotColor()});
+          
           // zoom turned off after integration?
           newJsvp.setZoomEnabled(false);
           panel.remove(jsvp);
           panel.add(newJsvp);
-
-          newJsvp.setPlotColors(new Color[] {newJsvp.getPlotColor(0),
-                                integralPlotColor});
+          
+          //newJsvp.setPlotColors(new Color[] {newJsvp.getPlotColor(0),
+          //                      integralPlotColor});
         }
       }
       catch (ScalesIncompatibleException ex) {

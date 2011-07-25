@@ -230,9 +230,9 @@ public abstract class JDXSource {
    */
   protected static void determineRevPlot(double d1,double d2, String datatype, String xUnits){
     //set reversePlot 'false' as default, i.e. make plot increasing
-    if(d1 < d2){
-      JSVPanel.setReversePlot(false);
-    } else JSVPanel.setReversePlot(true);
+//    if(d1 < d2){
+//      JSVPanel.setReversePlot(false);
+//    } else JSVPanel.setReversePlot(true);
     //check for the few anomalies
     if (datatype.contains("NMR") && (d1 < d2)) {
       JSVPanel.setReversePlot(NMR);
@@ -246,9 +246,11 @@ public abstract class JDXSource {
     }else if(datatype.contains("LINK") && (d1 < d2) && xUnits.contains("CM")){
     	JSVPanel.setReversePlot(IR_CM);
     }else if(datatype.contains("LINK") && (d1 > d2) && xUnits.contains("CM")){
+  	    System.out.println("JDXSource: d1>d2 datatype = IR");
     	JSVPanel.setReversePlot(!IR_CM);        
     }else if (datatype.contains("IR")  && (d1 < d2) && xUnits.contains("CM")) {
-        JSVPanel.setReversePlot(IR_CM);
+  	    System.out.println("JDXSource:d1<d2 datatype = IR");
+    	JSVPanel.setReversePlot(IR_CM);
     }else if (datatype.contains("IR")  && (d2 < d1) && xUnits.contains("CM")) {
         JSVPanel.setReversePlot(!IR_CM);
     }

@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2008 The University of the West Indies
+/* Copyright (c) 2002-2010 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -98,7 +98,7 @@ public class JDXSpectrum implements Graph{
    * Constructor
    */
   public JDXSpectrum(){
-    System.out.println("initlize JDXSPectrum " + this);
+    System.out.println("initialize JDXSpectrum " + this);
     headerTable = new HashMap<String, String>();
     xyCoords = new Coordinate[0];
   }

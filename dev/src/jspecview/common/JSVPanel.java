@@ -29,6 +29,9 @@
 // 31-10-2010 rjl - bug fix for drawZoomBox suggested by Tim te Beek
 // 01-11-2010 rjl - bug fix for drawZoomBox
 // 05-11-2010 rjl - colour the drawZoomBox area suggested by Valery Tkachenko
+// 23-07-2011 jak - Added feature to draw the x scale, y scale, x units and y units
+//					independently of each other. Added independent controls for the font,
+//					title font, title bold, and integral plot color.
 
 package jspecview.common;
 
@@ -147,8 +150,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
   protected boolean coordsOn = true;
   protected boolean highlightOn = false;
   protected boolean titleOn = true;
-  protected boolean scaleOn = true;
-  protected boolean unitsOn = true;
+  protected boolean xScaleOn = true;
+  protected boolean yScaleOn = true;
+  protected boolean xUnitsOn = true;
+  protected boolean yUnitsOn = true;
 
   // highlight range
   protected double hlStart, hlEnd;
@@ -209,8 +214,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
 
 
   /* PUT FONT FACE AND SIZE ATTRIBUTES HERE */
-  String fontName = null;
-
+  String displayFontName = null;
+  String titleFontName = null;
+  boolean titleBoldOn = false;
+  
   // The scale factors
   protected double xFactorForScale, yFactorForScale;
 
@@ -236,8 +243,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
 
   private boolean isPrinting = false;
   private boolean printGrid = gridOn;
-  private boolean printScale = true;
   private boolean printTitle = true;
+  private boolean printScale = true;
   private String printingFont = null;
   private String graphPosition = "default";
   private int defaultHeight = 450;
@@ -338,7 +345,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
   }
 
   /**
-   * Initises the JSVPanel
+   * Initializes the JSVPanel
    * @param spectra the array of spectra
    * @param startIndices the index of the start data point
    * @param endIndices the index of the end data point
@@ -377,7 +384,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
 // throw exception when units are not the same on both axes
 
   /**
-   * Intialises the JSVPanel
+   * Initializes the JSVPanel
    * @param spectra the array of spectra
    * @throws ScalesIncompatibleException
    */
@@ -547,21 +554,37 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
   public void setCoordinatesOn(boolean val){
     coordsOn = val;
   }
-
+  
   /**
-   * Allows the scale to be displayed or not
-   * @param val true if scale should be displayed, false otherwise
+   * Displays x scale if val is true
+   * @param val true if x scale should be displayed, false otherwise
    */
-  public void setScaleOn(boolean val){
-    scaleOn = val;
+  public void setXScaleOn(boolean val){
+	  xScaleOn = val;
   }
-
+  
   /**
-   * Allows the units are to be displayed or not
-   * @param val true if scale should be displayed, false otherwise
+   * Displays y scale if val is true
+   * @param val true if y scale should be displayed, false otherwise
    */
-  public void setUnitsOn(boolean val){
-    unitsOn = val;
+  public void setYScaleOn(boolean val){
+	  yScaleOn = val;
+  }
+  
+  /**
+   * Displays x units if val is true
+   * @param val true if x units should be displayed, false otherwise
+   */
+  public void setXUnitsOn(boolean val){
+	  xUnitsOn = val;
+  }
+  
+  /**
+   * Displays y units if val is true
+   * @param val true if y units should be displayed, false otherwise
+   */
+  public void setYUnitsOn(boolean val){
+	  yUnitsOn = val;
   }
 
   /**
@@ -695,15 +718,32 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
   public void setTitleOn(boolean val){
     titleOn = val;
   }
+  
+  /**
+   * Determines whether the title is bold or not
+   * @param val true if the title should be bold
+   */
+  public void setTitleBoldOn(boolean val){
+	  titleBoldOn = val;
+  }
+  
+  /**
+   * Sets the title font
+   * @param titleFont the name of the title font
+   */
+  public void setTitleFontName(String titleFont){
+	  this.titleFontName = titleFont;
+  }
 
 
   /**
    * Sets the display font name
-   * @param fontName the name of the display font
+   * @param displayFontName the name of the display font
    */
-  public void setDisplayFontName(String fontName){
-    this.fontName = fontName;
+  public void setDisplayFontName(String displayFontName){
+    this.displayFontName = displayFontName;
   }
+
 
   /* -------------------Other methods ------------------------------------*/
 
@@ -781,7 +821,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
 
   /**
    * Returns true if grid is on
-   * @return true if if the grid is displayed
+   * @return true if the grid is displayed
    */
   public boolean isGridOn(){
     return gridOn;
@@ -854,6 +894,14 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
   public Color getPlotColor(int index){
     return plotColors[index];
   }
+  
+  /**
+   * Returns the color of the integral plot
+   * @return the color of the integral plot
+   */
+  public Color getIntegralPlotColor(){
+	  return integralPlotColor;
+  }
 
   /**
    * Returns the color of the scale
@@ -878,7 +926,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
   public Color getTitleColor(){
     return titleColor;
   }
-
+  
   /**
    * Returns the color of the grid
    * @return the color of the grid
@@ -940,7 +988,15 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
    * @return the name of the font used in the display
    */
   public String getDisplayFontName(){
-    return fontName;
+    return displayFontName;
+  }
+  
+  /**
+   * Returns the font of the title
+   * @return the font of the title
+   */
+  public String getTitleFontName(){
+	  return titleFontName;
   }
 
   /*----------------------- JSVPanel PAINTING METHODS ---------------------*/
@@ -1044,37 +1100,45 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
       }
     }
 
-    boolean grid, scale, title, units, coords;
+    boolean grid, title, xunits, yunits, coords, xscale, yscale;
 
     if(isPrinting){
       grid = printGrid;
-      scale = printScale;
+      xscale = printScale;
+      yscale = printScale;
       title = printTitle;
-      units = printScale;
+      xunits = printScale;
+      yunits = printScale;
       coords = false;
     }
     else{
       grid = gridOn;
-      scale = scaleOn;
       title = titleOn;
-      units = unitsOn;
+      xunits = xUnitsOn;
+      yunits = yUnitsOn;
       coords = coordsOn;
+      xscale = xScaleOn;
+      yscale = yScaleOn;
     }
 
     if(grid)
-      drawGrid(g, height, width);
+    	drawGrid(g, height, width);
     for(int i = 0; i < numOfSpectra; i++)
-      drawPlot(g, i, height, width);
-    if(scale)
-      drawScale(g, height, width);
+    	drawPlot(g, i, height, width);
+    if(xscale)
+    	drawXScale(g, height, width);
+    if(yscale)
+    	drawYScale(g, height, width);
     if(title)
-      drawTitle(g, height, width);
-    if(units)
-      drawUnits(g, height, width);
+    	drawTitle(g, height, width);
+    if(xunits)
+    	drawXUnits(g, height, width);
+    if(yunits)
+    	drawYUnits(g, height, width);
     if(coords)
-      drawCoordinates(g, height, width);
+    	drawCoordinates(g, height, width);
     if(zoomEnabled)
-     drawZoomBox(g);
+    	drawZoomBox(g);
   }
 
 
@@ -1195,87 +1259,166 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
       g.drawLine(x1, invertY(height, y), x2, invertY(height, y));
     }
   } // End drawGrid
-
+  
   /**
-   * Draws the Scale
+   * Draws the x Scale
    * @param g the <code>Graphics</code> object
    * @param height the height to be drawn in pixels
    * @param width the width to be drawn in pixels
    */
-  protected void drawScale(Graphics g, int height, int width){
+  protected void drawXScale(Graphics g, int height, int width){
 
-    String hashX = "#";
-    String hashY = "#";
-    String hash1 = "0.00000000";
+	    String hashX = "#";
+	    //String hashY = "#";
+	    String hash1 = "0.00000000";
 
-    boolean drawScaleIncreasing;
+	    boolean drawScaleIncreasing;
 
-    if(numOfSpectra == 1)
-      drawScaleIncreasing = spectra[0].isIncreasing() ^ plotReversed;
-    else
-      //drawScaleIncreasing = !plotReversed;
-      drawScaleIncreasing = overlayIncreasing ^ plotReversed;
+	    if(numOfSpectra == 1)
+	      drawScaleIncreasing = spectra[0].isIncreasing() ^ plotReversed;
+	    else
+	      //drawScaleIncreasing = !plotReversed;
+	      drawScaleIncreasing = overlayIncreasing ^ plotReversed;
 
-    if (scaleData.hashNumX <= 0)
-      hashX = hash1.substring(0,Math.abs(scaleData.hashNumX)+3);
+	    if (scaleData.hashNumX <= 0)
+	      hashX = hash1.substring(0,Math.abs(scaleData.hashNumX)+3);
 
-    DecimalFormat displayXFormatter = new DecimalFormat(hashX, new DecimalFormatSymbols(java.util.Locale.US) );
+	    DecimalFormat displayXFormatter = new DecimalFormat(hashX, new DecimalFormatSymbols(java.util.Locale.US) );
 
-    if (scaleData.hashNumY <= 0)
-      hashY = hash1.substring(0,Math.abs(scaleData.hashNumY)+3);
-
-
-    DecimalFormat displayYFormatter = new DecimalFormat(hashY, new DecimalFormatSymbols(java.util.Locale.US));
-
-    Font font;
-
-    if(isPrinting)
-      font = new Font(printingFont, Font.PLAIN, calculateFontSize(width, 12, true));
-    else
-      font = new Font(fontName, Font.PLAIN, calculateFontSize(width, 12, true));
-    g.setFont(font);
-
-    if (drawScaleIncreasing){
-      for(double i = scaleData.minXOnScale; i < (scaleData.maxXOnScale + scaleData.xStep/2); i += scaleData.xStep){
-        int x = (int)(leftPlotAreaPos + ((i - scaleData.minXOnScale)/xFactorForScale));
-        int y1 = (int) topPlotAreaPos;
-        int y2 = (int) (topPlotAreaPos - 3);
-        g.setColor(gridColor);
-        g.drawLine(x, invertY(height, y1), x, invertY(height, y2));
-        g.setColor(scaleColor);
-        g.drawString(displayXFormatter.format(i), x - 10, (invertY(height, y2) + 15));
-      }
-    }
-    else{
-      for(double i = scaleData.minXOnScale, j = scaleData.maxXOnScale; i < (scaleData.maxXOnScale + scaleData.xStep/2); i += scaleData.xStep, j -= scaleData.xStep){
-        int x = (int)(leftPlotAreaPos + ((j - scaleData.minXOnScale)/xFactorForScale));
-        int y1 = (int) topPlotAreaPos;
-        int y2 = (int) (topPlotAreaPos - 3);
-        g.setColor(gridColor);
-        g.drawLine(x, invertY(height, y1), x, invertY(height, y2));
-        g.setColor(scaleColor);
-        g.drawString(displayXFormatter.format(i), x - 5, (invertY(height, y2) + 15));
-      }
-    }
-
-    if(isPrinting)
-      font = new Font(printingFont, Font.PLAIN, calculateFontSize(width, 12, false));
-    else
-      font = new Font(fontName, Font.PLAIN, calculateFontSize(width, 12, false));
-    g.setFont(font);
-
-    for(double i = scaleData.minYOnScale; (i < scaleData.maxYOnScale + scaleData.yStep/2); i += scaleData.yStep){
-      int x1 = (int) leftPlotAreaPos;
-      int x2 = (int)(leftPlotAreaPos - 3);
-      int y = (int) (topPlotAreaPos + ((i - scaleData.minYOnScale)/yFactorForScale));
-      g.setColor(gridColor);
-      g.drawLine(x1, invertY(height, y), x2, invertY(height, y));
-      g.setColor(scaleColor);
-      g.drawString(displayYFormatter.format(i), (x2 - 60), invertY(height, y));
-    }
-  } // End drawScale
+	    //if (scaleData.hashNumY <= 0)
+	    //  hashY = hash1.substring(0,Math.abs(scaleData.hashNumY)+3);
 
 
+	    //DecimalFormat displayYFormatter = new DecimalFormat(hashY, new DecimalFormatSymbols(java.util.Locale.US));
+
+	    Font font;
+
+	    if(isPrinting)
+	      font = new Font(printingFont, Font.PLAIN, calculateFontSize(width, 12, true));
+	    else
+	      font = new Font(displayFontName, Font.PLAIN, calculateFontSize(width, 12, true));
+	    g.setFont(font);
+
+	    if (drawScaleIncreasing){
+	      for(double i = scaleData.minXOnScale; i < (scaleData.maxXOnScale + scaleData.xStep/2); i += scaleData.xStep){
+	        int x = (int)(leftPlotAreaPos + ((i - scaleData.minXOnScale)/xFactorForScale));
+	        int y1 = (int) topPlotAreaPos;
+	        int y2 = (int) (topPlotAreaPos - 3);
+	        g.setColor(gridColor);
+	        g.drawLine(x, invertY(height, y1), x, invertY(height, y2));
+	        g.setColor(scaleColor);
+	        g.drawString(displayXFormatter.format(i), x - 10, (invertY(height, y2) + 15));
+	      }
+	    }
+	    else{
+	      for(double i = scaleData.minXOnScale, j = scaleData.maxXOnScale; i < (scaleData.maxXOnScale + scaleData.xStep/2); i += scaleData.xStep, j -= scaleData.xStep){
+	        int x = (int)(leftPlotAreaPos + ((j - scaleData.minXOnScale)/xFactorForScale));
+	        int y1 = (int) topPlotAreaPos;
+	        int y2 = (int) (topPlotAreaPos - 3);
+	        g.setColor(gridColor);
+	        g.drawLine(x, invertY(height, y1), x, invertY(height, y2));
+	        g.setColor(scaleColor);
+	        g.drawString(displayXFormatter.format(i), x - 5, (invertY(height, y2) + 15));
+	      }
+	    }
+
+	    if(isPrinting)
+	      font = new Font(printingFont, Font.PLAIN, calculateFontSize(width, 12, false));
+	    else
+	      font = new Font(displayFontName, Font.PLAIN, calculateFontSize(width, 12, false));
+	    g.setFont(font);
+
+	    for(double i = scaleData.minYOnScale; (i < scaleData.maxYOnScale + scaleData.yStep/2); i += scaleData.yStep){
+	      int x1 = (int) leftPlotAreaPos;
+	      int x2 = (int)(leftPlotAreaPos - 3);
+	      int y = (int) (topPlotAreaPos + ((i - scaleData.minYOnScale)/yFactorForScale));
+	      g.setColor(gridColor);
+	      g.drawLine(x1, invertY(height, y), x2, invertY(height, y));
+	      //g.setColor(scaleColor);
+	      //g.drawString(displayYFormatter.format(i), (x2 - 60), invertY(height, y));
+	    }
+
+  }
+  
+  /**
+   * Draws the y Scale
+   * @param g the <code>Graphics</code> object
+   * @param height the height to be drawn in pixels
+   * @param width the width to be drawn in pixels
+   */
+  protected void drawYScale(Graphics g, int height, int width){
+
+	    //String hashX = "#";
+	    String hashY = "#";
+	    String hash1 = "0.00000000";
+
+	    boolean drawScaleIncreasing;
+
+	    if(numOfSpectra == 1)
+	      drawScaleIncreasing = spectra[0].isIncreasing() ^ plotReversed;
+	    else
+	      //drawScaleIncreasing = !plotReversed;
+	      drawScaleIncreasing = overlayIncreasing ^ plotReversed;
+
+	    //if (scaleData.hashNumX <= 0)
+	    //  hashX = hash1.substring(0,Math.abs(scaleData.hashNumX)+3);
+
+	    //DecimalFormat displayXFormatter = new DecimalFormat(hashX, new DecimalFormatSymbols(java.util.Locale.US) );
+
+	    if (scaleData.hashNumY <= 0)
+	      hashY = hash1.substring(0,Math.abs(scaleData.hashNumY)+3);
+
+
+	    DecimalFormat displayYFormatter = new DecimalFormat(hashY, new DecimalFormatSymbols(java.util.Locale.US));
+
+	    Font font;
+
+	    if(isPrinting)
+	      font = new Font(printingFont, Font.PLAIN, calculateFontSize(width, 12, true));
+	    else
+	      font = new Font(displayFontName, Font.PLAIN, calculateFontSize(width, 12, true));
+	    g.setFont(font);
+
+	    if (drawScaleIncreasing){
+	      for(double i = scaleData.minXOnScale; i < (scaleData.maxXOnScale + scaleData.xStep/2); i += scaleData.xStep){
+	        int x = (int)(leftPlotAreaPos + ((i - scaleData.minXOnScale)/xFactorForScale));
+	        int y1 = (int) topPlotAreaPos;
+	        int y2 = (int) (topPlotAreaPos - 3);
+	        g.setColor(gridColor);
+	        g.drawLine(x, invertY(height, y1), x, invertY(height, y2));
+	        //g.setColor(scaleColor);
+	        //g.drawString(displayXFormatter.format(i), x - 10, (invertY(height, y2) + 15));
+	      }
+	    }
+	    else{
+	      for(double i = scaleData.minXOnScale, j = scaleData.maxXOnScale; i < (scaleData.maxXOnScale + scaleData.xStep/2); i += scaleData.xStep, j -= scaleData.xStep){
+	        int x = (int)(leftPlotAreaPos + ((j - scaleData.minXOnScale)/xFactorForScale));
+	        int y1 = (int) topPlotAreaPos;
+	        int y2 = (int) (topPlotAreaPos - 3);
+	        g.setColor(gridColor);
+	        g.drawLine(x, invertY(height, y1), x, invertY(height, y2));
+	        //g.setColor(scaleColor);
+	        //g.drawString(displayXFormatter.format(i), x - 5, (invertY(height, y2) + 15));
+	      }
+	    }
+
+	    if(isPrinting)
+	      font = new Font(printingFont, Font.PLAIN, calculateFontSize(width, 12, false));
+	    else
+	      font = new Font(displayFontName, Font.PLAIN, calculateFontSize(width, 12, false));
+	    g.setFont(font);
+
+	    for(double i = scaleData.minYOnScale; (i < scaleData.maxYOnScale + scaleData.yStep/2); i += scaleData.yStep){
+	      int x1 = (int) leftPlotAreaPos;
+	      int x2 = (int)(leftPlotAreaPos - 3);
+	      int y = (int) (topPlotAreaPos + ((i - scaleData.minYOnScale)/yFactorForScale));
+	      g.setColor(gridColor);
+	      g.drawLine(x1, invertY(height, y), x2, invertY(height, y));
+	      g.setColor(scaleColor);
+	      g.drawString(displayYFormatter.format(i), (x2 - 60), invertY(height, y));
+	    }
+  }
+  
   /**
    * Draws Title
    * @param g the <code>Graphics</code> object
@@ -1290,7 +1433,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
     if(isPrinting)
       font = new Font(printingFont, Font.BOLD, calculateFontSize(width, 14, true));
     else
-      font = new Font(fontName, Font.BOLD, calculateFontSize(width, 14, true));
+    	if(titleBoldOn)
+    		font = new Font(titleFontName, Font.BOLD, calculateFontSize(width, 14, true));
+    	else
+    		font = new Font(titleFontName, Font.PLAIN, calculateFontSize(width, 14, true));
 
 
     g.setFont(font);
@@ -1300,25 +1446,39 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
 
   } // End Draw Title
 
-  /**
-   * Draws the Units
-   * @param g the <code>Graphics</code> object
-   * @param height the height to be drawn in pixels
-   * @param width the width to be drawn in pixels
+   /**
+    * Draws the X Units
+    * @param g the <code>Graphics</code> object
+    * @param height the height to be drawn in pixels
+    * @param width the width to be drawn in pixels
+    */
+   protected void drawXUnits(Graphics g, int height, int width){
+	   g.setColor(unitsColor);
+	   Font font;
+	   if(isPrinting)
+		   font = new Font(printingFont, Font.ITALIC, calculateFontSize(width, 10, true));
+	   else
+		   font = new Font(displayFontName, Font.ITALIC, calculateFontSize(width, 10, true));
+	   g.setFont(font);
+	   g.drawString(spectra[0].getXUnits(), (int)(rightPlotAreaPos - (spectra[0].getXUnits().length() * 10)), (int)(bottomPlotAreaPos + 35));
+   }
+   
+   /**
+    * Draws the Y Units
+    * @param g the <code>Graphics</code> object
+    * @param height the height to be drawn in pixels
+    * @param width the width to be drawn in pixels
    */
-   protected void drawUnits(Graphics g, int height, int width){
-
-    g.setColor(unitsColor);
-    Font font;
-    if(isPrinting)
-      font = new Font(printingFont, Font.ITALIC, calculateFontSize(width, 10, true));
-    else
-      font = new Font(fontName, Font.ITALIC, calculateFontSize(width, 10, true));
-    g.setFont(font);
-    g.drawString(spectra[0].getYUnits(), (int)(leftPlotAreaPos - 60) , (int)(topPlotAreaPos - 15));
-    g.drawString(spectra[0].getXUnits(), (int)(rightPlotAreaPos - (spectra[0].getXUnits().length() * 10)) , (int)(bottomPlotAreaPos + 35));
-  } // End DrawUnits
-
+  protected void drawYUnits(Graphics g, int height, int width){
+	   g.setColor(unitsColor);
+	   Font font;
+	   if(isPrinting)
+		   font = new Font(printingFont, Font.ITALIC, calculateFontSize(width, 10, true));
+	   else
+		   font = new Font(displayFontName, Font.ITALIC, calculateFontSize(width, 10, true));
+	   g.setFont(font);
+	   g.drawString(spectra[0].getYUnits(), (int)(leftPlotAreaPos - 60), (int)(topPlotAreaPos - 15));
+  }
 
   /**
    * Draws the Coordinates
@@ -1333,7 +1493,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
     if(isPrinting)
       font = new Font(printingFont, Font.PLAIN, calculateFontSize(width, 12, true));
     else
-      font = new Font(fontName, Font.PLAIN, calculateFontSize(width, 12, true));
+      font = new Font(displayFontName, Font.PLAIN, calculateFontSize(width, 12, true));
     g.setFont(font);
     int x = (int) ((plotAreaWidth + leftPlotAreaPos) * 0.85);
     g.drawString(coordStr, x, (int)(topPlotAreaPos - 10));
@@ -1960,7 +2120,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
     // Set Graph Properties
     printingFont = pl.font;
     printGrid = pl.showGrid;
-    printScale = pl.showScale;
     printTitle = pl.showTitle;
     graphPosition = pl.position;
 

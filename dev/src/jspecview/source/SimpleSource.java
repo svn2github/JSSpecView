@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2009 The University of the West Indies
+/* Copyright (c) 2002-2010 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -250,6 +250,8 @@ public class SimpleSource extends JDXSource {
       }
 
       if( (label.equals("##$REFERENCEPOINT")) && (shiftRefType != 0) )  {
+    	label= "##$VARIANREFPOINT";  // rename ReferencePoint to avoid reprocessing
+ //   	notesLDRTable.put(label, t.value);  
         offset = Double.parseDouble(t.value);
         // varian doesn't need dataPointNum
         dataPointNum = 1;
@@ -287,7 +289,7 @@ public class SimpleSource extends JDXSource {
 
       if(label.equals("##.OBSERVEFREQUENCY")){
         obFreq = Double.parseDouble(t.value);
-        notesLDRTable.put(label, t.value);
+//        notesLDRTable.put(label, t.value);
       }
 
       if(Arrays.binarySearch(TABULAR_DATA_LABELS, label) > 0){
@@ -307,7 +309,7 @@ public class SimpleSource extends JDXSource {
           spectrum.setDataClass("XYPOINTS");
         }
 
-        //What the hell is this?
+        //Not used as there would be no spectrum to display
         if(spectrum.getDataClass().equals("PEAKASSIGNMENTS")){
           String tmp = t.value;
           try{

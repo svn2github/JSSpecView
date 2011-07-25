@@ -28,6 +28,10 @@
 // 08-01-2010 need bugfix for protected static reverseplot
 // 17-03-2010 fix for NMRShiftDB CML files
 // 11-06-2011 fix for LINK files and reverseplot 
+// 23-07-2011 jak - Added parameters for the visibility of x units, y units,
+//			  		x scale, and y scale.  Added parameteres for the font,
+//			  		title font, and integral plot color.  Added a method
+//			  		to reset view from a javascript call.
 
 package jspecview.applet;
 
@@ -35,6 +39,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GraphicsEnvironment;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -51,6 +56,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -110,7 +116,7 @@ public class JSVApplet extends JApplet {
     System.out.println("JSpecView " + this + " finalized");
    }
 
- public static final String APPLET_VERSION = "1.0.20110611-1145";
+ public static final String APPLET_VERSION = "1.0.20110725-0630";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath;
@@ -125,6 +131,11 @@ public class JSVApplet extends JApplet {
   boolean compoundMenuOn=false;
   boolean compoundMenuOn2=true;
   boolean enableZoom=true;
+  boolean xScaleOn=true;
+  boolean yScaleOn=true;
+  boolean xUnitsOn=true;
+  boolean yUnitsOn=true;
+  boolean titleBoldOn=false;
 
   int startIndex=-1;
   int endIndex=-1;
@@ -135,6 +146,8 @@ public class JSVApplet extends JApplet {
   String coordCallbackFunctionName=null; // = "coordCallBack";
   String peakCallbackFunctionName=null; // peakCallback
   String sltnclr="255,255,255"; //Colour of Solution
+  String titleFontName=null; // Title Font
+  String displayFontName=null; // Display Font
 
   Color titleColor=Color.BLACK;
   Color gridColor=Color.LIGHT_GRAY;
@@ -143,7 +156,7 @@ public class JSVApplet extends JApplet {
   Color coordinatesColor=Color.RED;
   Color plotAreaColor=Color.WHITE;
   Color backgroundColor=new Color(192,192,192);
-  Color plotColor= Color.BLUE;
+  Color plotColor=Color.BLUE;
 
 
   Color[] plotColors= {Color.blue, Color.green, Color.red, Color.magenta,
@@ -217,7 +230,15 @@ public class JSVApplet extends JApplet {
      "VERSION",
      "PEAKCALLBACKFUNCTIONNAME",
      "IRMODE",
-     "OBSCURE"
+     "OBSCURE",
+     "XSCALEON",
+     "YSCALEON",
+     "XUNITSON",
+     "YUNITSON",
+     "INTEGRALPLOTCOLOR",
+     "TITLEFONTNAME",
+     "TITLEBOLDON",
+     "DISPLAYFONTNAME"
      };
 
   final private static int PARAM_LOAD = 0;
@@ -245,7 +266,15 @@ public class JSVApplet extends JApplet {
   final private static int PARAM_PEAKCALLBACKFUNCTIONNAME = 22;
   final private static int PARAM_IRMODE = 23;
   final private static int PARAM_OBSCURE = 24;
-
+  final private static int PARAM_XSCALEON = 25;
+  final private static int PARAM_YSCALEON = 26;
+  final private static int PARAM_XUNITSON = 27;
+  final private static int PARAM_YUNITSON = 28;
+  final private static int PARAM_INTEGRALPLOTCOLOR = 29;
+  final private static int PARAM_TITLEFONTNAME = 30;
+  final private static int PARAM_TITLEBOLDON = 31;
+  final private static int PARAM_DISPLAYFONTNAME = 32;
+  
   final private static Hashtable<String, Integer> htParams =
       new Hashtable<String, Integer>(); {
     for (int i = 0; i < params.length; i++)
@@ -340,7 +369,7 @@ public class JSVApplet extends JApplet {
   }
 
   /**
-   * Initialises applet with parameters and load the <code>JDXSource</code>
+   * Initializes applet with parameters and load the <code>JDXSource</code>
    */
   @Override
   public void init() {
@@ -461,7 +490,7 @@ public class JSVApplet extends JApplet {
   }
 
   /**
-   * Initialises the applet's GUI components
+   * Initializes the applet's GUI components
    * @throws Exception
    */
   private void jbInit() throws Exception {
@@ -634,7 +663,7 @@ public class JSVApplet extends JApplet {
   }
 
   /**
-   * Initalises the <code>JSVPanels</code> and adds them to the jsvPanels array
+   * Initalizes the <code>JSVPanels</code> and adds them to the jsvPanels array
    * @throws JSpecViewException
    */
   private void initPanels() throws JSpecViewException {
@@ -703,6 +732,13 @@ public class JSVApplet extends JApplet {
        // set JSVPanel properties from applet parameters
         jsvp.setGridOn(gridOn);
         jsvp.setCoordinatesOn(coordinatesOn);
+        jsvp.setXScaleOn(xScaleOn);
+        jsvp.setYScaleOn(yScaleOn);
+        jsvp.setXUnitsOn(xUnitsOn);
+        jsvp.setYUnitsOn(yUnitsOn);
+        jsvp.setTitleBoldOn(titleBoldOn);
+        jsvp.setTitleFontName(titleFontName);
+        jsvp.setDisplayFontName(displayFontName);
         jsvp.setReversePlot(reversePlot);
         if(!reversePlot){
           String Xunits, datatype, dataclass;
@@ -770,12 +806,12 @@ public class JSVApplet extends JApplet {
         jsvp.setIntegralPlotColor(integralPlotColor);
         jsvp.setBackground(backgroundColor);
         getPlotColors();  //<======= Kind of sloppy
-        if(plotColors != null)
-          jsvp.setPlotColors(plotColors);
+        //if(plotColors == null)
+        //  jsvp.setPlotColors(plotColors);
   }
 
   /**
-   * Initialises the interface of the applet depending on the value of the
+   * Initializes the interface of the applet depending on the value of the
    * <i>interface</i> parameter
    */
   private void initInterface(){
@@ -1531,7 +1567,6 @@ public class JSVApplet extends JApplet {
      * @param e the ItemEvent
      */
   void integrateMenuItem_itemStateChanged(ItemEvent e) {
-
       if (e.getStateChange() == ItemEvent.SELECTED) {
         tempJSVP = JSpecViewUtils.appletIntegrate(appletPanel, true);
       }
@@ -1543,7 +1578,7 @@ public class JSVApplet extends JApplet {
           appletPanel.add(tempJSVP);
         }
       }
-
+      
       initProperties(tempJSVP);
       tempJSVP.repaint();
       tempJSVP.addMouseListener(new JSVPanelMouseListener());
@@ -1673,7 +1708,7 @@ public class JSVApplet extends JApplet {
   }
 
   /**
-   * Spits the comps array in 2 equal or nearly equal arrays an encapsulates them
+   * Splits the components array in 2 equal or nearly equal arrays and encapsulates them
    * in a <code>ComponentListPair</code> instance
    * @param comps an array of components
    * @return a <code>ComponentListPair</code>
@@ -1992,6 +2027,17 @@ public class JSVApplet extends JApplet {
       repaint();
     }
   }
+  
+  /**
+   * Method that can be called from another applet or from javascript
+   * that restores the zoom of a <code>JSVPanel</code> to its original state.
+   */
+  public void resetView(){
+	  if (selectedJSVPanel != null){
+		  selectedJSVPanel.reset();
+		  repaint();
+	  }
+  }
 
   /**
    * Calls a javascript function given by the function name
@@ -2053,7 +2099,6 @@ public class JSVApplet extends JApplet {
         case PARAM_COORDCALLBACKFUNCTIONNAME:
           coordCallbackFunctionName = value;
           break;
-
         case PARAM_SPECTRUMNUMBER:
           spectrumNumber = Integer.parseInt(value);
         case PARAM_INTERFACE:
@@ -2117,6 +2162,42 @@ public class JSVApplet extends JApplet {
           obscure = Boolean.parseBoolean(value);
           JSpecViewUtils.setObscure(obscure);
           break;
+        case PARAM_XSCALEON:
+        	xScaleOn = Boolean.parseBoolean(value);
+        	break;
+        case PARAM_YSCALEON:
+        	yScaleOn = Boolean.parseBoolean(value);
+        	break;
+        case PARAM_XUNITSON:
+        	xUnitsOn = Boolean.parseBoolean(value);
+        	break;
+        case PARAM_YUNITSON:
+        	yUnitsOn = Boolean.parseBoolean(value);
+        	break;
+        case PARAM_INTEGRALPLOTCOLOR:
+        	integralPlotColor = JSpecViewUtils.getColorFromString(value);
+        	break;
+        case PARAM_TITLEFONTNAME:
+        	GraphicsEnvironment g = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        	List<String> fontList = Arrays.asList(g.getAvailableFontFamilyNames());
+        	for(String s: fontList)
+        		if(value.equalsIgnoreCase(s)){
+        			titleFontName = value;
+        			break;
+        		}
+        	break;
+        case PARAM_TITLEBOLDON:
+        	titleBoldOn = Boolean.parseBoolean(value);
+        	break;
+        case PARAM_DISPLAYFONTNAME:
+        	GraphicsEnvironment g2 = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        	List<String> fontList2 = Arrays.asList(g2.getAvailableFontFamilyNames());
+        	for(String s2: fontList2)
+        		if(value.equalsIgnoreCase(s2)){
+        			displayFontName = value;
+        			break;
+        		}
+        	break;
         }
       } catch (Exception e) {
       }
