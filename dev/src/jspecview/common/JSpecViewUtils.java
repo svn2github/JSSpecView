@@ -20,8 +20,11 @@
 // CHANGES to 'JSpecViewUtils.java' - Application Utility Class
 // University of the West Indies, Mona Campus
 //
-// 23-07-2011 jak - altered appletIntegrate to support specifying
+// 23-07-2011 jak - Altered appletIntegrate to support specifying
 //					the integration plot color.
+// 24-09-2011 jak - Added method to parse integration ratio annotation
+//					string. Altered appletIntegrate to support integration
+//					ratio annotations.
 
 package jspecview.common;
 
@@ -833,7 +836,7 @@ public class JSpecViewUtils {
   }
 
 
-  public static JSVPanel appletIntegrate(JPanel panel, boolean showDialog) {
+  public static JSVPanel appletIntegrate(JPanel panel, boolean showDialog, ArrayList<IntegrationRatio> integrationRatios) {
     if (panel == null)
       return null;
 
@@ -893,6 +896,11 @@ public class JSpecViewUtils {
           
           // zoom turned off after integration?
           newJsvp.setZoomEnabled(false);
+          
+          // add integration ratio annotations if any exist
+          if(integrationRatios != null)
+        	  newJsvp.setIntegrationRatios(integrationRatios);
+          
           panel.remove(jsvp);
           panel.add(newJsvp);
           
@@ -973,6 +981,33 @@ public class JSpecViewUtils {
     }
     return (minIndex == Integer.MAX_VALUE) ? -1 : minIndex;
   }
+  
+  /**
+   * Parses integration ratios and x values from a string
+   * and returns them as <code>IntegrationRatio</code> objects
+   * @param value
+   * @return ArrayList<IntegrationRatio> object representing integration ratios
+   */
+  public static ArrayList<IntegrationRatio> getIntegrationRatiosFromString(String value) {
+	  // split input into x-value/integral-value pairs
+	  StringTokenizer allParamTokens = new StringTokenizer(value, ",");
+	  
+	  // create array list to return
+	  ArrayList<IntegrationRatio> inputRatios = new ArrayList<IntegrationRatio>();
+	  
+	  while (allParamTokens.hasMoreTokens()) {
+	      String token = allParamTokens.nextToken();
+	      // now split the x-value/integral-value pair
+	      StringTokenizer eachParam = new StringTokenizer(token,":");
+	      IntegrationRatio inputRatio = new IntegrationRatio();
+	      inputRatio.setXVal(Double.parseDouble(eachParam.nextToken()));
+	      inputRatio.setYVal(0.0);
+	      inputRatio.setIntegralVal(Double.parseDouble(eachParam.nextToken()));
+	      inputRatios.add(inputRatio);
+	  }
+
+		return inputRatios;
+	}
 
   /**
    * Returns a <code>Color</code> from a string representation as a hex value or

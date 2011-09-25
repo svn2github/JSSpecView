@@ -32,6 +32,8 @@
 // 23-07-2011 jak - Added feature to draw the x scale, y scale, x units and y units
 //					independently of each other. Added independent controls for the font,
 //					title font, title bold, and integral plot color.
+// 24-09-2011 jak - Altered drawGraph to fix bug related to reversed highlights. Added code to
+//					draw integration ratio annotations
 
 package jspecview.common;
 
@@ -61,6 +63,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Vector;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 import javax.print.attribute.HashPrintRequestAttributeSet;
@@ -184,6 +187,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
 
   // integral Color
   protected Color integralPlotColor = Color.red;
+  
+  //integration ratio annotations
+  protected ArrayList<IntegrationRatio> integrationRatios = new ArrayList<IntegrationRatio>();
 
   // scale color
   protected Color scaleColor = Color.black;
@@ -743,6 +749,16 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
   public void setDisplayFontName(String displayFontName){
     this.displayFontName = displayFontName;
   }
+  
+  /**
+   * Sets the integration ratios that will be displayed
+   * @param ratios array of the integration ratios
+   */
+  public void setIntegrationRatios(ArrayList<IntegrationRatio> ratios){
+	  // TODO use a more efficient array copy
+	  for(int i=0; i < ratios.size(); i++)
+		  integrationRatios.add(ratios.get(i).copy());
+  }
 
 
   /* -------------------Other methods ------------------------------------*/
@@ -1012,6 +1028,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
       int height = getHeight();
 
       drawGraph(g, height, width);
+      
+      if(integrationRatios != null)
+    	  drawIntegrationRatios(g, height, width);
    }
 
    /**
@@ -1036,12 +1055,20 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
     g.setColor(plotAreaColor);
     g.fillRect(plotAreaX, plotAreaY, plotAreaWidth, plotAreaHeight);
 
-    boolean plotIncreasing;
+    //boolean plotIncreasing;
+    //if(numOfSpectra == 1)
+    //  plotIncreasing = spectra[0].isIncreasing() ^ plotReversed;
+    //else
+    // plotIncreasing = !plotReversed;
+    
+    // reversed overlay highlights bug fix below with old code above
+    
+    boolean drawHighlightsIncreasing = false;
     if(numOfSpectra == 1)
-      plotIncreasing = spectra[0].isIncreasing() ^ plotReversed;
+    	drawHighlightsIncreasing = spectra[0].isIncreasing() ^ plotReversed;
     else
-      plotIncreasing = !plotReversed;
-
+    	drawHighlightsIncreasing = overlayIncreasing ^ plotReversed;
+    
     // fill highlight color
 
     if(highlightOn){
@@ -1052,7 +1079,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
 
       for(int i = 0; i < highlights.size(); i++){
         Highlight hl = (Highlight)highlights.elementAt(i);
-        if(plotIncreasing){
+        
+        if(drawHighlightsIncreasing){
           x1 = (int) (leftPlotAreaPos + ((hl.getStartX() -scaleData.minXOnScale)/xFactorForScale));
           x2 = (int) (leftPlotAreaPos + ((hl.getEndX() -scaleData.minXOnScale)/xFactorForScale));
         }
@@ -1497,6 +1525,60 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
     g.setFont(font);
     int x = (int) ((plotAreaWidth + leftPlotAreaPos) * 0.85);
     g.drawString(coordStr, x, (int)(topPlotAreaPos - 10));
+  }
+  
+  /**
+   * Draws the integration ratios recursively
+   * @param integrationRatios
+   */
+  protected void drawIntegrationRatios(Graphics g, int height, int width) {
+	  // determine whether there are any ratio annotations to draw
+	  if(integrationRatios == null)
+		  return;
+	  
+	  
+	  if(integrationRatios.size() > 0)
+	  {
+		  // make ratios the same color as the integral
+		  g.setColor(integralPlotColor);
+		  Font font;
+		  
+		  // determine font
+		  if(isPrinting)
+			  font = new Font(printingFont, Font.PLAIN, calculateFontSize(width, 12,true));
+		  else
+			  font = new Font(displayFontName, Font.PLAIN, calculateFontSize(width, 12, true));
+		  g.setFont(font);
+		  
+		  // obtain integration ratio annotation to output
+		  IntegrationRatio output;
+		  output = integrationRatios.remove(0);
+		  
+		  // determine whether the graph has been reversed or not
+		  Boolean drawRatiosIncreasing = false;
+		  if(numOfSpectra == 1)
+			  drawRatiosIncreasing = spectra[0].isIncreasing() ^ plotReversed;
+		  else
+			  drawRatiosIncreasing = overlayIncreasing ^ plotReversed;
+		  
+		  // draw the integration ratio annotation based on graph reversal status
+		  int x = 0, y = 0;
+		  if(drawRatiosIncreasing){
+			  x = (int) (leftPlotAreaPos +  (((output.getXVal())-scaleData.minXOnScale)/xFactorForScale));
+			  y = (int) (bottomPlotAreaPos + output.getYVal() - 10);
+		  }else{
+			  x = (int) (rightPlotAreaPos - (((output.getXVal())-scaleData.minXOnScale)/xFactorForScale));
+			  y = (int) (bottomPlotAreaPos + output.getYVal() - 10);
+		  }
+		  g.drawString(output.getIntegralString(), x, y);
+		  
+		  // recurse
+		  drawIntegrationRatios(g, height, width);
+		  
+		  integrationRatios.add(output);
+	  }
+	  else if(integrationRatios.size() == 0) // stopping condition for the recursion
+		  return;
   }
 
   /**

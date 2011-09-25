@@ -32,6 +32,7 @@
 //			  		x scale, and y scale.  Added parameteres for the font,
 //			  		title font, and integral plot color.  Added a method
 //			  		to reset view from a javascript call.
+// 24-09-2011 jak - Added parameter for integration ratio annotations.
 
 package jspecview.applet;
 
@@ -60,6 +61,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import java.util.ArrayList;
 
 import javax.swing.JApplet;
 import javax.swing.JCheckBoxMenuItem;
@@ -81,6 +83,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import jspecview.common.Coordinate;
+import jspecview.common.IntegrationRatio;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSpecViewUtils;
@@ -116,7 +119,7 @@ public class JSVApplet extends JApplet {
     System.out.println("JSpecView " + this + " finalized");
    }
 
- public static final String APPLET_VERSION = "1.0.20110725-0630";
+ public static final String APPLET_VERSION = "1.0.20110924-2119";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath;
@@ -148,6 +151,8 @@ public class JSVApplet extends JApplet {
   String sltnclr="255,255,255"; //Colour of Solution
   String titleFontName=null; // Title Font
   String displayFontName=null; // Display Font
+  
+  ArrayList<IntegrationRatio> integrationRatios = null; // Integration Ratio Annotations
 
   Color titleColor=Color.BLACK;
   Color gridColor=Color.LIGHT_GRAY;
@@ -238,7 +243,8 @@ public class JSVApplet extends JApplet {
      "INTEGRALPLOTCOLOR",
      "TITLEFONTNAME",
      "TITLEBOLDON",
-     "DISPLAYFONTNAME"
+     "DISPLAYFONTNAME",
+     "INTEGRATIONRATIOS"
      };
 
   final private static int PARAM_LOAD = 0;
@@ -274,6 +280,7 @@ public class JSVApplet extends JApplet {
   final private static int PARAM_TITLEFONTNAME = 30;
   final private static int PARAM_TITLEBOLDON = 31;
   final private static int PARAM_DISPLAYFONTNAME = 32;
+  final private static int PARAM_INTEGRATIONRATIOS = 33;
   
   final private static Hashtable<String, Integer> htParams =
       new Hashtable<String, Integer>(); {
@@ -1568,7 +1575,7 @@ public class JSVApplet extends JApplet {
      */
   void integrateMenuItem_itemStateChanged(ItemEvent e) {
       if (e.getStateChange() == ItemEvent.SELECTED) {
-        tempJSVP = JSpecViewUtils.appletIntegrate(appletPanel, true);
+        tempJSVP = JSpecViewUtils.appletIntegrate(appletPanel, true, integrationRatios);
       }
       else {
         if (JSpecViewUtils.hasIntegration((JSVPanel)appletPanel.getComponent(0))) {
@@ -2197,6 +2204,11 @@ public class JSVApplet extends JApplet {
         			displayFontName = value;
         			break;
         		}
+        	break;
+        case PARAM_INTEGRATIONRATIOS:
+        	// parse the string with a method in JSpecViewUtils
+        	System.out.println("Integration Ratio Parameter: " + value);
+        	integrationRatios = JSpecViewUtils.getIntegrationRatiosFromString(value);
         	break;
         }
       } catch (Exception e) {
