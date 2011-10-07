@@ -19,8 +19,11 @@
 
 package jspecview.source;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -100,56 +103,36 @@ public abstract class JDXSource {
   /** Indicates a Ntuple Source */
   public final static int NTUPLE = 2;
 
-  private static String getXmlType(String filecheck) {
-    return (filecheck.contains("<animl") ? "AML" : filecheck
-        .contains("xml-cml") ? "CML" : null);
+  private static JDXSource getXMLSource(String source) {
+    String xmlType = source.substring(0,400).toLowerCase();
+
+    if (xmlType.contains("<animl")) {
+      return AnIMLSource.getAniMLInstance(new ByteArrayInputStream(source.getBytes()));
+    }
+    else if (xmlType.contains("xml-cml")) {
+      return CMLSource.getCMLInstance(new ByteArrayInputStream(source.getBytes()));
+    }
+    return null;
   }
 
-  public static Object createJDXSource(String sourceContents, String filePath,
-                                       URL appletDocumentBase) {
+  public static JDXSource createJDXSource(String sourceContents, String filePath,
+                                       URL appletDocumentBase)
+    throws IOException, JSpecViewException
+  {
     InputStream in = null;
     System.out.println("createJDXSource " + filePath + " " + sourceContents + " " +
                        appletDocumentBase);
+ 
     if (filePath != null) {
-      Object ret = FileManager.getInputStream(filePath, true,
-                                              appletDocumentBase);
-      if (ret instanceof String)
-        return ret;
-      in = (InputStream) ret;
-      byte[] data = new byte[400];
-      try {
-        in.read(data, 0, 400);
-      }
-      catch (IOException e) {
-        try {
-          in.close();
-        }
-        catch (IOException e1) {
-          //
-        }
-        return "Unable to read source : " + e.getMessage();
-      }
-      try {
-        in.close();
-      }
-      catch (IOException e1) {
-        //
-      }
-      sourceContents = (new String(data)).toLowerCase();
-      String xmlType = getXmlType(sourceContents);
-      if (xmlType != null) {
-        in = (InputStream) FileManager.getInputStream(filePath, true,
-            appletDocumentBase);
-        if (xmlType.equals("AML")) {
-          return AnIMLSource.getAniMLInstance(in);
-        }
-        return CMLSource.getCMLInstance(in);
+      in = FileManager.getInputStream(filePath, true, appletDocumentBase);
+      sourceContents = getContentFromInputStream(in); 
+
+      JDXSource xmlSource = getXMLSource(sourceContents);
+      if (xmlSource != null) {
+        return xmlSource;
       }
     }
-    if (filePath != null) {
-      FileManager fm = new FileManager(appletDocumentBase);
-      sourceContents = fm.getFileAsString(filePath);
-    }
+
     int sourceType = determineJDXSourceType(sourceContents);
     //////////////////////////////////////////////
     double d1=0, d2=1;
@@ -182,7 +165,7 @@ public abstract class JDXSource {
     }
     determineRevPlot(d1, d2, datatype, xUnits);
     if (sourceType == -1) {
-      return "JDX Source Type not Recognized";
+      throw new JSpecViewException("JDX Source Type not Recognized");
     }
     try {
       switch (sourceType) {
@@ -193,11 +176,24 @@ public abstract class JDXSource {
       case NTUPLE:
         return NTupleSource.getInstance(sourceContents);
       // return RestrictedNTupleSource.getInstance(sourceContents, 128);
+      default:
+        throw new JSpecViewException("Unknown or unrecognised JCAMP-DX format");
       }
     } catch (JSpecViewException e) {
-      return "Error reading JDX format: " + e.getMessage();
+      throw new JSpecViewException("Error reading JDX format: " + e.getMessage());
     }
-    return "Error reading file";
+  }
+
+  private static String getContentFromInputStream(InputStream in)
+    throws IOException
+  {
+    StringBuffer sb = new StringBuffer();
+    BufferedReader br = new BufferedReader(new InputStreamReader(in));
+    String line;
+    while ((line = br.readLine()) != null)
+      sb.append(line).append("\n");
+    br.close();
+    return sb.toString();
   }
 
   /**
@@ -215,8 +211,9 @@ public abstract class JDXSource {
 
         return BLOCK;
       }
-      if (label.equals("##DATACLASS") && t.value.toUpperCase().equals("NTUPLES"))
+      if (label.equals("##DATACLASS") && t.value.toUpperCase().equals("NTUPLES")) {
           return NTUPLE;
+      }
       Arrays.sort(JDXSource.TABULAR_DATA_LABELS);
       if(Arrays.binarySearch(JDXSource.TABULAR_DATA_LABELS, label) > 0)
         return SIMPLE;

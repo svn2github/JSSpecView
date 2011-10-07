@@ -268,16 +268,19 @@ public class PreferencesDialog extends JDialog {
 
     // init preview panel
     try {
-      Object ret = JDXSource.createJDXSource(null, "sample.jdx", null);
-      if (ret instanceof String)
-        return;
-      JDXSource source = (JDXSource) ret;
+      JDXSource source = JDXSource.createJDXSource(null, "sample.jdx", null);
+
       previewPanel = new JSVPanel(source.getSpectra());
       previewPanel.setZoomEnabled(false);
       previewPanel.setCoordinatesOn(true);
       previewPanel.setGridOn(true);
     }
+    catch (IOException ioe) {
+      ioe.printStackTrace();
+      return;
+    }
     catch (JSpecViewException ex) {
+      ex.printStackTrace();
     }
 
     if(previewPanel != null)

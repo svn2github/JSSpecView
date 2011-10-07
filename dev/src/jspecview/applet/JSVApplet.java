@@ -119,7 +119,7 @@ public class JSVApplet extends JApplet {
     System.out.println("JSpecView " + this + " finalized");
    }
 
- public static final String APPLET_VERSION = "1.0.20110924-2119";
+ public static final String APPLET_VERSION = "1.0.20111006-1900";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath;
@@ -438,13 +438,17 @@ public class JSVApplet extends JApplet {
       writeStatus("Please set the 'filepath' or 'load file' parameter");
       return;
     }
-    Object ret = JDXSource.createJDXSource(data, fileName, base);
-    System.out.println(ret);
-    if (ret instanceof String) {
-      writeStatus((String) ret);
+
+    JDXSource source;
+    try {
+    	source = JDXSource.createJDXSource(data, fileName, base);
+    }
+    catch (Exception e) {
+      writeStatus(e.getMessage());
+      e.printStackTrace();
       return;
     }
-    source = (JDXSource) ret;
+
     specs = source.getSpectra();
     continuous = source.getJDXSpectrum(0).isContinuous();
     if (!compoundMenuOn2)

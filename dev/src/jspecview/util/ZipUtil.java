@@ -35,7 +35,7 @@ import java.util.zip.ZipInputStream;
 
 public class ZipUtil {
 
-  public static boolean isZipFile(InputStream is) throws Exception {
+  public static boolean isZipFile(InputStream is) throws IOException {
     byte[] abMagic = new byte[4];
     is.mark(5);
     int countRead = is.read(abMagic, 0, 4);

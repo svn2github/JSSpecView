@@ -1210,9 +1210,12 @@ public class MainFrame
       writeStatus("File: '" + filePath + "' is already opened");
       return;
     }
-    Object source = source = JDXSource.createJDXSource(null, filePath, null);
-    if (source instanceof String) {
-      writeStatus((String) source);
+    JDXSource source;
+    try {
+      source = JDXSource.createJDXSource(null, filePath, null);
+    }
+    catch (Exception e) {
+      writeStatus(e.getMessage());
       return;
     }
     currentSelectedSource = (JDXSource) source;

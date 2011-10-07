@@ -33,7 +33,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.ZipInputStream;
 
 public class FileManager {
 
@@ -52,146 +51,90 @@ public class FileManager {
     this.appletDocumentBase = appletDocumentBase;
   }
 
-  public String getFileAsString(String name) {
-    String[] data = new String[2];
-    data[0] = name;
-    // ignore error completely
-    getFileDataOrErrorAsString(data);
-    return data[1];
-  }
-
-  public boolean getFileDataOrErrorAsString(String[] data) {
-    data[1] = "";
-    String name = data[0];
+  public String getFileAsString(String name) throws IOException {
     if (name == null)
-      return false;
-    Object t = getBufferedReaderOrErrorMessageFromName(name, data);
-    if (t instanceof String) {
-      data[1] = (String) t;
-      return false;
+      throw new IOException("name is null");
+
+    BufferedReader br = getBufferedReaderFromName(name);
+
+    StringBuffer sb = new StringBuffer(8192);
+    String line;
+    while ((line = br.readLine()) != null) {
+      sb.append(line);
+      sb.append('\n');
     }
-    try {
-      BufferedReader br = (BufferedReader) t;
-      StringBuffer sb = new StringBuffer(8192);
-      String line;
-      int nBytesRead = 0;
-      while ((line = br.readLine()) != null) {
-        nBytesRead += line.length();
-        sb.append(line);
-        sb.append('\n');
-      }
-      br.close();
-      data[1] = sb.toString();
-      return true;
-    } catch (Exception ioe) {
-      data[1] = ioe.getMessage();
-      return false;
-    }
+    br.close();
+    return sb.toString();
   }
 
-  Object getBufferedReaderOrErrorMessageFromName(String name,
-                                                 String[] fullPathNameReturn) {
-    String[] names = classifyName(name);
-    if (openErrorMessage != null)
-      return openErrorMessage;
-    if (names == null)
-      return "cannot read file name: " + name;
-    if (fullPathNameReturn != null)
-      fullPathNameReturn[0] = names[0].replace('\\', '/');
-    return getUnzippedBufferedReaderOrErrorMessageFromName(names[0], false, false);
-  }
-
-  private String[] classifyName(String name) {
+  BufferedReader getBufferedReaderFromName(String name)
+    throws MalformedURLException, IOException
+  {
     if (name == null)
-      return null;
-    String[] names = new String[2];
+      throw new IOException("Cannot find " + name);
+    String path = classifyName(name);
+    return getUnzippedBufferedReaderFromName(path);
+  }
+
+  private String classifyName(String name)
+    throws MalformedURLException
+  {
     if (appletDocumentBase != null) {
       // This code is only for the applet
-      try {
-        if (name.indexOf(":\\") == 1 || name.indexOf(":/") == 1)
-          name = "file:///" + name;
-        //System.out.println("filemanager name " + name);
-        //System.out.println("filemanager adb " + appletDocumentBase);
-        URL url = new URL(appletDocumentBase, name);
-        names[0] = url.toString();
-        // we add one to lastIndexOf(), so don't worry about -1 return value
-        names[1] = names[0].substring(names[0].lastIndexOf('/') + 1,
-                names[0].length());
-        //System.out.println("filemanager 0 " + names[0]);
-        //System.out.println("filemanager 1 " + names[1]);
-      } catch (MalformedURLException e) {
-        openErrorMessage = e.getMessage();
-      }
-      return names;
+      if (name.indexOf(":\\") == 1 || name.indexOf(":/") == 1)
+        name = "file:///" + name;
+      //System.out.println("filemanager name " + name);
+      //System.out.println("filemanager adb " + appletDocumentBase);
+      URL url = new URL(appletDocumentBase, name);
+      return url.toString();
     }
+
     // This code is for the app
-    int i = urlTypeIndex(name);
-    if (i >= 0) {
-      try {
-        URL url = new URL(name);
-        names[0] = url.toString();
-        names[1] = names[0].substring(names[0].lastIndexOf('/') + 1,
-            names[0].length());
-      } catch (MalformedURLException e) {
-        openErrorMessage = e.getMessage();
-      }
-      return names;
+    if (urlTypeIndex(name)) {
+      URL url = new URL(name);
+      return url.toString();
     }
     File file = new File(name);
-    names[0] = file.getAbsolutePath();
-    names[1] = file.getName();
-    return names;
+    return file.getAbsolutePath();
   }
 
   private final static String[] urlPrefixes = {"http:", "https:", "ftp:", "file:"};
 
-  private static int urlTypeIndex(String name) {
-    for (int i = 0; i < urlPrefixes.length; ++i) {
-      if (name.startsWith(urlPrefixes[i])) {
-        return i;
+  private static boolean urlTypeIndex(String name) {
+    for (String prefix : urlPrefixes) {
+      if (name.startsWith(prefix)) {
+        return true;
       }
     }
-    return -1;
+    return false;
   }
 
-  Object getUnzippedBufferedReaderOrErrorMessageFromName(String name,
-                                                         boolean allowZipStream,
-                                                         boolean isTypeCheckOnly) {
+  BufferedReader getUnzippedBufferedReaderFromName(String name)
+    throws IOException
+  {
+    System.out.println("getUnzippedBufferedReaderFromName called");
     String[] subFileList = null;
-    if (name.indexOf("|") >= 0)
-      name = (subFileList = TextFormat.split(name, "|"))[0];
-    Object t = getInputStreamOrErrorMessageFromName(name, true);
-    if (t instanceof String)
-      return t;
-    try {
-      BufferedInputStream bis = new BufferedInputStream((InputStream)t, 8192);
-      InputStream is = bis;
-      if (isGzip(is)) {
-        is = new GZIPInputStream(bis);
-      } else if (ZipUtil.isZipFile(is)) {
-        if (allowZipStream)
-          return new ZipInputStream(bis);
-        //danger -- converting bytes to String here.
-        //we lose 128-156 or so.
-        String s = (String) ZipUtil.getZipFileContents(is, subFileList, 1);
-        is.close();
-        return getBufferedReaderForString(s);
+    if (name.indexOf("|") >= 0) {
+      subFileList = TextFormat.split(name, "|");
+      if (subFileList != null && subFileList.length > 0) {
+    	  name = subFileList[0];
       }
-      return new BufferedReader(new InputStreamReader(is));
-    } catch (Exception ioe) {
-      return ioe.getMessage();
     }
+    InputStream in = getInputStream(name, true, appletDocumentBase);
+    BufferedInputStream bis = new BufferedInputStream(in, 8192);
+    if (isGzip(bis)) {
+      return new BufferedReader(new InputStreamReader(new GZIPInputStream(bis)));
+    } else if (ZipUtil.isZipFile(bis)) {
+      //danger -- converting bytes to String here.
+      //we lose 128-156 or so.
+      String s = (String) ZipUtil.getZipFileContents(bis, subFileList, 1);
+      bis.close();
+      return new BufferedReader(new StringReader(s));
+    }
+    return new BufferedReader(new InputStreamReader(bis));
   }
 
-  BufferedReader getBufferedReaderForString(String string) {
-    return new BufferedReader(new StringReader(string));
-  }
-
-  Object getInputStreamOrErrorMessageFromName(String name, boolean showMsg) {
-    return getInputStream(name, showMsg, appletDocumentBase);
-  }
-
-  static boolean isGzip(InputStream is) throws Exception {
+  private static boolean isGzip(InputStream is) throws IOException {
     byte[] abMagic = new byte[4];
     is.mark(5);
     int countRead = is.read(abMagic, 0, 4);
@@ -199,9 +142,10 @@ public class FileManager {
     return (countRead == 4 && abMagic[0] == (byte) 0x1F && abMagic[1] == (byte) 0x8B);
   }
 
-  public static Object getInputStream(String name, boolean showMsg, URL appletDocumentBase) {
-    //System.out.println("inputstream for " + name);
-    String errorMessage = null;
+  public static InputStream getInputStream(String name, boolean showMsg, URL appletDocumentBase)
+    throws IOException, MalformedURLException
+  {
+    System.out.println("inputstream for " + name);
     int iurlPrefix;
     for (iurlPrefix = urlPrefixes.length; --iurlPrefix >= 0;)
       if (name.startsWith(urlPrefixes[iurlPrefix]))
@@ -210,29 +154,24 @@ public class FileManager {
     boolean isApplet = (appletDocumentBase != null);
     InputStream in;
     int length;
-    try {
-      if (isApplet || isURL) {
-        URL url = (isApplet ? new URL(appletDocumentBase, name) : new URL(name));
-        name = url.toString();
-        if (showMsg)
-          Logger.info("FileManager opening URL " + url.toString());
-        URLConnection conn = url.openConnection();
-        length = conn.getContentLength();
-        in = conn.getInputStream();
-      } else {
-        if (showMsg)
-          Logger.info("FileManager opening file " + name);
-        File file = new File(name);
-        System.out.println(file);
-        length = (int) file.length();
-        in = new FileInputStream(file);
-        System.out.println(in);
-      }
-      return new MonitorInputStream(in, length);
-    } catch (Exception e) {
-      errorMessage = "" + e;
+    if (isApplet || isURL) {
+      URL url = (isApplet ? new URL(appletDocumentBase, name) : new URL(name));
+      name = url.toString();
+      if (showMsg)
+        Logger.info("FileManager opening URL " + url.toString());
+      URLConnection conn = url.openConnection();
+      length = conn.getContentLength();
+      in = conn.getInputStream();
+    } else {
+      if (showMsg)
+        Logger.info("FileManager opening file " + name);
+      File file = new File(name);
+      System.out.println(file);
+      length = (int) file.length();
+      in = new FileInputStream(file);
+      System.out.println(in);
     }
-    return errorMessage;
+    return new MonitorInputStream(in, length);
   }
 
   public URL getResource(Object object, String fileName, boolean flagError) {
