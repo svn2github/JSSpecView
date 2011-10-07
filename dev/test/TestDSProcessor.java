@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2006 The University of the West Indies
+/* Copyright (c) 2002-2011 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -20,8 +20,7 @@
 package test;
 
 import java.io.FileWriter;
-
-import jspecview.util.DisplaySchemesProcessor;
+import jspecview.application.DisplaySchemesProcessor;
 
 public class TestDSProcessor {
 

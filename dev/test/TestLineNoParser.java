@@ -25,8 +25,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import jspecview.util.JDXSourceStringTokenizer;
-import jspecview.util.JSpecViewUtils;
+import jspecview.source.JDXSourceStringTokenizer;
+import jspecview.common.JSpecViewUtils;
 
 // Adding Comment to test update from command line
 // Testing another update...
@@ -35,7 +35,7 @@ import jspecview.util.JSpecViewUtils;
 /**
  * <p>Title: JSpecView</p>
  * <p>Description: A Graphical View for JCAMP-DX Files</p>
- * <p>Copyright: Copyright (c) 2002</p>
+ * <p>Copyright: Copyright (c) 2002-2011</p>
  * <p>Company: Dept. of Chemistry, University of the West Indies, Jamaica</p>
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
