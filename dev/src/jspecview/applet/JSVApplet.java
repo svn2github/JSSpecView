@@ -33,6 +33,9 @@
 //			  		title font, and integral plot color.  Added a method
 //			  		to reset view from a javascript call.
 // 24-09-2011 jak - Added parameter for integration ratio annotations.
+// 08-10-2011 jak - Add a method to toggle integration from a javascript
+//					call. Changed behavior to remove integration after reset
+//					view.
 
 package jspecview.applet;
 
@@ -119,7 +122,7 @@ public class JSVApplet extends JApplet {
     System.out.println("JSpecView " + this + " finalized");
    }
 
- public static final String APPLET_VERSION = "1.0.20111006-1900";
+ public static final String APPLET_VERSION = "1.0.20111008-1700";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath;
@@ -1398,7 +1401,12 @@ public class JSVApplet extends JApplet {
      * @param e the ActionEvent
    */
   void resetMenuItem_actionPerformed(ActionEvent e) {
-    selectedJSVPanel.reset();
+	  // Remove integration when view is reset
+	  if(integrateMenuItem.isSelected() == true)
+		  integrateMenuItem.setSelected(false);
+	  
+	  // Reset the view
+	  selectedJSVPanel.reset();	  
   }
 
   /**
@@ -2044,12 +2052,28 @@ public class JSVApplet extends JApplet {
    * that restores the zoom of a <code>JSVPanel</code> to its original state.
    */
   public void resetView(){
+	  // Remove Integration from view
+	  if(integrateMenuItem.isSelected() == true)
+		  integrateMenuItem.setSelected(false);
+		  
+	  // Reset the view
 	  if (selectedJSVPanel != null){
 		  selectedJSVPanel.reset();
 		  repaint();
 	  }
   }
 
+  /**
+   * Method that can be called from another applet or from javascript
+   * that toggles the integration graph of a <code>JSVPanel</code>.
+   */
+  public void toggleIntegration(){
+	  if(integrateMenuItem.isSelected() == false)
+		  integrateMenuItem.setSelected(true);
+	  else 
+		  integrateMenuItem.setSelected(false);
+  }
+  
   /**
    * Calls a javascript function given by the function name
    * passing to it the string parameters as arguments
