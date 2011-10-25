@@ -34,7 +34,7 @@
 //			  		to reset view from a javascript call.
 // 24-09-2011 jak - Added parameter for integration ratio annotations.
 // 08-10-2011 jak - Add a method to toggle integration from a javascript
-//					call. Changed behavior to remove integration after reset
+//					call. Changed behaviour to remove integration after reset
 //					view.
 
 package jspecview.applet;
@@ -123,7 +123,7 @@ public class JSVApplet extends JApplet {
     System.out.println("JSpecView " + this + " finalized");
    }
 
- public static final String APPLET_VERSION = "2.0.20111021-2015";
+ public static final String APPLET_VERSION = "1.0.20111024-1950";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath;

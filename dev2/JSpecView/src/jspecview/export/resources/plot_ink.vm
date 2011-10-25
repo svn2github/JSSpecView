@@ -48,51 +48,6 @@
    inkscape:window-maximized="1" />
 
 <!-- Copyright (c) 2002-2010 Dept. of Chemistry, University of the West Indies, Jamaica -->
-<script >
-  <![CDATA[
-  var doc;
-  var firstTranslateX = $firstTranslateX, firstTranslateY = $firstTranslateY;
-  var scaleX = $scaleX, scaleY = $scaleY;
-  var secondTranslateX = $secondTranslateX, secondTranslateY = $secondTranslateY;
-  var leftPlotArea = $leftPlotArea, rightPlotArea = $rightPlotArea;
-  var topPlotArea = $topPlotArea, bottomPlotArea = $bottomPlotArea;
-  var plotAreaWidth = $plotAreaWidth, plotAreaHeight = $plotAreaHeight;
-  var svgHeight = $svgHeight, svgWidth = $svgWidth;
-  var minXOnScale = $minXOnScale, minYOnScale = $minYOnScale;
-  var maxXOnScale = $maxXOnScale, maxYOnScale = $maxYOnScale;
-  var xScaleFactor = $xScaleFactor, yScaleFactor = $yScaleFactor;
-  var numDecimalPlacesX = $numDecimalPlacesX, numDecimalPlacesY = $numDecimalPlacesY;
-
-  var increasing = $increasing;
-
-  var transX = firstTranslateX;
-  var tempScaleX = scaleX;
-  var plotReversed = false;
-  var scaleOn = true;
-  var coordsOn = true;
-  ]]>
-</script>
-
-<!--
- It should be possible to construct your own JavaScript here to do this differently,
- default definitions used are:
-
-    int xUnitLabelX = rightPlotArea - 50;
-    int xUnitLabelY = bottomPlotArea + 30;
-    int yUnitLabelX = leftPlotArea - 80;
-    int yUnitLabelY = bottomPlotArea / 2;
-    int tempX = yUnitLabelX;
-    yUnitLabelX = -yUnitLabelY;
-    yUnitLabelY = tempX;
-
-    WHERE
-
-    rightPlotArea  = $rightPlotArea
-    bottomPlotArea = $bottomPlotArea
-    leftPlotArea   = $leftPlotArea
-    topPlotArea    = $topPlotArea
-
- -->
 
 <g id="Plot" transform="translate($firstTranslateX,$firstTranslateY) scale($scaleX,$scaleY) translate($secondTranslateX,$secondTranslateY)">
 
