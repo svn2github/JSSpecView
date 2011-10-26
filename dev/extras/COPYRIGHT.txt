@@ -1,9 +1,8 @@
 
-Copyright (c) 2002-2007 The University of the West Indies
+Copyright (c) 2002-2011 The University of the West Indies, Mona Campus, JAMAICA
 
-This software was originally created by The University of West Indies
-and may contain voluntary contributions from others in the
-JSpecView Development Team.
+This software was originally created at The University of West Indies, Jamaica
+and may contain voluntary contributions from others in the JSpecView Development Team.
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -23,21 +22,21 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
 This software uses several external libraries and resources:
 
 VelocityTools is a collection of Velocity subprojects with a
-common goal of creating tools and infrastructure for building 
+common goal of creating tools and infrastructure for building
 both web and non-web applications using the Velocity template engine.
 Distributed free and without warranty.
 Apache License Version 2.0, January 2004
 http://www.apache.org/licenses/LICENSE-2.0
 
-Apache Xerces is a collaborative software development project 
-dedicated to providing robust, full-featured, commercial-quality, 
-and freely available XML parsers and closely related technologies 
+Apache Xerces is a collaborative software development project
+dedicated to providing robust, full-featured, commercial-quality,
+and freely available XML parsers and closely related technologies
 on a wide variety of platforms supporting several languages.
 Distributed free and without warranty.
 Apache License Version 2.0, January 2004
 http://www.apache.org/licenses/LICENSE-2.0
 
-MDIDesktop routines add Multiple Document Interface (MDI) functionality 
+MDIDesktop routines add Multiple Document Interface (MDI) functionality
 not present in Swing (as of 2001).  Published by Gerald Nunn.
 Distributed free and without warranty.
 http://www.javaworld.com/javaworld/jw-05-2001/jw-0525-mdi.html
