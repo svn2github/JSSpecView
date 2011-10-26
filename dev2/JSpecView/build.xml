@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="jspecview" basedir="." default="clean-build">
+<project name="jspecview" basedir="." default="clean">
 	  <description>
 		    A JAVA based JCAMP-DX and XML Spectroscopy Viewer
 	  </description>
@@ -19,12 +19,17 @@
 	<property name="build.number" 		value="${build.major.number}.${build.minor.number}.${build.revision.number}"/>	
 	<property name="src.dir"     		value="src"/>
 	<property name="lib.dir"     		value="libs"/>
-	<property name="bin.dir" 			value="bin"/>	
-    <property name="build.dir"   		value="build"/>			
+	<property name="bin.dir" 			value="bin"/>
+    <property name="build.dir"   		value="build"/>
 	<property name="build.app.dir"   	value="${build.dir}"/>
-	<property name="build.applet.dir"  	value="${build.dir}"/>		
-	<property name="jsvlib.dir" 		value="../JSpecViewLib/bin"/>   
+	<property name="build.applet.dir"  	value="${build.dir}"/>
+	<property name="jsvlib.dir" 		value="../JSpecViewLib/bin"/>
 	<property name="main-class"  		value="jspecview.application.MainFrame"/>
+    <property name="extras.dir"         value="extras" />
+    <property name="dist.dir"           value="dist" />
+    <property name="dist.zip"           value="${dist.dir}/JSpecView.zip" />
+    <property name="applet.jar"         value="${build.dir}/jspecview.jar" />
+
     <path id="JSpecViewLib.classpath">
         <pathelement location="${jsvlib.dir}"/>
     </path>
@@ -33,54 +38,53 @@
         <pathelement location="libs/plugin.jar"/>
         <path refid="JSpecViewLib.classpath"/>
     </path>
- 		
+
 	<!--
     <path id="classpath">
         <fileset dir="${lib.dir}" includes="**/*.jar"/>
     </path>
     -->
-	
+
 	<target name="current-number">
 		<echo>Current build number:${build.number}</echo>
 	</target>
-	
+
 	<target name="revision">
 	    <propertyfile  file="build_info.properties">
 	    	<entry key="build.revision.number" type="int" operation="+" value="1" pattern="0"/>
 	    </propertyfile>
 	</target>
 
-	<target name="clean">
-		<delete dir="${build.dir}"/>
-	</target>
-	
 	<!--
 	<target name="compile">
         <mkdir dir="${classes.dir}"/>
-        <javac srcdir="${src.dir}" destdir="${classes.dir}"/>		
+        <javac srcdir="${src.dir}" destdir="${classes.dir}"/>
     </target>
 	-->
-	
+<!---
+-->
+
 	<target name="application-jar">
 		<antcall target="revision"></antcall>
         <mkdir dir="${build.app.dir}"/>
         <jar destfile="${build.app.dir}/${ant.project.name}.app.${build.number}.jar">
             <manifest>
             	<attribute name="Class-Path" value="."/>
-                <attribute name="Main-Class" value="${main-class}"/>            	
+                <attribute name="Main-Class" value="${main-class}"/>
             </manifest>
         	<fileset dir="${bin.dir}">
-        		<exclude name="jspecview/applet/"/>        		
+        		<exclude name="jspecview/applet/"/>
         	</fileset>
-        	<fileset dir="${jsvlib.dir}"/> 
-        </jar>		
+        	<fileset dir="${jsvlib.dir}"/>
+        </jar>
     </target>
-	
+<!---
+-->
 	<target name="applet-jar">
 		<antcall target="revision"></antcall>
         <mkdir dir="${build.applet.dir}"/>
         <jar destfile="${build.applet.dir}/${ant.project.name}.applet.${build.number}.jar">
-            <manifest>               
+            <manifest>
             	<attribute name="Class-Path" value=". plugin.jar"/>
             </manifest>
         	<fileset dir="${bin.dir}">
@@ -89,26 +93,54 @@
         		<exclude name="jspecview/application/resources/"/>
         		<exclude name="mdidesktop/"/>
         	</fileset>
-        	<fileset dir="${jsvlib.dir}"/>  
+        	<fileset dir="${jsvlib.dir}"/>
         	<!--<zipgroupfileset dir="${lib.dir}" includes="*.jar"></zipgroupfileset>-->
         </jar>
-		<!-- <copy file="${lib.dir}/plugin.jar" todir="${build.applet.dir}"/> --> 
+		<!-- <copy file="${lib.dir}/plugin.jar" todir="${build.applet.dir}"/> -->
     </target>
-	
+<!---
+-->
+
 	<target name="signed-applet-jar" depends="applet-jar">
 	    <signjar jar="${build.applet.dir}/${ant.project.name}.applet.${build.number}.jar"
 	             signedjar="${build.applet.dir}/${ant.project.name}.applet.signed.${build.number}.jar"
 	             keystore="certificate/JSVcertificate.store"
 	             storepass="JSV2011" alias="JSVcertificate" />
 	</target>
+<!---
+-->
+
+	<target name="make-distribution-zip-file" depends="application-jar,applet-jar,signed-applet-jar" description="Create JSpecView.zip">
+        <dirname property="dist.dir" file="${applet.jar}"/>
+             <mkdir dir="${dist.dir}"/>
+  	      <delete quiet="true">
+	         <fileset dir="${dist.dir}" includes = "*.*"/>
+	      </delete>
+          <jar jarfile="${dist.zip}" compress="${jar.compress}">
+           <fileset dir="${extras.dir}"/>
+		   <fileset dir="${build.dir}">
+		      <include name="*.jar"/>
+		   </fileset>
+	    </jar>
+	</target>
+
+
 
 	   <target name="Run" description="Run the application Mainframe" >
 	       <java classname="jspecview.application.MainFrame" failonerror="true" fork="yes">
 	           <classpath refid="JspecView.classpath"/>
 	       </java>
 	   </target>
-	
-	
-    <target name="clean-build" depends="clean,application-jar,signed-applet-jar"/>
-	
+<!--
+    	<target name="clean">
+		<delete dir="${build.dir}"/>
+	</target>
+-->
+        <target name="clean" >
+           <delete quiet="true">
+             <fileset dir ="${build.dir}" includes= "**/*.class" />
+             <fileset dir="${build.dir}" includes= "*.jar" />
+           </delete>
+        </target>
+
 </project>
