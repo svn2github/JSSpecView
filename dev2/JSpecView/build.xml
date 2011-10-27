@@ -27,7 +27,7 @@
 	<property name="main-class"  		value="jspecview.application.MainFrame"/>
     <property name="extras.dir"         value="extras" />
     <property name="dist.dir"           value="dist" />
-    <property name="dist.zip"           value="${dist.dir}/JSpecView.zip" />
+    <property name="dist.zip"           value="${dist.dir}/JSpecView" />
     <property name="applet.jar"         value="${build.dir}/jspecview.jar" />
 
     <path id="JSpecViewLib.classpath">
@@ -116,7 +116,7 @@
   	      <delete quiet="true">
 	         <fileset dir="${dist.dir}" includes = "*.*"/>
 	      </delete>
-          <jar jarfile="${dist.zip}" compress="${jar.compress}">
+          <jar jarfile="${dist.zip}.${build.number}.zip" compress="${jar.compress}">
            <fileset dir="${extras.dir}"/>
 		   <fileset dir="${build.dir}">
 		      <include name="*.jar"/>
