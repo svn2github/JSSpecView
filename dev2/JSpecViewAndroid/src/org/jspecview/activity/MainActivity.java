@@ -1,23 +1,3 @@
-/* Copyright (C) 2002-2011  The JSpecView Development Team
- *
- * Contact: robert.lancashire@uwimona.edu.jm
- *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
- *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
- *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
- */
-
-
 package org.jspecview.activity;
 
 //TODO: 
@@ -30,11 +10,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Vector;
 
 import org.jspecview.R;
+
 import jspecview.common.Coordinate;
+import jspecview.common.IntegralGraph;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSpecViewUtils;
 import jspecview.exception.JSpecViewException;
@@ -54,6 +35,7 @@ import com.lamerman.FileDialog;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -66,6 +48,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -77,11 +61,15 @@ public class MainActivity extends Activity{
 		    
     // Collection of Loaded JDXSpectrum objects
     Vector<JDXSpectrum> mSpectra;     
+    // The current visible spectrum
+    JDXSpectrum mCurrentSpectrum;   
+    // The index of the current visible spectrum
+    int mCurrentSpectrumIndex = 0;
     // series of all spectra loaded
     XYMultipleSeriesDataset[] mDatasets;
     // renderer for current spectra/series loaded
     XYMultipleSeriesRenderer mCurrentRenderer;
-    // renderer for all spectra/series
+    // renderers for all spectra/series
     XYMultipleSeriesRenderer[] mRenderers;
     // the view for the current visible spectrum or overlaid spectra
     GraphicalView mCurrentView;
@@ -99,13 +87,53 @@ public class MainActivity extends Activity{
     boolean mIsOverlayEnabled = false;
     // determines if a spectrum/spectra has finished loading
     boolean mIsLoadingComplete = false;
-    
+    // determines whether integration is enabled for the spectrum
+    boolean mIsIntegrated = false;
+    // integral graph for all valid spectra
+    IntegralGraph[] mIntegralGraphs;
+    // Holds the values of the current integration parameters
+    // TODO: serialize the IntegralGraph
+    double mIntegrationMinY = Double.MIN_VALUE;
+    double mIntegrationOffset = Double.MIN_VALUE;
+    double mIntegrationFactor = Double.MIN_VALUE;
+        
     InputStream mSpectrumInputStream = null;
     
     // List of colors for spectrum plots. Each overlaid spectra will have colors in the array respectively. 
     // When colors are exhausted then a random color is generated    
     int[] colors = new int[] { Color.BLUE, Color.GREEN, Color.CYAN, Color.YELLOW, Color.RED, Color.MAGENTA, Color.WHITE};
      
+    /*
+     * Options Menu IDs
+     */
+    static class MenuItemID{
+    	public static final int OPEN = 0;
+    	public static final int REVERSE_PLOT = 1;
+    	public static final int SHOW_HIDE_GRID = 2;
+    	public static final int ENABLE_COOORDINATES = 3;
+    	public static final int RESET = 4;
+    	public static final int SELECT_SPECTRUM = 5;
+    	public static final int OVERLAY_SPLIT = 6;
+    	public static final int ADD_REMOVE_INTEGRATION = 7;
+    }
+	
+	/*
+	 * Keys used to save the state of the activity in a Bundle
+	 */
+	static class StateKey{
+		public static final String SPECTRUM_FILE_PATH = "SpectrumFilePath";
+		public static final String GRID_VISIBLE = "GridVisible";
+		public static final String COORDINATES_ENABLED = "CoordinatesEnabled";
+		public static final String OVERLAY_ENABLED = "OverlayEnabled";
+		public static final String IS_INTEGRATED = "IsIntegrated";
+		public static final String CURRENT_SPECTRUM_INDEX = "CurrentSpectrumIndex";
+		public static final String INTEGRATION_PARAMS = "IntegrationParameters";
+	}
+	
+	// ID for the integration dialog
+	static final int DIALOG_INTEGRATION = 0;
+	//Integration Dialog
+	Dialog mIntegrateDialog;
     
     // Handler for callbacks to the UI Thread
     final Handler mHandler = new Handler();
@@ -129,9 +157,10 @@ public class MainActivity extends Activity{
 			int numDatasets = mDatasets.length;
 						
 			mRenderers = new XYMultipleSeriesRenderer[numDatasets];
+			mIntegralGraphs = new IntegralGraph[numDatasets];
 			
 			// Create a graphical view for each dataset in the mDatasets array
-			// For a Single spectra, the array will have only one dataset with a single series
+			// For a Single spectrum, the array will have only one dataset with a single series
 			// For multiple spectra, if overlay is enabled then the array will have one dataset with multiple series
 			// If overlay is disabled then the array will have a dataset with a single series for each spectrum
 			for(int i = 0; i < numDatasets; i++){
@@ -144,101 +173,33 @@ public class MainActivity extends Activity{
 				GraphicalView view = ChartFactory.getLineChartView(getApplicationContext(), dataset, multiRenderer);
 				view.setId(i);	
 				//for multiple non-overlaid spectra set all but the first view to be invisible
-				if(i > 0){
+				if(i != mCurrentSpectrumIndex){
 					view.setVisibility(View.GONE);
 				}
 				else{
-					// set the current view and renderer to be for the first spectrum
+					// set the current spectrum, view and renderer to be for the first spectrum
 					mCurrentRenderer = multiRenderer;
-					mCurrentView = view;
+					mCurrentView = view;					
+					mCurrentSpectrum = mSpectra.get(mCurrentSpectrumIndex);
+					
+					if(mIsIntegrated){
+						addIntegrationSeries(mCurrentSpectrumIndex, dataset, multiRenderer, mIntegrationMinY, mIntegrationOffset, mIntegrationFactor);
+					}
 				}
-								
+				
 				layout.addView(view);  
 				LayoutParams params = view.getLayoutParams();
 			    params.width = LayoutParams.FILL_PARENT;
 			    params.height = LayoutParams.FILL_PARENT;
 			    
-			    // Set touch handler to show coordinates if coordinates in enabled
-			    view.setOnTouchListener(new OnTouchListener() {			    	
-					@Override
-					public boolean onTouch(View view, MotionEvent event) {
-											
-						if(event.getAction() == MotionEvent.ACTION_DOWN){
-				    		if(mIsCoordinatesEnabled){
-				    			float x = event.getX();
-				    			float y = event.getY();
-					    		
-				    			GraphicalView gView = (GraphicalView)view;
-					    		SeriesSelection selection = gView.getChart().getSeriesAndPointForScreenCoordinate(new Point(x, y));
-					    		
-					    		if(selection != null){
-						    		double xVal = selection.getXValue();
-						    		double yVal = selection.getValue();
-						    		
-						    		Toast toast = Toast.makeText(getApplicationContext(), String.format("%1$.0f, %2$.3f", xVal, yVal), Toast.LENGTH_SHORT);
-						    		toast.show();
-					    		}				    		
-				    		}			    		
-				    	}
-				    	return false;
-					}
-				});	
+			    setViewOnTouchListener(view);	
 			    
 			    mIsLoadingComplete = true;
 			}		    		    		   
 		}
-
-		/*
-		 * Creates a multiple series renderer given a parameter determining how many series to create
-		 */
-		private XYMultipleSeriesRenderer createMultipleSeriesRenderer(int numSeries) {
-			
-			XYMultipleSeriesRenderer multiRenderer = new XYMultipleSeriesRenderer();
-			
-			multiRenderer.setApplyBackgroundColor(true);
-			multiRenderer.setBackgroundColor(Color.WHITE);		    
-			multiRenderer.setGridColor(Color.GRAY);
-			multiRenderer.setYLabelsAlign(Align.RIGHT);
-			multiRenderer.setAxisTitleTextSize(16);
-			multiRenderer.setChartTitleTextSize(20);
-			multiRenderer.setLabelsTextSize(15);
-			multiRenderer.setLegendTextSize(15);
-			multiRenderer.setMargins(new int[] { 0, 30, 0, 0 });
-			multiRenderer.setZoomEnabled(true, true);
-			multiRenderer.setExternalZoomEnabled(true);
-			multiRenderer.setPanLimits(null);
-			multiRenderer.setZoomLimits(null);
-			multiRenderer.setShowGrid(mIsGridVisible);
-			multiRenderer.setXLabels(10);
-						
-			int numColors = colors.length;		    
-		    for(int i =0; i < numSeries; i++){
-			    XYSeriesRenderer renderer = new XYSeriesRenderer();
-			    multiRenderer.addSeriesRenderer(renderer);
-		        renderer.setPointStyle(PointStyle.POINT);	
-		        // get series color from colors array or generate a color if no more are available
-		        if(i < numColors){
-		        	renderer.setColor(colors[i]);
-		        }
-		        else{
-		        	renderer.setColor(generateRandomColor());
-		        }
-		    }
-		    		    
-			return multiRenderer;
-		}
 	};
 	
-	/*
-	 * Keys used to save the state of the activity in a Bundle
-	 */
-	private static class StateKey{
-		public static final String SPECTRUM_FILE_PATH = "SpectrumFilePath";
-		public static final String GRID_VISIBLE = "GridVisible";
-		public static final String COORDINATES_ENABLED = "CoordinatesEnabled";
-		public static final String OVERLAY_ENABLED = "OverlayEnabled";
-	}
-	
+
 	 /**
      * Called when the activity is starting.
      * @param savedInstanceState
@@ -247,12 +208,20 @@ public class MainActivity extends Activity{
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);        
         setContentView(R.layout.main);
-        
+         
         if(savedInstanceState != null){
         	mSpectrumFilePath = savedInstanceState.getString(StateKey.SPECTRUM_FILE_PATH);
         	mIsGridVisible =  savedInstanceState.getBoolean(StateKey.GRID_VISIBLE);
         	mIsCoordinatesEnabled =  savedInstanceState.getBoolean(StateKey.COORDINATES_ENABLED);
         	mIsOverlayEnabled =  savedInstanceState.getBoolean(StateKey.OVERLAY_ENABLED);
+        	mCurrentSpectrumIndex = savedInstanceState.getInt(StateKey.CURRENT_SPECTRUM_INDEX);        	
+        	mIsIntegrated = savedInstanceState.getBoolean(StateKey.IS_INTEGRATED);
+        	if(mIsIntegrated){
+	        	double[] integrationParams = savedInstanceState.getDoubleArray(StateKey.INTEGRATION_PARAMS);
+	        	mIntegrationMinY = integrationParams[0];
+	        	mIntegrationFactor = integrationParams[1];
+	        	mIntegrationOffset = integrationParams[2];
+        	}
         	
         	loadSpectrum(mSpectrumFilePath);
         }
@@ -264,24 +233,17 @@ public class MainActivity extends Activity{
     	outState.putBoolean(StateKey.GRID_VISIBLE, mIsGridVisible);
     	outState.putBoolean(StateKey.COORDINATES_ENABLED, mIsCoordinatesEnabled);
     	outState.putBoolean(StateKey.OVERLAY_ENABLED, mIsOverlayEnabled);
+    	outState.putBoolean(StateKey.IS_INTEGRATED, mIsIntegrated);
+    	outState.putInt(StateKey.CURRENT_SPECTRUM_INDEX, mCurrentSpectrumIndex);
+    	if(mIsIntegrated){
+    		IntegralGraph ig = mIntegralGraphs[mCurrentSpectrumIndex];    		
+    		outState.putDoubleArray(StateKey.INTEGRATION_PARAMS, new double[]{ig.getPercentMinimumY(), ig.getIntegralFactor(), ig.getPercentOffset()});
+    	}
     };
     
     @Override
     public void onConfigurationChanged(android.content.res.Configuration newConfig){
     	super.onConfigurationChanged(newConfig);
-    }
-    
-    /*
-     * Options Menu IDs
-     */
-    private static class MenuItemID{
-    	public static final int OPEN = 0;
-    	public static final int REVERSE_PLOT = 1;
-    	public static final int SHOW_HIDE_GRID = 2;
-    	public static final int ENABLE_COOORDINATES = 3;
-    	public static final int RESET = 4;
-    	public static final int SELECT_SPECTRUM = 5;
-    	public static final int OVERLAY_SPLIT = 6;
     }
     
     @Override
@@ -351,7 +313,21 @@ public class MainActivity extends Activity{
 				    	}
     				}
     			}
-	    	}  		    	
+	    	}
+	    	if(!mIsOverlayEnabled && JSpecViewUtils.isHNMR(mSpectra.get(0))){
+	    		MenuItem miIntegrateSpectra = menu.findItem(MenuItemID.ADD_REMOVE_INTEGRATION);	    		
+	    		String integrationTitle = mIsIntegrated ? "Remove Integration" : "Integrate";
+    			if(miIntegrateSpectra == null){    					
+    				miIntegrateSpectra = menu.add(0, MenuItemID.ADD_REMOVE_INTEGRATION, 3, integrationTitle);
+    		    	{    		
+    		    		miIntegrateSpectra.setAlphabeticShortcut('i');
+    		    	}
+    			}
+    			else{
+    				miIntegrateSpectra.setTitle(integrationTitle);
+    				miIntegrateSpectra.setEnabled(true);
+    			}
+	    	}
     	}
     	
     	return true;
@@ -391,6 +367,16 @@ public class MainActivity extends Activity{
         		item.setTitle(mIsOverlayEnabled ? "Split Spectra" : "Overlay Spectra");    
         		reloadSpectrum();
     			return true;
+    		case MenuItemID.ADD_REMOVE_INTEGRATION:
+    			mIsIntegrated = !mIsIntegrated;    			
+    			if(mIsIntegrated){ 
+    				item.setEnabled(false);
+    				showDialog(DIALOG_INTEGRATION);   	
+    			}
+    			else{
+    				removeIntegrationFromView();
+    				item.setTitle("Integrate");
+    			}    			
     	}
     	return false;
     }
@@ -411,10 +397,37 @@ public class MainActivity extends Activity{
             mSelectSpectraDialog = null;
             loadSpectrum(filePath);
             
+            mIsIntegrated = false;
+            
     	} else if (resultCode == Activity.RESULT_CANCELED) {
            
     	}
     }
+    
+    @Override
+    protected Dialog onCreateDialog(int id) 
+    {
+    	Dialog dialog;
+    	switch(id){
+    	case DIALOG_INTEGRATION:
+    		createIntegrateDialog();
+    		dialog = mIntegrateDialog;
+    		break;
+    	default:
+            dialog = null; break;
+    	}
+    	return dialog;
+    };
+    
+    @Override
+    protected void onPrepareDialog(int id, Dialog dialog) 
+    {
+    	switch(id){
+    	case DIALOG_INTEGRATION:
+    		initializeIntegrationDialog(dialog);
+    	break;
+    	}    	
+    };
     
     /*
      * Shows the dialog to select a spectrum to view when an n-tuple spectra file is loaded and overlay is disabled
@@ -439,6 +452,8 @@ public class MainActivity extends Activity{
 		    		view.setVisibility(View.VISIBLE);
 		    		mCurrentView = view;
 		    		mCurrentRenderer = mRenderers[itemId];
+		    		mCurrentSpectrum = mSpectra.get(itemId);
+		    		mCurrentSpectrumIndex = itemId;
 		    		dialog.dismiss();
 	    	    }
 	    	});
@@ -446,6 +461,62 @@ public class MainActivity extends Activity{
     	}
     	mSelectSpectraDialog.show();
     }
+    
+    private void createIntegrateDialog(){
+    	mIntegrateDialog = new Dialog(this);
+    	mIntegrateDialog.setContentView(R.layout.integrate_dialog);
+    	mIntegrateDialog.setTitle("Integration Parameters");
+    	
+    	//initializeIntegrationDialog();
+    	 	
+    	Button okButton = (Button)mIntegrateDialog.findViewById(R.id.okButton);
+    	okButton.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {	
+				
+				EditText minimumYEditText = (EditText)mIntegrateDialog.findViewById(R.id.minimumYEditText);
+		    	EditText integralOffsetEditText = (EditText)mIntegrateDialog.findViewById(R.id.integralOffsetEditText);
+		    	EditText integralFactorEditText = (EditText)mIntegrateDialog.findViewById(R.id.integralFactorEditText);	
+				
+				
+				String minY = minimumYEditText.getText().toString();
+				String factor = integralFactorEditText.getText().toString();
+				String offset =  integralOffsetEditText.getText().toString();
+				
+				if(minY == "" && factor == "" && offset == ""){
+					Toast.makeText(getApplicationContext(), "Please supply integration parameters", Toast.LENGTH_SHORT).show();					
+				}
+				else{
+					mIntegrateDialog.dismiss();
+					addIntegrationToView(Double.parseDouble(minY), Double.parseDouble(offset), Double.parseDouble(factor));					
+				}				
+			}
+    	});
+    	
+    }
+
+	private void initializeIntegrationDialog(Dialog dialog) {
+		EditText minimumYEditText = (EditText)dialog.findViewById(R.id.minimumYEditText);
+    	EditText integralOffsetEditText = (EditText)dialog.findViewById(R.id.integralOffsetEditText);
+    	EditText integralFactorEditText = (EditText)dialog.findViewById(R.id.integralFactorEditText);
+    	  
+    	
+		//IntegralGraph integGraph = mIntegralGraphs[mCurrentSpectrumIndex];    	
+    	
+    	if(mIntegrationMinY != Double.MIN_VALUE){
+    		minimumYEditText.setText(String.valueOf(mIntegrationMinY));
+    		integralFactorEditText.setText(String.valueOf(mIntegrationFactor));
+    		integralOffsetEditText.setText(String.valueOf(mIntegrationOffset));    		
+    	}    	
+    	else{
+    		minimumYEditText.setText(JSpecViewUtils.integralMinY);
+    		integralFactorEditText.setText(JSpecViewUtils.integralFactor);
+    		integralOffsetEditText.setText(JSpecViewUtils.integralOffset); 
+    	}	
+    	
+    	mIntegrateDialog = dialog;
+	}
 
 	private void addLoadingMessage(LinearLayout layout) {
 		TextView loadingTextView = new TextView(this);
@@ -505,15 +576,8 @@ public class MainActivity extends Activity{
      * @throws IOException
      */
 	private Vector<JDXSpectrum> readSpectrum(InputStream stream) throws IOException, JSpecViewException {
-		int length = stream.available();
-		char[] buffer = new char[length];
-		
-        InputStreamReader reader = new InputStreamReader(stream);        
-        reader.read(buffer, 0, length);
-        String spectrumData = new String(buffer);
-        reader.close();
-               
-        Object source = JDXSource.createJDXSource(spectrumData, null, null);
+		               
+        Object source = JDXSource.createJDXSource(stream);
         if (source instanceof String) {            
             return null;
         }
@@ -568,9 +632,110 @@ public class MainActivity extends Activity{
     	    	    	    	
     	return datasets;
     }
+    
+    /*
+     * Determines if the current spectrum is integrated
+     */
+    private boolean hasIntegration(){
+    	return mIntegralGraphs[mCurrentSpectrumIndex] != null;
+    }
 
     /*
-     * Determines a spectrum file should be overlaid
+     * Adds an integration graph to the current HNMR spectrum 
+     */
+    private void addIntegrationToView(double minY, double offset, double factor){
+    
+		try {	
+			XYMultipleSeriesDataset dataset = mDatasets[mCurrentSpectrumIndex];		
+			XYMultipleSeriesRenderer multiRenderer = mRenderers[mCurrentSpectrumIndex];
+			
+			addIntegrationSeries(mCurrentSpectrumIndex, dataset, multiRenderer, minY, offset, factor);
+			
+			GraphicalView view = ChartFactory.getLineChartView(getApplicationContext(), dataset, multiRenderer);
+												
+			LinearLayout layout = getLayout();	
+			int id = mCurrentView.getId();
+			layout.removeView(mCurrentView);
+								
+			view.setId(id);
+			layout.addView(view, mCurrentSpectrumIndex);  
+			LayoutParams params = view.getLayoutParams();
+		    params.width = LayoutParams.FILL_PARENT;
+		    params.height = LayoutParams.FILL_PARENT;
+		    
+		    mCurrentRenderer = multiRenderer;
+			mCurrentView = view;	
+		    
+		    setViewOnTouchListener(view);	    		   
+				
+		}
+		catch (Exception ex) {	
+			Toast.makeText(getApplicationContext(), "Error adding integration", Toast.LENGTH_SHORT).show();
+		}
+    }
+    
+    /*
+     * Adds the integration graph series to the current dataset
+     */
+    private void addIntegrationSeries(int spectrumIndex, XYMultipleSeriesDataset dataset, XYMultipleSeriesRenderer multiRenderer,
+    		double minY, double offset, double factor){
+    	IntegralGraph integGraph = mIntegralGraphs[spectrumIndex];
+    	JDXSpectrum spectrum = mSpectra.get(spectrumIndex);
+		
+		if(integGraph == null){
+			integGraph = new IntegralGraph(spectrum, minY, offset, factor);
+			integGraph.setXUnits(spectrum.getXUnits());
+			integGraph.setYUnits(spectrum.getYUnits());
+			
+			mIntegralGraphs[spectrumIndex] = integGraph;
+		}
+	
+		XYSeries series = new XYSeries(integGraph.getTitle());
+		Coordinate[] integCoords = integGraph.getXYCoords();
+		for(int i = 0; i < integCoords.length; i++){
+			series.add(integCoords[i].getXVal(), integCoords[i].getYVal());
+		}
+		dataset.addSeries(series);				
+		
+		multiRenderer.addSeriesRenderer(createXYSeriesRenderer(Color.RED));    	
+    }
+    
+    /*
+     * Removes and integration graph from the spectrum
+     */
+    private void removeIntegrationFromView(){
+    
+		try {							
+			XYMultipleSeriesDataset dataset = mDatasets[mCurrentSpectrumIndex];			
+			dataset.removeSeries(1);				
+			
+			XYMultipleSeriesRenderer multiRenderer = mRenderers[mCurrentSpectrumIndex];
+			multiRenderer.removeSeriesRenderer(multiRenderer.getSeriesRendererAt(1));
+							
+			GraphicalView view = ChartFactory.getLineChartView(getApplicationContext(), dataset, multiRenderer);
+												
+			LinearLayout layout = getLayout();	
+			int id = mCurrentView.getId();
+			layout.removeView(mCurrentView);
+								
+			view.setId(id);
+			layout.addView(view, mCurrentSpectrumIndex);  
+			LayoutParams params = view.getLayoutParams();
+		    params.width = LayoutParams.FILL_PARENT;
+		    params.height = LayoutParams.FILL_PARENT;
+		    
+		    mCurrentRenderer = multiRenderer;
+			mCurrentView = view;	
+		    
+		    setViewOnTouchListener(view);	    		   
+		}
+		catch (Exception ex) {	
+			Toast.makeText(getApplicationContext(), "Error removing integration", Toast.LENGTH_SHORT).show();
+		}
+    }
+    
+    /*
+     * Determines if a spectrum file should be overlaid
      */
 	private boolean shouldOverlay() {
 		return canOverlay() && mIsOverlayEnabled;
@@ -602,5 +767,80 @@ public class MainActivity extends Activity{
 	private LinearLayout getLayout() {
 		LinearLayout layout = (LinearLayout) findViewById(R.id.layout);
 		return layout;
+	}
+	
+	/*
+	 * Creates a multiple series renderer given a parameter determining how many series to create
+	 */
+	private XYMultipleSeriesRenderer createMultipleSeriesRenderer(int numSeries) {
+		
+		XYMultipleSeriesRenderer multiRenderer = new XYMultipleSeriesRenderer();
+		
+		multiRenderer.setApplyBackgroundColor(true);
+		multiRenderer.setBackgroundColor(Color.WHITE);		    
+		multiRenderer.setGridColor(Color.GRAY);
+		multiRenderer.setYLabelsAlign(Align.RIGHT);
+		multiRenderer.setAxisTitleTextSize(16);
+		multiRenderer.setChartTitleTextSize(20);
+		multiRenderer.setLabelsTextSize(15);
+		multiRenderer.setLegendTextSize(15);
+		multiRenderer.setMargins(new int[] { 0, 40, 0, 0 });
+		multiRenderer.setZoomEnabled(true, true);
+		multiRenderer.setExternalZoomEnabled(true);
+		multiRenderer.setPanLimits(null);
+		multiRenderer.setZoomLimits(null);
+		multiRenderer.setShowGrid(mIsGridVisible);
+		multiRenderer.setXLabels(10);
+					
+		int numColors = colors.length;		    
+	    for(int i =0; i < numSeries; i++){
+	    	XYSeriesRenderer renderer = null;
+	    	if(i < numColors){
+	    		renderer = createXYSeriesRenderer(colors[i]);                                                 
+			}
+			else{
+				renderer = createXYSeriesRenderer(generateRandomColor());
+			}	    	
+	    	multiRenderer.addSeriesRenderer(renderer);
+	    }
+	    		    
+		return multiRenderer;
+	}
+
+	private XYSeriesRenderer createXYSeriesRenderer(int color) {
+		XYSeriesRenderer renderer = new XYSeriesRenderer();
+		
+		renderer.setPointStyle(PointStyle.POINT);
+		renderer.setColor(color);                                                  
+		
+		return renderer;
+	}
+
+	private void setViewOnTouchListener(GraphicalView view) {
+		// Set touch handler to show coordinates if coordinates in enabled
+		view.setOnTouchListener(new OnTouchListener() {			    	
+			@Override
+			public boolean onTouch(View view, MotionEvent event) {
+									
+				if(event.getAction() == MotionEvent.ACTION_DOWN){
+		    		if(mIsCoordinatesEnabled){
+		    			float x = event.getX();
+		    			float y = event.getY();
+			    		
+		    			GraphicalView gView = (GraphicalView)view;
+			    		SeriesSelection selection = gView.getChart().getSeriesAndPointForScreenCoordinate(new Point(x, y));
+			    		
+			    		if(selection != null){
+				    		double xVal = selection.getXValue();
+				    		double yVal = selection.getValue();
+				    		
+				    		Toast toast = Toast.makeText(getApplicationContext(), String.format("%1$.0f, %2$.3f", xVal, yVal), Toast.LENGTH_SHORT);
+				    		toast.show();
+			    		}				    		
+		    		}			    		
+		    	}
+		    	return false;
+			}
+		});
 	}
 }

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello World!</string>
+    <string name="app_name">JSpecView</string>
+    <string name="percent">%</string>
+    <string name="minimumY">Minimum Y</string>
+    <string name="integralFactor">Integral Factor</string>
+    <string name="integralOffset">Integral Offset</string>
+    <string name="OK">OK</string>
+</resources>
