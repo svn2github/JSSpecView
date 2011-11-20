@@ -3,6 +3,8 @@
 	<name>JspecViewAndroid</name>
 	<comment></comment>
 	<projects>
+		<project>AChartEngine</project>
+		<project>FileExplorer</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

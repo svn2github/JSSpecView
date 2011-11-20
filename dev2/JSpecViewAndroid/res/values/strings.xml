@@ -7,4 +7,51 @@
     <string name="integralFactor">Integral Factor</string>
     <string name="integralOffset">Integral Offset</string>
     <string name="OK">OK</string>
+    
+    <string name="pref_category_key_application">application_category</string>
+    <string name="pref_category_title_application">Application</string>
+    <string name="pref_category_key_spec_display">spec_display_category</string>
+    <string name="pref_category_title_spec_display">Spectrum Display</string>
+    <string name="pref_category_key_integration">integration_category</string>
+    <string name="pref_category_title_integration">Integration</string>
+    <string name="pref_category_key_abs_trans">abs_trans_category</string>
+    <string name="pref_category_title_abs_trans">Absorbance/Transmittance</string>
+    
+    <string name="pref_key_remember_last_dir">remember_last_dir</string>
+    <string name="pref_title_remember_last_dir">Remember directory</string>
+    <string name="pref_summary_remember_last_dir">Remember directory of last opened file</string>
+    
+    <string name="pref_key_reopen_last_file">reopen_last_file</string>
+    <string name="pref_title_reopen_last_file">Remember last file</string>
+    <string name="pref_summary_reopen_last_file">Open last opened file when application starts</string>
+    
+    <string name="pref_key_show_grid">show_grid</string>
+    <string name="pref_title_show_grid">Show grid</string>
+    <string name="pref_key_show_coordinates">show_coordinates</string>
+    <string name="pref_title_show_coordinates">Show coordinates</string>
+    
+    <string name="pref_key_show_overlaid">show_overlaid</string>
+    <string name="pref_title_show_overlaid">Show overlaid</string>
+    <string name="pref_summary_show_overlaid">Show compound files as overlaid if possible</string>
+    
+    <string name="pref_key_integ_min_y">integ_min_y</string>
+    <string name="pref_title_integ_min_y">Minimum Y (%)</string>
+    <string name="pref_key_integ_factor">integ_factor</string>
+    <string name="pref_title_integ_factor">Integral Factor (%)</string>
+    <string name="pref_key_integ_offset">integ_offset</string>
+    <string name="pref_title_integ_offset">Integral Offset (%)</string>
+    <string name="pref_key_integ_plot_color">integ_plot_color</string>
+    <string name="pref_title_integ_plot_color">Plot Color</string>
+    
+    <string name="pref_key_auto_integrate">auto_integrate</string>   
+    <string name="pref_title_auto_integrate">Automatically integrate</string>
+    <string name="pref_summary_auto_integrate">Automatically integrate HNMR</string>
+    
+    <string name="pref_key_auto_trans_to_abs">auto_trans_to_abs</string>  
+    <string name="pref_title_auto_trans_to_abs">To Absorbance</string>
+    <string name="pref_summary_auto_trans_to_abs">Automatically convert Transmittance to Absorbance</string>
+    
+    <string name="pref_key_auto_abs_to_trans">auto_abs_to_trans</string>
+    <string name="pref_title_auto_abs_to_trans">To Transmittance</string>
+    <string name="pref_summary_auto_abs_to_trans">Automatically convert Absorbance to Transmittance</string>
 </resources>

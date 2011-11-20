@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <PreferenceCategory android:key="@string/pref_category_key_application" android:title="@string/pref_category_title_application">        
+        <CheckBoxPreference android:title="@string/pref_title_remember_last_dir" android:key="@string/pref_key_remember_last_dir" android:summary="@string/pref_summary_remember_last_dir" android:defaultValue="true"/>
+        <CheckBoxPreference android:title="@string/pref_title_reopen_last_file" android:key="@string/pref_key_reopen_last_file" android:summary="@string/pref_summary_reopen_last_file" android:defaultValue="false"/>
+    </PreferenceCategory>
+    <PreferenceCategory android:key="@string/pref_category_key_spec_display" android:title="@string/pref_category_title_spec_display">
+        <CheckBoxPreference android:title="@string/pref_title_show_grid" android:key="@string/pref_key_show_grid" android:defaultValue="true"/>
+        <CheckBoxPreference android:title="@string/pref_title_show_coordinates" android:key="@string/pref_key_show_coordinates" android:defaultValue="false"/>
+        <CheckBoxPreference android:title="@string/pref_title_show_overlaid" android:key="@string/pref_key_show_overlaid" android:summary="@string/pref_summary_show_overlaid" android:defaultValue="false"/>
+    </PreferenceCategory>
+    <PreferenceCategory android:key="@string/pref_category_key_integration" android:title="@string/pref_category_title_integration">
+        <EditTextPreference android:key="@string/pref_key_integ_min_y" android:title="@string/pref_title_integ_min_y" android:dialogTitle="@string/pref_title_integ_min_y" android:defaultValue="0.1"/>
+        <EditTextPreference android:key="@string/pref_key_integ_factor" android:title="@string/pref_title_integ_factor" android:dialogTitle="@string/pref_title_integ_factor" android:defaultValue="50"/>
+        <EditTextPreference android:key="@string/pref_key_integ_offset" android:title="@string/pref_title_integ_offset" android:dialogTitle="@string/pref_title_integ_offset" android:defaultValue="30"/>
+        <ListPreference android:title="@string/pref_title_integ_plot_color" android:key="@string/pref_key_integ_plot_color" android:entryValues="@array/pref_integ_plot_color_values" android:entries="@array/pref_integ_plot_color_names" android:dialogTitle="@string/pref_title_integ_plot_color" android:defaultValue="#00FF00"/>
+        <CheckBoxPreference android:title="@string/pref_title_auto_integrate" android:key="@string/pref_key_auto_integrate" android:summary="@string/pref_summary_auto_integrate" android:defaultValue="false"/>
+    </PreferenceCategory>
+    <PreferenceCategory android:key="@string/pref_category_key_abs_trans" android:title="@string/pref_category_title_abs_trans">
+        <CheckBoxPreference android:title="@string/pref_title_auto_trans_to_abs" android:key="@string/pref_key_auto_trans_to_abs" android:summary="@string/pref_summary_auto_trans_to_abs" android:defaultValue="false"/>
+        <CheckBoxPreference android:title="@string/pref_title_auto_abs_to_trans" android:key="@string/pref_key_auto_abs_to_trans" android:summary="@string/pref_summary_auto_abs_to_trans" android:defaultValue="false"/>
+    </PreferenceCategory>
+
+</PreferenceScreen>
