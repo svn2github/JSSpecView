@@ -41,6 +41,10 @@ import javax.swing.SwingConstants;
  * @author Prof Robert J. Lancashire
  */
 public class IntegrateDialog extends JDialog {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   // Gui components
   private JPanel jPanel4 = new JPanel();
   private GridBagLayout gridBagLayout1 = new GridBagLayout();

@@ -46,6 +46,10 @@ import jspecview.common.JDXSpectrum;
  */
 public class OverlayLegendDialog extends JDialog {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   JSVPanel jsvp;
 
   /**
@@ -110,6 +114,10 @@ public class OverlayLegendDialog extends JDialog {
    * The Table Model for Legend
    */
   class LegendTableModel extends AbstractTableModel {
+        /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
         String[] columnNames = {"No.", "Plot Color", "Title"};
         Object[][] data;
 
@@ -171,6 +179,11 @@ public class OverlayLegendDialog extends JDialog {
     class ColorRenderer extends JLabel
                         implements TableCellRenderer {
 
+        /**
+       * 
+       */
+      private static final long serialVersionUID = 1L;
+
         public ColorRenderer() {
             setOpaque(true);
         }
@@ -201,6 +214,12 @@ public class OverlayLegendDialog extends JDialog {
      */
     class TitleRenderer extends JLabel
                         implements TableCellRenderer {
+        /**
+       * 
+       */
+      private static final long serialVersionUID = 1L;
+
+
         public TitleRenderer(){
           setOpaque(true);
         }

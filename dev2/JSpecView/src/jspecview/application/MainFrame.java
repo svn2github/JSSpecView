@@ -125,7 +125,6 @@ import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
 import jspecview.source.CompoundSource;
 import jspecview.source.JDXSource;
-import jspecview.util.FileManager;
 import mdidesktop.ScrollableDesktopPane;
 import mdidesktop.WindowMenu;
 import jspecview.common.Visible;
@@ -141,6 +140,10 @@ public class MainFrame
 
 //  ------------------------ Program Properties -------------------------
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   String propertiesFileName = "jspecview.properties";
   boolean toolbarOn;
   boolean sidePanelOn;
@@ -347,7 +350,7 @@ public class MainFrame
   ImageIcon overlayKeyIcon;
 
   private void getIcons() {
-    Class cl = getClass();
+    Class<? extends MainFrame> cl = getClass();
     URL iconURL = cl.getResource("icons/spec16.gif"); //imageIcon
     icon = Toolkit.getDefaultToolkit().getImage(iconURL);
     frameIcon = new ImageIcon(iconURL);
@@ -1910,6 +1913,10 @@ private void showUnableToOverlayMessage() {
    */
   private class SpectraTreeCellRenderer
       extends DefaultTreeCellRenderer {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
     Object value;
     boolean leaf;
 

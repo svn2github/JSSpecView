@@ -114,6 +114,12 @@ import org.w3c.dom.DOMImplementation;
  */
 public class JSVPanel extends JPanel implements Printable, MouseListener, MouseMotionListener{
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+
   @Override
   public void finalize() {
      System.out.println("JSVPanel " + this + " finalized");
@@ -217,7 +223,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
 
   protected Color zoomBoxColor = new Color (0,0,0,30);
 
-  private boolean isMousePressed, isMouseDragged, isMouseReleased;
+  //private boolean isMousePressed; 
+  private boolean isMouseDragged, isMouseReleased;
   private int zoomBoxX, currZoomBoxX;
   private boolean isMouseDraggedEvent;
 
@@ -1715,7 +1722,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
       if( xPixel >= leftPlotAreaPos && xPixel <= rightPlotAreaPos &&
           yPixel >= topPlotAreaPos && yPixel <= bottomPlotAreaPos){
 
-        isMousePressed = true;
+        //isMousePressed = true;
         zoomBoxX = xPixel;
 
         double xPt, yPt;

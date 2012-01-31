@@ -45,6 +45,11 @@ import jspecview.source.JDXSource;
  */
 public class JSVPanelPopupMenu extends JPopupMenu {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   JFileChooser jFileChooser = new JFileChooser();
 
   JSVPanel selectedJSVPanel;

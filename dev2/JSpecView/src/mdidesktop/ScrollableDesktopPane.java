@@ -22,7 +22,6 @@ package mdidesktop;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Insets;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.beans.PropertyVetoException;
 
@@ -41,6 +40,10 @@ import javax.swing.JViewport;
  * @author http://www.javaworld.com
  */
 public class ScrollableDesktopPane extends JDesktopPane {
+    /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
     private static int FRAME_OFFSET=20;
     private MDIDesktopManager manager;
 
@@ -56,8 +59,8 @@ public class ScrollableDesktopPane extends JDesktopPane {
     }
 
     public Component add(JInternalFrame frame) {
-        JInternalFrame[] array = getAllFrames();
-        Point p;
+        //JInternalFrame[] array = getAllFrames();
+        //Point p;
         int w;
         int h;
 
@@ -199,6 +202,10 @@ public class ScrollableDesktopPane extends JDesktopPane {
  * Used to provide scrollbar functionality.
  */
 class MDIDesktopManager extends DefaultDesktopManager {
+    /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
     private ScrollableDesktopPane desktop;
 
     public MDIDesktopManager(ScrollableDesktopPane desktop) {

@@ -43,6 +43,10 @@ import javax.swing.JScrollPane;
  */
 
 public class TextDialog extends JDialog {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   JPanel contentPanel = new JPanel();
   BorderLayout borderLayout = new BorderLayout();
   Reader reader;

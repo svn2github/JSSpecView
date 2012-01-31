@@ -46,6 +46,10 @@ import jspecview.applet.JSVApplet;
  * @author Prof. Robert J. Lancashire
  */
 public class AboutDialog extends JDialog {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   JPanel p = new JPanel();
   JTextArea txt;
 

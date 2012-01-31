@@ -47,6 +47,10 @@ import javax.swing.border.TitledBorder;
  * @author Prof Robert J. Lancashire
  */
 public class PrintLayoutDialog extends JDialog {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   private TitledBorder titledBorder1;
   private TitledBorder titledBorder2;
   private TitledBorder titledBorder3;

@@ -71,7 +71,7 @@ class JDXExporter {
   private static String toStringAux(int type, JDXSpectrum spectrum,
                                     int startIndex, int endIndex) {
 
-    String dataType = spectrum.getDataType();
+    //String dataType = spectrum.getDataType();
     StringBuffer buffer = new StringBuffer();
     Coordinate[] newXYCoords = spectrum.getXYCoords();
     String tabDataSet = "", tmpDataClass = "XYDATA";

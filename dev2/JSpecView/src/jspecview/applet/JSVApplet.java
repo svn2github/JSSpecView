@@ -118,7 +118,12 @@ import jspecview.common.Visible;
 
 public class JSVApplet extends JApplet {
 
-   @Override
+   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  @Override
    public void finalize() {
     System.out.println("JSpecView " + this + " finalized");
    }

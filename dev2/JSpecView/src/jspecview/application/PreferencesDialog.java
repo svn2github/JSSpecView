@@ -21,7 +21,6 @@ package jspecview.application;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GraphicsEnvironment;
@@ -31,15 +30,12 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.TreeMap;
 
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -64,8 +60,6 @@ import jspecview.application.common.AppUtils;
 import jspecview.application.common.JSVPanel;
 import jspecview.exception.JSpecViewException;
 import jspecview.source.JDXSource;
-import javax.swing.BoxLayout;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import javax.swing.UIManager;
 import javax.swing.JSeparator;
@@ -78,6 +72,10 @@ import javax.swing.JSeparator;
  */
 
 public class PreferencesDialog extends JDialog {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   JPanel contentpanel = new JPanel();
   BorderLayout contentBorderLayout = new BorderLayout();
   JTabbedPane preferencesTabbedPane = new JTabbedPane();
