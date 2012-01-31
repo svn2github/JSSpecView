@@ -28,6 +28,11 @@ package jspecview.exception;
  */
 public class JSpecViewException extends Exception {
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Constructor
    */
   public JSpecViewException() {

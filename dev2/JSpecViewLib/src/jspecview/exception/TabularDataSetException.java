@@ -30,6 +30,11 @@ package jspecview.exception;
 public class TabularDataSetException extends JDXSourceException {
 
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Intialises a TabularDataSetException
    */
   public TabularDataSetException() {

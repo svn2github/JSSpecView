@@ -284,7 +284,6 @@ public class SimpleXmlReader {
       return ptr;
     }
 
-    @SuppressWarnings("unused")
     public boolean readLine() throws IOException {
       return false;
     }

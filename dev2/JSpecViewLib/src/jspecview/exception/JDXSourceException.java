@@ -29,6 +29,11 @@ package jspecview.exception;
 public class JDXSourceException extends JSpecViewException {
 
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Constructor
    */
   public JDXSourceException() {

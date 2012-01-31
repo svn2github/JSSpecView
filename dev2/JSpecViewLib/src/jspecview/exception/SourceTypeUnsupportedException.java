@@ -30,6 +30,11 @@ package jspecview.exception;
 public class SourceTypeUnsupportedException extends JSpecViewException {
 
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Initialises a SourceTypeUnsupportedException
    */
   public SourceTypeUnsupportedException() {

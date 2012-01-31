@@ -30,6 +30,11 @@ package jspecview.exception;
 public class ScalesIncompatibleException extends JSpecViewException {
 
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Initialises the ScalesIncompatibleException
    */
   public ScalesIncompatibleException() {

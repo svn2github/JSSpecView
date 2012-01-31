@@ -29,6 +29,11 @@ package jspecview.exception;
 public class LDRNotFoundException extends JDXSourceException {
 
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Constructor
    */
   public LDRNotFoundException() {

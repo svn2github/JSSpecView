@@ -29,6 +29,11 @@ package jspecview.exception;
 public class SVGException extends JSpecViewException {
 
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Initialises a SVGException
    */
   public SVGException() {

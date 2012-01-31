@@ -38,7 +38,7 @@ import java.util.StringTokenizer;
 //import jspecview.application.MainFrame;
 import java.text.DecimalFormatSymbols;
 
-import jspecview.exception.ScalesIncompatibleException;
+//import jspecview.exception.ScalesIncompatibleException;
 
 /**
  * <code>JSpecViewUtils</code> contains static methods used to calculate values
