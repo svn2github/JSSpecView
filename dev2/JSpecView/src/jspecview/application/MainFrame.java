@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2011  The JSpecView Development Team
+/* Copyright (C) 2002-2012  The JSpecView Development Team
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *

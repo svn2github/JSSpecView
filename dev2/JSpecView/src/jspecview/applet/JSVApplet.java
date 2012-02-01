@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2011 The University of the West Indies
+/* Copyright (c) 2002-2012 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -109,6 +109,7 @@ import jspecview.common.Visible;
  * JSpecView Applet class.
  * For a list of parameters and scripting functionality see the file
  * JSpecView_Applet_Specification.html.
+ * @author Bob Hanson
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
  * @author Craig A. D. Walters
@@ -128,7 +129,7 @@ public class JSVApplet extends JApplet {
     System.out.println("JSpecView " + this + " finalized");
    }
 
- public static final String APPLET_VERSION = "1.0.20111024-1950";
+ public static final String APPLET_VERSION = "1.0.20120131-1950";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath;
