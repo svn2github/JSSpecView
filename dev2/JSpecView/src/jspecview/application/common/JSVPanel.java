@@ -2597,6 +2597,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
         return false;
       coord.setXVal(coordClicked.getXVal());
       coord.setYVal(coordClicked.getYVal());
+      if (actualCoord == null)
+        return true;
       int store = 0;
       double xPt = coord.getXVal();
         JDXSpectrum spectrum = (JDXSpectrum)getSpectrumAt(0);

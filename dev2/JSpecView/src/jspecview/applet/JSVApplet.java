@@ -988,30 +988,33 @@ public class JSVApplet extends JApplet {
     int clickCount = 0;
 
     /**
-     * If mouse is clicked with the plot area of the <code>JSVPanel</code>
-     * and coordinate call back is enabled then the value of the coordinate
-     * clicked is send to a javascript function specified by the
+     * If mouse is clicked with the plot area of the <code>JSVPanel</code> and
+     * coordinate call back is enabled then the value of the coordinate clicked
+     * is send to a javascript function specified by the
      * coordcallbackfunctionname parameter
-     * @param e the MouseEvent
+     * 
+     * @param e
+     *        the MouseEvent
      */
     @Override
-    public void mouseClicked(MouseEvent e){
-      JSVPanel jsvPanel = (JSVPanel)e.getSource();
+    public void mouseClicked(MouseEvent e) {
+      JSVPanel jsvPanel = (JSVPanel) e.getSource();
       selectedJSVPanel = jsvPanel;
-
-      if (peakCallbackFunctionName != null) {
-        Coordinate coord = new Coordinate();
-        Coordinate actualCoord = new Coordinate();
-        if (jsvPanel.getPickedCoordinates(coord, actualCoord));
-          callToJavaScript(peakCallbackFunctionName, coord.getXVal() + ", " +
-                  coord.getYVal() + ", "+ actualCoord.getXVal() +", "+
-                  actualCoord.getYVal() + ", " + (currentSpectrumIndex + 1));
-      }
-      else if(coordCallbackFunctionName != null){
-        Coordinate coord = jsvPanel.getClickedCoordinate();
-        if(coord != null)
-          callToJavaScript(coordCallbackFunctionName, coord.getXVal() + ", " +
-                           coord.getYVal());}
+      Coordinate coord = new Coordinate();
+      Coordinate actualCoord = (peakCallbackFunctionName == null ? null
+          : new Coordinate());
+      if (!jsvPanel.getPickedCoordinates(coord, actualCoord))
+        return;
+      if (actualCoord == null)
+        callToJavaScript(coordCallbackFunctionName, new Object[] {
+            Double.valueOf(coord.getXVal()), Double.valueOf(coord.getYVal()),
+            Integer.valueOf(currentSpectrumIndex + 1) });
+      else
+        callToJavaScript(peakCallbackFunctionName, new Object[] {
+            Double.valueOf(coord.getXVal()), Double.valueOf(coord.getYVal()),
+            Double.valueOf(actualCoord.getXVal()),
+            Double.valueOf(actualCoord.getYVal()),
+            Integer.valueOf(currentSpectrumIndex + 1) });
     }
 
     /**
@@ -2009,10 +2012,10 @@ public class JSVApplet extends JApplet {
    * @param function the javascript function name
    * @param parameters the function arguments as a string in the form "x, y, z..."
    */
-  public void callToJavaScript(String function, String parameters) {
+  public void callToJavaScript(String function, Object[] params) {
     try {
       JSObject win = JSObject.getWindow(this);
-      win.eval(function + "(" + parameters + ")");
+      win.call(function, params);
     }
     catch (Exception npe) {
       System.out.println("EXCEPTION-> " + npe.getMessage());
