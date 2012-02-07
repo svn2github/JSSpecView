@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2012  The JSpecView Development Team
+/* Copyright (C) 2002-2011  The JSpecView Development Team
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -109,6 +109,8 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import org.jmol.api.JmolSyncInterface;
+
 import jspecview.application.common.AppUtils;
 import jspecview.application.common.JSVPanel;
 import jspecview.application.common.JSVPanelPopupListener;
@@ -136,7 +138,7 @@ import jspecview.common.Visible;
  * @author Prof Robert J. Lancashire
  */
 public class MainFrame
-    extends JFrame implements DropTargetListener {
+    extends JFrame implements DropTargetListener, JmolSyncInterface {
 
 //  ------------------------ Program Properties -------------------------
 
@@ -314,6 +316,10 @@ public class MainFrame
         }
 
         int option;
+        if (jmol != null) {
+          setVisible(false);
+          return;
+        }
         if (showExitDialog) {
           option = JOptionPane.showConfirmDialog(MainFrame.this,
                                                  "Exit JSpecView? ", "Exit",
@@ -1185,6 +1191,7 @@ public class MainFrame
       exportSpectrum(e.getActionCommand());
     }
   };
+  private JmolSyncInterface jmol;
 
   /**
    * Shows dialog to open a file
@@ -2779,4 +2786,16 @@ private void showUnableToOverlayMessage() {
       dtde.rejectDrop();
     }
   }
+
+  @Override
+  public void registerApplet(String appletID, JmolSyncInterface jmolStatusListener) {
+    jmol = jmolStatusListener;    
+  }
+
+  @Override
+  public void syncScript(String script) {
+    //TODO
+    System.out.println("JSpecView MainFrame.syncScript: " + script);
+  }
+  
 }
