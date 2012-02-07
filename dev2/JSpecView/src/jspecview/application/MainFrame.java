@@ -2797,6 +2797,7 @@ private void showUnableToOverlayMessage() {
    * incoming script processing of <Peak file="" type="xxx"...> record from Jmol
    */
   public void syncScript(String script) {
+    //TODO link to processing of file loading, spectrum selection, and band selection
     System.out.println("JSpecView MainFrame.syncScript: " + script);
   }
 
