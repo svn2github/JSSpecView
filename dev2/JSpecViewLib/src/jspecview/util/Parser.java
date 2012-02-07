@@ -27,6 +27,7 @@ package jspecview.util;
 
 import java.util.BitSet;
 
+
 public class Parser {
 
   /// general static string-parsing class ///
@@ -43,86 +44,213 @@ public class Parser {
    *  @param str     the string to parse
    *  @param bs      the atom positions to assign
    *  @param data    the (sparce) array to fill
+   * @return  number of floats
    */
-  public static void parseFloatArray(String str, BitSet bs, float[] data) {
-    parseFloatArray(getTokens(str), bs, data);
+  public static int parseStringInfestedFloatArray(String str, BitSet bs, float[] data) {
+    return parseFloatArray(getTokens(str), bs, data);
   }
 
-  public static void parseFloatArray(String[] tokens, BitSet bs, float[] data) {
+  public static float[] parseFloatArray(String str) {
+    return parseFloatArray(str, new int[1]);
+  }
+
+  /**
+   * @param str 
+   * @param next 
+   * @return array of float values
+   *
+   */
+  public static float[] parseFloatArray(String str, int[] next) {
+    int pt = next[0];
+    if (pt < 0)
+      return new float[0];
+    pt = str.indexOf("[", pt);
+    if (pt >= 0)
+      str = str.substring(pt + 1);
+    next[0] = pt + 1;
+    pt = str.indexOf("]");
+    if (pt < 0)
+      pt = str.length();
+    else
+      str = str.substring(0, pt);
+    next[0] += pt + 1;
+    String[] tokens = getTokens(str);
+    float[] f = new float[tokens.length];
+    int n = parseFloatArray(tokens, null, f);
+    for (int i = n; i < f.length; i++)
+      f[i] = Float.NaN;
+    return f;
+  }
+  
+  public static int parseFloatArray(String[] tokens, BitSet bs, float[] data) {
     int len = data.length;
     int nTokens = tokens.length;
     int n = 0;
-    for (int i = 0; i < len && n < nTokens; i++) {
-      if (bs != null && !bs.get(i))
-        continue;
+    int max = 0;
+    boolean haveBitSet = (bs != null);
+    for (int i = (haveBitSet ? bs.nextSetBit(0) : 0); i >= 0 && i < len && n < nTokens; i = (haveBitSet ? bs.nextSetBit(i + 1) : i + 1)) {
       float f;
-      while (Float.isNaN(f = Parser.parseFloat(tokens[n++])) && n < nTokens) {
+      while (Float.isNaN(f = Parser.parseFloat(tokens[n++])) 
+          && n < nTokens) {
       }
-      data[i] = f;
+      if (!Float.isNaN(f))
+        data[(max = i)] = f;
+      if (n == nTokens)
+        break;
     }
+    return max + 1;
   }
 
-  public static float[][] parseFloatArray2d(String str) {
+  private static String fixDataString(String str) {
     str = str.replace(';', str.indexOf('\n') < 0 ? '\n' : ' ');
     str = TextFormat.trim(str, "\n \t");
+    str = TextFormat.simpleReplace(str, "\n ", "\n");
+    str = TextFormat.simpleReplace(str, "\n\n", "\n");
+    return str;    
+  }
+  
+  public static float[][] parseFloatArray2d(String str) {
+    str = fixDataString(str);
     int[] lines = markLines(str, '\n');
     int nLines = lines.length;
     float[][] data = new float[nLines][];
-    for (int iLine = 0, pt = 0; iLine < lines.length; pt = lines[iLine++]) {
+    for (int iLine = 0, pt = 0; iLine < nLines; pt = lines[iLine++]) {
       String[] tokens = getTokens(str.substring(pt, lines[iLine]));
       parseFloatArray(tokens, data[iLine] = new float[tokens.length]);
     }
     return data;
   }
+
+  public static float[][][] parseFloatArray3d(String str) {
+    str = fixDataString(str);
+    int[] lines = markLines(str, '\n');
+    int nLines = lines.length;
+    String[] tokens = getTokens(str.substring(0, lines[0]));
+    if (tokens.length != 3)
+      return new float[0][0][0];
+    int nX = parseInt(tokens[0]);
+    int nY = parseInt(tokens[1]);
+    int nZ = parseInt(tokens[2]);
+    if (nX < 1 || nY < 1 || nZ < 1)
+      return new float[1][1][1];
+    float[][][] data = new float[nX][nY][];
+    int iX = 0;
+    int iY = 0;
+    for (int iLine = 1, pt = lines[0]; iLine < nLines && iX < nX; pt = lines[iLine++]) {
+      tokens = getTokens(str.substring(pt, lines[iLine]));
+      if (tokens.length < nZ)
+        continue;
+      parseFloatArray(tokens, data[iX][iY] = new float[tokens.length]);
+      if (++iY == nY) {
+        iX++;
+        iY = 0;
+      } 
+    }
+    if (iX != nX) {
+      Logger.info("Error reading 3D data -- nX = " + nX + ", but only " + iX + " blocks read");      
+      return new float[1][1][1];
+    }
+    return data;
+  }
+
+  /**
+   * 
+   * @param f
+   * @param bs
+   * @param data
+   */
+  public static void setSelectedFloats(float f, BitSet bs, float[] data) {
+    boolean isAll = (bs == null);
+    int i0 = (isAll ? 0 : bs.nextSetBit(0));
+    for (int i = i0; i >= 0 && i < data.length; i = (isAll ? i + 1 : bs.nextSetBit(i + 1)))
+      data[i] = f;
+  }
   
-  public static void parseFloatArrayFromMatchAndField(String str, BitSet bs,
-                                                      int fieldMatch,
-                                                      int[] matchData,
-                                                      int field, float[] data) {
+  public static float[] extractData(String data, int field, int nBytes,
+                                    int firstLine) {
+    return parseFloatArrayFromMatchAndField(data, null, 0, 0, null, field,
+        nBytes, null, firstLine);
+  }
+
+  /**
+   * the major lifter here.
+   * 
+   * @param str         string containing the data 
+   * @param bs          selects specific rows of the data 
+   * @param fieldMatch  a free-format field pointer, or a column pointer
+   * @param fieldMatchColumnCount specifies a column count -- not free-format
+   * @param matchData   an array of data to match (atom numbers)
+   * @param field       a free-format field pointer, or a column pointer
+   * @param fieldColumnCount specifies a column count -- not free-format
+   * @param data        float array to modify or null if size unknown
+   * @param firstLine   first line to parse (1 indicates all)
+   * @return            data
+   */
+  public static float[] parseFloatArrayFromMatchAndField(
+                                                         String str,
+                                                         BitSet bs,
+                                                         int fieldMatch,
+                                                         int fieldMatchColumnCount,
+                                                         int[] matchData,
+                                                         int field,
+                                                         int fieldColumnCount,
+                                                         float[] data, int firstLine) {
     float f;
-    if (field == Integer.MIN_VALUE) { //just one value
-      f = parseFloat(str);
-      for (int i = 0; i < data.length; i++) 
-        if (bs == null || bs.get(i))
-          data[i] = f;
-      return; 
-    }
-    if (field <= 0) {
-      parseFloatArray(str, bs, data);
-      return;
-    }
-    int len = data.length;
     int i = -1;
     boolean isMatch = (matchData != null);
     int[] lines = markLines(str, (str.indexOf('\n') >= 0 ? '\n' : ';'));
+    int iLine = (firstLine <= 1 || firstLine >= lines.length ? 0 : firstLine - 1);
+    int pt = (iLine == 0 ? 0 : lines[iLine - 1]);
     int nLines = lines.length;
-    int pt = 0;
-    for (int iLine = 0; iLine < nLines; iLine++) {
-      String[] tokens = getTokens(str.substring(pt, lines[iLine]));
+    if (data == null)
+      data = new float[nLines - iLine];
+    int len = data.length;
+    int minLen = (fieldColumnCount <= 0 ? Math.max(field, fieldMatch) : Math
+        .max(field + fieldColumnCount, fieldMatch + fieldMatchColumnCount) - 1);
+    boolean haveBitSet = (bs != null);
+    for (; iLine < nLines; iLine++) {
+      String line = str.substring(pt, lines[iLine]).trim();
       pt = lines[iLine];
-      if (tokens.length < field || tokens.length < fieldMatch
-          || Float.isNaN(f = parseFloat(tokens[field - 1])))
-        continue;
+      String[] tokens = (fieldColumnCount <= 0 ? getTokens(line) : null);
+      // check for inappropriate data -- line too short or too few tokens or NaN for data
+      // and parse data
+      if (fieldColumnCount <= 0) {
+        if (tokens.length < minLen
+            || Float.isNaN(f = parseFloat(tokens[field - 1])))
+          continue;
+      } else {
+        if (line.length() < minLen
+            || Float.isNaN(f = parseFloat(line.substring(field - 1, field
+                + fieldColumnCount - 1))))
+          continue;
+      }
       int iData;
       if (isMatch) {
-        iData = parseInt(tokens[fieldMatch - 1]);
-        //in the fieldMatch column we have an integer pointing into matchData
-        //we replace that number then with the corresponding number in matchData
+        iData = parseInt(tokens == null ? line.substring(fieldMatch - 1,
+            fieldMatch + fieldMatchColumnCount - 1) : tokens[fieldMatch - 1]);
+        // in the fieldMatch column we have an integer pointing into matchData
+        // we replace that number then with the corresponding number in matchData
         if (iData == Integer.MIN_VALUE || iData < 0 || iData >= len
             || (iData = matchData[iData]) < 0)
           continue;
-        if (bs != null)
+        // and we set bs to indicate we are updating that value
+        if (haveBitSet)
           bs.set(iData);
       } else {
-        while (++i < len && bs != null && !bs.get(i)) {
-        }
-        if (i >= len)
-          return;
+        // no match data
+        // bs here indicates the specific data elements that need filling
+        if (haveBitSet) 
+          i = bs.nextSetBit(i + 1);
+        else
+          i++;
+        if (i < 0 || i >= len)
+          return data;
         iData = i;
       }
       data[iData] = f;
-      //System.out.println("assigning " + data[iData] + " to " + iData);
+      //System.out.println("data[" + iData + "] = " + data[iData]);
     }
+    return data;
   }
   
   /**
@@ -152,7 +280,7 @@ public class Parser {
   }
 
   public static float parseFloatStrict(String str) {
-    // checks trailing characters
+    // checks trailing characters and does not allow "1E35" to be float
     int cch = str.length();
     if (cch == 0)
       return Float.NaN;
@@ -203,7 +331,7 @@ public class Parser {
 
   public static float parseFloat(String str, int[] next) {
     int cch = str.length();
-    if (next[0] >= cch)
+    if (next[0] < 0 || next[0] >= cch)
       return Float.NaN;
     return parseFloatChecked(str, cch, next, false);
   }
@@ -212,7 +340,7 @@ public class Parser {
     int cch = str.length();
     if (ichMax > cch)
       ichMax = cch;
-    if (next[0] >= ichMax)
+    if (next[0] < 0 || next[0] >= ichMax)
       return Float.NaN;
     return parseFloatChecked(str, ichMax, next, false);
   }
@@ -222,10 +350,12 @@ public class Parser {
 
   private final static float[] tensScale = { 10, 100, 1000, 10000, 100000, 1000000 };
 
-  private static float parseFloatChecked(String str, int ichMax, int[] next, boolean checkTrailing) {
+  private static float parseFloatChecked(String str, int ichMax, int[] next, boolean isStrict) {
     boolean digitSeen = false;
     float value = 0;
     int ich = next[0];
+    if (isStrict && str.indexOf('\n') != str.lastIndexOf('\n'))
+        return Float.NaN;
     while (ich < ichMax && isWhiteSpace(str, ich))
       ++ich;
     boolean negative = false;
@@ -239,7 +369,9 @@ public class Parser {
       ++ich;
       digitSeen = true;
     }
+    boolean isDecimal = false;
     if (ch == '.') {
+      isDecimal = true;
       int iscale = 0;
       while (++ich < ichMax && (ch = str.charAt(ich)) >= '0' && ch <= '9') {
         if (iscale < decimalScale.length)
@@ -248,11 +380,13 @@ public class Parser {
         digitSeen = true;
       }
     }
+    boolean isExponent = false;
     if (!digitSeen)
       value = Float.NaN;
     else if (negative)
       value = -value;
     if (ich < ichMax && (ch == 'E' || ch == 'e' || ch == 'D')) {
+      isExponent = true;
       if (++ich >= ichMax)
         return Float.NaN;
       ch = str.charAt(ich);
@@ -271,7 +405,13 @@ public class Parser {
     } else {
        next[0] = ich; // the exponent code finds its own ichNextParse
     }
-    return (!checkTrailing || checkTrailingText(str, next[0], ichMax) ? value : Float.NaN);
+    if (value == Float.NEGATIVE_INFINITY)
+      value = -Float.MAX_VALUE;
+    else if (value == Float.POSITIVE_INFINITY)
+      value= Float.MAX_VALUE;
+    return (!isStrict 
+        || (!isExponent || isDecimal) && checkTrailingText(str, next[0], ichMax) 
+        ? value : Float.NaN);
   }
 
   private static boolean checkTrailingText(String str, int ich, int ichMax) {
@@ -285,7 +425,7 @@ public class Parser {
   
   public static int parseInt(String str, int[] next) {
     int cch = str.length();
-    if (next[0] >= cch)
+    if (next[0] < 0 || next[0] >= cch)
       return Integer.MIN_VALUE;
     return parseIntChecked(str, cch, next);
   }
@@ -294,7 +434,7 @@ public class Parser {
     int cch = str.length();
     if (ichMax > cch)
       ichMax = cch;
-    if (next[0] >= ichMax)
+    if (next[0] < 0 || next[0] >= ichMax)
       return Integer.MIN_VALUE;
     return parseIntChecked(str, ichMax, next);
   }
@@ -303,6 +443,8 @@ public class Parser {
     boolean digitSeen = false;
     int value = 0;
     int ich = next[0];
+    if (ich < 0)
+      return Integer.MIN_VALUE;
     char ch;
     while (ich < ichMax && isWhiteSpace(str, ich))
       ++ich;
@@ -328,7 +470,7 @@ public class Parser {
     if (line == null)
       return null;
     int cchLine = line.length();
-    if (ich > cchLine)
+    if (ich < 0 || ich > cchLine)
       return null;
     int tokenCount = countTokens(line, ich);
     String[] tokens = new String[tokenCount];
@@ -339,7 +481,7 @@ public class Parser {
     return tokens;
   }
 
-  public static int countTokens(String line, int ich) {
+  private static int countTokens(String line, int ich) {
     int tokenCount = 0;
     if (line != null) {
       int ichMax = line.length();
@@ -359,7 +501,7 @@ public class Parser {
 
   public static String parseToken(String str, int[] next) {
     int cch = str.length();
-    if (next[0] >= cch)
+    if (next[0] < 0 || next[0] >= cch)
       return null;
     return parseTokenChecked(str, cch, next);
   }
@@ -368,7 +510,7 @@ public class Parser {
     int cch = str.length();
     if (ichMax > cch)
       ichMax = cch;
-    if (next[0] >= ichMax)
+    if (next[0] < 0 || next[0] >= ichMax)
       return null;
     return parseTokenChecked(str, ichMax, next);
   }
@@ -410,25 +552,36 @@ public class Parser {
   }
   
   public static String getNextQuotedString(String line, int ipt0) {
+    int[] next = new int[] { ipt0 };
+    return getNextQuotedString(line, next);
+  }
+  
+  public static String getNextQuotedString(String line, int[] next) {
     String value = line;
-    int i = value.indexOf("\"", ipt0);
-    if (i < 0)
+    int i = next[0];
+    if (i < 0 || (i = value.indexOf("\"", i)) < 0)
       return "";
-    value = value.substring(i + 1);
+    next[0] = ++i;
+    value = value.substring(i);
     i = -1;
     while (++i < value.length() && value.charAt(i) != '"')
       if (value.charAt(i) == '\\')
         i++;
+    next[0] += i + 1;
     return value.substring(0, i);
   }
   
   private static boolean isWhiteSpace(String str, int ich) {
     char ch;
-    return ((ch = str.charAt(ich)) == ' ' || ch == '\t' || ch == '\n');
+    return (ich >= 0 && ((ch = str.charAt(ich)) == ' ' || ch == '\t' || ch == '\n'));
   }
 
   public static boolean isOneOf(String key, String semiList) {
-    return (';' + semiList + ';').indexOf(';' + key + ';') >= 0;
+    return key.indexOf(";") < 0  && (';' + semiList + ';').indexOf(';' + key + ';') >= 0;
   }
 
+  public static String getQuotedAttribute(String info, String name) {
+    int i = info.indexOf(name + "=");
+    return (i < 0 ? null : getNextQuotedString(info, i));
+  }
 }
