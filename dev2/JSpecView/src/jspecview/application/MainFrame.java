@@ -127,6 +127,7 @@ import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
 import jspecview.source.CompoundSource;
 import jspecview.source.JDXSource;
+import jspecview.util.Parser;
 import mdidesktop.ScrollableDesktopPane;
 import mdidesktop.WindowMenu;
 import jspecview.common.Visible;
@@ -2802,7 +2803,16 @@ private void showUnableToOverlayMessage() {
    */
   public void syncScript(String script) {
     //TODO link to processing of file loading, spectrum selection, and band selection
+    String file = Parser.getQuotedAttribute(script, "file");
+    String type = Parser.getQuotedAttribute(script, "type");
+    if (file == null || type == null)
+      return;
     System.out.println("JSpecView MainFrame.syncScript: " + script);
+    File f = new File(file);
+    if (!f.getName().equals(recentFileName))
+      openFile(f);
+    // handle type
+    
   }
 
   /**
