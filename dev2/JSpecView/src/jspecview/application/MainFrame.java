@@ -2793,9 +2793,21 @@ private void showUnableToOverlayMessage() {
   }
 
   @Override
+  /**
+   * incoming script processing of <Peak file="" type="xxx"...> record from Jmol
+   */
   public void syncScript(String script) {
-    //TODO
     System.out.println("JSpecView MainFrame.syncScript: " + script);
   }
-  
+
+  /**
+   * This is the method Debbie needs to call from within JSpecView
+   * when a peak is clicked.
+   * 
+   * @param peak
+   */
+  public void sendScript(String peak) {
+    // outgoing <Peak file="xxx" type="xxx"...> record to Jmol
+    jmol.syncScript("Select: " + peak);
+  }
 }
