@@ -2578,7 +2578,48 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
 
     private MouseListener thisMouseListener;
 
-    public void addNewMouseListener(MouseListener listener) {
-     thisMouseListener = listener;
+    public void addMouseListener(MouseListener listener) {
+      if (thisMouseListener != null)
+        removeMouseListener(thisMouseListener);
+      super.addMouseListener(listener);
+      thisMouseListener = listener;
     }
+
+    /**
+     * moving panel click event processing to JSVPanel from applet
+     * 
+     * @param coord
+     * @param actualCoord
+     * @return
+     */
+    public boolean getPickedCoordinates(Coordinate coord, Coordinate actualCoord) {
+      if (coordClicked == null)
+        return false;
+      coord.setXVal(coordClicked.getXVal());
+      coord.setYVal(coordClicked.getYVal());
+      int store = 0;
+      double xPt = coord.getXVal();
+        JDXSpectrum spectrum = (JDXSpectrum)getSpectrumAt(0);
+        for (int i = 0; i < spectrum.getXYCoords().length; i++) {
+          if (spectrum.getXYCoords()[i].getXVal() > xPt) {
+            store = i;
+            break;
+          }
+        }
+
+        double actualXPt = spectrum.getXYCoords()[store].getXVal();
+        double actualYPt = spectrum.getXYCoords()[store].getYVal();
+
+        DecimalFormat displayXFormatter = new DecimalFormat("0.000000",
+            new DecimalFormatSymbols(java.util.Locale.US ));
+        DecimalFormat displayYFormatter = new DecimalFormat("0.000000",
+            new DecimalFormatSymbols(java.util.Locale.US ));
+
+        String actualXCoordStr = displayXFormatter.format(actualXPt);
+        String actualYCoordStr = displayYFormatter.format(actualYPt);
+        actualCoord.setXVal(Double.parseDouble(actualXCoordStr));
+        actualCoord.setYVal(Double.parseDouble(actualYCoordStr));
+        return true;
+    }
+    
 }

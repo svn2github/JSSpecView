@@ -55,8 +55,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -1002,36 +1000,12 @@ public class JSVApplet extends JApplet {
       selectedJSVPanel = jsvPanel;
 
       if (peakCallbackFunctionName != null) {
-        Coordinate coord = jsvPanel.getClickedCoordinate();
-        int store = 0;
-        double xPt = coord.getXVal();
-
-        if(coord != null) {
-
-          JDXSpectrum spectrum = (JDXSpectrum)selectedJSVPanel.getSpectrumAt(0);
-          for (int i = 0; i < spectrum.getXYCoords().length; i++) {
-            if (spectrum.getXYCoords()[i].getXVal() > xPt) {
-              store = i;
-              break;
-            }
-          }
-
-          double actualXPt = spectrum.getXYCoords()[store].getXVal();
-          double actualYPt = spectrum.getXYCoords()[store].getYVal();
-
-          DecimalFormat displayXFormatter = new DecimalFormat("0.000000",
-              new DecimalFormatSymbols(java.util.Locale.US ));
-          DecimalFormat displayYFormatter = new DecimalFormat("0.000000",
-              new DecimalFormatSymbols(java.util.Locale.US ));
-
-          String actualXCoordStr = displayXFormatter.format(actualXPt);
-          String actualYCoordStr = displayYFormatter.format(actualYPt);
-          Coordinate actualCoord = new Coordinate(Double.parseDouble(actualXCoordStr)
-                                          , Double.parseDouble(actualYCoordStr) );
-
+        Coordinate coord = new Coordinate();
+        Coordinate actualCoord = new Coordinate();
+        if (jsvPanel.getPickedCoordinates(coord, actualCoord));
           callToJavaScript(peakCallbackFunctionName, coord.getXVal() + ", " +
                   coord.getYVal() + ", "+ actualCoord.getXVal() +", "+
-                  actualCoord.getYVal() + ", " + (currentSpectrumIndex + 1));}
+                  actualCoord.getYVal() + ", " + (currentSpectrumIndex + 1));
       }
       else if(coordCallbackFunctionName != null){
         Coordinate coord = jsvPanel.getClickedCoordinate();
