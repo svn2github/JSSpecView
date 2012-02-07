@@ -2602,9 +2602,11 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
       int store = 0;
       double xPt = coord.getXVal();
         JDXSpectrum spectrum = (JDXSpectrum)getSpectrumAt(0);
-        for (int i = 0; i < spectrum.getXYCoords().length; i++) {
-          if (spectrum.getXYCoords()[i].getXVal() > xPt) {
+        Coordinate[] coords = spectrum.getXYCoords();
+        for (int i = 0; i < coords.length; i++) {
+          if (coords[i].getXVal() > xPt) {
             store = i;
+            // I guess I don't see why only the starting point is important here
             break;
           }
         }
