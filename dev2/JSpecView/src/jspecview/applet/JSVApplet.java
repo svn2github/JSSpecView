@@ -2014,8 +2014,7 @@ public class JSVApplet extends JApplet {
    */
   public void callToJavaScript(String function, Object[] params) {
     try {
-      JSObject win = JSObject.getWindow(this);
-      win.call(function, params);
+      JSObject.getWindow(this).call(function, params);
     }
     catch (Exception npe) {
       System.out.println("EXCEPTION-> " + npe.getMessage());
