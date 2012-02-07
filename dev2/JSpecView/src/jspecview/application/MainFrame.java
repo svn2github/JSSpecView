@@ -2788,6 +2788,10 @@ private void showUnableToOverlayMessage() {
   }
 
   @Override
+  /**
+   * called by Jmol's StatusListener to register itself, indicating to 
+   * JSpecView that it needs to synchronize with it 
+   */
   public void registerApplet(String appletID, JmolSyncInterface jmolStatusListener) {
     jmol = jmolStatusListener;    
   }
@@ -2808,6 +2812,8 @@ private void showUnableToOverlayMessage() {
    * @param peak
    */
   public void sendScript(String peak) {
+    if (jmol == null)
+      return;
     // outgoing <Peak file="xxx" type="xxx"...> record to Jmol
     jmol.syncScript("Select: " + peak);
   }
