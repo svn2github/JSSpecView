@@ -2793,7 +2793,7 @@ private void showUnableToOverlayMessage() {
    * called by Jmol's StatusListener to register itself, indicating to 
    * JSpecView that it needs to synchronize with it 
    */
-  public void registerApplet(String appletID, JmolSyncInterface jmolStatusListener) {
+  public void register(String appletID, JmolSyncInterface jmolStatusListener) {
     jmol = jmolStatusListener;    
   }
 

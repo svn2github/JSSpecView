@@ -9,6 +9,6 @@ public interface JmolSyncInterface {
 
   public abstract void syncScript(String script);
 
-  public abstract void registerApplet(String appletID, JmolSyncInterface jsi);
+  public abstract void register(String id, JmolSyncInterface jsi);
 
 }
