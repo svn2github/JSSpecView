@@ -2802,6 +2802,8 @@ private void showUnableToOverlayMessage() {
    * incoming script processing of <Peak file="" type="xxx"...> record from Jmol
    */
   public void syncScript(String script) {
+    if (script.indexOf("<Peak") < 0)
+      return;
     //TODO link to processing of file loading, spectrum selection, and band selection
     String file = Parser.getQuotedAttribute(script, "file");
     String type = Parser.getQuotedAttribute(script, "type");
@@ -2811,9 +2813,15 @@ private void showUnableToOverlayMessage() {
     File f = new File(file);
     if (!f.getName().equals(recentFileName))
       openFile(f);
-    // handle type
-    
+    if (selectPanel(type))
+      selectedJSVPanel.processPeakSelect(script);
   }
+
+  private boolean selectPanel(String type) {
+    // TODO how to do this?  IR, HNMR, 13CNMR, MS, etc. 
+    return false;
+  }
+
 
   /**
    * This is the method Debbie needs to call from within JSpecView

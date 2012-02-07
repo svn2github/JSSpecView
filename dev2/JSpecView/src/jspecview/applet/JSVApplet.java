@@ -83,6 +83,8 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.jmol.api.JmolSyncInterface;
+
 import jspecview.application.common.AppUtils;
 import jspecview.application.common.JSVPanel;
 import jspecview.application.common.OverlayLegendDialog;
@@ -100,13 +102,14 @@ import jspecview.source.CompoundSource;
 import jspecview.source.JDXSource;
 import jspecview.source.NTupleSource;
 import jspecview.util.Logger;
+import jspecview.util.Parser;
 import netscape.javascript.JSObject;
 import jspecview.common.Visible;
 
 /**
- * JSpecView Applet class.
- * For a list of parameters and scripting functionality see the file
- * JSpecView_Applet_Specification.html.
+ * JSpecView Applet class. For a list of parameters and scripting functionality
+ * see the file JSpecView_Applet_Specification.html.
+ * 
  * @author Bob Hanson
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
@@ -114,20 +117,19 @@ import jspecview.common.Visible;
  * @author Prof Robert J. Lancashire
  */
 
+public class JSVApplet extends JApplet implements JmolSyncInterface {
 
-public class JSVApplet extends JApplet {
-
-   /**
+  /**
    * 
    */
   private static final long serialVersionUID = 1L;
 
   @Override
-   public void finalize() {
+  public void finalize() {
     System.out.println("JSpecView " + this + " finalized");
-   }
+  }
 
- public static final String APPLET_VERSION = "1.0.20120131-1950";
+  public static final String APPLET_VERSION = "1.0.20120131-1950";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath;
@@ -135,45 +137,44 @@ public class JSVApplet extends JApplet {
   String recentFileName = "";
   String fileURL;
 
-  boolean gridOn=true;
-  boolean coordinatesOn=true;
-  boolean reversePlot=false;
-  boolean menuOn=true;
-  boolean compoundMenuOn=false;
-  boolean compoundMenuOn2=true;
-  boolean enableZoom=true;
-  boolean xScaleOn=true;
-  boolean yScaleOn=true;
-  boolean xUnitsOn=true;
-  boolean yUnitsOn=true;
-  boolean titleBoldOn=false;
+  boolean gridOn = true;
+  boolean coordinatesOn = true;
+  boolean reversePlot = false;
+  boolean menuOn = true;
+  boolean compoundMenuOn = false;
+  boolean compoundMenuOn2 = true;
+  boolean enableZoom = true;
+  boolean xScaleOn = true;
+  boolean yScaleOn = true;
+  boolean xUnitsOn = true;
+  boolean yUnitsOn = true;
+  boolean titleBoldOn = false;
 
-  int startIndex=-1;
-  int endIndex=-1;
-  int spectrumNumber=-1; // blockNumber or nTupleNumber
+  int startIndex = -1;
+  int endIndex = -1;
+  int spectrumNumber = -1; // blockNumber or nTupleNumber
   int numberOfSpectra;
 
-  String theInterface="single"; // either tab, tile, single, overlay
-  String coordCallbackFunctionName=null; // = "coordCallBack";
-  String peakCallbackFunctionName=null; // peakCallback
-  String sltnclr="255,255,255"; //Colour of Solution
-  String titleFontName=null; // Title Font
-  String displayFontName=null; // Display Font
-  
+  String theInterface = "single"; // either tab, tile, single, overlay
+  String coordCallbackFunctionName = null; // = "coordCallBack";
+  String peakCallbackFunctionName = null; // peakCallback
+  String sltnclr = "255,255,255"; //Colour of Solution
+  String titleFontName = null; // Title Font
+  String displayFontName = null; // Display Font
+
   ArrayList<IntegrationRatio> integrationRatios = null; // Integration Ratio Annotations
 
-  Color titleColor=Color.BLACK;
-  Color gridColor=Color.LIGHT_GRAY;
-  Color unitsColor=Color.RED;
-  Color scaleColor=Color.BLACK;
-  Color coordinatesColor=Color.RED;
-  Color plotAreaColor=Color.WHITE;
-  Color backgroundColor=new Color(192,192,192);
-  Color plotColor=Color.BLUE;
+  Color titleColor = Color.BLACK;
+  Color gridColor = Color.LIGHT_GRAY;
+  Color unitsColor = Color.RED;
+  Color scaleColor = Color.BLACK;
+  Color coordinatesColor = Color.RED;
+  Color plotAreaColor = Color.WHITE;
+  Color backgroundColor = new Color(192, 192, 192);
+  Color plotColor = Color.BLUE;
 
-
-  Color[] plotColors= {Color.blue, Color.green, Color.red, Color.magenta,
-      Color.yellow, Color.orange,  Color.pink, Color.cyan};
+  Color[] plotColors = { Color.blue, Color.green, Color.red, Color.magenta,
+      Color.yellow, Color.orange, Color.pink, Color.cyan };
   String plotColorsStr;
   Color integralPlotColor = Color.red;
 
@@ -183,9 +184,8 @@ public class JSVApplet extends JApplet {
 
   /*---------------------------------END PARAMETERS------------------------*/
 
-
   boolean isSignedApplet = false;
-  boolean isStandalone=false;
+  boolean isStandalone = false;
   BorderLayout appletBorderLayout = new BorderLayout();
   JPanel statusPanel = new JPanel();
   JLabel statusTextLabel = new JLabel();
@@ -218,42 +218,15 @@ public class JSVApplet extends JApplet {
   JDXSpectrum xmlSpec;
   JSVPanel tempJSVP;
 
-  private static final String[] params = {
-     "LOAD",
-     "REVERSEPLOT",
-     "COORDINATESON",
-     "GRIDON",
-     "COORDCALLBACKFUNCTIONNAME",
-     "SPECTRUMNUMBER",
-     "INTERFACE",
-     "ENDINDEX",
-     "ENABLEZOOM",
-     "STARTINDEX",
-     "MENUON",
-     "COMPOUNDMENUON",
-     "BACKGROUNDCOLOR",
-     "COORDINATESCOLOR",
-     "GRIDCOLOR",
-     "PLOTAREACOLOR",
-     "PLOTCOLOR",
-     "SCALECOLOR",
-     "TITLECOLOR",
-     "UNITSCOLOR",
-     "PLOTCOLORS",
-     "VERSION",
-     "PEAKCALLBACKFUNCTIONNAME",
-     "IRMODE",
-     "OBSCURE",
-     "XSCALEON",
-     "YSCALEON",
-     "XUNITSON",
-     "YUNITSON",
-     "INTEGRALPLOTCOLOR",
-     "TITLEFONTNAME",
-     "TITLEBOLDON",
-     "DISPLAYFONTNAME",
-     "INTEGRATIONRATIOS"
-     };
+  private static final String[] params = { "LOAD", "REVERSEPLOT",
+      "COORDINATESON", "GRIDON", "COORDCALLBACKFUNCTIONNAME", "SPECTRUMNUMBER",
+      "INTERFACE", "ENDINDEX", "ENABLEZOOM", "STARTINDEX", "MENUON",
+      "COMPOUNDMENUON", "BACKGROUNDCOLOR", "COORDINATESCOLOR", "GRIDCOLOR",
+      "PLOTAREACOLOR", "PLOTCOLOR", "SCALECOLOR", "TITLECOLOR", "UNITSCOLOR",
+      "PLOTCOLORS", "VERSION", "PEAKCALLBACKFUNCTIONNAME", "IRMODE", "OBSCURE",
+      "XSCALEON", "YSCALEON", "XUNITSON", "YUNITSON", "INTEGRALPLOTCOLOR",
+      "TITLEFONTNAME", "TITLEBOLDON", "DISPLAYFONTNAME", "INTEGRATIONRATIOS",
+      "APPLETREADYCALLBACKFUNCTIONNAME", "APPLETID", "SYNCID" };
 
   final private static int PARAM_LOAD = 0;
   final private static int PARAM_REVERSEPLOT = 1;
@@ -289,15 +262,19 @@ public class JSVApplet extends JApplet {
   final private static int PARAM_TITLEBOLDON = 31;
   final private static int PARAM_DISPLAYFONTNAME = 32;
   final private static int PARAM_INTEGRATIONRATIOS = 33;
-  
-  final private static Hashtable<String, Integer> htParams =
-      new Hashtable<String, Integer>(); {
+  final private static int PARAM_APPLETREADYCALLBACKFUNCTIONNAME = 34;
+  final private static int PARAM_APPLETID = 35;
+  final private static int PARAM_SYNCID = 36;
+
+  final private static Hashtable<String, Integer> htParams = new Hashtable<String, Integer>();
+  {
     for (int i = 0; i < params.length; i++)
       htParams.put(params[i], new Integer(i));
   }
+
   //"ADDHIGHLIGHT", "REMOVEHIGHLIGHT", "REMOVEALLHIGHTLIGHTS"
 
- @Override
+  @Override
   public void destroy() {
     System.out.println("JSVApplet " + this + " destroy 1");
     if (commandWatcherThread != null) {
@@ -317,7 +294,7 @@ public class JSVApplet extends JApplet {
     System.out.println("JSVApplet " + this + " destroy 2");
   }
 
- /**
+  /**
    * Do we have new parameters passed from a javascript call?
    */
   public boolean newParams = false;
@@ -362,7 +339,7 @@ public class JSVApplet extends JApplet {
   /**
    * The index of the <code>JDXSpectrum</code> that is is focus.
    */
-  public int currentSpectrumIndex=0;
+  public int currentSpectrumIndex = 0;
 
   /**
    * Whether or not spectra should be overlayed
@@ -374,21 +351,31 @@ public class JSVApplet extends JApplet {
 
   /**
    * Returns a parameter value
-   * @param key the parameter name
-   * @param def the default value. If param is not found then this is returned
+   * 
+   * @param key
+   *        the parameter name
+   * @param def
+   *        the default value. If param is not found then this is returned
    * @return a parameter value
    */
   public String getParameter(String key, String def) {
-    return isStandalone ? System.getProperty(key, def) :
-      (getParameter(key) != null ? getParameter(key) : def);
+    return isStandalone ? System.getProperty(key, def)
+        : (getParameter(key) != null ? getParameter(key) : def);
   }
 
+  private String appletID;
+  private String syncID;
+
+  
   /**
    * Initializes applet with parameters and load the <code>JDXSource</code>
    */
   @Override
   public void init() {
-	  init(null);
+    init(null);
+    if (appletReadyCallbackFunctionName != null && fullName != null)
+      callToJavaScript(appletReadyCallbackFunctionName,
+          new Object[] { fullName });
   }
 
   private void init(String data) {
@@ -423,93 +410,12 @@ public class JSVApplet extends JApplet {
     statusTextLabel.setForeground(Color.darkGray);
     statusPanel.add(statusTextLabel, null);
     this.getContentPane().add(appletPanel);
-    String fileName = null;
-    boolean continuous = false;
-    String Xunits = "", Yunits = "";
-    double firstX = 0, lastX = 0;
-    System.out.println("applet: " + filePath);
-    URL base = null;
-    if (data != null) {
-    } else if (filePath != null) {
-      URL url;
-      try {
-        url = new URL(getCodeBase(), filePath);
-        System.out.println("applet: " + url);
-        fileName = url.toString();
-        recentFileName = url.getFile();
-        base = getDocumentBase();
-      } catch (MalformedURLException e) {
-        System.out.println("problem: " + e.getMessage());
-        fileName = filePath;
-      }
-    } else {
-      writeStatus("Please set the 'filepath' or 'load file' parameter");
-      return;
-    }
-
-    JDXSource source;
-    try {
-    	source = JDXSource.createJDXSource(data, fileName, base);
-    }
-    catch (Exception e) {
-      writeStatus(e.getMessage());
-      e.printStackTrace();
-      return;
-    }
-
-    specs = source.getSpectra();
-    continuous = source.getJDXSpectrum(0).isContinuous();
-    if (!compoundMenuOn2)
-      compoundMenuOn = false;
-    else {
-      compoundMenuOn = source instanceof CompoundSource;
-    }
-    Yunits = source.getJDXSpectrum(0).getYUnits();
-    Xunits = source.getJDXSpectrum(0).getXUnits();
-    firstX = source.getJDXSpectrum(0).getFirstX();
-    lastX = source.getJDXSpectrum(0).getLastX();
-
-    try {
-      initPanels();
-    } catch (JSpecViewException e1) {
-      writeStatus(e1.getMessage());
-      return;
-    }
-    initInterface();
-
-    System.out.println("JSpecView vs: " + APPLET_VERSION + " File " + fileName
-        + " Loaded Successfully");
-
-    // if Transmittance, visible 400-700 and nm then calc colour
-    if ((Xunits.toLowerCase().contains("nanometer"))
-        & (firstX < 401)
-        & (lastX > 699)
-        & ((Yunits.toLowerCase().contains("trans")) || Yunits.toLowerCase()
-            .contains("abs"))) {
-      //         sltnclr = Visible.Colour(source);
-      solColMenuItem.setEnabled(true);
-    } else {
-      solColMenuItem.setEnabled(false);
-    }
-    //  Can only integrate a continuous H NMR spectrum
-    if (continuous
-        && JSpecViewUtils.isHNMR((JDXSpectrum) selectedJSVPanel
-            .getSpectrumAt(0)))
-      integrateMenuItem.setEnabled(true);
- //Can only convert from T <-> A  if Absorbance or Transmittance and continuous
-    if ((continuous) && (Yunits.toLowerCase().contains("abs"))
-        || (Yunits.toLowerCase().contains("trans")))
-      transAbsMenuItem.setEnabled(true);
-    else
-      transAbsMenuItem.setEnabled(false);
-    setStringParameter("irmode", irMode);
-    exportAsMenu.setEnabled(true);
-    saveAsJDXMenu.setEnabled(continuous);
-    newFile = false;
+    openDataOrFile(data);
   }
 
   /**
    * Initializes the applet's GUI components
+   * 
    * @throws Exception
    */
   private void jbInit() throws Exception {
@@ -518,7 +424,7 @@ public class JSVApplet extends JApplet {
       isSignedApplet = true;
       startCommandThread();
     } catch (SecurityException se) {
-//System.err.println("Export menu disabled:
+      //System.err.println("Export menu disabled:
       //You need the signed Applet to export files");
     }
 
@@ -624,7 +530,8 @@ public class JSVApplet extends JApplet {
     compoundMenu.setEnabled(false);
     compoundMenu.setText("Blocks");
 
-    versionMenuItem.setText("<html><h3>JSpecView Version " + APPLET_VERSION + "</h3></html>");
+    versionMenuItem.setText("<html><h3>JSpecView Version " + APPLET_VERSION
+        + "</h3></html>");
 
     appletPopupMenu.add(fileMenu);
     appletPopupMenu.add(viewMenu);
@@ -634,7 +541,7 @@ public class JSVApplet extends JApplet {
     appletPopupMenu.add(aboutMenu);
     JSVPanel.setMenus(saveAsMenu, saveAsJDXMenu, exportAsMenu, actionListener);
     fileMenu.add(saveAsMenu);
-    if(isSignedApplet)
+    if (isSignedApplet)
       fileMenu.add(exportAsMenu);
     fileMenu.add(printMenuItem);
 
@@ -665,6 +572,7 @@ public class JSVApplet extends JApplet {
 
   /**
    * Get Applet information
+   * 
    * @return the String "JSpecView Applet"
    */
   @Override
@@ -674,6 +582,7 @@ public class JSVApplet extends JApplet {
 
   /**
    * Returns null
+   * 
    * @return null
    */
   @Override
@@ -683,14 +592,15 @@ public class JSVApplet extends JApplet {
 
   /**
    * Initalizes the <code>JSVPanels</code> and adds them to the jsvPanels array
+   * 
    * @throws JSpecViewException
    */
   private void initPanels() throws JSpecViewException {
     boolean showRange = false;
     JSVPanel jsvp;
 
-      numberOfSpectra = specs.size();
-      overlay = theInterface.equals("overlay") && numberOfSpectra > 1;
+    numberOfSpectra = specs.size();
+    overlay = theInterface.equals("overlay") && numberOfSpectra > 1;
 
     if (startIndex != -1 && endIndex != -1)
       showRange = true;
@@ -747,147 +657,153 @@ public class JSVApplet extends JApplet {
       }
     }
   }
-   private void initProperties(JSVPanel jsvp) {
-       // set JSVPanel properties from applet parameters
-        jsvp.setGridOn(gridOn);
-        jsvp.setCoordinatesOn(coordinatesOn);
-        jsvp.setXScaleOn(xScaleOn);
-        jsvp.setYScaleOn(yScaleOn);
-        jsvp.setXUnitsOn(xUnitsOn);
-        jsvp.setYUnitsOn(yUnitsOn);
-        jsvp.setTitleBoldOn(titleBoldOn);
-        jsvp.setTitleFontName(titleFontName);
-        jsvp.setDisplayFontName(displayFontName);
-        jsvp.setReversePlot(reversePlot);       
-        jsvp.setZoomEnabled(enableZoom);
-        // other JSVPanel properties
-        // Need to add to applet Parameters
-        jsvp.setPlotAreaColor(plotAreaColor);
-        jsvp.setGridColor(gridColor);
-        jsvp.setTitleColor(titleColor);
-        jsvp.setUnitsColor(unitsColor);
-        jsvp.setScaleColor(scaleColor);
-        jsvp.setcoordinatesColor(coordinatesColor);
-        //jsvp.setPlotColor(plotColor);
-        jsvp.setIntegralPlotColor(integralPlotColor);
-        jsvp.setBackground(backgroundColor);
-        getPlotColors();  //<======= Kind of sloppy
-        //if(plotColors == null)
-        //  jsvp.setPlotColors(plotColors);
-        jsvp.setXAxisDisplayedIncreasing(JSpecViewUtils.shouldDisplayXAxisIncreasing((JDXSpectrum)jsvp.getSpectrumAt(0))); 
+
+  private void initProperties(JSVPanel jsvp) {
+    // set JSVPanel properties from applet parameters
+    jsvp.setGridOn(gridOn);
+    jsvp.setCoordinatesOn(coordinatesOn);
+    jsvp.setXScaleOn(xScaleOn);
+    jsvp.setYScaleOn(yScaleOn);
+    jsvp.setXUnitsOn(xUnitsOn);
+    jsvp.setYUnitsOn(yUnitsOn);
+    jsvp.setTitleBoldOn(titleBoldOn);
+    jsvp.setTitleFontName(titleFontName);
+    jsvp.setDisplayFontName(displayFontName);
+    jsvp.setReversePlot(reversePlot);
+    jsvp.setZoomEnabled(enableZoom);
+    // other JSVPanel properties
+    // Need to add to applet Parameters
+    jsvp.setPlotAreaColor(plotAreaColor);
+    jsvp.setGridColor(gridColor);
+    jsvp.setTitleColor(titleColor);
+    jsvp.setUnitsColor(unitsColor);
+    jsvp.setScaleColor(scaleColor);
+    jsvp.setcoordinatesColor(coordinatesColor);
+    //jsvp.setPlotColor(plotColor);
+    jsvp.setIntegralPlotColor(integralPlotColor);
+    jsvp.setBackground(backgroundColor);
+    getPlotColors(); //<======= Kind of sloppy
+    //if(plotColors == null)
+    //  jsvp.setPlotColors(plotColors);
+    jsvp.setXAxisDisplayedIncreasing(JSpecViewUtils
+        .shouldDisplayXAxisIncreasing((JDXSpectrum) jsvp.getSpectrumAt(0)));
   }
 
   /**
    * Initializes the interface of the applet depending on the value of the
    * <i>interface</i> parameter
    */
-  private void initInterface(){
+  private void initInterface() {
     final int numberOfPanels = jsvPanels.length;
-    boolean canDoTile = (numberOfPanels >=2 && numberOfPanels <=10);
+    boolean canDoTile = (numberOfPanels >= 2 && numberOfPanels <= 10);
     boolean moreThanOnePanel = numberOfPanels > 1;
-    boolean showSpectrumNumber = spectrumNumber != -1 &&
-                                 spectrumNumber <= numberOfPanels;
+    boolean showSpectrumNumber = spectrumNumber != -1
+        && spectrumNumber <= numberOfPanels;
     //appletPanel.setBackground(backgroundColor);
-    if(theInterface.equals("tab") && moreThanOnePanel){
+    if (theInterface.equals("tab") && moreThanOnePanel) {
       spectraPane = new JTabbedPane(SwingConstants.TOP,
-                                    JTabbedPane.SCROLL_TAB_LAYOUT);
-      appletPanel.add(new JLabel(((CompoundSource)source).getTitle(),
-                                 SwingConstants.CENTER), BorderLayout.NORTH);
-      appletPanel.add(spectraPane,  BorderLayout.CENTER);
+          JTabbedPane.SCROLL_TAB_LAYOUT);
+      appletPanel.add(new JLabel(((CompoundSource) source).getTitle(),
+          SwingConstants.CENTER), BorderLayout.NORTH);
+      appletPanel.add(spectraPane, BorderLayout.CENTER);
 
-      for(int i = 0; i < numberOfPanels; i++){
-        String title = ((JDXSpectrum)specs.elementAt(i)).getTitle();
-        if(source instanceof NTupleSource)
+      for (int i = 0; i < numberOfPanels; i++) {
+        String title = ((JDXSpectrum) specs.elementAt(i)).getTitle();
+        if (source instanceof NTupleSource)
           title = title.substring(title.indexOf(':') + 1);
         else if (source instanceof BlockSource)
           //title = "block " + (i + 1);
-          title = title.substring(0, (title.length() >= 10 ? 10 :
-                                      title.length())) + "... : ";
+          title = title.substring(0, (title.length() >= 10 ? 10 : title
+              .length()))
+              + "... : ";
         spectraPane.addTab(title, jsvPanels[i]);
       }
       // Show the spectrum specified by the spectrumnumber parameter
-      if(showSpectrumNumber){
+      if (showSpectrumNumber) {
         spectraPane.setSelectedIndex(spectrumNumber - 1);
       }
-      selectedJSVPanel = (JSVPanel)spectraPane.getSelectedComponent();
-      spectraPane.addChangeListener(new ChangeListener(){
-        public void stateChanged(ChangeEvent e){
-          selectedJSVPanel = (JSVPanel)spectraPane.getSelectedComponent();
+      selectedJSVPanel = (JSVPanel) spectraPane.getSelectedComponent();
+      spectraPane.addChangeListener(new ChangeListener() {
+        public void stateChanged(ChangeEvent e) {
+          selectedJSVPanel = (JSVPanel) spectraPane.getSelectedComponent();
         }
       });
-    }
-    else if(theInterface.equals("tile") && canDoTile){
-      appletPanel.add(new JLabel(((CompoundSource)source).getTitle(),
-                                 SwingConstants.CENTER), BorderLayout.NORTH);
+    } else if (theInterface.equals("tile") && canDoTile) {
+      appletPanel.add(new JLabel(((CompoundSource) source).getTitle(),
+          SwingConstants.CENTER), BorderLayout.NORTH);
 
-      for(int i = 0; i < numberOfPanels; i++){
+      for (int i = 0; i < numberOfPanels; i++) {
         jsvPanels[i].setMinimumSize(new Dimension(250, 150));
         jsvPanels[i].setPreferredSize(new Dimension(300, 200));
       }
       JSplitPane splitPane = createSplitPane(jsvPanels);
-      appletPanel.add(splitPane,  BorderLayout.CENTER);
+      appletPanel.add(splitPane, BorderLayout.CENTER);
       //splitPane.setBackground(backgroundColor);
-    }
-    else{ // Single or overlay
-//      compoundMenuOn = true;
+    } else { // Single or overlay
+    //      compoundMenuOn = true;
       int spectrumIndex;
       String title;
-      if(showSpectrumNumber)
+      if (showSpectrumNumber)
         spectrumIndex = spectrumNumber - 1;
       else
         spectrumIndex = 0;
       selectedJSVPanel = jsvPanels[spectrumIndex];
       // Global variable for single interface
       currentSpectrumIndex = spectrumIndex;
-      if(overlay && source instanceof CompoundSource){
-        title = ((CompoundSource)source).getTitle();
+      if (overlay && source instanceof CompoundSource) {
+        title = ((CompoundSource) source).getTitle();
         jsvPanels[spectrumIndex].setTitle(title);
         overlayKeyMenuItem.setEnabled(true);
       }
       appletPanel.add(jsvPanels[spectrumIndex], BorderLayout.CENTER);
       // else interface = single
-      if(moreThanOnePanel && compoundMenuOn){
-          if(numberOfPanels <= 20){
-            // add Menus to navigate
-            JCheckBoxMenuItem mi;
-          if(source instanceof NTupleSource){
-            for(int i = 0; i < numberOfPanels; i++){
-              title = (i+1) + "- " + ((JDXSpectrum) specs.elementAt(i)).getTitle();
+      if (moreThanOnePanel && compoundMenuOn) {
+        if (numberOfPanels <= 20) {
+          // add Menus to navigate
+          JCheckBoxMenuItem mi;
+          if (source instanceof NTupleSource) {
+            for (int i = 0; i < numberOfPanels; i++) {
+              title = (i + 1) + "- "
+                  + ((JDXSpectrum) specs.elementAt(i)).getTitle();
               mi = new JCheckBoxMenuItem(title);
-              if (i == currentSpectrumIndex) mi.setSelected(true);
+              if (i == currentSpectrumIndex)
+                mi.setSelected(true);
               mi.addItemListener(new java.awt.event.ItemListener() {
                 public void itemStateChanged(ItemEvent e) {
                   if (e.getStateChange() == ItemEvent.SELECTED) {
                     // deselects the previously selected menu item
-                    JCheckBoxMenuItem deselectedMenu =
-(JCheckBoxMenuItem)((JCheckBoxMenuItem)e.getSource()).getParent().getComponent(currentSpectrumIndex);
+                    JCheckBoxMenuItem deselectedMenu = (JCheckBoxMenuItem) ((JCheckBoxMenuItem) e
+                        .getSource()).getParent().getComponent(
+                        currentSpectrumIndex);
                     deselectedMenu.setSelected(false);
                     compoundMenu_itemStateChanged(e);
                   }
                 }
               });
-              mi.setActionCommand(""+i);
+              mi.setActionCommand("" + i);
               compoundMenu.add(mi);
             }
             compoundMenu.setText("NTuples");
-          }
-          else if(source instanceof BlockSource){
-              for(int i = 0; i < numberOfPanels; i++){
-              title = (i+1) + "- " + ((JDXSpectrum)specs.elementAt(i)).getTitle();
+          } else if (source instanceof BlockSource) {
+            for (int i = 0; i < numberOfPanels; i++) {
+              title = (i + 1) + "- "
+                  + ((JDXSpectrum) specs.elementAt(i)).getTitle();
               mi = new JCheckBoxMenuItem(title);
-              if (i == currentSpectrumIndex) mi.setSelected(true);
+              if (i == currentSpectrumIndex)
+                mi.setSelected(true);
               mi.addItemListener(new java.awt.event.ItemListener() {
                 public void itemStateChanged(ItemEvent e) {
                   if (e.getStateChange() == ItemEvent.SELECTED) {
-                   // deselects the previously selected menu item
-                   JCheckBoxMenuItem deselectedMenu =
-(JCheckBoxMenuItem)((JCheckBoxMenuItem)e.getSource()).getParent().getComponent(currentSpectrumIndex);
-                   deselectedMenu.setSelected(false);
-                  compoundMenu_itemStateChanged(e);
+                    // deselects the previously selected menu item
+                    JCheckBoxMenuItem deselectedMenu = (JCheckBoxMenuItem) ((JCheckBoxMenuItem) e
+                        .getSource()).getParent().getComponent(
+                        currentSpectrumIndex);
+                    deselectedMenu.setSelected(false);
+                    compoundMenu_itemStateChanged(e);
+                  }
                 }
-              }
               });
-              mi.setActionCommand(""+i);
+              mi.setActionCommand("" + i);
               compoundMenu.add(mi);
             }
             compoundMenu.setText("Blocks");
@@ -896,8 +812,7 @@ public class JSVApplet extends JApplet {
           appletPopupMenu.add(compoundMenu, 3);
           if (compoundMenuOn)
             compoundMenu.setEnabled(true);
-        }
-        else{
+        } else {
           // open dialog box
           JMenuItem compoundMi = new JMenuItem("Choose Spectrum");
           compoundMi.addActionListener(new ActionListener() {
@@ -908,21 +823,19 @@ public class JSVApplet extends JApplet {
               msgStrBuffer.append(" to display another spectrum");
 
               String str = JOptionPane.showInputDialog(JSVApplet.this,
-                              msgStrBuffer.toString(),
-                              "Spectrum Chooser",
-                              JOptionPane.PLAIN_MESSAGE);
-              if(str != null){
+                  msgStrBuffer.toString(), "Spectrum Chooser",
+                  JOptionPane.PLAIN_MESSAGE);
+              if (str != null) {
                 int index = 0;
-                try{
+                try {
                   index = Integer.parseInt(str) - 1;
+                } catch (NumberFormatException nfe) {
                 }
-                catch(NumberFormatException nfe){}
 
-                if(index > 0 && index < numberOfPanels){
+                if (index > 0 && index < numberOfPanels) {
                   showSpectrum(index);
                   writeStatus(" ");
-                }
-                else
+                } else
                   writeStatus("Invalid Spectrum Number");
               }
             }
@@ -932,9 +845,11 @@ public class JSVApplet extends JApplet {
     }
   }
 
- /**
+  /**
    * display from a drop-down menu
-   * @param e the ItemEvent
+   * 
+   * @param e
+   *        the ItemEvent
    */
   void compoundMenu_itemStateChanged(ItemEvent e) {
 
@@ -946,22 +861,24 @@ public class JSVApplet extends JApplet {
     int index = Integer.parseInt(txt.substring(0, txt.indexOf("-")));
     //sltnclr = Visible.Colour(source);
     showSpectrum(index - 1);
-    }
+  }
 
   /**
    * Shows the </code>JSVPanel</code> at a certain index
-   * @param index the index
+   * 
+   * @param index
+   *        the index
    */
-  void showSpectrum(int index){
+  void showSpectrum(int index) {
     JSVPanel jsvp = jsvPanels[index];
     appletPanel.remove(jsvPanels[currentSpectrumIndex]);
     appletPanel.add(jsvp, BorderLayout.CENTER);
     currentSpectrumIndex = index;
     selectedJSVPanel = jsvp;
 
-    if (JSpecViewUtils.isHNMR((JDXSpectrum)selectedJSVPanel.getSpectrumAt(0)))
+    if (JSpecViewUtils.isHNMR((JDXSpectrum) selectedJSVPanel.getSpectrumAt(0)))
       integrateMenuItem.setEnabled(true);
-   else
+    else
       integrateMenuItem.setEnabled(false);
 
     chooseContainer();
@@ -971,9 +888,11 @@ public class JSVApplet extends JApplet {
 
   /**
    * Writes a message to the status label
-   * @param msg the message
+   * 
+   * @param msg
+   *        the message
    */
-  public void writeStatus(String msg){
+  public void writeStatus(String msg) {
     statusTextLabel.setText(msg);
   }
 
@@ -1019,46 +938,53 @@ public class JSVApplet extends JApplet {
 
     /**
      * Shows a popup menu when the right mouse button is clicked
-     * @param e MouseEvent
+     * 
+     * @param e
+     *        MouseEvent
      */
     @Override
     public void mousePressed(MouseEvent e) {
-        maybeShowPopup(e);
+      maybeShowPopup(e);
     }
 
     /**
      * Shows a popup menu when the right mouse button is clicked
-     * @param e MouseEvent
+     * 
+     * @param e
+     *        MouseEvent
      */
     @Override
     public void mouseReleased(MouseEvent e) {
-        maybeShowPopup(e);
+      maybeShowPopup(e);
     }
 
     /**
-     * If the right mouse button is clicked then show the popup menu
-     * and set status of <code>JCheckBoxMenuItem</code>s according to the
+     * If the right mouse button is clicked then show the popup menu and set
+     * status of <code>JCheckBoxMenuItem</code>s according to the
      * <code>JSVPanel</code> that is clicked
-     * @param e MouseEvent
+     * 
+     * @param e
+     *        MouseEvent
      */
     private void maybeShowPopup(MouseEvent e) {
       if (e.isPopupTrigger()) {
-          appletPopupMenu.show(e.getComponent(),
-                     e.getX(), e.getY());
-          JSVPanel jsvPanel = (JSVPanel)e.getSource();
-          selectedJSVPanel = jsvPanel;
+        appletPopupMenu.show(e.getComponent(), e.getX(), e.getY());
+        JSVPanel jsvPanel = (JSVPanel) e.getSource();
+        selectedJSVPanel = jsvPanel;
 
-          gridMenuItem.setSelected(jsvPanel.isGridOn());
-          coordinatesMenuItem.setSelected(jsvPanel.isCoordinatesOn());
+        gridMenuItem.setSelected(jsvPanel.isGridOn());
+        coordinatesMenuItem.setSelected(jsvPanel.isCoordinatesOn());
 
-          reversePlotMenuItem.setSelected(jsvPanel.isPlotReversed());
+        reversePlotMenuItem.setSelected(jsvPanel.isPlotReversed());
       }
     }
   }
 
   /**
    * Toggles the grid
-   * @param e the ItemEvent
+   * 
+   * @param e
+   *        the ItemEvent
    */
   void gridMenuItem_itemStateChanged(ItemEvent e) {
     selectedJSVPanel.setGridOn((e.getStateChange() == ItemEvent.SELECTED));
@@ -1066,17 +992,22 @@ public class JSVApplet extends JApplet {
   }
 
   /**
-     * Toggles the coordinates
-     * @param e the ItemEvent
+   * Toggles the coordinates
+   * 
+   * @param e
+   *        the ItemEvent
    */
   void coordinatesMenuItem_itemStateChanged(ItemEvent e) {
-    selectedJSVPanel.setCoordinatesOn((e.getStateChange() == ItemEvent.SELECTED));
+    selectedJSVPanel
+        .setCoordinatesOn((e.getStateChange() == ItemEvent.SELECTED));
     selectedJSVPanel.repaint();
   }
 
   /**
    * Reverses the plot
-   * @param e the ItemEvent
+   * 
+   * @param e
+   *        the ItemEvent
    */
   void reversePlotMenuItem_itemStateChanged(ItemEvent e) {
     selectedJSVPanel.setReversePlot((e.getStateChange() == ItemEvent.SELECTED));
@@ -1085,19 +1016,21 @@ public class JSVApplet extends JApplet {
 
   /**
    * Shows the header information for the Spectrum
-   * @param e the ActionEvent
+   * 
+   * @param e
+   *        the ActionEvent
    */
   void headerMenuItem_actionPerformed(ActionEvent e) {
-    if(overlay){
+    if (overlay) {
       // Show header of Source
-      HashMap<String, String> header = (HashMap<String, String>)
-          ((CompoundSource)source).getHeaderTable();
+      HashMap<String, String> header = (HashMap<String, String>) ((CompoundSource) source)
+          .getHeaderTable();
       Object[] headerLabels = header.keySet().toArray();
       Object[] headerValues = header.values().toArray();
 
       int coreHeaderSize = 5;
 
-      String[] columnNames = {"Label", "Description"};
+      String[] columnNames = { "Label", "Description" };
       int headerSize = header.size() + coreHeaderSize;
 
       Object rowData[][] = new Object[headerSize][];
@@ -1107,17 +1040,17 @@ public class JSVApplet extends JApplet {
       // add core header
       tmp = new Object[2];
       tmp[0] = "##TITLE";
-      tmp[1] = ((CompoundSource)source).getTitle();
+      tmp[1] = ((CompoundSource) source).getTitle();
       rowData[i++] = tmp;
 
       tmp = new Object[2];
       tmp[0] = "##JCAMP-DX";
-      tmp[1] = ((CompoundSource)source).getJcampdx();
+      tmp[1] = ((CompoundSource) source).getJcampdx();
       rowData[i++] = tmp;
 
       tmp = new Object[2];
       tmp[0] = "##DATA TYPE";
-      tmp[1] = ((CompoundSource)source).getDataType();
+      tmp[1] = ((CompoundSource) source).getDataType();
       rowData[i++] = tmp;
 
       /*
@@ -1129,15 +1062,15 @@ public class JSVApplet extends JApplet {
 
       tmp = new Object[2];
       tmp[0] = "##ORIGIN";
-      tmp[1] = ((CompoundSource)source).getOrigin();
+      tmp[1] = ((CompoundSource) source).getOrigin();
       rowData[i++] = tmp;
 
       tmp = new Object[2];
       tmp[0] = "##OWNER";
-      tmp[1] = ((CompoundSource)source).getOwner();
+      tmp[1] = ((CompoundSource) source).getOwner();
       rowData[i++] = tmp;
 
-      for(int j = 0; i < headerSize ; i++, j++){
+      for (int j = 0; i < headerSize; i++, j++) {
         tmp = new Object[2];
         tmp[0] = headerLabels[j];
         tmp[1] = headerValues[j];
@@ -1148,11 +1081,10 @@ public class JSVApplet extends JApplet {
       JScrollPane scrollPane = new JScrollPane(table);
 
       JOptionPane.showMessageDialog(this, scrollPane, "Header Information",
-                                    JOptionPane.PLAIN_MESSAGE);
+          JOptionPane.PLAIN_MESSAGE);
 
-    }
-    else{
-      JDXSpectrum spectrum = (JDXSpectrum)selectedJSVPanel.getSpectrumAt(0);
+    } else {
+      JDXSpectrum spectrum = (JDXSpectrum) selectedJSVPanel.getSpectrumAt(0);
 
       HashMap<String, String> header = spectrum.getHeaderTable();
       Object[] headerLabels = header.keySet().toArray();
@@ -1161,7 +1093,7 @@ public class JSVApplet extends JApplet {
       int coreHeaderSize = 6;
       int specParamsSize = 8;
 
-      String[] columnNames = {"Label", "Description"};
+      String[] columnNames = { "Label", "Description" };
       int headerSize = header.size() + coreHeaderSize + specParamsSize;
 
       Object rowData[][] = new Object[headerSize][];
@@ -1199,7 +1131,7 @@ public class JSVApplet extends JApplet {
       tmp[1] = spectrum.getOwner();
       rowData[i++] = tmp;
 
-      for(int j = 0; i < (headerSize - specParamsSize); i++, j++){
+      for (int j = 0; i < (headerSize - specParamsSize); i++, j++) {
         tmp = new Object[2];
         tmp[0] = headerLabels[j];
         tmp[1] = headerValues[j];
@@ -1220,27 +1152,25 @@ public class JSVApplet extends JApplet {
       tmp = new Object[2];
       tmp[0] = "##FIRSTX";
       double firstX;
-      if(spectrum.isIncreasing())
+      if (spectrum.isIncreasing())
         firstX = spectrum.getFirstX();
       else
         firstX = spectrum.getLastX();
 
-      tmp[1] = String.valueOf( spectrum.isHZtoPPM() ?
-                               firstX * spectrum.getObservedFreq() :
-                               firstX);
+      tmp[1] = String.valueOf(spectrum.isHZtoPPM() ? firstX
+          * spectrum.getObservedFreq() : firstX);
 
       rowData[i++] = tmp;
 
       tmp = new Object[2];
       tmp[0] = "##LASTX";
       double lastX;
-      if(spectrum.isIncreasing())
+      if (spectrum.isIncreasing())
         lastX = spectrum.getLastX();
       else
         lastX = spectrum.getFirstX();
-      tmp[1] = String.valueOf(spectrum.isHZtoPPM() ?
-                              lastX * spectrum.getObservedFreq() :
-                              lastX);
+      tmp[1] = String.valueOf(spectrum.isHZtoPPM() ? lastX
+          * spectrum.getObservedFreq() : lastX);
       rowData[i++] = tmp;
 
       tmp = new Object[2];
@@ -1260,7 +1190,7 @@ public class JSVApplet extends JApplet {
 
       tmp = new Object[2];
       tmp[0] = "##FIRSTY";
-      if(spectrum.isIncreasing())
+      if (spectrum.isIncreasing())
         tmp[1] = String.valueOf(spectrum.getFirstY());
       else
         tmp[1] = String.valueOf(spectrum.getLastY());
@@ -1270,36 +1200,41 @@ public class JSVApplet extends JApplet {
       JScrollPane scrollPane = new JScrollPane(table);
 
       JOptionPane.showMessageDialog(this, scrollPane, "Header Information",
-                                    JOptionPane.PLAIN_MESSAGE);
+          JOptionPane.PLAIN_MESSAGE);
     }
   }
 
   /**
    * Calculates the predicted colour of the Spectrum
-   * @param e the ActionEvent
+   * 
+   * @param e
+   *        the ActionEvent
    */
   void solColMenuItem_actionPerformed(ActionEvent e) {
 
-    JDXSpectrum spectrum = (JDXSpectrum)selectedJSVPanel.getSpectrumAt(0);
+    JDXSpectrum spectrum = (JDXSpectrum) selectedJSVPanel.getSpectrumAt(0);
     String Yunits = spectrum.getYUnits();
-//    System.out.println(spectrum.getTitle());
-    sltnclr = Visible.Colour(spectrum.getXYCoords(),Yunits);
+    //    System.out.println(spectrum.getTitle());
+    sltnclr = Visible.Colour(spectrum.getXYCoords(), Yunits);
 
     //JScrollPane scrollPane = new JScrollPane();
 
- JOptionPane.showMessageDialog(this,
- "<HTML><body bgcolor=rgb("+sltnclr+")><br />Predicted Solution Colour- RGB("
-+sltnclr+")<br /><br /></body></HTML>", "Predicted Colour",
- JOptionPane.INFORMATION_MESSAGE);
+    JOptionPane.showMessageDialog(this, "<HTML><body bgcolor=rgb(" + sltnclr
+        + ")><br />Predicted Solution Colour- RGB(" + sltnclr
+        + ")<br /><br /></body></HTML>", "Predicted Colour",
+        JOptionPane.INFORMATION_MESSAGE);
   }
 
   /**
    * Opens the print dialog to enable printing
-   * @param e ActionEvent
+   * 
+   * @param e
+   *        ActionEvent
    */
   void printMenuItem_actionPerformed(ActionEvent e) {
-    if(frame == null) {
-      System.err.println("Use the View/Window menu to lift the spectrum off the page first.");
+    if (frame == null) {
+      System.err
+          .println("Use the View/Window menu to lift the spectrum off the page first.");
       return;
     }
 
@@ -1308,13 +1243,15 @@ public class JSVApplet extends JApplet {
     PrintLayoutDialog ppd = new PrintLayoutDialog(frame);
     PrintLayoutDialog.PrintLayout pl = ppd.getPrintLayout();
 
-    if(pl != null)
+    if (pl != null)
       jsvp.printSpectrum(pl);
   }
 
   /**
    * Shows the next view when <code>JDXSpectrum</code> has been zoomed
-   * @param e the ActionEvent
+   * 
+   * @param e
+   *        the ActionEvent
    */
   void nextMenuItem_actionPerformed(ActionEvent e) {
     selectedJSVPanel.nextView();
@@ -1322,28 +1259,34 @@ public class JSVApplet extends JApplet {
 
   /**
    * Shows the previous view when <code>JDXSpectrum</code> has been zoomed
-   * @param e the ActionEvent
+   * 
+   * @param e
+   *        the ActionEvent
    */
   void previousMenuItem_actionPerformed(ActionEvent e) {
     selectedJSVPanel.previousView();
   }
 
   /**
-     * Resets the view when <code>JDXSpectrum</code> has been zoomed
-     * @param e the ActionEvent
+   * Resets the view when <code>JDXSpectrum</code> has been zoomed
+   * 
+   * @param e
+   *        the ActionEvent
    */
   void resetMenuItem_actionPerformed(ActionEvent e) {
-	  // Remove integration when view is reset
-	  if(integrateMenuItem.isSelected() == true)
-		  integrateMenuItem.setSelected(false);
-	  
-	  // Reset the view
-	  selectedJSVPanel.reset();	  
+    // Remove integration when view is reset
+    if (integrateMenuItem.isSelected() == true)
+      integrateMenuItem.setSelected(false);
+
+    // Reset the view
+    selectedJSVPanel.reset();
   }
 
   /**
    * Clears all zoomed views
-   * @param e the ActionEvent
+   * 
+   * @param e
+   *        the ActionEvent
    */
   void clearMenuItem_actionPerformed(ActionEvent e) {
     selectedJSVPanel.clearViews();
@@ -1351,7 +1294,9 @@ public class JSVApplet extends JApplet {
 
   /**
    * Shows the applet in a Frame
-   * @param e the ActionEvent
+   * 
+   * @param e
+   *        the ActionEvent
    */
   void windowMenuItem_itemStateChanged(ItemEvent e) {
     if (e.getStateChange() == ItemEvent.SELECTED) {
@@ -1370,8 +1315,7 @@ public class JSVApplet extends JApplet {
       validate();
       repaint();
       frame.addMouseListener(new JSVPanelMouseListener());
-      frame.addWindowListener(
-          new WindowAdapter() {
+      frame.addWindowListener(new WindowAdapter() {
         @Override
         public void windowClosing(WindowEvent e) {
           appletPanel.setSize(d);
@@ -1380,16 +1324,14 @@ public class JSVApplet extends JApplet {
           validate();
           repaint();
           integrateMenuItem.setEnabled(true);
-   //       if (compoundMenuOn)
-//             compoundMenu.setEnabled(true);
+          //       if (compoundMenuOn)
+          //             compoundMenu.setEnabled(true);
           frame.removeAll();
           frame.dispose();
           windowMenuItem.setSelected(false);
         }
-      }
-      );
-    }
-    else {
+      });
+    } else {
       // re-enable features that were disabled in Window mode
       integrateMenuItem.setEnabled(true);
       transAbsMenuItem.setEnabled(true);
@@ -1408,17 +1350,17 @@ public class JSVApplet extends JApplet {
     if (key == null)
       return false;
     try {
-    if (key.equalsIgnoreCase("irMode")) {
-      if ("transmittance".equalsIgnoreCase(value))
-        TAConvert(TO_TRANS);
-      else if ("absorbance".equalsIgnoreCase(value))
-        TAConvert(TO_ABS);
-      else if ("switch".equalsIgnoreCase(value))
-        TAConvert(IMPLIED);
-      else
-        return false;
-      return true;
-    }
+      if (key.equalsIgnoreCase("irMode")) {
+        if ("transmittance".equalsIgnoreCase(value))
+          TAConvert(TO_TRANS);
+        else if ("absorbance".equalsIgnoreCase(value))
+          TAConvert(TO_ABS);
+        else if ("switch".equalsIgnoreCase(value))
+          TAConvert(IMPLIED);
+        else
+          return false;
+        return true;
+      }
     } catch (Exception jsve) {
       //
     }
@@ -1427,38 +1369,41 @@ public class JSVApplet extends JApplet {
 
   /**
    * Allows conversion between TRANSMITTANCE and ABSORBANCE
-   * @param e ItemEvent
+   * 
+   * @param e
+   *        ItemEvent
    */
 
   void transAbsMenuItem_itemStateChanged(ItemEvent e) {
     // for some reason, at the the St. Olaf site, this is triggering twice
     // when the user clicks the menu item. Why?
     try {
-    System.out.println("ta event " + e.getID() + " " + e.getStateChange() + " "
-    + ItemEvent.SELECTED + " " + ItemEvent.DESELECTED + " " + e.toString());
-    if (e.getStateChange() == ItemEvent.SELECTED)
-       TAConvert(IMPLIED);
-    else
-       TAConvert(IMPLIED);
+      System.out.println("ta event " + e.getID() + " " + e.getStateChange()
+          + " " + ItemEvent.SELECTED + " " + ItemEvent.DESELECTED + " "
+          + e.toString());
+      if (e.getStateChange() == ItemEvent.SELECTED)
+        TAConvert(IMPLIED);
+      else
+        TAConvert(IMPLIED);
     } catch (Exception jsve) {
       // ignore?
     }
   }
 
-
   private long msTrigger = -1;
 
   /**
-   * Allows Transmittance to Absorbance conversion or vice versa
-   * depending on the value of comm.
-   * @param comm the conversion command
+   * Allows Transmittance to Absorbance conversion or vice versa depending on
+   * the value of comm.
+   * 
+   * @param comm
+   *        the conversion command
    * @throws Exception
    */
 
-
   private void TAConvert(int comm) throws Exception {
     long time = System.currentTimeMillis();
-    System.out.println(time + " " + msTrigger + " " + (time-msTrigger));
+    System.out.println(time + " " + msTrigger + " " + (time - msTrigger));
     if (msTrigger > 0 && time - msTrigger < 100)
       return;
     msTrigger = time;
@@ -1483,58 +1428,58 @@ public class JSVApplet extends JApplet {
       return;
     }
 
+    //  if successful, newSpec has the converted info
+    JDXSpectrum newSpec = TransmittanceAbsorbanceConverter.convert(spectrum);
 
-      //  if successful, newSpec has the converted info
-      JDXSpectrum newSpec = TransmittanceAbsorbanceConverter.convert(spectrum);
+    //  if not Abs or Trans data or if there is a problem, return null
+    if (newSpec == null)
+      return;
 
-      //  if not Abs or Trans data or if there is a problem, return null
-      if (newSpec == null)
-        return;
+    jsvp = new JSVPanel(newSpec);
 
-      jsvp = new JSVPanel(newSpec);
+    //  not working after loading a second file
+    //  if grid turned off or zoom done first
+    //  this returns full spectrum anyway
 
-      //  not working after loading a second file
-      //  if grid turned off or zoom done first
-      //  this returns full spectrum anyway
+    appletPanel.remove(0);
+    appletPanel.add(jsvp);
 
-      appletPanel.remove(0);
-      appletPanel.add(jsvp);
+    initProperties(jsvp);
+    solColMenuItem.setEnabled(true);
+    jsvp.addMouseListener(new JSVPanelMouseListener());
+    jsvp.repaint();
 
-      initProperties(jsvp);
-      solColMenuItem.setEnabled(true);
-      jsvp.addMouseListener(new JSVPanelMouseListener());
-      jsvp.repaint();
-
-      //  now need to validate and repaint
-      validate();
-      repaint();
+    //  now need to validate and repaint
+    validate();
+    repaint();
 
   }
 
   JSVPanelMouseListener tempMouseListener;
 
   /**
-     * Allows Integration of an HNMR spectrum
-     * @param e the ItemEvent
-     */
+   * Allows Integration of an HNMR spectrum
+   * 
+   * @param e
+   *        the ItemEvent
+   */
   void integrateMenuItem_itemStateChanged(ItemEvent e) {
-      if (e.getStateChange() == ItemEvent.SELECTED) {
-        tempJSVP = AppUtils.appletIntegrate(appletPanel, true, integrationRatios);
+    if (e.getStateChange() == ItemEvent.SELECTED) {
+      tempJSVP = AppUtils.appletIntegrate(appletPanel, true, integrationRatios);
+    } else {
+      if (AppUtils.hasIntegration((JSVPanel) appletPanel.getComponent(0))) {
+        appletPanel.remove((JSVPanel) appletPanel.getComponent(0));
+        tempJSVP = jsvPanels[currentSpectrumIndex];
+        tempJSVP.setZoomEnabled(true);
+        appletPanel.add(tempJSVP);
       }
-      else {
-        if (AppUtils.hasIntegration((JSVPanel)appletPanel.getComponent(0))) {
-          appletPanel.remove((JSVPanel)appletPanel.getComponent(0));
-          tempJSVP = jsvPanels[currentSpectrumIndex];
-          tempJSVP.setZoomEnabled(true);
-          appletPanel.add(tempJSVP);
-        }
-      }
-      
-      initProperties(tempJSVP);
-      tempJSVP.repaint();
-      tempJSVP.addMouseListener(new JSVPanelMouseListener());
-      chooseContainer();
     }
+
+    initProperties(tempJSVP);
+    tempJSVP.repaint();
+    tempJSVP.addMouseListener(new JSVPanelMouseListener());
+    chooseContainer();
+  }
 
   // check which mode the spectrum is in (windowed or applet)
   private void chooseContainer() {
@@ -1566,17 +1511,25 @@ public class JSVApplet extends JApplet {
 
   /**
    * Overlays the Spectra
-   * @param e the ActionEvent
+   * 
+   * @param e
+   *        the ActionEvent
    */
   void overlayKeyMenuItem_actionPerformed(ActionEvent e) {
     new OverlayLegendDialog(selectedJSVPanel);
   }
 
+  private String dirLastExported;
 
-  String dirLastExported;
+  private String appletReadyCallbackFunctionName;
+
+  private String fullName;
+
   /**
    * Export spectrum in a given format
-   * @param command the name of the format to export in
+   * 
+   * @param command
+   *        the name of the format to export in
    */
   void exportSpectrum(String command) {
     final String comm = command;
@@ -1590,17 +1543,16 @@ public class JSVApplet extends JApplet {
         recentFileName, dirLastExported);
   }
 
-
   private String export(int n, String comm, File file) {
     if (n < 0 || selectedJSVPanel.getNumberOfSpectra() <= n)
-      return "only " + selectedJSVPanel.getNumberOfSpectra() + " spectra available.";
+      return "only " + selectedJSVPanel.getNumberOfSpectra()
+          + " spectra available.";
     String errMsg = null;
-    try{
-      JDXSpectrum spec = (JDXSpectrum)selectedJSVPanel.getSpectrumAt(n);
-      errMsg = Exporter.export(comm, (file == null ? null : file.getAbsolutePath()), spec,
-          0, spec.getXYCoords().length - 1);
-    }
-    catch(IOException ioe){
+    try {
+      JDXSpectrum spec = (JDXSpectrum) selectedJSVPanel.getSpectrumAt(n);
+      errMsg = Exporter.export(comm, (file == null ? null : file
+          .getAbsolutePath()), spec, 0, spec.getXYCoords().length - 1);
+    } catch (IOException ioe) {
       errMsg = "Error writing: " + file.getName();
     }
     return errMsg;
@@ -1608,7 +1560,9 @@ public class JSVApplet extends JApplet {
 
   /**
    * Shows an About dialog
-   * @param e the ActionEvent
+   * 
+   * @param e
+   *        the ActionEvent
    */
   void versionMenuItem_actionPerformed(ActionEvent e) {
 
@@ -1616,41 +1570,45 @@ public class JSVApplet extends JApplet {
   }
 
   /**
-   * Used to tile JSVPanel when the <i>interface</i> paramters is equal to "tile"
-   * @param comps An array of components to tile
+   * Used to tile JSVPanel when the <i>interface</i> paramters is equal to
+   * "tile"
+   * 
+   * @param comps
+   *        An array of components to tile
    * @return a <code>JSplitPane</code> with components tiled
    */
-  public JSplitPane createSplitPane(JComponent[] comps){
+  public JSplitPane createSplitPane(JComponent[] comps) {
     ComponentListPair pair = createPair(comps);
     return createSplitPaneAux(pair);
   }
 
   /**
    * Auxiliary method for creating a tiled interface
-   * @param pair the <code>ComponentListPair</code>
+   * 
+   * @param pair
+   *        the <code>ComponentListPair</code>
    * @return a <code>JSplitPane</code> with components tiled
    */
-  public JSplitPane createSplitPaneAux(ComponentListPair pair){
+  public JSplitPane createSplitPaneAux(ComponentListPair pair) {
     int numTop = pair.top.length;
     int numBottom = pair.bottom.length;
     JSplitPane splitPane;
 
-    if(numBottom == 1 && numTop == 1){
+    if (numBottom == 1 && numTop == 1) {
       splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
       splitPane.setLeftComponent(pair.top[0]);
       splitPane.setRightComponent(pair.bottom[0]);
 
     }
 
-    else if(numBottom == 1 && numTop == 2){
+    else if (numBottom == 1 && numTop == 2) {
       splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
       JSplitPane newSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
       newSplitPane.setLeftComponent(pair.top[0]);
       newSplitPane.setRightComponent(pair.top[1]);
       splitPane.setLeftComponent(newSplitPane);
       splitPane.setRightComponent(pair.bottom[0]);
-    }
-    else{
+    } else {
       splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
       splitPane.setTopComponent(createSplitPaneAux(createPair(pair.top)));
       splitPane.setBottomComponent(createSplitPaneAux(createPair(pair.bottom)));
@@ -1659,24 +1617,26 @@ public class JSVApplet extends JApplet {
   }
 
   /**
-   * Splits the components array in 2 equal or nearly equal arrays and encapsulates them
-   * in a <code>ComponentListPair</code> instance
-   * @param comps an array of components
+   * Splits the components array in 2 equal or nearly equal arrays and
+   * encapsulates them in a <code>ComponentListPair</code> instance
+   * 
+   * @param comps
+   *        an array of components
    * @return a <code>ComponentListPair</code>
    */
-  public ComponentListPair createPair(JComponent[] comps){
-    int numBottom = (int)(comps.length/2);
+  public ComponentListPair createPair(JComponent[] comps) {
+    int numBottom = (int) (comps.length / 2);
     int numTop = numBottom + (comps.length % 2);
 
     JComponent[] top = new JComponent[numTop];
     JComponent[] bottom = new JComponent[numBottom];
 
     int i;
-    for(i = 0; i < numTop; i++){
+    for (i = 0; i < numTop; i++) {
       top[i] = comps[i];
     }
 
-    for(int j = 0; i < comps.length; i++, j++){
+    for (int j = 0; i < comps.length; i++, j++) {
       bottom[j] = comps[i];
     }
 
@@ -1690,7 +1650,7 @@ public class JSVApplet extends JApplet {
   /**
    * Representation of two array of components of equal or nearly equal size
    */
-  class ComponentListPair{
+  class ComponentListPair {
 
     /**
      * the first array
@@ -1705,95 +1665,97 @@ public class JSVApplet extends JApplet {
     /**
      * Constructor
      */
-    public ComponentListPair(){}
+    public ComponentListPair() {
+    }
   }
 
   /**
    * Returns a <code>Color</color> object from a parameter value
-   * @param key the parameter name
-   * @param def the default value
+   * 
+   * @param key
+   *        the parameter name
+   * @param def
+   *        the default value
    * @return a <code>Color</color> object from a parameter value
    */
-/*  private Color getColorParameter(String key, Color def){
-    String param = getParameter(key);
-    int r, g, b;
+  /*  private Color getColorParameter(String key, Color def){
+      String param = getParameter(key);
+      int r, g, b;
 
-    if(param == null){
-      return def;
-    }
+      if(param == null){
+        return def;
+      }
 
-    param = param.trim();
-    if(param.startsWith("#")){
+      param = param.trim();
+      if(param.startsWith("#")){
+        try{
+          return new Color(Integer.parseInt(param.substring(1), 16));
+        }
+        catch(NumberFormatException nfe){
+          return def;
+        }
+      }
+      StringTokenizer st = new StringTokenizer(param, ",;.- ");
       try{
-        return new Color(Integer.parseInt(param.substring(1), 16));
+        r = Integer.parseInt(st.nextToken().trim());
+        g = Integer.parseInt(st.nextToken().trim());
+        b = Integer.parseInt(st.nextToken().trim());
+
+        return new Color(r, g, b);
+      }
+      catch(NoSuchElementException nsee){
+        return def;
       }
       catch(NumberFormatException nfe){
         return def;
       }
     }
-    StringTokenizer st = new StringTokenizer(param, ",;.- ");
-    try{
-      r = Integer.parseInt(st.nextToken().trim());
-      g = Integer.parseInt(st.nextToken().trim());
-      b = Integer.parseInt(st.nextToken().trim());
 
-      return new Color(r, g, b);
-    }
-    catch(NoSuchElementException nsee){
-      return def;
-    }
-    catch(NumberFormatException nfe){
-      return def;
-    }
-  }
-
-*/
+  */
 
   /**
-   * Intialises the <code>plotColors</code> array from the
-   * <i>plotColorsStr</i> variable
+   * Intialises the <code>plotColors</code> array from the <i>plotColorsStr</i>
+   * variable
    */
-  public void getPlotColors(){
-    if(plotColorsStr != null){
+  public void getPlotColors() {
+    if (plotColorsStr != null) {
       StringTokenizer st = new StringTokenizer(plotColorsStr, ",;.- ");
       int r, g, b;
       Vector<Color> colors = new Vector<Color>();
 
-      try{
-        while(st.hasMoreTokens()){
+      try {
+        while (st.hasMoreTokens()) {
 
           String token = st.nextToken();
-          if(token.startsWith("#")){
-              colors.addElement(new Color(Integer.parseInt(token.substring(1), 16)));
-          }
-          else{
+          if (token.startsWith("#")) {
+            colors.addElement(new Color(Integer
+                .parseInt(token.substring(1), 16)));
+          } else {
             r = Integer.parseInt(token.trim());
             g = Integer.parseInt(st.nextToken().trim());
             b = Integer.parseInt(st.nextToken().trim());
             colors.addElement(new Color(r, g, b));
           }
         }
-      }
-      catch(NoSuchElementException nsee){
+      } catch (NoSuchElementException nsee) {
         return;
-      }
-      catch(NumberFormatException nfe){
+      } catch (NumberFormatException nfe) {
         return;
       }
 
-      plotColors = (Color[])colors.toArray(new Color[colors.size()]);
+      plotColors = (Color[]) colors.toArray(new Color[colors.size()]);
+    } else {
+      //      plotColors = new Color[specs.size()];
+      //      for(int i = 0; i < specs.size(); i++){
+      plotColors[0] = plotColor;
+      //        System.out.println(i+" "+plotColors[i]);
     }
-    else{
-//      plotColors = new Color[specs.size()];
-//      for(int i = 0; i < specs.size(); i++){
-        plotColors[0] = plotColor;
-//        System.out.println(i+" "+plotColors[i]);
-      }
-//    }
+    //    }
   }
 
   /**
    * Returns the current internal version of the Applet
+   * 
    * @return String
    */
   public String getAppletVersion() {
@@ -1802,25 +1764,26 @@ public class JSVApplet extends JApplet {
 
   /**
    * Returns the calculated colour of a visible spectrum (Transmittance)
+   * 
    * @return Color
    */
 
-  public String getSolnColour(){
+  public String getSolnColour() {
     return this.sltnclr;
   }
 
-
   /**
-   * Method that can be called from another applet or from javascript to
-   * return the coordinate of clicked point in the plot area of the <code>
+   * Method that can be called from another applet or from javascript to return
+   * the coordinate of clicked point in the plot area of the <code>
    * JSVPanel</code>
+   * 
    * @return A String representation of the coordinate
    */
-  public String getCoordinate(){
-    if (selectedJSVPanel != null){
+  public String getCoordinate() {
+    if (selectedJSVPanel != null) {
       Coordinate coord = selectedJSVPanel.getClickedCoordinate();
 
-      if(coord != null)
+      if (coord != null)
         return coord.getXVal() + " " + coord.getYVal();
     }
 
@@ -1828,33 +1791,33 @@ public class JSVApplet extends JApplet {
   }
 
   /**
-   * Method that can be called from another applet or from javascript
-   * that toggles the grid on a <code>JSVPanel</code>
+   * Method that can be called from another applet or from javascript that
+   * toggles the grid on a <code>JSVPanel</code>
    */
-  public void toggleGrid(){
-    if (selectedJSVPanel != null){
+  public void toggleGrid() {
+    if (selectedJSVPanel != null) {
       selectedJSVPanel.setGridOn(!selectedJSVPanel.isGridOn());
       repaint();
     }
   }
 
   /**
-   * Method that can be called from another applet or from javascript
-   * that toggles the coordinate on a <code>JSVPanel</code>
+   * Method that can be called from another applet or from javascript that
+   * toggles the coordinate on a <code>JSVPanel</code>
    */
-  public void toggleCoordinate(){
-    if (selectedJSVPanel != null){
+  public void toggleCoordinate() {
+    if (selectedJSVPanel != null) {
       selectedJSVPanel.setCoordinatesOn(!selectedJSVPanel.isCoordinatesOn());
       repaint();
     }
   }
 
   /**
-     * Method that can be called from another applet or from javascript
-     * that toggles reversing the plot on a <code>JSVPanel</code>
+   * Method that can be called from another applet or from javascript that
+   * toggles reversing the plot on a <code>JSVPanel</code>
    */
-  public void reversePlot(){
-    if (selectedJSVPanel != null){
+  public void reversePlot() {
+    if (selectedJSVPanel != null) {
       selectedJSVPanel.setReversePlot(!selectedJSVPanel.isPlotReversed());
       repaint();
     }
@@ -1862,20 +1825,23 @@ public class JSVApplet extends JApplet {
 
   /**
    * Gets a new set of parameters from a javascript call
-   * @param newJSVparams String
+   * 
+   * @param newJSVparams
+   *        String
    */
   public void script(String newJSVparams) {
     JSVparams = newJSVparams;
     newParams = true;
-    init();
+    init(null);
   }
 
   /**
    * Delivers spectrum coded as desired: XY, SQZ, PAC, DIF, AML, CML, SVG
+   * 
    * @param type
    * @param n
    * @return data
-   *
+   * 
    */
   public String export(String type, int n) {
     if (type == null)
@@ -1884,23 +1850,24 @@ public class JSVApplet extends JApplet {
   }
 
   /**
-    * Returns the spectrum at the specified block number
-    * @param block int
-  */
-  public void setSpectrumNumber(int block){
-    if (selectedJSVPanel != null){
+   * Returns the spectrum at the specified block number
+   * 
+   * @param block
+   *        int
+   */
+  public void setSpectrumNumber(int block) {
+    if (selectedJSVPanel != null) {
       if (theInterface.equals("single")) {
         showSpectrum(block - 1);
         repaint();
-      }
-      else {
+      } else {
         spectraPane.setSelectedIndex(block - 1);
         repaint();
       }
     }
- }
+  }
 
-  public void setFilePath(String tmpFilePath){
+  public void setFilePath(String tmpFilePath) {
     if (isSignedApplet)
       scriptQueue.add(tmpFilePath);
     else
@@ -1909,45 +1876,55 @@ public class JSVApplet extends JApplet {
 
   /**
    * Loads a new file into the existing applet window
-   * @param tmpFilePath String
-  */
-  void setFilePathLocal(String tmpFilePath){
-     getContentPane().removeAll();
-     appletPanel.removeAll();
-     newFilePath = tmpFilePath;
-     newFile = true;
-     init();
-     getContentPane().validate();
-     appletPanel.validate();
+   * 
+   * @param tmpFilePath
+   *        String
+   */
+  void setFilePathLocal(String tmpFilePath) {
+    getContentPane().removeAll();
+    appletPanel.removeAll();
+    newFilePath = tmpFilePath;
+    newFile = true;
+    init(null);
+    getContentPane().validate();
+    appletPanel.validate();
   }
-
 
   /**
    * Loads in-line JCAMP-DX data into the existing applet window
-   * @param data String
-  */
-  public void loadInline(String data){
-     getContentPane().removeAll();
-     appletPanel.removeAll();
-     newFilePath = null;
-     newFile = false;
-     init(data);
-     getContentPane().validate();
-     appletPanel.validate();
+   * 
+   * @param data
+   *        String
+   */
+  public void loadInline(String data) {
+    getContentPane().removeAll();
+    appletPanel.removeAll();
+    newFilePath = null;
+    newFile = false;
+    init(data);
+    getContentPane().validate();
+    appletPanel.validate();
   }
 
   /**
-   * Method that can be called from another applet or from javascript
-   * that adds a highlight to a portion of the plot area of a <code>JSVPanel</code>
-   * @param x1 the starting x value
-   * @param x2 the ending x value
-   * @param r the red portion of the highlight color
-   * @param g the green portion of the highlight color
-   * @param b the blue portion of the highlight color
-   * @param a the alpha portion of the highlight color
+   * Method that can be called from another applet or from javascript that adds
+   * a highlight to a portion of the plot area of a <code>JSVPanel</code>
+   * 
+   * @param x1
+   *        the starting x value
+   * @param x2
+   *        the ending x value
+   * @param r
+   *        the red portion of the highlight color
+   * @param g
+   *        the green portion of the highlight color
+   * @param b
+   *        the blue portion of the highlight color
+   * @param a
+   *        the alpha portion of the highlight color
    */
-  public void addHighlight(double x1, double x2, int r, int g, int b, int a){
-    if (selectedJSVPanel != null){
+  public void addHighlight(double x1, double x2, int r, int g, int b, int a) {
+    if (selectedJSVPanel != null) {
       selectedJSVPanel.setHighlightOn(true);
       Color color = new Color(r, g, b, a);
       selectedJSVPanel.addHighlight(x1, x2, color);
@@ -1956,74 +1933,81 @@ public class JSVApplet extends JApplet {
   }
 
   /**
-   * Method that can be called from another applet or from javascript
-   * that removes a highlight from the plot area of a <code>JSVPanel</code>
-   * @param x1 the starting x value
-   * @param x2 the ending x value
+   * Method that can be called from another applet or from javascript that
+   * removes a highlight from the plot area of a <code>JSVPanel</code>
+   * 
+   * @param x1
+   *        the starting x value
+   * @param x2
+   *        the ending x value
    */
-  public void removeHighlight(double x1, double x2){
-    if (selectedJSVPanel != null){
+  public void removeHighlight(double x1, double x2) {
+    if (selectedJSVPanel != null) {
       selectedJSVPanel.removeHighlight(x1, x2);
       repaint();
     }
   }
 
   /**
-   * Method that can be called from another applet or from javascript
-   * that removes all highlights from the plot area of a <code>JSVPanel</code>
+   * Method that can be called from another applet or from javascript that
+   * removes all highlights from the plot area of a <code>JSVPanel</code>
    */
-  public void removeAllHighlights(){
-    if (selectedJSVPanel != null){
+  public void removeAllHighlights() {
+    if (selectedJSVPanel != null) {
       selectedJSVPanel.removeAllHighlights();
       repaint();
     }
   }
-  
+
   /**
-   * Method that can be called from another applet or from javascript
-   * that restores the zoom of a <code>JSVPanel</code> to its original state.
+   * Method that can be called from another applet or from javascript that
+   * restores the zoom of a <code>JSVPanel</code> to its original state.
    */
-  public void resetView(){
-	  // Remove Integration from view
-	  if(integrateMenuItem.isSelected() == true)
-		  integrateMenuItem.setSelected(false);
-		  
-	  // Reset the view
-	  if (selectedJSVPanel != null){
-		  selectedJSVPanel.reset();
-		  repaint();
-	  }
+  public void resetView() {
+    // Remove Integration from view
+    if (integrateMenuItem.isSelected() == true)
+      integrateMenuItem.setSelected(false);
+
+    // Reset the view
+    if (selectedJSVPanel != null) {
+      selectedJSVPanel.reset();
+      repaint();
+    }
   }
 
   /**
-   * Method that can be called from another applet or from javascript
-   * that toggles the integration graph of a <code>JSVPanel</code>.
+   * Method that can be called from another applet or from javascript that
+   * toggles the integration graph of a <code>JSVPanel</code>.
    */
-  public void toggleIntegration(){
-	  if(integrateMenuItem.isSelected() == false)
-		  integrateMenuItem.setSelected(true);
-	  else 
-		  integrateMenuItem.setSelected(false);
+  public void toggleIntegration() {
+    if (integrateMenuItem.isSelected() == false)
+      integrateMenuItem.setSelected(true);
+    else
+      integrateMenuItem.setSelected(false);
   }
-  
+
   /**
-   * Calls a javascript function given by the function name
-   * passing to it the string parameters as arguments
-   * @param function the javascript function name
-   * @param parameters the function arguments as a string in the form "x, y, z..."
+   * Calls a javascript function given by the function name passing to it the
+   * string parameters as arguments
+   * 
+   * @param function
+   *        the javascript function name
+   * @param parameters
+   *        the function arguments as a string in the form "x, y, z..."
    */
   public void callToJavaScript(String function, Object[] params) {
     try {
       JSObject.getWindow(this).call(function, params);
-    }
-    catch (Exception npe) {
+    } catch (Exception npe) {
       System.out.println("EXCEPTION-> " + npe.getMessage());
     }
   }
 
   /**
    * Parses the javascript call parameters and executes them accordingly
-   * @param params String
+   * 
+   * @param params
+   *        String
    */
   public void parseInitScript(String params) {
     StringTokenizer allParamTokens = new StringTokenizer(params, ";");
@@ -2061,6 +2045,17 @@ public class JSVApplet extends JApplet {
           break;
         case PARAM_GRIDON:
           gridOn = Boolean.parseBoolean(value);
+          break;
+        case PARAM_SYNCID:
+          syncID = value;
+          fullName = appletID + "__" + syncID + "__";
+          break;
+        case PARAM_APPLETID:
+          appletID = value;
+          fullName = appletID + "__" + syncID + "__";
+          break;
+        case PARAM_APPLETREADYCALLBACKFUNCTIONNAME:
+          appletReadyCallbackFunctionName = value;
           break;
         case PARAM_COORDCALLBACKFUNCTIONNAME:
           coordCallbackFunctionName = value;
@@ -2117,7 +2112,7 @@ public class JSVApplet extends JApplet {
           peakCallbackFunctionName = value;
           break;
         case PARAM_PLOTCOLORS:
-          plotColorsStr= value;
+          plotColorsStr = value;
           break;
         case PARAM_VERSION:
           break;
@@ -2129,46 +2124,51 @@ public class JSVApplet extends JApplet {
           JSpecViewUtils.setObscure(obscure);
           break;
         case PARAM_XSCALEON:
-        	xScaleOn = Boolean.parseBoolean(value);
-        	break;
+          xScaleOn = Boolean.parseBoolean(value);
+          break;
         case PARAM_YSCALEON:
-        	yScaleOn = Boolean.parseBoolean(value);
-        	break;
+          yScaleOn = Boolean.parseBoolean(value);
+          break;
         case PARAM_XUNITSON:
-        	xUnitsOn = Boolean.parseBoolean(value);
-        	break;
+          xUnitsOn = Boolean.parseBoolean(value);
+          break;
         case PARAM_YUNITSON:
-        	yUnitsOn = Boolean.parseBoolean(value);
-        	break;
+          yUnitsOn = Boolean.parseBoolean(value);
+          break;
         case PARAM_INTEGRALPLOTCOLOR:
-        	integralPlotColor = AppUtils.getColorFromString(value);
-        	break;
+          integralPlotColor = AppUtils.getColorFromString(value);
+          break;
         case PARAM_TITLEFONTNAME:
-        	GraphicsEnvironment g = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        	List<String> fontList = Arrays.asList(g.getAvailableFontFamilyNames());
-        	for(String s: fontList)
-        		if(value.equalsIgnoreCase(s)){
-        			titleFontName = value;
-        			break;
-        		}
-        	break;
+          GraphicsEnvironment g = GraphicsEnvironment
+              .getLocalGraphicsEnvironment();
+          List<String> fontList = Arrays
+              .asList(g.getAvailableFontFamilyNames());
+          for (String s : fontList)
+            if (value.equalsIgnoreCase(s)) {
+              titleFontName = value;
+              break;
+            }
+          break;
         case PARAM_TITLEBOLDON:
-        	titleBoldOn = Boolean.parseBoolean(value);
-        	break;
+          titleBoldOn = Boolean.parseBoolean(value);
+          break;
         case PARAM_DISPLAYFONTNAME:
-        	GraphicsEnvironment g2 = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        	List<String> fontList2 = Arrays.asList(g2.getAvailableFontFamilyNames());
-        	for(String s2: fontList2)
-        		if(value.equalsIgnoreCase(s2)){
-        			displayFontName = value;
-        			break;
-        		}
-        	break;
+          GraphicsEnvironment g2 = GraphicsEnvironment
+              .getLocalGraphicsEnvironment();
+          List<String> fontList2 = Arrays.asList(g2
+              .getAvailableFontFamilyNames());
+          for (String s2 : fontList2)
+            if (value.equalsIgnoreCase(s2)) {
+              displayFontName = value;
+              break;
+            }
+          break;
         case PARAM_INTEGRATIONRATIOS:
-        	// parse the string with a method in JSpecViewUtils
-        	System.out.println("Integration Ratio Parameter: " + value);
-        	integrationRatios = JSpecViewUtils.getIntegrationRatiosFromString(value);
-        	break;
+          // parse the string with a method in JSpecViewUtils
+          System.out.println("Integration Ratio Parameter: " + value);
+          integrationRatios = JSpecViewUtils
+              .getIntegrationRatiosFromString(value);
+          break;
         }
       } catch (Exception e) {
       }
@@ -2217,9 +2217,141 @@ public class JSVApplet extends JApplet {
       commandWatcherThread = null;
     }
   }
+
   void interruptQueueThreads() {
     if (commandWatcherThread != null)
       commandWatcherThread.interrupt();
+  }
+
+  private void openDataOrFile(String data) {
+    String fileName = null;
+    System.out.println("applet: " + filePath);
+    URL base = null;
+    if (data != null) {
+    } else if (filePath != null) {
+      URL url;
+      try {
+        url = new URL(getCodeBase(), filePath);
+        System.out.println("applet: " + url);
+        fileName = url.toString();
+        recentFileName = url.getFile();
+        base = getDocumentBase();
+      } catch (MalformedURLException e) {
+        System.out.println("problem: " + e.getMessage());
+        fileName = filePath;
+      }
+    } else {
+      writeStatus("Please set the 'filepath' or 'load file' parameter");
+      return;
+    }
+
+    JDXSource source;
+    try {
+      source = JDXSource.createJDXSource(data, fileName, base);
+    } catch (Exception e) {
+      writeStatus(e.getMessage());
+      e.printStackTrace();
+      return;
+    }
+
+    specs = source.getSpectra();
+    boolean continuous = source.getJDXSpectrum(0).isContinuous();
+    if (!compoundMenuOn2)
+      compoundMenuOn = false;
+    else {
+      compoundMenuOn = source instanceof CompoundSource;
+    }
+
+    String Yunits = source.getJDXSpectrum(0).getYUnits();
+    String Xunits = source.getJDXSpectrum(0).getXUnits();
+    double firstX = source.getJDXSpectrum(0).getFirstX();
+    double lastX = source.getJDXSpectrum(0).getLastX();
+
+    try {
+      initPanels();
+    } catch (JSpecViewException e1) {
+      writeStatus(e1.getMessage());
+      return;
+    }
+    initInterface();
+
+    System.out.println("JSpecView vs: " + APPLET_VERSION + " File " + fileName
+        + " Loaded Successfully");
+
+    // if Transmittance, visible 400-700 and nm then calc colour
+    if ((Xunits.toLowerCase().contains("nanometer"))
+        & (firstX < 401)
+        & (lastX > 699)
+        & ((Yunits.toLowerCase().contains("trans")) || Yunits.toLowerCase()
+            .contains("abs"))) {
+      //         sltnclr = Visible.Colour(source);
+      solColMenuItem.setEnabled(true);
+    } else {
+      solColMenuItem.setEnabled(false);
+    }
+    //  Can only integrate a continuous H NMR spectrum
+    if (continuous
+        && JSpecViewUtils.isHNMR((JDXSpectrum) selectedJSVPanel
+            .getSpectrumAt(0)))
+      integrateMenuItem.setEnabled(true);
+    //Can only convert from T <-> A  if Absorbance or Transmittance and continuous
+    if ((continuous) && (Yunits.toLowerCase().contains("abs"))
+        || (Yunits.toLowerCase().contains("trans")))
+      transAbsMenuItem.setEnabled(true);
+    else
+      transAbsMenuItem.setEnabled(false);
+    setStringParameter("irmode", irMode);
+    exportAsMenu.setEnabled(true);
+    saveAsJDXMenu.setEnabled(continuous);
+    newFile = false;
+  }
+
+  private JmolSyncInterface jmol;
+  private String jmolFullName;
+
+  @Override
+  public void register(String id, JmolSyncInterface jsi) {
+    jmolFullName = id;
+    jmol = jsi;
+    System.out.println("JSpecView registering " + jsi + " as " + id);
+  }
+
+  @Override
+  /**
+   * preceed <Peak here with full name of Jmol applet (including syncID)
+   * 
+   */
+  public void syncScript(String script) {
+    if (script.indexOf("<Peak") < 0 || !script.startsWith(jmolFullName + "JSpecView"))
+      return;
+    String file = Parser.getQuotedAttribute(script, "file");
+    String type = Parser.getQuotedAttribute(script, "type");
+    if (file == null || type == null)
+      return;
+    System.out.println("JSpecView applet syncScript: " + script);
+    File f = new File(file);
+    if (!f.getName().equals(recentFileName))
+      setFilePathLocal(file);
+    if (selectPanel(type))
+      selectedJSVPanel.processPeakSelect(script);
+  }
+
+  private boolean selectPanel(String type) {
+    // TODO how to do this?  IR, HNMR, 13CNMR, MS, etc. 
+    return false;
+  }
+
+  /**
+   * This is the method Debbie needs to call from within JSpecView
+   * when a peak is clicked.
+   * 
+   * @param peak
+   */
+  public void sendScript(String peak) {
+    if (jmol == null)
+      return;
+    // outgoing <Peak file="xxx" type="xxx"...> record to Jmol
+    jmol.syncScript("Select: " + peak);
   }
 
 }

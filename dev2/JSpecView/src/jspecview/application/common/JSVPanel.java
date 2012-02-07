@@ -2625,5 +2625,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
         actualCoord.setYVal(Double.parseDouble(actualYCoordStr));
         return true;
     }
+
+    public void processPeakSelect(String script) {
+      script = script.substring(script.indexOf("<Peak"));
+      // TODO:  handle <Peak selection
+    }
     
 }
