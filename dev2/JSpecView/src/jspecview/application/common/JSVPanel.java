@@ -274,6 +274,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
   private String graphPosition = "default";
   private int defaultHeight = 450;
   private int defaultWidth = 280;
+  
+  // listeners to handle coordinatesClicked
+  private ArrayList<PeakPickedListener> peakPickedListeners = new ArrayList<PeakPickedListener>(); 
 
 
   //private MediaSize printMediaSize;
@@ -1853,6 +1856,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
         // System.out.println(xStr);        
 
         coordClicked = new Coordinate(Double.parseDouble(xStr), Double.parseDouble(yStr));
+        notifyPeakPickedListeners(coordClicked);
       }
       else
         coordClicked = null;
@@ -2629,6 +2633,37 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
     public void processPeakSelect(String script) {
       script = script.substring(script.indexOf("<Peak"));
       // TODO:  handle <Peak selection
+    }
+    
+    /**
+     * Adds a CoordinatePickedListener
+     * @param listener
+     */
+    public void addPeakPickedListener(PeakPickedListener listener){
+    	if(!peakPickedListeners.contains(listener)){
+    		peakPickedListeners.add(listener);
+    	}
+    }
+    
+    /**
+     * Notifies CoordinatePickedListeners
+     * @param coord
+     */
+    public void notifyPeakPickedListeners(Coordinate coord){
+    	
+    	// TODO: Currently Aassumes spectra are not overlayed
+    	JDXSpectrum spec = (JDXSpectrum)spectra[0];
+    	String peakInfo = spec.getAssociatedPeakInfo(coord);
+    	
+    	if(peakInfo != ""){
+	    	PeakPickedEvent eventObj = new PeakPickedEvent(this, coord, peakInfo);
+	    	for(int i = 0; i < peakPickedListeners.size(); i++){
+	    		PeakPickedListener listener = peakPickedListeners.get(i);
+	    		if(listener != null){
+	    			listener.peakPicked(eventObj);
+	    		}
+	    	}
+    	}
     }
     
 }

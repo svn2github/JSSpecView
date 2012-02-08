@@ -117,6 +117,8 @@ import jspecview.application.common.JSVPanelPopupListener;
 import jspecview.application.common.JSVPanelPopupMenu;
 import jspecview.application.common.JSpecViewFileFilter;
 import jspecview.application.common.OverlayLegendDialog;
+import jspecview.application.common.PeakPickedEvent;
+import jspecview.application.common.PeakPickedListener;
 import jspecview.application.common.PrintLayoutDialog;
 import jspecview.common.Coordinate;
 import jspecview.common.Graph;
@@ -139,7 +141,7 @@ import jspecview.common.Visible;
  * @author Prof Robert J. Lancashire
  */
 public class MainFrame
-    extends JFrame implements DropTargetListener, JmolSyncInterface {
+    extends JFrame implements DropTargetListener, JmolSyncInterface, PeakPickedListener {
 
 //  ------------------------ Program Properties -------------------------
 
@@ -1622,6 +1624,7 @@ private void showUnableToOverlayMessage() {
         jsvp = new JSVPanel(spec);
         jsvp.addMouseListener(new JSVPanelPopupListener(jsvpPopupMenu, jsvp,
             source));
+        jsvp.addPeakPickedListener(this);
         setJSVPanelProperties(jsvp, true);
         
         frame = new JInternalFrame(spec.getTitle(), true, true,
@@ -2813,14 +2816,17 @@ private void showUnableToOverlayMessage() {
     File f = new File(file);
     if (!f.getName().equals(recentFileName))
       openFile(f);
-    if (selectPanel(type))
-      selectedJSVPanel.processPeakSelect(script);
+    //if (selectPanel(type))
+    //  selectedJSVPanel.processPeakSelect(script);
+    
+    // TODO  Get the associated JSVPanel i.e the spectrum for which the peak info is associated. Likely need the block number to be send in the peak info?
+    // TODO  parse coordinate and add highlight to JSVPanel
   }
 
-  private boolean selectPanel(String type) {
-    // TODO how to do this?  IR, HNMR, 13CNMR, MS, etc. 
-    return false;
-  }
+//  private boolean selectPanel(String type) {
+//    // TODO how to do this?  IR, HNMR, 13CNMR, MS, etc. 
+//    return false;
+//  }
 
 
   /**
@@ -2835,4 +2841,10 @@ private void showUnableToOverlayMessage() {
     // outgoing <Peak file="xxx" type="xxx"...> record to Jmol
     jmol.syncScript("Select: " + peak);
   }
+
+	@Override
+	public void peakPicked(PeakPickedEvent eventObj) {
+		// TODO: Need to add filePath to string before sending
+		sendScript(eventObj.getPeakInfo());
+	}
 }

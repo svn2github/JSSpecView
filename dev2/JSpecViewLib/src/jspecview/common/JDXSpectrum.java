@@ -22,6 +22,7 @@ package jspecview.common;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -93,6 +94,9 @@ public class JDXSpectrum implements Graph{
   //private double deltaX = ERROR;
   // For NMR Spectra
   private double observedFreq = ERROR;
+  
+  
+  private ArrayList<PeakInfo> peakList = new ArrayList<PeakInfo>();
 
   /**
    * Constructor
@@ -677,4 +681,25 @@ public class JDXSpectrum implements Graph{
     String s = yUnits.toLowerCase();
     return (s.equals("absorbance") || s.contains("abs") || s.equals("a"));
   }
+
+
+	public ArrayList<PeakInfo> getPeakList() {
+		return peakList;
+	}
+	
+	public void setPeakList(ArrayList<PeakInfo> list) {
+		peakList = list;
+	}
+	
+	public String getAssociatedPeakInfo(Coordinate coord){
+		for(int i = 0; i < peakList.size(); i++){
+			PeakInfo peak = peakList.get(i);
+			double xVal = coord.getXVal();
+			if (xVal >= peak.getXMin() && xVal <= peak.getXMax()){
+				return peak.getStringInfo();
+			}
+		}
+		
+		return "";
+	}
 }

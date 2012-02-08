@@ -24,7 +24,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,8 +34,10 @@ import java.util.Vector;
 
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSpecViewUtils;
+import jspecview.common.PeakInfo;
 import jspecview.exception.JSpecViewException;
 import jspecview.util.FileManager;
+import jspecview.util.Parser;
 
 /**
  * <code>JDXSource</code> is representation of all the data in the JCAMP-DX file
@@ -259,4 +263,39 @@ public abstract class JDXSource {
   public void setErrorLog(String errors){
     this.errors = errors;
   }
+  
+  protected ArrayList<PeakInfo> readPeakList(String peakList) throws Exception {
+	  ArrayList<PeakInfo> peakData = new ArrayList<PeakInfo>();
+	  	BufferedReader reader = new BufferedReader(new StringReader(peakList));	  	
+	    String line = discardLinesUntilContains(reader, "<PeakList");	    
+	    String type = Parser.getQuotedAttribute(line, "type");	   
+	    line = reader.readLine();	    
+	    PeakInfo peak;	    
+	    while (line != null && !(line = line.trim()).startsWith("</PeakList")){
+	      if (line.startsWith("<Peak")){
+	    	
+	    	double xMax = Double.parseDouble(Parser.getQuotedAttribute(line, "xMax"));
+	    	double xMin = Double.parseDouble(Parser.getQuotedAttribute(line, "xMin"));
+	    	double yMax = Double.parseDouble(Parser.getQuotedAttribute(line, "yMax"));
+	    	double yMin = Double.parseDouble(Parser.getQuotedAttribute(line, "yMin"));
+	    	peak = new PeakInfo();
+	    	peak.setXMax(xMax);
+	    	peak.setXMin(xMin);
+	    	peak.setYMax(yMax);
+	    	peak.setYMin(yMin);
+	    	peak.setStringInfo("<Peak file=" + "" + " type=\"" + type + "\" " + line.trim().substring(5));
+	        peakData.add(peak);
+	      }
+	    }
+	    
+	    return peakData;
+   }
+  
+  protected String discardLinesUntilContains(BufferedReader reader, String containsMatch)
+  	throws Exception {
+	String line = reader.readLine();
+	while (line!= null && line.indexOf(containsMatch) < 0) {}
+	return line;
+  }
+  
 }

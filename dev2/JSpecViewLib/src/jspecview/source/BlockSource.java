@@ -362,6 +362,14 @@ public class BlockSource extends CompoundSource {
           }
           tabularSpecData = tmp;
         }
+        
+        if(label.equals("##$PEAK_LINKS")){
+	      	  try {
+	  			spectrum.setPeakList(bs.readPeakList(t.value));
+	  		} catch (Exception e) {
+	  			
+	  		}
+        }
 
         // Process Block
         else if(label.equals("##END")){

@@ -4,10 +4,9 @@ package jspecview.android.activity;
 // fix issue with reloading after orientation change
 // fix zooming for spectrum with a lot of points
 
-
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Vector;
@@ -15,6 +14,9 @@ import java.util.Vector;
 
 import jspecview.android.R;
 import jspecview.android.PreferencesManager;
+import jspecview.android.externalservice.ChemSpiderSvcClient;
+import jspecview.android.externalservice.ISpectrumSvc;
+import jspecview.android.externalservice.SpectrumSvcException;
 import jspecview.common.Coordinate;
 import jspecview.common.IntegralGraph;
 import jspecview.common.JDXSpectrum;
@@ -231,12 +233,30 @@ public class MainActivity extends Activity{
 	        	mIntegrationOffset = integrationParams[2];
         	}
         	
-        	loadSpectrum(mSpectrumFilePath);
+        	InputStream is = createFileInputStream();
+        	if(is != null){
+        		loadSpectrum(is);
+        	}      	
         }
                 
+                      
         PreferenceManager.setDefaultValues(this, R.xml.preference, false);
         prefMan = new PreferencesManager(this);
     }
+
+	private InputStream createFileInputStream() {
+		File file = new File(mSpectrumFilePath);
+		InputStream is = null;
+		try {
+			is = new FileInputStream(file);
+		} catch (FileNotFoundException e) {
+			Toast.makeText(getApplicationContext(), 
+					String.format("File '{0}' not found", mSpectrumFilePath), 
+					Toast.LENGTH_SHORT).show();
+		}
+		
+		return is;
+	}
     
     @Override
     protected void onStop() {    	
@@ -422,7 +442,12 @@ public class MainActivity extends Activity{
     		
             final String filePath = data.getStringExtra(FileDialog.RESULT_PATH);
             mSelectSpectraDialog = null;
-            loadSpectrum(filePath);
+            mSpectrumFilePath = filePath;
+            
+            InputStream is = createFileInputStream();
+        	if(is != null){
+        		loadSpectrum(is);
+        	}            
             
             // get the directory of the file and set the Last Directory preference
             String dirPath = filePath.substring(0, filePath.lastIndexOf("/") + 1);            
@@ -559,13 +584,11 @@ public class MainActivity extends Activity{
 	 * Creates a new thread to load a spectrum from a given file path and post the spectrum view to the UI
  	 *
 	 */
-	private void loadSpectrum(final String filePath) {
-		mSpectrumFilePath = filePath;		
+	private void loadSpectrum(final InputStream is) {				
 		Thread thread = new Thread(new Runnable() {			
 			public void run() {					
-				try {
-					File file = new File(filePath);  					
-					mSpectrumInputStream = new BufferedInputStream(new FileInputStream(file)); 
+				try {					  					
+					mSpectrumInputStream = is; 
 					mSpectra = readSpectrum(mSpectrumInputStream);												
 					mDatasets = createDatasets(mSpectra);
 					mHandler.post(mCreateSpectraView);

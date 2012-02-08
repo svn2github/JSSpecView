@@ -291,6 +291,14 @@ public class SimpleSource extends JDXSource {
         obFreq = Double.parseDouble(t.value);
 //        notesLDRTable.put(label, t.value);
       }
+      
+      if(label.equals("##$PEAK_LINKS")){
+    	  try {
+			spectrum.setPeakList(ss.readPeakList(t.value));
+		} catch (Exception e) {
+			
+		}
+      }
 
       if(Arrays.binarySearch(TABULAR_DATA_LABELS, label) > 0){
         tabularDataLabelLineNo =  t.labelLineNo;
