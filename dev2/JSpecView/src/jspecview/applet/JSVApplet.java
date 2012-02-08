@@ -83,8 +83,6 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.jmol.api.JmolSyncInterface;
-
 import jspecview.application.common.AppUtils;
 import jspecview.application.common.JSVPanel;
 import jspecview.application.common.OverlayLegendDialog;
@@ -117,7 +115,7 @@ import jspecview.common.Visible;
  * @author Prof Robert J. Lancashire
  */
 
-public class JSVApplet extends JApplet implements JmolSyncInterface {
+public class JSVApplet extends JApplet {
 
   /**
    * 
@@ -134,7 +132,7 @@ public class JSVApplet extends JApplet implements JmolSyncInterface {
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath;
   String newFilePath = null;
-  String recentFileName = "";
+  private String recentFileName = "";
   String fileURL;
 
   boolean gridOn = true;
@@ -156,8 +154,12 @@ public class JSVApplet extends JApplet implements JmolSyncInterface {
   int numberOfSpectra;
 
   String theInterface = "single"; // either tab, tile, single, overlay
-  String coordCallbackFunctionName = null; // = "coordCallBack";
-  String peakCallbackFunctionName = null; // peakCallback
+  private String coordCallbackFunctionName;
+  private String peakCallbackFunctionName; 
+  private String syncCallbackFunctionName;
+  private String appletReadyCallbackFunctionName;
+
+
   String sltnclr = "255,255,255"; //Colour of Solution
   String titleFontName = null; // Title Font
   String displayFontName = null; // Display Font
@@ -226,7 +228,7 @@ public class JSVApplet extends JApplet implements JmolSyncInterface {
       "PLOTCOLORS", "VERSION", "PEAKCALLBACKFUNCTIONNAME", "IRMODE", "OBSCURE",
       "XSCALEON", "YSCALEON", "XUNITSON", "YUNITSON", "INTEGRALPLOTCOLOR",
       "TITLEFONTNAME", "TITLEBOLDON", "DISPLAYFONTNAME", "INTEGRATIONRATIOS",
-      "APPLETREADYCALLBACKFUNCTIONNAME", "APPLETID", "SYNCID" };
+      "APPLETREADYCALLBACKFUNCTIONNAME", "APPLETID", "SYNCID", "SYNCCALLBACKFUNCTIONNAME" };
 
   final private static int PARAM_LOAD = 0;
   final private static int PARAM_REVERSEPLOT = 1;
@@ -265,9 +267,10 @@ public class JSVApplet extends JApplet implements JmolSyncInterface {
   final private static int PARAM_APPLETREADYCALLBACKFUNCTIONNAME = 34;
   final private static int PARAM_APPLETID = 35;
   final private static int PARAM_SYNCID = 36;
+  final private static int PARAM_SYNCCALLBACKFUNCTIONNAME = 37;
 
   final private static Hashtable<String, Integer> htParams = new Hashtable<String, Integer>();
-  {
+  static {
     for (int i = 0; i < params.length; i++)
       htParams.put(params[i], new Integer(i));
   }
@@ -375,7 +378,7 @@ public class JSVApplet extends JApplet implements JmolSyncInterface {
     init(null);
     if (appletReadyCallbackFunctionName != null && fullName != null)
       callToJavaScript(appletReadyCallbackFunctionName,
-          new Object[] { fullName });
+          new Object[] { appletID, fullName, Boolean.TRUE });
   }
 
   private void init(String data) {
@@ -1520,9 +1523,7 @@ public class JSVApplet extends JApplet implements JmolSyncInterface {
   }
 
   private String dirLastExported;
-
-  private String appletReadyCallbackFunctionName;
-
+  
   private String fullName;
 
   /**
@@ -2011,7 +2012,6 @@ public class JSVApplet extends JApplet implements JmolSyncInterface {
    */
   public void parseInitScript(String params) {
     StringTokenizer allParamTokens = new StringTokenizer(params, ";");
-
     if (JSpecViewUtils.DEBUG) {
       System.out.println("Running in DEBUG mode");
     }
@@ -2053,6 +2053,9 @@ public class JSVApplet extends JApplet implements JmolSyncInterface {
         case PARAM_APPLETID:
           appletID = value;
           fullName = appletID + "__" + syncID + "__";
+          break;
+        case PARAM_SYNCCALLBACKFUNCTIONNAME:
+          syncCallbackFunctionName = value;
           break;
         case PARAM_APPLETREADYCALLBACKFUNCTIONNAME:
           appletReadyCallbackFunctionName = value;
@@ -2225,14 +2228,12 @@ public class JSVApplet extends JApplet implements JmolSyncInterface {
 
   private void openDataOrFile(String data) {
     String fileName = null;
-    System.out.println("applet: " + filePath);
     URL base = null;
     if (data != null) {
     } else if (filePath != null) {
       URL url;
       try {
         url = new URL(getCodeBase(), filePath);
-        System.out.println("applet: " + url);
         fileName = url.toString();
         recentFileName = url.getFile();
         base = getDocumentBase();
@@ -2306,31 +2307,29 @@ public class JSVApplet extends JApplet implements JmolSyncInterface {
     newFile = false;
   }
 
-  private JmolSyncInterface jmol;
-  private String jmolFullName;
-
-  @Override
-  public void register(String id, JmolSyncInterface jsi) {
-    jmolFullName = id;
-    jmol = jsi;
-    System.out.println("JSpecView registering " + jsi + " as " + id);
-  }
-
-  @Override
+  /////////// simple sync functionality //////////
+  
   /**
    * preceed <Peak here with full name of Jmol applet (including syncID)
    * 
    */
   public void syncScript(String script) {
-    if (script.indexOf("<Peak") < 0 || !script.startsWith(jmolFullName + "JSpecView"))
-      return;
+    System.out.println("JSpecView applet syncScript: " + script);
     String file = Parser.getQuotedAttribute(script, "file");
     String type = Parser.getQuotedAttribute(script, "type");
     if (file == null || type == null)
       return;
-    System.out.println("JSpecView applet syncScript: " + script);
-    File f = new File(file);
-    if (!f.getName().equals(recentFileName))
+    URL url = null;
+    try {
+      url = new URL(getCodeBase(), file);
+    } catch (MalformedURLException e) {
+      System.out.println("Trouble with URL for " + file);
+      return;
+    }
+    String f = recentFileName = url.getFile();
+    System.out.println(f);
+    System.out.println(recentFileName);
+    if (!f.equals(recentFileName))
       setFilePathLocal(file);
     if (selectPanel(type))
       selectedJSVPanel.processPeakSelect(script);
@@ -2348,10 +2347,8 @@ public class JSVApplet extends JApplet implements JmolSyncInterface {
    * @param peak
    */
   public void sendScript(String peak) {
-    if (jmol == null)
-      return;
-    // outgoing <Peak file="xxx" type="xxx"...> record to Jmol
-    jmol.syncScript("Select: " + peak);
+    if (syncCallbackFunctionName != null)
+      callToJavaScript(syncCallbackFunctionName, new Object[] { fullName, "Select: " + peak });
   }
 
 }
