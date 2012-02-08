@@ -2821,6 +2821,12 @@ private void showUnableToOverlayMessage() {
     
     // TODO  Get the associated JSVPanel i.e the spectrum for which the peak info is associated. Likely need the block number to be send in the peak info?
     // TODO  parse coordinate and add highlight to JSVPanel
+    
+ // BH to DF: each <Peak record is unique -- or if it is not, then it doesn't matter. 
+ // So you just put each <Peak record in a master Hashtable and retrieve whatever 
+ // information you want using htPeakTable.get(script).  
+   
+    
   }
 
 //  private boolean selectPanel(String type) {
