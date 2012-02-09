@@ -2631,8 +2631,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
     }
 
     public void processPeakSelect(String script) {
-      script = script.substring(script.indexOf("<Peak"));
-      // TODO:  handle <Peak selection
+      script = script.substring(script.indexOf("<PeakAssignment"));
+      // TODO:  handle <PeakAssignment selection
     }
     
     /**

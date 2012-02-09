@@ -2802,10 +2802,10 @@ private void showUnableToOverlayMessage() {
 
   @Override
   /**
-   * incoming script processing of <Peak file="" type="xxx"...> record from Jmol
+   * incoming script processing of <PeakAssignment file="" type="xxx"...> record from Jmol
    */
   public void syncScript(String script) {
-    if (script.indexOf("<Peak") < 0)
+    if (script.indexOf("<PeakAssignment") < 0)
       return;
     //TODO link to processing of file loading, spectrum selection, and band selection
     String file = Parser.getQuotedAttribute(script, "file");
@@ -2822,8 +2822,8 @@ private void showUnableToOverlayMessage() {
     // TODO  Get the associated JSVPanel i.e the spectrum for which the peak info is associated. Likely need the block number to be send in the peak info?
     // TODO  parse coordinate and add highlight to JSVPanel
     
- // BH to DF: each <Peak record is unique -- or if it is not, then it doesn't matter. 
- // So you just put each <Peak record in a master Hashtable and retrieve whatever 
+ // BH to DF: each <PeakAssignment record is unique -- or if it is not, then it doesn't matter. 
+ // So you just put each <PeakAssignment record in a master Hashtable and retrieve whatever 
  // information you want using htPeakTable.get(script).  
    
     
@@ -2844,7 +2844,7 @@ private void showUnableToOverlayMessage() {
   public void sendScript(String peak) {
     if (jmol == null)
       return;
-    // outgoing <Peak file="xxx" type="xxx"...> record to Jmol
+    // outgoing <PeakAssignment file="xxx" type="xxx"...> record to Jmol
     jmol.syncScript("Select: " + peak);
   }
 

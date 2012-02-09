@@ -2310,7 +2310,7 @@ public class JSVApplet extends JApplet {
   /////////// simple sync functionality //////////
   
   /**
-   * preceed <Peak here with full name of Jmol applet (including syncID)
+   * preceed <Peaks here with full name of Jmol applet (including syncID)
    * 
    */
   public void syncScript(String script) {
