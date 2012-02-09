@@ -80,7 +80,7 @@ public class FileManager {
    * FileManager.classifyName
    * 
    * follow this with .replace('\\','/') and Escape.escape() to 
-   * match Jmol's file name in <Peak file="...">
+   * match Jmol's file name in <PeakData file="...">
    * 
    * @param name
    * @param appletDocumentBase
