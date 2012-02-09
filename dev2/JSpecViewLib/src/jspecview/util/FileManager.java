@@ -36,7 +36,6 @@ import java.util.zip.GZIPInputStream;
 
 public class FileManager {
 
-
   private URL appletDocumentBase = null;
   private String openErrorMessage;
 
