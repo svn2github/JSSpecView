@@ -267,12 +267,12 @@ public abstract class JDXSource {
   protected ArrayList<PeakInfo> readPeakList(String peakList) throws Exception {
 	  ArrayList<PeakInfo> peakData = new ArrayList<PeakInfo>();
 	  	BufferedReader reader = new BufferedReader(new StringReader(peakList));	  	
-	    String line = discardLinesUntilContains(reader, "<PeakList");	    
+	    String line = discardLinesUntilContains(reader, "<Peaks");	    
 	    String type = Parser.getQuotedAttribute(line, "type");	   
 	    line = reader.readLine();	    
 	    PeakInfo peak;	    
-	    while (line != null && !(line = line.trim()).startsWith("</PeakList")){
-	      if (line.startsWith("<Peak")){
+	    while (line != null && !(line = line.trim()).startsWith("</Peaks>")){
+	      if (line.startsWith("<PeakData")){
 	    	
 	    	double xMax = Double.parseDouble(Parser.getQuotedAttribute(line, "xMax"));
 	    	double xMin = Double.parseDouble(Parser.getQuotedAttribute(line, "xMin"));
@@ -283,7 +283,7 @@ public abstract class JDXSource {
 	    	peak.setXMin(xMin);
 	    	peak.setYMax(yMax);
 	    	peak.setYMin(yMin);
-	    	peak.setStringInfo("<Peak file=" + "" + " type=\"" + type + "\" " + line.trim().substring(5));
+	    	peak.setStringInfo("<PeakData file=" + "" + " type=\"" + type + "\" " + line.trim().substring(9));
 	        peakData.add(peak);
 	      }
 	    }

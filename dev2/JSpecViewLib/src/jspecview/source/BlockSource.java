@@ -363,7 +363,7 @@ public class BlockSource extends CompoundSource {
           tabularSpecData = tmp;
         }
         
-        if(label.equals("##$PEAK_LINKS")){
+        if(label.equals("##$PEAKS")){
 	      	  try {
 	  			spectrum.setPeakList(bs.readPeakList(t.value));
 	  		} catch (Exception e) {
