@@ -72,11 +72,23 @@ public class FileManager {
   {
     if (name == null)
       throw new IOException("Cannot find " + name);
-    String path = classifyName(name);
+    String path = classifyName(name, appletDocumentBase);
     return getUnzippedBufferedReaderFromName(path);
   }
 
-  private String classifyName(String name)
+  /**
+   * 
+   * FileManager.classifyName
+   * 
+   * follow this with .replace('\\','/') and Escape.escape() to 
+   * match Jmol's file name in <Peak file="...">
+   * 
+   * @param name
+   * @param appletDocumentBase
+   * @return
+   * @throws MalformedURLException
+   */
+  public static String classifyName(String name, URL appletDocumentBase)
     throws MalformedURLException
   {
     if (appletDocumentBase != null) {
@@ -214,6 +226,15 @@ public class FileManager {
   
   public String getErrorMessage() {
     return openErrorMessage;
+  }
+
+  public static String getJmolFilePath(String filePath, URL appletDocumentBase) {
+    try {
+      filePath = classifyName(filePath, appletDocumentBase);
+    } catch (MalformedURLException e) {
+      return null;
+    }
+    return (appletDocumentBase == null ? filePath.replace('\\', '/') : filePath); 
   }
 }
 
