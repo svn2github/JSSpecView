@@ -265,31 +265,35 @@ public abstract class JDXSource {
   }
   
   protected ArrayList<PeakInfo> readPeakList(String peakList) throws Exception {
-	  ArrayList<PeakInfo> peakData = new ArrayList<PeakInfo>();
-	  	BufferedReader reader = new BufferedReader(new StringReader(peakList));	  	
-	    String line = discardLinesUntilContains(reader, "<Peaks");	    
-	    String type = Parser.getQuotedAttribute(line, "type");	   
-	    line = reader.readLine();	    
-	    PeakInfo peak;	    
-	    while (line != null && !(line = line.trim()).startsWith("</Peaks>")){
-	      if (line.startsWith("<PeakData")){
-	    	
-	    	double xMax = Double.parseDouble(Parser.getQuotedAttribute(line, "xMax"));
-	    	double xMin = Double.parseDouble(Parser.getQuotedAttribute(line, "xMin"));
-	    	double yMax = Double.parseDouble(Parser.getQuotedAttribute(line, "yMax"));
-	    	double yMin = Double.parseDouble(Parser.getQuotedAttribute(line, "yMin"));
-	    	peak = new PeakInfo();
-	    	peak.setXMax(xMax);
-	    	peak.setXMin(xMin);
-	    	peak.setYMax(yMax);
-	    	peak.setYMin(yMin);
-	    	peak.setStringInfo("<PeakData file=" + "" + " type=\"" + type + "\" " + line.trim().substring(9));
-	        peakData.add(peak);
-	      }
-	    }
-	    
-	    return peakData;
-   }
+    ArrayList<PeakInfo> peakData = new ArrayList<PeakInfo>();
+    BufferedReader reader = new BufferedReader(new StringReader(peakList));
+    String line = discardLinesUntilContains(reader, "<Peaks");
+    String type = Parser.getQuotedAttribute(line, "type");
+    PeakInfo peak;
+    while ((line = reader.readLine()) != null && !(line = line.trim()).startsWith("</Peaks>")) {
+      if (line.startsWith("<PeakData")) {
+
+        double xMax = Double.parseDouble(Parser
+            .getQuotedAttribute(line, "xMax"));
+        double xMin = Double.parseDouble(Parser
+            .getQuotedAttribute(line, "xMin"));
+        double yMax = Double.parseDouble(Parser
+            .getQuotedAttribute(line, "yMax"));
+        double yMin = Double.parseDouble(Parser
+            .getQuotedAttribute(line, "yMin"));
+        peak = new PeakInfo();
+        peak.setXMax(xMax);
+        peak.setXMin(xMin);
+        peak.setYMax(yMax);
+        peak.setYMin(yMin);
+        peak.setStringInfo("<PeakData file=" + "" + " type=\"" + type + "\" "
+            + line.trim().substring(9));
+        peakData.add(peak);
+      }
+    }
+
+    return peakData;
+  }
   
   protected String discardLinesUntilContains(BufferedReader reader, String containsMatch)
   	throws Exception {
