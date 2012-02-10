@@ -2805,7 +2805,7 @@ private void showUnableToOverlayMessage() {
    * incoming script processing of <PeakAssignment file="" type="xxx"...> record from Jmol
    */
   public void syncScript(String script) {
-    if (script.indexOf("<PeakAssignment") < 0)
+    if (script.indexOf("<PeakData") < 0)
       return;
     //TODO link to processing of file loading, spectrum selection, and band selection
     String file = Parser.getQuotedAttribute(script, "file");
