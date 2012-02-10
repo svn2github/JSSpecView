@@ -127,7 +127,7 @@ public class JSVApplet extends JApplet {
     System.out.println("JSpecView " + this + " finalized");
   }
 
-  public static final String APPLET_VERSION = "1.0.20120208-0530";
+  public static final String APPLET_VERSION = "1.0.20120210-0730";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath;
@@ -139,7 +139,7 @@ public class JSVApplet extends JApplet {
   boolean coordinatesOn = true;
   boolean reversePlot = false;
   boolean menuOn = true;
-  boolean compoundMenuOn = false;
+  boolean compoundMenuOn = true;
   boolean compoundMenuOn2 = true;
   boolean enableZoom = true;
   boolean xScaleOn = true;
@@ -2257,11 +2257,11 @@ public class JSVApplet extends JApplet {
 
     specs = source.getSpectra();
     boolean continuous = source.getJDXSpectrum(0).isContinuous();
-    if (!compoundMenuOn2)
-      compoundMenuOn = false;
-    else {
+ //   if (!compoundMenuOn2)
+ //     compoundMenuOn = false;
+ //   else {
       compoundMenuOn = source instanceof CompoundSource;
-    }
+ //   }
 
     String Yunits = source.getJDXSpectrum(0).getYUnits();
     String Xunits = source.getJDXSpectrum(0).getXUnits();

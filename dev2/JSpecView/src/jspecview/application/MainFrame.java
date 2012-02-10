@@ -478,7 +478,7 @@ public class MainFrame
   }
 
   /**
-   * Sets the perferences or properties of the application that is loaded
+   * Sets the preferences or properties of the application that is loaded
    * from a properties file.
    */
   private void setApplicationProperties(boolean shouldApplySpectrumDisplaySettings) {

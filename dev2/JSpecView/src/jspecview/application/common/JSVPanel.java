@@ -144,7 +144,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
   // width and height of the JSVPanel
   //protected int width, height;
 
-  //The postion of the plot area
+  //The position of the plot area
   protected int plotAreaX = 80, plotAreaY = 30;
 
     // insets of the plot area
@@ -153,7 +153,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
   // width and height of the plot area
   protected int plotAreaWidth, plotAreaHeight;
 
-  // Postions of the borders of the plotArea
+  // Positions of the borders of the plotArea
   protected int leftPlotAreaPos, rightPlotAreaPos, topPlotAreaPos, bottomPlotAreaPos;
 
   // Enables or disables zoom
@@ -323,7 +323,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
   }
 
   /**
-   * Contructs a JSVPanel with an array of Spectra
+   * Constructs a JSVPanel with an array of Spectra
    * @param spectra an array of spectra (<code>Spectrum</code>)
    * @throws ScalesIncompatibleException
    */
@@ -351,7 +351,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
   }
 
   /**
-   * Contructs a JSVMultiPanel with a vector of Spectra
+   * Constructs a JSVMultiPanel with a vector of Spectra
    * @param spectra a <code>Vector</code> of spectra
    * @throws ScalesIncompatibleException
    */
@@ -814,7 +814,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
   }
 
   /**
-   * Remove the highlight at the specfied index in the internal list of highlights
+   * Remove the highlight at the specified index in the internal list of highlights
    * The index depends on the order in which the highlights were added
    * @param index the index of the highlight in the list
    */
