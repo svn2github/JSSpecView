@@ -25,7 +25,6 @@ import java.awt.event.ItemEvent;
 import java.util.HashMap;
 
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
@@ -45,15 +44,9 @@ import jspecview.source.JDXSource;
  */
 public class JSVPanelPopupMenu extends JPopupMenu {
 
-  /**
-   * 
-   */
+  protected boolean isApplet;
+  
   private static final long serialVersionUID = 1L;
-
-  JFileChooser jFileChooser = new JFileChooser();
-
-  JSVPanel selectedJSVPanel;
-  JDXSource source;
 
   /**
    * Menu Item that allows user to navigate to the next view of a JSVPanel
@@ -81,37 +74,19 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    * displayed on the <code>JSVPanel</code>
    */
   public JMenuItem properties = new JMenuItem();
-  /**
-   * Allows the grid to be toogled
-   */
-  public JCheckBoxMenuItem gridCheckBoxMenuItem = new JCheckBoxMenuItem();
-  /**
-   * Allows the coordinates to be toggled on or off
-   */
-  public JCheckBoxMenuItem coordsCheckBoxMenuItem = new JCheckBoxMenuItem();
-  /**
-   * Allows the plot to be reversed
-   */
-  public JCheckBoxMenuItem revPlotCheckBoxMenuItem = new JCheckBoxMenuItem();
 
-  /**
-   *Constructor
-   */
-  public JSVPanelPopupMenu(){
+  public JCheckBoxMenuItem integrateMenuItem = new JCheckBoxMenuItem();
+
+  public JSVPanelPopupMenu() {
     super();
-    try {
-      jbInit();
-    }
-    catch(Exception e) {
-      e.printStackTrace();
-    }
+    jbInit();
   }
 
   /**
    * Initialises GUI components
    * @throws Exception
    */
-  private void jbInit() throws Exception {
+  protected void jbInit() {
     nextMenuItem.setText("Next View");
     nextMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -155,38 +130,28 @@ public class JSVPanelPopupMenu extends JPopupMenu {
         coordsCheckBoxMenuItem_itemStateChanged(e);
       }
     });
-    revPlotCheckBoxMenuItem.setText("Reverse Plot");
-    revPlotCheckBoxMenuItem.addItemListener(new java.awt.event.ItemListener() {
+    reversePlotCheckBoxMenuItem.setText("Reverse Plot");
+    reversePlotCheckBoxMenuItem.addItemListener(new java.awt.event.ItemListener() {
       public void itemStateChanged(ItemEvent e) {
         revPlotCheckBoxMenuItem_itemStateChanged(e);
       }
     });
-    this.add(gridCheckBoxMenuItem);
-    this.add(coordsCheckBoxMenuItem);
-    this.add(revPlotCheckBoxMenuItem);
-    this.addSeparator();
-    this.add(nextMenuItem);
-    this.add(previousMenuItem);
-    this.add(clearMenuItem);
-    this.add(resetMenuItem);
-    this.addSeparator();
-    this.add(properties);
+    
+    setMenu();
   }
 
-  /**
-   * Sets the parent <code>JSVPanel</code> of the popupmenu
-   * @param jsvp the <code>JSVPanel</code>
-   */
-  public void setSelectedJSVPanel(JSVPanel jsvp){
-    selectedJSVPanel =  jsvp;
-  }
-
-  /**
-   * Sets the source of the Spectrum of the JSVPanel
-   * @param source the JDXSource
-   */
-  public void setSource(JDXSource source){
-    this.source = source;
+  
+  protected void setMenu() {
+    add(gridCheckBoxMenuItem);
+    add(coordsCheckBoxMenuItem);
+    add(reversePlotCheckBoxMenuItem);
+    addSeparator();
+    add(nextMenuItem);
+    add(previousMenuItem);
+    add(clearMenuItem);
+    add(resetMenuItem);
+    addSeparator();
+    add(properties);
   }
 
   /**
@@ -212,6 +177,8 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    * @param e the <code>ActionEvent</code>
    */
   void resetMenuItem_actionPerformed(ActionEvent e) {
+    if (integrateMenuItem.isSelected() == true)
+      integrateMenuItem.setSelected(false);
     selectedJSVPanel.reset();
   }
 
@@ -427,6 +394,40 @@ public class JSVPanelPopupMenu extends JPopupMenu {
                                     JOptionPane.PLAIN_MESSAGE);
     }
   }
+
+  protected JSVPanel selectedJSVPanel;
+  protected JDXSource source;
+
+  /**
+   * Allows the grid to be toogled
+   */
+  public JCheckBoxMenuItem gridCheckBoxMenuItem = new JCheckBoxMenuItem();
+  /**
+   * Allows the coordinates to be toggled on or off
+   */
+  public JCheckBoxMenuItem coordsCheckBoxMenuItem = new JCheckBoxMenuItem();
+  /**
+   * Allows the plot to be reversed
+   */
+  public JCheckBoxMenuItem reversePlotCheckBoxMenuItem = new JCheckBoxMenuItem();
+
+
+  /**
+   * Sets the parent <code>JSVPanel</code> of the popupmenu
+   * @param jsvp the <code>JSVPanel</code>
+   */
+  public void setSelectedJSVPanel(JSVPanel jsvp){
+    selectedJSVPanel =  jsvp;
+  }
+
+  /**
+   * Sets the source of the Spectrum of the JSVPanel
+   * @param source the JDXSource
+   */
+  public void setSource(JDXSource source){
+    this.source = source;
+  }
+
 
 
 }

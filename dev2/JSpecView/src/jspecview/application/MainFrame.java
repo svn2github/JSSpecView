@@ -114,7 +114,6 @@ import org.jmol.api.JmolSyncInterface;
 
 import jspecview.application.common.AppUtils;
 import jspecview.application.common.JSVPanel;
-import jspecview.application.common.JSVPanelPopupListener;
 import jspecview.application.common.JSVPanelPopupMenu;
 import jspecview.application.common.JSpecViewFileFilter;
 import jspecview.application.common.OverlayLegendDialog;
@@ -605,14 +604,7 @@ public class MainFrame
 
         Object nodeInfo = node.getUserObject();
         if (node.isLeaf()) {
-          SpecInfo specInfo = (SpecInfo) nodeInfo;
-          JInternalFrame frame = specInfo.frame;
-          frame.moveToFront();
-          try {
-            frame.setSelected(true);
-          }
-          catch (PropertyVetoException pve) {
-          }
+          setFrame((SpecInfo) nodeInfo);
         }
       }
     });
@@ -1310,6 +1302,7 @@ public class MainFrame
 
     setMenuEnables(spec);
 
+    specInfos = null;
     if (autoOverlay && source instanceof CompoundSource) {
       try {
         overlaySpectra(currentSelectedSource);
@@ -1430,6 +1423,8 @@ public class MainFrame
     jsvp.setDisplayFontName(ds.getFont());
     
     jsvp.setXAxisDisplayedIncreasing(JSpecViewUtils.shouldDisplayXAxisIncreasing((JDXSpectrum)jsvp.getSpectrumAt(0)));
+    jsvp.setSource(currentSelectedSource);
+    jsvp.setPopup(jsvpPopupMenu);
     
     jsvp.repaint();
   }
@@ -1480,7 +1475,6 @@ private void showUnableToOverlayMessage() {
     Vector<JDXSpectrum> specs = source.getSpectra();
     JSVPanel jsvp;
     jsvp = new JSVPanel(specs);
-    jsvp.addMouseListener(new JSVPanelPopupListener(jsvpPopupMenu, jsvp, source));
     jsvp.setTitle( ( (CompoundSource) source).getTitle());
 
     setJSVPanelProperties(jsvp, true);
@@ -1504,7 +1498,8 @@ private void showUnableToOverlayMessage() {
     }
     catch (PropertyVetoException pve) {}
     frame.show();
-    createTree(file.getName(), new JInternalFrame[] {frame});
+    specInfos = new SpecInfo[] { new SpecInfo(frame, jsvp) }; 
+    createTree(file.getName());
     validate();
     repaint();
 
@@ -1618,6 +1613,9 @@ private void showUnableToOverlayMessage() {
     closeSource(source);
     splitSpectra(source);
   }
+  
+  
+  SpecInfo[] specInfos;
 
   /**
    * Displays the spectrum of the <code>JDXSource</code> specified by source in
@@ -1634,18 +1632,17 @@ private void showUnableToOverlayMessage() {
     JInternalFrame[] frames = new JInternalFrame[specs.size()];
     JSVPanel jsvp;
     JInternalFrame frame;
-
+    specInfos = new SpecInfo[specs.size()];
     try {
       for (int i = 0; i < specs.size(); i++) {
         JDXSpectrum spec = (JDXSpectrum) specs.elementAt(i);
         jsvp = new JSVPanel(spec);
-        jsvp.addMouseListener(new JSVPanelPopupListener(jsvpPopupMenu, jsvp,
-            source));
         jsvp.addPeakPickedListener(this);
         setJSVPanelProperties(jsvp, true);
         
         frame = new JInternalFrame(spec.getTitle(), true, true,
                                    true, true);
+        specInfos[i] = new SpecInfo(frame, jsvp);
         
         frame.setFrameIcon(frameIcon);
         frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -1679,15 +1676,10 @@ private void showUnableToOverlayMessage() {
       // arrange windows in ascending order
       for (int i = (specs.size() - 1); i >= 0; i--) {
         frames[i].toFront();
-      }
+      } 
+      setFrame(specInfos[0]);
       
-      try {
-		frames[0].setSelected(true);
-	} catch (PropertyVetoException e) {
-		
-	}
-      
-      createTree(file.getName(), frames);
+      createTree(file.getName());
       
       overlaySplitButton.setIcon(overlayIcon);
       overlaySplitButton.setToolTipText("Overlay Display");
@@ -1703,7 +1695,7 @@ private void showUnableToOverlayMessage() {
    * @param fileName the name of the file
    * @param frames an array of JInternalFrames
    */
-  public void createTree(String fileName, JInternalFrame[] frames) {
+  public void createTree(String fileName) {
     DefaultMutableTreeNode fileNode = new DefaultMutableTreeNode(fileName);
     spectraTreeModel.insertNodeInto(fileNode, rootNode,
                                     fileNode.getChildCount());
@@ -1711,9 +1703,8 @@ private void showUnableToOverlayMessage() {
 
     DefaultMutableTreeNode specNode;
 
-    for (int i = 0; i < frames.length; i++) {
-      specNode = new DefaultMutableTreeNode(
-          new SpecInfo(frames[i]));
+    for (int i = 0; i < specInfos.length; i++) {
+      specNode = new DefaultMutableTreeNode(specInfos[i]);
 
       spectraTreeModel.insertNodeInto(specNode, fileNode,
                                       fileNode.getChildCount());
@@ -1727,13 +1718,16 @@ private void showUnableToOverlayMessage() {
    */
   private class SpecInfo {
     public JInternalFrame frame;
+    private JSVPanel jsvp;
 
     /**
      * Initialises a <code>SpecInfo</code> with the a JInternalFrame
      * @param frame the JInternalFrame
+     * @param jsvp 
      */
-    public SpecInfo(JInternalFrame frame) {
+    public SpecInfo(JInternalFrame frame, JSVPanel jsvp) {
       this.frame = frame;
+      this.jsvp = jsvp;
     }
 
     /**
@@ -1807,15 +1801,18 @@ private void showUnableToOverlayMessage() {
   
   /**
    * Shows the properties or header of a Spectrum
-   * @param e the ActionEvent
+   * 
+   * @param e
+   *        the ActionEvent
    */
   void propertiesMenuItem_actionPerformed(ActionEvent e) {
-	  JSVPanel jsvp = getCurrentJSVPanel();
-	    if(jsvp == null) return;
-      jsvpPopupMenu.setSelectedJSVPanel(jsvp);
-      jsvpPopupMenu.setSource(currentSelectedSource);
-      jsvpPopupMenu.properties_actionPerformed(e);
-    
+    JSVPanel jsvp = getCurrentJSVPanel();
+    if (jsvp == null)
+      return;
+    jsvpPopupMenu.setSelectedJSVPanel(jsvp);
+    jsvpPopupMenu.setSource(currentSelectedSource);
+    jsvpPopupMenu.properties_actionPerformed(e);
+
   }
 
   /**
@@ -2608,8 +2605,6 @@ private void showUnableToOverlayMessage() {
       newJsvPanel = AppUtils.integrate(this, frame, true);
     }
 
-    newJsvPanel.addMouseListener(new JSVPanelPopupListener(jsvpPopupMenu,
-        newJsvPanel, currentSelectedSource));
     setJSVPanelProperties(newJsvPanel, true);
     validate();
   }
@@ -2707,8 +2702,6 @@ private void showUnableToOverlayMessage() {
       }
       JSVPanel newJsvp = new JSVPanel(newSpec);
       //newJsvp.setOverlayIncreasing(spectrum.isIncreasing());
-      newJsvp.addMouseListener(new JSVPanelPopupListener(jsvpPopupMenu, newJsvp,
-          currentSelectedSource));
       setJSVPanelProperties(newJsvp, true);
 
       // Get from properties variable
@@ -2832,8 +2825,8 @@ private void showUnableToOverlayMessage() {
     System.out.println("JSpecView MainFrame.syncScript: " + script);
     if (!file.equals(recentURL))
       openFile(new File(file));
-    //if (selectPanel(type))
-    //  selectedJSVPanel.processPeakSelect(script);
+    if (selectPanel(type)) 
+      selectedJSVPanel.processPeakSelect(script);
     
     // TODO  Get the associated JSVPanel i.e the spectrum for which the peak info is associated. Likely need the block number to be send in the peak info?
     // TODO  parse coordinate and add highlight to JSVPanel
@@ -2845,27 +2838,47 @@ private void showUnableToOverlayMessage() {
     
   }
 
-//  private boolean selectPanel(String type) {
-//    // TODO how to do this?  IR, HNMR, 13CNMR, MS, etc. 
-//    return false;
-//  }
+  private boolean selectPanel(String type) {
+    for (int i = 0; i < specInfos.length; i++) {
+      SpecInfo si = specInfos[i];
+      if (((JDXSpectrum)si.jsvp.getSpectrumAt(0)).getPeakType().equals(type)) {
+        setFrame(si);
+        return true;
+      }
+    }
+    // TODO how to do this?  IR, HNMR, 13CNMR, MS, etc. 
+    return false;
+  }
 
+  private void setFrame(SpecInfo specInfo) {
+    JInternalFrame frame = specInfo.frame;
+    selectedJSVPanel = specInfo.jsvp;
+    frame.moveToFront();
+    try {
+      frame.setSelected(true);
+    } catch (PropertyVetoException pve) {
+    }
+  }
 
-  /**
+/**
    * This is the method Debbie needs to call from within JSpecView
    * when a peak is clicked.
    * 
    * @param peak
    */
   public void sendScript(String peak) {
+    if (peak != null)
+      selectedJSVPanel.processPeakSelect(peak);
+    String s = Escape.jmolSelect(peak, recentURL);
+    System.out.println("JSpecView MainFrame sendScript: " + s);
     if (jmol == null)
       return;
-    // outgoing <PeakAssignment file="xxx" type="xxx"...> record to Jmol
-    jmol.syncScript(Escape.jmolSelect(peak, recentURL));
+    // outgoing <PeakData file="xxx" type="xxx"...> record to Jmol    
+    jmol.syncScript(s);
   }
 
 	@Override
 	public void peakPicked(PeakPickedEvent eventObj) {
-    sendScript(eventObj.getPeakInfo());
+    sendScript(eventObj == null ? null : eventObj.getPeakInfo());
 	}
 }

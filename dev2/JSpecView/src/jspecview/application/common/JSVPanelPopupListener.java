@@ -19,11 +19,6 @@
 
 package jspecview.application.common;
 
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-
-import jspecview.source.JDXSource;
-
 /**
  * <code>JSVPanelPopupListener</code> shows the popup menu on <code>JSVPanel</code>s
  * when the right mouse button is clicked.
@@ -31,56 +26,6 @@ import jspecview.source.JDXSource;
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
  */
-public class JSVPanelPopupListener extends MouseAdapter {
-  private JSVPanelPopupMenu popup;
-  private JSVPanel jsvp;
-  private JDXSource source;
-
-  /**
-   * Constructor that takes the popup menu to be shown, the <code>JSVPanel</code>
-   * and the Source of the Spectrum
-   * @param popup the popup menu
-   * @param jsvp the JSVPanel to place the popup on
-   * @param source the JDXSource of the spectra displayed on the panel
-   */
-  public JSVPanelPopupListener(JSVPanelPopupMenu popup, JSVPanel jsvp, JDXSource source) {
-    super();
-    this.popup = popup;
-    this.jsvp = jsvp;
-    this.source = source;
-  }
-
-  /**
-   * Oversides mousePressed in <code>MouseAdapter</code> class
-   * @param e the <code>MouseEvent</code>
-   */
-  @Override
-  public void mousePressed(MouseEvent e) {
-      maybeShowPopup(e);
-  }
-
-  /**
-   * Overides mouseReleased in <code>MouseAdapter</code> class
-   * @param e the <code>MouseEvent</code>
-   */
-  @Override
-  public void mouseReleased(MouseEvent e) {
-      maybeShowPopup(e);
-  }
-
-  /**
-   * Shows the popop on the <code>JSVPanel</code>
-   * @param e the <code>MouseEvent</code>
-   */
-  private void maybeShowPopup(MouseEvent e) {
-    if (e.isPopupTrigger()) {
-        popup.show(jsvp, e.getX(), e.getY());
-        popup.setSelectedJSVPanel(jsvp);
-        popup.setSource(source);
-        popup.gridCheckBoxMenuItem.setSelected(jsvp.isGridOn());
-        popup.coordsCheckBoxMenuItem.setSelected(jsvp.isCoordinatesOn());
-        popup.revPlotCheckBoxMenuItem.setSelected(jsvp.isPlotReversed());
-    }
-  }
-
+public class JSVPanelPopupListener {
+  // no longer necessary -- BH  JSVPanel is just its own listener
 }

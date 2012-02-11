@@ -70,11 +70,9 @@ import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
@@ -86,6 +84,8 @@ import javax.swing.event.ChangeListener;
 import jspecview.application.common.AppUtils;
 import jspecview.application.common.JSVPanel;
 import jspecview.application.common.OverlayLegendDialog;
+import jspecview.application.common.PeakPickedEvent;
+import jspecview.application.common.PeakPickedListener;
 import jspecview.application.common.PrintLayoutDialog;
 import jspecview.common.Coordinate;
 import jspecview.common.IntegrationRatio;
@@ -116,7 +116,7 @@ import jspecview.common.Visible;
  * @author Prof Robert J. Lancashire
  */
 
-public class JSVApplet extends JApplet {
+public class JSVApplet extends JApplet implements PeakPickedListener {
 
   /**
    * 
@@ -192,32 +192,9 @@ public class JSVApplet extends JApplet {
   BorderLayout appletBorderLayout = new BorderLayout();
   JPanel statusPanel = new JPanel();
   JLabel statusTextLabel = new JLabel();
-  JPopupMenu appletPopupMenu = new JPopupMenu();
-  JMenu aboutMenu = new JMenu();
-  JMenu fileMenu = new JMenu();
-  JMenuItem printMenuItem = new JMenuItem();
-  JMenu saveAsMenu = new JMenu();
-  JMenu saveAsJDXMenu = new JMenu();
-  JMenu exportAsMenu = new JMenu();
-  JMenu viewMenu = new JMenu();
-  JCheckBoxMenuItem gridMenuItem = new JCheckBoxMenuItem();
-  JCheckBoxMenuItem coordinatesMenuItem = new JCheckBoxMenuItem();
-  JCheckBoxMenuItem reversePlotMenuItem = new JCheckBoxMenuItem();
-  JMenu zoomMenu = new JMenu();
-  JMenuItem nextMenuItem = new JMenuItem();
-  JMenuItem previousMenuItem = new JMenuItem();
-  JMenuItem resetMenuItem = new JMenuItem();
-  JMenuItem compoundMenu = new JMenu();
   JFileChooser jFileChooser;
   JSVPanel selectedJSVPanel;
-  JMenuItem clearMenuItem = new JMenuItem();
-  JCheckBoxMenuItem transAbsMenuItem = new JCheckBoxMenuItem();
-  JCheckBoxMenuItem integrateMenuItem = new JCheckBoxMenuItem();
-  JMenuItem solColMenuItem = new JMenuItem();
-  JMenuItem versionMenuItem = new JMenuItem();
-  JMenuItem headerMenuItem = new JMenuItem();
-  JCheckBoxMenuItem windowMenuItem = new JCheckBoxMenuItem();
-  JMenuItem overlayKeyMenuItem = new JMenuItem();
+  JSVAppletPopupMenu appletPopupMenu; 
   JDXSpectrum xmlSpec;
   JSVPanel tempJSVP;
 
@@ -393,13 +370,9 @@ public class JSVApplet extends JApplet {
         filePath = newFilePath;
     }
     // enable or disable menus
-    if (!menuOn) {
-      viewMenu.setEnabled(false);
-      fileMenu.setEnabled(false);
-      exportAsMenu.setEnabled(false);
-      saveAsMenu.setEnabled(false);
-    }
-    zoomMenu.setEnabled(enableZoom);
+    appletPopupMenu = new JSVAppletPopupMenu(this, isSignedApplet);
+    appletPopupMenu.enableMenus(menuOn, enableZoom);
+
     //setBackground(backgroundColor);
 
     try {
@@ -433,146 +406,8 @@ public class JSVApplet extends JApplet {
     }
 
     statusTextLabel.setText("Loading...");
-    aboutMenu.setText("About");
-
-    fileMenu.setText("File");
-    printMenuItem.setActionCommand("Print");
-    printMenuItem.setText("Print...");
-    printMenuItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        printMenuItem_actionPerformed(e);
-      }
-    });
-    viewMenu.setText("View");
-    gridMenuItem.setText("Show Grid");
-    gridMenuItem.addItemListener(new java.awt.event.ItemListener() {
-      public void itemStateChanged(ItemEvent e) {
-        gridMenuItem_itemStateChanged(e);
-      }
-    });
-    coordinatesMenuItem.setText("Show Coordinates");
-    coordinatesMenuItem.addItemListener(new java.awt.event.ItemListener() {
-      public void itemStateChanged(ItemEvent e) {
-        coordinatesMenuItem_itemStateChanged(e);
-      }
-    });
-    reversePlotMenuItem.setText("Reverse Plot");
-    reversePlotMenuItem.addItemListener(new java.awt.event.ItemListener() {
-      public void itemStateChanged(ItemEvent e) {
-        reversePlotMenuItem_itemStateChanged(e);
-      }
-    });
-    zoomMenu.setText("Zoom");
-    nextMenuItem.setText("Next View");
-    nextMenuItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        nextMenuItem_actionPerformed(e);
-      }
-    });
-    previousMenuItem.setText("Previous View");
-    previousMenuItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        previousMenuItem_actionPerformed(e);
-      }
-    });
-    resetMenuItem.setText("Reset View");
-    resetMenuItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        resetMenuItem_actionPerformed(e);
-      }
-    });
-    clearMenuItem.setText("Clear Views");
-    clearMenuItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        clearMenuItem_actionPerformed(e);
-      }
-    });
-    headerMenuItem.setText("Show Header...");
-    headerMenuItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        headerMenuItem_actionPerformed(e);
-      }
-    });
-
-    solColMenuItem.setEnabled(false);
-    solColMenuItem.setText("Predict Solution Colour...");
-    solColMenuItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        solColMenuItem_actionPerformed(e);
-      }
-    });
-
-    windowMenuItem.setText("Window");
-    windowMenuItem.addItemListener(new java.awt.event.ItemListener() {
-      public void itemStateChanged(ItemEvent e) {
-        windowMenuItem_itemStateChanged(e);
-      }
-    });
-    overlayKeyMenuItem.setEnabled(false);
-    overlayKeyMenuItem.setText("Show Overlay Key...");
-    overlayKeyMenuItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        overlayKeyMenuItem_actionPerformed(e);
-      }
-    });
-    transAbsMenuItem.setEnabled(true);
-    transAbsMenuItem.setText("Transmittance/Absorbance");
-    transAbsMenuItem.addItemListener(new java.awt.event.ItemListener() {
-      public void itemStateChanged(ItemEvent e) {
-        transAbsMenuItem_itemStateChanged(e);
-      }
-    });
-
-    integrateMenuItem.setEnabled(false);
-    integrateMenuItem.setText("Integrate");
-    integrateMenuItem.addItemListener(new java.awt.event.ItemListener() {
-      public void itemStateChanged(ItemEvent e) {
-        integrateMenuItem_itemStateChanged(e);
-      }
-    });
-
-    compoundMenu.setEnabled(false);
-    compoundMenu.setText("Blocks");
-
-    versionMenuItem.setText("<html><h3>JSpecView Version " + APPLET_VERSION
-        + "</h3></html>");
-
-    appletPopupMenu.add(fileMenu);
-    appletPopupMenu.add(viewMenu);
-    appletPopupMenu.add(zoomMenu);
-    appletPopupMenu.add(compoundMenu);
-    appletPopupMenu.addSeparator();
-    appletPopupMenu.add(aboutMenu);
-    JSVPanel.setMenus(saveAsMenu, saveAsJDXMenu, exportAsMenu, actionListener);
-    fileMenu.add(saveAsMenu);
-    if (isSignedApplet)
-      fileMenu.add(exportAsMenu);
-    fileMenu.add(printMenuItem);
-
-    viewMenu.add(gridMenuItem);
-    viewMenu.add(coordinatesMenuItem);
-    viewMenu.add(reversePlotMenuItem);
-    viewMenu.addSeparator();
-    viewMenu.add(headerMenuItem);
-    viewMenu.add(overlayKeyMenuItem);
-    viewMenu.addSeparator();
-    viewMenu.add(transAbsMenuItem);
-    viewMenu.add(solColMenuItem);
-    viewMenu.add(integrateMenuItem);
-    viewMenu.addSeparator();
-    viewMenu.add(windowMenuItem);
-    zoomMenu.add(nextMenuItem);
-    zoomMenu.add(previousMenuItem);
-    zoomMenu.add(resetMenuItem);
-    zoomMenu.add(clearMenuItem);
-    aboutMenu.add(versionMenuItem);
+    
   }
-
-  private ActionListener actionListener = new ActionListener() {
-    public void actionPerformed(ActionEvent e) {
-      exportSpectrum(e.getActionCommand());
-    }
-  };
 
   /**
    * Get Applet information
@@ -632,13 +467,8 @@ public class JSVApplet extends JApplet {
         return;
       }
       jsvPanels[0] = jsvp;
-
       initProperties(jsvp);
-
-      // add listeners
-      jsvp.addMouseListener(new JSVPanelMouseListener());
       selectedJSVPanel = jsvp;
-
     } else {
       // initalise JSVPanels and add them to the array
       jsvPanels = new JSVPanel[numberOfSpectra];
@@ -650,11 +480,7 @@ public class JSVApplet extends JApplet {
           else
             jsvp = new JSVPanel((JDXSpectrum) specs.elementAt(i));
           jsvPanels[i] = jsvp;
-
           initProperties(jsvp);
-
-          // add listeners
-          jsvp.addMouseListener(new JSVPanelMouseListener());
         }
       } catch (Exception e) {
         // TODO
@@ -664,6 +490,7 @@ public class JSVApplet extends JApplet {
 
   private void initProperties(JSVPanel jsvp) {
     // set JSVPanel properties from applet parameters
+    jsvp.addPeakPickedListener(this);
     jsvp.setGridOn(gridOn);
     jsvp.setCoordinatesOn(coordinatesOn);
     jsvp.setXScaleOn(xScaleOn);
@@ -691,6 +518,9 @@ public class JSVApplet extends JApplet {
     //  jsvp.setPlotColors(plotColors);
     jsvp.setXAxisDisplayedIncreasing(JSpecViewUtils
         .shouldDisplayXAxisIncreasing((JDXSpectrum) jsvp.getSpectrumAt(0)));
+    jsvp.setSource(source);
+    jsvp.setPopup(appletPopupMenu);
+
   }
 
   /**
@@ -757,7 +587,7 @@ public class JSVApplet extends JApplet {
       if (overlay && source instanceof CompoundSource) {
         title = ((CompoundSource) source).getTitle();
         jsvPanels[spectrumIndex].setTitle(title);
-        overlayKeyMenuItem.setEnabled(true);
+        appletPopupMenu.overlayKeyMenuItem.setEnabled(true);
       }
       appletPanel.add(jsvPanels[spectrumIndex], BorderLayout.CENTER);
       // else interface = single
@@ -785,9 +615,9 @@ public class JSVApplet extends JApplet {
                 }
               });
               mi.setActionCommand("" + i);
-              compoundMenu.add(mi);
+              appletPopupMenu.compoundMenu.add(mi);
             }
-            compoundMenu.setText("NTuples");
+            appletPopupMenu.compoundMenu.setText("NTuples");
           } else if (source instanceof BlockSource) {
             for (int i = 0; i < numberOfPanels; i++) {
               title = (i + 1) + "- "
@@ -808,14 +638,14 @@ public class JSVApplet extends JApplet {
                 }
               });
               mi.setActionCommand("" + i);
-              compoundMenu.add(mi);
+              appletPopupMenu.compoundMenu.add(mi);
             }
-            compoundMenu.setText("Blocks");
+            appletPopupMenu.compoundMenu.setText("Blocks");
           }
           // add compound menu to popup menu
-          appletPopupMenu.add(compoundMenu, 3);
+          appletPopupMenu.add(appletPopupMenu.compoundMenu, 3);
           if (compoundMenuOn)
-            compoundMenu.setEnabled(true);
+            appletPopupMenu.compoundMenu.setEnabled(true);
         } else {
           // open dialog box
           JMenuItem compoundMi = new JMenuItem("Choose Spectrum");
@@ -881,9 +711,9 @@ public class JSVApplet extends JApplet {
     selectedJSVPanel = jsvp;
 
     if (JSpecViewUtils.isHNMR((JDXSpectrum) selectedJSVPanel.getSpectrumAt(0)))
-      integrateMenuItem.setEnabled(true);
+      appletPopupMenu.integrateMenuItem.setEnabled(true);
     else
-      integrateMenuItem.setEnabled(false);
+      appletPopupMenu.integrateMenuItem.setEnabled(false);
 
     chooseContainer();
     this.validate();
@@ -972,50 +802,14 @@ public class JSVApplet extends JApplet {
      */
     private void maybeShowPopup(MouseEvent e) {
       if (e.isPopupTrigger()) {
-        appletPopupMenu.show(e.getComponent(), e.getX(), e.getY());
         JSVPanel jsvPanel = (JSVPanel) e.getSource();
         selectedJSVPanel = jsvPanel;
-
-        gridMenuItem.setSelected(jsvPanel.isGridOn());
-        coordinatesMenuItem.setSelected(jsvPanel.isCoordinatesOn());
-
-        reversePlotMenuItem.setSelected(jsvPanel.isPlotReversed());
+        appletPopupMenu.gridCheckBoxMenuItem.setSelected(jsvPanel.isGridOn());
+        appletPopupMenu.coordsCheckBoxMenuItem.setSelected(jsvPanel.isCoordinatesOn());
+        appletPopupMenu.reversePlotCheckBoxMenuItem.setSelected(jsvPanel.isPlotReversed());
+        appletPopupMenu.show(e.getComponent(), e.getX(), e.getY());
       }
     }
-  }
-
-  /**
-   * Toggles the grid
-   * 
-   * @param e
-   *        the ItemEvent
-   */
-  void gridMenuItem_itemStateChanged(ItemEvent e) {
-    selectedJSVPanel.setGridOn((e.getStateChange() == ItemEvent.SELECTED));
-    selectedJSVPanel.repaint();
-  }
-
-  /**
-   * Toggles the coordinates
-   * 
-   * @param e
-   *        the ItemEvent
-   */
-  void coordinatesMenuItem_itemStateChanged(ItemEvent e) {
-    selectedJSVPanel
-        .setCoordinatesOn((e.getStateChange() == ItemEvent.SELECTED));
-    selectedJSVPanel.repaint();
-  }
-
-  /**
-   * Reverses the plot
-   * 
-   * @param e
-   *        the ItemEvent
-   */
-  void reversePlotMenuItem_itemStateChanged(ItemEvent e) {
-    selectedJSVPanel.setReversePlot((e.getStateChange() == ItemEvent.SELECTED));
-    selectedJSVPanel.repaint();
   }
 
   /**
@@ -1228,7 +1022,7 @@ public class JSVApplet extends JApplet {
         + ")<br /><br /></body></HTML>", "Predicted Colour",
         JOptionPane.INFORMATION_MESSAGE);
   }
-
+  
   /**
    * Opens the print dialog to enable printing
    * 
@@ -1252,50 +1046,15 @@ public class JSVApplet extends JApplet {
   }
 
   /**
-   * Shows the next view when <code>JDXSpectrum</code> has been zoomed
-   * 
-   * @param e
-   *        the ActionEvent
-   */
-  void nextMenuItem_actionPerformed(ActionEvent e) {
-    selectedJSVPanel.nextView();
-  }
-
-  /**
-   * Shows the previous view when <code>JDXSpectrum</code> has been zoomed
-   * 
-   * @param e
-   *        the ActionEvent
-   */
-  void previousMenuItem_actionPerformed(ActionEvent e) {
-    selectedJSVPanel.previousView();
-  }
-
-  /**
-   * Resets the view when <code>JDXSpectrum</code> has been zoomed
-   * 
-   * @param e
-   *        the ActionEvent
-   */
-  void resetMenuItem_actionPerformed(ActionEvent e) {
-    // Remove integration when view is reset
-    if (integrateMenuItem.isSelected() == true)
-      integrateMenuItem.setSelected(false);
-
-    // Reset the view
-    selectedJSVPanel.reset();
-  }
-
-  /**
    * Clears all zoomed views
    * 
    * @param e
    *        the ActionEvent
    */
-  void clearMenuItem_actionPerformed(ActionEvent e) {
+/*  void clearMenuItem_actionPerformed(ActionEvent e) {
     selectedJSVPanel.clearViews();
   }
-
+*/
   /**
    * Shows the applet in a Frame
    * 
@@ -1305,9 +1064,9 @@ public class JSVApplet extends JApplet {
   void windowMenuItem_itemStateChanged(ItemEvent e) {
     if (e.getStateChange() == ItemEvent.SELECTED) {
       // disable some features when in Window mode
-      integrateMenuItem.setEnabled(false);
-      compoundMenu.setEnabled(false);
-      transAbsMenuItem.setEnabled(false);
+      appletPopupMenu.integrateMenuItem.setEnabled(false);
+      appletPopupMenu.compoundMenu.setEnabled(false);
+      appletPopupMenu.transAbsMenuItem.setEnabled(false);
       frame = new JFrame("JSpecView");
       frame.setSize(getSize());
       final Dimension d;
@@ -1327,20 +1086,20 @@ public class JSVApplet extends JApplet {
           setVisible(true);
           validate();
           repaint();
-          integrateMenuItem.setEnabled(true);
+          appletPopupMenu.integrateMenuItem.setEnabled(true);
           //       if (compoundMenuOn)
           //             compoundMenu.setEnabled(true);
           frame.removeAll();
           frame.dispose();
-          windowMenuItem.setSelected(false);
+          appletPopupMenu.windowMenuItem.setSelected(false);
         }
       });
     } else {
       // re-enable features that were disabled in Window mode
-      integrateMenuItem.setEnabled(true);
-      transAbsMenuItem.setEnabled(true);
+      appletPopupMenu.integrateMenuItem.setEnabled(true);
+      appletPopupMenu.transAbsMenuItem.setEnabled(true);
       if (compoundMenuOn)
-        compoundMenu.setEnabled(true);
+        appletPopupMenu.compoundMenu.setEnabled(true);
 
       getContentPane().add(appletPanel);
       validate();
@@ -1449,8 +1208,7 @@ public class JSVApplet extends JApplet {
     appletPanel.add(jsvp);
 
     initProperties(jsvp);
-    solColMenuItem.setEnabled(true);
-    jsvp.addMouseListener(new JSVPanelMouseListener());
+    appletPopupMenu.solColMenuItem.setEnabled(true);
     jsvp.repaint();
 
     //  now need to validate and repaint
@@ -1481,7 +1239,6 @@ public class JSVApplet extends JApplet {
 
     initProperties(tempJSVP);
     tempJSVP.repaint();
-    tempJSVP.addMouseListener(new JSVPanelMouseListener());
     chooseContainer();
   }
 
@@ -1489,23 +1246,23 @@ public class JSVApplet extends JApplet {
   private void chooseContainer() {
     // check first if we have ever had a frame
     if (frame == null) {
-      integrateMenuItem.setEnabled(true);
+      appletPopupMenu.integrateMenuItem.setEnabled(true);
       if (compoundMenuOn)
-        compoundMenu.setEnabled(true);
+        appletPopupMenu.compoundMenu.setEnabled(true);
       getContentPane().add(appletPanel);
       validate();
       repaint();
     } else {
       if (frame.getComponentCount() != 0) {
-        integrateMenuItem.setEnabled(false);
-        compoundMenu.setEnabled(false);
+        appletPopupMenu.integrateMenuItem.setEnabled(false);
+        appletPopupMenu.compoundMenu.setEnabled(false);
         frame.add(appletPanel);
         frame.validate();
         frame.setVisible(true);
       } else {
-        integrateMenuItem.setEnabled(true);
+        appletPopupMenu.integrateMenuItem.setEnabled(true);
         if (compoundMenuOn)
-          compoundMenu.setEnabled(true);
+          appletPopupMenu.compoundMenu.setEnabled(true);
         getContentPane().add(appletPanel);
         validate();
         repaint();
@@ -1861,11 +1618,10 @@ public class JSVApplet extends JApplet {
     if (selectedJSVPanel != null) {
       if (theInterface.equals("single")) {
         showSpectrum(block - 1);
-        repaint();
       } else {
         spectraPane.setSelectedIndex(block - 1);
-        repaint();
       }
+      repaint();
     }
   }
 
@@ -1963,29 +1719,13 @@ public class JSVApplet extends JApplet {
 
   /**
    * Method that can be called from another applet or from javascript that
-   * restores the zoom of a <code>JSVPanel</code> to its original state.
-   */
-  public void resetView() {
-    // Remove Integration from view
-    if (integrateMenuItem.isSelected() == true)
-      integrateMenuItem.setSelected(false);
-
-    // Reset the view
-    if (selectedJSVPanel != null) {
-      selectedJSVPanel.reset();
-      repaint();
-    }
-  }
-
-  /**
-   * Method that can be called from another applet or from javascript that
    * toggles the integration graph of a <code>JSVPanel</code>.
    */
   public void toggleIntegration() {
-    if (integrateMenuItem.isSelected() == false)
-      integrateMenuItem.setSelected(true);
+    if (appletPopupMenu.integrateMenuItem.isSelected() == false)
+      appletPopupMenu.integrateMenuItem.setSelected(true);
     else
-      integrateMenuItem.setSelected(false);
+      appletPopupMenu.integrateMenuItem.setSelected(false);
   }
 
   /**
@@ -2288,24 +2028,24 @@ public class JSVApplet extends JApplet {
         & ((Yunits.toLowerCase().contains("trans")) || Yunits.toLowerCase()
             .contains("abs"))) {
       //         sltnclr = Visible.Colour(source);
-      solColMenuItem.setEnabled(true);
+      appletPopupMenu.solColMenuItem.setEnabled(true);
     } else {
-      solColMenuItem.setEnabled(false);
+      appletPopupMenu.solColMenuItem.setEnabled(false);
     }
     //  Can only integrate a continuous H NMR spectrum
     if (continuous
         && JSpecViewUtils.isHNMR((JDXSpectrum) selectedJSVPanel
             .getSpectrumAt(0)))
-      integrateMenuItem.setEnabled(true);
+      appletPopupMenu.integrateMenuItem.setEnabled(true);
     //Can only convert from T <-> A  if Absorbance or Transmittance and continuous
     if ((continuous) && (Yunits.toLowerCase().contains("abs"))
         || (Yunits.toLowerCase().contains("trans")))
-      transAbsMenuItem.setEnabled(true);
+      appletPopupMenu.transAbsMenuItem.setEnabled(true);
     else
-      transAbsMenuItem.setEnabled(false);
+      appletPopupMenu.transAbsMenuItem.setEnabled(false);
     setStringParameter("irmode", irMode);
-    exportAsMenu.setEnabled(true);
-    saveAsJDXMenu.setEnabled(continuous);
+    appletPopupMenu.exportAsMenu.setEnabled(true);
+    appletPopupMenu.saveAsJDXMenu.setEnabled(continuous);
     newFile = false;
   }
 
@@ -2338,7 +2078,15 @@ public class JSVApplet extends JApplet {
   }
 
   private boolean selectPanel(String type) {
-    // TODO how to do this?  IR, HNMR, 13CNMR, MS, etc. 
+    // what if tabbed? 
+    if (jsvPanels == null) 
+      return false;
+    for (int i = 0; i < jsvPanels.length; i++) {
+      if (((JDXSpectrum)jsvPanels[i].getSpectrumAt(0)).getPeakType().equals(type)) {
+        setSpectrumNumber(i + 1);
+        return true;
+      }
+    }
     return false;
   }
 
@@ -2349,10 +2097,17 @@ public class JSVApplet extends JApplet {
    * @param peak
    */
   public void sendScript(String peak) {
+    if (peak != null)
+      selectedJSVPanel.processPeakSelect(peak);
     if (syncCallbackFunctionName == null)
       return;
     callToJavaScript(syncCallbackFunctionName, new Object[] {
         fullName, Escape.jmolSelect(peak, recentURL) });
+  }
+
+  @Override
+  public void peakPicked(PeakPickedEvent eventObj) {
+    sendScript(eventObj == null ? null : eventObj.getPeakInfo());
   }
 
 }

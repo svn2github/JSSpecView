@@ -93,6 +93,8 @@ import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
 import jspecview.export.Exporter;
 import jspecview.export.SVGExporter;
+import jspecview.source.JDXSource;
+import jspecview.util.Parser;
 import jspecview.util.TextFormat;
 
 /*
@@ -112,7 +114,7 @@ import org.w3c.dom.DOMImplementation;
  * @author Craig A.D. Walters
  * @author Prof Robert J. Lancashire
  */
-public class JSVPanel extends JPanel implements Printable, MouseListener, MouseMotionListener{
+public class JSVPanel extends JPanel implements Printable, MouseListener, MouseMotionListener {
 
   /**
    * 
@@ -136,10 +138,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
 
   // The list of Coordinate arrays
   private Coordinate[][] xyCoordsList;
-
-  // Default Listeners
-  private MouseListener defaultMouseListener;
-  private MouseMotionListener defaultMouseMotionListener;
 
   // width and height of the JSVPanel
   //protected int width, height;
@@ -287,8 +285,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
 
   public JSVPanel() {
     System.out.println("initialise JSVPanel " + this);
-    setDefaultMouseListener(this);
-    setDefaultMouseMotionListener(this);
+    setDefaultMouseListener();
   }
 
   /**
@@ -298,8 +295,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
    */
   public JSVPanel(Graph spectrum) throws ScalesIncompatibleException {
     super();
-    setDefaultMouseListener(this);
-    setDefaultMouseMotionListener(this);
+    setDefaultMouseListener();
     initJSVPanel(new Graph[]{spectrum});
   }
 
@@ -313,8 +309,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
    */
   public JSVPanel(Graph spectrum, int startIndex, int endIndex) throws JSpecViewException{
     super();
-    setDefaultMouseListener(this);
-    setDefaultMouseMotionListener(this);
+    setDefaultMouseListener();
     try{
       initJSVPanel(new Graph[]{spectrum}, new int[]{startIndex}, new int[]{endIndex});
     }
@@ -329,8 +324,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
    */
   public JSVPanel(Graph[] spectra)throws ScalesIncompatibleException{
     super();
-    setDefaultMouseListener(this);
-    setDefaultMouseMotionListener(this);
+    setDefaultMouseListener();
     initJSVPanel(spectra);
   }
 
@@ -345,8 +339,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
    */
   public JSVPanel(Graph[] spectra, int[] startIndices, int[] endIndices) throws JSpecViewException, ScalesIncompatibleException{
     super();
-    setDefaultMouseListener(this);
-    setDefaultMouseMotionListener(this);
+    setDefaultMouseListener();
     initJSVPanel(spectra, startIndices, endIndices);
   }
 
@@ -487,42 +480,11 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
 
   /**
    * Sets default MouseListener
-   * @param listener the <code>MouseListener</code>
    */
-  public void setDefaultMouseListener(MouseListener listener){
-    if (defaultMouseListener != null)
-      removeMouseListener(defaultMouseListener);
-    addMouseListener(listener);
-    defaultMouseListener = listener;
+  public void setDefaultMouseListener(){
+    addMouseListener(this);
+    addMouseMotionListener(this);
   }
-
-  /**
-   * Sets default MouseMotionListener
-   * @param listener the <code>MouseMotionListener</code>
-   */
-  public void setDefaultMouseMotionListener(MouseMotionListener listener){
-    if (defaultMouseMotionListener != null)
-      removeMouseMotionListener(defaultMouseMotionListener);
-    addMouseMotionListener(listener);
-    defaultMouseMotionListener = listener;
-  }
-
-  /**
-   * Removes default MouseListener
-   */
-  public void removeDefaultMouseListener(){
-    if (defaultMouseListener != null)
-      removeMouseListener(defaultMouseListener);
-  }
-
-  /**
-   * Removes default MouseMotionListener
-   */
-  public void removeDefaultMouseMotionListener(){
-    if (defaultMouseMotionListener != null)
-      removeMouseMotionListener(defaultMouseMotionListener);
-  }
-
 
   /* ------------------------- SETTER METHODS-------------------------------*/
   /**
@@ -1169,7 +1131,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
         }
 
         g.setColor(hl.getColor());
-
         g.fillRect(x1, plotAreaY, Math.abs(x2 - x1), plotAreaHeight);
       }
     }
@@ -1682,243 +1643,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
 	private boolean shouldDrawXAxisIncreasing() {
 		return isXAxisDisplayedIncreasing  ^ plotReversed;
 	}
-
-   /*--------------METHODS IN INTERFACE MouseListener-----------------------*/
-
-   /**
-    * Implements mouseClicked in interface MouseListener
-    * @param e the <code>MouseEvent</code>
-    */
-    public void mouseClicked(MouseEvent e){
-      fireMouseClicked(e);
-    }
-
-    /**
-     * Implements mouseEntered in interface MouseListener
-     * @param e the <code>MouseEvent</code>
-     */
-    public void mouseEntered(MouseEvent e){
-    }
-
-    /**
-     * Implements mouseExited in interface MouseListener
-     * @param e the <code>MouseEvent</code>
-     */
-    public void mouseExited(MouseEvent e){
-    }
-
-    /**
-     * Implements mousePressed in interface MouseListener
-     * @param e the <code>MouseEvent</code>
-     */
-    public void mousePressed(MouseEvent e){
-      // Maybe put this in a fireMousePressed() method
-      if(e.getButton() != MouseEvent.BUTTON1)
-        return;
-
-      int x = e.getX();
-      int y = e.getY();
-
-      int xPixel = x /*- getX()*/;
-      int yPixel = y /*- getY()*/;
-
-      if( xPixel >= leftPlotAreaPos && xPixel <= rightPlotAreaPos &&
-          yPixel >= topPlotAreaPos && yPixel <= bottomPlotAreaPos){
-
-        //isMousePressed = true;
-        zoomBoxX = xPixel;
-
-        double xPt, yPt;
-
-        Coordinate coord = getCoordFromPoint(xPixel, yPixel);
-
-        xPt = coord.getXVal();
-        yPt = coord.getYVal();
-
-        initX = xPt;
-        initY = yPt;
-
-        mousePressedInPlotArea = true;
-        repaint();
-
-      }
-      else
-        mousePressedInPlotArea = false;
-    }
-
-    /**
-     * Implements mouseReleased in interface MouseListener
-     * @param e the <code>MouseEvent</code>
-     */
-    public void mouseReleased(MouseEvent e){
-      // Maybe use a fireMouseReleased Method
-
-      if(e.getButton() != MouseEvent.BUTTON1)
-        return;
-
-      int x = e.getX();
-      int y = e.getY();
-
-      int xPixel = x /*- getX()*/;
-      int yPixel = y /*- getY()*/;
-
-      if( xPixel >= leftPlotAreaPos && xPixel <= rightPlotAreaPos &&
-          yPixel >= topPlotAreaPos && yPixel <= bottomPlotAreaPos){
-
-
-        isMouseReleased = true;
-
-        double xPt, yPt;
-
-        Coordinate coord = getCoordFromPoint(xPixel, yPixel);
-
-        xPt = coord.getXVal();
-        yPt = coord.getYVal();
-
-        finalX = xPt;
-        finalY = yPt;
-
-        if(mousePressedInPlotArea){
-          doZoom(initX, initY, finalX, finalY);
-        }
-
-      }
-
-    }
-
-
-   /*--------------METHODS IN INTERFACE MouseMotionListener------------------*/
-
-   /**
-    * Implements mouseDragged in interface MouseMotionListener
-    * @param e the <code>MouseEvent</code>
-    */
-   public void mouseDragged(MouseEvent e){
-    isMouseDraggedEvent = true;
-    fireMouseDragged(e);
-   }
-
-   /**
-    * Implements mouseMoved in interface MouseMotionListener
-    * @param e the <code>MouseEvent</code>
-    */
-  public void mouseMoved(MouseEvent e){
-    isMouseDraggedEvent = false;
-    fireMouseMoved(e);
-    if(mouseMovedOk)
-      repaint();
-  }
-
-  /**
-   * Called by the mouseClicked Method
-   * @param e the <code>MouseEvent</code>
-   */
-  protected void fireMouseClicked(MouseEvent e){
-    if(e.getButton() != MouseEvent.BUTTON1)
-        return;
-
-      int x = e.getX();
-      int y = e.getY();
-
-      int xPixel = x /*- getX()*/;
-      int yPixel = y /*- getY()*/;
-
-      if( xPixel >= leftPlotAreaPos && xPixel <= rightPlotAreaPos &&
-          yPixel >= topPlotAreaPos && yPixel <= bottomPlotAreaPos){
-
-        double xPt, yPt;
-
-        Coordinate coord = getCoordFromPoint(xPixel, yPixel);
-
-        xPt = coord.getXVal();
-        yPt = coord.getYVal();
-
-        String hashX = "#";
-        String hashY = "#";
-        String hash1 = "0.00000000";
-
-        if (scaleData.hashNumX <= 0)
-          hashX = hash1.substring(0,Math.abs(scaleData.hashNumX)+3);
-
-        DecimalFormat displayXFormatter = new DecimalFormat(hashX, new DecimalFormatSymbols(java.util.Locale.US));
-
-        if (scaleData.hashNumY <= 0)
-        hashY = hash1.substring(0,Math.abs(scaleData.hashNumY)+3);
-
-        DecimalFormat displayYFormatter = new DecimalFormat(hashY, new DecimalFormatSymbols(java.util.Locale.US));
-
-        String xStr, yStr;
-
-        xStr = displayXFormatter.format(xPt);
-        yStr = displayYFormatter.format(yPt);
-
-        // coordClickedStr = xStr + " "+ yStr;
-        // System.out.println(xStr);        
-
-        coordClicked = new Coordinate(Double.parseDouble(xStr), Double.parseDouble(yStr));
-        notifyPeakPickedListeners(coordClicked);
-      }
-      else
-        coordClicked = null;
-  }
-
-  /**
-   * Carries out the function of the MouseMoved Event
-   * @param e the <code>MouseEvent</code>
-   */
-  protected void fireMouseMoved(MouseEvent e){
-    int x = e.getX();
-    int y = e.getY();
-
-    int xPixel = x /*- getX()*/;
-    int yPixel = y /*- getY()*/;
-
-    if( xPixel >= leftPlotAreaPos && xPixel <= rightPlotAreaPos && 
-    		yPixel >= topPlotAreaPos && yPixel <= bottomPlotAreaPos ) {   	
-    	
-      if(isMouseDraggedEvent){
-        isMouseDragged = true;      
-        currZoomBoxX = xPixel;
-      }
-
-      double xPt, yPt;
-
-      Coordinate coord = getCoordFromPoint(xPixel, yPixel);
-
-      xPt = coord.getXVal();
-      yPt = coord.getYVal();
-
-      String hashX = "#";
-      String hashY = "#";
-      String hash1 = "0.00000000";
-
-      if (scaleData.hashNumX <= 0)
-        hashX = hash1.substring(0,Math.abs(scaleData.hashNumX)+3);
-
-      DecimalFormat displayXFormatter = new DecimalFormat(hashX, new DecimalFormatSymbols(java.util.Locale.US));
-
-      if (scaleData.hashNumY <= 0)
-      hashY = hash1.substring(0,Math.abs(scaleData.hashNumY)+3);
-
-      DecimalFormat displayYFormatter = new DecimalFormat(hashY, new DecimalFormatSymbols(java.util.Locale.US));
-
-      coordStr = "(" +displayXFormatter.format(xPt) + ", " + displayYFormatter.format(yPt) + ")";
-
-      mouseMovedOk = true;
-    }
-  }
-
-  /**
-   * Carries out the function of the MouseDragged Event
-   * @param e the <code>MouseEvent</code>
-   */
-  protected void fireMouseDragged(MouseEvent e){
-	isMouseDraggedEvent = true;  // testing	  
-    fireMouseMoved(e);
-    if(mouseMovedOk)
-      repaint();
-  }
-
 
    /*-------------------- METHODS FOR ZOOM SUPPORT--------------------------*/
 
@@ -2573,21 +2297,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
   }
 
     public void destroy() {
-      removeDefaultMouseListener();
-      removeDefaultMouseMotionListener();
-      if (thisMouseListener != null) {
-        removeMouseListener(thisMouseListener);
-        thisMouseListener = null;
-      }
-    }
-
-    private MouseListener thisMouseListener;
-
-    public void addMouseListener(MouseListener listener) {
-      if (thisMouseListener != null)
-        removeMouseListener(thisMouseListener);
-      super.addMouseListener(listener);
-      thisMouseListener = listener;
+      removeMouseListener(this);
+      removeMouseMotionListener(this);
     }
 
     /**
@@ -2631,9 +2342,20 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
         return true;
     }
 
-    public void processPeakSelect(String script) {
-      script = script.substring(script.indexOf("<PeakAssignment"));
-      // TODO:  handle <PeakAssignment selection
+    public void processPeakSelect(String peak) {
+      removeAllHighlights();
+      String xMin = Parser.getQuotedAttribute(peak, "xMin");
+      String xMax = Parser.getQuotedAttribute(peak, "xMax");
+      if (xMin == null || xMax == null)
+        return;
+      float x1 = Parser.parseFloat(xMin);
+      float x2 = Parser.parseFloat(xMax);
+      if (Float.isNaN(x1) || Float.isNaN(x2))
+        return;
+      setHighlightOn(true);
+      Color color = new Color(255, 0, 0);
+      addHighlight(x1, x2, color);
+      repaint();
     }
     
     /**
@@ -2646,25 +2368,277 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
     	}
     }
     
-    /**
-     * Notifies CoordinatePickedListeners
-     * @param coord
-     */
-    public void notifyPeakPickedListeners(Coordinate coord){
-    	
-    	// TODO: Currently Aassumes spectra are not overlayed
-    	JDXSpectrum spec = (JDXSpectrum)spectra[0];
-    	String peakInfo = spec.getAssociatedPeakInfo(coord);
-    	
-    	if(peakInfo != ""){
-	    	PeakPickedEvent eventObj = new PeakPickedEvent(this, coord, peakInfo);
-	    	for(int i = 0; i < peakPickedListeners.size(); i++){
-	    		PeakPickedListener listener = peakPickedListeners.get(i);
-	    		if(listener != null){
-	    			listener.peakPicked(eventObj);
-	    		}
-	    	}
-    	}
+  /**
+   * Notifies CoordinatePickedListeners
+   * 
+   * @param coord
+   */
+  public void notifyPeakPickedListeners(Coordinate coord) {
+
+    // TODO: Currently Aassumes spectra are not overlayed
+    JDXSpectrum spec = (JDXSpectrum) spectra[0];
+    String peakInfo = spec.getAssociatedPeakInfo(coord);
+
+    PeakPickedEvent eventObj = (peakInfo.equals("") ? null
+        : new PeakPickedEvent(this, coord, peakInfo));
+    for (int i = 0; i < peakPickedListeners.size(); i++) {
+      PeakPickedListener listener = peakPickedListeners.get(i);
+      if (listener != null) {
+        listener.peakPicked(eventObj);
+      }
     }
+  }
+
+    private JSVPanelPopupMenu popup;
+    private JDXSource source;
     
+    public void setPopup(JSVPanelPopupMenu appletPopupMenu) {
+      this.popup = appletPopupMenu;
+    }
+
+    public void setSource(JDXSource source) {
+      this.source = source;
+    }
+
+    /*--------------METHODS IN INTERFACE MouseListener-----------------------*/
+
+    /**
+     * Implements mouseClicked in interface MouseListener
+     * 
+     * @param e
+     *        the <code>MouseEvent</code>
+     */
+    public void mouseClicked(MouseEvent e) {
+      if (e.getButton() == MouseEvent.BUTTON3) {
+        popup.setSelectedJSVPanel(this);
+        popup.setSource(source);
+        popup.gridCheckBoxMenuItem.setSelected(isGridOn());
+        popup.coordsCheckBoxMenuItem.setSelected(isCoordinatesOn());
+        popup.reversePlotCheckBoxMenuItem.setSelected(isPlotReversed());
+        popup.show(this, e.getX(), e.getY());
+        return;
+      }
+      fireMouseClicked(e);
+    }
+
+      /**
+       * Implements mouseEntered in interface MouseListener
+       * @param e the <code>MouseEvent</code>
+       */
+      public void mouseEntered(MouseEvent e){
+      }
+
+      /**
+       * Implements mouseExited in interface MouseListener
+       * @param e the <code>MouseEvent</code>
+       */
+      public void mouseExited(MouseEvent e){
+      }
+
+      /**
+       * Implements mousePressed in interface MouseListener
+       * @param e the <code>MouseEvent</code>
+       */
+      public void mousePressed(MouseEvent e){
+        // Maybe put this in a fireMousePressed() method
+        if(e.getButton() != MouseEvent.BUTTON1)
+          return;
+
+        int x = e.getX();
+        int y = e.getY();
+
+        int xPixel = x /*- getX()*/;
+        int yPixel = y /*- getY()*/;
+
+        if( xPixel >= leftPlotAreaPos && xPixel <= rightPlotAreaPos &&
+            yPixel >= topPlotAreaPos && yPixel <= bottomPlotAreaPos){
+
+          //isMousePressed = true;
+          zoomBoxX = xPixel;
+
+          double xPt, yPt;
+
+          Coordinate coord = getCoordFromPoint(xPixel, yPixel);
+
+          xPt = coord.getXVal();
+          yPt = coord.getYVal();
+
+          initX = xPt;
+          initY = yPt;
+
+          mousePressedInPlotArea = true;
+          repaint();
+
+        }
+        else
+          mousePressedInPlotArea = false;
+      }
+
+      /**
+       * Implements mouseReleased in interface MouseListener
+       * @param e the <code>MouseEvent</code>
+       */
+      public void mouseReleased(MouseEvent e){
+        // Maybe use a fireMouseReleased Method
+
+        if(e.getButton() != MouseEvent.BUTTON1)
+          return;
+
+        int x = e.getX();
+        int y = e.getY();
+
+        int xPixel = x /*- getX()*/;
+        int yPixel = y /*- getY()*/;
+
+        if( xPixel >= leftPlotAreaPos && xPixel <= rightPlotAreaPos &&
+            yPixel >= topPlotAreaPos && yPixel <= bottomPlotAreaPos){
+
+
+          isMouseReleased = true;
+
+          double xPt, yPt;
+
+          Coordinate coord = getCoordFromPoint(xPixel, yPixel);
+
+          xPt = coord.getXVal();
+          yPt = coord.getYVal();
+
+          finalX = xPt;
+          finalY = yPt;
+
+          if(mousePressedInPlotArea){
+            doZoom(initX, initY, finalX, finalY);
+          }
+
+        }
+
+      }
+
+
+     public void mouseDragged(MouseEvent e){
+      isMouseDraggedEvent = true;
+      fireMouseDragged(e);
+     }
+
+     /**
+      * Implements mouseMoved in interface MouseMotionListener
+      * @param e the <code>MouseEvent</code>
+      */
+    public void mouseMoved(MouseEvent e){
+      isMouseDraggedEvent = false;
+      fireMouseMoved(e);
+      if(mouseMovedOk)
+        repaint();
+    }
+
+    /**
+     * Called by the mouseClicked Method
+     * @param e the <code>MouseEvent</code>
+     */
+    protected void fireMouseClicked(MouseEvent e){
+      if(e.getButton() != MouseEvent.BUTTON1)
+          return;
+
+        int x = e.getX();
+        int y = e.getY();
+
+        int xPixel = x /*- getX()*/;
+        int yPixel = y /*- getY()*/;
+
+        if( xPixel >= leftPlotAreaPos && xPixel <= rightPlotAreaPos &&
+            yPixel >= topPlotAreaPos && yPixel <= bottomPlotAreaPos){
+
+          double xPt, yPt;
+
+          Coordinate coord = getCoordFromPoint(xPixel, yPixel);
+
+          xPt = coord.getXVal();
+          yPt = coord.getYVal();
+
+          String hashX = "#";
+          String hashY = "#";
+          String hash1 = "0.00000000";
+
+          if (scaleData.hashNumX <= 0)
+            hashX = hash1.substring(0,Math.abs(scaleData.hashNumX)+3);
+
+          DecimalFormat displayXFormatter = new DecimalFormat(hashX, new DecimalFormatSymbols(java.util.Locale.US));
+
+          if (scaleData.hashNumY <= 0)
+          hashY = hash1.substring(0,Math.abs(scaleData.hashNumY)+3);
+
+          DecimalFormat displayYFormatter = new DecimalFormat(hashY, new DecimalFormatSymbols(java.util.Locale.US));
+
+          String xStr, yStr;
+
+          xStr = displayXFormatter.format(xPt);
+          yStr = displayYFormatter.format(yPt);
+
+          // coordClickedStr = xStr + " "+ yStr;
+          // System.out.println(xStr);        
+
+          coordClicked = new Coordinate(Double.parseDouble(xStr), Double.parseDouble(yStr));
+          notifyPeakPickedListeners(coordClicked);
+        }
+        else
+          coordClicked = null;
+    }
+
+    /**
+     * Carries out the function of the MouseMoved Event
+     * @param e the <code>MouseEvent</code>
+     */
+    protected void fireMouseMoved(MouseEvent e){
+      int x = e.getX();
+      int y = e.getY();
+
+      int xPixel = x /*- getX()*/;
+      int yPixel = y /*- getY()*/;
+
+      if( xPixel >= leftPlotAreaPos && xPixel <= rightPlotAreaPos && 
+          yPixel >= topPlotAreaPos && yPixel <= bottomPlotAreaPos ) {     
+        
+        if(isMouseDraggedEvent){
+          isMouseDragged = true;      
+          currZoomBoxX = xPixel;
+        }
+
+        double xPt, yPt;
+
+        Coordinate coord = getCoordFromPoint(xPixel, yPixel);
+
+        xPt = coord.getXVal();
+        yPt = coord.getYVal();
+
+        String hashX = "#";
+        String hashY = "#";
+        String hash1 = "0.00000000";
+
+        if (scaleData.hashNumX <= 0)
+          hashX = hash1.substring(0,Math.abs(scaleData.hashNumX)+3);
+
+        DecimalFormat displayXFormatter = new DecimalFormat(hashX, new DecimalFormatSymbols(java.util.Locale.US));
+
+        if (scaleData.hashNumY <= 0)
+        hashY = hash1.substring(0,Math.abs(scaleData.hashNumY)+3);
+
+        DecimalFormat displayYFormatter = new DecimalFormat(hashY, new DecimalFormatSymbols(java.util.Locale.US));
+
+        coordStr = "(" +displayXFormatter.format(xPt) + ", " + displayYFormatter.format(yPt) + ")";
+
+        mouseMovedOk = true;
+      }
+    }
+
+    /**
+     * Carries out the function of the MouseDragged Event
+     * @param e the <code>MouseEvent</code>
+     */
+    protected void fireMouseDragged(MouseEvent e){
+    isMouseDraggedEvent = true;  // testing   
+      fireMouseMoved(e);
+      if(mouseMovedOk)
+        repaint();
+    }
+
 }
