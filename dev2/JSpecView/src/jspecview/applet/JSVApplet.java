@@ -133,7 +133,7 @@ public class JSVApplet extends JApplet {
   String filePath, oldfilePath;
   String newFilePath = null;
   private String recentFileName = "";
-  String fileURL;
+  private String recentURL = "";
 
   boolean gridOn = true;
   boolean coordinatesOn = true;
@@ -2236,6 +2236,7 @@ public class JSVApplet extends JApplet {
         url = new URL(getCodeBase(), filePath);
         fileName = url.toString();
         recentFileName = url.getFile();
+        recentURL = url.toString();
         base = getDocumentBase();
       } catch (MalformedURLException e) {
         System.out.println("problem: " + e.getMessage());
@@ -2326,10 +2327,10 @@ public class JSVApplet extends JApplet {
       System.out.println("Trouble with URL for " + file);
       return;
     }
-    String f = url.getFile();
+    String f = url.toString();
     System.out.println(f);
-    System.out.println(recentFileName);
-    if (!f.equals(recentFileName))
+    System.out.println(recentURL);
+    if (!f.equals(recentURL))
       setFilePathLocal(file);
     if (selectPanel(type))
       selectedJSVPanel.processPeakSelect(script);

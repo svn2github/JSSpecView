@@ -2420,6 +2420,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
                             int index, String recentFileName,
                             String dirLastExported) {
     JSpecViewFileFilter filter = new JSpecViewFileFilter();
+    //TODO: This is flawed. It assumes the file name has one and only one "." in it. 
     String name = TextFormat.split(recentFileName, ".")[0];
     if ("XY FIX PAC SQZ DIF".indexOf(comm) >= 0) {
       filter.addExtension("jdx");
