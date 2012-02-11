@@ -2326,7 +2326,7 @@ public class JSVApplet extends JApplet {
       System.out.println("Trouble with URL for " + file);
       return;
     }
-    String f = recentFileName = url.getFile();
+    String f = url.getFile();
     System.out.println(f);
     System.out.println(recentFileName);
     if (!f.equals(recentFileName))
