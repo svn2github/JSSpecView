@@ -2074,8 +2074,9 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     System.out.println(recentURL);
     if (!f.equals(recentURL))
       setFilePathLocal(file);
-    if (selectPanel(type))
-      selectedJSVPanel.processPeakSelect(script);
+    if (!selectPanel(type))
+      script = null;    
+    selectedJSVPanel.processPeakSelect(script);
   }
 
   private boolean selectPanel(String type) {
@@ -2098,8 +2099,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
    * @param peak
    */
   public void sendScript(String peak) {
-    if (peak != null)
-      selectedJSVPanel.processPeakSelect(peak);
+    selectedJSVPanel.processPeakSelect(peak);
     if (syncCallbackFunctionName == null)
       return;
     callToJavaScript(syncCallbackFunctionName, new Object[] {

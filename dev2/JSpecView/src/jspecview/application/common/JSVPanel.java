@@ -2344,6 +2344,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
 
     public void processPeakSelect(String peak) {
       removeAllHighlights();
+      if (peak == null)
+        return;
       String xMin = Parser.getQuotedAttribute(peak, "xMin");
       String xMax = Parser.getQuotedAttribute(peak, "xMax");
       if (xMin == null || xMax == null)

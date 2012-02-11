@@ -2825,17 +2825,9 @@ private void showUnableToOverlayMessage() {
     System.out.println("JSpecView MainFrame.syncScript: " + script);
     if (!file.equals(recentURL))
       openFile(new File(file));
-    if (selectPanel(type)) 
-      selectedJSVPanel.processPeakSelect(script);
-    
-    // TODO  Get the associated JSVPanel i.e the spectrum for which the peak info is associated. Likely need the block number to be send in the peak info?
-    // TODO  parse coordinate and add highlight to JSVPanel
-    
- // BH to DF: each <PeakAssignment record is unique -- or if it is not, then it doesn't matter. 
- // So you just put each <PeakAssignment record in a master Hashtable and retrieve whatever 
- // information you want using htPeakTable.get(script).  
-   
-    
+    if (!selectPanel(type))
+      script = null;    
+    selectedJSVPanel.processPeakSelect(script);
   }
 
   private boolean selectPanel(String type) {
@@ -2867,8 +2859,7 @@ private void showUnableToOverlayMessage() {
    * @param peak
    */
   public void sendScript(String peak) {
-    if (peak != null)
-      selectedJSVPanel.processPeakSelect(peak);
+    selectedJSVPanel.processPeakSelect(peak);
     String s = Escape.jmolSelect(peak, recentURL);
     System.out.println("JSpecView MainFrame sendScript: " + s);
     if (jmol == null)
