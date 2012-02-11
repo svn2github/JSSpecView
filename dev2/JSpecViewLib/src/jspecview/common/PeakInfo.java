@@ -1,9 +1,16 @@
 package jspecview.common;
 
+import jspecview.util.Parser;
+
 public class PeakInfo {
 	private double xMin, xMax, yMin, yMax;
 	private String stringInfo;
+	private String type;
 	
+  public String getType() {
+    return type;
+  }
+  
 	public void setXMax(double xMax) {
 		this.xMax = xMax;
 	}
@@ -30,10 +37,11 @@ public class PeakInfo {
 	}
 	public void setStringInfo(String stringInfo) {
 		this.stringInfo = stringInfo;
+		type = Parser.getQuotedAttribute(stringInfo, "type");
 	}
+	
 	public String getStringInfo() {
 		return stringInfo;
 	}
-	
-	
+
 }

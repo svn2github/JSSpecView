@@ -668,7 +668,7 @@ public class JDXSpectrum implements Graph{
     newSpectrum.setYFactor(getYFactor());
     newSpectrum.setYUnits(getYUnits());
     newSpectrum.setPathlength(getPathlength());
-
+    newSpectrum.setPeakList(getPeakList());
     return newSpectrum;
   }
 
@@ -689,6 +689,12 @@ public class JDXSpectrum implements Graph{
 	
 	public void setPeakList(ArrayList<PeakInfo> list) {
 		peakList = list;
+	}
+	
+	public String getPeakType() {
+	  if (peakList == null || peakList.size() == 0)
+	    return null;
+	  return peakList.get(0).getType();
 	}
 	
 	public String getAssociatedPeakInfo(Coordinate coord){

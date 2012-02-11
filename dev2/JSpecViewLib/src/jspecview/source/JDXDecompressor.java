@@ -192,9 +192,10 @@ public class JDXDecompressor {
 
   /**
    * Decompresses DIF format
+   * 
    * @return the array of <code>Coordinate</code>s
    */
-  private Coordinate[] decompressASDF(){
+  private Coordinate[] decompressASDF() {
     char ch;
     int linenumber = labelLineNo;
     String line = null;
@@ -209,108 +210,110 @@ public class JDXDecompressor {
     Vector<Coordinate> xyCoords = new Vector<Coordinate>();
 
     BufferedReader dataReader = new BufferedReader(new StringReader(data));
-    try{
+    try {
       line = dataReader.readLine();
-    }
-    catch(IOException ioe){
+    } catch (IOException ioe) {
     }
     lineIndex = 0;
 
-    while (line != null){
+    while (line != null) {
       linenumber++;
-      if (lineIndex <= line.length()){
+      if (lineIndex <= line.length()) {
         point = new Coordinate();
         xval = getFirstXval(line);
         xval = (xval * xFactor);
         point.setXVal(xval);
-        yval = getYvalDIF(line,linenumber);
+        yval = getYvalDIF(line, linenumber);
         point.setYVal(yval * yFactor);
-        if (increasing){      // deltaX is positive
+        if (increasing) { // deltaX is positive
           if (xyCoords.isEmpty())
-            xyCoords.addElement( point );   // first data line only
-          else{
+            xyCoords.addElement(point); // first data line only
+          else {
             Coordinate last_pt = (Coordinate) xyCoords.lastElement();
             // DIF Y checkpoint means X value does not advance at start
             // of new line. Remove last values and put in latest ones
-            if(Math.abs(last_pt.getXVal()-point.getXVal()) < Math.abs(0.35 * deltaX)){
-              Coordinate old_lastPt = (Coordinate)xyCoords.set(xyCoords.size() - 1, point);
-                // Check for Y checkpoint error - Y values should correspond
-              if(Math.abs(point.getYVal()) < Math.abs(0.6 * old_lastPt.getYVal()) ||
-                 Math.abs(point.getYVal()) > Math.abs(1.4 * old_lastPt.getYVal()) ){
-                errorLog.append("Y Checkpoint Error! Line " +
-                                 linenumber + " " + point.getYVal() +
-                                  " " + old_lastPt.getYVal() + "\n");
+            if (Math.abs(last_pt.getXVal() - point.getXVal()) < Math
+                .abs(0.35 * deltaX)) {
+              Coordinate old_lastPt = (Coordinate) xyCoords.set(
+                  xyCoords.size() - 1, point);
+              // Check for Y checkpoint error - Y values should correspond
+              if (Math.abs(point.getYVal()) < Math.abs(0.6 * old_lastPt
+                  .getYVal())
+                  || Math.abs(point.getYVal()) > Math.abs(1.4 * old_lastPt
+                      .getYVal())) {
+                errorLog.append("Y Checkpoint Error! Line " + linenumber + " "
+                    + point.getYVal() + " " + old_lastPt.getYVal() + "\n");
               }// end DIF Y checkpoint test
-            }
-            else{
-              xyCoords.addElement( point );
+            } else {
+              xyCoords.addElement(point);
               // Check for X checkpoint error
               // first point of new line should be deltaX away
-        // ACD/Labs seem to have large rounding error so using between 0.6 and 1.4
-              if (Math.abs(point.getXVal() - last_pt.getXVal()) > Math.abs(1.4 * deltaX) ||
-                  Math.abs(point.getXVal() - last_pt.getXVal()) < Math.abs(0.6 * deltaX)){
-                    errorLog.append("X Checkpoint Error! Line " +
-                                  linenumber + " " + point.getXVal() +
-                                  " " + last_pt.getXVal() + "\n");
+              // ACD/Labs seem to have large rounding error so using between 0.6 and 1.4
+              if (Math.abs(point.getXVal() - last_pt.getXVal()) > Math
+                  .abs(1.4 * deltaX)
+                  || Math.abs(point.getXVal() - last_pt.getXVal()) < Math
+                      .abs(0.6 * deltaX)) {
+                errorLog.append("X Checkpoint Error! Line " + linenumber + " "
+                    + point.getXVal() + " " + last_pt.getXVal() + "\n");
 
               }
             }
           }
-        }
-        else{       //decreasing  - deltaX is negative
-          if (xyCoords.isEmpty()){
-            xyCoords.insertElementAt(point,0);  // first data line only
-          }
-          else{
+        } else { //decreasing  - deltaX is negative
+          if (xyCoords.isEmpty()) {
+            xyCoords.insertElementAt(point, 0); // first data line only
+          } else {
             Coordinate last_pt = (Coordinate) xyCoords.firstElement();
             // DIF Y checkpoint means X value does not advance at start
             // of new line. Remove last values and put in latest ones
-            if(Math.abs(last_pt.getXVal()-point.getXVal()) < Math.abs(0.35 * deltaX)){
+            if (Math.abs(last_pt.getXVal() - point.getXVal()) < Math
+                .abs(0.35 * deltaX)) {
               // set last point to current point
-              Coordinate old_lastPt = (Coordinate)xyCoords.set(0, point);
+              Coordinate old_lastPt = (Coordinate) xyCoords.set(0, point);
 
-                // Check for Y checkpoint error Y values should correspond
-              if(Math.abs(point.getYVal()) < Math.abs(0.6 * old_lastPt.getYVal()) ||
-                Math.abs(point.getYVal()) > Math.abs(1.4 * old_lastPt.getYVal()) ){
-                errorLog.append("Y Checkpoint Error! Line " +
-                                 linenumber + " " + point.getYVal() +
-                                  " " + old_lastPt.getYVal() + "\n");
+              // Check for Y checkpoint error Y values should correspond
+              if (Math.abs(point.getYVal()) < Math.abs(0.6 * old_lastPt
+                  .getYVal())
+                  || Math.abs(point.getYVal()) > Math.abs(1.4 * old_lastPt
+                      .getYVal())) {
+                errorLog.append("Y Checkpoint Error! Line " + linenumber + " "
+                    + point.getYVal() + " " + old_lastPt.getYVal() + "\n");
               }
             } // end DIF Y checkpoint test
-            else{
-              xyCoords.insertElementAt(point,0);
+            else {
+              xyCoords.insertElementAt(point, 0);
               // Check for X checkpoint error
               // first point of new line should be deltaX away
-        // ACD/Labs seem to have large rounding error so using between 0.6 and 1.4
-             // System.out.println(point.getXVal()+ " " +last_pt.getXVal());
-              if (Math.abs(last_pt.getXVal() - point.getXVal()) > Math.abs(1.4 * deltaX) ||
-                  Math.abs(last_pt.getXVal() - point.getXVal()) < Math.abs(0.6 * deltaX)){
-                    errorLog.append("X Checkpoint Error! Line " +
-                                  linenumber + " " + point.getXVal() +
-                                  " " + last_pt.getXVal() + "\n");
+              // ACD/Labs seem to have large rounding error so using between 0.6 and 1.4
+              // System.out.println(point.getXVal()+ " " +last_pt.getXVal());
+              if (Math.abs(last_pt.getXVal() - point.getXVal()) > Math
+                  .abs(1.4 * deltaX)
+                  || Math.abs(last_pt.getXVal() - point.getXVal()) < Math
+                      .abs(0.6 * deltaX)) {
+                errorLog.append("X Checkpoint Error! Line " + linenumber + " "
+                    + point.getXVal() + " " + last_pt.getXVal() + "\n");
 
               }
             }
           } // end if xyCoords is empty
         } // end if decreasing
       }
-      while (lineIndex < line.length()){
+      while (lineIndex < line.length()) {
         ch = line.charAt(lineIndex);
-        if (Dif.indexOf(ch) != -1){
+        if (Dif.indexOf(ch) != -1) {
           point = new Coordinate();
           xval += deltaX;
           point.setXVal(xval);
-          difval = getYvalDIF(line,linenumber);        
+          difval = getYvalDIF(line, linenumber);
           yval += difval;
           point.setYVal(yval * yFactor);
           if (increasing)
             xyCoords.addElement(point);
           else
-            xyCoords.insertElementAt(point,0);
-        }
-        else if (Dup.indexOf(ch) != -1){
-          dupFactor = getDUPVal(line,line.charAt(lineIndex));
-          for (i=1;i<dupFactor;i++){
+            xyCoords.insertElementAt(point, 0);
+        } else if (Dup.indexOf(ch) != -1) {
+          dupFactor = getDUPVal(line, line.charAt(lineIndex));
+          for (i = 1; i < dupFactor; i++) {
             point = new Coordinate();
             xval += deltaX;
             point.setXVal(xval);
@@ -319,42 +322,41 @@ public class JDXDecompressor {
             if (increasing)
               xyCoords.addElement(point);
             else
-              xyCoords.insertElementAt(point,0);
+              xyCoords.insertElementAt(point, 0);
           }
-        }
-        else if (Sqz.indexOf(ch) != -1){
+        } else if (Sqz.indexOf(ch) != -1) {
           point = new Coordinate();
           xval += deltaX;
           point.setXVal(xval);
-          yval = getYvalDIF(line,linenumber);
+          yval = getYvalDIF(line, linenumber);
           point.setYVal(yval * yFactor);
           if (increasing)
             xyCoords.addElement(point);
           else
-            xyCoords.insertElementAt(point,0);
+            xyCoords.insertElementAt(point, 0);
         }
         // Check for missing points in file
-        else if (ch == '?'){
+        else if (ch == '?') {
           lineIndex++;
           xval += deltaX;
-          errorLog.append("Invalid Data Symbol Found! Line " + linenumber + "\n");
+          errorLog.append("Invalid Data Symbol Found! Line " + linenumber
+              + "\n");
         }
         // check for spaces
-        else if(ch == ' '){
+        else if (ch == ' ') {
           lineIndex++;
         }
       }
-      try{
+      try {
         line = dataReader.readLine();
-        difval=0;
-      }
-      catch(IOException ioe){
+        difval = 0;
+      } catch (IOException ioe) {
       }
       lineIndex = 0;
     }
 
     Coordinate[] coord = new Coordinate[xyCoords.size()];
-    return (Coordinate[])xyCoords.toArray(coord);
+    return (Coordinate[]) xyCoords.toArray(coord);
   }
 
 
