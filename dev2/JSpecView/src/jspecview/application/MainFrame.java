@@ -70,6 +70,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.List;
@@ -129,6 +130,7 @@ import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
 import jspecview.source.CompoundSource;
 import jspecview.source.JDXSource;
+import jspecview.util.Escape;
 import jspecview.util.Parser;
 import mdidesktop.ScrollableDesktopPane;
 import mdidesktop.WindowMenu;
@@ -163,6 +165,7 @@ public class MainFrame
   String dirLastOpened;
   String dirLastExported;
   String recentFileName;
+  String recentURL;
 
   boolean autoIntegrate;
 
@@ -1210,9 +1213,7 @@ public class MainFrame
       if (url != null) {
         if (url.indexOf("://") == -1);
           url = "http://" + url;
-        String filePath = url.replace('\\', '/');
-        File fileName =  new File(filePath);
-        openFile(fileName);
+        openFile(null, url);
         //viewer.openFileAsynchronously(url);
       }
       return;
@@ -1252,16 +1253,32 @@ public class MainFrame
    * @param file the file
    */
   public void openFile(File file) {
+    openFile(file, null);
+  }
+  
+  private void openFile(File file, String url) {
     writeStatus(" ");
-    String fileName = recentFileName = file.getName();
-    String filePath = file.getAbsolutePath();
+    String filePath = null;
+    String fileName = null;
+    if (file == null) {
+      try {
+        fileName = (new URL(url)).getFile();
+      } catch (MalformedURLException e) {
+        return;
+      } 
+      recentURL = url;
+    } else {
+      fileName = recentFileName = file.getName();
+      filePath = file.getAbsolutePath();
+      recentURL = (url == null ? filePath.replace('\\', '/') : url);
+    }
     if (jdxSourceFiles.contains(file)) {
       writeStatus("File: '" + filePath + "' is already opened");
       return;
     }
     JDXSource source;
     try {
-      source = JDXSource.createJDXSource(null, filePath, null);
+      source = JDXSource.createJDXSource(null, (url == null ? filePath : url), null);
     }
     catch (Exception e) {
       writeStatus(e.getMessage());
@@ -2813,9 +2830,8 @@ private void showUnableToOverlayMessage() {
     if (file == null || type == null)
       return;
     System.out.println("JSpecView MainFrame.syncScript: " + script);
-    File f = new File(file);
-    if (!f.getName().equals(recentFileName))
-      openFile(f);
+    if (!file.equals(recentURL))
+      openFile(new File(file));
     //if (selectPanel(type))
     //  selectedJSVPanel.processPeakSelect(script);
     
@@ -2845,12 +2861,11 @@ private void showUnableToOverlayMessage() {
     if (jmol == null)
       return;
     // outgoing <PeakAssignment file="xxx" type="xxx"...> record to Jmol
-    jmol.syncScript("Select: " + peak);
+    jmol.syncScript(Escape.jmolSelect(peak, recentURL));
   }
 
 	@Override
 	public void peakPicked(PeakPickedEvent eventObj) {
-		// TODO: Need to add filePath to string before sending
-		sendScript(eventObj.getPeakInfo());
+    sendScript(eventObj.getPeakInfo());
 	}
 }

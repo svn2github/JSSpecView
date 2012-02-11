@@ -99,6 +99,7 @@ import jspecview.source.BlockSource;
 import jspecview.source.CompoundSource;
 import jspecview.source.JDXSource;
 import jspecview.source.NTupleSource;
+import jspecview.util.Escape;
 import jspecview.util.Logger;
 import jspecview.util.Parser;
 import netscape.javascript.JSObject;
@@ -2342,14 +2343,16 @@ public class JSVApplet extends JApplet {
   }
 
   /**
-   * This is the method Debbie needs to call from within JSpecView
-   * when a peak is clicked.
+   * This is the method Debbie needs to call from within JSpecView when a peak
+   * is clicked.
    * 
    * @param peak
    */
   public void sendScript(String peak) {
-    if (syncCallbackFunctionName != null)
-      callToJavaScript(syncCallbackFunctionName, new Object[] { fullName, "Select: " + peak });
+    if (syncCallbackFunctionName == null)
+      return;
+    callToJavaScript(syncCallbackFunctionName, new Object[] {
+        fullName, Escape.jmolSelect(peak, recentURL) });
   }
 
 }
