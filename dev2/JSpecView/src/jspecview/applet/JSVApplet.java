@@ -128,7 +128,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     System.out.println("JSpecView " + this + " finalized");
   }
 
-  public static final String APPLET_VERSION = "1.0.20120210-0730";
+  public static final String APPLET_VERSION = "1.0.20120211-1730";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath;
@@ -546,9 +546,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
           title = title.substring(title.indexOf(':') + 1);
         else if (source instanceof BlockSource)
           //title = "block " + (i + 1);
-          title = title.substring(0, (title.length() >= 10 ? 10 : title
-              .length()))
-              + "... : ";
+          title = title.substring(0, (title.length() >= 10 ? 10 : 
+        	  title.length())) + "... : ";
         spectraPane.addTab(title, jsvPanels[i]);
       }
       // Show the spectrum specified by the spectrumnumber parameter
@@ -752,7 +751,9 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     public void mouseClicked(MouseEvent e) {
       JSVPanel jsvPanel = (JSVPanel) e.getSource();
       selectedJSVPanel = jsvPanel;
-      Coordinate coord = new Coordinate();
+      Coordinate coord = jsvPanel.getClickedCoordinate();
+ //     Coordinate coord = new Coordinate();
+      
       Coordinate actualCoord = (peakCallbackFunctionName == null ? null
           : new Coordinate());
       if (!jsvPanel.getPickedCoordinates(coord, actualCoord))
