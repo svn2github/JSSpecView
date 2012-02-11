@@ -372,7 +372,6 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     // enable or disable menus
     appletPopupMenu = new JSVAppletPopupMenu(this, isSignedApplet);
     appletPopupMenu.enableMenus(menuOn, enableZoom);
-
     //setBackground(backgroundColor);
 
     try {
@@ -1752,6 +1751,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
    *        String
    */
   public void parseInitScript(String params) {
+    if (params == null)
+      params = "";
     StringTokenizer allParamTokens = new StringTokenizer(params, ";");
     if (JSpecViewUtils.DEBUG) {
       System.out.println("Running in DEBUG mode");
