@@ -49,12 +49,12 @@
 	    </propertyfile>
 	</target>
 
-	<!--
+<!--	
 	<target name="compile">
         <mkdir dir="${classes.dir}"/>
         <javac srcdir="${src.dir}" destdir="${classes.dir}"/>
     </target>
-	-->
+-->
 <!---
 -->
 
@@ -97,7 +97,7 @@
 	    <signjar jar="${build.applet.dir}/${ant.project.name}.applet.${build.number}.jar"
 	             signedjar="${build.applet.dir}/${ant.project.name}.applet.signed.${build.number}.jar"
 	             keystore="certificate/JSVcertificate.store"
-	             storepass="JSV2011" alias="JSVcertificate" />
+	             storepass="JSV2012" alias="JSVcertificate" />
 	</target>
 <!---
 -->
