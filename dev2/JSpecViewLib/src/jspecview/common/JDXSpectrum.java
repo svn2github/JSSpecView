@@ -700,18 +700,27 @@ public class JDXSpectrum implements Graph{
 	public boolean hasPeakIndex(String index) {
     if (peakList != null && peakList.size() > 0)
     for(int i = 0; i < peakList.size(); i++)
-      if (index.equals(peakList.get(i).getIndex()))
+      if (index.equals(peakList.get(i).getIndex())) {
+        selectedPeak = peakList.get(i);
         return true;
+      }
     return false;	  
 	}
 
+	private PeakInfo selectedPeak;
+	
+	public PeakInfo getSelectedPeak() {
+	  return selectedPeak;
+	}
+	
   public String getAssociatedPeakInfo(Coordinate coord) {
+    selectedPeak = null;
     if (peakList != null && peakList.size() > 0)
       for (int i = 0; i < peakList.size(); i++) {
         PeakInfo peak = peakList.get(i);
         double xVal = coord.getXVal();
         if (xVal >= peak.getXMin() && xVal <= peak.getXMax()) {
-          return peak.getStringInfo();
+          return (selectedPeak = peak).getStringInfo();
         }
       }
     return null;
