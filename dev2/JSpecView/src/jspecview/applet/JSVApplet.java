@@ -89,6 +89,7 @@ import jspecview.common.Coordinate;
 import jspecview.common.IntegrationRatio;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSpecViewUtils;
+import jspecview.common.PeakInfo;
 import jspecview.common.TransmittanceAbsorbanceConverter;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
@@ -154,10 +155,9 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
 
   String theInterface = "single"; // either tab, tile, single, overlay
   private String coordCallbackFunctionName;
-  private String peakCallbackFunctionName; 
+  private String peakCallbackFunctionName;
   private String syncCallbackFunctionName;
   private String appletReadyCallbackFunctionName;
-
 
   String sltnclr = "255,255,255"; //Colour of Solution
   String titleFontName = null; // Title Font
@@ -192,7 +192,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
   JLabel statusTextLabel = new JLabel();
   JFileChooser jFileChooser;
   JSVPanel selectedJSVPanel;
-  JSVAppletPopupMenu appletPopupMenu; 
+  JSVAppletPopupMenu appletPopupMenu;
   JDXSpectrum xmlSpec;
   JSVPanel tempJSVP;
 
@@ -204,7 +204,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
       "PLOTCOLORS", "VERSION", "PEAKCALLBACKFUNCTIONNAME", "IRMODE", "OBSCURE",
       "XSCALEON", "YSCALEON", "XUNITSON", "YUNITSON", "INTEGRALPLOTCOLOR",
       "TITLEFONTNAME", "TITLEBOLDON", "DISPLAYFONTNAME", "INTEGRATIONRATIOS",
-      "APPLETREADYCALLBACKFUNCTIONNAME", "APPLETID", "SYNCID", "SYNCCALLBACKFUNCTIONNAME" };
+      "APPLETREADYCALLBACKFUNCTIONNAME", "APPLETID", "SYNCID",
+      "SYNCCALLBACKFUNCTIONNAME" };
 
   final private static int PARAM_LOAD = 0;
   final private static int PARAM_REVERSEPLOT = 1;
@@ -345,7 +346,6 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
   private String appletID;
   private String syncID;
 
-  
   /**
    * Initializes applet with parameters and load the <code>JDXSource</code>
    */
@@ -353,8 +353,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
   public void init() {
     init(null);
     if (appletReadyCallbackFunctionName != null && fullName != null)
-      callToJavaScript(appletReadyCallbackFunctionName,
-          new Object[] { appletID, fullName, Boolean.TRUE });
+      callToJavaScript(appletReadyCallbackFunctionName, new Object[] {
+          appletID, fullName, Boolean.TRUE });
   }
 
   private void init(String data) {
@@ -403,7 +403,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     }
 
     statusTextLabel.setText("Loading...");
-    
+
   }
 
   /**
@@ -573,7 +573,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
       appletPanel.add(splitPane, BorderLayout.CENTER);
       //splitPane.setBackground(backgroundColor);
     } else { // Single or overlay
-    //      compoundMenuOn = true;
+      //      compoundMenuOn = true;
       int spectrumIndex;
       String title;
       if (showSpectrumNumber)
@@ -666,7 +666,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
                 }
 
                 if (index > 0 && index < numberOfPanels) {
-                  showSpectrum(index);
+                  showSpectrum(index, true);
                   writeStatus(" ");
                 } else
                   writeStatus("Invalid Spectrum Number");
@@ -693,7 +693,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     // shows the newly selected block
     int index = Integer.parseInt(txt.substring(0, txt.indexOf("-")));
     //sltnclr = Visible.Colour(source);
-    showSpectrum(index - 1);
+    showSpectrum(index - 1, true);
   }
 
   /**
@@ -702,7 +702,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
    * @param index
    *        the index
    */
-  void showSpectrum(int index) {
+  void showSpectrum(int index, boolean fromMenu) {
     JSVPanel jsvp = jsvPanels[index];
     appletPanel.remove(jsvPanels[currentSpectrumIndex]);
     appletPanel.add(jsvp, BorderLayout.CENTER);
@@ -717,6 +717,10 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     chooseContainer();
     this.validate();
     repaint();
+
+    if (fromMenu)
+      sendFrameChange(jsvp);
+
   }
 
   /**
@@ -939,7 +943,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
         + ")<br /><br /></body></HTML>", "Predicted Colour",
         JOptionPane.INFORMATION_MESSAGE);
   }
-  
+
   /**
    * Opens the print dialog to enable printing
    * 
@@ -968,10 +972,10 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
    * @param e
    *        the ActionEvent
    */
-/*  void clearMenuItem_actionPerformed(ActionEvent e) {
-    selectedJSVPanel.clearViews();
-  }
-*/
+  /*  void clearMenuItem_actionPerformed(ActionEvent e) {
+      selectedJSVPanel.clearViews();
+    }
+  */
   /**
    * Shows the applet in a Frame
    * 
@@ -1195,7 +1199,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
   }
 
   private String dirLastExported;
-  
+
   private String fullName;
 
   /**
@@ -1531,7 +1535,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
   public void setSpectrumNumber(int block) {
     if (selectedJSVPanel != null) {
       if (theInterface.equals("single")) {
-        showSpectrum(block - 1);
+        showSpectrum(block - 1, false);
       } else {
         spectraPane.setSelectedIndex(block - 1);
       }
@@ -1918,7 +1922,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
       compoundMenuOn = false;
     else {
       compoundMenuOn = source instanceof CompoundSource;
-   }
+    }
 
     String Yunits = source.getJDXSpectrum(0).getYUnits();
     String Xunits = source.getJDXSpectrum(0).getXUnits();
@@ -1965,7 +1969,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
   }
 
   /////////// simple sync functionality //////////
-  
+
   /**
    * preceed <Peaks here with full name of Jmol applet (including syncID)
    * 
@@ -1989,16 +1993,16 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     if (!f.equals(recentURL))
       setFilePathLocal(file);
     if (!selectPanel(index))
-      script = null;    
+      script = null;
     selectedJSVPanel.processPeakSelect(script);
   }
 
   private boolean selectPanel(String index) {
     // what if tabbed? 
-    if (jsvPanels == null) 
+    if (jsvPanels == null)
       return false;
     for (int i = 0; i < jsvPanels.length; i++) {
-      if (((JDXSpectrum)jsvPanels[i].getSpectrumAt(0)).hasPeakIndex(index)) {
+      if (((JDXSpectrum) jsvPanels[i].getSpectrumAt(0)).hasPeakIndex(index)) {
         setSpectrumNumber(i + 1);
         return true;
       }
@@ -2016,18 +2020,10 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     selectedJSVPanel.processPeakSelect(peak);
     if (syncCallbackFunctionName == null)
       return;
-    callToJavaScript(syncCallbackFunctionName, new Object[] {
-        fullName, Escape.jmolSelect(peak, recentURL) });
+    callToJavaScript(syncCallbackFunctionName, new Object[] { fullName,
+        Escape.jmolSelect(peak, recentURL) });
   }
 
-  @Override
-  public void peakPicked(PeakPickedEvent eventObj) {
-    selectedJSVPanel = (JSVPanel) eventObj.getSource();
-    currentSpectrumIndex = selectedJSVPanel.getIndex();
-    checkCallbacks();
-    sendScript(eventObj.getPeakInfo());
-  }
-  
   public void checkCallbacks() {
     if (coordCallbackFunctionName == null && peakCallbackFunctionName == null)
       return;
@@ -2046,6 +2042,19 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
           Double.valueOf(actualCoord.getXVal()),
           Double.valueOf(actualCoord.getYVal()),
           Integer.valueOf(currentSpectrumIndex + 1) });
+  }
+
+  @Override
+  public void peakPicked(PeakPickedEvent eventObj) {
+    selectedJSVPanel = (JSVPanel) eventObj.getSource();
+    currentSpectrumIndex = selectedJSVPanel.getIndex();
+    checkCallbacks();
+    sendScript(eventObj.getPeakInfo());
+  }
+
+  private void sendFrameChange(JSVPanel jsvp) {
+    PeakInfo pi = ((JDXSpectrum)jsvp.getSpectrumAt(0)).getSelectedPeak();
+    sendScript(pi == null ? null : pi.getStringInfo());
   }
 
 }

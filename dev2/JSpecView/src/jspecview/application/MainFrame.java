@@ -124,6 +124,7 @@ import jspecview.common.Coordinate;
 import jspecview.common.Graph;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSpecViewUtils;
+import jspecview.common.PeakInfo;
 import jspecview.common.TransmittanceAbsorbanceConverter;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
@@ -604,7 +605,7 @@ public class MainFrame
 
         Object nodeInfo = node.getUserObject();
         if (node.isLeaf()) {
-          setFrame((SpecInfo) nodeInfo);
+          setFrame((SpecInfo) nodeInfo, true);
         }
       }
     });
@@ -1677,7 +1678,7 @@ private void showUnableToOverlayMessage() {
       for (int i = (specs.size() - 1); i >= 0; i--) {
         frames[i].toFront();
       } 
-      setFrame(specInfos[0]);
+      setFrame(specInfos[0], false);
       
       createTree(file.getName());
       
@@ -2834,7 +2835,7 @@ private void showUnableToOverlayMessage() {
     for (int i = 0; i < specInfos.length; i++) {
       SpecInfo si = specInfos[i];
       if (((JDXSpectrum)si.jsvp.getSpectrumAt(0)).hasPeakIndex(index)) {
-        setFrame(si);
+        setFrame(si, false);
         return true;
       }
     }
@@ -2842,7 +2843,7 @@ private void showUnableToOverlayMessage() {
     return false;
   }
 
-  private void setFrame(SpecInfo specInfo) {
+  private void setFrame(SpecInfo specInfo, boolean fromTree) {
     JInternalFrame frame = specInfo.frame;
     selectedJSVPanel = specInfo.jsvp;
     frame.moveToFront();
@@ -2850,7 +2851,10 @@ private void showUnableToOverlayMessage() {
       frame.setSelected(true);
     } catch (PropertyVetoException pve) {
     }
+    if (fromTree)
+      sendFrameChange(specInfo.jsvp);
   }
+
 
 /**
    * This is the method Debbie needs to call from within JSpecView
@@ -2873,4 +2877,11 @@ private void showUnableToOverlayMessage() {
     selectedJSVPanel = (JSVPanel) eventObj.getSource();
     sendScript(eventObj.getPeakInfo());
 	}
+	
+  private void sendFrameChange(JSVPanel jsvp) {
+    PeakInfo pi = ((JDXSpectrum)jsvp.getSpectrumAt(0)).getSelectedPeak();
+    sendScript(pi == null ? null : pi.getStringInfo());
+  }
+
+
 }
