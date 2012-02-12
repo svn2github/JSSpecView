@@ -126,7 +126,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     System.out.println("JSpecView " + this + " finalized");
   }
 
-  public static final String APPLET_VERSION = "1.0.20120211-1730";
+  public static final String APPLET_VERSION = "1.0.20120212-1430";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath;
@@ -427,7 +427,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
   }
 
   /**
-   * Initalizes the <code>JSVPanels</code> and adds them to the jsvPanels array
+   * Initializes the <code>JSVPanels</code> and adds them to the jsvPanels array
    * 
    * @throws JSpecViewException
    */
@@ -468,7 +468,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
       selectedJSVPanel = jsvp;
       jsvp.setIndex(currentSpectrumIndex = 0);
     } else {
-      // initalise JSVPanels and add them to the array
+      // initialise JSVPanels and add them to the array
       jsvPanels = new JSVPanel[numberOfSpectra];
       try {
         for (int i = 0; i < numberOfSpectra; i++) {
@@ -1915,11 +1915,11 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
 
     specs = source.getSpectra();
     boolean continuous = source.getJDXSpectrum(0).isContinuous();
- //   if (!compoundMenuOn2)
- //     compoundMenuOn = false;
- //   else {
+    if (!compoundMenuOn2)
+      compoundMenuOn = false;
+    else {
       compoundMenuOn = source instanceof CompoundSource;
- //   }
+   }
 
     String Yunits = source.getJDXSpectrum(0).getYUnits();
     String Xunits = source.getJDXSpectrum(0).getXUnits();
