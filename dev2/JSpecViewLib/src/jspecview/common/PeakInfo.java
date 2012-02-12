@@ -6,6 +6,7 @@ public class PeakInfo {
 	private double xMin, xMax, yMin, yMax;
 	private String stringInfo;
 	private String type;
+  private String index;
 	
   public String getType() {
     return type;
@@ -38,10 +39,15 @@ public class PeakInfo {
 	public void setStringInfo(String stringInfo) {
 		this.stringInfo = stringInfo;
 		type = Parser.getQuotedAttribute(stringInfo, "type");
+    index = Parser.getQuotedAttribute(stringInfo, "index");
 	}
 	
 	public String getStringInfo() {
 		return stringInfo;
 	}
+
+  public String getIndex() {
+    return index;
+  }
 
 }

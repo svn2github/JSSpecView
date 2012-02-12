@@ -696,16 +696,24 @@ public class JDXSpectrum implements Graph{
 	    return null;
 	  return peakList.get(0).getType();
 	}
-	
-	public String getAssociatedPeakInfo(Coordinate coord){
-		for(int i = 0; i < peakList.size(); i++){
-			PeakInfo peak = peakList.get(i);
-			double xVal = coord.getXVal();
-			if (xVal >= peak.getXMin() && xVal <= peak.getXMax()){
-				return peak.getStringInfo();
-			}
-		}
-		
-		return "";
+
+	public boolean hasPeakIndex(String index) {
+    if (peakList != null && peakList.size() > 0)
+    for(int i = 0; i < peakList.size(); i++)
+      if (index.equals(peakList.get(i).getIndex()))
+        return true;
+    return false;	  
 	}
+
+  public String getAssociatedPeakInfo(Coordinate coord) {
+    if (peakList != null && peakList.size() > 0)
+      for (int i = 0; i < peakList.size(); i++) {
+        PeakInfo peak = peakList.get(i);
+        double xVal = coord.getXVal();
+        if (xVal >= peak.getXMin() && xVal <= peak.getXMax()) {
+          return peak.getStringInfo();
+        }
+      }
+    return null;
+  }
 }
