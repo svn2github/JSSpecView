@@ -811,4 +811,10 @@ public class JDXSpectrum implements Graph {
       }
     return null;
   }
+
+  public String getTitleLabel() {
+    String type = (peakList == null || peakList.size() == 0 ? dataType 
+        : peakList.get(0).getType());
+    return (type != null && type.length() > 0 ? type + " " : "") + title;
+  }
 }
