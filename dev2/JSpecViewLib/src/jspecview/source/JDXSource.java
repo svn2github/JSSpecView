@@ -41,30 +41,26 @@ import jspecview.util.Parser;
 
 /**
  * <code>JDXSource</code> is representation of all the data in the JCAMP-DX file
- * or source.
- * Note: All Jdx Source are viewed as having a set of Spectra
+ * or source. Note: All Jdx Source are viewed as having a set of Spectra
+ * 
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
  * @author Prof. Robert J. Lancashire
  */
 public abstract class JDXSource {
 
-
   /**
    * The labels for various tabular data
    */
-  public static final String[] TABULAR_DATA_LABELS = {"##XYDATA", "##XYPOINTS",
-                                                "##PEAKTABLE", "##DATATABLE",
-                                                "##PEAKASSIGNMENTS"};
+  public static final String[] TABULAR_DATA_LABELS = { "##XYDATA",
+      "##XYPOINTS", "##PEAKTABLE", "##DATATABLE", "##PEAKASSIGNMENTS" };
 
   /**
    * The variable list for the tabular data labels
    */
-  public static final String[][] VAR_LIST_TABLE =
-    {
-      {"PEAKTABLE", "XYDATA", "XYPOINTS"},
-      {"(XY..XY)", "(X++(Y..Y))", "(XY..XY)"}
-    };
+  public static final String[][] VAR_LIST_TABLE = {
+      { "PEAKTABLE", "XYDATA", "XYPOINTS" },
+      { "(XY..XY)", "(X++(Y..Y))", "(XY..XY)" } };
 
   // Table of header variables specific to the jdx source
   protected Map<String, String> headerTable;
@@ -81,18 +77,21 @@ public abstract class JDXSource {
   /**
    * Constructor
    */
-  public JDXSource(){
+  public JDXSource() {
     headerTable = new HashMap<String, String>();
     jdxSpectra = new Vector<JDXSpectrum>();
   }
 
   /**
    * Returns the Spectrum at a given index in the list
-   * @param index the spectrum index
+   * 
+   * @param index
+   *        the spectrum index
    * @return the Spectrum at a given index in the list
    */
-  public JDXSpectrum getJDXSpectrum(int index){
-    return jdxSpectra.size() <= index ? null : (JDXSpectrum)jdxSpectra.elementAt(index);
+  public JDXSpectrum getJDXSpectrum(int index) {
+    return jdxSpectra.size() <= index ? null : (JDXSpectrum) jdxSpectra
+        .elementAt(index);
   }
 
   /** Indicates a Simple Source */
@@ -103,28 +102,29 @@ public abstract class JDXSource {
   public final static int NTUPLE = 2;
 
   private static JDXSource getXMLSource(String source) {
-    String xmlType = source.substring(0,400).toLowerCase();
+    String xmlType = source.substring(0, 400).toLowerCase();
 
     if (xmlType.contains("<animl")) {
-      return AnIMLSource.getAniMLInstance(new ByteArrayInputStream(source.getBytes()));
-    }
-    else if (xmlType.contains("xml-cml")) {
-      return CMLSource.getCMLInstance(new ByteArrayInputStream(source.getBytes()));
+      return AnIMLSource.getAniMLInstance(new ByteArrayInputStream(source
+          .getBytes()));
+    } else if (xmlType.contains("xml-cml")) {
+      return CMLSource.getCMLInstance(new ByteArrayInputStream(source
+          .getBytes()));
     }
     return null;
   }
 
-  public static JDXSource createJDXSource(String sourceContents, String filePath,
-                                       URL appletDocumentBase)
-    throws IOException, JSpecViewException
-  {
+  public static JDXSource createJDXSource(String sourceContents,
+                                          String filePath,
+                                          URL appletDocumentBase)
+      throws IOException, JSpecViewException {
     InputStream in = null;
-    System.out.println("createJDXSource " + filePath + " " + sourceContents + " " +
-                       appletDocumentBase);
- 
+    System.out.println("createJDXSource " + filePath + " " + sourceContents
+        + " " + appletDocumentBase);
+
     if (filePath != null) {
       in = FileManager.getInputStream(filePath, true, appletDocumentBase);
-      sourceContents = getContentFromInputStream(in); 
+      sourceContents = getContentFromInputStream(in);
 
       JDXSource xmlSource = getXMLSource(sourceContents);
       if (xmlSource != null) {
@@ -133,7 +133,7 @@ public abstract class JDXSource {
     }
 
     int sourceType = determineJDXSourceType(sourceContents);
-    
+
     if (sourceType == -1) {
       throw new JSpecViewException("JDX Source Type not Recognized");
     }
@@ -145,33 +145,32 @@ public abstract class JDXSource {
         return BlockSource.getInstance(sourceContents);
       case NTUPLE:
         return NTupleSource.getInstance(sourceContents);
-      // return RestrictedNTupleSource.getInstance(sourceContents, 128);
+        // return RestrictedNTupleSource.getInstance(sourceContents, 128);
       default:
         throw new JSpecViewException("Unknown or unrecognised JCAMP-DX format");
       }
     } catch (JSpecViewException e) {
-      throw new JSpecViewException("Error reading JDX format: " + e.getMessage());
+      throw new JSpecViewException("Error reading JDX format: "
+          + e.getMessage());
     }
   }
-  
 
-  public static JDXSource createJDXSource(InputStream in)
-    throws IOException, JSpecViewException{
-	  
-	  String sourceContents = getContentFromInputStream(in); 
-	  
-	  return createJDXSource(sourceContents, null, null);
+  public static JDXSource createJDXSource(InputStream in) throws IOException,
+      JSpecViewException {
+
+    String sourceContents = getContentFromInputStream(in);
+
+    return createJDXSource(sourceContents, null, null);
   }
 
   public static JDXSource createJDXSource(String sourceContents)
-  throws IOException, JSpecViewException{
-	  	 	  
-	 return createJDXSource(sourceContents, null, null);
-}
-  
+      throws IOException, JSpecViewException {
+
+    return createJDXSource(sourceContents, null, null);
+  }
+
   private static String getContentFromInputStream(InputStream in)
-    throws IOException
-  {
+      throws IOException {
     StringBuffer sb = new StringBuffer();
     BufferedReader br = new BufferedReader(new InputStreamReader(in));
     String line;
@@ -183,24 +182,27 @@ public abstract class JDXSource {
 
   /**
    * Determines the type of JDX Source
-   * @param sourceContents the contents of the source
+   * 
+   * @param sourceContents
+   *        the contents of the source
    * @return the JDX source type
    */
-  private static int determineJDXSourceType(String sourceContents){
+  private static int determineJDXSourceType(String sourceContents) {
     JDXSourceStringTokenizer t = new JDXSourceStringTokenizer(sourceContents);
     String label;
-    while(t.hasMoreTokens()){
+    while (t.hasMoreTokens()) {
       t.nextToken();
       label = JSpecViewUtils.cleanLabel(t.label);
-      if (label.equals("##DATATYPE") && t.value.toUpperCase().equals("LINK")){
+      if (label.equals("##DATATYPE") && t.value.toUpperCase().equals("LINK")) {
 
         return BLOCK;
       }
-      if (label.equals("##DATACLASS") && t.value.toUpperCase().equals("NTUPLES")) {
-          return NTUPLE;
+      if (label.equals("##DATACLASS")
+          && t.value.toUpperCase().equals("NTUPLES")) {
+        return NTUPLE;
       }
       Arrays.sort(JDXSource.TABULAR_DATA_LABELS);
-      if(Arrays.binarySearch(JDXSource.TABULAR_DATA_LABELS, label) > 0)
+      if (Arrays.binarySearch(JDXSource.TABULAR_DATA_LABELS, label) > 0)
         return SIMPLE;
     }
     return -1;
@@ -208,64 +210,72 @@ public abstract class JDXSource {
 
   /**
    * Adds a Spectrum to the list
-   * @param spectrum the spectrum to be added
+   * 
+   * @param spectrum
+   *        the spectrum to be added
    */
-  public void addJDXSpectrum(JDXSpectrum spectrum){
+  public void addJDXSpectrum(JDXSpectrum spectrum) {
     jdxSpectra.addElement(spectrum);
   }
 
   /**
    * Returns the number of Spectra in this Source
+   * 
    * @return the number of Spectra in this Source
    */
-  public int getNumberOfSpectra(){
+  public int getNumberOfSpectra() {
     return jdxSpectra.size();
   }
 
-
   /**
    * Returns the Vector of Spectra
+   * 
    * @return the Vector of Spectra
    */
-  public Vector<JDXSpectrum> getSpectra(){
+  public Vector<JDXSpectrum> getSpectra() {
     return jdxSpectra;
   }
 
   /**
    * Returns the header table of the JDXSource
+   * 
    * @return the header table of the JDXSource
    */
-  public Map<String, String> getHeaderTable(){
+  public Map<String, String> getHeaderTable() {
     return headerTable;
   }
 
-
   /**
    * Sets the headertable for this Source
-   * @param table the header table
+   * 
+   * @param table
+   *        the header table
    */
-  public void setHeaderTable(Map<String, String> table){
+  public void setHeaderTable(Map<String, String> table) {
     headerTable = table;
   }
 
   /**
    * Returns the error log for this source
+   * 
    * @return the error log for this source
    */
-  public String getErrorLog(){
+  public String getErrorLog() {
     return errors;
   }
 
   /**
    * Sets the error log for this source
-   * @param errors error log for this source
+   * 
+   * @param errors
+   *        error log for this source
    */
-  public void setErrorLog(String errors){
+  public void setErrorLog(String errors) {
     this.errors = errors;
   }
-  
+
   private int index;
-  
+
   protected ArrayList<PeakInfo> readPeakList(String peakList) throws Exception {
     ArrayList<PeakInfo> peakData = new ArrayList<PeakInfo>();
     BufferedReader reader = new BufferedReader(new StringReader(peakList));
@@ -297,12 +307,14 @@ public abstract class JDXSource {
 
     return peakData;
   }
-  
-  protected String discardLinesUntilContains(BufferedReader reader, String containsMatch)
-  	throws Exception {
-	String line = reader.readLine();
-	while (line!= null && line.indexOf(containsMatch) < 0) {}
-	return line;
+
+  private String discardLinesUntilContains(BufferedReader reader,
+                                             String containsMatch)
+      throws Exception {
+    String line = reader.readLine();
+    while (line != null && line.indexOf(containsMatch) < 0) {
+    }
+    return line;
   }
-  
+
 }
