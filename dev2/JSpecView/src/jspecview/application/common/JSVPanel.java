@@ -88,6 +88,7 @@ import jspecview.common.Graph;
 import jspecview.common.IntegrationRatio;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSpecViewUtils;
+import jspecview.common.PeakInfo;
 import jspecview.common.JSpecViewUtils.MultiScaleData;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
@@ -1065,13 +1066,17 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
     	  drawIntegrationRatios(g, height, width);
    }
 
-   /**
-    * Draws the Spectrum to the panel
-    * @param g the <code>Graphics</code> object
-    * @param height the height to be drawn in pixels
-    * @param width the width to be drawn in pixels
-    */
-   protected void drawGraph(Graphics g, int height, int width){
+  /**
+   * Draws the Spectrum to the panel
+   * 
+   * @param g
+   *        the <code>Graphics</code> object
+   * @param height
+   *        the height to be drawn in pixels
+   * @param width
+   *        the width to be drawn in pixels
+   */
+  protected void drawGraph(Graphics g, int height, int width) {
     plotAreaWidth = width - (plotAreaInsets.right + plotAreaInsets.left);
     plotAreaHeight = height - (plotAreaInsets.top + plotAreaInsets.bottom);
 
@@ -1080,76 +1085,46 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
     topPlotAreaPos = plotAreaY;
     bottomPlotAreaPos = plotAreaHeight + plotAreaY;
 
-    xFactorForScale = (scaleData.maxXOnScale-scaleData.minXOnScale)/plotAreaWidth;
-    yFactorForScale = (scaleData.maxYOnScale-scaleData.minYOnScale)/plotAreaHeight;
+    xFactorForScale = (scaleData.maxXOnScale - scaleData.minXOnScale)
+        / plotAreaWidth;
+    yFactorForScale = (scaleData.maxYOnScale - scaleData.minYOnScale)
+        / plotAreaHeight;
 
     // fill plot area color
     g.setColor(plotAreaColor);
     g.fillRect(plotAreaX, plotAreaY, plotAreaWidth, plotAreaHeight);
-         
-     boolean drawHighlightsIncreasing = shouldDrawXAxisIncreasing();
-    
+
     // fill highlight color
 
-    if(highlightOn){
-      int x1, x2;
+    Color c = null;
 
-      if(JSpecViewUtils.DEBUG)
-          System.out.println();
+    if (highlightOn) {
+      if (JSpecViewUtils.DEBUG)
+        System.out.println();
+    }
 
-      for(int i = 0; i < highlights.size(); i++){
-        Highlight hl = (Highlight)highlights.elementAt(i);
-        
-        if(drawHighlightsIncreasing){
-          x1 = (int) (leftPlotAreaPos + ((hl.getStartX() -scaleData.minXOnScale)/xFactorForScale));
-          x2 = (int) (leftPlotAreaPos + ((hl.getEndX() -scaleData.minXOnScale)/xFactorForScale));
+    for (int i = 0; i < highlights.size(); i++) {
+      Highlight hl = (Highlight) highlights.elementAt(i);
+      drawBar(g, hl.getStartX(), hl.getEndX(), c = hl.getColor(), true);
+    }
+
+    ArrayList<PeakInfo> list = ((JDXSpectrum) getSpectrumAt(0)).getPeakList();
+    if (list != null && list.size() > 0) {
+      if (c == null)
+        c = new Color(255, 0, 0);
+      for (int i = list.size(); --i >= 0;) {
+        PeakInfo pi = list.get(i);
+        double xMin = pi.getXMin();
+        double xMax = pi.getXMax();
+        if (xMin != xMax) {
+          drawBar(g, xMin, xMax, c, false);
         }
-        else{
-          x2 = (int) (rightPlotAreaPos - ((hl.getStartX()-scaleData.minXOnScale)/xFactorForScale));
-          x1 = (int) (rightPlotAreaPos - ((hl.getEndX()-scaleData.minXOnScale)/xFactorForScale));
-        }
-
-        if(x1 > x2){
-          int tmp = x1;
-          x1 = x2;
-          x2 = tmp;
-        }
-
-        if(JSpecViewUtils.DEBUG){
-          System.out.println("x1: " + x1);
-          System.out.println("x2: " + x2);
-        }
-
-        // if either pixel is outside of plot area
-        if(!isPixelWithinPlotArea(x1) || !isPixelWithinPlotArea(x2)){
-          // if both are ouside of plot area
-          if(!isPixelWithinPlotArea(x1) && !isPixelWithinPlotArea(x2)){
-            // check if leftareapos and rightareapos both lie between
-            // x1 and x2
-            if(leftPlotAreaPos >= x1 && rightPlotAreaPos <= x2){
-               x1 = leftPlotAreaPos;
-               x2 = rightPlotAreaPos;
-            }
-            else{
-              continue;
-            }
-          }
-          else if(isPixelWithinPlotArea(x1) && !isPixelWithinPlotArea(x2)){
-            x2 = rightPlotAreaPos;
-          }
-          else if(!isPixelWithinPlotArea(x1) && isPixelWithinPlotArea(x2)){
-            x1 = leftPlotAreaPos;
-          }
-        }
-
-        g.setColor(hl.getColor());
-        g.fillRect(x1, plotAreaY, Math.abs(x2 - x1), plotAreaHeight);
       }
     }
 
     boolean grid, title, xunits, yunits, coords, xscale, yscale;
 
-    if(isPrinting){
+    if (isPrinting) {
       grid = printGrid;
       xscale = printScale;
       yscale = printScale;
@@ -1157,8 +1132,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
       xunits = printScale;
       yunits = printScale;
       coords = false;
-    }
-    else{
+    } else {
       grid = gridOn;
       title = titleOn;
       xunits = xUnitsOn;
@@ -1168,24 +1142,76 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
       yscale = yScaleOn;
     }
 
-    if(grid)
-    	drawGrid(g, height, width);
-    for(int i = 0; i < numOfSpectra; i++)
-    	drawPlot(g, i, height, width);
-    if(xscale)
-    	drawXScale(g, height, width);
-    if(yscale)
-    	drawYScale(g, height, width);
-    if(title)
-    	drawTitle(g, height, width);
-    if(xunits)
-    	drawXUnits(g, height, width);
-    if(yunits)
-    	drawYUnits(g, height, width);
-    if(coords)
-    	drawCoordinates(g, height, width);
-    if(zoomEnabled)
-    	drawZoomBox(g);
+    if (grid)
+      drawGrid(g, height, width);
+    for (int i = 0; i < numOfSpectra; i++)
+      drawPlot(g, i, height, width);
+    if (xscale)
+      drawXScale(g, height, width);
+    if (yscale)
+      drawYScale(g, height, width);
+    if (title)
+      drawTitle(g, height, width);
+    if (xunits)
+      drawXUnits(g, height, width);
+    if (yunits)
+      drawYUnits(g, height, width);
+    if (coords)
+      drawCoordinates(g, height, width);
+    if (zoomEnabled)
+      drawZoomBox(g);
+  }
+
+  /**
+   * draw a bar, but not necessarily full height
+   * @param g
+   * @param startX   units
+   * @param endX     units
+   * @param color
+   * @param isFullHeight
+   */
+  
+  private void drawBar(Graphics g, double startX, double endX, Color color, boolean isFullHeight) {
+
+    int x1 = xPixels(startX);
+    int x2 = xPixels(endX);
+
+    if (x1 > x2) {
+      int tmp = x1;
+      x1 = x2;
+      x2 = tmp;
+    }
+
+    if (JSpecViewUtils.DEBUG) {
+      System.out.println("x1: " + x1);
+      System.out.println("x2: " + x2);
+    }
+
+    // if either pixel is outside of plot area
+    if (!isPixelWithinPlotArea(x1) || !isPixelWithinPlotArea(x2)) {
+      // if both are ouside of plot area
+      if (!isPixelWithinPlotArea(x1) && !isPixelWithinPlotArea(x2)) {
+        // check if leftareapos and rightareapos both lie between
+        // x1 and x2
+        if (leftPlotAreaPos >= x1 && rightPlotAreaPos <= x2) {
+          x1 = leftPlotAreaPos;
+          x2 = rightPlotAreaPos;
+        } else {
+          return;
+        }
+      } else if (isPixelWithinPlotArea(x1) && !isPixelWithinPlotArea(x2)) {
+        x2 = rightPlotAreaPos;
+      } else if (!isPixelWithinPlotArea(x1) && isPixelWithinPlotArea(x2)) {
+        x1 = leftPlotAreaPos;
+      }
+    }
+    g.setColor(color);
+    g.fillRect(x1, plotAreaY, Math.abs(x2 - x1), (isFullHeight ? plotAreaHeight : 5));
+  }
+
+  private int xPixels(double dx) {
+    int x = (int) ((dx - scaleData.minXOnScale) / xFactorForScale);    
+    return (int) (shouldDrawXAxisIncreasing() ? leftPlotAreaPos + x : rightPlotAreaPos - x);
   }
 
   private boolean isPixelWithinPlotArea(int pix){
@@ -1197,79 +1223,88 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
 
   /**
    * Draws the plot on the Panel
-   * @param g the <code>Graphics</code> object
-   * @param index the index of the Spectrum to draw
-   * @param height the height to be drawn in pixels
-    * @param width the width to be drawn in pixels
+   * 
+   * @param g
+   *        the <code>Graphics</code> object
+   * @param index
+   *        the index of the Spectrum to draw
+   * @param height
+   *        the height to be drawn in pixels
+   * @param width
+   *        the width to be drawn in pixels
    */
-  protected void drawPlot(Graphics g, int index, int height, int width){
+  protected void drawPlot(Graphics g, int index, int height, int width) {
     // Check if specInfo in null or xyCoords is null
     //Coordinate[] xyCoords = spectra[index].getXYCoords();
     Coordinate[] xyCoords = xyCoordsList[index];
-   
+
     boolean drawPlotIncreasing = shouldDrawXAxisIncreasing();
-    
+
     // Draw a border
-    if(!gridOn){
+    if (!gridOn) {
       g.setColor(gridColor);
       g.drawRect(plotAreaX, plotAreaY, plotAreaWidth, plotAreaHeight);
     }
 
     g.setColor(plotColors[index]);
 
-
     // Check if revPLot on
 
-    if(drawPlotIncreasing){
-     if(!spectra[index].isContinuous()){
-         for(int i = scaleData.startDataPointIndices[index]; i <= scaleData.endDataPointIndices[index]; i++){
-             Coordinate point = xyCoords[i];
-             int x1 = (int) (leftPlotAreaPos + (((point.getXVal())-scaleData.minXOnScale)/xFactorForScale));
-             int y1 = (int) (topPlotAreaPos -scaleData.minYOnScale/yFactorForScale);
-             int x2 = (int) (leftPlotAreaPos + (((point.getXVal())-scaleData.minXOnScale)/xFactorForScale));
-             int y2 = (int) (topPlotAreaPos + (((point.getYVal())-scaleData.minYOnScale)/yFactorForScale));
-             g.drawLine(x1, invertY(height, y1), x2, invertY(height, y2));
-           }
-           if(scaleData.minYOnScale < 0){
-             g.drawLine(leftPlotAreaPos, invertY(height,(int)(topPlotAreaPos - scaleData.minYOnScale/yFactorForScale)),
-                        rightPlotAreaPos,invertY(height,(int)(topPlotAreaPos -scaleData.minYOnScale / yFactorForScale)));
-           }
-          }
-      else{
-        for(int i = scaleData.startDataPointIndices[index]; i < scaleData.endDataPointIndices[index]; i++){
+    if (drawPlotIncreasing) {
+      if (!spectra[index].isContinuous()) {
+        for (int i = scaleData.startDataPointIndices[index]; i <= scaleData.endDataPointIndices[index]; i++) {
+          Coordinate point = xyCoords[i];
+          int x1 = (int) (leftPlotAreaPos + (((point.getXVal()) - scaleData.minXOnScale) / xFactorForScale));
+          int y1 = (int) (topPlotAreaPos - scaleData.minYOnScale
+              / yFactorForScale);
+          int x2 = (int) (leftPlotAreaPos + (((point.getXVal()) - scaleData.minXOnScale) / xFactorForScale));
+          int y2 = (int) (topPlotAreaPos + (((point.getYVal()) - scaleData.minYOnScale) / yFactorForScale));
+          g.drawLine(x1, invertY(height, y1), x2, invertY(height, y2));
+        }
+        if (scaleData.minYOnScale < 0) {
+          g.drawLine(leftPlotAreaPos,
+              invertY(height, (int) (topPlotAreaPos - scaleData.minYOnScale
+                  / yFactorForScale)), rightPlotAreaPos, invertY(height,
+                  (int) (topPlotAreaPos - scaleData.minYOnScale
+                      / yFactorForScale)));
+        }
+      } else {
+        for (int i = scaleData.startDataPointIndices[index]; i < scaleData.endDataPointIndices[index]; i++) {
           Coordinate point1 = xyCoords[i];
-          Coordinate point2 = xyCoords[i+1];
-          int x1 = (int) (leftPlotAreaPos + (((point1.getXVal())-scaleData.minXOnScale)/xFactorForScale));
-          int y1 = (int) (topPlotAreaPos + (((point1.getYVal())-scaleData.minYOnScale)/yFactorForScale));
-          int x2 = (int) (leftPlotAreaPos + (((point2.getXVal())-scaleData.minXOnScale)/xFactorForScale));
-          int y2 = (int) (topPlotAreaPos + (((point2.getYVal())-scaleData.minYOnScale)/yFactorForScale));
+          Coordinate point2 = xyCoords[i + 1];
+          int x1 = (int) (leftPlotAreaPos + (((point1.getXVal()) - scaleData.minXOnScale) / xFactorForScale));
+          int y1 = (int) (topPlotAreaPos + (((point1.getYVal()) - scaleData.minYOnScale) / yFactorForScale));
+          int x2 = (int) (leftPlotAreaPos + (((point2.getXVal()) - scaleData.minXOnScale) / xFactorForScale));
+          int y2 = (int) (topPlotAreaPos + (((point2.getYVal()) - scaleData.minYOnScale) / yFactorForScale));
           g.drawLine(x1, invertY(height, y1), x2, invertY(height, y2));
         }
       }
-    }
-    else{
-      if(!spectra[index].isContinuous()){
-          for(int i = scaleData.endDataPointIndices[index]; i >= scaleData.startDataPointIndices[index]; i--){
-              Coordinate point = xyCoords[i];
-              int x1 = (int) (rightPlotAreaPos - (((point.getXVal())-scaleData.minXOnScale)/xFactorForScale));
-              int y1 = (int) (topPlotAreaPos -scaleData.minYOnScale/yFactorForScale);
-              int x2 = (int) (rightPlotAreaPos - (((point.getXVal())-scaleData.minXOnScale)/xFactorForScale));
-              int y2 = (int) (topPlotAreaPos + (((point.getYVal())-scaleData.minYOnScale)/yFactorForScale));
-              g.drawLine(x1, invertY(height, y1), x2, invertY(height, y2));
-            }
-            if(scaleData.minYOnScale < 0){
-            g.drawLine(rightPlotAreaPos,invertY(height, (int)(topPlotAreaPos -scaleData.minYOnScale/yFactorForScale)),
-                       leftPlotAreaPos, invertY(height, (int)(topPlotAreaPos -scaleData.minYOnScale/yFactorForScale)));
-            }
-      }
-      else{
-        for(int i = scaleData.endDataPointIndices[index]; i > scaleData.startDataPointIndices[index] ; i--){
+    } else {
+      if (!spectra[index].isContinuous()) {
+        for (int i = scaleData.endDataPointIndices[index]; i >= scaleData.startDataPointIndices[index]; i--) {
+          Coordinate point = xyCoords[i];
+          int x1 = (int) (rightPlotAreaPos - (((point.getXVal()) - scaleData.minXOnScale) / xFactorForScale));
+          int y1 = (int) (topPlotAreaPos - scaleData.minYOnScale
+              / yFactorForScale);
+          int x2 = (int) (rightPlotAreaPos - (((point.getXVal()) - scaleData.minXOnScale) / xFactorForScale));
+          int y2 = (int) (topPlotAreaPos + (((point.getYVal()) - scaleData.minYOnScale) / yFactorForScale));
+          g.drawLine(x1, invertY(height, y1), x2, invertY(height, y2));
+        }
+        if (scaleData.minYOnScale < 0) {
+          g.drawLine(rightPlotAreaPos,
+              invertY(height, (int) (topPlotAreaPos - scaleData.minYOnScale
+                  / yFactorForScale)), leftPlotAreaPos, invertY(height,
+                  (int) (topPlotAreaPos - scaleData.minYOnScale
+                      / yFactorForScale)));
+        }
+      } else {
+        for (int i = scaleData.endDataPointIndices[index]; i > scaleData.startDataPointIndices[index]; i--) {
           Coordinate point1 = xyCoords[i];
-          Coordinate point2 = xyCoords[i-1];
-          int x1 = (int) (rightPlotAreaPos -  (((point1.getXVal())-scaleData.minXOnScale)/xFactorForScale));
-          int y1 = (int) (topPlotAreaPos + (((point1.getYVal())-scaleData.minYOnScale)/yFactorForScale));
-          int x2 = (int) (rightPlotAreaPos - (((point2.getXVal())-scaleData.minXOnScale)/xFactorForScale));
-          int y2 = (int)(topPlotAreaPos + (((point2.getYVal())-scaleData.minYOnScale)/yFactorForScale));
+          Coordinate point2 = xyCoords[i - 1];
+          int x1 = (int) (rightPlotAreaPos - (((point1.getXVal()) - scaleData.minXOnScale) / xFactorForScale));
+          int y1 = (int) (topPlotAreaPos + (((point1.getYVal()) - scaleData.minYOnScale) / yFactorForScale));
+          int x2 = (int) (rightPlotAreaPos - (((point2.getXVal()) - scaleData.minXOnScale) / xFactorForScale));
+          int y2 = (int) (topPlotAreaPos + (((point2.getYVal()) - scaleData.minYOnScale) / yFactorForScale));
           g.drawLine(x1, invertY(height, y1), x2, invertY(height, y2));
         }
       }
@@ -2068,7 +2103,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
 
     /**
      * Overides the equals method in class <code>Object</code>
-     * @param obj the object that this <code>Hightlight<code> is compared to
+     * @param obj the object that this <code>Highlight<code> is compared to
      * @return true if equal
      */
     @Override
