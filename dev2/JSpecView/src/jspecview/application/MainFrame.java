@@ -121,7 +121,6 @@ import jspecview.application.common.PeakPickedEvent;
 import jspecview.application.common.PeakPickedListener;
 import jspecview.application.common.PrintLayoutDialog;
 import jspecview.common.Coordinate;
-import jspecview.common.Graph;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSpecViewUtils;
 import jspecview.common.PeakInfo;
@@ -1572,10 +1571,10 @@ private void showUnableToOverlayMessage() {
     if (source != null) {
       Vector<JDXSpectrum> spectra = source.getSpectra();
       for (int i = 0; i < spectra.size(); i++) {
-        String title = ((Graph) spectra.elementAt(i)).getTitle();
+        String title = ((JDXSpectrum) spectra.elementAt(i)).getTitleLabel();
         for (int j = 0; j < showMenu.getMenuComponentCount(); j++) {
           JMenuItem mi = (JMenuItem) showMenu.getMenuComponent(j);
-          if (mi.getText().equals(title)) {
+          if (mi.getText().endsWith(title)) {
             showMenu.remove(mi);
           }
         }
@@ -1641,7 +1640,7 @@ private void showUnableToOverlayMessage() {
         jsvp.addPeakPickedListener(this);
         setJSVPanelProperties(jsvp, true);
         
-        frame = new JInternalFrame(spec.getTitle(), true, true,
+        frame = new JInternalFrame(spec.getTitleLabel(), true, true,
                                    true, true);
         specInfos[i] = new SpecInfo(frame, jsvp);
         

@@ -47,6 +47,7 @@ import java.awt.GraphicsEnvironment;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -541,7 +542,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
       appletPanel.add(spectraPane, BorderLayout.CENTER);
 
       for (int i = 0; i < numberOfPanels; i++) {
-        String title = ((JDXSpectrum) specs.elementAt(i)).getTitle();
+        String title = ((JDXSpectrum) specs.elementAt(i)).getTitleLabel();
         if (source instanceof NTupleSource)
           title = title.substring(title.indexOf(':') + 1);
         else if (source instanceof BlockSource)
@@ -594,14 +595,13 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
         if (numberOfPanels <= 20) {
           // add Menus to navigate
           JCheckBoxMenuItem mi;
-          if (source instanceof NTupleSource) {
+          if (source instanceof NTupleSource || source instanceof BlockSource) {
             for (int i = 0; i < numberOfPanels; i++) {
-              title = (i + 1) + "- "
-                  + ((JDXSpectrum) specs.elementAt(i)).getTitle();
+              JDXSpectrum spec = (JDXSpectrum) specs.get(i);
+              title = (i + 1) + "- " + spec.getTitleLabel();
               mi = new JCheckBoxMenuItem(title);
-              if (i == currentSpectrumIndex)
-                mi.setSelected(true);
-              mi.addItemListener(new java.awt.event.ItemListener() {
+              mi.setSelected(i == currentSpectrumIndex);
+              mi.addItemListener(new ItemListener() {
                 public void itemStateChanged(ItemEvent e) {
                   if (e.getStateChange() == ItemEvent.SELECTED) {
                     // deselects the previously selected menu item
@@ -616,30 +616,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
               mi.setActionCommand("" + i);
               appletPopupMenu.compoundMenu.add(mi);
             }
-            appletPopupMenu.compoundMenu.setText("NTuples");
-          } else if (source instanceof BlockSource) {
-            for (int i = 0; i < numberOfPanels; i++) {
-              title = (i + 1) + "- "
-                  + ((JDXSpectrum) specs.elementAt(i)).getTitle();
-              mi = new JCheckBoxMenuItem(title);
-              if (i == currentSpectrumIndex)
-                mi.setSelected(true);
-              mi.addItemListener(new java.awt.event.ItemListener() {
-                public void itemStateChanged(ItemEvent e) {
-                  if (e.getStateChange() == ItemEvent.SELECTED) {
-                    // deselects the previously selected menu item
-                    JCheckBoxMenuItem deselectedMenu = (JCheckBoxMenuItem) ((JCheckBoxMenuItem) e
-                        .getSource()).getParent().getComponent(
-                        currentSpectrumIndex);
-                    deselectedMenu.setSelected(false);
-                    compoundMenu_itemStateChanged(e);
-                  }
-                }
-              });
-              mi.setActionCommand("" + i);
-              appletPopupMenu.compoundMenu.add(mi);
-            }
-            appletPopupMenu.compoundMenu.setText("Blocks");
+            appletPopupMenu.compoundMenu
+                .setText(source instanceof BlockSource ? "Blocks" : "NTuples");
           }
           // add compound menu to popup menu
           appletPopupMenu.add(appletPopupMenu.compoundMenu, 3);
