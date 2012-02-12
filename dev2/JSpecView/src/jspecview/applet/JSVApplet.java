@@ -126,7 +126,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     System.out.println("JSpecView " + this + " finalized");
   }
 
-  public static final String APPLET_VERSION = "1.0.20120212-1430";
+  public static final String APPLET_VERSION = "1.0.20120211-1730";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath;
@@ -427,7 +427,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
   }
 
   /**
-   * Initializes the <code>JSVPanels</code> and adds them to the jsvPanels array
+   * Initalizes the <code>JSVPanels</code> and adds them to the jsvPanels array
    * 
    * @throws JSpecViewException
    */
@@ -468,7 +468,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
       selectedJSVPanel = jsvp;
       jsvp.setIndex(currentSpectrumIndex = 0);
     } else {
-      // initialise JSVPanels and add them to the array
+      // initalise JSVPanels and add them to the array
       jsvPanels = new JSVPanel[numberOfSpectra];
       try {
         for (int i = 0; i < numberOfSpectra; i++) {
@@ -1904,7 +1904,6 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
       return;
     }
 
-    JDXSource source;
     try {
       source = JDXSource.createJDXSource(data, fileName, base);
     } catch (Exception e) {
