@@ -47,8 +47,6 @@ import java.awt.GraphicsEnvironment;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -128,7 +126,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     System.out.println("JSpecView " + this + " finalized");
   }
 
-  public static final String APPLET_VERSION = "1.0.20120212-1330";
+  public static final String APPLET_VERSION = "1.0.20120211-1730";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath;
@@ -140,8 +138,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
   boolean coordinatesOn = true;
   boolean reversePlot = false;
   boolean menuOn = true;
-  boolean compoundMenuOn = false;
-  boolean compoundMenuOn2 = false;
+  boolean compoundMenuOn = true;
+  boolean compoundMenuOn2 = true;
   boolean enableZoom = true;
   boolean xScaleOn = true;
   boolean yScaleOn = true;
@@ -429,7 +427,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
   }
 
   /**
-   * Initializes the <code>JSVPanels</code> and adds them to the jsvPanels array
+   * Initalizes the <code>JSVPanels</code> and adds them to the jsvPanels array
    * 
    * @throws JSpecViewException
    */
@@ -466,10 +464,11 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
         return;
       }
       jsvPanels[0] = jsvp;
-      initProperties(jsvp);
+      initProperties(jsvp, 0);
       selectedJSVPanel = jsvp;
+      jsvp.setIndex(currentSpectrumIndex = 0);
     } else {
-      // initialise JSVPanels and add them to the array
+      // initalise JSVPanels and add them to the array
       jsvPanels = new JSVPanel[numberOfSpectra];
       try {
         for (int i = 0; i < numberOfSpectra; i++) {
@@ -479,7 +478,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
           else
             jsvp = new JSVPanel((JDXSpectrum) specs.elementAt(i));
           jsvPanels[i] = jsvp;
-          initProperties(jsvp);
+          initProperties(jsvp, i);
         }
       } catch (Exception e) {
         // TODO
@@ -487,9 +486,10 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     }
   }
 
-  private void initProperties(JSVPanel jsvp) {
+  private void initProperties(JSVPanel jsvp, int index) {
     // set JSVPanel properties from applet parameters
     jsvp.addPeakPickedListener(this);
+    jsvp.setIndex(index);
     jsvp.setGridOn(gridOn);
     jsvp.setCoordinatesOn(coordinatesOn);
     jsvp.setXScaleOn(xScaleOn);
@@ -546,8 +546,9 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
           title = title.substring(title.indexOf(':') + 1);
         else if (source instanceof BlockSource)
           //title = "block " + (i + 1);
-          title = title.substring(0, (title.length() >= 10 ? 10 : 
-        	  title.length())) + "... : ";
+          title = title.substring(0, (title.length() >= 10 ? 10 : title
+              .length()))
+              + "... : ";
         spectraPane.addTab(title, jsvPanels[i]);
       }
       // Show the spectrum specified by the spectrumnumber parameter
@@ -604,8 +605,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
                 public void itemStateChanged(ItemEvent e) {
                   if (e.getStateChange() == ItemEvent.SELECTED) {
                     // deselects the previously selected menu item
-                    JCheckBoxMenuItem deselectedMenu = (JCheckBoxMenuItem) 
-                    ((JCheckBoxMenuItem) e.getSource()).getParent().getComponent(
+                    JCheckBoxMenuItem deselectedMenu = (JCheckBoxMenuItem) ((JCheckBoxMenuItem) e
+                        .getSource()).getParent().getComponent(
                         currentSpectrumIndex);
                     deselectedMenu.setSelected(false);
                     compoundMenu_itemStateChanged(e);
@@ -627,8 +628,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
                 public void itemStateChanged(ItemEvent e) {
                   if (e.getStateChange() == ItemEvent.SELECTED) {
                     // deselects the previously selected menu item
-                    JCheckBoxMenuItem deselectedMenu = (JCheckBoxMenuItem) 
-                    ((JCheckBoxMenuItem) e.getSource()).getParent().getComponent(
+                    JCheckBoxMenuItem deselectedMenu = (JCheckBoxMenuItem) ((JCheckBoxMenuItem) e
+                        .getSource()).getParent().getComponent(
                         currentSpectrumIndex);
                     deselectedMenu.setSelected(false);
                     compoundMenu_itemStateChanged(e);
@@ -726,90 +727,6 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
    */
   public void writeStatus(String msg) {
     statusTextLabel.setText(msg);
-  }
-
-  /**
-   * A Mouse Listener for the JSVPanel
-   */
-  class JSVPanelMouseListener extends MouseAdapter {
-
-    /**
-     * The number of mouse clicks
-     */
-    int clickCount = 0;
-
-    /**
-     * If mouse is clicked within the plot area of the <code>JSVPanel</code> and
-     * coordinate call back is enabled then the values of the coordinate clicked
-     * are sent to a javascript function specified by the
-     * coordcallbackfunctionname parameter
-     * 
-     * @param e
-     *        the MouseEvent
-     */
-    @Override
-    public void mouseClicked(MouseEvent e) {
-      JSVPanel jsvPanel = (JSVPanel) e.getSource();
-      selectedJSVPanel = jsvPanel;
-      Coordinate coord = jsvPanel.getClickedCoordinate();
- //     Coordinate coord = new Coordinate();
-      
-      Coordinate actualCoord = (peakCallbackFunctionName == null ? null
-          : new Coordinate());
-      if (!jsvPanel.getPickedCoordinates(coord, actualCoord))
-        return;
-      if (actualCoord == null)
-        callToJavaScript(coordCallbackFunctionName, new Object[] {
-            Double.valueOf(coord.getXVal()), Double.valueOf(coord.getYVal()),
-            Integer.valueOf(currentSpectrumIndex + 1) });
-      else
-        callToJavaScript(peakCallbackFunctionName, new Object[] {
-            Double.valueOf(coord.getXVal()), Double.valueOf(coord.getYVal()),
-            Double.valueOf(actualCoord.getXVal()),
-            Double.valueOf(actualCoord.getYVal()),
-            Integer.valueOf(currentSpectrumIndex + 1) });
-    }
-
-    /**
-     * Shows a popup menu when the right mouse button is clicked
-     * 
-     * @param e
-     *        MouseEvent
-     */
-    @Override
-    public void mousePressed(MouseEvent e) {
-      maybeShowPopup(e);
-    }
-
-    /**
-     * Shows a popup menu when the right mouse button is clicked
-     * 
-     * @param e
-     *        MouseEvent
-     */
-    @Override
-    public void mouseReleased(MouseEvent e) {
-      maybeShowPopup(e);
-    }
-
-    /**
-     * If the right mouse button is clicked then show the popup menu and set
-     * status of <code>JCheckBoxMenuItem</code>s according to the
-     * <code>JSVPanel</code> that is clicked
-     * 
-     * @param e
-     *        MouseEvent
-     */
-    private void maybeShowPopup(MouseEvent e) {
-      if (e.isPopupTrigger()) {
-        JSVPanel jsvPanel = (JSVPanel) e.getSource();
-        selectedJSVPanel = jsvPanel;
-        appletPopupMenu.gridCheckBoxMenuItem.setSelected(jsvPanel.isGridOn());
-        appletPopupMenu.coordsCheckBoxMenuItem.setSelected(jsvPanel.isCoordinatesOn());
-        appletPopupMenu.reversePlotCheckBoxMenuItem.setSelected(jsvPanel.isPlotReversed());
-        appletPopupMenu.show(e.getComponent(), e.getX(), e.getY());
-      }
-    }
   }
 
   /**
@@ -1077,7 +994,6 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
       remove(appletPanel);
       validate();
       repaint();
-      frame.addMouseListener(new JSVPanelMouseListener());
       frame.addWindowListener(new WindowAdapter() {
         @Override
         public void windowClosing(WindowEvent e) {
@@ -1207,7 +1123,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     appletPanel.remove(0);
     appletPanel.add(jsvp);
 
-    initProperties(jsvp);
+    initProperties(jsvp, 0);
     appletPopupMenu.solColMenuItem.setEnabled(true);
     jsvp.repaint();
 
@@ -1216,8 +1132,6 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     repaint();
 
   }
-
-  JSVPanelMouseListener tempMouseListener;
 
   /**
    * Allows Integration of an HNMR spectrum
@@ -1237,7 +1151,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
       }
     }
 
-    initProperties(tempJSVP);
+    initProperties(tempJSVP, currentSpectrumIndex);
     tempJSVP.repaint();
     chooseContainer();
   }
@@ -2001,11 +1915,11 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
 
     specs = source.getSpectra();
     boolean continuous = source.getJDXSpectrum(0).isContinuous();
-    if (!compoundMenuOn2)
-      compoundMenuOn = false;
-    else {
+ //   if (!compoundMenuOn2)
+ //     compoundMenuOn = false;
+ //   else {
       compoundMenuOn = source instanceof CompoundSource;
-    }
+ //   }
 
     String Yunits = source.getJDXSpectrum(0).getYUnits();
     String Xunits = source.getJDXSpectrum(0).getXUnits();
@@ -2060,8 +1974,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
   public void syncScript(String script) {
     System.out.println("JSpecView applet syncScript: " + script);
     String file = Parser.getQuotedAttribute(script, "file");
-    String type = Parser.getQuotedAttribute(script, "type");
-    if (file == null || type == null)
+    String index = Parser.getQuotedAttribute(script, "index");
+    if (file == null || index == null)
       return;
     URL url = null;
     try {
@@ -2075,17 +1989,17 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     System.out.println(recentURL);
     if (!f.equals(recentURL))
       setFilePathLocal(file);
-    if (!selectPanel(type))
+    if (!selectPanel(index))
       script = null;    
     selectedJSVPanel.processPeakSelect(script);
   }
 
-  private boolean selectPanel(String type) {
+  private boolean selectPanel(String index) {
     // what if tabbed? 
     if (jsvPanels == null) 
       return false;
     for (int i = 0; i < jsvPanels.length; i++) {
-      if (((JDXSpectrum)jsvPanels[i].getSpectrumAt(0)).getPeakType().equals(type)) {
+      if (((JDXSpectrum)jsvPanels[i].getSpectrumAt(0)).hasPeakIndex(index)) {
         setSpectrumNumber(i + 1);
         return true;
       }
@@ -2109,7 +2023,30 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
 
   @Override
   public void peakPicked(PeakPickedEvent eventObj) {
-    sendScript(eventObj == null ? null : eventObj.getPeakInfo());
+    selectedJSVPanel = (JSVPanel) eventObj.getSource();
+    currentSpectrumIndex = selectedJSVPanel.getIndex();
+    checkCallbacks();
+    sendScript(eventObj.getPeakInfo());
+  }
+  
+  public void checkCallbacks() {
+    if (coordCallbackFunctionName == null && peakCallbackFunctionName == null)
+      return;
+    Coordinate coord = new Coordinate();
+    Coordinate actualCoord = (peakCallbackFunctionName == null ? null
+        : new Coordinate());
+    if (!selectedJSVPanel.getPickedCoordinates(coord, actualCoord))
+      return;
+    if (actualCoord == null)
+      callToJavaScript(coordCallbackFunctionName, new Object[] {
+          Double.valueOf(coord.getXVal()), Double.valueOf(coord.getYVal()),
+          Integer.valueOf(currentSpectrumIndex + 1) });
+    else
+      callToJavaScript(peakCallbackFunctionName, new Object[] {
+          Double.valueOf(coord.getXVal()), Double.valueOf(coord.getYVal()),
+          Double.valueOf(actualCoord.getXVal()),
+          Double.valueOf(actualCoord.getYVal()),
+          Integer.valueOf(currentSpectrumIndex + 1) });
   }
 
 }

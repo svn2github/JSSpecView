@@ -121,6 +121,18 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
    */
   private static final long serialVersionUID = 1L;
 
+  private static final int MIN_DRAG_X_PIXELS = 5;// fewer than this means no zoom
+
+  private int index;
+  
+  public int getIndex() {
+    return index;
+  }
+  
+  public void setIndex(int index) {
+    this.index = index;
+  }
+  
 
   @Override
   public void finalize() {
@@ -257,7 +269,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
   private boolean mouseMovedOk = false;
 
   // The initial coordinate and final coordinates of zoom area
-  private double initX, initY, finalX, finalY;
+  private double initX, initY, finalX, finalY, initXpixel;
 
   // Minimum number of points that are displayable in a zoom
   private int minNumOfPointsForZoom = 3;
@@ -2375,14 +2387,12 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
    * 
    * @param coord
    */
-  public void notifyPeakPickedListeners(Coordinate coord) {
+  public void notifyPeakPickedListeners(Coordinate coord, MouseEvent e) {
 
     // TODO: Currently Aassumes spectra are not overlayed
     JDXSpectrum spec = (JDXSpectrum) spectra[0];
-    String peakInfo = spec.getAssociatedPeakInfo(coord);
-
-    PeakPickedEvent eventObj = (peakInfo.equals("") ? null
-        : new PeakPickedEvent(this, coord, peakInfo));
+    PeakPickedEvent eventObj = new PeakPickedEvent(this, coord, 
+        spec.getAssociatedPeakInfo(coord));
     for (int i = 0; i < peakPickedListeners.size(); i++) {
       PeakPickedListener listener = peakPickedListeners.get(i);
       if (listener != null) {
@@ -2465,9 +2475,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
           xPt = coord.getXVal();
           yPt = coord.getYVal();
 
+          initXpixel = xPixel;
           initX = xPt;
           initY = yPt;
-
           mousePressedInPlotArea = true;
           repaint();
 
@@ -2508,7 +2518,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
           finalX = xPt;
           finalY = yPt;
 
-          if(mousePressedInPlotArea){
+          if(mousePressedInPlotArea && Math.abs(xPixel - initXpixel) > MIN_DRAG_X_PIXELS){
             doZoom(initX, initY, finalX, finalY);
           }
 
@@ -2580,7 +2590,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener, MouseM
           // System.out.println(xStr);        
 
           coordClicked = new Coordinate(Double.parseDouble(xStr), Double.parseDouble(yStr));
-          notifyPeakPickedListeners(coordClicked);
+          notifyPeakPickedListeners(coordClicked, e);
         }
         else
           coordClicked = null;

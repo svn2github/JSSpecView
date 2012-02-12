@@ -2819,21 +2819,21 @@ private void showUnableToOverlayMessage() {
       return;
     //TODO link to processing of file loading, spectrum selection, and band selection
     String file = Parser.getQuotedAttribute(script, "file");
-    String type = Parser.getQuotedAttribute(script, "type");
-    if (file == null || type == null)
+    String index = Parser.getQuotedAttribute(script, "index");
+    if (file == null || index == null)
       return;
     System.out.println("JSpecView MainFrame.syncScript: " + script);
     if (!file.equals(recentURL))
       openFile(new File(file));
-    if (!selectPanel(type))
+    if (!selectPanel(index))
       script = null;    
     selectedJSVPanel.processPeakSelect(script);
   }
 
-  private boolean selectPanel(String type) {
+  private boolean selectPanel(String index) {
     for (int i = 0; i < specInfos.length; i++) {
       SpecInfo si = specInfos[i];
-      if (((JDXSpectrum)si.jsvp.getSpectrumAt(0)).getPeakType().equals(type)) {
+      if (((JDXSpectrum)si.jsvp.getSpectrumAt(0)).hasPeakIndex(index)) {
         setFrame(si);
         return true;
       }
@@ -2870,6 +2870,7 @@ private void showUnableToOverlayMessage() {
 
 	@Override
 	public void peakPicked(PeakPickedEvent eventObj) {
-    sendScript(eventObj == null ? null : eventObj.getPeakInfo());
+    selectedJSVPanel = (JSVPanel) eventObj.getSource();
+    sendScript(eventObj.getPeakInfo());
 	}
 }
