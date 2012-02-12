@@ -128,7 +128,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     System.out.println("JSpecView " + this + " finalized");
   }
 
-  public static final String APPLET_VERSION = "1.0.20120211-1730";
+  public static final String APPLET_VERSION = "1.0.20120212-1330";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath;
@@ -140,8 +140,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
   boolean coordinatesOn = true;
   boolean reversePlot = false;
   boolean menuOn = true;
-  boolean compoundMenuOn = true;
-  boolean compoundMenuOn2 = true;
+  boolean compoundMenuOn = false;
+  boolean compoundMenuOn2 = false;
   boolean enableZoom = true;
   boolean xScaleOn = true;
   boolean yScaleOn = true;
@@ -429,7 +429,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
   }
 
   /**
-   * Initalizes the <code>JSVPanels</code> and adds them to the jsvPanels array
+   * Initializes the <code>JSVPanels</code> and adds them to the jsvPanels array
    * 
    * @throws JSpecViewException
    */
@@ -469,7 +469,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
       initProperties(jsvp);
       selectedJSVPanel = jsvp;
     } else {
-      // initalise JSVPanels and add them to the array
+      // initialise JSVPanels and add them to the array
       jsvPanels = new JSVPanel[numberOfSpectra];
       try {
         for (int i = 0; i < numberOfSpectra; i++) {
@@ -604,8 +604,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
                 public void itemStateChanged(ItemEvent e) {
                   if (e.getStateChange() == ItemEvent.SELECTED) {
                     // deselects the previously selected menu item
-                    JCheckBoxMenuItem deselectedMenu = (JCheckBoxMenuItem) ((JCheckBoxMenuItem) e
-                        .getSource()).getParent().getComponent(
+                    JCheckBoxMenuItem deselectedMenu = (JCheckBoxMenuItem) 
+                    ((JCheckBoxMenuItem) e.getSource()).getParent().getComponent(
                         currentSpectrumIndex);
                     deselectedMenu.setSelected(false);
                     compoundMenu_itemStateChanged(e);
@@ -627,8 +627,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
                 public void itemStateChanged(ItemEvent e) {
                   if (e.getStateChange() == ItemEvent.SELECTED) {
                     // deselects the previously selected menu item
-                    JCheckBoxMenuItem deselectedMenu = (JCheckBoxMenuItem) ((JCheckBoxMenuItem) e
-                        .getSource()).getParent().getComponent(
+                    JCheckBoxMenuItem deselectedMenu = (JCheckBoxMenuItem) 
+                    ((JCheckBoxMenuItem) e.getSource()).getParent().getComponent(
                         currentSpectrumIndex);
                     deselectedMenu.setSelected(false);
                     compoundMenu_itemStateChanged(e);
@@ -739,9 +739,9 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     int clickCount = 0;
 
     /**
-     * If mouse is clicked with the plot area of the <code>JSVPanel</code> and
-     * coordinate call back is enabled then the value of the coordinate clicked
-     * is send to a javascript function specified by the
+     * If mouse is clicked within the plot area of the <code>JSVPanel</code> and
+     * coordinate call back is enabled then the values of the coordinate clicked
+     * are sent to a javascript function specified by the
      * coordcallbackfunctionname parameter
      * 
      * @param e
@@ -2001,11 +2001,11 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
 
     specs = source.getSpectra();
     boolean continuous = source.getJDXSpectrum(0).isContinuous();
- //   if (!compoundMenuOn2)
- //     compoundMenuOn = false;
- //   else {
+    if (!compoundMenuOn2)
+      compoundMenuOn = false;
+    else {
       compoundMenuOn = source instanceof CompoundSource;
- //   }
+    }
 
     String Yunits = source.getJDXSpectrum(0).getYUnits();
     String Xunits = source.getJDXSpectrum(0).getXUnits();
