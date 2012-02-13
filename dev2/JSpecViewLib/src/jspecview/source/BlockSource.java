@@ -115,8 +115,6 @@ public class BlockSource extends JDXSource {
             label = JSpecViewUtils.cleanLabel(t.label);
           } while (!label.equals("##TITLE"));
           spectrum = new JDXSpectrum();
-          spectrum.setXUnits("");
-          spectrum.setYUnits("");
           continue;
         }
 
