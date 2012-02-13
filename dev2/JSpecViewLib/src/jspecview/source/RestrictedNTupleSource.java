@@ -47,7 +47,7 @@ import jspecview.exception.JSpecViewException;
  * @author Prof Robert J. Lancashire
  */
 
-public class RestrictedNTupleSource extends CompoundSource {
+public class RestrictedNTupleSource extends JDXSource {
 
   /** The maximum number of spectra that will be instantiated */
   public static int MAX_NUMBER_SPECTRA = 32;
@@ -76,6 +76,7 @@ public class RestrictedNTupleSource extends CompoundSource {
    * @param sourceContents the contents of the source
    */
   protected RestrictedNTupleSource(String sourceContents) {
+    isCompoundSource = true;
     this.sourceContents = sourceContents;
   }
 
@@ -119,6 +120,8 @@ public class RestrictedNTupleSource extends CompoundSource {
 
     JDXSourceStringTokenizer t = new JDXSourceStringTokenizer(sourceContents);
 
+    //TODO  -- consolidate this with NTupleSource -- no need for a separate class here
+    
     // Read Source Specific Header
     String label = "";
     while(t.hasMoreTokens() && !label.equals("##NTUPLES")){

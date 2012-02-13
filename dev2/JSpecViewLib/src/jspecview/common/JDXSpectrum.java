@@ -27,6 +27,9 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import jspecview.exception.JSpecViewException;
+import jspecview.source.JDXDecompressor;
+
 /**
  * <code>JDXSpectrum</code> implements the Interface Spectrum for the display of
  * JDX Files.
@@ -35,7 +38,7 @@ import java.util.Iterator;
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
  */
-public class JDXSpectrum implements Graph {
+public class JDXSpectrum extends JDXObject implements Graph {
 
   @Override
   public void finalize() {
@@ -61,7 +64,7 @@ public class JDXSpectrum implements Graph {
   /**
    * specifies whether the spectrum is continuous
    */
-  private boolean continuous;
+  private boolean continuous = true;
 
   /**
    * whether the x values were converted from HZ to PPM
@@ -70,31 +73,12 @@ public class JDXSpectrum implements Graph {
 
   // -----------------------Core Fixed Header ----------------------------//
 
-  private String title = "";
-  private String jcampdx = "5.01";
-  private String dataType = "";
-  private String dataClass = "";
-  private String origin = "";
-  private String owner = "PUBLIC DOMAIN";
-  private String longDate = "";
-  private String date = "";
-  private String time = "";
-  private String pathlength = "";
-
   private Calendar now = Calendar.getInstance();
   private SimpleDateFormat formatter = new SimpleDateFormat(
       "yyyy/MM/dd HH:mm:ss.SSSS ZZZZ");
   private String currentTime = formatter.format(now.getTime());
   //private String finalDate = "";
 
-  // --------------------Spectral Parameters ------------------------------//
-  private String xUnits = "Arbitrary Units";
-  private String yUnits = "Arbitrary Units";
-  private double xFactor = ERROR;
-  private double yFactor = ERROR;
-  //private double deltaX = ERROR;
-  // For NMR Spectra
-  private double observedFreq = ERROR;
 
   private ArrayList<PeakInfo> peakList = new ArrayList<PeakInfo>();
 
@@ -205,151 +189,7 @@ public class JDXSpectrum implements Graph {
     parentSource = source;
   }*/
 
-  /*---------------------SET CORE FIXED HEADER------------------------- */
-
-  /**
-   * Sets the title of the spectrum
-   * 
-   * @param title
-   *        the spectrum title
-   */
-  public void setTitle(String title) {
-    this.title = title;
-  }
-
-  /**
-   * Sets the JCAMP-DX version number
-   * 
-   * @param versionNum
-   *        the JCAMP-DX version number
-   */
-  public void setJcampdx(String versionNum) {
-    this.jcampdx = versionNum;
-  }
-
-  /**
-   * Sets the data type
-   * 
-   * @param dataType
-   *        the data type
-   */
-  public void setDataType(String dataType) {
-    this.dataType = dataType;
-  }
-
-  /**
-   * Sets the data class
-   * 
-   * @param dataClass
-   *        the data class
-   */
-  public void setDataClass(String dataClass) {
-    this.dataClass = dataClass;
-  }
-
-  /**
-   * Sets the origin of the JCAMP-DX spectrum
-   * 
-   * @param origin
-   *        the origin
-   */
-  public void setOrigin(String origin) {
-    this.origin = origin;
-  }
-
-  /**
-   * Sets the owner
-   * 
-   * @param owner
-   *        the owner
-   */
-  public void setOwner(String owner) {
-    this.owner = owner;
-  }
-
-  /**
-   * Sets the long date of when the file was created
-   * 
-   * @param longDate
-   *        String
-   */
-  public void setLongDate(String longDate) {
-    this.longDate = longDate;
-  }
-
-  /**
-   * Sets the date the file was created
-   * 
-   * @param date
-   *        String
-   */
-  public void setDate(String date) {
-    this.date = date;
-  }
-
-  /**
-   * Sets the time the file was created
-   * 
-   * @param time
-   *        String
-   */
-  public void setTime(String time) {
-    this.time = time;
-  }
-
-  /**
-   * Sets the pathlength of the sample (required for AnIML IR/UV files)
-   * 
-   * @param pathlength
-   *        String
-   */
-  public void setPathlength(String pathlength) {
-    this.pathlength = pathlength;
-  }
-
   /* ------------------------------------------------------------------- */
-
-  /* -------------------SET SPECTRAL PARAMETERS -------------------------- */
-
-  /**
-   * Sets the units for the x axis
-   * 
-   * @param xUnits
-   *        the x units
-   */
-  public void setXUnits(String xUnits) {
-    this.xUnits = xUnits;
-  }
-
-  /**
-   * Sets the units for the y axis
-   * 
-   * @param yUnits
-   *        the y units
-   */
-  public void setYUnits(String yUnits) {
-    this.yUnits = yUnits;
-  }
-
-  /**
-   * Sets the original xfactor
-   * 
-   * @param xFactor
-   *        the x factor
-   */
-  public void setXFactor(double xFactor) {
-    this.xFactor = xFactor;
-  }
-
-  /**
-   * Sets the original y factor
-   * 
-   * @param yFactor
-   *        the y factor
-   */
-  public void setYFactor(double yFactor) {
-    this.yFactor = yFactor;
-  }
 
   /* --------------------------------------------------------------------- */
 
@@ -795,6 +635,8 @@ public class JDXSpectrum implements Graph {
 
   private PeakInfo selectedPeak;
 
+  private double deltaX;
+
   public PeakInfo getSelectedPeak() {
     return selectedPeak;
   }
@@ -816,5 +658,160 @@ public class JDXSpectrum implements Graph {
     String type = (peakList == null || peakList.size() == 0 ? dataType 
         : peakList.get(0).getType());
     return (type != null && type.length() > 0 ? type + " " : "") + title;
+  }
+
+  public boolean createXYCoords(String dataType, String tabularSpecData, int tabDataLineNo, StringBuffer errorLog) throws JSpecViewException {
+    
+    if(dataClass.equals("XYDATA")){
+
+      if(xFactor == ERROR)
+        throw new JSpecViewException("Error Reading Data Set: ##XFACTOR not found");
+
+      if(yFactor == ERROR)
+        throw new JSpecViewException("Error Reading Data Set: ##YFACTOR not found");
+
+      if(firstX == ERROR)
+        throw new JSpecViewException("Error Reading Data Set: ##FIRSTX not found");
+
+      if(lastX == ERROR)
+        throw new JSpecViewException("Error Reading Data Set: ##LASTX not found");
+
+      if(nPoints == -1)
+        throw new JSpecViewException("Error Reading Data Set: ##NPOINTS not found");
+
+      deltaX = JSpecViewUtils.deltaX(lastX, firstX, nPoints);
+
+      increasing = (deltaX > 0);
+
+      decompressData(tabularSpecData, tabDataLineNo, errorLog);
+      return true;
+    }
+    if(dataClass.equals("PEAKTABLE") || dataClass.equals("XYPOINTS")){
+      if(dataClass.equals("PEAKTABLE"))
+        continuous = false;
+      // check if there is an x and y factor
+      if (xFactor != ERROR && yFactor != ERROR)
+        xyCoords = JSpecViewUtils.parseDSV(tabularSpecData, xFactor, yFactor);
+      else
+        xyCoords = JSpecViewUtils.parseDSV(tabularSpecData, 1, 1);
+
+      deltaX = JSpecViewUtils.deltaX(xyCoords[xyCoords.length - 1].getXVal(), xyCoords[0].getXVal(), xyCoords.length);
+      increasing = (deltaX > 0);
+      return true;
+    }
+      return false;
+  }
+
+  public String getTabularSpecData(String label, String value) throws JSpecViewException {
+
+    if (label.equals("##PEAKASSIGNMENTS"))
+      setDataClass("PEAKASSIGNMENTS");
+    else if (label.equals("##PEAKTABLE"))
+      setDataClass("PEAKTABLE");
+    else if (label.equals("##XYDATA"))
+      setDataClass("XYDATA");
+    else if (label.equals("##XYPOINTS"))
+      setDataClass("XYPOINTS");
+
+    // Get CoordData
+    String tmp = value;
+    try {
+      char chr;
+      do {
+        tmp = tmp.substring(tmp.indexOf("\n") + 1);
+        chr = tmp.trim().charAt(0);
+      } while (!Character.isDigit(chr) && chr != '+' && chr != '-'
+          && chr != '.');
+    } catch (IndexOutOfBoundsException iobe) {
+      throw new JSpecViewException("Error Reading Data Set");
+    }
+    return tmp;
+  }
+
+  public boolean createXYCoords(
+                                 HashMap<String, ArrayList<String>> nTupleTable,
+                                 String[] plotSymbols, String dataType, 
+                                 String tabularSpecData, int tabDataLineNo, StringBuffer errorLog) {
+    ArrayList<String> list;
+    if(dataClass.equals("XYDATA")){
+      // Get Label Values
+
+      list = (ArrayList<String>)nTupleTable.get("##SYMBOL");
+      int index1 = list.indexOf(plotSymbols[0]);
+      int index2 = list.indexOf(plotSymbols[1]);
+
+      list = (ArrayList<String>)nTupleTable.get("##FACTOR");
+      xFactor = Double.parseDouble((String)list.get(index1));
+      yFactor = Double.parseDouble((String)list.get(index2));
+
+      list = (ArrayList<String>)nTupleTable.get("##LAST");
+      lastX = Double.parseDouble((String)list.get(index1));
+
+      list = (ArrayList<String>)nTupleTable.get("##FIRST");
+      firstX = Double.parseDouble((String)list.get(index1));
+      //firstY = Double.parseDouble((String)list.get(index2));
+
+      list = (ArrayList<String>)nTupleTable.get("##VARDIM");
+      nPoints = Integer.parseInt((String)list.get(index1));
+
+      list = (ArrayList<String>)nTupleTable.get("##UNITS");
+      xUnits = (String)list.get(index1);
+      yUnits = (String)list.get(index2);
+
+      decompressData(tabularSpecData, tabDataLineNo, errorLog);
+      return true;
+    }
+    if(dataClass.equals("PEAKTABLE") || dataClass.equals("XYPOINTS")){
+      list = (ArrayList<String>)nTupleTable.get("##SYMBOL");
+      int index1 = list.indexOf(plotSymbols[0]);
+      int index2 = list.indexOf(plotSymbols[1]);
+
+      list = (ArrayList<String>)nTupleTable.get("##UNITS");
+      xUnits = (String)list.get(index1);
+      yUnits = (String)list.get(index2);
+      xyCoords = JSpecViewUtils.parseDSV(tabularSpecData, xFactor, yFactor);
+      return true;
+    }
+    return false;
+  }
+
+  private void decompressData(String tabularSpecData, int tabDataLineNo, StringBuffer errorLog) {
+    deltaX = (lastX - firstX) / (nPoints - 1);
+
+    JDXDecompressor decompressor = new JDXDecompressor(tabularSpecData, xFactor, yFactor, deltaX);
+    decompressor.setLabelLineNo(tabDataLineNo);
+
+    xyCoords = decompressor.decompressData();
+
+    if(xyCoords == null)
+      xyCoords = JSpecViewUtils.parseDSV(tabularSpecData, xFactor, yFactor);
+
+    if (decompressor.getErrorLog().length()>0 ) {
+      errorLog.append(decompressor.getErrorLog() + "\n");
+      errorLog.append("firstX: " + firstX + " Found " +
+                         (increasing ? xyCoords[0] : xyCoords[xyCoords.length -1]).getXVal()  + "\n");
+      errorLog.append("lastX from Header " + lastX + " Found " +
+                         (increasing ? xyCoords[xyCoords.length -1] : xyCoords[0]).getXVal()  + "\n");
+      errorLog.append("deltaX from Header "+ deltaX  + "\n");
+      errorLog.append("Number of points in Header "+ nPoints + " Found " + xyCoords.length  + "\n");
+    }else{
+      errorLog.append("No Errors\n");
+    }
+
+    if(JSpecViewUtils.DEBUG){
+      System.err.println(errorLog.toString());
+    }
+
+    // apply offset
+    if(offset != ERROR && obFreq != ERROR && dataType.toUpperCase().contains("SPECTRUM")){
+        JSpecViewUtils.applyShiftReference(xyCoords, dataPointNum, firstX, lastX, offset, obFreq, shiftRefType);
+    }
+
+    if(obFreq != ERROR && xUnits.toUpperCase().equals("HZ")){
+      double xScale = obFreq;
+      JSpecViewUtils.applyScale(xyCoords, (1/xScale), 1);
+      xUnits = "PPM";
+      setHZtoPPM(true);
+    }
   }
 }

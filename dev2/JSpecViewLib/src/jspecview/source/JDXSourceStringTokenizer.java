@@ -72,7 +72,7 @@ public class JDXSourceStringTokenizer {
   /**
    * Gets the next token from the string and stores the label and the value
    */
-  public void nextToken(){
+  public boolean nextToken(){
     // ADD CODE TO IGNORE ##= COMMENTS
     // TWO LDR'S CAN'T BE ON THE SAME LINE
 
@@ -131,6 +131,8 @@ public class JDXSourceStringTokenizer {
     value = valueBuffer.toString().trim();
     int index = value.indexOf("=");
     value = value.substring(index+1).trim();
+    
+    return true;
   }
 
   /*

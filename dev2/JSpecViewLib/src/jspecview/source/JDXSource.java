@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
+import jspecview.common.JDXObject;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSpecViewUtils;
 import jspecview.common.PeakInfo;
@@ -47,8 +48,10 @@ import jspecview.util.Parser;
  * @author Khari A. Bryan
  * @author Prof. Robert J. Lancashire
  */
-public abstract class JDXSource {
+public abstract class JDXSource extends JDXObject {
 
+  public boolean isCompoundSource = false;
+  
   /**
    * The labels for various tabular data
    */
