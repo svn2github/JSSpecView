@@ -1973,6 +1973,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     if (!selectPanel(index))
       script = null;
     selectedJSVPanel.processPeakSelect(script);
+    sendFrameChange(selectedJSVPanel);
   }
 
   private boolean selectPanel(String index) {
