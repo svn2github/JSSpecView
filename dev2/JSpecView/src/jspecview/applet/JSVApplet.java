@@ -96,7 +96,6 @@ import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
 import jspecview.export.Exporter;
 import jspecview.source.BlockSource;
-import jspecview.source.CompoundSource;
 import jspecview.source.JDXSource;
 import jspecview.source.NTupleSource;
 import jspecview.util.Escape;
@@ -537,7 +536,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     if (theInterface.equals("tab") && moreThanOnePanel) {
       spectraPane = new JTabbedPane(SwingConstants.TOP,
           JTabbedPane.SCROLL_TAB_LAYOUT);
-      appletPanel.add(new JLabel(((CompoundSource) source).getTitle(),
+      appletPanel.add(new JLabel(source.getTitle(),
           SwingConstants.CENTER), BorderLayout.NORTH);
       appletPanel.add(spectraPane, BorderLayout.CENTER);
 
@@ -563,7 +562,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
         }
       });
     } else if (theInterface.equals("tile") && canDoTile) {
-      appletPanel.add(new JLabel(((CompoundSource) source).getTitle(),
+      appletPanel.add(new JLabel(source.getTitle(),
           SwingConstants.CENTER), BorderLayout.NORTH);
 
       for (int i = 0; i < numberOfPanels; i++) {
@@ -584,8 +583,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
       selectedJSVPanel = jsvPanels[spectrumIndex];
       // Global variable for single interface
       currentSpectrumIndex = spectrumIndex;
-      if (overlay && source instanceof CompoundSource) {
-        title = ((CompoundSource) source).getTitle();
+      if (overlay && source.isCompoundSource) {
+        title = source.getTitle();
         jsvPanels[spectrumIndex].setTitle(title);
         appletPopupMenu.overlayKeyMenuItem.setEnabled(true);
       }
@@ -720,8 +719,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
   void headerMenuItem_actionPerformed(ActionEvent e) {
     if (overlay) {
       // Show header of Source
-      HashMap<String, String> header = (HashMap<String, String>) ((CompoundSource) source)
-          .getHeaderTable();
+      HashMap<String, String> header = (HashMap<String, String>) source.getHeaderTable();
       Object[] headerLabels = header.keySet().toArray();
       Object[] headerValues = header.values().toArray();
 
@@ -737,17 +735,17 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
       // add core header
       tmp = new Object[2];
       tmp[0] = "##TITLE";
-      tmp[1] = ((CompoundSource) source).getTitle();
+      tmp[1] = source.getTitle();
       rowData[i++] = tmp;
 
       tmp = new Object[2];
       tmp[0] = "##JCAMP-DX";
-      tmp[1] = ((CompoundSource) source).getJcampdx();
+      tmp[1] = source.getJcampdx();
       rowData[i++] = tmp;
 
       tmp = new Object[2];
       tmp[0] = "##DATA TYPE";
-      tmp[1] = ((CompoundSource) source).getDataType();
+      tmp[1] = source.getDataType();
       rowData[i++] = tmp;
 
       /*
@@ -759,12 +757,12 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
 
       tmp = new Object[2];
       tmp[0] = "##ORIGIN";
-      tmp[1] = ((CompoundSource) source).getOrigin();
+      tmp[1] = source.getOrigin();
       rowData[i++] = tmp;
 
       tmp = new Object[2];
       tmp[0] = "##OWNER";
-      tmp[1] = ((CompoundSource) source).getOwner();
+      tmp[1] = source.getOwner();
       rowData[i++] = tmp;
 
       for (int j = 0; i < headerSize; i++, j++) {
@@ -1899,7 +1897,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     if (!compoundMenuOn2)
       compoundMenuOn = false;
     else {
-      compoundMenuOn = source instanceof CompoundSource;
+      compoundMenuOn = source.isCompoundSource;
     }
 
     String Yunits = source.getJDXSpectrum(0).getYUnits();

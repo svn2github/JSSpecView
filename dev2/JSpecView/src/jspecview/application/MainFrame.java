@@ -125,7 +125,6 @@ import jspecview.common.PeakInfo;
 import jspecview.common.TransmittanceAbsorbanceConverter;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
-import jspecview.source.CompoundSource;
 import jspecview.source.JDXSource;
 import jspecview.util.Escape;
 import jspecview.util.FileManager;
@@ -1362,7 +1361,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     setMenuEnables(spec);
 
     specInfos = null;
-    if (autoOverlay && source instanceof CompoundSource) {
+    if (autoOverlay && source.isCompoundSource) {
       try {
         overlaySpectra(currentSelectedSource);
       } catch (ScalesIncompatibleException ex) {
@@ -1508,7 +1507,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     if (source == null) {
       return;
     }
-    if (!(source instanceof CompoundSource)) {
+    if (!source.isCompoundSource) {
       writeStatus("Unable to Overlay, Incompatible source type");
       return;
     }
@@ -1546,12 +1545,12 @@ public class MainFrame extends JFrame implements DropTargetListener,
     Vector<JDXSpectrum> specs = source.getSpectra();
     JSVPanel jsvp;
     jsvp = new JSVPanel(specs);
-    jsvp.setTitle(((CompoundSource) source).getTitle());
+    jsvp.setTitle(source.getTitle());
 
     setJSVPanelProperties(jsvp, true);
 
-    JInternalFrame frame = new JInternalFrame(((CompoundSource) source)
-        .getTitle(), true, true, true, true);
+    JInternalFrame frame = new JInternalFrame(source.getTitle(), true, true,
+        true, true);
     frame.setFrameIcon(frameIcon);
     frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     frame.addInternalFrameListener(new JSVInternalFrameListener(file, source));
@@ -1677,7 +1676,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    */
   protected void splitMenuItem_actionPerformed(ActionEvent e) {
     JDXSource source = currentSelectedSource;
-    if (!(source instanceof CompoundSource)) {
+    if (!source.isCompoundSource) {
       return;
       // STATUS --> Can't Split
     }

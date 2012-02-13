@@ -32,7 +32,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
 import jspecview.common.JDXSpectrum;
-import jspecview.source.CompoundSource;
 import jspecview.source.JDXSource;
 
 /**
@@ -225,7 +224,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
 
     if(selectedJSVPanel.getNumberOfSpectra() > 1){
       // Show header of Source
-      HashMap<String, String> header = (HashMap<String, String>)((CompoundSource)source).getHeaderTable();
+      HashMap<String, String> header = (HashMap<String, String>) source.getHeaderTable();
       Object[] headerLabels = header.keySet().toArray();
       Object[] headerValues = header.values().toArray();
 
@@ -241,28 +240,28 @@ public class JSVPanelPopupMenu extends JPopupMenu {
       // add core header
       tmp = new Object[2];
       tmp[0] = "##TITLE";
-      tmp[1] = ((CompoundSource)source).getTitle();
+      tmp[1] = source.getTitle();
       rowData[i++] = tmp;
 
       tmp = new Object[2];
       tmp[0] = "##JCAMP-DX";
-      tmp[1] = ((CompoundSource)source).getJcampdx();
+      tmp[1] = source.getJcampdx();
       rowData[i++] = tmp;
 
       tmp = new Object[2];
       tmp[0] = "##DATA TYPE";
-      tmp[1] = ((CompoundSource)source).getDataType();
+      tmp[1] = source.getDataType();
       rowData[i++] = tmp;
 
 
       tmp = new Object[2];
       tmp[0] = "##ORIGIN";
-      tmp[1] = ((CompoundSource)source).getOrigin();
+      tmp[1] = source.getOrigin();
       rowData[i++] = tmp;
 
       tmp = new Object[2];
       tmp[0] = "##OWNER";
-      tmp[1] = ((CompoundSource)source).getOwner();
+      tmp[1] = source.getOwner();
       rowData[i++] = tmp;
 
       for(int j = 0; i < headerSize ; i++, j++){
