@@ -1660,8 +1660,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     if (numOfSpectra == 1)
       title = spectra[0].getTitle().substring(0, 1).toUpperCase()
           + spectra[0].getTitle().substring(1);
-    g
-        .drawString(title, (int) (leftPlotAreaPos),
+    g.drawString(title, (int) (leftPlotAreaPos),
             (int) (bottomPlotAreaPos + 45));
 
   } // End Draw Title

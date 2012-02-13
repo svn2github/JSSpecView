@@ -1714,6 +1714,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       for (int i = 0; i < specs.size(); i++) {
         JDXSpectrum spec = (JDXSpectrum) specs.elementAt(i);
         jsvp = new JSVPanel(spec);
+        jsvp.setIndex(i);
         jsvp.addPeakPickedListener(this);
         setJSVPanelProperties(jsvp, true);
 
@@ -2848,7 +2849,12 @@ public class MainFrame extends JFrame implements DropTargetListener,
   @Override
   public void peakPicked(PeakPickedEvent eventObj) {
     selectedJSVPanel = (JSVPanel) eventObj.getSource();
-    sendScript(eventObj.getPeakInfo());
+    String peaks = eventObj.getPeakInfo();
+    String title = (peaks == null ? ((JDXSpectrum) selectedJSVPanel
+        .getSpectrumAt(0)).getTitleLabel() : Parser.getQuotedAttribute(peaks,
+        "title"));
+    specInfos[selectedJSVPanel.getIndex()].frame.setTitle(title);
+    sendScript(peaks);
   }
 
   private void sendFrameChange(JSVPanel jsvp) {
