@@ -171,6 +171,11 @@ public class IntegralGraph implements Graph {
     return "Integral of: " + graph.getTitle();
   }
 
+  @Override
+  public String getTitleLabel() {
+    return getTitle();
+  }
+
   /**
    * Method from the <code>Graph</code> Interface.
    * Returns the x units of the <code>IntegralGragh</code>.
@@ -274,9 +279,6 @@ public class IntegralGraph implements Graph {
       double newY = integral * factor + offset; // + offset
       integralCoords.insertElementAt(new Coordinate(xyCoords[i].getXVal(), newY), 0);
     }
-
-
-
 
     Coordinate[] integralCoordsArray;
     Coordinate[] tempCoords = new Coordinate[integralCoords.size()];

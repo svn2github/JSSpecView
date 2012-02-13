@@ -159,7 +159,7 @@ public class ZipUtil {
     int len = v.size();
     String[] dirList = new String[len];
     for (int i = 0; i < len; i++)
-      dirList[i] = (String) v.elementAt(i);
+      dirList[i] = v.get(i);
     return dirList;
   }
   

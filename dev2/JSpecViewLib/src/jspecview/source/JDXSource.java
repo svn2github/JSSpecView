@@ -97,8 +97,7 @@ public abstract class JDXSource extends JDXObject {
    * @return the Spectrum at a given index in the list
    */
   public JDXSpectrum getJDXSpectrum(int index) {
-    return jdxSpectra.size() <= index ? null : (JDXSpectrum) jdxSpectra
-        .elementAt(index);
+    return jdxSpectra.size() <= index ? null : jdxSpectra.get(index);
   }
 
   private final static int TYPE_UNKNOWN = -1;

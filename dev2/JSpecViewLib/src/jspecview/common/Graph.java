@@ -51,6 +51,13 @@ public interface Graph {
    * @return the Title of the Spectrum
    */
   public String getTitle();
+
+  /**
+   * Gets the Title of the Spectrum with peak type if available
+   * @return the Title of the Spectrum
+   */
+  public String getTitleLabel();
+
   /**
    * Gets the units of the X axis
    * @return the units of the X axis
