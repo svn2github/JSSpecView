@@ -58,6 +58,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -87,6 +88,7 @@ import jspecview.application.common.PeakPickedEvent;
 import jspecview.application.common.PeakPickedListener;
 import jspecview.application.common.PrintLayoutDialog;
 import jspecview.common.Coordinate;
+import jspecview.common.Graph;
 import jspecview.common.IntegrationRatio;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSpecViewUtils;
@@ -473,10 +475,10 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
       try {
         for (int i = 0; i < numberOfSpectra; i++) {
           if (showRange)
-            jsvp = new JSVPanel((JDXSpectrum) specs.elementAt(i), startIndex,
+            jsvp = new JSVPanel(specs.get(i), startIndex,
                 endIndex);
           else
-            jsvp = new JSVPanel((JDXSpectrum) specs.elementAt(i));
+            jsvp = new JSVPanel(specs.get(i));
           jsvPanels[i] = jsvp;
           initProperties(jsvp, i);
         }
@@ -541,7 +543,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
       appletPanel.add(spectraPane, BorderLayout.CENTER);
 
       for (int i = 0; i < numberOfPanels; i++) {
-        String title = ((JDXSpectrum) specs.elementAt(i)).getTitleLabel();
+        String title = specs.get(i).getTitleLabel();
         if (source instanceof NTupleSource)
           title = title.substring(title.indexOf(':') + 1);
         else if (source instanceof BlockSource)
@@ -596,8 +598,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
           JCheckBoxMenuItem mi;
           if (source instanceof NTupleSource || source instanceof BlockSource) {
             for (int i = 0; i < numberOfPanels; i++) {
-              JDXSpectrum spec = (JDXSpectrum) specs.get(i);
-              title = (i + 1) + "- " + spec.getTitleLabel();
+              title = (i + 1) + "- " + specs.get(i).getTitleLabel();
               mi = new JCheckBoxMenuItem(title);
               mi.setSelected(i == currentSpectrumIndex);
               mi.addItemListener(new ItemListener() {
@@ -719,7 +720,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
   void headerMenuItem_actionPerformed(ActionEvent e) {
     if (overlay) {
       // Show header of Source
-      HashMap<String, String> header = (HashMap<String, String>) source.getHeaderTable();
+      Map<String, String> header = source.getHeaderTable();
       Object[] headerLabels = header.keySet().toArray();
       Object[] headerValues = header.values().toArray();
 
@@ -907,7 +908,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
    */
   void solColMenuItem_actionPerformed(ActionEvent e) {
 
-    JDXSpectrum spectrum = (JDXSpectrum) selectedJSVPanel.getSpectrumAt(0);
+    Graph spectrum = selectedJSVPanel.getSpectrumAt(0);
     String Yunits = spectrum.getYUnits();
     //    System.out.println(spectrum.getTitle());
     sltnclr = Visible.Colour(spectrum.getXYCoords(), Yunits);

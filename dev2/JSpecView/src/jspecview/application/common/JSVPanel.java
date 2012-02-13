@@ -1223,7 +1223,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     }
 
     for (int i = 0; i < highlights.size(); i++) {
-      Highlight hl = (Highlight) highlights.elementAt(i);
+      Highlight hl = highlights.get(i);
       drawBar(g, hl.getStartX(), hl.getEndX(), c = hl.getColor(), true);
     }
 
@@ -1658,8 +1658,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
     g.setFont(font);
     if (numOfSpectra == 1)
-      title = spectra[0].getTitle().substring(0, 1).toUpperCase()
-          + spectra[0].getTitle().substring(1);
+      title = spectra[0].getTitleLabel();
     g.drawString(title, (int) (leftPlotAreaPos),
             (int) (bottomPlotAreaPos + 45));
 
@@ -2071,8 +2070,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   public void previousView() {
     if (currentZoomIndex - 1 >= 0) {
-      scaleData = (JSpecViewUtils.MultiScaleData) zoomInfoList
-          .elementAt(--currentZoomIndex);
+      scaleData = zoomInfoList.get(--currentZoomIndex);
       repaint();
     }
   }
@@ -2082,8 +2080,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   public void nextView() {
     if (currentZoomIndex + 1 < zoomInfoList.size()) {
-      scaleData = (JSpecViewUtils.MultiScaleData) zoomInfoList
-          .elementAt(++currentZoomIndex);
+      scaleData = zoomInfoList.get(++currentZoomIndex);
       repaint();
     }
   }

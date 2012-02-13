@@ -119,6 +119,7 @@ import jspecview.application.common.PeakPickedEvent;
 import jspecview.application.common.PeakPickedListener;
 import jspecview.application.common.PrintLayoutDialog;
 import jspecview.common.Coordinate;
+import jspecview.common.Graph;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSpecViewUtils;
 import jspecview.common.PeakInfo;
@@ -1384,7 +1385,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     openRecentMenu.removeAll();
     int index;
     for (index = 0; index < recentFilePaths.size() - 1; index++) {
-      String path = (String) recentFilePaths.elementAt(index);
+      String path = recentFilePaths.get(index);
       filePaths += path + ", ";
       menuItem = new JMenuItem(path);
       openRecentMenu.add(menuItem);
@@ -1395,7 +1396,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
         }
       });
     }
-    String path = (String) recentFilePaths.elementAt(index);
+    String path = recentFilePaths.get(index);
     filePaths += path;
     menuItem = new JMenuItem(path);
     openRecentMenu.add(menuItem);
@@ -1604,7 +1605,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   protected void closeAllMenuItem_actionPerformed(ActionEvent e) {
 
     for (int i = 0; i < jdxSources.size(); i++) {
-      JDXSource source = (JDXSource) jdxSources.elementAt(i);
+      JDXSource source = jdxSources.get(i);
       closeSource(source);
     }
     // add calls to disable Menus while files not open.
@@ -1625,16 +1626,15 @@ public class MainFrame extends JFrame implements DropTargetListener,
   @SuppressWarnings("unchecked")
   public void closeSource(JDXSource source) {
     // Remove nodes and dispose of frames
-    Enumeration enume = rootNode.children();
+    Enumeration<DefaultMutableTreeNode> enume = rootNode.children();
     SpecInfo nodeInfo;
     DefaultMutableTreeNode childNode;
     while (enume.hasMoreElements()) {
-      DefaultMutableTreeNode node = (DefaultMutableTreeNode) enume
-          .nextElement();
+      DefaultMutableTreeNode node = enume.nextElement();
       String fileName = getFileForSource(source);
       if (((String) node.getUserObject()).equals(fileName)) {
-        for (Enumeration e = node.children(); e.hasMoreElements();) {
-          childNode = (DefaultMutableTreeNode) e.nextElement();
+        for (Enumeration<DefaultMutableTreeNode> e = node.children(); e.hasMoreElements();) {
+          childNode = e.nextElement();
           nodeInfo = (SpecInfo) childNode.getUserObject();
           nodeInfo.frame.dispose();
         }
@@ -1646,7 +1646,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     if (source != null) {
       Vector<JDXSpectrum> spectra = source.getSpectra();
       for (int i = 0; i < spectra.size(); i++) {
-        String title = ((JDXSpectrum) spectra.elementAt(i)).getTitleLabel();
+        String title = spectra.get(i).getTitleLabel();
         for (int j = 0; j < showMenu.getMenuComponentCount(); j++) {
           JMenuItem mi = (JMenuItem) showMenu.getMenuComponent(j);
           if (mi.getText().endsWith(title)) {
@@ -1712,7 +1712,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     specInfos = new SpecInfo[specs.size()];
     try {
       for (int i = 0; i < specs.size(); i++) {
-        JDXSpectrum spec = (JDXSpectrum) specs.elementAt(i);
+        JDXSpectrum spec = specs.get(i);
         jsvp = new JSVPanel(spec);
         jsvp.setIndex(i);
         jsvp.addPeakPickedListener(this);
@@ -2011,11 +2011,10 @@ public class MainFrame extends JFrame implements DropTargetListener,
     public DefaultMutableTreeNode getNodeForInternalFrame(
                                                           JInternalFrame frame,
                                                           DefaultMutableTreeNode parent) {
-      Enumeration enume = parent.breadthFirstEnumeration();
+      Enumeration<DefaultMutableTreeNode> enume = parent.breadthFirstEnumeration();
 
       while (enume.hasMoreElements()) {
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode) enume
-            .nextElement();
+        DefaultMutableTreeNode node = enume.nextElement();
         if (node.isLeaf()) {
           Object nodeInfo = node.getUserObject();
           if (nodeInfo instanceof SpecInfo) {
@@ -2078,12 +2077,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
     protected boolean isFrameHidden(Object value) {
       DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
       Object nodeInfo = node.getUserObject();
-      if (nodeInfo instanceof SpecInfo) {
-        //JInternalFrame frame = ( (SpecInfo) nodeInfo).frame;
-        if (!((SpecInfo) nodeInfo).frame.isVisible()) {
-          return true;
-        }
-      }
+      if (nodeInfo instanceof SpecInfo && !((SpecInfo) nodeInfo).frame.isVisible())
+        return true;
       return false;
     }
   }
@@ -2585,7 +2580,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     Container contentPane = frame.getContentPane();
 
     if (frame != null) {
-      //JSVPanel panel = (JSVPanel) frame.getContentPane().getComponent(0);
       JSVPanel jsvp = (JSVPanel) contentPane.getComponent(0);
       int numcomp = contentPane.getComponentCount();
       if ((numcomp > 1) & Yunits.toLowerCase().contains("trans")) {
@@ -2594,7 +2588,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       if ((numcomp > 1) & Yunits.toLowerCase().contains("abs")) {
         Yunits0 = "trans";
       }
-      JDXSpectrum spectrum = (JDXSpectrum) jsvp.getSpectrumAt(0);
+      Graph spectrum = jsvp.getSpectrumAt(0);
       //jsvpPopupMenu.setSelectedJSVPanel(panel);
       //jsvpPopupMenu.setSource(currentSelectedSource);
       //jsvpPopupMenu.properties_actionPerformed(e);
@@ -2850,8 +2844,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
   public void peakPicked(PeakPickedEvent eventObj) {
     selectedJSVPanel = (JSVPanel) eventObj.getSource();
     String peaks = eventObj.getPeakInfo();
-    String title = (peaks == null ? ((JDXSpectrum) selectedJSVPanel
-        .getSpectrumAt(0)).getTitleLabel() : Parser.getQuotedAttribute(peaks,
+    String title = (peaks == null ? selectedJSVPanel
+        .getSpectrumAt(0).getTitleLabel() : Parser.getQuotedAttribute(peaks,
         "title"));
     specInfos[selectedJSVPanel.getIndex()].frame.setTitle(title);
     sendScript(peaks);
