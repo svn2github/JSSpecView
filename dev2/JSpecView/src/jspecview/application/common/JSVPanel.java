@@ -854,9 +854,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   public void addHighlight(double x1, double x2, Color color) {
     Highlight hl = new Highlight(x1, x2, color);
-    if (!highlights.contains(hl)) {
+    if (!highlights.contains(hl))
       highlights.addElement(hl);
-    }
   }
 
   /**
@@ -2652,7 +2651,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     setHighlightOn(true);
     Color color = new Color(255, 0, 0);
     addHighlight(x1, x2, color);
-    repaint();
+    if (isWithinRange(x1) && isWithinRange(x2))
+      repaint();
+    else
+      reset();
   }
 
   /**
