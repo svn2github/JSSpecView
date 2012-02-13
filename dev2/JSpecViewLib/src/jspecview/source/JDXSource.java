@@ -30,6 +30,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 import jspecview.common.JDXObject;
@@ -99,12 +101,13 @@ public abstract class JDXSource extends JDXObject {
         .elementAt(index);
   }
 
+  private final static int TYPE_UNKNOWN = -1;
   /** Indicates a Simple Source */
-  public final static int SIMPLE = 0;
+  private final static int TYPE_SIMPLE = 0;
   /** Indicates a Block Source */
-  public final static int BLOCK = 1;
+  private final static int TYPE_BLOCK = 1;
   /** Indicates a Ntuple Source */
-  public final static int NTUPLE = 2;
+  private final static int TYPE_NTUPLE = 2;
 
   private static JDXSource getXMLSource(String source) {
     String xmlType = source.substring(0, 400).toLowerCase();
@@ -137,20 +140,17 @@ public abstract class JDXSource extends JDXObject {
       }
     }
 
-    int sourceType = determineJDXSourceType(sourceContents);
-
-    if (sourceType == -1) {
-      throw new JSpecViewException("JDX Source Type not Recognized");
-    }
     try {
-      switch (sourceType) {
-      case SIMPLE:
+      switch (determineJDXSourceType(sourceContents)) {
+      case TYPE_SIMPLE:
         return SimpleSource.getInstance(sourceContents);
-      case BLOCK:
+      case TYPE_BLOCK:
         return BlockSource.getInstance(sourceContents);
-      case NTUPLE:
+      case TYPE_NTUPLE:
         return NTupleSource.getInstance(sourceContents);
         // return RestrictedNTupleSource.getInstance(sourceContents, 128);
+      case TYPE_UNKNOWN:
+        throw new JSpecViewException("JDX Source Type not Recognized");
       default:
         throw new JSpecViewException("Unknown or unrecognised JCAMP-DX format");
       }
@@ -200,17 +200,17 @@ public abstract class JDXSource extends JDXObject {
       label = JSpecViewUtils.cleanLabel(t.label);
       if (label.equals("##DATATYPE") && t.value.toUpperCase().equals("LINK")) {
 
-        return BLOCK;
+        return TYPE_BLOCK;
       }
       if (label.equals("##DATACLASS")
           && t.value.toUpperCase().equals("NTUPLES")) {
-        return NTUPLE;
+        return TYPE_NTUPLE;
       }
       Arrays.sort(JDXSource.TABULAR_DATA_LABELS);
       if (Arrays.binarySearch(JDXSource.TABULAR_DATA_LABELS, label) > 0)
-        return SIMPLE;
+        return TYPE_SIMPLE;
     }
-    return -1;
+    return TYPE_UNKNOWN;
   }
 
   /**
@@ -281,7 +281,7 @@ public abstract class JDXSource extends JDXObject {
 
   private int index;
 
-  protected ArrayList<PeakInfo> readPeakList(String peakList) throws Exception {
+  public ArrayList<PeakInfo> readPeakList(String peakList) throws Exception {
     ArrayList<PeakInfo> peakData = new ArrayList<PeakInfo>();
     BufferedReader reader = new BufferedReader(new StringReader(peakList));
     String line = discardLinesUntilContains(reader, "<Peaks");
@@ -313,7 +313,7 @@ public abstract class JDXSource extends JDXObject {
     return peakData;
   }
 
-  private String discardLinesUntilContains(BufferedReader reader,
+  private static String discardLinesUntilContains(BufferedReader reader,
                                              String containsMatch)
       throws Exception {
     String line = reader.readLine();
@@ -321,5 +321,173 @@ public abstract class JDXSource extends JDXObject {
     }
     return line;
   }
+
+  protected static boolean checkCommon(JDXSource source, JDXObject jdxObject, String label,
+                                       String value, StringBuffer errorLog, 
+                                       HashMap<String, String> table) {
+    if (label.equals("##TITLE")) {
+      jdxObject.title = (JSpecViewUtils.obscure || value == null
+          || value.equals("") ? "Unknown" : value);
+      return true;
+    }
+    if (label.equals("##JCAMPDX")) {
+      jdxObject.jcampdx = value;
+      float version = Parser.parseFloat(value);
+      if (version >= 6.0 || Float.isNaN(version)) {
+        if (errorLog != null)
+          errorLog
+              .append("Warning: JCAMP-DX version may not be fully supported: "
+                  + value + "\n");
+      }
+      return true;
+    }
+
+    if (label.equals("##ORIGIN")) {
+      jdxObject.origin = (value != null && !value.equals("") ? value : "Unknown");
+      return true;
+    }
+
+    if (label.equals("##OWNER")) {
+      jdxObject.owner = (value != null && !value.equals("") ? value : "Unknown");
+      return true;
+    }
+
+    if (label.equals("##DATATYPE")) {
+      jdxObject.dataType = value;
+      return true;
+    }
+
+    if (label.equals("##LONGDATE")) {
+      jdxObject.longDate = value;
+      return true;
+    }
+
+    if (label.equals("##DATE")) {
+      jdxObject.date = value;
+      return true;
+    }
+
+    if (label.equals("##TIME")) {
+      jdxObject.time = value;
+      return true;
+    }
+
+    if (label.equals("##PATHLENGTH")) {
+      jdxObject.pathlength = value;
+      return true;
+    }
+
+    if (label.equals("##$PEAKS")) {
+      try {
+        ((JDXSpectrum) jdxObject).setPeakList(source.readPeakList(value));
+      } catch (Exception e) {
+
+      }
+      return true;
+    }
+
+    if(label.equals("##XLABEL")){
+      jdxObject.xUnits = value;
+      return true;
+    }
+
+    if(label.equals("##XUNITS") && jdxObject.xUnits.equals("")){
+      jdxObject.xUnits = (value != null && !value.equals("") ? value : "Arbitrary Units");
+      return true;
+    }
+
+    if(label.equals("##YLABEL")){
+      jdxObject.yUnits = value;
+      return true;
+    }
+
+    if(label.equals("##YUNITS") && jdxObject.yUnits.equals("")){
+      jdxObject.yUnits = (value != null && !value.equals("") ? value : "Arbitrary Units");
+      return true;
+    }
+
+    if(label.equals("##XFACTOR")){
+      jdxObject.xFactor = Double.parseDouble(value);
+      return true;
+    }
+
+    if(label.equals("##YFACTOR")){
+      jdxObject.yFactor = Double.parseDouble(value);
+      return true;
+    }
+
+    if (label.equals("##FIRSTX")) {
+      jdxObject.firstX = Double.parseDouble(value);
+      return true;
+    }
+
+    if (label.equals("##LASTX")) {
+      jdxObject.lastX = Double.parseDouble(value);
+      return true;
+    }
+
+    if (label.equals("##NPOINTS")) {
+      jdxObject.nPoints = Integer.parseInt(value);
+      return true;
+    }
+
+    if(label.equals("##MINX") ||
+        label.equals("##MINY") ||
+        label.equals("##MAXX") ||
+        label.equals("##MAXY") ||
+        label.equals("##FIRSTY")||
+        label.equals("##DELTAX") ||
+        label.equals("##DATACLASS"))
+        return true;
+
+    if (label.equals("##$OFFSET") && jdxObject.shiftRefType != 0) {
+      jdxObject.offset = Double.parseDouble(value);
+      // bruker doesn't need dataPointNum
+      jdxObject.dataPointNum = 1;
+      // bruker type
+      jdxObject.shiftRefType = 1;
+      return true;
+    }
+
+    if ((label.equals("##$REFERENCEPOINT")) && (jdxObject.shiftRefType != 0)) {
+      jdxObject.offset = Double.parseDouble(value);
+      // varian doesn't need dataPointNum
+      jdxObject.dataPointNum = 1;
+      // varian type
+      jdxObject.shiftRefType = 2;
+    }
+
+    else if (label.equals("##.SHIFTREFERENCE")) {
+      if (!(jdxObject.dataType.toUpperCase().contains("SPECTRUM")))
+        return true;
+      StringTokenizer srt = new StringTokenizer(value, ",");
+      if (srt.countTokens() != 4)
+        return true;
+      try {
+        srt.nextToken();
+        srt.nextToken();
+        jdxObject.dataPointNum = Integer.parseInt(srt.nextToken().trim());
+        jdxObject.offset = Double.parseDouble(srt.nextToken().trim());
+      } catch (NumberFormatException nfe) {
+        return true;
+      } catch (NoSuchElementException nsee) {
+        return true;
+      }
+
+      if (jdxObject.dataPointNum <= 0)
+        jdxObject.dataPointNum = 1;
+      jdxObject.shiftRefType = 0;
+      return true;
+    }
+
+    if (label.equals("##.OBSERVEFREQUENCY")) {
+      jdxObject.obFreq = Double.parseDouble(value);
+      table.put(label, value);
+      return true;
+    }
+    
+    return false;
+  }
+
 
 }

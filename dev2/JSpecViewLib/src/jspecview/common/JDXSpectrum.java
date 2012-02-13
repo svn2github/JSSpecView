@@ -57,16 +57,6 @@ public class JDXSpectrum extends JDXObject implements Graph {
   private Coordinate[] xyCoords;
 
   /**
-   * specifies whether the spectrum is increasing
-   */
-  private boolean increasing;
-
-  /**
-   * specifies whether the spectrum is continuous
-   */
-  private boolean continuous = true;
-
-  /**
    * whether the x values were converted from HZ to PPM
    */
   private boolean isHZtoPPM = false;
@@ -660,7 +650,15 @@ public class JDXSpectrum extends JDXObject implements Graph {
     return (type != null && type.length() > 0 ? type + " " : "") + title;
   }
 
-  public boolean createXYCoords(String tabularSpecData, int tabDataLineNo, StringBuffer errorLog) throws JSpecViewException {
+  public boolean createXYCoords(String tabularSpecData, int tabDataLineNo, HashMap<String, String> table, StringBuffer errorLog) throws JSpecViewException {
+    
+    if (tabularSpecData == null)
+      throw new JSpecViewException("Error Reading Data Set");
+
+    if (dataClass.equals("PEAKASSIGNMENTS"))
+      return true;
+    
+    setHeaderTable(table);
     
     if(dataClass.equals("XYDATA")){
 
@@ -762,6 +760,8 @@ public class JDXSpectrum extends JDXObject implements Graph {
       return true;
     }
     if(dataClass.equals("PEAKTABLE") || dataClass.equals("XYPOINTS")){
+      if (dataClass.equals("PEAKTABLE"))
+        continuous = false;
       list = (ArrayList<String>)nTupleTable.get("##SYMBOL");
       int index1 = list.indexOf(plotSymbols[0]);
       int index2 = list.indexOf(plotSymbols[1]);

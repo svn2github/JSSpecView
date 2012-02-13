@@ -67,7 +67,7 @@ public class BlockSource extends JDXSource {
     StringBuffer errorLog = new StringBuffer();
 
     BlockSource bs = new BlockSource();
-    
+
     int tabDataLineNo = 0;
     String tabularSpecData = null;
 
@@ -82,11 +82,11 @@ public class BlockSource extends JDXSource {
       throw new JSpecViewException("Error Reading Source");
     }
 
-    checkCommon(bs, label, t.value, errorLog, sourceLDRTable);
+    checkCommon(bs, bs, label, t.value, errorLog, sourceLDRTable);
 
     while (t.hasMoreTokens() && t.nextToken()
         && !(label = JSpecViewUtils.cleanLabel(t.label)).equals("##TITLE")) {
-      if (!checkCommon(bs, label, t.value, errorLog, sourceLDRTable))
+      if (!checkCommon(bs, bs, label, t.value, errorLog, sourceLDRTable))
         sourceLDRTable.put(t.label, t.value);
     }
 
@@ -99,12 +99,13 @@ public class BlockSource extends JDXSource {
     spectrum = new JDXSpectrum();
     LDRTable = new HashMap<String, String>();
 
-    checkCommon(spectrum, label, t.value, errorLog, LDRTable);
-    
+    checkCommon(bs, spectrum, label, t.value, errorLog, LDRTable);
+
     try {
-      while (t.hasMoreTokens() &&  t.nextToken()
-          && (!(tmp = JSpecViewUtils.cleanLabel(t.label)).equals("##END")
-            || !label.equals("##END"))) {
+      while (t.hasMoreTokens()
+          && t.nextToken()
+          && (!(tmp = JSpecViewUtils.cleanLabel(t.label)).equals("##END") || !label
+              .equals("##END"))) {
         label = tmp;
         System.out.println(label);
         if (label.equals("##JCAMPCS")) {
@@ -116,7 +117,7 @@ public class BlockSource extends JDXSource {
           continue;
         }
 
-        if (checkCommon(spectrum, label, t.value, errorLog, LDRTable))
+        if (checkCommon(bs, spectrum, label, t.value, errorLog, LDRTable))
           continue;
 
         if (Arrays.binarySearch(TABULAR_DATA_LABELS, label) > 0) {
@@ -125,30 +126,12 @@ public class BlockSource extends JDXSource {
           continue;
         }
 
-        if (label.equals("##$PEAKS")) {
-          try {
-            spectrum.setPeakList(bs.readPeakList(t.value));
-          } catch (Exception e) {
-            // ignore?
-          }
-          continue;
-        }
-
         // Process Block
         if (label.equals("##END")) {
 
-          if (tabularSpecData == null)
-            throw new JSpecViewException("Error Reading Data Set");
-
-          spectrum.setDataType(bs.getDataType());
-          if (!spectrum.getDataClass().equals("PEAKASSIGNMENTS")) {
-
-            if (!spectrum.createXYCoords(tabularSpecData,
-                tabDataLineNo, errorLog))
-              throw new JDXSourceException("Unable to read Block Source");
-
-            spectrum.setHeaderTable(LDRTable);
-          }
+          if (!spectrum.createXYCoords(tabularSpecData, tabDataLineNo,
+              LDRTable, errorLog))
+            throw new JDXSourceException("Unable to read Block Source");
 
           bs.addJDXSpectrum(spectrum);
 
@@ -157,7 +140,7 @@ public class BlockSource extends JDXSource {
           LDRTable = new HashMap<String, String>();
           continue;
         } // End Process Block
-        
+
         LDRTable.put(label, t.value);
 
       } // End Source File

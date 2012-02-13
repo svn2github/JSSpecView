@@ -538,21 +538,26 @@ public class JSpecViewUtils {
 
   /**
    * Extracts spaces, underscores etc. from the label
-   * @param label the label to be cleaned
+   * 
+   * @param label
+   *        the label to be cleaned
    * @return the new label
    */
-  public static String cleanLabel (String label){
+  public static String cleanLabel(String label) {
     int i;
     StringBuffer str = new StringBuffer();
 
-    for (i = 0; i < label.length(); i++){
-      switch (label.charAt(i)){
-        case '/' : break;
-        case '\\' : break;
-        case ' ' : break;
-        case '-' : break;
-        case '_' : break;
-        default : str.append(label.charAt(i)); break;
+    for (i = 0; i < label.length(); i++) {
+      switch (label.charAt(i)) {
+      case '/':
+      case '\\':
+      case ' ':
+      case '-':
+      case '_':
+        break;
+      default:
+        str.append(label.charAt(i));
+        break;
       }
     }
     return str.toString().toUpperCase();

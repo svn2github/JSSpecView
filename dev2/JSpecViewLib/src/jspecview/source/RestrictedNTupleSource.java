@@ -37,6 +37,9 @@ import jspecview.exception.JDXSourceException;
 import jspecview.exception.JSpecViewException;
 
 /**
+ * 
+ * NOT IMPLEMENTED -- see JDXSource.createJDXSource(...)
+ * 
  * Representation of a JCAMP-DX nTuple source. Since these source files may
  * have 128 spectra or more. Due to memory restictions only MAX_NUMBER_SPECTRA
  * of the spectra in the source will be instantiated at any one time. In order to

@@ -52,16 +52,19 @@ public class NTupleSource extends JDXSource {
 
   /**
    * Does the actual work of initializing the Source instance
-   * @param sourceContents the contents of the source as a String
+   * 
+   * @param sourceContents
+   *        the contents of the source as a String
    * @throws JSpecViewException
    * @return an instance of an NTupleSource
    */
-  public static NTupleSource getInstance(String sourceContents) throws JSpecViewException{
+  public static NTupleSource getInstance(String sourceContents)
+      throws JSpecViewException {
 
     JDXSpectrum spectrum;
-    HashMap<String,String> LDRTable;
-    HashMap<String,String> sourceLDRTable = new HashMap<String,String>();
-    HashMap<String,ArrayList<String>> nTupleTable = new HashMap<String,ArrayList<String>>();
+    HashMap<String, String> LDRTable;
+    HashMap<String, String> sourceLDRTable = new HashMap<String, String>();
+    HashMap<String, ArrayList<String>> nTupleTable = new HashMap<String, ArrayList<String>>();
 
     String page = "";
 
@@ -77,13 +80,13 @@ public class NTupleSource extends JDXSource {
 
     // Read Source Specific Header
     String label = "";
-    while(t.hasMoreTokens() && !label.equals("##NTUPLES")){
+    while (t.hasMoreTokens() && !label.equals("##NTUPLES")) {
       t.nextToken();
       label = JSpecViewUtils.cleanLabel(t.label);
-      
-      if (checkCommon(ns, label, t.value, errorLog, sourceLDRTable))
+
+      if (checkCommon(ns, ns, label, t.value, errorLog, sourceLDRTable))
         continue;
-      
+
       sourceLDRTable.put(label, t.value);
     } //Finished Pulling out the LDR Table Data
 
@@ -92,43 +95,42 @@ public class NTupleSource extends JDXSource {
     /*--------------------------------------------*/
     /*------------- Fetch Page Data --------------*/
 
-    if(!label.equals("##NTUPLES"))
+    if (!label.equals("##NTUPLES"))
       throw new JSpecViewException("Invalid NTuple Source");
 
     // Read NTuple Table
     StringTokenizer st;
     ArrayList<String> attrList;
-    while(t.hasMoreTokens()){
+    while (t.hasMoreTokens()) {
       t.nextToken();
       label = JSpecViewUtils.cleanLabel(t.label);
-      if(label.equals("##PAGE")){
+      if (label.equals("##PAGE")) {
         break;
       }
       st = new StringTokenizer(t.value, ",");
       attrList = new ArrayList<String>();
-      while(st.hasMoreTokens()){
+      while (st.hasMoreTokens()) {
         attrList.add(st.nextToken().trim());
       }
       nTupleTable.put(label, attrList);
     }//Finised With Page Data
     /*--------------------------------------------*/
 
-    if(!label.equals("##PAGE"))
+    if (!label.equals("##PAGE"))
       throw new JSpecViewException("Error Reading NTuple Source");
-
 
     /*--------------------------------------------*/
     /*-------- Gather Spectra Data From File -----*/
 
     // Create and add Spectra
     spectrum = new JDXSpectrum();
-    while(t.hasMoreTokens()){
+    while (t.hasMoreTokens()) {
 
-      if(label.equals("##ENDNTUPLES")){
+      if (label.equals("##ENDNTUPLES")) {
         break;
       }
 
-      if(label.equals("##PAGE")){
+      if (label.equals("##PAGE")) {
         page = t.value;
         t.nextToken(); // ignore ##PAGE
         label = JSpecViewUtils.cleanLabel(t.label);
@@ -136,63 +138,65 @@ public class NTupleSource extends JDXSource {
       }
 
       LDRTable = new HashMap<String, String>();
-      while(!label.equals("##DATATABLE")){
+      while (!label.equals("##DATATABLE")) {
         LDRTable.put(t.label, t.value);
         t.nextToken();
         label = JSpecViewUtils.cleanLabel(t.label);
       }
 
       boolean continuous = true;
-      if(label.equals("##DATATABLE")){
+      if (label.equals("##DATATABLE")) {
         tabDataLineNo = t.labelLineNo;
         // determine if continuous
         String dtblStr = t.value;
-        try{
+        try {
           BufferedReader reader = new BufferedReader(new StringReader(dtblStr));
           String line = reader.readLine();
-          if(line.trim().indexOf("PEAKS") > 0){
-            continuous =  false;
+          if (line.trim().indexOf("PEAKS") > 0) {
+            continuous = false;
           }
 
           // parse variable list
           int index1 = line.indexOf('(');
           int index2 = line.lastIndexOf(')');
-          if(index1 == -1 || index2 == -1)
+          if (index1 == -1 || index2 == -1)
             throw new JDXSourceException("Variable List not Found");
-          String varList = line.substring(index1, index2+1);
+          String varList = line.substring(index1, index2 + 1);
 
-          ArrayList<String> symbols = (ArrayList<String>) nTupleTable.get("##SYMBOL");
+          ArrayList<String> symbols = (ArrayList<String>) nTupleTable
+              .get("##SYMBOL");
           int countSyms = 0;
-          for(int i = 0; i < symbols.size(); i++){
-            String sym = ((String)symbols.get(i)).trim();
-            if(varList.indexOf(sym) != -1){
+          for (int i = 0; i < symbols.size(); i++) {
+            String sym = ((String) symbols.get(i)).trim();
+            if (varList.indexOf(sym) != -1) {
               plotSymbols[countSyms++] = sym;
             }
-            if(countSyms == 2)
+            if (countSyms == 2)
               break;
           }
-        }
-        catch(IOException ioe){
+        } catch (IOException ioe) {
         }
 
-        spectrum.setContinuous(continuous);
-        tabularSpecData = spectrum.getTabularSpecData("##" + (continuous ? "XYDATA" : "PEAKTABLE"), t.value);
+        tabularSpecData = spectrum.getTabularSpecData("##"
+            + (continuous ? "XYDATA" : "PEAKTABLE"), t.value);
 
-        if(!spectrum.createXYCoords(nTupleTable, plotSymbols, ns.getDataType(), tabularSpecData, tabDataLineNo, errorLog))
+        if (!spectrum.createXYCoords(nTupleTable, plotSymbols,
+            ns.getDataType(), tabularSpecData, tabDataLineNo, errorLog))
           throw new JDXSourceException("Unable to read Ntuple Source");
       }
-      spectrum.setTitle(spectrum.getTitle() + " : " + page);
+      spectrum.setTitle(ns.getTitle() + " : " + page);
       spectrum.setJcampdx(ns.getJcampdx());
       spectrum.setDataType(ns.getDataType());
       spectrum.setOrigin(ns.getOrigin());
       spectrum.setOwner(ns.getOwner());
 
-      for(Iterator<String> iter = sourceLDRTable.keySet().iterator(); iter.hasNext();){
-        String key = (String)iter.next();
-        if(!JSpecViewUtils.cleanLabel(key).equals("##TITLE") &&
-           !JSpecViewUtils.cleanLabel(key).equals("##DATACLASS") &&
-           !JSpecViewUtils.cleanLabel(key).equals("##NTUPLES"))
-        LDRTable.put(key, sourceLDRTable.get(key));
+      for (Iterator<String> iter = sourceLDRTable.keySet().iterator(); iter
+          .hasNext();) {
+        String key = iter.next();
+        if (!key.equals("##TITLE")
+            && !key.equals("##DATACLASS")
+            && !key.equals("##NTUPLES"))
+          LDRTable.put(key, sourceLDRTable.get(key));
       }
       spectrum.setHeaderTable(LDRTable);
 

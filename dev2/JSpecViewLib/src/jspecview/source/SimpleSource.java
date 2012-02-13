@@ -81,36 +81,27 @@ public class SimpleSource extends JDXSource {
     while (t.hasMoreTokens() && t.nextToken()
         && !(label = JSpecViewUtils.cleanLabel(t.label)).equals("##END")) {
 
-      if (checkCommon(spectrum, label, t.value, null, notesLDRTable))
+      if (checkCommon(ss, spectrum, label, t.value, errorLog, notesLDRTable))
         continue;
-
-      if (label.equals("##$PEAK_LINKS")) {
-        try {
-          spectrum.setPeakList(ss.readPeakList(t.value));
-        } catch (Exception e) {
-
-        }
-        continue;
-      }
 
       if (Arrays.binarySearch(TABULAR_DATA_LABELS, label) > 0) {
         tabularDataLabelLineNo = t.labelLineNo;
         tabularSpecData = spectrum.getTabularSpecData(label, t.value);
         continue;
       }
+      
       notesLDRTable.put(label, t.value);
     }
 
-    if (!label.equals("##END") || tabularSpecData == null)
-      throw new JSpecViewException("Error Reading Data Set");
+    if (!label.equals("##END"))
+      tabularSpecData = null;
 
-    if (!spectrum.getDataClass().equals("PEAKASSIGNMENTS")) {
-      if (!spectrum.createXYCoords(tabularSpecData,
-          tabularDataLabelLineNo, errorLog))
-        throw new JDXSourceException("Unable to read Simple Source");
-    }
+    if (!spectrum.createXYCoords(tabularSpecData, tabularDataLabelLineNo,
+        notesLDRTable, errorLog))
+      throw new JDXSourceException("Unable to read Simple Source");
+
     errorLog.append(ERROR_SEPARATOR);
-    spectrum.setHeaderTable(notesLDRTable);
+
     ss.addJDXSpectrum(spectrum);
     return ss;
   }
