@@ -23,8 +23,6 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Frame;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -33,6 +31,8 @@ import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+
+import jspecview.util.FileManager;
 
 /**
  * Dialog that displays String of text or contents of a file in a
@@ -63,8 +63,8 @@ public class TextDialog extends JDialog {
    */
   public TextDialog(Frame frame, String title, boolean modal, Reader reader) {
     super(frame, title, modal);
-    this.reader = reader;
     try {
+      this.reader = (reader == null ? FileManager.getBufferedReaderFromName(title, null) : reader);
       jbInit();
       //setSize(500, 400);
       pack();
@@ -94,8 +94,8 @@ public class TextDialog extends JDialog {
    * @param modal true if modal, false otherwise
    * @throws IOException
    */
-  public TextDialog(Frame frame, String title, File file, boolean modal) throws IOException{
-    this(frame, title, modal, new FileReader(file));
+  public TextDialog(Frame frame, String file, boolean modal) throws IOException{
+    this(frame, file, modal, null);
   }
 
   /**

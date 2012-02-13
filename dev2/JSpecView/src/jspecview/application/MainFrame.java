@@ -17,7 +17,6 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
 // CHANGES to 'MainFrame.java' - Main Application GUI
 // University of the West Indies, Mona Campus
 //
@@ -41,8 +40,7 @@
 package jspecview.application;
 
 import java.awt.BorderLayout;
-import java.awt.CardLayout;
-import java.awt.Color;
+import java.awt.CardLayout; //import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -130,6 +128,7 @@ import jspecview.exception.ScalesIncompatibleException;
 import jspecview.source.CompoundSource;
 import jspecview.source.JDXSource;
 import jspecview.util.Escape;
+import jspecview.util.FileManager;
 import jspecview.util.Parser;
 import mdidesktop.ScrollableDesktopPane;
 import mdidesktop.WindowMenu;
@@ -137,155 +136,165 @@ import jspecview.common.Visible;
 
 /**
  * The Main Class or Entry point of the JSpecView Application.
+ * 
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
  */
-public class MainFrame
-    extends JFrame implements DropTargetListener, JmolSyncInterface, PeakPickedListener {
+public class MainFrame extends JFrame implements DropTargetListener,
+    JmolSyncInterface, PeakPickedListener {
 
-//  ------------------------ Program Properties -------------------------
+  //  ------------------------ Program Properties -------------------------
 
   /**
    * 
    */
   private static final long serialVersionUID = 1L;
-  String propertiesFileName = "jspecview.properties";
-  boolean toolbarOn;
-  boolean sidePanelOn;
-  boolean statusbarOn;
-  boolean showExitDialog;
+  private static final int FILE_OPEN_OK = 0;
+  private static final int FILE_OPEN_ALREADY = -1;
+  private static final int FILE_OPEN_URLERROR = -2;
+  private static final int FILE_OPEN_ERROR = -3;
+  private static final int FILE_OPEN_NO_DATA = -4;
 
-  String defaultDisplaySchemeName;
-  boolean autoOverlay;
-  boolean autoShowLegend;
-  boolean useDirLastOpened;
-  boolean useDirLastExported;
-  String dirLastOpened;
-  String dirLastExported;
-  String recentFileName;
-  String recentURL;
+  private String propertiesFileName = "jspecview.properties";
+  private boolean toolbarOn;
+  private boolean sidePanelOn;
+  private boolean statusbarOn;
+  private boolean showExitDialog;
 
-  boolean autoIntegrate;
+  private String defaultDisplaySchemeName;
+  private boolean autoOverlay;
+  private boolean autoShowLegend;
+  private boolean useDirLastOpened;
+  private boolean useDirLastExported;
+  private String dirLastOpened;
+  private String dirLastExported;
+  private String recentFileName;
+  private String recentJmolName;
+  private String recentURL;
 
-  boolean AtoTSeparateWindow;
-  String autoATConversion;
-  
-  boolean svgForInscape;
+  private boolean autoIntegrate;
+  private String autoATConversion;
 
-//   ------------------------ Display Properties -------------------------
-  Color bgc= Color.WHITE;
-  boolean gridOn;
-  boolean coordinatesOn;
-  boolean xScaleOn;
-  boolean yScaleOn;
-  boolean obscure;
+  //private boolean AtoTSeparateWindow;
+  //private boolean svgForInscape;
+
+  //   ------------------------ Display Properties -------------------------
+  ///private Color bgc= Color.WHITE;
+  private boolean gridOn;
+  private boolean coordinatesOn;
+  private boolean xScaleOn;
+  private boolean yScaleOn;
+  //private boolean obscure;
   //  ----------------------- Application Attributes ---------------------
 
-  Vector<JDXSource> jdxSources = new Vector<JDXSource>();
-  Vector<File> jdxSourceFiles = new Vector<File>();
-  int numRecent = 10;
-  Vector<String> recentFilePaths = new Vector<String>(numRecent);
-  JDXSource currentSelectedSource = null;
-  Properties properties;
-  DisplaySchemesProcessor dsp;
-  String tempDS,sltnclr;
+  private JmolSyncInterface jmol;
+  private Vector<JDXSource> jdxSources = new Vector<JDXSource>();
+  private Vector<String> jdxSourceFiles = new Vector<String>();
+  private int numRecent = 10;
+  private Vector<String> recentFilePaths = new Vector<String>(numRecent);
+  private JDXSource currentSelectedSource = null;
+  private Properties properties;
+  private DisplaySchemesProcessor dsp;
+  private String tempDS, sltnclr;
+  private SpecInfo[] specInfos;
+  protected String selectedTreeFile;
 
-//   -------------------------- GUI Components  -------------------------
+
+  //   -------------------------- GUI Components  -------------------------
 
   final private int TO_TRANS = 0;
   final private int TO_ABS = 1;
   final private int IMPLIED = 2;
 
-//   ----------------------------------------------------------------------
+  //   ----------------------------------------------------------------------
 
-  JSVPanel selectedJSVPanel;
-  JMenuBar menuBar = new JMenuBar();
-  JMenu fileMenu = new JMenu();
-  JMenuItem openMenuItem = new JMenuItem();
-  JMenuItem openURLMenuItem = new JMenuItem();
-  JMenuItem printMenuItem = new JMenuItem();
-  JMenuItem closeMenuItem = new JMenuItem();
-  JMenuItem closeAllMenuItem = new JMenuItem();
-  JMenu saveAsMenu = new JMenu();
-  JMenu saveAsJDXMenu = new JMenu();
-  JMenu exportAsMenu = new JMenu();
-  JMenuItem exitMenuItem = new JMenuItem();
+  private JSVPanel selectedJSVPanel;
+  private JMenuBar menuBar = new JMenuBar();
+  private JMenu fileMenu = new JMenu();
+  private JMenuItem openMenuItem = new JMenuItem();
+  private JMenuItem openURLMenuItem = new JMenuItem();
+  private JMenuItem printMenuItem = new JMenuItem();
+  private JMenuItem closeMenuItem = new JMenuItem();
+  private JMenuItem closeAllMenuItem = new JMenuItem();
+  private JMenu saveAsMenu = new JMenu();
+  private JMenu saveAsJDXMenu = new JMenu();
+  private JMenu exportAsMenu = new JMenu();
+  private JMenuItem exitMenuItem = new JMenuItem();
   //JMenu windowMenu = new JMenu();
-  JMenu helpMenu = new JMenu();
-  JMenu optionsMenu = new JMenu();
-  JMenu displayMenu = new JMenu();
-  JMenu zoomMenu = new JMenu();
-  JCheckBoxMenuItem gridCheckBoxMenuItem = new JCheckBoxMenuItem();
-  JCheckBoxMenuItem coordsCheckBoxMenuItem = new JCheckBoxMenuItem();
-  JCheckBoxMenuItem revPlotCheckBoxMenuItem = new JCheckBoxMenuItem();
-  JCheckBoxMenuItem scaleXCheckBoxMenuItem = new JCheckBoxMenuItem();
-  JCheckBoxMenuItem scaleYCheckBoxMenuItem = new JCheckBoxMenuItem();
-  JMenuItem nextMenuItem = new JMenuItem();
-  JMenuItem prevMenuItem = new JMenuItem();
-  JMenuItem fullMenuItem = new JMenuItem();
-  JMenuItem clearMenuItem = new JMenuItem();
-  JMenuItem preferencesMenuItem = new JMenuItem();
-  JMenuItem contentsMenuItem = new JMenuItem();
-  JMenuItem aboutMenuItem = new JMenuItem();
-  JMenu openRecentMenu = new JMenu();
-  JCheckBoxMenuItem toolbarCheckBoxMenuItem = new JCheckBoxMenuItem();
-  JCheckBoxMenuItem sidePanelCheckBoxMenuItem = new JCheckBoxMenuItem();
-  JCheckBoxMenuItem statusCheckBoxMenuItem = new JCheckBoxMenuItem();
-  BorderLayout mainborderLayout = new BorderLayout();
-  JSplitPane mainSplitPane = new JSplitPane();
-  JSplitPane sideSplitPane = new JSplitPane();
+  private JMenu helpMenu = new JMenu();
+  private JMenu optionsMenu = new JMenu();
+  private JMenu displayMenu = new JMenu();
+  private JMenu zoomMenu = new JMenu();
+  private JCheckBoxMenuItem gridCheckBoxMenuItem = new JCheckBoxMenuItem();
+  private JCheckBoxMenuItem coordsCheckBoxMenuItem = new JCheckBoxMenuItem();
+  private JCheckBoxMenuItem revPlotCheckBoxMenuItem = new JCheckBoxMenuItem();
+  private JCheckBoxMenuItem scaleXCheckBoxMenuItem = new JCheckBoxMenuItem();
+  private JCheckBoxMenuItem scaleYCheckBoxMenuItem = new JCheckBoxMenuItem();
+  private JMenuItem nextMenuItem = new JMenuItem();
+  private JMenuItem prevMenuItem = new JMenuItem();
+  private JMenuItem fullMenuItem = new JMenuItem();
+  private JMenuItem clearMenuItem = new JMenuItem();
+  private JMenuItem preferencesMenuItem = new JMenuItem();
+  private JMenuItem contentsMenuItem = new JMenuItem();
+  private JMenuItem aboutMenuItem = new JMenuItem();
+  private JMenu openRecentMenu = new JMenu();
+  private JCheckBoxMenuItem toolbarCheckBoxMenuItem = new JCheckBoxMenuItem();
+  private JCheckBoxMenuItem sidePanelCheckBoxMenuItem = new JCheckBoxMenuItem();
+  private JCheckBoxMenuItem statusCheckBoxMenuItem = new JCheckBoxMenuItem();
+  private BorderLayout mainborderLayout = new BorderLayout();
+  private JSplitPane mainSplitPane = new JSplitPane();
+  private JSplitPane sideSplitPane = new JSplitPane();
 
+  private JScrollPane scrollPane = new JScrollPane();
+  private ScrollableDesktopPane desktopPane = new ScrollableDesktopPane();
+  private WindowMenu windowMenu = new WindowMenu(desktopPane);
+  private JTree spectraTree;
+  private JScrollPane spectraTreePane;
+  //private JTree errorTree = new JTree(new DefaultMutableTreeNode("Errors"));
+  private JPanel statusPanel = new JPanel();
+  private JLabel statusLabel = new JLabel();
 
-  JScrollPane scrollPane = new JScrollPane();
-  ScrollableDesktopPane desktopPane = new ScrollableDesktopPane();
-  WindowMenu windowMenu = new WindowMenu(desktopPane);
-  JTree spectraTree;
-  JScrollPane spectraTreePane;
-  JTree errorTree = new JTree(new DefaultMutableTreeNode("Errors"));
-  JPanel statusPanel = new JPanel();
-  JLabel statusLabel = new JLabel();
+  private JSVPanelPopupMenu jsvpPopupMenu = new JSVPanelPopupMenu();
+  private JMenuItem splitMenuItem = new JMenuItem();
+  private JMenuItem overlayMenuItem = new JMenuItem();
+  private DefaultMutableTreeNode rootNode;
+  private DefaultTreeModel spectraTreeModel;
+  private JMenuItem hideMenuItem = new JMenuItem();
+  private JMenuItem hideAllMenuItem = new JMenuItem();
+  private JMenu showMenu = new JMenu();
+  private JMenuItem showMenuItem = new JMenuItem();
+  private JMenuItem sourceMenuItem = new JMenuItem();
+  private JMenuItem propertiesMenuItem = new JMenuItem();
+  private BorderLayout borderLayout1 = new BorderLayout();
 
-  JSVPanelPopupMenu jsvpPopupMenu = new JSVPanelPopupMenu();
-  JMenuItem splitMenuItem = new JMenuItem();
-  JMenuItem overlayMenuItem = new JMenuItem();
-  DefaultMutableTreeNode rootNode;
-  DefaultTreeModel spectraTreeModel;
-  JMenuItem hideMenuItem = new JMenuItem();
-  JMenuItem hideAllMenuItem = new JMenuItem();
-  JMenu showMenu = new JMenu();
-  JMenuItem showMenuItem = new JMenuItem();
-  JMenuItem sourceMenuItem = new JMenuItem();
-  JMenuItem propertiesMenuItem = new JMenuItem();
-  BorderLayout borderLayout1 = new BorderLayout();
+  private JFileChooser fc;
+  private JToolBar jsvToolBar = new JToolBar();
+  private JButton previousButton = new JButton();
+  private JButton nextButton = new JButton();
+  private JButton resetButton = new JButton();
+  private JButton clearButton = new JButton();
+  private JButton openButton = new JButton();
+  private JButton propertiesButton = new JButton();
+  private JToggleButton gridToggleButton = new JToggleButton();
+  private JToggleButton coordsToggleButton = new JToggleButton();
+  private JButton printButton = new JButton();
+  private JToggleButton revPlotToggleButton = new JToggleButton();
+  private JButton aboutButton = new JButton();
+  private JButton overlaySplitButton = new JButton();
+  private JMenuItem overlayKeyMenuItem = new JMenuItem();
+  private JButton overlayKeyButton = new JButton();
+  //private OverlayLegendDialog legend;
+  private JMenu processingMenu = new JMenu();
+  private JMenuItem integrateMenuItem = new JMenuItem();
+  private JMenuItem transAbsMenuItem = new JMenuItem();
+  private JMenuItem solColMenuItem = new JMenuItem();
+  private JMenuItem errorLogMenuItem = new JMenuItem();
 
-  JFileChooser fc;
-  JToolBar jsvToolBar = new JToolBar();
-  JButton previousButton = new JButton();
-  JButton nextButton = new JButton();
-  JButton resetButton = new JButton();
-  JButton clearButton = new JButton();
-  JButton openButton = new JButton();
-  JButton propertiesButton = new JButton();
-  JToggleButton gridToggleButton = new JToggleButton();
-  JToggleButton coordsToggleButton = new JToggleButton();
-  JButton printButton = new JButton();
-  JToggleButton revPlotToggleButton = new JToggleButton();
-  JButton aboutButton = new JButton();
-  JButton overlaySplitButton = new JButton();
-  JMenuItem overlayKeyMenuItem = new JMenuItem();
-  JButton overlayKeyButton = new JButton();
-  OverlayLegendDialog legend;
-  JMenu processingMenu = new JMenu();
-  JMenuItem integrateMenuItem = new JMenuItem();
-  JMenuItem transAbsMenuItem = new JMenuItem();
-  JMenuItem solColMenuItem = new JMenuItem();
-  JMenuItem errorLogMenuItem = new JMenuItem();
-
-  
-  // Does certain tasks once regardless of how many instances of the program
-  // are running
   {
+    // Does certain tasks once regardless of how many 
+    // instances of the program are running  
+    // [are you sure?? not static; runs every instance? -- BH]
     onProgramStart();
   }
 
@@ -303,8 +312,7 @@ public class MainFrame
     // Initialise GUI Components
     try {
       jbInit();
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       e.printStackTrace();
     }
 
@@ -313,53 +321,44 @@ public class MainFrame
 
     // When application exits ...
     addWindowListener(new WindowAdapter() {
-      @Override public void windowClosing(WindowEvent we) {
-        try {
-          onProgramExit();
-        }
-        catch (Exception e) {
-        }
-
-        int option;
-        if (jmol != null) {
-          setVisible(false);
-          return;
-        }
-        if (showExitDialog) {
-          option = JOptionPane.showConfirmDialog(MainFrame.this,
-                                                 "Exit JSpecView? ", "Exit",
-                                                 JOptionPane.YES_NO_OPTION,
-                                                 JOptionPane.QUESTION_MESSAGE);
-
-          if (option == JOptionPane.YES_OPTION) {
-            System.exit(0);
-          }
-        }
-        else {
-          System.exit(0);
-        }
+      @Override
+      public void windowClosing(WindowEvent we) {
+        windowClosing_actionPerformed();
       }
     });
 
   }
 
-  Image icon;
-  ImageIcon frameIcon;
-  ImageIcon openIcon;
-  ImageIcon printIcon;
-  ImageIcon gridIcon;
-  ImageIcon coordinatesIcon;
-  ImageIcon reverseIcon;
-  ImageIcon previousIcon;
-  ImageIcon nextIcon;
-  ImageIcon resetIcon;
-  ImageIcon clearIcon;
-  ImageIcon informationIcon;
-  ImageIcon aboutIcon;
-  ImageIcon overlayIcon;
-  ImageIcon splitIcon;
-  ImageIcon overlayKeyIcon;
+  private void exitJSpecView(boolean withDialog) {
+    if (jmol != null) {
+      setVisible(false);
+      return;
+    }
+    if (withDialog
+        && showExitDialog
+        && JOptionPane.showConfirmDialog(MainFrame.this, "Exit JSpecView?",
+            "Exit", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) != JOptionPane.YES_OPTION)
+      return;
+    System.exit(0);
+  }
 
+  private Image icon;
+  private ImageIcon frameIcon;
+  private ImageIcon openIcon;
+  private ImageIcon printIcon;
+  private ImageIcon gridIcon;
+  private ImageIcon coordinatesIcon;
+  private ImageIcon reverseIcon;
+  private ImageIcon previousIcon;
+  private ImageIcon nextIcon;
+  private ImageIcon resetIcon;
+  private ImageIcon clearIcon;
+  private ImageIcon informationIcon;
+  private ImageIcon aboutIcon;
+  private ImageIcon overlayIcon;
+  private ImageIcon splitIcon;
+  private ImageIcon overlayKeyIcon;
+  
   private void getIcons() {
     Class<? extends MainFrame> cl = getClass();
     URL iconURL = cl.getResource("icons/spec16.gif"); //imageIcon
@@ -389,24 +388,24 @@ public class MainFrame
     sidePanelCheckBoxMenuItem.setSelected(sidePanelOn);
     toolbarCheckBoxMenuItem.setSelected(toolbarOn);
     statusCheckBoxMenuItem.setSelected(statusbarOn);
-    
+
     JSVPanel jsvp = getCurrentJSVPanel();
-    if(jsvp != null){
-    	gridCheckBoxMenuItem.setSelected(jsvp.isGridOn());
-        gridToggleButton.setSelected(jsvp.isGridOn());
-        coordsCheckBoxMenuItem.setSelected(jsvp.isCoordinatesOn());
-        coordsToggleButton.setSelected(jsvp.isCoordinatesOn());
-        revPlotCheckBoxMenuItem.setSelected(jsvp.isPlotReversed());
-        revPlotToggleButton.setSelected(jsvp.isPlotReversed());
-        scaleXCheckBoxMenuItem.setSelected(jsvp.isXScaleOn());
-        scaleYCheckBoxMenuItem.setSelected(jsvp.isYScaleOn());
+    if (jsvp != null) {
+      gridCheckBoxMenuItem.setSelected(jsvp.isGridOn());
+      gridToggleButton.setSelected(jsvp.isGridOn());
+      coordsCheckBoxMenuItem.setSelected(jsvp.isCoordinatesOn());
+      coordsToggleButton.setSelected(jsvp.isCoordinatesOn());
+      revPlotCheckBoxMenuItem.setSelected(jsvp.isPlotReversed());
+      revPlotToggleButton.setSelected(jsvp.isPlotReversed());
+      scaleXCheckBoxMenuItem.setSelected(jsvp.isXScaleOn());
+      scaleYCheckBoxMenuItem.setSelected(jsvp.isYScaleOn());
     }
   }
 
   /**
    * Task to do when program starts
    */
-  void onProgramStart() {
+  private void onProgramStart() {
 
     //boolean loadedOk;
     //Set Default Properties
@@ -444,25 +443,24 @@ public class MainFrame
       FileInputStream fileIn = new FileInputStream(propertiesFileName);
       properties.load(fileIn);
       //bgc = Visible.Colour();
+    } catch (Exception e) {
     }
-    catch (Exception e) {
-    }
-    
+
     dsp = new DisplaySchemesProcessor();
-    
+
     // try loading display scheme from the file system otherwise load it from the jar
-    if(!dsp.load("displaySchemes.xml")){    
-    	if(!dsp.load(getClass().getResourceAsStream("resources/displaySchemes.xml"))){
-    		writeStatus("Problem loading Display Scheme");
-    	}
+    if (!dsp.load("displaySchemes.xml")) {
+      if (!dsp.load(getClass().getResourceAsStream(
+          "resources/displaySchemes.xml"))) {
+        writeStatus("Problem loading Display Scheme");
+      }
     }
-    
-    
+
     setApplicationProperties(true);
     tempDS = defaultDisplaySchemeName;
     fc = (JSpecViewUtils.DEBUG ? new JFileChooser("C:/temp")
         : useDirLastOpened ? new JFileChooser(dirLastOpened)
-        : new JFileChooser());
+            : new JFileChooser());
 
     JSpecViewFileFilter filter = new JSpecViewFileFilter();
     filter = new JSpecViewFileFilter();
@@ -480,10 +478,11 @@ public class MainFrame
   }
 
   /**
-   * Sets the preferences or properties of the application that is loaded
-   * from a properties file.
+   * Sets the preferences or properties of the application that is loaded from a
+   * properties file.
    */
-  private void setApplicationProperties(boolean shouldApplySpectrumDisplaySettings) {
+  private void setApplicationProperties(
+                                        boolean shouldApplySpectrumDisplaySettings) {
 
     String recentFilesString = properties.getProperty("recentFilePaths");
     openRecentMenu.removeAll();
@@ -498,81 +497,89 @@ public class MainFrame
         menuItem = new JMenuItem(path);
         openRecentMenu.add(menuItem);
         menuItem.addActionListener(new ActionListener() {
-        @Override public void actionPerformed(ActionEvent ae) {
+          @Override
+          public void actionPerformed(ActionEvent ae) {
             openRecent_actionPerformed(ae);
           }
         });
       }
     }
 
-    showExitDialog = Boolean.valueOf(properties.getProperty("confirmBeforeExit")).
-        booleanValue();
+    showExitDialog = Boolean.valueOf(
+        properties.getProperty("confirmBeforeExit")).booleanValue();
 
-    autoOverlay = Boolean.valueOf(properties.getProperty("automaticallyOverlay")).
-        booleanValue();
-    autoShowLegend = Boolean.valueOf(properties.getProperty(
-        "automaticallyShowLegend")).booleanValue();
+    autoOverlay = Boolean.valueOf(
+        properties.getProperty("automaticallyOverlay")).booleanValue();
+    autoShowLegend = Boolean.valueOf(
+        properties.getProperty("automaticallyShowLegend")).booleanValue();
 
-    useDirLastOpened = Boolean.valueOf(properties.getProperty(
-        "useDirectoryLastOpenedFile")).booleanValue();
-    useDirLastExported = Boolean.valueOf(properties.getProperty(
-        "useDirectoryLastExportedFile")).booleanValue();
+    useDirLastOpened = Boolean.valueOf(
+        properties.getProperty("useDirectoryLastOpenedFile")).booleanValue();
+    useDirLastExported = Boolean.valueOf(
+        properties.getProperty("useDirectoryLastExportedFile")).booleanValue();
     dirLastOpened = properties.getProperty("directoryLastOpenedFile");
     dirLastExported = properties.getProperty("directoryLastExportedFile");
 
-    sidePanelOn = Boolean.valueOf(properties.getProperty("showSidePanel")).
-        booleanValue();
-    toolbarOn = Boolean.valueOf(properties.getProperty("showToolBar")).
-        booleanValue();
-    statusbarOn = Boolean.valueOf(properties.getProperty("showStatusBar")).
-        booleanValue();
+    sidePanelOn = Boolean.valueOf(properties.getProperty("showSidePanel"))
+        .booleanValue();
+    toolbarOn = Boolean.valueOf(properties.getProperty("showToolBar"))
+        .booleanValue();
+    statusbarOn = Boolean.valueOf(properties.getProperty("showStatusBar"))
+        .booleanValue();
 
     // Initialise DisplayProperties
-    defaultDisplaySchemeName = properties.getProperty(
-        "defaultDisplaySchemeName");
-    
-    if(shouldApplySpectrumDisplaySettings){
-	    gridOn = Boolean.valueOf(properties.getProperty("showGrid")).booleanValue();
-	    coordinatesOn = Boolean.valueOf(properties.getProperty("showCoordinates")).
-	        booleanValue();
-	    xScaleOn = Boolean.valueOf(properties.getProperty("showXScale")).booleanValue();
-	    yScaleOn = Boolean.valueOf(properties.getProperty("showYScale")).booleanValue();
+    defaultDisplaySchemeName = properties
+        .getProperty("defaultDisplaySchemeName");
+
+    if (shouldApplySpectrumDisplaySettings) {
+      gridOn = Boolean.valueOf(properties.getProperty("showGrid"))
+          .booleanValue();
+      coordinatesOn = Boolean
+          .valueOf(properties.getProperty("showCoordinates")).booleanValue();
+      xScaleOn = Boolean.valueOf(properties.getProperty("showXScale"))
+          .booleanValue();
+      yScaleOn = Boolean.valueOf(properties.getProperty("showYScale"))
+          .booleanValue();
     }
-    
+
     // TODO: Need to apply Properties to all panels that are opened
     // and update coordinates and grid CheckBoxMenuItems
 
     // Processing Properties
     autoATConversion = properties.getProperty("automaticTAConversion");
-    AtoTSeparateWindow = Boolean.valueOf(properties.getProperty(
-        "AtoTSeparateWindow")).booleanValue();
+    //AtoTSeparateWindow = Boolean.valueOf(properties.getProperty(
+    //"AtoTSeparateWindow")).booleanValue();
 
-    autoIntegrate = Boolean.valueOf(properties.getProperty(
-        "automaticallyIntegrate")).booleanValue();
+    autoIntegrate = Boolean.valueOf(
+        properties.getProperty("automaticallyIntegrate")).booleanValue();
     JSpecViewUtils.integralMinY = properties.getProperty("integralMinY");
     JSpecViewUtils.integralFactor = properties.getProperty("integralFactor");
     JSpecViewUtils.integralOffset = properties.getProperty("integralOffset");
-    AppUtils.integralPlotColor = AppUtils.getColorFromString(
-        properties.getProperty("integralPlotColor"));
-    
-    svgForInscape = Boolean.valueOf(properties.getProperty("svgForInscape")).booleanValue();
+    AppUtils.integralPlotColor = AppUtils.getColorFromString(properties
+        .getProperty("integralPlotColor"));
+
+    //svgForInscape = Boolean.valueOf(properties.getProperty("svgForInscape")).booleanValue();
 
   }
 
   /**
    * Returns a <code>Color</code> instance from a parameter
-   * @param key the parameter name
-   * @param def the default value
+   * 
+   * @param key
+   *        the parameter name
+   * @param def
+   *        the default value
    * @return a <code>Color</code> instance from a parameter
    */
-/*  private Color getColorProperty(String key, Color def) {
-    String param = properties.getProperty(key);
-    Color color = JSpecViewUtils.getColorFromString(param);
-    return (color == null ? def : color);
-  }
-*/
+  /*  private Color getColorProperty(String key, Color def) {
+      String param = properties.getProperty(key);
+      Color color = JSpecViewUtils.getColorFromString(param);
+      return (color == null ? def : color);
+    }
+  */
   /**
    * Tasks to do when program exits
+   * 
    * @throws Exception
    */
   void onProgramExit() throws Exception {
@@ -587,6 +594,7 @@ public class MainFrame
    * Creates tree representation of files that are opened
    */
   private void initSpectraTree() {
+    selectedTreeFile = null;
     rootNode = new DefaultMutableTreeNode("Spectra");
     spectraTreeModel = new DefaultTreeModel(rootNode);
     spectraTree = new JTree(spectraTreeModel);
@@ -594,9 +602,10 @@ public class MainFrame
         TreeSelectionModel.SINGLE_TREE_SELECTION);
     spectraTree.setCellRenderer(new SpectraTreeCellRenderer());
     spectraTree.addTreeSelectionListener(new TreeSelectionListener() {
-    @Override  public void valueChanged(TreeSelectionEvent e) {
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode)
-            spectraTree.getLastSelectedPathComponent();
+      @Override
+      public void valueChanged(TreeSelectionEvent e) {
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode) spectraTree
+            .getLastSelectedPathComponent();
 
         if (node == null) {
           return;
@@ -605,6 +614,8 @@ public class MainFrame
         Object nodeInfo = node.getUserObject();
         if (node.isLeaf()) {
           setFrame((SpecInfo) nodeInfo, true);
+        } else {
+          selectedTreeFile = ((JSVTreeNode) node).getFile();
         }
       }
     });
@@ -617,13 +628,15 @@ public class MainFrame
 
   /**
    * The main method
-   * @param args program parameters, takes the name of the file to open
+   * 
+   * @param args
+   *        program parameters, takes the name of the file to open
    */
   public static void main(String args[]) {
     try {
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+    } catch (Exception e) {
     }
-    catch (Exception e) {}
 
     MainFrame frame = new MainFrame();
     frame.setSize(800, 500);
@@ -638,19 +651,18 @@ public class MainFrame
         File file = new File(filePath);
         if (file.exists()) {
           frame.openFile(file);
-        }
-        else {
+        } else {
           frame.writeStatus("File: " + filePath + " does not exist");
         }
       }
-    }
-    else {
+    } else {
       frame.showFileOpenDialog();
     }
   }
 
   /**
    * Initializes GUI components
+   * 
    * @throws Exception
    */
   private void jbInit() throws Exception {
@@ -667,7 +679,8 @@ public class MainFrame
     openMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(79,
         InputEvent.CTRL_MASK, false));
     openMenuItem.addActionListener(new ActionListener() {
-        @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         open_actionPerformed(e);
       }
     });
@@ -677,7 +690,8 @@ public class MainFrame
     openURLMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(85,
         InputEvent.CTRL_MASK, false));
     openURLMenuItem.addActionListener(new ActionListener() {
-        @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         openURL_actionPerformed(e);
       }
     });
@@ -686,7 +700,7 @@ public class MainFrame
     printMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(80,
         InputEvent.CTRL_MASK, false));
     printMenuItem.addActionListener(new ActionListener() {
-        @Override
+      @Override
       public void actionPerformed(ActionEvent e) {
         printMenuItem_actionPerformed(e);
       }
@@ -696,14 +710,16 @@ public class MainFrame
     closeMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(115,
         InputEvent.CTRL_MASK, false));
     closeMenuItem.addActionListener(new ActionListener() {
-        @Override  public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         closeMenuItem_actionPerformed(e);
       }
     });
     closeAllMenuItem.setMnemonic('L');
     closeAllMenuItem.setText("Close All");
     closeAllMenuItem.addActionListener(new ActionListener() {
-        @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         closeAllMenuItem_actionPerformed(e);
       }
     });
@@ -712,7 +728,8 @@ public class MainFrame
     exitMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(115,
         InputEvent.ALT_MASK, false));
     exitMenuItem.addActionListener(new ActionListener() {
-        @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         exitMenuItem_actionPerformed(e);
       }
     });
@@ -725,14 +742,17 @@ public class MainFrame
     displayMenu.setMnemonic('D');
     displayMenu.setText("Display");
     displayMenu.addMenuListener(new MenuListener() {
-        @Override public void menuSelected(MenuEvent e) {
+      @Override
+      public void menuSelected(MenuEvent e) {
         displayMenu_menuSelected(e);
       }
 
-       @Override public void menuDeselected(MenuEvent e) {
+      @Override
+      public void menuDeselected(MenuEvent e) {
       }
 
-       @Override public void menuCanceled(MenuEvent e) {
+      @Override
+      public void menuCanceled(MenuEvent e) {
       }
     });
     zoomMenu.setMnemonic('Z');
@@ -742,16 +762,18 @@ public class MainFrame
     gridCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(71,
         InputEvent.CTRL_MASK, false));
     gridCheckBoxMenuItem.addItemListener(new ItemListener() {
-    @Override public void itemStateChanged(ItemEvent e) {
+      @Override
+      public void itemStateChanged(ItemEvent e) {
         gridCheckBoxMenuItem_itemStateChanged(e);
       }
     });
     coordsCheckBoxMenuItem.setMnemonic('C');
     coordsCheckBoxMenuItem.setText("Coordinates");
-    coordsCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(67,
-        InputEvent.CTRL_MASK, false));
+    coordsCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(
+        67, InputEvent.CTRL_MASK, false));
     coordsCheckBoxMenuItem.addItemListener(new ItemListener() {
-    @Override public void itemStateChanged(ItemEvent e) {
+      @Override
+      public void itemStateChanged(ItemEvent e) {
         coordsCheckBoxMenuItem_itemStateChanged(e);
       }
     });
@@ -760,37 +782,41 @@ public class MainFrame
     revPlotCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(
         82, InputEvent.CTRL_MASK, false));
     revPlotCheckBoxMenuItem.addItemListener(new ItemListener() {
-     @Override public void itemStateChanged(ItemEvent e) {
+      @Override
+      public void itemStateChanged(ItemEvent e) {
         revPlotCheckBoxMenuItem_itemStateChanged(e);
       }
     });
-    
+
     scaleXCheckBoxMenuItem.setMnemonic('X');
     scaleXCheckBoxMenuItem.setText("X Scale");
-    scaleXCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(88,
-        InputEvent.CTRL_MASK, false));
+    scaleXCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(
+        88, InputEvent.CTRL_MASK, false));
     scaleXCheckBoxMenuItem.addItemListener(new ItemListener() {
-    @Override public void itemStateChanged(ItemEvent e) {
-    	scaleXCheckBoxMenuItem_itemStateChanged(e);
+      @Override
+      public void itemStateChanged(ItemEvent e) {
+        scaleXCheckBoxMenuItem_itemStateChanged(e);
       }
     });
-    
+
     scaleYCheckBoxMenuItem.setMnemonic('Y');
     scaleYCheckBoxMenuItem.setText("Y Scale");
-    scaleYCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(89,
-        InputEvent.CTRL_MASK, false));
+    scaleYCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(
+        89, InputEvent.CTRL_MASK, false));
     scaleYCheckBoxMenuItem.addItemListener(new ItemListener() {
-    @Override public void itemStateChanged(ItemEvent e) {
-    	scaleYCheckBoxMenuItem_itemStateChanged(e);
+      @Override
+      public void itemStateChanged(ItemEvent e) {
+        scaleYCheckBoxMenuItem_itemStateChanged(e);
       }
     });
-    
+
     nextMenuItem.setMnemonic('N');
     nextMenuItem.setText("Next View");
     nextMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(78,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, false));
     nextMenuItem.addActionListener(new ActionListener() {
-     @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         nextMenuItem_actionPerformed(e);
       }
     });
@@ -799,7 +825,8 @@ public class MainFrame
     prevMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(80,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, false));
     prevMenuItem.addActionListener(new ActionListener() {
-    @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         prevMenuItem_actionPerformed(e);
       }
     });
@@ -808,7 +835,8 @@ public class MainFrame
     fullMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(70,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, false));
     fullMenuItem.addActionListener(new ActionListener() {
-    @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         fullMenuItem_actionPerformed(e);
       }
     });
@@ -817,7 +845,8 @@ public class MainFrame
     clearMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(67,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, false));
     clearMenuItem.addActionListener(new ActionListener() {
-     @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         clearMenuItem_actionPerformed(e);
       }
     });
@@ -827,23 +856,27 @@ public class MainFrame
     preferencesMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(80,
         InputEvent.SHIFT_MASK, false));
     preferencesMenuItem.addActionListener(new ActionListener() {
-    @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         preferencesMenuItem_actionPerformed(e);
       }
     });
     contentsMenuItem.setActionCommand("Contents");
     contentsMenuItem.setMnemonic('C');
     contentsMenuItem.setText("Contents...");
-    contentsMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(112, 0, false));
+    contentsMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(112, 0,
+        false));
     contentsMenuItem.addActionListener(new ActionListener() {
-    @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         contentsMenuItem_actionPerformed(e);
       }
     });
     aboutMenuItem.setMnemonic('A');
     aboutMenuItem.setText("About");
     aboutMenuItem.addActionListener(new ActionListener() {
-    @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         aboutMenuItem_actionPerformed(e);
       }
     });
@@ -858,31 +891,32 @@ public class MainFrame
     toolbarCheckBoxMenuItem.setSelected(true);
     toolbarCheckBoxMenuItem.setText("Toolbar");
     toolbarCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(
-        84,
-        InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, false));
+        84, InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, false));
     toolbarCheckBoxMenuItem.addItemListener(new ItemListener() {
-    @Override public void itemStateChanged(ItemEvent e) {
+      @Override
+      public void itemStateChanged(ItemEvent e) {
         toolbarCheckBoxMenuItem_itemStateChanged(e);
       }
     });
     sidePanelCheckBoxMenuItem.setMnemonic('S');
     sidePanelCheckBoxMenuItem.setSelected(true);
     sidePanelCheckBoxMenuItem.setText("Side Panel");
-    sidePanelCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(
-        83,
-        InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, false));
+    sidePanelCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke
+        .getKeyStroke(83, InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, false));
     sidePanelCheckBoxMenuItem.addItemListener(new ItemListener() {
-    @Override public void itemStateChanged(ItemEvent e) {
+      @Override
+      public void itemStateChanged(ItemEvent e) {
         sidePanelCheckBoxMenuItem_itemStateChanged(e);
       }
     });
     statusCheckBoxMenuItem.setMnemonic('B');
     statusCheckBoxMenuItem.setSelected(true);
     statusCheckBoxMenuItem.setText("Status Bar");
-    statusCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(66,
-        InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, false));
+    statusCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(
+        66, InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, false));
     statusCheckBoxMenuItem.addItemListener(new ItemListener() {
-    @Override public void itemStateChanged(ItemEvent e) {
+      @Override
+      public void itemStateChanged(ItemEvent e) {
         statusCheckBoxMenuItem_itemStateChanged(e);
       }
     });
@@ -898,7 +932,8 @@ public class MainFrame
     splitMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(83,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, false));
     splitMenuItem.addActionListener(new ActionListener() {
-    @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         splitMenuItem_actionPerformed(e);
       }
     });
@@ -907,30 +942,34 @@ public class MainFrame
     overlayMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(79,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, false));
     overlayMenuItem.addActionListener(new ActionListener() {
-    @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         overlayMenuItem_actionPerformed(e);
       }
     });
     hideMenuItem.setMnemonic('H');
     hideMenuItem.setText("Hide");
     hideMenuItem.addActionListener(new ActionListener() {
-    @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         hideMenuItem_actionPerformed(e);
       }
     });
     hideAllMenuItem.setMnemonic('L');
     hideAllMenuItem.setText("Hide All");
     hideAllMenuItem.addActionListener(new ActionListener() {
-    @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         hideAllMenuItem_actionPerformed(e);
       }
     });
     showMenuItem.setMnemonic('S');
     showMenuItem.setText("Show All");
-//    showAllMenuItem.setMnemonic('A');
-//    showAllMenuItem.setText("Show All");
+    //    showAllMenuItem.setMnemonic('A');
+    //    showAllMenuItem.setText("Show All");
     showMenuItem.addActionListener(new ActionListener() {
-    @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         showMenuItem_actionPerformed(e);
       }
     });
@@ -940,7 +979,8 @@ public class MainFrame
     sourceMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(83,
         InputEvent.CTRL_MASK, false));
     sourceMenuItem.addActionListener(new ActionListener() {
-    @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         sourceMenuItem_actionPerformed(e);
       }
     });
@@ -949,7 +989,8 @@ public class MainFrame
     propertiesMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(72,
         InputEvent.CTRL_MASK, false));
     propertiesMenuItem.addActionListener(new ActionListener() {
-    @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         propertiesMenuItem_actionPerformed(e);
       }
     });
@@ -958,7 +999,8 @@ public class MainFrame
     borderLayout1.setVgap(2);
 
     clearButton.addActionListener(new ActionListener() {
-    @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         clearButton_actionPerformed(e);
       }
     });
@@ -966,7 +1008,8 @@ public class MainFrame
     previousButton.setToolTipText("Previous View");
     previousButton.setIcon(previousIcon);
     previousButton.addActionListener(new ActionListener() {
-    @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         previousButton_actionPerformed(e);
       }
     });
@@ -974,7 +1017,8 @@ public class MainFrame
     nextButton.setToolTipText("Next View");
     nextButton.setIcon(nextIcon);
     nextButton.addActionListener(new ActionListener() {
-    @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         nextButton_actionPerformed(e);
       }
     });
@@ -982,7 +1026,8 @@ public class MainFrame
     resetButton.setToolTipText("Reset ");
     resetButton.setIcon(resetIcon);
     resetButton.addActionListener(new ActionListener() {
-    @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         resetButton_actionPerformed(e);
       }
     });
@@ -993,7 +1038,8 @@ public class MainFrame
     openButton.setToolTipText("Open");
     openButton.setIcon(openIcon);
     openButton.addActionListener(new ActionListener() {
-    @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         openButton_actionPerformed(e);
       }
     });
@@ -1001,7 +1047,8 @@ public class MainFrame
     propertiesButton.setToolTipText("Properties");
     propertiesButton.setIcon(informationIcon);
     propertiesButton.addActionListener(new ActionListener() {
-    @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         propertiesButton_actionPerformed(e);
       }
     });
@@ -1009,7 +1056,8 @@ public class MainFrame
     gridToggleButton.setToolTipText("Toggle Grid");
     gridToggleButton.setIcon(gridIcon);
     gridToggleButton.addActionListener(new ActionListener() {
-    @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         gridToggleButton_actionPerformed(e);
       }
     });
@@ -1017,7 +1065,8 @@ public class MainFrame
     coordsToggleButton.setToolTipText("Toggle Coordinates");
     coordsToggleButton.setIcon(coordinatesIcon);
     coordsToggleButton.addActionListener(new ActionListener() {
-    @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         coordsToggleButton_actionPerformed(e);
       }
     });
@@ -1025,7 +1074,8 @@ public class MainFrame
     printButton.setToolTipText("Print");
     printButton.setIcon(printIcon);
     printButton.addActionListener(new ActionListener() {
-    @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         printButton_actionPerformed(e);
       }
     });
@@ -1033,7 +1083,8 @@ public class MainFrame
     revPlotToggleButton.setToolTipText("Reverse Plot");
     revPlotToggleButton.setIcon(reverseIcon);
     revPlotToggleButton.addActionListener(new ActionListener() {
-    @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         revPlotToggleButton_actionPerformed(e);
       }
     });
@@ -1041,7 +1092,8 @@ public class MainFrame
     aboutButton.setToolTipText("About JSpecView");
     aboutButton.setIcon(aboutIcon);
     aboutButton.addActionListener(new ActionListener() {
-    @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         aboutButton_actionPerformed(e);
       }
     });
@@ -1049,14 +1101,16 @@ public class MainFrame
     overlaySplitButton.setIcon(overlayIcon);
     overlaySplitButton.setToolTipText("Overlay Display");
     overlaySplitButton.addActionListener(new ActionListener() {
-    @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         overlaySplitButton_actionPerformed(e);
       }
     });
     overlayKeyMenuItem.setEnabled(false);
     overlayKeyMenuItem.setText("Overlay Key");
     overlayKeyMenuItem.addActionListener(new ActionListener() {
-    @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         overlayKeyMenuItem_actionPerformed(e);
       }
     });
@@ -1065,7 +1119,8 @@ public class MainFrame
     overlayKeyButton.setToolTipText("Display Key for Overlaid Spectra");
     overlayKeyButton.setIcon(overlayKeyIcon);
     overlayKeyButton.addActionListener(new ActionListener() {
-    @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         overlayKeyButton_actionPerformed(e);
       }
     });
@@ -1074,25 +1129,29 @@ public class MainFrame
     integrateMenuItem.setMnemonic('I');
     integrateMenuItem.setText("Integrate HNMR");
     integrateMenuItem.addActionListener(new ActionListener() {
-    @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         integrateMenuItem_actionPerformed(e);
       }
     });
     transAbsMenuItem.setText("Transmittance/Absorbance");
     transAbsMenuItem.addActionListener(new ActionListener() {
-    @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         transAbsMenuItem_actionPerformed(e);
       }
     });
     solColMenuItem.setText("Predicted Solution Colour");
     solColMenuItem.addActionListener(new ActionListener() {
-    @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         solColMenuItem_actionPerformed(e);
       }
     });
     errorLogMenuItem.setText("Error Log ...");
     errorLogMenuItem.addActionListener(new ActionListener() {
-    @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         errorLogMenuItem_actionPerformed(e);
       }
     });
@@ -1176,7 +1235,7 @@ public class MainFrame
     windowMenu.addSeparator();
     windowMenu.add(hideMenuItem);
     windowMenu.add(hideAllMenuItem);
-//    windowMenu.add(showMenu);
+    //    windowMenu.add(showMenu);
     windowMenu.add(showMenuItem);
     processingMenu.add(integrateMenuItem).setEnabled(false);
     processingMenu.add(transAbsMenuItem).setEnabled(false);
@@ -1185,36 +1244,16 @@ public class MainFrame
   }
 
   private ActionListener actionListener = new ActionListener() {
-   @Override public void actionPerformed(ActionEvent e) {
+    @Override
+    public void actionPerformed(ActionEvent e) {
       exportSpectrum(e.getActionCommand());
     }
   };
-  private JmolSyncInterface jmol;
-
-  /**
-   * Shows dialog to open a file
-   * @param e the ActionEvent
-   */
-  void open_actionPerformed(ActionEvent e) {
-    showFileOpenDialog();
-  }
-
-  void openURL_actionPerformed(ActionEvent e){
-      String url = JOptionPane.showInputDialog(null, "Enter URL of a JCAMP-DX File", "Open URL",
-          JOptionPane.PLAIN_MESSAGE);
-      if (url != null) {
-        if (url.indexOf("://") == -1);
-          url = "http://" + url;
-        openFile(null, url);
-        //viewer.openFileAsynchronously(url);
-      }
-      return;
-    };
-
+  
   /**
    * Shows dialog to open a file
    */
-  public void showFileOpenDialog() {
+  private void showFileOpenDialog() {
     JSpecViewFileFilter filter = new JSpecViewFileFilter();
     filter.addExtension("jdx");
     filter.addExtension("dx");
@@ -1231,9 +1270,11 @@ public class MainFrame
 
   /**
    * Open a file listed in the open recent menu
-   * @param e the ActionEvent
+   * 
+   * @param e
+   *        the ActionEvent
    */
-  public void openRecent_actionPerformed(ActionEvent e) {
+  protected void openRecent_actionPerformed(ActionEvent e) {
     JMenuItem menuItem = (JMenuItem) e.getSource();
     String filePath = menuItem.getText();
     File file = new File(filePath);
@@ -1242,46 +1283,64 @@ public class MainFrame
 
   /**
    * Opens and displays a file
-   * @param file the file
+   * 
+   * @param file
+   *        the file
    */
   public void openFile(File file) {
     openFile(file, null);
   }
-  
-  private void openFile(File file, String url) {
+
+  /**
+   * Opens and displays a file, either local or remote
+   * 
+   * @param fileOrURL
+   */
+  public void openFile(String fileOrURL) {
+    if (FileManager.isURL(fileOrURL))
+      openFile(null, fileOrURL);
+    else
+      openFile(new File(fileOrURL), null);
+  }
+
+  private int openFile(File file, String url) {
     writeStatus(" ");
     String filePath = null;
     String fileName = null;
     if (file == null) {
       try {
-        fileName = (new URL(url)).getFile();
+        URL u = new URL(url);
+        fileName = FileManager.getName(url);
+        filePath = u.toString();
+        recentJmolName = filePath;
+        recentURL = filePath;
       } catch (MalformedURLException e) {
-        return;
-      } 
-      recentURL = url;
+        writeStatus(e.getMessage());
+        return FILE_OPEN_URLERROR;
+      }
     } else {
       fileName = recentFileName = file.getName();
       filePath = file.getAbsolutePath();
-      recentURL = (url == null ? filePath.replace('\\', '/') : url);
+      recentJmolName = (url == null ? filePath.replace('\\', '/') : url);
+      recentURL = null;
     }
-    if (jdxSourceFiles.contains(file)) {
-      writeStatus("File: '" + filePath + "' is already opened");
-      return;
+    if (jdxSourceFiles.contains(recentJmolName)) {
+      writeStatus(recentJmolName + " is already open");
+      return FILE_OPEN_ALREADY;
     }
     JDXSource source;
     try {
-      source = JDXSource.createJDXSource(null, (url == null ? filePath : url), null);
-    }
-    catch (Exception e) {
+      source = JDXSource.createJDXSource(null, filePath, null);
+    } catch (Exception e) {
       writeStatus(e.getMessage());
-      return;
+      return FILE_OPEN_ERROR;
     }
     currentSelectedSource = (JDXSource) source;
     jdxSources.addElement(currentSelectedSource);
-    jdxSourceFiles.addElement(file);
+    jdxSourceFiles.addElement(filePath);
     closeMenuItem.setEnabled(true);
-    closeMenuItem.setText("Close '" + fileName + "'");
-    setTitle("JSpecView - " + file.getAbsolutePath());
+    closeMenuItem.setText("Close " + fileName);
+    setTitle("JSpecView - " + filePath);
 
     // add calls to enable Menus that were greyed out until a file is opened.
 
@@ -1297,7 +1356,7 @@ public class MainFrame
 
     JDXSpectrum spec = currentSelectedSource.getJDXSpectrum(0);
     if (spec == null) {
-      return;
+      return FILE_OPEN_NO_DATA;
     }
 
     setMenuEnables(spec);
@@ -1331,7 +1390,8 @@ public class MainFrame
       menuItem = new JMenuItem(path);
       openRecentMenu.add(menuItem);
       menuItem.addActionListener(new ActionListener() {
-      @Override  public void actionPerformed(ActionEvent ae) {
+        @Override
+        public void actionPerformed(ActionEvent ae) {
           openRecent_actionPerformed(ae);
         }
       });
@@ -1341,11 +1401,13 @@ public class MainFrame
     menuItem = new JMenuItem(path);
     openRecentMenu.add(menuItem);
     menuItem.addActionListener(new ActionListener() {
-    @Override  public void actionPerformed(ActionEvent ae) {
+      @Override
+      public void actionPerformed(ActionEvent ae) {
         openRecent_actionPerformed(ae);
       }
     });
     properties.setProperty("recentFilePaths", filePaths);
+    return FILE_OPEN_OK;
   }
 
   void setMenuEnables(JDXSpectrum spec) {
@@ -1386,102 +1448,110 @@ public class MainFrame
 
   /**
    * Checks to see if this is an XML file
+   * 
    * @param file
    * @return true if anIML or CML
    */
 
   /**
-   * Sets the display properties as specified from the preferences dialog
-   * or the properties file
-   * @param jsvp the display panel
+   * Sets the display properties as specified from the preferences dialog or the
+   * properties file
+   * 
+   * @param jsvp
+   *        the display panel
    */
-  public void setJSVPanelProperties(JSVPanel jsvp, boolean shouldApplySpectrumDisplaySettings) {
+  public void setJSVPanelProperties(JSVPanel jsvp,
+                                    boolean shouldApplySpectrumDisplaySettings) {
 
     DisplayScheme ds = (DisplayScheme) dsp.getDisplaySchemes().get(
         defaultDisplaySchemeName);
-    
-    if(ds == null) ds = dsp.getDefaultScheme();
-    
-    if(shouldApplySpectrumDisplaySettings){
-	    jsvp.setCoordinatesOn(coordinatesOn);    
-	    jsvp.setGridOn(gridOn);  
-	    jsvp.setXScaleOn(xScaleOn);
-	    jsvp.setYScaleOn(yScaleOn);
-	    jsvp.setXUnitsOn(xScaleOn);
-	    jsvp.setYUnitsOn(yScaleOn);
+
+    if (ds == null)
+      ds = dsp.getDefaultScheme();
+
+    if (shouldApplySpectrumDisplaySettings) {
+      jsvp.setCoordinatesOn(coordinatesOn);
+      jsvp.setGridOn(gridOn);
+      jsvp.setXScaleOn(xScaleOn);
+      jsvp.setYScaleOn(yScaleOn);
+      jsvp.setXUnitsOn(xScaleOn);
+      jsvp.setYUnitsOn(yScaleOn);
     }
-    
+
     jsvp.setTitleColor(ds.getColor("title"));
     jsvp.setUnitsColor(ds.getColor("units"));
     jsvp.setScaleColor(ds.getColor("scale"));
     jsvp.setcoordinatesColor(ds.getColor("coordinates"));
-    jsvp.setGridColor(ds.getColor("grid"));    
+    jsvp.setGridColor(ds.getColor("grid"));
     jsvp.setPlotColor(ds.getColor("plot"));
-    jsvp.setPlotAreaColor(ds.getColor("plotarea"));    
+    jsvp.setPlotAreaColor(ds.getColor("plotarea"));
     jsvp.setBackground(ds.getColor("background"));
 
     jsvp.setDisplayFontName(ds.getFont());
-    
-    jsvp.setXAxisDisplayedIncreasing(JSpecViewUtils.shouldDisplayXAxisIncreasing((JDXSpectrum)jsvp.getSpectrumAt(0)));
+
+    jsvp.setXAxisDisplayedIncreasing(JSpecViewUtils
+        .shouldDisplayXAxisIncreasing((JDXSpectrum) jsvp.getSpectrumAt(0)));
     jsvp.setSource(currentSelectedSource);
     jsvp.setPopup(jsvpPopupMenu);
-    
+
     jsvp.repaint();
   }
 
   /**
    * Shows the current Source file as overlayed
-   * @param e the ActionEvent
+   * 
+   * @param e
+   *        the ActionEvent
    */
-  void overlayMenuItem_actionPerformed(ActionEvent e) {
+  protected void overlayMenuItem_actionPerformed(ActionEvent e) {
     JDXSource source = currentSelectedSource;
     if (source == null) {
       return;
     }
-    if (! (source instanceof CompoundSource)) {
-    	writeStatus("Unable to Overlay, Incompatible source type");
-    	return;      
+    if (!(source instanceof CompoundSource)) {
+      writeStatus("Unable to Overlay, Incompatible source type");
+      return;
     }
     try {
-      if(JSpecViewUtils.areScalesCompatible(source.getSpectra().toArray(new JDXSpectrum[]{}))){
-	      closeSource(source);
-	      overlaySpectra(source);
+      if (JSpecViewUtils.areScalesCompatible(source.getSpectra().toArray(
+          new JDXSpectrum[] {}))) {
+        closeSource(source);
+        overlaySpectra(source);
+      } else {
+        showUnableToOverlayMessage();
       }
-      else{
-    	 showUnableToOverlayMessage();
-      }
-    }
-    catch (Exception ex) { 
+    } catch (Exception ex) {
       splitSpectra(source);
     }
   }
 
-private void showUnableToOverlayMessage() {
-	writeStatus("Unable to Overlay, Scales are Incompatible");
-      JOptionPane.showMessageDialog(this,
-                                    "Unable to Overlay, Scales are Incompatible",
-                                    "Overlay Error", JOptionPane.ERROR_MESSAGE);
-}
+  private void showUnableToOverlayMessage() {
+    writeStatus("Unable to Overlay, Scales are Incompatible");
+    JOptionPane.showMessageDialog(this,
+        "Unable to Overlay, Scales are Incompatible", "Overlay Error",
+        JOptionPane.ERROR_MESSAGE);
+  }
 
   /**
    * Overlays the spectra of the specified <code>JDXSource</code>
-   * @param source the <code>JDXSource</code>
+   * 
+   * @param source
+   *        the <code>JDXSource</code>
    * @throws ScalesIncompatibleException
    */
-  private void overlaySpectra(JDXSource source) throws
-      ScalesIncompatibleException {
+  private void overlaySpectra(JDXSource source)
+      throws ScalesIncompatibleException {
 
-    File file = getFileForSource(source);
+    String file = getFileForSource(source);
     Vector<JDXSpectrum> specs = source.getSpectra();
     JSVPanel jsvp;
     jsvp = new JSVPanel(specs);
-    jsvp.setTitle( ( (CompoundSource) source).getTitle());
+    jsvp.setTitle(((CompoundSource) source).getTitle());
 
     setJSVPanelProperties(jsvp, true);
-    
-    JInternalFrame frame = new JInternalFrame(
-        ( (CompoundSource) source).getTitle(),
-        true, true, true, true);
+
+    JInternalFrame frame = new JInternalFrame(((CompoundSource) source)
+        .getTitle(), true, true, true, true);
     frame.setFrameIcon(frameIcon);
     frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     frame.addInternalFrameListener(new JSVInternalFrameListener(file, source));
@@ -1495,11 +1565,11 @@ private void showUnableToOverlayMessage() {
     solColMenuItem.setEnabled(false);
     try {
       frame.setMaximum(true);
+    } catch (PropertyVetoException pve) {
     }
-    catch (PropertyVetoException pve) {}
     frame.show();
-    specInfos = new SpecInfo[] { new SpecInfo(frame, jsvp) }; 
-    createTree(file.getName());
+    specInfos = new SpecInfo[] { new SpecInfo(frame, jsvp) };
+    createTree(file);
     validate();
     repaint();
 
@@ -1514,9 +1584,11 @@ private void showUnableToOverlayMessage() {
 
   /**
    * Closes the current JDXSource
-   * @param e the ActionEvent
+   * 
+   * @param e
+   *        the ActionEvent
    */
-  void closeMenuItem_actionPerformed(ActionEvent e) {
+  protected void closeMenuItem_actionPerformed(ActionEvent e) {
     closeSource(currentSelectedSource);
     removeSource(currentSelectedSource);
 
@@ -1526,9 +1598,11 @@ private void showUnableToOverlayMessage() {
 
   /**
    * Close all <code>JDXSource<code>s
-   * @param e the ActionEvent
+   * 
+   * @param e
+   *        the ActionEvent
    */
-  void closeAllMenuItem_actionPerformed(ActionEvent e) {
+  protected void closeAllMenuItem_actionPerformed(ActionEvent e) {
 
     for (int i = 0; i < jdxSources.size(); i++) {
       JDXSource source = (JDXSource) jdxSources.elementAt(i);
@@ -1545,7 +1619,9 @@ private void showUnableToOverlayMessage() {
 
   /**
    * Closes the <code>JDXSource</code> specified by source
-   * @param source the <code>JDXSource</code>
+   * 
+   * @param source
+   *        the <code>JDXSource</code>
    */
   @SuppressWarnings("unchecked")
   public void closeSource(JDXSource source) {
@@ -1556,7 +1632,7 @@ private void showUnableToOverlayMessage() {
     while (enume.hasMoreElements()) {
       DefaultMutableTreeNode node = (DefaultMutableTreeNode) enume
           .nextElement();
-      String fileName = getFileNameForSource(source);
+      String fileName = getFileForSource(source);
       if (((String) node.getUserObject()).equals(fileName)) {
         for (Enumeration e = node.children(); e.hasMoreElements();) {
           childNode = (DefaultMutableTreeNode) e.nextElement();
@@ -1593,19 +1669,23 @@ private void showUnableToOverlayMessage() {
   }
 
   /**
-   * Displays the spectrum of the current <code>JDXSource</code> in separate windows
-   * @param e the ActionEvent
+   * Displays the spectrum of the current <code>JDXSource</code> in separate
+   * windows
+   * 
+   * @param e
+   *        the ActionEvent
    */
-  void splitMenuItem_actionPerformed(ActionEvent e) {
+  protected void splitMenuItem_actionPerformed(ActionEvent e) {
     JDXSource source = currentSelectedSource;
-    if (! (source instanceof CompoundSource)) {
+    if (!(source instanceof CompoundSource)) {
       return;
       // STATUS --> Can't Split
     }
 
     JSVPanel jsvp = getCurrentJSVPanel();
-    if(jsvp == null) return;
- 
+    if (jsvp == null)
+      return;
+
     if (jsvp.getNumberOfSpectra() == 1) {
       return;
     }
@@ -1613,19 +1693,17 @@ private void showUnableToOverlayMessage() {
     closeSource(source);
     splitSpectra(source);
   }
-  
-  
-  SpecInfo[] specInfos;
 
   /**
    * Displays the spectrum of the <code>JDXSource</code> specified by source in
    * separate windows
-   * @param source the <code>JDXSource</code>
+   * 
+   * @param source
+   *        the <code>JDXSource</code>
    */
   private void splitSpectra(JDXSource source) {
 
-
-    File file = getFileForSource(source);
+    String file = getFileForSource(source);
 
     Vector<JDXSpectrum> specs = source.getSpectra();
     //JSVPanel[] panels = new JSVPanel[specs.size()];
@@ -1639,11 +1717,10 @@ private void showUnableToOverlayMessage() {
         jsvp = new JSVPanel(spec);
         jsvp.addPeakPickedListener(this);
         setJSVPanelProperties(jsvp, true);
-        
-        frame = new JInternalFrame(spec.getTitleLabel(), true, true,
-                                   true, true);
+
+        frame = new JInternalFrame(spec.getTitleLabel(), true, true, true, true);
         specInfos[i] = new SpecInfo(frame, jsvp);
-        
+
         frame.setFrameIcon(frameIcon);
         frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frame.setMinimumSize(new Dimension(365, 200));
@@ -1655,8 +1732,7 @@ private void showUnableToOverlayMessage() {
 
         if (autoATConversion.equals("AtoT")) {
           TAConvert(frame, TO_TRANS);
-        }
-        else if (autoATConversion.equals("TtoA")) {
+        } else if (autoATConversion.equals("TtoA")) {
           TAConvert(frame, TO_ABS);
         }
 
@@ -1669,36 +1745,40 @@ private void showUnableToOverlayMessage() {
         frame.setSize(550, 350);
         try {
           frame.setMaximum(true);
+        } catch (PropertyVetoException pve) {
         }
-        catch (PropertyVetoException pve) {}
       }
 
       // arrange windows in ascending order
       for (int i = (specs.size() - 1); i >= 0; i--) {
         frames[i].toFront();
-      } 
+      }
       setFrame(specInfos[0], false);
-      
-      createTree(file.getName());
-      
+
+      createTree(file);
+
       overlaySplitButton.setIcon(overlayIcon);
       overlaySplitButton.setToolTipText("Overlay Display");
-    }
-    catch (JSpecViewException jsve) {
+    } catch (JSpecViewException jsve) {
       //STATUS --> write message
     }
   }
 
   /**
-   * Adds the <code>JDXSource</code> info specified by the <code>fileName<code> to
+   * Adds the <code>JDXSource</code> info specified by the
+   * <code>fileName<code> to
    * the tree model for the side panel.
-   * @param fileName the name of the file
-   * @param frames an array of JInternalFrames
+   * 
+   * @param fileName
+   *        the name of the file
+   * @param frames
+   *        an array of JInternalFrames
    */
-  public void createTree(String fileName) {
-    DefaultMutableTreeNode fileNode = new DefaultMutableTreeNode(fileName);
-    spectraTreeModel.insertNodeInto(fileNode, rootNode,
-                                    fileNode.getChildCount());
+  public void createTree(String file) {
+    String fileName = FileManager.getName(file);
+    DefaultMutableTreeNode fileNode = new JSVTreeNode(fileName, file);
+    spectraTreeModel.insertNodeInto(fileNode, rootNode, fileNode
+        .getChildCount());
     spectraTree.scrollPathToVisible(new TreePath(fileNode.getPath()));
 
     DefaultMutableTreeNode specNode;
@@ -1706,8 +1786,8 @@ private void showUnableToOverlayMessage() {
     for (int i = 0; i < specInfos.length; i++) {
       specNode = new DefaultMutableTreeNode(specInfos[i]);
 
-      spectraTreeModel.insertNodeInto(specNode, fileNode,
-                                      fileNode.getChildCount());
+      spectraTreeModel.insertNodeInto(specNode, fileNode, fileNode
+          .getChildCount());
       spectraTree.scrollPathToVisible(new TreePath(specNode.getPath()));
     }
 
@@ -1722,8 +1802,10 @@ private void showUnableToOverlayMessage() {
 
     /**
      * Initialises a <code>SpecInfo</code> with the a JInternalFrame
-     * @param frame the JInternalFrame
-     * @param jsvp 
+     * 
+     * @param frame
+     *        the JInternalFrame
+     * @param jsvp
      */
     public SpecInfo(JInternalFrame frame, JSVPanel jsvp) {
       this.frame = frame;
@@ -1732,6 +1814,7 @@ private void showUnableToOverlayMessage() {
 
     /**
      * String representation of the class
+     * 
      * @return the string representation
      */
     @Override
@@ -1742,70 +1825,75 @@ private void showUnableToOverlayMessage() {
 
   /**
    * Toggles the grid
-   * @param e the ItemEvent
+   * 
+   * @param e
+   *        the ItemEvent
    */
   void gridCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-    
-	 JSVPanel jsvp = getCurrentJSVPanel();
-	 if(jsvp == null) return;
-	  
+
+    JSVPanel jsvp = getCurrentJSVPanel();
+    if (jsvp == null)
+      return;
+
     if (e.getStateChange() == ItemEvent.SELECTED) {
       jsvp.setGridOn(true);
       gridToggleButton.setSelected(true);
-    }
-    else {
+    } else {
       jsvp.setGridOn(false);
       gridToggleButton.setSelected(false);
     }
     repaint();
   }
 
-  
   /**
    * Toggles the X Scale
-   * @param e the ItemEvent
+   * 
+   * @param e
+   *        the ItemEvent
    */
   void scaleXCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-    
-	 JSVPanel jsvp = getCurrentJSVPanel();
-	 if(jsvp == null) return;
-	  
+
+    JSVPanel jsvp = getCurrentJSVPanel();
+    if (jsvp == null)
+      return;
+
     if (e.getStateChange() == ItemEvent.SELECTED) {
-      jsvp.setXScaleOn(true);   
+      jsvp.setXScaleOn(true);
       jsvp.setXUnitsOn(true);
-    }
-    else {
+    } else {
       jsvp.setXScaleOn(false);
-      jsvp.setYUnitsOn(false);      
+      jsvp.setYUnitsOn(false);
     }
     repaint();
   }
-  
+
   /**
    * Toggles the X Scale
-   * @param e the ItemEvent
+   * 
+   * @param e
+   *        the ItemEvent
    */
   void scaleYCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-    
-	 JSVPanel jsvp = getCurrentJSVPanel();
-	 if(jsvp == null) return;
-	  
+
+    JSVPanel jsvp = getCurrentJSVPanel();
+    if (jsvp == null)
+      return;
+
     if (e.getStateChange() == ItemEvent.SELECTED) {
-      jsvp.setYScaleOn(true);      
-    }
-    else {
-      jsvp.setYScaleOn(false);      
+      jsvp.setYScaleOn(true);
+    } else {
+      jsvp.setYScaleOn(false);
     }
     repaint();
   }
-  
+
   /**
    * Shows the properties or header of a Spectrum
    * 
    * @param e
    *        the ActionEvent
    */
-  void propertiesMenuItem_actionPerformed(ActionEvent e) {
+  protected void propertiesMenuItem_actionPerformed(ActionEvent e) {
     JSVPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
@@ -1818,18 +1906,20 @@ private void showUnableToOverlayMessage() {
   /**
    * Listener for a JInternalFrame
    */
-  private class JSVInternalFrameListener
-      extends InternalFrameAdapter {
+  private class JSVInternalFrameListener extends InternalFrameAdapter {
 
-    File file;
+    String file;
     JDXSource source;
 
     /**
      * Initialises a <code>JSVInternalFrameListener</code>
-     * @param file the name of the selected file
-     * @param source current the JDXSource of the file
+     * 
+     * @param file
+     *        the name of the selected file
+     * @param source
+     *        current the JDXSource of the file
      */
-    public JSVInternalFrameListener(File file, JDXSource source) {
+    public JSVInternalFrameListener(String file, JDXSource source) {
       this.file = file;
       this.source = source;
     }
@@ -1837,7 +1927,9 @@ private void showUnableToOverlayMessage() {
     /**
      * Gets the selected JSVPanel and updates menus and button according to the
      * panel's properties. Also sets the frame title to the current file name.
-     * @param e the InternalFrameEvent
+     * 
+     * @param e
+     *        the InternalFrameEvent
      */
     @Override
     public void internalFrameActivated(InternalFrameEvent e) {
@@ -1861,8 +1953,7 @@ private void showUnableToOverlayMessage() {
         overlaySplitButton.setToolTipText("Split Display");
         overlayKeyButton.setEnabled(true);
         overlayKeyMenuItem.setEnabled(true);
-      }
-      else {
+      } else {
         overlaySplitButton.setIcon(overlayIcon);
         overlaySplitButton.setToolTipText("Overlay Display");
         overlayKeyButton.setEnabled(false);
@@ -1872,8 +1963,8 @@ private void showUnableToOverlayMessage() {
       setMenuEnables(spec);
 
       // Update file|Close Menu
-      closeMenuItem.setText("Close '" + file.getName() + "'");
-      setTitle("JSpecView - " + file.getAbsolutePath());
+      closeMenuItem.setText("Close " + FileManager.getName(file));
+      setTitle("JSpecView - " + file);
 
       // Find Node in SpectraTree and select it
       DefaultMutableTreeNode node = getNodeForInternalFrame(frame, rootNode);
@@ -1883,7 +1974,9 @@ private void showUnableToOverlayMessage() {
 
     /**
      * Called when <code>JInternalFrame</code> is closing
-     * @param e the InternalFrameEvent
+     * 
+     * @param e
+     *        the InternalFrameEvent
      */
     @Override
     public void internalFrameClosing(InternalFrameEvent e) {
@@ -1894,7 +1987,9 @@ private void showUnableToOverlayMessage() {
 
     /**
      * Called when <code>JInternalFrame</code> has opened
-     * @param e the InternalFrameEvent
+     * 
+     * @param e
+     *        the InternalFrameEvent
      */
     @Override
     public void internalFrameOpened(InternalFrameEvent e) {
@@ -1905,26 +2000,30 @@ private void showUnableToOverlayMessage() {
 
     /**
      * Returns the tree node that is associated with an internal frame
-     * @param frame the JInternalFrame
-     * @param parent the parent node
+     * 
+     * @param frame
+     *        the JInternalFrame
+     * @param parent
+     *        the parent node
      * @return the tree node that is associated with an internal frame
      */
     @SuppressWarnings("unchecked")
-    public DefaultMutableTreeNode getNodeForInternalFrame(JInternalFrame frame,
-        DefaultMutableTreeNode parent) {
+    public DefaultMutableTreeNode getNodeForInternalFrame(
+                                                          JInternalFrame frame,
+                                                          DefaultMutableTreeNode parent) {
       Enumeration enume = parent.breadthFirstEnumeration();
 
       while (enume.hasMoreElements()) {
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode) enume.nextElement();
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode) enume
+            .nextElement();
         if (node.isLeaf()) {
           Object nodeInfo = node.getUserObject();
           if (nodeInfo instanceof SpecInfo) {
-            if ( ( (SpecInfo) nodeInfo).frame == frame) {
+            if (((SpecInfo) nodeInfo).frame == frame) {
               return node;
             }
           }
-        }
-        else {
+        } else {
           continue;
         }
       }
@@ -1936,8 +2035,7 @@ private void showUnableToOverlayMessage() {
   /**
    * Tree Cell Renderer for the Spectra Tree
    */
-  private class SpectraTreeCellRenderer
-      extends DefaultTreeCellRenderer {
+  private class SpectraTreeCellRenderer extends DefaultTreeCellRenderer {
     /**
      * 
      */
@@ -1949,18 +2047,13 @@ private void showUnableToOverlayMessage() {
     }
 
     @Override
-    public Component getTreeCellRendererComponent(
-        JTree tree,
-        Object value,
-        boolean sel,
-        boolean expanded,
-        boolean leaf,
-        int row,
-        boolean hasFocus) {
+    public Component getTreeCellRendererComponent(JTree tree, Object value,
+                                                  boolean sel,
+                                                  boolean expanded,
+                                                  boolean leaf, int row,
+                                                  boolean hasFocus) {
 
-      super.getTreeCellRendererComponent(
-          tree, value, sel,
-          expanded, leaf, row,
+      super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row,
           hasFocus);
 
       this.value = value;
@@ -1971,6 +2064,7 @@ private void showUnableToOverlayMessage() {
 
     /**
      * Returns a font depending on whether a frame is hidden
+     * 
      * @return the tree node that is associated with an internal frame
      */
     @Override
@@ -1986,7 +2080,7 @@ private void showUnableToOverlayMessage() {
       Object nodeInfo = node.getUserObject();
       if (nodeInfo instanceof SpecInfo) {
         //JInternalFrame frame = ( (SpecInfo) nodeInfo).frame;
-        if (! ( (SpecInfo) nodeInfo).frame.isVisible()) {
+        if (!((SpecInfo) nodeInfo).frame.isVisible()) {
           return true;
         }
       }
@@ -1999,42 +2093,40 @@ private void showUnableToOverlayMessage() {
    */
   public void showNotImplementedOptionPane() {
     JOptionPane.showMessageDialog(this, "Not Yet Implemented",
-                                  "Not Yet Implemented",
-                                  JOptionPane.INFORMATION_MESSAGE);
+        "Not Yet Implemented", JOptionPane.INFORMATION_MESSAGE);
   }
 
   /**
    * Returns the name of the file associated with a JDXSource
-   * @param source the JDXSource
+   * 
+   * @param source
+   *        the JDXSource
    * @return the name of the file associated with a JDXSource
    */
   public String getFileNameForSource(JDXSource source) {
-    File file = getFileForSource(source);
-    if (file != null) {
-      return file.getName();
-    }
-    return null;
+    String file = getFileForSource(source);
+    return (file == null ? null : FileManager.getName(file));
   }
 
   /**
-   * Returns the  file associated with a JDXSource
-   * @param source the JDXSource
+   * Returns the file associated with a JDXSource
+   * 
+   * @param source
+   *        the JDXSource
    * @return the file associated with a JDXSource
    */
-  public File getFileForSource(JDXSource source) {
+  public String getFileForSource(JDXSource source) {
     int index = jdxSources.indexOf(source);
-    if (index != -1) {
-      return (File) jdxSourceFiles.elementAt(index);
-    }
-
-    return null;
+    return (index < 0 ? null : jdxSourceFiles.get(index));
   }
 
-  /**
+  /*
    * Returns the JDXSource associated with a file given by name fileName
    * @param fileName the name of the file
    * @return the JDXSource associated with a file given by name fileName
-   */
+   * 
+   * -- not implemented since adding URL option  - BH
+   * 
   public JDXSource getSourceForFileName(String fileName) {
     int index = -1;
     for (int i = 0; i < jdxSourceFiles.size(); i++) {
@@ -2050,12 +2142,16 @@ private void showUnableToOverlayMessage() {
     return null;
   }
 
+   */
+
   /**
    * Removes a JDXSource object from the application
-   * @param source the JDXSource
+   * 
+   * @param source
+   *        the JDXSource
    */
   public void removeSource(JDXSource source) {
-    File file = getFileForSource(source);
+    String file = getFileForSource(source);
     jdxSourceFiles.removeElement(file);
     jdxSources.removeElement(source);
     currentSelectedSource = null;
@@ -2071,11 +2167,14 @@ private void showUnableToOverlayMessage() {
 
   /**
    * Prints the current Spectrum display
-   * @param e the ActionEvent
+   * 
+   * @param e
+   *        the ActionEvent
    */
-  void printMenuItem_actionPerformed(ActionEvent e) {
-	  JSVPanel jsvp = getCurrentJSVPanel();
-	    if(jsvp == null) return;
+  protected void printMenuItem_actionPerformed(ActionEvent e) {
+    JSVPanel jsvp = getCurrentJSVPanel();
+    if (jsvp == null)
+      return;
 
     PrintLayoutDialog ppd = new PrintLayoutDialog(this);
     PrintLayoutDialog.PrintLayout pl = ppd.getPrintLayout();
@@ -2087,58 +2186,63 @@ private void showUnableToOverlayMessage() {
 
   /**
    * Shows the source file contents
-   * @param e the ActionEvent
+   * 
+   * @param e
+   *        the ActionEvent
    */
-  void sourceMenuItem_actionPerformed(ActionEvent e) {
-    File file;
-    if (currentSelectedSource != null) {
+  protected void sourceMenuItem_actionPerformed(ActionEvent e) {
+    String file = selectedTreeFile;
+    if (file == null) {
+      if (currentSelectedSource == null) {
+        if (jdxSources.size() > 0) {
+          JOptionPane.showMessageDialog(this, "Please Select a Spectrum",
+              "Select Spectrum", JOptionPane.ERROR_MESSAGE);
+        }
+        return;
+      }
       file = getFileForSource(currentSelectedSource);
-      try {
-        new TextDialog(this, file.getAbsolutePath(), file, true);
-      }
-      catch (IOException ex) {
-        new TextDialog(this, "File Not Found",
-                                           "File Not Found", true);
-      }
     }
-    else {
-      if (jdxSources.size() > 0) {
-        JOptionPane.showMessageDialog(this, "Please Select a Spectrum",
-                                      "Select Spectrum",
-                                      JOptionPane.ERROR_MESSAGE);
-      }
+    try {
+      new TextDialog(this, file, true);
+    } catch (IOException ex) {
+      new TextDialog(this, "File Not Found", "File Not Found", true);
     }
+
   }
 
   /**
    * Exits the application
-   * @param e the ActionEvent
+   * 
+   * @param e
+   *        the ActionEvent
    */
-  void exitMenuItem_actionPerformed(ActionEvent e) {
-    System.exit(0);
+  protected void exitMenuItem_actionPerformed(ActionEvent e) {
+    exitJSpecView(false);
   }
 
   /**
    * Shows the preferences dialog
-   * @param e the ActionEvent
+   * 
+   * @param e
+   *        the ActionEvent
    */
   void preferencesMenuItem_actionPerformed(ActionEvent e) {
     PreferencesDialog pd = new PreferencesDialog(this, "Preferences", true,
-                                                 properties, dsp);
-    properties = pd.getPreferences();   
-    boolean shouldApplySpectrumDisplaySetting = pd.shouldApplySpectrumDisplaySettingsNow();
+        properties, dsp);
+    properties = pd.getPreferences();
+    boolean shouldApplySpectrumDisplaySetting = pd
+        .shouldApplySpectrumDisplaySettingsNow();
     // Apply Properties where appropriate
     setApplicationProperties(shouldApplySpectrumDisplaySetting);
-    
+
     JInternalFrame[] frames = desktopPane.getAllFrames();
     for (int i = 0; i < frames.length; i++) {
       JSVPanel jsvp = (JSVPanel) frames[i].getContentPane().getComponent(0);
       setJSVPanelProperties(jsvp, shouldApplySpectrumDisplaySetting);
     }
-    
-    
+
     setApplicationElements();
-    
+
     dsp.getDisplaySchemes();
     if (defaultDisplaySchemeName.equals("Current")) {
       properties.setProperty("defaultDisplaySchemeName", tempDS);
@@ -2147,7 +2251,9 @@ private void showUnableToOverlayMessage() {
 
   /**
    * Shows the Help | Contents dialog
-   * @param e the ActionEvent
+   * 
+   * @param e
+   *        the ActionEvent
    */
   void contentsMenuItem_actionPerformed(ActionEvent e) {
     showNotImplementedOptionPane();
@@ -2155,17 +2261,19 @@ private void showUnableToOverlayMessage() {
 
   /**
    * Toggles the Coordinates
-   * @param e the ItemEvent
+   * 
+   * @param e
+   *        the ItemEvent
    */
   void coordsCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-	  JSVPanel jsvp = getCurrentJSVPanel();
-	    if(jsvp == null) return;
-	    
+    JSVPanel jsvp = getCurrentJSVPanel();
+    if (jsvp == null)
+      return;
+
     if (e.getStateChange() == ItemEvent.SELECTED) {
       jsvp.setCoordinatesOn(true);
       coordsToggleButton.setSelected(true);
-    }
-    else {
+    } else {
       jsvp.setCoordinatesOn(false);
       coordsToggleButton.setSelected(false);
     }
@@ -2174,17 +2282,19 @@ private void showUnableToOverlayMessage() {
 
   /**
    * Reverses the plot
-   * @param e the ItemEvent
-   */    
+   * 
+   * @param e
+   *        the ItemEvent
+   */
   void revPlotCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-	JSVPanel jsvp = getCurrentJSVPanel();
-	if(jsvp == null) return;
-	  
+    JSVPanel jsvp = getCurrentJSVPanel();
+    if (jsvp == null)
+      return;
+
     if (e.getStateChange() == ItemEvent.SELECTED) {
       jsvp.setReversePlot(true);
       revPlotToggleButton.setSelected(true);
-    }
-    else {
+    } else {
       jsvp.setReversePlot(false);
       revPlotToggleButton.setSelected(false);
     }
@@ -2193,27 +2303,35 @@ private void showUnableToOverlayMessage() {
 
   /**
    * Shows the next zoomed view
-   * @param e the ActionEvent
+   * 
+   * @param e
+   *        the ActionEvent
    */
   void nextMenuItem_actionPerformed(ActionEvent e) {
-	JSVPanel jsvp = getCurrentJSVPanel();
-	if(jsvp == null) return;
+    JSVPanel jsvp = getCurrentJSVPanel();
+    if (jsvp == null)
+      return;
     jsvp.nextView();
   }
 
   /**
    * Shows the previous zoomed view
-   * @param e the ActionEvent
+   * 
+   * @param e
+   *        the ActionEvent
    */
   void prevMenuItem_actionPerformed(ActionEvent e) {
-	  JSVPanel jsvp = getCurrentJSVPanel();
-		if(jsvp == null) return;
+    JSVPanel jsvp = getCurrentJSVPanel();
+    if (jsvp == null)
+      return;
     jsvp.previousView();
   }
 
   /**
    * Shows the full spectrum
-   * @param e the ActionEvent
+   * 
+   * @param e
+   *        the ActionEvent
    */
   void fullMenuItem_actionPerformed(ActionEvent e) {
     JInternalFrame frame = desktopPane.getSelectedFrame();
@@ -2226,22 +2344,28 @@ private void showUnableToOverlayMessage() {
 
   /**
    * Clears all zoom views
-   * @param e the ActionEvent
+   * 
+   * @param e
+   *        the ActionEvent
    */
   void clearMenuItem_actionPerformed(ActionEvent e) {
-	  JSVPanel jsvp = getCurrentJSVPanel();
-		if(jsvp == null) return;
+    JSVPanel jsvp = getCurrentJSVPanel();
+    if (jsvp == null)
+      return;
     jsvp.clearViews();
   }
 
   /**
    * Sets the status of the menuitems according to the properties of the current
    * selected JSVPanel
-   * @param e the MenuEvent
+   * 
+   * @param e
+   *        the MenuEvent
    */
   void displayMenu_menuSelected(MenuEvent e) {
-	  JSVPanel jsvp = getCurrentJSVPanel();
-		if(jsvp == null) return;
+    JSVPanel jsvp = getCurrentJSVPanel();
+    if (jsvp == null)
+      return;
     gridCheckBoxMenuItem.setSelected(jsvp.isGridOn());
     coordsCheckBoxMenuItem.setSelected(jsvp.isCoordinatesOn());
     revPlotCheckBoxMenuItem.setSelected(jsvp.isPlotReversed());
@@ -2249,12 +2373,15 @@ private void showUnableToOverlayMessage() {
 
   /**
    * Export spectrum in a given format
-   * @param command the name of the format to export in
+   * 
+   * @param command
+   *        the name of the format to export in
    */
   void exportSpectrum(String command) {
     final String type = command;
     JSVPanel jsvp = getCurrentJSVPanel();
-	if(jsvp == null) return;
+    if (jsvp == null)
+      return;
     if (fc == null)
       return;
 
@@ -2264,13 +2391,16 @@ private void showUnableToOverlayMessage() {
       fc.setCurrentDirectory(new File(dirLastExported));
     }
 
-    dirLastExported = jsvp.exportSpectra(this, fc, type, recentFileName, dirLastExported);
+    dirLastExported = jsvp.exportSpectra(this, fc, type, recentFileName,
+        dirLastExported);
 
   }
 
   /**
    * Writes a message to the status bar
-   * @param msg the message
+   * 
+   * @param msg
+   *        the message
    */
   public void writeStatus(String msg) {
     statusLabel.setText(msg);
@@ -2278,7 +2408,9 @@ private void showUnableToOverlayMessage() {
 
   /**
    * Shows the Help | About Dialog
-   * @param e the ActionEvent
+   * 
+   * @param e
+   *        the ActionEvent
    */
   void aboutMenuItem_actionPerformed(ActionEvent e) {
     //JOptionPane.showMessageDialog(MainFrame.this, "<html><img src=MainFrame.class.getClassLoader().getResource(\"icons/spec16.gif\")> JSpecView version</img> " + JSVApplet.APPLET_VERSION + aboutJSpec, "About JSpecView", JOptionPane.PLAIN_MESSAGE);
@@ -2287,7 +2419,9 @@ private void showUnableToOverlayMessage() {
 
   /**
    * Hides the selected JInternalFrane
-   * @param e the ActionEvent
+   * 
+   * @param e
+   *        the ActionEvent
    */
   void hideMenuItem_actionPerformed(ActionEvent e) {
     JInternalFrame frame = desktopPane.getSelectedFrame();
@@ -2295,18 +2429,19 @@ private void showUnableToOverlayMessage() {
       if (frame != null) {
         frame.setVisible(false);
         frame.setSelected(false);
-//        spectraTree.validate();
+        //        spectraTree.validate();
         spectraTree.repaint();
       }
-    }
-    catch (PropertyVetoException pve) {
+    } catch (PropertyVetoException pve) {
     }
     //doInternalFrameClosing(frame);
   }
 
   /**
    * Hides all JInternalFranes
-   * @param e the ActionEvent
+   * 
+   * @param e
+   *        the ActionEvent
    */
   void hideAllMenuItem_actionPerformed(ActionEvent e) {
     JInternalFrame[] frames = desktopPane.getAllFrames();
@@ -2315,37 +2450,39 @@ private void showUnableToOverlayMessage() {
         if (frames[i].isVisible()) {
           frames[i].setVisible(false);
           frames[i].setSelected(false);
-//         doInternalFrameClosing(frames[i]);
+          //         doInternalFrameClosing(frames[i]);
         }
       }
-    }
-    catch (PropertyVetoException pve) {
+    } catch (PropertyVetoException pve) {
     }
   }
 
   /**
    * Shows all JInternalFrames
-   * @param e the ActionEvent
+   * 
+   * @param e
+   *        the ActionEvent
    */
-  void showMenuItem_actionPerformed(ActionEvent e) {
+  protected void showMenuItem_actionPerformed(ActionEvent e) {
     JInternalFrame[] frames = desktopPane.getAllFrames();
     try {
       for (int i = 0; i < frames.length; i++) {
         frames[i].setVisible(true);
       }
       frames[0].setSelected(true);
-    }
-    catch (PropertyVetoException pve) {
+    } catch (PropertyVetoException pve) {
     }
 
     showMenu.removeAll();
   }
 
   /**
-   * Does the necessary actions and cleaning up when  JInternalFrame closes
-   * @param frame the JInternalFrame
+   * Does the necessary actions and cleaning up when JInternalFrame closes
+   * 
+   * @param frame
+   *        the JInternalFrame
    */
-  void doInternalFrameClosing(final JInternalFrame frame) {
+  private void doInternalFrameClosing(final JInternalFrame frame) {
 
     closeSource(currentSelectedSource);
     removeSource(currentSelectedSource);
@@ -2363,234 +2500,48 @@ private void showUnableToOverlayMessage() {
     }
 
     /**
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        spectraTree.validate();
-        spectraTree.repaint();
-
-        // Add Title of internal frame to the Window|Show menu
-        JMenuItem menuItem = new JMenuItem(frame.getTitle());
-        showMenu.add(menuItem);
-        menuItem.addActionListener(new ActionListener(){
-          public void actionPerformed(ActionEvent e){
-            frame.setVisible(true);
-            frame.setSize(550, 350);
-            try{
-              frame.setSelected(true);
-              frame.setMaximum(true);
-            }
-            catch(PropertyVetoException pve){}
-            spectraTree.validate();
-            spectraTree.repaint();
-            showMenu.remove((JMenuItem)e.getSource());
-          }
-        });
+     * setDefaultCloseOperation(DISPOSE_ON_CLOSE); spectraTree.validate();
+     * spectraTree.repaint();
+     * 
+     * // Add Title of internal frame to the Window|Show menu JMenuItem menuItem
+     * = new JMenuItem(frame.getTitle()); showMenu.add(menuItem);
+     * menuItem.addActionListener(new ActionListener(){ public void
+     * actionPerformed(ActionEvent e){ frame.setVisible(true);
+     * frame.setSize(550, 350); try{ frame.setSelected(true);
+     * frame.setMaximum(true); } catch(PropertyVetoException pve){}
+     * spectraTree.validate(); spectraTree.repaint();
+     * showMenu.remove((JMenuItem)e.getSource()); } });
      */
 
   }
 
-  /**
-   * Shows the File Open Dialog
-   * @param e the ActionEvent
-   */
-  void openButton_actionPerformed(ActionEvent e) {
-    showFileOpenDialog();
-  }
-
-  /**
-   * Shows the print dialog
-   * @param e the ActionEvent
-   */
-  void printButton_actionPerformed(ActionEvent e) {
-    printMenuItem_actionPerformed(e);
-  }
-
-  /**
-   * Toggles the grid
-   * @param e the ActionEvent
-   */
-  void gridToggleButton_actionPerformed(ActionEvent e) {
-	  JSVPanel jsvp = getCurrentJSVPanel();
-		if(jsvp == null) return;
-    if ( ( (JToggleButton) e.getSource()).isSelected()) {
-      jsvp.setGridOn(true);
-    }
-    else {
-      jsvp.setGridOn(false);
-    }
-    repaint();
-  }
-
-  /**
-   * Toggles the coordinates
-   * @param e the the ActionEvent
-   */
-  void coordsToggleButton_actionPerformed(ActionEvent e) {
-	  JSVPanel jsvp = getCurrentJSVPanel();
-		if(jsvp == null) return;
-    if ( ( (JToggleButton) e.getSource()).isSelected()) {
-      jsvp.setCoordinatesOn(true);
-      coordinatesOn = true;
-    }
-    else {
-      jsvp.setCoordinatesOn(false);
-      coordinatesOn = false;
-    }
-
-    repaint();
-  }
-
-  /**
-   * Reverses the plot
-   * @param e the ActionEvent
-   */    
-  void revPlotToggleButton_actionPerformed(ActionEvent e) {
-	  JSVPanel jsvp = getCurrentJSVPanel();
-		if(jsvp == null) return;
-    if ( ( (JToggleButton) e.getSource()).isSelected()) {
-      jsvp.setReversePlot(true);
-    }
-    else {
-      jsvp.setReversePlot(false);
-    }
-    repaint();
-  }
-
-  /**
-   * Shows the previous zoomed view
-   * @param e the ActionEvent
-   */
-  void previousButton_actionPerformed(ActionEvent e) {
-    prevMenuItem_actionPerformed(e);
-  }
-
-  /**
-   * Shows the next zoomed view
-   * @param e the ActionEvent
-   */
-  void nextButton_actionPerformed(ActionEvent e) {
-    nextMenuItem_actionPerformed(e);
-  }
-
-  /**
-   * Shows the full view of the spectrum display
-   * @param e the ActionEvent
-   */
-  void resetButton_actionPerformed(ActionEvent e) {
-    fullMenuItem_actionPerformed(e);
-  }
-
-  /**
-   * Clears the zoomed views
-   * @param e the ActionEvent
-   */
-  void clearButton_actionPerformed(ActionEvent e) {
-    clearMenuItem_actionPerformed(e);
-  }
-
-  /**
-   * Shows the properties or header information for the current spectrum
-   * @param e the ActionEvent
-   */
-  void propertiesButton_actionPerformed(ActionEvent e) {
-    propertiesMenuItem_actionPerformed(e);
-  }
-
-  /**
-   * Shows the About dialog
-   * @param e the ActionEvent
-   */
-  void aboutButton_actionPerformed(ActionEvent e) {
-    aboutMenuItem_actionPerformed(e);
-  }
-
-  /**
-   * Split or overlays the spectra
-   * @param e the ActionEvent
-   */
-  void overlaySplitButton_actionPerformed(ActionEvent e) {
-    if ( ( (JButton) e.getSource()).getIcon() == overlayIcon) {
-      overlayMenuItem_actionPerformed(e);
-    }
-    else {
-      splitMenuItem_actionPerformed(e);
-    }
-  }
-
-  /**
-   * Shows or hides the toolbar
-   * @param e the ItemEvent
-   */
-  void toolbarCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-    if (e.getStateChange() == ItemEvent.SELECTED) {
-      getContentPane().add(jsvToolBar, BorderLayout.NORTH);
-    }
-    else {
-      getContentPane().remove(jsvToolBar);
-    }
-    validate();
-  }
-
-  /**
-   * Shows or hides the sidePanel
-   * @param e the ItemEvent
-   */
-  void sidePanelCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-    if (e.getStateChange() == ItemEvent.SELECTED) {
-      mainSplitPane.setDividerLocation(200);
-    }
-    else {
-      mainSplitPane.setDividerLocation(0);
-    }
-  }
-
-  /**
-   * Shows or hides the status bar
-   * @param e the ItemEvent
-   */
-  void statusCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-    if (e.getStateChange() == ItemEvent.SELECTED) {
-      getContentPane().add(statusPanel, BorderLayout.SOUTH);
-    }
-    else {
-      getContentPane().remove(statusPanel);
-    }
-    validate();
-  }
-
-  /**
-   * Shows the legend or key for the overlayed spectra
-   * @param e the ActionEvent
-   */
-  void overlayKeyMenuItem_actionPerformed(ActionEvent e) {
-	  JSVPanel jsvp = getCurrentJSVPanel();
-		if(jsvp == null) return;
-    if (jsvp.getNumberOfSpectra() > 1) {
-      legend = new OverlayLegendDialog(this, jsvp);
-    }
-  }
   
-  private JSVPanel getCurrentJSVPanel(){
-	  JInternalFrame frame = desktopPane.getSelectedFrame();
-	    if (frame == null) {
-	      return null;
-	    }
-	    JSVPanel jsvp = (JSVPanel) frame.getContentPane().getComponent(0);
-	    return jsvp;
+  private JSVPanel getCurrentJSVPanel() {
+    JInternalFrame frame = desktopPane.getSelectedFrame();
+    if (frame == null) {
+      return null;
+    }
+    JSVPanel jsvp = (JSVPanel) frame.getContentPane().getComponent(0);
+    return jsvp;
   }
 
   /**
    * Shows the legend or key for the overlayed spectra
-   * @param e the ActionEvent
+   * 
+   * @param e
+   *        the ActionEvent
    */
-  void overlayKeyButton_actionPerformed(ActionEvent e) {
+  protected void overlayKeyButton_actionPerformed(ActionEvent e) {
     overlayKeyMenuItem_actionPerformed(e);
   }
 
   /**
    * Allows Integration of an HNMR spectra
-   * @param e the ActionEvent
+   * 
+   * @param e
+   *        the ActionEvent
    */
-  void integrateMenuItem_actionPerformed(ActionEvent e) {
+  protected void integrateMenuItem_actionPerformed(ActionEvent e) {
     JInternalFrame frame = desktopPane.getSelectedFrame();
     JSVPanel newJsvPanel = (JSVPanel) frame.getContentPane().getComponent(0);
 
@@ -2599,7 +2550,7 @@ private void showUnableToOverlayMessage() {
       if (errMsg != null) {
         writeStatus((String) errMsg);
       } else {
-        newJsvPanel = (JSVPanel)frame.getContentPane().getComponent(0);
+        newJsvPanel = (JSVPanel) frame.getContentPane().getComponent(0);
       }
     } else {
       newJsvPanel = AppUtils.integrate(this, frame, true);
@@ -2611,35 +2562,38 @@ private void showUnableToOverlayMessage() {
 
   /**
    * Allows Transmittance to Absorbance conversion and vice versa
-   * @param e the ActionEvent
+   * 
+   * @param e
+   *        the ActionEvent
    */
-  void transAbsMenuItem_actionPerformed(ActionEvent e) {
+  protected void transAbsMenuItem_actionPerformed(ActionEvent e) {
     JInternalFrame frame = desktopPane.getSelectedFrame();
     TAConvert(frame, IMPLIED);
   }
 
   /**
    * Predicts the colour of a solution containing the compound
-   * @param e the ActionEvent
+   * 
+   * @param e
+   *        the ActionEvent
    */
-  void solColMenuItem_actionPerformed(ActionEvent e) {
+  protected void solColMenuItem_actionPerformed(ActionEvent e) {
     String Yunits = currentSelectedSource.getJDXSpectrum(0).getYUnits();
     String Yunits0 = Yunits;
 
     JInternalFrame frame = desktopPane.getSelectedFrame();
     Container contentPane = frame.getContentPane();
 
-
     if (frame != null) {
       //JSVPanel panel = (JSVPanel) frame.getContentPane().getComponent(0);
       JSVPanel jsvp = (JSVPanel) contentPane.getComponent(0);
-      int numcomp=contentPane.getComponentCount();
-       if ( (numcomp> 1)& Yunits.toLowerCase().contains("trans")) {
-         Yunits0 = "abs";
-       }
-       if ( (numcomp> 1)& Yunits.toLowerCase().contains("abs")) {
-         Yunits0 = "trans";
-       }
+      int numcomp = contentPane.getComponentCount();
+      if ((numcomp > 1) & Yunits.toLowerCase().contains("trans")) {
+        Yunits0 = "abs";
+      }
+      if ((numcomp > 1) & Yunits.toLowerCase().contains("abs")) {
+        Yunits0 = "trans";
+      }
       JDXSpectrum spectrum = (JDXSpectrum) jsvp.getSpectrumAt(0);
       //jsvpPopupMenu.setSelectedJSVPanel(panel);
       //jsvpPopupMenu.setSource(currentSelectedSource);
@@ -2647,18 +2601,22 @@ private void showUnableToOverlayMessage() {
       //Coordinate[] source;
       //source = currentSelectedSource.getJDXSpectrum(0).getXYCoords();
       //JDXSpectrum spectrum = (JDXSpectrum)selectedJSVPanel.getSpectrumAt(0);
-      sltnclr = Visible.Colour(spectrum.getXYCoords(),Yunits0);
-      JOptionPane.showMessageDialog(this, "<HTML><body bgcolor=rgb("+sltnclr+")><br />Predicted Solution Colour RGB("+sltnclr+")<br /><br /></body></HTML>"
-                                    , "Predicted Colour",
-                                    JOptionPane.INFORMATION_MESSAGE);
+      sltnclr = Visible.Colour(spectrum.getXYCoords(), Yunits0);
+      JOptionPane.showMessageDialog(this, "<HTML><body bgcolor=rgb(" + sltnclr
+          + ")><br />Predicted Solution Colour RGB(" + sltnclr
+          + ")<br /><br /></body></HTML>", "Predicted Colour",
+          JOptionPane.INFORMATION_MESSAGE);
     }
   }
 
   /**
-   * Allows Transmittance to Absorbance conversion or vice versa
-   * depending on the value of comm.
-   * @param frame the selected JInternalFrame
-   * @param comm the conversion command
+   * Allows Transmittance to Absorbance conversion or vice versa depending on
+   * the value of comm.
+   * 
+   * @param frame
+   *        the selected JInternalFrame
+   * @param comm
+   *        the conversion command
    */
   private void TAConvert(JInternalFrame frame, int comm) {
     if (frame == null) {
@@ -2683,19 +2641,19 @@ private void showUnableToOverlayMessage() {
     JDXSpectrum newSpec;
     try {
       switch (comm) {
-        case TO_TRANS:
-          newSpec = TransmittanceAbsorbanceConverter.AbsorbancetoTransmittance(
-              spectrum);
-          break;
-        case TO_ABS:
-          newSpec = TransmittanceAbsorbanceConverter.TransmittanceToAbsorbance(
-              spectrum);
-          break;
-        case IMPLIED:
-          newSpec = TransmittanceAbsorbanceConverter.convert(spectrum);
-          break;
-        default:
-          newSpec = null;
+      case TO_TRANS:
+        newSpec = TransmittanceAbsorbanceConverter
+            .AbsorbancetoTransmittance(spectrum);
+        break;
+      case TO_ABS:
+        newSpec = TransmittanceAbsorbanceConverter
+            .TransmittanceToAbsorbance(spectrum);
+        break;
+      case IMPLIED:
+        newSpec = TransmittanceAbsorbanceConverter.convert(spectrum);
+        break;
+      default:
+        newSpec = null;
       }
       if (newSpec == null) {
         return;
@@ -2707,49 +2665,51 @@ private void showUnableToOverlayMessage() {
       // Get from properties variable
       contentPane.remove(jsvp);
       contentPane.invalidate();
-      if (! (contentPane.getLayout() instanceof CardLayout)) {
+      if (!(contentPane.getLayout() instanceof CardLayout)) {
         contentPane.setLayout(new CardLayout());
       }
       contentPane.add(newJsvp, "new");
       contentPane.add(jsvp, "old");
       validate();
-    }
-    catch (JSpecViewException ex) {
+    } catch (JSpecViewException ex) {
     }
   }
 
   /**
    * Shows the log of error in the source file
-   * @param e the ActionEvent
+   * 
+   * @param e
+   *        the ActionEvent
    */
-  void errorLogMenuItem_actionPerformed(ActionEvent e) {
-      if(currentSelectedSource==null){
-        JOptionPane.showMessageDialog(null, "Please Select a Spectrum",
-                                      "Select Spectrum",
-                                      JOptionPane.WARNING_MESSAGE);
-             return;}
+  protected void errorLogMenuItem_actionPerformed(ActionEvent e) {
+    if (currentSelectedSource == null) {
+      JOptionPane.showMessageDialog(null, "Please Select a Spectrum",
+          "Select Spectrum", JOptionPane.WARNING_MESSAGE);
+      return;
+    }
 
     System.out.println(currentSelectedSource.getErrorLog().length());
-      if (currentSelectedSource.getErrorLog().length()>0) {
-          String errorLog = currentSelectedSource.getErrorLog();
-          File file = getFileForSource(currentSelectedSource);
-          new TextDialog(this, file.getAbsolutePath(), errorLog, true);
+    if (currentSelectedSource.getErrorLog().length() > 0) {
+      String errorLog = currentSelectedSource.getErrorLog();
+      String file = getFileForSource(currentSelectedSource);
+      new TextDialog(this, file, errorLog, true);
     }
-/*    else {
-      if (jdxSources.size() > 0) {
-        JOptionPane.showMessageDialog(this, "Please Select a Spectrum",
-                                      "Select Spectrum",
-                                      JOptionPane.WARNING_MESSAGE);
-      }
-    }*/
+    /*    else {
+          if (jdxSources.size() > 0) {
+            JOptionPane.showMessageDialog(this, "Please Select a Spectrum",
+                                          "Select Spectrum",
+                                          JOptionPane.WARNING_MESSAGE);
+          }
+        }*/
   }
 
-//
-//   Abstract methods that are used to perform drag and drop operations
-//
+  //
+  //   Abstract methods that are used to perform drag and drop operations
+  //
 
   // Called when the user is dragging and enters this drop target.
-  @Override public void dragEnter(DropTargetDragEvent dtde) {
+  @Override
+  public void dragEnter(DropTargetDragEvent dtde) {
     // accept all drags
     dtde.acceptDrag(dtde.getSourceActions());
     // visually indicate that drop target is under drag
@@ -2757,37 +2717,39 @@ private void showUnableToOverlayMessage() {
   }
 
   // Called when the user is dragging and moves over this drop target.
-  @Override public void dragOver(DropTargetDragEvent dtde) {
+  @Override
+  public void dragOver(DropTargetDragEvent dtde) {
 
   }
 
   // Called when the user is dragging and leaves this drop target.
-  @Override public void dragExit(DropTargetEvent dtde) {
+  @Override
+  public void dragExit(DropTargetEvent dtde) {
 
   }
 
   // Called when the user changes the drag action between copy or move.
-  @Override public void dropActionChanged(DropTargetDragEvent dtde) {
+  @Override
+  public void dropActionChanged(DropTargetDragEvent dtde) {
 
   }
 
   // Called when the user finishes or cancels the drag operation.
   @SuppressWarnings("unchecked")
-  @Override public void drop(DropTargetDropEvent dtde) {
+  @Override
+  public void drop(DropTargetDropEvent dtde) {
     try {
       Transferable t = dtde.getTransferable();
 
       if (t.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
         dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
-        List list = (List) t.getTransferData(DataFlavor.
-            javaFileListFlavor);
+        List list = (List) t.getTransferData(DataFlavor.javaFileListFlavor);
         dtde.getDropTargetContext().dropComplete(true);
         File[] files = (File[]) list.toArray();
         for (int i = 0; i < list.size(); i++) {
-          openFile( files[i]);
+          openFile(files[i]);
         }
-      }
-      else {
+      } else {
         dtde.rejectDrop();
       }
     }
@@ -2807,7 +2769,7 @@ private void showUnableToOverlayMessage() {
    * JSpecView that it needs to synchronize with it 
    */
   public void register(String appletID, JmolSyncInterface jmolStatusListener) {
-    jmol = jmolStatusListener;    
+    jmol = jmolStatusListener;
   }
 
   @Override
@@ -2815,26 +2777,39 @@ private void showUnableToOverlayMessage() {
    * incoming script processing of <PeakAssignment file="" type="xxx"...> record from Jmol
    */
   public void syncScript(String script) {
-    if (script.indexOf("<PeakData") < 0)
+    if (script.indexOf("<PeakData") < 0) {
+      checkScript(script);
       return;
+    }
     //TODO link to processing of file loading, spectrum selection, and band selection
     String file = Parser.getQuotedAttribute(script, "file");
     String index = Parser.getQuotedAttribute(script, "index");
     if (file == null || index == null)
       return;
     System.out.println("JSpecView MainFrame.syncScript: " + script);
-    if (!file.equals(recentURL))
+    if (!file.equals(recentJmolName))
       openFile(new File(file));
     if (!selectPanel(index))
-      script = null;    
+      script = null;
     selectedJSVPanel.processPeakSelect(script);
     sendFrameChange(selectedJSVPanel);
+  }
+
+  private void checkScript(String script) {
+    script = script.toUpperCase();
+    System.out.println(script);
+    if (script.equals("DEBUG ON")) {
+      JSpecViewUtils.DEBUG = true;
+    } else if (script.equals("DEBUG OFF")) {
+      JSpecViewUtils.DEBUG = false;
+    }
+
   }
 
   private boolean selectPanel(String index) {
     for (int i = 0; i < specInfos.length; i++) {
       SpecInfo si = specInfos[i];
-      if (((JDXSpectrum)si.jsvp.getSpectrumAt(0)).hasPeakIndex(index)) {
+      if (((JDXSpectrum) si.jsvp.getSpectrumAt(0)).hasPeakIndex(index)) {
         setFrame(si, false);
         return true;
       }
@@ -2855,16 +2830,15 @@ private void showUnableToOverlayMessage() {
       sendFrameChange(specInfo.jsvp);
   }
 
-
-/**
-   * This is the method Debbie needs to call from within JSpecView
-   * when a peak is clicked.
+  /**
+   * This is the method Debbie needs to call from within JSpecView when a peak
+   * is clicked.
    * 
    * @param peak
    */
   public void sendScript(String peak) {
     selectedJSVPanel.processPeakSelect(peak);
-    String s = Escape.jmolSelect(peak, recentURL);
+    String s = Escape.jmolSelect(peak, recentJmolName);
     System.out.println("JSpecView MainFrame sendScript: " + s);
     if (jmol == null)
       return;
@@ -2872,16 +2846,276 @@ private void showUnableToOverlayMessage() {
     jmol.syncScript(s);
   }
 
-	@Override
-	public void peakPicked(PeakPickedEvent eventObj) {
+  @Override
+  public void peakPicked(PeakPickedEvent eventObj) {
     selectedJSVPanel = (JSVPanel) eventObj.getSource();
     sendScript(eventObj.getPeakInfo());
-	}
-	
+  }
+
   private void sendFrameChange(JSVPanel jsvp) {
-    PeakInfo pi = ((JDXSpectrum)jsvp.getSpectrumAt(0)).getSelectedPeak();
+    PeakInfo pi = ((JDXSpectrum) jsvp.getSpectrumAt(0)).getSelectedPeak();
     sendScript(pi == null ? null : pi.getStringInfo());
   }
 
+  
+  ////////// MENU ACTIONS ///////////
+  
+  /**
+   * Shows the File Open Dialog
+   * 
+   * @param e
+   *        the ActionEvent
+   */
+  protected void openButton_actionPerformed(ActionEvent e) {
+    showFileOpenDialog();
+  }
 
+  /**
+   * Shows the print dialog
+   * 
+   * @param e
+   *        the ActionEvent
+   */
+  protected void printButton_actionPerformed(ActionEvent e) {
+    printMenuItem_actionPerformed(e);
+  }
+
+  /**
+   * Toggles the grid
+   * 
+   * @param e
+   *        the ActionEvent
+   */
+  protected void gridToggleButton_actionPerformed(ActionEvent e) {
+    JSVPanel jsvp = getCurrentJSVPanel();
+    if (jsvp == null)
+      return;
+    if (((JToggleButton) e.getSource()).isSelected()) {
+      jsvp.setGridOn(true);
+    } else {
+      jsvp.setGridOn(false);
+    }
+    repaint();
+  }
+
+  /**
+   * Toggles the coordinates
+   * 
+   * @param e
+   *        the the ActionEvent
+   */
+  protected void coordsToggleButton_actionPerformed(ActionEvent e) {
+    JSVPanel jsvp = getCurrentJSVPanel();
+    if (jsvp == null)
+      return;
+    if (((JToggleButton) e.getSource()).isSelected()) {
+      jsvp.setCoordinatesOn(true);
+      coordinatesOn = true;
+    } else {
+      jsvp.setCoordinatesOn(false);
+      coordinatesOn = false;
+    }
+
+    repaint();
+  }
+
+  /**
+   * Reverses the plot
+   * 
+   * @param e
+   *        the ActionEvent
+   */
+  protected void revPlotToggleButton_actionPerformed(ActionEvent e) {
+    JSVPanel jsvp = getCurrentJSVPanel();
+    if (jsvp == null)
+      return;
+    if (((JToggleButton) e.getSource()).isSelected()) {
+      jsvp.setReversePlot(true);
+    } else {
+      jsvp.setReversePlot(false);
+    }
+    repaint();
+  }
+
+  /**
+   * Shows the previous zoomed view
+   * 
+   * @param e
+   *        the ActionEvent
+   */
+  protected void previousButton_actionPerformed(ActionEvent e) {
+    prevMenuItem_actionPerformed(e);
+  }
+
+  /**
+   * Shows the next zoomed view
+   * 
+   * @param e
+   *        the ActionEvent
+   */
+  protected void nextButton_actionPerformed(ActionEvent e) {
+    nextMenuItem_actionPerformed(e);
+  }
+
+  /**
+   * Shows the full view of the spectrum display
+   * 
+   * @param e
+   *        the ActionEvent
+   */
+  protected void resetButton_actionPerformed(ActionEvent e) {
+    fullMenuItem_actionPerformed(e);
+  }
+
+  /**
+   * Clears the zoomed views
+   * 
+   * @param e
+   *        the ActionEvent
+   */
+  protected void clearButton_actionPerformed(ActionEvent e) {
+    clearMenuItem_actionPerformed(e);
+  }
+
+  /**
+   * Shows the properties or header information for the current spectrum
+   * 
+   * @param e
+   *        the ActionEvent
+   */
+  protected void propertiesButton_actionPerformed(ActionEvent e) {
+    propertiesMenuItem_actionPerformed(e);
+  }
+
+  /**
+   * Shows the About dialog
+   * 
+   * @param e
+   *        the ActionEvent
+   */
+  protected void aboutButton_actionPerformed(ActionEvent e) {
+    aboutMenuItem_actionPerformed(e);
+  }
+
+  /**
+   * Split or overlays the spectra
+   * 
+   * @param e
+   *        the ActionEvent
+   */
+  protected void overlaySplitButton_actionPerformed(ActionEvent e) {
+    if (((JButton) e.getSource()).getIcon() == overlayIcon) {
+      overlayMenuItem_actionPerformed(e);
+    } else {
+      splitMenuItem_actionPerformed(e);
+    }
+  }
+
+  /**
+   * Shows or hides the toolbar
+   * 
+   * @param e
+   *        the ItemEvent
+   */
+  protected void toolbarCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
+    if (e.getStateChange() == ItemEvent.SELECTED) {
+      getContentPane().add(jsvToolBar, BorderLayout.NORTH);
+    } else {
+      getContentPane().remove(jsvToolBar);
+    }
+    validate();
+  }
+
+  /**
+   * Shows or hides the sidePanel
+   * 
+   * @param e
+   *        the ItemEvent
+   */
+  protected void sidePanelCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
+    if (e.getStateChange() == ItemEvent.SELECTED) {
+      mainSplitPane.setDividerLocation(200);
+    } else {
+      mainSplitPane.setDividerLocation(0);
+    }
+  }
+
+  /**
+   * Shows or hides the status bar
+   * 
+   * @param e
+   *        the ItemEvent
+   */
+  protected void statusCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
+    if (e.getStateChange() == ItemEvent.SELECTED) {
+      getContentPane().add(statusPanel, BorderLayout.SOUTH);
+    } else {
+      getContentPane().remove(statusPanel);
+    }
+    validate();
+  }
+
+  /**
+   * Shows the legend or key for the overlayed spectra
+   * 
+   * @param e
+   *        the ActionEvent
+   */
+  protected void overlayKeyMenuItem_actionPerformed(ActionEvent e) {
+    JSVPanel jsvp = getCurrentJSVPanel();
+    if (jsvp == null)
+      return;
+    if (jsvp.getNumberOfSpectra() > 1) {
+      //legend = new OverlayLegendDialog(this, jsvp);
+    }
+  }
+  
+  /**
+   * Shows dialog to open a file
+   * 
+   * @param e
+   *        the ActionEvent
+   */
+  protected void open_actionPerformed(ActionEvent e) {
+    showFileOpenDialog();
+  }
+
+  private String recentOpenURL = "http://";
+
+  protected void openURL_actionPerformed(ActionEvent e) {
+    String msg = (recentURL == null ? recentOpenURL : recentURL);
+    String url = (String) JOptionPane.showInputDialog(null,
+        "Enter the URL of a JCAMP-DX File", "Open URL",
+        JOptionPane.PLAIN_MESSAGE, null, null, msg);
+    if (url == null)
+      return;
+    recentOpenURL = url;
+    openFile(null, url.indexOf("://") < 0 ? "file:/" + url : url);
+  };
+
+  protected void windowClosing_actionPerformed() {
+    try {
+      onProgramExit();
+    } catch (Exception e) {
+    }
+    exitJSpecView(true);
+  }
+
+  protected class JSVTreeNode extends DefaultMutableTreeNode {
+
+    private static final long serialVersionUID = 1L;
+    
+    private String file;
+
+    JSVTreeNode(String fileName, String file) {
+      super(fileName);
+      this.file = file;
+    }
+    
+    String getFile() {
+      return file;
+    }
+
+  }
 }
+
