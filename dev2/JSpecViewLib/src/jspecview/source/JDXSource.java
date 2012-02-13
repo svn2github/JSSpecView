@@ -50,6 +50,8 @@ import jspecview.util.Parser;
  */
 public abstract class JDXSource extends JDXObject {
 
+  protected final static String ERROR_SEPARATOR = "________________________________________________________";
+
   public boolean isCompoundSource = false;
   
   /**

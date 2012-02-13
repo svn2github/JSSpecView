@@ -60,8 +60,6 @@ public class BlockSource extends JDXSource {
   public static BlockSource getInstance(String sourceContents)
       throws JSpecViewException {
 
-    String errorSeparator = "________________________________________________________";
-
     HashMap<String, String> LDRTable;
     HashMap<String, String> sourceLDRTable = new HashMap<String, String>();
     String label, tmp;
@@ -142,9 +140,10 @@ public class BlockSource extends JDXSource {
           if (tabularSpecData == null)
             throw new JSpecViewException("Error Reading Data Set");
 
+          spectrum.setDataType(bs.getDataType());
           if (!spectrum.getDataClass().equals("PEAKASSIGNMENTS")) {
 
-            if (!spectrum.createXYCoords(bs.getDataType(), tabularSpecData,
+            if (!spectrum.createXYCoords(tabularSpecData,
                 tabDataLineNo, errorLog))
               throw new JDXSourceException("Unable to read Block Source");
 
@@ -167,7 +166,7 @@ public class BlockSource extends JDXSource {
     } catch (JSpecViewException jsve) {
       throw jsve;
     }
-    errorLog.append(errorSeparator);
+    errorLog.append(ERROR_SEPARATOR);
     bs.setErrorLog(errorLog.toString());
     return bs;
   }

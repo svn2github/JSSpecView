@@ -73,7 +73,6 @@ public class NTupleSource extends JDXSource {
     NTupleSource ns = new NTupleSource();
 
     StringBuffer errorLog = new StringBuffer();
-    String errorSeparator="________________________________________________________";
     JDXSourceStringTokenizer t = new JDXSourceStringTokenizer(sourceContents);
 
     // Read Source Specific Header
@@ -203,7 +202,7 @@ public class NTupleSource extends JDXSource {
       label = JSpecViewUtils.cleanLabel(t.label);
       spectrum = new JDXSpectrum();
     }
-    errorLog.append(errorSeparator);
+    errorLog.append(ERROR_SEPARATOR);
     ns.setErrorLog(errorLog.toString());
     return ns;
   }

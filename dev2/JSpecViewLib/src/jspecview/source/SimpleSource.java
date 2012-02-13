@@ -64,8 +64,6 @@ public class SimpleSource extends JDXSource {
     //SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSSS ZZZZ");
     //String currentTime =  formatter.format(now.getTime());
 
-    String errorSeparator = "________________________________________________________";
-
     JDXSpectrum spectrum = new JDXSpectrum();
 
     // The data Table
@@ -85,6 +83,7 @@ public class SimpleSource extends JDXSource {
 
       if (checkCommon(spectrum, label, t.value, null, notesLDRTable))
         continue;
+
       if (label.equals("##$PEAK_LINKS")) {
         try {
           spectrum.setPeakList(ss.readPeakList(t.value));
@@ -106,11 +105,11 @@ public class SimpleSource extends JDXSource {
       throw new JSpecViewException("Error Reading Data Set");
 
     if (!spectrum.getDataClass().equals("PEAKASSIGNMENTS")) {
-      if (!spectrum.createXYCoords(ss.getDataType(), tabularSpecData,
+      if (!spectrum.createXYCoords(tabularSpecData,
           tabularDataLabelLineNo, errorLog))
         throw new JDXSourceException("Unable to read Simple Source");
     }
-    errorLog.append(errorSeparator);
+    errorLog.append(ERROR_SEPARATOR);
     spectrum.setHeaderTable(notesLDRTable);
     ss.addJDXSpectrum(spectrum);
     return ss;

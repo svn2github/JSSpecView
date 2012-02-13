@@ -660,7 +660,7 @@ public class JDXSpectrum extends JDXObject implements Graph {
     return (type != null && type.length() > 0 ? type + " " : "") + title;
   }
 
-  public boolean createXYCoords(String dataType, String tabularSpecData, int tabDataLineNo, StringBuffer errorLog) throws JSpecViewException {
+  public boolean createXYCoords(String tabularSpecData, int tabDataLineNo, StringBuffer errorLog) throws JSpecViewException {
     
     if(dataClass.equals("XYDATA")){
 
