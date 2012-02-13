@@ -36,17 +36,17 @@ import java.util.zip.GZIPInputStream;
 
 public class FileManager {
 
-  private URL appletDocumentBase = null;
+  private URL appletDocumentBase;
   private String openErrorMessage;
 
   /**
    * From org.jmol.viewer.FileManager
-   *
+   * 
    * @param appletDocumentBase
-   *
+   * 
    */
 
-  public FileManager (URL appletDocumentBase) {
+  public FileManager(URL appletDocumentBase) {
     this.appletDocumentBase = appletDocumentBase;
   }
 
@@ -54,7 +54,7 @@ public class FileManager {
     if (name == null)
       throw new IOException("name is null");
 
-    BufferedReader br = getBufferedReaderFromName(name);
+    BufferedReader br = getBufferedReaderFromName(name, appletDocumentBase);
 
     StringBuffer sb = new StringBuffer(8192);
     String line;
@@ -66,21 +66,20 @@ public class FileManager {
     return sb.toString();
   }
 
-  BufferedReader getBufferedReaderFromName(String name)
-    throws MalformedURLException, IOException
-  {
+  public static BufferedReader getBufferedReaderFromName(String name, URL appletDocumentBase)
+      throws MalformedURLException, IOException {
     if (name == null)
       throw new IOException("Cannot find " + name);
     String path = classifyName(name, appletDocumentBase);
-    return getUnzippedBufferedReaderFromName(path);
+    return getUnzippedBufferedReaderFromName(path, appletDocumentBase);
   }
 
   /**
    * 
    * FileManager.classifyName
    * 
-   * follow this with .replace('\\','/') and Escape.escape() to 
-   * match Jmol's file name in <PeakData file="...">
+   * follow this with .replace('\\','/') and Escape.escape() to match Jmol's
+   * file name in <PeakData file="...">
    * 
    * @param name
    * @param appletDocumentBase
@@ -88,8 +87,7 @@ public class FileManager {
    * @throws MalformedURLException
    */
   public static String classifyName(String name, URL appletDocumentBase)
-    throws MalformedURLException
-  {
+      throws MalformedURLException {
     if (appletDocumentBase != null) {
       // This code is only for the applet
       if (name.indexOf(":\\") == 1 || name.indexOf(":/") == 1)
@@ -101,7 +99,7 @@ public class FileManager {
     }
 
     // This code is for the app
-    if (urlTypeIndex(name)) {
+    if (isURL(name)) {
       URL url = new URL(name);
       return url.toString();
     }
@@ -109,9 +107,10 @@ public class FileManager {
     return file.getAbsolutePath();
   }
 
-  private final static String[] urlPrefixes = {"http:", "https:", "ftp:", "file:"};
+  private final static String[] urlPrefixes = { "http:", "https:", "ftp:",
+      "file:" };
 
-  private static boolean urlTypeIndex(String name) {
+  public static boolean isURL(String name) {
     for (String prefix : urlPrefixes) {
       if (name.startsWith(prefix)) {
         return true;
@@ -120,15 +119,13 @@ public class FileManager {
     return false;
   }
 
-  BufferedReader getUnzippedBufferedReaderFromName(String name)
-    throws IOException
-  {
-    System.out.println("getUnzippedBufferedReaderFromName called");
+  private static BufferedReader getUnzippedBufferedReaderFromName(String name, URL appletDocumentBase)
+      throws IOException {
     String[] subFileList = null;
     if (name.indexOf("|") >= 0) {
       subFileList = TextFormat.split(name, "|");
       if (subFileList != null && subFileList.length > 0) {
-    	  name = subFileList[0];
+        name = subFileList[0];
       }
     }
     InputStream in = getInputStream(name, true, appletDocumentBase);
@@ -153,10 +150,9 @@ public class FileManager {
     return (countRead == 4 && abMagic[0] == (byte) 0x1F && abMagic[1] == (byte) 0x8B);
   }
 
-  public static InputStream getInputStream(String name, boolean showMsg, URL appletDocumentBase)
-    throws IOException, MalformedURLException
-  {
-    System.out.println("inputstream for " + name);
+  public static InputStream getInputStream(String name, boolean showMsg,
+                                           URL appletDocumentBase)
+      throws IOException, MalformedURLException {
     int iurlPrefix;
     for (iurlPrefix = urlPrefixes.length; --iurlPrefix >= 0;)
       if (name.startsWith(urlPrefixes[iurlPrefix]))
@@ -180,7 +176,6 @@ public class FileManager {
       System.out.println(file);
       length = (int) file.length();
       in = new FileInputStream(file);
-      System.out.println(in);
     }
     return new MonitorInputStream(in, length);
   }
@@ -222,7 +217,7 @@ public class FileManager {
     String str = sb.toString();
     return str;
   }
-  
+
   public String getErrorMessage() {
     return openErrorMessage;
   }
@@ -233,7 +228,19 @@ public class FileManager {
     } catch (MalformedURLException e) {
       return null;
     }
-    return (appletDocumentBase == null ? filePath.replace('\\', '/') : filePath); 
+    return (appletDocumentBase == null ? filePath.replace('\\', '/') : filePath);
+  }
+
+  public static String getName(String file) {
+    try {
+      if (isURL(file)) {
+        String name = (new URL(file)).getFile();
+        return name.substring(name.lastIndexOf('/') + 1);
+      }
+      return (new File(file)).getName();
+    } catch (MalformedURLException e) {
+      return null;
+    }
   }
 }
 
@@ -250,7 +257,7 @@ class MonitorInputStream extends FilterInputStream {
   }
 
   @Override
-  public int read() throws IOException{
+  public int read() throws IOException {
     ++readEventCount;
     int nextByte = super.read();
     if (nextByte >= 0)
@@ -280,7 +287,7 @@ class MonitorInputStream extends FilterInputStream {
   public long skip(long n) throws IOException {
     long cb = super.skip(n);
     // this will only work in relatively small files ... 2Gb
-    position = (int)(position + cb);
+    position = (int) (position + cb);
     return cb;
   }
 

@@ -36,6 +36,7 @@ import jspecview.common.JSpecViewUtils;
 import jspecview.exception.JDXSourceException;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.SourceTypeUnsupportedException;
+import jspecview.util.Parser;
 
 /**
  * Representation of an JCAMP-DX NTuple Source.
@@ -115,10 +116,10 @@ public class NTupleSource extends CompoundSource {
 
       if(label.equals("##JCAMPDX")){
         ns.setJcampdx(t.value);
-        double version = Double.parseDouble(t.value);
-        if(version >= 6.0){
-          errorLog.append("JCAMP-DX 6 Source Type is Unsupported\n");
-          throw new SourceTypeUnsupportedException("JCAMP-DX Source Type is Unsupported");
+        float version = Parser.parseFloat(t.value);
+        if(version >= 6.0 || Float.isNaN(version)) {
+          String s = "Warning: JCAMP-DX version may not be fully supported: " + t + "\n";
+          errorLog.append(s);
         }
         continue;
       }
