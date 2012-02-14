@@ -3,7 +3,10 @@ Feel free to add to this file anytime! Don't worry about sync problems.
 t6a.jdx  -- MS Relative Abundance is x 10 
 t6a.jdx  -- NMR -- no need for scale on left?
 
-file save -- includes Models but not Peaks
+DONE -- file save -- includes Models but not Peaks 
+
+file close in application does not change tree.
+
 
 in JDXSource.java I have commented out:
 
