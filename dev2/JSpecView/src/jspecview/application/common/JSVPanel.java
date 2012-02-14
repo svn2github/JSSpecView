@@ -2974,7 +2974,6 @@ spectra[0].getTitleLabel();
     notifyPeakPickedListeners(new PeakPickedEvent(this, coordClicked, peak.getStringInfo()));
   }
   
-  @Override
   public void keyPressed(KeyEvent e) {
     if (e.getModifiers() != 0)
       return;
@@ -2988,11 +2987,9 @@ spectra[0].getTitleLabel();
     }
   }
 
-  @Override
   public void keyReleased(KeyEvent e) {
   }
 
-  @Override
   public void keyTyped(KeyEvent e) {
   }
 }

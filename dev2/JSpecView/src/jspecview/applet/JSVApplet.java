@@ -2023,7 +2023,6 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
           Integer.valueOf(currentSpectrumIndex + 1) });
   }
 
-  @Override
   public void peakPicked(PeakPickedEvent eventObj) {
     setSelectedPanel((JSVPanel) eventObj.getSource());
     currentSpectrumIndex = selectedJSVPanel.getIndex();

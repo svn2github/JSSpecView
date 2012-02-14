@@ -497,7 +497,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
         menuItem = new JMenuItem(path);
         openRecentMenu.add(menuItem);
         menuItem.addActionListener(new ActionListener() {
-          @Override
           public void actionPerformed(ActionEvent ae) {
             openRecent_actionPerformed(ae);
           }
@@ -602,7 +601,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
         TreeSelectionModel.SINGLE_TREE_SELECTION);
     spectraTree.setCellRenderer(new SpectraTreeCellRenderer());
     spectraTree.addTreeSelectionListener(new TreeSelectionListener() {
-      @Override
       public void valueChanged(TreeSelectionEvent e) {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) spectraTree
             .getLastSelectedPathComponent();
@@ -679,7 +677,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     openMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(79,
         InputEvent.CTRL_MASK, false));
     openMenuItem.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         open_actionPerformed(e);
       }
@@ -690,7 +687,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     openURLMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(85,
         InputEvent.CTRL_MASK, false));
     openURLMenuItem.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         openURL_actionPerformed(e);
       }
@@ -700,7 +696,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     printMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(80,
         InputEvent.CTRL_MASK, false));
     printMenuItem.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         printMenuItem_actionPerformed(e);
       }
@@ -710,7 +705,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     closeMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(115,
         InputEvent.CTRL_MASK, false));
     closeMenuItem.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         closeMenuItem_actionPerformed(e);
       }
@@ -718,7 +712,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     closeAllMenuItem.setMnemonic('L');
     closeAllMenuItem.setText("Close All");
     closeAllMenuItem.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         closeAllMenuItem_actionPerformed(e);
       }
@@ -728,7 +721,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     exitMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(115,
         InputEvent.ALT_MASK, false));
     exitMenuItem.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         exitMenuItem_actionPerformed(e);
       }
@@ -742,16 +734,13 @@ public class MainFrame extends JFrame implements DropTargetListener,
     displayMenu.setMnemonic('D');
     displayMenu.setText("Display");
     displayMenu.addMenuListener(new MenuListener() {
-      @Override
       public void menuSelected(MenuEvent e) {
         displayMenu_menuSelected(e);
       }
 
-      @Override
       public void menuDeselected(MenuEvent e) {
       }
 
-      @Override
       public void menuCanceled(MenuEvent e) {
       }
     });
@@ -762,7 +751,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     gridCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(71,
         InputEvent.CTRL_MASK, false));
     gridCheckBoxMenuItem.addItemListener(new ItemListener() {
-      @Override
       public void itemStateChanged(ItemEvent e) {
         gridCheckBoxMenuItem_itemStateChanged(e);
       }
@@ -772,7 +760,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     coordsCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(
         67, InputEvent.CTRL_MASK, false));
     coordsCheckBoxMenuItem.addItemListener(new ItemListener() {
-      @Override
       public void itemStateChanged(ItemEvent e) {
         coordsCheckBoxMenuItem_itemStateChanged(e);
       }
@@ -782,7 +769,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     revPlotCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(
         82, InputEvent.CTRL_MASK, false));
     revPlotCheckBoxMenuItem.addItemListener(new ItemListener() {
-      @Override
       public void itemStateChanged(ItemEvent e) {
         revPlotCheckBoxMenuItem_itemStateChanged(e);
       }
@@ -793,7 +779,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     scaleXCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(
         88, InputEvent.CTRL_MASK, false));
     scaleXCheckBoxMenuItem.addItemListener(new ItemListener() {
-      @Override
       public void itemStateChanged(ItemEvent e) {
         scaleXCheckBoxMenuItem_itemStateChanged(e);
       }
@@ -804,7 +789,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     scaleYCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(
         89, InputEvent.CTRL_MASK, false));
     scaleYCheckBoxMenuItem.addItemListener(new ItemListener() {
-      @Override
       public void itemStateChanged(ItemEvent e) {
         scaleYCheckBoxMenuItem_itemStateChanged(e);
       }
@@ -815,7 +799,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     nextMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(78,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, false));
     nextMenuItem.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         nextMenuItem_actionPerformed(e);
       }
@@ -825,7 +808,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     prevMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(80,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, false));
     prevMenuItem.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         prevMenuItem_actionPerformed(e);
       }
@@ -835,7 +817,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     fullMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(70,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, false));
     fullMenuItem.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         fullMenuItem_actionPerformed(e);
       }
@@ -845,7 +826,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     clearMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(67,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, false));
     clearMenuItem.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         clearMenuItem_actionPerformed(e);
       }
@@ -856,7 +836,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     preferencesMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(80,
         InputEvent.SHIFT_MASK, false));
     preferencesMenuItem.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         preferencesMenuItem_actionPerformed(e);
       }
@@ -867,7 +846,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     contentsMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(112, 0,
         false));
     contentsMenuItem.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         contentsMenuItem_actionPerformed(e);
       }
@@ -875,7 +853,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     aboutMenuItem.setMnemonic('A');
     aboutMenuItem.setText("About");
     aboutMenuItem.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         aboutMenuItem_actionPerformed(e);
       }
@@ -893,7 +870,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     toolbarCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(
         84, InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, false));
     toolbarCheckBoxMenuItem.addItemListener(new ItemListener() {
-      @Override
       public void itemStateChanged(ItemEvent e) {
         toolbarCheckBoxMenuItem_itemStateChanged(e);
       }
@@ -904,7 +880,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     sidePanelCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke
         .getKeyStroke(83, InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, false));
     sidePanelCheckBoxMenuItem.addItemListener(new ItemListener() {
-      @Override
       public void itemStateChanged(ItemEvent e) {
         sidePanelCheckBoxMenuItem_itemStateChanged(e);
       }
@@ -915,7 +890,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     statusCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(
         66, InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, false));
     statusCheckBoxMenuItem.addItemListener(new ItemListener() {
-      @Override
       public void itemStateChanged(ItemEvent e) {
         statusCheckBoxMenuItem_itemStateChanged(e);
       }
@@ -932,7 +906,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     splitMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(83,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, false));
     splitMenuItem.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         splitMenuItem_actionPerformed(e);
       }
@@ -942,7 +915,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     overlayMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(79,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, false));
     overlayMenuItem.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         overlayMenuItem_actionPerformed(e);
       }
@@ -950,7 +922,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     hideMenuItem.setMnemonic('H');
     hideMenuItem.setText("Hide");
     hideMenuItem.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         hideMenuItem_actionPerformed(e);
       }
@@ -958,7 +929,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     hideAllMenuItem.setMnemonic('L');
     hideAllMenuItem.setText("Hide All");
     hideAllMenuItem.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         hideAllMenuItem_actionPerformed(e);
       }
@@ -968,7 +938,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     //    showAllMenuItem.setMnemonic('A');
     //    showAllMenuItem.setText("Show All");
     showMenuItem.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         showMenuItem_actionPerformed(e);
       }
@@ -979,7 +948,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     sourceMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(83,
         InputEvent.CTRL_MASK, false));
     sourceMenuItem.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         sourceMenuItem_actionPerformed(e);
       }
@@ -989,7 +957,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     propertiesMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(72,
         InputEvent.CTRL_MASK, false));
     propertiesMenuItem.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         propertiesMenuItem_actionPerformed(e);
       }
@@ -999,7 +966,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     borderLayout1.setVgap(2);
 
     clearButton.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         clearButton_actionPerformed(e);
       }
@@ -1008,7 +974,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     previousButton.setToolTipText("Previous View");
     previousButton.setIcon(previousIcon);
     previousButton.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         previousButton_actionPerformed(e);
       }
@@ -1017,7 +982,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     nextButton.setToolTipText("Next View");
     nextButton.setIcon(nextIcon);
     nextButton.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         nextButton_actionPerformed(e);
       }
@@ -1026,7 +990,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     resetButton.setToolTipText("Reset ");
     resetButton.setIcon(resetIcon);
     resetButton.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         resetButton_actionPerformed(e);
       }
@@ -1038,7 +1001,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     openButton.setToolTipText("Open");
     openButton.setIcon(openIcon);
     openButton.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         openButton_actionPerformed(e);
       }
@@ -1047,7 +1009,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     propertiesButton.setToolTipText("Properties");
     propertiesButton.setIcon(informationIcon);
     propertiesButton.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         propertiesButton_actionPerformed(e);
       }
@@ -1056,7 +1017,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     gridToggleButton.setToolTipText("Toggle Grid");
     gridToggleButton.setIcon(gridIcon);
     gridToggleButton.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         gridToggleButton_actionPerformed(e);
       }
@@ -1065,7 +1025,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     coordsToggleButton.setToolTipText("Toggle Coordinates");
     coordsToggleButton.setIcon(coordinatesIcon);
     coordsToggleButton.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         coordsToggleButton_actionPerformed(e);
       }
@@ -1074,7 +1033,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     printButton.setToolTipText("Print");
     printButton.setIcon(printIcon);
     printButton.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         printButton_actionPerformed(e);
       }
@@ -1083,7 +1041,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     revPlotToggleButton.setToolTipText("Reverse Plot");
     revPlotToggleButton.setIcon(reverseIcon);
     revPlotToggleButton.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         revPlotToggleButton_actionPerformed(e);
       }
@@ -1092,7 +1049,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     aboutButton.setToolTipText("About JSpecView");
     aboutButton.setIcon(aboutIcon);
     aboutButton.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         aboutButton_actionPerformed(e);
       }
@@ -1101,7 +1057,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     overlaySplitButton.setIcon(overlayIcon);
     overlaySplitButton.setToolTipText("Overlay Display");
     overlaySplitButton.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         overlaySplitButton_actionPerformed(e);
       }
@@ -1109,7 +1064,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     overlayKeyMenuItem.setEnabled(false);
     overlayKeyMenuItem.setText("Overlay Key");
     overlayKeyMenuItem.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         overlayKeyMenuItem_actionPerformed(e);
       }
@@ -1119,7 +1073,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     overlayKeyButton.setToolTipText("Display Key for Overlaid Spectra");
     overlayKeyButton.setIcon(overlayKeyIcon);
     overlayKeyButton.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         overlayKeyButton_actionPerformed(e);
       }
@@ -1129,28 +1082,24 @@ public class MainFrame extends JFrame implements DropTargetListener,
     integrateMenuItem.setMnemonic('I');
     integrateMenuItem.setText("Integrate HNMR");
     integrateMenuItem.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         integrateMenuItem_actionPerformed(e);
       }
     });
     transAbsMenuItem.setText("Transmittance/Absorbance");
     transAbsMenuItem.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         transAbsMenuItem_actionPerformed(e);
       }
     });
     solColMenuItem.setText("Predicted Solution Colour");
     solColMenuItem.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         solColMenuItem_actionPerformed(e);
       }
     });
     errorLogMenuItem.setText("Error Log ...");
     errorLogMenuItem.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         errorLogMenuItem_actionPerformed(e);
       }
@@ -1244,7 +1193,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
   }
 
   private ActionListener actionListener = new ActionListener() {
-    @Override
     public void actionPerformed(ActionEvent e) {
       exportSpectrum(e.getActionCommand());
     }
@@ -1390,7 +1338,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
       menuItem = new JMenuItem(path);
       openRecentMenu.add(menuItem);
       menuItem.addActionListener(new ActionListener() {
-        @Override
         public void actionPerformed(ActionEvent ae) {
           openRecent_actionPerformed(ae);
         }
@@ -1401,7 +1348,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     menuItem = new JMenuItem(path);
     openRecentMenu.add(menuItem);
     menuItem.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent ae) {
         openRecent_actionPerformed(ae);
       }
@@ -2702,7 +2648,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
   //
 
   // Called when the user is dragging and enters this drop target.
-  @Override
   public void dragEnter(DropTargetDragEvent dtde) {
     // accept all drags
     dtde.acceptDrag(dtde.getSourceActions());
@@ -2711,26 +2656,22 @@ public class MainFrame extends JFrame implements DropTargetListener,
   }
 
   // Called when the user is dragging and moves over this drop target.
-  @Override
   public void dragOver(DropTargetDragEvent dtde) {
 
   }
 
   // Called when the user is dragging and leaves this drop target.
-  @Override
   public void dragExit(DropTargetEvent dtde) {
 
   }
 
   // Called when the user changes the drag action between copy or move.
-  @Override
   public void dropActionChanged(DropTargetDragEvent dtde) {
 
   }
 
   // Called when the user finishes or cancels the drag operation.
   @SuppressWarnings("unchecked")
-  @Override
   public void drop(DropTargetDropEvent dtde) {
     try {
       Transferable t = dtde.getTransferable();
@@ -2757,7 +2698,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     }
   }
 
-  @Override
   /**
    * called by Jmol's StatusListener to register itself, indicating to 
    * JSpecView that it needs to synchronize with it 
@@ -2766,7 +2706,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     jmol = jmolStatusListener;
   }
 
-  @Override
   /**
    * incoming script processing of <PeakAssignment file="" type="xxx"...> record from Jmol
    */
@@ -2840,7 +2779,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     jmol.syncScript(s);
   }
 
-  @Override
   public void peakPicked(PeakPickedEvent eventObj) {
     selectedJSVPanel = (JSVPanel) eventObj.getSource();
     String peaks = eventObj.getPeakInfo();
