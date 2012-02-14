@@ -1,6 +1,9 @@
 Feel free to add to this file any time! Don't worry about sync problems.
 
-t6a.jdx  -- MS Relative Abundance is x 10 
+TODO: JDXCompresser AFFN optimization
+
+
+NEVERMIND !t6a.jdx  -- MS Relative Abundance is x 10 
   -- this is just wrong ##YFACTOR in t6a.jdx
    
 FIXED? t6a.jdx  -- NMR -- no need for scale on left? 
@@ -11,7 +14,7 @@ FIXED -- file save -- includes Models but not Peaks
 FIXED -- file close in application does not change tree or close file.
 
 
-in JDXSource.java I have commented out:
+QUESTION: In JDXSource.java I have commented out:
 
 //    if (label.equals("##PATHLENGTH")) {
 //      jdxObject.pathlength = value;
