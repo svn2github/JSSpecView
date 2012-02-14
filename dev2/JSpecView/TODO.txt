@@ -1,12 +1,14 @@
 Feel free to add to this file any time! Don't worry about sync problems.
 
 t6a.jdx  -- MS Relative Abundance is x 10 
-DONE? t6a.jdx  -- NMR -- no need for scale on left? 
+  -- this is just wrong ##YFACTOR in t6a.jdx
+   
+FIXED? t6a.jdx  -- NMR -- no need for scale on left? 
   -- made this to be only if not "Arbitrary Units" 
 
-DONE -- file save -- includes Models but not Peaks 
+FIXED -- file save -- includes Models but not Peaks 
 
-file close in application does not change tree.
+FIXED -- file close in application does not change tree or close file.
 
 
 in JDXSource.java I have commented out:
