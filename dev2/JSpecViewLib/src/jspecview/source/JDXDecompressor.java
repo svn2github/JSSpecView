@@ -247,7 +247,7 @@ public class JDXDecompressor {
           continue;
         }
         Coordinate last_pt = xyCoords[ipt - 1];
-        double xdif = Math.abs(last_pt.getXVal() - point.getXVal()); 
+        double xdif = Math.abs(last_pt.getXVal() - point.getXVal());
         if (increasing) { // deltaX is positive
           // DIF Y checkpoint means X value does not advance at start
           // of new line. Remove last values and put in latest ones
@@ -266,8 +266,7 @@ public class JDXDecompressor {
             // Check for X checkpoint error
             // first point of new line should be deltaX away
             // ACD/Labs seem to have large rounding error so using between 0.6 and 1.4
-            if (xdif > dif14
-                || xdif < dif06) {
+            if (xdif > dif14 || xdif < dif06) {
               errorLog.append("X Checkpoint Error! Line " + linenumber + " "
                   + point.getXVal() + " " + last_pt.getXVal() + "\n");
 
@@ -284,8 +283,7 @@ public class JDXDecompressor {
             double y1 = Math.abs(point.getYVal());
 
             // Check for Y checkpoint error Y values should correspond
-            if (y1 < 0.6 * y
-                || y1 > 1.4 * y) {
+            if (y1 < 0.6 * y || y1 > 1.4 * y) {
               errorLog.append("Y Checkpoint Error! Line " + linenumber + " "
                   + y1 + " " + y + "\n");
             }
@@ -296,8 +294,7 @@ public class JDXDecompressor {
             // first point of new line should be deltaX away
             // ACD/Labs seem to have large rounding error so using between 0.6 and 1.4
             // System.out.println(point.getXVal()+ " " +last_pt.getXVal());
-            if (xdif > dif14
-                || xdif < dif06) {
+            if (xdif > dif14 || xdif < dif06) {
               errorLog.append("X Checkpoint Error! Line " + linenumber + " "
                   + point.getXVal() + " " + last_pt.getXVal() + "\n");
 
