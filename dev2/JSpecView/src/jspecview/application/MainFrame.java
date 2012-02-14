@@ -1632,7 +1632,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     while (enume.hasMoreElements()) {
       DefaultMutableTreeNode node = enume.nextElement();
       String fileName = getFileForSource(source);
-      if (((String) node.getUserObject()).equals(fileName)) {
+      if (((JSVTreeNode)node).file.equals(fileName)) {
         for (Enumeration<DefaultMutableTreeNode> e = node.children(); e.hasMoreElements();) {
           childNode = e.nextElement();
           nodeInfo = (SpecInfo) childNode.getUserObject();
