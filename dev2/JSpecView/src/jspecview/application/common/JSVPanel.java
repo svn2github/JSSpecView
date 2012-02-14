@@ -48,6 +48,8 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -115,7 +117,7 @@ import org.w3c.dom.DOMImplementation;
  * @author Prof Robert J. Lancashire
  */
 public class JSVPanel extends JPanel implements Printable, MouseListener,
-    MouseMotionListener {
+    MouseMotionListener, KeyListener {
 
   /**
    * 
@@ -522,6 +524,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   public void setDefaultMouseListener() {
     addMouseListener(this);
     addMouseMotionListener(this);
+    addKeyListener(this);
   }
 
   /* ------------------------- SETTER METHODS-------------------------------*/
@@ -1658,7 +1661,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
     g.setFont(font);
     if (numOfSpectra == 1)
-      title = spectra[0].getTitleLabel();
+      title = ((JDXSpectrum)getSpectrumAt(0)).getPeakTitle();
+      //specInfos[selectedJSVPanel.getIndex()].frame.setTitle(title);
+spectra[0].getTitleLabel();
     g.drawString(title, (int) (leftPlotAreaPos),
             (int) (bottomPlotAreaPos + 45));
 
@@ -2669,7 +2674,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * 
    * @param coord
    */
-  public void notifyPeakPickedListeners(Coordinate coord, MouseEvent e) {
+  public void notifyPeakPickedListeners(Coordinate coord) {
 
     // TODO: Currently Aassumes spectra are not overlayed
     JDXSpectrum spec = (JDXSpectrum) spectra[0];
@@ -2703,6 +2708,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        the <code>MouseEvent</code>
    */
   public void mouseClicked(MouseEvent e) {
+    requestFocusInWindow();
     if (e.getButton() == MouseEvent.BUTTON3) {
       popup.setSelectedJSVPanel(this);
       popup.setSource(source);
@@ -2833,6 +2839,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       repaint();
   }
 
+  private double lastClickX = Double.MAX_VALUE;
   /**
    * Called by the mouseClicked Method
    * 
@@ -2856,7 +2863,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
       Coordinate coord = getCoordFromPoint(xPixel, yPixel);
 
-      xPt = coord.getXVal();
+      lastClickX = xPt = coord.getXVal();
       yPt = coord.getYVal();
 
       String hashX = "#";
@@ -2880,12 +2887,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       xStr = displayXFormatter.format(xPt);
       yStr = displayYFormatter.format(yPt);
 
-      // coordClickedStr = xStr + " "+ yStr;
-      // System.out.println(xStr);        
-
       coordClicked = new Coordinate(Double.parseDouble(xStr), Double
           .parseDouble(yStr));
-      notifyPeakPickedListeners(coordClicked, e);
+      notifyPeakPickedListeners(coordClicked);
     } else
       coordClicked = null;
   }
@@ -2954,4 +2958,34 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       repaint();
   }
 
+  public void toPeak(int istep) {
+    istep *= (shouldDrawXAxisIncreasing() ? 1 : -1);
+    coordClicked = new Coordinate(lastClickX, 0);
+    JDXSpectrum spec = (JDXSpectrum) getSpectrumAt(0);
+    if (!spec.setNextPeak(coordClicked, istep))
+      return;
+    notifyPeakPickedListeners(coordClicked);    
+  }
+  
+  @Override
+  public void keyPressed(KeyEvent e) {
+    if (e.getModifiers() != 0)
+      return;
+    switch (e.getKeyCode()) {
+    case KeyEvent.VK_LEFT:
+      toPeak(-1);
+      break;
+    case KeyEvent.VK_RIGHT:
+      toPeak(1);
+      break;
+    }
+  }
+
+  @Override
+  public void keyReleased(KeyEvent e) {
+  }
+
+  @Override
+  public void keyTyped(KeyEvent e) {
+  }
 }

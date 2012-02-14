@@ -2844,10 +2844,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
   public void peakPicked(PeakPickedEvent eventObj) {
     selectedJSVPanel = (JSVPanel) eventObj.getSource();
     String peaks = eventObj.getPeakInfo();
-    String title = (peaks == null ? selectedJSVPanel
-        .getSpectrumAt(0).getTitleLabel() : Parser.getQuotedAttribute(peaks,
-        "title"));
-    specInfos[selectedJSVPanel.getIndex()].frame.setTitle(title);
     sendScript(peaks);
   }
 

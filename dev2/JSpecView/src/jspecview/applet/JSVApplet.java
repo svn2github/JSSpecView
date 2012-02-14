@@ -557,10 +557,10 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
       if (showSpectrumNumber) {
         spectraPane.setSelectedIndex(spectrumNumber - 1);
       }
-      selectedJSVPanel = (JSVPanel) spectraPane.getSelectedComponent();
+      setSelectedPanel((JSVPanel) spectraPane.getSelectedComponent());
       spectraPane.addChangeListener(new ChangeListener() {
         public void stateChanged(ChangeEvent e) {
-          selectedJSVPanel = (JSVPanel) spectraPane.getSelectedComponent();
+          setSelectedPanel((JSVPanel) spectraPane.getSelectedComponent());
         }
       });
     } else if (theInterface.equals("tile") && canDoTile) {
@@ -582,7 +582,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
         spectrumIndex = spectrumNumber - 1;
       else
         spectrumIndex = 0;
-      selectedJSVPanel = jsvPanels[spectrumIndex];
+      setSelectedPanel(jsvPanels[spectrumIndex]);
+
       // Global variable for single interface
       currentSpectrumIndex = spectrumIndex;
       if (overlay && source.isCompoundSource) {
@@ -685,7 +686,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     appletPanel.remove(jsvPanels[currentSpectrumIndex]);
     appletPanel.add(jsvp, BorderLayout.CENTER);
     currentSpectrumIndex = index;
-    selectedJSVPanel = jsvp;
+    setSelectedPanel(jsvp);
 
     if (JSpecViewUtils.isHNMR((JDXSpectrum) selectedJSVPanel.getSpectrumAt(0)))
       appletPopupMenu.integrateMenuItem.setEnabled(true);
@@ -2024,10 +2025,16 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
 
   @Override
   public void peakPicked(PeakPickedEvent eventObj) {
-    selectedJSVPanel = (JSVPanel) eventObj.getSource();
+    setSelectedPanel((JSVPanel) eventObj.getSource());
     currentSpectrumIndex = selectedJSVPanel.getIndex();
     checkCallbacks();
     sendScript(eventObj.getPeakInfo());
+  }
+
+  private void setSelectedPanel(JSVPanel source) {
+    removeKeyListener(selectedJSVPanel);
+    selectedJSVPanel = source;
+    addKeyListener(selectedJSVPanel);
   }
 
   private void sendFrameChange(JSVPanel jsvp) {
