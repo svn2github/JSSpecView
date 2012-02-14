@@ -2675,11 +2675,12 @@ spectra[0].getTitleLabel();
    * @param coord
    */
   public void notifyPeakPickedListeners(Coordinate coord) {
-
     // TODO: Currently Aassumes spectra are not overlayed
-    JDXSpectrum spec = (JDXSpectrum) spectra[0];
-    PeakPickedEvent eventObj = new PeakPickedEvent(this, coord, spec
-        .getAssociatedPeakInfo(coord));
+    notifyPeakPickedListeners(new PeakPickedEvent(this, coord,
+        ((JDXSpectrum) spectra[0]).getAssociatedPeakInfo(coord)));
+  }
+
+  private void notifyPeakPickedListeners(PeakPickedEvent eventObj) {
     for (int i = 0; i < peakPickedListeners.size(); i++) {
       PeakPickedListener listener = peakPickedListeners.get(i);
       if (listener != null) {
@@ -2962,9 +2963,12 @@ spectra[0].getTitleLabel();
     istep *= (shouldDrawXAxisIncreasing() ? 1 : -1);
     coordClicked = new Coordinate(lastClickX, 0);
     JDXSpectrum spec = (JDXSpectrum) getSpectrumAt(0);
-    if (!spec.setNextPeak(coordClicked, istep))
+    int iPeak = spec.setNextPeak(coordClicked, istep);
+    if (iPeak < 0)
       return;
-    notifyPeakPickedListeners(coordClicked);    
+    PeakInfo peak = spec.getPeakList().get(iPeak);
+    coordClicked.setXVal(lastClickX = peak.getX());
+    notifyPeakPickedListeners(new PeakPickedEvent(this, coordClicked, peak.getStringInfo()));
   }
   
   @Override

@@ -146,7 +146,7 @@ abstract class XMLExporter extends FormExporter {
     if ((date.length() == 8) && (date.charAt(0) > '5'))
       longdate = "19" + date + " " + time;
 
-    pathlength = spec.getPathlength(); // ignored
+    //pathlength = spec.getPathlength(); // ignored
     obFreq = spec.getObservedFreq();
     firstX = xyCoords[startIndex].getXVal();
     lastX = xyCoords[endIndex].getXVal();
