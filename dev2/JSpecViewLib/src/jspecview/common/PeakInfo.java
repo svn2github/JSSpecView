@@ -50,4 +50,12 @@ public class PeakInfo {
     return index;
   }
 
+  String title;
+
+  public String getTitle() {
+    if (title == null)
+      title = Parser.getQuotedAttribute(stringInfo, "title");
+    return title;
+  }
+
 }

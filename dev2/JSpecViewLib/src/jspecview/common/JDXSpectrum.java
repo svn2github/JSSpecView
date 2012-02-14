@@ -513,7 +513,6 @@ public class JDXSpectrum extends JDXObject implements Graph {
     for (Iterator<String> iter = headerTable.keySet().iterator(); iter
         .hasNext();) {
       String label = (String) iter.next();
-      //System.out.println(label);
       String dataSet = (String) headerTable.get(label);
       buffer.append(label + "= " + dataSet + JSpecViewUtils.newLine);
     }
@@ -644,6 +643,9 @@ public class JDXSpectrum extends JDXObject implements Graph {
     return null;
   }
 
+  public String getPeakTitle() {
+    return (selectedPeak == null ? getTitleLabel() : selectedPeak.getTitle());
+  }
   public String getTitleLabel() {
     String type = (peakList == null || peakList.size() == 0 ? dataType 
         : peakList.get(0).getType());
@@ -813,5 +815,50 @@ public class JDXSpectrum extends JDXObject implements Graph {
       xUnits = "PPM";
       setHZtoPPM(true);
     }
+  }
+
+  public boolean setNextPeak(Coordinate coord, int istep) {
+    if (peakList == null || peakList.size() == 0)
+      return false;
+    double x0 = (selectedPeak != null ? selectedPeak.getXMin() : coord
+        .getXVal())
+        + istep * 0.000001;
+    int ipt1 = -1;
+    int ipt2 = -1;
+    double dmin1 = Double.MAX_VALUE * istep;
+    double dmin2 = 0;
+    for (int i = peakList.size(); --i >= 0;) {
+      double x = peakList.get(i).getXMin();
+      if (istep > 0) {
+        if (x > x0 && x < dmin1) {
+          // nearest on right
+          ipt1 = i;
+          dmin1 = x;
+        } else if (x < x0 && x - x0 < dmin2) {
+          // farthest on left
+          ipt2 = i;
+          dmin2 = x - x0;
+        }
+      } else {
+        if (x < x0 && x > dmin1) {
+          // nearest on left
+          ipt1 = i;
+          dmin1 = x;
+        } else if (x > x0 && x - x0 > dmin2) {
+          // farthest on right
+          ipt2 = i;
+          dmin2 = x - x0;
+        }
+      }
+    }
+    
+    if (ipt1 < 0) {
+      if (ipt2 < 0)
+        return false;
+      coord.setYVal(dmin1);
+      dmin1 = dmin2 + x0;
+    }
+    coord.setXVal(dmin1);
+    return true;
   }
 }
