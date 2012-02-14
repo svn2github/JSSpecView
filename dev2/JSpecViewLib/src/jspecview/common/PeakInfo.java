@@ -36,6 +36,11 @@ public class PeakInfo {
 	public double getYMax() {
 		return yMax;
 	}
+	
+	public double getX() {
+	  return (xMax + xMin) / 2;
+	}
+	
 	public void setStringInfo(String stringInfo) {
 		this.stringInfo = stringInfo;
 		type = Parser.getQuotedAttribute(stringInfo, "type");

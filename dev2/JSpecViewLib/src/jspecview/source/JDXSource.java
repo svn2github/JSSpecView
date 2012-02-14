@@ -34,7 +34,8 @@ import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import jspecview.common.JDXObject;
+import jspecview.common.JDXDataObject;
+import jspecview.common.JDXHeader;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSpecViewUtils;
 import jspecview.common.PeakInfo;
@@ -50,7 +51,7 @@ import jspecview.util.Parser;
  * @author Khari A. Bryan
  * @author Prof. Robert J. Lancashire
  */
-public abstract class JDXSource extends JDXObject {
+public abstract class JDXSource extends JDXHeader {
 
   protected final static String ERROR_SEPARATOR = "________________________________________________________";
 
@@ -321,58 +322,52 @@ public abstract class JDXSource extends JDXObject {
     return line;
   }
 
-  protected static boolean checkCommon(JDXSource source, JDXObject jdxObject, String label,
+  protected static boolean readDataLabel(JDXSource source, JDXDataObject jdxObject, String label,
                                        String value, StringBuffer errorLog, 
                                        HashMap<String, String> table) {
-    if (label.equals("##TITLE")) {
-      jdxObject.title = (JSpecViewUtils.obscure || value == null
-          || value.equals("") ? "Unknown" : value);
+
+    if (readHeaderLabel(jdxObject, label, value, errorLog))
       return true;
-    }
-    if (label.equals("##JCAMPDX")) {
-      jdxObject.jcampdx = value;
-      float version = Parser.parseFloat(value);
-      if (version >= 6.0 || Float.isNaN(version)) {
-        if (errorLog != null)
-          errorLog
-              .append("Warning: JCAMP-DX version may not be fully supported: "
-                  + value + "\n");
-      }
+    
+//    if (label.equals("##PATHLENGTH")) {
+//      jdxObject.pathlength = value;
+//      return true;
+//    }
+
+    // NOTE: returning TRUE for these means they are 
+    // not included in the header map -- is that what we want?
+    
+//    if(label.equals("##MINX") ||
+//        label.equals("##MINY") ||
+//        label.equals("##MAXX") ||
+//        label.equals("##MAXY") ||
+//        label.equals("##FIRSTY")||
+//        label.equals("##DELTAX") ||
+//        label.equals("##DATACLASS"))
+//        return true;
+
+    if (label.equals("##FIRSTX")) {
+      jdxObject.fileFirstX = Double.parseDouble(value);
       return true;
     }
 
-    if (label.equals("##ORIGIN")) {
-      jdxObject.origin = (value != null && !value.equals("") ? value : "Unknown");
+    if (label.equals("##LASTX")) {
+      jdxObject.fileLastX = Double.parseDouble(value);
       return true;
     }
 
-    if (label.equals("##OWNER")) {
-      jdxObject.owner = (value != null && !value.equals("") ? value : "Unknown");
+    if (label.equals("##NPOINTS")) {
+      jdxObject.nPointsFile = Integer.parseInt(value);
       return true;
     }
 
-    if (label.equals("##DATATYPE")) {
-      jdxObject.dataType = value;
+    if(label.equals("##XFACTOR")){
+      jdxObject.xFactor = Double.parseDouble(value);
       return true;
     }
 
-    if (label.equals("##LONGDATE")) {
-      jdxObject.longDate = value;
-      return true;
-    }
-
-    if (label.equals("##DATE")) {
-      jdxObject.date = value;
-      return true;
-    }
-
-    if (label.equals("##TIME")) {
-      jdxObject.time = value;
-      return true;
-    }
-
-    if (label.equals("##PATHLENGTH")) {
-      jdxObject.pathlength = value;
+    if(label.equals("##YFACTOR")){
+      jdxObject.yFactor = Double.parseDouble(value);
       return true;
     }
 
@@ -405,40 +400,14 @@ public abstract class JDXSource extends JDXObject {
       return true;
     }
 
-    if(label.equals("##XFACTOR")){
-      jdxObject.xFactor = Double.parseDouble(value);
+    // NMR variations: need observedFreq, offset, dataPointNum, and shiftRefType 
+    
+    if (label.equals("##.OBSERVEFREQUENCY")) {
+      jdxObject.observedFreq = Double.parseDouble(value);
+      table.put(label, value);
       return true;
     }
-
-    if(label.equals("##YFACTOR")){
-      jdxObject.yFactor = Double.parseDouble(value);
-      return true;
-    }
-
-    if (label.equals("##FIRSTX")) {
-      jdxObject.firstX = Double.parseDouble(value);
-      return true;
-    }
-
-    if (label.equals("##LASTX")) {
-      jdxObject.lastX = Double.parseDouble(value);
-      return true;
-    }
-
-    if (label.equals("##NPOINTS")) {
-      jdxObject.nPoints = Integer.parseInt(value);
-      return true;
-    }
-
-    if(label.equals("##MINX") ||
-        label.equals("##MINY") ||
-        label.equals("##MAXX") ||
-        label.equals("##MAXY") ||
-        label.equals("##FIRSTY")||
-        label.equals("##DELTAX") ||
-        label.equals("##DATACLASS"))
-        return true;
-
+    
     if (label.equals("##$OFFSET") && jdxObject.shiftRefType != 0) {
       jdxObject.offset = Double.parseDouble(value);
       // bruker doesn't need dataPointNum
@@ -479,12 +448,57 @@ public abstract class JDXSource extends JDXObject {
       return true;
     }
 
-    if (label.equals("##.OBSERVEFREQUENCY")) {
-      jdxObject.obFreq = Double.parseDouble(value);
-      table.put(label, value);
+    return false;
+  }
+  
+  protected static boolean readHeaderLabel(JDXHeader jdxHeader, String label, String value, StringBuffer errorLog) {
+    if (label.equals("##TITLE")) {
+      jdxHeader.title = (JSpecViewUtils.obscure || value == null
+          || value.equals("") ? "Unknown" : value);
       return true;
     }
-    
+    if (label.equals("##JCAMPDX")) {
+      jdxHeader.jcampdx = value;
+      float version = Parser.parseFloat(value);
+      if (version >= 6.0 || Float.isNaN(version)) {
+        if (errorLog != null)
+          errorLog
+              .append("Warning: JCAMP-DX version may not be fully supported: "
+                  + value + "\n");
+      }
+      return true;
+    }
+
+    if (label.equals("##ORIGIN")) {
+      jdxHeader.origin = (value != null && !value.equals("") ? value : "Unknown");
+      return true;
+    }
+
+    if (label.equals("##OWNER")) {
+      jdxHeader.owner = (value != null && !value.equals("") ? value : "Unknown");
+      return true;
+    }
+
+    if (label.equals("##DATATYPE")) {
+      jdxHeader.dataType = value;
+      return true;
+    }
+
+    if (label.equals("##LONGDATE")) {
+      jdxHeader.longDate = value;
+      return true;
+    }
+
+    if (label.equals("##DATE")) {
+      jdxHeader.date = value;
+      return true;
+    }
+
+    if (label.equals("##TIME")) {
+      jdxHeader.time = value;
+      return true;
+    }
+
     return false;
   }
 

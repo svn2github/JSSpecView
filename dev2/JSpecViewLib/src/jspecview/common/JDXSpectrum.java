@@ -38,14 +38,13 @@ import jspecview.source.JDXDecompressor;
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
  */
-public class JDXSpectrum extends JDXObject implements Graph {
+public class JDXSpectrum extends JDXDataObject implements Graph {
 
   @Override
   public void finalize() {
     System.out.println("JDXSpectrum " + this + " finalized");
   }
 
-  //private JDXSource parentSource;
   /**
    * HashMap of optional header values
    */
@@ -61,14 +60,9 @@ public class JDXSpectrum extends JDXObject implements Graph {
    */
   private boolean isHZtoPPM = false;
 
-  // -----------------------Core Fixed Header ----------------------------//
-
-  private Calendar now = Calendar.getInstance();
-  private SimpleDateFormat formatter = new SimpleDateFormat(
-      "yyyy/MM/dd HH:mm:ss.SSSS ZZZZ");
-  private String currentTime = formatter.format(now.getTime());
-  //private String finalDate = "";
-
+  private String currentTime = (new SimpleDateFormat(
+      "yyyy/MM/dd HH:mm:ss.SSSS ZZZZ"))
+      .format(Calendar.getInstance().getTime());
 
   private ArrayList<PeakInfo> peakList = new ArrayList<PeakInfo>();
 
@@ -92,6 +86,17 @@ public class JDXSpectrum extends JDXObject implements Graph {
   }
 
   /**
+   * Returns the table of headers
+   * 
+   * @return the table of headers
+   */
+  public HashMap<String, String> getHeaderTable() {
+    return headerTable;
+  }
+
+  /*   ---------- Constructed data --------------------------------------------------- */
+
+  /**
    * Sets the array of coordinates
    * 
    * @param coords
@@ -102,15 +107,6 @@ public class JDXSpectrum extends JDXObject implements Graph {
   }
 
   /**
-   * Returns the table of headers
-   * 
-   * @return the table of headers
-   */
-  public HashMap<String, String> getHeaderTable() {
-    return headerTable;
-  }
-
-  /**
    * Returns the array of coordinates
    * 
    * @return the array of coordinates
@@ -118,15 +114,6 @@ public class JDXSpectrum extends JDXObject implements Graph {
   public Coordinate[] getXYCoords() {
     return xyCoords;
   }
-
-  /**
-   * Return the parent Source of this Spectrum
-   * 
-   * @return the parent Source of this Spectrum
-   */
-  /* public JDXSource getParentSource(){
-     return parentSource;
-   }*/
 
   /**
    * Determines if the spectrum should be displayed with abscissa unit of Part
@@ -150,191 +137,12 @@ public class JDXSpectrum extends JDXObject implements Graph {
   }
 
   /**
-   * Sets value to true if spectrum is increasing
-   * 
-   * @param val
-   *        true if spectrum is increasing
-   */
-  public void setIncreasing(boolean val) {
-    increasing = val;
-  }
-
-  /**
-   * Sets value to true if spectrum is continuous
-   * 
-   * @param val
-   *        true if spectrum is continuous
-   */
-  public void setContinuous(boolean val) {
-    continuous = val;
-  }
-
-  /**
-   * Sets the parent source of this spectrum
-   * 
-   * @param source
-   *        the parent source
-   */
-  /*public void setParentSource(JDXSource source){
-    parentSource = source;
-  }*/
-
-  /* ------------------------------------------------------------------- */
-
-  /* --------------------------------------------------------------------- */
-
-  /**
-   * Sets the Observed Frequency (for NMR Spectra)
-   * 
-   * @param observedFreq
-   *        the observed frequency
-   */
-  public void setObservedFreq(double observedFreq) {
-    this.observedFreq = observedFreq;
-  }
-
-  /**
-   * Returns true if the spectrum is increasing
-   * 
-   * @return true if the spectrum is increasing
-   */
-  public boolean isIncreasing() {
-    return increasing;
-  }
-
-  /**
-   * Returns true if spectrum is continuous
-   * 
-   * @return true if spectrum is continuous
-   */
-  public boolean isContinuous() {
-    return continuous;
-  }
-
-  /* --------------- GET CORE FIXED HEADER ----------------------------- */
-
-  /**
-   * Returns the title of the spectrum
-   * 
-   * @return the title of the spectrum
-   */
-  public String getTitle() {
-    return title;
-  }
-
-  /**
-   * Returns the JCAMP-DX version
-   * 
-   * @return the JCAMP-DX version
-   */
-  public String getJcampdx() {
-    return jcampdx;
-  }
-
-  /**
-   * Returns the data type of the spectrum
-   * 
-   * @return the data type of the spectrum
-   */
-  public String getDataType() {
-    return dataType;
-  }
-
-  /**
-   * Returns the data class
-   * 
-   * @return the data class
-   */
-  public String getDataClass() {
-    return dataClass;
-  }
-
-  /**
-   * Returns the origin of the spectrum
-   * 
-   * @return the origin of the spectrum
-   */
-  public String getOrigin() {
-    return origin;
-  }
-
-  /**
-   * Returns the owner of the spectrum
-   * 
-   * @return the owner of the spectrum
-   */
-  public String getOwner() {
-    return owner;
-  }
-
-  /**
-   * Returns the long date first created
-   * 
-   * @return the long date first created
-   */
-  public String getLongDate() {
-    return longDate;
-  }
-
-  /**
-   * Returns the date first created
-   * 
-   * @return the date first created
-   */
-  public String getDate() {
-    return date;
-  }
-
-  /**
-   * Returns the time first created
-   * 
-   * @return the time first created
-   */
-  public String getTime() {
-    return time;
-  }
-
-  /**
-   * Returns the pathlength of the sample (required for AnIML IR/UV files)
-   * 
-   * @return the pathlength
-   */
-  public String getPathlength() {
-    return pathlength;
-  }
-
-  /*   ------------------------------------------------------------- */
-
-  /*  ------------------- GET SPECTRAL PARAMETERS --------------------- */
-
-  /**
-   * Returns the units for x-axis when spectrum is displayed
-   * 
-   * @return the units for x-axis when spectrum is displayed
-   */
-  public String getXUnits() {
-    return xUnits;
-  }
-
-  /**
-   * Returns the units for y-axis when spectrum is displayed
-   * 
-   * @return the units for y-axis when spectrum is displayed
-   */
-  public String getYUnits() {
-    return yUnits;
-  }
-
-  /**
    * Returns the first X value
    * 
    * @return the first X value
    */
   public double getFirstX() {
-    //if(isIncreasing())
     return xyCoords[0].getXVal();
-    //else
-    //  return xyCoords[getNumberOfPoints() - 1].getXVal();
   }
 
   /**
@@ -379,6 +187,10 @@ public class JDXSpectrum extends JDXObject implements Graph {
     return xyCoords.length;
   }
 
+  private double minX = Double.NaN, minY = Double.NaN;
+  private double maxX = Double.NaN, maxY = Double.NaN;
+  private double deltaX = Double.NaN;
+
   /**
    * Calculates and returns the minimum x value in the list of coordinates
    * Fairly expensive operation
@@ -386,7 +198,7 @@ public class JDXSpectrum extends JDXObject implements Graph {
    * @return the minimum x value in the list of coordinates
    */
   public double getMinX() {
-    return JSpecViewUtils.getMinX(xyCoords);
+    return (Double.isNaN(minX) ? (minX = JSpecViewUtils.getMinX(xyCoords)) : minX);
   }
 
   /**
@@ -396,7 +208,7 @@ public class JDXSpectrum extends JDXObject implements Graph {
    * @return the minimum x value in the list of coordinates
    */
   public double getMinY() {
-    return JSpecViewUtils.getMinY(xyCoords);
+    return (Double.isNaN(minY) ? (minY = JSpecViewUtils.getMinY(xyCoords)) : minY);
   }
 
   /**
@@ -406,7 +218,7 @@ public class JDXSpectrum extends JDXObject implements Graph {
    * @return the maximum x value in the list of coordinates
    */
   public double getMaxX() {
-    return JSpecViewUtils.getMaxX(xyCoords);
+    return (Double.isNaN(maxX) ? (maxX = JSpecViewUtils.getMaxX(xyCoords)) : maxX);
   }
 
   /**
@@ -416,25 +228,7 @@ public class JDXSpectrum extends JDXObject implements Graph {
    * @return the maximum y value in the list of coordinates
    */
   public double getMaxY() {
-    return JSpecViewUtils.getMaxX(xyCoords);
-  }
-
-  /**
-   * Returns the original x factor
-   * 
-   * @return the original x factor
-   */
-  public double getXFactor() {
-    return xFactor;
-  }
-
-  /**
-   * Returns the original y factor
-   * 
-   * @return the original y factor
-   */
-  public double getYFactor() {
-    return yFactor;
+    return (Double.isNaN(maxY) ? (maxY = JSpecViewUtils.getMaxY(xyCoords)) : maxY);
   }
 
   /**
@@ -443,7 +237,7 @@ public class JDXSpectrum extends JDXObject implements Graph {
    * @return the delta X
    */
   public double getDeltaX() {
-    return JSpecViewUtils.deltaX(getLastX(), getFirstX(), getNumberOfPoints());
+    return (Double.isNaN(deltaX) ? (deltaX = JSpecViewUtils.deltaX(getLastX(), getFirstX(), getNumberOfPoints())) : deltaX);
   }
 
   /**
@@ -567,24 +361,31 @@ public class JDXSpectrum extends JDXObject implements Graph {
   public JDXSpectrum copy() {
     JDXSpectrum newSpectrum = new JDXSpectrum();
 
-    newSpectrum.setContinuous(isContinuous());
+    newSpectrum.setTitle(getTitle());
+    newSpectrum.setJcampdx(getJcampdx());
+    newSpectrum.setOrigin(getOrigin());
+    newSpectrum.setOwner(getOwner());
     newSpectrum.setDataClass(getDataClass());
     newSpectrum.setDataType(getDataType());
     newSpectrum.setHeaderTable(getHeaderTable());
-    newSpectrum.setHZtoPPM(isHZtoPPM());
-    newSpectrum.setIncreasing(isIncreasing());
-    newSpectrum.setJcampdx(getJcampdx());
-    newSpectrum.setObservedFreq(getObservedFreq());
-    newSpectrum.setOrigin(getOrigin());
-    newSpectrum.setOwner(getOwner());
-    newSpectrum.setTitle(getTitle());
+
     newSpectrum.setXFactor(getXFactor());
-    newSpectrum.setXUnits(getXUnits());
-    newSpectrum.setXYCoords(getXYCoords());
     newSpectrum.setYFactor(getYFactor());
+    newSpectrum.setXUnits(getXUnits());
     newSpectrum.setYUnits(getYUnits());
-    newSpectrum.setPathlength(getPathlength());
+
+    //newSpectrum.setPathlength(getPathlength());
     newSpectrum.setPeakList(getPeakList());
+    newSpectrum.setXYCoords(getXYCoords());
+    newSpectrum.setContinuous(isContinuous());
+    newSpectrum.setIncreasing(isIncreasing());
+
+    newSpectrum.observedFreq = observedFreq;
+    newSpectrum.offset = offset;
+    newSpectrum.dataPointNum = dataPointNum;
+    newSpectrum.shiftRefType = shiftRefType;
+    newSpectrum.isHZtoPPM = isHZtoPPM;
+
     return newSpectrum;
   }
 
@@ -624,8 +425,6 @@ public class JDXSpectrum extends JDXObject implements Graph {
 
   private PeakInfo selectedPeak;
 
-  private double deltaX;
-
   public PeakInfo getSelectedPeak() {
     return selectedPeak;
   }
@@ -646,48 +445,35 @@ public class JDXSpectrum extends JDXObject implements Graph {
   public String getPeakTitle() {
     return (selectedPeak == null ? getTitleLabel() : selectedPeak.getTitle());
   }
+
   public String getTitleLabel() {
-    String type = (peakList == null || peakList.size() == 0 ? dataType 
+    String type = (peakList == null || peakList.size() == 0 ? dataType
         : peakList.get(0).getType());
     return (type != null && type.length() > 0 ? type + " " : "") + title;
   }
 
-  public boolean createXYCoords(String tabularSpecData, int tabDataLineNo, HashMap<String, String> table, StringBuffer errorLog) throws JSpecViewException {
-    
+  public boolean processTabularData(String tabularSpecData, int tabDataLineNo,
+                                    HashMap<String, String> table,
+                                    StringBuffer errorLog)
+      throws JSpecViewException {
+
     if (tabularSpecData == null)
       throw new JSpecViewException("Error Reading Data Set");
 
     if (dataClass.equals("PEAKASSIGNMENTS"))
       return true;
-    
+
     setHeaderTable(table);
-    
-    if(dataClass.equals("XYDATA")){
 
-      if(xFactor == ERROR)
-        throw new JSpecViewException("Error Reading Data Set: ##XFACTOR not found");
+    if (dataClass.equals("XYDATA")) {
 
-      if(yFactor == ERROR)
-        throw new JSpecViewException("Error Reading Data Set: ##YFACTOR not found");
-
-      if(firstX == ERROR)
-        throw new JSpecViewException("Error Reading Data Set: ##FIRSTX not found");
-
-      if(lastX == ERROR)
-        throw new JSpecViewException("Error Reading Data Set: ##LASTX not found");
-
-      if(nPoints == -1)
-        throw new JSpecViewException("Error Reading Data Set: ##NPOINTS not found");
-
-      deltaX = JSpecViewUtils.deltaX(lastX, firstX, nPoints);
-
-      increasing = (deltaX > 0);
-
+      checkRequiredTokens();
+      
       decompressData(tabularSpecData, tabDataLineNo, errorLog);
       return true;
     }
-    if(dataClass.equals("PEAKTABLE") || dataClass.equals("XYPOINTS")){
-      if(dataClass.equals("PEAKTABLE"))
+    if (dataClass.equals("PEAKTABLE") || dataClass.equals("XYPOINTS")) {
+      if (dataClass.equals("PEAKTABLE"))
         continuous = false;
       // check if there is an x and y factor
       if (xFactor != ERROR && yFactor != ERROR)
@@ -695,14 +481,16 @@ public class JDXSpectrum extends JDXObject implements Graph {
       else
         xyCoords = JSpecViewUtils.parseDSV(tabularSpecData, 1, 1);
 
-      deltaX = JSpecViewUtils.deltaX(xyCoords[xyCoords.length - 1].getXVal(), xyCoords[0].getXVal(), xyCoords.length);
-      increasing = (deltaX > 0);
+      double fileDeltaX = JSpecViewUtils.deltaX(xyCoords[xyCoords.length - 1]
+          .getXVal(), xyCoords[0].getXVal(), xyCoords.length);
+      increasing = (fileDeltaX > 0);
       return true;
     }
-      return false;
+    return false;
   }
 
-  public String getTabularSpecData(String label, String value) throws JSpecViewException {
+  public String getTabularData(String label, String value)
+      throws JSpecViewException {
 
     if (label.equals("##PEAKASSIGNMENTS"))
       setDataClass("PEAKASSIGNMENTS");
@@ -728,107 +516,121 @@ public class JDXSpectrum extends JDXObject implements Graph {
     return tmp;
   }
 
-  public boolean createXYCoords(
-                                 HashMap<String, ArrayList<String>> nTupleTable,
-                                 String[] plotSymbols, String dataType, 
-                                 String tabularSpecData, int tabDataLineNo, StringBuffer errorLog) {
+  public boolean createXYCoords(HashMap<String, ArrayList<String>> nTupleTable,
+                                String[] plotSymbols, String dataType,
+                                String tabularSpecData, int tabDataLineNo,
+                                StringBuffer errorLog) {
     ArrayList<String> list;
-    if(dataClass.equals("XYDATA")){
+    if (dataClass.equals("XYDATA")) {
       // Get Label Values
 
-      list = (ArrayList<String>)nTupleTable.get("##SYMBOL");
+      list = (ArrayList<String>) nTupleTable.get("##SYMBOL");
       int index1 = list.indexOf(plotSymbols[0]);
       int index2 = list.indexOf(plotSymbols[1]);
 
-      list = (ArrayList<String>)nTupleTable.get("##FACTOR");
-      xFactor = Double.parseDouble((String)list.get(index1));
-      yFactor = Double.parseDouble((String)list.get(index2));
+      list = (ArrayList<String>) nTupleTable.get("##FACTOR");
+      xFactor = Double.parseDouble((String) list.get(index1));
+      yFactor = Double.parseDouble((String) list.get(index2));
 
-      list = (ArrayList<String>)nTupleTable.get("##LAST");
-      lastX = Double.parseDouble((String)list.get(index1));
+      list = (ArrayList<String>) nTupleTable.get("##LAST");
+      fileLastX = Double.parseDouble((String) list.get(index1));
 
-      list = (ArrayList<String>)nTupleTable.get("##FIRST");
-      firstX = Double.parseDouble((String)list.get(index1));
+      list = (ArrayList<String>) nTupleTable.get("##FIRST");
+      fileFirstX = Double.parseDouble((String) list.get(index1));
       //firstY = Double.parseDouble((String)list.get(index2));
 
-      list = (ArrayList<String>)nTupleTable.get("##VARDIM");
-      nPoints = Integer.parseInt((String)list.get(index1));
+      list = (ArrayList<String>) nTupleTable.get("##VARDIM");
+      nPointsFile = Integer.parseInt((String) list.get(index1));
 
-      list = (ArrayList<String>)nTupleTable.get("##UNITS");
-      xUnits = (String)list.get(index1);
-      yUnits = (String)list.get(index2);
+      list = (ArrayList<String>) nTupleTable.get("##UNITS");
+      xUnits = (String) list.get(index1);
+      yUnits = (String) list.get(index2);
 
       decompressData(tabularSpecData, tabDataLineNo, errorLog);
       return true;
     }
-    if(dataClass.equals("PEAKTABLE") || dataClass.equals("XYPOINTS")){
+    if (dataClass.equals("PEAKTABLE") || dataClass.equals("XYPOINTS")) {
       if (dataClass.equals("PEAKTABLE"))
         continuous = false;
-      list = (ArrayList<String>)nTupleTable.get("##SYMBOL");
+      list = (ArrayList<String>) nTupleTable.get("##SYMBOL");
       int index1 = list.indexOf(plotSymbols[0]);
       int index2 = list.indexOf(plotSymbols[1]);
 
-      list = (ArrayList<String>)nTupleTable.get("##UNITS");
-      xUnits = (String)list.get(index1);
-      yUnits = (String)list.get(index2);
+      list = (ArrayList<String>) nTupleTable.get("##UNITS");
+      xUnits = (String) list.get(index1);
+      yUnits = (String) list.get(index2);
       xyCoords = JSpecViewUtils.parseDSV(tabularSpecData, xFactor, yFactor);
       return true;
     }
     return false;
   }
 
-  private void decompressData(String tabularSpecData, int tabDataLineNo, StringBuffer errorLog) {
-    deltaX = (lastX - firstX) / (nPoints - 1);
 
-    JDXDecompressor decompressor = new JDXDecompressor(tabularSpecData, xFactor, yFactor, deltaX);
+  private void decompressData(String tabularSpecData, int tabDataLineNo,
+                              StringBuffer errorLog) {
+
+    double fileDeltaX = JSpecViewUtils.deltaX(fileLastX, fileFirstX, nPointsFile);
+    increasing = (fileDeltaX > 0);
+
+    JDXDecompressor decompressor = new JDXDecompressor(tabularSpecData,
+        xFactor, yFactor, fileDeltaX);
     decompressor.setLabelLineNo(tabDataLineNo);
 
     xyCoords = decompressor.decompressData();
 
-    if(xyCoords == null)
+    if (xyCoords == null)
       xyCoords = JSpecViewUtils.parseDSV(tabularSpecData, xFactor, yFactor);
 
-    if (decompressor.getErrorLog().length()>0 ) {
+    if (decompressor.getErrorLog().length() > 0) {
       errorLog.append(decompressor.getErrorLog() + "\n");
-      errorLog.append("firstX: " + firstX + " Found " +
-                         (increasing ? xyCoords[0] : xyCoords[xyCoords.length -1]).getXVal()  + "\n");
-      errorLog.append("lastX from Header " + lastX + " Found " +
-                         (increasing ? xyCoords[xyCoords.length -1] : xyCoords[0]).getXVal()  + "\n");
-      errorLog.append("deltaX from Header "+ deltaX  + "\n");
-      errorLog.append("Number of points in Header "+ nPoints + " Found " + xyCoords.length  + "\n");
-    }else{
+      errorLog.append("firstX: "
+          + fileFirstX
+          + " Found "
+          + (increasing ? xyCoords[0] : xyCoords[xyCoords.length - 1])
+              .getXVal() + "\n");
+      errorLog.append("lastX from Header "
+          + fileLastX
+          + " Found "
+          + (increasing ? xyCoords[xyCoords.length - 1] : xyCoords[0])
+              .getXVal() + "\n");
+      errorLog.append("deltaX from Header " + fileDeltaX + "\n");
+      errorLog.append("Number of points in Header " + nPointsFile + " Found "
+          + xyCoords.length + "\n");
+    } else {
       errorLog.append("No Errors\n");
     }
 
-    if(JSpecViewUtils.DEBUG){
+    if (JSpecViewUtils.DEBUG) {
       System.err.println(errorLog.toString());
     }
 
     // apply offset
-    if(offset != ERROR && obFreq != ERROR && dataType.toUpperCase().contains("SPECTRUM")){
-        JSpecViewUtils.applyShiftReference(xyCoords, dataPointNum, firstX, lastX, offset, obFreq, shiftRefType);
+    if (offset != ERROR && observedFreq != ERROR
+        && dataType.toUpperCase().contains("SPECTRUM")) {
+      JSpecViewUtils.applyShiftReference(xyCoords, dataPointNum, fileFirstX,
+          fileLastX, offset, observedFreq, shiftRefType);
     }
 
-    if(obFreq != ERROR && xUnits.toUpperCase().equals("HZ")){
-      double xScale = obFreq;
-      JSpecViewUtils.applyScale(xyCoords, (1/xScale), 1);
+    if (observedFreq != ERROR && xUnits.toUpperCase().equals("HZ")) {
+      double xScale = observedFreq;
+      JSpecViewUtils.applyScale(xyCoords, (1 / xScale), 1);
       xUnits = "PPM";
       setHZtoPPM(true);
     }
   }
 
-  public boolean setNextPeak(Coordinate coord, int istep) {
+  double lastX = Double.NaN;
+  
+  public int setNextPeak(Coordinate coord, int istep) {
     if (peakList == null || peakList.size() == 0)
-      return false;
-    double x0 = (selectedPeak != null ? selectedPeak.getXMin() : coord
-        .getXVal())
-        + istep * 0.000001;
+      return -1;
+    double x0 = coord.getXVal() + istep * 0.000001;
     int ipt1 = -1;
     int ipt2 = -1;
     double dmin1 = Double.MAX_VALUE * istep;
     double dmin2 = 0;
     for (int i = peakList.size(); --i >= 0;) {
-      double x = peakList.get(i).getXMin();
+      double x = peakList.get(i).getX();
       if (istep > 0) {
         if (x > x0 && x < dmin1) {
           // nearest on right
@@ -851,14 +653,56 @@ public class JDXSpectrum extends JDXObject implements Graph {
         }
       }
     }
-    
+
     if (ipt1 < 0) {
       if (ipt2 < 0)
-        return false;
-      coord.setYVal(dmin1);
-      dmin1 = dmin2 + x0;
+        return -1;
+      ipt1 = ipt2;
     }
-    coord.setXVal(dmin1);
-    return true;
+    return ipt1;
   }
+ 
+  private boolean increasing = true;
+  private boolean continuous = true;
+
+
+  /**
+   * Sets value to true if spectrum is increasing
+   * 
+   * @param val
+   *        true if spectrum is increasing
+   */
+  public void setIncreasing(boolean val) {
+    increasing = val;
+  }
+
+  /**
+   * Sets value to true if spectrum is continuous
+   * 
+   * @param val
+   *        true if spectrum is continuous
+   */
+  public void setContinuous(boolean val) {
+    continuous = val;
+  }
+
+  /**
+   * Returns true if the spectrum is increasing
+   * 
+   * @return true if the spectrum is increasing
+   */
+  public boolean isIncreasing() {
+    return increasing;
+  }
+
+  /**
+   * Returns true if spectrum is continuous
+   * 
+   * @return true if spectrum is continuous
+   */
+  public boolean isContinuous() {
+    return continuous;
+  }
+
+
 }

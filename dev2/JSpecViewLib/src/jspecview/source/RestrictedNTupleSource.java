@@ -169,10 +169,10 @@ public class RestrictedNTupleSource extends JDXSource {
             continue;
       }
 
-      if(label.equals("##PATHLENGTH")){
-         ns.setPathlength(t.value);
-         continue;
-       }
+//      if(label.equals("##PATHLENGTH")){
+//         ns.setPathlength(t.value);
+//         continue;
+//       }
 
       if(label.equals("##DATATYPE")){
         ns.setDataType(t.value);

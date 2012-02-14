@@ -81,12 +81,12 @@ public class SimpleSource extends JDXSource {
     while (t.hasMoreTokens() && t.nextToken()
         && !(label = JSpecViewUtils.cleanLabel(t.label)).equals("##END")) {
 
-      if (checkCommon(ss, spectrum, label, t.value, errorLog, notesLDRTable))
+      if (readDataLabel(ss, spectrum, label, t.value, errorLog, notesLDRTable))
         continue;
 
       if (Arrays.binarySearch(TABULAR_DATA_LABELS, label) > 0) {
         tabularDataLabelLineNo = t.labelLineNo;
-        tabularSpecData = spectrum.getTabularSpecData(label, t.value);
+        tabularSpecData = spectrum.getTabularData(label, t.value);
         continue;
       }
       
@@ -96,7 +96,7 @@ public class SimpleSource extends JDXSource {
     if (!label.equals("##END"))
       tabularSpecData = null;
 
-    if (!spectrum.createXYCoords(tabularSpecData, tabularDataLabelLineNo,
+    if (!spectrum.processTabularData(tabularSpecData, tabularDataLabelLineNo,
         notesLDRTable, errorLog))
       throw new JDXSourceException("Unable to read Simple Source");
 

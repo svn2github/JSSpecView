@@ -126,7 +126,7 @@ public class JDXDecompressor {
     this.xFactor = xFactor;
     this.yFactor = yFactor;
     this.deltaX = deltaX;
-    this.increasing = deltaX > 0 ? true : false;
+    this.increasing = (deltaX > 0);
   }
 
   /**
@@ -145,7 +145,7 @@ public class JDXDecompressor {
     this.xFactor = xFactor;
     this.yFactor = yFactor;
     this.deltaX = JSpecViewUtils.deltaX(lastX, firstX, nPoints);
-    this.increasing = deltaX > 0 ? true : false;
+    this.increasing = (deltaX > 0);
   }
 
   /**

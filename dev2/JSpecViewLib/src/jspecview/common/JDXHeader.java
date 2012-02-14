@@ -1,14 +1,12 @@
 package jspecview.common;
 
-import jspecview.exception.JSpecViewException;
-
 /**
  * could be a spectrum or a source
  * 
  * @author Bob Hanson
  * 
  */
-public class JDXObject {
+public class JDXHeader {
 
   public String title = "";
   public String jcampdx = "5.01";
@@ -19,32 +17,7 @@ public class JDXObject {
   public String longDate = "";
   public String date = "";
   public String time = "";
-  public String pathlength = "";
 
-  // --------------------Spectral Parameters ------------------------------//
-  public double firstX = JDXSpectrum.ERROR;
-  public double lastX = JDXSpectrum.ERROR;
-  public int nPoints = -1;
-
-  public String xUnits = "";
-  public String yUnits = "";
-  public double xFactor = JDXSpectrum.ERROR;
-  public double yFactor = JDXSpectrum.ERROR;
-  // For NMR Spectra
-  public double observedFreq = JDXSpectrum.ERROR;
-  public double offset = JDXSpectrum.ERROR;
-  // Observed Frequency for NMR
-  public double obFreq = Graph.ERROR;
-  // Shift Reference for NMR
-  // shiftRef = 0, bruker = 1, varian = 2
-  public int shiftRefType = -1;
-  public int dataPointNum = -1;
-  // Variables needed to create JDXSpectrum
-  public double deltaX = Graph.ERROR;
-  public boolean increasing = true;
-  public boolean continuous = true;
-
-  /*---------------------SET CORE FIXED HEADER------------------------- */
 
   /**
    * Sets the title of the spectrum
@@ -136,57 +109,6 @@ public class JDXObject {
     this.time = time;
   }
 
-  /**
-   * Sets the pathlength of the sample (required for AnIML IR/UV files)
-   * 
-   * @param pathlength
-   *        String
-   */
-  public void setPathlength(String pathlength) {
-    this.pathlength = pathlength;
-  }
-
-  /* -------------------SET SPECTRAL PARAMETERS -------------------------- */
-
-  /**
-   * Sets the units for the x axis
-   * 
-   * @param xUnits
-   *        the x units
-   */
-  public void setXUnits(String xUnits) {
-    this.xUnits = xUnits;
-  }
-
-  /**
-   * Sets the units for the y axis
-   * 
-   * @param yUnits
-   *        the y units
-   */
-  public void setYUnits(String yUnits) {
-    this.yUnits = yUnits;
-  }
-
-  /**
-   * Sets the original xfactor
-   * 
-   * @param xFactor
-   *        the x factor
-   */
-  public void setXFactor(double xFactor) {
-    this.xFactor = xFactor;
-  }
-
-  /**
-   * Sets the original y factor
-   * 
-   * @param yFactor
-   *        the y factor
-   */
-  public void setYFactor(double yFactor) {
-    this.yFactor = yFactor;
-  }
 
   /**
    * Getter for property title.
@@ -215,10 +137,6 @@ public class JDXObject {
     return dataType;
   }
 
-  public int getNPoints() {
-    return nPoints;
-  }
-
   /**
    * Getter for property origin.
    * 
@@ -242,7 +160,7 @@ public class JDXObject {
    * 
    * @return Value of property longDate.
    */
-  protected String getLongDate() {
+  public String getLongDate() {
     return longDate;
   }
 
@@ -251,7 +169,7 @@ public class JDXObject {
    * 
    * @return Value of property date.
    */
-  protected String getDate() {
+  public String getDate() {
     return date;
   }
 
@@ -260,37 +178,17 @@ public class JDXObject {
    * 
    * @return Value of property time.
    */
-  protected String getTime() {
+  public String getTime() {
     return time;
   }
 
   /**
-   * Getter for pathlength.
+   * Returns the data class
    * 
-   * @return Value of pathlength.
+   * @return the data class
    */
-  protected String getPathlength() {
-    return pathlength;
+  public String getDataClass() {
+    return dataClass;
   }
 
-  public void checkRequiredTokens() throws JSpecViewException {
-    if (xFactor == Graph.ERROR)
-      throw new JSpecViewException(
-          "Error Reading Data Set: ##XFACTOR not found");
-
-    if (yFactor == Graph.ERROR)
-      throw new JSpecViewException(
-          "Error Reading Data Set: ##YFACTOR not found");
-
-    if (firstX == Graph.ERROR)
-      throw new JSpecViewException("Error Reading Data Set: ##FIRST not found");
-
-    if (lastX == Graph.ERROR)
-      throw new JSpecViewException("Error Reading Data Set: ##LASTX not found");
-
-    if (nPoints == -1)
-      throw new JSpecViewException(
-          "Error Reading Data Set: ##NPOINTS not found");
-
-  }
 }

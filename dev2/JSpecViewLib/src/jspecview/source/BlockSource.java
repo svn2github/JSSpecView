@@ -60,7 +60,7 @@ public class BlockSource extends JDXSource {
   public static BlockSource getInstance(String sourceContents)
       throws JSpecViewException {
 
-    HashMap<String, String> LDRTable;
+    HashMap<String, String> dataLDRTable;
     HashMap<String, String> sourceLDRTable = new HashMap<String, String>();
     String label, tmp;
 
@@ -78,28 +78,24 @@ public class BlockSource extends JDXSource {
     // Get the LDRs up to the ##TITLE of the first block
     t.nextToken();
     label = JSpecViewUtils.cleanLabel(t.label);
-    if (!label.equals("##TITLE")) {
+    if (!label.equals("##TITLE"))
       throw new JSpecViewException("Error Reading Source");
-    }
-
-    checkCommon(bs, bs, label, t.value, errorLog, sourceLDRTable);
-
+    readHeaderLabel(bs, label, t.value, errorLog);
     while (t.hasMoreTokens() && t.nextToken()
-        && !(label = JSpecViewUtils.cleanLabel(t.label)).equals("##TITLE")) {
-      if (!checkCommon(bs, bs, label, t.value, errorLog, sourceLDRTable))
+        && !(label = JSpecViewUtils.cleanLabel(t.label)).equals("##TITLE"))
+      if (!readHeaderLabel(bs, label, t.value, errorLog))
         sourceLDRTable.put(t.label, t.value);
-    }
 
     bs.setHeaderTable(sourceLDRTable);
 
     // If ##TITLE not found throw Exception
-    if (!label.equals("##TITLE")) {
+    if (!label.equals("##TITLE"))
       throw new JSpecViewException("Unable to Read Block Source");
-    }
-    spectrum = new JDXSpectrum();
-    LDRTable = new HashMap<String, String>();
 
-    checkCommon(bs, spectrum, label, t.value, errorLog, LDRTable);
+    spectrum = new JDXSpectrum();
+    dataLDRTable = new HashMap<String, String>();
+
+    readDataLabel(bs, spectrum, label, t.value, errorLog, dataLDRTable);
 
     try {
       while (t.hasMoreTokens()
@@ -107,41 +103,39 @@ public class BlockSource extends JDXSource {
           && (!(tmp = JSpecViewUtils.cleanLabel(t.label)).equals("##END") || !label
               .equals("##END"))) {
         label = tmp;
-        System.out.println(label);
         if (label.equals("##JCAMPCS")) {
           do {
             t.nextToken();
             label = JSpecViewUtils.cleanLabel(t.label);
           } while (!label.equals("##TITLE"));
           spectrum = new JDXSpectrum();
-          continue;
         }
 
-        if (checkCommon(bs, spectrum, label, t.value, errorLog, LDRTable))
+        if (readDataLabel(bs, spectrum, label, t.value, errorLog, dataLDRTable))
           continue;
 
         if (Arrays.binarySearch(TABULAR_DATA_LABELS, label) > 0) {
           tabDataLineNo = t.labelLineNo;
-          tabularSpecData = spectrum.getTabularSpecData(label, t.value);
+          tabularSpecData = spectrum.getTabularData(label, t.value);
           continue;
         }
 
         // Process Block
         if (label.equals("##END")) {
 
-          if (!spectrum.createXYCoords(tabularSpecData, tabDataLineNo,
-              LDRTable, errorLog))
+          if (!spectrum.processTabularData(tabularSpecData, tabDataLineNo,
+              dataLDRTable, errorLog))
             throw new JDXSourceException("Unable to read Block Source");
 
           bs.addJDXSpectrum(spectrum);
 
           tabularSpecData = null;
           spectrum = new JDXSpectrum();
-          LDRTable = new HashMap<String, String>();
+          dataLDRTable = new HashMap<String, String>();
           continue;
         } // End Process Block
 
-        LDRTable.put(label, t.value);
+        dataLDRTable.put(t.label, t.value);
 
       } // End Source File
     } catch (NoSuchElementException nsee) {

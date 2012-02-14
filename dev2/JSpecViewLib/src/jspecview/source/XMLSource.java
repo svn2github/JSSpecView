@@ -107,7 +107,7 @@ abstract class XMLSource extends JDXSource {
     spectrum.setLongDate(LongDate);
     spectrum.setOrigin(origin);
     spectrum.setOwner(owner);
-    spectrum.setPathlength(pathlength);
+    //spectrum.setPathlength(pathlength);
 
     //  now fill in what we can of a HashMap with parameters from the CML file
     //  syntax is:
