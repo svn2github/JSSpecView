@@ -380,7 +380,7 @@ public class RestrictedNTupleSource extends JDXSource {
 
         deltaX = (lastX - firstX) / (nPoints - 1);
 
-        JDXDecompressor decompressor = new JDXDecompressor(tabularSpecData, xFactor, yFactor, deltaX);
+        JDXDecompressor decompressor = new JDXDecompressor(tabularSpecData, xFactor, yFactor, deltaX, nPoints);
 
         xyCoords = decompressor.decompressData();
 
@@ -623,7 +623,7 @@ public class RestrictedNTupleSource extends JDXSource {
 
         deltaX = (lastX - firstX) / (nPoints - 1);
 
-        JDXDecompressor decompressor = new JDXDecompressor(tabularSpecData, xFactor, yFactor, deltaX);
+        JDXDecompressor decompressor = new JDXDecompressor(tabularSpecData, xFactor, yFactor, deltaX, nPoints);
 
         xyCoords = decompressor.decompressData();
 

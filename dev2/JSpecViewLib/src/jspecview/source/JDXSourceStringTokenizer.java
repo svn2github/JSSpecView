@@ -69,45 +69,46 @@ public class JDXSourceStringTokenizer {
     st = new StringTokenizer(contents);
   }
 
+  private StringBuffer dataSet = new StringBuffer();
+
   /**
    * Gets the next token from the string and stores the label and the value
    */
-  public boolean nextToken(){
+  public boolean nextToken() {
     // ADD CODE TO IGNORE ##= COMMENTS
     // TWO LDR'S CAN'T BE ON THE SAME LINE
-
-
-    String l, v, dataSet, line;
 
     labelLineNo += dataSetLineCount;
 
     // recontruct dataset
-    l = st.nextToken("=");
-    v = st.nextToken("##");
+    String l = st.nextToken("=");
+    String v = st.nextToken("##");
     // TODO:  Not testing here for NON jdx format?
-    dataSet = l + v + JSpecViewUtils.newLine;
-
-    StringReader stringReader = new StringReader(dataSet);
+    dataSet.setLength(0);
+    dataSet.append(l).append(v).append(JSpecViewUtils.newLine);
+    StringReader stringReader = new StringReader(dataSet.toString());
     BufferedReader lineReader = new BufferedReader(stringReader);
 
     // find out how many lines the dataset takes up
-    dataSetLineCount = 0;
+    dataSetLineCount = -1;
     try {
-      line = lineReader.readLine();
-      while(line != null){
-        line = lineReader.readLine();
-        if(line != null){
-          dataSetLineCount++;
-        }
-      }
+      while (lineReader.readLine() != null)
+        dataSetLineCount++;
+    } catch (IOException ex) {
     }
-    catch (IOException ex) {
-    }
+    label = l.trim();
+    value = (v.startsWith("<") && v.contains("</") ? v : trimComments(v));
+    value = value.substring(value.indexOf("=") + 1).trim();
 
+    return true;
+  }
 
+  private String trimComments(String v) {
+    
     // trim comments
     StringBuffer valueBuffer = new StringBuffer();
-    lineReader = new BufferedReader(new StringReader(v));
+    BufferedReader lineReader = new BufferedReader(new StringReader(v));
+    String line;
     try {
       while ((line = lineReader.readLine()) != null){
         line = line.trim();
@@ -120,32 +121,13 @@ public class JDXSourceStringTokenizer {
         // remove comments from the end of a line
         if(commentIndex != -1)
           line = line.substring(0, commentIndex).trim();
-
-        valueBuffer.append(line + JSpecViewUtils.newLine);
+        valueBuffer.append(line).append(JSpecViewUtils.newLine);
       }
     }
     catch (IOException ex) {
     }
-
-    label = l.trim();
-    value = valueBuffer.toString().trim();
-    int index = value.indexOf("=");
-    value = value.substring(index+1).trim();
-    
-    return true;
+    return valueBuffer.toString().trim();
   }
-
-  /*
-    public void nextToken(){
-
-    label = st.nextToken("=").trim();
-
-    value = st.nextToken("##").trim();
-    int index = value.indexOf("=");
-    value = value.substring(index+1).trim();
-  }
-
-  */
 
   /**
    * Returns true if the source string has more tokens

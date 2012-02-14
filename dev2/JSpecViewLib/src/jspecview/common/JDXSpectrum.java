@@ -575,7 +575,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     increasing = (fileDeltaX > 0);
 
     JDXDecompressor decompressor = new JDXDecompressor(tabularSpecData,
-        xFactor, yFactor, fileDeltaX);
+        xFactor, yFactor, fileDeltaX, nPointsFile);
     decompressor.setLabelLineNo(tabDataLineNo);
 
     xyCoords = decompressor.decompressData();
