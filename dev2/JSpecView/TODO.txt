@@ -1,5 +1,34 @@
 Feel free to add to this file anytime! Don't worry about sync problems.
 
 t6a.jdx  -- MS Relative Abundance is x 10 
+t6a.jdx  -- NMR -- no need for scale on left?
+
+file save -- includes Models but not Peaks
+
+in JDXSource.java I have commented out:
+
+//    if (label.equals("##PATHLENGTH")) {
+//      jdxObject.pathlength = value;
+//      return true;
+//    }
+
+    // NOTE: returning TRUE for these means they are 
+    // not included in the header map -- is that what we want?
+    
+//    if(label.equals("##MINX") ||
+//        label.equals("##MINY") ||
+//        label.equals("##MAXX") ||
+//        label.equals("##MAXY") ||
+//        label.equals("##FIRSTY")||
+//        label.equals("##DELTAX") ||
+//        label.equals("##DATACLASS"))
+//        return true;
+
+
+
+That was setting pathlength but never reading it, and the others were being ignored
+completely instead of being saved in the Hashtable. Don't we want those in the spectrum hashtable?
+
+ 
 
  
