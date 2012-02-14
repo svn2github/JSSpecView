@@ -171,7 +171,6 @@ public class IntegralGraph implements Graph {
     return "Integral of: " + graph.getTitle();
   }
 
-  @Override
   public String getTitleLabel() {
     return getTitle();
   }

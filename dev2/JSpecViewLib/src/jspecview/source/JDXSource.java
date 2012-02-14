@@ -63,8 +63,13 @@ public abstract class JDXSource extends JDXHeader {
   public static final String[] TABULAR_DATA_LABELS = { "##XYDATA",
       "##XYPOINTS", "##PEAKTABLE", "##DATATABLE", "##PEAKASSIGNMENTS" };
 
+  static {
+    Arrays.sort(TABULAR_DATA_LABELS);
+  }
+
   /**
    * The variable list for the tabular data labels
+   * NOTE: [0] MUST BE ALPHABETICAL ORDER
    */
   public static final String[][] VAR_LIST_TABLE = {
       { "PEAKTABLE", "XYDATA", "XYPOINTS" },
@@ -206,8 +211,7 @@ public abstract class JDXSource extends JDXHeader {
           && t.value.toUpperCase().equals("NTUPLES")) {
         return TYPE_NTUPLE;
       }
-      Arrays.sort(JDXSource.TABULAR_DATA_LABELS);
-      if (Arrays.binarySearch(JDXSource.TABULAR_DATA_LABELS, label) > 0)
+      if (Arrays.binarySearch(TABULAR_DATA_LABELS, label) > 0)
         return TYPE_SIMPLE;
     }
     return TYPE_UNKNOWN;

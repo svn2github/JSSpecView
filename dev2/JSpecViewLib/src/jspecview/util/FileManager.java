@@ -173,7 +173,6 @@ public class FileManager {
       if (showMsg)
         Logger.info("FileManager opening file " + name);
       File file = new File(name);
-      System.out.println(file);
       length = (int) file.length();
       in = new FileInputStream(file);
     }
