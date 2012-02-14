@@ -308,7 +308,9 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
         .hasNext();) {
       String label = (String) iter.next();
       String dataSet = (String) headerTable.get(label);
-      buffer.append(label + "= " + dataSet + JSpecViewUtils.newLine);
+      String nl = (dataSet.startsWith("<") && dataSet.contains("</") ? JSpecViewUtils.newLine : "");
+        
+      buffer.append(label + "= " + nl + dataSet + JSpecViewUtils.newLine);
     }
     if (getObservedFreq() != ERROR)
       buffer.append("##.OBSERVE FREQUENCY= " + getObservedFreq()

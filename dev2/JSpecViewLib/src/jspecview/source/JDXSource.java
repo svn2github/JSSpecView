@@ -377,7 +377,7 @@ public abstract class JDXSource extends JDXHeader {
       } catch (Exception e) {
 
       }
-      return true;
+      return false; // save in table as well, for export
     }
 
     if(label.equals("##XLABEL")){
