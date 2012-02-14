@@ -341,14 +341,14 @@ public abstract class JDXSource extends JDXHeader {
     // NOTE: returning TRUE for these means they are 
     // not included in the header map -- is that what we want?
     
-//    if(label.equals("##MINX") ||
-//        label.equals("##MINY") ||
-//        label.equals("##MAXX") ||
-//        label.equals("##MAXY") ||
-//        label.equals("##FIRSTY")||
-//        label.equals("##DELTAX") ||
-//        label.equals("##DATACLASS"))
-//        return true;
+    if(label.equals("##MINX") ||
+      label.equals("##MINY") ||
+      label.equals("##MAXX") ||
+      label.equals("##MAXY") ||
+      label.equals("##FIRSTY")||
+      label.equals("##DELTAX") ||
+      label.equals("##DATACLASS"))
+    return true;
 
     if (label.equals("##FIRSTX")) {
       jdxObject.fileFirstX = Double.parseDouble(value);
