@@ -1264,19 +1264,22 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       yscale = yScaleOn;
     }
 
+    boolean xAxis = !spectra[0].getXUnits().equalsIgnoreCase("Arbitrary Units");
+    boolean yAxis = !spectra[0].getYUnits().equalsIgnoreCase("Arbitrary Units");
+
     if (grid)
       drawGrid(g, height, width);
     for (int i = 0; i < numOfSpectra; i++)
       drawPlot(g, i, height, width);
-    if (xscale)
+    if (xscale && xAxis)
       drawXScale(g, height, width);
-    if (yscale)
+    if (yscale && yAxis)
       drawYScale(g, height, width);
     if (title)
       drawTitle(g, height, width);
-    if (xunits)
+    if (xunits && xAxis)
       drawXUnits(g, height, width);
-    if (yunits)
+    if (yunits && yAxis)
       drawYUnits(g, height, width);
     if (coords)
       drawCoordinates(g, height, width);
