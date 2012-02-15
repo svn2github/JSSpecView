@@ -20,7 +20,7 @@
 package jspecview.export;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 
 import jspecview.common.Coordinate;
@@ -161,7 +161,7 @@ abstract class XMLExporter extends FormExporter {
     // these may come back null, but context.put() turns that into ""
     // still, one must check for == null in tests here.
 
-    HashMap<String, String> specHead = spec.getHeaderTable();
+    Map<String, String> specHead = spec.getHeaderTable();
     state = specHead.get("##STATE");
     resolution = specHead.get("##RESOLUTION");
     model = specHead.get("##SPECTROMETER");

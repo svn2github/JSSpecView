@@ -71,6 +71,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.EventListener;
 import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -126,6 +127,7 @@ import jspecview.common.PeakInfo;
 import jspecview.common.TransmittanceAbsorbanceConverter;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
+import jspecview.source.JDXFileReader;
 import jspecview.source.JDXSource;
 import jspecview.util.Escape;
 import jspecview.util.FileManager;
@@ -639,7 +641,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     MainFrame frame = new MainFrame();
     frame.setSize(800, 500);
     //frame.pack();
-    frame.setVisible(true);
 
     // check for command-line arguments
     if (args.length > 0) {
@@ -653,7 +654,9 @@ public class MainFrame extends JFrame implements DropTargetListener,
           frame.writeStatus("File: " + filePath + " does not exist");
         }
       }
+      frame.setVisible(true);
     } else {
+      frame.setVisible(true);
       frame.showFileOpenDialog();
     }
   }
@@ -671,66 +674,47 @@ public class MainFrame extends JFrame implements DropTargetListener,
     getContentPane().setLayout(mainborderLayout);
     fileMenu.setMnemonic('F');
     fileMenu.setText("File");
-    openMenuItem.setActionCommand("Open");
-    openMenuItem.setMnemonic('O');
-    openMenuItem.setText("Open...");
-    openMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(79,
-        InputEvent.CTRL_MASK, false));
-    openMenuItem.addActionListener(new ActionListener() {
+    
+    setMenuItem(openMenuItem, 'O', "Open...", 79, InputEvent.CTRL_MASK, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         open_actionPerformed(e);
       }
     });
-    openURLMenuItem.setActionCommand("OpenURL");
-    openURLMenuItem.setMnemonic('U');
-    openURLMenuItem.setText("Open url...");
-    openURLMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(85,
-        InputEvent.CTRL_MASK, false));
-    openURLMenuItem.addActionListener(new ActionListener() {
+    setMenuItem(openURLMenuItem, 'U', "Open URL...", 85, InputEvent.CTRL_MASK, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         openURL_actionPerformed(e);
       }
     });
-    printMenuItem.setMnemonic('P');
-    printMenuItem.setText("Print...");
-    printMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(80,
-        InputEvent.CTRL_MASK, false));
-    printMenuItem.addActionListener(new ActionListener() {
+    setMenuItem(printMenuItem, 'P', "Print...", 80, InputEvent.CTRL_MASK, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         printMenuItem_actionPerformed(e);
       }
     });
-    closeMenuItem.setMnemonic('C');
-    closeMenuItem.setText("Close");
-    closeMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(115,
-        InputEvent.CTRL_MASK, false));
-    closeMenuItem.addActionListener(new ActionListener() {
+    setMenuItem(closeMenuItem, 'C', "Close", 115, InputEvent.CTRL_MASK, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         closeMenuItem_actionPerformed(e);
       }
     });
-    closeAllMenuItem.setMnemonic('L');
-    closeAllMenuItem.setText("Close All");
-    closeAllMenuItem.addActionListener(new ActionListener() {
+    setMenuItem(closeAllMenuItem, 'L', "Close All", 0, InputEvent.CTRL_MASK, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         closeAllMenuItem_actionPerformed(e);
       }
     });
-    exitMenuItem.setMnemonic('X');
-    exitMenuItem.setText("Exit");
-    exitMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(115,
-        InputEvent.ALT_MASK, false));
-    exitMenuItem.addActionListener(new ActionListener() {
+    setMenuItem(exitMenuItem, 'X', "Exit", 115, InputEvent.ALT_MASK, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         exitMenuItem_actionPerformed(e);
       }
     });
+    
     windowMenu.setMnemonic('W');
     windowMenu.setText("Window");
+    
     helpMenu.setMnemonic('H');
     helpMenu.setText("Help");
+    
     optionsMenu.setMnemonic('O');
     optionsMenu.setText("Options");
+    
     displayMenu.setMnemonic('D');
     displayMenu.setText("Display");
     displayMenu.addMenuListener(new MenuListener() {
@@ -746,113 +730,74 @@ public class MainFrame extends JFrame implements DropTargetListener,
     });
     zoomMenu.setMnemonic('Z');
     zoomMenu.setText("Zoom");
-    gridCheckBoxMenuItem.setMnemonic('G');
-    gridCheckBoxMenuItem.setText("Grid");
-    gridCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(71,
-        InputEvent.CTRL_MASK, false));
-    gridCheckBoxMenuItem.addItemListener(new ItemListener() {
-      public void itemStateChanged(ItemEvent e) {
-        gridCheckBoxMenuItem_itemStateChanged(e);
-      }
-    });
-    coordsCheckBoxMenuItem.setMnemonic('C');
-    coordsCheckBoxMenuItem.setText("Coordinates");
-    coordsCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(
-        67, InputEvent.CTRL_MASK, false));
-    coordsCheckBoxMenuItem.addItemListener(new ItemListener() {
-      public void itemStateChanged(ItemEvent e) {
-        coordsCheckBoxMenuItem_itemStateChanged(e);
-      }
-    });
-    revPlotCheckBoxMenuItem.setMnemonic('R');
-    revPlotCheckBoxMenuItem.setText("Reverse Plot");
-    revPlotCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(
-        82, InputEvent.CTRL_MASK, false));
-    revPlotCheckBoxMenuItem.addItemListener(new ItemListener() {
-      public void itemStateChanged(ItemEvent e) {
-        revPlotCheckBoxMenuItem_itemStateChanged(e);
-      }
-    });
-
-    scaleXCheckBoxMenuItem.setMnemonic('X');
-    scaleXCheckBoxMenuItem.setText("X Scale");
-    scaleXCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(
-        88, InputEvent.CTRL_MASK, false));
-    scaleXCheckBoxMenuItem.addItemListener(new ItemListener() {
-      public void itemStateChanged(ItemEvent e) {
-        scaleXCheckBoxMenuItem_itemStateChanged(e);
-      }
-    });
-
-    scaleYCheckBoxMenuItem.setMnemonic('Y');
-    scaleYCheckBoxMenuItem.setText("Y Scale");
-    scaleYCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(
-        89, InputEvent.CTRL_MASK, false));
-    scaleYCheckBoxMenuItem.addItemListener(new ItemListener() {
-      public void itemStateChanged(ItemEvent e) {
-        scaleYCheckBoxMenuItem_itemStateChanged(e);
-      }
-    });
-
-    nextMenuItem.setMnemonic('N');
-    nextMenuItem.setText("Next View");
-    nextMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(78,
-        InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, false));
-    nextMenuItem.addActionListener(new ActionListener() {
+    
+    setMenuItem(gridCheckBoxMenuItem, 'G', "Grid", 71, InputEvent.CTRL_MASK,
+        new ItemListener() {
+          public void itemStateChanged(ItemEvent e) {
+            gridCheckBoxMenuItem_itemStateChanged(e);
+          }
+        });
+    setMenuItem(coordsCheckBoxMenuItem, 'C', "Coordinates", 67,
+        InputEvent.CTRL_MASK, new ItemListener() {
+          public void itemStateChanged(ItemEvent e) {
+            coordsCheckBoxMenuItem_itemStateChanged(e);
+          }
+        });
+    setMenuItem(revPlotCheckBoxMenuItem, 'R', "Reverse Plot", 82,
+        InputEvent.CTRL_MASK, new ItemListener() {
+          public void itemStateChanged(ItemEvent e) {
+            revPlotCheckBoxMenuItem_itemStateChanged(e);
+          }
+        });
+    setMenuItem(scaleXCheckBoxMenuItem, 'X', "X Scale", 88,
+        InputEvent.CTRL_MASK, new ItemListener() {
+          public void itemStateChanged(ItemEvent e) {
+            scaleXCheckBoxMenuItem_itemStateChanged(e);
+          }
+        });
+    setMenuItem(scaleYCheckBoxMenuItem, 'Y', "Y Scale", 89,
+        InputEvent.CTRL_MASK, new ItemListener() {
+          public void itemStateChanged(ItemEvent e) {
+            scaleYCheckBoxMenuItem_itemStateChanged(e);
+          }
+        });
+    setMenuItem(nextMenuItem, 'N', "Next View", 78, InputEvent.CTRL_MASK
+        | InputEvent.SHIFT_MASK, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         nextMenuItem_actionPerformed(e);
       }
-    });
-    prevMenuItem.setMnemonic('P');
-    prevMenuItem.setText("Previous View");
-    prevMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(80,
-        InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, false));
-    prevMenuItem.addActionListener(new ActionListener() {
+    });    
+    setMenuItem(prevMenuItem, 'P', "Previous View", 80, InputEvent.CTRL_MASK
+        | InputEvent.SHIFT_MASK, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         prevMenuItem_actionPerformed(e);
       }
     });
-    fullMenuItem.setMnemonic('F');
-    fullMenuItem.setText("Full View");
-    fullMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(70,
-        InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, false));
-    fullMenuItem.addActionListener(new ActionListener() {
+    setMenuItem(fullMenuItem, 'F', "Full View", 70, InputEvent.CTRL_MASK
+        | InputEvent.SHIFT_MASK, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         fullMenuItem_actionPerformed(e);
       }
     });
-    clearMenuItem.setMnemonic('C');
-    clearMenuItem.setText("Clear Views");
-    clearMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(67,
-        InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, false));
-    clearMenuItem.addActionListener(new ActionListener() {
+    setMenuItem(clearMenuItem, 'C', "Clear Views", 67, InputEvent.CTRL_MASK
+        | InputEvent.SHIFT_MASK, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         clearMenuItem_actionPerformed(e);
       }
     });
-    preferencesMenuItem.setActionCommand("Preferences");
-    preferencesMenuItem.setMnemonic('P');
-    preferencesMenuItem.setText("Preferences...");
-    preferencesMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(80,
-        InputEvent.SHIFT_MASK, false));
-    preferencesMenuItem.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        preferencesMenuItem_actionPerformed(e);
-      }
-    });
-    contentsMenuItem.setActionCommand("Contents");
-    contentsMenuItem.setMnemonic('C');
-    contentsMenuItem.setText("Contents...");
-    contentsMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(112, 0,
-        false));
-    contentsMenuItem.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        contentsMenuItem_actionPerformed(e);
-      }
-    });
-    aboutMenuItem.setMnemonic('A');
-    aboutMenuItem.setText("About");
-    aboutMenuItem.addActionListener(new ActionListener() {
+    setMenuItem(preferencesMenuItem, 'P', "Preferences...", 80,
+        InputEvent.SHIFT_MASK, new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            preferencesMenuItem_actionPerformed(e);
+          }
+        });
+    setMenuItem(contentsMenuItem, 'C', "Contents...", 112, 0,
+        new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            contentsMenuItem_actionPerformed(e);
+          }
+        });
+    setMenuItem(aboutMenuItem, 'A', "About", 0, 0, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         aboutMenuItem_actionPerformed(e);
       }
@@ -860,40 +805,34 @@ public class MainFrame extends JFrame implements DropTargetListener,
     openRecentMenu.setActionCommand("OpenRecent");
     openRecentMenu.setMnemonic('R');
     openRecentMenu.setText("Open Recent");
+
     saveAsMenu.setMnemonic('A');
     saveAsJDXMenu.setMnemonic('J');
     exportAsMenu.setMnemonic('E');
 
-    toolbarCheckBoxMenuItem.setMnemonic('T');
-    toolbarCheckBoxMenuItem.setSelected(true);
-    toolbarCheckBoxMenuItem.setText("Toolbar");
-    toolbarCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(
-        84, InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, false));
-    toolbarCheckBoxMenuItem.addItemListener(new ItemListener() {
+    setMenuItem(toolbarCheckBoxMenuItem, 'T', "Toolbar", 84,
+        InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
         toolbarCheckBoxMenuItem_itemStateChanged(e);
       }
     });
-    sidePanelCheckBoxMenuItem.setMnemonic('S');
-    sidePanelCheckBoxMenuItem.setSelected(true);
-    sidePanelCheckBoxMenuItem.setText("Side Panel");
-    sidePanelCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke
-        .getKeyStroke(83, InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, false));
-    sidePanelCheckBoxMenuItem.addItemListener(new ItemListener() {
+    toolbarCheckBoxMenuItem.setSelected(true);
+
+    setMenuItem(sidePanelCheckBoxMenuItem, 'S', "Side Panel", 83, 
+        InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
         sidePanelCheckBoxMenuItem_itemStateChanged(e);
       }
     });
-    statusCheckBoxMenuItem.setMnemonic('B');
-    statusCheckBoxMenuItem.setSelected(true);
-    statusCheckBoxMenuItem.setText("Status Bar");
-    statusCheckBoxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(
-        66, InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, false));
-    statusCheckBoxMenuItem.addItemListener(new ItemListener() {
+    sidePanelCheckBoxMenuItem.setSelected(true);
+    
+    setMenuItem(statusCheckBoxMenuItem, 'B', "Status Bar",
+        66, InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
         statusCheckBoxMenuItem_itemStateChanged(e);
       }
     });
+    statusCheckBoxMenuItem.setSelected(true);
     sideSplitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
     sideSplitPane.setOneTouchExpandable(true);
     statusLabel.setToolTipText("");
@@ -901,62 +840,42 @@ public class MainFrame extends JFrame implements DropTargetListener,
     statusLabel.setText("  ");
     statusPanel.setBorder(BorderFactory.createEtchedBorder());
     statusPanel.setLayout(borderLayout1);
-    splitMenuItem.setMnemonic('P');
-    splitMenuItem.setText("Split");
-    splitMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(83,
-        InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, false));
-    splitMenuItem.addActionListener(new ActionListener() {
+    
+    setMenuItem(splitMenuItem, 'P', "Split", 83,
+        InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         splitMenuItem_actionPerformed(e);
       }
     });
-    overlayMenuItem.setMnemonic('O');
-    overlayMenuItem.setText("Overlay");
-    overlayMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(79,
-        InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, false));
-    overlayMenuItem.addActionListener(new ActionListener() {
+    setMenuItem(overlayMenuItem, 'O', "Overlay", 79, 
+        InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         overlayMenuItem_actionPerformed(e);
       }
     });
-    hideMenuItem.setMnemonic('H');
-    hideMenuItem.setText("Hide");
-    hideMenuItem.addActionListener(new ActionListener() {
+    setMenuItem(hideMenuItem, 'H', "Hide", 0, 0, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         hideMenuItem_actionPerformed(e);
       }
     });
-    hideAllMenuItem.setMnemonic('L');
-    hideAllMenuItem.setText("Hide All");
-    hideAllMenuItem.addActionListener(new ActionListener() {
+    setMenuItem(hideAllMenuItem, 'L', "Hide All", 0, 0, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         hideAllMenuItem_actionPerformed(e);
       }
     });
-    showMenuItem.setMnemonic('S');
-    showMenuItem.setText("Show All");
-    //    showAllMenuItem.setMnemonic('A');
-    //    showAllMenuItem.setText("Show All");
-    showMenuItem.addActionListener(new ActionListener() {
+    setMenuItem(showMenuItem, 'S', "Show All", 0, 0, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         showMenuItem_actionPerformed(e);
       }
     });
-    sourceMenuItem.setActionCommand("Source  ");
-    sourceMenuItem.setMnemonic('S');
-    sourceMenuItem.setText("Source ...");
-    sourceMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(83,
-        InputEvent.CTRL_MASK, false));
-    sourceMenuItem.addActionListener(new ActionListener() {
+    setMenuItem(sourceMenuItem, 'S', "Source ...", 83,
+        InputEvent.CTRL_MASK, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         sourceMenuItem_actionPerformed(e);
       }
     });
-    propertiesMenuItem.setMnemonic('P');
-    propertiesMenuItem.setText("Properties");
-    propertiesMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(72,
-        InputEvent.CTRL_MASK, false));
-    propertiesMenuItem.addActionListener(new ActionListener() {
+    setMenuItem(propertiesMenuItem, 'P', "Properties", 72,
+        InputEvent.CTRL_MASK, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         propertiesMenuItem_actionPerformed(e);
       }
@@ -965,11 +884,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     borderLayout1.setHgap(2);
     borderLayout1.setVgap(2);
 
-    clearButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        clearButton_actionPerformed(e);
-      }
-    });
     previousButton.setBorder(null);
     previousButton.setToolTipText("Previous View");
     previousButton.setIcon(previousIcon);
@@ -997,6 +911,12 @@ public class MainFrame extends JFrame implements DropTargetListener,
     clearButton.setBorder(null);
     clearButton.setToolTipText("Clear Views");
     clearButton.setIcon(clearIcon);
+    clearButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        clearButton_actionPerformed(e);
+      }
+    });
+
     openButton.setBorder(null);
     openButton.setToolTipText("Open");
     openButton.setIcon(openIcon);
@@ -1148,7 +1068,12 @@ public class MainFrame extends JFrame implements DropTargetListener,
     // TODO: Add help
     //helpMenu.add(contentsMenuItem);
     helpMenu.add(aboutMenuItem);
-    JSVPanel.setMenus(saveAsMenu, saveAsJDXMenu, exportAsMenu, actionListener);
+    JSVPanel.setMenus(saveAsMenu, saveAsJDXMenu, exportAsMenu,
+        (new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            exportSpectrum(e.getActionCommand());
+          }
+        }));
     //getContentPane().add(toolBar, BorderLayout.NORTH);
     getContentPane().add(statusPanel, BorderLayout.SOUTH);
     statusPanel.add(statusLabel, BorderLayout.SOUTH);
@@ -1192,12 +1117,19 @@ public class MainFrame extends JFrame implements DropTargetListener,
     windowMenu.addSeparator();
   }
 
-  private ActionListener actionListener = new ActionListener() {
-    public void actionPerformed(ActionEvent e) {
-      exportSpectrum(e.getActionCommand());
-    }
-  };
-  
+  private static void setMenuItem(JMenuItem item, char c, String text,
+                           int accel, int mask, EventListener el) {
+    item.setMnemonic(c);
+    item.setText(text);
+    if (accel > 0)
+      item.setAccelerator(javax.swing.KeyStroke.getKeyStroke(accel,
+          mask, false));
+    if (el instanceof ActionListener)
+      item.addActionListener((ActionListener) el);
+    else if (el instanceof ItemListener)
+      item.addItemListener((ItemListener) el);
+  }
+
   /**
    * Shows dialog to open a file
    */
@@ -1278,7 +1210,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     }
     JDXSource source;
     try {
-      source = JDXSource.createJDXSource(null, filePath, null);
+      source = JDXFileReader.createJDXSource(null, filePath, null);
     } catch (Exception e) {
       writeStatus(e.getMessage());
       return FILE_OPEN_ERROR;
@@ -1538,7 +1470,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     closeSource(currentSelectedSource);
     removeSource(currentSelectedSource);
 
-    if (jdxSources.size() < 1)
+    if (jdxSources.size() == 0)
       setMenuEnables(null);
   }
 
@@ -1880,8 +1812,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
     @Override
     public void internalFrameActivated(InternalFrameEvent e) {
       JInternalFrame frame = e.getInternalFrame();
-      currentSelectedSource = this.source;
-      JDXSpectrum spec = this.source.getJDXSpectrum(0);
+      currentSelectedSource = source;
+      JDXSpectrum spec = source.getJDXSpectrum(0);
 
       // Update the menu items for the display menu
       JSVPanel jsvp = (JSVPanel) frame.getContentPane().getComponent(0);
@@ -2428,7 +2360,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     closeSource(currentSelectedSource);
     removeSource(currentSelectedSource);
 
-    if (jdxSources.size() < 1) {
+    if (jdxSources.size() == 0) {
       saveAsMenu.setEnabled(false);
       closeMenuItem.setEnabled(false);
       closeAllMenuItem.setEnabled(false);

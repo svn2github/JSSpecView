@@ -55,10 +55,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -97,9 +95,8 @@ import jspecview.common.TransmittanceAbsorbanceConverter;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
 import jspecview.export.Exporter;
-import jspecview.source.BlockSource;
+import jspecview.source.JDXFileReader;
 import jspecview.source.JDXSource;
-import jspecview.source.NTupleSource;
 import jspecview.util.Escape;
 import jspecview.util.Logger;
 import jspecview.util.Parser;
@@ -544,9 +541,9 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
 
       for (int i = 0; i < numberOfPanels; i++) {
         String title = specs.get(i).getTitleLabel();
-        if (source instanceof NTupleSource)
+        if (source.type == JDXSource.TYPE_NTUPLE)
           title = title.substring(title.indexOf(':') + 1);
-        else if (source instanceof BlockSource)
+        else if (source.type == JDXSource.TYPE_BLOCK)
           //title = "block " + (i + 1);
           title = title.substring(0, (title.length() >= 10 ? 10 : title
               .length()))
@@ -597,7 +594,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
         if (numberOfPanels <= 20) {
           // add Menus to navigate
           JCheckBoxMenuItem mi;
-          if (source instanceof NTupleSource || source instanceof BlockSource) {
+          if (source.isCompoundSource) {
             for (int i = 0; i < numberOfPanels; i++) {
               title = (i + 1) + "- " + specs.get(i).getTitleLabel();
               mi = new JCheckBoxMenuItem(title);
@@ -618,7 +615,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
               appletPopupMenu.compoundMenu.add(mi);
             }
             appletPopupMenu.compoundMenu
-                .setText(source instanceof BlockSource ? "Blocks" : "NTuples");
+                .setText(source.type == JDXSource.TYPE_BLOCK ? "Blocks" : "NTuples");
           }
           // add compound menu to popup menu
           appletPopupMenu.add(appletPopupMenu.compoundMenu, 3);
@@ -719,186 +716,17 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
    *        the ActionEvent
    */
   void headerMenuItem_actionPerformed(ActionEvent e) {
-    if (overlay) {
-      // Show header of Source
-      Map<String, String> header = source.getHeaderTable();
-      Object[] headerLabels = header.keySet().toArray();
-      Object[] headerValues = header.values().toArray();
-
-      int coreHeaderSize = 5;
-
-      String[] columnNames = { "Label", "Description" };
-      int headerSize = header.size() + coreHeaderSize;
-
-      Object rowData[][] = new Object[headerSize][];
-      Object[] tmp;
-      int i = 0;
-
-      // add core header
-      tmp = new Object[2];
-      tmp[0] = "##TITLE";
-      tmp[1] = source.getTitle();
-      rowData[i++] = tmp;
-
-      tmp = new Object[2];
-      tmp[0] = "##JCAMP-DX";
-      tmp[1] = source.getJcampdx();
-      rowData[i++] = tmp;
-
-      tmp = new Object[2];
-      tmp[0] = "##DATA TYPE";
-      tmp[1] = source.getDataType();
-      rowData[i++] = tmp;
-
-      /*
-      tmp = new Object[2];
-      tmp[0] = "##DATA CLASS";
-      tmp[1] = ((CompoundSource)source).getDataClass();
-      rowData[i++] = tmp;
-      */
-
-      tmp = new Object[2];
-      tmp[0] = "##ORIGIN";
-      tmp[1] = source.getOrigin();
-      rowData[i++] = tmp;
-
-      tmp = new Object[2];
-      tmp[0] = "##OWNER";
-      tmp[1] = source.getOwner();
-      rowData[i++] = tmp;
-
-      for (int j = 0; i < headerSize; i++, j++) {
-        tmp = new Object[2];
-        tmp[0] = headerLabels[j];
-        tmp[1] = headerValues[j];
-        rowData[i] = tmp;
-      }
-
-      JTable table = new JTable(rowData, columnNames);
-      JScrollPane scrollPane = new JScrollPane(table);
-
-      JOptionPane.showMessageDialog(this, scrollPane, "Header Information",
-          JOptionPane.PLAIN_MESSAGE);
-
-    } else {
-      JDXSpectrum spectrum = (JDXSpectrum) selectedJSVPanel.getSpectrumAt(0);
-
-      HashMap<String, String> header = spectrum.getHeaderTable();
-      Object[] headerLabels = header.keySet().toArray();
-      Object[] headerValues = header.values().toArray();
-
-      int coreHeaderSize = 6;
-      int specParamsSize = 8;
-
-      String[] columnNames = { "Label", "Description" };
-      int headerSize = header.size() + coreHeaderSize + specParamsSize;
-
-      Object rowData[][] = new Object[headerSize][];
-      Object[] tmp;
-      int i = 0;
-
-      // add core header
-      tmp = new Object[2];
-      tmp[0] = "##TITLE";
-      tmp[1] = spectrum.getTitle();
-      rowData[i++] = tmp;
-
-      tmp = new Object[2];
-      tmp[0] = "##JCAMP-DX";
-      tmp[1] = spectrum.getJcampdx();
-      rowData[i++] = tmp;
-
-      tmp = new Object[2];
-      tmp[0] = "##DATA TYPE";
-      tmp[1] = spectrum.getDataType();
-      rowData[i++] = tmp;
-
-      tmp = new Object[2];
-      tmp[0] = "##DATA CLASS";
-      tmp[1] = spectrum.getDataClass();
-      rowData[i++] = tmp;
-
-      tmp = new Object[2];
-      tmp[0] = "##ORIGIN";
-      tmp[1] = spectrum.getOrigin();
-      rowData[i++] = tmp;
-
-      tmp = new Object[2];
-      tmp[0] = "##OWNER";
-      tmp[1] = spectrum.getOwner();
-      rowData[i++] = tmp;
-
-      for (int j = 0; i < (headerSize - specParamsSize); i++, j++) {
-        tmp = new Object[2];
-        tmp[0] = headerLabels[j];
-        tmp[1] = headerValues[j];
-        rowData[i] = tmp;
-      }
-
-      // add spectral parameters
-      tmp = new Object[2];
-      tmp[0] = "##XUNITS";
-      tmp[1] = spectrum.isHZtoPPM() ? "HZ" : spectrum.getXUnits();
-      rowData[i++] = tmp;
-
-      tmp = new Object[2];
-      tmp[0] = "##YUNITS";
-      tmp[1] = spectrum.getYUnits();
-      rowData[i++] = tmp;
-
-      tmp = new Object[2];
-      tmp[0] = "##FIRSTX";
-      double firstX;
-      if (spectrum.isIncreasing())
-        firstX = spectrum.getFirstX();
-      else
-        firstX = spectrum.getLastX();
-
-      tmp[1] = String.valueOf(spectrum.isHZtoPPM() ? firstX
-          * spectrum.getObservedFreq() : firstX);
-
-      rowData[i++] = tmp;
-
-      tmp = new Object[2];
-      tmp[0] = "##LASTX";
-      double lastX;
-      if (spectrum.isIncreasing())
-        lastX = spectrum.getLastX();
-      else
-        lastX = spectrum.getFirstX();
-      tmp[1] = String.valueOf(spectrum.isHZtoPPM() ? lastX
-          * spectrum.getObservedFreq() : lastX);
-      rowData[i++] = tmp;
-
-      tmp = new Object[2];
-      tmp[0] = "##XFACTOR";
-      tmp[1] = String.valueOf(spectrum.getXFactor());
-      rowData[i++] = tmp;
-
-      tmp = new Object[2];
-      tmp[0] = "##YFACTOR";
-      tmp[1] = String.valueOf(spectrum.getYFactor());
-      rowData[i++] = tmp;
-
-      tmp = new Object[2];
-      tmp[0] = "##NPOINTS";
-      tmp[1] = String.valueOf(spectrum.getNumberOfPoints());
-      rowData[i++] = tmp;
-
-      tmp = new Object[2];
-      tmp[0] = "##FIRSTY";
-      if (spectrum.isIncreasing())
-        tmp[1] = String.valueOf(spectrum.getFirstY());
-      else
-        tmp[1] = String.valueOf(spectrum.getLastY());
-      rowData[i++] = tmp;
-
-      JTable table = new JTable(rowData, columnNames);
-      JScrollPane scrollPane = new JScrollPane(table);
-
-      JOptionPane.showMessageDialog(this, scrollPane, "Header Information",
-          JOptionPane.PLAIN_MESSAGE);
-    }
+    
+    JDXSpectrum spectrum = (JDXSpectrum) selectedJSVPanel.getSpectrumAt(0);
+    Object[][] rowData = (overlay ? source
+        .getHeaderRowDataAsArray(false, 0) : spectrum
+        .getHeaderRowDataAsArray());
+    String[] columnNames = { "Label", "Description" };
+    JTable table = new JTable(rowData, columnNames);
+    table.setPreferredScrollableViewportSize(new Dimension(400, 195));
+    JScrollPane scrollPane = new JScrollPane(table);
+    JOptionPane.showMessageDialog(this, scrollPane, "Header Information",
+        JOptionPane.PLAIN_MESSAGE);
   }
 
   /**
@@ -1887,7 +1715,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     }
 
     try {
-      source = JDXSource.createJDXSource(data, fileName, base);
+      source = JDXFileReader.createJDXSource(data, fileName, base);
     } catch (Exception e) {
       writeStatus(e.getMessage());
       e.printStackTrace();

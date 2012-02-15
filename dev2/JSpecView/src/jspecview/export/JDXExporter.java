@@ -26,7 +26,7 @@ import java.util.Arrays;
 import jspecview.common.Coordinate;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSpecViewUtils;
-import jspecview.source.JDXSource;
+import jspecview.source.JDXFileReader;
 
 /**
  * class <code>JDXExporter</code> contains static methods for exporting a
@@ -118,8 +118,8 @@ class JDXExporter {
       break;
     }
 
-    int index = Arrays.binarySearch(JDXSource.VAR_LIST_TABLE[0], tmpDataClass);
-    String varList = JDXSource.VAR_LIST_TABLE[1][index];
+    int index = Arrays.binarySearch(JDXFileReader.VAR_LIST_TABLE[0], tmpDataClass);
+    String varList = JDXFileReader.VAR_LIST_TABLE[1][index];
 
     buffer.append(spectrum.getHeaderString(tmpDataClass, xCompFactor,
         yCompFactor, startIndex, endIndex));

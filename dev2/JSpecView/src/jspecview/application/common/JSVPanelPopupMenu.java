@@ -22,7 +22,6 @@ package jspecview.application.common;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
-import java.util.HashMap;
 
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenuItem;
@@ -218,180 +217,22 @@ public class JSVPanelPopupMenu extends JPopupMenu {
 
   /**
    * Shows the properties of the Spectrum displayed on the JSVPanel
-   * @param e the <code>ActionEvent</code
+   * 
+   * @param e
+   *        the <code>ActionEvent</code
    */
   public void properties_actionPerformed(ActionEvent e) {
 
-    if(selectedJSVPanel.getNumberOfSpectra() > 1){
-      // Show header of Source
-      HashMap<String, String> header = (HashMap<String, String>) source.getHeaderTable();
-      Object[] headerLabels = header.keySet().toArray();
-      Object[] headerValues = header.values().toArray();
-
-      int coreHeaderSize = 5;
-
-      String[] columnNames = {"Label", "Description"};
-      int headerSize = header.size() + coreHeaderSize;
-
-      Object rowData[][] = new Object[headerSize][];
-      Object[] tmp;
-      int i = 0;
-
-      // add core header
-      tmp = new Object[2];
-      tmp[0] = "##TITLE";
-      tmp[1] = source.getTitle();
-      rowData[i++] = tmp;
-
-      tmp = new Object[2];
-      tmp[0] = "##JCAMP-DX";
-      tmp[1] = source.getJcampdx();
-      rowData[i++] = tmp;
-
-      tmp = new Object[2];
-      tmp[0] = "##DATA TYPE";
-      tmp[1] = source.getDataType();
-      rowData[i++] = tmp;
-
-
-      tmp = new Object[2];
-      tmp[0] = "##ORIGIN";
-      tmp[1] = source.getOrigin();
-      rowData[i++] = tmp;
-
-      tmp = new Object[2];
-      tmp[0] = "##OWNER";
-      tmp[1] = source.getOwner();
-      rowData[i++] = tmp;
-
-      for(int j = 0; i < headerSize ; i++, j++){
-        tmp = new Object[2];
-        tmp[0] = headerLabels[j];
-        tmp[1] = headerValues[j];
-        rowData[i] = tmp;
-      }
-
-      JTable table = new JTable(rowData, columnNames);
-      table.setPreferredScrollableViewportSize(new Dimension(400, 95));
-      JScrollPane scrollPane = new JScrollPane(table);
-
-      JOptionPane.showMessageDialog(this, scrollPane, "Header Information",
-                                    JOptionPane.PLAIN_MESSAGE);
-
-    }
-    else{
-
-      JDXSpectrum spectrum = (JDXSpectrum)selectedJSVPanel.getSpectrumAt(0);
-
-      HashMap<String, String> header = spectrum.getHeaderTable();
-      Object[] headerLabels = header.keySet().toArray();
-      Object[] headerValues = header.values().toArray();
-
-      int coreHeaderSize = 6;
-      int specParamsSize = 8;
-
-      String[] columnNames = {"Label", "Description"};
-      int headerSize = header.size() + coreHeaderSize + specParamsSize;
-
-      Object rowData[][] = new Object[headerSize][];
-      Object[] tmp;
-      int i = 0;
-
-      // add core header
-      tmp = new Object[2];
-      tmp[0] = "##TITLE";
-      tmp[1] = spectrum.getTitle();
-      rowData[i++] = tmp;
-
-      tmp = new Object[2];
-      tmp[0] = "##JCAMP-DX";
-      tmp[1] = spectrum.getJcampdx();
-      rowData[i++] = tmp;
-
-      tmp = new Object[2];
-      tmp[0] = "##DATA TYPE";
-      tmp[1] = spectrum.getDataType();
-      rowData[i++] = tmp;
-
-      tmp = new Object[2];
-      tmp[0] = "##DATA CLASS";
-      tmp[1] = spectrum.getDataClass();
-      rowData[i++] = tmp;
-
-      tmp = new Object[2];
-      tmp[0] = "##ORIGIN";
-      tmp[1] = spectrum.getOrigin();
-      rowData[i++] = tmp;
-
-      tmp = new Object[2];
-      tmp[0] = "##OWNER";
-      tmp[1] = spectrum.getOwner();
-      rowData[i++] = tmp;
-
-      for(int j = 0; i < (headerSize - specParamsSize); i++, j++){
-        tmp = new Object[2];
-        tmp[0] = headerLabels[j];
-        tmp[1] = headerValues[j];
-        rowData[i] = tmp;
-      }
-
-      // add spectral parameters
-      tmp = new Object[2];
-      tmp[0] = "##XUNITS";
-      tmp[1] = spectrum.getXUnits();
-      rowData[i++] = tmp;
-
-      tmp = new Object[2];
-      tmp[0] = "##YUNITS";
-      tmp[1] = spectrum.getYUnits();
-      rowData[i++] = tmp;
-
-      tmp = new Object[2];
-      tmp[0] = "##FIRSTX";
-      if(spectrum.isIncreasing())
-        tmp[1] = String.valueOf(spectrum.getFirstX());
-      else
-        tmp[1] = String.valueOf(spectrum.getLastX());
-      rowData[i++] = tmp;
-
-      tmp = new Object[2];
-      tmp[0] = "##LASTX";
-      if(spectrum.isIncreasing())
-        tmp[1] = String.valueOf(spectrum.getLastX());
-      else
-        tmp[1] = String.valueOf(spectrum.getFirstX());
-      rowData[i++] = tmp;
-
-      tmp = new Object[2];
-      tmp[0] = "##XFACTOR";
-      tmp[1] = String.valueOf(spectrum.getXFactor());
-      rowData[i++] = tmp;
-
-      tmp = new Object[2];
-      tmp[0] = "##YFACTOR";
-      tmp[1] = String.valueOf(spectrum.getYFactor());
-      rowData[i++] = tmp;
-
-      tmp = new Object[2];
-      tmp[0] = "##NPOINTS";
-      tmp[1] = String.valueOf(spectrum.getNumberOfPoints());
-      rowData[i++] = tmp;
-
-      tmp = new Object[2];
-      tmp[0] = "##FIRSTY";
-      if(spectrum.isIncreasing())
-        tmp[1] = String.valueOf(spectrum.getFirstY());
-      else
-        tmp[1] = String.valueOf(spectrum.getLastY());
-      rowData[i++] = tmp;
-
-      JTable table = new JTable(rowData, columnNames);
-      table.setPreferredScrollableViewportSize(new Dimension(400, 195));
-      JScrollPane scrollPane = new JScrollPane(table);
-
-      JOptionPane.showMessageDialog(this, scrollPane, "Header Information",
-                                    JOptionPane.PLAIN_MESSAGE);
-    }
+    JDXSpectrum spectrum = (JDXSpectrum) selectedJSVPanel.getSpectrumAt(0);
+    Object[][] rowData = (source.isCompoundSource ? source
+        .getHeaderRowDataAsArray(false, 0) : spectrum
+        .getHeaderRowDataAsArray());
+    String[] columnNames = { "Label", "Description" };
+    JTable table = new JTable(rowData, columnNames);
+    table.setPreferredScrollableViewportSize(new Dimension(400, 195));
+    JScrollPane scrollPane = new JScrollPane(table);
+    JOptionPane.showMessageDialog(this, scrollPane, "Header Information",
+        JOptionPane.PLAIN_MESSAGE);
   }
 
   protected JSVPanel selectedJSVPanel;
