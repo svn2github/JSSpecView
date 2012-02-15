@@ -46,11 +46,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   }
 
   /**
-   * HashMap of optional header values
-   */
-  private HashMap<String, String> headerTable;
-
-  /**
    * Vector of x,y coordinates
    */
   private Coordinate[] xyCoords;
@@ -73,25 +68,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     System.out.println("initialize JDXSpectrum " + this);
     headerTable = new HashMap<String, String>();
     xyCoords = new Coordinate[0];
-  }
-
-  /**
-   * Sets the header table
-   * 
-   * @param table
-   *        a map of header labels and corresponding datasets
-   */
-  public void setHeaderTable(HashMap<String, String> table) {
-    headerTable = table;
-  }
-
-  /**
-   * Returns the table of headers
-   * 
-   * @return the table of headers
-   */
-  public HashMap<String, String> getHeaderTable() {
-    return headerTable;
   }
 
   /*   ---------- Constructed data --------------------------------------------------- */
@@ -277,81 +253,69 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
         new DecimalFormatSymbols(java.util.Locale.US));
 
     StringBuffer buffer = new StringBuffer();
-    String longdate = "";
     // start of header
-    buffer.append("##TITLE= " + getTitle() + JSpecViewUtils.newLine);
-    buffer.append("##JCAMP-DX= 5.01" /*+ getJcampdx()*/
-        + JSpecViewUtils.newLine);
-    buffer.append("##DATA TYPE= " + getDataType() + JSpecViewUtils.newLine);
-    buffer.append("##DATA CLASS= " + tmpDataClass + JSpecViewUtils.newLine);
-    buffer.append("##ORIGIN= " + getOrigin() + JSpecViewUtils.newLine);
-    buffer.append("##OWNER= " + getOwner() + JSpecViewUtils.newLine);
+    buffer.append("##TITLE= ").append(getTitle())
+        .append(JSpecViewUtils.newLine);
+    buffer.append("##JCAMP-DX= 5.01").append(JSpecViewUtils.newLine); /*+ getJcampdx()*/
+    buffer.append("##DATA TYPE= ").append(getDataType()).append(
+        JSpecViewUtils.newLine);
+    buffer.append("##DATA CLASS= ").append(tmpDataClass).append(
+        JSpecViewUtils.newLine);
+    buffer.append("##ORIGIN= ").append(getOrigin()).append(
+        JSpecViewUtils.newLine);
+    buffer.append("##OWNER= ").append(getOwner())
+        .append(JSpecViewUtils.newLine);
 
-    if ((getLongDate().equals("")) || (getDate().length() != 8))
+    String d = getDate();
+    String longdate = "";
+    if (getLongDate().equals("") || d.length() != 8) {
       longdate = currentTime + " $$ export date from JSpecView";
-
-    // give a 50 year window
-    // Y2K compliant
-    if (getDate().length() == 8) {
-      if (getDate().charAt(0) < '5')
-        longdate = "20" + getDate() + " " + getTime();
-      else
-        longdate = "19" + getDate() + " " + getTime();
-    }
-    if (!getLongDate().equals(""))
+    } else if (d.length() == 8) { // give a 50 year window; Y2K compliant
+      longdate = (d.charAt(0) < '5' ? "20" : "19") + d + " " + getTime();
+    } else {
       longdate = getLongDate();
-
-    buffer.append("##LONGDATE= " + longdate + JSpecViewUtils.newLine);
+    }
+    buffer.append("##LONGDATE= ").append(longdate).append(
+        JSpecViewUtils.newLine);
 
     // optional header
     for (Iterator<String> iter = headerTable.keySet().iterator(); iter
         .hasNext();) {
       String label = (String) iter.next();
       String dataSet = (String) headerTable.get(label);
-      String nl = (dataSet.startsWith("<") && dataSet.contains("</") ? JSpecViewUtils.newLine : "");
-        
-      buffer.append(label + "= " + nl + dataSet + JSpecViewUtils.newLine);
+      String nl = (dataSet.startsWith("<") && dataSet.contains("</") ? JSpecViewUtils.newLine
+          : "");
+      buffer.append(label).append("= ").append(nl).append(dataSet).append(
+          JSpecViewUtils.newLine);
     }
     if (getObservedFreq() != ERROR)
-      buffer.append("##.OBSERVE FREQUENCY= " + getObservedFreq()
-          + JSpecViewUtils.newLine);
+      buffer.append("##.OBSERVE FREQUENCY= ").append(getObservedFreq()).append(
+          JSpecViewUtils.newLine);
     //now need to put pathlength here
 
     // last part of header
 
-    if ((getObservedFreq() != ERROR)
-        && !(getDataType().toUpperCase().contains("FID")))
-      buffer.append("##XUNITS= HZ" + JSpecViewUtils.newLine);
-    else
-      buffer.append("##XUNITS= " + getXUnits() + JSpecViewUtils.newLine);
-
-    buffer.append("##YUNITS= " + getYUnits() + JSpecViewUtils.newLine);
-    buffer.append("##XFACTOR= " + sciFormatter.format(tmpXFactor)
-        + JSpecViewUtils.newLine);
-    buffer.append("##YFACTOR= " + sciFormatter.format(tmpYFactor)
-        + JSpecViewUtils.newLine);
-    if (getObservedFreq() != ERROR)
-      buffer.append("##FIRSTX= "
-          + varFormatter.format(xyCoords[startIndex].getXVal()
-              * getObservedFreq()) + JSpecViewUtils.newLine);
-    else
-      buffer.append("##FIRSTX= "
-          + varFormatter.format(xyCoords[startIndex].getXVal())
-          + JSpecViewUtils.newLine);
-    buffer.append("##FIRSTY= "
-        + varFormatter.format(xyCoords[startIndex].getYVal())
-        + JSpecViewUtils.newLine);
-    if (getObservedFreq() != ERROR)
-      buffer.append("##LASTX= "
-          + varFormatter.format(xyCoords[endIndex].getXVal()
-              * getObservedFreq()) + JSpecViewUtils.newLine);
-    else
-      buffer.append("##LASTX= "
-          + varFormatter.format(xyCoords[endIndex].getXVal())
-          + JSpecViewUtils.newLine);
-    buffer.append("##NPOINTS= " + (endIndex - startIndex + 1)
-        + JSpecViewUtils.newLine);
-
+    buffer.append("##XUNITS= ").append(getObservedFreq() == ERROR
+                || getDataType().toUpperCase().contains("FID") ? getXUnits()
+                : "HZ").append(JSpecViewUtils.newLine);
+    buffer.append("##YUNITS= ").append(getYUnits()).append(
+        JSpecViewUtils.newLine);
+    buffer.append("##XFACTOR= ").append(sciFormatter.format(tmpXFactor))
+        .append(JSpecViewUtils.newLine);
+    buffer.append("##YFACTOR= ").append(sciFormatter.format(tmpYFactor))
+        .append(JSpecViewUtils.newLine);
+    double f = (getObservedFreq() == ERROR ? 1 : getObservedFreq());
+    buffer.append("##FIRSTX= ").append(
+        varFormatter.format(xyCoords[startIndex].getXVal() * f)).append(
+        JSpecViewUtils.newLine);
+    buffer.append("##FIRSTY= ").append(
+        varFormatter.format(xyCoords[startIndex].getYVal())).append(
+        JSpecViewUtils.newLine);
+    buffer.append("##LASTX= ").append(
+        varFormatter.format(xyCoords[endIndex].getXVal() * f)).append(
+        JSpecViewUtils.newLine);
+    buffer.append("##NPOINTS= ").append((endIndex - startIndex + 1)).append(
+        JSpecViewUtils.newLine);
     return buffer.toString();
   }
 
@@ -405,8 +369,9 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return peakList;
   }
 
-  public void setPeakList(ArrayList<PeakInfo> list) {
+  public int setPeakList(ArrayList<PeakInfo> list) {
     peakList = list;
+    return list.size();
   }
 
   public String getPeakType() {
@@ -567,7 +532,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return false;
   }
 
-
   private void decompressData(String tabularSpecData, int tabDataLineNo,
                               StringBuffer errorLog) {
 
@@ -704,6 +668,26 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
    */
   public boolean isContinuous() {
     return continuous;
+  }
+
+  public Object[][] getHeaderRowDataAsArray() {
+    Object[][] rowData = getHeaderRowDataAsArray(true, 8);
+    int i = rowData.length - 8;
+    rowData[i++] = new Object[] { "##XUNITS", isHZtoPPM() ? "HZ" : getXUnits() };
+    rowData[i++] = new Object[] { "##YUNITS", getYUnits() };
+    double x = (isIncreasing() ? getFirstX() : getLastX());
+    rowData[i++] = new Object[] { "##FIRSTX",
+        String.valueOf(isHZtoPPM() ? x * getObservedFreq() : x) };
+    x = (isIncreasing() ? getLastX() : getFirstX());
+    rowData[i++] = new Object[] { "##FIRSTY",
+        String.valueOf(isIncreasing() ? getFirstY() : getLastY()) };
+    rowData[i++] = new Object[] { "##LASTX",
+        String.valueOf(isHZtoPPM() ? x * getObservedFreq() : x) };
+    rowData[i++] = new Object[] { "##XFACTOR", String.valueOf(getXFactor()) };
+    rowData[i++] = new Object[] { "##YFACTOR", String.valueOf(getYFactor()) };
+    rowData[i++] = new Object[] { "##NPOINTS",
+        String.valueOf(getNumberOfPoints()) };
+    return rowData;
   }
 
 

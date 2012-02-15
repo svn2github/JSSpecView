@@ -10,7 +10,7 @@
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ *  Lesser General License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this library; if not, write to the Free Software
@@ -35,20 +35,22 @@ import jspecview.util.Base64;
  * @author Prof. Robert J. Lancashire
  */
 
-public class AnIMLSource extends XMLSource {
+class AnIMLReader extends XMLReader {
 
   /**
    * Does the actual work of initializing the XMLSource
    * @param in an InputStream of the AnIML document
    * @return an instance of a AnIMLSource
    */
-  public static AnIMLSource getAniMLInstance(InputStream in) {
-    return (new AnIMLSource()).getXML(in);
+  static JDXSource getAniMLInstance(InputStream in) {
+    return (new AnIMLReader()).getXML(in);
   }
 
-  private AnIMLSource getXML(InputStream in) {
+  private JDXSource getXML(InputStream in) {
     try {
 
+      source = new JDXSource(JDXSource.TYPE_SIMPLE);
+      
       getSimpleXmlReader(in);
 
       reader.nextEvent();
@@ -78,7 +80,7 @@ public class AnIMLSource extends XMLSource {
       //
     }
 
-    return this;
+    return source;
   }
 
   /**

@@ -41,12 +41,14 @@ import jspecview.util.SimpleXmlReader;
  * @author Prof. Robert J. Lancashire
  */
 
-abstract class XMLSource extends JDXSource {
+abstract class XMLReader {
 
   //  protected XMLInputFactory factory;
   //  private XMLEventReader fer;
   //  private XMLEvent e;
 
+  protected JDXSource source;
+  
   protected SimpleXmlReader reader;
 
   protected String tagName = "START", attrList = "",
@@ -160,7 +162,7 @@ abstract class XMLSource extends JDXSource {
     Coordinate[] amlcoord = new Coordinate[npoints];
     xyCoords.toArray(amlcoord);
     spectrum.setXYCoords(amlcoord);
-    addJDXSpectrum(spectrum);
+    source.addJDXSpectrum(spectrum);
   }
 
   protected boolean checkPointCount() {
@@ -169,7 +171,7 @@ abstract class XMLSource extends JDXSource {
     if (continuous && npoints < 5) {
       System.err.println("Insufficient points to plot");
       errorLog.append("Insufficient points to plot \n");
-      setErrorLog(errorLog.toString());
+      source.setErrorLog(errorLog.toString());
       return false;
     }
     return true;
@@ -187,7 +189,7 @@ abstract class XMLSource extends JDXSource {
       errorLog.append("No Errors\n");
     }
     errorLog.append(errorSeparator);
-    setErrorLog(errorLog.toString());
+    source.setErrorLog(errorLog.toString());
   }
 
 

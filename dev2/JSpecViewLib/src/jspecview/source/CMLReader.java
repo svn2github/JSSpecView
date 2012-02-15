@@ -10,7 +10,7 @@
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ *  Lesser General License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this library; if not, write to the Free Software
@@ -32,7 +32,7 @@ import jspecview.util.Parser;
  * @author Prof. Robert J. Lancashire
  */
 
-public class CMLSource extends XMLSource {
+class CMLReader extends XMLReader {
   private boolean specfound = false;
 
   /**
@@ -40,13 +40,15 @@ public class CMLSource extends XMLSource {
    * @param in an InputStream of the CML document
    * @return an instance of a CMLSource
    */
-  public static CMLSource getCMLInstance(InputStream in) {
-    return (new CMLSource()).getXML(in);
+  static JDXSource getCMLInstance(InputStream in) {
+    return (new CMLReader()).getXML(in);
   }
 
-  private CMLSource getXML(InputStream in) {
+  private JDXSource getXML(InputStream in) {
     try {
 
+      source = new JDXSource(JDXSource.TYPE_SIMPLE);
+      
       getSimpleXmlReader(in);
       processXML(CML_0, CML_1);
 
@@ -69,7 +71,7 @@ public class CMLSource extends XMLSource {
       //
     }
 
-    return this;
+    return source;
   }
 
   String Ydelim = "";

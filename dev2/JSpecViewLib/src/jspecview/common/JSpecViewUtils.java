@@ -31,7 +31,7 @@ package jspecview.common;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 
@@ -767,7 +767,7 @@ public class JSpecViewUtils {
    */
   public static boolean isHNMR(JDXSpectrum spectrum) {
     String dataType = spectrum.getDataType();
-    HashMap<String, String> headerTable = spectrum.getHeaderTable();
+    Map<String, String> headerTable = spectrum.getHeaderTable();
     String obsNuc =  (String)headerTable.get("##.OBSERVENUCLEUS");
     if(dataType.toUpperCase().indexOf("NMR") != -1 &&
        obsNuc.toUpperCase().indexOf("H") != -1){
