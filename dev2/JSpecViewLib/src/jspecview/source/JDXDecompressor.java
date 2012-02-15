@@ -30,7 +30,6 @@ import java.io.StringReader;
 
 import jspecview.common.Coordinate;
 import jspecview.common.JSpecViewUtils;
-import jspecview.util.ArrayUtil;
 
 
 /**
@@ -312,8 +311,8 @@ public class JDXDecompressor {
     }
 
     if (nPoints != ipt) {
-      System.out.println("OH,oh, decompressor did not find " + nPoints + " points -- instead " + ipt);
-      System.out.println(data.substring(data.length()-50));
+      System.out.println("OH,oh, ASDF decompressor did not find " + nPoints + " points -- instead " + ipt);
+      System.out.println(data.substring(0, 50));
       Coordinate[] temp = new Coordinate[ipt];
       System.arraycopy(xyCoords, 0, temp, 0, ipt);
       xyCoords = temp;
@@ -417,6 +416,13 @@ public class JDXDecompressor {
       }
       lineIndex = 0;
     }
+    if (nPoints != ipt) {
+      System.out.println("OH,oh, AFFN decompressor did not find " + nPoints + " points -- instead " + ipt);
+      System.out.println(data.substring(0, 50));
+      Coordinate[] temp = new Coordinate[ipt];
+      System.arraycopy(xyCoords, 0, temp, 0, ipt);
+      xyCoords = temp;
+    }
     return (deltaX > 0 ? xyCoords : reverse(xyCoords));
   }
 
@@ -462,7 +468,7 @@ public class JDXDecompressor {
    * @param temp the DIF character
    * @return the DIF character as number as a string
    */
-  private String convDifChar (int temp)
+  private static String convDifChar (int temp)
   {
     int num =0;
     if ((temp >= '@') && (temp <= 'I')){
@@ -601,7 +607,7 @@ public class JDXDecompressor {
     }
 
     // Check if numbers are written in exponential notation
-    private int checkForExp(String line) {
+    private static int checkForExp(String line) {
       if (line.indexOf("E-") != -1) {
         return line.indexOf("E-") + 2;
       }
