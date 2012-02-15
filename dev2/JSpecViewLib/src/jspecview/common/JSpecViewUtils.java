@@ -665,23 +665,16 @@ public class JSpecViewUtils {
 
     Coordinate coord;
     switch (shiftRefType) {
-    case 0: {
-      //double deltaX = JSpecViewUtils.deltaX(xyCoords[xyCoords.length - 1].getXVal(), xyCoords[0].getXVal(), xyCoords.length);
-      coord = xyCoords[(xyCoords.length - 1) - (dataPointNum - 1)];
-
-      double dataPoint = coord.getXVal();
-
-      offset = dataPoint - offset * observedFreq;
+    case 0:
+      //double deltaX = JSpecViewUtils.deltaX(xyCoords[xyCoords.length - 1].getXVal(), xyCoords[0].getXVal(), xyCoords.length);     
+      offset = xyCoords[xyCoords.length - dataPointNum].getXVal() - offset * observedFreq;
       break;
-    }
-    case 1: {
+    case 1:
       offset = firstX - offset * observedFreq;
       break;
-    }
-    case 2: {
+    case 2:
       offset = lastX + offset;
       break;
-    }
     }
 
     for (int index = 0; index < xyCoords.length; index++) {
