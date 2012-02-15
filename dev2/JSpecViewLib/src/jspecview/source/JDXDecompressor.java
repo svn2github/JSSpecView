@@ -214,7 +214,7 @@ public class JDXDecompressor {
     Coordinate[] xyCoords = new Coordinate[nPoints];
 
     double difMax = Math.abs(0.35 * deltaX);
-    double dif14 = Math.abs(0.14 * deltaX);
+    double dif14 = Math.abs(1.4 * deltaX);
     double dif06 = Math.abs(0.6 * deltaX);
 
     BufferedReader dataReader = new BufferedReader(new StringReader(data));
@@ -310,6 +310,10 @@ public class JDXDecompressor {
       lineIndex = 0;
     }
 
+    if (nPoints != ipt) {
+      System.out.println("OH,oh, decompressor did not find " + nPoints + " points -- instead " + ipt);
+      System.out.println(data.substring(data.length()-50));
+    }
     return (deltaX > 0 ? xyCoords : reverse(xyCoords));
   }
 
