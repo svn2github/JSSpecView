@@ -389,7 +389,7 @@ public class JSpecViewUtils {
 
     // using 10 divisions
     spanX = (data.maxX - data.minX)/initNumXDivisions;
-    // spanX in sci notation as astring
+    // spanX in sci notation as a string
     String strSpanX = sciFormatter.format(spanX);
     strSpanX = strSpanX.toUpperCase();
     indexOfE = strSpanX.indexOf('E');
@@ -399,7 +399,7 @@ public class JSpecViewUtils {
     data.hashNumX = rightOfE;
 
     i = 0;
-    //make sure scale values are mutiples or factor of one of the values in the units array
+    //make sure scale values are multiples or factor of one of the values in the units array
     while(leftOfE > units[i] && i <= 6){
       i++;
     }
@@ -451,9 +451,9 @@ public class JSpecViewUtils {
    * Calculates values that <code>JSVPanel</code> needs in order to render
    * a graph, (eg. scale, min and max values) and stores the values in
    * the <code>JSpecViewUtils</code> inner class <code>ScaleData</code>.
-   * @param coordLists an array of arraya of coordinates
+   * @param coordLists an array of arrays of coordinates
    * @param startList the start indices
-   * @param endList the end inices
+   * @param endList the end indices
    * @param initNumXDivisions the initial number of X divisions for scale
    * @param initNumYDivisions the initial number of Y divisions for scale
    * @return returns an instance of <code>MultiScaleData</code>
@@ -778,7 +778,7 @@ public class JSpecViewUtils {
 
   /**
    * Finds a character that is in one string in another
-   * and return the index
+   * and returns the index
    * @param str the string to search
    * @param delim the string from which to find the characters to search for
    * @return the index of the of the character found,
@@ -832,10 +832,10 @@ public class JSpecViewUtils {
 	String datatype = spectrum.getDataType();
 	String xUnits = spectrum.getXUnits();
 	   	
-    if (datatype.toUpperCase().contains("NMR")) {
+    if (datatype.toUpperCase().contains("NMR") && !(datatype.toUpperCase().contains("FID"))) {
       return false;
     }else if(datatype.toUpperCase().contains("LINK") && xUnits.toUpperCase().contains("CM")){
-    	return false;          
+    	return false;    // I think this was because of a bug where BLOCK files kept type as LINK ?      
     }else if (datatype.toUpperCase().contains("INFRA") && xUnits.toUpperCase().contains("CM")) {
   	    return false;
     }
