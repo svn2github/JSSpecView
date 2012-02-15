@@ -1212,6 +1212,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     try {
       source = JDXFileReader.createJDXSource(null, filePath, null);
     } catch (Exception e) {
+      e.printStackTrace();
       writeStatus(e.getMessage());
       return FILE_OPEN_ERROR;
     }
