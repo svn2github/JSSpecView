@@ -37,7 +37,7 @@ public class Coordinate
     private double yVal = 0;
 
     /** the format of the string returned by getXString() and getYString() */
-    private DecimalFormat formatter = new DecimalFormat("0.########", new DecimalFormatSymbols(java.util.Locale.US ));
+    private static DecimalFormat formatter = new DecimalFormat("0.########", new DecimalFormatSymbols(java.util.Locale.US ));
 
     /**
      * Constructor

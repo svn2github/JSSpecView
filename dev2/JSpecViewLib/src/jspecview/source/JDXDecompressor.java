@@ -30,6 +30,7 @@ import java.io.StringReader;
 
 import jspecview.common.Coordinate;
 import jspecview.common.JSpecViewUtils;
+import jspecview.util.ArrayUtil;
 
 
 /**
@@ -313,6 +314,9 @@ public class JDXDecompressor {
     if (nPoints != ipt) {
       System.out.println("OH,oh, decompressor did not find " + nPoints + " points -- instead " + ipt);
       System.out.println(data.substring(data.length()-50));
+      Coordinate[] temp = new Coordinate[ipt];
+      System.arraycopy(xyCoords, 0, temp, 0, ipt);
+      xyCoords = temp;
     }
     return (deltaX > 0 ? xyCoords : reverse(xyCoords));
   }
