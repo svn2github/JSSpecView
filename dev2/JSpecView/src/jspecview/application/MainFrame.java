@@ -1313,7 +1313,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     // if a Peak Table is the current spectrum, disable the menu.
     boolean continuous = spec.isContinuous();
     saveAsJDXMenu.setEnabled(continuous);
-    integrateMenuItem.setEnabled(JSpecViewUtils.isHNMR(spec) && continuous);
+    integrateMenuItem.setEnabled(spec.isHNMR() && continuous);
     //  Can only convert from T <-> A  if Absorbance or Transmittance and continuous
     boolean isAbsTrans = (spec.isAbsorbance() || spec.isTransmittance());
     transAbsMenuItem.setEnabled(continuous && isAbsTrans);
@@ -1368,8 +1368,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
     jsvp.setDisplayFontName(ds.getFont());
 
-    jsvp.setXAxisDisplayedIncreasing(JSpecViewUtils
-        .shouldDisplayXAxisIncreasing((JDXSpectrum) jsvp.getSpectrumAt(0)));
+    jsvp.setXAxisDisplayedIncreasing(((JDXSpectrum) jsvp.getSpectrumAt(0)).shouldDisplayXAxisIncreasing());
     jsvp.setSource(currentSelectedSource);
     jsvp.setPopup(jsvpPopupMenu);
 

@@ -45,7 +45,7 @@ public class AppUtils {
 	      JDXSpectrum spectrum = (JDXSpectrum)jsvp.getSpectrumAt(0);
 	
 	      if (numGraphs == 1){
-	        allowIntegration = JSpecViewUtils.isHNMR(spectrum);
+	        allowIntegration = spectrum.isHNMR();
 	      }
 	      else if((integrateOn = AppUtils.hasIntegration(jsvp)) == true){
 	        allowIntegration = integrateOn;
@@ -108,7 +108,7 @@ public class AppUtils {
 	    JDXSpectrum spectrum = (JDXSpectrum) jsvp.getSpectrumAt(0);
 	
 	    if (numGraphs == 1) {
-	      allowIntegration = JSpecViewUtils.isHNMR(spectrum);
+	      allowIntegration = spectrum.isHNMR();
 	    }
 	    else if ((integrateOn = AppUtils.hasIntegration(jsvp)) == true) {
 	      allowIntegration = integrateOn;

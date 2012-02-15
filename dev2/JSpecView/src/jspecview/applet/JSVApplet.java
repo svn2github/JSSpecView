@@ -514,8 +514,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     getPlotColors(); //<======= Kind of sloppy
     //if(plotColors == null)
     //  jsvp.setPlotColors(plotColors);
-    jsvp.setXAxisDisplayedIncreasing(JSpecViewUtils
-        .shouldDisplayXAxisIncreasing((JDXSpectrum) jsvp.getSpectrumAt(0)));
+    jsvp.setXAxisDisplayedIncreasing(((JDXSpectrum) jsvp.getSpectrumAt(0)).shouldDisplayXAxisIncreasing());
     jsvp.setSource(source);
     jsvp.setPopup(appletPopupMenu);
 
@@ -685,7 +684,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     currentSpectrumIndex = index;
     setSelectedPanel(jsvp);
 
-    if (JSpecViewUtils.isHNMR((JDXSpectrum) selectedJSVPanel.getSpectrumAt(0)))
+    if (((JDXSpectrum) selectedJSVPanel.getSpectrumAt(0)).isHNMR())
       appletPopupMenu.integrateMenuItem.setEnabled(true);
     else
       appletPopupMenu.integrateMenuItem.setEnabled(false);
@@ -1759,8 +1758,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     }
     //  Can only integrate a continuous H NMR spectrum
     if (continuous
-        && JSpecViewUtils.isHNMR((JDXSpectrum) selectedJSVPanel
-            .getSpectrumAt(0)))
+        && ((JDXSpectrum) selectedJSVPanel
+            .getSpectrumAt(0)).isHNMR())
       appletPopupMenu.integrateMenuItem.setEnabled(true);
     //Can only convert from T <-> A  if Absorbance or Transmittance and continuous
     if ((continuous) && (Yunits.toLowerCase().contains("abs"))
