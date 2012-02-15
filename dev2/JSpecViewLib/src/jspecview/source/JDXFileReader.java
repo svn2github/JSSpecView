@@ -132,6 +132,326 @@ public class JDXFileReader {
     return sb.toString();
   }
 
+  private StringBuffer errorLog;
+
+  /**
+   * starting point for reading all data
+   * 
+   * @param sourceContents
+   *        the contents of the source as a String
+   * 
+   * @return source
+   * @throws JSpecViewException
+   */
+  private JDXSource getJDXSource(String sourceContents)
+      throws JSpecViewException {
+    
+    source = new JDXSource(JDXSource.TYPE_SIMPLE);
+    t = new JDXSourceStringTokenizer(sourceContents);
+    errorLog = new StringBuffer();
+
+    String label = "";
+    JDXSpectrum spectrum = new JDXSpectrum();
+
+    // The data Table
+    String tabularSpecData = null;
+    int tabularDataLabelLineNo = 0;
+
+    // Table for header information
+    HashMap<String, String> dataLDRTable = new HashMap<String, String>(20);
+
+    while (t.hasMoreTokens() && t.nextToken()
+        && !(label = cleanLabel(t.label)).equals("##END")) {
+      if (label.equals("##DATATYPE") && t.value.toUpperCase().equals("LINK"))
+        return getBlockSpectra(dataLDRTable);
+      if (label.equals("##NTUPLES"))
+        return getNTupleSpectra(dataLDRTable, spectrum);
+      if (JDXFileReader.readDataLabel(spectrum, label, t.value, errorLog,
+          dataLDRTable))
+        continue;
+      if (Arrays.binarySearch(JDXFileReader.TABULAR_DATA_LABELS, label) > 0) {
+        tabularDataLabelLineNo = t.labelLineNo;
+        tabularSpecData = spectrum.getTabularData(label, t.value);
+        continue;
+      }
+      dataLDRTable.put(t.label, t.value);
+      if (label.equals("##$PEAKS")) {
+        source.peakCount += spectrum.setPeakList(JDXFileReader.readPeakList(
+            t.value, source.peakCount));
+        continue;
+      }
+    }
+    if (!label.equals("##END"))
+      tabularSpecData = null;
+    if (!spectrum.processTabularData(tabularSpecData, tabularDataLabelLineNo,
+        dataLDRTable, errorLog))
+      throw new JDXSourceException("Unable to read JDX file");
+    errorLog.append(JDXFileReader.ERROR_SEPARATOR);
+    source.addJDXSpectrum(spectrum);
+    return source;
+  }
+
+  /**
+   * reads BLOCK data
+   * 
+   * @param sourceLDRTable
+   * @return source
+   * @throws JSpecViewException
+   */
+  private JDXSource getBlockSpectra(HashMap<String, String> sourceLDRTable)
+      throws JSpecViewException {
+    
+    System.out.println("--JDX block start--");
+    String label = "";
+    boolean isNew = (source.type == JDXSource.TYPE_SIMPLE);
+    while (t.hasMoreTokens() && t.nextToken()
+        && !(label = cleanLabel(t.label)).equals("##TITLE"))
+      if (isNew && !readHeaderLabel(source, label, t.value, errorLog))
+        sourceLDRTable.put(t.label, t.value);
+
+    // If ##TITLE not found throw Exception
+    if (!label.equals("##TITLE"))
+      throw new JSpecViewException("Unable to read block source");
+
+    if (isNew)
+      source.setHeaderTable(sourceLDRTable);
+    source.type = JDXSource.TYPE_BLOCK;
+    source.isCompoundSource = true;
+    HashMap<String, String> dataLDRTable;
+    int tabDataLineNo = 0;
+    String tabularSpecData = null;
+
+    JDXSpectrum spectrum = new JDXSpectrum();
+    dataLDRTable = new HashMap<String, String>();
+    readDataLabel(spectrum, label, t.value, errorLog, dataLDRTable);
+
+    try {
+      String tmp;
+      while (t.hasMoreTokens()
+          && t.nextToken()
+          && (!(tmp = cleanLabel(t.label)).equals("##END") || !label
+              .equals("##END"))) {
+        label = tmp;
+
+        if (label.equals("##DATATYPE") && t.value.toUpperCase().equals("LINK")) {
+          // embedded LINK 
+          getBlockSpectra(dataLDRTable);
+          spectrum = null;
+          label = null;
+        } else if (label.equals("##NTUPLES")) {
+          getNTupleSpectra(dataLDRTable, spectrum);
+          spectrum = null;
+          label = null;
+        } else if (label.equals("##JCAMPCS")) {
+          while (t.hasMoreTokens()
+              && t.nextToken()
+              && !(label = cleanLabel(t.label))
+                  .equals("##TITLE")) {
+          }
+          spectrum = null;
+          // label is not null -- will continue with TITLE
+        }
+
+        if (spectrum == null) {
+          spectrum = new JDXSpectrum();
+          dataLDRTable = new HashMap<String, String>();
+          if (label == null) {
+            label = "##END";
+            continue;
+          }
+        }
+
+        if (readDataLabel(spectrum, label, t.value, errorLog, dataLDRTable))
+          continue;
+
+        if (Arrays.binarySearch(TABULAR_DATA_LABELS, label) > 0) {
+          tabDataLineNo = t.labelLineNo;
+          tabularSpecData = spectrum.getTabularData(label, t.value);
+          continue;
+        }
+
+        // Process Block
+        if (label.equals("##END")) {
+
+          if (!spectrum.processTabularData(tabularSpecData, tabDataLineNo,
+              dataLDRTable, errorLog))
+            throw new JDXSourceException("Unable to read Block Source");
+
+          source.addJDXSpectrum(spectrum);
+
+          tabularSpecData = null;
+          spectrum = new JDXSpectrum();
+          dataLDRTable = new HashMap<String, String>();
+          continue;
+        } // End Process Block
+
+        dataLDRTable.put(t.label, t.value);
+
+        if (label.equals("##$PEAKS")) {
+          source.peakCount += spectrum.setPeakList(readPeakList(t.value,
+              source.peakCount));
+          continue;
+        }
+
+      } // End Source File
+    } catch (NoSuchElementException nsee) {
+      throw new JSpecViewException("Unable to Read Block Source");
+    } catch (JSpecViewException jsve) {
+      throw jsve;
+    }
+    errorLog.append(ERROR_SEPARATOR);
+    source.setErrorLog(errorLog.toString());
+    System.out.println("--JDX block end--");
+    return source;
+  }
+
+  /**
+   * reads NTUPLE data
+   * 
+   * @param sourceLDRTable
+   * @param spectrum0
+   * 
+   * @throws JSpecViewException
+   * @return source
+   */
+  private JDXSource getNTupleSpectra(Map<String, String> sourceLDRTable,
+                                      JDXSpectrum spectrum0)
+      throws JSpecViewException {
+
+    String label = "";
+    String page = "";
+
+    String tabularSpecData = null;
+    int tabDataLineNo = 0;
+
+    HashMap<String, ArrayList<String>> nTupleTable = new HashMap<String, ArrayList<String>>();
+    String[] plotSymbols = new String[2];
+
+    boolean isNew = (source.type == JDXSource.TYPE_SIMPLE);
+    if (isNew) {
+      source.type = JDXSource.TYPE_NTUPLE;
+      source.isCompoundSource = true;
+      source.setHeaderTable(sourceLDRTable);
+    }
+
+    // Read NTuple Table
+    while (t.hasMoreTokens() && t.nextToken()
+        && !(label = cleanLabel(t.label)).equals("##PAGE")) {
+      StringTokenizer st = new StringTokenizer(t.value, ",");
+      ArrayList<String> attrList = new ArrayList<String>();
+      while (st.hasMoreTokens())
+        attrList.add(st.nextToken().trim());
+      nTupleTable.put(label, attrList);
+    }//Finished With Page Data
+    if (!label.equals("##PAGE"))
+      throw new JSpecViewException("Error Reading NTuple Source");
+    page = t.value;
+
+    /*-------- Gather Spectra Data From File -----*/
+
+    JDXSpectrum spectrum = null;
+
+    while (t.hasMoreTokens() && t.nextToken()
+        && !(label = cleanLabel(t.label)).equals("##ENDNTUPLES")) {
+
+      if (label.equals("##PAGE")) {
+        page = t.value;
+        continue;
+      }
+
+      // Create and add Spectra
+      if (spectrum == null) {
+        spectrum = spectrum0.copy();
+        spectrum.setTitle(spectrum0.getTitle() + " : " + page);
+      }
+
+      HashMap<String, String> dataLDRTable = new HashMap<String, String>();
+      spectrum.setHeaderTable(dataLDRTable);
+
+      while (!label.equals("##DATATABLE")) {
+        dataLDRTable.put(t.label, t.value);
+        t.nextToken();
+        label = cleanLabel(t.label);
+      }
+
+      boolean continuous = true;
+      tabDataLineNo = t.labelLineNo;
+      try {
+        BufferedReader reader = new BufferedReader(new StringReader(t.value));
+        String line = reader.readLine();
+        if (line.trim().indexOf("PEAKS") > 0)
+          continuous = false;
+
+        // parse variable list
+        int index1 = line.indexOf('(');
+        int index2 = line.lastIndexOf(')');
+        if (index1 == -1 || index2 == -1)
+          throw new JDXSourceException("Variable List not Found");
+        String varList = line.substring(index1, index2 + 1);
+
+        ArrayList<String> symbols = (ArrayList<String>) nTupleTable
+            .get("##SYMBOL");
+        int countSyms = 0;
+        for (int i = 0; i < symbols.size(); i++) {
+          String sym = ((String) symbols.get(i)).trim();
+          if (varList.indexOf(sym) != -1) {
+            plotSymbols[countSyms++] = sym;
+          }
+          if (countSyms == 2)
+            break;
+        }
+      } catch (IOException ioe) {
+      }
+
+      tabularSpecData = spectrum.getTabularData("##"
+          + (continuous ? "XYDATA" : "PEAKTABLE"), t.value);
+
+      if (!spectrum.createXYCoords(nTupleTable, plotSymbols, spectrum
+          .getDataType(), tabularSpecData, tabDataLineNo, errorLog))
+        throw new JDXSourceException("Unable to read Ntuple Source");
+      for (Iterator<String> iter = sourceLDRTable.keySet().iterator(); iter
+          .hasNext();) {
+        label = iter.next();
+        String key = cleanLabel(label);
+        if (!key.equals("##TITLE") && !key.equals("##DATACLASS")
+            && !key.equals("##NTUPLES"))
+          dataLDRTable.put(label, sourceLDRTable.get(label));
+      }
+      source.addJDXSpectrum(spectrum);
+      spectrum = null;
+    }
+    errorLog.append(ERROR_SEPARATOR);
+    source.setErrorLog(errorLog.toString());
+    return source;
+  }
+  
+  /**
+   * Extracts spaces, underscores etc. from the label
+   * 
+   * @param label
+   *        the label to be cleaned
+   * @return the new label
+   */
+  private static String cleanLabel(String label) {
+    int i;
+    StringBuffer str = new StringBuffer();
+
+    for (i = 0; i < label.length(); i++) {
+      switch (label.charAt(i)) {
+      case '/':
+      case '\\':
+      case ' ':
+      case '-':
+      case '_':
+        break;
+      default:
+        str.append(label.charAt(i));
+        break;
+      }
+    }
+    return str.toString().toUpperCase();
+  }
+
   private static ArrayList<PeakInfo> readPeakList(String peakList, int index) {
     ArrayList<PeakInfo> peakData = new ArrayList<PeakInfo>();
     BufferedReader reader = new BufferedReader(new StringReader(peakList));
@@ -353,322 +673,6 @@ public class JDXFileReader {
     return false;
   }
 
-  private StringBuffer errorLog;
-
-
-  /**
-   * starting point for reading all data
-   * 
-   * @param sourceContents
-   *        the contents of the source as a String
-   * 
-   * @return source
-   * @throws JSpecViewException
-   */
-  private JDXSource getJDXSource(String sourceContents)
-      throws JSpecViewException {
-    
-    source = new JDXSource(JDXSource.TYPE_SIMPLE);
-    t = new JDXSourceStringTokenizer(sourceContents);
-    errorLog = new StringBuffer();
-
-    String label = "";
-    JDXSpectrum spectrum = new JDXSpectrum();
-
-    // The data Table
-    String tabularSpecData = null;
-    int tabularDataLabelLineNo = 0;
-
-    // Table for header information
-    HashMap<String, String> dataLDRTable = new HashMap<String, String>(20);
-
-    while (t.hasMoreTokens() && t.nextToken()
-        && !(label = cleanLabel(t.label)).equals("##END")) {
-      if (label.equals("##DATATYPE") && t.value.toUpperCase().equals("LINK"))
-        return getBlockSpectra(dataLDRTable);
-      if (label.equals("##NTUPLES"))
-        return getNTupleSpectra(dataLDRTable, spectrum);
-      if (JDXFileReader.readDataLabel(spectrum, label, t.value, errorLog,
-          dataLDRTable))
-        continue;
-      if (Arrays.binarySearch(JDXFileReader.TABULAR_DATA_LABELS, label) > 0) {
-        tabularDataLabelLineNo = t.labelLineNo;
-        tabularSpecData = spectrum.getTabularData(label, t.value);
-        continue;
-      }
-      dataLDRTable.put(t.label, t.value);
-      if (label.equals("##$PEAKS")) {
-        source.peakCount += spectrum.setPeakList(JDXFileReader.readPeakList(
-            t.value, source.peakCount));
-        continue;
-      }
-    }
-    if (!label.equals("##END"))
-      tabularSpecData = null;
-    if (!spectrum.processTabularData(tabularSpecData, tabularDataLabelLineNo,
-        dataLDRTable, errorLog))
-      throw new JDXSourceException("Unable to read JDX file");
-    errorLog.append(JDXFileReader.ERROR_SEPARATOR);
-    source.addJDXSpectrum(spectrum);
-    return source;
-  }
-
-  /**
-   * reads BLOCK data
-   * 
-   * @param sourceLDRTable
-   * @return source
-   * @throws JSpecViewException
-   */
-  private JDXSource getBlockSpectra(HashMap<String, String> sourceLDRTable)
-      throws JSpecViewException {
-    
-    String label = "";
-    boolean isNew = (source.type == JDXSource.TYPE_SIMPLE);
-    while (t.hasMoreTokens() && t.nextToken()
-        && !(label = cleanLabel(t.label)).equals("##TITLE"))
-      if (isNew && !readHeaderLabel(source, label, t.value, errorLog))
-        sourceLDRTable.put(t.label, t.value);
-
-    // If ##TITLE not found throw Exception
-    if (!label.equals("##TITLE"))
-      throw new JSpecViewException("Unable to read block source");
-
-    if (isNew)
-      source.setHeaderTable(sourceLDRTable);
-    source.type = JDXSource.TYPE_BLOCK;
-    source.isCompoundSource = true;
-    HashMap<String, String> dataLDRTable;
-    int tabDataLineNo = 0;
-    String tabularSpecData = null;
-
-    JDXSpectrum spectrum = new JDXSpectrum();
-    dataLDRTable = new HashMap<String, String>();
-    readDataLabel(spectrum, label, t.value, errorLog, dataLDRTable);
-
-    try {
-      String tmp;
-      while (t.hasMoreTokens()
-          && t.nextToken()
-          && (!(tmp = cleanLabel(t.label)).equals("##END") || !label
-              .equals("##END"))) {
-        label = tmp;
-
-        if (label.equals("##DATATYPE") && t.value.toUpperCase().equals("LINK")) {
-          // embedded LINK 
-          getBlockSpectra(dataLDRTable);
-          spectrum = null;
-          label = null;
-        } else if (label.equals("##NTUPLES")) {
-          getNTupleSpectra(dataLDRTable, spectrum);
-          spectrum = null;
-          label = null;
-        } else if (label.equals("##JCAMPCS")) {
-          while (t.hasMoreTokens()
-              && t.nextToken()
-              && !(label = cleanLabel(t.label))
-                  .equals("##TITLE")) {
-          }
-          spectrum = null;
-          // label is not null -- will continue with TITLE
-        }
-
-        if (spectrum == null) {
-          spectrum = new JDXSpectrum();
-          dataLDRTable = new HashMap<String, String>();
-          if (label == null)
-            continue;
-        }
-
-        if (readDataLabel(spectrum, label, t.value, errorLog, dataLDRTable))
-          continue;
-
-        if (Arrays.binarySearch(TABULAR_DATA_LABELS, label) > 0) {
-          tabDataLineNo = t.labelLineNo;
-          tabularSpecData = spectrum.getTabularData(label, t.value);
-          continue;
-        }
-
-        // Process Block
-        if (label.equals("##END")) {
-
-          if (!spectrum.processTabularData(tabularSpecData, tabDataLineNo,
-              dataLDRTable, errorLog))
-            throw new JDXSourceException("Unable to read Block Source");
-
-          source.addJDXSpectrum(spectrum);
-
-          tabularSpecData = null;
-          spectrum = new JDXSpectrum();
-          dataLDRTable = new HashMap<String, String>();
-          continue;
-        } // End Process Block
-
-        dataLDRTable.put(t.label, t.value);
-
-        if (label.equals("##$PEAKS")) {
-          source.peakCount += spectrum.setPeakList(readPeakList(t.value,
-              source.peakCount));
-          continue;
-        }
-
-      } // End Source File
-    } catch (NoSuchElementException nsee) {
-      throw new JSpecViewException("Unable to Read Block Source");
-    } catch (JSpecViewException jsve) {
-      throw jsve;
-    }
-    errorLog.append(ERROR_SEPARATOR);
-    source.setErrorLog(errorLog.toString());
-    return source;
-  }
-
-  /**
-   * reads NTUPLE data
-   * 
-   * @param sourceLDRTable
-   * @param spectrum0
-   * 
-   * @throws JSpecViewException
-   * @return source
-   */
-  private JDXSource getNTupleSpectra(Map<String, String> sourceLDRTable,
-                                      JDXSpectrum spectrum0)
-      throws JSpecViewException {
-
-    String label = "";
-    String page = "";
-
-    String tabularSpecData = null;
-    int tabDataLineNo = 0;
-
-    HashMap<String, ArrayList<String>> nTupleTable = new HashMap<String, ArrayList<String>>();
-    String[] plotSymbols = new String[2];
-
-    boolean isNew = (source.type == JDXSource.TYPE_SIMPLE);
-    if (isNew) {
-      source.type = JDXSource.TYPE_NTUPLE;
-      source.isCompoundSource = true;
-      source.setHeaderTable(sourceLDRTable);
-    }
-
-    // Read NTuple Table
-    while (t.hasMoreTokens() && t.nextToken()
-        && !(label = cleanLabel(t.label)).equals("##PAGE")) {
-      StringTokenizer st = new StringTokenizer(t.value, ",");
-      ArrayList<String> attrList = new ArrayList<String>();
-      while (st.hasMoreTokens())
-        attrList.add(st.nextToken().trim());
-      nTupleTable.put(label, attrList);
-    }//Finished With Page Data
-    if (!label.equals("##PAGE"))
-      throw new JSpecViewException("Error Reading NTuple Source");
-    page = t.value;
-
-    /*-------- Gather Spectra Data From File -----*/
-
-    JDXSpectrum spectrum = null;
-
-    while (t.hasMoreTokens() && t.nextToken()
-        && !(label = cleanLabel(t.label)).equals("##ENDNTUPLES")) {
-
-      if (label.equals("##PAGE")) {
-        page = t.value;
-        continue;
-      }
-
-      // Create and add Spectra
-      if (spectrum == null) {
-        spectrum = spectrum0.copy();
-        spectrum.setTitle(spectrum0.getTitle() + " : " + page);
-      }
-
-      HashMap<String, String> dataLDRTable = new HashMap<String, String>();
-      spectrum.setHeaderTable(dataLDRTable);
-
-      while (!label.equals("##DATATABLE")) {
-        dataLDRTable.put(t.label, t.value);
-        t.nextToken();
-        label = cleanLabel(t.label);
-      }
-
-      boolean continuous = true;
-      tabDataLineNo = t.labelLineNo;
-      try {
-        BufferedReader reader = new BufferedReader(new StringReader(t.value));
-        String line = reader.readLine();
-        if (line.trim().indexOf("PEAKS") > 0)
-          continuous = false;
-
-        // parse variable list
-        int index1 = line.indexOf('(');
-        int index2 = line.lastIndexOf(')');
-        if (index1 == -1 || index2 == -1)
-          throw new JDXSourceException("Variable List not Found");
-        String varList = line.substring(index1, index2 + 1);
-
-        ArrayList<String> symbols = (ArrayList<String>) nTupleTable
-            .get("##SYMBOL");
-        int countSyms = 0;
-        for (int i = 0; i < symbols.size(); i++) {
-          String sym = ((String) symbols.get(i)).trim();
-          if (varList.indexOf(sym) != -1) {
-            plotSymbols[countSyms++] = sym;
-          }
-          if (countSyms == 2)
-            break;
-        }
-      } catch (IOException ioe) {
-      }
-
-      tabularSpecData = spectrum.getTabularData("##"
-          + (continuous ? "XYDATA" : "PEAKTABLE"), t.value);
-
-      if (!spectrum.createXYCoords(nTupleTable, plotSymbols, spectrum
-          .getDataType(), tabularSpecData, tabDataLineNo, errorLog))
-        throw new JDXSourceException("Unable to read Ntuple Source");
-      for (Iterator<String> iter = sourceLDRTable.keySet().iterator(); iter
-          .hasNext();) {
-        label = iter.next();
-        String key = cleanLabel(label);
-        if (!key.equals("##TITLE") && !key.equals("##DATACLASS")
-            && !key.equals("##NTUPLES"))
-          dataLDRTable.put(label, sourceLDRTable.get(label));
-      }
-      source.addJDXSpectrum(spectrum);
-      spectrum = null;
-    }
-    errorLog.append(ERROR_SEPARATOR);
-    source.setErrorLog(errorLog.toString());
-    return source;
-  }
-  
-  /**
-   * Extracts spaces, underscores etc. from the label
-   * 
-   * @param label
-   *        the label to be cleaned
-   * @return the new label
-   */
-  private static String cleanLabel(String label) {
-    int i;
-    StringBuffer str = new StringBuffer();
-
-    for (i = 0; i < label.length(); i++) {
-      switch (label.charAt(i)) {
-      case '/':
-      case '\\':
-      case ' ':
-      case '-':
-      case '_':
-        break;
-      default:
-        str.append(label.charAt(i));
-        break;
-      }
-    }
-    return str.toString().toUpperCase();
-  }
 
 
 }

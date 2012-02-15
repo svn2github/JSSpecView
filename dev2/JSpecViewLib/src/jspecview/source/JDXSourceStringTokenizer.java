@@ -99,7 +99,8 @@ public class JDXSourceStringTokenizer {
     label = l.trim();
     value = (v.startsWith("<") && v.contains("</") ? v : trimComments(v));
     value = value.substring(value.indexOf("=") + 1).trim();
-
+    if (label.equals("##TITLE") || label.equals("##END"))
+      System.out.println(label + "\t" + value);
     return true;
   }
 
