@@ -291,6 +291,9 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     if (getObservedFreq() != ERROR)
       buffer.append("##.OBSERVE FREQUENCY= ").append(getObservedFreq()).append(
           JSpecViewUtils.newLine);
+    if (observedNucl != "")
+      buffer.append("##.OBSERVE NUCLEUS= ").append(observedNucl).append(
+          JSpecViewUtils.newLine);
     //now need to put pathlength here
 
     // last part of header
@@ -347,6 +350,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     newSpectrum.setIncreasing(isIncreasing());
 
     newSpectrum.observedFreq = observedFreq;
+    newSpectrum.observedNucl = observedNucl;
     newSpectrum.offset = offset;
     newSpectrum.dataPointNum = dataPointNum;
     newSpectrum.shiftRefType = shiftRefType;
@@ -690,5 +694,36 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return rowData;
   }
 
+  /**
+   * Determines if a spectrum is an HNMR spectrum
+   * @param spectrum the JDXSpectrum
+   * @return true if an HNMR, false otherwise
+   */
+  public boolean isHNMR() {
+    return (dataType.toUpperCase().indexOf("NMR") >= 0 && observedNucl.toUpperCase().indexOf("H") >= 0);
+  }
+
+  /**
+   * Determines if the plot should be displayed decreasing by default
+   * @param spectrum
+   */
+  public boolean shouldDisplayXAxisIncreasing(){
+  String datatype = getDataType();
+  String xUnits = getXUnits();
+      
+    if (datatype.toUpperCase().contains("NMR") && !(datatype.toUpperCase().contains("FID"))) {
+      return false;
+    }else if(datatype.toUpperCase().contains("LINK") && xUnits.toUpperCase().contains("CM")){
+      return false;    // I think this was because of a bug where BLOCK files kept type as LINK ?      
+    }else if (datatype.toUpperCase().contains("INFRA") && xUnits.toUpperCase().contains("CM")) {
+        return false;
+    }
+    else if(datatype.toUpperCase().contains("VIS") && xUnits.toUpperCase().contains("NANOMETERS")){
+      return true;
+    }
+    
+    return isIncreasing();
+  }
+  
 
 }

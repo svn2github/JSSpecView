@@ -249,7 +249,11 @@ public class JDXFileReader {
 
     if (label.equals("##.OBSERVEFREQUENCY")) {
       spectrum.observedFreq = Double.parseDouble(value);
-      table.put(label, value);
+      return true;
+    }
+
+    if (label.equals("##.OBSERVENUCLEUS")) {
+      spectrum.observedNucl = value;
       return true;
     }
 
@@ -379,7 +383,7 @@ public class JDXFileReader {
     HashMap<String, String> dataLDRTable = new HashMap<String, String>(20);
 
     while (t.hasMoreTokens() && t.nextToken()
-        && !(label = JSpecViewUtils.cleanLabel(t.label)).equals("##END")) {
+        && !(label = cleanLabel(t.label)).equals("##END")) {
       if (label.equals("##DATATYPE") && t.value.toUpperCase().equals("LINK"))
         return getBlockSpectra(dataLDRTable);
       if (label.equals("##NTUPLES"))
@@ -422,7 +426,7 @@ public class JDXFileReader {
     String label = "";
     boolean isNew = (source.type == JDXSource.TYPE_SIMPLE);
     while (t.hasMoreTokens() && t.nextToken()
-        && !(label = JSpecViewUtils.cleanLabel(t.label)).equals("##TITLE"))
+        && !(label = cleanLabel(t.label)).equals("##TITLE"))
       if (isNew && !readHeaderLabel(source, label, t.value, errorLog))
         sourceLDRTable.put(t.label, t.value);
 
@@ -446,7 +450,7 @@ public class JDXFileReader {
       String tmp;
       while (t.hasMoreTokens()
           && t.nextToken()
-          && (!(tmp = JSpecViewUtils.cleanLabel(t.label)).equals("##END") || !label
+          && (!(tmp = cleanLabel(t.label)).equals("##END") || !label
               .equals("##END"))) {
         label = tmp;
 
@@ -462,7 +466,7 @@ public class JDXFileReader {
         } else if (label.equals("##JCAMPCS")) {
           while (t.hasMoreTokens()
               && t.nextToken()
-              && !(label = JSpecViewUtils.cleanLabel(t.label))
+              && !(label = cleanLabel(t.label))
                   .equals("##TITLE")) {
           }
           spectrum = null;
@@ -550,7 +554,7 @@ public class JDXFileReader {
 
     // Read NTuple Table
     while (t.hasMoreTokens() && t.nextToken()
-        && !(label = JSpecViewUtils.cleanLabel(t.label)).equals("##PAGE")) {
+        && !(label = cleanLabel(t.label)).equals("##PAGE")) {
       StringTokenizer st = new StringTokenizer(t.value, ",");
       ArrayList<String> attrList = new ArrayList<String>();
       while (st.hasMoreTokens())
@@ -566,7 +570,7 @@ public class JDXFileReader {
     JDXSpectrum spectrum = null;
 
     while (t.hasMoreTokens() && t.nextToken()
-        && !(label = JSpecViewUtils.cleanLabel(t.label)).equals("##ENDNTUPLES")) {
+        && !(label = cleanLabel(t.label)).equals("##ENDNTUPLES")) {
 
       if (label.equals("##PAGE")) {
         page = t.value;
@@ -585,7 +589,7 @@ public class JDXFileReader {
       while (!label.equals("##DATATABLE")) {
         dataLDRTable.put(t.label, t.value);
         t.nextToken();
-        label = JSpecViewUtils.cleanLabel(t.label);
+        label = cleanLabel(t.label);
       }
 
       boolean continuous = true;
@@ -626,7 +630,7 @@ public class JDXFileReader {
       for (Iterator<String> iter = sourceLDRTable.keySet().iterator(); iter
           .hasNext();) {
         label = iter.next();
-        String key = JSpecViewUtils.cleanLabel(label);
+        String key = cleanLabel(label);
         if (!key.equals("##TITLE") && !key.equals("##DATACLASS")
             && !key.equals("##NTUPLES"))
           dataLDRTable.put(label, sourceLDRTable.get(label));
@@ -638,4 +642,33 @@ public class JDXFileReader {
     source.setErrorLog(errorLog.toString());
     return source;
   }
+  
+  /**
+   * Extracts spaces, underscores etc. from the label
+   * 
+   * @param label
+   *        the label to be cleaned
+   * @return the new label
+   */
+  private static String cleanLabel(String label) {
+    int i;
+    StringBuffer str = new StringBuffer();
+
+    for (i = 0; i < label.length(); i++) {
+      switch (label.charAt(i)) {
+      case '/':
+      case '\\':
+      case ' ':
+      case '-':
+      case '_':
+        break;
+      default:
+        str.append(label.charAt(i));
+        break;
+      }
+    }
+    return str.toString().toUpperCase();
+  }
+
+
 }

@@ -39,6 +39,7 @@ public class JDXDataObject extends JDXHeader {
   public String yUnits = "";
   
   // For NMR Spectra:
+  public String observedNucl = "";
   public double observedFreq = JDXSpectrum.ERROR;
   public double offset = JDXSpectrum.ERROR; // Shift Reference
   public int shiftRefType = -1; // shiftRef = 0, bruker = 1, varian = 2
