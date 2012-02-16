@@ -1264,8 +1264,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       yscale = yScaleOn;
     }
 
-    boolean xAxis = !spectra[0].getXUnits().equalsIgnoreCase("Arbitrary Units");
-    boolean yAxis = !spectra[0].getYUnits().equalsIgnoreCase("Arbitrary Units");
+    boolean xAxis = true;//!spectra[0].getXUnits().equalsIgnoreCase("Arbitrary Units");
+    boolean yAxis = true;//!spectra[0].getYUnits().equalsIgnoreCase("Arbitrary Units");
 
     if (grid)
       drawGrid(g, height, width);
