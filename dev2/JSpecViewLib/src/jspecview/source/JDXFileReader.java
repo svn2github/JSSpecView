@@ -192,6 +192,12 @@ public class JDXFileReader {
 
   public static void addHeader(List<String[]> table, String label,
                          String value) {
+    String[] entry;
+    for (int i = 0; i < table.size(); i++)
+      if ((entry = table.get(i))[0].equals(label)) {
+        entry[1] = value;
+        return;
+      }
     table.add(new String[] {label, value});
   }
 
