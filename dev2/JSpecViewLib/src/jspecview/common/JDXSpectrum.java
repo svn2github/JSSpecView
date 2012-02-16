@@ -25,7 +25,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 import jspecview.exception.JSpecViewException;
 import jspecview.source.JDXDecompressor;
@@ -66,7 +67,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
    */
   public JDXSpectrum() {
     System.out.println("initialize JDXSpectrum " + this);
-    headerTable = new HashMap<String, String>();
+    headerTable = new Vector<String[]>();
     xyCoords = new Coordinate[0];
   }
 
@@ -279,10 +280,10 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
         JSpecViewUtils.newLine);
 
     // optional header
-    for (Iterator<String> iter = headerTable.keySet().iterator(); iter
-        .hasNext();) {
-      String label = (String) iter.next();
-      String dataSet = (String) headerTable.get(label);
+    for (int i = 0; i < headerTable.size(); i++) {
+      String[] entry = headerTable.get(i);
+      String label = entry[0];
+      String dataSet = entry[1];
       String nl = (dataSet.startsWith("<") && dataSet.contains("</") ? JSpecViewUtils.newLine
           : "");
       buffer.append(label).append("= ").append(nl).append(dataSet).append(
@@ -424,7 +425,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   }
 
   public boolean processTabularData(String tabularSpecData, int tabDataLineNo,
-                                    HashMap<String, String> table,
+                                    List<String[]> table,
                                     StringBuffer errorLog)
       throws JSpecViewException {
 

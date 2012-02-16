@@ -1,7 +1,7 @@
 package jspecview.common;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * could be a spectrum or a source
@@ -195,7 +195,7 @@ public class JDXHeader {
   }
 
   // Table of header variables specific to the jdx source or spectrum
-  protected Map<String, String> headerTable = new HashMap<String, String>();
+  protected List<String[]> headerTable = new ArrayList<String[]>();
   
   /**
    * Sets the headerTable for this Source or spectrum
@@ -203,7 +203,7 @@ public class JDXHeader {
    * @param table
    *        the header table
    */
-  public void setHeaderTable(Map<String, String> table) {
+  public void setHeaderTable(List<String[]> table) {
     headerTable = table;
   }
 
@@ -212,16 +212,13 @@ public class JDXHeader {
    * 
    * @return the table of headers
    */
-  public Map<String, String> getHeaderTable() {
+  public List<String[]> getHeaderTable() {
     return headerTable;
   }
 
   public Object[][] getHeaderRowDataAsArray(boolean addDataClass, int nMore) {
     
-    Object[] headerLabels = headerTable.keySet().toArray();
-    Object[] headerValues = headerTable.values().toArray();
-    
-    Object rowData[][] = new Object[(addDataClass ? 6 : 5) + headerLabels.length + nMore][];
+    Object rowData[][] = new Object[(addDataClass ? 6 : 5) + headerTable.size() + nMore][];
 
     int i = 0;
     rowData[i++] = new Object[] { "##TITLE", title };
@@ -232,8 +229,8 @@ public class JDXHeader {
     rowData[i++] = new Object[] { "##ORIGIN", origin };
     rowData[i++] = new Object[] { "##OWNER", owner };
     
-    for(int j = 0; j < headerLabels.length; j++)
-      rowData[i++] = new Object[] { headerLabels[j], headerValues[j] };
+    for(int j = 0; j < headerTable.size(); j++)
+      rowData[i++] = headerTable.get(j);
     
     return rowData;
   }

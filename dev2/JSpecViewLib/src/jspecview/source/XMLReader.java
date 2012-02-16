@@ -26,7 +26,8 @@ package jspecview.source;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 import jspecview.common.Coordinate;
@@ -95,7 +96,7 @@ abstract class XMLReader {
     // end of import of CML document
     // now populate all the JSpecView spectrum variables.....
 
-    HashMap<String, String> LDRTable = new HashMap<String, String>(20);
+    List<String[]> LDRTable = new ArrayList<String[]>(20);
     JDXSpectrum spectrum = new JDXSpectrum();
 
     spectrum.setTitle(title);
@@ -113,21 +114,21 @@ abstract class XMLReader {
 
     //  now fill in what we can of a HashMap with parameters from the CML file
     //  syntax is:
-    //      LDRTable.put()
+    //      JDXFileReader.addHeader(LDRTable, )
     //      Key kk = new Key;
-    LDRTable.put("##PATHLENGTH", pathlength);
-    LDRTable.put("##RESOLUTION", resolution);
+    JDXFileReader.addHeader(LDRTable, "##PATHLENGTH", pathlength);
+    JDXFileReader.addHeader(LDRTable, "##RESOLUTION", resolution);
     if (!StrObFreq.equals(""))
-      LDRTable.put("##.OBSERVEFREQUENCY", StrObFreq);
+      JDXFileReader.addHeader(LDRTable, "##.OBSERVEFREQUENCY", StrObFreq);
     if (!obNucleus.equals(""))
-      LDRTable.put("##.OBSERVENUCLEUS", obNucleus);
-    LDRTable.put("##$MANUFACTURER", vendor);
+      JDXFileReader.addHeader(LDRTable, "##.OBSERVENUCLEUS", obNucleus);
+    JDXFileReader.addHeader(LDRTable, "##$MANUFACTURER", vendor);
     if (!casRN.equals(""))
-      LDRTable.put("##CASREGISTRYNO", casRN);
+      JDXFileReader.addHeader(LDRTable, "##CASREGISTRYNO", casRN);
     if (!molForm.equals(""))
-      LDRTable.put("##MOLFORM", molForm);
+      JDXFileReader.addHeader(LDRTable, "##MOLFORM", molForm);
     if (!modelType.equals(""))
-      LDRTable.put("##SPECTROMETER/DATA SYSTEM", modelType);
+      JDXFileReader.addHeader(LDRTable, "##SPECTROMETER/DATA SYSTEM", modelType);
 
     //etc etc.
     spectrum.setHeaderTable(LDRTable);

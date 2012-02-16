@@ -29,8 +29,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
@@ -158,7 +157,7 @@ public class JDXFileReader {
     int tabularDataLabelLineNo = 0;
 
     // Table for header information
-    HashMap<String, String> dataLDRTable = new HashMap<String, String>(20);
+    List<String[]> dataLDRTable = new ArrayList<String[]>(20);
 
     while (t.hasMoreTokens() && t.nextToken()
         && !(label = cleanLabel(t.label)).equals("##END")) {
@@ -174,7 +173,7 @@ public class JDXFileReader {
         tabularSpecData = spectrum.getTabularData(label, t.value);
         continue;
       }
-      dataLDRTable.put(t.label, t.value);
+      addHeader(dataLDRTable, t.label, t.value);
       if (label.equals("##$PEAKS")) {
         source.peakCount += spectrum.setPeakList(JDXFileReader.readPeakList(
             t.value, source.peakCount));
@@ -191,6 +190,11 @@ public class JDXFileReader {
     return source;
   }
 
+  public static void addHeader(List<String[]> table, String label,
+                         String value) {
+    table.add(new String[] {label, value});
+  }
+
   /**
    * reads BLOCK data
    * 
@@ -198,7 +202,7 @@ public class JDXFileReader {
    * @return source
    * @throws JSpecViewException
    */
-  private JDXSource getBlockSpectra(HashMap<String, String> sourceLDRTable)
+  private JDXSource getBlockSpectra(List<String[]> sourceLDRTable)
       throws JSpecViewException {
     
     System.out.println("--JDX block start--");
@@ -207,7 +211,7 @@ public class JDXFileReader {
     while (t.hasMoreTokens() && t.nextToken()
         && !(label = cleanLabel(t.label)).equals("##TITLE"))
       if (isNew && !readHeaderLabel(source, label, t.value, errorLog))
-        sourceLDRTable.put(t.label, t.value);
+        addHeader(sourceLDRTable, t.label, t.value);
 
     // If ##TITLE not found throw Exception
     if (!label.equals("##TITLE"))
@@ -217,12 +221,12 @@ public class JDXFileReader {
       source.setHeaderTable(sourceLDRTable);
     source.type = JDXSource.TYPE_BLOCK;
     source.isCompoundSource = true;
-    HashMap<String, String> dataLDRTable;
+    List<String[]> dataLDRTable;
     int tabDataLineNo = 0;
     String tabularSpecData = null;
 
     JDXSpectrum spectrum = new JDXSpectrum();
-    dataLDRTable = new HashMap<String, String>();
+    dataLDRTable = new ArrayList<String[]>();
     readDataLabel(spectrum, label, t.value, errorLog, dataLDRTable);
 
     try {
@@ -254,7 +258,7 @@ public class JDXFileReader {
 
         if (spectrum == null) {
           spectrum = new JDXSpectrum();
-          dataLDRTable = new HashMap<String, String>();
+          dataLDRTable = new ArrayList<String[]>();
           if (label == null) {
             label = "##END";
             continue;
@@ -281,11 +285,11 @@ public class JDXFileReader {
 
           tabularSpecData = null;
           spectrum = new JDXSpectrum();
-          dataLDRTable = new HashMap<String, String>();
+          dataLDRTable = new ArrayList<String[]>();
           continue;
         } // End Process Block
 
-        dataLDRTable.put(t.label, t.value);
+        addHeader(dataLDRTable, t.label, t.value);
 
         if (label.equals("##$PEAKS")) {
           source.peakCount += spectrum.setPeakList(readPeakList(t.value,
@@ -314,7 +318,7 @@ public class JDXFileReader {
    * @throws JSpecViewException
    * @return source
    */
-  private JDXSource getNTupleSpectra(Map<String, String> sourceLDRTable,
+  private JDXSource getNTupleSpectra(List<String[]> sourceLDRTable,
                                       JDXSpectrum spectrum0)
       throws JSpecViewException {
 
@@ -365,11 +369,11 @@ public class JDXFileReader {
         spectrum.setTitle(spectrum0.getTitle() + " : " + page);
       }
 
-      HashMap<String, String> dataLDRTable = new HashMap<String, String>();
+      List<String[]> dataLDRTable = new ArrayList<String[]>();
       spectrum.setHeaderTable(dataLDRTable);
 
       while (!label.equals("##DATATABLE")) {
-        dataLDRTable.put(t.label, t.value);
+        addHeader(dataLDRTable, t.label, t.value);
         t.nextToken();
         label = cleanLabel(t.label);
       }
@@ -409,13 +413,12 @@ public class JDXFileReader {
       if (!spectrum.createXYCoords(nTupleTable, plotSymbols, spectrum
           .getDataType(), tabularSpecData, tabDataLineNo, errorLog))
         throw new JDXSourceException("Unable to read Ntuple Source");
-      for (Iterator<String> iter = sourceLDRTable.keySet().iterator(); iter
-          .hasNext();) {
-        label = iter.next();
-        String key = cleanLabel(label);
+      for (int i = 0; i < sourceLDRTable.size(); i++) {
+        String[] entry = sourceLDRTable.get(i);
+        String key = cleanLabel(entry[0]);
         if (!key.equals("##TITLE") && !key.equals("##DATACLASS")
             && !key.equals("##NTUPLES"))
-          dataLDRTable.put(label, sourceLDRTable.get(label));
+          dataLDRTable.add(entry);
       }
       source.addJDXSpectrum(spectrum);
       spectrum = null;
@@ -499,7 +502,7 @@ public class JDXFileReader {
 
   private static boolean readDataLabel(JDXDataObject spectrum, String label,
                                        String value, StringBuffer errorLog,
-                                       Map<String, String> table) {
+                                       List<String[]> table) {
 
     if (readHeaderLabel(spectrum, label, value, errorLog))
       return true;

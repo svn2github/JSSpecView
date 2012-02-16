@@ -19,7 +19,7 @@
 
 package jspecview.source;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Vector;
 
 import jspecview.common.JDXHeader;
@@ -53,7 +53,7 @@ public class JDXSource extends JDXHeader {
   
   public JDXSource(int type) {
     this.type = type;
-    headerTable = new HashMap<String, String>();
+    headerTable = new ArrayList<String[]>();
     jdxSpectra = new Vector<JDXSpectrum>();
     isCompoundSource = (type != TYPE_SIMPLE);
   }
