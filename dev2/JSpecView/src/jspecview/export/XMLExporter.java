@@ -20,7 +20,7 @@
 package jspecview.export;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.List;
 import java.util.Vector;
 
 import jspecview.common.Coordinate;
@@ -161,20 +161,88 @@ abstract class XMLExporter extends FormExporter {
     // these may come back null, but context.put() turns that into ""
     // still, one must check for == null in tests here.
 
-    Map<String, String> specHead = spec.getHeaderTable();
-    state = specHead.get("##STATE");
-    resolution = specHead.get("##RESOLUTION");
-    model = specHead.get("##SPECTROMETER");
-    vendor = specHead.get("##$MANUFACTURER");
-    molform = specHead.get("##MOLFORM");
-    casRN = specHead.get("##CASREGISTRYNO");
-    casName = specHead.get("##CASNAME");
-    mp = specHead.get("##MP");
-    bp = specHead.get("##BP");
-    obNucleus = specHead.get("##.OBSERVENUCLEUS");
-    solvName = specHead.get("##.SOLVENTNAME");
-    solvRef = specHead.get("##.SOLVENTREFERENCE"); // should really try to parse info from SHIFTREFERENCE
+    setParams(spec.getHeaderTable());
     return true;
+  }
+
+  private final static String[] params = {
+    "##STATE",
+    "##RESOLUTION",
+    "##SPECTROMETER",
+    "##$MANUFACTURER",
+    "##MOLFORM",
+    "##CASREGISTRYNO",
+    "##CASNAME",
+    "##MP",
+    "##BP",
+    "##.OBSERVENUCLEUS",
+    "##.SOLVENTNAME",
+    "##.SOLVENTREFERENCE"
+    }; // should really try to parse info from SHIFTREFERENCE
+  
+  private static final int PARAM_STATE = 0;
+  private static final int PARAM_RESOLUTION = 1;
+  private static final int PARAM_SPECTROMETER = 2;
+  private static final int PARAM_MANUFACTURER = 3;
+  private static final int PARAM_MOLFORM = 4;
+  private static final int PARAM_CASREGISTRYNO = 5;
+  private static final int PARAM_CASNAME = 6;
+  private static final int PARAM_MP = 7;
+  private static final int PARAM_BP = 8;
+  private static final int PARAM_OBSERVENUCLEUS = 9;
+  private static final int PARAM_SOLVENTNAME = 10;
+  private static final int PARAM_SOLVENTREFERENCE = 11;
+  
+  private static int getParamIndex(String label) {
+    for (int i = 0; i < params.length; i++)
+      if (params[i].equalsIgnoreCase(label))
+        return i;
+    return -1;
+  }
+
+  private void setParams(List<String[]> table) {
+    for (int i = 0; i < table.size(); i++) {
+      String[] entry = table.get(i);
+      String val = entry[1];
+      switch (getParamIndex(entry[0])) {
+      case PARAM_STATE:
+        state = val;
+        break;
+      case PARAM_RESOLUTION:
+        resolution = val;
+        break;
+      case PARAM_SPECTROMETER:
+        model = val;
+        break;
+      case PARAM_MANUFACTURER:
+        vendor = val;
+        break;
+      case PARAM_MOLFORM:
+        molform = val;
+        break;
+      case PARAM_CASREGISTRYNO:
+        casRN = val;
+        break;
+      case PARAM_CASNAME:
+        casName = val;
+        break;
+      case PARAM_MP:
+        mp = val;
+        break;
+      case PARAM_BP:
+        bp = val;
+        break;
+      case PARAM_OBSERVENUCLEUS:
+        obNucleus = val;
+        break;
+      case PARAM_SOLVENTNAME:
+        solvName = val;
+        break;
+      case PARAM_SOLVENTREFERENCE:
+        solvRef = val;
+        break;
+      }
+    }
   }
 
   protected void setContext() {
