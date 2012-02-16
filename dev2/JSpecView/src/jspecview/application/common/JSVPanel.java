@@ -2642,8 +2642,8 @@ spectra[0].getTitleLabel();
   }
 
   public void processPeakSelect(String peak) {
-    System.out.println("JSVPanel.processPeakSelect removing highlights " + peak);
-    removeAllHighlights();
+    if (((JDXSpectrum) spectra[0]).getPeakList() != null)
+      removeAllHighlights();
     if (peak == null)
       return;
     String xMin = Parser.getQuotedAttribute(peak, "xMin");

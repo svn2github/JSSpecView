@@ -1793,8 +1793,6 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
       return;
     }
     String f = url.toString();
-    System.out.println(f);
-    System.out.println(recentURL);
     if (!f.equals(recentURL))
       setFilePathLocal(file);
     if (!selectPanel(index))
