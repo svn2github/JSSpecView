@@ -126,7 +126,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     System.out.println("JSpecView " + this + " finalized");
   }
 
-  public static final String APPLET_VERSION = "1.0.20120215-0000";
+  public static final String APPLET_VERSION = "1.0.20120216-0500";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath;
