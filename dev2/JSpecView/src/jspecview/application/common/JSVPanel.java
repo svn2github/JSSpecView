@@ -908,6 +908,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * Removes all highlights from the display
    */
   public void removeAllHighlights() {
+    System.out.println("JSVPanel.removeAllHighlights");
     highlights.removeAllElements();
   }
 
@@ -2641,6 +2642,7 @@ spectra[0].getTitleLabel();
   }
 
   public void processPeakSelect(String peak) {
+    System.out.println("JSVPanel.processPeakSelect removing highlights " + peak);
     removeAllHighlights();
     if (peak == null)
       return;
@@ -2653,7 +2655,7 @@ spectra[0].getTitleLabel();
     if (Float.isNaN(x1) || Float.isNaN(x2))
       return;
     setHighlightOn(true);
-    Color color = new Color(255, 0, 0);
+    Color color = new Color(255, 0, 0, 200);
     addHighlight(x1, x2, color);
     if (isWithinRange(x1) && isWithinRange(x2))
       repaint();

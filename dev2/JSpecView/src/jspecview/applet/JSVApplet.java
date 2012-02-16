@@ -1830,12 +1830,22 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
         Escape.jmolSelect(peak, recentURL) });
   }
 
+  /**
+   * fires peakCallback ONLY if there is a peak found
+   * fires coordCallback ONLY if there is no peak found or no peakCallback active
+   * 
+   * if (peakFound && havePeakCallback) { do the peakCallback } else { do the coordCallback }
+   * 
+   * Is that what we want? 
+   * 
+   */
   public void checkCallbacks() {
     if (coordCallbackFunctionName == null && peakCallbackFunctionName == null)
       return;
     Coordinate coord = new Coordinate();
     Coordinate actualCoord = (peakCallbackFunctionName == null ? null
         : new Coordinate());
+    // will return true if actualcoord is null (just doing coordCallback)
     if (!selectedJSVPanel.getPickedCoordinates(coord, actualCoord))
       return;
     if (actualCoord == null)
