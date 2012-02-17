@@ -1861,8 +1861,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
   public void peakPicked(PeakPickedEvent eventObj) {
     setSelectedPanel((JSVPanel) eventObj.getSource());
     currentSpectrumIndex = selectedJSVPanel.getIndex();
-    checkCallbacks();
     sendScript(eventObj.getPeakInfo());
+    checkCallbacks();
   }
 
   private void setSelectedPanel(JSVPanel source) {
