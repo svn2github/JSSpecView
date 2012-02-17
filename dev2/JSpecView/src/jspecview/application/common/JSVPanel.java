@@ -189,7 +189,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   // highlight range
   protected double hlStart, hlEnd;
 
-  protected Color highlightColor = new Color(255, 255, 0, 100);
+  protected Color highlightColor = new Color(255, 0, 0, 200);
 
   private Vector<Highlight> highlights = new Vector<Highlight>();
 
@@ -856,7 +856,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        the color of the highlight
    */
   public void addHighlight(double x1, double x2, Color color) {
-    Highlight hl = new Highlight(x1, x2, color);
+    Highlight hl = new Highlight(x1, x2, (color == null ? highlightColor : color));
     if (!highlights.contains(hl))
       highlights.addElement(hl);
   }
@@ -1219,8 +1219,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
     // fill highlight color
 
-    Color c = null;
-
     if (highlightOn) {
       if (JSpecViewUtils.DEBUG)
         System.out.println();
@@ -1228,19 +1226,17 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
     for (int i = 0; i < highlights.size(); i++) {
       Highlight hl = highlights.get(i);
-      drawBar(g, hl.getStartX(), hl.getEndX(), c = hl.getColor(), true);
+      drawBar(g, hl.getStartX(), hl.getEndX(), highlightColor = hl.getColor(), true);
     }
 
     ArrayList<PeakInfo> list = ((JDXSpectrum) getSpectrumAt(0)).getPeakList();
     if (list != null && list.size() > 0) {
-      if (c == null)
-        c = new Color(255, 0, 0);
       for (int i = list.size(); --i >= 0;) {
         PeakInfo pi = list.get(i);
         double xMin = pi.getXMin();
         double xMax = pi.getXMax();
         if (xMin != xMax) {
-          drawBar(g, xMin, xMax, c, false);
+          drawBar(g, xMin, xMax, highlightColor, false);
         }
       }
     }
@@ -2655,8 +2651,7 @@ spectra[0].getTitleLabel();
     if (Float.isNaN(x1) || Float.isNaN(x2))
       return;
     setHighlightOn(true);
-    Color color = new Color(255, 0, 0, 200);
-    addHighlight(x1, x2, color);
+    addHighlight(x1, x2, null);
     if (isWithinRange(x1) && isWithinRange(x2))
       repaint();
     else
