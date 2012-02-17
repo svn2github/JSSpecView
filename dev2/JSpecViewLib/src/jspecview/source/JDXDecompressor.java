@@ -97,11 +97,6 @@ public class JDXDecompressor {
   //private boolean isSqz = false;
 
   /**
-   * A log of the errors encountered during decompression
-   */
-  private StringBuffer errorLog = new StringBuffer("");
-
-  /**
    * The line number of the dataset label in the source file
    */
   private int labelLineNo = 0;
@@ -144,7 +139,7 @@ public class JDXDecompressor {
    *        the number of points
    */
   public JDXDecompressor(String data, double xFactor, double yFactor,
-      double lastX, double firstX, int nPoints) {
+      double lastX, double firstX, int nPoints){
     this.data = data;
     this.xFactor = xFactor;
     this.yFactor = yFactor;
@@ -153,20 +148,25 @@ public class JDXDecompressor {
   }
 
   /**
-   * Determines the type of compression, decompress the data
-   * and stores coordinates in an array to be returned
+   * Determines the type of compression, decompress the data and stores
+   * coordinates in an array to be returned
+   * 
+   * @param errorLog
    * @return the array of <code>Coordinate</code>s
    */
-  public Coordinate[] decompressData(){
+  public Coordinate[] decompressData(StringBuffer errorLog) {
     int compressionType = getCompressionType();
 
-    if(compressionType == -1)
+    if (compressionType == -1)
       return null;
 
-    switch(compressionType){
-      case JDXDecompressor.ASDF: return decompressASDF();
-      case JDXDecompressor.AFFN: return decompressAFFN();
-      default: return null;
+    switch (compressionType) {
+    case JDXDecompressor.ASDF:
+      return decompressASDF(errorLog);
+    case JDXDecompressor.AFFN:
+      return decompressAFFN(errorLog);
+    default:
+      return null;
     }
   }
 
@@ -193,13 +193,24 @@ public class JDXDecompressor {
     return -1;
   }
 
+  private Coordinate[] xyCoords;
+  private int ipt;
+  private void addPoint(Coordinate pt) {
+    if (ipt == xyCoords.length) {
+      Coordinate[] t = new Coordinate[ipt * 2];
+      System.arraycopy(xyCoords, 0, t, 0, ipt);
+      xyCoords = t;
+    }
+    xyCoords[ipt++] = pt;
+  }
 
   /**
    * Decompresses DIF format
+   * @param errorLog 
    * 
    * @return the array of <code>Coordinate</code>s
    */
-  private Coordinate[] decompressASDF() {
+  private Coordinate[] decompressASDF(StringBuffer errorLog) {
     char ch;
     int linenumber = labelLineNo;
     String line = null;
@@ -211,7 +222,7 @@ public class JDXDecompressor {
     String Dup = "STUVWXYZs";
     String Sqz = "ABCDEFGHI@abcdefghi";
     Coordinate point;
-    Coordinate[] xyCoords = new Coordinate[nPoints];
+    xyCoords = new Coordinate[nPoints];
 
     double difMax = Math.abs(0.35 * deltaX);
     double dif14 = Math.abs(1.4 * deltaX);
@@ -223,8 +234,8 @@ public class JDXDecompressor {
     } catch (IOException ioe) {
     }
     lineIndex = 0;
+    ipt = 0;
 
-    int ipt = 0;
     while (line != null) {
       linenumber++;
       if (lineIndex <= line.length()) {
@@ -235,7 +246,7 @@ public class JDXDecompressor {
         yval = getYvalDIF(line, linenumber);
         point.setYVal(yval * yFactor);
         if (ipt == 0) {
-          xyCoords[ipt++] = point; // first data line only
+          addPoint(point); // first data line only
           continue;
         }
         Coordinate last_pt = xyCoords[ipt - 1];
@@ -248,19 +259,17 @@ public class JDXDecompressor {
           // Check for Y checkpoint error - Y values should correspond
           double y = Math.abs(old_lastPt.getYVal());
           double y1 = Math.abs(point.getYVal());
-          if (y1 < 0.6 * y || y1 > 1.4 * y) {
-            errorLog.append("Y Checkpoint Error! Line " + linenumber + " " + y1
-                + " " + y + "\n");
-          }// end DIF Y checkpoint test
+          if (y1 < 0.6 * y || y1 > 1.4 * y)
+            errorLog.append("ASDF Y Checkpoint Error! Line " + linenumber + " y1/y0=" + y1/y
+                + " for y1=" + y1 + " y0=" + y + "\n");
         } else {
-          xyCoords[ipt++] = point;
+          addPoint(point);
           // Check for X checkpoint error
           // first point of new line should be deltaX away
           // ACD/Labs seem to have large rounding error so using between 0.6 and 1.4
-          if (xdif > dif14 || xdif < dif06) {
-            errorLog.append("X Checkpoint Error! Line " + linenumber + " "
-                + point.getXVal() + " " + last_pt.getXVal() + "\n");
-          }
+          if (xdif > dif14 || xdif < dif06)
+            errorLog.append("ASDF X Checkpoint Error! Line " + linenumber + " |x1-x0|="
+                + xdif + " for x1=" + point.getXVal() + " x0=" + last_pt.getXVal() + "\n");
         }
       }
       while (lineIndex < line.length()) {
@@ -272,7 +281,7 @@ public class JDXDecompressor {
           difval = getYvalDIF(line, linenumber);
           yval += difval;
           point.setYVal(yval * yFactor);
-          xyCoords[ipt++] = point;
+          addPoint(point);
         } else if (Dup.indexOf(ch) != -1) {
           dupFactor = getDUPVal(line, line.charAt(lineIndex));
           for (i = 1; i < dupFactor; i++) {
@@ -281,7 +290,7 @@ public class JDXDecompressor {
             point.setXVal(xval);
             yval += difval;
             point.setYVal(yval * yFactor);
-            xyCoords[ipt++] = point;
+            addPoint(point);
           }
         } else if (Sqz.indexOf(ch) != -1) {
           point = new Coordinate();
@@ -289,13 +298,13 @@ public class JDXDecompressor {
           point.setXVal(xval);
           yval = getYvalDIF(line, linenumber);
           point.setYVal(yval * yFactor);
-          xyCoords[ipt++] = point;
+          addPoint(point);
         } else if (ch == '?') {
           // Check for missing points in file
           lineIndex++;
           xval += deltaX;
-          errorLog.append("Invalid Data Symbol Found! Line " + linenumber
-              + "\n");
+          errorLog.append("ASDF Error -- Invalid Data Symbol Found! Line " + linenumber
+              + " ch=" + ch + "\n");
         }
         // check for spaces
         else if (ch == ' ') {
@@ -311,8 +320,7 @@ public class JDXDecompressor {
     }
 
     if (nPoints != ipt) {
-      System.out.println("OH,oh, ASDF decompressor did not find " + nPoints + " points -- instead " + ipt);
-      System.out.println(data.substring(0, 50));
+      errorLog.append("ASDF decompressor did not find " + nPoints + " points -- instead " + ipt);
       Coordinate[] temp = new Coordinate[ipt];
       System.arraycopy(xyCoords, 0, temp, 0, ipt);
       xyCoords = temp;
@@ -337,7 +345,7 @@ public class JDXDecompressor {
    * 
    * @return the array of <code>Coordinate</code>s
    */
-  private Coordinate[] decompressAFFN() {
+  private Coordinate[] decompressAFFN(StringBuffer errorLog) {
     char ch;
     int i;
     String line = null;
@@ -349,35 +357,32 @@ public class JDXDecompressor {
     String Pac = "+-.0123456789";
     String Dup = "STUVWXYZs";
 
-    Coordinate[] xyCoords = new Coordinate[nPoints];
+    lineIndex = 0;
+    xyCoords = new Coordinate[nPoints];
+    ipt = 0;
+
+    double dx08 = Math.abs(.8 * deltaX);
+    double dx12 = Math.abs(1.2 * deltaX);
 
     BufferedReader dataReader = new BufferedReader(new StringReader(data));
     try {
       line = dataReader.readLine();
     } catch (IOException ioe) {
     }
-    lineIndex = 0;
-
-    int ipt = 0;
-
-    double dx08 = Math.abs(.8 * deltaX);
-    double dx12 = Math.abs(1.2 * deltaX);
-
     while (line != null) {
       linenumber++;
       if (lineIndex <= line.length()) {
         point = new Coordinate();
-        xval = getFirstXval(line);
-        xval = (xval * xFactor);
-
+        xval = getFirstXval(line) * xFactor;
         if (ipt > 0) {
           Coordinate last_pt = new Coordinate();
           last_pt = xyCoords[ipt - 1];
           //Check for X checkpoint error
           double xdif = Math.abs(xval - last_pt.getXVal());
           if (xdif < dx08 && xdif > dx12) {
-            errorLog.append("X Checkpoint Error! Line " + linenumber + " "
-                + xval + " " + last_pt.getXVal() + "\n");
+            errorLog.append("AFFN X Checkpoint Error! Line " + linenumber + " |x1-x0|="
+                + xdif
+                + " for x1=" + xval + " x0=" + last_pt.getXVal() + "\n");
           }
         }
       }
@@ -390,7 +395,7 @@ public class JDXDecompressor {
           yval = getYvalPAC(line, linenumber);
           point.setYVal(yval * yFactor);
           if (yval != ERROR_CODE)
-            xyCoords[ipt++] = point;
+            addPoint(point);
           xval += deltaX;
         } else if (Dup.indexOf(ch) != -1) {
           dupFactor = getDUPVal(line, line.charAt(lineIndex));
@@ -398,15 +403,15 @@ public class JDXDecompressor {
             point = new Coordinate();
             point.setXVal(xval);
             point.setYVal(yval * yFactor);
-            xyCoords[ipt++] = point;
+            addPoint(point);
             xval += deltaX;
           }
         }
         else if (ch == '?') {        // Check for missing points in file
           lineIndex++;
           point.setXVal(point.getXVal() + deltaX);
-          errorLog.append("Invalid Data Symbol Found! Line " + linenumber
-              + "\n");
+          errorLog.append("AFFN Error: Invalid Data Symbol Found! Line " + linenumber
+              + " ch=" + ch + "\n");
         } else
           lineIndex++;
       }
@@ -417,8 +422,7 @@ public class JDXDecompressor {
       lineIndex = 0;
     }
     if (nPoints != ipt) {
-      System.out.println("OH,oh, AFFN decompressor did not find " + nPoints + " points -- instead " + ipt);
-      System.out.println(data.substring(0, 50));
+      errorLog.append("AFFN decompressor did not find " + nPoints + " points -- instead " + ipt + "\n");
       Coordinate[] temp = new Coordinate[ipt];
       System.arraycopy(xyCoords, 0, temp, 0, ipt);
       xyCoords = temp;
@@ -587,15 +591,6 @@ public class JDXDecompressor {
         lineIndex = line.length();
       }
       return ((Double.valueOf(temp)).doubleValue());
-    }
-
-    /**
-     * Returns a string that contains all the non-fatal errors encountered
-     * during decompression of the tabular data set
-     * @return the error log string
-     */
-    public String getErrorLog(){
-      return errorLog.toString();
     }
 
     /**

@@ -428,7 +428,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
                                     List<String[]> table,
                                     StringBuffer errorLog)
       throws JSpecViewException {
-
     if (tabularSpecData == null)
       throw new JSpecViewException("Error Reading Data Set");
 
@@ -540,6 +539,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   private void decompressData(String tabularSpecData, int tabDataLineNo,
                               StringBuffer errorLog) {
 
+    int errPt = errorLog.length();
     double fileDeltaX = JSpecViewUtils.deltaX(fileLastX, fileFirstX, nPointsFile);
     increasing = (fileDeltaX > 0);
 
@@ -547,13 +547,12 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
         xFactor, yFactor, fileDeltaX, nPointsFile);
     decompressor.setLabelLineNo(tabDataLineNo);
 
-    xyCoords = decompressor.decompressData();
+    xyCoords = decompressor.decompressData(errorLog);
 
     if (xyCoords == null)
       xyCoords = JSpecViewUtils.parseDSV(tabularSpecData, xFactor, yFactor);
 
-    if (decompressor.getErrorLog().length() > 0) {
-      errorLog.append(decompressor.getErrorLog() + "\n");
+    if (errorLog.length() != errPt) {
       errorLog.append("firstX: "
           + fileFirstX
           + " Found "
@@ -568,7 +567,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
       errorLog.append("Number of points in Header " + nPointsFile + " Found "
           + xyCoords.length + "\n");
     } else {
-      errorLog.append("No Errors\n");
+      errorLog.append("No Errors decompressing data\n");
     }
 
     if (JSpecViewUtils.DEBUG) {

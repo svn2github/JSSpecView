@@ -185,7 +185,7 @@ public class JDXFileReader {
     if (!spectrum.processTabularData(tabularSpecData, tabularDataLabelLineNo,
         dataLDRTable, errorLog))
       throw new JDXSourceException("Unable to read JDX file");
-    errorLog.append(JDXFileReader.ERROR_SEPARATOR);
+    source.setErrorLog(errorLog.toString());
     source.addJDXSpectrum(spectrum);
     return source;
   }
