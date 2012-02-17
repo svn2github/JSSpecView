@@ -2559,10 +2559,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
           "Select Spectrum", JOptionPane.WARNING_MESSAGE);
       return;
     }
-
-    System.out.println(currentSelectedSource.getErrorLog().length());
-    if (currentSelectedSource.getErrorLog().length() > 0) {
-      String errorLog = currentSelectedSource.getErrorLog();
+    String errorLog = currentSelectedSource.getErrorLog();
+    if (errorLog != null) {
       String file = getFileForSource(currentSelectedSource);
       new TextDialog(this, file, errorLog, true);
     }
