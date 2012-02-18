@@ -320,7 +320,7 @@ public class JDXDecompressor {
     }
 
     if (nPoints != ipt) {
-      errorLog.append("ASDF decompressor did not find " + nPoints + " points -- instead " + ipt);
+      errorLog.append("ASDF decompressor did not find " + nPoints + " points -- instead " + ipt + "\n");
       Coordinate[] temp = new Coordinate[ipt];
       System.arraycopy(xyCoords, 0, temp, 0, ipt);
       xyCoords = temp;
