@@ -717,6 +717,8 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
       return false;    // I think this was because of a bug where BLOCK files kept type as LINK ?      
     }else if (datatype.toUpperCase().contains("INFRA") && xUnits.toUpperCase().contains("CM")) {
         return false;
+    }else if (datatype.toUpperCase().contains("RAMAN") && xUnits.toUpperCase().contains("CM")) {
+        return false;
     }
     else if(datatype.toUpperCase().contains("VIS") && xUnits.toUpperCase().contains("NANOMETERS")){
       return true;
