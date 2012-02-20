@@ -186,14 +186,14 @@ public class JDXDecompressor {
         if (ipt == 0) {
           addPoint(point); // first data line only
         } else {
-          Coordinate last_pt = xyCoords[ipt - 1];
-          double xdif = Math.abs(last_pt.getXVal() - point.getXVal());
+          Coordinate lastPoint = xyCoords[ipt - 1];
+          double xdif = Math.abs(lastPoint.getXVal() - point.getXVal());
           // DIF Y checkpoint means X value does not advance at start
           // of new line. Remove last values and put in latest ones
           if (isCheckPoint && xdif < difMax) {
             xyCoords[ipt - 1] = point;
             // Check for Y checkpoint error - Y values should correspond
-            double y = last_pt.getYVal();
+            double y = lastPoint.getYVal();
             double y1 = point.getYVal();
             if (y1 != y)
               errorLog.append(line + "\nY-value Checkpoint Error! Line " + lineNumber
@@ -206,7 +206,7 @@ public class JDXDecompressor {
             if (xdif < dif06 || xdif > dif14)
               errorLog.append(line + "\nX-sequence Checkpoint Error! Line " + lineNumber
                   + " |x1-x0|=" + xdif + " instead of " + Math.abs(deltaX) + " for x1=" + point.getXVal() + " x0="
-                  + last_pt.getXVal() + "\n");
+                  + lastPoint.getXVal() + "\n");
           }
         }
         while (ich < lineLen) {
