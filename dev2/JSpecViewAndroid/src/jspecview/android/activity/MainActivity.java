@@ -22,6 +22,7 @@ import jspecview.common.IntegralGraph;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSpecViewUtils;
 import jspecview.exception.JSpecViewException;
+import jspecview.source.JDXFileReader;
 import jspecview.source.JDXSource;
 
 import org.achartengine.ChartFactory;
@@ -178,7 +179,7 @@ public class MainActivity extends Activity{
 				XYMultipleSeriesRenderer multiRenderer = createMultipleSeriesRenderer(dataset.getSeriesCount());
 				mRenderers[i] = multiRenderer;
 								
-				multiRenderer.setXAxisDecreasing(!JSpecViewUtils.shouldDisplayXAxisIncreasing(mSpectra.get(i)));
+				multiRenderer.setXAxisDecreasing(mSpectra.get(i).shouldDisplayXAxisIncreasing());
 				
 				GraphicalView view = ChartFactory.getLineChartView(getApplicationContext(), dataset, multiRenderer);
 				view.setId(i);	
@@ -356,7 +357,7 @@ public class MainActivity extends Activity{
     				}
     			}
 	    	}
-	    	if(!mIsOverlayEnabled && JSpecViewUtils.isHNMR(mSpectra.get(0))){
+	    	if(!mIsOverlayEnabled && mSpectra.get(0).isHNMR()){
 	    		MenuItem miIntegrateSpectra = menu.findItem(MenuItemID.ADD_REMOVE_INTEGRATION);	    		
 	    		String integrationTitle = mIsIntegrated ? "Remove Integration" : "Integrate";
     			if(miIntegrateSpectra == null){    					
@@ -629,18 +630,11 @@ public class MainActivity extends Activity{
      * @return
      * @throws IOException
      */
-	private Vector<JDXSpectrum> readSpectrum(InputStream stream) throws IOException, JSpecViewException {
-		               
-        Object source = JDXSource.createJDXSource(stream);
-        if (source instanceof String) {            
-            return null;
-        }
-        else{        	
-        	JDXSource jdxSource = (JDXSource)source;
-        	Vector<JDXSpectrum> jdxSpectra = jdxSource.getSpectra();        	
-        	return jdxSpectra;
-        }     
-        
+	private Vector<JDXSpectrum> readSpectrum(InputStream stream) throws IOException, JSpecViewException {		                
+		JDXSource source = JDXFileReader.createJDXSource(stream);             	
+    	JDXSource jdxSource = (JDXSource)source;
+    	Vector<JDXSpectrum> jdxSpectra = jdxSource.getSpectra();        	
+    	return jdxSpectra;   
 	}
     
   
