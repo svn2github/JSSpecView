@@ -59,7 +59,8 @@ class JDXCompressor {
   static String compressDIF(Coordinate[] xyCoords, int startDataPointIndex,
                             int endDataPointIndex, double xFactor,
                             double yFactor, boolean isDIFDUP) {
-    String yStr = "", temp;
+    String temp;
+    StringBuffer yStr = new StringBuffer();
     Coordinate curXY;
 
     int y1, y2, x1;
@@ -78,7 +79,7 @@ class JDXCompressor {
       temp = String.valueOf(y1);
       // convert 1st digit of string to SQZ
       temp = makeSQZ(temp);
-      yStr += temp;
+      yStr.append(temp);
       String lastDif = "";
       int nDif = 0;
       i++;
@@ -89,24 +90,22 @@ class JDXCompressor {
 
         // Calculate DIF value here
         temp = makeDIF(y2, y1);
-        System.out.println(y2 + "\t" + (y2 - y1));
         if (isDIFDUP && temp.equals(lastDif)) {
           nDif++;
         } else {
           lastDif = temp;
           if (nDif > 0) {
-            yStr += makeDUP(String.valueOf(nDif + 1));
-            System.out.println(yStr);
+            yStr.append(makeDUP(String.valueOf(nDif + 1)));
             nDif = 0;
           }
-          yStr += temp;
+          yStr.append(temp);
         }
         y1 = y2;
         i++;
       }
       if (nDif > 0) {
         temp = makeDUP(String.valueOf(nDif + 1));
-        yStr += temp;
+        yStr.append(temp);
       }
 
       curXY = xyCoords[i];
@@ -114,11 +113,11 @@ class JDXCompressor {
       // convert last digit of string to SQZ
       temp = makeSQZ(String.valueOf(y2));
 
-      yStr += temp;
+      yStr.append(temp);
       i++;
 
-      buffer.append(x1 + yStr + JSpecViewUtils.newLine);
-      yStr = "";
+      buffer.append(x1).append(yStr).append(JSpecViewUtils.newLine);
+      yStr.setLength(0);
     }
 
     if (i == endDataPointIndex) {
@@ -132,9 +131,7 @@ class JDXCompressor {
       temp = String.valueOf(y1);
       // convert 1st digit of string to SQZ
       temp = makeSQZ(temp);
-      yStr += temp;
-
-      buffer.append(x1 + yStr);
+      buffer.append(x1).append(yStr).append(temp);
       buffer.append("  $$checkpoint" + JSpecViewUtils.newLine);
     }
 
@@ -155,7 +152,8 @@ class JDXCompressor {
   static String compressFIX(Coordinate[] xyCoords, int startDataPointIndex, int endDataPointIndex, double xFactor, double yFactor){
     DecimalFormat formatter = new DecimalFormat("#", new DecimalFormatSymbols(java.util.Locale.US ));
     int ij;
-    String yStr = "", xStr, temp;
+    StringBuffer yStr = new StringBuffer();
+    String xStr, temp;
     Coordinate curXY;
     String tempYStr;
     String spaces = "          ";
@@ -190,17 +188,13 @@ class JDXCompressor {
         curXY = xyCoords[i];
         y2 = (int) Math.round(curXY.getYVal()/yFactor);
         temp = formatter.format(y2);
-
-        temp = spaces.substring(0, (10 - temp.length())) + temp + " ";
-        temp += " ";
-
-        yStr += temp;
-        ij ++;
+        yStr.append(spaces.substring(0, (10 - temp.length())))
+        .append(temp).append(" ");
+        ij++;
         i++;
       }
-      buffer.append(xStr + tempYStr + yStr + JSpecViewUtils.newLine);
-
-      yStr = "";
+      buffer.append(xStr).append(tempYStr).append(yStr).append(JSpecViewUtils.newLine);
+      yStr.setLength(0);
     }
 
     return buffer.toString();
@@ -218,7 +212,8 @@ class JDXCompressor {
    * @return A String representing the compressed data
    */
   static String compressSQZ(Coordinate[] xyCoords, int startDataPointIndex, int endDataPointIndex, double xFactor, double yFactor){
-    String yStr = "", temp;
+    StringBuffer yStr = new StringBuffer();
+    String temp;
     Coordinate curXY;
 
     int y1, y2, x1;
@@ -238,7 +233,7 @@ class JDXCompressor {
       temp = String.valueOf(y1);
       // convert 1st digit of string to SQZ
       temp = makeSQZ(temp);
-      yStr += temp;
+      yStr.append(temp);
 
       i++;
       while ((yStr.length() < 60) && i <= endDataPointIndex)
@@ -249,11 +244,11 @@ class JDXCompressor {
         temp = String.valueOf(y2);
         // Calculate DIF value here
         temp = makeSQZ(temp);
-        yStr += temp;
+        yStr.append(temp);
         i++;
       }
-      buffer.append(x1 + yStr + JSpecViewUtils.newLine);
-      yStr = "";
+      buffer.append(x1).append(yStr).append(JSpecViewUtils.newLine);
+      yStr.setLength(0);
 
     }
 
@@ -274,7 +269,8 @@ class JDXCompressor {
   static String compressPAC(Coordinate[] xyCoords, int startDataPointIndex, int endDataPointIndex, double xFactor, double yFactor){
     DecimalFormat formatter = new DecimalFormat("#", new DecimalFormatSymbols(java.util.Locale.US ));
     int ij;
-    String yStr = "", temp;
+    StringBuffer yStr = new StringBuffer();
+    String temp;
     Coordinate curXY;
 
     int y1, y2, x1;
@@ -299,13 +295,15 @@ class JDXCompressor {
         curXY = xyCoords[i];
         y2 = (int) Math.round(curXY.getYVal()/yFactor);
         temp = formatter.format(y2)+" ";
-        yStr += temp;
+        yStr.append(temp);
         ij ++;
         i++;
       }
-      buffer.append(formatter.format(x1) + " " + formatter.format(y1) + " " + yStr + JSpecViewUtils.newLine);
+      buffer.append(formatter.format(x1))
+          .append(" ").append(formatter.format(y1)).append(" ")
+          .append(yStr).append(JSpecViewUtils.newLine);
 
-      yStr = "";
+      yStr.setLength(0);
     }
 
     return buffer.toString();
@@ -313,21 +311,21 @@ class JDXCompressor {
 
   /**
    * Makes a SQZ Character
-   * @param yStr the input number as a string
+   * @param sNum the input number as a string
    * @return the SQZ character
    */
-  private static String makeSQZ(String yStr){
+  private static String makeSQZ(String sNum){
     boolean negative = false;
 
-    yStr.trim();
-    if (yStr.charAt(0) == '-'){
+    sNum.trim();
+    if (sNum.charAt(0) == '-'){
       negative = true;
-      yStr = yStr.substring(1);
+      sNum = sNum.substring(1);
     }
 
-    char[] yStrArray = yStr.toCharArray();
+    char[] yStrArray = sNum.toCharArray();
 
-    switch (yStr.charAt(0)){
+    switch (sNum.charAt(0)){
       case '0' : yStrArray[0] = '@';break;
       case '1' : if (negative) yStrArray[0] = 'a';else yStrArray[0] = 'A';break;
       case '2' : if (negative) yStrArray[0] = 'b';else yStrArray[0] = 'B';break;
@@ -343,13 +341,12 @@ class JDXCompressor {
   }
 
     /**
-   * Makes a SQZ Character
-   * @param yStr the input number as a string
-   * @return the SQZ character
+   * Makes a DUP Character
+   * @param sNum the input number as a string
+   * @return the DUP character
    */
-  private static String makeDUP(String yStr){
-    char[] yStrArray = yStr.toCharArray();
-    System.out.println("yStr " + yStr + " " + "STUVWXYZs".charAt(yStrArray[0] - '1'));
+  private static String makeDUP(String sNum){
+    char[] yStrArray = sNum.toCharArray();
     yStrArray[0] = "STUVWXYZs".charAt(yStrArray[0] - '1');
     return (new String(yStrArray));
   }
