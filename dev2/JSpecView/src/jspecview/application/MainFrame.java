@@ -419,7 +419,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     //boolean loadedOk;
     //Set Default Properties
 
-    // Initalize application properties with defaults
+    // Initialise application properties with defaults
     // and load properties from file
     properties = new Properties();
     // sets the list of recently opened files property to be initially empty
@@ -1314,6 +1314,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     //    jsvp.setZoomEnabled(true);
     // update availability of Exporting JCAMP-DX file so that
     // if a Peak Table is the current spectrum, disable the menu.
+    // need to check for XYPOINTS as well since not continuous either.... RL
     boolean continuous = spec.isContinuous();
     saveAsJDXMenu.setEnabled(continuous);
     integrateMenuItem.setEnabled(spec.isHNMR() && continuous);
