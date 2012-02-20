@@ -231,7 +231,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   // coordinate Color
   protected Color coordinatesColor = Color.red;
 
-  protected Color zoomBoxColor = new Color(0, 0, 0, 30);
+  protected Color zoomBoxColor = new Color(100, 100, 50, 130);
 
   //private boolean isMousePressed; 
   private boolean isMouseDragged, isMouseReleased;
@@ -1799,7 +1799,7 @@ spectra[0].getTitleLabel();
    *        the Graphics object
    */
   protected void drawZoomBox(Graphics g) {
-    //  adapted from suggestion by Valery Tkachenko 5 Nov 2010 and previously implemented for ChemSpider 
+    //  adapted from suggestion by Valery Tkachenko 5 Nov 2010 and previously implemented for ChemSpider
     if (isMouseDragged) {
       g.setColor(zoomBoxColor);
       g.fillRect(zoomBoxX, topPlotAreaPos, currZoomBoxX - zoomBoxX,
