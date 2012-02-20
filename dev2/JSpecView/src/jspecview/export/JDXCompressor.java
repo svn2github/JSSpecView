@@ -63,7 +63,8 @@ class JDXCompressor {
     StringBuffer yStr = new StringBuffer();
     Coordinate curXY;
 
-    int y1, y2, x1;
+    int y1, y2;
+    double x1;
     StringBuffer buffer = new StringBuffer();
 
     int i = startDataPointIndex;
@@ -71,7 +72,7 @@ class JDXCompressor {
       curXY = xyCoords[i];
 
       // Get first X value on line
-      x1 = (int) Math.round(curXY.getXVal() / xFactor);
+      x1 = curXY.getXVal() / xFactor;//(int) Math.round(curXY.getXVal() / xFactor);
 
       // Get First Y value on line
       y1 = (int) Math.round(curXY.getYVal() / yFactor);
@@ -121,7 +122,7 @@ class JDXCompressor {
       curXY = xyCoords[i];
 
       // Get first X value on line
-      x1 = (int) Math.round(curXY.getXVal() / xFactor);
+      x1 = curXY.getXVal() / xFactor;
 
       // Get First Y value on line
       y1 = (int) Math.round(curXY.getYVal() / yFactor);
@@ -153,9 +154,10 @@ class JDXCompressor {
     String xStr, temp;
     Coordinate curXY;
     String tempYStr;
-    String spaces = "          ";
+    String spaces = "                    ";
 
-    int y1, y2, x1;
+    int y1, y2;
+    double x1;
     StringBuffer buffer = new StringBuffer();
 
     int i = startDataPointIndex;
@@ -164,10 +166,11 @@ class JDXCompressor {
       ij = 1;
       curXY = xyCoords[i];
 
-      x1 = (int) Math.round(curXY.getXVal()/xFactor);
-      xStr = formatter.format(x1);
+      x1 = curXY.getXVal()/xFactor;
+      xStr = "" + x1;
 
-      xStr = xStr + spaces.substring(0, (10 - xStr.length()));
+      if (xStr.length() < 20)
+        xStr = spaces.substring(0, (20 - xStr.length()));
       xStr += " ";
 
       // Get First Y value on line
@@ -213,7 +216,8 @@ class JDXCompressor {
     String temp;
     Coordinate curXY;
 
-    int y1, y2, x1;
+    int y1, y2;
+    double x1;
     StringBuffer buffer = new StringBuffer();
 
     int i = startDataPointIndex;
@@ -223,7 +227,7 @@ class JDXCompressor {
       curXY = xyCoords[i];
 
       // Get first X value on line
-      x1 = (int)Math.round(curXY.getXVal()/ xFactor);
+      x1 = curXY.getXVal()/ xFactor;
 
       // Get First Y value on line
       y1 = (int)Math.round(curXY.getYVal()/ yFactor);
@@ -270,7 +274,8 @@ class JDXCompressor {
     String temp;
     Coordinate curXY;
 
-    int y1, y2, x1;
+    int y1, y2;
+    double x1;
     StringBuffer buffer = new StringBuffer();
 
     int i = startDataPointIndex;
@@ -280,7 +285,7 @@ class JDXCompressor {
       curXY = xyCoords[i];
 
       // Get first X value on line
-      x1 = (int) Math.round(curXY.getXVal()/xFactor);
+      x1 = curXY.getXVal() / xFactor;
 
       // Get First Y value on line
       y1 = (int) Math.round(curXY.getYVal()/yFactor);
@@ -296,7 +301,7 @@ class JDXCompressor {
         ij ++;
         i++;
       }
-      buffer.append(formatter.format(x1))
+      buffer.append(x1)
           .append(" ").append(formatter.format(y1)).append(" ")
           .append(yStr).append(JSpecViewUtils.newLine);
 

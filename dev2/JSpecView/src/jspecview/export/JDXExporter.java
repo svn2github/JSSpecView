@@ -62,11 +62,16 @@ class JDXExporter {
 
   /**
    * Auxiliary function for the toString functions
-   * @param type the type of compression
+   * 
+   * @param type
+   *        the type of compression
    * @param spectrum
-   * @param startIndex the start Coordinate Index
-   * @param endIndex the end Coordinate Index
-   * @return the spectrum string for the type of compression specified by <code>type</code>
+   * @param startIndex
+   *        the start Coordinate Index
+   * @param endIndex
+   *        the end Coordinate Index
+   * @return the spectrum string for the type of compression specified by
+   *         <code>type</code>
    */
   private static String toStringAux(int type, JDXSpectrum spectrum,
                                     int startIndex, int endIndex) {
@@ -75,7 +80,7 @@ class JDXExporter {
     StringBuffer buffer = new StringBuffer();
     Coordinate[] newXYCoords = spectrum.getXYCoords();
     String tabDataSet = "", tmpDataClass = "XYDATA";
-    double xCompFactor, yCompFactor;
+    double xCompFactor = 1, yCompFactor = 1;
 
     if (spectrum.isHZtoPPM()) {
       Coordinate[] xyCoords = newXYCoords;
@@ -86,14 +91,15 @@ class JDXExporter {
     }
 
     if (type != Exporter.XY) {
-      xCompFactor = JSpecViewUtils.getXFactorForCompression(newXYCoords,
-          startIndex, endIndex);
+      //xCompFactor = JSpecViewUtils.getXFactorForCompression(newXYCoords,
+        //  startIndex, endIndex);
       yCompFactor = JSpecViewUtils.getYFactorForCompression(newXYCoords,
           startIndex, endIndex);
     } else {
-      xCompFactor = yCompFactor = 1;
-      if (spectrum.isContinuous()) tmpDataClass = "XYDATA";
-          else tmpDataClass="XYPOINTS";
+      if (spectrum.isContinuous())
+        tmpDataClass = "XYDATA";
+      else
+        tmpDataClass = "XYPOINTS";
     }
 
     switch (type) {
@@ -115,16 +121,19 @@ class JDXExporter {
           xCompFactor, yCompFactor);
       break;
     case Exporter.XY:
-      tabDataSet = JSpecViewUtils.coordinatesToString(newXYCoords, startIndex, endIndex, 1);
+      tabDataSet = JSpecViewUtils.coordinatesToString(newXYCoords, startIndex,
+          endIndex, 1);
       break;
     }
 
-    int index = Arrays.binarySearch(JDXFileReader.VAR_LIST_TABLE[0], tmpDataClass);
+    int index = Arrays.binarySearch(JDXFileReader.VAR_LIST_TABLE[0],
+        tmpDataClass);
     String varList = JDXFileReader.VAR_LIST_TABLE[1][index];
 
     buffer.append(spectrum.getHeaderString(tmpDataClass, xCompFactor,
         yCompFactor, startIndex, endIndex));
-    buffer.append("##" + tmpDataClass + "= " + varList + JSpecViewUtils.newLine);
+    buffer
+        .append("##" + tmpDataClass + "= " + varList + JSpecViewUtils.newLine);
     buffer.append(tabDataSet);
     buffer.append("##END=");
 
