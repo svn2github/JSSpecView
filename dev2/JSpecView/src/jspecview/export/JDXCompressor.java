@@ -103,11 +103,8 @@ class JDXCompressor {
         y1 = y2;
         i++;
       }
-      if (nDif > 0) {
-        temp = makeDUP(String.valueOf(nDif + 1));
-        yStr.append(temp);
-      }
-
+      if (nDif > 0)
+        yStr.append(makeDUP(String.valueOf(nDif + 1)));
       curXY = xyCoords[i];
       y2 = (int) Math.round(curXY.getYVal() / yFactor);
       // convert last digit of string to SQZ
