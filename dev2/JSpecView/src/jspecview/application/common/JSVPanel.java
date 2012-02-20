@@ -2571,6 +2571,7 @@ spectra[0].getTitleLabel();
     exportAsMenu.setText("Export As");
     addMenuItem(saveAsJDXMenu, "XY", actionListener);
     addMenuItem(saveAsJDXMenu, "DIF", actionListener);
+    addMenuItem(saveAsJDXMenu, "DIFDUP", actionListener);
     addMenuItem(saveAsJDXMenu, "FIX", actionListener);
     addMenuItem(saveAsJDXMenu, "PAC", actionListener);
     addMenuItem(saveAsJDXMenu, "SQZ", actionListener);
