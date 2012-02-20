@@ -98,8 +98,9 @@ class JDXExporter {
 
     switch (type) {
     case Exporter.DIF:
+    case Exporter.DIFDUP:
       tabDataSet = JDXCompressor.compressDIF(newXYCoords, startIndex, endIndex,
-          xCompFactor, yCompFactor);
+          xCompFactor, yCompFactor, type == Exporter.DIFDUP);
       break;
     case Exporter.FIX:
       tabDataSet = JDXCompressor.compressFIX(newXYCoords, startIndex, endIndex,

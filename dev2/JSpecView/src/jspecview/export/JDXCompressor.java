@@ -42,17 +42,23 @@ class JDXCompressor {
 
   /**
    * Compresses the <code>Coordinate<code>s into DIF format
-   * @param xyCoords the array of <code>Coordinate</code>s
-   * @param startDataPointIndex the start index of the array of Coordinates to
-   *        be compressed
-   * @param endDataPointIndex the end index of the array of Coordinates to
-   *        be compressed
-   * @param xFactor x factor for compression
-   * @param yFactor y factor for compression
+   * 
+   * @param xyCoords
+   *        the array of <code>Coordinate</code>s
+   * @param startDataPointIndex
+   *        the start index of the array of Coordinates to be compressed
+   * @param endDataPointIndex
+   *        the end index of the array of Coordinates to be compressed
+   * @param xFactor
+   *        x factor for compression
+   * @param yFactor
+   *        y factor for compression
+   * @param isDIFDUP
    * @return A String representing the compressed data
    */
   static String compressDIF(Coordinate[] xyCoords, int startDataPointIndex,
-                                   int endDataPointIndex, double xFactor, double yFactor){
+                            int endDataPointIndex, double xFactor,
+                            double yFactor, boolean isDIFDUP) {
     String yStr = "", temp;
     Coordinate curXY;
 
@@ -60,37 +66,51 @@ class JDXCompressor {
     StringBuffer buffer = new StringBuffer();
 
     int i = startDataPointIndex;
-    while( i < endDataPointIndex)
-    {
+    while (i < endDataPointIndex) {
       curXY = xyCoords[i];
 
       // Get first X value on line
-      x1 = (int)Math.round(curXY.getXVal()/ xFactor);
+      x1 = (int) Math.round(curXY.getXVal() / xFactor);
 
       // Get First Y value on line
-      y1 = (int)Math.round(curXY.getYVal()/ yFactor);
+      y1 = (int) Math.round(curXY.getYVal() / yFactor);
 
       temp = String.valueOf(y1);
       // convert 1st digit of string to SQZ
       temp = makeSQZ(temp);
       yStr += temp;
-
+      String lastDif = "";
+      int nDif = 0;
       i++;
-      while ((yStr.length() < 60) && i < endDataPointIndex - 1)
-      {
+      while (yStr.length() < 60 && i < endDataPointIndex - 1) {
         // Print remaining Y values on a line
         curXY = xyCoords[i];
-        y2 = (int)Math.round(curXY.getYVal() / yFactor);
+        y2 = (int) Math.round(curXY.getYVal() / yFactor);
 
         // Calculate DIF value here
         temp = makeDIF(y2, y1);
-        yStr += temp;
+        System.out.println(y2 + "\t" + (y2 - y1));
+        if (isDIFDUP && temp.equals(lastDif)) {
+          nDif++;
+        } else {
+          lastDif = temp;
+          if (nDif > 0) {
+            yStr += makeDUP(String.valueOf(nDif + 1));
+            System.out.println(yStr);
+            nDif = 0;
+          }
+          yStr += temp;
+        }
         y1 = y2;
         i++;
       }
+      if (nDif > 0) {
+        temp = makeDUP(String.valueOf(nDif + 1));
+        yStr += temp;
+      }
 
       curXY = xyCoords[i];
-      y2 = (int)Math.round(curXY.getYVal() / yFactor);
+      y2 = (int) Math.round(curXY.getYVal() / yFactor);
       // convert last digit of string to SQZ
       temp = makeSQZ(String.valueOf(y2));
 
@@ -101,15 +121,14 @@ class JDXCompressor {
       yStr = "";
     }
 
-
-    if(i == endDataPointIndex){
+    if (i == endDataPointIndex) {
       curXY = xyCoords[i];
 
       // Get first X value on line
-      x1 = (int)Math.round(curXY.getXVal()/ xFactor);
+      x1 = (int) Math.round(curXY.getXVal() / xFactor);
 
       // Get First Y value on line
-      y1 = (int)Math.round(curXY.getYVal()/ yFactor);
+      y1 = (int) Math.round(curXY.getYVal() / yFactor);
       temp = String.valueOf(y1);
       // convert 1st digit of string to SQZ
       temp = makeSQZ(temp);
@@ -320,6 +339,18 @@ class JDXCompressor {
       case '8' : if (negative) yStrArray[0] = 'h';else yStrArray[0] = 'H';break;
       case '9' : if (negative) yStrArray[0] = 'i';else yStrArray[0] = 'I';break;
     }
+    return (new String(yStrArray));
+  }
+
+    /**
+   * Makes a SQZ Character
+   * @param yStr the input number as a string
+   * @return the SQZ character
+   */
+  private static String makeDUP(String yStr){
+    char[] yStrArray = yStr.toCharArray();
+    System.out.println("yStr " + yStr + " " + "STUVWXYZs".charAt(yStrArray[0] - '1'));
+    yStrArray[0] = "STUVWXYZs".charAt(yStrArray[0] - '1');
     return (new String(yStrArray));
   }
 
