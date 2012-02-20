@@ -1816,10 +1816,10 @@ public class MainFrame extends JFrame implements DropTargetListener,
     public void internalFrameActivated(InternalFrameEvent e) {
       JInternalFrame frame = e.getInternalFrame();
       setCurrentSource(source);
-      JDXSpectrum spec = source.getJDXSpectrum(0);
 
       // Update the menu items for the display menu
       JSVPanel jsvp = (JSVPanel) frame.getContentPane().getComponent(0);
+      JDXSpectrum spec = (JDXSpectrum) jsvp.getSpectrumAt(0);
       gridCheckBoxMenuItem.setSelected(jsvp.isGridOn());
       gridToggleButton.setSelected(jsvp.isGridOn());
       coordsCheckBoxMenuItem.setSelected(jsvp.isCoordinatesOn());
