@@ -59,145 +59,90 @@ class JDXCompressor {
   static String compressDIF(Coordinate[] xyCoords, int startDataPointIndex,
                             int endDataPointIndex, double xFactor,
                             double yFactor, boolean isDIFDUP) {
-    String temp;
     StringBuffer yStr = new StringBuffer();
-    Coordinate curXY;
 
-    int y1, y2;
-    double x1;
     StringBuffer buffer = new StringBuffer();
-
-    int i = startDataPointIndex;
-    while (i < endDataPointIndex) {
-      curXY = xyCoords[i];
-
-      // Get first X value on line
-      x1 = curXY.getXVal() / xFactor;//(int) Math.round(curXY.getXVal() / xFactor);
-
-      // Get First Y value on line
-      y1 = (int) Math.round(curXY.getYVal() / yFactor);
-
-      temp = String.valueOf(y1);
-      // convert 1st digit of string to SQZ
-      temp = makeSQZ(temp);
-      yStr.append(temp);
+    for (int i = startDataPointIndex; i < endDataPointIndex; i++) {
+      buffer.append(fixExponent(xyCoords[i].getXVal() / xFactor));
+      yStr.setLength(0);
+      int y1 = (int) Math.round(xyCoords[i].getYVal() / yFactor);
+      yStr.append(makeSQZ(y1));
       String lastDif = "";
       int nDif = 0;
-      i++;
-      while (yStr.length() < 60 && i < endDataPointIndex - 1) {
+      while (++i < endDataPointIndex - 1 && yStr.length() < 50) {
         // Print remaining Y values on a line
-        curXY = xyCoords[i];
-        y2 = (int) Math.round(curXY.getYVal() / yFactor);
-
+        int y2 = (int) Math.round(xyCoords[i].getYVal() / yFactor);
         // Calculate DIF value here
-        temp = makeDIF(y2, y1);
+        String temp = makeDIF(y2 - y1);
         if (isDIFDUP && temp.equals(lastDif)) {
           nDif++;
         } else {
           lastDif = temp;
           if (nDif > 0) {
-            yStr.append(makeDUP(String.valueOf(nDif + 1)));
+            yStr.append(makeDUP(nDif + 1));
             nDif = 0;
           }
           yStr.append(temp);
         }
         y1 = y2;
-        i++;
       }
       if (nDif > 0)
-        yStr.append(makeDUP(String.valueOf(nDif + 1)));
-      curXY = xyCoords[i];
-      y2 = (int) Math.round(curXY.getYVal() / yFactor);
+        yStr.append(makeDUP(nDif + 1));
       // convert last digit of string to SQZ
-      temp = makeSQZ(String.valueOf(y2));
-
-      yStr.append(temp);
-      i++;
-
-      buffer.append(fixExponent(x1)).append(yStr).append(JSpecViewUtils.newLine);
-      yStr.setLength(0);
+      yStr.append(makeSQZ(xyCoords[i], yFactor));
+      buffer.append(yStr).append(JSpecViewUtils.newLine);
     }
+    // Get checksum line -- for an X-sequence check only
+    buffer.append(fixExponent(xyCoords[endDataPointIndex].getXVal() / xFactor))
+        .append(makeSQZ(xyCoords[endDataPointIndex], yFactor));
+    buffer.append("  $$checkpoint" + JSpecViewUtils.newLine);
+    return buffer.toString();
+  }
 
-    if (i == endDataPointIndex) {
-      curXY = xyCoords[i];
+  final static String spaces = "                    ";
 
-      // Get first X value on line
-      x1 = curXY.getXVal() / xFactor;
 
-      // Get First Y value on line
-      y1 = (int) Math.round(curXY.getYVal() / yFactor);
-      temp = String.valueOf(y1);
-      // convert 1st digit of string to SQZ
-      temp = makeSQZ(temp);
-      buffer.append(fixExponent(x1)).append(yStr).append(temp);
-      buffer.append("  $$checkpoint" + JSpecViewUtils.newLine);
+  /**
+   * Compresses the <code>Coordinate<code>s into FIX format
+   * 
+   * @param xyCoords
+   *        the array of <code>Coordinate</code>s
+   * @param startDataPointIndex
+   *        startDataPointIndex the start index of the array of Coordinates to
+   *        be compressed
+   * @param endDataPointIndex
+   *        endDataPointIndex the end index of the array of Coordinates to be
+   *        compressed
+   * @param xFactor
+   *        x factor for compression
+   * @param yFactor
+   *        y factor for compression
+   * @return A String representing the compressed data
+   */
+  static String compressFIX(Coordinate[] xyCoords, int startDataPointIndex,
+                            int endDataPointIndex, double xFactor,
+                            double yFactor) {
+    DecimalFormat formatter = new DecimalFormat("#", new DecimalFormatSymbols(
+        java.util.Locale.US));
+    StringBuffer buffer = new StringBuffer();
+
+    for (int i = startDataPointIndex; i <= endDataPointIndex; i++) {
+      String xStr = fixExponent(xyCoords[i].getXVal( ) / xFactor);
+      if (xStr.length() < 20)
+        xStr += spaces.substring(0, (20 - xStr.length()));
+      buffer.append(xStr).append(" ");
+      format10(buffer, (int) Math.round(xyCoords[i].getYVal() / yFactor), formatter);
+      for (int j = 0; j < 5 && ++i <= endDataPointIndex; j++)
+        format10(buffer, (int) Math.round(xyCoords[i].getYVal() / yFactor), formatter);
+      buffer.append(JSpecViewUtils.newLine);
     }
 
     return buffer.toString();
   }
 
-  /**
-   * Compresses the <code>Coordinate<code>s into FIX format
-   * @param xyCoords the array of <code>Coordinate</code>s
-   * @param startDataPointIndex startDataPointIndex the start index of the array of Coordinates to
-   *        be compressed
-   * @param endDataPointIndex endDataPointIndex the end index of the array of Coordinates to
-   *        be compressed
-   * @param xFactor x factor for compression
-   * @param yFactor y factor for compression
-   * @return A String representing the compressed data
-   */
-  static String compressFIX(Coordinate[] xyCoords, int startDataPointIndex, int endDataPointIndex, double xFactor, double yFactor){
-    DecimalFormat formatter = new DecimalFormat("#", new DecimalFormatSymbols(java.util.Locale.US ));
-    int ij;
-    StringBuffer yStr = new StringBuffer();
-    String xStr, temp;
-    Coordinate curXY;
-    String tempYStr;
-    String spaces = "                    ";
-
-    int y1, y2;
-    double x1;
-    StringBuffer buffer = new StringBuffer();
-
-    int i = startDataPointIndex;
-    while( i <= endDataPointIndex)
-    {
-      ij = 1;
-      curXY = xyCoords[i];
-
-      x1 = curXY.getXVal()/xFactor;
-      xStr = fixExponent(x1);
-
-      if (xStr.length() < 20)
-        xStr = spaces.substring(0, (20 - xStr.length()));
-      xStr += " ";
-
-      // Get First Y value on line
-      y1 = (int) Math.round(curXY.getYVal()/yFactor);
-      tempYStr = formatter.format(y1);
-
-
-      tempYStr = spaces.substring(0, (10 - tempYStr.length())) + tempYStr + " ";
-      tempYStr += " ";
-
-      i++;
-      while ((ij <= 5) && i <= endDataPointIndex)
-      {
-        // Print remaining Y values on a line
-        curXY = xyCoords[i];
-        y2 = (int) Math.round(curXY.getYVal()/yFactor);
-        temp = formatter.format(y2);
-        yStr.append(spaces.substring(0, (10 - temp.length())))
-        .append(temp).append(" ");
-        ij++;
-        i++;
-      }
-      buffer.append(xStr).append(tempYStr).append(yStr).append(JSpecViewUtils.newLine);
-      yStr.setLength(0);
-    }
-
-    return buffer.toString();
+  private static void format10(StringBuffer buffer, int y, DecimalFormat formatter) {
+    String s = formatter.format(y);
+    buffer.append(spaces.substring(0, (10 - s.length()))).append(s).append(" ");
   }
 
   /**
@@ -213,46 +158,15 @@ class JDXCompressor {
    */
   static String compressSQZ(Coordinate[] xyCoords, int startDataPointIndex, int endDataPointIndex, double xFactor, double yFactor){
     StringBuffer yStr = new StringBuffer();
-    String temp;
-    Coordinate curXY;
-
-    int y1, y2;
-    double x1;
     StringBuffer buffer = new StringBuffer();
-
-    int i = startDataPointIndex;
-
-    while( i < endDataPointIndex)
-    {
-      curXY = xyCoords[i];
-
-      // Get first X value on line
-      x1 = curXY.getXVal()/ xFactor;
-
-      // Get First Y value on line
-      y1 = (int)Math.round(curXY.getYVal()/ yFactor);
-      temp = String.valueOf(y1);
-      // convert 1st digit of string to SQZ
-      temp = makeSQZ(temp);
-      yStr.append(temp);
-
-      i++;
-      while ((yStr.length() < 60) && i <= endDataPointIndex)
-      {
-        // Print remaining Y values on a line
-        curXY = xyCoords[i];
-        y2 = (int)Math.round(curXY.getYVal() / yFactor);
-        temp = String.valueOf(y2);
-        // Calculate DIF value here
-        temp = makeSQZ(temp);
-        yStr.append(temp);
-        i++;
-      }
-      buffer.append(fixExponent(x1)).append(yStr).append(JSpecViewUtils.newLine);
+    for (int i = startDataPointIndex; i < endDataPointIndex; i++) {
+      buffer.append(fixExponent(xyCoords[i].getXVal()/ xFactor));
       yStr.setLength(0);
-
+      yStr.append(makeSQZ(xyCoords[i], yFactor));
+      while ((yStr.length() < 60) && i <= endDataPointIndex)
+        yStr.append(makeSQZ(xyCoords[++i], yFactor));
+      buffer.append(yStr).append(JSpecViewUtils.newLine);
     }
-
     return buffer.toString();
   }
 
@@ -278,7 +192,8 @@ class JDXCompressor {
                             double yFactor) {
     StringBuffer buffer = new StringBuffer();
     for (int i = startDataPointIndex; i <= endDataPointIndex; i++) {
-      buffer.append(fixExponent(xyCoords[i].getXVal() / xFactor)).append(          fixPacY(xyCoords[i].getYVal() / yFactor));
+      buffer.append(fixExponent(xyCoords[i].getXVal() / xFactor))
+      .append(fixPacY(xyCoords[i].getYVal() / yFactor));
       for (int j = 0; j < 4 && ++i <= endDataPointIndex; j++) {
         // Print remaining Y values on a line
         buffer.append(fixPacY(xyCoords[i].getYVal() / yFactor));
@@ -293,86 +208,80 @@ class JDXCompressor {
   }
 
   /**
-   * Makes a SQZ Character
-   * @param sNum the input number as a string
+   * Makes a SQZ Character for a y value
+   * 
+   * @param pt the input point
+   * @param yFactor
    * @return the SQZ character
    */
-  private static String makeSQZ(String sNum){
-    boolean negative = false;
-
-    sNum.trim();
-    if (sNum.charAt(0) == '-'){
-      negative = true;
-      sNum = sNum.substring(1);
-    }
-
-    char[] yStrArray = sNum.toCharArray();
-
-    switch (sNum.charAt(0)){
-      case '0' : yStrArray[0] = '@';break;
-      case '1' : if (negative) yStrArray[0] = 'a';else yStrArray[0] = 'A';break;
-      case '2' : if (negative) yStrArray[0] = 'b';else yStrArray[0] = 'B';break;
-      case '3' : if (negative) yStrArray[0] = 'c';else yStrArray[0] = 'C';break;
-      case '4' : if (negative) yStrArray[0] = 'd';else yStrArray[0] = 'D';break;
-      case '5' : if (negative) yStrArray[0] = 'e';else yStrArray[0] = 'E';break;
-      case '6' : if (negative) yStrArray[0] = 'f';else yStrArray[0] = 'F';break;
-      case '7' : if (negative) yStrArray[0] = 'g';else yStrArray[0] = 'G';break;
-      case '8' : if (negative) yStrArray[0] = 'h';else yStrArray[0] = 'H';break;
-      case '9' : if (negative) yStrArray[0] = 'i';else yStrArray[0] = 'I';break;
-    }
-    return (new String(yStrArray));
+  private static String makeSQZ(Coordinate pt, double yFactor) {
+    return makeSQZ((int) Math.round(pt.getYVal() / yFactor));
   }
-
-    /**
-   * Makes a DUP Character
-   * @param sNum the input number as a string
-   * @return the DUP character
+    
+  /**
+   * Makes a SQZ Character
+   * 
+   * @param y the input number
+   * @return the SQZ character
    */
-  private static String makeDUP(String sNum){
-    char[] yStrArray = sNum.toCharArray();
-    yStrArray[0] = "STUVWXYZs".charAt(yStrArray[0] - '1');
-    return (new String(yStrArray));
+  private static String makeSQZ(int y) {
+    return compress(y, "@ABCDEFGHI", "abcdefghi");
   }
 
   /**
    * Makes a DIF Character
-   * @param y1 the first y value
-   * @param y2 the second y value
+   * 
+   * @param y2
+   *        the second y value
+   * @param y1
+   *        the first y value
    * @return the DIF Character
    */
-  private static String makeDIF(int y1, int y2){
-    boolean negative = false;
-    String yStr;
-
-    int dif = y1 - y2;
-    yStr = String.valueOf(dif);
-    yStr.trim();
-    if (yStr.charAt(0) == '-'){
-      negative = true;
-      yStr = yStr.substring(1);
-    }
-
-    char[] yStrArray = yStr.toCharArray();
-    switch (yStr.charAt(0))
-    {
-      case '0' : yStrArray[0] = '%';break;
-      case '1' : if (negative) yStrArray[0] = 'j';else yStrArray[0] = 'J';break;
-      case '2' : if (negative) yStrArray[0] = 'k';else yStrArray[0] = 'K';break;
-      case '3' : if (negative) yStrArray[0] = 'l';else yStrArray[0] = 'L';break;
-      case '4' : if (negative) yStrArray[0] = 'm';else yStrArray[0] = 'M';break;
-      case '5' : if (negative) yStrArray[0] = 'n';else yStrArray[0] = 'N';break;
-      case '6' : if (negative) yStrArray[0] = 'o';else yStrArray[0] = 'O';break;
-      case '7' : if (negative) yStrArray[0] = 'p';else yStrArray[0] = 'P';break;
-      case '8' : if (negative) yStrArray[0] = 'q';else yStrArray[0] = 'Q';break;
-      case '9' : if (negative) yStrArray[0] = 'r';else yStrArray[0] = 'R';break;
-    }
-    return (new String(yStrArray));
+  private static String makeDIF(int dy) {
+    return compress(dy, "%JKLMNOPQR", "jklmnopqr");
   }
 
+  /**
+   * Makes a DUP Character
+   * @param sNum the input number as a string
+   * @return the DUP character
+   */
+  private static String makeDUP(int y){
+    return compress(y, "STUVWXYZs", "");
+  }
+
+  /**
+   * replace first character and "-" sign with a letter
+   * 
+   * @param y
+   * @param strPos
+   * @param strNeg
+   * @return
+   */
+  private static String compress(int y, String strPos, String strNeg) {
+    boolean negative = false;
+    String yStr = String.valueOf(y);
+    char ch = yStr.charAt(0);
+    if (ch == '-') {
+      negative = true;
+      yStr = yStr.substring(1);
+      ch = yStr.charAt(0);
+    }
+    char[] yStrArray = yStr.toCharArray();
+    yStrArray[0] = (negative ? strNeg.charAt(ch - '1') 
+        : strPos.charAt(ch - '0'));
+    return new String(yStrArray);
+  }
+
+  /**
+   * JCAMP-DX requires 1.5E[+|-]nn or 1.5E[+|-]nnn only
+   * not Java's 1.5E3 or 1.5E-2
+   * 
+   * @param x
+   * @return
+   */
   private static String fixExponent(double x) {
-    // JCAMP-DX requires 1.5E[+|-]nn or 1.5E[+|-]nnn only
-    // not Java's 1.5E3 or 1.5E-2
-    String s = "" + x;
+    String s = String.valueOf(x);
     int pt = s.indexOf("E");
     if (pt < 0)
       return s;
