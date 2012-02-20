@@ -543,9 +543,8 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     double fileDeltaX = JSpecViewUtils.deltaX(fileLastX, fileFirstX, nPointsFile);
     increasing = (fileDeltaX > 0);
 
-    JDXDecompressor decompressor = new JDXDecompressor(tabularSpecData,
-        xFactor, yFactor, fileDeltaX, nPointsFile);
-    decompressor.setLabelLineNo(tabDataLineNo);
+    JDXDecompressor decompressor = new JDXDecompressor(xFactor,
+        yFactor, fileDeltaX, nPointsFile, tabDataLineNo, tabularSpecData);
 
     xyCoords = decompressor.decompressData(errorLog);
 
@@ -553,6 +552,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
       xyCoords = JSpecViewUtils.parseDSV(tabularSpecData, xFactor, yFactor);
 
     if (errorLog.length() != errPt) {
+      errorLog.append(getTitleLabel()).append("\n");
       errorLog.append("firstX: "
           + fileFirstX
           + " Found "
@@ -567,7 +567,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
       errorLog.append("Number of points in Header " + nPointsFile + " Found "
           + xyCoords.length + "\n");
     } else {
-      errorLog.append("No Errors decompressing data\n");
+      //errorLog.append("No Errors decompressing data\n");
     }
 
     if (JSpecViewUtils.DEBUG) {

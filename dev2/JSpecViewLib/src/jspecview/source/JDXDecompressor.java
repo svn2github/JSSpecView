@@ -31,12 +31,12 @@ import java.io.StringReader;
 import jspecview.common.Coordinate;
 import jspecview.common.JSpecViewUtils;
 
-
 /**
- * JDXDecompressor contains static methods to decompress the data part of 
- * JCAMP-DX spectra that have been compressed using DIF, FIX, SQZ or PAC formats.
- * If you wish to parse the data from XY formats see
+ * JDXDecompressor contains static methods to decompress the data part of
+ * JCAMP-DX spectra that have been compressed using DIF, FIX, SQZ or PAC
+ * formats. If you wish to parse the data from XY formats see
  * {@link jspecview.common.JSpecViewUtils#parseDSV(java.lang.String, double, double)}
+ * 
  * @author Christopher Muir
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
@@ -44,27 +44,6 @@ import jspecview.common.JSpecViewUtils;
  * @see jspecview.export.JDXCompressor
  */
 public class JDXDecompressor {
-
-
-  /**
-   * ASDF Compression
-   */
-  public static final int ASDF = 0;
-  /**
-   * AFFN Compression
-   */
-  public static final int AFFN = 1;
-
-
-  /**
-   * Error
-   */
-  public static final long ERROR_CODE = Long.MIN_VALUE;
-
-  /**
-   * The data
-   */
-  private String data;
 
   /**
    * The x compression factor
@@ -81,52 +60,59 @@ public class JDXDecompressor {
    */
   private double deltaX;
 
+
+  /**
+   * The (nominal) number of points
+   */
+  private int nPoints;
+
   /**
    * All Delimiters in a JCAMP-DX compressed file
    */
-  private static final String allDelim = "?+- %@ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrs\t\n";
+  private static final String allDelim = "+-%@ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrs? ,\t\n";
 
   /**
-   * The current line index
+   * The character index on the current line
    */
-  private int lineIndex;
-
-  /**
-   * Set to true whenever a SQZ character is encountered
-   */
-  //private boolean isSqz = false;
+  private int ich;
 
   /**
    * The line number of the dataset label in the source file
    */
-  private int labelLineNo = 0;
-  private int nPoints;
+  private int lineNumber = 0;
 
+  private BufferedReader dataReader;
 
   /**
-   * Initialises the <code>JDXDecompressor</code> from the compressed data,
-   * the x factor, the y factor and the deltaX value
-   * @param data the data to be decompressed
-   * @param xFactor the x factor
-   * @param yFactor the y factor
-   * @param deltaX the delta X value
-   * @param nPoints 
+   * Initialises the <code>JDXDecompressor</code> from the compressed data, the
+   * x factor, the y factor and the deltaX value
+   * @param xFactor
+   *        the x factor
+   * @param yFactor
+   *        the y factor
+   * @param deltaX
+   *        the delta X value
+   * @param nPoints
+   *        the expected number of points
+   * @param lineNumber
+   *        the starting line number
+   * @param data
+   *        the data to be decompressed
    */
-  public JDXDecompressor(String data, double xFactor, double yFactor, double deltaX, int nPoints){
-    this.data = data;
+  public JDXDecompressor(double xFactor, double yFactor, double deltaX,
+      int nPoints, int lineNumber, String data) {
+    dataReader = new BufferedReader(new StringReader(data));
     this.xFactor = xFactor;
     this.yFactor = yFactor;
     this.deltaX = deltaX;
     this.nPoints = nPoints;
+    this.lineNumber = lineNumber;
   }
 
   /**
    * Initialises the <code>JDXDecompressor</code> from the compressed data, the
    * x factor, the y factor and the deltaX value, the last X and first X values
    * in the source and the number of points
-   * 
-   * @param data
-   *        compressed data
    * @param xFactor
    *        the x factor
    * @param yFactor
@@ -137,64 +123,22 @@ public class JDXDecompressor {
    *        the first x value
    * @param nPoints
    *        the number of points
+   * @param lineNumber
+   *        the starting line number
+   * @param data
+   *        compressed data
    */
-  public JDXDecompressor(String data, double xFactor, double yFactor,
-      double lastX, double firstX, int nPoints){
-    this.data = data;
-    this.xFactor = xFactor;
-    this.yFactor = yFactor;
-    this.deltaX = JSpecViewUtils.deltaX(lastX, firstX, nPoints);
-    this.nPoints = nPoints;
-  }
-
-  /**
-   * Determines the type of compression, decompress the data and stores
-   * coordinates in an array to be returned
-   * 
-   * @param errorLog
-   * @return the array of <code>Coordinate</code>s
-   */
-  public Coordinate[] decompressData(StringBuffer errorLog) {
-    int compressionType = getCompressionType();
-
-    if (compressionType == -1)
-      return null;
-
-    switch (compressionType) {
-    case JDXDecompressor.ASDF:
-      return decompressASDF(errorLog);
-    case JDXDecompressor.AFFN:
-      return decompressAFFN(errorLog);
-    default:
-      return null;
-    }
-  }
-
-  /**
-   * Returns the compresssion type of the Source data
-   * @return the compresssion type of the Source data
-   */
-  public int getCompressionType(){
-    String dif = "%JKLMNOPQRjklmnopqr";
-    String sqz = "@ABCDFGHIabcdfghi";
-    String pac = " \t+-";
-    String dsv = ",;";
-
-
-    String line = data.substring(0,data.indexOf("\n",0));
-
-    if (JSpecViewUtils.findOneOf(line,dif) != -1 ||
-        JSpecViewUtils.findOneOf(line,sqz) != -1)
-        return JDXDecompressor.ASDF;
-    else if (JSpecViewUtils.findOneOf(line,dsv) == -1 &&
-            JSpecViewUtils.findOneOf(line,pac) != -1)
-        return JDXDecompressor.AFFN;
-
-    return -1;
+  public JDXDecompressor(double xFactor, double yFactor, double lastX,
+      double firstX, int nPoints, int lineNumber, String data) {
+    this(xFactor, yFactor, JSpecViewUtils.deltaX(lastX, firstX, nPoints), nPoints,
+        lineNumber, data);
   }
 
   private Coordinate[] xyCoords;
   private int ipt;
+  private String line;
+  private int lineLen;
+
   private void addPoint(Coordinate pt) {
     if (ipt == xyCoords.length) {
       Coordinate[] t = new Coordinate[ipt * 2];
@@ -204,123 +148,81 @@ public class JDXDecompressor {
     xyCoords[ipt++] = pt;
   }
 
+  private static final double FMINY = 0.6;
+  private static final double FMAXY = 1.4;
+
+  private int difVal = Integer.MIN_VALUE;
+  private int lastDif = Integer.MIN_VALUE;
+  private int dupCount;
+  private double xval, yval;
+
+  //private boolean isDIF;
+
   /**
-   * Decompresses DIF format
-   * @param errorLog 
+   * Determines the type of compression, decompress the data and stores
+   * coordinates in an array to be returned
    * 
+   * @param errorLog
    * @return the array of <code>Coordinate</code>s
    */
-  private Coordinate[] decompressASDF(StringBuffer errorLog) {
-    char ch;
-    int linenumber = labelLineNo;
-    String line = null;
-    int dupFactor, i;
-    double xval = 0;
-    double yval = 0;
-    double difval = 0;
-    String Dif = "JKLMNOPQR%jklmnopqr";
-    String Dup = "STUVWXYZs";
-    String Sqz = "ABCDEFGHI@abcdefghi";
-    Coordinate point;
+  public Coordinate[] decompressData(StringBuffer errorLog) {
+
+    testAlgorithm();
+
     xyCoords = new Coordinate[nPoints];
 
     double difMax = Math.abs(0.35 * deltaX);
     double dif14 = Math.abs(1.4 * deltaX);
     double dif06 = Math.abs(0.6 * deltaX);
+    //double dif08 = Math.abs(.8 * deltaX);
+    //double dif12 = Math.abs(1.2 * deltaX);
 
-    BufferedReader dataReader = new BufferedReader(new StringReader(data));
     try {
-      line = dataReader.readLine();
-    } catch (IOException ioe) {
-    }
-    lineIndex = 0;
-    ipt = 0;
-
-    while (line != null) {
-      linenumber++;
-      if (lineIndex <= line.length()) {
-        point = new Coordinate();
-        xval = getFirstXval(line);
-        xval = (xval * xFactor);
-        point.setXVal(xval);
-        yval = getYvalDIF(line, linenumber);
-        point.setYVal(yval * yFactor);
+      while ((line = dataReader.readLine()) != null) {
+        lineNumber++;
+        if ((lineLen = line.length()) == 0)
+          continue;
+        ich = 0;
+        boolean isCheckPoint = (lastDif != Integer.MIN_VALUE);
+        Coordinate point = new Coordinate(
+            (xval = getValue(allDelim) * xFactor), (yval = getYValue())
+                * yFactor);
         if (ipt == 0) {
           addPoint(point); // first data line only
-          continue;
-        }
-        Coordinate last_pt = xyCoords[ipt - 1];
-        double xdif = Math.abs(last_pt.getXVal() - point.getXVal());
-        // DIF Y checkpoint means X value does not advance at start
-        // of new line. Remove last values and put in latest ones
-        if (xdif < difMax) {
-          Coordinate old_lastPt = xyCoords[ipt - 1] = point;
-          //(Coordinate) xyCoords.set(xyCoords.size() - 1, point);
-          // Check for Y checkpoint error - Y values should correspond
-          double y = Math.abs(old_lastPt.getYVal());
-          double y1 = Math.abs(point.getYVal());
-          if (y1 < 0.6 * y || y1 > 1.4 * y)
-            errorLog.append("ASDF Y Checkpoint Error! Line " + linenumber + " y1/y0=" + y1/y
-                + " for y1=" + y1 + " y0=" + y + "\n");
         } else {
-          addPoint(point);
-          // Check for X checkpoint error
-          // first point of new line should be deltaX away
-          // ACD/Labs seem to have large rounding error so using between 0.6 and 1.4
-          if (xdif > dif14 || xdif < dif06)
-            errorLog.append("ASDF X Checkpoint Error! Line " + linenumber + " |x1-x0|="
-                + xdif + " for x1=" + point.getXVal() + " x0=" + last_pt.getXVal() + "\n");
-        }
-      }
-      while (lineIndex < line.length()) {
-        ch = line.charAt(lineIndex);
-        if (Dif.indexOf(ch) != -1) {
-          point = new Coordinate();
-          xval += deltaX;
-          point.setXVal(xval);
-          difval = getYvalDIF(line, linenumber);
-          yval += difval;
-          point.setYVal(yval * yFactor);
-          addPoint(point);
-        } else if (Dup.indexOf(ch) != -1) {
-          dupFactor = getDUPVal(line, line.charAt(lineIndex));
-          for (i = 1; i < dupFactor; i++) {
-            point = new Coordinate();
-            xval += deltaX;
-            point.setXVal(xval);
-            yval += difval;
-            point.setYVal(yval * yFactor);
+          Coordinate last_pt = xyCoords[ipt - 1];
+          double xdif = Math.abs(last_pt.getXVal() - point.getXVal());
+          // DIF Y checkpoint means X value does not advance at start
+          // of new line. Remove last values and put in latest ones
+          if (isCheckPoint && xdif < difMax) {
+            xyCoords[ipt - 1] = point;
+            // Check for Y checkpoint error - Y values should correspond
+            double y = Math.abs(last_pt.getYVal());
+            double y1 = Math.abs(point.getYVal());
+            if (y1 < FMINY * y || y1 > FMAXY * y)
+              errorLog.append("Y Checkpoint Error! Line " + lineNumber
+                  + " y1/y0=" + y1 / y + " for y1=" + y1 + " y0=" + y + "\n");
+          } else {
             addPoint(point);
+            // Check for X checkpoint error
+            // first point of new line should be deltaX away
+            // ACD/Labs seem to have large rounding error so using between 0.6 and 1.4
+            if (xdif < dif06 || xdif > dif14)
+              logXError(errorLog, xdif, point.getXVal(), last_pt.getXVal());
           }
-        } else if (Sqz.indexOf(ch) != -1) {
-          point = new Coordinate();
-          xval += deltaX;
-          point.setXVal(xval);
-          yval = getYvalDIF(line, linenumber);
-          point.setYVal(yval * yFactor);
-          addPoint(point);
-        } else if (ch == '?') {
-          // Check for missing points in file
-          lineIndex++;
-          xval += deltaX;
-          errorLog.append("ASDF Error -- Invalid Data Symbol Found! Line " + linenumber
-              + " ch=" + ch + "\n");
         }
-        // check for spaces
-        else if (ch == ' ') {
-          lineIndex++;
+        while (ich < lineLen) {
+          xval += deltaX;
+          if (!Double.isNaN(yval = getYValue()))
+            addPoint(new Coordinate(xval, yval * yFactor));
         }
       }
-      try {
-        line = dataReader.readLine();
-        difval = 0;
-      } catch (IOException ioe) {
-      }
-      lineIndex = 0;
+    } catch (IOException ioe) {
     }
 
     if (nPoints != ipt) {
-      errorLog.append("ASDF decompressor did not find " + nPoints + " points -- instead " + ipt + "\n");
+      errorLog.append("Decompressor did not find " + nPoints
+          + " points -- instead " + ipt + "\n");
       Coordinate[] temp = new Coordinate[ipt];
       System.arraycopy(xyCoords, 0, temp, 0, ipt);
       xyCoords = temp;
@@ -328,8 +230,173 @@ public class JDXDecompressor {
     return (deltaX > 0 ? xyCoords : reverse(xyCoords));
   }
 
+  private double getYValue() {
+    if (dupCount > 0) {
+      --dupCount;
+      yval = (lastDif == Integer.MIN_VALUE ? yval : yval + lastDif);
+      return yval;
+    }
+    if (difVal != Integer.MIN_VALUE) {
+      yval += difVal;
+      lastDif  = difVal;
+      difVal = Integer.MIN_VALUE;
+      //isDIF = true;
+      return yval;
+    }
+    if (ich == lineLen)
+      return Double.NaN;
+    char ch = line.charAt(ich);
+    switch (ch) {
+    case '%':
+      difVal = 0;
+      break;
+    case 'J':
+    case 'K':
+    case 'L':
+    case 'M':
+    case 'N':
+    case 'O':
+    case 'P':
+    case 'Q':
+    case 'R':
+      difVal = ch - 'I';
+      break;
+    case 'j':
+    case 'k':
+    case 'l':
+    case 'm':
+    case 'n':
+    case 'o':
+    case 'p':
+    case 'q':
+    case 'r':
+      difVal = 'i' - ch;
+      break;
+    case 'S':
+    case 'T':
+    case 'U':
+    case 'V':
+    case 'W':
+    case 'X':
+    case 'Y':
+    case 'Z':
+      dupCount = ch - 'R';
+      break;
+    case 's':
+      dupCount = 9;
+      break;
+    case '+':
+    case '-':
+    case '.':
+    case '0':
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+    case '9':
+    case '@':
+    case 'A':
+    case 'B':
+    case 'C':
+    case 'D':
+    case 'E':
+    case 'F':
+    case 'G':
+    case 'H':
+    case 'I':
+    case 'a':
+    case 'b':
+    case 'c':
+    case 'd':
+    case 'e':
+    case 'f':
+    case 'g':
+    case 'h':
+    case 'i':
+      lastDif = Integer.MIN_VALUE;
+      return getValue();
+    case '?':
+      lastDif = Integer.MIN_VALUE;
+      return Double.NaN;
+    default:
+      // ignore
+      ich++;
+      lastDif = Integer.MIN_VALUE;
+      return getYValue();
+    }
+    ich++;
+    if (difVal != Integer.MIN_VALUE)
+      difVal = getDifDup(difVal);
+    else
+      dupCount = getDifDup(dupCount) - 1;
+    return getYValue();
+  }
+  
+  private int getDifDup(int i) {
+    int ich0 = ich;
+    skipTo(allDelim);
+    return (ich0 == ich ? i : Integer.valueOf(i + line.substring(ich0, ich)));
+  }
 
-
+  private double getValue() {
+    int ich0 = ich;
+    if (ich == lineLen)
+      return Double.NaN;
+    char ch = line.charAt(ich);
+    int leader = 0;
+    switch (ch) {
+    case '+':
+    case '-':
+    case '.':
+    case '0':
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+    case '9':
+      return getValue(allDelim);
+    case '@':
+    case 'A':
+    case 'B':
+    case 'C':
+    case 'D':
+    case 'E':
+    case 'F':
+    case 'G':
+    case 'H':
+    case 'I':
+      leader = ch - '@';
+      ich0 = ++ich;
+      break;
+    case 'a':
+    case 'b':
+    case 'c':
+    case 'd':
+    case 'e':
+    case 'f':
+    case 'g':
+    case 'h':
+    case 'i':
+      leader =  '`' - ch;
+      ich0 = ++ich;
+      break;
+    default:
+      // skip
+      ich++;
+      return getValue();
+    }
+    skipTo(allDelim);
+    return Double.valueOf(leader + line.substring(ich0, ich)).doubleValue();
+  }
+  
   private static Coordinate[] reverse(Coordinate[] x) {
     int n = x.length;
     for (int i = 0; i < n; i++) {
@@ -340,276 +407,58 @@ public class JDXDecompressor {
     return x;
   }
 
-  /**
-   * Decompresses AFFN format
-   * 
-   * @return the array of <code>Coordinate</code>s
-   */
-  private Coordinate[] decompressAFFN(StringBuffer errorLog) {
-    char ch;
-    int i;
-    String line = null;
-    int dupFactor;
-    int linenumber = labelLineNo;
-    Coordinate point;
-    double xval = 0;
-    double yval = 0;
-    String Pac = "+-.0123456789";
-    String Dup = "STUVWXYZs";
 
-    lineIndex = 0;
-    xyCoords = new Coordinate[nPoints];
-    ipt = 0;
-
-    double dx08 = Math.abs(.8 * deltaX);
-    double dx12 = Math.abs(1.2 * deltaX);
-
-    BufferedReader dataReader = new BufferedReader(new StringReader(data));
-    try {
-      line = dataReader.readLine();
-    } catch (IOException ioe) {
-    }
-    while (line != null) {
-      linenumber++;
-      if (lineIndex <= line.length()) {
-        point = new Coordinate();
-        xval = getFirstXval(line) * xFactor;
-        if (ipt > 0) {
-          Coordinate last_pt = new Coordinate();
-          last_pt = xyCoords[ipt - 1];
-          //Check for X checkpoint error
-          double xdif = Math.abs(xval - last_pt.getXVal());
-          if (xdif < dx08 && xdif > dx12) {
-            errorLog.append("AFFN X Checkpoint Error! Line " + linenumber + " |x1-x0|="
-                + xdif
-                + " for x1=" + xval + " x0=" + last_pt.getXVal() + "\n");
-          }
-        }
-      }
-
-      while (lineIndex < line.length()) {
-        point = new Coordinate();
-        point.setXVal(xval);
-        ch = line.charAt(lineIndex);
-        if (Pac.indexOf(ch) != -1) {
-          yval = getYvalPAC(line, linenumber);
-          point.setYVal(yval * yFactor);
-          if (yval != ERROR_CODE)
-            addPoint(point);
-          xval += deltaX;
-        } else if (Dup.indexOf(ch) != -1) {
-          dupFactor = getDUPVal(line, line.charAt(lineIndex));
-          for (i = 1; i < dupFactor; i++) {
-            point = new Coordinate();
-            point.setXVal(xval);
-            point.setYVal(yval * yFactor);
-            addPoint(point);
-            xval += deltaX;
-          }
-        }
-        else if (ch == '?') {        // Check for missing points in file
-          lineIndex++;
-          point.setXVal(point.getXVal() + deltaX);
-          errorLog.append("AFFN Error: Invalid Data Symbol Found! Line " + linenumber
-              + " ch=" + ch + "\n");
-        } else
-          lineIndex++;
-      }
-      try {
-        line = dataReader.readLine();
-      } catch (IOException ioe) {
-      }
-      lineIndex = 0;
-    }
-    if (nPoints != ipt) {
-      errorLog.append("AFFN decompressor did not find " + nPoints + " points -- instead " + ipt + "\n");
-      Coordinate[] temp = new Coordinate[ipt];
-      System.arraycopy(xyCoords, 0, temp, 0, ipt);
-      xyCoords = temp;
-    }
-    return (deltaX > 0 ? xyCoords : reverse(xyCoords));
+  private void logXError(StringBuffer errorLog, double xdif, double xval,
+                         double xval2) {
+    errorLog.append("X Checkpoint Error! Line " + lineNumber
+        + " |x1-x0|=" + xdif + " for x1=" + xval + " x0=" + xval2 + "\n");
   }
 
+  private final static String whiteSpace = " ,\t\n";
 
-  /**
-   * Get first X-Val for a (X++(Y..Y)) data set
-   * @param line a line of data
-   * @return the first x value
-   */
-  private double getFirstXval(String line)
-  {
-    String temp = null;
-    int pos;
-    int disp = checkForExp(line);
-
-    // Check if first character is +/- which are delimiters
-    if ((line.charAt(0) == '-') || (line.charAt(0) == '+')){
-      if (disp != -1)
-        pos = JSpecViewUtils.findOneOf(line.substring(disp),allDelim) + 1 + disp;
-      else
-        pos = JSpecViewUtils.findOneOf(line.substring(1),allDelim) + 1;
+  private double getValue(String delim) {
+    int ich0 = ich;
+    char ch = '\0';
+    while (ich < lineLen && whiteSpace.indexOf(ch = line.charAt(ich)) >= 0)
+      ich++;
+    double factor = 1;
+    switch (ch) {
+    case '-':
+      factor = -1;
+      //fall through
+    case '+':
+      ich0 = ++ich;
+      break;
     }
-    else{
-      if (disp != -1)
-        pos = JSpecViewUtils.findOneOf(line.substring(disp), allDelim) + disp;
-      else
-        pos = JSpecViewUtils.findOneOf(line,allDelim);
-    }
-
-    try{
-      temp = line.substring(0,pos);
-      lineIndex = pos;
-      return ((Double.valueOf(temp)).doubleValue());
-    }
-    catch(NumberFormatException nfe){
-      return 0; // Return Error number
-    }
+    ch = skipTo(delim);
+    if (ch == 'E' && ich + 3 < lineLen)
+      switch (line.charAt(ich + 1)) {
+      case '-':
+      case '+':
+        ich += 4;
+        if (ich < lineLen && (ch = line.charAt(ich)) >= '0' && ch <= '9')
+          ich++;
+        break;
+      }
+    return factor * ((Double.valueOf(line.substring(ich0, ich))).doubleValue());
   }
 
-
-  /**
-   * Convert a DIF character to corresponding string of integers
-   * @param temp the DIF character
-   * @return the DIF character as number as a string
-   */
-  private static String convDifChar (int temp)
-  {
-    int num =0;
-    if ((temp >= '@') && (temp <= 'I')){
-      num = temp - '@';
-      //isSqz = true;
+  private char skipTo(String delim) {
+    int pos = JSpecViewUtils.findOneOf(line.substring(ich), delim);
+    if (pos < 0) {
+      ich = lineLen;
+      return '\0';
     }
-    else if ((temp >= 'a') && (temp <= 'i')){
-            num = -(temp - '`');
-            //isSqz = true;
-    }
-    else if ((temp >= 'J') && (temp <= 'R'))
-            num = temp - 'I';
-    else if ((temp >= 'j') && (temp <= 'r'))
-            num = -(temp - 'i');
-    else if (temp == '%')
-            num = 0;
-
-      return (String.valueOf(num));
+    ich += pos;
+    return line.charAt(ich); 
   }
 
-
-  /**
-   * Get Y-Value for a DIFed or SQZed data set
-   * @param line a line of data
-   * @param lineNo the line number
-   * @return the y value
-   */
-  private double getYvalDIF(String line, int lineNo){
-    String temp = new String();
-    int pos, num;
-
-    num = line.charAt(lineIndex);
-    temp = convDifChar(num);
-    lineIndex++;
-    pos = JSpecViewUtils.findOneOf(line.substring(lineIndex),allDelim);
-    if (pos != -1)
-    {
-            temp += line.substring(lineIndex,lineIndex+pos);
-            lineIndex += pos;
-    }
-    else
-    {
-            temp += line.substring(lineIndex);
-            lineIndex = line.length();
-    }
-    return ((Double.valueOf(temp)).doubleValue());
-  }
-
-
-  /**
-   * Get a duplicate factor
-   * @param line a line of the data
-   * @param dup_char duplicated character
-   * @return the the y value
-   */
-  private int getDUPVal (String line, int dup_char){
-    String temp = new String();
-    int ch,pos;
-
-    lineIndex++;
-    if ((dup_char >= 'S') && (dup_char <= 'Z'))
-    {
-            ch = (dup_char - 'R');
-            temp = String.valueOf(ch);
-    }
-    else if (dup_char == 's')
-             temp = "9";
-
-    pos = JSpecViewUtils.findOneOf(line.substring(lineIndex),allDelim);
-
-    if (pos != -1){
-      temp += line.substring(lineIndex,lineIndex+pos);
-      lineIndex += pos;
-    }
-    else{
-      temp += line.substring(lineIndex);
-      lineIndex = line.length();
-    }
-
-    return ((Integer.valueOf(temp)).intValue());
-  }
-
-  /**
-   * Get Y-Value for a PACked or FIXed data set
-   * @param line a line of data
-   * @param lineNo the line number
-   * @return the y value
-   */
-    private double getYvalPAC(String line, int lineNo){
-      String temp = new String();
-      int pos;
-      String PACDelim = "?+- \n";
-
-      if (line.charAt(lineIndex) == '-')
-      {
-        temp = "-";
-        lineIndex++;
-      }
-      else if (line.charAt(lineIndex) == '+')
-        lineIndex++;
-
-      // Check if numbers are written in exponential notation
-      int displacement = checkForExp(line.substring(lineIndex) );
-
-      if (displacement != -1)
-        pos = JSpecViewUtils.findOneOf(line.substring(displacement), PACDelim);
-      else
-        pos = JSpecViewUtils.findOneOf(line.substring(lineIndex), PACDelim);
-
-      if (pos != -1){
-        temp += line.substring(lineIndex,lineIndex+pos);
-        lineIndex += pos;
-      }
-      else{
-        temp += line.substring(lineIndex);
-        lineIndex = line.length();
-      }
-      return ((Double.valueOf(temp)).doubleValue());
-    }
-
-    /**
-     * Sets the line number for the dataset label in the source
-     * @param lineNo the line number
-     */
-    public void setLabelLineNo(int lineNo){
-      labelLineNo = lineNo;
-    }
-
-    // Check if numbers are written in exponential notation
-    private static int checkForExp(String line) {
-      if (line.indexOf("E-") != -1) {
-        return line.indexOf("E-") + 2;
-      }
-      else if (line.indexOf("E+") != -1) {
-        return line.indexOf("E+") + 2;
-      }
-      return -1;
-    }
-
+  private void testAlgorithm() {
+/*     line = "4265A8431K85L83L71K55P5j05k35k84k51j63n5K4M1j2j10j97k28j88j01j7K4or4k04k89";
+     lineLen = line.length();
+     System.out.println(getValue(allDelim));
+     while (ich < lineLen)
+       System.out.println(line.substring(0, ich) + "\n" + ipt++ + " " + (yval = getYValue()));
+     ipt= 0;
+*/  }
 }

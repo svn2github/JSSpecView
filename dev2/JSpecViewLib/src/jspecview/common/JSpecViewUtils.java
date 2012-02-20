@@ -866,16 +866,11 @@ public class JSpecViewUtils {
    * @return the index of the of the character found,
    */
   public static int findOneOf(String str, String delim) {
-    int index;
-    int minIndex = Integer.MAX_VALUE;
-    int len2 = delim.length();
-    for (int i = 0; i < len2; i++) {
-      index = str.indexOf(delim.charAt(i));
-      if (index < minIndex && index > -1) {
-        minIndex = index;
-      }
-    }
-    return (minIndex == Integer.MAX_VALUE) ? -1 : minIndex;
+    int n = str.length();
+    for (int i = 0; i < n; i++)
+      if (delim.indexOf(str.charAt(i)) >= 0)
+        return i;
+    return  -1;
   }
 
   /**

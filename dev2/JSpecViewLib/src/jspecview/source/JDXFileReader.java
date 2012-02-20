@@ -309,7 +309,8 @@ public class JDXFileReader {
     } catch (JSpecViewException jsve) {
       throw jsve;
     }
-    errorLog.append(ERROR_SEPARATOR);
+    if (errorLog.length() > 0)
+      errorLog.append(ERROR_SEPARATOR);
     source.setErrorLog(errorLog.toString());
     System.out.println("--JDX block end--");
     return source;
@@ -429,7 +430,8 @@ public class JDXFileReader {
       source.addJDXSpectrum(spectrum);
       spectrum = null;
     }
-    errorLog.append(ERROR_SEPARATOR);
+    if (errorLog.length() > 0)
+      errorLog.append(ERROR_SEPARATOR);
     source.setErrorLog(errorLog.toString());
     return source;
   }
