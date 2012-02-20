@@ -258,55 +258,38 @@ class JDXCompressor {
 
   /**
    * Compresses the <code>Coordinate<code>s into PAC format
-   * @param xyCoords the array of <code>Coordinate</code>s
-   * @param startDataPointIndex startDataPointIndex the start index of the array of Coordinates to
+   * 
+   * @param xyCoords
+   *        the array of <code>Coordinate</code>s
+   * @param startDataPointIndex
+   *        startDataPointIndex the start index of the array of Coordinates to
    *        be compressed
-   * @param endDataPointIndex endDataPointIndex the end index of the array of Coordinates to
-   *        be compressed
-   * @param xFactor x factor for compression
-   * @param yFactor y factor for compression
+   * @param endDataPointIndex
+   *        endDataPointIndex the end index of the array of Coordinates to be
+   *        compressed
+   * @param xFactor
+   *        x factor for compression
+   * @param yFactor
+   *        y factor for compression
    * @return A String representing the compressed data
    */
-  static String compressPAC(Coordinate[] xyCoords, int startDataPointIndex, int endDataPointIndex, double xFactor, double yFactor){
-    int ij;
-    StringBuffer yStr = new StringBuffer();
-    String temp;
-    Coordinate curXY;
-
-    double x1, y1, y2;
+  static String compressPAC(Coordinate[] xyCoords, int startDataPointIndex,
+                            int endDataPointIndex, double xFactor,
+                            double yFactor) {
     StringBuffer buffer = new StringBuffer();
-
-    int i = startDataPointIndex;
-    while( i <= endDataPointIndex)
-    {
-      ij = 1;
-      curXY = xyCoords[i];
-
-      // Get first X value on line
-      x1 = curXY.getXVal() / xFactor;
-
-      // Get First Y value on line
-      y1 = curXY.getYVal() / yFactor ;
-
-      i++;
-      while ((ij <= 5) && i <= endDataPointIndex)
-      {
+    for (int i = startDataPointIndex; i <= endDataPointIndex; i++) {
+      buffer.append(fixExponent(xyCoords[i].getXVal() / xFactor)).append(          fixPacY(xyCoords[i].getYVal() / yFactor));
+      for (int j = 0; j < 4 && ++i <= endDataPointIndex; j++) {
         // Print remaining Y values on a line
-        curXY = xyCoords[i];
-        y2 = curXY.getYVal() / yFactor;
-        temp = y2 +" ";
-        yStr.append(temp);
-        ij ++;
-        i++;
+        buffer.append(fixPacY(xyCoords[i].getYVal() / yFactor));
       }
-      buffer.append(fixExponent(x1))
-          .append(" ").append(fixExponent(y1)).append(" ")
-          .append(yStr).append(JSpecViewUtils.newLine);
-
-      yStr.setLength(0);
+      buffer.append(JSpecViewUtils.newLine);
     }
-
     return buffer.toString();
+  }
+
+  private static String fixPacY(double y) {
+    return (y < 0 ? "" : " ") + fixExponent(y);
   }
 
   /**
