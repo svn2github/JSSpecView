@@ -191,7 +191,6 @@ public class JDXDecompressor {
           dx = firstX - xval;
         xval += dx;
         Coordinate point = new Coordinate(xval, (yval = getYValue()) * yFactor);
-        System.out.println(point);
         if (ipt == 0) {
           addPoint(point); // first data line only
         } else {
