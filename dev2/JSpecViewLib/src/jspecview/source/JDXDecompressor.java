@@ -148,8 +148,8 @@ public class JDXDecompressor {
     xyCoords[ipt++] = pt;
   }
 
-  private static final double FMINY = 0.6;
-  private static final double FMAXY = 1.4;
+  //private static final double FMINY = 0.6;
+  //private static final double FMAXY = 1.4;
 
   private int difVal = Integer.MIN_VALUE;
   private int lastDif = Integer.MIN_VALUE;
