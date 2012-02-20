@@ -83,9 +83,15 @@ public class JDXDecompressor {
 
   private BufferedReader dataReader;
 
+  private double firstX;
+  private double dx;
+
   /**
    * Initialises the <code>JDXDecompressor</code> from the compressed data, the
    * x factor, the y factor and the deltaX value
+   * @param data
+   *        the data to be decompressed
+   * @param firstX TODO
    * @param xFactor
    *        the x factor
    * @param yFactor
@@ -96,12 +102,11 @@ public class JDXDecompressor {
    *        the expected number of points
    * @param lineNumber
    *        the starting line number
-   * @param data
-   *        the data to be decompressed
    */
-  public JDXDecompressor(double xFactor, double yFactor, double deltaX,
-      int nPoints, int lineNumber, String data) {
+  public JDXDecompressor(String data, double firstX, double xFactor,
+      double yFactor, double deltaX, int nPoints, int lineNumber) {
     dataReader = new BufferedReader(new StringReader(data));
+    this.firstX = firstX;
     this.xFactor = xFactor;
     this.yFactor = yFactor;
     this.deltaX = deltaX;
@@ -128,10 +133,10 @@ public class JDXDecompressor {
    * @param data
    *        compressed data
    */
-  public JDXDecompressor(double xFactor, double yFactor, double lastX,
-      double firstX, int nPoints, int lineNumber, String data) {
-    this(xFactor, yFactor, JSpecViewUtils.deltaX(lastX, firstX, nPoints), nPoints,
-        lineNumber, data);
+  public JDXDecompressor(double xFactor, double yFactor,
+      double lastX, double firstX, int nPoints, int lineNumber, String data) {
+    this(data, firstX, xFactor, yFactor,
+        JSpecViewUtils.deltaX(lastX, firstX, nPoints), nPoints, lineNumber);
   }
 
   private Coordinate[] xyCoords;
@@ -146,6 +151,7 @@ public class JDXDecompressor {
       xyCoords = t;
     }
     xyCoords[ipt++] = pt;
+
   }
 
   //private static final double FMINY = 0.6;
@@ -180,9 +186,12 @@ public class JDXDecompressor {
           continue;
         ich = 0;
         boolean isCheckPoint = (lastDif != Integer.MIN_VALUE);
-        Coordinate point = new Coordinate(
-            (xval = getValue(allDelim) * xFactor), (yval = getYValue())
-                * yFactor);
+        xval = getValue(allDelim) * xFactor;
+        if (ipt == 0)
+          dx = firstX - xval;
+        xval += dx;
+        Coordinate point = new Coordinate(xval, (yval = getYValue()) * yFactor);
+        System.out.println(point);
         if (ipt == 0) {
           addPoint(point); // first data line only
         } else {
@@ -196,7 +205,8 @@ public class JDXDecompressor {
             double y = lastPoint.getYVal();
             double y1 = point.getYVal();
             if (y1 != y)
-              errorLog.append(lastLine + "\n" + line + "\nY-value Checkpoint Error! Line " + lineNumber
+              errorLog.append(lastLine + "\n" + line
+                  + "\nY-value Checkpoint Error! Line " + lineNumber
                   + " for y1=" + y1 + " y0=" + y + "\n");
           } else {
             addPoint(point);
@@ -204,9 +214,11 @@ public class JDXDecompressor {
             // first point of new line should be deltaX away
             // ACD/Labs seem to have large rounding error so using between 0.6 and 1.4
             if (xdif < dif06 || xdif > dif14)
-              errorLog.append(lastLine + "\n" + line + "\nX-sequence Checkpoint Error! Line " + lineNumber
-                  + " |x1-x0|=" + xdif + " instead of " + Math.abs(deltaX) + " for x1=" + point.getXVal() + " x0="
-                  + lastPoint.getXVal() + "\n");
+              errorLog.append(lastLine + "\n" + line
+                  + "\nX-sequence Checkpoint Error! Line " + lineNumber
+                  + " |x1-x0|=" + xdif + " instead of " + Math.abs(deltaX)
+                  + " for x1=" + point.getXVal() + " x0=" + lastPoint.getXVal()
+                  + "\n");
           }
         }
         while (ich < lineLen) {

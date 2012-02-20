@@ -543,8 +543,8 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     double fileDeltaX = JSpecViewUtils.deltaX(fileLastX, fileFirstX, nPointsFile);
     increasing = (fileDeltaX > 0);
 
-    JDXDecompressor decompressor = new JDXDecompressor(xFactor,
-        yFactor, fileDeltaX, nPointsFile, tabDataLineNo, tabularSpecData);
+    JDXDecompressor decompressor = new JDXDecompressor(tabularSpecData,
+        fileFirstX, xFactor, yFactor, fileDeltaX, nPointsFile, tabDataLineNo);
 
     xyCoords = decompressor.decompressData(errorLog);
 
