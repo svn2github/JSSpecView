@@ -114,7 +114,7 @@ class JDXCompressor {
       yStr.append(temp);
       i++;
 
-      buffer.append(x1).append(yStr).append(JSpecViewUtils.newLine);
+      buffer.append(fixExponent(x1)).append(yStr).append(JSpecViewUtils.newLine);
       yStr.setLength(0);
     }
 
@@ -129,7 +129,7 @@ class JDXCompressor {
       temp = String.valueOf(y1);
       // convert 1st digit of string to SQZ
       temp = makeSQZ(temp);
-      buffer.append(x1).append(yStr).append(temp);
+      buffer.append(fixExponent(x1)).append(yStr).append(temp);
       buffer.append("  $$checkpoint" + JSpecViewUtils.newLine);
     }
 
@@ -167,7 +167,7 @@ class JDXCompressor {
       curXY = xyCoords[i];
 
       x1 = curXY.getXVal()/xFactor;
-      xStr = "" + x1;
+      xStr = fixExponent(x1);
 
       if (xStr.length() < 20)
         xStr = spaces.substring(0, (20 - xStr.length()));
@@ -248,7 +248,7 @@ class JDXCompressor {
         yStr.append(temp);
         i++;
       }
-      buffer.append(x1).append(yStr).append(JSpecViewUtils.newLine);
+      buffer.append(fixExponent(x1)).append(yStr).append(JSpecViewUtils.newLine);
       yStr.setLength(0);
 
     }
@@ -268,14 +268,12 @@ class JDXCompressor {
    * @return A String representing the compressed data
    */
   static String compressPAC(Coordinate[] xyCoords, int startDataPointIndex, int endDataPointIndex, double xFactor, double yFactor){
-    DecimalFormat formatter = new DecimalFormat("#", new DecimalFormatSymbols(java.util.Locale.US ));
     int ij;
     StringBuffer yStr = new StringBuffer();
     String temp;
     Coordinate curXY;
 
-    int y1, y2;
-    double x1;
+    double x1, y1, y2;
     StringBuffer buffer = new StringBuffer();
 
     int i = startDataPointIndex;
@@ -288,21 +286,21 @@ class JDXCompressor {
       x1 = curXY.getXVal() / xFactor;
 
       // Get First Y value on line
-      y1 = (int) Math.round(curXY.getYVal()/yFactor);
+      y1 = curXY.getYVal() / yFactor ;
 
       i++;
       while ((ij <= 5) && i <= endDataPointIndex)
       {
         // Print remaining Y values on a line
         curXY = xyCoords[i];
-        y2 = (int) Math.round(curXY.getYVal()/yFactor);
-        temp = formatter.format(y2)+" ";
+        y2 = curXY.getYVal() / yFactor;
+        temp = y2 +" ";
         yStr.append(temp);
         ij ++;
         i++;
       }
-      buffer.append(x1)
-          .append(" ").append(formatter.format(y1)).append(" ")
+      buffer.append(fixExponent(x1))
+          .append(" ").append(fixExponent(y1)).append(" ")
           .append(yStr).append(JSpecViewUtils.newLine);
 
       yStr.setLength(0);
@@ -387,4 +385,26 @@ class JDXCompressor {
     }
     return (new String(yStrArray));
   }
+
+  private static String fixExponent(double x) {
+    // JCAMP-DX requires 1.5E[+|-]nn or 1.5E[+|-]nnn only
+    // not Java's 1.5E3 or 1.5E-2
+    String s = "" + x;
+    int pt = s.indexOf("E");
+    if (pt < 0)
+      return s;
+    switch (s.length() - pt) {
+    case 2:
+      s = s.substring(0, pt + 1) + "0" + s.substring(pt + 1);
+      break;
+    case 3:
+      // 4.3E-3
+      if (s.charAt(pt + 1) == '-')
+        s = s.substring(0, pt + 2) + "0" + s.substring(pt + 2);
+      break;
+    } 
+    if (s.indexOf("E-") < 0)
+      s = s.substring(0, pt + 1) + "+" + s.substring(pt + 1);
+    return s;
+  }  
 }

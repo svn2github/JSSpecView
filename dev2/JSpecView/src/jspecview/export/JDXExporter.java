@@ -93,7 +93,8 @@ class JDXExporter {
     if (type != Exporter.XY) {
       //xCompFactor = JSpecViewUtils.getXFactorForCompression(newXYCoords,
         //  startIndex, endIndex);
-      yCompFactor = JSpecViewUtils.getYFactorForCompression(newXYCoords,
+      if (type != Exporter.PAC)
+        yCompFactor = JSpecViewUtils.getYFactorForCompression(newXYCoords,
           startIndex, endIndex);
     } else {
       if (spectrum.isContinuous())
