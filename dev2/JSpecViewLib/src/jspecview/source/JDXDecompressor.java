@@ -156,8 +156,6 @@ public class JDXDecompressor {
   private int dupCount;
   private double xval, yval;
 
-  //private boolean isDIF;
-
   /**
    * Determines the type of compression, decompress the data and stores
    * coordinates in an array to be returned
@@ -240,7 +238,6 @@ public class JDXDecompressor {
       yval += difVal;
       lastDif  = difVal;
       difVal = Integer.MIN_VALUE;
-      //isDIF = true;
       return yval;
     }
     if (ich == lineLen)
