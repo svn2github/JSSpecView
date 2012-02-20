@@ -172,8 +172,6 @@ public class JDXDecompressor {
     double difMax = Math.abs(0.35 * deltaX);
     double dif14 = Math.abs(1.4 * deltaX);
     double dif06 = Math.abs(0.6 * deltaX);
-    //double dif08 = Math.abs(.8 * deltaX);
-    //double dif12 = Math.abs(1.2 * deltaX);
 
     try {
       while ((line = dataReader.readLine()) != null) {
@@ -195,18 +193,20 @@ public class JDXDecompressor {
           if (isCheckPoint && xdif < difMax) {
             xyCoords[ipt - 1] = point;
             // Check for Y checkpoint error - Y values should correspond
-            double y = Math.abs(last_pt.getYVal());
-            double y1 = Math.abs(point.getYVal());
-            if (y1 < FMINY * y || y1 > FMAXY * y)
-              errorLog.append("Y Checkpoint Error! Line " + lineNumber
-                  + " y1/y0=" + y1 / y + " for y1=" + y1 + " y0=" + y + "\n");
+            double y = last_pt.getYVal();
+            double y1 = point.getYVal();
+            if (y1 != y)
+              errorLog.append(line + "\nY-value Checkpoint Error! Line " + lineNumber
+                  + " for y1=" + y1 + " y0=" + y + "\n");
           } else {
             addPoint(point);
             // Check for X checkpoint error
             // first point of new line should be deltaX away
             // ACD/Labs seem to have large rounding error so using between 0.6 and 1.4
             if (xdif < dif06 || xdif > dif14)
-              logXError(errorLog, xdif, point.getXVal(), last_pt.getXVal());
+              errorLog.append(line + "\nX-sequence Checkpoint Error! Line " + lineNumber
+                  + " |x1-x0|=" + xdif + " instead of " + Math.abs(deltaX) + " for x1=" + point.getXVal() + " x0="
+                  + last_pt.getXVal() + "\n");
           }
         }
         while (ich < lineLen) {
@@ -402,13 +402,6 @@ public class JDXDecompressor {
       x[n] = v;
     }
     return x;
-  }
-
-
-  private void logXError(StringBuffer errorLog, double xdif, double xval,
-                         double xval2) {
-    errorLog.append("X Checkpoint Error! Line " + lineNumber
-        + " |x1-x0|=" + xdif + " for x1=" + xval + " x0=" + xval2 + "\n");
   }
 
   private final static String whiteSpace = " ,\t\n";
