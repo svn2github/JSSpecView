@@ -63,7 +63,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.Vector;
+import java.util.List;
 import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
@@ -148,7 +148,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private int numOfSpectra;
 
   // Contains information needed to draw spectra
-  private JSpecViewUtils.MultiScaleData scaleData;
+  private MultiScaleData scaleData;
 
   // The list of Coordinate arrays
   private Coordinate[][] xyCoordsList;
@@ -191,7 +191,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
   protected Color highlightColor = new Color(255, 0, 0, 200);
 
-  private Vector<Highlight> highlights = new Vector<Highlight>();
+  private List<Highlight> highlights = new ArrayList<Highlight>();
 
   // The Current Coordinate to be drawn on the Panel
   private String coordStr = "";
@@ -250,7 +250,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   protected double xFactorForScale, yFactorForScale;
 
   // List of Scale data for zoom
-  protected Vector<MultiScaleData> zoomInfoList;
+  protected List<MultiScaleData> zoomInfoList;
 
   // Current index of view in zoomInfoList
   protected int currentZoomIndex;
@@ -365,23 +365,23 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   /**
-   * Constructs a JSVMultiPanel with a vector of Spectra
+   * Constructs a JSVMultiPanel with a List of Spectra
    * 
    * @param spectra
-   *        a <code>Vector</code> of spectra
+   *        a <code>List</code> of spectra
    * @throws ScalesIncompatibleException
    */
-  public JSVPanel(Vector<JDXSpectrum> spectra)
+  public JSVPanel(List<JDXSpectrum> spectra)
       throws ScalesIncompatibleException {
     this((Graph[]) spectra.toArray(new Graph[spectra.size()]));
   }
 
   /**
-   * Constructs a <code>JSVPanel</code> with vector of spectra and corresponding
+   * Constructs a <code>JSVPanel</code> with List of spectra and corresponding
    * start and end indices of data points that should be displayed
    * 
    * @param spectra
-   *        the vector of <code>Graph</code> instances
+   *        the List of <code>Graph</code> instances
    * @param startIndices
    *        the start indices
    * @param endIndices
@@ -389,7 +389,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @throws JSpecViewException
    * @throws ScalesIncompatibleException
    */
-  public JSVPanel(Vector<JDXSpectrum> spectra, int[] startIndices,
+  public JSVPanel(List<JDXSpectrum> spectra, int[] startIndices,
       int[] endIndices) throws JSpecViewException, ScalesIncompatibleException {
     this((Graph[]) spectra.toArray(new Graph[spectra.size()]), startIndices,
         endIndices);
@@ -433,7 +433,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       plotColors = tmpPlotColors;
     }
 
-    zoomInfoList = new Vector<MultiScaleData>();
+    zoomInfoList = new ArrayList<MultiScaleData>();
     doZoomWithoutRepaint(startIndices, endIndices);
 
     setBorder(BorderFactory.createLineBorder(Color.lightGray));
@@ -483,8 +483,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         endIndices, 10, 10);
 
     //add data to zoomInfoList
-    zoomInfoList = new Vector<MultiScaleData>();
-    zoomInfoList.addElement(scaleData);
+    zoomInfoList = new ArrayList<MultiScaleData>();
+    zoomInfoList.add(scaleData);
 
     setBorder(BorderFactory.createLineBorder(Color.lightGray));
   }
@@ -858,7 +858,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   public void addHighlight(double x1, double x2, Color color) {
     Highlight hl = new Highlight(x1, x2, (color == null ? highlightColor : color));
     if (!highlights.contains(hl))
-      highlights.addElement(hl);
+      highlights.add(hl);
   }
 
   /**
@@ -872,7 +872,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   public void addHighlight(double x1, double x2) {
     Highlight hl = new Highlight(x1, x2);
     if (!highlights.contains(hl)) {
-      highlights.addElement(hl);
+      highlights.add(hl);
     }
   }
 
@@ -885,7 +885,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        the index of the highlight in the list
    */
   public void removeHighlight(int index) {
-    highlights.removeElementAt(index);
+    highlights.remove(index);
   }
 
   /**
@@ -900,7 +900,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     Highlight hl = new Highlight(x1, x2);
     int index = highlights.indexOf(hl);
     if (index != -1) {
-      highlights.removeElementAt(index);
+      highlights.remove(index);
     }
   }
 
@@ -908,8 +908,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * Removes all highlights from the display
    */
   public void removeAllHighlights() {
-    System.out.println("JSVPanel.removeAllHighlights");
-    highlights.removeAllElements();
+    highlights.clear();
   }
 
   /* ------------------------- GET METHODS ----------------------------*/
@@ -1957,10 +1956,10 @@ spectra[0].getTitleLabel();
               tempStartDataPointIndices, tempEndDataPointIndices, 10, 10);
           if (zoomInfoList.size() > currentZoomIndex + 1) {
             for (int i = zoomInfoList.size() - 1; i >= currentZoomIndex + 1; i--) {
-              zoomInfoList.removeElementAt(i);
+              zoomInfoList.remove(i);
             }
           }
-          zoomInfoList.addElement(scaleData);
+          zoomInfoList.add(scaleData);
           currentZoomIndex++;
           repaint(); // just repaint the plot Area
         }
@@ -2019,10 +2018,10 @@ spectra[0].getTitleLabel();
         // ie. add the info to the zoomInfoList
         if (zoomInfoList.size() > currentZoomIndex + 1) {
           for (int i = zoomInfoList.size() - 1; i >= currentZoomIndex + 1; i--) {
-            zoomInfoList.removeElementAt(i);
+            zoomInfoList.remove(i);
           }
         }
-        zoomInfoList.addElement(scaleData);
+        zoomInfoList.add(scaleData);
         currentZoomIndex++;
         return true;
       }
@@ -2054,7 +2053,7 @@ spectra[0].getTitleLabel();
    * Resets the spectrum to it's original view
    */
   public void reset() {
-    scaleData = (JSpecViewUtils.MultiScaleData) zoomInfoList.firstElement();
+    scaleData = zoomInfoList.get(0);
     currentZoomIndex = 0;
     repaint();
   }
@@ -2066,7 +2065,7 @@ spectra[0].getTitleLabel();
     reset();
     int loopNum = zoomInfoList.size();
     for (int i = 1; i < loopNum; i++) {
-      zoomInfoList.removeElementAt(1);
+      zoomInfoList.remove(1);
     }
   }
 

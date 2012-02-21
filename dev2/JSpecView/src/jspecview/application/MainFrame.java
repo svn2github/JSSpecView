@@ -70,12 +70,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.EventListener;
 import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
-import java.util.Vector;
 
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
@@ -193,10 +193,9 @@ public class MainFrame extends JFrame implements DropTargetListener,
   //  ----------------------- Application Attributes ---------------------
 
   private JmolSyncInterface jmol;
-  private Vector<JDXSource> jdxSources = new Vector<JDXSource>();
-  private Vector<String> jdxSourceFiles = new Vector<String>();
+  private List<JDXSource> jdxSources = new ArrayList<JDXSource>();
   private int numRecent = 10;
-  private Vector<String> recentFilePaths = new Vector<String>(numRecent);
+  private List<String> recentFilePaths = new ArrayList<String>(numRecent);
   private JDXSource currentSelectedSource = null;
   private Properties properties;
   private DisplaySchemesProcessor dsp;
@@ -419,7 +418,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     //boolean loadedOk;
     //Set Default Properties
 
-    // Initialise application properties with defaults
+    // Initalize application properties with defaults
     // and load properties from file
     properties = new Properties();
     // sets the list of recently opened files property to be initially empty
@@ -495,14 +494,14 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
     String recentFilesString = properties.getProperty("recentFilePaths");
     openRecentMenu.removeAll();
-    recentFilePaths.removeAllElements();
+    recentFilePaths.clear();
     if (!recentFilesString.equals("")) {
       StringTokenizer st = new StringTokenizer(recentFilesString, ",");
       JMenuItem menuItem;
       String path;
       while (st.hasMoreTokens()) {
         path = st.nextToken().trim();
-        recentFilePaths.addElement(path);
+        recentFilePaths.add(path);
         menuItem = new JMenuItem(path);
         openRecentMenu.add(menuItem);
         menuItem.addActionListener(new ActionListener() {
@@ -1202,8 +1201,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
       recentJmolName = (url == null ? filePath.replace('\\', '/') : url);
       recentURL = null;
     }
-    if (jdxSourceFiles.contains(recentJmolName)) {
-      writeStatus(recentJmolName + " is already open");
+    if (isOpen(filePath)) {
+      writeStatus(filePath + " is already open");
       return FILE_OPEN_ALREADY;
     }
     try {
@@ -1213,8 +1212,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
       writeStatus(e.getMessage());
       return FILE_OPEN_ERROR;
     }    
-    jdxSources.addElement(currentSelectedSource);
-    jdxSourceFiles.addElement(filePath);
+    jdxSources.add(currentSelectedSource);
+    currentSelectedSource.setFilePath(filePath);
     closeMenuItem.setEnabled(true);
     closeMenuItem.setText("Close " + fileName);
     setTitle("JSpecView - " + filePath);
@@ -1251,10 +1250,10 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
     // ADD TO RECENT FILE PATHS
     if (recentFilePaths.size() >= numRecent) {
-      recentFilePaths.removeElementAt(numRecent - 1);
+      recentFilePaths.remove(numRecent - 1);
     }
     if (!recentFilePaths.contains(filePath)) {
-      recentFilePaths.insertElementAt(filePath, 0);
+      recentFilePaths.add(0, filePath);
     }
 
     String filePaths = "";
@@ -1283,6 +1282,13 @@ public class MainFrame extends JFrame implements DropTargetListener,
     });
     properties.setProperty("recentFilePaths", filePaths);
     return FILE_OPEN_OK;
+  }
+
+  private boolean isOpen(String filePath) {
+    for (int i = jdxSources.size(); --i >= 0;)
+      if (filePath.equals(jdxSources.get(i).getFilePath()))
+        return true;
+    return false;
   }
 
   private void setCurrentSource(JDXSource source) {
@@ -1425,7 +1431,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       throws ScalesIncompatibleException {
 
     String file = getFileForSource(source);
-    Vector<JDXSpectrum> specs = source.getSpectra();
+    List<JDXSpectrum> specs = source.getSpectra();
     JSVPanel jsvp;
     jsvp = new JSVPanel(specs);
     jsvp.setTitle(source.getTitle());
@@ -1526,7 +1532,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     }
 
     if (source != null) {
-      Vector<JDXSpectrum> spectra = source.getSpectra();
+      List<JDXSpectrum> spectra = source.getSpectra();
       for (int i = 0; i < spectra.size(); i++) {
         String title = spectra.get(i).getTitleLabel();
         for (int j = 0; j < showMenu.getMenuComponentCount(); j++) {
@@ -1586,7 +1592,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
     String file = getFileForSource(source);
 
-    Vector<JDXSpectrum> specs = source.getSpectra();
+    List<JDXSpectrum> specs = source.getSpectra();
     //JSVPanel[] panels = new JSVPanel[specs.size()];
     JInternalFrame[] frames = new JInternalFrame[specs.size()];
     JSVPanel jsvp;
@@ -1993,8 +1999,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    * @return the file associated with a JDXSource
    */
   public String getFileForSource(JDXSource source) {
-    int index = jdxSources.indexOf(source);
-    return (index < 0 ? null : jdxSourceFiles.get(index));
+    return (source.getFilePath());
   }
 
   /*
@@ -2028,9 +2033,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the JDXSource
    */
   public void removeSource(JDXSource source) {
-    String file = getFileForSource(source);
-    jdxSourceFiles.removeElement(file);
-    jdxSources.removeElement(source);
+    jdxSources.remove(source);
     setCurrentSource(null);
   }
 
@@ -2038,7 +2041,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
    * Removes all JDXSource objects from the application
    */
   public void removeAllSources() {
-    jdxSourceFiles.clear();
     jdxSources.clear();
   }
 
