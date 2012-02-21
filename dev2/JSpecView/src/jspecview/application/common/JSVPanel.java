@@ -1172,7 +1172,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   /*----------------------- JSVPanel PAINTING METHODS ---------------------*/
 
   /**
-   * Overides paintComponent in class JPanel inorder to draw the spectrum
+   * Overides paintComponent in class JPanel in order to draw the spectrum
    * 
    * @param g
    *        the <code>Graphics</code> object
@@ -1182,9 +1182,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     super.paintComponent(g);
     int width = getWidth();
     int height = getHeight();
-
+//TODO -- not all panels are getting the right size information here
     drawGraph(g, height, width);
-
     if (integrationRatios != null)
       drawIntegrationRatios(g, height, width);
   }
@@ -1200,9 +1199,12 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        the width to be drawn in pixels
    */
   protected void drawGraph(Graphics g, int height, int width) {
+    
     plotAreaWidth = width - (plotAreaInsets.right + plotAreaInsets.left);
     plotAreaHeight = height - (plotAreaInsets.top + plotAreaInsets.bottom);
 
+    System.out.println(" "  + width + " " + height + " " + plotAreaWidth + " " + plotAreaHeight + " " + title);
+    
     leftPlotAreaPos = plotAreaX;
     rightPlotAreaPos = plotAreaWidth + plotAreaX;
     topPlotAreaPos = plotAreaY;
