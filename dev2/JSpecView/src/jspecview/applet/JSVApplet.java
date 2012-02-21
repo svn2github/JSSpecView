@@ -59,7 +59,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
-import java.util.Vector;
 import java.util.ArrayList;
 
 import javax.swing.JApplet;
@@ -126,7 +125,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     System.out.println("JSpecView " + this + " finalized");
   }
 
-  public static final String APPLET_VERSION = "1.0.20120220-1430";
+  public static final String APPLET_VERSION = "1.0.20120220-1700";
 
   /* --------------------set default-PARAMETERS -------------------------*/
   String filePath, oldfilePath;
@@ -293,7 +292,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
   /**
    * A list of </code>JDXSpectrum</code> instances
    */
-  Vector<JDXSpectrum> specs;
+  List<JDXSpectrum> specs;
 
   /**
    * The <code>JSVPanel</code>s created for each </code>JDXSpectrum</code>
@@ -1203,20 +1202,20 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     if (plotColorsStr != null) {
       StringTokenizer st = new StringTokenizer(plotColorsStr, ",;.- ");
       int r, g, b;
-      Vector<Color> colors = new Vector<Color>();
+      List<Color> colors = new ArrayList<Color>();
 
       try {
         while (st.hasMoreTokens()) {
 
           String token = st.nextToken();
           if (token.startsWith("#")) {
-            colors.addElement(new Color(Integer
+            colors.add(new Color(Integer
                 .parseInt(token.substring(1), 16)));
           } else {
             r = Integer.parseInt(token.trim());
             g = Integer.parseInt(st.nextToken().trim());
             b = Integer.parseInt(st.nextToken().trim());
-            colors.addElement(new Color(r, g, b));
+            colors.add(new Color(r, g, b));
           }
         }
       } catch (NoSuchElementException nsee) {
@@ -1652,7 +1651,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
 
   // for the signed applet to load a remote file, it must
   // be using a thread started by the initiating thread;
-  Vector<String> scriptQueue = new Vector<String>();
+  List<String> scriptQueue = new ArrayList<String>();
   Thread commandWatcherThread;
 
   class CommandWatcher implements Runnable {
