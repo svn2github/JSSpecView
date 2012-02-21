@@ -442,6 +442,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
       return true;
     }
     if (dataClass.equals("PEAKTABLE") || dataClass.equals("XYPOINTS")) {
+      continuous = dataClass.equals("XYPOINTS");
       // check if there is an x and y factor
       if (xFactor != ERROR && yFactor != ERROR)
         xyCoords = JSpecViewUtils.parseDSV(tabularSpecData, xFactor, yFactor);
@@ -515,6 +516,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
       return true;
     }
     if (dataClass.equals("PEAKTABLE") || dataClass.equals("XYPOINTS")) {
+      continuous = dataClass.equals("XYPOINTS");
       list = (ArrayList<String>) nTupleTable.get("##SYMBOL");
       int index1 = list.indexOf(plotSymbols[0]);
       int index2 = list.indexOf(plotSymbols[1]);
@@ -627,7 +629,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
  
   private boolean increasing = true;
   private boolean continuous;
-
 
   /**
    * Sets value to true if spectrum is increasing
