@@ -28,7 +28,6 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.Iterator;
 import java.util.TreeMap;
 
 import jspecview.application.common.AppUtils;
@@ -238,9 +237,7 @@ public class DisplaySchemesProcessor {
     BufferedWriter buffer = new BufferedWriter(sw);
     String defaultDSName = "";
 
-    Iterator<String> interator = displaySchemes.keySet().iterator();
-    while (interator.hasNext()){
-      DisplayScheme ds = (DisplayScheme)displaySchemes.get(interator.next());
+    for (DisplayScheme ds: displaySchemes.values()) {
       if(ds.isDefault())
         defaultDSName = ds.getName();
 

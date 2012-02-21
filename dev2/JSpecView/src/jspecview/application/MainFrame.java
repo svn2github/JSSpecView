@@ -1353,8 +1353,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   public void setJSVPanelProperties(JSVPanel jsvp,
                                     boolean shouldApplySpectrumDisplaySettings) {
 
-    DisplayScheme ds = (DisplayScheme) dsp.getDisplaySchemes().get(
-        defaultDisplaySchemeName);
+    DisplayScheme ds = dsp.getDisplaySchemes().get(defaultDisplaySchemeName);
 
     if (ds == null)
       ds = dsp.getDefaultScheme();

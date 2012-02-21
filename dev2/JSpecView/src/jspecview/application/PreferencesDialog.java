@@ -31,7 +31,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
 
@@ -638,17 +638,14 @@ public class PreferencesDialog extends JDialog {
     defaultDSName = preferences.getProperty("defaultDisplaySchemeName");
 
     // load names of schemes in schemeComboBox
-    for (Iterator<String> i = displaySchemes.keySet().iterator(); i.hasNext(); ) {
-      Object item = i.next();
-      schemeComboBox.addItem(item);
-    }
+    for (String key: displaySchemes.keySet())
+      schemeComboBox.addItem(key);
 
     // load names of fonts in fontComboBox
     GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
     String allFontNames[] = ge.getAvailableFontFamilyNames();
-    for(int i = 0; i < allFontNames.length; i++){
+    for(int i = 0; i < allFontNames.length; i++)
       fontComboBox.addItem(allFontNames[i]);
-    }
 
     schemeComboBox.setSelectedItem(defaultDSName);
     
@@ -986,9 +983,8 @@ public class PreferencesDialog extends JDialog {
     DisplayScheme ds = null;
 
     TreeMap<String, DisplayScheme> schemes = dsp.getDisplaySchemes();
-    for (Iterator<String> i = schemes.keySet().iterator(); i.hasNext(); ) {
-      Object item = i.next();
-      ds = (DisplayScheme)schemes.get(item);
+    for (Map.Entry<String, DisplayScheme> entry: schemes.entrySet()) {
+      ds = entry.getValue();
       if(ds.getName().equals(schemeName)){
         currentDS = ds.copy();
         break;

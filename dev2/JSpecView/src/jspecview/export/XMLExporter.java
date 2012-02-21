@@ -21,7 +21,7 @@ package jspecview.export;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Vector;
+import java.util.ArrayList;
 
 import jspecview.common.Coordinate;
 import jspecview.common.JDXSpectrum;
@@ -36,48 +36,48 @@ import jspecview.common.JDXSpectrum;
  */
 abstract class XMLExporter extends FormExporter {
 
-  boolean continuous;
-  String title;
-  String ident;
-  String state;
-  String xUnits;
-  String yUnits;
-  String xUnitFactor = "";
-  String xUnitExponent = "1";
-  String xUnitLabel;
-  String yUnitLabel;
-  String datatype;
-  String owner;
-  String origin;
-  String spectypeInitials = "";
-  String longdate;
-  String date;
-  String time;
-  String vendor = "";
-  String model = "";
-  String resolution = "";
-  String pathlength;
-  String molform = "";
-  String bp = "";
-  String mp = "";
-  String casRN = "";
-  String casName = "";
-  String obNucleus = "";
+  protected boolean continuous;
+  protected String title;
+  protected String ident;
+  protected String state;
+  protected String xUnits;
+  protected String yUnits;
+  protected String xUnitFactor = "";
+  protected String xUnitExponent = "1";
+  protected String xUnitLabel;
+  protected String yUnitLabel;
+  protected String datatype;
+  protected String owner;
+  protected String origin;
+  protected String spectypeInitials = "";
+  protected String longdate;
+  protected String date;
+  protected String time;
+  protected String vendor = "";
+  protected String model = "";
+  protected String resolution = "";
+  protected String pathlength;
+  protected String molform = "";
+  protected String bp = "";
+  protected String mp = "";
+  protected String casRN = "";
+  protected String casName = "";
+  protected String obNucleus = "";
+ 
+  protected double obFreq;
+  protected double firstX;
+  protected double lastX;
+  protected double deltaX;
 
-  double obFreq;
-  double firstX;
-  double lastX;
-  double deltaX;
+  protected String solvRef = "";
+  protected String solvName = "";
+  
+  protected int startIndex;
+  protected int endIndex;
+  protected Coordinate[] xyCoords;
+  protected int npoints;
 
-  String solvRef = "";
-  String solvName = "";
-
-  int startIndex;
-  int endIndex;
-  Coordinate[] xyCoords;
-  int npoints;
-
-  Vector<Coordinate> newXYCoords = new Vector<Coordinate>();
+  protected List<Coordinate> newXYCoords = new ArrayList<Coordinate>();
 
   public boolean exportAsXML(JDXSpectrum spec, String fileName, int startIndex,
                              int endIndex) {
@@ -98,7 +98,7 @@ abstract class XMLExporter extends FormExporter {
     xyCoords = spec.getXYCoords();
     npoints = endIndex - startIndex + 1;
     for (int i = startIndex; i <= endIndex; i++)
-      newXYCoords.addElement(xyCoords[i]);
+      newXYCoords.add(xyCoords[i]);
 
     title = spec.getTitle();
 

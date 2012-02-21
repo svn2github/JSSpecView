@@ -21,10 +21,10 @@ package jspecview.export;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Vector;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
 
 import jspecview.common.Coordinate;
 import jspecview.util.Parser;
@@ -42,7 +42,7 @@ class FormContext {
 
   String[] tokens;
   Hashtable<String, Object> context = new Hashtable<String, Object>();
-  Vector<FormToken> formTokens;
+  List<FormToken> formTokens;
 
   FormContext() {
   }
@@ -61,7 +61,7 @@ class FormContext {
   }
 
   int commandLevel;
-  Vector<Integer> cmds = new Vector<Integer>();
+  List<Integer> cmds = new ArrayList<Integer>();
   String strError;
 
   final static int VT_DATA = 0;
@@ -80,7 +80,7 @@ class FormContext {
     int endPtr = -1;
     int ptr;
     String var;
-    Vector<Object> vc;
+    List<Object> vc;
     int pointCount;
     String data;
 
@@ -158,7 +158,7 @@ class FormContext {
   }
 
   private String getFormTokens(String template) {
-    formTokens = new Vector<FormToken>();
+    formTokens = new ArrayList<FormToken>();
     if (template.indexOf("\r\n") >= 0)
       template = TextFormat.replaceAllCharacters(template, "\r\n", '\n');
     template = template.replace('\r', '\n');
@@ -245,7 +245,7 @@ class FormContext {
             i = vt.endPtr;
             continue;
           }
-          Object varData = vt.vc.elementAt(vt.pointCount);
+          Object varData = vt.vc.get(vt.pointCount);
           if (varData instanceof Coordinate) {
             Coordinate c = (Coordinate) varData;
             context.put("pointCount", new Integer(vt.pointCount));
@@ -253,13 +253,9 @@ class FormContext {
             context.put(vt.var + ".yVal", new Double(c.getYVal()));
             context.put(vt.var + ".getXString()", c.getXString());
             context.put(vt.var + ".getYString()", c.getYString());
-          } else if (varData instanceof HashMap) {
-            HashMap<String, String> h = (HashMap) varData;
-            Iterator<String> iter = h.keySet().iterator();
-            while (iter.hasNext()) {
-              String key = iter.next();
-              context.put(vt.var + "." + key, h.get(key));
-            }
+          } else if (varData instanceof Map) {
+            for (Map.Entry<String, String> entry: ((Map<String, String>) varData).entrySet())
+              context.put(vt.var + "." + entry.getKey(), entry.getValue());
           }
           i = vt.cmdPtr;
           continue;
@@ -283,8 +279,8 @@ class FormContext {
     // #foreach  $xxx in XXX
     vt.var = tokens[1].substring(1);
     Object vc = context.get(tokens[3].substring(1));
-    if (vc instanceof Vector)
-      vt.vc = (Vector<Object>) vc;
+    if (vc instanceof List)
+      vt.vc = (List<Object>) vc;
     vt.cmdPtr = vt.ptr;
     vt.pointCount = -1;
   }

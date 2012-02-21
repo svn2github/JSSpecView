@@ -79,21 +79,17 @@ public class JSpecViewFileFilter extends FileFilter
 
   /**
    * Implementation of method from interface <code>FileFilter</code>.
-   * @param f the the file to be filtered
+   * 
+   * @param f
+   *        the the file to be filtered
    * @return true if the file should be shown, otherwise false
    */
   @Override
   public boolean accept(File f) {
-	if(f != null) {
-	    if(f.isDirectory()) {
-		return true;
-	    }
-	    String extension = getExtension(f);
-	    if(extension != null && filters.get(getExtension(f)) != null) {
-		return true;
-	    }
-	}
-	return false;
+    if (f == null || f.isDirectory())
+      return (f != null);
+    String extension = getExtension(f);
+    return (extension != null && filters.containsKey(extension));
   }
 
   /**

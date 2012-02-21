@@ -1494,7 +1494,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
       if (JSpecViewUtils.DEBUG) {
         System.out.println("KEY-> " + key + " VALUE-> " + value);
       }
-      Integer iparam = (Integer) htParams.get(key);
+      Integer iparam = htParams.get(key);
       try {
         switch (iparam == null ? -1 : iparam.intValue()) {
         case -1:

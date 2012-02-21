@@ -20,8 +20,8 @@
 package jspecview.application;
 
 import java.awt.Color;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.Hashtable;
+import java.util.Map;
 
 /**
  * This a representation of the Display Scheme for the spectral display.
@@ -37,7 +37,7 @@ public class DisplayScheme {
   /** The name of the font */
   private String font;
   /** A map of the name of the elements and their colors*/
-  private HashMap<String, Color> elementColors;
+  private Map<String, Color> elementColors;
   /** Specifies if the display scheme is the default */
   private boolean isDefault = false;
 
@@ -47,7 +47,7 @@ public class DisplayScheme {
    */
   public DisplayScheme(String name){
     this.name = name;
-    elementColors = new HashMap<String, Color>();
+    elementColors = new Hashtable<String, Color>();
     font = null;
   }
 
@@ -105,7 +105,7 @@ public class DisplayScheme {
    * @return the <code>Color</code> of the element
    */
   public Color getColor(String element){
-    Color color = ((Color)elementColors.get(element));
+    Color color = elementColors.get(element);
     return color;
   }
 
@@ -126,13 +126,8 @@ public class DisplayScheme {
   public DisplayScheme copy(String newName){
     DisplayScheme ds = new DisplayScheme(newName);
     ds.setFont(getFont());
-    for(Iterator<String> iter = elementColors.keySet().iterator(); iter.hasNext();){
-      String element = (String)iter.next();
-      Color color = (Color) elementColors.get(element);
-      Color newColor = new Color(color.getRGB());
-      ds.setColor(element, newColor);
-    }
-
+    for(Map.Entry<String, Color> entry: elementColors.entrySet())
+      ds.setColor(entry.getKey(), entry.getValue());
     return ds;
   }
 

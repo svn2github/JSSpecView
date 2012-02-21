@@ -23,8 +23,10 @@ import java.awt.Color;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.HashMap;
-import java.util.Vector;
+import java.util.Map;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.ArrayList;
 
 import jspecview.common.Coordinate;
 import jspecview.common.Graph;
@@ -207,8 +209,8 @@ public class SVGExporter extends FormExporter {
     String xStr, yStr;
 
     //Grid
-    Vector<HashMap<String, String>> vertGridCoords = new Vector<HashMap<String, String>>();
-    Vector<HashMap<String, String>> horizGridCoords = new Vector<HashMap<String, String>>();
+    List<Map<String, String>> vertGridCoords = new ArrayList<Map<String, String>>();
+    List<Map<String, String>> horizGridCoords = new ArrayList<Map<String, String>>();
 
     for (double i = minXOnScale; i < maxXOnScale + xStep / 2; i += xStep) {
       xPt = leftPlotArea + ((i - minXOnScale) * xScaleFactor);
@@ -216,10 +218,10 @@ public class SVGExporter extends FormExporter {
       xStr = formatter2.format(xPt);
       yStr = formatter2.format(yPt);
 
-      HashMap<String, String> hash = new HashMap<String, String>();
+      Map<String, String> hash = new Hashtable<String, String>();
       hash.put("xVal", xStr);
       hash.put("yVal", yStr);
-      vertGridCoords.addElement(hash);
+      vertGridCoords.add(hash);
     }
 
     for (double i = minYOnScale; i < maxYOnScale + yStep / 2; i += yStep) {
@@ -228,18 +230,18 @@ public class SVGExporter extends FormExporter {
       xStr = formatter2.format(xPt);
       yStr = formatter2.format(yPt);
 
-      HashMap<String, String> hash = new HashMap<String, String>();
+      Map<String, String> hash = new Hashtable<String, String>();
       hash.put("xVal", xStr);
       hash.put("yVal", yStr);
 
-      horizGridCoords.addElement(hash);
+      horizGridCoords.add(hash);
     }
 
     // Scale
 
-    Vector<HashMap<String, String>> xScaleList = new Vector<HashMap<String, String>>();
-    Vector<HashMap<String, String>> xScaleListReversed = new Vector<HashMap<String, String>>();
-    Vector<HashMap<String, String>> yScaleList = new Vector<HashMap<String, String>>();
+    List<Map<String, String>> xScaleList = new ArrayList<Map<String, String>>();
+    List<Map<String, String>> xScaleListReversed = new ArrayList<Map<String, String>>();
+    List<Map<String, String>> yScaleList = new ArrayList<Map<String, String>>();
 
     String hashX = "#";
     String hashY = "#";
@@ -265,11 +267,11 @@ public class SVGExporter extends FormExporter {
       yStr = formatter2.format(yPt);
       String iStr = displayXFormatter.format(i);
 
-      HashMap<String, String> hash = new HashMap<String, String>();
+      Map<String, String> hash = new Hashtable<String, String>();
       hash.put("xVal", xStr);
       hash.put("yVal", yStr);
       hash.put("number", iStr);
-      xScaleList.addElement(hash);
+      xScaleList.add(hash);
     }
 
     for (double i = minXOnScale, j = maxXOnScale; i < (maxXOnScale + xStep / 2); i += xStep, j -= xStep) {
@@ -280,11 +282,11 @@ public class SVGExporter extends FormExporter {
       yStr = formatter2.format(yPt);
       String iStr = displayXFormatter.format(i);
 
-      HashMap<String, String> hash = new HashMap<String, String>();
+      Map<String, String> hash = new Hashtable<String, String>();
       hash.put("xVal", xStr);
       hash.put("yVal", yStr);
       hash.put("number", iStr);
-      xScaleListReversed.addElement(hash);
+      xScaleListReversed.add(hash);
 
     }
 
@@ -296,11 +298,11 @@ public class SVGExporter extends FormExporter {
       yStr = formatter2.format(yPt);
       String iStr = displayYFormatter.format(i);
 
-      HashMap<String, String> hash = new HashMap<String, String>();
+      Map<String, String> hash = new Hashtable<String, String>();
       hash.put("xVal", xStr);
       hash.put("yVal", yStr);
       hash.put("number", iStr);
-      yScaleList.addElement(hash);
+      yScaleList.add(hash);
     }
 
     double firstTranslateX, firstTranslateY, secondTranslateX, secondTranslateY;
@@ -358,9 +360,9 @@ public class SVGExporter extends FormExporter {
     context.put("verticalGridCoords", vertGridCoords);
     context.put("horizontalGridCoords", horizGridCoords);
 
-    Vector<Coordinate> newXYCoords = new Vector<Coordinate>();
+    List<Coordinate> newXYCoords = new ArrayList<Coordinate>();
     for (int i = startDataPointIndex; i <= endDataPointIndex; i++)
-      newXYCoords.addElement(xyCoords[i]);
+      newXYCoords.add(xyCoords[i]);
 
     double firstX, firstY, lastX;
     firstX=xyCoords[startDataPointIndex].getXVal();
@@ -513,8 +515,8 @@ public class SVGExporter extends FormExporter {
     String xStr, yStr;
 
     //Grid
-    Vector<HashMap<String, String>> vertGridCoords = new Vector<HashMap<String, String>>();
-    Vector<HashMap<String, String>> horizGridCoords = new Vector<HashMap<String, String>>();
+    List<Map<String, String>> vertGridCoords = new ArrayList<Map<String, String>>();
+    List<Map<String, String>> horizGridCoords = new ArrayList<Map<String, String>>();
 
     for (double i = minXOnScale; i < maxXOnScale + xStep / 2; i += xStep) {
       xPt = leftPlotArea + ((i - minXOnScale) * xScaleFactor);
@@ -522,11 +524,11 @@ public class SVGExporter extends FormExporter {
       xStr = formatter2.format(xPt);
       yStr = formatter2.format(yPt);
 
-      HashMap<String, String> hash = new HashMap<String, String>();
+      Map<String, String> hash = new Hashtable<String, String>();
       hash.put("xVal", xStr);
       hash.put("yVal", yStr);
 
-      vertGridCoords.addElement(hash);
+      vertGridCoords.add(hash);
     }
 
     for (double i = minYOnScale; i < maxYOnScale + yStep / 2; i += yStep) {
@@ -535,18 +537,18 @@ public class SVGExporter extends FormExporter {
       xStr = formatter2.format(xPt);
       yStr = formatter2.format(yPt);
 
-      HashMap<String, String> hash = new HashMap<String, String>();
+      Map<String, String> hash = new Hashtable<String, String>();
       hash.put("xVal", xStr);
       hash.put("yVal", yStr);
 
-      horizGridCoords.addElement(hash);
+      horizGridCoords.add(hash);
     }
 
     // Scale
 
-    Vector<HashMap<String, String>> xScaleList = new Vector<HashMap<String, String>>();
-    Vector<HashMap<String, String>> xScaleListReversed = new Vector<HashMap<String, String>>();
-    Vector<HashMap<String, String>> yScaleList = new Vector<HashMap<String, String>>();
+    List<Map<String, String>> xScaleList = new ArrayList<Map<String, String>>();
+    List<Map<String, String>> xScaleListReversed = new ArrayList<Map<String, String>>();
+    List<Map<String, String>> yScaleList = new ArrayList<Map<String, String>>();
 
     String hashX = "#";
     String hashY = "#";
@@ -572,11 +574,11 @@ public class SVGExporter extends FormExporter {
       yStr = formatter2.format(yPt);
       String iStr = displayXFormatter.format(i);
 
-      HashMap<String, String> hash = new HashMap<String, String>();
+      Map<String, String> hash = new Hashtable<String, String>();
       hash.put("xVal", xStr);
       hash.put("yVal", yStr);
       hash.put("number", iStr);
-      xScaleList.addElement(hash);
+      xScaleList.add(hash);
     }
 
     for (double i = minXOnScale, j = maxXOnScale; i < (maxXOnScale + xStep / 2); i += xStep, j -= xStep) {
@@ -587,11 +589,11 @@ public class SVGExporter extends FormExporter {
       yStr = formatter2.format(yPt);
       String iStr = displayXFormatter.format(i);
 
-      HashMap<String, String> hash = new HashMap<String, String>();
+      Map<String, String> hash = new Hashtable<String, String>();
       hash.put("xVal", xStr);
       hash.put("yVal", yStr);
       hash.put("number", iStr);
-      xScaleListReversed.addElement(hash);
+      xScaleListReversed.add(hash);
 
     }
 
@@ -603,11 +605,11 @@ public class SVGExporter extends FormExporter {
       yStr = formatter2.format(yPt);
       String iStr = displayYFormatter.format(i);
 
-      HashMap<String, String> hash = new HashMap<String, String>();
+      Map<String, String> hash = new Hashtable<String, String>();
       hash.put("xVal", xStr);
       hash.put("yVal", yStr);
       hash.put("number", iStr);
-      yScaleList.addElement(hash);
+      yScaleList.add(hash);
     }
 
     double firstTranslateX, firstTranslateY, secondTranslateX, secondTranslateY;
@@ -659,12 +661,12 @@ public class SVGExporter extends FormExporter {
     context.put("verticalGridCoords", vertGridCoords);
     context.put("horizontalGridCoords", horizGridCoords);
 
-    Vector<Vector<Coordinate>> newXYCoordsList = new Vector<Vector<Coordinate>>();
-    Vector<Coordinate> coords = new Vector<Coordinate>();
+    List<List<Coordinate>> newXYCoordsList = new ArrayList<List<Coordinate>>();
+    List<Coordinate> coords = new ArrayList<Coordinate>();
     for (int i = 0; i < xyCoordsList.length; i++) {
       for (int j = startDataPointIndices[i]; j <= endDataPointIndices[i]; j++)
-        coords.addElement(xyCoordsList[i][j]);
-      newXYCoordsList.addElement(coords);
+        coords.add(xyCoordsList[i][j]);
+      newXYCoordsList.add(coords);
     }
 
     context.put("overlaid", new Boolean(true));
