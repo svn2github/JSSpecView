@@ -84,11 +84,11 @@ public class WindowMenu extends JMenu {
 
       public void menuDeselected(MenuEvent e) {
         Component[] menuItems = getMenuComponents();
-        for (int i = 3; i < menuItems.length; i++) {
-          if (menuItems[i] instanceof JCheckBoxMenuItem) {
+        for (int i = menuItems.length; --i >= 0; )
+          if (menuItems[i] instanceof JCheckBoxMenuItem)
             remove(menuItems[i]);
-          }
-        }
+          else
+            break;
       }
 
       public void menuSelected(MenuEvent e) {

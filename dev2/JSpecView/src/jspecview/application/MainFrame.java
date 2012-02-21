@@ -257,8 +257,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private JLabel statusLabel = new JLabel();
 
   private JSVPanelPopupMenu jsvpPopupMenu = new JSVPanelPopupMenu();
-  private JMenuItem splitMenuItem = new JMenuItem();
-  private JMenuItem overlayMenuItem = new JMenuItem();
+  private JCheckBoxMenuItem splitMenuItem = new JCheckBoxMenuItem();
+  private JCheckBoxMenuItem overlayMenuItem = new JCheckBoxMenuItem();
   private DefaultMutableTreeNode rootNode;
   private DefaultTreeModel spectraTreeModel;
   private JMenuItem hideMenuItem = new JMenuItem();
@@ -1389,6 +1389,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the ActionEvent
    */
   protected void overlayMenuItem_actionPerformed(ActionEvent e) {
+    overlayMenuItem.setSelected(false);
     JDXSource source = currentSelectedSource;
     if (source == null) {
       return;
@@ -1426,7 +1427,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
    */
   private void overlaySpectra(JDXSource source)
       throws ScalesIncompatibleException {
-
+    overlayMenuItem.setSelected(true);
+    splitMenuItem.setSelected(false);
     String file = getFileForSource(source);
     List<JDXSpectrum> specs = source.getSpectra();
     JSVPanel jsvp;
@@ -1561,19 +1563,12 @@ public class MainFrame extends JFrame implements DropTargetListener,
    */
   protected void splitMenuItem_actionPerformed(ActionEvent e) {
     JDXSource source = currentSelectedSource;
-    if (!source.isCompoundSource) {
+    JSVPanel jsvp = getCurrentJSVPanel();
+    if (!source.isCompoundSource || jsvp == null || jsvp.getNumberOfSpectra() == 1) {
+      splitMenuItem.setSelected(false);
       return;
       // STATUS --> Can't Split
     }
-
-    JSVPanel jsvp = getCurrentJSVPanel();
-    if (jsvp == null)
-      return;
-
-    if (jsvp.getNumberOfSpectra() == 1) {
-      return;
-    }
-
     closeSource(source);
     splitSpectra(source);
   }
@@ -1586,6 +1581,9 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the <code>JDXSource</code>
    */
   private void splitSpectra(JDXSource source) {
+
+    overlayMenuItem.setSelected(false);
+    splitMenuItem.setSelected(true);
 
     String file = getFileForSource(source);
 
