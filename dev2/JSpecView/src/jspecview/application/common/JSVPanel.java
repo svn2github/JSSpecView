@@ -1203,7 +1203,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     plotAreaWidth = width - (plotAreaInsets.right + plotAreaInsets.left);
     plotAreaHeight = height - (plotAreaInsets.top + plotAreaInsets.bottom);
 
-    System.out.println(" "  + width + " " + height + " " + plotAreaWidth + " " + plotAreaHeight + " " + title);
+    ///System.out.println("JSVPANEL "  + width + " " + height + " " + plotAreaWidth + " " + plotAreaHeight + " " + title);
     
     leftPlotAreaPos = plotAreaX;
     rightPlotAreaPos = plotAreaWidth + plotAreaX;

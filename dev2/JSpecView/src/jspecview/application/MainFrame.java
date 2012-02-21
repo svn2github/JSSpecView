@@ -330,7 +330,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
         windowClosing_actionPerformed();
       }
     });
-
   }
 
   private void exitJSpecView(boolean withDialog) {
@@ -1823,6 +1822,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
     @Override
     public void internalFrameActivated(InternalFrameEvent e) {
       JInternalFrame frame = e.getInternalFrame();
+      if (!frame.isVisible())
+        return;
       setCurrentSource(source);
 
       // Update the menu items for the display menu
@@ -2701,7 +2702,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       frame.setSelected(true);
     } catch (PropertyVetoException pve) {
     }
-    if (fromTree)
+    if (fromTree && frame.isEnabled())
       sendFrameChange(specInfo.jsvp);
   }
 

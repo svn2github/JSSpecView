@@ -43,16 +43,23 @@ public class WindowMenu extends JMenu {
    */
   private static final long serialVersionUID = 1L;
     private ScrollableDesktopPane desktop;
+    private JMenuItem stack=new JMenuItem("Stack");
     private JMenuItem cascade=new JMenuItem("Cascade");
     private JMenuItem tile=new JMenuItem("Tile");
 
     public WindowMenu(ScrollableDesktopPane desktop) {
         this.desktop=desktop;
         setText("Window");
+        add(stack);
         add(cascade);
         add(tile);
 
         addSeparator();
+        stack.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent ae) {
+              WindowMenu.this.desktop.stackFrames();
+          }
+      });
         cascade.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 WindowMenu.this.desktop.cascadeFrames();
@@ -87,7 +94,7 @@ public class WindowMenu extends JMenu {
         ChildMenuItem menu;
         JInternalFrame[] array = desktop.getAllFrames();
 
-        //if (array.length > 0) addSeparator();
+        stack.setEnabled(array.length > 0);
         cascade.setEnabled(array.length > 0);
         tile.setEnabled(array.length > 0);
 

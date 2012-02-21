@@ -32,6 +32,7 @@ import javax.swing.JInternalFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JViewport;
 
+
 /**
  * An extension of JDesktopPane that supports often used MDI functionality. This
  * class also handles setting scroll bars for when windows move too far to the left or
@@ -40,9 +41,7 @@ import javax.swing.JViewport;
  * @author http://www.javaworld.com
  */
 public class ScrollableDesktopPane extends JDesktopPane {
-    /**
-   * 
-   */
+
   private static final long serialVersionUID = 1L;
     private static int FRAME_OFFSET=20;
     private MDIDesktopManager manager;
@@ -98,6 +97,20 @@ public class ScrollableDesktopPane extends JDesktopPane {
         super.remove(c);
         checkDesktopSize();
     }
+
+  public void stackFrames() {
+    manager.setNormalSize();
+    JInternalFrame allFrames[] = getAllFrames();
+    for (int i = allFrames.length - 1; i >= 0; i--) {
+      try {
+        allFrames[i].setEnabled(false);
+        allFrames[i].setMaximum(false); // also activates?
+        allFrames[i].setMaximum(true);
+        allFrames[i].setEnabled(true);
+      } catch (PropertyVetoException e) {
+      }
+    }    
+  }
 
     /**
      * Cascade all internal frames
@@ -172,6 +185,8 @@ public class ScrollableDesktopPane extends JDesktopPane {
           }
         }
       }
+      
+      
     }
 
     /*
@@ -236,6 +251,8 @@ class MDIDesktopManager extends DefaultDesktopManager {
             }
 
             d.setSize(d.getWidth() - 20, d.getHeight() - 20);
+            x = (int) d.getWidth();
+            y = (int) d.getHeight();
             desktop.setAllSize(x,y);
             scrollPane.invalidate();
             scrollPane.validate();
@@ -257,33 +274,38 @@ class MDIDesktopManager extends DefaultDesktopManager {
         return null;
     }
 
-    protected void resizeDesktop() {
-        int x = 0;
-        int y = 0;
-        JScrollPane scrollPane = getScrollPane();
-        Insets scrollInsets = getScrollPaneInsets();
+  protected void resizeDesktop() {
+    int x = 0;
+    int y = 0;
+    JScrollPane scrollPane = getScrollPane();
+    Insets scrollInsets = getScrollPaneInsets();
 
-        if (scrollPane != null) {
-            JInternalFrame allFrames[] = desktop.getAllFrames();
-            for (int i = 0; i < allFrames.length; i++) {
-                if (allFrames[i].getX()+allFrames[i].getWidth()>x) {
-                    x = allFrames[i].getX() + allFrames[i].getWidth();
-                }
-                if (allFrames[i].getY()+allFrames[i].getHeight()>y) {
-                    y = allFrames[i].getY() + allFrames[i].getHeight();
-                }
-            }
-            Dimension d=scrollPane.getVisibleRect().getSize();
-            if (scrollPane.getBorder() != null) {
-               d.setSize(d.getWidth() - scrollInsets.left - scrollInsets.right,
-                         d.getHeight() - scrollInsets.top - scrollInsets.bottom);
-            }
-
-            if (x <= d.getWidth()) x = ((int)d.getWidth()) - 20;
-            if (y <= d.getHeight()) y = ((int)d.getHeight()) - 20;
-            desktop.setAllSize(x,y);
-            scrollPane.invalidate();
-            scrollPane.validate();
+    if (scrollPane != null) {
+      Dimension d = scrollPane.getVisibleRect().getSize();
+      JInternalFrame allFrames[] = desktop.getAllFrames();
+      for (int i = 0; i < allFrames.length; i++) {
+        if (allFrames[i].getX() + allFrames[i].getWidth() > x) {
+          x = allFrames[i].getX() + allFrames[i].getWidth();
         }
+        if (allFrames[i].getY() + allFrames[i].getHeight() > y) {
+          y = allFrames[i].getY() + allFrames[i].getHeight();
+        }
+      }
+      if (scrollPane.getBorder() != null) {
+        d.setSize(d.getWidth() - scrollInsets.left - scrollInsets.right, d
+            .getHeight()
+            - scrollInsets.top - scrollInsets.bottom);
+      }
+
+      if (x != d.getWidth())
+        x = ((int) d.getWidth()) - 20;
+      if (y != d.getHeight())
+        y = ((int) d.getHeight()) - 20;
+      desktop.setAllSize(x, y);
+      scrollPane.invalidate();
+      scrollPane.validate();
     }
+  }
+    
+
 }
