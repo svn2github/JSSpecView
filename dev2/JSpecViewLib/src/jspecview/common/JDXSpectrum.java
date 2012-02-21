@@ -431,22 +431,17 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     if (tabularSpecData == null)
       throw new JSpecViewException("Error Reading Data Set");
 
-    if (dataClass.equals("PEAKASSIGNMENTS")) {
-      continuous = false;
+    if (dataClass.equals("PEAKASSIGNMENTS"))
       return true;
-    }
 
     setHeaderTable(table);
 
     if (dataClass.equals("XYDATA")) {
-
-      checkRequiredTokens();
-      
+      checkRequiredTokens();      
       decompressData(tabularSpecData, tabDataLineNo, errorLog);
       return true;
     }
     if (dataClass.equals("PEAKTABLE") || dataClass.equals("XYPOINTS")) {
-      continuous = false;
       // check if there is an x and y factor
       if (xFactor != ERROR && yFactor != ERROR)
         xyCoords = JSpecViewUtils.parseDSV(tabularSpecData, xFactor, yFactor);
@@ -463,17 +458,14 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
 
   public String getTabularData(String label, String value)
       throws JSpecViewException {
-    continuous = false;
-    if (label.equals("##PEAKASSIGNMENTS")) {
+    if (label.equals("##PEAKASSIGNMENTS"))
       setDataClass("PEAKASSIGNMENTS");
-    } else if (label.equals("##PEAKTABLE")) {
+    else if (label.equals("##PEAKTABLE"))
       setDataClass("PEAKTABLE");
-    } else if (label.equals("##XYDATA")) {
+    else if (label.equals("##XYDATA"))
       setDataClass("XYDATA");
-      continuous = true;
-    } else if (label.equals("##XYPOINTS")) {
+    else if (label.equals("##XYPOINTS"))
       setDataClass("XYPOINTS");
-    }
     // Get CoordData
     String tmp = value;
     try {
@@ -523,7 +515,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
       return true;
     }
     if (dataClass.equals("PEAKTABLE") || dataClass.equals("XYPOINTS")) {
-      continuous = false;
       list = (ArrayList<String>) nTupleTable.get("##SYMBOL");
       int index1 = list.indexOf(plotSymbols[0]);
       int index2 = list.indexOf(plotSymbols[1]);
@@ -540,10 +531,11 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   private void decompressData(String tabularSpecData, int tabDataLineNo,
                               StringBuffer errorLog) {
 
+    
     int errPt = errorLog.length();
     double fileDeltaX = JSpecViewUtils.deltaX(fileLastX, fileFirstX, nPointsFile);
     increasing = (fileDeltaX > 0);
-
+    continuous = true;
     JDXDecompressor decompressor = new JDXDecompressor(tabularSpecData,
         fileFirstX, xFactor, yFactor, fileDeltaX, nPointsFile, tabDataLineNo);
 
@@ -634,7 +626,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   }
  
   private boolean increasing = true;
-  private boolean continuous = true;
+  private boolean continuous;
 
 
   /**
