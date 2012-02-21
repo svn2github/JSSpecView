@@ -36,6 +36,7 @@
 //                  but there will still be a problem if an attempt is made to
 //                  write out a new scheme under these circumstances!
 // 23-07-2011 jak - altered code to support drawing scales and units separately
+// 21-02-2012 rmh - lots of additions  -  integrated into Jmol
 
 package jspecview.application;
 
@@ -121,6 +122,7 @@ import jspecview.application.common.OverlayLegendDialog;
 import jspecview.application.common.PeakPickedEvent;
 import jspecview.application.common.PeakPickedListener;
 import jspecview.application.common.PrintLayoutDialog;
+import jspecview.application.common.ScriptParser;
 import jspecview.common.Coordinate;
 import jspecview.common.Graph;
 import jspecview.common.JDXSpectrum;
@@ -1741,13 +1743,9 @@ public class MainFrame extends JFrame implements DropTargetListener,
     if (jsvp == null)
       return;
 
-    if (e.getStateChange() == ItemEvent.SELECTED) {
-      jsvp.setXScaleOn(true);
-      jsvp.setXUnitsOn(true);
-    } else {
-      jsvp.setXScaleOn(false);
-      jsvp.setYUnitsOn(false);
-    }
+    jsvp.setXScaleOn(e.getStateChange() == ItemEvent.SELECTED);
+    jsvp.setXUnitsOn(e.getStateChange() == ItemEvent.SELECTED);
+
     repaint();
   }
 
@@ -1762,12 +1760,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     JSVPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
-
-    if (e.getStateChange() == ItemEvent.SELECTED) {
-      jsvp.setYScaleOn(true);
-    } else {
-      jsvp.setYScaleOn(false);
-    }
+    jsvp.setYScaleOn(e.getStateChange() == ItemEvent.SELECTED);
     repaint();
   }
 
@@ -2443,8 +2436,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the ActionEvent
    */
   protected void transAbsMenuItem_actionPerformed(ActionEvent e) {
-    JInternalFrame frame = desktopPane.getSelectedFrame();
-    TAConvert(frame, IMPLIED);
+    TAConvert(null, IMPLIED);
   }
 
   /**
@@ -2493,6 +2485,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the conversion command
    */
   private void TAConvert(JInternalFrame frame, int comm) {
+    if (frame == null)
+      frame = desktopPane.getSelectedFrame();
     if (frame == null) {
       return;
     }
@@ -2659,15 +2653,173 @@ public class MainFrame extends JFrame implements DropTargetListener,
     sendFrameChange(selectedJSVPanel);
   }
 
-  private void checkScript(String script) {
-    script = script.toUpperCase();
-    System.out.println(script);
-    if (script.equals("DEBUG ON")) {
-      JSpecViewUtils.DEBUG = true;
-    } else if (script.equals("DEBUG OFF")) {
-      JSpecViewUtils.DEBUG = false;
+  private void checkScript(String params) {
+    if (params == null)
+      params = "";
+    params = params.trim();
+    System.out.println("CHECKSCRIPT " + params);
+    StringTokenizer allParamTokens = new StringTokenizer(params, ";");
+    if (JSpecViewUtils.DEBUG) {
+      System.out.println("Running in DEBUG mode");
     }
+    while (allParamTokens.hasMoreTokens()) {
+      String token = allParamTokens.nextToken();
+      // now split the key/value pair
+      StringTokenizer eachParam = new StringTokenizer(token);
 
+      String key = eachParam.nextToken();
+      if (key.equalsIgnoreCase("SET"))
+        key = eachParam.nextToken();
+      key = key.toUpperCase();
+      String value = eachParam.nextToken();
+
+      Integer iparam = ScriptParser.htParams.get(key);
+      System.out.println("KEY-> " + key + " VALUE-> " + value + " : " + iparam);
+      JSVPanel jsvp = getCurrentJSVPanel();
+      if (jsvp == null && iparam != ScriptParser.PARAM_LOAD)
+        return;
+      try {
+        switch (iparam == null ? -1 : iparam.intValue()) {
+        case -1:
+          System.out.println("Unrecognized parameter: " + key);
+          break;
+        case ScriptParser.PARAM_LOAD:
+          openFile(value);
+          break;
+        case ScriptParser.PARAM_REVERSEPLOT:
+          jsvp.setReversePlot(Boolean.parseBoolean(value));
+          break;
+        case ScriptParser.PARAM_COORDINATESON:
+          setCoordinatesOn(jsvp, Boolean.parseBoolean(value));
+          break;
+        case ScriptParser.PARAM_GRIDON:
+          jsvp.setGridOn(Boolean.parseBoolean(value));
+          break;
+        case ScriptParser.PARAM_SYNCID:
+        case ScriptParser.PARAM_APPLETID:
+        case ScriptParser.PARAM_SYNCCALLBACKFUNCTIONNAME:
+        case ScriptParser.PARAM_APPLETREADYCALLBACKFUNCTIONNAME:
+        case ScriptParser.PARAM_COORDCALLBACKFUNCTIONNAME:
+          break;
+        case ScriptParser.PARAM_SPECTRUMNUMBER:
+          int ispec = Integer.parseInt(value);
+          if (ispec >= 0 || ispec < specInfos.length)
+            setFrame(specInfos[ispec], false);            
+          break;
+        case ScriptParser.PARAM_INTERFACE:
+          if (value.equalsIgnoreCase("stack"))
+            desktopPane.stackFrames();
+          else if (value.equalsIgnoreCase("cascade"))
+            desktopPane.cascadeFrames();
+          else if(value.equalsIgnoreCase("tile"))
+            desktopPane.tileFrames();            
+          break;
+        case ScriptParser.PARAM_ENDINDEX:
+          //endIndex = Integer.parseInt(value);
+          break;
+        case ScriptParser.PARAM_ENABLEZOOM:
+          //enableZoom = Boolean.parseBoolean(value);
+          break;
+        case ScriptParser.PARAM_STARTINDEX:
+          //startIndex = Integer.parseInt(value);
+          break;
+        case ScriptParser.PARAM_MENUON:
+          //menuOn = Boolean.parseBoolean(value);
+          break;
+        case ScriptParser.PARAM_COMPOUNDMENUON:
+          //compoundMenuOn2 = Boolean.parseBoolean(value);
+          break;
+        case ScriptParser.PARAM_BACKGROUNDCOLOR:
+          jsvp.setBackground(AppUtils.getColorFromString(value));
+          break;
+        case ScriptParser.PARAM_COORDINATESCOLOR:
+          jsvp.setcoordinatesColor(AppUtils.getColorFromString(value));
+          break;
+        case ScriptParser.PARAM_GRIDCOLOR:
+          jsvp.setGridColor(AppUtils.getColorFromString(value));
+          break;
+        case ScriptParser.PARAM_PLOTAREACOLOR:
+          jsvp.setPlotAreaColor(AppUtils.getColorFromString(value));
+          break;
+        case ScriptParser.PARAM_PLOTCOLOR:
+          jsvp.setPlotColor(AppUtils.getColorFromString(value));
+          break;
+        case ScriptParser.PARAM_SCALECOLOR:
+          jsvp.setScaleColor(AppUtils.getColorFromString(value));
+          break;
+        case ScriptParser.PARAM_TITLECOLOR:
+          jsvp.setTitleColor(AppUtils.getColorFromString(value));
+          break;
+        case ScriptParser.PARAM_UNITSCOLOR:
+          jsvp.setUnitsColor(AppUtils.getColorFromString(value));
+          break;
+        case ScriptParser.PARAM_PEAKCALLBACKFUNCTIONNAME:
+          break;
+        case ScriptParser.PARAM_PLOTCOLORS:
+          //plotColorsStr = value;
+          break;
+        case ScriptParser.PARAM_VERSION:
+          break;
+        case ScriptParser.PARAM_IRMODE:
+          if (value.toUpperCase().startsWith("T"))
+            TAConvert(null, TO_TRANS);
+          else if (value.toUpperCase().startsWith("A"))
+            TAConvert(null, TO_ABS);
+          break;
+        case ScriptParser.PARAM_OBSCURE:
+          //obscure = Boolean.parseBoolean(value);
+          //JSpecViewUtils.setObscure(obscure);
+          break;
+        case ScriptParser.PARAM_XSCALEON:
+          jsvp.setXScaleOn(Boolean.parseBoolean(value));
+          break;
+        case ScriptParser.PARAM_YSCALEON:
+          jsvp.setYScaleOn(Boolean.parseBoolean(value));
+          break;
+        case ScriptParser.PARAM_XUNITSON:
+          jsvp.setXUnitsOn(Boolean.parseBoolean(value));
+          break;
+        case ScriptParser.PARAM_YUNITSON:
+          jsvp.setYUnitsOn(Boolean.parseBoolean(value));
+          break;
+        case ScriptParser.PARAM_INTEGRALPLOTCOLOR:
+          jsvp.setIntegralPlotColor(AppUtils.getColorFromString(value));
+          break;
+        case ScriptParser.PARAM_TITLEFONTNAME:
+//          GraphicsEnvironment g = GraphicsEnvironment
+//              .getLocalGraphicsEnvironment();
+//          List<String> fontList = Arrays
+//              .asList(g.getAvailableFontFamilyNames());
+//          for (String s : fontList)
+//            if (value.equalsIgnoreCase(s)) {
+//              titleFontName = value;
+//              break;
+//            }
+          break;
+        case ScriptParser.PARAM_TITLEBOLDON:
+//          titleBoldOn = Boolean.parseBoolean(value);
+          break;
+        case ScriptParser.PARAM_DISPLAYFONTNAME:
+//          GraphicsEnvironment g2 = GraphicsEnvironment
+//              .getLocalGraphicsEnvironment();
+//          List<String> fontList2 = Arrays.asList(g2
+//              .getAvailableFontFamilyNames());
+//          for (String s2 : fontList2)
+//            if (value.equalsIgnoreCase(s2)) {
+//              displayFontName = value;
+//              break;
+//            }
+          break;
+        case ScriptParser.PARAM_INTEGRATIONRATIOS:
+          // parse the string with a method in JSpecViewUtils
+          // integrationRatios = JSpecViewUtils
+            //  .getIntegrationRatiosFromString(value);
+          break;
+        }
+      } catch (Exception e) {
+      }
+    }
+    repaint();
   }
 
   private boolean selectPanel(String index) {
@@ -2678,7 +2830,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
         return true;
       }
     }
-    // TODO how to do this?  IR, HNMR, 13CNMR, MS, etc. 
     return false;
   }
 
@@ -2758,11 +2909,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     JSVPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
-    if (((JToggleButton) e.getSource()).isSelected()) {
-      jsvp.setGridOn(true);
-    } else {
-      jsvp.setGridOn(false);
-    }
+    jsvp.setGridOn(((JToggleButton) e.getSource()).isSelected());
     repaint();
   }
 
@@ -2776,15 +2923,13 @@ public class MainFrame extends JFrame implements DropTargetListener,
     JSVPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
-    if (((JToggleButton) e.getSource()).isSelected()) {
-      jsvp.setCoordinatesOn(true);
-      coordinatesOn = true;
-    } else {
-      jsvp.setCoordinatesOn(false);
-      coordinatesOn = false;
-    }
-
+    setCoordinatesOn(jsvp, ((JToggleButton) e.getSource()).isSelected());
     repaint();
+  }
+
+  private void setCoordinatesOn(JSVPanel jsvp, boolean selected) {
+    coordinatesOn = selected;
+    jsvp.setCoordinatesOn(selected);
   }
 
   /**
@@ -2797,11 +2942,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     JSVPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
-    if (((JToggleButton) e.getSource()).isSelected()) {
-      jsvp.setReversePlot(true);
-    } else {
-      jsvp.setReversePlot(false);
-    }
+    jsvp.setReversePlot(((JToggleButton) e.getSource()).isSelected());
     repaint();
   }
 
