@@ -431,8 +431,10 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     if (tabularSpecData == null)
       throw new JSpecViewException("Error Reading Data Set");
 
-    if (dataClass.equals("PEAKASSIGNMENTS"))
+    if (dataClass.equals("PEAKASSIGNMENTS")) {
+      continuous = false;
       return true;
+    }
 
     setHeaderTable(table);
 
@@ -444,8 +446,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
       return true;
     }
     if (dataClass.equals("PEAKTABLE") || dataClass.equals("XYPOINTS")) {
-      if (dataClass.equals("PEAKTABLE"))
-        continuous = false;
+      continuous = false;
       // check if there is an x and y factor
       if (xFactor != ERROR && yFactor != ERROR)
         xyCoords = JSpecViewUtils.parseDSV(tabularSpecData, xFactor, yFactor);
@@ -462,16 +463,17 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
 
   public String getTabularData(String label, String value)
       throws JSpecViewException {
-
-    if (label.equals("##PEAKASSIGNMENTS"))
+    continuous = false;
+    if (label.equals("##PEAKASSIGNMENTS")) {
       setDataClass("PEAKASSIGNMENTS");
-    else if (label.equals("##PEAKTABLE"))
+    } else if (label.equals("##PEAKTABLE")) {
       setDataClass("PEAKTABLE");
-    else if (label.equals("##XYDATA"))
+    } else if (label.equals("##XYDATA")) {
       setDataClass("XYDATA");
-    else if (label.equals("##XYPOINTS"))
+      continuous = true;
+    } else if (label.equals("##XYPOINTS")) {
       setDataClass("XYPOINTS");
-
+    }
     // Get CoordData
     String tmp = value;
     try {
@@ -521,8 +523,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
       return true;
     }
     if (dataClass.equals("PEAKTABLE") || dataClass.equals("XYPOINTS")) {
-      if (dataClass.equals("PEAKTABLE"))
-        continuous = false;
+      continuous = false;
       list = (ArrayList<String>) nTupleTable.get("##SYMBOL");
       int index1 = list.indexOf(plotSymbols[0]);
       int index2 = list.indexOf(plotSymbols[1]);
