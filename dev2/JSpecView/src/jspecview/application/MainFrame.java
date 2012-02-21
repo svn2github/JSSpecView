@@ -1323,10 +1323,10 @@ public class MainFrame extends JFrame implements DropTargetListener,
     // if a Peak Table is the current spectrum, disable the menu.
     // need to check for XYPOINTS as well since not continuous either.... RL
     boolean continuous = spec.isContinuous();
-    saveAsJDXMenu.setEnabled(continuous);
+    boolean isAbsTrans = (spec.isAbsorbance() || spec.isTransmittance());
+    saveAsJDXMenu.setEnabled(spec.getDataClass().equals("XYDATA"));
     integrateMenuItem.setEnabled(spec.isHNMR() && continuous);
     //  Can only convert from T <-> A  if Absorbance or Transmittance and continuous
-    boolean isAbsTrans = (spec.isAbsorbance() || spec.isTransmittance());
     transAbsMenuItem.setEnabled(continuous && isAbsTrans);
     Coordinate xyCoords[] = spec.getXYCoords();
     String Xunits = spec.getXUnits().toLowerCase();
