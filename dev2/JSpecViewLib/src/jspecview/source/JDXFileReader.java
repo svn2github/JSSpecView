@@ -28,8 +28,9 @@ import java.io.StringReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
@@ -335,7 +336,7 @@ public class JDXFileReader {
     String tabularSpecData = null;
     int tabDataLineNo = 0;
 
-    HashMap<String, ArrayList<String>> nTupleTable = new HashMap<String, ArrayList<String>>();
+    Map<String, ArrayList<String>> nTupleTable = new Hashtable<String, ArrayList<String>>();
     String[] plotSymbols = new String[2];
 
     boolean isNew = (source.type == JDXSource.TYPE_SIMPLE);
@@ -404,7 +405,7 @@ public class JDXFileReader {
             .get("##SYMBOL");
         int countSyms = 0;
         for (int i = 0; i < symbols.size(); i++) {
-          String sym = ((String) symbols.get(i)).trim();
+          String sym = symbols.get(i).trim();
           if (varList.indexOf(sym) != -1) {
             plotSymbols[countSyms++] = sym;
           }

@@ -19,11 +19,6 @@
 
 package jspecview.source;
 
-//import java.util.Iterator;
-//import javax.xml.namespace.QName;
-//import javax.xml.stream.*;
-//import javax.xml.stream.events.* ;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;

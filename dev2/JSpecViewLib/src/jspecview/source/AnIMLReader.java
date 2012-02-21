@@ -146,7 +146,7 @@ class AnIMLReader extends XMLReader {
 
   private void processExperimentStepSet() throws Exception {
     if (tagName.equals("sampleref")) {
-      if (reader.getFullAttribute("role").contains("samplemeasurement"))
+      if (reader.getAttrValueLC("role").contains("samplemeasurement"))
         sampleID = reader.getAttrValue("sampleID");
     } else if (tagName.equals("author")) {
       process(AML_AUTHOR, true);

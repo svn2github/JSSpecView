@@ -24,7 +24,7 @@ import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 import java.util.Vector;
 
@@ -482,7 +482,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return tmp;
   }
 
-  public boolean createXYCoords(HashMap<String, ArrayList<String>> nTupleTable,
+  public boolean createXYCoords(Map<String, ArrayList<String>> nTupleTable,
                                 String[] plotSymbols, String dataType,
                                 String tabularSpecData, int tabDataLineNo,
                                 StringBuffer errorLog) {
@@ -490,40 +490,40 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     if (dataClass.equals("XYDATA")) {
       // Get Label Values
 
-      list = (ArrayList<String>) nTupleTable.get("##SYMBOL");
+      list = nTupleTable.get("##SYMBOL");
       int index1 = list.indexOf(plotSymbols[0]);
       int index2 = list.indexOf(plotSymbols[1]);
 
-      list = (ArrayList<String>) nTupleTable.get("##FACTOR");
-      xFactor = Double.parseDouble((String) list.get(index1));
-      yFactor = Double.parseDouble((String) list.get(index2));
+      list = nTupleTable.get("##FACTOR");
+      xFactor = Double.parseDouble(list.get(index1));
+      yFactor = Double.parseDouble(list.get(index2));
 
-      list = (ArrayList<String>) nTupleTable.get("##LAST");
-      fileLastX = Double.parseDouble((String) list.get(index1));
+      list = nTupleTable.get("##LAST");
+      fileLastX = Double.parseDouble(list.get(index1));
 
-      list = (ArrayList<String>) nTupleTable.get("##FIRST");
-      fileFirstX = Double.parseDouble((String) list.get(index1));
+      list = nTupleTable.get("##FIRST");
+      fileFirstX = Double.parseDouble(list.get(index1));
       //firstY = Double.parseDouble((String)list.get(index2));
 
-      list = (ArrayList<String>) nTupleTable.get("##VARDIM");
-      nPointsFile = Integer.parseInt((String) list.get(index1));
+      list = nTupleTable.get("##VARDIM");
+      nPointsFile = Integer.parseInt(list.get(index1));
 
-      list = (ArrayList<String>) nTupleTable.get("##UNITS");
-      xUnits = (String) list.get(index1);
-      yUnits = (String) list.get(index2);
+      list = nTupleTable.get("##UNITS");
+      xUnits = list.get(index1);
+      yUnits = list.get(index2);
 
       decompressData(tabularSpecData, tabDataLineNo, errorLog);
       return true;
     }
     if (dataClass.equals("PEAKTABLE") || dataClass.equals("XYPOINTS")) {
       continuous = dataClass.equals("XYPOINTS");
-      list = (ArrayList<String>) nTupleTable.get("##SYMBOL");
+      list = nTupleTable.get("##SYMBOL");
       int index1 = list.indexOf(plotSymbols[0]);
       int index2 = list.indexOf(plotSymbols[1]);
 
-      list = (ArrayList<String>) nTupleTable.get("##UNITS");
-      xUnits = (String) list.get(index1);
-      yUnits = (String) list.get(index2);
+      list = nTupleTable.get("##UNITS");
+      xUnits = list.get(index1);
+      yUnits = list.get(index2);
       xyCoords = JSpecViewUtils.parseDSV(tabularSpecData, xFactor, yFactor);
       return true;
     }

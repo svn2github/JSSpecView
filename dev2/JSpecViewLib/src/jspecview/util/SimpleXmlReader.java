@@ -127,18 +127,9 @@ public class SimpleXmlReader {
     return getAttrValue(key).toLowerCase();
   }
 
-  public Attribute getAttr(String name) {
-    return thisEvent.getAttributeByName(name);
-  }
-
   public String getAttrValue(String name) {
-    Attribute a = getAttr(name);
-    return (a == null ? "" : a.getValue());
-  }
-
-  public String getFullAttribute(String name) {
-    Attribute a = getAttr(name);
-    return (a == null ? "" : a.toString().toLowerCase());
+    String a = thisEvent.getAttributeByName(name);
+    return (a == null ? "" : a);
   }
 
   public String getCharacters() throws IOException {
@@ -158,7 +149,7 @@ public class SimpleXmlReader {
   }
 
 
-  class Buffer extends DataString {
+  private class Buffer extends DataString {
 
     Buffer(InputStream in) {
       reader = new BufferedReader(new InputStreamReader(in));
@@ -213,7 +204,7 @@ public class SimpleXmlReader {
 
   }
 
-  class DataString {
+  private class DataString {
 
     StringBuffer data;
     protected BufferedReader reader;
@@ -289,12 +280,12 @@ public class SimpleXmlReader {
     }
   }
 
-  class XmlEvent {
+  private class XmlEvent {
 
-    int eventType = TAG_NONE;
-    int ptr = 0;
-    Tag tag;
-    String data;
+    private int eventType = TAG_NONE;
+    private int ptr = 0;
+    private Tag tag;
+    private String data;
 
     @Override
     public String toString() {
@@ -328,10 +319,6 @@ public class SimpleXmlReader {
       return eventType;
     }
 
-    boolean isEndElement() {
-      return (eventType & END_ELEMENT) != 0;
-    }
-
     boolean isStartElement() {
       return (eventType & START_ELEMENT) != 0;
     }
@@ -344,17 +331,7 @@ public class SimpleXmlReader {
       return (tag == null ? TAG_NONE : tag.tagType);
     }
 
-    public String getFullAttribute(String name) {
-      Attribute a = getAttributeByName(name);
-      return (a == null ? "" : a.toString().toLowerCase());
-    }
-
-    public String getAttrValue(String name) {
-      Attribute a = getAttributeByName(name);
-      return (a == null ? "" : a.getValue());
-    }
-
-    public Attribute getAttributeByName(String name) {
+    public String getAttributeByName(String name) {
       return (tag == null ? null : tag.getAttributeByName(name));
     }
 
@@ -364,7 +341,7 @@ public class SimpleXmlReader {
     int tagType;
     String name;
     String text;
-    private Hashtable<String, Object> attributes;
+    private Hashtable<String, String> attributes;
 
     Tag() {
       //System.out.println("tag");
@@ -390,14 +367,14 @@ public class SimpleXmlReader {
       return name = text.substring(pt0, ptTemp).toLowerCase().trim();
     }
 
-    Attribute getAttributeByName(String attrName) {
+    String getAttributeByName(String attrName) {
       if (attributes == null)
         getAttributes();
-      return (Attribute) attributes.get(attrName.toLowerCase());
+      return attributes.get(attrName.toLowerCase());
     }
 
     private void getAttributes() {
-      attributes = new Hashtable<String, Object>();
+      attributes = new Hashtable<String, String>();
       DataString d = new DataString(
           new StringBuffer(text));
       try {
@@ -412,11 +389,11 @@ public class SimpleXmlReader {
           pt0 = ++d.ptr;
           d.skipTo('"', true);
           String attr = d.substring(pt0, d.ptr);
-          attributes.put(name, new Attribute(name, attr));
+          attributes.put(name, attr);
           int pt1 = name.indexOf(":");
           if (pt1 >= 0) {
             name = name.substring(pt1).trim();
-            attributes.put(name, new Attribute(name, attr));
+            attributes.put(name, attr);
           }
 
         }
@@ -425,24 +402,5 @@ public class SimpleXmlReader {
       }
     }
 
-  }
-
-
-  class Attribute {
-    String name;
-    String value;
-
-    Attribute(String name, String value) {
-      this.name = name;
-      this.value = value;
-    }
-
-    String getName() {
-      return name;
-    }
-
-    String getValue() {
-      return value;
-    }
   }
 }
