@@ -20,7 +20,7 @@
 package jspecview.source;
 
 import java.util.ArrayList;
-import java.util.Vector;
+import java.util.List;
 
 import jspecview.common.JDXHeader;
 import jspecview.common.JDXSpectrum;
@@ -47,14 +47,14 @@ public class JDXSource extends JDXHeader {
   public boolean isCompoundSource = false;
   
   // List of JDXSpectra
-  protected Vector<JDXSpectrum> jdxSpectra;
+  protected List<JDXSpectrum> jdxSpectra;
 
   public int peakCount;
   
   public JDXSource(int type) {
     this.type = type;
     headerTable = new ArrayList<String[]>();
-    jdxSpectra = new Vector<JDXSpectrum>();
+    jdxSpectra = new ArrayList<JDXSpectrum>();
     isCompoundSource = (type != TYPE_SIMPLE);
   }
 
@@ -76,7 +76,7 @@ public class JDXSource extends JDXHeader {
    *        the spectrum to be added
    */
   public void addJDXSpectrum(JDXSpectrum spectrum) {
-    jdxSpectra.addElement(spectrum);
+    jdxSpectra.add(spectrum);
   }
 
   /**
@@ -93,7 +93,7 @@ public class JDXSource extends JDXHeader {
    * 
    * @return the Vector of Spectra
    */
-  public Vector<JDXSpectrum> getSpectra() {
+  public List<JDXSpectrum> getSpectra() {
     return jdxSpectra;
   }
 
@@ -119,5 +119,14 @@ public class JDXSource extends JDXHeader {
     this.errors = errors;
   }
 
+  private String filePath;
+  
+  public void setFilePath(String filePath) {
+    this.filePath = filePath;
+  }
+  
+  public String getFilePath() {
+    return filePath;
+  }
 
 }
