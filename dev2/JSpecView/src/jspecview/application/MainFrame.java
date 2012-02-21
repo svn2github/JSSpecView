@@ -1311,11 +1311,12 @@ public class MainFrame extends JFrame implements DropTargetListener,
       printMenuItem.setEnabled(false);
       sourceMenuItem.setEnabled(false);
       errorLogMenuItem.setEnabled(false);
+      saveAsMenu.setEnabled(false);
       return;
     }
 
-    saveAsMenu.setEnabled(true);
     exportAsMenu.setEnabled(true);
+    saveAsMenu.setEnabled(true);
 
     //    jsvp.setZoomEnabled(true);
     // update availability of Exporting JCAMP-DX file so that
@@ -1457,7 +1458,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     }
     frame.show();
     specInfos = new SpecInfo[] { new SpecInfo(frame, jsvp) };
-    createTree(file);
+    createTree(file, frame);
     validate();
     repaint();
 
@@ -1595,18 +1596,16 @@ public class MainFrame extends JFrame implements DropTargetListener,
     List<JDXSpectrum> specs = source.getSpectra();
     //JSVPanel[] panels = new JSVPanel[specs.size()];
     JInternalFrame[] frames = new JInternalFrame[specs.size()];
-    JSVPanel jsvp;
-    JInternalFrame frame;
     specInfos = new SpecInfo[specs.size()];
     try {
       for (int i = 0; i < specs.size(); i++) {
         JDXSpectrum spec = specs.get(i);
-        jsvp = new JSVPanel(spec);
+        JSVPanel jsvp = new JSVPanel(spec);
         jsvp.setIndex(i);
         jsvp.addPeakPickedListener(this);
         setJSVPanelProperties(jsvp, true);
 
-        frame = new JInternalFrame(spec.getTitleLabel(), true, true, true, true);
+        JInternalFrame frame = new JInternalFrame(spec.getTitleLabel(), true, true, true, true);
         specInfos[i] = new SpecInfo(frame, jsvp);
 
         frame.setFrameIcon(frameIcon);
@@ -1643,7 +1642,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       }
       setFrame(specInfos[0], false);
 
-      createTree(file);
+      createTree(file, frames[0]);
 
       overlaySplitButton.setIcon(overlayIcon);
       overlaySplitButton.setToolTipText("Overlay Display");
@@ -1656,13 +1655,14 @@ public class MainFrame extends JFrame implements DropTargetListener,
    * Adds the <code>JDXSource</code> info specified by the
    * <code>fileName<code> to
    * the tree model for the side panel.
+   * @param frame 
    * 
    * @param fileName
    *        the name of the file
    * @param frames
    *        an array of JInternalFrames
    */
-  public void createTree(String file) {
+  public void createTree(String file, JInternalFrame frame) {
     String fileName = FileManager.getName(file);
     DefaultMutableTreeNode fileNode = new JSVTreeNode(fileName, file);
     spectraTreeModel.insertNodeInto(fileNode, rootNode, fileNode
@@ -1677,6 +1677,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
       spectraTreeModel.insertNodeInto(specNode, fileNode, fileNode
           .getChildCount());
       spectraTree.scrollPathToVisible(new TreePath(specNode.getPath()));
+      
+      selectFrameNode(frame);
     }
 
   }
@@ -1854,10 +1856,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       closeMenuItem.setText("Close " + FileManager.getName(file));
       setTitle("JSpecView - " + file);
 
-      // Find Node in SpectraTree and select it
-      DefaultMutableTreeNode node = getNodeForInternalFrame(frame, rootNode);
-      if (node != null)
-        spectraTree.setSelectionPath(new TreePath(node.getPath()));
+      selectFrameNode(frame);
     }
 
     /**
@@ -1884,38 +1883,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
       spectraTree.validate();
       spectraTree.repaint();
-    }
-
-    /**
-     * Returns the tree node that is associated with an internal frame
-     * 
-     * @param frame
-     *        the JInternalFrame
-     * @param parent
-     *        the parent node
-     * @return the tree node that is associated with an internal frame
-     */
-    @SuppressWarnings("unchecked")
-    public DefaultMutableTreeNode getNodeForInternalFrame(
-                                                          JInternalFrame frame,
-                                                          DefaultMutableTreeNode parent) {
-      Enumeration<DefaultMutableTreeNode> enume = parent.breadthFirstEnumeration();
-
-      while (enume.hasMoreElements()) {
-        DefaultMutableTreeNode node = enume.nextElement();
-        if (node.isLeaf()) {
-          Object nodeInfo = node.getUserObject();
-          if (nodeInfo instanceof SpecInfo) {
-            if (((SpecInfo) nodeInfo).frame == frame) {
-              return node;
-            }
-          }
-        } else {
-          continue;
-        }
-      }
-
-      return null;
     }
   }
 
@@ -1978,6 +1945,46 @@ public class MainFrame extends JFrame implements DropTargetListener,
     JOptionPane.showMessageDialog(this, "Not Yet Implemented",
         "Not Yet Implemented", JOptionPane.INFORMATION_MESSAGE);
   }
+
+  public void selectFrameNode(JInternalFrame frame) {
+    // Find Node in SpectraTree and select it
+    DefaultMutableTreeNode node = getNodeForInternalFrame(frame, rootNode);
+    if (node != null)
+      spectraTree.setSelectionPath(new TreePath(node.getPath()));
+  }
+  
+  /**
+   * Returns the tree node that is associated with an internal frame
+   * 
+   * @param frame
+   *        the JInternalFrame
+   * @param parent
+   *        the parent node
+   * @return the tree node that is associated with an internal frame
+   */
+  @SuppressWarnings("unchecked")
+  private DefaultMutableTreeNode getNodeForInternalFrame(
+                                                        JInternalFrame frame,
+                                                        DefaultMutableTreeNode parent) {
+    Enumeration<DefaultMutableTreeNode> enume = parent.breadthFirstEnumeration();
+
+    while (enume.hasMoreElements()) {
+      DefaultMutableTreeNode node = enume.nextElement();
+      if (node.isLeaf()) {
+        Object nodeInfo = node.getUserObject();
+        if (nodeInfo instanceof SpecInfo) {
+          if (((SpecInfo) nodeInfo).frame == frame) {
+            return node;
+          }
+        }
+      } else {
+        continue;
+      }
+    }
+
+    return null;
+  }
+
 
   /**
    * Returns the name of the file associated with a JDXSource
