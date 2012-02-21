@@ -9,14 +9,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Vector;
+import java.util.List;
 
 
 import jspecview.android.R;
 import jspecview.android.PreferencesManager;
-import jspecview.android.externalservice.ChemSpiderSvcClient;
-import jspecview.android.externalservice.ISpectrumSvc;
-import jspecview.android.externalservice.SpectrumSvcException;
 import jspecview.common.Coordinate;
 import jspecview.common.IntegralGraph;
 import jspecview.common.JDXSpectrum;
@@ -69,7 +66,7 @@ public class MainActivity extends Activity{
 	PreferencesManager prefMan;
 		    
     // Collection of Loaded JDXSpectrum objects
-    Vector<JDXSpectrum> mSpectra;     
+    List<JDXSpectrum> mSpectra;     
     // The current visible spectrum
     JDXSpectrum mCurrentSpectrum;   
     // The index of the current visible spectrum
@@ -630,10 +627,10 @@ public class MainActivity extends Activity{
      * @return
      * @throws IOException
      */
-	private Vector<JDXSpectrum> readSpectrum(InputStream stream) throws IOException, JSpecViewException {		                
+	private List<JDXSpectrum> readSpectrum(InputStream stream) throws IOException, JSpecViewException {		                
 		JDXSource source = JDXFileReader.createJDXSource(stream);             	
     	JDXSource jdxSource = (JDXSource)source;
-    	Vector<JDXSpectrum> jdxSpectra = jdxSource.getSpectra();        	
+    	List<JDXSpectrum> jdxSpectra = jdxSource.getSpectra();        	
     	return jdxSpectra;   
 	}
     
@@ -645,7 +642,7 @@ public class MainActivity extends Activity{
 	 * For multiple spectra, if overlay is enabled then the array will have one dataset with multiple series
 	 * If overlay is disabled then the array will have a dataset with a single series for each spectrum
      */
-    private XYMultipleSeriesDataset[] createDatasets(Vector<JDXSpectrum> spectra) {   	
+    private XYMultipleSeriesDataset[] createDatasets(List<JDXSpectrum> spectra) {   	
     	    	    	
     	int numSpectra = spectra.size();
     	XYMultipleSeriesDataset[] datasets; 
