@@ -397,6 +397,10 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
 
   private PeakInfo selectedPeak;
 
+  public void setSelectedPeak(PeakInfo peak) {
+    selectedPeak = peak;
+  }
+  
   public PeakInfo getSelectedPeak() {
     return selectedPeak;
   }
