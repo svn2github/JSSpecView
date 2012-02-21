@@ -2854,6 +2854,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     if (iPeak < 0)
       return;
     PeakInfo peak = spec.getPeakList().get(iPeak);
+    spec.setSelectedPeak(peak);
     coordClicked.setXVal(lastClickX = peak.getX());
     notifyPeakPickedListeners(new PeakPickedEvent(this, coordClicked, peak.getStringInfo()));
   }
