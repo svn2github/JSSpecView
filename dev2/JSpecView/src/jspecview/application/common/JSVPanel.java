@@ -77,6 +77,7 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -155,84 +156,77 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private Coordinate[][] xyCoordsList;
 
   // width and height of the JSVPanel
-  //protected int width, height;
+  //private int width, height;
 
   //The position of the plot area
-  protected int plotAreaX = 80, plotAreaY = 30;
+  private int plotAreaX = 80, plotAreaY = 30;
 
   // insets of the plot area
-  protected Insets plotAreaInsets = new Insets(plotAreaY, plotAreaX, 50, 50);
+  private Insets plotAreaInsets = new Insets(plotAreaY, plotAreaX, 50, 50);
 
   // width and height of the plot area
-  protected int plotAreaWidth, plotAreaHeight;
+  private int plotAreaWidth, plotAreaHeight;
 
   // Positions of the borders of the plotArea
-  protected int leftPlotAreaPos, rightPlotAreaPos, topPlotAreaPos,
+  private int leftPlotAreaPos, rightPlotAreaPos, topPlotAreaPos,
       bottomPlotAreaPos;
 
   // Enables or disables zoom
-  protected boolean zoomEnabled = true;
+  private boolean zoomEnabled = true;
 
   // turns on/off elements of the JSVPanel
-  protected boolean gridOn = false;
-  protected boolean coordsOn = true;
-  protected boolean highlightOn = false;
-  protected boolean titleOn = true;
-  protected boolean xScaleOn = true;
-  protected boolean yScaleOn = true;
-  protected boolean xUnitsOn = true;
-  protected boolean yUnitsOn = true;
+  private boolean gridOn = false;
+  private boolean coordsOn = true;
+  private boolean highlightOn = false;
+  private boolean titleOn = true;
+  private boolean xScaleOn = true;
+  private boolean yScaleOn = true;
+  private boolean xUnitsOn = true;
+  private boolean yUnitsOn = true;
 
   // export properties
   //export svg for inkscape
-  protected boolean svgExportForInscapeEnabled = false;
+  private boolean svgExportForInscapeEnabled = false;
 
-  // highlight range
-  protected double hlStart, hlEnd;
-
-  protected Color highlightColor = new Color(255, 0, 0, 200);
+  private Color highlightColor = new Color(255, 0, 0, 200);
 
   private List<Highlight> highlights = new ArrayList<Highlight>();
 
   // The Current Coordinate to be drawn on the Panel
   private String coordStr = "";
-
-  //private String coordClickedStr = null;
   private Coordinate coordClicked;
-
-  // Is true if plot is reversed
-  protected static boolean plotReversed;
+  private static boolean plotReversed;
 
   // background color of plot area
-  protected Color plotAreaColor = Color.white;
+  private Color plotAreaColor = Color.white;
 
   //plot line color
-  protected Color[] plotColors = { Color.blue, Color.green, Color.yellow,
+  private Color[] plotColors = { Color.blue, Color.green, Color.yellow,
       Color.orange, Color.red, Color.magenta, Color.pink, Color.cyan,
       Color.darkGray };
 
   // integral Color
-  protected Color integralPlotColor = Color.red;
+  private Color integralPlotColor = Color.red;
 
   //integration ratio annotations
-  protected ArrayList<IntegrationRatio> integrationRatios = new ArrayList<IntegrationRatio>();
+  private ArrayList<IntegrationRatio> integrationRatios = new ArrayList<IntegrationRatio>();
 
   // scale color
-  protected Color scaleColor = Color.black;
+  private Color scaleColor = Color.black;
 
   // titleColor
   private Color titleColor = Color.black;
 
   // units Color
-  protected Color unitsColor = Color.red;
+  private Color unitsColor = Color.red;
 
   // grid Color
-  protected Color gridColor = Color.gray;
+  private Color gridColor = Color.gray;
 
   // coordinate Color
-  protected Color coordinatesColor = Color.red;
+  private Color coordinatesColor = Color.red;
 
-  protected Color zoomBoxColor = new Color(100, 100, 50, 130);
+  private Color zoomBoxColor = new Color(100, 100, 50, 130);
 
   //private boolean isMousePressed; 
   private boolean isMouseDragged, isMouseReleased;
@@ -248,16 +242,16 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private boolean titleBoldOn = false;
 
   // The scale factors
-  protected double xFactorForScale, yFactorForScale;
+  private double xFactorForScale, yFactorForScale;
 
   // List of Scale data for zoom
-  protected List<MultiScaleData> zoomInfoList;
+  private List<MultiScaleData> zoomInfoList;
 
   // Current index of view in zoomInfoList
-  protected int currentZoomIndex;
+  private int currentZoomIndex;
 
   // Determines if the xAxis should be displayed increasing
-  protected boolean isXAxisDisplayedIncreasing = true;
+  private boolean isXAxisDisplayedIncreasing = true;
 
   // Used to identify whether the mouse was pressed within
   // the plot area;
@@ -1169,6 +1163,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     return isXAxisDisplayedIncreasing;
   }
 
+  @Override
+  public void setEnabled(boolean TF) {
+    super.setEnabled(TF);
+  }
   /*----------------------- JSVPanel PAINTING METHODS ---------------------*/
 
   /**
@@ -1179,10 +1177,12 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   @Override
   public void paintComponent(Graphics g) {
+    if (!isEnabled())
+      return;
+    System.out.println("DRAWING " + title);
     super.paintComponent(g);
     int width = getWidth();
     int height = getHeight();
-//TODO -- not all panels are getting the right size information here
     drawGraph(g, height, width);
     if (integrationRatios != null)
       drawIntegrationRatios(g, height, width);
@@ -1198,7 +1198,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @param width
    *        the width to be drawn in pixels
    */
-  protected void drawGraph(Graphics g, int height, int width) {
+  private void drawGraph(Graphics g, int height, int width) {
     
     plotAreaWidth = width - (plotAreaInsets.right + plotAreaInsets.left);
     plotAreaHeight = height - (plotAreaInsets.top + plotAreaInsets.bottom);
@@ -1363,7 +1363,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @param width
    *        the width to be drawn in pixels
    */
-  protected void drawPlot(Graphics g, int index, int height, int width) {
+  private void drawPlot(Graphics g, int index, int height, int width) {
     // Check if specInfo in null or xyCoords is null
     //Coordinate[] xyCoords = spectra[index].getXYCoords();
     Coordinate[] xyCoords = xyCoordsList[index];
@@ -1451,7 +1451,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @param width
    *        the width to be drawn in pixels
    */
-  protected void drawGrid(Graphics g, int height, int width) {
+  private void drawGrid(Graphics g, int height, int width) {
     g.setColor(gridColor);
 
     for (double val = scaleData.minXOnScale; val < scaleData.maxXOnScale
@@ -1481,7 +1481,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @param width
    *        the width to be drawn in pixels
    */
-  protected void drawXScale(Graphics g, int height, int width) {
+  private void drawXScale(Graphics g, int height, int width) {
 
     String hashX = "#";
     String hash1 = "0.00000000";
@@ -1521,7 +1521,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @param width
    *        the width to be drawn in pixels
    */
-  protected void drawYScale(Graphics g, int height, int width) {
+  private void drawYScale(Graphics g, int height, int width) {
 
     //String hashX = "#";
     String hashY = "#";
@@ -1556,7 +1556,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @param width
    *        the width to be drawn in pixels
    */
-  protected void drawTitle(Graphics g, int height, int width) {
+  private void drawTitle(Graphics g, int height, int width) {
     int style =(isPrinting || titleBoldOn ? Font.BOLD : Font.PLAIN);
     g.setFont(new Font((isPrinting ? printingFont : titleFontName), style, 
         calculateFontSize(width, 14, true)));
@@ -1577,7 +1577,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @param width
    *        the width to be drawn in pixels
    */
-  protected void drawXUnits(Graphics g, int height, int width) {
+  private void drawXUnits(Graphics g, int height, int width) {
     g.setColor(unitsColor);
     g.setFont(new Font((isPrinting ? printingFont : displayFontName), Font.ITALIC, calculateFontSize(width, 10,
         true)));
@@ -1597,7 +1597,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @param width
    *        the width to be drawn in pixels
    */
-  protected void drawYUnits(Graphics g, int height, int width) {
+  private void drawYUnits(Graphics g, int height, int width) {
     g.setColor(unitsColor);
     g.setFont(new Font((isPrinting ? printingFont : displayFontName), Font.ITALIC, calculateFontSize(width, 10,
         true)));
@@ -1615,7 +1615,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @param width
    *        the width to be drawn in pixels
    */
-  protected void drawCoordinates(Graphics g, int height, int width) {
+  private void drawCoordinates(Graphics g, int height, int width) {
     g.setColor(coordinatesColor);
     Font font;
 
@@ -1635,7 +1635,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * 
    * @param integrationRatios
    */
-  protected void drawIntegrationRatios(Graphics g, int height, int width) {
+  private void drawIntegrationRatios(Graphics g, int height, int width) {
     // determine whether there are any ratio annotations to draw
     if (integrationRatios == null)
       return;
@@ -1686,7 +1686,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @param g
    *        the Graphics object
    */
-  protected void drawZoomBox(Graphics g) {
+  private void drawZoomBox(Graphics g) {
     //  adapted from suggestion by Valery Tkachenko 5 Nov 2010 and previously implemented for ChemSpider
     if (isMouseDragged) {
       g.setColor(zoomBoxColor);
@@ -1712,7 +1712,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        true if the text lies along the width esle false
    * @return the size of the font
    */
-  protected int calculateFontSize(double length, int initSize, boolean isWidth) {
+  private int calculateFontSize(double length, int initSize, boolean isWidth) {
     int size = initSize;
 
     if (isWidth) {
@@ -1735,7 +1735,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        the height to be drawn in pixels
    * @return the inverted y pixel value
    */
-  protected int invertY(int height, int y) {
+  private int invertY(int height, int y) {
     return (plotAreaHeight - y + (2 * plotAreaInsets.top));
   }
 
@@ -1984,7 +1984,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * 
    * @return true if is within range or can be set to within range
    */
-  protected boolean isWithinRangeEnsured() {
+  private boolean isWithinRangeEnsured() {
     boolean rangeOK = true;
 
     if (!isWithinRange(initX) && !isWithinRange(finalX))
@@ -2006,7 +2006,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        the x coodinate
    * @return true if within range
    */
-  protected boolean isWithinRange(double x) {
+  private boolean isWithinRange(double x) {
     if (x >= scaleData.minX && x <= scaleData.maxX)
       return true;
     return false;
@@ -2736,7 +2736,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @param e
    *        the <code>MouseEvent</code>
    */
-  protected void fireMouseClicked(MouseEvent e) {
+  private void fireMouseClicked(MouseEvent e) {
     if (e.getButton() != MouseEvent.BUTTON1)
       return;
 
@@ -2790,7 +2790,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @param e
    *        the <code>MouseEvent</code>
    */
-  protected void fireMouseMoved(MouseEvent e) {
+  private void fireMouseMoved(MouseEvent e) {
     int x = e.getX();
     int y = e.getY();
 
@@ -2841,7 +2841,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @param e
    *        the <code>MouseEvent</code>
    */
-  protected void fireMouseDragged(MouseEvent e) {
+  private void fireMouseDragged(MouseEvent e) {
     isMouseDraggedEvent = true; // testing   
     fireMouseMoved(e);
     if (mouseMovedOk)
@@ -2878,5 +2878,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   public void keyTyped(KeyEvent e) {
+  }
+
+  public static JSVPanel getPanel0(JInternalFrame frame) {
+    return ((JSVPanel) frame.getContentPane().getComponent(0));
   }
 }

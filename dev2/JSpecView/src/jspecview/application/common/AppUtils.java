@@ -36,7 +36,7 @@ public class AppUtils {
 	      if(frame == null)
 	        return null;
 	
-	      JSVPanel jsvp = (JSVPanel)frame.getContentPane().getComponent(0);
+	      JSVPanel jsvp = JSVPanel.getPanel0(frame);
 	      boolean integrateOn = false;
 	      int numGraphs = jsvp.getNumberOfSpectra();
 	      boolean allowIntegration = false;

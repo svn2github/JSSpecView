@@ -134,8 +134,6 @@ import jspecview.source.JDXSource;
 import jspecview.util.Escape;
 import jspecview.util.FileManager;
 import jspecview.util.Parser;
-import mdidesktop.ScrollableDesktopPane;
-import mdidesktop.WindowMenu;
 import jspecview.common.Visible;
 
 /**
@@ -1827,7 +1825,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       setCurrentSource(source);
 
       // Update the menu items for the display menu
-      JSVPanel jsvp = (JSVPanel) frame.getContentPane().getComponent(0);
+      JSVPanel jsvp = JSVPanel.getPanel0(frame);
       JDXSpectrum spec = (JDXSpectrum) jsvp.getSpectrumAt(0);
       gridCheckBoxMenuItem.setSelected(jsvp.isGridOn());
       gridToggleButton.setSelected(jsvp.isGridOn());
@@ -2122,10 +2120,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
     setApplicationProperties(shouldApplySpectrumDisplaySetting);
 
     JInternalFrame[] frames = desktopPane.getAllFrames();
-    for (int i = 0; i < frames.length; i++) {
-      JSVPanel jsvp = (JSVPanel) frames[i].getContentPane().getComponent(0);
-      setJSVPanelProperties(jsvp, shouldApplySpectrumDisplaySetting);
-    }
+    for (int i = 0; i < frames.length; i++)
+      setJSVPanelProperties(JSVPanel.getPanel0(frames[i]), shouldApplySpectrumDisplaySetting);
 
     setApplicationElements();
 
@@ -2224,7 +2220,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     if (frame == null) {
       return;
     }
-    JSVPanel jsvp = (JSVPanel) frame.getContentPane().getComponent(0);
+    JSVPanel jsvp = JSVPanel.getPanel0(frame);
     jsvp.reset();
   }
 
@@ -2404,11 +2400,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   
   private JSVPanel getCurrentJSVPanel() {
     JInternalFrame frame = desktopPane.getSelectedFrame();
-    if (frame == null) {
-      return null;
-    }
-    JSVPanel jsvp = (JSVPanel) frame.getContentPane().getComponent(0);
-    return jsvp;
+    return (frame == null ? null : JSVPanel.getPanel0(frame));
   }
 
   /**
@@ -2429,14 +2421,14 @@ public class MainFrame extends JFrame implements DropTargetListener,
    */
   protected void integrateMenuItem_actionPerformed(ActionEvent e) {
     JInternalFrame frame = desktopPane.getSelectedFrame();
-    JSVPanel newJsvPanel = (JSVPanel) frame.getContentPane().getComponent(0);
+    JSVPanel newJsvPanel = JSVPanel.getPanel0(frame);
 
     if (AppUtils.hasIntegration(newJsvPanel)) {
       Object errMsg = AppUtils.removeIntegration(frame.getContentPane());
       if (errMsg != null) {
         writeStatus((String) errMsg);
       } else {
-        newJsvPanel = (JSVPanel) frame.getContentPane().getComponent(0);
+        newJsvPanel = JSVPanel.getPanel0(frame);
       }
     } else {
       newJsvPanel = AppUtils.integrate(this, frame, true);
@@ -2468,10 +2460,9 @@ public class MainFrame extends JFrame implements DropTargetListener,
     String Yunits0 = Yunits;
 
     JInternalFrame frame = desktopPane.getSelectedFrame();
-    Container contentPane = frame.getContentPane();
-
     if (frame != null) {
-      JSVPanel jsvp = (JSVPanel) contentPane.getComponent(0);
+      JSVPanel jsvp = JSVPanel.getPanel0(frame);
+      Container contentPane = frame.getContentPane();
       int numcomp = contentPane.getComponentCount();
       if ((numcomp > 1) & Yunits.toLowerCase().contains("trans")) {
         Yunits0 = "abs";
@@ -2510,9 +2501,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
     Container contentPane = frame.getContentPane();
     if (contentPane.getComponentCount() == 2) {
-      frame.remove(contentPane.getComponent(0));
-      JSVPanel jsvp = (JSVPanel) contentPane.getComponent(0);
-      jsvp.reset();
+      frame.remove(JSVPanel.getPanel0(frame));
+      JSVPanel.getPanel0(frame).reset();
       validate();
       return;
     }
@@ -2702,8 +2692,12 @@ public class MainFrame extends JFrame implements DropTargetListener,
       frame.setSelected(true);
     } catch (PropertyVetoException pve) {
     }
-    if (fromTree && frame.isEnabled())
+    if (fromTree && frame.isEnabled()) {
       sendFrameChange(specInfo.jsvp);
+      if (desktopPane.getStyle() == ScrollableDesktopPane.STYLE_STACK)
+        desktopPane.setAllEnabled(false);
+      selectedJSVPanel.setEnabled(true);
+    }
   }
 
   /**
