@@ -115,6 +115,8 @@ import jspecview.common.Visible;
 
 public class JSVApplet extends JApplet implements PeakPickedListener {
 
+  public static final String APPLET_VERSION = "1.0.20120220-1700"; //??? what is this? not 2.0.200? 
+
   /**
    * 
    */
@@ -125,57 +127,55 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     System.out.println("JSpecView " + this + " finalized");
   }
 
-  public static final String APPLET_VERSION = "1.0.20120220-1700";
-
   /* --------------------set default-PARAMETERS -------------------------*/
-  String filePath, oldfilePath;
-  String newFilePath = null;
+  private String filePath;
+  private String newFilePath = null;
   private String recentFileName = "";
   private String recentURL = "";
 
-  boolean gridOn = true;
-  boolean coordinatesOn = true;
-  boolean reversePlot = false;
-  boolean menuOn = true;
-  boolean compoundMenuOn = true;
-  boolean compoundMenuOn2 = true;
-  boolean enableZoom = true;
-  boolean xScaleOn = true;
-  boolean yScaleOn = true;
-  boolean xUnitsOn = true;
-  boolean yUnitsOn = true;
-  boolean titleBoldOn = false;
+  private boolean gridOn = true;
+  private boolean coordinatesOn = true;
+  private boolean reversePlot = false;
+  private boolean menuOn = true;
+  private boolean compoundMenuOn = true;
+  private boolean compoundMenuOn2 = true;
+  private boolean enableZoom = true;
+  private boolean xScaleOn = true;
+  private boolean yScaleOn = true;
+  private boolean xUnitsOn = true;
+  private boolean yUnitsOn = true;
+  private boolean titleBoldOn = false;
 
-  int startIndex = -1;
-  int endIndex = -1;
-  int spectrumNumber = -1; // blockNumber or nTupleNumber
-  int numberOfSpectra;
+  private int startIndex = -1;
+  private int endIndex = -1;
+  private int spectrumNumber = -1; // blockNumber or nTupleNumber
+  private int numberOfSpectra;
 
-  String theInterface = "single"; // either tab, tile, single, overlay
+  private String theInterface = "single"; // either tab, tile, single, overlay
   private String coordCallbackFunctionName;
   private String peakCallbackFunctionName;
   private String syncCallbackFunctionName;
   private String appletReadyCallbackFunctionName;
 
-  String sltnclr = "255,255,255"; //Colour of Solution
-  String titleFontName = null; // Title Font
-  String displayFontName = null; // Display Font
+  private String sltnclr = "255,255,255"; //Colour of Solution
+  private String titleFontName = null; // Title Font
+  private String displayFontName = null; // Display Font
 
-  ArrayList<IntegrationRatio> integrationRatios = null; // Integration Ratio Annotations
+  private ArrayList<IntegrationRatio> integrationRatios = null; // Integration Ratio Annotations
 
-  Color titleColor = Color.BLACK;
-  Color gridColor = Color.LIGHT_GRAY;
-  Color unitsColor = Color.RED;
-  Color scaleColor = Color.BLACK;
-  Color coordinatesColor = Color.RED;
-  Color plotAreaColor = Color.WHITE;
-  Color backgroundColor = new Color(192, 192, 192);
-  Color plotColor = Color.BLUE;
+  private Color titleColor = Color.BLACK;
+  private Color gridColor = Color.LIGHT_GRAY;
+  private Color unitsColor = Color.RED;
+  private Color scaleColor = Color.BLACK;
+  private Color coordinatesColor = Color.RED;
+  private Color plotAreaColor = Color.WHITE;
+  private Color backgroundColor = new Color(192, 192, 192);
+  private Color plotColor = Color.BLUE;
 
-  Color[] plotColors = { Color.blue, Color.green, Color.red, Color.magenta,
+  private Color[] plotColors = { Color.blue, Color.green, Color.red, Color.magenta,
       Color.yellow, Color.orange, Color.pink, Color.cyan };
-  String plotColorsStr;
-  Color integralPlotColor = Color.red;
+  private String plotColorsStr;
+  private Color integralPlotColor = Color.red;
 
   final private int TO_TRANS = 0;
   final private int TO_ABS = 1;
@@ -183,16 +183,14 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
 
   /*---------------------------------END PARAMETERS------------------------*/
 
-  boolean isSignedApplet = false;
-  boolean isStandalone = false;
-  BorderLayout appletBorderLayout = new BorderLayout();
-  JPanel statusPanel = new JPanel();
-  JLabel statusTextLabel = new JLabel();
-  JFileChooser jFileChooser;
-  JSVPanel selectedJSVPanel;
-  JSVAppletPopupMenu appletPopupMenu;
-  JDXSpectrum xmlSpec;
-  JSVPanel tempJSVP;
+  private boolean isSignedApplet = false;
+  private boolean isStandalone = false;
+  private JPanel statusPanel = new JPanel();
+  private JLabel statusTextLabel = new JLabel();
+  private JFileChooser jFileChooser;
+  private JSVPanel selectedJSVPanel;
+  private JSVAppletPopupMenu appletPopupMenu;
+  private JSVPanel tempJSVP;
 
   private static final String[] params = { "LOAD", "REVERSEPLOT",
       "COORDINATESON", "GRIDON", "COORDCALLBACKFUNCTIONNAME", "SPECTRUMNUMBER",
@@ -272,60 +270,55 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     System.out.println("JSVApplet " + this + " destroy 2");
   }
 
-  /**
-   * Do we have new parameters passed from a javascript call?
-   */
-  public boolean newParams = false;
-
-  public boolean newFile = false;
+  private boolean newFile = false;
 
   /**
    * parameters from a javascript call
    */
-  public String JSVparams;
+  private String JSVparams;
 
   /**
    * The panes of a tabbed display
    */
-  JTabbedPane spectraPane = new JTabbedPane();
+  private JTabbedPane spectraPane = new JTabbedPane();
 
   /**
    * A list of </code>JDXSpectrum</code> instances
    */
-  List<JDXSpectrum> specs;
+  private List<JDXSpectrum> specs;
 
   /**
    * The <code>JSVPanel</code>s created for each </code>JDXSpectrum</code>
    */
-  JSVPanel[] jsvPanels;
+  private JSVPanel[] jsvPanels;
 
   /**
    * The <code>JDXSource</code> instance
    */
-  JDXSource source;
+  private JDXSource source;
 
   /**
    * The Panel on which the applet contents are drawn
    */
-  JPanel appletPanel;
+  private JPanel appletPanel;
 
   /**
    * Frame constructed from applet panel when rising off web page
    */
-  JFrame frame;
+  private JFrame frame;
 
   /**
    * The index of the <code>JDXSpectrum</code> that is is focus.
    */
-  public int currentSpectrumIndex = 0;
+  private int currentSpectrumIndex = 0;
 
   /**
    * Whether or not spectra should be overlayed
    */
-  boolean overlay;
-  boolean obscure;
+  private boolean overlay;
+  private boolean obscure;
 
-  String irMode;
+  private String irMode;
 
   /**
    * Returns a parameter value
@@ -658,7 +651,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
    * @param e
    *        the ItemEvent
    */
-  void compoundMenu_itemStateChanged(ItemEvent e) {
+  private void compoundMenu_itemStateChanged(ItemEvent e) {
 
     // gets the newly selected title
     JCheckBoxMenuItem selectedMenu = (JCheckBoxMenuItem) e.getSource();
@@ -676,7 +669,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
    * @param index
    *        the index
    */
-  void showSpectrum(int index, boolean fromMenu) {
+  private void showSpectrum(int index, boolean fromMenu) {
     JSVPanel jsvp = jsvPanels[index];
     appletPanel.remove(jsvPanels[currentSpectrumIndex]);
     appletPanel.add(jsvp, BorderLayout.CENTER);
@@ -713,7 +706,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
    * @param e
    *        the ActionEvent
    */
-  void headerMenuItem_actionPerformed(ActionEvent e) {
+  protected void headerMenuItem_actionPerformed(ActionEvent e) {
     
     JDXSpectrum spectrum = (JDXSpectrum) selectedJSVPanel.getSpectrumAt(0);
     Object[][] rowData = (overlay ? source
@@ -733,7 +726,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
    * @param e
    *        the ActionEvent
    */
-  void solColMenuItem_actionPerformed(ActionEvent e) {
+  protected void solColMenuItem_actionPerformed(ActionEvent e) {
 
     Graph spectrum = selectedJSVPanel.getSpectrumAt(0);
     String Yunits = spectrum.getYUnits();
@@ -754,7 +747,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
    * @param e
    *        ActionEvent
    */
-  void printMenuItem_actionPerformed(ActionEvent e) {
+  protected void printMenuItem_actionPerformed(ActionEvent e) {
     if (frame == null) {
       System.err
           .println("Use the View/Window menu to lift the spectrum off the page first.");
@@ -786,7 +779,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
    * @param e
    *        the ActionEvent
    */
-  void windowMenuItem_itemStateChanged(ItemEvent e) {
+  protected void windowMenuItem_itemStateChanged(ItemEvent e) {
     if (e.getStateChange() == ItemEvent.SELECTED) {
       // disable some features when in Window mode
       appletPopupMenu.integrateMenuItem.setEnabled(false);
@@ -861,7 +854,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
    *        ItemEvent
    */
 
-  void transAbsMenuItem_itemStateChanged(ItemEvent e) {
+  protected void transAbsMenuItem_itemStateChanged(ItemEvent e) {
     // for some reason, at the the St. Olaf site, this is triggering twice
     // when the user clicks the menu item. Why?
     try {
@@ -947,7 +940,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
    * @param e
    *        the ItemEvent
    */
-  void integrateMenuItem_itemStateChanged(ItemEvent e) {
+  protected void integrateMenuItem_itemStateChanged(ItemEvent e) {
     if (e.getStateChange() == ItemEvent.SELECTED) {
       tempJSVP = AppUtils.appletIntegrate(appletPanel, true, integrationRatios);
     } else {
@@ -998,7 +991,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
    * @param e
    *        the ActionEvent
    */
-  void overlayKeyMenuItem_actionPerformed(ActionEvent e) {
+  protected void overlayKeyMenuItem_actionPerformed(ActionEvent e) {
     new OverlayLegendDialog(selectedJSVPanel);
   }
 
@@ -1012,7 +1005,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
    * @param command
    *        the name of the format to export in
    */
-  void exportSpectrum(String command) {
+  protected void exportSpectrum(String command) {
     final String comm = command;
     if (!isSignedApplet) {
       System.out.println(export(0, comm, null));
@@ -1040,17 +1033,6 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
   }
 
   /**
-   * Shows an About dialog
-   * 
-   * @param e
-   *        the ActionEvent
-   */
-  void versionMenuItem_actionPerformed(ActionEvent e) {
-
-    //AboutDialog ab = new AboutDialog(null, "", false);
-  }
-
-  /**
    * Used to tile JSVPanel when the <i>interface</i> paramters is equal to
    * "tile"
    * 
@@ -1058,7 +1040,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
    *        An array of components to tile
    * @return a <code>JSplitPane</code> with components tiled
    */
-  public JSplitPane createSplitPane(JComponent[] comps) {
+  private JSplitPane createSplitPane(JComponent[] comps) {
     ComponentListPair pair = createPair(comps);
     return createSplitPaneAux(pair);
   }
@@ -1070,7 +1052,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
    *        the <code>ComponentListPair</code>
    * @return a <code>JSplitPane</code> with components tiled
    */
-  public JSplitPane createSplitPaneAux(ComponentListPair pair) {
+  private JSplitPane createSplitPaneAux(ComponentListPair pair) {
     int numTop = pair.top.length;
     int numBottom = pair.bottom.length;
     JSplitPane splitPane;
@@ -1105,7 +1087,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
    *        an array of components
    * @return a <code>ComponentListPair</code>
    */
-  public ComponentListPair createPair(JComponent[] comps) {
+  private ComponentListPair createPair(JComponent[] comps) {
     int numBottom = (int) (comps.length / 2);
     int numTop = numBottom + (comps.length % 2);
 
@@ -1131,7 +1113,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
   /**
    * Representation of two array of components of equal or nearly equal size
    */
-  class ComponentListPair {
+  private class ComponentListPair {
 
     /**
      * the first array
@@ -1151,54 +1133,10 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
   }
 
   /**
-   * Returns a <code>Color</color> object from a parameter value
-   * 
-   * @param key
-   *        the parameter name
-   * @param def
-   *        the default value
-   * @return a <code>Color</color> object from a parameter value
-   */
-  /*  private Color getColorParameter(String key, Color def){
-      String param = getParameter(key);
-      int r, g, b;
-
-      if(param == null){
-        return def;
-      }
-
-      param = param.trim();
-      if(param.startsWith("#")){
-        try{
-          return new Color(Integer.parseInt(param.substring(1), 16));
-        }
-        catch(NumberFormatException nfe){
-          return def;
-        }
-      }
-      StringTokenizer st = new StringTokenizer(param, ",;.- ");
-      try{
-        r = Integer.parseInt(st.nextToken().trim());
-        g = Integer.parseInt(st.nextToken().trim());
-        b = Integer.parseInt(st.nextToken().trim());
-
-        return new Color(r, g, b);
-      }
-      catch(NoSuchElementException nsee){
-        return def;
-      }
-      catch(NumberFormatException nfe){
-        return def;
-      }
-    }
-
-  */
-
-  /**
    * Intialises the <code>plotColors</code> array from the <i>plotColorsStr</i>
    * variable
    */
-  public void getPlotColors() {
+  private void getPlotColors() {
     if (plotColorsStr != null) {
       StringTokenizer st = new StringTokenizer(plotColorsStr, ",;.- ");
       int r, g, b;
@@ -1312,7 +1250,6 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
    */
   public void script(String newJSVparams) {
     JSVparams = newJSVparams;
-    newParams = true;
     init(null);
   }
 
@@ -1360,7 +1297,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
    * @param tmpFilePath
    *        String
    */
-  void setFilePathLocal(String tmpFilePath) {
+  private void setFilePathLocal(String tmpFilePath) {
     getContentPane().removeAll();
     appletPanel.removeAll();
     newFilePath = tmpFilePath;
@@ -1651,10 +1588,10 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
 
   // for the signed applet to load a remote file, it must
   // be using a thread started by the initiating thread;
-  List<String> scriptQueue = new ArrayList<String>();
-  Thread commandWatcherThread;
+  private List<String> scriptQueue = new ArrayList<String>();
+  private Thread commandWatcherThread;
 
-  class CommandWatcher implements Runnable {
+  private class CommandWatcher implements Runnable {
     public void run() {
       Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
       int commandDelay = 200;
@@ -1685,12 +1622,12 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
       commandWatcherThread = null;
     }
   }
-
-  void interruptQueueThreads() {
+/*
+  private void interruptQueueThreads() {
     if (commandWatcherThread != null)
       commandWatcherThread.interrupt();
   }
-
+*/
   private void openDataOrFile(String data) {
     String fileName = null;
     URL base = null;
@@ -1836,7 +1773,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
    * Is that what we want? 
    * 
    */
-  public void checkCallbacks() {
+  private void checkCallbacks() {
     if (coordCallbackFunctionName == null && peakCallbackFunctionName == null)
       return;
     Coordinate coord = new Coordinate();

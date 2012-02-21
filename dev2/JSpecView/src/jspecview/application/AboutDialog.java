@@ -50,8 +50,8 @@ public class AboutDialog extends JDialog {
    * 
    */
   private static final long serialVersionUID = 1L;
-  JPanel p = new JPanel();
-  JTextArea txt;
+  private JPanel p = new JPanel();
+  private JTextArea txt;
 
   /**
    * Constructor
@@ -59,7 +59,7 @@ public class AboutDialog extends JDialog {
    * @param title the title of the frame
    * @param modal true is the dialog should be modal
    */
-  public AboutDialog(Frame owner, String title, boolean modal) {
+  private AboutDialog(Frame owner, String title, boolean modal) {
     super(owner, title, modal);
 
     try {
@@ -82,23 +82,15 @@ public class AboutDialog extends JDialog {
   }
 
   /**
-   * Constructor that initalises the Dialog without a parent frame,
-   * no title and modality to false
-   */
-  public AboutDialog() {
-    this(null, "", false);
-  }
-
-  /**
    * Constructor that initalises the Dialog a parent frame,
    * no title and modality to true
    * @param frame parent container for the About dialog
    */
-  public AboutDialog(Frame frame) {
+  AboutDialog(Frame frame) {
     this(frame, "", true);
   }
 
-  void jbInit() throws Exception {
+  private void jbInit() throws Exception {
     JLabel lbl = new JLabel(new ImageIcon(getClass().getResource("icons/about.gif")));
 
     Border b1 = new BevelBorder(BevelBorder.LOWERED);
