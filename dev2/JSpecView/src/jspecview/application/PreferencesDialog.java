@@ -56,9 +56,9 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import jspecview.application.common.AppUtils;
-import jspecview.application.common.DisplayScheme;
-import jspecview.application.common.JSVPanel;
+import jspecview.common.AppUtils;
+import jspecview.common.DisplayScheme;
+import jspecview.common.JSVPanel;
 import jspecview.exception.JSpecViewException;
 import jspecview.source.JDXFileReader;
 import jspecview.source.JDXSource;

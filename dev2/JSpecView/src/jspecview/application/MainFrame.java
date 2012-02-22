@@ -114,17 +114,17 @@ import javax.swing.tree.TreeSelectionModel;
 
 import org.jmol.api.JmolSyncInterface;
 
-import jspecview.application.common.AppUtils;
-import jspecview.application.common.DisplayScheme;
-import jspecview.application.common.JSVPanel;
-import jspecview.application.common.JSVPanelPopupMenu;
-import jspecview.application.common.JSpecViewFileFilter;
-import jspecview.application.common.OverlayLegendDialog;
-import jspecview.application.common.Parameters;
-import jspecview.application.common.PeakPickedEvent;
-import jspecview.application.common.PeakPickedListener;
-import jspecview.application.common.PrintLayoutDialog;
-import jspecview.application.common.ScriptParser.ScriptToken;
+import jspecview.common.AppUtils;
+import jspecview.common.DisplayScheme;
+import jspecview.common.JSVPanel;
+import jspecview.common.JSVPanelPopupMenu;
+import jspecview.common.JSpecViewFileFilter;
+import jspecview.common.OverlayLegendDialog;
+import jspecview.common.Parameters;
+import jspecview.common.PeakPickedEvent;
+import jspecview.common.PeakPickedListener;
+import jspecview.common.PrintLayoutDialog;
+import jspecview.common.ScriptParser.ScriptToken;
 import jspecview.common.Coordinate;
 import jspecview.common.Graph;
 import jspecview.common.JDXSpectrum;

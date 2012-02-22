@@ -8,8 +8,8 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
-import jspecview.application.common.JSVPanel;
-import jspecview.application.common.JSVPanelPopupMenu;
+import jspecview.common.JSVPanel;
+import jspecview.common.JSVPanelPopupMenu;
 
 class JSVAppletPopupMenu extends JSVPanelPopupMenu {
 

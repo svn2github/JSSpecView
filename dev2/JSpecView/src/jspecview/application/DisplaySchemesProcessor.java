@@ -30,8 +30,8 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.TreeMap;
 
-import jspecview.application.common.AppUtils;
-import jspecview.application.common.DisplayScheme;
+import jspecview.common.AppUtils;
+import jspecview.common.DisplayScheme;
 import jspecview.common.JSpecViewUtils;
 import jspecview.util.SimpleXmlReader;
 

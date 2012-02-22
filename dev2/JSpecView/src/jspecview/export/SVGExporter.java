@@ -31,8 +31,8 @@ import java.util.ArrayList;
 import jspecview.common.Coordinate;
 import jspecview.common.Graph;
 import jspecview.common.JSpecViewUtils;
-import jspecview.application.common.AppUtils;
-import jspecview.application.common.JSVPanel;
+import jspecview.common.AppUtils;
+import jspecview.common.JSVPanel;
 
 /**
  * class <code>SVGExporter</code> contains static methods to export a Graph as

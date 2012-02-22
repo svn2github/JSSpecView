@@ -33,7 +33,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JViewport;
 
 import jspecview.application.WindowMenu;
-import jspecview.application.common.JSVPanel;
+import jspecview.common.JSVPanel;
 
 /**
  * An extension of JDesktopPane that supports often used MDI functionality. This
