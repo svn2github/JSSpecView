@@ -2723,6 +2723,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private void setFrame(int i) {
     if (specInfos == null || i < 0 || i >= specInfos.length)
       return;
+    selectFrameNode(specInfos[i].frame);
     setFrame(specInfos[i], false);
   }
 
