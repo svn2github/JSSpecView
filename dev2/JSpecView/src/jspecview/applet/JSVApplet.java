@@ -115,8 +115,8 @@ import jspecview.common.Visible;
 
 public class JSVApplet extends JApplet implements PeakPickedListener {
 
-  public static final String APPLET_VERSION = "1.0.20120220-1700"; //??? what is this? not 2.0.200? 
-
+  public static final String APPLET_VERSION = "2.0.20120221-1930"; //??? what is this? not 2.0.200? 
+//  2.0.yyyymmdd-hhmm format - updated to keep track of whether you are using the latest version
   /**
    * 
    */
