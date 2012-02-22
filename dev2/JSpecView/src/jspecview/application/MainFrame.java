@@ -1296,6 +1296,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     boolean isError = (source != null && source.getErrorLog().length() > 0);
     errorLogButton.setIcon(isError ? errorLogRedIcon : errorLogIcon);      
     errorLogButton.setEnabled(isError);
+    errorLogMenuItem.setEnabled(isError);
   }
 
   void setMenuEnables(JDXSpectrum spec) {
