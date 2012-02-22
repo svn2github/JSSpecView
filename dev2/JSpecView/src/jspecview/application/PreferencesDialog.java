@@ -62,6 +62,8 @@ import jspecview.common.JSVPanel;
 import jspecview.exception.JSpecViewException;
 import jspecview.source.JDXFileReader;
 import jspecview.source.JDXSource;
+import jspecview.util.ColorUtil;
+
 import java.awt.Font;
 import javax.swing.UIManager;
 import javax.swing.JSeparator;
@@ -689,7 +691,7 @@ public class PreferencesDialog extends JDialog {
     integFactorTextField.setText(preferences.getProperty("integralFactor"));
     integOffsetTextField.setText(preferences.getProperty("integralOffset"));
     plotColorButton.setBackground(
-        AppUtils.getColorFromString(preferences.getProperty("integralPlotColor")));
+        ColorUtil.getColorFromString(preferences.getProperty("integralPlotColor")));
     autoIntegrateCheckBox.setSelected(
        Boolean.valueOf(preferences.getProperty("automaticallyIntegrate")).booleanValue());
     String autoConvert =

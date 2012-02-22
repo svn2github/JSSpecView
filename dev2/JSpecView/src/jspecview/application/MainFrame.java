@@ -134,6 +134,7 @@ import jspecview.common.TransmittanceAbsorbanceConverter;
 import jspecview.exception.ScalesIncompatibleException;
 import jspecview.source.JDXFileReader;
 import jspecview.source.JDXSource;
+import jspecview.util.ColorUtil;
 import jspecview.util.Escape;
 import jspecview.util.FileManager;
 import jspecview.util.Parser;
@@ -559,7 +560,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     JSpecViewUtils.integralMinY = properties.getProperty("integralMinY");
     JSpecViewUtils.integralFactor = properties.getProperty("integralFactor");
     JSpecViewUtils.integralOffset = properties.getProperty("integralOffset");
-    AppUtils.integralPlotColor = AppUtils.getColorFromString(properties
+    AppUtils.integralPlotColor = ColorUtil.getColorFromString(properties
         .getProperty("integralPlotColor"));
 
     //svgForInscape = Boolean.valueOf(properties.getProperty("svgForInscape")).booleanValue();

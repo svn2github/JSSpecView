@@ -9,6 +9,7 @@ import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
 import jspecview.common.JSpecViewUtils;
+import jspecview.util.ColorUtil;
 
 public class Parameters extends DisplayScheme {
 
@@ -162,7 +163,7 @@ public class Parameters extends DisplayScheme {
   }
 
   private Color setColor(String element, String value) {
-    return setColor(element, AppUtils.getColorFromString(value));
+    return setColor(element, ColorUtil.getColorFromString(value));
   }
 
   /**

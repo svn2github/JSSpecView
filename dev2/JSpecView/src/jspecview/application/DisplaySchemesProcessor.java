@@ -33,6 +33,7 @@ import java.util.TreeMap;
 import jspecview.common.AppUtils;
 import jspecview.common.DisplayScheme;
 import jspecview.common.JSpecViewUtils;
+import jspecview.util.ColorUtil;
 import jspecview.util.SimpleXmlReader;
 
 /**
@@ -219,7 +220,7 @@ public class DisplaySchemesProcessor {
   private Color getColor(){
     String value = reader.getAttrValueLC("hex");
     return (value.length() == 0 || value.equals("default") ? null
-        : AppUtils.getColorFromString(value));
+        : ColorUtil.getColorFromString(value));
   }
 
   /**
