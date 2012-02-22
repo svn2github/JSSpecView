@@ -131,7 +131,6 @@ import jspecview.common.JDXSpectrum;
 import jspecview.common.JSpecViewUtils;
 import jspecview.common.PeakInfo;
 import jspecview.common.TransmittanceAbsorbanceConverter;
-import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
 import jspecview.source.JDXFileReader;
 import jspecview.source.JDXSource;
@@ -1379,7 +1378,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     parameters.setFor(jsvp, (ds == null ? dsp.getDefaultScheme() : ds),
         includeMeasures);
 
-    jsvp.setXAxisDisplayedIncreasing((jsvp.getSpectrumAt(0))
+    jsvp.setXAxisDisplayedIncreasing((jsvp.getSpectrum())
         .shouldDisplayXAxisIncreasing());
     jsvp.setSource(currentSelectedSource);
     jsvp.setPopup(jsvpPopupMenu);
@@ -1595,7 +1594,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     //JSVPanel[] panels = new JSVPanel[specs.size()];
     JInternalFrame[] frames = new JInternalFrame[specs.size()];
     specInfos = new SpecInfo[specs.size()];
-    try {
       for (int i = 0; i < specs.size(); i++) {
         JDXSpectrum spec = specs.get(i);
         JSVPanel jsvp = new JSVPanel(spec);
@@ -1622,7 +1620,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
         }
 
         if (autoIntegrate) {
-          AppUtils.integrate(this, frame, false);
+          AppUtils.integrate(frame, false, null);
         }
 
         desktopPane.add(frame);
@@ -1644,9 +1642,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
       overlaySplitButton.setIcon(overlayIcon);
       overlaySplitButton.setToolTipText("Overlay Display");
-    } catch (JSpecViewException jsve) {
-      //STATUS --> write message
-    }
   }
 
   /**
@@ -1819,7 +1814,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
       // Update the menu items for the display menu
       JSVPanel jsvp = JSVPanel.getPanel0(frame);
-      JDXSpectrum spec = jsvp.getSpectrumAt(0);
+      JDXSpectrum spec = jsvp.getSpectrum();
       gridCheckBoxMenuItem.setSelected(jsvp.isGridOn());
       gridToggleButton.setSelected(jsvp.isGridOn());
       coordsCheckBoxMenuItem.setSelected(jsvp.isCoordinatesOn());
@@ -2414,17 +2409,9 @@ public class MainFrame extends JFrame implements DropTargetListener,
    */
   protected void integrateMenuItem_actionPerformed(ActionEvent e) {
     JInternalFrame frame = desktopPane.getSelectedFrame();
-    JSVPanel newJsvPanel = JSVPanel.getPanel0(frame);
-    if (AppUtils.hasIntegration(newJsvPanel)) {
-      Object errMsg = AppUtils.removeIntegration(frame.getContentPane());
-      if (errMsg != null) {
-        writeStatus((String) errMsg);
-      } else {
-        newJsvPanel = JSVPanel.getPanel0(frame);
-      }
-    } else {
-      newJsvPanel = AppUtils.integrate(this, frame, true);
-    }
+    JSVPanel newJsvPanel = (AppUtils.hasIntegration(JSVPanel.getPanel0(frame)) 
+        ? AppUtils.removeIntegration(frame.getContentPane())
+        : AppUtils.integrate(frame, true, null));
     setJSVPanelProperties(newJsvPanel, true);
     findSpec(frame).jsvp = selectedJSVPanel = newJsvPanel;
     validate();
@@ -2469,13 +2456,13 @@ public class MainFrame extends JFrame implements DropTargetListener,
       if ((numcomp > 1) & Yunits.toLowerCase().contains("abs")) {
         Yunits0 = "trans";
       }
-      Graph spectrum = jsvp.getSpectrumAt(0);
+      Graph spectrum = jsvp.getSpectrum();
       //jsvpPopupMenu.setSelectedJSVPanel(panel);
       //jsvpPopupMenu.setSource(currentSelectedSource);
       //jsvpPopupMenu.properties_actionPerformed(e);
       //Coordinate[] source;
       //source = currentSelectedSource.getJDXSpectrum(0).getXYCoords();
-      //JDXSpectrum spectrum = (JDXSpectrum)selectedJSVPanel.getSpectrumAt(0);
+      //JDXSpectrum spectrum = (JDXSpectrum)selectedJSVPanel.getSpectrum();
       sltnclr = Visible.Colour(spectrum.getXYCoords(), Yunits0);
       JOptionPane.showMessageDialog(this, "<HTML><body bgcolor=rgb(" + sltnclr
           + ")><br />Predicted Solution Colour RGB(" + sltnclr
@@ -2513,42 +2500,39 @@ public class MainFrame extends JFrame implements DropTargetListener,
       return;
     }
 
-    JDXSpectrum spectrum = jsvp.getSpectrumAt(0);
+    JDXSpectrum spectrum = jsvp.getSpectrum();
     JDXSpectrum newSpec;
-    try {
-      switch (comm) {
-      case TO_TRANS:
-        newSpec = TransmittanceAbsorbanceConverter
-            .AbsorbancetoTransmittance(spectrum);
-        break;
-      case TO_ABS:
-        newSpec = TransmittanceAbsorbanceConverter
-            .TransmittanceToAbsorbance(spectrum);
-        break;
-      case IMPLIED:
-        newSpec = TransmittanceAbsorbanceConverter.convert(spectrum);
-        break;
-      default:
-        newSpec = null;
-      }
-      if (newSpec == null) {
-        return;
-      }
-      JSVPanel newJsvp = new JSVPanel(newSpec);
-      //newJsvp.setOverlayIncreasing(spectrum.isIncreasing());
-      setJSVPanelProperties(newJsvp, true);
-
-      // Get from properties variable
-      contentPane.remove(jsvp);
-      contentPane.invalidate();
-      if (!(contentPane.getLayout() instanceof CardLayout)) {
-        contentPane.setLayout(new CardLayout());
-      }
-      contentPane.add(newJsvp, "new");
-      contentPane.add(jsvp, "old");
-      validate();
-    } catch (JSpecViewException ex) {
+    switch (comm) {
+    case TO_TRANS:
+      newSpec = TransmittanceAbsorbanceConverter
+          .AbsorbancetoTransmittance(spectrum);
+      break;
+    case TO_ABS:
+      newSpec = TransmittanceAbsorbanceConverter
+          .TransmittanceToAbsorbance(spectrum);
+      break;
+    case IMPLIED:
+      newSpec = TransmittanceAbsorbanceConverter.convert(spectrum);
+      break;
+    default:
+      newSpec = null;
     }
+    if (newSpec == null) {
+      return;
+    }
+    JSVPanel newJsvp = new JSVPanel(newSpec);
+    //newJsvp.setOverlayIncreasing(spectrum.isIncreasing());
+    setJSVPanelProperties(newJsvp, true);
+
+    // Get from properties variable
+    contentPane.remove(jsvp);
+    contentPane.invalidate();
+    if (!(contentPane.getLayout() instanceof CardLayout)) {
+      contentPane.setLayout(new CardLayout());
+    }
+    contentPane.add(newJsvp, "new");
+    contentPane.add(jsvp, "old");
+    validate();
   }
 
   /**
@@ -2744,7 +2728,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private boolean selectPanelByPeak(String index) {
     for (int i = 0; i < specInfos.length; i++) {
       SpecInfo si = specInfos[i];
-      if ((si.jsvp.getSpectrumAt(0)).hasPeakIndex(index)) {
+      if ((si.jsvp.getSpectrum()).hasPeakIndex(index)) {
         setFrame(si, false);
         return true;
       }
@@ -2793,7 +2777,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   }
 
   private void sendFrameChange(JSVPanel jsvp) {
-    PeakInfo pi = (jsvp.getSpectrumAt(0)).getSelectedPeak();
+    PeakInfo pi = (jsvp.getSpectrum()).getSelectedPeak();
     sendScript(pi == null ? null : pi.getStringInfo());
   }
 

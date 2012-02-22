@@ -223,7 +223,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    */
   public void properties_actionPerformed(ActionEvent e) {
 
-    JDXSpectrum spectrum = selectedJSVPanel.getSpectrumAt(0);
+    JDXSpectrum spectrum = selectedJSVPanel.getSpectrum();
     Object[][] rowData = (source.isCompoundSource ? source
         .getHeaderRowDataAsArray(false, 0) : spectrum
         .getHeaderRowDataAsArray());

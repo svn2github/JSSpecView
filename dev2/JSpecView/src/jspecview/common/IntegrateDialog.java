@@ -21,7 +21,6 @@ package jspecview.common;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -75,22 +74,6 @@ public class IntegrateDialog extends JDialog {
   private double factor;
 
   /**
-   * Initalises the <code>IntegralDialog with default values for minY, offset
-   * and factor. The default values are:
-   * <pre>
-   *   minY = 0.1
-   *   offset = 30%
-   *   factor = 50%
-   * </pre>
-   * @param frame the parent frame
-   * @param title the title of the dialog
-   * @param modal the modality
-   */
-  public IntegrateDialog(Frame frame, String title, boolean modal) {
-    this(frame, title, modal, 0.1, 30, 50);
-  }
-
-  /**
     * Initialses the <code>IntegralDialog with the given values for minY, offset
     * and factor
     * @param panel the parent panel
@@ -117,39 +100,6 @@ public class IntegrateDialog extends JDialog {
         setLocation( panel.getLocationOnScreen().x + (panel.getSize().width / 2),
                      panel.getLocationOnScreen().y + (panel.getSize().height / 2));
 
-      pack();
-      setVisible(true);
-
-    }
-    catch(Exception ex) {
-      ex.printStackTrace();
-    }
-  }
-
-  /**
-   * Initialses the <code>IntegralDialog with the given values  for minY, offset
-   * and factor
-   * @param frame the parent frame
-   * @param title the title of the dialog
-   * @param modal the modality
-   * @param minY the minimum percent Y
-   * @param offset the offset
-   * @param factor the integral factor
-   */
-  public IntegrateDialog(Frame frame, String title, boolean modal,
-                         double minY, double offset, double factor){
-    super(frame, title, modal);
-    this.minY = minY;
-    this.offset = offset;
-    this.factor = factor;
-    try {
-      jbInit();
-      setResizable(false);
-
-      // Sets the location to the middle of the parent frame if it has one
-      if(frame != null)
-        setLocation((frame.getLocation().x + frame.getSize().width)/2,
-                    (frame.getLocation().y + frame.getSize().height)/2);
       pack();
       setVisible(true);
 

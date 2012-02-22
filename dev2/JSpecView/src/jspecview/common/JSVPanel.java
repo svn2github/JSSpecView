@@ -296,10 +296,14 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        the spectrum
    * @throws ScalesIncompatibleException
    */
-  public JSVPanel(Graph spectrum) throws ScalesIncompatibleException {
+  public JSVPanel(Graph spectrum) {
     super();
     setDefaultMouseListener();
-    initJSVPanel(new Graph[] { spectrum });
+    try {
+      initJSVPanel(new Graph[] { spectrum });
+    } catch (ScalesIncompatibleException e) {
+      // impossible
+    }
   }
 
   /**
@@ -2268,9 +2272,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     newJSVPanel.setGridOn(isGridOn());
     newJSVPanel.setReversePlot(isPlotReversed());
     newJSVPanel.setCoordinatesOn(isCoordinatesOn());
-    //newJSVPanel.setOverlayIncreasing(isOverlayIncreasing());
     newJSVPanel.setZoomEnabled(isZoomEnabled());
-    //    newJSVPanel.setZoomEnabled(true);
 
     return newJSVPanel;
   }
@@ -2884,14 +2886,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     return ((JSVPanel) frame.getContentPane().getComponent(0));
   }
 
-  public static JSVPanel getPanel1(JInternalFrame frame) {
-    try {
-      return ((JSVPanel) frame.getContentPane().getComponent(1));
-    } catch (Exception e) {
-      return null;
-    }
-  }
-
   public void setParam(DisplayScheme ds, ScriptToken st) {
     if (st == null || st == ScriptToken.TITLEFONTNAME)
       setTitleFontName(ds.getTitleFont());
@@ -2930,6 +2924,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       setXUnitsOn(parameters.xUnitsOn);
     if (st == null || st == ScriptToken.YUNITSON)
       setYUnitsOn(parameters.yUnitsOn);
+  }
+
+  public JDXSpectrum getSpectrum() {
+    return getSpectrumAt(0);
   }
 
 }
