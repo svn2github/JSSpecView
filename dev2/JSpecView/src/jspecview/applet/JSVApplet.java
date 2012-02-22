@@ -274,7 +274,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     }
     // enable or disable menus
     appletPopupMenu = new JSVAppletPopupMenu(this, isSignedApplet);
-    appletPopupMenu.enableMenus(menuOn, enableZoom);
+    appletPopupMenu.enableMenus(allowMenu, enableZoom);
     //setBackground(backgroundColor);
 
     try {
@@ -888,10 +888,10 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
   }
 
   private String fullName;
-  private boolean enableZoom;
-  private boolean menuOn;
+  private boolean enableZoom = true;
+  private boolean allowMenu = true;
   private boolean compoundMenuOn;
-  private boolean compoundMenuOn2;
+  private boolean allowCompoundMenu = true;
   private String dirLastExported;
 
   /**
@@ -1318,10 +1318,10 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
           enableZoom = Boolean.parseBoolean(value);
           break;
         case MENUON:
-          menuOn = Boolean.parseBoolean(value);
+          allowMenu = Boolean.parseBoolean(value);
           break;
         case COMPOUNDMENUON:
-          compoundMenuOn2 = Boolean.parseBoolean(value);
+          allowCompoundMenu = Boolean.parseBoolean(value);
           break;
         case INTERFACE:
           theInterface = value;
@@ -1439,11 +1439,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
 
     specs = source.getSpectra();
     boolean continuous = source.getJDXSpectrum(0).isContinuous();
-    if (!compoundMenuOn2)
-      compoundMenuOn = false;
-    else {
-      compoundMenuOn = source.isCompoundSource;
-    }
+    compoundMenuOn = allowCompoundMenu && source.isCompoundSource;
 
     String Yunits = source.getJDXSpectrum(0).getYUnits();
     String Xunits = source.getJDXSpectrum(0).getXUnits();
