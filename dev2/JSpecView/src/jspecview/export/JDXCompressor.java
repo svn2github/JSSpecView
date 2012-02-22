@@ -79,7 +79,7 @@ class JDXCompressor {
         } else {
           lastDif = temp;
           if (nDif > 0) {
-            yStr.append(makeDUP(nDif + 1));
+            yStr.append(makeDUP(nDif));
             nDif = 0;
           }
           yStr.append(temp);
@@ -87,7 +87,7 @@ class JDXCompressor {
         y1 = y2;
       }
       if (nDif > 0)
-        yStr.append(makeDUP(nDif + 1));
+        yStr.append(makeDUP(nDif));
       // convert last digit of string to SQZ
       yStr.append(makeSQZ(xyCoords[i], yFactor));
       buffer.append(yStr).append(JSpecViewUtils.newLine);
