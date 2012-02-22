@@ -285,7 +285,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private JButton overlayKeyButton = new JButton();
   //private OverlayLegendDialog legend;
   private JMenu processingMenu = new JMenu();
-  private JMenuItem integrateMenuItem = new JMenuItem();
+  private JCheckBoxMenuItem integrateCheckBoxMenuItem = new JCheckBoxMenuItem();
   private JMenuItem transAbsMenuItem = new JMenuItem();
   private JMenuItem solColMenuItem = new JMenuItem();
   private JMenuItem errorLogMenuItem = new JMenuItem();
@@ -991,7 +991,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     overlayKeyButton.setEnabled(false);
 
     setMenuItem(
-    integrateMenuItem, 'I', "Integrate HNMR", 0, 0, new ActionListener() {
+    integrateCheckBoxMenuItem, 'I', "Integrate HNMR", 0, 0, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         integrateMenuItem_actionPerformed(e);
       }
@@ -1108,7 +1108,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     windowMenu.add(hideAllMenuItem);
     //    windowMenu.add(showMenu);
     windowMenu.add(showMenuItem);
-    processingMenu.add(integrateMenuItem).setEnabled(false);
+    processingMenu.add(integrateCheckBoxMenuItem).setEnabled(false);
     processingMenu.add(transAbsMenuItem).setEnabled(false);
     processingMenu.add(solColMenuItem).setEnabled(false);
     windowMenu.addSeparator();
@@ -1346,7 +1346,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
     boolean continuous = spec.isContinuous();
     boolean isAbsTrans = (spec.isAbsorbance() || spec.isTransmittance());
     saveAsJDXMenu.setEnabled(spec.getDataClass().equals("XYDATA"));
-    integrateMenuItem.setEnabled(spec.isHNMR() && continuous);
+    integrateCheckBoxMenuItem.setEnabled(spec.isHNMR() && continuous);
+    integrateCheckBoxMenuItem.setSelected(spec.isHNMR() && continuous && spec.isIntegrated());
     //  Can only convert from T <-> A  if Absorbance or Transmittance and continuous
     transAbsMenuItem.setEnabled(continuous && isAbsTrans);
     Coordinate xyCoords[] = spec.getXYCoords();
@@ -1378,7 +1379,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     parameters.setFor(jsvp, (ds == null ? dsp.getDefaultScheme() : ds),
         includeMeasures);
 
-    jsvp.setXAxisDisplayedIncreasing(((JDXSpectrum) jsvp.getSpectrumAt(0))
+    jsvp.setXAxisDisplayedIncreasing((jsvp.getSpectrumAt(0))
         .shouldDisplayXAxisIncreasing());
     jsvp.setSource(currentSelectedSource);
     jsvp.setPopup(jsvpPopupMenu);
@@ -1451,7 +1452,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     frame.getContentPane().add(jsvp);
     desktopPane.add(frame);
     frame.setSize(550, 350);
-    System.out.println("inside overlay");
     transAbsMenuItem.setEnabled(false);
     solColMenuItem.setEnabled(false);
     try {
@@ -1678,7 +1678,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
       
       selectFrameNode(frame);
     }
-
   }
 
   /**
@@ -1709,6 +1708,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     public String toString() {
       return frame.getTitle();
     }
+    
   }
 
   /**
@@ -1819,7 +1819,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
       // Update the menu items for the display menu
       JSVPanel jsvp = JSVPanel.getPanel0(frame);
-      JDXSpectrum spec = (JDXSpectrum) jsvp.getSpectrumAt(0);
+      JDXSpectrum spec = jsvp.getSpectrumAt(0);
       gridCheckBoxMenuItem.setSelected(jsvp.isGridOn());
       gridToggleButton.setSelected(jsvp.isGridOn());
       coordsCheckBoxMenuItem.setSelected(jsvp.isCoordinatesOn());
@@ -2426,9 +2426,18 @@ public class MainFrame extends JFrame implements DropTargetListener,
     } else {
       newJsvPanel = AppUtils.integrate(this, frame, true);
     }
-
+    newJsvPanel.getSpectrumAt(0).setIntegrated(AppUtils.hasIntegration(newJsvPanel));
     setJSVPanelProperties(newJsvPanel, true);
+    findSpec(frame).jsvp = selectedJSVPanel = newJsvPanel;
     validate();
+  }
+
+
+  private SpecInfo findSpec(JInternalFrame frame) {
+    for (int i = 0; i < specInfos.length; i++)
+      if (specInfos[i].frame == frame)
+        return specInfos[i];
+    return null;
   }
 
   /**
@@ -2506,7 +2515,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       return;
     }
 
-    JDXSpectrum spectrum = (JDXSpectrum) jsvp.getSpectrumAt(0);
+    JDXSpectrum spectrum = jsvp.getSpectrumAt(0);
     JDXSpectrum newSpec;
     try {
       switch (comm) {
@@ -2649,7 +2658,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     System.out.println("JSpecView MainFrame.syncScript: " + script);
     if (!file.equals(recentJmolName))
       openFile(new File(file));
-    if (!selectPanel(index))
+    if (!selectPanelByPeak(index))
       script = null;
     selectedJSVPanel.processPeakSelect(script);
     sendFrameChange(selectedJSVPanel);
@@ -2734,10 +2743,10 @@ public class MainFrame extends JFrame implements DropTargetListener,
     setFrame(specInfos[i], false);
   }
 
-  private boolean selectPanel(String index) {
+  private boolean selectPanelByPeak(String index) {
     for (int i = 0; i < specInfos.length; i++) {
       SpecInfo si = specInfos[i];
-      if (((JDXSpectrum) si.jsvp.getSpectrumAt(0)).hasPeakIndex(index)) {
+      if ((si.jsvp.getSpectrumAt(0)).hasPeakIndex(index)) {
         setFrame(si, false);
         return true;
       }
@@ -2748,12 +2757,14 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private void setFrame(SpecInfo specInfo, boolean fromTree) {
     JInternalFrame frame = specInfo.frame;
     selectedJSVPanel = specInfo.jsvp;
+    frame.setVisible(true);
     frame.moveToFront();
     try {
       frame.setSelected(true);
     } catch (PropertyVetoException pve) {
     }
     if (fromTree && frame.isEnabled()) {
+      selectedJSVPanel.setEnabled(true);
       sendFrameChange(specInfo.jsvp);
       if (desktopPane.getStyle() == ScrollableDesktopPane.STYLE_STACK)
         desktopPane.setAllEnabled(false);
@@ -2784,7 +2795,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   }
 
   private void sendFrameChange(JSVPanel jsvp) {
-    PeakInfo pi = ((JDXSpectrum) jsvp.getSpectrumAt(0)).getSelectedPeak();
+    PeakInfo pi = (jsvp.getSpectrumAt(0)).getSelectedPeak();
     sendScript(pi == null ? null : pi.getStringInfo());
   }
 

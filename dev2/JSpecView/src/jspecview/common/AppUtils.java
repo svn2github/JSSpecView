@@ -42,7 +42,7 @@ public class AppUtils {
 	      boolean allowIntegration = false;
 	      IntegralGraph integGraph = null;
 	      IntegrateDialog integDialog;
-	      JDXSpectrum spectrum = (JDXSpectrum)jsvp.getSpectrumAt(0);
+	      JDXSpectrum spectrum = jsvp.getSpectrumAt(0);
 	
 	      if (numGraphs == 1){
 	        allowIntegration = spectrum.isHNMR();
@@ -54,7 +54,7 @@ public class AppUtils {
 	      if(allowIntegration){
 	        if(showDialog){
 	          if(integrateOn){
-	            IntegralGraph graph = (IntegralGraph)jsvp.getSpectrumAt(1);
+	            IntegralGraph graph = (IntegralGraph)jsvp.getIntegralGraph();
 	            integDialog = new IntegrateDialog(owner, "Integration Parameters", true,
 	                graph.getPercentMinimumY(),
 	                graph.getPercentOffset(),
@@ -87,6 +87,8 @@ public class AppUtils {
 	            frame.getContentPane().remove(jsvp);
 	            frame.getContentPane().add(newJsvp);
 	            newJsvp.setPlotColors(new Color[]{newJsvp.getPlotColor(0), integralPlotColor});
+	            jsvp.setEnabled(true);
+	            newJsvp.setEnabled(true);
 	          }
 	        }
 	        catch (ScalesIncompatibleException ex) {
@@ -105,7 +107,7 @@ public class AppUtils {
 	    boolean allowIntegration = false;
 	    IntegralGraph integGraph = null;
 	    IntegrateDialog integDialog;
-	    JDXSpectrum spectrum = (JDXSpectrum) jsvp.getSpectrumAt(0);
+	    JDXSpectrum spectrum = jsvp.getSpectrumAt(0);
 	
 	    if (numGraphs == 1) {
 	      allowIntegration = spectrum.isHNMR();
@@ -117,7 +119,7 @@ public class AppUtils {
 	    if (allowIntegration) {
 	      if (showDialog) {
 	        if (integrateOn) {
-	          IntegralGraph graph = (IntegralGraph) jsvp.getSpectrumAt(1);
+	          IntegralGraph graph = (IntegralGraph) jsvp.getIntegralGraph();
 	          integDialog = new IntegrateDialog(panel, "Integration Parameters", true,
 	                                            graph.getPercentMinimumY(),
 	                                            graph.getPercentOffset(),
@@ -181,7 +183,7 @@ public class AppUtils {
 	  public static boolean hasIntegration(JSVPanel jsvp) {
 	    int numGraphs = jsvp.getNumberOfSpectra();
 	    if(numGraphs == 2){
-	      String title = jsvp.getSpectrumAt(1).getTitle();
+	      String title = jsvp.getIntegralGraph().getTitle();
 	      if(title.toLowerCase().indexOf("integral") != -1){
 	        return true;
 	      }

@@ -398,7 +398,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     jsvp.addPeakPickedListener(this);
     jsvp.setIndex(index);
     parameters.setFor(jsvp, null, true);
-    jsvp.setXAxisDisplayedIncreasing(((JDXSpectrum) jsvp.getSpectrumAt(0)).shouldDisplayXAxisIncreasing());
+    jsvp.setXAxisDisplayedIncreasing((jsvp.getSpectrumAt(0)).shouldDisplayXAxisIncreasing());
     jsvp.setSource(source);
     jsvp.setPopup(appletPopupMenu);
 
@@ -568,7 +568,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     currentSpectrumIndex = index;
     setSelectedPanel(jsvp);
 
-    if (((JDXSpectrum) selectedJSVPanel.getSpectrumAt(0)).isHNMR())
+    if ((selectedJSVPanel.getSpectrumAt(0)).isHNMR())
       appletPopupMenu.integrateMenuItem.setEnabled(true);
     else
       appletPopupMenu.integrateMenuItem.setEnabled(false);
@@ -600,7 +600,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
    */
   protected void headerMenuItem_actionPerformed(ActionEvent e) {
     
-    JDXSpectrum spectrum = (JDXSpectrum) selectedJSVPanel.getSpectrumAt(0);
+    JDXSpectrum spectrum = selectedJSVPanel.getSpectrumAt(0);
     Object[][] rowData = (overlay ? source
         .getHeaderRowDataAsArray(false, 0) : spectrum
         .getHeaderRowDataAsArray());
@@ -782,7 +782,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     JSVPanel jsvp = (JSVPanel) appletPanel.getComponent(0);
     if (jsvp.getNumberOfSpectra() > 1)
       return;
-    JDXSpectrum spectrum = (JDXSpectrum) jsvp.getSpectrumAt(0);
+    JDXSpectrum spectrum = jsvp.getSpectrumAt(0);
     if (!spectrum.isContinuous())
       return;
     switch (comm) {
@@ -918,7 +918,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
           + " spectra available.";
     String errMsg = null;
     try {
-      JDXSpectrum spec = (JDXSpectrum) selectedJSVPanel.getSpectrumAt(n);
+      JDXSpectrum spec = selectedJSVPanel.getSpectrumAt(n);
       errMsg = Exporter.export(comm, (file == null ? null : file
           .getAbsolutePath()), spec, 0, spec.getXYCoords().length - 1);
     } catch (IOException ioe) {
@@ -1470,7 +1470,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     }
     //  Can only integrate a continuous H NMR spectrum
     if (continuous
-        && ((JDXSpectrum) selectedJSVPanel
+        && (selectedJSVPanel
             .getSpectrumAt(0)).isHNMR())
       appletPopupMenu.integrateMenuItem.setEnabled(true);
     //Can only convert from T <-> A  if Absorbance or Transmittance and continuous
@@ -1525,7 +1525,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     if (jsvPanels == null)
       return false;
     for (int i = 0; i < jsvPanels.length; i++) {
-      if (((JDXSpectrum) jsvPanels[i].getSpectrumAt(0)).hasPeakIndex(index)) {
+      if ((jsvPanels[i].getSpectrumAt(0)).hasPeakIndex(index)) {
         setSpectrumNumber(i + 1);
         return true;
       }

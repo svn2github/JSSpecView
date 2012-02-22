@@ -406,6 +406,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       ScalesIncompatibleException {
     this.spectra = spectra;
     numOfSpectra = spectra.length;
+    if (numOfSpectra == 1)
+      title = (getSpectrumAt(0)).getPeakTitle();
 
     checkUnits();
 
@@ -445,7 +447,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private void initJSVPanel(Graph[] spectra) throws ScalesIncompatibleException {
     this.spectra = spectra;
     numOfSpectra = spectra.length;
-
+    if (numOfSpectra == 1)
+      title = (getSpectrumAt(0)).getPeakTitle();
     xyCoordsList = new Coordinate[numOfSpectra][];
 
     int[] startIndices = new int[numOfSpectra];
@@ -967,8 +970,17 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        the index of the <code>Spectrum</code>
    * @return the <code>Spectrum</code> at the specified index
    */
-  public Graph getSpectrumAt(int index) {
-    return spectra[index];
+  public JDXSpectrum getSpectrumAt(int index) {
+    return (JDXSpectrum) spectra[index];
+  }
+
+  /**
+   * Returns the <code>Integral</code> at the specified index
+   * 
+   * @return the <code>Spectrum</code> at the specified index
+   */
+  public Graph getIntegralGraph() {
+    return spectra[1];
   }
 
   /**
@@ -1220,7 +1232,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       drawBar(g, hl.getStartX(), hl.getEndX(), highlightColor = hl.getColor(), true);
     }
 
-    ArrayList<PeakInfo> list = ((JDXSpectrum) getSpectrumAt(0)).getPeakList();
+    ArrayList<PeakInfo> list = (getSpectrumAt(0)).getPeakList();
     if (list != null && list.size() > 0) {
       for (int i = list.size(); --i >= 0;) {
         PeakInfo pi = list.get(i);
@@ -1551,8 +1563,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         calculateFontSize(width, 14, true)));
     FontMetrics fm = g.getFontMetrics();
     g.setColor(titleColor);
-    if (numOfSpectra == 1)
-      title = ((JDXSpectrum) getSpectrumAt(0)).getPeakTitle();
     g.drawString(title, 5, (int) (height - fm.getHeight() / 2));
   }
 
@@ -2396,13 +2406,13 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     int numOfSpectra = getNumberOfSpectra();
     if (numOfSpectra == 1 || type.equals("JPG") || type.equals("PNG")) {
 
-      JDXSpectrum spec = (JDXSpectrum) getSpectrumAt(0);
+      JDXSpectrum spec = getSpectrumAt(0);
       return exportSpectrum(spec, fc, type, 0, recentFileName, dirLastExported);
     }
 
     String[] items = new String[numOfSpectra];
     for (int i = 0; i < numOfSpectra; i++) {
-      JDXSpectrum spectrum = (JDXSpectrum) getSpectrumAt(i);
+      JDXSpectrum spectrum = getSpectrumAt(i);
       items[i] = spectrum.getTitle();
     }
 
@@ -2433,7 +2443,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     button.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         int index = cb.getSelectedIndex();
-        JDXSpectrum spec = (JDXSpectrum) getSpectrumAt(index);
+        JDXSpectrum spec = getSpectrumAt(index);
         dialog.dispose();
         exportSpectrum(spec, f, t, index, rfn, dl);
       }
@@ -2491,7 +2501,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       return true;
     int store = 0;
     double xPt = coord.getXVal();
-    JDXSpectrum spectrum = (JDXSpectrum) getSpectrumAt(0);
+    JDXSpectrum spectrum = getSpectrumAt(0);
     Coordinate[] coords = spectrum.getXYCoords();
     for (int i = 0; i < coords.length; i++) {
       if (coords[i].getXVal() > xPt) {
@@ -2517,7 +2527,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   public void processPeakSelect(String peak) {
-    if (((JDXSpectrum) spectra[0]).getPeakList() != null)
+    if (getSpectrumAt(0).getPeakList() != null)
       removeAllHighlights();
     if (peak == null)
       return;
@@ -2556,7 +2566,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   public void notifyPeakPickedListeners(Coordinate coord) {
     // TODO: Currently Aassumes spectra are not overlayed
     notifyPeakPickedListeners(new PeakPickedEvent(this, coord,
-        ((JDXSpectrum) spectra[0]).getAssociatedPeakInfo(coord)));
+        getSpectrumAt(0).getAssociatedPeakInfo(coord)));
   }
 
   private void notifyPeakPickedListeners(PeakPickedEvent eventObj) {
@@ -2841,7 +2851,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   public void toPeak(int istep) {
     istep *= (shouldDrawXAxisIncreasing() ? 1 : -1);
     coordClicked = new Coordinate(lastClickX, 0);
-    JDXSpectrum spec = (JDXSpectrum) getSpectrumAt(0);
+    JDXSpectrum spec = getSpectrumAt(0);
     int iPeak = spec.setNextPeak(coordClicked, istep);
     if (iPeak < 0)
       return;
@@ -2872,6 +2882,14 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
   public static JSVPanel getPanel0(JInternalFrame frame) {
     return ((JSVPanel) frame.getContentPane().getComponent(0));
+  }
+
+  public static JSVPanel getPanel1(JInternalFrame frame) {
+    try {
+      return ((JSVPanel) frame.getContentPane().getComponent(1));
+    } catch (Exception e) {
+      return null;
+    }
   }
 
   public void setParam(DisplayScheme ds, ScriptToken st) {
