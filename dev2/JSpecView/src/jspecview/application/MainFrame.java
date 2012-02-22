@@ -2415,7 +2415,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
   protected void integrateMenuItem_actionPerformed(ActionEvent e) {
     JInternalFrame frame = desktopPane.getSelectedFrame();
     JSVPanel newJsvPanel = JSVPanel.getPanel0(frame);
-
     if (AppUtils.hasIntegration(newJsvPanel)) {
       Object errMsg = AppUtils.removeIntegration(frame.getContentPane());
       if (errMsg != null) {
@@ -2426,7 +2425,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     } else {
       newJsvPanel = AppUtils.integrate(this, frame, true);
     }
-    newJsvPanel.getSpectrumAt(0).setIntegrated(AppUtils.hasIntegration(newJsvPanel));
     setJSVPanelProperties(newJsvPanel, true);
     findSpec(frame).jsvp = selectedJSVPanel = newJsvPanel;
     validate();
