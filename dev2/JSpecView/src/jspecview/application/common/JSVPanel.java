@@ -85,6 +85,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
+import jspecview.application.common.ScriptParser.ScriptToken;
 import jspecview.common.Coordinate;
 import jspecview.common.Graph;
 import jspecview.common.IntegrationRatio;
@@ -2872,9 +2873,44 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     return ((JSVPanel) frame.getContentPane().getComponent(0));
   }
 
-  public void putParameters(Parameters parameters) {
-    // TODO Auto-generated method stub
-    
+  public void setParam(DisplayScheme ds, ScriptToken st) {
+    if (st == null || st == ScriptToken.TITLEFONTNAME)
+      setTitleFontName(ds.getTitleFont());
+    if (st == null || st == ScriptToken.DISPLAYFONTNAME)
+      setDisplayFontName(ds.getDisplayFont());
+    if (st == null || st == ScriptToken.TITLECOLOR)
+      setTitleColor(ds.getColor("title"));
+    if (st == null || st == ScriptToken.UNITSCOLOR)
+      setUnitsColor(ds.getColor("units"));
+    if (st == null || st == ScriptToken.SCALECOLOR)
+      setScaleColor(ds.getColor("scale"));
+    if (st == null || st == ScriptToken.COORDINATESCOLOR)
+      setcoordinatesColor(ds.getColor("coordinates"));
+    if (st == null || st == ScriptToken.GRIDCOLOR)
+      setGridColor(ds.getColor("grid"));
+    if (st == null || st == ScriptToken.PLOTCOLOR)
+      setPlotColor(ds.getColor("plot"));
+    if (st == null || st == ScriptToken.PLOTAREACOLOR)
+      setPlotAreaColor(ds.getColor("plotarea"));
+    if (st == null || st == ScriptToken.BACKGROUNDCOLOR)
+      setBackground(ds.getColor("background"));
+    if (st == null || st == ScriptToken.INTEGRALPLOTCOLOR)
+      setIntegralPlotColor(ds.getColor("integral"));
+  }
+
+  public void setBoolean(Parameters parameters, ScriptToken st) {
+    if (st == null || st == ScriptToken.GRIDON)
+      setGridOn(parameters.gridOn);
+    if (st == null || st == ScriptToken.COORDINATESON)
+      setCoordinatesOn(parameters.coordinatesOn);
+    if (st == null || st == ScriptToken.XSCALEON)
+      setXScaleOn(parameters.xScaleOn);
+    if (st == null || st == ScriptToken.YSCALEON)
+      setYScaleOn(parameters.yScaleOn);
+    if (st == null || st == ScriptToken.XUNITSON)
+      setXUnitsOn(parameters.xUnitsOn);
+    if (st == null || st == ScriptToken.YUNITSON)
+      setYUnitsOn(parameters.yUnitsOn);
   }
 
 }

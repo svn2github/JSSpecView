@@ -397,7 +397,6 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     // set JSVPanel properties from applet parameters
     jsvp.addPeakPickedListener(this);
     jsvp.setIndex(index);
-    parameters.getPlotColors(); //<======= Kind of sloppy
     parameters.setFor(jsvp, null, true);
     jsvp.setXAxisDisplayedIncreasing(((JDXSpectrum) jsvp.getSpectrumAt(0)).shouldDisplayXAxisIncreasing());
     jsvp.setSource(source);
@@ -1288,7 +1287,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
       try {
         switch (st) {
         default:
-          parameters.set(st, value);
+          parameters.set(null, st, value);
           break;
         case UNKNOWN:
           break;

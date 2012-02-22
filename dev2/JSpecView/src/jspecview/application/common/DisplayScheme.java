@@ -129,8 +129,10 @@ public class DisplayScheme {
    * @param element the name of the element
    * @param color the color the element should have
    */
-  public void setColor(String element, Color color){
-    elementColors.put(element, color);
+  public Color setColor(String element, Color color){
+    if (color != null)
+      elementColors.put(element, color);
+    return color;
   }
 
   /**

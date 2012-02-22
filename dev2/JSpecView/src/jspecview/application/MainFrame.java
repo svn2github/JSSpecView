@@ -327,6 +327,10 @@ public class MainFrame extends JFrame implements DropTargetListener,
   }
 
   private void exitJSpecView(boolean withDialog) {
+    try {
+      onProgramExit();
+    } catch (Exception e) {
+    }
     if (jmol != null) {
       setVisible(false);
       return;
@@ -641,18 +645,21 @@ public class MainFrame extends JFrame implements DropTargetListener,
     frame.setSize(800, 500);
     //frame.pack();
 
-    // check for command-line arguments
     if (args.length > 0) {
-      for (int i = 0; i < args.length; i++) {
-        System.out.println("JSpecView is attempting to open " + args[i]);
-        String filePath = args[i];
-        File file = new File(filePath);
-        if (file.exists()) {
-          frame.openFile(file);
-        } else {
-          frame.writeStatus("File: " + filePath + " does not exist");
+      // check for command-line arguments
+      if (args.length == 2 && args[0].equalsIgnoreCase("-script"))
+        frame.checkScript(args[1]);
+      else
+        for (int i = 0; i < args.length; i++) {
+          System.out.println("JSpecView is attempting to open " + args[i]);
+          String filePath = args[i];
+          File file = new File(filePath);
+          if (file.exists()) {
+            frame.openFile(file);
+          } else {
+            frame.writeStatus("File: " + filePath + " does not exist");
+          }
         }
-      }
       frame.setVisible(true);
     } else {
       frame.setVisible(true);
@@ -2637,20 +2644,18 @@ public class MainFrame extends JFrame implements DropTargetListener,
       System.out.println("Running in DEBUG mode");
     }
     JSVPanel jsvp = getCurrentJSVPanel();
-    jsvp.putParameters(parameters);
     while (allParamTokens.hasMoreTokens()) {
       String token = allParamTokens.nextToken();
       // now split the key/value pair
       StringTokenizer eachParam = new StringTokenizer(token);
-
       String key = eachParam.nextToken();
       if (key.equalsIgnoreCase("SET"))
         key = eachParam.nextToken();
       key = key.toUpperCase();
       String value = eachParam.nextToken();
-      ScriptToken st = ScriptToken.getScriptToken(value);
+      ScriptToken st = ScriptToken.getScriptToken(key);
       System.out.println("KEY-> " + key + " VALUE-> " + value + " : " + st);
-      if (jsvp == null && st != ScriptToken.LOAD)
+      if (jsvp == null && st != ScriptToken.LOAD && st != ScriptToken.SPECTRUMNUMBER)
         return;
       try {
         switch (st) {
@@ -2658,19 +2663,19 @@ public class MainFrame extends JFrame implements DropTargetListener,
           System.out.println("Unrecognized parameter: " + key);
           break;
         case LOAD:
+          int n = (specInfos == null ? 0 : specInfos.length);
           openFile(value);
-          jsvp = getCurrentJSVPanel();
+          setFrame(n);            
+          jsvp = selectedJSVPanel;
           if (jsvp == null)
             return;
-          jsvp.putParameters(parameters);
           break;
         default:
-          parameters.set(st, value);
+          parameters.set(jsvp, st, value);
           break;
         case SPECTRUMNUMBER:
-          int ispec = Integer.parseInt(value) - 1;
-          if (ispec >= 0 || ispec < specInfos.length)
-            setFrame(specInfos[ispec], false);            
+          setFrame(Integer.parseInt(value) - 1);            
+          jsvp = selectedJSVPanel;
           break;
         case INTERFACE:
           if (value.equalsIgnoreCase("stack"))
@@ -2698,9 +2703,14 @@ public class MainFrame extends JFrame implements DropTargetListener,
         }
       } catch (Exception e) {
       }
-      parameters.setFor(jsvp, null, true);
     }
     repaint();
+  }
+
+  private void setFrame(int i) {
+    if (specInfos == null || i < 0 || i >= specInfos.length)
+      return;
+    setFrame(specInfos[i], false);
   }
 
   private boolean selectPanel(String index) {
@@ -2984,10 +2994,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
   };
 
   protected void windowClosing_actionPerformed() {
-    try {
-      onProgramExit();
-    } catch (Exception e) {
-    }
     exitJSpecView(true);
   }
 

@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
+import jspecview.common.JSpecViewUtils;
+
 public class Parameters extends DisplayScheme {
 
   public Parameters(String name) {
@@ -41,38 +43,19 @@ public class Parameters extends DisplayScheme {
   
 
   public void setFor(JSVPanel jsvp, DisplayScheme ds, boolean includeMeasures) {
+    
     if (ds == null)
       ds = this;
-    
+
     // measures -- not in displayScheme?
     
-    if (includeMeasures) {
-      jsvp.setGridOn(gridOn);
-      jsvp.setCoordinatesOn(coordinatesOn);
-      jsvp.setXScaleOn(xScaleOn);
-      jsvp.setYScaleOn(yScaleOn);
-      jsvp.setXUnitsOn(xUnitsOn);
-      jsvp.setYUnitsOn(yUnitsOn);
-    }
-   
-    // colors
+    if (includeMeasures)
+      jsvp.setBoolean(this, null);
+
+    // colors and fonts
     
     jsvp.setPlotColors(plotColors);
-
-    jsvp.setTitleColor(ds.getColor("title"));
-    jsvp.setUnitsColor(ds.getColor("units"));
-    jsvp.setScaleColor(ds.getColor("scale"));
-    jsvp.setcoordinatesColor(ds.getColor("coordinates"));
-    jsvp.setGridColor(ds.getColor("grid"));
-    jsvp.setPlotColor(ds.getColor("plot"));
-    jsvp.setPlotAreaColor(ds.getColor("plotarea"));
-    jsvp.setBackground(ds.getColor("background"));
-    jsvp.setIntegralPlotColor(ds.getColor("integral"));
-
-    // fonts
-    
-    jsvp.setTitleFontName(ds.getTitleFont());
-    jsvp.setDisplayFontName(ds.getDisplayFont());
+    jsvp.setParam(ds, null);
 
     // misc
     
@@ -81,13 +64,22 @@ public class Parameters extends DisplayScheme {
     jsvp.setTitleBoldOn(titleBoldOn);
   }
 
-  public void set(ScriptParser.ScriptToken st, String value) {
+  public void set(JSVPanel jsvp, ScriptParser.ScriptToken st, String value) {
+    Object param = null;
+    
     switch (st) {
     default:
       return;
+    case DEBUG:
+      JSpecViewUtils.DEBUG = Boolean.parseBoolean(value);
+      return;
     case PLOTCOLORS:
       plotColorsStr = value;
-      break;
+      if (jsvp == null)
+        getPlotColors();
+      else
+        jsvp.setPlotColors(getPlotColors(value));
+      return;
     case REVERSEPLOT:
       reversePlot = Boolean.parseBoolean(value);
       break;
@@ -108,36 +100,36 @@ public class Parameters extends DisplayScheme {
       break;
     case YUNITSON:
       yUnitsOn = Boolean.parseBoolean(value);
-      break;      
-    case BACKGROUNDCOLOR:
-      setColor("background", value);
-      break;
-    case COORDINATESCOLOR:
-      setColor("coordinates", value);
-      break;
-    case GRIDCOLOR:
-      setColor("grid", value);
-      break;
-    case PLOTAREACOLOR:
-      setColor("plotArea", value);
-      break;
-    case PLOTCOLOR:
-      setColor("plot", value);
-      break;
-    case SCALECOLOR:
-      setColor("scale", value);
-      break;
-    case TITLECOLOR:
-      setColor("title", value);
-      break;
-    case UNITSCOLOR:
-      setColor("units", value);
-      break;
-    case INTEGRALPLOTCOLOR:
-      setColor("integral", value);
       break;
     case TITLEBOLDON:
       titleBoldOn = Boolean.parseBoolean(value);
+      break;
+    case BACKGROUNDCOLOR:
+      param = setColor("background", value);
+      break;
+    case COORDINATESCOLOR:
+      param = setColor("coordinates", value);
+      break;
+    case GRIDCOLOR:
+      param = setColor("grid", value);
+      break;
+    case PLOTAREACOLOR:
+      param = setColor("plotarea", value);
+      break;
+    case PLOTCOLOR:
+      param = setColor("plot", value);
+      break;
+    case SCALECOLOR:
+      param = setColor("scale", value);
+      break;
+    case TITLECOLOR:
+      param = setColor("title", value);
+      break;
+    case UNITSCOLOR:
+      param = setColor("units", value);
+      break;
+    case INTEGRALPLOTCOLOR:
+      param = setColor("integral", value);
       break;
     case TITLEFONTNAME:
       GraphicsEnvironment g = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -147,6 +139,7 @@ public class Parameters extends DisplayScheme {
           titleFont = value;
           break;
         }
+      param = titleFont;
       break;
     case DISPLAYFONTNAME:
       GraphicsEnvironment g2 = GraphicsEnvironment
@@ -157,12 +150,19 @@ public class Parameters extends DisplayScheme {
           displayFont = value;
           break;
         }
+      param = displayFont;
       break;
     }
+    if (jsvp == null)
+      return;
+    if (param != null)
+      jsvp.setParam(this, st);
+    else
+      jsvp.setBoolean(this, st);
   }
 
-  private void setColor(String element, String value) {
-    setColor(element, AppUtils.getColorFromString(value));
+  private Color setColor(String element, String value) {
+    return setColor(element, AppUtils.getColorFromString(value));
   }
 
   /**
@@ -171,38 +171,35 @@ public class Parameters extends DisplayScheme {
    */
   public void getPlotColors() {
     if (plotColorsStr != null) {
-      StringTokenizer st = new StringTokenizer(plotColorsStr, ",;.- ");
-      int r, g, b;
-      List<Color> colors = new ArrayList<Color>();
-
-      try {
-        while (st.hasMoreTokens()) {
-
-          String token = st.nextToken();
-          if (token.startsWith("#")) {
-            colors.add(new Color(Integer
-                .parseInt(token.substring(1), 16)));
-          } else {
-            r = Integer.parseInt(token.trim());
-            g = Integer.parseInt(st.nextToken().trim());
-            b = Integer.parseInt(st.nextToken().trim());
-            colors.add(new Color(r, g, b));
-          }
-        }
-      } catch (NoSuchElementException nsee) {
-        return;
-      } catch (NumberFormatException nfe) {
-        return;
-      }
-
-      plotColors = (Color[]) colors.toArray(new Color[colors.size()]);
+      plotColors = getPlotColors(plotColorsStr);
     } else {
-      //      plotColors = new Color[specs.size()];
-      //      for(int i = 0; i < specs.size(); i++){
       plotColors[0] = getColor("plot");
-      //        System.out.println(i+" "+plotColors[i]);
     }
-    //    }
+  }
+
+  private Color[] getPlotColors(String plotColorsStr) {
+    StringTokenizer st = new StringTokenizer(plotColorsStr, ",;.- ");
+    int r, g, b;
+    List<Color> colors = new ArrayList<Color>();
+    try {
+      while (st.hasMoreTokens()) {
+        String token = st.nextToken();
+        if (token.startsWith("#")) {
+          colors.add(new Color(Integer
+              .parseInt(token.substring(1), 16)));
+        } else {
+          r = Integer.parseInt(token.trim());
+          g = Integer.parseInt(st.nextToken().trim());
+          b = Integer.parseInt(st.nextToken().trim());
+          colors.add(new Color(r, g, b));
+        }
+      }
+    } catch (NoSuchElementException nsee) {
+      return null;
+    } catch (NumberFormatException nfe) {
+      return null;
+    }
+    return (Color[]) colors.toArray(new Color[colors.size()]);
   }
 
 

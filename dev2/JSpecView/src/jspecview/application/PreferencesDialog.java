@@ -1016,6 +1016,7 @@ public class PreferencesDialog extends JDialog {
       previewPanel.setPlotAreaColor(currentDS.getColor("plotarea"));
       previewPanel.setBackground(currentDS.getColor("background"));
       previewPanel.setGridColor(currentDS.getColor("grid"));
+      //TODO Title font here
       previewPanel.setDisplayFontName(currentDS.getDisplayFont());
       repaint();
     }
