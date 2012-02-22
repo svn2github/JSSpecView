@@ -43,14 +43,14 @@ public class AppUtils {
     JSVPanel jsvp = (JSVPanel) jp.getComponent(0);
     boolean integrateOn = false;
     int numGraphs = jsvp.getNumberOfSpectra();
-    boolean allowIntegration = false;
     IntegralGraph integGraph = null;
     IntegrateDialog integDialog;
     JDXSpectrum spectrum = jsvp.getSpectrum();
 
+    boolean allowIntegration = false;
     if (numGraphs == 1) {
       allowIntegration = spectrum.isHNMR();
-    } else if ((integrateOn = AppUtils.hasIntegration(jsvp)) == true) {
+    } else if ((integrateOn = hasIntegration(jsvp)) == true) {
       allowIntegration = integrateOn;
     }
     spectrum.setIntegrated(allowIntegration);
@@ -111,8 +111,7 @@ public class AppUtils {
    * @return true if had integral, false otherwise
    */
   public static boolean hasIntegration(JSVPanel jsvp) {
-    JDXSpectrum spec = jsvp.getSpectrum();
-    return spec.isIntegrated();
+    return jsvp.getSpectrum().isIntegrated();
   }
 
   public static JSVPanel removeIntegration(Container pane) {
