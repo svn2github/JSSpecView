@@ -280,6 +280,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private JToggleButton revPlotToggleButton = new JToggleButton();
   private JButton aboutButton = new JButton();
   private JButton overlaySplitButton = new JButton();
+  private JMenuItem scriptMenuItem = new JMenuItem();
   private JMenuItem overlayKeyMenuItem = new JMenuItem();
   private JButton overlayKeyButton = new JButton();
   //private OverlayLegendDialog legend;
@@ -797,6 +798,12 @@ public class MainFrame extends JFrame implements DropTargetListener,
         clearMenuItem_actionPerformed(e);
       }
     });
+    setMenuItem(scriptMenuItem, 'S', "Script...", 83, InputEvent.SHIFT_MASK
+        , new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        scriptMenuItem_actionPerformed(e);
+      }
+    });
     setMenuItem(preferencesMenuItem, 'P', "Preferences...", 80,
         InputEvent.SHIFT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
@@ -1023,6 +1030,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
     fileMenu.add(closeMenuItem).setEnabled(false);
     fileMenu.add(closeAllMenuItem).setEnabled(false);
     fileMenu.addSeparator();
+    fileMenu.add(scriptMenuItem);
+    fileMenu.addSeparator();
     fileMenu.add(saveAsMenu).setEnabled(false);
     fileMenu.add(exportAsMenu).setEnabled(false);
     fileMenu.addSeparator();
@@ -1103,6 +1112,17 @@ public class MainFrame extends JFrame implements DropTargetListener,
     processingMenu.add(transAbsMenuItem).setEnabled(false);
     processingMenu.add(solColMenuItem).setEnabled(false);
     windowMenu.addSeparator();
+  }
+
+  private String recentScript;
+  protected void scriptMenuItem_actionPerformed(ActionEvent e) {
+    String script = (String) JOptionPane.showInputDialog(null,
+        "Enter a JSpecView script", "Script",
+        JOptionPane.PLAIN_MESSAGE, null, null, (recentScript == null ? recentScript : ""));
+    if (script == null)
+      return;
+    recentScript = script;
+    checkScript(script);
   }
 
   private static void setButton(AbstractButton button, String tip,
