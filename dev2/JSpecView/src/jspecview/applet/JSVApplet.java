@@ -114,7 +114,7 @@ import jspecview.common.Visible;
 
 public class JSVApplet extends JApplet implements PeakPickedListener {
 
-  public static final String APPLET_VERSION = "2.0.20120221-1930"; //??? what is this? not 2.0.200? 
+  public static final String APPLET_VERSION = "2.0.20120222-0930"; //??? what is this? not 2.0.200? 
 //  2.0.yyyymmdd-hhmm format - updated to keep track of whether you are using the latest version
   /**
    * 
@@ -373,7 +373,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
       selectedJSVPanel = jsvp;
       jsvp.setIndex(currentSpectrumIndex = 0);
     } else {
-      // initalise JSVPanels and add them to the array
+      // initialise JSVPanels and add them to the array
       jsvPanels = new JSVPanel[numberOfSpectra];
       try {
         for (int i = 0; i < numberOfSpectra; i++) {
