@@ -17,7 +17,7 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package jspecview.application;
+package jspecview.application.common;
 
 import java.awt.Color;
 import java.util.Hashtable;
@@ -33,13 +33,15 @@ import java.util.Map;
 public class DisplayScheme {
 
   /** The name of the DisplayScheme */
-  private String name;
-  /** The name of the font */
-  private String font;
+  protected String name;
+  /** The name of the title font */
+  protected String titleFont;
+  /** The name of the display font */
+  protected String displayFont;
   /** A map of the name of the elements and their colors*/
-  private Map<String, Color> elementColors;
+  protected Map<String, Color> elementColors = new Hashtable<String, Color>();
   /** Specifies if the display scheme is the default */
-  private boolean isDefault = false;
+  protected boolean isDefault = false;
 
   /**
    * Intialises a DisplayScheme with the given name
@@ -47,8 +49,6 @@ public class DisplayScheme {
    */
   public DisplayScheme(String name){
     this.name = name;
-    elementColors = new Hashtable<String, Color>();
-    font = null;
   }
 
   /**
@@ -68,19 +68,34 @@ public class DisplayScheme {
   }
 
   /**
+   * @return the title font name used in this <code>DisplayScheme</code>
+   */
+  public String getTitleFont(){
+    return titleFont;
+  }
+
+  /**
+   * Sets the title font name
+   * @param fontName the name of the font
+   */
+  public void setTitleFont(String fontName){
+    titleFont = fontName;
+  }
+
+  /**
    * Returns the font name used in this <code>DisplayScheme</code>
    * @return the font name used in this <code>DisplayScheme</code>
    */
-  public String getFont(){
-    return font;
+  public String getDisplayFont(){
+    return displayFont;
   }
 
   /**
    * Sets the font name
    * @param fontName the name of the font
    */
-  public void setFont(String fontName){
-    font = fontName;
+  public void setDisplayFont(String fontName){
+    displayFont = fontName;
   }
 
   /**
@@ -125,7 +140,7 @@ public class DisplayScheme {
    */
   public DisplayScheme copy(String newName){
     DisplayScheme ds = new DisplayScheme(newName);
-    ds.setFont(getFont());
+    ds.setDisplayFont(getDisplayFont());
     for(Map.Entry<String, Color> entry: elementColors.entrySet())
       ds.setColor(entry.getKey(), entry.getValue());
     return ds;
@@ -138,5 +153,18 @@ public class DisplayScheme {
   public DisplayScheme copy(){
     return copy(getName());
   }
+
+  protected void setDefaults() {
+    setColor("title", Color.BLACK);
+    setColor("units", Color.RED);
+    setColor("scale", Color.BLACK);
+    setColor("coordinates", Color.RED);
+    setColor("grid", Color.LIGHT_GRAY);
+    setColor("plot", Color.BLUE);
+    setColor("plotarea", Color.WHITE);
+    setColor("background", new Color(192, 192, 192));
+    setColor("integral", Color.red);
+  }
+
 
 }

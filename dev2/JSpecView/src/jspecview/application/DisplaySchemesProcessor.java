@@ -31,6 +31,7 @@ import java.io.Writer;
 import java.util.TreeMap;
 
 import jspecview.application.common.AppUtils;
+import jspecview.application.common.DisplayScheme;
 import jspecview.common.JSpecViewUtils;
 import jspecview.util.SimpleXmlReader;
 
@@ -69,7 +70,7 @@ public class DisplaySchemesProcessor {
     Color white = new Color(255,255,255);
 
     DisplayScheme dsdef = new DisplayScheme("Default");
-    dsdef.setFont("default");
+    dsdef.setDisplayFont("default");
     dsdef.setColor("title", black);
     dsdef.setColor("coordinates", black);
     dsdef.setColor("scale", black);
@@ -159,7 +160,7 @@ public class DisplaySchemesProcessor {
 	      if (theTag.equals("font")) {
 	        attr = reader.getAttrValue("face");
 	        if (attr.length() > 0 && ds != null)
-	          ds.setFont(attr);
+	          ds.setDisplayFont(attr);
 	      } else if (theTag.equals("titlecolor")) {
 	        Color color = getColor();
 	        if (color == null)
@@ -243,7 +244,7 @@ public class DisplaySchemesProcessor {
 
       buffer.write("\t<displayScheme name=\"" + ds.getName() + "\">");
       buffer.newLine();
-      buffer.write("\t\t<font face = \"" + ds.getFont() + "\"/>");
+      buffer.write("\t\t<font face = \"" + ds.getDisplayFont() + "\"/>");
       buffer.newLine();
       buffer.write("\t\t<titleColor hex = \"" +
                    AppUtils.colorToHexString(ds.getColor("title")) +

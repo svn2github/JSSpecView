@@ -43,7 +43,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.GraphicsEnvironment;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -56,7 +55,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.ArrayList;
 
@@ -80,10 +78,11 @@ import javax.swing.event.ChangeListener;
 import jspecview.application.common.AppUtils;
 import jspecview.application.common.JSVPanel;
 import jspecview.application.common.OverlayLegendDialog;
+import jspecview.application.common.Parameters;
 import jspecview.application.common.PeakPickedEvent;
 import jspecview.application.common.PeakPickedListener;
 import jspecview.application.common.PrintLayoutDialog;
-import jspecview.application.common.ScriptParser;
+import jspecview.application.common.ScriptParser.ScriptToken;
 import jspecview.common.Coordinate;
 import jspecview.common.Graph;
 import jspecview.common.IntegrationRatio;
@@ -133,18 +132,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
   private String recentFileName = "";
   private String recentURL = "";
 
-  private boolean gridOn = true;
-  private boolean coordinatesOn = true;
-  private boolean reversePlot = false;
-  private boolean menuOn = true;
-  private boolean compoundMenuOn = true;
-  private boolean compoundMenuOn2 = true;
-  private boolean enableZoom = true;
-  private boolean xScaleOn = true;
-  private boolean yScaleOn = true;
-  private boolean xUnitsOn = true;
-  private boolean yUnitsOn = true;
-  private boolean titleBoldOn = false;
+  private ArrayList<IntegrationRatio> integrationRatios = null; // Integration Ratio Annotations
+
 
   private int startIndex = -1;
   private int endIndex = -1;
@@ -158,24 +147,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
   private String appletReadyCallbackFunctionName;
 
   private String sltnclr = "255,255,255"; //Colour of Solution
-  private String titleFontName = null; // Title Font
-  private String displayFontName = null; // Display Font
 
-  private ArrayList<IntegrationRatio> integrationRatios = null; // Integration Ratio Annotations
-
-  private Color titleColor = Color.BLACK;
-  private Color gridColor = Color.LIGHT_GRAY;
-  private Color unitsColor = Color.RED;
-  private Color scaleColor = Color.BLACK;
-  private Color coordinatesColor = Color.RED;
-  private Color plotAreaColor = Color.WHITE;
-  private Color backgroundColor = new Color(192, 192, 192);
-  private Color plotColor = Color.BLUE;
-
-  private Color[] plotColors = { Color.blue, Color.green, Color.red, Color.magenta,
-      Color.yellow, Color.orange, Color.pink, Color.cyan };
-  private String plotColorsStr;
-  private Color integralPlotColor = Color.red;
 
   final private int TO_TRANS = 0;
   final private int TO_ABS = 1;
@@ -419,35 +391,14 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     }
   }
 
+  private Parameters parameters = new Parameters("applet");
+  
   private void initProperties(JSVPanel jsvp, int index) {
     // set JSVPanel properties from applet parameters
     jsvp.addPeakPickedListener(this);
     jsvp.setIndex(index);
-    jsvp.setGridOn(gridOn);
-    jsvp.setCoordinatesOn(coordinatesOn);
-    jsvp.setXScaleOn(xScaleOn);
-    jsvp.setYScaleOn(yScaleOn);
-    jsvp.setXUnitsOn(xUnitsOn);
-    jsvp.setYUnitsOn(yUnitsOn);
-    jsvp.setTitleBoldOn(titleBoldOn);
-    jsvp.setTitleFontName(titleFontName);
-    jsvp.setDisplayFontName(displayFontName);
-    jsvp.setReversePlot(reversePlot);
-    jsvp.setZoomEnabled(enableZoom);
-    // other JSVPanel properties
-    // Need to add to applet Parameters
-    jsvp.setPlotAreaColor(plotAreaColor);
-    jsvp.setGridColor(gridColor);
-    jsvp.setTitleColor(titleColor);
-    jsvp.setUnitsColor(unitsColor);
-    jsvp.setScaleColor(scaleColor);
-    jsvp.setcoordinatesColor(coordinatesColor);
-    //jsvp.setPlotColor(plotColor);
-    jsvp.setIntegralPlotColor(integralPlotColor);
-    jsvp.setBackground(backgroundColor);
-    getPlotColors(); //<======= Kind of sloppy
-    //if(plotColors == null)
-    //  jsvp.setPlotColors(plotColors);
+    parameters.getPlotColors(); //<======= Kind of sloppy
+    parameters.setFor(jsvp, null, true);
     jsvp.setXAxisDisplayedIncreasing(((JDXSpectrum) jsvp.getSpectrumAt(0)).shouldDisplayXAxisIncreasing());
     jsvp.setSource(source);
     jsvp.setPopup(appletPopupMenu);
@@ -937,9 +888,12 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     new OverlayLegendDialog(selectedJSVPanel);
   }
 
-  private String dirLastExported;
-
   private String fullName;
+  private boolean enableZoom;
+  private boolean menuOn;
+  private boolean compoundMenuOn;
+  private boolean compoundMenuOn2;
+  private String dirLastExported;
 
   /**
    * Export spectrum in a given format
@@ -1072,46 +1026,6 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
      */
     public ComponentListPair() {
     }
-  }
-
-  /**
-   * Intialises the <code>plotColors</code> array from the <i>plotColorsStr</i>
-   * variable
-   */
-  private void getPlotColors() {
-    if (plotColorsStr != null) {
-      StringTokenizer st = new StringTokenizer(plotColorsStr, ",;.- ");
-      int r, g, b;
-      List<Color> colors = new ArrayList<Color>();
-
-      try {
-        while (st.hasMoreTokens()) {
-
-          String token = st.nextToken();
-          if (token.startsWith("#")) {
-            colors.add(new Color(Integer
-                .parseInt(token.substring(1), 16)));
-          } else {
-            r = Integer.parseInt(token.trim());
-            g = Integer.parseInt(st.nextToken().trim());
-            b = Integer.parseInt(st.nextToken().trim());
-            colors.add(new Color(r, g, b));
-          }
-        }
-      } catch (NoSuchElementException nsee) {
-        return;
-      } catch (NumberFormatException nfe) {
-        return;
-      }
-
-      plotColors = (Color[]) colors.toArray(new Color[colors.size()]);
-    } else {
-      //      plotColors = new Color[specs.size()];
-      //      for(int i = 0; i < specs.size(); i++){
-      plotColors[0] = plotColor;
-      //        System.out.println(i+" "+plotColors[i]);
-    }
-    //    }
   }
 
   /**
@@ -1369,149 +1283,73 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
         key = eachParam.nextToken();
       key = key.toUpperCase();
       String value = eachParam.nextToken();
-
-      if (JSpecViewUtils.DEBUG) {
-        System.out.println("KEY-> " + key + " VALUE-> " + value);
-      }
-      Integer iparam = ScriptParser.htParams.get(key);
+      ScriptToken st = ScriptToken.getScriptToken(key);
+      System.out.println("KEY-> " + key + " VALUE-> " + value + " : " + st);
       try {
-        switch (iparam == null ? -1 : iparam.intValue()) {
-        case -1:
+        switch (st) {
+        default:
+          parameters.set(st, value);
           break;
-        case ScriptParser.PARAM_LOAD:
+        case UNKNOWN:
+          break;
+        case LOAD:
           filePath = value;
           break;
-        case ScriptParser.PARAM_REVERSEPLOT:
-          reversePlot = Boolean.parseBoolean(value);
-          break;
-        case ScriptParser.PARAM_COORDINATESON:
-          coordinatesOn = Boolean.parseBoolean(value);
-          break;
-        case ScriptParser.PARAM_GRIDON:
-          gridOn = Boolean.parseBoolean(value);
-          break;
-        case ScriptParser.PARAM_SYNCID:
+        case SYNCID:
           syncID = value;
           fullName = appletID + "__" + syncID + "__";
           break;
-        case ScriptParser.PARAM_APPLETID:
+        case APPLETID:
           appletID = value;
           fullName = appletID + "__" + syncID + "__";
           break;
-        case ScriptParser.PARAM_SYNCCALLBACKFUNCTIONNAME:
+        case SYNCCALLBACKFUNCTIONNAME:
           syncCallbackFunctionName = value;
           break;
-        case ScriptParser.PARAM_APPLETREADYCALLBACKFUNCTIONNAME:
+        case APPLETREADYCALLBACKFUNCTIONNAME:
           appletReadyCallbackFunctionName = value;
           break;
-        case ScriptParser.PARAM_COORDCALLBACKFUNCTIONNAME:
+        case COORDCALLBACKFUNCTIONNAME:
           coordCallbackFunctionName = value;
           break;
-        case ScriptParser.PARAM_SPECTRUMNUMBER:
+        case SPECTRUMNUMBER:
           spectrumNumber = Integer.parseInt(value);
           break;
-        case ScriptParser.PARAM_INTERFACE:
+        case ENABLEZOOM:
+          enableZoom = Boolean.parseBoolean(value);
+          break;
+        case MENUON:
+          menuOn = Boolean.parseBoolean(value);
+          break;
+        case COMPOUNDMENUON:
+          compoundMenuOn2 = Boolean.parseBoolean(value);
+          break;
+        case INTERFACE:
           theInterface = value;
           if (!theInterface.equals("tab") && !theInterface.equals("tile")
               && !theInterface.equals("single")
               && !theInterface.equals("overlay"))
             theInterface = "single";
           break;
-        case ScriptParser.PARAM_ENDINDEX:
+        case ENDINDEX:
           endIndex = Integer.parseInt(value);
           break;
-        case ScriptParser.PARAM_ENABLEZOOM:
-          enableZoom = Boolean.parseBoolean(value);
-          break;
-        case ScriptParser.PARAM_STARTINDEX:
+        case STARTINDEX:
           startIndex = Integer.parseInt(value);
           break;
-        case ScriptParser.PARAM_MENUON:
-          menuOn = Boolean.parseBoolean(value);
-          break;
-        case ScriptParser.PARAM_COMPOUNDMENUON:
-          compoundMenuOn2 = Boolean.parseBoolean(value);
-          break;
-        case ScriptParser.PARAM_BACKGROUNDCOLOR:
-          backgroundColor = AppUtils.getColorFromString(value);
-          break;
-        case ScriptParser.PARAM_COORDINATESCOLOR:
-          coordinatesColor = AppUtils.getColorFromString(value);
-          break;
-        case ScriptParser.PARAM_GRIDCOLOR:
-          gridColor = AppUtils.getColorFromString(value);
-          break;
-        case ScriptParser.PARAM_PLOTAREACOLOR:
-          plotAreaColor = AppUtils.getColorFromString(value);
-          break;
-        case ScriptParser.PARAM_PLOTCOLOR:
-          plotColor = AppUtils.getColorFromString(value);
-          break;
-        case ScriptParser.PARAM_SCALECOLOR:
-          scaleColor = AppUtils.getColorFromString(value);
-          break;
-        case ScriptParser.PARAM_TITLECOLOR:
-          titleColor = AppUtils.getColorFromString(value);
-          break;
-        case ScriptParser.PARAM_UNITSCOLOR:
-          unitsColor = AppUtils.getColorFromString(value);
-          break;
-        case ScriptParser.PARAM_PEAKCALLBACKFUNCTIONNAME:
-          peakCallbackFunctionName = value;
-          break;
-        case ScriptParser.PARAM_PLOTCOLORS:
-          plotColorsStr = value;
-          break;
-        case ScriptParser.PARAM_VERSION:
-          break;
-        case ScriptParser.PARAM_IRMODE:
+        case IRMODE:
           irMode = value;
           break;
-        case ScriptParser.PARAM_OBSCURE:
+        case PEAKCALLBACKFUNCTIONNAME:
+          peakCallbackFunctionName = value;
+          break;
+        case VERSION:
+          break;
+        case OBSCURE:
           obscure = Boolean.parseBoolean(value);
           JSpecViewUtils.setObscure(obscure);
           break;
-        case ScriptParser.PARAM_XSCALEON:
-          xScaleOn = Boolean.parseBoolean(value);
-          break;
-        case ScriptParser.PARAM_YSCALEON:
-          yScaleOn = Boolean.parseBoolean(value);
-          break;
-        case ScriptParser.PARAM_XUNITSON:
-          xUnitsOn = Boolean.parseBoolean(value);
-          break;
-        case ScriptParser.PARAM_YUNITSON:
-          yUnitsOn = Boolean.parseBoolean(value);
-          break;
-        case ScriptParser.PARAM_INTEGRALPLOTCOLOR:
-          integralPlotColor = AppUtils.getColorFromString(value);
-          break;
-        case ScriptParser.PARAM_TITLEFONTNAME:
-          GraphicsEnvironment g = GraphicsEnvironment
-              .getLocalGraphicsEnvironment();
-          List<String> fontList = Arrays
-              .asList(g.getAvailableFontFamilyNames());
-          for (String s : fontList)
-            if (value.equalsIgnoreCase(s)) {
-              titleFontName = value;
-              break;
-            }
-          break;
-        case ScriptParser.PARAM_TITLEBOLDON:
-          titleBoldOn = Boolean.parseBoolean(value);
-          break;
-        case ScriptParser.PARAM_DISPLAYFONTNAME:
-          GraphicsEnvironment g2 = GraphicsEnvironment
-              .getLocalGraphicsEnvironment();
-          List<String> fontList2 = Arrays.asList(g2
-              .getAvailableFontFamilyNames());
-          for (String s2 : fontList2)
-            if (value.equalsIgnoreCase(s2)) {
-              displayFontName = value;
-              break;
-            }
-          break;
-        case ScriptParser.PARAM_INTEGRATIONRATIOS:
+        case INTEGRATIONRATIOS:
           // parse the string with a method in JSpecViewUtils
           System.out.println("Integration Ratio Parameter: " + value);
           integrationRatios = JSpecViewUtils

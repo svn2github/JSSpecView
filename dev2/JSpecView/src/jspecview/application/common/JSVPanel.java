@@ -201,10 +201,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private Color plotAreaColor = Color.white;
 
   //plot line color
-  private Color[] plotColors = { Color.blue, Color.green, Color.yellow,
-      Color.orange, Color.red, Color.magenta, Color.pink, Color.cyan,
-      Color.darkGray };
-
+  private Color[] plotColors;
+  
   // integral Color
   private Color integralPlotColor = Color.red;
 
@@ -462,18 +460,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       endIndices[i] = xyCoordsList[i].length - 1;
     }
 
-    if (numOfSpectra > plotColors.length) {
-      Color[] tmpPlotColors = new Color[numOfSpectra];
-      int numAdditionColors = numOfSpectra - plotColors.length;
-      System.arraycopy(plotColors, 0, tmpPlotColors, 0, plotColors.length);
-
-      for (int i = 0, j = plotColors.length; i < numAdditionColors; i++, j++) {
-        tmpPlotColors[j] = generateRandomColor();
-      }
-
-      plotColors = tmpPlotColors;
-    }
-
+    setPlotColors(Parameters.defaultPlotColors);
+    
     scaleData = JSpecViewUtils.generateScaleData(xyCoordsList, startIndices,
         endIndices, 10, 10);
 
@@ -2883,4 +2871,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   public static JSVPanel getPanel0(JInternalFrame frame) {
     return ((JSVPanel) frame.getContentPane().getComponent(0));
   }
+
+  public void putParameters(Parameters parameters) {
+    // TODO Auto-generated method stub
+    
+  }
+
 }

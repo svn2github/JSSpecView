@@ -92,7 +92,7 @@ public class AppUtils {
 	        catch (ScalesIncompatibleException ex) {
 	        }
 	      }
-	      return (JSVPanel)frame.getContentPane().getComponent(0);
+	      return JSVPanel.getPanel0(frame);
 	  }
 
 	public static JSVPanel appletIntegrate(JPanel panel, boolean showDialog, ArrayList<IntegrationRatio> integrationRatios) {

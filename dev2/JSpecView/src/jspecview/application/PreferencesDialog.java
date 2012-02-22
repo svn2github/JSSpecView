@@ -57,6 +57,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import jspecview.application.common.AppUtils;
+import jspecview.application.common.DisplayScheme;
 import jspecview.application.common.JSVPanel;
 import jspecview.exception.JSpecViewException;
 import jspecview.source.JDXFileReader;
@@ -673,7 +674,7 @@ public class PreferencesDialog extends JDialog {
     }
 
     schemeComboBox.setSelectedItem(currentDS.getName());
-    fontComboBox.setSelectedItem(currentDS.getFont());
+    fontComboBox.setSelectedItem(currentDS.getDisplayFont());
 
     repaint();
   }
@@ -943,7 +944,7 @@ public class PreferencesDialog extends JDialog {
     boolean isdefault = defaultFontCheckBox.isSelected();
     if(!isdefault){
       String fontName = (String)fontComboBox.getSelectedItem();
-      currentDS.setFont(fontName);
+      currentDS.setDisplayFont(fontName);
     }
 
     TreeMap<String, DisplayScheme> dispSchemes = dsp.getDisplaySchemes();
@@ -993,7 +994,7 @@ public class PreferencesDialog extends JDialog {
     elementList.getSelectionModel().setSelectionInterval(0, 0);
 
     // Update Selected Font
-    String fontName = currentDS.getFont();
+    String fontName = currentDS.getDisplayFont();
     fontComboBox.setSelectedItem(fontName);
 
     // kludge
@@ -1015,7 +1016,7 @@ public class PreferencesDialog extends JDialog {
       previewPanel.setPlotAreaColor(currentDS.getColor("plotarea"));
       previewPanel.setBackground(currentDS.getColor("background"));
       previewPanel.setGridColor(currentDS.getColor("grid"));
-      previewPanel.setDisplayFontName(currentDS.getFont());
+      previewPanel.setDisplayFontName(currentDS.getDisplayFont());
       repaint();
     }
   }
@@ -1026,7 +1027,7 @@ public class PreferencesDialog extends JDialog {
    */
   void fontComboBox_actionPerformed(ActionEvent e) {
     String fontName = (String)((JComboBox)e.getSource()).getSelectedItem();
-    currentDS.setFont(fontName);
+    currentDS.setDisplayFont(fontName);
     // kludge
     currentDS.setName("Current");
     updatePreviewPanel();
@@ -1041,7 +1042,7 @@ public class PreferencesDialog extends JDialog {
     if(cb.isSelected()){
       fontComboBox.setSelectedItem("Default");
       fontComboBox.setEnabled(false);
-      currentDS.setFont("Default");
+      currentDS.setDisplayFont("Default");
       // kludge
       currentDS.setName("Current");
       updatePreviewPanel();

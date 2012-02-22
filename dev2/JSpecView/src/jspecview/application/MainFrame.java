@@ -115,14 +115,16 @@ import javax.swing.tree.TreeSelectionModel;
 import org.jmol.api.JmolSyncInterface;
 
 import jspecview.application.common.AppUtils;
+import jspecview.application.common.DisplayScheme;
 import jspecview.application.common.JSVPanel;
 import jspecview.application.common.JSVPanelPopupMenu;
 import jspecview.application.common.JSpecViewFileFilter;
 import jspecview.application.common.OverlayLegendDialog;
+import jspecview.application.common.Parameters;
 import jspecview.application.common.PeakPickedEvent;
 import jspecview.application.common.PeakPickedListener;
 import jspecview.application.common.PrintLayoutDialog;
-import jspecview.application.common.ScriptParser;
+import jspecview.application.common.ScriptParser.ScriptToken;
 import jspecview.common.Coordinate;
 import jspecview.common.Graph;
 import jspecview.common.JDXSpectrum;
@@ -180,16 +182,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private boolean autoIntegrate;
   private String autoATConversion;
 
-  //private boolean AtoTSeparateWindow;
-  //private boolean svgForInscape;
-
-  //   ------------------------ Display Properties -------------------------
-  ///private Color bgc= Color.WHITE;
-  private boolean gridOn;
-  private boolean coordinatesOn;
-  private boolean xScaleOn;
-  private boolean yScaleOn;
-  //private boolean obscure;
+  private Parameters parameters = new Parameters("application");
+  
   //  ----------------------- Application Attributes ---------------------
 
   private JmolSyncInterface jmol;
@@ -538,13 +532,13 @@ public class MainFrame extends JFrame implements DropTargetListener,
         .getProperty("defaultDisplaySchemeName");
 
     if (shouldApplySpectrumDisplaySettings) {
-      gridOn = Boolean.valueOf(properties.getProperty("showGrid"))
+      parameters.gridOn = Boolean.valueOf(properties.getProperty("showGrid"))
           .booleanValue();
-      coordinatesOn = Boolean
+      parameters.coordinatesOn = Boolean
           .valueOf(properties.getProperty("showCoordinates")).booleanValue();
-      xScaleOn = Boolean.valueOf(properties.getProperty("showXScale"))
+      parameters.xScaleOn = Boolean.valueOf(properties.getProperty("showXScale"))
           .booleanValue();
-      yScaleOn = Boolean.valueOf(properties.getProperty("showYScale"))
+      parameters.yScaleOn = Boolean.valueOf(properties.getProperty("showYScale"))
           .booleanValue();
     }
 
@@ -1350,34 +1344,14 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the display panel
    */
   public void setJSVPanelProperties(JSVPanel jsvp,
-                                    boolean shouldApplySpectrumDisplaySettings) {
+                                    boolean includeMeasures) {
 
     DisplayScheme ds = dsp.getDisplaySchemes().get(defaultDisplaySchemeName);
+    parameters.setFor(jsvp, (ds == null ? dsp.getDefaultScheme() : ds),
+        includeMeasures);
 
-    if (ds == null)
-      ds = dsp.getDefaultScheme();
-
-    if (shouldApplySpectrumDisplaySettings) {
-      jsvp.setCoordinatesOn(coordinatesOn);
-      jsvp.setGridOn(gridOn);
-      jsvp.setXScaleOn(xScaleOn);
-      jsvp.setYScaleOn(yScaleOn);
-      jsvp.setXUnitsOn(xScaleOn);
-      jsvp.setYUnitsOn(yScaleOn);
-    }
-
-    jsvp.setTitleColor(ds.getColor("title"));
-    jsvp.setUnitsColor(ds.getColor("units"));
-    jsvp.setScaleColor(ds.getColor("scale"));
-    jsvp.setcoordinatesColor(ds.getColor("coordinates"));
-    jsvp.setGridColor(ds.getColor("grid"));
-    jsvp.setPlotColor(ds.getColor("plot"));
-    jsvp.setPlotAreaColor(ds.getColor("plotarea"));
-    jsvp.setBackground(ds.getColor("background"));
-
-    jsvp.setDisplayFontName(ds.getFont());
-
-    jsvp.setXAxisDisplayedIncreasing(((JDXSpectrum) jsvp.getSpectrumAt(0)).shouldDisplayXAxisIncreasing());
+    jsvp.setXAxisDisplayedIncreasing(((JDXSpectrum) jsvp.getSpectrumAt(0))
+        .shouldDisplayXAxisIncreasing());
     jsvp.setSource(currentSelectedSource);
     jsvp.setPopup(jsvpPopupMenu);
 
@@ -2499,7 +2473,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       return;
     }
 
-    JSVPanel jsvp = (JSVPanel) contentPane.getComponent(0);
+    JSVPanel jsvp = JSVPanel.getPanel0(frame);
     if (jsvp.getNumberOfSpectra() > 1) {
       return;
     }
@@ -2662,6 +2636,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
     if (JSpecViewUtils.DEBUG) {
       System.out.println("Running in DEBUG mode");
     }
+    JSVPanel jsvp = getCurrentJSVPanel();
+    jsvp.putParameters(parameters);
     while (allParamTokens.hasMoreTokens()) {
       String token = allParamTokens.nextToken();
       // now split the key/value pair
@@ -2672,41 +2648,31 @@ public class MainFrame extends JFrame implements DropTargetListener,
         key = eachParam.nextToken();
       key = key.toUpperCase();
       String value = eachParam.nextToken();
-
-      Integer iparam = ScriptParser.htParams.get(key);
-      System.out.println("KEY-> " + key + " VALUE-> " + value + " : " + iparam);
-      JSVPanel jsvp = getCurrentJSVPanel();
-      if (jsvp == null && iparam != ScriptParser.PARAM_LOAD)
+      ScriptToken st = ScriptToken.getScriptToken(value);
+      System.out.println("KEY-> " + key + " VALUE-> " + value + " : " + st);
+      if (jsvp == null && st != ScriptToken.LOAD)
         return;
       try {
-        switch (iparam == null ? -1 : iparam.intValue()) {
-        case -1:
+        switch (st) {
+        case UNKNOWN:
           System.out.println("Unrecognized parameter: " + key);
           break;
-        case ScriptParser.PARAM_LOAD:
+        case LOAD:
           openFile(value);
+          jsvp = getCurrentJSVPanel();
+          if (jsvp == null)
+            return;
+          jsvp.putParameters(parameters);
           break;
-        case ScriptParser.PARAM_REVERSEPLOT:
-          jsvp.setReversePlot(Boolean.parseBoolean(value));
+        default:
+          parameters.set(st, value);
           break;
-        case ScriptParser.PARAM_COORDINATESON:
-          setCoordinatesOn(jsvp, Boolean.parseBoolean(value));
-          break;
-        case ScriptParser.PARAM_GRIDON:
-          jsvp.setGridOn(Boolean.parseBoolean(value));
-          break;
-        case ScriptParser.PARAM_SYNCID:
-        case ScriptParser.PARAM_APPLETID:
-        case ScriptParser.PARAM_SYNCCALLBACKFUNCTIONNAME:
-        case ScriptParser.PARAM_APPLETREADYCALLBACKFUNCTIONNAME:
-        case ScriptParser.PARAM_COORDCALLBACKFUNCTIONNAME:
-          break;
-        case ScriptParser.PARAM_SPECTRUMNUMBER:
+        case SPECTRUMNUMBER:
           int ispec = Integer.parseInt(value) - 1;
           if (ispec >= 0 || ispec < specInfos.length)
             setFrame(specInfos[ispec], false);            
           break;
-        case ScriptParser.PARAM_INTERFACE:
+        case INTERFACE:
           if (value.equalsIgnoreCase("stack"))
             desktopPane.stackFrames();
           else if (value.equalsIgnoreCase("cascade"))
@@ -2714,103 +2680,17 @@ public class MainFrame extends JFrame implements DropTargetListener,
           else if(value.equalsIgnoreCase("tile"))
             desktopPane.tileFrames();            
           break;
-        case ScriptParser.PARAM_ENDINDEX:
-          //endIndex = Integer.parseInt(value);
-          break;
-        case ScriptParser.PARAM_ENABLEZOOM:
-          //enableZoom = Boolean.parseBoolean(value);
-          break;
-        case ScriptParser.PARAM_STARTINDEX:
-          //startIndex = Integer.parseInt(value);
-          break;
-        case ScriptParser.PARAM_MENUON:
-          //menuOn = Boolean.parseBoolean(value);
-          break;
-        case ScriptParser.PARAM_COMPOUNDMENUON:
-          //compoundMenuOn2 = Boolean.parseBoolean(value);
-          break;
-        case ScriptParser.PARAM_BACKGROUNDCOLOR:
-          jsvp.setBackground(AppUtils.getColorFromString(value));
-          break;
-        case ScriptParser.PARAM_COORDINATESCOLOR:
-          jsvp.setcoordinatesColor(AppUtils.getColorFromString(value));
-          break;
-        case ScriptParser.PARAM_GRIDCOLOR:
-          jsvp.setGridColor(AppUtils.getColorFromString(value));
-          break;
-        case ScriptParser.PARAM_PLOTAREACOLOR:
-          jsvp.setPlotAreaColor(AppUtils.getColorFromString(value));
-          break;
-        case ScriptParser.PARAM_PLOTCOLOR:
-          jsvp.setPlotColor(AppUtils.getColorFromString(value));
-          break;
-        case ScriptParser.PARAM_SCALECOLOR:
-          jsvp.setScaleColor(AppUtils.getColorFromString(value));
-          break;
-        case ScriptParser.PARAM_TITLECOLOR:
-          jsvp.setTitleColor(AppUtils.getColorFromString(value));
-          break;
-        case ScriptParser.PARAM_UNITSCOLOR:
-          jsvp.setUnitsColor(AppUtils.getColorFromString(value));
-          break;
-        case ScriptParser.PARAM_PEAKCALLBACKFUNCTIONNAME:
-          break;
-        case ScriptParser.PARAM_PLOTCOLORS:
-          //plotColorsStr = value;
-          break;
-        case ScriptParser.PARAM_VERSION:
-          break;
-        case ScriptParser.PARAM_IRMODE:
+        case IRMODE:
           if (value.toUpperCase().startsWith("T"))
             TAConvert(null, TO_TRANS);
           else if (value.toUpperCase().startsWith("A"))
             TAConvert(null, TO_ABS);
           break;
-        case ScriptParser.PARAM_OBSCURE:
+        case OBSCURE:
           //obscure = Boolean.parseBoolean(value);
           //JSpecViewUtils.setObscure(obscure);
           break;
-        case ScriptParser.PARAM_XSCALEON:
-          jsvp.setXScaleOn(Boolean.parseBoolean(value));
-          break;
-        case ScriptParser.PARAM_YSCALEON:
-          jsvp.setYScaleOn(Boolean.parseBoolean(value));
-          break;
-        case ScriptParser.PARAM_XUNITSON:
-          jsvp.setXUnitsOn(Boolean.parseBoolean(value));
-          break;
-        case ScriptParser.PARAM_YUNITSON:
-          jsvp.setYUnitsOn(Boolean.parseBoolean(value));
-          break;
-        case ScriptParser.PARAM_INTEGRALPLOTCOLOR:
-          jsvp.setIntegralPlotColor(AppUtils.getColorFromString(value));
-          break;
-        case ScriptParser.PARAM_TITLEFONTNAME:
-//          GraphicsEnvironment g = GraphicsEnvironment
-//              .getLocalGraphicsEnvironment();
-//          List<String> fontList = Arrays
-//              .asList(g.getAvailableFontFamilyNames());
-//          for (String s : fontList)
-//            if (value.equalsIgnoreCase(s)) {
-//              titleFontName = value;
-//              break;
-//            }
-          break;
-        case ScriptParser.PARAM_TITLEBOLDON:
-//          titleBoldOn = Boolean.parseBoolean(value);
-          break;
-        case ScriptParser.PARAM_DISPLAYFONTNAME:
-//          GraphicsEnvironment g2 = GraphicsEnvironment
-//              .getLocalGraphicsEnvironment();
-//          List<String> fontList2 = Arrays.asList(g2
-//              .getAvailableFontFamilyNames());
-//          for (String s2 : fontList2)
-//            if (value.equalsIgnoreCase(s2)) {
-//              displayFontName = value;
-//              break;
-//            }
-          break;
-        case ScriptParser.PARAM_INTEGRATIONRATIOS:
+        case INTEGRATIONRATIOS:
           // parse the string with a method in JSpecViewUtils
           // integrationRatios = JSpecViewUtils
             //  .getIntegrationRatiosFromString(value);
@@ -2818,6 +2698,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
         }
       } catch (Exception e) {
       }
+      parameters.setFor(jsvp, null, true);
     }
     repaint();
   }
@@ -2928,7 +2809,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   }
 
   private void setCoordinatesOn(JSVPanel jsvp, boolean selected) {
-    coordinatesOn = selected;
+    parameters.coordinatesOn = selected;
     jsvp.setCoordinatesOn(selected);
   }
 
