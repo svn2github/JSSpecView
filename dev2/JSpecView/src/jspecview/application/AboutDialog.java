@@ -115,7 +115,7 @@ public class AboutDialog extends JDialog {
     txt = drawMessage(message, "Arial", Font.PLAIN, 12);
     p.add(txt);
 
-    message = "Authors:\nD. Facey, K. Bryan, C. Walters\nProf. Robert J. Lancashire and\n";
+    message = "Authors:\nD. Facey, K. Bryan, C. Walters\nProf. Robert J. Lancashire, Prof. Robert M. Hanson, and\n";
     message += "volunteer developers through sourceforge.";
     txt = drawMessage(message, "Arial", Font.BOLD, 12);
     p.add(txt);

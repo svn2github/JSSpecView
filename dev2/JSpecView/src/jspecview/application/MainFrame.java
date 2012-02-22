@@ -2702,7 +2702,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
         case ScriptParser.PARAM_COORDCALLBACKFUNCTIONNAME:
           break;
         case ScriptParser.PARAM_SPECTRUMNUMBER:
-          int ispec = Integer.parseInt(value);
+          int ispec = Integer.parseInt(value) - 1;
           if (ispec >= 0 || ispec < specInfos.length)
             setFrame(specInfos[ispec], false);            
           break;
