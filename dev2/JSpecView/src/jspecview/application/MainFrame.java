@@ -1118,7 +1118,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   protected void scriptMenuItem_actionPerformed(ActionEvent e) {
     String script = (String) JOptionPane.showInputDialog(null,
         "Enter a JSpecView script", "Script",
-        JOptionPane.PLAIN_MESSAGE, null, null, (recentScript == null ? recentScript : ""));
+        JOptionPane.PLAIN_MESSAGE, null, null, (recentScript == null ? "" : recentScript));
     if (script == null)
       return;
     recentScript = script;
