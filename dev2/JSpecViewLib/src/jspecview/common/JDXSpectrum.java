@@ -724,6 +724,16 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     
     return isIncreasing();
   }
+
+  private boolean isIntegrated;
+  
+  public boolean isIntegrated() {
+    return isIntegrated;
+  }
+  
+  public void setIntegrated(boolean TF) {
+    isIntegrated = TF;
+  }
   
 
 }
