@@ -82,10 +82,7 @@
             	<attribute name="Class-Path" value=". plugin.jar"/>
             </manifest>
         	<fileset dir="${bin.dir}">
-        		<exclude name="jspecview/application/*.class"/>
-        		<exclude name="jspecview/application/icons/"/>
-        		<exclude name="jspecview/application/resources/"/>
-        		<exclude name="mdidesktop/"/>
+        		<exclude name="jspecview/application/**"/>
         	</fileset>
         	<fileset dir="${jsvlib.dir}"/>
         </jar>		
