@@ -1121,6 +1121,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     processingMenu.add(transAbsMenuItem).setEnabled(false);
     processingMenu.add(solColMenuItem).setEnabled(false);
     windowMenu.addSeparator();
+    
   }
 
   private String recentZoom;

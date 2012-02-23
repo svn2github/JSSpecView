@@ -2830,8 +2830,11 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       DecimalFormat displayYFormatter = new DecimalFormat(hashY,
           new DecimalFormatSymbols(java.util.Locale.US));
 
-      coordStr = "(" + displayXFormatter.format(xPt) + ", "
+      String xx = displayXFormatter.format(xPt);
+      coordStr = "(" + xx + ", "
           + displayYFormatter.format(yPt) + ")";
+      
+      setToolTipText(xx);
 
       mouseMovedOk = true;
     }
