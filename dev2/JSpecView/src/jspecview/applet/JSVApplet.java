@@ -82,6 +82,7 @@ import jspecview.common.Parameters;
 import jspecview.common.PeakPickedEvent;
 import jspecview.common.PeakPickedListener;
 import jspecview.common.PrintLayoutDialog;
+import jspecview.common.ScriptInterface;
 import jspecview.common.ScriptParser;
 import jspecview.common.ScriptParser.ScriptToken;
 import jspecview.common.Coordinate;
@@ -113,7 +114,7 @@ import jspecview.common.Visible;
  * @author Prof Robert J. Lancashire
  */
 
-public class JSVApplet extends JApplet implements PeakPickedListener {
+public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInterface {
 
   public static final String APPLET_VERSION = "2.0.20120222-1700"; //??? what is this? not 2.0.200? 
 //  2.0.yyyymmdd-hhmm format - updated to keep track of whether you are using the latest version
@@ -569,10 +570,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     currentSpectrumIndex = index;
     setSelectedPanel(jsvp);
 
-    if ((selectedJSVPanel.getSpectrum()).isHNMR())
-      appletPopupMenu.integrateMenuItem.setEnabled(true);
-    else
-      appletPopupMenu.integrateMenuItem.setEnabled(false);
+    appletPopupMenu.integrateMenuItem.setEnabled(selectedJSVPanel.getSpectrum().isHNMR());
 
     chooseContainer();
     this.validate();
@@ -776,7 +774,6 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
 
   private void TAConvert(int comm) throws Exception {
     long time = System.currentTimeMillis();
-    System.out.println(time + " " + msTrigger + " " + (time - msTrigger));
     if (msTrigger > 0 && time - msTrigger < 100)
       return;
     msTrigger = time;
@@ -1141,7 +1138,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
 
   public void setFilePath(String tmpFilePath) {
     if (isSignedApplet)
-      scriptQueue.add(tmpFilePath);
+      scriptQueue.add("load " + tmpFilePath);
     else
       setFilePathLocal(tmpFilePath);
   }
@@ -1382,7 +1379,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
               String scriptItem = scriptQueue.remove(0);
               System.out.println("executing " + scriptItem);
               if (scriptItem != null) {
-                setFilePathLocal(scriptItem);
+                checkScriptNow(scriptItem);
               }
             }
           }
@@ -1486,6 +1483,63 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
 
   /////////// simple sync functionality //////////
 
+  public void checkScriptNow(String params) {
+      if (params == null)
+        params = "";
+      params = params.trim();
+      System.out.println("CHECKSCRIPT " + params);
+      StringTokenizer allParamTokens = new StringTokenizer(params, ";");
+      if (JSpecViewUtils.DEBUG) {
+        System.out.println("Running in DEBUG mode");
+      }
+      JSVPanel jsvp = selectedJSVPanel;
+      while (allParamTokens.hasMoreTokens()) {
+        String token = allParamTokens.nextToken();
+        // now split the key/value pair
+        StringTokenizer eachParam = new StringTokenizer(token);
+        String key = ScriptParser.getKey(eachParam);
+        ScriptToken st = ScriptToken.getScriptToken(key);
+        String value = ScriptParser.getValue(st, eachParam);
+        System.out.println("KEY-> " + key + " VALUE-> " + value + " : " + st);
+        if (jsvp == null && st != ScriptToken.LOAD && st != ScriptToken.SPECTRUMNUMBER)
+          return;
+        try {
+          switch (st) {
+          case UNKNOWN:
+            System.out.println("Unrecognized parameter: " + key);
+            break;
+          case LOAD:
+            filePath = value;
+            openDataOrFile(null);
+            break;
+          default:
+            parameters.set(jsvp, st, value);
+            break;
+          case SPECTRUMNUMBER:
+            setSpectrumNumber(Integer.parseInt(value));            
+            jsvp = selectedJSVPanel;
+            break;
+//          case INTERFACE:
+//            if (value.equalsIgnoreCase("stack"))
+//              desktopPane.stackFrames();
+//            else if (value.equalsIgnoreCase("cascade"))
+//              desktopPane.cascadeFrames();
+//            else if(value.equalsIgnoreCase("tile"))
+//              desktopPane.tileFrames();            
+//            break;
+          case IRMODE:
+            if (value.toUpperCase().startsWith("T"))
+              TAConvert(TO_TRANS);
+            else if (value.toUpperCase().startsWith("A"))
+              TAConvert(TO_ABS);
+            break;
+          }
+        } catch (Exception e) {
+        }
+      }
+      repaint();
+    }
+
   /**
    * preceed <Peaks here with full name of Jmol applet (including syncID)
    * 
@@ -1515,10 +1569,10 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     sendFrameChange(selectedJSVPanel);
   }
 
-  private void checkScript(String script) {
+  public void checkScript(String script) {
     scriptQueue.add(script);
   }
-
+  
   private boolean selectPanel(String index) {
     // what if tabbed? 
     if (jsvPanels == null)
@@ -1583,10 +1637,12 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
     checkCallbacks();
   }
 
-  private void setSelectedPanel(JSVPanel source) {
+  private void setSelectedPanel(JSVPanel jsvp) {
     removeKeyListener(selectedJSVPanel);
-    selectedJSVPanel = source;
+    selectedJSVPanel = jsvp;
     addKeyListener(selectedJSVPanel);
+    for (int i = jsvPanels.length; --i >= 0; )
+      jsvPanels[i].setEnabled(jsvPanels[i] == jsvp);
   }
 
   private void sendFrameChange(JSVPanel jsvp) {

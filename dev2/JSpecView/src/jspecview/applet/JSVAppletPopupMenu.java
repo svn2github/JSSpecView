@@ -18,7 +18,7 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
   private JSVApplet applet;
 
   JSVAppletPopupMenu(JSVApplet applet, boolean isSigned) {
-    super();
+    super(applet);
     isApplet = true;
     this.isSigned = isSigned;
     this.applet = applet;
@@ -135,6 +135,8 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     add(zoomMenu);
     add(compoundMenu);
     addSeparator();
+    add(scriptMenuItem);
+    addSeparator();
     add(aboutMenu);
     JSVPanel.setMenus(saveAsMenu, saveAsJDXMenu, exportAsMenu, actionListener);
     fileMenu.add(saveAsMenu);
@@ -158,6 +160,7 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     zoomMenu.add(previousMenuItem);
     zoomMenu.add(resetMenuItem);
     zoomMenu.add(clearMenuItem);
+    zoomMenu.add(userZoomMenuItem);
     aboutMenu.add(versionMenuItem);
   }
   

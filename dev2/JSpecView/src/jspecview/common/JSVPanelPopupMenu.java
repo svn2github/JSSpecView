@@ -21,6 +21,7 @@ package jspecview.common;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 
 import javax.swing.JCheckBoxMenuItem;
@@ -73,10 +74,16 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    */
   public JMenuItem properties = new JMenuItem();
 
-  public JCheckBoxMenuItem integrateMenuItem = new JCheckBoxMenuItem();
+  protected JMenuItem userZoomMenuItem = new JMenuItem();
+  protected JMenuItem scriptMenuItem = new JMenuItem();
 
-  public JSVPanelPopupMenu() {
+  public JCheckBoxMenuItem integrateMenuItem = new JCheckBoxMenuItem();
+  
+  private ScriptInterface scripter;
+  
+  public JSVPanelPopupMenu(ScriptInterface scripter) {
     super();
+    this.scripter = scripter;
     jbInit();
   }
 
@@ -109,6 +116,18 @@ public class JSVPanelPopupMenu extends JPopupMenu {
         resetMenuItem_actionPerformed(e);
       }
     });
+    scriptMenuItem.setText("Script...");
+    scriptMenuItem.addActionListener(new ActionListener() {
+       public void actionPerformed(ActionEvent e) {
+         scriptMenuItem_actionPerformed(e);
+       }
+     });
+    userZoomMenuItem.setText("Set Zoom...");
+    userZoomMenuItem.addActionListener(new ActionListener() {
+       public void actionPerformed(ActionEvent e) {
+         userMenuItem_actionPerformed(e);
+       }
+     });
     properties.setActionCommand("Properties");
     properties.setText("Properties");
     properties.addActionListener(new java.awt.event.ActionListener() {
@@ -139,6 +158,14 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   }
 
   
+  protected void scriptMenuItem_actionPerformed(ActionEvent e) {
+    script();
+  }
+  
+  protected void userMenuItem_actionPerformed(ActionEvent e) {
+    userZoom();
+  }
+  
   protected void setMenu() {
     add(gridCheckBoxMenuItem);
     add(coordsCheckBoxMenuItem);
@@ -148,6 +175,9 @@ public class JSVPanelPopupMenu extends JPopupMenu {
     add(previousMenuItem);
     add(clearMenuItem);
     add(resetMenuItem);
+    add(userZoomMenuItem);
+    addSeparator();
+    add(scriptMenuItem);
     addSeparator();
     add(properties);
   }
@@ -266,6 +296,30 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    */
   public void setSource(JDXSource source){
     this.source = source;
+  }
+
+  private String recentZoom;
+
+  public void userZoom() {
+    String zoom = (String) JOptionPane.showInputDialog(null,
+        "Enter zoom range", "Zoom", JOptionPane.PLAIN_MESSAGE, null, null,
+        (recentZoom == null ? "" : recentZoom));
+    if (zoom == null)
+      return;
+    recentZoom = zoom;
+    scripter.checkScript("zoom " + zoom);
+  }
+
+  private String recentScript;
+
+  public void script() {
+    String script = (String) JOptionPane.showInputDialog(null,
+        "Enter a JSpecView script", "Script", JOptionPane.PLAIN_MESSAGE, null,
+        null, (recentScript == null ? "" : recentScript));
+    if (script == null)
+      return;
+    recentScript = script;
+    scripter.checkScript(script);
   }
 
 

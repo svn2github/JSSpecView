@@ -124,6 +124,7 @@ import jspecview.common.Parameters;
 import jspecview.common.PeakPickedEvent;
 import jspecview.common.PeakPickedListener;
 import jspecview.common.PrintLayoutDialog;
+import jspecview.common.ScriptInterface;
 import jspecview.common.ScriptParser;
 import jspecview.common.ScriptParser.ScriptToken;
 import jspecview.common.Coordinate;
@@ -149,7 +150,7 @@ import jspecview.common.Visible;
  * @author Prof Robert J. Lancashire
  */
 public class MainFrame extends JFrame implements DropTargetListener,
-    JmolSyncInterface, PeakPickedListener {
+    JmolSyncInterface, PeakPickedListener, ScriptInterface {
 
   //  ------------------------ Program Properties -------------------------
 
@@ -254,7 +255,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private JPanel statusPanel = new JPanel();
   private JLabel statusLabel = new JLabel();
 
-  private JSVPanelPopupMenu jsvpPopupMenu = new JSVPanelPopupMenu();
+  private JSVPanelPopupMenu jsvpPopupMenu = new JSVPanelPopupMenu(this);
   private JCheckBoxMenuItem splitMenuItem = new JCheckBoxMenuItem();
   private JCheckBoxMenuItem overlayMenuItem = new JCheckBoxMenuItem();
   private DefaultMutableTreeNode rootNode;
@@ -1124,26 +1125,12 @@ public class MainFrame extends JFrame implements DropTargetListener,
     
   }
 
-  private String recentZoom;
   protected void userMenuItem_actionPerformed(ActionEvent e) {
-    String zoom = (String) JOptionPane.showInputDialog(null,
-        "Enter zoom range", "Zoom",
-        JOptionPane.PLAIN_MESSAGE, null, null, (recentZoom == null ? "" : recentZoom));
-    if (zoom == null)
-      return;
-    recentZoom = zoom;
-    checkScript("zoom " + zoom);
+    jsvpPopupMenu.userZoom();
   }
 
-  private String recentScript;
   protected void scriptMenuItem_actionPerformed(ActionEvent e) {
-    String script = (String) JOptionPane.showInputDialog(null,
-        "Enter a JSpecView script", "Script",
-        JOptionPane.PLAIN_MESSAGE, null, null, (recentScript == null ? "" : recentScript));
-    if (script == null)
-      return;
-    recentScript = script;
-    checkScript(script);
+    jsvpPopupMenu.script();
   }
 
   private static void setButton(AbstractButton button, String tip,
@@ -2668,7 +2655,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     sendFrameChange(selectedJSVPanel);
   }
 
-  private void checkScript(String params) {
+  public void checkScript(String params) {
     if (params == null)
       params = "";
     params = params.trim();
@@ -2682,10 +2669,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       String token = allParamTokens.nextToken();
       // now split the key/value pair
       StringTokenizer eachParam = new StringTokenizer(token);
-      String key = eachParam.nextToken();
-      if (key.equalsIgnoreCase("SET"))
-        key = eachParam.nextToken();
-      key = key.toUpperCase();
+      String key = ScriptParser.getKey(eachParam);
       ScriptToken st = ScriptToken.getScriptToken(key);
       String value = ScriptParser.getValue(st, eachParam);
       System.out.println("KEY-> " + key + " VALUE-> " + value + " : " + st);

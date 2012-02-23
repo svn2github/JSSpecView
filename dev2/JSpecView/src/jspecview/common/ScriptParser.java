@@ -98,4 +98,11 @@ public class ScriptParser {
       return x1 + "," + x2;
     }
   }
+
+  public static String getKey(StringTokenizer eachParam) {
+    String key = eachParam.nextToken();
+    if (key.equalsIgnoreCase("SET"))
+      key = eachParam.nextToken();
+    return key.toUpperCase();
+  }
 }
