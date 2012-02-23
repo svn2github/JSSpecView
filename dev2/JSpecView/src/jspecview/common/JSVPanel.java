@@ -140,7 +140,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private Graph[] spectra;
 
   // The Number of Spectra
-  private int numOfSpectra;
+  private int nSpectra;
 
   // Contains information needed to draw spectra
   private MultiScaleData scaleData;
@@ -401,21 +401,21 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
                             int[] endIndices) throws JSpecViewException,
       ScalesIncompatibleException {
     this.spectra = spectra;
-    numOfSpectra = spectra.length;
-    if (numOfSpectra == 1)
+    nSpectra = spectra.length;
+    if (nSpectra == 1)
       title = (getSpectrumAt(0)).getPeakTitle();
 
     checkUnits();
 
-    xyCoordsList = new Coordinate[numOfSpectra][];
+    xyCoordsList = new Coordinate[nSpectra][];
 
-    for (int i = 0; i < numOfSpectra; i++) {
+    for (int i = 0; i < nSpectra; i++) {
       xyCoordsList[i] = spectra[i].getXYCoords();
     }
 
-    if (numOfSpectra > plotColors.length) {
-      Color[] tmpPlotColors = new Color[numOfSpectra];
-      int numAdditionColors = numOfSpectra - plotColors.length;
+    if (nSpectra > plotColors.length) {
+      Color[] tmpPlotColors = new Color[nSpectra];
+      int numAdditionColors = nSpectra - plotColors.length;
       System.arraycopy(plotColors, 0, tmpPlotColors, 0, plotColors.length);
 
       for (int i = 0, j = plotColors.length; i < numAdditionColors; i++, j++) {
@@ -442,19 +442,19 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   private void initJSVPanel(Graph[] spectra) throws ScalesIncompatibleException {
     this.spectra = spectra;
-    numOfSpectra = spectra.length;
-    if (numOfSpectra == 1)
+    nSpectra = spectra.length;
+    if (nSpectra == 1)
       title = (getSpectrumAt(0)).getPeakTitle();
-    xyCoordsList = new Coordinate[numOfSpectra][];
+    xyCoordsList = new Coordinate[nSpectra][];
 
-    int[] startIndices = new int[numOfSpectra];
-    int[] endIndices = new int[numOfSpectra];
+    int[] startIndices = new int[nSpectra];
+    int[] endIndices = new int[nSpectra];
     //boolean[] plotIncreasing = new boolean[numOfSpectra];
 
     // test if all have same x and y units
     checkUnits();
 
-    for (int i = 0; i < numOfSpectra; i++) {
+    for (int i = 0; i < nSpectra; i++) {
       xyCoordsList[i] = spectra[i].getXYCoords();
       startIndices[i] = 0;
       endIndices[i] = xyCoordsList[i].length - 1;
@@ -681,9 +681,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   public void setPlotColors(Color[] colors) {
     Color[] tmpPlotColors;
-    if (colors.length < numOfSpectra) {
-      tmpPlotColors = new Color[numOfSpectra];
-      int numAdditionColors = numOfSpectra - colors.length;
+    if (colors.length < nSpectra) {
+      tmpPlotColors = new Color[nSpectra];
+      int numAdditionColors = nSpectra - colors.length;
       System.arraycopy(colors, 0, tmpPlotColors, 0, colors.length);
 
       for (int i = 0, j = colors.length; i < numAdditionColors; i++, j++) {
@@ -691,9 +691,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       }
 
       plotColors = tmpPlotColors;
-    } else if (colors.length > numOfSpectra) {
-      plotColors = new Color[numOfSpectra];
-      System.arraycopy(colors, 0, plotColors, 0, numOfSpectra);
+    } else if (colors.length > nSpectra) {
+      plotColors = new Color[nSpectra];
+      System.arraycopy(colors, 0, plotColors, 0, nSpectra);
     } else
       plotColors = colors;
 
@@ -985,7 +985,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @return the Number of Spectra
    */
   public int getNumberOfSpectra() {
-    return numOfSpectra;
+    return nSpectra;
   }
 
   /**
@@ -1265,7 +1265,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
     if (grid)
       drawGrid(g, height, width);
-    for (int i = 0; i < numOfSpectra; i++)
+    for (int i = 0; i < nSpectra; i++)
       drawPlot(g, i, height, width);
     if (xscale && xAxis)
       drawXScale(g, height, width);
@@ -1816,8 +1816,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     } else if (!ScaleData.isWithinRange(finalX, scaleData)) {
       finalX = scaleData.maxX;
     }
-    int[] startIndices = new int[numOfSpectra];
-    int[] endIndices = new int[numOfSpectra];
+    int[] startIndices = new int[nSpectra];
+    int[] endIndices = new int[nSpectra];
     if (doZoomWithoutRepaint(initX, finalX, startIndices, endIndices))
       repaint();
   }
@@ -2710,12 +2710,30 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
           new DecimalFormatSymbols(java.util.Locale.US));
 
       String xx = displayXFormatter.format(xPt);
-      coordStr = "(" + xx + ", "
-          + displayYFormatter.format(yPt) + ")";
-      
-      setToolTipText(xx);
+      coordStr = "(" + xx + ", " + displayYFormatter.format(yPt) + ")";
 
       mouseMovedOk = true;
+
+      if (getSpectrumAt(0).isIntegrated()) {
+        displayYFormatter = new DecimalFormat("#0.0", new DecimalFormatSymbols(
+            java.util.Locale.US));
+        yPt = spectra[1].getYValueAt(xPt);
+        xx = displayYFormatter.format(yPt);
+      } else if (nSpectra == 1) {
+        if (getSpectrumAt(0).isHNMR()) {
+          yPt = Double.MAX_VALUE;
+        } else {
+          yPt = spectra[0].getYValueAt(xPt);
+          xx += ", " + displayYFormatter.format(yPt);
+        }
+      } else {
+        return;
+      }
+      if (Double.isNaN(yPt))
+        setToolTipText(null);
+      else
+        setToolTipText(xx);
+
     }
   }
 
