@@ -19,8 +19,8 @@
 
 package jspecview.common;
 
+import java.util.Comparator;
 import java.util.Vector;
-
 
 
 /**
@@ -58,7 +58,7 @@ public class IntegralGraph implements Graph {
   /**
    * The array of the <code>IntegralGraph</code> coordinates
    */
-  private Coordinate coordinates[];
+  private Coordinate xyCoords[];
 
   /**
    * value of the x Units. Necessary for the implementation of the
@@ -88,7 +88,7 @@ public class IntegralGraph implements Graph {
     this.percentMinY = percentMinY;
     this.percentOffset = percentOffset;
     this.integralFactor = integralFactor;
-    coordinates = calculateIntegral();
+    xyCoords = calculateIntegral();
   }
 
   /**
@@ -202,7 +202,7 @@ public class IntegralGraph implements Graph {
    * @see jspecview.common.Graph#getNumberOfPoints()
    */
   public int getNumberOfPoints() {
-    return coordinates.length;
+    return xyCoords.length;
   }
 
   /**
@@ -212,7 +212,7 @@ public class IntegralGraph implements Graph {
    * @see jspecview.common.Graph#getXYCoords()
    */
   public Coordinate[] getXYCoords() {
-    return coordinates;
+    return xyCoords;
   }
 
   /**
@@ -235,7 +235,7 @@ public class IntegralGraph implements Graph {
    * Recalutes the intregral
    */
   public void recalculate(){
-    coordinates = calculateIntegral();
+    xyCoords = calculateIntegral();
   }
 
   /**
@@ -284,6 +284,20 @@ public class IntegralGraph implements Graph {
     integralCoordsArray = (Coordinate[])integralCoords.toArray(tempCoords);
 
     return integralCoordsArray;
+  }
+
+  private static Comparator<Coordinate> c;
+  
+  /**
+   * returns FRACTIONAL value * 100
+   */
+  public double getYValueAt(double x) {
+    if (c == null)
+      c = new CoordComparator();
+    double y = Coordinate.getYValueAt(xyCoords, x, c);
+    double y0 = xyCoords[xyCoords.length - 1].getYVal();
+    double y1 = xyCoords[0].getYVal();
+    return (y - y0) / (y1 - y0) * 100;
   }
 
 }

@@ -80,4 +80,6 @@ public interface Graph {
    * @return the array of coordinates
    */
   public Coordinate[] getXYCoords();
+  public double getYValueAt(double x);
+
 }

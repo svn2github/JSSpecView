@@ -63,5 +63,4 @@ public class MultiScaleData extends ScaleData {
     endDataPointIndices = data.endDataPointIndices;
     numOfPointsList = data.numOfPointsList;
   }
-
-}
+ }

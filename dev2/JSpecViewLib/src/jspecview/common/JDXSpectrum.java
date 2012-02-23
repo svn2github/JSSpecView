@@ -24,6 +24,7 @@ import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.List;
 import java.util.Vector;
@@ -726,13 +727,23 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   }
 
   private boolean isIntegrated;
-  
+
   public boolean isIntegrated() {
     return isIntegrated;
   }
   
   public void setIntegrated(boolean TF) {
     isIntegrated = TF;
+  }
+
+  private Comparator<Coordinate> c;
+  
+  public double getYValueAt(double x) {
+    if (!isContinuous())
+      return Double.NaN;
+    if (c == null)
+      c = new CoordComparator();
+    return Coordinate.getYValueAt(xyCoords, x, c);
   }
   
 
