@@ -1184,7 +1184,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   public void paintComponent(Graphics g) {
     if (!isEnabled())
       return;
-    System.out.println("DRAWING " + title);
+//    System.out.println("DRAWING " + title);
     super.paintComponent(g);
     int width = getWidth();
     int height = getHeight();
