@@ -84,7 +84,7 @@ import jspecview.common.PeakPickedListener;
 import jspecview.common.PrintLayoutDialog;
 import jspecview.common.ScriptInterface;
 import jspecview.common.ScriptParser;
-import jspecview.common.ScriptParser.ScriptToken;
+import jspecview.common.ScriptToken;
 import jspecview.common.Coordinate;
 import jspecview.common.Graph;
 import jspecview.common.IntegrationRatio;

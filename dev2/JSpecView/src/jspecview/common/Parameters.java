@@ -66,7 +66,7 @@ public class Parameters extends DisplayScheme {
     jsvp.setTitleBoldOn(titleBoldOn);
   }
 
-  public void set(JSVPanel jsvp, ScriptParser.ScriptToken st, String value) {
+  public void set(JSVPanel jsvp, ScriptToken st, String value) {
     Object param = null;
     
     switch (st) {

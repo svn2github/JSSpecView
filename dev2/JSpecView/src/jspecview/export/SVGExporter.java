@@ -33,6 +33,8 @@ import jspecview.common.Graph;
 import jspecview.common.JSpecViewUtils;
 import jspecview.common.AppUtils;
 import jspecview.common.JSVPanel;
+import jspecview.common.MultiScaleData;
+import jspecview.common.ScaleData;
 
 /**
  * class <code>SVGExporter</code> contains static methods to export a Graph as
@@ -181,7 +183,7 @@ public class SVGExporter extends FormExporter {
     DecimalFormat formatter2 = new DecimalFormat("0.######",
         new DecimalFormatSymbols(java.util.Locale.US));
 
-    JSpecViewUtils.ScaleData scaleData = JSpecViewUtils.generateScaleData(
+    ScaleData scaleData = JSpecViewUtils.generateScaleData(
         xyCoords, startDataPointIndex, endDataPointIndex, 10, 10);
 
     double maxXOnScale = scaleData.maxXOnScale;
@@ -487,7 +489,7 @@ public class SVGExporter extends FormExporter {
     DecimalFormat formatter2 = new DecimalFormat("0.######",
         new DecimalFormatSymbols(java.util.Locale.US));
 
-    JSpecViewUtils.MultiScaleData scaleData = JSpecViewUtils.generateScaleData(
+    MultiScaleData scaleData = JSpecViewUtils.generateScaleData(
         xyCoordsList, startDataPointIndices, endDataPointIndices, 10, 10);
 
     double maxXOnScale = scaleData.maxXOnScale;

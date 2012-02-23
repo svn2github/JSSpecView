@@ -85,14 +85,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
-import jspecview.common.ScriptParser.ScriptToken;
-import jspecview.common.Coordinate;
-import jspecview.common.Graph;
-import jspecview.common.IntegrationRatio;
-import jspecview.common.JDXSpectrum;
-import jspecview.common.JSpecViewUtils;
-import jspecview.common.PeakInfo;
-import jspecview.common.JSpecViewUtils.MultiScaleData;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
 import jspecview.export.Exporter;
@@ -434,7 +426,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     }
 
     zoomInfoList = new ArrayList<MultiScaleData>();
-    doZoomWithoutRepaint(startIndices, endIndices);
+    doZoomWithoutRepaint(initX, finalX, startIndices, endIndices);
 
     setBorder(BorderFactory.createLineBorder(Color.lightGray));
   }
@@ -1704,7 +1696,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     }
   }
 
-  // THIS METHOD NEEDS REWORKING!!!
   /**
    * Calculates the size of the font to display based on the window size
    * 
@@ -1718,6 +1709,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   private int calculateFontSize(double length, int initSize, boolean isWidth) {
     int size = initSize;
+    // TODO THIS METHOD NEEDS REWORKING!!!
 
     if (isWidth) {
       if (length < 400)
@@ -1780,6 +1772,14 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * Zooms the spectrum between two coordinates
    * 
    * @param initX
+   *        TODO
+   * @param initY
+   *        TODO
+   * @param finalX
+   *        TODO
+   * @param finalY
+   *        TODO
+   * @param initX
    *        the X start coordinate of the zoom area
    * @param initY
    *        the Y start coordinate of the zoom area
@@ -1788,158 +1788,71 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @param finalY
    *        the Y end coordinate of the zoom area
    */
-  public void doZoom() {
-    if (zoomEnabled) {
+  public void doZoom(double initX, double initY, double finalX, double finalY) {
+    if (!zoomEnabled)
+      return;
 
-      //int tempStartDataPointIndex = 0;
-      //int tempEndDataPointIndex;
-      int[] tempStartDataPointIndices = new int[numOfSpectra];
-      int[] tempEndDataPointIndices = new int[numOfSpectra];
-
-      int ptCount = 0;
-      int numSpectraWithMinPointsForZoom = 0;
-
-      // swap points if init value > final value
-      if (initX > finalX) {
-        double tempX = initX;
-        initX = finalX;
-        finalX = tempX;
-      }
-
-      if (initY > finalY) {
-        double tempY = initY;
-        initY = finalY;
-        finalY = tempY;
-      }
-
-      if (isWithinRangeEnsured()) {
-        //determine startDataPointIndex
-        int index = 0;
-        for (int i = 0; i < numOfSpectra; i++) {
-          Coordinate[] xyCoords = spectra[i].getXYCoords();
-
-          for (index = scaleData.startDataPointIndices[i]; index <= scaleData.endDataPointIndices[i]; index++) {
-            double x = xyCoords[index].getXVal();
-            if (x >= initX) {
-              tempStartDataPointIndices[i] = index;
-              break;
-            }
-          }
-
-          // determine endDataPointIndex
-          for (; index <= scaleData.endDataPointIndices[i]; index++) {
-            double x = xyCoords[index].getXVal();
-            ptCount++;
-            if (x >= finalX) {
-              break;
-            }
-          }
-
-          if (ptCount >= minNumOfPointsForZoom) {
-            numSpectraWithMinPointsForZoom++;
-          }
-          ptCount = 0;
-          tempEndDataPointIndices[i] = index - 1;
-        }
-
-        // need to have a pt count list
-        if (numSpectraWithMinPointsForZoom == numOfSpectra) {
-          // Save scale data
-          scaleData = JSpecViewUtils.generateScaleData(xyCoordsList,
-              tempStartDataPointIndices, tempEndDataPointIndices, 10, 10);
-          if (zoomInfoList.size() > currentZoomIndex + 1) {
-            for (int i = zoomInfoList.size() - 1; i >= currentZoomIndex + 1; i--) {
-              zoomInfoList.remove(i);
-            }
-          }
-          zoomInfoList.add(scaleData);
-          currentZoomIndex++;
-          repaint(); // just repaint the plot Area
-        }
-      }
+    // swap points if init value > final value
+    if (initX > finalX) {
+      double tempX = initX;
+      initX = finalX;
+      finalX = tempX;
     }
-  }
 
-  /**
-   * Zooms the spectrum between two indices in the list of coordinates
-   * 
-   * @param startIndices
-   *        the start indices
-   * @param endIndices
-   *        the end indices
-   * @throws JSpecViewException
-   */
-  public void doZoom(int[] startIndices, int[] endIndices)
-      throws JSpecViewException {
-    if (doZoomWithoutRepaint(startIndices, endIndices))
-      repaint(); // just repaint the plot Area
+    if (initY > finalY) {
+      double tempY = initY;
+      initY = finalY;
+      finalY = tempY;
+    }
+
+    // Determine if the range of the area selected for zooming is within the plot
+    // Area and if not ensure that it is
+
+    if (!ScaleData.isWithinRange(initX, scaleData)
+        && !ScaleData.isWithinRange(finalX, scaleData))
+      return;
+    if (!ScaleData.isWithinRange(initX, scaleData)) {
+      initX = scaleData.minX;
+    } else if (!ScaleData.isWithinRange(finalX, scaleData)) {
+      finalX = scaleData.maxX;
+    }
+    int[] startIndices = new int[numOfSpectra];
+    int[] endIndices = new int[numOfSpectra];
+    if (doZoomWithoutRepaint(initX, finalX, startIndices, endIndices))
+      repaint();
   }
 
   /**
    * Zooms the spectrum but does not repaint so that it is not visible
    * 
+   * @param initX
+   *        TODO
+   * @param finalX
+   *        TODO
    * @param startIndices
    *        the start indices
    * @param endIndices
    *        the end indices
+   * 
    * @return true if successful
    * @throws JSpecViewException
    */
-  private boolean doZoomWithoutRepaint(int[] startIndices, int[] endIndices)
-      throws JSpecViewException {
-    if (zoomEnabled) {
-      // Ensure range
-      int countHasMinNumOfPointsForZoom = 0;
-      if (startIndices.length != numOfSpectra
-          || endIndices.length != numOfSpectra)
-        throw new JSpecViewException("Invalid start or endIndices");
-      // throw invalid argument exception
-
-      for (int i = 0; i < numOfSpectra; i++) {
-        if (startIndices[i] < 0)
-          startIndices[i] = 0;
-        if (endIndices[i] >= spectra[i].getNumberOfPoints())
-          endIndices[i] = spectra[i].getNumberOfPoints() - 1;
-        if ((endIndices[i] - startIndices[i] + 1) >= minNumOfPointsForZoom)
-          countHasMinNumOfPointsForZoom++;
-      }
-
-      if (countHasMinNumOfPointsForZoom == numOfSpectra) {
-        scaleData = JSpecViewUtils.generateScaleData(xyCoordsList,
-            startIndices, endIndices, 10, 10);
-        // Not sure if I should do this
-        // ie. add the info to the zoomInfoList
-        if (zoomInfoList.size() > currentZoomIndex + 1) {
-          for (int i = zoomInfoList.size() - 1; i >= currentZoomIndex + 1; i--) {
-            zoomInfoList.remove(i);
-          }
-        }
-        zoomInfoList.add(scaleData);
-        currentZoomIndex++;
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  /**
-   * Zooms the spectrum between two data points in the list of coordinates
-   * specified by startindex and endindex
-   * 
-   * @param startIndex
-   *        the index of the starting data point
-   * @param endIndex
-   *        the index of the ending data point
-   * @throws JSpecViewException
-   */
-  public void doZoom(int startIndex, int endIndex) throws JSpecViewException {
-   // if (numOfSpectra != 1) {
-     // throw new JSpecViewException("Can't Zoom");
-      // throw invalid argument exception
-  //  }
-
-    doZoom(new int[] { startIndex }, new int[] { endIndex });
+  private boolean doZoomWithoutRepaint(double initX, double finalX,
+                                       int[] startIndices, int[] endIndices) {
+    if (!zoomEnabled)
+      return false;
+    if (!ScaleData.setDataPointIndices(spectra, scaleData, initX, finalX,
+        minNumOfPointsForZoom, startIndices, endIndices))
+      return false;
+    scaleData = JSpecViewUtils.generateScaleData(xyCoordsList, startIndices,
+        endIndices, 10, 10);
+    // add to and clean the zoom list
+    if (zoomInfoList.size() > currentZoomIndex + 1)
+      for (int i = zoomInfoList.size() - 1; i > currentZoomIndex; i--)
+        zoomInfoList.remove(i);
+    zoomInfoList.add(scaleData);
+    currentZoomIndex++;
+    return true;
   }
 
   /**
@@ -1966,7 +1879,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * Displays the previous view zoomed
    */
   public void previousView() {
-    if (currentZoomIndex - 1 >= 0) {
+    if (currentZoomIndex > 0) {
       scaleData = zoomInfoList.get(--currentZoomIndex);
       repaint();
     }
@@ -1980,40 +1893,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       scaleData = zoomInfoList.get(++currentZoomIndex);
       repaint();
     }
-  }
-
-  /**
-   * Determines if the range of the area selected for zooming is within the plot
-   * Area and if not ensures that it is
-   * 
-   * @return true if is within range or can be set to within range
-   */
-  private boolean isWithinRangeEnsured() {
-    boolean rangeOK = true;
-
-    if (!isWithinRange(initX) && !isWithinRange(finalX))
-      rangeOK = false;
-    else if (!isWithinRange(initX)) {
-      initX = scaleData.minX;
-    } else if (!isWithinRange(finalX)) {
-      finalX = scaleData.maxX;
-    }
-
-    return rangeOK;
-  }
-
-  /**
-   * Determines if the x coordinate is within the range of coordinates in the
-   * coordinate list
-   * 
-   * @param x
-   *        the x coodinate
-   * @return true if within range
-   */
-  private boolean isWithinRange(double x) {
-    if (x >= scaleData.minX && x <= scaleData.maxX)
-      return true;
-    return false;
   }
 
   /*----------------- METHODS IN INTERFACE Printable ---------------------- */
@@ -2543,7 +2422,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       return;
     setHighlightOn(true);
     addHighlight(x1, x2, null);
-    if (isWithinRange(x1) && isWithinRange(x2))
+    if (ScaleData.isWithinRange(x1, scaleData) && ScaleData.isWithinRange(x2, scaleData))
       repaint();
     else
       reset();
@@ -2706,7 +2585,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
       if (mousePressedInPlotArea
           && Math.abs(xPixel - initXpixel) > MIN_DRAG_X_PIXELS) {
-        doZoom();
+        doZoom(initX, initY, finalX, finalY);
       }
 
     }
@@ -2933,26 +2812,19 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     return getSpectrumAt(0);
   }
 
-  private Coordinate z0;
-  private Coordinate z1;
-  
   public void setZoom(double x1, double x2) {
-    if (!Double.isNaN(x1))
-      z0 = getCoordFromPoint(xPixels(x1), topPlotAreaPos);
-    if (!Double.isNaN(x2))
-      z1 = getCoordFromPoint(xPixels(x2), bottomPlotAreaPos);
-    if (z0 != null && z1 != null) {
+    Coordinate z0 = getCoordFromPoint(xPixels(x1), topPlotAreaPos);
+    Coordinate z1 = getCoordFromPoint(xPixels(x2), bottomPlotAreaPos);
+    scaleData = zoomInfoList.get(0);
+    double initX = z0.getXVal();
+    double initY = z0.getYVal();
+    double finalX = z1.getXVal();
+    double finalY = z1.getYVal();
+    if (initX == 0 && finalX == 0)
       scaleData = zoomInfoList.get(0);
-      initX = z0.getXVal();
-      initY = z0.getYVal();
-      finalX = z1.getXVal();
-      finalY = z1.getYVal();
-      if (initX == 0 && finalX == 0)
-        scaleData = zoomInfoList.get(0);
-      else
-        doZoom();
-      z0 = z1 = null;
-    }
+    else
+      doZoom(initX, initY, finalX, finalY);
+    z0 = z1 = null;
   }
 
 }
