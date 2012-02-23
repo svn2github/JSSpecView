@@ -124,6 +124,7 @@ import jspecview.common.Parameters;
 import jspecview.common.PeakPickedEvent;
 import jspecview.common.PeakPickedListener;
 import jspecview.common.PrintLayoutDialog;
+import jspecview.common.ScriptParser;
 import jspecview.common.ScriptParser.ScriptToken;
 import jspecview.common.Coordinate;
 import jspecview.common.Graph;
@@ -228,10 +229,11 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private JCheckBoxMenuItem revPlotCheckBoxMenuItem = new JCheckBoxMenuItem();
   private JCheckBoxMenuItem scaleXCheckBoxMenuItem = new JCheckBoxMenuItem();
   private JCheckBoxMenuItem scaleYCheckBoxMenuItem = new JCheckBoxMenuItem();
-  private JMenuItem nextMenuItem = new JMenuItem();
-  private JMenuItem prevMenuItem = new JMenuItem();
-  private JMenuItem fullMenuItem = new JMenuItem();
-  private JMenuItem clearMenuItem = new JMenuItem();
+  private JMenuItem nextZoomMenuItem = new JMenuItem();
+  private JMenuItem prevZoomMenuItem = new JMenuItem();
+  private JMenuItem fullZoomMenuItem = new JMenuItem();
+  private JMenuItem clearZoomMenuItem = new JMenuItem();
+  private JMenuItem userZoomMenuItem = new JMenuItem();
   private JMenuItem preferencesMenuItem = new JMenuItem();
   private JMenuItem contentsMenuItem = new JMenuItem();
   private JMenuItem aboutMenuItem = new JMenuItem();
@@ -774,31 +776,37 @@ public class MainFrame extends JFrame implements DropTargetListener,
             scaleYCheckBoxMenuItem_itemStateChanged(e);
           }
         });
-    setMenuItem(nextMenuItem, 'N', "Next View", 78, InputEvent.CTRL_MASK
+    setMenuItem(nextZoomMenuItem, 'N', "Next View", 78, InputEvent.CTRL_MASK
         | InputEvent.SHIFT_MASK, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         nextMenuItem_actionPerformed(e);
       }
     });
-    setMenuItem(prevMenuItem, 'P', "Previous View", 80, InputEvent.CTRL_MASK
+    setMenuItem(prevZoomMenuItem, 'P', "Previous View", 80, InputEvent.CTRL_MASK
         | InputEvent.SHIFT_MASK, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         prevMenuItem_actionPerformed(e);
       }
     });
-    setMenuItem(fullMenuItem, 'F', "Full View", 70, InputEvent.CTRL_MASK
+    setMenuItem(fullZoomMenuItem, 'F', "Full View", 70, InputEvent.CTRL_MASK
         | InputEvent.SHIFT_MASK, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         fullMenuItem_actionPerformed(e);
       }
     });
-    setMenuItem(clearMenuItem, 'C', "Clear Views", 67, InputEvent.CTRL_MASK
+    setMenuItem(clearZoomMenuItem, 'C', "Clear Views", 67, InputEvent.CTRL_MASK
         | InputEvent.SHIFT_MASK, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         clearMenuItem_actionPerformed(e);
       }
     });
-    setMenuItem(scriptMenuItem, 'S', "Script...", 83, InputEvent.SHIFT_MASK
+    setMenuItem(userZoomMenuItem, 'Z', "Set Zoom...", 90, InputEvent.CTRL_MASK
+       | InputEvent.SHIFT_MASK , new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        userMenuItem_actionPerformed(e);
+      }
+    });
+    setMenuItem(scriptMenuItem, 'T', "Script...", 83, InputEvent.ALT_MASK
         , new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         scriptMenuItem_actionPerformed(e);
@@ -1051,10 +1059,11 @@ public class MainFrame extends JFrame implements DropTargetListener,
     displayMenu.addSeparator();
     displayMenu.add(propertiesMenuItem);
     displayMenu.add(overlayKeyMenuItem).setEnabled(false);
-    zoomMenu.add(nextMenuItem);
-    zoomMenu.add(prevMenuItem);
-    zoomMenu.add(fullMenuItem);
-    zoomMenu.add(clearMenuItem);
+    zoomMenu.add(nextZoomMenuItem);
+    zoomMenu.add(prevZoomMenuItem);
+    zoomMenu.add(fullZoomMenuItem);
+    zoomMenu.add(clearZoomMenuItem);
+    zoomMenu.add(userZoomMenuItem);
     optionsMenu.add(preferencesMenuItem);
     optionsMenu.addSeparator();
     optionsMenu.add(toolbarCheckBoxMenuItem);
@@ -1112,6 +1121,17 @@ public class MainFrame extends JFrame implements DropTargetListener,
     processingMenu.add(transAbsMenuItem).setEnabled(false);
     processingMenu.add(solColMenuItem).setEnabled(false);
     windowMenu.addSeparator();
+  }
+
+  private String recentZoom;
+  protected void userMenuItem_actionPerformed(ActionEvent e) {
+    String zoom = (String) JOptionPane.showInputDialog(null,
+        "Enter zoom range", "Zoom",
+        JOptionPane.PLAIN_MESSAGE, null, null, (recentZoom == null ? "" : recentZoom));
+    if (zoom == null)
+      return;
+    recentZoom = zoom;
+    checkScript("zoom " + zoom);
   }
 
   private String recentScript;
@@ -2389,7 +2409,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   
   private JSVPanel getCurrentJSVPanel() {
     JInternalFrame frame = desktopPane.getSelectedFrame();
-    return (frame == null ? null : JSVPanel.getPanel0(frame));
+    return (frame == null ? selectedJSVPanel : JSVPanel.getPanel0(frame));
   }
 
   /**
@@ -2656,7 +2676,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     if (JSpecViewUtils.DEBUG) {
       System.out.println("Running in DEBUG mode");
     }
-    JSVPanel jsvp = getCurrentJSVPanel();
+    JSVPanel jsvp = selectedJSVPanel;
     while (allParamTokens.hasMoreTokens()) {
       String token = allParamTokens.nextToken();
       // now split the key/value pair
@@ -2665,8 +2685,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
       if (key.equalsIgnoreCase("SET"))
         key = eachParam.nextToken();
       key = key.toUpperCase();
-      String value = eachParam.nextToken();
       ScriptToken st = ScriptToken.getScriptToken(key);
+      String value = ScriptParser.getValue(st, eachParam);
       System.out.println("KEY-> " + key + " VALUE-> " + value + " : " + st);
       if (jsvp == null && st != ScriptToken.LOAD && st != ScriptToken.SPECTRUMNUMBER)
         return;

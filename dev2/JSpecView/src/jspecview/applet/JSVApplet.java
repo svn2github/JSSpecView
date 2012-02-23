@@ -82,6 +82,7 @@ import jspecview.common.Parameters;
 import jspecview.common.PeakPickedEvent;
 import jspecview.common.PeakPickedListener;
 import jspecview.common.PrintLayoutDialog;
+import jspecview.common.ScriptParser;
 import jspecview.common.ScriptParser.ScriptToken;
 import jspecview.common.Coordinate;
 import jspecview.common.Graph;
@@ -1275,13 +1276,12 @@ public class JSVApplet extends JApplet implements PeakPickedListener {
       String token = allParamTokens.nextToken();
       // now split the key/value pair
       StringTokenizer eachParam = new StringTokenizer(token);
-
       String key = eachParam.nextToken();
       if (key.equalsIgnoreCase("SET"))
         key = eachParam.nextToken();
       key = key.toUpperCase();
-      String value = eachParam.nextToken();
       ScriptToken st = ScriptToken.getScriptToken(key);
+      String value = ScriptParser.getValue(st, eachParam);
       System.out.println("KEY-> " + key + " VALUE-> " + value + " : " + st);
       try {
         switch (st) {

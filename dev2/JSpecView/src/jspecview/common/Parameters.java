@@ -10,6 +10,7 @@ import java.util.StringTokenizer;
 
 import jspecview.common.JSpecViewUtils;
 import jspecview.util.ColorUtil;
+import jspecview.util.TextFormat;
 
 public class Parameters extends DisplayScheme {
 
@@ -153,6 +154,12 @@ public class Parameters extends DisplayScheme {
         }
       param = displayFont;
       break;
+    case ZOOM:
+      value = TextFormat.replaceAllCharacters(value, " ,",' ').trim();
+      String[] minmax = TextFormat.split(value, ' ');
+      if (jsvp != null)
+        jsvp.setZoom(Double.parseDouble(minmax[0]), Double.parseDouble(minmax[1]));
+      break;
     }
     if (jsvp == null)
       return;
@@ -202,6 +209,4 @@ public class Parameters extends DisplayScheme {
     }
     return (Color[]) colors.toArray(new Color[colors.size()]);
   }
-
-
 }

@@ -1788,7 +1788,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @param finalY
    *        the Y end coordinate of the zoom area
    */
-  public void doZoom(double initX, double initY, double finalX, double finalY) {
+  public void doZoom() {
     if (zoomEnabled) {
 
       //int tempStartDataPointIndex = 0;
@@ -1934,10 +1934,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @throws JSpecViewException
    */
   public void doZoom(int startIndex, int endIndex) throws JSpecViewException {
-    if (numOfSpectra != 1) {
-      throw new JSpecViewException("Can't Zoom");
+   // if (numOfSpectra != 1) {
+     // throw new JSpecViewException("Can't Zoom");
       // throw invalid argument exception
-    }
+  //  }
 
     doZoom(new int[] { startIndex }, new int[] { endIndex });
   }
@@ -2706,7 +2706,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
       if (mousePressedInPlotArea
           && Math.abs(xPixel - initXpixel) > MIN_DRAG_X_PIXELS) {
-        doZoom(initX, initY, finalX, finalY);
+        doZoom();
       }
 
     }
@@ -2928,6 +2928,28 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
   public JDXSpectrum getSpectrum() {
     return getSpectrumAt(0);
+  }
+
+  private Coordinate z0;
+  private Coordinate z1;
+  
+  public void setZoom(double x1, double x2) {
+    if (!Double.isNaN(x1))
+      z0 = getCoordFromPoint(xPixels(x1), topPlotAreaPos);
+    if (!Double.isNaN(x2))
+      z1 = getCoordFromPoint(xPixels(x2), bottomPlotAreaPos);
+    if (z0 != null && z1 != null) {
+      scaleData = zoomInfoList.get(0);
+      initX = z0.getXVal();
+      initY = z0.getYVal();
+      finalX = z1.getXVal();
+      finalY = z1.getYVal();
+      if (initX == 0 && finalX == 0)
+        scaleData = zoomInfoList.get(0);
+      else
+        doZoom();
+      z0 = z1 = null;
+    }
   }
 
 }
