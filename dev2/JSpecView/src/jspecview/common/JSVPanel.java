@@ -2718,7 +2718,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         displayYFormatter = new DecimalFormat("#0.0", new DecimalFormatSymbols(
             java.util.Locale.US));
         yPt = spectra[1].getYValueAt(xPt);
-        xx = displayYFormatter.format(yPt);
+        xx += ", " + displayYFormatter.format(yPt);
       } else if (nSpectra == 1) {
         if (getSpectrumAt(0).isHNMR()) {
           yPt = Double.MAX_VALUE;
