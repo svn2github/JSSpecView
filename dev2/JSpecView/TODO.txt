@@ -1,6 +1,9 @@
 Feel free to add to this file any time! Don't worry about sync problems.
 
 
+for a block file allow overlaying some of the spectra not necessarily all the spectra
+
+
  
 
  
