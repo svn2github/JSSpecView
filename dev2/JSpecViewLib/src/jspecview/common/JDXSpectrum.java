@@ -743,4 +743,161 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return Coordinate.getYValueAt(xyCoords, x, c);
   }
 
+  private JDXSpectrum convertedSpectrum;
+
+  public static final int TO_ABS = 0;
+  public static final int TO_TRANS = 1;
+  public static final int IMPLIED = 2;
+  public static final double MAXABS = 4; // maximum absorbance allowed
+  
+  public JDXSpectrum getConvertedSpectrum() {
+    return convertedSpectrum;
+  }
+  
+  public void setConvertedSpectrum(JDXSpectrum spectrum) {
+    convertedSpectrum = spectrum;
+  }
+
+  /**
+   * Converts and returns a converted spectrum. If original was Absorbance then
+   * a Transmittance spectrum is returned and vice versa if spectrum was neither
+   * Absorbance nor Transmittance then null is returned
+   * 
+   * @param spectrum
+   *        the JDXSpectrum
+   * @return the converted spectrum
+   */
+  public static JDXSpectrum convert(JDXSpectrum spectrum) {
+    JDXSpectrum spec = spectrum.getConvertedSpectrum();
+    return (spec != null ? spec : spectrum.isAbsorbance() ? toT(spectrum) : toA(spectrum));
+  }
+
+  /**
+   * Converts a spectrum from Absorbance to Transmittance
+   * 
+   * @param spectrum
+   *        the JDXSpectrum
+   * @return the converted spectrum
+   */
+  
+  public static JDXSpectrum toT(JDXSpectrum spectrum) {
+    if (!spectrum.isAbsorbance())
+      return null;
+    Coordinate[] xyCoords = spectrum.getXYCoords();
+    Coordinate[] newXYCoords = new Coordinate[xyCoords.length];
+    if (!isYInRange(xyCoords, 0, MAXABS))
+      xyCoords = normalise(xyCoords, 0, MAXABS);
+    for (int i = 0; i < xyCoords.length; i++)
+      newXYCoords[i] = new Coordinate(xyCoords[i].getXVal(),
+          toTransmittance(xyCoords[i].getYVal()));
+    return newSpectrum(spectrum, newXYCoords, "TRANSMITTANCE");
+  }
+
+  /**
+   * Converts a spectrum from Transmittance to Absorbance
+   * 
+   * @param spectrum
+   *        the JDXSpectrum
+   * @return the converted spectrum
+   */
+  public static JDXSpectrum toA(JDXSpectrum spectrum) {
+    if (!spectrum.isTransmittance())
+      return null;
+    Coordinate[] xyCoords = spectrum.getXYCoords();
+    Coordinate[] newXYCoords = new Coordinate[xyCoords.length];
+    boolean isPercent = isYInRange(xyCoords, -2, 2);
+    for (int i = 0; i < xyCoords.length; i++)
+      newXYCoords[i] = new Coordinate(xyCoords[i].getXVal(), 
+          toAbsorbance(xyCoords[i].getYVal(), isPercent));
+    return newSpectrum(spectrum, newXYCoords, "ABSORBANCE");
+  }
+
+  /**
+   * copy spectrum with new cooordinates
+   * 
+   * @param spectrum
+   * @param newXYCoords
+   * @param units
+   * @return
+   */
+  public static JDXSpectrum newSpectrum(JDXSpectrum spectrum,
+                                         Coordinate[] newXYCoords,
+                                         String units) {
+    JDXSpectrum convSpectrum = spectrum.copy();
+    convSpectrum.setOrigin("JSpecView Converted");
+    convSpectrum.setOwner("JSpecView Generated");
+    convSpectrum.setXYCoords(newXYCoords);
+    convSpectrum.setYUnits(units);
+    spectrum.setConvertedSpectrum(convSpectrum);
+    convSpectrum.setConvertedSpectrum(spectrum);
+    return convSpectrum;
+  }
+
+  /**
+   * Converts a value in Transmittance to Absorbance -- max of MAXABS (4)
+   * 
+   * 
+   * @param x
+   * @param isPercent
+   * @return the value in Absorbance
+   */
+  public static double toAbsorbance(double x, boolean isPercent) {
+    return (Math.min(MAXABS, isPercent ? 2 - log10(x) : -log10(x)));
+  }
+
+  /**
+   * Converts a value from Absorbance to Transmittance
+   * 
+   * @param x
+   * @return the value in Transmittance
+   */
+  public static double toTransmittance(double x) {
+    return (x <= 0 ? 1 : Math.pow(10, -x));
+  }
+
+  /**
+   * Returns the log of a value to the base 10
+   * 
+   * @param value
+   *        the input value
+   * @return the log of a value to the base 10
+   */
+  public static double log10(double value) {
+    return Math.log(value) / Math.log(10);
+  }
+
+  /**
+   * Determines if the y values of a spectrum are in a certain range
+   * 
+   * @param xyCoords
+   * @param min
+   * @param max
+  * @return true is in range, otherwise false
+   */
+  public static boolean isYInRange(Coordinate[] xyCoords, double min,
+                                    double max) {
+    return (JSpecViewUtils.getMinY(xyCoords) >= min 
+        && JSpecViewUtils.getMaxY(xyCoords) >= max);
+  }
+
+  /**
+   * Normalises the y values of a spectrum to a certain range
+   * 
+   * @param xyCoords
+   * @param min
+   * @param max
+   * @return array of normalised coordinates
+   */
+  public static Coordinate[] normalise(Coordinate[] xyCoords, double min,
+                                        double max) {
+    Coordinate[] newXYCoords = new Coordinate[xyCoords.length];
+    double minY = JSpecViewUtils.getMinY(xyCoords);
+    double maxY = JSpecViewUtils.getMaxY(xyCoords);
+    double factor = (maxY - minY) / (max - min); // range = 0-5
+    for (int i = 0; i < xyCoords.length; i++)
+      newXYCoords[i] = new Coordinate(xyCoords[i].getXVal(), 
+          ((xyCoords[i].getYVal() - minY) / factor) - min);
+    return newXYCoords;
+  }
+
 }
