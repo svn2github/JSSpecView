@@ -25,7 +25,6 @@
 package jspecview.common;
 
 import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 
 /**
  * The <code>IntegrationRatio</code> class stores the x and y values of an
@@ -40,7 +39,7 @@ public class IntegrationRatio extends Coordinate
     double integralVal = 0;
 	
 	/** the format of the string returned by getXString() and getYString() */
-    private DecimalFormat formatter = new DecimalFormat("0.########", new DecimalFormatSymbols(java.util.Locale.US ));
+    private DecimalFormat formatter = JSpecViewUtils.getDecimalFormat("0.########");
     
     /**
      * Constructor

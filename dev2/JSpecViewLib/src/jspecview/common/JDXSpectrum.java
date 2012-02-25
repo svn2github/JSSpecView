@@ -20,7 +20,6 @@
 package jspecview.common;
 
 import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -249,10 +248,8 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
 
     //final String CORE_STR = "TITLE,ORIGIN,OWNER,DATE,TIME,DATATYPE,JCAMPDX";
 
-    DecimalFormat varFormatter = new DecimalFormat("0.########",
-        new DecimalFormatSymbols(java.util.Locale.US));
-    DecimalFormat sciFormatter = new DecimalFormat("0.########E0",
-        new DecimalFormatSymbols(java.util.Locale.US));
+    DecimalFormat varFormatter = JSpecViewUtils.getDecimalFormat("0.########");
+    DecimalFormat sciFormatter = JSpecViewUtils.getDecimalFormat("0.########E0");
 
     StringBuffer buffer = new StringBuffer();
     // start of header
@@ -726,14 +723,14 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return isIncreasing();
   }
 
-  private boolean isIntegrated;
+  private Graph integration;
 
-  public boolean isIntegrated() {
-    return isIntegrated;
+  public Graph getIntegrationGraph() {
+    return integration;
   }
   
-  public void setIntegrated(boolean TF) {
-    isIntegrated = TF;
+  public void setIntegrationGraph(Graph graph) {
+    integration = graph;
   }
 
   private Comparator<Coordinate> c;
@@ -745,6 +742,5 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
       c = new CoordComparator();
     return Coordinate.getYValueAt(xyCoords, x, c);
   }
-  
 
 }

@@ -67,14 +67,19 @@ public class JSpecViewUtils {
   public static final double FACTOR_DIVISOR = 1000000;
 
   /**
-   * If the applet is needed for teaching , then we need to obscure the title of
+   * If the applet is needed for teaching, then we need to obscure the title of
    * the spectrum
    */
-  public static boolean obscure = false;
-
+  public static boolean obscure;
   public static String integralMinY = "0.1";
   public static String integralFactor = "50.0";
   public static String integralOffset = "30.0";
+
+  public static DecimalFormat getDecimalFormat(String hash) {
+    return new DecimalFormat(hash, new DecimalFormatSymbols(java.util.Locale.US));
+  }
+
+
 
   /**
    * Returns the minimum x value of an array of <code>Coordniate</code>s
@@ -451,7 +456,7 @@ public class JSpecViewUtils {
     double spanX, spanY;
     double[] units = { 1.5, 2.0, 2.5, 4.0, 5.0, 8.0, 10.0 };
     // formats the spanX and spanY values into scientific notation
-    DecimalFormat sciFormatter = new DecimalFormat("0.###E0");
+    DecimalFormat sciFormatter = getDecimalFormat("0.###E0");
     // index of the letter 'E' in spanX and spanY values formatted  in sci notation
     // as a string
     int indexOfE;
@@ -560,8 +565,7 @@ public class JSpecViewUtils {
 
     double spanX, spanY;
     double[] units = { 1.5, 2.0, 2.5, 4.0, 5.0, 8.0, 10.0 };
-    DecimalFormat sciFormatter = new DecimalFormat("0.###E0",
-        new DecimalFormatSymbols(java.util.Locale.US));
+    DecimalFormat sciFormatter = getDecimalFormat("0.###E0");
 
     int indexOfE;
     double leftOfE;
@@ -756,7 +760,7 @@ public class JSpecViewUtils {
                                            int startDataPointIndex,
                                            int endDataPointIndex, int numPerLine) {
 
-    DecimalFormat formatter = new DecimalFormat("0.000000");
+    DecimalFormat formatter = getDecimalFormat("0.000000");
     StringBuffer buffer = new StringBuffer();
 
     if (endDataPointIndex > startDataPointIndex) {

@@ -20,7 +20,6 @@
 package jspecview.common;
 
 import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -39,8 +38,7 @@ public class Coordinate {
   private double yVal = 0;
 
   /** the format of the string returned by getXString() and getYString() */
-  private static DecimalFormat formatter = new DecimalFormat("0.########",
-      new DecimalFormatSymbols(java.util.Locale.US));
+  private static DecimalFormat formatter = JSpecViewUtils.getDecimalFormat("0.########");
 
   /**
    * Constructor
