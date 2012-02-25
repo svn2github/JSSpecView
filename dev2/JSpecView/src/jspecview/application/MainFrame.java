@@ -1355,7 +1355,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
     boolean isAbsTrans = (spec.isAbsorbance() || spec.isTransmittance());
     saveAsJDXMenu.setEnabled(spec.getDataClass().equals("XYDATA"));
     integrateCheckBoxMenuItem.setEnabled(spec.isHNMR() && continuous);
-    integrateCheckBoxMenuItem.setSelected(spec.isHNMR() && continuous && spec.isIntegrated());
+    integrateCheckBoxMenuItem.setSelected(spec.isHNMR() && continuous 
+        && spec.getIntegrationGraph() != null);
     //  Can only convert from T <-> A  if Absorbance or Transmittance and continuous
     transAbsMenuItem.setEnabled(continuous && isAbsTrans);
     Coordinate xyCoords[] = spec.getXYCoords();

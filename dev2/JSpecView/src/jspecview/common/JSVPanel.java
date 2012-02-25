@@ -63,7 +63,6 @@ import java.awt.print.PrinterJob;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -332,6 +331,14 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     super();
     setDefaultMouseListener();
     initJSVPanel(spectra);
+  }
+
+  public static JSVPanel getIntegralPanel(JDXSpectrum spectrum) {
+    try {
+      return new JSVPanel(new Graph[] { spectrum, spectrum.getIntegrationGraph() });
+    } catch (ScalesIncompatibleException e) {
+      return null;
+    }
   }
 
   /**
@@ -1488,8 +1495,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     if (scaleData.hashNumX <= 0)
       hashX = hash1.substring(0, Math.abs(scaleData.hashNumX) + 3);
 
-    DecimalFormat displayXFormatter = new DecimalFormat(hashX,
-        new DecimalFormatSymbols(java.util.Locale.US));
+    DecimalFormat displayXFormatter = JSpecViewUtils.getDecimalFormat(hashX);
 
     g.setFont(new Font((isPrinting ? printingFont : displayFontName),
         Font.PLAIN, calculateFontSize(width, 12, true)));
@@ -1525,8 +1531,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     String hash1 = "0.00000000";
     if (scaleData.hashNumY <= 0)
       hashY = hash1.substring(0, Math.abs(scaleData.hashNumY) + 3);
-    DecimalFormat displayYFormatter = new DecimalFormat(hashY,
-        new DecimalFormatSymbols(java.util.Locale.US));
+    DecimalFormat displayYFormatter = JSpecViewUtils.getDecimalFormat(hashY);
     g.setFont(new Font((isPrinting ? printingFont : displayFontName),
         Font.PLAIN, calculateFontSize(width, 12, true)));
     FontMetrics fm = g.getFontMetrics();
@@ -2366,6 +2371,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     removeMouseMotionListener(this);
   }
 
+//  private static DecimalFormat coordFormatter = JSpecViewUtils.getDecimalFormat("0.000000");
+
   /**
    * moving panel click event processing to JSVPanel from applet
    * 
@@ -2395,15 +2402,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     double actualXPt = spectrum.getXYCoords()[store].getXVal();
     double actualYPt = spectrum.getXYCoords()[store].getYVal();
 
-    DecimalFormat displayXFormatter = new DecimalFormat("0.000000",
-        new DecimalFormatSymbols(java.util.Locale.US));
-    DecimalFormat displayYFormatter = new DecimalFormat("0.000000",
-        new DecimalFormatSymbols(java.util.Locale.US));
-
-    String actualXCoordStr = displayXFormatter.format(actualXPt);
-    String actualYCoordStr = displayYFormatter.format(actualYPt);
-    actualCoord.setXVal(Double.parseDouble(actualXCoordStr));
-    actualCoord.setYVal(Double.parseDouble(actualYCoordStr));
+    actualCoord.setXVal(actualXPt);//Double.parseDouble(coordFormatter.format(actualXPt)));
+    actualCoord.setYVal(actualYPt);//Double.parseDouble(coordFormatter.format(actualYPt)));
     return true;
   }
 
@@ -2611,6 +2611,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   private double lastClickX = Double.MAX_VALUE;
+
   /**
    * Called by the mouseClicked Method
    * 
@@ -2644,14 +2645,12 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       if (scaleData.hashNumX <= 0)
         hashX = hash1.substring(0, Math.abs(scaleData.hashNumX) + 3);
 
-      DecimalFormat displayXFormatter = new DecimalFormat(hashX,
-          new DecimalFormatSymbols(java.util.Locale.US));
+      DecimalFormat displayXFormatter = JSpecViewUtils.getDecimalFormat(hashX);
 
       if (scaleData.hashNumY <= 0)
         hashY = hash1.substring(0, Math.abs(scaleData.hashNumY) + 3);
 
-      DecimalFormat displayYFormatter = new DecimalFormat(hashY,
-          new DecimalFormatSymbols(java.util.Locale.US));
+      DecimalFormat displayYFormatter = JSpecViewUtils.getDecimalFormat(hashY);
 
       String xStr, yStr;
 
@@ -2700,41 +2699,29 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       if (scaleData.hashNumX <= 0)
         hashX = hash1.substring(0, Math.abs(scaleData.hashNumX) + 3);
 
-      DecimalFormat displayXFormatter = new DecimalFormat(hashX,
-          new DecimalFormatSymbols(java.util.Locale.US));
+      DecimalFormat formatter = JSpecViewUtils.getDecimalFormat(hashX);
 
       if (scaleData.hashNumY <= 0)
         hashY = hash1.substring(0, Math.abs(scaleData.hashNumY) + 3);
 
-      DecimalFormat displayYFormatter = new DecimalFormat(hashY,
-          new DecimalFormatSymbols(java.util.Locale.US));
+      String xx = formatter.format(xPt);
+      formatter = JSpecViewUtils.getDecimalFormat(hashY);
+      coordStr = "(" + xx + ", " + formatter.format(yPt) + ")";
 
-      String xx = displayXFormatter.format(xPt);
-      coordStr = "(" + xx + ", " + displayYFormatter.format(yPt) + ")";
-
-      mouseMovedOk = true;
-
-      if (getSpectrumAt(0).isIntegrated()) {
-        displayYFormatter = new DecimalFormat("#0.0", new DecimalFormatSymbols(
-            java.util.Locale.US));
-        yPt = spectra[1].getYValueAt(xPt);
-        xx += ", " + displayYFormatter.format(yPt);
-      } else if (nSpectra == 1) {
-        if (getSpectrumAt(0).isHNMR()) {
-          yPt = Double.MAX_VALUE;
-        } else {
+      if (nSpectra == 1) {
+        if (!getSpectrumAt(0).isHNMR()) {
           yPt = spectra[0].getYValueAt(xPt);
-          xx += ", " + displayYFormatter.format(yPt);
+          xx += ", " + formatter.format(yPt);
         }
-      } else {
-        return;
+      } else if (getSpectrumAt(0).getIntegrationGraph() != null) {
+        formatter = JSpecViewUtils.getDecimalFormat("#0.0");
+        yPt = spectra[1].getYValueAt(xPt);
+        xx += ", " + formatter.format(yPt);
       }
-      if (Double.isNaN(yPt))
-        setToolTipText(null);
-      else
-        setToolTipText(xx);
 
+      setToolTipText(Double.isNaN(yPt) ? null : xx);
     }
+    mouseMovedOk = true;
   }
 
   /**

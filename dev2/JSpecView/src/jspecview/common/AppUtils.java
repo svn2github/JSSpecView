@@ -7,12 +7,10 @@ import java.util.ArrayList;
 import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
 
-import jspecview.common.Graph;
 import jspecview.common.IntegralGraph;
 import jspecview.common.IntegrationRatio;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSpecViewUtils;
-import jspecview.exception.ScalesIncompatibleException;
 
 public class AppUtils {
 
@@ -40,19 +38,13 @@ public class AppUtils {
         .getContentPane()
         : frameOrPanel);
     JSVPanel jsvp = (JSVPanel) jp.getComponent(0);
-    int numGraphs = jsvp.getNumberOfSpectra();
     JDXSpectrum spectrum = jsvp.getSpectrum();
-
-    boolean integrateOn = spectrum.isIntegrated();
-    boolean allowIntegration = (numGraphs == 1 ? spectrum.isHNMR()
-        : integrateOn);
-    spectrum.setIntegrated(allowIntegration);
-    if (allowIntegration) {
-      IntegralGraph integGraph;
+    IntegralGraph graph = (IntegralGraph) jsvp.getIntegralGraph();
+    spectrum.setIntegrationGraph(null);
+    if (graph != null || spectrum.isHNMR() && jsvp.getNumberOfSpectra() == 1) {
       if (showDialog) {
         IntegrateDialog integDialog;
-        if (integrateOn) {
-          IntegralGraph graph = (IntegralGraph) jsvp.getIntegralGraph();
+        if (graph != null) {
           integDialog = new IntegrateDialog(jp, "Integration Parameters", true,
               graph.getPercentMinimumY(), graph.getPercentOffset(), graph
                   .getIntegralFactor());
@@ -62,34 +54,26 @@ public class AppUtils {
                   .parseDouble(JSpecViewUtils.integralOffset), Double
                   .parseDouble(JSpecViewUtils.integralFactor));
         }
-        integGraph = new IntegralGraph(spectrum, integDialog.getMinimumY(),
+        graph = new IntegralGraph(spectrum, integDialog.getMinimumY(),
             integDialog.getOffset(), integDialog.getFactor());
       } else {
-        integGraph = new IntegralGraph(spectrum, Double
+        graph = new IntegralGraph(spectrum, Double
             .parseDouble(JSpecViewUtils.integralMinY), Double
             .parseDouble(JSpecViewUtils.integralOffset), Double
             .parseDouble(JSpecViewUtils.integralFactor));
       }
-      integGraph.setXUnits(spectrum.getXUnits());
-      integGraph.setYUnits(spectrum.getYUnits());
-
-      if (integGraph != null) {
-        try {
-          JSVPanel newJsvp = new JSVPanel(new Graph[] { spectrum, integGraph });
-          newJsvp.setTitle(integGraph.getTitle());
-          newJsvp.setPlotColors(new Color[] { newJsvp.getPlotColor(0),
-              jsvp.getIntegralPlotColor() });
-
-          // add integration ratio annotations if any exist
-          if (integrationRatios != null)
-            newJsvp.setIntegrationRatios(integrationRatios);
-
-          jp.remove(jsvp);
-          jp.add(newJsvp);
-        } catch (ScalesIncompatibleException ex) {
-          // impossible
-        }
-      }
+      graph.setXUnits(spectrum.getXUnits());
+      graph.setYUnits(spectrum.getYUnits());
+      spectrum.setIntegrationGraph(graph);
+      JSVPanel newJsvp = JSVPanel.getIntegralPanel(spectrum);
+      newJsvp.setTitle(graph.getTitle());
+      newJsvp.setPlotColors(new Color[] { newJsvp.getPlotColor(0),
+          jsvp.getIntegralPlotColor() });
+      // add integration ratio annotations if any exist
+      if (integrationRatios != null)
+        newJsvp.setIntegrationRatios(integrationRatios);
+      jp.remove(jsvp);
+      jp.add(newJsvp);
     }
     return (JSVPanel) jp.getComponent(0);
   }
@@ -102,13 +86,13 @@ public class AppUtils {
    * @return true if had integral, false otherwise
    */
   public static boolean hasIntegration(JSVPanel jsvp) {
-    return jsvp.getSpectrum().isIntegrated();
+    return (jsvp.getSpectrum().getIntegrationGraph() != null);
   }
 
   public static JSVPanel removeIntegration(Container pane) {
     JSVPanel jsvp = (JSVPanel) pane.getComponent(0);
     JDXSpectrum spectrum = jsvp.getSpectrum();
-    spectrum.setIntegrated(false);
+    spectrum.setIntegrationGraph(null);
     JSVPanel newJsvp = new JSVPanel(spectrum);
     pane.remove(jsvp);
     pane.add(newJsvp);

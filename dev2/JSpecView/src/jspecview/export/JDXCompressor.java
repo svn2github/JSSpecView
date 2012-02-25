@@ -20,7 +20,6 @@
 package jspecview.export;
 
 import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 
 import jspecview.common.Coordinate;
 import jspecview.common.JSpecViewUtils;
@@ -122,8 +121,7 @@ class JDXCompressor {
   static String compressFIX(Coordinate[] xyCoords, int startDataPointIndex,
                             int endDataPointIndex, double xFactor,
                             double yFactor) {
-    DecimalFormat formatter = new DecimalFormat("#", new DecimalFormatSymbols(
-        java.util.Locale.US));
+    DecimalFormat formatter = JSpecViewUtils.getDecimalFormat("#");
     StringBuffer buffer = new StringBuffer();
 
     for (int i = startDataPointIndex; i <= endDataPointIndex; i++) {

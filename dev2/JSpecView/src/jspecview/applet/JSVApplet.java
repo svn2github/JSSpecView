@@ -777,7 +777,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     if (msTrigger > 0 && time - msTrigger < 100)
       return;
     msTrigger = time;
-    JSVPanel jsvp = (JSVPanel) appletPanel.getComponent(0);
+    JSVPanel jsvp = getCurrentPanel();
     if (jsvp.getNumberOfSpectra() > 1)
       return;
     JDXSpectrum spectrum = jsvp.getSpectrum();
@@ -824,6 +824,9 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
 
   }
 
+  private JSVPanel getCurrentPanel() {
+    return (JSVPanel) appletPanel.getComponent(0);
+  }
   /**
    * Allows Integration of an HNMR spectrum
    * 
@@ -834,8 +837,9 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     if (e.getStateChange() == ItemEvent.SELECTED) {
       tempJSVP = AppUtils.integrate(appletPanel, true, integrationRatios);
     } else {
-      if (AppUtils.hasIntegration((JSVPanel) appletPanel.getComponent(0))) {
-        appletPanel.remove((JSVPanel) appletPanel.getComponent(0));
+      JSVPanel jsvp = getCurrentPanel();
+      if (AppUtils.hasIntegration(jsvp)) {
+        appletPanel.remove(jsvp);
         tempJSVP = jsvPanels[currentSpectrumIndex];
         appletPanel.add(tempJSVP);
       }
