@@ -2832,4 +2832,28 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     z0 = z1 = null;
   }
 
+  public static JSVPanel taConvert(JSVPanel jsvp, int mode) {
+    if (jsvp.getNumberOfSpectra() > 1)
+      return null;
+    JDXSpectrum spectrum = jsvp.getSpectrum();
+    if (!spectrum.isContinuous())
+      return null;
+    switch (mode) {
+    case JDXSpectrum.TO_ABS:
+      if (!spectrum.isTransmittance())
+        return null;
+      break;
+    case JDXSpectrum.TO_TRANS:
+      if (!spectrum.isAbsorbance())
+        return null;
+      break;
+    case JDXSpectrum.IMPLIED:
+      break;
+    default:
+      return null;
+    }
+    spectrum = JDXSpectrum.convert(spectrum);
+    return (spectrum == null ? null : new JSVPanel(spectrum));
+  }
+
 }

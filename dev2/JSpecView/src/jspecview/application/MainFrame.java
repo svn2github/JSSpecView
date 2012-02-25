@@ -132,7 +132,6 @@ import jspecview.common.Graph;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSpecViewUtils;
 import jspecview.common.PeakInfo;
-import jspecview.common.TransmittanceAbsorbanceConverter;
 import jspecview.exception.ScalesIncompatibleException;
 import jspecview.source.JDXFileReader;
 import jspecview.source.JDXSource;
@@ -199,12 +198,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private SpecInfo[] specInfos;
   protected String selectedTreeFile;
 
-
-  //   -------------------------- GUI Components  -------------------------
-
-  final private int TO_TRANS = 0;
-  final private int TO_ABS = 1;
-  final private int IMPLIED = 2;
 
   //   ----------------------------------------------------------------------
 
@@ -1624,9 +1617,9 @@ public class MainFrame extends JFrame implements DropTargetListener,
         frames[i] = frame;
 
         if (autoATConversion.equals("AtoT")) {
-          TAConvert(frame, TO_TRANS);
+          TAConvert(frame, JDXSpectrum.TO_TRANS);
         } else if (autoATConversion.equals("TtoA")) {
-          TAConvert(frame, TO_ABS);
+          TAConvert(frame, JDXSpectrum.TO_ABS);
         }
 
         if (autoIntegrate) {
@@ -2442,7 +2435,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the ActionEvent
    */
   protected void transAbsMenuItem_actionPerformed(ActionEvent e) {
-    TAConvert(null, IMPLIED);
+    TAConvert(null, JDXSpectrum.IMPLIED);
   }
 
   /**
@@ -2498,50 +2491,15 @@ public class MainFrame extends JFrame implements DropTargetListener,
     }
 
     Container contentPane = frame.getContentPane();
-    if (contentPane.getComponentCount() == 2) {
-      frame.remove(JSVPanel.getPanel0(frame));
-      JSVPanel.getPanel0(frame).reset();
-      validate();
-      return;
-    }
-
-    JSVPanel jsvp = JSVPanel.getPanel0(frame);
-    if (jsvp.getNumberOfSpectra() > 1) {
-      return;
-    }
-
-    JDXSpectrum spectrum = jsvp.getSpectrum();
-    JDXSpectrum newSpec;
-    switch (comm) {
-    case TO_TRANS:
-      newSpec = TransmittanceAbsorbanceConverter
-          .AbsorbancetoTransmittance(spectrum);
-      break;
-    case TO_ABS:
-      newSpec = TransmittanceAbsorbanceConverter
-          .TransmittanceToAbsorbance(spectrum);
-      break;
-    case IMPLIED:
-      newSpec = TransmittanceAbsorbanceConverter.convert(spectrum);
-      break;
-    default:
-      newSpec = null;
-    }
-    if (newSpec == null) {
-      return;
-    }
-    JSVPanel newJsvp = new JSVPanel(newSpec);
-    //newJsvp.setOverlayIncreasing(spectrum.isIncreasing());
-    setJSVPanelProperties(newJsvp, true);
+    JSVPanel jsvp = JSVPanel.taConvert(JSVPanel.getPanel0(frame), comm);
+    setJSVPanelProperties(jsvp, true);
 
     // Get from properties variable
-    contentPane.remove(jsvp);
+    contentPane.remove(0);
     contentPane.invalidate();
-    if (!(contentPane.getLayout() instanceof CardLayout)) {
+    if (!(contentPane.getLayout() instanceof CardLayout))
       contentPane.setLayout(new CardLayout());
-    }
-    contentPane.add(newJsvp, "new");
-    contentPane.add(jsvp, "old");
+    contentPane.add(jsvp, "new");
     validate();
   }
 
@@ -2706,9 +2664,9 @@ public class MainFrame extends JFrame implements DropTargetListener,
           break;
         case IRMODE:
           if (value.toUpperCase().startsWith("T"))
-            TAConvert(null, TO_TRANS);
+            TAConvert(null, JDXSpectrum.TO_TRANS);
           else if (value.toUpperCase().startsWith("A"))
-            TAConvert(null, TO_ABS);
+            TAConvert(null, JDXSpectrum.TO_ABS);
           break;
         case OBSCURE:
           //obscure = Boolean.parseBoolean(value);

@@ -91,7 +91,6 @@ import jspecview.common.IntegrationRatio;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSpecViewUtils;
 import jspecview.common.PeakInfo;
-import jspecview.common.TransmittanceAbsorbanceConverter;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
 import jspecview.export.Exporter;
@@ -150,10 +149,6 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
 
   private String sltnclr = "255,255,255"; //Colour of Solution
 
-
-  final private int TO_TRANS = 0;
-  final private int TO_ABS = 1;
-  final private int IMPLIED = 2;
 
   /*---------------------------------END PARAMETERS------------------------*/
 
@@ -723,11 +718,11 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     try {
       if (key.equalsIgnoreCase("irMode")) {
         if ("transmittance".equalsIgnoreCase(value))
-          TAConvert(TO_TRANS);
+          TAConvert(JDXSpectrum.TO_TRANS);
         else if ("absorbance".equalsIgnoreCase(value))
-          TAConvert(TO_ABS);
+          TAConvert(JDXSpectrum.TO_ABS);
         else if ("switch".equalsIgnoreCase(value))
-          TAConvert(IMPLIED);
+          TAConvert(JDXSpectrum.IMPLIED);
         else
           return false;
         return true;
@@ -753,9 +748,9 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
           + " " + ItemEvent.SELECTED + " " + ItemEvent.DESELECTED + " "
           + e.toString());
       if (e.getStateChange() == ItemEvent.SELECTED)
-        TAConvert(IMPLIED);
+        TAConvert(JDXSpectrum.IMPLIED);
       else
-        TAConvert(IMPLIED);
+        TAConvert(JDXSpectrum.IMPLIED);
     } catch (Exception jsve) {
       // ignore?
     }
@@ -777,39 +772,9 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     if (msTrigger > 0 && time - msTrigger < 100)
       return;
     msTrigger = time;
-    JSVPanel jsvp = getCurrentPanel();
-    if (jsvp.getNumberOfSpectra() > 1)
+    JSVPanel jsvp = JSVPanel.taConvert(getCurrentPanel(), comm);
+    if (jsvp == null)
       return;
-    JDXSpectrum spectrum = jsvp.getSpectrum();
-    if (!spectrum.isContinuous())
-      return;
-    switch (comm) {
-    case TO_ABS:
-      if (!spectrum.isTransmittance())
-        return;
-      break;
-    case TO_TRANS:
-      if (!spectrum.isAbsorbance())
-        return;
-      break;
-    case IMPLIED:
-      break;
-    default:
-      return;
-    }
-
-    //  if successful, newSpec has the converted info
-    JDXSpectrum newSpec = TransmittanceAbsorbanceConverter.convert(spectrum);
-
-    //  if not Abs or Trans data or if there is a problem, return null
-    if (newSpec == null)
-      return;
-
-    jsvp = new JSVPanel(newSpec);
-
-    //  not working after loading a second file
-    //  if grid turned off or zoom done first
-    //  this returns full spectrum anyway
 
     appletPanel.remove(0);
     appletPanel.add(jsvp);
@@ -1533,9 +1498,9 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
 //            break;
           case IRMODE:
             if (value.toUpperCase().startsWith("T"))
-              TAConvert(TO_TRANS);
+              TAConvert(JDXSpectrum.TO_TRANS);
             else if (value.toUpperCase().startsWith("A"))
-              TAConvert(TO_ABS);
+              TAConvert(JDXSpectrum.TO_ABS);
             break;
           }
         } catch (Exception e) {
