@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2008 The University of the West Indies
+/* Copyright (c) 2002-2012 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -232,14 +232,14 @@ public class IntegralGraph implements Graph {
   }
 
   /**
-   * Recalutes the intregral
+   * Recalculates the integral
    */
   public void recalculate(){
     xyCoords = calculateIntegral();
   }
 
   /**
-   * Calulates the integral from the input <code>Graph</code>
+   * Calculates the integral from the input <code>Graph</code>
    * @return the array of coordinates of the Integral
    * @see jspecview.IntegralGraph#recalculate()
    */
