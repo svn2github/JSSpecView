@@ -67,7 +67,7 @@ public class JSpecViewUtils {
   public static final double FACTOR_DIVISOR = 1000000;
 
   /**
-   * If the applet is needed for teaching, then we need to obscure the title of
+   * If the applet is used for teaching, then we may need to obscure the title of
    * the spectrum
    */
   public static boolean obscure;
