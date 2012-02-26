@@ -71,9 +71,9 @@ public class JSpecViewUtils {
    * the spectrum
    */
   public static boolean obscure;
-  public static String integralMinY = "0.1";
-  public static String integralFactor = "50.0";
-  public static String integralOffset = "30.0";
+  public static double integralMinY = 0.1;
+  public static double integralFactor = 50;
+  public static double integralOffset = 30;
 
   public static DecimalFormat getDecimalFormat(String hash) {
     return new DecimalFormat(hash, new DecimalFormatSymbols(java.util.Locale.US));
