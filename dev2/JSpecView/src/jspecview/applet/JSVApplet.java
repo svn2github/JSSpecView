@@ -246,6 +246,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
    */
   @Override
   public void init() {
+    JSVparams = getParameter("script");
     init(null);
     if (appletReadyCallbackFunctionName != null && fullName != null)
       callToJavaScript(appletReadyCallbackFunctionName, new Object[] {
@@ -258,7 +259,6 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     if (data != null) {
       // have string data
     } else if (!newFile) {
-      JSVparams = getParameter("script");
       parseInitScript(execScript = JSVparams);
     } else if (newFilePath != null) {
         filePath = newFilePath;
@@ -1408,20 +1408,6 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
       ScriptToken st = ScriptToken.getScriptToken(key);
       String value = ScriptParser.getValue(st, eachParam);
       System.out.println("KEY-> " + key + " VALUE-> " + value + " : " + st);
-      if (jsvp == null) {
-        switch (st) {
-        case LOAD:
-        case SPECTRUMNUMBER:
-        case SPECTRUM:
-        case PEAKCALLBACKFUNCTIONNAME:
-        case SYNCCALLBACKFUNCTIONNAME:
-        case COORDCALLBACKFUNCTIONNAME:
-        case INTEGRATIONRATIOS:
-          break;
-        default:
-          return;
-        }
-      }
       try {
         switch (st) {
         case UNKNOWN:
@@ -1457,6 +1443,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
         //              desktopPane.tileFrames();            
         //            break;
         case IRMODE:
+          if (jsvp == null) 
+            continue;
           TAConvert(value.toUpperCase().startsWith("T") ? JDXSpectrum.TO_TRANS
               : value.toUpperCase().startsWith("A") ? JDXSpectrum.TO_ABS
                   : JDXSpectrum.IMPLIED);
@@ -1467,9 +1455,13 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
           integrationRatios = JSpecViewUtils
               .getIntegrationRatiosFromString(value);
         case INTEGRATE:
+          if (jsvp == null) 
+            continue;
           integrate(value.equals("?"));
           break;
         case GETSOLUTIONCOLOR:
+          if (jsvp == null) 
+            continue;
           setSolutionColor(true);
           break;
         }

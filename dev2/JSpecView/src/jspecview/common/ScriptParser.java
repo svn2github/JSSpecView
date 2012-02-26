@@ -9,9 +9,9 @@ public class ScriptParser {
       return "";
     switch (st) {
     default:
-      return params.nextToken();
+      return nextStringToken(params);
     case ZOOM:
-      String x1 = params.nextToken();
+      String x1 = nextStringToken(params);
       if (x1.equalsIgnoreCase("out"))
         return "0,0";
       String x2 = null;
@@ -19,21 +19,38 @@ public class ScriptParser {
       if (pt >= 0) {
         if (x1.endsWith(",")) {
           x1 = x1.substring(0, x1.length() - 1);
-          x2 = params.nextToken();
+          x2 = nextStringToken(params);
         } else {
           x2 = x1.substring(pt + 1, x1.length());
           x1 = x1.substring(0, pt);
         }
       } else {
-        x2 = params.nextToken();
+        x2 = nextStringToken(params);
         if (x2.equals(",")) {
-          x2 = params.nextToken();
+          x2 = nextStringToken(params);
         } else if (x2.startsWith(",")) {
           x2 = x2.substring(1);
         }
       }
       return x1 + "," + x2;
     }
+  }
+
+  private static String nextStringToken(StringTokenizer params) {
+    String s = params.nextToken();
+    if (s.charAt(0) != '"') 
+      return s;
+    if (s.endsWith("\""))
+      return s.substring(1, s.length() - 1);
+    StringBuffer sb = new StringBuffer(s);
+    s = null;
+    while (params.hasMoreTokens() && !(s = params.nextToken()).endsWith("\"")) {
+      sb.append(" ").append(s);
+      s = null;
+    }
+    if (s != null)
+      sb.append(s.substring(0, s.length() - 1));
+    return sb.toString();
   }
 
   public static String getKey(StringTokenizer eachParam) {
