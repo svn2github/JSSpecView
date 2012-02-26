@@ -648,7 +648,7 @@ public class JSpecViewUtils {
    * @param firstX
    *        the first X value
    * @param lastX
-   *        th elast X value
+   *        the last X value
    * @param offset
    *        the offset value
    * @param observedFreq
