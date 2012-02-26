@@ -38,6 +38,7 @@ package jspecview.common;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -255,13 +256,13 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   // Minimum number of points that are displayable in a zoom
   private int minNumOfPointsForZoom = 3;
 
-  private String title = null;
+  private String title;
 
-  private boolean isPrinting = false;
+  private boolean isPrinting;
   private boolean printGrid = gridOn;
   private boolean printTitle = true;
   private boolean printScale = true;
-  private String printingFont = null;
+  private String printingFont;
   private String graphPosition = "default";
   private int defaultHeight = 450;
   private int defaultWidth = 280;
@@ -410,7 +411,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     this.spectra = spectra;
     nSpectra = spectra.length;
     if (nSpectra == 1)
-      title = (getSpectrumAt(0)).getPeakTitle();
+      setTitle(getSpectrumAt(0).getPeakTitle());
 
     checkUnits();
 
@@ -451,7 +452,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     this.spectra = spectra;
     nSpectra = spectra.length;
     if (nSpectra == 1)
-      title = (getSpectrumAt(0)).getPeakTitle();
+      setTitle(getSpectrumAt(0).getPeakTitle());
     xyCoordsList = new Coordinate[nSpectra][];
 
     int[] startIndices = new int[nSpectra];
@@ -744,6 +745,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   public void setTitle(String title) {
     this.title = title;
+    setName(title);
   }
 
   /**
@@ -975,15 +977,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   public JDXSpectrum getSpectrumAt(int index) {
     return (JDXSpectrum) spectra[index];
-  }
-
-  /**
-   * Returns the <code>Integral</code> at the specified index
-   * 
-   * @return the <code>Spectrum</code> at the specified index
-   */
-  public Graph getIntegralGraph() {
-    return spectra[1];
   }
 
   /**
@@ -1235,7 +1228,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       drawBar(g, hl.getStartX(), hl.getEndX(), highlightColor = hl.getColor(), true);
     }
 
-    ArrayList<PeakInfo> list = (getSpectrumAt(0)).getPeakList();
+    ArrayList<PeakInfo> list = getSpectrumAt(0).getPeakList();
     if (list != null && list.size() > 0) {
       for (int i = list.size(); --i >= 0;) {
         PeakInfo pi = list.get(i);
@@ -2854,6 +2847,19 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     }
     spectrum = JDXSpectrum.convert(spectrum);
     return (spectrum == null ? null : new JSVPanel(spectrum));
+  }
+
+  public static void showSolutionColor(Component component, String sltnclr) {
+    JOptionPane.showMessageDialog(component, "<HTML><body bgcolor=rgb(" + sltnclr
+        + ")><br />Predicted Solution Colour- RGB(" + sltnclr
+        + ")<br /><br /></body></HTML>", "Predicted Colour",
+        JOptionPane.INFORMATION_MESSAGE);
+  }
+
+  public String getSolutionColor() {
+    Graph spectrum = getSpectrum();
+    String Yunits = spectrum.getYUnits();
+    return Visible.Colour(spectrum.getXYCoords(), Yunits);
   }
 
 }

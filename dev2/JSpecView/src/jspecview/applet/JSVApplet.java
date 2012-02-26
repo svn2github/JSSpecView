@@ -41,6 +41,7 @@ package jspecview.applet;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -86,7 +87,6 @@ import jspecview.common.ScriptInterface;
 import jspecview.common.ScriptParser;
 import jspecview.common.ScriptToken;
 import jspecview.common.Coordinate;
-import jspecview.common.Graph;
 import jspecview.common.IntegrationRatio;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSpecViewUtils;
@@ -100,7 +100,6 @@ import jspecview.util.Escape;
 import jspecview.util.Logger;
 import jspecview.util.Parser;
 import netscape.javascript.JSObject;
-import jspecview.common.Visible;
 
 /**
  * JSpecView Applet class. For a list of parameters and scripting functionality
@@ -159,7 +158,6 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
   private JFileChooser jFileChooser;
   private JSVPanel selectedJSVPanel;
   private JSVAppletPopupMenu appletPopupMenu;
-  private JSVPanel tempJSVP;
 
   @Override
   public void destroy() {
@@ -175,9 +173,6 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
           jsvPanels[i] = null;
         }
     }
-    if (tempJSVP != null)
-      tempJSVP.destroy();
-    tempJSVP = null;
     System.out.println("JSVApplet " + this + " destroy 2");
   }
 
@@ -229,8 +224,6 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
   private boolean overlay;
   private boolean obscure;
 
-  private String irMode;
-
   /**
    * Returns a parameter value
    * 
@@ -260,13 +253,14 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
   }
 
   private void init(String data) {
+    // this is tricky
+    String execScript = null;
     if (data != null) {
-
+      // have string data
     } else if (!newFile) {
       JSVparams = getParameter("script");
-      parseInitScript(JSVparams);
-    } else {
-      if (newFilePath != null)
+      parseInitScript(execScript = JSVparams);
+    } else if (newFilePath != null) {
         filePath = newFilePath;
     }
     // enable or disable menus
@@ -286,7 +280,10 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     statusTextLabel.setForeground(Color.darkGray);
     statusPanel.add(statusTextLabel, null);
     this.getContentPane().add(appletPanel);
-    openDataOrFile(data);
+    if (execScript == null)
+      openDataOrFile(data);
+    else
+      checkScriptNow(execScript);
   }
 
   /**
@@ -340,7 +337,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     numberOfSpectra = specs.size();
     overlay = theInterface.equals("overlay") && numberOfSpectra > 1;
 
-    if (startIndex != -1 && endIndex != -1)
+    if (startIndex >= 0 && endIndex > startIndex)
       showRange = true;
 
     // Initialise JSVpanels
@@ -365,6 +362,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
         initPanels();
         return;
       }
+      endIndex = startIndex = -1;
       jsvPanels[0] = jsvp;
       initProperties(jsvp, 0);
       selectedJSVPanel = jsvp;
@@ -565,7 +563,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     currentSpectrumIndex = index;
     setSelectedPanel(jsvp);
 
-    appletPopupMenu.integrateMenuItem.setEnabled(selectedJSVPanel.getSpectrum().isHNMR());
+    appletPopupMenu.integrateCheckBoxMenuItem.setEnabled(selectedJSVPanel.getSpectrum().isHNMR());
 
     chooseContainer();
     this.validate();
@@ -608,23 +606,11 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
 
   /**
    * Calculates the predicted colour of the Spectrum
-   * 
-   * @param e
-   *        the ActionEvent
    */
-  protected void solColMenuItem_actionPerformed(ActionEvent e) {
-
-    Graph spectrum = selectedJSVPanel.getSpectrum();
-    String Yunits = spectrum.getYUnits();
-    //    System.out.println(spectrum.getTitle());
-    sltnclr = Visible.Colour(spectrum.getXYCoords(), Yunits);
-
-    //JScrollPane scrollPane = new JScrollPane();
-
-    JOptionPane.showMessageDialog(this, "<HTML><body bgcolor=rgb(" + sltnclr
-        + ")><br />Predicted Solution Colour- RGB(" + sltnclr
-        + ")<br /><br /></body></HTML>", "Predicted Colour",
-        JOptionPane.INFORMATION_MESSAGE);
+  public void setSolutionColor(boolean showMessage) {
+    sltnclr = selectedJSVPanel.getSolutionColor();
+    if (showMessage)
+      JSVPanel.showSolutionColor((Component)this, sltnclr);
   }
 
   /**
@@ -668,7 +654,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
   protected void windowMenuItem_itemStateChanged(ItemEvent e) {
     if (e.getStateChange() == ItemEvent.SELECTED) {
       // disable some features when in Window mode
-      appletPopupMenu.integrateMenuItem.setEnabled(false);
+      appletPopupMenu.integrateCheckBoxMenuItem.setEnabled(false);
       appletPopupMenu.compoundMenu.setEnabled(false);
       appletPopupMenu.transAbsMenuItem.setEnabled(false);
       frame = new JFrame("JSpecView");
@@ -689,7 +675,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
           setVisible(true);
           validate();
           repaint();
-          appletPopupMenu.integrateMenuItem.setEnabled(true);
+          appletPopupMenu.integrateCheckBoxMenuItem.setEnabled(true);
           //       if (compoundMenuOn)
           //             compoundMenu.setEnabled(true);
           frame.removeAll();
@@ -699,7 +685,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
       });
     } else {
       // re-enable features that were disabled in Window mode
-      appletPopupMenu.integrateMenuItem.setEnabled(true);
+      appletPopupMenu.integrateCheckBoxMenuItem.setEnabled(true);
       appletPopupMenu.transAbsMenuItem.setEnabled(true);
       if (compoundMenuOn)
         appletPopupMenu.compoundMenu.setEnabled(true);
@@ -710,27 +696,6 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
       frame.removeAll();
       frame.dispose();
     }
-  }
-
-  public boolean setStringParameter(String key, String value) {
-    if (key == null)
-      return false;
-    try {
-      if (key.equalsIgnoreCase("irMode")) {
-        if ("transmittance".equalsIgnoreCase(value))
-          TAConvert(JDXSpectrum.TO_TRANS);
-        else if ("absorbance".equalsIgnoreCase(value))
-          TAConvert(JDXSpectrum.TO_ABS);
-        else if ("switch".equalsIgnoreCase(value))
-          TAConvert(JDXSpectrum.IMPLIED);
-        else
-          return false;
-        return true;
-      }
-    } catch (Exception jsve) {
-      //
-    }
-    return false;
   }
 
   /**
@@ -795,23 +760,17 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
   /**
    * Allows Integration of an HNMR spectrum
    * 
-   * @param e
-   *        the ItemEvent
    */
-  protected void integrateMenuItem_itemStateChanged(ItemEvent e) {
-    if (e.getStateChange() == ItemEvent.SELECTED) {
-      tempJSVP = AppUtils.integrate(appletPanel, true, integrationRatios);
-    } else {
-      JSVPanel jsvp = getCurrentPanel();
-      if (AppUtils.hasIntegration(jsvp)) {
-        appletPanel.remove(jsvp);
-        tempJSVP = jsvPanels[currentSpectrumIndex];
-        appletPanel.add(tempJSVP);
-      }
-    }
-
-    initProperties(tempJSVP, currentSpectrumIndex);
-    tempJSVP.repaint();
+  protected void integrate(boolean showMessage) {
+    JSVPanel jsvp = getCurrentPanel();
+    JSVPanel jsvpNew = (AppUtils.hasIntegration(jsvp) 
+        ? AppUtils.removeIntegration(appletPanel)
+        : AppUtils.integrate(appletPanel, showMessage, integrationRatios));
+    appletPanel.remove(jsvp);
+    appletPanel.add(jsvpNew);
+    initProperties(jsvpNew, currentSpectrumIndex);
+    jsvpNew.repaint();
+    integrationRatios = null;
     chooseContainer();
   }
 
@@ -819,7 +778,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
   private void chooseContainer() {
     // check first if we have ever had a frame
     if (frame == null) {
-      appletPopupMenu.integrateMenuItem.setEnabled(true);
+      appletPopupMenu.integrateCheckBoxMenuItem.setEnabled(true);
       if (compoundMenuOn)
         appletPopupMenu.compoundMenu.setEnabled(true);
       getContentPane().add(appletPanel);
@@ -827,13 +786,13 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
       repaint();
     } else {
       if (frame.getComponentCount() != 0) {
-        appletPopupMenu.integrateMenuItem.setEnabled(false);
+        appletPopupMenu.integrateCheckBoxMenuItem.setEnabled(false);
         appletPopupMenu.compoundMenu.setEnabled(false);
         frame.add(appletPanel);
         frame.validate();
         frame.setVisible(true);
       } else {
-        appletPopupMenu.integrateMenuItem.setEnabled(true);
+        appletPopupMenu.integrateCheckBoxMenuItem.setEnabled(true);
         if (compoundMenuOn)
           appletPopupMenu.compoundMenu.setEnabled(true);
         getContentPane().add(appletPanel);
@@ -1009,7 +968,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
    */
 
   public String getSolnColour() {
-    return this.sltnclr;
+    return sltnclr;
   }
 
   /**
@@ -1202,10 +1161,10 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
    * toggles the integration graph of a <code>JSVPanel</code>.
    */
   public void toggleIntegration() {
-    if (appletPopupMenu.integrateMenuItem.isSelected() == false)
-      appletPopupMenu.integrateMenuItem.setSelected(true);
+    if (appletPopupMenu.integrateCheckBoxMenuItem.isSelected() == false)
+      appletPopupMenu.integrateCheckBoxMenuItem.setSelected(true);
     else
-      appletPopupMenu.integrateMenuItem.setSelected(false);
+      appletPopupMenu.integrateCheckBoxMenuItem.setSelected(false);
   }
 
   /**
@@ -1256,8 +1215,11 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
           break;
         case UNKNOWN:
           break;
-        case LOAD:
-          filePath = value;
+        case VERSION:
+          break;
+        case OBSCURE:
+          obscure = Boolean.parseBoolean(value);
+          JSpecViewUtils.setObscure(obscure);
           break;
         case SYNCID:
           syncID = value;
@@ -1267,17 +1229,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
           appletID = value;
           fullName = appletID + "__" + syncID + "__";
           break;
-        case SYNCCALLBACKFUNCTIONNAME:
-          syncCallbackFunctionName = value;
-          break;
         case APPLETREADYCALLBACKFUNCTIONNAME:
           appletReadyCallbackFunctionName = value;
-          break;
-        case COORDCALLBACKFUNCTIONNAME:
-          coordCallbackFunctionName = value;
-          break;
-        case SPECTRUMNUMBER:
-          spectrumNumber = Integer.parseInt(value);
           break;
         case ENABLEZOOM:
           enableZoom = Boolean.parseBoolean(value);
@@ -1301,23 +1254,9 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
         case STARTINDEX:
           startIndex = Integer.parseInt(value);
           break;
-        case IRMODE:
-          irMode = value;
-          break;
-        case PEAKCALLBACKFUNCTIONNAME:
-          peakCallbackFunctionName = value;
-          break;
-        case VERSION:
-          break;
-        case OBSCURE:
-          obscure = Boolean.parseBoolean(value);
-          JSpecViewUtils.setObscure(obscure);
-          break;
-        case INTEGRATIONRATIOS:
-          // parse the string with a method in JSpecViewUtils
-          System.out.println("Integration Ratio Parameter: " + value);
-          integrationRatios = JSpecViewUtils
-              .getIntegrationRatiosFromString(value);
+        case SPECTRUMNUMBER:
+        case SPECTRUM:
+          spectrumNumber = Integer.parseInt(value);
           break;
         }
       } catch (Exception e) {
@@ -1437,14 +1376,13 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     if (continuous
         && (selectedJSVPanel
             .getSpectrum()).isHNMR())
-      appletPopupMenu.integrateMenuItem.setEnabled(true);
+      appletPopupMenu.integrateCheckBoxMenuItem.setEnabled(true);
     //Can only convert from T <-> A  if Absorbance or Transmittance and continuous
     if ((continuous) && (Yunits.toLowerCase().contains("abs"))
         || (Yunits.toLowerCase().contains("trans")))
       appletPopupMenu.transAbsMenuItem.setEnabled(true);
     else
       appletPopupMenu.transAbsMenuItem.setEnabled(false);
-    setStringParameter("irmode", irMode);
     appletPopupMenu.exportAsMenu.setEnabled(true);
     appletPopupMenu.saveAsJDXMenu.setEnabled(continuous);
     newFile = false;
@@ -1453,61 +1391,93 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
   /////////// simple sync functionality //////////
 
   public void checkScriptNow(String params) {
-      if (params == null)
-        params = "";
-      params = params.trim();
-      System.out.println("CHECKSCRIPT " + params);
-      StringTokenizer allParamTokens = new StringTokenizer(params, ";");
-      if (JSpecViewUtils.DEBUG) {
-        System.out.println("Running in DEBUG mode");
-      }
-      JSVPanel jsvp = selectedJSVPanel;
-      while (allParamTokens.hasMoreTokens()) {
-        String token = allParamTokens.nextToken();
-        // now split the key/value pair
-        StringTokenizer eachParam = new StringTokenizer(token);
-        String key = ScriptParser.getKey(eachParam);
-        ScriptToken st = ScriptToken.getScriptToken(key);
-        String value = ScriptParser.getValue(st, eachParam);
-        System.out.println("KEY-> " + key + " VALUE-> " + value + " : " + st);
-        if (jsvp == null && st != ScriptToken.LOAD && st != ScriptToken.SPECTRUMNUMBER)
+    if (params == null)
+      params = "";
+    params = params.trim();
+    System.out.println("CHECKSCRIPT " + params);
+    StringTokenizer allParamTokens = new StringTokenizer(params, ";");
+    if (JSpecViewUtils.DEBUG) {
+      System.out.println("Running in DEBUG mode");
+    }
+    JSVPanel jsvp = selectedJSVPanel;
+    while (allParamTokens.hasMoreTokens()) {
+      String token = allParamTokens.nextToken();
+      // now split the key/value pair
+      StringTokenizer eachParam = new StringTokenizer(token);
+      String key = ScriptParser.getKey(eachParam);
+      ScriptToken st = ScriptToken.getScriptToken(key);
+      String value = ScriptParser.getValue(st, eachParam);
+      System.out.println("KEY-> " + key + " VALUE-> " + value + " : " + st);
+      if (jsvp == null) {
+        switch (st) {
+        case LOAD:
+        case SPECTRUMNUMBER:
+        case SPECTRUM:
+        case PEAKCALLBACKFUNCTIONNAME:
+        case SYNCCALLBACKFUNCTIONNAME:
+        case COORDCALLBACKFUNCTIONNAME:
+        case INTEGRATIONRATIOS:
+          break;
+        default:
           return;
-        try {
-          switch (st) {
-          case UNKNOWN:
-            System.out.println("Unrecognized parameter: " + key);
-            break;
-          case LOAD:
-            filePath = value;
-            openDataOrFile(null);
-            break;
-          default:
-            parameters.set(jsvp, st, value);
-            break;
-          case SPECTRUMNUMBER:
-            setSpectrumNumber(Integer.parseInt(value));            
-            jsvp = selectedJSVPanel;
-            break;
-//          case INTERFACE:
-//            if (value.equalsIgnoreCase("stack"))
-//              desktopPane.stackFrames();
-//            else if (value.equalsIgnoreCase("cascade"))
-//              desktopPane.cascadeFrames();
-//            else if(value.equalsIgnoreCase("tile"))
-//              desktopPane.tileFrames();            
-//            break;
-          case IRMODE:
-            if (value.toUpperCase().startsWith("T"))
-              TAConvert(JDXSpectrum.TO_TRANS);
-            else if (value.toUpperCase().startsWith("A"))
-              TAConvert(JDXSpectrum.TO_ABS);
-            break;
-          }
-        } catch (Exception e) {
         }
       }
-      repaint();
+      try {
+        switch (st) {
+        case UNKNOWN:
+          System.out.println("Unrecognized parameter: " + key);
+          break;
+        case LOAD:
+          filePath = value;
+          openDataOrFile(null);
+          break;
+        default:
+          parameters.set(jsvp, st, value);
+          break;
+        case PEAKCALLBACKFUNCTIONNAME:
+          peakCallbackFunctionName = value;
+          break;
+        case SYNCCALLBACKFUNCTIONNAME:
+          syncCallbackFunctionName = value;
+          break;
+        case COORDCALLBACKFUNCTIONNAME:
+          coordCallbackFunctionName = value;
+          break;
+        case SPECTRUMNUMBER:
+        case SPECTRUM:
+          setSpectrumNumber(Integer.parseInt(value));
+          jsvp = selectedJSVPanel;
+          break;
+        //          case INTERFACE:
+        //            if (value.equalsIgnoreCase("stack"))
+        //              desktopPane.stackFrames();
+        //            else if (value.equalsIgnoreCase("cascade"))
+        //              desktopPane.cascadeFrames();
+        //            else if(value.equalsIgnoreCase("tile"))
+        //              desktopPane.tileFrames();            
+        //            break;
+        case IRMODE:
+          TAConvert(value.toUpperCase().startsWith("T") ? JDXSpectrum.TO_TRANS
+              : value.toUpperCase().startsWith("A") ? JDXSpectrum.TO_ABS
+                  : JDXSpectrum.IMPLIED);
+          break;
+        case INTEGRATIONRATIOS:
+          // parse the string with a method in JSpecViewUtils
+          System.out.println("Integration Ratio Parameter: " + value);
+          integrationRatios = JSpecViewUtils
+              .getIntegrationRatiosFromString(value);
+        case INTEGRATE:
+          integrate(value.equals("?"));
+          break;
+        case GETSOLUTIONCOLOR:
+          setSolutionColor(true);
+          break;
+        }
+      } catch (Exception e) {
+      }
     }
+    repaint();
+  }
 
   /**
    * preceed <Peaks here with full name of Jmol applet (including syncID)

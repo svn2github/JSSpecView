@@ -42,8 +42,6 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
   private JMenu viewMenu = new JMenu();
   private JMenu zoomMenu = new JMenu();
   JMenuItem compoundMenu = new JMenu();
-  JCheckBoxMenuItem transAbsMenuItem = new JCheckBoxMenuItem();
-  JMenuItem solColMenuItem = new JMenuItem();
   private JMenuItem versionMenuItem = new JMenuItem();
   private JMenuItem headerMenuItem = new JMenuItem();
   JCheckBoxMenuItem windowMenuItem = new JCheckBoxMenuItem();
@@ -87,14 +85,6 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
       }
     });
 
-    solColMenuItem.setEnabled(false);
-    solColMenuItem.setText("Predict Solution Colour...");
-    solColMenuItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        applet.solColMenuItem_actionPerformed(e);
-      }
-    });
-
     windowMenuItem.setText("Window");
     windowMenuItem.addItemListener(new java.awt.event.ItemListener() {
       public void itemStateChanged(ItemEvent e) {
@@ -106,21 +96,6 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     overlayKeyMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
         applet.overlayKeyMenuItem_actionPerformed(e);
-      }
-    });
-    transAbsMenuItem.setEnabled(true);
-    transAbsMenuItem.setText("Transmittance/Absorbance");
-    transAbsMenuItem.addItemListener(new java.awt.event.ItemListener() {
-      public void itemStateChanged(ItemEvent e) {
-        applet.transAbsMenuItem_itemStateChanged(e);
-      }
-    });
-
-    integrateMenuItem.setEnabled(false);
-    integrateMenuItem.setText("Integrate");
-    integrateMenuItem.addItemListener(new java.awt.event.ItemListener() {
-      public void itemStateChanged(ItemEvent e) {
-        applet.integrateMenuItem_itemStateChanged(e);
       }
     });
 
@@ -151,9 +126,7 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     viewMenu.add(headerMenuItem);
     viewMenu.add(overlayKeyMenuItem);
     viewMenu.addSeparator();
-    viewMenu.add(transAbsMenuItem);
-    viewMenu.add(solColMenuItem);
-    viewMenu.add(integrateMenuItem);
+    setProcessingMenu(viewMenu);
     viewMenu.addSeparator();
     viewMenu.add(windowMenuItem);
     zoomMenu.add(nextMenuItem);

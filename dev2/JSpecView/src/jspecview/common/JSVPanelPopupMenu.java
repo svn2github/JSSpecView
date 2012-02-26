@@ -23,8 +23,11 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.EventListener;
 
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
@@ -77,7 +80,9 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   protected JMenuItem userZoomMenuItem = new JMenuItem();
   protected JMenuItem scriptMenuItem = new JMenuItem();
 
-  public JCheckBoxMenuItem integrateMenuItem = new JCheckBoxMenuItem();
+  public JCheckBoxMenuItem integrateCheckBoxMenuItem = new JCheckBoxMenuItem();
+  public JCheckBoxMenuItem transAbsMenuItem = new JCheckBoxMenuItem();
+  public JMenuItem solColMenuItem = new JMenuItem();
   
   private ScriptInterface scripter;
   
@@ -205,8 +210,8 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    * @param e the <code>ActionEvent</code>
    */
   void resetMenuItem_actionPerformed(ActionEvent e) {
-    if (integrateMenuItem.isSelected() == true)
-      integrateMenuItem.setSelected(false);
+    if (integrateCheckBoxMenuItem.isSelected() == true)
+      integrateCheckBoxMenuItem.setSelected(false);
     selectedJSVPanel.reset();
   }
 
@@ -322,6 +327,43 @@ public class JSVPanelPopupMenu extends JPopupMenu {
     scripter.checkScript(script);
   }
 
+  public static void setMenuItem(JMenuItem item, char c, String text,
+                           int accel, int mask, EventListener el) {
+    if (c != '\0')
+      item.setMnemonic(c);
+    item.setText(text);
+    if (accel > 0)
+      item.setAccelerator(javax.swing.KeyStroke.getKeyStroke(accel,
+          mask, false));
+    if (el instanceof ActionListener)
+      item.addActionListener((ActionListener) el);
+    else if (el instanceof ItemListener)
+      item.addItemListener((ItemListener) el);
+  }
 
+  public void setProcessingMenu(JMenu processingMenu) {
+    processingMenu.add(integrateCheckBoxMenuItem).setEnabled(false);
+    processingMenu.add(transAbsMenuItem).setEnabled(false);
+    processingMenu.add(solColMenuItem).setEnabled(false);
+        setMenuItem(
+        integrateCheckBoxMenuItem, 'I', "Integrate HNMR", 0, 0,
+        new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            scripter.checkScript("INTEGRATE ?");
+          }
+        });
+        setMenuItem(
+        transAbsMenuItem, '\0', "Transmittance/Absorbance", 0, 0, new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            scripter.checkScript("IRMODE IMPLIED");
+          }
+        });
+        setMenuItem(
+        solColMenuItem, '\0', "Predicted Solution Colour", 0, 0, new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            scripter.checkScript("GETSOLUTIONCOLOR");
+          }
+        });
+  }
 
 }

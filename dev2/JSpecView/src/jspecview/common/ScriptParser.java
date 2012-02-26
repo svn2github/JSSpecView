@@ -5,6 +5,8 @@ import java.util.StringTokenizer;
 public class ScriptParser {
 
   public static String getValue(ScriptToken st, StringTokenizer params) {
+    if (!params.hasMoreTokens())
+      return "";
     switch (st) {
     default:
       return params.nextToken();

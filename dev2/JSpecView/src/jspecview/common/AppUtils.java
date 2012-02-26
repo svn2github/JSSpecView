@@ -39,7 +39,7 @@ public class AppUtils {
         : frameOrPanel);
     JSVPanel jsvp = (JSVPanel) jp.getComponent(0);
     JDXSpectrum spectrum = jsvp.getSpectrum();
-    IntegralGraph graph = (IntegralGraph) jsvp.getIntegralGraph();
+    IntegralGraph graph = (IntegralGraph) spectrum.getIntegrationGraph();
     spectrum.setIntegrationGraph(null);
     if (graph != null || spectrum.isHNMR() && jsvp.getNumberOfSpectra() == 1) {
       if (showDialog) {
@@ -50,17 +50,14 @@ public class AppUtils {
                   .getIntegralFactor());
         } else {
           integDialog = new IntegrateDialog(jp, "Integration Parameters", true,
-              Double.parseDouble(JSpecViewUtils.integralMinY), Double
-                  .parseDouble(JSpecViewUtils.integralOffset), Double
-                  .parseDouble(JSpecViewUtils.integralFactor));
+              JSpecViewUtils.integralMinY, JSpecViewUtils.integralOffset,
+              JSpecViewUtils.integralFactor);
         }
         graph = new IntegralGraph(spectrum, integDialog.getMinimumY(),
             integDialog.getOffset(), integDialog.getFactor());
       } else {
-        graph = new IntegralGraph(spectrum, Double
-            .parseDouble(JSpecViewUtils.integralMinY), Double
-            .parseDouble(JSpecViewUtils.integralOffset), Double
-            .parseDouble(JSpecViewUtils.integralFactor));
+        graph = new IntegralGraph(spectrum, JSpecViewUtils.integralMinY,
+            JSpecViewUtils.integralOffset, JSpecViewUtils.integralFactor);
       }
       graph.setXUnits(spectrum.getXUnits());
       graph.setYUnits(spectrum.getYUnits());
