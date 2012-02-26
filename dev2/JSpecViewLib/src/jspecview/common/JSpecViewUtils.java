@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2009 The University of the West Indies
+/* Copyright (c) 2002-2012 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -82,7 +82,7 @@ public class JSpecViewUtils {
 
 
   /**
-   * Returns the minimum x value of an array of <code>Coordniate</code>s
+   * Returns the minimum x value of an array of <code>Coordinate</code>s
    * 
    * @param coords
    *        the coordinates
@@ -90,7 +90,7 @@ public class JSpecViewUtils {
    *        the starting index
    * @param end
    *        the ending index
-   * @return the minimum x value of an array of <code>Coordniate</code>s
+   * @return the minimum x value of an array of <code>Coordinate</code>s
    */
   public static double getMaxX(Coordinate[] coords, int start, int end) {
     double tempMaxX, tempX;
@@ -103,7 +103,7 @@ public class JSpecViewUtils {
   }
 
   /**
-   * Returns the maximum x value of an array of <code>Coordniate</code>s
+   * Returns the maximum x value of an array of <code>Coordinate</code>s
    * 
    * @param coords
    *        the coordinates
@@ -111,7 +111,7 @@ public class JSpecViewUtils {
    *        the starting index
    * @param end
    *        the ending index
-   * @return the maximum x value of an array of <code>Coordniate</code>s
+   * @return the maximum x value of an array of <code>Coordinate</code>s
    */
   public static double getMinX(Coordinate[] coords, int start, int end) {
     double tempMinX, tempX;
@@ -125,7 +125,7 @@ public class JSpecViewUtils {
   }
 
   /**
-   * Returns the minimum x value of an array of <code>Coordniate</code>s
+   * Returns the minimum x value of an array of <code>Coordinate</code>s
    * 
    * @param coords
    *        the coordinates
@@ -133,7 +133,7 @@ public class JSpecViewUtils {
    *        the starting index
    * @param end
    *        the ending index
-   * @return the minimum x value of an array of <code>Coordniate</code>s
+   * @return the minimum x value of an array of <code>Coordinate</code>s
    */
   public static double getMinY(Coordinate[] coords, int start, int end) {
     double tempMinY, tempY;
@@ -147,7 +147,7 @@ public class JSpecViewUtils {
   }
 
   /**
-   * Returns the maximum y value of an array of <code>Coordniate</code>s
+   * Returns the maximum y value of an array of <code>Coordinate</code>s
    * 
    * @param coords
    *        the coordinates
@@ -155,7 +155,7 @@ public class JSpecViewUtils {
    *        the starting index
    * @param end
    *        the ending index
-   * @return the maximum y value of an array of <code>Coordniate</code>s
+   * @return the maximum y value of an array of <code>Coordinate</code>s
    */
   public static double getMaxY(Coordinate[] coords, int start, int end) {
     double tempMaxY, tempY;
@@ -168,44 +168,44 @@ public class JSpecViewUtils {
   }
 
   /**
-   * Returns the minimum x value of an array of <code>Coordniate</code>s
+   * Returns the minimum x value of an array of <code>Coordinate</code>s
    * 
    * @param coords
    *        the coordinates
-   * @return the minimum x value of an array of <code>Coordniate</code>s
+   * @return the minimum x value of an array of <code>Coordinate</code>s
    */
   public static double getMinX(Coordinate[] coords) {
     return JSpecViewUtils.getMinX(coords, 0, coords.length - 1);
   }
 
   /**
-   * Returns the minimum y value of an array of <code>Coordniate</code>s
+   * Returns the minimum y value of an array of <code>Coordinate</code>s
    * 
    * @param coords
    *        the coordinates
-   * @return the minimum y value of an array of <code>Coordniate</code>s
+   * @return the minimum y value of an array of <code>Coordinate</code>s
    */
   public static double getMinY(Coordinate[] coords) {
     return JSpecViewUtils.getMinY(coords, 0, coords.length - 1);
   }
 
   /**
-   * Returns the maximum x value of an array of <code>Coordniate</code>s
+   * Returns the maximum x value of an array of <code>Coordinate</code>s
    * 
    * @param coords
    *        the coordinates
-   * @return the maximum x value of an array of <code>Coordniate</code>s
+   * @return the maximum x value of an array of <code>Coordinate</code>s
    */
   public static double getMaxX(Coordinate[] coords) {
     return JSpecViewUtils.getMaxX(coords, 0, coords.length - 1);
   }
 
   /**
-   * Returns the maximum y value of an array of <code>Coordniate</code>s
+   * Returns the maximum y value of an array of <code>Coordinate</code>s
    * 
    * @param coords
    *        the coordinates
-   * @return the maximum y value of an array of <code>Coordniate</code>s
+   * @return the maximum y value of an array of <code>Coordinate</code>s
    */
   public static double getMaxY(Coordinate[] coords) {
     return JSpecViewUtils.getMaxY(coords, 0, coords.length - 1);
