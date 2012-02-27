@@ -1095,14 +1095,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
   }
 
-  protected void userMenuItem_actionPerformed(ActionEvent e) {
-    jsvpPopupMenu.userZoom();
-  }
-
-  protected void scriptMenuItem_actionPerformed(ActionEvent e) {
-    jsvpPopupMenu.script();
-  }
-
   private static void setButton(AbstractButton button, String tip,
                                 ImageIcon icon, ActionListener actionListener) {
     button.setBorder(null);
@@ -1127,19 +1119,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
       properties.setProperty("directoryLastOpenedFile", file.getParent());
       openFile(file);
     }
-  }
-
-  /**
-   * Open a file listed in the open recent menu
-   * 
-   * @param e
-   *        the ActionEvent
-   */
-  protected void openRecent_actionPerformed(ActionEvent e) {
-    JMenuItem menuItem = (JMenuItem) e.getSource();
-    String filePath = menuItem.getText();
-    File file = new File(filePath);
-    openFile(file);
   }
 
   /**
@@ -1593,137 +1572,32 @@ public class MainFrame extends JFrame implements DropTargetListener,
     selectFrameNode(frames[0]);
   }
 
-  /**
-   * Shows the current Source file as overlayed
-   * 
-   * @param e
-   *        the ActionEvent
-   */
-  protected void overlayMenuItem_actionPerformed(ActionEvent e) {
-    overlayMenuItem.setSelected(false);
-    if (currentSelectedSource == null || selectedJSVPanel == null) {
-      return;
+
+  protected class JSVTreeNode extends DefaultMutableTreeNode {
+
+    private final static long serialVersionUID = 1L;
+
+    private JDXSource source;
+    private String fileName;
+    private JInternalFrame frame;
+    private JSVPanel jsvp;
+
+    private JSVTreeNode(String fileName, JDXSource source,
+        JInternalFrame frame, JSVPanel jsvp) {
+      super(fileName);
+      this.source = source;
+      this.fileName = fileName;
+      this.frame = frame;
+      this.jsvp = jsvp;
     }
-    if (!currentSelectedSource.isCompoundSource) {
-      writeStatus("Unable to Overlay, Incompatible source type");
-      return;
+
+    @Override
+    public String toString() {
+      return (frame == null ? fileName : frame.getTitle());
     }
-    try {
-      if (JSpecViewUtils.areScalesCompatible(currentSelectedSource.getSpectra()
-          .toArray(new JDXSpectrum[] {}))) {
-        closeSource(currentSelectedSource);
-        overlaySpectra(currentSelectedSource);
-      } else {
-        showUnableToOverlayMessage();
-      }
-    } catch (Exception ex) {
-      splitSpectra(currentSelectedSource);
-    }
-  }
-
-  /**
-   * Closes the current JDXSource
-   * 
-   * @param e
-   *        the ActionEvent
-   */
-  protected void closeMenuItem_actionPerformed(ActionEvent e) {
-    closeSource(currentSelectedSource);
-    setCurrentSource(null);
-    if (specNodes.size() == 0)
-      setMenuEnables(null);
-  }
-
-  /**
-   * Close all <code>JDXSource<code>s
-   * 
-   * @param e
-   *        the ActionEvent
-   */
-  protected void closeAllMenuItem_actionPerformed(ActionEvent e) {
-    closeSource(null);
-    setMenuEnables(null);
-  }
-
-  /**
-   * Displays the spectrum of the current <code>JDXSource</code> in separate
-   * windows
-   * 
-   * @param e
-   *        the ActionEvent
-   */
-  protected void splitMenuItem_actionPerformed(ActionEvent e) {
-    JDXSource source = currentSelectedSource;
-    JSVPanel jsvp = getCurrentJSVPanel();
-    if (!source.isCompoundSource || jsvp == null
-        || jsvp.getNumberOfSpectra() == 1) {
-      splitMenuItem.setSelected(false);
-      return;
-      // STATUS --> Can't Split
-    }
-    closeSource(source);
-    splitSpectra(source);
-  }
-
-  /**
-   * Toggles the grid
-   * 
-   * @param e
-   *        the ItemEvent
-   */
-  void gridCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-    JSVPanel jsvp = getCurrentJSVPanel();
-    if (jsvp == null)
-      return;
-    jsvp.setGridOn(e.getStateChange() == ItemEvent.SELECTED);
-    repaint();
-  }
-
-  /**
-   * Toggles the X Scale
-   * 
-   * @param e
-   *        the ItemEvent
-   */
-  void scaleXCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-    JSVPanel jsvp = getCurrentJSVPanel();
-    if (jsvp == null)
-      return;
-    jsvp.setXScaleOn(e.getStateChange() == ItemEvent.SELECTED);
-    jsvp.setXUnitsOn(e.getStateChange() == ItemEvent.SELECTED);
-    repaint();
-  }
-
-  /**
-   * Toggles the X Scale
-   * 
-   * @param e
-   *        the ItemEvent
-   */
-  void scaleYCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-    JSVPanel jsvp = getCurrentJSVPanel();
-    if (jsvp == null)
-      return;
-    jsvp.setYScaleOn(e.getStateChange() == ItemEvent.SELECTED);
-    repaint();
-  }
-
-  /**
-   * Shows the properties or header of a Spectrum
-   * 
-   * @param e
-   *        the ActionEvent
-   */
-  protected void propertiesMenuItem_actionPerformed(ActionEvent e) {
-    JSVPanel jsvp = getCurrentJSVPanel();
-    if (jsvp == null)
-      return;
-    jsvpPopupMenu.setSelectedJSVPanel(jsvp);
-    jsvpPopupMenu.setSource(currentSelectedSource);
-    jsvpPopupMenu.properties_actionPerformed(e);
 
   }
-
+  
   /**
    * Listener for a JInternalFrame
    */
@@ -1946,6 +1820,238 @@ public class MainFrame extends JFrame implements DropTargetListener,
     return (frame != null ? frame : selectedJSVPanel == null ? null
         : findNode(selectedJSVPanel).frame);
   }
+
+  //
+  //   Abstract methods that are used to perform drag and drop operations
+  //
+
+  // Called when the user is dragging and enters this drop target.
+  public void dragEnter(DropTargetDragEvent dtde) {
+    // accept all drags
+    dtde.acceptDrag(dtde.getSourceActions());
+    // visually indicate that drop target is under drag
+    //showUnderDrag(true);
+  }
+
+  // Called when the user is dragging and moves over this drop target.
+  public void dragOver(DropTargetDragEvent dtde) {
+
+  }
+
+  // Called when the user is dragging and leaves this drop target.
+  public void dragExit(DropTargetEvent dtde) {
+
+  }
+
+  // Called when the user changes the drag action between copy or move.
+  public void dropActionChanged(DropTargetDragEvent dtde) {
+
+  }
+
+  // Called when the user finishes or cancels the drag operation.
+  @SuppressWarnings("unchecked")
+  public void drop(DropTargetDropEvent dtde) {
+    try {
+      Transferable t = dtde.getTransferable();
+
+      if (t.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+        dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+        List list = (List) t.getTransferData(DataFlavor.javaFileListFlavor);
+        dtde.getDropTargetContext().dropComplete(true);
+        File[] files = (File[]) list.toArray();
+        for (int i = 0; i < list.size(); i++)
+          openFile(files[i]);
+      } else {
+        dtde.rejectDrop();
+      }
+    }
+
+    catch (IOException e) {
+      dtde.rejectDrop();
+    }
+
+    catch (UnsupportedFlavorException e) {
+      dtde.rejectDrop();
+    }
+  }
+
+  /**
+   * called by Jmol's StatusListener to register itself, indicating to JSpecView
+   * that it needs to synchronize with it
+   */
+  public void register(String appletID, JmolSyncInterface jmolStatusListener) {
+    jmol = jmolStatusListener;
+  }
+
+  /**
+   * incoming script processing of <PeakAssignment file="" type="xxx"...> record
+   * from Jmol
+   */
+  public void syncScript(String script) {
+    if (script.indexOf("<PeakData") < 0) {
+      checkScript(script);
+      return;
+    }
+    String file = Parser.getQuotedAttribute(script, "file");
+    String index = Parser.getQuotedAttribute(script, "index");
+    if (file == null || index == null)
+      return;
+    System.out.println("JSpecView MainFrame.syncScript: " + script);
+    if (!file.equals(recentJmolName))
+      openFile(new File(file));
+    if (!selectPanelByPeak(index))
+      script = null;
+    selectedJSVPanel.processPeakSelect(script);
+    sendFrameChange(selectedJSVPanel);
+  }
+
+  public void checkScript(String params) {
+    if (params == null)
+      params = "";
+    params = params.trim();
+    System.out.println("CHECKSCRIPT " + params);
+    StringTokenizer allParamTokens = new StringTokenizer(params, ";");
+    if (JSpecViewUtils.DEBUG) {
+      System.out.println("Running in DEBUG mode");
+    }
+    JSVPanel jsvp = selectedJSVPanel;
+    while (allParamTokens.hasMoreTokens()) {
+      String token = allParamTokens.nextToken();
+      // now split the key/value pair
+      StringTokenizer eachParam = new StringTokenizer(token);
+      String key = ScriptParser.getKey(eachParam);
+      ScriptToken st = ScriptToken.getScriptToken(key);
+      String value = ScriptParser.getValue(st, eachParam);
+      System.out.println("KEY-> " + key + " VALUE-> " + value + " : " + st);
+      try {
+        switch (st) {
+        case UNKNOWN:
+          System.out.println("Unrecognized parameter: " + key);
+          break;
+        case LOAD:
+          openFile(value);
+          jsvp = selectedJSVPanel;
+          if (jsvp == null)
+            return;
+          break;
+        default:
+          parameters.set(jsvp, st, value);
+          break;
+        case SPECTRUMNUMBER:
+          setFrame(Integer.parseInt(value) - 1);
+          jsvp = selectedJSVPanel;
+          break;
+        case AUTOINTEGRATE:
+          autoIntegrate = Boolean.valueOf(value.toLowerCase());
+          break;
+        case IRMODE:
+          irMode = JDXSpectrum.TA_NO_CONVERT;
+          if (jsvp != null)
+            taConvert(
+                null,
+                value.toUpperCase().startsWith("T") ? (irMode = JDXSpectrum.TO_TRANS)
+                    : value.toUpperCase().startsWith("A") ? (irMode = JDXSpectrum.TO_ABS)
+                        : JDXSpectrum.IMPLIED);
+          break;
+        case INTEGRATE:
+          if (jsvp != null)
+            integrate(value);
+          break;
+        case GETSOLUTIONCOLOR:
+          if (jsvp != null)
+            setSolutionColor(true);
+          break;
+        case INTERFACE:
+          if (value.equalsIgnoreCase("stack"))
+            desktopPane.stackFrames();
+          else if (value.equalsIgnoreCase("cascade"))
+            desktopPane.cascadeFrames();
+          else if (value.equalsIgnoreCase("tile"))
+            desktopPane.tileFrames();
+          break;
+        case OBSCURE:
+          //obscure = Boolean.parseBoolean(value);
+          //JSpecViewUtils.setObscure(obscure);
+          break;
+        case INTEGRATIONRATIOS:
+          // parse the string with a method in JSpecViewUtils
+          // integrationRatios = JSpecViewUtils
+          //  .getIntegrationRatiosFromString(value);
+          break;
+        }
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+    repaint();
+  }
+
+  private void setFrame(int i) {
+    if (specNodes == null || i < 0 || i >= specNodes.size())
+      return;
+    selectFrameNode(specNodes.get(i).frame);
+    setFrame(specNodes.get(i), false);
+
+  }
+
+  private boolean selectPanelByPeak(String index) {
+    for (int i = specNodes.size(); --i >= 0;) {
+      JSVTreeNode node = specNodes.get(i);
+      if ((node.jsvp.getSpectrum()).hasPeakIndex(index)) {
+        setFrame(node, false);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private void setFrame(JSVTreeNode specNode, boolean fromTree) {
+    JInternalFrame frame = specNode.frame;
+    selectedJSVPanel = specNode.jsvp;
+    frame.setVisible(true);
+    frame.moveToFront();
+    try {
+      frame.setSelected(true);
+    } catch (PropertyVetoException pve) {
+    }
+    if (fromTree && frame.isEnabled()) {
+      selectedJSVPanel.setEnabled(true);
+      sendFrameChange(specNode.jsvp);
+      if (desktopPane.getStyle() == ScrollableDesktopPane.STYLE_STACK)
+        desktopPane.setAllEnabled(false);
+      selectedJSVPanel.setEnabled(true);
+    }
+    setMenuEnables(selectedJSVPanel.getSpectrum());
+  }
+
+  /**
+   * This is the method Debbie needs to call from within JSpecView when a peak
+   * is clicked.
+   * 
+   * @param peak
+   */
+  public void sendScript(String peak) {
+    selectedJSVPanel.processPeakSelect(peak);
+    String s = Escape.jmolSelect(peak, recentJmolName);
+    System.out.println("JSpecView MainFrame sendScript: " + s);
+    if (jmol == null)
+      return;
+    // outgoing <PeakData file="xxx" type="xxx"...> record to Jmol    
+    jmol.syncScript(s);
+  }
+
+  public void peakPicked(PeakPickedEvent eventObj) {
+    selectedJSVPanel = (JSVPanel) eventObj.getSource();
+    String peaks = eventObj.getPeakInfo();
+    sendScript(peaks);
+  }
+
+  private void sendFrameChange(JSVPanel jsvp) {
+    PeakInfo pi = (jsvp.getSpectrum()).getSelectedPeak();
+    sendScript(pi == null ? null : pi.getStringInfo());
+  }
+
+  ////////// MENU ACTIONS ///////////
 
   /**
    * Shows the legend or key for the overlayed spectra
@@ -2271,238 +2377,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
       new TextDialog(this, currentSelectedSource.getFilePath(), errorLog, true);
   }
 
-  //
-  //   Abstract methods that are used to perform drag and drop operations
-  //
-
-  // Called when the user is dragging and enters this drop target.
-  public void dragEnter(DropTargetDragEvent dtde) {
-    // accept all drags
-    dtde.acceptDrag(dtde.getSourceActions());
-    // visually indicate that drop target is under drag
-    //showUnderDrag(true);
-  }
-
-  // Called when the user is dragging and moves over this drop target.
-  public void dragOver(DropTargetDragEvent dtde) {
-
-  }
-
-  // Called when the user is dragging and leaves this drop target.
-  public void dragExit(DropTargetEvent dtde) {
-
-  }
-
-  // Called when the user changes the drag action between copy or move.
-  public void dropActionChanged(DropTargetDragEvent dtde) {
-
-  }
-
-  // Called when the user finishes or cancels the drag operation.
-  @SuppressWarnings("unchecked")
-  public void drop(DropTargetDropEvent dtde) {
-    try {
-      Transferable t = dtde.getTransferable();
-
-      if (t.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-        dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
-        List list = (List) t.getTransferData(DataFlavor.javaFileListFlavor);
-        dtde.getDropTargetContext().dropComplete(true);
-        File[] files = (File[]) list.toArray();
-        for (int i = 0; i < list.size(); i++)
-          openFile(files[i]);
-      } else {
-        dtde.rejectDrop();
-      }
-    }
-
-    catch (IOException e) {
-      dtde.rejectDrop();
-    }
-
-    catch (UnsupportedFlavorException e) {
-      dtde.rejectDrop();
-    }
-  }
-
-  /**
-   * called by Jmol's StatusListener to register itself, indicating to JSpecView
-   * that it needs to synchronize with it
-   */
-  public void register(String appletID, JmolSyncInterface jmolStatusListener) {
-    jmol = jmolStatusListener;
-  }
-
-  /**
-   * incoming script processing of <PeakAssignment file="" type="xxx"...> record
-   * from Jmol
-   */
-  public void syncScript(String script) {
-    if (script.indexOf("<PeakData") < 0) {
-      checkScript(script);
-      return;
-    }
-    String file = Parser.getQuotedAttribute(script, "file");
-    String index = Parser.getQuotedAttribute(script, "index");
-    if (file == null || index == null)
-      return;
-    System.out.println("JSpecView MainFrame.syncScript: " + script);
-    if (!file.equals(recentJmolName))
-      openFile(new File(file));
-    if (!selectPanelByPeak(index))
-      script = null;
-    selectedJSVPanel.processPeakSelect(script);
-    sendFrameChange(selectedJSVPanel);
-  }
-
-  public void checkScript(String params) {
-    if (params == null)
-      params = "";
-    params = params.trim();
-    System.out.println("CHECKSCRIPT " + params);
-    StringTokenizer allParamTokens = new StringTokenizer(params, ";");
-    if (JSpecViewUtils.DEBUG) {
-      System.out.println("Running in DEBUG mode");
-    }
-    JSVPanel jsvp = selectedJSVPanel;
-    while (allParamTokens.hasMoreTokens()) {
-      String token = allParamTokens.nextToken();
-      // now split the key/value pair
-      StringTokenizer eachParam = new StringTokenizer(token);
-      String key = ScriptParser.getKey(eachParam);
-      ScriptToken st = ScriptToken.getScriptToken(key);
-      String value = ScriptParser.getValue(st, eachParam);
-      System.out.println("KEY-> " + key + " VALUE-> " + value + " : " + st);
-      try {
-        switch (st) {
-        case UNKNOWN:
-          System.out.println("Unrecognized parameter: " + key);
-          break;
-        case LOAD:
-          openFile(value);
-          jsvp = selectedJSVPanel;
-          if (jsvp == null)
-            return;
-          break;
-        default:
-          parameters.set(jsvp, st, value);
-          break;
-        case SPECTRUMNUMBER:
-          setFrame(Integer.parseInt(value) - 1);
-          jsvp = selectedJSVPanel;
-          break;
-        case AUTOINTEGRATE:
-          autoIntegrate = Boolean.valueOf(value.toLowerCase());
-          break;
-        case IRMODE:
-          irMode = JDXSpectrum.TA_NO_CONVERT;
-          if (jsvp != null)
-            taConvert(
-                null,
-                value.toUpperCase().startsWith("T") ? (irMode = JDXSpectrum.TO_TRANS)
-                    : value.toUpperCase().startsWith("A") ? (irMode = JDXSpectrum.TO_ABS)
-                        : JDXSpectrum.IMPLIED);
-          break;
-        case INTEGRATE:
-          if (jsvp != null)
-            integrate(value);
-          break;
-        case GETSOLUTIONCOLOR:
-          if (jsvp != null)
-            setSolutionColor(true);
-          break;
-        case INTERFACE:
-          if (value.equalsIgnoreCase("stack"))
-            desktopPane.stackFrames();
-          else if (value.equalsIgnoreCase("cascade"))
-            desktopPane.cascadeFrames();
-          else if (value.equalsIgnoreCase("tile"))
-            desktopPane.tileFrames();
-          break;
-        case OBSCURE:
-          //obscure = Boolean.parseBoolean(value);
-          //JSpecViewUtils.setObscure(obscure);
-          break;
-        case INTEGRATIONRATIOS:
-          // parse the string with a method in JSpecViewUtils
-          // integrationRatios = JSpecViewUtils
-          //  .getIntegrationRatiosFromString(value);
-          break;
-        }
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
-    repaint();
-  }
-
-  private void setFrame(int i) {
-    if (specNodes == null || i < 0 || i >= specNodes.size())
-      return;
-    selectFrameNode(specNodes.get(i).frame);
-    setFrame(specNodes.get(i), false);
-
-  }
-
-  private boolean selectPanelByPeak(String index) {
-    for (int i = 0; i < specNodes.size(); i++) {
-      JSVTreeNode node = specNodes.get(i);
-      if ((node.jsvp.getSpectrum()).hasPeakIndex(index)) {
-        setFrame(node, false);
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private void setFrame(JSVTreeNode specNode, boolean fromTree) {
-    JInternalFrame frame = specNode.frame;
-    selectedJSVPanel = specNode.jsvp;
-    frame.setVisible(true);
-    frame.moveToFront();
-    try {
-      frame.setSelected(true);
-    } catch (PropertyVetoException pve) {
-    }
-    if (fromTree && frame.isEnabled()) {
-      selectedJSVPanel.setEnabled(true);
-      sendFrameChange(specNode.jsvp);
-      if (desktopPane.getStyle() == ScrollableDesktopPane.STYLE_STACK)
-        desktopPane.setAllEnabled(false);
-      selectedJSVPanel.setEnabled(true);
-    }
-    setMenuEnables(selectedJSVPanel.getSpectrum());
-  }
-
-  /**
-   * This is the method Debbie needs to call from within JSpecView when a peak
-   * is clicked.
-   * 
-   * @param peak
-   */
-  public void sendScript(String peak) {
-    selectedJSVPanel.processPeakSelect(peak);
-    String s = Escape.jmolSelect(peak, recentJmolName);
-    System.out.println("JSpecView MainFrame sendScript: " + s);
-    if (jmol == null)
-      return;
-    // outgoing <PeakData file="xxx" type="xxx"...> record to Jmol    
-    jmol.syncScript(s);
-  }
-
-  public void peakPicked(PeakPickedEvent eventObj) {
-    selectedJSVPanel = (JSVPanel) eventObj.getSource();
-    String peaks = eventObj.getPeakInfo();
-    sendScript(peaks);
-  }
-
-  private void sendFrameChange(JSVPanel jsvp) {
-    PeakInfo pi = (jsvp.getSpectrum()).getSelectedPeak();
-    sendScript(pi == null ? null : pi.getStringInfo());
-  }
-
-  ////////// MENU ACTIONS ///////////
-
   /**
    * Shows the File Open Dialog
    * 
@@ -2730,28 +2604,158 @@ public class MainFrame extends JFrame implements DropTargetListener,
     exitJSpecView(true);
   }
 
-  protected class JSVTreeNode extends DefaultMutableTreeNode {
+  
+  
+  protected void userMenuItem_actionPerformed(ActionEvent e) {
+    jsvpPopupMenu.userZoom();
+  }
 
-    private final static long serialVersionUID = 1L;
+  protected void scriptMenuItem_actionPerformed(ActionEvent e) {
+    jsvpPopupMenu.script();
+  }
 
-    private JDXSource source;
-    private String fileName;
-    private JInternalFrame frame;
-    private JSVPanel jsvp;
+  /**
+   * Open a file listed in the open recent menu
+   * 
+   * @param e
+   *        the ActionEvent
+   */
+  protected void openRecent_actionPerformed(ActionEvent e) {
+    JMenuItem menuItem = (JMenuItem) e.getSource();
+    String filePath = menuItem.getText();
+    File file = new File(filePath);
+    openFile(file);
+  }
 
-    private JSVTreeNode(String fileName, JDXSource source,
-        JInternalFrame frame, JSVPanel jsvp) {
-      super(fileName);
-      this.source = source;
-      this.fileName = fileName;
-      this.frame = frame;
-      this.jsvp = jsvp;
+  /**
+   * Shows the current Source file as overlayed
+   * 
+   * @param e
+   *        the ActionEvent
+   */
+  protected void overlayMenuItem_actionPerformed(ActionEvent e) {
+    overlayMenuItem.setSelected(false);
+    if (currentSelectedSource == null || selectedJSVPanel == null) {
+      return;
     }
-
-    @Override
-    public String toString() {
-      return (frame == null ? fileName : frame.getTitle());
+    if (!currentSelectedSource.isCompoundSource) {
+      writeStatus("Unable to Overlay, Incompatible source type");
+      return;
     }
+    try {
+      if (JSpecViewUtils.areScalesCompatible(currentSelectedSource.getSpectra()
+          .toArray(new JDXSpectrum[] {}))) {
+        closeSource(currentSelectedSource);
+        overlaySpectra(currentSelectedSource);
+      } else {
+        showUnableToOverlayMessage();
+      }
+    } catch (Exception ex) {
+      splitSpectra(currentSelectedSource);
+    }
+  }
+
+  /**
+   * Closes the current JDXSource
+   * 
+   * @param e
+   *        the ActionEvent
+   */
+  protected void closeMenuItem_actionPerformed(ActionEvent e) {
+    closeSource(currentSelectedSource);
+    setCurrentSource(null);
+    if (specNodes.size() == 0)
+      setMenuEnables(null);
+  }
+
+  /**
+   * Close all <code>JDXSource<code>s
+   * 
+   * @param e
+   *        the ActionEvent
+   */
+  protected void closeAllMenuItem_actionPerformed(ActionEvent e) {
+    closeSource(null);
+    setMenuEnables(null);
+  }
+
+  /**
+   * Displays the spectrum of the current <code>JDXSource</code> in separate
+   * windows
+   * 
+   * @param e
+   *        the ActionEvent
+   */
+  protected void splitMenuItem_actionPerformed(ActionEvent e) {
+    JDXSource source = currentSelectedSource;
+    JSVPanel jsvp = getCurrentJSVPanel();
+    if (!source.isCompoundSource || jsvp == null
+        || jsvp.getNumberOfSpectra() == 1) {
+      splitMenuItem.setSelected(false);
+      return;
+      // STATUS --> Can't Split
+    }
+    closeSource(source);
+    splitSpectra(source);
+  }
+
+  /**
+   * Toggles the grid
+   * 
+   * @param e
+   *        the ItemEvent
+   */
+  void gridCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
+    JSVPanel jsvp = getCurrentJSVPanel();
+    if (jsvp == null)
+      return;
+    jsvp.setGridOn(e.getStateChange() == ItemEvent.SELECTED);
+    repaint();
+  }
+
+  /**
+   * Toggles the X Scale
+   * 
+   * @param e
+   *        the ItemEvent
+   */
+  void scaleXCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
+    JSVPanel jsvp = getCurrentJSVPanel();
+    if (jsvp == null)
+      return;
+    jsvp.setXScaleOn(e.getStateChange() == ItemEvent.SELECTED);
+    jsvp.setXUnitsOn(e.getStateChange() == ItemEvent.SELECTED);
+    repaint();
+  }
+
+  /**
+   * Toggles the X Scale
+   * 
+   * @param e
+   *        the ItemEvent
+   */
+  void scaleYCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
+    JSVPanel jsvp = getCurrentJSVPanel();
+    if (jsvp == null)
+      return;
+    jsvp.setYScaleOn(e.getStateChange() == ItemEvent.SELECTED);
+    repaint();
+  }
+
+  /**
+   * Shows the properties or header of a Spectrum
+   * 
+   * @param e
+   *        the ActionEvent
+   */
+  protected void propertiesMenuItem_actionPerformed(ActionEvent e) {
+    JSVPanel jsvp = getCurrentJSVPanel();
+    if (jsvp == null)
+      return;
+    jsvpPopupMenu.setSelectedJSVPanel(jsvp);
+    jsvpPopupMenu.setSource(currentSelectedSource);
+    jsvpPopupMenu.properties_actionPerformed(e);
 
   }
+
 }
