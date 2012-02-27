@@ -334,9 +334,14 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     initJSVPanel(spectra);
   }
 
-  public static JSVPanel getIntegralPanel(JDXSpectrum spectrum) {
+  public static JSVPanel getIntegralPanel(JDXSpectrum spectrum, Color color) {
     try {
-      return new JSVPanel(new Graph[] { spectrum, spectrum.getIntegrationGraph() });
+      Graph graph = spectrum.getIntegrationGraph();
+      JSVPanel jsvp = new JSVPanel(new Graph[] { spectrum, graph });
+      jsvp.setTitle(graph.getTitle());
+      jsvp.setPlotColors(new Color[] { jsvp.getPlotColor(0),
+          color });
+      return jsvp;
     } catch (ScalesIncompatibleException e) {
       return null;
     }
@@ -678,7 +683,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        the color
    */
   public void setIntegralPlotColor(Color color) {
-    integralPlotColor = color;
+    if (color != null)
+      integralPlotColor = color;
   }
 
   /**
@@ -1373,7 +1379,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       g.drawRect(plotAreaX, plotAreaY, plotAreaWidth, plotAreaHeight);
     }
 
-    g.setColor(plotColors[index]);
+    Color color = plotColors[index];
+    if (index == 1 && getSpectrumAt(0).getIntegrationGraph() != null)
+      color = integralPlotColor;
+    g.setColor(color);
 
     // Check if revPLot on
 
@@ -2828,25 +2837,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   public static JSVPanel taConvert(JSVPanel jsvp, int mode) {
     if (jsvp.getNumberOfSpectra() > 1)
       return null;
-    JDXSpectrum spectrum = jsvp.getSpectrum();
-    if (!spectrum.isContinuous())
-      return null;
-    switch (mode) {
-    case JDXSpectrum.TO_ABS:
-      if (!spectrum.isTransmittance())
-        return null;
-      break;
-    case JDXSpectrum.TO_TRANS:
-      if (!spectrum.isAbsorbance())
-        return null;
-      break;
-    case JDXSpectrum.IMPLIED:
-      break;
-    default:
-      return null;
-    }
-    spectrum = JDXSpectrum.convert(spectrum);
-    return (spectrum == null ? null : new JSVPanel(spectrum));
+    JDXSpectrum spectrum = JDXSpectrum.taConvert(jsvp.getSpectrum(), mode);
+    return (spectrum == jsvp.getSpectrum() ? null : new JSVPanel(spectrum));
   }
 
   public static void showSolutionColor(Component component, String sltnclr) {

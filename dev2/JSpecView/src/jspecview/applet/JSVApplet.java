@@ -138,6 +138,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
   private int startIndex = -1;
   private int endIndex = -1;
   private int spectrumNumber = -1; // blockNumber or nTupleNumber
+  private int irMode = JDXSpectrum.TA_NO_CONVERT;
+  private Boolean autoIntegrate;
   private int numberOfSpectra;
 
   private String theInterface = "single"; // either tab, tile, single, overlay
@@ -334,9 +336,6 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     boolean showRange = false;
     JSVPanel jsvp;
 
-    numberOfSpectra = specs.size();
-    overlay = theInterface.equals("overlay") && numberOfSpectra > 1;
-
     if (startIndex >= 0 && endIndex > startIndex)
       showRange = true;
 
@@ -359,6 +358,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
           jsvp = new JSVPanel(specs);
       } catch (ScalesIncompatibleException sie) {
         theInterface = "single";
+        overlay = false;
         initPanels();
         return;
       }
@@ -372,11 +372,15 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
       jsvPanels = new JSVPanel[numberOfSpectra];
       try {
         for (int i = 0; i < numberOfSpectra; i++) {
-          if (showRange)
-            jsvp = new JSVPanel(specs.get(i), startIndex,
+          JDXSpectrum spec = specs.get(i);
+          if (spec.getIntegrationGraph() != null) {
+            jsvp = JSVPanel.getIntegralPanel(spec, null);
+          } else if (showRange) {
+            jsvp = new JSVPanel(spec, startIndex,
                 endIndex);
-          else
-            jsvp = new JSVPanel(specs.get(i));
+          } else {
+            jsvp = new JSVPanel(spec);
+          }
           jsvPanels[i] = jsvp;
           initProperties(jsvp, i);
         }
@@ -713,9 +717,9 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
           + " " + ItemEvent.SELECTED + " " + ItemEvent.DESELECTED + " "
           + e.toString());
       if (e.getStateChange() == ItemEvent.SELECTED)
-        TAConvert(JDXSpectrum.IMPLIED);
+        taConvert(JDXSpectrum.IMPLIED);
       else
-        TAConvert(JDXSpectrum.IMPLIED);
+        taConvert(JDXSpectrum.IMPLIED);
     } catch (Exception jsve) {
       // ignore?
     }
@@ -732,7 +736,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
    * @throws Exception
    */
 
-  private void TAConvert(int comm) throws Exception {
+  private void taConvert(int comm) throws Exception {
     long time = System.currentTimeMillis();
     if (msTrigger > 0 && time - msTrigger < 100)
       return;
@@ -757,17 +761,21 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
   private JSVPanel getCurrentPanel() {
     return (JSVPanel) appletPanel.getComponent(0);
   }
+
   /**
    * Allows Integration of an HNMR spectrum
    * 
    */
-  protected void integrate(boolean showMessage) {
+  protected void integrate(String value) {
+    boolean showMessage = value.equals("?");
+    int mode = (value.equals("?") ? JDXSpectrum.INTEGRATE_TOGGLE
+        : value.equalsIgnoreCase("OFF") ? JDXSpectrum.INTEGRATE_OFF
+        : JDXSpectrum.INTEGRATE_ON);
     JSVPanel jsvp = getCurrentPanel();
-    JSVPanel jsvpNew = (AppUtils.hasIntegration(jsvp) 
-        ? AppUtils.removeIntegration(appletPanel)
-        : AppUtils.integrate(appletPanel, showMessage, integrationRatios));
-    appletPanel.remove(jsvp);
-    appletPanel.add(jsvpNew);
+    JSVPanel jsvpNew = AppUtils.checkIntegral(jsvp, appletPanel, mode,
+        showMessage, integrationRatios);
+    if (jsvp == jsvpNew)
+      return;
     initProperties(jsvpNew, currentSpectrumIndex);
     jsvpNew.repaint();
     integrationRatios = null;
@@ -1258,6 +1266,13 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
         case SPECTRUM:
           spectrumNumber = Integer.parseInt(value);
           break;
+        case AUTOINTEGRATE:
+          autoIntegrate = Boolean.valueOf(value);
+          break;
+        case IRMODE:
+          irMode = (value.toUpperCase().startsWith("T") ? JDXSpectrum.TO_TRANS
+              : JDXSpectrum.TO_ABS);
+       
         }
       } catch (Exception e) {
       }
@@ -1306,12 +1321,13 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
       commandWatcherThread = null;
     }
   }
-/*
-  private void interruptQueueThreads() {
-    if (commandWatcherThread != null)
-      commandWatcherThread.interrupt();
-  }
-*/
+
+  /*
+    private void interruptQueueThreads() {
+      if (commandWatcherThread != null)
+        commandWatcherThread.interrupt();
+    }
+  */
   private void openDataOrFile(String data) {
     String fileName = null;
     URL base = null;
@@ -1342,6 +1358,9 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     }
 
     specs = source.getSpectra();
+    numberOfSpectra = specs.size();
+    overlay = (theInterface.equals("overlay") && numberOfSpectra > 1);
+    overlay &= !JDXSpectrum.process(specs, irMode, autoIntegrate);
     boolean continuous = source.getJDXSpectrum(0).isContinuous();
     compoundMenuOn = allowCompoundMenu && source.isCompoundSource;
 
@@ -1373,9 +1392,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
       appletPopupMenu.solColMenuItem.setEnabled(false);
     }
     //  Can only integrate a continuous H NMR spectrum
-    if (continuous
-        && (selectedJSVPanel
-            .getSpectrum()).isHNMR())
+    if (continuous && selectedJSVPanel.getSpectrum().isHNMR())
       appletPopupMenu.integrateCheckBoxMenuItem.setEnabled(true);
     //Can only convert from T <-> A  if Absorbance or Transmittance and continuous
     if ((continuous) && (Yunits.toLowerCase().contains("abs"))
@@ -1445,7 +1462,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
         case IRMODE:
           if (jsvp == null) 
             continue;
-          TAConvert(value.toUpperCase().startsWith("T") ? JDXSpectrum.TO_TRANS
+          taConvert(value.toUpperCase().startsWith("T") ? JDXSpectrum.TO_TRANS
               : value.toUpperCase().startsWith("A") ? JDXSpectrum.TO_ABS
                   : JDXSpectrum.IMPLIED);
           break;
@@ -1457,7 +1474,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
         case INTEGRATE:
           if (jsvp == null) 
             continue;
-          integrate(value.equals("?"));
+          integrate(value);
           break;
         case GETSOLUTIONCOLOR:
           if (jsvp == null) 

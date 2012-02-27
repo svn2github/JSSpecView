@@ -178,8 +178,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private String recentJmolName;
   private String recentURL;
 
+  private int irMode = JDXSpectrum.TA_NO_CONVERT;
   private boolean autoIntegrate;
-  private String autoATConversion;
 
   private Parameters parameters = new Parameters("application");
   
@@ -539,7 +539,12 @@ public class MainFrame extends JFrame implements DropTargetListener,
     // and update coordinates and grid CheckBoxMenuItems
 
     // Processing Properties
-    autoATConversion = properties.getProperty("automaticTAConversion");
+    String autoATConversion = properties.getProperty("automaticTAConversion");
+    if (autoATConversion.equals("AtoT")) {
+      irMode = JDXSpectrum.TO_TRANS;
+    } else if (autoATConversion.equals("TtoA")) {
+      irMode = JDXSpectrum.TO_ABS;
+    }
 
     autoIntegrate = Boolean.valueOf(
         properties.getProperty("automaticallyIntegrate")).booleanValue();
@@ -1211,7 +1216,10 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
     setMenuEnables(spec);
 
-    if (autoOverlay && currentSelectedSource.isCompoundSource) {
+    List<JDXSpectrum> specs = currentSelectedSource.getSpectra();
+    boolean overlay = autoOverlay && currentSelectedSource.isCompoundSource;
+    overlay &= !JDXSpectrum.process(specs, irMode, autoIntegrate);
+    if (overlay) {
       try {
         overlaySpectra(currentSelectedSource);
       } catch (ScalesIncompatibleException ex) {
@@ -1346,34 +1354,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     jsvp.repaint();
   }
 
-  /**
-   * Shows the current Source file as overlayed
-   * 
-   * @param e
-   *        the ActionEvent
-   */
-  protected void overlayMenuItem_actionPerformed(ActionEvent e) {
-    overlayMenuItem.setSelected(false);
-    if (currentSelectedSource == null || selectedJSVPanel == null) {
-      return;
-    }
-    if (!currentSelectedSource.isCompoundSource) {
-      writeStatus("Unable to Overlay, Incompatible source type");
-      return;
-    }
-    try {
-      if (JSpecViewUtils.areScalesCompatible(currentSelectedSource.getSpectra().toArray(
-          new JDXSpectrum[] {}))) {
-        closeSource(currentSelectedSource);
-        overlaySpectra(currentSelectedSource);
-      } else {
-        showUnableToOverlayMessage();
-      }
-    } catch (Exception ex) {
-      splitSpectra(currentSelectedSource);
-    }
-  }
-
   private void showUnableToOverlayMessage() {
     writeStatus("Unable to Overlay, Scales are Incompatible");
     JOptionPane.showMessageDialog(this,
@@ -1431,28 +1411,108 @@ public class MainFrame extends JFrame implements DropTargetListener,
   }
 
   /**
-   * Closes the current JDXSource
+   * Displays the spectrum of the <code>JDXSource</code> specified by source in
+   * separate windows
    * 
-   * @param e
-   *        the ActionEvent
+   * @param source
+   *        the <code>JDXSource</code>
    */
-  protected void closeMenuItem_actionPerformed(ActionEvent e) {
-    closeSource(currentSelectedSource);
-    setCurrentSource(null);
-    if (specNodes.size() == 0)
-      setMenuEnables(null);
+  private void splitSpectra(JDXSource source) {
+
+    overlayMenuItem.setSelected(false);
+    splitMenuItem.setSelected(true);
+
+    List<JDXSpectrum> specs = source.getSpectra();
+    //JSVPanel[] panels = new JSVPanel[specs.size()];
+    JInternalFrame[] frames = new JInternalFrame[specs.size()];
+      for (int i = 0; i < specs.size(); i++) {
+        JDXSpectrum spec = specs.get(i);
+        JSVPanel jsvp = (spec.getIntegrationGraph() == null 
+            ? new JSVPanel(spec) : JSVPanel.getIntegralPanel(spec, null));
+        jsvp.setIndex(i);
+        jsvp.addPeakPickedListener(this);
+        setJSVPanelProperties(jsvp, true);
+        JInternalFrame frame = new JInternalFrame(spec.getTitleLabel(), true, true, true, true);
+        frame.setFrameIcon(frameIcon);
+        frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        frame.setMinimumSize(new Dimension(365, 200));
+        frame.setPreferredSize(new Dimension(365, 200));
+        frame.getContentPane().add(jsvp);
+        frame.addInternalFrameListener(new JSVInternalFrameListener(source));
+        frames[i] = frame;
+        desktopPane.add(frame);
+        frame.setVisible(true);
+        frame.setSize(550, 350);
+        try {
+          frame.setMaximum(true);
+        } catch (PropertyVetoException pve) {
+        }
+      }
+
+      // arrange windows in ascending order
+      for (int i = (specs.size() - 1); i >= 0; i--)
+        frames[i].toFront();
+      createTree(source, frames);
+
+      overlaySplitButton.setIcon(overlayIcon);
+      overlaySplitButton.setToolTipText("Overlay Display");
   }
 
   /**
-   * Close all <code>JDXSource<code>s
+   * Allows Integration of an HNMR spectra
    * 
-   * @param e
-   *        the ActionEvent
    */
-  protected void closeAllMenuItem_actionPerformed(ActionEvent e) {
-    closeSource(null);
-    setMenuEnables(null);
+  protected void integrate(String value) {
+    boolean showMessage = value.equals("?");
+    int mode = (value.equals("?") ? JDXSpectrum.INTEGRATE_TOGGLE
+        : value.equalsIgnoreCase("OFF") ? JDXSpectrum.INTEGRATE_OFF
+        : JDXSpectrum.INTEGRATE_ON);
+    JSVTreeNode node = findNode(selectedJSVPanel);
+    JSVPanel jsvpNew = AppUtils.checkIntegral(selectedJSVPanel, 
+        node.frame, mode, showMessage, null);
+    if (jsvpNew == selectedJSVPanel)
+      return;
+    setJSVPanelProperties(jsvpNew, true);
+    node.jsvp = selectedJSVPanel = jsvpNew;
+    validate();
   }
+
+
+  /**
+   * Calculates the predicted colour of the Spectrum
+   */
+  private void setSolutionColor(boolean showMessage) {
+    sltnclr = selectedJSVPanel.getSolutionColor();
+    if (showMessage)
+      JSVPanel.showSolutionColor((Component)this, sltnclr);
+  }
+  
+  /**
+   * Allows Transmittance to Absorbance conversion or vice versa depending on
+   * the value of comm.
+   * 
+   * @param frame
+   *        the selected JInternalFrame
+   * @param comm
+   *        the conversion command
+   */
+  private void taConvert(JInternalFrame frame, int comm) {
+    JSVPanel jsvp = getCurrentJSVPanel();
+    if (jsvp == null)
+      return;
+    JSVTreeNode node = findNode(jsvp);
+    node.jsvp = selectedJSVPanel = JSVPanel.taConvert(jsvp, comm);
+    setJSVPanelProperties(node.jsvp, true);
+    // Get from properties variable
+    Container contentPane = (frame = node.frame).getContentPane();
+    contentPane.remove(0);
+    contentPane.invalidate();
+    if (!(contentPane.getLayout() instanceof CardLayout))
+      contentPane.setLayout(new CardLayout());
+    contentPane.add(node.jsvp, "new");
+    validate();
+  }
+
 
   /**
    * Closes the <code>JDXSource</code> specified by source
@@ -1500,83 +1560,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
   }
 
   /**
-   * Displays the spectrum of the current <code>JDXSource</code> in separate
-   * windows
-   * 
-   * @param e
-   *        the ActionEvent
-   */
-  protected void splitMenuItem_actionPerformed(ActionEvent e) {
-    JDXSource source = currentSelectedSource;
-    JSVPanel jsvp = getCurrentJSVPanel();
-    if (!source.isCompoundSource || jsvp == null || jsvp.getNumberOfSpectra() == 1) {
-      splitMenuItem.setSelected(false);
-      return;
-      // STATUS --> Can't Split
-    }
-    closeSource(source);
-    splitSpectra(source);
-  }
-
-  /**
-   * Displays the spectrum of the <code>JDXSource</code> specified by source in
-   * separate windows
-   * 
-   * @param source
-   *        the <code>JDXSource</code>
-   */
-  private void splitSpectra(JDXSource source) {
-
-    overlayMenuItem.setSelected(false);
-    splitMenuItem.setSelected(true);
-
-    List<JDXSpectrum> specs = source.getSpectra();
-    //JSVPanel[] panels = new JSVPanel[specs.size()];
-    JInternalFrame[] frames = new JInternalFrame[specs.size()];
-      for (int i = 0; i < specs.size(); i++) {
-        JDXSpectrum spec = specs.get(i);
-        JSVPanel jsvp = new JSVPanel(spec);
-        jsvp.setIndex(i);
-        jsvp.addPeakPickedListener(this);
-        setJSVPanelProperties(jsvp, true);
-        JInternalFrame frame = new JInternalFrame(spec.getTitleLabel(), true, true, true, true);
-        frame.setFrameIcon(frameIcon);
-        frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        frame.setMinimumSize(new Dimension(365, 200));
-        frame.setPreferredSize(new Dimension(365, 200));
-        frame.getContentPane().add(jsvp);
-        frame.addInternalFrameListener(new JSVInternalFrameListener(source));
-        frames[i] = frame;
-
-        if (autoATConversion.equals("AtoT")) {
-          TAConvert(frame, JDXSpectrum.TO_TRANS);
-        } else if (autoATConversion.equals("TtoA")) {
-          TAConvert(frame, JDXSpectrum.TO_ABS);
-        }
-
-        if (autoIntegrate) {
-          AppUtils.integrate(frame, false, null);
-        }
-
-        desktopPane.add(frame);
-        frame.setVisible(true);
-        frame.setSize(550, 350);
-        try {
-          frame.setMaximum(true);
-        } catch (PropertyVetoException pve) {
-        }
-      }
-
-      // arrange windows in ascending order
-      for (int i = (specs.size() - 1); i >= 0; i--)
-        frames[i].toFront();
-      createTree(source, frames);
-
-      overlaySplitButton.setIcon(overlayIcon);
-      overlaySplitButton.setToolTipText("Overlay Display");
-  }
-
-  /**
    * Adds the <code>JDXSource</code> info specified by the
    * <code>fileName<code> to
    * the tree model for the side panel.
@@ -1606,6 +1589,77 @@ public class MainFrame extends JFrame implements DropTargetListener,
     selectFrameNode(frames[0]);    
   }
   
+  /**
+   * Shows the current Source file as overlayed
+   * 
+   * @param e
+   *        the ActionEvent
+   */
+  protected void overlayMenuItem_actionPerformed(ActionEvent e) {
+    overlayMenuItem.setSelected(false);
+    if (currentSelectedSource == null || selectedJSVPanel == null) {
+      return;
+    }
+    if (!currentSelectedSource.isCompoundSource) {
+      writeStatus("Unable to Overlay, Incompatible source type");
+      return;
+    }
+    try {
+      if (JSpecViewUtils.areScalesCompatible(currentSelectedSource.getSpectra().toArray(
+          new JDXSpectrum[] {}))) {
+        closeSource(currentSelectedSource);
+        overlaySpectra(currentSelectedSource);
+      } else {
+        showUnableToOverlayMessage();
+      }
+    } catch (Exception ex) {
+      splitSpectra(currentSelectedSource);
+    }
+  }
+
+  /**
+   * Closes the current JDXSource
+   * 
+   * @param e
+   *        the ActionEvent
+   */
+  protected void closeMenuItem_actionPerformed(ActionEvent e) {
+    closeSource(currentSelectedSource);
+    setCurrentSource(null);
+    if (specNodes.size() == 0)
+      setMenuEnables(null);
+  }
+
+  /**
+   * Close all <code>JDXSource<code>s
+   * 
+   * @param e
+   *        the ActionEvent
+   */
+  protected void closeAllMenuItem_actionPerformed(ActionEvent e) {
+    closeSource(null);
+    setMenuEnables(null);
+  }
+
+  /**
+   * Displays the spectrum of the current <code>JDXSource</code> in separate
+   * windows
+   * 
+   * @param e
+   *        the ActionEvent
+   */
+  protected void splitMenuItem_actionPerformed(ActionEvent e) {
+    JDXSource source = currentSelectedSource;
+    JSVPanel jsvp = getCurrentJSVPanel();
+    if (!source.isCompoundSource || jsvp == null || jsvp.getNumberOfSpectra() == 1) {
+      splitMenuItem.setSelected(false);
+      return;
+      // STATUS --> Can't Split
+    }
+    closeSource(source);
+    splitSpectra(source);
+  }
+
   /**
    * Toggles the grid
    * 
@@ -1849,6 +1903,66 @@ public class MainFrame extends JFrame implements DropTargetListener,
       if (specNodes.get(i).jsvp == jsvp)
         return specNodes.get(i);
     return null;
+  }
+
+  /**
+   * Does the necessary actions and cleaning up when JInternalFrame closes
+   * 
+   * @param frame
+   *        the JInternalFrame
+   */
+  private void doInternalFrameClosing(final JInternalFrame frame) {
+
+    closeSource(currentSelectedSource);
+    setCurrentSource(null);
+    
+    if (specNodes.size() == 0) {
+      saveAsMenu.setEnabled(false);
+      closeMenuItem.setEnabled(false);
+      closeAllMenuItem.setEnabled(false);
+      displayMenu.setEnabled(false);
+      windowMenu.setEnabled(false);
+      processingMenu.setEnabled(false);
+      printMenuItem.setEnabled(false);
+      sourceMenuItem.setEnabled(false);
+      errorLogMenuItem.setEnabled(false);
+    }
+
+    /**
+     * setDefaultCloseOperation(DISPOSE_ON_CLOSE); spectraTree.validate();
+     * spectraTree.repaint();
+     * 
+     * // Add Title of internal frame to the Window|Show menu JMenuItem menuItem
+     * = new JMenuItem(frame.getTitle()); showMenu.add(menuItem);
+     * menuItem.addActionListener(new ActionListener(){ public void
+     * actionPerformed(ActionEvent e){ frame.setVisible(true);
+     * frame.setSize(550, 350); try{ frame.setSelected(true);
+     * frame.setMaximum(true); } catch(PropertyVetoException pve){}
+     * spectraTree.validate(); spectraTree.repaint();
+     * showMenu.remove((JMenuItem)e.getSource()); } });
+     */
+
+  }
+  
+  private JSVPanel getCurrentJSVPanel() {
+    JInternalFrame frame = desktopPane.getSelectedFrame();
+    return (frame == null ? selectedJSVPanel : JSVPanel.getPanel0(frame));
+  }
+
+  private JInternalFrame getCurrentFrame() {
+    JInternalFrame frame = desktopPane.getSelectedFrame();
+    return (frame != null ? frame : selectedJSVPanel == null ? null 
+        : findNode(selectedJSVPanel).frame);
+  }
+
+  /**
+   * Shows the legend or key for the overlayed spectra
+   * 
+   * @param e
+   *        the ActionEvent
+   */
+  protected void overlayKeyButton_actionPerformed(ActionEvent e) {
+    overlayKeyMenuItem_actionPerformed(e);
   }
 
 
@@ -2156,147 +2270,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
   }
 
   /**
-   * Does the necessary actions and cleaning up when JInternalFrame closes
-   * 
-   * @param frame
-   *        the JInternalFrame
-   */
-  private void doInternalFrameClosing(final JInternalFrame frame) {
-
-    closeSource(currentSelectedSource);
-    setCurrentSource(null);
-    
-    if (specNodes.size() == 0) {
-      saveAsMenu.setEnabled(false);
-      closeMenuItem.setEnabled(false);
-      closeAllMenuItem.setEnabled(false);
-      displayMenu.setEnabled(false);
-      windowMenu.setEnabled(false);
-      processingMenu.setEnabled(false);
-      printMenuItem.setEnabled(false);
-      sourceMenuItem.setEnabled(false);
-      errorLogMenuItem.setEnabled(false);
-    }
-
-    /**
-     * setDefaultCloseOperation(DISPOSE_ON_CLOSE); spectraTree.validate();
-     * spectraTree.repaint();
-     * 
-     * // Add Title of internal frame to the Window|Show menu JMenuItem menuItem
-     * = new JMenuItem(frame.getTitle()); showMenu.add(menuItem);
-     * menuItem.addActionListener(new ActionListener(){ public void
-     * actionPerformed(ActionEvent e){ frame.setVisible(true);
-     * frame.setSize(550, 350); try{ frame.setSelected(true);
-     * frame.setMaximum(true); } catch(PropertyVetoException pve){}
-     * spectraTree.validate(); spectraTree.repaint();
-     * showMenu.remove((JMenuItem)e.getSource()); } });
-     */
-
-  }
-
-  
-  private JSVPanel getCurrentJSVPanel() {
-    JInternalFrame frame = desktopPane.getSelectedFrame();
-    return (frame == null ? selectedJSVPanel : JSVPanel.getPanel0(frame));
-  }
-
-  private JInternalFrame getCurrentFrame() {
-    JInternalFrame frame = desktopPane.getSelectedFrame();
-    return (frame != null ? frame : selectedJSVPanel == null ? null 
-        : findNode(selectedJSVPanel).frame);
-  }
-
-  /**
-   * Shows the legend or key for the overlayed spectra
-   * 
-   * @param e
-   *        the ActionEvent
-   */
-  protected void overlayKeyButton_actionPerformed(ActionEvent e) {
-    overlayKeyMenuItem_actionPerformed(e);
-  }
-
-  /**
-   * Allows Integration of an HNMR spectra
-   * 
-   */
-  private void integrate() {
-    JSVTreeNode node = findNode(selectedJSVPanel);
-    JSVPanel newJsvPanel = (AppUtils.hasIntegration(selectedJSVPanel) 
-        ? AppUtils.removeIntegration(node.frame.getContentPane())
-        : AppUtils.integrate(node.frame, true, null));
-    setJSVPanelProperties(newJsvPanel, true);
-    node.jsvp = selectedJSVPanel = newJsvPanel;
-    validate();
-  }
-
-
-  /**
-   * Calculates the predicted colour of the Spectrum
-   */
-  private void setSolutionColor(boolean showMessage) {
-    sltnclr = selectedJSVPanel.getSolutionColor();
-    if (showMessage)
-      JSVPanel.showSolutionColor((Component)this, sltnclr);
-  }
-/*
-  protected void solColMenuItem_actionPerformed(ActionEvent e) {
-    String Yunits = currentSelectedSource.getJDXSpectrum(0).getYUnits();
-    String Yunits0 = Yunits;
-
-    JInternalFrame frame = desktopPane.getSelectedFrame();
-    if (frame != null) {
-      JSVPanel jsvp = JSVPanel.getPanel0(frame);
-      Container contentPane = frame.getContentPane();
-      int numcomp = contentPane.getComponentCount();
-      if ((numcomp > 1) & Yunits.toLowerCase().contains("trans")) {
-        Yunits0 = "abs";
-      }
-      if ((numcomp > 1) & Yunits.toLowerCase().contains("abs")) {
-        Yunits0 = "trans";
-      }
-      Graph spectrum = jsvp.getSpectrum();
-      //jsvpPopupMenu.setSelectedJSVPanel(panel);
-      //jsvpPopupMenu.setSource(currentSelectedSource);
-      //jsvpPopupMenu.properties_actionPerformed(e);
-      //Coordinate[] source;
-      //source = currentSelectedSource.getJDXSpectrum(0).getXYCoords();
-      //JDXSpectrum spectrum = (JDXSpectrum)selectedJSVPanel.getSpectrum();
-      sltnclr = Visible.Colour(spectrum.getXYCoords(), Yunits0);
-      JOptionPane.showMessageDialog(this, "<HTML><body bgcolor=rgb(" + sltnclr
-          + ")><br />Predicted Solution Colour RGB(" + sltnclr
-          + ")<br /><br /></body></HTML>", "Predicted Colour",
-          JOptionPane.INFORMATION_MESSAGE);
-    }
-  }
-*/
-  /**
-   * Allows Transmittance to Absorbance conversion or vice versa depending on
-   * the value of comm.
-   * 
-   * @param frame
-   *        the selected JInternalFrame
-   * @param comm
-   *        the conversion command
-   */
-  private void TAConvert(JInternalFrame frame, int comm) {
-    JSVPanel jsvp = getCurrentJSVPanel();
-    if (jsvp == null)
-      return;
-    JSVTreeNode node = findNode(jsvp);
-    node.jsvp = selectedJSVPanel = JSVPanel.taConvert(jsvp, comm);
-    setJSVPanelProperties(node.jsvp, true);
-    // Get from properties variable
-    Container contentPane = (frame = node.frame).getContentPane();
-    contentPane.remove(0);
-    contentPane.invalidate();
-    if (!(contentPane.getLayout() instanceof CardLayout))
-      contentPane.setLayout(new CardLayout());
-    contentPane.add(node.jsvp, "new");
-    validate();
-  }
-
-  /**
    * Shows the log of error in the source file
    * 
    * @param e
@@ -2414,8 +2387,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
       ScriptToken st = ScriptToken.getScriptToken(key);
       String value = ScriptParser.getValue(st, eachParam);
       System.out.println("KEY-> " + key + " VALUE-> " + value + " : " + st);
-      if (jsvp == null && st != ScriptToken.LOAD && st != ScriptToken.SPECTRUMNUMBER)
-        return;
       try {
         switch (st) {
         case UNKNOWN:
@@ -2431,27 +2402,36 @@ public class MainFrame extends JFrame implements DropTargetListener,
           parameters.set(jsvp, st, value);
           break;
         case SPECTRUMNUMBER:
-          setFrame(Integer.parseInt(value) - 1);            
+          setFrame(Integer.parseInt(value) - 1);
           jsvp = selectedJSVPanel;
           break;
+        case AUTOINTEGRATE:
+          autoIntegrate = Boolean.valueOf(value.toLowerCase());
+          break;
         case IRMODE:
-          TAConvert(null, value.toUpperCase().startsWith("T") ? JDXSpectrum.TO_TRANS
-              : value.toUpperCase().startsWith("A") ? JDXSpectrum.TO_ABS
-                  : JDXSpectrum.IMPLIED);
+          irMode = JDXSpectrum.TA_NO_CONVERT;
+          if (jsvp != null)
+            taConvert(
+                null,
+                value.toUpperCase().startsWith("T") ? (irMode = JDXSpectrum.TO_TRANS)
+                    : value.toUpperCase().startsWith("A") ? (irMode = JDXSpectrum.TO_ABS)
+                        : JDXSpectrum.IMPLIED);
           break;
         case INTEGRATE:
-          integrate();
-         break;
+          if (jsvp != null)
+            integrate(value);
+          break;
         case GETSOLUTIONCOLOR:
-          setSolutionColor(true);
-         break;
+          if (jsvp != null)
+            setSolutionColor(true);
+          break;
         case INTERFACE:
           if (value.equalsIgnoreCase("stack"))
             desktopPane.stackFrames();
           else if (value.equalsIgnoreCase("cascade"))
             desktopPane.cascadeFrames();
-          else if(value.equalsIgnoreCase("tile"))
-            desktopPane.tileFrames();            
+          else if (value.equalsIgnoreCase("tile"))
+            desktopPane.tileFrames();
           break;
         case OBSCURE:
           //obscure = Boolean.parseBoolean(value);
@@ -2460,7 +2440,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
         case INTEGRATIONRATIOS:
           // parse the string with a method in JSpecViewUtils
           // integrationRatios = JSpecViewUtils
-            //  .getIntegrationRatiosFromString(value);
+          //  .getIntegrationRatiosFromString(value);
           break;
         }
       } catch (Exception e) {

@@ -56,6 +56,7 @@ public class Parameters extends DisplayScheme {
 
     // colors and fonts
     
+    if(jsvp.getPlotColor(1) != null) // integration
     jsvp.setPlotColors(plotColors);
     jsvp.setParam(ds, null);
 

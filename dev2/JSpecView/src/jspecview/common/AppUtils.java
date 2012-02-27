@@ -3,6 +3,7 @@ package jspecview.common;
 import java.awt.Color;
 import java.awt.Container;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
@@ -42,6 +43,9 @@ public class AppUtils {
     IntegralGraph graph = (IntegralGraph) spectrum.getIntegrationGraph();
     spectrum.setIntegrationGraph(null);
     if (graph != null || spectrum.isHNMR() && jsvp.getNumberOfSpectra() == 1) {
+      double minY = Double.NaN;
+      double offset = Double.NaN;
+      double factor = Double.NaN;
       if (showDialog) {
         IntegrateDialog integDialog;
         if (graph != null) {
@@ -53,24 +57,19 @@ public class AppUtils {
               JSpecViewUtils.integralMinY, JSpecViewUtils.integralOffset,
               JSpecViewUtils.integralFactor);
         }
-        graph = new IntegralGraph(spectrum, integDialog.getMinimumY(),
-            integDialog.getOffset(), integDialog.getFactor());
-      } else {
-        graph = new IntegralGraph(spectrum, JSpecViewUtils.integralMinY,
-            JSpecViewUtils.integralOffset, JSpecViewUtils.integralFactor);
+        minY = integDialog.getMinimumY();
+        offset = integDialog.getOffset();
+        factor = integDialog.getFactor();
       }
-      graph.setXUnits(spectrum.getXUnits());
-      graph.setYUnits(spectrum.getYUnits());
-      spectrum.setIntegrationGraph(graph);
-      JSVPanel newJsvp = JSVPanel.getIntegralPanel(spectrum);
-      newJsvp.setTitle(graph.getTitle());
-      newJsvp.setPlotColors(new Color[] { newJsvp.getPlotColor(0),
-          jsvp.getIntegralPlotColor() });
+      graph = spectrum.integrate(minY, offset, factor);
+      if (graph != null) {
+        JSVPanel newJsvp = JSVPanel.getIntegralPanel(spectrum, jsvp.getIntegralPlotColor());
       // add integration ratio annotations if any exist
-      if (integrationRatios != null)
-        newJsvp.setIntegrationRatios(integrationRatios);
-      jp.remove(jsvp);
-      jp.add(newJsvp);
+        if (integrationRatios != null)
+          newJsvp.setIntegrationRatios(integrationRatios);
+        jp.remove(jsvp);
+        jp.add(newJsvp);
+      }
     }
     return (JSVPanel) jp.getComponent(0);
   }
@@ -86,13 +85,18 @@ public class AppUtils {
     return (jsvp.getSpectrum().getIntegrationGraph() != null);
   }
 
-  public static JSVPanel removeIntegration(Container pane) {
-    JSVPanel jsvp = (JSVPanel) pane.getComponent(0);
+  public static JSVPanel removeIntegration(Container frameOrPanel) {
+    JPanel jp = (JPanel) (frameOrPanel instanceof JInternalFrame ? ((JInternalFrame) frameOrPanel)
+        .getContentPane()
+        : frameOrPanel);
+    JSVPanel jsvp = (JSVPanel) jp.getComponent(0);
     JDXSpectrum spectrum = jsvp.getSpectrum();
+    if (spectrum.getIntegrationGraph() == null)
+      return jsvp;
     spectrum.setIntegrationGraph(null);
     JSVPanel newJsvp = new JSVPanel(spectrum);
-    pane.remove(jsvp);
-    pane.add(newJsvp);
+    jp.remove(jsvp);
+    jp.add(newJsvp);
     return newJsvp;
   }
 
@@ -114,6 +118,23 @@ public class AppUtils {
     if (b.length() == 1)
       b = "0" + b;
     return "#" + r + g + b;
+  }
+
+  public static JSVPanel checkIntegral(JSVPanel jsvp,
+                                       Container frameOrPanel,
+                                       int mode,
+                                       boolean showMessage,
+                                       ArrayList<IntegrationRatio> integrationRatios) {
+    return (mode == JDXSpectrum.INTEGRATE_OFF
+        || mode != JDXSpectrum.INTEGRATE_ON && AppUtils.hasIntegration(jsvp) 
+        ? AppUtils.removeIntegration(frameOrPanel)
+            : AppUtils.integrate(frameOrPanel, showMessage, integrationRatios));
+  }
+
+  public static void integrate(List<JDXSpectrum> specs,
+                               ArrayList<IntegrationRatio> integrationRatios) {
+    // TODO Auto-generated method stub
+    
   }
 
 }
