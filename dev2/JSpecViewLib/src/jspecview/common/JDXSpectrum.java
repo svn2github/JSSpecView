@@ -745,10 +745,15 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
 
   private JDXSpectrum convertedSpectrum;
 
-  public static final int TO_ABS = 0;
-  public static final int TO_TRANS = 1;
-  public static final int IMPLIED = 2;
+  public static final int TA_NO_CONVERT = 0;
+  public static final int TO_ABS = 1;
+  public static final int TO_TRANS = 2;
+  public static final int IMPLIED = 3;
   public static final double MAXABS = 4; // maximum absorbance allowed
+
+  public static final int INTEGRATE_OFF = 1;
+  public static final int INTEGRATE_ON = 2;
+  public static final int INTEGRATE_TOGGLE = 3;
   
   public JDXSpectrum getConvertedSpectrum() {
     return convertedSpectrum;
@@ -758,6 +763,25 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     convertedSpectrum = spectrum;
   }
 
+  public static JDXSpectrum taConvert(JDXSpectrum spectrum, int mode) {
+    if (!spectrum.isContinuous())
+      return spectrum;
+    switch (mode) {
+    case TO_ABS:
+      if (!spectrum.isTransmittance())
+        return spectrum;
+      break;
+    case TO_TRANS:
+      if (!spectrum.isAbsorbance())
+        return spectrum;
+      break;
+    case IMPLIED:
+      break;
+    default:
+      return spectrum;
+    }
+    return convert(spectrum);
+  }
   /**
    * Converts and returns a converted spectrum. If original was Absorbance then
    * a Transmittance spectrum is returned and vice versa if spectrum was neither
@@ -900,4 +924,30 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return newXYCoords;
   }
 
+  public IntegralGraph integrate(double minY, double offset, double factor) {
+    if (!isHNMR())
+      return null;
+    if (Double.isNaN(minY))
+      minY = JSpecViewUtils.integralMinY;
+    if (Double.isNaN(offset))
+      offset = JSpecViewUtils.integralOffset;
+    if (Double.isNaN(factor))
+      factor = JSpecViewUtils.integralFactor;
+    IntegralGraph graph = new IntegralGraph(this, minY, offset, factor, xUnits,
+        yUnits);
+    setIntegrationGraph(graph);
+    return graph;
+  }
+
+  public static boolean process(List<JDXSpectrum> specs, int irMode,
+                             Boolean autoIntegrate) {
+    boolean haveIntegral = false;
+    if (irMode == TO_ABS || irMode == TO_TRANS)
+      for (int i = 0; i < specs.size(); i++)
+        specs.set(i, taConvert(specs.get(i), irMode));
+    if (autoIntegrate)
+      for (int i = 0; i < specs.size(); i++)
+        haveIntegral |= (specs.get(i).integrate(Double.NaN, Double.NaN, Double.NaN) != null);
+    return haveIntegral;
+  }
 }

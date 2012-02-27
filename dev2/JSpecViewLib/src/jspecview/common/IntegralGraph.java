@@ -83,11 +83,13 @@ public class IntegralGraph implements Graph {
    * @param integralFactor the integral factor
    */
   public IntegralGraph(Graph graph, double percentMinY, double percentOffset,
-                       double integralFactor) {
+                       double integralFactor, String xUnits, String yUnits) {
     this.graph = graph;
     this.percentMinY = percentMinY;
     this.percentOffset = percentOffset;
     this.integralFactor = integralFactor;
+    this.xUnits = xUnits;
+    this.yUnits = yUnits;
     xyCoords = calculateIntegral();
   }
 
