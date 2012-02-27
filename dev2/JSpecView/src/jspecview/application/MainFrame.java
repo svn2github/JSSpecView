@@ -1867,7 +1867,11 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private void overlay(String[] ids) {
     List<JDXSpectrum> list = new ArrayList<JDXSpectrum>();
     StringBuffer sb = new StringBuffer();
+    String id0 = (selectedJSVPanel == null ? "1." : findNode(selectedJSVPanel).id);
+    id0 = id0.substring(0, id0.indexOf(".") + 1);
     for (int i = 0; i < ids.length; i++) {
+      if (!ids[i].contains("."))
+        ids[i] = id0 + ids[i];
       JDXSpectrum spec = findSpectrumById(ids[i]);
       if (spec == null)
         continue;
