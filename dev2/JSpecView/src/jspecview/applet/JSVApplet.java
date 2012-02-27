@@ -491,7 +491,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
               appletPopupMenu.compoundMenu.add(mi);
             }
             appletPopupMenu.compoundMenu
-                .setText(source.type == JDXSource.TYPE_BLOCK ? "Blocks" : "NTuples");
+                .setText(source.type == JDXSource.TYPE_OVERLAY ? "Spectra" 
+                    : source.type == JDXSource.TYPE_BLOCK ? "Blocks" : "NTuples");
           }
           // add compound menu to popup menu
           appletPopupMenu.add(appletPopupMenu.compoundMenu, 3);
@@ -1361,8 +1362,9 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
 
     specs = source.getSpectra();
     numberOfSpectra = specs.size();
-    overlay = isOverlay || (theInterface.equals("overlay") && numberOfSpectra > 1);
+    overlay = isOverlay && !name.equals("NONE") || (theInterface.equals("overlay") && numberOfSpectra > 1);
     overlay &= !JDXSpectrum.process(specs, irMode, !isOverlay && autoIntegrate);
+    
     boolean continuous = source.getJDXSpectrum(0).isContinuous();
     String Yunits = source.getJDXSpectrum(0).getYUnits();
     String Xunits = source.getJDXSpectrum(0).getXUnits();
@@ -1501,8 +1503,13 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
   private void overlay(String[] ids) {
     if (specsSaved == null)
       specsSaved = specs;
-    if (ids.length == 0 || ids.length == 1 && ids[0].equalsIgnoreCase("none")) {
+    if (ids.length == 0 || ids.length == 1 && ids[0].equalsIgnoreCase("all")) {
       openDataOrFile(null, "", specsSaved);
+      setSpectrumNumber(1);
+      return;
+    }
+    if (ids.length == 1 && ids[0].equalsIgnoreCase("none")) {
+      openDataOrFile(null, "NONE", specsSaved);
       setSpectrumNumber(1);
       return;
     }
