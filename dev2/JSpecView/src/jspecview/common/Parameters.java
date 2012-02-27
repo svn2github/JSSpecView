@@ -169,7 +169,7 @@ public class Parameters extends DisplayScheme {
       jsvp.setBoolean(this, st);
   }
 
-  private boolean parseBoolean(String value) {
+  private static boolean parseBoolean(String value) {
     if (value.length() == 0)
       value = "true";
     return Boolean.valueOf(value);
