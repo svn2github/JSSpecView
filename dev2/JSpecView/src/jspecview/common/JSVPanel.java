@@ -197,7 +197,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private Color[] plotColors;
   
   // integral Color
-  private Color integralPlotColor = Color.red;
+  private Color integralPlotColor = AppUtils.integralPlotColor;
 
   //integration ratio annotations
   private ArrayList<IntegrationRatio> integrationRatios = new ArrayList<IntegrationRatio>();

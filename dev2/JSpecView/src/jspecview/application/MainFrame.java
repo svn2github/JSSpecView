@@ -182,7 +182,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private boolean autoIntegrate;
 
   private Parameters parameters = new Parameters("application");
-  
+
   //  ----------------------- Application Attributes ---------------------
 
   private JmolSyncInterface jmol;
@@ -192,7 +192,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private Properties properties;
   private DisplaySchemesProcessor dsp;
   private String tempDS, sltnclr;
-
 
   //   ----------------------------------------------------------------------
 
@@ -350,7 +349,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private ImageIcon overlayKeyIcon;
   private ImageIcon errorLogIcon;
   private ImageIcon errorLogRedIcon;
-  
+
   private void getIcons() {
     Class<? extends MainFrame> cl = getClass();
     URL iconURL = cl.getResource("icons/spec16.gif"); //imageIcon
@@ -527,12 +526,12 @@ public class MainFrame extends JFrame implements DropTargetListener,
     if (shouldApplySpectrumDisplaySettings) {
       parameters.gridOn = Boolean.valueOf(properties.getProperty("showGrid"))
           .booleanValue();
-      parameters.coordinatesOn = Boolean
-          .valueOf(properties.getProperty("showCoordinates")).booleanValue();
-      parameters.xScaleOn = Boolean.valueOf(properties.getProperty("showXScale"))
-          .booleanValue();
-      parameters.yScaleOn = Boolean.valueOf(properties.getProperty("showYScale"))
-          .booleanValue();
+      parameters.coordinatesOn = Boolean.valueOf(
+          properties.getProperty("showCoordinates")).booleanValue();
+      parameters.xScaleOn = Boolean.valueOf(
+          properties.getProperty("showXScale")).booleanValue();
+      parameters.yScaleOn = Boolean.valueOf(
+          properties.getProperty("showYScale")).booleanValue();
     }
 
     // TODO: Need to apply Properties to all panels that are opened
@@ -546,17 +545,20 @@ public class MainFrame extends JFrame implements DropTargetListener,
       irMode = JDXSpectrum.TO_ABS;
     }
 
-    autoIntegrate = Boolean.valueOf(
-        properties.getProperty("automaticallyIntegrate")).booleanValue();
     try {
-      JSpecViewUtils.integralMinY = Double.parseDouble(properties.getProperty("integralMinY"));
-      JSpecViewUtils.integralFactor = Double.parseDouble(properties.getProperty("integralFactor"));
-      JSpecViewUtils.integralOffset = Double.parseDouble(properties.getProperty("integralOffset"));
+      autoIntegrate = Boolean.valueOf(
+          properties.getProperty("automaticallyIntegrate")).booleanValue();
+      JSpecViewUtils.integralMinY = Double.parseDouble(properties
+          .getProperty("integralMinY"));
+      JSpecViewUtils.integralFactor = Double.parseDouble(properties
+          .getProperty("integralFactor"));
+      JSpecViewUtils.integralOffset = Double.parseDouble(properties
+          .getProperty("integralOffset"));
+      AppUtils.integralPlotColor = ColorUtil.getColorFromString(properties
+          .getProperty("integralPlotColor"));
     } catch (Exception e) {
       // bad property value
     }
-    AppUtils.integralPlotColor = ColorUtil.getColorFromString(properties
-        .getProperty("integralPlotColor"));
 
     //svgForInscape = Boolean.valueOf(properties.getProperty("svgForInscape")).booleanValue();
 
@@ -674,38 +676,38 @@ public class MainFrame extends JFrame implements DropTargetListener,
     fileMenu.setMnemonic('F');
     fileMenu.setText("File");
 
-    JSVPanelPopupMenu.setMenuItem(openMenuItem, 'O', "Open...", 79, InputEvent.CTRL_MASK,
-        new ActionListener() {
+    JSVPanelPopupMenu.setMenuItem(openMenuItem, 'O', "Open...", 79,
+        InputEvent.CTRL_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             open_actionPerformed(e);
           }
         });
-    JSVPanelPopupMenu.setMenuItem(openURLMenuItem, 'U', "Open URL...", 85, InputEvent.CTRL_MASK,
-        new ActionListener() {
+    JSVPanelPopupMenu.setMenuItem(openURLMenuItem, 'U', "Open URL...", 85,
+        InputEvent.CTRL_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             openURL_actionPerformed(e);
           }
         });
-    JSVPanelPopupMenu.setMenuItem(printMenuItem, 'P', "Print...", 80, InputEvent.CTRL_MASK,
-        new ActionListener() {
+    JSVPanelPopupMenu.setMenuItem(printMenuItem, 'P', "Print...", 80,
+        InputEvent.CTRL_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             printMenuItem_actionPerformed(e);
           }
         });
-    JSVPanelPopupMenu.setMenuItem(closeMenuItem, 'C', "Close", 115, InputEvent.CTRL_MASK,
-        new ActionListener() {
+    JSVPanelPopupMenu.setMenuItem(closeMenuItem, 'C', "Close", 115,
+        InputEvent.CTRL_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             closeMenuItem_actionPerformed(e);
           }
         });
-    JSVPanelPopupMenu.setMenuItem(closeAllMenuItem, 'L', "Close All", 0, InputEvent.CTRL_MASK,
-        new ActionListener() {
+    JSVPanelPopupMenu.setMenuItem(closeAllMenuItem, 'L', "Close All", 0,
+        InputEvent.CTRL_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             closeAllMenuItem_actionPerformed(e);
           }
         });
-    JSVPanelPopupMenu.setMenuItem(exitMenuItem, 'X', "Exit", 115, InputEvent.ALT_MASK,
-        new ActionListener() {
+    JSVPanelPopupMenu.setMenuItem(exitMenuItem, 'X', "Exit", 115,
+        InputEvent.ALT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             exitMenuItem_actionPerformed(e);
           }
@@ -736,20 +738,20 @@ public class MainFrame extends JFrame implements DropTargetListener,
     zoomMenu.setMnemonic('Z');
     zoomMenu.setText("Zoom");
 
-    JSVPanelPopupMenu.setMenuItem(gridCheckBoxMenuItem, 'G', "Grid", 71, InputEvent.CTRL_MASK,
-        new ItemListener() {
+    JSVPanelPopupMenu.setMenuItem(gridCheckBoxMenuItem, 'G', "Grid", 71,
+        InputEvent.CTRL_MASK, new ItemListener() {
           public void itemStateChanged(ItemEvent e) {
             gridCheckBoxMenuItem_itemStateChanged(e);
           }
         });
-    JSVPanelPopupMenu.setMenuItem(coordsCheckBoxMenuItem, 'C', "Coordinates", 67,
-        InputEvent.CTRL_MASK, new ItemListener() {
+    JSVPanelPopupMenu.setMenuItem(coordsCheckBoxMenuItem, 'C', "Coordinates",
+        67, InputEvent.CTRL_MASK, new ItemListener() {
           public void itemStateChanged(ItemEvent e) {
             coordsCheckBoxMenuItem_itemStateChanged(e);
           }
         });
-    JSVPanelPopupMenu.setMenuItem(revPlotCheckBoxMenuItem, 'R', "Reverse Plot", 82,
-        InputEvent.CTRL_MASK, new ItemListener() {
+    JSVPanelPopupMenu.setMenuItem(revPlotCheckBoxMenuItem, 'R', "Reverse Plot",
+        82, InputEvent.CTRL_MASK, new ItemListener() {
           public void itemStateChanged(ItemEvent e) {
             revPlotCheckBoxMenuItem_itemStateChanged(e);
           }
@@ -766,44 +768,44 @@ public class MainFrame extends JFrame implements DropTargetListener,
             scaleYCheckBoxMenuItem_itemStateChanged(e);
           }
         });
-    JSVPanelPopupMenu.setMenuItem(nextZoomMenuItem, 'N', "Next View", 78, InputEvent.CTRL_MASK
-        | InputEvent.SHIFT_MASK, new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        nextMenuItem_actionPerformed(e);
-      }
-    });
-    JSVPanelPopupMenu.setMenuItem(prevZoomMenuItem, 'P', "Previous View", 80, InputEvent.CTRL_MASK
-        | InputEvent.SHIFT_MASK, new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        prevMenuItem_actionPerformed(e);
-      }
-    });
-    JSVPanelPopupMenu.setMenuItem(fullZoomMenuItem, 'F', "Full View", 70, InputEvent.CTRL_MASK
-        | InputEvent.SHIFT_MASK, new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        fullMenuItem_actionPerformed(e);
-      }
-    });
-    JSVPanelPopupMenu.setMenuItem(clearZoomMenuItem, 'C', "Clear Views", 67, InputEvent.CTRL_MASK
-        | InputEvent.SHIFT_MASK, new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        clearMenuItem_actionPerformed(e);
-      }
-    });
-    JSVPanelPopupMenu.setMenuItem(userZoomMenuItem, 'Z', "Set Zoom...", 90, InputEvent.CTRL_MASK
-       | InputEvent.SHIFT_MASK , new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        userMenuItem_actionPerformed(e);
-      }
-    });
-    JSVPanelPopupMenu.setMenuItem(scriptMenuItem, 'T', "Script...", 83, InputEvent.ALT_MASK
-        , new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        scriptMenuItem_actionPerformed(e);
-      }
-    });
-    JSVPanelPopupMenu.setMenuItem(preferencesMenuItem, 'P', "Preferences...", 80,
-        InputEvent.SHIFT_MASK, new ActionListener() {
+    JSVPanelPopupMenu.setMenuItem(nextZoomMenuItem, 'N', "Next View", 78,
+        InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            nextMenuItem_actionPerformed(e);
+          }
+        });
+    JSVPanelPopupMenu.setMenuItem(prevZoomMenuItem, 'P', "Previous View", 80,
+        InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            prevMenuItem_actionPerformed(e);
+          }
+        });
+    JSVPanelPopupMenu.setMenuItem(fullZoomMenuItem, 'F', "Full View", 70,
+        InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            fullMenuItem_actionPerformed(e);
+          }
+        });
+    JSVPanelPopupMenu.setMenuItem(clearZoomMenuItem, 'C', "Clear Views", 67,
+        InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            clearMenuItem_actionPerformed(e);
+          }
+        });
+    JSVPanelPopupMenu.setMenuItem(userZoomMenuItem, 'Z', "Set Zoom...", 90,
+        InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            userMenuItem_actionPerformed(e);
+          }
+        });
+    JSVPanelPopupMenu.setMenuItem(scriptMenuItem, 'T', "Script...", 83,
+        InputEvent.ALT_MASK, new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            scriptMenuItem_actionPerformed(e);
+          }
+        });
+    JSVPanelPopupMenu.setMenuItem(preferencesMenuItem, 'P', "Preferences...",
+        80, InputEvent.SHIFT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             preferencesMenuItem_actionPerformed(e);
           }
@@ -814,11 +816,12 @@ public class MainFrame extends JFrame implements DropTargetListener,
             contentsMenuItem_actionPerformed(e);
           }
         });
-    JSVPanelPopupMenu.setMenuItem(aboutMenuItem, 'A', "About", 0, 0, new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        aboutMenuItem_actionPerformed(e);
-      }
-    });
+    JSVPanelPopupMenu.setMenuItem(aboutMenuItem, 'A', "About", 0, 0,
+        new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            aboutMenuItem_actionPerformed(e);
+          }
+        });
     openRecentMenu.setActionCommand("OpenRecent");
     openRecentMenu.setMnemonic('R');
     openRecentMenu.setText("Open Recent");
@@ -835,16 +838,16 @@ public class MainFrame extends JFrame implements DropTargetListener,
         });
     toolbarCheckBoxMenuItem.setSelected(true);
 
-    JSVPanelPopupMenu.setMenuItem(sidePanelCheckBoxMenuItem, 'S', "Side Panel", 83,
-        InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, new ItemListener() {
+    JSVPanelPopupMenu.setMenuItem(sidePanelCheckBoxMenuItem, 'S', "Side Panel",
+        83, InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, new ItemListener() {
           public void itemStateChanged(ItemEvent e) {
             sidePanelCheckBoxMenuItem_itemStateChanged(e);
           }
         });
     sidePanelCheckBoxMenuItem.setSelected(true);
 
-    JSVPanelPopupMenu.setMenuItem(statusCheckBoxMenuItem, 'B', "Status Bar", 66,
-        InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, new ItemListener() {
+    JSVPanelPopupMenu.setMenuItem(statusCheckBoxMenuItem, 'B', "Status Bar",
+        66, InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, new ItemListener() {
           public void itemStateChanged(ItemEvent e) {
             statusCheckBoxMenuItem_itemStateChanged(e);
           }
@@ -861,35 +864,38 @@ public class MainFrame extends JFrame implements DropTargetListener,
     borderLayout1.setHgap(2);
     borderLayout1.setVgap(2);
 
-    JSVPanelPopupMenu.setMenuItem(splitMenuItem, 'P', "Split", 83, InputEvent.CTRL_MASK
-        | InputEvent.SHIFT_MASK, new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        splitMenuItem_actionPerformed(e);
-      }
-    });
-    JSVPanelPopupMenu.setMenuItem(overlayMenuItem, 'O', "Overlay", 79, InputEvent.CTRL_MASK
-        | InputEvent.SHIFT_MASK, new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        overlayMenuItem_actionPerformed(e);
-      }
-    });
-    JSVPanelPopupMenu.setMenuItem(hideMenuItem, 'H', "Hide", 0, 0, new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        hideMenuItem_actionPerformed(e);
-      }
-    });
-    JSVPanelPopupMenu.setMenuItem(hideAllMenuItem, 'L', "Hide All", 0, 0, new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        hideAllMenuItem_actionPerformed(e);
-      }
-    });
-    JSVPanelPopupMenu.setMenuItem(showMenuItem, 'S', "Show All", 0, 0, new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        showMenuItem_actionPerformed(e);
-      }
-    });
-    JSVPanelPopupMenu.setMenuItem(sourceMenuItem, 'S', "Source ...", 83, InputEvent.CTRL_MASK,
+    JSVPanelPopupMenu.setMenuItem(splitMenuItem, 'P', "Split", 83,
+        InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            splitMenuItem_actionPerformed(e);
+          }
+        });
+    JSVPanelPopupMenu.setMenuItem(overlayMenuItem, 'O', "Overlay", 79,
+        InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            overlayMenuItem_actionPerformed(e);
+          }
+        });
+    JSVPanelPopupMenu.setMenuItem(hideMenuItem, 'H', "Hide", 0, 0,
         new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            hideMenuItem_actionPerformed(e);
+          }
+        });
+    JSVPanelPopupMenu.setMenuItem(hideAllMenuItem, 'L', "Hide All", 0, 0,
+        new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            hideAllMenuItem_actionPerformed(e);
+          }
+        });
+    JSVPanelPopupMenu.setMenuItem(showMenuItem, 'S', "Show All", 0, 0,
+        new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            showMenuItem_actionPerformed(e);
+          }
+        });
+    JSVPanelPopupMenu.setMenuItem(sourceMenuItem, 'S', "Source ...", 83,
+        InputEvent.CTRL_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             sourceMenuItem_actionPerformed(e);
           }
@@ -900,11 +906,12 @@ public class MainFrame extends JFrame implements DropTargetListener,
             propertiesMenuItem_actionPerformed(e);
           }
         });
-    JSVPanelPopupMenu.setMenuItem(overlayKeyMenuItem, '\0', "Overlay Key", 0, 0, new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        overlayKeyMenuItem_actionPerformed(e);
-      }
-    });
+    JSVPanelPopupMenu.setMenuItem(overlayKeyMenuItem, '\0', "Overlay Key", 0,
+        0, new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            overlayKeyMenuItem_actionPerformed(e);
+          }
+        });
 
     setButton(previousButton, "Previous View", previousIcon,
         new ActionListener() {
@@ -939,12 +946,11 @@ public class MainFrame extends JFrame implements DropTargetListener,
             propertiesButton_actionPerformed(e);
           }
         });
-    setButton(errorLogButton, "Error Log", errorLogIcon,
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            errorLogMenuItem_actionPerformed(e);
-          }
-        });
+    setButton(errorLogButton, "Error Log", errorLogIcon, new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        errorLogMenuItem_actionPerformed(e);
+      }
+    });
 
     setButton(gridToggleButton, "Toggle Grid", gridIcon, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -968,37 +974,36 @@ public class MainFrame extends JFrame implements DropTargetListener,
             revPlotToggleButton_actionPerformed(e);
           }
         });
-    setButton(aboutButton, "About JSpecView", aboutIcon, 
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            aboutButton_actionPerformed(e);
-          }
-        });
+    setButton(aboutButton, "About JSpecView", aboutIcon, new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        aboutButton_actionPerformed(e);
+      }
+    });
     setButton(overlaySplitButton, "Overlay Display", overlayIcon,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             overlaySplitButton_actionPerformed(e);
           }
         });
-    setButton(overlayKeyButton,"Display Key for Overlaid Spectra",overlayKeyIcon,
-        new ActionListener() {
+    setButton(overlayKeyButton, "Display Key for Overlaid Spectra",
+        overlayKeyIcon, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             overlayKeyButton_actionPerformed(e);
           }
         });
     overlayKeyButton.setEnabled(false);
 
-    
-    JSVPanelPopupMenu.setMenuItem(errorLogMenuItem, '\0', "Error Log ...", 0, 0, new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        errorLogMenuItem_actionPerformed(e);
-      }
-    });
+    JSVPanelPopupMenu.setMenuItem(errorLogMenuItem, '\0', "Error Log ...", 0,
+        0, new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            errorLogMenuItem_actionPerformed(e);
+          }
+        });
 
     processingMenu.setMnemonic('P');
     processingMenu.setText("Processing");
     jsvpPopupMenu.setProcessingMenu(processingMenu);
-    
+
     menuBar.add(fileMenu);
     menuBar.add(displayMenu).setEnabled(false);
     menuBar.add(optionsMenu);
@@ -1089,7 +1094,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     //    windowMenu.add(showMenu);
     windowMenu.add(showMenuItem);
     windowMenu.addSeparator();
-    
+
   }
 
   protected void userMenuItem_actionPerformed(ActionEvent e) {
@@ -1101,7 +1106,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   }
 
   private static void setButton(AbstractButton button, String tip,
-                         ImageIcon icon, ActionListener actionListener) {
+                                ImageIcon icon, ActionListener actionListener) {
     button.setBorder(null);
     button.setToolTipText(tip);
     button.setIcon(icon);
@@ -1192,7 +1197,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       e.printStackTrace();
       writeStatus(e.getMessage());
       return FILE_OPEN_ERROR;
-    }    
+    }
     currentSelectedSource.setFilePath(filePath);
     setCloseMenuItem(fileName);
     setTitle("JSpecView - " + filePath);
@@ -1280,7 +1285,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private void setCurrentSource(JDXSource source) {
     currentSelectedSource = source;
     boolean isError = (source != null && source.getErrorLog().length() > 0);
-    errorLogButton.setIcon(isError ? errorLogRedIcon : errorLogIcon);      
+    errorLogButton.setIcon(isError ? errorLogRedIcon : errorLogIcon);
     errorLogButton.setEnabled(isError);
     errorLogMenuItem.setEnabled(isError);
   }
@@ -1312,9 +1317,10 @@ public class MainFrame extends JFrame implements DropTargetListener,
     boolean continuous = spec.isContinuous();
     boolean isAbsTrans = (spec.isAbsorbance() || spec.isTransmittance());
     saveAsJDXMenu.setEnabled(spec.getDataClass().equals("XYDATA"));
-    jsvpPopupMenu.integrateCheckBoxMenuItem.setEnabled(spec.isHNMR() && continuous);
-    jsvpPopupMenu.integrateCheckBoxMenuItem.setSelected(spec.isHNMR() && continuous 
-        && spec.getIntegrationGraph() != null);
+    jsvpPopupMenu.integrateCheckBoxMenuItem.setEnabled(spec.isHNMR()
+        && continuous);
+    jsvpPopupMenu.integrateCheckBoxMenuItem.setSelected(spec.isHNMR()
+        && continuous && spec.getIntegrationGraph() != null);
     //  Can only convert from T <-> A  if Absorbance or Transmittance and continuous
     jsvpPopupMenu.transAbsMenuItem.setEnabled(continuous && isAbsTrans);
     Coordinate xyCoords[] = spec.getXYCoords();
@@ -1339,8 +1345,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    * @param jsvp
    *        the display panel
    */
-  public void setJSVPanelProperties(JSVPanel jsvp,
-                                    boolean includeMeasures) {
+  public void setJSVPanelProperties(JSVPanel jsvp, boolean includeMeasures) {
 
     DisplayScheme ds = dsp.getDisplaySchemes().get(defaultDisplaySchemeName);
     parameters.setFor(jsvp, (ds == null ? dsp.getDefaultScheme() : ds),
@@ -1425,37 +1430,38 @@ public class MainFrame extends JFrame implements DropTargetListener,
     List<JDXSpectrum> specs = source.getSpectra();
     //JSVPanel[] panels = new JSVPanel[specs.size()];
     JInternalFrame[] frames = new JInternalFrame[specs.size()];
-      for (int i = 0; i < specs.size(); i++) {
-        JDXSpectrum spec = specs.get(i);
-        JSVPanel jsvp = (spec.getIntegrationGraph() == null 
-            ? new JSVPanel(spec) : JSVPanel.getIntegralPanel(spec, null));
-        jsvp.setIndex(i);
-        jsvp.addPeakPickedListener(this);
-        setJSVPanelProperties(jsvp, true);
-        JInternalFrame frame = new JInternalFrame(spec.getTitleLabel(), true, true, true, true);
-        frame.setFrameIcon(frameIcon);
-        frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        frame.setMinimumSize(new Dimension(365, 200));
-        frame.setPreferredSize(new Dimension(365, 200));
-        frame.getContentPane().add(jsvp);
-        frame.addInternalFrameListener(new JSVInternalFrameListener(source));
-        frames[i] = frame;
-        desktopPane.add(frame);
-        frame.setVisible(true);
-        frame.setSize(550, 350);
-        try {
-          frame.setMaximum(true);
-        } catch (PropertyVetoException pve) {
-        }
+    for (int i = 0; i < specs.size(); i++) {
+      JDXSpectrum spec = specs.get(i);
+      JSVPanel jsvp = (spec.getIntegrationGraph() == null ? new JSVPanel(spec)
+          : JSVPanel.getIntegralPanel(spec, null));
+      jsvp.setIndex(i);
+      jsvp.addPeakPickedListener(this);
+      setJSVPanelProperties(jsvp, true);
+      JInternalFrame frame = new JInternalFrame(spec.getTitleLabel(), true,
+          true, true, true);
+      frame.setFrameIcon(frameIcon);
+      frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+      frame.setMinimumSize(new Dimension(365, 200));
+      frame.setPreferredSize(new Dimension(365, 200));
+      frame.getContentPane().add(jsvp);
+      frame.addInternalFrameListener(new JSVInternalFrameListener(source));
+      frames[i] = frame;
+      desktopPane.add(frame);
+      frame.setVisible(true);
+      frame.setSize(550, 350);
+      try {
+        frame.setMaximum(true);
+      } catch (PropertyVetoException pve) {
       }
+    }
 
-      // arrange windows in ascending order
-      for (int i = (specs.size() - 1); i >= 0; i--)
-        frames[i].toFront();
-      createTree(source, frames);
+    // arrange windows in ascending order
+    for (int i = (specs.size() - 1); i >= 0; i--)
+      frames[i].toFront();
+    createTree(source, frames);
 
-      overlaySplitButton.setIcon(overlayIcon);
-      overlaySplitButton.setToolTipText("Overlay Display");
+    overlaySplitButton.setIcon(overlayIcon);
+    overlaySplitButton.setToolTipText("Overlay Display");
   }
 
   /**
@@ -1464,12 +1470,12 @@ public class MainFrame extends JFrame implements DropTargetListener,
    */
   protected void integrate(String value) {
     boolean showMessage = value.equals("?");
-    int mode = (value.equals("?") ? JDXSpectrum.INTEGRATE_TOGGLE
-        : value.equalsIgnoreCase("OFF") ? JDXSpectrum.INTEGRATE_OFF
+    int mode = (value.equals("?") ? JDXSpectrum.INTEGRATE_TOGGLE : value
+        .equalsIgnoreCase("OFF") ? JDXSpectrum.INTEGRATE_OFF
         : JDXSpectrum.INTEGRATE_ON);
     JSVTreeNode node = findNode(selectedJSVPanel);
-    JSVPanel jsvpNew = AppUtils.checkIntegral(selectedJSVPanel, 
-        node.frame, mode, showMessage, null);
+    JSVPanel jsvpNew = AppUtils.checkIntegral(selectedJSVPanel, node.frame,
+        mode, showMessage, null);
     if (jsvpNew == selectedJSVPanel)
       return;
     setJSVPanelProperties(jsvpNew, true);
@@ -1477,16 +1483,15 @@ public class MainFrame extends JFrame implements DropTargetListener,
     validate();
   }
 
-
   /**
    * Calculates the predicted colour of the Spectrum
    */
   private void setSolutionColor(boolean showMessage) {
     sltnclr = selectedJSVPanel.getSolutionColor();
     if (showMessage)
-      JSVPanel.showSolutionColor((Component)this, sltnclr);
+      JSVPanel.showSolutionColor((Component) this, sltnclr);
   }
-  
+
   /**
    * Allows Transmittance to Absorbance conversion or vice versa depending on
    * the value of comm.
@@ -1512,7 +1517,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     contentPane.add(node.jsvp, "new");
     validate();
   }
-
 
   /**
    * Closes the <code>JDXSource</code> specified by source
@@ -1563,8 +1567,9 @@ public class MainFrame extends JFrame implements DropTargetListener,
    * Adds the <code>JDXSource</code> info specified by the
    * <code>fileName<code> to
    * the tree model for the side panel.
-   * @param frame 
-   * @param specInfos2 
+   * 
+   * @param frame
+   * @param specInfos2
    * 
    * @param fileName
    *        the name of the file
@@ -1573,7 +1578,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
    */
   public void createTree(JDXSource source, JInternalFrame[] frames) {
     String fileName = FileManager.getName(source.getFilePath());
-    DefaultMutableTreeNode fileNode = new JSVTreeNode(fileName, source, null, null);
+    DefaultMutableTreeNode fileNode = new JSVTreeNode(fileName, source, null,
+        null);
     spectraTreeModel.insertNodeInto(fileNode, rootNode, rootNode
         .getChildCount());
     spectraTree.scrollPathToVisible(new TreePath(fileNode.getPath()));
@@ -1581,14 +1587,14 @@ public class MainFrame extends JFrame implements DropTargetListener,
     for (int i = 0; i < frames.length; i++) {
       JSVPanel jsvp = JSVPanel.getPanel0(frames[i]);
       JSVTreeNode specNode = new JSVTreeNode(fileName, source, frames[i], jsvp);
-      specNodes.add(specNode); 
+      specNodes.add(specNode);
       spectraTreeModel.insertNodeInto(specNode, fileNode, fileNode
           .getChildCount());
-      spectraTree.scrollPathToVisible(new TreePath(specNode.getPath())); 
+      spectraTree.scrollPathToVisible(new TreePath(specNode.getPath()));
     }
-    selectFrameNode(frames[0]);    
+    selectFrameNode(frames[0]);
   }
-  
+
   /**
    * Shows the current Source file as overlayed
    * 
@@ -1605,8 +1611,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
       return;
     }
     try {
-      if (JSpecViewUtils.areScalesCompatible(currentSelectedSource.getSpectra().toArray(
-          new JDXSpectrum[] {}))) {
+      if (JSpecViewUtils.areScalesCompatible(currentSelectedSource.getSpectra()
+          .toArray(new JDXSpectrum[] {}))) {
         closeSource(currentSelectedSource);
         overlaySpectra(currentSelectedSource);
       } else {
@@ -1651,7 +1657,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
   protected void splitMenuItem_actionPerformed(ActionEvent e) {
     JDXSource source = currentSelectedSource;
     JSVPanel jsvp = getCurrentJSVPanel();
-    if (!source.isCompoundSource || jsvp == null || jsvp.getNumberOfSpectra() == 1) {
+    if (!source.isCompoundSource || jsvp == null
+        || jsvp.getNumberOfSpectra() == 1) {
       splitMenuItem.setSelected(false);
       return;
       // STATUS --> Can't Split
@@ -1788,7 +1795,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
         overlayKeyMenuItem.setEnabled(false);
       }
 
-      setMenuEnables(spec);      
+      setMenuEnables(spec);
       setCloseMenuItem(FileManager.getName(source.getFilePath()));
       setTitle("JSpecView - " + source.getFilePath());
       selectFrameNode(frame);
@@ -1855,9 +1862,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
      */
     @Override
     public Font getFont() {
-      return new Font("Dialog",
-          (node == null || node.frame == null || node.frame.isVisible() ? Font.BOLD
-              : Font.ITALIC), 12);
+      return new Font("Dialog", (node == null || node.frame == null
+          || node.frame.isVisible() ? Font.BOLD : Font.ITALIC), 12);
     }
 
   }
@@ -1876,7 +1882,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     if (node != null)
       spectraTree.setSelectionPath(new TreePath(node.getPath()));
   }
-  
+
   /**
    * Returns the tree node that is associated with an internal frame
    * 
@@ -1884,20 +1890,20 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the JInternalFrame
    * @return the tree node that is associated with an internal frame
    */
-   private JSVTreeNode findNode(JInternalFrame frame) {
-    for (int i = specNodes.size(); --i >= 0; )
+  private JSVTreeNode findNode(JInternalFrame frame) {
+    for (int i = specNodes.size(); --i >= 0;)
       if (specNodes.get(i).frame == frame)
         return specNodes.get(i);
     return null;
   }
 
-   /**
-    * Returns the tree node that is associated with a panel
-    * 
-    * @param frame
-    *        the JInternalFrame
-    * @return the tree node that is associated with a panel
-    */
+  /**
+   * Returns the tree node that is associated with a panel
+   * 
+   * @param frame
+   *        the JInternalFrame
+   * @return the tree node that is associated with a panel
+   */
   private JSVTreeNode findNode(JSVPanel jsvp) {
     for (int i = specNodes.size(); --i >= 0;)
       if (specNodes.get(i).jsvp == jsvp)
@@ -1915,7 +1921,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
     closeSource(currentSelectedSource);
     setCurrentSource(null);
-    
+
     if (specNodes.size() == 0) {
       saveAsMenu.setEnabled(false);
       closeMenuItem.setEnabled(false);
@@ -1943,7 +1949,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
      */
 
   }
-  
+
   private JSVPanel getCurrentJSVPanel() {
     JInternalFrame frame = desktopPane.getSelectedFrame();
     return (frame == null ? selectedJSVPanel : JSVPanel.getPanel0(frame));
@@ -1951,7 +1957,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
   private JInternalFrame getCurrentFrame() {
     JInternalFrame frame = desktopPane.getSelectedFrame();
-    return (frame != null ? frame : selectedJSVPanel == null ? null 
+    return (frame != null ? frame : selectedJSVPanel == null ? null
         : findNode(selectedJSVPanel).frame);
   }
 
@@ -1964,7 +1970,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
   protected void overlayKeyButton_actionPerformed(ActionEvent e) {
     overlayKeyMenuItem_actionPerformed(e);
   }
-
 
   /**
    * Prints the current Spectrum display
@@ -1992,13 +1997,13 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the ActionEvent
    */
   protected void sourceMenuItem_actionPerformed(ActionEvent e) {
-      if (currentSelectedSource == null) {
-        if (specNodes.size() > 0) {
-          JOptionPane.showMessageDialog(this, "Please Select a Spectrum",
-              "Select Spectrum", JOptionPane.ERROR_MESSAGE);
-        }
-        return;
+    if (currentSelectedSource == null) {
+      if (specNodes.size() > 0) {
+        JOptionPane.showMessageDialog(this, "Please Select a Spectrum",
+            "Select Spectrum", JOptionPane.ERROR_MESSAGE);
       }
+      return;
+    }
     try {
       new TextDialog(this, currentSelectedSource.getFilePath(), true);
     } catch (IOException ex) {
@@ -2034,7 +2039,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
     JInternalFrame[] frames = desktopPane.getAllFrames();
     for (int i = 0; i < frames.length; i++)
-      setJSVPanelProperties(JSVPanel.getPanel0(frames[i]), shouldApplySpectrumDisplaySetting);
+      setJSVPanelProperties(JSVPanel.getPanel0(frames[i]),
+          shouldApplySpectrumDisplaySetting);
 
     setApplicationElements();
 
@@ -2341,15 +2347,16 @@ public class MainFrame extends JFrame implements DropTargetListener,
   }
 
   /**
-   * called by Jmol's StatusListener to register itself, indicating to 
-   * JSpecView that it needs to synchronize with it 
+   * called by Jmol's StatusListener to register itself, indicating to JSpecView
+   * that it needs to synchronize with it
    */
   public void register(String appletID, JmolSyncInterface jmolStatusListener) {
     jmol = jmolStatusListener;
   }
 
   /**
-   * incoming script processing of <PeakAssignment file="" type="xxx"...> record from Jmol
+   * incoming script processing of <PeakAssignment file="" type="xxx"...> record
+   * from Jmol
    */
   public void syncScript(String script) {
     if (script.indexOf("<PeakData") < 0) {
@@ -2515,9 +2522,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
     sendScript(pi == null ? null : pi.getStringInfo());
   }
 
-  
   ////////// MENU ACTIONS ///////////
-  
+
   /**
    * Shows the File Open Dialog
    * 
@@ -2717,7 +2723,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       //legend = new OverlayLegendDialog(this, jsvp);
     }
   }
-  
+
   /**
    * Shows dialog to open a file
    * 
@@ -2748,20 +2754,21 @@ public class MainFrame extends JFrame implements DropTargetListener,
   protected class JSVTreeNode extends DefaultMutableTreeNode {
 
     private final static long serialVersionUID = 1L;
-    
+
     private JDXSource source;
     private String fileName;
     private JInternalFrame frame;
     private JSVPanel jsvp;
 
-    private JSVTreeNode(String fileName, JDXSource source, JInternalFrame frame, JSVPanel jsvp) {
+    private JSVTreeNode(String fileName, JDXSource source,
+        JInternalFrame frame, JSVPanel jsvp) {
       super(fileName);
       this.source = source;
       this.fileName = fileName;
       this.frame = frame;
       this.jsvp = jsvp;
     }
-    
+
     @Override
     public String toString() {
       return (frame == null ? fileName : frame.getTitle());
@@ -2769,4 +2776,3 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
   }
 }
-
