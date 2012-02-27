@@ -30,7 +30,7 @@ public class Parameters extends DisplayScheme {
 
   private Color[] plotColors;  
   private String plotColorsStr;
-  private boolean reversePlot = false;
+  boolean reversePlot = false;
   private boolean enableZoom = true;
   private boolean titleBoldOn = false;
 
@@ -62,7 +62,6 @@ public class Parameters extends DisplayScheme {
 
     // misc
     
-    jsvp.setReversePlot(reversePlot);
     jsvp.setZoomEnabled(enableZoom);
     jsvp.setTitleBoldOn(titleBoldOn);
   }
@@ -74,7 +73,7 @@ public class Parameters extends DisplayScheme {
     default:
       return;
     case DEBUG:
-      JSpecViewUtils.DEBUG = Boolean.parseBoolean(value);
+      JSpecViewUtils.DEBUG = parseBoolean(value);
       return;
     case PLOTCOLORS:
       plotColorsStr = value;
@@ -84,28 +83,28 @@ public class Parameters extends DisplayScheme {
         jsvp.setPlotColors(getPlotColors(value));
       return;
     case REVERSEPLOT:
-      reversePlot = Boolean.parseBoolean(value);
+      reversePlot = parseBoolean(value);
       break;
     case COORDINATESON:
-      coordinatesOn = Boolean.parseBoolean(value);
+      coordinatesOn = parseBoolean(value);
       break;
     case GRIDON:
-      gridOn = Boolean.parseBoolean(value);
+      gridOn = parseBoolean(value);
       break;
     case XSCALEON:
-      xScaleOn = Boolean.parseBoolean(value);
+      xScaleOn = parseBoolean(value);
       break;
     case YSCALEON:
-      yScaleOn = Boolean.parseBoolean(value);
+      yScaleOn = parseBoolean(value);
       break;
     case XUNITSON:
-      xUnitsOn = Boolean.parseBoolean(value);
+      xUnitsOn = parseBoolean(value);
       break;
     case YUNITSON:
-      yUnitsOn = Boolean.parseBoolean(value);
+      yUnitsOn = parseBoolean(value);
       break;
     case TITLEBOLDON:
-      titleBoldOn = Boolean.parseBoolean(value);
+      titleBoldOn = parseBoolean(value);
       break;
     case BACKGROUNDCOLOR:
       param = setColor("background", value);
@@ -168,6 +167,12 @@ public class Parameters extends DisplayScheme {
       jsvp.setParam(this, st);
     else
       jsvp.setBoolean(this, st);
+  }
+
+  private boolean parseBoolean(String value) {
+    if (value.length() == 0)
+      value = "true";
+    return Boolean.valueOf(value);
   }
 
   private Color setColor(String element, String value) {

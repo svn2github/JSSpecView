@@ -2813,6 +2813,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       setXUnitsOn(parameters.xUnitsOn);
     if (st == null || st == ScriptToken.YUNITSON)
       setYUnitsOn(parameters.yUnitsOn);
+    if (st == null || st == ScriptToken.REVERSEPLOT)
+      setReversePlot(parameters.reversePlot);
   }
 
   public JDXSpectrum getSpectrum() {

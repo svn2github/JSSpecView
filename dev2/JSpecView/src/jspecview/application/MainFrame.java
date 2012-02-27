@@ -638,7 +638,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
     MainFrame frame = new MainFrame();
     frame.setSize(800, 500);
-    //frame.pack();
 
     if (args.length > 0) {
       // check for command-line arguments
@@ -655,11 +654,10 @@ public class MainFrame extends JFrame implements DropTargetListener,
             frame.writeStatus("File: " + filePath + " does not exist");
           }
         }
-      frame.setVisible(true);
-    } else {
-      frame.setVisible(true);
-      frame.showFileOpenDialog();
     }
+    frame.setVisible(true);
+    if (args.length == 0)
+      frame.showFileOpenDialog();
   }
 
   /**
@@ -1674,18 +1672,10 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the ItemEvent
    */
   void gridCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-
     JSVPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
-
-    if (e.getStateChange() == ItemEvent.SELECTED) {
-      jsvp.setGridOn(true);
-      gridToggleButton.setSelected(true);
-    } else {
-      jsvp.setGridOn(false);
-      gridToggleButton.setSelected(false);
-    }
+    jsvp.setGridOn(e.getStateChange() == ItemEvent.SELECTED);
     repaint();
   }
 
@@ -1696,14 +1686,11 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the ItemEvent
    */
   void scaleXCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-
     JSVPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
-
     jsvp.setXScaleOn(e.getStateChange() == ItemEvent.SELECTED);
     jsvp.setXUnitsOn(e.getStateChange() == ItemEvent.SELECTED);
-
     repaint();
   }
 
@@ -1714,7 +1701,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the ItemEvent
    */
   void scaleYCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-
     JSVPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
@@ -2091,14 +2077,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     JSVPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
-
-    if (e.getStateChange() == ItemEvent.SELECTED) {
-      jsvp.setReversePlot(true);
-      revPlotToggleButton.setSelected(true);
-    } else {
-      jsvp.setReversePlot(false);
-      revPlotToggleButton.setSelected(false);
-    }
+    jsvp.setReversePlot(e.getStateChange() == ItemEvent.SELECTED);
     repaint();
   }
 
