@@ -940,7 +940,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   }
 
   public static boolean process(List<JDXSpectrum> specs, int irMode,
-                             Boolean autoIntegrate) {
+                             boolean autoIntegrate) {
     boolean haveIntegral = false;
     if (irMode == TO_ABS || irMode == TO_TRANS)
       for (int i = 0; i < specs.size(); i++)
