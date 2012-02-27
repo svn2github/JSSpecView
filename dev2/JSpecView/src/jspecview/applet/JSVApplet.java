@@ -1267,7 +1267,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
           spectrumNumber = Integer.parseInt(value);
           break;
         case AUTOINTEGRATE:
-          autoIntegrate = Boolean.valueOf(value);
+          autoIntegrate = Parameters.parseBoolean(value);
           break;
         case IRMODE:
           irMode = (value.toUpperCase().startsWith("T") ? JDXSpectrum.TO_TRANS

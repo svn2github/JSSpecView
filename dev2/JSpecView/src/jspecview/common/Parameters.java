@@ -169,10 +169,10 @@ public class Parameters extends DisplayScheme {
       jsvp.setBoolean(this, st);
   }
 
-  private static boolean parseBoolean(String value) {
+  public static boolean parseBoolean(String value) {
     if (value.length() == 0)
-      value = "true";
-    return Boolean.valueOf(value);
+      value = "true" + Boolean.valueOf(value);
+    return Boolean.parseBoolean(value);
   }
 
   private Color setColor(String element, String value) {

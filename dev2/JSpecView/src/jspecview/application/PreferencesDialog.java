@@ -693,7 +693,7 @@ public class PreferencesDialog extends JDialog {
     plotColorButton.setBackground(
         ColorUtil.getColorFromString(preferences.getProperty("integralPlotColor")));
     autoIntegrateCheckBox.setSelected(
-       Boolean.valueOf(preferences.getProperty("automaticallyIntegrate")).booleanValue());
+       Boolean.parseBoolean(preferences.getProperty("automaticallyIntegrate")));
     String autoConvert =
         preferences.getProperty("automaticTAConversion");
     if(autoConvert.equals("TtoA")){
@@ -707,7 +707,7 @@ public class PreferencesDialog extends JDialog {
     }
 
     separateWindowCheckBox.setSelected(
-        Boolean.valueOf(preferences.getProperty("AtoTSeparateWindow")).booleanValue());
+        Boolean.parseBoolean(preferences.getProperty("AtoTSeparateWindow")));
 
   }
 
@@ -718,31 +718,31 @@ public class PreferencesDialog extends JDialog {
   private void initGeneralTab(){    
     
     confirmExitCheckBox.setSelected(
-        Boolean.valueOf(preferences.getProperty("confirmBeforeExit")).booleanValue());
+        Boolean.parseBoolean(preferences.getProperty("confirmBeforeExit")));
     openedDirCheckBox.setSelected(
-        Boolean.valueOf(preferences.getProperty("useDirectoryLastOpenedFile")).booleanValue());
+        Boolean.parseBoolean(preferences.getProperty("useDirectoryLastOpenedFile")));
     exportDirCheckBox.setSelected(
-        Boolean.valueOf(preferences.getProperty("useDirectoryLastExportedFile")).booleanValue());
+        Boolean.parseBoolean(preferences.getProperty("useDirectoryLastExportedFile")));
     svgForInkscapeCheckBox.setSelected(
-        Boolean.valueOf(preferences.getProperty("svgForInkscape")).booleanValue());       
+        Boolean.parseBoolean(preferences.getProperty("svgForInkscape")));       
     overlayCheckBox.setSelected(
-        Boolean.valueOf(preferences.getProperty("automaticallyOverlay")).booleanValue());   
+        Boolean.parseBoolean(preferences.getProperty("automaticallyOverlay")));   
     legendCheckBox.setSelected(
-        Boolean.valueOf(preferences.getProperty("automaticallyShowLegend")).booleanValue());    
+        Boolean.parseBoolean(preferences.getProperty("automaticallyShowLegend")));    
     gridCheckBox.setSelected(
-        Boolean.valueOf(preferences.getProperty("showGrid")).booleanValue());   
+        Boolean.parseBoolean(preferences.getProperty("showGrid")));   
     coordinatesCheckBox.setSelected(
-        Boolean.valueOf(preferences.getProperty("showCoordinates")).booleanValue());   
+        Boolean.parseBoolean(preferences.getProperty("showCoordinates")));   
     scaleXCheckBox.setSelected(
-        Boolean.valueOf(preferences.getProperty("showXScale")).booleanValue());
+        Boolean.parseBoolean(preferences.getProperty("showXScale")));
     scaleYCheckBox.setSelected(
-            Boolean.valueOf(preferences.getProperty("showYScale")).booleanValue());
+            Boolean.parseBoolean(preferences.getProperty("showYScale")));
     sidePanelCheckBox.setSelected(
-        Boolean.valueOf(preferences.getProperty("showSidePanel")).booleanValue());    
+        Boolean.parseBoolean(preferences.getProperty("showSidePanel")));    
     toolbarCheckBox.setSelected(
-        Boolean.valueOf(preferences.getProperty("showToolBar")).booleanValue());
+        Boolean.parseBoolean(preferences.getProperty("showToolBar")));
     statusBarCheckBox.setSelected(
-    		Boolean.valueOf(preferences.getProperty("showStatusBar")).booleanValue());
+    		Boolean.parseBoolean(preferences.getProperty("showStatusBar")));
 
     
    
@@ -840,7 +840,7 @@ public class PreferencesDialog extends JDialog {
     // Processing tab
     preferences.setProperty("automaticallyIntegrate", Boolean.toString(autoIntegrateCheckBox.isSelected()));
 
-    boolean autoTACovert = Boolean.valueOf(AutoConvertCheckBox.isSelected()).booleanValue();
+    boolean autoTACovert = AutoConvertCheckBox.isSelected();
     if(autoTACovert){
       if(TtoARadioButton.isSelected())
         preferences.setProperty("automaticTAConversion", "TtoA");

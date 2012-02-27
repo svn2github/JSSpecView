@@ -497,41 +497,41 @@ public class MainFrame extends JFrame implements DropTargetListener,
       }
     }
 
-    showExitDialog = Boolean.valueOf(
-        properties.getProperty("confirmBeforeExit")).booleanValue();
+    showExitDialog = Boolean.parseBoolean(
+        properties.getProperty("confirmBeforeExit"));
 
-    autoOverlay = Boolean.valueOf(
-        properties.getProperty("automaticallyOverlay")).booleanValue();
-    autoShowLegend = Boolean.valueOf(
-        properties.getProperty("automaticallyShowLegend")).booleanValue();
+    autoOverlay = Boolean.parseBoolean(
+        properties.getProperty("automaticallyOverlay"));
+    autoShowLegend = Boolean.parseBoolean(
+        properties.getProperty("automaticallyShowLegend"));
 
-    useDirLastOpened = Boolean.valueOf(
-        properties.getProperty("useDirectoryLastOpenedFile")).booleanValue();
-    useDirLastExported = Boolean.valueOf(
-        properties.getProperty("useDirectoryLastExportedFile")).booleanValue();
+    useDirLastOpened = Boolean.parseBoolean(
+        properties.getProperty("useDirectoryLastOpenedFile"));
+    useDirLastExported = Boolean.parseBoolean(
+        properties.getProperty("useDirectoryLastExportedFile"));
     dirLastOpened = properties.getProperty("directoryLastOpenedFile");
     dirLastExported = properties.getProperty("directoryLastExportedFile");
 
-    sidePanelOn = Boolean.valueOf(properties.getProperty("showSidePanel"))
-        .booleanValue();
-    toolbarOn = Boolean.valueOf(properties.getProperty("showToolBar"))
-        .booleanValue();
-    statusbarOn = Boolean.valueOf(properties.getProperty("showStatusBar"))
-        .booleanValue();
+    sidePanelOn = Boolean.parseBoolean(properties.getProperty("showSidePanel"))
+        ;
+    toolbarOn = Boolean.parseBoolean(properties.getProperty("showToolBar"))
+        ;
+    statusbarOn = Boolean.parseBoolean(properties.getProperty("showStatusBar"))
+        ;
 
     // Initialise DisplayProperties
     defaultDisplaySchemeName = properties
         .getProperty("defaultDisplaySchemeName");
 
     if (shouldApplySpectrumDisplaySettings) {
-      parameters.gridOn = Boolean.valueOf(properties.getProperty("showGrid"))
-          .booleanValue();
-      parameters.coordinatesOn = Boolean.valueOf(
-          properties.getProperty("showCoordinates")).booleanValue();
-      parameters.xScaleOn = Boolean.valueOf(
-          properties.getProperty("showXScale")).booleanValue();
-      parameters.yScaleOn = Boolean.valueOf(
-          properties.getProperty("showYScale")).booleanValue();
+      parameters.gridOn = Boolean.parseBoolean(properties.getProperty("showGrid"))
+          ;
+      parameters.coordinatesOn = Boolean.parseBoolean(
+          properties.getProperty("showCoordinates"));
+      parameters.xScaleOn = Boolean.parseBoolean(
+          properties.getProperty("showXScale"));
+      parameters.yScaleOn = Boolean.parseBoolean(
+          properties.getProperty("showYScale"));
     }
 
     // TODO: Need to apply Properties to all panels that are opened
@@ -546,8 +546,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
     }
 
     try {
-      autoIntegrate = Boolean.valueOf(
-          properties.getProperty("automaticallyIntegrate")).booleanValue();
+      autoIntegrate = Boolean.parseBoolean(
+          properties.getProperty("automaticallyIntegrate"));
       JSpecViewUtils.integralMinY = Double.parseDouble(properties
           .getProperty("integralMinY"));
       JSpecViewUtils.integralFactor = Double.parseDouble(properties
@@ -560,7 +560,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       // bad property value
     }
 
-    //svgForInscape = Boolean.valueOf(properties.getProperty("svgForInscape")).booleanValue();
+    //svgForInscape = Boolean.parseBoolean(properties.getProperty("svgForInscape"));
 
   }
 
@@ -1942,7 +1942,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
           jsvp = selectedJSVPanel;
           break;
         case AUTOINTEGRATE:
-          autoIntegrate = Boolean.valueOf(value.toLowerCase());
+          autoIntegrate = Parameters.parseBoolean(value);
           break;
         case IRMODE:
           irMode = JDXSpectrum.TA_NO_CONVERT;
