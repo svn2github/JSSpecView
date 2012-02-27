@@ -1199,13 +1199,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
     // if current spectrum is not a Peak Table then enable Menu to re-export
 
-    closeAllMenuItem.setEnabled(true);
-    displayMenu.setEnabled(true);
-    windowMenu.setEnabled(true);
-    processingMenu.setEnabled(true);
-    printMenuItem.setEnabled(true);
-    sourceMenuItem.setEnabled(true);
-    errorLogMenuItem.setEnabled(true);
+    setSourceEnabled(true);
 
     JDXSpectrum spec = currentSelectedSource.getJDXSpectrum(0);
     if (spec == null) {
@@ -1239,6 +1233,19 @@ public class MainFrame extends JFrame implements DropTargetListener,
     return FILE_OPEN_OK;
   }
   
+  private void setSourceEnabled(boolean b) {
+    closeAllMenuItem.setEnabled(b);
+    displayMenu.setEnabled(b);
+    windowMenu.setEnabled(b);
+    processingMenu.setEnabled(b);
+    printMenuItem.setEnabled(b);
+    sourceMenuItem.setEnabled(b);
+    errorLogMenuItem.setEnabled(b);
+    exportAsMenu.setEnabled(b);
+    saveAsMenu.setEnabled(b);
+
+  }
+
   private void updateRecentMenus() {
     String filePaths = "";
     JMenuItem menuItem;
@@ -1291,16 +1298,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
     if (spec == null) {
       setCloseMenuItem(null);
-      saveAsMenu.setEnabled(false);
-      exportAsMenu.setEnabled(false);
-      closeAllMenuItem.setEnabled(false);
-      displayMenu.setEnabled(false);
-      windowMenu.setEnabled(false);
-      processingMenu.setEnabled(false);
-      printMenuItem.setEnabled(false);
-      sourceMenuItem.setEnabled(false);
-      errorLogMenuItem.setEnabled(false);
-      saveAsMenu.setEnabled(false);
+      setSourceEnabled(false);
       return;
     }
 
@@ -1557,6 +1555,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
     setCloseMenuItem(null);
     setTitle("JSpecView");
+    if (source == null)
+      setMenuEnables(null);
     System.gc();
   }
 
@@ -1645,6 +1645,22 @@ public class MainFrame extends JFrame implements DropTargetListener,
      return null;
   }
 
+  private JDXSource findSourceByNameOrId(String id) {
+    for (int i = specNodes.size(); --i >= 0;) {
+      JSVTreeNode node = specNodes.get(i);
+      if (id.equals(node.id)
+          || id.equalsIgnoreCase(node.source.getFilePath()))
+        return node.source;
+    }
+    // only if that doesn't work -- check file name for exact case
+    for (int i = specNodes.size(); --i >= 0;) {
+      JSVTreeNode node = specNodes.get(i);
+      if (id.equals(node.fileName))
+        return node.source;
+    }
+    return null;
+  }
+
   
   /**
    * Does the necessary actions and cleaning up when JInternalFrame closes
@@ -1656,33 +1672,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
     closeSource(currentSelectedSource);
     setCurrentSource(null);
-
-    if (specNodes.size() == 0) {
-      saveAsMenu.setEnabled(false);
-      closeMenuItem.setEnabled(false);
-      closeAllMenuItem.setEnabled(false);
-      displayMenu.setEnabled(false);
-      windowMenu.setEnabled(false);
-      processingMenu.setEnabled(false);
-      printMenuItem.setEnabled(false);
-      sourceMenuItem.setEnabled(false);
-      errorLogMenuItem.setEnabled(false);
-    }
-
-    /**
-     * setDefaultCloseOperation(DISPOSE_ON_CLOSE); spectraTree.validate();
-     * spectraTree.repaint();
-     * 
-     * // Add Title of internal frame to the Window|Show menu JMenuItem menuItem
-     * = new JMenuItem(frame.getTitle()); showMenu.add(menuItem);
-     * menuItem.addActionListener(new ActionListener(){ public void
-     * actionPerformed(ActionEvent e){ frame.setVisible(true);
-     * frame.setSize(550, 350); try{ frame.setSelected(true);
-     * frame.setMaximum(true); } catch(PropertyVetoException pve){}
-     * spectraTree.validate(); spectraTree.repaint();
-     * showMenu.remove((JMenuItem)e.getSource()); } });
-     */
-
+    if (specNodes.size() == 0)
+      setMenuEnables(null);
   }
 
   private JSVPanel getCurrentJSVPanel() {
@@ -1809,6 +1800,9 @@ public class MainFrame extends JFrame implements DropTargetListener,
           if (jsvp == null)
             return;
           break;
+        case CLOSE:
+          close(value);
+          break;
         default:
           parameters.set(jsvp, st, value);
           break;
@@ -1862,6 +1856,18 @@ public class MainFrame extends JFrame implements DropTargetListener,
       }
     }
     repaint();
+  }
+
+  private void close(String value) {
+    value = value.replace('\\', '/');
+    if (value.equalsIgnoreCase("all")) {
+      closeSource(null);
+      return;
+    }
+    JDXSource source = (value.length() == 0 ? currentSelectedSource : findSourceByNameOrId(value));
+    if (source == null)
+      return;
+    closeSource(source);
   }
 
   private void overlay(String[] ids) {
@@ -2580,7 +2586,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
    */
   protected void closeAllMenuItem_actionPerformed(ActionEvent e) {
     closeSource(null);
-    setMenuEnables(null);
   }
 
   /**

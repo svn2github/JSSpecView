@@ -13,6 +13,13 @@ public class ScriptParser {
     switch (st) {
     default:
       return nextStringToken(params);
+    case CLOSE:
+    case LOAD:
+      pt = token.indexOf(" ");
+      if (pt < 0)
+        return "";
+      String s = token.substring(pt).trim();
+      return (s.startsWith("\"") && s.endsWith("\"") ? s.substring(1, s.length() - 1) : s);        
     case OVERLAY:
       pt = token.indexOf(" ");
       if (pt < 0)
