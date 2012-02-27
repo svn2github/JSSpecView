@@ -77,6 +77,14 @@ public enum ScriptToken {
     return (st == null ? UNKNOWN : st);
   }
 
+  /**
+   * tweak command options depending upon special cases
+   * 
+   * @param st
+   * @param params
+   * @param token
+   * @return
+   */
   public static String getValue(ScriptToken st, StringTokenizer params, String token) {
     if (!params.hasMoreTokens())
       return "";
