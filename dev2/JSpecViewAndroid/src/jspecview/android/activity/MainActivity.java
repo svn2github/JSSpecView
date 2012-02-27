@@ -564,9 +564,9 @@ public class MainActivity extends Activity{
     		integralOffsetEditText.setText(String.valueOf(mIntegrationOffset));    		
     	}    	
     	else{
-    		minimumYEditText.setText(JSpecViewUtils.integralMinY);
-    		integralFactorEditText.setText(JSpecViewUtils.integralFactor);
-    		integralOffsetEditText.setText(JSpecViewUtils.integralOffset); 
+    		minimumYEditText.setText(String.valueOf(JSpecViewUtils.integralMinY));
+    		integralFactorEditText.setText(String.valueOf(JSpecViewUtils.integralFactor));
+    		integralOffsetEditText.setText(String.valueOf(JSpecViewUtils.integralOffset)); 
     	}	
     	
     	mIntegrateDialog = dialog;
@@ -722,9 +722,8 @@ public class MainActivity extends Activity{
     	JDXSpectrum spectrum = mSpectra.get(spectrumIndex);
 		
 		if(integGraph == null){
-			integGraph = new IntegralGraph(spectrum, minY, offset, factor);
-			integGraph.setXUnits(spectrum.getXUnits());
-			integGraph.setYUnits(spectrum.getYUnits());
+			integGraph = new IntegralGraph(spectrum, minY, offset, factor, spectrum.getXUnits(), 
+			    spectrum.getYUnits());
 			
 			mIntegralGraphs[spectrumIndex] = integGraph;
 		}
