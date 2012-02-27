@@ -906,23 +906,4 @@ public class JSpecViewUtils {
     return inputRatios;
   }
 
-  public static boolean areScalesCompatible(Graph[] spectra) {
-    String xUnit = spectra[0].getXUnits();
-    String yUnit = spectra[0].getYUnits();
-    int numOfSpectra = spectra.length;
-
-    for (int i = 1; i < numOfSpectra; i++) {
-      String tempXUnit, tempYUnit;
-      tempXUnit = spectra[i].getXUnits();
-      tempYUnit = spectra[i].getYUnits();
-      if (!xUnit.equals(tempXUnit) || !yUnit.equals(tempYUnit)) {
-        return false;
-      }
-      xUnit = tempXUnit;
-      yUnit = tempYUnit;
-    }
-
-    return true;
-  }
-
 }

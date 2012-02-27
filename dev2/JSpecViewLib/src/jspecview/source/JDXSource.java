@@ -35,6 +35,8 @@ import jspecview.common.JDXSpectrum;
  */
 public class JDXSource extends JDXHeader {
 
+  public final static int TYPE_OVERLAY = -2;
+  
   public final static int TYPE_UNKNOWN = -1;
   /** Indicates a Simple Source */
   public final static int TYPE_SIMPLE = 0;
@@ -50,6 +52,7 @@ public class JDXSource extends JDXHeader {
   protected List<JDXSpectrum> jdxSpectra;
 
   public int peakCount;
+  
   
   public JDXSource(int type) {
     this.type = type;
@@ -98,7 +101,7 @@ public class JDXSource extends JDXHeader {
   }
 
   // Errors
-  String errors;
+  String errors = "";
 
   /**
    * Returns the error log for this source
@@ -120,7 +123,7 @@ public class JDXSource extends JDXHeader {
   }
 
   private String filePath;
-  
+
   public void setFilePath(String filePath) {
     this.filePath = filePath;
   }
@@ -129,4 +132,14 @@ public class JDXSource extends JDXHeader {
     return filePath;
   }
 
+  public static JDXSource createOverlay(String name, List<JDXSpectrum> specs) {
+    JDXSource source = new JDXSource(TYPE_OVERLAY);
+    for (int i = 0; i < specs.size(); i++)
+      source.addJDXSpectrum(specs.get(i));
+    return source;
+  }
+
+  public boolean isOverlay() {
+    return type == TYPE_OVERLAY;
+  }
 }

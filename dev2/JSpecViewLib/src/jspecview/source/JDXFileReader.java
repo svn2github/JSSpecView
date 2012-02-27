@@ -72,8 +72,9 @@ public class JDXFileReader {
   static {
     Arrays.sort(TABULAR_DATA_LABELS);
   }
-  private static JDXSource source;
-  private static JDXSourceStringTokenizer t;
+  private JDXSource source;
+  private JDXSourceStringTokenizer t;
+  private StringBuffer errorLog;
 
   public static JDXSource createJDXSource(InputStream in) throws IOException,
       JSpecViewException {
@@ -131,8 +132,6 @@ public class JDXFileReader {
     br.close();
     return sb.toString();
   }
-
-  private StringBuffer errorLog;
 
   /**
    * starting point for reading all data
@@ -684,7 +683,5 @@ public class JDXFileReader {
 
     return false;
   }
-
-
 
 }
