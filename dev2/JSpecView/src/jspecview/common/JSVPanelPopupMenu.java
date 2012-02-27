@@ -79,6 +79,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
 
   protected JMenuItem userZoomMenuItem = new JMenuItem();
   protected JMenuItem scriptMenuItem = new JMenuItem();
+  public JMenuItem overlayMenuItem = new JMenuItem();
 
   public JCheckBoxMenuItem integrateCheckBoxMenuItem = new JCheckBoxMenuItem();
   public JCheckBoxMenuItem transAbsMenuItem = new JCheckBoxMenuItem();
@@ -121,6 +122,12 @@ public class JSVPanelPopupMenu extends JPopupMenu {
         resetMenuItem_actionPerformed(e);
       }
     });
+    overlayMenuItem.setText("Overlay...");
+    overlayMenuItem.addActionListener(new ActionListener() {
+       public void actionPerformed(ActionEvent e) {
+         overlayMenuItem_actionPerformed(e);
+       }
+     });
     scriptMenuItem.setText("Script...");
     scriptMenuItem.addActionListener(new ActionListener() {
        public void actionPerformed(ActionEvent e) {
@@ -167,6 +174,10 @@ public class JSVPanelPopupMenu extends JPopupMenu {
     script();
   }
   
+  protected void overlayMenuItem_actionPerformed(ActionEvent e) {
+    overlay();
+  }
+  
   protected void userMenuItem_actionPerformed(ActionEvent e) {
     userZoom();
   }
@@ -182,6 +193,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
     add(resetMenuItem);
     add(userZoomMenuItem);
     addSeparator();
+    add(overlayMenuItem);
     add(scriptMenuItem);
     addSeparator();
     add(properties);
@@ -364,6 +376,18 @@ public class JSVPanelPopupMenu extends JPopupMenu {
             scripter.checkScript("GETSOLUTIONCOLOR");
           }
         });
+  }
+
+  protected String recentOverlay = "1.1,1.2";
+
+  public void overlay() {
+    String script = (String) JOptionPane.showInputDialog(null,
+        "Enter a list of Spectrum IDs separated by commas", "Overlay", JOptionPane.PLAIN_MESSAGE, null,
+        null, recentOverlay);
+    if (script == null)
+      return;
+    recentOverlay = script;
+    scripter.checkScript("overlay " + script);
   }
 
 }

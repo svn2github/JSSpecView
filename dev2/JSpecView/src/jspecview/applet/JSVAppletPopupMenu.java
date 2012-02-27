@@ -22,6 +22,7 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     isApplet = true;
     this.isSigned = isSigned;
     this.applet = applet;
+    recentOverlay = "none";
     initialize();
   }
 

@@ -490,7 +490,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @throws ScalesIncompatibleException
    */
   private void checkUnits() throws ScalesIncompatibleException {
-    if (!JSpecViewUtils.areScalesCompatible(spectra)) {
+    if (!JDXSpectrum.areScalesCompatible(spectra)) {
       throw new ScalesIncompatibleException();
     }
   }
@@ -1202,12 +1202,12 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        the width to be drawn in pixels
    */
   private void drawGraph(Graphics g, int height, int width) {
-    
+
     plotAreaWidth = width - (plotAreaInsets.right + plotAreaInsets.left);
     plotAreaHeight = height - (plotAreaInsets.top + plotAreaInsets.bottom);
 
     ///System.out.println("JSVPANEL "  + width + " " + height + " " + plotAreaWidth + " " + plotAreaHeight + " " + title);
-    
+
     leftPlotAreaPos = plotAreaX;
     rightPlotAreaPos = plotAreaWidth + plotAreaX;
     topPlotAreaPos = plotAreaY;
@@ -1231,10 +1231,13 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
     for (int i = 0; i < highlights.size(); i++) {
       Highlight hl = highlights.get(i);
-      drawBar(g, hl.getStartX(), hl.getEndX(), highlightColor = hl.getColor(), true);
+      drawBar(g, hl.getStartX(), hl.getEndX(), highlightColor = hl.getColor(),
+          true);
     }
 
-    ArrayList<PeakInfo> list = getSpectrumAt(0).getPeakList();
+    ArrayList<PeakInfo> list = (nSpectra == 1
+        || getSpectrum().getIntegrationGraph() != null ? getSpectrumAt(0)
+        .getPeakList() : null);
     if (list != null && list.size() > 0) {
       for (int i = list.size(); --i >= 0;) {
         PeakInfo pi = list.get(i);

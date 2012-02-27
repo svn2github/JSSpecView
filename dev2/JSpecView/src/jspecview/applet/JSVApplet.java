@@ -61,7 +61,6 @@ import java.util.ArrayList;
 
 import javax.swing.JApplet;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -99,6 +98,7 @@ import jspecview.source.JDXSource;
 import jspecview.util.Escape;
 import jspecview.util.Logger;
 import jspecview.util.Parser;
+import jspecview.util.TextFormat;
 import netscape.javascript.JSObject;
 
 /**
@@ -169,11 +169,10 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
       commandWatcherThread = null;
     }
     if (jsvPanels != null) {
-      for (int i = 0; i < jsvPanels.length; i++)
-        if (jsvPanels[i] != null) {
-          jsvPanels[i].destroy();
-          jsvPanels[i] = null;
-        }
+      for (int i = jsvPanels.size(); --i >= 0;) {
+        jsvPanels.get(i).destroy();
+        jsvPanels.remove(i);
+      }
     }
     System.out.println("JSVApplet " + this + " destroy 2");
   }
@@ -198,7 +197,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
   /**
    * The <code>JSVPanel</code>s created for each </code>JDXSpectrum</code>
    */
-  private JSVPanel[] jsvPanels;
+  private List<JSVPanel> jsvPanels;
 
   /**
    * The <code>JDXSource</code> instance
@@ -276,14 +275,13 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
       e.printStackTrace();
     }
     appletPanel = new JPanel(new BorderLayout());
-    //appletPanel.add(statusPanel,  BorderLayout.SOUTH);
     Font statusFont = new Font(null, Font.PLAIN, 12);
     statusTextLabel.setFont(statusFont);
     statusTextLabel.setForeground(Color.darkGray);
     statusPanel.add(statusTextLabel, null);
     this.getContentPane().add(appletPanel);
     if (execScript == null)
-      openDataOrFile(data);
+      openDataOrFile(data, null, null);
     else
       checkScriptNow(execScript);
   }
@@ -343,7 +341,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
 
     if (overlay) {
       // overlay all spectra on a panel
-      jsvPanels = new JSVPanel[1];
+      jsvPanels = new ArrayList<JSVPanel>();
 
       try {
         if (showRange) {
@@ -363,13 +361,13 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
         return;
       }
       endIndex = startIndex = -1;
-      jsvPanels[0] = jsvp;
+      jsvPanels.add(jsvp);
       initProperties(jsvp, 0);
       selectedJSVPanel = jsvp;
       jsvp.setIndex(currentSpectrumIndex = 0);
     } else {
       // initialise JSVPanels and add them to the array
-      jsvPanels = new JSVPanel[numberOfSpectra];
+      jsvPanels = new ArrayList<JSVPanel>();
       try {
         for (int i = 0; i < numberOfSpectra; i++) {
           JDXSpectrum spec = specs.get(i);
@@ -381,7 +379,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
           } else {
             jsvp = new JSVPanel(spec);
           }
-          jsvPanels[i] = jsvp;
+          jsvPanels.add(jsvp);
           initProperties(jsvp, i);
         }
       } catch (Exception e) {
@@ -408,7 +406,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
    * <i>interface</i> parameter
    */
   private void initInterface() {
-    final int numberOfPanels = jsvPanels.length;
+    final int numberOfPanels = jsvPanels.size();
     boolean canDoTile = (numberOfPanels >= 2 && numberOfPanels <= 10);
     boolean moreThanOnePanel = numberOfPanels > 1;
     boolean showSpectrumNumber = spectrumNumber != -1
@@ -430,7 +428,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
           title = title.substring(0, (title.length() >= 10 ? 10 : title
               .length()))
               + "... : ";
-        spectraPane.addTab(title, jsvPanels[i]);
+        spectraPane.addTab(title, jsvPanels.get(i));
       }
       // Show the spectrum specified by the spectrumnumber parameter
       if (showSpectrumNumber) {
@@ -447,39 +445,35 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
           SwingConstants.CENTER), BorderLayout.NORTH);
 
       for (int i = 0; i < numberOfPanels; i++) {
-        jsvPanels[i].setMinimumSize(new Dimension(250, 150));
-        jsvPanels[i].setPreferredSize(new Dimension(300, 200));
+        jsvPanels.get(i).setMinimumSize(new Dimension(250, 150));
+        jsvPanels.get(i).setPreferredSize(new Dimension(300, 200));
       }
       JSplitPane splitPane = createSplitPane(jsvPanels);
       appletPanel.add(splitPane, BorderLayout.CENTER);
       //splitPane.setBackground(backgroundColor);
     } else { // Single or overlay
       //      compoundMenuOn = true;
-      int spectrumIndex;
-      String title;
-      if (showSpectrumNumber)
-        spectrumIndex = spectrumNumber - 1;
-      else
-        spectrumIndex = 0;
-      setSelectedPanel(jsvPanels[spectrumIndex]);
+      int spectrumIndex = (showSpectrumNumber ? spectrumNumber - 1 : 0);
+            
+      setSelectedPanel(spectrumIndex >= jsvPanels.size() ? null : jsvPanels.get(spectrumIndex));
 
       // Global variable for single interface
       currentSpectrumIndex = spectrumIndex;
       if (overlay && source.isCompoundSource) {
-        title = source.getTitle();
-        jsvPanels[spectrumIndex].setTitle(title);
+        jsvPanels.get(spectrumIndex).setTitle(source.getTitle());
         appletPopupMenu.overlayKeyMenuItem.setEnabled(true);
       }
-      appletPanel.add(jsvPanels[spectrumIndex], BorderLayout.CENTER);
+      appletPanel.add(jsvPanels.get(spectrumIndex), BorderLayout.CENTER);
       // else interface = single
       if (moreThanOnePanel && compoundMenuOn) {
-        if (numberOfPanels <= 20) {
+        appletPopupMenu.compoundMenu.removeAll();
+        appletPopupMenu.compoundMenu.add(appletPopupMenu.overlayMenuItem);
+        if (jsvPanels.size() <= 20) {
           // add Menus to navigate
           JCheckBoxMenuItem mi;
           if (source.isCompoundSource) {
             for (int i = 0; i < numberOfPanels; i++) {
-              title = (i + 1) + "- " + specs.get(i).getTitleLabel();
-              mi = new JCheckBoxMenuItem(title);
+              mi = new JCheckBoxMenuItem((i + 1) + "- " + specs.get(i).getTitleLabel());
               mi.setSelected(i == currentSpectrumIndex);
               mi.addItemListener(new ItemListener() {
                 public void itemStateChanged(ItemEvent e) {
@@ -487,7 +481,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
                     // deselects the previously selected menu item
                     JCheckBoxMenuItem deselectedMenu = (JCheckBoxMenuItem) ((JCheckBoxMenuItem) e
                         .getSource()).getParent().getComponent(
-                        currentSpectrumIndex);
+                        currentSpectrumIndex + 1);
                     deselectedMenu.setSelected(false);
                     compoundMenu_itemStateChanged(e);
                   }
@@ -561,8 +555,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
    *        the index
    */
   private void showSpectrum(int index, boolean fromMenu) {
-    JSVPanel jsvp = jsvPanels[index];
-    appletPanel.remove(jsvPanels[currentSpectrumIndex]);
+    JSVPanel jsvp = jsvPanels.get(index);
+    appletPanel.remove(jsvPanels.get(currentSpectrumIndex));
     appletPanel.add(jsvp, BorderLayout.CENTER);
     currentSpectrumIndex = index;
     setSelectedPanel(jsvp);
@@ -868,7 +862,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
    *        An array of components to tile
    * @return a <code>JSplitPane</code> with components tiled
    */
-  private JSplitPane createSplitPane(JComponent[] comps) {
+  private JSplitPane createSplitPane(List<JSVPanel> comps) {
     ComponentListPair pair = createPair(comps);
     return createSplitPaneAux(pair);
   }
@@ -881,24 +875,24 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
    * @return a <code>JSplitPane</code> with components tiled
    */
   private JSplitPane createSplitPaneAux(ComponentListPair pair) {
-    int numTop = pair.top.length;
-    int numBottom = pair.bottom.length;
+    int numTop = pair.top.size();
+    int numBottom = pair.bottom.size();
     JSplitPane splitPane;
 
     if (numBottom == 1 && numTop == 1) {
       splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-      splitPane.setLeftComponent(pair.top[0]);
-      splitPane.setRightComponent(pair.bottom[0]);
+      splitPane.setLeftComponent(pair.top.get(0));
+      splitPane.setRightComponent(pair.bottom.get(0));
 
     }
 
     else if (numBottom == 1 && numTop == 2) {
       splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
       JSplitPane newSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-      newSplitPane.setLeftComponent(pair.top[0]);
-      newSplitPane.setRightComponent(pair.top[1]);
+      newSplitPane.setLeftComponent(pair.top.get(0));
+      newSplitPane.setRightComponent(pair.top.get(1));
       splitPane.setLeftComponent(newSplitPane);
-      splitPane.setRightComponent(pair.bottom[0]);
+      splitPane.setRightComponent(pair.bottom.get(0));
     } else {
       splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
       splitPane.setTopComponent(createSplitPaneAux(createPair(pair.top)));
@@ -915,21 +909,19 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
    *        an array of components
    * @return a <code>ComponentListPair</code>
    */
-  private ComponentListPair createPair(JComponent[] comps) {
-    int numBottom = (int) (comps.length / 2);
-    int numTop = numBottom + (comps.length % 2);
+  private ComponentListPair createPair(List<JSVPanel> comps) {
+    int numBottom = (int) (comps.size() / 2);
+    int numTop = numBottom + (comps.size() % 2);
 
-    JComponent[] top = new JComponent[numTop];
-    JComponent[] bottom = new JComponent[numBottom];
+    List<JSVPanel> top = new ArrayList<JSVPanel>();
+    List<JSVPanel> bottom = new ArrayList<JSVPanel>();
 
     int i;
-    for (i = 0; i < numTop; i++) {
-      top[i] = comps[i];
-    }
+    for (i = 0; i < numTop; i++)
+      top.add(comps.get(i));
 
-    for (int j = 0; i < comps.length; i++, j++) {
-      bottom[j] = comps[i];
-    }
+    for (; i < comps.size(); i++)
+      bottom.add(comps.get(i));
 
     ComponentListPair pair = new ComponentListPair();
     pair.bottom = bottom;
@@ -946,12 +938,12 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     /**
      * the first array
      */
-    public JComponent[] top;
+    public List<JSVPanel> top;
 
     /**
      * the second array
      */
-    public JComponent[] bottom;
+    public List<JSVPanel> bottom;
 
     /**
      * Constructor
@@ -1214,7 +1206,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
         key = eachParam.nextToken();
       key = key.toUpperCase();
       ScriptToken st = ScriptToken.getScriptToken(key);
-      String value = ScriptParser.getValue(st, eachParam);
+      String value = ScriptParser.getValue(st, eachParam, token);
       System.out.println("KEY-> " + key + " VALUE-> " + value + " : " + st);
       try {
         switch (st) {
@@ -1322,16 +1314,25 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     }
   }
 
+  int nOverlays;
+  private List<JDXSpectrum> specsSaved;
+
   /*
     private void interruptQueueThreads() {
       if (commandWatcherThread != null)
         commandWatcherThread.interrupt();
     }
   */
-  private void openDataOrFile(String data) {
+  private void openDataOrFile(String data, String name, List<JDXSpectrum> specs1) {
+    appletPanel.removeAll();
     String fileName = null;
     URL base = null;
-    if (data != null) {
+    boolean isOverlay = false;
+    if (specs1 != null) {
+      fileName = "Overlay" + (++nOverlays);
+      isOverlay = true;
+      specs = specs1;
+    } else if (data != null) {
     } else if (filePath != null) {
       URL url;
       try {
@@ -1350,7 +1351,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     }
 
     try {
-      source = JDXFileReader.createJDXSource(data, fileName, base);
+      source = (isOverlay ? JDXSource.createOverlay(fileName, specs)
+          : JDXFileReader.createJDXSource(data, fileName, base));
     } catch (Exception e) {
       writeStatus(e.getMessage());
       e.printStackTrace();
@@ -1359,15 +1361,15 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
 
     specs = source.getSpectra();
     numberOfSpectra = specs.size();
-    overlay = (theInterface.equals("overlay") && numberOfSpectra > 1);
-    overlay &= !JDXSpectrum.process(specs, irMode, autoIntegrate);
+    overlay = isOverlay || (theInterface.equals("overlay") && numberOfSpectra > 1);
+    overlay &= !JDXSpectrum.process(specs, irMode, !isOverlay && autoIntegrate);
     boolean continuous = source.getJDXSpectrum(0).isContinuous();
-    compoundMenuOn = allowCompoundMenu && source.isCompoundSource;
-
     String Yunits = source.getJDXSpectrum(0).getYUnits();
     String Xunits = source.getJDXSpectrum(0).getXUnits();
     double firstX = source.getJDXSpectrum(0).getFirstX();
     double lastX = source.getJDXSpectrum(0).getLastX();
+
+    compoundMenuOn = allowCompoundMenu && source.isCompoundSource;
 
     try {
       initPanels();
@@ -1375,6 +1377,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
       writeStatus(e1.getMessage());
       return;
     }
+    
     initInterface();
 
     System.out.println("JSpecView vs: " + APPLET_VERSION + " File " + fileName
@@ -1423,7 +1426,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
       StringTokenizer eachParam = new StringTokenizer(token);
       String key = ScriptParser.getKey(eachParam);
       ScriptToken st = ScriptToken.getScriptToken(key);
-      String value = ScriptParser.getValue(st, eachParam);
+      String value = ScriptParser.getValue(st, eachParam, token);
       System.out.println("KEY-> " + key + " VALUE-> " + value + " : " + st);
       try {
         switch (st) {
@@ -1431,8 +1434,10 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
           System.out.println("Unrecognized parameter: " + key);
           break;
         case LOAD:
+          specsSaved = null;
           filePath = value;
-          openDataOrFile(null);
+          openDataOrFile(null, null, null);
+          setSpectrumNumber(1);
           break;
         default:
           parameters.set(jsvp, st, value);
@@ -1476,6 +1481,9 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
             continue;
           integrate(value);
           break;
+        case OVERLAY:
+          overlay(TextFormat.split(value, ","));
+          break;
         case GETSOLUTIONCOLOR:
           if (jsvp == null) 
             continue;
@@ -1487,6 +1495,35 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
       }
     }
     repaint();
+  }
+
+  
+  private void overlay(String[] ids) {
+    if (specsSaved == null)
+      specsSaved = specs;
+    if (ids.length == 0 || ids.length == 1 && ids[0].equalsIgnoreCase("none")) {
+      openDataOrFile(null, "", specsSaved);
+      setSpectrumNumber(1);
+      return;
+    }
+    List<JDXSpectrum> list = new ArrayList<JDXSpectrum>();
+    StringBuffer sb = new StringBuffer();
+    for (int i = 0; i < ids.length; i++) {
+      JDXSpectrum spec = findSpectrumById(ids[i]);
+      if (spec == null)
+        continue;
+        list.add(spec);
+        sb.append(",").append(ids[i]);
+    }
+    if (list.size() > 1 && JDXSpectrum.areScalesCompatible(list)) {
+      openDataOrFile(null, sb.toString().substring(1), list);
+      setSpectrumNumber(1);
+    }
+  }
+
+  private JDXSpectrum findSpectrumById(String id) {
+    int i = Parser.parseInt(id);
+    return (i >= 0 && i < specsSaved.size() ? specsSaved.get(i) : null);
   }
 
   /**
@@ -1526,8 +1563,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     // what if tabbed? 
     if (jsvPanels == null)
       return false;
-    for (int i = 0; i < jsvPanels.length; i++) {
-      if ((jsvPanels[i].getSpectrum()).hasPeakIndex(index)) {
+    for (int i = 0; i < jsvPanels.size(); i++) {
+      if ((jsvPanels.get(i).getSpectrum()).hasPeakIndex(index)) {
         setSpectrumNumber(i + 1);
         return true;
       }
@@ -1590,8 +1627,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     removeKeyListener(selectedJSVPanel);
     selectedJSVPanel = jsvp;
     addKeyListener(selectedJSVPanel);
-    for (int i = jsvPanels.length; --i >= 0; )
-      jsvPanels[i].setEnabled(jsvPanels[i] == jsvp);
+    for (int i = jsvPanels.size(); --i >= 0; )
+      jsvPanels.get(i).setEnabled(jsvPanels.get(i) == jsvp);
   }
 
   private void sendFrameChange(JSVPanel jsvp) {

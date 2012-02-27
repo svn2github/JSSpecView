@@ -137,6 +137,7 @@ import jspecview.util.ColorUtil;
 import jspecview.util.Escape;
 import jspecview.util.FileManager;
 import jspecview.util.Parser;
+import jspecview.util.TextFormat;
 
 /**
  * The Main Class or Entry point of the JSpecView Application.
@@ -244,7 +245,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
   private JSVPanelPopupMenu jsvpPopupMenu = new JSVPanelPopupMenu(this);
   private JCheckBoxMenuItem splitMenuItem = new JCheckBoxMenuItem();
-  private JCheckBoxMenuItem overlayMenuItem = new JCheckBoxMenuItem();
+  private JCheckBoxMenuItem overlayAllMenuItem = new JCheckBoxMenuItem();
+  private JMenuItem overlayMenuItem = new JMenuItem();
   private JSVTreeNode rootNode;
   private DefaultTreeModel spectraTreeModel;
   private JMenuItem hideMenuItem = new JMenuItem();
@@ -597,7 +599,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    */
   private void initSpectraTree() {
     currentSelectedSource = null;
-    rootNode = new JSVTreeNode("Spectra", null, null, null);
+    rootNode = new JSVTreeNode("Spectra", null, null, null,null);
     spectraTreeModel = new DefaultTreeModel(rootNode);
     spectraTree = new JTree(spectraTreeModel);
     spectraTree.getSelectionModel().setSelectionMode(
@@ -868,10 +870,16 @@ public class MainFrame extends JFrame implements DropTargetListener,
             splitMenuItem_actionPerformed(e);
           }
         });
-    JSVPanelPopupMenu.setMenuItem(overlayMenuItem, 'O', "Overlay", 79,
+    JSVPanelPopupMenu.setMenuItem(overlayAllMenuItem, 'Y', "Overlay All", 0,
+        0, new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            overlayMenuItem_actionPerformed(e, true);
+          }
+        });
+    JSVPanelPopupMenu.setMenuItem(overlayMenuItem, 'O', "Overlay...", 79,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            overlayMenuItem_actionPerformed(e);
+            overlayMenuItem_actionPerformed(e, false);
           }
         });
     JSVPanelPopupMenu.setMenuItem(hideMenuItem, 'H', "Hide", 0, 0,
@@ -1085,6 +1093,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     //sideSplitPane.setTopComponent(spectraTreePane);
     //sideSplitPane.setBottomComponent(errorTree);
     windowMenu.add(splitMenuItem);
+    windowMenu.add(overlayAllMenuItem);
     windowMenu.add(overlayMenuItem);
     windowMenu.addSeparator();
     windowMenu.add(hideMenuItem);
@@ -1128,7 +1137,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the file
    */
   public void openFile(File file) {
-    openFile(file, null);
+    openFile(file, null, null);
   }
 
   /**
@@ -1138,16 +1147,22 @@ public class MainFrame extends JFrame implements DropTargetListener,
    */
   public void openFile(String fileOrURL) {
     if (FileManager.isURL(fileOrURL))
-      openFile(null, fileOrURL);
+      openFile(null, fileOrURL, null);
     else
-      openFile(new File(fileOrURL), null);
+      openFile(new File(fileOrURL), null, null);
   }
 
-  private int openFile(File file, String url) {
+  private int nOverlay;
+  
+  private int openFile(File file, String url, List<JDXSpectrum> specs) {
     writeStatus(" ");
     String filePath = null;
     String fileName = null;
-    if (file == null) {
+    boolean isOverlay = false;
+    if (specs != null) {
+      isOverlay = true;
+      fileName = filePath = "Overlay" + (++nOverlay);
+    } else if (url != null) {
       try {
         URL u = new URL(url);
         fileName = FileManager.getName(url);
@@ -1169,7 +1184,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
       return FILE_OPEN_ALREADY;
     }
     try {
-      setCurrentSource(JDXFileReader.createJDXSource(null, filePath, null));
+      setCurrentSource(isOverlay ? JDXSource.createOverlay(url, specs) 
+          : JDXFileReader.createJDXSource(null, filePath, null));
     } catch (Exception e) {
       e.printStackTrace();
       writeStatus(e.getMessage());
@@ -1198,12 +1214,12 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
     setMenuEnables(spec);
 
-    List<JDXSpectrum> specs = currentSelectedSource.getSpectra();
-    boolean overlay = autoOverlay && currentSelectedSource.isCompoundSource;
-    overlay &= !JDXSpectrum.process(specs, irMode, autoIntegrate);
+    specs = currentSelectedSource.getSpectra();
+    boolean overlay = isOverlay || autoOverlay && currentSelectedSource.isCompoundSource;
+    overlay &= !JDXSpectrum.process(specs, irMode, !isOverlay && autoIntegrate);
     if (overlay) {
       try {
-        overlaySpectra(currentSelectedSource);
+        overlaySpectra(currentSelectedSource, (isOverlay ? url : null));
       } catch (ScalesIncompatibleException ex) {
         splitSpectra(currentSelectedSource);
       }
@@ -1218,7 +1234,12 @@ public class MainFrame extends JFrame implements DropTargetListener,
     if (!recentFilePaths.contains(filePath)) {
       recentFilePaths.add(0, filePath);
     }
-
+    if (!isOverlay)
+      updateRecentMenus();
+    return FILE_OPEN_OK;
+  }
+  
+  private void updateRecentMenus() {
     String filePaths = "";
     JMenuItem menuItem;
     openRecentMenu.removeAll();
@@ -1244,7 +1265,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
       }
     });
     properties.setProperty("recentFilePaths", filePaths);
-    return FILE_OPEN_OK;
   }
 
   private void setCloseMenuItem(String fileName) {
@@ -1350,9 +1370,9 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the <code>JDXSource</code>
    * @throws ScalesIncompatibleException
    */
-  private void overlaySpectra(JDXSource source)
+  private void overlaySpectra(JDXSource source, String name)
       throws ScalesIncompatibleException {
-    overlayMenuItem.setSelected(true);
+    overlayAllMenuItem.setSelected(true);
     splitMenuItem.setSelected(false);
     List<JDXSpectrum> specs = source.getSpectra();
     JSVPanel jsvp;
@@ -1361,7 +1381,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
     setJSVPanelProperties(jsvp, true);
 
-    JInternalFrame frame = new JInternalFrame(source.getTitle(), true, true,
+    JInternalFrame frame = new JInternalFrame((name == null ? source.getTitle() : name), true, true,
         true, true);
     frame.setFrameIcon(frameIcon);
     frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -1401,7 +1421,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    */
   private void splitSpectra(JDXSource source) {
 
-    overlayMenuItem.setSelected(false);
+    overlayAllMenuItem.setSelected(false);
     splitMenuItem.setSelected(true);
 
     List<JDXSpectrum> specs = source.getSpectra();
@@ -1540,6 +1560,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     System.gc();
   }
 
+  private int fileCount = 0;
   /**
    * Adds the <code>JDXSource</code> info specified by the
    * <code>fileName<code> to
@@ -1555,15 +1576,16 @@ public class MainFrame extends JFrame implements DropTargetListener,
    */
   public void createTree(JDXSource source, JInternalFrame[] frames) {
     String fileName = FileManager.getName(source.getFilePath());
-    DefaultMutableTreeNode fileNode = new JSVTreeNode(fileName, source, null,
-        null);
+    JSVTreeNode fileNode = new JSVTreeNode(fileName, source, null,
+        null, null);
     spectraTreeModel.insertNodeInto(fileNode, rootNode, rootNode
         .getChildCount());
     spectraTree.scrollPathToVisible(new TreePath(fileNode.getPath()));
 
+    fileCount++;
     for (int i = 0; i < frames.length; i++) {
       JSVPanel jsvp = JSVPanel.getPanel0(frames[i]);
-      JSVTreeNode specNode = new JSVTreeNode(fileName, source, frames[i], jsvp);
+      JSVTreeNode specNode = new JSVTreeNode(fileName, source, frames[i], jsvp, fileCount + "." + (i + 1));
       specNodes.add(specNode);
       spectraTreeModel.insertNodeInto(specNode, fileNode, fileNode
           .getChildCount());
@@ -1572,161 +1594,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     selectFrameNode(frames[0]);
   }
 
-
-  protected class JSVTreeNode extends DefaultMutableTreeNode {
-
-    private final static long serialVersionUID = 1L;
-
-    private JDXSource source;
-    private String fileName;
-    private JInternalFrame frame;
-    private JSVPanel jsvp;
-
-    private JSVTreeNode(String fileName, JDXSource source,
-        JInternalFrame frame, JSVPanel jsvp) {
-      super(fileName);
-      this.source = source;
-      this.fileName = fileName;
-      this.frame = frame;
-      this.jsvp = jsvp;
-    }
-
-    @Override
-    public String toString() {
-      return (frame == null ? fileName : frame.getTitle());
-    }
-
-  }
-  
-  /**
-   * Listener for a JInternalFrame
-   */
-  private class JSVInternalFrameListener extends InternalFrameAdapter {
-
-    JDXSource source;
-
-    /**
-     * Initialises a <code>JSVInternalFrameListener</code>
-     * 
-     * @param file
-     *        the name of the selected file
-     * @param source
-     *        current the JDXSource of the file
-     */
-    public JSVInternalFrameListener(JDXSource source) {
-      this.source = source;
-    }
-
-    /**
-     * Gets the selected JSVPanel and updates menus and button according to the
-     * panel's properties. Also sets the frame title to the current file name.
-     * 
-     * @param e
-     *        the InternalFrameEvent
-     */
-    @Override
-    public void internalFrameActivated(InternalFrameEvent e) {
-      JInternalFrame frame = e.getInternalFrame();
-      if (!frame.isVisible())
-        return;
-      setCurrentSource(source);
-
-      // Update the menu items for the display menu
-      JSVPanel jsvp = JSVPanel.getPanel0(frame);
-      JDXSpectrum spec = jsvp.getSpectrum();
-      gridCheckBoxMenuItem.setSelected(jsvp.isGridOn());
-      gridToggleButton.setSelected(jsvp.isGridOn());
-      coordsCheckBoxMenuItem.setSelected(jsvp.isCoordinatesOn());
-      coordsToggleButton.setSelected(jsvp.isCoordinatesOn());
-      revPlotCheckBoxMenuItem.setSelected(jsvp.isPlotReversed());
-      revPlotToggleButton.setSelected(jsvp.isPlotReversed());
-      scaleXCheckBoxMenuItem.setSelected(jsvp.isXScaleOn());
-      scaleYCheckBoxMenuItem.setSelected(jsvp.isYScaleOn());
-
-      if (jsvp.getNumberOfSpectra() > 1) {
-        overlaySplitButton.setIcon(splitIcon);
-        overlaySplitButton.setToolTipText("Split Display");
-        overlayKeyButton.setEnabled(true);
-        overlayKeyMenuItem.setEnabled(true);
-      } else {
-        overlaySplitButton.setIcon(overlayIcon);
-        overlaySplitButton.setToolTipText("Overlay Display");
-        overlayKeyButton.setEnabled(false);
-        overlayKeyMenuItem.setEnabled(false);
-      }
-
-      setMenuEnables(spec);
-      setCloseMenuItem(FileManager.getName(source.getFilePath()));
-      setTitle("JSpecView - " + source.getFilePath());
-      selectFrameNode(frame);
-    }
-
-    /**
-     * Called when <code>JInternalFrame</code> is closing
-     * 
-     * @param e
-     *        the InternalFrameEvent
-     */
-    @Override
-    public void internalFrameClosing(InternalFrameEvent e) {
-      final JInternalFrame frame = e.getInternalFrame();
-
-      doInternalFrameClosing(frame);
-    }
-
-    /**
-     * Called when <code>JInternalFrame</code> has opened
-     * 
-     * @param e
-     *        the InternalFrameEvent
-     */
-    @Override
-    public void internalFrameOpened(InternalFrameEvent e) {
-
-      spectraTree.validate();
-      spectraTree.repaint();
-    }
-  }
-
-  /**
-   * Tree Cell Renderer for the Spectra Tree
-   */
-  private class SpectraTreeCellRenderer extends DefaultTreeCellRenderer {
-    /**
-     * 
-     */
-    private final static long serialVersionUID = 1L;
-    JSVTreeNode node;
-
-    public SpectraTreeCellRenderer() {
-    }
-
-    @Override
-    public Component getTreeCellRendererComponent(JTree tree, Object value,
-                                                  boolean sel,
-                                                  boolean expanded,
-                                                  boolean leaf, int row,
-                                                  boolean hasFocus) {
-
-      super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row,
-          hasFocus);
-
-      node = (JSVTreeNode) value;
-      return this;
-    }
-
-    /**
-     * Returns a font depending on whether a frame is hidden
-     * 
-     * @return the tree node that is associated with an internal frame
-     */
-    @Override
-    public Font getFont() {
-      return new Font("Dialog", (node == null || node.frame == null
-          || node.frame.isVisible() ? Font.BOLD : Font.ITALIC), 12);
-    }
-
-  }
 
   /**
    * Shows a dialog with the message "Not Yet Implemented"
@@ -1771,6 +1638,14 @@ public class MainFrame extends JFrame implements DropTargetListener,
     return null;
   }
 
+  private JDXSpectrum findSpectrumById(String id) {
+    for (int i = specNodes.size(); --i >= 0;)
+      if (id.equals(specNodes.get(i).id))
+        return specNodes.get(i).jsvp.getSpectrum();
+     return null;
+  }
+
+  
   /**
    * Does the necessary actions and cleaning up when JInternalFrame closes
    * 
@@ -1921,7 +1796,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       StringTokenizer eachParam = new StringTokenizer(token);
       String key = ScriptParser.getKey(eachParam);
       ScriptToken st = ScriptToken.getScriptToken(key);
-      String value = ScriptParser.getValue(st, eachParam);
+      String value = ScriptParser.getValue(st, eachParam, token);
       System.out.println("KEY-> " + key + " VALUE-> " + value + " : " + st);
       try {
         switch (st) {
@@ -1957,6 +1832,9 @@ public class MainFrame extends JFrame implements DropTargetListener,
           if (jsvp != null)
             integrate(value);
           break;
+        case OVERLAY:
+          overlay(TextFormat.split(value, ","));
+          break;
         case GETSOLUTIONCOLOR:
           if (jsvp != null)
             setSolutionColor(true);
@@ -1984,6 +1862,20 @@ public class MainFrame extends JFrame implements DropTargetListener,
       }
     }
     repaint();
+  }
+
+  private void overlay(String[] ids) {
+    List<JDXSpectrum> list = new ArrayList<JDXSpectrum>();
+    StringBuffer sb = new StringBuffer();
+    for (int i = 0; i < ids.length; i++) {
+      JDXSpectrum spec = findSpectrumById(ids[i]);
+      if (spec == null)
+        continue;
+        list.add(spec);
+        sb.append(",").append(ids[i]);
+    }
+    if (list.size() > 1 && JDXSpectrum.areScalesCompatible(list))
+      openFile(null, sb.toString().substring(1), list);
   }
 
   private void setFrame(int i) {
@@ -2512,7 +2404,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    */
   protected void overlaySplitButton_actionPerformed(ActionEvent e) {
     if (((JButton) e.getSource()).getIcon() == overlayIcon) {
-      overlayMenuItem_actionPerformed(e);
+      overlayMenuItem_actionPerformed(e, true);
     } else {
       splitMenuItem_actionPerformed(e);
     }
@@ -2597,7 +2489,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     if (url == null)
       return;
     recentOpenURL = url;
-    openFile(null, url.indexOf("://") < 0 ? "file:/" + url : url);
+    openFile(null, url.indexOf("://") < 0 ? "file:/" + url : url, null);
   };
 
   protected void windowClosing_actionPerformed() {
@@ -2633,25 +2525,33 @@ public class MainFrame extends JFrame implements DropTargetListener,
    * @param e
    *        the ActionEvent
    */
-  protected void overlayMenuItem_actionPerformed(ActionEvent e) {
-    overlayMenuItem.setSelected(false);
-    if (currentSelectedSource == null || selectedJSVPanel == null) {
-      return;
-    }
-    if (!currentSelectedSource.isCompoundSource) {
-      writeStatus("Unable to Overlay, Incompatible source type");
-      return;
-    }
-    try {
-      if (JSpecViewUtils.areScalesCompatible(currentSelectedSource.getSpectra()
-          .toArray(new JDXSpectrum[] {}))) {
-        closeSource(currentSelectedSource);
-        overlaySpectra(currentSelectedSource);
-      } else {
-        showUnableToOverlayMessage();
+  protected void overlayMenuItem_actionPerformed(ActionEvent e, boolean isAll) {
+    if (isAll) {
+      overlayAllMenuItem.setSelected(false);
+      if (currentSelectedSource == null || selectedJSVPanel == null) {
+        return;
       }
-    } catch (Exception ex) {
-      splitSpectra(currentSelectedSource);
+      if (!currentSelectedSource.isCompoundSource) {
+        writeStatus("Unable to Overlay, Incompatible source type");
+        return;
+      }
+      if (currentSelectedSource.isOverlay()) {
+        closeSource(currentSelectedSource);
+        return;
+      }
+      try {
+        if (JDXSpectrum.areScalesCompatible(currentSelectedSource.getSpectra()
+            .toArray(new JDXSpectrum[] {}))) {
+          closeSource(currentSelectedSource);
+          overlaySpectra(currentSelectedSource, null);
+        } else {
+          showUnableToOverlayMessage();
+        }
+      } catch (Exception ex) {
+        splitSpectra(currentSelectedSource);
+      }
+    } else {
+      jsvpPopupMenu.overlay();
     }
   }
 
@@ -2696,7 +2596,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
       // STATUS --> Can't Split
     }
     closeSource(source);
-    splitSpectra(source);
+    if (!source.isOverlay())
+      splitSpectra(source);
   }
 
   /**
@@ -2757,5 +2658,163 @@ public class MainFrame extends JFrame implements DropTargetListener,
     jsvpPopupMenu.properties_actionPerformed(e);
 
   }
+
+  protected class JSVTreeNode extends DefaultMutableTreeNode {
+
+    private final static long serialVersionUID = 1L;
+
+    private JDXSource source;
+    private String fileName;
+    private JInternalFrame frame;
+    private JSVPanel jsvp;
+    private String id;
+
+    private JSVTreeNode(String fileName, JDXSource source,
+        JInternalFrame frame, JSVPanel jsvp, String id) {
+      super(fileName);
+      this.source = source;
+      this.fileName = fileName;
+      this.frame = frame;
+      this.jsvp = jsvp;
+      this.id = id;
+    }
+
+    @Override
+    public String toString() {
+      return ((id == null ? "" : id + ": ") + (frame == null ? fileName : frame.getTitle()));
+    }
+
+  }
+  
+  /**
+   * Listener for a JInternalFrame
+   */
+  private class JSVInternalFrameListener extends InternalFrameAdapter {
+
+    JDXSource source;
+
+    /**
+     * Initialises a <code>JSVInternalFrameListener</code>
+     * 
+     * @param file
+     *        the name of the selected file
+     * @param source
+     *        current the JDXSource of the file
+     */
+    public JSVInternalFrameListener(JDXSource source) {
+      this.source = source;
+    }
+
+    /**
+     * Gets the selected JSVPanel and updates menus and button according to the
+     * panel's properties. Also sets the frame title to the current file name.
+     * 
+     * @param e
+     *        the InternalFrameEvent
+     */
+    @Override
+    public void internalFrameActivated(InternalFrameEvent e) {
+      JInternalFrame frame = e.getInternalFrame();
+      if (!frame.isVisible())
+        return;
+      setCurrentSource(source);
+
+      // Update the menu items for the display menu
+      JSVPanel jsvp = JSVPanel.getPanel0(frame);
+      JDXSpectrum spec = jsvp.getSpectrum();
+      gridCheckBoxMenuItem.setSelected(jsvp.isGridOn());
+      gridToggleButton.setSelected(jsvp.isGridOn());
+      coordsCheckBoxMenuItem.setSelected(jsvp.isCoordinatesOn());
+      coordsToggleButton.setSelected(jsvp.isCoordinatesOn());
+      revPlotCheckBoxMenuItem.setSelected(jsvp.isPlotReversed());
+      revPlotToggleButton.setSelected(jsvp.isPlotReversed());
+      scaleXCheckBoxMenuItem.setSelected(jsvp.isXScaleOn());
+      scaleYCheckBoxMenuItem.setSelected(jsvp.isYScaleOn());
+
+      if (jsvp.getNumberOfSpectra() > 1) {
+        overlaySplitButton.setIcon(splitIcon);
+        overlaySplitButton.setToolTipText("Split Display");
+        overlayKeyButton.setEnabled(true);
+        overlayKeyMenuItem.setEnabled(true);
+      } else {
+        overlaySplitButton.setIcon(overlayIcon);
+        overlaySplitButton.setToolTipText("Overlay Display");
+        overlayKeyButton.setEnabled(false);
+        overlayKeyMenuItem.setEnabled(false);
+      }
+
+      setMenuEnables(spec);
+      setCloseMenuItem(FileManager.getName(source.getFilePath()));
+      setTitle("JSpecView - " + source.getFilePath());
+      selectFrameNode(frame);
+    }
+
+    /**
+     * Called when <code>JInternalFrame</code> is closing
+     * 
+     * @param e
+     *        the InternalFrameEvent
+     */
+    @Override
+    public void internalFrameClosing(InternalFrameEvent e) {
+      final JInternalFrame frame = e.getInternalFrame();
+
+      doInternalFrameClosing(frame);
+    }
+
+    /**
+     * Called when <code>JInternalFrame</code> has opened
+     * 
+     * @param e
+     *        the InternalFrameEvent
+     */
+    @Override
+    public void internalFrameOpened(InternalFrameEvent e) {
+
+      spectraTree.validate();
+      spectraTree.repaint();
+    }
+  }
+
+  /**
+   * Tree Cell Renderer for the Spectra Tree
+   */
+  private class SpectraTreeCellRenderer extends DefaultTreeCellRenderer {
+    /**
+     * 
+     */
+    private final static long serialVersionUID = 1L;
+    JSVTreeNode node;
+
+    public SpectraTreeCellRenderer() {
+    }
+
+    @Override
+    public Component getTreeCellRendererComponent(JTree tree, Object value,
+                                                  boolean sel,
+                                                  boolean expanded,
+                                                  boolean leaf, int row,
+                                                  boolean hasFocus) {
+
+      super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row,
+          hasFocus);
+
+      node = (JSVTreeNode) value;
+      return this;
+    }
+
+    /**
+     * Returns a font depending on whether a frame is hidden
+     * 
+     * @return the tree node that is associated with an internal frame
+     */
+    @Override
+    public Font getFont() {
+      return new Font("Dialog", (node == null || node.frame == null
+          || node.frame.isVisible() ? Font.BOLD : Font.ITALIC), 12);
+    }
+
+  }
+
 
 }

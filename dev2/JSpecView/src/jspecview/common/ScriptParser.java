@@ -2,37 +2,28 @@ package jspecview.common;
 
 import java.util.StringTokenizer;
 
+import jspecview.util.TextFormat;
+
 public class ScriptParser {
 
-  public static String getValue(ScriptToken st, StringTokenizer params) {
+  public static String getValue(ScriptToken st, StringTokenizer params, String token) {
     if (!params.hasMoreTokens())
       return "";
+    int pt;
     switch (st) {
     default:
       return nextStringToken(params);
+    case OVERLAY:
+      pt = token.indexOf(" ");
+      if (pt < 0)
+        return "";
+      return TextFormat.simpleReplace(token.substring(pt).trim(), " ", "");      
     case ZOOM:
       String x1 = nextStringToken(params);
-      if (x1.equalsIgnoreCase("out"))
+      pt = token.indexOf(" ");
+      if (pt < 0 || x1.equalsIgnoreCase("out"))
         return "0,0";
-      String x2 = null;
-      int pt = x1.indexOf(",");
-      if (pt >= 0) {
-        if (x1.endsWith(",")) {
-          x1 = x1.substring(0, x1.length() - 1);
-          x2 = nextStringToken(params);
-        } else {
-          x2 = x1.substring(pt + 1, x1.length());
-          x1 = x1.substring(0, pt);
-        }
-      } else {
-        x2 = nextStringToken(params);
-        if (x2.equals(",")) {
-          x2 = nextStringToken(params);
-        } else if (x2.startsWith(",")) {
-          x2 = x2.substring(1);
-        }
-      }
-      return x1 + "," + x2;
+      return TextFormat.simpleReplace(token.substring(pt).trim(), " ", "");
     }
   }
 
