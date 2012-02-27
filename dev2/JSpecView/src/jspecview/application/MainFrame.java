@@ -124,7 +124,6 @@ import jspecview.common.PeakPickedEvent;
 import jspecview.common.PeakPickedListener;
 import jspecview.common.PrintLayoutDialog;
 import jspecview.common.ScriptInterface;
-import jspecview.common.ScriptParser;
 import jspecview.common.ScriptToken;
 import jspecview.common.Coordinate;
 import jspecview.common.JDXSpectrum;
@@ -1785,9 +1784,9 @@ public class MainFrame extends JFrame implements DropTargetListener,
       String token = allParamTokens.nextToken();
       // now split the key/value pair
       StringTokenizer eachParam = new StringTokenizer(token);
-      String key = ScriptParser.getKey(eachParam);
+      String key = ScriptToken.getKey(eachParam);
       ScriptToken st = ScriptToken.getScriptToken(key);
-      String value = ScriptParser.getValue(st, eachParam, token);
+      String value = ScriptToken.getValue(st, eachParam, token);
       System.out.println("KEY-> " + key + " VALUE-> " + value + " : " + st);
       try {
         switch (st) {
