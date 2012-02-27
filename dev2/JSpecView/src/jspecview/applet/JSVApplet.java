@@ -139,7 +139,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
   private int endIndex = -1;
   private int spectrumNumber = -1; // blockNumber or nTupleNumber
   private int irMode = JDXSpectrum.TA_NO_CONVERT;
-  private Boolean autoIntegrate;
+  private boolean autoIntegrate;
   private int numberOfSpectra;
 
   private String theInterface = "single"; // either tab, tile, single, overlay
@@ -1483,6 +1483,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
           break;
         }
       } catch (Exception e) {
+        e.printStackTrace();
       }
     }
     repaint();
