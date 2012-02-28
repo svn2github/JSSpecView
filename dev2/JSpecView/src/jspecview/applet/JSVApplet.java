@@ -799,17 +799,14 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
    *        the name of the format to export in
    */
   protected void exportSpectrum(String command) {
-    final String comm = command;
     if (!isSignedApplet) {
-      System.out.println(export(0, comm, null));
+      System.out.println(export(0, command, null));
       // for now -- just send to output
       writeStatus("output sent to Java console");
       return;
     }
-    if (jFileChooser == null)
-      jFileChooser = new JFileChooser();
-    dirLastExported = selectedJSVPanel.exportSpectra(frame, jFileChooser, comm,
-        recentFileName, dirLastExported);
+    dirLastExported = selectedJSVPanel.exportSpectra(frame, jFileChooser,
+        command, recentFileName, dirLastExported);
   }
 
   private String export(int n, String comm, File file) {
