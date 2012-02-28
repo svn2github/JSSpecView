@@ -1527,7 +1527,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
       if (fileName == null || node.source.getFilePath().equals(fileName)) {
         for (Enumeration<JSVTreeNode> e = node.children(); e.hasMoreElements();) {
           JSVTreeNode childNode = e.nextElement();
-          System.out.println(childNode);
           toDelete.add(childNode);
           childNode.frame.dispose();
           specNodes.remove(childNode);
