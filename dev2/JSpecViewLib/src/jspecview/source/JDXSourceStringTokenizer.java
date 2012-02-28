@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.StringTokenizer;
 
-import jspecview.common.JSpecViewUtils;
+import jspecview.util.TextFormat;
 
 
 /**
@@ -85,7 +85,7 @@ public class JDXSourceStringTokenizer {
     String v = st.nextToken("##");
     // TODO:  Not testing here for NON jdx format?
     dataSet.setLength(0);
-    dataSet.append(l).append(v).append(JSpecViewUtils.newLine);
+    dataSet.append(l).append(v).append(TextFormat.newLine);
     StringReader stringReader = new StringReader(dataSet.toString());
     BufferedReader lineReader = new BufferedReader(stringReader);
 
@@ -122,7 +122,7 @@ public class JDXSourceStringTokenizer {
         // remove comments from the end of a line
         if(commentIndex != -1)
           line = line.substring(0, commentIndex).trim();
-        valueBuffer.append(line).append(JSpecViewUtils.newLine);
+        valueBuffer.append(line).append(TextFormat.newLine);
       }
     }
     catch (IOException ex) {

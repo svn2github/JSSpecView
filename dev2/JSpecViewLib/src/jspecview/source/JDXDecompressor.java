@@ -29,13 +29,13 @@ import java.io.IOException;
 import java.io.StringReader;
 
 import jspecview.common.Coordinate;
-import jspecview.common.JSpecViewUtils;
+import jspecview.util.Parser;
 
 /**
  * JDXDecompressor contains static methods to decompress the data part of
  * JCAMP-DX spectra that have been compressed using DIF, FIX, SQZ or PAC
  * formats. If you wish to parse the data from XY formats see
- * {@link jspecview.common.JSpecViewUtils#parseDSV(java.lang.String, double, double)}
+ * {@link jspecview.common.Coordinate#parseDSV(java.lang.String, double, double)}
  * 
  * @author Christopher Muir
  * @author Debbie-Ann Facey
@@ -136,7 +136,7 @@ public class JDXDecompressor {
   public JDXDecompressor(double xFactor, double yFactor,
       double lastX, double firstX, int nPoints, int lineNumber, String data) {
     this(data, firstX, xFactor, yFactor,
-        JSpecViewUtils.deltaX(lastX, firstX, nPoints), nPoints, lineNumber);
+        Coordinate.deltaX(lastX, firstX, nPoints), nPoints, lineNumber);
   }
 
   private Coordinate[] xyCoords;
@@ -446,7 +446,7 @@ public class JDXDecompressor {
   }
 
   private char skipTo(String delim) {
-    int pos = JSpecViewUtils.findOneOf(line.substring(ich), delim);
+    int pos = Parser.findOneOf(line.substring(ich), delim);
     if (pos < 0) {
       ich = lineLen;
       return '\0';

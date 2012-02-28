@@ -19,7 +19,9 @@
 
 package jspecview.common;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 
@@ -250,7 +252,7 @@ public class IntegralGraph implements Graph {
     double integral = 0;
     Coordinate[] xyCoords = graph.getXYCoords();
     //double minY = JSpecViewUtils.getMinY(xyCoords);
-    double maxY = JSpecViewUtils.getMaxY(xyCoords);
+    double maxY = Coordinate.getMaxY(xyCoords);
     double minYForIntegral = percentMinY / 100 * maxY; // 0.1%
     Vector<Coordinate> integralCoords = new Vector<Coordinate>();
 
@@ -300,6 +302,35 @@ public class IntegralGraph implements Graph {
     double y0 = xyCoords[xyCoords.length - 1].getYVal();
     double y1 = xyCoords[0].getYVal();
     return (y - y0) / (y1 - y0) * 100;
+  }
+
+  /**
+   * Parses integration ratios and x values from a string and returns them as
+   * <code>IntegrationRatio</code> objects
+   * 
+   * @param value
+   * @return ArrayList<IntegrationRatio> object representing integration ratios
+   */
+  public static ArrayList<IntegrationRatio> getIntegrationRatiosFromString(
+                                                                           String value) {
+    // split input into x-value/integral-value pairs
+    StringTokenizer allParamTokens = new StringTokenizer(value, ",");
+  
+    // create array list to return
+    ArrayList<IntegrationRatio> inputRatios = new ArrayList<IntegrationRatio>();
+  
+    while (allParamTokens.hasMoreTokens()) {
+      String token = allParamTokens.nextToken();
+      // now split the x-value/integral-value pair
+      StringTokenizer eachParam = new StringTokenizer(token, ":");
+      IntegrationRatio inputRatio = new IntegrationRatio();
+      inputRatio.setXVal(Double.parseDouble(eachParam.nextToken()));
+      inputRatio.setYVal(0.0);
+      inputRatio.setIntegralVal(Double.parseDouble(eachParam.nextToken()));
+      inputRatios.add(inputRatio);
+    }
+  
+    return inputRatios;
   }
 
 }

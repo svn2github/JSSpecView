@@ -26,6 +26,7 @@
 package jspecview.util;
 
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 
 public class TextFormat {
 
@@ -35,6 +36,11 @@ public class TextFormat {
       "0.0000", "0.00000", "0.000000", "0.0000000", "0.00000000", "0.000000000" };
 
   private final static Boolean[] useNumberLocalization = new Boolean[1];
+
+  /**
+   * The line separator for the system that the program is running on
+   */
+  public static final String newLine = System.getProperty("line.separator");
   {
     useNumberLocalization[0] = Boolean.TRUE;
   }
@@ -459,6 +465,15 @@ public class TextFormat {
         return false;
     }
     return true;
+  }
+
+  /**
+   * If the applet is used for teaching, then we may need to obscure the title of
+   * the spectrum
+   */
+  
+  public static DecimalFormat getDecimalFormat(String hash) {
+    return new DecimalFormat(hash, new DecimalFormatSymbols(java.util.Locale.US));
   }
   
   

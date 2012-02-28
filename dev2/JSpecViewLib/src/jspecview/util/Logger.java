@@ -300,4 +300,5 @@ public final class Logger {
       info(msg + ": " + (time) + " ms");
     return time;
   }
+
 }

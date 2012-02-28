@@ -23,33 +23,10 @@
  */
 package jspecview.util;
 
-import java.awt.Color;
 import java.util.Hashtable;
 import java.util.Map;
 
  public class ColorUtil {
-
-   /**
-    * Returns a <code>Color</code> from a string representation as a hex value or
-    * a delimiter separated rgb values. The following are all valid arguments:
-    * 
-    * <pre>
-    * "#ffffff"
-    * "#FFFFFF"
-    * "255 255 255"
-    * "255,255,255"
-    * "255;255;255"
-    * "255-255-255"
-    * "255.255.255"
-    * </pre>
-    * 
-    * @param string
-    *        the color as a string
-    * @return a <code>Color</code> from a string representation
-    */
-   public static Color getColorFromString(String strColor) {
-     return new Color(getArgbFromString(strColor.trim()));
-   }
 
   /**
    * accepts [xRRGGBB] or [0xRRGGBB] or [0xFFRRGGBB] or #RRGGBB or

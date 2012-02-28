@@ -26,6 +26,8 @@ package jspecview.common;
 
 import java.text.DecimalFormat;
 
+import jspecview.util.TextFormat;
+
 /**
  * The <code>IntegrationRatio</code> class stores the x and y values of an
  * integration ratio as well as its value.
@@ -39,7 +41,7 @@ public class IntegrationRatio extends Coordinate
     double integralVal = 0;
 	
 	/** the format of the string returned by getXString() and getYString() */
-    private DecimalFormat formatter = JSpecViewUtils.getDecimalFormat("0.########");
+    private DecimalFormat formatter = TextFormat.getDecimalFormat("0.########");
     
     /**
      * Constructor

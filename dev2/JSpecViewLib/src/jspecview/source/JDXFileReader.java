@@ -37,7 +37,6 @@ import java.util.StringTokenizer;
 import jspecview.common.JDXDataObject;
 import jspecview.common.JDXHeader;
 import jspecview.common.JDXSpectrum;
-import jspecview.common.JSpecViewUtils;
 import jspecview.common.PeakInfo;
 import jspecview.exception.JDXSourceException;
 import jspecview.exception.JSpecViewException;
@@ -75,20 +74,26 @@ public class JDXFileReader {
   private JDXSource source;
   private JDXSourceStringTokenizer t;
   private StringBuffer errorLog;
-
-  public static JDXSource createJDXSource(InputStream in) throws IOException,
-      JSpecViewException {
-    return createJDXSource(getContentFromInputStream(in), null, null);
+  private boolean obscure;
+  
+  private JDXFileReader (boolean obscure) {
+    this.obscure = obscure;
   }
 
-  public static JDXSource createJDXSource(String sourceContents)
+  public static JDXSource createJDXSource(InputStream in, boolean obscure) throws IOException,
+      JSpecViewException {
+    return createJDXSource(getContentFromInputStream(in), null, null, obscure);
+  }
+
+  public static JDXSource createJDXSource(String sourceContents, boolean obscure)
       throws IOException, JSpecViewException {
-    return createJDXSource(sourceContents, null, null);
+    return createJDXSource(sourceContents, null, null, obscure);
   }
 
   public static JDXSource createJDXSource(String sourceContents,
                                           String filePath,
-                                          URL appletDocumentBase)
+                                          URL appletDocumentBase,
+                                          boolean obscure)
       throws IOException, JSpecViewException {
 
     try {
@@ -102,7 +107,7 @@ public class JDXFileReader {
           return xmlSource;
         throw new JSpecViewException("File type not recognized");
       }
-      return (new JDXFileReader()).getJDXSource(sourceContents);
+      return (new JDXFileReader(obscure)).getJDXSource(sourceContents);
     } catch (JSpecViewException e) {
       throw new JSpecViewException("Error reading JDX format: "
           + e.getMessage());
@@ -166,7 +171,7 @@ public class JDXFileReader {
       if (label.equals("##NTUPLES"))
         return getNTupleSpectra(dataLDRTable, spectrum);
       if (JDXFileReader.readDataLabel(spectrum, label, t.value, errorLog,
-          dataLDRTable))
+          dataLDRTable, obscure))
         continue;
       if (Arrays.binarySearch(JDXFileReader.TABULAR_DATA_LABELS, label) > 0) {
         tabularDataLabelLineNo = t.labelLineNo;
@@ -216,7 +221,7 @@ public class JDXFileReader {
     boolean isNew = (source.type == JDXSource.TYPE_SIMPLE);
     while (t.hasMoreTokens() && t.nextToken()
         && !(label = cleanLabel(t.label)).equals("##TITLE"))
-      if (isNew && !readHeaderLabel(source, label, t.value, errorLog))
+      if (isNew && !readHeaderLabel(source, label, t.value, errorLog, obscure))
         addHeader(sourceLDRTable, t.label, t.value);
 
     // If ##TITLE not found throw Exception
@@ -233,7 +238,7 @@ public class JDXFileReader {
 
     JDXSpectrum spectrum = new JDXSpectrum();
     dataLDRTable = new ArrayList<String[]>();
-    readDataLabel(spectrum, label, t.value, errorLog, dataLDRTable);
+    readDataLabel(spectrum, label, t.value, errorLog, dataLDRTable, obscure);
 
     try {
       String tmp;
@@ -271,7 +276,7 @@ public class JDXFileReader {
           }
         }
 
-        if (readDataLabel(spectrum, label, t.value, errorLog, dataLDRTable))
+        if (readDataLabel(spectrum, label, t.value, errorLog, dataLDRTable, obscure))
           continue;
 
         if (Arrays.binarySearch(TABULAR_DATA_LABELS, label) > 0) {
@@ -510,9 +515,9 @@ public class JDXFileReader {
 
   private static boolean readDataLabel(JDXDataObject spectrum, String label,
                                        String value, StringBuffer errorLog,
-                                       List<String[]> table) {
+                                       List<String[]> table, boolean obscure) {
 
-    if (readHeaderLabel(spectrum, label, value, errorLog))
+    if (readHeaderLabel(spectrum, label, value, errorLog, obscure))
       return true;
 
     //    if (label.equals("##PATHLENGTH")) {
@@ -632,9 +637,10 @@ public class JDXFileReader {
   }
 
   private static boolean readHeaderLabel(JDXHeader jdxHeader, String label,
-                                         String value, StringBuffer errorLog) {
+                                         String value, StringBuffer errorLog, 
+                                         boolean obscure) {
     if (label.equals("##TITLE")) {
-      jdxHeader.title = (JSpecViewUtils.obscure || value == null
+      jdxHeader.title = (obscure || value == null
           || value.equals("") ? "Unknown" : value);
       return true;
     }
