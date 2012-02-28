@@ -1219,16 +1219,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
     } else {
       splitSpectra(currentSelectedSource);
     }
-
-    // ADD TO RECENT FILE PATHS
-    if (recentFilePaths.size() >= MAX_RECENT) {
-      recentFilePaths.remove(MAX_RECENT - 1);
-    }
-    if (!recentFilePaths.contains(filePath)) {
-      recentFilePaths.add(0, filePath);
-    }
     if (!isOverlay)
-      updateRecentMenus();
+      updateRecentMenus(filePath);
     return FILE_OPEN_OK;
   }
   
@@ -1245,7 +1237,13 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
   }
 
-  private void updateRecentMenus() {
+  private void updateRecentMenus(String filePath) {
+
+    // ADD TO RECENT FILE PATHS
+    if (recentFilePaths.size() >= MAX_RECENT)
+      recentFilePaths.remove(MAX_RECENT - 1);
+    if (!recentFilePaths.contains(filePath))
+      recentFilePaths.add(0, filePath);
     String filePaths = "";
     JMenuItem menuItem;
     openRecentMenu.removeAll();
@@ -1522,20 +1520,26 @@ public class MainFrame extends JFrame implements DropTargetListener,
   public void closeSource(JDXSource source) {
     // Remove nodes and dispose of frames
     String fileName = (source == null ? null : source.getFilePath());
+    List<JSVTreeNode> toDelete = new ArrayList<JSVTreeNode>();
     Enumeration<JSVTreeNode> enume = rootNode.children();
     while (enume.hasMoreElements()) {
       JSVTreeNode node = enume.nextElement();
       if (fileName == null || node.source.getFilePath().equals(fileName)) {
         for (Enumeration<JSVTreeNode> e = node.children(); e.hasMoreElements();) {
           JSVTreeNode childNode = e.nextElement();
+          System.out.println(childNode);
+          toDelete.add(childNode);
           childNode.frame.dispose();
           specNodes.remove(childNode);
         }
-        spectraTreeModel.removeNodeFromParent(node);
-        break;
+        toDelete.add(node);
+        if (fileName != null)
+          break;
       }
     }
 
+    for (int i = 0; i < toDelete.size(); i++)
+      spectraTreeModel.removeNodeFromParent(toDelete.get(i));
     selectedJSVPanel = null;
     if (source != null) {
       List<JDXSpectrum> spectra = source.getSpectra();
