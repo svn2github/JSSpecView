@@ -17,7 +17,6 @@ import jspecview.android.PreferencesManager;
 import jspecview.common.Coordinate;
 import jspecview.common.IntegralGraph;
 import jspecview.common.JDXSpectrum;
-import jspecview.common.JSpecViewUtils;
 import jspecview.exception.JSpecViewException;
 import jspecview.source.JDXFileReader;
 import jspecview.source.JDXSource;
@@ -564,9 +563,9 @@ public class MainActivity extends Activity{
     		integralOffsetEditText.setText(String.valueOf(mIntegrationOffset));    		
     	}    	
     	else{
-    		minimumYEditText.setText(String.valueOf(JSpecViewUtils.integralMinY));
-    		integralFactorEditText.setText(String.valueOf(JSpecViewUtils.integralFactor));
-    		integralOffsetEditText.setText(String.valueOf(JSpecViewUtils.integralOffset)); 
+    		minimumYEditText.setText("0.1");
+    		integralFactorEditText.setText("50");
+    		integralOffsetEditText.setText("30"); 
     	}	
     	
     	mIntegrateDialog = dialog;
@@ -628,7 +627,7 @@ public class MainActivity extends Activity{
      * @throws IOException
      */
 	private List<JDXSpectrum> readSpectrum(InputStream stream) throws IOException, JSpecViewException {		                
-		JDXSource source = JDXFileReader.createJDXSource(stream);             	
+		JDXSource source = JDXFileReader.createJDXSource(stream, false);             	
     	JDXSource jdxSource = (JDXSource)source;
     	List<JDXSpectrum> jdxSpectra = jdxSource.getSpectra();        	
     	return jdxSpectra;   
