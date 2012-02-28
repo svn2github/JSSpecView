@@ -43,7 +43,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -126,8 +125,6 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
   }
 
   /* --------------------set default-PARAMETERS -------------------------*/
-  private String filePath;
-  private String newFilePath = null;
   private String recentFileName = "";
   private String recentURL = "";
 
@@ -154,8 +151,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
 
   private boolean isSignedApplet = false;
   private boolean isStandalone = false;
-  private JPanel statusPanel = new JPanel();
-  private JLabel statusTextLabel = new JLabel();
+  //private JPanel statusPanel = new JPanel();
+  //private JLabel statusTextLabel = new JLabel();
   private JFileChooser jFileChooser;
   private JSVPanel selectedJSVPanel;
   private JSVAppletPopupMenu appletPopupMenu;
@@ -175,13 +172,6 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     }
     System.out.println("JSVApplet " + this + " destroy 2");
   }
-
-  private boolean newFile = false;
-
-  /**
-   * parameters from a javascript call
-   */
-  private String JSVparams;
 
   /**
    * The panes of a tabbed display
@@ -241,67 +231,57 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
   private String appletID;
   private String syncID;
 
+  private Thread commandWatcherThread;
+
   /**
    * Initializes applet with parameters and load the <code>JDXSource</code>
    */
   @Override
   public void init() {
-    JSVparams = getParameter("script");
-    init(null);
+    try {
+      jFileChooser = new JFileChooser();
+      isSignedApplet = true;
+      commandWatcherThread = new Thread(new CommandWatcher());
+      commandWatcherThread.setName("CommmandWatcherThread");
+      commandWatcherThread.start();
+    } catch (Exception e) {
+      // just not a signed applet
+      //e.printStackTrace();
+    }
+    initParams(getParameter("script"));
     if (appletReadyCallbackFunctionName != null && fullName != null)
       callToJavaScript(appletReadyCallbackFunctionName, new Object[] {
           appletID, fullName, Boolean.TRUE });
   }
 
-  private void init(String data) {
-    // this is tricky
-    String execScript = null;
-    if (data != null) {
-      // have string data
-    } else if (!newFile) {
-      parseInitScript(execScript = JSVparams);
-    } else if (newFilePath != null) {
-        filePath = newFilePath;
-    }
-    // enable or disable menus
-    appletPopupMenu = new JSVAppletPopupMenu(this, isSignedApplet);
-    appletPopupMenu.enableMenus(allowMenu, enableZoom);
-    //setBackground(backgroundColor);
-
-    try {
-      jbInit();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    appletPanel = new JPanel(new BorderLayout());
-    Font statusFont = new Font(null, Font.PLAIN, 12);
-    statusTextLabel.setFont(statusFont);
-    statusTextLabel.setForeground(Color.darkGray);
-    statusPanel.add(statusTextLabel, null);
-    this.getContentPane().add(appletPanel);
-    if (execScript == null)
-      openDataOrFile(data, null, null);
-    else
-      checkScriptNow(execScript);
-  }
-
   /**
-   * Initializes the applet's GUI components
+   * starts or restarts applet display from scratch
+   * or from a JSVApplet.script() JavaScript command
    * 
-   * @throws Exception
+   * Involves a two-pass sequence through parsing the 
+   * parameters, because order is not important in this
+   * sort of call. 
+   * 
+   * To call a script and have commands execute in order, use 
+   * 
+   *   JSVApplet.runScript(script)
+   * 
+   * instead
+   * 
+   * @param params
    */
-  private void jbInit() throws Exception {
-    try {
-      jFileChooser = new JFileChooser();
-      isSignedApplet = true;
-      startCommandThread();
-    } catch (SecurityException se) {
-      //System.err.println("Export menu disabled:
-      //You need the signed Applet to export files");
-    }
-
-    statusTextLabel.setText("Loading...");
-
+  private void initParams(String params) {
+    parseInitScript(params);
+    newAppletPanel();
+    appletPopupMenu = new JSVAppletPopupMenu(this, isSignedApplet, allowMenu,
+        enableZoom);
+    runScriptNow(params);
+  }
+  
+  private void newAppletPanel() {
+    getContentPane().removeAll();
+    appletPanel = new JPanel(new BorderLayout());
+    getContentPane().add(appletPanel);
   }
 
   /**
@@ -312,16 +292,6 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
   @Override
   public String getAppletInfo() {
     return "JSpecView Applet " + APPLET_VERSION;
-  }
-
-  /**
-   * Returns null
-   * 
-   * @return null
-   */
-  @Override
-  public String[][] getParameterInfo() {
-    return null;
   }
 
   /**
@@ -579,7 +549,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
    *        the message
    */
   public void writeStatus(String msg) {
-    statusTextLabel.setText(msg);
+    System.out.println("writeStatus: " + msg);
+    //statusTextLabel.setText(msg);
   }
 
   /**
@@ -835,6 +806,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
       writeStatus("output sent to Java console");
       return;
     }
+    if (jFileChooser == null)
+      jFileChooser = new JFileChooser();
     dirLastExported = selectedJSVPanel.exportSpectra(frame, jFileChooser, comm,
         recentFileName, dirLastExported);
   }
@@ -1028,9 +1001,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
    * @param newJSVparams
    *        String
    */
-  public void script(String newJSVparams) {
-    JSVparams = newJSVparams;
-    init(null);
+  public void script(String params) {
+    initParams(params);
   }
 
   /**
@@ -1066,7 +1038,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
 
   public void setFilePath(String tmpFilePath) {
     if (isSignedApplet)
-      scriptQueue.add("load " + tmpFilePath);
+      runScript("load " + tmpFilePath);
     else
       setFilePathLocal(tmpFilePath);
   }
@@ -1077,12 +1049,9 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
    * @param tmpFilePath
    *        String
    */
-  private void setFilePathLocal(String tmpFilePath) {
-    getContentPane().removeAll();
-    appletPanel.removeAll();
-    newFilePath = tmpFilePath;
-    newFile = true;
-    init(null);
+  private void setFilePathLocal(String filePath) {
+    newAppletPanel();
+    openDataOrFile(null, null, null, filePath);
     getContentPane().validate();
     appletPanel.validate();
   }
@@ -1094,11 +1063,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
    *        String
    */
   public void loadInline(String data) {
-    getContentPane().removeAll();
-    appletPanel.removeAll();
-    newFilePath = null;
-    newFile = false;
-    init(data);
+    newAppletPanel();
+    openDataOrFile(data, null, null, null);
     getContentPane().validate();
     appletPanel.validate();
   }
@@ -1271,16 +1237,9 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     }
   }
 
-  private void startCommandThread() {
-    commandWatcherThread = new Thread(new CommandWatcher());
-    commandWatcherThread.setName("CommmandWatcherThread");
-    commandWatcherThread.start();
-  }
-
   // for the signed applet to load a remote file, it must
   // be using a thread started by the initiating thread;
   private List<String> scriptQueue = new ArrayList<String>();
-  private Thread commandWatcherThread;
 
   private class CommandWatcher implements Runnable {
     public void run() {
@@ -1293,9 +1252,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
             if (scriptQueue.size() > 0) {
               String scriptItem = scriptQueue.remove(0);
               System.out.println("executing " + scriptItem);
-              if (scriptItem != null) {
-                checkScriptNow(scriptItem);
-              }
+              if (scriptItem != null)
+                runScriptNow(scriptItem);
             }
           }
         } catch (InterruptedException ie) {
@@ -1323,7 +1281,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
         commandWatcherThread.interrupt();
     }
   */
-  private void openDataOrFile(String data, String name, List<JDXSpectrum> specs1) {
+  private void openDataOrFile(String data, String name, List<JDXSpectrum> specs1, String filePath) {
     appletPanel.removeAll();
     String fileName = null;
     URL base = null;
@@ -1406,16 +1364,15 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
       appletPopupMenu.transAbsMenuItem.setEnabled(false);
     appletPopupMenu.exportAsMenu.setEnabled(true);
     appletPopupMenu.saveAsJDXMenu.setEnabled(continuous);
-    newFile = false;
   }
 
   /////////// simple sync functionality //////////
 
-  public void checkScriptNow(String params) {
+  public void runScriptNow(String params) {
     if (params == null)
       params = "";
     params = params.trim();
-    System.out.println("CHECKSCRIPT " + params);
+    System.out.println("RUNSCRIPT " + params);
     StringTokenizer allParamTokens = new StringTokenizer(params, ";");
     if (JSpecViewUtils.DEBUG) {
       System.out.println("Running in DEBUG mode");
@@ -1436,8 +1393,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
           break;
         case LOAD:
           specsSaved = null;
-          filePath = value;
-          openDataOrFile(null, null, null);
+          openDataOrFile(null, null, null, value);
           setSpectrumNumber(1);
           break;
         default:
@@ -1503,12 +1459,12 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     if (specsSaved == null)
       specsSaved = specs;
     if (ids.length == 0 || ids.length == 1 && ids[0].equalsIgnoreCase("all")) {
-      openDataOrFile(null, "", specsSaved);
+      openDataOrFile(null, "", specsSaved, null);
       setSpectrumNumber(1);
       return;
     }
     if (ids.length == 1 && ids[0].equalsIgnoreCase("none")) {
-      openDataOrFile(null, "NONE", specsSaved);
+      openDataOrFile(null, "NONE", specsSaved, null);
       setSpectrumNumber(1);
       return;
     }
@@ -1522,7 +1478,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
         sb.append(",").append(ids[i]);
     }
     if (list.size() > 1 && JDXSpectrum.areScalesCompatible(list)) {
-      openDataOrFile(null, sb.toString().substring(1), list);
+      openDataOrFile(null, sb.toString().substring(1), list, null);
       setSpectrumNumber(1);
     }
   }
@@ -1538,7 +1494,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
    */
   public void syncScript(String script) {
     if (script.indexOf("<PeakData") < 0) {
-      checkScript(script);
+      runScript(script);
       return;
     }
     String file = Parser.getQuotedAttribute(script, "file");
@@ -1561,8 +1517,11 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     sendFrameChange(selectedJSVPanel);
   }
 
-  public void checkScript(String script) {
-    scriptQueue.add(script);
+  public void runScript(String script) {
+    if (isSignedApplet)
+      scriptQueue.add(script);
+    else
+      runScriptNow(script);
   }
   
   private boolean selectPanel(String index) {

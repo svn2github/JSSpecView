@@ -1,6 +1,6 @@
 package jspecview.common;
 
 public interface ScriptInterface {
-  public void checkScript(String script);
+  public void runScript(String script);
 
 }

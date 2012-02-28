@@ -643,7 +643,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     if (args.length > 0) {
       // check for command-line arguments
       if (args.length == 2 && args[0].equalsIgnoreCase("-script"))
-        frame.checkScript(args[1]);
+        frame.runScript(args[1]);
       else
         for (int i = 0; i < args.length; i++) {
           System.out.println("JSpecView is attempting to open " + args[i]);
@@ -1757,7 +1757,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    */
   public void syncScript(String script) {
     if (script.indexOf("<PeakData") < 0) {
-      checkScript(script);
+      runScript(script);
       return;
     }
     String file = Parser.getQuotedAttribute(script, "file");
@@ -1773,7 +1773,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     sendFrameChange(selectedJSVPanel);
   }
 
-  public void checkScript(String params) {
+  public void runScript(String params) {
     if (params == null)
       params = "";
     params = params.trim();

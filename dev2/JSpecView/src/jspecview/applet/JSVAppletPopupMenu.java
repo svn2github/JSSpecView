@@ -17,13 +17,21 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
 
   private JSVApplet applet;
 
-  JSVAppletPopupMenu(JSVApplet applet, boolean isSigned) {
+  JSVAppletPopupMenu(JSVApplet applet, boolean isSigned, 
+      boolean allowMenu, boolean enableZoom) {
     super(applet);
     isApplet = true;
     this.isSigned = isSigned;
     this.applet = applet;
     recentOverlay = "none";
-    initialize();
+    super.jbInit();
+    if (!allowMenu) {
+      viewMenu.setEnabled(false);
+      fileMenu.setEnabled(false);
+      exportAsMenu.setEnabled(false);
+      saveAsMenu.setEnabled(false);
+    }
+    zoomMenu.setEnabled(enableZoom);
   }
 
   private ActionListener actionListener = new ActionListener() {
@@ -49,22 +57,9 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
   JMenuItem overlayKeyMenuItem = new JMenuItem();
 
   protected void jbInit() {
-    // handled later, by initialize();
+    // handled later
   }
 
-  void initialize() {
-    super.jbInit();
-  }
-  public void enableMenus(boolean menuOn, boolean enableZoom) {
-    if (!menuOn) {
-      viewMenu.setEnabled(false);
-      fileMenu.setEnabled(false);
-      exportAsMenu.setEnabled(false);
-      saveAsMenu.setEnabled(false);
-    }
-    zoomMenu.setEnabled(enableZoom);
-  }
-  
   protected void setMenu() {
     aboutMenu.setText("About");
 

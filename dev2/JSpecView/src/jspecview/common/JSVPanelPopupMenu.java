@@ -324,7 +324,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
     if (zoom == null)
       return;
     recentZoom = zoom;
-    scripter.checkScript("zoom " + zoom);
+    scripter.runScript("zoom " + zoom);
   }
 
   private String recentScript;
@@ -336,7 +336,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
     if (script == null)
       return;
     recentScript = script;
-    scripter.checkScript(script);
+    scripter.runScript(script);
   }
 
   public static void setMenuItem(JMenuItem item, char c, String text,
@@ -361,19 +361,19 @@ public class JSVPanelPopupMenu extends JPopupMenu {
         integrateCheckBoxMenuItem, 'I', "Integrate HNMR", 0, 0,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            scripter.checkScript("INTEGRATE ?");
+            scripter.runScript("INTEGRATE ?");
           }
         });
         setMenuItem(
         transAbsMenuItem, '\0', "Transmittance/Absorbance", 0, 0, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            scripter.checkScript("IRMODE IMPLIED");
+            scripter.runScript("IRMODE IMPLIED");
           }
         });
         setMenuItem(
         solColMenuItem, '\0', "Predicted Solution Colour", 0, 0, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            scripter.checkScript("GETSOLUTIONCOLOR");
+            scripter.runScript("GETSOLUTIONCOLOR");
           }
         });
   }
@@ -387,7 +387,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
     if (script == null)
       return;
     recentOverlay = script;
-    scripter.checkScript("overlay " + script);
+    scripter.runScript("overlay " + script);
   }
 
 }
