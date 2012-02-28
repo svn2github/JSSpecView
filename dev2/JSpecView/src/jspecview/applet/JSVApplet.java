@@ -1198,7 +1198,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
       System.out.println("Running in DEBUG mode");
     }
     while (allParamTokens.hasMoreTokens()) {
-      String token = allParamTokens.nextToken();
+      String token = allParamTokens.nextToken().trim();
       // now split the key/value pair
       StringTokenizer eachParam = new StringTokenizer(token);
       String key = eachParam.nextToken();
@@ -1422,7 +1422,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     }
     JSVPanel jsvp = selectedJSVPanel;
     while (allParamTokens.hasMoreTokens()) {
-      String token = allParamTokens.nextToken();
+      String token = allParamTokens.nextToken().trim();
       // now split the key/value pair
       StringTokenizer eachParam = new StringTokenizer(token);
       String key = ScriptToken.getKey(eachParam);
