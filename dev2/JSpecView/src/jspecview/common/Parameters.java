@@ -8,8 +8,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
-import jspecview.common.JSpecViewUtils;
-import jspecview.util.ColorUtil;
+import jspecview.util.Logger;
 import jspecview.util.TextFormat;
 
 public class Parameters extends DisplayScheme {
@@ -35,14 +34,16 @@ public class Parameters extends DisplayScheme {
   private boolean titleBoldOn = false;
 
 
-  // specific to parmaters?
   public boolean coordinatesOn = true;
   public boolean gridOn = true;
   public boolean xScaleOn = true;
   public boolean yScaleOn = true;
   boolean xUnitsOn = true;
   boolean yUnitsOn = true;
-  
+
+  public double integralMinY = 0.1;
+  public double integralFactor = 50;
+  public double integralOffset = 30;
 
   public void setFor(JSVPanel jsvp, DisplayScheme ds, boolean includeMeasures) {
     
@@ -73,7 +74,7 @@ public class Parameters extends DisplayScheme {
     default:
       return;
     case DEBUG:
-      JSpecViewUtils.DEBUG = parseBoolean(value);
+      Logger.debugging = parseBoolean(value);
       return;
     case PLOTCOLORS:
       plotColorsStr = value;
@@ -176,7 +177,7 @@ public class Parameters extends DisplayScheme {
   }
 
   private Color setColor(String element, String value) {
-    return setColor(element, ColorUtil.getColorFromString(value));
+    return setColor(element, AppUtils.getColorFromString(value));
   }
 
   /**

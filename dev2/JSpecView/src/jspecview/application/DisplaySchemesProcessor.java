@@ -32,9 +32,8 @@ import java.util.TreeMap;
 
 import jspecview.common.AppUtils;
 import jspecview.common.DisplayScheme;
-import jspecview.common.JSpecViewUtils;
-import jspecview.util.ColorUtil;
 import jspecview.util.SimpleXmlReader;
+import jspecview.util.TextFormat;
 
 /**
  * <code>DisplaySchemesProcessor</code> loads and saves the display schemes of
@@ -220,7 +219,7 @@ public class DisplaySchemesProcessor {
   private Color getColor(){
     String value = reader.getAttrValueLC("hex");
     return (value.length() == 0 || value.equals("default") ? null
-        : ColorUtil.getColorFromString(value));
+        : AppUtils.getColorFromString(value));
   }
 
   /**
@@ -287,8 +286,8 @@ public class DisplaySchemesProcessor {
     buffer.flush();
 
     StringBuffer outBuffer = new StringBuffer();
-    outBuffer.append("<?xml version=\"1.0\"?>" + JSpecViewUtils.newLine);
-    outBuffer.append("<displaySchemes default=\""+ defaultDSName +"\">" + JSpecViewUtils.newLine);
+    outBuffer.append("<?xml version=\"1.0\"?>" + TextFormat.newLine);
+    outBuffer.append("<displaySchemes default=\""+ defaultDSName +"\">" + TextFormat.newLine);
     outBuffer.append(sw.getBuffer());
 
     writer.write(outBuffer.toString());

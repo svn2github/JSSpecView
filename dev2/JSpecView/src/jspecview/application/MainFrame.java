@@ -127,14 +127,13 @@ import jspecview.common.ScriptInterface;
 import jspecview.common.ScriptToken;
 import jspecview.common.Coordinate;
 import jspecview.common.JDXSpectrum;
-import jspecview.common.JSpecViewUtils;
 import jspecview.common.PeakInfo;
 import jspecview.exception.ScalesIncompatibleException;
 import jspecview.source.JDXFileReader;
 import jspecview.source.JDXSource;
-import jspecview.util.ColorUtil;
 import jspecview.util.Escape;
 import jspecview.util.FileManager;
+import jspecview.util.Logger;
 import jspecview.util.Parser;
 import jspecview.util.TextFormat;
 
@@ -452,7 +451,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
     setApplicationProperties(true);
     tempDS = defaultDisplaySchemeName;
-    fc = (JSpecViewUtils.DEBUG ? new JFileChooser("C:/temp")
+    fc = (Logger.debugging ? new JFileChooser("C:/temp")
         : useDirLastOpened ? new JFileChooser(dirLastOpened)
             : new JFileChooser());
 
@@ -549,14 +548,15 @@ public class MainFrame extends JFrame implements DropTargetListener,
     try {
       autoIntegrate = Boolean.parseBoolean(
           properties.getProperty("automaticallyIntegrate"));
-      JSpecViewUtils.integralMinY = Double.parseDouble(properties
+      parameters.integralMinY = Double.parseDouble(properties
           .getProperty("integralMinY"));
-      JSpecViewUtils.integralFactor = Double.parseDouble(properties
+      parameters.integralFactor = Double.parseDouble(properties
           .getProperty("integralFactor"));
-      JSpecViewUtils.integralOffset = Double.parseDouble(properties
+      parameters.integralOffset = Double.parseDouble(properties
           .getProperty("integralOffset"));
-      AppUtils.integralPlotColor = ColorUtil.getColorFromString(properties
-          .getProperty("integralPlotColor"));
+      parameters.set(null, 
+          ScriptToken.INTEGRALPLOTCOLOR, 
+          properties.getProperty("integralPlotColor"));
     } catch (Exception e) {
       // bad property value
     }
@@ -1184,7 +1184,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     }
     try {
       setCurrentSource(isOverlay ? JDXSource.createOverlay(url, specs) 
-          : JDXFileReader.createJDXSource(null, filePath, null));
+          : JDXFileReader.createJDXSource(null, filePath, null, false));
     } catch (Exception e) {
       e.printStackTrace();
       writeStatus(e.getMessage());
@@ -1209,7 +1209,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
     specs = currentSelectedSource.getSpectra();
     boolean overlay = isOverlay || autoOverlay && currentSelectedSource.isCompoundSource;
-    overlay &= !JDXSpectrum.process(specs, irMode, !isOverlay && autoIntegrate);
+    overlay &= !JDXSpectrum.process(specs, irMode, !isOverlay && autoIntegrate, 
+        parameters.integralMinY, parameters.integralOffset, parameters.integralFactor);
     if (overlay) {
       try {
         overlaySpectra(currentSelectedSource, (isOverlay ? url : null));
@@ -1467,7 +1468,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
         : JDXSpectrum.INTEGRATE_ON);
     JSVTreeNode node = findNode(selectedJSVPanel);
     JSVPanel jsvpNew = AppUtils.checkIntegral(selectedJSVPanel, node.frame,
-        mode, showMessage, null);
+        mode, showMessage, null, parameters);
     if (jsvpNew == selectedJSVPanel)
       return;
     setJSVPanelProperties(jsvpNew, true);
@@ -1779,7 +1780,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     params = params.trim();
     System.out.println("CHECKSCRIPT " + params);
     StringTokenizer allParamTokens = new StringTokenizer(params, ";");
-    if (JSpecViewUtils.DEBUG) {
+    if (Logger.debugging) {
       System.out.println("Running in DEBUG mode");
     }
     JSVPanel jsvp = selectedJSVPanel;
@@ -2173,7 +2174,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     if (fc == null)
       return;
 
-    if (JSpecViewUtils.DEBUG) {
+    if (Logger.debugging) {
       fc.setCurrentDirectory(new File("C:\\JCAMPDX"));
     } else if (useDirLastExported) {
       fc.setCurrentDirectory(new File(dirLastExported));

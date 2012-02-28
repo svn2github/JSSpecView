@@ -62,8 +62,6 @@ import jspecview.common.JSVPanel;
 import jspecview.exception.JSpecViewException;
 import jspecview.source.JDXFileReader;
 import jspecview.source.JDXSource;
-import jspecview.util.ColorUtil;
-
 import java.awt.Font;
 import javax.swing.UIManager;
 import javax.swing.JSeparator;
@@ -635,44 +633,44 @@ public class PreferencesDialog extends JDialog {
   /**
    * Initialise the Display Tab, where display schemes are created or set
    */
-  private void initDisplayTab(){
+  private void initDisplayTab() {
     TreeMap<String, DisplayScheme> displaySchemes = dsp.getDisplaySchemes();
 
     defaultDSName = preferences.getProperty("defaultDisplaySchemeName");
 
     // load names of schemes in schemeComboBox
-    for (String key: displaySchemes.keySet())
+    for (String key : displaySchemes.keySet())
       schemeComboBox.addItem(key);
 
     // load names of fonts in fontComboBox
     GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
     String allFontNames[] = ge.getAvailableFontFamilyNames();
-    for(int i = 0; i < allFontNames.length; i++)
+    for (int i = 0; i < allFontNames.length; i++)
       fontComboBox.addItem(allFontNames[i]);
 
     schemeComboBox.setSelectedItem(defaultDSName);
-    
+
     // init preview panel
     try {
-      JDXSource source = JDXFileReader.createJDXSource(getClass().getResourceAsStream("resources/sample.jdx"));
+      JDXSource source = JDXFileReader.createJDXSource(getClass()
+          .getResourceAsStream("resources/sample.jdx"), false);
 
       previewPanel = new JSVPanel(source.getSpectra());
       previewPanel.setZoomEnabled(false);
       previewPanel.setCoordinatesOn(true);
       previewPanel.setGridOn(true);
-    }
-    catch (IOException ioe) {
+    } catch (IOException ioe) {
       ioe.printStackTrace();
       return;
-    }
-    catch (JSpecViewException ex) {
+    } catch (JSpecViewException ex) {
       ex.printStackTrace();
     }
 
-    if(previewPanel != null)
+    if (previewPanel != null)
       displayPanel.add(previewPanel, BorderLayout.CENTER);
-    else{
-      displayPanel.add(new JButton("Error Loading Sample File!"), BorderLayout.CENTER);
+    else {
+      displayPanel.add(new JButton("Error Loading Sample File!"),
+          BorderLayout.CENTER);
     }
 
     schemeComboBox.setSelectedItem(currentDS.getName());
@@ -691,7 +689,7 @@ public class PreferencesDialog extends JDialog {
     integFactorTextField.setText(preferences.getProperty("integralFactor"));
     integOffsetTextField.setText(preferences.getProperty("integralOffset"));
     plotColorButton.setBackground(
-        ColorUtil.getColorFromString(preferences.getProperty("integralPlotColor")));
+        AppUtils.getColorFromString(preferences.getProperty("integralPlotColor")));
     autoIntegrateCheckBox.setSelected(
        Boolean.parseBoolean(preferences.getProperty("automaticallyIntegrate")));
     String autoConvert =

@@ -25,8 +25,8 @@ import java.util.Arrays;
 
 import jspecview.common.Coordinate;
 import jspecview.common.JDXSpectrum;
-import jspecview.common.JSpecViewUtils;
 import jspecview.source.JDXFileReader;
+import jspecview.util.TextFormat;
 
 /**
  * class <code>JDXExporter</code> contains static methods for exporting a
@@ -39,6 +39,12 @@ import jspecview.source.JDXFileReader;
  */
 
 class JDXExporter {
+
+  /**
+   * The factor divisor used in compressing spectral data in one of DIF, SQZ,
+   * PAC and FIX formats
+   */
+  private static final double FACTOR_DIVISOR = 1000000;
 
   /**
    * Exports spectrum in X,Y format
@@ -87,15 +93,15 @@ class JDXExporter {
       newXYCoords = new Coordinate[xyCoords.length];
       for (int i = 0; i < xyCoords.length; i++)
         newXYCoords[i] = xyCoords[i].copy();
-      JSpecViewUtils.applyScale(newXYCoords, spectrum.getObservedFreq(), 1);
+      Coordinate.applyScale(newXYCoords, spectrum.getObservedFreq(), 1);
     }
 
     if (type != Exporter.XY) {
       //xCompFactor = JSpecViewUtils.getXFactorForCompression(newXYCoords,
         //  startIndex, endIndex);
       if (type != Exporter.PAC)
-        yCompFactor = JSpecViewUtils.getYFactorForCompression(newXYCoords,
-          startIndex, endIndex);
+        yCompFactor = getYFactorForCompression(newXYCoords,
+          startIndex, endIndex, FACTOR_DIVISOR);
     } else {
       if (spectrum.isContinuous())
         tmpDataClass = "XYDATA";
@@ -122,7 +128,7 @@ class JDXExporter {
           xCompFactor, yCompFactor);
       break;
     case Exporter.XY:
-      tabDataSet = JSpecViewUtils.coordinatesToString(newXYCoords, startIndex,
+      tabDataSet = Coordinate.coordinatesToString(newXYCoords, startIndex,
           endIndex, 1);
       break;
     }
@@ -134,12 +140,66 @@ class JDXExporter {
     buffer.append(spectrum.getHeaderString(tmpDataClass, xCompFactor,
         yCompFactor, startIndex, endIndex));
     buffer
-        .append("##" + tmpDataClass + "= " + varList + JSpecViewUtils.newLine);
+        .append("##" + tmpDataClass + "= " + varList + TextFormat.newLine);
     buffer.append(tabDataSet);
     buffer.append("##END=");
 
     return buffer.toString();
   }
+
+//  /**
+//   * Returns the X Compression factor by finding the subtracting the min and max
+//   * x values and dividing by the factor divisor
+//   * 
+//   * @param xyCoords
+//   *        an array of coordinates
+//   * @param startDataPointIndex
+//   *        the start index
+//   * @param endDataPointIndex
+//   *        the end index
+//   * @param factorDivisor
+//   *        the factor divisor
+//   * @return the X Compression factor
+//   */
+//  private static double getXFactorForCompression(Coordinate[] xyCoords,
+//                                                int startDataPointIndex,
+//                                                int endDataPointIndex,
+//                                                double factorDivisor) {
+//  
+//    double maxX = Coordinate.getMaxX(xyCoords, startDataPointIndex,
+//        endDataPointIndex);
+//    double minX = Coordinate.getMinX(xyCoords, startDataPointIndex,
+//        endDataPointIndex);
+//  
+//    return (maxX - minX) / factorDivisor;
+//  }
+  
+
+  /**
+   * Returns the Y Compression factor by finding the subtracting the min and max
+   * y values and dividing by the default factor divisor
+   * 
+   * @param xyCoords
+   *        an array of coordinates
+   * @param startDataPointIndex
+   *        the start index
+   * @param endDataPointIndex
+   *        the end index
+   * @param factorDivisor 
+   * @return the Y Compression factor
+   */
+  private static double getYFactorForCompression(Coordinate[] xyCoords,
+                                                int startDataPointIndex,
+                                                int endDataPointIndex, double factorDivisor) {
+    
+    double maxY = Coordinate.getMaxY(xyCoords, startDataPointIndex,
+        endDataPointIndex);
+    double minY = Coordinate.getMinY(xyCoords, startDataPointIndex,
+        endDataPointIndex);
+  
+    return (maxY - minY) / factorDivisor;
+  }
+
 
 
 }

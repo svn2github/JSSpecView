@@ -22,7 +22,7 @@ package jspecview.export;
 import java.text.DecimalFormat;
 
 import jspecview.common.Coordinate;
-import jspecview.common.JSpecViewUtils;
+import jspecview.util.TextFormat;
 
 
 /**
@@ -89,12 +89,12 @@ class JDXCompressor {
         yStr.append(makeDUP(nDif));
       // convert last digit of string to SQZ
       yStr.append(makeSQZ(xyCoords[i], yFactor));
-      buffer.append(yStr).append(JSpecViewUtils.newLine);
+      buffer.append(yStr).append(TextFormat.newLine);
     }
     // Get checksum line -- for an X-sequence check only
     buffer.append(fixExponent(xyCoords[endDataPointIndex].getXVal() / xFactor))
         .append(makeSQZ(xyCoords[endDataPointIndex], yFactor));
-    buffer.append("  $$checkpoint" + JSpecViewUtils.newLine);
+    buffer.append("  $$checkpoint" + TextFormat.newLine);
     return buffer.toString();
   }
 
@@ -121,7 +121,7 @@ class JDXCompressor {
   static String compressFIX(Coordinate[] xyCoords, int startDataPointIndex,
                             int endDataPointIndex, double xFactor,
                             double yFactor) {
-    DecimalFormat formatter = JSpecViewUtils.getDecimalFormat("#");
+    DecimalFormat formatter = TextFormat.getDecimalFormat("#");
     StringBuffer buffer = new StringBuffer();
 
     for (int i = startDataPointIndex; i <= endDataPointIndex; i++) {
@@ -132,7 +132,7 @@ class JDXCompressor {
       format10(buffer, (int) Math.round(xyCoords[i].getYVal() / yFactor), formatter);
       for (int j = 0; j < 5 && ++i <= endDataPointIndex; j++)
         format10(buffer, (int) Math.round(xyCoords[i].getYVal() / yFactor), formatter);
-      buffer.append(JSpecViewUtils.newLine);
+      buffer.append(TextFormat.newLine);
     }
 
     return buffer.toString();
@@ -163,7 +163,7 @@ class JDXCompressor {
       yStr.append(makeSQZ(xyCoords[i], yFactor));
       while ((yStr.length() < 60) && i <= endDataPointIndex)
         yStr.append(makeSQZ(xyCoords[++i], yFactor));
-      buffer.append(yStr).append(JSpecViewUtils.newLine);
+      buffer.append(yStr).append(TextFormat.newLine);
     }
     return buffer.toString();
   }
@@ -196,7 +196,7 @@ class JDXCompressor {
         // Print remaining Y values on a line
         buffer.append(fixPacY(xyCoords[i].getYVal() / yFactor));
       }
-      buffer.append(JSpecViewUtils.newLine);
+      buffer.append(TextFormat.newLine);
     }
     return buffer.toString();
   }

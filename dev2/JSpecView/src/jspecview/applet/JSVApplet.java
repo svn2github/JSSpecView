@@ -75,6 +75,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import jspecview.common.AppUtils;
+import jspecview.common.IntegralGraph;
 import jspecview.common.JSVPanel;
 import jspecview.common.OverlayLegendDialog;
 import jspecview.common.Parameters;
@@ -86,7 +87,6 @@ import jspecview.common.ScriptToken;
 import jspecview.common.Coordinate;
 import jspecview.common.IntegrationRatio;
 import jspecview.common.JDXSpectrum;
-import jspecview.common.JSpecViewUtils;
 import jspecview.common.PeakInfo;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
@@ -212,7 +212,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
    * Whether or not spectra should be overlayed
    */
   private boolean overlay;
-  private boolean obscure;
+  private Boolean obscure;
 
   /**
    * Returns a parameter value
@@ -738,7 +738,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
         : JDXSpectrum.INTEGRATE_ON);
     JSVPanel jsvp = getCurrentPanel();
     JSVPanel jsvpNew = AppUtils.checkIntegral(jsvp, appletPanel, mode,
-        showMessage, integrationRatios);
+        showMessage, integrationRatios, parameters);
     if (jsvp == jsvpNew)
       return;
     initProperties(jsvpNew, currentSpectrumIndex);
@@ -1157,7 +1157,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     if (params == null)
       params = "";
     StringTokenizer allParamTokens = new StringTokenizer(params, ";");
-    if (JSpecViewUtils.DEBUG) {
+    if (Logger.debugging) {
       System.out.println("Running in DEBUG mode");
     }
     while (allParamTokens.hasMoreTokens()) {
@@ -1181,8 +1181,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
         case VERSION:
           break;
         case OBSCURE:
-          obscure = Boolean.parseBoolean(value);
-          JSpecViewUtils.setObscure(obscure);
+          if (obscure == null) // once only 
+            obscure = Boolean.valueOf(value);
           break;
         case SYNCID:
           syncID = value;
@@ -1307,7 +1307,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
 
     try {
       source = (isOverlay ? JDXSource.createOverlay(fileName, specs)
-          : JDXFileReader.createJDXSource(data, fileName, base));
+          : JDXFileReader.createJDXSource(data, fileName, base, obscure == Boolean.TRUE));
     } catch (Exception e) {
       writeStatus(e.getMessage());
       e.printStackTrace();
@@ -1317,7 +1317,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     specs = source.getSpectra();
     numberOfSpectra = specs.size();
     overlay = isOverlay && !name.equals("NONE") || (theInterface.equals("overlay") && numberOfSpectra > 1);
-    overlay &= !JDXSpectrum.process(specs, irMode, !isOverlay && autoIntegrate);
+    overlay &= !JDXSpectrum.process(specs, irMode, !isOverlay && autoIntegrate,
+        parameters.integralMinY, parameters.integralOffset, parameters.integralFactor);
     
     boolean continuous = source.getJDXSpectrum(0).isContinuous();
     String Yunits = source.getJDXSpectrum(0).getYUnits();
@@ -1371,7 +1372,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     params = params.trim();
     System.out.println("RUNSCRIPT " + params);
     StringTokenizer allParamTokens = new StringTokenizer(params, ";");
-    if (JSpecViewUtils.DEBUG) {
+    if (Logger.debugging) {
       System.out.println("Running in DEBUG mode");
     }
     JSVPanel jsvp = selectedJSVPanel;
@@ -1428,7 +1429,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
         case INTEGRATIONRATIOS:
           // parse the string with a method in JSpecViewUtils
           System.out.println("Integration Ratio Parameter: " + value);
-          integrationRatios = JSpecViewUtils
+          integrationRatios = IntegralGraph
               .getIntegrationRatiosFromString(value);
         case INTEGRATE:
           if (jsvp == null) 

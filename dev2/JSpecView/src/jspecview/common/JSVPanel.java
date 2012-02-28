@@ -90,6 +90,7 @@ import jspecview.exception.ScalesIncompatibleException;
 import jspecview.export.Exporter;
 import jspecview.export.SVGExporter;
 import jspecview.source.JDXSource;
+import jspecview.util.Logger;
 import jspecview.util.Parser;
 import jspecview.util.TextFormat;
 
@@ -197,7 +198,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private Color[] plotColors;
   
   // integral Color
-  private Color integralPlotColor = AppUtils.integralPlotColor;
+  private Color integralPlotColor = Color.red;
 
   //integration ratio annotations
   private ArrayList<IntegrationRatio> integrationRatios = new ArrayList<IntegrationRatio>();
@@ -475,7 +476,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
     setPlotColors(Parameters.defaultPlotColors);
     
-    scaleData = JSpecViewUtils.generateScaleData(xyCoordsList, startIndices,
+    scaleData = MultiScaleData.generateScaleData(xyCoordsList, startIndices,
         endIndices, 10, 10);
 
     //add data to zoomInfoList
@@ -1225,7 +1226,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     // fill highlight color
 
     if (highlightOn) {
-      if (JSpecViewUtils.DEBUG)
+      if (Logger.debugging)
         System.out.println();
     }
 
@@ -1316,7 +1317,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       x2 = tmp;
     }
 
-    if (JSpecViewUtils.DEBUG) {
+    if (Logger.debugging) {
       System.out.println("x1: " + x1);
       System.out.println("x2: " + x2);
     }
@@ -1500,7 +1501,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     if (scaleData.hashNumX <= 0)
       hashX = hash1.substring(0, Math.abs(scaleData.hashNumX) + 3);
 
-    DecimalFormat displayXFormatter = JSpecViewUtils.getDecimalFormat(hashX);
+    DecimalFormat displayXFormatter = TextFormat.getDecimalFormat(hashX);
 
     g.setFont(new Font((isPrinting ? printingFont : displayFontName),
         Font.PLAIN, calculateFontSize(width, 12, true)));
@@ -1536,7 +1537,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     String hash1 = "0.00000000";
     if (scaleData.hashNumY <= 0)
       hashY = hash1.substring(0, Math.abs(scaleData.hashNumY) + 3);
-    DecimalFormat displayYFormatter = JSpecViewUtils.getDecimalFormat(hashY);
+    DecimalFormat displayYFormatter = TextFormat.getDecimalFormat(hashY);
     g.setFont(new Font((isPrinting ? printingFont : displayFontName),
         Font.PLAIN, calculateFontSize(width, 12, true)));
     FontMetrics fm = g.getFontMetrics();
@@ -1854,7 +1855,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     if (!ScaleData.setDataPointIndices(spectra, scaleData, initX, finalX,
         minNumOfPointsForZoom, startIndices, endIndices))
       return false;
-    scaleData = JSpecViewUtils.generateScaleData(xyCoordsList, startIndices,
+    scaleData = MultiScaleData.generateScaleData(xyCoordsList, startIndices,
         endIndices, 10, 10);
     // add to and clean the zoom list
     if (zoomInfoList.size() > currentZoomIndex + 1)
@@ -2650,12 +2651,12 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       if (scaleData.hashNumX <= 0)
         hashX = hash1.substring(0, Math.abs(scaleData.hashNumX) + 3);
 
-      DecimalFormat displayXFormatter = JSpecViewUtils.getDecimalFormat(hashX);
+      DecimalFormat displayXFormatter = TextFormat.getDecimalFormat(hashX);
 
       if (scaleData.hashNumY <= 0)
         hashY = hash1.substring(0, Math.abs(scaleData.hashNumY) + 3);
 
-      DecimalFormat displayYFormatter = JSpecViewUtils.getDecimalFormat(hashY);
+      DecimalFormat displayYFormatter = TextFormat.getDecimalFormat(hashY);
 
       String xStr, yStr;
 
@@ -2704,13 +2705,13 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       if (scaleData.hashNumX <= 0)
         hashX = hash1.substring(0, Math.abs(scaleData.hashNumX) + 3);
 
-      DecimalFormat formatter = JSpecViewUtils.getDecimalFormat(hashX);
+      DecimalFormat formatter = TextFormat.getDecimalFormat(hashX);
 
       if (scaleData.hashNumY <= 0)
         hashY = hash1.substring(0, Math.abs(scaleData.hashNumY) + 3);
 
       String xx = formatter.format(xPt);
-      formatter = JSpecViewUtils.getDecimalFormat(hashY);
+      formatter = TextFormat.getDecimalFormat(hashY);
       coordStr = "(" + xx + ", " + formatter.format(yPt) + ")";
 
       if (nSpectra == 1) {
@@ -2719,7 +2720,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
           xx += ", " + formatter.format(yPt);
         }
       } else if (getSpectrum().getIntegrationGraph() != null) {
-        formatter = JSpecViewUtils.getDecimalFormat("#0.0");
+        formatter = TextFormat.getDecimalFormat("#0.0");
         yPt = spectra[1].getYValueAt(xPt);
         xx += ", " + formatter.format(yPt);
       }

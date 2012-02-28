@@ -29,11 +29,11 @@ import java.util.ArrayList;
 
 import jspecview.common.Coordinate;
 import jspecview.common.Graph;
-import jspecview.common.JSpecViewUtils;
 import jspecview.common.AppUtils;
 import jspecview.common.JSVPanel;
 import jspecview.common.MultiScaleData;
 import jspecview.common.ScaleData;
+import jspecview.util.TextFormat;
 
 /**
  * class <code>SVGExporter</code> contains static methods to export a Graph as
@@ -179,9 +179,9 @@ public class SVGExporter extends FormExporter {
     initForm(fileName);
 
     //DecimalFormat formatter = JSpecViewUtils.getDecimalFormat("0.000000", new DecimalFormatSymbols(java.util.Locale.US ));
-    DecimalFormat formatter2 = JSpecViewUtils.getDecimalFormat("0.######");
+    DecimalFormat formatter2 = TextFormat.getDecimalFormat("0.######");
 
-    ScaleData scaleData = JSpecViewUtils.generateScaleData(
+    ScaleData scaleData = Coordinate.generateScaleData(
         xyCoords, startDataPointIndex, endDataPointIndex, 10, 10);
 
     double maxXOnScale = scaleData.maxXOnScale;
@@ -250,12 +250,12 @@ public class SVGExporter extends FormExporter {
     if (hashNumX <= 0)
       hashX = hash1.substring(0, Math.abs(hashNumX) + 3);
 
-    DecimalFormat displayXFormatter = JSpecViewUtils.getDecimalFormat(hashX);
+    DecimalFormat displayXFormatter = TextFormat.getDecimalFormat(hashX);
 
     if (hashNumY <= 0)
       hashY = hash1.substring(0, Math.abs(hashNumY) + 3);
 
-    DecimalFormat displayYFormatter = JSpecViewUtils.getDecimalFormat(hashY);
+    DecimalFormat displayYFormatter = TextFormat.getDecimalFormat(hashY);
 
     for (double i = minXOnScale; i < (maxXOnScale + xStep / 2); i += xStep) {
       xPt = leftPlotArea + ((i - minXOnScale) * xScaleFactor);
@@ -482,9 +482,9 @@ public class SVGExporter extends FormExporter {
                                  Color scaleColor, Color unitsColor,  boolean exportForInkscape) throws IOException {
     initForm(fileName);
     //DecimalFormat formatter = JSpecViewUtils.getDecimalFormat("0.000000", new DecimalFormatSymbols(java.util.Locale.US ));
-    DecimalFormat formatter2 = JSpecViewUtils.getDecimalFormat("0.######");
+    DecimalFormat formatter2 = TextFormat.getDecimalFormat("0.######");
 
-    MultiScaleData scaleData = JSpecViewUtils.generateScaleData(
+    MultiScaleData scaleData = MultiScaleData.generateScaleData(
         xyCoordsList, startDataPointIndices, endDataPointIndices, 10, 10);
 
     double maxXOnScale = scaleData.maxXOnScale;
@@ -554,12 +554,12 @@ public class SVGExporter extends FormExporter {
     if (hashNumX <= 0)
       hashX = hash1.substring(0, Math.abs(hashNumX) + 3);
 
-    DecimalFormat displayXFormatter = JSpecViewUtils.getDecimalFormat(hashX);
+    DecimalFormat displayXFormatter = TextFormat.getDecimalFormat(hashX);
 
     if (hashNumY <= 0)
       hashY = hash1.substring(0, Math.abs(hashNumY) + 3);
 
-    DecimalFormat displayYFormatter = JSpecViewUtils.getDecimalFormat(hashY);
+    DecimalFormat displayYFormatter = TextFormat.getDecimalFormat(hashY);
 
     for (double i = minXOnScale; i < (maxXOnScale + xStep / 2); i += xStep) {
       xPt = leftPlotArea + ((i - minXOnScale) * xScaleFactor);
