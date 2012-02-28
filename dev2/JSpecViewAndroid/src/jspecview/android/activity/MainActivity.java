@@ -176,7 +176,7 @@ public class MainActivity extends Activity{
 				XYMultipleSeriesRenderer multiRenderer = createMultipleSeriesRenderer(dataset.getSeriesCount());
 				mRenderers[i] = multiRenderer;
 								
-				multiRenderer.setXAxisDecreasing(mSpectra.get(i).shouldDisplayXAxisIncreasing());
+				multiRenderer.setXAxisDecreasing(!mSpectra.get(i).shouldDisplayXAxisIncreasing());
 				
 				GraphicalView view = ChartFactory.getLineChartView(getApplicationContext(), dataset, multiRenderer);
 				view.setId(i);	
