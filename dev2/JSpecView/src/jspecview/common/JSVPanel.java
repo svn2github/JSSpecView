@@ -416,7 +416,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     this.spectra = spectra;
     nSpectra = spectra.length;
     if (nSpectra == 1)
-      setTitle(getSpectrum().getPeakTitle());
+      setTitle(getSpectrum().getTitleLabel());
 
     checkUnits();
 
@@ -457,7 +457,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     this.spectra = spectra;
     nSpectra = spectra.length;
     if (nSpectra == 1)
-      setTitle(getSpectrum().getPeakTitle());
+      setTitle(getSpectrum().getTitleLabel());
     xyCoordsList = new Coordinate[nSpectra][];
 
     int[] startIndices = new int[nSpectra];
