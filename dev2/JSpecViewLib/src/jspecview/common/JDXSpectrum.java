@@ -461,8 +461,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return false;
   }
 
-  public String getTabularData(String label, String value)
-      throws JSpecViewException {
+  public String getTabularData(String label, String value) {
     if (label.equals("##PEAKASSIGNMENTS"))
       setDataClass("PEAKASSIGNMENTS");
     else if (label.equals("##PEAKTABLE"))
@@ -471,19 +470,14 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
       setDataClass("XYDATA");
     else if (label.equals("##XYPOINTS"))
       setDataClass("XYPOINTS");
-    // Get CoordData
-    String tmp = value;
-    try {
-      char chr;
-      do {
-        tmp = tmp.substring(tmp.indexOf("\n") + 1);
-        chr = tmp.trim().charAt(0);
-      } while (!Character.isDigit(chr) && chr != '+' && chr != '-'
-          && chr != '.');
-    } catch (IndexOutOfBoundsException iobe) {
-      throw new JSpecViewException("Error Reading Data Set");
-    }
-    return tmp;
+    // skip header lines
+    int pt = value.indexOf('\n') + 1;
+    while (pt < value.length() && "0123456789.-+".indexOf(value.charAt(pt)) < 0) 
+      pt++;
+    value = value.substring(pt);
+    return value;
+    
+   
   }
 
   public boolean createXYCoords(Map<String, ArrayList<String>> nTupleTable,
