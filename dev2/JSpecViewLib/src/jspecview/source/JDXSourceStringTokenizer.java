@@ -19,13 +19,7 @@
 
 package jspecview.source;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.StringTokenizer;
-
-import jspecview.util.TextFormat;
-
 
 /**
  * <code>JDXSourceStringTokenizer</code> breaks up the <code>JDXSource</code>
@@ -77,7 +71,7 @@ class JDXSourceStringTokenizer extends StringTokenizer {
     // start of a data-label.
     
     int pt = 0;
-    while (hasMoreTokens() && (pt = ptNonSpace(v)) >= 0
+    while (hasMoreTokens() && (pt = ptNonSpaceRev(v, v.length())) >= 0
         && "\n\r".indexOf(v.charAt(pt)) < 0) {
       //  ## only counts if at start of line
       v.append("##").append(nextToken("##"));
@@ -94,47 +88,90 @@ class JDXSourceStringTokenizer extends StringTokenizer {
     
     // fix up label and value
     label = label.trim();
-    value = v.substring(1).trim();
-    v = null;
-    if (value.length() > 0 && (value.charAt(0) != '<' || value.indexOf("</") < 0))
-        value = trimComments(value);
+    value = trimLines(v);
     if (label.equals("##TITLE") || label.equals("##END"))
       System.out.println(label + "\t" + value);
     return true;
   }
 
-  private static int ptNonSpace(StringBuffer v) {
-    int pt = v.length();
-    while (pt > 0 && v.charAt(--pt) == ' ') {
+  private String trimLines(StringBuffer v) {
+    int n = v.length();
+    int ilast = n - 1;
+    int vpt = ptNonWhite(v, 1, n);
+    // no line trimming for XML
+    if (vpt >= n)
+      return "";
+    if (v.charAt(vpt) == '<' && v.indexOf("</") >= 0)
+      return v.substring(vpt, n);
+    char[] buffer = new char[n - vpt];
+    int pt = 0;
+    for (;vpt < n; vpt++) {
+      char ch;
+      switch (ch = v.charAt(vpt)) {
+      case '\r':
+        if (vpt < ilast && v.charAt(vpt + 1) == '\n')
+          continue;
+        ch = '\n';
+        break;
+      case '\n':
+        if (pt > 0 && buffer[pt - 1] != '\n')
+          pt -= vpt - ptNonSpaceRev(v, vpt) - 1;
+        vpt = ptNonSpace(v, ++vpt, n) - 1;
+        break;
+      case '$':
+        if (vpt < ilast && v.charAt(vpt + 1) == '$') {
+          vpt++;
+          while (vpt < ilast && "\n\r".indexOf(v.charAt(++vpt)) < 0) {
+            // skip to end of line
+          }
+          vpt--;
+          continue;
+        }
+        break;
+      }
+      if (ch == '\n' && pt > 0 && buffer[pt - 1] == '\n')
+        continue;
+      buffer[pt++] = ch;
+    }
+    if (buffer[pt - 1] == '\n')
+      --pt;
+    return (new String(buffer)).substring(0, pt);
+  }
+
+  private static int ptNonWhite(StringBuffer v, int pt, int n) {
+    while (pt < n && Character.isWhitespace(v.charAt(pt))) 
+      pt++;
+    return pt;
+  }
+
+  private static int ptNonSpace(StringBuffer v, int pt, int n) {
+    while (pt < n && (v.charAt(pt) == ' ' || v.charAt(pt) == '\t'))
+      pt++;
+    return pt;
+  }
+
+  private static int ptNonSpaceRev(StringBuffer v, int pt) {
+    while (--pt >= 0 && (v.charAt(pt) == ' ' || v.charAt(pt) == '\t')) {
       // move on back one character
     }
     return pt;
   }
 
-  private static String trimComments(String v) {
-    
-    // trim comments
-    StringBuffer valueBuffer = new StringBuffer();
-    BufferedReader lineReader = new BufferedReader(new StringReader(v));
-    String line;
-    try {
-      while ((line = lineReader.readLine()) != null){
-        line = line.trim();
-        int commentIndex = line.indexOf("$$");
-        // ignore comments that start at the beginning of the line
-        // or empty lines
-        if(commentIndex == 0)
-          continue;
-
-        // remove comments from the end of a line
-        if(commentIndex != -1)
-          line = line.substring(0, commentIndex).trim();
-        valueBuffer.append(line).append(TextFormat.newLine);
-      }
-    }
-    catch (IOException ex) {
-    }
-    return valueBuffer.toString().trim();
-  }
-
+//    BufferedReader lineReader = new BufferedReader(new StringReader(v));
+//    String line;
+//    try {
+//      while ((line = lineReader.readLine()) != null){
+//        line = line.trim();
+//        int commentIndex = line.indexOf("$$");
+//        // ignore comments that start at the beginning of the line
+//        // or empty lines
+//        if(commentIndex == 0)
+//          continue;
+//
+//        // remove comments from the end of a line
+//        if(commentIndex != -1)
+//          line = line.substring(0, commentIndex).trim();
+//        valueBuffer.append(line).append(TextFormat.newLine);
+//      }
+//    }
 }
