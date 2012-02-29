@@ -36,7 +36,12 @@ import jspecview.util.TextFormat;
  * @author Prof Robert J. Lancashire
  * @see jspecview.source.JDXSource
  */
-class JDXSourceStringTokenizer {
+class JDXSourceStringTokenizer extends StringTokenizer {
+
+  public JDXSourceStringTokenizer(String str) {
+    super(str);
+  }
+
   /**
    * The Label part of the next token
    */
@@ -45,11 +50,6 @@ class JDXSourceStringTokenizer {
    * The value part of the next token
    */
   String value;
-
-  /**
-   * The StringTokenizer used to return tokens
-   */
-  private StringTokenizer st;
 
   /**
    * The line number of the label
@@ -62,33 +62,25 @@ class JDXSourceStringTokenizer {
   private int dataSetLineCount = 1;
   
   /**
-   * Constructor creates a new JDXSourceStringTokenizer from a string
-   * @param contents the source string
-   */
-  JDXSourceStringTokenizer(String contents){
-    st = new StringTokenizer(contents);
-  }
-
-  /**
    * Gets the next token from the string and stores the label and the value
    */
-  boolean nextToken() {
+  boolean getNextToken() {
     // ADD CODE TO IGNORE ##= COMMENTS
     // TWO LDR'S CAN'T BE ON THE SAME LINE
 
     labelLineNo += dataSetLineCount;
 
-    label = st.nextToken("=");
-    StringBuffer v = new StringBuffer(st.nextToken("##"));
+    label = nextToken("=");
+    StringBuffer v = new StringBuffer(nextToken("##"));
 
     // ## At the start of a line, preceded only by blanks indicate the
     // start of a data-label.
     
     int pt = 0;
-    while (st.hasMoreTokens() && (pt = ptNonSpace(v)) >= 0
+    while (hasMoreTokens() && (pt = ptNonSpace(v)) >= 0
         && "\n\r".indexOf(v.charAt(pt)) < 0) {
       //  ## only counts if at start of line
-      v.append("##").append(st.nextToken("##"));
+      v.append("##").append(nextToken("##"));
     }
 
     // count lines
@@ -111,14 +103,15 @@ class JDXSourceStringTokenizer {
     return true;
   }
 
-  private int ptNonSpace(StringBuffer v) {
+  private static int ptNonSpace(StringBuffer v) {
     int pt = v.length();
     while (pt > 0 && v.charAt(--pt) == ' ') {
+      // move on back one character
     }
     return pt;
   }
 
-  private String trimComments(String v) {
+  private static String trimComments(String v) {
     
     // trim comments
     StringBuffer valueBuffer = new StringBuffer();
@@ -144,11 +137,4 @@ class JDXSourceStringTokenizer {
     return valueBuffer.toString().trim();
   }
 
-  /**
-   * Returns true if the source string has more tokens
-   * @return true if the source string has more tokens other false
-   */
-  boolean hasMoreTokens(){
-    return st.hasMoreTokens();
-  }
 }

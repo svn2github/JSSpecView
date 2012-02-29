@@ -164,7 +164,7 @@ public class JDXFileReader {
     // Table for header information
     List<String[]> dataLDRTable = new ArrayList<String[]>(20);
 
-    while (t.hasMoreTokens() && t.nextToken()
+    while (t.hasMoreTokens() && t.getNextToken()
         && !(label = cleanLabel(t.label)).equals("##END")) {
       if (label.equals("##DATATYPE") && t.value.toUpperCase().equals("LINK"))
         return getBlockSpectra(dataLDRTable);
@@ -219,7 +219,7 @@ public class JDXFileReader {
     System.out.println("--JDX block start--");
     String label = "";
     boolean isNew = (source.type == JDXSource.TYPE_SIMPLE);
-    while (t.hasMoreTokens() && t.nextToken()
+    while (t.hasMoreTokens() && t.getNextToken()
         && !(label = cleanLabel(t.label)).equals("##TITLE"))
       if (isNew && !readHeaderLabel(source, label, t.value, errorLog, obscure))
         addHeader(sourceLDRTable, t.label, t.value);
@@ -243,7 +243,7 @@ public class JDXFileReader {
     try {
       String tmp;
       while (t.hasMoreTokens()
-          && t.nextToken()
+          && t.getNextToken()
           && (!(tmp = cleanLabel(t.label)).equals("##END") || !label
               .equals("##END"))) {
         label = tmp;
@@ -259,7 +259,7 @@ public class JDXFileReader {
           label = null;
         } else if (label.equals("##JCAMPCS")) {
           while (t.hasMoreTokens()
-              && t.nextToken()
+              && t.getNextToken()
               && !(label = cleanLabel(t.label))
                   .equals("##TITLE")) {
           }
@@ -351,7 +351,7 @@ public class JDXFileReader {
     }
 
     // Read NTuple Table
-    while (t.hasMoreTokens() && t.nextToken()
+    while (t.hasMoreTokens() && t.getNextToken()
         && !(label = cleanLabel(t.label)).equals("##PAGE")) {
       StringTokenizer st = new StringTokenizer(t.value, ",");
       ArrayList<String> attrList = new ArrayList<String>();
@@ -367,7 +367,7 @@ public class JDXFileReader {
 
     JDXSpectrum spectrum = null;
 
-    while (t.hasMoreTokens() && t.nextToken()
+    while (t.hasMoreTokens() && t.getNextToken()
         && !(label = cleanLabel(t.label)).equals("##ENDNTUPLES")) {
 
       if (label.equals("##PAGE")) {
@@ -386,7 +386,7 @@ public class JDXFileReader {
 
       while (!label.equals("##DATATABLE")) {
         addHeader(dataLDRTable, t.label, t.value);
-        t.nextToken();
+        t.getNextToken();
         label = cleanLabel(t.label);
       }
 
