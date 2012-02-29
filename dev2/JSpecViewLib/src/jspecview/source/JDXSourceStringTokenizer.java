@@ -69,8 +69,6 @@ class JDXSourceStringTokenizer {
     st = new StringTokenizer(contents);
   }
 
-  private StringBuffer dataSet = new StringBuffer();
-
   /**
    * Gets the next token from the string and stores the label and the value
    */
@@ -82,20 +80,27 @@ class JDXSourceStringTokenizer {
 
     label = st.nextToken("=");
     StringBuffer v = new StringBuffer(st.nextToken("##"));
-    while (st.hasMoreTokens() && v.length() == 0
-        || "\n\r".indexOf(v.charAt(v.length() - 1)) < 0) {
+
+    // ## At the start of a line, preceded only by blanks indicate the
+    // start of a data-label.
+    
+    int pt = 0;
+    while (st.hasMoreTokens() && (pt = ptNonSpace(v)) >= 0
+        && "\n\r".indexOf(v.charAt(pt)) < 0) {
       //  ## only counts if at start of line
       v.append("##").append(st.nextToken("##"));
     }
-    // find out how many lines the dataset takes up
 
-    dataSet.setLength(0);
-    dataSet.append(label).append(v);
+    // count lines
+    StringBuffer dataSet = new StringBuffer(label);
+    dataSet.append(v);
     char c = (dataSet.indexOf("\r") < 0 ? '\n' : '\r');
     dataSetLineCount = 0;
     for (int i = dataSet.length(); --i >= 0;)
       if (dataSet.charAt(i) == c)
         dataSetLineCount++;
+    
+    // fix up label and value
     label = label.trim();
     value = v.substring(1).trim();
     v = null;
@@ -104,6 +109,13 @@ class JDXSourceStringTokenizer {
     if (label.equals("##TITLE") || label.equals("##END"))
       System.out.println(label + "\t" + value);
     return true;
+  }
+
+  private int ptNonSpace(StringBuffer v) {
+    int pt = v.length();
+    while (pt > 0 && v.charAt(--pt) == ' ') {
+    }
+    return pt;
   }
 
   private String trimComments(String v) {
