@@ -94,7 +94,7 @@ class JDXCompressor {
     // Get checksum line -- for an X-sequence check only
     buffer.append(fixExponent(xyCoords[endDataPointIndex].getXVal() / xFactor))
         .append(makeSQZ(xyCoords[endDataPointIndex], yFactor));
-    buffer.append("  $$checkpoint" + TextFormat.newLine);
+    buffer.append("  $$checkpoint").append(TextFormat.newLine);
     return buffer.toString();
   }
 
