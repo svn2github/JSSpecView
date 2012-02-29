@@ -98,7 +98,7 @@ class JDXSourceStringTokenizer extends StringTokenizer {
     int n = v.length();
     int ilast = n - 1;
     int vpt = ptNonWhite(v, 1, n);
-    // no line trimming for XML
+    // no line trimming for XML or <....> data
     if (vpt >= n)
       return "";
     if (v.charAt(vpt) == '<') {
