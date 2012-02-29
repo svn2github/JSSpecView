@@ -10,7 +10,7 @@
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ *  Lesser General License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this library; if not, write to the Free Software
@@ -36,15 +36,15 @@ import jspecview.util.TextFormat;
  * @author Prof Robert J. Lancashire
  * @see jspecview.source.JDXSource
  */
-public class JDXSourceStringTokenizer {
+class JDXSourceStringTokenizer {
   /**
    * The Label part of the next token
    */
-  public String label;
+  String label;
   /**
    * The value part of the next token
    */
-  public String value;
+  String value;
 
   /**
    * The StringTokenizer used to return tokens
@@ -54,18 +54,18 @@ public class JDXSourceStringTokenizer {
   /**
    * The line number of the label
    */
-  public int labelLineNo = 0;
+  int labelLineNo = 0;
 
   /**
    * variable to keep a count of the number of lines that a dataset takes up
    */
   private int dataSetLineCount = 1;
-
+  
   /**
    * Constructor creates a new JDXSourceStringTokenizer from a string
    * @param contents the source string
    */
-  public JDXSourceStringTokenizer(String contents){
+  JDXSourceStringTokenizer(String contents){
     st = new StringTokenizer(contents);
   }
 
@@ -74,31 +74,33 @@ public class JDXSourceStringTokenizer {
   /**
    * Gets the next token from the string and stores the label and the value
    */
-  public boolean nextToken() {
+  boolean nextToken() {
     // ADD CODE TO IGNORE ##= COMMENTS
     // TWO LDR'S CAN'T BE ON THE SAME LINE
 
     labelLineNo += dataSetLineCount;
 
-    // recontruct dataset
-    String l = st.nextToken("=");
-    String v = st.nextToken("##");
-    // TODO:  Not testing here for NON jdx format?
-    dataSet.setLength(0);
-    dataSet.append(l).append(v).append(TextFormat.newLine);
-    StringReader stringReader = new StringReader(dataSet.toString());
-    BufferedReader lineReader = new BufferedReader(stringReader);
-
-    // find out how many lines the dataset takes up
-    dataSetLineCount = -1;
-    try {
-      while (lineReader.readLine() != null)
-        dataSetLineCount++;
-    } catch (IOException ex) {
+    label = st.nextToken("=");
+    StringBuffer v = new StringBuffer(st.nextToken("##"));
+    while (st.hasMoreTokens() && v.length() == 0
+        || "\n\r".indexOf(v.charAt(v.length() - 1)) < 0) {
+      //  ## only counts if at start of line
+      v.append("##").append(st.nextToken("##"));
     }
-    label = l.trim();
-    value = (v.startsWith("<") && v.contains("</") ? v : trimComments(v));
-    value = value.substring(value.indexOf("=") + 1).trim();
+    // find out how many lines the dataset takes up
+
+    dataSet.setLength(0);
+    dataSet.append(label).append(v);
+    char c = (dataSet.indexOf("\r") < 0 ? '\n' : '\r');
+    dataSetLineCount = 0;
+    for (int i = dataSet.length(); --i >= 0;)
+      if (dataSet.charAt(i) == c)
+        dataSetLineCount++;
+    label = label.trim();
+    value = v.substring(1).trim();
+    v = null;
+    if (value.length() > 0 && (value.charAt(0) != '<' || value.indexOf("</") < 0))
+        value = trimComments(value);
     if (label.equals("##TITLE") || label.equals("##END"))
       System.out.println(label + "\t" + value);
     return true;
@@ -134,7 +136,7 @@ public class JDXSourceStringTokenizer {
    * Returns true if the source string has more tokens
    * @return true if the source string has more tokens other false
    */
-  public boolean hasMoreTokens(){
+  boolean hasMoreTokens(){
     return st.hasMoreTokens();
   }
 }
