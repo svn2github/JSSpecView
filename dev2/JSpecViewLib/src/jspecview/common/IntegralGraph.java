@@ -311,25 +311,23 @@ public class IntegralGraph implements Graph {
    * @param value
    * @return ArrayList<IntegrationRatio> object representing integration ratios
    */
-  public static ArrayList<IntegrationRatio> getIntegrationRatiosFromString(
+  public static ArrayList<Annotation> getIntegrationRatiosFromString(
                                                                            String value) {
     // split input into x-value/integral-value pairs
     StringTokenizer allParamTokens = new StringTokenizer(value, ",");
-  
+
     // create array list to return
-    ArrayList<IntegrationRatio> inputRatios = new ArrayList<IntegrationRatio>();
-  
+    ArrayList<Annotation> inputRatios = new ArrayList<Annotation>();
+
     while (allParamTokens.hasMoreTokens()) {
       String token = allParamTokens.nextToken();
       // now split the x-value/integral-value pair
       StringTokenizer eachParam = new StringTokenizer(token, ":");
-      IntegrationRatio inputRatio = new IntegrationRatio();
-      inputRatio.setXVal(Double.parseDouble(eachParam.nextToken()));
-      inputRatio.setYVal(0.0);
-      inputRatio.setIntegralVal(Double.parseDouble(eachParam.nextToken()));
+      Annotation inputRatio = new Annotation(Double
+          .parseDouble(eachParam.nextToken()), 0.0, eachParam.nextToken(), true);
       inputRatios.add(inputRatio);
     }
-  
+
     return inputRatios;
   }
 
