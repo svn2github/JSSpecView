@@ -41,9 +41,9 @@ public class Parameters extends DisplayScheme {
   boolean xUnitsOn = true;
   boolean yUnitsOn = true;
 
-  public double integralMinY = 0.1;
-  public double integralFactor = 50;
-  public double integralOffset = 30;
+  public double integralMinY = IntegralGraph.DEFAULT_MINY;
+  public double integralFactor = IntegralGraph.DEFAULT_FACTOR;
+  public double integralOffset = IntegralGraph.DEFAULT_OFFSET;
 
   public void setFor(JSVPanel jsvp, DisplayScheme ds, boolean includeMeasures) {
     

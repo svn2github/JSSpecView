@@ -178,11 +178,9 @@ public class SVGExporter extends FormExporter {
 
     initForm(fileName);
 
-    //DecimalFormat formatter = JSpecViewUtils.getDecimalFormat("0.000000", new DecimalFormatSymbols(java.util.Locale.US ));
     DecimalFormat formatter2 = TextFormat.getDecimalFormat("0.######");
 
-    ScaleData scaleData = Coordinate.generateScaleData(
-        xyCoords, startDataPointIndex, endDataPointIndex, 10, 10);
+    ScaleData scaleData = new ScaleData(xyCoords, startDataPointIndex, endDataPointIndex, 10, 10);
 
     double maxXOnScale = scaleData.maxXOnScale;
     double minXOnScale = scaleData.minXOnScale;
@@ -190,8 +188,8 @@ public class SVGExporter extends FormExporter {
     double minYOnScale = scaleData.minYOnScale;
     double xStep = scaleData.xStep;
     double yStep = scaleData.yStep;
-    int hashNumX = scaleData.hashNumX;
-    int hashNumY = scaleData.hashNumY;
+    int hashNumX = scaleData.hashNums[0];
+    int hashNumY = scaleData.hashNums[1];
 
     int plotAreaWidth = svgWidth - leftInset - rightInset;
     int plotAreaHeight = svgHeight - topInset - bottomInset;
@@ -452,40 +450,58 @@ public class SVGExporter extends FormExporter {
 
   /**
    * Export an overlaid graph as SVG with specified Coordinates and Colors
+   * 
    * @param fileName
-   * @param xyCoordsList an array of arrays of Coordinates
-   * @param title the title of the graph
-   * @param startDataPointIndices the start indices of the coordinates
-   * @param endDataPointIndices the end indices of the coordinates
-   * @param xUnits the units of the x axis
-   * @param yUnits the units of the y axis
-   * @param continuous true if the graph is continuous, otherwise false
-   * @param increasing true is the graph is increasing, otherwise false
-   * @param plotAreaColor the color of the plot area
-   * @param backgroundColor the color of the background
-   * @param plotColor the color of the plot
-   * @param gridColor the color of the grid
-   * @param titleColor the color of the title
-   * @param scaleColor the color of the scales
-   * @param unitsColor the color of the units
-   * @param exportForInkscape determines if inkscape svg is exported
+   * @param xyCoordsList
+   *        an array of arrays of Coordinates
+   * @param title
+   *        the title of the graph
+   * @param startDataPointIndices
+   *        the start indices of the coordinates
+   * @param endDataPointIndices
+   *        the end indices of the coordinates
+   * @param xUnits
+   *        the units of the x axis
+   * @param yUnits
+   *        the units of the y axis
+   * @param continuous
+   *        true if the graph is continuous, otherwise false
+   * @param increasing
+   *        true is the graph is increasing, otherwise false
+   * @param plotAreaColor
+   *        the color of the plot area
+   * @param backgroundColor
+   *        the color of the background
+   * @param plotColor
+   *        the color of the plot
+   * @param gridColor
+   *        the color of the grid
+   * @param titleColor
+   *        the color of the title
+   * @param scaleColor
+   *        the color of the scales
+   * @param unitsColor
+   *        the color of the units
+   * @param exportForInkscape
+   *        determines if inkscape svg is exported
    * @return data if fileName is null
    * @throws IOException
    */
   public String exportAsSVG(String fileName, Coordinate[][] xyCoordsList,
-                                 String title, int[] startDataPointIndices,
-                                 int[] endDataPointIndices, String xUnits,
-                                 String yUnits, boolean continuous,
-                                 boolean increasing, Color plotAreaColor,
-                                 Color backgroundColor, Color plotColor,
-                                 Color gridColor, Color titleColor,
-                                 Color scaleColor, Color unitsColor,  boolean exportForInkscape) throws IOException {
+                            String title, int[] startDataPointIndices,
+                            int[] endDataPointIndices, String xUnits,
+                            String yUnits, boolean continuous,
+                            boolean increasing, Color plotAreaColor,
+                            Color backgroundColor, Color plotColor,
+                            Color gridColor, Color titleColor,
+                            Color scaleColor, Color unitsColor,
+                            boolean exportForInkscape) throws IOException {
     initForm(fileName);
     //DecimalFormat formatter = JSpecViewUtils.getDecimalFormat("0.000000", new DecimalFormatSymbols(java.util.Locale.US ));
     DecimalFormat formatter2 = TextFormat.getDecimalFormat("0.######");
 
-    MultiScaleData scaleData = MultiScaleData.generateScaleData(
-        xyCoordsList, startDataPointIndices, endDataPointIndices, 10, 10);
+    MultiScaleData scaleData = new MultiScaleData(xyCoordsList,
+        startDataPointIndices, endDataPointIndices, 10, 10);
 
     double maxXOnScale = scaleData.maxXOnScale;
     double minXOnScale = scaleData.minXOnScale;
@@ -493,8 +509,8 @@ public class SVGExporter extends FormExporter {
     double minYOnScale = scaleData.minYOnScale;
     double xStep = scaleData.xStep;
     double yStep = scaleData.yStep;
-    int hashNumX = scaleData.hashNumX;
-    int hashNumY = scaleData.hashNumY;
+    int hashNumX = scaleData.hashNums[0];
+    int hashNumY = scaleData.hashNums[1];
 
     int plotAreaWidth = svgWidth - leftInset - rightInset;
     int plotAreaHeight = svgHeight - topInset - bottomInset;
@@ -627,8 +643,7 @@ public class SVGExporter extends FormExporter {
     }
 
     context.put("plotAreaColor", AppUtils.colorToHexString(plotAreaColor));
-    context.put("backgroundColor", AppUtils
-        .colorToHexString(backgroundColor));
+    context.put("backgroundColor", AppUtils.colorToHexString(backgroundColor));
     context.put("plotColor", AppUtils.colorToHexString(plotColor));
     context.put("gridColor", AppUtils.colorToHexString(gridColor));
     context.put("titleColor", AppUtils.colorToHexString(titleColor));
@@ -690,12 +705,12 @@ public class SVGExporter extends FormExporter {
     context.put("numDecimalPlacesX", new Integer(Math.abs(hashNumX)));
     context.put("numDecimalPlacesY", new Integer(Math.abs(hashNumY)));
 
-    if (exportForInkscape){
-        System.out.println("inkscape is true ");
-        return writeForm("plot_ink.vm");
-    }else {
-        System.out.println("inkscape is false ");
-        return writeForm("plot.vm");
+    if (exportForInkscape) {
+      System.out.println("inkscape is true ");
+      return writeForm("plot_ink.vm");
+    } else {
+      System.out.println("inkscape is false ");
+      return writeForm("plot.vm");
     }
   }
 }
