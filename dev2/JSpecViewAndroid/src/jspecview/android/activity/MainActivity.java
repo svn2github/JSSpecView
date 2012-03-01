@@ -563,9 +563,9 @@ public class MainActivity extends Activity{
     		integralOffsetEditText.setText(String.valueOf(mIntegrationOffset));    		
     	}    	
     	else{
-    		minimumYEditText.setText("0.1");
-    		integralFactorEditText.setText("50");
-    		integralOffsetEditText.setText("30"); 
+    		minimumYEditText.setText(String.valueOf(IntegralGraph.DEFAULT_MINY));
+    		integralFactorEditText.setText(String.valueOf(IntegralGraph.DEFAULT_FACTOR));
+    		integralOffsetEditText.setText(String.valueOf(IntegralGraph.DEFAULT_OFFSET)); 
     	}	
     	
     	mIntegrateDialog = dialog;
