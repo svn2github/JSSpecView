@@ -1358,7 +1358,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   private int yPixels(double yVal) {
-    return (int) (topPlotAreaPos + (yVal - scaleData.minYOnScale) / yFactorForScale);  
+    return invertY((int) (topPlotAreaPos + (yVal - scaleData.minYOnScale) / yFactorForScale));
   }
 
   private boolean isPixelWithinPlotArea(int pix) {
@@ -1406,7 +1406,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
           int y1 = yPixels(point1.getYVal());
           int x2 = xPixels(point2.getXVal());
           int y2 = yPixels(point2.getYVal());
-          g.drawLine(x1, invertY(height, y1), x2, invertY(height, y2));
+          g.drawLine(x1, y1, x2, y2);
         }
       } else {
         for (int i = scaleData.startDataPointIndices[index]; i <= scaleData.endDataPointIndices[index]; i++) {
@@ -1414,12 +1414,12 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
           int x1 = xPixels(point.getXVal());
           int y1 = yPixels(Math.max(scaleData.minYOnScale, 0));
           int y2 = yPixels(point.getYVal());
-          g.drawLine(x1, invertY(height, y1), x1, invertY(height, y2));
+          g.drawLine(x1, y1, x1, y2);
         }
         if (scaleData.minYOnScale < 0) {
           int y = yPixels(0);
           g.drawLine(rightPlotAreaPos,
-              invertY(height, y), leftPlotAreaPos, invertY(height, y));
+              invertY(y), leftPlotAreaPos, invertY(y));
         }
       }
   } // End drawPlot
@@ -1442,7 +1442,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       int x = xPixels(val);
       int y1 = yPixels(scaleData.minYOnScale);
       int y2 = yPixels(scaleData.maxYOnScale);
-      g.drawLine(x, invertY(height, y1), x, invertY(height, y2));
+      g.drawLine(x, y1, x, y2);
     }
 
     for (double val = scaleData.minYOnScale; val < scaleData.maxYOnScale
@@ -1450,7 +1450,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       int x1 = xPixels(scaleData.minXOnScale);
       int x2 = xPixels(scaleData.maxXOnScale);
       int y = yPixels(val);
-      g.drawLine(x1, invertY(height, y), x2, invertY(height, y));
+      g.drawLine(x1, y, x2, y);
     }
   }
 
@@ -1479,17 +1479,16 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     g.setFont(new Font((isPrinting ? printingFont : displayFontName),
         Font.PLAIN, calculateFontSize(width, 12, true)));
     FontMetrics fm = g.getFontMetrics();
-    int y1 = (int) topPlotAreaPos;
-    int y2 = (int) (topPlotAreaPos - 3);
+    int y1 = invertY((int) topPlotAreaPos);
+    int y2 = invertY((int) (topPlotAreaPos - 3));
     double scaleMax = scaleData.maxXOnScale + scaleData.xStep / 2;
     for (double val = scaleData.minXOnScale, vald = scaleData.maxXOnScale; val < scaleMax; val += scaleData.xStep, vald -= scaleData.xStep) {
       int x = (int) (leftPlotAreaPos + (((drawScaleIncreasing ? val : vald) - scaleData.minXOnScale) / xFactorForScale));
       g.setColor(gridColor);
-      g.drawLine(x, invertY(height, y1), x, invertY(height, y2));
+      g.drawLine(x, y1, x, y2);
       g.setColor(scaleColor);
       String s = displayXFormatter.format(val);
-      g.drawString(s, x - fm.stringWidth(s) / 2, (invertY(height, y2) + fm
-          .getHeight()));
+      g.drawString(s, x - fm.stringWidth(s) / 2, y2 + fm.getHeight());
     }
   }
 
@@ -1519,11 +1518,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       int x1 = (int) leftPlotAreaPos;
       int y = yPixels(val);
       g.setColor(gridColor);
-      g.drawLine(x1, invertY(height, y), x1 - 3, invertY(height, y));
+      g.drawLine(x1, y, x1 - 3, y);
       g.setColor(scaleColor);
       String s = displayYFormatter.format(val);
-      g.drawString(s, (x1 - 4 - fm.stringWidth(s)), invertY(height, y)
-          + fm.getHeight() / 3);
+      g.drawString(s, (x1 - 4 - fm.stringWidth(s)), y + fm.getHeight() / 3);
     }
   }
 
@@ -1621,7 +1619,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         color = Color.BLACK;
       g.setColor(color);
       int x = xPixels(note.getXVal());
-      int y = (note.isPixels ? (int) (bottomPlotAreaPos + note.getYVal() - 10)
+      int y = (note.isPixels ? invertY((int) (bottomPlotAreaPos + note.getYVal() - 10))
           : yPixels(note.getYVal()));
       g.drawString(note.text, x, y);
     }
@@ -1683,7 +1681,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        the height to be drawn in pixels
    * @return the inverted y pixel value
    */
-  private int invertY(int height, int y) {
+  private int invertY(int y) {
     return (plotAreaHeight - y + (2 * plotAreaInsets.top));
   }
 
