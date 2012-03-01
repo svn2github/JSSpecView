@@ -41,7 +41,7 @@ public class IntegrationRatio extends Coordinate
     double integralVal = 0;
 	
 	/** the format of the string returned by getXString() and getYString() */
-    private DecimalFormat formatter = TextFormat.getDecimalFormat("0.########");
+    private static DecimalFormat formatter = TextFormat.getDecimalFormat("0.########");
     
     /**
      * Constructor
@@ -102,8 +102,8 @@ public class IntegrationRatio extends Coordinate
      */
     @Override
     public IntegrationRatio copy(){
-    	double x = super.getXVal();
-    	double y = super.getYVal();
+    	double x = getXVal();
+    	double y = getYVal();
     	return new IntegrationRatio(x, y, integralVal);
     }
     
@@ -114,15 +114,10 @@ public class IntegrationRatio extends Coordinate
      */
     @Override
     public boolean equals(Object otherObject){
-    	if (this == otherObject) return true;
-    	
-    	if (otherObject == null) return false;
-    	
-    	if (getClass() != otherObject.getClass()) return false;
-    	
-    	IntegrationRatio other = (IntegrationRatio) otherObject;
-    	
-    	return (super.getXVal() == other.getXVal() && super.getYVal() == other.getYVal() && integralVal == other.getIntegralVal());
+      return (this == otherObject 
+          || otherObject instanceof IntegrationRatio
+          && ((Coordinate) otherObject).equals(this)
+          && integralVal == ((IntegrationRatio)otherObject).integralVal);
     }
 
     /**
@@ -131,7 +126,7 @@ public class IntegrationRatio extends Coordinate
      */
     @Override
     public String toString(){
-      return "[" + super.getXVal() + ", " + super.getYVal() + "," + integralVal + "]";
+      return "[" + getXVal() + ", " + getYVal() + "," + integralVal + "]";
     }
 }
 
