@@ -85,7 +85,7 @@ import jspecview.common.PrintLayoutDialog;
 import jspecview.common.ScriptInterface;
 import jspecview.common.ScriptToken;
 import jspecview.common.Coordinate;
-import jspecview.common.IntegrationRatio;
+import jspecview.common.Annotation;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.PeakInfo;
 import jspecview.exception.JSpecViewException;
@@ -128,7 +128,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
   private String recentFileName = "";
   private String recentURL = "";
 
-  private ArrayList<IntegrationRatio> integrationRatios = null; // Integration Ratio Annotations
+  private ArrayList<Annotation> integrationRatios = null; // Integration Ratio Annotations
 
 
   private int startIndex = -1;
@@ -738,12 +738,16 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
         : JDXSpectrum.INTEGRATE_ON);
     JSVPanel jsvp = getCurrentPanel();
     JSVPanel jsvpNew = AppUtils.checkIntegral(jsvp, appletPanel, mode,
-        showMessage, integrationRatios, parameters);
-    if (jsvp == jsvpNew)
+        showMessage, parameters);
+    if (jsvp == jsvpNew) {
+      integrationRatios = null;
       return;
+    }
     initProperties(jsvpNew, currentSpectrumIndex);
+    if (integrationRatios != null)
+      jsvpNew.setIntegrationRatios(integrationRatios);
+    integrationRatios = null; // first time only
     jsvpNew.repaint();
-    integrationRatios = null;
     chooseContainer();
   }
 

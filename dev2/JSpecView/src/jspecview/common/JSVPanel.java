@@ -189,7 +189,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   // The Current Coordinate to be drawn on the Panel
   private String coordStr = "";
   private Coordinate coordClicked;
-  private static boolean plotReversed;
+  private boolean plotReversed;
+  
+  private boolean shouldDrawXAxisIncreasing;
 
   // background color of plot area
   private Color plotAreaColor = Color.white;
@@ -201,7 +203,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private Color integralPlotColor = Color.red;
 
   //integration ratio annotations
-  private ArrayList<IntegrationRatio> integrationRatios = new ArrayList<IntegrationRatio>();
+  private ArrayList<Annotation> integrationRatios;
+
+  private ArrayList<Annotation> annotations;
 
   // scale color
   private Color scaleColor = Color.black;
@@ -271,17 +275,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   // listeners to handle coordinatesClicked
   private ArrayList<PeakPickedListener> peakPickedListeners = new ArrayList<PeakPickedListener>();
 
-  //private MediaSize printMediaSize;
-  //  private double letterSize_width = 8.5;
-  //  private double letterSize_length = 11.0;
-  //  private int letter_pix_length = 648;
-  //  private int letter_pix_width = 468;
-
-  public JSVPanel() {
-    System.out.println("initialise JSVPanel " + this);
-    setDefaultMouseListener();
-  }
-
   /**
    * Constructs a new JSVPanel
    * 
@@ -291,7 +284,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   public JSVPanel(Graph spectrum) {
     super();
-    setDefaultMouseListener();
     try {
       initJSVPanel(new Graph[] { spectrum });
     } catch (ScalesIncompatibleException e) {
@@ -314,7 +306,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   public JSVPanel(Graph spectrum, int startIndex, int endIndex)
       throws JSpecViewException {
     super();
-    setDefaultMouseListener();
     try {
       initJSVPanel(new Graph[] { spectrum }, new int[] { startIndex },
           new int[] { endIndex });
@@ -331,7 +322,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   public JSVPanel(Graph[] spectra) throws ScalesIncompatibleException {
     super();
-    setDefaultMouseListener();
     initJSVPanel(spectra);
   }
 
@@ -364,7 +354,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   public JSVPanel(Graph[] spectra, int[] startIndices, int[] endIndices)
       throws JSpecViewException, ScalesIncompatibleException {
     super();
-    setDefaultMouseListener();
     initJSVPanel(spectra, startIndices, endIndices);
   }
 
@@ -455,6 +444,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @throws ScalesIncompatibleException
    */
   private void initJSVPanel(Graph[] spectra) throws ScalesIncompatibleException {
+    setDefaultMouseListener();
     this.spectra = spectra;
     nSpectra = spectra.length;
     if (nSpectra == 1)
@@ -821,10 +811,27 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @param ratios
    *        array of the integration ratios
    */
-  public void setIntegrationRatios(ArrayList<IntegrationRatio> ratios) {
-    // TODO use a more efficient array copy
-    for (int i = 0; i < ratios.size(); i++)
-      integrationRatios.add(ratios.get(i).copy());
+  public void setIntegrationRatios(ArrayList<Annotation> ratios) {
+    integrationRatios = ratios;
+  }
+
+  /**
+   * Sets the integration ratios that will be displayed
+   * 
+   * @param ratios
+   *        array of the integration ratios
+   */
+  public void addAnnotation(String value) {
+    if (value.equalsIgnoreCase("none")) {
+      annotations = null;
+      return;
+    }
+    ColoredAnnotation annotation = ColoredAnnotation.getAnnotation(value);
+    if (annotation == null)
+      return;
+    if (annotations == null)
+      annotations = new ArrayList<Annotation>();
+    annotations.add(annotation);
   }
 
   /*
@@ -1183,13 +1190,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   public void paintComponent(Graphics g) {
     if (!isEnabled())
       return;
-//    System.out.println("DRAWING " + title);
     super.paintComponent(g);
-    int width = getWidth();
-    int height = getHeight();
-    drawGraph(g, height, width);
-    if (integrationRatios != null)
-      drawIntegrationRatios(g, height, width);
+    drawGraph(g, getHeight(), getWidth());
   }
 
   /**
@@ -1203,7 +1205,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        the width to be drawn in pixels
    */
   private void drawGraph(Graphics g, int height, int width) {
-
+    shouldDrawXAxisIncreasing = isXAxisDisplayedIncreasing ^ plotReversed;
     plotAreaWidth = width - (plotAreaInsets.right + plotAreaInsets.left);
     plotAreaHeight = height - (plotAreaInsets.top + plotAreaInsets.bottom);
 
@@ -1291,6 +1293,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       drawCoordinates(g, height, width);
     if (zoomEnabled)
       drawZoomBox(g);
+    if (integrationRatios != null)
+      drawAnnotations(g, height, width, integrationRatios, integralPlotColor);
+    if (annotations != null)
+      drawAnnotations(g, height, width, annotations, null);
   }
 
   /**
@@ -1347,8 +1353,12 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
   private int xPixels(double dx) {
     int x = (int) ((dx - scaleData.minXOnScale) / xFactorForScale);
-    return (int) (shouldDrawXAxisIncreasing() ? leftPlotAreaPos + x
+    return (int) (shouldDrawXAxisIncreasing ? leftPlotAreaPos + x
         : rightPlotAreaPos - x);
+  }
+
+  private int yPixels(double yVal) {
+    return (int) (topPlotAreaPos + (yVal - scaleData.minYOnScale) / yFactorForScale);  
   }
 
   private boolean isPixelWithinPlotArea(int pix) {
@@ -1375,8 +1385,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     //Coordinate[] xyCoords = spectra[index].getXYCoords();
     Coordinate[] xyCoords = xyCoordsList[index];
 
-    boolean drawPlotIncreasing = shouldDrawXAxisIncreasing();
-
     // Draw a border
     if (!gridOn) {
       g.setColor(gridColor);
@@ -1390,65 +1398,30 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
     // Check if revPLot on
 
-    if (drawPlotIncreasing) {
-      if (!spectra[index].isContinuous()) {
-        for (int i = scaleData.startDataPointIndices[index]; i <= scaleData.endDataPointIndices[index]; i++) {
-          Coordinate point = xyCoords[i];
-          int x1 = (int) (leftPlotAreaPos + (((point.getXVal()) - scaleData.minXOnScale) / xFactorForScale));
-          int y1 = (int) (topPlotAreaPos - scaleData.minYOnScale
-              / yFactorForScale);
-          int x2 = (int) (leftPlotAreaPos + (((point.getXVal()) - scaleData.minXOnScale) / xFactorForScale));
-          int y2 = (int) (topPlotAreaPos + (((point.getYVal()) - scaleData.minYOnScale) / yFactorForScale));
-          g.drawLine(x1, invertY(height, y1), x2, invertY(height, y2));
-        }
-        if (scaleData.minYOnScale < 0) {
-          g.drawLine(leftPlotAreaPos,
-              invertY(height, (int) (topPlotAreaPos - scaleData.minYOnScale
-                  / yFactorForScale)), rightPlotAreaPos, invertY(height,
-                  (int) (topPlotAreaPos - scaleData.minYOnScale
-                      / yFactorForScale)));
-        }
-      } else {
+      if (spectra[index].isContinuous()) {
         for (int i = scaleData.startDataPointIndices[index]; i < scaleData.endDataPointIndices[index]; i++) {
           Coordinate point1 = xyCoords[i];
           Coordinate point2 = xyCoords[i + 1];
-          int x1 = (int) (leftPlotAreaPos + (((point1.getXVal()) - scaleData.minXOnScale) / xFactorForScale));
-          int y1 = (int) (topPlotAreaPos + (((point1.getYVal()) - scaleData.minYOnScale) / yFactorForScale));
-          int x2 = (int) (leftPlotAreaPos + (((point2.getXVal()) - scaleData.minXOnScale) / xFactorForScale));
-          int y2 = (int) (topPlotAreaPos + (((point2.getYVal()) - scaleData.minYOnScale) / yFactorForScale));
+          int x1 = xPixels(point1.getXVal());
+          int y1 = yPixels(point1.getYVal());
+          int x2 = xPixels(point2.getXVal());
+          int y2 = yPixels(point2.getYVal());
           g.drawLine(x1, invertY(height, y1), x2, invertY(height, y2));
-        }
-      }
-    } else {
-      if (!spectra[index].isContinuous()) {
-        for (int i = scaleData.endDataPointIndices[index]; i >= scaleData.startDataPointIndices[index]; i--) {
-          Coordinate point = xyCoords[i];
-          int x1 = (int) (rightPlotAreaPos - (((point.getXVal()) - scaleData.minXOnScale) / xFactorForScale));
-          int y1 = (int) (topPlotAreaPos - scaleData.minYOnScale
-              / yFactorForScale);
-          int x2 = (int) (rightPlotAreaPos - (((point.getXVal()) - scaleData.minXOnScale) / xFactorForScale));
-          int y2 = (int) (topPlotAreaPos + (((point.getYVal()) - scaleData.minYOnScale) / yFactorForScale));
-          g.drawLine(x1, invertY(height, y1), x2, invertY(height, y2));
-        }
-        if (scaleData.minYOnScale < 0) {
-          g.drawLine(rightPlotAreaPos,
-              invertY(height, (int) (topPlotAreaPos - scaleData.minYOnScale
-                  / yFactorForScale)), leftPlotAreaPos, invertY(height,
-                  (int) (topPlotAreaPos - scaleData.minYOnScale
-                      / yFactorForScale)));
         }
       } else {
-        for (int i = scaleData.endDataPointIndices[index]; i > scaleData.startDataPointIndices[index]; i--) {
-          Coordinate point1 = xyCoords[i];
-          Coordinate point2 = xyCoords[i - 1];
-          int x1 = (int) (rightPlotAreaPos - (((point1.getXVal()) - scaleData.minXOnScale) / xFactorForScale));
-          int y1 = (int) (topPlotAreaPos + (((point1.getYVal()) - scaleData.minYOnScale) / yFactorForScale));
-          int x2 = (int) (rightPlotAreaPos - (((point2.getXVal()) - scaleData.minXOnScale) / xFactorForScale));
-          int y2 = (int) (topPlotAreaPos + (((point2.getYVal()) - scaleData.minYOnScale) / yFactorForScale));
-          g.drawLine(x1, invertY(height, y1), x2, invertY(height, y2));
+        for (int i = scaleData.startDataPointIndices[index]; i <= scaleData.endDataPointIndices[index]; i++) {
+          Coordinate point = xyCoords[i];          
+          int x1 = xPixels(point.getXVal());
+          int y1 = yPixels(Math.max(scaleData.minYOnScale, 0));
+          int y2 = yPixels(point.getYVal());
+          g.drawLine(x1, invertY(height, y1), x1, invertY(height, y2));
+        }
+        if (scaleData.minYOnScale < 0) {
+          int y = yPixels(0);
+          g.drawLine(rightPlotAreaPos,
+              invertY(height, y), leftPlotAreaPos, invertY(height, y));
         }
       }
-    }
   } // End drawPlot
 
   /**
@@ -1466,17 +1439,17 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
     for (double val = scaleData.minXOnScale; val < scaleData.maxXOnScale
         + scaleData.xStep / 2; val += scaleData.xStep) {
-      int x = (int) (leftPlotAreaPos + ((val - scaleData.minXOnScale) / xFactorForScale));
-      int y1 = (int) topPlotAreaPos;
-      int y2 = (int) (topPlotAreaPos + ((scaleData.maxYOnScale - scaleData.minYOnScale) / yFactorForScale));
+      int x = xPixels(val);
+      int y1 = yPixels(scaleData.minYOnScale);
+      int y2 = yPixels(scaleData.maxYOnScale);
       g.drawLine(x, invertY(height, y1), x, invertY(height, y2));
     }
 
     for (double val = scaleData.minYOnScale; val < scaleData.maxYOnScale
         + scaleData.yStep / 2; val += scaleData.yStep) {
-      int x1 = (int) leftPlotAreaPos;
-      int x2 = (int) (leftPlotAreaPos + ((scaleData.maxXOnScale - scaleData.minXOnScale) / xFactorForScale));
-      int y = (int) (topPlotAreaPos + ((val - scaleData.minYOnScale) / yFactorForScale));
+      int x1 = xPixels(scaleData.minXOnScale);
+      int x2 = xPixels(scaleData.maxXOnScale);
+      int y = yPixels(val);
       g.drawLine(x1, invertY(height, y), x2, invertY(height, y));
     }
   }
@@ -1496,7 +1469,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     String hashX = "#";
     String hash1 = "0.00000000";
 
-    boolean drawScaleIncreasing = shouldDrawXAxisIncreasing();
+    boolean drawScaleIncreasing = shouldDrawXAxisIncreasing;
 
     if (scaleData.hashNumX <= 0)
       hashX = hash1.substring(0, Math.abs(scaleData.hashNumX) + 3);
@@ -1544,7 +1517,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     double max = scaleData.maxYOnScale + scaleData.yStep / 2;
     for (double val = scaleData.minYOnScale; val < max; val += scaleData.yStep) {
       int x1 = (int) leftPlotAreaPos;
-      int y = (int) (topPlotAreaPos + ((val - scaleData.minYOnScale) / yFactorForScale));
+      int y = yPixels(val);
       g.setColor(gridColor);
       g.drawLine(x1, invertY(height, y), x1 - 3, invertY(height, y));
       g.setColor(scaleColor);
@@ -1636,54 +1609,22 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     g.drawString(coordStr, x, (int) (topPlotAreaPos - 10));
   }
 
-  /**
-   * Draws the integration ratios recursively
-   * 
-   * @param integrationRatios
-   */
-  private void drawIntegrationRatios(Graphics g, int height, int width) {
-    // determine whether there are any ratio annotations to draw
-    if (integrationRatios == null)
-      return;
-
-    if (integrationRatios.size() > 0) {
-      // make ratios the same color as the integral
-      g.setColor(integralPlotColor);
-      Font font;
-
-      // determine font
-      if (isPrinting)
-        font = new Font(printingFont, Font.PLAIN, calculateFontSize(width, 12,
-            true));
-      else
-        font = new Font(displayFontName, Font.PLAIN, calculateFontSize(width,
-            12, true));
-      g.setFont(font);
-
-      // obtain integration ratio annotation to output
-      IntegrationRatio output;
-      output = integrationRatios.remove(0);
-
-      // determine whether the graph has been reversed or not	 
-      boolean drawRatiosIncreasing = shouldDrawXAxisIncreasing();
-
-      // draw the integration ratio annotation based on graph reversal status
-      int x = 0, y = 0;
-      if (drawRatiosIncreasing) {
-        x = (int) (leftPlotAreaPos + (((output.getXVal()) - scaleData.minXOnScale) / xFactorForScale));
-        y = (int) (bottomPlotAreaPos + output.getYVal() - 10);
-      } else {
-        x = (int) (rightPlotAreaPos - (((output.getXVal()) - scaleData.minXOnScale) / xFactorForScale));
-        y = (int) (bottomPlotAreaPos + output.getYVal() - 10);
-      }
-      g.drawString(output.getIntegralString(), x, y);
-
-      // recurse
-      drawIntegrationRatios(g, height, width);
-
-      integrationRatios.add(output);
-    } else if (integrationRatios.size() == 0) // stopping condition for the recursion
-      return;
+  // determine whether there are any ratio annotations to draw
+  private void drawAnnotations(Graphics g, int height, int width,
+                               ArrayList<Annotation> annotations, Color color) {
+    g.setFont(new Font(isPrinting ? printingFont : displayFontName, Font.BOLD,
+        calculateFontSize(width, 12, true)));
+    for (int i = annotations.size(); --i >= 0;) {
+      Annotation note = annotations.get(i);
+      color = (note instanceof ColoredAnnotation ? ((ColoredAnnotation) note).color : color);
+      if (color == null)
+        color = Color.BLACK;
+      g.setColor(color);
+      int x = xPixels(note.getXVal());
+      int y = (note.isPixels ? (int) (bottomPlotAreaPos + note.getYVal() - 10)
+          : yPixels(note.getYVal()));
+      g.drawString(note.text, x, y);
+    }
   }
 
   /**
@@ -1755,11 +1696,11 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        the y pixel value of the coordinate
    * @return the coordinate
    */
-  public Coordinate getCoordFromPoint(int xPixel, int yPixel) {
+  private Coordinate getCoordFromPoint(int xPixel, int yPixel) {
     double xPt, yPt;
 
     boolean plotIncreasing;
-    plotIncreasing = shouldDrawXAxisIncreasing();
+    plotIncreasing = shouldDrawXAxisIncreasing;
 
     if (!plotIncreasing)
       xPt = (((rightPlotAreaPos - xPixel) * xFactorForScale) + scaleData.minXOnScale);
@@ -1771,10 +1712,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         + (((topPlotAreaPos - yPixel) * yFactorForScale));
 
     return new Coordinate(xPt, yPt);
-  }
-
-  private boolean shouldDrawXAxisIncreasing() {
-    return isXAxisDisplayedIncreasing ^ plotReversed;
   }
 
   /*-------------------- METHODS FOR ZOOM SUPPORT--------------------------*/
@@ -2154,17 +2091,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   public boolean isOverlayIncreasing() {
     return overlayIncreasing;
-  }
-
-  public JSVPanel copy() {
-    JSVPanel newJSVPanel = new JSVPanel();
-
-    newJSVPanel.setGridOn(isGridOn());
-    newJSVPanel.setReversePlot(isPlotReversed());
-    newJSVPanel.setCoordinatesOn(isCoordinatesOn());
-    newJSVPanel.setZoomEnabled(isZoomEnabled());
-
-    return newJSVPanel;
   }
 
   /*
@@ -2628,11 +2554,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     if (e.getButton() != MouseEvent.BUTTON1)
       return;
 
-    int x = e.getX();
-    int y = e.getY();
-
-    int xPixel = x /*- getX()*/;
-    int yPixel = y /*- getY()*/;
+    int xPixel = e.getX();
+    int yPixel = e.getY();
 
     if (xPixel >= leftPlotAreaPos && xPixel <= rightPlotAreaPos
         && yPixel >= topPlotAreaPos && yPixel <= bottomPlotAreaPos) {
@@ -2744,7 +2667,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   public void toPeak(int istep) {
-    istep *= (shouldDrawXAxisIncreasing() ? 1 : -1);
+    istep *= (shouldDrawXAxisIncreasing ? 1 : -1);
     coordClicked = new Coordinate(lastClickX, 0);
     JDXSpectrum spec = getSpectrum();
     int iPeak = spec.setNextPeak(coordClicked, istep);

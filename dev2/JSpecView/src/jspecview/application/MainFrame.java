@@ -62,6 +62,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyVetoException;
@@ -93,6 +95,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.JTree;
@@ -240,6 +243,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   //private JTree errorTree = new JTree(new DefaultMutableTreeNode("Errors"));
   private JPanel statusPanel = new JPanel();
   private JLabel statusLabel = new JLabel();
+  private JTextField commandInput = new JTextField();
 
   private JSVPanelPopupMenu jsvpPopupMenu = new JSVPanelPopupMenu(this);
   private JCheckBoxMenuItem splitMenuItem = new JCheckBoxMenuItem();
@@ -1061,7 +1065,26 @@ public class MainFrame extends JFrame implements DropTargetListener,
           }
         }));
     getContentPane().add(statusPanel, BorderLayout.SOUTH);
-    statusPanel.add(statusLabel, BorderLayout.SOUTH);
+    statusPanel.add(statusLabel, BorderLayout.NORTH);
+    statusPanel.add(commandInput, BorderLayout.SOUTH);
+    commandInput.addKeyListener(new KeyListener() {
+
+      public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+          runScript(commandInput.getText());
+        }
+      }
+
+      public void keyReleased(KeyEvent e) {
+        // TODO Auto-generated method stub
+        
+      }
+
+      public void keyTyped(KeyEvent e) {
+      }
+      
+    });
+    
     getContentPane().add(jsvToolBar, BorderLayout.NORTH);
     jsvToolBar.add(openButton, null);
     jsvToolBar.add(printButton, null);
@@ -1468,7 +1491,9 @@ public class MainFrame extends JFrame implements DropTargetListener,
         : JDXSpectrum.INTEGRATE_ON);
     JSVTreeNode node = findNode(selectedJSVPanel);
     JSVPanel jsvpNew = AppUtils.checkIntegral(selectedJSVPanel, node.frame,
-        mode, showMessage, null, parameters);
+        mode, showMessage, parameters);
+    //if (integrationRatios != null)   applet only?
+      //newJsvp.setIntegrationRatios(integrationRatios);
     if (jsvpNew == selectedJSVPanel)
       return;
     setJSVPanelProperties(jsvpNew, true);
@@ -1828,6 +1853,10 @@ public class MainFrame extends JFrame implements DropTargetListener,
         case INTEGRATE:
           if (jsvp != null)
             integrate(value);
+          break;
+        case ANNOTATION:
+          if (jsvp != null)
+            jsvp.addAnnotation(value);
           break;
         case OVERLAY:
           overlay(TextFormat.split(value, ","));

@@ -2,14 +2,11 @@ package jspecview.common;
 
 import java.awt.Color;
 import java.awt.Container;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
 
 import jspecview.common.IntegralGraph;
-import jspecview.common.IntegrationRatio;
 import jspecview.common.JDXSpectrum;
 import jspecview.util.ColorUtil;
 
@@ -33,7 +30,6 @@ public class AppUtils {
   public static JSVPanel integrate(
                                    Container frameOrPanel,
                                    boolean showDialog,
-                                   ArrayList<IntegrationRatio> integrationRatios,
                                    Parameters parameters) {
     JPanel jp = (JPanel) (frameOrPanel instanceof JInternalFrame ? ((JInternalFrame) frameOrPanel)
         .getContentPane()
@@ -65,8 +61,6 @@ public class AppUtils {
         JSVPanel newJsvp = JSVPanel.getIntegralPanel(spectrum, jsvp
             .getIntegralPlotColor());
         // add integration ratio annotations if any exist
-        if (integrationRatios != null)
-          newJsvp.setIntegrationRatios(integrationRatios);
         jp.remove(jsvp);
         jp.add(newJsvp);
       }
@@ -114,19 +108,12 @@ public class AppUtils {
                                        Container frameOrPanel,
                                        int mode,
                                        boolean showMessage,
-                                       ArrayList<IntegrationRatio> integrationRatios,
                                        Parameters parameters) {
     return (mode == JDXSpectrum.INTEGRATE_OFF
         || mode != JDXSpectrum.INTEGRATE_ON
         && jsvp.getSpectrum().getIntegrationGraph() != null 
         ? removeIntegration(frameOrPanel)
-        : integrate(frameOrPanel, showMessage, integrationRatios, parameters));
-  }
-
-  public static void integrate(List<JDXSpectrum> specs,
-                               ArrayList<IntegrationRatio> integrationRatios) {
-    // TODO Auto-generated method stub
-    
+        : integrate(frameOrPanel, showMessage, parameters));
   }
 
   /**

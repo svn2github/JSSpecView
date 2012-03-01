@@ -12,11 +12,12 @@ import jspecview.util.TextFormat;
 public enum ScriptToken {
 
   UNKNOWN("?"),
+  ANNOTATION("ANNOTATION"),  // annotation x y color "text"
   APPLETID("APPLETID"),
   APPLETREADYCALLBACKFUNCTIONNAME("APPLETREADYCALLBACKFUNCTIONNAME"),
   AUTOINTEGRATE("AUTOINTEGRATE"),
   BACKGROUNDCOLOR("BACKGROUNDCOLOR"),
-  CLOSE("CLOSE"),
+  CLOSE("CLOSE"),   // id or file name or ALL
   COMPOUNDMENUON("COMPOUNDMENUON"),
   COORDCALLBACKFUNCTIONNAME("COORDCALLBACKFUNCTIONNAME"),
   COORDINATESCOLOR("COORDINATESCOLOR"),
@@ -36,7 +37,7 @@ public enum ScriptToken {
   LOAD("LOAD"),
   MENUON("MENUON"),
   OBSCURE("OBSCURE"),
-  OVERLAY("OVERLAY"),
+  OVERLAY("OVERLAY"),   // overlay specno,specno,specno....
   PEAKCALLBACKFUNCTIONNAME("PEAKCALLBACKFUNCTIONNAME"),
   PLOTAREACOLOR("PLOTAREACOLOR"),
   PLOTCOLOR("PLOTCOLOR"),
@@ -92,6 +93,7 @@ public enum ScriptToken {
     switch (st) {
     default:
       return nextStringToken(params);
+    case ANNOTATION:
     case CLOSE:
     case LOAD:
       // takes full command, possibly removing ""
@@ -116,7 +118,7 @@ public enum ScriptToken {
     }
   }
 
-  static String nextStringToken(StringTokenizer params) {
+  public static String nextStringToken(StringTokenizer params) {
     String s = params.nextToken();
     if (s.charAt(0) != '"') 
       return s;
