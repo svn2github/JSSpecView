@@ -1,5 +1,9 @@
 package jspecview.common;
 
+import java.text.DecimalFormat;
+
+import jspecview.util.TextFormat;
+
 /**
  * Stores information
  * about scale and range that <code>JSVPanel</code> needs to to display a
@@ -9,10 +13,14 @@ package jspecview.common;
  * {@link jspecview.common.MultiScaleData#generateScaleData(jspecview.common.Coordinate[][], int[], int[], int, int)}
  * You do not need to create an instance of this class manually. Instead call
  * the
- * {@link jspecview.common.Coordinate#generateScaleData(jspecview.common.Coordinate[], int, int, int, int)}
+ * {@link jspecview.common.ScaleData#generateScaleData(jspecview.common.Coordinate[], int, int, int, int)}
  * .
  */
 public class ScaleData {
+
+  private final static double[] UNITS = { 1.5, 2.0, 2.5, 4.0, 5.0, 8.0, 10.0 };
+  private final static DecimalFormat SCI_FORMATTER = TextFormat.getDecimalFormat("0.###E0");
+
   // X variables
   /**
    * The minimum X value in the list of coordinates of the graph
@@ -30,14 +38,20 @@ public class ScaleData {
   protected int numInitXdiv;
 
   /**
-   * The precision (number of decimal places) of the Y values
+   * The precision (number of decimal places) of the X and Y values
    */
-  public int hashNumX;
+  public int hashNums[] = new int[2];
 
   /**
    * The step value of X axis of the scale
    */
   public double xStep;
+
+  /**
+   * First grid x value
+   */
+  public double firstX = Double.NaN;
+  
 
   /**
    * the minimum X value on the scale
@@ -69,11 +83,6 @@ public class ScaleData {
    * The preferred number of Y division for the scale
    */
   public int numInitYdiv;
-
-  /**
-   * The precision (number of decimal places) of the Y values
-   */
-  public int hashNumY;
 
   /**
    * The step value of Y axis of the scale
@@ -111,10 +120,43 @@ public class ScaleData {
    */
   public int numOfPoints;
 
+  public ScaleData(double minX, double maxX, double minY, double maxY) {
+    this.minX = minX;
+    this.maxX = maxX;
+    this.minY = minY;
+    this.maxY = maxY;
+  }
+
   /**
-   * Initialises a <code>ScaleData</code>
+   * Calculates values that <code>JSVPanel</code> needs in order to render a
+   * graph, (eg. scale, min and max values) and stores the values in the
+   * class <code>ScaleData</code>. Note: This
+   * method is not used in the application, instead the more general
+   * {@link jspecview.common.MultiScaleData} is generated with
+   * the
+   * {@link jspecview.common.MultiScaleData#generateScaleData(jspecview.common.Coordinate[][], int[], int[], int, int)}
+   * method
+   * 
+   * @param coords
+   *        the array of coordinates
+   * @param start
+   *        the start index
+   * @param end
+   *        the end index
+   * @param initNumXDivisions
+   *        the initial number of X divisions for scale
+   * @param initNumYDivisions
+   *        the initial number of Y divisions for scale
+   * @return returns an instance of <code>ScaleData</code>
    */
-  public ScaleData() {
+  public ScaleData(Coordinate[] coords, int start,
+                                            int end, int initNumXDivisions,
+                                            int initNumYDivisions) {
+    this(Coordinate.getMinX(coords, start, end),
+        Coordinate.getMaxX(coords, start, end),
+        Coordinate.getMinY(coords, start, end),
+        Coordinate.getMaxY(coords, start, end));  
+    setScale(initNumXDivisions, initNumYDivisions);
   }
 
   /**
@@ -128,8 +170,10 @@ public class ScaleData {
     maxX = data.maxX;
     numInitXdiv = data.numInitXdiv;
 
-    hashNumX = data.hashNumX;
+    hashNums[0] = data.hashNums[0];
+    hashNums[1] = data.hashNums[1];
     xStep = data.xStep;
+    firstX = data.firstX;
     minXOnScale = data.minXOnScale;
     maxXOnScale = data.maxXOnScale;
     numOfXDivisions = data.numOfXDivisions;
@@ -138,7 +182,6 @@ public class ScaleData {
     maxY = data.maxY;
     numInitYdiv = data.numInitYdiv;
 
-    hashNumY = data.hashNumY;
     yStep = data.yStep;
     minYOnScale = data.minYOnScale;
     maxYOnScale = data.maxYOnScale;
@@ -148,6 +191,55 @@ public class ScaleData {
     endDataPointIndex = data.endDataPointIndex;
     numOfPoints = data.numOfPoints;
   }
+
+  protected ScaleData setScale(int initNumXDivisions, int initNumYDivisions) {
+
+    numInitXdiv = initNumXDivisions;
+    numInitYdiv = initNumYDivisions;
+
+    // X Scale
+    xStep = getStep(minX, maxX, initNumXDivisions, hashNums, 0);
+    minXOnScale = xStep * Math.floor(minX / xStep);
+    maxXOnScale = xStep * Math.ceil(maxX / xStep);
+
+    numOfXDivisions = (int) Math.ceil((maxXOnScale - minXOnScale) / xStep);
+    boolean USE_FIRSTX = true;
+    if (USE_FIRSTX) {
+      firstX = Math.floor(minX / xStep) * xStep;
+      if (Math.abs((minX - firstX) / xStep) > 0.0001)
+        firstX += xStep;
+      minXOnScale = minX;
+      maxXOnScale = maxX;
+      System.out.println("scaleData xStep minX firstX maxX minXonScale maxXonScale\n"
+          + xStep + "\t" + minX + "\t" + firstX + "\t" + maxX + "\t" + minXOnScale + "\t"
+          + maxXOnScale);
+    }
+    // Y Scale
+    if (minY == 0 && maxY == 0)
+      maxY = 1;
+    yStep = getStep(minY, maxY, initNumYDivisions, hashNums, 1);
+    minYOnScale = yStep * Math.floor(minY / yStep);
+    maxYOnScale = yStep * Math.ceil(maxY / yStep);
+    numOfYDivisions = (int) Math.ceil((maxYOnScale - minYOnScale) / yStep);
+    return this;
+  }
+
+  private static double getStep(double min, double max, int nDiv, int[] hashNums, int i) {
+    double spanX = (max - min) / nDiv;
+    String strSpanX = SCI_FORMATTER.format(spanX);
+    strSpanX = strSpanX.toUpperCase();
+    int indexOfE = strSpanX.indexOf('E');
+    return getStepFromExponent(Double.parseDouble(strSpanX.substring(0, indexOfE)),
+        (hashNums[i] = Integer.parseInt(strSpanX.substring(indexOfE + 1))));
+  }
+
+  private static double getStepFromExponent(double leftOfE, int rightOfE) {    
+    int i = 0;
+    while (leftOfE > UNITS[i] && i <= 6)
+      i++;
+    return Math.pow(10, rightOfE) * UNITS[i];
+  }
+
 
   /**
    * Determines if the x coordinate is within the range of coordinates in the
@@ -163,58 +255,5 @@ public class ScaleData {
       return true;
     return false;
   }
-
-  /**
-   * 
-   * @param spectra
-   * @param scaleData
-   * @param initX
-   * @param finalX
-   * @param minPoints
-   * @param startIndices  to fill
-   * @param endIndices    to fill
-   * @return
-   */
-  public static boolean setDataPointIndices(Graph[] spectra,
-                                            MultiScaleData scaleData,
-                                            double initX,
-                                            double finalX, int minPoints,
-                                            int[] startIndices,
-                                            int[] endIndices) {
-    int ptCount = 0;
-    int nSpectraOK = 0;
-    int nSpectra = startIndices.length;
-    int index = 0;
-    for (int i = 0; i < nSpectra; i++) {
-      Coordinate[] xyCoords = spectra[i].getXYCoords();
-      int iStart = scaleData.startDataPointIndices[i];
-      int iEnd = scaleData.endDataPointIndices[i];
-      for (index = iStart; index <= iEnd; index++) {
-        double x = xyCoords[index].getXVal();
-        if (x >= initX) {
-          startIndices[i] = index;
-          break;
-        }
-      }
-
-      // determine endDataPointIndex
-      for (; index <= iEnd; index++) {
-        double x = xyCoords[index].getXVal();
-        ptCount++;
-        if (x >= finalX) {
-          break;
-        }
-      }
-
-      if (ptCount >= minPoints) {
-        nSpectraOK++;
-      }
-      ptCount = 0;
-      endIndices[i] = index - 1;
-    }
-
-    return (nSpectraOK == nSpectra);
-  }
-
 
 }

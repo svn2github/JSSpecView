@@ -35,7 +35,12 @@ import java.util.Vector;
  * @see jspecview.common.JDXSpectrum
  */
 public class IntegralGraph implements Graph {
- /**
+
+  public final static double DEFAULT_MINY = 0.1;
+  public final static double DEFAULT_FACTOR = 50;
+  public final static double DEFAULT_OFFSET = 30;
+
+  /**
    * The input graph
    */
   private Graph graph;

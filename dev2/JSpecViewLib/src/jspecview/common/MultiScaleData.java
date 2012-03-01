@@ -1,8 +1,5 @@
 package jspecview.common;
 
-import java.text.DecimalFormat;
-
-import jspecview.util.TextFormat;
 
 /**
  * Stores information
@@ -30,39 +27,13 @@ public class MultiScaleData extends ScaleData {
   public int[] numOfPointsList;
 
   /**
-   * Initialises a <code>MultiScaleData</code>
-   */
-  public MultiScaleData() {
-    super();
-  }
-
-  /**
    * Initialises a <code>MultiScaleData</code> from another one
    * 
    * @param data
    *        the <code>MultiScaleData</code> to copy
    */
   public MultiScaleData(MultiScaleData data) {
-    minX = data.minX;
-    maxX = data.maxX;
-    numInitXdiv = data.numInitXdiv;
-
-    hashNumX = data.hashNumX;
-    xStep = data.xStep;
-    minXOnScale = data.minXOnScale;
-    maxXOnScale = data.maxXOnScale;
-    numOfXDivisions = data.numOfXDivisions;
-
-    minY = data.minY;
-    maxY = data.maxY;
-    numInitYdiv = data.numInitYdiv;
-
-    hashNumY = data.hashNumY;
-    yStep = data.yStep;
-    minYOnScale = data.minYOnScale;
-    maxYOnScale = data.maxYOnScale;
-    numOfYDivisions = data.numOfYDivisions;
-
+    super(data);    
     startDataPointIndices = data.startDataPointIndices;
     endDataPointIndices = data.endDataPointIndices;
     numOfPointsList = data.numOfPointsList;
@@ -70,8 +41,8 @@ public class MultiScaleData extends ScaleData {
 
   /**
    * Calculates values that <code>JSVPanel</code> needs in order to render a
-   * graph, (eg. scale, min and max values) and stores the values in the
-   * class <code>ScaleData</code>.
+   * graph, (eg. scale, min and max values) and stores the values in the class
+   * <code>ScaleData</code>.
    * 
    * @param coordLists
    *        an array of arrays of coordinates
@@ -85,86 +56,69 @@ public class MultiScaleData extends ScaleData {
    *        the initial number of Y divisions for scale
    * @return returns an instance of <code>MultiScaleData</code>
    */
-  public static MultiScaleData generateScaleData(Coordinate[][] coordLists,
-                                                 int[] startList,
-                                                 int[] endList,
-                                                 int initNumXDivisions,
-                                                 int initNumYDivisions) {
-  
-    MultiScaleData data = new MultiScaleData();
-  
-    double spanX, spanY;
-    double[] units = { 1.5, 2.0, 2.5, 4.0, 5.0, 8.0, 10.0 };
-    DecimalFormat sciFormatter = TextFormat.getDecimalFormat("0.###E0");
-  
-    int indexOfE;
-    double leftOfE;
-    int rightOfE;
-    int i;
-  
-    // startDataPointIndex and endDataPointIndex
-    data.startDataPointIndices = startList;
-    data.endDataPointIndices = endList;
-    data.numInitXdiv = initNumXDivisions;
-  
-    int[] tmpList = new int[startList.length];
-    for (int j = 0; j < startList.length; j++) {
-      tmpList[j] = endList[j] - startList[j] + 1;
-    }
-    data.numOfPointsList = tmpList;
-  
-    // X Scale
-    data.minX = Coordinate.getMinX(coordLists, startList, endList);
-    data.maxX = Coordinate.getMaxX(coordLists, startList, endList);
-    spanX = (data.maxX - data.minX) / initNumXDivisions;
-    String strSpanX = sciFormatter.format(spanX);
-    strSpanX = strSpanX.toUpperCase();
-    indexOfE = strSpanX.indexOf('E');
-    leftOfE = Double.parseDouble(strSpanX.substring(0, indexOfE));
-    rightOfE = Integer.parseInt(strSpanX.substring(indexOfE + 1));
-    data.hashNumX = rightOfE;
-  
-    i = 0;
-    while (leftOfE > units[i] && i <= 6) {
-      i++;
-    }
-  
-    data.xStep = Math.pow(10, rightOfE) * units[i];
-    data.minXOnScale = data.xStep * Math.floor((data.minX) / data.xStep);
-    data.maxXOnScale = data.xStep * Math.ceil((data.maxX) / data.xStep);
-    data.numOfXDivisions = (int) Math
-        .ceil((data.maxXOnScale - data.minXOnScale) / data.xStep);
-  
-    // Find min and max x and y
-  
-    // Y Scale
-    data.minY = Coordinate.getMinY(coordLists, startList, endList);
-    data.maxY = Coordinate.getMaxY(coordLists, startList, endList);
-    data.numInitYdiv = initNumYDivisions;
-  
-    if (data.minY == 0 && data.maxY == 0) {
-      data.maxY = 1;
-    }
-  
-    spanY = (data.maxY - data.minY) / initNumYDivisions;
-    String strSpanY = sciFormatter.format(spanY);
-    strSpanY = strSpanY.toUpperCase();
-    indexOfE = strSpanY.indexOf('E');
-    leftOfE = Double.parseDouble(strSpanY.substring(0, indexOfE));
-    rightOfE = Integer.parseInt(strSpanY.substring(indexOfE + 1));
-    data.hashNumY = rightOfE;
-  
-    i = 0;
-    while (leftOfE > units[i] && i <= 6) {
-      i++;
-    }
-  
-    data.yStep = Math.pow(10, rightOfE) * units[i];
-    data.minYOnScale = data.yStep * Math.floor((data.minY) / data.yStep);
-    data.maxYOnScale = data.yStep * Math.ceil((data.maxY) / data.yStep);
-    data.numOfYDivisions = (int) Math
-        .ceil((data.maxYOnScale - data.minYOnScale) / data.yStep);
-  
-    return data;
+  public MultiScaleData(Coordinate[][] coordLists, int[] startList,
+      int[] endList, int initNumXDivisions, int initNumYDivisions) {
+    super(Coordinate.getMinX(coordLists, startList, endList), 
+        Coordinate.getMaxX(coordLists, startList, endList), 
+        Coordinate.getMinY(coordLists, startList, endList), 
+        Coordinate.getMaxY(coordLists,startList, endList));
+    startDataPointIndices = startList;
+    endDataPointIndices = endList;
+    numOfPointsList = new int[startList.length];
+    for (int j = 0; j < startList.length; j++)
+      numOfPointsList[j] = endList[j] - startList[j] + 1;
+    setScale(initNumXDivisions, initNumYDivisions);
   }
+  
+  /**
+   * 
+   * @param spectra
+   * @param scaleData
+   * @param initX
+   * @param finalX
+   * @param minPoints
+   * @param startIndices  to fill
+   * @param endIndices    to fill
+   * @return
+   */
+  public boolean setDataPointIndices(Graph[] spectra,
+                                            double initX,
+                                            double finalX, int minPoints,
+                                            int[] startIndices,
+                                            int[] endIndices) {
+    int ptCount = 0;
+    int nSpectraOK = 0;
+    int nSpectra = startIndices.length;
+    int index = 0;
+    for (int i = 0; i < nSpectra; i++) {
+      Coordinate[] xyCoords = spectra[i].getXYCoords();
+      int iStart = startDataPointIndices[i];
+      int iEnd = endDataPointIndices[i];
+      for (index = iStart; index <= iEnd; index++) {
+        double x = xyCoords[index].getXVal();
+        if (x >= initX) {
+          startIndices[i] = index;
+          break;
+        }
+      }
+
+      // determine endDataPointIndex
+      for (; index <= iEnd; index++) {
+        double x = xyCoords[index].getXVal();
+        ptCount++;
+        if (x >= finalX) {
+          break;
+        }
+      }
+
+      if (ptCount >= minPoints) {
+        nSpectraOK++;
+      }
+      ptCount = 0;
+      endIndices[i] = index - 1;
+    }
+
+    return (nSpectraOK == nSpectra);
+  }
+
  }

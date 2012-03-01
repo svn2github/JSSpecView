@@ -380,316 +380,7 @@ public class Coordinate {
   }
 
   /**
-   * Calculates values that <code>JSVPanel</code> needs in order to render a
-   * graph, (eg. scale, min and max values) and stores the values in the
-   * class <code>ScaleData</code>. Note: This
-   * method is not used in the application, instead the more general
-   * {@link jspecview.common.MultiScaleData} is generated with
-   * the
-   * {@link jspecview.common.MultiScaleData#generateScaleData(jspecview.common.Coordinate[][], int[], int[], int, int)}
-   * method
-   * 
-   * @param coords
-   *        the array of coordinates
-   * @param start
-   *        the start index
-   * @param end
-   *        the end index
-   * @param initNumXDivisions
-   *        the initial number of X divisions for scale
-   * @param initNumYDivisions
-   *        the initial number of Y divisions for scale
-   * @return returns an instance of <code>ScaleData</code>
-   */
-  public static ScaleData generateScaleData(Coordinate[] coords, int start,
-                                            int end, int initNumXDivisions,
-                                            int initNumYDivisions) {
-    ScaleData data = new ScaleData();
-  
-    // max and min values divided by the number of divisions
-    // ie. how much the scale would go up by (the step)
-    double spanX, spanY;
-    double[] units = { 1.5, 2.0, 2.5, 4.0, 5.0, 8.0, 10.0 };
-    // formats the spanX and spanY values into scientific notation
-    DecimalFormat sciFormatter = TextFormat.getDecimalFormat("0.###E0");
-    // index of the letter 'E' in spanX and spanY values formatted  in sci notation
-    // as a string
-    int indexOfE;
-    // number to the left of the 'E'
-    double leftOfE;
-    // integer to the right of 'E'
-    int rightOfE;
-    int i;
-  
-    // startDataPointIndex and endDataPointIndex
-    data.startDataPointIndex = start;
-    data.endDataPointIndex = end;
-    data.numOfPoints = data.endDataPointIndex - data.startDataPointIndex + 1;
-    data.numInitXdiv = initNumXDivisions;
-  
-    // X Scale
-    data.minX = getMinX(coords, start, end);
-    data.maxX = getMaxX(coords, start, end);
-  
-    // using 10 divisions
-    spanX = (data.maxX - data.minX) / initNumXDivisions;
-    // spanX in sci notation as a string
-    String strSpanX = sciFormatter.format(spanX);
-    strSpanX = strSpanX.toUpperCase();
-    indexOfE = strSpanX.indexOf('E');
-    leftOfE = Double.parseDouble(strSpanX.substring(0, indexOfE));
-    rightOfE = Integer.parseInt(strSpanX.substring(indexOfE + 1));
-    // the number of decimal places that the scale number should be formatted to
-    data.hashNumX = rightOfE;
-  
-    i = 0;
-    //make sure scale values are multiples or factor of one of the values in the units array
-    while (leftOfE > units[i] && i <= 6) {
-      i++;
-    }
-  
-    // find the new span based on the unit found
-    data.xStep = Math.pow(10, rightOfE) * units[i];
-    // the minimum x value for the scale
-    data.minXOnScale = data.xStep * Math.floor((data.minX) / data.xStep);
-    // the minimum y value for the scale
-    data.maxXOnScale = data.xStep * Math.ceil((data.maxX) / data.xStep);
-  
-    // the number of divisions with the new step
-    data.numOfXDivisions = (int) Math
-        .ceil((data.maxXOnScale - data.minXOnScale) / data.xStep);
-  
-    // Find min and max x and y
-  
-    // Y Scale
-    // Do the same for Y scale
-    data.minY = getMinY(coords, start, end);
-    data.maxY = getMaxY(coords, start, end);
-    data.numInitYdiv = initNumYDivisions;
-  
-    if (data.minY == 0 && data.maxY == 0) {
-      data.maxY = 1;
-    }
-  
-    spanY = (data.maxY - data.minY) / initNumYDivisions;
-    String strSpanY = sciFormatter.format(spanY);
-    strSpanY = strSpanY.toUpperCase();
-    indexOfE = strSpanY.indexOf('E');
-    leftOfE = Double.parseDouble(strSpanY.substring(0, indexOfE));
-    rightOfE = Integer.parseInt(strSpanY.substring(indexOfE + 1));
-    data.hashNumY = rightOfE;
-  
-    i = 0;
-    while (leftOfE > units[i] && i <= 6) {
-      i++;
-    }
-  
-    data.yStep = Math.pow(10, rightOfE) * units[i];
-    data.minYOnScale = data.yStep * Math.floor((data.minY) / data.yStep);
-    data.maxYOnScale = data.yStep * Math.ceil((data.maxY) / data.yStep);
-    data.numOfYDivisions = (int) Math
-        .ceil((data.maxYOnScale - data.minYOnScale) / data.yStep);
-  
-    return data;
-  }
-
-  /**
-   * Returns the maximum y value value from an array of arrays of
-   * <code>Coordinate</code>s.
-   * 
-   * @param coordLists
-   *        the 2d coordinate array
-   * @param startList
-   *        the start indices
-   * @param endList
-   *        the end indices
-   * @return the maximum y value value from an array of arrays of
-   *         <code>Coordinate</code>s
-   */
-  public static double getMaxY(Coordinate[][] coordLists, int[] startList,
-                               int[] endList) {
-    double tmpMaxY, tmp;
-  
-    tmpMaxY = getMaxY(coordLists[0], startList[0], endList[0]);
-    for (int i = 1; i < coordLists.length; i++) {
-      tmp = getMaxY(coordLists[i], startList[i], endList[i]);
-      if (tmp > tmpMaxY)
-        tmpMaxY = tmp;
-    }
-  
-    return tmpMaxY;
-  }
-
-  /**
-   * Returns the maximum x value value from an array of arrays of
-   * <code>Coordinate</code>s.
-   * 
-   * @param coordLists
-   *        the 2d coordinate array
-   * @param startList
-   *        the start indices
-   * @param endList
-   *        the end indices
-   * @return the maximum x value value from an array of arrays of
-   *         <code>Coordinate</code>s
-   */
-  public static double getMaxX(Coordinate[][] coordLists, int[] startList,
-                               int[] endList) {
-    double tmpMaxX, tmp;
-  
-    tmpMaxX = getMaxX(coordLists[0], startList[0], endList[0]);
-    for (int i = 1; i < coordLists.length; i++) {
-      tmp = getMaxX(coordLists[i], startList[i], endList[i]);
-      if (tmp > tmpMaxX)
-        tmpMaxX = tmp;
-    }
-  
-    return tmpMaxX;
-  }
-
-  /**
-   * Returns the minimum y value value from an array of arrays of
-   * <code>Coordinate</code>s.
-   * 
-   * @param coordLists
-   *        the 2d coordinate array
-   * @param startList
-   *        the start indices
-   * @param endList
-   *        the end indices
-   * @return the minimum y value value from an array of arrays of
-   *         <code>Coordinate</code>s
-   */
-  public static double getMinY(Coordinate[][] coordLists, int[] startList,
-                               int[] endList) {
-    double tmpMinY, tmp;
-  
-    tmpMinY = getMinY(coordLists[0], startList[0], endList[0]);
-    for (int i = 1; i < coordLists.length; i++) {
-      tmp = getMinY(coordLists[i], startList[i], endList[i]);
-      if (tmp < tmpMinY)
-        tmpMinY = tmp;
-    }
-  
-    return tmpMinY;
-  }
-
-  /**
-   * Returns the minimum x value value from an array of arrays of
-   * <code>Coordinate</code>s.
-   * 
-   * @param coordLists
-   *        the 2d coordinate array
-   * @param startList
-   *        the start indices
-   * @param endList
-   *        the end indices
-   * @return the minimum x value value from an array of arrays of
-   *         <code>Coordinate</code>s
-   */
-  public static double getMinX(Coordinate[][] coordLists, int[] startList,
-                               int[] endList) {
-    double tmpMinX, tmp;
-  
-    tmpMinX = getMinX(coordLists[0], startList[0], endList[0]);
-    for (int i = 1; i < coordLists.length; i++) {
-      tmp = getMinX(coordLists[i], startList[i], endList[i]);
-      if (tmp < tmpMinX)
-        tmpMinX = tmp;
-    }
-  
-    return tmpMinX;
-  }
-
-  /**
-   * Returns the maximum y value of an array of <code>Coordinate</code>s
-   * 
-   * @param coords
-   *        the coordinates
-   * @return the maximum y value of an array of <code>Coordinate</code>s
-   */
-  public static double getMaxY(Coordinate[] coords) {
-    return getMaxY(coords, 0, coords.length - 1);
-  }
-
-  /**
-   * Returns the maximum x value of an array of <code>Coordinate</code>s
-   * 
-   * @param coords
-   *        the coordinates
-   * @return the maximum x value of an array of <code>Coordinate</code>s
-   */
-  public static double getMaxX(Coordinate[] coords) {
-    return getMaxX(coords, 0, coords.length - 1);
-  }
-
-  /**
-   * Returns the minimum y value of an array of <code>Coordinate</code>s
-   * 
-   * @param coords
-   *        the coordinates
-   * @return the minimum y value of an array of <code>Coordinate</code>s
-   */
-  public static double getMinY(Coordinate[] coords) {
-    return getMinY(coords, 0, coords.length - 1);
-  }
-
-  /**
    * Returns the minimum x value of an array of <code>Coordinate</code>s
-   * 
-   * @param coords
-   *        the coordinates
-   * @return the minimum x value of an array of <code>Coordinate</code>s
-   */
-  public static double getMinX(Coordinate[] coords) {
-    return getMinX(coords, 0, coords.length - 1);
-  }
-
-  /**
-   * Returns the maximum y value of an array of <code>Coordinate</code>s
-   * 
-   * @param coords
-   *        the coordinates
-   * @param start
-   *        the starting index
-   * @param end
-   *        the ending index
-   * @return the maximum y value of an array of <code>Coordinate</code>s
-   */
-  public static double getMaxY(Coordinate[] coords, int start, int end) {
-    double tempMaxY, tempY;
-    tempMaxY = coords[start].getYVal();
-    for (int index = start + 1; index <= end; index++) {
-      tempY = coords[index].getYVal();
-      tempMaxY = Math.max(tempMaxY, tempY);
-    }
-    return tempMaxY;
-  }
-
-  /**
-   * Returns the minimum x value of an array of <code>Coordinate</code>s
-   * 
-   * @param coords
-   *        the coordinates
-   * @param start
-   *        the starting index
-   * @param end
-   *        the ending index
-   * @return the minimum x value of an array of <code>Coordinate</code>s
-   */
-  public static double getMinY(Coordinate[] coords, int start, int end) {
-    double tempMinY, tempY;
-    tempMinY = coords[start].getYVal();
-    for (int index = start + 1; index <= end; index++) {
-      tempY = coords[index].getYVal();
-      tempMinY = Math.min(tempMinY, tempY);
-    }
-  
-    return tempMinY;
-  }
-
-  /**
-   * Returns the maximum x value of an array of <code>Coordinate</code>s
    * 
    * @param coords
    *        the coordinates
@@ -715,6 +406,41 @@ public class Coordinate {
    * 
    * @param coords
    *        the coordinates
+   * @return the minimum x value of an array of <code>Coordinate</code>s
+   */
+  public static double getMinX(Coordinate[] coords) {
+    return getMinX(coords, 0, coords.length - 1);
+  }
+
+  /**
+   * Returns the minimum x value value from an array of arrays of
+   * <code>Coordinate</code>s.
+   * 
+   * @param coordLists
+   *        the 2d coordinate array
+   * @param startList
+   *        the start indices
+   * @param endList
+   *        the end indices
+   * @return the minimum x value value from an array of arrays of
+   *         <code>Coordinate</code>s
+   */
+  public static double getMinX(Coordinate[][] coordLists, int[] startList,
+                               int[] endList) {
+    double tmpMinX = Double.MAX_VALUE;
+    for (int i = 0; i < coordLists.length; i++) {
+      double tmp = getMinX(coordLists[i], startList[i], endList[i]);
+      if (tmp < tmpMinX)
+        tmpMinX = tmp;
+    }
+    return tmpMinX;
+  }
+
+  /**
+   * Returns the minimum x value of an array of <code>Coordinate</code>s
+   * 
+   * @param coords
+   *        the coordinates
    * @param start
    *        the starting index
    * @param end
@@ -729,6 +455,154 @@ public class Coordinate {
       tempMaxX = Math.max(tempMaxX, tempX);
     }
     return tempMaxX;
+  }
+
+  /**
+   * Returns the maximum x value of an array of <code>Coordinate</code>s
+   * 
+   * @param coords
+   *        the coordinates
+   * @return the maximum x value of an array of <code>Coordinate</code>s
+   */
+  public static double getMaxX(Coordinate[] coords) {
+    return getMaxX(coords, 0, coords.length - 1);
+  }
+
+  /**
+   * Returns the maximum x value value from an array of arrays of
+   * <code>Coordinate</code>s.
+   * 
+   * @param coordLists
+   *        the 2d coordinate array
+   * @param startList
+   *        the start indices
+   * @param endList
+   *        the end indices
+   * @return the maximum x value value from an array of arrays of
+   *         <code>Coordinate</code>s
+   */
+  public static double getMaxX(Coordinate[][] coordLists, int[] startList,
+                               int[] endList) {
+    double tmpMaxX = -Double.MAX_VALUE;
+    for (int i = 0; i < coordLists.length; i++) {
+      double tmp = getMaxX(coordLists[i], startList[i], endList[i]);
+      if (tmp > tmpMaxX)
+        tmpMaxX = tmp;
+    }
+    return tmpMaxX;
+  }
+
+  /**
+   * Returns the minimum y value of an array of <code>Coordinate</code>s
+   * 
+   * @param coords
+   *        the coordinates
+   * @param start
+   *        the starting index
+   * @param end
+   *        the ending index
+   * @return the minimum y value of an array of <code>Coordinate</code>s
+   */
+  public static double getMinY(Coordinate[] coords, int start, int end) {
+    double tempMinY, tempY;
+    tempMinY = coords[start].getYVal();
+    for (int index = start + 1; index <= end; index++) {
+      tempY = coords[index].getYVal();
+      tempMinY = Math.min(tempMinY, tempY);
+    }
+  
+    return tempMinY;
+  }
+
+  /**
+   * Returns the minimum y value of an array of <code>Coordinate</code>s
+   * 
+   * @param coords
+   *        the coordinates
+   * @return the minimum y value of an array of <code>Coordinate</code>s
+   */
+  public static double getMinY(Coordinate[] coords) {
+    return getMinY(coords, 0, coords.length - 1);
+  }
+
+  /**
+   * Returns the minimum y value value from an array of arrays of
+   * <code>Coordinate</code>s.
+   * 
+   * @param coordLists
+   *        the 2d coordinate array
+   * @param startList
+   *        the start indices
+   * @param endList
+   *        the end indices
+   * @return the minimum y value value from an array of arrays of
+   *         <code>Coordinate</code>s
+   */
+  public static double getMinY(Coordinate[][] coordLists, int[] startList,
+                               int[] endList) {
+    double tmpMinY = Double.MAX_VALUE;
+    for (int i = 0; i < coordLists.length; i++) {
+      double tmp = getMinY(coordLists[i], startList[i], endList[i]);
+      if (tmp < tmpMinY)
+        tmpMinY = tmp;
+    }  
+    return tmpMinY;
+  }
+
+  /**
+   * Returns the maximum y value of an array of <code>Coordinate</code>s
+   * 
+   * @param coords
+   *        the coordinates
+   * @param start
+   *        the starting index
+   * @param end
+   *        the ending index
+   * @return the maximum y value of an array of <code>Coordinate</code>s
+   */
+  public static double getMaxY(Coordinate[] coords, int start, int end) {
+    double tempMaxY, tempY;
+    tempMaxY = coords[start].getYVal();
+    for (int index = start + 1; index <= end; index++) {
+      tempY = coords[index].getYVal();
+      tempMaxY = Math.max(tempMaxY, tempY);
+    }
+    return tempMaxY;
+  }
+
+  /**
+   * Returns the maximum y value of an array of <code>Coordinate</code>s
+   * 
+   * @param coords
+   *        the coordinates
+   * @return the maximum y value of an array of <code>Coordinate</code>s
+   */
+  public static double getMaxY(Coordinate[] coords) {
+    return getMaxY(coords, 0, coords.length - 1);
+  }
+
+  /**
+   * Returns the maximum y value value from an array of arrays of
+   * <code>Coordinate</code>s.
+   * 
+   * @param coordLists
+   *        the 2d coordinate array
+   * @param startList
+   *        the start indices
+   * @param endList
+   *        the end indices
+   * @return the maximum y value value from an array of arrays of
+   *         <code>Coordinate</code>s
+   */
+  public static double getMaxY(Coordinate[][] coordLists, int[] startList,
+                               int[] endList) {
+    double tmpMaxY = -Double.MAX_VALUE;
+    for (int i = 0; i < coordLists.length; i++) {
+      double tmp = getMaxY(coordLists[i], startList[i], endList[i]);
+      if (tmp > tmpMaxY)
+        tmpMaxY = tmp;
+    }
+    return tmpMaxY;
   }
 
   public static double getYValueAt(Coordinate[] xyCoords, double xPt,
