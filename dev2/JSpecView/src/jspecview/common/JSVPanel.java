@@ -465,7 +465,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     setPlotColors(Parameters.defaultPlotColors);
 
     multiScaleData = new MultiScaleData(xyCoordsList, startIndices, endIndices,
-        10, 10);
+        10, 10, getSpectrum().isContinuous());
 
     //add data to zoomInfoList
     zoomInfoList = new ArrayList<MultiScaleData>();
@@ -1817,7 +1817,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         minNumOfPointsForZoom, startIndices, endIndices))
       return false;
     multiScaleData = new MultiScaleData(xyCoordsList, startIndices, endIndices,
-        10, 10);
+        10, 10, getSpectrum().isContinuous());
     // add to and clean the zoom list
     if (zoomInfoList.size() > currentZoomIndex + 1)
       for (int i = zoomInfoList.size() - 1; i > currentZoomIndex; i--)

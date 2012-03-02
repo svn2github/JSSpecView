@@ -170,7 +170,7 @@ public class SVGExporter extends FormExporter {
    */
   private String exportAsSVG(String fileName, Coordinate[] xyCoords, String title,
                            int startDataPointIndex, int endDataPointIndex,
-                           String xUnits, String yUnits, boolean continuous,
+                           String xUnits, String yUnits, boolean isContinuous,
                            boolean increasing, Color plotAreaColor,
                            Color backgroundColor, Color plotColor,
                            Color gridColor, Color titleColor, Color scaleColor,
@@ -180,7 +180,7 @@ public class SVGExporter extends FormExporter {
 
     DecimalFormat formatter2 = TextFormat.getDecimalFormat("0.######");
 
-    ScaleData scaleData = new ScaleData(xyCoords, startDataPointIndex, endDataPointIndex, 10, 10);
+    ScaleData scaleData = new ScaleData(xyCoords, startDataPointIndex, endDataPointIndex, 10, 10, isContinuous);
 
     double maxXOnScale = scaleData.maxXOnScale;
     double minXOnScale = scaleData.minXOnScale;
@@ -367,7 +367,7 @@ public class SVGExporter extends FormExporter {
     
     context.put("title", title);
     context.put("xyCoords", newXYCoords);
-    context.put("continuous", new Boolean(continuous));
+    context.put("continuous", new Boolean(isContinuous));
     context.put("firstTranslateX", new Double(firstTranslateX));
     context.put("firstTranslateY", new Double(firstTranslateY));
     context.put("scaleX", new Double(scaleX));
@@ -501,7 +501,7 @@ public class SVGExporter extends FormExporter {
     DecimalFormat formatter2 = TextFormat.getDecimalFormat("0.######");
 
     MultiScaleData scaleData = new MultiScaleData(xyCoordsList,
-        startDataPointIndices, endDataPointIndices, 10, 10);
+        startDataPointIndices, endDataPointIndices, 10, 10, false);
 
     double maxXOnScale = scaleData.maxXOnScale;
     double minXOnScale = scaleData.minXOnScale;
