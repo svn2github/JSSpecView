@@ -65,7 +65,7 @@ public class JDXFileReader {
       { "PEAKTABLE", "XYDATA", "XYPOINTS" },
       { "(XY..XY)", "(X++(Y..Y))", "(XY..XY)" } };
 
-  private final static String ERROR_SEPARATOR = "________________________________________________________";
+  final static String ERROR_SEPARATOR = "________________________________________________________";
   private final static String[] TABULAR_DATA_LABELS = { "##XYDATA",
       "##XYPOINTS", "##PEAKTABLE", "##DATATABLE", "##PEAKASSIGNMENTS" };
   static {

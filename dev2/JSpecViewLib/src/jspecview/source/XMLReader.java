@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import jspecview.common.Coordinate;
 import jspecview.common.Graph;
@@ -73,7 +72,6 @@ abstract class XMLReader {
   protected String casRN = "";
   protected String sampleID;
   protected StringBuffer errorLog = new StringBuffer();
-  protected String errorSeparator = "________________________________________________________";
 
   protected void getSimpleXmlReader(InputStream in) {
     reader = new SimpleXmlReader(in);
@@ -174,10 +172,8 @@ abstract class XMLReader {
     reader = null;
     if (errorLog.length() > 0) {
       errorLog.append("these errors were found in " + type + " \n");
-    } else {
-      errorLog.append("No Errors\n");
+      errorLog.append(JDXFileReader.ERROR_SEPARATOR);
     }
-    errorLog.append(errorSeparator);
     source.setErrorLog(errorLog.toString());
   }
 
@@ -236,8 +232,6 @@ abstract class XMLReader {
     }
   }
 
-  private boolean inResults;
-  
   /**
    * Process the audit XML events
    * @param tagId
