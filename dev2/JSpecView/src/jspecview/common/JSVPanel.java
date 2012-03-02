@@ -1358,8 +1358,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   private int yPixels(double yVal) {
-    return invertY((int) (topPlotAreaPos + (yVal - multiScaleData.minYOnScale)
-        / yFactorForScale));
+    return (Double.isNaN(yVal) ? Integer.MIN_VALUE : invertY((int) (topPlotAreaPos + (yVal - multiScaleData.minYOnScale)
+        / yFactorForScale)));
   }
 
   private boolean isPixelWithinPlotArea(int pix) {
@@ -1407,6 +1407,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         int y1 = yPixels(point1.getYVal());
         int x2 = xPixels(point2.getXVal());
         int y2 = yPixels(point2.getYVal());
+        if (y1 == Integer.MIN_VALUE || y2 == Integer.MIN_VALUE)
+          continue;
         g.drawLine(x1, y1, x2, y2);
       }
     } else {
@@ -1415,6 +1417,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         int x1 = xPixels(point.getXVal());
         int y1 = yPixels(Math.max(multiScaleData.minYOnScale, 0));
         int y2 = yPixels(point.getYVal());
+        if (y2 == Integer.MIN_VALUE)
+          continue;
         g.drawLine(x1, y1, x1, y2);
       }
       if (multiScaleData.minYOnScale < 0) {
