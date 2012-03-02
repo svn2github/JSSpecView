@@ -1496,6 +1496,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     FontMetrics fm = g.getFontMetrics();
     int y1 = invertY((int) topPlotAreaPos);
     int y2 = invertY((int) (topPlotAreaPos - 3));
+    double maxWidth = (xPixels(multiScaleData.xStep) - xPixels(0)) * 0.95;
     double lastX;
     if (Double.isNaN(multiScaleData.firstX)) {
       lastX = multiScaleData.maxXOnScale + multiScaleData.xStep / 2;
@@ -1505,7 +1506,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         g.drawLine(x, y1, x, y2);
         g.setColor(scaleColor);
         String s = displayXFormatter.format(val);
-        g.drawString(s, x - fm.stringWidth(s) / 2, y2 + fm.getHeight());
+        int w = fm.stringWidth(s);
+        g.drawString(s, x - w / 2, y2 + fm.getHeight());
       }
     } else {
       lastX = multiScaleData.maxXOnScale * 1.0001;
@@ -1515,7 +1517,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         g.drawLine(x, y1, x, y2);
         g.setColor(scaleColor);
         String s = displayXFormatter.format(val);
-        g.drawString(s, x - fm.stringWidth(s) / 2, y2 + fm.getHeight());
+        int w = fm.stringWidth(s);
+        g.drawString(s, x - w / 2, y2 + fm.getHeight());
+        val += Math.floor(w/maxWidth) * multiScaleData.xStep;
       }
     }
   }
