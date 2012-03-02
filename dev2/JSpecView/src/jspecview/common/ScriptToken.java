@@ -12,7 +12,6 @@ import jspecview.util.TextFormat;
 public enum ScriptToken {
 
   UNKNOWN("?"),
-  ANNOTATION("ANNOTATION"),  // annotation x y color "text"
   APPLETID("APPLETID"),
   APPLETREADYCALLBACKFUNCTIONNAME("APPLETREADYCALLBACKFUNCTIONNAME"),
   AUTOINTEGRATE("AUTOINTEGRATE"),
@@ -34,6 +33,7 @@ public enum ScriptToken {
   INTEGRATIONRATIOS("INTEGRATIONRATIOS"),
   INTERFACE("INTERFACE"),
   IRMODE("IRMODE"),
+  LABEL("LABEL"),  // label x y color "text"
   LOAD("LOAD"),
   MENUON("MENUON"),
   OBSCURE("OBSCURE"),
@@ -93,7 +93,7 @@ public enum ScriptToken {
     switch (st) {
     default:
       return nextStringToken(params);
-    case ANNOTATION:
+    case LABEL:
     case CLOSE:
     case LOAD:
       // takes full command, possibly removing ""
