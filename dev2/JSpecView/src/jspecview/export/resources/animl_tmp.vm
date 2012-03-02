@@ -7,7 +7,7 @@
 <!--AniML IR Technique Definition (http://animl.sf.net/schema/techniques/IR%20base%20instance%20document.atid) dated 2004/09/01 -->
 <!--AniML Sample Schema (http://animl.sf.net/schema/techniques/Sample%20Parameters%20base%20instance%20document.atid) dated 2004/09/01 -->
 <!--AniML Core Schema (http://animl.sourceforge.net/schema/animl-core.xsd) dated 2004/04/20 -->
-<!--JCAMP-DX v4.24 (http://www.jcamp.org/protocols/dxir01.pdf) accessed 02/19/06 -->
+<!--JCAMP-DX v4.24 (http://www.jcamp-dx.org/protocols/dxir01.pdf) accessed 2nd March 2012 -->
 <!--JCAMP/AnIML crosswalk XL spreadsheet (http://animl.sourceforge.net/IUPAC/All%20JCAMP-DX%20and%20netCDF%20Labels%20version%2028%20August%202003.xls) 02/19/06 -->
 
 <!--Stuart J. Chalk February 19, 2006 -->
