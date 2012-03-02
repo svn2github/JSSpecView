@@ -57,7 +57,8 @@ public class MultiScaleData extends ScaleData {
    * @return returns an instance of <code>MultiScaleData</code>
    */
   public MultiScaleData(Coordinate[][] coordLists, int[] startList,
-      int[] endList, int initNumXDivisions, int initNumYDivisions) {
+      int[] endList, int initNumXDivisions, int initNumYDivisions,
+      boolean isContinuous) {
     super(Coordinate.getMinX(coordLists, startList, endList), 
         Coordinate.getMaxX(coordLists, startList, endList), 
         Coordinate.getMinY(coordLists, startList, endList), 
@@ -67,7 +68,7 @@ public class MultiScaleData extends ScaleData {
     numOfPointsList = new int[startList.length];
     for (int j = 0; j < startList.length; j++)
       numOfPointsList[j] = endList[j] - startList[j] + 1;
-    setScale(initNumXDivisions, initNumYDivisions);
+    setScale(initNumXDivisions, initNumYDivisions, isContinuous);
   }
   
   /**
