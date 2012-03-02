@@ -138,26 +138,19 @@ abstract class XMLReader {
       }
     }
 
-    Coordinate AMLpoint;
-    Vector<Coordinate> xyCoords = new Vector<Coordinate>();
+    Coordinate[] xyCoords = new Coordinate[npoints];
 
     //   for ease of plotting etc. all data is stored internally in increasing order
-    for (int x = 0; x < npoints; x++) {
-      AMLpoint = new Coordinate();
-      AMLpoint.setXVal(xaxisData[x] / xScale);
-      AMLpoint.setYVal(yaxisData[x]);
-      if (increasing)
-        xyCoords.addElement(AMLpoint);
-      else
-        xyCoords.insertElementAt(AMLpoint, 0);
-    }
+    for (int x = 0; x < npoints; x++)
+      xyCoords[x] = new Coordinate(xaxisData[x] / xScale, yaxisData[x]);
 
+    if (!increasing)
+      xyCoords = JDXDecompressor.reverse(xyCoords);
+      
     spectrum.setXUnits(xaxisUnit);
     spectrum.setYUnits(yaxisUnit);
 
-    Coordinate[] amlcoord = new Coordinate[npoints];
-    xyCoords.toArray(amlcoord);
-    spectrum.setXYCoords(amlcoord);
+    spectrum.setXYCoords(xyCoords);
     source.addJDXSpectrum(spectrum);
   }
 
@@ -194,6 +187,7 @@ abstract class XMLReader {
     "audittrail",
     "experimentstepset",
     "sampleset",
+    "xx result",
     // cml:
     "spectrum",
     "metadatalist",
@@ -211,36 +205,39 @@ abstract class XMLReader {
   final static int AML_AUDITTRAIL = 0;
   final static int AML_EXPERIMENTSTEPSET = 1;
   final static int AML_SAMPLESET = 2;
+  final static int AML_RESULT = 3;
   final static int AML_1 = 3;
 
-  final static int CML_0 = 3;
-  final static int CML_SPECTRUM = 3;
-  final static int CML_METADATALIST = 4;
-  final static int CML_CONDITIONLIST = 5;
-  final static int CML_PARAMETERLIST = 6;
-  final static int CML_SAMPLE = 7;
-  final static int CML_SPECTRUMDATA = 8;
-  final static int CML_PEAKLIST = 9;
+  final static int CML_0 = 4;
+  final static int CML_SPECTRUM = 4;
+  final static int CML_METADATALIST = 5;
+  final static int CML_CONDITIONLIST = 6;
+  final static int CML_PARAMETERLIST = 7;
+  final static int CML_SAMPLE = 8;
+  final static int CML_SPECTRUMDATA = 9;
+  final static int CML_PEAKLIST = 10;
   final static int CML_1 = 10;
 
-  final static int AML_AUTHOR = 10;
-  final static int CML_PEAKLIST2 = 11;
+  final static int AML_AUTHOR = 11;
+  final static int CML_PEAKLIST2 = 12;
 
   protected void processXML(int i0, int i1) throws Exception {
     while (reader.hasNext()) {
       if (reader.nextEvent() != SimpleXmlReader.START_ELEMENT)
         continue;
-        String theTag = reader.getTagName();
-        boolean requiresEndTag = (reader.getTagType() != SimpleXmlReader.START_END_ELEMENT);
-        //System.out.println(theTag);
-        for (int i = i0; i < i1; i++)
-          if (theTag.equals(tagNames[i])) {
-            process(i, requiresEndTag);
-            break;
-          }
-      }
+      String theTag = reader.getTagName();
+      boolean requiresEndTag = reader.requiresEndTag();
+      //System.out.println(theTag);
+      for (int i = i0; i < i1; i++)
+        if (theTag.equals(tagNames[i])) {
+          process(i, requiresEndTag);
+          break;
+        }
+    }
   }
 
+  private boolean inResults;
+  
   /**
    * Process the audit XML events
    * @param tagId
@@ -258,13 +255,17 @@ abstract class XMLReader {
         default:
           continue;
         case SimpleXmlReader.END_ELEMENT:
-          if (reader.getEndTag().equals(thisTagName))
+          if (reader.getEndTag().equals(thisTagName)) {
+            processEndTag(tagId);
             return;
+          }
           continue;
         case SimpleXmlReader.START_ELEMENT:
           break;
         }
         tagName = reader.getTagName();
+        if (tagName.startsWith("!--"))
+          continue;
         attrList = reader.getAttributeList();
         if (!processTag(tagId))
           return;
@@ -279,6 +280,10 @@ abstract class XMLReader {
   protected boolean processTag(int tagId) throws Exception {
     // overridden
     return true;
+  }
+
+  protected void processEndTag(int tagId) throws Exception {
+    // overridden
   }
 
 }

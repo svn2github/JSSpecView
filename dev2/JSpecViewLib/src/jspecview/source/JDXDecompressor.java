@@ -406,7 +406,7 @@ public class JDXDecompressor {
     return Double.valueOf(leader + line.substring(ich0, ich)).doubleValue();
   }
   
-  private static Coordinate[] reverse(Coordinate[] x) {
+  public static Coordinate[] reverse(Coordinate[] x) {
     int n = x.length;
     for (int i = 0; i < n; i++) {
       Coordinate v = x[i];

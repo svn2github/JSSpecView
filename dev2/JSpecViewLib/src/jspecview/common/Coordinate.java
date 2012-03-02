@@ -390,15 +390,14 @@ public class Coordinate {
    *        the ending index
    * @return the maximum x value of an array of <code>Coordinate</code>s
    */
-  public static double getMinX(Coordinate[] coords, int start, int end) {
-    double tempMinX, tempX;
-    tempMinX = coords[start].getXVal();
-    for (int index = start + 1; index <= end; index++) {
-      tempX = coords[index].getXVal();
-      tempMinX = Math.min(tempMinX, tempX);
+  public static double getMinX(Coordinate[] coords, int start, int end) {   
+    double min = Double.MAX_VALUE;
+    for (int index = start; index <= end; index++) {
+      double tmp = coords[index].getXVal();
+      if (tmp < min)
+      min = tmp;
     }
-  
-    return tempMinX;
+    return min;
   }
 
   /**
@@ -427,13 +426,13 @@ public class Coordinate {
    */
   public static double getMinX(Coordinate[][] coordLists, int[] startList,
                                int[] endList) {
-    double tmpMinX = Double.MAX_VALUE;
+    double min = Double.MAX_VALUE;
     for (int i = 0; i < coordLists.length; i++) {
       double tmp = getMinX(coordLists[i], startList[i], endList[i]);
-      if (tmp < tmpMinX)
-        tmpMinX = tmp;
+      if (tmp < min)
+        min = tmp;
     }
-    return tmpMinX;
+    return min;
   }
 
   /**
@@ -448,13 +447,13 @@ public class Coordinate {
    * @return the minimum x value of an array of <code>Coordinate</code>s
    */
   public static double getMaxX(Coordinate[] coords, int start, int end) {
-    double tempMaxX, tempX;
-    tempMaxX = coords[start].getXVal();
-    for (int index = start + 1; index <= end; index++) {
-      tempX = coords[index].getXVal();
-      tempMaxX = Math.max(tempMaxX, tempX);
+    double max = -Double.MAX_VALUE;
+    for (int index = start; index <= end; index++) {
+      double tmp = coords[index].getXVal();
+      if (tmp > max)
+        max = tmp;
     }
-    return tempMaxX;
+    return max;
   }
 
   /**
@@ -483,13 +482,13 @@ public class Coordinate {
    */
   public static double getMaxX(Coordinate[][] coordLists, int[] startList,
                                int[] endList) {
-    double tmpMaxX = -Double.MAX_VALUE;
+    double max = -Double.MAX_VALUE;
     for (int i = 0; i < coordLists.length; i++) {
       double tmp = getMaxX(coordLists[i], startList[i], endList[i]);
-      if (tmp > tmpMaxX)
-        tmpMaxX = tmp;
+      if (tmp > max)
+        max = tmp;
     }
-    return tmpMaxX;
+    return max;
   }
 
   /**
@@ -504,14 +503,13 @@ public class Coordinate {
    * @return the minimum y value of an array of <code>Coordinate</code>s
    */
   public static double getMinY(Coordinate[] coords, int start, int end) {
-    double tempMinY, tempY;
-    tempMinY = coords[start].getYVal();
-    for (int index = start + 1; index <= end; index++) {
-      tempY = coords[index].getYVal();
-      tempMinY = Math.min(tempMinY, tempY);
+    double min = Double.MAX_VALUE;
+    for (int index = start; index <= end; index++) {
+      double tmp = coords[index].getYVal();
+      if (tmp < min)
+      min = tmp;
     }
-  
-    return tempMinY;
+    return min;
   }
 
   /**
@@ -540,13 +538,13 @@ public class Coordinate {
    */
   public static double getMinY(Coordinate[][] coordLists, int[] startList,
                                int[] endList) {
-    double tmpMinY = Double.MAX_VALUE;
+    double min = Double.MAX_VALUE;
     for (int i = 0; i < coordLists.length; i++) {
       double tmp = getMinY(coordLists[i], startList[i], endList[i]);
-      if (tmp < tmpMinY)
-        tmpMinY = tmp;
+      if (tmp < min)
+        min = tmp;
     }  
-    return tmpMinY;
+    return min;
   }
 
   /**
@@ -561,13 +559,13 @@ public class Coordinate {
    * @return the maximum y value of an array of <code>Coordinate</code>s
    */
   public static double getMaxY(Coordinate[] coords, int start, int end) {
-    double tempMaxY, tempY;
-    tempMaxY = coords[start].getYVal();
-    for (int index = start + 1; index <= end; index++) {
-      tempY = coords[index].getYVal();
-      tempMaxY = Math.max(tempMaxY, tempY);
+    double max = -Double.MAX_VALUE;
+    for (int index = start; index <= end; index++) {
+      double tmp = coords[index].getYVal();
+      if (tmp > max)
+        max = tmp;
     }
-    return tempMaxY;
+    return max;
   }
 
   /**
@@ -596,13 +594,13 @@ public class Coordinate {
    */
   public static double getMaxY(Coordinate[][] coordLists, int[] startList,
                                int[] endList) {
-    double tmpMaxY = -Double.MAX_VALUE;
+    double max = -Double.MAX_VALUE;
     for (int i = 0; i < coordLists.length; i++) {
       double tmp = getMaxY(coordLists[i], startList[i], endList[i]);
-      if (tmp > tmpMaxY)
-        tmpMaxY = tmp;
+      if (tmp > max)
+        max = tmp;
     }
-    return tmpMaxY;
+    return max;
   }
 
   public static double getYValueAt(Coordinate[] xyCoords, double xPt,

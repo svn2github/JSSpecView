@@ -44,6 +44,7 @@ public class SimpleXmlReader {
   public final static int END_ELEMENT = 2;
   public final static int START_END_ELEMENT = 3;
   public final static int CHARACTERS = 4;
+  public final static int COMMENT = 6;
   public final static int EOF = 8;
 
 
@@ -88,7 +89,9 @@ public class SimpleXmlReader {
   }
 
   public void nextTag() throws IOException {
-    thisEvent = buffer.nextTag();
+    while ((thisEvent = buffer.nextTag()).eventType == SimpleXmlReader.COMMENT) {
+    }
+    System.out.println("sxr next tag " + thisEvent.getTagName());
   }
 
   public int nextEvent() throws IOException {
@@ -100,6 +103,7 @@ public class SimpleXmlReader {
     thisEvent = buffer.nextTag();
     while (!thisEvent.isStartElement())
       thisEvent = buffer.nextTag();
+    System.out.println(thisEvent.getTagName());
   }
 
   public String getTagName() {
@@ -310,6 +314,8 @@ public class SimpleXmlReader {
       } else {
         b.skipOver('>', false);
         String s = b.data.substring(ptr, b.ptr);
+        if (s.startsWith("<!--"))
+          eventType = COMMENT;
         //System.out.println("new tag: " + s);
         tag = new Tag(s);
       }
@@ -349,7 +355,8 @@ public class SimpleXmlReader {
 
     Tag(String fulltag) {
       text = fulltag;
-      tagType = (fulltag.charAt(1) == '/' ? END_ELEMENT : fulltag
+      tagType = (fulltag.startsWith("<!--") ? COMMENT 
+          : fulltag.charAt(1) == '/' ? END_ELEMENT : fulltag
           .charAt(fulltag.length() - 2) == '/' ? START_END_ELEMENT
           : START_ELEMENT);
     }
@@ -402,5 +409,10 @@ public class SimpleXmlReader {
       }
     }
 
+  }
+
+  public boolean requiresEndTag() {
+    int tagType = thisEvent.getTagType(); 
+    return  tagType != START_END_ELEMENT && tagType != COMMENT;
   }
 }

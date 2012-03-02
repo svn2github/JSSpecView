@@ -27,6 +27,7 @@ import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 
 import jspecview.util.Base64;
+import jspecview.util.SimpleXmlReader;
 
 
 /**
@@ -111,11 +112,24 @@ class AnIMLReader extends XMLReader {
       // AML_AUTHOR is processed via AML_EXPERIMENTSTEPSET
       processAuthor();
       return true;
+    case AML_RESULT:
+      inResult = true;
+      return true;
     default:
       System.out.println("AnIMLSource not processing tag " + tagNames[tagId]
           + "!");
       // should not be here
       return false;
+    }
+  }
+
+  @Override
+  protected void processEndTag(int tagId) throws Exception {
+    switch(tagId) {
+    case AML_RESULT:
+    case AML_EXPERIMENTSTEPSET:
+      inResult = false;
+      break;
     }
   }
 
@@ -144,8 +158,15 @@ class AnIMLReader extends XMLReader {
     }
   }
 
+  private boolean inResult;
+  
   private void processExperimentStepSet() throws Exception {
-    if (tagName.equals("sampleref")) {
+    System.out.println("AnIML experiment " + tagName);
+    
+    if (tagName.equals("result")) {
+      inResult = true;
+      
+    } else if (tagName.equals("sampleref")) {
       if (reader.getAttrValueLC("role").contains("samplemeasurement"))
         sampleID = reader.getAttrValue("sampleID");
     } else if (tagName.equals("author")) {
@@ -154,12 +175,12 @@ class AnIMLReader extends XMLReader {
       LongDate = reader.thisValue();
     } else if (tagName.equals("technique")) {
       techname = reader.getAttrValue("name").toUpperCase() + " SPECTRUM";
-    } else if (tagName.equals("vectorset")) {
+    } else if (tagName.equals("vectorset") || tagName.equals("seriesset") && inResult) {
       npoints = Integer.parseInt(reader.getAttrValue("length"));
       System.out.println("AnIML No. of points= " + npoints);
       xaxisData = new double[npoints];
       yaxisData = new double[npoints];
-    } else if (tagName.equals("vector")) {
+    } else if (tagName.equals("vector") || tagName.equals("series") && inResult) {
       String axisLabel = reader.getAttrValue("name");
       String dependency = reader.getAttrValueLC("dependency");
       if (dependency.equals("independent")) {
@@ -199,17 +220,26 @@ class AnIMLReader extends XMLReader {
       reader.nextTag();
       if (reader.getTagName().equals("startvalue"))
         firstX = Double.parseDouble(reader.qualifiedValue());
-      reader.nextStartTag();
+      nextStartTag();
       if (reader.getTagName().equals("increment"))
         deltaX = Double.parseDouble(reader.qualifiedValue());
     }
-    reader.nextStartTag();
-    xaxisUnit = reader.getAttrValue("label");
+    if (!inResult) {
+      nextStartTag();
+      xaxisUnit = reader.getAttrValue("label");
+    }
     increasing = (deltaX > 0 ? true : false);
     continuous = true;
     for (int j = 0; j < npoints; j++)
       xaxisData[j] = firstX + (deltaX * j);
     lastX = xaxisData[npoints - 1];
+  }
+
+  private void nextStartTag() throws IOException {
+    reader.nextStartTag();
+    while (reader.getTagType() == SimpleXmlReader.COMMENT) {
+      reader.nextStartTag();
+    }
   }
 
   private void getYValues() throws IOException {

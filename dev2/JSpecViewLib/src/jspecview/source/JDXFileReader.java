@@ -117,7 +117,7 @@ public class JDXFileReader {
   private static JDXSource getXMLSource(String source) {
     String xmlType = source.substring(0, 400).toLowerCase();
 
-    if (xmlType.contains("<animl")) {
+    if (xmlType.contains("<animl") || xmlType.contains("<!doctype technique")) {
       return AnIMLReader.getAniMLInstance(new ByteArrayInputStream(source
           .getBytes()));
     } else if (xmlType.contains("xml-cml")) {
