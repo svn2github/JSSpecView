@@ -1502,7 +1502,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
     for (int i = integrals.size(); --i >= 0;) {
       Integral in = integrals.get(i);
-      if (Double.isNaN(in.value))
+      if (in.value == 0)
         continue;
       String s = "  " + formatter.format(Math.abs(in.value));
       int x = xPixels(in.x);
@@ -2649,7 +2649,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     if (isFinal || integrals.size() == 0) {
       integrals.add(in);
       if (isFinal)
-        integrals.get(0).value = Double.NaN;
+        integrals.get(0).value = 0;
     } else {
       integrals.set(0, in);
     }
