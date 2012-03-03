@@ -329,7 +329,7 @@ public class IntegralGraph implements Graph {
     StringTokenizer allParamTokens = new StringTokenizer(value, ",");
 
     // create array list to return
-    ArrayList<Annotation> inputRatios = new ArrayList<Annotation>();
+    ArrayList<Annotation> ratios = new ArrayList<Annotation>();
 
     while (allParamTokens.hasMoreTokens()) {
       String token = allParamTokens.nextToken();
@@ -337,10 +337,10 @@ public class IntegralGraph implements Graph {
       StringTokenizer eachParam = new StringTokenizer(token, ":");
       Annotation inputRatio = new Annotation(Double
           .parseDouble(eachParam.nextToken()), 0.0, eachParam.nextToken(), true);
-      inputRatios.add(inputRatio);
+      ratios.add(inputRatio);
     }
 
-    return inputRatios;
+    return ratios;
   }
 
   private List<Integral> integrals;  
