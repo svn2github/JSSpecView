@@ -148,18 +148,18 @@ H     0.00000    1.25431    1.89604    0.00000   -0.37000   -0.60000
 </Models>
 ##$PEAKS=
 <Peaks type="IR" xUnits="1/cm" yUnits="TRANSMITTANCE" >
-<PeakData id="1" title="B1-asymm stretch of CH group (~3088 cm-1)" peakShape="broad" model="C1.13" xMax="3120" xMin="3080"  yMax="1" yMin="0" />
-<PeakData id="2" title="A1-symm stretch of CH group (~3080 cm-1)" peakShape="broad" model="C1.14" xMax="3100" xMin="3060"  yMax="1" yMin="0" />
+<PeakData id="1" title="B1-asymm stretch of C-H group (~3088 cm-1)" peakShape="broad" model="C1.13" xMax="3120" xMin="3080"  yMax="1" yMin="0" />
+<PeakData id="2" title="A1-symm stretch of C-H group (~3080 cm-1)" peakShape="broad" model="C1.14" xMax="3100" xMin="3060"  yMax="1" yMin="0" />
 <PeakData id="3" title="A1- C=C stretch (~1590 cm-1)" peakShape="broad" model="C1.12" xMax="1600" xMin="1555"  yMax="1" yMin="0" />
-<PeakData id="4" title="B1-asymm C-H wagging (~1300 cm-1)" peakShape="broad" model="C1.11" xMax="1320" xMin="1240"  yMax="1" yMin="0" />
+<PeakData id="4" title="B1-asymm C-H bend (~1300 cm-1)" peakShape="broad" model="C1.11" xMax="1320" xMin="1240"  yMax="1" yMin="0" />
 <PeakData id="5" title="A1- C-H scissors (~1180 cm-1)" peakShape="broad" model="C1.10" xMax="1210" xMin="1160"  yMax="1" yMin="0" />
-<PeakData id="6" title="Inactive A2- C-H wagging (~875 cm-1)" peakShape="broad" model="C1.9" xMax="900" xMin="860"  yMax="1" yMin="0" />
-<PeakData id="7" title="B1-asymm stretch of CCl group (~850 cm-1)" peakShape="broad" model="C1.8" xMax="870" xMin="830"  yMax="1" yMin="0" />
-<PeakData id="8" title="A1-symm stretch of CCl group (~715 cm-1)" peakShape="broad" model="C1.6" xMax="735" xMin="695"  yMax="1" yMin="0" />
-<PeakData id="9" title="B2-asym C-H flap (~697 cm-1)" peakShape="broad" model="C1.7" xMax="720" xMin="670"  yMax="1" yMin="0" />
-<PeakData id="10" title="B1- asymm bend of C-Cl group (~571 cm-1)" peakShape="broad" model="C1.5" xMax="590" xMin="550"  yMax="1" yMin="0" />
+<PeakData id="6" title="Inactive A2- C-H rocking (~875 cm-1)" peakShape="broad" model="C1.8" xMax="900" xMin="860"  yMax="1" yMin="0" />
+<PeakData id="7" title="B1-asymm stretch of C-Cl group (~850 cm-1)" peakShape="broad" model="C1.7" xMax="870" xMin="830"  yMax="1" yMin="0" />
+<PeakData id="8" title="A1-symm stretch of C-Cl group (~715 cm-1)" peakShape="broad" model="C1.6" xMax="735" xMin="695"  yMax="1" yMin="0" />
+<PeakData id="9" title="B2-asym C-H flap (~697 cm-1)" peakShape="broad" model="C1.9" xMax="720" xMin="670"  yMax="1" yMin="0" />
+<PeakData id="10" title="B2-asymm bend of C-Cl group (~571 cm-1)" peakShape="broad" model="C1.5" xMax="590" xMin="550"  yMax="1" yMin="0" />
 <PeakData id="11" title="Inactive A2- Cl-C=C-Cl torsion (~406 cm-1)" peakShape="broad" model="C1.4" xMax="420" xMin="380"  yMax="1" yMin="0" />
-<PeakData id="12" title="A1- symm bend of C-Cl group (~173 cm-1)" peakShape="broad" model="C1.3" xMax="190" xMin="150"  yMax="1" yMin="0" />
+<PeakData id="12" title="A1-symm bend of C-Cl group (~173 cm-1)" peakShape="broad" model="C1.3" xMax="190" xMin="150"  yMax="1" yMin="0" />
 </Peaks>
 ##XUNITS= 1/CM
 ##YUNITS= TRANSMITTANCE
@@ -372,18 +372,18 @@ H     0.00000    1.25431    1.89604    0.00000   -0.37000   -0.60000
 </Models>
 ##$PEAKS=
 <Peaks type="RAMAN" xUnits="1/cm" yUnits="TRANSMITTANCE" >
-<PeakData id="1" title="B1-asymm stretch of CH group (~3088 cm-1)" peakShape="broad" model="C2.13" xMax="3120" xMin="3080"  yMax="1" yMin="0" />
-<PeakData id="2" title="A1-symm stretch of CH group (~3080 cm-1)" peakShape="broad" model="C2.14" xMax="3100" xMin="3060"  yMax="1" yMin="0" />
+<PeakData id="1" title="B1-asymm stretch of C-H group (~3088 cm-1)" peakShape="broad" model="C2.13" xMax="3120" xMin="3080"  yMax="1" yMin="0" />
+<PeakData id="2" title="A1-symm stretch of C-H group (~3080 cm-1)" peakShape="broad" model="C2.14" xMax="3100" xMin="3060"  yMax="1" yMin="0" />
 <PeakData id="3" title="A1- C=C stretch (~1590 cm-1)" peakShape="broad" model="C2.12" xMax="1600" xMin="1555"  yMax="1" yMin="0" />
-<PeakData id="4" title="B1-asymm C-H wagging (~1260 cm-1)" peakShape="broad" model="C2.11" xMax="1280" xMin="1240"  yMax="1" yMin="0" />
+<PeakData id="4" title="B1-asymm C-H bend (~1300 cm-1)" peakShape="broad" model="C2.11" xMax="1320" xMin="1240"  yMax="1" yMin="0" />
 <PeakData id="5" title="A1- C-H scissors (~1180 cm-1)" peakShape="broad" model="C2.10" xMax="1210" xMin="1160"  yMax="1" yMin="0" />
-<PeakData id="6" title="A2- C-H wagging (~875 cm-1)" peakShape="broad" model="C2.9" xMax="900" xMin="860"  yMax="1" yMin="0" />
-<PeakData id="7" title="B1-asymm stretch of CCl group (~850 cm-1)" peakShape="broad" model="C2.8" xMax="870" xMin="830"  yMax="1" yMin="0" />
-<PeakData id="8" title="A1-symm stretch of CCl group (~715 cm-1)" peakShape="broad" model="C2.6" xMax="735" xMin="695"  yMax="1" yMin="0" />
-<PeakData id="9" title="B2-asym C-H flap (~697 cm-1)" peakShape="broad" model="C2.7" xMax="720" xMin="670"  yMax="1" yMin="0" />
-<PeakData id="10" title="B1- asymm bend of C-Cl group (~571 cm-1)" peakShape="broad" model="C2.5" xMax="590" xMin="550"  yMax="1" yMin="0" />
+<PeakData id="6" title="A2- C-H rocking (~875 cm-1)" peakShape="broad" model="C2.8" xMax="900" xMin="860"  yMax="1" yMin="0" />
+<PeakData id="7" title="B1-asymm stretch of C-Cl group (~850 cm-1)" peakShape="broad" model="C2.7" xMax="870" xMin="830"  yMax="1" yMin="0" />
+<PeakData id="8" title="A1-symm stretch of C-Cl group (~715 cm-1)" peakShape="broad" model="C2.6" xMax="735" xMin="695"  yMax="1" yMin="0" />
+<PeakData id="9" title="B2-asym C-H flap (~697 cm-1)" peakShape="broad" model="C2.9" xMax="720" xMin="670"  yMax="1" yMin="0" />
+<PeakData id="10" title="B2-asymm bend of C-Cl group (~571 cm-1)" peakShape="broad" model="C2.5" xMax="590" xMin="550"  yMax="1" yMin="0" />
 <PeakData id="11" title="A2- Cl-C=C-Cl torsion (~406 cm-1)" peakShape="broad" model="C2.4" xMax="420" xMin="380"  yMax="1" yMin="0" />
-<PeakData id="12" title="A1- symm bend of C-Cl group (~173 cm-1)" peakShape="broad" model="C2.3" xMax="190" xMin="150"  yMax="1" yMin="0" />
+<PeakData id="12" title="A1-symm bend of C-Cl group (~173 cm-1)" peakShape="broad" model="C2.3" xMax="190" xMin="150"  yMax="1" yMin="0" />
 </Peaks>
 ##XUNITS=1/CM
 ##YUNITS=RAMAN INTENSITY
