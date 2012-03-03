@@ -31,10 +31,11 @@ package jspecview.common;
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
+ * @author Bob Hanson hansonr@stolaf.edu
  */
 public class Annotation extends Coordinate {
-  public String text = "";
-  public boolean isPixels;
+  private String text = "";
+  private boolean isPixels;
   
   /**
    * Constructor -- note that x is spectral X value, but y is pixels above
@@ -53,6 +54,14 @@ public class Annotation extends Coordinate {
     this.isPixels = isPixels;
   }
 
+  public String getText() {
+    return text;
+  }
+  
+  public boolean isPixels() {
+    return isPixels;
+  }
+
   /**
    * Overrides Objects toString() method
    * 
@@ -62,4 +71,5 @@ public class Annotation extends Coordinate {
   public String toString() {
     return "[" + getXVal() + ", " + getYVal() + "," + text + "]";
   }
+
 }

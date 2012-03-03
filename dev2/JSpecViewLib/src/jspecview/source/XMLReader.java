@@ -47,7 +47,7 @@ abstract class XMLReader {
   protected SimpleXmlReader reader;
 
   protected String tagName = "START", attrList = "",
-      title = "identifier not found", owner = "UNKNOWN", origin = "UNKNOWN";
+      title = "", owner = "UNKNOWN", origin = "UNKNOWN";
   protected String tmpEnd = "END", molForm = "", techname = "";
   protected int npoints = -1, samplenum = -1;
   protected double[] yaxisData;
