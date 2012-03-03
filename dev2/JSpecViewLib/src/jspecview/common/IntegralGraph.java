@@ -325,12 +325,9 @@ public class IntegralGraph implements Graph {
    */
   public static ArrayList<Annotation> getIntegrationRatiosFromString(
                                                                            String value) {
+    ArrayList<Annotation> ratios = new ArrayList<Annotation>();
     // split input into x-value/integral-value pairs
     StringTokenizer allParamTokens = new StringTokenizer(value, ",");
-
-    // create array list to return
-    ArrayList<Annotation> ratios = new ArrayList<Annotation>();
-
     while (allParamTokens.hasMoreTokens()) {
       String token = allParamTokens.nextToken();
       // now split the x-value/integral-value pair
@@ -339,7 +336,6 @@ public class IntegralGraph implements Graph {
           .parseDouble(eachParam.nextToken()), 0.0, eachParam.nextToken(), true);
       ratios.add(ratio);
     }
-
     return ratios;
   }
 
