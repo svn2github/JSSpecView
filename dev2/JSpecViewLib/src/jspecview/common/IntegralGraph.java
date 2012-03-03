@@ -300,13 +300,17 @@ public class IntegralGraph implements Graph {
   /**
    * returns FRACTIONAL value * 100
    */
-  public double getYValueAt(double x) {
-    if (c == null)
-      c = new CoordComparator();
-    double y = Coordinate.getYValueAt(xyCoords, x, c);
+  public double getPercentYValueAt(double x) {
+    double y = getYValueAt(x);
     double y0 = xyCoords[xyCoords.length - 1].getYVal();
     double y1 = xyCoords[0].getYVal();
     return (y - y0) / (y1 - y0) * 100;
+  }
+
+  public double getYValueAt(double x) {
+    if (c == null)
+      c = new CoordComparator();
+    return Coordinate.getYValueAt(xyCoords, x, c);
   }
 
   /**

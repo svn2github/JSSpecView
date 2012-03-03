@@ -719,19 +719,19 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return isIncreasing();
   }
 
-  private Graph integration;
+  private IntegralGraph integration;
 
-  public Graph getIntegrationGraph() {
+  public IntegralGraph getIntegrationGraph() {
     return integration;
   }
   
-  public void setIntegrationGraph(Graph graph) {
+  public void setIntegrationGraph(IntegralGraph graph) {
     integration = graph;
   }
 
   private Comparator<Coordinate> c;
   
-  public double getYValueAt(double x) {
+  public double getPercentYValueAt(double x) {
     if (!isContinuous())
       return Double.NaN;
     if (c == null)
