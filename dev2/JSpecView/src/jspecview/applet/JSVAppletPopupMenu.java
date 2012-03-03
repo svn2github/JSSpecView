@@ -34,7 +34,7 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     zoomMenu.setEnabled(enableZoom);
   }
 
-  private ActionListener actionListener = new ActionListener() {
+  private ActionListener exportActionListener = new ActionListener() {
     public void actionPerformed(ActionEvent e) {
       applet.exportSpectrum(e.getActionCommand());
     }
@@ -109,7 +109,7 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     add(scriptMenuItem);
     addSeparator();
     add(aboutMenu);
-    JSVPanel.setMenus(saveAsMenu, saveAsJDXMenu, exportAsMenu, actionListener);
+    JSVPanel.setMenus(saveAsMenu, saveAsJDXMenu, exportAsMenu, exportActionListener);
     fileMenu.add(saveAsMenu);
     if (isSigned)
       fileMenu.add(exportAsMenu);
