@@ -47,7 +47,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Insets;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -2184,7 +2183,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        the spectrum to export
    * @param fc
    *        file chooser to use
-   * @param comm
+   * @param mode
    *        the format to export in
    * @param index
    *        the index of the spectrum
@@ -2192,24 +2191,24 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @param dirLastExported
    * @return dirLastExported
    */
-  public String exportSpectrum(JDXSpectrum spec, JFileChooser fc, String comm,
+  public String exportSpectrum(JDXSpectrum spec, JFileChooser fc, String mode,
                                int index, String recentFileName,
                                String dirLastExported) {
     JSpecViewFileFilter filter = new JSpecViewFileFilter();
     //TODO: This is flawed. It assumes the file name has one and only one "." in it. 
     String name = TextFormat.split(recentFileName, ".")[0];
-    if ("XY FIX PAC SQZ DIF DIFDUP".indexOf(comm) >= 0) {
+    if ("XY FIX PAC SQZ DIF DIFDUP".indexOf(mode) >= 0) {
       filter.addExtension("jdx");
       filter.addExtension("dx");
       filter.setDescription("JCAMP-DX Files");
       name += ".jdx";
     } else {
-      if (comm.toLowerCase().indexOf("iml") >= 0
-          || comm.toLowerCase().indexOf("aml") >= 0)
-        comm = "XML";
-      filter.addExtension(comm);
-      filter.setDescription(comm + " Files");
-      name += "." + comm.toLowerCase();
+      if (mode.toLowerCase().indexOf("iml") >= 0
+          || mode.toLowerCase().indexOf("aml") >= 0)
+        mode = "XML";
+      filter.addExtension(mode);
+      filter.setDescription(mode + " Files");
+      name += "." + mode.toLowerCase();
     }
     fc.setFileFilter(filter);
     fc.setSelectedFile(new File(name));
@@ -2228,48 +2227,68 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
     if (option != -1) {
       if (option == JOptionPane.NO_OPTION) {
-        return exportSpectrum(spec, fc, comm, index, recentFileName,
+        return exportSpectrum(spec, fc, mode, index, recentFileName,
             this.dirLastExported);
       }
     }
 
     startIndex = getStartDataPointIndices()[index];
     endIndex = getEndDataPointIndices()[index];
+    export(mode, file, spec, startIndex, endIndex);
+    return this.dirLastExported;
+  }
 
+  public void export(List<String> tokens) {
+    String mode = null;
+    String fileName = null;
+    switch (tokens.size()) {
+    default:
+      return;
+    case 1:
+      mode = tokens.get(0);
+      if(mode.charAt(0) == '\"' || mode.indexOf(".") >= 0) {
+        fileName = mode;
+        if(fileName.charAt(0) == '\"')
+          fileName = mode.substring(1, mode.length() - 1);
+        String ext = fileName.substring(fileName.lastIndexOf(".") + 1).toUpperCase();
+        if (ext.equals("PNG") || ext.equals("JPG"))
+          mode = ext;
+        else
+          mode = "XY";
+      } else {
+        mode = mode.toUpperCase();
+      }
+      break;
+    case 2:
+      mode = tokens.get(0);
+      fileName = tokens.get(1);      
+    }
+    if(fileName.charAt(0) == '\"')
+      fileName = fileName.substring(1, mode.length() - 1);
+    export(mode, new File(fileName), getSpectrum(),getStartDataPointIndices()[0],getEndDataPointIndices()[0]);       
+  }
+    
+  private void export(String mode, File file, JDXSpectrum spec, int startIndex, int endIndex) {
     try {
-      if (comm.equals("PNG")) {
+      if (mode.equals("PNG") || mode.equals("JPG")) {
         try {
-          Rectangle r = getBounds();
-          Image image = createImage(r.width, r.height);
-          Graphics g = image.getGraphics();
-          paint(g);
-          ImageIO.write((RenderedImage) image, "png", new File(file
+          Image image = createImage(getWidth(), getHeight());
+          paint(image.getGraphics());
+          ImageIO.write((RenderedImage) image, mode.toLowerCase(), new File(file
               .getAbsolutePath()));
         } catch (IOException ioe) {
           ioe.printStackTrace();
         }
-      } else if (comm.equals("JPG")) {
-        try {
-          Rectangle r = getBounds();
-          Image image = createImage(r.width, r.height);
-          Graphics g = image.getGraphics();
-          paint(g);
-          ImageIO.write((RenderedImage) image, "jpg", new File(file
-              .getAbsolutePath()));
-        } catch (IOException ioe) {
-          ioe.printStackTrace();
-        }
-      } else if (comm.equals("SVG")) {
+      } else if (mode.equals("SVG")) {
         (new SVGExporter()).exportAsSVG(file.getAbsolutePath(), this, index,
             true);
       } else {
-        Exporter.export(comm, file.getAbsolutePath(), spec, startIndex,
+        Exporter.export(mode, file.getAbsolutePath(), spec, startIndex,
             endIndex);
       }
     } catch (IOException ioe) {
       // STATUS --> "Error writing: " + file.getName()
     }
-    return this.dirLastExported;
   }
 
   public String exportSpectra(JFrame frame, JFileChooser fc, String type,

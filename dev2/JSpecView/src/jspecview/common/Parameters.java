@@ -9,7 +9,6 @@ import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
 import jspecview.util.Logger;
-import jspecview.util.TextFormat;
 
 public class Parameters extends DisplayScheme {
 
@@ -69,12 +68,9 @@ public class Parameters extends DisplayScheme {
 
   public void set(JSVPanel jsvp, ScriptToken st, String value) {
     Object param = null;
-    
+    List<String> tokens;
     switch (st) {
     default:
-      return;
-    case DEBUG:
-      Logger.debugging = parseBoolean(value);
       return;
     case PLOTCOLORS:
       plotColorsStr = value;
@@ -82,6 +78,23 @@ public class Parameters extends DisplayScheme {
         getPlotColors();
       else
         jsvp.setPlotColors(getPlotColors(value));
+      return;
+    case ZOOM:
+      if (jsvp != null) {
+        tokens = ScriptToken.getTokens(value);
+        switch (tokens.size()) {
+        case 1:
+          if (tokens.get(0).equalsIgnoreCase("out"))
+            jsvp.setZoom(0, 0);
+          break;
+        case 2:
+          jsvp.setZoom(Double.parseDouble(tokens.get(0)), Double
+              .parseDouble(tokens.get(1)));
+        }
+      }
+      break;
+    case DEBUG:
+      Logger.debugging = parseBoolean(value);
       return;
     case REVERSEPLOT:
       reversePlot = parseBoolean(value);
@@ -154,12 +167,6 @@ public class Parameters extends DisplayScheme {
           break;
         }
       param = displayFont;
-      break;
-    case ZOOM:
-      value = TextFormat.replaceAllCharacters(value, " ,",' ').trim();
-      String[] minmax = TextFormat.split(value, ' ');
-      if (jsvp != null)
-        jsvp.setZoom(Double.parseDouble(minmax[0]), Double.parseDouble(minmax[1]));
       break;
     }
     if (jsvp == null)

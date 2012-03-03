@@ -24,8 +24,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
-
-import jspecview.util.TextFormat;
+import java.util.Map.Entry;
 
 /**
  * ScriptToken takes care of script command processing
@@ -35,59 +34,68 @@ import jspecview.util.TextFormat;
 
 public enum ScriptToken {
 
+  // null tip means DON'T SHOW
   UNKNOWN("?"),
   APPLETID("APPLETID"),
   APPLETREADYCALLBACKFUNCTIONNAME("APPLETREADYCALLBACKFUNCTIONNAME"),
-  AUTOINTEGRATE("AUTOINTEGRATE"),
-  BACKGROUNDCOLOR("BACKGROUNDCOLOR"),
-  CLOSE("CLOSE"),   // id or file name or ALL
-  COMPOUNDMENUON("COMPOUNDMENUON"),
+  AUTOINTEGRATE("AUTOINTEGRATE", "TF"),
+  BACKGROUNDCOLOR("BACKGROUNDCOLOR", "C"),
+  CLOSE("CLOSE", "spectrumId or fileName or ALL"),
+  COMPOUNDMENUON("COMPOUNDMENUON", "TF"),
   COORDCALLBACKFUNCTIONNAME("COORDCALLBACKFUNCTIONNAME"),
-  COORDINATESCOLOR("COORDINATESCOLOR"),
-  COORDINATESON("COORDINATESON"),
-  DEBUG("DEBUG"),
-  DISPLAYFONTNAME("DISPLAYFONTNAME"),
-  ENABLEZOOM("ENABLEZOOM"),
+  COORDINATESCOLOR("COORDINATESCOLOR", "C"),
+  COORDINATESON("COORDINATESON", "TF"),
+  DEBUG("DEBUG", "TF"),
+  DISPLAYFONTNAME("DISPLAYFONTNAME", "fontName"),
+  ENABLEZOOM("ENABLEZOOM", "TF"),
   ENDINDEX("ENDINDEX"),
-  GETSOLUTIONCOLOR("GETSOLUTIONCOLOR"),
-  GRIDCOLOR("GRIDCOLOR"),
-  GRIDON("GRIDON"),
-  INTEGRATE("INTEGRATE"),
+  EXPORT("EXPORT", "[JPG,PNG,XY,...] \"filename\""), 
+  GETSOLUTIONCOLOR("GETSOLUTIONCOLOR", ""),
+  GRIDCOLOR("GRIDCOLOR", "C"),
+  GRIDON("GRIDON", "TF"),
+  INTEGRATE("INTEGRATE", ""),
   INTEGRALPLOTCOLOR("INTEGRALPLOTCOLOR"),
   INTEGRATIONRATIOS("INTEGRATIONRATIOS"),
   INTERFACE("INTERFACE"),
-  IRMODE("IRMODE"),
-  LABEL("LABEL"),  // label x y color "text"
-  LOAD("LOAD"),
+  IRMODE("IRMODE", "A or T or ?"),
+  LABEL("LABEL", "x y [color and/or \"text\"]"),
+  LOAD("LOAD", "[APPEND] \"fileName\""),
   MENUON("MENUON"),
   OBSCURE("OBSCURE"),
-  OVERLAY("OVERLAY"),   // overlay specno,specno,specno....
+  OVERLAY("OVERLAY", "spectrumID, spectrumID, ..."),
   PEAKCALLBACKFUNCTIONNAME("PEAKCALLBACKFUNCTIONNAME"),
-  PLOTAREACOLOR("PLOTAREACOLOR"),
-  PLOTCOLOR("PLOTCOLOR"),
+  PLOTAREACOLOR("PLOTAREACOLOR", "C"),
+  PLOTCOLOR("PLOTCOLOR", "C"),
   PLOTCOLORS("PLOTCOLORS"),
-  REVERSEPLOT("REVERSEPLOT"),
-  SCALECOLOR("SCALECOLOR"),
-  SPECTRUM("SPECTRUM"),
+  REVERSEPLOT("REVERSEPLOT", "TF"),
+  SCALECOLOR("SCALECOLOR", "C"),
+  SPECTRUM("SPECTRUM", "spectrumID"),
   SPECTRUMNUMBER("SPECTRUMNUMBER"),
   STARTINDEX("STARTINDEX"),
   SYNCCALLBACKFUNCTIONNAME("SYNCCALLBACKFUNCTIONNAME"),
   SYNCID("SYNCID"),
-  TITLEBOLDON("TITLEBOLDON"),
-  TITLECOLOR("TITLECOLOR"),
-  TITLEFONTNAME("TITLEFONTNAME"),
-  UNITSCOLOR("UNITSCOLOR"),
+  TITLEBOLDON("TITLEBOLDON", "TF"),
+  TITLECOLOR("TITLECOLOR", "C"),
+  TITLEFONTNAME("TITLEFONTNAME", "fontName"),
+  UNITSCOLOR("UNITSCOLOR", "C"),
   VERSION("VERSION"),
-  XSCALEON("XSCALEON"),
-  XUNITSON("XUNITSON"),
-  YSCALEON("YSCALEON"),
-  YUNITSON("YUNITSON"),
-  ZOOM("ZOOM");
+  XSCALEON("XSCALEON", "TF"),
+  XUNITSON("XUNITSON", "TF"),
+  YSCALEON("YSCALEON", "TF"),
+  YUNITSON("YUNITSON", "TF"),
+  ZOOM("ZOOM", "OUT or x1,x2");
 
-  private String name;
+  private String tip;
+
+  public String getTip() {
+    return "  " + (tip == "TF" ? "TRUE or FALSE" : tip == "C" ? "<color>" : tip);
+  }
 
   private ScriptToken(String name) {
-    this.name = name;
+  }
+
+  private ScriptToken(String name, String tip) {
+    this.tip = tip;
   }
 
   public static Map<String, ScriptToken> htParams;
@@ -96,10 +104,25 @@ public enum ScriptToken {
     if (htParams == null) {
       htParams = new Hashtable<String, ScriptToken>();
       for (ScriptToken item : values())
-        htParams.put(item.name, item);
+        htParams.put(item.name(), item);
     }
     ScriptToken st = htParams.get(name.toUpperCase());
     return (st == null ? UNKNOWN : st);
+  }
+
+  public static List<ScriptToken> getScriptTokenList(String name, boolean isExact) {
+    name = name.toUpperCase();
+    List<ScriptToken> list = new ArrayList<ScriptToken>();
+    ScriptToken st = getScriptToken(name);
+    if (isExact) {
+      if (st != null)
+        list.add(st);
+    } else {
+      for (Entry<String, ScriptToken> entry: htParams.entrySet())
+         if (entry.getKey().startsWith(name) && entry.getValue().tip != null)
+           list.add(entry.getValue());
+    }
+    return list;
   }
 
   /**
@@ -107,44 +130,32 @@ public enum ScriptToken {
    * 
    * @param st
    * @param params
-   * @param token
+   * @param cmd
    * @return
    */
-  public static String getValue(ScriptToken st, StringTokenizer params, String token) {
+  public static String getValue(ScriptToken st, StringTokenizer params, String cmd) {
     if (!params.hasMoreTokens())
       return "";
-    int pt;
     switch (st) {
     default:
       return nextStringToken(params, true);
     case LABEL:
-      // no trimming of quotes
-      pt = token.indexOf(" ");
-      if (pt < 0)
-        return "";
-      return token.substring(pt).trim();
-    case CLOSE:
     case LOAD:
-      // takes full command, possibly removing ""
-      pt = token.indexOf(" ");
-      if (pt < 0)
-        return "";
-      String s = token.substring(pt).trim();
-      return (s.startsWith("\"") && s.endsWith("\"") ? s.substring(1, s.length() - 1) : s);        
+    case CLOSE:
+      // take full command
+      return removeCommandName(cmd);
     case OVERLAY:
-      // clean, with no spaces
-      pt = token.indexOf(" ");
-      if (pt < 0)
-        return "";
-      return TextFormat.simpleReplace(token.substring(pt).trim(), " ", "");      
     case ZOOM:
-      // clean, with no spaces; possibly "out"
-      String x1 = nextStringToken(params, true);
-      pt = token.indexOf(" ");
-      if (pt < 0 || x1.equalsIgnoreCase("out"))
-        return "0,0";
-      return TextFormat.simpleReplace(token.substring(pt).trim(), " ", "");
+      // commas to spaces
+      return removeCommandName(cmd).replace(',',' ').trim();
     }
+  }
+
+  private static String removeCommandName(String cmd) {
+    int pt = cmd.indexOf(" ");
+    if (pt < 0)
+      return "";
+    return cmd.substring(pt).trim();
   }
 
   public static String nextStringToken(StringTokenizer params, boolean removeQuotes) {
@@ -152,7 +163,7 @@ public enum ScriptToken {
     if (s.charAt(0) != '"') 
       return s;
     if (s.endsWith("\""))
-      return (removeQuotes ? s.substring(1, s.length() - 1) : s);
+      return (removeQuotes ? trimQuotes(s) : s);
     StringBuffer sb = new StringBuffer(s.substring(1));
     s = null;
     while (params.hasMoreTokens() && !(s = params.nextToken()).endsWith("\"")) {
@@ -179,4 +190,20 @@ public enum ScriptToken {
       tokens.add(nextStringToken(st, false));
     return tokens;
   }
+
+  public static String getNameList(List<ScriptToken> list) {
+    if (list.size() == 0)
+      return "";
+    StringBuffer sb = new StringBuffer();
+    for (int i = 0; i < list.size(); i++)
+      sb.append(",").append(list.get(i));
+    return sb.toString().substring(1);
+  }
+
+  public static String trimQuotes(String value) {
+    return (value.length() > 1 && value.startsWith("\"")
+        && value.endsWith("\"") ? value.substring(1, value.length() - 1)
+        : value);
+  }
+
 }

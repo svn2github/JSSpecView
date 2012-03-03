@@ -96,7 +96,6 @@ import jspecview.source.JDXSource;
 import jspecview.util.Escape;
 import jspecview.util.Logger;
 import jspecview.util.Parser;
-import jspecview.util.TextFormat;
 import netscape.javascript.JSObject;
 
 /**
@@ -1222,7 +1221,6 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
           startIndex = Integer.parseInt(value);
           break;
         case SPECTRUMNUMBER:
-        case SPECTRUM:
           spectrumNumber = Integer.parseInt(value);
           break;
         case AUTOINTEGRATE:
@@ -1394,8 +1392,9 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
           System.out.println("Unrecognized parameter: " + key);
           break;
         case LOAD:
+          // no APPEND here
           specsSaved = null;
-          openDataOrFile(null, null, null, value);
+          openDataOrFile(null, null, null, ScriptToken.trimQuotes(value));
           setSpectrumNumber(1);
           break;
         default:
@@ -1410,8 +1409,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
         case COORDCALLBACKFUNCTIONNAME:
           coordCallbackFunctionName = value;
           break;
-        case SPECTRUMNUMBER:
         case SPECTRUM:
+        case SPECTRUMNUMBER:
           setSpectrumNumber(Integer.parseInt(value));
           jsvp = selectedJSVPanel;
           break;
@@ -1441,7 +1440,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
           integrate(value);
           break;
         case OVERLAY:
-          overlay(TextFormat.split(value, ","));
+          overlay(ScriptToken.getTokens(value));
           break;
         case GETSOLUTIONCOLOR:
           if (jsvp == null) 
@@ -1457,30 +1456,31 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
   }
 
   
-  private void overlay(String[] ids) {
+  private void overlay(List<String> list) {
     if (specsSaved == null)
       specsSaved = specs;
-    if (ids.length == 0 || ids.length == 1 && ids[0].equalsIgnoreCase("all")) {
+    if (list.size() == 0 || list.size() == 1 && list.get(0).equalsIgnoreCase("all")) {
       openDataOrFile(null, "", specsSaved, null);
       setSpectrumNumber(1);
       return;
     }
-    if (ids.length == 1 && ids[0].equalsIgnoreCase("none")) {
+    if (list.size() == 1 && list.get(0).equalsIgnoreCase("none")) {
       openDataOrFile(null, "NONE", specsSaved, null);
       setSpectrumNumber(1);
       return;
     }
-    List<JDXSpectrum> list = new ArrayList<JDXSpectrum>();
+    List<JDXSpectrum> slist = new ArrayList<JDXSpectrum>();
     StringBuffer sb = new StringBuffer();
-    for (int i = 0; i < ids.length; i++) {
-      JDXSpectrum spec = findSpectrumById(ids[i]);
+    for (int i = 0; i < list.size(); i++) {
+      String id = list.get(i);
+      JDXSpectrum spec = findSpectrumById(id);
       if (spec == null)
         continue;
-        list.add(spec);
-        sb.append(",").append(ids[i]);
+        slist.add(spec);
+        sb.append(",").append(id);
     }
-    if (list.size() > 1 && JDXSpectrum.areScalesCompatible(list)) {
-      openDataOrFile(null, sb.toString().substring(1), list, null);
+    if (list.size() > 1 && JDXSpectrum.areScalesCompatible(slist)) {
+      openDataOrFile(null, sb.toString().substring(1), slist, null);
       setSpectrumNumber(1);
     }
   }

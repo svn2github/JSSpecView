@@ -139,7 +139,6 @@ import jspecview.util.Escape;
 import jspecview.util.FileManager;
 import jspecview.util.Logger;
 import jspecview.util.Parser;
-import jspecview.util.TextFormat;
 
 /**
  * The Main Class or Entry point of the JSpecView Application.
@@ -1070,9 +1069,11 @@ public class MainFrame extends JFrame implements DropTargetListener,
     statusPanel.add(statusLabel, BorderLayout.NORTH);
     statusPanel.add(commandInput, BorderLayout.SOUTH);
     commandHistory = new CommandHistory(this, commandInput);
+    commandInput.setFocusTraversalKeysEnabled(false);
     commandInput.addKeyListener(new KeyListener() {
       public void keyPressed(KeyEvent e) {
         commandHistory.keyPressed(e.getKeyCode());
+        checkCommandLineForTip(e.getKeyChar());
       }
 
       public void keyReleased(KeyEvent e) {
@@ -1081,6 +1082,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       }
 
       public void keyTyped(KeyEvent e) {
+//        checkCommandLineForTip(e.getKeyChar());
       }
       
     });
@@ -1124,6 +1126,38 @@ public class MainFrame extends JFrame implements DropTargetListener,
     windowMenu.add(showMenuItem);
     windowMenu.addSeparator();
 
+  }
+
+  protected void checkCommandLineForTip(char c) {
+    String cmd = commandInput.getText()
+        + (Character.isISOControl(c) ? "" : "" + c);
+    String tip;
+    if (cmd.length() == 0) {
+      tip = "Enter a command:";
+    } else {
+      List<String> tokens = ScriptToken.getTokens(cmd);
+      if (tokens.size() == 0)
+        return;
+      boolean isExact = (cmd.endsWith(" ") || tokens.size() > 1);
+      List<ScriptToken> list = ScriptToken.getScriptTokenList(tokens.get(0),
+          isExact);
+      switch (list.size()) {
+      case 0:
+        tip = "?";
+        break;
+      case 1:
+        if (c == '\t' || isExact) {
+          tip = list.get(0).name() + " " + list.get(0).getTip();
+          if (c == '\t')
+            commandInput.setText(list.get(0).name() + " ");
+          break;
+        }
+        // fall through
+      default:
+        tip = ScriptToken.getNameList(list);
+      }
+    }
+    writeStatus(tip);
   }
 
   private static void setButton(AbstractButton button, String tip,
@@ -1177,7 +1211,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private int nOverlay;
   
   private int openFile(File file, String url, List<JDXSpectrum> specs) {
-    writeStatus(" ");
+    writeStatus("");
     String filePath = null;
     String fileName = null;
     boolean isOverlay = false;
@@ -1478,6 +1512,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
     overlaySplitButton.setIcon(overlayIcon);
     overlaySplitButton.setToolTipText("Overlay Display");
+    commandInput.requestFocusInWindow();
   }
 
   /**
@@ -1673,6 +1708,13 @@ public class MainFrame extends JFrame implements DropTargetListener,
      return null;
   }
 
+  private JSVTreeNode findNodeById(String id) {
+    for (int i = specNodes.size(); --i >= 0;)
+      if (id.equals(specNodes.get(i).id))
+        return specNodes.get(i);
+     return null;
+  }
+
   private JDXSource findSourceByNameOrId(String id) {
     for (int i = specNodes.size(); --i >= 0;) {
       JSVTreeNode node = specNodes.get(i);
@@ -1823,19 +1865,32 @@ public class MainFrame extends JFrame implements DropTargetListener,
           System.out.println("Unrecognized parameter: " + key);
           break;
         case LOAD:
-          openFile(value);
+          if (value.toUpperCase().startsWith("APPEND ")) {
+            value = value.substring(7).trim();
+          } else {
+            close("all");
+          }
+          openFile(ScriptToken.trimQuotes(value));
           jsvp = selectedJSVPanel;
           if (jsvp == null)
             return;
           break;
         case CLOSE:
-          close(value);
+          close(ScriptToken.trimQuotes(value));
           break;
         default:
           parameters.set(jsvp, st, value);
           break;
+        case SPECTRUM:
         case SPECTRUMNUMBER:
-          setFrame(Integer.parseInt(value) - 1);
+          if (value.indexOf('.') >= 0) {
+            JSVTreeNode node = findNodeById(value);
+            if (node == null)
+              return; // fail!
+            setFrame(node);
+          } else {
+            setFrame(Integer.parseInt(value) - 1);
+          }
           jsvp = selectedJSVPanel;
           break;
         case AUTOINTEGRATE:
@@ -1854,12 +1909,16 @@ public class MainFrame extends JFrame implements DropTargetListener,
           if (jsvp != null)
             integrate(value);
           break;
+        case EXPORT:
+          if (jsvp != null)
+            jsvp.export(ScriptToken.getTokens(value));
+          break;
         case LABEL:
           if (jsvp != null)
             jsvp.addAnnotation(ScriptToken.getTokens(value));
           break;
         case OVERLAY:
-          overlay(TextFormat.split(value, ","));
+          overlay(ScriptToken.getTokens(value));
           break;
         case GETSOLUTIONCOLOR:
           if (jsvp != null)
@@ -1887,6 +1946,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
         e.printStackTrace();
       }
     }
+    commandInput.requestFocusInWindow();
     repaint();
   }
 
@@ -1902,30 +1962,34 @@ public class MainFrame extends JFrame implements DropTargetListener,
     closeSource(source);
   }
 
-  private void overlay(String[] ids) {
-    List<JDXSpectrum> list = new ArrayList<JDXSpectrum>();
+  private void overlay(List<String> list) {
+    List<JDXSpectrum> slist = new ArrayList<JDXSpectrum>();
     StringBuffer sb = new StringBuffer();
     String id0 = (selectedJSVPanel == null ? "1." : findNode(selectedJSVPanel).id);
     id0 = id0.substring(0, id0.indexOf(".") + 1);
-    for (int i = 0; i < ids.length; i++) {
-      if (!ids[i].contains("."))
-        ids[i] = id0 + ids[i];
-      JDXSpectrum spec = findSpectrumById(ids[i]);
+    for (int i = 0; i < list.size(); i++) {
+      String id = list.get(i);
+      if (!id.contains("."))
+        id = id0 + id;
+      JDXSpectrum spec = findSpectrumById(id);
       if (spec == null)
         continue;
-        list.add(spec);
-        sb.append(",").append(ids[i]);
+        slist.add(spec);
+        sb.append(",").append(id);
     }
-    if (list.size() > 1 && JDXSpectrum.areScalesCompatible(list))
-      openFile(null, sb.toString().substring(1), list);
+    if (slist.size() > 1 && JDXSpectrum.areScalesCompatible(slist))
+      openFile(null, sb.toString().substring(1), slist);
   }
 
   private void setFrame(int i) {
     if (specNodes == null || i < 0 || i >= specNodes.size())
       return;
-    selectFrameNode(specNodes.get(i).frame);
-    setFrame(specNodes.get(i), false);
+    setFrame(specNodes.get(i));
+  }
 
+  private void setFrame(JSVTreeNode node) {
+    selectFrameNode(node.frame);
+    setFrame(node, false);
   }
 
   private boolean selectPanelByPeak(String index) {
@@ -2221,6 +2285,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the message
    */
   public void writeStatus(String msg) {
+    if (msg.length() == 0)
+      msg = "Enter a command:";
     statusLabel.setText(msg);
   }
 
