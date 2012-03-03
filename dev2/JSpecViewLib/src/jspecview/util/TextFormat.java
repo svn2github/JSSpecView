@@ -475,6 +475,11 @@ public class TextFormat {
   public static DecimalFormat getDecimalFormat(String hash) {
     return new DecimalFormat(hash, new DecimalFormatSymbols(java.util.Locale.US));
   }
-  
+
+  public static String trimQuotes(String value) {
+    return (value.length() > 1 && value.startsWith("\"")
+        && value.endsWith("\"") ? value.substring(1, value.length() - 1)
+        : value);
+  }  
   
 }
