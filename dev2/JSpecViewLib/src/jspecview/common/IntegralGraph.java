@@ -335,9 +335,9 @@ public class IntegralGraph implements Graph {
       String token = allParamTokens.nextToken();
       // now split the x-value/integral-value pair
       StringTokenizer eachParam = new StringTokenizer(token, ":");
-      Annotation inputRatio = new Annotation(Double
+      Annotation ratio = new Annotation(Double
           .parseDouble(eachParam.nextToken()), 0.0, eachParam.nextToken(), true);
-      ratios.add(inputRatio);
+      ratios.add(ratio);
     }
 
     return ratios;
