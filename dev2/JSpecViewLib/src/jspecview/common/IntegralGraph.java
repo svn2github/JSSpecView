@@ -21,8 +21,11 @@ package jspecview.common;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
+
+import jspecview.common.Integral;
 
 
 /**
@@ -338,6 +341,33 @@ public class IntegralGraph implements Graph {
     }
 
     return inputRatios;
+  }
+
+  private List<Integral> integrals;  
+
+  public void addIntegral(double x1, double x2, boolean isFinal) {
+    if (Double.isNaN(x1)) {
+      integrals = null;
+      return;
+    }
+    double intVal = Math.abs(getPercentYValueAt(x2) - getPercentYValueAt(x1));
+    if (isFinal) {
+      integrals.get(0).value = 0;
+      if (intVal == 0)
+        return;
+    }
+    if (integrals == null)
+      integrals = new ArrayList<Integral>();
+    Integral in = new Integral(intVal, x1, x2, getYValueAt(x1), getYValueAt(x2));
+    if (isFinal || integrals.size() == 0) {
+      integrals.add(in);
+    } else {
+      integrals.set(0, in);
+    }
+  }
+
+  public List<Integral> getIntegrals() {
+    return integrals;
   }
 
 }

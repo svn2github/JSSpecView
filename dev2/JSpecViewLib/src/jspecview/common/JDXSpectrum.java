@@ -967,4 +967,8 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
         haveIntegral |= (specs.get(i).integrate(minY, offset, factor) != null);
     return haveIntegral;
   }
+
+  public List<Integral> getIntegrals() {
+   return (integration == null ? null : integration.getIntegrals());
+  }
 }
