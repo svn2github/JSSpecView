@@ -1518,7 +1518,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     FontMetrics fm = g.getFontMetrics();
     int y1 = invertY((int) topPlotAreaPos);
     int y2 = invertY((int) (topPlotAreaPos - 3));
-    double maxWidth = (xPixels(multiScaleData.xStep) - xPixels(0)) * 0.95;
+    double maxWidth = Math.abs((xPixels(multiScaleData.xStep) - xPixels(0)) * 0.95);
     double lastX;
     if (Double.isNaN(multiScaleData.firstX)) {
       lastX = multiScaleData.maxXOnScale + multiScaleData.xStep / 2;
