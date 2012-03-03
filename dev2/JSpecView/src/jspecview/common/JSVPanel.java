@@ -1320,8 +1320,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       drawAnnotations(g, height, width, integrationRatios, integralPlotColor);
     if (annotations != null)
       drawAnnotations(g, height, width, annotations, null);
-    if (integrals != null)
-      drawIntegralValue(g, width);
+    drawIntegralValue(g, width);
   }
 
   /**
@@ -1495,6 +1494,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   private void drawIntegralValue(Graphics g, int width) {
+    List<Integral> integrals = getSpectrum().getIntegrals();
+    if (integrals == null)
+      return;
     setFont(g, width, Font.BOLD, 12);
     FontMetrics fm = g.getFontMetrics();
     NumberFormat formatter = getFormatter("#0.0");
@@ -1505,7 +1507,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       if (in.value == 0)
         continue;
       String s = "  " + formatter.format(Math.abs(in.value));
-      int x = xPixels(in.x);
+      int x = xPixels(in.x2);
       int y1 = yPixels(in.y1);
       int y2 = yPixels(in.y2);
       g.drawLine(x, y1, x, y2);
@@ -2617,42 +2619,15 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     finalY = coord.getYVal();
   }
 
-  private class Integral {
-    double value;
-    double x;
-    double y1;
-    double y2;
-
-    Integral(double value, double x, double y1, double y2) {
-      this.value = value;
-      this.x = x;
-      this.y1 = y1;
-      this.y2 = y2;
-    }
-  }
-  
-  private List<Integral> integrals;
-  
   private void clearIntegrals() {
-    integrals = null;
+    checkIntegral(Double.NaN, 0, false);
   }
   
   private void checkIntegral(double x1, double x2, boolean isFinal) {
     IntegralGraph ig = getSpectrum().getIntegrationGraph();
     if (ig == null)
       return;
-    if (integrals == null) {
-      integrals = new ArrayList<Integral>();
-    }
-    Integral in = new Integral(Math.abs(ig.getPercentYValueAt(x2) - ig.getPercentYValueAt(x1)),
-        x2, ig.getYValueAt(x1), ig.getYValueAt(x2));
-    if (isFinal || integrals.size() == 0) {
-      integrals.add(in);
-      if (isFinal)
-        integrals.get(0).value = 0;
-    } else {
-      integrals.set(0, in);
-    }
+    ig.addIntegral(x1, x2, isFinal);
     repaint();
   }
 
