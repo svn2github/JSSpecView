@@ -64,6 +64,8 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyVetoException;
@@ -629,6 +631,28 @@ public class MainFrame extends JFrame implements DropTargetListener,
     spectraTreePane = new JScrollPane(spectraTree);
     spectraTree.setEditable(false);
     spectraTree.setRootVisible(false);
+    spectraTree.addMouseListener(new MouseListener() {
+
+      public void mouseClicked(MouseEvent e) {
+        if (e.getClickCount() == 2 && selectedJSVPanel != null) {
+          selectedJSVPanel.setZoom(0,0);
+          repaint();
+        }
+      }
+
+      public void mouseEntered(MouseEvent e) {
+      }
+
+      public void mouseExited(MouseEvent e) {
+      }
+
+      public void mousePressed(MouseEvent e) {
+      }
+
+      public void mouseReleased(MouseEvent e) {
+      }
+      
+    });
   }
 
   /**
@@ -2021,6 +2045,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
       selectedJSVPanel.setEnabled(true);
     }
     setMenuEnables(selectedJSVPanel.getSpectrum());
+    if (selectedJSVPanel.getSpectrum().getIntegrationGraph() != null)
+      writeStatus("Use CTRL-LEFT-DRAG to measure an integration value.");
   }
 
   /**

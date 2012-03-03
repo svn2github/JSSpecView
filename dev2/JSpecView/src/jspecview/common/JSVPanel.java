@@ -62,9 +62,11 @@ import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
 import java.io.File;
 import java.io.IOException;
-import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.print.attribute.HashPrintRequestAttributeSet;
@@ -1318,6 +1320,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       drawAnnotations(g, height, width, integrationRatios, integralPlotColor);
     if (annotations != null)
       drawAnnotations(g, height, width, annotations, null);
+    if (integrals != null)
+      drawIntegralValue(g, width);
   }
 
   /**
@@ -1490,6 +1494,34 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     }
   }
 
+  private void drawIntegralValue(Graphics g, int width) {
+    setFont(g, width, Font.BOLD, 12);
+    FontMetrics fm = g.getFontMetrics();
+    NumberFormat formatter = getFormatter("#0.0");
+    g.setColor(integralPlotColor);
+
+    for (int i = integrals.size(); --i >= 0;) {
+      Integral in = integrals.get(i);
+      if (Double.isNaN(in.value))
+        continue;
+      String s = "  " + formatter.format(Math.abs(in.value));
+      int x = xPixels(in.x);
+      int y1 = yPixels(in.y1);
+      int y2 = yPixels(in.y2);
+      g.drawLine(x, y1, x, y2);
+      g.drawLine(x + 1, y1, x + 1, y2);
+      g.drawString(s, x, (y1 + y2) / 2  + fm.getHeight() / 3);
+    }
+  }
+
+  private Map<String, NumberFormat> htFormats = new Hashtable<String, NumberFormat>();
+  private NumberFormat getFormatter(String hash) {
+    NumberFormat formatter = htFormats.get(hash);
+    if (formatter == null)
+      htFormats.put(hash, formatter = TextFormat.getDecimalFormat(hash));
+    return formatter;
+  }
+
   /**
    * Draws the x Scale
    * 
@@ -1510,10 +1542,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     if (multiScaleData.hashNums[0] <= 0)
       hashX = hash1.substring(0, Math.abs(multiScaleData.hashNums[0]) + 3);
 
-    DecimalFormat displayXFormatter = TextFormat.getDecimalFormat(hashX);
-
-    g.setFont(new Font((isPrinting ? printingFont : displayFontName),
-        Font.PLAIN, calculateFontSize(width, 12, true)));
+    NumberFormat formatter = getFormatter(hashX);
+    setFont(g, width, Font.PLAIN, 12);
     FontMetrics fm = g.getFontMetrics();
     int y1 = invertY((int) topPlotAreaPos);
     int y2 = invertY((int) (topPlotAreaPos - 3));
@@ -1526,7 +1556,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         g.setColor(gridColor);
         g.drawLine(x, y1, x, y2);
         g.setColor(scaleColor);
-        String s = displayXFormatter.format(val);
+        String s = formatter.format(val);
         int w = fm.stringWidth(s);
         g.drawString(s, x - w / 2, y2 + fm.getHeight());
       }
@@ -1537,12 +1567,17 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         g.setColor(gridColor);
         g.drawLine(x, y1, x, y2);
         g.setColor(scaleColor);
-        String s = displayXFormatter.format(val);
+        String s = formatter.format(val);
         int w = fm.stringWidth(s);
         g.drawString(s, x - w / 2, y2 + fm.getHeight());
         val += Math.floor(w/maxWidth) * multiScaleData.xStep;
       }
     }
+  }
+
+  private void setFont(Graphics g, int width, int mode, int size) {
+    g.setFont(new Font((isPrinting ? printingFont : displayFontName),
+        mode, calculateFontSize(width, size, true)));
   }
 
   /**
@@ -1562,9 +1597,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     String hash1 = "0.00000000";
     if (multiScaleData.hashNums[1] <= 0)
       hashY = hash1.substring(0, Math.abs(multiScaleData.hashNums[1]) + 3);
-    DecimalFormat displayYFormatter = TextFormat.getDecimalFormat(hashY);
-    g.setFont(new Font((isPrinting ? printingFont : displayFontName),
-        Font.PLAIN, calculateFontSize(width, 12, true)));
+    NumberFormat formatter = getFormatter(hashY);
+    setFont(g, width, Font.PLAIN, 12); 
     FontMetrics fm = g.getFontMetrics();
     double max = multiScaleData.maxYOnScale + multiScaleData.yStep / 2;
     for (double val = multiScaleData.minYOnScale; val < max; val += multiScaleData.yStep) {
@@ -1573,7 +1607,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       g.setColor(gridColor);
       g.drawLine(x1, y, x1 - 3, y);
       g.setColor(scaleColor);
-      String s = displayYFormatter.format(val);
+      String s = formatter.format(val);
       g.drawString(s, (x1 - 4 - fm.stringWidth(s)), y + fm.getHeight() / 3);
     }
   }
@@ -1589,9 +1623,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        the width to be drawn in pixels
    */
   private void drawTitle(Graphics g, int height, int width) {
-    int style = (isPrinting || titleBoldOn ? Font.BOLD : Font.PLAIN);
-    g.setFont(new Font((isPrinting ? printingFont : titleFontName), style,
-        calculateFontSize(width, 14, true)));
+    setFont(g, width, isPrinting || titleBoldOn ? Font.BOLD : Font.PLAIN, 
+        14); 
     FontMetrics fm = g.getFontMetrics();
     g.setColor(titleColor);
     g.drawString(getSpectrum().getPeakTitle(), 5, (int) (height - fm
@@ -1610,8 +1643,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   private void drawXUnits(Graphics g, int height, int width) {
     g.setColor(unitsColor);
-    g.setFont(new Font((isPrinting ? printingFont : displayFontName),
-        Font.ITALIC, calculateFontSize(width, 10, true)));
+    setFont(g, width, Font.ITALIC, 10);
     FontMetrics fm = g.getFontMetrics();
     String s = spectra[0].getXUnits();
     g.drawString(s, (int) (rightPlotAreaPos - fm.stringWidth(s)),
@@ -1630,8 +1662,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   private void drawYUnits(Graphics g, int height, int width) {
     g.setColor(unitsColor);
-    g.setFont(new Font((isPrinting ? printingFont : displayFontName),
-        Font.ITALIC, calculateFontSize(width, 10, true)));
+    setFont(g, width, Font.ITALIC, 10);
     FontMetrics fm = g.getFontMetrics();
     g.drawString(spectra[0].getYUnits(), 5, (int) (topPlotAreaPos - fm
         .getHeight()));
@@ -1649,24 +1680,15 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   private void drawCoordinates(Graphics g, int height, int width) {
     g.setColor(coordinatesColor);
-    Font font;
-
-    if (isPrinting)
-      font = new Font(printingFont, Font.PLAIN, calculateFontSize(width, 12,
-          true));
-    else
-      font = new Font(displayFontName, Font.PLAIN, calculateFontSize(width, 12,
-          true));
-    g.setFont(font);
-    int x = (int) ((plotAreaWidth + leftPlotAreaPos) * 0.85);
-    g.drawString(coordStr, x, (int) (topPlotAreaPos - 10));
+    setFont(g, width, Font.PLAIN, 12);
+    g.drawString(coordStr, (int) ((plotAreaWidth + leftPlotAreaPos) * 0.85), 
+        (int) (topPlotAreaPos - 10));
   }
 
   // determine whether there are any ratio annotations to draw
   private void drawAnnotations(Graphics g, int height, int width,
                                ArrayList<Annotation> annotations, Color color) {
-    g.setFont(new Font(isPrinting ? printingFont : displayFontName, Font.BOLD,
-        calculateFontSize(width, 12, true)));
+    setFont(g, width, Font.BOLD, 12);
     for (int i = annotations.size(); --i >= 0;) {
       Annotation note = annotations.get(i);
       color = (note instanceof ColoredAnnotation ? ((ColoredAnnotation) note).getColor()
@@ -2486,6 +2508,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   public void mouseClicked(MouseEvent e) {
     requestFocusInWindow();
+    if (e.isControlDown())
+      clearIntegrals();
     if (e.getButton() == MouseEvent.BUTTON3) {
       popup.setSelectedJSVPanel(this);
       popup.setSource(source);
@@ -2507,6 +2531,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   public void mouseEntered(MouseEvent e) {
   }
 
+  
+  int mouseClickCount;
+  
   /**
    * Implements mouseExited in interface MouseListener
    * 
@@ -2523,32 +2550,24 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        the <code>MouseEvent</code>
    */
   public void mousePressed(MouseEvent e) {
+    mouseClickCount = e.getClickCount();
+    isCtrlDown = e.isControlDown();
     // Maybe put this in a fireMousePressed() method
     if (e.getButton() != MouseEvent.BUTTON1)
       return;
 
-    int x = e.getX();
-    int y = e.getY();
+    int xPixel = e.getX();
+    int yPixel = e.getY();
+    if (checkXY(xPixel, yPixel)) {
 
-    int xPixel = x /*- getX()*/;
-    int yPixel = y /*- getY()*/;
-
-    if (xPixel >= leftPlotAreaPos && xPixel <= rightPlotAreaPos
-        && yPixel >= topPlotAreaPos && yPixel <= bottomPlotAreaPos) {
-
-      //isMousePressed = true;
       zoomBoxX = xPixel;
-
-      double xPt, yPt;
 
       Coordinate coord = getCoordFromPoint(xPixel, yPixel);
 
-      xPt = coord.getXVal();
-      yPt = coord.getYVal();
-
+      initX = coord.getXVal();
+      initY = coord.getYVal();
       initXpixel = xPixel;
-      initX = xPt;
-      initY = yPt;
+      
       mousePressedInPlotArea = true;
       repaint();
 
@@ -2568,34 +2587,73 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     if (e.getButton() != MouseEvent.BUTTON1)
       return;
 
-    int x = e.getX();
-    int y = e.getY();
+    int xPixel = e.getX();
+    int yPixel = e.getY();
 
-    int xPixel = x /*- getX()*/;
-    int yPixel = y /*- getY()*/;
+    if (!checkXY(xPixel, yPixel))
+      return;
+    isMouseReleased = true;
 
-    if (xPixel >= leftPlotAreaPos && xPixel <= rightPlotAreaPos
-        && yPixel >= topPlotAreaPos && yPixel <= bottomPlotAreaPos) {
+    setMouseFinalXY(e);
 
-      isMouseReleased = true;
-
-      double xPt, yPt;
-
-      Coordinate coord = getCoordFromPoint(xPixel, yPixel);
-
-      xPt = coord.getXVal();
-      yPt = coord.getYVal();
-
-      finalX = xPt;
-      finalY = yPt;
-
-      if (mousePressedInPlotArea
-          && Math.abs(xPixel - initXpixel) > MIN_DRAG_X_PIXELS) {
+    if (mousePressedInPlotArea
+        && Math.abs(xPixel - initXpixel) > MIN_DRAG_X_PIXELS) {
+      if (getSpectrum().getIntegrationGraph() != null && isCtrlDown) {
+          checkIntegral(initX, finalX, true);      
+      } else {
         doZoom(initX, initY, finalX, finalY);
       }
-
     }
+  }
 
+  private boolean checkXY(int xPixel, int yPixel) {
+    return (xPixel >= leftPlotAreaPos && xPixel <= rightPlotAreaPos
+        && yPixel >= topPlotAreaPos && yPixel <= bottomPlotAreaPos);
+  }
+
+  private void setMouseFinalXY(MouseEvent e) {
+    Coordinate coord = getCoordFromPoint(e.getX(), e.getY());
+    finalX = coord.getXVal();
+    finalY = coord.getYVal();
+  }
+
+  private class Integral {
+    double value;
+    double x;
+    double y1;
+    double y2;
+
+    Integral(double value, double x, double y1, double y2) {
+      this.value = value;
+      this.x = x;
+      this.y1 = y1;
+      this.y2 = y2;
+    }
+  }
+  
+  private List<Integral> integrals;
+  
+  private void clearIntegrals() {
+    integrals = null;
+  }
+  
+  private void checkIntegral(double x1, double x2, boolean isFinal) {
+    IntegralGraph ig = getSpectrum().getIntegrationGraph();
+    if (ig == null)
+      return;
+    if (integrals == null) {
+      integrals = new ArrayList<Integral>();
+    }
+    Integral in = new Integral(Math.abs(ig.getPercentYValueAt(x2) - ig.getPercentYValueAt(x1)),
+        x2, ig.getYValueAt(x1), ig.getYValueAt(x2));
+    if (isFinal || integrals.size() == 0) {
+      integrals.add(in);
+      if (isFinal)
+        integrals.get(0).value = Double.NaN;
+    } else {
+      integrals.set(0, in);
+    }
+    repaint();
   }
 
   public void mouseDragged(MouseEvent e) {
@@ -2618,6 +2676,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
   private double lastClickX = Double.MAX_VALUE;
 
+  private boolean isCtrlDown;
+
   /**
    * Called by the mouseClicked Method
    * 
@@ -2625,46 +2685,41 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        the <code>MouseEvent</code>
    */
   private void fireMouseClicked(MouseEvent e) {
-    if (e.getButton() != MouseEvent.BUTTON1)
-      return;
-
     int xPixel = e.getX();
     int yPixel = e.getY();
 
-    if (xPixel >= leftPlotAreaPos && xPixel <= rightPlotAreaPos
-        && yPixel >= topPlotAreaPos && yPixel <= bottomPlotAreaPos) {
-
-      double xPt, yPt;
-
-      Coordinate coord = getCoordFromPoint(xPixel, yPixel);
-
-      lastClickX = xPt = coord.getXVal();
-      yPt = coord.getYVal();
-
-      String hashX = "#";
-      String hashY = "#";
-      String hash1 = "0.00000000";
-
-      if (multiScaleData.hashNums[0] <= 0)
-        hashX = hash1.substring(0, Math.abs(multiScaleData.hashNums[0]) + 3);
-
-      DecimalFormat displayXFormatter = TextFormat.getDecimalFormat(hashX);
-
-      if (multiScaleData.hashNums[1] <= 0)
-        hashY = hash1.substring(0, Math.abs(multiScaleData.hashNums[1]) + 3);
-
-      DecimalFormat displayYFormatter = TextFormat.getDecimalFormat(hashY);
-
-      String xStr, yStr;
-
-      xStr = displayXFormatter.format(xPt);
-      yStr = displayYFormatter.format(yPt);
-
-      coordClicked = new Coordinate(Double.parseDouble(xStr), Double
-          .parseDouble(yStr));
-      notifyPeakPickedListeners(coordClicked);
-    } else
+    if (!checkXY(xPixel, yPixel)) {
       coordClicked = null;
+      return;
+    }
+
+    Coordinate coord = getCoordFromPoint(xPixel, yPixel);
+
+    lastClickX = coord.getXVal();
+    
+    coordClicked = coord;
+    //  double yPt = coord.getYVal();
+//
+//    String hashX = "#";
+//    String hashY = "#";
+//    String hash1 = "0.00000000";
+//
+//    if (multiScaleData.hashNums[0] <= 0)
+//      hashX = hash1.substring(0, Math.abs(multiScaleData.hashNums[0]) + 3);
+//
+//    DecimalFormat displayXFormatter = TextFormat.getDecimalFormat(hashX);
+//    String xStr = displayXFormatter.format(lastClickX);
+//
+//    if (multiScaleData.hashNums[1] <= 0)
+//      hashY = hash1.substring(0, Math.abs(multiScaleData.hashNums[1]) + 3);
+//
+//    DecimalFormat displayYFormatter = TextFormat.getDecimalFormat(hashY);
+//
+//    String yStr = displayYFormatter.format(yPt);
+
+//    coordClicked = new Coordinate(Double.parseDouble(xStr), Double
+  //      .parseDouble(yStr));
+    notifyPeakPickedListeners(coordClicked);
   }
 
   /**
@@ -2674,26 +2729,19 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        the <code>MouseEvent</code>
    */
   private void fireMouseMoved(MouseEvent e) {
-    int x = e.getX();
-    int y = e.getY();
-
-    int xPixel = x /*- getX()*/;
-    int yPixel = y /*- getY()*/;
-
-    if (xPixel >= leftPlotAreaPos && xPixel <= rightPlotAreaPos
-        && yPixel >= topPlotAreaPos && yPixel <= bottomPlotAreaPos) {
+    int xPixel = e.getX();
+    int yPixel = e.getY();
+    if (checkXY(xPixel, yPixel)) {
 
       if (isMouseDraggedEvent) {
         isMouseDragged = true;
         currZoomBoxX = xPixel;
       }
 
-      double xPt, yPt;
-
       Coordinate coord = getCoordFromPoint(xPixel, yPixel);
 
-      xPt = coord.getXVal();
-      yPt = coord.getYVal();
+      double xPt = coord.getXVal();
+      double yPt = coord.getYVal();
 
       String hashX = "#";
       String hashY = "#";
@@ -2701,27 +2749,22 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
       if (multiScaleData.hashNums[0] <= 0)
         hashX = hash1.substring(0, Math.abs(multiScaleData.hashNums[0]) + 3);
-
-      DecimalFormat formatter = TextFormat.getDecimalFormat(hashX);
+      String xx = getFormatter(hashX).format(xPt);
 
       if (multiScaleData.hashNums[1] <= 0)
         hashY = hash1.substring(0, Math.abs(multiScaleData.hashNums[1]) + 3);
-
-      String xx = formatter.format(xPt);
-      formatter = TextFormat.getDecimalFormat(hashY);
+      NumberFormat formatter = getFormatter(hashY);
       coordStr = "(" + xx + ", " + formatter.format(yPt) + ")";
 
       if (nSpectra == 1) {
         if (!getSpectrum().isHNMR()) {
-          yPt = spectra[0].getYValueAt(xPt);
+          yPt = spectra[0].getPercentYValueAt(xPt);
           xx += ", " + formatter.format(yPt);
         }
       } else if (getSpectrum().getIntegrationGraph() != null) {
-        formatter = TextFormat.getDecimalFormat("#0.0");
-        yPt = spectra[1].getYValueAt(xPt);
-        xx += ", " + formatter.format(yPt);
+        yPt = spectra[1].getPercentYValueAt(xPt);
+        xx += ", " + getFormatter("#0.0").format(yPt);
       }
-
       setToolTipText(Double.isNaN(yPt) ? null : xx);
     }
     mouseMovedOk = true;
@@ -2736,6 +2779,11 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private void fireMouseDragged(MouseEvent e) {
     isMouseDraggedEvent = true; // testing   
     fireMouseMoved(e);
+    if (getSpectrum().getIntegrationGraph() != null && isCtrlDown) {
+      setMouseFinalXY(e);
+      checkIntegral(initX, finalX, false);      
+      return;
+    }
     if (mouseMovedOk)
       repaint();
   }

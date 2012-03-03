@@ -1,3 +1,7 @@
+3.3.2012 BH
+LOAD APPEND
+integration visible with CTRL-LEFT-DRAG
+
 27.2.2012 BH
 OVERLAY 1.2,2.1,... for application
 OVERLAY for applet (implicit CLOSE ALL, but OVERLAY NONE can return original)

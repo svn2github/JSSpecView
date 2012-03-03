@@ -36,7 +36,7 @@ public class AppUtils {
         : frameOrPanel);
     JSVPanel jsvp = (JSVPanel) jp.getComponent(0);
     JDXSpectrum spectrum = jsvp.getSpectrum();
-    IntegralGraph graph = (IntegralGraph) spectrum.getIntegrationGraph();
+    IntegralGraph graph = spectrum.getIntegrationGraph();
     spectrum.setIntegrationGraph(null);
     if (graph != null || spectrum.isHNMR() && jsvp.getNumberOfSpectra() == 1) {
       if (showDialog) {
