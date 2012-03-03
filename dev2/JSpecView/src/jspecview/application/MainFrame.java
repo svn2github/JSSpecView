@@ -2047,6 +2047,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
     setMenuEnables(selectedJSVPanel.getSpectrum());
     if (selectedJSVPanel.getSpectrum().getIntegrationGraph() != null)
       writeStatus("Use CTRL-LEFT-DRAG to measure an integration value.");
+    else 
+      writeStatus("");
   }
 
   /**
