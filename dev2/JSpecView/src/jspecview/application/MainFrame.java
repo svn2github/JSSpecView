@@ -139,6 +139,7 @@ import jspecview.util.Escape;
 import jspecview.util.FileManager;
 import jspecview.util.Logger;
 import jspecview.util.Parser;
+import jspecview.util.TextFormat;
 
 /**
  * The Main Class or Entry point of the JSpecView Application.
@@ -1870,13 +1871,13 @@ public class MainFrame extends JFrame implements DropTargetListener,
           } else {
             close("all");
           }
-          openFile(ScriptToken.trimQuotes(value));
+          openFile(TextFormat.trimQuotes(value));
           jsvp = selectedJSVPanel;
           if (jsvp == null)
             return;
           break;
         case CLOSE:
-          close(ScriptToken.trimQuotes(value));
+          close(TextFormat.trimQuotes(value));
           break;
         default:
           parameters.set(jsvp, st, value);

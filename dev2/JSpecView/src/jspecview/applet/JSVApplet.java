@@ -96,6 +96,7 @@ import jspecview.source.JDXSource;
 import jspecview.util.Escape;
 import jspecview.util.Logger;
 import jspecview.util.Parser;
+import jspecview.util.TextFormat;
 import netscape.javascript.JSObject;
 
 /**
@@ -1394,7 +1395,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
         case LOAD:
           // no APPEND here
           specsSaved = null;
-          openDataOrFile(null, null, null, ScriptToken.trimQuotes(value));
+          openDataOrFile(null, null, null, TextFormat.trimQuotes(value));
           setSpectrumNumber(1);
           break;
         default:

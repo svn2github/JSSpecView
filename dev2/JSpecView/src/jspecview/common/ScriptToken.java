@@ -26,6 +26,8 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Map.Entry;
 
+import jspecview.util.TextFormat;
+
 /**
  * ScriptToken takes care of script command processing
  * 
@@ -163,7 +165,7 @@ public enum ScriptToken {
     if (s.charAt(0) != '"') 
       return s;
     if (s.endsWith("\""))
-      return (removeQuotes ? trimQuotes(s) : s);
+      return (removeQuotes ? TextFormat.trimQuotes(s) : s);
     StringBuffer sb = new StringBuffer(s.substring(1));
     s = null;
     while (params.hasMoreTokens() && !(s = params.nextToken()).endsWith("\"")) {
@@ -198,12 +200,6 @@ public enum ScriptToken {
     for (int i = 0; i < list.size(); i++)
       sb.append(",").append(list.get(i));
     return sb.toString().substring(1);
-  }
-
-  public static String trimQuotes(String value) {
-    return (value.length() > 1 && value.startsWith("\"")
-        && value.endsWith("\"") ? value.substring(1, value.length() - 1)
-        : value);
   }
 
 }
