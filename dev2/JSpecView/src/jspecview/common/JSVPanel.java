@@ -813,23 +813,45 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     integrationRatios = ratios;
   }
 
+  ColoredAnnotation lastAnnotation;
+
   /**
    * Sets the integration ratios that will be displayed
    * 
    * @param ratios
    *        array of the integration ratios
    */
-  public void addAnnotation(String value) {
-    if (value.equalsIgnoreCase("none")) {
+  public void addAnnotation(List<String> args) {
+    if (args.size() == 0 || args.size() == 1
+        && args.get(0).equalsIgnoreCase("none")) {
       annotations = null;
+      lastAnnotation = null;
       return;
     }
-    ColoredAnnotation annotation = ColoredAnnotation.getAnnotation(value);
+    if (args.size() < 4 && lastAnnotation == null)
+      lastAnnotation = new ColoredAnnotation(
+          (multiScaleData.maxXOnScale + multiScaleData.minXOnScale) / 2,
+          (multiScaleData.maxYOnScale + multiScaleData.minYOnScale) / 2, title,
+          Color.BLACK, false);
+    ColoredAnnotation annotation = ColoredAnnotation.getAnnotation(args,
+        lastAnnotation);
     if (annotation == null)
       return;
+    if (annotations == null && args.size() == 1
+        && args.get(0).charAt(0) == '\"') {
+      String s = annotation.getText();
+      setTitle(s);
+      getSpectrum().setTitle(s);
+      return;
+    }
+    lastAnnotation = annotation;
     if (annotations == null)
       annotations = new ArrayList<Annotation>();
-    annotations.add(annotation);
+    for (int i = annotations.size(); --i >= 0;)
+      if (((Coordinate) annotations.get(i)).equals(annotation))
+        annotations.remove(i);
+    if (annotation.getText().length() > 0)
+      annotations.add(annotation);
   }
 
   /*
@@ -1648,15 +1670,15 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         calculateFontSize(width, 12, true)));
     for (int i = annotations.size(); --i >= 0;) {
       Annotation note = annotations.get(i);
-      color = (note instanceof ColoredAnnotation ? ((ColoredAnnotation) note).color
+      color = (note instanceof ColoredAnnotation ? ((ColoredAnnotation) note).getColor()
           : color);
       if (color == null)
         color = Color.BLACK;
       g.setColor(color);
       int x = xPixels(note.getXVal());
-      int y = (note.isPixels ? invertY((int) (bottomPlotAreaPos
+      int y = (note.isPixels() ? invertY((int) (bottomPlotAreaPos
           + note.getYVal() - 10)) : yPixels(note.getYVal()));
-      g.drawString(note.text, x, y);
+      g.drawString(note.getText(), x, y);
     }
   }
 

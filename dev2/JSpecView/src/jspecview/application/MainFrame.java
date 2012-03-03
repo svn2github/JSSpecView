@@ -117,6 +117,7 @@ import javax.swing.tree.TreeSelectionModel;
 import org.jmol.api.JmolSyncInterface;
 
 import jspecview.common.AppUtils;
+import jspecview.common.CommandHistory;
 import jspecview.common.DisplayScheme;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelPopupMenu;
@@ -353,6 +354,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private ImageIcon overlayKeyIcon;
   private ImageIcon errorLogIcon;
   private ImageIcon errorLogRedIcon;
+  private CommandHistory commandHistory;
 
   private void getIcons() {
     Class<? extends MainFrame> cl = getClass();
@@ -1067,12 +1069,10 @@ public class MainFrame extends JFrame implements DropTargetListener,
     getContentPane().add(statusPanel, BorderLayout.SOUTH);
     statusPanel.add(statusLabel, BorderLayout.NORTH);
     statusPanel.add(commandInput, BorderLayout.SOUTH);
+    commandHistory = new CommandHistory(this, commandInput);
     commandInput.addKeyListener(new KeyListener() {
-
       public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-          runScript(commandInput.getText());
-        }
+        commandHistory.keyPressed(e.getKeyCode());
       }
 
       public void keyReleased(KeyEvent e) {
@@ -1854,9 +1854,9 @@ public class MainFrame extends JFrame implements DropTargetListener,
           if (jsvp != null)
             integrate(value);
           break;
-        case ANNOTATION:
+        case LABEL:
           if (jsvp != null)
-            jsvp.addAnnotation(value);
+            jsvp.addAnnotation(ScriptToken.getTokens(value));
           break;
         case OVERLAY:
           overlay(TextFormat.split(value, ","));
@@ -2856,6 +2856,5 @@ public class MainFrame extends JFrame implements DropTargetListener,
     }
 
   }
-
 
 }
