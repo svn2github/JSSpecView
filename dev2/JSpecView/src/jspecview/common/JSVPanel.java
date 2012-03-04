@@ -2241,24 +2241,15 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       return dirLastExported;
     File file = fc.getSelectedFile();
     this.dirLastExported = file.getParent();
-    int option = -1;
-    int startIndex, endIndex;
     if (file.exists()) {
-      option = JOptionPane.showConfirmDialog(this, "Overwrite file?",
+      int option = JOptionPane.showConfirmDialog(this, "Overwrite file?",
           "Confirm Overwrite Existing File", JOptionPane.YES_NO_OPTION,
           JOptionPane.QUESTION_MESSAGE);
-    }
-
-    if (option != -1) {
-      if (option == JOptionPane.NO_OPTION) {
+      if (option == JOptionPane.NO_OPTION)
         return exportSpectrum(spec, fc, mode, index, recentFileName,
             this.dirLastExported);
-      }
     }
-
-    startIndex = getStartDataPointIndices()[index];
-    endIndex = getEndDataPointIndices()[index];
-    export(mode, file, spec, startIndex, endIndex);
+    export(mode, file, spec, getStartDataPointIndices()[index], getEndDataPointIndices()[index]);
     return this.dirLastExported;
   }
 
