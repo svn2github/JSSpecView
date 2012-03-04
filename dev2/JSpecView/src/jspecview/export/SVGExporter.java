@@ -91,7 +91,7 @@ public class SVGExporter extends FormExporter {
    * @return data if fileName is null
    * @throws IOException
    */
-  String exportAsSVG(String path, Graph graph, int startIndex, int endIndex)
+  public String exportAsSVG(String path, Graph graph, int startIndex, int endIndex)
       throws IOException {
     return exportAsSVG(path, graph.getXYCoords(), "", startIndex,
         endIndex, graph.getXUnits(), graph.getYUnits(), graph.isContinuous(),
@@ -118,36 +118,6 @@ public class SVGExporter extends FormExporter {
   }
 
   /**
-   * Exports the Graphs that are displayed by JSVPanel to a file given by fileName,
-   * with the same Color Scheme as the JSVPanel. If graph is zoomed then export
-   * the current view if doZoom is true
-   * @param fileName the name of the file
-   * @param jsvp the JSVPanel
-   * @param specIndex the index of the graph to export
-   * @param doZoom if true then if graph is zoomed then export the current view
-   * @throws IOException
-   */
-  public void exportAsSVG(String fileName, JSVPanel jsvp, int specIndex,
-                          boolean doZoom) throws IOException {
-    Graph graph = (Graph) jsvp.getSpectrumAt(specIndex);
-    int startIndex, endIndex;
-
-    if (doZoom) {
-      startIndex = jsvp.getStartDataPointIndices()[specIndex];
-      endIndex = jsvp.getEndDataPointIndices()[specIndex];
-    } else {
-      startIndex = 0;
-      endIndex = graph.getNumberOfPoints() - 1;
-    }
-
-    exportAsSVG(fileName, graph.getXYCoords(), graph.getTitle(), startIndex,
-        endIndex, graph.getXUnits(), graph.getYUnits(), graph.isContinuous(),
-        graph.isIncreasing(), jsvp.getPlotAreaColor(), jsvp.getBackground(),
-        jsvp.getPlotColor(0), jsvp.getGridColor(), jsvp.getTitleColor(), jsvp
-            .getScaleColor(), jsvp.getUnitsColor(), jsvp.isSvgExportForInkscapeEnabled());
-  }
-
-  /**
    * Export a graph as SVG with specified Coordinates and Colors
    * @param fileName
    * @param xyCoords an array of Coordinates
@@ -168,7 +138,7 @@ public class SVGExporter extends FormExporter {
    * @return data if fileName is null
    * @throws IOException
    */
-  private String exportAsSVG(String fileName, Coordinate[] xyCoords, String title,
+  public String exportAsSVG(String fileName, Coordinate[] xyCoords, String title,
                            int startDataPointIndex, int endDataPointIndex,
                            String xUnits, String yUnits, boolean isContinuous,
                            boolean increasing, Color plotAreaColor,

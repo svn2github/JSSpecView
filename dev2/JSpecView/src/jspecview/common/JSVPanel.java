@@ -2288,13 +2288,13 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     }
     String ext = fileName.substring(fileName.lastIndexOf(".") + 1)
         .toUpperCase();
-    if (ext.equals("PNG") || ext.equals("JPG") || ext.equals("SVG")) {
-      mode = ext;
-    } else if (ext.equals("JDX")) {
+    if (ext.equals("JDX")) {
       if (mode == null)
         mode = "XY";
-    } else {
-      fileName += ".jdx";
+    } else if (Exporter.isExportMode(ext)) {
+      mode = ext;
+    } else if (Exporter.isExportMode(mode)){
+      fileName += "."  + mode;
     }
     return export(mode, new File(fileName), getSpectrum(),
         getStartDataPointIndices()[0], getEndDataPointIndices()[0]);
@@ -2312,8 +2312,11 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
           ioe.printStackTrace();
         }
       } else if (mode.equals("SVG")) {
-        (new SVGExporter()).exportAsSVG(file.getAbsolutePath(), this, index,
-            true);
+        (new SVGExporter()).exportAsSVG(file.getAbsolutePath(), spec.getXYCoords(), spec.getTitle(), startIndex,
+            endIndex, spec.getXUnits(), spec.getYUnits(), spec.isContinuous(),
+            spec.isIncreasing(), getPlotAreaColor(), getBackground(),
+            getPlotColor(0), getGridColor(), getTitleColor(), 
+            getScaleColor(), getUnitsColor(), isSvgExportForInkscapeEnabled());
       } else {
         Exporter.export(mode, file.getAbsolutePath(), spec, startIndex,
             endIndex);
