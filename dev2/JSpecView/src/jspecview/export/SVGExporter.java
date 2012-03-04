@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import jspecview.common.Coordinate;
 import jspecview.common.Graph;
 import jspecview.common.AppUtils;
-import jspecview.common.JSVPanel;
 import jspecview.common.MultiScaleData;
 import jspecview.common.ScaleData;
 import jspecview.util.TextFormat;
