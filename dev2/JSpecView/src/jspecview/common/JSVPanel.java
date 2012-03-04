@@ -2262,37 +2262,45 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     return this.dirLastExported;
   }
 
-  public void export(List<String> tokens) {
-    String mode = null;
+  /**
+   * from EXPORT command
+   * 
+   * @param tokens
+   * 
+   * @return message for status line
+   */
+  public String export(List<String> tokens) {
+    String mode = "XY";
     String fileName = null;
     switch (tokens.size()) {
     default:
-      return;
+      return "EXPORT what?";
     case 1:
-      mode = tokens.get(0);
-      if(mode.charAt(0) == '\"' || mode.indexOf(".") >= 0) {
-        fileName = mode;
-        if(fileName.charAt(0) == '\"')
-          fileName = mode.substring(1, mode.length() - 1);
-        String ext = fileName.substring(fileName.lastIndexOf(".") + 1).toUpperCase();
-        if (ext.equals("PNG") || ext.equals("JPG"))
-          mode = ext;
-        else
-          mode = "XY";
-      } else {
-        mode = mode.toUpperCase();
-      }
+      fileName = TextFormat.trimQuotes(tokens.get(0));
+      int pt = fileName.indexOf(".");
+      if (pt < 0)
+        return "EXPORT mode?";
       break;
     case 2:
-      mode = tokens.get(0);
-      fileName = tokens.get(1);      
+      mode = tokens.get(0).toUpperCase();
+      fileName = TextFormat.trimQuotes(tokens.get(1));
+      break;
     }
-    if(fileName.charAt(0) == '\"')
-      fileName = fileName.substring(1, mode.length() - 1);
-    export(mode, new File(fileName), getSpectrum(),getStartDataPointIndices()[0],getEndDataPointIndices()[0]);       
+    String ext = fileName.substring(fileName.lastIndexOf(".") + 1)
+        .toUpperCase();
+    if (ext.equals("PNG") || ext.equals("JPG")) {
+      mode = ext;
+    } else if (ext.equals("JDX")) {
+      if (mode == null)
+        mode = "XY";
+    } else {
+      fileName += ".jdx";
+    }
+    return export(mode, new File(fileName), getSpectrum(),
+        getStartDataPointIndices()[0], getEndDataPointIndices()[0]);
   }
     
-  private void export(String mode, File file, JDXSpectrum spec, int startIndex, int endIndex) {
+  private String export(String mode, File file, JDXSpectrum spec, int startIndex, int endIndex) {
     try {
       if (mode.equals("PNG") || mode.equals("JPG")) {
         try {
@@ -2310,8 +2318,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         Exporter.export(mode, file.getAbsolutePath(), spec, startIndex,
             endIndex);
       }
+      return "Exported " + mode + ": " + file.getAbsolutePath();
     } catch (IOException ioe) {
-      // STATUS --> "Error writing: " + file.getName()
+      return "Error exporting " + file.getAbsolutePath() + ": " + ioe.getMessage();
     }
   }
 

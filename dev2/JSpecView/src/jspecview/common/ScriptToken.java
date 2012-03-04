@@ -144,6 +144,7 @@ public enum ScriptToken {
     case LABEL:
     case LOAD:
     case CLOSE:
+    case EXPORT:
       // take full command
       return removeCommandName(cmd);
     case OVERLAY:

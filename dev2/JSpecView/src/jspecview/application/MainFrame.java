@@ -1154,6 +1154,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
   }
 
   protected void checkCommandLineForTip(char c) {
+    if (c != '\t' && (c == '\n' || c < 32 || c > 126))
+      return;
     String cmd = commandInput.getText()
         + (Character.isISOControl(c) ? "" : "" + c);
     String tip;
@@ -1870,6 +1872,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     if (params == null)
       params = "";
     params = params.trim();
+    String msg = null;
     System.out.println("CHECKSCRIPT " + params);
     StringTokenizer allParamTokens = new StringTokenizer(params, ";");
     if (Logger.debugging) {
@@ -1936,7 +1939,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
           break;
         case EXPORT:
           if (jsvp != null)
-            jsvp.export(ScriptToken.getTokens(value));
+            msg = jsvp.export(ScriptToken.getTokens(value));
           break;
         case LABEL:
           if (jsvp != null)
@@ -1971,7 +1974,10 @@ public class MainFrame extends JFrame implements DropTargetListener,
         e.printStackTrace();
       }
     }
-    commandInput.requestFocusInWindow();
+    if (msg == null)
+      commandInput.requestFocusInWindow();
+    else
+      writeStatus(msg);
     repaint();
   }
 
@@ -2314,6 +2320,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the message
    */
   public void writeStatus(String msg) {
+    System.out.println("writing status " + msg);
     if (msg.length() == 0)
       msg = "Enter a command:";
     statusLabel.setText(msg);
