@@ -2288,7 +2288,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     }
     String ext = fileName.substring(fileName.lastIndexOf(".") + 1)
         .toUpperCase();
-    if (ext.equals("PNG") || ext.equals("JPG")) {
+    if (ext.equals("PNG") || ext.equals("JPG") || ext.equals("SVG")) {
       mode = ext;
     } else if (ext.equals("JDX")) {
       if (mode == null)
