@@ -85,7 +85,7 @@ public enum ScriptToken {
   XUNITSON("XUNITSON", "TF"),
   YSCALEON("YSCALEON", "TF"),
   YUNITSON("YUNITSON", "TF"),
-  ZOOM("ZOOM", "OUT or x1,x2");
+  ZOOM("ZOOM", "OUT or x1,x2 or x1,y1 x2,y2");
 
   private String tip;
 

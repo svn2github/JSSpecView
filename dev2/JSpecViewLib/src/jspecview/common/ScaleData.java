@@ -203,17 +203,14 @@ public class ScaleData {
     xStep = getStep(minX, maxX, initNumXDivisions, hashNums, 0);
     minXOnScale = xStep * Math.floor(minX / xStep);
     maxXOnScale = xStep * Math.ceil(maxX / xStep);
-    boolean USE_FIRSTX = true;
-    if (USE_FIRSTX) {
-      firstX = Math.floor(minX / xStep) * xStep;
-      if (Math.abs((minX - firstX) / xStep) > 0.0001)
-        firstX += xStep;
-      minXOnScale = minX;
-      maxXOnScale = maxX;
-      System.out.println("scaleData xStep minX firstX maxX minXonScale maxXonScale\n"
-          + xStep + "\t" + minX + "\t" + firstX + "\t" + maxX + "\t" + minXOnScale + "\t"
-          + maxXOnScale);
-    }
+    firstX = Math.floor(minX / xStep) * xStep;
+    if (Math.abs((minX - firstX) / xStep) > 0.0001)
+      firstX += xStep;
+    minXOnScale = minX;
+    maxXOnScale = maxX;
+    //System.out.println("scaleData xStep minX firstX maxX minXonScale maxXonScale\n"
+    //    + xStep + "\t" + minX + "\t" + firstX + "\t" + maxX + "\t" + minXOnScale + "\t"
+    //    + maxXOnScale);
     if (!isContinuous)
       maxXOnScale += xStep / 2; // MS should not end with line at end
     //numOfXDivisions = (int) Math.ceil((maxXOnScale - minXOnScale) / xStep);

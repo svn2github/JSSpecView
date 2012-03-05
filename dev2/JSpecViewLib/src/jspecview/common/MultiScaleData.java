@@ -46,6 +46,8 @@ public class MultiScaleData extends ScaleData {
    * 
    * @param coordLists
    *        an array of arrays of coordinates
+   * @param yPt1 
+   * @param yPt2 
    * @param startList
    *        the start indices
    * @param endList
@@ -56,15 +58,24 @@ public class MultiScaleData extends ScaleData {
    *        the initial number of Y divisions for scale
    * @return returns an instance of <code>MultiScaleData</code>
    */
-  public MultiScaleData(Coordinate[][] coordLists, int[] startList,
-      int[] endList, int initNumXDivisions, int initNumYDivisions,
-      boolean isContinuous) {
+  public MultiScaleData(Coordinate[][] coordLists, double yPt1,
+      double yPt2, int[] startList, int[] endList,
+      int initNumXDivisions, int initNumYDivisions, boolean isContinuous) {
     super(Coordinate.getMinX(coordLists, startList, endList), 
         Coordinate.getMaxX(coordLists, startList, endList), 
         Coordinate.getMinY(coordLists, startList, endList), 
         Coordinate.getMaxY(coordLists,startList, endList));
     startDataPointIndices = startList;
     endDataPointIndices = endList;
+    if (yPt1 != yPt2) {
+      minY = yPt1;
+      maxY = yPt2;
+      if (minY > maxY) {
+        double t = minY;
+        minY = maxY;
+        maxY = t;
+      }
+    }
     numOfPointsList = new int[startList.length];
     for (int j = 0; j < startList.length; j++)
       numOfPointsList[j] = endList[j] - startList[j] + 1;
