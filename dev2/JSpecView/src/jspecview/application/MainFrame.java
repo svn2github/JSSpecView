@@ -134,6 +134,7 @@ import jspecview.common.ScriptToken;
 import jspecview.common.Coordinate;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.PeakInfo;
+import jspecview.common.ZoomListener;
 import jspecview.exception.ScalesIncompatibleException;
 import jspecview.source.JDXFileReader;
 import jspecview.source.JDXSource;
@@ -151,7 +152,7 @@ import jspecview.util.TextFormat;
  * @author Prof Robert J. Lancashire
  */
 public class MainFrame extends JFrame implements DropTargetListener,
-    JmolSyncInterface, PeakPickedListener, ScriptInterface {
+    JmolSyncInterface, PeakPickedListener, ScriptInterface, ZoomListener {
 
   //  ------------------------ Program Properties -------------------------
 
@@ -1513,6 +1514,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
           : JSVPanel.getIntegralPanel(spec, null));
       jsvp.setIndex(i);
       jsvp.addPeakPickedListener(this);
+      jsvp.addZoomListener(this);
       setJSVPanelProperties(jsvp, true);
       JInternalFrame frame = new JInternalFrame(spec.getTitleLabel(), true,
           true, true, true);
@@ -2953,6 +2955,13 @@ public class MainFrame extends JFrame implements DropTargetListener,
           || node.frame.isVisible() ? Font.BOLD : Font.ITALIC), 12);
     }
 
+  }
+
+  public void zoomed(double x1, double y1, double x2, double y2) {
+    if (x1 == x2)
+      writeStatus("");
+    else
+      writeStatus("Double-Click highlighted spectrum in menu to zoom out.");
   }
 
 }

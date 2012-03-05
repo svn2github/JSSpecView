@@ -276,6 +276,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   // listeners to handle coordinatesClicked
   private ArrayList<PeakPickedListener> peakPickedListeners = new ArrayList<PeakPickedListener>();
 
+  // listeners to handle zooomed
+  private ArrayList<ZoomListener> zoomListeners = new ArrayList<ZoomListener>();
+
   /**
    * Constructs a new JSVPanel
    * 
@@ -1884,6 +1887,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         zoomInfoList.remove(i);
     zoomInfoList.add(multiScaleData);
     currentZoomIndex++;
+    notifyZoomListeners(initX, finalX, yPt1, yPt2);
     return true;
   }
 
@@ -2473,6 +2477,25 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * 
    * @param listener
    */
+  public void addZoomListener(ZoomListener listener) {
+    zoomListeners.add(listener);
+  }
+
+  /**
+   * Notifies CoordinatePickedListeners
+   * 
+   * @param coord
+   */
+  public void notifyZoomListeners(double x1, double y1, double x2, double y2) {
+    for (int i = 0; i < zoomListeners.size(); i++)
+      zoomListeners.get(i).zoomed(x1, y1, x2, y2);
+  }
+
+  /**
+   * Adds a CoordinatePickedListener
+   * 
+   * @param listener
+   */
   public void addPeakPickedListener(PeakPickedListener listener) {
     if (!peakPickedListeners.contains(listener)) {
       peakPickedListeners.add(listener);
@@ -2875,6 +2898,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     double finalY = z1.getYVal();
     if (initX != 0 || finalX != 0)
       doZoom(initX, initY, finalX, finalY);
+    else
+      notifyZoomListeners(0, 0, 0, 0);
   }
 
   private int fixY(int yPixels) {
