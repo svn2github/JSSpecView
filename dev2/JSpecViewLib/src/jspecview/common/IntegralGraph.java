@@ -26,6 +26,7 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import jspecview.common.Integral;
+import jspecview.util.TextFormat;
 
 
 /**
@@ -339,7 +340,11 @@ public class IntegralGraph implements Graph {
     return ratios;
   }
 
-  private List<Integral> integrals;  
+  private List<Integral> integrals;
+  public static final int INTEGRATE_MARK = 4;
+  public static final int INTEGRATE_TOGGLE = 3;
+  public static final int INTEGRATE_ON = 2;
+  public static final int INTEGRATE_OFF = 1;  
 
   public void addIntegral(double x1, double x2, boolean isFinal) {
     if (Double.isNaN(x1)) {
@@ -364,6 +369,37 @@ public class IntegralGraph implements Graph {
 
   public List<Integral> getIntegrals() {
     return integrals;
+  }
+
+  public static int getMode(String value) {
+    return (value.equals("?") ? INTEGRATE_TOGGLE : value
+        .equalsIgnoreCase("OFF") ? INTEGRATE_OFF : value
+        .toUpperCase().startsWith("MARK") ? INTEGRATE_MARK
+        : INTEGRATE_ON);
+  }
+
+  public void addMarks(String ppms) {
+    //2-3,4-5,6-7...
+    ppms = TextFormat.simpleReplace(" " + ppms, ",", " ");
+    ppms = TextFormat.simpleReplace(ppms, " -"," #");
+    ppms = TextFormat.simpleReplace(ppms, "--","-#");
+    ppms = ppms.replace('-','^');
+    ppms = ppms.replace('#','-');
+    List<String> tokens = ScriptToken.getTokens(ppms);
+    addIntegral(0, 0, false);
+    for (int i = tokens.size(); --i >= 0;) {
+      String s = tokens.get(i);
+      int pt = s.indexOf('^');
+      if (pt < 0)
+        continue;
+      try {
+        double x2 = Double.valueOf(s.substring(0, pt).trim());
+        double x1 = Double.valueOf(s.substring(pt + 1).trim());
+        addIntegral(x1, x2, true);
+      } catch (Exception e) {
+        continue;
+      }
+    }
   }
 
 }

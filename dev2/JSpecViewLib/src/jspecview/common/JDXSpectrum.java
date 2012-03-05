@@ -747,10 +747,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   public static final int IMPLIED = 3;
   public static final double MAXABS = 4; // maximum absorbance allowed
 
-  public static final int INTEGRATE_OFF = 1;
-  public static final int INTEGRATE_ON = 2;
-  public static final int INTEGRATE_TOGGLE = 3;
-  
   public JDXSpectrum getConvertedSpectrum() {
     return convertedSpectrum;
   }
