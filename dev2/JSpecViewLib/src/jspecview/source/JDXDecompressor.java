@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.StringReader;
 
 import jspecview.common.Coordinate;
+import jspecview.util.Logger;
 import jspecview.util.Parser;
 
 /**
@@ -143,6 +144,7 @@ public class JDXDecompressor {
   private int ipt;
   private String line, lastLine;
   private int lineLen;
+  private StringBuffer errorLog;
 
   private void addPoint(Coordinate pt) {
     if (ipt == xyCoords.length) {
@@ -151,6 +153,8 @@ public class JDXDecompressor {
       xyCoords = t;
     }
     xyCoords[ipt++] = pt;
+    if (Logger.debugging)
+      logError("Coord: " + pt + "\n");
 
   }
 
@@ -171,7 +175,13 @@ public class JDXDecompressor {
    */
   public Coordinate[] decompressData(StringBuffer errorLog) {
 
-    testAlgorithm();
+    this.errorLog = errorLog;
+    
+    if (Logger.debugging)
+      logError("firstX=" + firstX 
+          + " xFactor=" + xFactor + " yFactor=" + yFactor + " deltaX=" + deltaX + " nPoints=" + nPoints + "\n");
+
+          testAlgorithm();
 
     xyCoords = new Coordinate[nPoints];
 
@@ -182,6 +192,8 @@ public class JDXDecompressor {
     try {
       while ((line = dataReader.readLine()) != null) {
         lineNumber++;
+        if (Logger.debugging)
+          logError(lineNumber + "\t" + line + "\n");
         if ((lineLen = line.length()) == 0)
           continue;
         ich = 0;
@@ -204,7 +216,7 @@ public class JDXDecompressor {
             double y = lastPoint.getYVal();
             double y1 = point.getYVal();
             if (y1 != y)
-              errorLog.append(lastLine + "\n" + line
+              logError(lastLine + "\n" + line
                   + "\nY-value Checkpoint Error! Line " + lineNumber
                   + " for y1=" + y1 + " y0=" + y + "\n");
           } else {
@@ -213,14 +225,14 @@ public class JDXDecompressor {
             // first point of new line should be deltaX away
             // ACD/Labs seem to have large rounding error so using between 0.6 and 1.4
             if (xdif < dif06 || xdif > dif14)
-              errorLog.append(lastLine + "\n" + line
+              logError(lastLine + "\n" + line
                   + "\nX-sequence Checkpoint Error! Line " + lineNumber
                   + " |x1-x0|=" + xdif + " instead of " + Math.abs(deltaX)
                   + " for x1=" + point.getXVal() + " x0=" + lastPoint.getXVal()
                   + "\n");
           }
         }
-        while (ich < lineLen) {
+        while (ich < lineLen || difVal != Integer.MIN_VALUE || dupCount > 0) {
           xval += deltaX;
           if (!Double.isNaN(yval = getYValue()))
             addPoint(new Coordinate(xval, yval * yFactor));
@@ -231,13 +243,19 @@ public class JDXDecompressor {
     }
 
     if (nPoints != ipt) {
-      errorLog.append("Decompressor did not find " + nPoints
+      logError("Decompressor did not find " + nPoints
           + " points -- instead " + ipt + "\n");
       Coordinate[] temp = new Coordinate[ipt];
       System.arraycopy(xyCoords, 0, temp, 0, ipt);
       xyCoords = temp;
     }
     return (deltaX > 0 ? xyCoords : reverse(xyCoords));
+  }
+
+  private void logError(String s) {
+    if (Logger.debugging)
+      System.out.println(s);
+    errorLog.append(s);  
   }
 
   private double getYValue() {
@@ -255,6 +273,8 @@ public class JDXDecompressor {
     if (ich == lineLen)
       return Double.NaN;
     char ch = line.charAt(ich);
+    if (Logger.debugging)
+      System.out.println(ch);
     switch (ch) {
     case '%':
       difVal = 0;
