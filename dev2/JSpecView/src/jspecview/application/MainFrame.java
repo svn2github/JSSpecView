@@ -1547,13 +1547,9 @@ public class MainFrame extends JFrame implements DropTargetListener,
    * 
    */
   protected void integrate(String value) {
-    boolean showMessage = value.equals("?");
-    int mode = (value.equals("?") ? JDXSpectrum.INTEGRATE_TOGGLE : value
-        .equalsIgnoreCase("OFF") ? JDXSpectrum.INTEGRATE_OFF
-        : JDXSpectrum.INTEGRATE_ON);
     JSVTreeNode node = findNode(selectedJSVPanel);
     JSVPanel jsvpNew = AppUtils.checkIntegral(selectedJSVPanel, node.frame,
-        mode, showMessage, parameters);
+        parameters, value);
     //if (integrationRatios != null)   applet only?
       //newJsvp.setIntegrationRatios(integrationRatios);
     if (jsvpNew == selectedJSVPanel)

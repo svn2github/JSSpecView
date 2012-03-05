@@ -106,12 +106,21 @@ public class AppUtils {
   public static JSVPanel checkIntegral(
                                        JSVPanel jsvp,
                                        Container frameOrPanel,
-                                       int mode,
-                                       boolean showMessage,
-                                       Parameters parameters) {
-    return (mode == JDXSpectrum.INTEGRATE_OFF
-        || mode != JDXSpectrum.INTEGRATE_ON
-        && jsvp.getSpectrum().getIntegrationGraph() != null 
+                                       Parameters parameters, String value) {
+    IntegralGraph graph = jsvp.getSpectrum().getIntegrationGraph();
+    boolean showMessage = value.equals("?");
+    int mode = IntegralGraph.getMode(value);
+    if (mode == IntegralGraph.INTEGRATE_MARK) {
+      if (graph == null) {
+        jsvp = checkIntegral(jsvp, frameOrPanel, parameters, "ON");
+        graph = jsvp.getSpectrum().getIntegrationGraph();
+      }
+      if (graph != null)
+        graph.addMarks(value.substring(5).trim());
+      return jsvp;    
+    }
+    return (mode == IntegralGraph.INTEGRATE_OFF
+        || mode != IntegralGraph.INTEGRATE_ON && graph != null 
         ? removeIntegration(frameOrPanel)
         : integrate(frameOrPanel, showMessage, parameters));
   }

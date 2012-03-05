@@ -732,13 +732,9 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
    * 
    */
   protected void integrate(String value) {
-    boolean showMessage = value.equals("?");
-    int mode = (value.equals("?") ? JDXSpectrum.INTEGRATE_TOGGLE
-        : value.equalsIgnoreCase("OFF") ? JDXSpectrum.INTEGRATE_OFF
-        : JDXSpectrum.INTEGRATE_ON);
     JSVPanel jsvp = getCurrentPanel();
-    JSVPanel jsvpNew = AppUtils.checkIntegral(jsvp, appletPanel, mode,
-        showMessage, parameters);
+    JSVPanel jsvpNew = AppUtils.checkIntegral(jsvp, appletPanel,
+        parameters, value);
     if (jsvp == jsvpNew) {
       integrationRatios = null;
       return;
