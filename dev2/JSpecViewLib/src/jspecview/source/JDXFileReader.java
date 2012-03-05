@@ -100,8 +100,9 @@ public class JDXFileReader {
       if (filePath != null)
         sourceContents = getContentFromInputStream(FileManager.getInputStream(
             filePath, true, appletDocumentBase));
-
-      if (!sourceContents.startsWith("#")) {
+      int pt1 = sourceContents.indexOf('#');
+      int pt2 = sourceContents.indexOf('<');
+      if (pt1 < 0 || pt2 >= 0 && pt2 < pt1) {
         JDXSource xmlSource = getXMLSource(sourceContents);
         if (xmlSource != null)
           return xmlSource;
