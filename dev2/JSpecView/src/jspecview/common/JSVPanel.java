@@ -2608,7 +2608,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     if (checkXY(xPixel, yPixel)) {
 
       zoomBoxX = xPixel;
-      zoomBoxY = yPixel;
+      zoomBoxY = (isCtrlDown ? topPlotAreaPos : fixY(yPixel));
 
       Coordinate coord = getCoordFromPoint(xPixel, yPixel);
 
@@ -2757,7 +2757,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       if (isMouseDraggedEvent) {
         isMouseDragged = true;
         currZoomBoxX = xPixel;
-        currZoomBoxY = fixY(yPixel);
+        currZoomBoxY = (isCtrlDown ? bottomPlotAreaPos : fixY(yPixel));
       }
 
       Coordinate coord = getCoordFromPoint(xPixel, yPixel);
