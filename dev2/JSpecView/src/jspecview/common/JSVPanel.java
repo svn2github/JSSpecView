@@ -2638,7 +2638,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     int xPixel = e.getX();
     int yPixel = e.getY();
 
-    if (!checkXY(xPixel, yPixel))
+    if (!checkXY(xPixel, fixY(yPixel)))
       return;
     isMouseReleased = true;
 
@@ -2660,7 +2660,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   private void setMouseFinalXY(MouseEvent e) {
-    Coordinate coord = getCoordFromPoint(e.getX(), e.getY());
+    Coordinate coord = getCoordFromPoint(e.getX(), fixY(e.getY()));
     finalX = coord.getXVal();
     finalY = coord.getYVal();
   }
