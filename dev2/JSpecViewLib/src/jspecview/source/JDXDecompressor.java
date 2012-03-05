@@ -167,7 +167,7 @@ public class JDXDecompressor {
   private double xval, yval;
 
   /**
-   * Determines the type of compression, decompress the data and stores
+   * Determines the type of compression, decompresses the data and stores
    * coordinates in an array to be returned
    * 
    * @param errorLog
