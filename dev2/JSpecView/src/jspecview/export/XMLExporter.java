@@ -56,7 +56,7 @@ abstract class XMLExporter extends FormExporter {
   protected String vendor = "";
   protected String model = "";
   protected String resolution = "";
-  protected String pathlength;
+  protected String pathlength = "";
   protected String molform = "";
   protected String bp = "";
   protected String mp = "";
