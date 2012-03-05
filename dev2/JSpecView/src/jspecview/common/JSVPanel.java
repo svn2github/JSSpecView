@@ -1435,6 +1435,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         int y2 = yPixels(point2.getYVal());
         if (y1 == Integer.MIN_VALUE || y2 == Integer.MIN_VALUE)
           continue;
+        y1 = fixY(y1);
+        y2 = fixY(y2);
+        if (y1 == y2 && isOffScale(y1))
+          continue;
         g.drawLine(x1, y1, x2, y2);
       }
     } else {
@@ -1445,6 +1449,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         int y2 = yPixels(point.getYVal());
         if (y2 == Integer.MIN_VALUE)
           continue;
+        y1 = fixY(y1);
+        y2 = fixY(y2);
+        if (y1 == y2 && isOffScale(y1))
+          continue;
         g.drawLine(x1, y1, x1, y2);
       }
       if (multiScaleData.minYOnScale < 0) {
@@ -1453,6 +1461,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       }
     }
   } // End drawPlot
+
+  private boolean isOffScale(int y) {
+    return (y == topPlotAreaPos || y == bottomPlotAreaPos);
+  }
 
   /**
    * Draws the grid on the Panel
