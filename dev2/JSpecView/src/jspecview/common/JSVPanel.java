@@ -2841,6 +2841,14 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   public void keyTyped(KeyEvent e) {
+    if (e.getKeyChar() == 'z') {
+      previousView();
+      return;
+    }
+    if (e.getKeyChar() == 'y') {
+      nextView();
+      return;
+    }
   }
 
   public static JSVPanel getPanel0(JInternalFrame frame) {
