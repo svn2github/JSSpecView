@@ -635,7 +635,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
       public void mouseClicked(MouseEvent e) {
         if (e.getClickCount() == 2 && selectedJSVPanel != null) {
-          selectedJSVPanel.setZoom(0,0);
+          selectedJSVPanel.setZoom(0,0,0,0);
           repaint();
         }
       }

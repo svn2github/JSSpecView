@@ -470,7 +470,7 @@ public class SVGExporter extends FormExporter {
     DecimalFormat formatter2 = TextFormat.getDecimalFormat("0.######");
 
     MultiScaleData scaleData = new MultiScaleData(xyCoordsList,
-        startDataPointIndices, endDataPointIndices, 10, 10, false);
+        0, 0, startDataPointIndices, endDataPointIndices, 10, 10, false);
 
     double maxXOnScale = scaleData.maxXOnScale;
     double minXOnScale = scaleData.minXOnScale;

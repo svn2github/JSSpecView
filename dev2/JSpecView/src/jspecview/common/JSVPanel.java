@@ -428,7 +428,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     }
 
     zoomInfoList = new ArrayList<MultiScaleData>();
-    doZoomWithoutRepaint(initX, finalX, startIndices, endIndices);
+    doZoomWithoutRepaint(initX, finalX, 0, 0, startIndices, endIndices);
 
     setBorder(BorderFactory.createLineBorder(Color.lightGray));
   }
@@ -465,8 +465,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
     setPlotColors(Parameters.defaultPlotColors);
 
-    multiScaleData = new MultiScaleData(xyCoordsList, startIndices, endIndices,
-        10, 10, getSpectrum().isContinuous());
+    multiScaleData = new MultiScaleData(xyCoordsList, 0, 0,
+        startIndices, endIndices, 10, 10, getSpectrum().isContinuous());
 
     //add data to zoomInfoList
     zoomInfoList = new ArrayList<MultiScaleData>();
@@ -1337,7 +1337,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
   private void drawBar(Graphics g, double startX, double endX, Color color,
                        boolean isFullHeight) {
-
     int x1 = xPixels(startX);
     int x2 = xPixels(endX);
 
@@ -1517,6 +1516,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   private Map<String, NumberFormat> htFormats = new Hashtable<String, NumberFormat>();
+
+  private int zoomBoxY;
+
+  private int currZoomBoxY;
   private NumberFormat getFormatter(String hash) {
     NumberFormat formatter = htFormats.get(hash);
     if (formatter == null)
@@ -1715,8 +1718,11 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     //  adapted from suggestion by Valery Tkachenko 5 Nov 2010 and previously implemented for ChemSpider
     if (isMouseDragged) {
       g.setColor(zoomBoxColor);
-      g.fillRect(Math.min(zoomBoxX, currZoomBoxX), topPlotAreaPos, Math
-          .abs(currZoomBoxX - zoomBoxX), bottomPlotAreaPos - topPlotAreaPos);
+      g.fillRect(
+          Math.min(zoomBoxX, currZoomBoxX), 
+          Math.min(zoomBoxY, currZoomBoxY), 
+          Math.abs(currZoomBoxX - zoomBoxX), 
+          Math.abs(currZoomBoxY - zoomBoxY));
       isMouseDragged = false;
     }
     if (isMouseReleased) {
@@ -1843,7 +1849,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     }
     int[] startIndices = new int[nSpectra];
     int[] endIndices = new int[nSpectra];
-    if (doZoomWithoutRepaint(initX, finalX, startIndices, endIndices))
+    if (doZoomWithoutRepaint(initX, finalX, initY, finalY, startIndices, endIndices))
       repaint();
   }
 
@@ -1863,14 +1869,15 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @throws JSpecViewException
    */
   private boolean doZoomWithoutRepaint(double initX, double finalX,
+                                       double yPt1, double yPt2,
                                        int[] startIndices, int[] endIndices) {
     if (!zoomEnabled)
       return false;
     if (!multiScaleData.setDataPointIndices(spectra, initX, finalX,
         minNumOfPointsForZoom, startIndices, endIndices))
       return false;
-    multiScaleData = new MultiScaleData(xyCoordsList, startIndices, endIndices,
-        10, 10, getSpectrum().isContinuous());
+    multiScaleData = new MultiScaleData(xyCoordsList, yPt1, yPt2,
+        startIndices, endIndices, 10, 10, getSpectrum().isContinuous());
     // add to and clean the zoom list
     if (zoomInfoList.size() > currentZoomIndex + 1)
       for (int i = zoomInfoList.size() - 1; i > currentZoomIndex; i--)
@@ -2561,11 +2568,12 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     if (e.getButton() != MouseEvent.BUTTON1)
       return;
 
-    int xPixel = e.getX();
-    int yPixel = e.getY();
+    int xPixel = (e.getX());
+    int yPixel = fixY(e.getY());
     if (checkXY(xPixel, yPixel)) {
 
       zoomBoxX = xPixel;
+      zoomBoxY = yPixel;
 
       Coordinate coord = getCoordFromPoint(xPixel, yPixel);
 
@@ -2707,13 +2715,14 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        the <code>MouseEvent</code>
    */
   private void fireMouseMoved(MouseEvent e) {
-    int xPixel = e.getX();
-    int yPixel = e.getY();
+    int xPixel = (e.getX());
+    int yPixel = fixY(e.getY());
     if (checkXY(xPixel, yPixel)) {
 
       if (isMouseDraggedEvent) {
         isMouseDragged = true;
         currZoomBoxX = xPixel;
+        currZoomBoxY = fixY(yPixel);
       }
 
       Coordinate coord = getCoordFromPoint(xPixel, yPixel);
@@ -2849,7 +2858,14 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     return getSpectrumAt(0);
   }
 
-  public void setZoom(double x1, double x2) {
+  public void setZoom(double x1, double y1, double x2, double y2) {
+    int py1 = (y1 == y2 ? topPlotAreaPos : fixY(yPixels(y1)));
+    int py2 = (y1 == y2 ? bottomPlotAreaPos : fixY(yPixels(y2)));
+    if (py1 > py2) {
+      int t = py1;
+      py1 = py2;
+      py2 = t;
+    }
     Coordinate z0 = getCoordFromPoint(xPixels(x1), topPlotAreaPos);
     Coordinate z1 = getCoordFromPoint(xPixels(x2), bottomPlotAreaPos);
     multiScaleData = zoomInfoList.get(0);
@@ -2857,11 +2873,12 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     double initY = z0.getYVal();
     double finalX = z1.getXVal();
     double finalY = z1.getYVal();
-    if (initX == 0 && finalX == 0)
-      multiScaleData = zoomInfoList.get(0);
-    else
+    if (initX != 0 || finalX != 0)
       doZoom(initX, initY, finalX, finalY);
-    z0 = z1 = null;
+  }
+
+  private int fixY(int yPixels) {
+    return Math.max(Math.min(yPixels, bottomPlotAreaPos), topPlotAreaPos);
   }
 
   public static JSVPanel taConvert(JSVPanel jsvp, int mode) {

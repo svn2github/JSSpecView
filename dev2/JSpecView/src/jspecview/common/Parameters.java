@@ -85,11 +85,17 @@ public class Parameters extends DisplayScheme {
         switch (tokens.size()) {
         case 1:
           if (tokens.get(0).equalsIgnoreCase("out"))
-            jsvp.setZoom(0, 0);
+            jsvp.setZoom(0, 0, 0, 0);
           break;
         case 2:
-          jsvp.setZoom(Double.parseDouble(tokens.get(0)), Double
-              .parseDouble(tokens.get(1)));
+          jsvp.setZoom(Double.parseDouble(tokens.get(0)), 0, Double
+              .parseDouble(tokens.get(1)), 0);
+        case 4:
+          jsvp.setZoom(
+              Double.parseDouble(tokens.get(0)), 
+              Double.parseDouble(tokens.get(1)), 
+              Double.parseDouble(tokens.get(2)), 
+              Double.parseDouble(tokens.get(3))); 
         }
       }
       break;
