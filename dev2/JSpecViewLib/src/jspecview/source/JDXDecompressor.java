@@ -154,7 +154,7 @@ public class JDXDecompressor {
     }
     xyCoords[ipt++] = pt;
     if (Logger.debugging)
-      logError("Coord: " + pt + "\n");
+      logError("Coord: " + pt);
 
   }
 
@@ -179,7 +179,7 @@ public class JDXDecompressor {
     
     if (Logger.debugging)
       logError("firstX=" + firstX 
-          + " xFactor=" + xFactor + " yFactor=" + yFactor + " deltaX=" + deltaX + " nPoints=" + nPoints + "\n");
+          + " xFactor=" + xFactor + " yFactor=" + yFactor + " deltaX=" + deltaX + " nPoints=" + nPoints);
 
           testAlgorithm();
 
@@ -193,7 +193,7 @@ public class JDXDecompressor {
       while ((line = dataReader.readLine()) != null) {
         lineNumber++;
         if (Logger.debugging)
-          logError(lineNumber + "\t" + line + "\n");
+          logError(lineNumber + "\t" + line);
         if ((lineLen = line.length()) == 0)
           continue;
         ich = 0;
@@ -218,7 +218,7 @@ public class JDXDecompressor {
             if (y1 != y)
               logError(lastLine + "\n" + line
                   + "\nY-value Checkpoint Error! Line " + lineNumber
-                  + " for y1=" + y1 + " y0=" + y + "\n");
+                  + " for y1=" + y1 + " y0=" + y);
           } else {
             addPoint(point);
             // Check for X checkpoint error
@@ -228,8 +228,7 @@ public class JDXDecompressor {
               logError(lastLine + "\n" + line
                   + "\nX-sequence Checkpoint Error! Line " + lineNumber
                   + " |x1-x0|=" + xdif + " instead of " + Math.abs(deltaX)
-                  + " for x1=" + point.getXVal() + " x0=" + lastPoint.getXVal()
-                  + "\n");
+                  + " for x1=" + point.getXVal() + " x0=" + lastPoint.getXVal());
           }
         }
         while (ich < lineLen || difVal != Integer.MIN_VALUE || dupCount > 0) {
@@ -244,7 +243,7 @@ public class JDXDecompressor {
 
     if (nPoints != ipt) {
       logError("Decompressor did not find " + nPoints
-          + " points -- instead " + ipt + "\n");
+          + " points -- instead " + ipt);
       Coordinate[] temp = new Coordinate[ipt];
       System.arraycopy(xyCoords, 0, temp, 0, ipt);
       xyCoords = temp;
@@ -255,7 +254,7 @@ public class JDXDecompressor {
   private void logError(String s) {
     if (Logger.debugging)
       System.out.println(s);
-    errorLog.append(s);  
+    errorLog.append(s).append('\n');  
   }
 
   private double getYValue() {
