@@ -158,9 +158,8 @@ public class JDXSourceStreamTokenizer {
   }
 
   private String readLine() throws IOException {
-    line = br.readLine();
     lineNo++;
-    return line;
+    return br.readLine();
   }
 
   private static String trimLines(StringBuffer v) {
