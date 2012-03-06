@@ -250,12 +250,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   // Determines if the xAxis should be displayed increasing
   private boolean isXAxisDisplayedIncreasing = true;
 
-  // Used to identify whether the mouse was pressed within
-  // the plot area;
-  private boolean mousePressedInPlotArea;
-
-  private boolean mouseMovedOk = false;
-
   // The initial coordinate and final coordinates of zoom area
   private double initX, initY, finalX, finalY, initXpixel;
 
@@ -2597,30 +2591,23 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        the <code>MouseEvent</code>
    */
   public void mousePressed(MouseEvent e) {
-    mouseClickCount = e.getClickCount();
-    isIntegralDrag = (e.isControlDown() && getSpectrum().getIntegrationGraph() != null);
-    // Maybe put this in a fireMousePressed() method
     if (e.getButton() != MouseEvent.BUTTON1)
       return;
 
-    int xPixel = (e.getX());
+    mouseClickCount = e.getClickCount();
+    isIntegralDrag = (e.isControlDown() && getSpectrum().getIntegrationGraph() != null);
+    int xPixel = fixX(e.getX());
     int yPixel = fixY(e.getY());
-    if (checkXY(xPixel, yPixel)) {
 
-      zoomBoxX = xPixel;
-      zoomBoxY = (isIntegralDrag ? topPlotAreaPos : fixY(yPixel));
+    zoomBoxX = xPixel;
+    zoomBoxY = (isIntegralDrag ? topPlotAreaPos : yPixel);
 
-      Coordinate coord = getCoordFromPoint(xPixel, yPixel);
+    Coordinate coord = getCoordFromPoint(xPixel, yPixel);
 
-      initX = coord.getXVal();
-      initY = coord.getYVal();
-      initXpixel = xPixel;
-      
-      mousePressedInPlotArea = true;
-      repaint();
-
-    } else
-      mousePressedInPlotArea = false;
+    initX = coord.getXVal();
+    initY = coord.getYVal();
+    initXpixel = xPixel;
+    repaint();
   }
 
   /**
@@ -2635,23 +2622,19 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     if (e.getButton() != MouseEvent.BUTTON1)
       return;
 
-    int xPixel = e.getX();
-    int yPixel = e.getY();
-
-    if (!checkXY(xPixel, fixY(yPixel)))
-      return;
     isMouseReleased = true;
 
-    setMouseFinalXY(e);
+    int xPixel = fixX(e.getX());
+    int yPixel = fixY(e.getY());
 
-    if (mousePressedInPlotArea
-        && Math.abs(xPixel - initXpixel) > MIN_DRAG_X_PIXELS) {
-      if (isIntegralDrag) {
-          checkIntegral(initX, finalX, true);      
-      } else {
-        doZoom(initX, initY, finalX, finalY);
-      }
-    }
+    setMouseFinalXY(xPixel, yPixel);
+
+    if (Math.abs(xPixel - initXpixel) <= MIN_DRAG_X_PIXELS)
+      return;
+    if (isIntegralDrag)
+      checkIntegral(initX, finalX, true);
+    else
+      doZoom(initX, initY, finalX, finalY);
   }
 
   private boolean checkXY(int xPixel, int yPixel) {
@@ -2659,8 +2642,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         && yPixel >= topPlotAreaPos && yPixel <= bottomPlotAreaPos);
   }
 
-  private void setMouseFinalXY(MouseEvent e) {
-    Coordinate coord = getCoordFromPoint(e.getX(), fixY(e.getY()));
+  private void setMouseFinalXY(int x, int y) {
+    Coordinate coord = getCoordFromPoint(x, y);
     finalX = coord.getXVal();
     finalY = coord.getYVal();
   }
@@ -2691,8 +2674,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   public void mouseMoved(MouseEvent e) {
     isMouseDraggedEvent = false;
     fireMouseMoved(e);
-    if (mouseMovedOk)
-      repaint();
+    repaint();
   }
 
   private double lastClickX = Double.MAX_VALUE;
@@ -2750,46 +2732,43 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        the <code>MouseEvent</code>
    */
   private void fireMouseMoved(MouseEvent e) {
-    int xPixel = (e.getX());
+    int xPixel = fixX(e.getX());
     int yPixel = fixY(e.getY());
-    if (checkXY(xPixel, yPixel)) {
 
-      if (isMouseDraggedEvent) {
-        isMouseDragged = true;
-        currZoomBoxX = xPixel;
-        currZoomBoxY = (isIntegralDrag ? bottomPlotAreaPos : fixY(yPixel));
-      }
-
-      Coordinate coord = getCoordFromPoint(xPixel, yPixel);
-
-      double xPt = coord.getXVal();
-      double yPt = coord.getYVal();
-
-      String hashX = "#";
-      String hashY = "#";
-      String hash1 = "0.00000000";
-
-      if (multiScaleData.hashNums[0] <= 0)
-        hashX = hash1.substring(0, Math.abs(multiScaleData.hashNums[0]) + 3);
-      String xx = getFormatter(hashX).format(xPt);
-
-      if (multiScaleData.hashNums[1] <= 0)
-        hashY = hash1.substring(0, Math.abs(multiScaleData.hashNums[1]) + 3);
-      NumberFormat formatter = getFormatter(hashY);
-      coordStr = "(" + xx + ", " + formatter.format(yPt) + ")";
-
-      if (nSpectra == 1) {
-        if (!getSpectrum().isHNMR()) {
-          yPt = spectra[0].getPercentYValueAt(xPt);
-          xx += ", " + formatter.format(yPt);
-        }
-      } else if (getSpectrum().getIntegrationGraph() != null) {
-        yPt = spectra[1].getPercentYValueAt(xPt);
-        xx += ", " + getFormatter("#0.0").format(yPt);
-      }
-      setToolTipText(Double.isNaN(yPt) ? null : xx);
+    if (isMouseDraggedEvent) {
+      isMouseDragged = true;
+      currZoomBoxX = xPixel;
+      currZoomBoxY = (isIntegralDrag ? bottomPlotAreaPos : fixY(yPixel));
     }
-    mouseMovedOk = true;
+
+    Coordinate coord = getCoordFromPoint(xPixel, yPixel);
+
+    double xPt = coord.getXVal();
+    double yPt = coord.getYVal();
+
+    String hashX = "#";
+    String hashY = "#";
+    String hash1 = "0.00000000";
+
+    if (multiScaleData.hashNums[0] <= 0)
+      hashX = hash1.substring(0, Math.abs(multiScaleData.hashNums[0]) + 3);
+    String xx = getFormatter(hashX).format(xPt);
+
+    if (multiScaleData.hashNums[1] <= 0)
+      hashY = hash1.substring(0, Math.abs(multiScaleData.hashNums[1]) + 3);
+    NumberFormat formatter = getFormatter(hashY);
+    coordStr = "(" + xx + ", " + formatter.format(yPt) + ")";
+
+    if (nSpectra == 1) {
+      if (!getSpectrum().isHNMR()) {
+        yPt = spectra[0].getPercentYValueAt(xPt);
+        xx += ", " + formatter.format(yPt);
+      }
+    } else if (getSpectrum().getIntegrationGraph() != null) {
+      yPt = spectra[1].getPercentYValueAt(xPt);
+      xx += ", " + getFormatter("#0.0").format(yPt);
+    }
+    setToolTipText(Double.isNaN(yPt) ? null : xx);
   }
 
   /**
@@ -2802,12 +2781,11 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     isMouseDraggedEvent = true; // testing   
     fireMouseMoved(e);
     if (isIntegralDrag) {
-      setMouseFinalXY(e);
+      setMouseFinalXY(fixX(e.getX()), fixY(e.getY()));
       checkIntegral(initX, finalX, false);      
       return;
     }
-    if (mouseMovedOk)
-      repaint();
+    repaint();
   }
 
   public void toPeak(int istep) {
@@ -2924,6 +2902,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
   private int fixY(int yPixels) {
     return Math.max(Math.min(yPixels, bottomPlotAreaPos), topPlotAreaPos);
+  }
+
+  private int fixX(int xPixels) {
+    return Math.max(Math.min(xPixels, rightPlotAreaPos), leftPlotAreaPos);
   }
 
   public static JSVPanel taConvert(JSVPanel jsvp, int mode) {
