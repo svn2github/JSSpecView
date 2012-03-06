@@ -121,6 +121,7 @@ import org.jmol.api.JmolSyncInterface;
 import jspecview.common.AppUtils;
 import jspecview.common.CommandHistory;
 import jspecview.common.DisplayScheme;
+import jspecview.common.Graph;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelPopupMenu;
 import jspecview.common.JSpecViewFileFilter;
@@ -1221,7 +1222,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the file
    */
   public void openFile(File file) {
-    openFile(file, null, null);
+    openFile(file, null, null, -1, -1);
   }
 
   /**
@@ -1229,16 +1230,16 @@ public class MainFrame extends JFrame implements DropTargetListener,
    * 
    * @param fileOrURL
    */
-  public void openFile(String fileOrURL) {
+  public void openFile(String fileOrURL, int firstSpec, int lastSpec) {
     if (FileManager.isURL(fileOrURL))
-      openFile(null, fileOrURL, null);
+      openFile(null, fileOrURL, null, firstSpec, lastSpec);
     else
-      openFile(new File(fileOrURL), null, null);
+      openFile(new File(fileOrURL), null, null, firstSpec, lastSpec);
   }
 
   private int nOverlay;
   
-  private int openFile(File file, String url, List<JDXSpectrum> specs) {
+  private int openFile(File file, String url, List<JDXSpectrum> specs, int firstSpec, int lastSpec) {
     writeStatus("");
     String filePath = null;
     String fileName = null;
@@ -1269,7 +1270,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     }
     try {
       setCurrentSource(isOverlay ? JDXSource.createOverlay(url, specs) 
-          : JDXFileReader.createJDXSource(null, filePath, null, false));
+          : JDXFileReader.createJDXSource(null, filePath, null, false, firstSpec, lastSpec));
     } catch (Exception e) {
       e.printStackTrace();
       writeStatus(e.getMessage());
@@ -1399,10 +1400,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
     boolean continuous = spec.isContinuous();
     boolean isAbsTrans = (spec.isAbsorbance() || spec.isTransmittance());
     saveAsJDXMenu.setEnabled(spec.getDataClass().equals("XYDATA"));
-    jsvpPopupMenu.integrateCheckBoxMenuItem.setEnabled(spec.isHNMR()
-        && continuous);
-    jsvpPopupMenu.integrateCheckBoxMenuItem.setSelected(spec.isHNMR()
-        && continuous && spec.getIntegrationGraph() != null);
+    jsvpPopupMenu.integrateCheckBoxMenuItem.setEnabled(spec.canIntegrate());
+    jsvpPopupMenu.integrateCheckBoxMenuItem.setSelected(spec.canIntegrate() && spec.getIntegrationGraph() != null);
     //  Can only convert from T <-> A  if Absorbance or Transmittance and continuous
     jsvpPopupMenu.transAbsMenuItem.setEnabled(continuous && isAbsTrans);
     Coordinate xyCoords[] = spec.getXYCoords();
@@ -1881,6 +1880,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
       System.out.println("Running in DEBUG mode");
     }
     JSVPanel jsvp = selectedJSVPanel;
+    List<String> tokens;
+    int pt;
     while (allParamTokens.hasMoreTokens()) {
       String token = allParamTokens.nextToken();
       // now split the key/value pair
@@ -1897,13 +1898,32 @@ public class MainFrame extends JFrame implements DropTargetListener,
         default:
           parameters.set(jsvp, st, value);
           break;
+        case YSCALE:
+          if (jsvp == null)
+            continue;
+          tokens = ScriptToken.getTokens(value);
+          pt = 0;
+          boolean isAll = false;
+          if (tokens.size() > 1 && tokens.get(0).equalsIgnoreCase("ALL")) {
+            isAll = true;
+            pt++;
+          }
+          double y1 = Double.parseDouble(tokens.get(pt++));
+          double y2 = Double.parseDouble(tokens.get(pt));
+          setYScale(y1, y2, isAll);
+          break;          
         case LOAD:
-          if (value.toUpperCase().startsWith("APPEND ")) {
-            value = value.substring(7).trim();
+          tokens = ScriptToken.getTokens(value);
+          pt = 0;
+          if (tokens.size() > 1 && tokens.get(0).equalsIgnoreCase("APPEND")) {
+            pt++;
           } else {
             close("all");
           }
-          openFile(TextFormat.trimQuotes(value));
+          String filename = TextFormat.trimQuotes(tokens.get(pt));
+          int firstSpec = (pt + 1 < tokens.size() ? Integer.valueOf(tokens.get(++pt)): -1); 
+          int lastSpec = (pt + 1 < tokens.size() ? Integer.valueOf(tokens.get(++pt)) : firstSpec); 
+          openFile(filename, firstSpec, lastSpec);
           jsvp = selectedJSVPanel;
           if (jsvp == null)
             return;
@@ -1983,6 +2003,23 @@ public class MainFrame extends JFrame implements DropTargetListener,
     repaint();
   }
 
+  private void setYScale(double y1, double y2, boolean isAll) {
+    if (isAll) {
+      Graph[] graphs = new Graph[] { selectedJSVPanel.getSpectrum(), null };
+      for (int i = specNodes.size(); --i >= 0;) {
+        JSVTreeNode node = specNodes.get(i);
+        if (node.source != currentSelectedSource)
+          continue;
+        graphs[1] = node.jsvp.getSpectrum();
+        if (JDXSpectrum.areScalesCompatible(graphs))
+          node.jsvp.setZoom(Double.NaN, y1, Double.NaN, y2);
+      }
+    } else {
+      selectedJSVPanel.setZoom(Double.NaN, y1, Double.NaN, y2);
+    }
+    
+  }
+
   private void close(String value) {
     value = value.replace('\\', '/');
     if (value.equalsIgnoreCase("all")) {
@@ -2011,7 +2048,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
         sb.append(",").append(id);
     }
     if (slist.size() > 1 && JDXSpectrum.areScalesCompatible(slist))
-      openFile(null, sb.toString().substring(1), slist);
+      openFile(null, sb.toString().substring(1), slist, -1, -1);
   }
 
   private void setFrame(int i) {
@@ -2322,6 +2359,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the message
    */
   public void writeStatus(String msg) {
+    if (msg == null)
+      msg = "Unexpected Error";
     if (msg.length() == 0)
       msg = "Enter a command:";
     statusLabel.setText(msg);
@@ -2634,7 +2673,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     if (url == null)
       return;
     recentOpenURL = url;
-    openFile(null, url.indexOf("://") < 0 ? "file:/" + url : url, null);
+    openFile(null, url.indexOf("://") < 0 ? "file:/" + url : url, null, -1, -1);
   };
 
   protected void windowClosing_actionPerformed() {
@@ -2961,10 +3000,24 @@ public class MainFrame extends JFrame implements DropTargetListener,
   }
 
   public void zoomed(double x1, double y1, double x2, double y2) {
+    if (Double.isNaN(x2)) {
+      // pass on to menu
+      advanceSpectrumBy((int) x1);
+      return;
+    }
     if (x1 == x2)
       writeStatus("");
     else
       writeStatus("Double-Click highlighted spectrum in menu to zoom out.");
+  }
+
+  private void advanceSpectrumBy(int n) {
+    int i = specNodes.size(); 
+    for (; --i >= 0;)
+      if (specNodes.get(i).jsvp == selectedJSVPanel)
+        break;
+    setFrame(i + n);
+    selectedJSVPanel.requestFocusInWindow();
   }
 
 }

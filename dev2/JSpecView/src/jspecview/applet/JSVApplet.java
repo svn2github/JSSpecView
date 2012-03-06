@@ -532,7 +532,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     currentSpectrumIndex = index;
     setSelectedPanel(jsvp);
 
-    appletPopupMenu.integrateCheckBoxMenuItem.setEnabled(selectedJSVPanel.getSpectrum().isHNMR());
+    appletPopupMenu.integrateCheckBoxMenuItem.setEnabled(selectedJSVPanel.getSpectrum().canIntegrate());
 
     chooseContainer();
     this.validate();
@@ -1278,7 +1278,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
         commandWatcherThread.interrupt();
     }
   */
-  private void openDataOrFile(String data, String name, List<JDXSpectrum> specs1, String filePath) {
+  private void openDataOrFile(String data, String name,
+                              List<JDXSpectrum> specs1, String filePath) {
     appletPanel.removeAll();
     String fileName = null;
     URL base = null;
@@ -1307,7 +1308,9 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
 
     try {
       source = (isOverlay ? JDXSource.createOverlay(fileName, specs)
-          : JDXFileReader.createJDXSource(FileManager.getBufferedReaderForString(data), fileName, base, obscure == Boolean.TRUE));
+          : JDXFileReader.createJDXSource(FileManager
+              .getBufferedReaderForString(data), fileName, base,
+              obscure == Boolean.TRUE, -1, -1));
     } catch (Exception e) {
       writeStatus(e.getMessage());
       e.printStackTrace();
@@ -1316,10 +1319,12 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
 
     specs = source.getSpectra();
     numberOfSpectra = specs.size();
-    overlay = isOverlay && !name.equals("NONE") || (theInterface.equals("overlay") && numberOfSpectra > 1);
+    overlay = isOverlay && !name.equals("NONE")
+        || (theInterface.equals("overlay") && numberOfSpectra > 1);
     overlay &= !JDXSpectrum.process(specs, irMode, !isOverlay && autoIntegrate,
-        parameters.integralMinY, parameters.integralOffset, parameters.integralFactor);
-    
+        parameters.integralMinY, parameters.integralOffset,
+        parameters.integralFactor);
+
     boolean continuous = source.getJDXSpectrum(0).isContinuous();
     String Yunits = source.getJDXSpectrum(0).getYUnits();
     String Xunits = source.getJDXSpectrum(0).getXUnits();
@@ -1334,7 +1339,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
       writeStatus(e1.getMessage());
       return;
     }
-    
+
     initInterface();
 
     System.out.println("JSpecView vs: " + APPLET_VERSION + " File " + fileName
@@ -1352,7 +1357,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
       appletPopupMenu.solColMenuItem.setEnabled(false);
     }
     //  Can only integrate a continuous H NMR spectrum
-    if (continuous && selectedJSVPanel.getSpectrum().isHNMR())
+    if (continuous && selectedJSVPanel.getSpectrum().canIntegrate())
       appletPopupMenu.integrateCheckBoxMenuItem.setEnabled(true);
     //Can only convert from T <-> A  if Absorbance or Transmittance and continuous
     if ((continuous) && (Yunits.toLowerCase().contains("abs"))

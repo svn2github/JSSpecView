@@ -38,7 +38,7 @@ public class AppUtils {
     JDXSpectrum spectrum = jsvp.getSpectrum();
     IntegralGraph graph = spectrum.getIntegrationGraph();
     spectrum.setIntegrationGraph(null);
-    if (graph != null || spectrum.isHNMR() && jsvp.getNumberOfSpectra() == 1) {
+    if (graph != null || spectrum.canIntegrate() && jsvp.getNumberOfSpectra() == 1) {
       if (showDialog) {
         IntegrateDialog integDialog;
         if (graph != null) {

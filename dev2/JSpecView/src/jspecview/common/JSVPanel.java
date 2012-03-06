@@ -1828,7 +1828,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @param finalY
    *        the Y end coordinate of the zoom area
    */
-  public void doZoom(double initX, double initY, double finalX, double finalY) {
+  private void doZoom(double initX, double initY, double finalX, double finalY, boolean isMouseEvent) {
     if (!zoomEnabled)
       return;
 
@@ -1858,8 +1858,12 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     }
     int[] startIndices = new int[nSpectra];
     int[] endIndices = new int[nSpectra];
-    if (doZoomWithoutRepaint(initX, finalX, initY, finalY, startIndices, endIndices))
-      repaint();
+    if (doZoomWithoutRepaint(initX, finalX, initY, finalY, startIndices,
+        endIndices)) {
+      notifyZoomListeners(initX, finalX, initY, finalY);
+      if (isMouseEvent)
+        repaint();
+    }
   }
 
   /**
@@ -1893,7 +1897,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         zoomInfoList.remove(i);
     zoomInfoList.add(multiScaleData);
     currentZoomIndex++;
-    notifyZoomListeners(initX, finalX, yPt1, yPt2);
     return true;
   }
 
@@ -2634,7 +2637,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     if (isIntegralDrag)
       checkIntegral(initX, finalX, true);
     else
-      doZoom(initX, initY, finalX, finalY);
+      doZoom(initX, initY, finalX, finalY, true);
   }
 
   private boolean checkXY(int xPixel, int yPixel) {
@@ -2812,6 +2815,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     case KeyEvent.VK_RIGHT:
       toPeak(1);
       break;
+    case KeyEvent.VK_DOWN:
+    case KeyEvent.VK_UP:
+      notifyZoomListeners((e.getKeyCode() == KeyEvent.VK_DOWN ? 1 : -1), Double.NaN, Double.NaN, Double.NaN);
+      break;
     }
   }
 
@@ -2880,22 +2887,13 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   public void setZoom(double x1, double y1, double x2, double y2) {
-    int py1 = (y1 == y2 ? topPlotAreaPos : fixY(yPixels(y1)));
-    int py2 = (y1 == y2 ? bottomPlotAreaPos : fixY(yPixels(y2)));
-    if (py1 > py2) {
-      int t = py1;
-      py1 = py2;
-      py2 = t;
-    }
-    Coordinate z0 = getCoordFromPoint(xPixels(x1), topPlotAreaPos);
-    Coordinate z1 = getCoordFromPoint(xPixels(x2), bottomPlotAreaPos);
     multiScaleData = zoomInfoList.get(0);
-    double initX = z0.getXVal();
-    double initY = z0.getYVal();
-    double finalX = z1.getXVal();
-    double finalY = z1.getYVal();
-    if (initX != 0 || finalX != 0)
-      doZoom(initX, initY, finalX, finalY);
+    if (Double.isNaN(x1)) {
+      x1 = multiScaleData.minX;
+      x2 = multiScaleData.maxX;
+    }
+    if (x1 != 0 || x2 != 0)
+      doZoom(x1, y1, x2, y2, false);
     else
       notifyZoomListeners(0, 0, 0, 0);
   }
