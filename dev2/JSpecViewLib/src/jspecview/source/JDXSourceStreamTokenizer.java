@@ -33,13 +33,13 @@ import jspecview.util.Logger;
  * @author Prof Robert J. Lancashire
  * @see jspecview.source.JDXSource
  */
-public class JDXSourceStringTokenizer {
+public class JDXSourceStreamTokenizer {
 
-  BufferedReader br;
-  public JDXSourceStringTokenizer(BufferedReader br) {
+  private BufferedReader br;
+  
+  JDXSourceStreamTokenizer(BufferedReader br) {
     this.br = br;
-    
- }
+  }
 
   /**
    * The Label part of the next token
@@ -57,6 +57,114 @@ public class JDXSourceStringTokenizer {
   private String line;
 
   private int lineNo;
+
+  String getLabel() {
+    label = null;
+    value = null;
+    while (line == null) {
+      try {
+        readLine();
+        line = line.trim();
+      } catch (IOException e) {
+        line = "";
+        return null;
+      }
+      System.out.println(line);
+      if (line.startsWith("##"))
+        break;
+      line = null;
+    }
+    int pt = line.indexOf("=");
+    if (pt < 0)
+      return null;
+    label = line.substring(0, pt).trim();
+    line = line.substring(pt + 1);
+    labelLineNo = lineNo;
+    if (Logger.debugging)
+      System.out.println(label);
+    return cleanLabel(label);
+  }
+  
+  /**
+   * Extracts spaces, underscores etc. from the label
+   * 
+   * @param label
+   *        the label to be cleaned
+   * @return the new label
+   */
+  static String cleanLabel(String label) {
+    if (label == null)
+      return null;
+    int i;
+    StringBuffer str = new StringBuffer();
+
+    for (i = 0; i < label.length(); i++) {
+      switch (label.charAt(i)) {
+      case '/':
+      case '\\':
+      case ' ':
+      case '-':
+      case '_':
+        break;
+      default:
+        str.append(label.charAt(i));
+        break;
+      }
+    }
+    return str.toString().toUpperCase();
+  }
+
+  String getRawLabel() {
+    return label;
+  }
+
+  int getLabelLineNo() {
+    return labelLineNo;
+  }
+
+  public String getValue() {
+    if (value != null)
+      return value;
+    StringBuffer sb = new StringBuffer(line);
+    if (sb.length() > 0)
+      sb.append('\n');
+    try {
+      while (readLine() != null) {
+        if (line.indexOf("##") >= 0 && line.trim().startsWith("##"))
+          break;
+        sb.append(line).append('\n');
+      }
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    value = trimLines(sb);
+    if (Logger.debugging)
+      System.out.println(value);
+    return value;
+  }
+
+  public String readLineTrimmed() throws IOException {
+    readLine();
+    if (line == null)
+      return null;
+    if (line.indexOf("$$") < 0)
+      return line.trim();
+    StringBuffer sb = new StringBuffer(line);
+    return trimLines(sb).trim();
+  }
+
+  String flushLine() {
+    StringBuffer sb = new StringBuffer(line);
+    line = null;
+    return trimLines(sb).trim();
+  }
+
+  private String readLine() throws IOException {
+    line = br.readLine();
+    lineNo++;
+    return line;
+  }
 
   private static String trimLines(StringBuffer v) {
     int n = v.length();
@@ -124,117 +232,5 @@ public class JDXSourceStringTokenizer {
     return pt;
   }
 
-  public String getNextLabel() {
-    line = null;
-    return getLabel();
-  }
-  
-  public String getLabel() {
-    label = null;
-    value = null;
-    while (line == null) {
-      try {
-        readLine();
-        line = line.trim();
-      } catch (IOException e) {
-        line = "";
-        return null;
-      }
-      System.out.println(line);
-      if (line.startsWith("##"))
-        break;
-      line = null;
-    }
-    int pt = line.indexOf("=");
-    if (pt < 0)
-      return null;
-    label = line.substring(0, pt).trim();
-    line = line.substring(pt + 1);
-    labelLineNo = lineNo;
-    if (Logger.debugging)
-      System.out.println(label);
-    return cleanLabel(label);
-  }
-  
-  private String readLine() throws IOException {
-    line = br.readLine();
-    lineNo++;
-    return line;
-  }
-
-  /**
-   * Extracts spaces, underscores etc. from the label
-   * 
-   * @param label
-   *        the label to be cleaned
-   * @return the new label
-   */
-  static String cleanLabel(String label) {
-    if (label == null)
-      return null;
-    int i;
-    StringBuffer str = new StringBuffer();
-
-    for (i = 0; i < label.length(); i++) {
-      switch (label.charAt(i)) {
-      case '/':
-      case '\\':
-      case ' ':
-      case '-':
-      case '_':
-        break;
-      default:
-        str.append(label.charAt(i));
-        break;
-      }
-    }
-    return str.toString().toUpperCase();
-  }
-
-  public String getRawLabel() {
-    return label;
-  }
-
-  public int getLabelLineNo() {
-    return labelLineNo;
-  }
-
-  public String getValue() {
-    if (value != null)
-      return value;
-    StringBuffer sb = new StringBuffer(line);
-    if (sb.length() > 0)
-      sb.append('\n');
-    try {
-      while (readLine() != null) {
-        if (line.indexOf("##") >= 0 && line.trim().startsWith("##"))
-          break;
-        sb.append(line).append('\n');
-      }
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    value = trimLines(sb);
-    if (Logger.debugging)
-      System.out.println(value);
-    return value;
-  }
-
-  public String readLineTrimmed() throws IOException {
-    readLine();
-    if (line == null)
-      return null;
-    if (line.indexOf("$$") < 0)
-      return line.trim();
-    StringBuffer sb = new StringBuffer(line);
-    return trimLines(sb).trim();
-  }
-
-  public String flushLine() {
-    StringBuffer sb = new StringBuffer(line);
-    line = null;
-    return trimLines(sb).trim();
-  }
 
 }

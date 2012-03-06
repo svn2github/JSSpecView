@@ -31,7 +31,7 @@ import java.util.Vector;
 
 import jspecview.exception.JSpecViewException;
 import jspecview.source.JDXDecompressor;
-import jspecview.source.JDXSourceStringTokenizer;
+import jspecview.source.JDXSourceStreamTokenizer;
 import jspecview.util.Logger;
 import jspecview.util.TextFormat;
 
@@ -430,7 +430,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return (type != null && type.length() > 0 ? type + " " : "") + title;
   }
 
-  public boolean processTabularData(JDXSourceStringTokenizer t,
+  public boolean processTabularData(JDXSourceStreamTokenizer t,
                                     List<String[]> table,
                                     StringBuffer errorLog)
       throws JSpecViewException {
@@ -468,7 +468,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
 
   public boolean createXYCoords(Map<String, ArrayList<String>> nTupleTable,
                                 String[] plotSymbols, String dataType,
-                                JDXSourceStringTokenizer t,
+                                JDXSourceStreamTokenizer t,
                                 StringBuffer errorLog) {
     ArrayList<String> list;
     if (dataClass.equals("XYDATA")) {
@@ -514,7 +514,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return false;
   }
 
-  private void decompressData(JDXSourceStringTokenizer t,
+  private void decompressData(JDXSourceStreamTokenizer t,
                               StringBuffer errorLog) {
 
     

@@ -69,7 +69,7 @@ public class JDXFileReader {
     Arrays.sort(TABULAR_DATA_LABELS);
   }
   private JDXSource source;
-  private JDXSourceStringTokenizer t;
+  private JDXSourceStreamTokenizer t;
   private StringBuffer errorLog;
   private boolean obscure;
 
@@ -142,7 +142,7 @@ public class JDXFileReader {
       throws JSpecViewException {
 
     source = new JDXSource(JDXSource.TYPE_SIMPLE);
-    t = new JDXSourceStringTokenizer(br);
+    t = new JDXSourceStreamTokenizer(br);
     errorLog = new StringBuffer();
 
     String label = "";
@@ -397,7 +397,7 @@ public class JDXFileReader {
         throw new JDXSourceException("Unable to read Ntuple Source");
       for (int i = 0; i < sourceLDRTable.size(); i++) {
         String[] entry = sourceLDRTable.get(i);
-        String key = JDXSourceStringTokenizer.cleanLabel(entry[0]);
+        String key = JDXSourceStreamTokenizer.cleanLabel(entry[0]);
         if (!key.equals("##TITLE") && !key.equals("##DATACLASS")
             && !key.equals("##NTUPLES"))
           dataLDRTable.add(entry);
@@ -457,7 +457,7 @@ public class JDXFileReader {
   }
 
   private static boolean readDataLabel(JDXDataObject spectrum, String label,
-                                       JDXSourceStringTokenizer t, StringBuffer errorLog,
+                                       JDXSourceStreamTokenizer t, StringBuffer errorLog,
                                        List<String[]> table, boolean obscure) {
 
     if (readHeaderLabel(spectrum, label, t, errorLog, obscure))
@@ -583,7 +583,7 @@ public class JDXFileReader {
   }
 
   private static boolean readHeaderLabel(JDXHeader jdxHeader, String label,
-                                         JDXSourceStringTokenizer t, StringBuffer errorLog,
+                                         JDXSourceStreamTokenizer t, StringBuffer errorLog,
                                          boolean obscure) {
     if (label.equals("##TITLE")) {
       String value = t.getValue();

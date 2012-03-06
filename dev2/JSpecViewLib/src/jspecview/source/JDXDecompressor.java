@@ -80,7 +80,7 @@ public class JDXDecompressor {
    */
   private int lineNumber = 0;
 
-  private JDXSourceStringTokenizer t;
+  private JDXSourceStreamTokenizer t;
   private double firstX;
   private double dx;
 
@@ -101,7 +101,7 @@ public class JDXDecompressor {
    * @param lineNumber
    *        the starting line number
    */
-  public JDXDecompressor(JDXSourceStringTokenizer t, double firstX, double xFactor,
+  public JDXDecompressor(JDXSourceStreamTokenizer t, double firstX, double xFactor,
       double yFactor, double deltaX, int nPoints) {
     this.t = t;
     this.firstX = firstX;
