@@ -185,7 +185,7 @@ public class Parameters extends DisplayScheme {
 
   public static boolean parseBoolean(String value) {
     if (value.length() == 0)
-      value = "true" + Boolean.valueOf(value);
+      value = "true";
     return Boolean.parseBoolean(value);
   }
 
