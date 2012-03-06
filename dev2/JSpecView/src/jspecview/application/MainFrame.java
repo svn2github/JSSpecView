@@ -1372,6 +1372,10 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private void setCurrentSource(JDXSource source) {
     currentSelectedSource = source;
     boolean isError = (source != null && source.getErrorLog().length() > 0);
+    setError(isError);
+  }
+
+  private void setError(boolean isError) {
     errorLogButton.setIcon(isError ? errorLogRedIcon : errorLogIcon);
     errorLogButton.setEnabled(isError);
     errorLogMenuItem.setEnabled(isError);
@@ -1626,6 +1630,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     for (int i = 0; i < toDelete.size(); i++)
       spectraTreeModel.removeNodeFromParent(toDelete.get(i));
     selectedJSVPanel = null;
+    setError(false);
     if (source != null) {
       List<JDXSpectrum> spectra = source.getSpectra();
       for (int i = 0; i < spectra.size(); i++) {
@@ -1640,7 +1645,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
       saveAsJDXMenu.setEnabled(true);
       saveAsMenu.setEnabled(true);
     }
-
     setCloseMenuItem(null);
     setTitle("JSpecView");
     if (source == null)
@@ -1890,6 +1894,9 @@ public class MainFrame extends JFrame implements DropTargetListener,
         case UNKNOWN:
           System.out.println("Unrecognized parameter: " + key);
           break;
+        default:
+          parameters.set(jsvp, st, value);
+          break;
         case LOAD:
           if (value.toUpperCase().startsWith("APPEND ")) {
             value = value.substring(7).trim();
@@ -1903,9 +1910,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
           break;
         case CLOSE:
           close(TextFormat.trimQuotes(value));
-          break;
-        default:
-          parameters.set(jsvp, st, value);
           break;
         case SPECTRUM:
         case SPECTRUMNUMBER:
@@ -2318,7 +2322,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the message
    */
   public void writeStatus(String msg) {
-    System.out.println("writing status " + msg);
     if (msg.length() == 0)
       msg = "Enter a command:";
     statusLabel.setText(msg);
