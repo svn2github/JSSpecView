@@ -154,8 +154,8 @@ public class JDXFileReader {
         && !label.equals("##END")) {
       if (label.equals("##DATATYPE") && t.getValue().toUpperCase().equals("LINK"))
         return getBlockSpectra(dataLDRTable);
-      if (label.equals("##NTUPLES"))
-        return getNTupleSpectra(dataLDRTable, spectrum);
+      if (label.equals("##NTUPLES") || label.equals("##VARNAME"))
+        return getNTupleSpectra(dataLDRTable, spectrum, label);
       if (Arrays.binarySearch(TABULAR_DATA_LABELS, label) > 0) {
         setTabularDataType(spectrum, label);
         if (!spectrum.processTabularData(t, dataLDRTable, errorLog))
@@ -234,8 +234,8 @@ public class JDXFileReader {
           getBlockSpectra(dataLDRTable);
           spectrum = null;
           label = null;
-        } else if (label.equals("##NTUPLES")) {
-          getNTupleSpectra(dataLDRTable, spectrum);
+        } else if (label.equals("##NTUPLES") || label.equals("##VARNAME")) {
+            getNTupleSpectra(dataLDRTable, spectrum, label);
           spectrum = null;
           label = null;
         } else if (label.equals("##JCAMPCS")) {
@@ -306,15 +306,19 @@ public class JDXFileReader {
    * 
    * @param sourceLDRTable
    * @param spectrum0
+   * @param haveVarLabel 
    * 
    * @throws JSpecViewException
    * @return source
    */
   private JDXSource getNTupleSpectra(List<String[]> sourceLDRTable,
-                                     JDXSpectrum spectrum0)
+                                     JDXSpectrum spectrum0, String label)
       throws JSpecViewException {
-    t.getValue();
-    String label = "";
+    boolean haveFirstLabel = !label.equals("##NTUPLES");
+    if (!haveFirstLabel) {
+      label = "";
+      t.getValue();
+    }
     Map<String, ArrayList<String>> nTupleTable = new Hashtable<String, ArrayList<String>>();
     String[] plotSymbols = new String[2];
 
@@ -326,7 +330,8 @@ public class JDXFileReader {
     }
 
     // Read NTuple Table
-    while (!(label = t.getLabel()).equals("##PAGE")) {
+    while (!(label = (haveFirstLabel ? label : t.getLabel())).equals("##PAGE")) {
+      haveFirstLabel = false;
       StringTokenizer st = new StringTokenizer(t.getValue(), ",");
       ArrayList<String> attrList = new ArrayList<String>();
       while (st.hasMoreTokens())
