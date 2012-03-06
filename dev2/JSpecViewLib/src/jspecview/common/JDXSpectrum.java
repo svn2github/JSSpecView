@@ -19,6 +19,7 @@
 
 package jspecview.common;
 
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ import java.util.Vector;
 
 import jspecview.exception.JSpecViewException;
 import jspecview.source.JDXDecompressor;
+import jspecview.source.JDXSourceStringTokenizer;
 import jspecview.util.Logger;
 import jspecview.util.TextFormat;
 
@@ -68,7 +70,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
    * Constructor
    */
   public JDXSpectrum() {
-    System.out.println("initialize JDXSpectrum " + this);
+    //System.out.println("initialize JDXSpectrum " + this);
     headerTable = new Vector<String[]>();
     xyCoords = new Coordinate[0];
   }
@@ -428,13 +430,10 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return (type != null && type.length() > 0 ? type + " " : "") + title;
   }
 
-  public boolean processTabularData(String tabularSpecData, int tabDataLineNo,
+  public boolean processTabularData(JDXSourceStringTokenizer t,
                                     List<String[]> table,
                                     StringBuffer errorLog)
       throws JSpecViewException {
-    if (tabularSpecData == null)
-      throw new JSpecViewException("Error Reading Data Set");
-
     if (dataClass.equals("PEAKASSIGNMENTS"))
       return true;
 
@@ -442,16 +441,22 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
 
     if (dataClass.equals("XYDATA")) {
       checkRequiredTokens();      
-      decompressData(tabularSpecData, tabDataLineNo, errorLog);
+      decompressData(t, errorLog);
       return true;
     }
     if (dataClass.equals("PEAKTABLE") || dataClass.equals("XYPOINTS")) {
       continuous = dataClass.equals("XYPOINTS");
       // check if there is an x and y factor
+      try {
+        t.readLineTrimmed();
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
       if (xFactor != ERROR && yFactor != ERROR)
-        xyCoords = Coordinate.parseDSV(tabularSpecData, xFactor, yFactor);
+        xyCoords = Coordinate.parseDSV(t.getValue(), xFactor, yFactor);
       else
-        xyCoords = Coordinate.parseDSV(tabularSpecData, 1, 1);
+        xyCoords = Coordinate.parseDSV(t.getValue(), 1, 1);
 
       double fileDeltaX = Coordinate.deltaX(xyCoords[xyCoords.length - 1]
           .getXVal(), xyCoords[0].getXVal(), xyCoords.length);
@@ -461,28 +466,9 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return false;
   }
 
-  public String getTabularData(String label, String value) {
-    if (label.equals("##PEAKASSIGNMENTS"))
-      setDataClass("PEAKASSIGNMENTS");
-    else if (label.equals("##PEAKTABLE"))
-      setDataClass("PEAKTABLE");
-    else if (label.equals("##XYDATA"))
-      setDataClass("XYDATA");
-    else if (label.equals("##XYPOINTS"))
-      setDataClass("XYPOINTS");
-    // skip header lines
-    int pt = value.indexOf('\n') + 1;
-    while (pt < value.length() && "0123456789.-+".indexOf(value.charAt(pt)) < 0) 
-      pt++;
-    value = value.substring(pt);
-    return value;
-    
-   
-  }
-
   public boolean createXYCoords(Map<String, ArrayList<String>> nTupleTable,
                                 String[] plotSymbols, String dataType,
-                                String tabularSpecData, int tabDataLineNo,
+                                JDXSourceStringTokenizer t,
                                 StringBuffer errorLog) {
     ArrayList<String> list;
     if (dataClass.equals("XYDATA")) {
@@ -510,7 +496,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
       xUnits = list.get(index1);
       yUnits = list.get(index2);
 
-      decompressData(tabularSpecData, tabDataLineNo, errorLog);
+      decompressData(t, errorLog);
       return true;
     }
     if (dataClass.equals("PEAKTABLE") || dataClass.equals("XYPOINTS")) {
@@ -522,13 +508,13 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
       list = nTupleTable.get("##UNITS");
       xUnits = list.get(index1);
       yUnits = list.get(index2);
-      xyCoords = Coordinate.parseDSV(tabularSpecData, xFactor, yFactor);
+      xyCoords = Coordinate.parseDSV(t.getValue(), xFactor, yFactor);
       return true;
     }
     return false;
   }
 
-  private void decompressData(String tabularSpecData, int tabDataLineNo,
+  private void decompressData(JDXSourceStringTokenizer t,
                               StringBuffer errorLog) {
 
     
@@ -536,14 +522,11 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     double fileDeltaX = Coordinate.deltaX(fileLastX, fileFirstX, nPointsFile);
     increasing = (fileDeltaX > 0);
     continuous = true;
-    JDXDecompressor decompressor = new JDXDecompressor(tabularSpecData,
-        fileFirstX, xFactor, yFactor, fileDeltaX, nPointsFile, tabDataLineNo);
+    JDXDecompressor decompressor = new JDXDecompressor(t,
+        fileFirstX, xFactor, yFactor, fileDeltaX, nPointsFile);
 
     double[] firstLastX = new double[2];
     xyCoords = decompressor.decompressData(errorLog, firstLastX);
-
-    if (xyCoords == null)
-      xyCoords = Coordinate.parseDSV(tabularSpecData, xFactor, yFactor);
 
     if (errorLog.length() != errPt) {
       errorLog.append(getTitleLabel()).append("\n");

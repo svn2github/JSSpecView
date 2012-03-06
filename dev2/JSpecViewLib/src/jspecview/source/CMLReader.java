@@ -19,8 +19,8 @@
 
 package jspecview.source;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Vector;
 
 import jspecview.util.Parser;
@@ -40,16 +40,16 @@ class CMLReader extends XMLReader {
    * @param in an InputStream of the CML document
    * @return an instance of a CMLSource
    */
-  static JDXSource getCMLInstance(InputStream in) {
-    return (new CMLReader()).getXML(in);
+  static JDXSource getCMLInstance(BufferedReader br) {
+    return (new CMLReader()).getXML(br);
   }
 
-  private JDXSource getXML(InputStream in) {
+  private JDXSource getXML(BufferedReader br) {
     try {
 
       source = new JDXSource(JDXSource.TYPE_SIMPLE);
       
-      getSimpleXmlReader(in);
+      getSimpleXmlReader(br);
       processXML(CML_0, CML_1);
 
       if (!checkPointCount())
@@ -66,7 +66,7 @@ class CMLReader extends XMLReader {
     processErrors("CML");
 
     try {
-      in.close();
+      br.close();
     } catch (IOException e1) {
       //
     }

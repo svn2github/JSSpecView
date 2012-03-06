@@ -19,7 +19,10 @@
 
 package jspecview.source;
 
-import java.util.StringTokenizer;
+import java.io.BufferedReader;
+import java.io.IOException;
+
+import jspecview.util.Logger;
 
 /**
  * <code>JDXSourceStringTokenizer</code> breaks up the <code>JDXSource</code>
@@ -30,74 +33,35 @@ import java.util.StringTokenizer;
  * @author Prof Robert J. Lancashire
  * @see jspecview.source.JDXSource
  */
-class JDXSourceStringTokenizer extends StringTokenizer {
+public class JDXSourceStringTokenizer {
 
-  public JDXSourceStringTokenizer(String str) {
-    super(str);
-  }
+  BufferedReader br;
+  public JDXSourceStringTokenizer(BufferedReader br) {
+    this.br = br;
+    
+ }
 
   /**
    * The Label part of the next token
    */
-  String label;
+  private String label;
   /**
    * The value part of the next token
    */
-  String value;
+  private String value;
 
   /**
    * The line number of the label
    */
-  int labelLineNo = 0;
+  private int labelLineNo = 0;
+  private String line;
 
-  /**
-   * variable to keep a count of the number of lines that a dataset takes up
-   */
-  private int dataSetLineCount = 1;
-  
-  /**
-   * Gets the next token from the string and stores the label and the value
-   */
-  boolean getNextToken() {
-    // ADD CODE TO IGNORE ##= COMMENTS
-    // TWO LDR'S CAN'T BE ON THE SAME LINE
+  private int lineNo;
 
-    labelLineNo += dataSetLineCount;
-
-    label = nextToken("=");
-    StringBuffer v = new StringBuffer(nextToken("##"));
-
-    // ## At the start of a line, preceded only by blanks indicate the
-    // start of a data-label.
-    
-    int pt = 0;
-    while (hasMoreTokens() && (pt = ptNonSpaceRev(v, v.length())) >= 0
-        && "\n\r".indexOf(v.charAt(pt)) < 0) {
-      //  ## only counts if at start of line
-      v.append("##").append(nextToken("##"));
-    }
-
-    // count lines
-    StringBuffer dataSet = new StringBuffer(label);
-    dataSet.append(v);
-    char c = (dataSet.indexOf("\r") < 0 ? '\n' : '\r');
-    dataSetLineCount = 0;
-    for (int i = dataSet.length(); --i >= 0;)
-      if (dataSet.charAt(i) == c)
-        dataSetLineCount++;
-    
-    // fix up label and value
-    label = label.trim();
-    value = trimLines(v);
-    if (label.equals("##TITLE") || label.equals("##END"))
-      System.out.println(label + "\t" + value);
-    return true;
-  }
-
-  private String trimLines(StringBuffer v) {
+  private static String trimLines(StringBuffer v) {
     int n = v.length();
     int ilast = n - 1;
-    int vpt = ptNonWhite(v, 1, n);
+    int vpt = ptNonWhite(v, 0, n);
     // no line trimming for XML or <....> data
     if (vpt >= n)
       return "";
@@ -125,10 +89,9 @@ class JDXSourceStringTokenizer extends StringTokenizer {
       case '$':
         if (vpt < ilast && v.charAt(vpt + 1) == '$') {
           vpt++;
-          while (vpt < ilast && "\n\r".indexOf(v.charAt(++vpt)) < 0) {
+          while (++vpt < n && "\n\r".indexOf(v.charAt(vpt)) < 0) {
             // skip to end of line
           }
-          vpt--;
           continue;
         }
         break;
@@ -161,21 +124,117 @@ class JDXSourceStringTokenizer extends StringTokenizer {
     return pt;
   }
 
-//    BufferedReader lineReader = new BufferedReader(new StringReader(v));
-//    String line;
-//    try {
-//      while ((line = lineReader.readLine()) != null){
-//        line = line.trim();
-//        int commentIndex = line.indexOf("$$");
-//        // ignore comments that start at the beginning of the line
-//        // or empty lines
-//        if(commentIndex == 0)
-//          continue;
-//
-//        // remove comments from the end of a line
-//        if(commentIndex != -1)
-//          line = line.substring(0, commentIndex).trim();
-//        valueBuffer.append(line).append(TextFormat.newLine);
-//      }
-//    }
+  public String getNextLabel() {
+    line = null;
+    return getLabel();
+  }
+  
+  public String getLabel() {
+    label = null;
+    value = null;
+    while (line == null) {
+      try {
+        readLine();
+        line = line.trim();
+      } catch (IOException e) {
+        line = "";
+        return null;
+      }
+      System.out.println(line);
+      if (line.startsWith("##"))
+        break;
+      line = null;
+    }
+    int pt = line.indexOf("=");
+    if (pt < 0)
+      return null;
+    label = line.substring(0, pt).trim();
+    line = line.substring(pt + 1);
+    labelLineNo = lineNo;
+    if (Logger.debugging)
+      System.out.println(label);
+    return cleanLabel(label);
+  }
+  
+  private String readLine() throws IOException {
+    line = br.readLine();
+    lineNo++;
+    return line;
+  }
+
+  /**
+   * Extracts spaces, underscores etc. from the label
+   * 
+   * @param label
+   *        the label to be cleaned
+   * @return the new label
+   */
+  static String cleanLabel(String label) {
+    if (label == null)
+      return null;
+    int i;
+    StringBuffer str = new StringBuffer();
+
+    for (i = 0; i < label.length(); i++) {
+      switch (label.charAt(i)) {
+      case '/':
+      case '\\':
+      case ' ':
+      case '-':
+      case '_':
+        break;
+      default:
+        str.append(label.charAt(i));
+        break;
+      }
+    }
+    return str.toString().toUpperCase();
+  }
+
+  public String getRawLabel() {
+    return label;
+  }
+
+  public int getLabelLineNo() {
+    return labelLineNo;
+  }
+
+  public String getValue() {
+    if (value != null)
+      return value;
+    StringBuffer sb = new StringBuffer(line);
+    if (sb.length() > 0)
+      sb.append('\n');
+    try {
+      while (readLine() != null) {
+        if (line.indexOf("##") >= 0 && line.trim().startsWith("##"))
+          break;
+        sb.append(line).append('\n');
+      }
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    value = trimLines(sb);
+    if (Logger.debugging)
+      System.out.println(value);
+    return value;
+  }
+
+  public String readLineTrimmed() throws IOException {
+    readLine();
+    if (line == null)
+      return null;
+    if (line.indexOf("$$") < 0)
+      return line.trim();
+    StringBuffer sb = new StringBuffer(line);
+    return trimLines(sb).trim();
+  }
+
+  public String flushLine() {
+    StringBuffer sb = new StringBuffer(line);
+    line = null;
+    return trimLines(sb).trim();
+  }
+
 }

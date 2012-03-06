@@ -19,8 +19,8 @@
 
 package jspecview.source;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
@@ -43,16 +43,16 @@ class AnIMLReader extends XMLReader {
    * @param in an InputStream of the AnIML document
    * @return an instance of a AnIMLSource
    */
-  static JDXSource getAniMLInstance(InputStream in) {
-    return (new AnIMLReader()).getXML(in);
+  static JDXSource getAniMLInstance(BufferedReader br) {
+    return (new AnIMLReader()).getXML(br);
   }
 
-  private JDXSource getXML(InputStream in) {
+  private JDXSource getXML(BufferedReader br) {
     try {
 
       source = new JDXSource(JDXSource.TYPE_SIMPLE);
       
-      getSimpleXmlReader(in);
+      getSimpleXmlReader(br);
 
       reader.nextEvent();
 
@@ -76,7 +76,7 @@ class AnIMLReader extends XMLReader {
     processErrors("anIML");
 
     try {
-      in.close();
+      br.close();
     } catch (IOException e1) {
       //
     }

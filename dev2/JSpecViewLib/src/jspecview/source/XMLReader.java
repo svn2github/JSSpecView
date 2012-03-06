@@ -19,8 +19,8 @@
 
 package jspecview.source;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,8 +73,8 @@ abstract class XMLReader {
   protected String sampleID;
   protected StringBuffer errorLog = new StringBuffer();
 
-  protected void getSimpleXmlReader(InputStream in) {
-    reader = new SimpleXmlReader(in);
+  protected void getSimpleXmlReader(BufferedReader br) {
+    reader = new SimpleXmlReader(br);
   }
 
   protected void checkStart() throws Exception {

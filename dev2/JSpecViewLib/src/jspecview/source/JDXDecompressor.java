@@ -24,9 +24,7 @@
 
 package jspecview.source;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.StringReader;
 
 import jspecview.common.Coordinate;
 import jspecview.util.Logger;
@@ -82,15 +80,14 @@ public class JDXDecompressor {
    */
   private int lineNumber = 0;
 
-  private BufferedReader dataReader;
-
+  private JDXSourceStringTokenizer t;
   private double firstX;
   private double dx;
 
   /**
    * Initialises the <code>JDXDecompressor</code> from the compressed data, the
    * x factor, the y factor and the deltaX value
-   * @param data
+   * @param t
    *        the data to be decompressed
    * @param firstX TODO
    * @param xFactor
@@ -104,40 +101,15 @@ public class JDXDecompressor {
    * @param lineNumber
    *        the starting line number
    */
-  public JDXDecompressor(String data, double firstX, double xFactor,
-      double yFactor, double deltaX, int nPoints, int lineNumber) {
-    dataReader = new BufferedReader(new StringReader(data));
+  public JDXDecompressor(JDXSourceStringTokenizer t, double firstX, double xFactor,
+      double yFactor, double deltaX, int nPoints) {
+    this.t = t;
     this.firstX = firstX;
     this.xFactor = xFactor;
     this.yFactor = yFactor;
     this.deltaX = deltaX;
     this.nPoints = nPoints;
-    this.lineNumber = lineNumber;
-  }
-
-  /**
-   * Initialises the <code>JDXDecompressor</code> from the compressed data, the
-   * x factor, the y factor and the deltaX value, the last X and first X values
-   * in the source and the number of points
-   * @param xFactor
-   *        the x factor
-   * @param yFactor
-   *        the y factor
-   * @param lastX
-   *        the last x value
-   * @param firstX
-   *        the first x value
-   * @param nPoints
-   *        the number of points
-   * @param lineNumber
-   *        the starting line number
-   * @param data
-   *        compressed data
-   */
-  public JDXDecompressor(double xFactor, double yFactor,
-      double lastX, double firstX, int nPoints, int lineNumber, String data) {
-    this(data, firstX, xFactor, yFactor,
-        Coordinate.deltaX(lastX, firstX, nPoints), nPoints, lineNumber);
+    this.lineNumber = t.getLabelLineNo();
   }
 
   private Coordinate[] xyCoords;
@@ -152,10 +124,10 @@ public class JDXDecompressor {
       System.arraycopy(xyCoords, 0, t, 0, ipt);
       xyCoords = t;
     }
+    if (Logger.debugging)
+      logError("Coord: " + ipt + pt);
     xyCoords[ipt++] = pt;
     firstLastX[1] = pt.getXVal();
-    if (Logger.debugging)
-      logError("Coord: " + pt);
 
   }
 
@@ -194,7 +166,7 @@ public class JDXDecompressor {
     double dif06 = Math.abs(0.6 * deltaX);
 
     try {
-      while ((line = dataReader.readLine()) != null) {
+      while ((line = t.readLineTrimmed()) != null && line.indexOf("##") < 0) {
         lineNumber++;
         if (Logger.debugging)
           logError(lineNumber + "\t" + line);
@@ -246,7 +218,6 @@ public class JDXDecompressor {
       }
     } catch (IOException ioe) {
     }
-
     if (nPoints != ipt) {
       logError("Decompressor did not find " + nPoints
           + " points -- instead " + ipt);

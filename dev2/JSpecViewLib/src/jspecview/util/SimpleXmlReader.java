@@ -21,8 +21,6 @@ package jspecview.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.InputStream;
 import java.util.Hashtable;
 
 public class SimpleXmlReader {
@@ -48,8 +46,8 @@ public class SimpleXmlReader {
   public final static int EOF = 8;
 
 
-  public SimpleXmlReader(InputStream in) {
-    buffer = new Buffer(in);
+  public SimpleXmlReader(BufferedReader br) {
+    buffer = new Buffer(br);
   }
 
   public String getBufferData() {
@@ -155,8 +153,8 @@ public class SimpleXmlReader {
 
   private class Buffer extends DataString {
 
-    Buffer(InputStream in) {
-      reader = new BufferedReader(new InputStreamReader(in));
+    Buffer(BufferedReader br) {
+      reader = br;
     }
 
     boolean hasNext() {

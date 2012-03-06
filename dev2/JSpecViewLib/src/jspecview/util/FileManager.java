@@ -66,6 +66,15 @@ public class FileManager {
     return sb.toString();
   }
 
+  public static BufferedReader getBufferedReaderForInputStream(InputStream in)
+      throws IOException {
+    return new BufferedReader(new InputStreamReader(in));
+  }
+  
+  public static BufferedReader getBufferedReaderForString(String data) {
+    return (data == null ? null : new BufferedReader(new StringReader(data)));
+  }
+
   public static BufferedReader getBufferedReaderFromName(String name, URL appletDocumentBase)
       throws MalformedURLException, IOException {
     if (name == null)
