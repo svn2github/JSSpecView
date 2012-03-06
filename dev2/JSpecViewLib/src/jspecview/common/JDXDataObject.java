@@ -44,6 +44,7 @@ public class JDXDataObject extends JDXHeader {
   public double offset = JDXSpectrum.ERROR; // Shift Reference
   public int shiftRefType = -1; // shiftRef = 0, bruker = 1, varian = 2
   public int dataPointNum = -1;
+  public int numDim = 1;
 
   // For AnIML IR/UV files:
   

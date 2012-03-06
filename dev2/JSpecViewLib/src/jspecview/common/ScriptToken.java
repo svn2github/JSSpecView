@@ -61,7 +61,7 @@ public enum ScriptToken {
   INTERFACE("INTERFACE"),
   IRMODE("IRMODE", "A or T or ?"),
   LABEL("LABEL", "x y [color and/or \"text\"]"),
-  LOAD("LOAD", "[APPEND] \"fileName\""),
+  LOAD("LOAD", "[APPEND] \"fileName\" [first] [last]"),
   MENUON("MENUON"),
   OBSCURE("OBSCURE"),
   OVERLAY("OVERLAY", "spectrumID, spectrumID, ..."),
@@ -83,6 +83,7 @@ public enum ScriptToken {
   VERSION("VERSION"),
   XSCALEON("XSCALEON", "TF"),
   XUNITSON("XUNITSON", "TF"),
+  YSCALE("YSCALE", "[ALL] lowValue highValue"),
   YSCALEON("YSCALEON", "TF"),
   YUNITSON("YUNITSON", "TF"),
   ZOOM("ZOOM", "OUT or x1,x2 or x1,y1 x2,y2");
@@ -146,6 +147,7 @@ public enum ScriptToken {
     case CLOSE:
     case EXPORT:
     case INTEGRATE:
+    case YSCALE:
       // take full command
       return removeCommandName(cmd);
     case OVERLAY:

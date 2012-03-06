@@ -73,27 +73,49 @@ public class JDXFileReader {
   private StringBuffer errorLog;
   private boolean obscure;
 
-  private JDXFileReader(boolean obscure) {
-    this.obscure = obscure;
-  }
+  private boolean done;
 
+  private JDXFileReader(boolean obscure, int iSpecFirst, int iSpecLast) {
+    this.obscure = obscure;
+    firstSpec = iSpecFirst;
+    lastSpec = iSpecLast;
+  }
+  
+  
+  /**
+   * used only for preferences display
+   * 
+   * @param in
+   * @param obscure
+   * @return
+   * @throws IOException
+   * @throws JSpecViewException
+   */
   public static JDXSource createJDXSource(InputStream in, boolean obscure)
       throws IOException, JSpecViewException {
     return createJDXSource(FileManager.getBufferedReaderForInputStream(in),
-        null, null, obscure);
+        null, null, obscure, -1, -1);
   }
 
-  public static JDXSource createJDXSource(String sourceContents, boolean obscure)
-      throws IOException, JSpecViewException {
-    return createJDXSource(FileManager
-        .getBufferedReaderForString(sourceContents), null, null, obscure);
-  }
-
+  /**
+   * general entrance method
+   * 
+   * @param br
+   * @param filePath
+   * @param appletDocumentBase
+   * @param obscure
+   * @param iSpecFirst TODO
+   * @param iSpecLast TODO
+   * @return
+   * @throws IOException
+   * @throws JSpecViewException
+   */
   public static JDXSource createJDXSource(BufferedReader br,
                                           String filePath,
                                           URL appletDocumentBase,
-                                          boolean obscure) throws IOException,
+                                          boolean obscure, int iSpecFirst, int iSpecLast) throws IOException,
       JSpecViewException {
+    
     try {
       if (filePath != null)
         br = FileManager.getBufferedReaderFromName(filePath, appletDocumentBase);
@@ -111,7 +133,7 @@ public class JDXFileReader {
           return xmlSource;
         throw new JSpecViewException("File type not recognized");
       }
-      return (new JDXFileReader(obscure)).getJDXSource(br);
+      return (new JDXFileReader(obscure, iSpecFirst, iSpecLast)).getJDXSource(br);
     } catch (JSpecViewException e) {
       br.close();
       throw new JSpecViewException("Error reading JDX format: "
@@ -150,7 +172,7 @@ public class JDXFileReader {
 
     // Table for header information
     List<String[]> dataLDRTable = new ArrayList<String[]>(20);
-    while ((label = t.getLabel()) != null
+    while (!done && (label = t.getLabel()) != null
         && !label.equals("##END")) {
       if (label.equals("##DATATYPE") && t.getValue().toUpperCase().equals("LINK"))
         return getBlockSpectra(dataLDRTable);
@@ -178,9 +200,19 @@ public class JDXFileReader {
     return source;
   }
 
-  private void addSpectrum(JDXSpectrum spectrum) {
+  private int firstSpec = -1;
+  private int lastSpec = -1;
+  private int nSpec = 0;
+  
+  private boolean addSpectrum(JDXSpectrum spectrum) {
+    nSpec++;
+    if (firstSpec > 0 && nSpec < firstSpec)
+      return true;
+    if (lastSpec > 0 && nSpec > lastSpec)
+      return !(done = true);
     source.addJDXSpectrum(spectrum);
-    System.out.println("Spectrum " + (source.getSpectra().size()));
+    System.out.println("Spectrum " + nSpec);
+    return true;
   }
 
   public static void addHeader(List<String[]> table, String label, String value) {
@@ -249,7 +281,8 @@ public class JDXFileReader {
           spectrum = null;
           // label is not null -- will continue with TITLE
         }
-
+        if (done)
+          break;
         if (spectrum == null) {
           spectrum = new JDXSpectrum();
           dataLDRTable = new ArrayList<String[]>();
@@ -272,7 +305,8 @@ public class JDXFileReader {
 
         // Process Block
         if (label.equals("##END")) {
-          addSpectrum(spectrum);
+          if (!addSpectrum(spectrum))
+            return source;
           spectrum = newSpectrum();
           dataLDRTable = new ArrayList<String[]>();
           t.getValue();
@@ -318,6 +352,10 @@ public class JDXFileReader {
   private JDXSource getNTupleSpectra(List<String[]> sourceLDRTable,
                                      JDXSpectrum spectrum0, String label)
       throws JSpecViewException {
+    boolean isOK = (spectrum0.numDim == 1 || firstSpec > 0);
+    if (firstSpec > 0)
+      spectrum0.numDim = 1; // don't display in 2D if only loading some spectra
+    
     boolean haveFirstLabel = !label.equals("##NTUPLES");
     if (!haveFirstLabel) {
       label = "";
@@ -349,7 +387,7 @@ public class JDXFileReader {
 
     JDXSpectrum spectrum = null;
 
-    while (!(label = t.getLabel()).equals("##ENDNTUPLES")) {
+    while (!done && !(label = t.getLabel()).equals("##ENDNTUPLES")) {
 
       if (label.equals("##PAGE")) {
         page = t.getValue();
@@ -406,7 +444,8 @@ public class JDXFileReader {
             && !key.equals("##NTUPLES"))
           dataLDRTable.add(entry);
       }
-      addSpectrum(spectrum);
+      if (isOK)
+        addSpectrum(spectrum);
       spectrum = null;
     }
     if (errorLog.length() > 0)
@@ -532,6 +571,11 @@ public class JDXFileReader {
     }
 
     // NMR variations: need observedFreq, offset, dataPointNum, and shiftRefType 
+
+    if (label.equals("##NUMDIM")) {
+      spectrum.numDim = Integer.parseInt(t.getValue());
+      return true;
+    }
 
     if (label.equals("##.OBSERVEFREQUENCY")) {
       spectrum.observedFreq = Double.parseDouble(t.getValue());

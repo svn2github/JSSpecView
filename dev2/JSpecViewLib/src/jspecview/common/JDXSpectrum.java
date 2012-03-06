@@ -51,7 +51,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   }
 
   /**
-   * Vector of x,y coordinates
+   * array of x,y coordinates
    */
   private Coordinate[] xyCoords;
 
@@ -59,7 +59,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
    * whether the x values were converted from HZ to PPM
    */
   private boolean isHZtoPPM = false;
-
+  
   private String currentTime = (new SimpleDateFormat(
       "yyyy/MM/dd HH:mm:ss.SSSS ZZZZ"))
       .format(Calendar.getInstance().getTime());
@@ -291,8 +291,10 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
       buffer.append(label).append("= ").append(nl).append(dataSet).append(
           TextFormat.newLine);
     }
-    if (getObservedFreq() != ERROR)
-      buffer.append("##.OBSERVE FREQUENCY= ").append(getObservedFreq()).append(
+    if (numDim != 1)
+      buffer.append("##NUM DIM= ").append(numDim).append(TextFormat.newLine);
+    if (observedFreq != ERROR)
+      buffer.append("##.OBSERVE FREQUENCY= ").append(observedFreq).append(
           TextFormat.newLine);
     if (observedNucl != "")
       buffer.append("##.OBSERVE NUCLEUS= ").append(observedNucl).append(
@@ -358,6 +360,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     newSpectrum.dataPointNum = dataPointNum;
     newSpectrum.shiftRefType = shiftRefType;
     newSpectrum.isHZtoPPM = isHZtoPPM;
+    newSpectrum.numDim = numDim;
 
     return newSpectrum;
   }
@@ -562,8 +565,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     }
   }
 
-  double lastX = Double.NaN;
-  
   public int setNextPeak(Coordinate coord, int istep) {
     if (peakList == null || peakList.size() == 0)
       return -1;
@@ -897,7 +898,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   }
 
   public IntegralGraph integrate(double minY, double offset, double factor) {
-    if (!isHNMR())
+    if (!canIntegrate())
       return null;
     IntegralGraph graph = new IntegralGraph(this, minY, offset, factor, xUnits,
         yUnits);
@@ -946,5 +947,9 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
 
   public List<Integral> getIntegrals() {
    return (integration == null ? null : integration.getIntegrals());
+  }
+
+  public boolean canIntegrate() {
+    return (isHNMR() && numDim == 1 && continuous);
   }
 }
