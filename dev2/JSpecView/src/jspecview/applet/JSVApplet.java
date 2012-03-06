@@ -94,6 +94,7 @@ import jspecview.export.Exporter;
 import jspecview.source.JDXFileReader;
 import jspecview.source.JDXSource;
 import jspecview.util.Escape;
+import jspecview.util.FileManager;
 import jspecview.util.Logger;
 import jspecview.util.Parser;
 import jspecview.util.TextFormat;
@@ -1306,7 +1307,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
 
     try {
       source = (isOverlay ? JDXSource.createOverlay(fileName, specs)
-          : JDXFileReader.createJDXSource(data, fileName, base, obscure == Boolean.TRUE));
+          : JDXFileReader.createJDXSource(FileManager.getBufferedReaderForString(data), fileName, base, obscure == Boolean.TRUE));
     } catch (Exception e) {
       writeStatus(e.getMessage());
       e.printStackTrace();

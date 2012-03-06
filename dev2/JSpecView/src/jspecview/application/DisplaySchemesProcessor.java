@@ -20,11 +20,10 @@
 package jspecview.application;
 
 import java.awt.Color;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -32,6 +31,7 @@ import java.util.TreeMap;
 
 import jspecview.common.AppUtils;
 import jspecview.common.DisplayScheme;
+import jspecview.util.FileManager;
 import jspecview.util.SimpleXmlReader;
 import jspecview.util.TextFormat;
 
@@ -110,6 +110,14 @@ public class DisplaySchemesProcessor {
     return displaySchemes;
   }
 
+  public boolean load(InputStream stream) {
+    try {
+      return load(FileManager.getBufferedReaderForInputStream(stream));
+    } catch (IOException e) {
+      return false;
+    }
+  }
+
   /**
    * Loads the display schemes into memory and stores them in a <code>Vector</code>
    * @param dispSchemeFileName the name of the file to load
@@ -117,13 +125,12 @@ public class DisplaySchemesProcessor {
    * @return true if loaded successfully
    */
   public boolean load(String dispSchemeFileName){
-    fileName = dispSchemeFileName;    
-    
+    fileName = dispSchemeFileName;        
     try{
-    	InputStream in = new FileInputStream(fileName);
-    	return load(in);
+      BufferedReader br = FileManager.getBufferedReaderFromName(fileName, null);
+    	return load(br);
     }
-    catch(FileNotFoundException e){
+    catch(IOException e){
     	return false;
     }
     
@@ -135,9 +142,9 @@ public class DisplaySchemesProcessor {
    * @throws Exception
    * @return true if loaded successfully
    */
-  public boolean load(InputStream dispSchemeInputStream) { 
+  public boolean load(BufferedReader br) { 
 	  
-    reader = new SimpleXmlReader(dispSchemeInputStream);
+    reader = new SimpleXmlReader(br);
     String defaultDS = "Default";
     DisplayScheme ds = null;
     String attr;

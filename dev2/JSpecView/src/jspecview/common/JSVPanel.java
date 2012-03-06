@@ -1343,10 +1343,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       x2 = tmp;
     }
 
-    if (Logger.debugging) {
-      System.out.println("x1: " + x1);
-      System.out.println("x2: " + x2);
-    }
+////    if (Logger.debugging) {
+////      System.out.println("x1: " + x1);
+////      System.out.println("x2: " + x2);
+//    }
 
     // if either pixel is outside of plot area
     if (!isPixelWithinPlotArea(x1) || !isPixelWithinPlotArea(x2)) {
