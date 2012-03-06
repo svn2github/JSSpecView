@@ -153,6 +153,7 @@ public class JDXDecompressor {
       xyCoords = t;
     }
     xyCoords[ipt++] = pt;
+    firstLastX[1] = pt.getXVal();
     if (Logger.debugging)
       logError("Coord: " + pt);
 
@@ -166,17 +167,20 @@ public class JDXDecompressor {
   private int dupCount;
   private double xval, yval;
 
+  private double[] firstLastX;
+
   /**
    * Determines the type of compression, decompresses the data and stores
    * coordinates in an array to be returned
    * 
    * @param errorLog
+   * @param firstLastX 
    * @return the array of <code>Coordinate</code>s
    */
-  public Coordinate[] decompressData(StringBuffer errorLog) {
+  public Coordinate[] decompressData(StringBuffer errorLog, double[] firstLastX) {
 
     this.errorLog = errorLog;
-    
+    this.firstLastX = firstLastX;
     if (Logger.debugging)
       logError("firstX=" + firstX 
           + " xFactor=" + xFactor + " yFactor=" + yFactor + " deltaX=" + deltaX + " nPoints=" + nPoints);
@@ -199,8 +203,10 @@ public class JDXDecompressor {
         ich = 0;
         boolean isCheckPoint = (lastDif != Integer.MIN_VALUE);
         xval = getValue(allDelim) * xFactor;
-        if (ipt == 0)
+        if (ipt == 0) {
+          firstLastX[0] = xval;
           dx = firstX - xval;
+        }
         xval += dx;
         Coordinate point = new Coordinate(xval, (yval = getYValue()) * yFactor);
         if (ipt == 0) {
