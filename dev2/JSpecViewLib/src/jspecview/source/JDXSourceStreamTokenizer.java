@@ -148,18 +148,19 @@ public class JDXSourceStreamTokenizer {
     if (line.indexOf("$$") < 0)
       return line.trim();
     StringBuffer sb = new StringBuffer(line);
-    return trimLines(sb).trim();
+    return trimLines(sb);
   }
 
   String flushLine() {
     StringBuffer sb = new StringBuffer(line);
     line = null;
-    return trimLines(sb).trim();
+    return trimLines(sb);
   }
 
   private String readLine() throws IOException {
+    line = br.readLine();
     lineNo++;
-    return br.readLine();
+    return line;
   }
 
   private static String trimLines(StringBuffer v) {
@@ -206,7 +207,7 @@ public class JDXSourceStreamTokenizer {
     }
     if (buffer[pt - 1] == '\n')
       --pt;
-    return (new String(buffer)).substring(0, pt);
+    return (new String(buffer)).substring(0, pt).trim();
   }
 
   private static int ptNonWhite(StringBuffer v, int pt, int n) {
