@@ -61,6 +61,10 @@ public class JDXSourceStreamTokenizer {
     while (line == null) {
       try {
         readLine();
+        if (line == null) {
+          line = "";
+          return null;
+        }
         line = line.trim();
       } catch (IOException e) {
         line = "";
@@ -205,7 +209,7 @@ public class JDXSourceStreamTokenizer {
         continue;
       buffer[pt++] = ch;
     }
-    if (buffer[pt - 1] == '\n')
+    if (pt > 0 && buffer[pt - 1] == '\n')
       --pt;
     return (new String(buffer)).substring(0, pt).trim();
   }

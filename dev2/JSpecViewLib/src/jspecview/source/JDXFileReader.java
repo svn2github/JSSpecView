@@ -208,8 +208,12 @@ public class JDXFileReader {
     boolean isNew = (source.type == JDXSource.TYPE_SIMPLE);
     while ((label = t.getLabel()) != null
         && !label.equals("##TITLE"))
-      if (isNew && !readHeaderLabel(source, label, t, errorLog, obscure))
-        addHeader(sourceLDRTable, t.getRawLabel(), t.getValue());
+      if (isNew) {
+        if (!readHeaderLabel(source, label, t, errorLog, obscure))
+          addHeader(sourceLDRTable, t.getRawLabel(), t.getValue());
+      } else {
+        t.getValue();
+      }
 
     // If ##TITLE not found throw Exception
     if (!label.equals("##TITLE"))
