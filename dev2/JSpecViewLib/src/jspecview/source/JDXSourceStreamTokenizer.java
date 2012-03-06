@@ -25,9 +25,6 @@ import java.io.IOException;
 import jspecview.util.Logger;
 
 /**
- * <code>JDXSourceStringTokenizer</code> breaks up the <code>JDXSource</code>
- * into pairs of Label Data Records (LDRs).
- * When nextToken() is called, the label and value variables are updated.
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
