@@ -2598,7 +2598,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   public void mousePressed(MouseEvent e) {
     mouseClickCount = e.getClickCount();
-    isCtrlDown = e.isControlDown();
+    isIntegralDrag = (e.isControlDown() && getSpectrum().getIntegrationGraph() != null);
     // Maybe put this in a fireMousePressed() method
     if (e.getButton() != MouseEvent.BUTTON1)
       return;
@@ -2608,7 +2608,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     if (checkXY(xPixel, yPixel)) {
 
       zoomBoxX = xPixel;
-      zoomBoxY = (isCtrlDown ? topPlotAreaPos : fixY(yPixel));
+      zoomBoxY = (isIntegralDrag ? topPlotAreaPos : fixY(yPixel));
 
       Coordinate coord = getCoordFromPoint(xPixel, yPixel);
 
@@ -2646,7 +2646,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
     if (mousePressedInPlotArea
         && Math.abs(xPixel - initXpixel) > MIN_DRAG_X_PIXELS) {
-      if (getSpectrum().getIntegrationGraph() != null && isCtrlDown) {
+      if (isIntegralDrag) {
           checkIntegral(initX, finalX, true);      
       } else {
         doZoom(initX, initY, finalX, finalY);
@@ -2697,7 +2697,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
   private double lastClickX = Double.MAX_VALUE;
 
-  private boolean isCtrlDown;
+  private boolean isIntegralDrag;
 
   /**
    * Called by the mouseClicked Method
@@ -2757,7 +2757,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       if (isMouseDraggedEvent) {
         isMouseDragged = true;
         currZoomBoxX = xPixel;
-        currZoomBoxY = (isCtrlDown ? bottomPlotAreaPos : fixY(yPixel));
+        currZoomBoxY = (isIntegralDrag ? bottomPlotAreaPos : fixY(yPixel));
       }
 
       Coordinate coord = getCoordFromPoint(xPixel, yPixel);
@@ -2801,7 +2801,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private void fireMouseDragged(MouseEvent e) {
     isMouseDraggedEvent = true; // testing   
     fireMouseMoved(e);
-    if (getSpectrum().getIntegrationGraph() != null && isCtrlDown) {
+    if (isIntegralDrag) {
       setMouseFinalXY(e);
       checkIntegral(initX, finalX, false);      
       return;
