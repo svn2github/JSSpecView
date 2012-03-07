@@ -732,6 +732,8 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
 
   private JDXSpectrum convertedSpectrum;
 
+  private double userYFactor = 1;
+
   public static final int TA_NO_CONVERT = 0;
   public static final int TO_ABS = 1;
   public static final int TO_TRANS = 2;
@@ -917,7 +919,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   }
 
   public static boolean areScalesCompatible(Graph s1, Graph s2) {
-    return (s1.getXUnits() == s2.getXUnits() && s1.getYUnits() == s2.getYUnits());
+    return (s1.getXUnits().equalsIgnoreCase(s2.getXUnits()));// && s1.getYUnits() == s2.getYUnits());
   }
 
   public static boolean areScalesCompatible(List<JDXSpectrum> spectra) {
@@ -1004,6 +1006,14 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   
   public int getSubIndex() {
     return subIndex;
+  }
+
+  public double getUserYFactor() {
+    return userYFactor;
+  }
+
+  public void setUserYFactor(double userYFactor) {
+    this.userYFactor = userYFactor;
   }
 
 

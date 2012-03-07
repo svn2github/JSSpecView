@@ -81,5 +81,6 @@ public interface Graph {
    */
   public Coordinate[] getXYCoords();
   public double getPercentYValueAt(double x);
+  public double getUserYFactor();
   
 }

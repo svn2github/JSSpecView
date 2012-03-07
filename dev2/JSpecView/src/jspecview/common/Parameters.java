@@ -207,20 +207,11 @@ public class Parameters extends DisplayScheme {
 
   private Color[] getPlotColors(String plotColorsStr) {
     StringTokenizer st = new StringTokenizer(plotColorsStr, ",;.- ");
-    int r, g, b;
     List<Color> colors = new ArrayList<Color>();
     try {
       while (st.hasMoreTokens()) {
         String token = st.nextToken();
-        if (token.startsWith("#")) {
-          colors.add(new Color(Integer
-              .parseInt(token.substring(1), 16)));
-        } else {
-          r = Integer.parseInt(token.trim());
-          g = Integer.parseInt(st.nextToken().trim());
-          b = Integer.parseInt(st.nextToken().trim());
-          colors.add(new Color(r, g, b));
-        }
+        colors.add(AppUtils.getColorFromString(token));
       }
     } catch (NoSuchElementException nsee) {
       return null;

@@ -1608,6 +1608,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
   public void closeSource(JDXSource source) {
     // Remove nodes and dispose of frames
     String fileName = (source == null ? null : source.getFilePath());
+    if (source == null)
+      fileCount = 0;
     List<JSVTreeNode> toDelete = new ArrayList<JSVTreeNode>();
     Enumeration<JSVTreeNode> enume = rootNode.children();
     while (enume.hasMoreElements()) {
@@ -1647,6 +1649,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
     setTitle("JSpecView");
     if (source == null)
       setMenuEnables(null);
+    else
+      setFrame(specNodes.size() - 1);
     System.gc();
   }
 
@@ -1728,7 +1732,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     return null;
   }
 
-  private JDXSpectrum findSpectrumById(String id) {
+  public JDXSpectrum findSpectrumById(String id) {
     for (int i = specNodes.size(); --i >= 0;)
       if (id.equals(specNodes.get(i).id))
         return specNodes.get(i).jsvp.getSpectrum();
@@ -1969,7 +1973,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
             jsvp.addAnnotation(ScriptToken.getTokens(value));
           break;
         case OVERLAY:
-          overlay(ScriptToken.getTokens(value));
+          overlay(ScriptToken.getTokens(TextFormat.simpleReplace(value, "*", " * ")));
           break;
         case GETSOLUTIONCOLOR:
           if (jsvp != null)
@@ -2026,6 +2030,13 @@ public class MainFrame extends JFrame implements DropTargetListener,
       closeSource(null);
       return;
     }
+    if (value.endsWith("*")) {
+      value = value.substring(0, value.length() - 1);
+      for (int i = specNodes.size(); --i >= 0; )
+        if (specNodes.get(i).fileName.startsWith(value))
+          closeSource(specNodes.get(i).source);
+      return;
+    }
     JDXSource source = (value.length() == 0 ? currentSelectedSource : findSourceByNameOrId(value));
     if (source == null)
       return;
@@ -2035,17 +2046,28 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private void overlay(List<String> list) {
     List<JDXSpectrum> slist = new ArrayList<JDXSpectrum>();
     StringBuffer sb = new StringBuffer();
-    String id0 = (selectedJSVPanel == null ? "1." : findNode(selectedJSVPanel).id);
+    String id0 = (selectedJSVPanel == null ? "1."
+        : findNode(selectedJSVPanel).id);
     id0 = id0.substring(0, id0.indexOf(".") + 1);
-    for (int i = 0; i < list.size(); i++) {
+    int n = list.size();
+    for (int i = 0; i < n; i++) {
       String id = list.get(i);
+      double userYFactor = 1;
+      if (i + 1 < n && list.get(i + 1).equals("*")) {
+        i += 2;
+        try {
+          userYFactor = Double.parseDouble(list.get(i));
+        } catch (NumberFormatException e) {
+        }
+      }
       if (!id.contains("."))
         id = id0 + id;
       JDXSpectrum spec = findSpectrumById(id);
       if (spec == null)
         continue;
-        slist.add(spec);
-        sb.append(",").append(id);
+      spec.setUserYFactor(userYFactor);
+      slist.add(spec);
+      sb.append(",").append(id);
     }
     if (slist.size() > 1 && JDXSpectrum.areScalesCompatible(slist))
       openFile(null, sb.toString().substring(1), slist, -1, -1);

@@ -540,7 +540,7 @@ public class Coordinate {
                                int[] endList) {
     double min = Double.MAX_VALUE;
     for (int i = 0; i < spectra.length; i++) {
-      double tmp = getMinY(spectra[i].getXYCoords(), startList[i], endList[i]);
+      double tmp = getMinY(spectra[i].getXYCoords(), startList[i], endList[i]) * spectra[i].getUserYFactor();
       if (tmp < min)
         min = tmp;
     }  
@@ -596,7 +596,7 @@ public class Coordinate {
                                int[] endList) {
     double max = -Double.MAX_VALUE;
     for (int i = 0; i < spectra.length; i++) {
-      double tmp = getMaxY(spectra[i].getXYCoords(), startList[i], endList[i]);
+      double tmp = getMaxY(spectra[i].getXYCoords(), startList[i], endList[i]) * spectra[i].getUserYFactor();
       if (tmp > max)
         max = tmp;
     }

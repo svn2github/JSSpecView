@@ -1443,7 +1443,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
           integrate(value);
           break;
         case OVERLAY:
-          overlay(ScriptToken.getTokens(value));
+          overlay(ScriptToken.getTokens(TextFormat.simpleReplace(value, "*", " * ")));
           break;
         case GETSOLUTIONCOLOR:
           if (jsvp == null) 
@@ -1462,7 +1462,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
   private void overlay(List<String> list) {
     if (specsSaved == null)
       specsSaved = specs;
-    if (list.size() == 0 || list.size() == 1 && list.get(0).equalsIgnoreCase("all")) {
+    if (list.size() == 0 || list.size() == 1
+        && list.get(0).equalsIgnoreCase("all")) {
       openDataOrFile(null, "", specsSaved, null);
       setSpectrumNumber(1);
       return;
@@ -1474,13 +1475,23 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     }
     List<JDXSpectrum> slist = new ArrayList<JDXSpectrum>();
     StringBuffer sb = new StringBuffer();
-    for (int i = 0; i < list.size(); i++) {
+    int n = list.size();
+    for (int i = 0; i < n; i++) {
       String id = list.get(i);
+      double userYFactor = 1;
+      if (i + 1 < n && list.get(i + 1).equals("*")) {
+        i += 2;
+        try {
+          userYFactor = Double.parseDouble(list.get(i));
+        } catch (NumberFormatException e) {
+        }
+      }
       JDXSpectrum spec = findSpectrumById(id);
       if (spec == null)
         continue;
-        slist.add(spec);
-        sb.append(",").append(id);
+      spec.setUserYFactor(userYFactor);
+      slist.add(spec);
+      sb.append(",").append(id);
     }
     if (list.size() > 1 && JDXSpectrum.areScalesCompatible(slist)) {
       openDataOrFile(null, sb.toString().substring(1), slist, null);
@@ -1488,7 +1499,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     }
   }
 
-  private JDXSpectrum findSpectrumById(String id) {
+  public JDXSpectrum findSpectrumById(String id) {
     int i = Parser.parseInt(id);
     return (i >= 0 && i < specsSaved.size() ? specsSaved.get(i) : null);
   }

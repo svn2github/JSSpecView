@@ -239,6 +239,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
   // The scale factors
   private double xFactorForScale, yFactorForScale;
+  
+  private double userYFactor = 1;
 
   // List of Scale data for zoom
   private List<MultiScaleData> zoomInfoList;
@@ -265,6 +267,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private String graphPosition = "default";
   private int defaultHeight = 450;
   private int defaultWidth = 280;
+  private boolean allowYScale = true;
+  
 
   // listeners to handle coordinatesClicked
   private ArrayList<PeakPickedListener> peakPickedListeners = new ArrayList<PeakPickedListener>();
@@ -445,9 +449,12 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     // test if all have same x and y units
     checkUnits();
 
+    allowYScale = true;
     for (int i = 0; i < nSpectra; i++) {
       startIndices[i] = 0;
       endIndices[i] = spectra[i].getXYCoords().length - 1;
+      allowYScale &= (!spectra[i].getYUnits().equals(spectra[0].getYUnits()) 
+          || spectra[i].getUserYFactor() != spectra[0].getUserYFactor());        
     }
 
     setPlotColors(Parameters.defaultPlotColors);
@@ -802,6 +809,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   ColoredAnnotation lastAnnotation;
+
+  private double minYScale;
 
   /**
    * Sets the integration ratios that will be displayed
@@ -1217,11 +1226,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     topPlotAreaPos = plotAreaY;
     bottomPlotAreaPos = plotAreaHeight + plotAreaY;
 
-    xFactorForScale = (multiScaleData.maxXOnScale - multiScaleData.minXOnScale)
-        / plotAreaWidth;
-    yFactorForScale = (multiScaleData.maxYOnScale - multiScaleData.minYOnScale)
-        / plotAreaHeight;
-
     // fill plot area color
     g.setColor(plotAreaColor);
     g.fillRect(plotAreaX, plotAreaY, plotAreaWidth, plotAreaHeight);
@@ -1282,13 +1286,16 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     boolean xAxis = true;//!spectra[0].getXUnits().equalsIgnoreCase("Arbitrary Units");
     boolean yAxis = true;//!spectra[0].getYUnits().equalsIgnoreCase("Arbitrary Units");
 
+    userYFactor = getSpectrum().getUserYFactor();
+
+    setScaleFactors(multiScaleData);
     if (grid)
       drawGrid(g, height, width);
-    for (int i = 0; i < nSpectra; i++)
+    for (int i = nSpectra; --i >= 0; )
       drawPlot(g, i, height, width);
     if (xscale && xAxis)
       drawXScale(g, height, width);
-    if (yscale && yAxis)
+    if (yscale && yAxis && allowYScale)
       drawYScale(g, height, width);
     if (title)
       drawTitle(g, height, width);
@@ -1323,7 +1330,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
                        boolean isFullHeight) {
     int x1 = xPixels(startX);
     int x2 = xPixels(endX);
-
     if (x1 > x2) {
       int tmp = x1;
       x1 = x2;
@@ -1365,7 +1371,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   private int yPixels(double yVal) {
-    return (Double.isNaN(yVal) ? Integer.MIN_VALUE : invertY((int) (topPlotAreaPos + (yVal - multiScaleData.minYOnScale)
+    return (Double.isNaN(yVal) ? Integer.MIN_VALUE : invertY((int) (topPlotAreaPos + (yVal * userYFactor - minYScale)
         / yFactorForScale)));
   }
 
@@ -1406,6 +1412,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
     // Check if revPLot on
 
+    userYFactor = spectra[index].getUserYFactor();
     if (spectra[index].isContinuous()) {
       for (int i = multiScaleData.startDataPointIndices[index]; i < multiScaleData.endDataPointIndices[index]; i++) {
         Coordinate point1 = xyCoords[i];
@@ -1604,7 +1611,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     double max = multiScaleData.maxYOnScale + multiScaleData.yStep / 2;
     for (double val = multiScaleData.minYOnScale; val < max; val += multiScaleData.yStep) {
       int x1 = (int) leftPlotAreaPos;
-      int y = yPixels(val);
+      int y = yPixels(val * userYFactor);
       g.setColor(gridColor);
       g.drawLine(x1, y, x1 - 3, y);
       g.setColor(scaleColor);
@@ -1766,6 +1773,14 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     return (plotAreaHeight - y + (2 * plotAreaInsets.top));
   }
 
+  private void setScaleFactors(MultiScaleData multiScaleData) {
+    xFactorForScale = (multiScaleData.maxXOnScale - multiScaleData.minXOnScale)
+        / plotAreaWidth;
+    yFactorForScale = (multiScaleData.maxYOnScale - multiScaleData.minYOnScale)
+        / plotAreaHeight;
+    minYScale = multiScaleData.minYOnScale;
+  }
+  
   /**
    * Calculates spectrum coordinates from system Coordinates
    * 

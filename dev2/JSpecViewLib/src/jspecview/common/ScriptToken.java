@@ -64,11 +64,11 @@ public enum ScriptToken {
   LOAD("LOAD", "[APPEND] \"fileName\" [first] [last]"),
   MENUON("MENUON"),
   OBSCURE("OBSCURE"),
-  OVERLAY("OVERLAY", "spectrumID, spectrumID, ..."),
+  OVERLAY("OVERLAY", "spectrumID[*factor], spectrumID[*factor], ..."),
   PEAKCALLBACKFUNCTIONNAME("PEAKCALLBACKFUNCTIONNAME"),
   PLOTAREACOLOR("PLOTAREACOLOR", "C"),
   PLOTCOLOR("PLOTCOLOR", "C"),
-  PLOTCOLORS("PLOTCOLORS"),
+  PLOTCOLORS("PLOTCOLORS", "color,color,color,..."),
   REVERSEPLOT("REVERSEPLOT", "TF"),
   SCALECOLOR("SCALECOLOR", "C"),
   SPECTRUM("SPECTRUM", "spectrumID"),
@@ -142,6 +142,7 @@ public enum ScriptToken {
     switch (st) {
     default:
       return nextStringToken(params, true);
+    case PLOTCOLORS:
     case LABEL:
     case LOAD:
     case CLOSE:

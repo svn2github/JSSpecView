@@ -402,4 +402,8 @@ public class IntegralGraph implements Graph {
     }
   }
 
+  public double getUserYFactor() {
+    return 1;
+  }
+
 }
