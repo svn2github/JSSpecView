@@ -29,7 +29,7 @@ ps354066809845d-1.jdf
 ##$REVISION= 15-AUG-2007 19:23:48
 ##$CONTENT= gradient phase sensitive dqf cosy
 ##$INSTRUMENT= DELTA_NMR
-##$SITE
+##$SITE=
 ##$NODENAME= ecp400
 ##$DIMENSIONS= 2
 ##$STORAGE= FLOAT
