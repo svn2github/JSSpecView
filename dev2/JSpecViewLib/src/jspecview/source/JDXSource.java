@@ -79,7 +79,9 @@ public class JDXSource extends JDXHeader {
    *        the spectrum to be added
    */
   public void addJDXSpectrum(JDXSpectrum spectrum) {
-    jdxSpectra.add(spectrum);
+    int n = jdxSpectra.size();
+    if (n == 0 || !jdxSpectra.get(n - 1).addSubSpectrum(spectrum))
+      jdxSpectra.add(spectrum);
   }
 
   /**

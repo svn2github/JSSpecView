@@ -424,11 +424,11 @@ public class Coordinate {
    * @return the minimum x value value from an array of arrays of
    *         <code>Coordinate</code>s
    */
-  public static double getMinX(Coordinate[][] coordLists, int[] startList,
+  public static double getMinX(Graph[] spectra, int[] startList,
                                int[] endList) {
     double min = Double.MAX_VALUE;
-    for (int i = 0; i < coordLists.length; i++) {
-      double tmp = getMinX(coordLists[i], startList[i], endList[i]);
+    for (int i = 0; i < spectra.length; i++) {
+      double tmp = getMinX(spectra[i].getXYCoords(), startList[i], endList[i]);
       if (tmp < min)
         min = tmp;
     }
@@ -480,11 +480,11 @@ public class Coordinate {
    * @return the maximum x value value from an array of arrays of
    *         <code>Coordinate</code>s
    */
-  public static double getMaxX(Coordinate[][] coordLists, int[] startList,
+  public static double getMaxX(Graph[] spectra, int[] startList,
                                int[] endList) {
     double max = -Double.MAX_VALUE;
-    for (int i = 0; i < coordLists.length; i++) {
-      double tmp = getMaxX(coordLists[i], startList[i], endList[i]);
+    for (int i = 0; i < spectra.length; i++) {
+      double tmp = getMaxX(spectra[i].getXYCoords(), startList[i], endList[i]);
       if (tmp > max)
         max = tmp;
     }
@@ -536,11 +536,11 @@ public class Coordinate {
    * @return the minimum y value value from an array of arrays of
    *         <code>Coordinate</code>s
    */
-  public static double getMinY(Coordinate[][] coordLists, int[] startList,
+  public static double getMinY(Graph[] spectra, int[] startList,
                                int[] endList) {
     double min = Double.MAX_VALUE;
-    for (int i = 0; i < coordLists.length; i++) {
-      double tmp = getMinY(coordLists[i], startList[i], endList[i]);
+    for (int i = 0; i < spectra.length; i++) {
+      double tmp = getMinY(spectra[i].getXYCoords(), startList[i], endList[i]);
       if (tmp < min)
         min = tmp;
     }  
@@ -592,11 +592,11 @@ public class Coordinate {
    * @return the maximum y value value from an array of arrays of
    *         <code>Coordinate</code>s
    */
-  public static double getMaxY(Coordinate[][] coordLists, int[] startList,
+  public static double getMaxY(Graph[] spectra, int[] startList,
                                int[] endList) {
     double max = -Double.MAX_VALUE;
-    for (int i = 0; i < coordLists.length; i++) {
-      double tmp = getMaxY(coordLists[i], startList[i], endList[i]);
+    for (int i = 0; i < spectra.length; i++) {
+      double tmp = getMaxY(spectra[i].getXYCoords(), startList[i], endList[i]);
       if (tmp > max)
         max = tmp;
     }

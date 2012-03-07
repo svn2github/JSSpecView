@@ -44,8 +44,8 @@ public class MultiScaleData extends ScaleData {
    * graph, (eg. scale, min and max values) and stores the values in the class
    * <code>ScaleData</code>.
    * 
-   * @param coordLists
-   *        an array of arrays of coordinates
+   * @param spectra
+   *        an array of spectra
    * @param yPt1 
    * @param yPt2 
    * @param startList
@@ -58,13 +58,13 @@ public class MultiScaleData extends ScaleData {
    *        the initial number of Y divisions for scale
    * @return returns an instance of <code>MultiScaleData</code>
    */
-  public MultiScaleData(Coordinate[][] coordLists, double yPt1,
+  public MultiScaleData(Graph[] spectra, double yPt1,
       double yPt2, int[] startList, int[] endList,
       int initNumXDivisions, int initNumYDivisions, boolean isContinuous) {
-    super(Coordinate.getMinX(coordLists, startList, endList), 
-        Coordinate.getMaxX(coordLists, startList, endList), 
-        Coordinate.getMinY(coordLists, startList, endList), 
-        Coordinate.getMaxY(coordLists,startList, endList));
+    super(Coordinate.getMinX(spectra, startList, endList), 
+        Coordinate.getMaxX(spectra, startList, endList), 
+        Coordinate.getMinY(spectra, startList, endList), 
+        Coordinate.getMaxY(spectra,startList, endList));
     startDataPointIndices = startList;
     endDataPointIndices = endList;
     if (yPt1 != yPt2) {

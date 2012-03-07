@@ -168,7 +168,7 @@ public class JDXFileReader {
     errorLog = new StringBuffer();
 
     String label = "";
-    JDXSpectrum spectrum = newSpectrum();
+    JDXSpectrum spectrum = new JDXSpectrum();
 
     // Table for header information
     List<String[]> dataLDRTable = new ArrayList<String[]>(20);
@@ -203,6 +203,8 @@ public class JDXFileReader {
   private int firstSpec = -1;
   private int lastSpec = -1;
   private int nSpec = 0;
+
+  private double blockID;
   
   private boolean addSpectrum(JDXSpectrum spectrum) {
     nSpec++;
@@ -210,6 +212,7 @@ public class JDXFileReader {
       return true;
     if (lastSpec > 0 && nSpec > lastSpec)
       return !(done = true);
+    spectrum.setBlockID(blockID);
     source.addJDXSpectrum(spectrum);
     System.out.println("Spectrum " + nSpec);
     return true;
@@ -256,7 +259,7 @@ public class JDXFileReader {
     source.type = JDXSource.TYPE_BLOCK;
     source.isCompoundSource = true;
     List<String[]> dataLDRTable;
-    JDXSpectrum spectrum = newSpectrum();
+    JDXSpectrum spectrum = new JDXSpectrum();
     dataLDRTable = new ArrayList<String[]>();
     readDataLabel(spectrum, label, t, errorLog, dataLDRTable, obscure);
 
@@ -307,7 +310,7 @@ public class JDXFileReader {
         if (label.equals("##END")) {
           if (!addSpectrum(spectrum))
             return source;
-          spectrum = newSpectrum();
+          spectrum = new JDXSpectrum();
           dataLDRTable = new ArrayList<String[]>();
           t.getValue();
           continue;
@@ -335,10 +338,6 @@ public class JDXFileReader {
     return source;
   }
 
-  private JDXSpectrum newSpectrum() {
-    return new JDXSpectrum();
-  }
-
   /**
    * reads NTUPLE data
    * 
@@ -352,7 +351,8 @@ public class JDXFileReader {
   private JDXSource getNTupleSpectra(List<String[]> sourceLDRTable,
                                      JDXSpectrum spectrum0, String label)
       throws JSpecViewException {
-    boolean isOK = (spectrum0.numDim == 1 || firstSpec > 0);
+    blockID = Math.random();
+    boolean isOK = true;//(spectrum0.is1D() || firstSpec > 0);
     if (firstSpec > 0)
       spectrum0.numDim = 1; // don't display in 2D if only loading some spectra
     

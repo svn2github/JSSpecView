@@ -56,6 +56,42 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   private Coordinate[] xyCoords;
 
   /**
+   * spectra that can never be displayed independently, or at least not by default
+   * 2D slices, for example.
+   */
+  private List<JDXSpectrum> subSpectra;
+  private int currentSubSpectrum;
+  private double blockID; // a random number generated in JDXFileReader
+  public void setBlockID(double id) {
+    blockID = id;
+  }
+  public List<JDXSpectrum> getSubSpectra() {
+    return subSpectra;
+  }
+  
+  /**
+   * adds an nD subspectrum and titles it "Subspectrum <n>"
+   * These spectra can be iterated over using the UP and DOWN keys.
+   * 
+   * @param spectrum
+   * @return
+   */
+  public boolean addSubSpectrum(JDXSpectrum spectrum) {
+    if (numDim < 2 || blockID != spectrum.blockID
+        || !areScalesCompatible(this, spectrum))
+      return false;
+    if (subSpectra == null) {
+      subSpectra = new ArrayList<JDXSpectrum>();
+      subSpectra.add(this);
+      setTitle(subSpectra.size() + ": " + title);
+    }
+    subSpectra.add(spectrum);
+    spectrum.setTitle(subSpectra.size() + ": " + spectrum.title);
+    System.out.println("Added subspectrum " + subSpectra.size());
+    return true;
+  }
+
+  /**
    * whether the x values were converted from HZ to PPM
    */
   private boolean isHZtoPPM = false;
@@ -93,7 +129,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
    * @return the array of coordinates
    */
   public Coordinate[] getXYCoords() {
-    return xyCoords;
+    return getCurrentSubSpectrum().xyCoords;
   }
 
   /**
@@ -291,7 +327,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
       buffer.append(label).append("= ").append(nl).append(dataSet).append(
           TextFormat.newLine);
     }
-    if (numDim != 1)
+    if (!is1D())
       buffer.append("##NUM DIM= ").append(numDim).append(TextFormat.newLine);
     if (observedFreq != ERROR)
       buffer.append("##.OBSERVE FREQUENCY= ").append(observedFreq).append(
@@ -906,29 +942,23 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return graph;
   }
 
+  public static boolean areScalesCompatible(Graph s1, Graph s2) {
+    return (s1.getXUnits() == s2.getXUnits() && s1.getYUnits() == s2.getYUnits());
+  }
+
   public static boolean areScalesCompatible(List<JDXSpectrum> spectra) {
-    JDXSpectrum[] specs = new JDXSpectrum[spectra.size()];
-    for (int i = spectra.size(); --i >= 0;)
-      specs[i] = spectra.get(i);
-    return areScalesCompatible(specs);
+    if (spectra.size() >= 2)
+    for (int i = spectra.size(); --i >= 1;)
+      if (!areScalesCompatible(spectra.get(0), spectra.get(i)))
+        return false;
+    return true;
   }
 
   public static boolean areScalesCompatible(Graph[] spectra) {
-    String xUnit = spectra[0].getXUnits();
-    String yUnit = spectra[0].getYUnits();
-    int numOfSpectra = spectra.length;
-  
-    for (int i = 1; i < numOfSpectra; i++) {
-      String tempXUnit, tempYUnit;
-      tempXUnit = spectra[i].getXUnits();
-      tempYUnit = spectra[i].getYUnits();
-      if (!xUnit.equals(tempXUnit) || !yUnit.equals(tempYUnit)) {
+    if (spectra.length >= 2)
+    for (int i = spectra.length; --i >= 1; )
+      if (!areScalesCompatible(spectra[0], spectra[i]))
         return false;
-      }
-      xUnit = tempXUnit;
-      yUnit = tempYUnit;
-    }
-  
     return true;
   }
 
@@ -951,5 +981,17 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
 
   public boolean canIntegrate() {
     return (isHNMR() && numDim == 1 && continuous);
+  }
+
+  public boolean is1D() {
+    return numDim == 1;
+  }
+  
+  public JDXSpectrum getCurrentSubSpectrum() {
+    return (subSpectra == null ? this : subSpectra.get(currentSubSpectrum));
+  }
+
+  public void advanceSubSpectrum(int dir) {
+    currentSubSpectrum = Math.max(0, Math.min(currentSubSpectrum + dir, subSpectra.size() - 1));
   }
 }
