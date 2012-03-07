@@ -404,7 +404,7 @@ public class SVGExporter extends FormExporter {
    * @return data if fileName is null
    * @throws IOException
    */
-  public String exportAsSVG(String fileName, Coordinate[][] xyCoordsList,
+  public String exportAsSVG(String fileName, Graph[] spectra,
                                  String title, int[] startDataPointIndices,
                                  int[] endDataPointIndices, String xUnits,
                                  String yUnits, boolean continuous,
@@ -412,7 +412,7 @@ public class SVGExporter extends FormExporter {
                                  Color backgroundColor, Color plotColor,
                                  Color gridColor, Color titleColor,
                                  Color scaleColor, Color unitsColor) throws IOException {
-	  return exportAsSVG(fileName, xyCoordsList, title, startDataPointIndices, 
+	  return exportAsSVG(fileName, spectra, title, startDataPointIndices, 
 			  endDataPointIndices, xUnits, yUnits, continuous, increasing, plotAreaColor, 
 			  backgroundColor, plotColor, gridColor, titleColor, scaleColor, unitsColor, false);
   }
@@ -456,7 +456,7 @@ public class SVGExporter extends FormExporter {
    * @return data if fileName is null
    * @throws IOException
    */
-  public String exportAsSVG(String fileName, Coordinate[][] xyCoordsList,
+  public String exportAsSVG(String fileName, Graph[] spectra,
                             String title, int[] startDataPointIndices,
                             int[] endDataPointIndices, String xUnits,
                             String yUnits, boolean continuous,
@@ -469,7 +469,7 @@ public class SVGExporter extends FormExporter {
     //DecimalFormat formatter = JSpecViewUtils.getDecimalFormat("0.000000", new DecimalFormatSymbols(java.util.Locale.US ));
     DecimalFormat formatter2 = TextFormat.getDecimalFormat("0.######");
 
-    MultiScaleData scaleData = new MultiScaleData(xyCoordsList,
+    MultiScaleData scaleData = new MultiScaleData(spectra,
         0, 0, startDataPointIndices, endDataPointIndices, 10, 10, false);
 
     double maxXOnScale = scaleData.maxXOnScale;
@@ -642,9 +642,10 @@ public class SVGExporter extends FormExporter {
 
     List<List<Coordinate>> newXYCoordsList = new ArrayList<List<Coordinate>>();
     List<Coordinate> coords = new ArrayList<Coordinate>();
-    for (int i = 0; i < xyCoordsList.length; i++) {
+    for (int i = 0; i < spectra.length; i++) {
+      Coordinate[] xyCoords = spectra[i].getXYCoords();
       for (int j = startDataPointIndices[i]; j <= endDataPointIndices[i]; j++)
-        coords.add(xyCoordsList[i][j]);
+        coords.add(xyCoords[j]);
       newXYCoordsList.add(coords);
     }
 

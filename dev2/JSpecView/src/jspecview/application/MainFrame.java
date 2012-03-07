@@ -2005,13 +2005,12 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
   private void setYScale(double y1, double y2, boolean isAll) {
     if (isAll) {
-      Graph[] graphs = new Graph[] { selectedJSVPanel.getSpectrum(), null };
+      JDXSpectrum spec = selectedJSVPanel.getSpectrum();
       for (int i = specNodes.size(); --i >= 0;) {
         JSVTreeNode node = specNodes.get(i);
         if (node.source != currentSelectedSource)
           continue;
-        graphs[1] = node.jsvp.getSpectrum();
-        if (JDXSpectrum.areScalesCompatible(graphs))
+        if (JDXSpectrum.areScalesCompatible(spec, node.jsvp.getSpectrum()))
           node.jsvp.setZoom(Double.NaN, y1, Double.NaN, y2);
       }
     } else {
@@ -2724,8 +2723,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
         return;
       }
       try {
-        if (JDXSpectrum.areScalesCompatible(currentSelectedSource.getSpectra()
-            .toArray(new JDXSpectrum[] {}))) {
+        if (JDXSpectrum.areScalesCompatible(currentSelectedSource.getSpectra())) {
           closeSource(currentSelectedSource);
           overlaySpectra(currentSelectedSource, null);
         } else {

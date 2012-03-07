@@ -147,9 +147,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   // Contains information needed to draw spectra
   private MultiScaleData multiScaleData;
 
-  // The list of Coordinate arrays
-  private Coordinate[][] xyCoordsList;
-
   // width and height of the JSVPanel
   //private int width, height;
 
@@ -406,12 +403,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
     checkUnits();
 
-    xyCoordsList = new Coordinate[nSpectra][];
-
-    for (int i = 0; i < nSpectra; i++) {
-      xyCoordsList[i] = spectra[i].getXYCoords();
-    }
-
     if (nSpectra > plotColors.length) {
       Color[] tmpPlotColors = new Color[nSpectra];
       int numAdditionColors = nSpectra - plotColors.length;
@@ -445,8 +436,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     nSpectra = spectra.length;
     if (nSpectra == 1)
       setTitle(getSpectrum().getTitleLabel());
-    xyCoordsList = new Coordinate[nSpectra][];
-
     int[] startIndices = new int[nSpectra];
     int[] endIndices = new int[nSpectra];
     //boolean[] plotIncreasing = new boolean[numOfSpectra];
@@ -455,14 +444,13 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     checkUnits();
 
     for (int i = 0; i < nSpectra; i++) {
-      xyCoordsList[i] = spectra[i].getXYCoords();
       startIndices[i] = 0;
-      endIndices[i] = xyCoordsList[i].length - 1;
+      endIndices[i] = spectra[i].getXYCoords().length - 1;
     }
 
     setPlotColors(Parameters.defaultPlotColors);
 
-    multiScaleData = new MultiScaleData(xyCoordsList, 0, 0,
+    multiScaleData = new MultiScaleData(spectra, 0, 0,
         startIndices, endIndices, 10, 10, getSpectrum().isContinuous());
 
     //add data to zoomInfoList
@@ -1134,15 +1122,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   /**
-   * Returns the list of coordinates of all the Graphs
-   * 
-   * @return an array of arrays of <code>Coordinate</code>
-   */
-  public Coordinate[][] getXYCoordsList() {
-    return xyCoordsList;
-  }
-
-  /**
    * Return the start indices of the Scaledata
    * 
    * @return the start indices of the Scaledata
@@ -1404,7 +1383,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private void drawPlot(Graphics g, int index, int height, int width) {
     // Check if specInfo in null or xyCoords is null
     //Coordinate[] xyCoords = spectra[index].getXYCoords();
-    Coordinate[] xyCoords = xyCoordsList[index];
+    Coordinate[] xyCoords = spectra[index].getXYCoords();
 
     // Draw a border
     if (!gridOn) {
@@ -1889,7 +1868,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     if (!multiScaleData.setDataPointIndices(spectra, initX, finalX,
         minNumOfPointsForZoom, startIndices, endIndices))
       return false;
-    multiScaleData = new MultiScaleData(xyCoordsList, yPt1, yPt2,
+    multiScaleData = new MultiScaleData(spectra, yPt1, yPt2,
         startIndices, endIndices, 10, 10, getSpectrum().isContinuous());
     // add to and clean the zoom list
     if (zoomInfoList.size() > currentZoomIndex + 1)
@@ -2817,7 +2796,13 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       break;
     case KeyEvent.VK_DOWN:
     case KeyEvent.VK_UP:
-      notifyZoomListeners((e.getKeyCode() == KeyEvent.VK_DOWN ? 1 : -1), Double.NaN, Double.NaN, Double.NaN);
+      int dir = (e.getKeyCode() == KeyEvent.VK_DOWN ? 1 : -1);
+      if (getSpectrumAt(0).is1D())
+        notifyZoomListeners(dir, Double.NaN, Double.NaN, Double.NaN);
+      else {
+        getSpectrumAt(0).advanceSubSpectrum(dir);
+        repaint();
+      }
       break;
     }
   }
@@ -2883,7 +2868,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   public JDXSpectrum getSpectrum() {
-    return getSpectrumAt(0);
+    return getSpectrumAt(0).getCurrentSubSpectrum();
   }
 
   public void setZoom(double x1, double y1, double x2, double y2) {
