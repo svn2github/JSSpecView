@@ -2926,9 +2926,11 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         switch (e.getKeyCode()) {
         case 45: //'-'
           scaleYBy(0.5);
+          e.consume();
           break;
         case 61: //'='
           scaleYBy(2);
+          e.consume();
           break;
         }
       }
@@ -2938,9 +2940,11 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     switch (e.getKeyCode()) {
     case KeyEvent.VK_LEFT:
       toPeak(-1);
+      e.consume();
       break;
     case KeyEvent.VK_RIGHT:
       toPeak(1);
+      e.consume();
       break;
     case KeyEvent.VK_DOWN:
     case KeyEvent.VK_UP:
@@ -2951,6 +2955,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         getSpectrumAt(0).advanceSubSpectrum(-dir);
         repaint();
       }
+      e.consume();
       break;
     }
   }
