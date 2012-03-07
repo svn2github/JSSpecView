@@ -121,7 +121,6 @@ import org.jmol.api.JmolSyncInterface;
 import jspecview.common.AppUtils;
 import jspecview.common.CommandHistory;
 import jspecview.common.DisplayScheme;
-import jspecview.common.Graph;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelPopupMenu;
 import jspecview.common.JSpecViewFileFilter;
