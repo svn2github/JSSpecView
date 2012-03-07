@@ -1239,6 +1239,12 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
           true);
     }
 
+    int subIndex = getSpectrum().getSubIndex();
+    if (subIndex > 0) {
+      g.setColor(plotColors[0]);
+      int y = ((int) (plotAreaHeight * 1.0 * (subIndex + 1) / getSpectrumAt(0).getSubSpectra().size()));
+      g.fillRect(rightPlotAreaPos, bottomPlotAreaPos - y, 3, y);
+    }
     ArrayList<PeakInfo> list = (nSpectra == 1
         || getSpectrum().getIntegrationGraph() != null ? getSpectrum()
         .getPeakList() : null);
@@ -2802,7 +2808,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       if (getSpectrumAt(0).is1D())
         notifyZoomListeners(dir, Double.NaN, Double.NaN, Double.NaN);
       else {
-        getSpectrumAt(0).advanceSubSpectrum(dir);
+        getSpectrumAt(0).advanceSubSpectrum(-dir);
         repaint();
       }
       break;
