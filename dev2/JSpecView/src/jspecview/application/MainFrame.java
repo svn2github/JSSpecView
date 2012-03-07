@@ -1647,11 +1647,14 @@ public class MainFrame extends JFrame implements DropTargetListener,
     }
     setCloseMenuItem(null);
     setTitle("JSpecView");
+    currentSelectedSource = null;
     if (source == null)
       setMenuEnables(null);
     else
       setFrame(specNodes.size() - 1);
+    recentJmolName = null;
     System.gc();
+    Logger.checkMemory();
   }
 
   private int fileCount = 0;
@@ -1864,8 +1867,9 @@ public class MainFrame extends JFrame implements DropTargetListener,
     if (file == null || index == null)
       return;
     System.out.println("JSpecView MainFrame.syncScript: " + script);
-    if (!file.equals(recentJmolName))
-      openFile(new File(file));
+    if (!file.equals(recentJmolName)) {
+      openFile(null, file,null, -1, -1);
+    }
     if (!selectPanelByPeak(index))
       script = null;
     selectedJSVPanel.processPeakSelect(script);
@@ -2880,6 +2884,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       this.frame = frame;
       this.jsvp = jsvp;
       this.id = id;
+      System.out.println("TREE NODE fileName=" + fileName + " source.filePath=" + (source == null ? "null" : source.getFilePath()));
     }
 
     @Override
@@ -3028,7 +3033,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     if (x1 == x2)
       writeStatus("");
     else
-      writeStatus("Double-Click highlighted spectrum in menu to zoom out.");
+      writeStatus("Double-Click highlighted spectrum in menu to zoom out; CTRL+/CTRL- to adjust Y scaling.");
   }
 
   private void advanceSpectrumBy(int n) {

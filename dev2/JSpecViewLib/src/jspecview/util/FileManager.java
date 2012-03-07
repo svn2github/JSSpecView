@@ -80,6 +80,7 @@ public class FileManager {
     if (name == null)
       throw new IOException("Cannot find " + name);
     String path = classifyName(name, appletDocumentBase);
+    System.out.println("JSV FIleManager with  " + path);
     return getUnzippedBufferedReaderFromName(path, appletDocumentBase);
   }
 
@@ -167,6 +168,7 @@ public class FileManager {
       if (name.startsWith(urlPrefixes[iurlPrefix]))
         break;
     boolean isURL = (iurlPrefix >= 0);
+    System.out.println("FM getInputStream "  + isURL + " " + name);
     boolean isApplet = (appletDocumentBase != null);
     InputStream in;
     int length;

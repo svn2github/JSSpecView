@@ -462,18 +462,24 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
     setPlotColors(Parameters.defaultPlotColors);
 
-    List<JDXSpectrum> subSpecs = getSpectrumAt(0).getSubSpectra(); 
-    if (subSpecs == null)
-      multiScaleData = new MultiScaleData(spectra, 0, 0,
-          startIndices, endIndices, 10, 10, getSpectrum().isContinuous());
-    else
-      multiScaleData = new MultiScaleData(subSpecs, 0, 0, 10, 10, getSpectrum().isContinuous());  
-
+    getMultiScaleData(0, 0, startIndices, endIndices);
     //add data to zoomInfoList
     zoomInfoList = new ArrayList<MultiScaleData>();
     zoomInfoList.add(multiScaleData);
 
     setBorder(BorderFactory.createLineBorder(Color.lightGray));
+  }
+
+  private void getMultiScaleData(double y1, double y2, int[] startIndices,
+                                 int[] endIndices) {
+    //List<JDXSpectrum> subSpecs = getSpectrumAt(0).getSubSpectra(); 
+    //if (subSpecs == null)
+      // this did not work - way too sharp peaks
+    //else
+      //multiScaleData = new MultiScaleData(subSpecs, 0, 0, 10, 10, getSpectrum().isContinuous());  
+
+    multiScaleData = new MultiScaleData(spectra, y1, y2,
+        startIndices, endIndices, 10, 10, getSpectrum().isContinuous());
   }
 
   /**
@@ -1244,6 +1250,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     topPlotAreaPos = plotAreaY;
     bottomPlotAreaPos = plotAreaHeight + plotAreaY;
     rightPlotAreaPos = plotAreaWidth + plotAreaX;
+    userYFactor = getSpectrum().getUserYFactor();
+    setScaleFactors(multiScaleData);
 
     //widthRatioMin = 0.3;
     draw1D = true;
@@ -1254,6 +1262,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       width = (int) Math.floor(widthRatio * width);
       plotAreaWidth = width - (plotAreaInsets.right + plotAreaInsets.left);
       rightPlotAreaPos = plotAreaWidth + plotAreaX;
+      setScaleFactors(multiScaleData);
     }
     
     ///System.out.println("JSVPANEL "  + width + " " + height + " " + plotAreaWidth + " " + plotAreaHeight + " " + title);
@@ -1284,7 +1293,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       int y = ((int) (plotAreaHeight * 1.0 * (subIndex + 1) / getSpectrumAt(0).getSubSpectra().size()));
       g.fillRect(rightPlotAreaPos, bottomPlotAreaPos - y, 3, y);
       if (image2D != null) {
-        g.drawLine(rightPlotAreaPos, bottomPlotAreaPos - y, getWidth(), bottomPlotAreaPos - y);
+        g.drawLine(rightPlotAreaPos, bottomPlotAreaPos - y, getWidth() - 10, bottomPlotAreaPos - y);
         g.drawLine(xLine0,topPlotAreaPos - 10, xLine0, bottomPlotAreaPos + 10);
         g.drawLine(xLine1, bottomPlotAreaPos + 10, xLine1, topPlotAreaPos - 10);
       }
@@ -1326,9 +1335,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     boolean xAxis = true;//!spectra[0].getXUnits().equalsIgnoreCase("Arbitrary Units");
     boolean yAxis = true;//!spectra[0].getYUnits().equalsIgnoreCase("Arbitrary Units");
 
-    userYFactor = getSpectrum().getUserYFactor();
-
-    setScaleFactors(multiScaleData);
     if (grid)
       drawGrid(g, height, width);
     for (int i = nSpectra; --i >= 0; )
@@ -1416,7 +1422,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   private boolean isPixelWithinPlotArea(int pix) {
-    if (pix >= leftPlotAreaPos && pix <= rightPlotAreaPos) {
+    if (pix >= leftPlotAreaPos && pix <= rightPlotAreaPos) {  
       return true;
     }
     return false;
@@ -1833,18 +1839,25 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private Coordinate getCoordFromPoint(int xPixel, int yPixel) {
     double xPt, yPt;
 
-    boolean plotIncreasing;
-    plotIncreasing = shouldDrawXAxisIncreasing;
+    if (image2D != null && xPixel >= bwidthLeft - 5 && xPixel < getWidth() - 15) {
 
-    if (!plotIncreasing)
-      xPt = (((rightPlotAreaPos - xPixel) * xFactorForScale) + multiScaleData.minXOnScale);
-    else
-      xPt = multiScaleData.maxXOnScale
-          - (((rightPlotAreaPos - xPixel) * xFactorForScale));
-
-    yPt = multiScaleData.maxYOnScale
-        + (((topPlotAreaPos - yPixel) * yFactorForScale));
-
+      xPt = 1.0 * (fixX2D(xPixel) - bwidthLeft) / imageWidthHeight[0];
+      //System.out.println("getCOord shoulddrawXInc " + shouldDrawXAxisIncreasing);
+      //if (shouldDrawXAxisIncreasing)
+        xPt = 1 - xPt;
+      Coordinate[] xyCoords = getSpectrum().getXYCoords();
+      xPt = xPt * (xyCoords[xyCoords.length - 1].getXVal() - xyCoords[0].getXVal()) + xyCoords[0].getXVal(); 
+      int n = getSpectrumAt(0).getSubSpectra().size();
+      yPt = Math.min(n, Math.max(0, (int)((bottomPlotAreaPos - yPixel) * 1.0 / imageWidthHeight[1] * n)));
+    } else {
+      xPixel = fixX(xPixel);
+      yPixel = fixY(yPixel);
+      xPt = (shouldDrawXAxisIncreasing 
+         ?  multiScaleData.maxXOnScale - (rightPlotAreaPos - xPixel) * xFactorForScale 
+         :  multiScaleData.minXOnScale + (rightPlotAreaPos - xPixel) * xFactorForScale);
+      yPt = multiScaleData.maxYOnScale + (topPlotAreaPos - yPixel) * yFactorForScale;
+    }
+    
     return new Coordinate(xPt, yPt);
   }
 
@@ -1931,8 +1944,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     if (!multiScaleData.setDataPointIndices(spectra, initX, finalX,
         minNumOfPointsForZoom, startIndices, endIndices))
       return false;
-    multiScaleData = new MultiScaleData(spectra, yPt1, yPt2,
-        startIndices, endIndices, 10, 10, getSpectrum().isContinuous());
+    getMultiScaleData(yPt1, yPt2, startIndices, endIndices);
     // add to and clean the zoom list
     if (zoomInfoList.size() > currentZoomIndex + 1)
       for (int i = zoomInfoList.size() - 1; i > currentZoomIndex; i--)
@@ -1957,10 +1969,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   public void clearViews() {
     reset();
-    int loopNum = zoomInfoList.size();
-    for (int i = 1; i < loopNum; i++) {
-      zoomInfoList.remove(1);
-    }
+    // leave first zoom
+    for (int i = zoomInfoList.size(); --i >= 1; ) 
+      zoomInfoList.remove(i);
   }
 
   /**
@@ -2645,7 +2656,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     int xPixel = e.getX();
     int yPixel = fixY(e.getY());
 
-    if (checkImageDrag(xPixel, yPixel))
+    if (checkImageDrag(xPixel, yPixel, true))
       return;
 
     xPixel = fixX(xPixel);
@@ -2664,17 +2675,43 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     repaint();
   }
 
-  private boolean checkImageDrag(int xPixel, int yPixel) {
-    if (image2D != null && xPixel > rightPlotAreaPos + 10) {
-      int iSpec = (int) (1.0 * (bottomPlotAreaPos - yPixel) / plotAreaHeight * getSpectrumAt(0).getSubSpectra().size());
-      getSpectrumAt(0).setCurrentSubSpectrum(iSpec);
+  
+  boolean triggerNewImage2DZoom;
+  boolean isLine0, isLine1;
+  
+  private boolean checkImageDrag(int xPixel, int yPixel, boolean isPress) {
+    if (image2D == null || xPixel < rightPlotAreaPos + 10)
+      return false;
+    if (isPress) {
+      isLine0 = (Math.abs(xPixel - xLine0) < 5);
+      isLine1 = (!isLine0 && Math.abs(xPixel - xLine1) < 5);
+    }
+    if (isLine0 || isLine1) {
+      if (isLine0)
+        xLine0 = fixX2D(xPixel);
+      else if (isLine1)
+        xLine1 = fixX2D(xPixel);
+      triggerNewImage2DZoom = true;
+      isMouseDraggedEvent = true;
       repaint();
-      isMouseDraggedEvent = false;
       return true;
     }
-    return false;
+
+    int iSpec = (int) (1.0 * (bottomPlotAreaPos - yPixel) / plotAreaHeight * getSpectrumAt(
+        0).getSubSpectra().size());
+    getSpectrumAt(0).setCurrentSubSpectrum(iSpec);
+    repaint();
+    isMouseDraggedEvent = false;
+    return true;
   }
 
+  private int fixX2D(int xPixel) {
+    return (xPixel < bwidthLeft ? bwidthLeft
+        : xPixel >= bwidthLeft + imageWidthHeight[0] ? xPixel = bwidthLeft + imageWidthHeight[0] - 1
+            : xPixel);
+  }
+
+  
   /**
    * Implements mouseReleased in interface MouseListener
    * 
@@ -2692,14 +2729,23 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     int xPixel = fixX(e.getX());
     int yPixel = fixY(e.getY());
 
+    if (triggerNewImage2DZoom) {
+      triggerNewImage2DZoom = false;
+      clearViews();
+      doZoom(getX2DFromPixel(xLine1), multiScaleData.minY, getX2DFromPixel(xLine0), multiScaleData.maxY, true);
+      return;
+    }
     setMouseFinalXY(xPixel, yPixel);
-
     if (Math.abs(xPixel - initXpixel) <= MIN_DRAG_X_PIXELS)
       return;
     if (isIntegralDrag)
       checkIntegral(initX, finalX, true);
     else
       doZoom(initX, initY, finalX, finalY, true);
+  }
+
+  private double getX2DFromPixel(int x) {
+    return getCoordFromPoint(x, 0).getXVal();
   }
 
   private boolean checkXY(int xPixel, int yPixel) {
@@ -2803,10 +2849,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     if (isMouseDraggedEvent) {
       isMouseDragged = true;
       currZoomBoxX = xPixel;
-      currZoomBoxY = (isIntegralDrag ? bottomPlotAreaPos : fixY(yPixel));
+      currZoomBoxY = (isIntegralDrag ? bottomPlotAreaPos : yPixel);
     }
 
-    Coordinate coord = getCoordFromPoint(xPixel, yPixel);
+    Coordinate coord = getCoordFromPoint(e.getX(), e.getY());
 
     double xPt = coord.getXVal();
     double yPt = coord.getYVal();
@@ -2847,7 +2893,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     int xPixel = e.getX();
     int yPixel = fixY(e.getY());
 
-    if (checkImageDrag(xPixel, yPixel))
+    if (checkImageDrag(xPixel, yPixel, false))
       return;
     
     isMouseDraggedEvent = true; // testing   
@@ -2875,8 +2921,20 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   public void keyPressed(KeyEvent e) {
-    if (e.getModifiers() != 0)
+    if (e.getModifiers() != 0) {
+      if (e.isControlDown()) {
+        switch (e.getKeyCode()) {
+        case 45: //'-'
+          scaleYBy(0.5);
+          break;
+        case 61: //'='
+          scaleYBy(2);
+          break;
+        }
+      }
+
       return;
+    }
     switch (e.getKeyCode()) {
     case KeyEvent.VK_LEFT:
       toPeak(-1);
@@ -2895,6 +2953,11 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       }
       break;
     }
+  }
+
+  private void scaleYBy(double factor) {
+    doZoom(multiScaleData.minX, multiScaleData.minY, 
+        multiScaleData.maxX, multiScaleData.maxY / factor, true);
   }
 
   public void keyReleased(KeyEvent e) {
@@ -3013,22 +3076,22 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
   
   private int xLine0, xLine1;
-  private int[] wh = new int[2];
+  private int[] imageWidthHeight = new int[2];
   private boolean draw2DImage(Graphics g, int width, int height) {
     if (bwidth != width || bheight != plotAreaHeight) {
-      int[] buffer = getSpectrumAt(0).get2dBuffer(bwidth = width, bheight = plotAreaHeight, wh, multiScaleData.minY, multiScaleData.maxY);
+      int[] buffer = getSpectrumAt(0).get2dBuffer(bwidth = width, bheight = plotAreaHeight, imageWidthHeight, multiScaleData.minY, multiScaleData.maxY);
       if (buffer == null) {
         image2D = null;
         draw1D = true;
         return false;
       }
-      image2D = new BufferedImage(wh[0], wh[1], BufferedImage.TYPE_BYTE_GRAY);
+      image2D = new BufferedImage(imageWidthHeight[0], imageWidthHeight[1], BufferedImage.TYPE_BYTE_GRAY);
       WritableRaster raster = image2D.getRaster();
-      raster.setSamples(0, 0, wh[0], wh[1], 0, buffer);
-      widthRatio = 1.0 * (width - wh[0]) / width;
-      bwidthLeft = (int) Math.floor(bwidth - wh[0]) - 20;
-      xLine0 = bwidthLeft + (int) (wh[0] *(1 - 1.0 *  multiScaleData.startDataPointIndices[0]/ getSpectrum().getXYCoords().length));
-      xLine1 = bwidthLeft + (int) (wh[0] *(1 - 1.0 *  multiScaleData.endDataPointIndices[0]/ getSpectrum().getXYCoords().length));
+      raster.setSamples(0, 0, imageWidthHeight[0], imageWidthHeight[1], 0, buffer);
+      widthRatio = 1.0 * (width - imageWidthHeight[0]) / width;
+      bwidthLeft = (int) Math.floor(bwidth - imageWidthHeight[0]) - 20;
+      xLine0 = bwidthLeft + (int) (imageWidthHeight[0] *(1 - 1.0 *  multiScaleData.startDataPointIndices[0]/ getSpectrum().getXYCoords().length));
+      xLine1 = bwidthLeft + (int) (imageWidthHeight[0] *(1 - 1.0 *  multiScaleData.endDataPointIndices[0]/ getSpectrum().getXYCoords().length));
       draw1D = true;// || (widthRatio >= widthRatioMin);
     }
     if (image2D != null) {

@@ -47,7 +47,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
 
   @Override
   public void finalize() {
-    System.out.println("JDXSpectrum " + this + " finalized");
+    System.out.println("JDXSpectrum " + this + " finalized " + title);
   }
 
   /**
@@ -1034,7 +1034,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
       return null;
     int nSpec = subSpectra.size();
     double grayFactor = 255 / (bufMaxY - bufMinY);
-    double r = Math.min(1.0 * width/xyCoords.length, 1.0 * height/nSpec);
+    double r = Math.min(1.0 * width * 0.9/xyCoords.length, 1.0 * height/nSpec);
     if (r > 1)
       r = 1;
     wh[0] = width = (int) Math.floor(r * xyCoords.length);
@@ -1049,6 +1049,8 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
       double f = subSpectra.get(i).getUserYFactor();
       for (int j = 0; j < xyCoords.length; j++) {
         int pt = (int) ((height - 1 - Math.floor(i * r)) * width + width - 1 - Math.floor(j * r));
+        if (pt < 0)
+          pt = 0;
         buf[pt] = 255 - (int) Math.floor((bufMinY + points[j].getYVal()* f) * grayFactor);
       }
     }
