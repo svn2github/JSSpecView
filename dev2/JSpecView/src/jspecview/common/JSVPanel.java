@@ -33,6 +33,7 @@
 //					title font, title bold, and integral plot color.
 // 24-09-2011 jak - Altered drawGraph to fix bug related to reversed highlights. Added code to
 //					draw integration ratio annotations
+// 03-06-2012 rmh - Full overhaul; code simplification; added support for Jcamp 6 nD spectra
 
 package jspecview.common;
 
@@ -112,6 +113,7 @@ import org.w3c.dom.DOMImplementation;
  * @author Khari A. Bryan
  * @author Craig A.D. Walters
  * @author Prof Robert J. Lancashire
+ * @author Bob Hanson hansonr@stolaf.edu
  */
 public class JSVPanel extends JPanel implements Printable, MouseListener,
     MouseMotionListener, KeyListener {
