@@ -61,36 +61,10 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
    */
   private List<JDXSpectrum> subSpectra;
   private int currentSubSpectrum;
+  private double y2D = Double.NaN;
   private double blockID; // a random number generated in JDXFileReader
-  public void setBlockID(double id) {
-    blockID = id;
-  }
-  public List<JDXSpectrum> getSubSpectra() {
-    return subSpectra;
-  }
+  private int subIndex;  
   
-  /**
-   * adds an nD subspectrum and titles it "Subspectrum <n>"
-   * These spectra can be iterated over using the UP and DOWN keys.
-   * 
-   * @param spectrum
-   * @return
-   */
-  public boolean addSubSpectrum(JDXSpectrum spectrum) {
-    if (numDim < 2 || blockID != spectrum.blockID
-        || !areScalesCompatible(this, spectrum))
-      return false;
-    if (subSpectra == null) {
-      subSpectra = new ArrayList<JDXSpectrum>();
-      subSpectra.add(this);
-      setTitle(subSpectra.size() + ": " + title);
-    }
-    subSpectra.add(spectrum);
-    spectrum.setTitle(subSpectra.size() + ": " + spectrum.title);
-    System.out.println("Added subspectrum " + subSpectra.size());
-    return true;
-  }
-
   /**
    * whether the x values were converted from HZ to PPM
    */
@@ -986,6 +960,17 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   public boolean is1D() {
     return numDim == 1;
   }
+
+  public void setY2D(double d) {
+    y2D = d;
+  }
+  
+  public void setBlockID(double id) {
+    blockID = id;
+  }
+  public List<JDXSpectrum> getSubSpectra() {
+    return subSpectra;
+  }
   
   public JDXSpectrum getCurrentSubSpectrum() {
     return (subSpectra == null ? this : subSpectra.get(currentSubSpectrum));
@@ -994,4 +979,32 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   public void advanceSubSpectrum(int dir) {
     currentSubSpectrum = Math.max(0, Math.min(currentSubSpectrum + dir, subSpectra.size() - 1));
   }
+
+  /**
+   * adds an nD subspectrum and titles it "Subspectrum <n>"
+   * These spectra can be iterated over using the UP and DOWN keys.
+   * 
+   * @param spectrum
+   * @return
+   */
+  public boolean addSubSpectrum(JDXSpectrum spectrum) {
+    if (numDim < 2 || blockID != spectrum.blockID
+        || !areScalesCompatible(this, spectrum))
+      return false;
+    if (subSpectra == null) {
+      subSpectra = new ArrayList<JDXSpectrum>();
+      addSubSpectrum(this);
+    }
+    spectrum.subIndex = subSpectra.size();
+    subSpectra.add(spectrum);
+    spectrum.setTitle(subSpectra.size() + ": " + spectrum.title);
+    System.out.println("Added subspectrum " + subSpectra.size() + ": " + spectrum.y2D);
+    return true;
+  }
+  
+  public int getSubIndex() {
+    return subIndex;
+  }
+
+
 }

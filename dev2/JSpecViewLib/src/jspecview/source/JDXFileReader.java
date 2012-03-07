@@ -383,10 +383,20 @@ public class JDXFileReader {
     if (!label.equals("##PAGE"))
       throw new JSpecViewException("Error Reading NTuple Source");
     String page = t.getValue();
-    /*-------- Gather Spectra Data From File -----*/
-
+    /*
+     * 7.3.1 ##PAGE= (STRING).
+This LDR indicates the start of a PAGE which contains tabular data. It may have no
+argument, or it may be omitted when the data consists of one PAGE. When the Data Table
+represents a property like a spectrum or a particular fraction, or at a particular time, or at a
+specific location in two or three dimensional space, the appropriate PAGE VARIABLE
+values will be given as arguments of the ##PAGE= LDR, as in the following examples:
+##PAGE= N=l $$ Spectrum of first fraction of GCIR run
+##PAGE= T=10:21 $$ Spectrum of product stream at time: 10:21
+##PAGE= X=5.2, Y=7.23 $$ Spectrum of known containing 5.2 % X and 7.23% Y
+     */
+    
+    
     JDXSpectrum spectrum = null;
-
     while (!done && !(label = t.getLabel()).equals("##ENDNTUPLES")) {
 
       if (label.equals("##PAGE")) {
@@ -398,6 +408,8 @@ public class JDXFileReader {
       if (spectrum == null) {
         spectrum = spectrum0.copy();
         spectrum.setTitle(spectrum0.getTitle() + " : " + page);
+        if (!spectrum.is1D())
+          setSpectrumY2(spectrum, page);
       }
 
       List<String[]> dataLDRTable = new ArrayList<String[]>();
@@ -453,6 +465,17 @@ public class JDXFileReader {
     source.setErrorLog(errorLog.toString());
     return source;
   }
+
+  private void setSpectrumY2(JDXSpectrum spectrum, String page) {
+    int pt = page.indexOf('=');
+    if (pt >= 0)
+      try {
+        spectrum.setY2D(Double.parseDouble(page.substring(pt + 1).trim())); 
+      } catch (NumberFormatException e) {
+        //we tried.            
+      }
+  }
+
 
   private static ArrayList<PeakInfo> readPeakList(String peakList, int index) {
     ArrayList<PeakInfo> peakData = new ArrayList<PeakInfo>();
