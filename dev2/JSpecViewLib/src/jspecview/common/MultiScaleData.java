@@ -1,5 +1,7 @@
 package jspecview.common;
 
+import java.util.List;
+
 
 /**
  * Stores information
@@ -63,10 +65,18 @@ public class MultiScaleData extends ScaleData {
       int initNumXDivisions, int initNumYDivisions, boolean isContinuous) {
     super(Coordinate.getMinX(spectra, startList, endList), 
         Coordinate.getMaxX(spectra, startList, endList), 
-        Coordinate.getMinY(spectra, startList, endList), 
-        Coordinate.getMaxY(spectra,startList, endList));
+        Coordinate.getMinYUser(spectra, startList, endList), 
+        Coordinate.getMaxYUser(spectra,startList, endList));
     startDataPointIndices = startList;
     endDataPointIndices = endList;
+    numOfPointsList = new int[startList.length];
+    for (int j = 0; j < startList.length; j++)
+      numOfPointsList[j] = endList[j] - startList[j] + 1;
+    init(yPt1, yPt2, initNumXDivisions, initNumYDivisions, isContinuous);
+  }
+  
+  private void init(double yPt1, double yPt2,
+                    int initNumXDivisions, int initNumYDivisions, boolean isContinuous) {
     if (yPt1 != yPt2) {
       minY = yPt1;
       maxY = yPt2;
@@ -76,12 +86,23 @@ public class MultiScaleData extends ScaleData {
         maxY = t;
       }
     }
-    numOfPointsList = new int[startList.length];
-    for (int j = 0; j < startList.length; j++)
-      numOfPointsList[j] = endList[j] - startList[j] + 1;
     setScale(initNumXDivisions, initNumYDivisions, isContinuous);
   }
-  
+
+  public MultiScaleData(List<JDXSpectrum> spectra, double yPt1, double yPt2,
+      int initNumXDivisions, int initNumYDivisions,
+      boolean isContinuous) {
+    super(Coordinate.getMinX(spectra.get(0).getXYCoords()), 
+        Coordinate.getMaxX(spectra.get(0).getXYCoords()),
+        Coordinate.getMinYUser(spectra), 
+        Coordinate.getMaxYUser(spectra));
+    int n =  spectra.get(0).getXYCoords().length - 1;
+    startDataPointIndices = new int[] { 0 };
+    endDataPointIndices = new int[] { n - 1 };
+    numOfPointsList = new int[] { n };
+    init(yPt1, yPt2, initNumXDivisions, initNumYDivisions, isContinuous);
+  }
+
   /**
    * 
    * @param spectra

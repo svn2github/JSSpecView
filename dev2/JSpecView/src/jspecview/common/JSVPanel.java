@@ -462,8 +462,12 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
     setPlotColors(Parameters.defaultPlotColors);
 
-    multiScaleData = new MultiScaleData(spectra, 0, 0,
-        startIndices, endIndices, 10, 10, getSpectrum().isContinuous());
+    List<JDXSpectrum> subSpecs = getSpectrumAt(0).getSubSpectra(); 
+    if (subSpecs == null)
+      multiScaleData = new MultiScaleData(spectra, 0, 0,
+          startIndices, endIndices, 10, 10, getSpectrum().isContinuous());
+    else
+      multiScaleData = new MultiScaleData(subSpecs, 0, 0, 10, 10, getSpectrum().isContinuous());  
 
     //add data to zoomInfoList
     zoomInfoList = new ArrayList<MultiScaleData>();
@@ -1279,8 +1283,11 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       g.setColor(plotColors[0]);
       int y = ((int) (plotAreaHeight * 1.0 * (subIndex + 1) / getSpectrumAt(0).getSubSpectra().size()));
       g.fillRect(rightPlotAreaPos, bottomPlotAreaPos - y, 3, y);
-      if (image2D != null)
+      if (image2D != null) {
         g.drawLine(rightPlotAreaPos, bottomPlotAreaPos - y, getWidth(), bottomPlotAreaPos - y);
+        g.drawLine(xLine0,topPlotAreaPos - 10, xLine0, bottomPlotAreaPos + 10);
+        g.drawLine(xLine1, bottomPlotAreaPos + 10, xLine1, topPlotAreaPos - 10);
+      }
     }
     ArrayList<PeakInfo> list = (nSpectra == 1
         || getSpectrum().getIntegrationGraph() != null ? getSpectrum()
@@ -1932,6 +1939,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         zoomInfoList.remove(i);
     zoomInfoList.add(multiScaleData);
     currentZoomIndex++;
+    clear2DImage();
     return true;
   }
 
@@ -1961,6 +1969,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   public void previousView() {
     if (currentZoomIndex > 0) {
       multiScaleData = zoomInfoList.get(--currentZoomIndex);
+      bwidth = 0;
       repaint();
     }
   }
@@ -1971,6 +1980,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   public void nextView() {
     if (currentZoomIndex + 1 < zoomInfoList.size()) {
       multiScaleData = zoomInfoList.get(++currentZoomIndex);
+      bwidth = 0;
       repaint();
     }
   }
@@ -2996,13 +3006,17 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private BufferedImage image2D;
   private int bwidth, bheight;
   private int bwidthLeft;
-
   private boolean draw1D = true;
   
+  private void clear2DImage() {
+    bwidth = 0;
+  }
+  
+  private int xLine0, xLine1;
+  private int[] wh = new int[2];
   private boolean draw2DImage(Graphics g, int width, int height) {
     if (bwidth != width || bheight != plotAreaHeight) {
-      int[] wh = new int[2];
-      int[] buffer = getSpectrumAt(0).get2dBuffer(bwidth = width, bheight = plotAreaHeight, wh);
+      int[] buffer = getSpectrumAt(0).get2dBuffer(bwidth = width, bheight = plotAreaHeight, wh, multiScaleData.minY, multiScaleData.maxY);
       if (buffer == null) {
         image2D = null;
         draw1D = true;
@@ -3013,6 +3027,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       raster.setSamples(0, 0, wh[0], wh[1], 0, buffer);
       widthRatio = 1.0 * (width - wh[0]) / width;
       bwidthLeft = (int) Math.floor(bwidth - wh[0]) - 20;
+      xLine0 = bwidthLeft + (int) (wh[0] *(1 - 1.0 *  multiScaleData.startDataPointIndices[0]/ getSpectrum().getXYCoords().length));
+      xLine1 = bwidthLeft + (int) (wh[0] *(1 - 1.0 *  multiScaleData.endDataPointIndices[0]/ getSpectrum().getXYCoords().length));
       draw1D = true;// || (widthRatio >= widthRatioMin);
     }
     if (image2D != null) {

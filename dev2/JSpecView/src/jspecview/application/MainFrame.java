@@ -2020,8 +2020,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       }
     } else {
       selectedJSVPanel.setZoom(Double.NaN, y1, Double.NaN, y2);
-    }
-    
+    }    
   }
 
   private void close(String value) {

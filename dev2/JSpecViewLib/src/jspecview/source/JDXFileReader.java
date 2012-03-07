@@ -75,6 +75,7 @@ public class JDXFileReader {
 
   private boolean done;
 
+  private double[] minMaxY = new double[] { Double.MAX_VALUE, Double.MIN_VALUE };
   private JDXFileReader(boolean obscure, int iSpecFirst, int iSpecLast) {
     this.obscure = obscure;
     firstSpec = iSpecFirst;
@@ -180,7 +181,7 @@ public class JDXFileReader {
         return getNTupleSpectra(dataLDRTable, spectrum, label);
       if (Arrays.binarySearch(TABULAR_DATA_LABELS, label) > 0) {
         setTabularDataType(spectrum, label);
-        if (!spectrum.processTabularData(t, dataLDRTable, errorLog))
+        if (!spectrum.processTabularData(t, dataLDRTable, minMaxY, errorLog))
           throw new JDXSourceException("Unable to read JDX file");
         continue;
       }
@@ -301,7 +302,7 @@ public class JDXFileReader {
 
         if (Arrays.binarySearch(TABULAR_DATA_LABELS, label) > 0) {
           setTabularDataType(spectrum, label);
-          if (!spectrum.processTabularData(t, dataLDRTable, errorLog))
+          if (!spectrum.processTabularData(t, dataLDRTable, minMaxY, errorLog))
             throw new JDXSourceException("Unable to read Block Source");
           continue;
         }
@@ -351,6 +352,7 @@ public class JDXFileReader {
   private JDXSource getNTupleSpectra(List<String[]> sourceLDRTable,
                                      JDXSpectrum spectrum0, String label)
       throws JSpecViewException {
+    double[] minMaxY = new double[] {Double.MAX_VALUE, Double.MIN_VALUE};
     blockID = Math.random();
     boolean isOK = true;//(spectrum0.is1D() || firstSpec > 0);
     if (firstSpec > 0)
@@ -447,7 +449,7 @@ values will be given as arguments of the ##PAGE= LDR, as in the following exampl
       setTabularDataType(spectrum, "##" + (continuous ? "XYDATA" : "PEAKTABLE"));
 
       if (!spectrum.createXYCoords(nTupleTable, plotSymbols, spectrum
-          .getDataType(), t, errorLog))
+          .getDataType(), t, minMaxY, errorLog))
         throw new JDXSourceException("Unable to read Ntuple Source");
       for (int i = 0; i < sourceLDRTable.size(); i++) {
         String[] entry = sourceLDRTable.get(i);
@@ -463,6 +465,7 @@ values will be given as arguments of the ##PAGE= LDR, as in the following exampl
     if (errorLog.length() > 0)
       errorLog.append(ERROR_SEPARATOR);
     source.setErrorLog(errorLog.toString());
+    System.out.println("NTUPLE MIN/MAX Y = " + minMaxY[0] + " " + minMaxY[1]);
     return source;
   }
 

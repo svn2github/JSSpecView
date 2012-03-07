@@ -63,7 +63,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   private int currentSubSpectrum;
   private double y2D = Double.NaN;
   private double blockID; // a random number generated in JDXFileReader
-  private int subIndex = 0;  
   
   /**
    * whether the x values were converted from HZ to PPM
@@ -444,7 +443,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   }
 
   public boolean processTabularData(JDXSourceStreamTokenizer t,
-                                    List<String[]> table,
+                                    List<String[]> table, double[] minMaxY,
                                     StringBuffer errorLog)
       throws JSpecViewException {
     if (dataClass.equals("PEAKASSIGNMENTS"))
@@ -454,7 +453,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
 
     if (dataClass.equals("XYDATA")) {
       checkRequiredTokens();      
-      decompressData(t, errorLog);
+      decompressData(t, minMaxY, errorLog);
       return true;
     }
     if (dataClass.equals("PEAKTABLE") || dataClass.equals("XYPOINTS")) {
@@ -481,7 +480,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
 
   public boolean createXYCoords(Map<String, ArrayList<String>> nTupleTable,
                                 String[] plotSymbols, String dataType,
-                                JDXSourceStreamTokenizer t,
+                                JDXSourceStreamTokenizer t, double[] minMaxY,
                                 StringBuffer errorLog) {
     ArrayList<String> list;
     if (dataClass.equals("XYDATA")) {
@@ -509,7 +508,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
       xUnits = list.get(index1);
       yUnits = list.get(index2);
 
-      decompressData(t, errorLog);
+      decompressData(t, minMaxY, errorLog);
       return true;
     }
     if (dataClass.equals("PEAKTABLE") || dataClass.equals("XYPOINTS")) {
@@ -527,7 +526,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return false;
   }
 
-  private void decompressData(JDXSourceStreamTokenizer t,
+  private void decompressData(JDXSourceStreamTokenizer t, double[] minMaxY,
                               StringBuffer errorLog) {
 
     
@@ -540,7 +539,12 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
 
     double[] firstLastX = new double[2];
     xyCoords = decompressor.decompressData(errorLog, firstLastX);
-
+    double d = decompressor.getMinY();
+    if (d < minMaxY[0])
+      minMaxY[0] = d;
+    d = decompressor.getMaxY();
+    if (d > minMaxY[1])
+      minMaxY[1] = d;
     if (errorLog.length() != errPt) {
       errorLog.append(getTitleLabel()).append("\n");
       errorLog.append("firstX: "
@@ -1002,7 +1006,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
       subSpectra = new ArrayList<JDXSpectrum>();
       addSubSpectrum(this);
     }
-    spectrum.subIndex = subSpectra.size();
     subSpectra.add(spectrum);
     spectrum.setTitle(subSpectra.size() + ": " + spectrum.title);
     System.out.println("Added subspectrum " + subSpectra.size() + ": " + spectrum.y2D);
@@ -1023,21 +1026,14 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
 
   private int[] buf2d;
   private int bwidth,bheight;
-  private double grayFactor = Double.NaN;
 
-  private double bufMinY;
-
-  public int[] get2dBuffer(int width, int height, int[] wh) {
+  public int[] get2dBuffer(int width, int height, int[] wh, double bufMinY, double bufMaxY) {
     if (bwidth == width && bheight == height)
       return buf2d;
     if (subSpectra == null)
       return null;
     int nSpec = subSpectra.size();
-    if (Double.isNaN(grayFactor)) {
-      bufMinY = Coordinate.getMinY(subSpectra);
-      double bufMaxY = Coordinate.getMaxY(subSpectra);
-      grayFactor = 255 / (bufMaxY - bufMinY);
-    }
+    double grayFactor = 255 / (bufMaxY - bufMinY);
     double r = Math.min(1.0 * width/xyCoords.length, 1.0 * height/nSpec);
     if (r > 1)
       r = 1;

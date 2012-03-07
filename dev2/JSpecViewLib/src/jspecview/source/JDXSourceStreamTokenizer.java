@@ -70,16 +70,19 @@ public class JDXSourceStreamTokenizer {
         line = "";
         return null;
       }
-      System.out.println(line);
       if (line.startsWith("##"))
         break;
       line = null;
     }
     int pt = line.indexOf("=");
-    if (pt < 0)
-      return null;
-    label = line.substring(0, pt).trim();
-    line = line.substring(pt + 1);
+    if (pt < 0) {
+      System.out.println("BAD JDX LINE -- no '=' (line " + lineNo + "): " + line);
+      label = line;
+      line = "";
+    } else {
+      label = line.substring(0, pt).trim();
+      line = line.substring(pt + 1);
+    }
     labelLineNo = lineNo;
     if (Logger.debugging)
       System.out.println(label);

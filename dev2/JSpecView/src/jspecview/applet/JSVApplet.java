@@ -1445,6 +1445,21 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
         case OVERLAY:
           overlay(ScriptToken.getTokens(TextFormat.simpleReplace(value, "*", " * ")));
           break;
+        case YSCALE:
+          if (jsvp == null)
+            continue;
+          List<String> tokens = ScriptToken.getTokens(value);
+          int pt = 0;
+          boolean isAll = false;
+          if (tokens.size() > 1 && tokens.get(0).equalsIgnoreCase("ALL")) {
+            isAll = true;
+            pt++;
+          }
+          double y1 = Double.parseDouble(tokens.get(pt++));
+          double y2 = Double.parseDouble(tokens.get(pt));
+          setYScale(y1, y2, isAll);
+          break;          
+
         case GETSOLUTIONCOLOR:
           if (jsvp == null) 
             continue;
@@ -1458,7 +1473,17 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     repaint();
   }
 
-  
+  private void setYScale(double y1, double y2, boolean isAll) {
+    if (isAll) {
+      JDXSpectrum spec = selectedJSVPanel.getSpectrum();
+      for (int i = jsvPanels.size(); --i >= 0; )
+        if (JDXSpectrum.areScalesCompatible(spec, jsvPanels.get(i).getSpectrum()))
+          jsvPanels.get(i).setZoom(Double.NaN, y1, Double.NaN, y2);
+    } else {
+      selectedJSVPanel.setZoom(Double.NaN, y1, Double.NaN, y2);
+    }        
+  }
+
   private void overlay(List<String> list) {
     if (specsSaved == null)
       specsSaved = specs;

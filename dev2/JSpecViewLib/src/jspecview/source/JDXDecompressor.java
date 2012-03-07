@@ -83,6 +83,17 @@ public class JDXDecompressor {
   private JDXSourceStreamTokenizer t;
   private double firstX;
   private double dx;
+  
+  private double maxY = Double.MIN_VALUE;
+  private double minY = Double.MAX_VALUE;
+  
+  public double getMinY() {
+    return minY;
+  }
+  
+  public double getMaxY() {
+    return maxY;
+  }
 
   /**
    * Initialises the <code>JDXDecompressor</code> from the compressed data, the
@@ -124,6 +135,11 @@ public class JDXDecompressor {
       System.arraycopy(xyCoords, 0, t, 0, ipt);
       xyCoords = t;
     }
+    double d = pt.getYVal();
+    if (d > maxY)
+      maxY = d;
+    else if (d < minY)
+      minY = d;
     if (Logger.debugging)
       logError("Coord: " + ipt + pt);
     xyCoords[ipt++] = pt;
