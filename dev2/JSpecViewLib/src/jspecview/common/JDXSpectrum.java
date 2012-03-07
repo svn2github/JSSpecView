@@ -63,7 +63,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   private int currentSubSpectrum;
   private double y2D = Double.NaN;
   private double blockID; // a random number generated in JDXFileReader
-  private int subIndex;  
+  private int subIndex = 0;  
   
   /**
    * whether the x values were converted from HZ to PPM
@@ -979,7 +979,12 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   }
 
   public void advanceSubSpectrum(int dir) {
-    currentSubSpectrum = Math.max(0, Math.min(currentSubSpectrum + dir, subSpectra.size() - 1));
+    setCurrentSubSpectrum(currentSubSpectrum + dir);
+  }
+  
+
+  public void setCurrentSubSpectrum(int n) {
+    currentSubSpectrum = Math.max(0, Math.min(n, subSpectra.size() - 1));
   }
 
   /**
@@ -1005,7 +1010,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   }
   
   public int getSubIndex() {
-    return subIndex;
+    return (subSpectra == null ? -1 : currentSubSpectrum);
   }
 
   public double getUserYFactor() {
@@ -1014,6 +1019,45 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
 
   public void setUserYFactor(double userYFactor) {
     this.userYFactor = userYFactor;
+  }
+
+  private int[] buf2d;
+  private int bwidth,bheight;
+  private double grayFactor = Double.NaN;
+
+  private double bufMinY;
+
+  public int[] get2dBuffer(int width, int height, int[] wh) {
+    if (bwidth == width && bheight == height)
+      return buf2d;
+    if (subSpectra == null)
+      return null;
+    int nSpec = subSpectra.size();
+    if (Double.isNaN(grayFactor)) {
+      bufMinY = Coordinate.getMinY(subSpectra);
+      double bufMaxY = Coordinate.getMaxY(subSpectra);
+      grayFactor = 255 / (bufMaxY - bufMinY);
+    }
+    double r = Math.min(1.0 * width/xyCoords.length, 1.0 * height/nSpec);
+    if (r > 1)
+      r = 1;
+    wh[0] = width = (int) Math.floor(r * xyCoords.length);
+    wh[1] = height = (int) Math.floor(r * nSpec);
+    bwidth = width;
+    bheight = height;
+    int[] buf = new int[width * height];
+    for (int i = 0; i < nSpec; i++) {
+      Coordinate[] points = subSpectra.get(i).xyCoords;
+      if (points.length != xyCoords.length)
+        return null;
+      double f = subSpectra.get(i).getUserYFactor();
+      for (int j = 0; j < xyCoords.length; j++) {
+        int pt = (int) ((height - 1 - Math.floor(i * r)) * width + width - 1 - Math.floor(j * r));
+        buf[pt] = 255 - (int) Math.floor((bufMinY + points[j].getYVal()* f) * grayFactor);
+      }
+    }
+    buf2d = buf;
+    return buf2d;
   }
 
 

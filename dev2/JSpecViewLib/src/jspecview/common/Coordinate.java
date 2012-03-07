@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Comparator;
+import java.util.List;
 import java.util.StringTokenizer;
 
 import jspecview.util.Logger;
@@ -512,6 +513,7 @@ public class Coordinate {
     return min;
   }
 
+  
   /**
    * Returns the minimum y value of an array of <code>Coordinate</code>s
    * 
@@ -541,6 +543,17 @@ public class Coordinate {
     double min = Double.MAX_VALUE;
     for (int i = 0; i < spectra.length; i++) {
       double tmp = getMinY(spectra[i].getXYCoords(), startList[i], endList[i]) * spectra[i].getUserYFactor();
+      if (tmp < min)
+        min = tmp;
+    }  
+    return min;
+  }
+
+  public static double getMinY(List<JDXSpectrum> spectra) {
+    double min = Double.MAX_VALUE;
+    for (int i = 0; i < spectra.size(); i++) {
+      Coordinate[] xy = spectra.get(i).getXYCoords();
+      double tmp = getMinY(xy) * spectra.get(i).getUserYFactor();
       if (tmp < min)
         min = tmp;
     }  
@@ -603,6 +616,17 @@ public class Coordinate {
     return max;
   }
 
+  public static double getMaxY(List<JDXSpectrum> spectra) {
+    double max = Double.MAX_VALUE;
+    for (int i = 0; i < spectra.size(); i++) {
+      Coordinate[] xy = spectra.get(i).getXYCoords();
+      double tmp = getMaxY(xy) * spectra.get(i).getUserYFactor();
+      if (tmp < max)
+        max = tmp;
+    }  
+    return max;
+  }
+
   public static double getYValueAt(Coordinate[] xyCoords, double xPt,
                                    Comparator<Coordinate> c) {
     Coordinate x = new Coordinate(xPt, 0);
@@ -620,4 +644,5 @@ public class Coordinate {
       return y1; 
     return y0 + (y1 - y0) / (x1 - x0) * (xPt - x0);
   }
+
 }

@@ -55,7 +55,9 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
+import java.awt.image.WritableRaster;
 import java.awt.print.PageFormat;
 import java.awt.print.Paper;
 import java.awt.print.Printable;
@@ -456,6 +458,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       allowYScale &= (!spectra[i].getYUnits().equals(spectra[0].getYUnits()) 
           || spectra[i].getUserYFactor() != spectra[0].getUserYFactor());        
     }
+    allowYScale = true;
 
     setPlotColors(Parameters.defaultPlotColors);
 
@@ -650,6 +653,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     plotAreaColor = color;
   }
 
+  public void setBackgroundColor(Color color) {
+    //setBackground(backgroundColor);
+  }
+  
   /**
    * Sets the color of the plot
    * 
@@ -812,6 +819,16 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
   private double minYScale;
 
+  private boolean display2D = true;
+
+  private double widthRatio;
+
+//  private double widthRatioMin;
+  
+  public void setDisplay2D(boolean TF) {
+    display2D = TF;
+  }
+ 
   /**
    * Sets the integration ratios that will be displayed
    * 
@@ -1215,17 +1232,31 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        the width to be drawn in pixels
    */
   private void drawGraph(Graphics g, int height, int width) {
+    
     shouldDrawXAxisIncreasing = isXAxisDisplayedIncreasing ^ plotReversed;
     plotAreaWidth = width - (plotAreaInsets.right + plotAreaInsets.left);
     plotAreaHeight = height - (plotAreaInsets.top + plotAreaInsets.bottom);
-
-    ///System.out.println("JSVPANEL "  + width + " " + height + " " + plotAreaWidth + " " + plotAreaHeight + " " + title);
-
     leftPlotAreaPos = plotAreaX;
-    rightPlotAreaPos = plotAreaWidth + plotAreaX;
     topPlotAreaPos = plotAreaY;
     bottomPlotAreaPos = plotAreaHeight + plotAreaY;
+    rightPlotAreaPos = plotAreaWidth + plotAreaX;
 
+    //widthRatioMin = 0.3;
+    draw1D = true;
+    if (getSpectrumAt(0).getSubSpectra() != null 
+        && display2D && draw2DImage(g, width, height)) {
+      if (!draw1D)
+        return;
+      width = (int) Math.floor(widthRatio * width);
+      plotAreaWidth = width - (plotAreaInsets.right + plotAreaInsets.left);
+      rightPlotAreaPos = plotAreaWidth + plotAreaX;
+    }
+    
+    ///System.out.println("JSVPANEL "  + width + " " + height + " " + plotAreaWidth + " " + plotAreaHeight + " " + title);
+
+
+    
+    
     // fill plot area color
     g.setColor(plotAreaColor);
     g.fillRect(plotAreaX, plotAreaY, plotAreaWidth, plotAreaHeight);
@@ -1243,11 +1274,13 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
           true);
     }
 
-    int subIndex = getSpectrum().getSubIndex();
-    if (subIndex > 0) {
+    int subIndex = getSpectrumAt(0).getSubIndex();
+    if (subIndex >= 0) {
       g.setColor(plotColors[0]);
       int y = ((int) (plotAreaHeight * 1.0 * (subIndex + 1) / getSpectrumAt(0).getSubSpectra().size()));
       g.fillRect(rightPlotAreaPos, bottomPlotAreaPos - y, 3, y);
+      if (image2D != null)
+        g.drawLine(rightPlotAreaPos, bottomPlotAreaPos - y, getWidth(), bottomPlotAreaPos - y);
     }
     ArrayList<PeakInfo> list = (nSpectra == 1
         || getSpectrum().getIntegrationGraph() != null ? getSpectrum()
@@ -2599,10 +2632,16 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     if (e.getButton() != MouseEvent.BUTTON1)
       return;
 
+    int xPixel = e.getX();
+    int yPixel = fixY(e.getY());
+
+    if (checkImageDrag(xPixel, yPixel))
+      return;
+
+    xPixel = fixX(xPixel);
+
     mouseClickCount = e.getClickCount();
     isIntegralDrag = (e.isControlDown() && getSpectrum().getIntegrationGraph() != null);
-    int xPixel = fixX(e.getX());
-    int yPixel = fixY(e.getY());
 
     zoomBoxX = xPixel;
     zoomBoxY = (isIntegralDrag ? topPlotAreaPos : yPixel);
@@ -2615,6 +2654,17 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     repaint();
   }
 
+  private boolean checkImageDrag(int xPixel, int yPixel) {
+    if (image2D != null && xPixel > rightPlotAreaPos + 10) {
+      int iSpec = (int) (1.0 * (bottomPlotAreaPos - yPixel) / plotAreaHeight * getSpectrumAt(0).getSubSpectra().size());
+      getSpectrumAt(0).setCurrentSubSpectrum(iSpec);
+      repaint();
+      isMouseDraggedEvent = false;
+      return true;
+    }
+    return false;
+  }
+
   /**
    * Implements mouseReleased in interface MouseListener
    * 
@@ -2624,7 +2674,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   public void mouseReleased(MouseEvent e) {
     // Maybe use a fireMouseReleased Method
 
-    if (e.getButton() != MouseEvent.BUTTON1)
+    if (e.getButton() != MouseEvent.BUTTON1 || !isMouseDraggedEvent)
       return;
 
     isMouseReleased = true;
@@ -2783,10 +2833,17 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        the <code>MouseEvent</code>
    */
   private void fireMouseDragged(MouseEvent e) {
+
+    int xPixel = e.getX();
+    int yPixel = fixY(e.getY());
+
+    if (checkImageDrag(xPixel, yPixel))
+      return;
+    
     isMouseDraggedEvent = true; // testing   
     fireMouseMoved(e);
     if (isIntegralDrag) {
-      setMouseFinalXY(fixX(e.getX()), fixY(e.getY()));
+      setMouseFinalXY(fixX(xPixel), yPixel);
       checkIntegral(initX, finalX, false);      
       return;
     }
@@ -2868,7 +2925,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     if (st == null || st == ScriptToken.PLOTAREACOLOR)
       setPlotAreaColor(ds.getColor("plotarea"));
     if (st == null || st == ScriptToken.BACKGROUNDCOLOR)
-      setBackground(ds.getColor("background"));
+      setBackgroundColor(ds.getColor("background"));
     if (st == null || st == ScriptToken.INTEGRALPLOTCOLOR)
       setIntegralPlotColor(ds.getColor("integral"));
   }
@@ -2888,6 +2945,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       setYUnitsOn(parameters.yUnitsOn);
     if (st == null || st == ScriptToken.REVERSEPLOT)
       setReversePlot(parameters.reversePlot);
+    if (st == null || st == ScriptToken.DISPLAY2D)
+      setDisplay2D(parameters.display2D);
   }
 
   public JDXSpectrum getSpectrum() {
@@ -2933,5 +2992,32 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     String Yunits = spectrum.getYUnits();
     return Visible.Colour(spectrum.getXYCoords(), Yunits);
   }
+  
+  private BufferedImage image2D;
+  private int bwidth, bheight;
+  private int bwidthLeft;
 
+  private boolean draw1D = true;
+  
+  private boolean draw2DImage(Graphics g, int width, int height) {
+    if (bwidth != width || bheight != plotAreaHeight) {
+      int[] wh = new int[2];
+      int[] buffer = getSpectrumAt(0).get2dBuffer(bwidth = width, bheight = plotAreaHeight, wh);
+      if (buffer == null) {
+        image2D = null;
+        draw1D = true;
+        return false;
+      }
+      image2D = new BufferedImage(wh[0], wh[1], BufferedImage.TYPE_BYTE_GRAY);
+      WritableRaster raster = image2D.getRaster();
+      raster.setSamples(0, 0, wh[0], wh[1], 0, buffer);
+      widthRatio = 1.0 * (width - wh[0]) / width;
+      bwidthLeft = (int) Math.floor(bwidth - wh[0]) - 20;
+      draw1D = true;// || (widthRatio >= widthRatioMin);
+    }
+    if (image2D != null) {
+      g.drawImage(image2D, bwidthLeft, topPlotAreaPos, null);
+    }
+    return true;    
+  }
 }
