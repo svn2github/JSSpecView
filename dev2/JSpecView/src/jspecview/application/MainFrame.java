@@ -1927,6 +1927,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
           jsvp = selectedJSVPanel;
           if (jsvp == null)
             return;
+          if (!jsvp.getSpectrum().is1D())
+            msg = "Click on the spectrum and use UP or DOWN keys to see subspectra.";
           break;
         case CLOSE:
           close(TextFormat.trimQuotes(value));
