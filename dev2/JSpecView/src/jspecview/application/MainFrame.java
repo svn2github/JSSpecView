@@ -1222,10 +1222,10 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the file
    */
   public void openFile(File file, boolean closeFirst) {
-    if (closeFirst) {
+    if (closeFirst) { // drag/drop
       JDXSource source = findSourceByNameOrId(file.getAbsolutePath());
       if (source != null)
-        closeSource(source);
+         ;
     }
     openFile(file, null, null, -1, -1);
   }
@@ -2881,8 +2881,9 @@ public class MainFrame extends JFrame implements DropTargetListener,
       }
       try {
         if (JDXSpectrum.areScalesCompatible(currentSelectedSource.getSpectra())) {
+          JDXSource source = currentSelectedSource;
           closeSource(currentSelectedSource);
-          overlaySpectra(currentSelectedSource, null);
+          overlaySpectra(source, null);
         } else {
           showUnableToOverlayMessage();
         }
