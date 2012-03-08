@@ -85,7 +85,7 @@ public class JDXSourceStreamTokenizer {
     }
     labelLineNo = lineNo;
     if (Logger.debugging)
-      System.out.println(label);
+      Logger.info(label);
     return cleanLabel(label);
   }
   
