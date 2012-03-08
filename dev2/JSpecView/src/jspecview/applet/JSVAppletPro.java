@@ -50,6 +50,9 @@ import org.jmol.api.JSVInterface;
 
 
 /**
+ * A signed applet that has an Advanced... menu item that pulls up a MainFrame
+ * (blank at the moment)
+ * 
  * @author Bob Hanson St. Olaf College hansonr@stolaf.edu
  */
 
@@ -68,6 +71,7 @@ public class JSVAppletPro extends JSVApplet implements JSVInterface {
     if (mainFrame == null)
       mainFrame = new MainFrame(this);
     mainFrame.setVisible(true);
+    // TODO -- load file?
   }
 
   public void exitJSpecView(boolean withDialog, Object frame) {
