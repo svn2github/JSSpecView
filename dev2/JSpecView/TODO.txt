@@ -1,13 +1,26 @@
-Feel free to add to this file any time! Don't worry about sync problems.
-=============
+Feel free to add to this file any time! Don't worry about sync problems. 
+
+Put new items at top, please.
+
+====TODO=========
+
+Use of Ctrl-/ Ctrl+
+OK for when baseline is at the bottom, needs to work as well for spectra 
+where the baseline is at the top of the page 
+
+Dialog Box for overlay colours, not working
+
+
+=====DONE========
 
 DONE for a block file allow overlaying some of the spectra not necessarily all the spectra
 
-command:   OVERLAY 1.1,1.2 for instance
+  command:   OVERLAY 1.1,1.2 for instance
 
-6th Mar
-turn off RED error icon when file is closed.
+6th Mar turn off RED error icon when file is closed.
 Done
+
+done 8.3.12
 
 bug:
 If I open a file then open another file then open another file
@@ -16,9 +29,6 @@ BUT instead of it showing 1 JDX type it keeps on increasing in the
 list so jcamp-dx shows up 3 times
 and every time I open another file it seems to add another jcamp-dx to
 the drop down file type list.
- 
-Use of Ctrl-/ Ctrl+
-OK for when baseline is at the bottom, needs to work as well for spectra 
-where the baseline is at the top of the page 
 
-Dialog Box for overlay colours, not working
+done 8.3.12
+ 
