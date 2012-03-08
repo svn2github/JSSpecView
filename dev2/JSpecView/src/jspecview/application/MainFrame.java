@@ -1152,7 +1152,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       File file = fc.getSelectedFile();
       properties.setProperty("directoryLastOpenedFile", file.getParent());
-      openFile(file, true);
+      openFile(file.getAbsolutePath(), true);
     }
   }
 
@@ -1162,13 +1162,13 @@ public class MainFrame extends JFrame implements DropTargetListener,
    * @param file
    *        the file
    */
-  public void openFile(File file, boolean closeFirst) {
+  public void openFile(String fileName, boolean closeFirst) {
     if (closeFirst) { // drag/drop
-      JDXSource source = findSourceByNameOrId(file.getAbsolutePath());
+      JDXSource source = findSourceByNameOrId((new File(fileName)).getAbsolutePath());
       if (source != null)
          ;
     }
-    openFile(file, null, null, -1, -1);
+    openFile(fileName, null, -1, -1);
   }
 
   /**
@@ -1177,34 +1177,35 @@ public class MainFrame extends JFrame implements DropTargetListener,
    * @param fileOrURL
    */
   public void openFile(String fileOrURL, int firstSpec, int lastSpec) {
-    if (FileManager.isURL(fileOrURL))
-      openFile(null, fileOrURL, null, firstSpec, lastSpec);
-    else
-      openFile(new File(fileOrURL), null, null, firstSpec, lastSpec);
+      openFile(fileOrURL, null, firstSpec, lastSpec);
   }
 
   private int nOverlay;
   
-  private int openFile(File file, String url, List<JDXSpectrum> specs, int firstSpec, int lastSpec) {
+  private int openFile(String url, List<JDXSpectrum> specs, int firstSpec, int lastSpec) {
     writeStatus("");
     String filePath = null;
     String fileName = null;
     boolean isOverlay = false;
+    File file = null;
     if (specs != null) {
       isOverlay = true;
       fileName = filePath = "Overlay" + (++nOverlay);
     } else if (url != null) {
       try {
+        System.out.println("openFile " + url);
         URL u = new URL(url);
+        System.out.println("openFile " + u);
         fileName = FileManager.getName(url);
         filePath = u.toString();
+        System.out.println("openFile " + fileName + " " + filePath);
         recentJmolName = filePath;
         recentURL = filePath;
       } catch (MalformedURLException e) {
-        writeStatus(e.getMessage());
-        return FILE_OPEN_URLERROR;
+        file = new File(url);
       }
-    } else {
+    } 
+    if (file != null) {
       fileName = recentFileName = file.getName();
       filePath = file.getAbsolutePath();
       recentJmolName = (url == null ? filePath.replace('\\', '/') : url);
@@ -1797,7 +1798,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
           dtde.getDropTargetContext().dropComplete(true);
           File[] files = (File[]) list.toArray();
           for (int i = 0; i < list.size(); i++)
-            openFile(files[i], true);
+            openFile(files[i].getAbsolutePath(), true);
 /*          
           
           
@@ -1939,7 +1940,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       return;
     System.out.println("JSpecView MainFrame.syncScript: " + script);
     if (!file.equals(recentJmolName)) {
-      openFile(null, file,null, -1, -1);
+      openFile(file, null, -1, -1);
     }
     if (!selectPanelByPeak(index))
       script = null;
@@ -2147,7 +2148,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       sb.append(",").append(id);
     }
     if (slist.size() > 1 && JDXSpectrum.areScalesCompatible(slist))
-      openFile(null, sb.toString().substring(1), slist, -1, -1);
+      openFile(sb.toString().substring(1), slist, -1, -1);
   }
 
   private void setFrame(int i) {
@@ -2772,7 +2773,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     if (url == null)
       return;
     recentOpenURL = url;
-    openFile(null, url.indexOf("://") < 0 ? "file:/" + url : url, null, -1, -1);
+    openFile(url, null, -1, -1);
   };
 
   protected void windowClosing_actionPerformed() {
@@ -2796,10 +2797,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the ActionEvent
    */
   protected void openRecent_actionPerformed(ActionEvent e) {
-    JMenuItem menuItem = (JMenuItem) e.getSource();
-    String filePath = menuItem.getText();
-    File file = new File(filePath);
-    openFile(file, true);
+    openFile(((JMenuItem) e.getSource()).getText(), true);
   }
 
   /**

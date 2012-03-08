@@ -41,7 +41,6 @@
 package jspecview.application;
 
 import java.awt.Component;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.Properties;
@@ -82,13 +81,7 @@ public class JSpecView implements JSVInterface {
       else
         for (int i = 0; i < args.length; i++) {
           System.out.println("JSpecView is attempting to open " + args[i]);
-          String filePath = args[i];
-          File file = new File(filePath);
-          if (file.exists()) {
-            frame.openFile(file, false);
-          } else {
-            frame.writeStatus("File: " + filePath + " does not exist");
-          }
+          frame.openFile(args[i], false);
         }
     }
     frame.setVisible(true);
