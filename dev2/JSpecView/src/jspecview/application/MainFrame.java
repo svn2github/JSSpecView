@@ -356,6 +356,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private ImageIcon splitIcon;
   private ImageIcon overlayKeyIcon;
   private ImageIcon errorLogIcon;
+  private ImageIcon errorLogYellowIcon;
   private ImageIcon errorLogRedIcon;
   private CommandHistory commandHistory;
 
@@ -380,6 +381,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     overlayKeyIcon = new ImageIcon(cl.getResource("icons/overlayKey24.gif"));
     errorLogIcon = new ImageIcon(cl.getResource("icons/errorLog24.gif"));
     errorLogRedIcon = new ImageIcon(cl.getResource("icons/errorLogRed24.gif"));
+    errorLogYellowIcon = new ImageIcon(cl.getResource("icons/errorLogYellow24.gif"));
   }
 
   /**
@@ -681,7 +683,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
           String filePath = args[i];
           File file = new File(filePath);
           if (file.exists()) {
-            frame.openFile(file);
+            frame.openFile(file, false);
           } else {
             frame.writeStatus("File: " + filePath + " does not exist");
           }
@@ -1210,7 +1212,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       File file = fc.getSelectedFile();
       properties.setProperty("directoryLastOpenedFile", file.getParent());
-      openFile(file);
+      openFile(file, true);
     }
   }
 
@@ -1220,7 +1222,12 @@ public class MainFrame extends JFrame implements DropTargetListener,
    * @param file
    *        the file
    */
-  public void openFile(File file) {
+  public void openFile(File file, boolean closeFirst) {
+    if (closeFirst) {
+      JDXSource source = findSourceByNameOrId(file.getAbsolutePath());
+      if (source != null)
+        closeSource(source);
+    }
     openFile(file, null, null, -1, -1);
   }
 
@@ -1372,11 +1379,11 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private void setCurrentSource(JDXSource source) {
     currentSelectedSource = source;
     boolean isError = (source != null && source.getErrorLog().length() > 0);
-    setError(isError);
+    setError(isError, (isError && source.getErrorLog().indexOf("Warning") >= 0));
   }
 
-  private void setError(boolean isError) {
-    errorLogButton.setIcon(isError ? errorLogRedIcon : errorLogIcon);
+  private void setError(boolean isError, boolean isWarningOnly) {
+    errorLogButton.setIcon(isWarningOnly? errorLogYellowIcon : isError ? errorLogRedIcon : errorLogIcon);
     errorLogButton.setEnabled(isError);
     errorLogMenuItem.setEnabled(isError);
   }
@@ -1608,8 +1615,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
   public void closeSource(JDXSource source) {
     // Remove nodes and dispose of frames
     String fileName = (source == null ? null : source.getFilePath());
-    if (source == null)
-      fileCount = 0;
     List<JSVTreeNode> toDelete = new ArrayList<JSVTreeNode>();
     Enumeration<JSVTreeNode> enume = rootNode.children();
     while (enume.hasMoreElements()) {
@@ -1630,7 +1635,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     for (int i = 0; i < toDelete.size(); i++)
       spectraTreeModel.removeNodeFromParent(toDelete.get(i));
     selectedJSVPanel = null;
-    setError(false);
+    setError(false, false);
     if (source != null) {
       List<JDXSpectrum> spectra = source.getSpectra();
       for (int i = 0; i < spectra.size(); i++) {
@@ -1653,8 +1658,19 @@ public class MainFrame extends JFrame implements DropTargetListener,
     else
       setFrame(specNodes.size() - 1);
     recentJmolName = null;
+    setFileCount();
     System.gc();
     Logger.checkMemory();
+  }
+
+  private void setFileCount() {
+    int max = 0;
+    for (int i = 0; i < specNodes.size(); i++) {
+      float f = Parser.parseFloat(specNodes.get(i).id);
+      if (f >= max + 1)
+        max = (int) Math.floor(f);
+    }
+    fileCount = max;
   }
 
   private int fileCount = 0;
@@ -1830,7 +1846,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
         dtde.getDropTargetContext().dropComplete(true);
         File[] files = (File[]) list.toArray();
         for (int i = 0; i < list.size(); i++)
-          openFile(files[i]);
+          openFile(files[i], true);
       } else {
         dtde.rejectDrop();
       }
@@ -2728,7 +2744,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     JMenuItem menuItem = (JMenuItem) e.getSource();
     String filePath = menuItem.getText();
     File file = new File(filePath);
-    openFile(file);
+    openFile(file, true);
   }
 
   /**
