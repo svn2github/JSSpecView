@@ -462,7 +462,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
     setPlotColors(Parameters.defaultPlotColors);
 
-    getMultiScaleData(0, 0, startIndices, endIndices);
+    getMultiScaleData(0, 0, 0, 0, startIndices, endIndices);
     //add data to zoomInfoList
     zoomInfoList = new ArrayList<MultiScaleData>();
     zoomInfoList.add(multiScaleData);
@@ -470,16 +470,20 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     setBorder(BorderFactory.createLineBorder(Color.lightGray));
   }
 
-  private void getMultiScaleData(double y1, double y2, int[] startIndices,
+  private void getMultiScaleData(double x1, double x2, double y1, double y2, int[] startIndices,
                                  int[] endIndices) {
-    //List<JDXSpectrum> subSpecs = getSpectrumAt(0).getSubSpectra(); 
-    //if (subSpecs == null)
-      // this did not work - way too sharp peaks
-    //else
-      //multiScaleData = new MultiScaleData(subSpecs, 0, 0, 10, 10, getSpectrum().isContinuous());  
-
-    multiScaleData = new MultiScaleData(spectra, y1, y2,
-        startIndices, endIndices, 10, 10, getSpectrum().isContinuous());
+    if (!getSpectrumAt(0).isForcedSubset()) {
+      multiScaleData = new MultiScaleData(spectra, y1, y2, startIndices,
+          endIndices, 10, 10, getSpectrumAt(0).isContinuous());
+    } else if (y1 == y2) {
+      //start up, forced subsets (too many spectra) 
+      multiScaleData = new MultiScaleData(getSpectrumAt(0).getSubSpectra(), y1,
+          y2, 10, 10, getSpectrum().isContinuous());
+    } else {
+      multiScaleData = new MultiScaleData(graphsTemp, y1, y2, startIndices,
+          endIndices, 10, 10, getSpectrumAt(0).isContinuous());
+      multiScaleData.setXRange(x1, x2, 10);
+    }
   }
 
   /**
@@ -831,7 +835,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
   private boolean display2D = true;
 
-  private double widthRatio;
+  private double widthRatio = 1;
 
 //  private double widthRatioMin;
   
@@ -1253,9 +1257,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     userYFactor = getSpectrum().getUserYFactor();
     setScaleFactors(multiScaleData);
 
-    //widthRatioMin = 0.3;
+    //widthRatio = (getSpectrumAt(0).isForcedSubset() ? 1 : 0.3);
     draw1D = true;
     if (getSpectrumAt(0).getSubSpectra() != null 
+        && !getSpectrumAt(0).isForcedSubset() 
         && display2D && draw2DImage(g, width, height)) {
       if (!draw1D)
         return;
@@ -1288,7 +1293,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     }
 
     int subIndex = getSpectrumAt(0).getSubIndex();
-    if (subIndex >= 0) {
+    if (subIndex >= 0 && !getSpectrumAt(0).isForcedSubset()) {
       g.setColor(plotColors[0]);
       int y = ((int) (plotAreaHeight * 1.0 * (subIndex + 1) / getSpectrumAt(0).getSubSpectra().size()));
       g.fillRect(rightPlotAreaPos, bottomPlotAreaPos - y, 3, y);
@@ -1491,7 +1496,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       }
       if (multiScaleData.minYOnScale < 0) {
         int y = yPixels(0);
-        g.drawLine(rightPlotAreaPos, invertY(y), leftPlotAreaPos, invertY(y));
+        g.drawLine(rightPlotAreaPos, y, leftPlotAreaPos, y);
       }
     }
   } // End drawPlot
@@ -1569,6 +1574,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private int zoomBoxY;
 
   private int currZoomBoxY;
+
+  private Graph[] graphsTemp = new Graph[1];
+  
   private NumberFormat getFormatter(String hash) {
     NumberFormat formatter = htFormats.get(hash);
     if (formatter == null)
@@ -1941,10 +1949,17 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
                                        int[] startIndices, int[] endIndices) {
     if (!zoomEnabled)
       return false;
-    if (!multiScaleData.setDataPointIndices(spectra, initX, finalX,
-        minNumOfPointsForZoom, startIndices, endIndices))
-      return false;
-    getMultiScaleData(yPt1, yPt2, startIndices, endIndices);
+    if (getSpectrumAt(0).isForcedSubset()) {
+      graphsTemp[0] = getSpectrum();
+      if (!multiScaleData.setDataPointIndices(graphsTemp, initX, finalX,
+          minNumOfPointsForZoom, startIndices, endIndices, false))
+        return false;
+    } else {
+      if (!multiScaleData.setDataPointIndices(spectra, initX, finalX,
+          minNumOfPointsForZoom, startIndices, endIndices, true))
+        return false;
+    }
+    getMultiScaleData(initX, finalX, yPt1, yPt2, startIndices, endIndices);
     // add to and clean the zoom list
     if (zoomInfoList.size() > currentZoomIndex + 1)
       for (int i = zoomInfoList.size() - 1; i > currentZoomIndex; i--)
@@ -2949,10 +2964,12 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     case KeyEvent.VK_DOWN:
     case KeyEvent.VK_UP:
       int dir = (e.getKeyCode() == KeyEvent.VK_DOWN ? 1 : -1);
-      if (getSpectrumAt(0).is1D())
+      if (getSpectrumAt(0).getSubSpectra() == null)
         notifyZoomListeners(dir, Double.NaN, Double.NaN, Double.NaN);
       else {
-        getSpectrumAt(0).advanceSubSpectrum(-dir);
+        
+        advanceSubSpectrum(-dir);
+        
         repaint();
       }
       e.consume();
@@ -2960,6 +2977,16 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     }
   }
 
+  public void advanceSubSpectrum(int i) {
+    if (getSpectrumAt(0).advanceSubSpectrum(i))
+      multiScaleData.setXRange(getSpectrum());
+  }
+
+  public void setCurrentSubSpectrum(int i) {
+    if (getSpectrumAt(0).setCurrentSubSpectrum(i))
+      multiScaleData.setXRange(getSpectrum());
+  }
+  
   private void scaleYBy(double factor) {
     doZoom(multiScaleData.minX, multiScaleData.minY, 
         multiScaleData.maxX, multiScaleData.maxY / factor, true);
@@ -3083,6 +3110,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private int xLine0, xLine1;
   private int[] imageWidthHeight = new int[2];
   private boolean draw2DImage(Graphics g, int width, int height) {
+    //widthRatio = 1;
     if (bwidth != width || bheight != plotAreaHeight) {
       int[] buffer = getSpectrumAt(0).get2dBuffer(bwidth = width, bheight = plotAreaHeight, imageWidthHeight, multiScaleData.minY, multiScaleData.maxY);
       if (buffer == null) {

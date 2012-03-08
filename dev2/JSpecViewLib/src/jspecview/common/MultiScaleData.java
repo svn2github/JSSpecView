@@ -66,7 +66,7 @@ public class MultiScaleData extends ScaleData {
     super(Coordinate.getMinX(spectra, startList, endList), 
         Coordinate.getMaxX(spectra, startList, endList), 
         Coordinate.getMinYUser(spectra, startList, endList), 
-        Coordinate.getMaxYUser(spectra,startList, endList));
+        Coordinate.getMaxYUser(spectra, startList, endList));
     startDataPointIndices = startList;
     endDataPointIndices = endList;
     numOfPointsList = new int[startList.length];
@@ -92,8 +92,9 @@ public class MultiScaleData extends ScaleData {
   public MultiScaleData(List<JDXSpectrum> spectra, double yPt1, double yPt2,
       int initNumXDivisions, int initNumYDivisions,
       boolean isContinuous) {
-    super(Coordinate.getMinX(spectra.get(0).getXYCoords()), 
-        Coordinate.getMaxX(spectra.get(0).getXYCoords()),
+    // forced subsets
+    super(Coordinate.getMinX(spectra), 
+        Coordinate.getMaxX(spectra),
         Coordinate.getMinYUser(spectra), 
         Coordinate.getMaxYUser(spectra));
     int n =  spectra.get(0).getXYCoords().length - 1;
@@ -118,40 +119,55 @@ public class MultiScaleData extends ScaleData {
                                             double initX,
                                             double finalX, int minPoints,
                                             int[] startIndices,
-                                            int[] endIndices) {
-    int ptCount = 0;
+                                            int[] endIndices, boolean useRange) {
     int nSpectraOK = 0;
     int nSpectra = startIndices.length;
-    int index = 0;
     for (int i = 0; i < nSpectra; i++) {
       Coordinate[] xyCoords = spectra[i].getXYCoords();
-      int iStart = startDataPointIndices[i];
-      int iEnd = endDataPointIndices[i];
-      for (index = iStart; index <= iEnd; index++) {
-        double x = xyCoords[index].getXVal();
-        if (x >= initX) {
-          startIndices[i] = index;
-          break;
-        }
-      }
-
-      // determine endDataPointIndex
-      for (; index <= iEnd; index++) {
-        double x = xyCoords[index].getXVal();
-        ptCount++;
-        if (x >= finalX) {
-          break;
-        }
-      }
-
-      if (ptCount >= minPoints) {
+      int iStart = (useRange ? startDataPointIndices[i] : 0);
+      int iEnd = (useRange ? endDataPointIndices[i] : xyCoords.length - 1);
+      if (setXRange(i, xyCoords, initX, finalX, iStart, iEnd, startIndices, endIndices)
+          >= minPoints)
         nSpectraOK++;
+    }
+    return (nSpectraOK == nSpectra);
+  }
+
+  private static int setXRange(int i, Coordinate[] xyCoords, double initX, double finalX, int iStart, int iEnd, int[] startIndices, int[] endIndices) {
+    int index = 0;
+    int ptCount = 0;
+    for (index = iStart; index <= iEnd; index++) {
+      double x = xyCoords[index].getXVal();
+      if (x >= initX) {
+        startIndices[i] = index;
+        break;
       }
-      ptCount = 0;
-      endIndices[i] = index - 1;
     }
 
-    return (nSpectraOK == nSpectra);
+    // determine endDataPointIndex
+    for (; index <= iEnd; index++) {
+      double x = xyCoords[index].getXVal();
+      ptCount++;
+      if (x >= finalX) {
+        break;
+      }
+    }
+    endIndices[i] = index - 1;
+    return ptCount;
+  }
+
+  public void setXRange(Graph graph) {
+    int n = graph.getXYCoords().length - 1;
+    startDataPointIndices[0] = 0;
+    endDataPointIndices[0] = n;
+    setXRange(0, graph.getXYCoords(), minX, maxX, 0, n, startDataPointIndices, endDataPointIndices);
+  }
+
+  public void setXRange(double x1, double x2, int initNumXDivisions) {
+    // TODO Auto-generated method stub
+    minX = x1;
+    maxX = x2;
+    setXScale(initNumXDivisions);
   }
 
  }

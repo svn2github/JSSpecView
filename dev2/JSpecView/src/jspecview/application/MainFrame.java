@@ -1921,13 +1921,16 @@ public class MainFrame extends JFrame implements DropTargetListener,
           break;          
         case LOAD:
           tokens = ScriptToken.getTokens(value);
+          String filename = tokens.get(0);
           pt = 0;
-          if (tokens.size() > 1 && tokens.get(0).equalsIgnoreCase("APPEND")) {
-            pt++;
+          if (filename.equalsIgnoreCase("APPEND")) {
+            filename = tokens.get(++pt);
           } else {
+            if (filename.equals("\"\"") && currentSelectedSource != null)
+              filename = currentSelectedSource.getFilePath(); 
             close("all");
           }
-          String filename = TextFormat.trimQuotes(tokens.get(pt));
+          filename = TextFormat.trimQuotes(filename);
           int firstSpec = (pt + 1 < tokens.size() ? Integer.valueOf(tokens.get(++pt)): -1); 
           int lastSpec = (pt + 1 < tokens.size() ? Integer.valueOf(tokens.get(++pt)) : firstSpec); 
           openFile(filename, firstSpec, lastSpec);

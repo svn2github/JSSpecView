@@ -78,9 +78,9 @@ public class JDXSource extends JDXHeader {
    * @param spectrum
    *        the spectrum to be added
    */
-  public void addJDXSpectrum(JDXSpectrum spectrum) {
+  public void addJDXSpectrum(JDXSpectrum spectrum, boolean forceSub) {
     int n = jdxSpectra.size();
-    if (n == 0 || !jdxSpectra.get(n - 1).addSubSpectrum(spectrum))
+    if (n == 0 || !jdxSpectra.get(n - 1).addSubSpectrum(spectrum, forceSub))
       jdxSpectra.add(spectrum);
   }
 
@@ -137,7 +137,7 @@ public class JDXSource extends JDXHeader {
   public static JDXSource createOverlay(String name, List<JDXSpectrum> specs) {
     JDXSource source = new JDXSource(TYPE_OVERLAY);
     for (int i = 0; i < specs.size(); i++)
-      source.addJDXSpectrum(specs.get(i));
+      source.addJDXSpectrum(specs.get(i), false);
     return source;
   }
 

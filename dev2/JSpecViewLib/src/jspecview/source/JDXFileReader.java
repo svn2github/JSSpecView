@@ -201,11 +201,13 @@ public class JDXFileReader {
     return source;
   }
 
-  private int firstSpec = -1;
-  private int lastSpec = -1;
+  private int firstSpec = 0;
+  private int lastSpec = 0;
   private int nSpec = 0;
 
   private double blockID;
+
+  private boolean forceSub;
   
   private boolean addSpectrum(JDXSpectrum spectrum) {
     nSpec++;
@@ -214,7 +216,7 @@ public class JDXFileReader {
     if (lastSpec > 0 && nSpec > lastSpec)
       return !(done = true);
     spectrum.setBlockID(blockID);
-    source.addJDXSpectrum(spectrum);
+    source.addJDXSpectrum(spectrum, forceSub);
     System.out.println("Spectrum " + nSpec);
     return true;
   }
@@ -243,13 +245,19 @@ public class JDXFileReader {
     String label = "";
     boolean isNew = (source.type == JDXSource.TYPE_SIMPLE);
     while ((label = t.getLabel()) != null
-        && !label.equals("##TITLE"))
+        && !label.equals("##TITLE")) {
       if (isNew) {
         if (!readHeaderLabel(source, label, t, errorLog, obscure))
           addHeader(sourceLDRTable, t.getRawLabel(), t.getValue());
       } else {
         t.getValue();
       }
+      if (label.equals("##BLOCKS")) {
+        int nBlocks = Parser.parseInt(t.getValue());
+        if (nBlocks > 100 && firstSpec <=0)
+          forceSub = true;
+      }
+    }
 
     // If ##TITLE not found throw Exception
     if (!label.equals("##TITLE"))

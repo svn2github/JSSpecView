@@ -436,10 +436,10 @@ public class Coordinate {
     return min;
   }
 
-  public static double getMinX(List<JDXSpectrum> spectra, int start, int end) {
+  public static double getMinX(List<JDXSpectrum> spectra) {
     double min = Double.MAX_VALUE;
     for (int i = 0; i < spectra.size(); i++) {
-      double tmp = getMinX(spectra.get(i).getXYCoords(), start, end);
+      double tmp = getMinX(spectra.get(i).getXYCoords());
       if (tmp < min)
         min = tmp;
     }  
@@ -502,10 +502,10 @@ public class Coordinate {
     return max;
   }
 
-  public static double getMaxX(List<JDXSpectrum> spectra, int start, int end) {
+  public static double getMaxX(List<JDXSpectrum> spectra) {
     double max = -Double.MAX_VALUE;
     for (int i = 0; i < spectra.size(); i++) {
-      double tmp = getMaxX(spectra.get(i).getXYCoords(), start, end);
+      double tmp = getMaxX(spectra.get(i).getXYCoords());
       if (tmp > max)
         max = tmp;
     }  

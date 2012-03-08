@@ -63,7 +63,11 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   private int currentSubSpectrum;
   private double y2D = Double.NaN;
   private double blockID; // a random number generated in JDXFileReader
-  
+  private boolean isForcedSubset;
+  public boolean isForcedSubset() {
+    return isForcedSubset;
+  }
+
   /**
    * whether the x values were converted from HZ to PPM
    */
@@ -982,13 +986,14 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return (subSpectra == null ? this : subSpectra.get(currentSubSpectrum));
   }
 
-  public void advanceSubSpectrum(int dir) {
-    setCurrentSubSpectrum(currentSubSpectrum + dir);
+  public boolean advanceSubSpectrum(int dir) {
+    return setCurrentSubSpectrum(currentSubSpectrum + dir);
   }
   
 
-  public void setCurrentSubSpectrum(int n) {
+  public boolean setCurrentSubSpectrum(int n) {
     currentSubSpectrum = Math.max(0, Math.min(n, subSpectra.size() - 1));
+    return isForcedSubset;
   }
 
   /**
@@ -998,13 +1003,14 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
    * @param spectrum
    * @return
    */
-  public boolean addSubSpectrum(JDXSpectrum spectrum) {
-    if (numDim < 2 || blockID != spectrum.blockID
+  public boolean addSubSpectrum(JDXSpectrum spectrum, boolean forceSub) {
+    if (!forceSub && (numDim < 2 || blockID != spectrum.blockID)
         || !areScalesCompatible(this, spectrum))
       return false;
+    isForcedSubset = forceSub; // too many blocks (>100)
     if (subSpectra == null) {
       subSpectra = new ArrayList<JDXSpectrum>();
-      addSubSpectrum(this);
+      addSubSpectrum(this, true);
     }
     subSpectra.add(spectrum);
     spectrum.setTitle(subSpectra.size() + ": " + spectrum.title);
@@ -1030,7 +1036,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   public int[] get2dBuffer(int width, int height, int[] wh, double bufMinY, double bufMaxY) {
     if (bwidth == width && bheight == height)
       return buf2d;
-    if (subSpectra == null)
+    if (subSpectra == null || !subSpectra.get(0).isContinuous())
       return null;
     int nSpec = subSpectra.size();
     double grayFactor = 255 / (bufMaxY - bufMinY);

@@ -149,7 +149,7 @@ abstract class XMLReader {
     spectrum.setYUnits(yaxisUnit);
 
     spectrum.setXYCoords(xyCoords);
-    source.addJDXSpectrum(spectrum);
+    source.addJDXSpectrum(spectrum, false);
   }
 
   protected boolean checkPointCount() {

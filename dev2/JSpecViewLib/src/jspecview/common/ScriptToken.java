@@ -62,7 +62,7 @@ public enum ScriptToken {
   INTERFACE("INTERFACE"),
   IRMODE("IRMODE", "A or T or ?"),
   LABEL("LABEL", "x y [color and/or \"text\"]"),
-  LOAD("LOAD", "[APPEND] \"fileName\" [first] [last]"),
+  LOAD("LOAD", "[APPEND] \"fileName\" [first] [last]; use \"\" to reload current file"),
   MENUON("MENUON"),
   OBSCURE("OBSCURE"),
   OVERLAY("OVERLAY", "spectrumID[*factor], spectrumID[*factor], ..."),

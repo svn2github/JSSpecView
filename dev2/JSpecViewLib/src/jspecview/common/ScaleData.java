@@ -196,9 +196,21 @@ public class ScaleData {
   protected ScaleData setScale(int initNumXDivisions, int initNumYDivisions, 
                                boolean isContinuous) {
 
-    //numInitXdiv = initNumXDivisions;
-    //numInitYdiv = initNumYDivisions;
+    setXScale(initNumXDivisions);
+    if (!isContinuous)
+      maxXOnScale += xStep / 2; // MS should not end with line at end
 
+    // Y Scale
+    
+    if (minY == 0 && maxY == 0)
+      maxY = 1;
+    yStep = getStep(minY, maxY, initNumYDivisions, hashNums, 1);
+    minYOnScale = yStep * Math.floor(minY / yStep);
+    maxYOnScale = yStep * Math.ceil(maxY / yStep);
+    return this;
+  }
+
+  protected void setXScale(int initNumXDivisions) {
     // X Scale
     xStep = getStep(minX, maxX, initNumXDivisions, hashNums, 0);
     minXOnScale = xStep * Math.floor(minX / xStep);
@@ -211,17 +223,7 @@ public class ScaleData {
     //System.out.println("scaleData xStep minX firstX maxX minXonScale maxXonScale\n"
     //    + xStep + "\t" + minX + "\t" + firstX + "\t" + maxX + "\t" + minXOnScale + "\t"
     //    + maxXOnScale);
-    if (!isContinuous)
-      maxXOnScale += xStep / 2; // MS should not end with line at end
     //numOfXDivisions = (int) Math.ceil((maxXOnScale - minXOnScale) / xStep);
-    // Y Scale
-    if (minY == 0 && maxY == 0)
-      maxY = 1;
-    yStep = getStep(minY, maxY, initNumYDivisions, hashNums, 1);
-    minYOnScale = yStep * Math.floor(minY / yStep);
-    maxYOnScale = yStep * Math.ceil(maxY / yStep);
-    //numOfYDivisions = (int) Math.ceil((maxYOnScale - minYOnScale) / yStep);
-    return this;
   }
 
   private static double getStep(double min, double max, int nDiv, int[] hashNums, int i) {
