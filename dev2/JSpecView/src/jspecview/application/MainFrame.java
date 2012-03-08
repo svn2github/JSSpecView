@@ -163,7 +163,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private final static long serialVersionUID = 1L;
   private final static int FILE_OPEN_OK = 0;
   private final static int FILE_OPEN_ALREADY = -1;
-  private final static int FILE_OPEN_URLERROR = -2;
+  //private final static int FILE_OPEN_URLERROR = -2;
   private final static int FILE_OPEN_ERROR = -3;
   private final static int FILE_OPEN_NO_DATA = -4;
   private final static int MAX_RECENT = 10;
@@ -455,11 +455,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
             : new JFileChooser());
 
     JSpecViewFileFilter filter = new JSpecViewFileFilter();
-    filter = new JSpecViewFileFilter();
-    filter.addExtension("jdx");
-    filter.addExtension("dx");
-    filter.setDescription("JCAMP-DX Files");
-    fc.setFileFilter(filter);
 
     filter = new JSpecViewFileFilter();
     filter.addExtension("xml");
@@ -467,6 +462,13 @@ public class MainFrame extends JFrame implements DropTargetListener,
     filter.addExtension("cml");
     filter.setDescription("CML/XML Files");
     fc.setFileFilter(filter);
+
+    filter = new JSpecViewFileFilter();
+    filter.addExtension("jdx");
+    filter.addExtension("dx");
+    filter.setDescription("JCAMP-DX Files");
+    fc.setFileFilter(filter);
+
   }
 
   /**
@@ -1142,14 +1144,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    * Shows dialog to open a file
    */
   void showFileOpenDialog() {
-    JSpecViewFileFilter filter = new JSpecViewFileFilter();
-    filter.addExtension("jdx");
-    filter.addExtension("dx");
-    filter.setDescription("JCAMP-DX Files");
-    fc.setFileFilter(filter);
-    int returnVal = fc.showOpenDialog(this);
-
-    if (returnVal == JFileChooser.APPROVE_OPTION) {
+    if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
       File file = fc.getSelectedFile();
       properties.setProperty("directoryLastOpenedFile", file.getParent());
       openFile(file.getAbsolutePath(), true);
