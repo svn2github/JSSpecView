@@ -238,26 +238,140 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
         : (getParameter(key) != null ? getParameter(key) : def);
   }
 
+  /////////////// public methods called from page ////////////////
+  
+  /**
+   * Returns the current internal version of the Applet
+   * 
+   * @return String
+   */
+  public String getAppletVersion() {
+    return JSVApplet.APPLET_VERSION;
+  }
+
+  /**
+   * Get Applet information
+   * 
+   * @return the String "JSpecView Applet"
+   */
+  @Override
+  public String getAppletInfo() {
+    return "JSpecView Applet " + APPLET_VERSION;
+  }
+  
+  /**
+   * Calculates the predicted colour of the Spectrum
+   */
+  public void setSolutionColor(boolean showMessage) {
+    sltnclr = selectedJSVPanel.getSolutionColor();
+    if (showMessage)
+      JSVPanel.showSolutionColor((Component)this, sltnclr);
+  }
+
+  /**
+   * Returns the calculated colour of a visible spectrum (Transmittance)
+   * 
+   * @return Color
+   */
+
+  public String getSolnColour() {
+    return sltnclr;
+  }
+
+  /**
+   * Method that can be called from another applet or from javascript to return
+   * the coordinate of clicked point in the plot area of the <code>
+   * JSVPanel</code>
+   * 
+   * @return A String representation of the coordinate
+   */
+  public String getCoordinate() {
+    if (selectedJSVPanel != null) {
+      Coordinate coord = selectedJSVPanel.getClickedCoordinate();
+
+      if (coord != null)
+        return coord.getXVal() + " " + coord.getYVal();
+    }
+
+    return "";
+  }
+
+  /**
+   * Method that can be called from another applet or from javascript that
+   * toggles the grid on a <code>JSVPanel</code>
+   */
+  public void toggleGrid() {
+    if (selectedJSVPanel != null) {
+      selectedJSVPanel.setGridOn(!selectedJSVPanel.isGridOn());
+      repaint();
+    }
+  }
+
+  /**
+   * Method that can be called from another applet or from javascript that
+   * toggles the coordinate on a <code>JSVPanel</code>
+   */
+  public void toggleCoordinate() {
+    if (selectedJSVPanel != null) {
+      selectedJSVPanel.setCoordinatesOn(!selectedJSVPanel.isCoordinatesOn());
+      repaint();
+    }
+  }
+
+  /**
+   * Method that can be called from another applet or from javascript that
+   * toggles reversing the plot on a <code>JSVPanel</code>
+   */
+  public void reversePlot() {
+    if (selectedJSVPanel != null) {
+      selectedJSVPanel.setReversePlot(!selectedJSVPanel.isPlotReversed());
+      repaint();
+    }
+  }
+
+
+  /**
+   * Writes a message to the status label
+   * 
+   * @param msg
+   *        the message
+   */
+  public void writeStatus(String msg) {
+    System.out.println("writeStatus: " + msg);
+    //statusTextLabel.setText(msg);
+  }
+
+  public void runScript(String script) {
+    if (scriptQueue == null)
+      processCommand(script);
+    else
+      scriptQueue.add(script);
+  }
+  
   private String appletID;
   private String syncID;
 
   private Thread commandWatcherThread;
 
   /**
-   * Initializes applet with parameters and load the <code>JDXSource</code>
+   * Initializes applet with parameters and load the <code>JDXSource</code> 
+   * called by the browser
+   * 
    */
   @Override
   public void init() {
     try {
       jFileChooser = new JFileChooser();
       isSignedApplet = true;
-      commandWatcherThread = new Thread(new CommandWatcher());
-      commandWatcherThread.setName("CommmandWatcherThread");
-      commandWatcherThread.start();
     } catch (Exception e) {
       // just not a signed applet
       //e.printStackTrace();
     }
+    scriptQueue = new ArrayList<String>();
+    commandWatcherThread = new Thread(new CommandWatcher());
+    commandWatcherThread.setName("CommmandWatcherThread");
+    commandWatcherThread.start();
+    
     initParams(getParameter("script"));
     if (appletReadyCallbackFunctionName != null && fullName != null)
       callToJavaScript(appletReadyCallbackFunctionName, new Object[] {
@@ -291,16 +405,6 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     getContentPane().removeAll();
     appletPanel = new JPanel(new BorderLayout());
     getContentPane().add(appletPanel);
-  }
-
-  /**
-   * Get Applet information
-   * 
-   * @return the String "JSpecView Applet"
-   */
-  @Override
-  public String getAppletInfo() {
-    return "JSpecView Applet " + APPLET_VERSION;
   }
 
   /**
@@ -552,17 +656,6 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
   }
 
   /**
-   * Writes a message to the status label
-   * 
-   * @param msg
-   *        the message
-   */
-  public void writeStatus(String msg) {
-    System.out.println("writeStatus: " + msg);
-    //statusTextLabel.setText(msg);
-  }
-
-  /**
    * Shows the header information for the Spectrum
    * 
    * @param e
@@ -580,15 +673,6 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     JScrollPane scrollPane = new JScrollPane(table);
     JOptionPane.showMessageDialog(this, scrollPane, "Header Information",
         JOptionPane.PLAIN_MESSAGE);
-  }
-
-  /**
-   * Calculates the predicted colour of the Spectrum
-   */
-  public void setSolutionColor(boolean showMessage) {
-    sltnclr = selectedJSVPanel.getSolutionColor();
-    if (showMessage)
-      JSVPanel.showSolutionColor((Component)this, sltnclr);
   }
 
   /**
@@ -932,77 +1016,21 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
   }
 
   /**
-   * Returns the current internal version of the Applet
+   * Loads a new file into the existing applet window
    * 
-   * @return String
+   * @param tmpFilePath
+   *        String
    */
-  public String getAppletVersion() {
-    return JSVApplet.APPLET_VERSION;
+  private void setFilePathLocal(String filePath) {
+    newAppletPanel();
+    openDataOrFile(null, null, null, filePath);
+    getContentPane().validate();
+    appletPanel.validate();
   }
 
   /**
-   * Returns the calculated colour of a visible spectrum (Transmittance)
-   * 
-   * @return Color
-   */
-
-  public String getSolnColour() {
-    return sltnclr;
-  }
-
-  /**
-   * Method that can be called from another applet or from javascript to return
-   * the coordinate of clicked point in the plot area of the <code>
-   * JSVPanel</code>
-   * 
-   * @return A String representation of the coordinate
-   */
-  public String getCoordinate() {
-    if (selectedJSVPanel != null) {
-      Coordinate coord = selectedJSVPanel.getClickedCoordinate();
-
-      if (coord != null)
-        return coord.getXVal() + " " + coord.getYVal();
-    }
-
-    return "";
-  }
-
-  /**
-   * Method that can be called from another applet or from javascript that
-   * toggles the grid on a <code>JSVPanel</code>
-   */
-  public void toggleGrid() {
-    if (selectedJSVPanel != null) {
-      selectedJSVPanel.setGridOn(!selectedJSVPanel.isGridOn());
-      repaint();
-    }
-  }
-
-  /**
-   * Method that can be called from another applet or from javascript that
-   * toggles the coordinate on a <code>JSVPanel</code>
-   */
-  public void toggleCoordinate() {
-    if (selectedJSVPanel != null) {
-      selectedJSVPanel.setCoordinatesOn(!selectedJSVPanel.isCoordinatesOn());
-      repaint();
-    }
-  }
-
-  /**
-   * Method that can be called from another applet or from javascript that
-   * toggles reversing the plot on a <code>JSVPanel</code>
-   */
-  public void reversePlot() {
-    if (selectedJSVPanel != null) {
-      selectedJSVPanel.setReversePlot(!selectedJSVPanel.isPlotReversed());
-      repaint();
-    }
-  }
-
-  /**
-   * Gets a new set of parameters from a javascript call
+   * Legacy call -- does NOT carry out process in order 
+   * -- all parameters are set, then the file is loaded
    * 
    * @param newJSVparams
    *        String
@@ -1011,6 +1039,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     initParams(params);
   }
 
+  
   /**
    * Delivers spectrum coded as desired: XY, SQZ, PAC, DIF, AML, CML, SVG
    * 
@@ -1044,22 +1073,9 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
 
   public void setFilePath(String tmpFilePath) {
     if (isSignedApplet)
-      runScript("load " + tmpFilePath);
+      runScriptNow("load " + tmpFilePath);
     else
       setFilePathLocal(tmpFilePath);
-  }
-
-  /**
-   * Loads a new file into the existing applet window
-   * 
-   * @param tmpFilePath
-   *        String
-   */
-  private void setFilePathLocal(String filePath) {
-    newAppletPanel();
-    openDataOrFile(null, null, null, filePath);
-    getContentPane().validate();
-    appletPanel.validate();
   }
 
   /**
@@ -1140,6 +1156,35 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
   }
 
   /**
+   * precede <Peaks here with full name of Jmol applet (including syncID)
+   * 
+   */
+  public void syncScript(String script) {
+    if (script.indexOf("<PeakData") < 0) {
+      runScriptNow(script);
+      return;
+    }
+    String file = Parser.getQuotedAttribute(script, "file");
+    String index = Parser.getQuotedAttribute(script, "index");
+    if (file == null || index == null)
+      return;
+    URL url = null;
+    try {
+      url = new URL(getCodeBase(), file);
+    } catch (MalformedURLException e) {
+      System.out.println("Trouble with URL for " + file);
+      return;
+    }
+    String f = url.toString();
+    if (!f.equals(recentURL))
+      setFilePathLocal(file);
+    if (!selectPanel(index))
+      script = null;
+    selectedJSVPanel.processPeakSelect(script);
+    sendFrameChange(selectedJSVPanel);
+  }
+
+  /**
    * Calls a javascript function given by the function name passing to it the
    * string parameters as arguments
    * 
@@ -1148,7 +1193,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
    * @param parameters
    *        the function arguments as a string in the form "x, y, z..."
    */
-  public void callToJavaScript(String function, Object[] params) {
+  private void callToJavaScript(String function, Object[] params) {
     try {
       JSObject.getWindow(this).call(function, params);
     } catch (Exception npe) {
@@ -1162,7 +1207,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
    * @param params
    *        String
    */
-  public void parseInitScript(String params) {
+  private void parseInitScript(String params) {
     if (params == null)
       params = "";
     StringTokenizer allParamTokens = new StringTokenizer(params, ";");
@@ -1244,7 +1289,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
 
   // for the signed applet to load a remote file, it must
   // be using a thread started by the initiating thread;
-  private List<String> scriptQueue = new ArrayList<String>();
+  private List<String> scriptQueue;
 
   private class CommandWatcher implements Runnable {
     public void run() {
@@ -1258,7 +1303,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
               String scriptItem = scriptQueue.remove(0);
               System.out.println("executing " + scriptItem);
               if (scriptItem != null)
-                runScriptNow(scriptItem);
+                processCommand(scriptItem);
             }
           }
         } catch (InterruptedException ie) {
@@ -1378,9 +1423,13 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     appletPopupMenu.saveAsJDXMenu.setEnabled(continuous);
   }
 
+  protected void processCommand(String script) {
+    runScriptNow(script);
+  }
+
   /////////// simple sync functionality //////////
 
-  public void runScriptNow(String params) {
+  private void runScriptNow(String params) {
     if (params == null)
       params = "";
     params = params.trim();
@@ -1533,47 +1582,11 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     }
   }
 
-  public JDXSpectrum findSpectrumById(String id) {
+  private JDXSpectrum findSpectrumById(String id) {
     int i = Parser.parseInt(id);
     return (i >= 0 && i < specsSaved.size() ? specsSaved.get(i) : null);
   }
 
-  /**
-   * preceed <Peaks here with full name of Jmol applet (including syncID)
-   * 
-   */
-  public void syncScript(String script) {
-    if (script.indexOf("<PeakData") < 0) {
-      runScript(script);
-      return;
-    }
-    String file = Parser.getQuotedAttribute(script, "file");
-    String index = Parser.getQuotedAttribute(script, "index");
-    if (file == null || index == null)
-      return;
-    URL url = null;
-    try {
-      url = new URL(getCodeBase(), file);
-    } catch (MalformedURLException e) {
-      System.out.println("Trouble with URL for " + file);
-      return;
-    }
-    String f = url.toString();
-    if (!f.equals(recentURL))
-      setFilePathLocal(file);
-    if (!selectPanel(index))
-      script = null;
-    selectedJSVPanel.processPeakSelect(script);
-    sendFrameChange(selectedJSVPanel);
-  }
-
-  public void runScript(String script) {
-    if (isSignedApplet)
-      scriptQueue.add(script);
-    else
-      runScriptNow(script);
-  }
-  
   private boolean selectPanel(String index) {
     // what if tabbed? 
     if (jsvPanels == null)
@@ -1588,12 +1601,11 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
   }
 
   /**
-   * This is the method Debbie needs to call from within JSpecView when a peak
-   * is clicked.
+   *  call when a peak is clicked.
    * 
    * @param peak
    */
-  public void sendScript(String peak) {
+  private void sendScript(String peak) {
     selectedJSVPanel.processPeakSelect(peak);
     if (syncCallbackFunctionName == null)
       return;
@@ -1631,6 +1643,9 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
           Integer.valueOf(currentSpectrumIndex + 1) });
   }
 
+  /**
+   * called by notifyPeakPickedListeners in JSVPanel
+   */
   public void peakPicked(PeakPickedEvent eventObj) {
     setSelectedPanel((JSVPanel) eventObj.getSource());
     currentSpectrumIndex = selectedJSVPanel.getIndex();

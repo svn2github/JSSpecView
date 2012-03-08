@@ -1688,7 +1688,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     return null;
   }
 
-  public JDXSpectrum findSpectrumById(String id) {
+  private JDXSpectrum findSpectrumById(String id) {
     for (int i = specNodes.size(); --i >= 0;)
       if (id.equals(specNodes.get(i).id))
         return specNodes.get(i).jsvp.getSpectrum();
@@ -1926,7 +1926,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    */
   public void syncScript(String script) {
     if (script.indexOf("<PeakData") < 0) {
-      runScript(script);
+      runScriptNow(script);
       return;
     }
     String file = Parser.getQuotedAttribute(script, "file");
@@ -1943,13 +1943,23 @@ public class MainFrame extends JFrame implements DropTargetListener,
     sendFrameChange(selectedJSVPanel);
   }
 
-  public void runScript(String params) {
-    if (params == null)
-      params = "";
-    params = params.trim();
+  /**
+   * ScriptInterface requires this. In the applet, this would be queued
+   */
+  public void runScript(String script) {
+    if (jsv != null)
+      jsv.runScript(script);
+    else
+      runScriptNow(script);
+  }
+
+  public void runScriptNow(String script) {
+    if (script == null)
+      script = "";
+    script = script.trim();
     String msg = null;
-    System.out.println("CHECKSCRIPT " + params);
-    StringTokenizer allParamTokens = new StringTokenizer(params, ";");
+    System.out.println("CHECKSCRIPT " + script);
+    StringTokenizer allParamTokens = new StringTokenizer(script, ";");
     if (Logger.debugging) {
       System.out.println("Running in DEBUG mode");
     }

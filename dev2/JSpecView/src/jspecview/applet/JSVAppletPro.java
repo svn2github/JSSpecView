@@ -39,10 +39,7 @@
 
 package jspecview.applet;
 
-
 import java.util.Properties;
-
-import javax.swing.JFrame;
 
 import jspecview.application.MainFrame;
 
@@ -60,13 +57,69 @@ public class JSVAppletPro extends JSVApplet implements JSVInterface {
 
   private static final long serialVersionUID = 1L;
 
-  protected void initParams(String params) {
+  private MainFrame mainFrame;
+
+  @Override
+  public void init() {
     isPro = true;
-    super.initParams(params);
+    super.init();
+  }
+
+  /**
+   * JSVAppletPro uses "script()" for executing a real script, 
+   * not a parameter initialization. "runScript()" will also work
+   * 
+   */
+  
+  @Override
+  public void script(String script) {
+    runScript(script);
   }
   
-  private JFrame mainFrame;
   @Override
+  public void syncScript(String script) {
+    if (mainFrame != null && mainFrame.isVisible())
+      mainFrame.syncScript(script);
+    else
+      super.syncScript(script);      
+  }
+
+  @Override
+  public void writeStatus(String msg) {
+    if (mainFrame != null && mainFrame.isVisible())
+      mainFrame.writeStatus(msg);
+    else
+      super.writeStatus(msg);
+  }
+
+  // The following methods are considered legacy commands and
+  // are not processed by JSpecViewAppletPro
+  // Use script() instead;
+  
+  public String export(String type, int n) { return ""; }
+  public void setSpectrumNumber(int block) {}
+  public void setFilePath(String tmpFilePath) {}
+  public void loadInline(String data) {}
+  public void addHighlight(double x1, double x2, int r, int g, int b, int a) {}
+  public void removeHighlight(double x1, double x2) {}
+  public void removeAllHighlights() {}  
+  public void toggleIntegration() {}
+  
+  /**
+   * executed only by the command processor and menu actions
+   * present only so that processed commands are sent to the right place
+   * 
+   */
+  @Override
+  protected void processCommand(String script) {
+    if (mainFrame != null && mainFrame.isVisible())
+      mainFrame.runScriptNow(script);
+    else
+      super.processCommand(script);
+  } 
+   
+  /////////// JSVInterface ////////////
+  
   void doAdvanced() {
     if (mainFrame == null)
       mainFrame = new MainFrame(this);

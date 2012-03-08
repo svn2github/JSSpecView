@@ -62,6 +62,8 @@ import org.jmol.api.JSVInterface;
  */
 public class JSpecView implements JSVInterface {
 
+  private MainFrame mainFrame;
+
   //  ------------------------ Program Properties -------------------------
 
   public static void main(String args[]) {
@@ -71,25 +73,32 @@ public class JSpecView implements JSVInterface {
     }
 
     JSpecView jsv = new JSpecView();
-    
-    MainFrame frame = new MainFrame((JSVInterface) jsv);
+    jsv.mainFrame = new MainFrame((JSVInterface) jsv);
 
     if (args.length > 0) {
       // check for command-line arguments
       if (args.length == 2 && args[0].equalsIgnoreCase("-script"))
-        frame.runScript(args[1]);
+        jsv.mainFrame.runScriptNow(args[1]);
       else
         for (int i = 0; i < args.length; i++) {
           System.out.println("JSpecView is attempting to open " + args[i]);
-          frame.openFile(args[i], false);
+          jsv.mainFrame.openFile(args[i], false);
         }
     }
-    frame.setVisible(true);
+    jsv.mainFrame.setVisible(true);
     if (args.length == 0)
-      frame.showFileOpenDialog();
+      jsv.mainFrame.showFileOpenDialog();
   }
 
   private static String propertiesFileName = "jspecview.properties";
+
+
+  /**
+   * for the applet, this is queued
+   */
+  public void runScript(String script) {
+    mainFrame.runScriptNow(script);
+  }
 
   public void setProperties(Properties properties) {
     try {
