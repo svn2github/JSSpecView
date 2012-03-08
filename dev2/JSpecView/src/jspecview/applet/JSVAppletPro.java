@@ -68,7 +68,7 @@ public class JSVAppletPro extends JSVApplet implements JSVInterface {
       //           JmolApplet       Jmol
       // 
    * 
-   * JSVAppletPro and JSpecView and JSVAppletPro can create a MainFrame
+   * JSVAppletPro and JSpecView can create a MainFrame
    * MainFrame can interface with Jmol via JmolSyncInterface and JSVInterface
    * JSVAppletPro and JSVApplet can interact with JmolApplet via JavaScript callbacks
    * 
