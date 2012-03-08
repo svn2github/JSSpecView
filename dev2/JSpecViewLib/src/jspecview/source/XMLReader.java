@@ -143,7 +143,7 @@ abstract class XMLReader {
       xyCoords[x] = new Coordinate(xaxisData[x] / xScale, yaxisData[x]);
 
     if (!increasing)
-      xyCoords = JDXDecompressor.reverse(xyCoords);
+      xyCoords = Coordinate.reverse(xyCoords);
       
     spectrum.setXUnits(xaxisUnit);
     spectrum.setYUnits(yaxisUnit);
@@ -223,7 +223,8 @@ abstract class XMLReader {
         continue;
       String theTag = reader.getTagName();
       boolean requiresEndTag = reader.requiresEndTag();
-      //System.out.println(theTag);
+      if (Logger.debugging)
+        Logger.info(tagName);
       for (int i = i0; i <= i1; i++)
         if (theTag.equals(tagNames[i])) {
           process(i, requiresEndTag);

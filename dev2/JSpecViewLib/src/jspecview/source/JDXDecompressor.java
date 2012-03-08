@@ -241,7 +241,7 @@ public class JDXDecompressor {
       System.arraycopy(xyCoords, 0, temp, 0, ipt);
       xyCoords = temp;
     }
-    return (deltaX > 0 ? xyCoords : reverse(xyCoords));
+    return (deltaX > 0 ? xyCoords : Coordinate.reverse(xyCoords));
   }
 
   private void logError(String s) {
@@ -418,16 +418,6 @@ public class JDXDecompressor {
     return Double.valueOf(leader + line.substring(ich0, ich)).doubleValue();
   }
   
-  public static Coordinate[] reverse(Coordinate[] x) {
-    int n = x.length;
-    for (int i = 0; i < n; i++) {
-      Coordinate v = x[i];
-      x[i] = x[--n];
-      x[n] = v;
-    }
-    return x;
-  }
-
   private final static String whiteSpace = " ,\t\n";
 
   private double getValue(String delim) {

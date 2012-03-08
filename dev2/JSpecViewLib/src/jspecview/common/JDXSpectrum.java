@@ -699,19 +699,19 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
    * @param spectrum
    */
   public boolean shouldDisplayXAxisIncreasing(){
-  String datatype = getDataType();
-  String xUnits = getXUnits();
+  String datatype = getDataType().toUpperCase();
+  String xUnits = getXUnits().toUpperCase();
       
-    if (datatype.toUpperCase().contains("NMR") && !(datatype.toUpperCase().contains("FID"))) {
+    if (datatype.contains("NMR") && !(datatype.contains("FID"))) {
       return false;
-    }else if(datatype.toUpperCase().contains("LINK") && xUnits.toUpperCase().contains("CM")){
+    }else if(datatype.contains("LINK") && xUnits.contains("CM")){
       return false;    // I think this was because of a bug where BLOCK files kept type as LINK ?      
-    }else if (datatype.toUpperCase().contains("INFRA") && xUnits.toUpperCase().contains("CM")) {
+    }else if (datatype.startsWith("IR") || datatype.contains("INFRA") && xUnits.contains("CM")) {
         return false;
-    }else if (datatype.toUpperCase().contains("RAMAN") && xUnits.toUpperCase().contains("CM")) {
+    }else if (datatype.contains("RAMAN") && xUnits.contains("CM")) {
         return false;
     }
-    else if(datatype.toUpperCase().contains("VIS") && xUnits.toUpperCase().contains("NANOMETERS")){
+    else if(datatype.contains("VIS") && xUnits.contains("NANOMETERS")){
       return true;
     }
     

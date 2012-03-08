@@ -378,7 +378,7 @@ class CMLReader extends XMLReader {
     firstX = xaxisData[0];
     lastX = xaxisData[npoints - 1];
     firstY = yaxisData[0];
-    increasing = lastX > firstX ? true : false;
+    increasing = (lastX > firstX);
     continuous = false;
 
   }

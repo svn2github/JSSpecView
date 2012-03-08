@@ -158,6 +158,16 @@ public class Coordinate {
     return "[" + xVal + ", " + yVal + "]";
   }
   
+  public static Coordinate[] reverse(Coordinate[] x) {
+    int n = x.length;
+    for (int i = 0; i < n; i++) {
+      Coordinate v = x[i];
+      x[i] = x[--n];
+      x[n] = v;
+    }
+    return x;
+  }
+
   /**
    * Parses data stored in x, y format
    * 
