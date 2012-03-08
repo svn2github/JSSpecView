@@ -50,7 +50,6 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetDragEvent;
@@ -68,6 +67,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyVetoException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -1837,28 +1837,141 @@ public class MainFrame extends JFrame implements DropTargetListener,
   // Called when the user finishes or cancels the drag operation.
   @SuppressWarnings("unchecked")
   public void drop(DropTargetDropEvent dtde) {
-    try {
-      Transferable t = dtde.getTransferable();
-
-      if (t.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-        dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
-        List list = (List) t.getTransferData(DataFlavor.javaFileListFlavor);
-        dtde.getDropTargetContext().dropComplete(true);
-        File[] files = (File[]) list.toArray();
-        for (int i = 0; i < list.size(); i++)
-          openFile(files[i], true);
-      } else {
-        dtde.rejectDrop();
+    Logger.debug("Drop detected...");
+    Transferable t = dtde.getTransferable();
+    boolean isAccepted = false;
+    if (t.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+      while (true) {
+        Object o = null;
+        try {
+          dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+          o = t.getTransferData(DataFlavor.javaFileListFlavor);
+          isAccepted = true;
+        } catch (Exception e) {
+          Logger.error("transfer failed");
+        }
+        // if o is still null we had an exception
+        if (o instanceof List) {
+          List<File> list = (List<File>) o;
+          dtde.getDropTargetContext().dropComplete(true);
+          File[] files = (File[]) list.toArray();
+          for (int i = 0; i < list.size(); i++)
+            openFile(files[i], true);
+/*          
+          
+          
+          final int length = fileList.size();
+          if (length == 1) {
+            String fileName = fileList.get(0).getAbsolutePath().trim();
+            if (fileName.endsWith(".bmp"))
+              break; // try another flavor -- Mozilla bug
+            dtde.getDropTargetContext().dropComplete(true);
+            loadFile(fileName);
+            return;
+          }
+*/
+          return;
+        }
+        break;
       }
     }
 
-    catch (IOException e) {
-      dtde.rejectDrop();
-    }
+    Logger.debug("browsing supported flavours to find something useful...");
+    DataFlavor[] df = t.getTransferDataFlavors();
 
-    catch (UnsupportedFlavorException e) {
-      dtde.rejectDrop();
+    if (df == null || df.length == 0)
+      return;
+    for (int i = 0; i < df.length; ++i) {
+      DataFlavor flavor = df[i];
+      Object o = null;
+      if (true) {
+        Logger.info("df " + i + " flavor " + flavor);
+        Logger.info("  class: " + flavor.getRepresentationClass().getName());
+        Logger.info("  mime : " + flavor.getMimeType());
+      }
+
+      if (flavor.getMimeType().startsWith("text/uri-list")
+          && flavor.getRepresentationClass().getName().equals(
+              "java.lang.String")) {
+
+        /*
+         * This is one of the (many) flavors that KDE provides: df 2 flavour
+         * java.awt.datatransfer.DataFlavor[mimetype=text/uri-list;
+         * representationclass=java.lang.String] java.lang.String String: file
+         * :/home/egonw/data/Projects/SourceForge/Jmol/Jmol-HEAD/samples/
+         * cml/methanol2.cml
+         * 
+         * A later KDE version gave me the following. Note the mime!! hence the
+         * startsWith above
+         * 
+         * df 3 flavor java.awt.datatransfer.DataFlavor[mimetype=text/uri-list
+         * ;representationclass=java.lang.String] class: java.lang.String mime :
+         * text/uri-list; class=java.lang.String; charset=Unicode
+         */
+
+        try {
+          o = null;
+          if (!isAccepted)
+            dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+          isAccepted = true;
+          o = t.getTransferData(flavor);
+        } catch (Exception e) {
+          Logger.error(null, e);
+        }
+
+        if (o instanceof String) {
+          if (Logger.debugging) {
+            Logger.debug("  String: " + o.toString());
+          }
+          openFile(o.toString(), -1, -1);
+          dtde.getDropTargetContext().dropComplete(true);
+          return;
+        }
+      } else if (flavor.getMimeType().equals(
+          "application/x-java-serialized-object; class=java.lang.String")) {
+
+        /*
+         * This is one of the flavors that jEdit provides:
+         * 
+         * df 0 flavor java.awt.datatransfer.DataFlavor[mimetype=application/
+         * x-java-serialized-object;representationclass=java.lang.String] class:
+         * java.lang.String mime : application/x-java-serialized-object;
+         * class=java.lang.String String: <molecule title="benzene.mol"
+         * xmlns="http://www.xml-cml.org/schema/cml2/core"
+         * 
+         * But KDE also provides:
+         * 
+         * df 24 flavor java.awt.datatransfer.DataFlavor[mimetype=application
+         * /x-java-serialized-object;representationclass=java.lang.String]
+         * class: java.lang.String mime : application/x-java-serialized-object;
+         * class=java.lang.String String: file:/home/egonw/Desktop/1PN8.pdb
+         */
+
+        try {
+          o = null;
+          if (!isAccepted)
+            dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+          isAccepted = true;
+          o = t.getTransferData(df[i]);
+        } catch (Exception e) {
+          Logger.error(null, e);
+        }
+
+        if (o instanceof String) {
+          String content = (String) o;
+          if (Logger.debugging) {
+            Logger.debug("  String: " + content);
+          }
+          if (content.startsWith("file:/")) {
+            openFile(content, -1, -1);
+          }
+          dtde.getDropTargetContext().dropComplete(true);
+          return;
+        }
+      }
     }
+    if (!isAccepted)
+      dtde.rejectDrop();
   }
 
   /**
