@@ -274,9 +274,19 @@ public class JDXFileReader {
 
     try {
       String tmp;
-      while ((tmp = t.getLabel()) != null
-          && (!tmp.equals("##END") || !label.equals("##END"))) {
+      while ((tmp = t.getLabel()) != null) {
+          if (tmp.equals("##END") && label.equals("##END")) {
+            System.out.println("##END= " + t.getValue());
+            break;
+          }
         label = tmp;
+        if (Arrays.binarySearch(TABULAR_DATA_LABELS, label) > 0) {
+          setTabularDataType(spectrum, label);
+          if (!spectrum.processTabularData(t, dataLDRTable, minMaxY, errorLog))
+            throw new JDXSourceException("Unable to read Block Source");
+          continue;
+        }
+
         if (label.equals("##DATATYPE") && t.getValue().toUpperCase().equals("LINK")) {
           // embedded LINK 
           getBlockSpectra(dataLDRTable);
@@ -311,13 +321,6 @@ public class JDXFileReader {
         if (readDataLabel(spectrum, label, t, errorLog, dataLDRTable,
             obscure))
           continue;
-
-        if (Arrays.binarySearch(TABULAR_DATA_LABELS, label) > 0) {
-          setTabularDataType(spectrum, label);
-          if (!spectrum.processTabularData(t, dataLDRTable, minMaxY, errorLog))
-            throw new JDXSourceException("Unable to read Block Source");
-          continue;
-        }
 
         // Process Block
         if (label.equals("##END")) {
