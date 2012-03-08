@@ -224,7 +224,7 @@ abstract class XMLReader {
       String theTag = reader.getTagName();
       boolean requiresEndTag = reader.requiresEndTag();
       //System.out.println(theTag);
-      for (int i = i0; i < i1; i++)
+      for (int i = i0; i <= i1; i++)
         if (theTag.equals(tagNames[i])) {
           process(i, requiresEndTag);
           break;
