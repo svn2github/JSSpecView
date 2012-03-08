@@ -202,6 +202,9 @@ public class MainFrame extends JFrame implements DropTargetListener,
   //   ----------------------------------------------------------------------
 
   private JSVPanel selectedJSVPanel;
+  public JSVPanel getSelectedPanel() {
+    return selectedJSVPanel;
+  }
   private JMenuBar menuBar = new JMenuBar();
   private JMenu fileMenu = new JMenu();
   private JMenuItem openMenuItem = new JMenuItem();
@@ -1163,7 +1166,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       if (source != null)
          ;
     }
-    openFile(fileName, null, -1, -1);
+    openDataOrFile(null, fileName, null, -1, -1);
   }
 
   /**
@@ -1172,18 +1175,24 @@ public class MainFrame extends JFrame implements DropTargetListener,
    * @param fileOrURL
    */
   public void openFile(String fileOrURL, int firstSpec, int lastSpec) {
-      openFile(fileOrURL, null, firstSpec, lastSpec);
+      openDataOrFile(null, fileOrURL, null, firstSpec, lastSpec);
   }
 
   private int nOverlay;
   
-  private int openFile(String url, List<JDXSpectrum> specs, int firstSpec, int lastSpec) {
+  public void loadInline(String data) {
+    openDataOrFile(data, null, null, -1, -1);
+  }
+
+  private int openDataOrFile(String data, String url,
+                             List<JDXSpectrum> specs, int firstSpec, int lastSpec) {
     writeStatus("");
     String filePath = null;
     String fileName = null;
     boolean isOverlay = false;
     File file = null;
-    if (specs != null) {
+    if (data != null) {
+    } else if (specs != null) {
       isOverlay = true;
       fileName = filePath = "Overlay" + (++nOverlay);
     } else if (url != null) {
@@ -1199,20 +1208,22 @@ public class MainFrame extends JFrame implements DropTargetListener,
       } catch (MalformedURLException e) {
         file = new File(url);
       }
-    } 
+    }
     if (file != null) {
       fileName = recentFileName = file.getName();
       filePath = file.getAbsolutePath();
       recentJmolName = (url == null ? filePath.replace('\\', '/') : url);
       recentURL = null;
     }
-    if (isOpen(filePath)) {
+    if (filePath != null && isOpen(filePath)) {
       writeStatus(filePath + " is already open");
       return FILE_OPEN_ALREADY;
     }
     try {
-      setCurrentSource(isOverlay ? JDXSource.createOverlay(url, specs) 
-          : JDXFileReader.createJDXSource(null, filePath, null, false, firstSpec, lastSpec));
+      setCurrentSource(isOverlay ? JDXSource.createOverlay(url, specs)
+          : JDXFileReader.createJDXSource(FileManager
+              .getBufferedReaderForString(data), filePath, null, false,
+              firstSpec, lastSpec));
     } catch (Exception e) {
       e.printStackTrace();
       writeStatus(e.getMessage());
@@ -1236,9 +1247,11 @@ public class MainFrame extends JFrame implements DropTargetListener,
     setMenuEnables(spec);
 
     specs = currentSelectedSource.getSpectra();
-    boolean overlay = isOverlay || autoOverlay && currentSelectedSource.isCompoundSource;
-    overlay &= !JDXSpectrum.process(specs, irMode, !isOverlay && autoIntegrate, 
-        parameters.integralMinY, parameters.integralOffset, parameters.integralFactor);
+    boolean overlay = isOverlay || autoOverlay
+        && currentSelectedSource.isCompoundSource;
+    overlay &= !JDXSpectrum.process(specs, irMode, !isOverlay && autoIntegrate,
+        parameters.integralMinY, parameters.integralOffset,
+        parameters.integralFactor);
     if (overlay) {
       try {
         overlaySpectra(currentSelectedSource, (isOverlay ? url : null));
@@ -1592,7 +1605,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     if (source == null)
       setMenuEnables(null);
     else
-      setFrame(specNodes.size() - 1);
+      setSpectrumNumber(specNodes.size());
     recentJmolName = null;
     setFileCount();
     System.gc();
@@ -1935,7 +1948,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       return;
     System.out.println("JSpecView MainFrame.syncScript: " + script);
     if (!file.equals(recentJmolName)) {
-      openFile(file, null, -1, -1);
+      openDataOrFile(null, file, null, -1, -1);
     }
     if (!selectPanelByPeak(index))
       script = null;
@@ -2028,7 +2041,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
               return; // fail!
             setFrame(node);
           } else {
-            setFrame(Integer.parseInt(value) - 1);
+            setSpectrumNumber(Integer.parseInt(value));
           }
           jsvp = selectedJSVPanel;
           break;
@@ -2153,9 +2166,13 @@ public class MainFrame extends JFrame implements DropTargetListener,
       sb.append(",").append(id);
     }
     if (slist.size() > 1 && JDXSpectrum.areScalesCompatible(slist))
-      openFile(sb.toString().substring(1), slist, -1, -1);
+      openDataOrFile(null, sb.toString().substring(1), slist, -1, -1);
   }
 
+  public void setSpectrumNumber(int n) {
+    setFrame(n - 1);
+  }
+  
   private void setFrame(int i) {
     if (specNodes == null || i < 0 || i >= specNodes.size())
       return;
@@ -2209,12 +2226,13 @@ public class MainFrame extends JFrame implements DropTargetListener,
    */
   public void sendScript(String peak) {
     selectedJSVPanel.processPeakSelect(peak);
-    String s = Escape.jmolSelect(peak, recentJmolName);
-    System.out.println("JSpecView MainFrame sendScript: " + s);
-    if (jmol == null)
-      return;
+    String msg = Escape.jmolSelect(peak, recentJmolName);
+    System.out.println("JSpecView MainFrame sendScript: " + msg);
     // outgoing <PeakData file="xxx" type="xxx"...> record to Jmol    
-    jmol.syncScript(s);
+    if (jmol != null) // MainFrame --> embedding application
+      jmol.syncScript(msg);
+    if (jsv != null) // MainFrame --> embedding applet
+      jsv.syncToJmol(msg);
   }
 
   public void peakPicked(PeakPickedEvent eventObj) {
@@ -2778,7 +2796,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     if (url == null)
       return;
     recentOpenURL = url;
-    openFile(url, null, -1, -1);
+    openDataOrFile(null, url, null, -1, -1);
   };
 
   protected void windowClosing_actionPerformed() {

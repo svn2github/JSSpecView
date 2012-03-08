@@ -42,6 +42,7 @@ package jspecview.applet;
 import java.util.Properties;
 
 import jspecview.application.MainFrame;
+import jspecview.common.JSVPanel;
 
 import org.jmol.api.JSVInterface;
 
@@ -84,7 +85,23 @@ public class JSVAppletPro extends JSVApplet implements JSVInterface {
   public void script(String script) {
     runScript(script);
   }
-  
+
+  @Override
+  public void loadInline(String data) {
+    if (mainFrame != null && mainFrame.isVisible())
+      mainFrame.loadInline(data);
+    else
+      super.loadInline(data);      
+  }
+
+  @Override
+  public void setSpectrumNumber(int n) {
+    if (mainFrame != null && mainFrame.isVisible())
+      mainFrame.setSpectrumNumber(n);
+    else
+      super.setSpectrumNumber(n);      
+  }
+
   @Override
   public void syncScript(String script) {
     if (mainFrame != null && mainFrame.isVisible())
@@ -101,18 +118,10 @@ public class JSVAppletPro extends JSVApplet implements JSVInterface {
       super.writeStatus(msg);
   }
 
-  // The following methods are considered legacy commands and
-  // are not processed by JSpecViewAppletPro
-  // Use script() instead;
-  
-  public String export(String type, int n) { return ""; }
-  public void setSpectrumNumber(int block) {}
-  public void setFilePath(String tmpFilePath) {}
-  public void loadInline(String data) {}
-  public void addHighlight(double x1, double x2, int r, int g, int b, int a) {}
-  public void removeHighlight(double x1, double x2) {}
-  public void removeAllHighlights() {}  
-  public void toggleIntegration() {}
+  public JSVPanel getSelectedPanel() {
+    return (mainFrame != null && mainFrame.isVisible() ? mainFrame.getSelectedPanel() 
+        : super.getSelectedPanel());
+  }
   
   /**
    * executed only by the command processor and menu actions
@@ -145,6 +154,10 @@ public class JSVAppletPro extends JSVApplet implements JSVInterface {
   }
 
   public void setProperties(Properties properties) {
+  }
+
+  public void syncToJmol(String msg) {
+    super.syncToJmol(msg);
   }
 
 }
