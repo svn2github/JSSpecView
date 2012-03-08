@@ -47,15 +47,33 @@ import jspecview.common.JSVPanel;
 import org.jmol.api.JSVInterface;
 
 
-/**
- * A signed applet that has an Advanced... menu item that pulls up a MainFrame
- * (blank at the moment)
+
+ /** A signed applet that has an Advanced... menu item that pulls up a MainFrame
  * 
  * @author Bob Hanson St. Olaf College hansonr@stolaf.edu
  */
 
 public class JSVAppletPro extends JSVApplet implements JSVInterface {
 
+  /*  class interactions:
+   * 
+      //           JSVAppletPro    JSpecView
+      //             /   |    \       /
+      //     [extension] |  [instantiation]
+      //           /     |      \   /
+      //      JSVApplet  |    MainFrame
+      //           \     |        \
+      //         [JavaScript]   [interface]
+      //             \   |          \
+      //           JmolApplet       Jmol
+      // 
+   * 
+   * JSVAppletPro and JSpecView and JSVAppletPro can create a MainFrame
+   * MainFrame can interface with Jmol via JmolSyncInterface and JSVInterface
+   * JSVAppletPro and JSVApplet can interact with JmolApplet via JavaScript callbacks
+   * 
+   */
+  
   private static final long serialVersionUID = 1L;
 
   private MainFrame mainFrame;
