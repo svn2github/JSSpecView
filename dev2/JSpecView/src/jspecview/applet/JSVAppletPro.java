@@ -61,10 +61,19 @@ public class JSVAppletPro extends JSVApplet implements JSVInterface {
 
   @Override
   public void init() {
-    isPro = true;
     super.init();
   }
 
+  @Override
+  public boolean isPro() {
+    return true;
+  }
+  
+  @Override
+  public String getAppletInfo() {
+    return super.getAppletInfo() + " (PRO)";
+  }
+  
   /**
    * JSVAppletPro uses "script()" for executing a real script, 
    * not a parameter initialization. "runScript()" will also work

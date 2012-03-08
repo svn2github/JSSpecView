@@ -98,8 +98,7 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     compoundMenu.setEnabled(false);
     compoundMenu.setText("Blocks");
 
-    versionMenuItem.setText("<html><h3>JSpecView Version " + JSVApplet.APPLET_VERSION
-        + "</h3></html>");
+    versionMenuItem.setText("<html><h3>" + applet.getAppletInfo() + "</h3></html>");
 
     add(fileMenu);
     add(viewMenu);

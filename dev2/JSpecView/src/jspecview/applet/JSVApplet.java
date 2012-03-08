@@ -120,9 +120,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
    */
   private static final long serialVersionUID = 1L;
 
-  protected boolean isPro;
   public boolean isPro() {
-    return isPro;
+    return false;
   }
   
   @Override
@@ -260,7 +259,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
    */
   @Override
   public String getAppletInfo() {
-    return "JSpecView Applet " + APPLET_VERSION;
+    return "JSpecView Applet " + getAppletVersion();
   }
   
   /**
@@ -1400,7 +1399,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
 
     initInterface();
 
-    System.out.println("JSpecView vs: " + APPLET_VERSION + " File " + fileName
+    System.out.println(getAppletInfo() + " File " + fileName
         + " Loaded Successfully");
 
     // if Transmittance, visible 400-700 and nm then calc colour
