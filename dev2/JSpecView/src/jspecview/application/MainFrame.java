@@ -69,8 +69,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyVetoException;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -101,7 +99,6 @@ import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.SwingConstants;
-import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
@@ -115,6 +112,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import org.jmol.api.JSVInterface;
 import org.jmol.api.JmolSyncInterface;
 
 import jspecview.common.AppUtils;
@@ -153,6 +151,10 @@ import jspecview.util.TextFormat;
 public class MainFrame extends JFrame implements DropTargetListener,
     JmolSyncInterface, PeakPickedListener, ScriptInterface, ZoomListener {
 
+  public static void main(String args[]) {
+    JSpecView.main(args);
+  }
+
   //  ------------------------ Program Properties -------------------------
 
   /**
@@ -166,7 +168,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private final static int FILE_OPEN_NO_DATA = -4;
   private final static int MAX_RECENT = 10;
 
-  private String propertiesFileName = "jspecview.properties";
   private boolean toolbarOn;
   private boolean sidePanelOn;
   private boolean statusbarOn;
@@ -283,18 +284,17 @@ public class MainFrame extends JFrame implements DropTargetListener,
   //private OverlayLegendDialog legend;
   private JMenu processingMenu = new JMenu();
   private JMenuItem errorLogMenuItem = new JMenuItem();
-
-  {
-    // Does certain tasks once regardless of how many 
-    // instances of the program are running  
-    // [are you sure?? not static; runs every instance? -- BH]
-    onProgramStart();
-  }
+  private JSVInterface jsv;
 
   /**
    * Constructor
+   * @param jsv 
    */
-  public MainFrame() {
+  public MainFrame(JSVInterface jsv) {
+    
+    this.jsv = jsv;
+    onProgramStart();
+    
     // initialise MainFrame as a target for the drag-and-drop action
     new DropTarget(this, this);
 
@@ -319,23 +319,17 @@ public class MainFrame extends JFrame implements DropTargetListener,
         windowClosing_actionPerformed();
       }
     });
+    setSize(800, 500);
   }
 
   private void exitJSpecView(boolean withDialog) {
-    try {
-      onProgramExit();
-    } catch (Exception e) {
-    }
-    if (jmol != null) {
+    jsv.saveProperties(properties);
+    if (isEmbedded) {
       setVisible(false);
       return;
     }
-    if (withDialog
-        && showExitDialog
-        && JOptionPane.showConfirmDialog(MainFrame.this, "Exit JSpecView?",
-            "Exit", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) != JOptionPane.YES_OPTION)
-      return;
-    System.exit(0);
+    dsp.getDisplaySchemes().remove("Current");
+    jsv.exitJSpecView(withDialog && showExitDialog, this);
   }
 
   private Image icon;
@@ -442,13 +436,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
     properties.setProperty("integralOffset", "30");
     properties.setProperty("integralPlotColor", "#ff0000");
 
-    try {
-      FileInputStream fileIn = new FileInputStream(propertiesFileName);
-      properties.load(fileIn);
-      //bgc = Visible.Colour();
-    } catch (Exception e) {
-    }
-
+    jsv.setProperties(properties);
+    
     dsp = new DisplaySchemesProcessor();
 
     // try loading display scheme from the file system otherwise load it from the jar
@@ -590,18 +579,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
       return (color == null ? def : color);
     }
   */
-  /**
-   * Tasks to do when program exits
-   * 
-   * @throws Exception
-   */
-  void onProgramExit() throws Exception {
-    // SET RECENT PATHS PROPERTY!!!
-    // Write out current properties
-    FileOutputStream fileOut = new FileOutputStream(propertiesFileName);
-    properties.store(fileOut, "JSpecView Application Properties");
-    dsp.getDisplaySchemes().remove("Current");
-  }
 
   /**
    * Creates tree representation of files that are opened
@@ -655,42 +632,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
       }
       
     });
-  }
-
-  /**
-   * The main method
-   * 
-   * @param args
-   *        program parameters, takes the name of the file to open
-   */
-  public static void main(String args[]) {
-    try {
-      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-    } catch (Exception e) {
-    }
-
-    MainFrame frame = new MainFrame();
-    frame.setSize(800, 500);
-
-    if (args.length > 0) {
-      // check for command-line arguments
-      if (args.length == 2 && args[0].equalsIgnoreCase("-script"))
-        frame.runScript(args[1]);
-      else
-        for (int i = 0; i < args.length; i++) {
-          System.out.println("JSpecView is attempting to open " + args[i]);
-          String filePath = args[i];
-          File file = new File(filePath);
-          if (file.exists()) {
-            frame.openFile(file, false);
-          } else {
-            frame.writeStatus("File: " + filePath + " does not exist");
-          }
-        }
-    }
-    frame.setVisible(true);
-    if (args.length == 0)
-      frame.showFileOpenDialog();
   }
 
   /**
@@ -1200,7 +1141,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   /**
    * Shows dialog to open a file
    */
-  private void showFileOpenDialog() {
+  void showFileOpenDialog() {
     JSpecViewFileFilter filter = new JSpecViewFileFilter();
     filter.addExtension("jdx");
     filter.addExtension("dx");
@@ -1673,6 +1614,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   }
 
   private int fileCount = 0;
+  private boolean isEmbedded;
   /**
    * Adds the <code>JDXSource</code> info specified by the
    * <code>fileName<code> to
@@ -1979,6 +1921,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    */
   public void register(String appletID, JmolSyncInterface jmolStatusListener) {
     jmol = jmolStatusListener;
+    isEmbedded = true;
   }
 
   /**

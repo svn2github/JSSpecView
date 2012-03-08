@@ -29,6 +29,7 @@
     <property name="dist.dir"           value="dist" />
     <property name="dist.zip"           value="${dist.dir}/jspecview.zip" />
     <property name="applet.jar"         value="${build.dir}/jspecview.jar" />
+    <property name="appletpro.jar"         value="${build.dir}/JSpecViewPro.jar" />
 
     <path id="jspecviewlib.classpath">
         <pathelement location="${jsvlib.dir}"/>
@@ -96,6 +97,28 @@
 	             keystore="certificate/JSVcertificate.store"
 	             storepass="JSV2012" alias="JSVcertificate" />
 	</target>
+<!---
+-->
+
+  <target name="make-signed-applet-pro-jar" description="Make signed JSpecView applet pro jar">
+    <antcall target="revision"></antcall>
+        <mkdir dir="${build.applet.dir}"/>
+        <jar destfile="${build.applet.dir}/temp.jar">
+            <manifest>
+              <attribute name="Class-Path" value=". plugin.jar"/>
+            </manifest>
+          <fileset dir="${bin.dir}">
+          </fileset>
+          <fileset dir="${jsvlib.dir}"/>
+        </jar>    
+      <signjar jar="${build.applet.dir}/temp.jar"
+               signedjar="${build.applet.dir}/${ant.project.name}.applet.pro.${build.number}.jar"
+               keystore="certificate/JSVcertificate.store"
+               storepass="JSV2012" alias="JSVcertificate" />
+    <delete>
+      <fileset dir="${build.applet.dir}" includes = "temp.jar"/>
+    </delete>
+  </target>
 <!---
 -->
 

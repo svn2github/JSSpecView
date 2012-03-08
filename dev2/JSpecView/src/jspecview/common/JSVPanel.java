@@ -2465,7 +2465,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
                               JMenu exportAsMenu, ActionListener actionListener) {
     saveAsMenu.setText("Save As");
     saveAsJDXMenu.setText("JDX");
-    exportAsMenu.setText("Export As");
     addMenuItem(saveAsJDXMenu, "XY", actionListener);
     addMenuItem(saveAsJDXMenu, "DIF", actionListener);
     addMenuItem(saveAsJDXMenu, "DIFDUP", actionListener);
@@ -2475,9 +2474,12 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     saveAsMenu.add(saveAsJDXMenu);
     addMenuItem(saveAsMenu, "CML", actionListener);
     addMenuItem(saveAsMenu, "XML (AnIML)", actionListener);
-    addMenuItem(exportAsMenu, "JPG", actionListener);
-    addMenuItem(exportAsMenu, "PNG", actionListener);
-    addMenuItem(exportAsMenu, "SVG", actionListener);
+    if (exportAsMenu != null) {
+      exportAsMenu.setText("Export As");
+      addMenuItem(exportAsMenu, "JPG", actionListener);
+      addMenuItem(exportAsMenu, "PNG", actionListener);
+      addMenuItem(exportAsMenu, "SVG", actionListener);
+    }
   }
 
   private static void addMenuItem(JMenu m, String key,

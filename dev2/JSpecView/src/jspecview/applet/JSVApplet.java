@@ -120,6 +120,11 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
    */
   private static final long serialVersionUID = 1L;
 
+  protected boolean isPro;
+  public boolean isPro() {
+    return isPro;
+  }
+  
   @Override
   public void finalize() {
     System.out.println("JSpecView " + this + " finalized");
@@ -150,8 +155,12 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
 
   /*---------------------------------END PARAMETERS------------------------*/
 
-  private boolean isSignedApplet = false;
-  private boolean isStandalone = false;
+  private boolean isSignedApplet;
+  public boolean isSigned() {
+    return isSignedApplet;
+  }
+  
+  private boolean isStandalone;
   //private JPanel statusPanel = new JPanel();
   //private JLabel statusTextLabel = new JLabel();
   private JFileChooser jFileChooser;
@@ -271,11 +280,10 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
    * 
    * @param params
    */
-  private void initParams(String params) {
+  protected void initParams(String params) {
     parseInitScript(params);
     newAppletPanel();
-    appletPopupMenu = new JSVAppletPopupMenu(this, isSignedApplet, allowMenu,
-        enableZoom);
+    appletPopupMenu = new JSVAppletPopupMenu(this, allowMenu, enableZoom);
     runScriptNow(params);
   }
   
@@ -1365,7 +1373,8 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
       appletPopupMenu.transAbsMenuItem.setEnabled(true);
     else
       appletPopupMenu.transAbsMenuItem.setEnabled(false);
-    appletPopupMenu.exportAsMenu.setEnabled(true);
+    if (appletPopupMenu.exportAsMenu != null)
+      appletPopupMenu.exportAsMenu.setEnabled(true);
     appletPopupMenu.saveAsJDXMenu.setEnabled(continuous);
   }
 
@@ -1640,6 +1649,10 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
   private void sendFrameChange(JSVPanel jsvp) {
     PeakInfo pi = ((JDXSpectrum)jsvp.getSpectrum()).getSelectedPeak();
     sendScript(pi == null ? null : pi.getStringInfo());
+  }
+
+  void doAdvanced() {
+    // only for JSVAppletPro
   }
 
 }

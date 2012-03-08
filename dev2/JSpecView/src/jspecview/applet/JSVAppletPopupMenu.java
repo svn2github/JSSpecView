@@ -3,6 +3,7 @@ package jspecview.applet;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
@@ -13,15 +14,12 @@ import jspecview.common.JSVPanelPopupMenu;
 
 class JSVAppletPopupMenu extends JSVPanelPopupMenu {
 
-  private boolean isSigned;
-
   private JSVApplet applet;
 
-  JSVAppletPopupMenu(JSVApplet applet, boolean isSigned, 
+  JSVAppletPopupMenu(JSVApplet applet, 
       boolean allowMenu, boolean enableZoom) {
     super(applet);
     isApplet = true;
-    this.isSigned = isSigned;
     this.applet = applet;
     recentOverlay = "none";
     super.jbInit();
@@ -47,7 +45,7 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
   private JMenuItem printMenuItem = new JMenuItem();
   private JMenu saveAsMenu = new JMenu();
   JMenu saveAsJDXMenu = new JMenu();
-  JMenu exportAsMenu = new JMenu();
+  JMenu exportAsMenu;
   private JMenu viewMenu = new JMenu();
   private JMenu zoomMenu = new JMenu();
   JMenuItem compoundMenu = new JMenu();
@@ -55,6 +53,8 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
   private JMenuItem headerMenuItem = new JMenuItem();
   JCheckBoxMenuItem windowMenuItem = new JCheckBoxMenuItem();
   JMenuItem overlayKeyMenuItem = new JMenuItem();
+
+  private JMenuItem advancedMenuItem;
 
   protected void jbInit() {
     // handled later
@@ -66,7 +66,7 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     fileMenu.setText("File");
     printMenuItem.setActionCommand("Print");
     printMenuItem.setText("Print...");
-    printMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    printMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         applet.printMenuItem_actionPerformed(e);
       }
@@ -75,21 +75,21 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     zoomMenu.setText("Zoom");
     
     headerMenuItem.setText("Show Header...");
-    headerMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    headerMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         applet.headerMenuItem_actionPerformed(e);
       }
     });
 
     windowMenuItem.setText("Window");
-    windowMenuItem.addItemListener(new java.awt.event.ItemListener() {
+    windowMenuItem.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
         applet.windowMenuItem_itemStateChanged(e);
       }
     });
     overlayKeyMenuItem.setEnabled(false);
     overlayKeyMenuItem.setText("Show Overlay Key...");
-    overlayKeyMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    overlayKeyMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         applet.overlayKeyMenuItem_actionPerformed(e);
       }
@@ -107,12 +107,24 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     add(compoundMenu);
     addSeparator();
     add(scriptMenuItem);
+    if (applet.isPro()) {
+      advancedMenuItem = new JMenuItem();
+      advancedMenuItem.setText("Advanced...");
+      advancedMenuItem.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          applet.doAdvanced();
+        }
+      });
+      add(advancedMenuItem);
+    }
     addSeparator();
     add(aboutMenu);
-    JSVPanel.setMenus(saveAsMenu, saveAsJDXMenu, exportAsMenu, exportActionListener);
     fileMenu.add(saveAsMenu);
-    if (isSigned)
+    if (applet.isSigned()) {
+      exportAsMenu = new JMenu();
       fileMenu.add(exportAsMenu);
+    }
+    JSVPanel.setMenus(saveAsMenu, saveAsJDXMenu, exportAsMenu, exportActionListener);
     fileMenu.add(printMenuItem);
 
     viewMenu.add(gridCheckBoxMenuItem);
