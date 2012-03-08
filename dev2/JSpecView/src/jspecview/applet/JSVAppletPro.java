@@ -120,11 +120,12 @@ public class JSVAppletPro extends JSVApplet implements JSVInterface {
    
   /////////// JSVInterface ////////////
   
-  void doAdvanced() {
-    if (mainFrame == null)
+  void doAdvanced(String filePath) {
+    if (mainFrame == null) {
       mainFrame = new MainFrame(this);
+    }
+    mainFrame.runScript("load \"" + filePath + "\"");
     mainFrame.setVisible(true);
-    // TODO -- load file?
   }
 
   public void exitJSpecView(boolean withDialog, Object frame) {

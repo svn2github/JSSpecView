@@ -112,7 +112,7 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
       advancedMenuItem.setText("Advanced...");
       advancedMenuItem.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          applet.doAdvanced();
+          applet.doAdvanced(applet.getSource().getFilePath());
         }
       });
       add(advancedMenuItem);

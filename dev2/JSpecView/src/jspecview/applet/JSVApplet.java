@@ -202,6 +202,10 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
    * The <code>JDXSource</code> instance
    */
   private JDXSource source;
+  
+  JDXSource getSource() {
+    return source;
+  }
 
   /**
    * The Panel on which the applet contents are drawn
@@ -1364,6 +1368,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
           : JDXFileReader.createJDXSource(FileManager
               .getBufferedReaderForString(data), fileName, base,
               obscure == Boolean.TRUE, -1, -1));
+      source.setFilePath(fileName);
     } catch (Exception e) {
       writeStatus(e.getMessage());
       e.printStackTrace();
@@ -1666,7 +1671,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
     sendScript(pi == null ? null : pi.getStringInfo());
   }
 
-  void doAdvanced() {
+  void doAdvanced(String filePath) {
     // only for JSVAppletPro
   }
 
