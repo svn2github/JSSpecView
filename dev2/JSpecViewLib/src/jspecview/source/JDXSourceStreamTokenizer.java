@@ -81,6 +81,7 @@ public class JDXSourceStreamTokenizer {
       line = "";
     } else {
       label = line.substring(0, pt).trim();
+      System.out.println(label);
       line = line.substring(pt + 1);
     }
     labelLineNo = lineNo;

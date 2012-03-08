@@ -217,7 +217,7 @@ public class JDXFileReader {
       return !(done = true);
     spectrum.setBlockID(blockID);
     source.addJDXSpectrum(spectrum, forceSub);
-    System.out.println("Spectrum " + nSpec);
+    System.out.println("Spectrum " + nSpec + " XYDATA: " + spectrum.getXYCoords().length);
     return true;
   }
 
@@ -285,19 +285,23 @@ public class JDXFileReader {
         } else if (label.equals("##NTUPLES") || label.equals("##VARNAME")) {
             getNTupleSpectra(dataLDRTable, spectrum, label);
           spectrum = null;
-          label = null;
+          label = "";
         } else if (label.equals("##JCAMPCS")) {
           while (!(label = t.getLabel()).equals("##TITLE")) {
             t.getValue();
           }
           spectrum = null;
           // label is not null -- will continue with TITLE
+        } else {
+          t.getValue();
         }
         if (done)
           break;
         if (spectrum == null) {
           spectrum = new JDXSpectrum();
           dataLDRTable = new ArrayList<String[]>();
+          if (label == "") 
+            continue;
           if (label == null) {
             label = "##END";
             continue;
@@ -317,7 +321,7 @@ public class JDXFileReader {
 
         // Process Block
         if (label.equals("##END")) {
-          if (!addSpectrum(spectrum))
+          if (spectrum.getXYCoords().length > 0 && !addSpectrum(spectrum))
             return source;
           spectrum = new JDXSpectrum();
           dataLDRTable = new ArrayList<String[]>();
@@ -407,7 +411,11 @@ values will be given as arguments of the ##PAGE= LDR, as in the following exampl
     
     
     JDXSpectrum spectrum = null;
-    while (!done && !(label = t.getLabel()).equals("##ENDNTUPLES")) {
+    while (!done) {
+      if ((label = t.getLabel()).equals("##ENDNTUPLES")) {
+        t.getValue();
+        break;
+      }
 
       if (label.equals("##PAGE")) {
         page = t.getValue();
@@ -639,9 +647,10 @@ values will be given as arguments of the ##PAGE= LDR, as in the following exampl
     }
 
     else if (label.equals("##.SHIFTREFERENCE")) {
+      String val = t.getValue();
       if (!(spectrum.dataType.toUpperCase().contains("SPECTRUM")))
         return true;
-      StringTokenizer srt = new StringTokenizer(t.getValue(), ",");
+      StringTokenizer srt = new StringTokenizer(val, ",");
       if (srt.countTokens() != 4)
         return true;
       try {
