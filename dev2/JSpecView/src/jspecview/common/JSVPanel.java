@@ -1575,6 +1575,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private int currZoomBoxY;
 
   private Graph[] graphsTemp = new Graph[1];
+
+  private double zPt;
   
   private NumberFormat getFormatter(String hash) {
     NumberFormat formatter = htFormats.get(hash);
@@ -1846,6 +1848,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private Coordinate getCoordFromPoint(int xPixel, int yPixel) {
     double xPt, yPt;
 
+    zPt = Double.NaN;
+    
     if (image2D != null && xPixel >= bwidthLeft - 5 && xPixel < getWidth() - 15) {
 
       xPt = 1.0 * (fixX2D(xPixel) - bwidthLeft) / imageWidthHeight[0];
@@ -1855,7 +1859,11 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       Coordinate[] xyCoords = getSpectrum().getXYCoords();
       xPt = xPt * (xyCoords[xyCoords.length - 1].getXVal() - xyCoords[0].getXVal()) + xyCoords[0].getXVal(); 
       int n = getSpectrumAt(0).getSubSpectra().size();
-      yPt = Math.min(n, Math.max(0, (int)((bottomPlotAreaPos - yPixel) * 1.0 / imageWidthHeight[1] * n)));
+      int y = Math.min(n - 1, Math.max(0, (int)((bottomPlotAreaPos - yPixel) * 1.0 / imageWidthHeight[1] * n)));
+      yPt = y;
+      JDXSpectrum spec = getSpectrumAt(0).getSubSpectra().get(y);
+      //zPt = spec.getYValueAt(spec.getXYCoords(), xPt);
+      zPt = spec.getY2D();
     } else {
       xPixel = fixX(xPixel);
       yPixel = fixY(yPixel);
@@ -2812,38 +2820,12 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private void fireMouseClicked(MouseEvent e) {
     int xPixel = e.getX();
     int yPixel = e.getY();
-
     if (!checkXY(xPixel, yPixel)) {
       coordClicked = null;
       return;
     }
-
-    Coordinate coord = getCoordFromPoint(xPixel, yPixel);
-
-    lastClickX = coord.getXVal();
-    
-    coordClicked = coord;
-    //  double yPt = coord.getYVal();
-//
-//    String hashX = "#";
-//    String hashY = "#";
-//    String hash1 = "0.00000000";
-//
-//    if (multiScaleData.hashNums[0] <= 0)
-//      hashX = hash1.substring(0, Math.abs(multiScaleData.hashNums[0]) + 3);
-//
-//    DecimalFormat displayXFormatter = TextFormat.getDecimalFormat(hashX);
-//    String xStr = displayXFormatter.format(lastClickX);
-//
-//    if (multiScaleData.hashNums[1] <= 0)
-//      hashY = hash1.substring(0, Math.abs(multiScaleData.hashNums[1]) + 3);
-//
-//    DecimalFormat displayYFormatter = TextFormat.getDecimalFormat(hashY);
-//
-//    String yStr = displayYFormatter.format(yPt);
-
-//    coordClicked = new Coordinate(Double.parseDouble(xStr), Double
-  //      .parseDouble(yStr));
+    coordClicked = getCoordFromPoint(xPixel, yPixel);
+    lastClickX = coordClicked.getXVal();
     notifyPeakPickedListeners(coordClicked);
   }
 
@@ -2867,6 +2849,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
     double xPt = coord.getXVal();
     double yPt = coord.getYVal();
+    if (image2D != null && e.getX() > bwidthLeft)
+      yPt = zPt;
 
     String hashX = "#";
     String hashY = "#";
@@ -2882,7 +2866,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     coordStr = "(" + xx + ", " + formatter.format(yPt) + ")";
 
     if (nSpectra == 1) {
-      if (!getSpectrum().isHNMR()) {
+      if (yPt == zPt) {
+        xx += ", " + formatter.format(yPt);        
+      } else if (!getSpectrum().isHNMR()) {
         yPt = spectra[0].getPercentYValueAt(xPt);
         xx += ", " + formatter.format(yPt);
       }
