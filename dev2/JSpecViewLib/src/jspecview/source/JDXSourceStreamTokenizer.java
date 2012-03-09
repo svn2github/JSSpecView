@@ -55,7 +55,15 @@ public class JDXSourceStreamTokenizer {
 
   private int lineNo;
 
+  String peakLabel() {
+    return nextLabel(false);
+  }
+  
   String getLabel() {
+    return nextLabel(true);
+  }
+  
+  private String nextLabel(boolean isGet) {
     label = null;
     value = null;
     while (line == null) {
@@ -81,10 +89,11 @@ public class JDXSourceStreamTokenizer {
       line = "";
     } else {
       label = line.substring(0, pt).trim();
-      line = line.substring(pt + 1);
+      if (isGet)
+        line = line.substring(pt + 1);
     }
     labelLineNo = lineNo;
-    if (Logger.debugging)
+    //if (Logger.debugging)
       Logger.info(label);
     return cleanLabel(label);
   }

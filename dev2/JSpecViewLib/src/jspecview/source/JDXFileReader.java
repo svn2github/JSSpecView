@@ -43,8 +43,13 @@ import jspecview.util.Parser;
 
 /**
  * <code>JDXFileReader</code> reads JDX data, including complex BLOCK files that
- * contain NTUPLE blocks or more BLOCK files BLOCK files containing subblocks
- * are just read linearly, not as a hierarchy (for now) (maybe!)
+ * contain NTUPLE blocks or nested BLOCK data. 
+ * 
+ * In addition, this reader allows for simple concatenation -- no LINK record is 
+ * required. This allows for testing simply by joining files. 
+ * 
+ * We also might be able to adapt this to reading a ZIP file collection.
+ * 
  * 
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
@@ -161,44 +166,57 @@ public class JDXFileReader {
    * @return source
    * @throws JSpecViewException
    */
-  private JDXSource getJDXSource(BufferedReader br)
-      throws JSpecViewException {
+  private JDXSource getJDXSource(BufferedReader br) throws JSpecViewException {
 
     source = new JDXSource(JDXSource.TYPE_SIMPLE);
     t = new JDXSourceStreamTokenizer(br);
     errorLog = new StringBuffer();
 
-    String label = "";
-    JDXSpectrum spectrum = new JDXSpectrum();
+    String label;
 
-    // Table for header information
-    List<String[]> dataLDRTable = new ArrayList<String[]>(20);
-    while (!done && (label = t.getLabel()) != null
-        && !label.equals("##END")) {
-      if (label.equals("##DATATYPE") && t.getValue().toUpperCase().equals("LINK"))
-        return getBlockSpectra(dataLDRTable);
-      if (label.equals("##NTUPLES") || label.equals("##VARNAME"))
-        return getNTupleSpectra(dataLDRTable, spectrum, label);
-      if (Arrays.binarySearch(TABULAR_DATA_LABELS, label) > 0) {
-        setTabularDataType(spectrum, label);
-        if (!spectrum.processTabularData(t, dataLDRTable, minMaxY, errorLog))
-          throw new JDXSourceException("Unable to read JDX file");
-        continue;
-      }
-      if (readDataLabel(spectrum, label, t, errorLog,
-          dataLDRTable, obscure))
-        continue;
-      String value = t.getValue();
-      addHeader(dataLDRTable, t.getRawLabel(), value);
-      if (label.equals("##$PEAKS")) {
-        source.peakCount += spectrum.setPeakList(readPeakList(
-            value, source.peakCount));
-        continue;
+    while (!done && "##TITLE".equals(t.peakLabel())) {
+      JDXSpectrum spectrum = new JDXSpectrum();
+      List<String[]> dataLDRTable = new ArrayList<String[]>(20);
+      while (!done && (label = t.getLabel()) != null && !isEnd(label)) {
+        if (label.equals("##DATATYPE")
+            && t.getValue().toUpperCase().equals("LINK")) {
+          getBlockSpectra(dataLDRTable);
+          spectrum = null;
+          continue;
+        }
+        if (label.equals("##NTUPLES") || label.equals("##VARNAME")) {
+          getNTupleSpectra(dataLDRTable, spectrum, label);
+          spectrum = null;
+          continue;
+        }
+        if (Arrays.binarySearch(TABULAR_DATA_LABELS, label) > 0) {
+          setTabularDataType(spectrum, label);
+          if (!spectrum.processTabularData(t, dataLDRTable, minMaxY, errorLog))
+            throw new JDXSourceException("Unable to read JDX file");
+          addSpectrum(spectrum, false);
+          spectrum = null;
+          continue;
+        }
+        if (readDataLabel(spectrum, label, t, errorLog, dataLDRTable, obscure))
+          continue;
+        String value = t.getValue();
+        addHeader(dataLDRTable, t.getRawLabel(), value);
+        if (label.equals("##$PEAKS")) {
+          source.peakCount += spectrum.setPeakList(readPeakList(value,
+              source.peakCount));
+          continue;
+        }
       }
     }
     source.setErrorLog(errorLog.toString());
-    addSpectrum(spectrum, false);
     return source;
+  }
+
+  private boolean isEnd(String label) {
+    if (!label.equals("##END"))
+      return false;
+    t.getValue();
+    return true;
   }
 
   private int firstSpec = 0;
@@ -274,7 +292,7 @@ public class JDXFileReader {
     try {
       String tmp;
       while ((tmp = t.getLabel()) != null) {
-          if (tmp.equals("##END") && label.equals("##END")) {
+          if (label.equals("##END") && isEnd(tmp)) {
             System.out.println("##END= " + t.getValue());
             break;
           }
@@ -322,7 +340,7 @@ public class JDXFileReader {
           continue;
 
         // Process Block
-        if (label.equals("##END")) {
+        if (isEnd(label)) {
           if (spectrum.getXYCoords().length > 0 && !addSpectrum(spectrum, forceSub))
             return source;
           spectrum = new JDXSpectrum();
@@ -413,6 +431,7 @@ values will be given as arguments of the ##PAGE= LDR, as in the following exampl
     
     
     JDXSpectrum spectrum = null;
+    boolean isFirst = true;
     while (!done) {
       if ((label = t.getLabel()).equals("##ENDNTUPLES")) {
         t.getValue();
@@ -479,7 +498,8 @@ values will be given as arguments of the ##PAGE= LDR, as in the following exampl
           dataLDRTable.add(entry);
       }
       if (isOK)
-        addSpectrum(spectrum, true);
+        addSpectrum(spectrum, !isFirst);
+      isFirst = false;
       spectrum = null;
     }
     if (errorLog.length() > 0)
