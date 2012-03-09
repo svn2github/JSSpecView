@@ -154,7 +154,7 @@ public class JDXSourceStreamTokenizer {
     }
     value = trimLines(sb);
     if (Logger.debugging)
-      System.out.println(value);
+      Logger.info(value);
     return value;
   }
 
@@ -188,8 +188,8 @@ public class JDXSourceStreamTokenizer {
     if (vpt >= n)
       return "";
     if (v.charAt(vpt) == '<') {
-      n = v.lastIndexOf(">");
-      if (n < 0)
+      n = v.lastIndexOf(">") + 1;
+      if (n == 0)
         n = v.length();
       return v.substring(vpt, n);
     }

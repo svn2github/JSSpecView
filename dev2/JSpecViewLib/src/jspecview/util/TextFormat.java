@@ -480,6 +480,38 @@ public class TextFormat {
     return (value.length() > 1 && value.startsWith("\"")
         && value.endsWith("\"") ? value.substring(1, value.length() - 1)
         : value);
+  }
+
+  static DecimalFormat formatter = TextFormat.getDecimalFormat("0.000000E00");
+  /**
+   * JCAMP-DX requires 1.5E[+|-]nn or 1.5E[+|-]nnn only
+   * not Java's 1.5E3 or 1.5E-2
+   * 
+   * @param x
+   * @return
+   */
+  public static String fixExponent(double x) {
+    String s = formatter.format(x);
+    int pt = s.indexOf("E");
+    if (pt < 0) {
+//      pt = s.indexOf("0000000");
+//      if (pt >= 0 && s.length() > 16)
+//        return s.substring(0, pt);  
+      return s;
+    }
+    switch (s.length() - pt) {
+    case 2:
+      s = s.substring(0, pt + 1) + "0" + s.substring(pt + 1);
+      break;
+    case 3:
+      // 4.3E-3
+      if (s.charAt(pt + 1) == '-')
+        s = s.substring(0, pt + 2) + "0" + s.substring(pt + 2);
+      break;
+    } 
+    if (s.indexOf("E-") < 0)
+      s = s.substring(0, pt + 1) + "+" + s.substring(pt + 1);
+    return s;
   }  
   
 }

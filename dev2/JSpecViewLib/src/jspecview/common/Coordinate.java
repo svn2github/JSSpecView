@@ -248,40 +248,21 @@ public class Coordinate {
                                            int startDataPointIndex,
                                            int endDataPointIndex, int numPerLine) {
   
-    DecimalFormat formatter = TextFormat.getDecimalFormat("0.000000");
     StringBuffer buffer = new StringBuffer();
-  
     if (endDataPointIndex > startDataPointIndex) {
       for (int index = startDataPointIndex; index <= endDataPointIndex; index++) {
         Coordinate point = xyCoords[index];
-        if (numPerLine > 0) {
-          buffer.append(formatter.format(point.getXVal()) + ", "
-              + formatter.format(point.getYVal()) + " ");
-          if (((index + 1) % numPerLine) == 0)
-            buffer.append(TextFormat.newLine);
-        } else {
-          buffer.append(formatter.format(point.getXVal()) + ", "
-              + formatter.format(point.getYVal()));
-          if (index < endDataPointIndex)
-            buffer.append(TextFormat.newLine);
-        }
+        buffer.append(TextFormat.fixExponent(point.getXVal()))
+        .append(", ").append(TextFormat.fixExponent(point.getYVal()))
+        .append(numPerLine > 1 && ((index + 1) % numPerLine) != 0 ? ' ' : TextFormat.newLine);
       }
     } else {
       for (int index = startDataPointIndex; index <= endDataPointIndex; index--) {
         Coordinate point = xyCoords[index];
-        if (numPerLine > 0) {
-          buffer.append(formatter.format(point.getXVal()) + ", "
-              + formatter.format(point.getYVal()) + " ");
-          if (((index + 1) % numPerLine) == 0)
-            buffer.append(TextFormat.newLine);
-        } else {
-          buffer.append(formatter.format(point.getXVal()) + ", "
-              + formatter.format(point.getYVal()));
-          if (index < endDataPointIndex)
-            buffer.append(TextFormat.newLine);
-        }
-      }
-  
+        buffer.append(TextFormat.fixExponent(point.getXVal()))
+        .append(", ").append(TextFormat.fixExponent(point.getYVal()))
+        .append(numPerLine > 1 && ((index + 1) % numPerLine) != 0 ? ' ' : TextFormat.newLine);
+      }  
     }
     return buffer.toString();
   }

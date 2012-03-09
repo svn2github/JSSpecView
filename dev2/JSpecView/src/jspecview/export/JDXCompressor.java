@@ -33,6 +33,7 @@ import jspecview.util.TextFormat;
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
+ * @author Bob Hanson hansonr@stolaf.edu
  * @see jspecview.common.Coordinate
  * @see jspecview.source.JDXDecompressor
  */
@@ -62,7 +63,7 @@ class JDXCompressor {
 
     StringBuffer buffer = new StringBuffer();
     for (int i = startDataPointIndex; i < endDataPointIndex; i++) {
-      buffer.append(fixExponent(xyCoords[i].getXVal() / xFactor));
+      buffer.append(TextFormat.fixExponent(xyCoords[i].getXVal() / xFactor));
       yStr.setLength(0);
       int y1 = (int) Math.round(xyCoords[i].getYVal() / yFactor);
       yStr.append(makeSQZ(y1));
@@ -78,7 +79,7 @@ class JDXCompressor {
         } else {
           lastDif = temp;
           if (nDif > 0) {
-            yStr.append(makeDUP(nDif));
+            yStr.append(makeDUP(nDif + 1));
             nDif = 0;
           }
           yStr.append(temp);
@@ -92,7 +93,7 @@ class JDXCompressor {
       buffer.append(yStr).append(TextFormat.newLine);
     }
     // Get checksum line -- for an X-sequence check only
-    buffer.append(fixExponent(xyCoords[endDataPointIndex].getXVal() / xFactor))
+    buffer.append(TextFormat.fixExponent(xyCoords[endDataPointIndex].getXVal() / xFactor))
         .append(makeSQZ(xyCoords[endDataPointIndex], yFactor));
     buffer.append("  $$checkpoint").append(TextFormat.newLine);
     return buffer.toString();
@@ -125,7 +126,7 @@ class JDXCompressor {
     StringBuffer buffer = new StringBuffer();
 
     for (int i = startDataPointIndex; i <= endDataPointIndex; i++) {
-      String xStr = fixExponent(xyCoords[i].getXVal( ) / xFactor);
+      String xStr = TextFormat.fixExponent(xyCoords[i].getXVal( ) / xFactor);
       if (xStr.length() < 20)
         xStr += spaces.substring(0, (20 - xStr.length()));
       buffer.append(xStr).append(" ");
@@ -158,7 +159,7 @@ class JDXCompressor {
     StringBuffer yStr = new StringBuffer();
     StringBuffer buffer = new StringBuffer();
     for (int i = startDataPointIndex; i < endDataPointIndex; i++) {
-      buffer.append(fixExponent(xyCoords[i].getXVal()/ xFactor));
+      buffer.append(TextFormat.fixExponent(xyCoords[i].getXVal()/ xFactor));
       yStr.setLength(0);
       yStr.append(makeSQZ(xyCoords[i], yFactor));
       while ((yStr.length() < 60) && i <= endDataPointIndex)
@@ -190,7 +191,7 @@ class JDXCompressor {
                             double yFactor) {
     StringBuffer buffer = new StringBuffer();
     for (int i = startDataPointIndex; i <= endDataPointIndex; i++) {
-      buffer.append(fixExponent(xyCoords[i].getXVal() / xFactor))
+      buffer.append(TextFormat.fixExponent(xyCoords[i].getXVal() / xFactor))
       .append(fixPacY(xyCoords[i].getYVal() / yFactor));
       for (int j = 0; j < 4 && ++i <= endDataPointIndex; j++) {
         // Print remaining Y values on a line
@@ -202,7 +203,7 @@ class JDXCompressor {
   }
 
   private static String fixPacY(double y) {
-    return (y < 0 ? "" : " ") + fixExponent(y);
+    return (y < 0 ? "" : " ") + TextFormat.fixExponent(y);
   }
 
   /**
@@ -245,7 +246,7 @@ class JDXCompressor {
    * @return the DUP character
    */
   private static String makeDUP(int y){
-    return compress(y, "STUVWXYZs", "");
+    return compress(y, "0STUVWXYZs", "");
   }
 
   /**
@@ -269,32 +270,5 @@ class JDXCompressor {
     yStrArray[0] = (negative ? strNeg.charAt(ch - '1') 
         : strPos.charAt(ch - '0'));
     return new String(yStrArray);
-  }
-
-  /**
-   * JCAMP-DX requires 1.5E[+|-]nn or 1.5E[+|-]nnn only
-   * not Java's 1.5E3 or 1.5E-2
-   * 
-   * @param x
-   * @return
-   */
-  private static String fixExponent(double x) {
-    String s = String.valueOf(x);
-    int pt = s.indexOf("E");
-    if (pt < 0)
-      return s;
-    switch (s.length() - pt) {
-    case 2:
-      s = s.substring(0, pt + 1) + "0" + s.substring(pt + 1);
-      break;
-    case 3:
-      // 4.3E-3
-      if (s.charAt(pt + 1) == '-')
-        s = s.substring(0, pt + 2) + "0" + s.substring(pt + 2);
-      break;
-    } 
-    if (s.indexOf("E-") < 0)
-      s = s.substring(0, pt + 1) + "+" + s.substring(pt + 1);
-    return s;
   }  
 }

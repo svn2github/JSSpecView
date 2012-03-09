@@ -191,7 +191,13 @@ class JDXExporter {
   private static double getYFactorForCompression(Coordinate[] xyCoords,
                                                 int startDataPointIndex,
                                                 int endDataPointIndex, double factorDivisor) {
-    
+    int i = 0;
+    double y;
+    for (; i < xyCoords.length; i++) 
+      if ((y = xyCoords[i].getYVal()) != Math.floor(y))
+          break;
+    if (i == xyCoords.length)
+      return 1;
     double maxY = Coordinate.getMaxY(xyCoords, startDataPointIndex,
         endDataPointIndex);
     double minY = Coordinate.getMinY(xyCoords, startDataPointIndex,

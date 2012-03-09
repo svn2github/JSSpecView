@@ -267,7 +267,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     //final String CORE_STR = "TITLE,ORIGIN,OWNER,DATE,TIME,DATATYPE,JCAMPDX";
 
     DecimalFormat varFormatter = TextFormat.getDecimalFormat("0.########");
-    DecimalFormat sciFormatter = TextFormat.getDecimalFormat("0.########E0");
 
     StringBuffer buffer = new StringBuffer();
     // start of header
@@ -317,16 +316,16 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
 
     // last part of header
 
-    buffer.append("##XUNITS= ").append(getObservedFreq() == ERROR
-                || getDataType().toUpperCase().contains("FID") ? getXUnits()
-                : "HZ").append(TextFormat.newLine);
+    boolean toHz = (getObservedFreq() != ERROR
+                && !getDataType().toUpperCase().contains("FID"));
+    buffer.append("##XUNITS= ").append(toHz ? "HZ" : getXUnits()).append(TextFormat.newLine);
     buffer.append("##YUNITS= ").append(getYUnits()).append(
         TextFormat.newLine);
-    buffer.append("##XFACTOR= ").append(sciFormatter.format(tmpXFactor))
+    buffer.append("##XFACTOR= ").append(TextFormat.fixExponent(tmpXFactor))
         .append(TextFormat.newLine);
-    buffer.append("##YFACTOR= ").append(sciFormatter.format(tmpYFactor))
+    buffer.append("##YFACTOR= ").append(TextFormat.fixExponent(tmpYFactor))
         .append(TextFormat.newLine);
-    double f = (getObservedFreq() == ERROR ? 1 : getObservedFreq());
+    double f = (toHz ? getObservedFreq() : 1);
     buffer.append("##FIRSTX= ").append(
         varFormatter.format(xyCoords[startIndex].getXVal() * f)).append(
         TextFormat.newLine);
@@ -1083,6 +1082,5 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
 
   public double getY2D() {
     return y2D;
-  }
-  
+  } 
 }

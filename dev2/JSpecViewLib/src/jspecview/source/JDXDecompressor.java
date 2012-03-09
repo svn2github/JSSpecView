@@ -40,6 +40,7 @@ import jspecview.util.Parser;
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
+ * @author Bob Hanson - hansonr@stolaf.edu
  * @see jspecview.export.JDXCompressor
  */
 public class JDXDecompressor {

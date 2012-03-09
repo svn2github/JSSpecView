@@ -781,7 +781,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
           }
         });
     JSVPanelPopupMenu.setMenuItem(preferencesMenuItem, 'P', "Preferences...",
-        80, InputEvent.SHIFT_MASK, new ActionListener() {
+        0, 0, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             preferencesMenuItem_actionPerformed(e);
           }
