@@ -197,7 +197,7 @@ public class JDXFileReader {
       }
     }
     source.setErrorLog(errorLog.toString());
-    addSpectrum(spectrum);
+    addSpectrum(spectrum, false);
     return source;
   }
 
@@ -207,9 +207,7 @@ public class JDXFileReader {
 
   private double blockID;
 
-  private boolean forceSub;
-  
-  private boolean addSpectrum(JDXSpectrum spectrum) {
+  private boolean addSpectrum(JDXSpectrum spectrum, boolean forceSub) {
     nSpec++;
     if (firstSpec > 0 && nSpec < firstSpec)
       return true;
@@ -244,6 +242,7 @@ public class JDXFileReader {
     System.out.println("--JDX block start--");
     String label = "";
     boolean isNew = (source.type == JDXSource.TYPE_SIMPLE);
+    boolean forceSub = false;
     while ((label = t.getLabel()) != null
         && !label.equals("##TITLE")) {
       if (isNew) {
@@ -324,7 +323,7 @@ public class JDXFileReader {
 
         // Process Block
         if (label.equals("##END")) {
-          if (spectrum.getXYCoords().length > 0 && !addSpectrum(spectrum))
+          if (spectrum.getXYCoords().length > 0 && !addSpectrum(spectrum, forceSub))
             return source;
           spectrum = new JDXSpectrum();
           dataLDRTable = new ArrayList<String[]>();
@@ -478,7 +477,7 @@ values will be given as arguments of the ##PAGE= LDR, as in the following exampl
           dataLDRTable.add(entry);
       }
       if (isOK)
-        addSpectrum(spectrum);
+        addSpectrum(spectrum, true);
       spectrum = null;
     }
     if (errorLog.length() > 0)
