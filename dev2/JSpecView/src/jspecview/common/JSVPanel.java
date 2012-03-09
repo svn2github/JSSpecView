@@ -467,20 +467,25 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     setBorder(BorderFactory.createLineBorder(Color.lightGray));
   }
 
-  private void getMultiScaleData(double x1, double x2, double y1, double y2, int[] startIndices,
-                                 int[] endIndices) {
-    if (!getSpectrumAt(0).is1D()) {
+  private void getMultiScaleData(double x1, double x2, double y1, double y2,
+                                 int[] startIndices, int[] endIndices) {
+    List<JDXSpectrum> subspecs = getSpectrumAt(0).getSubSpectra();
+    if (!getSpectrumAt(0).is1D() || subspecs == null && y1 == y2) {
+      // 2D spectrum 
       multiScaleData = new MultiScaleData(spectra, y1, y2, startIndices,
           endIndices, 10, 10, getSpectrumAt(0).isContinuous());
-    } else if (y1 == y2) {
-      //start up, forced subsets (too many spectra) 
-      multiScaleData = new MultiScaleData(getSpectrumAt(0).getSubSpectra(), y1,
-          y2, 10, 10, getSpectrum().isContinuous());
-    } else {
-      multiScaleData = new MultiScaleData(graphsTemp, y1, y2, startIndices,
-          endIndices, 10, 10, getSpectrumAt(0).isContinuous());
-      multiScaleData.setXRange(x1, x2, 10);
+      return;
     }
+    if (y1 == y2) {
+      //start up, forced subsets (too many spectra) 
+      multiScaleData = new MultiScaleData(subspecs, y1, y2, 10, 10, getSpectrum()
+          .isContinuous());
+      return;
+    }
+    // from a zoom measurement
+    multiScaleData = new MultiScaleData(graphsTemp, y1, y2, startIndices,
+        endIndices, 10, 10, getSpectrumAt(0).isContinuous());
+    multiScaleData.setXRange(x1, x2, 10);
   }
 
   /**
