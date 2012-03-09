@@ -93,7 +93,7 @@ public class JDXSourceStreamTokenizer {
         line = line.substring(pt + 1);
     }
     labelLineNo = lineNo;
-    //if (Logger.debugging)
+    if (Logger.debugging)
       Logger.info(label);
     return cleanLabel(label);
   }
