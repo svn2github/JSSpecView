@@ -63,7 +63,7 @@ class JDXCompressor {
 
     StringBuffer buffer = new StringBuffer();
     for (int i = startDataPointIndex; i < endDataPointIndex; i++) {
-      buffer.append(TextFormat.fixExponent(xyCoords[i].getXVal() / xFactor));
+      buffer.append(TextFormat.fixExponentInt(xyCoords[i].getXVal() / xFactor));
       yStr.setLength(0);
       int y1 = (int) Math.round(xyCoords[i].getYVal() / yFactor);
       yStr.append(makeSQZ(y1));
@@ -93,7 +93,7 @@ class JDXCompressor {
       buffer.append(yStr).append(TextFormat.newLine);
     }
     // Get checksum line -- for an X-sequence check only
-    buffer.append(TextFormat.fixExponent(xyCoords[endDataPointIndex].getXVal() / xFactor))
+    buffer.append(TextFormat.fixExponentInt(xyCoords[endDataPointIndex].getXVal() / xFactor))
         .append(makeSQZ(xyCoords[endDataPointIndex], yFactor));
     buffer.append("  $$checkpoint").append(TextFormat.newLine);
     return buffer.toString();
@@ -126,9 +126,9 @@ class JDXCompressor {
     StringBuffer buffer = new StringBuffer();
 
     for (int i = startDataPointIndex; i <= endDataPointIndex; i++) {
-      String xStr = TextFormat.fixExponent(xyCoords[i].getXVal( ) / xFactor);
+      String xStr = TextFormat.fixExponentInt(xyCoords[i].getXVal( ) / xFactor);
       if (xStr.length() < 20)
-        xStr += spaces.substring(0, (20 - xStr.length()));
+        xStr += spaces.substring(0, (14 - xStr.length()));
       buffer.append(xStr).append(" ");
       format10(buffer, (int) Math.round(xyCoords[i].getYVal() / yFactor), formatter);
       for (int j = 0; j < 5 && ++i <= endDataPointIndex; j++)
@@ -159,7 +159,7 @@ class JDXCompressor {
     StringBuffer yStr = new StringBuffer();
     StringBuffer buffer = new StringBuffer();
     for (int i = startDataPointIndex; i < endDataPointIndex; i++) {
-      buffer.append(TextFormat.fixExponent(xyCoords[i].getXVal()/ xFactor));
+      buffer.append(TextFormat.fixExponentInt(xyCoords[i].getXVal()/ xFactor));
       yStr.setLength(0);
       yStr.append(makeSQZ(xyCoords[i], yFactor));
       while ((yStr.length() < 60) && i <= endDataPointIndex)
@@ -191,7 +191,7 @@ class JDXCompressor {
                             double yFactor) {
     StringBuffer buffer = new StringBuffer();
     for (int i = startDataPointIndex; i <= endDataPointIndex; i++) {
-      buffer.append(TextFormat.fixExponent(xyCoords[i].getXVal() / xFactor))
+      buffer.append(TextFormat.fixExponentInt(xyCoords[i].getXVal() / xFactor))
       .append(fixPacY(xyCoords[i].getYVal() / yFactor));
       for (int j = 0; j < 4 && ++i <= endDataPointIndex; j++) {
         // Print remaining Y values on a line
@@ -203,7 +203,7 @@ class JDXCompressor {
   }
 
   private static String fixPacY(double y) {
-    return (y < 0 ? "" : " ") + TextFormat.fixExponent(y);
+    return (y < 0 ? "" : " ") + TextFormat.fixExponentInt(y);
   }
 
   /**
