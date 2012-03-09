@@ -273,10 +273,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   
 
   // listeners to handle coordinatesClicked
-  private ArrayList<PeakPickedListener> peakPickedListeners = new ArrayList<PeakPickedListener>();
-
-  // listeners to handle zooomed
-  private ArrayList<ZoomListener> zoomListeners = new ArrayList<ZoomListener>();
+  private ArrayList<PanelListener> listeners = new ArrayList<PanelListener>();
 
   /**
    * Constructs a new JSVPanel
@@ -472,7 +469,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
   private void getMultiScaleData(double x1, double x2, double y1, double y2, int[] startIndices,
                                  int[] endIndices) {
-    if (!getSpectrumAt(0).isForcedSubset()) {
+    if (!getSpectrumAt(0).is1D()) {
       multiScaleData = new MultiScaleData(spectra, y1, y2, startIndices,
           endIndices, 10, 10, getSpectrumAt(0).isContinuous());
     } else if (y1 == y2) {
@@ -1247,6 +1244,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   private void drawGraph(Graphics g, int height, int width) {
     
+    JDXSpectrum spec0 = getSpectrumAt(0);
     shouldDrawXAxisIncreasing = isXAxisDisplayedIncreasing ^ plotReversed;
     plotAreaWidth = width - (plotAreaInsets.right + plotAreaInsets.left);
     plotAreaHeight = height - (plotAreaInsets.top + plotAreaInsets.bottom);
@@ -1257,10 +1255,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     userYFactor = getSpectrum().getUserYFactor();
     setScaleFactors(multiScaleData);
 
-    //widthRatio = (getSpectrumAt(0).isForcedSubset() ? 1 : 0.3);
+    //widthRatio = (getSpectrumAt(0).is1D() ? 1 : 0.3);
     draw1D = true;
-    if (getSpectrumAt(0).getSubSpectra() != null 
-        && !getSpectrumAt(0).isForcedSubset() 
+    if (!spec0.is1D()
         && display2D && draw2DImage(g, width, height)) {
       if (!draw1D)
         return;
@@ -1292,8 +1289,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
           true);
     }
 
-    int subIndex = getSpectrumAt(0).getSubIndex();
-    if (subIndex >= 0 && !getSpectrumAt(0).isForcedSubset()) {
+    int subIndex = spec0.getSubIndex();
+    if (subIndex >= 0 && !spec0.is1D()) {
       g.setColor(plotColors[0]);
       int y = ((int) (plotAreaHeight * 1.0 * (subIndex + 1) / getSpectrumAt(0).getSubSpectra().size()));
       g.fillRect(rightPlotAreaPos, bottomPlotAreaPos - y, 3, y);
@@ -1301,6 +1298,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         g.drawLine(rightPlotAreaPos, bottomPlotAreaPos - y, getWidth() - 10, bottomPlotAreaPos - y);
         g.drawLine(xLine0,topPlotAreaPos - 10, xLine0, bottomPlotAreaPos + 10);
         g.drawLine(xLine1, bottomPlotAreaPos + 10, xLine1, topPlotAreaPos - 10);
+        drawUnits(g, width, spec0.nucleusX, getWidth() - 30, bottomPlotAreaPos, 1, 1.0);
+        drawUnits(g, width, spec0.nucleusY, bwidthLeft - 5, topPlotAreaPos, 1, 0);
       }
     }
     ArrayList<PeakInfo> list = (nSpectra == 1
@@ -1351,9 +1350,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     if (title)
       drawTitle(g, height, width);
     if (xunits && xAxis)
-      drawXUnits(g, height, width);
+      drawXUnits(g, width);
     if (yunits && yAxis)
-      drawYUnits(g, height, width);
+      drawYUnits(g, width);
     if (coords)
       drawCoordinates(g, height, width);
     if (zoomEnabled)
@@ -1703,13 +1702,17 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @param width
    *        the width to be drawn in pixels
    */
-  private void drawXUnits(Graphics g, int height, int width) {
+  private void drawXUnits(Graphics g, int width) {
+    drawUnits(g, width, spectra[0].getXUnits(), rightPlotAreaPos, bottomPlotAreaPos, 1, 2.5);
+  }
+
+  private void drawUnits(Graphics g, int width, String s,
+                         int x, int y, double hOff, double vOff) {
     g.setColor(unitsColor);
     setFont(g, width, Font.ITALIC, 10);
     FontMetrics fm = g.getFontMetrics();
-    String s = spectra[0].getXUnits();
-    g.drawString(s, (int) (rightPlotAreaPos - fm.stringWidth(s)),
-        (int) (bottomPlotAreaPos + fm.getHeight() * 2.5));
+    g.drawString(s, (int) (x - fm.stringWidth(s) * hOff),
+        (int) (y + fm.getHeight() * vOff));
   }
 
   /**
@@ -1722,12 +1725,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @param width
    *        the width to be drawn in pixels
    */
-  private void drawYUnits(Graphics g, int height, int width) {
-    g.setColor(unitsColor);
-    setFont(g, width, Font.ITALIC, 10);
-    FontMetrics fm = g.getFontMetrics();
-    g.drawString(spectra[0].getYUnits(), 5, (int) (topPlotAreaPos - fm
-        .getHeight()));
+  private void drawYUnits(Graphics g, int width) {
+    drawUnits(g, width, spectra[0].getYUnits(), 5, topPlotAreaPos, 0, -1);
   }
 
   /**
@@ -1949,7 +1948,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
                                        int[] startIndices, int[] endIndices) {
     if (!zoomEnabled)
       return false;
-    if (getSpectrumAt(0).isForcedSubset()) {
+    if (getSpectrumAt(0).is1D()) {
       graphsTemp[0] = getSpectrum();
       if (!multiScaleData.setDataPointIndices(graphsTemp, initX, finalX,
           minNumOfPointsForZoom, startIndices, endIndices, false))
@@ -2554,23 +2553,18 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       reset();
   }
 
-  /**
-   * Adds a CoordinatePickedListener
-   * 
-   * @param listener
-   */
-  public void addZoomListener(ZoomListener listener) {
-    zoomListeners.add(listener);
-  }
-
+  private double[] zoom = new double[4];
   /**
    * Notifies CoordinatePickedListeners
    * 
    * @param coord
    */
   public void notifyZoomListeners(double x1, double y1, double x2, double y2) {
-    for (int i = 0; i < zoomListeners.size(); i++)
-      zoomListeners.get(i).zoomed(x1, y1, x2, y2);
+    zoom[0] = x1;
+    zoom[1] = y1;
+    zoom[2] = x2;
+    zoom[3] = y2;
+    notifyListeners(zoom);
   }
 
   /**
@@ -2578,9 +2572,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * 
    * @param listener
    */
-  public void addPeakPickedListener(PeakPickedListener listener) {
-    if (!peakPickedListeners.contains(listener)) {
-      peakPickedListeners.add(listener);
+  public void addListener(PanelListener listener) {
+    if (!listeners.contains(listener)) {
+      listeners.add(listener);
     }
   }
 
@@ -2591,15 +2585,15 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   public void notifyPeakPickedListeners(Coordinate coord) {
     // TODO: Currently Aassumes spectra are not overlayed
-    notifyPeakPickedListeners(new PeakPickedEvent(this, coord, getSpectrum()
+    notifyListeners(new PeakPickedEvent(this, coord, getSpectrum()
         .getAssociatedPeakInfo(coord)));
   }
 
-  private void notifyPeakPickedListeners(PeakPickedEvent eventObj) {
-    for (int i = 0; i < peakPickedListeners.size(); i++) {
-      PeakPickedListener listener = peakPickedListeners.get(i);
+  private void notifyListeners(Object eventObj) {
+    for (int i = 0; i < listeners.size(); i++) {
+      PanelListener listener = listeners.get(i);
       if (listener != null) {
-        listener.peakPicked(eventObj);
+        listener.panelEvent(eventObj);
       }
     }
   }
@@ -2933,7 +2927,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     PeakInfo peak = spec.getPeakList().get(iPeak);
     spec.setSelectedPeak(peak);
     coordClicked.setXVal(lastClickX = peak.getX());
-    notifyPeakPickedListeners(new PeakPickedEvent(this, coordClicked, peak
+    notifyListeners(new PeakPickedEvent(this, coordClicked, peak
         .getStringInfo()));
   }
 
@@ -2969,9 +2963,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       if (getSpectrumAt(0).getSubSpectra() == null)
         notifyZoomListeners(dir, Double.NaN, Double.NaN, Double.NaN);
       else {
-        
         advanceSubSpectrum(-dir);
-        
+        notifyListeners(getSpectrum().getTitleLabel());        
         repaint();
       }
       e.consume();

@@ -123,15 +123,14 @@ import jspecview.common.JSVPanelPopupMenu;
 import jspecview.common.JSpecViewFileFilter;
 import jspecview.common.OverlayLegendDialog;
 import jspecview.common.Parameters;
+import jspecview.common.PanelListener;
 import jspecview.common.PeakPickedEvent;
-import jspecview.common.PeakPickedListener;
 import jspecview.common.PrintLayoutDialog;
 import jspecview.common.ScriptInterface;
 import jspecview.common.ScriptToken;
 import jspecview.common.Coordinate;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.PeakInfo;
-import jspecview.common.ZoomListener;
 import jspecview.exception.ScalesIncompatibleException;
 import jspecview.source.JDXFileReader;
 import jspecview.source.JDXSource;
@@ -149,7 +148,7 @@ import jspecview.util.TextFormat;
  * @author Prof Robert J. Lancashire
  */
 public class MainFrame extends JFrame implements DropTargetListener,
-    JmolSyncInterface, PeakPickedListener, ScriptInterface, ZoomListener {
+    JmolSyncInterface, PanelListener, ScriptInterface {
 
   public static void main(String args[]) {
     JSpecView.main(args);
@@ -1471,8 +1470,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       JSVPanel jsvp = (spec.getIntegrationGraph() == null ? new JSVPanel(spec)
           : JSVPanel.getIntegralPanel(spec, null));
       jsvp.setIndex(i);
-      jsvp.addPeakPickedListener(this);
-      jsvp.addZoomListener(this);
+      jsvp.addListener(this);
       setJSVPanelProperties(jsvp, true);
       JInternalFrame frame = new JInternalFrame(spec.getTitleLabel(), true,
           true, true, true);
@@ -2235,10 +2233,32 @@ public class MainFrame extends JFrame implements DropTargetListener,
       jsv.syncToJmol(msg);
   }
 
-  public void peakPicked(PeakPickedEvent eventObj) {
-    selectedJSVPanel = (JSVPanel) eventObj.getSource();
-    String peaks = eventObj.getPeakInfo();
-    sendScript(peaks);
+  public void panelEvent(Object eventObj) {
+    if (eventObj instanceof PeakPickedEvent) {
+      peakPicked((PeakPickedEvent) eventObj);
+    } else if (eventObj instanceof double[]) {
+      double[] d = (double[]) eventObj;
+      zoomed(d[0], d[1], d[2], d[3]);
+    } else if (eventObj instanceof String) {
+      desktopPane.getSelectedFrame().setTitle((String) eventObj);      
+    }
+  }
+
+  private void peakPicked(PeakPickedEvent e) {
+    selectedJSVPanel = (JSVPanel) e.getSource();
+    sendScript(e.getPeakInfo());
+  }
+
+  private void zoomed(double x1, double y1, double x2, double y2) {
+    if (Double.isNaN(x2)) {
+      // pass on to menu
+      advanceSpectrumBy((int) x1);
+      return;
+    }
+    if (x1 == x2)
+      writeStatus("");
+    else
+      writeStatus("Double-Click highlighted spectrum in menu to zoom out; CTRL+/CTRL- to adjust Y scaling.");
   }
 
   private void sendFrameChange(JSVPanel jsvp) {
@@ -3118,18 +3138,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
           || node.frame.isVisible() ? Font.BOLD : Font.ITALIC), 12);
     }
 
-  }
-
-  public void zoomed(double x1, double y1, double x2, double y2) {
-    if (Double.isNaN(x2)) {
-      // pass on to menu
-      advanceSpectrumBy((int) x1);
-      return;
-    }
-    if (x1 == x2)
-      writeStatus("");
-    else
-      writeStatus("Double-Click highlighted spectrum in menu to zoom out; CTRL+/CTRL- to adjust Y scaling.");
   }
 
   private void advanceSpectrumBy(int n) {

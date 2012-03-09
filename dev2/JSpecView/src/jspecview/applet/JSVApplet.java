@@ -79,8 +79,8 @@ import jspecview.common.IntegralGraph;
 import jspecview.common.JSVPanel;
 import jspecview.common.OverlayLegendDialog;
 import jspecview.common.Parameters;
+import jspecview.common.PanelListener;
 import jspecview.common.PeakPickedEvent;
-import jspecview.common.PeakPickedListener;
 import jspecview.common.PrintLayoutDialog;
 import jspecview.common.ScriptInterface;
 import jspecview.common.ScriptToken;
@@ -111,7 +111,7 @@ import netscape.javascript.JSObject;
  * @author Prof Robert J. Lancashire
  */
 
-public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInterface {
+public class JSVApplet extends JApplet implements PanelListener, ScriptInterface {
 
   public static final String APPLET_VERSION = "2.0.20120308-2000"; //
 //  2.0.yyyymmdd-hhmm format - should be updated to keep track of the latest version (based on Jamaica time)
@@ -595,7 +595,7 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
 
   private void initProperties(JSVPanel jsvp, int index) {
     // set JSVPanel properties from applet parameters
-    jsvp.addPeakPickedListener(this);
+    jsvp.addListener(this);
     jsvp.setIndex(index);
     parameters.setFor(jsvp, null, true);
     jsvp.setXAxisDisplayedIncreasing((jsvp.getSpectrum()).shouldDisplayXAxisIncreasing());
@@ -1641,11 +1641,14 @@ public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInte
   /**
    * called by notifyPeakPickedListeners in JSVPanel
    */
-  public void peakPicked(PeakPickedEvent eventObj) {
-    setSelectedPanel((JSVPanel) eventObj.getSource());
-    currentSpectrumIndex = selectedJSVPanel.getIndex();
-    sendScript(eventObj.getPeakInfo());
-    checkCallbacks();
+  public void panelEvent(Object eventObj) {
+    if (eventObj instanceof PeakPickedEvent) {
+      PeakPickedEvent e = (PeakPickedEvent) eventObj;
+      setSelectedPanel((JSVPanel) e.getSource());
+      currentSpectrumIndex = selectedJSVPanel.getIndex();
+      sendScript(e.getPeakInfo());
+      checkCallbacks();
+    }
   }  
   
   /**
