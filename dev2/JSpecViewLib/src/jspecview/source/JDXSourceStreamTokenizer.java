@@ -86,7 +86,8 @@ public class JDXSourceStreamTokenizer {
     if (pt < 0) {
       System.out.println("BAD JDX LINE -- no '=' (line " + lineNo + "): " + line);
       label = line;
-      line = "";
+      if (!isGet)
+        line = ""; 
     } else {
       label = line.substring(0, pt).trim();
       if (isGet)
