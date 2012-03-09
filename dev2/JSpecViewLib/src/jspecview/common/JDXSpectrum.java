@@ -20,7 +20,6 @@
 package jspecview.common;
 
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -261,12 +260,10 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
    *        the index of the ending coordinate
    * @return the String for the header of the spectrum
    */
-  public String getHeaderString(String tmpDataClass, double tmpXFactor,
+  public String getHeaderString(String tmpDataClass, double minY, double maxY, double tmpXFactor,
                                 double tmpYFactor, int startIndex, int endIndex) {
 
     //final String CORE_STR = "TITLE,ORIGIN,OWNER,DATE,TIME,DATATYPE,JCAMPDX";
-
-    DecimalFormat varFormatter = TextFormat.getDecimalFormat("0.########");
 
     StringBuffer buffer = new StringBuffer();
     // start of header
@@ -327,15 +324,19 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
         .append(TextFormat.newLine);
     double f = (toHz ? getObservedFreq() : 1);
     buffer.append("##FIRSTX= ").append(
-        varFormatter.format(xyCoords[startIndex].getXVal() * f)).append(
+        TextFormat.fixExponent(xyCoords[startIndex].getXVal() * f)).append(
         TextFormat.newLine);
     buffer.append("##FIRSTY= ").append(
-        varFormatter.format(xyCoords[startIndex].getYVal())).append(
+        TextFormat.fixExponent(xyCoords[startIndex].getYVal())).append(
         TextFormat.newLine);
     buffer.append("##LASTX= ").append(
-        varFormatter.format(xyCoords[endIndex].getXVal() * f)).append(
+        TextFormat.fixExponent(xyCoords[endIndex].getXVal() * f)).append(
         TextFormat.newLine);
     buffer.append("##NPOINTS= ").append((endIndex - startIndex + 1)).append(
+        TextFormat.newLine);
+    buffer.append("##MINY= ").append(TextFormat.fixExponent(minY)).append(
+        TextFormat.newLine);
+    buffer.append("##MAXY= ").append(TextFormat.fixExponent(maxY)).append(
         TextFormat.newLine);
     return buffer.toString();
   }

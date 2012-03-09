@@ -96,18 +96,14 @@ class JDXExporter {
       Coordinate.applyScale(newXYCoords, spectrum.getObservedFreq(), 1);
     }
 
-    if (type != Exporter.XY) {
-      //xCompFactor = JSpecViewUtils.getXFactorForCompression(newXYCoords,
-        //  startIndex, endIndex);
-      if (type != Exporter.PAC)
-        yCompFactor = getYFactorForCompression(newXYCoords,
-          startIndex, endIndex, FACTOR_DIVISOR);
-    } else {
-      if (spectrum.isContinuous())
-        tmpDataClass = "XYDATA";
-      else
-        tmpDataClass = "XYPOINTS";
-    }
+    double minY = Coordinate.getMinY(newXYCoords, startIndex, endIndex);
+    double maxY = Coordinate.getMaxY(newXYCoords, startIndex, endIndex);
+
+    if (type == Exporter.XY)
+      tmpDataClass = (spectrum.isContinuous() ?  "XYDATA" : "XYPOINTS");
+    else if (type != Exporter.PAC)
+      yCompFactor = getYFactorForCompression(newXYCoords, startIndex, endIndex,
+          minY, maxY, FACTOR_DIVISOR);
 
     switch (type) {
     case Exporter.DIF:
@@ -136,11 +132,9 @@ class JDXExporter {
     int index = Arrays.binarySearch(JDXFileReader.VAR_LIST_TABLE[0],
         tmpDataClass);
     String varList = JDXFileReader.VAR_LIST_TABLE[1][index];
-
-    buffer.append(spectrum.getHeaderString(tmpDataClass, xCompFactor,
-        yCompFactor, startIndex, endIndex));
-    buffer
-        .append("##" + tmpDataClass + "= " + varList + TextFormat.newLine);
+    buffer.append(spectrum.getHeaderString(tmpDataClass, minY, maxY,
+        xCompFactor, yCompFactor, startIndex, endIndex));
+    buffer.append("##" + tmpDataClass + "= " + varList + TextFormat.newLine);
     buffer.append(tabDataSet);
     buffer.append("##END=");
 
@@ -190,19 +184,16 @@ class JDXExporter {
    */
   private static double getYFactorForCompression(Coordinate[] xyCoords,
                                                 int startDataPointIndex,
-                                                int endDataPointIndex, double factorDivisor) {
-    int i = 0;
+                                                int endDataPointIndex,
+                                                double maxY, double minY, 
+                                                double factorDivisor) {
+    int i = startDataPointIndex;
     double y;
-    for (; i < xyCoords.length; i++) 
+    for (; i <= endDataPointIndex; i++) 
       if ((y = xyCoords[i].getYVal()) != Math.floor(y))
           break;
-    if (i == xyCoords.length)
+    if (i > endDataPointIndex)
       return 1;
-    double maxY = Coordinate.getMaxY(xyCoords, startDataPointIndex,
-        endDataPointIndex);
-    double minY = Coordinate.getMinY(xyCoords, startDataPointIndex,
-        endDataPointIndex);
-  
     return (maxY - minY) / factorDivisor;
   }
 

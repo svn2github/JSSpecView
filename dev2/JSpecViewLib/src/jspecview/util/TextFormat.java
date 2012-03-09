@@ -513,5 +513,4 @@ public class TextFormat {
       s = s.substring(0, pt + 1) + "+" + s.substring(pt + 1);
     return s;
   }  
-  
 }
