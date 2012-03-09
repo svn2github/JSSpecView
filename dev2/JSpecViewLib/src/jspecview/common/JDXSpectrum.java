@@ -318,25 +318,25 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     buffer.append("##XUNITS= ").append(toHz ? "HZ" : getXUnits()).append(TextFormat.newLine);
     buffer.append("##YUNITS= ").append(getYUnits()).append(
         TextFormat.newLine);
-    buffer.append("##XFACTOR= ").append(TextFormat.fixExponent(tmpXFactor))
+    buffer.append("##XFACTOR= ").append(TextFormat.fixExponentInt(tmpXFactor))
         .append(TextFormat.newLine);
-    buffer.append("##YFACTOR= ").append(TextFormat.fixExponent(tmpYFactor))
+    buffer.append("##YFACTOR= ").append(TextFormat.fixExponentInt(tmpYFactor))
         .append(TextFormat.newLine);
     double f = (toHz ? getObservedFreq() : 1);
     buffer.append("##FIRSTX= ").append(
-        TextFormat.fixExponent(xyCoords[startIndex].getXVal() * f)).append(
+        TextFormat.fixExponentInt(xyCoords[startIndex].getXVal() * f)).append(
         TextFormat.newLine);
     buffer.append("##FIRSTY= ").append(
-        TextFormat.fixExponent(xyCoords[startIndex].getYVal())).append(
+        TextFormat.fixExponentInt(xyCoords[startIndex].getYVal())).append(
         TextFormat.newLine);
     buffer.append("##LASTX= ").append(
-        TextFormat.fixExponent(xyCoords[endIndex].getXVal() * f)).append(
+        TextFormat.fixExponentInt(xyCoords[endIndex].getXVal() * f)).append(
         TextFormat.newLine);
     buffer.append("##NPOINTS= ").append((endIndex - startIndex + 1)).append(
         TextFormat.newLine);
-    buffer.append("##MINY= ").append(TextFormat.fixExponent(minY)).append(
+    buffer.append("##MINY= ").append(TextFormat.fixExponentInt(minY)).append(
         TextFormat.newLine);
-    buffer.append("##MAXY= ").append(TextFormat.fixExponent(maxY)).append(
+    buffer.append("##MAXY= ").append(TextFormat.fixExponentInt(maxY)).append(
         TextFormat.newLine);
     return buffer.toString();
   }

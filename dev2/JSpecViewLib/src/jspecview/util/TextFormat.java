@@ -512,5 +512,9 @@ public class TextFormat {
     if (s.indexOf("E-") < 0)
       s = s.substring(0, pt + 1) + "+" + s.substring(pt + 1);
     return s;
+  }
+
+  public static String fixExponentInt(double x) {
+    return (x == Math.floor(x) ? String.valueOf((int) x) : simpleReplace(fixExponent(x), "E+00", ""));
   }  
 }
