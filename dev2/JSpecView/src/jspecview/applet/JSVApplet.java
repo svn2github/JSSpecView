@@ -113,7 +113,7 @@ import netscape.javascript.JSObject;
 
 public class JSVApplet extends JApplet implements PeakPickedListener, ScriptInterface {
 
-  public static final String APPLET_VERSION = "2.0.20120307-0500"; //
+  public static final String APPLET_VERSION = "2.0.20120308-2000"; //
 //  2.0.yyyymmdd-hhmm format - should be updated to keep track of the latest version (based on Jamaica time)
   
   private static final long serialVersionUID = 1L;
