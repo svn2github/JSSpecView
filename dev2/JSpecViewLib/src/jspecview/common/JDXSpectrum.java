@@ -579,15 +579,16 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
       System.err.println(errorLog.toString());
     }
 
+    double freq = (Double.isNaN(freq2dX) ? observedFreq : freq2dX);
     // apply offset
-    if (offset != ERROR && observedFreq != ERROR
+    if (offset != ERROR && freq != ERROR
         && dataType.toUpperCase().contains("SPECTRUM")) {
       Coordinate.applyShiftReference(xyCoords, dataPointNum, fileFirstX,
-          fileLastX, offset, observedFreq, shiftRefType);
+          fileLastX, offset, freq, shiftRefType);
     }
 
-    if (observedFreq != ERROR && xUnits.toUpperCase().equals("HZ")) {
-      double xScale = observedFreq;
+    if (freq != ERROR && xUnits.toUpperCase().equals("HZ")) {
+      double xScale = freq;
       Coordinate.applyScale(xyCoords, (1 / xScale), 1);
       xUnits = "PPM";
       setHZtoPPM(true);
