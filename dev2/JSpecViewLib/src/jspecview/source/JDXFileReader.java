@@ -67,7 +67,7 @@ public class JDXFileReader {
       { "PEAKTABLE", "XYDATA", "XYPOINTS" },
       { "(XY..XY)", "(X++(Y..Y))", "(XY..XY)" } };
 
-  final static String ERROR_SEPARATOR = "________________________________________________________";
+  final static String ERROR_SEPARATOR = "=====================\n";
   private final static String[] TABULAR_DATA_LABELS = { "##XYDATA",
       "##XYPOINTS", "##PEAKTABLE", "##DATATABLE", "##PEAKASSIGNMENTS" };
   static {
@@ -172,9 +172,11 @@ public class JDXFileReader {
     t = new JDXSourceStreamTokenizer(br);
     errorLog = new StringBuffer();
 
-    String label;
+    String label = null;
 
     while (!done && "##TITLE".equals(t.peakLabel())) {
+      if (label != null)
+        errorLog.append("Warning - file is a concatenation without LINK record -- does not conform to IUPAC standards!\n");
       JDXSpectrum spectrum = new JDXSpectrum();
       List<String[]> dataLDRTable = new ArrayList<String[]>(20);
       while (!done && (label = t.getLabel()) != null && !isEnd(label)) {
@@ -364,12 +366,19 @@ public class JDXFileReader {
     } catch (JSpecViewException jsve) {
       throw jsve;
     }
-    if (errorLog.length() > 0)
-      errorLog.append(ERROR_SEPARATOR);
+    addErrorLogSeparator();
     source.setErrorLog(errorLog.toString());
     System.out.println("--JDX block end--");
     return source;
   }
+
+  private void addErrorLogSeparator() {
+    if (errorLog.length() > 0
+        && errorLog.lastIndexOf(ERROR_SEPARATOR) != errorLog.length()
+            - ERROR_SEPARATOR.length())
+      errorLog.append(ERROR_SEPARATOR);
+  }
+
 
   /**
    * reads NTUPLE data
@@ -502,8 +511,7 @@ values will be given as arguments of the ##PAGE= LDR, as in the following exampl
       isFirst = false;
       spectrum = null;
     }
-    if (errorLog.length() > 0)
-      errorLog.append(ERROR_SEPARATOR);
+    addErrorLogSeparator();
     source.setErrorLog(errorLog.toString());
     System.out.println("NTUPLE MIN/MAX Y = " + minMaxY[0] + " " + minMaxY[1]);
     return source;
