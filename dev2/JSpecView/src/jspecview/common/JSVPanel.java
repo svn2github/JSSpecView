@@ -2849,8 +2849,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
     double xPt = coord.getXVal();
     double yPt = coord.getYVal();
-    if (image2D != null && e.getX() > bwidthLeft)
-      yPt = zPt;
+    //if (image2D != null && e.getX() > bwidthLeft)
+      //yPt = zPt;
 
     String hashX = "#";
     String hashY = "#";
@@ -2866,9 +2866,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     coordStr = "(" + xx + ", " + formatter.format(yPt) + ")";
 
     if (nSpectra == 1) {
-      if (yPt == zPt) {
+      /*if (yPt == zPt) {
         xx += ", " + formatter.format(yPt);        
-      } else if (!getSpectrum().isHNMR()) {
+      } else */if (!getSpectrum().isHNMR()) {
         yPt = spectra[0].getPercentYValueAt(xPt);
         xx += ", " + formatter.format(yPt);
       }
