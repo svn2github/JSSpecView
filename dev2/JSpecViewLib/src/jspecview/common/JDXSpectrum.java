@@ -60,6 +60,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
    * 2D slices, for example.
    */
   private List<JDXSpectrum> subSpectra;
+  private JDXSpectrum parent;
   private int currentSubSpectrum;
   private double y2D = Double.NaN;
   private double blockID; // a random number generated in JDXFileReader
@@ -374,6 +375,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     newSpectrum.shiftRefType = shiftRefType;
     newSpectrum.isHZtoPPM = isHZtoPPM;
     newSpectrum.numDim = numDim;
+    newSpectrum.nucleusX = nucleusX;
 
     return newSpectrum;
   }
@@ -443,7 +445,9 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   public String getTitleLabel() {
     String type = (peakList == null || peakList.size() == 0 ? dataType
         : peakList.get(0).getType());
-    return (type != null && type.length() > 0 ? type + " " : "") + title;
+    return (type != null && type.length() > 0 ? type + " " : "") 
+    + title 
+    + (parent == null ? "" : " (" + parent.subSpectra.size() + ")");
   }
 
   public boolean processTabularData(JDXSourceStreamTokenizer t,
@@ -482,7 +486,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return false;
   }
 
-  public boolean createXYCoords(Map<String, ArrayList<String>> nTupleTable,
+  public boolean readNTUPLECoords(Map<String, ArrayList<String>> nTupleTable,
                                 String[] plotSymbols, String dataType,
                                 JDXSourceStreamTokenizer t, double[] minMaxY,
                                 StringBuffer errorLog) {
@@ -512,6 +516,13 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
       xUnits = list.get(index1);
       yUnits = list.get(index2);
 
+      if (nucleusX == null && (list = nTupleTable.get("##.NUCLEUS")) != null) {
+        setNucleus(list.get(0), false);
+        setNucleus(list.get(index1), true);
+      } else {
+        nucleusX = "?";
+      }
+      
       decompressData(t, minMaxY, errorLog);
       return true;
     }
@@ -1013,6 +1024,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
       addSubSpectrum(this, true);
     }
     subSpectra.add(spectrum);
+    spectrum.parent = this;
     spectrum.setTitle(subSpectra.size() + ": " + spectrum.title);
     System.out.println("Added subspectrum " + subSpectra.size() + ": " + spectrum.y2D);
     return true;
@@ -1063,6 +1075,5 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     buf2d = buf;
     return buf2d;
   }
-
-
+  
 }

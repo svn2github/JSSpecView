@@ -1,6 +1,7 @@
 package jspecview.common;
 
 import jspecview.exception.JSpecViewException;
+import jspecview.util.Logger;
 
 /**
  * spectrum data AS READ FROM FILE
@@ -45,19 +46,65 @@ public class JDXDataObject extends JDXHeader {
   public int shiftRefType = -1; // shiftRef = 0, bruker = 1, varian = 2
   public int dataPointNum = -1;
   public int numDim = 1;
+  
+  
+  // 2D nucleus calc
+  public String nucleusX, nucleusY = "?";
+  public double freq2dX = Double.NaN;
+  public double freq2dY = Double.NaN;
 
-  // For AnIML IR/UV files:
-  
-  // public double pathlength
-  
-//  /**
-//   * Returns the pathlength of the sample (required for AnIML IR/UV files)
-//   * 
-//   * @return the pathlength
-//   */
-//  public String getPathlength() {
-//    return pathlength;
-//  }
+  protected void setNucleus(String nuc, boolean isX) {
+    if (isX)
+      nucleusX = nuc;
+    else
+      nucleusY = nuc;
+    double freq;
+    try {
+      if (observedNucl.indexOf(nuc) >= 0) {
+        freq = observedFreq;
+      } else {
+        double g1 = getGyroMagneticRatio(observedNucl);
+        double g2 = getGyroMagneticRatio(nuc);
+        freq = observedFreq * g2 / g1;
+      }
+    } catch (Exception e) {
+      return;
+    }
+    if (isX)
+      freq2dX = freq;
+     else  
+      freq2dY = freq;
+    Logger.info("Freq for " + nuc + " = " + freq);
+  }
+
+  private static double getGyroMagneticRatio(String nuc) {
+    int pt = nuc.length();
+    double val = Double.NaN;
+    switch (nuc.charAt(--pt)) {
+    case 'F':
+      val = 40.08;
+      break;
+    case 'C':
+      val = 10.71;
+      break;
+    case 'N':
+      val = 3.08;
+      break;
+    case 'A':
+    case 'a':
+      if (nuc.charAt(--pt) == 'N')
+        val = 11.27;
+      break;
+    case 'P':
+      val = 17.25;
+      break;
+    case 'H':
+      char ch = nuc.charAt(pt - 1); 
+      val = (ch == '2' ? 6.54 : ch == '1' ? 42.58 : val);
+      break;
+    }
+    return (Character.isDigit(nuc.charAt(--pt)) ? val : Double.NaN);
+  }
 
 
   /**
@@ -146,4 +193,20 @@ public class JDXDataObject extends JDXHeader {
     return yFactor;
   }
 
+
+  // For AnIML IR/UV files:
+  
+  // public double pathlength
+  
+//  /**
+//   * Returns the pathlength of the sample (required for AnIML IR/UV files)
+//   * 
+//   * @return the pathlength
+//   */
+//  public String getPathlength() {
+//    return pathlength;
+//  }
+
+
+  
 }

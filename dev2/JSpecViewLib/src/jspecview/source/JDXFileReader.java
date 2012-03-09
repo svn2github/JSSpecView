@@ -428,8 +428,9 @@ values will be given as arguments of the ##PAGE= LDR, as in the following exampl
       if (spectrum == null) {
         spectrum = spectrum0.copy();
         spectrum.setTitle(spectrum0.getTitle() + " : " + page);
-        if (!spectrum.is1D())
+        if (!spectrum.is1D()) {
           setSpectrumY2(spectrum, page);
+        }
       }
 
       List<String[]> dataLDRTable = new ArrayList<String[]>();
@@ -466,9 +467,10 @@ values will be given as arguments of the ##PAGE= LDR, as in the following exampl
 
       setTabularDataType(spectrum, "##" + (continuous ? "XYDATA" : "PEAKTABLE"));
 
-      if (!spectrum.createXYCoords(nTupleTable, plotSymbols, spectrum
+      if (!spectrum.readNTUPLECoords(nTupleTable, plotSymbols, spectrum
           .getDataType(), t, minMaxY, errorLog))
         throw new JDXSourceException("Unable to read Ntuple Source");
+      spectrum0.nucleusX = spectrum.nucleusX; 
       for (int i = 0; i < sourceLDRTable.size(); i++) {
         String[] entry = sourceLDRTable.get(i);
         String key = JDXSourceStreamTokenizer.cleanLabel(entry[0]);
