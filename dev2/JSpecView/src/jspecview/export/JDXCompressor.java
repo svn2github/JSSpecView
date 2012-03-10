@@ -63,15 +63,15 @@ class JDXCompressor {
 
     StringBuffer buffer = new StringBuffer();
     for (int i = startDataPointIndex; i < endDataPointIndex; i++) {
-      buffer.append(TextFormat.fixExponentInt(xyCoords[i].getXVal() / xFactor));
+      buffer.append(TextFormat.fixIntNoExponent(xyCoords[i].getXVal() / xFactor));
       yStr.setLength(0);
-      int y1 = (int) Math.round(xyCoords[i].getYVal() / yFactor);
+      long y1 = (long) Math.round(xyCoords[i].getYVal() / yFactor);
       yStr.append(makeSQZ(y1));
       String lastDif = "";
       int nDif = 0;
       while (++i < endDataPointIndex - 1 && yStr.length() < 50) {
         // Print remaining Y values on a line
-        int y2 = (int) Math.round(xyCoords[i].getYVal() / yFactor);
+        long y2 = (long) Math.round(xyCoords[i].getYVal() / yFactor);
         // Calculate DIF value here
         String temp = makeDIF(y2 - y1);
         if (isDIFDUP && temp.equals(lastDif)) {
@@ -126,20 +126,20 @@ class JDXCompressor {
     StringBuffer buffer = new StringBuffer();
 
     for (int i = startDataPointIndex; i <= endDataPointIndex; i++) {
-      String xStr = TextFormat.fixExponentInt(xyCoords[i].getXVal( ) / xFactor);
+      String xStr = TextFormat.fixIntNoExponent(xyCoords[i].getXVal( ) / xFactor);
       if (xStr.length() < 20)
         xStr += spaces.substring(0, (14 - xStr.length()));
       buffer.append(xStr).append(" ");
-      format10(buffer, (int) Math.round(xyCoords[i].getYVal() / yFactor), formatter);
+      format10(buffer, (long) Math.round(xyCoords[i].getYVal() / yFactor), formatter);
       for (int j = 0; j < 5 && ++i <= endDataPointIndex; j++)
-        format10(buffer, (int) Math.round(xyCoords[i].getYVal() / yFactor), formatter);
+        format10(buffer, (long) Math.round(xyCoords[i].getYVal() / yFactor), formatter);
       buffer.append(TextFormat.newLine);
     }
 
     return buffer.toString();
   }
 
-  private static void format10(StringBuffer buffer, int y, DecimalFormat formatter) {
+  private static void format10(StringBuffer buffer, long y, DecimalFormat formatter) {
     String s = formatter.format(y);
     buffer.append(spaces.substring(0, (10 - s.length()))).append(s).append(" ");
   }
@@ -159,7 +159,7 @@ class JDXCompressor {
     StringBuffer yStr = new StringBuffer();
     StringBuffer buffer = new StringBuffer();
     for (int i = startDataPointIndex; i < endDataPointIndex; i++) {
-      buffer.append(TextFormat.fixExponentInt(xyCoords[i].getXVal()/ xFactor));
+      buffer.append(TextFormat.fixIntNoExponent(xyCoords[i].getXVal()/ xFactor));
       yStr.setLength(0);
       yStr.append(makeSQZ(xyCoords[i], yFactor));
       while ((yStr.length() < 60) && i <= endDataPointIndex)
@@ -191,7 +191,7 @@ class JDXCompressor {
                             double yFactor) {
     StringBuffer buffer = new StringBuffer();
     for (int i = startDataPointIndex; i <= endDataPointIndex; i++) {
-      buffer.append(TextFormat.fixExponentInt(xyCoords[i].getXVal() / xFactor))
+      buffer.append(TextFormat.fixIntNoExponent(xyCoords[i].getXVal() / xFactor))
       .append(fixPacY(xyCoords[i].getYVal() / yFactor));
       for (int j = 0; j < 4 && ++i <= endDataPointIndex; j++) {
         // Print remaining Y values on a line
@@ -203,7 +203,7 @@ class JDXCompressor {
   }
 
   private static String fixPacY(double y) {
-    return (y < 0 ? "" : " ") + TextFormat.fixExponentInt(y);
+    return (y < 0 ? "" : " ") + TextFormat.fixIntNoExponent(y);
   }
 
   /**
@@ -214,7 +214,7 @@ class JDXCompressor {
    * @return the SQZ character
    */
   private static String makeSQZ(Coordinate pt, double yFactor) {
-    return makeSQZ((int) Math.round(pt.getYVal() / yFactor));
+    return makeSQZ((long) Math.round(pt.getYVal() / yFactor));
   }
     
   /**
@@ -223,7 +223,7 @@ class JDXCompressor {
    * @param y the input number
    * @return the SQZ character
    */
-  private static String makeSQZ(int y) {
+  private static String makeSQZ(long y) {
     return compress(y, "@ABCDEFGHI", "abcdefghi");
   }
 
@@ -236,7 +236,7 @@ class JDXCompressor {
    *        the first y value
    * @return the DIF Character
    */
-  private static String makeDIF(int dy) {
+  private static String makeDIF(long dy) {
     return compress(dy, "%JKLMNOPQR", "jklmnopqr");
   }
 
@@ -245,7 +245,7 @@ class JDXCompressor {
    * @param sNum the input number as a string
    * @return the DUP character
    */
-  private static String makeDUP(int y){
+  private static String makeDUP(long y){
     return compress(y, "0STUVWXYZs", "");
   }
 
@@ -257,7 +257,7 @@ class JDXCompressor {
    * @param strNeg
    * @return
    */
-  private static String compress(int y, String strPos, String strNeg) {
+  private static String compress(long y, String strPos, String strNeg) {
     boolean negative = false;
     String yStr = String.valueOf(y);
     char ch = yStr.charAt(0);

@@ -231,43 +231,6 @@ public class Coordinate {
   }
 
   /**
-   * Converts and returns the list of Coordinates as a string with the number of
-   * coordinate per line specified by numPerLine argument
-   * 
-   * @param xyCoords
-   *        the array of coordinates
-   * @param startDataPointIndex
-   *        that start index
-   * @param endDataPointIndex
-   *        the end index
-   * @param numPerLine
-   *        number of coordinates per line
-   * @return returns the list of Coordinates as a string
-   */
-  public static String coordinatesToString(Coordinate[] xyCoords,
-                                           int startDataPointIndex,
-                                           int endDataPointIndex, int numPerLine) {
-  
-    StringBuffer buffer = new StringBuffer();
-    if (endDataPointIndex > startDataPointIndex) {
-      for (int index = startDataPointIndex; index <= endDataPointIndex; index++) {
-        Coordinate point = xyCoords[index];
-        buffer.append(TextFormat.fixExponent(point.getXVal()))
-        .append(", ").append(TextFormat.fixExponent(point.getYVal()))
-        .append(numPerLine > 1 && ((index + 1) % numPerLine) != 0 ? ' ' : TextFormat.newLine);
-      }
-    } else {
-      for (int index = startDataPointIndex; index <= endDataPointIndex; index--) {
-        Coordinate point = xyCoords[index];
-        buffer.append(TextFormat.fixExponent(point.getXVal()))
-        .append(", ").append(TextFormat.fixExponent(point.getYVal()))
-        .append(numPerLine > 1 && ((index + 1) % numPerLine) != 0 ? ' ' : TextFormat.newLine);
-      }  
-    }
-    return buffer.toString();
-  }
-
-  /**
    * Returns the Delta X value
    * 
    * @param last

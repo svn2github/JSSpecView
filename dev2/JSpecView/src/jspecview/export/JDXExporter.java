@@ -86,9 +86,9 @@ class JDXExporter {
     StringBuffer buffer = new StringBuffer();
     Coordinate[] newXYCoords = spectrum.getXYCoords();
     String tabDataSet = "", tmpDataClass = "XYDATA";
-    double xCompFactor = 1, yCompFactor = 1;
 
     if (spectrum.isHZtoPPM()) {
+      // convert back to Hz.
       Coordinate[] xyCoords = newXYCoords;
       newXYCoords = new Coordinate[xyCoords.length];
       for (int i = 0; i < xyCoords.length; i++)
@@ -96,15 +96,30 @@ class JDXExporter {
       Coordinate.applyScale(newXYCoords, spectrum.getObservedFreq(), 1);
     }
 
+    double xCompFactor = spectrum.getXFactor();
+    boolean isIntegerX = areIntegers(newXYCoords, startIndex, endIndex, 1.0, true);
+    if (!isIntegerX && !areIntegers(newXYCoords, startIndex, endIndex, xCompFactor, true))
+      xCompFactor = 1;
+    
     double minY = Coordinate.getMinY(newXYCoords, startIndex, endIndex);
     double maxY = Coordinate.getMaxY(newXYCoords, startIndex, endIndex);
+    double yCompFactor = spectrum.getYFactor();
 
-    if (type == Exporter.XY)
+    switch (type) {
+    case Exporter.XY:
+      yCompFactor = 1;
       tmpDataClass = (spectrum.isContinuous() ?  "XYDATA" : "XYPOINTS");
-    else if (type != Exporter.PAC)
-      yCompFactor = getYFactorForCompression(newXYCoords, startIndex, endIndex,
-          minY, maxY, FACTOR_DIVISOR);
-
+      break;
+    case Exporter.PAC:
+      yCompFactor = 1;
+      break;
+    default:
+      boolean isIntegerY = areIntegers(newXYCoords, startIndex, endIndex, 1.0, false);
+      if (!isIntegerY && !areIntegers(newXYCoords, startIndex, endIndex, yCompFactor, false)) {
+        yCompFactor = (maxY - minY) / FACTOR_DIVISOR;
+      }
+      break;
+    }
     switch (type) {
     case Exporter.DIF:
     case Exporter.DIFDUP:
@@ -124,7 +139,7 @@ class JDXExporter {
           xCompFactor, yCompFactor);
       break;
     case Exporter.XY:
-      tabDataSet = Coordinate.coordinatesToString(newXYCoords, startIndex,
+      tabDataSet = coordinatesToString(newXYCoords, startIndex,
           endIndex, 1);
       break;
     }
@@ -169,34 +184,52 @@ class JDXExporter {
 //  }
   
 
+  private static boolean areIntegers(Coordinate[] xyCoords, int startIndex,
+                                     int endIndex, double factor, boolean isX) {
+    for (int i = startIndex; i <= endIndex; i++) {
+      double x = (isX ? xyCoords[i].getXVal() : xyCoords[i].getYVal()) / factor;
+      if (TextFormat.isAlmostInteger(x))
+          return false;
+    }
+    return true;
+  }
+  
   /**
-   * Returns the Y Compression factor by finding the subtracting the min and max
-   * y values and dividing by the default factor divisor
+   * Converts and returns the list of Coordinates as a string with the number of
+   * coordinate per line specified by numPerLine argument
    * 
    * @param xyCoords
-   *        an array of coordinates
+   *        the array of coordinates
    * @param startDataPointIndex
-   *        the start index
+   *        that start index
    * @param endDataPointIndex
    *        the end index
-   * @param factorDivisor 
-   * @return the Y Compression factor
+   * @param numPerLine
+   *        number of coordinates per line
+   * @return returns the list of Coordinates as a string
    */
-  private static double getYFactorForCompression(Coordinate[] xyCoords,
-                                                int startDataPointIndex,
-                                                int endDataPointIndex,
-                                                double maxY, double minY, 
-                                                double factorDivisor) {
-    int i = startDataPointIndex;
-    double y;
-    for (; i <= endDataPointIndex; i++) 
-      if ((y = xyCoords[i].getYVal()) != Math.floor(y))
-          break;
-    if (i > endDataPointIndex)
-      return 1;
-    return (maxY - minY) / factorDivisor;
+  public static String coordinatesToString(Coordinate[] xyCoords,
+                                           int startDataPointIndex,
+                                           int endDataPointIndex, int numPerLine) {
+  
+    StringBuffer buffer = new StringBuffer();
+    if (endDataPointIndex > startDataPointIndex) {
+      for (int index = startDataPointIndex; index <= endDataPointIndex; index++) {
+        Coordinate point = xyCoords[index];
+        buffer.append(TextFormat.fixIntNoExponent(point.getXVal()))
+        .append(", ").append(TextFormat.fixIntNoExponent(point.getYVal()))
+        .append(numPerLine > 1 && ((index + 1) % numPerLine) != 0 ? ' ' : TextFormat.newLine);
+      }
+    } else {
+      for (int index = startDataPointIndex; index <= endDataPointIndex; index--) {
+        Coordinate point = xyCoords[index];
+        buffer.append(TextFormat.fixIntNoExponent(point.getXVal()))
+        .append(", ").append(TextFormat.fixIntNoExponent(point.getYVal()))
+        .append(numPerLine > 1 && ((index + 1) % numPerLine) != 0 ? ' ' : TextFormat.newLine);
+      }  
+    }
+    return buffer.toString();
   }
-
 
 
 }

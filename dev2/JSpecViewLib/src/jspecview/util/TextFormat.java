@@ -28,6 +28,8 @@ package jspecview.util;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 
+import jspecview.common.Coordinate;
+
 public class TextFormat {
 
   private final static DecimalFormat[] formatters = new DecimalFormat[10];
@@ -235,10 +237,10 @@ public class TextFormat {
         }
         ich += len;
         if (!Float.isNaN(floatT))
-          strLabel += TextFormat.format(floatT, width, precision, alignLeft,
+          strLabel += format(floatT, width, precision, alignLeft,
               zeroPad);
         else if (strT != null)
-          strLabel += TextFormat.format(strT, width, precision, alignLeft,
+          strLabel += format(strT, width, precision, alignLeft,
               zeroPad);
         if (doOne)
           break;
@@ -482,7 +484,8 @@ public class TextFormat {
         : value);
   }
 
-  static DecimalFormat formatter = TextFormat.getDecimalFormat("0.000000E00");
+  static DecimalFormat formatter1 = getDecimalFormat("0.000000E00");
+  static DecimalFormat formatter2 = getDecimalFormat("0.0000000000");
   /**
    * JCAMP-DX requires 1.5E[+|-]nn or 1.5E[+|-]nnn only
    * not Java's 1.5E3 or 1.5E-2
@@ -491,12 +494,9 @@ public class TextFormat {
    * @return
    */
   public static String fixExponent(double x) {
-    String s = formatter.format(x);
+    String s = formatter1.format(x);
     int pt = s.indexOf("E");
     if (pt < 0) {
-//      pt = s.indexOf("0000000");
-//      if (pt >= 0 && s.length() > 16)
-//        return s.substring(0, pt);  
       return s;
     }
     switch (s.length() - pt) {
@@ -515,6 +515,29 @@ public class TextFormat {
   }
 
   public static String fixExponentInt(double x) {
-    return (x == Math.floor(x) ? String.valueOf((int) x) : simpleReplace(fixExponent(x), "E+00", ""));
+    return (x == Math.floor(x) ? String.valueOf((long) x) : simpleReplace(fixExponent(x), "E+00", ""));
+  }
+
+  public static String fixIntNoExponent(double x) {
+    return (x == Math.floor(x) ? String.valueOf((long) x) : rtrim(formatter2.format(x),"0"));
+  }
+  
+  public static boolean isAlmostInteger(double x) {
+    return (x != 0 && Math.abs(x - Math.floor(x)) / x > 1e-8);
   }  
+  
+  static {
+    System.out.println("TEST TextFormat.java");
+    System.out.println((long) 1.23456789E10);   
+    System.out.println((long) Math.round(1.2345678999999E10));   
+    System.out.println((long) 1.2345679000001E+10);   
+    System.out.println((long) 1.2345679005001E10);   
+    System.out.println((long) Math.round(1.2345679004999E10));   
+    System.out.println((long) 1.234567890123E15);   
+    System.out.println((long) 9.999999666666666665E17);   
+    ////////////////////////////12345678901234567
+    System.out.println((long) 1.2345678901234567E15);   
+    
+  }
+
 }
