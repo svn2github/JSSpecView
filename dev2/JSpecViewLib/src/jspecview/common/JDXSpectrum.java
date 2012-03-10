@@ -708,25 +708,26 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
 
   /**
    * Determines if the plot should be displayed decreasing by default
+   * 
    * @param spectrum
    */
-  public boolean shouldDisplayXAxisIncreasing(){
-  String datatype = getDataType().toUpperCase();
-  String xUnits = getXUnits().toUpperCase();
-      
+  public boolean shouldDisplayXAxisIncreasing() {
+    String datatype = getDataType().toUpperCase();
+    String xUnits = getXUnits().toUpperCase();
+
     if (datatype.contains("NMR") && !(datatype.contains("FID"))) {
       return false;
-    }else if(datatype.contains("LINK") && xUnits.contains("CM")){
-      return false;    // I think this was because of a bug where BLOCK files kept type as LINK ?      
-    }else if (datatype.startsWith("IR") || datatype.contains("INFRA") && xUnits.contains("CM")) {
-        return false;
-    }else if (datatype.contains("RAMAN") && xUnits.contains("CM")) {
-        return false;
-    }
-    else if(datatype.contains("VIS") && xUnits.contains("NANOMETERS")){
+    } else if (datatype.contains("LINK") && xUnits.contains("CM")) {
+      return false; // I think this was because of a bug where BLOCK files kept type as LINK ?      
+    } else if (datatype.startsWith("IR") || datatype.contains("INFRA")
+        && xUnits.contains("CM")) {
+      return false;
+    } else if (datatype.contains("RAMAN") && xUnits.contains("CM")) {
+      return false;
+    } else if (datatype.contains("VIS") && xUnits.contains("NANOMETERS")) {
       return true;
     }
-    
+
     return isIncreasing();
   }
 
@@ -1049,6 +1050,14 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
 
   private int[] buf2d;
   private int bwidth,bheight;
+
+  private boolean exportXAxisLeftToRight;
+  public void setExportXAxisDirection(boolean leftToRight) {
+    exportXAxisLeftToRight = leftToRight;
+  }
+  public boolean isExportXAxisLeftToRight() {
+    return exportXAxisLeftToRight;
+  }
 
   public int[] get2dBuffer(int width, int height, int[] wh, double bufMinY, double bufMaxY) {
     if (bwidth == width && bheight == height)

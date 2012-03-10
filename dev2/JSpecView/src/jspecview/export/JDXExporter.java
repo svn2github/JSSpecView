@@ -63,7 +63,7 @@ class JDXExporter {
     FileWriter writer = new FileWriter(path);
     writer.write(data);
     writer.close();
-    return null;
+    return " (" + data.length() + " bytes)";
   }
 
   /**
@@ -120,27 +120,33 @@ class JDXExporter {
       }
       break;
     }
+    int step = 1;
+    if (spectrum.isExportXAxisLeftToRight() != (spectrum.getFirstX() < spectrum.getLastX())) {
+      int t = startIndex;
+      startIndex = endIndex;
+      endIndex = t;
+      step = -1;
+    }
     switch (type) {
     case Exporter.DIF:
     case Exporter.DIFDUP:
-      tabDataSet = JDXCompressor.compressDIF(newXYCoords, startIndex, endIndex,
+      tabDataSet = JDXCompressor.compressDIF(newXYCoords, startIndex, endIndex, step, 
           xCompFactor, yCompFactor, type == Exporter.DIFDUP);
       break;
     case Exporter.FIX:
-      tabDataSet = JDXCompressor.compressFIX(newXYCoords, startIndex, endIndex,
+      tabDataSet = JDXCompressor.compressFIX(newXYCoords, startIndex, endIndex, step, 
           xCompFactor, yCompFactor);
       break;
     case Exporter.PAC:
-      tabDataSet = JDXCompressor.compressPAC(newXYCoords, startIndex, endIndex,
+      tabDataSet = JDXCompressor.compressPAC(newXYCoords, startIndex, endIndex, step, 
           xCompFactor, yCompFactor);
       break;
     case Exporter.SQZ:
-      tabDataSet = JDXCompressor.compressSQZ(newXYCoords, startIndex, endIndex,
+      tabDataSet = JDXCompressor.compressSQZ(newXYCoords, startIndex, endIndex, step, 
           xCompFactor, yCompFactor);
       break;
     case Exporter.XY:
-      tabDataSet = coordinatesToString(newXYCoords, startIndex,
-          endIndex, 1);
+      tabDataSet = JDXCompressor.getXYList(newXYCoords, startIndex, endIndex, step);
       break;
     }
 
@@ -156,34 +162,6 @@ class JDXExporter {
     return buffer.toString();
   }
 
-//  /**
-//   * Returns the X Compression factor by finding the subtracting the min and max
-//   * x values and dividing by the factor divisor
-//   * 
-//   * @param xyCoords
-//   *        an array of coordinates
-//   * @param startDataPointIndex
-//   *        the start index
-//   * @param endDataPointIndex
-//   *        the end index
-//   * @param factorDivisor
-//   *        the factor divisor
-//   * @return the X Compression factor
-//   */
-//  private static double getXFactorForCompression(Coordinate[] xyCoords,
-//                                                int startDataPointIndex,
-//                                                int endDataPointIndex,
-//                                                double factorDivisor) {
-//  
-//    double maxX = Coordinate.getMaxX(xyCoords, startDataPointIndex,
-//        endDataPointIndex);
-//    double minX = Coordinate.getMinX(xyCoords, startDataPointIndex,
-//        endDataPointIndex);
-//  
-//    return (maxX - minX) / factorDivisor;
-//  }
-  
-
   private static boolean areIntegers(Coordinate[] xyCoords, int startIndex,
                                      int endIndex, double factor, boolean isX) {
     for (int i = startIndex; i <= endIndex; i++) {
@@ -194,42 +172,4 @@ class JDXExporter {
     return true;
   }
   
-  /**
-   * Converts and returns the list of Coordinates as a string with the number of
-   * coordinate per line specified by numPerLine argument
-   * 
-   * @param xyCoords
-   *        the array of coordinates
-   * @param startDataPointIndex
-   *        that start index
-   * @param endDataPointIndex
-   *        the end index
-   * @param numPerLine
-   *        number of coordinates per line
-   * @return returns the list of Coordinates as a string
-   */
-  public static String coordinatesToString(Coordinate[] xyCoords,
-                                           int startDataPointIndex,
-                                           int endDataPointIndex, int numPerLine) {
-  
-    StringBuffer buffer = new StringBuffer();
-    if (endDataPointIndex > startDataPointIndex) {
-      for (int index = startDataPointIndex; index <= endDataPointIndex; index++) {
-        Coordinate point = xyCoords[index];
-        buffer.append(TextFormat.fixIntNoExponent(point.getXVal()))
-        .append(", ").append(TextFormat.fixIntNoExponent(point.getYVal()))
-        .append(numPerLine > 1 && ((index + 1) % numPerLine) != 0 ? ' ' : TextFormat.newLine);
-      }
-    } else {
-      for (int index = startDataPointIndex; index <= endDataPointIndex; index--) {
-        Coordinate point = xyCoords[index];
-        buffer.append(TextFormat.fixIntNoExponent(point.getXVal()))
-        .append(", ").append(TextFormat.fixIntNoExponent(point.getYVal()))
-        .append(numPerLine > 1 && ((index + 1) % numPerLine) != 0 ? ' ' : TextFormat.newLine);
-      }  
-    }
-    return buffer.toString();
-  }
-
-
 }

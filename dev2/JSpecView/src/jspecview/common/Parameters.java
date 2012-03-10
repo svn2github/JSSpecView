@@ -91,6 +91,7 @@ public class Parameters extends DisplayScheme {
         case 2:
           jsvp.setZoom(Double.parseDouble(tokens.get(0)), 0, Double
               .parseDouble(tokens.get(1)), 0);
+          break;
         case 4:
           jsvp.setZoom(
               Double.parseDouble(tokens.get(0)), 

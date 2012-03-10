@@ -24,11 +24,11 @@ import java.text.DecimalFormat;
 import jspecview.common.Coordinate;
 import jspecview.util.TextFormat;
 
-
 /**
  * <code>JDXCompressor</code> takes an array of <code>Coordinates<code> and
  * compresses them into one of the JCAMP-DX compression formats: DIF, FIX, PAC
  * and SQZ.
+ * 
  * @author Christopher Muir
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
@@ -45,9 +45,9 @@ class JDXCompressor {
    * 
    * @param xyCoords
    *        the array of <code>Coordinate</code>s
-   * @param startDataPointIndex
+   * @param startIndex
    *        the start index of the array of Coordinates to be compressed
-   * @param endDataPointIndex
+   * @param endIndex
    *        the end index of the array of Coordinates to be compressed
    * @param xFactor
    *        x factor for compression
@@ -56,20 +56,21 @@ class JDXCompressor {
    * @param isDIFDUP
    * @return A String representing the compressed data
    */
-  static String compressDIF(Coordinate[] xyCoords, int startDataPointIndex,
-                            int endDataPointIndex, double xFactor,
+  static String compressDIF(Coordinate[] xyCoords, int startIndex,
+                            int endIndex, int step, double xFactor,
                             double yFactor, boolean isDIFDUP) {
     StringBuffer yStr = new StringBuffer();
-
     StringBuffer buffer = new StringBuffer();
-    for (int i = startDataPointIndex; i < endDataPointIndex; i++) {
-      buffer.append(TextFormat.fixIntNoExponent(xyCoords[i].getXVal() / xFactor));
+    for (int i = startIndex; i != endIndex;) {
+      buffer.append(TextFormat
+          .fixIntNoExponent(xyCoords[i].getXVal() / xFactor));
       yStr.setLength(0);
       long y1 = (long) Math.round(xyCoords[i].getYVal() / yFactor);
       yStr.append(makeSQZ(y1));
       String lastDif = "";
       int nDif = 0;
-      while (++i < endDataPointIndex - 1 && yStr.length() < 50) {
+      i += step;
+      while (i + step != endIndex && yStr.length() < 50) {
         // Print remaining Y values on a line
         long y2 = (long) Math.round(xyCoords[i].getYVal() / yFactor);
         // Calculate DIF value here
@@ -85,85 +86,104 @@ class JDXCompressor {
           yStr.append(temp);
         }
         y1 = y2;
+        i += step;
       }
       if (nDif > 0)
         yStr.append(makeDUP(nDif));
       // convert last digit of string to SQZ
       yStr.append(makeSQZ(xyCoords[i], yFactor));
       buffer.append(yStr).append(TextFormat.newLine);
+      i += step;
     }
     // Get checksum line -- for an X-sequence check only
-    buffer.append(TextFormat.fixExponentInt(xyCoords[endDataPointIndex].getXVal() / xFactor))
-        .append(makeSQZ(xyCoords[endDataPointIndex], yFactor));
+    buffer.append(
+        TextFormat.fixIntNoExponent(xyCoords[endIndex].getXVal() / xFactor))
+        .append(makeSQZ(xyCoords[endIndex], yFactor));
     buffer.append("  $$checkpoint").append(TextFormat.newLine);
     return buffer.toString();
   }
 
   final static String spaces = "                    ";
 
-
   /**
    * Compresses the <code>Coordinate<code>s into FIX format
    * 
    * @param xyCoords
    *        the array of <code>Coordinate</code>s
-   * @param startDataPointIndex
-   *        startDataPointIndex the start index of the array of Coordinates to
-   *        be compressed
-   * @param endDataPointIndex
-   *        endDataPointIndex the end index of the array of Coordinates to be
+   * @param startIndex
+   *        startIndex the start index of the array of Coordinates to be
    *        compressed
+   * @param endIndex
+   *        endIndex the end index of the array of Coordinates to be compressed
    * @param xFactor
    *        x factor for compression
    * @param yFactor
    *        y factor for compression
    * @return A String representing the compressed data
    */
-  static String compressFIX(Coordinate[] xyCoords, int startDataPointIndex,
-                            int endDataPointIndex, double xFactor,
-                            double yFactor) {
+  static String compressFIX(Coordinate[] xyCoords, int startIndex, int step,
+                            int endIndex, double xFactor, double yFactor) {
+    endIndex += step;
     DecimalFormat formatter = TextFormat.getDecimalFormat("#");
     StringBuffer buffer = new StringBuffer();
-
-    for (int i = startDataPointIndex; i <= endDataPointIndex; i++) {
-      String xStr = TextFormat.fixIntNoExponent(xyCoords[i].getXVal( ) / xFactor);
+    for (int i = startIndex; i != endIndex;) {
+      String xStr = TextFormat
+          .fixIntNoExponent(xyCoords[i].getXVal() / xFactor);
       if (xStr.length() < 20)
         xStr += spaces.substring(0, (14 - xStr.length()));
       buffer.append(xStr).append(" ");
-      format10(buffer, (long) Math.round(xyCoords[i].getYVal() / yFactor), formatter);
-      for (int j = 0; j < 5 && ++i <= endDataPointIndex; j++)
-        format10(buffer, (long) Math.round(xyCoords[i].getYVal() / yFactor), formatter);
+      format10(buffer, (long) Math.round(xyCoords[i].getYVal() / yFactor),
+          formatter);
+      i += step;
+      for (int j = 0; j < 5 && i != endIndex; j++) {
+        format10(buffer, (long) Math.round(xyCoords[i].getYVal() / yFactor),
+            formatter);
+        i += step;
+      }
       buffer.append(TextFormat.newLine);
     }
 
     return buffer.toString();
   }
 
-  private static void format10(StringBuffer buffer, long y, DecimalFormat formatter) {
+  private static void format10(StringBuffer buffer, long y,
+                               DecimalFormat formatter) {
     String s = formatter.format(y);
     buffer.append(spaces.substring(0, (10 - s.length()))).append(s).append(" ");
   }
 
   /**
    * Compresses the <code>Coordinate<code>s into SQZ format
-   * @param xyCoords the array of <code>Coordinate</code>s
-   * @param startDataPointIndex startDataPointIndex the start index of the array of Coordinates to
-   *        be compressed
-   * @param endDataPointIndex endDataPointIndex the end index of the array of Coordinates to
-   *        be compressed
-   * @param xFactor x factor for compression
-   * @param yFactor y factor for compression
+   * 
+   * @param xyCoords
+   *        the array of <code>Coordinate</code>s
+   * @param startIndex
+   *        startIndex the start index of the array of Coordinates to be
+   *        compressed
+   * @param endIndex
+   *        endIndex the end index of the array of Coordinates to be compressed
+   * @param xFactor
+   *        x factor for compression
+   * @param yFactor
+   *        y factor for compression
    * @return A String representing the compressed data
    */
-  static String compressSQZ(Coordinate[] xyCoords, int startDataPointIndex, int endDataPointIndex, double xFactor, double yFactor){
+  static String compressSQZ(Coordinate[] xyCoords, int startIndex,
+                            int endIndex, int step, double xFactor,
+                            double yFactor) {
     StringBuffer yStr = new StringBuffer();
+    endIndex += step;
     StringBuffer buffer = new StringBuffer();
-    for (int i = startDataPointIndex; i < endDataPointIndex; i++) {
-      buffer.append(TextFormat.fixIntNoExponent(xyCoords[i].getXVal()/ xFactor));
+    for (int i = startIndex; i == startIndex || i != endIndex;) {
+      buffer.append(TextFormat
+          .fixIntNoExponent(xyCoords[i].getXVal() / xFactor));
       yStr.setLength(0);
       yStr.append(makeSQZ(xyCoords[i], yFactor));
-      while ((yStr.length() < 60) && i <= endDataPointIndex)
-        yStr.append(makeSQZ(xyCoords[++i], yFactor));
+      i += step;
+      while ((yStr.length() < 60) && i != endIndex) {
+        yStr.append(makeSQZ(xyCoords[i], yFactor));
+        i += step;
+      }
       buffer.append(yStr).append(TextFormat.newLine);
     }
     return buffer.toString();
@@ -174,28 +194,31 @@ class JDXCompressor {
    * 
    * @param xyCoords
    *        the array of <code>Coordinate</code>s
-   * @param startDataPointIndex
-   *        startDataPointIndex the start index of the array of Coordinates to
-   *        be compressed
-   * @param endDataPointIndex
-   *        endDataPointIndex the end index of the array of Coordinates to be
+   * @param startIndex
+   *        startIndex the start index of the array of Coordinates to be
    *        compressed
+   * @param endIndex
+   *        endIndex the end index of the array of Coordinates to be compressed
    * @param xFactor
    *        x factor for compression
    * @param yFactor
    *        y factor for compression
    * @return A String representing the compressed data
    */
-  static String compressPAC(Coordinate[] xyCoords, int startDataPointIndex,
-                            int endDataPointIndex, double xFactor,
+  static String compressPAC(Coordinate[] xyCoords, int startIndex,
+                            int endIndex, int step, double xFactor,
                             double yFactor) {
     StringBuffer buffer = new StringBuffer();
-    for (int i = startDataPointIndex; i <= endDataPointIndex; i++) {
-      buffer.append(TextFormat.fixIntNoExponent(xyCoords[i].getXVal() / xFactor))
-      .append(fixPacY(xyCoords[i].getYVal() / yFactor));
-      for (int j = 0; j < 4 && ++i <= endDataPointIndex; j++) {
+    endIndex += step;
+    for (int i = startIndex; i != endIndex;) {
+      buffer.append(
+          TextFormat.fixIntNoExponent(xyCoords[i].getXVal() / xFactor)).append(
+          fixPacY(xyCoords[i].getYVal() / yFactor));
+      i += step;
+      for (int j = 0; j < 4 && i != endIndex; j++) {
         // Print remaining Y values on a line
         buffer.append(fixPacY(xyCoords[i].getYVal() / yFactor));
+        i += step;
       }
       buffer.append(TextFormat.newLine);
     }
@@ -209,18 +232,20 @@ class JDXCompressor {
   /**
    * Makes a SQZ Character for a y value
    * 
-   * @param pt the input point
+   * @param pt
+   *        the input point
    * @param yFactor
    * @return the SQZ character
    */
   private static String makeSQZ(Coordinate pt, double yFactor) {
     return makeSQZ((long) Math.round(pt.getYVal() / yFactor));
   }
-    
+
   /**
    * Makes a SQZ Character
    * 
-   * @param y the input number
+   * @param y
+   *        the input number
    * @return the SQZ character
    */
   private static String makeSQZ(long y) {
@@ -242,10 +267,12 @@ class JDXCompressor {
 
   /**
    * Makes a DUP Character
-   * @param sNum the input number as a string
+   * 
+   * @param sNum
+   *        the input number as a string
    * @return the DUP character
    */
-  private static String makeDUP(long y){
+  private static String makeDUP(long y) {
     return compress(y, "0STUVWXYZs", "");
   }
 
@@ -267,8 +294,33 @@ class JDXCompressor {
       ch = yStr.charAt(0);
     }
     char[] yStrArray = yStr.toCharArray();
-    yStrArray[0] = (negative ? strNeg.charAt(ch - '1') 
-        : strPos.charAt(ch - '0'));
+    yStrArray[0] = (negative ? strNeg.charAt(ch - '1') : strPos
+        .charAt(ch - '0'));
     return new String(yStrArray);
-  }  
+  }
+
+  /**
+   * Converts and returns the list of Coordinates as a string
+   * 
+   * @param xyCoords
+   *        the array of coordinates
+   * @param startIndex
+   *        that start index
+   * @param endIndex
+   *        the end index
+   * @return returns the list of Coordinates as a string
+   */
+  static String getXYList(Coordinate[] xyCoords, int startIndex, int endIndex,
+                          int step) {
+    endIndex += step;
+    StringBuffer buffer = new StringBuffer();
+    for (int i = startIndex; i != endIndex; i += step) {
+      Coordinate point = xyCoords[i];
+      buffer.append(TextFormat.fixIntNoExponent(point.getXVal())).append(", ")
+          .append(TextFormat.fixIntNoExponent(point.getYVal())).append(
+              TextFormat.newLine);
+    }
+    return buffer.toString();
+  }
+
 }

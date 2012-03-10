@@ -193,7 +193,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private Coordinate coordClicked;
   private boolean plotReversed;
 
-  private boolean shouldDrawXAxisIncreasing;
+  private boolean drawXAxisLeftToRight;
 
   // background color of plot area
   private Color plotAreaColor = Color.white;
@@ -251,7 +251,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private int currentZoomIndex;
 
   // Determines if the xAxis should be displayed increasing
-  private boolean isXAxisDisplayedIncreasing = true;
+  private boolean xAxisLeftToRight = true;
 
   // The initial coordinate and final coordinates of zoom area
   private double initX, initY, finalX, finalY, initXpixel;
@@ -627,15 +627,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     yUnitsOn = val;
   }
 
-  /**
-   * Displays plot in reverse if val is true
-   * 
-   * @param val
-   *        true or false
-   */
-  public void setReversePlot(boolean val) {
-    plotReversed = val;
-  }
 
   /**
    * Sets the Minimum number of points that may be displayed when the spectrum
@@ -896,7 +887,24 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * Sets whether the x Axis should be displayed increasing
    */
   public void setXAxisDisplayedIncreasing(boolean val) {
-    isXAxisDisplayedIncreasing = val;
+    xAxisLeftToRight = val;
+    setDrawXAxis();
+  }
+
+  /**
+   * Displays plot in reverse if val is true
+   * 
+   * @param val
+   *        true or false
+   */
+  public void setReversePlot(boolean val) {
+    plotReversed = val;
+    setDrawXAxis();
+  }
+
+  private void setDrawXAxis() {
+    drawXAxisLeftToRight = xAxisLeftToRight ^ plotReversed;
+    getSpectrum().setExportXAxisDirection(drawXAxisLeftToRight);
   }
 
   /* -------------------Other methods ------------------------------------*/
@@ -971,6 +979,24 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   /* ------------------------- GET METHODS ----------------------------*/
 
   /**
+   * Returns true if plot is left to right
+   * 
+   * @return true if plot is left to right 
+   */
+  public boolean isXAxisLeftToright() {
+    return xAxisLeftToRight;
+  }
+
+  /**
+   * Returns true if plot is reversed
+   * 
+   * @return true if plot is reversed
+   */
+  public boolean isPlotReversed() {
+    return plotReversed;
+  }
+
+  /**
    * Returns true if zoom is enabled
    * 
    * @return true if zoom is enabled
@@ -1013,15 +1039,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   public boolean isYScaleOn() {
     return yScaleOn;
-  }
-
-  /**
-   * Returns true if plot is reversed
-   * 
-   * @return true if plot is reversed
-   */
-  public boolean isPlotReversed() {
-    return plotReversed;
   }
 
   /**
@@ -1213,7 +1230,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * Returns true is the X Axis is displayed increasing
    */
   public boolean isXAxisDisplayedIncreasing() {
-    return isXAxisDisplayedIncreasing;
+    return xAxisLeftToRight;
   }
 
   @Override
@@ -1250,7 +1267,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private void drawGraph(Graphics g, int height, int width) {
     
     JDXSpectrum spec0 = getSpectrumAt(0);
-    shouldDrawXAxisIncreasing = isXAxisDisplayedIncreasing ^ plotReversed;
     plotAreaWidth = width - (plotAreaInsets.right + plotAreaInsets.left);
     plotAreaHeight = height - (plotAreaInsets.top + plotAreaInsets.bottom);
     leftPlotAreaPos = plotAreaX;
@@ -1421,7 +1437,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
   private int xPixels(double dx) {
     int x = (int) ((dx - multiScaleData.minXOnScale) / xFactorForScale);
-    return (int) (shouldDrawXAxisIncreasing ? leftPlotAreaPos + x
+    return (int) (drawXAxisLeftToRight ? leftPlotAreaPos + x
         : rightPlotAreaPos - x);
   }
 
@@ -1605,8 +1621,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     String hashX = "#";
     String hash1 = "0.00000000";
 
-    boolean drawScaleIncreasing = shouldDrawXAxisIncreasing;
-
     if (multiScaleData.hashNums[0] <= 0)
       hashX = hash1.substring(0, Math.abs(multiScaleData.hashNums[0]) + 3);
 
@@ -1620,7 +1634,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     if (Double.isNaN(multiScaleData.firstX)) {
       lastX = multiScaleData.maxXOnScale + multiScaleData.xStep / 2;
       for (double val = multiScaleData.minXOnScale, vald = multiScaleData.maxXOnScale; val < lastX; val += multiScaleData.xStep, vald -= multiScaleData.xStep) {
-        int x = (int) (leftPlotAreaPos + (((drawScaleIncreasing ? val : vald) - multiScaleData.minXOnScale) / xFactorForScale));
+        int x = (int) (leftPlotAreaPos + (((drawXAxisLeftToRight ? val : vald) - multiScaleData.minXOnScale) / xFactorForScale));
         g.setColor(gridColor);
         g.drawLine(x, y1, x, y2);
         g.setColor(scaleColor);
@@ -1872,7 +1886,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     } else {
       xPixel = fixX(xPixel);
       yPixel = fixY(yPixel);
-      xPt = (shouldDrawXAxisIncreasing 
+      xPt = (drawXAxisLeftToRight 
          ?  multiScaleData.maxXOnScale - (rightPlotAreaPos - xPixel) * xFactorForScale 
          :  multiScaleData.minXOnScale + (rightPlotAreaPos - xPixel) * xFactorForScale);
       yPt = multiScaleData.maxYOnScale + (topPlotAreaPos - yPixel) * yFactorForScale;
@@ -2395,6 +2409,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
     
   private String export(String mode, File file, JDXSpectrum spec, int startIndex, int endIndex) {
+    String msg = " OK";
     try {
       if (mode.equals("PNG") || mode.equals("JPG")) {
         try {
@@ -2406,16 +2421,16 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
           ioe.printStackTrace();
         }
       } else if (mode.equals("SVG")) {
-        (new SVGExporter()).exportAsSVG(file.getAbsolutePath(), spec.getXYCoords(), spec.getTitle(), startIndex,
+        msg = (new SVGExporter()).exportAsSVG(file.getAbsolutePath(), spec.getXYCoords(), spec.getTitle(), startIndex,
             endIndex, spec.getXUnits(), spec.getYUnits(), spec.isContinuous(),
             spec.isIncreasing(), getPlotAreaColor(), getBackground(),
             getPlotColor(0), getGridColor(), getTitleColor(), 
             getScaleColor(), getUnitsColor(), isSvgExportForInkscapeEnabled());
       } else {
-        Exporter.export(mode, file.getAbsolutePath(), spec, startIndex,
+        msg = Exporter.export(mode, file.getAbsolutePath(), spec, startIndex,
             endIndex);
       }
-      return "Exported " + mode + ": " + file.getAbsolutePath();
+      return "Exported " + mode + ": " + file.getAbsolutePath() + msg;
     } catch (IOException ioe) {
       return "Error exporting " + file.getAbsolutePath() + ": " + ioe.getMessage();
     }
@@ -2909,7 +2924,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   public void toPeak(int istep) {
-    istep *= (shouldDrawXAxisIncreasing ? 1 : -1);
+    istep *= (drawXAxisLeftToRight ? 1 : -1);
     coordClicked = new Coordinate(lastClickX, 0);
     JDXSpectrum spec = getSpectrum();
     int iPeak = spec.setNextPeak(coordClicked, istep);

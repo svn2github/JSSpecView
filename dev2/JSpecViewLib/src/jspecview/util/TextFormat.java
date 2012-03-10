@@ -28,8 +28,6 @@ package jspecview.util;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 
-import jspecview.common.Coordinate;
-
 public class TextFormat {
 
   private final static DecimalFormat[] formatters = new DecimalFormat[10];
