@@ -588,7 +588,6 @@ public class Coordinate {
       if (tmp > max)
         max = tmp;
     }
-    System.out.println(max);
     return max;
   }
 

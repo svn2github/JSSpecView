@@ -706,6 +706,21 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return (dataType.toUpperCase().indexOf("NMR") >= 0 && observedNucl.toUpperCase().indexOf("H") >= 0);
   }
 
+  public static final int SCALE_NONE = 0;
+  public static final int SCALE_TOP = 1;
+  public static final int SCALE_BOTTOM = 2;
+  public static final int SCALE_TOP_BOTTOM = 3;
+  
+  public int getYScaleType() {
+    String datatype = getDataType().toUpperCase();
+    String yUnits = getYUnits().toUpperCase();
+    if (datatype.contains("NMR"))
+      return SCALE_TOP_BOTTOM;
+    if (datatype.startsWith("IR") || datatype.contains("INFRA"))
+      return (yUnits.startsWith("T") ? SCALE_NONE : SCALE_TOP);
+    return SCALE_TOP;
+  }
+  
   /**
    * Determines if the plot should be displayed decreasing by default
    * 
@@ -714,7 +729,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   public boolean shouldDisplayXAxisIncreasing() {
     String datatype = getDataType().toUpperCase();
     String xUnits = getXUnits().toUpperCase();
-
     if (datatype.contains("NMR") && !(datatype.contains("FID"))) {
       return false;
     } else if (datatype.contains("LINK") && xUnits.contains("CM")) {

@@ -1514,7 +1514,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
           continue;
         g.drawLine(x1, y1, x1, y2);
       }
-      if (multiScaleData.minYOnScale < 0) {
+      if (multiScaleData.isYZeroOnScale()) {
         int y = yPixels(0);
         g.drawLine(rightPlotAreaPos, y, leftPlotAreaPos, y);
       }
@@ -2989,8 +2989,22 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
   
   private void scaleYBy(double factor) {
-    doZoom(multiScaleData.minX, multiScaleData.minY, 
-        multiScaleData.maxX, multiScaleData.maxY / factor, true);
+    if (!allowYScale)
+      return;
+    double factor1 = factor;
+    double factor2 = factor;
+    switch (getSpectrum().getYScaleType()) {
+    case JDXSpectrum.SCALE_NONE:
+      return;
+    case JDXSpectrum.SCALE_TOP:
+      factor1 = 1;
+      break;
+    case JDXSpectrum.SCALE_BOTTOM:
+      factor2 = 1;
+      break;
+    }
+    doZoom(multiScaleData.minX, multiScaleData.minY / factor1, 
+        multiScaleData.maxX, multiScaleData.maxY / factor2, true);
   }
 
   public void keyReleased(KeyEvent e) {

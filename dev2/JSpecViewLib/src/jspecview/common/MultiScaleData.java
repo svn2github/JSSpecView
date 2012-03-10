@@ -170,4 +170,8 @@ public class MultiScaleData extends ScaleData {
     setXScale(initNumXDivisions);
   }
 
+  public boolean isYZeroOnScale() {
+    return (minYOnScale < 0 && maxYOnScale > 0);
+  }
+
  }
