@@ -280,7 +280,7 @@ public class PreferencesDialog extends JDialog {
     toolbarCheckBox.setText("Show toolbar");
     exportDirCheckBox.setText("Remember directory of last exported file");
     openedDirCheckBox.setText("Remember directory of last opened file");
-    legendCheckBox.setText("Automatically show legend when spectra are overlayed");
+    legendCheckBox.setText("Automatically show legend when spectra are overlaid");
     confirmExitCheckBox.setText("Confirm before exiting");
     sidePanelCheckBox.setText("Show side panel");
     
@@ -538,7 +538,7 @@ public class PreferencesDialog extends JDialog {
     
     generalPanel.add(spectrumPanel);
     spectrumPanel.setLayout(null);
-    overlayCheckBox.setText("Show compound files as overlayed if possible");
+    overlayCheckBox.setText("Show compound files as overlaid if possible");
     
     JLabel lblTheFollowingProperties = new JLabel("The spectrum display properties above will apply for new spectra");
     lblTheFollowingProperties.setFont(new Font("Tahoma", Font.ITALIC, 11));
@@ -655,7 +655,7 @@ public class PreferencesDialog extends JDialog {
       JDXSource source = JDXFileReader.createJDXSource(getClass()
           .getResourceAsStream("resources/sample.jdx"), false);
 
-      previewPanel = new JSVPanel(source.getSpectra());
+      previewPanel = new JSVPanel(source.getSpectra().get(0));
       previewPanel.setZoomEnabled(false);
       previewPanel.setCoordinatesOn(true);
       previewPanel.setGridOn(true);

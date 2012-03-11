@@ -227,11 +227,12 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private Color zoomBoxColor = new Color(100, 100, 50, 130);
 
   //private boolean isMousePressed; 
-  private boolean isMouseDragged, isMouseReleased;
+  private boolean zoomBoxVisible, isMouseReleased;
   private int zoomBoxX, currZoomBoxX;
   private boolean isMouseDraggedEvent;
+  private boolean isMouseDraggedEvent2D;
 
-  // whether to draw an overlayed plot increasing or decreasing
+  // whether to draw an overlaid plot increasing or decreasing
   private boolean overlayIncreasing = false;
 
   /* PUT FONT FACE AND SIZE ATTRIBUTES HERE */
@@ -254,7 +255,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private boolean xAxisLeftToRight = true;
 
   // The initial coordinate and final coordinates of zoom area
-  private double initX, initY, finalX, finalY, initXpixel;
+  private double initX, initY, finalX, finalY;
 
   // Minimum number of points that are displayable in a zoom
   private int minNumOfPointsForZoom = 3;
@@ -284,11 +285,11 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   public JSVPanel(Graph spectrum) {
     super();
-    try {
-      initJSVPanel(new Graph[] { spectrum });
-    } catch (ScalesIncompatibleException e) {
-      // impossible
-    }
+    // standard applet not overlaid and not showing range
+    // standard application split spectra
+    // removal of integration, taConvert
+    // Preferences Dialog sample.jdx
+    initJSVPanel(new Graph[] { spectrum }, null, null);
   }
 
   /**
@@ -304,13 +305,11 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @throws JSpecViewException
    */
   public JSVPanel(Graph spectrum, int startIndex, int endIndex)
-      throws JSpecViewException {
+      throws ScalesIncompatibleException {
     super();
-    try {
+    // from applet not overlaid but showing range
       initJSVPanel(new Graph[] { spectrum }, new int[] { startIndex },
           new int[] { endIndex });
-    } catch (ScalesIncompatibleException sie) {
-    }
   }
 
   /**
@@ -320,51 +319,27 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        an array of spectra (<code>Spectrum</code>)
    * @throws ScalesIncompatibleException
    */
-  public JSVPanel(Graph[] spectra) throws ScalesIncompatibleException {
+  public JSVPanel(Graph[] spectra) {
     super();
-    initJSVPanel(spectra);
-  }
-
-  public static JSVPanel getIntegralPanel(JDXSpectrum spectrum, Color color) {
-    try {
-      Graph graph = spectrum.getIntegrationGraph();
-      JSVPanel jsvp = new JSVPanel(new Graph[] { spectrum, graph });
-      jsvp.setTitle(graph.getTitle());
-      jsvp.setPlotColors(new Color[] { jsvp.getPlotColor(0), color });
-      return jsvp;
-    } catch (ScalesIncompatibleException e) {
-      return null;
-    }
-  }
-
-  /**
-   * Constructs a <code>JSVPanel</code> with an array of spectra and
-   * corresponding start and end indices of data points that should be displayed
-   * 
-   * @param spectra
-   *        the array of spectra
-   * @param startIndices
-   *        the indices of coordinates at which the display should start
-   * @param endIndices
-   *        the indices of the end coordinates
-   * @throws JSpecViewException
-   * @throws ScalesIncompatibleException
-   */
-  public JSVPanel(Graph[] spectra, int[] startIndices, int[] endIndices)
-      throws JSpecViewException, ScalesIncompatibleException {
-    super();
-    initJSVPanel(spectra, startIndices, endIndices);
+    // specifically for getIntegralPanel
+    initJSVPanel(spectra, null, null);
   }
 
   /**
    * Constructs a JSVMultiPanel with a List of Spectra
    * 
    * @param spectra
+   *
    *        a <code>List</code> of spectra
    * @throws ScalesIncompatibleException
    */
   public JSVPanel(List<JDXSpectrum> spectra) throws ScalesIncompatibleException {
-    this((Graph[]) spectra.toArray(new Graph[spectra.size()]));
+    super();
+    // applet overlay, no range
+    // application overlay, no range
+    if (!JDXSpectrum.areScalesCompatible(spectra))
+      throw new ScalesIncompatibleException();
+    initJSVPanel((Graph[]) spectra.toArray(new Graph[spectra.size()]), null, null);
   }
 
   /**
@@ -381,9 +356,21 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @throws ScalesIncompatibleException
    */
   public JSVPanel(List<JDXSpectrum> spectra, int[] startIndices,
-      int[] endIndices) throws JSpecViewException, ScalesIncompatibleException {
-    this((Graph[]) spectra.toArray(new Graph[spectra.size()]), startIndices,
+      int[] endIndices) throws ScalesIncompatibleException {
+    // from applet only;  overlay with a set of spectra, with range.
+    super();
+    if (!JDXSpectrum.areScalesCompatible(spectra))
+      throw new ScalesIncompatibleException();
+    initJSVPanel((Graph[]) spectra.toArray(new Graph[spectra.size()]), startIndices,
         endIndices);
+  }
+
+  public static JSVPanel getIntegralPanel(JDXSpectrum spectrum, Color color) {
+    Graph graph = spectrum.getIntegrationGraph();
+    JSVPanel jsvp = new JSVPanel(new Graph[] { spectrum, graph });
+    jsvp.setTitle(graph.getTitle());
+    jsvp.setPlotColors(new Color[] { jsvp.getPlotColor(0), color });
+    return jsvp;
   }
 
   /**
@@ -398,104 +385,70 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @throws JSpecViewException
    * @throws ScalesIncompatibleException
    */
+  
   private void initJSVPanel(Graph[] spectra, int[] startIndices,
-                            int[] endIndices) throws JSpecViewException,
-      ScalesIncompatibleException {
+                            int[] endIndices) {
     this.spectra = spectra;
     nSpectra = spectra.length;
     if (nSpectra == 1)
       setTitle(getSpectrum().getTitleLabel());
-
-    checkUnits();
-
-    if (nSpectra > plotColors.length) {
-      Color[] tmpPlotColors = new Color[nSpectra];
-      int numAdditionColors = nSpectra - plotColors.length;
-      System.arraycopy(plotColors, 0, tmpPlotColors, 0, plotColors.length);
-
-      for (int i = 0, j = plotColors.length; i < numAdditionColors; i++, j++) {
-        tmpPlotColors[j] = generateRandomColor();
+    if (startIndices == null) {
+      startIndices = new int[nSpectra];
+      endIndices = new int[nSpectra];
+      for (int i = 0; i < nSpectra; i++) {
+        startIndices[i] = 0;
+        endIndices[i] = spectra[i].getXYCoords().length - 1;
       }
-
-      plotColors = tmpPlotColors;
     }
-
-    zoomInfoList = new ArrayList<MultiScaleData>();
-    doZoomWithoutRepaint(initX, finalX, 0, 0, startIndices, endIndices);
-
-    setBorder(BorderFactory.createLineBorder(Color.lightGray));
-  }
-
-  // throw exception when units are not the same on both axes
-
-  /**
-   * Initializes the JSVPanel
-   * 
-   * @param spectra
-   *        the array of spectra
-   * @throws ScalesIncompatibleException
-   */
-  private void initJSVPanel(Graph[] spectra) throws ScalesIncompatibleException {
-    setDefaultMouseListener();
-    this.spectra = spectra;
-    nSpectra = spectra.length;
-    if (nSpectra == 1)
-      setTitle(getSpectrum().getTitleLabel());
-    int[] startIndices = new int[nSpectra];
-    int[] endIndices = new int[nSpectra];
-    //boolean[] plotIncreasing = new boolean[numOfSpectra];
-
-    // test if all have same x and y units
-    checkUnits();
-
     allowYScale = true;
     for (int i = 0; i < nSpectra; i++) {
-      startIndices[i] = 0;
-      endIndices[i] = spectra[i].getXYCoords().length - 1;
-      allowYScale &= (!spectra[i].getYUnits().equals(spectra[0].getYUnits()) 
-          || spectra[i].getUserYFactor() != spectra[0].getUserYFactor());        
+      allowYScale &= (spectra[i].getYUnits().equals(spectra[0].getYUnits()) 
+          && spectra[i].getUserYFactor() == spectra[0].getUserYFactor());        
     }
-    allowYScale = true;
-
-    setPlotColors(Parameters.defaultPlotColors);
-
     getMultiScaleData(0, 0, 0, 0, startIndices, endIndices);
-    //add data to zoomInfoList
     zoomInfoList = new ArrayList<MultiScaleData>();
     zoomInfoList.add(multiScaleData);
-
+    setPlotColors(Parameters.defaultPlotColors);
     setBorder(BorderFactory.createLineBorder(Color.lightGray));
+    addKeyListener(this);
+    addMouseListener(this);
+    addMouseMotionListener(this);
+  }
+
+  public void setPlotColors(Color[] colors) {
+    if (colors.length > nSpectra) {
+      Color[] tmpPlotColors = new Color[nSpectra];
+      System.arraycopy(colors, 0, tmpPlotColors, 0, nSpectra);
+      colors = tmpPlotColors;
+    } else if (nSpectra > colors.length) {
+      Color[] tmpPlotColors = new Color[nSpectra];
+      int numAdditionColors = nSpectra - colors.length;
+      System.arraycopy(colors, 0, tmpPlotColors, 0, colors.length);
+      for (int i = 0, j = colors.length; i < numAdditionColors; i++, j++)
+        tmpPlotColors[j] = generateRandomColor();
+      colors = tmpPlotColors;
+    }
+    plotColors = colors;
   }
 
   private void getMultiScaleData(double x1, double x2, double y1, double y2,
                                  int[] startIndices, int[] endIndices) {
+    Graph[] graphs = graphsTemp;
     List<JDXSpectrum> subspecs = getSpectrumAt(0).getSubSpectra();
+    
     if (!getSpectrumAt(0).is1D() || subspecs == null && y1 == y2) {
-      // 2D spectrum 
-      multiScaleData = new MultiScaleData(spectra, y1, y2, startIndices,
-          endIndices, 10, 10, getSpectrumAt(0).isContinuous());
-      return;
-    }
-    if (y1 == y2) {
+      // 2D spectrum or startup
+      graphs = this.spectra;
+    } else if (y1 == y2) {
       //start up, forced subsets (too many spectra) 
       multiScaleData = new MultiScaleData(subspecs, y1, y2, 10, 10, getSpectrum()
           .isContinuous());
       return;
     }
-    // from a zoom measurement
-    multiScaleData = new MultiScaleData(graphsTemp, y1, y2, startIndices,
+    multiScaleData = new MultiScaleData(graphs, y1, y2, startIndices,
         endIndices, 10, 10, getSpectrumAt(0).isContinuous());
-    multiScaleData.setXRange(x1, x2, 10);
-  }
-
-  /**
-   * 
-   * @throws ScalesIncompatibleException
-   */
-  private void checkUnits() throws ScalesIncompatibleException {
-    if (!JDXSpectrum.areScalesCompatible(spectra)) {
-      throw new ScalesIncompatibleException();
-    }
+    if (graphs == graphsTemp)
+      multiScaleData.setXRange(x1, x2, 10);
   }
 
   /**
@@ -513,17 +466,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     if (!randomColor.equals(Color.blue))
       return randomColor;
     return generateRandomColor();
-  }
-
-  /* ------------------------------LISTENER METHODS-------------------------*/
-
-  /**
-   * Sets default MouseListener
-   */
-  public void setDefaultMouseListener() {
-    addMouseListener(this);
-    addMouseMotionListener(this);
-    addKeyListener(this);
   }
 
   /* ------------------------- SETTER METHODS-------------------------------*/
@@ -683,32 +625,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   public void setIntegralPlotColor(Color color) {
     if (color != null)
       integralPlotColor = color;
-  }
-
-  /**
-   * Sets the color of the plots
-   * 
-   * @param colors
-   *        an array of <code>Color</code>
-   */
-  public void setPlotColors(Color[] colors) {
-    Color[] tmpPlotColors;
-    if (colors.length < nSpectra) {
-      tmpPlotColors = new Color[nSpectra];
-      int numAdditionColors = nSpectra - colors.length;
-      System.arraycopy(colors, 0, tmpPlotColors, 0, colors.length);
-
-      for (int i = 0, j = colors.length; i < numAdditionColors; i++, j++) {
-        tmpPlotColors[j] = generateRandomColor();
-      }
-
-      plotColors = tmpPlotColors;
-    } else if (colors.length > nSpectra) {
-      plotColors = new Color[nSpectra];
-      System.arraycopy(colors, 0, plotColors, 0, nSpectra);
-    } else
-      plotColors = colors;
-
   }
 
   /**
@@ -1597,8 +1513,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
   private Graph[] graphsTemp = new Graph[1];
 
-  private double zPt;
-  
   private NumberFormat getFormatter(String hash) {
     NumberFormat formatter = htFormats.get(hash);
     if (formatter == null)
@@ -1793,14 +1707,14 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   private void drawZoomBox(Graphics g) {
     //  adapted from suggestion by Valery Tkachenko 5 Nov 2010 and previously implemented for ChemSpider
-    if (isMouseDragged) {
+    if (zoomBoxVisible) {
       g.setColor(zoomBoxColor);
       g.fillRect(
           Math.min(zoomBoxX, currZoomBoxX), 
           Math.min(zoomBoxY, currZoomBoxY), 
           Math.abs(currZoomBoxX - zoomBoxX), 
           Math.abs(currZoomBoxY - zoomBoxY));
-      isMouseDragged = false;
+      zoomBoxVisible = false;
     }
     if (isMouseReleased) {
       isMouseReleased = false; // bug fix suggested by Tim te Beek 29 Oct 2010    
@@ -1867,7 +1781,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private Coordinate getCoordFromPoint(int xPixel, int yPixel) {
     double xPt, yPt;
 
-    zPt = Double.NaN;
+    //zPt = Double.NaN;
     
     if (image2D != null && xPixel >= bwidthLeft - 5 && xPixel < getWidth() - 15) {
 
@@ -1880,9 +1794,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       int n = getSpectrumAt(0).getSubSpectra().size();
       int y = Math.min(n - 1, Math.max(0, (int)((bottomPlotAreaPos - yPixel) * 1.0 / imageWidthHeight[1] * n)));
       yPt = y;
-      JDXSpectrum spec = getSpectrumAt(0).getSubSpectra().get(y);
+      //JDXSpectrum spec = getSpectrumAt(0).getSubSpectra().get(y);
       //zPt = spec.getYValueAt(spec.getXYCoords(), xPt);
-      zPt = spec.getY2D();
+      //zPt = spec.getY2D();
     } else {
       xPixel = fixX(xPixel);
       yPixel = fixY(yPixel);
@@ -2268,7 +2182,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   /**
-   * Sets whether plots that are overlayed should be drawn in increasing of
+   * Sets whether plots that are overlaid should be drawn in increasing of
    * decreasing
    * 
    * @param val
@@ -2279,7 +2193,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   /**
-   * Returns whether overlayed plots are drawn increasing
+   * Returns whether overlaid plots are drawn increasing
    * 
    * @return true is increasing, false otherwise
    */
@@ -2612,7 +2526,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @param coord
    */
   public void notifyPeakPickedListeners(Coordinate coord) {
-    // TODO: Currently Aassumes spectra are not overlayed
+    // TODO: Currently Aassumes spectra are not overlaid
     notifyListeners(new PeakPickedEvent(this, coord, getSpectrum()
         .getAssociatedPeakInfo(coord)));
   }
@@ -2710,7 +2624,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
     initX = coord.getXVal();
     initY = coord.getYVal();
-    initXpixel = xPixel;
     repaint();
   }
 
@@ -2724,6 +2637,14 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     if (isPress) {
       isLine0 = (Math.abs(xPixel - xLine0) < 5);
       isLine1 = (!isLine0 && Math.abs(xPixel - xLine1) < 5);
+      if (!isLine0 && !isLine1) {
+        if (xPixel > bwidthLeft - 10);
+        zoomBoxX = fixX2D(xPixel);
+        zoomBoxY = yPixel;
+        isMouseDraggedEvent = true;
+        isMouseDraggedEvent2D = true;
+        return true;
+      }
     }
     if (isLine0 || isLine1) {
       if (isLine0)
@@ -2735,6 +2656,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       repaint();
       return true;
     }
+    if (xPixel > bwidthLeft - 10)
+      return false;
 
     int iSpec = (int) (1.0 * (bottomPlotAreaPos - yPixel) / plotAreaHeight * getSpectrumAt(
         0).getSubSpectra().size());
@@ -2765,7 +2688,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
     isMouseReleased = true;
 
-    int xPixel = fixX(e.getX());
+    int xPixel = e.getX();
     int yPixel = fixY(e.getY());
 
     if (triggerNewImage2DZoom) {
@@ -2774,9 +2697,17 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       doZoom(getX2DFromPixel(xLine1), multiScaleData.minY, getX2DFromPixel(xLine0), multiScaleData.maxY, true);
       return;
     }
-    setMouseFinalXY(xPixel, yPixel);
-    if (Math.abs(xPixel - initXpixel) <= MIN_DRAG_X_PIXELS)
+    if (isMouseDraggedEvent2D) {
+      xPixel = fixX2D(xPixel);
+      if (Math.abs(xPixel - zoomBoxX) <= MIN_DRAG_X_PIXELS)
+        return;
+      setMouseFinalXY(xPixel, yPixel);
       return;
+    }
+    xPixel = fixX(xPixel);
+    if (Math.abs(xPixel - zoomBoxX) <= MIN_DRAG_X_PIXELS)
+      return;
+    setMouseFinalXY(xPixel, yPixel);
     if (isIntegralDrag)
       checkIntegral(initX, finalX, true);
     else
@@ -2812,7 +2743,19 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
   public void mouseDragged(MouseEvent e) {
     isMouseDraggedEvent = true;
-    fireMouseDragged(e);
+    int xPixel = e.getX();
+    int yPixel = fixY(e.getY());
+
+    if (checkImageDrag(xPixel, yPixel, false))
+      return;
+    
+    processMouseMoved(e);
+    if (isIntegralDrag) {
+      setMouseFinalXY(fixX(xPixel), yPixel);
+      checkIntegral(initX, finalX, false);      
+      return;
+    }
+    repaint();
   }
 
   /**
@@ -2823,7 +2766,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   public void mouseMoved(MouseEvent e) {
     isMouseDraggedEvent = false;
-    fireMouseMoved(e);
+    isMouseDraggedEvent2D = false;
+    processMouseMoved(e);
     repaint();
   }
 
@@ -2855,22 +2799,27 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @param e
    *        the <code>MouseEvent</code>
    */
-  private void fireMouseMoved(MouseEvent e) {
-    int xPixel = fixX(e.getX());
-    int yPixel = fixY(e.getY());
+  private void processMouseMoved(MouseEvent e) {
+    int xPixel = e.getX();
+    int yPixel = e.getY();
 
     if (isMouseDraggedEvent) {
-      isMouseDragged = true;
-      currZoomBoxX = xPixel;
-      currZoomBoxY = (isIntegralDrag ? bottomPlotAreaPos : yPixel);
+      zoomBoxVisible = true;
+      boolean is2dDrag = (image2D != null && xPixel > bwidthLeft - 10);
+      currZoomBoxX = (is2dDrag ? fixX2D(xPixel) : fixX(xPixel));
+      currZoomBoxY = (isIntegralDrag ? bottomPlotAreaPos : fixY(yPixel));
+      if (is2dDrag) {
+        setToolTipText("");
+        return;
+      }
     }
 
-    Coordinate coord = getCoordFromPoint(e.getX(), e.getY());
+    Coordinate coord = getCoordFromPoint(fixX(e.getX()), fixY(e.getY()));
 
     double xPt = coord.getXVal();
     double yPt = coord.getYVal();
     //if (image2D != null && e.getX() > bwidthLeft)
-      //yPt = zPt;
+    //yPt = zPt;
 
     String hashX = "#";
     String hashY = "#";
@@ -2897,30 +2846,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       xx += ", " + getFormatter("#0.0").format(yPt);
     }
     setToolTipText(Double.isNaN(yPt) ? null : xx);
-  }
-
-  /**
-   * Carries out the function of the MouseDragged Event
-   * 
-   * @param e
-   *        the <code>MouseEvent</code>
-   */
-  private void fireMouseDragged(MouseEvent e) {
-
-    int xPixel = e.getX();
-    int yPixel = fixY(e.getY());
-
-    if (checkImageDrag(xPixel, yPixel, false))
-      return;
-    
-    isMouseDraggedEvent = true; // testing   
-    fireMouseMoved(e);
-    if (isIntegralDrag) {
-      setMouseFinalXY(fixX(xPixel), yPixel);
-      checkIntegral(initX, finalX, false);      
-      return;
-    }
-    repaint();
   }
 
   public void toPeak(int istep) {

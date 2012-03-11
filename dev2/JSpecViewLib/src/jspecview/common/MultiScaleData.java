@@ -13,22 +13,14 @@ import java.util.List;
  */
 public class MultiScaleData extends ScaleData {
 
-  /**
-   * start inidices
-   */
   public int[] startDataPointIndices;
-
-  /**
-   * end indices
-   */
   public int[] endDataPointIndices;
-
-  /**
-   * number of points list
-   */
   public int[] numOfPointsList;
-
+  public double minY2D, maxY2D;
+ 
+  
   /**
+   * Never utilized?? 
    * Initialises a <code>MultiScaleData</code> from another one
    * 
    * @param data
@@ -39,6 +31,8 @@ public class MultiScaleData extends ScaleData {
     startDataPointIndices = data.startDataPointIndices;
     endDataPointIndices = data.endDataPointIndices;
     numOfPointsList = data.numOfPointsList;
+    minY2D = data.minY2D;
+    maxY2D = data.maxY2D;
   }
 
   /**
@@ -75,20 +69,6 @@ public class MultiScaleData extends ScaleData {
     init(yPt1, yPt2, initNumXDivisions, initNumYDivisions, isContinuous);
   }
   
-  private void init(double yPt1, double yPt2,
-                    int initNumXDivisions, int initNumYDivisions, boolean isContinuous) {
-    if (yPt1 != yPt2) {
-      minY = yPt1;
-      maxY = yPt2;
-      if (minY > maxY) {
-        double t = minY;
-        minY = maxY;
-        maxY = t;
-      }
-    }
-    setScale(initNumXDivisions, initNumYDivisions, isContinuous);
-  }
-
   public MultiScaleData(List<JDXSpectrum> spectra, double yPt1, double yPt2,
       int initNumXDivisions, int initNumYDivisions,
       boolean isContinuous) {
@@ -102,6 +82,20 @@ public class MultiScaleData extends ScaleData {
     endDataPointIndices = new int[] { n - 1 };
     numOfPointsList = new int[] { n };
     init(yPt1, yPt2, initNumXDivisions, initNumYDivisions, isContinuous);
+  }
+
+  private void init(double yPt1, double yPt2,
+                    int initNumXDivisions, int initNumYDivisions, boolean isContinuous) {
+    if (yPt1 != yPt2) {
+      minY = yPt1;
+      maxY = yPt2;
+      if (minY > maxY) {
+        double t = minY;
+        minY = maxY;
+        maxY = t;
+      }
+    }
+    setScale(initNumXDivisions, initNumYDivisions, isContinuous);
   }
 
   /**
@@ -174,4 +168,15 @@ public class MultiScaleData extends ScaleData {
     return (minYOnScale < 0 && maxYOnScale > 0);
   }
 
- }
+  public void setMinMaxY2D(List<JDXSpectrum> subspectra) {
+    minY2D = Double.MAX_VALUE;
+    maxY2D = -Double.MAX_VALUE;
+    for (int i = subspectra.size(); --i >= 0; ) {
+      double d = subspectra.get(i).getY2D();
+      if (d < minY2D)
+        minY2D = d;
+      else if (d > maxY2D)
+        maxY2D = d;
+    }
+  }
+}

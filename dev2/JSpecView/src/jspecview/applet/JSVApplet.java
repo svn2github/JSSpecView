@@ -162,7 +162,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
   private String recentURL = "";
   private JSVPanel selectedJSVPanel;
   private JDXSource currentSource;
-  private boolean isOverlayed;
+  private boolean isOverlaid;
    
   public boolean isSigned() {
     return isSignedApplet;
@@ -544,7 +544,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
 
     // Initialise JSVpanels
 
-    if (isOverlayed) {
+    if (isOverlaid) {
       // overlay all spectra on a panel
       jsvPanels = new ArrayList<JSVPanel>();
 
@@ -561,7 +561,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
           jsvp = new JSVPanel(specs);
       } catch (ScalesIncompatibleException sie) {
         theInterface = "single";
-        isOverlayed = false;
+        isOverlaid = false;
         initPanels();
         return;
       }
@@ -571,6 +571,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
       selectedJSVPanel = jsvp;
       jsvp.setIndex(currentSpectrumIndex = 0);
     } else {
+      // not overlaid
       // initialise JSVPanels and add them to the array
       jsvPanels = new ArrayList<JSVPanel>();
       try {
@@ -662,7 +663,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
 
       // Global variable for single interface
       currentSpectrumIndex = spectrumIndex;
-      if (isOverlayed && currentSource.isCompoundSource) {
+      if (isOverlaid && currentSource.isCompoundSource) {
         jsvPanels.get(spectrumIndex).setTitle(currentSource.getTitle());
         appletPopupMenu.overlayKeyMenuItem.setEnabled(true);
       }
@@ -786,7 +787,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
   protected void headerMenuItem_actionPerformed(ActionEvent e) {
     
     JDXSpectrum spectrum = selectedJSVPanel.getSpectrum();
-    Object[][] rowData = (isOverlayed ? currentSource
+    Object[][] rowData = (isOverlaid ? currentSource
         .getHeaderRowDataAsArray(false, 0) : spectrum
         .getHeaderRowDataAsArray());
     String[] columnNames = { "Label", "Description" };
@@ -1324,9 +1325,9 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
 
     specs = currentSource.getSpectra();
     numberOfSpectra = specs.size();
-    isOverlayed = isOverlay && !name.equals("NONE")
+    isOverlaid = isOverlay && !name.equals("NONE")
         || (theInterface.equals("overlay") && numberOfSpectra > 1);
-    isOverlayed &= !JDXSpectrum.process(specs, irMode, !isOverlay && autoIntegrate,
+    isOverlaid &= !JDXSpectrum.process(specs, irMode, !isOverlay && autoIntegrate,
         parameters.integralMinY, parameters.integralOffset,
         parameters.integralFactor);
 

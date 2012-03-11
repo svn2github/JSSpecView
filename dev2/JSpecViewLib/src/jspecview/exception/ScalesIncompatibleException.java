@@ -20,7 +20,7 @@
 package jspecview.exception;
 
 /**
- * Exception thrown when graphs cannot be overlayed because the scales have
+ * Exception thrown when graphs cannot be overlaid because the scales have
  * different units.
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan

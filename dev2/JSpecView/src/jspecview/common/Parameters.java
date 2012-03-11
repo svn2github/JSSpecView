@@ -46,23 +46,23 @@ public class Parameters extends DisplayScheme {
   public double integralOffset = IntegralGraph.DEFAULT_OFFSET;
 
   public void setFor(JSVPanel jsvp, DisplayScheme ds, boolean includeMeasures) {
-    
+
     if (ds == null)
       ds = this;
 
     // measures -- not in displayScheme?
-    
+
     if (includeMeasures)
       jsvp.setBoolean(this, null);
 
     // colors and fonts
-    
-    if(jsvp.getPlotColor(1) != null) // integration
-    jsvp.setPlotColors(plotColors);
+
+    if (jsvp.getPlotColor(1) != null) // integration
+      jsvp.setPlotColors(plotColors);
     jsvp.setParam(ds, null);
 
     // misc
-    
+
     jsvp.setZoomEnabled(enableZoom);
     jsvp.setTitleBoldOn(titleBoldOn);
   }

@@ -2269,7 +2269,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   ////////// MENU ACTIONS ///////////
 
   /**
-   * Shows the legend or key for the overlayed spectra
+   * Shows the legend or key for the overlaid spectra
    * 
    * @param e
    *        the ActionEvent
@@ -2782,7 +2782,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   }
 
   /**
-   * Shows the legend or key for the overlayed spectra
+   * Shows the legend or key for the overlaid spectra
    * 
    * @param e
    *        the ActionEvent
@@ -2844,7 +2844,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   }
 
   /**
-   * Shows the current Source file as overlayed
+   * Shows the current Source file as overlaid
    * 
    * @param e
    *        the ActionEvent

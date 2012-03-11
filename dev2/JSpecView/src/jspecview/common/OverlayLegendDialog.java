@@ -39,7 +39,7 @@ import javax.swing.table.TableColumn;
 import jspecview.common.JDXSpectrum;
 
 /**
- * Dialog for showing the legend or key for overlayed plots in a <code>JSVPanel</code>.
+ * Dialog for showing the legend or key for overlaid plots in a <code>JSVPanel</code>.
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
