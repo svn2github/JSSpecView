@@ -1548,7 +1548,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
 
   private JDXSpectrum findSpectrumById(String id) {
     int i = Parser.parseInt(id);
-    return (i >= 0 && i < specsSaved.size() ? specsSaved.get(i) : null);
+    return (i > 0 && i <= specsSaved.size() ? specsSaved.get(i - 1) : null);
   }
 
   private boolean selectPanel(String index) {
