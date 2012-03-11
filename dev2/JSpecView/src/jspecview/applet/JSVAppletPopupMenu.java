@@ -9,7 +9,7 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
-import jspecview.common.JSVPanel;
+import jspecview.common.AppUtils;
 import jspecview.common.JSVPanelPopupMenu;
 
 class JSVAppletPopupMenu extends JSVPanelPopupMenu {
@@ -123,7 +123,7 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
       exportAsMenu = new JMenu();
       fileMenu.add(exportAsMenu);
     }
-    JSVPanel.setMenus(saveAsMenu, saveAsJDXMenu, exportAsMenu, exportActionListener);
+    AppUtils.setMenus(saveAsMenu, saveAsJDXMenu, exportAsMenu, exportActionListener);
     fileMenu.add(printMenuItem);
 
     viewMenu.add(gridCheckBoxMenuItem);

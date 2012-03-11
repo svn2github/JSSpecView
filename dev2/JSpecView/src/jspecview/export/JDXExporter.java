@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
+
 import jspecview.common.Coordinate;
 import jspecview.common.JDXSpectrum;
 import jspecview.source.JDXFileReader;
@@ -41,7 +42,7 @@ import jspecview.util.TextFormat;
  * @author Prof Robert J. Lancashire
  */
 
-class JDXExporter {
+public class JDXExporter {
 
   /**
    * The factor divisor used in compressing spectral data in one of DIF, SQZ,

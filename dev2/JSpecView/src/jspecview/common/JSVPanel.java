@@ -37,62 +37,40 @@
 
 package jspecview.common;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
-import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
 import java.awt.print.PageFormat;
 import java.awt.print.Paper;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
-import java.io.File;
-import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 
-import javax.imageio.ImageIO;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet; //import javax.print.attribute.standard.MediaSize;
 import javax.print.attribute.standard.OrientationRequested;
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
-
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
-import jspecview.export.Exporter;
-import jspecview.export.SVGExporter;
 import jspecview.source.JDXSource;
 import jspecview.util.Logger;
 import jspecview.util.Parser;
@@ -2201,238 +2179,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     return overlayIncreasing;
   }
 
-  /*
-   public void generateSVG(){
-   // Get a DOMImplementation
-   DOMImplementation domImpl =
-   GenericDOMImplementation.getDOMImplementation();
-
-   // Create an instance of org.w3c.dom.Document
-   Document document = domImpl.createDocument(null, "svg", null);
-
-   // Create an instance of the SVG Generator
-   SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
-
-   // Ask the test to render into the SVG Graphics2D implementation
-   this.paintComponent(svgGenerator);
-
-   // Finally, stream out SVG to the standard output using UTF-8
-   // character to byte encoding
-   boolean useCSS = true; // we want to use CSS style attribute
-   try{
-   Writer out = new FileWriter("testSvgGen.svg");
-   svgGenerator.stream(out, useCSS);
-   out.close();
-   }
-   catch(Exception e){
-   }
-   }
-   */
-
-  private String dirLastExported;
-
-  /**
-   * Auxiliary Export method
-   * 
-   * @param spec
-   *        the spectrum to export
-   * @param fc
-   *        file chooser to use
-   * @param mode
-   *        the format to export in
-   * @param index
-   *        the index of the spectrum
-   * @param recentFileName
-   * @param dirLastExported
-   * @return dirLastExported
-   */
-  public String exportSpectrum(JDXSpectrum spec, JFileChooser fc, String mode,
-                               int index, String recentFileName,
-                               String dirLastExported) {
-    JSpecViewFileFilter filter = new JSpecViewFileFilter();
-    //TODO: This is flawed. It assumes the file name has one and only one "." in it. 
-    String name = TextFormat.split(recentFileName, ".")[0];
-    if ("XY FIX PAC SQZ DIF DIFDUP".indexOf(mode) >= 0) {
-      filter.addExtension("jdx");
-      filter.addExtension("dx");
-      filter.setDescription("JCAMP-DX Files");
-      name += ".jdx";
-    } else {
-      if (mode.toLowerCase().indexOf("iml") >= 0
-          || mode.toLowerCase().indexOf("aml") >= 0)
-        mode = "XML";
-      filter.addExtension(mode);
-      filter.setDescription(mode + " Files");
-      name += "." + mode.toLowerCase();
-    }
-    fc.setFileFilter(filter);
-    fc.setSelectedFile(new File(name));
-    int returnVal = fc.showSaveDialog(this);
-    if (returnVal != JFileChooser.APPROVE_OPTION)
-      return dirLastExported;
-    File file = fc.getSelectedFile();
-    this.dirLastExported = file.getParent();
-    if (file.exists()) {
-      int option = JOptionPane.showConfirmDialog(this, "Overwrite file?",
-          "Confirm Overwrite Existing File", JOptionPane.YES_NO_OPTION,
-          JOptionPane.QUESTION_MESSAGE);
-      if (option == JOptionPane.NO_OPTION)
-        return exportSpectrum(spec, fc, mode, index, recentFileName,
-            this.dirLastExported);
-    }
-    export(mode, file, spec, getStartDataPointIndices()[index], getEndDataPointIndices()[index]);
-    return this.dirLastExported;
-  }
-
-  /**
-   * from EXPORT command
-   * 
-   * @param tokens
-   * 
-   * @return message for status line
-   */
-  public String export(List<String> tokens) {
-    String mode = "XY";
-    String fileName = null;
-    switch (tokens.size()) {
-    default:
-      return "EXPORT what?";
-    case 1:
-      fileName = TextFormat.trimQuotes(tokens.get(0));
-      int pt = fileName.indexOf(".");
-      if (pt < 0)
-        return "EXPORT mode?";
-      break;
-    case 2:
-      mode = tokens.get(0).toUpperCase();
-      fileName = TextFormat.trimQuotes(tokens.get(1));
-      break;
-    }
-    String ext = fileName.substring(fileName.lastIndexOf(".") + 1)
-        .toUpperCase();
-    if (ext.equals("JDX")) {
-      if (mode == null)
-        mode = "XY";
-    } else if (Exporter.isExportMode(ext)) {
-      mode = ext;
-    } else if (Exporter.isExportMode(mode)){
-      fileName += "."  + mode;
-    }
-    return export(mode, new File(fileName), getSpectrum(),
-        getStartDataPointIndices()[0], getEndDataPointIndices()[0]);
-  }
-    
-  private String export(String mode, File file, JDXSpectrum spec, int startIndex, int endIndex) {
-    String msg = " OK";
-    try {
-      if (mode.equals("PNG") || mode.equals("JPG")) {
-        try {
-          Image image = createImage(getWidth(), getHeight());
-          paint(image.getGraphics());
-          ImageIO.write((RenderedImage) image, mode.toLowerCase(), new File(file
-              .getAbsolutePath()));
-        } catch (IOException ioe) {
-          ioe.printStackTrace();
-        }
-      } else if (mode.equals("SVG")) {
-        msg = (new SVGExporter()).exportAsSVG(file.getAbsolutePath(), spec.getXYCoords(), spec.getTitle(), startIndex,
-            endIndex, spec.getXUnits(), spec.getYUnits(), spec.isContinuous(),
-            spec.isIncreasing(), getPlotAreaColor(), getBackground(),
-            getPlotColor(0), getGridColor(), getTitleColor(), 
-            getScaleColor(), getUnitsColor(), isSvgExportForInkscapeEnabled());
-      } else {
-        msg = Exporter.export(mode, file.getAbsolutePath(), spec, startIndex,
-            endIndex);
-      }
-      return "Exported " + mode + ": " + file.getAbsolutePath() + msg;
-    } catch (IOException ioe) {
-      return "Error exporting " + file.getAbsolutePath() + ": " + ioe.getMessage();
-    }
-  }
-
-  public String exportSpectra(JFrame frame, JFileChooser fc, String type,
-                              String recentFileName, String dirLastExported) {
-    // if JSVPanel has more than one spectrum...Choose which one to export
-    int numOfSpectra = getNumberOfSpectra();
-    if (numOfSpectra == 1 || type.equals("JPG") || type.equals("PNG")) {
-
-      JDXSpectrum spec = getSpectrum();
-      return exportSpectrum(spec, fc, type, 0, recentFileName, dirLastExported);
-    }
-
-    String[] items = new String[numOfSpectra];
-    for (int i = 0; i < numOfSpectra; i++) {
-      JDXSpectrum spectrum = getSpectrumAt(i);
-      items[i] = spectrum.getTitle();
-    }
-
-    final JDialog dialog = new JDialog(frame, "Choose Spectrum", true);
-    dialog.setResizable(false);
-    dialog.setSize(200, 100);
-    dialog.setLocation((getLocation().x + getSize().width) / 2,
-        (getLocation().y + getSize().height) / 2);
-    final JComboBox cb = new JComboBox(items);
-    Dimension d = new Dimension(120, 25);
-    cb.setPreferredSize(d);
-    cb.setMaximumSize(d);
-    cb.setMinimumSize(d);
-    JPanel panel = new JPanel(new FlowLayout());
-    JButton button = new JButton("OK");
-    panel.add(cb);
-    panel.add(button);
-    dialog.getContentPane().setLayout(new BorderLayout());
-    dialog.getContentPane().add(
-        new JLabel("Choose Spectrum to export", SwingConstants.CENTER),
-        BorderLayout.NORTH);
-    dialog.getContentPane().add(panel);
-    this.dirLastExported = dirLastExported;
-    final String dl = dirLastExported;
-    final String t = type;
-    final String rfn = recentFileName;
-    final JFileChooser f = fc;
-    button.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        int index = cb.getSelectedIndex();
-        JDXSpectrum spec = getSpectrumAt(index);
-        dialog.dispose();
-        exportSpectrum(spec, f, t, index, rfn, dl);
-      }
-    });
-    dialog.setVisible(true);
-    return this.dirLastExported;
-  }
-
-  public static void setMenus(JMenu saveAsMenu, JMenu saveAsJDXMenu,
-                              JMenu exportAsMenu, ActionListener actionListener) {
-    saveAsMenu.setText("Save As");
-    saveAsJDXMenu.setText("JDX");
-    addMenuItem(saveAsJDXMenu, "XY", actionListener);
-    addMenuItem(saveAsJDXMenu, "DIF", actionListener);
-    addMenuItem(saveAsJDXMenu, "DIFDUP", actionListener);
-    addMenuItem(saveAsJDXMenu, "FIX", actionListener);
-    addMenuItem(saveAsJDXMenu, "PAC", actionListener);
-    addMenuItem(saveAsJDXMenu, "SQZ", actionListener);
-    saveAsMenu.add(saveAsJDXMenu);
-    addMenuItem(saveAsMenu, "CML", actionListener);
-    addMenuItem(saveAsMenu, "XML (AnIML)", actionListener);
-    if (exportAsMenu != null) {
-      exportAsMenu.setText("Export As");
-      addMenuItem(exportAsMenu, "JPG", actionListener);
-      addMenuItem(exportAsMenu, "PNG", actionListener);
-      addMenuItem(exportAsMenu, "SVG", actionListener);
-    }
-  }
-
-  private static void addMenuItem(JMenu m, String key,
-                                  ActionListener actionListener) {
-    JMenuItem jmi = new JMenuItem();
-    jmi.setMnemonic(key.charAt(0));
-    jmi.setText(key);
-    jmi.addActionListener(actionListener);
-    m.add(jmi);
-  }
-
   public void destroy() {
+    removeKeyListener(this);
     removeMouseListener(this);
     removeMouseMotionListener(this);
   }

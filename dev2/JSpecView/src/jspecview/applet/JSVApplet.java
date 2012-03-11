@@ -1016,12 +1016,12 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
    */
   void exportSpectrum(String command) {
     if (!isSignedApplet) {
-      System.out.println(export(selectedJSVPanel, 0, command, null));
+      Logger.info(export(selectedJSVPanel, 0, command, null));
       // for now -- just send to output
       writeStatus("output sent to Java console");
       return;
     }
-    dirLastExported = selectedJSVPanel.exportSpectra(offWindowFrame, jFileChooser,
+    dirLastExported = Exporter.exportSpectra(selectedJSVPanel, offWindowFrame, jFileChooser,
         command, recentFileName, dirLastExported);
   }
 

@@ -132,6 +132,7 @@ import jspecview.common.Coordinate;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.PeakInfo;
 import jspecview.exception.ScalesIncompatibleException;
+import jspecview.export.Exporter;
 import jspecview.source.JDXFileReader;
 import jspecview.source.JDXSource;
 import jspecview.util.Escape;
@@ -1031,7 +1032,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     optionsMenu.add(sidePanelCheckBoxMenuItem);
     optionsMenu.add(statusCheckBoxMenuItem);
     helpMenu.add(aboutMenuItem);
-    JSVPanel.setMenus(saveAsMenu, saveAsJDXMenu, exportAsMenu,
+    AppUtils.setMenus(saveAsMenu, saveAsJDXMenu, exportAsMenu,
         (new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             exportSpectrum(e.getActionCommand());
@@ -2061,7 +2062,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
           break;
         case EXPORT:
           if (jsvp != null)
-            msg = jsvp.export(ScriptToken.getTokens(value));
+            msg = Exporter.export(jsvp, ScriptToken.getTokens(value));
           break;
         case LABEL:
           if (jsvp != null)
@@ -2490,7 +2491,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       fc.setCurrentDirectory(new File(dirLastExported));
     }
 
-    dirLastExported = jsvp.exportSpectra(this, fc, type, recentFileName,
+    dirLastExported = Exporter.exportSpectra(jsvp, this, fc, type, recentFileName,
         dirLastExported);
 
   }

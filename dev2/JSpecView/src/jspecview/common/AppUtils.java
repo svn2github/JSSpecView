@@ -2,8 +2,11 @@ package jspecview.common;
 
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.event.ActionListener;
 
 import javax.swing.JInternalFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 
 import jspecview.common.IntegralGraph;
@@ -146,5 +149,39 @@ public class AppUtils {
   public static Color getColorFromString(String strColor) {
     return new Color(ColorUtil.getArgbFromString(strColor.trim()));
   }
+
+  ////////////////// menuing methods common to app and applet //////////////
+  
+  
+  public static void setMenus(JMenu saveAsMenu, JMenu saveAsJDXMenu,
+                              JMenu exportAsMenu, ActionListener actionListener) {
+    saveAsMenu.setText("Save As");
+    saveAsJDXMenu.setText("JDX");
+    addMenuItem(saveAsJDXMenu, "XY", actionListener);
+    addMenuItem(saveAsJDXMenu, "DIF", actionListener);
+    addMenuItem(saveAsJDXMenu, "DIFDUP", actionListener);
+    addMenuItem(saveAsJDXMenu, "FIX", actionListener);
+    addMenuItem(saveAsJDXMenu, "PAC", actionListener);
+    addMenuItem(saveAsJDXMenu, "SQZ", actionListener);
+    saveAsMenu.add(saveAsJDXMenu);
+    addMenuItem(saveAsMenu, "CML", actionListener);
+    addMenuItem(saveAsMenu, "XML (AnIML)", actionListener);
+    if (exportAsMenu != null) {
+      exportAsMenu.setText("Export As");
+      addMenuItem(exportAsMenu, "JPG", actionListener);
+      addMenuItem(exportAsMenu, "PNG", actionListener);
+      addMenuItem(exportAsMenu, "SVG", actionListener);
+    }
+  }
+
+  private static void addMenuItem(JMenu m, String key,
+                                  ActionListener actionListener) {
+    JMenuItem jmi = new JMenuItem();
+    jmi.setMnemonic(key.charAt(0));
+    jmi.setText(key);
+    jmi.addActionListener(actionListener);
+    m.add(jmi);
+  }
+
 
 }
