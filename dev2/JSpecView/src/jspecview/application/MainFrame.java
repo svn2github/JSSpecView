@@ -2062,7 +2062,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
           break;
         case EXPORT:
           if (jsvp != null)
-            msg = Exporter.export(jsvp, ScriptToken.getTokens(value));
+            msg = Exporter.exportCmd(jsvp, ScriptToken.getTokens(value));
           break;
         case LABEL:
           if (jsvp != null)

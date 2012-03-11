@@ -60,7 +60,7 @@ public class JDXExporter {
    * @return data if path is null
    * @throws IOException
    */
-  static String export(int type, String path, JDXSpectrum spectrum, int startIndex, int endIndex) throws IOException{
+  static String export(Exporter.Type type, String path, JDXSpectrum spectrum, int startIndex, int endIndex) throws IOException{
     String data = toStringAux(type, spectrum, startIndex, endIndex);
     if (path == null)
       return data;
@@ -83,7 +83,7 @@ public class JDXExporter {
    * @return the spectrum string for the type of compression specified by
    *         <code>type</code>
    */
-  private static String toStringAux(int type, JDXSpectrum spectrum,
+  private static String toStringAux(Exporter.Type type, JDXSpectrum spectrum,
                                     int startIndex, int endIndex) {
 
     //String dataType = spectrum.getDataType();
@@ -110,11 +110,11 @@ public class JDXExporter {
     double yCompFactor = spectrum.getYFactor();
 
     switch (type) {
-    case Exporter.XY:
+    case XY:
       yCompFactor = 1;
       tmpDataClass = (spectrum.isContinuous() ?  "XYDATA" : "XYPOINTS");
       break;
-    case Exporter.PAC:
+    case PAC:
       yCompFactor = 1;
       break;
     default:
@@ -132,24 +132,24 @@ public class JDXExporter {
       step = -1;
     }
     switch (type) {
-    case Exporter.DIF:
-    case Exporter.DIFDUP:
+    case DIF:
+    case DIFDUP:
       tabDataSet = JDXCompressor.compressDIF(newXYCoords, startIndex, endIndex, step, 
-          xCompFactor, yCompFactor, type == Exporter.DIFDUP);
+          xCompFactor, yCompFactor, type == Exporter.Type.DIFDUP);
       break;
-    case Exporter.FIX:
+    case FIX:
       tabDataSet = JDXCompressor.compressFIX(newXYCoords, startIndex, endIndex, step, 
           xCompFactor, yCompFactor);
       break;
-    case Exporter.PAC:
+    case PAC:
       tabDataSet = JDXCompressor.compressPAC(newXYCoords, startIndex, endIndex, step, 
           xCompFactor, yCompFactor);
       break;
-    case Exporter.SQZ:
+    case SQZ:
       tabDataSet = JDXCompressor.compressSQZ(newXYCoords, startIndex, endIndex, step, 
           xCompFactor, yCompFactor);
       break;
-    case Exporter.XY:
+    case XY:
       tabDataSet = JDXCompressor.getXYList(newXYCoords, startIndex, endIndex, step);
       break;
     }

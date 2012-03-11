@@ -49,7 +49,6 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -290,7 +289,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
   }
 
   /**
-   * Delivers spectrum coded as desired: XY, SQZ, PAC, DIF, AML, CML, SVG
+   * Delivers spectrum coded as desired: XY, SQZ, PAC, DIF, DIFDUP, FIX, AML, CML
    * 
    * @param type
    * @param n
@@ -300,7 +299,17 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
   public String export(String type, int n) {
     if (type == null)
       type = "XY";
-    return export(getSelectedPanel(), n, type.toUpperCase(), null);
+    JSVPanel jsvp = getSelectedPanel();
+    if (n < -1 || jsvp.getNumberOfSpectra() <= n)
+      return "only " + jsvp.getNumberOfSpectra()
+          + " spectra available.";
+    try {
+      JDXSpectrum spec = (n < 0 ? jsvp.getSpectrum() : jsvp.getSpectrumAt(n));
+      return Exporter.exportTheSpectrum(Exporter.Type.getType(type), null, spec, 0, spec.getXYCoords().length - 1);
+    } catch (IOException ioe) {
+      // not possible
+    }
+    return null;
   }
 
   public void setFilePath(String tmpFilePath) {
@@ -464,8 +473,8 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
    * @param msg
    *        the message
    */
-  public void writeStatus(String msg) {
-    System.out.println("writeStatus: " + msg);
+  protected void writeStatus(String msg) {
+    Logger.info(msg);
     //statusTextLabel.setText(msg);
   }
 
@@ -1014,34 +1023,16 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
    * @param command
    *        the name of the format to export in
    */
-  void exportSpectrum(String command) {
-    if (!isSignedApplet) {
-      Logger.info(export(selectedJSVPanel, 0, command, null));
-      // for now -- just send to output
-      writeStatus("output sent to Java console");
-      return;
-    }
-    dirLastExported = Exporter.exportSpectra(selectedJSVPanel, offWindowFrame, jFileChooser,
-        command, recentFileName, dirLastExported);
-  }
-
-  private String export(JSVPanel jsvp, int n, String comm, File file) {
-    if (n < 0 || jsvp.getNumberOfSpectra() <= n)
-      return "only " + jsvp.getNumberOfSpectra()
-          + " spectra available.";
-    String errMsg = null;
-    try {
-      JDXSpectrum spec = jsvp.getSpectrumAt(n);
-      errMsg = Exporter.export(comm, (file == null ? null : file
-          .getAbsolutePath()), spec, 0, spec.getXYCoords().length - 1);
-    } catch (IOException ioe) {
-      errMsg = "Error writing: " + file.getName();
-    }
-    return errMsg;
+  void exportSpectrum(String type) {
+    if (isSignedApplet)
+      dirLastExported = Exporter.exportSpectra(selectedJSVPanel,
+          offWindowFrame, jFileChooser, type, recentFileName, dirLastExported);
+    else
+      Logger.info(export(type, -1));
   }
 
   /**
-   * Used to tile JSVPanel when the <i>interface</i> paramters is equal to
+   * Used to tile JSVPanel when the <i>interface</i> parameters is equal to
    * "tile"
    * 
    * @param comps
@@ -1453,6 +1444,10 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
             continue;
           integrate(value);
           break;
+        case EXPORT:
+          if (jsvp != null && isPro())
+            writeStatus(Exporter.exportCmd(jsvp, ScriptToken.getTokens(value)));
+          return;
         case OVERLAY:
           overlay(ScriptToken.getTokens(TextFormat.simpleReplace(value, "*", " * ")));
           break;
@@ -1540,9 +1535,12 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
       slist.add(spec);
       sb.append(",").append(id);
     }
+    String s = sb.toString().substring(1);
     if (list.size() > 1 && JDXSpectrum.areScalesCompatible(slist)) {
-      openDataOrFile(null, sb.toString().substring(1), slist, null);
+      openDataOrFile(null, s, slist, null);
       setSpectrum(1);
+    } else {
+      writeStatus("Spectra cannot be overlaid: " + s);
     }
   }
 

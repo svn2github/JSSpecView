@@ -82,6 +82,6 @@ abstract class FormExporter {
     } catch (IOException ioe) {
     }
 
-    return null;
+    return " OK";
   }
 }

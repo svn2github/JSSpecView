@@ -79,7 +79,7 @@ abstract class XMLExporter extends FormExporter {
 
   protected List<Coordinate> newXYCoords = new ArrayList<Coordinate>();
 
-  public boolean exportAsXML(JDXSpectrum spec, String fileName, int startIndex,
+  protected boolean setup(JDXSpectrum spec, String fileName, int startIndex,
                              int endIndex) {
     this.startIndex = startIndex;
     this.endIndex = endIndex;

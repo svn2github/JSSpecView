@@ -45,7 +45,7 @@ class AMLExporter extends XMLExporter {
   String exportAsAnIML(String fileName, JDXSpectrum spec, int startIndex,
                      int endIndex) throws IOException {
 
-    if (!super.exportAsXML(spec, fileName, startIndex, endIndex))
+    if (!setup(spec, fileName, startIndex, endIndex))
       return null;
 
     if (solvName == null || solvName.equals(""))

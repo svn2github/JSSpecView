@@ -48,36 +48,13 @@ import jspecview.util.TextFormat;
  * @author Craig A.D. Walters
  * @author Prof Robert J. Lancashire
  */
-public class SVGExporter extends FormExporter {
+class SVGExporter extends FormExporter {
 
-  /**
-   * The width of the SVG
-   */
   private static int svgWidth = 850;
-
-  /**
-   * The height of the SVG
-   */
   private static int svgHeight = 400;
-
-  /**
-   * the left inset of the plot area of the SVG
-   */
   private static int leftInset = 100;
-
-  /**
-   * The right inset of the plot area of the SVG
-   */
   private static int rightInset = 200;
-
-  /**
-   * The bottom inset of the plot area of the SVG
-   */
   private static int bottomInset = 80;
-
-  /**
-   * The top inset of the plot area of the SVG
-   */
   private static int topInset = 20;
 
   
@@ -90,30 +67,12 @@ public class SVGExporter extends FormExporter {
    * @return data if fileName is null
    * @throws IOException
    */
-  public String exportAsSVG(String path, Graph graph, int startIndex, int endIndex)
+  String exportAsSVG(String path, Graph graph, int startIndex, int endIndex)
       throws IOException {
     return exportAsSVG(path, graph.getXYCoords(), "", startIndex,
         endIndex, graph.getXUnits(), graph.getYUnits(), graph.isContinuous(),
         graph.isIncreasing(), Color.lightGray, Color.white, Color.black,
         Color.gray, Color.black, Color.black, Color.black, false);
-  }
-  
-  /**
-   * Export a Graph as SVG to a file given by fileName
-   * @param path the file path
-   * @param graph the Graph
-   * @param startIndex
-   * @param endIndex
-   * @return data if fileName is null
-   * @return inkscape svg supported
-   * @throws IOException
-   */
-  String exportAsSVG(String path, Graph graph, int startIndex, int endIndex, boolean exportForInkscape)
-      throws IOException {
-    return exportAsSVG(path, graph.getXYCoords(), "", startIndex,
-        endIndex, graph.getXUnits(), graph.getYUnits(), graph.isContinuous(),
-        graph.isIncreasing(), Color.lightGray, Color.white, Color.black,
-        Color.gray, Color.black, Color.black, Color.black, exportForInkscape);
   }
 
   /**
@@ -137,7 +96,7 @@ public class SVGExporter extends FormExporter {
    * @return data if fileName is null
    * @throws IOException
    */
-  public String exportAsSVG(String fileName, Coordinate[] xyCoords, String title,
+  String exportAsSVG(String fileName, Coordinate[] xyCoords, String title,
                            int startDataPointIndex, int endDataPointIndex,
                            String xUnits, String yUnits, boolean isContinuous,
                            boolean increasing, Color plotAreaColor,
