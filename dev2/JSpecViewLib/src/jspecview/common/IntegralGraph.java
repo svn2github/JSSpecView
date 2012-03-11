@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.StringTokenizer;
-import java.util.Vector;
 
 import jspecview.common.Integral;
 import jspecview.util.TextFormat;
@@ -253,50 +252,38 @@ public class IntegralGraph implements Graph {
 
   /**
    * Calculates the integral from the input <code>Graph</code>
+   * 
    * @return the array of coordinates of the Integral
    * @see jspecview.IntegralGraph#recalculate()
    */
-  private Coordinate[] calculateIntegral(){
-    double totalIntegral = 0;
-    double integral = 0;
+  private Coordinate[] calculateIntegral() {
     Coordinate[] xyCoords = graph.getXYCoords();
-    //double minY = JSpecViewUtils.getMinY(xyCoords);
+    Coordinate[] integralCoords = new Coordinate[xyCoords.length];
+
     double maxY = Coordinate.getMaxY(xyCoords);
     double minYForIntegral = percentMinY / 100 * maxY; // 0.1%
-    Vector<Coordinate> integralCoords = new Vector<Coordinate>();
-
-
-    // Find total integral
-    for(int i = 0; i < xyCoords.length; i++){
+    double integral = 0;
+    for (int i = 0; i < xyCoords.length; i++) {
       double y = xyCoords[i].getYVal();
-      if(y > minYForIntegral){
-       totalIntegral += y;
-      }
+      if (y > minYForIntegral)
+        integral += y;
     }
 
-    double totalIntegralScalefactor = maxY / totalIntegral;
-    double factor = (integralFactor / 100) * totalIntegralScalefactor;  // 50%
-    double offset = (percentOffset/100) * maxY;
+    double totalIntegralScalefactor = maxY / integral;
+    double factor = (integralFactor / 100) * totalIntegralScalefactor; // 50%
+    double offset = (percentOffset / 100) * maxY;
 
     // Calculate Integral Graph
 
-    for(int i = xyCoords.length-1; i >= 0; i--){
+    integral = 0;
+    for (int i = xyCoords.length, j = 0; --i >= 0; j++) {
       double y = xyCoords[i].getYVal();
-      if(y > minYForIntegral){
-       integral += y;
-      }else{
-        integral += 0;
-      }
-
-      double newY = integral * factor + offset; // + offset
-      integralCoords.insertElementAt(new Coordinate(xyCoords[i].getXVal(), newY), 0);
+      if (y > minYForIntegral)
+        integral += y;
+      integralCoords[j] = new Coordinate(xyCoords[i].getXVal(), integral
+          * factor + offset);
     }
-
-    Coordinate[] integralCoordsArray;
-    Coordinate[] tempCoords = new Coordinate[integralCoords.size()];
-    integralCoordsArray = (Coordinate[])integralCoords.toArray(tempCoords);
-
-    return integralCoordsArray;
+    return integralCoords;
   }
 
   private static Comparator<Coordinate> c;

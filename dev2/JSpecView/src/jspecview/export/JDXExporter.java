@@ -21,7 +21,10 @@ package jspecview.export;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.List;
 
 import jspecview.common.Coordinate;
 import jspecview.common.JDXSpectrum;
@@ -153,12 +156,115 @@ class JDXExporter {
     int index = Arrays.binarySearch(JDXFileReader.VAR_LIST_TABLE[0],
         tmpDataClass);
     String varList = JDXFileReader.VAR_LIST_TABLE[1][index];
-    buffer.append(spectrum.getHeaderString(tmpDataClass, minY, maxY,
+    buffer.append(getHeaderString(spectrum, tmpDataClass, minY, maxY,
         xCompFactor, yCompFactor, startIndex, endIndex));
     buffer.append("##" + tmpDataClass + "= " + varList + TextFormat.newLine);
     buffer.append(tabDataSet);
     buffer.append("##END=");
 
+    return buffer.toString();
+  }
+
+  /**
+   * Returns the String for the header of the spectrum
+   * 
+   * @param tmpDataClass
+   *        the dataclass
+   * @param tmpXFactor
+   *        the x factor
+   * @param tmpYFactor
+   *        the y factor
+   * @param startIndex
+   *        the index of the starting coordinate
+   * @param endIndex
+   *        the index of the ending coordinate
+   * @return the String for the header of the spectrum
+   */
+  private static String getHeaderString(JDXSpectrum spec, String tmpDataClass,
+                                        double minY, double maxY,
+                                        double tmpXFactor, double tmpYFactor,
+                                        int startIndex, int endIndex) {
+
+    //final String CORE_STR = "TITLE,ORIGIN,OWNER,DATE,TIME,DATATYPE,JCAMPDX";
+
+    StringBuffer buffer = new StringBuffer();
+    // start of header
+    buffer.append("##TITLE= ").append(spec.getTitle()).append(
+        TextFormat.newLine);
+    buffer.append("##JCAMP-DX= 5.01").append(TextFormat.newLine); /*+ getJcampdx()*/
+    buffer.append("##DATA TYPE= ").append(spec.getDataType()).append(
+        TextFormat.newLine);
+    buffer.append("##DATA CLASS= ").append(tmpDataClass).append(
+        TextFormat.newLine);
+    buffer.append("##ORIGIN= ").append(spec.getOrigin()).append(
+        TextFormat.newLine);
+    buffer.append("##OWNER= ").append(spec.getOwner()).append(
+        TextFormat.newLine);
+    String d = spec.getDate();
+    String longdate = "";
+    String currentTime = (new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSSS ZZZZ"))
+        .format(Calendar.getInstance().getTime());
+    if (spec.getLongDate().equals("") || d.length() != 8) {
+      longdate = currentTime + " $$ export date from JSpecView";
+    } else if (d.length() == 8) { // give a 50 year window; Y2K compliant
+      longdate = (d.charAt(0) < '5' ? "20" : "19") + d + " " + spec.getTime();
+    } else {
+      longdate = spec.getLongDate();
+    }
+    buffer.append("##LONGDATE= ").append(longdate).append(TextFormat.newLine);
+
+    // optional header
+    List<String[]> headerTable = spec.getHeaderTable();
+    for (int i = 0; i < headerTable.size(); i++) {
+      String[] entry = headerTable.get(i);
+      String label = entry[0];
+      String dataSet = entry[1];
+      String nl = (dataSet.startsWith("<") && dataSet.contains("</") ? TextFormat.newLine
+          : "");
+      buffer.append(label).append("= ").append(nl).append(dataSet).append(
+          TextFormat.newLine);
+    }
+    double observedFreq = spec.getObservedFreq();
+    if (!spec.is1D())
+      buffer.append("##NUM DIM= ").append(spec.numDim).append(
+          TextFormat.newLine);
+    if (observedFreq != JDXSpectrum.ERROR)
+      buffer.append("##.OBSERVE FREQUENCY= ").append(observedFreq).append(
+          TextFormat.newLine);
+    if (spec.observedNucl != "")
+      buffer.append("##.OBSERVE NUCLEUS= ").append(spec.observedNucl).append(
+          TextFormat.newLine);
+    //now need to put pathlength here
+
+    // last part of header
+
+    boolean toHz = (observedFreq != JDXSpectrum.ERROR && !spec.getDataType()
+        .toUpperCase().contains("FID"));
+    buffer.append("##XUNITS= ").append(toHz ? "HZ" : spec.getXUnits()).append(
+        TextFormat.newLine);
+    buffer.append("##YUNITS= ").append(spec.getYUnits()).append(
+        TextFormat.newLine);
+    buffer.append("##XFACTOR= ").append(TextFormat.fixExponentInt(tmpXFactor))
+        .append(TextFormat.newLine);
+    buffer.append("##YFACTOR= ").append(TextFormat.fixExponentInt(tmpYFactor))
+        .append(TextFormat.newLine);
+    double f = (toHz ? observedFreq : 1);
+    Coordinate[] xyCoords = spec.getXYCoords();
+    buffer.append("##FIRSTX= ").append(
+        TextFormat.fixExponentInt(xyCoords[startIndex].getXVal() * f)).append(
+        TextFormat.newLine);
+    buffer.append("##FIRSTY= ").append(
+        TextFormat.fixExponentInt(xyCoords[startIndex].getYVal())).append(
+        TextFormat.newLine);
+    buffer.append("##LASTX= ").append(
+        TextFormat.fixExponentInt(xyCoords[endIndex].getXVal() * f)).append(
+        TextFormat.newLine);
+    buffer.append("##NPOINTS= ").append((Math.abs(endIndex - startIndex) + 1))
+        .append(TextFormat.newLine);
+    buffer.append("##MINY= ").append(TextFormat.fixExponentInt(minY)).append(
+        TextFormat.newLine);
+    buffer.append("##MAXY= ").append(TextFormat.fixExponentInt(maxY)).append(
+        TextFormat.newLine);
     return buffer.toString();
   }
 

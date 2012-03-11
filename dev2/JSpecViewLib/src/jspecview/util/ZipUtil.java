@@ -29,7 +29,8 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -142,7 +143,7 @@ public class ZipUtil {
   }
   
   private static String[] getZipDirectoryOrErrorAndClose(InputStream is, boolean addManifest) throws IOException {
-    Vector<String> v = new Vector<String>();
+    List<String> v = new ArrayList<String>();
     ZipInputStream zis = new ZipInputStream(is);
     ZipEntry ze;
     String manifest = null;
@@ -151,7 +152,7 @@ public class ZipUtil {
       if (addManifest && fileName.equals("JmolManifest"))
         manifest = getZipEntryAsString(zis); 
       else
-        v.addElement(fileName);
+        v.add(fileName);
     }
     zis.close();
     if (addManifest)

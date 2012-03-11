@@ -20,9 +20,7 @@
 package jspecview.common;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.List;
@@ -32,7 +30,6 @@ import jspecview.exception.JSpecViewException;
 import jspecview.source.JDXDecompressor;
 import jspecview.source.JDXSourceStreamTokenizer;
 import jspecview.util.Logger;
-import jspecview.util.TextFormat;
 
 /**
  * <code>JDXSpectrum</code> implements the Interface Spectrum for the display of
@@ -73,10 +70,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
    */
   private boolean isHZtoPPM = false;
   
-  private String currentTime = (new SimpleDateFormat(
-      "yyyy/MM/dd HH:mm:ss.SSSS ZZZZ"))
-      .format(Calendar.getInstance().getTime());
-
   private ArrayList<PeakInfo> peakList = new ArrayList<PeakInfo>();
 
   /**
@@ -241,104 +234,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
    */
   public double getObservedFreq() {
     return observedFreq;
-  }
-
-  // ***************************** To String Methods ****************************
-
-  /**
-   * Returns the String for the header of the spectrum
-   * 
-   * @param tmpDataClass
-   *        the dataclass
-   * @param tmpXFactor
-   *        the x factor
-   * @param tmpYFactor
-   *        the y factor
-   * @param startIndex
-   *        the index of the starting coordinate
-   * @param endIndex
-   *        the index of the ending coordinate
-   * @return the String for the header of the spectrum
-   */
-  public String getHeaderString(String tmpDataClass, double minY, double maxY, double tmpXFactor,
-                                double tmpYFactor, int startIndex, int endIndex) {
-
-    //final String CORE_STR = "TITLE,ORIGIN,OWNER,DATE,TIME,DATATYPE,JCAMPDX";
-
-    StringBuffer buffer = new StringBuffer();
-    // start of header
-    buffer.append("##TITLE= ").append(getTitle())
-        .append(TextFormat.newLine);
-    buffer.append("##JCAMP-DX= 5.01").append(TextFormat.newLine); /*+ getJcampdx()*/
-    buffer.append("##DATA TYPE= ").append(getDataType()).append(
-        TextFormat.newLine);
-    buffer.append("##DATA CLASS= ").append(tmpDataClass).append(
-        TextFormat.newLine);
-    buffer.append("##ORIGIN= ").append(getOrigin()).append(
-        TextFormat.newLine);
-    buffer.append("##OWNER= ").append(getOwner())
-        .append(TextFormat.newLine);
-
-    String d = getDate();
-    String longdate = "";
-    if (getLongDate().equals("") || d.length() != 8) {
-      longdate = currentTime + " $$ export date from JSpecView";
-    } else if (d.length() == 8) { // give a 50 year window; Y2K compliant
-      longdate = (d.charAt(0) < '5' ? "20" : "19") + d + " " + getTime();
-    } else {
-      longdate = getLongDate();
-    }
-    buffer.append("##LONGDATE= ").append(longdate).append(
-        TextFormat.newLine);
-
-    // optional header
-    for (int i = 0; i < headerTable.size(); i++) {
-      String[] entry = headerTable.get(i);
-      String label = entry[0];
-      String dataSet = entry[1];
-      String nl = (dataSet.startsWith("<") && dataSet.contains("</") ? TextFormat.newLine
-          : "");
-      buffer.append(label).append("= ").append(nl).append(dataSet).append(
-          TextFormat.newLine);
-    }
-    if (!is1D())
-      buffer.append("##NUM DIM= ").append(numDim).append(TextFormat.newLine);
-    if (observedFreq != ERROR)
-      buffer.append("##.OBSERVE FREQUENCY= ").append(observedFreq).append(
-          TextFormat.newLine);
-    if (observedNucl != "")
-      buffer.append("##.OBSERVE NUCLEUS= ").append(observedNucl).append(
-          TextFormat.newLine);
-    //now need to put pathlength here
-
-    // last part of header
-
-    boolean toHz = (getObservedFreq() != ERROR
-                && !getDataType().toUpperCase().contains("FID"));
-    buffer.append("##XUNITS= ").append(toHz ? "HZ" : getXUnits()).append(TextFormat.newLine);
-    buffer.append("##YUNITS= ").append(getYUnits()).append(
-        TextFormat.newLine);
-    buffer.append("##XFACTOR= ").append(TextFormat.fixExponentInt(tmpXFactor))
-        .append(TextFormat.newLine);
-    buffer.append("##YFACTOR= ").append(TextFormat.fixExponentInt(tmpYFactor))
-        .append(TextFormat.newLine);
-    double f = (toHz ? getObservedFreq() : 1);
-    buffer.append("##FIRSTX= ").append(
-        TextFormat.fixExponentInt(xyCoords[startIndex].getXVal() * f)).append(
-        TextFormat.newLine);
-    buffer.append("##FIRSTY= ").append(
-        TextFormat.fixExponentInt(xyCoords[startIndex].getYVal())).append(
-        TextFormat.newLine);
-    buffer.append("##LASTX= ").append(
-        TextFormat.fixExponentInt(xyCoords[endIndex].getXVal() * f)).append(
-        TextFormat.newLine);
-    buffer.append("##NPOINTS= ").append((endIndex - startIndex + 1)).append(
-        TextFormat.newLine);
-    buffer.append("##MINY= ").append(TextFormat.fixExponentInt(minY)).append(
-        TextFormat.newLine);
-    buffer.append("##MAXY= ").append(TextFormat.fixExponentInt(maxY)).append(
-        TextFormat.newLine);
-    return buffer.toString();
   }
 
   /**
