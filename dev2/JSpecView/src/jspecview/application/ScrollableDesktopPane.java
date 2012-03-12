@@ -102,8 +102,8 @@ public class ScrollableDesktopPane extends JDesktopPane {
   }
 
   public void stackFrames() {
-    setMyStyle(STYLE_STACK);
     manager.setNormalSize();
+    setMyStyle(STYLE_STACK);
     JInternalFrame allFrames[] = getAllFrames();
     for (int i = allFrames.length - 1; i >= 0; i--) {
       try {
@@ -116,8 +116,9 @@ public class ScrollableDesktopPane extends JDesktopPane {
     }
   }
 
-  private void setMyStyle(int style) {
+  void setMyStyle(int style) {
     this.style = style;
+    System.out.println("ScrollDesktoppane.setMystyle" + style);
     windowMenu.setMyStyle(this.style = style);
   }
 
@@ -125,14 +126,16 @@ public class ScrollableDesktopPane extends JDesktopPane {
    * Cascade all internal frames
    */
   public void cascadeFrames() {
-    setMyStyle(STYLE_CASCADE);
     setAllEnabled(true);
     manager.setNormalSize();
+    setMyStyle(STYLE_CASCADE);
     int x = 0;
     int y = 0;
     JInternalFrame allFrames[] = getAllFrames();
     int frameHeight = (getBounds().height - 5) - allFrames.length
         * FRAME_OFFSET;
+    if (frameHeight < 100)
+      frameHeight = 100;
     int frameWidth = (getBounds().width - 5) - allFrames.length * FRAME_OFFSET;
     for (int i = allFrames.length - 1; i >= 0; i--) {
       allFrames[i].setSize(frameWidth, frameHeight);
@@ -146,9 +149,9 @@ public class ScrollableDesktopPane extends JDesktopPane {
    * Tile all internal frames
    */
   public void tileFrames() {
-    setMyStyle(STYLE_TILE);
     setAllEnabled(true);
     manager.setNormalSize();
+    setMyStyle(STYLE_TILE);
 
     JScrollPane scrollPane = manager.getScrollPane();
     Rectangle viewP;
@@ -219,6 +222,8 @@ public class ScrollableDesktopPane extends JDesktopPane {
     setMinimumSize(d);
     setMaximumSize(d);
     setPreferredSize(d);
+    setMyStyle(STYLE_STACK);
+    
   }
 
   /*
@@ -282,6 +287,7 @@ class MDIDesktopManager extends DefaultDesktopManager {
       x = (int) d.getWidth();
       y = (int) d.getHeight();
       desktop.setAllSize(x, y);
+      desktop.setMyStyle(ScrollableDesktopPane.STYLE_STACK);
       scrollPane.invalidate();
       scrollPane.validate();
     }
