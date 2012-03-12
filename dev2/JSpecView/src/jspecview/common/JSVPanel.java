@@ -2797,6 +2797,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   
   private int xLine0, xLine1;
   private int[] imageWidthHeight = new int[2];
+
   private boolean draw2DImage(Graphics g, int width, int height) {
     //widthRatio = 1;
     if (bwidth != width || bheight != plotAreaHeight) {

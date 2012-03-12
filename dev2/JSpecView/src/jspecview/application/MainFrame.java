@@ -44,8 +44,10 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout; //import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
@@ -247,7 +249,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private WindowMenu windowMenu = new WindowMenu(desktopPane);
   private JTree spectraTree;
   private JScrollPane spectraTreePane;
-  //private JTree errorTree = new JTree(new DefaultMutableTreeNode("Errors"));
   private JPanel statusPanel = new JPanel();
   private JLabel statusLabel = new JLabel();
   private JTextField commandInput = new JTextField();
@@ -284,7 +285,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private JMenuItem scriptMenuItem = new JMenuItem();
   private JMenuItem overlayKeyMenuItem = new JMenuItem();
   private JButton overlayKeyButton = new JButton();
-  //private OverlayLegendDialog legend;
   private JMenu processingMenu = new JMenu();
   private JMenuItem errorLogMenuItem = new JMenuItem();
   private JSVInterface jsv;
@@ -1442,10 +1442,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
     validate();
     repaint();
 
-    //OverlayLegendDialog legend;
-    if (autoShowLegend) {
-      new OverlayLegendDialog(this, jsvp);
-    }
+    if (autoShowLegend)
+      findNode(selectedJSVPanel).setLegend(new OverlayLegendDialog(this, jsvp));
 
     overlaySplitButton.setIcon(splitIcon);
     overlaySplitButton.setToolTipText("Split Display");
@@ -1667,9 +1665,17 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
   public void selectFrameNode(JInternalFrame frame) {
     // Find Node in SpectraTree and select it
-    DefaultMutableTreeNode node = findNode(frame);
-    if (node != null)
-      spectraTree.setSelectionPath(new TreePath(node.getPath()));
+    JSVTreeNode node = findNode(frame);
+    if (node == null)
+      return;
+    spectraTree.setSelectionPath(new TreePath(node.getPath()));
+    setOverlayKeys(node);
+  }
+
+  private void setOverlayKeys(JSVTreeNode node) {
+    boolean showLegends = overlayKeyMenuItem.isSelected();
+    for (int i = specNodes.size(); --i >= 0;)
+      specNodes.get(i).setLegendVisibility(this, specNodes.get(i) == node && showLegends);
   }
 
   /**
@@ -2792,9 +2798,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
     JSVPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
-    if (jsvp.getNumberOfSpectra() > 1) {
-      //legend = new OverlayLegendDialog(this, jsvp);
-    }
+    overlayKeyMenuItem.setSelected(!overlayKeyMenuItem.isSelected());
+    setOverlayKeys(findNode(jsvp));
   }
 
   /**
@@ -2992,6 +2997,23 @@ public class MainFrame extends JFrame implements DropTargetListener,
     private JInternalFrame frame;
     private JSVPanel jsvp;
     private String id;
+    private Dialog legend;
+    
+    private void setLegend(Dialog legend) {
+      if (this.legend != null)
+        this.legend.dispose();
+      this.legend = legend;
+    }
+
+    private void setLegendVisibility(Frame frame, boolean visible) {
+      if (legend == null && visible) {
+        setLegend(
+            jsvp.getNumberOfSpectra() > 1 ? new OverlayLegendDialog(frame, jsvp)
+                : null);
+      }
+      if (legend != null)
+        legend.setVisible(visible);
+    }
 
     private JSVTreeNode(String fileName, JDXSource source,
         JInternalFrame frame, JSVPanel jsvp, String id) {

@@ -104,8 +104,6 @@ public class OverlayLegendDialog extends JDialog {
     column.setPreferredWidth(60);
     column = table.getColumnModel().getColumn(2);
     column.setPreferredWidth(250);
-
-
     JScrollPane scrollPane = new JScrollPane(table);
     getContentPane().add(scrollPane, BorderLayout.CENTER);
   }
