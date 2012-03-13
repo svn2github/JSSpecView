@@ -1280,11 +1280,12 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     int xPixel = (rightPlotAreaPos + isd.xPixel0)/2;
     int yPixel = isd.toPixelY(subIndex);
     g.drawLine(xPixel, yPixel, getWidth() - 10, yPixel);
-    g.drawLine(xLine0,topPlotAreaPos - 10, xLine0, bottomPlotAreaPos + 10);
-    g.drawLine(xLine1,topPlotAreaPos - 10, xLine1, bottomPlotAreaPos + 10);
     drawHandle(g, xPixel, yPixel);
-    drawHandle(g, xLine0, bottomPlotAreaPos + 10);
-    drawHandle(g, xLine1, bottomPlotAreaPos + 10);
+    yPixel = bottomPlotAreaPos + 10;
+    g.drawLine(xLine0,topPlotAreaPos - 10, xLine0, yPixel);
+    drawHandle(g, xLine0, yPixel);
+    g.drawLine(xLine1,topPlotAreaPos - 10, xLine1, yPixel);
+    drawHandle(g, xLine1, yPixel);
   }
 
   private void drawHandle(Graphics g, int x, int y) {
