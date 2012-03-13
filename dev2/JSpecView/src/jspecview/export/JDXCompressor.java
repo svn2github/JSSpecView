@@ -70,36 +70,43 @@ class JDXCompressor {
       String lastDif = "";
       int nDif = 0;
       i += step;
-      while (i + step != endIndex && yStr.length() < 50) {
-        // Print remaining Y values on a line
-        long y2 = (long) Math.round(xyCoords[i].getYVal() / yFactor);
-        // Calculate DIF value here
-        String temp = makeDIF(y2 - y1);
-        if (isDIFDUP && temp.equals(lastDif)) {
-          nDif++;
-        } else {
-          lastDif = temp;
-          if (nDif > 0) {
-            yStr.append(makeDUP(nDif + 1));
-            nDif = 0;
+      if (i != endIndex)
+        while (i + step != endIndex && yStr.length() < 50) {
+          // Print remaining Y values on a line
+          long y2 = (long) Math.round(xyCoords[i].getYVal() / yFactor);
+          // Calculate DIF value here
+          String temp = makeDIF(y2 - y1);
+          if (isDIFDUP && temp.equals(lastDif)) {
+            nDif++;
+          } else {
+            lastDif = temp;
+            if (nDif > 0) {
+              yStr.append(makeDUP(nDif + 1));
+              nDif = 0;
+            }
+            yStr.append(temp);
           }
-          yStr.append(temp);
+          y1 = y2;
+          i += step;
         }
-        y1 = y2;
-        i += step;
-      }
       if (nDif > 0)
         yStr.append(makeDUP(nDif));
       // convert last digit of string to SQZ
       yStr.append(makeSQZ(xyCoords[i], yFactor));
       buffer.append(yStr).append(TextFormat.newLine);
+      if (i == endIndex) {
+        endIndex = -1;
+        break;
+      }
       i += step;
     }
     // Get checksum line -- for an X-sequence check only
-    buffer.append(
-        TextFormat.fixIntNoExponent(xyCoords[endIndex].getXVal() / xFactor))
-        .append(makeSQZ(xyCoords[endIndex], yFactor));
-    buffer.append("  $$checkpoint").append(TextFormat.newLine);
+    if (endIndex >= 0) {
+      buffer.append(
+          TextFormat.fixIntNoExponent(xyCoords[endIndex].getXVal() / xFactor))
+          .append(makeSQZ(xyCoords[endIndex], yFactor));
+      buffer.append("  $$checkpoint").append(TextFormat.newLine);
+    }
     return buffer.toString();
   }
 
