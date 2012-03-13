@@ -239,9 +239,9 @@ public class JDXExporter {
 
     // last part of header
 
-    boolean toHz = (observedFreq != JDXSpectrum.ERROR && !spec.getDataType()
-        .toUpperCase().contains("FID"));
-    buffer.append("##XUNITS= ").append(toHz ? "HZ" : spec.getXUnits()).append(
+    //boolean toHz = (observedFreq != JDXSpectrum.ERROR && !spec.getDataType()
+      //  .toUpperCase().contains("FID"));
+    buffer.append("##XUNITS= ").append(spec.isHZtoPPM() ? "HZ" : spec.getXUnits()).append(
         TextFormat.newLine);
     buffer.append("##YUNITS= ").append(spec.getYUnits()).append(
         TextFormat.newLine);
@@ -249,7 +249,7 @@ public class JDXExporter {
         .append(TextFormat.newLine);
     buffer.append("##YFACTOR= ").append(TextFormat.fixExponentInt(tmpYFactor))
         .append(TextFormat.newLine);
-    double f = (toHz ? observedFreq : 1);
+    double f = (spec.isHZtoPPM() ? observedFreq : 1);
     Coordinate[] xyCoords = spec.getXYCoords();
     buffer.append("##FIRSTX= ").append(
         TextFormat.fixExponentInt(xyCoords[startIndex].getXVal() * f)).append(
