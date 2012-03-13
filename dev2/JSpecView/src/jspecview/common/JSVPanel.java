@@ -2527,6 +2527,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
   private boolean isIntegralDrag;
 
+  private int[] tempi4 = new int[4];
+
   /**
    * Called by the mouseClicked Method
    * 
@@ -2682,9 +2684,15 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       factor2 = 1;
       break;
     }
-    thisWidth = 0;
-    doZoom(multiScaleData.minX, multiScaleData.minY / factor1, 
+    if (isd != null)
+      isd.getView(tempi4);
+    doZoom(multiScaleData.minX, multiScaleData.minY / factor1,
         multiScaleData.maxX, multiScaleData.maxY / factor2, true);
+    if (isd == null)
+      return;
+    update2dImage(true);
+    isd.setView(tempi4);
+    repaint();
   }
 
   public void keyReleased(KeyEvent e) {
@@ -2810,7 +2818,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     if (isd == null && !get2DImage(width))
         return false;
     if (image2D != null) {
-      isd.setView();
       g.drawImage(image2D, 
           isd.xPixel0, isd.yPixel0,  // destination 
           isd.xPixel0 + isd.xPixels - 1, // destination 
@@ -2825,9 +2832,23 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private boolean get2DImage(int width) {
     isd = new ImageScaleData();
     isd.setScale(zoomInfoList.get(0));
-    isd.setScale(multiScaleData);
     multiScaleData.isd = isd;
-    int[] buffer = getSpectrumAt(0).get2dBuffer(thisWidth = width, thisHeight = plotAreaHeight, isd);
+    thisWidth = width;
+    thisHeight = plotAreaHeight;
+    if (!update2dImage(false))
+      return false;
+    widthRatio = 1.0 * (width - isd.xPixels) / width;
+    isd.setXY0((int) Math.floor(width - isd.xPixels) - 20, topPlotAreaPos);
+    isd.resetZoom();
+    xLine0 = isd.toPixelX(multiScaleData.startDataPointIndices[0]);
+    xLine1 = isd.toPixelX(multiScaleData.endDataPointIndices[0]);
+    draw1D = true;// || (widthRatio >= widthRatioMin);
+    return true;
+  }
+
+  private boolean update2dImage(boolean forceNew) {    
+    isd.setScale(multiScaleData);
+    int[] buffer = getSpectrumAt(0).get2dBuffer(thisWidth, thisHeight, isd, forceNew);
     if (buffer == null) {
       image2D = null;
       draw1D = true;
@@ -2836,12 +2857,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     image2D = new BufferedImage(isd.imageWidth, isd.imageHeight, BufferedImage.TYPE_BYTE_GRAY);
     WritableRaster raster = image2D.getRaster();
     raster.setSamples(0, 0, isd.imageWidth, isd.imageHeight, 0, buffer);
-    widthRatio = 1.0 * (width - isd.xPixels) / width;
-    isd.setXY0((int) Math.floor(width - isd.xPixels) - 20, topPlotAreaPos);
-    isd.resetZoom();
-    xLine0 = isd.toPixelX(multiScaleData.startDataPointIndices[0]);
-    xLine1 = isd.toPixelX(multiScaleData.endDataPointIndices[0]);
-    draw1D = true;// || (widthRatio >= widthRatioMin);
     return true;
   }
 }

@@ -971,13 +971,21 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   private int thisWidth,thisHeight;
 
 
-  public int[] get2dBuffer(int width, int height, ImageScaleData isd) {
+  /**
+   * 
+   * @param width
+   * @param height
+   * @param isd
+   * @return
+   */
+  public int[] get2dBuffer(int width, int height, ImageScaleData isd, boolean forceNew) {
     if (subSpectra == null || !subSpectra.get(0).isContinuous())
       return null;
-    if (thisWidth == width && thisHeight == height)
+    if (!forceNew && thisWidth == width && thisHeight == height)
       return buf2d;
     int nSpec = subSpectra.size();
     double grayFactor = 255 / (isd.maxZ - isd.minZ);
+    System.out.println("JDXSPEC GRaY " + grayFactor);
     double r = Math.min(1.0 * width * 0.6/xyCoords.length, 1.0 * height/nSpec);
     if (r > 1)
       r = 1;
@@ -985,7 +993,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     thisHeight = height = nSpec;
     isd.setImageSize(width, height);
     isd.setPixelWidthHeight((int) Math.floor(r * width), (int) Math.floor(r * height));
-    if (buf2d != null && grayFactor == grayFactorLast)
+    if (!forceNew && buf2d != null && grayFactor == grayFactorLast)
       return buf2d;
     grayFactorLast = grayFactor;
     int[] buf = new int[width * height];

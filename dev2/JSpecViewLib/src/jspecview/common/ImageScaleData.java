@@ -79,8 +79,7 @@ public class ImageScaleData {
     this.imageWidth = width;
     this.imageHeight = height;
     xView2 = width - 1;
-    yView2 = height - 1;
-    
+    yView2 = height - 1; 
   }
   
   public void setXY0(int xPixel, int yPixel) {
@@ -95,6 +94,20 @@ public class ImageScaleData {
     this.yPixels = yPixels;
   }
   
+  public void getView(int[] i4) {
+    i4[0] = xView1;
+    i4[1] = yView1;
+    i4[2] = xView2;
+    i4[3] = yView2;
+  }
+
+  public void setView(int[] i4) {
+    xView1 = i4[0];
+    yView1 = i4[1];
+    xView2 = i4[2];
+    yView2 = i4[3];
+  }
+  
   public void setView() {
     if (xPixelZoom1 == 0)
       resetZoom();
@@ -106,6 +119,8 @@ public class ImageScaleData {
     yView1 = Math.min(y1, y2);
     xView2 = Math.max(x1, x2);
     yView2 = Math.max(y1, y2);
+    System.out.println("imagescaledata setView " + xView1 + " " + yView1 + " " + xView2 + " " + yView2);
+
     resetZoom();
   }
 
