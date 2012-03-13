@@ -17,6 +17,7 @@ public class MultiScaleData extends ScaleData {
   public int[] endDataPointIndices;
   public int[] numOfPointsList;
   public double minY2D, maxY2D;
+  public ImageScaleData isd;
  
   
   /**

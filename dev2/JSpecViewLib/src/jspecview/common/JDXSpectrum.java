@@ -957,10 +957,8 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     this.userYFactor = userYFactor;
   }
 
-  private int[] buf2d;
-  private int bwidth,bheight;
-
   private boolean exportXAxisLeftToRight;
+
   public void setExportXAxisDirection(boolean leftToRight) {
     exportXAxisLeftToRight = leftToRight;
   }
@@ -968,20 +966,28 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return exportXAxisLeftToRight;
   }
 
-  public int[] get2dBuffer(int width, int height, int[] wh, double bufMinY, double bufMaxY) {
-    if (bwidth == width && bheight == height)
-      return buf2d;
+  private double grayFactorLast;
+  private int[] buf2d;
+  private int thisWidth,thisHeight;
+
+
+  public int[] get2dBuffer(int width, int height, ImageScaleData isd) {
     if (subSpectra == null || !subSpectra.get(0).isContinuous())
       return null;
+    if (thisWidth == width && thisHeight == height)
+      return buf2d;
     int nSpec = subSpectra.size();
-    double grayFactor = 255 / (bufMaxY - bufMinY);
-    double r = Math.min(1.0 * width * 0.9/xyCoords.length, 1.0 * height/nSpec);
+    double grayFactor = 255 / (isd.maxZ - isd.minZ);
+    double r = Math.min(1.0 * width * 0.6/xyCoords.length, 1.0 * height/nSpec);
     if (r > 1)
       r = 1;
-    wh[0] = width = (int) Math.floor(r * xyCoords.length);
-    wh[1] = height = (int) Math.floor(r * nSpec);
-    bwidth = width;
-    bheight = height;
+    thisWidth = width = xyCoords.length;
+    thisHeight = height = nSpec;
+    isd.setImageSize(width, height);
+    isd.setPixelWidthHeight((int) Math.floor(r * width), (int) Math.floor(r * height));
+    if (buf2d != null && grayFactor == grayFactorLast)
+      return buf2d;
+    grayFactorLast = grayFactor;
     int[] buf = new int[width * height];
     for (int i = 0; i < nSpec; i++) {
       Coordinate[] points = subSpectra.get(i).xyCoords;
@@ -989,10 +995,10 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
         return null;
       double f = subSpectra.get(i).getUserYFactor();
       for (int j = 0; j < xyCoords.length; j++) {
-        int pt = (int) ((height - 1 - Math.floor(i * r)) * width + width - 1 - Math.floor(j * r));
+        int pt = (int) ((height - 1 - i) * width + width - 1 - j);
         if (pt < 0)
           pt = 0;
-        buf[pt] = 255 - (int) Math.floor((bufMinY + points[j].getYVal()* f) * grayFactor);
+        buf[pt] = 255 - (int) Math.floor((isd.minZ + points[j].getYVal()* f) * grayFactor);
       }
     }
     buf2d = buf;
