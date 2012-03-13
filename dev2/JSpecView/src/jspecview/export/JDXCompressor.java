@@ -70,7 +70,10 @@ class JDXCompressor {
       String lastDif = "";
       int nDif = 0;
       i += step;
-      if (i != endIndex)
+      if (i == endIndex) {
+        // we're done
+        i -= step;
+      } else {
         while (i + step != endIndex && yStr.length() < 50) {
           // Print remaining Y values on a line
           long y2 = (long) Math.round(xyCoords[i].getYVal() / yFactor);
@@ -89,24 +92,19 @@ class JDXCompressor {
           y1 = y2;
           i += step;
         }
-      if (nDif > 0)
-        yStr.append(makeDUP(nDif));
-      // convert last digit of string to SQZ
-      yStr.append(makeSQZ(xyCoords[i], yFactor));
-      buffer.append(yStr).append(TextFormat.newLine);
-      if (i == endIndex) {
-        endIndex = -1;
-        break;
+        if (nDif > 0)
+          yStr.append(makeDUP(nDif));
+        // convert last digit of string to SQZ
+        yStr.append(makeSQZ(xyCoords[i], yFactor));
       }
+      buffer.append(yStr).append(TextFormat.newLine);
       i += step;
     }
     // Get checksum line -- for an X-sequence check only
-    if (endIndex >= 0) {
-      buffer.append(
-          TextFormat.fixIntNoExponent(xyCoords[endIndex].getXVal() / xFactor))
-          .append(makeSQZ(xyCoords[endIndex], yFactor));
-      buffer.append("  $$checkpoint").append(TextFormat.newLine);
-    }
+    buffer.append(
+        TextFormat.fixIntNoExponent(xyCoords[endIndex].getXVal() / xFactor))
+        .append(makeSQZ(xyCoords[endIndex], yFactor));
+    buffer.append("  $$checkpoint").append(TextFormat.newLine);
     return buffer.toString();
   }
 
