@@ -33,7 +33,8 @@ public class ImageScaleData {
    * 
    * 
    */
-  public int xPixel0, yPixel0, imageWidth, imageHeight, xPixels, yPixels;
+  public int xPixel0, yPixel0, xPixel1, yPixel1;
+  public int imageWidth, imageHeight, xPixels, yPixels;
   public int xPixelZoom1, yPixelZoom1, xPixelZoom2, yPixelZoom2;
   public int xView1, yView1, xView2, yView2;
   public double minX = Double.NaN, maxX, minZ, maxZ;
@@ -78,11 +79,13 @@ public class ImageScaleData {
   public void setXY0(int xPixel, int yPixel) {
     xPixel0 = xPixel;
     yPixel0 = yPixel;
+    xPixel1 = xPixel0 + xPixels - 1;
+    yPixel1 = yPixel0 + yPixels - 1;
   }
  
   public void setPixelWidthHeight (int xPixels, int yPixels) {
     this.xPixels = xPixels;
-    this.yPixels = yPixels;   
+    this.yPixels = yPixels;
   }
   
   public void setView() {
@@ -102,22 +105,20 @@ public class ImageScaleData {
   public void resetZoom() {
     xPixelZoom1 = xPixel0;
     yPixelZoom1 = yPixel0;
-    xPixelZoom2 = xPixel0 + xPixels;
-    yPixelZoom2 = yPixel0 + yPixels;
+    xPixelZoom2 = xPixel1;
+    yPixelZoom2 = yPixel1;
   }
 
   public int fixX(int xPixel) {
-    return (xPixel < xPixel0 ? xPixel0
-        : xPixel >= xPixel0 + xPixels ? xPixel = xPixel0 + xPixels - 1
-            : xPixel);
+    return (xPixel < xPixel0 ? xPixel0 : xPixel > xPixel1 ? xPixel1 : xPixel);
   }
 
   public int toImageX(double xPixel) {
-    return xView1 + (int) Math.floor((xPixel - xPixel0) / xPixels * (xView2 - xView1));
+    return xView1 + (int) Math.floor((xPixel - xPixel0) / (xPixels - 1) * (xView2 - xView1));
   }
 
   public int toImageY(double yPixel) {
-    return yView1 + (int) Math.floor((yPixel - yPixel0) / yPixels * (yView2 - yView1));
+    return yView1 + (int) Math.floor((yPixel - yPixel0) / (yPixels - 1) * (yView2 - yView1));
   }
 
   public boolean isXWithinRange(int xPixel) {
@@ -125,7 +126,7 @@ public class ImageScaleData {
   }
   
   public double toX(int xPixel) {
-    return maxX + (minX - maxX) * toImageX(fixX(xPixel)) / imageWidth;
+    return maxX + (minX - maxX) * toImageX(fixX(xPixel)) / (imageWidth - 1);
   }
   
   public int toSubSpectrumIndex(int yPixel) {
@@ -133,13 +134,20 @@ public class ImageScaleData {
   }
 
   public int toPixelX(int imageX) {
-    return xPixel0 + (int) (xPixels *(1 - 1.0 *  imageX / imageWidth)); 
+    return xPixel0 + (int) ((xPixels - 1) *(1 - 1.0 *  imageX / (imageWidth - 1))); 
   }
 
   public int toPixelY(int subIndex) {
-    double f = 1.0 * (subIndex - (imageHeight - yView1)) / (yView2 - yView1);
-    int y = yPixel0 - (int) (f * yPixels);
+    // yView2 > yView1, but these are imageHeight - 1 - subIndex
+    
+    double f = 1.0 * (imageHeight - 1 - subIndex - yView1) / (yView2 - yView1);
+    int y = yPixel0 + (int) (f * (yPixels - 1));
     return y; 
   }
 
+  public int fixSubIndex(int subIndex) {
+    int sub2 = imageHeight - 1 - yView1;
+    int sub1 = imageHeight - 1 - yView2;
+    return Math.max(sub1, Math.min(sub2, subIndex)); 
+  }
 }

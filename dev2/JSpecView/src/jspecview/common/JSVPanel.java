@@ -1207,12 +1207,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     int subIndex = spec0.getSubIndex();
     if (subIndex >= 0 && isd != null) {
       g.setColor(plotColors[0]);
-      int yPixel = isd.toPixelY(subIndex);
 //      g.fillRect(rightPlotAreaPos, bottomPlotAreaPos - y, 3, y);
       if (image2D != null) {
-        g.drawLine(rightPlotAreaPos, yPixel, getWidth() - 10, yPixel);
-        g.drawLine(xLine0,topPlotAreaPos - 10, xLine0, bottomPlotAreaPos + 10);
-        g.drawLine(xLine1, bottomPlotAreaPos + 10, xLine1, topPlotAreaPos - 10);
+        draw2dCursors(g, subIndex);
         drawUnits(g, width, spec0.nucleusX, getWidth() - 30, bottomPlotAreaPos, 1, 1.0);
         drawUnits(g, width, spec0.nucleusY, isd.xPixel0 - 5, topPlotAreaPos, 1, 0);
       }
@@ -1277,6 +1274,21 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     if (annotations != null)
       drawAnnotations(g, height, width, annotations, null);
     drawIntegralValue(g, width);
+  }
+
+  private void draw2dCursors(Graphics g, int subIndex) {
+    int xPixel = (rightPlotAreaPos + isd.xPixel0)/2;
+    int yPixel = isd.toPixelY(subIndex);
+    g.drawLine(xPixel, yPixel, getWidth() - 10, yPixel);
+    g.drawLine(xLine0,topPlotAreaPos - 10, xLine0, bottomPlotAreaPos + 10);
+    g.drawLine(xLine1,topPlotAreaPos - 10, xLine1, bottomPlotAreaPos + 10);
+    drawHandle(g, xPixel, yPixel);
+    drawHandle(g, xLine0, bottomPlotAreaPos + 10);
+    drawHandle(g, xLine1, bottomPlotAreaPos + 10);
+  }
+
+  private void drawHandle(Graphics g, int x, int y) {
+    g.fillRect(x - 2, y - 2, 5, 5);
   }
 
   /**
@@ -1794,7 +1806,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @param finalY
    *        the Y end coordinate of the zoom area
    */
-  private void doZoom(double initX, double initY, double finalX, double finalY, boolean doRepaint) {
+  private void doZoom(double initX, double initY, double finalX, double finalY,
+                      boolean doRepaint) {
     if (!zoomEnabled)
       return;
 
@@ -1824,12 +1837,12 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     }
     int[] startIndices = new int[nSpectra];
     int[] endIndices = new int[nSpectra];
-    if (doZoomWithoutRepaint(initX, finalX, initY, finalY, startIndices,
-        endIndices)) {
-      notifyZoomListeners(initX, finalX, initY, finalY);
-      if (doRepaint)
-        repaint();
-    }
+    if (!doZoomWithoutRepaint(initX, finalX, initY, finalY, startIndices,
+        endIndices))
+      return;
+    notifyZoomListeners(initX, finalX, initY, finalY);
+    if (doRepaint)
+      repaint();
   }
 
   /**
@@ -1863,6 +1876,12 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         return false;
     }
     getMultiScaleData(initX, finalX, yPt1, yPt2, startIndices, endIndices);
+    if (isd != null) {
+      int isub = getSpectrumAt(0).getSubIndex();
+      int ifix = isd.fixSubIndex(isub);
+      if (ifix != isub)
+        setCurrentSubSpectrum(ifix);
+    }
     // add to and clean the zoom list
     if (zoomInfoList.size() > currentZoomIndex + 1)
       for (int i = zoomInfoList.size() - 1; i > currentZoomIndex; i--)
@@ -2362,7 +2381,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   
-  boolean triggerNewImage2DZoom;
+  boolean triggerImageCursorXZoom;
   boolean isLine0, isLine1;
 
   private boolean isSubSpectrumDrag;
@@ -2375,14 +2394,15 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       isMouseDraggedEvent = false;
       return true;
     }
-    if (image2D == null || xPixel < rightPlotAreaPos + 10)
+    isSubSpectrumDrag = false;
+    if (image2D == null || !triggerImageCursorXZoom && xPixel < rightPlotAreaPos + 10)
       return false;
     if (isPress) {
       isSubSpectrumDrag = (xPixel < isd.xPixel0 - 10);
       if (isSubSpectrumDrag)
         return true;
-      isLine0 = (Math.abs(xPixel - xLine0) < 5);
-      isLine1 = (!isLine0 && Math.abs(xPixel - xLine1) < 5);
+      isLine0 = (yPixel == bottomPlotAreaPos && Math.abs(xPixel - xLine0) < 5);
+      isLine1 = (yPixel == bottomPlotAreaPos && !isLine0 && Math.abs(xPixel - xLine1) < 5);
       if (!isLine0 && !isLine1) {
         zoomBoxX = isd.fixX(xPixel);
         zoomBoxY = yPixel;
@@ -2396,7 +2416,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         xLine0 = isd.fixX(xPixel);
       else if (isLine1)
         xLine1 = isd.fixX(xPixel);
-      triggerNewImage2DZoom = true;
+      triggerImageCursorXZoom = true;
       isMouseDraggedEvent = true;
       repaint();
       return true;
@@ -2422,8 +2442,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     int xPixel = e.getX();
     int yPixel = fixY(e.getY());
 
-    if (triggerNewImage2DZoom) {
-      triggerNewImage2DZoom = false;
+    if (triggerImageCursorXZoom) {
+      triggerImageCursorXZoom = false;
       multiScaleData = zoomInfoList.get(0);
       doZoom(isd.toX(xLine1), multiScaleData.minY, isd.toX(xLine0), multiScaleData.maxY, true);
       return;
@@ -2434,7 +2454,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         return;
       isd.setZoom(zoomBoxX, zoomBoxY, currZoomBoxX, currZoomBoxY);
       xLine0 = isd.xPixel0;
-      xLine1 = isd.xPixel0 + isd.xPixels;
+      xLine1 = isd.xPixel0 + isd.xPixels - 1;
       isMouseDraggedEvent2D = false;
       doZoom(isd.toX(xLine1), multiScaleData.minY, isd.toX(xLine0), multiScaleData.maxY, true);      
       return;
@@ -2536,7 +2556,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
     if (isMouseDraggedEvent) {
       zoomBoxVisible = true;
-      boolean is2dDrag = (image2D != null && xPixel > isd.xPixel0 - 10);
+      boolean is2dDrag = isMouseDraggedEvent2D;
       currZoomBoxX = (is2dDrag ? isd.fixX(xPixel) : fixX(xPixel));
       currZoomBoxY = (isIntegralDrag ? bottomPlotAreaPos : fixY(yPixel));
       if (is2dDrag) {
@@ -2748,12 +2768,12 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     notifyZoomListeners(0, 0, 0, 0);
   }
 
-  private int fixY(int yPixels) {
-    return Math.max(Math.min(yPixels, bottomPlotAreaPos), topPlotAreaPos);
+  private int fixY(int yPixel) {
+    return Math.max(Math.min(yPixel, bottomPlotAreaPos), topPlotAreaPos);
   }
 
-  private int fixX(int xPixels) {
-    return Math.max(Math.min(xPixels, rightPlotAreaPos), leftPlotAreaPos);
+  private int fixX(int xPixel) {
+    return Math.max(Math.min(xPixel, rightPlotAreaPos), leftPlotAreaPos);
   }
 
   public static JSVPanel taConvert(JSVPanel jsvp, int mode) {
@@ -2792,8 +2812,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       isd.setView();
       g.drawImage(image2D, 
           isd.xPixel0, isd.yPixel0,  // destination 
-          isd.xPixel0 + isd.xPixels, // destination 
-          isd.yPixel0 + isd.yPixels, // destination 
+          isd.xPixel0 + isd.xPixels - 1, // destination 
+          isd.yPixel0 + isd.yPixels - 1, // destination 
           isd.xView1, isd.yView1, isd.xView2, isd.yView2, null); // source
     }
     return true;    
@@ -2812,12 +2832,12 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       draw1D = true;
       return false;
     }
-    isd.resetZoom();
     image2D = new BufferedImage(isd.imageWidth, isd.imageHeight, BufferedImage.TYPE_BYTE_GRAY);
     WritableRaster raster = image2D.getRaster();
     raster.setSamples(0, 0, isd.imageWidth, isd.imageHeight, 0, buffer);
     widthRatio = 1.0 * (width - isd.xPixels) / width;
     isd.setXY0((int) Math.floor(width - isd.xPixels) - 20, topPlotAreaPos);
+    isd.resetZoom();
     xLine0 = isd.toPixelX(multiScaleData.startDataPointIndices[0]);
     xLine1 = isd.toPixelX(multiScaleData.endDataPointIndices[0]);
     draw1D = true;// || (widthRatio >= widthRatioMin);
