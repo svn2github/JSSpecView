@@ -3,7 +3,11 @@ package jspecview.common;
 public class ImageScaleData {
   
   /*
+   * The viewPort is related to two coordinate systems, image and screen.
+   * 
    * Image Coordinates:
+   * 
+   *  Note that the last displayed image pixel is (xView2, yView2)
    * 
    *    (0,0)
    *     /---------------------------/
@@ -19,6 +23,7 @@ public class ImageScaleData {
    *                                
    * Pixel(Screen) Coordinates:
    * 
+   *  Note that the last displayed screen pixel is (yPixels - 1, xPixels - 1)
    *    
    *     /---------------------------/
    *     /   (pixel0)                /
@@ -71,8 +76,10 @@ public class ImageScaleData {
   }
   
   public void setImageSize(int width, int height) {
-    this.imageWidth = xView2 = width;
-    this.imageHeight = yView2 = height;
+    this.imageWidth = width;
+    this.imageHeight = height;
+    xView2 = width - 1;
+    yView2 = height - 1;
     
   }
   
