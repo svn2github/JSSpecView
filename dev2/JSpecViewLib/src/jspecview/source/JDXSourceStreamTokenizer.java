@@ -69,8 +69,6 @@ public class JDXSourceStreamTokenizer {
     while (line == null) {
       try {
         readLine();
-        if (lineNo > 3850)
-          System.out.println(line);
         if (line == null) {
           line = "";
           return null;
@@ -87,7 +85,7 @@ public class JDXSourceStreamTokenizer {
     int pt = line.indexOf("=");
     if (pt < 0) {
       if (isGet)
-        System.out.println("BAD JDX LINE -- no '=' (line " + lineNo + "): " + line);
+        Logger.info("BAD JDX LINE -- no '=' (line " + lineNo + "): " + line);
       label = line;
       if (!isGet)
         line = ""; 
