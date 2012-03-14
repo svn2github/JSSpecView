@@ -18,7 +18,7 @@ import jspecview.common.Coordinate;
 import jspecview.common.IntegralGraph;
 import jspecview.common.JDXSpectrum;
 import jspecview.exception.JSpecViewException;
-import jspecview.source.JDXFileReader;
+import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
 
 import org.achartengine.ChartFactory;
@@ -627,7 +627,7 @@ public class MainActivity extends Activity{
      * @throws IOException
      */
 	private List<JDXSpectrum> readSpectrum(InputStream stream) throws IOException, JSpecViewException {		                
-		JDXSource source = JDXFileReader.createJDXSource(stream, false);             	
+		JDXSource source = FileReader.createJDXSource(stream, false);             	
     	JDXSource jdxSource = (JDXSource)source;
     	List<JDXSpectrum> jdxSpectra = jdxSource.getSpectra();        	
     	return jdxSpectra;   
