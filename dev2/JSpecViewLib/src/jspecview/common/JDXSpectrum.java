@@ -59,6 +59,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   private JDXSpectrum parent;
   private int currentSubSpectrum;
   private double y2D = Double.NaN;
+  public String y2DUnits = "";
   private double blockID; // a random number generated in JDXFileReader
   private boolean isForcedSubset;
   public boolean isForcedSubset() {
@@ -271,6 +272,9 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     newSpectrum.isHZtoPPM = isHZtoPPM;
     newSpectrum.numDim = numDim;
     newSpectrum.nucleusX = nucleusX;
+    newSpectrum.nucleusY = nucleusY;
+    newSpectrum.freq2dX = freq2dX;
+    newSpectrum.freq2dY = freq2dY;
 
     return newSpectrum;
   }
@@ -901,6 +905,18 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     y2D = d;
   }
   
+  public void setY2DUnits(String units) {
+    y2DUnits = units;
+  }
+  
+  public double getY2D() {
+    return y2D;
+  } 
+
+  public String getY2DUnits() {
+    return y2DUnits;
+  } 
+
   public void setBlockID(double id) {
     blockID = id;
   }
@@ -1013,7 +1029,10 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return buf2d;
   }
 
-  public double getY2D() {
-    return y2D;
-  } 
+  public double getY2DPPM() {
+    double d = y2D;
+    if (y2DUnits.equals("HZ"))
+      d /= freq2dY;
+    return d;
+  }
 }

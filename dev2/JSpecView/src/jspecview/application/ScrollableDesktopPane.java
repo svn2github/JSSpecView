@@ -118,7 +118,6 @@ public class ScrollableDesktopPane extends JDesktopPane {
 
   void setMyStyle(int style) {
     this.style = style;
-    System.out.println("ScrollDesktoppane.setMystyle" + style);
     windowMenu.setMyStyle(this.style = style);
   }
 

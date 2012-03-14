@@ -2571,23 +2571,35 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   private void setToolTipForPixels(int xPixel, int yPixel) {
+    
+    String hashX = "#";
+    String hash1 = "0.00000000";
+    if (multiScaleData.hashNums[0] <= 0)
+      hashX = hash1.substring(0, Math.abs(multiScaleData.hashNums[0]) + 3);
+    NumberFormat formatter = getFormatter(hashX);
+
+    if (isd != null && isd.fixX(xPixel) == xPixel && fixY(yPixel) == yPixel) {
+      String s = formatter.format(isd.toX(xPixel));
+      int isub = isd.toSubSpectrumIndex(yPixel);
+      JDXSpectrum spec = getSpectrumAt(0).getSubSpectra().get(isub);
+      double d = spec.getY2D();
+      s += "," + formatter.format(d);
+      String units = spec.getY2DUnits();
+      if (units.equals("HZ"))
+        s += " HZ (" + formatter.format(spec.getY2DPPM()) + " PPM)";
+      setToolTipText(s);
+      return;
+    }
     Coordinate coord = getCoordFromPoint(fixX(xPixel), fixY(yPixel));
     double xPt = coord.getXVal();
     double yPt = coord.getYVal();
-    //if (image2D != null && e.getX() > bwidthLeft)
-    //yPt = zPt;
 
-    String hashX = "#";
+    String xx = formatter.format(xPt);
+
     String hashY = "#";
-    String hash1 = "0.00000000";
-
-    if (multiScaleData.hashNums[0] <= 0)
-      hashX = hash1.substring(0, Math.abs(multiScaleData.hashNums[0]) + 3);
-    String xx = getFormatter(hashX).format(xPt);
-
     if (multiScaleData.hashNums[1] <= 0)
       hashY = hash1.substring(0, Math.abs(multiScaleData.hashNums[1]) + 3);
-    NumberFormat formatter = getFormatter(hashY);
+    formatter = getFormatter(hashY);
     coordStr = "(" + xx + ", " + formatter.format(yPt) + ")";
 
     if (nSpectra == 1) {

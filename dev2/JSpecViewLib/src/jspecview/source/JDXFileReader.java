@@ -385,7 +385,7 @@ public class JDXFileReader {
    * 
    * @param sourceLDRTable
    * @param spectrum0
-   * @param haveVarLabel 
+   * @param haveVarLabel
    * 
    * @throws JSpecViewException
    * @return source
@@ -393,12 +393,12 @@ public class JDXFileReader {
   private JDXSource getNTupleSpectra(List<String[]> sourceLDRTable,
                                      JDXSpectrum spectrum0, String label)
       throws JSpecViewException {
-    double[] minMaxY = new double[] {Double.MAX_VALUE, Double.MIN_VALUE};
+    double[] minMaxY = new double[] { Double.MAX_VALUE, Double.MIN_VALUE };
     blockID = Math.random();
     boolean isOK = true;//(spectrum0.is1D() || firstSpec > 0);
     if (firstSpec > 0)
       spectrum0.numDim = 1; // don't display in 2D if only loading some spectra
-    
+
     boolean haveFirstLabel = !label.equals("##NTUPLES");
     if (!haveFirstLabel) {
       label = "";
@@ -423,22 +423,22 @@ public class JDXFileReader {
         attrList.add(st.nextToken().trim());
       nTupleTable.put(label, attrList);
     }//Finished With Page Data
+    ArrayList<String> symbols = (ArrayList<String>) nTupleTable.get("##SYMBOL");
     if (!label.equals("##PAGE"))
       throw new JSpecViewException("Error Reading NTuple Source");
     String page = t.getValue();
     /*
      * 7.3.1 ##PAGE= (STRING).
-This LDR indicates the start of a PAGE which contains tabular data. It may have no
-argument, or it may be omitted when the data consists of one PAGE. When the Data Table
-represents a property like a spectrum or a particular fraction, or at a particular time, or at a
-specific location in two or three dimensional space, the appropriate PAGE VARIABLE
-values will be given as arguments of the ##PAGE= LDR, as in the following examples:
-##PAGE= N=l $$ Spectrum of first fraction of GCIR run
-##PAGE= T=10:21 $$ Spectrum of product stream at time: 10:21
-##PAGE= X=5.2, Y=7.23 $$ Spectrum of known containing 5.2 % X and 7.23% Y
+    This LDR indicates the start of a PAGE which contains tabular data. It may have no
+    argument, or it may be omitted when the data consists of one PAGE. When the Data Table
+    represents a property like a spectrum or a particular fraction, or at a particular time, or at a
+    specific location in two or three dimensional space, the appropriate PAGE VARIABLE
+    values will be given as arguments of the ##PAGE= LDR, as in the following examples:
+    ##PAGE= N=l $$ Spectrum of first fraction of GCIR run
+    ##PAGE= T=10:21 $$ Spectrum of product stream at time: 10:21
+    ##PAGE= X=5.2, Y=7.23 $$ Spectrum of known containing 5.2 % X and 7.23% Y
      */
-    
-    
+
     JDXSpectrum spectrum = null;
     boolean isFirst = true;
     while (!done) {
@@ -457,7 +457,18 @@ values will be given as arguments of the ##PAGE= LDR, as in the following exampl
         spectrum = spectrum0.copy();
         spectrum.setTitle(spectrum0.getTitle() + " : " + page);
         if (!spectrum.is1D()) {
-          setSpectrumY2(spectrum, page);
+          int pt = page.indexOf('=');
+          if (pt >= 0)
+            try {
+              spectrum
+                  .setY2D(Double.parseDouble(page.substring(pt + 1).trim()));
+              String y2dUnits = page.substring(0, pt).trim();
+              int i = symbols.indexOf(y2dUnits);
+              if (i >= 0)
+                spectrum.setY2DUnits(nTupleTable.get("##UNITS").get(i));
+            } catch (Exception e) {
+              //we tried.            
+            }
         }
       }
 
@@ -481,8 +492,6 @@ values will be given as arguments of the ##PAGE= LDR, as in the following exampl
         throw new JDXSourceException("Variable List not Found");
       String varList = line.substring(index1, index2 + 1);
 
-      ArrayList<String> symbols = (ArrayList<String>) nTupleTable
-          .get("##SYMBOL");
       int countSyms = 0;
       for (int i = 0; i < symbols.size(); i++) {
         String sym = symbols.get(i).trim();
@@ -498,7 +507,11 @@ values will be given as arguments of the ##PAGE= LDR, as in the following exampl
       if (!spectrum.readNTUPLECoords(nTupleTable, plotSymbols, spectrum
           .getDataType(), t, minMaxY, errorLog))
         throw new JDXSourceException("Unable to read Ntuple Source");
-      spectrum0.nucleusX = spectrum.nucleusX; 
+      spectrum0.nucleusX = spectrum.nucleusX;
+      spectrum0.nucleusY = spectrum.nucleusY;
+      spectrum0.freq2dX = spectrum.freq2dX;
+      spectrum0.freq2dY = spectrum.freq2dY;
+      spectrum0.y2DUnits = spectrum.y2DUnits;
       for (int i = 0; i < sourceLDRTable.size(); i++) {
         String[] entry = sourceLDRTable.get(i);
         String key = JDXSourceStreamTokenizer.cleanLabel(entry[0]);
@@ -516,17 +529,6 @@ values will be given as arguments of the ##PAGE= LDR, as in the following exampl
     System.out.println("NTUPLE MIN/MAX Y = " + minMaxY[0] + " " + minMaxY[1]);
     return source;
   }
-
-  private void setSpectrumY2(JDXSpectrum spectrum, String page) {
-    int pt = page.indexOf('=');
-    if (pt >= 0)
-      try {
-        spectrum.setY2D(Double.parseDouble(page.substring(pt + 1).trim())); 
-      } catch (NumberFormatException e) {
-        //we tried.            
-      }
-  }
-
 
   private static ArrayList<PeakInfo> readPeakList(String peakList, int index) {
     ArrayList<PeakInfo> peakData = new ArrayList<PeakInfo>();
