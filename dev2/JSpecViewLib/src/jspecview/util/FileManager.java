@@ -134,20 +134,20 @@ public class FileManager {
     String[] subFileList = null;
     if (name.indexOf("|") >= 0) {
       subFileList = TextFormat.split(name, "|");
-      if (subFileList != null && subFileList.length > 0) {
+      if (subFileList != null && subFileList.length > 0)
         name = subFileList[0];
-      }
     }
     InputStream in = getInputStream(name, true, appletDocumentBase);
     BufferedInputStream bis = new BufferedInputStream(in, 8192);
     if (isGzip(bis)) {
       return new BufferedReader(new InputStreamReader(new GZIPInputStream(bis)));
     } else if (ZipUtil.isZipFile(bis)) {
+      return new ZipFileSequentialReader(bis, subFileList);
       //danger -- converting bytes to String here.
       //we lose 128-156 or so.
-      String s = (String) ZipUtil.getZipFileContents(bis, subFileList, 1);
-      bis.close();
-      return new BufferedReader(new StringReader(s));
+      //String s = (String) ZipUtil.getZipFileContents(bis, subFileList, 1);
+      //bis.close();
+      //return new BufferedReader(new StringReader(s));
     }
     return new BufferedReader(new InputStreamReader(bis));
   }

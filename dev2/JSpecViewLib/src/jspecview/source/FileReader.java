@@ -40,6 +40,7 @@ import jspecview.exception.JDXSourceException;
 import jspecview.exception.JSpecViewException;
 import jspecview.util.FileManager;
 import jspecview.util.Parser;
+import jspecview.util.ZipFileSequentialReader;
 
 /**
  * <code>JDXFileReader</code> reads JDX data, including complex BLOCK files that
@@ -56,7 +57,7 @@ import jspecview.util.Parser;
  * @author Prof. Robert J. Lancashire
  * @author Bob Hanson, hansonr@stolaf.edu
  */
-public class JDXFileReader {
+public class FileReader {
 
   /**
    * Labels for the exporter
@@ -81,7 +82,9 @@ public class JDXFileReader {
   private boolean done;
 
   private double[] minMaxY = new double[] { Double.MAX_VALUE, Double.MIN_VALUE };
-  private JDXFileReader(boolean obscure, int iSpecFirst, int iSpecLast) {
+
+  private boolean isZipFile;
+  private FileReader(boolean obscure, int iSpecFirst, int iSpecLast) {
     this.obscure = obscure;
     firstSpec = iSpecFirst;
     lastSpec = iSpecLast;
@@ -139,7 +142,7 @@ public class JDXFileReader {
           return xmlSource;
         throw new JSpecViewException("File type not recognized");
       }
-      return (new JDXFileReader(obscure, iSpecFirst, iSpecLast)).getJDXSource(br);
+      return (new FileReader(obscure, iSpecFirst, iSpecLast)).getJDXSource(br);
     } catch (JSpecViewException e) {
       br.close();
       throw new JSpecViewException("Error reading JDX format: "
@@ -169,13 +172,14 @@ public class JDXFileReader {
   private JDXSource getJDXSource(BufferedReader br) throws JSpecViewException {
 
     source = new JDXSource(JDXSource.TYPE_SIMPLE);
+    isZipFile = (br instanceof ZipFileSequentialReader);
     t = new JDXSourceStreamTokenizer(br);
     errorLog = new StringBuffer();
 
     String label = null;
 
     while (!done && "##TITLE".equals(t.peakLabel())) {
-      if (label != null)
+      if (label != null && !isZipFile)
         errorLog.append("Warning - file is a concatenation without LINK record -- does not conform to IUPAC standards!\n");
       JDXSpectrum spectrum = new JDXSpectrum();
       List<String[]> dataLDRTable = new ArrayList<String[]>(20);

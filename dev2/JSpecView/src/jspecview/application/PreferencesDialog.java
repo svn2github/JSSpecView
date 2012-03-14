@@ -60,7 +60,7 @@ import jspecview.common.AppUtils;
 import jspecview.common.DisplayScheme;
 import jspecview.common.JSVPanel;
 import jspecview.exception.JSpecViewException;
-import jspecview.source.JDXFileReader;
+import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
 import java.awt.Font;
 import javax.swing.UIManager;
@@ -652,7 +652,7 @@ public class PreferencesDialog extends JDialog {
 
     // init preview panel
     try {
-      JDXSource source = JDXFileReader.createJDXSource(getClass()
+      JDXSource source = FileReader.createJDXSource(getClass()
           .getResourceAsStream("resources/sample.jdx"), false);
 
       previewPanel = new JSVPanel(source.getSpectra().get(0));

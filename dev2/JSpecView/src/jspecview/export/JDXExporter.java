@@ -29,7 +29,7 @@ import java.util.List;
 
 import jspecview.common.Coordinate;
 import jspecview.common.JDXSpectrum;
-import jspecview.source.JDXFileReader;
+import jspecview.source.FileReader;
 import jspecview.util.TextFormat;
 
 /**
@@ -154,9 +154,9 @@ public class JDXExporter {
       break;
     }
 
-    int index = Arrays.binarySearch(JDXFileReader.VAR_LIST_TABLE[0],
+    int index = Arrays.binarySearch(FileReader.VAR_LIST_TABLE[0],
         tmpDataClass);
-    String varList = JDXFileReader.VAR_LIST_TABLE[1][index];
+    String varList = FileReader.VAR_LIST_TABLE[1][index];
     buffer.append(getHeaderString(spectrum, tmpDataClass, minY, maxY,
         xCompFactor, yCompFactor, startIndex, endIndex));
     buffer.append("##" + tmpDataClass + "= " + varList + TextFormat.newLine);

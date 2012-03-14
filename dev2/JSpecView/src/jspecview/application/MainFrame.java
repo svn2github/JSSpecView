@@ -135,7 +135,7 @@ import jspecview.common.JDXSpectrum;
 import jspecview.common.PeakInfo;
 import jspecview.exception.ScalesIncompatibleException;
 import jspecview.export.Exporter;
-import jspecview.source.JDXFileReader;
+import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
 import jspecview.util.Escape;
 import jspecview.util.FileManager;
@@ -1221,7 +1221,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     }
     try {
       setCurrentSource(isOverlay ? JDXSource.createOverlay(url, specs)
-          : JDXFileReader.createJDXSource(FileManager
+          : FileReader.createJDXSource(FileManager
               .getBufferedReaderForString(data), filePath, null, false,
               firstSpec, lastSpec));
     } catch (Exception e) {

@@ -90,7 +90,7 @@ import jspecview.common.PeakInfo;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
 import jspecview.export.Exporter;
-import jspecview.source.JDXFileReader;
+import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
 import jspecview.util.Escape;
 import jspecview.util.FileManager;
@@ -1304,7 +1304,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
 
     try {
       currentSource = (isOverlay ? JDXSource.createOverlay(fileName, specs)
-          : JDXFileReader.createJDXSource(FileManager
+          : FileReader.createJDXSource(FileManager
               .getBufferedReaderForString(data), fileName, base,
               obscureTitleFromUser == Boolean.TRUE, -1, -1));
       currentSource.setFilePath(fileName);
