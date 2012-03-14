@@ -64,7 +64,7 @@ public class TextDialog extends JDialog {
   public TextDialog(Frame frame, String title, boolean modal, Reader reader) {
     super(frame, title, modal);
     try {
-      this.reader = (reader == null ? FileManager.getBufferedReaderFromName(title, null) : reader);
+      this.reader = (reader == null ? FileManager.getBufferedReaderFromName(title, null, null) : reader);
       jbInit();
       //setSize(500, 400);
       pack();

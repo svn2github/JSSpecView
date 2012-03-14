@@ -127,7 +127,7 @@ public class DisplaySchemesProcessor {
   public boolean load(String dispSchemeFileName){
     fileName = dispSchemeFileName;        
     try{
-      BufferedReader br = FileManager.getBufferedReaderFromName(fileName, null);
+      BufferedReader br = FileManager.getBufferedReaderFromName(fileName, null, "##TITLE");
     	return load(br);
     }
     catch(IOException e){
