@@ -127,7 +127,7 @@ public class FileReader {
     
     try {
       if (filePath != null)
-        br = FileManager.getBufferedReaderFromName(filePath, appletDocumentBase);
+        br = FileManager.getBufferedReaderFromName(filePath, appletDocumentBase, "##TITLE");
       br.mark(400);
       char[] chs = new char[400];
       br.read(chs);

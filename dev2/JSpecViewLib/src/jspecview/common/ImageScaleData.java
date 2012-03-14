@@ -119,7 +119,6 @@ public class ImageScaleData {
     yView1 = Math.min(y1, y2);
     xView2 = Math.max(x1, x2);
     yView2 = Math.max(y1, y2);
-    System.out.println("imagescaledata setView " + xView1 + " " + yView1 + " " + xView2 + " " + yView2);
 
     resetZoom();
   }

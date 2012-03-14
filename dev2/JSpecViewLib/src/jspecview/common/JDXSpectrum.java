@@ -1001,7 +1001,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
       return buf2d;
     int nSpec = subSpectra.size();
     double grayFactor = 255 / (isd.maxZ - isd.minZ);
-    System.out.println("JDXSPEC GRaY " + grayFactor);
     double r = Math.min(1.0 * width * 0.6/xyCoords.length, 1.0 * height/nSpec);
     if (r > 1)
       r = 1;

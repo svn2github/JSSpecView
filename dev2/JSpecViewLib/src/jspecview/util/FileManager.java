@@ -54,7 +54,7 @@ public class FileManager {
     if (name == null)
       throw new IOException("name is null");
 
-    BufferedReader br = getBufferedReaderFromName(name, appletDocumentBase);
+    BufferedReader br = getBufferedReaderFromName(name, appletDocumentBase, null);
 
     StringBuffer sb = new StringBuffer(8192);
     String line;
@@ -75,13 +75,13 @@ public class FileManager {
     return (data == null ? null : new BufferedReader(new StringReader(data)));
   }
 
-  public static BufferedReader getBufferedReaderFromName(String name, URL appletDocumentBase)
+  public static BufferedReader getBufferedReaderFromName(String name, URL appletDocumentBase, String startCode)
       throws MalformedURLException, IOException {
     if (name == null)
       throw new IOException("Cannot find " + name);
     String path = classifyName(name, appletDocumentBase);
     System.out.println("JSV FIleManager with  " + path);
-    return getUnzippedBufferedReaderFromName(path, appletDocumentBase);
+    return getUnzippedBufferedReaderFromName(path, appletDocumentBase, startCode);
   }
 
   /**
@@ -129,7 +129,7 @@ public class FileManager {
     return false;
   }
 
-  private static BufferedReader getUnzippedBufferedReaderFromName(String name, URL appletDocumentBase)
+  private static BufferedReader getUnzippedBufferedReaderFromName(String name, URL appletDocumentBase, String startCode)
       throws IOException {
     String[] subFileList = null;
     if (name.indexOf("|") >= 0) {
@@ -142,7 +142,7 @@ public class FileManager {
     if (isGzip(bis)) {
       return new BufferedReader(new InputStreamReader(new GZIPInputStream(bis)));
     } else if (ZipUtil.isZipFile(bis)) {
-      return new ZipFileSequentialReader(bis, subFileList);
+      return new ZipFileSequentialReader(bis, subFileList, startCode);
       //danger -- converting bytes to String here.
       //we lose 128-156 or so.
       //String s = (String) ZipUtil.getZipFileContents(bis, subFileList, 1);

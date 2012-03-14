@@ -42,11 +42,14 @@ public class ZipFileSequentialReader extends BufferedReader {
   private ZipEntry ze;
   private int ptMark;  
   private String data;
+  private String startCode;
+  private int lineCount;
   
-  public ZipFileSequentialReader(BufferedInputStream bis, String[] subFileList) {
+  public ZipFileSequentialReader(BufferedInputStream bis, String[] subFileList, String startCode) {
     super(new StringReader(""));
     this.subFileList = subFileList;
     zis = new ZipInputStream(bis);
+    this.startCode = startCode;
     nextEntry();
   }
 
@@ -99,6 +102,7 @@ public class ZipFileSequentialReader extends BufferedReader {
   private void nextEntry() {
     len = pt = 0;
     cr = '\0';
+    lineCount = 0;
     try {
       while ((ze = zis.getNextEntry()) != null)
         if (isEntryOK(ze.getName()))
@@ -150,8 +154,11 @@ public class ZipFileSequentialReader extends BufferedReader {
         line = new StringBuffer(pt - pt0);
       if (pt != pt0)
         line.append(data.substring(pt0, pt + (ch == cr ? -1 : 0)));
-      if (ch == cr || zis.available() != 1 || (len = zis.read(buf)) < 0)
+      if (ch == cr || zis.available() != 1 || (len = zis.read(buf)) < 0) {
+        if (lineCount++ == 0 && startCode != null && line.indexOf(startCode) < 0)
+          return null;
        return line.toString();
+      }
       pt = 0;
       data = new String(buf, 0, len);
       if (data.indexOf('\0') >= 0)
