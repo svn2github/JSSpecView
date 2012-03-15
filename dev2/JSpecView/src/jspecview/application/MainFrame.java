@@ -616,7 +616,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     spectraTree.setEditable(false);
     spectraTree.setRootVisible(false);
     spectraTree.addMouseListener(new MouseListener() {
-
       public void mouseClicked(MouseEvent e) {
         if (e.getClickCount() == 2 && selectedJSVPanel != null) {
           selectedJSVPanel.setZoom(0,0,0,0);
@@ -637,6 +636,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       }
       
     });
+    new DropTarget(spectraTree, this);
   }
 
   /**
@@ -1769,6 +1769,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   // Called when the user is dragging and enters this drop target.
   public void dragEnter(DropTargetDragEvent dtde) {
     // accept all drags
+    System.out.println("DragEnter");
     dtde.acceptDrag(dtde.getSourceActions());
     // visually indicate that drop target is under drag
     //showUnderDrag(true);
@@ -1781,7 +1782,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
   // Called when the user is dragging and leaves this drop target.
   public void dragExit(DropTargetEvent dtde) {
-
+    System.out.println("DragExit");
   }
 
   // Called when the user changes the drag action between copy or move.
