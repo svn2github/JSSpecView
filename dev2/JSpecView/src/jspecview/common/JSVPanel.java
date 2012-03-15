@@ -98,13 +98,15 @@ import org.w3c.dom.DOMImplementation;
 public class JSVPanel extends JPanel implements Printable, MouseListener,
     MouseMotionListener, KeyListener {
 
-  /**
-   * 
-   */
   private static final long serialVersionUID = 1L;
-
   private static final int MIN_DRAG_X_PIXELS = 5;// fewer than this means no zoom
 
+  private PlotWidget zoomBox1D, zoomBox2D, 
+      pin1Dx0, pin1Dx1, pin1Dy0, pin1Dy1, 
+      pin2Dx0, pin2Dx1, pin2Dy;
+  private PlotWidget thisWidget;
+  private PlotWidget[] widgets;
+  
   private int index;
 
   public int getIndex() {
@@ -133,17 +135,16 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   //private int width, height;
 
   //The position of the plot area
-  private int plotAreaX = 80, plotAreaY = 30;
+  private int leftPlotAreaPos = 80, topPlotAreaPos = 30;
 
   // insets of the plot area
-  private Insets plotAreaInsets = new Insets(plotAreaY, plotAreaX, 50, 50);
+  private Insets plotAreaInsets = new Insets(topPlotAreaPos, leftPlotAreaPos, 50, 50);
 
   // width and height of the plot area
   private int plotAreaWidth, plotAreaHeight;
 
   // Positions of the borders of the plotArea
-  private int leftPlotAreaPos, rightPlotAreaPos, topPlotAreaPos,
-      bottomPlotAreaPos;
+  private int rightPlotAreaPos, bottomPlotAreaPos;
 
   // Enables or disables zoom
   private boolean zoomEnabled = true;
@@ -204,12 +205,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
   private Color zoomBoxColor = new Color(100, 100, 50, 130);
 
-  //private boolean isMousePressed; 
-  private boolean zoomBoxVisible, isMouseReleased;
-  private int zoomBoxX, currZoomBoxX;
-  private boolean isMouseDraggedEvent;
-  private boolean isMouseDraggedEvent2D;
-
   /* PUT FONT FACE AND SIZE ATTRIBUTES HERE */
   private String displayFontName = null;
   private String titleFontName = null;
@@ -228,9 +223,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
   // Determines if the xAxis should be displayed increasing
   private boolean xAxisLeftToRight = true;
-
-  // The initial coordinate and final coordinates of zoom area
-  private double initX, initY, finalX, finalY;
 
   // Minimum number of points that are displayable in a zoom
   private int minNumOfPointsForZoom = 3;
@@ -456,8 +448,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        right inset
    */
   public void setPlotAreaInsets(int top, int left, int bottom, int right) {
-    plotAreaX = left;
-    plotAreaY = top;
+    leftPlotAreaPos = left;
+    topPlotAreaPos = top;
     plotAreaInsets = new Insets(top, left, bottom, right);
   }
 
@@ -468,8 +460,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        the insets of the plot area
    */
   public void setPlotAreaInsets(Insets insets) {
-    plotAreaX = insets.left;
-    plotAreaY = insets.top;
+    leftPlotAreaPos = insets.left;
+    topPlotAreaPos = insets.top;
     plotAreaInsets = insets;
   }
 
@@ -1155,37 +1147,35 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        the width to be drawn in pixels
    */
   private void drawGraph(Graphics g, int height, int width) {
-    
+
     JDXSpectrum spec0 = getSpectrumAt(0);
     plotAreaWidth = width - (plotAreaInsets.right + plotAreaInsets.left);
     plotAreaHeight = height - (plotAreaInsets.top + plotAreaInsets.bottom);
-    leftPlotAreaPos = plotAreaX;
-    topPlotAreaPos = plotAreaY;
-    bottomPlotAreaPos = plotAreaHeight + plotAreaY;
-    rightPlotAreaPos = plotAreaWidth + plotAreaX;
+    boolean isResized = (thisWidth != width || thisPlotHeight != plotAreaHeight);
+    if (isResized)
+      isd = null;
+    thisWidth = width;
+    thisPlotHeight = plotAreaHeight;
+    bottomPlotAreaPos = plotAreaHeight + topPlotAreaPos;
+    rightPlotAreaPos = plotAreaWidth + leftPlotAreaPos;
     userYFactor = getSpectrum().getUserYFactor();
     setScaleFactors(multiScaleData);
-
-    //widthRatio = (getSpectrumAt(0).is1D() ? 1 : 0.3);
-    draw1D = true;
-    if (!spec0.is1D()
-        && display2D && draw2DImage(g, width, height)) {
-      if (!draw1D)
-        return;
+    if (!spec0.is1D() && display2D && (isd != null || get2DImage(width))) {
       width = (int) Math.floor(widthRatio * width);
       plotAreaWidth = width - (plotAreaInsets.right + plotAreaInsets.left);
-      rightPlotAreaPos = plotAreaWidth + plotAreaX;
+      rightPlotAreaPos = plotAreaWidth + leftPlotAreaPos;
       setScaleFactors(multiScaleData);
     }
-    
-    ///System.out.println("JSVPANEL "  + width + " " + height + " " + plotAreaWidth + " " + plotAreaHeight + " " + title);
 
+    if (isResized)
+      setWidgets();
 
-    
-    
+    if (isd != null)
+      draw2DImage(g);
+
     // fill plot area color
     g.setColor(plotAreaColor);
-    g.fillRect(plotAreaX, plotAreaY, plotAreaWidth, plotAreaHeight);
+    g.fillRect(leftPlotAreaPos, topPlotAreaPos, plotAreaWidth, plotAreaHeight);
 
     // fill highlight color
 
@@ -1203,12 +1193,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     int subIndex = spec0.getSubIndex();
     if (subIndex >= 0 && isd != null) {
       g.setColor(plotColors[0]);
-//      g.fillRect(rightPlotAreaPos, bottomPlotAreaPos - y, 3, y);
-      if (image2D != null) {
-        draw2dCursors(g, subIndex);
-        drawUnits(g, width, spec0.nucleusX, getWidth() - 30, bottomPlotAreaPos, 1, 1.0);
-        drawUnits(g, width, spec0.nucleusY, isd.xPixel0 - 5, topPlotAreaPos, 1, 0);
-      }
+      drawUnits(g, width, spec0.nucleusX, getWidth() - 30, bottomPlotAreaPos,
+          1, 1.0);
+      drawUnits(g, width, spec0.nucleusY, isd.xPixel0 - 5, topPlotAreaPos, 1, 0);
     }
     ArrayList<PeakInfo> list = (nSpectra == 1
         || getSpectrum().getIntegrationGraph() != null ? getSpectrum()
@@ -1247,9 +1234,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     boolean xAxis = true;//!spectra[0].getXUnits().equalsIgnoreCase("Arbitrary Units");
     boolean yAxis = true;//!spectra[0].getYUnits().equalsIgnoreCase("Arbitrary Units");
 
+    drawZoomBoxes(g);
     if (grid)
       drawGrid(g, height, width);
-    for (int i = nSpectra; --i >= 0; )
+    for (int i = nSpectra; --i >= 0;)
       drawPlot(g, i, height, width);
     if (xscale && xAxis)
       drawXScale(g, height, width);
@@ -1263,25 +1251,115 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       drawYUnits(g, width);
     if (coords)
       drawCoordinates(g, height, width);
-    if (zoomEnabled)
-      drawZoomBox(g);
     if (integrationRatios != null)
       drawAnnotations(g, height, width, integrationRatios, integralPlotColor);
     if (annotations != null)
       drawAnnotations(g, height, width, annotations, null);
     drawIntegralValue(g, width);
+    drawPins(g, subIndex);
   }
 
-  private void draw2dCursors(Graphics g, int subIndex) {
-    int xPixel = (rightPlotAreaPos + isd.xPixel0)/2;
-    int yPixel = isd.toPixelY(subIndex);
-    g.drawLine(xPixel, yPixel, getWidth() - 10, yPixel);
-    drawHandle(g, xPixel, yPixel);
-    yPixel = bottomPlotAreaPos + 10;
-    g.drawLine(xLine0,topPlotAreaPos - 10, xLine0, yPixel);
-    drawHandle(g, xLine0, yPixel);
-    g.drawLine(xLine1,topPlotAreaPos - 10, xLine1, yPixel);
-    drawHandle(g, xLine1, yPixel);
+  private void setWidgets() {
+    if (zoomBox1D == null) {
+      zoomBox1D = new PlotWidget(false);
+      pin1Dx0 = new PlotWidget(true);
+      pin1Dx1 = new PlotWidget(true);
+      pin1Dy0 = new PlotWidget(true);
+      pin1Dy1 = new PlotWidget(true);
+      reset1DPins();
+      if (isd != null) {
+        zoomBox2D = new PlotWidget(false);
+        pin2Dx0 = new PlotWidget(true);
+        pin2Dx1 = new PlotWidget(true);
+        pin2Dy = new PlotWidget(true);
+        pin2Dx0.setX(isd.toX(isd.xPixel0), isd.xPixel0);
+        pin2Dx1.setX(isd.toX(isd.xPixel1), isd.xPixel1);
+      }
+      widgets = new PlotWidget[] { zoomBox1D, zoomBox2D, pin1Dx0, pin1Dx1,
+          pin1Dy0, pin1Dy1, pin2Dx0, pin2Dx1, pin2Dy };
+    } else {
+      pin1Dx0.setX(pin1Dx0.x, toPixelX0(pin1Dx0.x));
+      pin1Dx1.setX(pin1Dx1.x, toPixelX0(pin1Dx1.x));
+      pin1Dy0.setY(pin1Dy0.y, toPixelY0(pin1Dy0.y));
+      pin1Dy1.setY(pin1Dy1.y, toPixelY0(pin1Dy1.y));
+      if (isd != null) {
+        pin2Dx0.setX(pin1Dx0.x, isd.toPixelX(pin2Dx0.x));
+        pin2Dx1.setX(pin2Dx1.x, isd.toPixelX(pin2Dx1.x));
+      }
+    }
+    pin1Dx0.yPixel0 = pin1Dx1.yPixel0 = topPlotAreaPos - 5;
+    pin1Dx0.yPixel1 = pin1Dx1.yPixel1 = topPlotAreaPos;
+    pin1Dy0.xPixel0 = pin1Dy1.xPixel0 = rightPlotAreaPos + 5;
+    pin1Dy0.xPixel1 = pin1Dy1.xPixel1 = rightPlotAreaPos;
+    if (isd != null) {
+      pin2Dx0.yPixel0 = pin2Dx1.yPixel0 = bottomPlotAreaPos + 15;
+      pin2Dx0.yPixel1 = pin2Dx1.yPixel1 = topPlotAreaPos - 5;
+      pin2Dx0.yPixel0 = pin2Dx1.yPixel0 = bottomPlotAreaPos + 15;
+      pin2Dx1.yPixel1 = pin2Dx1.yPixel1 = topPlotAreaPos - 5;
+      pin2Dy.xPixel0 = (rightPlotAreaPos + isd.xPixel0) / 2;
+      pin2Dy.xPixel1 = getWidth() - 10;
+    }
+  }
+
+  private void reset1DPins() {
+    pin1Dx0.setX(toX0(rightPlotAreaPos), rightPlotAreaPos);
+    pin1Dx1.setX(toX0(leftPlotAreaPos), leftPlotAreaPos);
+    pin1Dy0.setY(toY0(topPlotAreaPos), topPlotAreaPos);
+    pin1Dy1.setY(toY0(bottomPlotAreaPos), bottomPlotAreaPos);
+  }
+
+  private void drawZoomBoxes(Graphics g) {
+    if (zoomEnabled) {
+      drawWidget(g, zoomBox1D);
+      drawWidget(g, zoomBox2D);
+    }
+  }
+
+  private void drawPins(Graphics g, int subIndex) {
+    // topbar
+    g.setColor(gridColor);
+    fillBox(g, leftPlotAreaPos, pin1Dx0.yPixel1, rightPlotAreaPos, pin1Dx1.yPixel1 + 2);    
+    fillBox(g, pin1Dy0.xPixel1, bottomPlotAreaPos, pin1Dy1.xPixel1 + 2, topPlotAreaPos);    
+    g.setColor(plotColors[0]);
+    fillBox(g, pin1Dx0.xPixel0, pin1Dx0.yPixel1, pin1Dx1.xPixel0, pin1Dx1.yPixel1 + 2);
+    fillBox(g, pin1Dy0.xPixel1, pin1Dy0.yPixel1, pin1Dy1.xPixel1 + 2, pin1Dy1.yPixel0);
+
+    if (subIndex >= 0 && isd != null) {
+      pin2Dy.yPixel0 = pin2Dy.yPixel1 = isd.toPixelY(subIndex);
+      drawWidget(g, pin2Dx0);
+      drawWidget(g, pin2Dx1);
+      drawWidget(g, pin2Dy);
+    }
+    drawWidget(g, pin1Dx0);
+    drawWidget(g, pin1Dx1);
+    drawWidget(g, pin1Dy0);
+    drawWidget(g, pin1Dy1);
+  }
+
+  private boolean isInTopBar(int xPixel, int yPixel) {
+    return (xPixel == fixX(xPixel) && yPixel > pin1Dx0.yPixel0 && yPixel < pin1Dx0.yPixel1);
+  }
+
+  private boolean isInRightBar(int xPixel, int yPixel) {
+    return (yPixel == fixY(yPixel) && xPixel > pin1Dy0.xPixel1 && xPixel < pin1Dy0.xPixel0);
+  }
+
+  private void drawWidget(Graphics g, PlotWidget pw) {
+    if (pw == null)
+      return;
+    if (pw.isPin) {
+      g.setColor(plotColors[0]);
+      g.drawLine(pw.xPixel0, pw.yPixel0, pw.xPixel1, pw.yPixel1);
+      drawHandle(g, pw.xPixel0, pw.yPixel0);
+    } else if (pw.xPixel1 != pw.xPixel0) {
+      g.setColor(zoomBoxColor);
+      fillBox(g, pw.xPixel0, pw.yPixel0, pw.xPixel1, pw.yPixel1);
+    }
+  }
+
+  private void fillBox(Graphics g, int x0, int y0, int x1, int y1) {
+    g.fillRect(Math.min(x0, x1), Math.min(y0, y1), 
+        Math.abs(x0 - x1), Math.abs(y0 - y1));
   }
 
   private void drawHandle(Graphics g, int x, int y) {
@@ -1302,58 +1380,21 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
   private void drawBar(Graphics g, double startX, double endX, Color color,
                        boolean isFullHeight) {
-    int x1 = xPixels(startX);
-    int x2 = xPixels(endX);
+    int x1 = toPixelX(startX);
+    int x2 = toPixelX(endX);
     if (x1 > x2) {
       int tmp = x1;
       x1 = x2;
       x2 = tmp;
     }
-
-////    if (Logger.debugging) {
-////      System.out.println("x1: " + x1);
-////      System.out.println("x2: " + x2);
-//    }
-
     // if either pixel is outside of plot area
-    if (!isPixelWithinPlotArea(x1) || !isPixelWithinPlotArea(x2)) {
-      // if both are ouside of plot area
-      if (!isPixelWithinPlotArea(x1) && !isPixelWithinPlotArea(x2)) {
-        // check if leftareapos and rightareapos both lie between
-        // x1 and x2
-        if (leftPlotAreaPos >= x1 && rightPlotAreaPos <= x2) {
-          x1 = leftPlotAreaPos;
-          x2 = rightPlotAreaPos;
-        } else {
-          return;
-        }
-      } else if (isPixelWithinPlotArea(x1) && !isPixelWithinPlotArea(x2)) {
-        x2 = rightPlotAreaPos;
-      } else if (!isPixelWithinPlotArea(x1) && isPixelWithinPlotArea(x2)) {
-        x1 = leftPlotAreaPos;
-      }
-    }
+    x1 = fixX(x1);
+    x2 = fixX(x2);
+    if (x1 == x2)
+      return;
     g.setColor(color);
-    g.fillRect(x1, plotAreaY, Math.abs(x2 - x1), (isFullHeight ? plotAreaHeight
-        : 5));
-  }
-
-  private int xPixels(double dx) {
-    int x = (int) ((dx - multiScaleData.minXOnScale) / xFactorForScale);
-    return (int) (drawXAxisLeftToRight ? leftPlotAreaPos + x
-        : rightPlotAreaPos - x);
-  }
-
-  private int yPixels(double yVal) {
-    return (Double.isNaN(yVal) ? Integer.MIN_VALUE : invertY((int) (topPlotAreaPos + (yVal * userYFactor - minYScale)
-        / yFactorForScale)));
-  }
-
-  private boolean isPixelWithinPlotArea(int pix) {
-    if (pix >= leftPlotAreaPos && pix <= rightPlotAreaPos) {  
-      return true;
-    }
-    return false;
+    fillBox(g, x1, topPlotAreaPos, x2, topPlotAreaPos
+        + (isFullHeight ? plotAreaHeight : 5));
   }
 
   /**
@@ -1376,7 +1417,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     // Draw a border
     if (!gridOn) {
       g.setColor(gridColor);
-      g.drawRect(plotAreaX, plotAreaY, plotAreaWidth, plotAreaHeight);
+      g.drawRect(leftPlotAreaPos, topPlotAreaPos, plotAreaWidth, plotAreaHeight);
     }
 
     Color color = plotColors[index];
@@ -1391,10 +1432,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       for (int i = multiScaleData.startDataPointIndices[index]; i < multiScaleData.endDataPointIndices[index]; i++) {
         Coordinate point1 = xyCoords[i];
         Coordinate point2 = xyCoords[i + 1];
-        int x1 = xPixels(point1.getXVal());
-        int y1 = yPixels(point1.getYVal());
-        int x2 = xPixels(point2.getXVal());
-        int y2 = yPixels(point2.getYVal());
+        int x1 = toPixelX(point1.getXVal());
+        int y1 = toPixelY(point1.getYVal());
+        int x2 = toPixelX(point2.getXVal());
+        int y2 = toPixelY(point2.getYVal());
         if (y1 == Integer.MIN_VALUE || y2 == Integer.MIN_VALUE)
           continue;
         y1 = fixY(y1);
@@ -1406,9 +1447,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     } else {
       for (int i = multiScaleData.startDataPointIndices[index]; i <= multiScaleData.endDataPointIndices[index]; i++) {
         Coordinate point = xyCoords[i];
-        int x1 = xPixels(point.getXVal());
-        int y1 = yPixels(Math.max(multiScaleData.minYOnScale, 0));
-        int y2 = yPixels(point.getYVal());
+        int x1 = toPixelX(point.getXVal());
+        int y1 = toPixelY(Math.max(multiScaleData.minYOnScale, 0));
+        int y2 = toPixelY(point.getYVal());
         if (y2 == Integer.MIN_VALUE)
           continue;
         y1 = fixY(y1);
@@ -1418,7 +1459,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         g.drawLine(x1, y1, x1, y2);
       }
       if (multiScaleData.isYZeroOnScale()) {
-        int y = yPixels(0);
+        int y = toPixelY(0);
         g.drawLine(rightPlotAreaPos, y, leftPlotAreaPos, y);
       }
     }
@@ -1445,26 +1486,26 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     if (Double.isNaN(multiScaleData.firstX)) {
       lastX = multiScaleData.maxXOnScale + multiScaleData.xStep / 2;
       for (double val = multiScaleData.minXOnScale; val < lastX; val += multiScaleData.xStep) {
-        int x = xPixels(val);
-        int y1 = yPixels(multiScaleData.minYOnScale);
-        int y2 = yPixels(multiScaleData.maxYOnScale);
+        int x = toPixelX(val);
+        int y1 = toPixelY(multiScaleData.minYOnScale);
+        int y2 = toPixelY(multiScaleData.maxYOnScale);
         g.drawLine(x, y1, x, y2);
       }
     } else {
       lastX = multiScaleData.maxXOnScale * 1.0001;
       for (double val = multiScaleData.firstX; val <= lastX; val += multiScaleData.xStep) {
-        int x = xPixels(val);
-        int y1 = yPixels(multiScaleData.minYOnScale);
-        int y2 = yPixels(multiScaleData.maxYOnScale);
+        int x = toPixelX(val);
+        int y1 = toPixelY(multiScaleData.minYOnScale);
+        int y2 = toPixelY(multiScaleData.maxYOnScale);
         g.drawLine(x, y1, x, y2);
       }
     }
 
     for (double val = multiScaleData.minYOnScale; val < multiScaleData.maxYOnScale
         + multiScaleData.yStep / 2; val += multiScaleData.yStep) {
-      int x1 = xPixels(multiScaleData.minXOnScale);
-      int x2 = xPixels(multiScaleData.maxXOnScale);
-      int y = yPixels(val);
+      int x1 = toPixelX(multiScaleData.minXOnScale);
+      int x2 = toPixelX(multiScaleData.maxXOnScale);
+      int y = toPixelY(val);
       g.drawLine(x1, y, x2, y);
     }
   }
@@ -1483,9 +1524,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       if (in.value == 0)
         continue;
       String s = "  " + formatter.format(Math.abs(in.value));
-      int x = xPixels(in.x2);
-      int y1 = yPixels(in.y1);
-      int y2 = yPixels(in.y2);
+      int x = toPixelX(in.x2);
+      int y1 = toPixelY(in.y1);
+      int y2 = toPixelY(in.y2);
       g.drawLine(x, y1, x, y2);
       g.drawLine(x + 1, y1, x + 1, y2);
       g.drawString(s, x, (y1 + y2) / 2  + fm.getHeight() / 3);
@@ -1493,10 +1534,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   private Map<String, NumberFormat> htFormats = new Hashtable<String, NumberFormat>();
-
-  private int zoomBoxY;
-
-  private int currZoomBoxY;
 
   private Graph[] graphsTemp = new Graph[1];
 
@@ -1527,10 +1564,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
     NumberFormat formatter = getFormatter(hashX);
     setFont(g, width, Font.PLAIN, 12);
-    FontMetrics fm = g.getFontMetrics();
-    int y1 = invertY((int) topPlotAreaPos);
-    int y2 = invertY((int) (topPlotAreaPos - 3));
-    double maxWidth = Math.abs((xPixels(multiScaleData.xStep) - xPixels(0)) * 0.95);
+    FontMetrics fm = g.getFontMetrics();    
+    int y1 = bottomPlotAreaPos;
+    int y2 = bottomPlotAreaPos + 3;
+    double maxWidth = Math.abs((toPixelX(multiScaleData.xStep) - toPixelX(0)) * 0.95);
     double lastX;
     if (Double.isNaN(multiScaleData.firstX)) {
       lastX = multiScaleData.maxXOnScale + multiScaleData.xStep / 2;
@@ -1546,7 +1583,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     } else {
       lastX = multiScaleData.maxXOnScale * 1.0001;
       for (double val = multiScaleData.firstX; val <= lastX; val += multiScaleData.xStep) {
-        int x = xPixels(val);
+        int x = toPixelX(val);
         g.setColor(gridColor);
         g.drawLine(x, y1, x, y2);
         g.setColor(scaleColor);
@@ -1586,7 +1623,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     double max = multiScaleData.maxYOnScale + multiScaleData.yStep / 2;
     for (double val = multiScaleData.minYOnScale; val < max; val += multiScaleData.yStep) {
       int x1 = (int) leftPlotAreaPos;
-      int y = yPixels(val * userYFactor);
+      int y = toPixelY(val * userYFactor);
       g.setColor(gridColor);
       g.drawLine(x1, y, x1 - 3, y);
       g.setColor(scaleColor);
@@ -1679,33 +1716,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       if (color == null)
         color = Color.BLACK;
       g.setColor(color);
-      int x = xPixels(note.getXVal());
-      int y = (note.isPixels() ? invertY((int) (bottomPlotAreaPos
-          + note.getYVal() - 10)) : yPixels(note.getYVal()));
+      int x = toPixelX(note.getXVal());
+      int y = (note.isPixels() ? (int) (topPlotAreaPos + 10 - note.getYVal()) 
+          : toPixelY(note.getYVal()));
       g.drawString(note.getText(), x, y);
-    }
-  }
-
-  /**
-   * Draws a light grey rectangle over the portion of the spectrum to be zoomed
-   * 
-   * @param g
-   *        the Graphics object
-   */
-  private void drawZoomBox(Graphics g) {
-    //  adapted from suggestion by Valery Tkachenko 5 Nov 2010 and previously implemented for ChemSpider
-    if (zoomBoxVisible) {
-      g.setColor(zoomBoxColor);
-      g.fillRect(
-          Math.min(zoomBoxX, currZoomBoxX), 
-          Math.min(zoomBoxY, currZoomBoxY), 
-          Math.abs(currZoomBoxX - zoomBoxX), 
-          Math.abs(currZoomBoxY - zoomBoxY));
-      zoomBoxVisible = false;
-    }
-    if (isMouseReleased) {
-      isMouseReleased = false; // bug fix suggested by Tim te Beek 29 Oct 2010    
-      repaint();
     }
   }
 
@@ -1735,19 +1749,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     return size;
   } // End calculateFontSize
 
-  /**
-   * Utility used to invert the value of y in the default coordinate system
-   * 
-   * @param y
-   *        the y pixel value
-   * @param imageHeight
-   *        the height to be drawn in pixels
-   * @return the inverted y pixel value
-   */
-  private int invertY(int y) {
-    return (plotAreaHeight - y + (2 * plotAreaInsets.top));
-  }
-
   private void setScaleFactors(MultiScaleData multiScaleData) {
     xFactorForScale = (multiScaleData.maxXOnScale - multiScaleData.minXOnScale)
         / plotAreaWidth;
@@ -1755,30 +1756,58 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         / plotAreaHeight;
     minYScale = multiScaleData.minYOnScale;
   }
+
+  private int toPixelX(double dx) {
+    int x = (int) ((dx - multiScaleData.minXOnScale) / xFactorForScale);
+    return (int) (drawXAxisLeftToRight ? leftPlotAreaPos + x
+        : rightPlotAreaPos - x);
+  }
+
+  private int toPixelX0(double x) {
+    MultiScaleData multiScaleData = zoomInfoList.get(0);
+    double factor = (multiScaleData.maxXOnScale - multiScaleData.minXOnScale) / plotAreaWidth;
+    return (int) (drawXAxisLeftToRight ? rightPlotAreaPos - (multiScaleData.maxXOnScale - x) / factor
+        : rightPlotAreaPos - (x - multiScaleData.minXOnScale) / factor);
+  }
   
-  /**
-   * Calculates spectrum coordinates from system Coordinates
-   * 
-   * @param xPixel
-   *        the x pixel value of the coordinate
-   * @param yPixel
-   *        the y pixel value of the coordinate
-   * @return the coordinate
-   */
-  private Coordinate getCoordFromPoint(int xPixel, int yPixel) {
-    double xPt, yPt;
-    if (image2D != null && isd.isXWithinRange(xPixel)) {
-      xPt = isd.toX(xPixel);
-      yPt = isd.toSubSpectrumIndex(yPixel);
-    } else {
-      xPixel = fixX(xPixel);
-      yPixel = fixY(yPixel);
-      xPt = (drawXAxisLeftToRight 
+  private double toX(int xPixel) {
+    if (isd != null && isd.isXWithinRange(xPixel))
+      return isd.toX(xPixel);
+    xPixel = fixX(xPixel);
+    return (drawXAxisLeftToRight 
          ?  multiScaleData.maxXOnScale - (rightPlotAreaPos - xPixel) * xFactorForScale 
          :  multiScaleData.minXOnScale + (rightPlotAreaPos - xPixel) * xFactorForScale);
-      yPt = multiScaleData.maxYOnScale + (topPlotAreaPos - yPixel) * yFactorForScale;
-    }    
-    return new Coordinate(xPt, yPt);
+  }
+
+  private double toX0(int xPixel) {
+    xPixel = fixX(xPixel);
+    MultiScaleData multiScaleData = zoomInfoList.get(0);
+    double factor = (multiScaleData.maxXOnScale - multiScaleData.minXOnScale) / plotAreaWidth;
+    return (drawXAxisLeftToRight ? multiScaleData.maxXOnScale
+        - (rightPlotAreaPos - xPixel) * factor : multiScaleData.minXOnScale
+        + (rightPlotAreaPos - xPixel) * factor);
+  }
+
+  private int toPixelY(double yVal) {
+    return (Double.isNaN(yVal) ? Integer.MIN_VALUE 
+        : bottomPlotAreaPos - (int) ((yVal * userYFactor - minYScale) / yFactorForScale));
+  }
+
+  private int toPixelY0(double y) {
+    MultiScaleData multiScaleData = zoomInfoList.get(0);
+    double factor = (multiScaleData.maxYOnScale - multiScaleData.minYOnScale) / plotAreaHeight;
+    return (int) (topPlotAreaPos + (multiScaleData.maxYOnScale - y) / factor);
+  }
+  
+  private double toY(int yPixel) {
+    return multiScaleData.maxYOnScale + (topPlotAreaPos - yPixel) * yFactorForScale;
+  }
+  
+  private double toY0(int yPixel) {
+    yPixel = fixY(yPixel);
+    MultiScaleData multiScaleData = zoomInfoList.get(0);
+    double factor = (multiScaleData.maxYOnScale - multiScaleData.minYOnScale) / plotAreaHeight;
+    return (multiScaleData.maxYOnScale + (topPlotAreaPos - yPixel) * factor);
   }
 
   /*-------------------- METHODS FOR ZOOM SUPPORT--------------------------*/
@@ -1804,7 +1833,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        the Y end coordinate of the zoom area
    */
   private void doZoom(double initX, double initY, double finalX, double finalY,
-                      boolean doRepaint) {
+                      boolean doRepaint, boolean addZoom, boolean checkRange) {
     if (!zoomEnabled)
       return;
 
@@ -1821,21 +1850,25 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       finalY = tempY;
     }
 
-    // Determine if the range of the area selected for zooming is within the plot
+    // determine if the range of the area selected for zooming is within the plot
     // Area and if not ensure that it is
 
-    if (!ScaleData.isWithinRange(initX, multiScaleData)
-        && !ScaleData.isWithinRange(finalX, multiScaleData))
-      return;
-    if (!ScaleData.isWithinRange(initX, multiScaleData)) {
-      initX = multiScaleData.minX;
-    } else if (!ScaleData.isWithinRange(finalX, multiScaleData)) {
-      finalX = multiScaleData.maxX;
+    if (checkRange) {
+      if (!ScaleData.isWithinRange(initX, multiScaleData)
+          && !ScaleData.isWithinRange(finalX, multiScaleData))
+        return;
+      if (!ScaleData.isWithinRange(initX, multiScaleData)) {
+        initX = multiScaleData.minX;
+      } else if (!ScaleData.isWithinRange(finalX, multiScaleData)) {
+        finalX = multiScaleData.maxX;
+      }
+    } else {
+      multiScaleData = zoomInfoList.get(0);
     }
     int[] startIndices = new int[nSpectra];
     int[] endIndices = new int[nSpectra];
     if (!doZoomWithoutRepaint(initX, finalX, initY, finalY, startIndices,
-        endIndices))
+        endIndices, addZoom))
       return;
     notifyZoomListeners(initX, finalX, initY, finalY);
     if (doRepaint)
@@ -1845,9 +1878,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   /**
    * Zooms the spectrum but does not repaint so that it is not visible
    * 
-   * @param initX
+   * @param xPt1
    *        TODO
-   * @param finalX
+   * @param xPt2
    *        TODO
    * @param startIndices
    *        the start indices
@@ -1857,43 +1890,63 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @return true if successful
    * @throws JSpecViewException
    */
-  private boolean doZoomWithoutRepaint(double initX, double finalX,
+  private boolean doZoomWithoutRepaint(double xPt1, double xPt2,
                                        double yPt1, double yPt2,
-                                       int[] startIndices, int[] endIndices) {
+                                       int[] startIndices, int[] endIndices, 
+                                       boolean addZoom) {
     if (!zoomEnabled)
       return false;
     if (getSpectrumAt(0).is1D() && getSpectrumAt(0).getSubSpectra() != null) {
       graphsTemp[0] = getSpectrum();
-      if (!multiScaleData.setDataPointIndices(graphsTemp, initX, finalX,
+      if (!multiScaleData.setDataPointIndices(graphsTemp, xPt1, xPt2,
           minNumOfPointsForZoom, startIndices, endIndices, false))
         return false;
     } else {
-      if (!multiScaleData.setDataPointIndices(spectra, initX, finalX,
+      if (!multiScaleData.setDataPointIndices(spectra, xPt1, xPt2,
           minNumOfPointsForZoom, startIndices, endIndices, true))
         return false;
     }
-    getMultiScaleData(initX, finalX, yPt1, yPt2, startIndices, endIndices);
+    getMultiScaleData(xPt1, xPt2, yPt1, yPt2, startIndices, endIndices);
+    pin1Dx0.setX(xPt1, toPixelX0(xPt1));
+    pin1Dx1.setX(xPt2, toPixelX0(xPt2));
+    pin1Dy0.setY(yPt1, toPixelY0(yPt1));
+    pin1Dy1.setY(yPt2, toPixelY0(yPt2));
     if (isd != null) {
       int isub = getSpectrumAt(0).getSubIndex();
       int ifix = isd.fixSubIndex(isub);
       if (ifix != isub)
         setCurrentSubSpectrum(ifix);
     }
+    if (addZoom)
+      addCurrentZoom();
+    return true;
+  }
+
+  private void addCurrentZoom() {
     // add to and clean the zoom list
     if (zoomInfoList.size() > currentZoomIndex + 1)
       for (int i = zoomInfoList.size() - 1; i > currentZoomIndex; i--)
         zoomInfoList.remove(i);
     zoomInfoList.add(multiScaleData);
     currentZoomIndex++;
-    return true;
   }
 
   /**
    * Resets the spectrum to it's original view
    */
   public void reset() {
-    multiScaleData = zoomInfoList.get(0);
-    currentZoomIndex = 0;
+    setZoomTo(0);
+  }
+
+  private void setZoomTo(int i) {
+    isd = null;
+    currentZoomIndex = i;
+    multiScaleData = zoomInfoList.get(i);
+    pin1Dx0.setX(multiScaleData.minXOnScale, toPixelX0(multiScaleData.minXOnScale));
+    pin1Dx1.setX(multiScaleData.maxXOnScale, toPixelX0(multiScaleData.maxXOnScale));
+    pin1Dy0.setY(multiScaleData.minYOnScale, toPixelY0(multiScaleData.minYOnScale));
+    pin1Dy1.setY(multiScaleData.maxYOnScale, toPixelY0(multiScaleData.maxYOnScale));
+    thisWidth = 0;    
     repaint();
   }
 
@@ -1911,24 +1964,16 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * Displays the previous view zoomed
    */
   public void previousView() {
-    if (currentZoomIndex > 0) {
-      multiScaleData = zoomInfoList.get(--currentZoomIndex);
-      isd = null;
-      //isd = multiScaleData.isd;
-      repaint();
-    }
+    if (currentZoomIndex > 0)
+      setZoomTo(currentZoomIndex - 1);
   }
 
   /**
    * Displays the next view zoomed
    */
   public void nextView() {
-    if (currentZoomIndex + 1 < zoomInfoList.size()) {
-      multiScaleData = zoomInfoList.get(++currentZoomIndex);
-      isd = null;
-      //isd = multiScaleData.isd;
-      repaint();
-    }
+    if (currentZoomIndex + 1 < zoomInfoList.size())
+      setZoomTo(currentZoomIndex + 1);
   }
 
   /*----------------- METHODS IN INTERFACE Printable ---------------------- */
@@ -2283,48 +2328,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
   /*--------------METHODS IN INTERFACE MouseListener-----------------------*/
 
-  /**
-   * Implements mouseClicked in interface MouseListener
-   * 
-   * @param e
-   *        the <code>MouseEvent</code>
-   */
-  public void mouseClicked(MouseEvent e) {
-    requestFocusInWindow();
-    if (e.isControlDown())
-      clearIntegrals();
-    if (e.getButton() == MouseEvent.BUTTON3) {
-      popup.setSelectedJSVPanel(this);
-      popup.setSource(source);
-      popup.gridCheckBoxMenuItem.setSelected(isGridOn());
-      popup.coordsCheckBoxMenuItem.setSelected(isCoordinatesOn());
-      popup.reversePlotCheckBoxMenuItem.setSelected(isPlotReversed());
-      popup.show(this, e.getX(), e.getY());
-      return;
-    }
-    fireMouseClicked(e);
-  }
-
-  /**
-   * Implements mouseEntered in interface MouseListener
-   * 
-   * @param e
-   *        the <code>MouseEvent</code>
-   */
-  public void mouseEntered(MouseEvent e) {
-  }
-
-  
-  int mouseClickCount;
-  
-  /**
-   * Implements mouseExited in interface MouseListener
-   * 
-   * @param e
-   *        the <code>MouseEvent</code>
-   */
-  public void mouseExited(MouseEvent e) {
-  }
+  private boolean isIntegralDrag;
 
   /**
    * Implements mousePressed in interface MouseListener
@@ -2335,157 +2339,78 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   public void mousePressed(MouseEvent e) {
     if (e.getButton() != MouseEvent.BUTTON1)
       return;
-
-    int xPixel = e.getX();
-    int yPixel = fixY(e.getY());
-
-    if (checkImageDrag(xPixel, yPixel, true))
-      return;
-
-    xPixel = fixX(xPixel);
-
-    mouseClickCount = e.getClickCount();
     isIntegralDrag = (e.isControlDown() && getSpectrum().getIntegrationGraph() != null);
-
-    zoomBoxX = xPixel;
-    zoomBoxY = (isIntegralDrag ? topPlotAreaPos : yPixel);
-
-    Coordinate coord = getCoordFromPoint(xPixel, yPixel);
-
-    initX = coord.getXVal();
-    initY = coord.getYVal();
-    repaint();
+    checkWidgetEvent(e.getX(), e.getY(), true);
   }
-
   
-  boolean triggerImageCursorXZoom;
-  boolean isLine0, isLine1;
-
-  private boolean isSubSpectrumDrag;
-  
-  private boolean checkImageDrag(int xPixel, int yPixel, boolean isPress) {
-    if (isSubSpectrumDrag && !isPress) {
-      int iSpec = isd.toSubSpectrumIndex(yPixel);
-      getSpectrumAt(0).setCurrentSubSpectrum(iSpec);
-      repaint();
-      isMouseDraggedEvent = false;
-      return true;
-    }
-    isSubSpectrumDrag = false;
-    if (image2D == null || !triggerImageCursorXZoom && xPixel < rightPlotAreaPos + 10)
-      return false;
+  private boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
     if (isPress) {
-      isSubSpectrumDrag = (xPixel < isd.xPixel0 - 10);
-      if (isSubSpectrumDrag)
+      thisWidget = null;
+      if (!checkPinSelected(xPixel, yPixel)) {
+        yPixel = fixY(yPixel);
+        if (xPixel < rightPlotAreaPos) {
+          xPixel = fixX(xPixel);
+          zoomBox1D.setX(toX(xPixel), xPixel);
+          zoomBox1D.yPixel0 = (isIntegralDrag ? topPlotAreaPos : yPixel);
+          thisWidget = zoomBox1D;
+        } else if (isd != null && xPixel < isd.xPixel1) {
+          zoomBox2D.setX(isd.toX(xPixel), isd.fixX(xPixel));
+          zoomBox2D.yPixel0 = yPixel;
+          thisWidget = zoomBox2D;
+        }
+      }
+    } else if (thisWidget != null) {
+      // mouse drag with widget
+      if (thisWidget.isPin) {
+        if (thisWidget == pin2Dy) {
+          yPixel = fixY(yPixel);
+          pin2Dy.yPixel0 = pin2Dy.yPixel1 = yPixel;
+          int iSpec = isd.toSubSpectrumIndex(yPixel);
+          getSpectrumAt(0).setCurrentSubSpectrum(iSpec);
+          return true;
+        }
+        if (thisWidget == pin2Dx0 || thisWidget == pin2Dx1) {
+          xPixel = isd.fixX(xPixel);
+          thisWidget.setX(isd.toX(xPixel), xPixel);
+          doZoom(pin2Dx0.x, multiScaleData.minY, pin2Dx1.x, multiScaleData.maxY, false, false, false);
+          return true;
+        }
+        if (thisWidget == pin1Dx0 || thisWidget == pin1Dx1) {
+          xPixel = fixX(xPixel);
+          thisWidget.setX(toX0(xPixel), xPixel);
+          doZoom(toX0(pin1Dx0.xPixel0), multiScaleData.minYOnScale,
+              toX0(pin1Dx1.xPixel0), multiScaleData.maxYOnScale, false, false, false);
+          return true;
+        }
+        if (thisWidget == pin1Dy0 || thisWidget == pin1Dy1) {
+          yPixel = fixY(yPixel);
+          thisWidget.setY(toY0(yPixel), yPixel);
+          doZoom(multiScaleData.minXOnScale, toY0(pin1Dy0.yPixel0), 
+              multiScaleData.maxXOnScale, toY0(pin1Dy1.yPixel0), false, false, false);
+          return true;
+        }
+      } else if (thisWidget == zoomBox1D) {
+        zoomBox1D.xPixel1 = fixX(xPixel);
+        zoomBox1D.yPixel1 = (isIntegralDrag ? bottomPlotAreaPos : fixY(yPixel));
+        if (isIntegralDrag && zoomBox1D.xPixel0 != zoomBox1D.xPixel1)
+          checkIntegral(zoomBox1D.x, toX(zoomBox1D.xPixel1), false);
         return true;
-      isLine0 = (yPixel == bottomPlotAreaPos && Math.abs(xPixel - xLine0) < 5);
-      isLine1 = (yPixel == bottomPlotAreaPos && !isLine0 && Math.abs(xPixel - xLine1) < 5);
-      if (!isLine0 && !isLine1) {
-        zoomBoxX = isd.fixX(xPixel);
-        zoomBoxY = yPixel;
-        isMouseDraggedEvent = true;
-        isMouseDraggedEvent2D = true;
+      } else if (thisWidget == zoomBox2D) {
+        zoomBox2D.xPixel1 = isd.fixX(xPixel);
+        zoomBox2D.yPixel1 = fixY(yPixel);
         return true;
       }
-    }
-    if (isLine0 || isLine1) {
-      if (isLine0)
-        xLine0 = isd.fixX(xPixel);
-      else if (isLine1)
-        xLine1 = isd.fixX(xPixel);
-      triggerImageCursorXZoom = true;
-      isMouseDraggedEvent = true;
-      multiScaleData = zoomInfoList.get(0);
-      doZoom(isd.toX(xLine1), multiScaleData.minY, isd.toX(xLine0), multiScaleData.maxY, true);
-      repaint();
-      return true;
     }
     return false;
   }
   
-  /**
-   * Implements mouseReleased in interface MouseListener
-   * 
-   * @param e
-   *        the <code>MouseEvent</code>
-   */
-  public void mouseReleased(MouseEvent e) {
-    // Maybe use a fireMouseReleased Method
-
-    if (e.getButton() != MouseEvent.BUTTON1 || !isMouseDraggedEvent)
-      return;
-
-    isMouseReleased = true;
-    isSubSpectrumDrag = false;
-    
-    int xPixel = e.getX();
-    int yPixel = fixY(e.getY());
-
-    if (triggerImageCursorXZoom) {
-      triggerImageCursorXZoom = false;
-      //multiScaleData = zoomInfoList.get(0);
-      //doZoom(isd.toX(xLine1), multiScaleData.minY, isd.toX(xLine0), multiScaleData.maxY, true);
-      return;
-    }
-    if (isMouseDraggedEvent2D) {
-      xPixel = isd.fixX(xPixel);
-      if (Math.abs(xPixel - zoomBoxX) <= MIN_DRAG_X_PIXELS)
-        return;
-      isd.setZoom(zoomBoxX, zoomBoxY, currZoomBoxX, currZoomBoxY);
-      xLine0 = isd.xPixel0;
-      xLine1 = isd.xPixel0 + isd.xPixels - 1;
-      isMouseDraggedEvent2D = false;
-      doZoom(isd.toX(xLine1), multiScaleData.minY, isd.toX(xLine0), multiScaleData.maxY, true);      
-      return;
-    }
-    xPixel = fixX(xPixel);
-    if (Math.abs(xPixel - zoomBoxX) <= MIN_DRAG_X_PIXELS)
-      return;
-    setMouseFinalXY(xPixel, yPixel);
-    if (isIntegralDrag)
-      checkIntegral(initX, finalX, true);
-    else
-      doZoom(initX, initY, finalX, finalY, true);
-  }
-
-  private boolean checkXY(int xPixel, int yPixel) {
-    return (xPixel >= leftPlotAreaPos && xPixel <= rightPlotAreaPos
-        && yPixel >= topPlotAreaPos && yPixel <= bottomPlotAreaPos);
-  }
-
-  private void setMouseFinalXY(int x, int y) {
-    Coordinate coord = getCoordFromPoint(x, y);
-    finalX = coord.getXVal();
-    finalY = coord.getYVal();
-  }
-
-  private void clearIntegrals() {
-    checkIntegral(Double.NaN, 0, false);
-  }
-  
-  private void checkIntegral(double x1, double x2, boolean isFinal) {
-    IntegralGraph ig = getSpectrum().getIntegrationGraph();
-    if (ig == null)
-      return;
-    ig.addIntegral(x1, x2, isFinal);
-    repaint();
-  }
-
-  public void mouseDragged(MouseEvent e) {
-    isMouseDraggedEvent = true;
-    int xPixel = e.getX();
-    int yPixel = fixY(e.getY());
-
-    if (checkImageDrag(xPixel, yPixel, false))
-      return;
-    
-    processMouseMoved(e);
-    if (isIntegralDrag) {
-      setMouseFinalXY(fixX(xPixel), yPixel);
-      checkIntegral(initX, finalX, false);      
-      return;
-    }
-    repaint();
+  private boolean checkPinSelected(int xPixel, int yPixel) {
+    for (int i = 0; i < widgets.length; i++)
+      if (widgets[i] != null && widgets[i].isPin && widgets[i].selected(xPixel, yPixel)) {
+        thisWidget = widgets[i];
+        return true;
+      }
+    return false;
   }
 
   /**
@@ -2495,58 +2420,102 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        the <code>MouseEvent</code>
    */
   public void mouseMoved(MouseEvent e) {
-    isMouseDraggedEvent = false;
-    isMouseDraggedEvent2D = false;
-    processMouseMoved(e);
+    setToolTipForPixels(e.getX(), e.getY());
     repaint();
+  }
+
+  public void mouseDragged(MouseEvent e) {
+    checkWidgetEvent(e.getX(), e.getY(), false);
+    mouseMoved(e);
+  }
+
+  /**
+   * Implements mouseReleased in interface MouseListener
+   * 
+   * @param e
+   *        the <code>MouseEvent</code>
+   */
+  public void mouseReleased(MouseEvent e) {
+
+    if (thisWidget == null || e.getButton() != MouseEvent.BUTTON1)
+      return;
+
+    if (thisWidget == zoomBox2D) {
+      if (Math.abs(zoomBox2D.xPixel1 - zoomBox2D.xPixel0) <= MIN_DRAG_X_PIXELS)
+        return;
+      isd.setZoom(zoomBox2D.xPixel0, zoomBox2D.yPixel0, zoomBox2D.xPixel1,
+          zoomBox2D.yPixel1);
+      zoomBox2D.xPixel1 = zoomBox2D.xPixel0;
+      pin2Dx0.setX(isd.toX(isd.xPixel0), isd.xPixel0);
+      int xPixel = isd.xPixel0 + isd.xPixels - 1;
+      pin2Dx1.setX(isd.toX(xPixel), xPixel);
+      doZoom(isd.toX(pin2Dx0.xPixel0), multiScaleData.minY, isd
+          .toX(pin2Dx1.xPixel0), multiScaleData.maxY, true, true, false);
+    } else if (thisWidget == zoomBox1D) {
+      if (Math.abs(zoomBox1D.xPixel1 - zoomBox1D.xPixel0) <= MIN_DRAG_X_PIXELS)
+        return;
+      int x1 = zoomBox1D.xPixel1;
+      zoomBox1D.xPixel1 = zoomBox1D.xPixel0;
+      doZoom(toX(zoomBox1D.xPixel0), toY(zoomBox1D.yPixel0), toX(x1),
+          toY(zoomBox1D.yPixel1), true, true, false);
+    } else if (thisWidget == pin1Dx0 || thisWidget == pin1Dx1 || thisWidget == pin2Dx0 || thisWidget == pin2Dx1) {
+      addCurrentZoom();
+    }
+    thisWidget = null;
+    return;
   }
 
   private double lastClickX = Double.MAX_VALUE;
 
-  private boolean isIntegralDrag;
-
-  private int[] tempi4 = new int[4];
-
   /**
-   * Called by the mouseClicked Method
+   * Implements mouseClicked in interface MouseListener
    * 
    * @param e
    *        the <code>MouseEvent</code>
    */
-  private void fireMouseClicked(MouseEvent e) {
+  public void mouseClicked(MouseEvent e) {
+    requestFocusInWindow();
     int xPixel = e.getX();
     int yPixel = e.getY();
-    if (!checkXY(xPixel, yPixel)) {
+    if (e.getButton() == MouseEvent.BUTTON3) {
+      popup.setSelectedJSVPanel(this);
+      popup.setSource(source);
+      popup.gridCheckBoxMenuItem.setSelected(isGridOn());
+      popup.coordsCheckBoxMenuItem.setSelected(isCoordinatesOn());
+      popup.reversePlotCheckBoxMenuItem.setSelected(isPlotReversed());
+      popup.show(this, xPixel, yPixel);
+      return;
+    }
+    if (e.isControlDown())
+      clearIntegrals();
+    else if (e.getClickCount() == 2) {
+      if (isInTopBar(xPixel, yPixel))
+        doZoom(toX0(leftPlotAreaPos), multiScaleData.minYOnScale, toX0(rightPlotAreaPos), multiScaleData.maxYOnScale, true, true, false);
+      else if (isInRightBar(xPixel, yPixel))
+        doZoom(multiScaleData.minXOnScale, zoomInfoList.get(0).minYOnScale, multiScaleData.maxXOnScale, zoomInfoList.get(0).maxYOnScale, true, true, false);
+      return;
+    }
+    if (xPixel != fixX(xPixel) || yPixel != fixY(yPixel)) {
       coordClicked = null;
       return;
     }
-    coordClicked = getCoordFromPoint(xPixel, yPixel);
+    coordClicked = new Coordinate(toX(xPixel), toY(yPixel));
     lastClickX = coordClicked.getXVal();
     notifyPeakPickedListeners(coordClicked);
   }
 
-  /**
-   * Carries out the function of the MouseMoved Event
-   * 
-   * @param e
-   *        the <code>MouseEvent</code>
-   */
-  private void processMouseMoved(MouseEvent e) {
-    int xPixel = e.getX();
-    int yPixel = e.getY();
-
-    if (isMouseDraggedEvent) {
-      zoomBoxVisible = true;
-      boolean is2dDrag = isMouseDraggedEvent2D;
-      currZoomBoxX = (is2dDrag ? isd.fixX(xPixel) : fixX(xPixel));
-      currZoomBoxY = (isIntegralDrag ? bottomPlotAreaPos : fixY(yPixel));
-      if (is2dDrag) {
-        setToolTipText("");
-        return;
-      }
-    }
-    setToolTipForPixels(e.getX(), e.getY());
+  private void clearIntegrals() {
+    checkIntegral(Double.NaN, 0, false);
+    repaint();
   }
+  
+  private void checkIntegral(double x1, double x2, boolean isFinal) {
+    IntegralGraph ig = getSpectrum().getIntegrationGraph();
+    if (ig == null)
+      return;
+    ig.addIntegral(x1, x2, isFinal);
+  }
+
 
   private void setToolTipForPixels(int xPixel, int yPixel) {
     
@@ -2568,22 +2537,22 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       setToolTipText(s);
       return;
     }
-    Coordinate coord = getCoordFromPoint(fixX(xPixel), fixY(yPixel));
-    double xPt = coord.getXVal();
-    double yPt = coord.getYVal();
-
+    
+    double xPt = toX(fixX(xPixel));
     String xx = formatter.format(xPt);
 
+    double yPt = (isd != null && isd.isXWithinRange(xPixel) ? 
+        isd.toSubSpectrumIndex(fixY(yPixel)) : toY(fixY(yPixel)));
     String hashY = "#";
     if (multiScaleData.hashNums[1] <= 0)
       hashY = hash1.substring(0, Math.abs(multiScaleData.hashNums[1]) + 3);
     formatter = getFormatter(hashY);
     coordStr = "(" + xx + ", " + formatter.format(yPt) + ")";
 
-    if (nSpectra == 1) {
-      /*if (yPt == zPt) {
-        xx += ", " + formatter.format(yPt);        
-      } else */if (!getSpectrum().isHNMR()) {
+    if (xPixel != fixX(xPixel) || yPixel != fixY(yPixel)) {
+      yPt = Double.NaN;
+    } else if (nSpectra == 1) {
+      if (!getSpectrum().isHNMR()) {
         yPt = spectra[0].getPercentYValueAt(xPt);
         xx += ", " + formatter.format(yPt);
       }
@@ -2594,18 +2563,11 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     setToolTipText(Double.isNaN(yPt) ? null : xx);
   }
 
-  public void toPeak(int istep) {
-    istep *= (drawXAxisLeftToRight ? 1 : -1);
-    coordClicked = new Coordinate(lastClickX, 0);
-    JDXSpectrum spec = getSpectrum();
-    int iPeak = spec.setNextPeak(coordClicked, istep);
-    if (iPeak < 0)
-      return;
-    PeakInfo peak = spec.getPeakList().get(iPeak);
-    spec.setSelectedPeak(peak);
-    coordClicked.setXVal(lastClickX = peak.getX());
-    notifyListeners(new PeakPickedEvent(this, coordClicked, peak
-        .getStringInfo()));
+  public void mouseEntered(MouseEvent e) {
+  }
+
+  
+  public void mouseExited(MouseEvent e) {
   }
 
   public void keyPressed(KeyEvent e) {
@@ -2649,6 +2611,20 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     }
   }
 
+  public void toPeak(int istep) {
+    istep *= (drawXAxisLeftToRight ? 1 : -1);
+    coordClicked = new Coordinate(lastClickX, 0);
+    JDXSpectrum spec = getSpectrum();
+    int iPeak = spec.setNextPeak(coordClicked, istep);
+    if (iPeak < 0)
+      return;
+    PeakInfo peak = spec.getPeakList().get(iPeak);
+    spec.setSelectedPeak(peak);
+    coordClicked.setXVal(lastClickX = peak.getX());
+    notifyListeners(new PeakPickedEvent(this, coordClicked, peak
+        .getStringInfo()));
+  }
+
   public void advanceSubSpectrum(int i) {
     if (getSpectrumAt(0).advanceSubSpectrum(i))
       multiScaleData.setXRange(getSpectrum());
@@ -2659,6 +2635,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       multiScaleData.setXRange(getSpectrum());
   }
   
+  private int[] tempi4 = new int[4];
+
   private void scaleYBy(double factor) {
     if (!allowYScale)
       return;
@@ -2677,7 +2655,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     if (isd != null)
       isd.getView(tempi4);
     doZoom(multiScaleData.minX, multiScaleData.minY / factor1,
-        multiScaleData.maxX, multiScaleData.maxY / factor2, true);
+        multiScaleData.maxX, multiScaleData.maxY / factor2, true, true, false);
     if (isd == null)
       return;
     update2dImage(true);
@@ -2752,7 +2730,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   public void setZoom(double x1, double y1, double x2, double y2) {
-    multiScaleData = zoomInfoList.get(0);
+    setZoomTo(0);
     if (Double.isNaN(x1)) {
       // yzoom only
       x1 = multiScaleData.minX;
@@ -2760,10 +2738,11 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       isd = null;
     }
     if (x1 != 0 || x2 != 0) {
-      doZoom(x1, y1, x2, y2, false);
+      doZoom(x1, y1, x2, y2, false, true, false);
       return;
     }
-    multiScaleData.isd = isd = null;
+    isd = null;
+    thisWidth = 0;
     notifyZoomListeners(0, 0, 0, 0);
   }
 
@@ -2796,52 +2775,37 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
   
   private BufferedImage image2D;
-  private int thisWidth, thisHeight;
-  private boolean draw1D = true;
+  private int thisWidth, thisPlotHeight;
   
-  private int xLine0, xLine1;
-
-  private boolean draw2DImage(Graphics g, int width, int height) {
-    //widthRatio = 1;
-    if (thisWidth != width || thisHeight != plotAreaHeight)
-      isd = null;
-    if (isd == null && !get2DImage(width))
-        return false;
-    if (image2D != null) {
+  private void draw2DImage(Graphics g) {
+    if (isd != null) {
       g.drawImage(image2D, 
           isd.xPixel0, isd.yPixel0,  // destination 
           isd.xPixel0 + isd.xPixels - 1, // destination 
           isd.yPixel0 + isd.yPixels - 1, // destination 
           isd.xView1, isd.yView1, isd.xView2, isd.yView2, null); // source
     }
-    return true;    
   }
 
   private ImageScaleData isd;
-  
+
   private boolean get2DImage(int width) {
     isd = new ImageScaleData();
     isd.setScale(zoomInfoList.get(0));
-    multiScaleData.isd = isd;
-    thisWidth = width;
-    thisHeight = plotAreaHeight;
     if (!update2dImage(false))
       return false;
     widthRatio = 1.0 * (width - isd.xPixels) / width;
     isd.setXY0((int) Math.floor(width - isd.xPixels) - 20, topPlotAreaPos);
     isd.resetZoom();
-    xLine0 = isd.toPixelX(multiScaleData.startDataPointIndices[0]);
-    xLine1 = isd.toPixelX(multiScaleData.endDataPointIndices[0]);
-    draw1D = true;// || (widthRatio >= widthRatioMin);
     return true;
   }
 
   private boolean update2dImage(boolean forceNew) {    
     isd.setScale(multiScaleData);
-    int[] buffer = getSpectrumAt(0).get2dBuffer(thisWidth, thisHeight, isd, forceNew);
+    int[] buffer = getSpectrumAt(0).get2dBuffer(thisWidth, thisPlotHeight, isd, forceNew);
     if (buffer == null) {
       image2D = null;
-      draw1D = true;
+      isd = null;
       return false;
     }
     image2D = new BufferedImage(isd.imageWidth, isd.imageHeight, BufferedImage.TYPE_BYTE_GRAY);

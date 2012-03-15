@@ -134,12 +134,12 @@ public class ImageScaleData {
     return (xPixel < xPixel0 ? xPixel0 : xPixel > xPixel1 ? xPixel1 : xPixel);
   }
 
-  public int toImageX(double xPixel) {
-    return xView1 + (int) Math.floor((xPixel - xPixel0) / (xPixels - 1) * (xView2 - xView1));
+  public int toImageX(int xPixel) {
+    return xView1 + (int) Math.floor((xPixel - xPixel0) / (xPixels - 1.0) * (xView2 - xView1));
   }
 
-  public int toImageY(double yPixel) {
-    return yView1 + (int) Math.floor((yPixel - yPixel0) / (yPixels - 1) * (yView2 - yView1));
+  public int toImageY(int yPixel) {
+    return yView1 + (int) Math.floor((yPixel - yPixel0) / (yPixels - 1.0) * (yView2 - yView1));
   }
 
   public boolean isXWithinRange(int xPixel) {
@@ -148,6 +148,12 @@ public class ImageScaleData {
   
   public double toX(int xPixel) {
     return maxX + (minX - maxX) * toImageX(fixX(xPixel)) / (imageWidth - 1);
+  }
+  
+  public int toPixelX(double x) {
+    double x0 = toX(xPixel0);
+    double x1 = toX(xPixel1);
+    return xPixel0 + (int) ((x - x0) / (x1 - x0) * (xPixel1 - xPixel0));
   }
   
   public int toSubSpectrumIndex(int yPixel) {
