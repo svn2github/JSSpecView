@@ -1302,10 +1302,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   private void reset1DPins() {
-    pin1Dx0.setX(toX0(rightPlotAreaPos), rightPlotAreaPos);
-    pin1Dx1.setX(toX0(leftPlotAreaPos), leftPlotAreaPos);
-    pin1Dy0.setY(toY0(topPlotAreaPos), topPlotAreaPos);
-    pin1Dy1.setY(toY0(bottomPlotAreaPos), bottomPlotAreaPos);
+    pin1Dx0.setX(multiScaleData.minX, toPixelX0(multiScaleData.minX));
+    pin1Dx1.setX(multiScaleData.maxX, toPixelX0(multiScaleData.maxX));
+    pin1Dy0.setY(multiScaleData.minY, toPixelY0(multiScaleData.minY));
+    pin1Dy1.setY(multiScaleData.maxY, toPixelY0(multiScaleData.maxY));
   }
 
   private void drawZoomBoxes(Graphics g) {
@@ -1440,7 +1440,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
           continue;
         y1 = fixY(y1);
         y2 = fixY(y2);
-        if (y1 == y2 && isOffScale(y1))
+        if (y1 == y2 && (y1 == topPlotAreaPos || y1 == bottomPlotAreaPos))
           continue;
         g.drawLine(x1, y1, x2, y2);
       }
@@ -1454,7 +1454,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
           continue;
         y1 = fixY(y1);
         y2 = fixY(y2);
-        if (y1 == y2 && isOffScale(y1))
+        if (y1 == y2 && (y1 == topPlotAreaPos || y1 == bottomPlotAreaPos))
           continue;
         g.drawLine(x1, y1, x1, y2);
       }
@@ -1463,12 +1463,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         g.drawLine(rightPlotAreaPos, y, leftPlotAreaPos, y);
       }
     }
-  } // End drawPlot
-
-  private boolean isOffScale(int y) {
-    return (y == topPlotAreaPos || y == bottomPlotAreaPos);
-  }
-
+  } 
+  
   /**
    * Draws the grid on the Panel
    * 
@@ -1487,26 +1483,20 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       lastX = multiScaleData.maxXOnScale + multiScaleData.xStep / 2;
       for (double val = multiScaleData.minXOnScale; val < lastX; val += multiScaleData.xStep) {
         int x = toPixelX(val);
-        int y1 = toPixelY(multiScaleData.minYOnScale);
-        int y2 = toPixelY(multiScaleData.maxYOnScale);
-        g.drawLine(x, y1, x, y2);
+        g.drawLine(x, topPlotAreaPos, x, bottomPlotAreaPos);
       }
     } else {
       lastX = multiScaleData.maxXOnScale * 1.0001;
       for (double val = multiScaleData.firstX; val <= lastX; val += multiScaleData.xStep) {
         int x = toPixelX(val);
-        int y1 = toPixelY(multiScaleData.minYOnScale);
-        int y2 = toPixelY(multiScaleData.maxYOnScale);
-        g.drawLine(x, y1, x, y2);
+        g.drawLine(x, topPlotAreaPos, x, bottomPlotAreaPos);
       }
     }
-
     for (double val = multiScaleData.minYOnScale; val < multiScaleData.maxYOnScale
         + multiScaleData.yStep / 2; val += multiScaleData.yStep) {
-      int x1 = toPixelX(multiScaleData.minXOnScale);
-      int x2 = toPixelX(multiScaleData.maxXOnScale);
       int y = toPixelY(val);
-      g.drawLine(x1, y, x2, y);
+      if (y == fixY(y))
+        g.drawLine(leftPlotAreaPos, y, rightPlotAreaPos, y);
     }
   }
 
@@ -1514,7 +1504,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     List<Integral> integrals = getSpectrum().getIntegrals();
     if (integrals == null)
       return;
-    setFont(g, width, Font.BOLD, 12);
+    setFont(g, width, Font.BOLD, 12, false);
     FontMetrics fm = g.getFontMetrics();
     NumberFormat formatter = getFormatter("#0.0");
     g.setColor(integralPlotColor);
@@ -1563,7 +1553,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       hashX = hash1.substring(0, Math.abs(multiScaleData.hashNums[0]) + 3);
 
     NumberFormat formatter = getFormatter(hashX);
-    setFont(g, width, Font.PLAIN, 12);
+    setFont(g, width, Font.PLAIN, 12, false);
     FontMetrics fm = g.getFontMetrics();    
     int y1 = bottomPlotAreaPos;
     int y2 = bottomPlotAreaPos + 3;
@@ -1595,7 +1585,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     }
   }
 
-  private void setFont(Graphics g, int width, int mode, int size) {
+  private void setFont(Graphics g, int width, int mode, int size, boolean isLabel) {
     g.setFont(new Font((isPrinting ? printingFont : displayFontName),
         mode, calculateFontSize(width, size, true)));
   }
@@ -1618,7 +1608,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     if (multiScaleData.hashNums[1] <= 0)
       hashY = hash1.substring(0, Math.abs(multiScaleData.hashNums[1]) + 3);
     NumberFormat formatter = getFormatter(hashY);
-    setFont(g, width, Font.PLAIN, 12); 
+    setFont(g, width, Font.PLAIN, 12, false); 
     FontMetrics fm = g.getFontMetrics();
     double max = multiScaleData.maxYOnScale + multiScaleData.yStep / 2;
     for (double val = multiScaleData.minYOnScale; val < max; val += multiScaleData.yStep) {
@@ -1644,7 +1634,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   private void drawTitle(Graphics g, int height, int width) {
     setFont(g, width, isPrinting || titleBoldOn ? Font.BOLD : Font.PLAIN, 
-        14); 
+        14, true); 
     FontMetrics fm = g.getFontMetrics();
     g.setColor(titleColor);
     g.drawString(getSpectrum().getPeakTitle(), 5, (int) (height - fm
@@ -1668,7 +1658,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private void drawUnits(Graphics g, int width, String s,
                          int x, int y, double hOff, double vOff) {
     g.setColor(unitsColor);
-    setFont(g, width, Font.ITALIC, 10);
+    setFont(g, width, Font.ITALIC, 10, false);
     FontMetrics fm = g.getFontMetrics();
     g.drawString(s, (int) (x - fm.stringWidth(s) * hOff),
         (int) (y + fm.getHeight() * vOff));
@@ -1700,7 +1690,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   private void drawCoordinates(Graphics g, int height, int width) {
     g.setColor(coordinatesColor);
-    setFont(g, width, Font.PLAIN, 12);
+    setFont(g, width, Font.PLAIN, 12, true);
     g.drawString(coordStr, (int) ((plotAreaWidth + leftPlotAreaPos) * 0.85), 
         (int) (topPlotAreaPos - 10));
   }
@@ -1708,7 +1698,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   // determine whether there are any ratio annotations to draw
   private void drawAnnotations(Graphics g, int height, int width,
                                ArrayList<Annotation> annotations, Color color) {
-    setFont(g, width, Font.BOLD, 12);
+    setFont(g, width, Font.BOLD, 12, false);
     for (int i = annotations.size(); --i >= 0;) {
       Annotation note = annotations.get(i);
       color = (note instanceof ColoredAnnotation ? ((ColoredAnnotation) note).getColor()
@@ -1730,24 +1720,41 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        ??
    * @param initSize
    *        the intial size of the font
-   * @param isWidth
-   *        true if the text lies along the width esle false
+   * @param isLabel
+   *        true if the text lies along the width else false
    * @return the size of the font
    */
-  private int calculateFontSize(double length, int initSize, boolean isWidth) {
+  private int calculateFontSize(double length, int initSize, boolean isLabel) {
     int size = initSize;
     // TODO THIS METHOD NEEDS REWORKING!!!
-
-    if (isWidth) {
+    if (isLabel) {
       if (length < 400)
         size = (int) ((length * initSize) / 400);
     } else {
       if (length < 250)
         size = (int) ((length * initSize) / 250);
     }
-
     return size;
-  } // End calculateFontSize
+  }
+
+  /*-------------------- METHODS FOR SCALING AND ZOOM --------------------------*/
+
+  public void setZoom(double x1, double y1, double x2, double y2) {
+    setZoomTo(0);
+    if (Double.isNaN(x1)) {
+      // yzoom only
+      x1 = multiScaleData.minX;
+      x2 = multiScaleData.maxX;
+      isd = null;
+    }
+    if (x1 != 0 || x2 != 0) {
+      doZoom(x1, y1, x2, y2, false, true, false);
+      return;
+    }
+    isd = null;
+    thisWidth = 0;
+    notifyZoomListeners(0, 0, 0, 0);
+  }
 
   private void setScaleFactors(MultiScaleData multiScaleData) {
     xFactorForScale = (multiScaleData.maxXOnScale - multiScaleData.minXOnScale)
@@ -1755,6 +1762,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     yFactorForScale = (multiScaleData.maxYOnScale - multiScaleData.minYOnScale)
         / plotAreaHeight;
     minYScale = multiScaleData.minYOnScale;
+  }
+
+  private int fixX(int xPixel) {
+    return Math.max(Math.min(xPixel, rightPlotAreaPos), leftPlotAreaPos);
   }
 
   private int toPixelX(double dx) {
@@ -1788,6 +1799,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         + (rightPlotAreaPos - xPixel) * factor);
   }
 
+  private int fixY(int yPixel) {
+    return Math.max(Math.min(yPixel, bottomPlotAreaPos), topPlotAreaPos);
+  }
+
   private int toPixelY(double yVal) {
     return (Double.isNaN(yVal) ? Integer.MIN_VALUE 
         : bottomPlotAreaPos - (int) ((yVal * userYFactor - minYScale) / yFactorForScale));
@@ -1807,10 +1822,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     yPixel = fixY(yPixel);
     MultiScaleData multiScaleData = zoomInfoList.get(0);
     double factor = (multiScaleData.maxYOnScale - multiScaleData.minYOnScale) / plotAreaHeight;
-    return (multiScaleData.maxYOnScale + (topPlotAreaPos - yPixel) * factor);
+    double y = multiScaleData.maxYOnScale + (topPlotAreaPos - yPixel) * factor;
+    return Math.max(multiScaleData.minY, Math.min(y, multiScaleData.maxY));
   }
-
-  /*-------------------- METHODS FOR ZOOM SUPPORT--------------------------*/
 
   /**
    * Zooms the spectrum between two coordinates
@@ -1944,8 +1958,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     multiScaleData = zoomInfoList.get(i);
     pin1Dx0.setX(multiScaleData.minXOnScale, toPixelX0(multiScaleData.minXOnScale));
     pin1Dx1.setX(multiScaleData.maxXOnScale, toPixelX0(multiScaleData.maxXOnScale));
-    pin1Dy0.setY(multiScaleData.minYOnScale, toPixelY0(multiScaleData.minYOnScale));
-    pin1Dy1.setY(multiScaleData.maxYOnScale, toPixelY0(multiScaleData.maxYOnScale));
+    pin1Dy0.setY(multiScaleData.minY, toPixelY0(multiScaleData.minY));
+    pin1Dy1.setY(multiScaleData.maxY, toPixelY0(multiScaleData.maxY));
     thisWidth = 0;    
     repaint();
   }
@@ -2378,15 +2392,15 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         if (thisWidget == pin1Dx0 || thisWidget == pin1Dx1) {
           xPixel = fixX(xPixel);
           thisWidget.setX(toX0(xPixel), xPixel);
-          doZoom(toX0(pin1Dx0.xPixel0), multiScaleData.minYOnScale,
-              toX0(pin1Dx1.xPixel0), multiScaleData.maxYOnScale, false, false, false);
+          doZoom(pin1Dx0.x, multiScaleData.minY,
+              pin1Dx1.x, multiScaleData.maxY, false, false, false);
           return true;
         }
         if (thisWidget == pin1Dy0 || thisWidget == pin1Dy1) {
           yPixel = fixY(yPixel);
           thisWidget.setY(toY0(yPixel), yPixel);
-          doZoom(multiScaleData.minXOnScale, toY0(pin1Dy0.yPixel0), 
-              multiScaleData.maxXOnScale, toY0(pin1Dy1.yPixel0), false, false, false);
+          doZoom(multiScaleData.minXOnScale, pin1Dy0.y, 
+              multiScaleData.maxXOnScale, pin1Dy1.y, false, false, false);
           return true;
         }
       } else if (thisWidget == zoomBox1D) {
@@ -2490,9 +2504,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       clearIntegrals();
     else if (e.getClickCount() == 2) {
       if (isInTopBar(xPixel, yPixel))
-        doZoom(toX0(leftPlotAreaPos), multiScaleData.minYOnScale, toX0(rightPlotAreaPos), multiScaleData.maxYOnScale, true, true, false);
+        doZoom(toX0(leftPlotAreaPos), multiScaleData.minY, toX0(rightPlotAreaPos), multiScaleData.maxY, true, true, false);
       else if (isInRightBar(xPixel, yPixel))
-        doZoom(multiScaleData.minXOnScale, zoomInfoList.get(0).minYOnScale, multiScaleData.maxXOnScale, zoomInfoList.get(0).maxYOnScale, true, true, false);
+        doZoom(multiScaleData.minXOnScale, zoomInfoList.get(0).minY, multiScaleData.maxXOnScale, zoomInfoList.get(0).maxY, true, true, false);
       return;
     }
     if (xPixel != fixX(xPixel) || yPixel != fixY(yPixel)) {
@@ -2723,35 +2737,14 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       setReversePlot(parameters.reversePlot);
     if (st == null || st == ScriptToken.DISPLAY2D)
       setDisplay2D(parameters.display2D);
+    if (st == null || st == ScriptToken.TITLEON)
+      setTitleOn(parameters.titleOn);
+    if (st == null || st == ScriptToken.TITLEBOLDON)
+      setTitleBoldOn(parameters.titleBoldOn);
   }
 
   public JDXSpectrum getSpectrum() {
     return getSpectrumAt(0).getCurrentSubSpectrum();
-  }
-
-  public void setZoom(double x1, double y1, double x2, double y2) {
-    setZoomTo(0);
-    if (Double.isNaN(x1)) {
-      // yzoom only
-      x1 = multiScaleData.minX;
-      x2 = multiScaleData.maxX;
-      isd = null;
-    }
-    if (x1 != 0 || x2 != 0) {
-      doZoom(x1, y1, x2, y2, false, true, false);
-      return;
-    }
-    isd = null;
-    thisWidth = 0;
-    notifyZoomListeners(0, 0, 0, 0);
-  }
-
-  private int fixY(int yPixel) {
-    return Math.max(Math.min(yPixel, bottomPlotAreaPos), topPlotAreaPos);
-  }
-
-  private int fixX(int xPixel) {
-    return Math.max(Math.min(xPixel, rightPlotAreaPos), leftPlotAreaPos);
   }
 
   public static JSVPanel taConvert(JSVPanel jsvp, int mode) {
@@ -2773,6 +2766,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     String Yunits = spectrum.getYUnits();
     return Visible.Colour(spectrum.getXYCoords(), Yunits);
   }
+
+  /////////////// 2D image /////////////////
   
   private BufferedImage image2D;
   private int thisWidth, thisPlotHeight;

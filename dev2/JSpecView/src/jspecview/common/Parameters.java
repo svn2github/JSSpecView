@@ -19,6 +19,7 @@ public class Parameters extends DisplayScheme {
 
   protected void setDefaults() {
     super.setDefaults();
+    titleOn = !name.equals("application");
     plotColors = new Color[defaultPlotColors.length];
     System.arraycopy(defaultPlotColors, 0, plotColors, 0, plotColors.length);
   }
@@ -28,9 +29,10 @@ public class Parameters extends DisplayScheme {
 
   private Color[] plotColors;  
   private String plotColorsStr;
-  boolean reversePlot = false;
+  boolean reversePlot;
   private boolean enableZoom = true;
-  private boolean titleBoldOn = false;
+  boolean titleOn = true;
+  boolean titleBoldOn;
 
 
   public boolean display2D = true;
@@ -65,6 +67,7 @@ public class Parameters extends DisplayScheme {
 
     jsvp.setZoomEnabled(enableZoom);
     jsvp.setTitleBoldOn(titleBoldOn);
+    jsvp.setTitleOn(titleOn);
   }
 
   public void set(JSVPanel jsvp, ScriptToken st, String value) {
@@ -127,6 +130,9 @@ public class Parameters extends DisplayScheme {
       break;
     case YUNITSON:
       yUnitsOn = parseBoolean(value);
+      break;
+    case TITLEON:
+      titleOn = parseBoolean(value);
       break;
     case TITLEBOLDON:
       titleBoldOn = parseBoolean(value);
