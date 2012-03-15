@@ -2395,6 +2395,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         xLine1 = isd.fixX(xPixel);
       triggerImageCursorXZoom = true;
       isMouseDraggedEvent = true;
+      multiScaleData = zoomInfoList.get(0);
+      doZoom(isd.toX(xLine1), multiScaleData.minY, isd.toX(xLine0), multiScaleData.maxY, true);
       repaint();
       return true;
     }
@@ -2421,8 +2423,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
     if (triggerImageCursorXZoom) {
       triggerImageCursorXZoom = false;
-      multiScaleData = zoomInfoList.get(0);
-      doZoom(isd.toX(xLine1), multiScaleData.minY, isd.toX(xLine0), multiScaleData.maxY, true);
+      //multiScaleData = zoomInfoList.get(0);
+      //doZoom(isd.toX(xLine1), multiScaleData.minY, isd.toX(xLine0), multiScaleData.maxY, true);
       return;
     }
     if (isMouseDraggedEvent2D) {

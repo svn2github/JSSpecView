@@ -524,18 +524,18 @@ public class TextFormat {
     return (x != 0 && Math.abs(x - Math.floor(x)) / x > 1e-8);
   }  
   
-  static {
-    System.out.println("TEST TextFormat.java");
-    System.out.println((long) 1.23456789E10);   
-    System.out.println((long) Math.round(1.2345678999999E10));   
-    System.out.println((long) 1.2345679000001E+10);   
-    System.out.println((long) 1.2345679005001E10);   
-    System.out.println((long) Math.round(1.2345679004999E10));   
-    System.out.println((long) 1.234567890123E15);   
-    System.out.println((long) 9.999999666666666665E17);   
-    ////////////////////////////12345678901234567
-    System.out.println((long) 1.2345678901234567E15);   
-    
-  }
+//  static {
+//    System.out.println("TEST TextFormat.java");
+//    System.out.println((long) 1.23456789E10);   
+//    System.out.println((long) Math.round(1.2345678999999E10));   
+//    System.out.println((long) 1.2345679000001E+10);   
+//    System.out.println((long) 1.2345679005001E10);   
+//    System.out.println((long) Math.round(1.2345679004999E10));   
+//    System.out.println((long) 1.234567890123E15);   
+//    System.out.println((long) 9.999999666666666665E17);   
+//    ////////////////////////////12345678901234567
+//    System.out.println((long) 1.2345678901234567E15);   
+//    
+//  }
 
 }
