@@ -2741,6 +2741,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       setTitleOn(parameters.titleOn);
     if (st == null || st == ScriptToken.TITLEBOLDON)
       setTitleBoldOn(parameters.titleBoldOn);
+    if (st == null || st == ScriptToken.ENABLEZOOM)
+      setZoomEnabled(parameters.enableZoom);
   }
 
   public JDXSpectrum getSpectrum() {

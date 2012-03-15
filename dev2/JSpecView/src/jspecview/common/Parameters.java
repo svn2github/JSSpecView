@@ -30,7 +30,7 @@ public class Parameters extends DisplayScheme {
   private Color[] plotColors;  
   private String plotColorsStr;
   boolean reversePlot;
-  private boolean enableZoom = true;
+  boolean enableZoom = true;
   boolean titleOn = true;
   boolean titleBoldOn;
 
@@ -62,13 +62,7 @@ public class Parameters extends DisplayScheme {
     if (jsvp.getPlotColor(1) != null) // integration
       jsvp.setPlotColors(plotColors);
     jsvp.setParam(ds, null);
-
-    // misc
-
-    jsvp.setZoomEnabled(enableZoom);
-    jsvp.setTitleBoldOn(titleBoldOn);
-    jsvp.setTitleOn(titleOn);
-  }
+ }
 
   public void set(JSVPanel jsvp, ScriptToken st, String value) {
     Object param = null;
