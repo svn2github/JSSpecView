@@ -116,7 +116,7 @@ public class MultiScaleData extends ScaleData {
                                             int[] startIndices,
                                             int[] endIndices, boolean useRange) {
     int nSpectraOK = 0;
-    int nSpectra = startIndices.length;
+    int nSpectra = spectra.length;
     for (int i = 0; i < nSpectra; i++) {
       Coordinate[] xyCoords = spectra[i].getXYCoords();
       int iStart = (useRange ? startDataPointIndices[i] : 0);

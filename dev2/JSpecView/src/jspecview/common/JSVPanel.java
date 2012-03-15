@@ -210,9 +210,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private boolean isMouseDraggedEvent;
   private boolean isMouseDraggedEvent2D;
 
-  // whether to draw an overlaid plot increasing or decreasing
-  private boolean overlayIncreasing = false;
-
   /* PUT FONT FACE AND SIZE ATTRIBUTES HERE */
   private String displayFontName = null;
   private String titleFontName = null;
@@ -411,12 +408,11 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
   private void getMultiScaleData(double x1, double x2, double y1, double y2,
                                  int[] startIndices, int[] endIndices) {
-    Graph[] graphs = graphsTemp;
+    Graph[] graphs = (graphsTemp[0] == null ? spectra : graphsTemp);
     List<JDXSpectrum> subspecs = getSpectrumAt(0).getSubSpectra();
-    
     if (!getSpectrumAt(0).is1D() || subspecs == null && y1 == y2) {
       // 2D spectrum or startup
-      graphs = this.spectra;
+      graphs = spectra;
     } else if (y1 == y2) {
       //start up, forced subsets (too many spectra) 
       multiScaleData = new MultiScaleData(subspecs, y1, y2, 10, 10, getSpectrum()
@@ -425,7 +421,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     }
     multiScaleData = new MultiScaleData(graphs, y1, y2, startIndices,
         endIndices, 10, 10, getSpectrumAt(0).isContinuous());
-    if (graphs == graphsTemp)
+    if (x1 != x2)
       multiScaleData.setXRange(x1, x2, 10);
   }
 
@@ -1866,7 +1862,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
                                        int[] startIndices, int[] endIndices) {
     if (!zoomEnabled)
       return false;
-    if (getSpectrumAt(0).is1D()) {
+    if (getSpectrumAt(0).is1D() && getSpectrumAt(0).getSubSpectra() != null) {
       graphsTemp[0] = getSpectrum();
       if (!multiScaleData.setDataPointIndices(graphsTemp, initX, finalX,
           minNumOfPointsForZoom, startIndices, endIndices, false))
@@ -2163,26 +2159,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
       return ((hl.x1 == this.x1) && (hl.x2 == this.x2));
     }
-  }
-
-  /**
-   * Sets whether plots that are overlaid should be drawn in increasing of
-   * decreasing
-   * 
-   * @param val
-   *        true if increasing, false otherwise
-   */
-  public void setOverlayIncreasing(boolean val) {
-    overlayIncreasing = val;
-  }
-
-  /**
-   * Returns whether overlaid plots are drawn increasing
-   * 
-   * @return true is increasing, false otherwise
-   */
-  public boolean isOverlayIncreasing() {
-    return overlayIncreasing;
   }
 
   public void destroy() {
