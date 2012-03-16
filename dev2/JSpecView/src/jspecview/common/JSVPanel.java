@@ -102,7 +102,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private static final int MIN_DRAG_X_PIXELS = 5;// fewer than this means no zoom
 
   private PlotWidget zoomBox1D, zoomBox2D, 
-      pin1Dx0, pin1Dx1, pin1Dy0, pin1Dy1, 
+      pin1Dx0, pin1Dx1, pin1Dy0, pin1Dy1,
+      pin1Dx01, pin1Dy01, 
       pin2Dx0, pin2Dx1, pin2Dy;
   private PlotWidget thisWidget;
   private PlotWidget[] widgets;
@@ -1167,8 +1168,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       setScaleFactors(multiScaleData);
     }
 
-    if (isResized)
-      setWidgets();
+    setWidgets(isResized);
 
     if (isd != null)
       draw2DImage(g);
@@ -1259,13 +1259,20 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     drawPins(g, subIndex);
   }
 
-  private void setWidgets() {
+  private void setWidgets(boolean isResized) {
+    if (!isResized) {
+      pin1Dx01.setX(0, (pin1Dx0.xPixel0 + pin1Dx1.xPixel0)/2);
+      pin1Dy01.setY(0, (pin1Dy0.yPixel0 + pin1Dy1.yPixel0)/2);
+      return;
+    }
     if (zoomBox1D == null) {
       zoomBox1D = new PlotWidget(false);
       pin1Dx0 = new PlotWidget(true);
       pin1Dx1 = new PlotWidget(true);
       pin1Dy0 = new PlotWidget(true);
       pin1Dy1 = new PlotWidget(true);
+      pin1Dx01 = new PlotWidget(true);
+      pin1Dy01 = new PlotWidget(true);
       reset1DPins();
       if (isd != null) {
         zoomBox2D = new PlotWidget(false);
@@ -1275,8 +1282,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         pin2Dx0.setX(isd.toX(isd.xPixel0), isd.xPixel0);
         pin2Dx1.setX(isd.toX(isd.xPixel1), isd.xPixel1);
       }
-      widgets = new PlotWidget[] { zoomBox1D, zoomBox2D, pin1Dx0, pin1Dx1,
-          pin1Dy0, pin1Dy1, pin2Dx0, pin2Dx1, pin2Dy };
+      widgets = new PlotWidget[] { zoomBox1D, zoomBox2D, 
+          pin1Dx0, pin1Dx01, pin1Dx1,
+          pin1Dy0, pin1Dy01, pin1Dy1, 
+          pin2Dx0, pin2Dx1, pin2Dy };
     } else {
       pin1Dx0.setX(pin1Dx0.x, toPixelX0(pin1Dx0.x));
       pin1Dx1.setX(pin1Dx1.x, toPixelX0(pin1Dx1.x));
@@ -1287,10 +1296,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         pin2Dx1.setX(pin2Dx1.x, isd.toPixelX(pin2Dx1.x));
       }
     }
-    pin1Dx0.yPixel0 = pin1Dx1.yPixel0 = topPlotAreaPos - 5;
-    pin1Dx0.yPixel1 = pin1Dx1.yPixel1 = topPlotAreaPos;
-    pin1Dy0.xPixel0 = pin1Dy1.xPixel0 = rightPlotAreaPos + 5;
-    pin1Dy0.xPixel1 = pin1Dy1.xPixel1 = rightPlotAreaPos;
+    pin1Dx0.yPixel0 = pin1Dx1.yPixel0 = pin1Dx01.yPixel0 = topPlotAreaPos - 5;
+    pin1Dx0.yPixel1 = pin1Dx1.yPixel1 = pin1Dx01.yPixel1 = topPlotAreaPos;
+    pin1Dy0.xPixel0 = pin1Dy1.xPixel0 = pin1Dy01.xPixel0 = rightPlotAreaPos + 5;
+    pin1Dy0.xPixel1 = pin1Dy1.xPixel1 = pin1Dy01.xPixel1 = rightPlotAreaPos;
     if (isd != null) {
       pin2Dx0.yPixel0 = pin2Dx1.yPixel0 = bottomPlotAreaPos + 15;
       pin2Dx0.yPixel1 = pin2Dx1.yPixel1 = topPlotAreaPos - 5;
@@ -1306,6 +1315,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     pin1Dx1.setX(multiScaleData.maxX, toPixelX0(multiScaleData.maxX));
     pin1Dy0.setY(multiScaleData.minY, toPixelY0(multiScaleData.minY));
     pin1Dy1.setY(multiScaleData.maxY, toPixelY0(multiScaleData.maxY));
+    pin1Dx01.setX(0, (pin1Dx0.xPixel0 + pin1Dx1.xPixel0)/2);
+    pin1Dy01.setY(0, (pin1Dy0.yPixel0 + pin1Dy1.yPixel0)/2);
   }
 
   private void drawZoomBoxes(Graphics g) {
@@ -1316,7 +1327,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   private void drawPins(Graphics g, int subIndex) {
-    // topbar
+    // top/side slider bars
     g.setColor(gridColor);
     fillBox(g, leftPlotAreaPos, pin1Dx0.yPixel1, rightPlotAreaPos, pin1Dx1.yPixel1 + 2);    
     fillBox(g, pin1Dy0.xPixel1, bottomPlotAreaPos, pin1Dy1.xPixel1 + 2, topPlotAreaPos);    
@@ -1331,8 +1342,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       drawWidget(g, pin2Dy);
     }
     drawWidget(g, pin1Dx0);
+    drawWidget(g, pin1Dx01);
     drawWidget(g, pin1Dx1);
     drawWidget(g, pin1Dy0);
+    drawWidget(g, pin1Dy01);
     drawWidget(g, pin1Dy1);
   }
 
@@ -2389,16 +2402,30 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
           doZoom(pin2Dx0.x, multiScaleData.minY, pin2Dx1.x, multiScaleData.maxY, false, false, false);
           return true;
         }
-        if (thisWidget == pin1Dx0 || thisWidget == pin1Dx1) {
+        if (thisWidget == pin1Dx0 || thisWidget == pin1Dx1 || thisWidget == pin1Dx01) {
           xPixel = fixX(xPixel);
           thisWidget.setX(toX0(xPixel), xPixel);
+          if (thisWidget == pin1Dx01) {
+            int dp = xPixel - (pin1Dx0.xPixel0 + pin1Dx1.xPixel0)/2 + 1;
+            xPixel = pin1Dx0.xPixel0 + dp;
+            pin1Dx0.setX(toX0(xPixel), xPixel);
+            xPixel = pin1Dx1.xPixel0 + dp;
+            pin1Dx1.setX(toX0(xPixel), xPixel);
+          }
           doZoom(pin1Dx0.x, multiScaleData.minY,
               pin1Dx1.x, multiScaleData.maxY, false, false, false);
           return true;
         }
-        if (thisWidget == pin1Dy0 || thisWidget == pin1Dy1) {
+        if (thisWidget == pin1Dy0 || thisWidget == pin1Dy1 || thisWidget == pin1Dy01) {
           yPixel = fixY(yPixel);
           thisWidget.setY(toY0(yPixel), yPixel);
+          if (thisWidget == pin1Dy01) {
+            int dp = yPixel - (pin1Dy0.yPixel0 + pin1Dy1.yPixel0)/2 + 1;
+            yPixel = pin1Dy0.yPixel0 + dp;
+            pin1Dy0.setY(toY0(yPixel), yPixel);
+            yPixel = pin1Dy1.yPixel0 + dp;
+            pin1Dy1.setY(toY0(yPixel), yPixel);
+          }
           doZoom(multiScaleData.minXOnScale, pin1Dy0.y, 
               multiScaleData.maxXOnScale, pin1Dy1.y, false, false, false);
           return true;
