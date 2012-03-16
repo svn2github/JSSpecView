@@ -9,9 +9,8 @@ package jspecview.common;
  * {@link jspecview.common.ScaleData#generateScaleData(jspecview.common.Coordinate[], int, int, int, int)}
  * .
  */
-class PlotWidget {
+class PlotWidget extends Coordinate {
 
-  double x, y;
   int xPixel0;
   int yPixel0;
   int xPixel1;
@@ -19,10 +18,21 @@ class PlotWidget {
   boolean isPin;
   boolean isXtype;
   boolean is2D;
+  private String name;
+  
+  @Override
+  public String toString() {
+    return name
+        + (!isPin ? "" + xPixel0 + " " + yPixel0 + " / " + xPixel1 + " "
+            + yPixel1 : " x=" + getXVal() + "/" + xPixel0 + " y=" + getYVal()
+            + "/" + yPixel0);
+  }
  
-  PlotWidget(boolean isPin, boolean isXtype, boolean is2D) {
-    this.isPin = isPin;
-    this.isXtype = isXtype;
+  public PlotWidget(String name) {
+    this.name = name;
+    isPin = (name.charAt(0) == 'p');
+    isXtype = (name.indexOf("x") >= 0);
+    is2D = (name.indexOf("2D") >= 0);
   }
 
   boolean selected(int xPixel, int yPixel) {
@@ -30,17 +40,19 @@ class PlotWidget {
   }
 
   public void setX(double x, int xPixel) {
-    this.x = x;
+    if (x > 6.5 && name.indexOf("0") < 0)
+      System.out.println("setting x for " + name + "\t" + x + "\t" + xPixel);
+    setXVal(x);
     xPixel0 = xPixel1 = xPixel;
   }
 
   public void setY(double y, int yPixel) {
-    this.y = y;
+    setYVal(y);
     yPixel0 = yPixel1 = yPixel;
   }
 
   public double getValue() {
-    return (isXtype ? x : y);
+    return (isXtype ? getXVal() : getYVal());
   }
 
 }

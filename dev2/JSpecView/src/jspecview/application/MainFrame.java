@@ -44,6 +44,7 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout; //import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Cursor;
 import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -612,7 +613,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     });
     spectraTree.putClientProperty("JTree.lineStyle", "Angled");
     spectraTree.setShowsRootHandles(true);
-    spectraTreePane = new JScrollPane(spectraTree);
     spectraTree.setEditable(false);
     spectraTree.setRootVisible(false);
     spectraTree.addMouseListener(new MouseListener() {
@@ -637,6 +637,10 @@ public class MainFrame extends JFrame implements DropTargetListener,
       
     });
     new DropTarget(spectraTree, this);
+    spectraTreePane = new JScrollPane(spectraTree);
+    if (mainSplitPane != null)
+      mainSplitPane.setLeftComponent(spectraTreePane);
+
   }
 
   /**
@@ -1164,7 +1168,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     if (closeFirst) { // drag/drop
       JDXSource source = findSourceByNameOrId((new File(fileName)).getAbsolutePath());
       if (source != null)
-         ;
+         closeSource(source);
     }
     openDataOrFile(null, fileName, null, -1, -1);
   }
@@ -1219,6 +1223,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       writeStatus(filePath + " is already open");
       return FILE_OPEN_ALREADY;
     }
+    setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)); 
     try {
       setCurrentSource(isOverlay ? JDXSource.createOverlay(url, specs)
           : FileReader.createJDXSource(FileManager
@@ -1227,8 +1232,11 @@ public class MainFrame extends JFrame implements DropTargetListener,
     } catch (Exception e) {
       e.printStackTrace();
       writeStatus(e.getMessage());
+      setCursor(Cursor.getDefaultCursor());
       return FILE_OPEN_ERROR;
     }
+    setCursor(Cursor.getDefaultCursor());
+    System.gc();
     currentSelectedSource.setFilePath(filePath);
     setCloseMenuItem(fileName);
     setTitle("JSpecView - " + filePath);
@@ -1580,7 +1588,20 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
     for (int i = 0; i < toDelete.size(); i++)
       spectraTreeModel.removeNodeFromParent(toDelete.get(i));
+    //initSpectraTree();
+
+    if (source == null) {
+      jsvpPopupMenu.setSelectedJSVPanel(null);
+      jsvpPopupMenu.setSource(null);
+      if (selectedJSVPanel != null)
+        selectedJSVPanel.dispose();
+      if (currentSelectedSource != null)
+        currentSelectedSource.dispose();
+    }
     selectedJSVPanel = null;
+    currentSelectedSource = null;
+    System.gc();
+
     setError(false, false);
     if (source != null) {
       List<JDXSpectrum> spectra = source.getSpectra();
@@ -1598,11 +1619,11 @@ public class MainFrame extends JFrame implements DropTargetListener,
     }
     setCloseMenuItem(null);
     setTitle("JSpecView");
-    currentSelectedSource = null;
-    if (source == null)
+    if (source == null) {
       setMenuEnables(null);
-    else
+    } else {
       setSpectrumNumber(specNodes.size());
+    }
     recentJmolName = null;
     setFileCount();
     System.gc();
@@ -1766,28 +1787,20 @@ public class MainFrame extends JFrame implements DropTargetListener,
   //   Abstract methods that are used to perform drag and drop operations
   //
 
-  // Called when the user is dragging and enters this drop target.
   public void dragEnter(DropTargetDragEvent dtde) {
+    // Called when the user is dragging and enters this drop target.
     // accept all drags
-    System.out.println("DragEnter");
     dtde.acceptDrag(dtde.getSourceActions());
-    // visually indicate that drop target is under drag
-    //showUnderDrag(true);
   }
 
-  // Called when the user is dragging and moves over this drop target.
   public void dragOver(DropTargetDragEvent dtde) {
-
   }
 
-  // Called when the user is dragging and leaves this drop target.
   public void dragExit(DropTargetEvent dtde) {
-    System.out.println("DragExit");
   }
-
-  // Called when the user changes the drag action between copy or move.
+  
   public void dropActionChanged(DropTargetDragEvent dtde) {
-
+    // Called when the user changes the drag action between copy or move
   }
 
   // Called when the user finishes or cancels the drag operation.
@@ -1796,6 +1809,12 @@ public class MainFrame extends JFrame implements DropTargetListener,
     Logger.debug("Drop detected...");
     Transferable t = dtde.getTransferable();
     boolean isAccepted = false;
+    // idea here is that if the drop is into the panel ('this'), then
+    // we want a replacement; if the drop is to the menu, then we want an addition.
+    // just an idea....
+    boolean doAppend = (dtde.getDropTargetContext().getDropTarget().getComponent() != this);
+    if (!doAppend)
+      closeSource(null);
     if (t.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
       while (true) {
         Object o = null;
@@ -1811,8 +1830,12 @@ public class MainFrame extends JFrame implements DropTargetListener,
           List<File> list = (List<File>) o;
           dtde.getDropTargetContext().dropComplete(true);
           File[] files = (File[]) list.toArray();
+          dtde = null;
+          StringBuffer sb = new StringBuffer();
+          
           for (int i = 0; i < list.size(); i++)
-            openFile(files[i].getAbsolutePath(), true);
+            sb.append("load APPEND " + Escape.escape(files[i].getAbsolutePath()) + ";\n");
+          runScript(sb.toString());
 /*          
           
           
@@ -2127,11 +2150,11 @@ public class MainFrame extends JFrame implements DropTargetListener,
   }
 
   private void close(String value) {
-    value = value.replace('\\', '/');
-    if (value.equalsIgnoreCase("all")) {
+    if (value == null || value.equalsIgnoreCase("all")) {
       closeSource(null);
       return;
     }
+    value = value.replace('\\', '/');
     if (value.endsWith("*")) {
       value = value.substring(0, value.length() - 1);
       for (int i = specNodes.size(); --i >= 0; )

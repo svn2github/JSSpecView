@@ -239,7 +239,7 @@ public class FileReader {
       return !(done = true);
     spectrum.setBlockID(blockID);
     source.addJDXSpectrum(spectrum, forceSub);
-    System.out.println("Spectrum " + nSpec + " XYDATA: " + spectrum.getXYCoords().length);
+    //System.out.println("Spectrum " + nSpec + " XYDATA: " + spectrum.getXYCoords().length);
     return true;
   }
 

@@ -36,6 +36,9 @@ package jspecview.common;
 public class Annotation extends Coordinate {
   private String text = "";
   private boolean isPixels;
+  public boolean is2D;
+  public int offsetX;
+  public int offsetY;
   
   /**
    * Constructor -- note that x is spectral X value, but y is pixels above
@@ -48,16 +51,23 @@ public class Annotation extends Coordinate {
    * @param integralValue
    *        the integral value
    */
-  public Annotation(double x, double y, String text, boolean isPixels) {
+  public Annotation(double x, double y, String text, boolean isPixels, boolean is2D, int offsetX, int offsetY) {
     super(x, y);
     this.text = text;
     this.isPixels = isPixels;
+    this.is2D = is2D;
+    this.offsetX = offsetX;
+    this.offsetY = offsetY;
   }
 
   public String getText() {
     return text;
   }
-  
+
+  public void setText(String text) {
+    this.text = text;
+  }
+
   public boolean isPixels() {
     return isPixels;
   }

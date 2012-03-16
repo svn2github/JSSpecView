@@ -38,19 +38,23 @@ public class JDXSource extends JDXHeader {
   public final static int TYPE_OVERLAY = -2;
   
   public final static int TYPE_UNKNOWN = -1;
-  /** Indicates a Simple Source */
   public final static int TYPE_SIMPLE = 0;
-  /** Indicates a Block Source */
   public final static int TYPE_BLOCK = 1;
-  /** Indicates a Ntuple Source */
   public final static int TYPE_NTUPLE = 2;
 
   public int type = TYPE_SIMPLE;
   public boolean isCompoundSource = false;
   
-  // List of JDXSpectra
-  protected List<JDXSpectrum> jdxSpectra;
+  private List<JDXSpectrum> jdxSpectra;
+  private String errors = "";
+  private String filePath;
 
+
+  public void dispose() {
+    headerTable = null;
+    jdxSpectra = null;    
+  }
+  
   public int peakCount;
   
   
@@ -102,9 +106,6 @@ public class JDXSource extends JDXHeader {
     return jdxSpectra;
   }
 
-  // Errors
-  String errors = "";
-
   /**
    * Returns the error log for this source
    * 
@@ -124,8 +125,6 @@ public class JDXSource extends JDXHeader {
     this.errors = errors;
   }
 
-  private String filePath;
-
   public void setFilePath(String filePath) {
     this.filePath = filePath;
   }
@@ -142,7 +141,7 @@ public class JDXSource extends JDXHeader {
   }
 
   public boolean isOverlay() {
-    return type == TYPE_OVERLAY;
+    return (type == TYPE_OVERLAY);
   }
 
   public Object[][] getHeaderRowDataAsArray(boolean addDataClass,
@@ -154,4 +153,5 @@ public class JDXSource extends JDXHeader {
       data[data.length - rowData.length + i] = rowData[i];
     return data;
   }
+
 }

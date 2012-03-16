@@ -33,8 +33,8 @@ public class ColoredAnnotation extends Annotation {
   private Color color;
 
   public ColoredAnnotation(double x, double y, String text, Color color,
-      boolean isPixels) {
-    super(x, y, text, isPixels);
+      boolean isPixels, boolean is2D, int offsetX, int offsetY) {
+    super(x, y, text, isPixels, is2D, offsetX, offsetY);
     this.color = color;
   }
 
@@ -107,7 +107,7 @@ public class ColoredAnnotation extends Annotation {
         if (text.charAt(0) == '\"')
           text = text.substring(1, text.length() - 1);
       }
-      return new ColoredAnnotation(x, y, text, color, false);
+      return new ColoredAnnotation(x, y, text, color, false, false, 0, 0);
     } catch (Exception e) {
       return null;
     }

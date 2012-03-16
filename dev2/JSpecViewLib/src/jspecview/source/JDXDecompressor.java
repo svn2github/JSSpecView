@@ -122,6 +122,7 @@ public class JDXDecompressor {
     this.deltaX = deltaX;
     this.nPoints = nPoints;
     this.lineNumber = t.getLabelLineNo();
+    //Logger.checkMemory();
   }
 
   private Coordinate[] xyCoords;

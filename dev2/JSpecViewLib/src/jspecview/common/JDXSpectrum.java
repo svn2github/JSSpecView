@@ -966,7 +966,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     subSpectra.add(spectrum);
     spectrum.parent = this;
     spectrum.setTitle(subSpectra.size() + ": " + spectrum.title);
-    System.out.println("Added subspectrum " + subSpectra.size() + ": " + spectrum.y2D);
+    //System.out.println("Added subspectrum " + subSpectra.size() + ": " + spectrum.y2D);
     return true;
   }
   
@@ -1010,13 +1010,9 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
       return buf2d;
     int nSpec = subSpectra.size();
     double grayFactor = 255 / (isd.maxZ - isd.minZ);
-    double r = Math.min(1.0 * width * 0.6/xyCoords.length, 1.0 * height/nSpec);
-    if (r > 1)
-      r = 1;
     thisWidth = width = xyCoords.length;
     thisHeight = height = nSpec;
     isd.setImageSize(width, height);
-    isd.setPixelWidthHeight((int) Math.floor(r * width), (int) Math.floor(r * height));
     if (!forceNew && buf2d != null && grayFactor == grayFactorLast)
       return buf2d;
     grayFactorLast = grayFactor;

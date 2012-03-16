@@ -35,6 +35,7 @@ public class Parameters extends DisplayScheme {
   boolean titleBoldOn;
 
 
+  public boolean display1D = false;
   public boolean display2D = true;
   public boolean coordinatesOn = true;
   public boolean gridOn = true;
@@ -101,6 +102,9 @@ public class Parameters extends DisplayScheme {
     case DEBUG:
       Logger.debugging = parseBoolean(value);
       return;
+    case DISPLAY1D:
+      display1D = parseBoolean(value);
+      break;
     case DISPLAY2D:
       display2D = parseBoolean(value);
       break;

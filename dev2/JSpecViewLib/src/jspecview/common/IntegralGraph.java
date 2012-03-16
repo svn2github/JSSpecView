@@ -280,7 +280,7 @@ public class IntegralGraph implements Graph {
       double y = xyCoords[i].getYVal();
       if (y > minYForIntegral)
         integral += y;
-      integralCoords[j] = new Coordinate(xyCoords[i].getXVal(), integral
+      integralCoords[i] = new Coordinate(xyCoords[i].getXVal(), integral
           * factor + offset);
     }
     return integralCoords;
@@ -321,7 +321,7 @@ public class IntegralGraph implements Graph {
       // now split the x-value/integral-value pair
       StringTokenizer eachParam = new StringTokenizer(token, ":");
       Annotation ratio = new Annotation(Double
-          .parseDouble(eachParam.nextToken()), 0.0, eachParam.nextToken(), true);
+          .parseDouble(eachParam.nextToken()), 0.0, eachParam.nextToken(), true, false, 0, 0);
       ratios.add(ratio);
     }
     return ratios;
