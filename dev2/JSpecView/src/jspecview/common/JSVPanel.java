@@ -2617,11 +2617,13 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     } else {
         double val = Double.valueOf(sval);
         if (pw.isXtype) {
-          pw.setX(val, pw.is2D ? isd.toPixelX(val) : toPixelX0(val));
+          double val2 = (pw == pin1Dx0 ? pin1Dx1.x : pw == pin1Dx1 ? pin1Dx0.x : pw == pin2Dx0 ? pin2Dx1.x : pin2Dx0.x);
+          doZoom(val, pin1Dy0.y, val2, pin1Dy1.y, false, true, false);
         } else if (pw.is2D) {
           setCurrentSubSpectrum((int) val);
         } else {
-          pw.setY(val, toPixelY0(val));
+          double val2 = (pw == pin1Dy0 ? pin1Dy1.y : pin1Dy0.y);
+          doZoom(pin1Dx0.x, val, pin1Dx1.x, val2, false, true, false);
         }
     }
     } catch (Exception e) {
