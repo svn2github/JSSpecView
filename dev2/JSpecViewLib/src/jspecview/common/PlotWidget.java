@@ -17,9 +17,12 @@ class PlotWidget {
   int xPixel1;
   int yPixel1;
   boolean isPin;
-
-  PlotWidget(boolean isPin) {
+  boolean isXtype;
+  boolean is2D;
+ 
+  PlotWidget(boolean isPin, boolean isXtype, boolean is2D) {
     this.isPin = isPin;
+    this.isXtype = isXtype;
   }
 
   boolean selected(int xPixel, int yPixel) {
@@ -34,6 +37,10 @@ class PlotWidget {
   public void setY(double y, int yPixel) {
     this.y = y;
     yPixel0 = yPixel1 = yPixel;
+  }
+
+  public double getValue() {
+    return (isXtype ? x : y);
   }
 
 }
