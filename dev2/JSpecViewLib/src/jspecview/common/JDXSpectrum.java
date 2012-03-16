@@ -577,8 +577,17 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   }
 
   public Object[][] getHeaderRowDataAsArray() {
-    Object[][] rowData = getHeaderRowDataAsArray(true, 8);
-    int i = rowData.length - 8;
+    int n = 8;
+    if (observedFreq != JDXSpectrum.ERROR)
+      n++;
+    if (observedNucl != "")
+      n++;
+    Object[][] rowData = getHeaderRowDataAsArray(true, n);
+    int i = rowData.length - n;
+    if (observedFreq != JDXSpectrum.ERROR)
+      rowData[i++] = new Object[] { "##.OBSERVE FREQUENCY", "" + observedFreq };
+    if (observedNucl != "")
+      rowData[i++] = new Object[] { "##.OBSERVE NUCLEUS", observedNucl };
     rowData[i++] = new Object[] { "##XUNITS", isHZtoPPM() ? "HZ" : getXUnits() };
     rowData[i++] = new Object[] { "##YUNITS", getYUnits() };
     double x = (isIncreasing() ? getFirstX() : getLastX());

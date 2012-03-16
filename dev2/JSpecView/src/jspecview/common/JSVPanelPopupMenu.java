@@ -271,9 +271,9 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   public void properties_actionPerformed(ActionEvent e) {
 
     JDXSpectrum spectrum = selectedJSVPanel.getSpectrum();
-    Object[][] rowData = (source.isCompoundSource ? source
-        .getHeaderRowDataAsArray(false, 0) : spectrum
-        .getHeaderRowDataAsArray());
+    Object[][] rowData = spectrum.getHeaderRowDataAsArray();
+    if (false && source.isCompoundSource)
+      rowData = source.getHeaderRowDataAsArray(false, rowData);
     String[] columnNames = { "Label", "Description" };
     JTable table = new JTable(rowData, columnNames);
     table.setPreferredScrollableViewportSize(new Dimension(400, 195));

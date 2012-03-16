@@ -144,4 +144,14 @@ public class JDXSource extends JDXHeader {
   public boolean isOverlay() {
     return type == TYPE_OVERLAY;
   }
+
+  public Object[][] getHeaderRowDataAsArray(boolean addDataClass,
+                                            Object[][] rowData) {
+    if (rowData == null)
+      rowData = new Object[0][0];
+    Object[][] data = getHeaderRowDataAsArray(addDataClass, rowData.length);
+    for (int i = rowData.length; --i >= 0; )
+      data[data.length - rowData.length + i] = rowData[i];
+    return data;
+  }
 }

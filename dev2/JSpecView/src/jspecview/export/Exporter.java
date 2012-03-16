@@ -41,7 +41,7 @@ public class Exporter {
           return mode;
       return UNK;
     }    
-
+    
     public static boolean isExportMode(String ext) {
       return (getType(ext) != UNK);
     }
