@@ -22,6 +22,7 @@ package jspecview.export;
 import java.text.DecimalFormat;
 
 import jspecview.common.Coordinate;
+import jspecview.util.Logger;
 import jspecview.util.TextFormat;
 
 /**
@@ -65,6 +66,8 @@ class JDXCompressor {
       buffer.append(TextFormat
           .fixIntNoExponent(xyCoords[i].getXVal() / xFactor));
       yStr.setLength(0);
+      if (Logger.debugging)
+        Logger.info("" + i + '\t' + xyCoords[i].getXVal() + '\t' + xyCoords[i].getYVal());
       long y1 = (long) Math.round(xyCoords[i].getYVal() / yFactor);
       yStr.append(makeSQZ(y1));
       String lastDif = "";
@@ -89,13 +92,17 @@ class JDXCompressor {
             }
             yStr.append(temp);
           }
+          if (Logger.debugging)
+            Logger.info("" + i + '\t' + xyCoords[i].getXVal() + '\t' + xyCoords[i].getYVal() + '\t' + y2 + '\t' + nDif + '\t' + yStr);
           y1 = y2;
           i += step;
         }
         if (nDif > 0)
-          yStr.append(makeDUP(nDif));
+          yStr.append(makeDUP(nDif + 1));
         // convert last digit of string to SQZ
         yStr.append(makeSQZ(xyCoords[i], yFactor));
+        if (Logger.debugging)
+          Logger.info("" + i + '\t' + xyCoords[i].getXVal() + '\t' + xyCoords[i].getYVal() + '\t' + nDif + '\t' + yStr);
       }
       buffer.append(yStr).append(TextFormat.newLine);
       i += step;
