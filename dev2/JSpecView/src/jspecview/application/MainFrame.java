@@ -1121,13 +1121,22 @@ public class MainFrame extends JFrame implements DropTargetListener,
         tip = "?";
         break;
       case 1:
+        ScriptToken st = list.get(0);
+        tip = st.getTip();
+        if (tip.indexOf("TRUE") >= 0)
+          tip = " (" + parameters.getBoolean(st) + ")";
+        else if (st.name().indexOf("COLOR") >= 0)
+          tip = " (" + AppUtils.colorToHexString(parameters.getColor(st)) + ")";
+        else 
+          tip = "";
         if (c == '\t' || isExact) {
-          tip = list.get(0).name() + " " + list.get(0).getTip();
+          tip = st.name() + " " + st.getTip() + tip;
           if (c == '\t')
-            commandInput.setText(list.get(0).name() + " ");
+            commandInput.setText(st.name() + " ");
           break;
         }
-        // fall through
+        tip = st.name() + " " + tip;
+        break;
       default:
         tip = ScriptToken.getNameList(list);
       }

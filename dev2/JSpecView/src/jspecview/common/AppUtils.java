@@ -94,6 +94,8 @@ public class AppUtils {
    * @return a hex string representation of a <code>Color</color> object
    */
   public static String colorToHexString(Color color) {
+    if (color == null)
+      return "";
     String r = Integer.toHexString(color.getRed());
     if (r.length() == 1)
       r = "0" + r;
