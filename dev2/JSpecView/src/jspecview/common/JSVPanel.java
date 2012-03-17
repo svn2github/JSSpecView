@@ -828,15 +828,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   /**
-   * Returns the insets of the plot area
-   * 
-   * @return the insets of the plot area
-   */
-  public Insets getPlotAreaInsets() {
-    return plotAreaInsets;
-  }
-
-  /**
    * Returns the color of the plotArea
    * 
    * @return the color of the plotArea
@@ -901,24 +892,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   public Color getGridColor() {
     return gridColor;
-  }
-
-  /**
-   * Returns the color of the Coodinates
-   * 
-   * @return the color of the Coodinates
-   */
-  public Color getcoordinatesColor() {
-    return coordinatesColor;
-  }
-
-  /**
-   * Returns the color of the highlighted Region
-   * 
-   * @return the color of the highlighted Region
-   */
-  public Color getHighlightColor() {
-    return highlightColor;
   }
 
   /**
@@ -1054,11 +1027,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       fillBox(g, leftPlotAreaPos, topPlotAreaPos, rightPlotAreaPos,
           bottomPlotAreaPos, plotAreaColor);
       drawWidgets(g, subIndex);
-      drawHighlights(g);
-      drawPeakTabs(g);
       if (grid)
         drawGrid(g, height, width);
-
+      drawHighlights(g);
+      drawPeakTabs(g);
       // scale-related, title, and coordinates
       if (xscale)
         drawXScale(g, height, width);
@@ -1838,25 +1810,20 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
                       boolean doRepaint, boolean addZoom, boolean checkRange) {
     if (!enableZoom)
       return;
-    System.out.println("dozoom " + initX + " " + initY + " " + finalX+ " " + finalY);
-
-    // swap points if init value > final value
     if (initX > finalX) {
       double tempX = initX;
       initX = finalX;
       finalX = tempX;
     }
-
     if (initY > finalY) {
       double tempY = initY;
       initY = finalY;
       finalY = tempY;
     }
-
     boolean is2DYScaleChange = (isd != null && (isd.minZ != initY || isd.maxZ != finalY));
     
     // determine if the range of the area selected for zooming is within the plot
-    // Area and if not ensure that it is
+    // area and if not ensure that it is
 
     if (checkRange) {
       if (!ScaleData.isWithinRange(initX, multiScaleData)
