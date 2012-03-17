@@ -248,7 +248,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private boolean allowYScale = true;
   ColoredAnnotation lastAnnotation;
   private double minYScale;
-  private boolean display1Dand2D;
+  private boolean display1Dwith2D;
   private boolean display2D = true;
   private double widthRatio = 1;
 
@@ -412,11 +412,16 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     plotColors = colors;
   }
 
+  
+  private boolean allow2D() {
+    return !getSpectrumAt(0).is1D();
+  }
+  
   private void getMultiScaleData(double x1, double x2, double y1, double y2,
                                  int[] startIndices, int[] endIndices) {
     Graph[] graphs = (graphsTemp[0] == null ? spectra : graphsTemp);
     List<JDXSpectrum> subspecs = getSpectrumAt(0).getSubSpectra();
-    if (!getSpectrumAt(0).is1D() || subspecs == null && y1 == y2) {
+    if (allow2D() || subspecs == null && y1 == y2) {
       // 2D spectrum or startup
       graphs = spectra;
     } else if (y1 == y2) {
@@ -718,8 +723,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     integrationRatios = ratios;
   }
 
-  public void setDisplay1Dand2D(boolean TF) {
-    display1Dand2D = TF;
+  public void setDisplay1Dwith2D(boolean TF) {
+    display1Dwith2D = TF;
     thisWidth = 0;
   }
  
@@ -1214,9 +1219,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     rightPlotAreaPos = plotAreaWidth + leftPlotAreaPos;
     userYFactor = getSpectrum().getUserYFactor();
     setScaleFactors(multiScaleData);
-    if (!spec0.is1D() && display2D && (isd != null || get2DImage(width))) {
+    if (allow2D() && display2D && (isd != null || get2DImage(width))) {
       width = (int) Math.floor(widthRatio * width);
-      plotAreaWidth = (display1Dand2D ? width
+      plotAreaWidth = (display1Dwith2D ? width
           - (plotAreaInsets.right + plotAreaInsets.left) : 0);
       rightPlotAreaPos = plotAreaWidth + leftPlotAreaPos;
       setScaleFactors(multiScaleData);
@@ -1225,7 +1230,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     int subIndex = spec0.getSubIndex();
     setWidgets(isResized, subIndex);
 
-    doDraw1DObjects = (isd == null || display1Dand2D);
+    doDraw1DObjects = (isd == null || display1Dwith2D);
 
     if (isd != null)
       draw2DImage(g);
@@ -2030,7 +2035,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
                                        boolean addZoom) {
     if (!zoomEnabled)
       return false;
-    if (getSpectrumAt(0).is1D() && getSpectrumAt(0).getSubSpectra() != null) {
+    if (!allow2D() && getSpectrumAt(0).getSubSpectra() != null) {
       graphsTemp[0] = getSpectrum();
       if (!multiScaleData.setDataPointIndices(graphsTemp, xPt1, xPt2,
           minNumOfPointsForZoom, startIndices, endIndices, false))
@@ -2569,7 +2574,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   public void mouseMoved(MouseEvent e) {
     setToolTipForPixels(e.getX(), e.getY());
-    if (isd != null && !display1Dand2D && sticky2Dcursor)
+    if (isd != null && !display1Dwith2D && sticky2Dcursor)
       set2DCrossHairs(e.getX(), e.getY());
     repaint();
   }
@@ -2820,12 +2825,12 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       int isub = isd.toSubSpectrumIndex(yPixel);
       String s = formatterX.format(isd.toX(xPixel)) + " " + getSpectrum().getXUnits() + ",  "
           + get2DYLabel(isub, formatterX);
-      setToolTipText(display1Dand2D ? s : "");
+      setToolTipText(display1Dwith2D ? s : "");
       coordStr = s;
       return;
     }
 
-    if (isd != null && !display1Dand2D) {
+    if (isd != null && !display1Dwith2D) {
       setToolTipText("");
       coordStr = "";
       return;      
@@ -2995,51 +3000,53 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       setTitleFontName(ds.getTitleFont());
     if (st == null || st == ScriptToken.DISPLAYFONTNAME)
       setDisplayFontName(ds.getDisplayFont());
-    if (st == null || st == ScriptToken.TITLECOLOR)
-      setTitleColor(ds.getColor("title"));
-    if (st == null || st == ScriptToken.UNITSCOLOR)
-      setUnitsColor(ds.getColor("units"));
-    if (st == null || st == ScriptToken.SCALECOLOR)
-      setScaleColor(ds.getColor("scale"));
-    if (st == null || st == ScriptToken.COORDINATESCOLOR)
-      setcoordinatesColor(ds.getColor("coordinates"));
-    if (st == null || st == ScriptToken.GRIDCOLOR)
-      setGridColor(ds.getColor("grid"));
-    if (st == null || st == ScriptToken.PLOTCOLOR)
-      setPlotColor(ds.getColor("plot"));
-    if (st == null || st == ScriptToken.PLOTAREACOLOR)
-      setPlotAreaColor(ds.getColor("plotarea"));
-    if (st == null || st == ScriptToken.BACKGROUNDCOLOR)
-      setBackgroundColor(ds.getColor("background"));
-    if (st == null || st == ScriptToken.INTEGRALPLOTCOLOR)
-      setIntegralPlotColor(ds.getColor("integral"));
+    ScriptToken t;
+    if (st == (t = ScriptToken.TITLECOLOR) || st == null)
+      setTitleColor(ds.getColor(t));
+    if (st == (t = ScriptToken.UNITSCOLOR) || st == null)
+      setUnitsColor(ds.getColor(t));
+    if (st == (t = ScriptToken.SCALECOLOR) || st == null)
+      setScaleColor(ds.getColor(t));
+    if (st == (t = ScriptToken.COORDINATESCOLOR) || st == null)
+      setcoordinatesColor(ds.getColor(t));
+    if (st == (t = ScriptToken.GRIDCOLOR) || st == null)
+      setGridColor(ds.getColor(t));
+    if (st == (t = ScriptToken.PLOTCOLOR) || st == null)
+      setPlotColor(ds.getColor(t));
+    if (st == (t = ScriptToken.PLOTAREACOLOR) || st == null)
+      setPlotAreaColor(ds.getColor(t));
+    if (st == (t = ScriptToken.BACKGROUNDCOLOR) || st == null)
+      setBackgroundColor(ds.getColor(t));
+    if (st == (t = ScriptToken.INTEGRALPLOTCOLOR) || st == null)
+      setIntegralPlotColor(ds.getColor(t));
   }
 
   public void setBoolean(Parameters parameters, ScriptToken st) {
-    if (st == null || st == ScriptToken.GRIDON)
-      setGridOn(parameters.gridOn);
-    if (st == null || st == ScriptToken.COORDINATESON)
-      setCoordinatesOn(parameters.coordinatesOn);
-    if (st == null || st == ScriptToken.XSCALEON)
-      setXScaleOn(parameters.xScaleOn);
-    if (st == null || st == ScriptToken.YSCALEON)
-      setYScaleOn(parameters.yScaleOn);
-    if (st == null || st == ScriptToken.XUNITSON)
-      setXUnitsOn(parameters.xUnitsOn);
-    if (st == null || st == ScriptToken.YUNITSON)
-      setYUnitsOn(parameters.yUnitsOn);
-    if (st == null || st == ScriptToken.REVERSEPLOT)
-      setReversePlot(parameters.reversePlot);
-    if (st == null || st == ScriptToken.DISPLAY2D)
-      setDisplay2D(parameters.display2D);
-    if (st == null || st == ScriptToken.DISPLAY1D)
-      setDisplay1Dand2D(parameters.display1D);
-    if (st == null || st == ScriptToken.TITLEON)
-      setTitleOn(parameters.titleOn);
-    if (st == null || st == ScriptToken.TITLEBOLDON)
-      setTitleBoldOn(parameters.titleBoldOn);
-    if (st == null || st == ScriptToken.ENABLEZOOM)
-      setZoomEnabled(parameters.enableZoom);
+    ScriptToken t;
+    if (st == (t = ScriptToken.GRIDON) || st == null)
+      setGridOn(parameters.getBoolean(t));
+    if (st == (t = ScriptToken.COORDINATESON) || st == null)
+      setCoordinatesOn(parameters.getBoolean(t));
+    if (st == (t = ScriptToken.XSCALEON) || st == null)
+      setXScaleOn(parameters.getBoolean(t));
+    if (st == (t = ScriptToken.YSCALEON) || st == null)
+      setYScaleOn(parameters.getBoolean(t));
+    if (st == (t = ScriptToken.XUNITSON) || st == null)
+      setXUnitsOn(parameters.getBoolean(t));
+    if (st == (t = ScriptToken.YUNITSON) || st == null)
+      setYUnitsOn(parameters.getBoolean(t));
+    if (st == (t = ScriptToken.REVERSEPLOT) || st == null)
+      setReversePlot(parameters.getBoolean(t));
+    if (st == (t = ScriptToken.DISPLAY2D) || st == null)
+      setDisplay2D(parameters.getBoolean(t));
+    if (st == (t = ScriptToken.DISPLAY1D) || st == null)
+      setDisplay1Dwith2D(parameters.getBoolean(t));
+    if (st == (t = ScriptToken.TITLEON) || st == null)
+      setTitleOn(parameters.getBoolean(t));
+    if (st == (t = ScriptToken.TITLEBOLDON) || st == null)
+      setTitleBoldOn(parameters.getBoolean(t));
+    if (st == (t = ScriptToken.ENABLEZOOM) || st == null)
+      setZoomEnabled(parameters.getBoolean(t));
   }
 
   public JDXSpectrum getSpectrum() {
@@ -3088,7 +3095,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     isd.setScale(zoomInfoList.get(0));
     if (!update2dImage(false))
       return false;
-    widthRatio = (display1Dand2D ? 1.0 * (width - isd.xPixels) / width : 1);
+    widthRatio = (display1Dwith2D ? 1.0 * (width - isd.xPixels) / width : 1);
     isd.setXY0((int) Math.floor(width - isd.xPixels) - 20, topPlotAreaPos);
     isd.resetZoom();
     sticky2Dcursor = true;
@@ -3106,7 +3113,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     image2D = new BufferedImage(isd.imageWidth, isd.imageHeight, BufferedImage.TYPE_BYTE_GRAY);
     WritableRaster raster = image2D.getRaster();
     raster.setSamples(0, 0, isd.imageWidth, isd.imageHeight, 0, buffer);
-    isd.setPixelWidthHeight((int) ((display1Dand2D ? 0.6 : 0.9) * thisWidth), thisPlotHeight);
+    isd.setPixelWidthHeight((int) ((display1Dwith2D ? 0.6 : 0.9) * thisWidth), thisPlotHeight);
     return true;
   }
 

@@ -529,7 +529,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
   private void initParams(String params) {
     parseInitScript(params);
     newAppletPanel();
-    appletPopupMenu = new JSVAppletPopupMenu(this, allowMenu, enableZoom);
+    appletPopupMenu = new JSVAppletPopupMenu(this, allowMenu, parameters.getBoolean(ScriptToken.ENABLEZOOM));
     runScriptNow(params);
   }
   
@@ -1011,7 +1011,6 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
   }
 
   private String fullName;
-  private boolean enableZoom = true;
   private boolean allowMenu = true;
   private boolean compoundMenuOn;
   private boolean allowCompoundMenu = true;
@@ -1192,9 +1191,6 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
         case APPLETREADYCALLBACKFUNCTIONNAME:
           appletReadyCallbackFunctionName = value;
           break;
-        case ENABLEZOOM:
-          enableZoom = Boolean.parseBoolean(value);
-          break;
         case MENUON:
           allowMenu = Boolean.parseBoolean(value);
           break;
@@ -1218,7 +1214,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
           spectrumNumber = Integer.parseInt(value);
           break;
         case AUTOINTEGRATE:
-          autoIntegrate = Parameters.parseBoolean(value);
+          autoIntegrate = Parameters.isTrue(value);
           break;
         case IRMODE:
           irMode = (value.toUpperCase().startsWith("T") ? JDXSpectrum.TO_TRANS

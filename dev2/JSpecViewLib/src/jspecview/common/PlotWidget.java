@@ -40,8 +40,6 @@ class PlotWidget extends Coordinate {
   }
 
   public void setX(double x, int xPixel) {
-    if (x > 6.5 && name.indexOf("0") < 0)
-      System.out.println("setting x for " + name + "\t" + x + "\t" + xPixel);
     setXVal(x);
     xPixel0 = xPixel1 = xPixel;
   }

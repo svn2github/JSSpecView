@@ -39,7 +39,7 @@ public class DisplayScheme {
   /** The name of the display font */
   protected String displayFont;
   /** A map of the name of the elements and their colors*/
-  protected Map<String, Color> elementColors = new Hashtable<String, Color>();
+  protected Map<ScriptToken, Color> elementColors = new Hashtable<ScriptToken, Color>();
   /** Specifies if the display scheme is the default */
   protected boolean isDefault = false;
 
@@ -119,9 +119,8 @@ public class DisplayScheme {
    * @param element the name of the element
    * @return the <code>Color</code> of the element
    */
-  public Color getColor(String element){
-    Color color = elementColors.get(element);
-    return color;
+  public Color getColor(ScriptToken st){
+    return elementColors.get(st);
   }
 
   /**
@@ -129,9 +128,10 @@ public class DisplayScheme {
    * @param element the name of the element
    * @param color the color the element should have
    */
-  public Color setColor(String element, Color color){
+  public Color setColor(ScriptToken st, Color color){
+    System.out.println(name + " " + st + " " + color);
     if (color != null)
-      elementColors.put(element, color);
+      elementColors.put(st, color);
     return color;
   }
 
@@ -143,7 +143,7 @@ public class DisplayScheme {
   public DisplayScheme copy(String newName){
     DisplayScheme ds = new DisplayScheme(newName);
     ds.setDisplayFont(getDisplayFont());
-    for(Map.Entry<String, Color> entry: elementColors.entrySet())
+    for(Map.Entry<ScriptToken, Color> entry: elementColors.entrySet())
       ds.setColor(entry.getKey(), entry.getValue());
     return ds;
   }
@@ -157,15 +157,15 @@ public class DisplayScheme {
   }
 
   protected void setDefaults() {
-    setColor("title", Color.BLACK);
-    setColor("units", Color.RED);
-    setColor("scale", Color.BLACK);
-    setColor("coordinates", Color.RED);
-    setColor("grid", Color.LIGHT_GRAY);
-    setColor("plot", Color.BLUE);
-    setColor("plotarea", Color.WHITE);
-    setColor("background", new Color(192, 192, 192));
-    setColor("integral", Color.red);
+    setColor(ScriptToken.TITLECOLOR, Color.BLACK);
+    setColor(ScriptToken.UNITSCOLOR, Color.RED);
+    setColor(ScriptToken.SCALECOLOR, Color.BLACK);
+    setColor(ScriptToken.COORDINATESCOLOR, Color.RED);
+    setColor(ScriptToken.GRIDCOLOR, Color.LIGHT_GRAY);
+    setColor(ScriptToken.PLOTCOLOR, Color.BLUE);
+    setColor(ScriptToken.PLOTAREACOLOR, Color.WHITE);
+    setColor(ScriptToken.BACKGROUNDCOLOR, new Color(192, 192, 192));
+    setColor(ScriptToken.INTEGRALPLOTCOLOR, Color.red);
   }
 
 

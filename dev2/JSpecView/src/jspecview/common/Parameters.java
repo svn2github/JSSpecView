@@ -4,7 +4,9 @@ import java.awt.Color;
 import java.awt.GraphicsEnvironment;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
@@ -19,7 +21,16 @@ public class Parameters extends DisplayScheme {
 
   protected void setDefaults() {
     super.setDefaults();
-    titleOn = !name.equals("application");
+    setBoolean(ScriptToken.TITLEON, !name.equals("application"));
+    setBoolean(ScriptToken.ENABLEZOOM, true);
+    setBoolean(ScriptToken.DISPLAY2D, true);
+    setBoolean(ScriptToken.COORDINATESON, true);
+    setBoolean(ScriptToken.GRIDON, true);
+    setBoolean(ScriptToken.XSCALEON, true);
+    setBoolean(ScriptToken.YSCALEON, true);
+    setBoolean(ScriptToken.XUNITSON, true);
+    setBoolean(ScriptToken.YUNITSON, true);
+
     plotColors = new Color[defaultPlotColors.length];
     System.arraycopy(defaultPlotColors, 0, plotColors, 0, plotColors.length);
   }
@@ -29,20 +40,6 @@ public class Parameters extends DisplayScheme {
 
   private Color[] plotColors;  
   private String plotColorsStr;
-  boolean reversePlot;
-  boolean enableZoom = true;
-  boolean titleOn = true;
-  boolean titleBoldOn;
-
-
-  public boolean display1D = false;
-  public boolean display2D = true;
-  public boolean coordinatesOn = true;
-  public boolean gridOn = true;
-  public boolean xScaleOn = true;
-  public boolean yScaleOn = true;
-  boolean xUnitsOn = true;
-  boolean yUnitsOn = true;
 
   public double integralMinY = IntegralGraph.DEFAULT_MINY;
   public double integralFactor = IntegralGraph.DEFAULT_FACTOR;
@@ -100,67 +97,32 @@ public class Parameters extends DisplayScheme {
       }
       break;
     case DEBUG:
-      Logger.debugging = parseBoolean(value);
+      Logger.debugging = isTrue(value);
       return;
-    case DISPLAY1D:
-      display1D = parseBoolean(value);
-      break;
-    case DISPLAY2D:
-      display2D = parseBoolean(value);
-      break;
-    case REVERSEPLOT:
-      reversePlot = parseBoolean(value);
-      break;
     case COORDINATESON:
-      coordinatesOn = parseBoolean(value);
-      break;
+    case DISPLAY1D:
+    case DISPLAY2D:
+    case ENABLEZOOM:
     case GRIDON:
-      gridOn = parseBoolean(value);
-      break;
-    case XSCALEON:
-      xScaleOn = parseBoolean(value);
-      break;
-    case YSCALEON:
-      yScaleOn = parseBoolean(value);
-      break;
-    case XUNITSON:
-      xUnitsOn = parseBoolean(value);
-      break;
-    case YUNITSON:
-      yUnitsOn = parseBoolean(value);
-      break;
+    case REVERSEPLOT:
     case TITLEON:
-      titleOn = parseBoolean(value);
-      break;
     case TITLEBOLDON:
-      titleBoldOn = parseBoolean(value);
+    case XSCALEON:
+    case XUNITSON:
+    case YSCALEON:
+    case YUNITSON:
+      setBoolean(st, value);
       break;
     case BACKGROUNDCOLOR:
-      param = setColor("background", value);
-      break;
     case COORDINATESCOLOR:
-      param = setColor("coordinates", value);
-      break;
     case GRIDCOLOR:
-      param = setColor("grid", value);
-      break;
-    case PLOTAREACOLOR:
-      param = setColor("plotarea", value);
-      break;
-    case PLOTCOLOR:
-      param = setColor("plot", value);
-      break;
-    case SCALECOLOR:
-      param = setColor("scale", value);
-      break;
-    case TITLECOLOR:
-      param = setColor("title", value);
-      break;
-    case UNITSCOLOR:
-      param = setColor("units", value);
-      break;
     case INTEGRALPLOTCOLOR:
-      param = setColor("integral", value);
+    case PLOTAREACOLOR:
+    case PLOTCOLOR:
+    case SCALECOLOR:
+    case TITLECOLOR:
+    case UNITSCOLOR:
+      param = setColor(st, value);
       break;
     case TITLEFONTNAME:
       GraphicsEnvironment g = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -192,14 +154,30 @@ public class Parameters extends DisplayScheme {
       jsvp.setBoolean(this, st);
   }
 
-  public static boolean parseBoolean(String value) {
-    if (value.length() == 0)
-      value = "true";
-    return Boolean.parseBoolean(value);
+  private Map<ScriptToken, Boolean> htBooleans = new Hashtable<ScriptToken, Boolean>();
+  
+  public static boolean isTrue(String value) {
+    return (value.length() == 0 || Boolean.parseBoolean(value)); 
+  }
+  
+  public boolean setBoolean(ScriptToken st, String value) {
+    return setBoolean(st, isTrue(value));
   }
 
-  private Color setColor(String element, String value) {
-    return setColor(element, AppUtils.getColorFromString(value));
+  public boolean setBoolean(ScriptToken st, boolean val) {
+    if (val)
+      htBooleans.put(st, Boolean.TRUE);
+    else
+      htBooleans.remove(st);
+    return val;
+  }
+
+  public boolean getBoolean(ScriptToken t) {
+    return htBooleans.containsKey(t);
+  }
+    
+  private Color setColor(ScriptToken st, String value) {
+    return setColor(st, AppUtils.getColorFromString(value));
   }
 
   /**
@@ -210,7 +188,7 @@ public class Parameters extends DisplayScheme {
     if (plotColorsStr != null) {
       plotColors = getPlotColors(plotColorsStr);
     } else {
-      plotColors[0] = getColor("plot");
+      plotColors[0] = getColor(ScriptToken.PLOTCOLOR);
     }
   }
 
@@ -229,4 +207,5 @@ public class Parameters extends DisplayScheme {
     }
     return (Color[]) colors.toArray(new Color[colors.size()]);
   }
+
 }

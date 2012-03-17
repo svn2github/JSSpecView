@@ -31,6 +31,7 @@ import java.util.TreeMap;
 
 import jspecview.common.AppUtils;
 import jspecview.common.DisplayScheme;
+import jspecview.common.ScriptToken;
 import jspecview.util.FileManager;
 import jspecview.util.SimpleXmlReader;
 import jspecview.util.TextFormat;
@@ -66,19 +67,17 @@ public class DisplaySchemesProcessor {
    * @return boolean
    */
   public DisplayScheme loadDefault() {
-    Color black = new Color(0,0,0);
-    Color white = new Color(255,255,255);
-
     DisplayScheme dsdef = new DisplayScheme("Default");
     dsdef.setDisplayFont("default");
-    dsdef.setColor("title", black);
-    dsdef.setColor("coordinates", black);
-    dsdef.setColor("scale", black);
-    dsdef.setColor("units", black);
-    dsdef.setColor("grid", black);
-    dsdef.setColor("plot", black);
-    dsdef.setColor("plotarea", white);
-    dsdef.setColor("background", white);
+    dsdef.setColor(ScriptToken.TITLECOLOR, Color.BLACK);
+    dsdef.setColor(ScriptToken.UNITSCOLOR, Color.BLACK);
+    dsdef.setColor(ScriptToken.SCALECOLOR, Color.BLACK);
+    dsdef.setColor(ScriptToken.COORDINATESCOLOR, Color.BLACK);
+    dsdef.setColor(ScriptToken.GRIDCOLOR, Color.BLACK);
+    dsdef.setColor(ScriptToken.PLOTCOLOR, Color.BLACK);
+    dsdef.setColor(ScriptToken.PLOTAREACOLOR, Color.WHITE);
+    dsdef.setColor(ScriptToken.BACKGROUNDCOLOR, Color.WHITE);
+    dsdef.setColor(ScriptToken.INTEGRALPLOTCOLOR, Color.RED);
     displaySchemes.put("Default", dsdef);
     
     return dsdef;
@@ -137,83 +136,88 @@ public class DisplaySchemesProcessor {
   }
 
   /**
-   * Loads the display schemes into memory and stores them in a <code>Vector</code>
-   * @param dispSchemeInputStream the input stream to load
+   * Loads the display schemes into memory and stores them in a
+   * <code>Vector</code>
+   * 
+   * @param dispSchemeInputStream
+   *        the input stream to load
    * @throws Exception
    * @return true if loaded successfully
    */
-  public boolean load(BufferedReader br) { 
-	  
+  public boolean load(BufferedReader br) {
+
     reader = new SimpleXmlReader(br);
     String defaultDS = "Default";
     DisplayScheme ds = null;
     String attr;
-    try{
-	    while (reader.hasNext()) {
-	      if (reader.nextEvent() != SimpleXmlReader.START_ELEMENT)
-	        continue;
-	      String theTag = reader.getTagName();
-	      if (theTag.equals("displayschemes")) {
-	        defaultDS = reader.getAttrValue("default");
-	      }
-	      if (theTag.equals("displayscheme")) {
-	        String name = reader.getAttrValue("name");
-	        ds = new DisplayScheme(name);
-	        if (name.equals(defaultDS))
-	          ds.setDefault(true);
-	      }
-	      if (ds == null)
-	        continue;
-	      if (theTag.equals("font")) {
-	        attr = reader.getAttrValue("face");
-	        if (attr.length() > 0 && ds != null)
-	          ds.setDisplayFont(attr);
-	      } else if (theTag.equals("titlecolor")) {
-	        Color color = getColor();
-	        if (color == null)
-	          color = Color.decode("#0000ff");
-	        ds.setColor("title", color);
-	      } else if (theTag.equals("coordinatecolor")) {
-	        Color color = getColor();
-	        if (color == null)
-	          color = Color.decode("#ff0000");
-	        ds.setColor("coordinates", color);
-	      } else if (theTag.equals("scalecolor")) {
-	        Color color = getColor();
-	        if (color == null)
-	          color = Color.decode("#660000");
-	        ds.setColor("scale", color);
-	      } else if (theTag.equals("unitscolor")) {
-	        Color color = getColor();
-	        if (color == null)
-	          color = Color.decode("#ff0000");
-	        ds.setColor("units", color);
-	      } else if (theTag.equals("gridcolor")) {
-	        Color color = getColor();
-	        if (color == null)
-	          color = Color.decode("#4e4c4c");
-	        ds.setColor("grid", color);
-	      } else if (theTag.equals("plotcolor")) {
-	        Color color = getColor();
-	        if (color == null)
-	          Color.decode("#ff9900");
-	        ds.setColor("plot", color);
-	      } else if (theTag.equals("plotareacolor")) {
-	        Color color = getColor();
-	        if (color == null)
-	          color = Color.decode("#333333");
-	        ds.setColor("plotarea", color);
-	      } else if (theTag.equals("backgroundcolor")) {
-	        Color color = getColor();
-	        if (color == null)
-	          color = Color.decode("#c0c0c0");
-	        ds.setColor("background", color);
-	      }
-	      displaySchemes.put(ds.getName(), ds);
-	    }
-    }
-    catch(IOException e){
-    	return false;
+    try {
+      while (reader.hasNext()) {
+        if (reader.nextEvent() != SimpleXmlReader.START_ELEMENT)
+          continue;
+        String theTag = reader.getTagName();
+        if (theTag.equals("displayschemes")) {
+          defaultDS = reader.getAttrValue("default");
+        }
+        if (theTag.equals("displayscheme")) {
+          String name = reader.getAttrValue("name");
+          ds = new DisplayScheme(name);
+          if (name.equals(defaultDS))
+            ds.setDefault(true);
+          displaySchemes.put(name, ds);
+        }
+        if (ds == null)
+          continue;
+        if (theTag.equals("font")) {
+          attr = reader.getAttrValue("face");
+          if (attr.length() > 0 && ds != null)
+            ds.setDisplayFont(attr);
+        } else {
+          if (theTag.equals("coordinateColor"))
+            theTag = "coordinatesColor";
+          ScriptToken st = ScriptToken.getScriptToken(theTag);
+          if (st != ScriptToken.UNKNOWN) {
+            Color color = getColor();
+            if (color == null) {
+              String def;
+              switch (st) {
+              default:
+                def = null;
+                break;
+              case TITLECOLOR:
+                def = "#0000ff";
+                break;
+              case COORDINATESCOLOR:
+                def = "#ff0000";
+                break;
+              case SCALECOLOR:
+                def = "#660000";
+                break;
+              case UNITSCOLOR:
+                def = "#ff0000";
+                break;
+              case GRIDCOLOR:
+                def = "#4e4c4c";
+                break;
+              case PLOTCOLOR:
+                def = "#ff9900";
+                break;
+              case PLOTAREACOLOR:
+                def = "#333333";
+                break;
+              case BACKGROUNDCOLOR:
+                def = "#c0c0c0";
+                break;
+              }
+              if (def != null)
+                color = Color.decode(def);
+            }
+            if (color != null)
+              ds.setColor(st, color);
+          }
+        }
+      }
+    } catch (IOException e) {
+      return false;
     }
     return true;
   }
@@ -254,35 +258,35 @@ public class DisplaySchemesProcessor {
       buffer.write("\t\t<font face = \"" + ds.getDisplayFont() + "\"/>");
       buffer.newLine();
       buffer.write("\t\t<titleColor hex = \"" +
-                   AppUtils.colorToHexString(ds.getColor("title")) +
+                   AppUtils.colorToHexString(ds.getColor(ScriptToken.TITLECOLOR)) +
                    "\"/>");
       buffer.newLine();
       buffer.write("\t\t<scaleColor hex = \"" +
-                   AppUtils.colorToHexString(ds.getColor("scale")) +
+                   AppUtils.colorToHexString(ds.getColor(ScriptToken.SCALECOLOR)) +
                    "\"/>");
       buffer.newLine();
       buffer.write("\t\t<unitsColor hex = \"" +
-                   AppUtils.colorToHexString(ds.getColor("units")) +
+                   AppUtils.colorToHexString(ds.getColor(ScriptToken.UNITSCOLOR)) +
                    "\"/>");
       buffer.newLine();
       buffer.write("\t\t<coordinateColor hex = \"" +
-                   AppUtils.colorToHexString(ds.getColor("coordinates")) +
+                   AppUtils.colorToHexString(ds.getColor(ScriptToken.COORDINATESCOLOR)) +
                    "\"/>");
       buffer.newLine();
       buffer.write("\t\t<gridColor hex = \"" +
-                   AppUtils.colorToHexString(ds.getColor("grid")) +
+                   AppUtils.colorToHexString(ds.getColor(ScriptToken.GRIDCOLOR)) +
                    "\"/>");
       buffer.newLine();
       buffer.write("\t\t<plotColor hex = \"" +
-                   AppUtils.colorToHexString(ds.getColor("plot")) +
+                   AppUtils.colorToHexString(ds.getColor(ScriptToken.PLOTCOLOR)) +
                    "\"/>");
       buffer.newLine();
       buffer.write("\t\t<plotAreaColor hex = \"" +
-                   AppUtils.colorToHexString(ds.getColor("plotarea")) +
+                   AppUtils.colorToHexString(ds.getColor(ScriptToken.PLOTAREACOLOR)) +
                    "\"/>");
       buffer.newLine();
       buffer.write("\t\t<backgroundColor hex = \"" +
-                   AppUtils.colorToHexString(ds.getColor("background")) +
+                   AppUtils.colorToHexString(ds.getColor(ScriptToken.BACKGROUNDCOLOR)) +
                    "\"/>");
       buffer.newLine();
       buffer.write("\t</displayScheme>");

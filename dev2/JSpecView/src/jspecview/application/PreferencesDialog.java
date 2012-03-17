@@ -59,6 +59,7 @@ import javax.swing.event.ListSelectionListener;
 import jspecview.common.AppUtils;
 import jspecview.common.DisplayScheme;
 import jspecview.common.JSVPanel;
+import jspecview.common.ScriptToken;
 import jspecview.exception.JSpecViewException;
 import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
@@ -761,7 +762,7 @@ public class PreferencesDialog extends JDialog {
       Color color = button.getBackground();
       currentColorButton.setBackground(color);
       String element = (String)elementList.getSelectedValue();
-      currentDS.setColor(element.toLowerCase(), color);
+      currentDS.setColor(ScriptToken.getScriptToken(element), color);
       // kludge
       currentDS.setName("Current");
       updatePreviewPanel();
@@ -776,13 +777,14 @@ public class PreferencesDialog extends JDialog {
     /**
      * Sets the color of the currentColorButton to the color of the selected
      * element in the list
-     * @param lse the ListSelectionEvent
+     * 
+     * @param lse
+     *        the ListSelectionEvent
      */
-    public void valueChanged(ListSelectionEvent lse){
-      JList list = (JList)lse.getSource();
-      String element = (String)list.getSelectedValue();
-      Color color = currentDS.getColor(element.toLowerCase());
-      currentColorButton.setBackground(color);
+    public void valueChanged(ListSelectionEvent lse) {
+      currentColorButton.setBackground(currentDS
+          .getColor(ScriptToken.getScriptToken((String) ((JList) lse
+              .getSource()).getSelectedValue())));
     }
   }
 
@@ -887,9 +889,7 @@ public class PreferencesDialog extends JDialog {
     Color color = JColorChooser.showDialog(this, "Choose Color", Color.black);
     if(color != null){
       currentColorButton.setBackground(color);
-      String element = (String)elementList.getSelectedValue();
-      currentDS.setColor(element.toLowerCase(), color);
-      // kludge
+      currentDS.setColor(ScriptToken.getScriptToken((String)elementList.getSelectedValue()), color);
       currentDS.setName("Current");
       updatePreviewPanel();
     }
@@ -1008,14 +1008,14 @@ public class PreferencesDialog extends JDialog {
    */
   void updatePreviewPanel(){
     if(previewPanel != null){
-      previewPanel.setTitleColor(currentDS.getColor("title"));
-      previewPanel.setPlotColor(currentDS.getColor("plot"));
-      previewPanel.setScaleColor(currentDS.getColor("scale"));
-      previewPanel.setcoordinatesColor(currentDS.getColor("coordinates"));
-      previewPanel.setUnitsColor(currentDS.getColor("units"));
-      previewPanel.setPlotAreaColor(currentDS.getColor("plotarea"));
-      previewPanel.setBackground(currentDS.getColor("background"));
-      previewPanel.setGridColor(currentDS.getColor("grid"));
+      previewPanel.setTitleColor(currentDS.getColor(ScriptToken.TITLECOLOR));
+      previewPanel.setPlotColor(currentDS.getColor(ScriptToken.PLOTCOLOR));
+      previewPanel.setScaleColor(currentDS.getColor(ScriptToken.SCALECOLOR));
+      previewPanel.setcoordinatesColor(currentDS.getColor(ScriptToken.COORDINATESCOLOR));
+      previewPanel.setUnitsColor(currentDS.getColor(ScriptToken.UNITSCOLOR));
+      previewPanel.setPlotAreaColor(currentDS.getColor(ScriptToken.PLOTAREACOLOR));
+      previewPanel.setBackground(currentDS.getColor(ScriptToken.BACKGROUNDCOLOR));
+      previewPanel.setGridColor(currentDS.getColor(ScriptToken.GRIDCOLOR));
       //TODO Title font here
       previewPanel.setDisplayFontName(currentDS.getDisplayFont());
       repaint();

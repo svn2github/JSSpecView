@@ -502,41 +502,38 @@ public class MainFrame extends JFrame implements DropTargetListener,
       }
     }
 
-    showExitDialog = Boolean.parseBoolean(
-        properties.getProperty("confirmBeforeExit"));
+    showExitDialog = Boolean.parseBoolean(properties
+        .getProperty("confirmBeforeExit"));
 
-    autoOverlay = Boolean.parseBoolean(
-        properties.getProperty("automaticallyOverlay"));
-    autoShowLegend = Boolean.parseBoolean(
-        properties.getProperty("automaticallyShowLegend"));
+    autoOverlay = Boolean.parseBoolean(properties
+        .getProperty("automaticallyOverlay"));
+    autoShowLegend = Boolean.parseBoolean(properties
+        .getProperty("automaticallyShowLegend"));
 
-    useDirLastOpened = Boolean.parseBoolean(
-        properties.getProperty("useDirectoryLastOpenedFile"));
-    useDirLastExported = Boolean.parseBoolean(
-        properties.getProperty("useDirectoryLastExportedFile"));
+    useDirLastOpened = Boolean.parseBoolean(properties
+        .getProperty("useDirectoryLastOpenedFile"));
+    useDirLastExported = Boolean.parseBoolean(properties
+        .getProperty("useDirectoryLastExportedFile"));
     dirLastOpened = properties.getProperty("directoryLastOpenedFile");
     dirLastExported = properties.getProperty("directoryLastExportedFile");
 
-    sidePanelOn = Boolean.parseBoolean(properties.getProperty("showSidePanel"))
-        ;
-    toolbarOn = Boolean.parseBoolean(properties.getProperty("showToolBar"))
-        ;
-    statusbarOn = Boolean.parseBoolean(properties.getProperty("showStatusBar"))
-        ;
+    sidePanelOn = Boolean.parseBoolean(properties.getProperty("showSidePanel"));
+    toolbarOn = Boolean.parseBoolean(properties.getProperty("showToolBar"));
+    statusbarOn = Boolean.parseBoolean(properties.getProperty("showStatusBar"));
 
     // Initialise DisplayProperties
     defaultDisplaySchemeName = properties
         .getProperty("defaultDisplaySchemeName");
 
     if (shouldApplySpectrumDisplaySettings) {
-      parameters.gridOn = Boolean.parseBoolean(properties.getProperty("showGrid"))
-          ;
-      parameters.coordinatesOn = Boolean.parseBoolean(
-          properties.getProperty("showCoordinates"));
-      parameters.xScaleOn = Boolean.parseBoolean(
-          properties.getProperty("showXScale"));
-      parameters.yScaleOn = Boolean.parseBoolean(
-          properties.getProperty("showYScale"));
+      parameters.setBoolean(ScriptToken.GRIDON, properties
+          .getProperty("showGrid"));
+      parameters.setBoolean(ScriptToken.COORDINATESON, properties
+          .getProperty("showCoordinates"));
+      parameters.setBoolean(ScriptToken.XSCALEON, properties
+          .getProperty("showXScale"));
+      parameters.setBoolean(ScriptToken.YSCALEON, properties
+          .getProperty("showYScale"));
     }
 
     // TODO: Need to apply Properties to all panels that are opened
@@ -551,17 +548,16 @@ public class MainFrame extends JFrame implements DropTargetListener,
     }
 
     try {
-      autoIntegrate = Boolean.parseBoolean(
-          properties.getProperty("automaticallyIntegrate"));
+      autoIntegrate = Boolean.parseBoolean(properties
+          .getProperty("automaticallyIntegrate"));
       parameters.integralMinY = Double.parseDouble(properties
           .getProperty("integralMinY"));
       parameters.integralFactor = Double.parseDouble(properties
           .getProperty("integralFactor"));
       parameters.integralOffset = Double.parseDouble(properties
           .getProperty("integralOffset"));
-      parameters.set(null, 
-          ScriptToken.INTEGRALPLOTCOLOR, 
-          properties.getProperty("integralPlotColor"));
+      parameters.set(null, ScriptToken.INTEGRALPLOTCOLOR, properties
+          .getProperty("integralPlotColor"));
     } catch (Exception e) {
       // bad property value
     }
@@ -2075,7 +2071,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
           jsvp = selectedJSVPanel;
           break;
         case AUTOINTEGRATE:
-          autoIntegrate = Parameters.parseBoolean(value);
+          autoIntegrate = Parameters.isTrue(value);
           break;
         case IRMODE:
           irMode = JDXSpectrum.TA_NO_CONVERT;
@@ -2676,7 +2672,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   }
 
   private void setCoordinatesOn(JSVPanel jsvp, boolean selected) {
-    parameters.coordinatesOn = selected;
+    parameters.setBoolean(ScriptToken.COORDINATESON, selected);
     jsvp.setCoordinatesOn(selected);
   }
 
