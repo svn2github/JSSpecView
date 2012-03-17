@@ -66,7 +66,6 @@ import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet; //import javax.print.attribute.standard.MediaSize;
 import javax.print.attribute.standard.OrientationRequested;
 import javax.swing.BorderFactory;
-import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import jspecview.exception.JSpecViewException;
@@ -74,14 +73,6 @@ import jspecview.exception.ScalesIncompatibleException;
 import jspecview.source.JDXSource;
 import jspecview.util.Parser;
 import jspecview.util.TextFormat;
-
-/*
-// Batik SVG Generator
-import org.apache.batik.svggen.SVGGraphics2D;
-import org.apache.batik.dom.GenericDOMImplementation;
-import org.w3c.dom.Document;
-import org.w3c.dom.DOMImplementation;
-*/
 
 /**
  * JSVPanel class draws a plot from the data contained a instance of a
@@ -94,27 +85,34 @@ import org.w3c.dom.DOMImplementation;
  * @author Prof Robert J. Lancashire
  * @author Bob Hanson hansonr@stolaf.edu
  */
+
 public class JSVPanel extends JPanel implements Printable, MouseListener,
     MouseMotionListener, KeyListener {
 
   private static final long serialVersionUID = 1L;
   private static final int MIN_DRAG_X_PIXELS = 5;// fewer than this means no zoom
 
-  private PlotWidget zoomBox1D, zoomBox2D, 
-      pin1Dx0, pin1Dx1, pin1Dy0, pin1Dy1,
-      pin1Dx01, pin1Dy01, 
-      pin2Dx0, pin2Dx1, pin2Dy;
-  private PlotWidget thisWidget;
-  private PlotWidget[] widgets;
-  
+  @Override
+  public void finalize() {
+    System.out.println("JSVPanel " + this + " finalized");
+  }
 
   public void dispose() {
     spectra = null;
     zoomInfoList = null;
     image2D = null;
     isd = null;
+    popup.setSource(null);
+    popup = null;
+    source = null;
+    removeKeyListener(this);
+    removeMouseListener(this);
+    removeMouseMotionListener(this);
   }
 
+  /**
+   * index of this panel in a set of split panels
+   */
   private int index;
 
   public int getIndex() {
@@ -125,137 +123,269 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     this.index = index;
   }
 
-  @Override
-  public void finalize() {
-    System.out.println("JSVPanel " + this + " finalized");
+  // Critical fields
+  
+  private Graph[] spectra;
+  private MultiScaleData multiScaleData;
+  private List<Highlight> highlights = new ArrayList<Highlight>();
+  private List<MultiScaleData> zoomInfoList;
+  private ArrayList<Annotation> integrationRatios;
+  private ArrayList<Annotation> annotations;
+  private JSVPanelPopupMenu popup;
+  private JDXSource source;
+  private ImageScaleData isd;
+  private BufferedImage image2D;
+
+  public JDXSource getSource() {
+    return source;
   }
 
-  // The list of spectra
-  private Graph[] spectra;
+  public JSVPanelPopupMenu getPopup() {
+    return popup;
+  }
 
-  // The Number of Spectra
-  private int nSpectra;
+  // sliders and zoom boxes
+  
+  private PlotWidget zoomBox1D, zoomBox2D, 
+      pin1Dx0, pin1Dx1, pin1Dy0, pin1Dy1,
+      pin1Dx01, pin1Dy01, 
+      pin2Dx0, pin2Dx1, pin2Dy;
+  private PlotWidget[] widgets;
 
-  // Contains information needed to draw spectra
-  private MultiScaleData multiScaleData;
-
-  // width and height of the JSVPanel
-  //private int width, height;
-
-  //The position of the plot area
+  // plot parameters
+  
+  private int defaultHeight = 450;
+  private int defaultWidth = 280;
   private int leftPlotAreaPos = 80, topPlotAreaPos = 30;
-
-  // insets of the plot area
+  private int rightPlotAreaPos, bottomPlotAreaPos;
+  private int plotAreaWidth, plotAreaHeight;
   private Insets plotAreaInsets = new Insets(topPlotAreaPos, leftPlotAreaPos, 50, 50);
 
-  // width and height of the plot area
-  private int plotAreaWidth, plotAreaHeight;
+  // static parameters
+  private static int minNumOfPointsForZoom = 3;
 
-  // Positions of the borders of the plotArea
-  private int rightPlotAreaPos, bottomPlotAreaPos;
-
-  // Enables or disables zoom
-  private boolean zoomEnabled = true;
-
-  // turns on/off elements of the JSVPanel
-  private boolean gridOn = false;
-  private boolean coordsOn = true;
-  private boolean highlightOn = false;
-  private boolean titleOn = true;
-  private boolean xScaleOn = true;
-  private boolean yScaleOn = true;
-  private boolean xUnitsOn = true;
-  private boolean yUnitsOn = true;
-
-  // export properties
-  //export svg for inkscape
-  private boolean svgExportForInscapeEnabled = false;
-
-  private Color highlightColor = new Color(255, 0, 0, 200);
-
-  private List<Highlight> highlights = new ArrayList<Highlight>();
-
-  // The Current Coordinate to be drawn on the Panel
-  private String coordStr = "";
-  private Coordinate coordClicked;
-  private boolean plotReversed;
-
-  private boolean drawXAxisLeftToRight;
-
-  // background color of plot area
-  private Color plotAreaColor = Color.white;
-
-  //plot line color
-  private Color[] plotColors;
-
-  // integral Color
-  private Color integralPlotColor = Color.red;
-
-  //integration ratio annotations
-  private ArrayList<Annotation> integrationRatios;
-
-  private ArrayList<Annotation> annotations;
-
-  // scale color
-  private Color scaleColor = Color.black;
-
-  // titleColor
-  private Color titleColor = Color.black;
-
-  // units Color
-  private Color unitsColor = Color.red;
-
-  // grid Color
-  private Color gridColor = Color.gray;
-
-  // coordinate Color
-  private Color coordinatesColor = Color.red;
-
-  private Color zoomBoxColor = new Color(100, 100, 50, 130);
-
-  /* PUT FONT FACE AND SIZE ATTRIBUTES HERE */
-  private String displayFontName = null;
-  private String titleFontName = null;
-  private boolean titleBoldOn = false;
-
-  // The scale factors
-  private double xFactorForScale, yFactorForScale;
+  // current values
   
+  private ColoredAnnotation lastAnnotation;
+  private Coordinate coordClicked;
+  private PlotWidget thisWidget; 
+  
+  private boolean allowYScale = true;
+  private boolean drawXAxisLeftToRight;
+  private boolean isIntegralDrag;
+  private boolean sticky2Dcursor = true;
+  private boolean xAxisLeftToRight = true;  
+
+  private int currentZoomIndex;  
+  private int nSpectra;
+  private int thisWidth, thisPlotHeight;
+
+  private double lastClickX = Double.MAX_VALUE;
+  private double minYScale;
   private double userYFactor = 1;
+  private double xFactorForScale, yFactorForScale;
+  private double widthRatio = 1;
 
-  // List of Scale data for zoom
-  private List<MultiScaleData> zoomInfoList;
-
-  // Current index of view in zoomInfoList
-  private int currentZoomIndex;
-
-  // Determines if the xAxis should be displayed increasing
-  private boolean xAxisLeftToRight = true;
-
-  // Minimum number of points that are displayable in a zoom
-  private int minNumOfPointsForZoom = 3;
-
+  private String coordStr = "";
+  private String startupPinTip = "Click to set.";
   private String title;
 
+  public void setTitle(String title) {
+    this.title = title;
+    setName(title);
+  }
+  
+  // not implemented?
+  private boolean svgExportForInscapeEnabled = false;
+
+  /**
+   * not implemented? 
+   * 
+   * sets whether svg export should support inkscape
+   * @param val
+   *   true if inkscape svg export is enabled
+   */
+  public void setSvgExportForInscapeEnabled(boolean val) {
+    svgExportForInscapeEnabled = val;
+  }
+
+  /**
+   * not implemented ? 
+   * Determines whether svg export should support inkscape
+   * @return true if inkscape svg export is enabled
+   */
+  public boolean isSvgExportForInkscapeEnabled() {
+    return svgExportForInscapeEnabled;
+  }
+
+  //////// settable parameters //////////
+  
+  private boolean coordinatesOn = true;
+  private boolean display1D     = false; // with 2D
+  private boolean display2D     = true;
+  private boolean enableZoom    = true;
+  private boolean gridOn        = false;
+  private boolean reversePlot   = false;
+  private boolean titleBoldOn   = false;
+  private boolean titleOn       = true;
+  private boolean xScaleOn      = true;
+  private boolean xUnitsOn      = true;
+  private boolean yScaleOn      = true;
+  private boolean yUnitsOn      = true;
+
+
+  public void setBoolean(Parameters parameters, ScriptToken st) {
+    if (st == null) {
+      Map<ScriptToken, Boolean> booleans = parameters.getBooleans();
+      for(Map.Entry<ScriptToken, Boolean> entry: booleans.entrySet())
+        setBoolean(parameters, entry.getKey());
+      return;
+    }
+    switch (st) {
+    case COORDINATESON:
+      coordinatesOn = parameters.getBoolean(st);
+      break;
+    case DISPLAY1D:
+      display1D = parameters.getBoolean(st);
+      thisWidth = 0;
+      break;
+    case DISPLAY2D:
+      display2D = parameters.getBoolean(st);
+      thisWidth = 0;
+      break;
+    case ENABLEZOOM:
+      enableZoom = parameters.getBoolean(st);
+      break;
+    case GRIDON:
+      gridOn = parameters.getBoolean(st);
+      break;
+    case REVERSEPLOT:
+      reversePlot = parameters.getBoolean(st);
+      break;
+    case TITLEBOLDON:
+      titleBoldOn = parameters.getBoolean(st);
+      break;
+    case TITLEON:
+      titleOn = parameters.getBoolean(st);
+      break;
+    case XSCALEON:
+      xScaleOn = parameters.getBoolean(st);
+      break;
+    case XUNITSON:
+      xUnitsOn = parameters.getBoolean(st);
+      break;
+    case YSCALEON:
+      yScaleOn = parameters.getBoolean(st);
+      break;
+    case YUNITSON:
+      yUnitsOn = parameters.getBoolean(st);
+      break;
+    default:
+      System.out.println("JSVPanel --- unrecognized Parameter boolean: " + st);
+      break;
+    }
+  }
+
+  ////////// settable colors and fonts //////////
+  
+  private String displayFontName;
+  private String titleFontName;
+  private Color coordinatesColor;
+  private Color gridColor;
+  private Color integralPlotColor;
+  private Color plotAreaColor;
+  private Color scaleColor;
+  private Color titleColor;
+  private Color unitsColor;
+
+  private Color[] plotColors;
+
+  public void setPlotColors(Color[] colors) {
+    if (colors.length > nSpectra) {
+      Color[] tmpPlotColors = new Color[nSpectra];
+      System.arraycopy(colors, 0, tmpPlotColors, 0, nSpectra);
+      colors = tmpPlotColors;
+    } else if (nSpectra > colors.length) {
+      Color[] tmpPlotColors = new Color[nSpectra];
+      int numAdditionColors = nSpectra - colors.length;
+      System.arraycopy(colors, 0, tmpPlotColors, 0, colors.length);
+      for (int i = 0, j = colors.length; i < numAdditionColors; i++, j++)
+        tmpPlotColors[j] = generateRandomColor();
+      colors = tmpPlotColors;
+    }
+    plotColors = colors;
+  }
+
+  // potentially settable; 
+  
+  private Color highlightColor = new Color(255, 0, 0, 200);
+  private Color zoomBoxColor = new Color(100, 100, 50, 130);
+
+  public void setColorOrFont(DisplayScheme ds, ScriptToken st) {
+    if (st == null) {
+      Map<ScriptToken, Color> colors = ds.getColors();
+      for(Map.Entry<ScriptToken, Color> entry: colors.entrySet())
+        setColorOrFont(ds, entry.getKey());
+      setColorOrFont(ds, ScriptToken.DISPLAYFONTNAME);
+      setColorOrFont(ds, ScriptToken.TITLEFONTNAME);
+      return;
+    }
+    switch (st) {
+    case BACKGROUNDCOLOR:
+      setBackground(ds.getColor(st));
+      break;
+    case COORDINATESCOLOR:
+      coordinatesColor= ds.getColor(st);
+      break;
+    case DISPLAYFONTNAME:
+      displayFontName = ds.getDisplayFont();
+      break;
+    case GRIDCOLOR:
+      gridColor = ds.getColor(st);
+      break;
+    case INTEGRALPLOTCOLOR:
+      integralPlotColor= ds.getColor(st);
+      break;
+    case PLOTCOLOR:
+      plotColors[0] = ds.getColor(st);
+      break;
+    case PLOTAREACOLOR:
+      plotAreaColor= ds.getColor(st);
+      break;
+    case SCALECOLOR:
+      scaleColor= ds.getColor(st);
+      break;
+    case TITLECOLOR:
+      titleColor= ds.getColor(st);
+      break;
+    case TITLEFONTNAME:
+      titleFontName= ds.getTitleFont();
+      break;
+    case UNITSCOLOR:
+      unitsColor= ds.getColor(st);
+      break;
+    default:
+      System.out.println("JSVPanel --- unrecognized DisplayScheme color: " + st);
+      break;
+    }
+  }
+
+  /////////// print parameters ///////////
+  
   private boolean isPrinting;
   private boolean printGrid = gridOn;
   private boolean printTitle = true;
   private boolean printScale = true;
   private String printingFont;
-  private String graphPosition = "default";
-  private int defaultHeight = 450;
-  private int defaultWidth = 280;
-  private boolean allowYScale = true;
-  ColoredAnnotation lastAnnotation;
-  private double minYScale;
-  private boolean display1Dwith2D;
-  private boolean display2D = true;
-  private double widthRatio = 1;
+  private String printGraphPosition = "default";
 
+  // listeners to handle various events
   
-
-  // listeners to handle coordinatesClicked
   private ArrayList<PanelListener> listeners = new ArrayList<PanelListener>();
+
+  public JSVPanel() {
+    super();
+  }
 
   /**
    * Constructs a new JSVPanel
@@ -264,8 +394,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        the spectrum
    * @throws ScalesIncompatibleException
    */
-  public JSVPanel(Graph spectrum) {
-    super();
+  public JSVPanel(Graph spectrum, JDXSource source, JSVPanelPopupMenu popup) {
+    this.source = source;
+    this.popup = popup;
     // standard applet not overlaid and not showing range
     // standard application split spectra
     // removal of integration, taConvert
@@ -285,73 +416,18 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        the index of the end coordinate
    * @throws JSpecViewException
    */
-  public JSVPanel(Graph spectrum, int startIndex, int endIndex)
+  public JSVPanel(Graph spectrum, int startIndex, int endIndex,
+      JDXSource source, JSVPanelPopupMenu popup)
       throws ScalesIncompatibleException {
-    super();
+    this.source = source;
+    this.popup = popup;
     // from applet not overlaid but showing range
-      initJSVPanel(new Graph[] { spectrum }, new int[] { startIndex },
-          new int[] { endIndex });
+    initJSVPanel(new Graph[] { spectrum }, new int[] { startIndex },
+        new int[] { endIndex });
   }
 
-  /**
-   * Constructs a JSVPanel with an array of Spectra
-   * 
-   * @param spectra
-   *        an array of spectra (<code>Spectrum</code>)
-   * @throws ScalesIncompatibleException
-   */
-  public JSVPanel(Graph[] spectra) {
-    super();
-    // specifically for getIntegralPanel
-    initJSVPanel(spectra, null, null);
-  }
-
-  /**
-   * Constructs a JSVMultiPanel with a List of Spectra
-   * 
-   * @param spectra
-   *
-   *        a <code>List</code> of spectra
-   * @throws ScalesIncompatibleException
-   */
-  public JSVPanel(List<JDXSpectrum> spectra) throws ScalesIncompatibleException {
-    super();
-    // applet overlay, no range
-    // application overlay, no range
-    if (!JDXSpectrum.areScalesCompatible(spectra))
-      throw new ScalesIncompatibleException();
-    initJSVPanel((Graph[]) spectra.toArray(new Graph[spectra.size()]), null, null);
-  }
-
-  /**
-   * Constructs a <code>JSVPanel</code> with List of spectra and corresponding
-   * start and end indices of data points that should be displayed
-   * 
-   * @param spectra
-   *        the List of <code>Graph</code> instances
-   * @param startIndices
-   *        the start indices
-   * @param endIndices
-   *        the end indices
-   * @throws JSpecViewException
-   * @throws ScalesIncompatibleException
-   */
-  public JSVPanel(List<JDXSpectrum> spectra, int[] startIndices,
-      int[] endIndices) throws ScalesIncompatibleException {
-    // from applet only;  overlay with a set of spectra, with range.
-    super();
-    if (!JDXSpectrum.areScalesCompatible(spectra))
-      throw new ScalesIncompatibleException();
-    initJSVPanel((Graph[]) spectra.toArray(new Graph[spectra.size()]), startIndices,
-        endIndices);
-  }
-
-  public static JSVPanel getIntegralPanel(JDXSpectrum spectrum, Color color) {
-    Graph graph = spectrum.getIntegrationGraph();
-    JSVPanel jsvp = new JSVPanel(new Graph[] { spectrum, graph });
-    jsvp.setTitle(graph.getTitle());
-    jsvp.setPlotColors(new Color[] { jsvp.getPlotColor(0), color });
-    return jsvp;
+  public JDXSpectrum getSpectrum() {
+    return getSpectrumAt(0).getCurrentSubSpectrum();
   }
 
   /**
@@ -367,12 +443,14 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @throws ScalesIncompatibleException
    */
   
-  private void initJSVPanel(Graph[] spectra, int[] startIndices,
+  protected void initJSVPanel(Graph[] spectra, int[] startIndices,
                             int[] endIndices) {
     this.spectra = spectra;
     nSpectra = spectra.length;
     if (nSpectra == 1)
       setTitle(getSpectrum().getTitleLabel());
+    xAxisLeftToRight = getSpectrumAt(0).shouldDisplayXAxisIncreasing();
+    setDrawXAxis();
     if (startIndices == null) {
       startIndices = new int[nSpectra];
       endIndices = new int[nSpectra];
@@ -391,27 +469,15 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     zoomInfoList.add(multiScaleData);
     setPlotColors(Parameters.defaultPlotColors);
     setBorder(BorderFactory.createLineBorder(Color.lightGray));
-    addKeyListener(this);
-    addMouseListener(this);
-    addMouseMotionListener(this);
-  }
-
-  public void setPlotColors(Color[] colors) {
-    if (colors.length > nSpectra) {
-      Color[] tmpPlotColors = new Color[nSpectra];
-      System.arraycopy(colors, 0, tmpPlotColors, 0, nSpectra);
-      colors = tmpPlotColors;
-    } else if (nSpectra > colors.length) {
-      Color[] tmpPlotColors = new Color[nSpectra];
-      int numAdditionColors = nSpectra - colors.length;
-      System.arraycopy(colors, 0, tmpPlotColors, 0, colors.length);
-      for (int i = 0, j = colors.length; i < numAdditionColors; i++, j++)
-        tmpPlotColors[j] = generateRandomColor();
-      colors = tmpPlotColors;
+    if (source == null) {
+      // preferences dialog
+      coordStr = "(0,0)";
+    } else {
+      addKeyListener(this);
+      addMouseListener(this);
+      addMouseMotionListener(this);
     }
-    plotColors = colors;
   }
-
   
   private boolean allow2D() {
     return !getSpectrumAt(0).is1D();
@@ -485,77 +551,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   /**
-   * Sets the zoom enabled or disabled
-   * 
-   * @param val
-   *        true or false
-   */
-  public void setZoomEnabled(boolean val) {
-    zoomEnabled = val;
-  }
-
-  /**
-   * Displays grid if val is true
-   * 
-   * @param val
-   *        true or false
-   */
-  public void setGridOn(boolean val) {
-    gridOn = val;
-  }
-
-  /**
-   * Displays Coordinates if val is true
-   * 
-   * @param val
-   *        true or false
-   */
-  public void setCoordinatesOn(boolean val) {
-    coordsOn = val;
-  }
-
-  /**
-   * Displays x scale if val is true
-   * 
-   * @param val
-   *        true if x scale should be displayed, false otherwise
-   */
-  public void setXScaleOn(boolean val) {
-    xScaleOn = val;
-  }
-
-  /**
-   * Displays y scale if val is true
-   * 
-   * @param val
-   *        true if y scale should be displayed, false otherwise
-   */
-  public void setYScaleOn(boolean val) {
-    yScaleOn = val;
-  }
-
-  /**
-   * Displays x units if val is true
-   * 
-   * @param val
-   *        true if x units should be displayed, false otherwise
-   */
-  public void setXUnitsOn(boolean val) {
-    xUnitsOn = val;
-  }
-
-  /**
-   * Displays y units if val is true
-   * 
-   * @param val
-   *        true if y units should be displayed, false otherwise
-   */
-  public void setYUnitsOn(boolean val) {
-    yUnitsOn = val;
-  }
-
-
-  /**
    * Sets the Minimum number of points that may be displayed when the spectrum
    * is zoomed
    * 
@@ -565,152 +560,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   public void setMinNumOfPointsForZoom(int num) {
     minNumOfPointsForZoom = (num >= minNumOfPointsForZoom) ? num
         : minNumOfPointsForZoom;
-  }
-
-  /**
-   * Sets the color of the title displayed
-   * 
-   * @param color
-   *        the color
-   */
-  public void setTitleColor(Color color) {
-    titleColor = color;
-  }
-
-  /**
-   * Sets the color of the plotArea;
-   * 
-   * @param color
-   *        the color
-   */
-  public void setPlotAreaColor(Color color) {
-    plotAreaColor = color;
-  }
-
-  public void setBackgroundColor(Color color) {
-    //setBackground(backgroundColor);
-  }
-  
-  /**
-   * Sets the color of the plot
-   * 
-   * @param color
-   *        the color
-   */
-  public void setPlotColor(Color color) {
-    plotColors[0] = color;
-  }
-
-  /**
-   * Sets the color of the integral plot
-   * 
-   * @param color
-   *        the color
-   */
-  public void setIntegralPlotColor(Color color) {
-    if (color != null)
-      integralPlotColor = color;
-  }
-
-  /**
-   * Sets the color of the scale
-   * 
-   * @param color
-   *        the color
-   */
-  public void setScaleColor(Color color) {
-    scaleColor = color;
-  }
-
-  /**
-   * Sets the color of the units
-   * 
-   * @param color
-   *        the color
-   */
-  public void setUnitsColor(Color color) {
-    unitsColor = color;
-  }
-
-  /**
-   * Sets the color of the grid
-   * 
-   * @param color
-   *        the color
-   */
-  public void setGridColor(Color color) {
-    gridColor = color;
-  }
-
-  /**
-   * Sets the title that will be displayed on the panel
-   * 
-   * @param title
-   *        the title that will be displayed on the panel
-   */
-  public void setTitle(String title) {
-    this.title = title;
-    setName(title);
-  }
-
-  /**
-   * Sets the color of the Coordinates
-   * 
-   * @param color
-   *        the color
-   */
-  public void setcoordinatesColor(Color color) {
-    coordinatesColor = color;
-  }
-
-  /**
-   * Sets highlighting enabled or disabled
-   * 
-   * @param val
-   *        true or false
-   */
-  public void setHighlightOn(boolean val) {
-    highlightOn = val;
-  }
-
-  /**
-   * Allows the title to be displayed or not
-   * 
-   * @param val
-   *        true if scale should be displayed, false otherwise
-   */
-  public void setTitleOn(boolean val) {
-    titleOn = val;
-  }
-
-  /**
-   * Determines whether the title is bold or not
-   * 
-   * @param val
-   *        true if the title should be bold
-   */
-  public void setTitleBoldOn(boolean val) {
-    titleBoldOn = val;
-  }
-
-  /**
-   * Sets the title font
-   * 
-   * @param titleFont
-   *        the name of the title font
-   */
-  public void setTitleFontName(String titleFont) {
-    this.titleFontName = titleFont;
-  }
-
-  /**
-   * Sets the display font name
-   * 
-   * @param displayFontName
-   *        the name of the display font
-   */
-  public void setDisplayFontName(String displayFontName) {
-    this.displayFontName = displayFontName;
   }
 
   /**
@@ -724,7 +573,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   public void setDisplay1Dwith2D(boolean TF) {
-    display1Dwith2D = TF;
+    display1D = TF;
     thisWidth = 0;
   }
  
@@ -795,22 +644,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     return (Math.abs(xp1 - xp2) + Math.abs(yp1 - yp2) < 10);
   }
 
-  /*
-   * sets whether svg export should support inkscape
-   * @param true if inkscape svg export is enabled
-   */
-  public void setSvgExportForInscapeEnabled(boolean val) {
-    svgExportForInscapeEnabled = val;
-  }
-
-  /*
-   * Sets whether the x Axis should be displayed increasing
-   */
-  public void setXAxisDisplayedIncreasing(boolean val) {
-    xAxisLeftToRight = val;
-    setDrawXAxis();
-  }
-
   /**
    * Displays plot in reverse if val is true
    * 
@@ -818,12 +651,12 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        true or false
    */
   public void setReversePlot(boolean val) {
-    plotReversed = val;
+    reversePlot = val;
     setDrawXAxis();
   }
 
   private void setDrawXAxis() {
-    drawXAxisLeftToRight = xAxisLeftToRight ^ plotReversed;
+    drawXAxisLeftToRight = xAxisLeftToRight ^ reversePlot;
     getSpectrum().setExportXAxisDirection(drawXAxisLeftToRight);
   }
 
@@ -896,24 +729,13 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     highlights.clear();
   }
 
-  /* ------------------------- GET METHODS ----------------------------*/
-
-  /**
-   * Returns true if plot is left to right
-   * 
-   * @return true if plot is left to right 
-   */
-  public boolean isXAxisLeftToright() {
-    return xAxisLeftToRight;
-  }
-
   /**
    * Returns true if plot is reversed
    * 
    * @return true if plot is reversed
    */
   public boolean isPlotReversed() {
-    return plotReversed;
+    return reversePlot;
   }
 
   /**
@@ -922,7 +744,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @return true if zoom is enabled
    */
   public boolean isZoomEnabled() {
-    return zoomEnabled;
+    return enableZoom;
   }
 
   /**
@@ -931,7 +753,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @return true if coordinates are displayed
    */
   public boolean isCoordinatesOn() {
-    return coordsOn;
+    return coordinatesOn;
   }
 
   /**
@@ -1094,15 +916,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   /**
-   * Returns whether highlighting is enabled
-   * 
-   * @return whether highlighting is enabled
-   */
-  public boolean getHighlightOn() {
-    return highlightOn;
-  }
-
-  /**
    * Return the start indices of the Scaledata
    * 
    * @return the start indices of the Scaledata
@@ -1136,21 +949,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   public String getTitleFontName() {
     return titleFontName;
-  }
-
-  /*
-   * Determines whether svg export should support inkscape
-   * @return true if inkscape svg export is enabled
-   */
-  public boolean isSvgExportForInkscapeEnabled() {
-    return svgExportForInscapeEnabled;
-  }
-
-  /*
-   * Returns true is the X Axis is displayed increasing
-   */
-  public boolean isXAxisDisplayedIncreasing() {
-    return xAxisLeftToRight;
   }
 
   @Override
@@ -1201,7 +999,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       title = titleOn;
       xunits = xUnitsOn;
       yunits = yUnitsOn;
-      coords = coordsOn;
+      coords = coordinatesOn;
       xscale = xScaleOn;
       yscale = yScaleOn;
     }
@@ -1211,7 +1009,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     boolean isResized = (thisWidth != width || thisPlotHeight != plotAreaHeight);
     if (isResized) {
       requestFocusInWindow();
-      isd = null;
     }
     thisWidth = width;
     thisPlotHeight = plotAreaHeight;
@@ -1219,18 +1016,23 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     rightPlotAreaPos = plotAreaWidth + leftPlotAreaPos;
     userYFactor = getSpectrum().getUserYFactor();
     setScaleFactors(multiScaleData);
-    if (allow2D() && display2D && (isd != null || get2DImage(width))) {
+    if (allow2D() && display2D && (isd != null || get2DImage())) {
+      setImageWindow();
       width = (int) Math.floor(widthRatio * width);
-      plotAreaWidth = (display1Dwith2D ? width
-          - (plotAreaInsets.right + plotAreaInsets.left) : 0);
-      rightPlotAreaPos = plotAreaWidth + leftPlotAreaPos;
+      if (display1D) {
+        plotAreaWidth = width - plotAreaInsets.right - plotAreaInsets.left;
+        rightPlotAreaPos = plotAreaWidth + leftPlotAreaPos;
+      } else {
+        plotAreaWidth = 0;
+        rightPlotAreaPos = isd.xPixel0 - 30;
+      }
       setScaleFactors(multiScaleData);
     }
 
+    doDraw1DObjects = (isd == null || display1D);
+
     int subIndex = spec0.getSubIndex();
     setWidgets(isResized, subIndex);
-
-    doDraw1DObjects = (isd == null || display1Dwith2D);
 
     if (isd != null)
       draw2DImage(g);
@@ -1246,8 +1048,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       fillBox(g, leftPlotAreaPos, topPlotAreaPos, rightPlotAreaPos,
           bottomPlotAreaPos, plotAreaColor);
       drawWidgets(g, subIndex);
-      if (highlightOn)
-        drawHighlights(g);
+      drawHighlights(g);
       drawPeakTabs(g);
       if (grid)
         drawGrid(g, height, width);
@@ -1375,10 +1176,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     pin1Dx1.setX(pin1Dx1.getXVal(), toPixelX0(pin1Dx1.getXVal()));
     pin1Dy0.setY(pin1Dy0.getYVal(), toPixelY0(pin1Dy0.getYVal()));
     pin1Dy1.setY(pin1Dy1.getYVal(), toPixelY0(pin1Dy1.getYVal()));
-    if (isd != null) {
-      pin2Dx0.setX(pin2Dx0.getXVal(), isd.toPixelX(pin2Dx0.getXVal())); 
-      pin2Dx1.setX(pin2Dx1.getXVal(), isd.toPixelX(pin2Dx1.getXVal()));
-    }
   }
 
   /**
@@ -1428,25 +1225,23 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private void drawWidgets(Graphics g, int subIndex) {
     // top/side slider bar backgrounds
     if (doDraw1DObjects) {
-      g.setColor(gridColor);
       fillBox(g, leftPlotAreaPos, pin1Dx0.yPixel1, rightPlotAreaPos,
-          pin1Dx1.yPixel1 + 2, null);
-      fillBox(g, pin1Dy0.xPixel1, bottomPlotAreaPos, pin1Dy1.xPixel1 + 2,
-          topPlotAreaPos, null);
-      // main top/side slider bars 
-      g.setColor(plotColors[0]);
+          pin1Dx1.yPixel1 + 2, gridColor);
       fillBox(g, pin1Dx0.xPixel0, pin1Dx0.yPixel1, pin1Dx1.xPixel0,
-          pin1Dx1.yPixel1 + 2, null);
-      fillBox(g, pin1Dy0.xPixel1, pin1Dy0.yPixel1, pin1Dy1.xPixel1 + 2,
-          pin1Dy1.yPixel0, null);
+          pin1Dx1.yPixel1 + 2, plotColors[0]);
     }
+    fillBox(g, pin1Dy0.xPixel1, bottomPlotAreaPos, pin1Dy1.xPixel1 + 2,
+        topPlotAreaPos, gridColor);
+    fillBox(g, pin1Dy0.xPixel1, pin1Dy0.yPixel1, pin1Dy1.xPixel1 + 2,
+        pin1Dy1.yPixel0, plotColors[0]);
     for (int i = 0; i < widgets.length; i++) {
       PlotWidget pw = widgets[i];
       if (pw == null)
         continue;
       g.setColor(pw.isPin ? plotColors[0] : zoomBoxColor);
-      if ((pw.isPin || zoomEnabled)
-          && (pw.is2D && pw != pin2Dx0 || doDraw1DObjects))
+      if ((pw.isPin || enableZoom)
+          && (pw.is2D && pw != pin2Dx0 || doDraw1DObjects || 
+              pw == pin1Dy0 || pw == pin1Dy1 || pw == pin1Dy01))
         drawWidget(g, pw);
     }
   }
@@ -1890,7 +1685,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   private int fixX(int xPixel) {
-    return Math.max(Math.min(xPixel, rightPlotAreaPos), leftPlotAreaPos);
+    return Coordinate.intoRange(xPixel, leftPlotAreaPos, rightPlotAreaPos);
   }
 
   private int toPixelX(double dx) {
@@ -1925,7 +1720,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   private int fixY(int yPixel) {
-    return Math.max(Math.min(yPixel, bottomPlotAreaPos), topPlotAreaPos);
+    return Coordinate.intoRange(yPixel, topPlotAreaPos, bottomPlotAreaPos);
   }
 
   private int toPixelY(double yVal) {
@@ -1971,9 +1766,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @param finalY
    *        the Y end coordinate of the zoom area
    */
-  private void doZoom(double initX, double initY, double finalX, double finalY,
+  private synchronized void doZoom(double initX, double initY, double finalX, double finalY,
                       boolean doRepaint, boolean addZoom, boolean checkRange) {
-    if (!zoomEnabled)
+    if (!enableZoom)
       return;
 
     // swap points if init value > final value
@@ -1989,6 +1784,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       finalY = tempY;
     }
 
+    boolean is2DYScaleChange = (isd != null && (isd.minZ != initY || isd.maxZ != finalY));
+    
     // determine if the range of the area selected for zooming is within the plot
     // Area and if not ensure that it is
 
@@ -2006,59 +1803,35 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     }
     int[] startIndices = new int[nSpectra];
     int[] endIndices = new int[nSpectra];
-    if (!doZoomWithoutRepaint(initX, finalX, initY, finalY, startIndices,
-        endIndices, addZoom))
-      return;
-    notifyZoomListeners(initX, finalX, initY, finalY);
-    if (doRepaint)
-      repaint();
-  }
-
-  /**
-   * Zooms the spectrum but does not repaint so that it is not visible
-   * 
-   * @param xPt1
-   *        TODO
-   * @param xPt2
-   *        TODO
-   * @param startIndices
-   *        the start indices
-   * @param endIndices
-   *        the end indices
-   * 
-   * @return true if successful
-   * @throws JSpecViewException
-   */
-  private boolean doZoomWithoutRepaint(double xPt1, double xPt2,
-                                       double yPt1, double yPt2,
-                                       int[] startIndices, int[] endIndices, 
-                                       boolean addZoom) {
-    if (!zoomEnabled)
-      return false;
     if (!allow2D() && getSpectrumAt(0).getSubSpectra() != null) {
       graphsTemp[0] = getSpectrum();
-      if (!multiScaleData.setDataPointIndices(graphsTemp, xPt1, xPt2,
+      if (!multiScaleData.setDataPointIndices(graphsTemp, initX, finalX,
           minNumOfPointsForZoom, startIndices, endIndices, false))
-        return false;
+        return;
     } else {
-      if (!multiScaleData.setDataPointIndices(spectra, xPt1, xPt2,
+      if (!multiScaleData.setDataPointIndices(spectra, initX, finalX,
           minNumOfPointsForZoom, startIndices, endIndices, true))
-        return false;
+        return;
     }
-    getMultiScaleData(xPt1, xPt2, yPt1, yPt2, startIndices, endIndices);
-    pin1Dx0.setX(xPt1, toPixelX0(xPt1));
-    pin1Dx1.setX(xPt2, toPixelX0(xPt2));
-    pin1Dy0.setY(yPt1, toPixelY0(yPt1));
-    pin1Dy1.setY(yPt2, toPixelY0(yPt2));
+    
+    getMultiScaleData(initX, finalX, initY, finalY, startIndices, endIndices);
+    pin1Dx0.setX(initX, toPixelX0(initX));
+    pin1Dx1.setX(finalX, toPixelX0(finalX));
+    pin1Dy0.setY(initY, toPixelY0(initY));
+    pin1Dy1.setY(finalY, toPixelY0(finalY));
     if (isd != null) {
       int isub = getSpectrumAt(0).getSubIndex();
       int ifix = isd.fixSubIndex(isub);
       if (ifix != isub)
         setCurrentSubSpectrum(ifix);
+      if (is2DYScaleChange)
+        update2dImage(true);
     }
     if (addZoom)
       addCurrentZoom();
-    return true;
+    notifyZoomListeners(initX, finalX, initY, finalY);
+    if (doRepaint)
+      repaint();
   }
 
   private void addCurrentZoom() {
@@ -2136,7 +1909,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
       double height, width;
 
-      if (graphPosition.equals("default")) {
+      if (printGraphPosition.equals("default")) {
         g2D.translate(pf.getImageableX(), pf.getImageableY());
         if (pf.getOrientation() == PageFormat.PORTRAIT) {
           height = defaultHeight;
@@ -2145,7 +1918,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
           height = defaultWidth;
           width = defaultHeight;
         }
-      } else if (graphPosition.equals("fit to page")) {
+      } else if (printGraphPosition.equals("fit to page")) {
         g2D.translate(pf.getImageableX(), pf.getImageableY());
         height = pf.getImageableHeight();
         width = pf.getImageableWidth();
@@ -2203,7 +1976,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     printingFont = pl.font;
     printGrid = pl.showGrid;
     printTitle = pl.showTitle;
-    graphPosition = pl.position;
+    printGraphPosition = pl.position;
 
     /* Create a print job */
     PrinterJob pj = PrinterJob.getPrinterJob();
@@ -2243,8 +2016,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   public Coordinate getClickedCoordinate() {
     return coordClicked;
   }
-
-  /*--------------------------------------------------------------------------*/
 
   /**
    * Private class to represent a Highlighted region of the spectrum display
@@ -2345,14 +2116,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     }
   }
 
-  public void destroy() {
-    removeKeyListener(this);
-    removeMouseListener(this);
-    removeMouseMotionListener(this);
-  }
-
-  //  private static DecimalFormat coordFormatter = JSpecViewUtils.getDecimalFormat("0.000000");
-
   /**
    * moving panel click event processing to JSVPanel from applet
    * 
@@ -2400,7 +2163,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     float x2 = Parser.parseFloat(xMax);
     if (Float.isNaN(x1) || Float.isNaN(x2))
       return;
-    setHighlightOn(true);
     addHighlight(x1, x2, null);
     if (ScaleData.isWithinRange(x1, multiScaleData)
         && ScaleData.isWithinRange(x2, multiScaleData))
@@ -2454,20 +2216,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     }
   }
 
-  private JSVPanelPopupMenu popup;
-  private JDXSource source;
-
-  public void setPopup(JSVPanelPopupMenu appletPopupMenu) {
-    this.popup = appletPopupMenu;
-  }
-
-  public void setSource(JDXSource source) {
-    this.source = source;
-  }
-
   /*--------------METHODS IN INTERFACE MouseListener-----------------------*/
-
-  private boolean isIntegralDrag;
 
   /**
    * Implements mousePressed in interface MouseListener
@@ -2483,7 +2232,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
   
   private boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
-    if (!zoomEnabled)
+    if (!enableZoom)
       return false;
     if (isPress) {
       thisWidget = getPinSelected(xPixel, yPixel);
@@ -2576,7 +2325,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   public void mouseMoved(MouseEvent e) {
     setToolTipForPixels(e.getX(), e.getY());
-    if (isd != null && !display1Dwith2D && sticky2Dcursor)
+    if (isd != null && !display1D && sticky2Dcursor)
       set2DCrossHairs(e.getX(), e.getY());
     repaint();
   }
@@ -2620,11 +2369,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       isd.setZoom(zoomBox2D.xPixel0, zoomBox2D.yPixel0, zoomBox2D.xPixel1,
           zoomBox2D.yPixel1);
       zoomBox2D.xPixel1 = zoomBox2D.xPixel0;
-      pin2Dx0.setX(isd.toX(isd.xPixel0), isd.xPixel0);
-      int xPixel = isd.xPixel0 + isd.xPixels - 1;
-      pin2Dx1.setX(isd.toX(xPixel), xPixel);
-      doZoom(isd.toX(pin2Dx0.xPixel0), multiScaleData.minY, isd
-          .toX(pin2Dx1.xPixel0), multiScaleData.maxY, true, true, false);
+      doZoom(isd.toX(isd.xPixel0), multiScaleData.minY, isd.toX(isd.xPixel0 + isd.xPixels - 1), multiScaleData.maxY, true, true, false);
     } else if (thisWidget == zoomBox1D) {
       if (Math.abs(zoomBox1D.xPixel1 - zoomBox1D.xPixel0) <= MIN_DRAG_X_PIXELS)
         return;
@@ -2639,9 +2384,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     thisWidget = null;
     return;
   }
-
-  private double lastClickX = Double.MAX_VALUE;
-  private boolean sticky2Dcursor = true;
 
   /**
    * Implements mouseClicked in interface MouseListener
@@ -2742,35 +2484,39 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     if (sval == null)
       return;
     try {
-    if (pw == pin1Dx01 || pw == pin1Dy01) {
-      int pt = sval.indexOf("-", 1);
-      if (pt < 0)
-        return;
-      double val1 = Double.valueOf(sval.substring(0, pt));
-      double val2 = Double.valueOf(sval.substring(pt + 1));
-      if (pw == pin1Dx01) {
-        doZoom(val1, pin1Dy0.getYVal(), val2, pin1Dy1.getYVal(), false, true, false);
+      if (pw == pin1Dx01 || pw == pin1Dy01) {
+        int pt = sval.indexOf("-", 1);
+        if (pt < 0)
+          return;
+        double val1 = Double.valueOf(sval.substring(0, pt));
+        double val2 = Double.valueOf(sval.substring(pt + 1));
+        if (pw == pin1Dx01) {
+          doZoom(val1, pin1Dy0.getYVal(), val2, pin1Dy1.getYVal(), true, true,
+              false);
+        } else {
+          doZoom(pin1Dx0.getXVal(), val1, pin1Dx1.getXVal(), val2, true, true,
+              false);
+        }
       } else {
-        doZoom(pin1Dx0.getXVal(), val1, pin1Dx0.getXVal(), val2, false, true, false);
-      }
-    } else {
         double val = Double.valueOf(sval);
         if (pw.isXtype) {
-          double val2 = (pw == pin1Dx0 ? pin1Dx1.getXVal() : pw == pin1Dx1 ? pin1Dx0.getXVal() : pw == pin2Dx0 ? pin2Dx1.getXVal() : pin2Dx0.getXVal());
+          double val2 = (pw == pin1Dx0 || pw == pin2Dx0 ? pin1Dx1.getXVal()
+              : pin1Dx0.getXVal());
           if (pw.is2D)
             pw.setX(val, isd.toPixelX(val));
-          doZoom(val, pin1Dy0.getYVal(), val2, pin1Dy1.getYVal(), false, true, false);
+          doZoom(val, pin1Dy0.getYVal(), val2, pin1Dy1.getYVal(), true, true,
+              false);
         } else if (pw.is2D) {
           setCurrentSubSpectrum((int) val);
+          repaint();
         } else {
           double val2 = (pw == pin1Dy0 ? pin1Dy1.getYVal() : pin1Dy0.getYVal());
-          doZoom(pin1Dx0.getXVal(), val, pin1Dx1.getXVal(), val2, false, true, false);
+          doZoom(pin1Dx0.getXVal(), val, pin1Dx1.getXVal(), val2, true, true,
+              false);
         }
-    }
+      }
     } catch (Exception e) {
-      return;
     }
-    repaint();
   }
 
   private void clearIntegrals() {
@@ -2784,8 +2530,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       return;
     ig.addIntegral(x1, x2, isFinal);
   }
-
-  String startupPinTip = "Click to set.";
 
   private void setToolTipForPixels(int xPixel, int yPixel) {
 
@@ -2827,12 +2571,12 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       int isub = isd.toSubSpectrumIndex(yPixel);
       String s = formatterX.format(isd.toX(xPixel)) + " " + getSpectrum().getXUnits() + ",  "
           + get2DYLabel(isub, formatterX);
-      setToolTipText(display1Dwith2D ? s : "");
+      setToolTipText(display1D ? s : "");
       coordStr = s;
       return;
     }
 
-    if (isd != null && !display1Dwith2D) {
+    if (isd != null && !display1D) {
       setToolTipText("");
       coordStr = "";
       return;      
@@ -2928,7 +2672,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   public void advanceSubSpectrum(int i) {
-    if (getSpectrumAt(0).advanceSubSpectrum(i))
+    getSpectrumAt(0).advanceSubSpectrum(i);
+    if (getSpectrumAt(0).isForcedSubset())
       multiScaleData.setXRange(getSpectrum());
     notifySubSpectrumChange();
   }
@@ -2938,13 +2683,12 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   public void setCurrentSubSpectrum(int i) {
-    if (getSpectrumAt(0).setCurrentSubSpectrum(i))
+    getSpectrumAt(0).setCurrentSubSpectrum(i);
+    if (getSpectrumAt(0).isForcedSubset())
       multiScaleData.setXRange(getSpectrum());
     notifySubSpectrumChange();
   }
   
-  private int[] tempi4 = new int[4];
-
   private void scaleYBy(double factor) {
     if (!allowYScale)
       return;
@@ -2960,23 +2704,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       factor2 = 1;
       break;
     }
-    double x0 = 0;
-    double x1 = 0;
-    if (isd != null) {
-      isd.getView(tempi4);
-      x0 = pin1Dx0.getXVal();
-      x1 = pin1Dx1.getXVal();
-    }
     doZoom(multiScaleData.minX, multiScaleData.minY / factor1,
         multiScaleData.maxX, multiScaleData.maxY / factor2, true, true, false);
-    if (isd == null)
-      return;
-    thisWidth = -1;
-    update2dImage(true);
-    isd.setView(tempi4);
-    pin1Dx0.setX(x0, toPixelX(x0));
-    pin1Dx1.setX(x1, toPixelX(x1));
-    repaint();
   }
 
   public void keyReleased(KeyEvent e) {
@@ -2993,73 +2722,12 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     }
   }
 
-  public static JSVPanel getPanel0(JInternalFrame frame) {
-    return ((JSVPanel) frame.getContentPane().getComponent(0));
-  }
-
-  public void setParam(DisplayScheme ds, ScriptToken st) {
-    if (st == null || st == ScriptToken.TITLEFONTNAME)
-      setTitleFontName(ds.getTitleFont());
-    if (st == null || st == ScriptToken.DISPLAYFONTNAME)
-      setDisplayFontName(ds.getDisplayFont());
-    ScriptToken t;
-    if (st == (t = ScriptToken.TITLECOLOR) || st == null)
-      setTitleColor(ds.getColor(t));
-    if (st == (t = ScriptToken.UNITSCOLOR) || st == null)
-      setUnitsColor(ds.getColor(t));
-    if (st == (t = ScriptToken.SCALECOLOR) || st == null)
-      setScaleColor(ds.getColor(t));
-    if (st == (t = ScriptToken.COORDINATESCOLOR) || st == null)
-      setcoordinatesColor(ds.getColor(t));
-    if (st == (t = ScriptToken.GRIDCOLOR) || st == null)
-      setGridColor(ds.getColor(t));
-    if (st == (t = ScriptToken.PLOTCOLOR) || st == null)
-      setPlotColor(ds.getColor(t));
-    if (st == (t = ScriptToken.PLOTAREACOLOR) || st == null)
-      setPlotAreaColor(ds.getColor(t));
-    if (st == (t = ScriptToken.BACKGROUNDCOLOR) || st == null)
-      setBackgroundColor(ds.getColor(t));
-    if (st == (t = ScriptToken.INTEGRALPLOTCOLOR) || st == null)
-      setIntegralPlotColor(ds.getColor(t));
-  }
-
-  public void setBoolean(Parameters parameters, ScriptToken st) {
-    ScriptToken t;
-    if (st == (t = ScriptToken.GRIDON) || st == null)
-      setGridOn(parameters.getBoolean(t));
-    if (st == (t = ScriptToken.COORDINATESON) || st == null)
-      setCoordinatesOn(parameters.getBoolean(t));
-    if (st == (t = ScriptToken.XSCALEON) || st == null)
-      setXScaleOn(parameters.getBoolean(t));
-    if (st == (t = ScriptToken.YSCALEON) || st == null)
-      setYScaleOn(parameters.getBoolean(t));
-    if (st == (t = ScriptToken.XUNITSON) || st == null)
-      setXUnitsOn(parameters.getBoolean(t));
-    if (st == (t = ScriptToken.YUNITSON) || st == null)
-      setYUnitsOn(parameters.getBoolean(t));
-    if (st == (t = ScriptToken.REVERSEPLOT) || st == null)
-      setReversePlot(parameters.getBoolean(t));
-    if (st == (t = ScriptToken.DISPLAY2D) || st == null)
-      setDisplay2D(parameters.getBoolean(t));
-    if (st == (t = ScriptToken.DISPLAY1D) || st == null)
-      setDisplay1Dwith2D(parameters.getBoolean(t));
-    if (st == (t = ScriptToken.TITLEON) || st == null)
-      setTitleOn(parameters.getBoolean(t));
-    if (st == (t = ScriptToken.TITLEBOLDON) || st == null)
-      setTitleBoldOn(parameters.getBoolean(t));
-    if (st == (t = ScriptToken.ENABLEZOOM) || st == null)
-      setZoomEnabled(parameters.getBoolean(t));
-  }
-
-  public JDXSpectrum getSpectrum() {
-    return getSpectrumAt(0).getCurrentSubSpectrum();
-  }
-
   public static JSVPanel taConvert(JSVPanel jsvp, int mode) {
     if (jsvp.getNumberOfSpectra() > 1)
       return null;
     JDXSpectrum spectrum = JDXSpectrum.taConvert(jsvp.getSpectrum(), mode);
-    return (spectrum == jsvp.getSpectrum() ? null : new JSVPanel(spectrum));
+    return (spectrum == jsvp.getSpectrum() ? null : new JSVPanel(spectrum,
+        jsvp.source, jsvp.popup));
   }
 
   public static void showSolutionColor(Component component, String sltnclr) {
@@ -3077,9 +2745,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
   /////////////// 2D image /////////////////
   
-  private BufferedImage image2D;
-  private int thisWidth, thisPlotHeight;
-  
   private void draw2DImage(Graphics g) {
     if (isd != null) {
       g.drawImage(image2D, 
@@ -3090,32 +2755,36 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     }
   }
 
-  private ImageScaleData isd;
-
-  private boolean get2DImage(int width) {
+  private boolean get2DImage() {
     isd = new ImageScaleData();
     isd.setScale(zoomInfoList.get(0));
     if (!update2dImage(false))
       return false;
-    widthRatio = (display1Dwith2D ? 1.0 * (width - isd.xPixels) / width : 1);
-    isd.setXY0((int) Math.floor(width - isd.xPixels) - 20, topPlotAreaPos);
     isd.resetZoom();
     sticky2Dcursor = true;
     return true;
   }
 
+  private void setImageWindow() {
+    isd.setPixelWidthHeight((int) ((display1D ? 0.6 : 0.9) * thisWidth), thisPlotHeight);
+    widthRatio = (display1D ? 1.0 * (thisWidth - isd.xPixels) / thisWidth : 1);
+    isd.setXY0((int) Math.floor(thisWidth - isd.xPixels) - 20, topPlotAreaPos);
+  }
+
   private boolean update2dImage(boolean forceNew) {
     isd.setScale(multiScaleData);
-    int[] buffer = getSpectrumAt(0).get2dBuffer(thisWidth, thisPlotHeight, isd, forceNew);
+    JDXSpectrum spec0 = getSpectrumAt(0);
+    int[] buffer = spec0.get2dBuffer(thisWidth, thisPlotHeight, isd, forceNew);
     if (buffer == null) {
       image2D = null;
       isd = null;
       return false;
     }
+    isd.setImageSize(spec0.getXYCoords().length, spec0.getSubSpectra().size(), !forceNew);
     image2D = new BufferedImage(isd.imageWidth, isd.imageHeight, BufferedImage.TYPE_BYTE_GRAY);
     WritableRaster raster = image2D.getRaster();
     raster.setSamples(0, 0, isd.imageWidth, isd.imageHeight, 0, buffer);
-    isd.setPixelWidthHeight((int) ((display1Dwith2D ? 0.6 : 0.9) * thisWidth), thisPlotHeight);
+    setImageWindow();
     return true;
   }
 

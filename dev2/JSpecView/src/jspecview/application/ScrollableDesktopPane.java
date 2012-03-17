@@ -33,7 +33,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JViewport;
 
 import jspecview.application.WindowMenu;
-import jspecview.common.JSVPanel;
+import jspecview.common.JSVFrame;
 
 /**
  * An extension of JDesktopPane that supports often used MDI functionality. This
@@ -67,6 +67,7 @@ public class ScrollableDesktopPane extends JDesktopPane {
     setDragMode(JDesktopPane.OUTLINE_DRAG_MODE);
   }
 
+  @Override
   public void setBounds(int x, int y, int w, int h) {
     super.setBounds(x, y, w, h);
     checkDesktopSize();
@@ -206,11 +207,7 @@ public class ScrollableDesktopPane extends JDesktopPane {
   public void setAllEnabled(boolean isEnabled) {
     JInternalFrame[] frames = getAllFrames();
     for (int i = 0; i < frames.length; i++)
-      setJSVPanelEnabled(frames[i], isEnabled);
-  }
-
-  private void setJSVPanelEnabled(JInternalFrame frame, boolean isEnabled) {
-    JSVPanel.getPanel0(frame).setEnabled(isEnabled);
+      MainFrame.getPanel0((JSVFrame) frames[i]).setEnabled(isEnabled);
   }
 
   /*

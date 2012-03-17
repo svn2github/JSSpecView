@@ -121,6 +121,8 @@ import org.jmol.api.JmolSyncInterface;
 import jspecview.common.AppUtils;
 import jspecview.common.CommandHistory;
 import jspecview.common.DisplayScheme;
+import jspecview.common.JSV1DOverlayPanel;
+import jspecview.common.JSVFrame;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelPopupMenu;
 import jspecview.common.JSpecViewFileFilter;
@@ -191,6 +193,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private boolean autoIntegrate;
 
   private Parameters parameters = new Parameters("application");
+  private Parameters tempParams = new Parameters("temp");
 
   //  ----------------------- Application Attributes ---------------------
 
@@ -1267,7 +1270,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
         parameters.integralFactor);
     if (overlay) {
       try {
-        overlaySpectra(currentSelectedSource, (isOverlay ? url : null));
+        overlay(currentSelectedSource, (isOverlay ? url : null));
       } catch (ScalesIncompatibleException ex) {
         splitSpectra(currentSelectedSource);
       }
@@ -1399,12 +1402,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     DisplayScheme ds = dsp.getDisplaySchemes().get(defaultDisplaySchemeName);
     parameters.setFor(jsvp, (ds == null ? dsp.getDefaultScheme() : ds),
         includeMeasures);
-
-    jsvp.setXAxisDisplayedIncreasing((jsvp.getSpectrum())
-        .shouldDisplayXAxisIncreasing());
-    jsvp.setSource(currentSelectedSource);
-    jsvp.setPopup(jsvpPopupMenu);
-
     jsvp.repaint();
   }
 
@@ -1422,19 +1419,17 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the <code>JDXSource</code>
    * @throws ScalesIncompatibleException
    */
-  private void overlaySpectra(JDXSource source, String name)
+  private void overlay(JDXSource source, String name)
       throws ScalesIncompatibleException {
     overlayAllMenuItem.setSelected(true);
     splitMenuItem.setSelected(false);
     List<JDXSpectrum> specs = source.getSpectra();
-    JSVPanel jsvp;
-    jsvp = new JSVPanel(specs);
+    JSVPanel jsvp = new JSV1DOverlayPanel(specs, null, null);
     jsvp.setTitle(source.getTitle());
 
     setJSVPanelProperties(jsvp, true);
 
-    JInternalFrame frame = new JInternalFrame((name == null ? source.getTitle() : name), true, true,
-        true, true);
+    JSVFrame frame = new JSVFrame((name == null ? source.getTitle() : name));
     frame.setFrameIcon(frameIcon);
     frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     frame.addInternalFrameListener(new JSVInternalFrameListener(source));
@@ -1450,7 +1445,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     } catch (PropertyVetoException pve) {
     }
     frame.show();
-    JInternalFrame[] frames = new JInternalFrame[] { frame };
+    JSVFrame[] frames = new JSVFrame[] { frame };
     createTree(source, frames);
     validate();
     repaint();
@@ -1476,16 +1471,15 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
     List<JDXSpectrum> specs = source.getSpectra();
     //JSVPanel[] panels = new JSVPanel[specs.size()];
-    JInternalFrame[] frames = new JInternalFrame[specs.size()];
+    JSVFrame[] frames = new JSVFrame[specs.size()];
     for (int i = 0; i < specs.size(); i++) {
       JDXSpectrum spec = specs.get(i);
-      JSVPanel jsvp = (spec.getIntegrationGraph() == null ? new JSVPanel(spec)
-          : JSVPanel.getIntegralPanel(spec, null));
+      JSVPanel jsvp = (spec.getIntegrationGraph() == null ? new JSVPanel(spec, source, jsvpPopupMenu)
+          : JSV1DOverlayPanel.getIntegralPanel(spec, null));
       jsvp.setIndex(i);
       jsvp.addListener(this);
       setJSVPanelProperties(jsvp, true);
-      JInternalFrame frame = new JInternalFrame(spec.getTitleLabel(), true,
-          true, true, true);
+      JSVFrame frame = new JSVFrame(spec.getTitleLabel());
       frame.setFrameIcon(frameIcon);
       frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
       frame.setMinimumSize(new Dimension(365, 200));
@@ -1543,11 +1537,11 @@ public class MainFrame extends JFrame implements DropTargetListener,
    * the value of comm.
    * 
    * @param frame
-   *        the selected JInternalFrame
+   *        the selected JSVFrame
    * @param comm
    *        the conversion command
    */
-  private void taConvert(JInternalFrame frame, int comm) {
+  private void taConvert(JSVFrame frame, int comm) {
     JSVPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
@@ -1658,9 +1652,9 @@ public class MainFrame extends JFrame implements DropTargetListener,
    * @param fileName
    *        the name of the file
    * @param frames
-   *        an array of JInternalFrames
+   *        an array of JSVFrames
    */
-  public void createTree(JDXSource source, JInternalFrame[] frames) {
+  public void createTree(JDXSource source, JSVFrame[] frames) {
     String fileName = FileManager.getName(source.getFilePath());
     JSVTreeNode fileNode = new JSVTreeNode(fileName, source, null,
         null, null);
@@ -1670,7 +1664,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
     fileCount++;
     for (int i = 0; i < frames.length; i++) {
-      JSVPanel jsvp = JSVPanel.getPanel0(frames[i]);
+      JSVPanel jsvp = getPanel0(frames[i]);
       JSVTreeNode specNode = new JSVTreeNode(fileName, source, frames[i], jsvp, fileCount + "." + (i + 1));
       specNodes.add(specNode);
       spectraTreeModel.insertNodeInto(specNode, fileNode, fileNode
@@ -1689,7 +1683,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
         "Not Yet Implemented", JOptionPane.INFORMATION_MESSAGE);
   }
 
-  public void selectFrameNode(JInternalFrame frame) {
+  public void selectFrameNode(JSVFrame frame) {
     // Find Node in SpectraTree and select it
     JSVTreeNode node = findNode(frame);
     if (node == null)
@@ -1708,10 +1702,10 @@ public class MainFrame extends JFrame implements DropTargetListener,
    * Returns the tree node that is associated with an internal frame
    * 
    * @param frame
-   *        the JInternalFrame
+   *        the JSVFrame
    * @return the tree node that is associated with an internal frame
    */
-  private JSVTreeNode findNode(JInternalFrame frame) {
+  private JSVTreeNode findNode(JSVFrame frame) {
     for (int i = specNodes.size(); --i >= 0;)
       if (specNodes.get(i).frame == frame)
         return specNodes.get(i);
@@ -1722,7 +1716,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    * Returns the tree node that is associated with a panel
    * 
    * @param frame
-   *        the JInternalFrame
+   *        the JSVFrame
    * @return the tree node that is associated with a panel
    */
   private JSVTreeNode findNode(JSVPanel jsvp) {
@@ -1764,10 +1758,10 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
   
   /**
-   * Does the necessary actions and cleaning up when JInternalFrame closes
+   * Does the necessary actions and cleaning up when JSVFrame closes
    * 
    * @param frame
-   *        the JInternalFrame
+   *        the JSVFrame
    */
   private void doInternalFrameClosing(final JInternalFrame frame) {
 
@@ -1778,12 +1772,12 @@ public class MainFrame extends JFrame implements DropTargetListener,
   }
 
   private JSVPanel getCurrentJSVPanel() {
-    JInternalFrame frame = desktopPane.getSelectedFrame();
-    return (frame == null ? selectedJSVPanel : JSVPanel.getPanel0(frame));
+    JSVFrame frame = (JSVFrame) desktopPane.getSelectedFrame();
+    return (frame == null ? selectedJSVPanel : getPanel0(frame));
   }
 
-  private JInternalFrame getCurrentFrame() {
-    JInternalFrame frame = desktopPane.getSelectedFrame();
+  private JSVFrame getCurrentFrame() {
+    JSVFrame frame = (JSVFrame) desktopPane.getSelectedFrame();
     return (frame != null ? frame : selectedJSVPanel == null ? null
         : findNode(selectedJSVPanel).frame);
   }
@@ -2230,7 +2224,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   }
 
   private void setFrame(JSVTreeNode specNode, boolean fromTree) {
-    JInternalFrame frame = specNode.frame;
+    JSVFrame frame = specNode.frame;
     selectedJSVPanel = specNode.jsvp;
     frame.setVisible(true);
     frame.moveToFront();
@@ -2382,7 +2376,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
     JInternalFrame[] frames = desktopPane.getAllFrames();
     for (int i = 0; i < frames.length; i++)
-      setJSVPanelProperties(JSVPanel.getPanel0(frames[i]),
+      setJSVPanelProperties(getPanel0((JSVFrame) frames[i]),
           shouldApplySpectrumDisplaySetting);
 
     setApplicationElements();
@@ -2415,10 +2409,10 @@ public class MainFrame extends JFrame implements DropTargetListener,
       return;
 
     if (e.getStateChange() == ItemEvent.SELECTED) {
-      jsvp.setCoordinatesOn(true);
+      AppUtils.setBoolean(jsvp, tempParams, ScriptToken.COORDINATESON, true);
       coordsToggleButton.setSelected(true);
     } else {
-      jsvp.setCoordinatesOn(false);
+      AppUtils.setBoolean(jsvp, tempParams, ScriptToken.COORDINATESON, false);
       coordsToggleButton.setSelected(false);
     }
     repaint();
@@ -2563,7 +2557,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the ActionEvent
    */
   void hideMenuItem_actionPerformed(ActionEvent e) {
-    JInternalFrame frame = getCurrentFrame();
+    JSVFrame frame = getCurrentFrame();
     try {
       if (frame != null) {
         frame.setVisible(false);
@@ -2597,7 +2591,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   }
 
   /**
-   * Shows all JInternalFrames
+   * Shows all JSVFrames
    * 
    * @param e
    *        the ActionEvent
@@ -2662,7 +2656,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
     JSVPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
-    jsvp.setGridOn(((JToggleButton) e.getSource()).isSelected());
+    AppUtils.setBoolean(jsvp, tempParams, ScriptToken.GRIDON,
+        ((JToggleButton) e.getSource()).isSelected());
     repaint();
   }
 
@@ -2682,7 +2677,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
   private void setCoordinatesOn(JSVPanel jsvp, boolean selected) {
     parameters.setBoolean(ScriptToken.COORDINATESON, selected);
-    jsvp.setCoordinatesOn(selected);
+    jsvp.setBoolean(parameters, ScriptToken.COORDINATESON);
   }
 
   /**
@@ -2902,7 +2897,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
         if (JDXSpectrum.areScalesCompatible(currentSelectedSource.getSpectra())) {
           JDXSource source = currentSelectedSource;
           closeSource(currentSelectedSource);
-          overlaySpectra(source, null);
+          overlay(source, null);
         } else {
           showUnableToOverlayMessage();
         }
@@ -2968,7 +2963,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
     JSVPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
-    jsvp.setGridOn(e.getStateChange() == ItemEvent.SELECTED);
+    AppUtils.setBoolean(jsvp, tempParams, ScriptToken.GRIDON,
+        e.getStateChange() == ItemEvent.SELECTED);
     repaint();
   }
 
@@ -2982,8 +2978,9 @@ public class MainFrame extends JFrame implements DropTargetListener,
     JSVPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
-    jsvp.setXScaleOn(e.getStateChange() == ItemEvent.SELECTED);
-    jsvp.setXUnitsOn(e.getStateChange() == ItemEvent.SELECTED);
+    boolean b = (e.getStateChange() == ItemEvent.SELECTED);
+    AppUtils.setBoolean(jsvp, tempParams, ScriptToken.XSCALEON, b);
+    AppUtils.setBoolean(jsvp, tempParams, ScriptToken.XUNITSON, b);
     repaint();
   }
 
@@ -2997,7 +2994,9 @@ public class MainFrame extends JFrame implements DropTargetListener,
     JSVPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
-    jsvp.setYScaleOn(e.getStateChange() == ItemEvent.SELECTED);
+    boolean b = (e.getStateChange() == ItemEvent.SELECTED);
+    AppUtils.setBoolean(jsvp, tempParams, ScriptToken.YSCALEON, b);
+    AppUtils.setBoolean(jsvp, tempParams, ScriptToken.YUNITSON, b);
     repaint();
   }
 
@@ -3023,7 +3022,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
     private JDXSource source;
     private String fileName;
-    private JInternalFrame frame;
+    private JSVFrame frame;
     private JSVPanel jsvp;
     private String id;
     private Dialog legend;
@@ -3045,7 +3044,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     }
 
     private JSVTreeNode(String fileName, JDXSource source,
-        JInternalFrame frame, JSVPanel jsvp, String id) {
+        JSVFrame frame, JSVPanel jsvp, String id) {
       super(fileName);
       this.source = source;
       this.fileName = fileName;
@@ -3063,7 +3062,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   }
   
   /**
-   * Listener for a JInternalFrame
+   * Listener for a JSVFrame
    */
   private class JSVInternalFrameListener extends InternalFrameAdapter {
 
@@ -3090,13 +3089,13 @@ public class MainFrame extends JFrame implements DropTargetListener,
      */
     @Override
     public void internalFrameActivated(InternalFrameEvent e) {
-      JInternalFrame frame = e.getInternalFrame();
+      JSVFrame frame = (JSVFrame) e.getInternalFrame();
       if (!frame.isVisible())
         return;
       setCurrentSource(source);
 
       // Update the menu items for the display menu
-      JSVPanel jsvp = JSVPanel.getPanel0(frame);
+      JSVPanel jsvp = getPanel0(frame);
       JDXSpectrum spec = jsvp.getSpectrum();
       gridCheckBoxMenuItem.setSelected(jsvp.isGridOn());
       gridToggleButton.setSelected(jsvp.isGridOn());
@@ -3126,20 +3125,20 @@ public class MainFrame extends JFrame implements DropTargetListener,
     }
 
     /**
-     * Called when <code>JInternalFrame</code> is closing
+     * Called when <code>JSVFrame</code> is closing
      * 
      * @param e
      *        the InternalFrameEvent
      */
     @Override
     public void internalFrameClosing(InternalFrameEvent e) {
-      final JInternalFrame frame = e.getInternalFrame();
+      final JSVFrame frame = (JSVFrame) e.getInternalFrame();
 
       doInternalFrameClosing(frame);
     }
 
     /**
-     * Called when <code>JInternalFrame</code> has opened
+     * Called when <code>JSVFrame</code> has opened
      * 
      * @param e
      *        the InternalFrameEvent
@@ -3199,6 +3198,10 @@ public class MainFrame extends JFrame implements DropTargetListener,
         break;
     setFrame(i + n);
     selectedJSVPanel.requestFocusInWindow();
+  }
+
+  static JSVPanel getPanel0(JSVFrame frame) {
+    return ((JSVPanel) frame.getContentPane().getComponent(0));
   }
 
 }

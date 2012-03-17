@@ -43,20 +43,6 @@ public class ImageScaleData {
   public int xPixelZoom1, yPixelZoom1, xPixelZoom2, yPixelZoom2;
   public int xView1, yView1, xView2, yView2;
   public double minX = Double.NaN, maxX, minZ, maxZ;
-
-  public ImageScaleData copy() {
-    ImageScaleData isd = new ImageScaleData();
-    isd.setXY0(xPixel0, yPixel0);
-    isd.setImageSize(imageWidth, imageHeight);
-    isd.setPixelWidthHeight(xPixels, yPixels);
-    isd.minX = minX;
-    isd.minZ = minZ;
-    isd.maxX = maxX;
-    isd.maxZ = maxZ;
-    isd.resetZoom();
-    isd.setView();
-    return isd;
-  }
   
   public void setScale(ScaleData scaleData) {
     if (Double.isNaN(minX)) {
@@ -75,11 +61,13 @@ public class ImageScaleData {
     setView();
   }
   
-  public void setImageSize(int width, int height) {
+  public void setImageSize(int width, int height, boolean setView) {
     this.imageWidth = width;
     this.imageHeight = height;
-    xView2 = width - 1;
-    yView2 = height - 1; 
+    if (setView) {
+      xView2 = width - 1;
+      yView2 = height - 1;
+    }
   }
   
   public void setXY0(int xPixel, int yPixel) {
@@ -157,7 +145,7 @@ public class ImageScaleData {
   }
   
   public int toSubSpectrumIndex(int yPixel) {
-    return Math.min(imageHeight - 1, Math.max(0, imageHeight - 1 - toImageY(yPixel)));
+    return Coordinate.intoRange(imageHeight - 1 - toImageY(yPixel), 0, imageHeight - 1);
   }
 
   public int toPixelX(int imageX) {
@@ -173,8 +161,6 @@ public class ImageScaleData {
   }
 
   public int fixSubIndex(int subIndex) {
-    int sub2 = imageHeight - 1 - yView1;
-    int sub1 = imageHeight - 1 - yView2;
-    return Math.max(sub1, Math.min(sub2, subIndex)); 
+    return Coordinate.intoRange(subIndex, imageHeight - 1 - yView2, imageHeight - 1 - yView1);
   }
 }

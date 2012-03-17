@@ -240,8 +240,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    * @param e the <code>ItemEvent</code
    */
   void gridCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-    selectedJSVPanel.setGridOn((e.getStateChange() == ItemEvent.SELECTED));
-    selectedJSVPanel.repaint();
+    scripter.runScript("GRIDON " + (e.getStateChange() == ItemEvent.SELECTED));
   }
 
   /**
@@ -249,8 +248,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    * @param e the <code>ItemEvent</code
    */
   void coordsCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-    selectedJSVPanel.setCoordinatesOn((e.getStateChange() == ItemEvent.SELECTED));
-    selectedJSVPanel.repaint();
+    scripter.runScript("COORDINATESON " + (e.getStateChange() == ItemEvent.SELECTED));
   }
 
   /**
@@ -272,8 +270,8 @@ public class JSVPanelPopupMenu extends JPopupMenu {
 
     JDXSpectrum spectrum = selectedJSVPanel.getSpectrum();
     Object[][] rowData = spectrum.getHeaderRowDataAsArray();
-    if (false && source.isCompoundSource)
-      rowData = source.getHeaderRowDataAsArray(false, rowData);
+    //if (source.isCompoundSource)
+      //rowData = source.getHeaderRowDataAsArray(false, rowData);
     String[] columnNames = { "Label", "Description" };
     JTable table = new JTable(rowData, columnNames);
     table.setPreferredScrollableViewportSize(new Dimension(400, 195));

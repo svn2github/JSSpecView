@@ -75,6 +75,7 @@ import javax.swing.event.ChangeListener;
 
 import jspecview.common.AppUtils;
 import jspecview.common.IntegralGraph;
+import jspecview.common.JSV1DOverlayPanel;
 import jspecview.common.JSVPanel;
 import jspecview.common.OverlayLegendDialog;
 import jspecview.common.Parameters;
@@ -140,6 +141,8 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
   private String sltnclr = "255,255,255"; //Colour of Solution
 
   private Parameters parameters = new Parameters("applet");
+  private Parameters tempParams = new Parameters("temp");
+   
 
   /*---------------------------------END PARAMETERS------------------------*/
 
@@ -199,7 +202,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     }
     if (jsvPanels != null) {
       for (int i = jsvPanels.size(); --i >= 0;) {
-        jsvPanels.get(i).destroy();
+        jsvPanels.get(i).dispose();
         jsvPanels.remove(i);
       }
     }
@@ -334,10 +337,10 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
    */
   public void toggleGrid() {
     JSVPanel jsvp = getSelectedPanel();
-    if (jsvp != null) {
-      jsvp.setGridOn(!jsvp.isGridOn());
-      repaint();
-    }
+    if (jsvp == null)
+      return;
+    AppUtils.setBoolean(jsvp, tempParams, ScriptToken.GRIDON, !jsvp.isGridOn());
+    repaint();
   }
 
   /**
@@ -346,10 +349,11 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
    */
   public void toggleCoordinate() {
     JSVPanel jsvp = getSelectedPanel();
-    if (jsvp != null) {
-      jsvp.setCoordinatesOn(!jsvp.isCoordinatesOn());
-      repaint();
-    }
+    if (jsvp == null)
+      return;
+    AppUtils.setBoolean(jsvp, tempParams, ScriptToken.COORDINATESON, 
+        !jsvp.isCoordinatesOn());
+    repaint();
   }
 
   /**
@@ -381,7 +385,6 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
   public void addHighlight(double x1, double x2, int r, int g, int b, int a) {
     JSVPanel jsvp = getSelectedPanel();
     if (jsvp != null) {
-      jsvp.setHighlightOn(true);
       Color color = new Color(r, g, b, a);
       jsvp.addHighlight(x1, x2, color);
       repaint();
@@ -558,16 +561,15 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
       jsvPanels = new ArrayList<JSVPanel>();
 
       try {
+        int[] startIndices = null;
+        int[] endIndices = null;
         if (showRange) {
-          int[] startIndices = new int[numberOfSpectra];
-          int[] endIndices = new int[numberOfSpectra];
-
+          startIndices = new int[numberOfSpectra];
+          endIndices = new int[numberOfSpectra];
           Arrays.fill(startIndices, startIndex);
           Arrays.fill(endIndices, endIndex);
-
-          jsvp = new JSVPanel(specs, startIndices, endIndices);
-        } else
-          jsvp = new JSVPanel(specs);
+        }
+        jsvp = new JSV1DOverlayPanel(specs, startIndices, endIndices);
       } catch (ScalesIncompatibleException sie) {
         theInterface = "single";
         isOverlaid = false;
@@ -587,12 +589,12 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
         for (int i = 0; i < numberOfSpectra; i++) {
           JDXSpectrum spec = specs.get(i);
           if (spec.getIntegrationGraph() != null) {
-            jsvp = JSVPanel.getIntegralPanel(spec, null);
+            jsvp = JSV1DOverlayPanel.getIntegralPanel(spec, null);
           } else if (showRange) {
             jsvp = new JSVPanel(spec, startIndex,
-                endIndex);
+                endIndex, currentSource, appletPopupMenu);
           } else {
-            jsvp = new JSVPanel(spec);
+            jsvp = new JSVPanel(spec, currentSource, appletPopupMenu);
           }
           jsvPanels.add(jsvp);
           initProperties(jsvp, i);
@@ -608,10 +610,6 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     jsvp.addListener(this);
     jsvp.setIndex(index);
     parameters.setFor(jsvp, null, true);
-    jsvp.setXAxisDisplayedIncreasing((jsvp.getSpectrum()).shouldDisplayXAxisIncreasing());
-    jsvp.setSource(currentSource);
-    jsvp.setPopup(appletPopupMenu);
-
   }
 
   /**

@@ -59,7 +59,7 @@ public class Parameters extends DisplayScheme {
 
     if (jsvp.getPlotColor(1) != null) // integration
       jsvp.setPlotColors(plotColors);
-    jsvp.setParam(ds, null);
+    jsvp.setColorOrFont(ds, null);
  }
 
   public void set(JSVPanel jsvp, ScriptToken st, String value) {
@@ -149,17 +149,21 @@ public class Parameters extends DisplayScheme {
     if (jsvp == null)
       return;
     if (param != null)
-      jsvp.setParam(this, st);
+      jsvp.setColorOrFont(this, st);
     else
       jsvp.setBoolean(this, st);
   }
 
-  private Map<ScriptToken, Boolean> htBooleans = new Hashtable<ScriptToken, Boolean>();
-  
   public static boolean isTrue(String value) {
     return (value.length() == 0 || Boolean.parseBoolean(value)); 
   }
   
+  private Map<ScriptToken, Boolean> htBooleans = new Hashtable<ScriptToken, Boolean>();
+
+  public Map<ScriptToken, Boolean> getBooleans() {
+    return htBooleans;
+  }
+
   public boolean setBoolean(ScriptToken st, String value) {
     return setBoolean(st, isTrue(value));
   }

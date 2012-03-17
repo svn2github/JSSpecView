@@ -877,14 +877,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return true;
   }
 
-  public static boolean areScalesCompatible(Graph[] spectra) {
-    if (spectra.length >= 2)
-    for (int i = spectra.length; --i >= 1; )
-      if (!areScalesCompatible(spectra[0], spectra[i]))
-        return false;
-    return true;
-  }
-
   public static boolean process(List<JDXSpectrum> specs, int irMode,
                              boolean autoIntegrate, 
                              double minY, double offset, double factor) {
@@ -937,14 +929,13 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return (subSpectra == null ? this : subSpectra.get(currentSubSpectrum));
   }
 
-  public boolean advanceSubSpectrum(int dir) {
-    return setCurrentSubSpectrum(currentSubSpectrum + dir);
+  public void advanceSubSpectrum(int dir) {
+    setCurrentSubSpectrum(currentSubSpectrum + dir);
   }
   
 
-  public boolean setCurrentSubSpectrum(int n) {
-    currentSubSpectrum = Math.max(0, Math.min(n, subSpectra.size() - 1));
-    return isForcedSubset;
+  public void setCurrentSubSpectrum(int n) {
+    currentSubSpectrum = Coordinate.intoRange(n, 0, subSpectra.size() - 1);
   }
 
   /**
@@ -1009,28 +1000,23 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     if (!forceNew && thisWidth == width && thisHeight == height)
       return buf2d;
     int nSpec = subSpectra.size();
-    double grayFactor = 255 / (isd.maxZ - isd.minZ);
     thisWidth = width = xyCoords.length;
     thisHeight = height = nSpec;
-    isd.setImageSize(width, height);
+    double grayFactor = 255 / (isd.maxZ - isd.minZ);
     if (!forceNew && buf2d != null && grayFactor == grayFactorLast)
       return buf2d;
     grayFactorLast = grayFactor;
-    int[] buf = new int[width * height];
+    int pt = width * height;
+    int[] buf = new int[pt];
     for (int i = 0; i < nSpec; i++) {
       Coordinate[] points = subSpectra.get(i).xyCoords;
       if (points.length != xyCoords.length)
         return null;
       double f = subSpectra.get(i).getUserYFactor();
-      for (int j = 0; j < xyCoords.length; j++) {
-        int pt = (int) ((height - 1 - i) * width + width - 1 - j);
-        if (pt < 0)
-          pt = 0;
-        buf[pt] = 255 - (int) Math.floor((isd.minZ + points[j].getYVal()* f) * grayFactor);
-      }
+      for (int j = 0; j < xyCoords.length; j++)
+        buf[--pt] = 255 - Coordinate.intoRange((int) ((points[j].getYVal()* f - isd.minZ) * grayFactor), 0, 255);
     }
-    buf2d = buf;
-    return buf2d;
+    return (buf2d = buf);
   }
 
   public double getY2DPPM() {

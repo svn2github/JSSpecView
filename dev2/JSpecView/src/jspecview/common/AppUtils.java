@@ -61,7 +61,7 @@ public class AppUtils {
           parameters.integralOffset, parameters.integralFactor);
 
       if (graph != null) {
-        JSVPanel newJsvp = JSVPanel.getIntegralPanel(spectrum, jsvp
+        JSVPanel newJsvp = JSV1DOverlayPanel.getIntegralPanel(spectrum, jsvp
             .getIntegralPlotColor());
         // add integration ratio annotations if any exist
         jp.remove(jsvp);
@@ -80,7 +80,7 @@ public class AppUtils {
     if (spectrum.getIntegrationGraph() == null)
       return jsvp;
     spectrum.setIntegrationGraph(null);
-    JSVPanel newJsvp = new JSVPanel(spectrum);
+    JSVPanel newJsvp = new JSVPanel(spectrum, jsvp.getSource(), jsvp.getPopup());
     jp.remove(jsvp);
     jp.add(newJsvp);
     return newJsvp;
@@ -183,6 +183,22 @@ public class AppUtils {
     jmi.setText(key);
     jmi.addActionListener(actionListener);
     m.add(jmi);
+  }
+
+  /**
+   * setting of boolean parameters for a panel is only through Parameters
+   * 
+   * @param jsvp
+   * @param params
+   * @param st
+   * @param b
+   */
+  public static void setBoolean(JSVPanel jsvp, Parameters params,
+                                  ScriptToken st, boolean b) {
+    if (params == null)
+      params = new Parameters("temp");
+    params.setBoolean(st, b);
+    jsvp.setBoolean(params, st);
   }
 
 

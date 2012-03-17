@@ -656,10 +656,10 @@ public class PreferencesDialog extends JDialog {
       JDXSource source = FileReader.createJDXSource(getClass()
           .getResourceAsStream("resources/sample.jdx"), false);
 
-      previewPanel = new JSVPanel(source.getSpectra().get(0));
-      previewPanel.setZoomEnabled(false);
-      previewPanel.setCoordinatesOn(true);
-      previewPanel.setGridOn(true);
+      previewPanel = new JSVPanel(source.getSpectra().get(0), null, null);
+      AppUtils.setBoolean(previewPanel, null, ScriptToken.ENABLEZOOM, false);
+      AppUtils.setBoolean(previewPanel, null, ScriptToken.GRIDON, true);
+      AppUtils.setBoolean(previewPanel, null, ScriptToken.COORDINATESON, true);
     } catch (IOException ioe) {
       ioe.printStackTrace();
       return;
@@ -1008,16 +1008,7 @@ public class PreferencesDialog extends JDialog {
    */
   void updatePreviewPanel(){
     if(previewPanel != null){
-      previewPanel.setTitleColor(currentDS.getColor(ScriptToken.TITLECOLOR));
-      previewPanel.setPlotColor(currentDS.getColor(ScriptToken.PLOTCOLOR));
-      previewPanel.setScaleColor(currentDS.getColor(ScriptToken.SCALECOLOR));
-      previewPanel.setcoordinatesColor(currentDS.getColor(ScriptToken.COORDINATESCOLOR));
-      previewPanel.setUnitsColor(currentDS.getColor(ScriptToken.UNITSCOLOR));
-      previewPanel.setPlotAreaColor(currentDS.getColor(ScriptToken.PLOTAREACOLOR));
-      previewPanel.setBackground(currentDS.getColor(ScriptToken.BACKGROUNDCOLOR));
-      previewPanel.setGridColor(currentDS.getColor(ScriptToken.GRIDCOLOR));
-      //TODO Title font here
-      previewPanel.setDisplayFontName(currentDS.getDisplayFont());
+      previewPanel.setColorOrFont(currentDS, null);
       repaint();
     }
   }

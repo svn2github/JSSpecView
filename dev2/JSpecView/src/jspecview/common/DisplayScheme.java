@@ -40,6 +40,10 @@ public class DisplayScheme {
   protected String displayFont;
   /** A map of the name of the elements and their colors*/
   protected Map<ScriptToken, Color> elementColors = new Hashtable<ScriptToken, Color>();
+  public Map<ScriptToken, Color> getColors() {
+    return elementColors;
+  }
+  
   /** Specifies if the display scheme is the default */
   protected boolean isDefault = false;
 
