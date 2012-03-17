@@ -30,10 +30,13 @@ public class Escape {
   private final static String escapable = "\\\\\tt\rr\nn\"\""; 
 
   public static String jmolSelect(String peak, String file) {
-    String script = (peak == null ? "vibration off; select none;selectionHalos off"
-        : "vibration on; selectionHalos on;");
+    String script = (peak == null ? "vibration off; select none;selectionHalos off;"
+        : (peak.indexOf("\"IR\"") >= 0 || peak.indexOf("\"RAMAN\"") >= 0 
+        ? "vibration ON; selectionHalos OFF;"
+            : "vibration OFF; selectionHalos ON;"));
     return "Select: "
-        + TextFormat.simpleReplace(peak, "file=\"\"", "file=" + escape(file)) + " script=\""+script+"\"";
+        + TextFormat.simpleReplace(peak, "file=\"\"", "file=" + escape(file))
+        + " script=\"" + script + "\"";
   }
 
   public static String escape(String str) {

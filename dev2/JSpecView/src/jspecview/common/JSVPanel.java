@@ -201,29 +201,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     setName(title);
   }
   
-  // not implemented?
-  private boolean svgExportForInscapeEnabled = false;
-
-  /**
-   * not implemented? 
-   * 
-   * sets whether svg export should support inkscape
-   * @param val
-   *   true if inkscape svg export is enabled
-   */
-  public void setSvgExportForInscapeEnabled(boolean val) {
-    svgExportForInscapeEnabled = val;
-  }
-
-  /**
-   * not implemented ? 
-   * Determines whether svg export should support inkscape
-   * @return true if inkscape svg export is enabled
-   */
-  public boolean isSvgExportForInkscapeEnabled() {
-    return svgExportForInscapeEnabled;
-  }
-
   //////// settable parameters //////////
   
   private boolean coordinatesOn = true;

@@ -359,6 +359,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private ImageIcon errorLogYellowIcon;
   private ImageIcon errorLogRedIcon;
   private CommandHistory commandHistory;
+  private boolean svgForInkscape;
 
   private void getIcons() {
     Class<? extends MainFrame> cl = getClass();
@@ -565,25 +566,9 @@ public class MainFrame extends JFrame implements DropTargetListener,
       // bad property value
     }
 
-    //svgForInscape = Boolean.parseBoolean(properties.getProperty("svgForInscape"));
+    svgForInkscape = Boolean.parseBoolean(properties.getProperty("svgForInkscape"));
 
   }
-
-  /**
-   * Returns a <code>Color</code> instance from a parameter
-   * 
-   * @param key
-   *        the parameter name
-   * @param def
-   *        the default value
-   * @return a <code>Color</code> instance from a parameter
-   */
-  /*  private Color getColorProperty(String key, Color def) {
-      String param = properties.getProperty(key);
-      Color color = JSpecViewUtils.getColorFromString(param);
-      return (color == null ? def : color);
-    }
-  */
 
   /**
    * Creates tree representation of files that are opened
@@ -1209,12 +1194,9 @@ public class MainFrame extends JFrame implements DropTargetListener,
       fileName = filePath = "Overlay" + (++nOverlay);
     } else if (url != null) {
       try {
-        System.out.println("openFile " + url);
         URL u = new URL(url);
-        System.out.println("openFile " + u);
         fileName = FileManager.getName(url);
         filePath = u.toString();
-        System.out.println("openFile " + fileName + " " + filePath);
         recentJmolName = filePath;
         recentURL = filePath;
       } catch (MalformedURLException e) {
@@ -2091,7 +2073,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
           break;
         case EXPORT:
           if (jsvp != null)
-            msg = Exporter.exportCmd(jsvp, ScriptToken.getTokens(value));
+            msg = Exporter.exportCmd(jsvp, ScriptToken.getTokens(value), svgForInkscape);
           break;
         case LABEL:
           if (jsvp != null)

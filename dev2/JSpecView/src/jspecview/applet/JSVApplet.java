@@ -1440,7 +1440,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
           break;
         case EXPORT:
           if (jsvp != null && isPro())
-            writeStatus(Exporter.exportCmd(jsvp, ScriptToken.getTokens(value)));
+            writeStatus(Exporter.exportCmd(jsvp, ScriptToken.getTokens(value), false));
           return;
         case OVERLAY:
           overlay(ScriptToken.getTokens(TextFormat.simpleReplace(value, "*", " * ")));

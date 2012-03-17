@@ -929,11 +929,9 @@ public class PreferencesDialog extends JDialog {
   void saveButton_actionPerformed(ActionEvent e) {
     // Prompt for Scheme Name
     String input = "";
-    while(input.equals("")){
+    while(input != null && input.equals(""))
       input = JOptionPane.showInputDialog(this, "Enter the Name of the Display Scheme",
                                 "Display Scheme Name", JOptionPane.PLAIN_MESSAGE);
-    }
-
     if(input == null)
       return;
 

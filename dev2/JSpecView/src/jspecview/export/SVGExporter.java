@@ -32,6 +32,7 @@ import jspecview.common.Graph;
 import jspecview.common.AppUtils;
 import jspecview.common.MultiScaleData;
 import jspecview.common.ScaleData;
+import jspecview.util.Logger;
 import jspecview.util.TextFormat;
 
 /**
@@ -64,15 +65,16 @@ class SVGExporter extends FormExporter {
    * @param graph the Graph
    * @param startIndex
    * @param endIndex
+   * @param forInkscape 
    * @return data if fileName is null
    * @throws IOException
    */
-  String exportAsSVG(String path, Graph graph, int startIndex, int endIndex)
+  String exportAsSVG(String path, Graph graph, int startIndex, int endIndex, boolean forInkscape)
       throws IOException {
     return exportAsSVG(path, graph.getXYCoords(), "", startIndex,
         endIndex, graph.getXUnits(), graph.getYUnits(), graph.isContinuous(),
         graph.isIncreasing(), Color.lightGray, Color.white, Color.black,
-        Color.gray, Color.black, Color.black, Color.black, false);
+        Color.gray, Color.black, Color.black, Color.black, forInkscape);
   }
 
   /**
@@ -118,7 +120,6 @@ class SVGExporter extends FormExporter {
     double yStep = scaleData.yStep;
     int hashNumX = scaleData.hashNums[0];
     int hashNumY = scaleData.hashNums[1];
-
     int plotAreaWidth = svgWidth - leftInset - rightInset;
     int plotAreaHeight = svgHeight - topInset - bottomInset;
     double xScaleFactor = (plotAreaWidth / (maxXOnScale - minXOnScale));
@@ -129,7 +130,6 @@ class SVGExporter extends FormExporter {
     int bottomPlotArea = topInset + plotAreaHeight;
     int titlePosition = bottomPlotArea + 60;
     context.put("titlePosition", new Integer(titlePosition));
-
 
     double xPt, yPt;
     String xStr, yStr;
@@ -143,7 +143,6 @@ class SVGExporter extends FormExporter {
       yPt = topPlotArea;
       xStr = formatter2.format(xPt);
       yStr = formatter2.format(yPt);
-
       Map<String, String> hash = new Hashtable<String, String>();
       hash.put("xVal", xStr);
       hash.put("yVal", yStr);
@@ -155,11 +154,9 @@ class SVGExporter extends FormExporter {
       yPt = topPlotArea + ((i - minYOnScale) * yScaleFactor);
       xStr = formatter2.format(xPt);
       yStr = formatter2.format(yPt);
-
       Map<String, String> hash = new Hashtable<String, String>();
       hash.put("xVal", xStr);
       hash.put("yVal", yStr);
-
       horizGridCoords.add(hash);
     }
 
@@ -168,21 +165,15 @@ class SVGExporter extends FormExporter {
     List<Map<String, String>> xScaleList = new ArrayList<Map<String, String>>();
     List<Map<String, String>> xScaleListReversed = new ArrayList<Map<String, String>>();
     List<Map<String, String>> yScaleList = new ArrayList<Map<String, String>>();
-
     String hashX = "#";
     String hashY = "#";
     String hash1 = "0.00000000";
-
     if (hashNumX <= 0)
       hashX = hash1.substring(0, Math.abs(hashNumX) + 3);
-
     DecimalFormat displayXFormatter = TextFormat.getDecimalFormat(hashX);
-
     if (hashNumY <= 0)
       hashY = hash1.substring(0, Math.abs(hashNumY) + 3);
-
     DecimalFormat displayYFormatter = TextFormat.getDecimalFormat(hashY);
-
     for (double i = minXOnScale; i < (maxXOnScale + xStep / 2); i += xStep) {
       xPt = leftPlotArea + ((i - minXOnScale) * xScaleFactor);
       xPt -= 10; // shift to left by 10
@@ -190,14 +181,12 @@ class SVGExporter extends FormExporter {
       xStr = formatter2.format(xPt);
       yStr = formatter2.format(yPt);
       String iStr = displayXFormatter.format(i);
-
       Map<String, String> hash = new Hashtable<String, String>();
       hash.put("xVal", xStr);
       hash.put("yVal", yStr);
       hash.put("number", iStr);
       xScaleList.add(hash);
     }
-
     for (double i = minXOnScale, j = maxXOnScale; i < (maxXOnScale + xStep / 2); i += xStep, j -= xStep) {
       xPt = leftPlotArea + ((j - minXOnScale) * xScaleFactor);
       xPt -= 10;
@@ -634,12 +623,8 @@ class SVGExporter extends FormExporter {
     context.put("numDecimalPlacesX", new Integer(Math.abs(hashNumX)));
     context.put("numDecimalPlacesY", new Integer(Math.abs(hashNumY)));
 
-    if (exportForInkscape) {
-      System.out.println("inkscape is true ");
-      return writeForm("plot_ink.vm");
-    } else {
-      System.out.println("inkscape is false ");
-      return writeForm("plot.vm");
-    }
+    String vm = (exportForInkscape ? "plot_ink.vm" : "plot.vm");
+    Logger.info("SVGExport using " + vm);
+    return writeForm(vm);
   }
 }

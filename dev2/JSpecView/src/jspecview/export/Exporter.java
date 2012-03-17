@@ -30,7 +30,7 @@ import jspecview.util.TextFormat;
 public class Exporter {
 
   public enum Type {
-    UNK, DIF, FIX, SQZ, PAC, XY, DIFDUP, PNG, JPG, SVG, CML, AML;
+    UNK, DIF, FIX, SQZ, PAC, XY, DIFDUP, PNG, JPG, SVG, SVGI, CML, AML;
 
     public static Type getType(String type) {
       type = type.toUpperCase();
@@ -74,7 +74,8 @@ public class Exporter {
     case SQZ:
       return JDXExporter.export(mode, path, spec, startIndex, endIndex);      
     case SVG:
-      return (new SVGExporter()).exportAsSVG(path, spec, startIndex, endIndex);
+    case SVGI:
+      return (new SVGExporter()).exportAsSVG(path, spec, startIndex, endIndex, mode == Type.SVGI);
     case CML:
       return (new CMLExporter()).exportAsCML(path, spec, startIndex, endIndex);
     case AML:
@@ -142,7 +143,7 @@ public class Exporter {
    * 
    * @return message for status line
    */
-  public static String exportCmd(JSVPanel jsvp, List<String> tokens) {
+  public static String exportCmd(JSVPanel jsvp, List<String> tokens, boolean forInkscape) {
     // MainFrame or applet EXPORT command
     String mode = "XY";
     String fileName = null;
@@ -170,7 +171,10 @@ public class Exporter {
     } else if (Type.isExportMode(mode)){
       fileName += "."  + mode;
     }
-    return exportSpectrumOrImage(jsvp, Type.getType(mode), -1, fileName);
+    Type type = Type.getType(mode);
+    if (forInkscape && type == Type.SVG)
+      type = Type.SVGI;
+    return exportSpectrumOrImage(jsvp, type, -1, fileName);
   }
 
   /**
@@ -257,12 +261,13 @@ public class Exporter {
         msg = " OK";
         break;
       case SVG:
-        msg = (new SVGExporter()).exportAsSVG(path, spec.getXYCoords(), spec
-            .getTitle(), startIndex, endIndex, spec.getXUnits(), spec
-            .getYUnits(), spec.isContinuous(), spec.isIncreasing(), jsvp
-            .getPlotAreaColor(), jsvp.getBackground(), jsvp.getPlotColor(0),
+      case SVGI:
+        msg = (new SVGExporter()).exportAsSVG(path, spec.getXYCoords(), 
+            spec.getTitle(), startIndex, endIndex, spec.getXUnits(), 
+            spec.getYUnits(), spec.isContinuous(), spec.isIncreasing(), 
+            jsvp.getPlotAreaColor(), jsvp.getBackground(), jsvp.getPlotColor(0),
             jsvp.getGridColor(), jsvp.getTitleColor(), jsvp.getScaleColor(),
-            jsvp.getUnitsColor(), jsvp.isSvgExportForInkscapeEnabled());
+            jsvp.getUnitsColor(), imode == Type.SVGI);
         break;
       default:
         msg = exportTheSpectrum(imode, path, spec, startIndex, endIndex);
