@@ -69,9 +69,9 @@ M  END
 <Peaks type="HNMR" xUnits="ppm" yUnits="arbitrary units" >
 <PeakData  id="1" title="methyl group ~2.3" peakShape="singlet" model="aspirin" atoms="19,20,21"  xMax="2.83" xMin="1.83"  yMax="10000" yMin="0" />
 <PeakData  id="2" title="H ~5.03" peakShape="multiplet" model="aspirin" atoms="18"  xMax="5.23" xMin="4.83"  yMax="10000" yMin="0" />
-<PeakData  id="3" title="H ~7.18" peakShape="multiplet" model="aspirin" atoms="14"  xMax="7.33" xMin="7.03"  yMax="10000" yMin="0" />
-<PeakData  id="4" title="H ~7.38" peakShape="multiplet" model="aspirin" atoms="16"  xMax="7.53" xMin="7.23"  yMax="10000" yMin="0" />
-<PeakData  id="5" title="H ~7.61" peakShape="multiplet" model="aspirin" atoms="15"  xMax="7.76" xMin="7.36"  yMax="10000" yMin="0" />
+<PeakData  id="3" title="H ~7.18" peakShape="multiplet" model="aspirin" atoms="14"  xMax="7.25" xMin="7.11"  yMax="10000" yMin="0" />
+<PeakData  id="4" title="H ~7.38" peakShape="multiplet" model="aspirin" atoms="16"  xMax="7.45" xMin="7.31"  yMax="10000" yMin="0" />
+<PeakData  id="5" title="H ~7.61" peakShape="multiplet" model="aspirin" atoms="15"  xMax="7.68" xMin="7.53"  yMax="10000" yMin="0" />
 <PeakData  id="6" title="H ~8.04" peakShape="multiplet" model="aspirin" atoms="17"  xMax="8.24" xMin="7.84"  yMax="10000" yMin="0" />
 </Peaks>
 ##.SOLVENTNAME= CHLOROFORM-d
@@ -1152,14 +1152,15 @@ M  END
 </Models>
 ##$PEAKS=
 <Peaks type="13CNMR" xUnits="ppm" yUnits="arbitrary units" >
-<PeakData id="1" title="C at 21" peakShape="singlet" model="aspirin" atoms="9"  xMax="22" xMin="20"  yMax="10000" yMin="0" />
-<PeakData  id="2" title="C ~125" peakShape="singlet" model="aspirin" atoms="3"  xMax="126" xMin="124"  yMax="10000" yMin="0" />
-<PeakData  id="3" title="C ~127" peakShape="singlet" model="aspirin" atoms="5"  xMax="128" xMin="126"  yMax="10000" yMin="0" />
-<PeakData  id="4" title="C ~132" peakShape="singlet" model="aspirin" atoms="6"  xMax="133.5" xMin="130"  yMax="10000" yMin="0" />
-<PeakData  id="5" title="C ~134" peakShape="singlet" model="aspirin" atoms="4"  xMax="136" xMin="134"  yMax="10000" yMin="0" />
-<PeakData  id="6" title="C ~152" peakShape="singlet" model="aspirin" atoms="2"  xMax="153" xMin="151"  yMax="10000" yMin="0" />
-<PeakData  id="7" title="C ~167" peakShape="singlet" model="aspirin" atoms="8"  xMax="169" xMin="166"  yMax="10000" yMin="0" />
-<PeakData  id="8" title="C ~171" peakShape="singlet" model="aspirin" atoms="7"  xMax="172" xMin="170"  yMax="10000" yMin="0" />
+<PeakData id="1" title="C at 21" peakShape="singlet" model="aspirin" atoms="9"  xMax="23" xMin="19"  yMax="10000" yMin="0" />
+<PeakData id="2" title="C ~124" peakShape="singlet" model="aspirin" atoms="1"  xMax="124.9" xMin="124"  yMax="10000" yMin="0" />
+<PeakData id="3" title="C ~125" peakShape="singlet" model="aspirin" atoms="3"  xMax="125.9" xMin="125"  yMax="10000" yMin="0" />
+<PeakData id="4" title="C ~127" peakShape="singlet" model="aspirin" atoms="5"  xMax="128" xMin="126.1"  yMax="10000" yMin="0" />
+<PeakData id="5" title="C ~132" peakShape="singlet" model="aspirin" atoms="6"  xMax="133.5" xMin="130"  yMax="10000" yMin="0" />
+<PeakData id="6" title="C ~134" peakShape="singlet" model="aspirin" atoms="4"  xMax="136" xMin="134"  yMax="10000" yMin="0" />
+<PeakData id="7" title="C ~152" peakShape="singlet" model="aspirin" atoms="2"  xMax="153" xMin="151"  yMax="10000" yMin="0" />
+<PeakData id="8" title="C ~167" peakShape="singlet" model="aspirin" atoms="8"  xMax="169" xMin="166"  yMax="10000" yMin="0" />
+<PeakData id="9" title="C ~171" peakShape="singlet" model="aspirin" atoms="7"  xMax="173" xMin="170"  yMax="10000" yMin="0" />
 </Peaks>
 ##.OBSERVEFREQUENCY= 125.758
 ##.OBSERVENUCLEUS= ^13C
