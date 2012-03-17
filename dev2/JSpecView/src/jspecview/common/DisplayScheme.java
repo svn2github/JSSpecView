@@ -129,7 +129,6 @@ public class DisplayScheme {
    * @param color the color the element should have
    */
   public Color setColor(ScriptToken st, Color color){
-    System.out.println(name + " " + st + " " + color);
     if (color != null)
       elementColors.put(st, color);
     return color;

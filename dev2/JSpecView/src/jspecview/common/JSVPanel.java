@@ -2483,6 +2483,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
   
   private boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
+    if (!zoomEnabled)
+      return false;
     if (isPress) {
       thisWidget = getPinSelected(xPixel, yPixel);
       if (thisWidget == null) {
