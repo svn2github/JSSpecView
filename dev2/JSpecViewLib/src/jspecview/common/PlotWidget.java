@@ -15,24 +15,26 @@ class PlotWidget extends Coordinate {
   int yPixel0;
   int xPixel1;
   int yPixel1;
-  boolean isPin;
+  boolean isPinOrCursor;
   boolean isXtype;
   boolean is2D;
+  boolean is2Donly;
   private String name;
   
   @Override
   public String toString() {
     return name
-        + (!isPin ? "" + xPixel0 + " " + yPixel0 + " / " + xPixel1 + " "
+        + (!isPinOrCursor ? "" + xPixel0 + " " + yPixel0 + " / " + xPixel1 + " "
             + yPixel1 : " x=" + getXVal() + "/" + xPixel0 + " y=" + getYVal()
             + "/" + yPixel0);
   }
  
   public PlotWidget(String name) {
     this.name = name;
-    isPin = (name.charAt(0) == 'p');
+    isPinOrCursor = (name.charAt(0) != 'z');
     isXtype = (name.indexOf("x") >= 0);
     is2D = (name.indexOf("2D") >= 0);
+    is2Donly = (is2D && name.charAt(0) == 'p');
   }
 
   boolean selected(int xPixel, int yPixel) {

@@ -61,13 +61,11 @@ public class ImageScaleData {
     setView();
   }
   
-  public void setImageSize(int width, int height, boolean setView) {
+  public void setImageSize(int width, int height, boolean resetView) {
     this.imageWidth = width;
     this.imageHeight = height;
-    if (setView) {
-      xView2 = width - 1;
-      yView2 = height - 1;
-    }
+    if (resetView)
+      resetView();
   }
   
   public void setXY0(int xPixel, int yPixel) {
@@ -82,18 +80,11 @@ public class ImageScaleData {
     this.yPixels = yPixels;
   }
   
-  public void getView(int[] i4) {
-    i4[0] = xView1;
-    i4[1] = yView1;
-    i4[2] = xView2;
-    i4[3] = yView2;
-  }
-
-  public void setView(int[] i4) {
-    xView1 = i4[0];
-    yView1 = i4[1];
-    xView2 = i4[2];
-    yView2 = i4[3];
+  public void resetView() {
+    xView1 = 0;
+    yView1 = 0;
+    xView2 = imageWidth - 1;
+    yView2 = imageHeight - 1;
   }
   
   public void setView() {
@@ -130,6 +121,14 @@ public class ImageScaleData {
     return yView1 + (int) Math.floor((yPixel - yPixel0) / (yPixels - 1.0) * (yView2 - yView1));
   }
 
+  public int toImageX0(int xPixel) {
+    return Coordinate.intoRange((int) ((1.0 * xPixel - xPixel0) / (xPixels - 1) * (imageWidth - 1)), 0, imageWidth - 1);
+  }
+
+  public int toImageY0(int yPixel) {
+    return Coordinate.intoRange((int) ((1.0 * yPixel - yPixel0) / (yPixels - 1) * (imageHeight - 1)), 0, imageHeight - 1);
+  }
+
   public boolean isXWithinRange(int xPixel) {
     return (xPixel >= xPixel0 - 5 && xPixel < xPixel0 + xPixels + 5);
   }
@@ -138,14 +137,27 @@ public class ImageScaleData {
     return maxX + (minX - maxX) * toImageX(fixX(xPixel)) / (imageWidth - 1);
   }
   
+  public double toX0(int xPixel) {
+    return maxX + (minX - maxX) * (fixX(xPixel) - xPixel0) / (xPixels - 1);
+  }
+  
   public int toPixelX(double x) {
     double x0 = toX(xPixel0);
     double x1 = toX(xPixel1);
-    return xPixel0 + (int) ((x - x0) / (x1 - x0) * (xPixel1 - xPixel0));
+    return xPixel0 + (int) ((x - x0) / (x1 - x0) * (xPixels - 1));
   }
   
-  public int toSubSpectrumIndex(int yPixel) {
+  public int toPixelX0(double x) {
+    //TODO -- assumes reverse axis
+    return xPixel1 - (int) ((x - minX) / (maxX - minX) * (xPixels - 1));
+  }
+  
+  public int toSubspectrumIndex(int yPixel) {
     return Coordinate.intoRange(imageHeight - 1 - toImageY(yPixel), 0, imageHeight - 1);
+  }
+
+  public int toPixelY0(double ysub) {
+    return yPixel1 - (int) (ysub / (imageHeight - 1) * (yPixels - 1));
   }
 
   public int toPixelX(int imageX) {
@@ -162,5 +174,17 @@ public class ImageScaleData {
 
   public int fixSubIndex(int subIndex) {
     return Coordinate.intoRange(subIndex, imageHeight - 1 - yView2, imageHeight - 1 - yView1);
+  }
+
+  public void setView0(int xp1, int yp1, int xp2, int yp2) {
+    int x1 = toImageX0(xp1);
+    int y1 = toImageY0(yp1);
+    int x2 = toImageX0(xp2);
+    int y2 = toImageY0(yp2);
+    xView1 = Math.min(x1, x2);
+    yView1 = Math.min(y1, y2);
+    xView2 = Math.max(x1, x2);
+    yView2 = Math.max(y1, y2);
+    resetZoom();
   }
 }

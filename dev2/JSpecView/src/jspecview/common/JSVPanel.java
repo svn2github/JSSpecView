@@ -147,9 +147,15 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   // sliders and zoom boxes
   
   private PlotWidget zoomBox1D, zoomBox2D, 
-      pin1Dx0, pin1Dx1, pin1Dy0, pin1Dy1,
-      pin1Dx01, pin1Dy01, 
-      pin2Dx0, pin2Dx1, pin2Dy;
+      pin1Dx0, pin1Dx1, // ppm range -- horizontal bar on 1D spectrum 
+      pin1Dy0, pin1Dy1, // y-scaling -- vertical bar on 1D spectrum and left of 2D when no 1D
+      pin1Dx01, pin1Dy01, // center pins for those
+      pin2Dx0, pin2Dx1, // ppm range -- horizontal bar on 2D spectrum 
+      pin2Dy0, pin2Dy1, // subspectrum range -- vertical bar on 2D spectrum
+      pin2Dx01, pin2Dy01, // center pins for those
+      cur2Dx0, cur2Dx1, // 2D x cursors -- derived from pin1Dx0 and pin1Dx1 values
+      cur2Dy;           // 2D y cursor -- points to currently displayed 1D slice
+      
   private PlotWidget[] widgets;
 
   // plot parameters
@@ -1153,9 +1159,21 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     pin1Dy01 = new PlotWidget("pin1Dy01");
     if (isd != null) {
       zoomBox2D = new PlotWidget("zoomBox2D");
+      // these pins only present when no 1D is present
       pin2Dx0 = new PlotWidget("pin2Dx0");
       pin2Dx1 = new PlotWidget("pin2Dx1");
-      pin2Dy = new PlotWidget("pin2Dy");
+      pin2Dy0 = new PlotWidget("pin2Dy0");
+      pin2Dy1 = new PlotWidget("pin2Dy1");
+      pin2Dx01 = new PlotWidget("pin2Dx01");
+      pin2Dy01 = new PlotWidget("pin2Dy01");
+      // these pins only present when 1D and 2D
+      cur2Dx0 = new PlotWidget("cur2Dx0");
+      // these pins only present whenever 2D present
+      cur2Dx1 = new PlotWidget("cur2Dx1");
+      cur2Dy = new PlotWidget("cur2Dy");
+      pin2Dy0.setY(0, isd.toPixelY0(0));
+      int n = getSpectrumAt(0).getSubSpectra().size();
+      pin2Dy1.setY(n, isd.toPixelY0(n));
     }
     pin1Dx0.setX(multiScaleData.minX, toPixelX0(multiScaleData.minX));
     pin1Dx1.setX(multiScaleData.maxX, toPixelX0(multiScaleData.maxX));
@@ -1164,7 +1182,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     widgets = new PlotWidget[] { zoomBox1D, zoomBox2D, 
         pin1Dx0, pin1Dx01, pin1Dx1,
         pin1Dy0, pin1Dy01, pin1Dy1, 
-        pin2Dx0, pin2Dx1, pin2Dy };
+        pin2Dx0, pin2Dx01, pin2Dx1,
+        pin2Dy0, pin2Dy01, pin2Dy1, 
+        cur2Dx0, cur2Dx1, cur2Dy };
   }
 
   /**
@@ -1176,6 +1196,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     pin1Dx1.setX(pin1Dx1.getXVal(), toPixelX0(pin1Dx1.getXVal()));
     pin1Dy0.setY(pin1Dy0.getYVal(), toPixelY0(pin1Dy0.getYVal()));
     pin1Dy1.setY(pin1Dy1.getYVal(), toPixelY0(pin1Dy1.getYVal()));
+    if (isd != null) {
+      pin2Dy0.setY(pin2Dy0.getYVal(), isd.toPixelY0(pin2Dy0.getYVal()));
+      pin2Dy1.setY(pin2Dy1.getYVal(), isd.toPixelY0(pin2Dy1.getYVal()));
+    }
   }
 
   /**
@@ -1188,12 +1212,16 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     pin1Dy0.xPixel0 = pin1Dy1.xPixel0 = pin1Dy01.xPixel0 = rightPlotAreaPos + 5;
     pin1Dy0.xPixel1 = pin1Dy1.xPixel1 = pin1Dy01.xPixel1 = rightPlotAreaPos;
     if (isd != null) {
-      pin2Dx0.yPixel0 = pin2Dx1.yPixel0 = bottomPlotAreaPos + 15;
-      pin2Dx0.yPixel1 = pin2Dx1.yPixel1 = topPlotAreaPos - 5;
-      pin2Dx0.yPixel0 = pin2Dx1.yPixel0 = bottomPlotAreaPos + 15;
-      pin2Dx1.yPixel1 = pin2Dx1.yPixel1 = topPlotAreaPos - 5;
-      pin2Dy.xPixel0 = (doDraw1DObjects ? (rightPlotAreaPos + isd.xPixel0) / 2 : isd.xPixel0 - 15);
-      pin2Dy.xPixel1 = isd.xPixel1 + 5;
+      pin2Dx0.yPixel0 = pin2Dx1.yPixel0 = pin2Dx01.yPixel0 = topPlotAreaPos - 5;
+      pin2Dx0.yPixel1 = pin2Dx1.yPixel1 = pin2Dx01.yPixel1 = topPlotAreaPos;
+      pin2Dy0.xPixel0 = pin2Dy1.xPixel0 = pin2Dy01.xPixel0 = isd.xPixel1 + 5;
+      pin2Dy0.xPixel1 = pin2Dy1.xPixel1 = pin2Dy01.xPixel1 = isd.xPixel1;
+      cur2Dx0.yPixel0 = cur2Dx1.yPixel0 = bottomPlotAreaPos + 15;
+      cur2Dx0.yPixel1 = cur2Dx1.yPixel1 = topPlotAreaPos - 5;
+      cur2Dx0.yPixel0 = cur2Dx1.yPixel0 = bottomPlotAreaPos + 15;
+      cur2Dx1.yPixel1 = cur2Dx1.yPixel1 = topPlotAreaPos - 5;
+      cur2Dy.xPixel0 = (doDraw1DObjects ? (rightPlotAreaPos + isd.xPixel0) / 2 : isd.xPixel0 - 15);
+      cur2Dy.xPixel1 = isd.xPixel1 + 5;
     }
   }
 
@@ -1208,9 +1236,25 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     pin1Dy01.setY(0, (pin1Dy0.yPixel0 + pin1Dy1.yPixel0) / 2);
     if (isd == null)
       return;
-    pin2Dx0.setX(pin1Dx0.getXVal(), isd.toPixelX(pin1Dx0.getXVal()));
-    pin2Dx1.setX(pin1Dx1.getXVal(), isd.toPixelX(pin1Dx1.getXVal()));
-    pin2Dy.yPixel0 = pin2Dy.yPixel1 = isd.toPixelY(subIndex);
+    
+    double x = pin1Dx0.getXVal();
+    cur2Dx0.setX(x, isd.toPixelX(x));
+    x = pin1Dx1.getXVal();
+    cur2Dx1.setX(x, isd.toPixelX(x));
+    
+    x = isd.toX(isd.xPixel0);
+    pin2Dx0.setX(x, isd.toPixelX0(x));
+    x = isd.toX(isd.xPixel1);
+    pin2Dx1.setX(x, isd.toPixelX0(x));
+    pin2Dx01.setX(0, (pin2Dx0.xPixel0 + pin2Dx1.xPixel0) / 2);
+
+    double y = isd.imageHeight - 1 - isd.yView1;
+    pin2Dy0.setY(y, isd.toPixelY0(y));
+    y = isd.imageHeight - 1 - isd.yView2;
+    pin2Dy1.setY(y, isd.toPixelY0(y));
+    pin2Dy01.setY(0, (pin2Dy0.yPixel0 + pin2Dy1.yPixel0) / 2);
+
+    cur2Dy.yPixel0 = cur2Dy.yPixel1 = isd.toPixelY(subIndex);
   }
 
   boolean doDraw1DObjects = true;
@@ -1229,35 +1273,59 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
           pin1Dx1.yPixel1 + 2, gridColor);
       fillBox(g, pin1Dx0.xPixel0, pin1Dx0.yPixel1, pin1Dx1.xPixel0,
           pin1Dx1.yPixel1 + 2, plotColors[0]);
+    } else {
+      fillBox(g, isd.xPixel0, pin2Dx0.yPixel1, isd.xPixel1,
+          pin2Dx0.yPixel1 + 2, gridColor);
+      fillBox(g, pin2Dx0.xPixel0, pin2Dx0.yPixel1, pin2Dx1.xPixel0,
+          pin2Dx1.yPixel1 + 2, plotColors[0]);
+      fillBox(g, pin2Dy0.xPixel1, bottomPlotAreaPos, pin2Dy1.xPixel1 + 2,
+          topPlotAreaPos, gridColor);
+      fillBox(g, pin2Dy0.xPixel1, pin2Dy0.yPixel1, pin2Dy1.xPixel1 + 2,
+          pin2Dy1.yPixel0, plotColors[0]);
     }
     fillBox(g, pin1Dy0.xPixel1, bottomPlotAreaPos, pin1Dy1.xPixel1 + 2,
         topPlotAreaPos, gridColor);
     fillBox(g, pin1Dy0.xPixel1, pin1Dy0.yPixel1, pin1Dy1.xPixel1 + 2,
         pin1Dy1.yPixel0, plotColors[0]);
+
     for (int i = 0; i < widgets.length; i++) {
       PlotWidget pw = widgets[i];
       if (pw == null)
         continue;
-      g.setColor(pw.isPin ? plotColors[0] : zoomBoxColor);
-      if ((pw.isPin || enableZoom)
-          && (pw.is2D && pw != pin2Dx0 || doDraw1DObjects || 
-              pw == pin1Dy0 || pw == pin1Dy1 || pw == pin1Dy01))
-        drawWidget(g, pw);
+      if (!pw.isPinOrCursor && !enableZoom)
+        continue;
+      if (pw.is2D) {
+        if (pw == cur2Dx0 && !doDraw1DObjects)// || pw.is2Donly && doDraw1DObjects)
+          continue;
+      } else if (!doDraw1DObjects && pw != pin1Dy0 && pw != pin1Dy1
+          && pw != pin1Dy01) {
+        continue;
+      }
+      g.setColor(pw.isPinOrCursor ? plotColors[0] : zoomBoxColor);
+      drawWidget(g, pw);
     }
   }
 
   private boolean isInTopBar(int xPixel, int yPixel) {
-    return (xPixel == fixX(xPixel) && yPixel > pin1Dx0.yPixel0 && yPixel < pin1Dx0.yPixel1);
+    return (xPixel == fixX(xPixel) && yPixel > pin1Dx0.yPixel0 - 2 && yPixel < pin1Dx0.yPixel1);
+  }
+
+  private boolean isInTopBar2D(int xPixel, int yPixel) {
+    return (isd != null && xPixel == isd.fixX(xPixel) && yPixel > pin2Dx0.yPixel0 - 2 && yPixel < pin2Dx0.yPixel1);
   }
 
   private boolean isInRightBar(int xPixel, int yPixel) {
-    return (yPixel == fixY(yPixel) && xPixel > pin1Dy0.xPixel1 && xPixel < pin1Dy0.xPixel0);
+    return (yPixel == fixY(yPixel) && xPixel > pin1Dy0.xPixel1 && xPixel < pin1Dy0.xPixel0 + 2);
+  }
+
+  private boolean isInRightBar2D(int xPixel, int yPixel) {
+    return (yPixel == fixY(yPixel) && xPixel > pin2Dy0.xPixel1 && xPixel < pin2Dy0.xPixel0 + 2);
   }
 
   private void drawWidget(Graphics g, PlotWidget pw) {
     if (pw == null)
       return;
-    if (pw.isPin) {
+    if (pw.isPinOrCursor) {
       g.setColor(plotColors[0]);
       g.drawLine(pw.xPixel0, pw.yPixel0, pw.xPixel1, pw.yPixel1);
       drawHandle(g, pw.xPixel0, pw.yPixel0);
@@ -1770,6 +1838,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
                       boolean doRepaint, boolean addZoom, boolean checkRange) {
     if (!enableZoom)
       return;
+    System.out.println("dozoom " + initX + " " + initY + " " + finalX+ " " + finalY);
 
     // swap points if init value > final value
     if (initX > finalX) {
@@ -2249,60 +2318,106 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
           thisWidget = zoomBox2D;
         }
       }
-    } else if (thisWidget != null) {
-      // mouse drag with widget
-      if (thisWidget.isPin) {
-        if (thisWidget == pin2Dy) {
-          yPixel = fixY(yPixel);
-          pin2Dy.yPixel0 = pin2Dy.yPixel1 = yPixel;
-          setCurrentSubSpectrum(isd.toSubSpectrumIndex(yPixel));
-          return true;
-        }
-        if (thisWidget == pin2Dx0 || thisWidget == pin2Dx1) {
-          xPixel = isd.fixX(xPixel);
-          thisWidget.setX(isd.toX(xPixel), xPixel);
-          doZoom(pin2Dx0.getXVal(), multiScaleData.minY, pin2Dx1.getXVal(), multiScaleData.maxY, false, false, false);
-          return true;
-        }
-        if (thisWidget == pin1Dx0 || thisWidget == pin1Dx1 || thisWidget == pin1Dx01) {
-          xPixel = fixX(xPixel);
-          thisWidget.setX(toX0(xPixel), xPixel);
-          if (thisWidget == pin1Dx01) {
-            int dp = xPixel - (pin1Dx0.xPixel0 + pin1Dx1.xPixel0)/2 + 1;
-            xPixel = pin1Dx0.xPixel0 + dp;
-            pin1Dx0.setX(toX0(xPixel), xPixel);
-            xPixel = pin1Dx1.xPixel0 + dp;
-            pin1Dx1.setX(toX0(xPixel), xPixel);
-          }
-          doZoom(pin1Dx0.getXVal(), multiScaleData.minY,
-              pin1Dx1.getXVal(), multiScaleData.maxY, false, false, false);
-          return true;
-        }
-        if (thisWidget == pin1Dy0 || thisWidget == pin1Dy1 || thisWidget == pin1Dy01) {
-          yPixel = fixY(yPixel);
-          thisWidget.setY(toY0(yPixel), yPixel);
-          if (thisWidget == pin1Dy01) {
-            int dp = yPixel - (pin1Dy0.yPixel0 + pin1Dy1.yPixel0)/2 + 1;
-            yPixel = pin1Dy0.yPixel0 + dp;
-            pin1Dy0.setY(toY0(yPixel), yPixel);
-            yPixel = pin1Dy1.yPixel0 + dp;
-            pin1Dy1.setY(toY0(yPixel), yPixel);
-          }
-          doZoom(multiScaleData.minXOnScale, pin1Dy0.getYVal(), 
-              multiScaleData.maxXOnScale, pin1Dy1.getYVal(), false, false, false);
-          return true;
-        }
-      } else if (thisWidget == zoomBox1D) {
-        zoomBox1D.xPixel1 = fixX(xPixel);
-        zoomBox1D.yPixel1 = (isIntegralDrag ? bottomPlotAreaPos : fixY(yPixel));
-        if (isIntegralDrag && zoomBox1D.xPixel0 != zoomBox1D.xPixel1)
-          checkIntegral(zoomBox1D.getXVal(), toX(zoomBox1D.xPixel1), false);
-        return true;
-      } else if (thisWidget == zoomBox2D) {
-        zoomBox2D.xPixel1 = isd.fixX(xPixel);
-        zoomBox2D.yPixel1 = fixY(yPixel);
-        return true;
+      return true;
+    }
+    if (thisWidget == null)
+      return false;
+
+    // mouse drag with widget
+    if (thisWidget == zoomBox1D) {
+      zoomBox1D.xPixel1 = fixX(xPixel);
+      zoomBox1D.yPixel1 = (isIntegralDrag ? bottomPlotAreaPos : fixY(yPixel));
+      if (isIntegralDrag && zoomBox1D.xPixel0 != zoomBox1D.xPixel1)
+        checkIntegral(zoomBox1D.getXVal(), toX(zoomBox1D.xPixel1), false);
+      return true;
+    }
+    if (thisWidget == zoomBox2D) {
+      zoomBox2D.xPixel1 = isd.fixX(xPixel);
+      zoomBox2D.yPixel1 = fixY(yPixel);
+      return true;
+    }
+    if (thisWidget == cur2Dy) {
+      yPixel = fixY(yPixel);
+      cur2Dy.yPixel0 = cur2Dy.yPixel1 = yPixel;
+      setCurrentSubSpectrum(isd.toSubspectrumIndex(yPixel));
+      return true;
+    }
+    if (thisWidget == cur2Dx0 || thisWidget == cur2Dx1) {
+      xPixel = isd.fixX(xPixel);
+      thisWidget.setX(isd.toX(xPixel), xPixel);
+      doZoom(cur2Dx0.getXVal(), multiScaleData.minY, cur2Dx1.getXVal(),
+          multiScaleData.maxY, false, false, false);
+      return true;
+    }
+    if (thisWidget == pin1Dx0 || thisWidget == pin1Dx1
+        || thisWidget == pin1Dx01) {
+      xPixel = fixX(xPixel);
+      thisWidget.setX(toX0(xPixel), xPixel);
+      if (thisWidget == pin1Dx01) {
+        int dp = xPixel - (pin1Dx0.xPixel0 + pin1Dx1.xPixel0) / 2 + 1;
+        xPixel = pin1Dx0.xPixel0 + dp;
+        pin1Dx0.setX(toX0(xPixel), xPixel);
+        xPixel = pin1Dx1.xPixel0 + dp;
+        pin1Dx1.setX(toX0(xPixel), xPixel);
       }
+      doZoom(pin1Dx0.getXVal(), multiScaleData.minY, pin1Dx1.getXVal(),
+          multiScaleData.maxY, false, false, false);
+      return true;
+    }
+    if (thisWidget == pin1Dy0 || thisWidget == pin1Dy1
+        || thisWidget == pin1Dy01) {
+      yPixel = fixY(yPixel);
+      thisWidget.setY(toY0(yPixel), yPixel);
+      if (thisWidget == pin1Dy01) {
+        int dp = yPixel - (pin1Dy0.yPixel0 + pin1Dy1.yPixel0) / 2 + 1;
+        yPixel = pin1Dy0.yPixel0 + dp;
+        pin1Dy0.setY(toY0(yPixel), yPixel);
+        yPixel = pin1Dy1.yPixel0 + dp;
+        pin1Dy1.setY(toY0(yPixel), yPixel);
+      }
+      doZoom(multiScaleData.minXOnScale, pin1Dy0.getYVal(),
+          multiScaleData.maxXOnScale, pin1Dy1.getYVal(), false, false, false);
+      return true;
+    }
+    if (thisWidget == pin2Dx0 || thisWidget == pin2Dx1
+        || thisWidget == pin2Dx01) {
+      xPixel = isd.fixX(xPixel);
+      thisWidget.setX(isd.toX0(xPixel), xPixel);
+      if (thisWidget == pin2Dx01) {
+        int dp = xPixel - (pin2Dx0.xPixel0 + pin2Dx1.xPixel0) / 2 + 1;
+        xPixel = pin2Dx0.xPixel0 + dp;
+        pin2Dx0.setX(isd.toX0(xPixel), xPixel);
+        xPixel = pin2Dx1.xPixel0 + dp;
+        pin2Dx1.setX(isd.toX0(xPixel), xPixel);
+      }
+      if (Math.abs(pin2Dx0.xPixel0 - pin2Dx1.xPixel0) < MIN_DRAG_X_PIXELS) {
+        reset2D(true);
+        return false;
+      }
+      isd.setView0(pin2Dx0.xPixel0, pin2Dy0.yPixel0, pin2Dx1.xPixel0,
+          pin2Dy1.yPixel0);
+      doZoom(pin2Dx0.getXVal(), multiScaleData.minY, pin2Dx1.getXVal(),
+          multiScaleData.maxY, false, false, false);
+      return true;
+    }
+    if (thisWidget == pin2Dy0 || thisWidget == pin2Dy1
+        || thisWidget == pin2Dy01) {
+      yPixel = fixY(yPixel);
+      thisWidget.setY(isd.toSubspectrumIndex(yPixel), yPixel);
+      if (thisWidget == pin2Dy01) {
+        int dp = yPixel - (pin2Dy0.yPixel0 + pin2Dy1.yPixel0) / 2 + 1;
+        yPixel = pin2Dy0.yPixel0 + dp;
+        pin2Dy0.setY(isd.toSubspectrumIndex(yPixel), yPixel);
+        yPixel = pin2Dy1.yPixel0 + dp;
+        pin2Dy1.setY(isd.toSubspectrumIndex(yPixel), yPixel);
+      }
+      if (Math.abs(pin2Dy0.yPixel0 - pin2Dy1.yPixel0) < MIN_DRAG_X_PIXELS) {
+        reset2D(false);
+        return false;
+      }
+      isd.setView0(pin2Dx0.xPixel0, pin2Dy0.yPixel0, pin2Dx1.xPixel1,
+          pin2Dy1.yPixel1);
+      return true;
     }
     return false;
   }
@@ -2310,7 +2425,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private PlotWidget getPinSelected(int xPixel, int yPixel) {
     if (widgets != null)
       for (int i = 0; i < widgets.length; i++)
-        if (widgets[i] != null && widgets[i].isPin
+        if (widgets[i] != null && widgets[i].isPinOrCursor
             && widgets[i].selected(xPixel, yPixel)) {
           return widgets[i];
         }
@@ -2333,8 +2448,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private void set2DCrossHairs(int xPixel, int yPixel) {
     if (xPixel == isd.fixX(xPixel) && yPixel == fixY(yPixel)) {
       pin1Dx1.setX(isd.toX(xPixel), toPixelX(isd.toX(xPixel)));
-      pin2Dx1.setX(isd.toX(xPixel), xPixel);
-      setCurrentSubSpectrum(isd.toSubSpectrumIndex(yPixel));
+      cur2Dx1.setX(isd.toX(xPixel), xPixel);
+      setCurrentSubSpectrum(isd.toSubspectrumIndex(yPixel));
     }      
   }
 
@@ -2378,7 +2493,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
           toY(zoomBox1D.yPixel1), true, true, false);
       zoomBox1D.xPixel1 = zoomBox1D.xPixel0;
     } else if (thisWidget == pin1Dx0 || thisWidget == pin1Dx1
-        || thisWidget == pin2Dx0 || thisWidget == pin2Dx1) {
+        || thisWidget == cur2Dx0 || thisWidget == cur2Dx1) {
       addCurrentZoom();
     }
     thisWidget = null;
@@ -2415,36 +2530,44 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     else if (e.getClickCount() == 2) {
       if (is2D) {
         if (sticky2Dcursor) {
-          addAnnotation(new ColoredAnnotation(isd.toX(xPixel), isd.toSubSpectrumIndex(yPixel),
-              coordStr, Color.BLACK, false, true, 5, 5), true);
+          addAnnotation(new ColoredAnnotation(isd.toX(xPixel), isd
+              .toSubspectrumIndex(yPixel), coordStr, Color.BLACK, false, true,
+              5, 5), true);
         }
         sticky2Dcursor = !sticky2Dcursor;
         set2DCrossHairs(e.getX(), e.getY());
         repaint();
         return;
       }
-      if (isInTopBar(xPixel, yPixel))
+      if (isInTopBar(xPixel, yPixel)) {
         doZoom(toX0(leftPlotAreaPos), multiScaleData.minY,
             toX0(rightPlotAreaPos), multiScaleData.maxY, true, true, false);
-      else if (isInRightBar(xPixel, yPixel))
+      } else if (isInRightBar(xPixel, yPixel)) {
         doZoom(multiScaleData.minXOnScale, zoomInfoList.get(0).minY,
             multiScaleData.maxXOnScale, zoomInfoList.get(0).maxY, true, true,
             false);
+      } else if (isInTopBar2D(xPixel, yPixel)) {
+        reset2D(true);
+      } else if (isInRightBar2D(xPixel, yPixel)) {
+        reset2D(false);
+      }
+
       return;
     }
     if (is2D && annotations != null) {
-      Coordinate xy = new Coordinate(isd.toX(xPixel), isd.toSubSpectrumIndex(yPixel));
+      Coordinate xy = new Coordinate(isd.toX(xPixel), isd
+          .toSubspectrumIndex(yPixel));
       Annotation a = findAnnotation2D(xy);
       if (a != null && setAnnotationText(a)) {
         repaint();
         return;
       }
     }
-    if (is2D){
+    if (is2D) {
       sticky2Dcursor = false;
       set2DCrossHairs(e.getX(), e.getY());
       repaint();
-      return;      
+      return;
     }
     if (xPixel != fixX(xPixel) || yPixel != fixY(yPixel)) {
       coordClicked = null;
@@ -2453,6 +2576,17 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     coordClicked = new Coordinate(toX(xPixel), toY(yPixel));
     lastClickX = coordClicked.getXVal();
     notifyPeakPickedListeners(coordClicked);
+  }
+
+  private void reset2D(boolean isX) {
+    if (isX) {
+      isd.setView0(isd.xPixel0, pin2Dy0.yPixel0, isd.xPixel1, pin2Dy1.yPixel0);
+      doZoom(isd.minX, multiScaleData.minY, isd.maxX, multiScaleData.maxY,
+          true, true, false);
+    } else {
+      isd.setView0(pin2Dx0.xPixel0, isd.yPixel0, pin2Dx1.xPixel0, isd.yPixel1);
+      repaint();
+    }
   }
 
   private boolean setAnnotationText(Annotation a) {
@@ -2469,22 +2603,29 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
   private void setWidgetValueByUser(PlotWidget pw) {
     String sval;
-    if (pw == pin2Dy)
-      sval = "" + isd.toSubSpectrumIndex(pw.yPixel0);
+    if (pw == cur2Dy)
+      sval = "" + isd.toSubspectrumIndex(pw.yPixel0);
     else if (pw == pin1Dx01)
       sval = "" + Math.min(pin1Dx0.getXVal(), pin1Dx1.getXVal()) + " - "
           + Math.max(pin1Dx0.getXVal(), pin1Dx1.getXVal());
     else if (pw == pin1Dy01)
       sval = "" + Math.min(pin1Dy0.getYVal(), pin1Dy1.getYVal()) + " - "
           + Math.max(pin1Dy0.getYVal(), pin1Dy1.getYVal());
+    else if (pw == pin2Dx01)
+      sval = "" + Math.min(pin2Dx0.getXVal(), pin2Dx1.getXVal()) + " - "
+          + Math.max(pin2Dx0.getXVal(), pin2Dx1.getXVal());
+    else if (pw == pin2Dy01)
+      sval = "" + (int) Math.min(pin2Dy0.getYVal(), pin2Dy1.getYVal()) + " - "
+          + (int) Math.max(pin2Dy0.getYVal(), pin2Dy1.getYVal());
     else
       sval = "" + pw.getValue();
     sval = (String) JOptionPane.showInputDialog(null, "New value?",
         "Set Slider", JOptionPane.PLAIN_MESSAGE, null, null, sval);
     if (sval == null)
       return;
+    sval = sval.trim();
     try {
-      if (pw == pin1Dx01 || pw == pin1Dy01) {
+      if (pw == pin1Dx01 || pw == pin1Dy01 || pw == pin2Dx01 || pw == pin2Dy01) {
         int pt = sval.indexOf("-", 1);
         if (pt < 0)
           return;
@@ -2493,21 +2634,31 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         if (pw == pin1Dx01) {
           doZoom(val1, pin1Dy0.getYVal(), val2, pin1Dy1.getYVal(), true, true,
               false);
-        } else {
+        } else if (pw == pin1Dy01) {
           doZoom(pin1Dx0.getXVal(), val1, pin1Dx1.getXVal(), val2, true, true,
               false);
+        } else if (pw == pin2Dx01) {
+          isd.setView0(isd.toPixelX0(val1), pin2Dy0.yPixel0, isd.toPixelX0(val2), pin2Dy1.yPixel0);
+          doZoom(val1, pin1Dy0.getYVal(), val2, pin1Dy1.getYVal(), true, true,
+              false);
+        } else if (pw == pin2Dy01) {
+          isd.setView0(pin2Dx0.xPixel0, isd.toPixelY0(val1), pin2Dx1.xPixel0, isd.toPixelY0(val2));
+          doZoom(isd.toX(isd.xPixel0), multiScaleData.minY, isd.toX(isd.xPixel0 + isd.xPixels - 1), multiScaleData.maxY, true, true, false);
         }
       } else {
         double val = Double.valueOf(sval);
         if (pw.isXtype) {
-          double val2 = (pw == pin1Dx0 || pw == pin2Dx0 ? pin1Dx1.getXVal()
+          double val2 = (pw == pin1Dx0 || pw == cur2Dx0 || pw == pin2Dx0 ? pin1Dx1
+              .getXVal()
               : pin1Dx0.getXVal());
-          if (pw.is2D)
-            pw.setX(val, isd.toPixelX(val));
           doZoom(val, pin1Dy0.getYVal(), val2, pin1Dy1.getYVal(), true, true,
               false);
-        } else if (pw.is2D) {
+        } else if (pw == cur2Dy) {
           setCurrentSubSpectrum((int) val);
+          repaint();
+        } else if (pw == pin2Dy0 || pw == pin2Dy1) {
+          int val2 = (pw == pin2Dy0 ? pin2Dy1.yPixel0 : pin2Dy0.yPixel0);
+          isd.setView0(pin2Dx0.xPixel0, isd.toPixelY((int) val), pin2Dx1.xPixel0, val2);
           repaint();
         } else {
           double val2 = (pw == pin1Dy0 ? pin1Dy1.getYVal() : pin1Dy0.getYVal());
@@ -2551,24 +2702,31 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         return;
       }
       String s;
-      if (pw == pin1Dx01) {
+      if (pw == pin1Dx01 || pw == pin2Dx01) {
         s = formatterX.format(Math.min(pin1Dx0.getXVal(), pin1Dx1.getXVal())) + " - "
             + formatterX.format(Math.max(pin1Dx0.getXVal(), pin1Dx1.getXVal()));
       } else if (pw == pin1Dy01) {
         s = formatterY.format(Math.min(pin1Dy0.getYVal(), pin1Dy1.getYVal())) + " - "
             + formatterX.format(Math.max(pin1Dy0.getYVal(), pin1Dy1.getYVal()));
-      } else if (pw == pin2Dy) {
-        int isub = isd.toSubSpectrumIndex(pw.yPixel0);
+      } else if (pw == cur2Dy) {
+        int isub = isd.toSubspectrumIndex(pw.yPixel0);
         s = get2DYLabel(isub, formatterX);
-      } else {
+      } else if (pw == pin2Dy01) {
+        s = "" + (int) Math.min(pin2Dy0.getYVal(), pin2Dy1.getYVal()) + " - "
+        + (int) Math.max(pin2Dy0.getYVal(), pin2Dy1.getYVal());
+      } else if (pw.isXtype) {
         s = formatterX.format(pw.getXVal());
+      } else if (pw.is2D) {
+        s = "" + (int) pw.getYVal();
+      } else {
+        s = formatterY.format(pw.getYVal());
       }
       setToolTipText(s);
       return;
     }
 
     if (isd != null && isd.fixX(xPixel) == xPixel && fixY(yPixel) == yPixel) {
-      int isub = isd.toSubSpectrumIndex(yPixel);
+      int isub = isd.toSubspectrumIndex(yPixel);
       String s = formatterX.format(isd.toX(xPixel)) + " " + getSpectrum().getXUnits() + ",  "
           + get2DYLabel(isub, formatterX);
       setToolTipText(display1D ? s : "");
@@ -2585,7 +2743,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     String xx = formatterX.format(xPt);
 
     double yPt = (isd != null && isd.isXWithinRange(xPixel) ? isd
-        .toSubSpectrumIndex(fixY(yPixel)) : toY(fixY(yPixel)));
+        .toSubspectrumIndex(fixY(yPixel)) : toY(fixY(yPixel)));
     formatterY = getFormatter(hashY);
     coordStr = "(" + xx + ", " + formatterY.format(yPt) + ")";
 
