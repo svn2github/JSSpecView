@@ -1291,7 +1291,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   private boolean isInRightBar2D(int xPixel, int yPixel) {
-    return (yPixel == fixY(yPixel) && xPixel > pin2Dy0.xPixel1 && xPixel < pin2Dy0.xPixel0 + 2);
+    return (isd != null && yPixel == fixY(yPixel) && xPixel > pin2Dy0.xPixel1 && xPixel < pin2Dy0.xPixel0 + 2);
   }
 
   private void drawWidget(Graphics g, PlotWidget pw) {
