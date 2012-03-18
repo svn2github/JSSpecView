@@ -905,7 +905,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   }
   
   public boolean canIntegrate() {
-    return (isHNMR() && numDim == 1 && continuous);
+    return (continuous && isHNMR() && is1D());
   }
 
   public boolean canConvertTransAbs() {
