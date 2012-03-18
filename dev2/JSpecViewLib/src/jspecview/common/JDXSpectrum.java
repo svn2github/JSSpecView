@@ -900,8 +900,23 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
    return (integration == null ? null : integration.getIntegrals());
   }
 
+  public boolean canSaveAsJDX() {
+    return getDataClass().equals("XYDATA");
+  }
+  
   public boolean canIntegrate() {
     return (isHNMR() && numDim == 1 && continuous);
+  }
+
+  public boolean canConvertTransAbs() {
+    return (continuous && (yUnits.toLowerCase().contains("abs"))
+        || yUnits.toLowerCase().contains("trans"));
+  }
+
+  public boolean canShowSolutionColor() {
+    return (canConvertTransAbs()
+        && (xUnits.toLowerCase().contains("nanometer") || xUnits.equalsIgnoreCase("nm")) 
+        && getFirstX() < 401 && getLastX() > 699);
   }
 
   public boolean is1D() {
@@ -1073,4 +1088,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     if (match == null || key.equalsIgnoreCase(match))
       info.put(key, value);
   }
+
+
 }

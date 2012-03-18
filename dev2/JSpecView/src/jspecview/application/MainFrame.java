@@ -135,7 +135,6 @@ import jspecview.common.PeakPickedEvent;
 import jspecview.common.PrintLayoutDialog;
 import jspecview.common.ScriptInterface;
 import jspecview.common.ScriptToken;
-import jspecview.common.Coordinate;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.PeakInfo;
 import jspecview.exception.ScalesIncompatibleException;
@@ -975,6 +974,17 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
     processingMenu.setMnemonic('P');
     processingMenu.setText("Processing");
+    processingMenu.addMenuListener(new MenuListener() {
+      public void menuSelected(MenuEvent e) {
+        processingMenu_menuSelected(e);
+      }
+
+      public void menuDeselected(MenuEvent e) {
+      }
+
+      public void menuCanceled(MenuEvent e) {
+      }
+    });
     jsvpPopupMenu.setProcessingMenu(processingMenu);
 
     menuBar.add(fileMenu);
@@ -1089,6 +1099,10 @@ public class MainFrame extends JFrame implements DropTargetListener,
     windowMenu.add(showMenuItem);
     windowMenu.addSeparator();
 
+  }
+
+  protected void processingMenu_menuSelected(MenuEvent e) {
+    jsvpPopupMenu.setEnables(selectedJSVPanel);  
   }
 
   protected void checkCommandLineForTip(char c) {
@@ -1351,24 +1365,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
     exportAsMenu.setEnabled(true);
     saveAsMenu.setEnabled(true);
-
-    //    jsvp.setZoomEnabled(true);
-    // update availability of Exporting JCAMP-DX file so that
-    // if a Peak Table is the current spectrum, disable the menu.
-    // need to check for XYPOINTS as well since not continuous either.... RL
-    boolean continuous = spec.isContinuous();
-    boolean isAbsTrans = (spec.isAbsorbance() || spec.isTransmittance());
-    saveAsJDXMenu.setEnabled(spec.getDataClass().equals("XYDATA"));
-    jsvpPopupMenu.integrateCheckBoxMenuItem.setEnabled(spec.canIntegrate());
-    jsvpPopupMenu.integrateCheckBoxMenuItem.setSelected(spec.canIntegrate() && spec.getIntegrationGraph() != null);
-    //  Can only convert from T <-> A  if Absorbance or Transmittance and continuous
-    jsvpPopupMenu.transAbsMenuItem.setEnabled(continuous && isAbsTrans);
-    Coordinate xyCoords[] = spec.getXYCoords();
-    String Xunits = spec.getXUnits().toLowerCase();
-    jsvpPopupMenu.solColMenuItem.setEnabled(isAbsTrans
-        && (Xunits.equals("nanometers") || Xunits.equals("nm"))
-        && xyCoords[0].getXVal() < 401
-        && xyCoords[(xyCoords.length - 1)].getXVal() > 699);
+    saveAsJDXMenu.setEnabled(spec.canSaveAsJDX());
   }
 
   /**
@@ -1427,8 +1424,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     frame.getContentPane().add(jsvp);
     desktopPane.add(frame);
     frame.setSize(550, 350);
-    jsvpPopupMenu.transAbsMenuItem.setEnabled(false);
-    jsvpPopupMenu.solColMenuItem.setEnabled(false);
     try {
       frame.setMaximum(true);
     } catch (PropertyVetoException pve) {
@@ -1464,7 +1459,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
       JDXSpectrum spec = specs.get(i);
       JSVPanel jsvp = (spec.getIntegrationGraph() == null ? new JSVPanel(spec, source, jsvpPopupMenu)
           : JSV1DOverlayPanel.getIntegralPanel(spec, null, source, jsvpPopupMenu));
-      jsvp.setIndex(i);
       setJSVPanelProperties(jsvp, true);
       JSVFrame frame = new JSVFrame(spec.getTitleLabel());
       frame.setFrameIcon(frameIcon);
@@ -1577,8 +1571,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     //initSpectraTree();
 
     if (source == null) {
-      jsvpPopupMenu.setSelectedJSVPanel(null);
-      jsvpPopupMenu.setSource(null);
+      jsvpPopupMenu.dispose();
       if (selectedJSVPanel != null)
         selectedJSVPanel.dispose();
       if (currentSelectedSource != null)
@@ -3002,8 +2995,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     JSVPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
-    jsvpPopupMenu.setSelectedJSVPanel(jsvp);
-    jsvpPopupMenu.setSource(currentSelectedSource);
+    jsvpPopupMenu.setEnables(jsvp);
     jsvpPopupMenu.properties_actionPerformed(e);
 
   }

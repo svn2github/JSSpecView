@@ -580,10 +580,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
         return;
       }
       endIndex = startIndex = -1;
-      jsvPanels.add(jsvp);
-      initProperties(jsvp, 0);
-      selectedJSVPanel = jsvp;
-      jsvp.setIndex(currentSpectrumIndex = 0);
+      initProperties(jsvp, -1);
     } else {
       // not overlaid
       // initialise JSVPanels and add them to the array
@@ -609,11 +606,16 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     }
   }
 
-  private void initProperties(JSVPanel jsvp, int index) {
-    // set JSVPanel properties from applet parameters
+  private void initProperties(JSVPanel jsvp, int oldIndex) {
+    if (oldIndex < 0) {
+      jsvPanels.add(jsvp);
+    } else {
+      jsvPanels.remove(oldIndex);
+      jsvPanels.add(oldIndex, jsvp);
+    }
     jsvp.addListener(this);
-    jsvp.setIndex(index);
     parameters.setFor(jsvp, null, true);
+    setSelectedPanel(jsvp);
   }
 
   /**
@@ -771,22 +773,14 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
    *        the index
    */
   private void showSpectrum(int index, boolean fromMenu) {
-    System.out.println("showSpectrum " + index);
+    System.out.println("showSpectrum " + index + " currentindex = " + currentSpectrumIndex);
+    if (index == currentSpectrumIndex)
+      return;
     JSVPanel jsvp = jsvPanels.get(index);
-    appletPanel.remove(jsvPanels.get(currentSpectrumIndex));
-    appletPanel.add(jsvp, BorderLayout.CENTER);
-    currentSpectrumIndex = index;
     setSelectedPanel(jsvp);
-
-    appletPopupMenu.integrateCheckBoxMenuItem.setEnabled(selectedJSVPanel.getSpectrum().canIntegrate());
-
     chooseContainer();
-    this.validate();
-    repaint();
-
     if (fromMenu)
       sendFrameChange(jsvp);
-
   }
 
   /**
@@ -849,10 +843,6 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
    */
   protected void windowMenuItem_itemStateChanged(ItemEvent e) {
     if (e.getStateChange() == ItemEvent.SELECTED) {
-      // disable some features when in Window mode
-      appletPopupMenu.integrateCheckBoxMenuItem.setEnabled(false);
-      appletPopupMenu.compoundMenu.setEnabled(false);
-      appletPopupMenu.transAbsMenuItem.setEnabled(false);
       offWindowFrame = new JFrame("JSpecView");
       offWindowFrame.setSize(getSize());
       final Dimension d;
@@ -871,21 +861,12 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
           setVisible(true);
           validate();
           repaint();
-          appletPopupMenu.integrateCheckBoxMenuItem.setEnabled(true);
-          //       if (compoundMenuOn)
-          //             compoundMenu.setEnabled(true);
           offWindowFrame.removeAll();
           offWindowFrame.dispose();
           appletPopupMenu.windowMenuItem.setSelected(false);
         }
       });
     } else {
-      // re-enable features that were disabled in Window mode
-      appletPopupMenu.integrateCheckBoxMenuItem.setEnabled(true);
-      appletPopupMenu.transAbsMenuItem.setEnabled(true);
-      if (compoundMenuOn)
-        appletPopupMenu.compoundMenu.setEnabled(true);
-
       getContentPane().add(appletPanel);
       validate();
       repaint();
@@ -936,12 +917,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     JSVPanel jsvp = JSVPanel.taConvert(getCurrentPanel(), comm);
     if (jsvp == null)
       return;
-
-    appletPanel.remove(0);
-    appletPanel.add(jsvp);
-
-    initProperties(jsvp, 0);
-    appletPopupMenu.solColMenuItem.setEnabled(true);
+    initProperties(jsvp, currentSpectrumIndex);
     jsvp.repaint();
 
     //  now need to validate and repaint
@@ -974,31 +950,18 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     chooseContainer();
   }
 
-  // check which mode the spectrum is in (windowed or applet)
   private void chooseContainer() {
-    // check first if we have ever had a frame
-    if (offWindowFrame == null) {
-      appletPopupMenu.integrateCheckBoxMenuItem.setEnabled(true);
+    if (offWindowFrame == null || offWindowFrame.getComponentCount() == 0) {
       if (compoundMenuOn)
         appletPopupMenu.compoundMenu.setEnabled(true);
       getContentPane().add(appletPanel);
       validate();
       repaint();
     } else {
-      if (offWindowFrame.getComponentCount() != 0) {
-        appletPopupMenu.integrateCheckBoxMenuItem.setEnabled(false);
-        appletPopupMenu.compoundMenu.setEnabled(false);
-        offWindowFrame.add(appletPanel);
-        offWindowFrame.validate();
-        offWindowFrame.setVisible(true);
-      } else {
-        appletPopupMenu.integrateCheckBoxMenuItem.setEnabled(true);
-        if (compoundMenuOn)
-          appletPopupMenu.compoundMenu.setEnabled(true);
-        getContentPane().add(appletPanel);
-        validate();
-        repaint();
-      }
+      appletPopupMenu.compoundMenu.setEnabled(false);
+      offWindowFrame.add(appletPanel);
+      offWindowFrame.validate();
+      offWindowFrame.setVisible(true);
     }
   }
 
@@ -1275,6 +1238,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
   private void openDataOrFile(String data, String name,
                               List<JDXSpectrum> specs1, String filePath) {
     appletPanel.removeAll();
+    System.out.println("openDataOrFile " + name);
     String fileName = null;
     URL base = null;
     boolean isOverlay = false;
@@ -1320,12 +1284,6 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
         parameters.integralMinY, parameters.integralOffset,
         parameters.integralFactor);
 
-    boolean continuous = currentSource.getJDXSpectrum(0).isContinuous();
-    String Yunits = currentSource.getJDXSpectrum(0).getYUnits();
-    String Xunits = currentSource.getJDXSpectrum(0).getXUnits();
-    double firstX = currentSource.getJDXSpectrum(0).getFirstX();
-    double lastX = currentSource.getJDXSpectrum(0).getLastX();
-
     compoundMenuOn = allowCompoundMenu && currentSource.isCompoundSource;
 
     try {
@@ -1340,29 +1298,6 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     System.out.println(getAppletInfo() + " File " + fileName
         + " Loaded Successfully");
 
-    // if Transmittance, visible 400-700 and nm then calc colour
-    if ((Xunits.toLowerCase().contains("nanometer"))
-        & (firstX < 401)
-        & (lastX > 699)
-        & ((Yunits.toLowerCase().contains("trans")) || Yunits.toLowerCase()
-            .contains("abs"))) {
-      //         sltnclr = Visible.Colour(source);
-      appletPopupMenu.solColMenuItem.setEnabled(true);
-    } else {
-      appletPopupMenu.solColMenuItem.setEnabled(false);
-    }
-    //  Can only integrate a continuous H NMR spectrum
-    if (continuous && selectedJSVPanel.getSpectrum().canIntegrate())
-      appletPopupMenu.integrateCheckBoxMenuItem.setEnabled(true);
-    //Can only convert from T <-> A  if Absorbance or Transmittance and continuous
-    if ((continuous) && (Yunits.toLowerCase().contains("abs"))
-        || (Yunits.toLowerCase().contains("trans")))
-      appletPopupMenu.transAbsMenuItem.setEnabled(true);
-    else
-      appletPopupMenu.transAbsMenuItem.setEnabled(false);
-    if (appletPopupMenu.exportAsMenu != null)
-      appletPopupMenu.exportAsMenu.setEnabled(true);
-    appletPopupMenu.saveAsJDXMenu.setEnabled(continuous);
   }
 
   protected void processCommand(String script) {
@@ -1606,11 +1541,21 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
   }
 
   private void setSelectedPanel(JSVPanel jsvp) {
-    removeKeyListener(selectedJSVPanel);
-    selectedJSVPanel = jsvp;
-    addKeyListener(selectedJSVPanel);
+    if (jsvp != selectedJSVPanel) {
+      if (selectedJSVPanel != null) {
+        appletPanel.remove(selectedJSVPanel);
+        removeKeyListener(selectedJSVPanel);
+      }
+      appletPanel.add(jsvp, BorderLayout.CENTER);
+      addKeyListener(jsvp);
+      selectedJSVPanel = jsvp;
+    }
     for (int i = jsvPanels.size(); --i >= 0; )
-      jsvPanels.get(i).setEnabled(jsvPanels.get(i) == jsvp);
+      if (jsvPanels.get(i) == jsvp)
+        currentSpectrumIndex = i;
+      else 
+        jsvPanels.get(i).setEnabled(false);
+    jsvp.setEnabled(true);
   }
 
   private void sendFrameChange(JSVPanel jsvp) {
@@ -1632,6 +1577,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
    * @param msg
    */
   protected void syncToJmol(String msg) {
+    System.out.println("syncToJmol " + msg);
     callToJavaScript(syncCallbackFunctionName, new Object[] { fullName, msg });    
   }
 
@@ -1642,7 +1588,6 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     if (eventObj instanceof PeakPickedEvent) {
       PeakPickedEvent e = (PeakPickedEvent) eventObj;
       setSelectedPanel((JSVPanel) e.getSource());
-      currentSpectrumIndex = selectedJSVPanel.getIndex();
       sendScript(e.getPeakInfo());
       checkCallbacks();
     }

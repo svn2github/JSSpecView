@@ -44,8 +44,6 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
   private JMenu fileMenu = new JMenu();
   private JMenuItem printMenuItem = new JMenuItem();
   private JMenu saveAsMenu = new JMenu();
-  JMenu saveAsJDXMenu = new JMenu();
-  JMenu exportAsMenu;
   private JMenu viewMenu = new JMenu();
   private JMenu zoomMenu = new JMenu();
   JMenuItem compoundMenu = new JMenu();
@@ -123,6 +121,7 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
       exportAsMenu = new JMenu();
       fileMenu.add(exportAsMenu);
     }
+    saveAsJDXMenu = new JMenu();
     AppUtils.setMenus(saveAsMenu, saveAsJDXMenu, exportAsMenu, exportActionListener);
     fileMenu.add(printMenuItem);
 

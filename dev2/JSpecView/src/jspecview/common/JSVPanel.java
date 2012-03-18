@@ -104,7 +104,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     zoomInfoList = null;
     image2D = null;
     isd = null;
-    popup.setSource(null);
+    popup.dispose();
     popup = null;
     source = null;
     removeKeyListener(this);
@@ -112,22 +112,13 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     removeMouseMotionListener(this);
   }
 
-  /**
-   * index of this panel in a set of split panels
-   */
-  private int index;
-
-  public int getIndex() {
-    return index;
-  }
-
-  public void setIndex(int index) {
-    this.index = index;
-    getSpectrumAt(0).setId("#" + index);
-  }
-
   // Critical fields
   
+  protected boolean isOverlaid = false;
+  public boolean isOverlaid() {
+    return isOverlaid;
+  }
+
   private Graph[] spectra;
   private MultiScaleData multiScaleData;
   private List<Highlight> highlights = new ArrayList<Highlight>();
@@ -169,7 +160,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private int rightPlotAreaPos, bottomPlotAreaPos;
   private int plotAreaWidth, plotAreaHeight;
   private Insets plotAreaInsets = new Insets(topPlotAreaPos, leftPlotAreaPos, 50, 50);
-
+  
   // static parameters
   private static int minNumOfPointsForZoom = 3;
 
@@ -2494,11 +2485,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       return;
     }
     if (e.getButton() == MouseEvent.BUTTON3) {
-      popup.setSelectedJSVPanel(this);
-      popup.setSource(source);
-      popup.gridCheckBoxMenuItem.setSelected(isGridOn());
-      popup.coordsCheckBoxMenuItem.setSelected(isCoordinatesOn());
-      popup.reversePlotCheckBoxMenuItem.setSelected(isPlotReversed());
       popup.show(this, xPixel, yPixel);
       return;
     }

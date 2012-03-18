@@ -76,6 +76,7 @@ public class JSV1DOverlayPanel extends JSVPanel {
       int[] endIndices) throws ScalesIncompatibleException {
     if (!JDXSpectrum.areScalesCompatible(spectra))
       throw new ScalesIncompatibleException();
+    isOverlaid = true;
     initJSVPanel((Graph[]) spectra.toArray(new Graph[spectra.size()]), startIndices,
         endIndices);
   }
