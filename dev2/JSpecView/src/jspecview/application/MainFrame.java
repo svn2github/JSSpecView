@@ -1388,6 +1388,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   public void setJSVPanelProperties(JSVPanel jsvp, boolean includeMeasures) {
 
     DisplayScheme ds = dsp.getDisplaySchemes().get(defaultDisplaySchemeName);
+    jsvp.addListener(this);
     parameters.setFor(jsvp, (ds == null ? dsp.getDefaultScheme() : ds),
         includeMeasures);
     jsvp.repaint();
@@ -1464,7 +1465,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
       JSVPanel jsvp = (spec.getIntegrationGraph() == null ? new JSVPanel(spec, source, jsvpPopupMenu)
           : JSV1DOverlayPanel.getIntegralPanel(spec, null, source, jsvpPopupMenu));
       jsvp.setIndex(i);
-      jsvp.addListener(this);
       setJSVPanelProperties(jsvp, true);
       JSVFrame frame = new JSVFrame(spec.getTitleLabel());
       frame.setFrameIcon(frameIcon);

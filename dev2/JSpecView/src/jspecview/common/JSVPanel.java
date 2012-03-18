@@ -2258,12 +2258,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   private void notifyListeners(Object eventObj) {
-    for (int i = 0; i < listeners.size(); i++) {
-      PanelListener listener = listeners.get(i);
-      if (listener != null) {
-        listener.panelEvent(eventObj);
-      }
-    }
+    for (int i = 0; i < listeners.size(); i++)
+      if (listeners.get(i) != null)
+        listeners.get(i).panelEvent(eventObj);
   }
 
   /*--------------METHODS IN INTERFACE MouseListener-----------------------*/
