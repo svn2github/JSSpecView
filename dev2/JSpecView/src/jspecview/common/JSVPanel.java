@@ -348,7 +348,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     }
     Color color = ds.getColor(st);
     if (color != null)
-      options.put(st.name(), color);
+      options.put(st.name(), AppUtils.colorToHexString(color));
     switch (st) {
     case BACKGROUNDCOLOR:
       setBackground(color);

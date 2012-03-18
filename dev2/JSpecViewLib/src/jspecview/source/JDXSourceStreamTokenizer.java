@@ -107,7 +107,7 @@ public class JDXSourceStreamTokenizer {
    *        the label to be cleaned
    * @return the new label
    */
-  static String cleanLabel(String label) {
+  public static String cleanLabel(String label) {
     if (label == null)
       return null;
     int i;

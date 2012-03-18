@@ -1034,10 +1034,24 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
 
   public Map<String, Object> getInfo() {
     Map<String, Object> info = new Hashtable<String, Object>();
-    info.put("header", getHeaderRowDataAsArray());
+    Map<String, Object> head = new Hashtable<String, Object>();
+    String[][] list = getHeaderRowDataAsArray();
+    for (int i = 0; i < list.length; i++) {
+      Map<String, Object> data = new Hashtable<String, Object>();
+      data.put("value", fixInfoValue(list[i][1]));
+      data.put("index", Integer.valueOf(i + 1));
+      head.put(JDXSourceStreamTokenizer.cleanLabel(list[i][0]), data);
+    }
+    info.put("header", head);
     info.put("id", id);
     info.put("isHZToPPM", Boolean.valueOf(isHZtoPPM));
     info.put("subSpectrumCount", Integer.valueOf(subSpectra == null ? 0 : subSpectra.size()));
+    return info;
+  }
+
+  private static Object fixInfoValue(String info) {
+    try { return (Integer.valueOf(info)); } catch (Exception e) {}
+    try { return (Double.valueOf(info)); } catch (Exception e) {}
     return info;
   }
 }
