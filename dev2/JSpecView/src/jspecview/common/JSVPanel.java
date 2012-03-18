@@ -61,6 +61,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
 
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet; //import javax.print.attribute.standard.MediaSize;
@@ -219,21 +221,25 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
   Hashtable<String, Object>options = new Hashtable<String, Object>();
 
-  public Map<String, Object> getInfo(boolean isSelected) {
-    options.put("selected", Boolean.valueOf(isSelected));
-    options.put("sourceFilePath", source.getFilePath());
-    options.put("spectra", getSpectraInfo());
-    options.put("title", title);
-    options.put("index", Integer.valueOf(index));
-    options.put("nSpectra", Integer.valueOf(nSpectra));
-    options.put("userYFactor", Double.valueOf(userYFactor));
-    return options;
+  public Map<String, Object> getInfo(boolean isSelected, String key) {
+    Map<String, Object> info = new Hashtable<String, Object>();
+    Set<Entry<String, Object>> entries = options.entrySet();
+    for (Entry<String, Object> entry: entries)
+      JDXSpectrum.putInfo(key, info, entry.getKey(), entry.getValue());
+    JDXSpectrum.putInfo(key, info, "selected", Boolean.valueOf(isSelected));
+    JDXSpectrum.putInfo(key, info, "filePath", source.getFilePath());
+    JDXSpectrum.putInfo(key, info, "type", source.getDataType());
+    JDXSpectrum.putInfo(key, info, "title", title);
+    JDXSpectrum.putInfo(key, info, "nSpectra", Integer.valueOf(nSpectra));
+    JDXSpectrum.putInfo(key, info, "userYFactor", Double.valueOf(userYFactor));
+    info.put("spectra", getSpectraInfo(key));
+    return info;
   }
   
-  private Object getSpectraInfo() {
+  private Object getSpectraInfo(String key) {
     List<Map<String, Object>> spectraInfo = new ArrayList<Map<String, Object>>();
     for (int i = 0; i < nSpectra; i++)
-      spectraInfo.add(spectra[i].getInfo());
+      spectraInfo.add(spectra[i].getInfo(key));
     return spectraInfo;
   }
 

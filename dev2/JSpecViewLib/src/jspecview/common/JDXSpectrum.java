@@ -1032,20 +1032,33 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return d;
   }
 
-  public Map<String, Object> getInfo() {
+  public Map<String, Object> getInfo(String key) {
     Map<String, Object> info = new Hashtable<String, Object>();
+    info.put("id", id);
+    boolean justHeader = ("header" == key);
     Map<String, Object> head = new Hashtable<String, Object>();
     String[][] list = getHeaderRowDataAsArray();
     for (int i = 0; i < list.length; i++) {
-      Map<String, Object> data = new Hashtable<String, Object>();
-      data.put("value", fixInfoValue(list[i][1]));
-      data.put("index", Integer.valueOf(i + 1));
-      head.put(JDXSourceStreamTokenizer.cleanLabel(list[i][0]), data);
+      String label = JDXSourceStreamTokenizer.cleanLabel(list[i][0]);
+      if (key != null && !justHeader && !label.equals(key))
+        continue;
+      Object val = fixInfoValue(list[i][1]);
+      if (key == null) {
+        Map<String, Object> data = new Hashtable<String, Object>();
+        data.put("value", val);
+        data.put("index", Integer.valueOf(i + 1));
+        info.put(label, data);
+      } else {
+        info.put(label, val);
+      }
     }
     info.put("header", head);
-    info.put("id", id);
-    info.put("isHZToPPM", Boolean.valueOf(isHZtoPPM));
-    info.put("subSpectrumCount", Integer.valueOf(subSpectra == null ? 0 : subSpectra.size()));
+    if (!justHeader) {
+      putInfo(key, info, "type", getDataType());
+      putInfo(key, info, "isHZToPPM", Boolean.valueOf(isHZtoPPM));
+      putInfo(key, info, "subSpectrumCount", Integer
+          .valueOf(subSpectra == null ? 0 : subSpectra.size()));
+    }
     return info;
   }
 
@@ -1053,5 +1066,11 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     try { return (Integer.valueOf(info)); } catch (Exception e) {}
     try { return (Double.valueOf(info)); } catch (Exception e) {}
     return info;
+  }
+
+  public static void putInfo(String match, Map<String, Object> info,
+                             String key, Object value) {
+    if (match == null || key.equalsIgnoreCase(match))
+      info.put(key, value);
   }
 }

@@ -435,6 +435,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
   }
 
   public void runScript(String script) {
+    //System.out.println(getPropertyAsJSON("type"));
     if (scriptQueue == null)
       processCommand(script);
     else
@@ -1659,17 +1660,24 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     initParams(params);
   }
 
-  public Map<String, Object> getProperties() {
+  public Map<String, Object> getPropertyAsJavaObject(String key) {
+    if ("".equals(key))
+      key = null;
     List<Map<String, Object>> info = new ArrayList<Map<String, Object>>();
     for (int i = 0; i < jsvPanels.size(); i++) {
       JSVPanel jsvp = jsvPanels.get(i);
       if (jsvp == null)
         continue;
-      info.add(jsvp.getInfo(true));
+      info.add(jsvp.getInfo(true, key));
     }
     Map<String, Object> map = new Hashtable<String, Object>();
     map.put("items", info);
     return map;
+  }
+  
+  public String getPropertyAsJSON(String key) {
+    Map<String, Object> map = getPropertyAsJavaObject(key);
+    return Escape.toJSON(null, map);
   }
 
 

@@ -3198,13 +3198,15 @@ public class MainFrame extends JFrame implements DropTargetListener,
     return ((JSVPanel) frame.getContentPane().getComponent(0));
   }
 
-  public Map<String, Object> getProperties() {
+  public Map<String, Object> getProperty(String key) {
+    if ("".equals(key))
+      key = null;
     List<Map<String, Object>> info = new ArrayList<Map<String, Object>>();
     for (int i = 0; i < specNodes.size(); i++) {
       JSVPanel jsvp = specNodes.get(i).jsvp;
       if (jsvp == null)
         continue;
-      info.add(jsvp.getInfo(jsvp.getSource() == currentSelectedSource));
+      info.add(jsvp.getInfo(jsvp.getSource() == currentSelectedSource, key));
     }
     Map<String, Object> map = new Hashtable<String, Object>();
     map.put("items", info);

@@ -409,12 +409,12 @@ public class IntegralGraph implements Graph {
     return 1;
   }
 
-  public Map<String, Object> getInfo() {
+  public Map<String, Object> getInfo(String key) {
     Map<String, Object> info = new Hashtable<String, Object>();
-    info.put("type", "integration");
-    info.put("percentMinY", Double.valueOf(percentMinY));
-    info.put("percentOffset", Double.valueOf(percentOffset));
-    info.put("integralFactor", Double.valueOf(integralFactor));
+    JDXSpectrum.putInfo(key, info, "type", "integration");
+    JDXSpectrum.putInfo(key, info, "percentMinY", Double.valueOf(percentMinY));
+    JDXSpectrum.putInfo(key, info, "percentOffset", Double.valueOf(percentOffset));
+    JDXSpectrum.putInfo(key, info, "integralFactor", Double.valueOf(integralFactor));
     //TODO annotations
     return info;
   }
