@@ -34,7 +34,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 /**
- * Dialog for inputing values for the calulation of the <code>IntegralGraph</code>.
+ * Dialog for providing values for the calculation of the <code>IntegralGraph</code>.
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
@@ -74,7 +74,7 @@ public class IntegrateDialog extends JDialog {
   private double factor;
 
   /**
-    * Initialses the <code>IntegralDialog with the given values for minY, offset
+    * Initialises the <code>IntegralDialog</code> with the given values for minY, offset
     * and factor
     * @param panel the parent panel
     * @param title the title of the dialog
