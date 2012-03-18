@@ -82,25 +82,25 @@ public class JDXDataObject extends JDXHeader {
     double val = Double.NaN;
     switch (nuc.charAt(--pt)) {
     case 'F':
-      val = 40.08;
+      val = 40.07757016;
       break;
     case 'C':
-      val = 10.71;
+      val = 10.70838657;
       break;
     case 'N':
-      val = 3.08;
+      val = 3.07770646;
       break;
     case 'A':
     case 'a':
       if (nuc.charAt(--pt) == 'N')
-        val = 11.27;
+        val = 11.26952167;
       break;
     case 'P':
-      val = 17.25;
+      val = 17.2514409;
       break;
     case 'H':
       char ch = nuc.charAt(pt - 1); 
-      val = (ch == '2' ? 6.54 : ch == '1' ? 42.58 : val);
+      val = (ch == '2' ? 6.53590131 : ch == '1' ? 42.57774806 : val);
       break;
     }
     return (Character.isDigit(nuc.charAt(--pt)) ? val : Double.NaN);
