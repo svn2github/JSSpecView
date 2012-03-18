@@ -2720,14 +2720,14 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         .toSubspectrumIndex(fixY(yPixel)) : toY(fixY(yPixel)));
     formatterY = getFormatter(hashY);
     coordStr = "(" + xx + ", " + formatterY.format(yPt) + ")";
-
     if (xPixel != fixX(xPixel) || yPixel != fixY(yPixel)) {
       yPt = Double.NaN;
     } else if (nSpectra == 1) {
-      if (!getSpectrum().isHNMR()) {
-        yPt = spectra[0].getPercentYValueAt(xPt);
-        xx += ", " + formatterY.format(yPt);
-      }
+// I have no idea what I was thinking here...
+//      if (!getSpectrum().isHNMR()) {
+//        yPt = spectra[0].getPercentYValueAt(xPt);
+//        xx += ", " + formatterY.format(yPt);
+//      }
     } else if (getSpectrum().getIntegrationGraph() != null) {
       yPt = spectra[1].getPercentYValueAt(xPt);
       xx += ", " + getFormatter("#0.0").format(yPt);
