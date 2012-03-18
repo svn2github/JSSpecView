@@ -795,7 +795,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
   protected void headerMenuItem_actionPerformed(ActionEvent e) {
     
     JDXSpectrum spectrum = selectedJSVPanel.getSpectrum();
-    Object[][] rowData = (isOverlaid ? currentSource
+    String[][] rowData = (isOverlaid ? currentSource
         .getHeaderRowDataAsArray(false, 0) : spectrum
         .getHeaderRowDataAsArray());
     String[] columnNames = { "Label", "Description" };
