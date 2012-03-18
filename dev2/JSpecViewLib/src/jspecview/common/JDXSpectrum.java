@@ -582,31 +582,31 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return continuous;
   }
 
-  public Object[][] getHeaderRowDataAsArray() {
+  public String[][] getHeaderRowDataAsArray() {
     int n = 8;
     if (observedFreq != JDXSpectrum.ERROR)
       n++;
     if (observedNucl != "")
       n++;
-    Object[][] rowData = getHeaderRowDataAsArray(true, n);
+    String[][] rowData = getHeaderRowDataAsArray(true, n);
     int i = rowData.length - n;
     if (observedFreq != JDXSpectrum.ERROR)
-      rowData[i++] = new Object[] { "##.OBSERVE FREQUENCY", "" + observedFreq };
+      rowData[i++] = new String[] { "##.OBSERVE FREQUENCY", "" + observedFreq };
     if (observedNucl != "")
-      rowData[i++] = new Object[] { "##.OBSERVE NUCLEUS", observedNucl };
-    rowData[i++] = new Object[] { "##XUNITS", isHZtoPPM() ? "HZ" : getXUnits() };
-    rowData[i++] = new Object[] { "##YUNITS", getYUnits() };
+      rowData[i++] = new String[] { "##.OBSERVE NUCLEUS", observedNucl };
+    rowData[i++] = new String[] { "##XUNITS", isHZtoPPM() ? "HZ" : getXUnits() };
+    rowData[i++] = new String[] { "##YUNITS", getYUnits() };
     double x = (isIncreasing() ? getFirstX() : getLastX());
-    rowData[i++] = new Object[] { "##FIRSTX",
+    rowData[i++] = new String[] { "##FIRSTX",
         String.valueOf(isHZtoPPM() ? x * getObservedFreq() : x) };
     x = (isIncreasing() ? getLastX() : getFirstX());
-    rowData[i++] = new Object[] { "##FIRSTY",
+    rowData[i++] = new String[] { "##FIRSTY",
         String.valueOf(isIncreasing() ? getFirstY() : getLastY()) };
-    rowData[i++] = new Object[] { "##LASTX",
+    rowData[i++] = new String[] { "##LASTX",
         String.valueOf(isHZtoPPM() ? x * getObservedFreq() : x) };
-    rowData[i++] = new Object[] { "##XFACTOR", String.valueOf(getXFactor()) };
-    rowData[i++] = new Object[] { "##YFACTOR", String.valueOf(getYFactor()) };
-    rowData[i++] = new Object[] { "##NPOINTS",
+    rowData[i++] = new String[] { "##XFACTOR", String.valueOf(getXFactor()) };
+    rowData[i++] = new String[] { "##YFACTOR", String.valueOf(getYFactor()) };
+    rowData[i++] = new String[] { "##NPOINTS",
         String.valueOf(getNumberOfPoints()) };
     return rowData;
   }

@@ -216,18 +216,18 @@ public class JDXHeader {
     return headerTable;
   }
 
-  public Object[][] getHeaderRowDataAsArray(boolean addDataClass, int nMore) {
+  public String[][] getHeaderRowDataAsArray(boolean addDataClass, int nMore) {
     
-    Object rowData[][] = new Object[(addDataClass ? 6 : 5) + headerTable.size() + nMore][];
+    String[][] rowData = new String[(addDataClass ? 6 : 5) + headerTable.size() + nMore][];
 
     int i = 0;
-    rowData[i++] = new Object[] { "##TITLE", title };
-    rowData[i++] = new Object[] { "##JCAMP-DX", jcampdx };
-    rowData[i++] = new Object[] { "##DATA TYPE", dataType };
+    rowData[i++] = new String[] { "##TITLE", title };
+    rowData[i++] = new String[] { "##JCAMP-DX", jcampdx };
+    rowData[i++] = new String[] { "##DATA TYPE", dataType };
     if (addDataClass)
-      rowData[i++] = new Object[] { "##DATA CLASS", dataClass };      
-    rowData[i++] = new Object[] { "##ORIGIN", origin };
-    rowData[i++] = new Object[] { "##OWNER", owner };
+      rowData[i++] = new String[] { "##DATA CLASS", dataClass };      
+    rowData[i++] = new String[] { "##ORIGIN", origin };
+    rowData[i++] = new String[] { "##OWNER", owner };
     
     for(int j = 0; j < headerTable.size(); j++)
       rowData[i++] = headerTable.get(j);
