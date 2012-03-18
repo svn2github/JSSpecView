@@ -53,7 +53,9 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.ArrayList;
 
@@ -1656,5 +1658,19 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
   public void script(String params) {
     initParams(params);
   }
+
+  public Map<String, Object> getProperties() {
+    List<Map<String, Object>> info = new ArrayList<Map<String, Object>>();
+    for (int i = 0; i < jsvPanels.size(); i++) {
+      JSVPanel jsvp = jsvPanels.get(i);
+      if (jsvp == null)
+        continue;
+      info.add(jsvp.getInfo(true));
+    }
+    Map<String, Object> map = new Hashtable<String, Object>();
+    map.put("items", info);
+    return map;
+  }
+
 
 }

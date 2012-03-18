@@ -61,7 +61,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   private int currentSubSpectrum;
   private double y2D = Double.NaN;
   public String y2DUnits = "";
-  private String id;
+  private String id = "";
   public void setId(String id) {
     this.id = id;
   }

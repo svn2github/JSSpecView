@@ -1097,6 +1097,10 @@ public class MainFrame extends JFrame implements DropTargetListener,
     String cmd = commandInput.getText()
         + (Character.isISOControl(c) ? "" : "" + c);
     String tip;
+    if (cmd.indexOf(";") >= 0)
+      cmd = cmd.substring(cmd.lastIndexOf(";") + 1);
+    while (cmd.startsWith(" "))
+      cmd = cmd.substring(1);
     if (cmd.length() == 0) {
       tip = "Enter a command:";
     } else {
@@ -1624,6 +1628,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
   private int fileCount = 0;
   private boolean isEmbedded;
+  private boolean isHidden;
   /**
    * Adds the <code>JDXSource</code> info specified by the
    * <code>fileName<code> to
@@ -2043,6 +2048,10 @@ public class MainFrame extends JFrame implements DropTargetListener,
           break;
         case CLOSE:
           close(TextFormat.trimQuotes(value));
+          break;
+        case HIDDEN:
+          isHidden = (jmol != null && Parameters.isTrue(value));
+          setVisible(!isHidden);
           break;
         case SPECTRUM:
         case SPECTRUMNUMBER:
@@ -3198,7 +3207,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       info.add(jsvp.getInfo(jsvp.getSource() == currentSelectedSource));
     }
     Map<String, Object> map = new Hashtable<String, Object>();
-    map.put("panelInfo", info);
+    map.put("items", info);
     return map;
   }
 

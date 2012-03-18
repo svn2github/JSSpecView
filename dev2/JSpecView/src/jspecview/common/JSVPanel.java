@@ -121,6 +121,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
   public void setIndex(int index) {
     this.index = index;
+    getSpectrumAt(0).setId("#" + index);
   }
 
   // Critical fields
