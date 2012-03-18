@@ -49,7 +49,7 @@ public class IntegralGraph implements Graph {
   private Graph graph;
 
   /**
-   * The minimum percent of Y values to use in calulating the integral
+   * The minimum percent of Y values to use in calculating the integral
    */
   private double percentMinY;
 
@@ -85,7 +85,7 @@ public class IntegralGraph implements Graph {
   private String yUnits = "Arbitrary Units";
 
   /**
-   * Calculates and intialises the <code>IntegralGraph</code> from an input <code>Graph</code>,
+   * Calculates and initialises the <code>IntegralGraph</code> from an input <code>Graph</code>,
    *  the percentage Minimum Y value, the percent offset and the integral factor
    * @param graph the input graph
    * @param percentMinY percentage Minimum Y value
