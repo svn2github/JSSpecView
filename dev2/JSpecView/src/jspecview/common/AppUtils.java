@@ -62,7 +62,7 @@ public class AppUtils {
 
       if (graph != null) {
         JSVPanel newJsvp = JSV1DOverlayPanel.getIntegralPanel(spectrum, jsvp
-            .getIntegralPlotColor());
+            .getIntegralPlotColor(), jsvp.getSource(), jsvp.getPopup());
         // add integration ratio annotations if any exist
         jp.remove(jsvp);
         jp.add(newJsvp);

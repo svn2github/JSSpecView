@@ -589,10 +589,11 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
         for (int i = 0; i < numberOfSpectra; i++) {
           JDXSpectrum spec = specs.get(i);
           if (spec.getIntegrationGraph() != null) {
-            jsvp = JSV1DOverlayPanel.getIntegralPanel(spec, null);
+            jsvp = JSV1DOverlayPanel.getIntegralPanel(spec, null,
+                currentSource, appletPopupMenu);
           } else if (showRange) {
-            jsvp = new JSVPanel(spec, startIndex,
-                endIndex, currentSource, appletPopupMenu);
+            jsvp = new JSVPanel(spec, startIndex, endIndex, currentSource,
+                appletPopupMenu);
           } else {
             jsvp = new JSVPanel(spec, currentSource, appletPopupMenu);
           }

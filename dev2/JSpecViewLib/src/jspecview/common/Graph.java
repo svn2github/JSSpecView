@@ -19,6 +19,8 @@
 
 package jspecview.common;
 
+import java.util.Map;
+
 
 /**
  * Interface Graph provides methods that are used for the display by
@@ -82,5 +84,6 @@ public interface Graph {
   public Coordinate[] getXYCoords();
   public double getPercentYValueAt(double x);
   public double getUserYFactor();
+  public Map<String, Object> getInfo();
   
 }

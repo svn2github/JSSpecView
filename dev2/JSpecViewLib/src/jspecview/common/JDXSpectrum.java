@@ -22,6 +22,7 @@ package jspecview.common;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.List;
 import java.util.Vector;
@@ -60,6 +61,11 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   private int currentSubSpectrum;
   private double y2D = Double.NaN;
   public String y2DUnits = "";
+  private String id;
+  public void setId(String id) {
+    this.id = id;
+  }
+  
   private double blockID; // a random number generated in JDXFileReader
   private boolean isForcedSubset;
   public boolean isForcedSubset() {
@@ -1024,5 +1030,14 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     if (y2DUnits.equals("HZ"))
       d /= freq2dY;
     return d;
+  }
+
+  public Map<String, Object> getInfo() {
+    Map<String, Object> info = new Hashtable<String, Object>();
+    info.put("header", getHeaderRowDataAsArray());
+    info.put("id", id);
+    info.put("isHZToPPM", Boolean.valueOf(isHZtoPPM));
+    info.put("subSpectrumCount", Integer.valueOf(subSpectra == null ? 0 : subSpectra.size()));
+    return info;
   }
 }

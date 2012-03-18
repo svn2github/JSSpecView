@@ -41,6 +41,7 @@ import java.awt.Color;
 import java.util.List;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
+import jspecview.source.JDXSource;
 
 /**
  * JSVPanel class draws a plot from the data contained a instance of a
@@ -87,13 +88,21 @@ public class JSV1DOverlayPanel extends JSVPanel {
    *        an array of spectra (<code>Spectrum</code>)
    * @throws ScalesIncompatibleException
    */
-  private JSV1DOverlayPanel(Graph[] spectra) {
+  private JSV1DOverlayPanel(Graph[] spectra,
+                            JDXSource source,
+                            JSVPanelPopupMenu popup) {
+    this.source = source;
+    this.popup = popup;
     initJSVPanel(spectra, null, null);
   }
 
-  public static JSV1DOverlayPanel getIntegralPanel(JDXSpectrum spectrum, Color color) {
+  public static JSV1DOverlayPanel getIntegralPanel(JDXSpectrum spectrum,
+                                                   Color color,
+                                                   JDXSource source,
+                                                   JSVPanelPopupMenu popup) {
     Graph graph = spectrum.getIntegrationGraph();
-    JSV1DOverlayPanel jsvp = new JSV1DOverlayPanel(new Graph[] { spectrum, graph });
+    JSV1DOverlayPanel jsvp = new JSV1DOverlayPanel(new Graph[] { spectrum,
+        graph }, source, popup);
     jsvp.setTitle(graph.getTitle());
     jsvp.setPlotColors(new Color[] { jsvp.getPlotColor(0), color });
     return jsvp;

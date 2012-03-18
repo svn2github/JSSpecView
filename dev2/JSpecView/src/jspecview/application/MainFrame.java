@@ -77,7 +77,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
@@ -1452,12 +1454,11 @@ public class MainFrame extends JFrame implements DropTargetListener,
     splitMenuItem.setSelected(true);
 
     List<JDXSpectrum> specs = source.getSpectra();
-    //JSVPanel[] panels = new JSVPanel[specs.size()];
     JSVFrame[] frames = new JSVFrame[specs.size()];
     for (int i = 0; i < specs.size(); i++) {
       JDXSpectrum spec = specs.get(i);
       JSVPanel jsvp = (spec.getIntegrationGraph() == null ? new JSVPanel(spec, source, jsvpPopupMenu)
-          : JSV1DOverlayPanel.getIntegralPanel(spec, null));
+          : JSV1DOverlayPanel.getIntegralPanel(spec, null, source, jsvpPopupMenu));
       jsvp.setIndex(i);
       jsvp.addListener(this);
       setJSVPanelProperties(jsvp, true);
@@ -3033,6 +3034,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
       this.frame = frame;
       this.jsvp = jsvp;
       this.id = id;
+      if (jsvp != null)
+        jsvp.getSpectrumAt(0).setId(id);
       System.out.println("TREE NODE fileName=" + fileName + " source.filePath=" + (source == null ? "null" : source.getFilePath()));
     }
 
@@ -3184,6 +3187,19 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
   static JSVPanel getPanel0(JSVFrame frame) {
     return ((JSVPanel) frame.getContentPane().getComponent(0));
+  }
+
+  public Map<String, Object> getProperties() {
+    List<Map<String, Object>> info = new ArrayList<Map<String, Object>>();
+    for (int i = 0; i < specNodes.size(); i++) {
+      JSVPanel jsvp = specNodes.get(i).jsvp;
+      if (jsvp == null)
+        continue;
+      info.add(jsvp.getInfo(jsvp.getSource() == currentSelectedSource));
+    }
+    Map<String, Object> map = new Hashtable<String, Object>();
+    map.put("panelInfo", info);
+    return map;
   }
 
 }

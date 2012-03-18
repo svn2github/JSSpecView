@@ -21,7 +21,9 @@ package jspecview.common;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import jspecview.common.Integral;
@@ -391,6 +393,16 @@ public class IntegralGraph implements Graph {
 
   public double getUserYFactor() {
     return 1;
+  }
+
+  public Map<String, Object> getInfo() {
+    Map<String, Object> info = new Hashtable<String, Object>();
+    info.put("type", "integration");
+    info.put("percentMinY", Double.valueOf(percentMinY));
+    info.put("percentOffset", Double.valueOf(percentOffset));
+    info.put("integralFactor", Double.valueOf(integralFactor));
+    //TODO annotations
+    return info;
   }
 
 }

@@ -131,8 +131,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private List<MultiScaleData> zoomInfoList;
   private ArrayList<Annotation> integrationRatios;
   private ArrayList<Annotation> annotations;
-  private JSVPanelPopupMenu popup;
-  private JDXSource source;
+  protected JSVPanelPopupMenu popup;
+  protected JDXSource source;
   private ImageScaleData isd;
   private BufferedImage image2D;
 
@@ -216,6 +216,25 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private boolean yScaleOn      = true;
   private boolean yUnitsOn      = true;
 
+  Hashtable<String, Object>options = new Hashtable<String, Object>();
+
+  public Map<String, Object> getInfo(boolean isSelected) {
+    options.put("selected", Boolean.valueOf(isSelected));
+    options.put("sourceFilePath", source.getFilePath());
+    options.put("spectra", getSpectraInfo());
+    options.put("title", title);
+    options.put("index", Integer.valueOf(index));
+    options.put("nSpectra", Integer.valueOf(nSpectra));
+    options.put("userYFactor", Double.valueOf(userYFactor));
+    return options;
+  }
+  
+  private Object getSpectraInfo() {
+    List<Map<String, Object>> spectraInfo = new ArrayList<Map<String, Object>>();
+    for (int i = 0; i < nSpectra; i++)
+      spectraInfo.add(spectra[i].getInfo());
+    return spectraInfo;
+  }
 
   public void setBoolean(Parameters parameters, ScriptToken st) {
     if (st == null) {
@@ -224,44 +243,46 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
         setBoolean(parameters, entry.getKey());
       return;
     }
+    boolean isTrue = parameters.getBoolean(st);
+    options.put(st.name(), (isTrue ? Boolean.TRUE : Boolean.FALSE));
     switch (st) {
     case COORDINATESON:
-      coordinatesOn = parameters.getBoolean(st);
+      coordinatesOn = isTrue;
       break;
     case DISPLAY1D:
-      display1D = parameters.getBoolean(st);
+      display1D = isTrue;
       thisWidth = 0;
       break;
     case DISPLAY2D:
-      display2D = parameters.getBoolean(st);
+      display2D = isTrue;
       thisWidth = 0;
       break;
     case ENABLEZOOM:
-      enableZoom = parameters.getBoolean(st);
+      enableZoom = isTrue;
       break;
     case GRIDON:
-      gridOn = parameters.getBoolean(st);
+      gridOn = isTrue;
       break;
     case REVERSEPLOT:
-      reversePlot = parameters.getBoolean(st);
+      reversePlot = isTrue;
       break;
     case TITLEBOLDON:
-      titleBoldOn = parameters.getBoolean(st);
+      titleBoldOn = isTrue;
       break;
     case TITLEON:
-      titleOn = parameters.getBoolean(st);
+      titleOn = isTrue;
       break;
     case XSCALEON:
-      xScaleOn = parameters.getBoolean(st);
+      xScaleOn = isTrue;
       break;
     case XUNITSON:
-      xUnitsOn = parameters.getBoolean(st);
+      xUnitsOn = isTrue;
       break;
     case YSCALEON:
-      yScaleOn = parameters.getBoolean(st);
+      yScaleOn = isTrue;
       break;
     case YUNITSON:
-      yUnitsOn = parameters.getBoolean(st);
+      yUnitsOn = isTrue;
       break;
     default:
       System.out.println("JSVPanel --- unrecognized Parameter boolean: " + st);
@@ -314,38 +335,47 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       return;
     }
     switch (st) {
-    case BACKGROUNDCOLOR:
-      setBackground(ds.getColor(st));
-      break;
-    case COORDINATESCOLOR:
-      coordinatesColor= ds.getColor(st);
-      break;
     case DISPLAYFONTNAME:
       displayFontName = ds.getDisplayFont();
-      break;
-    case GRIDCOLOR:
-      gridColor = ds.getColor(st);
-      break;
-    case INTEGRALPLOTCOLOR:
-      integralPlotColor= ds.getColor(st);
-      break;
-    case PLOTCOLOR:
-      plotColors[0] = ds.getColor(st);
-      break;
-    case PLOTAREACOLOR:
-      plotAreaColor= ds.getColor(st);
-      break;
-    case SCALECOLOR:
-      scaleColor= ds.getColor(st);
-      break;
-    case TITLECOLOR:
-      titleColor= ds.getColor(st);
-      break;
+      if (displayFontName != null)
+        options.put(st.name(), displayFontName);
+      return;
     case TITLEFONTNAME:
       titleFontName= ds.getTitleFont();
+      if (titleFontName != null)
+        options.put(st.name(), titleFontName);
+      return;
+    }
+    Color color = ds.getColor(st);
+    if (color != null)
+      options.put(st.name(), color);
+    switch (st) {
+    case BACKGROUNDCOLOR:
+      setBackground(color);
+      break;
+    case COORDINATESCOLOR:
+      coordinatesColor= color;
+      break;
+    case GRIDCOLOR:
+      gridColor = color;
+      break;
+    case INTEGRALPLOTCOLOR:
+      integralPlotColor= color;
+      break;
+    case PLOTCOLOR:
+      plotColors[0] = color;
+      break;
+    case PLOTAREACOLOR:
+      plotAreaColor= color;
+      break;
+    case SCALECOLOR:
+      scaleColor= color;
+      break;
+    case TITLECOLOR:
+      titleColor= color;
       break;
     case UNITSCOLOR:
-      unitsColor= ds.getColor(st);
+      unitsColor= color;
       break;
     default:
       System.out.println("JSVPanel --- unrecognized DisplayScheme color: " + st);
