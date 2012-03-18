@@ -240,8 +240,6 @@ public class JDXDataObject extends JDXHeader {
   };
 
   private static double getGyroMagneticRatio(String nuc) {
-    // will throw a caught exception if the string is not
-    // of the proper form.
     int pt = 0;
     while (pt < nuc.length() && !Character.isDigit(nuc.charAt(pt)))
       pt++;
