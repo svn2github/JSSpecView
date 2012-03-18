@@ -2,6 +2,7 @@ package jspecview.common;
 
 import jspecview.exception.JSpecViewException;
 import jspecview.util.Logger;
+import jspecview.util.Parser;
 
 /**
  * spectrum data AS READ FROM FILE
@@ -77,33 +78,43 @@ public class JDXDataObject extends JDXHeader {
     Logger.info("Freq for " + nuc + " = " + freq);
   }
 
+  /*
+   * from CODATA 2010 Physical Constants Task Group
+1H      267.5222005        42.57748060
+2H      41.0662791      6.53590131
+13C     67.2828400      10.70839657
+15N     -27.1261804     -4.31726570
+19F     251.8148000        40.07757016
+23Na    70.8084930      11.26952167
+31P     108.3940000     17.25144090
+   */
   private static double getGyroMagneticRatio(String nuc) {
-    int pt = nuc.length();
-    double val = Double.NaN;
-    switch (nuc.charAt(--pt)) {
-    case 'F':
-      val = 40.07757016;
-      break;
-    case 'C':
-      val = 10.70838657;
-      break;
-    case 'N':
-      val = 3.07770646;
-      break;
-    case 'A':
-    case 'a':
-      if (nuc.charAt(--pt) == 'N')
-        val = 11.26952167;
-      break;
-    case 'P':
-      val = 17.2514409;
-      break;
-    case 'H':
-      char ch = nuc.charAt(pt - 1); 
-      val = (ch == '2' ? 6.53590131 : ch == '1' ? 42.57774806 : val);
-      break;
+    // will throw a caught exception if the string is not
+    // of the proper form.
+    int pt = 0;
+    while (!Character.isDigit(nuc.charAt(pt)))
+      pt++;
+    switch (Parser.parseInt(nuc.substring(pt))) {
+    default:
+      return Double.NaN;
+    case 1: //1H
+      return 42.57774806;
+    case 2: //2H
+      return 6.53590131;
+    case 13: //13C
+      return 10.70838657;
+    case 14: //14N
+      return 3.07770646;
+    case 15: //15N
+      // absolute value is all that is needed here.
+      return 4.31726570;
+    case 19: //19F
+      return 40.07757016;
+    case 23: //23Na
+      return 11.26952167;
+    case 31: //31P
+      return 17.2514409;
     }
-    return (Character.isDigit(nuc.charAt(--pt)) ? val : Double.NaN);
   }
 
 
