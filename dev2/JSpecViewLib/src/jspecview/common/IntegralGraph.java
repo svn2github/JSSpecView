@@ -349,11 +349,25 @@ public class IntegralGraph implements Graph {
     if (integrals == null)
       integrals = new ArrayList<Integral>();
     Integral in = new Integral(intVal, x1, x2, getYValueAt(x1), getYValueAt(x2));
+    if (isFinal)
+      clearIntegrals(x1, x2);
     if (isFinal || integrals.size() == 0) {
       integrals.add(in);
     } else {
       integrals.set(0, in);
     }
+  }
+
+  private void clearIntegrals(double x1, double x2) {
+    // no overlapping integrals. Ignore first, which is the temporary one
+    
+    for (int i = integrals.size(); --i >= 1;) {
+      Integral in = integrals.get(i);
+      if (Math.min(in.x1, in.x2) < Math.max(x1, x2) 
+          && Math.max(in.x1, in.x2) > Math.min(x1, x2))
+        integrals.remove(i);
+    }
+    
   }
 
   public List<Integral> getIntegrals() {
