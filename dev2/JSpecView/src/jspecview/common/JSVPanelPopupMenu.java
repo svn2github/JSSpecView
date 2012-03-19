@@ -90,7 +90,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   protected JMenu appletSaveAsJDXMenu; // applet only
   protected JMenu appletExportAsMenu;  // applet only
   protected JMenuItem appletAdvancedMenuItem;
-  public JMenu appletCompoundMenu;
+  protected JMenu appletCompoundMenu;
   protected JMenuItem overlayKeyMenuItem;
   
   private ScriptInterface scripter;

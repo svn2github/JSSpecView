@@ -46,7 +46,6 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
@@ -60,7 +59,6 @@ import java.util.StringTokenizer;
 import java.util.ArrayList;
 
 import javax.swing.JApplet;
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -167,7 +165,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
   private JSVPanel selectedJSVPanel;
   private JDXSource currentSource;
   private boolean isOverlaid;
-   
+
   public boolean isSigned() {
     return isSignedApplet;
   }
@@ -629,7 +627,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
   private void initInterface() {
     final int numberOfPanels = jsvPanels.size();
     boolean canDoTile = (numberOfPanels >= 2 && numberOfPanels <= 10);
-    boolean moreThanOnePanel = numberOfPanels > 1;
+    boolean moreThanOnePanel = (numberOfPanels > 1);
     boolean showSpectrumNumber = spectrumNumber != -1
         && spectrumNumber <= numberOfPanels;
     //appletPanel.setBackground(backgroundColor);
@@ -683,89 +681,48 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
       if (isOverlaid && currentSource.isCompoundSource) {
         jsvPanels.get(spectrumIndex).setTitle(currentSource.getTitle());
       }
-      appletPanel.add(jsvPanels.get(spectrumIndex), BorderLayout.CENTER);
-      appletPopupMenu.appletCompoundMenu.removeAll();
-      if (moreThanOnePanel && compoundMenuOn) {
-        //appletPopupMenu.appletCompoundMenu.add(appletPopupMenu.overlayMenuItem);
-        if (jsvPanels.size() <= 20) {
-          // add Menus to navigate
-          JCheckBoxMenuItem mi;
-          if (currentSource.isCompoundSource) {
-            for (int i = 0; i < numberOfPanels; i++) {
-              mi = new JCheckBoxMenuItem((i + 1) + "- " + specs.get(i).getTitleLabel());
-              mi.setSelected(i == currentSpectrumIndex);
-              mi.addItemListener(new ItemListener() {
-                public void itemStateChanged(ItemEvent e) {
-                  if (e.getStateChange() == ItemEvent.SELECTED) {
-                    // deselects the previously selected menu item
-                    JCheckBoxMenuItem deselectedMenu = (JCheckBoxMenuItem) ((JCheckBoxMenuItem) e
-                        .getSource()).getParent().getComponent(
-                        currentSpectrumIndex + 1);
-                    deselectedMenu.setSelected(false);
-                    compoundMenu_itemStateChanged(e);
-                  }
-                }
-              });
-              mi.setActionCommand("" + i);
-              appletPopupMenu.appletCompoundMenu.add(mi);
-            }
-            appletPopupMenu.appletCompoundMenu
-                .setText(currentSource.type == JDXSource.TYPE_OVERLAY ? "Spectra" 
-                    : currentSource.type == JDXSource.TYPE_BLOCK ? "Blocks" : "NTuples");
-          }
-          // add compound menu to popup menu
-          appletPopupMenu.add(appletPopupMenu.appletCompoundMenu, 3);
-          if (compoundMenuOn)
-            appletPopupMenu.appletCompoundMenu.setEnabled(true);
-        } else {
-          // open dialog box
-          JMenuItem compoundMi = new JMenuItem("Choose Spectrum");
-          compoundMi.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-              StringBuffer msgStrBuffer = new StringBuffer();
-              msgStrBuffer.append("Choose a number between 1 and ");
-              msgStrBuffer.append(numberOfPanels);
-              msgStrBuffer.append(" to display another spectrum");
-
-              String str = JOptionPane.showInputDialog(JSVApplet.this,
-                  msgStrBuffer.toString(), "Spectrum Chooser",
-                  JOptionPane.PLAIN_MESSAGE);
-              if (str != null) {
-                int index = 0;
-                try {
-                  index = Integer.parseInt(str) - 1;
-                } catch (NumberFormatException nfe) {
-                }
-
-                if (index > 0 && index < numberOfPanels) {
-                  showSpectrum(index);
-                  writeStatus(" ");
-                } else
-                  writeStatus("Invalid Spectrum Number");
-              }
-            }
-          });
-        }
-      }
+      appletPanel.add(jsvPanels.get(spectrumIndex), BorderLayout.CENTER);      
+      appletPopupMenu.setCompoundMenu(this, currentSource, spectrumIndex, specs, 
+          compoundMenuOn && currentSource.isCompoundSource, 
+          compoundMenuSelectionListener, compoundMenuChooseListener);  
     }
   }
 
-  /**
-   * display from a drop-down menu
-   * 
-   * @param e
-   *        the ItemEvent
-   */
-  private void compoundMenu_itemStateChanged(ItemEvent e) {
+  private ActionListener compoundMenuChooseListener = new ActionListener() {
+    public void actionPerformed(ActionEvent e) {
+      StringBuffer msgStrBuffer = new StringBuffer();
+      msgStrBuffer.append("Choose a number between 1 and ");
+      msgStrBuffer.append(specs.size());
+      msgStrBuffer.append(" to display another spectrum");
 
-    // gets the newly selected title
-    JCheckBoxMenuItem selectedMenu = (JCheckBoxMenuItem) e.getSource();
-    String txt = selectedMenu.getText();
+      String str = JOptionPane.showInputDialog(JSVApplet.this,
+          msgStrBuffer.toString(), "Spectrum Chooser",
+          JOptionPane.PLAIN_MESSAGE);
+      if (str != null) {
+        int index = 0;
+        try {
+          index = Integer.parseInt(str) - 1;
+        } catch (NumberFormatException nfe) {
+        }
 
-    // shows the newly selected block
-    int index = Integer.parseInt(txt.substring(0, txt.indexOf("-")));
-    //sltnclr = Visible.Colour(source);
-    showSpectrum(index - 1);
+        if (index > 0 && index < jsvPanels.size()) {
+          showSpectrum(index);
+          writeStatus(" ");
+        } else
+          writeStatus("Invalid Spectrum Number");
+      }
+    }
+  };
+
+  private ActionListener compoundMenuSelectionListener = new ActionListener() {
+    public void actionPerformed(ActionEvent e) {
+        compoundMenu_itemStateChanged(e);
+    }
+  };
+   
+  private void compoundMenu_itemStateChanged(ActionEvent e) {
+    String txt = ((JMenuItem) e.getSource()).getText();
+    showSpectrum(Parser.parseInt(txt) - 1);
   }
 
   /**
@@ -948,13 +905,10 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
 
   private void addPanelToFrame() {
     if (offWindowFrame == null || offWindowFrame.getComponentCount() == 0) {
-      if (compoundMenuOn)
-        appletPopupMenu.appletCompoundMenu.setEnabled(true);
       getContentPane().add(appletPanel);
       validate();
       repaint();
     } else {
-      appletPopupMenu.appletCompoundMenu.setEnabled(false);
       offWindowFrame.add(appletPanel);
       offWindowFrame.validate();
       offWindowFrame.setVisible(true);

@@ -4,13 +4,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.List;
 
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-
 import jspecview.common.AppUtils;
+import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVPanelPopupMenu;
+import jspecview.source.JDXSource;
 
 class JSVAppletPopupMenu extends JSVPanelPopupMenu {
 
@@ -140,5 +142,42 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     zoomMenu.add(userZoomMenuItem);
     aboutMenu.add(versionMenuItem);
   }
-  
+
+  public void setCompoundMenu(JSVApplet jsvApplet, JDXSource currentSource,
+                              int currentSpectrumIndex,
+                              List<JDXSpectrum> specs, boolean allowSelection,
+                              ActionListener compoundMenuSelectionListener,
+                              ActionListener compoundMenuChooseListener) {
+    appletCompoundMenu.removeAll();
+    if (!allowSelection)
+      return;
+
+    //appletCompoundMenu.add(overlayMenuItem);
+    if (specs.size() <= 20) {
+      // add Menus to navigate
+      JMenuItem mi;
+      if (currentSource.isCompoundSource) {
+        for (int i = 0; i < specs.size(); i++) {
+          mi = new JMenuItem((i + 1) + "- "
+              + specs.get(i).getTitleLabel());
+          mi.setSelected(i == currentSpectrumIndex);
+          mi.addActionListener(compoundMenuSelectionListener);
+          mi.setActionCommand("" + i);
+          appletCompoundMenu.add(mi);
+        }
+        appletCompoundMenu
+            .setText(currentSource.type == JDXSource.TYPE_OVERLAY ? "Spectra"
+                : currentSource.type == JDXSource.TYPE_BLOCK ? "Blocks"
+                    : "NTuples");
+      }
+      // add compound menu to popup menu
+      add(appletCompoundMenu, 3);
+      appletCompoundMenu.setEnabled(true);
+    } else {
+      // open dialog box
+      JMenuItem compoundMi = new JMenuItem("Choose Spectrum");
+      compoundMi.addActionListener(compoundMenuChooseListener);
+    }
+  }
+    
 }
