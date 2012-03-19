@@ -10,27 +10,78 @@ import jspecview.util.Parser;
  * @author Bob Hanson
  * 
  */
-public class JDXDataObject extends JDXHeader {
+public abstract class JDXDataObject extends JDXHeader {
+
+  /**
+   * Error number that is returned when a min value is undefined
+   */
+  public static final double ERROR = Double.MAX_VALUE;
+
+  protected double blockID; // a random number generated in JDXFileReader
+
+  public void setBlockID(double id) {
+    blockID = id;
+  }
 
   // --------------------Required Spectral Parameters ------------------------------//
-  public double fileFirstX = JDXSpectrum.ERROR;
-  public double fileLastX = JDXSpectrum.ERROR;
+  public double fileFirstX = ERROR;
+  public double fileLastX = ERROR;
   public int nPointsFile = -1;
-  public double xFactor = JDXSpectrum.ERROR;
-  public double yFactor = JDXSpectrum.ERROR;
+
+  public double xFactor = ERROR;
+  public double yFactor = ERROR;
+
+  /**
+   * Sets the original xfactor
+   * 
+   * @param xFactor
+   *        the x factor
+   */
+  public void setXFactor(double xFactor) {
+    this.xFactor = xFactor;
+  }
+
+  /**
+   * Returns the original x factor
+   * 
+   * @return the original x factor
+   */
+  public double getXFactor() {
+    return xFactor;
+  }
+
+  /**
+   * Sets the original y factor
+   * 
+   * @param yFactor
+   *        the y factor
+   */
+  public void setYFactor(double yFactor) {
+    this.yFactor = yFactor;
+  }
+
+  /**
+   * Returns the original y factor
+   * 
+   * @return the original y factor
+   */
+  public double getYFactor() {
+    return yFactor;
+  }
+
 
   public void checkRequiredTokens() throws JSpecViewException {
-    if (fileFirstX == Graph.ERROR)
+    if (fileFirstX == ERROR)
       throw new JSpecViewException("Error Reading Data Set: ##FIRST not found");
-    if (fileLastX == Graph.ERROR)
+    if (fileLastX == ERROR)
       throw new JSpecViewException("Error Reading Data Set: ##LASTX not found");
     if (nPointsFile == -1)
       throw new JSpecViewException(
           "Error Reading Data Set: ##NPOINTS not found");
-    if (xFactor == Graph.ERROR)
+    if (xFactor == ERROR)
       throw new JSpecViewException(
           "Error Reading Data Set: ##XFACTOR not found");
-    if (yFactor == Graph.ERROR)
+    if (yFactor == ERROR)
       throw new JSpecViewException(
           "Error Reading Data Set: ##YFACTOR not found");
   }
@@ -40,21 +91,120 @@ public class JDXDataObject extends JDXHeader {
   public String xUnits = "";
   public String yUnits = "";
   
+  /**
+   * Sets the units for the x axis
+   * 
+   * @param xUnits
+   *        the x units
+   */
+  public void setXUnits(String xUnits) {
+    this.xUnits = xUnits;
+  }
+
+  /**
+   * Returns the units for x-axis when spectrum is displayed
+   * 
+   * @return the units for x-axis when spectrum is displayed
+   */
+  public String getXUnits() {
+    return xUnits;
+  }
+
+  /**
+   * Sets the units for the y axis
+   * 
+   * @param yUnits
+   *        the y units
+   */
+  public void setYUnits(String yUnits) {
+    this.yUnits = yUnits;
+  }
+
+  /**
+   * Returns the units for y-axis when spectrum is displayed
+   * 
+   * @return the units for y-axis when spectrum is displayed
+   */
+  public String getYUnits() {
+    return yUnits;
+  }
+
+  public static final int SCALE_NONE = 0;
+  public static final int SCALE_TOP = 1;
+  public static final int SCALE_BOTTOM = 2;
+  public static final int SCALE_TOP_BOTTOM = 3;
+  
+  public int getYScaleType() {
+    String datatype = getDataType().toUpperCase();
+    String yUnits = getYUnits().toUpperCase();
+    if (datatype.contains("NMR"))
+      return SCALE_TOP_BOTTOM;
+    if (datatype.startsWith("IR") || datatype.contains("INFRA"))
+      return (yUnits.startsWith("T") ? SCALE_NONE : SCALE_TOP);
+    return SCALE_TOP;
+  }
+  
   // For NMR Spectra:
   public String observedNucl = "";
-  public double observedFreq = JDXSpectrum.ERROR;
-  public double offset = JDXSpectrum.ERROR; // Shift Reference
+  public double observedFreq = ERROR;
+  /**
+   * Sets the Observed Frequency (for NMR Spectra)
+   * 
+   * @param observedFreq
+   *        the observed frequency
+   */
+  public void setObservedFreq(double observedFreq) {
+    this.observedFreq = observedFreq;
+  }
+
+  /**
+   * Returns the observed frequency (for NMR Spectra)
+   * 
+   * @return the observed frequency (for NMR Spectra)
+   */
+  public double getObservedFreq() {
+    return observedFreq;
+  }
+
+
+  public double offset = ERROR; // Shift Reference
   public int shiftRefType = -1; // shiftRef = 0, bruker = 1, varian = 2
   public int dataPointNum = -1;
+
   public int numDim = 1;
-  
-  
+  public boolean is1D() {
+    return numDim == 1;
+  }
+
+    
   // 2D nucleus calc
   public String nucleusX, nucleusY = "?";
   public double freq2dX = Double.NaN;
   public double freq2dY = Double.NaN;
+  private double y2D = Double.NaN;
 
-  protected void setNucleus(String nuc, boolean isX) {
+  public void setY2D(double d) {
+    y2D = d;
+  }
+  
+  public double getY2D() {
+    return y2D;
+  } 
+
+  public String y2DUnits = "";
+  public void setY2DUnits(String units) {
+    y2DUnits = units;
+  }
+  
+  public double getY2DPPM() {
+    double d = y2D;
+    if (y2DUnits.equals("HZ"))
+      d /= freq2dY;
+    return d;
+  }
+
+
+  public void setNucleus(String nuc, boolean isX) {
     if (isX)
       nucleusX = nuc;
     else
@@ -251,92 +401,126 @@ public class JDXDataObject extends JDXHeader {
     return (gyroData[i] == pt ? gyroData[i + 1] : Double.NaN);
   }
 
-  /**
-   * Sets the units for the x axis
-   * 
-   * @param xUnits
-   *        the x units
-   */
-  public void setXUnits(String xUnits) {
-    this.xUnits = xUnits;
+//////////////// derived info /////////////
+  
+  public boolean isTransmittance() {
+    String s = yUnits.toLowerCase();
+    return (s.equals("transmittance") || s.contains("trans") || s.equals("t"));
+  }
+
+  public boolean isAbsorbance() {
+    String s = yUnits.toLowerCase();
+    return (s.equals("absorbance") || s.contains("abs") || s.equals("a"));
+  }
+
+  public boolean canSaveAsJDX() {
+    return getDataClass().equals("XYDATA");
+  }
+  
+  public boolean canIntegrate() {
+    return (continuous && isHNMR() && is1D());
+  }
+
+  public boolean canConvertTransAbs() {
+    return (continuous && (yUnits.toLowerCase().contains("abs"))
+        || yUnits.toLowerCase().contains("trans"));
+  }
+
+  public boolean canShowSolutionColor() {
+    return (canConvertTransAbs()
+        && (xUnits.toLowerCase().contains("nanometer") || xUnits.equalsIgnoreCase("nm")) 
+        && getFirstX() < 401 && getLastX() > 699);
   }
 
   /**
-   * Sets the units for the y axis
-   * 
-   * @param yUnits
-   *        the y units
+   * whether the x values were converted from HZ to PPM
    */
-  public void setYUnits(String yUnits) {
-    this.yUnits = yUnits;
+  protected boolean isHZtoPPM = false;
+  
+  /**
+   * Determines if the spectrum should be displayed with abscissa unit of Part
+   * Per Million (PPM) instead of Hertz (HZ)
+   * 
+   * @return true if abscissa unit should be PPM
+   */
+  public boolean isHZtoPPM() {
+    return isHZtoPPM;
   }
 
   /**
-   * Sets the original xfactor
+   * Sets the value to true if the spectrum should be displayed with abscissa
+   * unit of Part Per Million (PPM) instead of Hertz (HZ)
    * 
-   * @param xFactor
-   *        the x factor
+   * @param val
+   *        true or false
    */
-  public void setXFactor(double xFactor) {
-    this.xFactor = xFactor;
+  public void setHZtoPPM(boolean val) {
+    isHZtoPPM = val;
+  }
+
+  private boolean increasing = true;
+
+  /**
+   * Sets value to true if spectrum is increasing
+   * 
+   * @param val
+   *        true if spectrum is increasing
+   */
+  public void setIncreasing(boolean val) {
+    increasing = val;
   }
 
   /**
-   * Sets the original y factor
+   * Returns true if the spectrum is increasing
    * 
-   * @param yFactor
-   *        the y factor
+   * @return true if the spectrum is increasing
    */
-  public void setYFactor(double yFactor) {
-    this.yFactor = yFactor;
+  public boolean isIncreasing() {
+    return increasing;
   }
 
   /**
-   * Sets the Observed Frequency (for NMR Spectra)
+   * Determines if the plot should be displayed decreasing by default
    * 
-   * @param observedFreq
-   *        the observed frequency
+   * @param spectrum
    */
-  public void setObservedFreq(double observedFreq) {
-    this.observedFreq = observedFreq;
+  public boolean shouldDisplayXAxisIncreasing() {
+    String datatype = getDataType().toUpperCase();
+    String xUnits = getXUnits().toUpperCase();
+    if (datatype.contains("NMR") && !(datatype.contains("FID"))) {
+      return false;
+    } else if (datatype.contains("LINK") && xUnits.contains("CM")) {
+      return false; // I think this was because of a bug where BLOCK files kept type as LINK ?      
+    } else if (datatype.startsWith("IR") || datatype.contains("INFRA")
+        && xUnits.contains("CM")) {
+      return false;
+    } else if (datatype.contains("RAMAN") && xUnits.contains("CM")) {
+      return false;
+    } else if (datatype.contains("VIS") && xUnits.contains("NANOMETERS")) {
+      return true;
+    }
+    return isIncreasing();
+  }
+
+  private boolean continuous;
+  /**
+   * Sets value to true if spectrum is continuous
+   * 
+   * @param val
+   *        true if spectrum is continuous
+   */
+  public void setContinuous(boolean val) {
+    continuous = val;
   }
 
   /**
-   * Returns the units for x-axis when spectrum is displayed
+   * Returns true if spectrum is continuous
    * 
-   * @return the units for x-axis when spectrum is displayed
+   * @return true if spectrum is continuous
    */
-  public String getXUnits() {
-    return xUnits;
+  public boolean isContinuous() {
+    return continuous;
   }
-
-  /**
-   * Returns the units for y-axis when spectrum is displayed
-   * 
-   * @return the units for y-axis when spectrum is displayed
-   */
-  public String getYUnits() {
-    return yUnits;
-  }
-
-  /**
-   * Returns the original x factor
-   * 
-   * @return the original x factor
-   */
-  public double getXFactor() {
-    return xFactor;
-  }
-
-  /**
-   * Returns the original y factor
-   * 
-   * @return the original y factor
-   */
-  public double getYFactor() {
-    return yFactor;
-  }
-
 
   // For AnIML IR/UV files:
   
@@ -351,6 +535,194 @@ public class JDXDataObject extends JDXHeader {
 //    return pathlength;
 //  }
 
+  public String[][] getHeaderRowDataAsArray() {
+    int n = 8;
+    if (observedFreq != ERROR)
+      n++;
+    if (observedNucl != "")
+      n++;
+    String[][] rowData = getHeaderRowDataAsArray(true, n);
+    int i = rowData.length - n;
+    if (observedFreq != ERROR)
+      rowData[i++] = new String[] { "##.OBSERVE FREQUENCY", "" + observedFreq };
+    if (observedNucl != "")
+      rowData[i++] = new String[] { "##.OBSERVE NUCLEUS", observedNucl };
+    rowData[i++] = new String[] { "##XUNITS", isHZtoPPM() ? "HZ" : getXUnits() };
+    rowData[i++] = new String[] { "##YUNITS", getYUnits() };
+    double x = (isIncreasing() ? getFirstX() : getLastX());
+    rowData[i++] = new String[] { "##FIRSTX",
+        String.valueOf(isHZtoPPM() ? x * getObservedFreq() : x) };
+    x = (isIncreasing() ? getLastX() : getFirstX());
+    rowData[i++] = new String[] { "##FIRSTY",
+        String.valueOf(isIncreasing() ? getFirstY() : getLastY()) };
+    rowData[i++] = new String[] { "##LASTX",
+        String.valueOf(isHZtoPPM() ? x * getObservedFreq() : x) };
+    rowData[i++] = new String[] { "##XFACTOR", String.valueOf(getXFactor()) };
+    rowData[i++] = new String[] { "##YFACTOR", String.valueOf(getYFactor()) };
+    rowData[i++] = new String[] { "##NPOINTS",
+        String.valueOf(getNumberOfPoints()) };
+    return rowData;
+  }
 
-  
+  /**
+   * Determines if a spectrum is an HNMR spectrum
+   * @param spectrum the JDXSpectrum
+   * @return true if an HNMR, false otherwise
+   */
+  public boolean isHNMR() {
+    return (dataType.toUpperCase().indexOf("NMR") >= 0 && observedNucl.toUpperCase().indexOf("H") >= 0);
+  }
+
+  /**
+   * Sets the array of coordinates
+   * 
+   * @param coords
+   *        the array of Coordinates
+   */
+  public void setXYCoords(Coordinate[] coords) {
+    xyCoords = coords;
+  }
+
+  /**
+   * array of x,y coordinates
+   */
+  protected Coordinate[] xyCoords;
+
+  /**
+   * Returns the first X value
+   * 
+   * @return the first X value
+   */
+  public double getFirstX() {
+    return xyCoords[0].getXVal();
+  }
+
+  /**
+   * Returns the first Y value
+   * 
+   * @return the first Y value
+   */
+  public double getFirstY() {
+    //if(isIncreasing())
+    return xyCoords[0].getYVal();
+    //else
+    //  return xyCoords[getNumberOfPoints() - 1].getYVal();
+  }
+
+  /**
+   * Returns the last X value
+   * 
+   * @return the last X value
+   */
+  public double getLastX() {
+    // if(isIncreasing())
+    return xyCoords[getNumberOfPoints() - 1].getXVal();
+    // else
+    //   return xyCoords[0].getXVal();
+  }
+
+  /**
+   * Returns the last Y value
+   * 
+   * @return the last Y value
+   */
+  public double getLastY() {
+    return xyCoords[getNumberOfPoints() - 1].getYVal();
+  }
+
+  /**
+   * Returns the number of points
+   * 
+   * @return the number of points
+   */
+  public int getNumberOfPoints() {
+    return xyCoords.length;
+  }
+
+  private double minX = Double.NaN, minY = Double.NaN;
+  private double maxX = Double.NaN, maxY = Double.NaN;
+  private double deltaX = Double.NaN;
+
+  /**
+   * Calculates and returns the minimum x value in the list of coordinates
+   * Fairly expensive operation
+   * 
+   * @return the minimum x value in the list of coordinates
+   */
+  public double getMinX() {
+    return (Double.isNaN(minX) ? (minX = Coordinate.getMinX(xyCoords)) : minX);
+  }
+
+  /**
+   * Calculates and returns the minimum y value in the list of coordinates
+   * Fairly expensive operation
+   * 
+   * @return the minimum x value in the list of coordinates
+   */
+  public double getMinY() {
+    return (Double.isNaN(minY) ? (minY = Coordinate.getMinY(xyCoords)) : minY);
+  }
+
+  /**
+   * Calculates and returns the maximum x value in the list of coordinates
+   * Fairly expensive operation
+   * 
+   * @return the maximum x value in the list of coordinates
+   */
+  public double getMaxX() {
+    return (Double.isNaN(maxX) ? (maxX = Coordinate.getMaxX(xyCoords)) : maxX);
+  }
+
+  /**
+   * Calculates and returns the maximum y value in the list of coordinates
+   * Fairly expensive operation
+   * 
+   * @return the maximum y value in the list of coordinates
+   */
+  public double getMaxY() {
+    return (Double.isNaN(maxY) ? (maxY = Coordinate.getMaxY(xyCoords)) : maxY);
+  }
+
+  /**
+   * Returns the delta X
+   * 
+   * @return the delta X
+   */
+  public double getDeltaX() {
+    return (Double.isNaN(deltaX) ? (deltaX = Coordinate.deltaX(getLastX(), getFirstX(), getNumberOfPoints())) : deltaX);
+  }
+
+  public void copyTo(JDXDataObject newObj) {
+    newObj.setTitle(getTitle());
+    newObj.setJcampdx(getJcampdx());
+    newObj.setOrigin(getOrigin());
+    newObj.setOwner(getOwner());
+    newObj.setDataClass(getDataClass());
+    newObj.setDataType(getDataType());
+    newObj.setHeaderTable(getHeaderTable());
+
+    newObj.setXFactor(getXFactor());
+    newObj.setYFactor(getYFactor());
+    newObj.setXUnits(getXUnits());
+    newObj.setYUnits(getYUnits());
+
+    //newSpectrum.setPathlength(getPathlength());
+    newObj.setXYCoords(xyCoords);
+    newObj.setContinuous(isContinuous());
+    newObj.setIncreasing(isIncreasing());
+
+    newObj.observedFreq = observedFreq;
+    newObj.observedNucl = observedNucl;
+    newObj.offset = offset;
+    newObj.dataPointNum = dataPointNum;
+    newObj.shiftRefType = shiftRefType;
+    newObj.isHZtoPPM = isHZtoPPM;
+    newObj.numDim = numDim;
+    newObj.nucleusX = nucleusX;
+    newObj.nucleusY = nucleusY;
+    newObj.freq2dX = freq2dX;
+    newObj.freq2dY = freq2dY;
+
+  }
+
 }

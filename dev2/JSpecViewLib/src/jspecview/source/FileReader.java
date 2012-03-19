@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
+import jspecview.common.Coordinate;
 import jspecview.common.JDXDataObject;
 import jspecview.common.JDXHeader;
 import jspecview.common.JDXSpectrum;
@@ -39,6 +40,7 @@ import jspecview.common.PeakInfo;
 import jspecview.exception.JDXSourceException;
 import jspecview.exception.JSpecViewException;
 import jspecview.util.FileManager;
+import jspecview.util.Logger;
 import jspecview.util.Parser;
 import jspecview.util.ZipFileSequentialReader;
 
@@ -69,6 +71,7 @@ public class FileReader {
       { "(XY..XY)", "(X++(Y..Y))", "(XY..XY)" } };
 
   final static String ERROR_SEPARATOR = "=====================\n";
+  
   private final static String[] TABULAR_DATA_LABELS = { "##XYDATA",
       "##XYPOINTS", "##PEAKTABLE", "##DATATABLE", "##PEAKASSIGNMENTS" };
   static {
@@ -80,8 +83,6 @@ public class FileReader {
   private boolean obscure;
 
   private boolean done;
-
-  private double[] minMaxY = new double[] { Double.MAX_VALUE, Double.MIN_VALUE };
 
   private boolean isZipFile;
   private FileReader(boolean obscure, int iSpecFirst, int iSpecLast) {
@@ -197,7 +198,7 @@ public class FileReader {
         }
         if (Arrays.binarySearch(TABULAR_DATA_LABELS, label) > 0) {
           setTabularDataType(spectrum, label);
-          if (!spectrum.processTabularData(t, dataLDRTable, minMaxY, errorLog))
+          if (!processTabularData(spectrum, dataLDRTable))
             throw new JDXSourceException("Unable to read JDX file");
           addSpectrum(spectrum, false);
           spectrum = null;
@@ -241,16 +242,6 @@ public class FileReader {
     source.addJDXSpectrum(spectrum, forceSub);
     //System.out.println("Spectrum " + nSpec + " XYDATA: " + spectrum.getXYCoords().length);
     return true;
-  }
-
-  public static void addHeader(List<String[]> table, String label, String value) {
-    String[] entry;
-    for (int i = 0; i < table.size(); i++)
-      if ((entry = table.get(i))[0].equals(label)) {
-        entry[1] = value;
-        return;
-      }
-    table.add(new String[] { label, value });
   }
 
   /**
@@ -305,7 +296,7 @@ public class FileReader {
         label = tmp;
         if (Arrays.binarySearch(TABULAR_DATA_LABELS, label) > 0) {
           setTabularDataType(spectrum, label);
-          if (!spectrum.processTabularData(t, dataLDRTable, minMaxY, errorLog))
+          if (!processTabularData(spectrum, dataLDRTable))
             throw new JDXSourceException("Unable to read Block Source");
           continue;
         }
@@ -395,7 +386,7 @@ public class FileReader {
    * @return source
    */
   private JDXSource getNTupleSpectra(List<String[]> sourceLDRTable,
-                                     JDXSpectrum spectrum0, String label)
+                                     JDXDataObject spectrum0, String label)
       throws JSpecViewException {
     double[] minMaxY = new double[] { Double.MAX_VALUE, Double.MIN_VALUE };
     blockID = Math.random();
@@ -458,7 +449,8 @@ public class FileReader {
 
       // Create and add Spectra
       if (spectrum == null) {
-        spectrum = spectrum0.copy();
+        spectrum = new JDXSpectrum();
+        spectrum0.copyTo(spectrum);
         spectrum.setTitle(spectrum0.getTitle() + " : " + page);
         if (!spectrum.is1D()) {
           int pt = page.indexOf('=');
@@ -508,8 +500,8 @@ public class FileReader {
 
       setTabularDataType(spectrum, "##" + (continuous ? "XYDATA" : "PEAKTABLE"));
 
-      if (!spectrum.readNTUPLECoords(nTupleTable, plotSymbols, spectrum
-          .getDataType(), t, minMaxY, errorLog))
+      if (!readNTUPLECoords(spectrum, nTupleTable, plotSymbols, spectrum
+          .getDataType(), minMaxY))
         throw new JDXSourceException("Unable to read Ntuple Source");
       spectrum0.nucleusX = spectrum.nucleusX;
       spectrum0.nucleusY = spectrum.nucleusY;
@@ -769,7 +761,7 @@ public class FileReader {
     return false;
   }
 
-  public void setTabularDataType(JDXSpectrum spectrum, String label) {
+  private void setTabularDataType(JDXDataObject spectrum, String label) {
     if (label.equals("##PEAKASSIGNMENTS"))
       spectrum.setDataClass("PEAKASSIGNMENTS");
     else if (label.equals("##PEAKTABLE"))
@@ -784,5 +776,163 @@ public class FileReader {
 //      e.printStackTrace();
 //    }
   }
-  
+
+  private boolean processTabularData(JDXDataObject spec, 
+                                            List<String[]> table)
+      throws JSpecViewException {
+    if (spec.dataClass.equals("PEAKASSIGNMENTS"))
+      return true;
+
+    spec.setHeaderTable(table);
+
+    if (spec.dataClass.equals("XYDATA")) {
+      spec.checkRequiredTokens();
+      decompressData(spec, null);
+      return true;
+    }
+    if (spec.dataClass.equals("PEAKTABLE") || spec.dataClass.equals("XYPOINTS")) {
+      spec.setContinuous(spec.dataClass.equals("XYPOINTS"));
+      // check if there is an x and y factor
+      try {
+        t.readLineTrimmed();
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+      Coordinate[] xyCoords;
+      
+      if (spec.xFactor != JDXDataObject.ERROR && spec.yFactor != JDXDataObject.ERROR)
+        xyCoords = Coordinate.parseDSV(t.getValue(), spec.xFactor, spec.yFactor);
+      else
+        xyCoords = Coordinate.parseDSV(t.getValue(), 1, 1);
+      spec.setXYCoords(xyCoords);
+      double fileDeltaX = Coordinate.deltaX(xyCoords[xyCoords.length - 1]
+          .getXVal(), xyCoords[0].getXVal(), xyCoords.length);
+      spec.setIncreasing(fileDeltaX > 0);
+      return true;
+    }
+    return false;
+  }
+
+  private boolean readNTUPLECoords(JDXDataObject spec, 
+                                          Map<String, ArrayList<String>> nTupleTable,
+                                          String[] plotSymbols,
+                                          String dataType, double[] minMaxY) {
+    ArrayList<String> list;
+    if (spec.dataClass.equals("XYDATA")) {
+      // Get Label Values
+
+      list = nTupleTable.get("##SYMBOL");
+      int index1 = list.indexOf(plotSymbols[0]);
+      int index2 = list.indexOf(plotSymbols[1]);
+
+      list = nTupleTable.get("##FACTOR");
+      spec.xFactor = Double.parseDouble(list.get(index1));
+      spec.yFactor = Double.parseDouble(list.get(index2));
+
+      list = nTupleTable.get("##LAST");
+      spec.fileLastX = Double.parseDouble(list.get(index1));
+
+      list = nTupleTable.get("##FIRST");
+      spec.fileFirstX = Double.parseDouble(list.get(index1));
+      //firstY = Double.parseDouble((String)list.get(index2));
+
+      list = nTupleTable.get("##VARDIM");
+      spec.nPointsFile = Integer.parseInt(list.get(index1));
+
+      list = nTupleTable.get("##UNITS");
+      spec.xUnits = list.get(index1);
+      spec.yUnits = list.get(index2);
+
+      if (spec.nucleusX == null && (list = nTupleTable.get("##.NUCLEUS")) != null) {
+        spec.setNucleus(list.get(0), false);
+        spec.setNucleus(list.get(index1), true);
+      } else {
+        spec.nucleusX = "?";
+      }
+
+      decompressData(spec, minMaxY);
+      return true;
+    }
+    if (spec.dataClass.equals("PEAKTABLE") || spec.dataClass.equals("XYPOINTS")) {
+      spec.setContinuous(spec.dataClass.equals("XYPOINTS"));
+      list = nTupleTable.get("##SYMBOL");
+      int index1 = list.indexOf(plotSymbols[0]);
+      int index2 = list.indexOf(plotSymbols[1]);
+
+      list = nTupleTable.get("##UNITS");
+      spec.xUnits = list.get(index1);
+      spec.yUnits = list.get(index2);
+      spec.setXYCoords(Coordinate.parseDSV(t.getValue(), spec.xFactor, spec.yFactor));
+      return true;
+    }
+    return false;
+  }
+
+  private void decompressData(JDXDataObject spec, double[] minMaxY) {
+
+    int errPt = errorLog.length();
+    double fileDeltaX = Coordinate.deltaX(spec.fileLastX, spec.fileFirstX,
+        spec.nPointsFile);
+    spec.setIncreasing(fileDeltaX > 0);
+    spec.setContinuous(true);
+    JDXDecompressor decompressor = new JDXDecompressor(t, spec.fileFirstX,
+        spec.xFactor, spec.yFactor, fileDeltaX, spec.nPointsFile);
+
+    double[] firstLastX = new double[2];
+    Coordinate[] xyCoords = decompressor.decompressData(errorLog, firstLastX);
+    spec.setXYCoords(xyCoords);
+    double d = decompressor.getMinY();
+    if (minMaxY != null) {
+      if (d < minMaxY[0])
+        minMaxY[0] = d;
+      d = decompressor.getMaxY();
+      if (d > minMaxY[1])
+        minMaxY[1] = d;
+    }
+    double freq = (Double.isNaN(spec.freq2dX) ? spec.observedFreq
+        : spec.freq2dX);
+    // apply offset
+    if (spec.offset != JDXDataObject.ERROR && freq != JDXDataObject.ERROR
+        && spec.dataType.toUpperCase().contains("SPECTRUM")) {
+      Coordinate
+          .applyShiftReference(xyCoords, spec.dataPointNum, spec.fileFirstX,
+              spec.fileLastX, spec.offset, freq, spec.shiftRefType);
+    }
+
+    if (freq != JDXDataObject.ERROR && spec.xUnits.toUpperCase().equals("HZ")) {
+      double xScale = freq;
+      Coordinate.applyScale(xyCoords, (1 / xScale), 1);
+      spec.xUnits = "PPM";
+      spec.setHZtoPPM(true);
+    }
+    if (errorLog.length() != errPt) {
+      errorLog.append(spec.title).append("\n");
+      errorLog.append("firstX: " + spec.fileFirstX + " Found " + firstLastX[0]
+          + "\n");
+      errorLog.append("lastX from Header " + spec.fileLastX + " Found "
+          + firstLastX[1] + "\n");
+      errorLog.append("deltaX from Header " + fileDeltaX + "\n");
+      errorLog.append("Number of points in Header " + spec.nPointsFile
+          + " Found " + xyCoords.length + "\n");
+    } else {
+      //errorLog.append("No Errors decompressing data\n");
+    }
+
+    if (Logger.debugging) {
+      System.err.println(errorLog.toString());
+    }
+
+  }
+
+  public static void addHeader(List<String[]> table, String label, String value) {
+    String[] entry;
+    for (int i = 0; i < table.size(); i++)
+      if ((entry = table.get(i))[0].equals(label)) {
+        entry[1] = value;
+        return;
+      }
+    table.add(new String[] { label, value });
+  }
+
 }

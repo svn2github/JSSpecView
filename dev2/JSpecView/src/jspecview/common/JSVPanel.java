@@ -2727,9 +2727,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
   private String get2DYLabel(int isub, NumberFormat formatterX) {
     JDXSpectrum spec = getSpectrumAt(0).getSubSpectra().get(isub);
-    double d = spec.getY2D();
-    String units = spec.getY2DUnits();
-    return formatterX.format(d) + (units.equals("HZ") ?  " HZ (" + formatterX.format(spec.getY2DPPM()) + " PPM)" : "");
+    return formatterX.format(spec.getY2D()) + (spec.y2DUnits.equals("HZ") ?  
+        " HZ (" + formatterX.format(spec.getY2DPPM()) + " PPM)" : "");
   }
 
   public void mouseEntered(MouseEvent e) {
@@ -2817,12 +2816,12 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     double factor1 = factor;
     double factor2 = factor;
     switch (getSpectrum().getYScaleType()) {
-    case JDXSpectrum.SCALE_NONE:
+    case JDXDataObject.SCALE_NONE:
       return;
-    case JDXSpectrum.SCALE_TOP:
+    case JDXDataObject.SCALE_TOP:
       factor1 = 1;
       break;
-    case JDXSpectrum.SCALE_BOTTOM:
+    case JDXDataObject.SCALE_BOTTOM:
       factor2 = 1;
       break;
     }

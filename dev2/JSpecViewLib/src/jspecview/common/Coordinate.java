@@ -158,6 +158,40 @@ public class Coordinate {
     return "[" + xVal + ", " + yVal + "]";
   }
   
+  /**
+   * Determines if the y values of a spectrum are in a certain range
+   * 
+   * @param xyCoords
+   * @param min
+   * @param max
+  * @return true is in range, otherwise false
+   */
+  public static boolean isYInRange(Coordinate[] xyCoords, double min,
+                                    double max) {
+    return (getMinY(xyCoords) >= min 
+        && getMaxY(xyCoords) >= max);
+  }
+
+  /**
+   * Normalises the y values of a spectrum to a certain range
+   * 
+   * @param xyCoords
+   * @param min
+   * @param max
+   * @return array of normalised coordinates
+   */
+  public static Coordinate[] normalise(Coordinate[] xyCoords, double min,
+                                        double max) {
+    Coordinate[] newXYCoords = new Coordinate[xyCoords.length];
+    double minY = getMinY(xyCoords);
+    double maxY = getMaxY(xyCoords);
+    double factor = (maxY - minY) / (max - min); // range = 0-5
+    for (int i = 0; i < xyCoords.length; i++)
+      newXYCoords[i] = new Coordinate(xyCoords[i].getXVal(), 
+          ((xyCoords[i].getYVal() - minY) / factor) - min);
+    return newXYCoords;
+  }
+
   public static Coordinate[] reverse(Coordinate[] x) {
     int n = x.length;
     for (int i = 0; i < n; i++) {

@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jspecview.common.Coordinate;
-import jspecview.common.Graph;
+import jspecview.common.JDXDataObject;
 import jspecview.common.JDXSpectrum;
 import jspecview.util.Logger;
 import jspecview.util.SimpleXmlReader;
@@ -61,14 +61,14 @@ abstract class XMLReader {
   protected String sampleowner = "", obNucleus = "", StrObFreq = "";
   protected boolean increasing = false, continuous = false;
   protected int ivspoints, evspoints, sampleRefNum = 0;
-  protected double deltaX = Graph.ERROR;
-  protected double xFactor = Graph.ERROR;
-  protected double yFactor = Graph.ERROR;
-  protected double firstX = Graph.ERROR;
-  protected double lastX = Graph.ERROR;
-  protected double firstY = Graph.ERROR;
-  protected double obFreq = Graph.ERROR;
-  protected double refPoint = Graph.ERROR;
+  protected double deltaX = JDXDataObject.ERROR;
+  protected double xFactor = JDXDataObject.ERROR;
+  protected double yFactor = JDXDataObject.ERROR;
+  protected double firstX = JDXDataObject.ERROR;
+  protected double lastX = JDXDataObject.ERROR;
+  protected double firstY = JDXDataObject.ERROR;
+  protected double obFreq = JDXDataObject.ERROR;
+  protected double refPoint = JDXDataObject.ERROR;
   protected String casRN = "";
   protected String sampleID;
   protected StringBuffer errorLog = new StringBuffer();
@@ -127,7 +127,7 @@ abstract class XMLReader {
     spectrum.setHeaderTable(LDRTable);
 
     double xScale = 1; // NMR data stored internally as ppm
-    if (obFreq != Graph.ERROR) {
+    if (obFreq != JDXDataObject.ERROR) {
       spectrum.setObservedFreq(obFreq);
       if (xaxisUnit.toUpperCase().equals("HZ")) {
         xaxisUnit = "PPM";

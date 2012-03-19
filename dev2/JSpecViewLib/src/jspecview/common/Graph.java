@@ -34,11 +34,6 @@ import java.util.Map;
 public interface Graph {
 
   /**
-   * Error number that is returned when a min value is undefined
-   */
-  public static final double ERROR = Double.MAX_VALUE;
-
-  /**
    * Specifies whether the Spectrum is increasing
    * @return if the Spectrum is increasing or not
    */

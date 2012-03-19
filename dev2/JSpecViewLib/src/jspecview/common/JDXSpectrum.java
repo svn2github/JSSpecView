@@ -19,18 +19,13 @@
 
 package jspecview.common;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.List;
-import java.util.Vector;
 
-import jspecview.exception.JSpecViewException;
-import jspecview.source.JDXDecompressor;
 import jspecview.source.JDXSourceStreamTokenizer;
-import jspecview.util.Logger;
 
 /**
  * <code>JDXSpectrum</code> implements the Interface Spectrum for the display of
@@ -48,34 +43,21 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   }
 
   /**
-   * array of x,y coordinates
-   */
-  private Coordinate[] xyCoords;
-
-  /**
    * spectra that can never be displayed independently, or at least not by default
    * 2D slices, for example.
    */
   private List<JDXSpectrum> subSpectra;
   private JDXSpectrum parent;
   private int currentSubSpectrum;
-  private double y2D = Double.NaN;
-  public String y2DUnits = "";
-  private String id = "";
-  public void setId(String id) {
-    this.id = id;
-  }
-  
-  private double blockID; // a random number generated in JDXFileReader
   private boolean isForcedSubset;
   public boolean isForcedSubset() {
     return isForcedSubset;
   }
 
-  /**
-   * whether the x values were converted from HZ to PPM
-   */
-  private boolean isHZtoPPM = false;
+  private String id = "";
+  public void setId(String id) {
+    this.id = id;
+  }
   
   private ArrayList<PeakInfo> peakList = new ArrayList<PeakInfo>();
 
@@ -84,20 +66,20 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
    */
   public JDXSpectrum() {
     //System.out.println("initialize JDXSpectrum " + this);
-    headerTable = new Vector<String[]>();
+    headerTable = new ArrayList<String[]>();
     xyCoords = new Coordinate[0];
   }
 
-  /*   ---------- Constructed data --------------------------------------------------- */
-
   /**
-   * Sets the array of coordinates
+   * Returns a copy of this <code>JDXSpectrum</code>
    * 
-   * @param coords
-   *        the array of Coordinates
+   * @return a copy of this <code>JDXSpectrum</code>
    */
-  public void setXYCoords(Coordinate[] coords) {
-    xyCoords = coords;
+  public JDXSpectrum copy() {
+    JDXSpectrum newSpectrum = new JDXSpectrum();
+    copyTo(newSpectrum);
+    newSpectrum.setPeakList(getPeakList());
+    return newSpectrum;
   }
 
   /**
@@ -109,192 +91,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return getCurrentSubSpectrum().xyCoords;
   }
 
-  /**
-   * Determines if the spectrum should be displayed with abscissa unit of Part
-   * Per Million (PPM) instead of Hertz (HZ)
-   * 
-   * @return true if abscissa unit should be PPM
-   */
-  public boolean isHZtoPPM() {
-    return isHZtoPPM;
-  }
-
-  /**
-   * Sets the value to true if the spectrum should be displayed with abscissa
-   * unit of Part Per Million (PPM) instead of Hertz (HZ)
-   * 
-   * @param val
-   *        true or false
-   */
-  public void setHZtoPPM(boolean val) {
-    isHZtoPPM = val;
-  }
-
-  /**
-   * Returns the first X value
-   * 
-   * @return the first X value
-   */
-  public double getFirstX() {
-    return xyCoords[0].getXVal();
-  }
-
-  /**
-   * Returns the first Y value
-   * 
-   * @return the first Y value
-   */
-  public double getFirstY() {
-    //if(isIncreasing())
-    return xyCoords[0].getYVal();
-    //else
-    //  return xyCoords[getNumberOfPoints() - 1].getYVal();
-  }
-
-  /**
-   * Returns the last X value
-   * 
-   * @return the last X value
-   */
-  public double getLastX() {
-    // if(isIncreasing())
-    return xyCoords[getNumberOfPoints() - 1].getXVal();
-    // else
-    //   return xyCoords[0].getXVal();
-  }
-
-  /**
-   * Returns the last Y value
-   * 
-   * @return the last Y value
-   */
-  public double getLastY() {
-    return xyCoords[getNumberOfPoints() - 1].getYVal();
-  }
-
-  /**
-   * Returns the number of points
-   * 
-   * @return the number of points
-   */
-  public int getNumberOfPoints() {
-    return xyCoords.length;
-  }
-
-  private double minX = Double.NaN, minY = Double.NaN;
-  private double maxX = Double.NaN, maxY = Double.NaN;
-  private double deltaX = Double.NaN;
-
-  /**
-   * Calculates and returns the minimum x value in the list of coordinates
-   * Fairly expensive operation
-   * 
-   * @return the minimum x value in the list of coordinates
-   */
-  public double getMinX() {
-    return (Double.isNaN(minX) ? (minX = Coordinate.getMinX(xyCoords)) : minX);
-  }
-
-  /**
-   * Calculates and returns the minimum y value in the list of coordinates
-   * Fairly expensive operation
-   * 
-   * @return the minimum x value in the list of coordinates
-   */
-  public double getMinY() {
-    return (Double.isNaN(minY) ? (minY = Coordinate.getMinY(xyCoords)) : minY);
-  }
-
-  /**
-   * Calculates and returns the maximum x value in the list of coordinates
-   * Fairly expensive operation
-   * 
-   * @return the maximum x value in the list of coordinates
-   */
-  public double getMaxX() {
-    return (Double.isNaN(maxX) ? (maxX = Coordinate.getMaxX(xyCoords)) : maxX);
-  }
-
-  /**
-   * Calculates and returns the maximum y value in the list of coordinates
-   * Fairly expensive operation
-   * 
-   * @return the maximum y value in the list of coordinates
-   */
-  public double getMaxY() {
-    return (Double.isNaN(maxY) ? (maxY = Coordinate.getMaxY(xyCoords)) : maxY);
-  }
-
-  /**
-   * Returns the delta X
-   * 
-   * @return the delta X
-   */
-  public double getDeltaX() {
-    return (Double.isNaN(deltaX) ? (deltaX = Coordinate.deltaX(getLastX(), getFirstX(), getNumberOfPoints())) : deltaX);
-  }
-
-  /**
-   * Returns the observed frequency (for NMR Spectra)
-   * 
-   * @return the observed frequency (for NMR Spectra)
-   */
-  public double getObservedFreq() {
-    return observedFreq;
-  }
-
-  /**
-   * Returns a copy of this <code>JDXSpectrum</code>
-   * 
-   * @return a copy of this <code>JDXSpectrum</code>
-   */
-  public JDXSpectrum copy() {
-    JDXSpectrum newSpectrum = new JDXSpectrum();
-
-    newSpectrum.setTitle(getTitle());
-    newSpectrum.setJcampdx(getJcampdx());
-    newSpectrum.setOrigin(getOrigin());
-    newSpectrum.setOwner(getOwner());
-    newSpectrum.setDataClass(getDataClass());
-    newSpectrum.setDataType(getDataType());
-    newSpectrum.setHeaderTable(getHeaderTable());
-
-    newSpectrum.setXFactor(getXFactor());
-    newSpectrum.setYFactor(getYFactor());
-    newSpectrum.setXUnits(getXUnits());
-    newSpectrum.setYUnits(getYUnits());
-
-    //newSpectrum.setPathlength(getPathlength());
-    newSpectrum.setPeakList(getPeakList());
-    newSpectrum.setXYCoords(getXYCoords());
-    newSpectrum.setContinuous(isContinuous());
-    newSpectrum.setIncreasing(isIncreasing());
-
-    newSpectrum.observedFreq = observedFreq;
-    newSpectrum.observedNucl = observedNucl;
-    newSpectrum.offset = offset;
-    newSpectrum.dataPointNum = dataPointNum;
-    newSpectrum.shiftRefType = shiftRefType;
-    newSpectrum.isHZtoPPM = isHZtoPPM;
-    newSpectrum.numDim = numDim;
-    newSpectrum.nucleusX = nucleusX;
-    newSpectrum.nucleusY = nucleusY;
-    newSpectrum.freq2dX = freq2dX;
-    newSpectrum.freq2dY = freq2dY;
-
-    return newSpectrum;
-  }
-
-  public boolean isTransmittance() {
-    String s = yUnits.toLowerCase();
-    return (s.equals("transmittance") || s.contains("trans") || s.equals("t"));
-  }
-
-  public boolean isAbsorbance() {
-    String s = yUnits.toLowerCase();
-    return (s.equals("absorbance") || s.contains("abs") || s.equals("a"));
-  }
-
+  
   public ArrayList<PeakInfo> getPeakList() {
     return peakList;
   }
@@ -355,151 +152,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     + (parent == null ? "" : " (" + parent.subSpectra.size() + ")");
   }
 
-  public boolean processTabularData(JDXSourceStreamTokenizer t,
-                                    List<String[]> table, double[] minMaxY,
-                                    StringBuffer errorLog)
-      throws JSpecViewException {
-    if (dataClass.equals("PEAKASSIGNMENTS"))
-      return true;
-
-    setHeaderTable(table);
-
-    if (dataClass.equals("XYDATA")) {
-      checkRequiredTokens();      
-      decompressData(t, minMaxY, errorLog);
-      return true;
-    }
-    if (dataClass.equals("PEAKTABLE") || dataClass.equals("XYPOINTS")) {
-      continuous = dataClass.equals("XYPOINTS");
-      // check if there is an x and y factor
-      try {
-        t.readLineTrimmed();
-      } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-      if (xFactor != ERROR && yFactor != ERROR)
-        xyCoords = Coordinate.parseDSV(t.getValue(), xFactor, yFactor);
-      else
-        xyCoords = Coordinate.parseDSV(t.getValue(), 1, 1);
-
-      double fileDeltaX = Coordinate.deltaX(xyCoords[xyCoords.length - 1]
-          .getXVal(), xyCoords[0].getXVal(), xyCoords.length);
-      increasing = (fileDeltaX > 0);
-      return true;
-    }
-    return false;
-  }
-
-  public boolean readNTUPLECoords(Map<String, ArrayList<String>> nTupleTable,
-                                String[] plotSymbols, String dataType,
-                                JDXSourceStreamTokenizer t, double[] minMaxY,
-                                StringBuffer errorLog) {
-    ArrayList<String> list;
-    if (dataClass.equals("XYDATA")) {
-      // Get Label Values
-
-      list = nTupleTable.get("##SYMBOL");
-      int index1 = list.indexOf(plotSymbols[0]);
-      int index2 = list.indexOf(plotSymbols[1]);
-
-      list = nTupleTable.get("##FACTOR");
-      xFactor = Double.parseDouble(list.get(index1));
-      yFactor = Double.parseDouble(list.get(index2));
-
-      list = nTupleTable.get("##LAST");
-      fileLastX = Double.parseDouble(list.get(index1));
-
-      list = nTupleTable.get("##FIRST");
-      fileFirstX = Double.parseDouble(list.get(index1));
-      //firstY = Double.parseDouble((String)list.get(index2));
-
-      list = nTupleTable.get("##VARDIM");
-      nPointsFile = Integer.parseInt(list.get(index1));
-
-      list = nTupleTable.get("##UNITS");
-      xUnits = list.get(index1);
-      yUnits = list.get(index2);
-
-      if (nucleusX == null && (list = nTupleTable.get("##.NUCLEUS")) != null) {
-        setNucleus(list.get(0), false);
-        setNucleus(list.get(index1), true);
-      } else {
-        nucleusX = "?";
-      }
-      
-      decompressData(t, minMaxY, errorLog);
-      return true;
-    }
-    if (dataClass.equals("PEAKTABLE") || dataClass.equals("XYPOINTS")) {
-      continuous = dataClass.equals("XYPOINTS");
-      list = nTupleTable.get("##SYMBOL");
-      int index1 = list.indexOf(plotSymbols[0]);
-      int index2 = list.indexOf(plotSymbols[1]);
-
-      list = nTupleTable.get("##UNITS");
-      xUnits = list.get(index1);
-      yUnits = list.get(index2);
-      xyCoords = Coordinate.parseDSV(t.getValue(), xFactor, yFactor);
-      return true;
-    }
-    return false;
-  }
-
-  private void decompressData(JDXSourceStreamTokenizer t, double[] minMaxY,
-                              StringBuffer errorLog) {
-
-    
-    int errPt = errorLog.length();
-    double fileDeltaX = Coordinate.deltaX(fileLastX, fileFirstX, nPointsFile);
-    increasing = (fileDeltaX > 0);
-    continuous = true;
-    JDXDecompressor decompressor = new JDXDecompressor(t,
-        fileFirstX, xFactor, yFactor, fileDeltaX, nPointsFile);
-
-    double[] firstLastX = new double[2];
-    xyCoords = decompressor.decompressData(errorLog, firstLastX);
-    double d = decompressor.getMinY();
-    if (d < minMaxY[0])
-      minMaxY[0] = d;
-    d = decompressor.getMaxY();
-    if (d > minMaxY[1])
-      minMaxY[1] = d;
-    if (errorLog.length() != errPt) {
-      errorLog.append(getTitleLabel()).append("\n");
-      errorLog.append("firstX: "
-          + fileFirstX
-          + " Found " + firstLastX[0] + "\n");
-      errorLog.append("lastX from Header "
-          + fileLastX
-          + " Found " + firstLastX[1] + "\n");
-      errorLog.append("deltaX from Header " + fileDeltaX + "\n");
-      errorLog.append("Number of points in Header " + nPointsFile + " Found "
-          + xyCoords.length + "\n");
-    } else {
-      //errorLog.append("No Errors decompressing data\n");
-    }
-
-    if (Logger.debugging) {
-      System.err.println(errorLog.toString());
-    }
-
-    double freq = (Double.isNaN(freq2dX) ? observedFreq : freq2dX);
-    // apply offset
-    if (offset != ERROR && freq != ERROR
-        && dataType.toUpperCase().contains("SPECTRUM")) {
-      Coordinate.applyShiftReference(xyCoords, dataPointNum, fileFirstX,
-          fileLastX, offset, freq, shiftRefType);
-    }
-
-    if (freq != ERROR && xUnits.toUpperCase().equals("HZ")) {
-      double xScale = freq;
-      Coordinate.applyScale(xyCoords, (1 / xScale), 1);
-      xUnits = "PPM";
-      setHZtoPPM(true);
-    }
-  }
-
   public int setNextPeak(Coordinate coord, int istep) {
     if (peakList == null || peakList.size() == 0)
       return -1;
@@ -541,124 +193,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return ipt1;
   }
  
-  private boolean increasing = true;
-  private boolean continuous;
-
-  /**
-   * Sets value to true if spectrum is increasing
-   * 
-   * @param val
-   *        true if spectrum is increasing
-   */
-  public void setIncreasing(boolean val) {
-    increasing = val;
-  }
-
-  /**
-   * Sets value to true if spectrum is continuous
-   * 
-   * @param val
-   *        true if spectrum is continuous
-   */
-  public void setContinuous(boolean val) {
-    continuous = val;
-  }
-
-  /**
-   * Returns true if the spectrum is increasing
-   * 
-   * @return true if the spectrum is increasing
-   */
-  public boolean isIncreasing() {
-    return increasing;
-  }
-
-  /**
-   * Returns true if spectrum is continuous
-   * 
-   * @return true if spectrum is continuous
-   */
-  public boolean isContinuous() {
-    return continuous;
-  }
-
-  public String[][] getHeaderRowDataAsArray() {
-    int n = 8;
-    if (observedFreq != JDXSpectrum.ERROR)
-      n++;
-    if (observedNucl != "")
-      n++;
-    String[][] rowData = getHeaderRowDataAsArray(true, n);
-    int i = rowData.length - n;
-    if (observedFreq != JDXSpectrum.ERROR)
-      rowData[i++] = new String[] { "##.OBSERVE FREQUENCY", "" + observedFreq };
-    if (observedNucl != "")
-      rowData[i++] = new String[] { "##.OBSERVE NUCLEUS", observedNucl };
-    rowData[i++] = new String[] { "##XUNITS", isHZtoPPM() ? "HZ" : getXUnits() };
-    rowData[i++] = new String[] { "##YUNITS", getYUnits() };
-    double x = (isIncreasing() ? getFirstX() : getLastX());
-    rowData[i++] = new String[] { "##FIRSTX",
-        String.valueOf(isHZtoPPM() ? x * getObservedFreq() : x) };
-    x = (isIncreasing() ? getLastX() : getFirstX());
-    rowData[i++] = new String[] { "##FIRSTY",
-        String.valueOf(isIncreasing() ? getFirstY() : getLastY()) };
-    rowData[i++] = new String[] { "##LASTX",
-        String.valueOf(isHZtoPPM() ? x * getObservedFreq() : x) };
-    rowData[i++] = new String[] { "##XFACTOR", String.valueOf(getXFactor()) };
-    rowData[i++] = new String[] { "##YFACTOR", String.valueOf(getYFactor()) };
-    rowData[i++] = new String[] { "##NPOINTS",
-        String.valueOf(getNumberOfPoints()) };
-    return rowData;
-  }
-
-  /**
-   * Determines if a spectrum is an HNMR spectrum
-   * @param spectrum the JDXSpectrum
-   * @return true if an HNMR, false otherwise
-   */
-  public boolean isHNMR() {
-    return (dataType.toUpperCase().indexOf("NMR") >= 0 && observedNucl.toUpperCase().indexOf("H") >= 0);
-  }
-
-  public static final int SCALE_NONE = 0;
-  public static final int SCALE_TOP = 1;
-  public static final int SCALE_BOTTOM = 2;
-  public static final int SCALE_TOP_BOTTOM = 3;
-  
-  public int getYScaleType() {
-    String datatype = getDataType().toUpperCase();
-    String yUnits = getYUnits().toUpperCase();
-    if (datatype.contains("NMR"))
-      return SCALE_TOP_BOTTOM;
-    if (datatype.startsWith("IR") || datatype.contains("INFRA"))
-      return (yUnits.startsWith("T") ? SCALE_NONE : SCALE_TOP);
-    return SCALE_TOP;
-  }
-  
-  /**
-   * Determines if the plot should be displayed decreasing by default
-   * 
-   * @param spectrum
-   */
-  public boolean shouldDisplayXAxisIncreasing() {
-    String datatype = getDataType().toUpperCase();
-    String xUnits = getXUnits().toUpperCase();
-    if (datatype.contains("NMR") && !(datatype.contains("FID"))) {
-      return false;
-    } else if (datatype.contains("LINK") && xUnits.contains("CM")) {
-      return false; // I think this was because of a bug where BLOCK files kept type as LINK ?      
-    } else if (datatype.startsWith("IR") || datatype.contains("INFRA")
-        && xUnits.contains("CM")) {
-      return false;
-    } else if (datatype.contains("RAMAN") && xUnits.contains("CM")) {
-      return false;
-    } else if (datatype.contains("VIS") && xUnits.contains("NANOMETERS")) {
-      return true;
-    }
-
-    return isIncreasing();
-  }
-
   private IntegralGraph integration;
 
   public IntegralGraph getIntegrationGraph() {
@@ -685,7 +219,18 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
 
   private JDXSpectrum convertedSpectrum;
 
+  /**
+   * when the user click VK_UP or VK_DOWN
+   * 
+   */
   private double userYFactor = 1;
+  public void setUserYFactor(double userYFactor) {
+    this.userYFactor = userYFactor;
+  }
+
+  public double getUserYFactor() {
+    return userYFactor;
+  }
 
   public static final int TA_NO_CONVERT = 0;
   public static final int TO_ABS = 1;
@@ -718,18 +263,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     default:
       return spectrum;
     }
-    return convert(spectrum);
-  }
-  /**
-   * Converts and returns a converted spectrum. If original was Absorbance then
-   * a Transmittance spectrum is returned and vice versa if spectrum was neither
-   * Absorbance nor Transmittance then null is returned
-   * 
-   * @param spectrum
-   *        the JDXSpectrum
-   * @return the converted spectrum
-   */
-  public static JDXSpectrum convert(JDXSpectrum spectrum) {
     JDXSpectrum spec = spectrum.getConvertedSpectrum();
     return (spec != null ? spec : spectrum.isAbsorbance() ? toT(spectrum) : toA(spectrum));
   }
@@ -742,13 +275,13 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
    * @return the converted spectrum
    */
   
-  public static JDXSpectrum toT(JDXSpectrum spectrum) {
+  private static JDXSpectrum toT(JDXSpectrum spectrum) {
     if (!spectrum.isAbsorbance())
       return null;
     Coordinate[] xyCoords = spectrum.getXYCoords();
     Coordinate[] newXYCoords = new Coordinate[xyCoords.length];
-    if (!isYInRange(xyCoords, 0, MAXABS))
-      xyCoords = normalise(xyCoords, 0, MAXABS);
+    if (!Coordinate.isYInRange(xyCoords, 0, MAXABS))
+      xyCoords = Coordinate.normalise(xyCoords, 0, MAXABS);
     for (int i = 0; i < xyCoords.length; i++)
       newXYCoords[i] = new Coordinate(xyCoords[i].getXVal(),
           toTransmittance(xyCoords[i].getYVal()));
@@ -762,12 +295,12 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
    *        the JDXSpectrum
    * @return the converted spectrum
    */
-  public static JDXSpectrum toA(JDXSpectrum spectrum) {
+  private static JDXSpectrum toA(JDXSpectrum spectrum) {
     if (!spectrum.isTransmittance())
       return null;
     Coordinate[] xyCoords = spectrum.getXYCoords();
     Coordinate[] newXYCoords = new Coordinate[xyCoords.length];
-    boolean isPercent = isYInRange(xyCoords, -2, 2);
+    boolean isPercent = Coordinate.isYInRange(xyCoords, -2, 2);
     for (int i = 0; i < xyCoords.length; i++)
       newXYCoords[i] = new Coordinate(xyCoords[i].getXVal(), 
           toAbsorbance(xyCoords[i].getYVal(), isPercent));
@@ -785,14 +318,14 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   public static JDXSpectrum newSpectrum(JDXSpectrum spectrum,
                                          Coordinate[] newXYCoords,
                                          String units) {
-    JDXSpectrum convSpectrum = spectrum.copy();
-    convSpectrum.setOrigin("JSpecView Converted");
-    convSpectrum.setOwner("JSpecView Generated");
-    convSpectrum.setXYCoords(newXYCoords);
-    convSpectrum.setYUnits(units);
-    spectrum.setConvertedSpectrum(convSpectrum);
-    convSpectrum.setConvertedSpectrum(spectrum);
-    return convSpectrum;
+    JDXSpectrum specNew = spectrum.copy();
+    specNew.setOrigin("JSpecView Converted");
+    specNew.setOwner("JSpecView Generated");
+    specNew.setXYCoords(newXYCoords);
+    specNew.setYUnits(units);
+    spectrum.setConvertedSpectrum(specNew);
+    specNew.setConvertedSpectrum(spectrum);
+    return specNew;
   }
 
   /**
@@ -803,7 +336,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
    * @param isPercent
    * @return the value in Absorbance
    */
-  public static double toAbsorbance(double x, boolean isPercent) {
+  private static double toAbsorbance(double x, boolean isPercent) {
     return (Math.min(MAXABS, isPercent ? 2 - log10(x) : -log10(x)));
   }
 
@@ -813,7 +346,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
    * @param x
    * @return the value in Transmittance
    */
-  public static double toTransmittance(double x) {
+  private static double toTransmittance(double x) {
     return (x <= 0 ? 1 : Math.pow(10, -x));
   }
 
@@ -824,42 +357,8 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
    *        the input value
    * @return the log of a value to the base 10
    */
-  public static double log10(double value) {
+  private static double log10(double value) {
     return Math.log(value) / Math.log(10);
-  }
-
-  /**
-   * Determines if the y values of a spectrum are in a certain range
-   * 
-   * @param xyCoords
-   * @param min
-   * @param max
-  * @return true is in range, otherwise false
-   */
-  public static boolean isYInRange(Coordinate[] xyCoords, double min,
-                                    double max) {
-    return (Coordinate.getMinY(xyCoords) >= min 
-        && Coordinate.getMaxY(xyCoords) >= max);
-  }
-
-  /**
-   * Normalises the y values of a spectrum to a certain range
-   * 
-   * @param xyCoords
-   * @param min
-   * @param max
-   * @return array of normalised coordinates
-   */
-  public static Coordinate[] normalise(Coordinate[] xyCoords, double min,
-                                        double max) {
-    Coordinate[] newXYCoords = new Coordinate[xyCoords.length];
-    double minY = Coordinate.getMinY(xyCoords);
-    double maxY = Coordinate.getMaxY(xyCoords);
-    double factor = (maxY - minY) / (max - min); // range = 0-5
-    for (int i = 0; i < xyCoords.length; i++)
-      newXYCoords[i] = new Coordinate(xyCoords[i].getXVal(), 
-          ((xyCoords[i].getYVal() - minY) / factor) - min);
-    return newXYCoords;
   }
 
   public IntegralGraph integrate(double minY, double offset, double factor) {
@@ -900,48 +399,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
    return (integration == null ? null : integration.getIntegrals());
   }
 
-  public boolean canSaveAsJDX() {
-    return getDataClass().equals("XYDATA");
-  }
-  
-  public boolean canIntegrate() {
-    return (continuous && isHNMR() && is1D());
-  }
-
-  public boolean canConvertTransAbs() {
-    return (continuous && (yUnits.toLowerCase().contains("abs"))
-        || yUnits.toLowerCase().contains("trans"));
-  }
-
-  public boolean canShowSolutionColor() {
-    return (canConvertTransAbs()
-        && (xUnits.toLowerCase().contains("nanometer") || xUnits.equalsIgnoreCase("nm")) 
-        && getFirstX() < 401 && getLastX() > 699);
-  }
-
-  public boolean is1D() {
-    return numDim == 1;
-  }
-
-  public void setY2D(double d) {
-    y2D = d;
-  }
-  
-  public void setY2DUnits(String units) {
-    y2DUnits = units;
-  }
-  
-  public double getY2D() {
-    return y2D;
-  } 
-
-  public String getY2DUnits() {
-    return y2DUnits;
-  } 
-
-  public void setBlockID(double id) {
-    blockID = id;
-  }
   public List<JDXSpectrum> getSubSpectra() {
     return subSpectra;
   }
@@ -984,14 +441,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   
   public int getSubIndex() {
     return (subSpectra == null ? -1 : currentSubSpectrum);
-  }
-
-  public double getUserYFactor() {
-    return userYFactor;
-  }
-
-  public void setUserYFactor(double userYFactor) {
-    this.userYFactor = userYFactor;
   }
 
   private boolean exportXAxisLeftToRight;
@@ -1038,13 +487,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
         buf[--pt] = 255 - Coordinate.intoRange((int) ((points[j].getYVal()* f - isd.minZ) * grayFactor), 0, 255);
     }
     return (buf2d = buf);
-  }
-
-  public double getY2DPPM() {
-    double d = y2D;
-    if (y2DUnits.equals("HZ"))
-      d /= freq2dY;
-    return d;
   }
 
   public Map<String, Object> getInfo(String key) {
