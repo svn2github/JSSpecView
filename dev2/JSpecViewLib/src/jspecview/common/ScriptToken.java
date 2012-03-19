@@ -182,7 +182,7 @@ public enum ScriptToken {
       s = null;
     }
     if (s != null)
-      sb.append(s.substring(0, s.length() - 1));
+      sb.append(" ").append(s.substring(0, s.length() - 1));
     s = sb.toString();
     return (removeQuotes ? s : "\"" + s + "\"");
   }
