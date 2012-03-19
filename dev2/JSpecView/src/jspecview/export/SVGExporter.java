@@ -322,13 +322,9 @@ class SVGExporter extends FormExporter {
     context.put("numDecimalPlacesX", new Integer(Math.abs(hashNumX)));
     context.put("numDecimalPlacesY", new Integer(Math.abs(hashNumY)));
 
-    if (exportForInkscape){
-        System.out.println("inkscape is true ");
-        return writeForm("plot_ink.vm");
-    }else {
-        System.out.println("inkscape is false ");
-        return writeForm("plot.vm");
-    }
+    String vm = (exportForInkscape ? "plot_ink.vm" : "plot.vm");
+    Logger.info("SVGExporter using " + vm);
+    return writeForm(vm);
   }
   
   /**

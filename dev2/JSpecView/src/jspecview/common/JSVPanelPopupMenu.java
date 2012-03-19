@@ -84,8 +84,14 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   public JCheckBoxMenuItem integrateCheckBoxMenuItem = new JCheckBoxMenuItem();
   public JMenuItem transAbsMenuItem = new JMenuItem();
   public JMenuItem solColMenuItem = new JMenuItem();
-  public JMenu saveAsJDXMenu; // applet only
-  public JMenu exportAsMenu;  // applet only
+  
+  // applet only:
+  
+  protected JMenu appletSaveAsJDXMenu; // applet only
+  protected JMenu appletExportAsMenu;  // applet only
+  protected JMenuItem appletAdvancedMenuItem;
+  public JMenu appletCompoundMenu;
+  protected JMenuItem overlayKeyMenuItem;
   
   private ScriptInterface scripter;
   
@@ -381,7 +387,6 @@ public class JSVPanelPopupMenu extends JPopupMenu {
 
   public void setEnables(JSVPanel jsvp) {
     this.jsvp = jsvp;
-    source = jsvp.getSource();
     JDXSpectrum spec0 = jsvp.getSpectrumAt(0);
     gridCheckBoxMenuItem.setSelected(jsvp.isGridOn());
     coordsCheckBoxMenuItem.setSelected(jsvp.isCoordinatesOn());
@@ -393,14 +398,20 @@ public class JSVPanelPopupMenu extends JPopupMenu {
     solColMenuItem.setEnabled(!isOverlaid && spec0.canShowSolutionColor());
     transAbsMenuItem.setEnabled(!isOverlaid && spec0.canConvertTransAbs());
     
-    if (saveAsJDXMenu != null) // applet only
-      saveAsJDXMenu.setEnabled(spec0.canSaveAsJDX());
-    if (exportAsMenu != null) // applet only
-      exportAsMenu.setEnabled(true);
+    if (appletSaveAsJDXMenu != null)
+      appletSaveAsJDXMenu.setEnabled(spec0.canSaveAsJDX());
+    if (appletExportAsMenu != null)
+      appletExportAsMenu.setEnabled(true);
+    if (appletAdvancedMenuItem != null)
+      appletAdvancedMenuItem.setEnabled(!isOverlaid);
+    if (appletCompoundMenu != null) 
+      appletCompoundMenu.setEnabled(
+          appletCompoundMenu.isEnabled() && appletCompoundMenu.getItemCount() > 0);
+    if (overlayKeyMenuItem != null)
+      overlayKeyMenuItem.setEnabled(isOverlaid);
   }
 
   public void dispose() {
-    source = null;
     jsvp = null;    
   }
 }

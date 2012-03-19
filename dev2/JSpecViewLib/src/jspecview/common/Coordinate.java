@@ -22,12 +22,10 @@ package jspecview.common;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Comparator;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import jspecview.util.Logger;
 import jspecview.util.TextFormat;
 
 
@@ -215,10 +213,6 @@ public class Coordinate {
    */
   public static Coordinate[] parseDSV(String dataPoints, double xFactor,
                                       double yFactor) {
-    // for debugging;
-    long time1, time2, totalTime;
-    time1 = 0;
-    // for debugging
   
     //int linenumber = 0;
     Coordinate point;
@@ -230,36 +224,16 @@ public class Coordinate {
     StringTokenizer st = new StringTokenizer(dataPoints, delim);
     String tmp1, tmp2;
   
-    if (Logger.debugging) {
-      System.out.print("Started Parsing DSV at: ");
-      System.out.println(Calendar.getInstance().getTime());
-      time1 = Calendar.getInstance().getTimeInMillis();
-    }
-  
     while (st.hasMoreTokens()) {
       tmp1 = st.nextToken().trim();
       tmp2 = st.nextToken().trim();
-  
-      if (Logger.debugging) {
-        System.out.println("tkn1: " + tmp1);
-        System.out.println("tkn2: " + tmp2);
-      }
   
       xval = Double.parseDouble(tmp1);
       yval = Double.parseDouble(tmp2);
       point = new Coordinate((xval * xFactor), (yval * yFactor));
       xyCoords.add(point);
     }
-  
-    if (Logger.debugging) {
-      System.out.print("Finished Parsing DSV at: ");
-      System.out.println(Calendar.getInstance().getTime());
-      time2 = Calendar.getInstance().getTimeInMillis();
-      totalTime = time2 - time1;
-      System.out.println("Total time = " + totalTime + "ms or "
-          + ((double) totalTime / 1000) + "s");
-    }
-  
+    
     Coordinate[] coord = new Coordinate[xyCoords.size()];
     return (Coordinate[]) xyCoords.toArray(coord);
   }

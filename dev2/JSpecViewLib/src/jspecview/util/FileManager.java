@@ -80,7 +80,6 @@ public class FileManager {
     if (name == null)
       throw new IOException("Cannot find " + name);
     String path = classifyName(name, appletDocumentBase);
-    System.out.println("JSV FIleManager with  " + path);
     return getUnzippedBufferedReaderFromName(path, appletDocumentBase, startCode);
   }
 

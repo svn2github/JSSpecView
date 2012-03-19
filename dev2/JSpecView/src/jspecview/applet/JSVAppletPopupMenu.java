@@ -26,7 +26,7 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     if (!allowMenu) {
       viewMenu.setEnabled(false);
       fileMenu.setEnabled(false);
-      exportAsMenu.setEnabled(false);
+      appletExportAsMenu.setEnabled(false);
       saveAsMenu.setEnabled(false);
     }
     zoomMenu.setEnabled(enableZoom);
@@ -46,13 +46,9 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
   private JMenu saveAsMenu = new JMenu();
   private JMenu viewMenu = new JMenu();
   private JMenu zoomMenu = new JMenu();
-  JMenuItem compoundMenu = new JMenu();
   private JMenuItem versionMenuItem = new JMenuItem();
   private JMenuItem headerMenuItem = new JMenuItem();
   JCheckBoxMenuItem windowMenuItem = new JCheckBoxMenuItem();
-  JMenuItem overlayKeyMenuItem = new JMenuItem();
-
-  private JMenuItem advancedMenuItem;
 
   protected void jbInit() {
     // handled later
@@ -85,6 +81,7 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
         applet.windowMenuItem_itemStateChanged(e);
       }
     });
+    overlayKeyMenuItem = new JMenuItem();
     overlayKeyMenuItem.setEnabled(false);
     overlayKeyMenuItem.setText("Show Overlay Key...");
     overlayKeyMenuItem.addActionListener(new ActionListener() {
@@ -93,36 +90,37 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
       }
     });
 
-    compoundMenu.setEnabled(false);
-    compoundMenu.setText("Blocks");
+    appletCompoundMenu = new JMenu();
+    appletCompoundMenu.setEnabled(false);
+    appletCompoundMenu.setText("Blocks");
 
     versionMenuItem.setText("<html><h3>" + applet.getAppletInfo() + "</h3></html>");
 
     add(fileMenu);
     add(viewMenu);
     add(zoomMenu);
-    add(compoundMenu);
+    add(appletCompoundMenu);
     addSeparator();
     add(scriptMenuItem);
     if (applet.isPro()) {
-      advancedMenuItem = new JMenuItem();
-      advancedMenuItem.setText("Advanced...");
-      advancedMenuItem.addActionListener(new ActionListener() {
+      appletAdvancedMenuItem = new JMenuItem();
+      appletAdvancedMenuItem.setText("Advanced...");
+      appletAdvancedMenuItem.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           applet.doAdvanced(applet.getSource().getFilePath());
         }
       });
-      add(advancedMenuItem);
+      add(appletAdvancedMenuItem);
     }
     addSeparator();
     add(aboutMenu);
     fileMenu.add(saveAsMenu);
     if (applet.isSigned()) {
-      exportAsMenu = new JMenu();
-      fileMenu.add(exportAsMenu);
+      appletExportAsMenu = new JMenu();
+      fileMenu.add(appletExportAsMenu);
     }
-    saveAsJDXMenu = new JMenu();
-    AppUtils.setMenus(saveAsMenu, saveAsJDXMenu, exportAsMenu, exportActionListener);
+    appletSaveAsJDXMenu = new JMenu();
+    AppUtils.setMenus(saveAsMenu, appletSaveAsJDXMenu, appletExportAsMenu, exportActionListener);
     fileMenu.add(printMenuItem);
 
     viewMenu.add(gridCheckBoxMenuItem);

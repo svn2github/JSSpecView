@@ -204,6 +204,8 @@ public class FileReader {
           spectrum = null;
           continue;
         }
+        if (spectrum == null)
+          spectrum = new JDXSpectrum();
         if (readDataLabel(spectrum, label, t, errorLog, dataLDRTable, obscure))
           continue;
         String value = t.getValue();
@@ -254,7 +256,7 @@ public class FileReader {
   private JDXSource getBlockSpectra(List<String[]> sourceLDRTable)
       throws JSpecViewException {
 
-    System.out.println("--JDX block start--");
+    Logger.debug("--JDX block start--");
     String label = "";
     boolean isNew = (source.type == JDXSource.TYPE_SIMPLE);
     boolean forceSub = false;
@@ -290,7 +292,7 @@ public class FileReader {
       String tmp;
       while ((tmp = t.getLabel()) != null) {
           if (label.equals("##END") && isEnd(tmp)) {
-            System.out.println("##END= " + t.getValue());
+            Logger.debug("##END= " + t.getValue());
             break;
           }
         label = tmp;
@@ -363,7 +365,7 @@ public class FileReader {
     }
     addErrorLogSeparator();
     source.setErrorLog(errorLog.toString());
-    System.out.println("--JDX block end--");
+    Logger.debug("--JDX block end--");
     return source;
   }
 
@@ -522,7 +524,7 @@ public class FileReader {
     }
     addErrorLogSeparator();
     source.setErrorLog(errorLog.toString());
-    System.out.println("NTUPLE MIN/MAX Y = " + minMaxY[0] + " " + minMaxY[1]);
+    Logger.info("NTUPLE MIN/MAX Y = " + minMaxY[0] + " " + minMaxY[1]);
     return source;
   }
 

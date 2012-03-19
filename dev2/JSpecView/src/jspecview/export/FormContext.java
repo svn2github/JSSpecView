@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import jspecview.common.Coordinate;
+import jspecview.util.Logger;
 import jspecview.util.Parser;
 import jspecview.util.TextFormat;
 
@@ -143,7 +144,7 @@ class FormContext {
           formTokens.get(cmdPtr).endPtr = ptr;
           cmds.add(0, new Integer(ptr));
         } else {
-          System.out.println("??? " + token);
+          Logger.warn("??? " + token);
         }
         if (checkIf) {
           FormToken vt = formTokens.get(cmdPtr);
@@ -350,12 +351,12 @@ class FormContext {
       case OP_NE:
         return (!value.equals(compare));
       default:
-        System.out.println("???? " + key + " " + compare + " " + value);
+        Logger.warn("???? " + key + " " + compare + " " + value);
       }
       break;
     }
     } catch (Exception e) {
-      System.out.println(e.getMessage() + " in VelocityContext.merge");
+      Logger.warn(e.getMessage() + " in VelocityContext.merge");
     }
 //    if (value != null) {
   //    x = !value.equalsIgnoreCase("false") && !value.equalsIgnoreCase("0");

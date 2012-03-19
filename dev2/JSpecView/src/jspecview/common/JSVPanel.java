@@ -73,6 +73,7 @@ import javax.swing.JPanel;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
 import jspecview.source.JDXSource;
+import jspecview.util.Logger;
 import jspecview.util.Parser;
 import jspecview.util.TextFormat;
 
@@ -96,7 +97,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
   @Override
   public void finalize() {
-    System.out.println("JSVPanel " + this + " finalized");
+    Logger.info("JSVPanel " + this + " finalized");
   }
 
   public void dispose() {
@@ -104,8 +105,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     zoomInfoList = null;
     image2D = null;
     isd = null;
-    popup.dispose();
-    popup = null;
+    if (popup != null) {
+      popup.dispose();
+      popup = null;
+    }
     source = null;
     removeKeyListener(this);
     removeMouseListener(this);
@@ -186,6 +189,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private double xFactorForScale, yFactorForScale;
   private double widthRatio = 1;
 
+  private String filePath = "";
   private String coordStr = "";
   private String startupPinTip = "Click to set.";
   private String title;
@@ -218,8 +222,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     for (Entry<String, Object> entry: entries)
       JDXSpectrum.putInfo(key, info, entry.getKey(), entry.getValue());
     JDXSpectrum.putInfo(key, info, "selected", Boolean.valueOf(isSelected));
-    JDXSpectrum.putInfo(key, info, "filePath", source.getFilePath());
-    JDXSpectrum.putInfo(key, info, "type", source.getDataType());
+    JDXSpectrum.putInfo(key, info, "filePath", filePath);
+    JDXSpectrum.putInfo(key, info, "type", getSpectrumAt(0).getDataType());
     JDXSpectrum.putInfo(key, info, "title", title);
     JDXSpectrum.putInfo(key, info, "nSpectra", Integer.valueOf(nSpectra));
     JDXSpectrum.putInfo(key, info, "userYFactor", Double.valueOf(userYFactor));
@@ -283,7 +287,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       yUnitsOn = isTrue;
       break;
     default:
-      System.out.println("JSVPanel --- unrecognized Parameter boolean: " + st);
+      Logger.warn("JSVPanel --- unrecognized Parameter boolean: " + st);
       break;
     }
   }
@@ -376,7 +380,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       unitsColor= color;
       break;
     default:
-      System.out.println("JSVPanel --- unrecognized DisplayScheme color: " + st);
+      Logger.warn("JSVPanel --- unrecognized DisplayScheme color: " + st);
       break;
     }
   }
@@ -480,7 +484,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     zoomInfoList.add(multiScaleData);
     setPlotColors(Parameters.defaultPlotColors);
     setBorder(BorderFactory.createLineBorder(Color.lightGray));
-    if (source == null) {
+    filePath = (source == null ? "" : source.getFilePath());
+    if (popup == null) {
       // preferences dialog
       coordStr = "(0,0)";
     } else {

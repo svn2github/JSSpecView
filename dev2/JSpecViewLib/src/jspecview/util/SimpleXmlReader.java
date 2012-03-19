@@ -89,7 +89,6 @@ public class SimpleXmlReader {
   public void nextTag() throws IOException {
     while ((thisEvent = buffer.nextTag()).eventType == SimpleXmlReader.COMMENT) {
     }
-    System.out.println("sxr next tag " + thisEvent.getTagName());
   }
 
   public int nextEvent() throws IOException {
@@ -101,7 +100,6 @@ public class SimpleXmlReader {
     thisEvent = buffer.nextTag();
     while (!thisEvent.isStartElement())
       thisEvent = buffer.nextTag();
-    System.out.println(thisEvent.getTagName());
   }
 
   public String getTagName() {

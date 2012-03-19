@@ -1410,7 +1410,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     overlayAllMenuItem.setSelected(true);
     splitMenuItem.setSelected(false);
     List<JDXSpectrum> specs = source.getSpectra();
-    JSVPanel jsvp = new JSV1DOverlayPanel(specs, null, null);
+    JSVPanel jsvp = new JSV1DOverlayPanel(specs, null, null, jsvpPopupMenu);
     jsvp.setTitle(source.getTitle());
 
     setJSVPanelProperties(jsvp, true);
@@ -1955,7 +1955,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     String index = Parser.getQuotedAttribute(script, "index");
     if (file == null || index == null)
       return;
-    System.out.println("JSpecView MainFrame.syncScript: " + script);
+    Logger.info("JSpecView MainFrame.syncScript: " + script);
     if (!file.equals(recentJmolName)) {
       openDataOrFile(null, file, null, -1, -1);
     }
@@ -1980,11 +1980,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
       script = "";
     script = script.trim();
     String msg = null;
-    System.out.println("CHECKSCRIPT " + script);
+    Logger.debug("runScriptNow: " + script);
     StringTokenizer allParamTokens = new StringTokenizer(script, ";");
-    if (Logger.debugging) {
-      System.out.println("Running in DEBUG mode");
-    }
     JSVPanel jsvp = selectedJSVPanel;
     List<String> tokens;
     int pt;
@@ -1995,11 +1992,12 @@ public class MainFrame extends JFrame implements DropTargetListener,
       String key = ScriptToken.getKey(eachParam);
       ScriptToken st = ScriptToken.getScriptToken(key);
       String value = ScriptToken.getValue(st, eachParam, token);
-      System.out.println("KEY-> " + key + " VALUE-> " + value + " : " + st);
+      if (Logger.debugging)
+        Logger.info("KEY-> " + key + " VALUE-> " + value + " : " + st);
       try {
         switch (st) {
         case UNKNOWN:
-          System.out.println("Unrecognized parameter: " + key);
+          Logger.warn("Unrecognized parameter: " + key);
           break;
         default:
           parameters.set(jsvp, st, value);
@@ -2240,7 +2238,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   public void sendScript(String peak) {
     selectedJSVPanel.processPeakSelect(peak);
     String msg = Escape.jmolSelect(peak, recentJmolName);
-    System.out.println("JSpecView MainFrame sendScript: " + msg);
+    Logger.info("JSpecView MainFrame sendScript: " + msg);
     // outgoing <PeakData file="xxx" type="xxx"...> record to Jmol    
     if (jmol != null) // MainFrame --> embedding application
       jmol.syncScript(msg);
@@ -3037,7 +3035,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       this.id = id;
       if (jsvp != null)
         jsvp.getSpectrumAt(0).setId(id);
-      System.out.println("TREE NODE fileName=" + fileName + " source.filePath=" + (source == null ? "null" : source.getFilePath()));
+      //System.out.println("TREE NODE fileName=" + fileName + " source.filePath=" + (source == null ? "null" : source.getFilePath()));
     }
 
     @Override

@@ -197,18 +197,20 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
 
   @Override
   public void destroy() {
-    System.out.println("JSVApplet " + this + " destroy 1");
-    if (commandWatcherThread != null) {
-      commandWatcherThread.interrupt();
-      commandWatcherThread = null;
-    }
-    if (jsvPanels != null) {
-      for (int i = jsvPanels.size(); --i >= 0;) {
-        jsvPanels.get(i).dispose();
-        jsvPanels.remove(i);
+    try {
+      if (commandWatcherThread != null) {
+        commandWatcherThread.interrupt();
+        commandWatcherThread = null;
       }
+      if (jsvPanels != null) {
+        for (int i = jsvPanels.size(); --i >= 0;) {
+          jsvPanels.get(i).dispose();
+          jsvPanels.remove(i);
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
     }
-    System.out.println("JSVApplet " + this + " destroy 2");
   }
 
   /**
@@ -447,21 +449,21 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
    * 
    */
   public void syncScript(String script) {
-    System.out.println("jsvapplet syncScript " + script);
+    Logger.info("jsvapplet syncScript " + script);
     if (script.indexOf("<PeakData") < 0) {
       runScript(script);
       return;
     }
     String fileName = Parser.getQuotedAttribute(script, "file");
     String index = Parser.getQuotedAttribute(script, "index");
-    System.out.println("jsvapplet syncScript file/index " + fileName + " " + index);
+//    System.out.println("jsvapplet syncScript file/index " + fileName + " " + index);
     if (fileName == null || index == null)
       return;
     URL url = null;
     try {
       url = new URL(getCodeBase(), fileName);
     } catch (MalformedURLException e) {
-      System.out.println("Trouble with URL for " + fileName);
+      Logger.warn("Trouble with URL for " + fileName);
       return;
     }
     String f = url.toString();
@@ -572,7 +574,9 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
           Arrays.fill(startIndices, startIndex);
           Arrays.fill(endIndices, endIndex);
         }
-        jsvp = new JSV1DOverlayPanel(specs, startIndices, endIndices);
+        jsvp = new JSV1DOverlayPanel(specs, startIndices, endIndices, appletPopupMenu);
+        
+        
       } catch (ScalesIncompatibleException sie) {
         theInterface = "single";
         isOverlaid = false;
@@ -675,16 +679,14 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
       setSelectedPanel(spectrumIndex >= jsvPanels.size() ? null : jsvPanels.get(spectrumIndex));
 
       // Global variable for single interface
-      currentSpectrumIndex = spectrumIndex;
+
       if (isOverlaid && currentSource.isCompoundSource) {
         jsvPanels.get(spectrumIndex).setTitle(currentSource.getTitle());
-        appletPopupMenu.overlayKeyMenuItem.setEnabled(true);
       }
       appletPanel.add(jsvPanels.get(spectrumIndex), BorderLayout.CENTER);
-      // else interface = single
+      appletPopupMenu.appletCompoundMenu.removeAll();
       if (moreThanOnePanel && compoundMenuOn) {
-        appletPopupMenu.compoundMenu.removeAll();
-        appletPopupMenu.compoundMenu.add(appletPopupMenu.overlayMenuItem);
+        //appletPopupMenu.appletCompoundMenu.add(appletPopupMenu.overlayMenuItem);
         if (jsvPanels.size() <= 20) {
           // add Menus to navigate
           JCheckBoxMenuItem mi;
@@ -705,16 +707,16 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
                 }
               });
               mi.setActionCommand("" + i);
-              appletPopupMenu.compoundMenu.add(mi);
+              appletPopupMenu.appletCompoundMenu.add(mi);
             }
-            appletPopupMenu.compoundMenu
+            appletPopupMenu.appletCompoundMenu
                 .setText(currentSource.type == JDXSource.TYPE_OVERLAY ? "Spectra" 
                     : currentSource.type == JDXSource.TYPE_BLOCK ? "Blocks" : "NTuples");
           }
           // add compound menu to popup menu
-          appletPopupMenu.add(appletPopupMenu.compoundMenu, 3);
+          appletPopupMenu.add(appletPopupMenu.appletCompoundMenu, 3);
           if (compoundMenuOn)
-            appletPopupMenu.compoundMenu.setEnabled(true);
+            appletPopupMenu.appletCompoundMenu.setEnabled(true);
         } else {
           // open dialog box
           JMenuItem compoundMi = new JMenuItem("Choose Spectrum");
@@ -736,7 +738,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
                 }
 
                 if (index > 0 && index < numberOfPanels) {
-                  showSpectrum(index, true);
+                  showSpectrum(index);
                   writeStatus(" ");
                 } else
                   writeStatus("Invalid Spectrum Number");
@@ -763,7 +765,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     // shows the newly selected block
     int index = Integer.parseInt(txt.substring(0, txt.indexOf("-")));
     //sltnclr = Visible.Colour(source);
-    showSpectrum(index - 1, true);
+    showSpectrum(index - 1);
   }
 
   /**
@@ -772,15 +774,12 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
    * @param index
    *        the index
    */
-  private void showSpectrum(int index, boolean fromMenu) {
-    System.out.println("showSpectrum " + index + " currentindex = " + currentSpectrumIndex);
-    if (index == currentSpectrumIndex)
-      return;
+  private void showSpectrum(int index) {
     JSVPanel jsvp = jsvPanels.get(index);
-    setSelectedPanel(jsvp);
-    chooseContainer();
-    if (fromMenu)
-      sendFrameChange(jsvp);
+    if (jsvp != selectedJSVPanel)
+      setSelectedPanel(jsvp);
+    addPanelToFrame();
+    sendFrameChange(jsvp);
   }
 
   /**
@@ -886,9 +885,6 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     // for some reason, at the the St. Olaf site, this is triggering twice
     // when the user clicks the menu item. Why?
     try {
-      System.out.println("ta event " + e.getID() + " " + e.getStateChange()
-          + " " + ItemEvent.SELECTED + " " + ItemEvent.DESELECTED + " "
-          + e.toString());
       if (e.getStateChange() == ItemEvent.SELECTED)
         taConvert(JDXSpectrum.IMPLIED);
       else
@@ -947,18 +943,18 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
       jsvpNew.setIntegrationRatios(integrationRatios);
     integrationRatios = null; // first time only
     jsvpNew.repaint();
-    chooseContainer();
+    addPanelToFrame();
   }
 
-  private void chooseContainer() {
+  private void addPanelToFrame() {
     if (offWindowFrame == null || offWindowFrame.getComponentCount() == 0) {
       if (compoundMenuOn)
-        appletPopupMenu.compoundMenu.setEnabled(true);
+        appletPopupMenu.appletCompoundMenu.setEnabled(true);
       getContentPane().add(appletPanel);
       validate();
       repaint();
     } else {
-      appletPopupMenu.compoundMenu.setEnabled(false);
+      appletPopupMenu.appletCompoundMenu.setEnabled(false);
       offWindowFrame.add(appletPanel);
       offWindowFrame.validate();
       offWindowFrame.setVisible(true);
@@ -1104,7 +1100,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     try {
       JSObject.getWindow(this).call(function, params);
     } catch (Exception npe) {
-      System.out.println("EXCEPTION-> " + npe.getMessage());
+      Logger.warn("EXCEPTION-> " + npe.getMessage());
     }
   }
 
@@ -1119,7 +1115,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
       params = "";
     StringTokenizer allParamTokens = new StringTokenizer(params, ";");
     if (Logger.debugging) {
-      System.out.println("Running in DEBUG mode");
+      Logger.info("Running in DEBUG mode");
     }
     while (allParamTokens.hasMoreTokens()) {
       String token = allParamTokens.nextToken().trim();
@@ -1131,7 +1127,8 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
       key = key.toUpperCase();
       ScriptToken st = ScriptToken.getScriptToken(key);
       String value = ScriptToken.getValue(st, eachParam, token);
-      System.out.println("KEY-> " + key + " VALUE-> " + value + " : " + st);
+      if (Logger.debugging)
+        Logger.info("KEY-> " + key + " VALUE-> " + value + " : " + st);
       try {
         switch (st) {
         default:
@@ -1205,7 +1202,6 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
           if (commandWatcherThread != null) {
             if (scriptQueue.size() > 0) {
               String scriptItem = scriptQueue.remove(0);
-              System.out.println("executing " + scriptItem);
               if (scriptItem != null)
                 processCommand(scriptItem);
             }
@@ -1238,7 +1234,6 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
   private void openDataOrFile(String data, String name,
                               List<JDXSpectrum> specs1, String filePath) {
     appletPanel.removeAll();
-    System.out.println("openDataOrFile " + name);
     String fileName = null;
     URL base = null;
     boolean isOverlay = false;
@@ -1256,7 +1251,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
         recentURL = url.toString();
         base = getDocumentBase();
       } catch (MalformedURLException e) {
-        System.out.println("problem: " + e.getMessage());
+        Logger.warn("problem: " + e.getMessage());
         fileName = filePath;
       }
     } else {
@@ -1295,7 +1290,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
 
     initInterface();
 
-    System.out.println(getAppletInfo() + " File " + fileName
+    Logger.info(getAppletInfo() + " File " + fileName
         + " Loaded Successfully");
 
   }
@@ -1310,11 +1305,9 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     if (params == null)
       params = "";
     params = params.trim();
-    System.out.println("RUNSCRIPT " + params);
+    if (Logger.debugging)
+      Logger.info("RUNSCRIPT " + params);
     StringTokenizer allParamTokens = new StringTokenizer(params, ";");
-    if (Logger.debugging) {
-      System.out.println("Running in DEBUG mode");
-    }
     JSVPanel jsvp = selectedJSVPanel;
     while (allParamTokens.hasMoreTokens()) {
       String token = allParamTokens.nextToken().trim();
@@ -1323,11 +1316,12 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
       String key = ScriptToken.getKey(eachParam);
       ScriptToken st = ScriptToken.getScriptToken(key);
       String value = ScriptToken.getValue(st, eachParam, token);
-      System.out.println("KEY-> " + key + " VALUE-> " + value + " : " + st);
+      //System.out.println("KEY-> " + key + " VALUE-> " + value + " : " + st);
       try {
         switch (st) {
+        case HIDDEN:
         case UNKNOWN:
-          System.out.println("Unrecognized parameter: " + key);
+          Logger.info("Unrecognized parameter: " + key);
           break;
         case LOAD:
           // no APPEND here
@@ -1369,7 +1363,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
           break;
         case INTEGRATIONRATIOS:
           // parse the string with a method in JSpecViewUtils
-          System.out.println("Integration Ratio Parameter: " + value);
+          //System.out.println("Integration Ratio Parameter: " + value);
           integrationRatios = IntegralGraph
               .getIntegrationRatiosFromString(value);
         case INTEGRATE:
@@ -1415,7 +1409,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
   private void setSpectrum(int i) {
     if (selectedJSVPanel != null) {
       if (theInterface.equals("single")) {
-        showSpectrum(i - 1, false);
+        showSpectrum(i - 1);
       } else {
         tabbedDisplayPane.setSelectedIndex(i - 1);
       }
@@ -1487,8 +1481,6 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     if (jsvPanels == null)
       return false;
     for (int i = 0; i < jsvPanels.size(); i++) {
-      System.out.println("jsvapplet selectPanel " + index);
-
       if ((jsvPanels.get(i).getSpectrum()).hasPeakIndex(index)) {
         setSpectrum(i + 1);
         return true;
@@ -1558,7 +1550,11 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     jsvp.setEnabled(true);
   }
 
+  JSVPanel prevPanel = null;
   private void sendFrameChange(JSVPanel jsvp) {
+    if (jsvp == prevPanel)
+      return;
+    prevPanel = jsvp;
     PeakInfo pi = ((JDXSpectrum)jsvp.getSpectrum()).getSelectedPeak();
     sendScript(pi == null ? null : pi.getStringInfo());
   }

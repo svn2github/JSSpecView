@@ -247,8 +247,7 @@ public class JDXDecompressor {
   }
 
   private void logError(String s) {
-    if (Logger.debugging)
-      System.out.println(s);
+    Logger.debug(s);
     errorLog.append(s).append('\n');  
   }
 
@@ -268,7 +267,7 @@ public class JDXDecompressor {
       return Double.NaN;
     char ch = line.charAt(ich);
     if (Logger.debugging)
-      System.out.println(ch);
+      Logger.info("" + ch);
     switch (ch) {
     case '%':
       difVal = 0;
