@@ -2888,7 +2888,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
         splitSpectra(currentSelectedSource);
       }
     } else {
-      jsvpPopupMenu.overlay();
+      jsvpPopupMenu.overlay(-1);
     }
   }
 

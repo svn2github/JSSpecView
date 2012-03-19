@@ -152,23 +152,21 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     if (!allowSelection)
       return;
 
-    //appletCompoundMenu.add(overlayMenuItem);
+    appletCompoundMenu.add(overlayAllMenuItem);
+    appletCompoundMenu.add(overlayNoneMenuItem);
+    appletCompoundMenu.add(overlayMenuItem);
     if (specs.size() <= 20) {
       // add Menus to navigate
-      JMenuItem mi;
       if (currentSource.isCompoundSource) {
         for (int i = 0; i < specs.size(); i++) {
-          mi = new JMenuItem((i + 1) + "- "
+          JCheckBoxMenuItem mi = new JCheckBoxMenuItem((i + 1) + "- "
               + specs.get(i).getTitleLabel());
           mi.setSelected(i == currentSpectrumIndex);
           mi.addActionListener(compoundMenuSelectionListener);
           mi.setActionCommand("" + i);
           appletCompoundMenu.add(mi);
         }
-        appletCompoundMenu
-            .setText(currentSource.type == JDXSource.TYPE_OVERLAY ? "Spectra"
-                : currentSource.type == JDXSource.TYPE_BLOCK ? "Blocks"
-                    : "NTuples");
+        appletCompoundMenu.setText("Spectra");
       }
       // add compound menu to popup menu
       add(appletCompoundMenu, 3);

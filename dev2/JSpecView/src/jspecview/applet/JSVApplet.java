@@ -159,6 +159,8 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
   private JSVAppletPopupMenu appletPopupMenu;  
   private List<JSVPanel> jsvPanels;
   private List<JDXSpectrum> specs;
+  private List<JSVPanel> jsvPanelsSaved;
+  private List<JDXSpectrum> specsSaved;
   private int currentSpectrumIndex;
   private String recentFileName = "";
   private String recentURL = "";
@@ -682,7 +684,8 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
         jsvPanels.get(spectrumIndex).setTitle(currentSource.getTitle());
       }
       appletPanel.add(jsvPanels.get(spectrumIndex), BorderLayout.CENTER);      
-      appletPopupMenu.setCompoundMenu(currentSource, spectrumIndex, specs, 
+      appletPopupMenu.setCompoundMenu(currentSource, spectrumIndex, 
+          (specsSaved == null ? specs : specsSaved), 
           compoundMenuOn && currentSource.isCompoundSource, 
           compoundMenuSelectionListener, compoundMenuChooseListener);  
     }
@@ -690,6 +693,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
 
   private ActionListener compoundMenuChooseListener = new ActionListener() {
     public void actionPerformed(ActionEvent e) {
+      resetSaved();
       StringBuffer msgStrBuffer = new StringBuffer();
       msgStrBuffer.append("Choose a number between 1 and ");
       msgStrBuffer.append(specs.size());
@@ -704,7 +708,6 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
           index = Integer.parseInt(str) - 1;
         } catch (NumberFormatException nfe) {
         }
-
         if (index > 0 && index < jsvPanels.size()) {
           showSpectrum(index);
           writeStatus(" ");
@@ -722,6 +725,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
    
   private void compoundMenu_itemStateChanged(ActionEvent e) {
     String txt = ((JMenuItem) e.getSource()).getText();
+    resetSaved();
     showSpectrum(Parser.parseInt(txt) - 1);
   }
 
@@ -1177,7 +1181,6 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
   }
 
   int nOverlays;
-  private List<JDXSpectrum> specsSaved;
 
   /*
     private void interruptQueueThreads() {
@@ -1279,7 +1282,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
           break;
         case LOAD:
           // no APPEND here
-          specsSaved = null;
+          setSaved(false);
           openDataOrFile(null, null, null, TextFormat.trimQuotes(value));
           setSpectrum(1);
           break;
@@ -1382,9 +1385,27 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     }        
   }
 
+  private void setSaved(boolean isOverlay) {
+    if (isOverlay) {
+      if (specsSaved == null) {
+        specsSaved = specs;
+        jsvPanelsSaved = jsvPanels;
+      }
+    } else {
+      specsSaved = null;
+      jsvPanelsSaved = null;
+    }
+  }
+  
+  private void resetSaved() {
+    if (specsSaved != null) {
+      specs = specsSaved;
+      jsvPanels = jsvPanelsSaved;
+    }
+  }
+  
   private void overlay(List<String> list) {
-    if (specsSaved == null)
-      specsSaved = specs;
+    setSaved(true);
     if (list.size() == 0 || list.size() == 1
         && list.get(0).equalsIgnoreCase("all")) {
       openDataOrFile(null, "", specsSaved, null);

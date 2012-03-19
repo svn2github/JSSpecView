@@ -80,6 +80,8 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   protected JMenuItem userZoomMenuItem = new JMenuItem();
   protected JMenuItem scriptMenuItem = new JMenuItem();
   public JMenuItem overlayMenuItem = new JMenuItem();
+  public JMenuItem overlayAllMenuItem = new JMenuItem();
+  public JMenuItem overlayNoneMenuItem = new JMenuItem();
 
   public JCheckBoxMenuItem integrateCheckBoxMenuItem = new JCheckBoxMenuItem();
   public JMenuItem transAbsMenuItem = new JMenuItem();
@@ -130,10 +132,22 @@ public class JSVPanelPopupMenu extends JPopupMenu {
         resetMenuItem_actionPerformed(e);
       }
     });
-    overlayMenuItem.setText("Overlay...");
+    overlayMenuItem.setText("Overlay Selected");
     overlayMenuItem.addActionListener(new ActionListener() {
        public void actionPerformed(ActionEvent e) {
-         overlayMenuItem_actionPerformed(e);
+         overlayMenuItem_actionPerformed(e, -1);
+       }
+     });
+    overlayAllMenuItem.setText("Overlay All");
+    overlayAllMenuItem.addActionListener(new ActionListener() {
+       public void actionPerformed(ActionEvent e) {
+         overlayMenuItem_actionPerformed(e, 1);
+       }
+     });
+    overlayNoneMenuItem.setText("Overlay None");
+    overlayNoneMenuItem.addActionListener(new ActionListener() {
+       public void actionPerformed(ActionEvent e) {
+         overlayMenuItem_actionPerformed(e, 0);
        }
      });
     scriptMenuItem.setText("Script...");
@@ -182,8 +196,8 @@ public class JSVPanelPopupMenu extends JPopupMenu {
     script();
   }
   
-  protected void overlayMenuItem_actionPerformed(ActionEvent e) {
-    overlay();
+  protected void overlayMenuItem_actionPerformed(ActionEvent e, int n) {
+    overlay(n);
   }
   
   protected void userMenuItem_actionPerformed(ActionEvent e) {
@@ -369,14 +383,24 @@ public class JSVPanelPopupMenu extends JPopupMenu {
 
   protected String recentOverlay = "1.1,1.2";
 
-  public void overlay() {
-    String script = (String) JOptionPane.showInputDialog(null,
-        "Enter a list of Spectrum IDs separated by commas", "Overlay", JOptionPane.PLAIN_MESSAGE, null,
-        null, recentOverlay);
-    if (script == null)
-      return;
-    recentOverlay = script;
-    scripter.runScript("overlay " + script);
+  public void overlay(int n) {
+    switch (n) {
+    case 0:
+      scripter.runScript("overlay NONE");
+      break;
+    case 1:
+      scripter.runScript("overlay ALL");
+      break;
+    default:
+      String script = (String) JOptionPane.showInputDialog(null,
+          "Enter a list of Spectrum IDs separated by commas", "Overlay",
+          JOptionPane.PLAIN_MESSAGE, null, null, recentOverlay);
+      if (script == null)
+        return;
+      recentOverlay = script;
+      scripter.runScript("overlay " + script);
+      break;
+    }
   }
 
 
@@ -406,7 +430,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
       appletAdvancedMenuItem.setEnabled(!isOverlaid);
     if (appletCompoundMenu != null) 
       appletCompoundMenu.setEnabled(
-          appletCompoundMenu.isEnabled() && appletCompoundMenu.getItemCount() > 0);
+          appletCompoundMenu.isEnabled() && appletCompoundMenu.getItemCount() > 3);
     if (overlayKeyMenuItem != null)
       overlayKeyMenuItem.setEnabled(isOverlaid);
   }
