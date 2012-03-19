@@ -115,7 +115,7 @@ import netscape.javascript.JSObject;
 
 public class JSVApplet extends JApplet implements PanelListener, ScriptInterface {
 
-  public static final String APPLET_VERSION = "2.0.20120316-0450"; //
+  public static final String APPLET_VERSION = "2.0.20120318-1940"; //
 //  2.0.yyyymmdd-hhmm format - should be updated to keep track of the latest version (based on Jamaica time)
   
   private static final long serialVersionUID = 1L;
