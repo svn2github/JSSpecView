@@ -143,7 +143,7 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     aboutMenu.add(versionMenuItem);
   }
 
-  public void setCompoundMenu(JSVApplet jsvApplet, JDXSource currentSource,
+  public void setCompoundMenu(JDXSource currentSource,
                               int currentSpectrumIndex,
                               List<JDXSpectrum> specs, boolean allowSelection,
                               ActionListener compoundMenuSelectionListener,

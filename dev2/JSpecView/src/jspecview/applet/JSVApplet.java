@@ -682,7 +682,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
         jsvPanels.get(spectrumIndex).setTitle(currentSource.getTitle());
       }
       appletPanel.add(jsvPanels.get(spectrumIndex), BorderLayout.CENTER);      
-      appletPopupMenu.setCompoundMenu(this, currentSource, spectrumIndex, specs, 
+      appletPopupMenu.setCompoundMenu(currentSource, spectrumIndex, specs, 
           compoundMenuOn && currentSource.isCompoundSource, 
           compoundMenuSelectionListener, compoundMenuChooseListener);  
     }
