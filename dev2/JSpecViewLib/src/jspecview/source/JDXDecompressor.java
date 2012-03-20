@@ -87,6 +87,8 @@ public class JDXDecompressor {
   
   private double maxY = Double.MIN_VALUE;
   private double minY = Double.MAX_VALUE;
+
+  private boolean debugging;
   
   public double getMinY() {
     return minY;
@@ -122,6 +124,8 @@ public class JDXDecompressor {
     this.deltaX = deltaX;
     this.nPoints = nPoints;
     this.lineNumber = t.getLabelLineNo();
+    debugging = Logger.isActiveLevel(Logger.LEVEL_DEBUGHIGH);
+
     //Logger.checkMemory();
   }
 
@@ -142,7 +146,7 @@ public class JDXDecompressor {
       maxY = d;
     else if (d < minY)
       minY = d;
-    if (Logger.debugging)
+    if (debugging)
       logError("Coord: " + ipt + pt);
     xyCoords[ipt++] = pt;
     firstLastX[1] = pt.getXVal();
@@ -171,7 +175,7 @@ public class JDXDecompressor {
 
     this.errorLog = errorLog;
     this.firstLastX = firstLastX;
-    if (Logger.debugging)
+    if (debugging)
       logError("firstX=" + firstX 
           + " xFactor=" + xFactor + " yFactor=" + yFactor + " deltaX=" + deltaX + " nPoints=" + nPoints);
 
@@ -186,7 +190,7 @@ public class JDXDecompressor {
     try {
       while ((line = t.readLineTrimmed()) != null && line.indexOf("##") < 0) {
         lineNumber++;
-        if (Logger.debugging)
+        if (debugging)
           logError(lineNumber + "\t" + line);
         if ((lineLen = line.length()) == 0)
           continue;
@@ -247,7 +251,8 @@ public class JDXDecompressor {
   }
 
   private void logError(String s) {
-    Logger.debug(s);
+    if (debugging)
+      Logger.debug(s);
     errorLog.append(s).append('\n');  
   }
 
@@ -266,7 +271,7 @@ public class JDXDecompressor {
     if (ich == lineLen)
       return Double.NaN;
     char ch = line.charAt(ich);
-    if (Logger.debugging)
+    if (debugging)
       Logger.info("" + ch);
     switch (ch) {
     case '%':

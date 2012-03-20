@@ -656,7 +656,7 @@ public class PreferencesDialog extends JDialog {
       JDXSource source = FileReader.createJDXSource(getClass()
           .getResourceAsStream("resources/sample.jdx"), false);
 
-      previewPanel = new JSVPanel(source.getSpectra().get(0), null, null);
+      previewPanel = new JSVPanel(source.getSpectra().get(0), null);
       AppUtils.setBoolean(previewPanel, null, ScriptToken.ENABLEZOOM, false);
       AppUtils.setBoolean(previewPanel, null, ScriptToken.GRIDON, true);
       AppUtils.setBoolean(previewPanel, null, ScriptToken.COORDINATESON, true);

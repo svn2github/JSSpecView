@@ -123,7 +123,6 @@ import org.jmol.api.JmolSyncInterface;
 import jspecview.common.AppUtils;
 import jspecview.common.CommandHistory;
 import jspecview.common.DisplayScheme;
-import jspecview.common.JSV1DOverlayPanel;
 import jspecview.common.JSVFrame;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelPopupMenu;
@@ -1201,8 +1200,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
     openDataOrFile(data, null, null, -1, -1);
   }
 
-  private int openDataOrFile(String data, String url,
-                             List<JDXSpectrum> specs, int firstSpec, int lastSpec) {
+  private int openDataOrFile(String data, String url, List<JDXSpectrum> specs,
+                             int firstSpec, int lastSpec) {
     writeStatus("");
     String filePath = null;
     String fileName = null;
@@ -1233,7 +1232,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       writeStatus(filePath + " is already open");
       return FILE_OPEN_ALREADY;
     }
-    setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)); 
+    setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
     try {
       setCurrentSource(isOverlay ? JDXSource.createOverlay(url, specs)
           : FileReader.createJDXSource(FileManager
@@ -1271,11 +1270,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
         parameters.integralMinY, parameters.integralOffset,
         parameters.integralFactor);
     if (overlay) {
-      try {
-        overlay(currentSelectedSource, (isOverlay ? url : null));
-      } catch (ScalesIncompatibleException ex) {
-        splitSpectra(currentSelectedSource);
-      }
+      overlay(currentSelectedSource, (isOverlay ? url : null));
     } else {
       splitSpectra(currentSelectedSource);
     }
@@ -1391,13 +1386,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     jsvp.repaint();
   }
 
-  private void showUnableToOverlayMessage() {
-    writeStatus("Unable to Overlay, Scales are Incompatible");
-    JOptionPane.showMessageDialog(this,
-        "Unable to Overlay, Scales are Incompatible", "Overlay Error",
-        JOptionPane.ERROR_MESSAGE);
-  }
-
   /**
    * Overlays the spectra of the specified <code>JDXSource</code>
    * 
@@ -1405,12 +1393,11 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the <code>JDXSource</code>
    * @throws ScalesIncompatibleException
    */
-  private void overlay(JDXSource source, String name)
-      throws ScalesIncompatibleException {
+  private void overlay(JDXSource source, String name) {
     overlayAllMenuItem.setSelected(true);
     splitMenuItem.setSelected(false);
     List<JDXSpectrum> specs = source.getSpectra();
-    JSVPanel jsvp = new JSV1DOverlayPanel(specs, null, null, jsvpPopupMenu);
+    JSVPanel jsvp = JSVPanel.getJSVPanel(specs, 0, 0, jsvpPopupMenu);
     jsvp.setTitle(source.getTitle());
 
     setJSVPanelProperties(jsvp, true);
@@ -1434,7 +1421,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     validate();
     repaint();
 
-    if (autoShowLegend)
+    if (autoShowLegend && selectedJSVPanel.getNumberOfGraphSets() == 1)
       findNode(selectedJSVPanel).setLegend(new OverlayLegendDialog(this, jsvp));
 
     overlaySplitButton.setIcon(splitIcon);
@@ -1457,8 +1444,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
     JSVFrame[] frames = new JSVFrame[specs.size()];
     for (int i = 0; i < specs.size(); i++) {
       JDXSpectrum spec = specs.get(i);
-      JSVPanel jsvp = (spec.getIntegrationGraph() == null ? new JSVPanel(spec, source, jsvpPopupMenu)
-          : JSV1DOverlayPanel.getIntegralPanel(spec, null, source, jsvpPopupMenu));
+      JSVPanel jsvp = (spec.getIntegrationGraph() == null ? new JSVPanel(spec, jsvpPopupMenu)
+          : JSVPanel.getIntegralPanel(spec, null, jsvpPopupMenu));
       setJSVPanelProperties(jsvp, true);
       JSVFrame frame = new JSVFrame(spec.getTitleLabel());
       frame.setFrameIcon(frameIcon);
@@ -1815,6 +1802,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
           
           for (int i = 0; i < list.size(); i++)
             sb.append("load APPEND " + Escape.escape(files[i].getAbsolutePath()) + ";\n");
+          if (!doAppend && list.size() > 1)
+            sb.append("overlay *");
           runScript(sb.toString());
 /*          
           
@@ -2081,7 +2070,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
             jsvp.addAnnotation(ScriptToken.getTokens(value));
           break;
         case OVERLAY:
-          overlay(ScriptToken.getTokens(TextFormat.simpleReplace(value, "*", " * ")));
+          overlay(value);
           break;
         case GETSOLUTIONCOLOR:
           if (jsvp != null)
@@ -2123,7 +2112,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
         JSVTreeNode node = specNodes.get(i);
         if (node.source != currentSelectedSource)
           continue;
-        if (JDXSpectrum.areScalesCompatible(spec, node.jsvp.getSpectrum()))
+        if (JDXSpectrum.areScalesCompatible(spec, node.jsvp.getSpectrum(), false))
           node.jsvp.setZoom(Double.NaN, y1, Double.NaN, y2);
       }
     } else {
@@ -2150,13 +2139,30 @@ public class MainFrame extends JFrame implements DropTargetListener,
     closeSource(source);
   }
 
-  private void overlay(List<String> list) {
-    List<JDXSpectrum> slist = new ArrayList<JDXSpectrum>();
+  private void overlay(String value) {
+    List<String> list;
+    List<String> list0 = null;
+    String s = value;
+    value = TextFormat.simpleReplace(value, "*", " * ");
+    if (value.equals(" * ")) {
+      list = ScriptToken.getTokens(getSpectrumListAsString()); 
+    } else if (s.startsWith("\"")) {
+      list = ScriptToken.getTokens(value);
+    } else {
+      value = TextFormat.simpleReplace(value, "-", " - ");
+      list = ScriptToken.getTokens(value);
+      list0 = ScriptToken.getTokens(getSpectrumListAsString());
+      if (list0.size() == 0)
+        return;
+    }
+      
+    List<JDXSpectrum> speclist = new ArrayList<JDXSpectrum>();
     StringBuffer sb = new StringBuffer();
     String id0 = (selectedJSVPanel == null ? "1."
         : findNode(selectedJSVPanel).id);
     id0 = id0.substring(0, id0.indexOf(".") + 1);
     int n = list.size();
+    String idLast = null;
     for (int i = 0; i < n; i++) {
       String id = list.get(i);
       double userYFactor = 1;
@@ -2167,17 +2173,41 @@ public class MainFrame extends JFrame implements DropTargetListener,
         } catch (NumberFormatException e) {
         }
       }
+      if (id.equals("-")) {
+        if (idLast == null)
+          idLast = list0.get(0);
+        id = (i + 1 == n ? list0.get(list0.size() - 1) : list.get(++i));
+        if (!id.contains("."))
+          id = id0 + id;
+        int pt = 0;
+        while (pt < list0.size() && !list0.get(pt).equals(idLast))
+          pt++;
+        pt++;
+        while (pt < list0.size() && !idLast.equals(id)) {
+          speclist.add(findSpectrumById(idLast = list0.get(pt++)));
+          sb.append(",").append(idLast);
+        }
+        continue;
+      }
       if (!id.contains("."))
         id = id0 + id;
       JDXSpectrum spec = findSpectrumById(id);
       if (spec == null)
         continue;
+      idLast = id;
       spec.setUserYFactor(userYFactor);
-      slist.add(spec);
+      speclist.add(spec);
       sb.append(",").append(id);
     }
-    if (slist.size() > 1 && JDXSpectrum.areScalesCompatible(slist))
-      openDataOrFile(null, sb.toString().substring(1), slist, -1, -1);
+    if (speclist.size() > 1)
+      openDataOrFile(null, sb.toString().substring(1), speclist, -1, -1);
+  }
+
+  private String getSpectrumListAsString() {
+    StringBuffer sb = new StringBuffer();
+    for (int i = 0; i < specNodes.size(); i++)
+      sb.append(" ").append(specNodes.get(i).id);
+    return sb.toString().trim();
   }
 
   public void setSpectrumNumber(int n) {
@@ -2451,7 +2481,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     JSVPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
-    jsvp.reset();
+    jsvp.clearViews();
   }
 
   /**
@@ -2877,13 +2907,9 @@ public class MainFrame extends JFrame implements DropTargetListener,
         return;
       }
       try {
-        if (JDXSpectrum.areScalesCompatible(currentSelectedSource.getSpectra())) {
-          JDXSource source = currentSelectedSource;
-          closeSource(currentSelectedSource);
-          overlay(source, null);
-        } else {
-          showUnableToOverlayMessage();
-        }
+        JDXSource source = currentSelectedSource;
+        closeSource(currentSelectedSource);
+        overlay(source, null);
       } catch (Exception ex) {
         splitSpectra(currentSelectedSource);
       }
@@ -2926,7 +2952,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     JDXSource source = currentSelectedSource;
     JSVPanel jsvp = getCurrentJSVPanel();
     if (!source.isCompoundSource || jsvp == null
-        || jsvp.getNumberOfSpectra() == 1) {
+        || jsvp.getNumberOfGraphSets() == 1) {
       splitMenuItem.setSelected(false);
       return;
       // STATUS --> Can't Split
@@ -3018,8 +3044,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
     private void setLegendVisibility(Frame frame, boolean visible) {
       if (legend == null && visible) {
         setLegend(
-            jsvp.getNumberOfSpectra() > 1 ? new OverlayLegendDialog(frame, jsvp)
-                : null);
+            jsvp.getNumberOfSpectraInCurrentSet() > 1 && jsvp.getNumberOfGraphSets() == 1 
+            ? new OverlayLegendDialog(frame, jsvp) : null);
       }
       if (legend != null)
         legend.setVisible(visible);
@@ -3090,7 +3116,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       scaleXCheckBoxMenuItem.setSelected(jsvp.isXScaleOn());
       scaleYCheckBoxMenuItem.setSelected(jsvp.isYScaleOn());
 
-      if (jsvp.getNumberOfSpectra() > 1) {
+      if (jsvp.getNumberOfGraphSets() > 1) {
         overlaySplitButton.setIcon(splitIcon);
         overlaySplitButton.setToolTipText("Split Display");
         overlayKeyButton.setEnabled(true);
@@ -3196,7 +3222,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       JSVPanel jsvp = specNodes.get(i).jsvp;
       if (jsvp == null)
         continue;
-      info.add(jsvp.getInfo(jsvp.getSource() == currentSelectedSource, key));
+      info.add(jsvp.getInfo(jsvp == selectedJSVPanel, key));
     }
     Map<String, Object> map = new Hashtable<String, Object>();
     map.put("items", info);

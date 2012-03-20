@@ -45,10 +45,12 @@ public class IntegralGraph implements Graph {
   public final static double DEFAULT_FACTOR = 50;
   public final static double DEFAULT_OFFSET = 30;
 
-  /**
-   * The input graph
-   */
-  private Graph graph;
+  private List<Integral> integrals;
+  private Graph sourceGraph;
+
+  public String getFilePath() {
+    return sourceGraph.getFilePath();
+  }
 
   /**
    * The minimum percent of Y values to use in calculating the integral
@@ -96,7 +98,7 @@ public class IntegralGraph implements Graph {
    */
   public IntegralGraph(Graph graph, double percentMinY, double percentOffset,
                        double integralFactor, String xUnits, String yUnits) {
-    this.graph = graph;
+    this.sourceGraph = graph;
     this.percentMinY = percentMinY;
     this.percentOffset = percentOffset;
     this.integralFactor = integralFactor;
@@ -161,7 +163,7 @@ public class IntegralGraph implements Graph {
    * @see jspecview.common.Graph#isIncreasing()
    */
   public boolean isIncreasing() {
-    return graph.isIncreasing();
+    return sourceGraph.isIncreasing();
   }
 
   /**
@@ -182,7 +184,7 @@ public class IntegralGraph implements Graph {
    * @return the title of the <code>IntegralGraph</code>
    */
   public String getTitle() {
-    return "Integral of: " + graph.getTitle();
+    return "Integral of: " + sourceGraph.getTitle();
   }
 
   public String getTitleLabel() {
@@ -259,7 +261,7 @@ public class IntegralGraph implements Graph {
    * @see jspecview.IntegralGraph#recalculate()
    */
   private Coordinate[] calculateIntegral() {
-    Coordinate[] xyCoords = graph.getXYCoords();
+    Coordinate[] xyCoords = sourceGraph.getXYCoords();
     Coordinate[] integralCoords = new Coordinate[xyCoords.length];
 
     double maxY = Coordinate.getMaxY(xyCoords);
@@ -329,7 +331,6 @@ public class IntegralGraph implements Graph {
     return ratios;
   }
 
-  private List<Integral> integrals;
   public static final int INTEGRATE_MARK = 4;
   public static final int INTEGRATE_TOGGLE = 3;
   public static final int INTEGRATE_ON = 2;
@@ -417,6 +418,10 @@ public class IntegralGraph implements Graph {
     JDXSpectrum.putInfo(key, info, "integralFactor", Double.valueOf(integralFactor));
     //TODO annotations
     return info;
+  }
+
+  public boolean is1D() {
+    return true;
   }
 
 }

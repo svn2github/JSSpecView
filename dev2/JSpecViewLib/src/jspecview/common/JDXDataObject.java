@@ -17,6 +17,16 @@ public abstract class JDXDataObject extends JDXHeader {
    */
   public static final double ERROR = Double.MAX_VALUE;
 
+  private String filePath;
+
+  public void setFilePath(String filePath) {
+    this.filePath = filePath;
+  }
+
+  public String getFilePath() {
+    return filePath;
+  }
+
   protected double blockID; // a random number generated in JDXFileReader
 
   public void setBlockID(double id) {
@@ -722,6 +732,7 @@ public abstract class JDXDataObject extends JDXHeader {
     newObj.nucleusY = nucleusY;
     newObj.freq2dX = freq2dX;
     newObj.freq2dY = freq2dY;
+    newObj.filePath = filePath;
 
   }
 

@@ -54,7 +54,7 @@ public class MultiScaleData extends ScaleData {
    *        the initial number of Y divisions for scale
    * @return returns an instance of <code>MultiScaleData</code>
    */
-  public MultiScaleData(Graph[] spectra, double yPt1,
+  public MultiScaleData(List<Graph> spectra, double yPt1,
       double yPt2, int[] startList, int[] endList,
       int initNumXDivisions, int initNumYDivisions, boolean isContinuous) {
     super(Coordinate.getMinX(spectra, startList, endList), 
@@ -100,7 +100,7 @@ public class MultiScaleData extends ScaleData {
 
   /**
    * 
-   * @param spectra
+   * @param graphsTemp
    * @param scaleData
    * @param initX
    * @param finalX
@@ -109,15 +109,15 @@ public class MultiScaleData extends ScaleData {
    * @param endIndices    to fill
    * @return
    */
-  public boolean setDataPointIndices(Graph[] spectra,
+  public boolean setDataPointIndices(List<Graph> graphsTemp,
                                             double initX,
                                             double finalX, int minPoints,
                                             int[] startIndices,
                                             int[] endIndices, boolean useRange) {
     int nSpectraOK = 0;
-    int nSpectra = spectra.length;
+    int nSpectra = graphsTemp.size();
     for (int i = 0; i < nSpectra; i++) {
-      Coordinate[] xyCoords = spectra[i].getXYCoords();
+      Coordinate[] xyCoords = graphsTemp.get(i).getXYCoords();
       int iStart = (useRange ? startDataPointIndices[i] : 0);
       int iEnd = (useRange ? endDataPointIndices[i] : xyCoords.length - 1);
       if (setXRange(i, xyCoords, initX, finalX, iStart, iEnd, startIndices, endIndices)

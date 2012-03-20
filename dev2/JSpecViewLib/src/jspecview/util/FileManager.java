@@ -167,7 +167,6 @@ public class FileManager {
       if (name.startsWith(urlPrefixes[iurlPrefix]))
         break;
     boolean isURL = (iurlPrefix >= 0);
-    System.out.println("FM getInputStream "  + isURL + " " + name);
     boolean isApplet = (appletDocumentBase != null);
     InputStream in;
     int length;

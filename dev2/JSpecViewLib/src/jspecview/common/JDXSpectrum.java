@@ -370,16 +370,10 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return graph;
   }
 
-  public static boolean areScalesCompatible(Graph s1, Graph s2) {
-    return (s1.getXUnits().equalsIgnoreCase(s2.getXUnits()));// && s1.getYUnits() == s2.getYUnits());
-  }
-
-  public static boolean areScalesCompatible(List<JDXSpectrum> spectra) {
-    if (spectra.size() >= 2)
-    for (int i = spectra.size(); --i >= 1;)
-      if (!areScalesCompatible(spectra.get(0), spectra.get(i)))
-        return false;
-    return true;
+  public static boolean areScalesCompatible(Graph s1, Graph s2,
+                                            boolean allow2D2D) {
+    return ((allow2D2D ? s1.is1D() == s2.is1D() : s1.is1D() && s2.is1D()) 
+        && s1.getXUnits().equalsIgnoreCase(s2.getXUnits()));
   }
 
   public static boolean process(List<JDXSpectrum> specs, int irMode,
@@ -425,7 +419,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
    */
   public boolean addSubSpectrum(JDXSpectrum spectrum, boolean forceSub) {
     if (!forceSub && (numDim < 2 || blockID != spectrum.blockID)
-        || !areScalesCompatible(this, spectrum))
+        || !areScalesCompatible(this, spectrum, true))
       return false;
     isForcedSubset = forceSub; // too many blocks (>100)
     if (subSpectra == null) {
@@ -530,6 +524,5 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     if (match == null || key.equalsIgnoreCase(match))
       info.put(key, value);
   }
-
 
 }

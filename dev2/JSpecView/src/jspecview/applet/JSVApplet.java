@@ -51,7 +51,6 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -75,7 +74,6 @@ import javax.swing.event.ChangeListener;
 
 import jspecview.common.AppUtils;
 import jspecview.common.IntegralGraph;
-import jspecview.common.JSV1DOverlayPanel;
 import jspecview.common.JSVPanel;
 import jspecview.common.OverlayLegendDialog;
 import jspecview.common.Parameters;
@@ -89,7 +87,6 @@ import jspecview.common.Annotation;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.PeakInfo;
 import jspecview.exception.JSpecViewException;
-import jspecview.exception.ScalesIncompatibleException;
 import jspecview.export.Exporter;
 import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
@@ -307,8 +304,8 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     if (type == null)
       type = "XY";
     JSVPanel jsvp = getSelectedPanel();
-    if (n < -1 || jsvp.getNumberOfSpectra() <= n)
-      return "only " + jsvp.getNumberOfSpectra()
+    if (n < -1 || jsvp.getNumberOfSpectraInCurrentSet() <= n)
+      return "only " + jsvp.getNumberOfSpectraInCurrentSet()
           + " spectra available.";
     try {
       JDXSpectrum spec = (n < 0 ? jsvp.getSpectrum() : jsvp.getSpectrumAt(n));
@@ -553,53 +550,31 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
    * @throws JSpecViewException
    */
   private void initPanels() throws JSpecViewException {
-    boolean showRange = false;
     JSVPanel jsvp;
-
-    if (startIndex >= 0 && endIndex > startIndex)
-      showRange = true;
 
     // Initialise JSVpanels
 
+    if (isOverlaid && startIndex != endIndex) {
+      theInterface = "single";
+      isOverlaid = false;
+    }
+    jsvPanels = new ArrayList<JSVPanel>();
     if (isOverlaid) {
       // overlay all spectra on a panel
-      jsvPanels = new ArrayList<JSVPanel>();
-
-      try {
-        int[] startIndices = null;
-        int[] endIndices = null;
-        if (showRange) {
-          startIndices = new int[numberOfSpectra];
-          endIndices = new int[numberOfSpectra];
-          Arrays.fill(startIndices, startIndex);
-          Arrays.fill(endIndices, endIndex);
-        }
-        jsvp = new JSV1DOverlayPanel(specs, startIndices, endIndices, appletPopupMenu);
-        
-        
-      } catch (ScalesIncompatibleException sie) {
-        theInterface = "single";
-        isOverlaid = false;
-        initPanels();
-        return;
-      }
+      jsvp = JSVPanel.getJSVPanel(specs, startIndex, endIndex, appletPopupMenu);
       endIndex = startIndex = -1;
       initProperties(jsvp, -1);
     } else {
-      // not overlaid
       // initialise JSVPanels and add them to the array
-      jsvPanels = new ArrayList<JSVPanel>();
       try {
         for (int i = 0; i < numberOfSpectra; i++) {
           JDXSpectrum spec = specs.get(i);
           if (spec.getIntegrationGraph() != null) {
-            jsvp = JSV1DOverlayPanel.getIntegralPanel(spec, null,
-                currentSource, appletPopupMenu);
-          } else if (showRange) {
-            jsvp = new JSVPanel(spec, startIndex, endIndex, currentSource,
-                appletPopupMenu);
+            jsvp = JSVPanel.getIntegralPanel(spec, null, appletPopupMenu);
           } else {
-            jsvp = new JSVPanel(spec, currentSource, appletPopupMenu);
+            List<JDXSpectrum> list = new ArrayList<JDXSpectrum>();
+            list.add(spec);
+            jsvp = JSVPanel.getJSVPanel(list, startIndex, endIndex, appletPopupMenu);
           }
           jsvPanels.add(jsvp);
           initProperties(jsvp, i);
@@ -1378,7 +1353,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     if (isAll) {
       JDXSpectrum spec = selectedJSVPanel.getSpectrum();
       for (int i = jsvPanels.size(); --i >= 0; )
-        if (JDXSpectrum.areScalesCompatible(spec, jsvPanels.get(i).getSpectrum()))
+        if (JDXSpectrum.areScalesCompatible(spec, jsvPanels.get(i).getSpectrum(), false))
           jsvPanels.get(i).setZoom(Double.NaN, y1, Double.NaN, y2);
     } else {
       selectedJSVPanel.setZoom(Double.NaN, y1, Double.NaN, y2);
@@ -1438,7 +1413,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
       sb.append(",").append(id);
     }
     String s = sb.toString().substring(1);
-    if (list.size() > 1 && JDXSpectrum.areScalesCompatible(slist)) {
+    if (list.size() > 1) {
       openDataOrFile(null, s, slist, null);
       setSpectrum(1);
     } else {

@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import jspecview.common.Coordinate;
 import jspecview.common.Graph;
 import jspecview.common.AppUtils;
-import jspecview.common.MultiScaleData;
 import jspecview.common.ScaleData;
 import jspecview.util.Logger;
 import jspecview.util.TextFormat;
@@ -348,6 +347,7 @@ class SVGExporter extends FormExporter {
    * @return data if fileName is null
    * @throws IOException
    */
+  /*
   public String exportAsSVG(String fileName, Graph[] spectra,
                                  String title, int[] startDataPointIndices,
                                  int[] endDataPointIndices, String xUnits,
@@ -360,7 +360,7 @@ class SVGExporter extends FormExporter {
 			  endDataPointIndices, xUnits, yUnits, continuous, increasing, plotAreaColor, 
 			  backgroundColor, plotColor, gridColor, titleColor, scaleColor, unitsColor, false);
   }
-
+*/
   /**
    * Export an overlaid graph as SVG with specified Coordinates and Colors
    * 
@@ -400,6 +400,8 @@ class SVGExporter extends FormExporter {
    * @return data if fileName is null
    * @throws IOException
    */
+  
+  /*
   public String exportAsSVG(String fileName, Graph[] spectra,
                             String title, int[] startDataPointIndices,
                             int[] endDataPointIndices, String xUnits,
@@ -623,4 +625,5 @@ class SVGExporter extends FormExporter {
     Logger.info("SVGExport using " + vm);
     return writeForm(vm);
   }
+  */
 }

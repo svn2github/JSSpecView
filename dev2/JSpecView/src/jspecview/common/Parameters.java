@@ -97,7 +97,10 @@ public class Parameters extends DisplayScheme {
       }
       break;
     case DEBUG:
-      Logger.debugging = isTrue(value);
+      Logger.setLogLevel(value.toLowerCase().equals("high") ? 
+            Logger.LEVEL_DEBUGHIGH
+            : isTrue(value) ? Logger.LEVEL_DEBUG 
+                : Logger.LEVEL_INFO);
       return;
     case COORDINATESON:
     case DISPLAY1D:
@@ -169,15 +172,12 @@ public class Parameters extends DisplayScheme {
   }
 
   public boolean setBoolean(ScriptToken st, boolean val) {
-    if (val)
-      htBooleans.put(st, Boolean.TRUE);
-    else
-      htBooleans.remove(st);
+    htBooleans.put(st, Boolean.valueOf(val));
     return val;
   }
 
   public boolean getBoolean(ScriptToken t) {
-    return htBooleans.containsKey(t);
+    return Boolean.TRUE == htBooleans.get(t);
   }
     
   private Color setColor(ScriptToken st, String value) {

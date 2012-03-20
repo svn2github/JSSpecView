@@ -35,7 +35,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
 import jspecview.common.JDXSpectrum;
-import jspecview.source.JDXSource;
 
 /**
  * Popup Menu for JSVPanel.
@@ -244,8 +243,6 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    * @param e the <code>ActionEvent</code>
    */
   void resetMenuItem_actionPerformed(ActionEvent e) {
-    if (integrateCheckBoxMenuItem.isSelected() == true)
-      integrateCheckBoxMenuItem.setSelected(false);
     jsvp.reset();
   }
 
@@ -292,8 +289,6 @@ public class JSVPanelPopupMenu extends JPopupMenu {
 
     JDXSpectrum spectrum = jsvp.getSpectrum();
     Object[][] rowData = spectrum.getHeaderRowDataAsArray();
-    //if (source.isCompoundSource)
-      //rowData = source.getHeaderRowDataAsArray(false, rowData);
     String[] columnNames = { "Label", "Description" };
     JTable table = new JTable(rowData, columnNames);
     table.setPreferredScrollableViewportSize(new Dimension(400, 195));
@@ -303,7 +298,6 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   }
 
   protected JSVPanel jsvp;
-  protected JDXSource source;
 
   /**
    * Allows the grid to be toogled
@@ -418,9 +412,10 @@ public class JSVPanelPopupMenu extends JPopupMenu {
     integrateCheckBoxMenuItem.setSelected(spec0.getIntegrationGraph() != null);
 
     boolean isOverlaid = jsvp.isOverlaid();
-    integrateCheckBoxMenuItem.setEnabled(!isOverlaid && spec0.canIntegrate());
-    solColMenuItem.setEnabled(!isOverlaid && spec0.canShowSolutionColor());
-    transAbsMenuItem.setEnabled(!isOverlaid && spec0.canConvertTransAbs());
+    boolean isSingle = jsvp.getNumberOfSpectraTotal() == 1;
+    integrateCheckBoxMenuItem.setEnabled(isSingle && spec0.canIntegrate());
+    solColMenuItem.setEnabled(isSingle && spec0.canShowSolutionColor());
+    transAbsMenuItem.setEnabled(isSingle && spec0.canConvertTransAbs());
     
     if (appletSaveAsJDXMenu != null)
       appletSaveAsJDXMenu.setEnabled(spec0.canSaveAsJDX());
@@ -432,7 +427,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
       appletCompoundMenu.setEnabled(
           appletCompoundMenu.isEnabled() && appletCompoundMenu.getItemCount() > 3);
     if (overlayKeyMenuItem != null)
-      overlayKeyMenuItem.setEnabled(isOverlaid);
+      overlayKeyMenuItem.setEnabled(isOverlaid && jsvp.getNumberOfGraphSets() == 1);
   }
 
   public void dispose() {

@@ -91,7 +91,7 @@ public class Exporter {
                                      String dirLastExported) {
     // From popup menu click SaveAs or Export
     // if JSVPanel has more than one spectrum...Choose which one to export
-    int numOfSpectra = panel.getNumberOfSpectra();
+    int numOfSpectra = panel.getNumberOfGraphSets();
     if (numOfSpectra == 1 || type.equals("JPG") || type.equals("PNG"))
       return exportSpectrumOrImage(panel, type, -1, fc, recentFileName,
           dirLastExported);
@@ -277,4 +277,5 @@ public class Exporter {
       return "Error exporting " + path + ": " + ioe.getMessage();
     }
   }
+  
 }

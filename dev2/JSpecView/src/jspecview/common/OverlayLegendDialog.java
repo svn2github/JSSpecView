@@ -152,7 +152,7 @@ public class OverlayLegendDialog extends JDialog {
           JDXSpectrum spectrum;
           Object[] row;
 
-          int numSpectra = jsvp.getNumberOfSpectra();
+          int numSpectra = jsvp.getNumberOfSpectraInCurrentSet();
           data = new Object[numSpectra][];
 
           for(int index = 0; index < numSpectra; index++){

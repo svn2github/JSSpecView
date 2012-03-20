@@ -80,5 +80,6 @@ public interface Graph {
   public double getPercentYValueAt(double x);
   public double getUserYFactor();
   public Map<String, Object> getInfo(String key);
-  
+  public String getFilePath();
+  public boolean is1D();
 }

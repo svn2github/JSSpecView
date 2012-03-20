@@ -41,7 +41,7 @@ public class AppUtils {
     JDXSpectrum spectrum = jsvp.getSpectrum();
     IntegralGraph graph = spectrum.getIntegrationGraph();
     spectrum.setIntegrationGraph(null);
-    if (graph != null || spectrum.canIntegrate() && jsvp.getNumberOfSpectra() == 1) {
+    if (graph != null || spectrum.canIntegrate() && jsvp.getNumberOfSpectraInCurrentSet() == 1) {
       if (showDialog) {
         IntegrateDialog integDialog;
         if (graph != null) {
@@ -61,8 +61,8 @@ public class AppUtils {
           parameters.integralOffset, parameters.integralFactor);
 
       if (graph != null) {
-        JSVPanel newJsvp = JSV1DOverlayPanel.getIntegralPanel(spectrum, jsvp
-            .getIntegralPlotColor(), jsvp.getSource(), jsvp.getPopup());
+        JSVPanel newJsvp = JSVPanel.getIntegralPanel(spectrum, jsvp
+            .getIntegralPlotColor(), jsvp.getPopup());
         // add integration ratio annotations if any exist
         jp.remove(jsvp);
         jp.add(newJsvp);
@@ -80,7 +80,7 @@ public class AppUtils {
     if (spectrum.getIntegrationGraph() == null)
       return jsvp;
     spectrum.setIntegrationGraph(null);
-    JSVPanel newJsvp = new JSVPanel(spectrum, jsvp.getSource(), jsvp.getPopup());
+    JSVPanel newJsvp = new JSVPanel(spectrum, jsvp.getPopup());
     jp.remove(jsvp);
     jp.add(newJsvp);
     return newJsvp;
@@ -199,6 +199,22 @@ public class AppUtils {
       params = new Parameters("temp");
     params.setBoolean(st, b);
     jsvp.setBoolean(params, st);
+  }
+
+  /**
+   * Returns a randomly generated <code>Color</code>
+   * 
+   * @return a randomly generated <code>Color</code>
+   */
+  public static Color generateRandomColor() {
+    while (true) {
+      int red = (int) (Math.random() * 255);
+      int green = (int) (Math.random() * 255);
+      int blue = (int) (Math.random() * 255);
+      Color randomColor = new Color(red, green, blue);
+      if (!randomColor.equals(Color.blue))
+        return randomColor;
+    }
   }
 
 
