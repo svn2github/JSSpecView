@@ -419,7 +419,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     return jsvp;
   }
 
-  public void initJSVPanel(List<Graph> spectra, int startIndex, int endIndex) {
+  private void initJSVPanel(List<Graph> spectra, int startIndex, int endIndex) {
     setBorder(BorderFactory.createLineBorder(Color.lightGray));
     nSpectra = spectra.size();
     graphSets = JSVGraphSet.getGraphSets(this, spectra, startIndex, endIndex);
@@ -491,6 +491,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
   /**
    * Add information about a region of the displayed spectrum to be highlighted
+   * applet only right now
    * 
    * @param x1
    *        the x value of the coordinate where the highlight should start
@@ -501,18 +502,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   public void addHighlight(double x1, double x2, Color color) {
     currentGraphSet.addHighlight(x1, x2, color);
-  }
-
-  /**
-   * Add information about a region of the displayed spectrum to be highlighted
-   * 
-   * @param x1
-   *        the x value of the coordinate where the highlight should start
-   * @param x2
-   *        the x value of the coordinate where the highlight should end
-   */
-  public void addHighlight(double x1, double x2) {
-    currentGraphSet.addHighlight(x1, x2);
   }
 
   /**
@@ -616,6 +605,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   public int getNumberOfGraphSets() {
     return graphSets.size();
+  }
+
+  public int getNumberOfSpectraInCurrentSet() {
+    return currentGraphSet.getNumberOfSpectra();
   }
 
   /**
@@ -757,24 +750,27 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   private void drawGraph(Graphics g, int height, int width) {
 
-    boolean grid, title, xunits, yunits, coords, xscale, yscale;
+    boolean withGrid, withTitle, withXUnits, withYUnits, 
+        withCoords, withXScale, withYScale, withSliders;
 
     if (isPrinting) {
-      grid = printGrid;
-      xscale = printScale;
-      yscale = printScale;
-      title = printTitle;
-      xunits = printScale;
-      yunits = printScale;
-      coords = false;
+      withCoords = false;
+      withTitle = printTitle;
+      withGrid = printGrid;
+      withXScale = printScale;
+      withYScale = printScale;
+      withXUnits = printScale;
+      withYUnits = printScale;
+      withSliders = false;
     } else {
-      grid = gridOn;
-      title = titleOn;
-      xunits = xUnitsOn;
-      yunits = yUnitsOn;
-      coords = coordinatesOn;
-      xscale = xScaleOn;
-      yscale = yScaleOn;
+      withCoords = coordinatesOn;
+      withTitle = titleOn;
+      withGrid = gridOn;
+      withXUnits = xUnitsOn;
+      withYUnits = yUnitsOn;
+      withXScale = xScaleOn;
+      withYScale = yScaleOn;
+      withSliders = true;
     }
     plotAreaWidth = width - (plotAreaInsets.right + plotAreaInsets.left);
     plotAreaHeight = height - (plotAreaInsets.top + plotAreaInsets.bottom);
@@ -784,13 +780,14 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     }
     thisWidth = width;
     thisPlotHeight = plotAreaHeight;
-    
-    for (int i = graphSets.size(); --i >= 0; ) 
-      graphSets.get(i).drawGraph(g, grid, xunits, yunits, xscale, yscale, 
-          !isIntegralDrag, height, width, plotAreaInsets, isResized, enableZoom);
-     if (title)
+
+    for (int i = graphSets.size(); --i >= 0;)
+      graphSets.get(i).drawGraph(g, withGrid, withXUnits, withYUnits,
+          withXScale, withYScale, withSliders, !isIntegralDrag, height, width,
+          plotAreaInsets, isResized, enableZoom);
+    if (withTitle)
       drawTitle(g, height, width);
-    if (coords)
+    if (withCoords)
       drawCoordinates(g, height, width);
   }
 
@@ -1035,6 +1032,53 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     return true;
   }
 
+  public static JSVPanel taConvert(JSVPanel jsvp, int mode) {
+    if (jsvp.getNumberOfSpectraTotal() > 1)
+      return null;
+    JDXSpectrum spectrum = JDXSpectrum.taConvert(jsvp.getSpectrum(), mode);
+    return (spectrum == jsvp.getSpectrum() ? null : new JSVPanel(spectrum,
+        jsvp.popup));
+  }
+
+  public static void showSolutionColor(Component component, String sltnclr) {
+    JOptionPane.showMessageDialog(component, "<HTML><body bgcolor=rgb("
+        + sltnclr + ")><br />Predicted Solution Colour- RGB(" + sltnclr
+        + ")<br /><br /></body></HTML>", "Predicted Colour",
+        JOptionPane.INFORMATION_MESSAGE);
+  }
+
+  public String getSolutionColor() {
+    Graph spectrum = getSpectrum();
+    String Yunits = spectrum.getYUnits();
+    return Visible.Colour(spectrum.getXYCoords(), Yunits);
+  }
+
+  public void refresh() {
+    thisWidth = 0;
+    repaint();
+  }
+
+  public void addAnnotation(List<String> tokens) {
+    currentGraphSet.addAnnotation(tokens);
+    // TODO Auto-generated method stub
+    
+  }
+
+  public void processPeakSelect(String peak) {
+    System.out.println("JSVPANEL PROCESS " + peak);
+    // note that we could have multiple matches? 
+    for (int i = 0; i < graphSets.size(); i++)
+      graphSets.get(i).processPeakSelect(peak);
+  }
+
+  public String findPeak(String fileName, String index) {
+    PeakInfo pi;
+    for (int i = 0; i < graphSets.size(); i+= 1)
+      if ((pi = graphSets.get(i).findPeak(fileName, index)) != null)
+        return pi.toString();
+    return null;
+  }
+
   /**
    * Adds a PanelListener
    * 
@@ -1088,16 +1132,18 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       return;
     int xPixel = e.getX();
     int yPixel = e.getY();
-    if (findGraphSet(xPixel, yPixel, true) == null)
+    JSVGraphSet gs = JSVGraphSet.findGraphSet(graphSets, xPixel, yPixel);
+    if (gs == null)
       return;
-    isIntegralDrag = (e.isControlDown() && currentGraphSet.getSpectrum().getIntegrationGraph() != null);
-    currentGraphSet.checkWidgetEvent(xPixel, yPixel, true);
+    isIntegralDrag = (e.isControlDown() && gs.getSpectrum().getIntegrationGraph() != null);
+    currentGraphSet = gs;
+    gs.checkWidgetEvent(xPixel, yPixel, true);
   }
 
   public void mouseMoved(MouseEvent e) {
     int xPixel = e.getX();
     int yPixel = e.getY();
-    JSVGraphSet gs = findGraphSet(xPixel, yPixel, false);
+    JSVGraphSet gs = JSVGraphSet.findGraphSet(graphSets, xPixel, yPixel);
     if (gs == null)
       return;
     gs.mouseMovedEvent(xPixel, yPixel);
@@ -1106,10 +1152,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   public void mouseDragged(MouseEvent e) {
     int xPixel = e.getX();
     int yPixel = e.getY();
-    if (findGraphSet(xPixel, yPixel, true) == null)
+    if (JSVGraphSet.findGraphSet(graphSets, xPixel, yPixel) != currentGraphSet)
       return;
     currentGraphSet.checkWidgetEvent(xPixel, yPixel, false);
-    mouseMoved(e);
+    currentGraphSet.mouseMovedEvent(xPixel, yPixel);
   }
 
   public void mouseReleased(MouseEvent e) {
@@ -1127,20 +1173,11 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       popup.show(this, xPixel, yPixel);
       return;
     }
-    if (findGraphSet(xPixel, yPixel, true) == null)
+    JSVGraphSet gs = JSVGraphSet.findGraphSet(graphSets, xPixel, yPixel);
+    if (gs == null)
       return;
-    currentGraphSet.mouseClickEvent(xPixel, yPixel, e.getClickCount(), e
-        .isControlDown());
-  }
-
-  private JSVGraphSet findGraphSet(int xPixel, int yPixel, boolean makeCurrent) {
-    for (int i = graphSets.size(); --i >= 0; )
-      if (graphSets.get(i).hasPoint(xPixel, yPixel)) {
-        if (makeCurrent)
-          currentGraphSet = graphSets.get(i);
-        return graphSets.get(i);
-      }
-    return null;
+    currentGraphSet = gs;
+    gs.mouseClickEvent(xPixel, yPixel, e.getClickCount(), e.isControlDown());
   }
 
   public void mouseEntered(MouseEvent e) {
@@ -1163,7 +1200,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
           break;
         }
       }
-
       return;
     }
     switch (e.getKeyCode()) {
@@ -1201,57 +1237,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       currentGraphSet.nextView();
       return;
     }
-  }
-
-  public static JSVPanel taConvert(JSVPanel jsvp, int mode) {
-    if (jsvp.getNumberOfSpectraTotal() > 1)
-      return null;
-    JDXSpectrum spectrum = JDXSpectrum.taConvert(jsvp.getSpectrum(), mode);
-    return (spectrum == jsvp.getSpectrum() ? null : new JSVPanel(spectrum,
-        jsvp.popup));
-  }
-
-  public static void showSolutionColor(Component component, String sltnclr) {
-    JOptionPane.showMessageDialog(component, "<HTML><body bgcolor=rgb("
-        + sltnclr + ")><br />Predicted Solution Colour- RGB(" + sltnclr
-        + ")<br /><br /></body></HTML>", "Predicted Colour",
-        JOptionPane.INFORMATION_MESSAGE);
-  }
-
-  public String getSolutionColor() {
-    Graph spectrum = getSpectrum();
-    String Yunits = spectrum.getYUnits();
-    return Visible.Colour(spectrum.getXYCoords(), Yunits);
-  }
-
-  public void refresh() {
-    thisWidth = 0;
-    repaint();
-  }
-
-  public void addAnnotation(List<String> tokens) {
-    currentGraphSet.addAnnotation(tokens);
-    // TODO Auto-generated method stub
-    
-  }
-
-  public int getNumberOfSpectraInCurrentSet() {
-    return currentGraphSet.getNumberOfSpectra();
-  }
-
-  public void processPeakSelect(String peak) {
-    System.out.println("JSVPANEL PROCESS " + peak);
-    // note that we could have multiple matches? 
-    for (int i = 0; i < graphSets.size(); i++)
-      graphSets.get(i).processPeakSelect(peak);
-  }
-
-  public String findPeak(String fileName, String index) {
-    PeakInfo pi;
-    for (int i = 0; i < graphSets.size(); i+= 1)
-      if ((pi = graphSets.get(i).findPeak(fileName, index)) != null)
-        return pi.toString();
-    return null;
   }
 
 }

@@ -15,10 +15,14 @@ class PlotWidget extends Coordinate {
   int yPixel0;
   int xPixel1;
   int yPixel1;
+  
+  boolean isPin;
   boolean isPinOrCursor;
   boolean isXtype;
   boolean is2D;
   boolean is2Donly;
+  boolean isEnabled = true;
+  
   private String name;
   
   @Override
@@ -29,8 +33,9 @@ class PlotWidget extends Coordinate {
             + "/" + yPixel0);
   }
  
-  public PlotWidget(String name) {
+  PlotWidget(String name) {
     this.name = name;
+    isPin = (name.charAt(0) == 'p');
     isPinOrCursor = (name.charAt(0) != 'z');
     isXtype = (name.indexOf("x") >= 0);
     is2D = (name.indexOf("2D") >= 0);
@@ -41,18 +46,22 @@ class PlotWidget extends Coordinate {
     return (Math.abs(xPixel - xPixel0) < 5 && Math.abs(yPixel - yPixel0) < 5);
   }
 
-  public void setX(double x, int xPixel) {
+  void setX(double x, int xPixel) {
     setXVal(x);
     xPixel0 = xPixel1 = xPixel;
   }
 
-  public void setY(double y, int yPixel) {
+  void setY(double y, int yPixel) {
     setYVal(y);
     yPixel0 = yPixel1 = yPixel;
   }
 
-  public double getValue() {
+  double getValue() {
     return (isXtype ? getXVal() : getYVal());
+  }
+
+  void setEnabled(boolean enabled) {
+    isEnabled = enabled;
   }
 
 }
