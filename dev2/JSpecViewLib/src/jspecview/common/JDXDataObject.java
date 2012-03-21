@@ -18,13 +18,18 @@ public abstract class JDXDataObject extends JDXHeader {
   public static final double ERROR = Double.MAX_VALUE;
 
   private String filePath;
-
+  private String filePathForwardSlash;
+  
   public void setFilePath(String filePath) {
     this.filePath = filePath.trim();
+    filePathForwardSlash = this.filePath.replace('\\','/');
   }
 
   public String getFilePath() {
     return filePath;
+  }
+  public String getFilePathForwardSlash() {
+    return filePathForwardSlash;
   }
 
   protected double blockID; // a random number generated in JDXFileReader

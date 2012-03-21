@@ -792,7 +792,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
           withXScale, withYScale, withSliders, !isIntegralDrag, height, width,
           plotAreaInsets, isResized, enableZoom);
     if (withTitle)
-      drawTitle(g, height, width);
+      drawTitle(g, height, width, getSpectrum().getPeakTitle());
     if (withCoords)
       drawCoordinates(g, height, width);
   }
@@ -825,12 +825,12 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @param width
    *        the width to be drawn in pixels
    */
-  private void drawTitle(Graphics g, int height, int width) {
+  void drawTitle(Graphics g, int height, int width, String title) {
     setFont(g, width, isPrinting || titleBoldOn ? Font.BOLD : Font.PLAIN, 14,
         true);
     FontMetrics fm = g.getFontMetrics();
     g.setColor(titleColor);
-    g.drawString(getSpectrum().getPeakTitle(), 5, (int) (height - fm
+    g.drawString(title, 5, (int) (height - fm
         .getHeight() / 2));
   }
 
@@ -1083,6 +1083,11 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       if ((pi = graphSets.get(i).findPeak(fileName, index)) != null)
         return pi;
     return null;
+  }
+
+  public void selectSpectrum(String fileName, String type, String model) {
+    for (int i = 0; i < graphSets.size(); i+= 1)
+      graphSets.get(i).selectSpectrum(fileName, type, model);
   }
 
   /**

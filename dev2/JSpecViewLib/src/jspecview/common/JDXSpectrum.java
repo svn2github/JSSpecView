@@ -103,13 +103,22 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return list.size();
   }
 
-  public PeakInfo findPeak(String filePath, String index) {
+  public PeakInfo findPeakByFileIndex(String filePath, String index) {
     if (peakList != null && peakList.size() > 0)
       for (int i = 0; i < peakList.size(); i++)
-        if (peakList.get(i).check(filePath, index))
+        if (peakList.get(i).checkFileIndex(filePath, index))
           return (selectedPeak = peakList.get(i));
     return null;
   }
+
+  public boolean matchesPeakTypeModel(String type, String model) {
+    if (peakList != null && peakList.size() > 0)
+      for (int i = 0; i < peakList.size(); i++)
+        if (peakList.get(i).checkTypeModel(type, model))
+          return true;
+    return false;
+  }
+
 
   private PeakInfo selectedPeak;
 

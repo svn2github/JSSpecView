@@ -11,7 +11,8 @@ public class PeakInfo {
 	private String type;
   private String index;
 	private String file;
-  public String title;
+  private String title;
+  private String model;
   public Graph spectrum;
 
 	
@@ -61,6 +62,8 @@ public class PeakInfo {
 		type = Parser.getQuotedAttribute(stringInfo, "type");
     index = Parser.getQuotedAttribute(stringInfo, "index");
     file = Parser.getQuotedAttribute(stringInfo, "file");
+    model = Parser.getQuotedAttribute(stringInfo, "model");
+    title = Parser.getQuotedAttribute(stringInfo, "title");
 	}
 
 	@Override
@@ -73,13 +76,24 @@ public class PeakInfo {
   }
 
   public String getTitle() {
-    if (title == null && stringInfo != null)
-      title = Parser.getQuotedAttribute(stringInfo, "title");
     return title;
   }
 
-  public boolean check(String filePath, String sIndex) {
-    return (index.equals(sIndex) && file.equals(filePath));
+  public boolean checkFileIndex(String filePath, String sIndex) {
+    return (sIndex.equals(index) && filePath.equals(file));
+  }
+
+  public boolean checkTypeModel(String type, String model) {
+    return (type != null && model != null 
+        && type.equals(this.type) && model.equals(this.model));
+  }
+
+  public String getModel() {
+    return model;
+  }
+
+  public String getFilePath() {
+    return file;
   }
 
 }

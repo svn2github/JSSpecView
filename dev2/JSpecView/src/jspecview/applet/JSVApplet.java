@@ -1540,9 +1540,12 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
   public void panelEvent(Object eventObj) {
     if (eventObj instanceof PeakPickEvent) {
       PeakPickEvent e = (PeakPickEvent) eventObj;
+      PeakInfo pi = e.getPeakInfo();
       setSelectedPanel((JSVPanel) e.getSource());
-      selectedJSVPanel.processPeakSelect(e.getPeakInfo());
-      sendScript(e.getPeakInfo().toString());
+      selectedJSVPanel.processPeakSelect(pi);
+      sendScript(pi.toString());
+      if (!pi.isClearAll())
+        selectedJSVPanel.selectSpectrum(pi.getFilePath(), pi.getType(), pi.getModel());
       checkCallbacks();
     } else if (eventObj instanceof ZoomEvent) {
     } else if (eventObj instanceof SubSpecChangeEvent) {

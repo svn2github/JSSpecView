@@ -60,6 +60,7 @@ class JSVGraphSet {
   private ArrayList<Annotation> annotations;
   private ColoredAnnotation lastAnnotation;
   protected JDXSource source;
+  
   private ImageScaleData isd;
   private BufferedImage image2D;
   private PlotWidget zoomBox1D, zoomBox2D, 
@@ -91,6 +92,7 @@ class JSVGraphSet {
 
   private int currentZoomIndex;  
   private int nSpectra;
+  private int iThisSpectrum = -1;
 
   double userYFactor = 1;
   private double xFactorForScale, yFactorForScale;
@@ -517,7 +519,11 @@ class JSVGraphSet {
 
       // the graphs
       for (int i = nSpectra; --i >= 0;)
-        drawPlot(g, i, height, width, withGrid, drawY0);
+        if (doPlot(i)) {
+          drawPlot(g, i, height, width, withGrid, drawY0);
+          if (iThisSpectrum == i)
+            jsvp.drawTitle(g, height, width, spectra.get(i).getTitle());
+        }
 
       // over-spectrum stuff    
       if (integrationRatios != null)
@@ -530,6 +536,11 @@ class JSVGraphSet {
     if (annotations != null)
       drawAnnotations(g, height, width, annotations, null);
 
+  }
+
+  private boolean doPlot(int i) {
+    return (iThisSpectrum < 0 || iThisSpectrum == i 
+            || spectra.get(i) instanceof IntegralGraph && iThisSpectrum == i - 1);
   }
 
   private void draw2DUnits(Graphics g, int width, int subIndex,
@@ -862,7 +873,7 @@ class JSVGraphSet {
     Coordinate[] xyCoords = spectra.get(index).getXYCoords();
 
     g.setColor(index == 1 && getSpectrum().getIntegrationGraph() != null
-        ? jsvp.getIntegralPlotColor() : plotColors[index]);
+        ? jsvp.getIntegralPlotColor() : plotColors[iThisSpectrum == index ? 0 : index]);
 
     // Check if revPLot on
     int y0 = toPixelY(0);
@@ -2057,10 +2068,28 @@ class JSVGraphSet {
     }
   }
 
+  void selectSpectrum(String filePath, String type, String model) {
+    if (nSpectra == 1 || jsvp.currentGraphSet == this) {
+      iThisSpectrum = -1;
+      return;
+    }
+    boolean haveFound = false;
+    for (int i = spectra.size(); --i >= 0;) {
+      if ((filePath == null || getSpectrumAt(i).getFilePathForwardSlash().equals(filePath))
+        && (getSpectrumAt(i).matchesPeakTypeModel(type, model))) {
+          iThisSpectrum = i;
+          haveFound = true;
+        }
+    }
+    if (!haveFound && iThisSpectrum >= 0)
+      iThisSpectrum = Integer.MAX_VALUE; // no plots in that case
+  }
+
+
   PeakInfo findPeak(String filePath, String index) {
     // for now we are only checking the base spectrum, but
     // there might be a need to check subspectra at some point?
-   return getSpectrumAt(0).findPeak(filePath, index);
+   return getSpectrumAt(0).findPeakByFileIndex(filePath, index);
   }
 
   void toPeak(int istep) {

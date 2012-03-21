@@ -2172,11 +2172,12 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private void overlay(String value) {
     List<String> list;
     List<String> list0 = null;
-    String s = value;
+    if (value.equalsIgnoreCase("all"))
+      value = "*";
     value = TextFormat.simpleReplace(value, "*", " * ");
     if (value.equals(" * ")) {
       list = ScriptToken.getTokens(getSpectrumListAsString());
-    } else if (s.startsWith("\"")) {
+    } else if (value.startsWith("\"")) {
       list = ScriptToken.getTokens(value);
     } else {
       value = TextFormat.simpleReplace(value, "-", " - ");
@@ -2294,10 +2295,12 @@ public class MainFrame extends JFrame implements DropTargetListener,
   public void panelEvent(Object eventObj) {
     if (eventObj instanceof PeakPickEvent) {
       PeakPickEvent e = ((PeakPickEvent) eventObj);
+      PeakInfo pi = e.getPeakInfo();
       selectedJSVPanel = (JSVPanel) e.getSource();
-      selectedJSVPanel.processPeakSelect(e.getPeakInfo());
+      selectedJSVPanel.processPeakSelect(pi);
       sendScript(e.toString());
-      setMainTitle(e.getPeakInfo().getTitle());
+      setMainTitle(pi.getTitle());
+      selectedJSVPanel.selectSpectrum(pi.getFilePath(), pi.getType(), pi.getModel());
     } else if (eventObj instanceof ZoomEvent) {
       writeStatus("Double-Click highlighted spectrum in menu to zoom out; CTRL+/CTRL- to adjust Y scaling.");
     } else if (eventObj instanceof SubSpecChangeEvent) {
@@ -2310,7 +2313,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   }
 
   private void setMainTitle(String title) {
-    String t = selectedJSVPanel.getTitle();
+    String t = selectedJSVPanel.getSpectrum().getTitleLabel();
     desktopPane.getSelectedFrame().setTitle(title == null ?  t : t + " - " + title);
   }
 
