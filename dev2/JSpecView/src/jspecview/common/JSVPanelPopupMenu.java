@@ -413,7 +413,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
 
     boolean isOverlaid = jsvp.isOverlaid();
     boolean isSingle = jsvp.getNumberOfSpectraTotal() == 1;
-    integrateCheckBoxMenuItem.setEnabled(isSingle && spec0.canIntegrate());
+    integrateCheckBoxMenuItem.setEnabled(isSingle && spec0.canIntegrate() || spec0.getIntegrationGraph() != null);
     solColMenuItem.setEnabled(isSingle && spec0.canShowSolutionColor());
     transAbsMenuItem.setEnabled(isSingle && spec0.canConvertTransAbs());
     

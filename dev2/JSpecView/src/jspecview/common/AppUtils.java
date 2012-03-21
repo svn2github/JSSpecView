@@ -113,7 +113,7 @@ public class AppUtils {
                                        Container frameOrPanel,
                                        Parameters parameters, String value) {
     IntegralGraph graph = jsvp.getSpectrum().getIntegrationGraph();
-    boolean showMessage = value.equals("?");
+    boolean showMessage = false;//value.equals("?");
     int mode = IntegralGraph.getMode(value);
     if (mode == IntegralGraph.INTEGRATE_MARK) {
       if (graph == null) {

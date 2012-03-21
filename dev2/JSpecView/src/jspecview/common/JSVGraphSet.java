@@ -102,7 +102,32 @@ class JSVGraphSet {
 
   private Color[] plotColors;
 
-  public JSVGraphSet(JSVPanel jsvp) {
+
+  static List<JSVGraphSet> getGraphSets(JSVPanel jsvp, List<Graph> spectra,
+      int startIndex, int endIndex) {
+    List<JSVGraphSet> graphSets = new ArrayList<JSVGraphSet>();
+    JSVGraphSet graphSet = null;
+    Graph specLast = null;
+    for (int i = 0; i < spectra.size(); i++) {
+      Graph spec = spectra.get(i);
+      if (specLast == null || !JDXSpectrum.areScalesCompatible(spec, specLast, false)) {
+        graphSet = new JSVGraphSet(jsvp);
+        graphSets.add(graphSet);
+      }
+      graphSet.addSpec(specLast = spec);
+    }
+    setFractionalPositions(graphSets);
+    for (int i = graphSets.size(); --i >= 0;)
+      graphSets.get(i).initGraphSet(startIndex, endIndex);
+    return graphSets;
+  }
+
+
+  
+  
+  
+  
+  private JSVGraphSet(JSVPanel jsvp) {
     this.jsvp = jsvp;
   }
 
@@ -133,6 +158,17 @@ class JSVGraphSet {
   }
 
   /**
+   * Returns the <code>Spectrum</code> at the specified index
+   * 
+   * @param index
+   *        the index of the <code>Spectrum</code>
+   * @return the <code>Spectrum</code> at the specified index
+   */
+  JDXSpectrum getSpectrumAt(int index) {
+    return (JDXSpectrum) spectra.get(index);
+  }
+
+  /**
    * Initializes the graph set
    * 
    * @param spectra
@@ -145,7 +181,7 @@ class JSVGraphSet {
    * @throws ScalesIncompatibleException
    */
   
-  protected void initGraphSet(int startIndex, int endIndex) {
+  private void initGraphSet(int startIndex, int endIndex) {
     xAxisLeftToRight = getSpectrumAt(0).shouldDisplayXAxisIncreasing();
     setDrawXAxis();
     int[] startIndices = new int[nSpectra];
@@ -233,7 +269,7 @@ class JSVGraphSet {
     addAnnotation(annotation, false);
   }
 
-  Annotation findAnnotation2D(Coordinate xy) {
+  private Annotation findAnnotation2D(Coordinate xy) {
     for (int i = annotations.size(); --i >= 0;) {
       Annotation a = annotations.get(i);
       if (isNearby2D(a, xy))
@@ -241,6 +277,7 @@ class JSVGraphSet {
     }
     return null;    
   }
+  
   private void addAnnotation(ColoredAnnotation annotation, boolean isToggle) {
     if (annotations == null)
       annotations = new ArrayList<Annotation>();
@@ -254,7 +291,7 @@ class JSVGraphSet {
       annotations.add(annotation);
   }
 
-  boolean isNearby2D(Coordinate a1, Coordinate a2) {
+  private boolean isNearby2D(Coordinate a1, Coordinate a2) {
     int xp1 = isd.toPixelX(a1.getXVal());
     int yp1 = toPixelY(a1.getYVal());
     int xp2 = isd.toPixelX(a2.getXVal());
@@ -348,17 +385,6 @@ class JSVGraphSet {
   }
 
   /**
-   * Returns the <code>Spectrum</code> at the specified index
-   * 
-   * @param index
-   *        the index of the <code>Spectrum</code>
-   * @return the <code>Spectrum</code> at the specified index
-   */
-  JDXSpectrum getSpectrumAt(int index) {
-    return (JDXSpectrum) spectra.get(index);
-  }
-
-  /**
    * Returns the Number of Spectra
    * 
    * @return the Number of Spectra
@@ -386,7 +412,7 @@ class JSVGraphSet {
   
   private double fracX = 1, fracY = 1, fX0 = 0, fY0 = 0; // take up full screen
   
-  public static void setFractionalPositions(List<JSVGraphSet> graphSets) {
+  private static void setFractionalPositions(List<JSVGraphSet> graphSets) {
     // for now, just a vertical stack
     int n = graphSets.size();
     double f = 0;
@@ -418,7 +444,7 @@ class JSVGraphSet {
 
   }
   
-  public boolean hasPoint(int xPixel, int yPixel) {
+  boolean hasPoint(int xPixel, int yPixel) {
     return (xPixel >= xPixel00 && xPixel <= xPixel11 && yPixel >= yPixel00 && yPixel <= yPixel11);
   }
   
@@ -1062,7 +1088,7 @@ class JSVGraphSet {
 
   /*-------------------- METHODS FOR SCALING AND ZOOM --------------------------*/
 
-  public void setZoom(double x1, double y1, double x2, double y2) {
+  void setZoom(double x1, double y1, double x2, double y2) {
     setZoomTo(0);
     if (Double.isNaN(x1)) {
       // yzoom only
@@ -1736,11 +1762,11 @@ class JSVGraphSet {
     return spectraInfo;
   }
 
-  public void setPlotColor0(Color color) {
+  void setPlotColor0(Color color) {
     plotColors[0] = color;
   }
 
-  public void mouseClickEvent(int xPixel, int yPixel, int clickCount, boolean isControlDown) {
+  void mouseClickEvent(int xPixel, int yPixel, int clickCount, boolean isControlDown) {
     PlotWidget pw = getPinSelected(xPixel, yPixel);
     if (pw != null) {
       setWidgetValueByUser(pw);
@@ -1802,7 +1828,7 @@ class JSVGraphSet {
     jsvp.notifyPeakPickedListeners(jsvp.coordClicked);
   }
 
-  public void mouseReleasedEvent() {
+  void mouseReleasedEvent() {
     if (jsvp.isIntegralDrag) {
       if (zoomBox1D.xPixel0 != zoomBox1D.xPixel1) {
         checkIntegral(toX(zoomBox1D.xPixel0), toX(zoomBox1D.xPixel1), true);
@@ -1841,7 +1867,7 @@ class JSVGraphSet {
     && (!asY || Math.abs(zb.yPixel1 - zb.yPixel0) > MIN_DRAG_X_PIXELS));
   }
 
-  public void mouseMovedEvent(int xPixel, int yPixel) {
+  void mouseMovedEvent(int xPixel, int yPixel) {
     setToolTipForPixels(xPixel, yPixel);
     if (isd != null && !jsvp.display1D && sticky2Dcursor)
       set2DCrossHairs(xPixel, yPixel);

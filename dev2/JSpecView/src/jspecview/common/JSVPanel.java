@@ -375,9 +375,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     // Preferences Dialog sample.jdx
 
     this.popup = popup;
-    List<JSVGraphSet> graphSets = new ArrayList<JSVGraphSet>();
-    JSVGraphSet graphSet = new JSVGraphSet(this);
-    graphSets.add(graphSet);
     List<Graph> spectra = new ArrayList<Graph>();
     spectra.add(spectrum);
     initJSVPanel(spectra, 0, 0);
@@ -424,24 +421,10 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   public void initJSVPanel(List<Graph> spectra, int startIndex, int endIndex) {
-    nSpectra = spectra.size();
-    List<JSVGraphSet> graphSets = new ArrayList<JSVGraphSet>();
-    JSVGraphSet graphSet = null;
-    Graph specLast = null;
-    for (int i = 0; i < spectra.size(); i++) {
-      Graph spec = spectra.get(i);
-      if (specLast == null || !JDXSpectrum.areScalesCompatible(spec, specLast, false)) {
-        graphSet = new JSVGraphSet(this);
-        graphSets.add(graphSet);
-      }
-      graphSet.addSpec(specLast = spec);
-    }
-    JSVGraphSet.setFractionalPositions(graphSets);
     setBorder(BorderFactory.createLineBorder(Color.lightGray));
-    this.graphSets = graphSets;
+    nSpectra = spectra.size();
+    graphSets = JSVGraphSet.getGraphSets(this, spectra, startIndex, endIndex);
     currentGraphSet = graphSets.get(0);
-    for (int i = graphSets.size(); --i >= 0;)
-      graphSets.get(i).initGraphSet(startIndex, endIndex);
     if (nSpectra == 1)
       setTitle(getSpectrum().getTitleLabel());
     if (popup == null) {
@@ -458,47 +441,15 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     return getSpectrumAt(0).getCurrentSubSpectrum();
   }
 
-  /* ------------------------- SETTER METHODS-------------------------------*/
   /**
-   * Sets the insets of the plot area
+   * Returns the <code>Spectrum</code> at the specified index
    * 
-   * @param top
-   *        top inset
-   * @param left
-   *        left inset
-   * @param bottom
-   *        bottom inset
-   * @param right
-   *        right inset
+   * @param index
+   *        the index of the <code>Spectrum</code>
+   * @return the <code>Spectrum</code> at the specified index
    */
-  public void setPlotAreaInsets(int top, int left, int bottom, int right) {
-    leftPlotAreaPos = left;
-    topPlotAreaPos = top;
-    plotAreaInsets = new Insets(top, left, bottom, right);
-  }
-
-  /**
-   * Sets the plot area insets
-   * 
-   * @param insets
-   *        the insets of the plot area
-   */
-  public void setPlotAreaInsets(Insets insets) {
-    leftPlotAreaPos = insets.left;
-    topPlotAreaPos = insets.top;
-    plotAreaInsets = insets;
-  }
-
-  /**
-   * Sets the Minimum number of points that may be displayed when the spectrum
-   * is zoomed
-   * 
-   * @param num
-   *        the number of points
-   */
-  public void setMinNumOfPointsForZoom(int num) {
-    minNumOfPointsForZoom = (num >= minNumOfPointsForZoom) ? num
-        : minNumOfPointsForZoom;
+  public JDXSpectrum getSpectrumAt(int index) {
+    return currentGraphSet.getSpectrumAt(index);
   }
 
   /**
@@ -650,27 +601,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     return yScaleOn;
   }
 
-  /**
-   * Returns the minimum number of points for zoom if plot is reversed
-   * 
-   * @return the minimum number of points for zoom if plot is reversed
-   */
-  public int getMinNumOfPointsForZoom() {
-    return minNumOfPointsForZoom;
-  }
-
-  /**
-   * Returns the <code>Spectrum</code> at the specified index
-   * 
-   * @param index
-   *        the index of the <code>Spectrum</code>
-   * @return the <code>Spectrum</code> at the specified index
-   */
-  public JDXSpectrum getSpectrumAt(int index) {
-    return currentGraphSet.getSpectrumAt(index);
-  }
-
-  /**
+   /**
    * Returns the Number of Graph sets
    * 
    * @return the Number of graph sets
@@ -797,11 +728,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    */
   public String getTitleFontName() {
     return titleFontName;
-  }
-
-  @Override
-  public void setEnabled(boolean TF) {
-    super.setEnabled(TF);
   }
 
   /*----------------------- JSVPanel PAINTING METHODS ---------------------*/
