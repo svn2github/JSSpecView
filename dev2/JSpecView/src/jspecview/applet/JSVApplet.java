@@ -1506,7 +1506,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     if (jsvp == prevPanel)
       return;
     prevPanel = jsvp;
-    PeakInfo pi = ((JDXSpectrum)jsvp.getSpectrum()).getSelectedPeak();
+    PeakInfo pi = jsvp.getSpectrum().getSelectedPeak();
     sendScript(pi == null ? null : pi.getStringInfo());
   }
 
