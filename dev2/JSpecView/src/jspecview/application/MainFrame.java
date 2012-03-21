@@ -2297,15 +2297,21 @@ public class MainFrame extends JFrame implements DropTargetListener,
       selectedJSVPanel = (JSVPanel) e.getSource();
       selectedJSVPanel.processPeakSelect(e.getPeakInfo());
       sendScript(e.toString());
+      setMainTitle(e.getPeakInfo().getTitle());
     } else if (eventObj instanceof ZoomEvent) {
       writeStatus("Double-Click highlighted spectrum in menu to zoom out; CTRL+/CTRL- to adjust Y scaling.");
     } else if (eventObj instanceof SubSpecChangeEvent) {
       SubSpecChangeEvent e = (SubSpecChangeEvent) eventObj;
-      if (e.isValid()) 
-        desktopPane.getSelectedFrame().setTitle(e.toString());
+      if (e.isValid())
+        setMainTitle(e.toString());
       else        // pass on to menu
         advanceSpectrumBy(-e.getSubIndex());
     }
+  }
+
+  private void setMainTitle(String title) {
+    String t = selectedJSVPanel.getTitle();
+    desktopPane.getSelectedFrame().setTitle(title == null ?  t : t + " - " + title);
   }
 
   private void sendFrameChange(JSVPanel jsvp) {

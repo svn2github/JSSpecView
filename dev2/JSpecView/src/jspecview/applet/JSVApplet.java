@@ -1510,8 +1510,10 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
       return;
     prevPanel = jsvp;
     PeakInfo pi = jsvp.getSpectrum().getSelectedPeak();
+    if (pi == null)
+      pi = PeakInfo.nullPeakInfo;
     selectedJSVPanel.processPeakSelect(pi);
-    sendScript(pi == null ? null : pi.toString());
+    sendScript(pi.toString());
   }
 
   ///////////// MISC methods from interfaces /////////////

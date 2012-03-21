@@ -123,7 +123,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
 
   public PeakInfo getAssociatedPeakInfo(Coordinate coord) {
     selectedPeak = null;
-    if (peakList != null && peakList.size() > 0)
+    if (coord != null && peakList != null && peakList.size() > 0)
       for (int i = 0; i < peakList.size(); i++) {
         PeakInfo peak = peakList.get(i);
         double xVal = coord.getXVal();

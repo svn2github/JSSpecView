@@ -73,7 +73,7 @@ public class PeakInfo {
   }
 
   public String getTitle() {
-    if (title == null)
+    if (title == null && stringInfo != null)
       title = Parser.getQuotedAttribute(stringInfo, "title");
     return title;
   }
