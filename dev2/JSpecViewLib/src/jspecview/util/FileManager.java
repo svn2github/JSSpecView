@@ -183,6 +183,7 @@ public class FileManager {
         Logger.info("FileManager opening file " + name);
       File file = new File(name);
       length = (int) file.length();
+      System.out.println(file);
       in = new FileInputStream(file);
     }
     return new MonitorInputStream(in, length);

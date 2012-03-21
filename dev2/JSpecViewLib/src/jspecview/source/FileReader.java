@@ -89,7 +89,7 @@ public class FileReader {
   private String filePath;
   
   private FileReader(String filePath, boolean obscure, int iSpecFirst, int iSpecLast) {
-    this.filePath = filePath;
+    this.filePath = (filePath == null ? "string data" : filePath);
     this.obscure = obscure;
     firstSpec = iSpecFirst;
     lastSpec = iSpecLast;
@@ -108,7 +108,7 @@ public class FileReader {
   public static JDXSource createJDXSource(InputStream in, boolean obscure)
       throws IOException, JSpecViewException {
     return createJDXSource(FileManager.getBufferedReaderForInputStream(in),
-        "string data", null, obscure, -1, -1);
+        null, null, obscure, -1, -1);
   }
 
   /**
