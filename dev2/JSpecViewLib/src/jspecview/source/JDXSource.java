@@ -74,7 +74,7 @@ public class JDXSource extends JDXHeader {
    * @return the Spectrum at a given index in the list
    */
   public JDXSpectrum getJDXSpectrum(int index) {
-    return (jdxSpectra.size() <= index ? null : (JDXSpectrum) jdxSpectra.get(index));
+    return (jdxSpectra.size() <= index ? null : jdxSpectra.get(index));
   }
 
   /**
@@ -88,7 +88,7 @@ public class JDXSource extends JDXHeader {
       filePath = this.filePath;
     spectrum.setFilePath(filePath);
     int n = jdxSpectra.size();
-    if (n == 0 || !((JDXSpectrum) jdxSpectra.get(n - 1)).addSubSpectrum(spectrum, forceSub))
+    if (n == 0 || !jdxSpectra.get(n - 1).addSubSpectrum(spectrum, forceSub))
       jdxSpectra.add(spectrum);
   }
 
