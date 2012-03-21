@@ -1427,18 +1427,18 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     return (i > 0 && i <= specsSaved.size() ? specsSaved.get(i - 1) : null);
   }
 
-  private String selectPanel(String fileName, String index) {
+  private PeakInfo selectPanel(String fileName, String index) {
     // what if tabbed? 
     if (jsvPanels == null)
       return null;
-    String s = selectedJSVPanel.findPeak(fileName, index);
-    if (s != null)
-      return s;
+    PeakInfo pi = selectedJSVPanel.findPeak(fileName, index);
+    if (pi != null)
+      return pi;
     for (int i = 0; i < jsvPanels.size(); i++) {
-      s = jsvPanels.get(i).findPeak(fileName, index);
-      if (s != null) {
+      pi = jsvPanels.get(i).findPeak(fileName, index);
+      if (pi != null) {
         setSpectrum(i + 1);
-        return s;
+        return pi;
       }
     }
     return null;
@@ -1450,7 +1450,6 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
    * @param peak
    */
   private void sendScript(String peak) {
-    selectedJSVPanel.processPeakSelect(peak);
     if (syncCallbackFunctionName == null)
       return;
     peak = Escape.jmolSelect(peak);
@@ -1511,6 +1510,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
       return;
     prevPanel = jsvp;
     PeakInfo pi = jsvp.getSpectrum().getSelectedPeak();
+    selectedJSVPanel.processPeakSelect(pi);
     sendScript(pi == null ? null : pi.toString());
   }
 
@@ -1539,6 +1539,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     if (eventObj instanceof PeakPickEvent) {
       PeakPickEvent e = (PeakPickEvent) eventObj;
       setSelectedPanel((JSVPanel) e.getSource());
+      selectedJSVPanel.processPeakSelect(e.getPeakInfo());
       sendScript(e.getPeakInfo().toString());
       checkCallbacks();
     } else if (eventObj instanceof ZoomEvent) {

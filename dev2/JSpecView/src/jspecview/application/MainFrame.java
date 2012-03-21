@@ -1950,7 +1950,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
    * @param peak
    */
   public void sendScript(String peak) {
-    selectedJSVPanel.processPeakSelect(peak);
     String msg = Escape.jmolSelect(peak);
     Logger.info("JSpecView MainFrame sendScript: " + msg);
     if (jmol != null) // MainFrame --> embedding application
@@ -2256,17 +2255,17 @@ public class MainFrame extends JFrame implements DropTargetListener,
     setFrame(node, false);
   }
 
-  private String selectPanelByPeak(String fileName, String index) {
-    String s = null;
-    if ((s = selectedJSVPanel.findPeak(fileName, index)) == null)
+  private PeakInfo selectPanelByPeak(String fileName, String index) {
+    PeakInfo pi = null;
+    if ((pi = selectedJSVPanel.findPeak(fileName, index)) == null)
       for (int i = specNodes.size(); --i >= 0;) {
         JSVTreeNode node = specNodes.get(i);
-        if ((s = node.jsvp.findPeak(fileName, index)) != null) {
+        if ((pi = node.jsvp.findPeak(fileName, index)) != null) {
           setFrame(node, false);
           break;
         }
       }
-    return s;
+    return pi;
   }
 
   private void setFrame(JSVTreeNode specNode, boolean fromTree) {
@@ -2296,6 +2295,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     if (eventObj instanceof PeakPickEvent) {
       PeakPickEvent e = ((PeakPickEvent) eventObj);
       selectedJSVPanel = (JSVPanel) e.getSource();
+      selectedJSVPanel.processPeakSelect(e.getPeakInfo());
       sendScript(e.toString());
     } else if (eventObj instanceof ZoomEvent) {
       writeStatus("Double-Click highlighted spectrum in menu to zoom out; CTRL+/CTRL- to adjust Y scaling.");
@@ -2310,6 +2310,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
   private void sendFrameChange(JSVPanel jsvp) {
     PeakInfo pi = (jsvp.getSpectrum()).getSelectedPeak();
+    selectedJSVPanel.processPeakSelect(pi == null ? PeakInfo.nullPeakInfo : pi);
     sendScript(pi == null ? null : pi.toString());
   }
 

@@ -111,7 +111,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   // Critical fields
 
   private List<JSVGraphSet> graphSets;
-  private JSVGraphSet currentGraphSet;
+  JSVGraphSet currentGraphSet;
   protected JSVPanelPopupMenu popup;
 
   public JSVPanelPopupMenu getPopup() {
@@ -424,8 +424,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     nSpectra = spectra.size();
     graphSets = JSVGraphSet.getGraphSets(this, spectra, startIndex, endIndex);
     currentGraphSet = graphSets.get(0);
-    if (nSpectra == 1)
-      setTitle(getSpectrum().getTitleLabel());
+    setTitle(getSpectrum().getTitleLabel());
     if (popup == null) {
       // preferences dialog
       coordStr = "(0,0)";
@@ -434,6 +433,13 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       addMouseListener(this);
       addMouseMotionListener(this);
     }
+  }
+
+  private void setCurrentGraphSet(JSVGraphSet gs) {
+    if (currentGraphSet == gs)
+      return;
+    currentGraphSet = gs;
+    notifySubSpectrumChange(gs.getSpectrum().getSubIndex(), gs.getSpectrum());
   }
 
   public JDXSpectrum getSpectrum() {
@@ -501,7 +507,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        the color of the highlight
    */
   public void addHighlight(double x1, double x2, Color color) {
-    currentGraphSet.addHighlight(x1, x2, color);
+    currentGraphSet.addHighlight(x1, x2, null, color);
   }
 
   /**
@@ -1064,18 +1070,18 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     
   }
 
-  public void processPeakSelect(String peak) {
-    System.out.println("JSVPANEL PROCESS " + peak);
+  public void processPeakSelect(PeakInfo peakInfo) {
+    System.out.println("JSVPANEL PROCESS " + peakInfo);
     // note that we could have multiple matches? 
     for (int i = 0; i < graphSets.size(); i++)
-      graphSets.get(i).processPeakSelect(peak);
+      graphSets.get(i).processPeakSelect(peakInfo);
   }
 
-  public String findPeak(String fileName, String index) {
+  public PeakInfo findPeak(String fileName, String index) {
     PeakInfo pi;
     for (int i = 0; i < graphSets.size(); i+= 1)
       if ((pi = graphSets.get(i).findPeak(fileName, index)) != null)
-        return pi.toString();
+        return pi;
     return null;
   }
 
@@ -1136,7 +1142,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     if (gs == null)
       return;
     isIntegralDrag = (e.isControlDown() && gs.getSpectrum().getIntegrationGraph() != null);
-    currentGraphSet = gs;
+    setCurrentGraphSet(gs);
     gs.checkWidgetEvent(xPixel, yPixel, true);
   }
 
@@ -1176,8 +1182,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     JSVGraphSet gs = JSVGraphSet.findGraphSet(graphSets, xPixel, yPixel);
     if (gs == null)
       return;
-    currentGraphSet = gs;
+    setCurrentGraphSet(gs);
     gs.mouseClickEvent(xPixel, yPixel, e.getClickCount(), e.isControlDown());
+    notifyPeakPickedListeners(coordClicked);
   }
 
   public void mouseEntered(MouseEvent e) {

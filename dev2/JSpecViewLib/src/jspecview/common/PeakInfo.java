@@ -4,11 +4,23 @@ import jspecview.util.Logger;
 import jspecview.util.Parser;
 
 public class PeakInfo {
-	private double xMin, xMax, yMin, yMax;
+	public final static PeakInfo nullPeakInfo = new PeakInfo();
+
+  private double xMin, xMax, yMin, yMax;
 	private String stringInfo;
 	private String type;
   private String index;
 	private String file;
+  public String title;
+  public Graph spectrum;
+
+	
+	public PeakInfo() {
+	}
+
+	public boolean isClearAll() {
+	  return (spectrum == null);
+	}
 	
   public String getType() {
     return type;
@@ -59,8 +71,6 @@ public class PeakInfo {
   public String getIndex() {
     return index;
   }
-
-  String title;
 
   public String getTitle() {
     if (title == null)

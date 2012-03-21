@@ -98,6 +98,8 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
 
   public int setPeakList(ArrayList<PeakInfo> list) {
     peakList = list;
+    for (int i = list.size(); --i >= 0; )
+      peakList.get(i).spectrum = this;
     return list.size();
   }
 
@@ -363,8 +365,17 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
 
   public static boolean areScalesCompatible(Graph s1, Graph s2,
                                             boolean allow2D2D) {
-    return ((allow2D2D ? s1.is1D() == s2.is1D() : s1.is1D() && s2.is1D()) 
-        && s1.getXUnits().equalsIgnoreCase(s2.getXUnits()));
+    if (!((allow2D2D ? s1.is1D() == s2.is1D() : s1.is1D() && s2.is1D()) 
+        && s1.getXUnits().equalsIgnoreCase(s2.getXUnits())))
+      return false;
+    if (!(s1 instanceof JDXSpectrum) || !(s2 instanceof JDXSpectrum))
+      return true;
+    JDXSpectrum spec1 = (JDXSpectrum) s1;
+    JDXSpectrum spec2 = (JDXSpectrum) s2;
+    if (spec1.isHNMR() != spec2.isHNMR())
+      return false;
+    return true;
+    
   }
 
   public static boolean process(List<JDXSpectrum> specs, int irMode,

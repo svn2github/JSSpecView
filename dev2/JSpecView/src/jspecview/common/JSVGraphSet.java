@@ -333,11 +333,14 @@ class JSVGraphSet {
    *        the x value of the coordinate where the highlight should start
    * @param x2
    *        the x value of the coordinate where the highlight should end
+   * @param spec 
    * @param color
    *        the color of the highlight
    */
-  void addHighlight(double x1, double x2, Color color) {
-    Highlight hl = new Highlight(x1, x2, (color == null ? jsvp.getHighlightColor()
+  void addHighlight(double x1, double x2, Graph spec, Color color) {
+    if (spec == null)
+      spec = getSpectrumAt(0);
+    Highlight hl = new Highlight(x1, x2, spec, (color == null ? jsvp.getHighlightColor()
         : color));
     if (!highlights.contains(hl))
       highlights.add(hl);
@@ -364,10 +367,10 @@ class JSVGraphSet {
    *        the x value of the coordinate where the highlight ended
    */
   void removeHighlight(double x1, double x2) {
-    Highlight hl = new Highlight(x1, x2);
-    int index = highlights.indexOf(hl);
-    if (index != -1) {
-      highlights.remove(index);
+    for (int i = highlights.size(); --i >= 0;) {
+      Highlight h = highlights.get(i);
+      if (h.x1 == x1 && h.x2 == x2)
+        highlights.remove(i);
     }
   }
 
@@ -377,6 +380,13 @@ class JSVGraphSet {
   void removeAllHighlights() {
     highlights.clear();
   }
+
+  void removeAllHighlights(Graph spec) {
+    for (int i = highlights.size(); --i >= 0; )
+      if (highlights.get(i).spectrum == spec)
+        highlights.remove(i);
+    jsvp.repaint();
+ }
 
   /**
    * Returns the Number of Spectra
@@ -442,7 +452,7 @@ class JSVGraphSet {
    * @param withYUnits
    * @param withXScale
    * @param withYScale
-   * @param withSliders
+   * @param isInteractive
    * @param drawY0
    * @param height
    * @param width
@@ -453,10 +463,11 @@ class JSVGraphSet {
   void drawGraph(Graphics g, boolean withGrid, boolean withXUnits, boolean withYUnits,
                  boolean withXScale,
                  boolean withYScale,
-                 boolean withSliders,
+                 boolean isInteractive,
                  boolean drawY0, //!isIntegralDrag
                  int height, int width, 
-                 Insets plotAreaInsets, boolean isResized, boolean enableZoom) {
+                 Insets plotAreaInsets, 
+                 boolean isResized, boolean enableZoom) {
     // for now, at least, we only allow one 2D image
     this.enableZoom = enableZoom;
     setPositionForFrame(width, height, plotAreaInsets);
@@ -484,11 +495,14 @@ class JSVGraphSet {
       draw2DImage(g);
     draw2DUnits(g, width, subIndex, spec0);
     doDraw1DObjects = (isd == null || jsvp.display1D);
+    if (isInteractive)
+      drawFrame(g, height, width, withGrid);
     if (doDraw1DObjects) {
       // background stuff
       fillBox(g, xPixel0, yPixel0, xPixel1, yPixel1, jsvp.getPlotAreaColor());
-      drawWidgets(g, subIndex, withSliders);
-      drawGrid(g, height, width, !withGrid);
+      drawWidgets(g, subIndex, isInteractive);
+      if (withGrid)
+        drawGrid(g, height, width);
       drawHighlights(g);
       drawPeakTabs(g);
       // scale-related, title, and coordinates
@@ -511,7 +525,7 @@ class JSVGraphSet {
             .getIntegralPlotColor());
       drawIntegralValue(g, width);
     } else {
-      drawWidgets(g, subIndex, withSliders);
+      drawWidgets(g, subIndex, isInteractive);
     }
     if (annotations != null)
       drawAnnotations(g, height, width, annotations, null);
@@ -897,7 +911,24 @@ class JSVGraphSet {
       }
     }
   } 
-  
+
+  /**
+   * 
+   * @param g
+   * @param height
+   * @param width
+   */
+  private void drawFrame(Graphics g, int height, int width, boolean withGrid) {
+    if (!withGrid) {
+      g.setColor(jsvp.getGridColor());
+      g.drawRect(xPixel0, yPixel0, xPixels, yPixels);
+    }
+    if (this == jsvp.currentGraphSet && fracY != 1) {
+      g.setColor(Color.MAGENTA);
+      g.drawRect(xPixel00 + 10, yPixel00 + 1, xPixel11 - xPixel00 - 20, yPixel11 - yPixel00 - 2);
+    }
+  }
+
   /**
    * Draws the grid on the Panel
    * 
@@ -908,13 +939,8 @@ class JSVGraphSet {
    * @param width
    *        the width to be drawn in pixels
    */
-  private void drawGrid(Graphics g, int height, int width, boolean asBox) {
+  private void drawGrid(Graphics g, int height, int width) {
     g.setColor(jsvp.getGridColor());
-    if (asBox) {
-      g.setColor(jsvp.getGridColor());
-      g.drawRect(xPixel0, yPixel0, xPixels, yPixels);
-      return;
-    }
     double lastX;
     if (Double.isNaN(multiScaleData.firstX)) {
       lastX = multiScaleData.maxXOnScale + multiScaleData.xStep / 2;
@@ -1356,6 +1382,7 @@ class JSVGraphSet {
     private double x1;
     private double x2;
     private Color color = new Color(255, 255, 0, 100);
+    private Graph spectrum;
 
     /**
      * Constructor
@@ -1377,12 +1404,14 @@ class JSVGraphSet {
      *        starting x coordinate
      * @param x2
      *        ending x coordinate
+     * @param spec 
      * @param color
      *        the color of the highlighted region
      */
-    Highlight(double x1, double x2, Color color) {
+    Highlight(double x1, double x2, Graph spec, Color color) {
       this(x1, x2);
       this.color = color;
+      spectrum = spec;
     }
 
     /**
@@ -1748,7 +1777,6 @@ class JSVGraphSet {
     jsvp.coordClicked = new Coordinate(toX(xPixel), toY(yPixel));
     jsvp.lastClickX = jsvp.coordClicked.getXVal();
     jsvp.coordsClicked = getSpectrum().getXYCoords();
-    jsvp.notifyPeakPickedListeners(jsvp.coordClicked);
   }
 
   void mouseReleasedEvent() {
@@ -2001,25 +2029,32 @@ class JSVGraphSet {
     }
   }
 
-  void processPeakSelect(String peak) {
-    if (getSpectrum().getPeakList() != null)
-      removeAllHighlights();
-    if (peak == null)
-      return;
-    String xMin = Parser.getQuotedAttribute(peak, "xMin");
-    String xMax = Parser.getQuotedAttribute(peak, "xMax");
-    if (xMin == null || xMax == null)
-      return;
-    float x1 = Parser.parseFloat(xMin);
-    float x2 = Parser.parseFloat(xMax);
-    if (Float.isNaN(x1) || Float.isNaN(x2))
-      return;
-    addHighlight(x1, x2, null);
-    if (ScaleData.isWithinRange(x1, multiScaleData)
-        && ScaleData.isWithinRange(x2, multiScaleData))
-      jsvp.repaint();
-    else
-      reset();
+  void processPeakSelect(PeakInfo peakInfo) {
+    for (int i = spectra.size(); --i >= 0; ) {
+      Graph spec = spectra.get(i);
+      if (!peakInfo.isClearAll() && spec != peakInfo.spectrum)
+        continue;
+      String peak = peakInfo.toString();
+      removeAllHighlights(spectra.get(i));
+      if (peak == null) {
+        continue;
+      }
+      String xMin = Parser.getQuotedAttribute(peak, "xMin");
+      String xMax = Parser.getQuotedAttribute(peak, "xMax");
+      if (xMin == null || xMax == null)
+        return;
+      float x1 = Parser.parseFloat(xMin);
+      float x2 = Parser.parseFloat(xMax);
+      if (Float.isNaN(x1) || Float.isNaN(x2))
+        return;
+      addHighlight(x1, x2, spec, null);
+      if (ScaleData.isWithinRange(x1, multiScaleData)
+          && ScaleData.isWithinRange(x2, multiScaleData))
+        jsvp.repaint();
+      else
+        reset();
+      
+    }
   }
 
   PeakInfo findPeak(String filePath, String index) {
@@ -2039,7 +2074,7 @@ class JSVGraphSet {
     PeakInfo peak = spec.getPeakList().get(iPeak);
     spec.setSelectedPeak(peak);
     jsvp.coordClicked.setXVal(jsvp.lastClickX = peak.getX());
-    jsvp.notifyListeners(new PeakPickEvent(jsvp, jsvp.coordClicked, peak));
+    jsvp.notifyListeners(new PeakPickEvent(jsvp, jsvp.coordClicked, peak == null ? PeakInfo.nullPeakInfo  : peak));
   }
 
 }

@@ -6,6 +6,7 @@ public class SubSpecChangeEvent {
   private String title;
   public SubSpecChangeEvent(int isub, String title) {
     this.isub = isub;
+    this.title = title;
   }
   
   public boolean isValid() {
