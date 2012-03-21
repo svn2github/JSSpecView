@@ -160,6 +160,7 @@ class JSVGraphSet {
       allowYScale &= (spectra.get(i).getYUnits().equals(spectra.get(0).getYUnits()) 
           && spectra.get(i).getUserYFactor() == spectra.get(0).getUserYFactor());        
     }
+    allowYScale &= (fracY == 1 && fracX == 1);
     getMultiScaleData(0, 0, 0, 0, startIndices, endIndices);
     System.out.println("JSVGraphSet nSpectra = " + nSpectra);
     zoomInfoList = new ArrayList<MultiScaleData>();
@@ -414,7 +415,6 @@ class JSVGraphSet {
     yPixel1 = yPixel11 - insets.bottom / (yPixel11 > height - 2 ? 1 : 2);
     xPixels = xPixel1 - xPixel0 + 1;
     yPixels = yPixel1 - yPixel0 + 1;
-    allowYScale &= (fY0 == 1 && fX0 == 1);
 
   }
   
