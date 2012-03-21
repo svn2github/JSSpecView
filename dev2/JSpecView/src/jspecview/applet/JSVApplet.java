@@ -86,6 +86,8 @@ import jspecview.common.Coordinate;
 import jspecview.common.Annotation;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.PeakInfo;
+import jspecview.common.SubSpecChangeEvent;
+import jspecview.common.ZoomEvent;
 import jspecview.exception.JSpecViewException;
 import jspecview.export.Exporter;
 import jspecview.source.FileReader;
@@ -1539,6 +1541,8 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
       setSelectedPanel((JSVPanel) e.getSource());
       sendScript(e.getPeakInfo().toString());
       checkCallbacks();
+    } else if (eventObj instanceof ZoomEvent) {
+    } else if (eventObj instanceof SubSpecChangeEvent) {
     }
   }  
   
