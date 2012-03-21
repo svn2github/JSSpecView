@@ -71,7 +71,6 @@ import javax.swing.JPanel;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
 import jspecview.util.Logger;
-import jspecview.util.Parser;
 import jspecview.util.TextFormat;
 
 /**
@@ -854,7 +853,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   public void setZoom(double x1, double y1, double x2, double y2) {
     currentGraphSet.setZoom(x1, y1, x2, y2);
     thisWidth = 0;
-    notifyZoomListeners(0, 0, 0, 0);
+    notifyZoomListeners(x1, y1, x2, y2);
   }
 
   /**
@@ -1036,44 +1035,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     return true;
   }
 
-  public void processPeakSelect(String peak) {
-    if (getSpectrum().getPeakList() != null)
-      removeAllHighlights();
-    if (peak == null)
-      return;
-    String xMin = Parser.getQuotedAttribute(peak, "xMin");
-    String xMax = Parser.getQuotedAttribute(peak, "xMax");
-    if (xMin == null || xMax == null)
-      return;
-    float x1 = Parser.parseFloat(xMin);
-    float x2 = Parser.parseFloat(xMax);
-    if (Float.isNaN(x1) || Float.isNaN(x2))
-      return;
-    addHighlight(x1, x2, null);
-    if (ScaleData.isWithinRange(x1, currentGraphSet.multiScaleData)
-        && ScaleData.isWithinRange(x2, currentGraphSet.multiScaleData))
-      repaint();
-    else
-      reset();
-  }
-
-  private double[] zoom = new double[4];
-
   /**
-   * Notifies CoordinatePickedListeners
-   * 
-   * @param coord
-   */
-  public void notifyZoomListeners(double x1, double y1, double x2, double y2) {
-    zoom[0] = x1;
-    zoom[1] = y1;
-    zoom[2] = x2;
-    zoom[3] = y2;
-    notifyListeners(zoom);
-  }
-
-  /**
-   * Adds a CoordinatePickedListener
+   * Adds a PanelListener
    * 
    * @param listener
    */
@@ -1084,13 +1047,31 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   /**
+   * 
+   * @param isub -1 indicates direction if no subspectra or subspectrum index if subspectra
+   * @param spec null indicates no subspectra
+   */
+  public void notifySubSpectrumChange(int isub, JDXSpectrum spec) {
+    notifyListeners(new SubSpecChangeEvent(isub, (spec == null ? null : spec.getTitleLabel())));
+  }
+  
+  /**
+   * Notifies CoordinatePickedListeners
+   * 
+   * @param coord
+   */
+  public void notifyZoomListeners(double x1, double y1, double x2, double y2) {
+    notifyListeners(new ZoomEvent(x1, y1, x2, y2));
+  }
+
+  /**
    * Notifies CoordinatePickedListeners
    * 
    * @param coord
    */
   public void notifyPeakPickedListeners(Coordinate coord) {
     // TODO: Currently Aassumes spectra are not overlaid
-    notifyListeners(new PeakPickedEvent(this, coord, getSpectrum()
+    notifyListeners(new PeakPickEvent(this, coord, getSpectrum()
         .getAssociatedPeakInfo(coord)));
   }
 
@@ -1196,11 +1177,11 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       break;
     case KeyEvent.VK_DOWN:
     case KeyEvent.VK_UP:
-      int dir = (e.getKeyCode() == KeyEvent.VK_DOWN ? 1 : -1);
-      if (getSpectrumAt(0).getSubSpectra() == null)
-        notifyZoomListeners(dir, Double.NaN, Double.NaN, Double.NaN);
-      else {
-        currentGraphSet.advanceSubSpectrum(-dir);
+      int dir = (e.getKeyCode() == KeyEvent.VK_DOWN ? -1 : 1);
+      if (getSpectrumAt(0).getSubSpectra() == null) {
+        notifySubSpectrumChange(dir, null);
+      } else {
+        currentGraphSet.advanceSubSpectrum(dir);
         repaint();
       }
       e.consume();
@@ -1256,6 +1237,21 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
   public int getNumberOfSpectraInCurrentSet() {
     return currentGraphSet.getNumberOfSpectra();
+  }
+
+  public void processPeakSelect(String peak) {
+    System.out.println("JSVPANEL PROCESS " + peak);
+    // note that we could have multiple matches? 
+    for (int i = 0; i < graphSets.size(); i++)
+      graphSets.get(i).processPeakSelect(peak);
+  }
+
+  public String findPeak(String fileName, String index) {
+    PeakInfo pi;
+    for (int i = 0; i < graphSets.size(); i+= 1)
+      if ((pi = graphSets.get(i).findPeak(fileName, index)) != null)
+        return pi.toString();
+    return null;
   }
 
 }

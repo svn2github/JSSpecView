@@ -5,12 +5,12 @@ import java.util.EventObject;
 import jspecview.common.Coordinate;
 
 @SuppressWarnings("serial")
-public class PeakPickedEvent extends EventObject {
+public class PeakPickEvent extends EventObject {
 	
 	private Coordinate coord;
-	private String peakInfo;
+	private PeakInfo peakInfo;
 	
-	public PeakPickedEvent(Object source, Coordinate coord, String peakInfo) {
+	public PeakPickEvent(Object source, Coordinate coord, PeakInfo peakInfo) {
 		super(source);
 		this.coord = coord;
 		this.peakInfo = peakInfo;
@@ -20,8 +20,12 @@ public class PeakPickedEvent extends EventObject {
 		return coord;
 	}
 
-	public String getPeakInfo() {
+	public PeakInfo getPeakInfo() {
 		return peakInfo;
 	}
 
+	@Override
+	public String toString() {
+	  return (peakInfo == null ? null : peakInfo.toString());
+	}
 }

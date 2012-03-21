@@ -38,6 +38,8 @@ import javax.swing.JOptionPane;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
 import jspecview.source.JDXSource;
+import jspecview.util.Logger;
+import jspecview.util.Parser;
 
 /**
  * JSVGraphSet class represents a set of overlaid spectra within the same rectangle within a JSVPanel
@@ -117,8 +119,10 @@ class JSVGraphSet {
       graphSet.addSpec(specLast = spec);
     }
     setFractionalPositions(graphSets);
-    for (int i = graphSets.size(); --i >= 0;)
+    for (int i = graphSets.size(); --i >= 0;) {
       graphSets.get(i).initGraphSet(startIndex, endIndex);
+      Logger.info("JSVGraphSet " + (i + 1) + " nSpectra = " + graphSets.get(i).nSpectra);
+    }
     return graphSets;
   }
 
@@ -198,7 +202,6 @@ class JSVGraphSet {
     }
     allowYScale &= (fracY == 1 && fracX == 1);
     getMultiScaleData(0, 0, 0, 0, startIndices, endIndices);
-    System.out.println("JSVGraphSet nSpectra = " + nSpectra);
     zoomInfoList = new ArrayList<MultiScaleData>();
     zoomInfoList.add(multiScaleData);
     setPlotColors(Parameters.defaultPlotColors);
@@ -633,6 +636,15 @@ class JSVGraphSet {
         cur2Dx0, cur2Dx1, cur2Dy };
   }
 
+  private void resetPinsFromMultiScaleData() {
+    if (pin1Dx0 == null)
+      return;
+    pin1Dx0.setX(multiScaleData.minXOnScale, toPixelX0(multiScaleData.minXOnScale));
+    pin1Dx1.setX(multiScaleData.maxXOnScale, toPixelX0(multiScaleData.maxXOnScale));
+    pin1Dy0.setY(multiScaleData.minY, toPixelY0(multiScaleData.minY));
+    pin1Dy1.setY(multiScaleData.maxY, toPixelY0(multiScaleData.maxY));
+  }
+  
   /**
    * use the pin values to find their positions along the slider
    * 
@@ -1123,13 +1135,6 @@ class JSVGraphSet {
         : xPixel1 - x);
   }
 
-  private int toPixelX0(double x) {
-    MultiScaleData multiScaleData = zoomInfoList.get(0);
-    double factor = (multiScaleData.maxXOnScale - multiScaleData.minXOnScale) / xPixels;
-    return (int) (!drawXAxisLeftToRight ? xPixel1 - (multiScaleData.maxXOnScale - x) / factor
-        : xPixel1 - (x - multiScaleData.minXOnScale) / factor);
-  }
-  
   private double toX(int xPixel) {
     if (isd != null && isd.isXWithinRange(xPixel))
       return isd.toX(xPixel);
@@ -1143,11 +1148,18 @@ class JSVGraphSet {
     xPixel = fixX(xPixel);
     MultiScaleData multiScaleData = zoomInfoList.get(0);
     double factor = (multiScaleData.maxXOnScale - multiScaleData.minXOnScale) / xPixels;
-    return (!drawXAxisLeftToRight ? multiScaleData.maxXOnScale
+    return (drawXAxisLeftToRight ? multiScaleData.maxXOnScale
         - (xPixel1 - xPixel) * factor : multiScaleData.minXOnScale
         + (xPixel1 - xPixel) * factor);
   }
 
+  private int toPixelX0(double x) {
+    MultiScaleData multiScaleData = zoomInfoList.get(0);
+    double factor = (multiScaleData.maxXOnScale - multiScaleData.minXOnScale) / xPixels;
+    return (int) (drawXAxisLeftToRight ? xPixel1 - (multiScaleData.maxXOnScale - x) / factor
+        : xPixel1 - (x - multiScaleData.minXOnScale) / factor);
+  }
+  
   private int fixY(int yPixel) {
     return Coordinate.intoRange(yPixel, yPixel0, yPixel1);
   }
@@ -1285,10 +1297,7 @@ class JSVGraphSet {
     isd = null;
     currentZoomIndex = i;
     multiScaleData = zoomInfoList.get(i);
-    pin1Dx0.setX(multiScaleData.minXOnScale, toPixelX0(multiScaleData.minXOnScale));
-    pin1Dx1.setX(multiScaleData.maxXOnScale, toPixelX0(multiScaleData.maxXOnScale));
-    pin1Dy0.setY(multiScaleData.minY, toPixelY0(multiScaleData.minY));
-    pin1Dy1.setY(multiScaleData.maxY, toPixelY0(multiScaleData.maxY));
+    resetPinsFromMultiScaleData();
     jsvp.refresh();
   }
 
@@ -1459,6 +1468,141 @@ class JSVGraphSet {
     return true;
   }
 
+  boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
+    if (!enableZoom)
+      return false;
+    PlotWidget widget = jsvp.thisWidget;
+    if (isPress) {
+      widget = getPinSelected(xPixel, yPixel);
+      if (widget == null) {
+        yPixel = fixY(yPixel);
+        if (xPixel < xPixel1) {
+          xPixel = fixX(xPixel);
+          zoomBox1D.setX(toX(xPixel), xPixel);
+          zoomBox1D.yPixel0 = (jsvp.isIntegralDrag ? yPixel0 : yPixel);
+          widget = zoomBox1D;
+        } else if (isd != null && xPixel < isd.xPixel1) {
+          zoomBox2D.setX(isd.toX(xPixel), isd.fixX(xPixel));
+          zoomBox2D.yPixel0 = yPixel;
+          widget = zoomBox2D;
+        }
+      }
+      jsvp.thisWidget = widget;
+      return true;
+    }
+    if (widget == null)
+      return false;
+
+    // mouse drag with widget
+    if (widget == zoomBox1D) {
+      zoomBox1D.xPixel1 = fixX(xPixel);
+      zoomBox1D.yPixel1 = (jsvp.isIntegralDrag ? yPixel1 : fixY(yPixel));
+      if (jsvp.isIntegralDrag && zoomBox1D.xPixel0 != zoomBox1D.xPixel1)
+        checkIntegral(zoomBox1D.getXVal(), toX(zoomBox1D.xPixel1), false);
+      return true;
+    }
+    if (widget == zoomBox2D) {
+      zoomBox2D.xPixel1 = isd.fixX(xPixel);
+      zoomBox2D.yPixel1 = fixY(yPixel);
+      return true;
+    }
+    if (widget == cur2Dy) {
+      yPixel = fixY(yPixel);
+      cur2Dy.yPixel0 = cur2Dy.yPixel1 = yPixel;
+      setCurrentSubSpectrum(isd.toSubspectrumIndex(yPixel));
+      return true;
+    }
+    if (widget == cur2Dx0 || widget == cur2Dx1) {
+      xPixel = isd.fixX(xPixel);
+      widget.setX(isd.toX(xPixel), xPixel);
+      doZoom(cur2Dx0.getXVal(), multiScaleData.minY, cur2Dx1.getXVal(),
+          multiScaleData.maxY, false, false, false);
+      return true;
+    }
+    if (widget == pin1Dx0 || widget == pin1Dx1
+        || widget == pin1Dx01) {
+      xPixel = fixX(xPixel);
+      widget.setX(toX0(xPixel), xPixel);
+      if (widget == pin1Dx01) {
+        int dp = xPixel - (pin1Dx0.xPixel0 + pin1Dx1.xPixel0) / 2 + 1;
+        xPixel = pin1Dx0.xPixel0 + dp;
+        int xPixel1 = pin1Dx1.xPixel0 + dp;
+        if (fixX(xPixel) != xPixel || fixX(xPixel1) != xPixel1)
+          return true;
+        pin1Dx0.setX(toX0(xPixel), xPixel);
+        pin1Dx1.setX(toX0(xPixel1), xPixel1);
+      }
+      doZoom(pin1Dx0.getXVal(), multiScaleData.minY, pin1Dx1.getXVal(),
+          multiScaleData.maxY, false, false, false);
+      return true;
+    }
+    if (widget == pin1Dy0 || widget == pin1Dy1
+        || widget == pin1Dy01) {
+      yPixel = fixY(yPixel);
+      widget.setY(toY0(yPixel), yPixel);
+      if (widget == pin1Dy01) {
+        int dp = yPixel - (pin1Dy0.yPixel0 + pin1Dy1.yPixel0) / 2 + 1;
+        yPixel = pin1Dy0.yPixel0 + dp;
+        int yPixel1 = pin1Dy1.yPixel0 + dp;
+        double y0 = toY0(yPixel);
+        double y1 = toY0(yPixel1);
+        if (Math.min(y0, y1) == multiScaleData.minY
+            || Math.max(y0, y1)== multiScaleData.maxY)
+          return true;
+        pin1Dy0.setY(y0, yPixel);
+        pin1Dy1.setY(y1, yPixel1);
+      }
+      doZoom(multiScaleData.minXOnScale, pin1Dy0.getYVal(),
+          multiScaleData.maxXOnScale, pin1Dy1.getYVal(), false, false, false);
+      return true;
+    }
+    if (widget == pin2Dx0 || widget == pin2Dx1
+        || widget == pin2Dx01) {
+      xPixel = isd.fixX(xPixel);
+      widget.setX(isd.toX0(xPixel), xPixel);
+      if (widget == pin2Dx01) {
+        int dp = xPixel - (pin2Dx0.xPixel0 + pin2Dx1.xPixel0) / 2 + 1;
+        xPixel = pin2Dx0.xPixel0 + dp;
+        int xPixel1 = pin2Dx1.xPixel0 + dp;
+        if (isd.fixX(xPixel) != xPixel || isd.fixX(xPixel1) != xPixel1)
+          return true;
+        pin2Dx0.setX(isd.toX0(xPixel), xPixel);
+        pin2Dx1.setX(isd.toX0(xPixel1), xPixel1);
+      }
+      if (!isGoodEvent(pin2Dx0, pin2Dx1, true)) {
+        reset2D(true);
+        return false;
+      }
+      isd.setView0(pin2Dx0.xPixel0, pin2Dy0.yPixel0, pin2Dx1.xPixel0,
+          pin2Dy1.yPixel0);
+      doZoom(pin2Dx0.getXVal(), multiScaleData.minY, pin2Dx1.getXVal(),
+          multiScaleData.maxY, false, false, false);
+      return true;
+    }
+    if (widget == pin2Dy0 || widget == pin2Dy1
+        || widget == pin2Dy01) {
+      yPixel = fixY(yPixel);
+      widget.setY(isd.toSubspectrumIndex(yPixel), yPixel);
+      if (widget == pin2Dy01) {
+        int dp = yPixel - (pin2Dy0.yPixel0 + pin2Dy1.yPixel0) / 2 + 1;
+        yPixel = pin2Dy0.yPixel0 + dp;
+        int yPixel1 = pin2Dy1.yPixel0 + dp;
+        if (yPixel != fixY(yPixel) || yPixel1 != fixY(yPixel1))
+          return true;
+        pin2Dy0.setY(isd.toSubspectrumIndex(yPixel), yPixel);
+        pin2Dy1.setY(isd.toSubspectrumIndex(yPixel1), yPixel1);
+      }
+      if (!isGoodEvent(pin2Dy0, pin2Dy1, false)) {
+        reset2D(false);
+        return false;
+      }
+      isd.setView0(pin2Dx0.xPixel0, pin2Dy0.yPixel0, pin2Dx1.xPixel1,
+          pin2Dy1.yPixel1);
+      return true;
+    }
+    return false;
+  }
+
   private void setWidgetValueByUser(PlotWidget pw) {
     String sval;
     if (pw == cur2Dy)
@@ -1541,7 +1685,6 @@ class JSVGraphSet {
   }
 
   private void setToolTipForPixels(int xPixel, int yPixel) {
-
     String hashX = "#";
     String hash1 = "0.00000000";
     if (multiScaleData.hashNums[0] <= 0)
@@ -1625,37 +1768,20 @@ class JSVGraphSet {
         " HZ (" + formatterX.format(spec.getY2DPPM()) + " PPM)" : "");
   }
 
- void toPeak(int istep) {
-    istep *= (drawXAxisLeftToRight ? 1 : -1);
-    JDXSpectrum spec = getSpectrum();
-    jsvp.coordClicked = new Coordinate(jsvp.lastClickX, 0);
-    jsvp.coordsClicked = spec.getXYCoords();
-    int iPeak = spec.setNextPeak(jsvp.coordClicked, istep);
-    if (iPeak < 0)
-      return;
-    PeakInfo peak = spec.getPeakList().get(iPeak);
-    spec.setSelectedPeak(peak);
-    jsvp.coordClicked.setXVal(jsvp.lastClickX = peak.getX());
-    jsvp.notifyListeners(new PeakPickedEvent(jsvp, jsvp.coordClicked, peak
-        .getStringInfo()));
-  }
-
-  void advanceSubSpectrum(int i) {
-    getSpectrumAt(0).advanceSubSpectrum(i);
-    if (getSpectrumAt(0).isForcedSubset())
+  void advanceSubSpectrum(int dir) {
+    JDXSpectrum spec0 = getSpectrumAt(0); 
+    int i = spec0.advanceSubSpectrum(dir);
+    if (spec0.isForcedSubset())
       multiScaleData.setXRange(getSpectrum());
-    notifySubSpectrumChange();
-  }
-
-  private void notifySubSpectrumChange() {
-    jsvp.notifyListeners(getSpectrum().getTitleLabel());        
+    jsvp.notifySubSpectrumChange(i, getSpectrum());
   }
 
   void setCurrentSubSpectrum(int i) {
-    getSpectrumAt(0).setCurrentSubSpectrum(i);
-    if (getSpectrumAt(0).isForcedSubset())
+    JDXSpectrum spec0 = getSpectrumAt(0);
+    i = spec0.setCurrentSubSpectrum(i);
+    if (spec0.isForcedSubset())
       multiScaleData.setXRange(getSpectrum());
-    notifySubSpectrumChange();
+    jsvp.notifySubSpectrumChange(i, getSpectrum());
   }
   
   void scaleYBy(double factor) {
@@ -1799,7 +1925,6 @@ class JSVGraphSet {
       } else if (isInRightBar2D(xPixel, yPixel)) {
         reset2D(false);
       }
-
       return;
     }
     if (is2D && annotations != null) {
@@ -1830,17 +1955,14 @@ class JSVGraphSet {
 
   void mouseReleasedEvent() {
     if (jsvp.isIntegralDrag) {
-      if (zoomBox1D.xPixel0 != zoomBox1D.xPixel1) {
+      if (!isGoodEvent(zoomBox1D, null, true)) {
         checkIntegral(toX(zoomBox1D.xPixel0), toX(zoomBox1D.xPixel1), true);
         zoomBox1D.xPixel1 = zoomBox1D.xPixel0;
         jsvp.repaint();
       }
       jsvp.isIntegralDrag = false;
-      return;
-    }
-
-    if (jsvp.thisWidget == zoomBox2D) {
-      if (!isGoodEvent(zoomBox2D, true, true))
+    } else if (jsvp.thisWidget == zoomBox2D) {
+      if (!isGoodEvent(zoomBox2D, null, true))
         return;
       isd.setZoom(zoomBox2D.xPixel0, zoomBox2D.yPixel0, zoomBox2D.xPixel1,
           zoomBox2D.yPixel1);
@@ -1848,7 +1970,7 @@ class JSVGraphSet {
       doZoom(isd.toX(isd.xPixel0), multiScaleData.minY, isd.toX(isd.xPixel0
           + isd.xPixels - 1), multiScaleData.maxY, true, true, false);
     } else if (jsvp.thisWidget == zoomBox1D) {
-      if (!isGoodEvent(zoomBox1D, true, true))
+      if (!isGoodEvent(zoomBox1D, null, true))
         return;
       int x1 = zoomBox1D.xPixel1;
       doZoom(toX(zoomBox1D.xPixel0), toY(zoomBox1D.yPixel0), toX(x1),
@@ -1860,11 +1982,14 @@ class JSVGraphSet {
     }
   }
 
-  private static final int MIN_DRAG_X_PIXELS = 5;// fewer than this means no zoom
+  private static final int MIN_DRAG_PIXELS = 5;// fewer than this means no zoom or reset
 
-  private static boolean isGoodEvent(PlotWidget zb, boolean asX, boolean asY) {
-    return (!asX || (Math.abs(zb.xPixel1 - zb.xPixel0) > MIN_DRAG_X_PIXELS)
-    && (!asY || Math.abs(zb.yPixel1 - zb.yPixel0) > MIN_DRAG_X_PIXELS));
+  private static boolean isGoodEvent(PlotWidget zOrP, PlotWidget p, boolean asX) {
+    return (
+        p == null ? (Math.abs(zOrP.xPixel1 - zOrP.xPixel0) > MIN_DRAG_PIXELS
+            && Math.abs(zOrP.yPixel1 - zOrP.yPixel0) > MIN_DRAG_PIXELS)
+            : asX ? Math.abs(zOrP.xPixel0 - p.xPixel0) > MIN_DRAG_PIXELS
+                : Math.abs(zOrP.yPixel0 - p.yPixel0) > MIN_DRAG_PIXELS);
   }
 
   void mouseMovedEvent(int xPixel, int yPixel) {
@@ -1874,128 +1999,45 @@ class JSVGraphSet {
     jsvp.repaint();
   }
 
-  boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
-    if (!enableZoom)
-      return false;
-    PlotWidget widget = jsvp.thisWidget;
-    if (isPress) {
-      widget = getPinSelected(xPixel, yPixel);
-      if (widget == null) {
-        yPixel = fixY(yPixel);
-        if (xPixel < xPixel1) {
-          xPixel = fixX(xPixel);
-          zoomBox1D.setX(toX(xPixel), xPixel);
-          zoomBox1D.yPixel0 = (jsvp.isIntegralDrag ? yPixel0 : yPixel);
-          widget = zoomBox1D;
-        } else if (isd != null && xPixel < isd.xPixel1) {
-          zoomBox2D.setX(isd.toX(xPixel), isd.fixX(xPixel));
-          zoomBox2D.yPixel0 = yPixel;
-          widget = zoomBox2D;
-        }
-      }
-      jsvp.thisWidget = widget;
-      return true;
-    }
-    if (widget == null)
-      return false;
+  public void processPeakSelect(String peak) {
+    if (getSpectrum().getPeakList() != null)
+      removeAllHighlights();
+    if (peak == null)
+      return;
+    String xMin = Parser.getQuotedAttribute(peak, "xMin");
+    String xMax = Parser.getQuotedAttribute(peak, "xMax");
+    if (xMin == null || xMax == null)
+      return;
+    float x1 = Parser.parseFloat(xMin);
+    float x2 = Parser.parseFloat(xMax);
+    if (Float.isNaN(x1) || Float.isNaN(x2))
+      return;
+    addHighlight(x1, x2, null);
+    if (ScaleData.isWithinRange(x1, multiScaleData)
+        && ScaleData.isWithinRange(x2, multiScaleData))
+      jsvp.repaint();
+    else
+      reset();
+  }
 
-    // mouse drag with widget
-    if (widget == zoomBox1D) {
-      zoomBox1D.xPixel1 = fixX(xPixel);
-      zoomBox1D.yPixel1 = (jsvp.isIntegralDrag ? yPixel1 : fixY(yPixel));
-      if (jsvp.isIntegralDrag && zoomBox1D.xPixel0 != zoomBox1D.xPixel1)
-        checkIntegral(zoomBox1D.getXVal(), toX(zoomBox1D.xPixel1), false);
-      return true;
-    }
-    if (widget == zoomBox2D) {
-      zoomBox2D.xPixel1 = isd.fixX(xPixel);
-      zoomBox2D.yPixel1 = fixY(yPixel);
-      return true;
-    }
-    if (widget == cur2Dy) {
-      yPixel = fixY(yPixel);
-      cur2Dy.yPixel0 = cur2Dy.yPixel1 = yPixel;
-      setCurrentSubSpectrum(isd.toSubspectrumIndex(yPixel));
-      return true;
-    }
-    if (widget == cur2Dx0 || widget == cur2Dx1) {
-      xPixel = isd.fixX(xPixel);
-      widget.setX(isd.toX(xPixel), xPixel);
-      doZoom(cur2Dx0.getXVal(), multiScaleData.minY, cur2Dx1.getXVal(),
-          multiScaleData.maxY, false, false, false);
-      return true;
-    }
-    if (widget == pin1Dx0 || widget == pin1Dx1
-        || widget == pin1Dx01) {
-      xPixel = fixX(xPixel);
-      widget.setX(toX0(xPixel), xPixel);
-      if (widget == pin1Dx01) {
-        int dp = xPixel - (pin1Dx0.xPixel0 + pin1Dx1.xPixel0) / 2 + 1;
-        xPixel = pin1Dx0.xPixel0 + dp;
-        pin1Dx0.setX(toX0(xPixel), xPixel);
-        xPixel = pin1Dx1.xPixel0 + dp;
-        pin1Dx1.setX(toX0(xPixel), xPixel);
-      }
-      doZoom(pin1Dx0.getXVal(), multiScaleData.minY, pin1Dx1.getXVal(),
-          multiScaleData.maxY, false, false, false);
-      return true;
-    }
-    if (widget == pin1Dy0 || widget == pin1Dy1
-        || widget == pin1Dy01) {
-      yPixel = fixY(yPixel);
-      widget.setY(toY0(yPixel), yPixel);
-      if (widget == pin1Dy01) {
-        int dp = yPixel - (pin1Dy0.yPixel0 + pin1Dy1.yPixel0) / 2 + 1;
-        yPixel = pin1Dy0.yPixel0 + dp;
-        pin1Dy0.setY(toY0(yPixel), yPixel);
-        yPixel = pin1Dy1.yPixel0 + dp;
-        pin1Dy1.setY(toY0(yPixel), yPixel);
-      }
-      doZoom(multiScaleData.minXOnScale, pin1Dy0.getYVal(),
-          multiScaleData.maxXOnScale, pin1Dy1.getYVal(), false, false, false);
-      return true;
-    }
-    if (widget == pin2Dx0 || widget == pin2Dx1
-        || widget == pin2Dx01) {
-      xPixel = isd.fixX(xPixel);
-      widget.setX(isd.toX0(xPixel), xPixel);
-      if (widget == pin2Dx01) {
-        int dp = xPixel - (pin2Dx0.xPixel0 + pin2Dx1.xPixel0) / 2 + 1;
-        xPixel = pin2Dx0.xPixel0 + dp;
-        pin2Dx0.setX(isd.toX0(xPixel), xPixel);
-        xPixel = pin2Dx1.xPixel0 + dp;
-        pin2Dx1.setX(isd.toX0(xPixel), xPixel);
-      }
-      if (!isGoodEvent(pin2Dx0, true, false)) {
-        reset2D(true);
-        return false;
-      }
-      isd.setView0(pin2Dx0.xPixel0, pin2Dy0.yPixel0, pin2Dx1.xPixel0,
-          pin2Dy1.yPixel0);
-      doZoom(pin2Dx0.getXVal(), multiScaleData.minY, pin2Dx1.getXVal(),
-          multiScaleData.maxY, false, false, false);
-      return true;
-    }
-    if (widget == pin2Dy0 || widget == pin2Dy1
-        || widget == pin2Dy01) {
-      yPixel = fixY(yPixel);
-      widget.setY(isd.toSubspectrumIndex(yPixel), yPixel);
-      if (widget == pin2Dy01) {
-        int dp = yPixel - (pin2Dy0.yPixel0 + pin2Dy1.yPixel0) / 2 + 1;
-        yPixel = pin2Dy0.yPixel0 + dp;
-        pin2Dy0.setY(isd.toSubspectrumIndex(yPixel), yPixel);
-        yPixel = pin2Dy1.yPixel0 + dp;
-        pin2Dy1.setY(isd.toSubspectrumIndex(yPixel), yPixel);
-      }
-      if (!isGoodEvent(pin2Dy0, false, true)) {
-        reset2D(false);
-        return false;
-      }
-      isd.setView0(pin2Dx0.xPixel0, pin2Dy0.yPixel0, pin2Dx1.xPixel1,
-          pin2Dy1.yPixel1);
-      return true;
-    }
-    return false;
+  public PeakInfo findPeak(String filePath, String index) {
+    // for now we are only checking the base spectrum, but
+    // there might be a need to check subspectra at some point?
+   return getSpectrumAt(0).findPeak(filePath, index);
+  }
+
+  void toPeak(int istep) {
+    istep *= (drawXAxisLeftToRight ? 1 : -1);
+    JDXSpectrum spec = getSpectrum();
+    jsvp.coordClicked = new Coordinate(jsvp.lastClickX, 0);
+    jsvp.coordsClicked = spec.getXYCoords();
+    int iPeak = spec.setNextPeak(jsvp.coordClicked, istep);
+    if (iPeak < 0)
+      return;
+    PeakInfo peak = spec.getPeakList().get(iPeak);
+    spec.setSelectedPeak(peak);
+    jsvp.coordClicked.setXVal(jsvp.lastClickX = peak.getX());
+    jsvp.notifyListeners(new PeakPickEvent(jsvp, jsvp.coordClicked, peak));
   }
 
 }

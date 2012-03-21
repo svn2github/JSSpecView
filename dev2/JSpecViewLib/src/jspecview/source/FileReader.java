@@ -39,6 +39,7 @@ import jspecview.common.JDXSpectrum;
 import jspecview.common.PeakInfo;
 import jspecview.exception.JDXSourceException;
 import jspecview.exception.JSpecViewException;
+import jspecview.util.Escape;
 import jspecview.util.FileManager;
 import jspecview.util.Logger;
 import jspecview.util.Parser;
@@ -532,7 +533,7 @@ public class FileReader {
     return source;
   }
 
-  private static ArrayList<PeakInfo> readPeakList(String peakList, int index) {
+  private ArrayList<PeakInfo> readPeakList(String peakList, int index) {
     ArrayList<PeakInfo> peakData = new ArrayList<PeakInfo>();
     BufferedReader reader = new BufferedReader(new StringReader(peakList));
     String line;
@@ -540,6 +541,7 @@ public class FileReader {
       line = discardLinesUntilContains(reader, "<Peaks");
       String type = Parser.getQuotedAttribute(line, "type");
       PeakInfo peak;
+      String path = Escape.escape(filePath.replace('\\','/'));
       while ((line = reader.readLine()) != null
           && !(line = line.trim()).startsWith("</Peaks>")) {
         if (line.startsWith("<PeakData")) {
@@ -557,7 +559,7 @@ public class FileReader {
           peak.setXMin(xMin);
           peak.setYMax(yMax);
           peak.setYMin(yMin);
-          peak.setStringInfo("<PeakData file=\"\" index=\"" + (++index)
+          peak.setStringInfo("<PeakData file=" + path + " index=\"" + (++index)
               + "\" type=\"" + type + "\" " + line.substring(9).trim());
           peakData.add(peak);
         }

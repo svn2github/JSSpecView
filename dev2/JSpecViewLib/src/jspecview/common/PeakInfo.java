@@ -1,5 +1,6 @@
 package jspecview.common;
 
+import jspecview.util.Logger;
 import jspecview.util.Parser;
 
 public class PeakInfo {
@@ -7,6 +8,7 @@ public class PeakInfo {
 	private String stringInfo;
 	private String type;
   private String index;
+	private String file;
 	
   public String getType() {
     return type;
@@ -42,12 +44,15 @@ public class PeakInfo {
 	}
 	
 	public void setStringInfo(String stringInfo) {
+	  Logger.info("JSpecView found " + stringInfo);
 		this.stringInfo = stringInfo;
 		type = Parser.getQuotedAttribute(stringInfo, "type");
     index = Parser.getQuotedAttribute(stringInfo, "index");
+    file = Parser.getQuotedAttribute(stringInfo, "file");
 	}
-	
-	public String getStringInfo() {
+
+	@Override
+	public String toString() {
 		return stringInfo;
 	}
 
@@ -61,6 +66,10 @@ public class PeakInfo {
     if (title == null)
       title = Parser.getQuotedAttribute(stringInfo, "title");
     return title;
+  }
+
+  public boolean check(String filePath, String sIndex) {
+    return (index.equals(sIndex) && file.equals(filePath));
   }
 
 }

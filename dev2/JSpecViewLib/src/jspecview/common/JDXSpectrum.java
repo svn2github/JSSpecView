@@ -48,7 +48,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
    */
   private List<JDXSpectrum> subSpectra;
   private JDXSpectrum parent;
-  private int currentSubSpectrum;
+  private int currentSubSpectrumIndex;
   private boolean isForcedSubset;
   public boolean isForcedSubset() {
     return isForcedSubset;
@@ -101,20 +101,12 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return list.size();
   }
 
-  public String getPeakType() {
-    if (peakList == null || peakList.size() == 0)
-      return null;
-    return peakList.get(0).getType();
-  }
-
-  public boolean hasPeakIndex(String index) {
+  public PeakInfo findPeak(String filePath, String index) {
     if (peakList != null && peakList.size() > 0)
       for (int i = 0; i < peakList.size(); i++)
-        if (index.equals(peakList.get(i).getIndex())) {
-          selectedPeak = peakList.get(i);
-          return true;
-        }
-    return false;
+        if (peakList.get(i).check(filePath, index))
+          return (selectedPeak = peakList.get(i));
+    return null;
   }
 
   private PeakInfo selectedPeak;
@@ -127,15 +119,14 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return selectedPeak;
   }
 
-  public String getAssociatedPeakInfo(Coordinate coord) {
+  public PeakInfo getAssociatedPeakInfo(Coordinate coord) {
     selectedPeak = null;
     if (peakList != null && peakList.size() > 0)
       for (int i = 0; i < peakList.size(); i++) {
         PeakInfo peak = peakList.get(i);
         double xVal = coord.getXVal();
-        if (xVal >= peak.getXMin() && xVal <= peak.getXMax()) {
-          return (selectedPeak = peak).getStringInfo();
-        }
+        if (xVal >= peak.getXMin() && xVal <= peak.getXMax())
+          return (selectedPeak = peak);
       }
     return null;
   }
@@ -398,16 +389,15 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   }
   
   public JDXSpectrum getCurrentSubSpectrum() {
-    return (subSpectra == null ? this : subSpectra.get(currentSubSpectrum));
+    return (subSpectra == null ? this : subSpectra.get(currentSubSpectrumIndex));
   }
 
-  public void advanceSubSpectrum(int dir) {
-    setCurrentSubSpectrum(currentSubSpectrum + dir);
+  public int advanceSubSpectrum(int dir) {
+    return setCurrentSubSpectrum(currentSubSpectrumIndex + dir);
   }
   
-
-  public void setCurrentSubSpectrum(int n) {
-    currentSubSpectrum = Coordinate.intoRange(n, 0, subSpectra.size() - 1);
+  public int setCurrentSubSpectrum(int n) {
+    return (currentSubSpectrumIndex = Coordinate.intoRange(n, 0, subSpectra.size() - 1));
   }
 
   /**
@@ -434,7 +424,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   }
   
   public int getSubIndex() {
-    return (subSpectra == null ? -1 : currentSubSpectrum);
+    return (subSpectra == null ? -1 : currentSubSpectrumIndex);
   }
 
   private boolean exportXAxisLeftToRight;

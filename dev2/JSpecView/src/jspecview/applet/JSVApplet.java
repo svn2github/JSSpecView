@@ -78,7 +78,7 @@ import jspecview.common.JSVPanel;
 import jspecview.common.OverlayLegendDialog;
 import jspecview.common.Parameters;
 import jspecview.common.PanelListener;
-import jspecview.common.PeakPickedEvent;
+import jspecview.common.PeakPickEvent;
 import jspecview.common.PrintLayoutDialog;
 import jspecview.common.ScriptInterface;
 import jspecview.common.ScriptToken;
@@ -466,9 +466,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     String f = url.toString();
     if (!f.equals(recentURL))
       setFilePathLocal(fileName);
-    if (!selectPanel(index))
-      script = null;
-    selectedJSVPanel.processPeakSelect(script);
+    selectedJSVPanel.processPeakSelect(selectPanel(fileName, index));
     sendFrameChange(selectedJSVPanel);
   }
 
@@ -1427,17 +1425,21 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     return (i > 0 && i <= specsSaved.size() ? specsSaved.get(i - 1) : null);
   }
 
-  private boolean selectPanel(String index) {
+  private String selectPanel(String fileName, String index) {
     // what if tabbed? 
     if (jsvPanels == null)
-      return false;
+      return null;
+    String s = selectedJSVPanel.findPeak(fileName, index);
+    if (s != null)
+      return s;
     for (int i = 0; i < jsvPanels.size(); i++) {
-      if ((jsvPanels.get(i).getSpectrum()).hasPeakIndex(index)) {
+      s = jsvPanels.get(i).findPeak(fileName, index);
+      if (s != null) {
         setSpectrum(i + 1);
-        return true;
+        return s;
       }
     }
-    return false;
+    return null;
   }
 
   /**
@@ -1449,7 +1451,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     selectedJSVPanel.processPeakSelect(peak);
     if (syncCallbackFunctionName == null)
       return;
-    peak = Escape.jmolSelect(peak, recentURL);
+    peak = Escape.jmolSelect(peak);
     syncToJmol(peak);
   }
 
@@ -1507,7 +1509,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
       return;
     prevPanel = jsvp;
     PeakInfo pi = jsvp.getSpectrum().getSelectedPeak();
-    sendScript(pi == null ? null : pi.getStringInfo());
+    sendScript(pi == null ? null : pi.toString());
   }
 
   ///////////// MISC methods from interfaces /////////////
@@ -1532,10 +1534,10 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
    * called by notifyPeakPickedListeners in JSVPanel
    */
   public void panelEvent(Object eventObj) {
-    if (eventObj instanceof PeakPickedEvent) {
-      PeakPickedEvent e = (PeakPickedEvent) eventObj;
+    if (eventObj instanceof PeakPickEvent) {
+      PeakPickEvent e = (PeakPickEvent) eventObj;
       setSelectedPanel((JSVPanel) e.getSource());
-      sendScript(e.getPeakInfo());
+      sendScript(e.getPeakInfo().toString());
       checkCallbacks();
     }
   }  
