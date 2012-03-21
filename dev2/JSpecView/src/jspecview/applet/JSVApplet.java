@@ -1192,7 +1192,8 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     }
 
     try {
-      currentSource = (isOverlay ? JDXSource.createOverlay(fileName, specs)
+      currentSource = (isOverlay ? 
+          JDXSource.createOverlay(fileName, specs)
           : FileReader.createJDXSource(FileManager
               .getBufferedReaderForString(data), fileName, base,
               obscureTitleFromUser == Boolean.TRUE, -1, -1));

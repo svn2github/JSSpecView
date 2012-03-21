@@ -148,7 +148,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     String type = (peakList == null || peakList.size() == 0 ? dataType
         : peakList.get(0).getType());
     return (type != null && type.length() > 0 ? type + " " : "") 
-    + title 
+    + getTitle() 
     + (parent == null ? "" : " (" + parent.subSpectra.size() + ")");
   }
 

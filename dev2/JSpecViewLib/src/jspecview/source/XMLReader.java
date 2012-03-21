@@ -43,6 +43,7 @@ abstract class XMLReader {
   //  private XMLEvent e;
 
   protected JDXSource source;
+  protected String filePath = "";
   
   protected SimpleXmlReader reader;
 
@@ -72,6 +73,10 @@ abstract class XMLReader {
   protected String casRN = "";
   protected String sampleID;
   protected StringBuffer errorLog = new StringBuffer();
+
+  public XMLReader(String filePath) {
+    this.filePath = filePath;
+  }
 
   protected void getSimpleXmlReader(BufferedReader br) {
     reader = new SimpleXmlReader(br);
@@ -149,7 +154,7 @@ abstract class XMLReader {
     spectrum.setYUnits(yaxisUnit);
 
     spectrum.setXYCoords(xyCoords);
-    source.addJDXSpectrum(spectrum, false);
+    source.addJDXSpectrum(filePath, spectrum, false);
   }
 
   protected boolean checkPointCount() {

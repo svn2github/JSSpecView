@@ -33,21 +33,27 @@ import jspecview.util.Parser;
  */
 
 class CMLReader extends XMLReader {
-  private boolean specfound = false;
 
+  public CMLReader(String filePath) {
+    super(filePath);
+  }
+
+  private boolean specfound = false;
+  
   /**
    * Does the actual work of initializing the CMLSource
+   * @param filePath 
    * @param in an InputStream of the CML document
    * @return an instance of a CMLSource
    */
-  static JDXSource getCMLInstance(BufferedReader br) {
-    return (new CMLReader()).getXML(br);
+  static JDXSource getCMLInstance(String filePath, BufferedReader br) {
+    return (new CMLReader(filePath)).getXML(br);
   }
 
   private JDXSource getXML(BufferedReader br) {
     try {
 
-      source = new JDXSource(JDXSource.TYPE_SIMPLE);
+      source = new JDXSource(JDXSource.TYPE_SIMPLE, filePath);
       
       getSimpleXmlReader(br);
       processXML(CML_0, CML_1);

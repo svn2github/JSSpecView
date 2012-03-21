@@ -20,7 +20,7 @@ public abstract class JDXDataObject extends JDXHeader {
   private String filePath;
 
   public void setFilePath(String filePath) {
-    this.filePath = filePath;
+    this.filePath = filePath.trim();
   }
 
   public String getFilePath() {

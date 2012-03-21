@@ -58,8 +58,9 @@ public class JDXSource extends JDXHeader {
   public int peakCount;
   
   
-  public JDXSource(int type) {
+  public JDXSource(int type, String filePath) {
     this.type = type;
+    this.filePath = filePath;
     headerTable = new ArrayList<String[]>();
     jdxSpectra = new ArrayList<JDXSpectrum>();
     isCompoundSource = (type != TYPE_SIMPLE);
@@ -82,7 +83,9 @@ public class JDXSource extends JDXHeader {
    * @param spectrum
    *        the spectrum to be added
    */
-  public void addJDXSpectrum(JDXSpectrum spectrum, boolean forceSub) {
+  public void addJDXSpectrum(String filePath, JDXSpectrum spectrum, boolean forceSub) {
+    if (filePath == null)
+      filePath = this.filePath;
     spectrum.setFilePath(filePath);
     int n = jdxSpectra.size();
     if (n == 0 || !((JDXSpectrum) jdxSpectra.get(n - 1)).addSubSpectrum(spectrum, forceSub))
@@ -135,9 +138,9 @@ public class JDXSource extends JDXHeader {
   }
 
   public static JDXSource createOverlay(String name, List<JDXSpectrum> specs) {
-    JDXSource source = new JDXSource(TYPE_OVERLAY);
+    JDXSource source = new JDXSource(TYPE_OVERLAY, "overlaid");
     for (int i = 0; i < specs.size(); i++)
-      source.addJDXSpectrum(specs.get(i), false);
+      source.addJDXSpectrum(specs.get(i).getFilePath(), specs.get(i), false);
     return source;
   }
 

@@ -83,7 +83,6 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
         applet.windowMenuItem_itemStateChanged(e);
       }
     });
-    overlayKeyMenuItem = new JMenuItem();
     overlayKeyMenuItem.setEnabled(false);
     overlayKeyMenuItem.setText("Show Overlay Key...");
     overlayKeyMenuItem.addActionListener(new ActionListener() {

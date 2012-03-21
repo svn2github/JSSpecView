@@ -85,7 +85,11 @@ public class FileReader {
   private boolean done;
 
   private boolean isZipFile;
-  private FileReader(boolean obscure, int iSpecFirst, int iSpecLast) {
+
+  private String filePath;
+  
+  private FileReader(String filePath, boolean obscure, int iSpecFirst, int iSpecLast) {
+    this.filePath = filePath;
     this.obscure = obscure;
     firstSpec = iSpecFirst;
     lastSpec = iSpecLast;
@@ -104,7 +108,7 @@ public class FileReader {
   public static JDXSource createJDXSource(InputStream in, boolean obscure)
       throws IOException, JSpecViewException {
     return createJDXSource(FileManager.getBufferedReaderForInputStream(in),
-        null, null, obscure, -1, -1);
+        "string data", null, obscure, -1, -1);
   }
 
   /**
@@ -137,13 +141,13 @@ public class FileReader {
       int pt1 = header.indexOf('#');
       int pt2 = header.indexOf('<');
       if (pt1 < 0 || pt2 >= 0 && pt2 < pt1) {
-        JDXSource xmlSource = getXMLSource(header, br);
+        JDXSource xmlSource = getXMLSource(filePath, header, br);
         br.close();
         if (xmlSource != null)
           return xmlSource;
         throw new JSpecViewException("File type not recognized");
       }
-      return (new FileReader(obscure, iSpecFirst, iSpecLast)).getJDXSource(br);
+      return (new FileReader(filePath, obscure, iSpecFirst, iSpecLast)).getJDXSource(br);
     } catch (JSpecViewException e) {
       br.close();
       throw new JSpecViewException("Error reading JDX format: "
@@ -151,12 +155,12 @@ public class FileReader {
     }
   }
 
-  private static JDXSource getXMLSource(String header, BufferedReader br) {
+  private static JDXSource getXMLSource(String filePath, String header, BufferedReader br) {
     String xmlType = header.toLowerCase();
     if (xmlType.contains("<animl") || xmlType.contains("<!doctype technique")) {
-      return AnIMLReader.getAniMLInstance(br);
+      return AnIMLReader.getAniMLInstance(filePath, br);
     } else if (xmlType.contains("xml-cml")) {
-      return CMLReader.getCMLInstance(br);
+      return CMLReader.getCMLInstance(filePath, br);
     }
     return null;
   }
@@ -172,7 +176,7 @@ public class FileReader {
    */
   private JDXSource getJDXSource(BufferedReader br) throws JSpecViewException {
 
-    source = new JDXSource(JDXSource.TYPE_SIMPLE);
+    source = new JDXSource(JDXSource.TYPE_SIMPLE, filePath);
     isZipFile = (br instanceof ZipFileSequentialReader);
     t = new JDXSourceStreamTokenizer(br);
     errorLog = new StringBuffer();
@@ -241,7 +245,7 @@ public class FileReader {
     if (lastSpec > 0 && nSpec > lastSpec)
       return !(done = true);
     spectrum.setBlockID(blockID);
-    source.addJDXSpectrum(spectrum, forceSub);
+    source.addJDXSpectrum(null, spectrum, forceSub);
     //System.out.println("Spectrum " + nSpec + " XYDATA: " + spectrum.getXYCoords().length);
     return true;
   }

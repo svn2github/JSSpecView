@@ -37,6 +37,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
 import jspecview.common.JDXSpectrum;
+import jspecview.util.FileManager;
 
 /**
  * Dialog for showing the legend or key for overlaid plots in a <code>JSVPanel</code>.
@@ -150,23 +151,29 @@ public class OverlayLegendDialog extends JDialog {
           Color plotColor;
           String title;
           JDXSpectrum spectrum;
-          Object[] row;
+          Object[] cols;
 
           int numSpectra = jsvp.getNumberOfSpectraInCurrentSet();
           data = new Object[numSpectra][];
+          String f1 = jsvp.getSpectrumAt(0).getFilePath();
+          String f2 = jsvp.getSpectrumAt(numSpectra - 1).getFilePath();
+          boolean useFileName = !f1.equals(f2);
 
           for(int index = 0; index < numSpectra; index++){
-            row = new Object[3];
+            cols = new Object[3];
 
-            spectrum = (JDXSpectrum)jsvp.getSpectrumAt(index);
+            spectrum = jsvp.getSpectrumAt(index);
             title = spectrum.getTitle();
+            if (useFileName)
+              title = FileManager.getName(spectrum.getFilePath())
+                  +  " - " + title;
             plotColor = jsvp.getPlotColor(index);
 
-            row[0] = new Integer(index + 1);
-            row[1] = plotColor;
-            row[2] = title;
+            cols[0] = new Integer(index + 1);
+            cols[1] = plotColor;
+            cols[2] = " " + title;
 
-            data[index] = row;
+            data[index] = cols;
           }
         }
     }
@@ -227,7 +234,7 @@ public class OverlayLegendDialog extends JDialog {
                                 JTable table, Object title,
                                 boolean isSelected, boolean hasFocus,
                                 int row, int column) {
-            setHorizontalAlignment(SwingConstants.CENTER);
+            setHorizontalAlignment(SwingConstants.LEFT);
             setText(title.toString());
             //setText("   " + title.toString());
 

@@ -287,7 +287,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private JButton aboutButton = new JButton();
   private JButton overlaySplitButton = new JButton();
   private JMenuItem scriptMenuItem = new JMenuItem();
-  private JMenuItem overlayKeyMenuItem = new JMenuItem();
   private JButton overlayKeyButton = new JButton();
   private JMenu processingMenu = new JMenu();
   private JMenuItem errorLogMenuItem = new JMenuItem();
@@ -360,6 +359,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private ImageIcon errorLogRedIcon;
   private CommandHistory commandHistory;
   private boolean svgForInkscape;
+  private JMenuItem overlayKeyMenuItem;
 
   private void getIcons() {
     Class<? extends MainFrame> cl = getClass();
@@ -691,7 +691,13 @@ public class MainFrame extends JFrame implements DropTargetListener,
     displayMenu.setText("Display");
     displayMenu.addMenuListener(new MenuListener() {
       public void menuSelected(MenuEvent e) {
-        displayMenu_menuSelected(e);
+        JSVPanel jsvp = getCurrentJSVPanel();
+        if (jsvp == null)
+          return;
+        gridCheckBoxMenuItem.setSelected(jsvp.isGridOn());
+        coordsCheckBoxMenuItem.setSelected(jsvp.isCoordinatesOn());
+        revPlotCheckBoxMenuItem.setSelected(jsvp.isPlotReversed());
+        jsvpPopupMenu.setEnables(selectedJSVPanel);  
       }
 
       public void menuDeselected(MenuEvent e) {
@@ -877,6 +883,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
             propertiesMenuItem_actionPerformed(e);
           }
         });
+    overlayKeyMenuItem = jsvpPopupMenu.overlayKeyMenuItem;
     JSVPanelPopupMenu.setMenuItem(overlayKeyMenuItem, '\0', "Overlay Key", 0,
         0, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
@@ -975,7 +982,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     processingMenu.setText("Processing");
     processingMenu.addMenuListener(new MenuListener() {
       public void menuSelected(MenuEvent e) {
-        processingMenu_menuSelected(e);
+        jsvpPopupMenu.setEnables(selectedJSVPanel);  
       }
 
       public void menuDeselected(MenuEvent e) {
@@ -1098,10 +1105,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     windowMenu.add(showMenuItem);
     windowMenu.addSeparator();
 
-  }
-
-  protected void processingMenu_menuSelected(MenuEvent e) {
-    jsvpPopupMenu.setEnables(selectedJSVPanel);  
   }
 
   protected void checkCommandLineForTip(char c) {
@@ -2495,22 +2498,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     if (jsvp == null)
       return;
     jsvp.clearViews();
-  }
-
-  /**
-   * Sets the status of the menuitems according to the properties of the current
-   * selected JSVPanel
-   * 
-   * @param e
-   *        the MenuEvent
-   */
-  void displayMenu_menuSelected(MenuEvent e) {
-    JSVPanel jsvp = getCurrentJSVPanel();
-    if (jsvp == null)
-      return;
-    gridCheckBoxMenuItem.setSelected(jsvp.isGridOn());
-    coordsCheckBoxMenuItem.setSelected(jsvp.isCoordinatesOn());
-    revPlotCheckBoxMenuItem.setSelected(jsvp.isPlotReversed());
   }
 
   /**

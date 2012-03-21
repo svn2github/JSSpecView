@@ -40,17 +40,23 @@ class AnIMLReader extends XMLReader {
 
   /**
    * Does the actual work of initializing the XMLSource
+   * @param filePath 
    * @param in an InputStream of the AnIML document
    * @return an instance of a AnIMLSource
    */
-  static JDXSource getAniMLInstance(BufferedReader br) {
-    return (new AnIMLReader()).getXML(br);
+  static JDXSource getAniMLInstance(String filePath, BufferedReader br) {
+    return (new AnIMLReader(filePath)).getXML(br);
+  }
+  
+  AnIMLReader(String filePath) {
+    super(filePath);
   }
 
+   
   private JDXSource getXML(BufferedReader br) {
     try {
 
-      source = new JDXSource(JDXSource.TYPE_SIMPLE);
+      source = new JDXSource(JDXSource.TYPE_SIMPLE, filePath);
       
       getSimpleXmlReader(br);
 

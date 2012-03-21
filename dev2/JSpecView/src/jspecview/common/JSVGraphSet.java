@@ -167,15 +167,14 @@ class JSVGraphSet {
     setPlotColors(Parameters.defaultPlotColors);
   }
   
-  private boolean allow2D() {
-    return !getSpectrumAt(0).is1D();
-  }
-  
   private void getMultiScaleData(double x1, double x2, double y1, double y2,
                                  int[] startIndices, int[] endIndices) {
     List<Graph>graphs = (graphsTemp.size() == 0 ? spectra : graphsTemp);
     List<JDXSpectrum> subspecs = getSpectrumAt(0).getSubSpectra();
-    if (allow2D() || subspecs == null && y1 == y2) {
+    boolean dontUseSubspecs = (subspecs == null || subspecs.size() == 2);
+    //NMR real/imaginary
+    boolean is2D = !getSpectrumAt(0).is1D(); 
+    if (is2D || dontUseSubspecs && y1 == y2) {
       // 2D spectrum or startup
       graphs = spectra;
     } else if (y1 == y2) {
@@ -355,7 +354,7 @@ class JSVGraphSet {
    * @return the <code>Spectrum</code> at the specified index
    */
   JDXSpectrum getSpectrumAt(int index) {
-    return (JDXSpectrum) spectra.get(0);
+    return (JDXSpectrum) spectra.get(index);
   }
 
   /**
@@ -380,23 +379,6 @@ class JSVGraphSet {
     return plotColors[index];
   }
 
-  /**
-   * Return the start indices of the Scaledata
-   * 
-   * @return the start indices of the Scaledata
-   */
-  int[] getStartDataPointIndices() {
-    return multiScaleData.startDataPointIndices;
-  }
-
-  /**
-   * Return the end indices of the Scaledata
-   * 
-   * @return the end indices of the Scaledata
-   */
-  int[] getEndDataPointIndices() {
-    return multiScaleData.endDataPointIndices;
-  }
 
   /*----------------------- PAINTING METHODS ---------------------*/
 
@@ -462,7 +444,7 @@ class JSVGraphSet {
     JDXSpectrum spec0 = getSpectrumAt(0);
     userYFactor = getSpectrum().getUserYFactor();  
     setScaleFactors(multiScaleData);
-    if (allow2D() && jsvp.display2D && (isd != null || get2DImage())) {
+    if (!getSpectrumAt(0).is1D() && jsvp.display2D && (isd != null || get2DImage())) {
       setImageWindow();
       width = (int) Math.floor(widthRatio * xPixels * 0.8);
       if (jsvp.display1D) {
@@ -487,8 +469,12 @@ class JSVGraphSet {
       // background stuff
       fillBox(g, xPixel0, yPixel0, xPixel1, yPixel1, jsvp.getPlotAreaColor());
       drawWidgets(g, subIndex);
-      if (grid)
+      if (grid) {
         drawGrid(g, height, width);
+      } else {
+        g.setColor(jsvp.getGridColor());
+        g.drawRect(xPixel0, yPixel0, xPixels, yPixels);
+      }
       drawHighlights(g);
       drawPeakTabs(g);
       // scale-related, title, and coordinates
@@ -825,12 +811,6 @@ class JSVGraphSet {
     // Check if specInfo in null or xyCoords is null
     //Coordinate[] xyCoords = spectra[index].getXYCoords();
     Coordinate[] xyCoords = spectra.get(index).getXYCoords();
-
-    // Draw a border
-    if (!gridOn) {
-      g.setColor(jsvp.getGridColor());
-      g.drawRect(xPixel0, yPixel0, xPixels, yPixels);
-    }
 
     g.setColor(index == 1 && getSpectrum().getIntegrationGraph() != null
         ? jsvp.getIntegralPlotColor() : plotColors[index]);
@@ -1225,7 +1205,11 @@ class JSVGraphSet {
     int[] startIndices = new int[nSpectra];
     int[] endIndices = new int[nSpectra];
     graphsTemp.clear();
-    if (!allow2D() && getSpectrumAt(0).getSubSpectra() != null) {
+    List<JDXSpectrum> subspecs = getSpectrumAt(0).getSubSpectra();
+    boolean dontUseSubspecs = (subspecs == null || subspecs.size() == 2);
+    //NMR real/imaginary
+    boolean is2D = !getSpectrumAt(0).is1D(); 
+    if (!is2D && !dontUseSubspecs) {
       graphsTemp.add(getSpectrum());
       if (!multiScaleData.setDataPointIndices(graphsTemp, initX, finalX,
           JSVPanel.minNumOfPointsForZoom, startIndices, endIndices, false))
