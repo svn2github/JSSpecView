@@ -151,7 +151,7 @@ class JSVGraphSet {
     int[] startIndices = new int[nSpectra];
     int[] endIndices = new int[nSpectra];
     allowYScale = true;
-    if (endIndex == 0)
+    if (endIndex <= 0)
       endIndex = Integer.MAX_VALUE;
     for (int i = 0; i < nSpectra; i++) {
       int iLast = spectra.get(i).getXYCoords().length - 1;

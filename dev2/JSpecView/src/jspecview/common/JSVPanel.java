@@ -405,10 +405,9 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @throws JSpecViewException
    * @throws ScalesIncompatibleException
    */
-  public JSVPanel(List<Graph> spectra, int startIndex,
+  private JSVPanel(List<Graph> spectra, int startIndex,
       int endIndex, JSVPanelPopupMenu popup) {
     this.popup = popup;
-    isOverlaid = true;
     initJSVPanel(spectra, startIndex, endIndex);
   }
 
