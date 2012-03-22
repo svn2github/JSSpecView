@@ -1936,50 +1936,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
   }
 
   /**
-   * called by Jmol's StatusListener to register itself, indicating to JSpecView
-   * that it needs to synchronize with it
-   */
-  public void register(String appletID, JmolSyncInterface jmolStatusListener) {
-    jmol = jmolStatusListener;
-    isEmbedded = true;
-  }
-
-  /**
-   * outgoing method for return messages to Jmol
-   * 
-   * @param peak
-   */
-  public void sendScript(String peak) {
-    String msg = Escape.jmolSelect(peak);
-    Logger.info("JSpecView MainFrame sendScript: " + msg);
-    if (jmol != null) // MainFrame --> embedding application
-      jmol.syncScript(msg);
-    if (jsv != null) // MainFrame --> embedding applet
-      jsv.syncToJmol(msg);
-  }
-
-  /**
-   * incoming script processing of <PeakAssignment file="" type="xxx"...> record
-   * from Jmol
-   */
-  public void syncScript(String script) {
-    if (script.indexOf("<PeakData") < 0) {
-      runScriptNow(script);
-      return;
-    }
-    String file = Parser.getQuotedAttribute(script, "file");
-    String index = Parser.getQuotedAttribute(script, "index");
-    if (file == null || index == null)
-      return;
-    Logger.info("JSpecView MainFrame.syncScript: " + script);
-    if (!file.equals(recentJmolName)) {
-      openDataOrFile(null, file, null, -1, -1);
-    }
-    selectedJSVPanel.processPeakSelect(selectPanelByPeak(file, index));
-    sendFrameChange(selectedJSVPanel);
-  }
-
-  /**
    * ScriptInterface requires this. In the applet, this would be queued
    */
   public void runScript(String script) {
@@ -2010,6 +1966,9 @@ public class MainFrame extends JFrame implements DropTargetListener,
         Logger.info("KEY-> " + key + " VALUE-> " + value + " : " + st);
       try {
         switch (st) {
+        case TEST:
+          syncScript("<PeakData file=\"c:/temp/t.jdx\" index=\"2\" type=\"MS\" id=\"2\" title=\"b-caryopholene (~93)\" peakShape=\"sharp\" model=\"caryoph\"  xMax=\"94\" xMin=\"92\"  yMax=\"100\" yMin=\"0\" />");
+          break;
         case UNKNOWN:
           Logger.warn("Unrecognized parameter: " + key);
           break;
@@ -2261,6 +2220,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     if ((pi = selectedJSVPanel.findPeak(fileName, index)) == null)
       for (int i = specNodes.size(); --i >= 0;) {
         JSVTreeNode node = specNodes.get(i);
+        System.out.println(node);
         if ((pi = node.jsvp.findPeak(fileName, index)) != null) {
           setFrame(node, false);
           break;
@@ -2270,6 +2230,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   }
 
   private void setFrame(JSVTreeNode specNode, boolean fromTree) {
+    System.out.println("setFrame" + specNode);
     JSVFrame frame = specNode.frame;
     selectedJSVPanel = specNode.jsvp;
     frame.setVisible(true);
@@ -2293,6 +2254,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   }
 
   public void panelEvent(Object eventObj) {
+    System.out.println("panelEvent " + eventObj);
     if (eventObj instanceof PeakPickEvent) {
       PeakPickEvent e = ((PeakPickEvent) eventObj);
       PeakInfo pi = e.getPeakInfo();
@@ -2318,7 +2280,11 @@ public class MainFrame extends JFrame implements DropTargetListener,
   }
 
   private void sendFrameChange(JSVPanel jsvp) {
-    PeakInfo pi = (jsvp.getSpectrum()).getSelectedPeak();
+    PeakInfo pi = jsvp.getSpectrum().getSelectedPeak();
+    System.out.println("sendFrameChange1  " + pi);
+    if (pi == null)
+      pi = jsvp.getSpectrum().getModelPeakInfo();
+    System.out.println("sendframechange2 " + pi);
     selectedJSVPanel.processPeakSelect(pi == null ? PeakInfo.nullPeakInfo : pi);
     sendScript(pi == null ? null : pi.toString());
   }
@@ -3225,5 +3191,67 @@ public class MainFrame extends JFrame implements DropTargetListener,
     map.put("items", info);
     return map;
   }
+
+  /**
+   * called by Jmol's StatusListener to register itself, indicating to JSpecView
+   * that it needs to synchronize with it
+   */
+  public void register(String appletID, JmolSyncInterface jmolStatusListener) {
+    jmol = jmolStatusListener;
+    isEmbedded = true;
+  }
+
+  /**
+   * outgoing method for return messages to Jmol
+   * 
+   * @param peak
+   */
+  public void sendScript(String peak) {
+    String msg = Escape.jmolSelect(peak);
+    Logger.info("JSpecView MainFrame sendScript: " + msg);
+    if (jmol != null) // MainFrame --> embedding application
+      jmol.syncScript(msg);
+    if (jsv != null) // MainFrame --> embedding applet
+      jsv.syncToJmol(msg);
+  }
+
+  /**
+   * incoming script processing of <PeakAssignment file="" type="xxx"...> record
+   * from Jmol
+   */
+  public void syncScript(String script) {
+    if (script.indexOf("<PeakData") < 0) {
+      runScriptNow(script);
+      return;
+    }
+    String file = Parser.getQuotedAttribute(script, "file");
+    String index = Parser.getQuotedAttribute(script, "index");
+    if (file == null || index == null)
+      return;
+    Logger.info("JSpecView MainFrame.syncScript: " + script);
+    if (!selectMostRecentPanelByFileName(file)) {
+      closeSource(null);
+      openDataOrFile(null, file, null, -1, -1);
+      System.out.println("doing overlay now");
+      overlay("*");
+    }
+    selectedJSVPanel.repaint();
+    selectedJSVPanel.processPeakSelect(selectPanelByPeak(file, index));
+    String type = Parser.getQuotedAttribute(script, "type");
+    String model = Parser.getQuotedAttribute(script, "model");
+    selectedJSVPanel.selectSpectrum(file, type, model);
+    sendFrameChange(selectedJSVPanel);
+  }
+
+  private boolean selectMostRecentPanelByFileName(String fileName) {
+    for (int i = specNodes.size(); --i >= 0;)
+      if (specNodes.get(i).jsvp.hasFileLoaded(fileName)) {
+        setFrame(specNodes.get(i), false);
+        return true;
+      }
+    System.out.println("mainframe did not find " + fileName);
+    return false;
+  }
+
 
 }

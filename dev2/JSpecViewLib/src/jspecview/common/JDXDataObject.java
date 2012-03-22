@@ -28,6 +28,7 @@ public abstract class JDXDataObject extends JDXHeader {
   public String getFilePath() {
     return filePath;
   }
+  
   public String getFilePathForwardSlash() {
     return filePathForwardSlash;
   }

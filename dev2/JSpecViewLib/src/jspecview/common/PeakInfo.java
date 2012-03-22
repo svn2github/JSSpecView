@@ -15,6 +15,8 @@ public class PeakInfo {
   private String model;
   public Graph spectrum;
 
+  private String atoms;
+
 	
 	public PeakInfo() {
 	}
@@ -63,6 +65,7 @@ public class PeakInfo {
     index = Parser.getQuotedAttribute(stringInfo, "index");
     file = Parser.getQuotedAttribute(stringInfo, "file");
     model = Parser.getQuotedAttribute(stringInfo, "model");
+    atoms = Parser.getQuotedAttribute(stringInfo, "atoms");
     title = Parser.getQuotedAttribute(stringInfo, "title");
 	}
 
@@ -94,6 +97,10 @@ public class PeakInfo {
 
   public String getFilePath() {
     return file;
+  }
+
+  public boolean isModelOnly() {
+    return (model != null && atoms == null);
   }
 
 }

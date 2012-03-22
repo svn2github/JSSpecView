@@ -100,14 +100,18 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     peakList = list;
     for (int i = list.size(); --i >= 0; )
       peakList.get(i).spectrum = this;
+    System.out.println("Spectrum " + getTitle() + " peaks: " + list.size());
     return list.size();
   }
 
   public PeakInfo findPeakByFileIndex(String filePath, String index) {
+    System.out.println("JDXSPECTRUM findPeakByFileIndex " + this);
     if (peakList != null && peakList.size() > 0)
       for (int i = 0; i < peakList.size(); i++)
-        if (peakList.get(i).checkFileIndex(filePath, index))
+        if (peakList.get(i).checkFileIndex(filePath, index)) {
+          System.out.println("oK: " + peakList.get(i));
           return (selectedPeak = peakList.get(i));
+        }
     return null;
   }
 
@@ -130,6 +134,13 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return selectedPeak;
   }
 
+  public PeakInfo getModelPeakInfo() {
+    for (int i = 0; i < peakList.size(); i++)
+      if (peakList.get(i).isModelOnly())
+        return peakList.get(i);
+    return null;
+  }
+  
   public PeakInfo getAssociatedPeakInfo(Coordinate coord) {
     selectedPeak = null;
     if (coord != null && peakList != null && peakList.size() > 0)
@@ -534,5 +545,9 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     if (match == null || key.equalsIgnoreCase(match))
       info.put(key, value);
   }
-
+  
+  @Override
+  public String toString() {
+    return getTitleLabel();
+  }
 }

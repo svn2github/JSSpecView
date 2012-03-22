@@ -82,4 +82,5 @@ public interface Graph {
   public Map<String, Object> getInfo(String key);
   public String getFilePath();
   public boolean is1D();
+  public String getFilePathForwardSlash();
 }

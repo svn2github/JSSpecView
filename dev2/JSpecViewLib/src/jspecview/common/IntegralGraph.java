@@ -424,4 +424,8 @@ public class IntegralGraph implements Graph {
     return true;
   }
 
+  public String getFilePathForwardSlash() {
+    return ""; // don't want to find this one
+  }
+
 }

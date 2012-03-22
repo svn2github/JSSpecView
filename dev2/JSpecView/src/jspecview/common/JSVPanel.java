@@ -359,6 +359,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   // listeners to handle various events
 
   private ArrayList<PanelListener> listeners = new ArrayList<PanelListener>();
+  private List<Graph> spectra;
 
   /**
    * Constructs a new JSVPanel
@@ -422,6 +423,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   private void initJSVPanel(List<Graph> spectra, int startIndex, int endIndex) {
     setBorder(BorderFactory.createLineBorder(Color.lightGray));
     nSpectra = spectra.size();
+    this.spectra = spectra;
     graphSets = JSVGraphSet.getGraphSets(this, spectra, startIndex, endIndex);
     currentGraphSet = graphSets.get(0);
     setTitle(getSpectrum().getTitleLabel());
@@ -443,7 +445,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   public JDXSpectrum getSpectrum() {
-    return getSpectrumAt(0).getCurrentSubSpectrum();
+    return currentGraphSet.getSpectrum().getCurrentSubSpectrum();
   }
 
   /**
@@ -1079,9 +1081,12 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
   public PeakInfo findPeak(String fileName, String index) {
     PeakInfo pi;
-    for (int i = 0; i < graphSets.size(); i+= 1)
-      if ((pi = graphSets.get(i).findPeak(fileName, index)) != null)
+    System.out.println("JSVPanel " + this + "\n looking for " + fileName + " " + index);
+    for (int i = graphSets.size(); --i >= 0; )
+      if ((pi = graphSets.get(i).findPeak(fileName, index)) != null) {
+        System.out.println(" found " + pi);
         return pi;
+      }
     return null;
   }
 
@@ -1125,7 +1130,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @param coord
    */
   public void notifyPeakPickedListeners(Coordinate coord) {
-    // TODO: Currently Aassumes spectra are not overlaid
     notifyListeners(new PeakPickEvent(this, coord, getSpectrum()
         .getAssociatedPeakInfo(coord)));
   }
@@ -1189,7 +1193,6 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       return;
     setCurrentGraphSet(gs);
     gs.mouseClickEvent(xPixel, yPixel, e.getClickCount(), e.isControlDown());
-    notifyPeakPickedListeners(coordClicked);
   }
 
   public void mouseEntered(MouseEvent e) {
@@ -1199,6 +1202,13 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   }
 
   public void keyPressed(KeyEvent e) {
+    if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+      currentGraphSet.escape();
+      isIntegralDrag = false;
+      repaint();
+      e.consume();
+      return;
+    }
     if (e.getModifiers() != 0) {
       if (e.isControlDown()) {
         switch (e.getKeyCode()) {
@@ -1249,6 +1259,15 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       currentGraphSet.nextView();
       return;
     }
+  }
+
+  public boolean hasFileLoaded(String filePath) {
+    for (int i = spectra.size(); --i >= 0;) {
+       System.out.println(i + " JSVPanel hasFileloaded? look for " + filePath + " -- fouund " + spectra.get(i).getFilePathForwardSlash());
+      if (spectra.get(i).getFilePathForwardSlash().equals(filePath))
+        return  true;
+    }
+    return false;
   }
 
 }

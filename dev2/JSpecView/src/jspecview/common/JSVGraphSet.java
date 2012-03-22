@@ -166,7 +166,7 @@ class JSVGraphSet {
 
 
   JDXSpectrum getSpectrum() {
-    return getSpectrumAt(0).getCurrentSubSpectrum();
+    return getSpectrumAt(iThisSpectrum < 0 || iThisSpectrum == Integer.MAX_VALUE ? 0 : iThisSpectrum).getCurrentSubSpectrum();
   }
 
   /**
@@ -554,17 +554,24 @@ class JSVGraphSet {
   }
 
   private void drawHighlights(Graphics g) {
+    if (iThisSpectrum == Integer.MAX_VALUE)
+      return;
+    Graph spec = spectra.get(Math.max(iThisSpectrum, 0));
     for (int i = 0; i < highlights.size(); i++) {
       Highlight hl = highlights.get(i);
-      drawBar(g, hl.getStartX(), hl.getEndX(), jsvp.setHighlightColor(hl.getColor()),
+      if (hl.spectrum == spec)
+        drawBar(g, hl.getStartX(), hl.getEndX(), jsvp.setHighlightColor(hl.getColor()),
           true);
     }
   }
 
   private void drawPeakTabs(Graphics g) {
+    if (iThisSpectrum == Integer.MAX_VALUE)
+      return;
+    Graph spec = spectra.get(Math.max(iThisSpectrum, 0));
     ArrayList<PeakInfo> list = (nSpectra == 1
-        || getSpectrum().getIntegrationGraph() != null ? getSpectrum()
-        .getPeakList() : null);
+        || getSpectrum().getIntegrationGraph() != null 
+        || iThisSpectrum >= 0 ? ((JDXSpectrum)spec).getPeakList() : null);
     if (list != null && list.size() > 0) {
       Color highlightColor = jsvp.getHighlightColor();
       for (int i = list.size(); --i >= 0;) {
@@ -1730,7 +1737,8 @@ class JSVGraphSet {
     plotColors[0] = color;
   }
 
-  void mouseClickEvent(int xPixel, int yPixel, int clickCount, boolean isControlDown) {
+  void mouseClickEvent(int xPixel, int yPixel, int clickCount,
+                       boolean isControlDown) {
     PlotWidget pw = getPinSelected(xPixel, yPixel);
     if (pw != null) {
       setWidgetValueByUser(pw);
@@ -1743,8 +1751,8 @@ class JSVGraphSet {
       if (is2D) {
         if (sticky2Dcursor) {
           addAnnotation(new ColoredAnnotation(isd.toX(xPixel), isd
-              .toSubspectrumIndex(yPixel), jsvp.coordStr, Color.BLACK, false, true,
-              5, 5), true);
+              .toSubspectrumIndex(yPixel), jsvp.coordStr, Color.BLACK, false,
+              true, 5, 5), true);
         }
         sticky2Dcursor = !sticky2Dcursor;
         set2DCrossHairs(xPixel, yPixel);
@@ -1752,8 +1760,8 @@ class JSVGraphSet {
         return;
       }
       if (isInTopBar(xPixel, yPixel)) {
-        doZoom(toX0(xPixel0), multiScaleData.minY,
-            toX0(xPixel1), multiScaleData.maxY, true, true, false);
+        doZoom(toX0(xPixel0), multiScaleData.minY, toX0(xPixel1),
+            multiScaleData.maxY, true, true, false);
       } else if (isInRightBar(xPixel, yPixel)) {
         doZoom(multiScaleData.minXOnScale, zoomInfoList.get(0).minY,
             multiScaleData.maxXOnScale, zoomInfoList.get(0).maxY, true, true,
@@ -1782,12 +1790,13 @@ class JSVGraphSet {
     }
     if (xPixel != fixX(xPixel) || yPixel != fixY(yPixel)) {
       jsvp.coordClicked = null;
-      jsvp.coordsClicked = null;      
-      return;
+      jsvp.coordsClicked = null;
+    } else {
+      jsvp.coordClicked = new Coordinate(toX(xPixel), toY(yPixel));
+      jsvp.lastClickX = jsvp.coordClicked.getXVal();
+      jsvp.coordsClicked = getSpectrum().getXYCoords();
     }
-    jsvp.coordClicked = new Coordinate(toX(xPixel), toY(yPixel));
-    jsvp.lastClickX = jsvp.coordClicked.getXVal();
-    jsvp.coordsClicked = getSpectrum().getXYCoords();
+    jsvp.notifyPeakPickedListeners(jsvp.coordClicked);
   }
 
   void mouseReleasedEvent() {
@@ -2069,7 +2078,8 @@ class JSVGraphSet {
   }
 
   void selectSpectrum(String filePath, String type, String model) {
-    if (nSpectra == 1 || jsvp.currentGraphSet == this) {
+    System.out.println("jsvgraphset selectSpectrum " + filePath + " " + type + " " + model);
+    if (nSpectra == 1) {
       iThisSpectrum = -1;
       return;
     }
@@ -2078,6 +2088,7 @@ class JSVGraphSet {
       if ((filePath == null || getSpectrumAt(i).getFilePathForwardSlash().equals(filePath))
         && (getSpectrumAt(i).matchesPeakTypeModel(type, model))) {
           iThisSpectrum = i;
+          System.out.println("have found it -- " + i);
           haveFound = true;
         }
     }
@@ -2104,6 +2115,12 @@ class JSVGraphSet {
     spec.setSelectedPeak(peak);
     jsvp.coordClicked.setXVal(jsvp.lastClickX = peak.getX());
     jsvp.notifyListeners(new PeakPickEvent(jsvp, jsvp.coordClicked, peak == null ? PeakInfo.nullPeakInfo  : peak));
+  }
+
+  void escape() {
+    jsvp.thisWidget = null;
+    zoomBox1D.xPixel0 = zoomBox1D.xPixel1 = zoomBox2D.xPixel0 = zoomBox2D.xPixel1 = 0;
+    
   }
 
 }

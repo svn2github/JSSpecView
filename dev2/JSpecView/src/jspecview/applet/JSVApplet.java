@@ -469,6 +469,9 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     if (!f.equals(recentURL))
       setFilePathLocal(fileName);
     selectedJSVPanel.processPeakSelect(selectPanel(fileName, index));
+    String type = Parser.getQuotedAttribute(script, "type");
+    String model = Parser.getQuotedAttribute(script, "model");
+    selectedJSVPanel.selectSpectrum(fileName, type, model);
     sendFrameChange(selectedJSVPanel);
   }
 
@@ -1542,6 +1545,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
       PeakPickEvent e = (PeakPickEvent) eventObj;
       PeakInfo pi = e.getPeakInfo();
       setSelectedPanel((JSVPanel) e.getSource());
+      System.out.println("panelEvent sending to selected panel; " + pi);
       selectedJSVPanel.processPeakSelect(pi);
       sendScript(pi.toString());
       if (!pi.isClearAll())
