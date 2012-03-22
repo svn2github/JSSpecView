@@ -1076,6 +1076,10 @@ abstract class GraphSet {
 
   /*-------------------- METHODS FOR SCALING AND ZOOM --------------------------*/
 
+  // static parameters
+  final static int minNumOfPointsForZoom = 3;
+
+
   void setZoom(double x1, double y1, double x2, double y2) {
     setZoomTo(0);
     if (Double.isNaN(x1)) {
@@ -1157,11 +1161,11 @@ abstract class GraphSet {
     if (!is2D && !dontUseSubspecs) {
       graphsTemp.add(getSpectrum());
       if (!multiScaleData.setDataPointIndices(graphsTemp, initX, finalX,
-          Panel.minNumOfPointsForZoom, startIndices, endIndices, false))
+          minNumOfPointsForZoom, startIndices, endIndices, false))
         return;
     } else {
       if (!multiScaleData.setDataPointIndices(spectra, initX, finalX,
-          Panel.minNumOfPointsForZoom, startIndices, endIndices, false))
+          minNumOfPointsForZoom, startIndices, endIndices, false))
         return;
     }
 

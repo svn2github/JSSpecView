@@ -233,7 +233,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    * @param e the <code>ActionEvent</code>
    */
   void nextMenuItem_actionPerformed(ActionEvent e) {
-    jsvp.nextView();
+    jsvp.pd.nextView();
   }
 
   /**
@@ -242,7 +242,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    * @param e the <code>ActionEvent</code>
    */
   void previousMenuItem_actionPerformed(ActionEvent e) {
-    jsvp.previousView();
+    jsvp.pd.previousView();
   }
 
   /**
@@ -250,7 +250,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    * @param e the <code>ActionEvent</code>
    */
   void resetMenuItem_actionPerformed(ActionEvent e) {
-    jsvp.reset();
+    jsvp.pd.reset();
   }
 
   /**
@@ -258,7 +258,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    * @param e the <code>ActionEvent</code>
    */
   void clearMenuItem_actionPerformed(ActionEvent e) {
-    jsvp.clearViews();
+    jsvp.pd.clearViews();
   }
 
   /**
@@ -282,7 +282,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    * @param e the <code>ItemEvent</code
    */
   void revPlotCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-    jsvp.setReversePlot((e.getStateChange() == ItemEvent.SELECTED));
+    jsvp.pd.setReversePlot((e.getStateChange() == ItemEvent.SELECTED));
     jsvp.repaint();
   }
 
@@ -411,13 +411,13 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   public void setEnables(AwtPanel jsvp) {
     this.jsvp = jsvp;
     JDXSpectrum spec0 = jsvp.getSpectrumAt(0);
-    gridCheckBoxMenuItem.setSelected(jsvp.isGridOn());
-    coordsCheckBoxMenuItem.setSelected(jsvp.isCoordinatesOn());
-    reversePlotCheckBoxMenuItem.setSelected(jsvp.isPlotReversed());
+    gridCheckBoxMenuItem.setSelected(jsvp.pd.isGridOn());
+    coordsCheckBoxMenuItem.setSelected(jsvp.pd.isCoordinatesOn());
+    reversePlotCheckBoxMenuItem.setSelected(jsvp.pd.isPlotReversed());
     integrateCheckBoxMenuItem.setSelected(spec0.getIntegrationGraph() != null);
 
-    boolean isOverlaid = jsvp.isOverlaid();
-    boolean isSingle = jsvp.getNumberOfSpectraTotal() == 1;
+    boolean isOverlaid = jsvp.pd.isOverlaid();
+    boolean isSingle = jsvp.pd.getNumberOfSpectraTotal() == 1;
     integrateCheckBoxMenuItem.setEnabled(isSingle && spec0.canIntegrate() || spec0.getIntegrationGraph() != null);
     solColMenuItem.setEnabled(isSingle && spec0.canShowSolutionColor());
     transAbsMenuItem.setEnabled(isSingle && spec0.canConvertTransAbs());
@@ -432,7 +432,37 @@ public class JSVPanelPopupMenu extends JPopupMenu {
       appletCompoundMenu.setEnabled(
           appletCompoundMenu.isEnabled() && appletCompoundMenu.getItemCount() > 3);
     if (overlayKeyMenuItem != null)
-      overlayKeyMenuItem.setEnabled(isOverlaid && jsvp.getNumberOfGraphSets() == 1);
+      overlayKeyMenuItem.setEnabled(isOverlaid && jsvp.pd.getNumberOfGraphSets() == 1);
+  }
+
+  static void addMenuItem(JMenu m, String key,
+                                  ActionListener actionListener) {
+    JMenuItem jmi = new JMenuItem();
+    jmi.setMnemonic(key.charAt(0));
+    jmi.setText(key);
+    jmi.addActionListener(actionListener);
+    m.add(jmi);
+  }
+
+  public static void setMenus(JMenu saveAsMenu, JMenu saveAsJDXMenu,
+                              JMenu exportAsMenu, ActionListener actionListener) {
+    saveAsMenu.setText("Save As");
+    saveAsJDXMenu.setText("JDX");
+    JSVPanelPopupMenu.addMenuItem(saveAsJDXMenu, "XY", actionListener);
+    JSVPanelPopupMenu.addMenuItem(saveAsJDXMenu, "DIF", actionListener);
+    JSVPanelPopupMenu.addMenuItem(saveAsJDXMenu, "DIFDUP", actionListener);
+    JSVPanelPopupMenu.addMenuItem(saveAsJDXMenu, "FIX", actionListener);
+    JSVPanelPopupMenu.addMenuItem(saveAsJDXMenu, "PAC", actionListener);
+    JSVPanelPopupMenu.addMenuItem(saveAsJDXMenu, "SQZ", actionListener);
+    saveAsMenu.add(saveAsJDXMenu);
+    JSVPanelPopupMenu.addMenuItem(saveAsMenu, "CML", actionListener);
+    JSVPanelPopupMenu.addMenuItem(saveAsMenu, "XML (AnIML)", actionListener);
+    if (exportAsMenu != null) {
+      exportAsMenu.setText("Export As");
+      JSVPanelPopupMenu.addMenuItem(exportAsMenu, "JPG", actionListener);
+      JSVPanelPopupMenu.addMenuItem(exportAsMenu, "PNG", actionListener);
+      JSVPanelPopupMenu.addMenuItem(exportAsMenu, "SVG", actionListener);
+    }
   }
 
 }

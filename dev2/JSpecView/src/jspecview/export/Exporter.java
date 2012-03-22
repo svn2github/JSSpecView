@@ -24,7 +24,7 @@ import javax.swing.SwingConstants;
 
 import jspecview.common.JDXSpectrum;
 import jspecview.common.AwtPanel;
-import jspecview.common.JSpecViewFileFilter;
+import jspecview.common.JSVFileFilter;
 import jspecview.common.ScriptToken;
 import jspecview.util.TextFormat;
 
@@ -92,7 +92,7 @@ public class Exporter {
                                      String dirLastExported) {
     // From popup menu click SaveAs or Export
     // if JSVPanel has more than one spectrum...Choose which one to export
-    int numOfSpectra = panel.getNumberOfGraphSets();
+    int numOfSpectra = panel.pd.getNumberOfGraphSets();
     if (numOfSpectra == 1 || type.equals("JPG") || type.equals("PNG"))
       return exportSpectrumOrImage(panel, type, -1, fc, recentFileName,
           dirLastExported);
@@ -197,7 +197,7 @@ public class Exporter {
                                int index, JFileChooser fc, String recentFileName,
                                String dirLastExported) {
     Type imode = Type.getType(mode);
-    JSpecViewFileFilter filter = new JSpecViewFileFilter();
+    JSVFileFilter filter = new JSVFileFilter();
     //TODO: This is flawed. It assumes the file name has one and only one "." in it. 
     int pt = recentFileName.lastIndexOf(".");
     String name = (pt < 0 ? recentFileName : recentFileName.substring(0, pt));
@@ -248,8 +248,8 @@ public class Exporter {
     } else {
       spec = jsvp.getSpectrumAt(index);
     }
-    int startIndex = jsvp.getStartDataPointIndices()[index];
-    int endIndex = jsvp.getEndDataPointIndices()[index];
+    int startIndex = jsvp.pd.getStartDataPointIndices()[index];
+    int endIndex = jsvp.pd.getEndDataPointIndices()[index];
     String msg;
     try {
       switch (imode) {

@@ -27,9 +27,9 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.ArrayList;
 
+import jspecview.common.AwtParameters;
 import jspecview.common.Coordinate;
 import jspecview.common.Graph;
-import jspecview.common.AppUtils;
 import jspecview.common.ScaleData;
 import jspecview.util.Logger;
 import jspecview.util.TextFormat;
@@ -240,14 +240,14 @@ class SVGExporter extends FormExporter {
  double yTickB= yStep/5;
  
     context
-        .put("plotAreaColor", AppUtils.colorToHexString(plotAreaColor));
-    context.put("backgroundColor", AppUtils
+        .put("plotAreaColor", AwtParameters.colorToHexString(plotAreaColor));
+    context.put("backgroundColor", AwtParameters
         .colorToHexString(backgroundColor));
-    context.put("plotColor", AppUtils.colorToHexString(plotColor));
-    context.put("gridColor", AppUtils.colorToHexString(gridColor));
-    context.put("titleColor", AppUtils.colorToHexString(titleColor));
-    context.put("scaleColor", AppUtils.colorToHexString(scaleColor));
-    context.put("unitsColor", AppUtils.colorToHexString(unitsColor));
+    context.put("plotColor", AwtParameters.colorToHexString(plotColor));
+    context.put("gridColor", AwtParameters.colorToHexString(gridColor));
+    context.put("titleColor", AwtParameters.colorToHexString(titleColor));
+    context.put("scaleColor", AwtParameters.colorToHexString(scaleColor));
+    context.put("unitsColor", AwtParameters.colorToHexString(unitsColor));
 
     context.put("svgHeight", new Integer(svgHeight));
     context.put("svgWidth", new Integer(svgWidth));

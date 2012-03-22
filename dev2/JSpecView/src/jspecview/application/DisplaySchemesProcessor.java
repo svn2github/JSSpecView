@@ -29,8 +29,8 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.TreeMap;
 
-import jspecview.common.AppUtils;
-import jspecview.common.DisplayScheme;
+import jspecview.common.AwtParameters;
+import jspecview.common.Parameters;
 import jspecview.common.ScriptToken;
 import jspecview.util.FileManager;
 import jspecview.util.SimpleXmlReader;
@@ -50,7 +50,7 @@ public class DisplaySchemesProcessor {
   private String fileName = "displaySchemes.xml";
 
   /** The list of displaySchemes that is loaded from file */
-  private TreeMap<String, DisplayScheme> displaySchemes;
+  private TreeMap<String, Parameters> displaySchemes;
 
   private SimpleXmlReader reader;
 
@@ -58,7 +58,7 @@ public class DisplaySchemesProcessor {
    * Initialises the <code>DisplaySchemesProcessor</code>
    */
   public DisplaySchemesProcessor() {
-    displaySchemes = new TreeMap<String, DisplayScheme>();
+    displaySchemes = new TreeMap<String, Parameters>();
   }
 
   /**
@@ -66,8 +66,8 @@ public class DisplaySchemesProcessor {
    * @param dispSchemeFileName String
    * @return boolean
    */
-  public DisplayScheme loadDefault() {
-    DisplayScheme dsdef = new DisplayScheme("Default");
+  public Parameters loadDefault() {
+    Parameters dsdef = new Parameters("Default");
     dsdef.setDisplayFont("default");
     dsdef.setColor(ScriptToken.TITLECOLOR, Color.BLACK);
     dsdef.setColor(ScriptToken.UNITSCOLOR, Color.BLACK);
@@ -83,8 +83,8 @@ public class DisplaySchemesProcessor {
     return dsdef;
   }
   
-  public DisplayScheme getDefaultScheme(){
-	  DisplayScheme ds = displaySchemes.get("Default");
+  public Parameters getDefaultScheme(){
+	  Parameters ds = displaySchemes.get("Default");
 	  if(ds == null){
 		  ds = loadDefault();
 	  }
@@ -105,7 +105,7 @@ public class DisplaySchemesProcessor {
    * Returns the list of <code>DisplayScheme</code>s that were loaded
    * @return the list of <code>DisplayScheme</code>s that were loaded
    */
-  public TreeMap<String, DisplayScheme> getDisplaySchemes(){
+  public TreeMap<String, Parameters> getDisplaySchemes(){
     return displaySchemes;
   }
 
@@ -148,7 +148,7 @@ public class DisplaySchemesProcessor {
 
     reader = new SimpleXmlReader(br);
     String defaultDS = "Default";
-    DisplayScheme ds = null;
+    Parameters ds = null;
     String attr;
     try {
       while (reader.hasNext()) {
@@ -160,7 +160,7 @@ public class DisplaySchemesProcessor {
         }
         if (theTag.equals("displayscheme")) {
           String name = reader.getAttrValue("name");
-          ds = new DisplayScheme(name);
+          ds = new Parameters(name);
           if (name.equals(defaultDS))
             ds.setDefault(true);
           displaySchemes.put(name, ds);
@@ -230,7 +230,7 @@ public class DisplaySchemesProcessor {
   private Color getColor(){
     String value = reader.getAttrValueLC("hex");
     return (value.length() == 0 || value.equals("default") ? null
-        : AppUtils.getColorFromString(value));
+        : AwtParameters.getColorFromString(value));
   }
 
   /**
@@ -249,7 +249,7 @@ public class DisplaySchemesProcessor {
     BufferedWriter buffer = new BufferedWriter(sw);
     String defaultDSName = "";
 
-    for (DisplayScheme ds: displaySchemes.values()) {
+    for (Parameters ds: displaySchemes.values()) {
       if(ds.isDefault())
         defaultDSName = ds.getName();
 
@@ -258,35 +258,35 @@ public class DisplaySchemesProcessor {
       buffer.write("\t\t<font face = \"" + ds.getDisplayFont() + "\"/>");
       buffer.newLine();
       buffer.write("\t\t<titleColor hex = \"" +
-                   AppUtils.colorToHexString(ds.getColor(ScriptToken.TITLECOLOR)) +
+                   AwtParameters.colorToHexString(ds.getColor(ScriptToken.TITLECOLOR)) +
                    "\"/>");
       buffer.newLine();
       buffer.write("\t\t<scaleColor hex = \"" +
-                   AppUtils.colorToHexString(ds.getColor(ScriptToken.SCALECOLOR)) +
+                   AwtParameters.colorToHexString(ds.getColor(ScriptToken.SCALECOLOR)) +
                    "\"/>");
       buffer.newLine();
       buffer.write("\t\t<unitsColor hex = \"" +
-                   AppUtils.colorToHexString(ds.getColor(ScriptToken.UNITSCOLOR)) +
+                   AwtParameters.colorToHexString(ds.getColor(ScriptToken.UNITSCOLOR)) +
                    "\"/>");
       buffer.newLine();
       buffer.write("\t\t<coordinateColor hex = \"" +
-                   AppUtils.colorToHexString(ds.getColor(ScriptToken.COORDINATESCOLOR)) +
+                   AwtParameters.colorToHexString(ds.getColor(ScriptToken.COORDINATESCOLOR)) +
                    "\"/>");
       buffer.newLine();
       buffer.write("\t\t<gridColor hex = \"" +
-                   AppUtils.colorToHexString(ds.getColor(ScriptToken.GRIDCOLOR)) +
+                   AwtParameters.colorToHexString(ds.getColor(ScriptToken.GRIDCOLOR)) +
                    "\"/>");
       buffer.newLine();
       buffer.write("\t\t<plotColor hex = \"" +
-                   AppUtils.colorToHexString(ds.getColor(ScriptToken.PLOTCOLOR)) +
+                   AwtParameters.colorToHexString(ds.getColor(ScriptToken.PLOTCOLOR)) +
                    "\"/>");
       buffer.newLine();
       buffer.write("\t\t<plotAreaColor hex = \"" +
-                   AppUtils.colorToHexString(ds.getColor(ScriptToken.PLOTAREACOLOR)) +
+                   AwtParameters.colorToHexString(ds.getColor(ScriptToken.PLOTAREACOLOR)) +
                    "\"/>");
       buffer.newLine();
       buffer.write("\t\t<backgroundColor hex = \"" +
-                   AppUtils.colorToHexString(ds.getColor(ScriptToken.BACKGROUNDCOLOR)) +
+                   AwtParameters.colorToHexString(ds.getColor(ScriptToken.BACKGROUNDCOLOR)) +
                    "\"/>");
       buffer.newLine();
       buffer.write("\t</displayScheme>");

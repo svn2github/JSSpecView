@@ -97,7 +97,7 @@ public class ColoredAnnotation extends Annotation {
         return null;
       double x = (xPt < 0 ? lastAnnotation.getXVal() : Double.valueOf(args.get(xPt)));
       double y = (yPt < 0 ? lastAnnotation.getYVal() : Double.valueOf(args.get(yPt)));
-      Color color =(colorPt < 0 ? lastAnnotation.getColor() : AppUtils
+      Color color =(colorPt < 0 ? lastAnnotation.getColor() : AwtParameters
           .getColorFromString(args.get(colorPt)));
       String text;
       if (textPt < 0) {

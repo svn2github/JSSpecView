@@ -75,7 +75,7 @@ public class OverlayLegendDialog extends JDialog {
    * @param jsvp the <code>JSVPanel</code>
    */
   public OverlayLegendDialog(AwtPanel jsvp) {
-    this(null, ("Legend: " + jsvp.getTitle()), false, jsvp);
+    this(null, ("Legend: " + jsvp.pd.getTitle()), false, jsvp);
   }
 
   /**
@@ -85,7 +85,7 @@ public class OverlayLegendDialog extends JDialog {
    * @param jsvp the <code>JSVPanel</code>
    */
   public OverlayLegendDialog(Frame frame, AwtPanel jsvp) {
-    this(frame, ("Legend: " + jsvp.getTitle()), false, jsvp);
+    this(frame, ("Legend: " + jsvp.pd.getTitle()), false, jsvp);
   }
 
   /**
@@ -153,7 +153,7 @@ public class OverlayLegendDialog extends JDialog {
           JDXSpectrum spectrum;
           Object[] cols;
 
-          int numSpectra = jsvp.getNumberOfSpectraInCurrentSet();
+          int numSpectra = jsvp.pd.getNumberOfSpectraInCurrentSet();
           data = new Object[numSpectra][];
           String f1 = jsvp.getSpectrumAt(0).getFilePath();
           String f2 = jsvp.getSpectrumAt(numSpectra - 1).getFilePath();

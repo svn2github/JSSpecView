@@ -27,20 +27,20 @@ import javax.swing.filechooser.FileFilter;
 /**
  * A implementation of the <code>FileFilter</code> that filters out all files
  * except those with extensions that are added.
- * @see jspecview.common.JSpecViewFileFilter#JSpecViewFileFilter(java.lang.String[])
- * @see jspecview.common.JSpecViewFileFilter#JSpecViewFileFilter(java.lang.String[], java.lang.String)
- * @see jspecview.common.JSpecViewFileFilter#addExtension(java.lang.String)
+ * @see jspecview.common.JSVFileFilter#JSpecViewFileFilter(java.lang.String[])
+ * @see jspecview.common.JSVFileFilter#JSpecViewFileFilter(java.lang.String[], java.lang.String)
+ * @see jspecview.common.JSVFileFilter#addExtension(java.lang.String)
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
  */
-public class JSpecViewFileFilter extends FileFilter
+public class JSVFileFilter extends FileFilter
 {
 
   /**
    * A list of file extensions
    */
-  private Hashtable<String, JSpecViewFileFilter> filters = null;
+  private Hashtable<String, JSVFileFilter> filters = null;
 
   /**
    * Description of the filter
@@ -50,8 +50,8 @@ public class JSpecViewFileFilter extends FileFilter
   /**
    * Intialises a <code>JSpecViewFileFilter</code>
    */
-  public JSpecViewFileFilter() {
-    filters = new Hashtable<String, JSpecViewFileFilter>();
+  public JSVFileFilter() {
+    filters = new Hashtable<String, JSVFileFilter>();
   }
 
   /**
@@ -59,7 +59,7 @@ public class JSpecViewFileFilter extends FileFilter
    * to filter
    * @param filters a <code>String</code> of filters
    */
-  public JSpecViewFileFilter(String[] filters) {
+  public JSVFileFilter(String[] filters) {
     this(filters, null);
   }
 
@@ -69,7 +69,7 @@ public class JSpecViewFileFilter extends FileFilter
    * @param filters the array of file extensions
    * @param description the description
    */
-  public JSpecViewFileFilter(String[] filters, String description) {
+  public JSVFileFilter(String[] filters, String description) {
     this();
     for (int i = 0; i < filters.length; i++) {
 	    addExtension(filters[i]);
@@ -114,7 +114,7 @@ public class JSpecViewFileFilter extends FileFilter
    */
   public void addExtension(String extension) {
 	if(filters == null) {
-	    filters = new Hashtable<String, JSpecViewFileFilter>(5);
+	    filters = new Hashtable<String, JSVFileFilter>(5);
 	}
 	filters.put(extension.toLowerCase(), this);
   }

@@ -56,8 +56,8 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import jspecview.common.AppUtils;
-import jspecview.common.DisplayScheme;
+import jspecview.common.AwtParameters;
+import jspecview.common.Parameters;
 import jspecview.common.AwtPanel;
 import jspecview.common.ScriptToken;
 import jspecview.exception.JSpecViewException;
@@ -154,7 +154,7 @@ public class PreferencesDialog extends JDialog {
   private JRadioButton AtoTRadioButton = new JRadioButton();
   private ButtonGroup conversionButtonGroup = new ButtonGroup();
 
-  DisplayScheme currentDS = new DisplayScheme("Current");
+  Parameters currentDS = new Parameters("Current");
   private DisplaySchemesProcessor dsp;
   private AwtPanel previewPanel = null;
   private String defaultDSName = "";
@@ -635,7 +635,7 @@ public class PreferencesDialog extends JDialog {
    * Initialise the Display Tab, where display schemes are created or set
    */
   private void initDisplayTab() {
-    TreeMap<String, DisplayScheme> displaySchemes = dsp.getDisplaySchemes();
+    TreeMap<String, Parameters> displaySchemes = dsp.getDisplaySchemes();
 
     defaultDSName = preferences.getProperty("defaultDisplaySchemeName");
 
@@ -657,9 +657,9 @@ public class PreferencesDialog extends JDialog {
           .getResourceAsStream("resources/sample.jdx"), false);
 
       previewPanel = new AwtPanel(source.getSpectra().get(0), null);
-      AppUtils.setBoolean(previewPanel, null, ScriptToken.ENABLEZOOM, false);
-      AppUtils.setBoolean(previewPanel, null, ScriptToken.GRIDON, true);
-      AppUtils.setBoolean(previewPanel, null, ScriptToken.COORDINATESON, true);
+      Parameters.setBoolean(previewPanel, null, ScriptToken.ENABLEZOOM, false);
+      Parameters.setBoolean(previewPanel, null, ScriptToken.GRIDON, true);
+      Parameters.setBoolean(previewPanel, null, ScriptToken.COORDINATESON, true);
     } catch (IOException ioe) {
       ioe.printStackTrace();
       return;
@@ -690,7 +690,7 @@ public class PreferencesDialog extends JDialog {
     integFactorTextField.setText(preferences.getProperty("integralFactor"));
     integOffsetTextField.setText(preferences.getProperty("integralOffset"));
     plotColorButton.setBackground(
-        AppUtils.getColorFromString(preferences.getProperty("integralPlotColor")));
+        AwtParameters.getColorFromString(preferences.getProperty("integralPlotColor")));
     autoIntegrateCheckBox.setSelected(
        Boolean.parseBoolean(preferences.getProperty("automaticallyIntegrate")));
     String autoConvert =
@@ -782,7 +782,7 @@ public class PreferencesDialog extends JDialog {
      *        the ListSelectionEvent
      */
     public void valueChanged(ListSelectionEvent lse) {
-      currentColorButton.setBackground(currentDS
+      currentColorButton.setBackground((Color) currentDS
           .getColor(ScriptToken.getScriptToken((String) ((JList) lse
               .getSource()).getSelectedValue())));
     }
@@ -856,7 +856,7 @@ public class PreferencesDialog extends JDialog {
     preferences.setProperty("integralFactor", integFactorTextField.getText());
     preferences.setProperty("integralOffset", integOffsetTextField.getText());
     preferences.setProperty("integralPlotColor",
-                           AppUtils.colorToHexString(plotColorButton.getBackground()));
+                           AwtParameters.colorToHexString(plotColorButton.getBackground()));
 
     // Display Schemes Tab
     preferences.setProperty("defaultDisplaySchemeName", currentDS.getName());
@@ -865,7 +865,7 @@ public class PreferencesDialog extends JDialog {
     //TreeMap<String,DisplayScheme> dispSchemes;
     if(currentDS.getName().equals("Current")){
       //@SuppressWarnings("unchecked")
-      TreeMap<String, DisplayScheme> dispSchemes = dsp.getDisplaySchemes();
+      TreeMap<String, Parameters> dispSchemes = dsp.getDisplaySchemes();
       dispSchemes.put("Current", currentDS);
     }
 
@@ -904,7 +904,7 @@ public class PreferencesDialog extends JDialog {
 	 int option = JOptionPane.showConfirmDialog(this, "Do you really want to delete '" + currentDS.getName() + "'? This cannot be undone.",
 			  "Delete Scheme", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 	 if(option == JOptionPane.YES_OPTION){
-		 TreeMap<String, DisplayScheme> dispSchemes = dsp.getDisplaySchemes();
+		 TreeMap<String, Parameters> dispSchemes = dsp.getDisplaySchemes();
 
 		 dispSchemes.remove(currentDS.getName());
 	
@@ -945,7 +945,7 @@ public class PreferencesDialog extends JDialog {
       currentDS.setDisplayFont(fontName);
     }
 
-    TreeMap<String, DisplayScheme> dispSchemes = dsp.getDisplaySchemes();
+    TreeMap<String, Parameters> dispSchemes = dsp.getDisplaySchemes();
 
     dispSchemes.put(input, currentDS);
 
@@ -979,10 +979,10 @@ public class PreferencesDialog extends JDialog {
   void schemeComboBox_actionPerformed(ActionEvent e) {
     JComboBox schemeCB = (JComboBox)e.getSource();
     String schemeName = (String)schemeCB.getSelectedItem();
-    DisplayScheme ds = null;
+    Parameters ds = null;
 
-    TreeMap<String, DisplayScheme> schemes = dsp.getDisplaySchemes();
-    for (Map.Entry<String, DisplayScheme> entry: schemes.entrySet()) {
+    TreeMap<String, Parameters> schemes = dsp.getDisplaySchemes();
+    for (Map.Entry<String, Parameters> entry: schemes.entrySet()) {
       ds = entry.getValue();
       if(ds.getName().equals(schemeName)){
         currentDS = ds.copy();
@@ -1087,7 +1087,7 @@ public class PreferencesDialog extends JDialog {
    * Retruns the current Display Scheme
    * @return the current Display Scheme
    */
-  public DisplayScheme getSelectedDisplayScheme(){
+  public Parameters getSelectedDisplayScheme(){
     return currentDS;
   }
 

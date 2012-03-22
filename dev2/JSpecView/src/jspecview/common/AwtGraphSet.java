@@ -62,7 +62,7 @@ class AwtGraphSet extends GraphSet {
 
   @Override
   protected void initGraphSet(int startIndex, int endIndex) {
-    setPlotColors(Parameters.defaultPlotColors);
+    setPlotColors(AwtParameters.defaultPlotColors);
     super.initGraphSet(startIndex, endIndex);
   }
 
@@ -77,10 +77,21 @@ class AwtGraphSet extends GraphSet {
       int numAdditionColors = nSpectra - colors.length;
       System.arraycopy(colors, 0, tmpPlotColors, 0, colors.length);
       for (int i = 0, j = colors.length; i < numAdditionColors; i++, j++)
-        tmpPlotColors[j] = AppUtils.generateRandomColor();
+        tmpPlotColors[j] = generateRandomColor();
       colors = tmpPlotColors;
     }
     plotColors = colors;
+  }
+
+  private static Color generateRandomColor() {
+    while (true) {
+      int red = (int) (Math.random() * 255);
+      int green = (int) (Math.random() * 255);
+      int blue = (int) (Math.random() * 255);
+      Color randomColor = new Color(red, green, blue);
+      if (!randomColor.equals(Color.blue))
+        return randomColor;
+    }
   }
 
   void setPlotColor0(Object oColor) {
@@ -186,7 +197,7 @@ class AwtGraphSet extends GraphSet {
   protected boolean update2dImage(boolean forceNew) {
     isd.setScale(multiScaleData);
     JDXSpectrum spec0 = getSpectrumAt(0);
-    int[] buffer = spec0.get2dBuffer(jsvp.thisWidth, jsvp.thisPlotHeight, isd,
+    int[] buffer = spec0.get2dBuffer(jsvp.pd.thisWidth, jsvp.pd.thisPlotHeight, isd,
         forceNew);
     if (buffer == null) {
       image2D = null;
@@ -199,7 +210,7 @@ class AwtGraphSet extends GraphSet {
         BufferedImage.TYPE_BYTE_GRAY);
     WritableRaster raster = image2D.getRaster();
     raster.setSamples(0, 0, isd.imageWidth, isd.imageHeight, 0, buffer);
-    setImageWindow(jsvp.display1D);
+    setImageWindow(jsvp.pd.display1D);
     return true;
   }
 
@@ -223,12 +234,12 @@ class AwtGraphSet extends GraphSet {
 
   @Override
   void refresh() {
-    jsvp.refresh();
+    jsvp.pd.refresh();
   }
 
   @Override
   protected void notifySubSpectrumChange(int i, JDXSpectrum spectrum) {
-    jsvp.notifySubSpectrumChange(i, spectrum);
+    jsvp.pd.notifySubSpectrumChange(i, spectrum);
   }
 
   /**
@@ -335,49 +346,49 @@ class AwtGraphSet extends GraphSet {
 
   @Override
   protected String getCoordString() {
-    return jsvp.coordStr;
+    return jsvp.pd.coordStr;
   }
 
   @Override
   protected void notifyPeakPickedListeners() {
-    jsvp.notifyPeakPickedListeners();
+    jsvp.pd.notifyPeakPickedListeners();
   }
 
   @Override
   protected Coordinate setCoordClicked(double x, double y) {
     if (Double.isNaN(x)) {
-      jsvp.coordClicked = null;
-      jsvp.coordsClicked = null;
+      jsvp.pd.coordClicked = null;
+      jsvp.pd.coordsClicked = null;
       return null;
     }
-    jsvp.coordClicked = new Coordinate(x, y);
-    jsvp.coordsClicked = getSpectrum().getXYCoords();
-    return jsvp.coordClicked;
+    jsvp.pd.coordClicked = new Coordinate(x, y);
+    jsvp.pd.coordsClicked = getSpectrum().getXYCoords();
+    return jsvp.pd.coordClicked;
   }
 
   @Override
   protected void setIntegralDrag(boolean b) {
-    jsvp.isIntegralDrag = b;
+    jsvp.pd.isIntegralDrag = b;
   }
 
   @Override
   protected PlotWidget getThisWidget() {
-    return jsvp.thisWidget;
+    return jsvp.pd.thisWidget;
   }
 
   @Override
   protected boolean isIntegralDrag() {
-    return jsvp.isIntegralDrag;
+    return jsvp.pd.isIntegralDrag;
   }
 
   @Override
   protected void setThisWidget(PlotWidget widget) {
-    jsvp.thisWidget = widget;
+    jsvp.pd.thisWidget = widget;
   }
 
   @Override
   protected void notifyPeakListeners(PeakInfo peak) {
-    jsvp.notifyListeners(new PeakPickEvent(jsvp, jsvp.coordClicked,
+    jsvp.pd.notifyListeners(new PeakPickEvent(jsvp, jsvp.pd.coordClicked,
         peak == null ? PeakInfo.nullPeakInfo : peak));
   }
 
@@ -443,7 +454,7 @@ class AwtGraphSet extends GraphSet {
 
   @Override
   protected boolean isCurrentGraphSet() {
-    return (this == jsvp.currentGraphSet);
+    return (this == jsvp.pd.currentGraphSet);
   }
 
   @Override
@@ -468,13 +479,13 @@ class AwtGraphSet extends GraphSet {
 
   @Override
   protected NumberFormat getFormatter(String hash) {
-    return jsvp.getFormatter(hash);
+    return jsvp.pd.getFormatter(hash);
   }
 
   @Override
   protected void setFont(Object g, int width, int face, int size,
                          boolean isLabel) {
-    jsvp.setFont(g, width, face, size, isLabel);
+    jsvp.pd.setFont(g, width, face, size, isLabel);
   }
 
   @Override
@@ -494,16 +505,16 @@ class AwtGraphSet extends GraphSet {
 
   @Override
   protected boolean setStartupPinTip() {
-    if (jsvp.startupPinTip == null)
+    if (jsvp.pd.startupPinTip == null)
       return false;
-    jsvp.setToolTipText(jsvp.startupPinTip);
-    jsvp.startupPinTip = null;
+    jsvp.setToolTipText(jsvp.pd.startupPinTip);
+    jsvp.pd.startupPinTip = null;
     return true;
   }
 
   @Override
   protected void setCoordStr(String string) {
-    jsvp.coordStr = string;
+    jsvp.pd.coordStr = string;
   }
 
   @Override

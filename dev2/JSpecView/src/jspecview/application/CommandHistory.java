@@ -17,13 +17,15 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package jspecview.common;
+package jspecview.application;
 
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JTextField;
+
+import jspecview.common.ScriptInterface;
 
 /**
  * CommandHistory keeps a command history and responds to key events

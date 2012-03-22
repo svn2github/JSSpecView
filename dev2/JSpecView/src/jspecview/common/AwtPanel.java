@@ -60,6 +60,8 @@ import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet; //import javax.print.attribute.standard.MediaSize;
 import javax.print.attribute.standard.OrientationRequested;
 import javax.swing.BorderFactory;
+import javax.swing.JPanel;
+
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
 import jspecview.util.Logger;
@@ -76,7 +78,7 @@ import jspecview.util.Logger;
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-public class AwtPanel extends JSVPanel implements Printable, MouseListener,
+public class AwtPanel extends JPanel implements Panel, Printable, MouseListener,
     MouseMotionListener, KeyListener {
 
   private static final long serialVersionUID = 1L;
@@ -86,29 +88,47 @@ public class AwtPanel extends JSVPanel implements Printable, MouseListener,
     Logger.info("JSVPanel " + this + " finalized");
   }
 
+  public PanelData pd;
+
+  public PanelData getPanelData() {
+    return pd;
+  }
+
+  JSVPanelPopupMenu popup;
+  
+  public JSVPanelPopupMenu getPopup() {
+    return popup;
+  }
+
   public void dispose() {
-    super.dispose();
+    if (popup != null) {
+      popup.dispose();
+      popup = null;
+    }
+    pd.dispose();
+    pd = null;
     removeKeyListener(this);
     removeMouseListener(this);
     removeMouseMotionListener(this);
   }
 
-  public JSVPanelPopupMenu getPopup() {
-    return popup;
+  public JDXSpectrum getSpectrum() {
+    return pd.getSpectrum();
   }
-
-  @Override
+  
+  public JDXSpectrum getSpectrumAt(int i) {
+    return pd.getSpectrumAt(i);
+  }
+  
   public void setTitle(String title) {
-    super.setTitle(title);
+    pd.setTitle(title);
     setName(title);
   }
 
-  @Override
   protected void doRepaint() {
     repaint();    
   }
 
-  @Override
   protected void doRequestFocusInWindow() {
     requestFocusInWindow();
   }
@@ -123,9 +143,10 @@ public class AwtPanel extends JSVPanel implements Printable, MouseListener,
   private Color titleColor;
   private Color unitsColor;
 
-  public void setPlotColors(Color[] colors) {
-    for (int i = graphSets.size(); --i >= 0;)
-      graphSets.get(i).setPlotColors(colors);
+  public void setPlotColors(Object oColors) {
+    Color[] colors = (Color[]) oColors;
+    for (int i = pd.graphSets.size(); --i >= 0;)
+      pd.graphSets.get(i).setPlotColors(colors);
   }
 
   // potentially settable; 
@@ -146,10 +167,10 @@ public class AwtPanel extends JSVPanel implements Printable, MouseListener,
     return zoomBoxColor;
   }
 
-  public void setColorOrFont(DisplayScheme ds, ScriptToken st) {
+  public void setColorOrFont(Parameters ds, ScriptToken st) {
     if (st == null) {
-      Map<ScriptToken, Color> colors = ds.getColors();
-      for (Map.Entry<ScriptToken, Color> entry : colors.entrySet())
+      Map<ScriptToken, Object> colors = ds.getColors();
+      for (Map.Entry<ScriptToken, Object> entry : colors.entrySet())
         setColorOrFont(ds, entry.getKey());
       setColorOrFont(ds, ScriptToken.DISPLAYFONTNAME);
       setColorOrFont(ds, ScriptToken.TITLEFONTNAME);
@@ -157,19 +178,15 @@ public class AwtPanel extends JSVPanel implements Printable, MouseListener,
     }
     switch (st) {
     case DISPLAYFONTNAME:
-      displayFontName = ds.getDisplayFont();
-      if (displayFontName != null)
-        options.put(st.name(), displayFontName);
+      pd.setFontName(st, ds.getDisplayFont());
       return;
     case TITLEFONTNAME:
-      titleFontName = ds.getTitleFont();
-      if (titleFontName != null)
-        options.put(st.name(), titleFontName);
+      pd.setFontName(st, ds.getTitleFont());
       return;
     }
-    Color color = ds.getColor(st);
+    Color color = (Color) ds.getColor(st);
     if (color != null)
-      options.put(st.name(), AppUtils.colorToHexString(color));
+      pd.options.put(st.name(), AwtParameters.colorToHexString(color));
     switch (st) {
     case BACKGROUNDCOLOR:
       setBackground(color);
@@ -184,8 +201,8 @@ public class AwtPanel extends JSVPanel implements Printable, MouseListener,
       integralPlotColor = color;
       break;
     case PLOTCOLOR:
-      for (int i = graphSets.size(); --i >= 0;)
-        graphSets.get(i).setPlotColor0(color);
+      for (int i = pd.graphSets.size(); --i >= 0;)
+        pd.graphSets.get(i).setPlotColor0(color);
       break;
     case PLOTAREACOLOR:
       plotAreaColor = color;
@@ -218,8 +235,13 @@ public class AwtPanel extends JSVPanel implements Printable, MouseListener,
     // removal of integration, taConvert
     // Preferences Dialog sample.jdx
 
+    pd = new PanelData(this);
     this.popup = popup;
-    initSingleSpectrum(spectrum);
+    pd.initSingleSpectrum(spectrum);
+  }
+
+  public Panel getNewPanel(JDXSpectrum spectrum) {
+    return new AwtPanel(spectrum, popup);
   }
 
   public static AwtPanel getJSVPanel(List<JDXSpectrum> specs, int startIndex, int endIndex, JSVPanelPopupMenu popup) {
@@ -227,7 +249,7 @@ public class AwtPanel extends JSVPanel implements Printable, MouseListener,
     for (int i = 0; i < specs.size(); i++)
       graphs.add(specs.get(i));
     AwtPanel jsvp = new AwtPanel(graphs, startIndex, endIndex, popup);
-    jsvp.isOverlaid = (specs.size() > 1);
+    jsvp.pd.isOverlaid = (specs.size() > 1);
     return jsvp;
   }
 
@@ -246,19 +268,33 @@ public class AwtPanel extends JSVPanel implements Printable, MouseListener,
    */
   private AwtPanel(List<Graph> spectra, int startIndex,
       int endIndex, JSVPanelPopupMenu popup) {
+    pd = new PanelData(this);
     this.popup = popup;
-    initJSVPanel(spectra, startIndex, endIndex);
+    pd.initJSVPanel(spectra, startIndex, endIndex);
   }
 
-  public static AwtPanel getIntegralPanel(JDXSpectrum spectrum, Color color,
-                                          JSVPanelPopupMenu popup) {
+  /**
+   * generates a single panel or an integrated panel, as appropriate
+   * 
+   * @param spec
+   * @param jsvpPopupMenu
+   * @return
+   */
+  public static AwtPanel getNewPanel(JDXSpectrum spec,
+                                     JSVPanelPopupMenu jsvpPopupMenu) {
+    return (spec.getIntegrationGraph() == null ? new AwtPanel(spec,
+        jsvpPopupMenu) : (AwtPanel) (new AwtPanel(spec, jsvpPopupMenu))
+        .getIntegralPanel(spec));
+  }
+
+  public Panel getIntegralPanel(JDXSpectrum spectrum) {
     Graph graph = spectrum.getIntegrationGraph();
     List<Graph> graphs = new ArrayList<Graph>();
     graphs.add(spectrum);
     graphs.add(graph);
     AwtPanel jsvp = new AwtPanel(graphs, 0, 0, popup);
     jsvp.setTitle(graph.getTitle());
-    jsvp.setPlotColors(new Color[] { jsvp.getPlotColor(0), color });
+    jsvp.setPlotColors(new Color[] { getPlotColor(0), getColor(ScriptToken.INTEGRALPLOTCOLOR) });
     return jsvp;
   }
 
@@ -274,7 +310,7 @@ public class AwtPanel extends JSVPanel implements Printable, MouseListener,
    * @return the color of the plot
    */
   public Color getPlotColor(int index) {
-    return ((AwtGraphSet) currentGraphSet).getPlotColor(index);
+    return ((AwtGraphSet) pd.currentGraphSet).getPlotColor(index);
   }
 
   public Color getColor(ScriptToken whatColor) {
@@ -311,14 +347,13 @@ public class AwtPanel extends JSVPanel implements Printable, MouseListener,
    */
   @Override
   public void paintComponent(Graphics g) {
-    if (!isEnabled() || graphSets == null)
+    if (!isEnabled() || pd.graphSets == null)
       return;
     super.paintComponent(g);
-    drawGraph(g, getHeight(), getWidth());
+    pd.drawGraph(g, getHeight(), getWidth());
   }
 
-  @Override
-  protected void setFont(Object g, String name, int mode, int size) {
+  public void setFont(Object g, String name, int mode, int size) {
     ((Graphics) g).setFont(new Font(name, mode, size));
   }
 
@@ -332,9 +367,9 @@ public class AwtPanel extends JSVPanel implements Printable, MouseListener,
    * @param width
    *        the width to be drawn in pixels
    */
-  void drawTitle(Object og, int height, int width, String title) {
+  public void drawTitle(Object og, int height, int width, String title) {
     Graphics g = (Graphics) og;
-    setFont(g, width, isPrinting || titleBoldOn ? Font.BOLD : Font.PLAIN, 14,
+    pd.setFont(g, width, pd.isPrinting || pd.titleBoldOn ? Font.BOLD : Font.PLAIN, 14,
         true);
     FontMetrics fm = g.getFontMetrics();
     g.setColor(titleColor);
@@ -352,12 +387,12 @@ public class AwtPanel extends JSVPanel implements Printable, MouseListener,
    * @param width
    *        the width to be drawn in pixels
    */
-  protected void drawCoordinates(Object og, int height, int width) {
+  public void drawCoordinates(Object og, int height, int width) {
     Graphics g = (Graphics) og;
     g.setColor(coordinatesColor);
-    setFont(g, width, Font.PLAIN, 12, true);
-    g.drawString(coordStr, (int) ((plotAreaWidth + leftPlotAreaPos) * 0.85),
-        (int) (topPlotAreaPos - 10));
+    pd.setFont(g, width, Font.PLAIN, 12, true);
+    g.drawString(pd.coordStr, (int) ((pd.plotAreaWidth + pd.leftPlotAreaPos) * 0.85),
+        (int) (pd.topPlotAreaPos - 10));
   }
 
   /*----------------- METHODS IN INTERFACE Printable ---------------------- */
@@ -377,20 +412,20 @@ public class AwtPanel extends JSVPanel implements Printable, MouseListener,
   public int print(Graphics g, PageFormat pf, int pi) throws PrinterException {
     if (pi == 0) {
       Graphics2D g2D = (Graphics2D) g;
-      isPrinting = true;
+      pd.isPrinting = true;
 
       double height, width;
 
-      if (printGraphPosition.equals("default")) {
+      if (pd.printGraphPosition.equals("default")) {
         g2D.translate(pf.getImageableX(), pf.getImageableY());
         if (pf.getOrientation() == PageFormat.PORTRAIT) {
-          height = defaultHeight;
-          width = defaultWidth;
+          height = pd.defaultHeight;
+          width = pd.defaultWidth;
         } else {
-          height = defaultWidth;
-          width = defaultHeight;
+          height = pd.defaultWidth;
+          width = pd.defaultHeight;
         }
-      } else if (printGraphPosition.equals("fit to page")) {
+      } else if (pd.printGraphPosition.equals("fit to page")) {
         g2D.translate(pf.getImageableX(), pf.getImageableY());
         height = pf.getImageableHeight();
         width = pf.getImageableWidth();
@@ -401,25 +436,25 @@ public class AwtPanel extends JSVPanel implements Printable, MouseListener,
         int x, y;
 
         if (pf.getOrientation() == PageFormat.PORTRAIT) {
-          height = defaultHeight;
-          width = defaultWidth;
+          height = pd.defaultHeight;
+          width = pd.defaultWidth;
           x = (int) (paperWidth - width) / 2;
           y = (int) (paperHeight - height) / 2;
         } else {
-          height = defaultWidth;
-          width = defaultHeight;
-          y = (int) (paperWidth - defaultWidth) / 2;
-          x = (int) (paperHeight - defaultHeight) / 2;
+          height = pd.defaultWidth;
+          width = pd.defaultHeight;
+          y = (int) (paperWidth - pd.defaultWidth) / 2;
+          x = (int) (paperHeight - pd.defaultHeight) / 2;
         }
         g2D.translate(x, y);
       }
 
-      drawGraph(g2D, (int) height, (int) width);
+      pd.drawGraph(g2D, (int) height, (int) width);
 
-      isPrinting = false;
+      pd.isPrinting = false;
       return Printable.PAGE_EXISTS;
     }
-    isPrinting = false;
+    pd.isPrinting = false;
     return Printable.NO_SUCH_PAGE;
   }
 
@@ -445,10 +480,10 @@ public class AwtPanel extends JSVPanel implements Printable, MouseListener,
     //MediaSize size = MediaSize.getMediaSizeForName(pl.paper);
 
     // Set Graph Properties
-    printingFont = pl.font;
-    printGrid = pl.showGrid;
-    printTitle = pl.showTitle;
-    printGraphPosition = pl.position;
+    pd.printingFont = pl.font;
+    pd.printGrid = pl.showGrid;
+    pd.printTitle = pl.showTitle;
+    pd.printGraphPosition = pl.position;
 
     /* Create a print job */
     PrinterJob pj = PrinterJob.getPrinterJob();
@@ -482,19 +517,19 @@ public class AwtPanel extends JSVPanel implements Printable, MouseListener,
   public void mousePressed(MouseEvent e) {
     if (e.getButton() != MouseEvent.BUTTON1)
       return;
-    doMousePressed(e.getX(), e.getY(), e.isControlDown());
+    pd.doMousePressed(e.getX(), e.getY(), e.isControlDown());
   }
 
   public void mouseMoved(MouseEvent e) {
-    doMouseMoved(e.getX(), e.getY());
+    pd.doMouseMoved(e.getX(), e.getY());
   }
 
   public void mouseDragged(MouseEvent e) {
-    doMouseDragged(e.getX(), e.getY());
+    pd.doMouseDragged(e.getX(), e.getY());
   }
   
   public void mouseReleased(MouseEvent e) {
-    doMouseReleased(e.getButton() == MouseEvent.BUTTON1);
+    pd.doMouseReleased(e.getButton() == MouseEvent.BUTTON1);
   }
 
   public void mouseClicked(MouseEvent e) {
@@ -503,7 +538,7 @@ public class AwtPanel extends JSVPanel implements Printable, MouseListener,
       return;
     }
     requestFocusInWindow();
-    doMouseClicked(e.getX(), e.getY(), e.getClickCount(), e.isControlDown());
+    pd.doMouseClicked(e.getX(), e.getY(), e.getClickCount(), e.isControlDown());
   }
 
   public void mouseEntered(MouseEvent e) {
@@ -514,8 +549,8 @@ public class AwtPanel extends JSVPanel implements Printable, MouseListener,
 
   public void keyPressed(KeyEvent e) {
     if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-      currentGraphSet.escape();
-      isIntegralDrag = false;
+      pd.currentGraphSet.escape();
+      pd.isIntegralDrag = false;
       repaint();
       e.consume();
       return;
@@ -524,11 +559,11 @@ public class AwtPanel extends JSVPanel implements Printable, MouseListener,
       if (e.isControlDown()) {
         switch (e.getKeyCode()) {
         case 45: //'-'
-          currentGraphSet.scaleYBy(0.5);
+          pd.currentGraphSet.scaleYBy(0.5);
           e.consume();
           break;
         case 61: //'='
-          currentGraphSet.scaleYBy(2);
+          pd.currentGraphSet.scaleYBy(2);
           e.consume();
           break;
         }
@@ -537,20 +572,20 @@ public class AwtPanel extends JSVPanel implements Printable, MouseListener,
     }
     switch (e.getKeyCode()) {
     case KeyEvent.VK_LEFT:
-      currentGraphSet.toPeak(-1);
+      pd.currentGraphSet.toPeak(-1);
       e.consume();
       break;
     case KeyEvent.VK_RIGHT:
-      currentGraphSet.toPeak(1);
+      pd.currentGraphSet.toPeak(1);
       e.consume();
       break;
     case KeyEvent.VK_DOWN:
     case KeyEvent.VK_UP:
       int dir = (e.getKeyCode() == KeyEvent.VK_DOWN ? -1 : 1);
-      if (getSpectrumAt(0).getSubSpectra() == null) {
-        notifySubSpectrumChange(dir, null);
+      if (pd.getSpectrumAt(0).getSubSpectra() == null) {
+        pd.notifySubSpectrumChange(dir, null);
       } else {
-        currentGraphSet.advanceSubSpectrum(dir);
+        pd.currentGraphSet.advanceSubSpectrum(dir);
         repaint();
       }
       e.consume();
@@ -563,26 +598,24 @@ public class AwtPanel extends JSVPanel implements Printable, MouseListener,
 
   public void keyTyped(KeyEvent e) {
     if (e.getKeyChar() == 'z') {
-      currentGraphSet.previousView();
+      pd.currentGraphSet.previousView();
       return;
     }
     if (e.getKeyChar() == 'y') {
-      currentGraphSet.nextView();
+      pd.currentGraphSet.nextView();
       return;
     }
   }
 
-  @Override
-  protected void setupPlatform() {
+  public void setupPlatform() {
     setBorder(BorderFactory.createLineBorder(Color.lightGray));
     if (popup == null) {
       // preferences dialog
-      coordStr = "(0,0)";
+      pd.coordStr = "(0,0)";
     } else {
       addKeyListener(this);
       addMouseListener(this);
       addMouseMotionListener(this);
     }
   }
-
 }

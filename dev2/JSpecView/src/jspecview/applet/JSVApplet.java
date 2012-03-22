@@ -41,7 +41,6 @@ package jspecview.applet;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -72,12 +71,13 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import jspecview.common.AppUtils;
 import jspecview.common.IntegralGraph;
 import jspecview.common.AwtPanel;
 import jspecview.common.OverlayLegendDialog;
-import jspecview.common.Parameters;
+import jspecview.common.AwtParameters;
+import jspecview.common.PanelData;
 import jspecview.common.PanelListener;
+import jspecview.common.Parameters;
 import jspecview.common.PeakPickEvent;
 import jspecview.common.PrintLayoutDialog;
 import jspecview.common.ScriptInterface;
@@ -139,8 +139,8 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
 
   private String sltnclr = "255,255,255"; //Colour of Solution
 
-  private Parameters parameters = new Parameters("applet");
-  private Parameters tempParams = new Parameters("temp");
+  private AwtParameters parameters = new AwtParameters("applet");
+  private AwtParameters tempParams = new AwtParameters("temp");
    
 
   /*---------------------------------END PARAMETERS------------------------*/
@@ -249,9 +249,9 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
    * Calculates the predicted colour of the Spectrum
    */
   public void setSolutionColor(boolean showMessage) {
-    sltnclr = getSelectedPanel().getSolutionColor();
-    if (showMessage)
-      AppUtils.showSolutionColor((Component)this, sltnclr);
+    String msg = selectedJSVPanel.pd.getSolutionColorHtml();
+    JOptionPane.showMessageDialog(this, msg, "Predicted Colour",
+        JOptionPane.INFORMATION_MESSAGE);
   }
 
   /**
@@ -274,7 +274,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
   public String getCoordinate() {
     // important to use getSelectedPanel() here because it may be from MainFrame in PRO
     if (getSelectedPanel() != null) {
-      Coordinate coord = getSelectedPanel().getClickedCoordinate();
+      Coordinate coord = getSelectedPanel().pd.getClickedCoordinate();
       if (coord != null)
         return coord.getXVal() + " " + coord.getYVal();
     }
@@ -306,8 +306,8 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     if (type == null)
       type = "XY";
     AwtPanel jsvp = getSelectedPanel();
-    if (n < -1 || jsvp.getNumberOfSpectraInCurrentSet() <= n)
-      return "only " + jsvp.getNumberOfSpectraInCurrentSet()
+    if (n < -1 || jsvp.pd.getNumberOfSpectraInCurrentSet() <= n)
+      return "only " + jsvp.pd.getNumberOfSpectraInCurrentSet()
           + " spectra available.";
     try {
       JDXSpectrum spec = (n < 0 ? jsvp.getSpectrum() : jsvp.getSpectrumAt(n));
@@ -342,7 +342,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     AwtPanel jsvp = getSelectedPanel();
     if (jsvp == null)
       return;
-    AppUtils.setBoolean(jsvp, tempParams, ScriptToken.GRIDON, !jsvp.isGridOn());
+    Parameters.setBoolean(jsvp, tempParams, ScriptToken.GRIDON, !jsvp.pd.isGridOn());
     repaint();
   }
 
@@ -354,8 +354,8 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     AwtPanel jsvp = getSelectedPanel();
     if (jsvp == null)
       return;
-    AppUtils.setBoolean(jsvp, tempParams, ScriptToken.COORDINATESON, 
-        !jsvp.isCoordinatesOn());
+    Parameters.setBoolean(jsvp, tempParams, ScriptToken.COORDINATESON, 
+        !jsvp.pd.isCoordinatesOn());
     repaint();
   }
 
@@ -389,7 +389,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     AwtPanel jsvp = getSelectedPanel();
     if (jsvp != null) {
       Color color = new Color(r, g, b, a);
-      jsvp.addHighlight(x1, x2, color);
+      jsvp.pd.addHighlight(x1, x2, color);
       repaint();
     }
   }
@@ -401,7 +401,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
   public void removeAllHighlights() {
     AwtPanel jsvp = getSelectedPanel();
     if (jsvp != null) {
-      jsvp.removeAllHighlights();
+      jsvp.pd.removeAllHighlights();
       repaint();
     }
   }
@@ -418,7 +418,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
   public void removeHighlight(double x1, double x2) {
     AwtPanel jsvp = getSelectedPanel();
     if (jsvp != null) {
-      jsvp.removeHighlight(x1, x2);
+      jsvp.pd.removeHighlight(x1, x2);
       repaint();
     }
   }
@@ -430,7 +430,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
   public void reversePlot() {
     AwtPanel jsvp = getSelectedPanel();
     if (jsvp != null) {
-      jsvp.setReversePlot(!jsvp.isPlotReversed());
+      jsvp.pd.setReversePlot(!jsvp.pd.isPlotReversed());
       repaint();
     }
   }
@@ -468,10 +468,10 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     String f = url.toString();
     if (!f.equals(recentURL))
       setFilePathLocal(fileName);
-    selectedJSVPanel.processPeakSelect(selectPanel(fileName, index));
+    selectedJSVPanel.pd.processPeakSelect(selectPanel(fileName, index));
     String type = Parser.getQuotedAttribute(script, "type");
     String model = Parser.getQuotedAttribute(script, "model");
-    selectedJSVPanel.selectSpectrum(fileName, type, model);
+    selectedJSVPanel.pd.selectSpectrum(fileName, type, model);
     sendFrameChange(selectedJSVPanel);
   }
 
@@ -573,7 +573,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
         for (int i = 0; i < numberOfSpectra; i++) {
           JDXSpectrum spec = specs.get(i);
           if (spec.getIntegrationGraph() != null) {
-            jsvp = AwtPanel.getIntegralPanel(spec, null, appletPopupMenu);
+            jsvp = AwtPanel.getNewPanel(spec, appletPopupMenu);
           } else {
             List<JDXSpectrum> list = new ArrayList<JDXSpectrum>();
             list.add(spec);
@@ -595,7 +595,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
       jsvPanels.remove(oldIndex);
       jsvPanels.add(oldIndex, jsvp);
     }
-    jsvp.addListener(this);
+    jsvp.pd.addListener(this);
     parameters.setFor(jsvp, null, true);
     setSelectedPanel(jsvp);
   }
@@ -849,7 +849,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     if (msTrigger > 0 && time - msTrigger < 100)
       return;
     msTrigger = time;
-    AwtPanel jsvp = AppUtils.taConvert(getCurrentPanel(), comm);
+    AwtPanel jsvp = (AwtPanel) PanelData.taConvert(getCurrentPanel(), comm);
     if (jsvp == null)
       return;
     initProperties(jsvp, currentSpectrumIndex);
@@ -871,15 +871,18 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
    */
   private void integrate(String value) {
     AwtPanel jsvp = getCurrentPanel();
-    AwtPanel jsvpNew = AppUtils.checkIntegral(jsvp, appletPanel,
+    AwtPanel jsvpNew = (AwtPanel)PanelData.checkIntegral(jsvp,
         parameters, value);
     if (jsvp == jsvpNew) {
       integrationRatios = null;
       return;
     }
+    appletPanel.remove(jsvp);
+    appletPanel.add(jsvpNew);
+
     initProperties(jsvpNew, currentSpectrumIndex);
     if (integrationRatios != null)
-      jsvpNew.setIntegrationRatios(integrationRatios);
+      jsvpNew.pd.setIntegrationRatios(integrationRatios);
     integrationRatios = null; // first time only
     jsvpNew.repaint();
     addPanelToFrame();
@@ -1112,7 +1115,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
           spectrumNumber = Integer.parseInt(value);
           break;
         case AUTOINTEGRATE:
-          autoIntegrate = Parameters.isTrue(value);
+          autoIntegrate = AwtParameters.isTrue(value);
           break;
         case IRMODE:
           irMode = (value.toUpperCase().startsWith("T") ? JDXSpectrum.TO_TRANS
@@ -1358,9 +1361,9 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
       JDXSpectrum spec = selectedJSVPanel.getSpectrum();
       for (int i = jsvPanels.size(); --i >= 0; )
         if (JDXSpectrum.areScalesCompatible(spec, jsvPanels.get(i).getSpectrum(), false))
-          jsvPanels.get(i).setZoom(Double.NaN, y1, Double.NaN, y2);
+          jsvPanels.get(i).pd.setZoom(Double.NaN, y1, Double.NaN, y2);
     } else {
-      selectedJSVPanel.setZoom(Double.NaN, y1, Double.NaN, y2);
+      selectedJSVPanel.pd.setZoom(Double.NaN, y1, Double.NaN, y2);
     }        
   }
 
@@ -1434,11 +1437,11 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     // what if tabbed? 
     if (jsvPanels == null)
       return null;
-    PeakInfo pi = selectedJSVPanel.findPeak(fileName, index);
+    PeakInfo pi = selectedJSVPanel.pd.findPeak(fileName, index);
     if (pi != null)
       return pi;
     for (int i = 0; i < jsvPanels.size(); i++) {
-      pi = jsvPanels.get(i).findPeak(fileName, index);
+      pi = jsvPanels.get(i).pd.findPeak(fileName, index);
       if (pi != null) {
         setSpectrum(i + 1);
         return pi;
@@ -1475,7 +1478,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     Coordinate actualCoord = (peakCallbackFunctionName == null ? null
         : new Coordinate());
     // will return true if actualcoord is null (just doing coordCallback)
-    if (!selectedJSVPanel.getPickedCoordinates(coord, actualCoord))
+    if (!selectedJSVPanel.pd.getPickedCoordinates(coord, actualCoord))
       return;
     if (actualCoord == null)
       callToJavaScript(coordCallbackFunctionName, new Object[] {
@@ -1515,7 +1518,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     PeakInfo pi = jsvp.getSpectrum().getSelectedPeak();
     if (pi == null)
       pi = PeakInfo.nullPeakInfo;
-    selectedJSVPanel.processPeakSelect(pi);
+    selectedJSVPanel.pd.processPeakSelect(pi);
     sendScript(pi.toString());
   }
 
@@ -1546,10 +1549,10 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
       PeakInfo pi = e.getPeakInfo();
       setSelectedPanel((AwtPanel) e.getSource());
       System.out.println("panelEvent sending to selected panel; " + pi);
-      selectedJSVPanel.processPeakSelect(pi);
+      selectedJSVPanel.pd.processPeakSelect(pi);
       sendScript(pi.toString());
       if (!pi.isClearAll())
-        selectedJSVPanel.selectSpectrum(pi.getFilePath(), pi.getType(), pi.getModel());
+        selectedJSVPanel.pd.selectSpectrum(pi.getFilePath(), pi.getType(), pi.getModel());
       checkCallbacks();
     } else if (eventObj instanceof ZoomEvent) {
     } else if (eventObj instanceof SubSpecChangeEvent) {
@@ -1576,7 +1579,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
       AwtPanel jsvp = jsvPanels.get(i);
       if (jsvp == null)
         continue;
-      info.add(jsvp.getInfo(true, key));
+      info.add(jsvp.pd.getInfo(true, key));
     }
     Map<String, Object> map = new Hashtable<String, Object>();
     map.put("items", info);

@@ -45,8 +45,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import javax.swing.JPanel; // the only Swing component here
-
 import jspecview.util.Logger;
 import jspecview.util.TextFormat;
 
@@ -62,44 +60,30 @@ import jspecview.util.TextFormat;
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-public abstract class JSVPanel extends JPanel implements Panel {
+public class PanelData {
 
-  abstract protected void setupPlatform();
-
-  abstract protected void doRequestFocusInWindow();
-
-  abstract protected void setFont(Object g, String string, int mode, int size);
-
-  abstract protected void drawCoordinates(Object g, int height, int width);
-
-  abstract protected void doRepaint();
-
-  abstract void drawTitle(Object g, int height, int width, String title);
-
-  abstract public void setColorOrFont(DisplayScheme ds, ScriptToken st);
-
-  protected static final long serialVersionUID = 1L;
-
+  PanelData(Panel owner) {
+    this.owner = owner;
+  }
+  
+  
   // Critical fields
 
-  protected ArrayList<PanelListener> listeners = new ArrayList<PanelListener>();
-  protected List<GraphSet> graphSets;
+  private Panel owner;
+  private ArrayList<PanelListener> listeners = new ArrayList<PanelListener>();
+  List<GraphSet> graphSets;
   GraphSet currentGraphSet;
-  protected JSVPanelPopupMenu popup;
-  protected Map<String, NumberFormat> htFormats = new Hashtable<String, NumberFormat>();
+  private Map<String, NumberFormat> htFormats = new Hashtable<String, NumberFormat>();
   PlotWidget thisWidget;
   Coordinate coordClicked;
   Coordinate[] coordsClicked;
   Hashtable<String, Object> options = new Hashtable<String, Object>();
 
   public void dispose() {
+    owner = null;
     for (int i = 0; i < graphSets.size(); i++)
       graphSets.get(i).dispose();
     graphSets = null;
-    if (popup != null) {
-      popup.dispose();
-      popup = null;
-    }
     currentGraphSet = null;
     htFormats = null;
     coordClicked = null;
@@ -107,10 +91,6 @@ public abstract class JSVPanel extends JPanel implements Panel {
     thisWidget = null;
     options = null;
     listeners = null;
-  }
-
-  public JSVPanelPopupMenu getPopup() {
-    return popup;
   }
 
   // plot parameters
@@ -235,8 +215,22 @@ public abstract class JSVPanel extends JPanel implements Panel {
 
   ////////// settable colors and fonts //////////
 
-  String displayFontName;
-  protected String titleFontName;
+  private String displayFontName;
+  private String titleFontName;
+
+
+  public void setFontName(ScriptToken st, String fontName) {    
+    switch (st) {
+    case DISPLAYFONTNAME:
+      displayFontName = fontName;
+      break;
+    case TITLEFONTNAME:
+      titleFontName = fontName;
+      break;
+    }
+    if (fontName != null)
+      options.put(st.name(), fontName);
+  }
 
   /////////// print parameters ///////////
 
@@ -247,6 +241,7 @@ public abstract class JSVPanel extends JPanel implements Panel {
   String printingFont;
   protected String printGraphPosition = "default";
 
+
   // listeners to handle various events
 
   protected void initSingleSpectrum(Graph spectrum) {
@@ -256,9 +251,9 @@ public abstract class JSVPanel extends JPanel implements Panel {
   }
 
   protected void initJSVPanel(List<Graph> spectra, int startIndex, int endIndex) {
-    setupPlatform();
+    owner.setupPlatform();
     nSpectra = spectra.size();
-    graphSets = GraphSet.getGraphSets(this, spectra, startIndex, endIndex);
+    graphSets = GraphSet.getGraphSets(owner, spectra, startIndex, endIndex);
     currentGraphSet = graphSets.get(0);
     setTitle(getSpectrum().getTitleLabel());
   }
@@ -528,7 +523,7 @@ public abstract class JSVPanel extends JPanel implements Panel {
     plotAreaHeight = height - (top + bottom);
     boolean isResized = (thisWidth != width || thisPlotHeight != plotAreaHeight);
     if (isResized) {
-      doRequestFocusInWindow();
+      owner.requestFocusInWindow();
     }
     thisWidth = width;
     thisPlotHeight = plotAreaHeight;
@@ -539,9 +534,9 @@ public abstract class JSVPanel extends JPanel implements Panel {
               withYScale, withSliders, !isIntegralDrag, height, width, left,
               right, top, bottom, isResized, enableZoom, display1D, display2D);
     if (withTitle)
-      drawTitle(g, height, width, getSpectrum().getPeakTitle());
+      owner.drawTitle(g, height, width, getSpectrum().getPeakTitle());
     if (withCoords)
-      drawCoordinates(g, height, width);
+      owner.drawCoordinates(g, height, width);
   }
 
   NumberFormat getFormatter(String hash) {
@@ -559,7 +554,7 @@ public abstract class JSVPanel extends JPanel implements Panel {
       if (width < 250)
         size = (int) ((width * size) / 250);
     }
-    setFont(g, (isPrinting ? printingFont : displayFontName), mode, size);
+    owner.setFont(g, (isPrinting ? printingFont : displayFontName), mode, size);
   }
 
   /*-------------------- METHODS FOR SCALING AND ZOOM --------------------------*/
@@ -624,13 +619,18 @@ public abstract class JSVPanel extends JPanel implements Panel {
         actualCoord);
   }
 
-  public String getSolutionColor() {
-    return currentGraphSet.getSolutionColor();
+  public String getSolutionColorHtml() {
+    String color = currentGraphSet.getSolutionColor();
+    return "<HTML><body bgcolor=rgb(" + color
+        + ")><br />Predicted Solution Colour- RGB(" + color
+        + ")<br /><br /></body></HTML>";
   }
+
+
 
   public void refresh() {
     thisWidth = 0;
-    doRepaint();
+    owner.repaint();
   }
 
   public void addAnnotation(List<String> tokens) {
@@ -749,5 +749,84 @@ public abstract class JSVPanel extends JPanel implements Panel {
     setCurrentGraphSet(gs);
     gs.mouseClickEvent(xPixel, yPixel, clickCount, isControlDown);
   }
+  
+  public static Panel checkIntegral(Panel jsvp, 
+                                    Parameters parameters, String value) {
+    IntegralGraph graph = jsvp.getSpectrum().getIntegrationGraph();
+    boolean showMessage = false;//value.equals("?");
+    int mode = IntegralGraph.getMode(value);
+    if (mode == IntegralGraph.INTEGRATE_MARK) {
+      if (graph == null) {
+        jsvp = checkIntegral(jsvp, parameters, "ON");
+        graph = jsvp.getSpectrum().getIntegrationGraph();
+      }
+      if (graph != null)
+        graph.addMarks(value.substring(5).trim());
+      return jsvp;
+    }
+    return (mode == IntegralGraph.INTEGRATE_OFF
+        || mode != IntegralGraph.INTEGRATE_ON && graph != null ? removeIntegration(jsvp)
+        : integrate(jsvp, showMessage, parameters));
+  }
+
+  public static Panel removeIntegration(Panel jsvp) {
+    JDXSpectrum spectrum = jsvp.getSpectrum();
+    if (spectrum.getIntegrationGraph() == null)
+      return jsvp;
+    spectrum.setIntegrationGraph(null);
+    return jsvp.getNewPanel(spectrum);
+  }
+
+  /**
+     * Integrates an HNMR spectrum
+     * 
+     * @param frameOrPanel
+     *        the selected frame
+     * @param showDialog
+     *        if true then dialog is shown, otherwise spectrum is integrated with
+     *        default values
+     * @param integrationRatios
+     * 
+     * 
+     * @return the panel containing the HNMR spectrum with integral displayed
+     */
+    public static Panel integrate(Panel jsvp, boolean showDialog,
+                                     Parameters parameters) {
+      JDXSpectrum spectrum = jsvp.getSpectrum();
+      IntegralGraph graph = spectrum.getIntegrationGraph();
+      spectrum.setIntegrationGraph(null);
+      if (graph != null || spectrum.canIntegrate()
+          && jsvp.getPanelData().getNumberOfSpectraInCurrentSet() == 1) {
+  /*      if (showDialog) {
+          IntegrateDialog integDialog;
+          if (graph != null) {
+            integDialog = new IntegrateDialog(jp, "Integration Parameters", true,
+                graph.getPercentMinimumY(), graph.getPercentOffset(), graph
+                    .getIntegralFactor());
+          } else {
+            integDialog = new IntegrateDialog(jp, "Integration Parameters", true,
+                parameters.integralMinY, parameters.integralOffset,
+                parameters.integralFactor);
+          }
+          parameters.integralMinY = integDialog.getMinimumY();
+          parameters.integralOffset = integDialog.getOffset();
+          parameters.integralFactor = integDialog.getFactor();
+        }
+  */      graph = spectrum.integrate(parameters.integralMinY,
+            parameters.integralOffset, parameters.integralFactor);
+  
+        if (graph != null)
+          jsvp = jsvp.getIntegralPanel(spectrum);
+      }
+      return jsvp;
+    }
+
+  public static Panel taConvert(Panel jsvp, int mode) {
+    if (jsvp.getPanelData().getNumberOfSpectraTotal() > 1)
+      return null;
+    JDXSpectrum spectrum = JDXSpectrum.taConvert(jsvp.getSpectrum(), mode);
+    return (spectrum == jsvp.getSpectrum() ? null : jsvp.getNewPanel(spectrum));
+  }
+
 
 }

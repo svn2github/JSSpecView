@@ -9,7 +9,6 @@ import java.util.List;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import jspecview.common.AppUtils;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVPanelPopupMenu;
 import jspecview.source.JDXSource;
@@ -121,7 +120,7 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
       fileMenu.add(appletExportAsMenu);
     }
     appletSaveAsJDXMenu = new JMenu();
-    AppUtils.setMenus(saveAsMenu, appletSaveAsJDXMenu, appletExportAsMenu, exportActionListener);
+    JSVPanelPopupMenu.setMenus(saveAsMenu, appletSaveAsJDXMenu, appletExportAsMenu, exportActionListener);
     fileMenu.add(printMenuItem);
 
     viewMenu.add(gridCheckBoxMenuItem);
