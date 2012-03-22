@@ -188,7 +188,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private String dirLastOpened;
   private String dirLastExported;
   private String recentFileName;
-  private String recentJmolName;
   private String recentURL;
 
   private int irMode = JDXSpectrum.TA_NO_CONVERT;
@@ -1227,7 +1226,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
         URL u = new URL(url);
         fileName = FileManager.getName(url);
         filePath = u.toString();
-        recentJmolName = filePath;
+        //recentJmolName = filePath;
         recentURL = filePath;
       } catch (MalformedURLException e) {
         file = new File(url);
@@ -1236,7 +1235,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     if (file != null) {
       fileName = recentFileName = file.getName();
       filePath = file.getAbsolutePath();
-      recentJmolName = (url == null ? filePath.replace('\\', '/') : url);
+      //recentJmolName = (url == null ? filePath.replace('\\', '/') : url);
       recentURL = null;
     }
     if (filePath != null && isOpen(filePath)) {
@@ -1509,7 +1508,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private void setSolutionColor(boolean showMessage) {
     sltnclr = selectedJSVPanel.getSolutionColor();
     if (showMessage)
-      AwtPanel.showSolutionColor((Component) this, sltnclr);
+      AppUtils.showSolutionColor((Component) this, sltnclr);
   }
 
   /**
@@ -1526,7 +1525,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     if (jsvp == null)
       return;
     JSVTreeNode node = findNode(jsvp);
-    node.jsvp = selectedJSVPanel = AwtPanel.taConvert(jsvp, comm);
+    node.jsvp = selectedJSVPanel = AppUtils.taConvert(jsvp, comm);
     setJSVPanelProperties(node.jsvp, true);
     // Get from properties variable
     Container contentPane = (frame = node.frame).getContentPane();
@@ -1602,7 +1601,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     } else {
       setSpectrumNumber(specNodes.size());
     }
-    recentJmolName = null;
+    //recentJmolName = null;
     setFileCount();
     System.gc();
     Logger.checkMemory();
@@ -2280,6 +2279,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
   }
 
   private void sendFrameChange(AwtPanel jsvp) {
+    if (jsvp.getNumberOfGraphSets() == 1)
+      return;
     PeakInfo pi = jsvp.getSpectrum().getSelectedPeak();
     System.out.println("sendFrameChange1  " + pi);
     if (pi == null)

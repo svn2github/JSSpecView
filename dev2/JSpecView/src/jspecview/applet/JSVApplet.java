@@ -251,7 +251,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
   public void setSolutionColor(boolean showMessage) {
     sltnclr = getSelectedPanel().getSolutionColor();
     if (showMessage)
-      AwtPanel.showSolutionColor((Component)this, sltnclr);
+      AppUtils.showSolutionColor((Component)this, sltnclr);
   }
 
   /**
@@ -849,7 +849,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     if (msTrigger > 0 && time - msTrigger < 100)
       return;
     msTrigger = time;
-    AwtPanel jsvp = AwtPanel.taConvert(getCurrentPanel(), comm);
+    AwtPanel jsvp = AppUtils.taConvert(getCurrentPanel(), comm);
     if (jsvp == null)
       return;
     initProperties(jsvp, currentSpectrumIndex);

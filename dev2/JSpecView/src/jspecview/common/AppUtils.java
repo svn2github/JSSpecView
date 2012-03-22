@@ -1,12 +1,14 @@
 package jspecview.common;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.event.ActionListener;
 
 import javax.swing.JInternalFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import jspecview.common.IntegralGraph;
@@ -215,6 +217,21 @@ public class AppUtils {
       if (!randomColor.equals(Color.blue))
         return randomColor;
     }
+  }
+
+  public static AwtPanel taConvert(AwtPanel jsvp, int mode) {
+    if (jsvp.getNumberOfSpectraTotal() > 1)
+      return null;
+    JDXSpectrum spectrum = JDXSpectrum.taConvert(jsvp.getSpectrum(), mode);
+    return (spectrum == jsvp.getSpectrum() ? null : new AwtPanel(spectrum,
+        jsvp.popup));
+  }
+
+  public static void showSolutionColor(Component component, String sltnclr) {
+    JOptionPane.showMessageDialog(component, "<HTML><body bgcolor=rgb("
+        + sltnclr + ")><br />Predicted Solution Colour- RGB(" + sltnclr
+        + ")<br /><br /></body></HTML>", "Predicted Colour",
+        JOptionPane.INFORMATION_MESSAGE);
   }
 
 

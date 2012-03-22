@@ -550,4 +550,11 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   public String toString() {
     return getTitleLabel();
   }
+
+  public static boolean hasFileloaded(List<Graph> spectra, String filePath) {
+    for (int i = spectra.size(); --i >= 0;)
+      if (spectra.get(i).getFilePathForwardSlash().equals(filePath))
+        return true;
+    return false;
+  }
 }

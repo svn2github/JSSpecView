@@ -38,12 +38,10 @@
 package jspecview.common;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Insets;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -66,7 +64,6 @@ import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet; //import javax.print.attribute.standard.MediaSize;
 import javax.print.attribute.standard.OrientationRequested;
 import javax.swing.BorderFactory;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
@@ -85,7 +82,7 @@ import jspecview.util.TextFormat;
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-public class AwtPanel extends JPanel implements Printable, MouseListener,
+public class AwtPanel extends JPanel implements Panel, Printable, MouseListener,
     MouseMotionListener, KeyListener {
 
   private static final long serialVersionUID = 1L;
@@ -110,8 +107,8 @@ public class AwtPanel extends JPanel implements Printable, MouseListener,
 
   // Critical fields
 
-  private List<AwtGraphSet> graphSets;
-  AwtGraphSet currentGraphSet;
+  private List<GraphSet> graphSets;
+  GraphSet currentGraphSet;
   protected JSVPanelPopupMenu popup;
 
   public JSVPanelPopupMenu getPopup() {
@@ -128,12 +125,8 @@ public class AwtPanel extends JPanel implements Printable, MouseListener,
   private int defaultWidth = 280;
   private int leftPlotAreaPos = 80, topPlotAreaPos = 30;
   private int plotAreaWidth, plotAreaHeight;
-  private Insets plotAreaInsets = new Insets(topPlotAreaPos, leftPlotAreaPos,
-      50, 50);
-
-  // static parameters
-  static int minNumOfPointsForZoom = 3;
-
+  private int left = leftPlotAreaPos, right = 50, top = topPlotAreaPos, bottom = 50;
+  
   // current values
 
   Coordinate coordClicked;
@@ -152,8 +145,6 @@ public class AwtPanel extends JPanel implements Printable, MouseListener,
   int thisWidth;
   int thisPlotHeight;
   PlotWidget thisWidget;
-
-  double lastClickX = Double.MAX_VALUE;
 
   String coordStr = "";
   String startupPinTip = "Click to set.";
@@ -420,11 +411,15 @@ public class AwtPanel extends JPanel implements Printable, MouseListener,
     return jsvp;
   }
 
+  public GraphSet newGraphSet() {
+    return new AwtGraphSet(this);
+  }
+
   private void initJSVPanel(List<Graph> spectra, int startIndex, int endIndex) {
     setBorder(BorderFactory.createLineBorder(Color.lightGray));
     nSpectra = spectra.size();
     this.spectra = spectra;
-    graphSets = AwtGraphSet.getGraphSets(this, spectra, startIndex, endIndex);
+    graphSets = GraphSet.getGraphSets(this, spectra, startIndex, endIndex);
     currentGraphSet = graphSets.get(0);
     setTitle(getSpectrum().getTitleLabel());
     if (popup == null) {
@@ -437,7 +432,7 @@ public class AwtPanel extends JPanel implements Printable, MouseListener,
     }
   }
 
-  private void setCurrentGraphSet(AwtGraphSet gs) {
+  private void setCurrentGraphSet(GraphSet gs) {
     if (currentGraphSet == gs)
       return;
     currentGraphSet = gs;
@@ -646,7 +641,7 @@ public class AwtPanel extends JPanel implements Printable, MouseListener,
    */
   public Color getPlotColor(int index) {
     //TODO -- what about this?
-    return currentGraphSet.getPlotColor(index);
+    return ((AwtGraphSet) currentGraphSet).getPlotColor(index);
   }
 
   /**
@@ -780,8 +775,8 @@ public class AwtPanel extends JPanel implements Printable, MouseListener,
       withYScale = yScaleOn;
       withSliders = true;
     }
-    plotAreaWidth = width - (plotAreaInsets.right + plotAreaInsets.left);
-    plotAreaHeight = height - (plotAreaInsets.top + plotAreaInsets.bottom);
+    plotAreaWidth = width - (right + left);
+    plotAreaHeight = height - (top + bottom);
     boolean isResized = (thisWidth != width || thisPlotHeight != plotAreaHeight);
     if (isResized) {
       requestFocusInWindow();
@@ -792,7 +787,7 @@ public class AwtPanel extends JPanel implements Printable, MouseListener,
     for (int i = graphSets.size(); --i >= 0;)
       graphSets.get(i).drawGraph(g, withGrid, withXUnits, withYUnits,
           withXScale, withYScale, withSliders, !isIntegralDrag, height, width,
-          plotAreaInsets, isResized, enableZoom);
+          left, right, top, bottom, isResized, enableZoom, display1D, display2D);
     if (withTitle)
       drawTitle(g, height, width, getSpectrum().getPeakTitle());
     if (withCoords)
@@ -1027,38 +1022,11 @@ public class AwtPanel extends JPanel implements Printable, MouseListener,
    * @return
    */
   public boolean getPickedCoordinates(Coordinate coord, Coordinate actualCoord) {
-    if (coordClicked == null)
-      return false;
-    double x = coordClicked.getXVal();
-    coord.setXVal(x);
-    coord.setYVal(coordClicked.getYVal());
-    if (actualCoord == null)
-      return true;
-    int pt = Coordinate.getNearestIndexForX(coordsClicked, x);
-    actualCoord.setXVal(coordsClicked[pt].getXVal());
-    actualCoord.setYVal(coordsClicked[pt].getYVal());
-    return true;
-  }
-
-  public static AwtPanel taConvert(AwtPanel jsvp, int mode) {
-    if (jsvp.getNumberOfSpectraTotal() > 1)
-      return null;
-    JDXSpectrum spectrum = JDXSpectrum.taConvert(jsvp.getSpectrum(), mode);
-    return (spectrum == jsvp.getSpectrum() ? null : new AwtPanel(spectrum,
-        jsvp.popup));
-  }
-
-  public static void showSolutionColor(Component component, String sltnclr) {
-    JOptionPane.showMessageDialog(component, "<HTML><body bgcolor=rgb("
-        + sltnclr + ")><br />Predicted Solution Colour- RGB(" + sltnclr
-        + ")<br /><br /></body></HTML>", "Predicted Colour",
-        JOptionPane.INFORMATION_MESSAGE);
+    return GraphSet.getPickedCoordinates(coordsClicked, coordClicked, coord, actualCoord);
   }
 
   public String getSolutionColor() {
-    Graph spectrum = getSpectrum();
-    String Yunits = spectrum.getYUnits();
-    return Visible.Colour(spectrum.getXYCoords(), Yunits);
+    return currentGraphSet.getSolutionColor();
   }
 
   public void refresh() {
@@ -1067,32 +1035,27 @@ public class AwtPanel extends JPanel implements Printable, MouseListener,
   }
 
   public void addAnnotation(List<String> tokens) {
-    currentGraphSet.addAnnotation(tokens);
-    // TODO Auto-generated method stub
-    
+    String title = currentGraphSet.addAnnotation(tokens, getTitle());
+    if (title != null)
+      setTitle(title);
   }
 
   public void processPeakSelect(PeakInfo peakInfo) {
-    System.out.println("JSVPANEL PROCESS " + peakInfo);
-    // note that we could have multiple matches? 
     for (int i = 0; i < graphSets.size(); i++)
       graphSets.get(i).processPeakSelect(peakInfo);
   }
 
   public PeakInfo findPeak(String fileName, String index) {
-    PeakInfo pi;
-    System.out.println("JSVPanel " + this + "\n looking for " + fileName + " " + index);
-    for (int i = graphSets.size(); --i >= 0; )
-      if ((pi = graphSets.get(i).findPeak(fileName, index)) != null) {
-        System.out.println(" found " + pi);
-        return pi;
-      }
-    return null;
+    return GraphSet.findPeak(graphSets, fileName, index);
   }
 
   public void selectSpectrum(String fileName, String type, String model) {
     for (int i = 0; i < graphSets.size(); i+= 1)
       graphSets.get(i).selectSpectrum(fileName, type, model);
+  }
+
+  public boolean hasFileLoaded(String filePath) {
+    return JDXSpectrum.hasFileloaded(spectra, filePath);
   }
 
   /**
@@ -1129,9 +1092,9 @@ public class AwtPanel extends JPanel implements Printable, MouseListener,
    * 
    * @param coord
    */
-  public void notifyPeakPickedListeners(Coordinate coord) {
-    notifyListeners(new PeakPickEvent(this, coord, getSpectrum()
-        .getAssociatedPeakInfo(coord)));
+  public void notifyPeakPickedListeners() {
+    notifyListeners(new PeakPickEvent(this, coordClicked, getSpectrum()
+        .getAssociatedPeakInfo(coordClicked)));
   }
 
   void notifyListeners(Object eventObj) {
@@ -1140,14 +1103,14 @@ public class AwtPanel extends JPanel implements Printable, MouseListener,
         listeners.get(i).panelEvent(eventObj);
   }
 
-  /*--------------METHODS IN INTERFACE MouseListener-----------------------*/
+  /*--------------the rest are all mouse and keyboard interface -----------------------*/
 
   public void mousePressed(MouseEvent e) {
     if (e.getButton() != MouseEvent.BUTTON1)
       return;
     int xPixel = e.getX();
     int yPixel = e.getY();
-    AwtGraphSet gs = AwtGraphSet.findGraphSet(graphSets, xPixel, yPixel);
+    GraphSet gs = GraphSet.findGraphSet(graphSets, xPixel, yPixel);
     if (gs == null)
       return;
     isIntegralDrag = (e.isControlDown() && gs.getSpectrum().getIntegrationGraph() != null);
@@ -1158,19 +1121,19 @@ public class AwtPanel extends JPanel implements Printable, MouseListener,
   public void mouseMoved(MouseEvent e) {
     int xPixel = e.getX();
     int yPixel = e.getY();
-    AwtGraphSet gs = AwtGraphSet.findGraphSet(graphSets, xPixel, yPixel);
+    GraphSet gs = GraphSet.findGraphSet(graphSets, xPixel, yPixel);
     if (gs == null)
       return;
-    gs.mouseMovedEvent(xPixel, yPixel);
+    gs.mouseMovedEvent(xPixel, yPixel, display1D);
   }
 
   public void mouseDragged(MouseEvent e) {
     int xPixel = e.getX();
     int yPixel = e.getY();
-    if (AwtGraphSet.findGraphSet(graphSets, xPixel, yPixel) != currentGraphSet)
+    if (GraphSet.findGraphSet(graphSets, xPixel, yPixel) != currentGraphSet)
       return;
     currentGraphSet.checkWidgetEvent(xPixel, yPixel, false);
-    currentGraphSet.mouseMovedEvent(xPixel, yPixel);
+    currentGraphSet.mouseMovedEvent(xPixel, yPixel, display1D);
   }
 
   public void mouseReleased(MouseEvent e) {
@@ -1188,7 +1151,7 @@ public class AwtPanel extends JPanel implements Printable, MouseListener,
       popup.show(this, xPixel, yPixel);
       return;
     }
-    AwtGraphSet gs = AwtGraphSet.findGraphSet(graphSets, xPixel, yPixel);
+    GraphSet gs = GraphSet.findGraphSet(graphSets, xPixel, yPixel);
     if (gs == null)
       return;
     setCurrentGraphSet(gs);
@@ -1259,15 +1222,6 @@ public class AwtPanel extends JPanel implements Printable, MouseListener,
       currentGraphSet.nextView();
       return;
     }
-  }
-
-  public boolean hasFileLoaded(String filePath) {
-    for (int i = spectra.size(); --i >= 0;) {
-       System.out.println(i + " JSVPanel hasFileloaded? look for " + filePath + " -- fouund " + spectra.get(i).getFilePathForwardSlash());
-      if (spectra.get(i).getFilePathForwardSlash().equals(filePath))
-        return  true;
-    }
-    return false;
   }
 
 }

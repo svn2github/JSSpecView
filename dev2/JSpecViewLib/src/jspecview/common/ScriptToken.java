@@ -37,61 +37,64 @@ import jspecview.util.TextFormat;
 public enum ScriptToken {
 
   // null tip means DON'T SHOW
-  UNKNOWN("?"),
-  APPLETID("APPLETID"),
-  APPLETREADYCALLBACKFUNCTIONNAME("APPLETREADYCALLBACKFUNCTIONNAME"),
-  AUTOINTEGRATE("AUTOINTEGRATE", "TF"),
-  BACKGROUNDCOLOR("BACKGROUNDCOLOR", "C"),
-  CLOSE("CLOSE", "spectrumId or fileName or ALL"),
-  COMPOUNDMENUON("COMPOUNDMENUON", "TF"),
-  COORDCALLBACKFUNCTIONNAME("COORDCALLBACKFUNCTIONNAME"),
-  COORDINATESCOLOR("COORDINATESCOLOR", "C"),
-  COORDINATESON("COORDINATESON", "TF"),
-  DEBUG("DEBUG", "TF"),
-  DISPLAYFONTNAME("DISPLAYFONTNAME", "fontName"),
-  DISPLAY1D("DISPLAY1D", "TF"),
-  DISPLAY2D("DISPLAY2D", "TF"),
-  ENABLEZOOM("ENABLEZOOM", "TF"),
-  ENDINDEX("ENDINDEX"),
-  EXPORT("EXPORT", "[XY,DIF,DIFDUP,PAC,FIX,SQZ,AML,CML,JPG,PNG,SVG,SVGI] \"filename\""), 
-  GETSOLUTIONCOLOR("GETSOLUTIONCOLOR", ""),
-  GRIDCOLOR("GRIDCOLOR", "C"),
-  GRIDON("GRIDON", "TF"),
-  HIDDEN("HIDDEN", "TF"),
-  INTEGRATE("INTEGRATE", "ON/OFF/?/MARK ppm1-ppm2,ppm3-ppm4,..."),
-  INTEGRALPLOTCOLOR("INTEGRALPLOTCOLOR"),
-  INTEGRATIONRATIOS("INTEGRATIONRATIOS"),
-  INTERFACE("INTERFACE"),
-  IRMODE("IRMODE", "A or T or ?"),
-  LABEL("LABEL", "x y [color and/or \"text\"]"),
-  LOAD("LOAD", "[APPEND] \"fileName\" [first] [last]; use \"\" to reload current file"),
-  MENUON("MENUON"),
-  OBSCURE("OBSCURE"),
-  OVERLAY("OVERLAY", "spectrumID[*factor], spectrumID[*factor], ..."),
-  PEAKCALLBACKFUNCTIONNAME("PEAKCALLBACKFUNCTIONNAME"),
-  PLOTAREACOLOR("PLOTAREACOLOR", "C"),
-  PLOTCOLOR("PLOTCOLOR", "C"),
-  PLOTCOLORS("PLOTCOLORS", "color,color,color,..."),
-  REVERSEPLOT("REVERSEPLOT", "TF"),
-  SCALECOLOR("SCALECOLOR", "C"),
-  SPECTRUM("SPECTRUM", "spectrumID"),
-  SPECTRUMNUMBER("SPECTRUMNUMBER"),
-  STARTINDEX("STARTINDEX"),
-  SYNCCALLBACKFUNCTIONNAME("SYNCCALLBACKFUNCTIONNAME"),
-  SYNCID("SYNCID"),
-  TEST("TEST"),
-  TITLEON("TITLEON", "TF"), // default OFF for application, ON for applet
-  TITLEBOLDON("TITLEBOLDON", "TF"),
-  TITLECOLOR("TITLECOLOR", "C"),
-  TITLEFONTNAME("TITLEFONTNAME", "fontName"),
-  UNITSCOLOR("UNITSCOLOR", "C"),
-  VERSION("VERSION"),
-  XSCALEON("XSCALEON", "TF"),
-  XUNITSON("XUNITSON", "TF"),
-  YSCALE("YSCALE", "[ALL] lowValue highValue"),
-  YSCALEON("YSCALEON", "TF"),
-  YUNITSON("YUNITSON", "TF"),
-  ZOOM("ZOOM", "OUT or x1,x2 or x1,y1 x2,y2");
+  UNKNOWN,
+  APPLETID,
+  APPLETREADYCALLBACKFUNCTIONNAME,
+  AUTOINTEGRATE("TF"),
+  BACKGROUNDCOLOR("C"),
+  CLOSE("spectrumId or fileName or ALL"),
+  COMPOUNDMENUON("TF"),
+  COORDCALLBACKFUNCTIONNAME,
+  COORDINATESCOLOR("C"),
+  COORDINATESON("TF"),
+  DEBUG("TF"),
+  DISPLAYFONTNAME("fontName"),
+  DISPLAY1D("TF"),
+  DISPLAY2D("TF"),
+  ENABLEZOOM("TF"),
+  ENDINDEX,
+  EXPORT("[XY,DIF,DIFDUP,PAC,FIX,SQZ,AML,CML,JPG,PNG,SVG,SVGI] \"filename\""), 
+  GETSOLUTIONCOLOR,
+  GRIDCOLOR("C"),
+  GRIDON("TF"),
+  HIDDEN("TF"),
+  INTEGRATE("ON/OFF/?/MARK ppm1-ppm2,ppm3-ppm4,..."),
+  INTEGRALPLOTCOLOR,
+  INTEGRATIONRATIOS,
+  INTERFACE,
+  IRMODE("A or T or ?"),
+  LABEL("x y [color and/or \"text\"]"),
+  LOAD("[APPEND] \"fileName\" [first] [last]; use \"\" to reload current file"),
+  MENUON,
+  OBSCURE,
+  OVERLAY("spectrumID[*factor], spectrumID[*factor], ..."),
+  PEAKCALLBACKFUNCTIONNAME,
+  PLOTAREACOLOR("C"),
+  PLOTCOLOR("C"),
+  PLOTCOLORS("color,color,color,..."),
+  REVERSEPLOT("TF"),
+  SCALECOLOR("C"),
+  SPECTRUM("spectrumID"),
+  SPECTRUMNUMBER,
+  STARTINDEX,
+  SYNCCALLBACKFUNCTIONNAME,
+  SYNCID,
+  TEST,
+  TITLEON("TF"), // default OFF for application, ON for applet
+  TITLEBOLDON("TF"),
+  TITLECOLOR("C"),
+  TITLEFONTNAME("fontName"),
+  UNITSCOLOR("C"),
+  VERSION,
+  XSCALEON("TF"),
+  XUNITSON("TF"),
+  YSCALE("[ALL] lowValue highValue"),
+  YSCALEON("TF"),
+  YUNITSON("TF"),
+  ZOOM("OUT or x1,x2 or x1,y1 x2,y2"), 
+  
+  HIGHLIGHTCOLOR("C"), // not implemented 
+  ZOOMBOXCOLOR; // not implemented
 
   private String tip;
 
@@ -99,10 +102,10 @@ public enum ScriptToken {
     return "  " + (tip == "TF" ? "TRUE or FALSE" : tip == "C" ? "<color>" : tip);
   }
 
-  private ScriptToken(String name) {
+  private ScriptToken() {
   }
 
-  private ScriptToken(String name, String tip) {
+  private ScriptToken(String tip) {
     this.tip = tip;
   }
 
