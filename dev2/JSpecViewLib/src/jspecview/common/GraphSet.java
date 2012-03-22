@@ -130,7 +130,7 @@ abstract class GraphSet {
   protected int currentZoomIndex;
   protected int nSpectra;
   protected int iThisSpectrum = -1;
-  private double lastClickX;
+  protected double lastClickX;
 
   double userYFactor = 1;
   protected double xFactorForScale, yFactorForScale;
@@ -593,8 +593,7 @@ abstract class GraphSet {
     if (xPixel != fixX(xPixel) || yPixel != fixY(yPixel)) {
       setCoordClicked(Double.NaN, 0);
     } else {
-      lastClickX = toX(xPixel);
-      setCoordClicked(lastClickX, toY(yPixel));
+      setCoordClicked(toX(xPixel), toY(yPixel));
     }
     notifyPeakPickedListeners();
   }
@@ -877,8 +876,6 @@ abstract class GraphSet {
   }
 
   void selectSpectrum(String filePath, String type, String model) {
-    System.out.println("jsvgraphset selectSpectrum " + filePath + " " + type
-        + " " + model);
     if (nSpectra == 1) {
       iThisSpectrum = -1;
       return;
@@ -900,6 +897,7 @@ abstract class GraphSet {
   void toPeak(int istep) {
     istep *= (drawXAxisLeftToRight ? 1 : -1);
     JDXSpectrum spec = getSpectrum();
+    System.out.println(lastClickX);
     Coordinate coord = setCoordClicked(lastClickX, 0);
     int iPeak = spec.setNextPeak(coord, istep);
     if (iPeak < 0)

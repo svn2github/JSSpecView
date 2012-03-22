@@ -361,7 +361,7 @@ class AwtGraphSet extends GraphSet {
       jsvp.pd.coordsClicked = null;
       return null;
     }
-    jsvp.pd.coordClicked = new Coordinate(x, y);
+    jsvp.pd.coordClicked = new Coordinate(lastClickX = x, y);
     jsvp.pd.coordsClicked = getSpectrum().getXYCoords();
     return jsvp.pd.coordClicked;
   }

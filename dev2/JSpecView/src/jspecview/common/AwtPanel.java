@@ -316,7 +316,7 @@ public class AwtPanel extends JPanel implements Panel, Printable, MouseListener,
   public Color getColor(ScriptToken whatColor) {
     switch (whatColor) {
     default:
-      System.out.println("awtgraphset missing color " + whatColor);
+      Logger.error("awtgraphset missing color " + whatColor);
       return Color.BLACK;
     case ZOOMBOXCOLOR:
       return zoomBoxColor;
