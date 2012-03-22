@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
+import jspecview.util.ColorUtil;
 import jspecview.util.Logger;
 
 public class Parameters extends DisplayScheme {
@@ -34,9 +35,16 @@ public class Parameters extends DisplayScheme {
     plotColors = new Color[defaultPlotColors.length];
     System.arraycopy(defaultPlotColors, 0, plotColors, 0, plotColors.length);
   }
-  public final static Color[] defaultPlotColors = { Color.blue, Color.green, Color.yellow,
-      Color.orange, Color.red, Color.magenta, Color.pink, Color.cyan,
-      Color.darkGray };
+  public final static Color[] defaultPlotColors = { 
+    Color.blue, 
+    AppUtils.getColorFromString("darkGreen"),
+    AppUtils.getColorFromString("darkred"),
+    AppUtils.getColorFromString("orange"),
+    AppUtils.getColorFromString("magenta"),
+    AppUtils.getColorFromString("cyan"),
+    AppUtils.getColorFromString("maroon"),
+    AppUtils.getColorFromString("darkGray"),
+  };
 
   private Color[] plotColors;  
   private String plotColorsStr;
