@@ -699,7 +699,7 @@ public class PanelData {
    * @param coord
    */
   public void notifyPeakPickedListeners() {
-    notifyListeners(new PeakPickEvent(this, coordClicked, getSpectrum()
+    notifyListeners(new PeakPickEvent(owner, coordClicked, getSpectrum()
         .getAssociatedPeakInfo(coordClicked)));
   }
 
