@@ -52,23 +52,17 @@ import java.awt.print.Paper;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
-import java.text.NumberFormat;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.Set;
-import java.util.Map.Entry;
 
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet; //import javax.print.attribute.standard.MediaSize;
 import javax.print.attribute.standard.OrientationRequested;
 import javax.swing.BorderFactory;
-import javax.swing.JPanel;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
 import jspecview.util.Logger;
-import jspecview.util.TextFormat;
 
 /**
  * JSVPanel class draws a plot from the data contained a instance of a
@@ -82,7 +76,7 @@ import jspecview.util.TextFormat;
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-public class AwtPanel extends JPanel implements Panel, Printable, MouseListener,
+public class AwtPanel extends JSVPanel implements Printable, MouseListener,
     MouseMotionListener, KeyListener {
 
   private static final long serialVersionUID = 1L;
@@ -93,161 +87,34 @@ public class AwtPanel extends JPanel implements Panel, Printable, MouseListener,
   }
 
   public void dispose() {
-    for (int i = 0; i < graphSets.size(); i++)
-      graphSets.get(i).dispose();
-    graphSets = null;
-    if (popup != null) {
-      popup.dispose();
-      popup = null;
-    }
+    super.dispose();
     removeKeyListener(this);
     removeMouseListener(this);
     removeMouseMotionListener(this);
   }
 
-  // Critical fields
-
-  private List<GraphSet> graphSets;
-  GraphSet currentGraphSet;
-  protected JSVPanelPopupMenu popup;
-
   public JSVPanelPopupMenu getPopup() {
     return popup;
   }
 
-  private Map<String, NumberFormat> htFormats = new Hashtable<String, NumberFormat>();
-
-  // sliders and zoom boxes
-
-  // plot parameters
-
-  private int defaultHeight = 450;
-  private int defaultWidth = 280;
-  private int leftPlotAreaPos = 80, topPlotAreaPos = 30;
-  private int plotAreaWidth, plotAreaHeight;
-  private int left = leftPlotAreaPos, right = 50, top = topPlotAreaPos, bottom = 50;
-  
-  // current values
-
-  Coordinate coordClicked;
-  Coordinate[] coordsClicked;
-
-  private boolean drawXAxisLeftToRight;
-  private boolean xAxisLeftToRight = true;
-  boolean isIntegralDrag;
-  protected boolean isOverlaid;
-
-  public boolean isOverlaid() {
-    return isOverlaid;
-  }
-
-  private int nSpectra;
-  int thisWidth;
-  int thisPlotHeight;
-  PlotWidget thisWidget;
-
-  String coordStr = "";
-  String startupPinTip = "Click to set.";
-  private String title;
-
+  @Override
   public void setTitle(String title) {
-    this.title = title;
+    super.setTitle(title);
     setName(title);
   }
 
-  //////// settable parameters //////////
-
-  private boolean coordinatesOn = true;
-  boolean display1D = false; // with 2D
-  boolean display2D = true;
-  private boolean enableZoom = true;
-  private boolean gridOn = false;
-  private boolean reversePlot = false;
-  private boolean titleBoldOn = false;
-  private boolean titleOn = true;
-  private boolean xScaleOn = true;
-  private boolean xUnitsOn = true;
-  private boolean yScaleOn = true;
-  private boolean yUnitsOn = true;
-
-  Hashtable<String, Object> options = new Hashtable<String, Object>();
-
-  public Map<String, Object> getInfo(boolean isSelected, String key) {
-    Map<String, Object> info = new Hashtable<String, Object>();
-    Set<Entry<String, Object>> entries = options.entrySet();
-    for (Entry<String, Object> entry : entries)
-      JDXSpectrum.putInfo(key, info, entry.getKey(), entry.getValue());
-    JDXSpectrum.putInfo(key, info, "selected", Boolean.valueOf(isSelected));
-    JDXSpectrum.putInfo(key, info, "type", getSpectrumAt(0).getDataType());
-    JDXSpectrum.putInfo(key, info, "title", title);
-    JDXSpectrum.putInfo(key, info, "nSets", Integer.valueOf(graphSets.size()));
-    JDXSpectrum.putInfo(key, info, "userYFactor", Double
-        .valueOf(currentGraphSet.userYFactor));
-    List<Map<String, Object>> sets = new ArrayList<Map<String, Object>>();
-    for (int i = graphSets.size(); --i >= 0;)
-      sets.add(graphSets.get(i).getInfo(key, isSelected && graphSets.get(i) == currentGraphSet));
-    info.put("sets", sets);
-    return info;
+  @Override
+  protected void doRepaint() {
+    repaint();    
   }
 
-  public void setBoolean(Parameters parameters, ScriptToken st) {
-    if (st == null) {
-      Map<ScriptToken, Boolean> booleans = parameters.getBooleans();
-      for (Map.Entry<ScriptToken, Boolean> entry : booleans.entrySet())
-        setBoolean(parameters, entry.getKey());
-      return;
-    }
-    boolean isTrue = parameters.getBoolean(st);
-    options.put(st.name(), (isTrue ? Boolean.TRUE : Boolean.FALSE));
-    switch (st) {
-    case COORDINATESON:
-      coordinatesOn = isTrue;
-      break;
-    case DISPLAY1D:
-      display1D = isTrue;
-      thisWidth = 0;
-      break;
-    case DISPLAY2D:
-      display2D = isTrue;
-      thisWidth = 0;
-      break;
-    case ENABLEZOOM:
-      enableZoom = isTrue;
-      break;
-    case GRIDON:
-      gridOn = isTrue;
-      break;
-    case REVERSEPLOT:
-      reversePlot = isTrue;
-      break;
-    case TITLEBOLDON:
-      titleBoldOn = isTrue;
-      break;
-    case TITLEON:
-      titleOn = isTrue;
-      break;
-    case XSCALEON:
-      xScaleOn = isTrue;
-      break;
-    case XUNITSON:
-      xUnitsOn = isTrue;
-      break;
-    case YSCALEON:
-      yScaleOn = isTrue;
-      break;
-    case YUNITSON:
-      yUnitsOn = isTrue;
-      break;
-    default:
-      Logger.warn("JSVPanel --- unrecognized Parameter boolean: " + st);
-      break;
-    }
+  @Override
+  protected void doRequestFocusInWindow() {
+    requestFocusInWindow();
   }
 
-  ////////// settable colors and fonts //////////
+  ////////// settable colors //////////
 
-  String displayFontName;
-  private String titleFontName;
   private Color coordinatesColor;
   private Color gridColor;
   private Color integralPlotColor;
@@ -338,20 +205,6 @@ public class AwtPanel extends JPanel implements Panel, Printable, MouseListener,
     }
   }
 
-  /////////// print parameters ///////////
-
-  boolean isPrinting;
-  private boolean printGrid = gridOn;
-  private boolean printTitle = true;
-  private boolean printScale = true;
-  String printingFont;
-  private String printGraphPosition = "default";
-
-  // listeners to handle various events
-
-  private ArrayList<PanelListener> listeners = new ArrayList<PanelListener>();
-  private List<Graph> spectra;
-
   /**
    * Constructs a new JSVPanel
    * 
@@ -366,9 +219,7 @@ public class AwtPanel extends JPanel implements Panel, Printable, MouseListener,
     // Preferences Dialog sample.jdx
 
     this.popup = popup;
-    List<Graph> spectra = new ArrayList<Graph>();
-    spectra.add(spectrum);
-    initJSVPanel(spectra, 0, 0);
+    initSingleSpectrum(spectrum);
   }
 
   public static AwtPanel getJSVPanel(List<JDXSpectrum> specs, int startIndex, int endIndex, JSVPanelPopupMenu popup) {
@@ -415,223 +266,6 @@ public class AwtPanel extends JPanel implements Panel, Printable, MouseListener,
     return new AwtGraphSet(this);
   }
 
-  private void initJSVPanel(List<Graph> spectra, int startIndex, int endIndex) {
-    setBorder(BorderFactory.createLineBorder(Color.lightGray));
-    nSpectra = spectra.size();
-    this.spectra = spectra;
-    graphSets = GraphSet.getGraphSets(this, spectra, startIndex, endIndex);
-    currentGraphSet = graphSets.get(0);
-    setTitle(getSpectrum().getTitleLabel());
-    if (popup == null) {
-      // preferences dialog
-      coordStr = "(0,0)";
-    } else {
-      addKeyListener(this);
-      addMouseListener(this);
-      addMouseMotionListener(this);
-    }
-  }
-
-  private void setCurrentGraphSet(GraphSet gs) {
-    if (currentGraphSet == gs)
-      return;
-    currentGraphSet = gs;
-    notifySubSpectrumChange(gs.getSpectrum().getSubIndex(), gs.getSpectrum());
-  }
-
-  public JDXSpectrum getSpectrum() {
-    return currentGraphSet.getSpectrum().getCurrentSubSpectrum();
-  }
-
-  /**
-   * Returns the <code>Spectrum</code> at the specified index
-   * 
-   * @param index
-   *        the index of the <code>Spectrum</code>
-   * @return the <code>Spectrum</code> at the specified index
-   */
-  public JDXSpectrum getSpectrumAt(int index) {
-    return currentGraphSet.getSpectrumAt(index);
-  }
-
-  /**
-   * Sets the integration ratios that will be displayed
-   * 
-   * @param ratios
-   *        array of the integration ratios
-   */
-  public void setIntegrationRatios(ArrayList<Annotation> ratios) {
-    currentGraphSet.setIntegrationRatios(ratios);
-  }
-
-  public void setDisplay1Dwith2D(boolean TF) {
-    display1D = TF;
-    thisWidth = 0;
-  }
-
-  public void setDisplay2D(boolean TF) {
-    display2D = TF;
-    thisWidth = 0;
-  }
-
-  /**
-   * Displays plot in reverse if val is true
-   * 
-   * @param val
-   *        true or false
-   */
-  public void setReversePlot(boolean val) {
-    reversePlot = val;
-    setDrawXAxis();
-  }
-
-  private void setDrawXAxis() {
-    drawXAxisLeftToRight = xAxisLeftToRight ^ reversePlot;
-    getSpectrum().setExportXAxisDirection(drawXAxisLeftToRight);
-  }
-
-  /* -------------------Other methods ------------------------------------*/
-
-  /**
-   * Add information about a region of the displayed spectrum to be highlighted
-   * applet only right now
-   * 
-   * @param x1
-   *        the x value of the coordinate where the highlight should start
-   * @param x2
-   *        the x value of the coordinate where the highlight should end
-   * @param color
-   *        the color of the highlight
-   */
-  public void addHighlight(double x1, double x2, Color color) {
-    currentGraphSet.addHighlight(x1, x2, null, color);
-  }
-
-  /**
-   * Remove the highlight at the specified index in the internal list of
-   * highlights The index depends on the order in which the highlights were
-   * added
-   * 
-   * @param index
-   *        the index of the highlight in the list
-   */
-  public void removeHighlight(int index) {
-    currentGraphSet.removeHighlight(index);
-  }
-
-  /**
-   * Remove the highlight specified by the starting and ending x value
-   * 
-   * @param x1
-   *        the x value of the coordinate where the highlight started
-   * @param x2
-   *        the x value of the coordinate where the highlight ended
-   */
-  public void removeHighlight(double x1, double x2) {
-    currentGraphSet.removeHighlight(x1, x2);
-  }
-
-  /**
-   * Removes all highlights from the display
-   */
-  public void removeAllHighlights() {
-    currentGraphSet.removeAllHighlights();
-  }
-
-  /**
-   * Returns true if plot is reversed
-   * 
-   * @return true if plot is reversed
-   */
-  public boolean isPlotReversed() {
-    return reversePlot;
-  }
-
-  /**
-   * Returns true if zoom is enabled
-   * 
-   * @return true if zoom is enabled
-   */
-  public boolean isZoomEnabled() {
-    return enableZoom;
-  }
-
-  /**
-   * Returns true if coordinates are on
-   * 
-   * @return true if coordinates are displayed
-   */
-  public boolean isCoordinatesOn() {
-    return coordinatesOn;
-  }
-
-  /**
-   * Returns true if grid is on
-   * 
-   * @return true if the grid is displayed
-   */
-  public boolean isGridOn() {
-    return gridOn;
-  }
-
-  /**
-   * Returns true if x Scale is on
-   * 
-   * @return true if x Scale is displayed
-   */
-  public boolean isXScaleOn() {
-    return xScaleOn;
-  }
-
-  /**
-   * Returns true if y Scale is on
-   * 
-   * @return true if the y Scale is displayed
-   */
-  public boolean isYScaleOn() {
-    return yScaleOn;
-  }
-
-   /**
-   * Returns the Number of Graph sets
-   * 
-   * @return the Number of graph sets
-   */
-  public int getNumberOfSpectraTotal() {
-    return nSpectra;
-  }
-
-  /**
-   * Returns the Number of Graph sets
-   * 
-   * @return the Number of graph sets
-   */
-  public int getNumberOfGraphSets() {
-    return graphSets.size();
-  }
-
-  public int getNumberOfSpectraInCurrentSet() {
-    return currentGraphSet.getNumberOfSpectra();
-  }
-
-  /**
-   * Returns the title displayed on the graph
-   * 
-   * @return the title displayed on the graph
-   */
-  public String getTitle() {
-    return title;
-  }
-
-  /**
-   * Returns the color of the plotArea
-   * 
-   * @return the color of the plotArea
-   */
-  public Color getPlotAreaColor() {
-    return plotAreaColor;
-  }
-
   /**
    * Returns the color of the plot at a certain index
    * 
@@ -640,89 +274,31 @@ public class AwtPanel extends JPanel implements Panel, Printable, MouseListener,
    * @return the color of the plot
    */
   public Color getPlotColor(int index) {
-    //TODO -- what about this?
     return ((AwtGraphSet) currentGraphSet).getPlotColor(index);
   }
 
-  /**
-   * Returns the color of the integral plot
-   * 
-   * @return the color of the integral plot
-   */
-  public Color getIntegralPlotColor() {
-    return integralPlotColor;
-  }
-
-  /**
-   * Returns the color of the scale
-   * 
-   * @return the color of the scale
-   */
-  public Color getScaleColor() {
-    return scaleColor;
-  }
-
-  /**
-   * Returns the color of the units
-   * 
-   * @return the color of the units
-   */
-  public Color getUnitsColor() {
-    return unitsColor;
-  }
-
-  /**
-   * Returns the color of the title
-   * 
-   * @return the color of the title
-   */
-  public Color getTitleColor() {
-    return titleColor;
-  }
-
-  /**
-   * Returns the color of the grid
-   * 
-   * @return the color of the grid
-   */
-  public Color getGridColor() {
-    return gridColor;
-  }
-
-  /**
-   * Return the start indices of the Scaledata
-   * 
-   * @return the start indices of the Scaledata
-   */
-  public int[] getStartDataPointIndices() {
-    return currentGraphSet.multiScaleData.startDataPointIndices;
-  }
-
-  /**
-   * Return the end indices of the Scaledata
-   * 
-   * @return the end indices of the Scaledata
-   */
-  public int[] getEndDataPointIndices() {
-    return currentGraphSet.multiScaleData.endDataPointIndices;
-  }
-
-  /**
-   * Returns the name of the font used in the display
-   * 
-   * @return the name of the font used in the display
-   */
-  public String getDisplayFontName() {
-    return displayFontName;
-  }
-
-  /**
-   * Returns the font of the title
-   * 
-   * @return the font of the title
-   */
-  public String getTitleFontName() {
-    return titleFontName;
+  public Color getColor(ScriptToken whatColor) {
+    switch (whatColor) {
+    default:
+      System.out.println("awtgraphset missing color " + whatColor);
+      return Color.BLACK;
+    case ZOOMBOXCOLOR:
+      return zoomBoxColor;
+    case HIGHLIGHTCOLOR:
+      return highlightColor;
+    case INTEGRALPLOTCOLOR:
+      return integralPlotColor;
+    case GRIDCOLOR:
+      return gridColor;
+    case PLOTAREACOLOR:
+      return plotAreaColor;
+    case SCALECOLOR:
+      return scaleColor;
+    case TITLECOLOR:
+      return titleColor;
+    case UNITSCOLOR:
+      return unitsColor;
+    }
   }
 
   /*----------------------- JSVPanel PAINTING METHODS ---------------------*/
@@ -741,75 +317,9 @@ public class AwtPanel extends JPanel implements Panel, Printable, MouseListener,
     drawGraph(g, getHeight(), getWidth());
   }
 
-  /**
-   * Draws the Spectrum to the panel
-   * 
-   * @param g
-   *        the <code>Graphics</code> object
-   * @param height
-   *        the height to be drawn in pixels
-   * @param width
-   *        the width to be drawn in pixels
-   */
-  private void drawGraph(Graphics g, int height, int width) {
-
-    boolean withGrid, withTitle, withXUnits, withYUnits, 
-        withCoords, withXScale, withYScale, withSliders;
-
-    if (isPrinting) {
-      withCoords = false;
-      withTitle = printTitle;
-      withGrid = printGrid;
-      withXScale = printScale;
-      withYScale = printScale;
-      withXUnits = printScale;
-      withYUnits = printScale;
-      withSliders = false;
-    } else {
-      withCoords = coordinatesOn;
-      withTitle = titleOn;
-      withGrid = gridOn;
-      withXUnits = xUnitsOn;
-      withYUnits = yUnitsOn;
-      withXScale = xScaleOn;
-      withYScale = yScaleOn;
-      withSliders = true;
-    }
-    plotAreaWidth = width - (right + left);
-    plotAreaHeight = height - (top + bottom);
-    boolean isResized = (thisWidth != width || thisPlotHeight != plotAreaHeight);
-    if (isResized) {
-      requestFocusInWindow();
-    }
-    thisWidth = width;
-    thisPlotHeight = plotAreaHeight;
-
-    for (int i = graphSets.size(); --i >= 0;)
-      graphSets.get(i).drawGraph(g, withGrid, withXUnits, withYUnits,
-          withXScale, withYScale, withSliders, !isIntegralDrag, height, width,
-          left, right, top, bottom, isResized, enableZoom, display1D, display2D);
-    if (withTitle)
-      drawTitle(g, height, width, getSpectrum().getPeakTitle());
-    if (withCoords)
-      drawCoordinates(g, height, width);
-  }
-
-  NumberFormat getFormatter(String hash) {
-    NumberFormat formatter = htFormats.get(hash);
-    if (formatter == null)
-      htFormats.put(hash, formatter = TextFormat.getDecimalFormat(hash));
-    return formatter;
-  }
-
-  void setFont(Graphics g, int width, int mode, int size, boolean isLabel) {
-    if (isLabel) {
-      if (width < 400)
-        size = (int) ((width * size) / 400);
-    } else {
-      if (width < 250)
-        size = (int) ((width * size) / 250);
-    }
-    g.setFont(new Font((isPrinting ? printingFont : displayFontName), mode, size));
+  @Override
+  protected void setFont(Object g, String name, int mode, int size) {
+    ((Graphics) g).setFont(new Font(name, mode, size));
   }
 
   /**
@@ -822,7 +332,8 @@ public class AwtPanel extends JPanel implements Panel, Printable, MouseListener,
    * @param width
    *        the width to be drawn in pixels
    */
-  void drawTitle(Graphics g, int height, int width, String title) {
+  void drawTitle(Object og, int height, int width, String title) {
+    Graphics g = (Graphics) og;
     setFont(g, width, isPrinting || titleBoldOn ? Font.BOLD : Font.PLAIN, 14,
         true);
     FontMetrics fm = g.getFontMetrics();
@@ -841,48 +352,12 @@ public class AwtPanel extends JPanel implements Panel, Printable, MouseListener,
    * @param width
    *        the width to be drawn in pixels
    */
-  private void drawCoordinates(Graphics g, int height, int width) {
+  protected void drawCoordinates(Object og, int height, int width) {
+    Graphics g = (Graphics) og;
     g.setColor(coordinatesColor);
     setFont(g, width, Font.PLAIN, 12, true);
     g.drawString(coordStr, (int) ((plotAreaWidth + leftPlotAreaPos) * 0.85),
         (int) (topPlotAreaPos - 10));
-  }
-
-  /*-------------------- METHODS FOR SCALING AND ZOOM --------------------------*/
-
-  public void setZoom(double x1, double y1, double x2, double y2) {
-    currentGraphSet.setZoom(x1, y1, x2, y2);
-    thisWidth = 0;
-    notifyZoomListeners(x1, y1, x2, y2);
-  }
-
-  /**
-   * Resets the spectrum to it's original view
-   */
-  public void reset() {
-    currentGraphSet.reset();
-  }
-
-  /**
-   * Clears all views in the zoom list
-   */
-  public void clearViews() {
-    for (int i = graphSets.size(); --i >= 0; )
-      graphSets.get(i).clearViews();
-  }
-
-  /**
-   * Displays the previous view zoomed
-   */
-  public void previousView() {
-    currentGraphSet.previousView();
-  }
-
-  /**
-   * Displays the next view zoomed
-   */
-  public void nextView() {
-    currentGraphSet.nextView();
   }
 
   /*----------------- METHODS IN INTERFACE Printable ---------------------- */
@@ -1001,161 +476,34 @@ public class AwtPanel extends JPanel implements Panel, Printable, MouseListener,
 
   }
 
-  /*------------------------- Javascript call functions ---------------------*/
-
-  /**
-   * Returns the spectrum coordinate of the point on the display that was
-   * clicked
-   * 
-   * @return the spectrum coordinate of the point on the display that was
-   *         clicked
-   */
-  public Coordinate getClickedCoordinate() {
-    return coordClicked;
-  }
-
-  /**
-   * moving panel click event processing to JSVPanel from applet
-   * 
-   * @param coord
-   * @param actualCoord
-   * @return
-   */
-  public boolean getPickedCoordinates(Coordinate coord, Coordinate actualCoord) {
-    return GraphSet.getPickedCoordinates(coordsClicked, coordClicked, coord, actualCoord);
-  }
-
-  public String getSolutionColor() {
-    return currentGraphSet.getSolutionColor();
-  }
-
-  public void refresh() {
-    thisWidth = 0;
-    repaint();
-  }
-
-  public void addAnnotation(List<String> tokens) {
-    String title = currentGraphSet.addAnnotation(tokens, getTitle());
-    if (title != null)
-      setTitle(title);
-  }
-
-  public void processPeakSelect(PeakInfo peakInfo) {
-    for (int i = 0; i < graphSets.size(); i++)
-      graphSets.get(i).processPeakSelect(peakInfo);
-  }
-
-  public PeakInfo findPeak(String fileName, String index) {
-    return GraphSet.findPeak(graphSets, fileName, index);
-  }
-
-  public void selectSpectrum(String fileName, String type, String model) {
-    for (int i = 0; i < graphSets.size(); i+= 1)
-      graphSets.get(i).selectSpectrum(fileName, type, model);
-  }
-
-  public boolean hasFileLoaded(String filePath) {
-    return JDXSpectrum.hasFileloaded(spectra, filePath);
-  }
-
-  /**
-   * Adds a PanelListener
-   * 
-   * @param listener
-   */
-  public void addListener(PanelListener listener) {
-    if (!listeners.contains(listener)) {
-      listeners.add(listener);
-    }
-  }
-
-  /**
-   * 
-   * @param isub -1 indicates direction if no subspectra or subspectrum index if subspectra
-   * @param spec null indicates no subspectra
-   */
-  public void notifySubSpectrumChange(int isub, JDXSpectrum spec) {
-    notifyListeners(new SubSpecChangeEvent(isub, (spec == null ? null : spec.getTitleLabel())));
-  }
-  
-  /**
-   * Notifies CoordinatePickedListeners
-   * 
-   * @param coord
-   */
-  public void notifyZoomListeners(double x1, double y1, double x2, double y2) {
-    notifyListeners(new ZoomEvent(x1, y1, x2, y2));
-  }
-
-  /**
-   * Notifies CoordinatePickedListeners
-   * 
-   * @param coord
-   */
-  public void notifyPeakPickedListeners() {
-    notifyListeners(new PeakPickEvent(this, coordClicked, getSpectrum()
-        .getAssociatedPeakInfo(coordClicked)));
-  }
-
-  void notifyListeners(Object eventObj) {
-    for (int i = 0; i < listeners.size(); i++)
-      if (listeners.get(i) != null)
-        listeners.get(i).panelEvent(eventObj);
-  }
 
   /*--------------the rest are all mouse and keyboard interface -----------------------*/
 
   public void mousePressed(MouseEvent e) {
     if (e.getButton() != MouseEvent.BUTTON1)
       return;
-    int xPixel = e.getX();
-    int yPixel = e.getY();
-    GraphSet gs = GraphSet.findGraphSet(graphSets, xPixel, yPixel);
-    if (gs == null)
-      return;
-    isIntegralDrag = (e.isControlDown() && gs.getSpectrum().getIntegrationGraph() != null);
-    setCurrentGraphSet(gs);
-    gs.checkWidgetEvent(xPixel, yPixel, true);
+    doMousePressed(e.getX(), e.getY(), e.isControlDown());
   }
 
   public void mouseMoved(MouseEvent e) {
-    int xPixel = e.getX();
-    int yPixel = e.getY();
-    GraphSet gs = GraphSet.findGraphSet(graphSets, xPixel, yPixel);
-    if (gs == null)
-      return;
-    gs.mouseMovedEvent(xPixel, yPixel, display1D);
+    doMouseMoved(e.getX(), e.getY());
   }
 
   public void mouseDragged(MouseEvent e) {
-    int xPixel = e.getX();
-    int yPixel = e.getY();
-    if (GraphSet.findGraphSet(graphSets, xPixel, yPixel) != currentGraphSet)
-      return;
-    currentGraphSet.checkWidgetEvent(xPixel, yPixel, false);
-    currentGraphSet.mouseMovedEvent(xPixel, yPixel, display1D);
+    doMouseDragged(e.getX(), e.getY());
   }
-
+  
   public void mouseReleased(MouseEvent e) {
-    if (thisWidget == null || e.getButton() != MouseEvent.BUTTON1)
-      return;
-    currentGraphSet.mouseReleasedEvent();
-    thisWidget = null;
+    doMouseReleased(e.getButton() == MouseEvent.BUTTON1);
   }
 
   public void mouseClicked(MouseEvent e) {
-    requestFocusInWindow();
-    int xPixel = e.getX();
-    int yPixel = e.getY();
     if (e.getButton() == MouseEvent.BUTTON3) {
-      popup.show(this, xPixel, yPixel);
+      popup.show(this, e.getX(), e.getY());
       return;
     }
-    GraphSet gs = GraphSet.findGraphSet(graphSets, xPixel, yPixel);
-    if (gs == null)
-      return;
-    setCurrentGraphSet(gs);
-    gs.mouseClickEvent(xPixel, yPixel, e.getClickCount(), e.isControlDown());
+    requestFocusInWindow();
+    doMouseClicked(e.getX(), e.getY(), e.getClickCount(), e.isControlDown());
   }
 
   public void mouseEntered(MouseEvent e) {
@@ -1221,6 +569,19 @@ public class AwtPanel extends JPanel implements Panel, Printable, MouseListener,
     if (e.getKeyChar() == 'y') {
       currentGraphSet.nextView();
       return;
+    }
+  }
+
+  @Override
+  protected void setupPlatform() {
+    setBorder(BorderFactory.createLineBorder(Color.lightGray));
+    if (popup == null) {
+      // preferences dialog
+      coordStr = "(0,0)";
+    } else {
+      addKeyListener(this);
+      addMouseListener(this);
+      addMouseMotionListener(this);
     }
   }
 

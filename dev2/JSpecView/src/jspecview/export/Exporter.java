@@ -25,6 +25,7 @@ import javax.swing.SwingConstants;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.AwtPanel;
 import jspecview.common.JSpecViewFileFilter;
+import jspecview.common.ScriptToken;
 import jspecview.util.TextFormat;
 
 public class Exporter {
@@ -265,9 +266,13 @@ public class Exporter {
         msg = (new SVGExporter()).exportAsSVG(path, spec.getXYCoords(), 
             spec.getTitle(), startIndex, endIndex, spec.getXUnits(), 
             spec.getYUnits(), spec.isContinuous(), spec.isIncreasing(), 
-            jsvp.getPlotAreaColor(), jsvp.getBackground(), jsvp.getPlotColor(0),
-            jsvp.getGridColor(), jsvp.getTitleColor(), jsvp.getScaleColor(),
-            jsvp.getUnitsColor(), imode == Type.SVGI);
+            jsvp.getColor(ScriptToken.PLOTAREACOLOR), jsvp.getBackground(), 
+            jsvp.getPlotColor(0),
+            jsvp.getColor(ScriptToken.GRIDCOLOR),
+            jsvp.getColor(ScriptToken.TITLECOLOR),
+            jsvp.getColor(ScriptToken.SCALECOLOR),
+            jsvp.getColor(ScriptToken.UNITSCOLOR),
+            imode == Type.SVGI);
         break;
       default:
         msg = exportTheSpectrum(imode, path, spec, startIndex, endIndex);

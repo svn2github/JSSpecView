@@ -32,9 +32,7 @@ public class AppUtils {
    * 
    * @return the panel containing the HNMR spectrum with integral displayed
    */
-  public static AwtPanel integrate(
-                                   Container frameOrPanel,
-                                   boolean showDialog,
+  public static AwtPanel integrate(Container frameOrPanel, boolean showDialog,
                                    Parameters parameters) {
     JPanel jp = (JPanel) (frameOrPanel instanceof JInternalFrame ? ((JInternalFrame) frameOrPanel)
         .getContentPane()
@@ -43,7 +41,8 @@ public class AppUtils {
     JDXSpectrum spectrum = jsvp.getSpectrum();
     IntegralGraph graph = spectrum.getIntegrationGraph();
     spectrum.setIntegrationGraph(null);
-    if (graph != null || spectrum.canIntegrate() && jsvp.getNumberOfSpectraInCurrentSet() == 1) {
+    if (graph != null || spectrum.canIntegrate()
+        && jsvp.getNumberOfSpectraInCurrentSet() == 1) {
       if (showDialog) {
         IntegrateDialog integDialog;
         if (graph != null) {
@@ -64,7 +63,7 @@ public class AppUtils {
 
       if (graph != null) {
         AwtPanel newJsvp = AwtPanel.getIntegralPanel(spectrum, jsvp
-            .getIntegralPlotColor(), jsvp.getPopup());
+            .getColor(ScriptToken.INTEGRALPLOTCOLOR), jsvp.getPopup());
         // add integration ratio annotations if any exist
         jp.remove(jsvp);
         jp.add(newJsvp);

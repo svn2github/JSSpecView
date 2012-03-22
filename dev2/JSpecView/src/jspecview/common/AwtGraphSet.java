@@ -43,6 +43,15 @@ class AwtGraphSet extends GraphSet {
   protected List<Highlight> highlights = new ArrayList<Highlight>();
   private Color[] plotColors;
 
+  @Override
+  protected void disposeImage() {
+    image2D = null;
+    jsvp = null;
+    highlights = null;
+    plotColors = null;
+  }
+
+
   AwtGraphSet(AwtPanel jsvp) {
     this.jsvp = jsvp;
   }
@@ -128,17 +137,13 @@ class AwtGraphSet extends GraphSet {
     }
   }
 
-  /**
-   * Removes all highlights from the display
-   */
-  void removeAllHighlights() {
-    highlights.clear();
-  }
-
   void removeAllHighlights(Graph spec) {
-    for (int i = highlights.size(); --i >= 0;)
-      if (highlights.get(i).spectrum == spec)
-        highlights.remove(i);
+    if (spec == null)
+      highlights.clear();
+    else
+      for (int i = highlights.size(); --i >= 0;)
+        if (highlights.get(i).spectrum == spec)
+          highlights.remove(i);
     jsvp.repaint();
   }
 
@@ -329,11 +334,6 @@ class AwtGraphSet extends GraphSet {
   }
 
   @Override
-  protected void disposeImage() {
-    image2D = null;
-  }
-
-  @Override
   protected String getCoordString() {
     return jsvp.coordStr;
   }
@@ -397,41 +397,15 @@ class AwtGraphSet extends GraphSet {
 
   @Override
   protected void drawTitle(Object g, int height, int width, String title) {
-    jsvp.drawTitle((Graphics) g, height, width, title);
+    jsvp.drawTitle(g, height, width, title);
   }
 
   @Override
   protected void setColor(Object g, ScriptToken whatColor) {
-    if (whatColor == null)
-      return;
-    Color color = null;
-    switch (whatColor) {
-    default:
-      System.out.println("awtgraphset missing color " + whatColor);
-      break;
-    case ZOOMBOXCOLOR:
-      color = jsvp.getZoomBoxColor();
-      break;
-    case HIGHLIGHTCOLOR:
-      color = jsvp.getHighlightColor();
-      break;
-    case GRIDCOLOR:
-      color = jsvp.getGridColor();
-      break;
-    case PLOTCOLOR:
-      color = plotColors[0];
-      break;
-    case PLOTAREACOLOR:
-      color = jsvp.getPlotAreaColor();
-      break;
-    case SCALECOLOR:
-      color = jsvp.getScaleColor();
-      break;
-    case UNITSCOLOR:
-      color = jsvp.getUnitsColor();
-      break;
-    }
-    ((Graphics) g).setColor(color);
+    if (whatColor != null)
+      ((Graphics) g)
+          .setColor(whatColor == ScriptToken.PLOTCOLOR ? plotColors[0] : jsvp
+              .getColor(whatColor));
   }
 
   @Override
@@ -459,7 +433,7 @@ class AwtGraphSet extends GraphSet {
   @Override
   protected void setPlotColor(Object g, int i) {
     ((Graphics) g)
-        .setColor(i < 0 ? jsvp.getIntegralPlotColor() : plotColors[i]);
+        .setColor(i < 0 ? jsvp.getColor(ScriptToken.INTEGRALPLOTCOLOR) : plotColors[i]);
   }
 
   @Override
@@ -500,7 +474,7 @@ class AwtGraphSet extends GraphSet {
   @Override
   protected void setFont(Object g, int width, int face, int size,
                          boolean isLabel) {
-    jsvp.setFont((Graphics) g, width, face, size, isLabel);
+    jsvp.setFont(g, width, face, size, isLabel);
   }
 
   @Override

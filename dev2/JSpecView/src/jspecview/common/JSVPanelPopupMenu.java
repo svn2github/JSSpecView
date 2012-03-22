@@ -49,6 +49,15 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   
   private static final long serialVersionUID = 1L;
 
+  protected AwtPanel jsvp;
+  private ScriptInterface scripter;
+  
+
+  public void dispose() {
+    jsvp = null;
+    scripter = null;
+  }
+
   /**
    * Menu Item that allows user to navigate to the next view of a JSVPanel
    * that has been zoomed
@@ -93,8 +102,6 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   protected JMenuItem appletAdvancedMenuItem;
   protected JMenu appletCompoundMenu;
   public JMenuItem overlayKeyMenuItem = new JMenuItem();
-  
-  private ScriptInterface scripter;
   
   public JSVPanelPopupMenu(ScriptInterface scripter) {
     super();
@@ -297,8 +304,6 @@ public class JSVPanelPopupMenu extends JPopupMenu {
         JOptionPane.PLAIN_MESSAGE);
   }
 
-  protected AwtPanel jsvp;
-
   /**
    * Allows the grid to be toogled
    */
@@ -430,7 +435,4 @@ public class JSVPanelPopupMenu extends JPopupMenu {
       overlayKeyMenuItem.setEnabled(isOverlaid && jsvp.getNumberOfGraphSets() == 1);
   }
 
-  public void dispose() {
-    jsvp = null;    
-  }
 }

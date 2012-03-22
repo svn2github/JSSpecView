@@ -47,9 +47,30 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
    * 2D slices, for example.
    */
   private List<JDXSpectrum> subSpectra;
+  private ArrayList<PeakInfo> peakList = new ArrayList<PeakInfo>();
   private JDXSpectrum parent;
+  private int[] buf2d;
+  private IntegralGraph integration;
+  private PeakInfo selectedPeak;
+
+  public void dispose() {
+    buf2d = null;
+    integration = null;
+    if (subSpectra != null)
+    for (int i = 0; i < subSpectra.size(); i++)
+      if (subSpectra.get(i) != this)
+        subSpectra.get(i).dispose();
+    subSpectra = null;
+    parent = null;
+    peakList = null;
+    selectedPeak = null;
+  }
+
+  private int thisWidth,thisHeight;
   private int currentSubSpectrumIndex;
+  private double grayFactorLast;
   private boolean isForcedSubset;
+  
   public boolean isForcedSubset() {
     return isForcedSubset;
   }
@@ -59,8 +80,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     this.id = id;
   }
   
-  private ArrayList<PeakInfo> peakList = new ArrayList<PeakInfo>();
-
   /**
    * Constructor
    */
@@ -123,8 +142,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return false;
   }
 
-
-  private PeakInfo selectedPeak;
 
   public void setSelectedPeak(PeakInfo peak) {
     selectedPeak = peak;
@@ -206,8 +223,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return ipt1;
   }
  
-  private IntegralGraph integration;
-
   public IntegralGraph getIntegrationGraph() {
     return integration;
   }
@@ -467,11 +482,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return exportXAxisLeftToRight;
   }
 
-  private double grayFactorLast;
-  private int[] buf2d;
-  private int thisWidth,thisHeight;
-
-
   /**
    * 
    * @param width
@@ -551,10 +561,5 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return getTitleLabel();
   }
 
-  public static boolean hasFileloaded(List<Graph> spectra, String filePath) {
-    for (int i = spectra.size(); --i >= 0;)
-      if (spectra.get(i).getFilePathForwardSlash().equals(filePath))
-        return true;
-    return false;
-  }
+
 }

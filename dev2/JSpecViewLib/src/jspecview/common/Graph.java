@@ -83,4 +83,6 @@ public interface Graph {
   public String getFilePath();
   public boolean is1D();
   public String getFilePathForwardSlash();
+
+  public void dispose();
 }

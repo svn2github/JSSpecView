@@ -1575,6 +1575,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       if (currentSelectedSource != null)
         currentSelectedSource.dispose();
     }
+    
     selectedJSVPanel = null;
     currentSelectedSource = null;
     System.gc();

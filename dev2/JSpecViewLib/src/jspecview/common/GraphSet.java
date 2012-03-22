@@ -14,6 +14,59 @@ import jspecview.util.Parser;
 
 abstract class GraphSet {
 
+  abstract void addHighlight(double x1, double x2, Graph spec, Object oColor);
+  abstract protected void disposeImage();
+  abstract protected void draw2DImage(Object g);
+  abstract protected void drawHandle(Object g, int x, int y);
+  abstract protected void drawHighlights(Object g, Graph spec);
+  abstract protected void drawLine(Object g, int x0, int y0, int x1, int y1);
+  abstract protected void drawRect(Object g, int xPixel02, int yPixel02,
+                                   int xPixels2, int yPixels2);
+  abstract protected void drawString(Object g, String s, int x, int y);
+  abstract protected void drawTitle(Object g, int height, int width,
+                                    String title);
+  abstract protected void fillBox(Object g, int x0, int y0, int x1, int y1,
+                                  ScriptToken whatColor);
+  abstract Annotation getAnnotation(double x, double y, String text,
+                                    boolean isPixels, boolean is2D,
+                                    int offsetX, int offsetY);
+  abstract Annotation getAnnotation(List<String> args, Annotation lastAnnotation);
+  abstract protected boolean get2DImage();
+  abstract protected String getCoordString();
+  abstract protected int getFontHeight(Object g);
+  abstract protected NumberFormat getFormatter(String hash);
+  abstract protected GraphSet getGraphSet(Object jsvp);
+  abstract protected String getInput(String message, String title, String sval);
+  abstract protected PlotWidget getThisWidget();
+  abstract protected int getStringWidth(Object g, String s);
+  abstract protected boolean isCurrentGraphSet();
+  abstract protected boolean isIntegralDrag();
+  abstract protected void notifyPeakPickedListeners();
+  abstract protected void notifyPeakListeners(PeakInfo peak);
+  abstract protected void notifySubSpectrumChange(int i, JDXSpectrum spectrum);
+  abstract void refresh();
+  abstract void removeAllHighlights(Graph graph);
+  abstract void removeHighlight(int index);
+  abstract void removeHighlight(double x1, double x2);
+  abstract void repaint();
+  abstract protected void setAnnotationColor(Object g, Annotation note, ScriptToken whatColor);
+  abstract protected void setColor(Object g, ScriptToken plotcolor);
+  abstract protected Coordinate setCoordClicked(double x, double y);
+  abstract protected void setCoordStr(String string);
+  abstract protected void setCurrentBoxColor(Object g);
+  abstract protected void setFont(Object g, int width, int face, int size,
+                                  boolean b);
+  abstract protected void setIntegralDrag(boolean b);
+  abstract protected void setPlotColor(Object g, int i);
+  abstract void setPlotColors(Object oColors);
+  abstract void setPlotColor0(Object oColor);
+  abstract protected boolean setStartupPinTip();  
+  abstract protected void setThisWidget(PlotWidget widget);
+  abstract protected void setToolTipText(String s);
+  abstract boolean update2dImage(boolean b);
+
+
+
   protected List<Graph> spectra = new ArrayList<Graph>(2);
 
   int getNumberOfSpectra() {
@@ -27,6 +80,25 @@ abstract class GraphSet {
   protected Annotation lastAnnotation;
   protected JDXSource source;
   protected ImageScaleData isd;
+  private List<Graph> graphsTemp = new ArrayList<Graph>();
+  protected PlotWidget[] widgets;
+
+
+  void dispose() {
+    for (int i = 0; i < spectra.size(); i++)
+      spectra.get(i).dispose();
+    spectra = null;
+    multiScaleData = null;
+    zoomInfoList = null;
+    integrationRatios = null;
+    annotations = null;
+    lastAnnotation = null;
+    source = null;
+    isd = null;
+    graphsTemp = null;
+    widgets = null;
+    disposeImage();
+  }
 
   protected double fracX = 1, fracY = 1, fX0 = 0, fY0 = 0; // take up full screen
 
@@ -39,7 +111,6 @@ abstract class GraphSet {
       cur2Dx0, cur2Dx1, // 2D x cursors -- derived from pin1Dx0 and pin1Dx1 values
       cur2Dy; // 2D y cursor -- points to currently displayed 1D slice
 
-  protected PlotWidget[] widgets;
 
   // for the 1D plot area:
   protected int xPixel0, yPixel0, xPixel1, yPixel1;
@@ -65,8 +136,6 @@ abstract class GraphSet {
   protected double xFactorForScale, yFactorForScale;
   protected double minYScale;
   protected double widthRatio;
-
-  protected List<Graph> graphsTemp = new ArrayList<Graph>();
 
   PeakInfo findPeak(String filePath, String index) {
     // for now we are only checking the base spectrum, but
@@ -155,8 +224,6 @@ abstract class GraphSet {
   protected boolean hasPoint(int xPixel, int yPixel) {
     return (xPixel >= xPixel00 && xPixel <= xPixel11 && yPixel >= yPixel00 && yPixel <= yPixel11);
   }
-
-  abstract protected GraphSet getGraphSet(Object jsvp);
 
   /**
    * Initializes the graph set
@@ -349,13 +416,7 @@ abstract class GraphSet {
     return spectraInfo;
   }
 
-  abstract void setPlotColors(Object oColors);
 
-  abstract void setPlotColor0(Object oColor);
-
-  abstract Annotation getAnnotation(double x, double y, String text,
-                                    boolean isPixels, boolean is2D,
-                                    int offsetX, int offsetY);
 
   String addAnnotation(List<String> args, String title) {
     if (args.size() == 0 || args.size() == 1
@@ -383,7 +444,6 @@ abstract class GraphSet {
     return null;
   }
 
-  abstract Annotation getAnnotation(List<String> args, Annotation lastAnnotation);
 
   protected Annotation findAnnotation2D(Coordinate xy) {
     for (int i = annotations.size(); --i >= 0;) {
@@ -417,14 +477,6 @@ abstract class GraphSet {
   void setIntegrationRatios(ArrayList<Annotation> ratios) {
     integrationRatios = ratios;
   }
-
-  abstract void addHighlight(double x1, double x2, Graph spec, Object oColor);
-
-  abstract void removeHighlight(int index);
-
-  abstract void removeHighlight(double x1, double x2);
-
-  abstract void removeAllHighlights(Graph graph);
 
   /**
    * 
@@ -481,22 +533,11 @@ abstract class GraphSet {
         && iThisSpectrum == i - 1);
   }
 
-  abstract protected boolean get2DImage();
-
   protected void setImageWindow(boolean display1D) {
     isd.setPixelWidthHeight((int) ((display1D ? 0.6 : 1) * xPixels), yPixels);
     widthRatio = (display1D ? 1.0 * (xPixels - isd.xPixels) / xPixels : 1);
     isd.setXY0((int) Math.floor(xPixel1 - isd.xPixels), yPixel0);
   }
-
-  void dispose() {
-    spectra = null;
-    zoomInfoList = null;
-    isd = null;
-    disposeImage();
-  }
-
-  abstract protected void disposeImage();
 
   void mouseClickEvent(int xPixel, int yPixel, int clickCount,
                        boolean isControlDown) {
@@ -558,12 +599,6 @@ abstract class GraphSet {
     notifyPeakPickedListeners();
   }
 
-  abstract protected void notifyPeakPickedListeners();
-
-  abstract protected Coordinate setCoordClicked(double x, double y);
-
-  abstract protected String getCoordString();
-
   void mouseReleasedEvent() {
     PlotWidget thisWidget = getThisWidget();
     if (isIntegralDrag()) {
@@ -593,12 +628,6 @@ abstract class GraphSet {
       addCurrentZoom();
     }
   }
-
-  abstract protected PlotWidget getThisWidget();
-
-  abstract protected boolean isIntegralDrag();
-
-  abstract protected void setIntegralDrag(boolean b);
 
   private static final int MIN_DRAG_PIXELS = 5;// fewer than this means no zoom or reset
 
@@ -747,8 +776,6 @@ abstract class GraphSet {
     return false;
   }
 
-  abstract protected void setThisWidget(PlotWidget widget);
-
   private void setWidgetValueByUser(PlotWidget pw) {
     String sval;
     if (pw == cur2Dy)
@@ -821,8 +848,6 @@ abstract class GraphSet {
     }
   }
 
-  abstract protected String getInput(String message, String title, String sval);
-
   void processPeakSelect(PeakInfo peakInfo) {
     for (int i = spectra.size(); --i >= 0;) {
       Graph spec = spectra.get(i);
@@ -884,8 +909,6 @@ abstract class GraphSet {
     setCoordClicked(peak.getX(), 0);
     notifyPeakListeners(peak);
   }
-
-  abstract protected void notifyPeakListeners(PeakInfo peak);
 
   void escape() {
     setThisWidget(null);
@@ -1169,7 +1192,6 @@ abstract class GraphSet {
     notifySubSpectrumChange(i, getSpectrum());
   }
 
-  abstract protected void notifySubSpectrumChange(int i, JDXSpectrum spectrum);
 
   void scaleYBy(double factor) {
     if (!allowYScale)
@@ -1189,10 +1211,6 @@ abstract class GraphSet {
     doZoom(multiScaleData.minX, multiScaleData.minY / factor1,
         multiScaleData.maxX, multiScaleData.maxY / factor2, true, true, false);
   }
-
-  abstract void repaint();
-
-  abstract boolean update2dImage(boolean b);
 
   protected void addCurrentZoom() {
     // add to and clean the zoom list
@@ -1217,8 +1235,6 @@ abstract class GraphSet {
     resetPinsFromMultiScaleData();
     refresh();
   }
-
-  abstract void refresh();
 
   /**
    * Clears all views in the zoom list
@@ -1295,10 +1311,6 @@ abstract class GraphSet {
       drawAnnotations(g, height, width, annotations, null);
   }
 
-  abstract protected void draw2DImage(Object g);
-
-  abstract protected void drawTitle(Object g, int height, int width,
-                                    String title);
 
   private void draw2DUnits(Object g, int width, int subIndex, JDXSpectrum spec0) {
     if (subIndex >= 0 && isd != null) {
@@ -1308,16 +1320,12 @@ abstract class GraphSet {
     }
   }
 
-  abstract protected void setColor(Object g, ScriptToken plotcolor);
-
   private void drawHighlights(Object g) {
     if (iThisSpectrum == Integer.MAX_VALUE)
       return;
     Graph spec = spectra.get(Math.max(iThisSpectrum, 0));
     drawHighlights(g, spec);
   }
-
-  abstract protected void drawHighlights(Object g, Graph spec);
 
   private void drawPeakTabs(Object g) {
     if (iThisSpectrum == Integer.MAX_VALUE)
@@ -1397,13 +1405,6 @@ abstract class GraphSet {
           ScriptToken.ZOOMBOXCOLOR);
     }
   }
-
-  abstract protected void drawLine(Object g, int x0, int y0, int x1, int y1);
-
-  abstract protected void fillBox(Object g, int x0, int y0, int x1, int y1,
-                                  ScriptToken whatColor);
-
-  abstract protected void drawHandle(Object g, int x, int y);
 
   /**
    * draw a bar, but not necessarily full height
@@ -1505,8 +1506,6 @@ abstract class GraphSet {
     }
   }
 
-  abstract protected void setPlotColor(Object g, int i);
-
   /**
    * 
    * @param g
@@ -1524,13 +1523,6 @@ abstract class GraphSet {
           yPixel11 - yPixel00 - 2);
     }
   }
-
-  abstract protected boolean isCurrentGraphSet();
-
-  abstract protected void setCurrentBoxColor(Object g);
-
-  abstract protected void drawRect(Object g, int xPixel02, int yPixel02,
-                                   int xPixels2, int yPixels2);
 
   /**
    * Draws the grid on the Panel
@@ -1594,15 +1586,6 @@ abstract class GraphSet {
     }
   }
 
-  abstract protected NumberFormat getFormatter(String hash);
-
-  abstract protected void drawString(Object g, String s, int x, int y);
-
-  abstract protected int getFontHeight(Object g);
-
-  abstract protected void setFont(Object g, int width, int face, int size,
-                                  boolean b);
-
   /**
    * Draws the x Scale
    * 
@@ -1653,8 +1636,6 @@ abstract class GraphSet {
       }
     }
   }
-
-  abstract protected int getStringWidth(Object g, String s);
 
   /**
    * Draws the y Scale
@@ -1740,8 +1721,6 @@ abstract class GraphSet {
       drawString(g, note.getText(), x + note.offsetX, y - note.offsetY);
     }
   }
-
-  abstract protected void setAnnotationColor(Object g, Annotation note, ScriptToken whatColor);
 
   PlotWidget getPinSelected(int xPixel, int yPixel) {
     if (widgets != null)
@@ -1871,13 +1850,6 @@ abstract class GraphSet {
     }
     setToolTipText(Double.isNaN(yPt) ? null : xx);
   }
-
-  abstract protected void setCoordStr(String string);
-
-  abstract protected void setToolTipText(String s);
-
-  abstract protected boolean setStartupPinTip();
-  
   
   private String get2DYLabel(int isub, NumberFormat formatterX) {
     JDXSpectrum spec = getSpectrumAt(0).getSubSpectra().get(isub);
@@ -1899,8 +1871,6 @@ abstract class GraphSet {
     String Yunits = spectrum.getYUnits();
     return Visible.Colour(spectrum.getXYCoords(), Yunits);
   }
-
-  abstract void removeAllHighlights();
 
   static boolean getPickedCoordinates(Coordinate[] coordsClicked,
                                              Coordinate coordClicked,
@@ -1929,5 +1899,10 @@ abstract class GraphSet {
       }
     return null;
   }
-
+  public boolean hasFileLoaded(String filePath) {
+    for (int i = spectra.size(); --i >= 0;)
+      if (spectra.get(i).getFilePathForwardSlash().equals(filePath))
+        return true;
+    return false;
+  }
 }

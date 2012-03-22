@@ -48,6 +48,12 @@ public class IntegralGraph implements Graph {
   private List<Integral> integrals;
   private Graph sourceGraph;
 
+  public void dispose() {
+    integrals = null;
+    sourceGraph = null;
+  }
+
+
   public String getFilePath() {
     return sourceGraph.getFilePath();
   }
