@@ -45,7 +45,7 @@ public class Parameters extends DisplayScheme {
   public double integralFactor = IntegralGraph.DEFAULT_FACTOR;
   public double integralOffset = IntegralGraph.DEFAULT_OFFSET;
 
-  public void setFor(JSVPanel jsvp, DisplayScheme ds, boolean includeMeasures) {
+  public void setFor(AwtPanel jsvp, DisplayScheme ds, boolean includeMeasures) {
 
     if (ds == null)
       ds = this;
@@ -62,7 +62,7 @@ public class Parameters extends DisplayScheme {
     jsvp.setColorOrFont(ds, null);
  }
 
-  public void set(JSVPanel jsvp, ScriptToken st, String value) {
+  public void set(AwtPanel jsvp, ScriptToken st, String value) {
     Object param = null;
     List<String> tokens;
     switch (st) {

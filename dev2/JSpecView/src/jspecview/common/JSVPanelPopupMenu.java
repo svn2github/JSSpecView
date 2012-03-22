@@ -41,7 +41,7 @@ import jspecview.common.JDXSpectrum;
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
- * @see jspecview.common.JSVPanel
+ * @see jspecview.common.AwtPanel
  */
 public class JSVPanelPopupMenu extends JPopupMenu {
 
@@ -52,22 +52,22 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   /**
    * Menu Item that allows user to navigate to the next view of a JSVPanel
    * that has been zoomed
-   * @see jspecview.common.JSVPanel#nextView()
+   * @see jspecview.common.AwtPanel#nextView()
    */
   public JMenuItem nextMenuItem = new JMenuItem();
   /**
    * Menu Item for navigating to previous view
-   * @see jspecview.common.JSVPanel#previousView()
+   * @see jspecview.common.AwtPanel#previousView()
    */
   public JMenuItem previousMenuItem = new JMenuItem();
   /**
    * Allows for all view to be cleared
-   * @see jspecview.common.JSVPanel#clearViews()
+   * @see jspecview.common.AwtPanel#clearViews()
    */
   public JMenuItem clearMenuItem = new JMenuItem();
   /**
    * Allows for the JSVPanel to be reset to it's original display
-   * @see jspecview.common.JSVPanel#reset()
+   * @see jspecview.common.AwtPanel#reset()
    */
   public JMenuItem resetMenuItem = new JMenuItem();
   /**
@@ -297,7 +297,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
         JOptionPane.PLAIN_MESSAGE);
   }
 
-  protected JSVPanel jsvp;
+  protected AwtPanel jsvp;
 
   /**
    * Allows the grid to be toogled
@@ -398,12 +398,12 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   }
 
 
-  public void show(JSVPanel jsvp, int x, int y) {
+  public void show(AwtPanel jsvp, int x, int y) {
     setEnables(jsvp);
     super.show(jsvp, x, y);
   }
 
-  public void setEnables(JSVPanel jsvp) {
+  public void setEnables(AwtPanel jsvp) {
     this.jsvp = jsvp;
     JDXSpectrum spec0 = jsvp.getSpectrumAt(0);
     gridCheckBoxMenuItem.setSelected(jsvp.isGridOn());

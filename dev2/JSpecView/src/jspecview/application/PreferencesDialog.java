@@ -58,7 +58,7 @@ import javax.swing.event.ListSelectionListener;
 
 import jspecview.common.AppUtils;
 import jspecview.common.DisplayScheme;
-import jspecview.common.JSVPanel;
+import jspecview.common.AwtPanel;
 import jspecview.common.ScriptToken;
 import jspecview.exception.JSpecViewException;
 import jspecview.source.FileReader;
@@ -156,7 +156,7 @@ public class PreferencesDialog extends JDialog {
 
   DisplayScheme currentDS = new DisplayScheme("Current");
   private DisplaySchemesProcessor dsp;
-  private JSVPanel previewPanel = null;
+  private AwtPanel previewPanel = null;
   private String defaultDSName = "";
   private JLabel jLabel8 = new JLabel();
   private JLabel jLabel9 = new JLabel();
@@ -656,7 +656,7 @@ public class PreferencesDialog extends JDialog {
       JDXSource source = FileReader.createJDXSource(getClass()
           .getResourceAsStream("resources/sample.jdx"), false);
 
-      previewPanel = new JSVPanel(source.getSpectra().get(0), null);
+      previewPanel = new AwtPanel(source.getSpectra().get(0), null);
       AppUtils.setBoolean(previewPanel, null, ScriptToken.ENABLEZOOM, false);
       AppUtils.setBoolean(previewPanel, null, ScriptToken.GRIDON, true);
       AppUtils.setBoolean(previewPanel, null, ScriptToken.COORDINATESON, true);

@@ -74,7 +74,7 @@ import javax.swing.event.ChangeListener;
 
 import jspecview.common.AppUtils;
 import jspecview.common.IntegralGraph;
-import jspecview.common.JSVPanel;
+import jspecview.common.AwtPanel;
 import jspecview.common.OverlayLegendDialog;
 import jspecview.common.Parameters;
 import jspecview.common.PanelListener;
@@ -156,14 +156,14 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
   private JFrame offWindowFrame;
   private JPanel appletPanel;
   private JSVAppletPopupMenu appletPopupMenu;  
-  private List<JSVPanel> jsvPanels;
+  private List<AwtPanel> jsvPanels;
   private List<JDXSpectrum> specs;
-  private List<JSVPanel> jsvPanelsSaved;
+  private List<AwtPanel> jsvPanelsSaved;
   private List<JDXSpectrum> specsSaved;
   private int currentSpectrumIndex;
   private String recentFileName = "";
   private String recentURL = "";
-  private JSVPanel selectedJSVPanel;
+  private AwtPanel selectedJSVPanel;
   private JDXSource currentSource;
   private boolean isOverlaid;
 
@@ -171,7 +171,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     return isSignedApplet;
   }
   
-  public JSVPanel getSelectedPanel() {
+  public AwtPanel getSelectedPanel() {
     return selectedJSVPanel;
   }
   
@@ -251,7 +251,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
   public void setSolutionColor(boolean showMessage) {
     sltnclr = getSelectedPanel().getSolutionColor();
     if (showMessage)
-      JSVPanel.showSolutionColor((Component)this, sltnclr);
+      AwtPanel.showSolutionColor((Component)this, sltnclr);
   }
 
   /**
@@ -305,7 +305,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
   public String export(String type, int n) {
     if (type == null)
       type = "XY";
-    JSVPanel jsvp = getSelectedPanel();
+    AwtPanel jsvp = getSelectedPanel();
     if (n < -1 || jsvp.getNumberOfSpectraInCurrentSet() <= n)
       return "only " + jsvp.getNumberOfSpectraInCurrentSet()
           + " spectra available.";
@@ -339,7 +339,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
    * toggles the grid on a <code>JSVPanel</code>
    */
   public void toggleGrid() {
-    JSVPanel jsvp = getSelectedPanel();
+    AwtPanel jsvp = getSelectedPanel();
     if (jsvp == null)
       return;
     AppUtils.setBoolean(jsvp, tempParams, ScriptToken.GRIDON, !jsvp.isGridOn());
@@ -351,7 +351,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
    * toggles the coordinate on a <code>JSVPanel</code>
    */
   public void toggleCoordinate() {
-    JSVPanel jsvp = getSelectedPanel();
+    AwtPanel jsvp = getSelectedPanel();
     if (jsvp == null)
       return;
     AppUtils.setBoolean(jsvp, tempParams, ScriptToken.COORDINATESON, 
@@ -386,7 +386,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
    *        the alpha portion of the highlight color
    */
   public void addHighlight(double x1, double x2, int r, int g, int b, int a) {
-    JSVPanel jsvp = getSelectedPanel();
+    AwtPanel jsvp = getSelectedPanel();
     if (jsvp != null) {
       Color color = new Color(r, g, b, a);
       jsvp.addHighlight(x1, x2, color);
@@ -399,7 +399,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
    * removes all highlights from the plot area of a <code>JSVPanel</code>
    */
   public void removeAllHighlights() {
-    JSVPanel jsvp = getSelectedPanel();
+    AwtPanel jsvp = getSelectedPanel();
     if (jsvp != null) {
       jsvp.removeAllHighlights();
       repaint();
@@ -416,7 +416,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
    *        the ending x value
    */
   public void removeHighlight(double x1, double x2) {
-    JSVPanel jsvp = getSelectedPanel();
+    AwtPanel jsvp = getSelectedPanel();
     if (jsvp != null) {
       jsvp.removeHighlight(x1, x2);
       repaint();
@@ -428,7 +428,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
    * toggles reversing the plot on a <code>JSVPanel</code>
    */
   public void reversePlot() {
-    JSVPanel jsvp = getSelectedPanel();
+    AwtPanel jsvp = getSelectedPanel();
     if (jsvp != null) {
       jsvp.setReversePlot(!jsvp.isPlotReversed());
       repaint();
@@ -553,7 +553,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
    * @throws JSpecViewException
    */
   private void initPanels() throws JSpecViewException {
-    JSVPanel jsvp;
+    AwtPanel jsvp;
 
     // Initialise JSVpanels
 
@@ -561,10 +561,10 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
       theInterface = "single";
       isOverlaid = false;
     }
-    jsvPanels = new ArrayList<JSVPanel>();
+    jsvPanels = new ArrayList<AwtPanel>();
     if (isOverlaid) {
       // overlay all spectra on a panel
-      jsvp = JSVPanel.getJSVPanel(specs, startIndex, endIndex, appletPopupMenu);
+      jsvp = AwtPanel.getJSVPanel(specs, startIndex, endIndex, appletPopupMenu);
       endIndex = startIndex = -1;
       initProperties(jsvp, -1);
     } else {
@@ -573,11 +573,11 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
         for (int i = 0; i < numberOfSpectra; i++) {
           JDXSpectrum spec = specs.get(i);
           if (spec.getIntegrationGraph() != null) {
-            jsvp = JSVPanel.getIntegralPanel(spec, null, appletPopupMenu);
+            jsvp = AwtPanel.getIntegralPanel(spec, null, appletPopupMenu);
           } else {
             List<JDXSpectrum> list = new ArrayList<JDXSpectrum>();
             list.add(spec);
-            jsvp = JSVPanel.getJSVPanel(list, startIndex, endIndex, appletPopupMenu);
+            jsvp = AwtPanel.getJSVPanel(list, startIndex, endIndex, appletPopupMenu);
           }
           jsvPanels.add(jsvp);
           initProperties(jsvp, i);
@@ -588,7 +588,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     }
   }
 
-  private void initProperties(JSVPanel jsvp, int oldIndex) {
+  private void initProperties(AwtPanel jsvp, int oldIndex) {
     if (oldIndex < 0) {
       jsvPanels.add(jsvp);
     } else {
@@ -633,10 +633,10 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
       if (showSpectrumNumber) {
         tabbedDisplayPane.setSelectedIndex(spectrumNumber - 1);
       }
-      setSelectedPanel((JSVPanel) tabbedDisplayPane.getSelectedComponent());
+      setSelectedPanel((AwtPanel) tabbedDisplayPane.getSelectedComponent());
       tabbedDisplayPane.addChangeListener(new ChangeListener() {
         public void stateChanged(ChangeEvent e) {
-          setSelectedPanel((JSVPanel) tabbedDisplayPane.getSelectedComponent());
+          setSelectedPanel((AwtPanel) tabbedDisplayPane.getSelectedComponent());
         }
       });
     } else if (theInterface.equals("tile") && canDoTile) {
@@ -714,7 +714,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
    *        the index
    */
   private void showSpectrum(int index) {
-    JSVPanel jsvp = jsvPanels.get(index);
+    AwtPanel jsvp = jsvPanels.get(index);
     if (jsvp != selectedJSVPanel)
       setSelectedPanel(jsvp);
     addPanelToFrame();
@@ -754,7 +754,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
       return;
     }
 
-    JSVPanel jsvp = selectedJSVPanel;
+    AwtPanel jsvp = selectedJSVPanel;
 
     PrintLayoutDialog ppd = new PrintLayoutDialog(offWindowFrame);
     PrintLayoutDialog.PrintLayout pl = ppd.getPrintLayout();
@@ -849,7 +849,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     if (msTrigger > 0 && time - msTrigger < 100)
       return;
     msTrigger = time;
-    JSVPanel jsvp = JSVPanel.taConvert(getCurrentPanel(), comm);
+    AwtPanel jsvp = AwtPanel.taConvert(getCurrentPanel(), comm);
     if (jsvp == null)
       return;
     initProperties(jsvp, currentSpectrumIndex);
@@ -861,8 +861,8 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
 
   }
 
-  private JSVPanel getCurrentPanel() {
-    return (JSVPanel) appletPanel.getComponent(0);
+  private AwtPanel getCurrentPanel() {
+    return (AwtPanel) appletPanel.getComponent(0);
   }
 
   /**
@@ -870,8 +870,8 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
    * 
    */
   private void integrate(String value) {
-    JSVPanel jsvp = getCurrentPanel();
-    JSVPanel jsvpNew = AppUtils.checkIntegral(jsvp, appletPanel,
+    AwtPanel jsvp = getCurrentPanel();
+    AwtPanel jsvpNew = AppUtils.checkIntegral(jsvp, appletPanel,
         parameters, value);
     if (jsvp == jsvpNew) {
       integrationRatios = null;
@@ -935,7 +935,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
    *        An array of components to tile
    * @return a <code>JSplitPane</code> with components tiled
    */
-  private JSplitPane createSplitPane(List<JSVPanel> comps) {
+  private JSplitPane createSplitPane(List<AwtPanel> comps) {
     ComponentListPair pair = createPair(comps);
     return createSplitPaneAux(pair);
   }
@@ -982,11 +982,11 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
    *        an array of components
    * @return a <code>ComponentListPair</code>
    */
-  private ComponentListPair createPair(List<JSVPanel> comps) {
+  private ComponentListPair createPair(List<AwtPanel> comps) {
     int numBottom = (int) (comps.size() / 2);
     int numTop = numBottom + (comps.size() % 2);
-    List<JSVPanel> top = new ArrayList<JSVPanel>();
-    List<JSVPanel> bottom = new ArrayList<JSVPanel>();
+    List<AwtPanel> top = new ArrayList<AwtPanel>();
+    List<AwtPanel> bottom = new ArrayList<AwtPanel>();
     int i;
     for (i = 0; i < numTop; i++)
       top.add(comps.get(i));
@@ -1001,10 +1001,10 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
    */
   private class ComponentListPair {
     
-    List<JSVPanel> top; 
-    List<JSVPanel> bottom;
+    List<AwtPanel> top; 
+    List<AwtPanel> bottom;
 
-    public ComponentListPair(List<JSVPanel> top, List<JSVPanel> bottom) {
+    public ComponentListPair(List<AwtPanel> top, List<AwtPanel> bottom) {
       this.top = top;
       this.bottom = bottom;
     }
@@ -1244,7 +1244,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     if (Logger.debugging)
       Logger.info("RUNSCRIPT " + params);
     StringTokenizer allParamTokens = new StringTokenizer(params, ";");
-    JSVPanel jsvp = selectedJSVPanel;
+    AwtPanel jsvp = selectedJSVPanel;
     while (allParamTokens.hasMoreTokens()) {
       String token = allParamTokens.nextToken().trim();
       // now split the key/value pair
@@ -1489,7 +1489,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
           Integer.valueOf(currentSpectrumIndex + 1) });
   }
 
-  private void setSelectedPanel(JSVPanel jsvp) {
+  private void setSelectedPanel(AwtPanel jsvp) {
     if (jsvp != selectedJSVPanel) {
       if (selectedJSVPanel != null) {
         appletPanel.remove(selectedJSVPanel);
@@ -1507,8 +1507,8 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     jsvp.setEnabled(true);
   }
 
-  JSVPanel prevPanel = null;
-  private void sendFrameChange(JSVPanel jsvp) {
+  AwtPanel prevPanel = null;
+  private void sendFrameChange(AwtPanel jsvp) {
     if (jsvp == prevPanel)
       return;
     prevPanel = jsvp;
@@ -1544,7 +1544,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     if (eventObj instanceof PeakPickEvent) {
       PeakPickEvent e = (PeakPickEvent) eventObj;
       PeakInfo pi = e.getPeakInfo();
-      setSelectedPanel((JSVPanel) e.getSource());
+      setSelectedPanel((AwtPanel) e.getSource());
       System.out.println("panelEvent sending to selected panel; " + pi);
       selectedJSVPanel.processPeakSelect(pi);
       sendScript(pi.toString());
@@ -1573,7 +1573,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
       key = null;
     List<Map<String, Object>> info = new ArrayList<Map<String, Object>>();
     for (int i = 0; i < jsvPanels.size(); i++) {
-      JSVPanel jsvp = jsvPanels.get(i);
+      AwtPanel jsvp = jsvPanels.get(i);
       if (jsvp == null)
         continue;
       info.add(jsvp.getInfo(true, key));

@@ -124,7 +124,7 @@ import jspecview.common.AppUtils;
 import jspecview.common.CommandHistory;
 import jspecview.common.DisplayScheme;
 import jspecview.common.JSVFrame;
-import jspecview.common.JSVPanel;
+import jspecview.common.AwtPanel;
 import jspecview.common.JSVPanelPopupMenu;
 import jspecview.common.JSpecViewFileFilter;
 import jspecview.common.OverlayLegendDialog;
@@ -209,9 +209,9 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
   //   ----------------------------------------------------------------------
 
-  private JSVPanel selectedJSVPanel;
+  private AwtPanel selectedJSVPanel;
 
-  public JSVPanel getSelectedPanel() {
+  public AwtPanel getSelectedPanel() {
     return selectedJSVPanel;
   }
 
@@ -400,7 +400,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     toolbarCheckBoxMenuItem.setSelected(toolbarOn);
     statusCheckBoxMenuItem.setSelected(statusbarOn);
 
-    JSVPanel jsvp = getCurrentJSVPanel();
+    AwtPanel jsvp = getCurrentJSVPanel();
     if (jsvp != null) {
       gridCheckBoxMenuItem.setSelected(jsvp.isGridOn());
       gridToggleButton.setSelected(jsvp.isGridOn());
@@ -698,7 +698,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     displayMenu.setText("Display");
     displayMenu.addMenuListener(new MenuListener() {
       public void menuSelected(MenuEvent e) {
-        JSVPanel jsvp = getCurrentJSVPanel();
+        AwtPanel jsvp = getCurrentJSVPanel();
         if (jsvp == null)
           return;
         gridCheckBoxMenuItem.setSelected(jsvp.isGridOn());
@@ -1389,7 +1389,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    * @param jsvp
    *        the display panel
    */
-  public void setJSVPanelProperties(JSVPanel jsvp, boolean includeMeasures) {
+  public void setJSVPanelProperties(AwtPanel jsvp, boolean includeMeasures) {
 
     DisplayScheme ds = dsp.getDisplaySchemes().get(defaultDisplaySchemeName);
     jsvp.addListener(this);
@@ -1409,7 +1409,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     overlayAllMenuItem.setSelected(true);
     splitMenuItem.setSelected(false);
     List<JDXSpectrum> specs = source.getSpectra();
-    JSVPanel jsvp = JSVPanel.getJSVPanel(specs, 0, 0, jsvpPopupMenu);
+    AwtPanel jsvp = AwtPanel.getJSVPanel(specs, 0, 0, jsvpPopupMenu);
     jsvp.setTitle(source.getTitle());
 
     setJSVPanelProperties(jsvp, true);
@@ -1456,8 +1456,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
     JSVFrame[] frames = new JSVFrame[specs.size()];
     for (int i = 0; i < specs.size(); i++) {
       JDXSpectrum spec = specs.get(i);
-      JSVPanel jsvp = (spec.getIntegrationGraph() == null ? new JSVPanel(spec,
-          jsvpPopupMenu) : JSVPanel.getIntegralPanel(spec, null, jsvpPopupMenu));
+      AwtPanel jsvp = (spec.getIntegrationGraph() == null ? new AwtPanel(spec,
+          jsvpPopupMenu) : AwtPanel.getIntegralPanel(spec, null, jsvpPopupMenu));
       setJSVPanelProperties(jsvp, true);
       JSVFrame frame = new JSVFrame(spec.getTitleLabel());
       frame.setFrameIcon(frameIcon);
@@ -1492,7 +1492,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    */
   protected void integrate(String value) {
     JSVTreeNode node = findNode(selectedJSVPanel);
-    JSVPanel jsvpNew = AppUtils.checkIntegral(selectedJSVPanel, node.frame,
+    AwtPanel jsvpNew = AppUtils.checkIntegral(selectedJSVPanel, node.frame,
         parameters, value);
     //if (integrationRatios != null)   applet only?
     //newJsvp.setIntegrationRatios(integrationRatios);
@@ -1509,7 +1509,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
   private void setSolutionColor(boolean showMessage) {
     sltnclr = selectedJSVPanel.getSolutionColor();
     if (showMessage)
-      JSVPanel.showSolutionColor((Component) this, sltnclr);
+      AwtPanel.showSolutionColor((Component) this, sltnclr);
   }
 
   /**
@@ -1522,11 +1522,11 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the conversion command
    */
   private void taConvert(JSVFrame frame, int comm) {
-    JSVPanel jsvp = getCurrentJSVPanel();
+    AwtPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
     JSVTreeNode node = findNode(jsvp);
-    node.jsvp = selectedJSVPanel = JSVPanel.taConvert(jsvp, comm);
+    node.jsvp = selectedJSVPanel = AwtPanel.taConvert(jsvp, comm);
     setJSVPanelProperties(node.jsvp, true);
     // Get from properties variable
     Container contentPane = (frame = node.frame).getContentPane();
@@ -1644,7 +1644,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
 
     fileCount++;
     for (int i = 0; i < frames.length; i++) {
-      JSVPanel jsvp = getPanel0(frames[i]);
+      AwtPanel jsvp = getPanel0(frames[i]);
       JSVTreeNode specNode = new JSVTreeNode(fileName, source, frames[i], jsvp,
           fileCount + "." + (i + 1));
       specNodes.add(specNode);
@@ -1700,7 +1700,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the JSVFrame
    * @return the tree node that is associated with a panel
    */
-  private JSVTreeNode findNode(JSVPanel jsvp) {
+  private JSVTreeNode findNode(AwtPanel jsvp) {
     for (int i = specNodes.size(); --i >= 0;)
       if (specNodes.get(i).jsvp == jsvp)
         return specNodes.get(i);
@@ -1750,7 +1750,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       setMenuEnables(null);
   }
 
-  private JSVPanel getCurrentJSVPanel() {
+  private AwtPanel getCurrentJSVPanel() {
     JSVFrame frame = (JSVFrame) desktopPane.getSelectedFrame();
     return (frame == null ? selectedJSVPanel : getPanel0(frame));
   }
@@ -1952,7 +1952,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     String msg = null;
     Logger.debug("runScriptNow: " + script);
     StringTokenizer allParamTokens = new StringTokenizer(script, ";");
-    JSVPanel jsvp = selectedJSVPanel;
+    AwtPanel jsvp = selectedJSVPanel;
     List<String> tokens;
     int pt;
     while (allParamTokens.hasMoreTokens()) {
@@ -2258,7 +2258,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     if (eventObj instanceof PeakPickEvent) {
       PeakPickEvent e = ((PeakPickEvent) eventObj);
       PeakInfo pi = e.getPeakInfo();
-      selectedJSVPanel = (JSVPanel) e.getSource();
+      selectedJSVPanel = (AwtPanel) e.getSource();
       selectedJSVPanel.processPeakSelect(pi);
       sendScript(e.toString());
       setMainTitle(pi.getTitle());
@@ -2279,7 +2279,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     desktopPane.getSelectedFrame().setTitle(title == null ?  t : t + " - " + title);
   }
 
-  private void sendFrameChange(JSVPanel jsvp) {
+  private void sendFrameChange(AwtPanel jsvp) {
     PeakInfo pi = jsvp.getSpectrum().getSelectedPeak();
     System.out.println("sendFrameChange1  " + pi);
     if (pi == null)
@@ -2308,7 +2308,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the ActionEvent
    */
   protected void printMenuItem_actionPerformed(ActionEvent e) {
-    JSVPanel jsvp = getCurrentJSVPanel();
+    AwtPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
 
@@ -2397,7 +2397,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the ItemEvent
    */
   void coordsCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-    JSVPanel jsvp = getCurrentJSVPanel();
+    AwtPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
 
@@ -2418,7 +2418,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the ItemEvent
    */
   void revPlotCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-    JSVPanel jsvp = getCurrentJSVPanel();
+    AwtPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
     jsvp.setReversePlot(e.getStateChange() == ItemEvent.SELECTED);
@@ -2432,7 +2432,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the ActionEvent
    */
   void nextMenuItem_actionPerformed(ActionEvent e) {
-    JSVPanel jsvp = getCurrentJSVPanel();
+    AwtPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
     jsvp.nextView();
@@ -2445,7 +2445,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the ActionEvent
    */
   void prevMenuItem_actionPerformed(ActionEvent e) {
-    JSVPanel jsvp = getCurrentJSVPanel();
+    AwtPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
     jsvp.previousView();
@@ -2458,7 +2458,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the ActionEvent
    */
   void fullMenuItem_actionPerformed(ActionEvent e) {
-    JSVPanel jsvp = getCurrentJSVPanel();
+    AwtPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
     jsvp.clearViews();
@@ -2471,7 +2471,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the ActionEvent
    */
   void clearMenuItem_actionPerformed(ActionEvent e) {
-    JSVPanel jsvp = getCurrentJSVPanel();
+    AwtPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
     jsvp.clearViews();
@@ -2485,7 +2485,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    */
   void exportSpectrum(String command) {
     final String type = command;
-    JSVPanel jsvp = getCurrentJSVPanel();
+    AwtPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
     if (fc == null)
@@ -2630,7 +2630,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the ActionEvent
    */
   protected void gridToggleButton_actionPerformed(ActionEvent e) {
-    JSVPanel jsvp = getCurrentJSVPanel();
+    AwtPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
     AppUtils.setBoolean(jsvp, tempParams, ScriptToken.GRIDON,
@@ -2645,14 +2645,14 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the the ActionEvent
    */
   protected void coordsToggleButton_actionPerformed(ActionEvent e) {
-    JSVPanel jsvp = getCurrentJSVPanel();
+    AwtPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
     setCoordinatesOn(jsvp, ((JToggleButton) e.getSource()).isSelected());
     repaint();
   }
 
-  private void setCoordinatesOn(JSVPanel jsvp, boolean selected) {
+  private void setCoordinatesOn(AwtPanel jsvp, boolean selected) {
     parameters.setBoolean(ScriptToken.COORDINATESON, selected);
     jsvp.setBoolean(parameters, ScriptToken.COORDINATESON);
   }
@@ -2664,7 +2664,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the ActionEvent
    */
   protected void revPlotToggleButton_actionPerformed(ActionEvent e) {
-    JSVPanel jsvp = getCurrentJSVPanel();
+    AwtPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
     jsvp.setReversePlot(((JToggleButton) e.getSource()).isSelected());
@@ -2796,7 +2796,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the ActionEvent
    */
   protected void overlayKeyMenuItem_actionPerformed(ActionEvent e) {
-    JSVPanel jsvp = getCurrentJSVPanel();
+    AwtPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
     overlayKeyMenuItem.setSelected(!overlayKeyMenuItem.isSelected());
@@ -2912,7 +2912,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    */
   protected void splitMenuItem_actionPerformed(ActionEvent e) {
     JDXSource source = currentSelectedSource;
-    JSVPanel jsvp = getCurrentJSVPanel();
+    AwtPanel jsvp = getCurrentJSVPanel();
     if (!source.isCompoundSource || jsvp == null
         || jsvp.getNumberOfGraphSets() == 1) {
       splitMenuItem.setSelected(false);
@@ -2931,7 +2931,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the ItemEvent
    */
   void gridCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-    JSVPanel jsvp = getCurrentJSVPanel();
+    AwtPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
     AppUtils.setBoolean(jsvp, tempParams, ScriptToken.GRIDON, e
@@ -2946,7 +2946,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the ItemEvent
    */
   void scaleXCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-    JSVPanel jsvp = getCurrentJSVPanel();
+    AwtPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
     boolean b = (e.getStateChange() == ItemEvent.SELECTED);
@@ -2962,7 +2962,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the ItemEvent
    */
   void scaleYCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-    JSVPanel jsvp = getCurrentJSVPanel();
+    AwtPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
     boolean b = (e.getStateChange() == ItemEvent.SELECTED);
@@ -2978,7 +2978,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
    *        the ActionEvent
    */
   protected void propertiesMenuItem_actionPerformed(ActionEvent e) {
-    JSVPanel jsvp = getCurrentJSVPanel();
+    AwtPanel jsvp = getCurrentJSVPanel();
     if (jsvp == null)
       return;
     jsvpPopupMenu.setEnables(jsvp);
@@ -2993,7 +2993,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     private JDXSource source;
     private String fileName;
     private JSVFrame frame;
-    private JSVPanel jsvp;
+    private AwtPanel jsvp;
     private String id;
     private Dialog legend;
 
@@ -3014,7 +3014,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     }
 
     private JSVTreeNode(String fileName, JDXSource source, JSVFrame frame,
-        JSVPanel jsvp, String id) {
+        AwtPanel jsvp, String id) {
       super(fileName);
       this.source = source;
       this.fileName = fileName;
@@ -3068,7 +3068,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       setCurrentSource(source);
 
       // Update the menu items for the display menu
-      JSVPanel jsvp = getPanel0(frame);
+      AwtPanel jsvp = getPanel0(frame);
       JDXSpectrum spec = jsvp.getSpectrum();
       gridCheckBoxMenuItem.setSelected(jsvp.isGridOn());
       gridToggleButton.setSelected(jsvp.isGridOn());
@@ -3173,8 +3173,8 @@ public class MainFrame extends JFrame implements DropTargetListener,
     selectedJSVPanel.requestFocusInWindow();
   }
 
-  static JSVPanel getPanel0(JSVFrame frame) {
-    return ((JSVPanel) frame.getContentPane().getComponent(0));
+  static AwtPanel getPanel0(JSVFrame frame) {
+    return ((AwtPanel) frame.getContentPane().getComponent(0));
   }
 
   public Map<String, Object> getProperty(String key) {
@@ -3182,7 +3182,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       key = null;
     List<Map<String, Object>> info = new ArrayList<Map<String, Object>>();
     for (int i = 0; i < specNodes.size(); i++) {
-      JSVPanel jsvp = specNodes.get(i).jsvp;
+      AwtPanel jsvp = specNodes.get(i).jsvp;
       if (jsvp == null)
         continue;
       info.add(jsvp.getInfo(jsvp == selectedJSVPanel, key));

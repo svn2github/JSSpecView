@@ -23,7 +23,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 import jspecview.common.JDXSpectrum;
-import jspecview.common.JSVPanel;
+import jspecview.common.AwtPanel;
 import jspecview.common.JSpecViewFileFilter;
 import jspecview.util.TextFormat;
 
@@ -85,7 +85,7 @@ public class Exporter {
     }
   }
 
-  public static String exportSpectra(JSVPanel panel, JFrame frame,
+  public static String exportSpectra(AwtPanel panel, JFrame frame,
                                      JFileChooser fc, String type,
                                      String recentFileName,
                                      String dirLastExported) {
@@ -124,7 +124,7 @@ public class Exporter {
     final String t = type;
     final String rfn = recentFileName;
     final JFileChooser f = fc;
-    final JSVPanel jsvp = panel;
+    final AwtPanel jsvp = panel;
     button.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         int index = cb.getSelectedIndex();
@@ -143,7 +143,7 @@ public class Exporter {
    * 
    * @return message for status line
    */
-  public static String exportCmd(JSVPanel jsvp, List<String> tokens, boolean forInkscape) {
+  public static String exportCmd(AwtPanel jsvp, List<String> tokens, boolean forInkscape) {
     // MainFrame or applet EXPORT command
     String mode = "XY";
     String fileName = null;
@@ -192,7 +192,7 @@ public class Exporter {
    * @param dirLastExported
    * @return dirLastExported
    */
-  private static String exportSpectrumOrImage(JSVPanel jsvp, String mode,
+  private static String exportSpectrumOrImage(AwtPanel jsvp, String mode,
                                int index, JFileChooser fc, String recentFileName,
                                String dirLastExported) {
     Type imode = Type.getType(mode);
@@ -238,7 +238,7 @@ public class Exporter {
     return dir;
   }
   
-  private static String exportSpectrumOrImage(JSVPanel jsvp, Type imode,
+  private static String exportSpectrumOrImage(AwtPanel jsvp, Type imode,
                                               int index, String path) {
     JDXSpectrum spec;
     if (index < 0) {

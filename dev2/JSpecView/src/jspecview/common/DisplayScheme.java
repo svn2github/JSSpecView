@@ -28,7 +28,7 @@ import java.util.Map;
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
- * @see jspecview.common.JSVPanel
+ * @see jspecview.common.AwtPanel
  */
 public class DisplayScheme {
 

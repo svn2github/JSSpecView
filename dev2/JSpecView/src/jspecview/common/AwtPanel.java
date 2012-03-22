@@ -85,7 +85,7 @@ import jspecview.util.TextFormat;
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-public class JSVPanel extends JPanel implements Printable, MouseListener,
+public class AwtPanel extends JPanel implements Printable, MouseListener,
     MouseMotionListener, KeyListener {
 
   private static final long serialVersionUID = 1L;
@@ -110,8 +110,8 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
 
   // Critical fields
 
-  private List<JSVGraphSet> graphSets;
-  JSVGraphSet currentGraphSet;
+  private List<AwtGraphSet> graphSets;
+  AwtGraphSet currentGraphSet;
   protected JSVPanelPopupMenu popup;
 
   public JSVPanelPopupMenu getPopup() {
@@ -368,7 +368,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    *        the spectrum
    * @throws ScalesIncompatibleException
    */
-  public JSVPanel(Graph spectrum, JSVPanelPopupMenu popup) {
+  public AwtPanel(Graph spectrum, JSVPanelPopupMenu popup) {
     // standard applet not overlaid and not showing range
     // standard application split spectra
     // removal of integration, taConvert
@@ -380,11 +380,11 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     initJSVPanel(spectra, 0, 0);
   }
 
-  public static JSVPanel getJSVPanel(List<JDXSpectrum> specs, int startIndex, int endIndex, JSVPanelPopupMenu popup) {
+  public static AwtPanel getJSVPanel(List<JDXSpectrum> specs, int startIndex, int endIndex, JSVPanelPopupMenu popup) {
     List<Graph> graphs = new ArrayList<Graph>(specs.size());
     for (int i = 0; i < specs.size(); i++)
       graphs.add(specs.get(i));
-    JSVPanel jsvp = new JSVPanel(graphs, startIndex, endIndex, popup);
+    AwtPanel jsvp = new AwtPanel(graphs, startIndex, endIndex, popup);
     jsvp.isOverlaid = (specs.size() > 1);
     return jsvp;
   }
@@ -402,19 +402,19 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
    * @throws JSpecViewException
    * @throws ScalesIncompatibleException
    */
-  private JSVPanel(List<Graph> spectra, int startIndex,
+  private AwtPanel(List<Graph> spectra, int startIndex,
       int endIndex, JSVPanelPopupMenu popup) {
     this.popup = popup;
     initJSVPanel(spectra, startIndex, endIndex);
   }
 
-  public static JSVPanel getIntegralPanel(JDXSpectrum spectrum, Color color,
+  public static AwtPanel getIntegralPanel(JDXSpectrum spectrum, Color color,
                                           JSVPanelPopupMenu popup) {
     Graph graph = spectrum.getIntegrationGraph();
     List<Graph> graphs = new ArrayList<Graph>();
     graphs.add(spectrum);
     graphs.add(graph);
-    JSVPanel jsvp = new JSVPanel(graphs, 0, 0, popup);
+    AwtPanel jsvp = new AwtPanel(graphs, 0, 0, popup);
     jsvp.setTitle(graph.getTitle());
     jsvp.setPlotColors(new Color[] { jsvp.getPlotColor(0), color });
     return jsvp;
@@ -424,7 +424,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     setBorder(BorderFactory.createLineBorder(Color.lightGray));
     nSpectra = spectra.size();
     this.spectra = spectra;
-    graphSets = JSVGraphSet.getGraphSets(this, spectra, startIndex, endIndex);
+    graphSets = AwtGraphSet.getGraphSets(this, spectra, startIndex, endIndex);
     currentGraphSet = graphSets.get(0);
     setTitle(getSpectrum().getTitleLabel());
     if (popup == null) {
@@ -437,7 +437,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     }
   }
 
-  private void setCurrentGraphSet(JSVGraphSet gs) {
+  private void setCurrentGraphSet(AwtGraphSet gs) {
     if (currentGraphSet == gs)
       return;
     currentGraphSet = gs;
@@ -1040,11 +1040,11 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
     return true;
   }
 
-  public static JSVPanel taConvert(JSVPanel jsvp, int mode) {
+  public static AwtPanel taConvert(AwtPanel jsvp, int mode) {
     if (jsvp.getNumberOfSpectraTotal() > 1)
       return null;
     JDXSpectrum spectrum = JDXSpectrum.taConvert(jsvp.getSpectrum(), mode);
-    return (spectrum == jsvp.getSpectrum() ? null : new JSVPanel(spectrum,
+    return (spectrum == jsvp.getSpectrum() ? null : new AwtPanel(spectrum,
         jsvp.popup));
   }
 
@@ -1147,7 +1147,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       return;
     int xPixel = e.getX();
     int yPixel = e.getY();
-    JSVGraphSet gs = JSVGraphSet.findGraphSet(graphSets, xPixel, yPixel);
+    AwtGraphSet gs = AwtGraphSet.findGraphSet(graphSets, xPixel, yPixel);
     if (gs == null)
       return;
     isIntegralDrag = (e.isControlDown() && gs.getSpectrum().getIntegrationGraph() != null);
@@ -1158,7 +1158,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   public void mouseMoved(MouseEvent e) {
     int xPixel = e.getX();
     int yPixel = e.getY();
-    JSVGraphSet gs = JSVGraphSet.findGraphSet(graphSets, xPixel, yPixel);
+    AwtGraphSet gs = AwtGraphSet.findGraphSet(graphSets, xPixel, yPixel);
     if (gs == null)
       return;
     gs.mouseMovedEvent(xPixel, yPixel);
@@ -1167,7 +1167,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
   public void mouseDragged(MouseEvent e) {
     int xPixel = e.getX();
     int yPixel = e.getY();
-    if (JSVGraphSet.findGraphSet(graphSets, xPixel, yPixel) != currentGraphSet)
+    if (AwtGraphSet.findGraphSet(graphSets, xPixel, yPixel) != currentGraphSet)
       return;
     currentGraphSet.checkWidgetEvent(xPixel, yPixel, false);
     currentGraphSet.mouseMovedEvent(xPixel, yPixel);
@@ -1188,7 +1188,7 @@ public class JSVPanel extends JPanel implements Printable, MouseListener,
       popup.show(this, xPixel, yPixel);
       return;
     }
-    JSVGraphSet gs = JSVGraphSet.findGraphSet(graphSets, xPixel, yPixel);
+    AwtGraphSet gs = AwtGraphSet.findGraphSet(graphSets, xPixel, yPixel);
     if (gs == null)
       return;
     setCurrentGraphSet(gs);

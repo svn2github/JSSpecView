@@ -47,10 +47,10 @@ import jspecview.util.Parser;
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-class JSVGraphSet {
+class AwtGraphSet {
 
   
-  private JSVPanel jsvp;
+  private AwtPanel jsvp;
   private static final long serialVersionUID = 1L;
   private List<Graph> spectra = new ArrayList<Graph>(2);
   MultiScaleData multiScaleData;
@@ -106,19 +106,19 @@ class JSVGraphSet {
 
   private Color[] plotColors;
 
-  private JSVGraphSet(JSVPanel jsvp) {
+  private AwtGraphSet(AwtPanel jsvp) {
     this.jsvp = jsvp;
   }
 
-  static List<JSVGraphSet> getGraphSets(JSVPanel jsvp, List<Graph> spectra,
+  static List<AwtGraphSet> getGraphSets(AwtPanel jsvp, List<Graph> spectra,
       int startIndex, int endIndex) {
-    List<JSVGraphSet> graphSets = new ArrayList<JSVGraphSet>();
-    JSVGraphSet graphSet = null;
+    List<AwtGraphSet> graphSets = new ArrayList<AwtGraphSet>();
+    AwtGraphSet graphSet = null;
     Graph specLast = null;
     for (int i = 0; i < spectra.size(); i++) {
       Graph spec = spectra.get(i);
       if (specLast == null || !JDXSpectrum.areScalesCompatible(spec, specLast, false)) {
-        graphSet = new JSVGraphSet(jsvp);
+        graphSet = new AwtGraphSet(jsvp);
         graphSets.add(graphSet);
       }
       graphSet.addSpec(specLast = spec);
@@ -131,7 +131,7 @@ class JSVGraphSet {
     return graphSets;
   }
 
-  static JSVGraphSet findGraphSet(List<JSVGraphSet> graphSets,
+  static AwtGraphSet findGraphSet(List<AwtGraphSet> graphSets,
                                          int xPixel, int yPixel) {
     for (int i = graphSets.size(); --i >= 0;)
       if (graphSets.get(i).hasPoint(xPixel, yPixel))
@@ -414,7 +414,7 @@ class JSVGraphSet {
 
   private double fracX = 1, fracY = 1, fX0 = 0, fY0 = 0; // take up full screen
   
-  private static void setFractionalPositions(List<JSVGraphSet> graphSets) {
+  private static void setFractionalPositions(List<AwtGraphSet> graphSets) {
     // for now, just a vertical stack
     int n = graphSets.size();
     double f = 0;
@@ -424,7 +424,7 @@ class JSVGraphSet {
     f = 1 / f;
     double x = 0;
     for (int i = 0; i < n; i++) {
-      JSVGraphSet gs = graphSets.get(i);
+      AwtGraphSet gs = graphSets.get(i);
       double g = (gs.getSpectrumAt(0).is1D() ? f : n2d * f); 
       gs.fracY = g;
       gs.fY0 = x;
@@ -1296,11 +1296,11 @@ class JSVGraphSet {
     if (!is2D && !dontUseSubspecs) {
       graphsTemp.add(getSpectrum());
       if (!multiScaleData.setDataPointIndices(graphsTemp, initX, finalX,
-          JSVPanel.minNumOfPointsForZoom, startIndices, endIndices, false))
+          AwtPanel.minNumOfPointsForZoom, startIndices, endIndices, false))
         return;
     } else {
       if (!multiScaleData.setDataPointIndices(spectra, initX, finalX,
-          JSVPanel.minNumOfPointsForZoom, startIndices, endIndices, false))
+          AwtPanel.minNumOfPointsForZoom, startIndices, endIndices, false))
         return;
     }
     
@@ -1648,11 +1648,11 @@ class JSVGraphSet {
         multiScaleData.maxX, multiScaleData.maxY / factor2, true, true, false);
   }
 
-  static JSVPanel taConvert(JSVPanel jsvp, int mode) {
+  static AwtPanel taConvert(AwtPanel jsvp, int mode) {
     if (jsvp.getNumberOfSpectraTotal() != 1)
       return null;
     JDXSpectrum spectrum = JDXSpectrum.taConvert(jsvp.getSpectrum(), mode);
-    return (spectrum == jsvp.getSpectrum() ? null : new JSVPanel(spectrum, jsvp.popup));
+    return (spectrum == jsvp.getSpectrum() ? null : new AwtPanel(spectrum, jsvp.popup));
   }
 
   static void showSolutionColor(Component component, String sltnclr) {

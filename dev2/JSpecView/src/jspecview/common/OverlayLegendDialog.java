@@ -51,7 +51,7 @@ public class OverlayLegendDialog extends JDialog {
    * 
    */
   private static final long serialVersionUID = 1L;
-  JSVPanel jsvp;
+  AwtPanel jsvp;
 
   /**
    * Initialises the <code>OverlayLegendDialog</code>
@@ -60,7 +60,7 @@ public class OverlayLegendDialog extends JDialog {
    * @param modal the modality
    * @param jsvp the <code>JSVPanel</code>
    */
-  public OverlayLegendDialog(Frame frame, String title, boolean modal, JSVPanel jsvp) {
+  public OverlayLegendDialog(Frame frame, String title, boolean modal, AwtPanel jsvp) {
     super(frame, title, modal);
     this.jsvp = jsvp;
     init();
@@ -74,7 +74,7 @@ public class OverlayLegendDialog extends JDialog {
    * "Legend: " + jsvp.getTitle() and null parent
    * @param jsvp the <code>JSVPanel</code>
    */
-  public OverlayLegendDialog(JSVPanel jsvp) {
+  public OverlayLegendDialog(AwtPanel jsvp) {
     this(null, ("Legend: " + jsvp.getTitle()), false, jsvp);
   }
 
@@ -84,7 +84,7 @@ public class OverlayLegendDialog extends JDialog {
    * @param frame the parent frame
    * @param jsvp the <code>JSVPanel</code>
    */
-  public OverlayLegendDialog(Frame frame, JSVPanel jsvp) {
+  public OverlayLegendDialog(Frame frame, AwtPanel jsvp) {
     this(frame, ("Legend: " + jsvp.getTitle()), false, jsvp);
   }
 

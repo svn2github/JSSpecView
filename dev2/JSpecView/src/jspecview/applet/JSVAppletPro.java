@@ -42,7 +42,7 @@ package jspecview.applet;
 import java.util.Properties;
 
 import jspecview.application.MainFrame;
-import jspecview.common.JSVPanel;
+import jspecview.common.AwtPanel;
 
 import org.jmol.api.JSVInterface;
 
@@ -136,7 +136,7 @@ public class JSVAppletPro extends JSVApplet implements JSVInterface {
       super.writeStatus(msg);
   }
 
-  public JSVPanel getSelectedPanel() {
+  public AwtPanel getSelectedPanel() {
     return (mainFrame != null && mainFrame.isVisible() ? mainFrame.getSelectedPanel() 
         : super.getSelectedPanel());
   }

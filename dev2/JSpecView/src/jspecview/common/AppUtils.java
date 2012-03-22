@@ -30,14 +30,14 @@ public class AppUtils {
    * 
    * @return the panel containing the HNMR spectrum with integral displayed
    */
-  public static JSVPanel integrate(
+  public static AwtPanel integrate(
                                    Container frameOrPanel,
                                    boolean showDialog,
                                    Parameters parameters) {
     JPanel jp = (JPanel) (frameOrPanel instanceof JInternalFrame ? ((JInternalFrame) frameOrPanel)
         .getContentPane()
         : frameOrPanel);
-    JSVPanel jsvp = (JSVPanel) jp.getComponent(0);
+    AwtPanel jsvp = (AwtPanel) jp.getComponent(0);
     JDXSpectrum spectrum = jsvp.getSpectrum();
     IntegralGraph graph = spectrum.getIntegrationGraph();
     spectrum.setIntegrationGraph(null);
@@ -61,26 +61,26 @@ public class AppUtils {
           parameters.integralOffset, parameters.integralFactor);
 
       if (graph != null) {
-        JSVPanel newJsvp = JSVPanel.getIntegralPanel(spectrum, jsvp
+        AwtPanel newJsvp = AwtPanel.getIntegralPanel(spectrum, jsvp
             .getIntegralPlotColor(), jsvp.getPopup());
         // add integration ratio annotations if any exist
         jp.remove(jsvp);
         jp.add(newJsvp);
       }
     }
-    return (JSVPanel) jp.getComponent(0);
+    return (AwtPanel) jp.getComponent(0);
   }
 
-  public static JSVPanel removeIntegration(Container frameOrPanel) {
+  public static AwtPanel removeIntegration(Container frameOrPanel) {
     JPanel jp = (JPanel) (frameOrPanel instanceof JInternalFrame ? ((JInternalFrame) frameOrPanel)
         .getContentPane()
         : frameOrPanel);
-    JSVPanel jsvp = (JSVPanel) jp.getComponent(0);
+    AwtPanel jsvp = (AwtPanel) jp.getComponent(0);
     JDXSpectrum spectrum = jsvp.getSpectrum();
     if (spectrum.getIntegrationGraph() == null)
       return jsvp;
     spectrum.setIntegrationGraph(null);
-    JSVPanel newJsvp = new JSVPanel(spectrum, jsvp.getPopup());
+    AwtPanel newJsvp = new AwtPanel(spectrum, jsvp.getPopup());
     jp.remove(jsvp);
     jp.add(newJsvp);
     return newJsvp;
@@ -108,8 +108,8 @@ public class AppUtils {
     return "#" + r + g + b;
   }
 
-  public static JSVPanel checkIntegral(
-                                       JSVPanel jsvp,
+  public static AwtPanel checkIntegral(
+                                       AwtPanel jsvp,
                                        Container frameOrPanel,
                                        Parameters parameters, String value) {
     IntegralGraph graph = jsvp.getSpectrum().getIntegrationGraph();
@@ -193,7 +193,7 @@ public class AppUtils {
    * @param st
    * @param b
    */
-  public static void setBoolean(JSVPanel jsvp, Parameters params,
+  public static void setBoolean(AwtPanel jsvp, Parameters params,
                                   ScriptToken st, boolean b) {
     if (params == null)
       params = new Parameters("temp");
