@@ -99,8 +99,14 @@ public class PeakInfo {
     return file;
   }
 
-  public boolean isModelOnly() {
-    return (model != null && atoms == null);
+  /**
+   * a spectrum which, when loaded, should fire a message to load first peak
+   * -- GC for now
+   * 
+   * @return
+   */
+  public boolean autoSelectOnLoad() {
+    return (type.equalsIgnoreCase("GC"));
   }
 
 }

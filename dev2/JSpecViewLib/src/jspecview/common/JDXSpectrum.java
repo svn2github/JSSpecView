@@ -153,7 +153,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
 
   public PeakInfo getModelPeakInfo() {
     for (int i = 0; i < peakList.size(); i++)
-      if (peakList.get(i).isModelOnly())
+      if (peakList.get(i).autoSelectOnLoad())
         return peakList.get(i);
     return null;
   }

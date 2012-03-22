@@ -1956,7 +1956,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     List<String> tokens;
     int pt;
     while (allParamTokens.hasMoreTokens()) {
-      String token = allParamTokens.nextToken();
+      String token = allParamTokens.nextToken().trim();
       // now split the key/value pair
       StringTokenizer eachParam = new StringTokenizer(token);
       String key = ScriptToken.getKey(eachParam);
@@ -1967,7 +1967,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
       try {
         switch (st) {
         case TEST:
-          syncScript("<PeakData file=\"c:/temp/t.jdx\" index=\"2\" type=\"MS\" id=\"2\" title=\"b-caryopholene (~93)\" peakShape=\"sharp\" model=\"caryoph\"  xMax=\"94\" xMin=\"92\"  yMax=\"100\" yMin=\"0\" />");
+          runTest();
           break;
         case UNKNOWN:
           Logger.warn("Unrecognized parameter: " + key);
@@ -2283,7 +2283,6 @@ public class MainFrame extends JFrame implements DropTargetListener,
     if (jsvp.getNumberOfGraphSets() == 1)
       return;
     PeakInfo pi = jsvp.getSpectrum().getSelectedPeak();
-    System.out.println("sendFrameChange1  " + pi);
     if (pi == null)
       pi = jsvp.getSpectrum().getModelPeakInfo();
     System.out.println("sendframechange2 " + pi);
@@ -3253,6 +3252,10 @@ public class MainFrame extends JFrame implements DropTargetListener,
       }
     System.out.println("mainframe did not find " + fileName);
     return false;
+  }
+
+  private void runTest() {
+    syncScript("<PeakData file=\"c:/temp/t.jdx\" index=\"2\" type=\"MS\" id=\"2\" title=\"b-caryopholene (~93)\" peakShape=\"sharp\" model=\"caryoph\"  xMax=\"94\" xMin=\"92\"  yMax=\"100\" yMin=\"0\" />");
   }
 
 
