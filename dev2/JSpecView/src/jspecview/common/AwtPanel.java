@@ -142,6 +142,10 @@ public class AwtPanel extends JPanel implements Panel, Printable, MouseListener,
   private Color scaleColor;
   private Color titleColor;
   private Color unitsColor;
+  // potentially settable; 
+
+  private Color highlightColor = new Color(255, 0, 0, 200);
+  private Color zoomBoxColor = new Color(100, 100, 50, 130);
 
   public void setPlotColors(Object oColors) {
     Color[] colors = (Color[]) oColors;
@@ -149,23 +153,6 @@ public class AwtPanel extends JPanel implements Panel, Printable, MouseListener,
       pd.graphSets.get(i).setPlotColors(colors);
   }
 
-  // potentially settable; 
-
-  private Color highlightColor = new Color(255, 0, 0, 200);
-
-  public Color setHighlightColor(Color color) {
-    return (highlightColor = color);
-  }
-
-  public Color getHighlightColor() {
-    return highlightColor;
-  }
-
-  private Color zoomBoxColor = new Color(100, 100, 50, 130);
-
-  public Color getZoomBoxColor() {
-    return zoomBoxColor;
-  }
 
   public void setColorOrFont(Parameters ds, ScriptToken st) {
     if (st == null) {
@@ -184,7 +171,11 @@ public class AwtPanel extends JPanel implements Panel, Printable, MouseListener,
       pd.setFontName(st, ds.getTitleFont());
       return;
     }
-    Color color = (Color) ds.getColor(st);
+    setColor(st, ds.getColor(st));
+  }
+
+  public void setColor(ScriptToken st, Object oColor) {
+    Color color = (Color) oColor;
     if (color != null)
       pd.options.put(st.name(), AwtParameters.colorToHexString(color));
     switch (st) {
@@ -196,6 +187,9 @@ public class AwtPanel extends JPanel implements Panel, Printable, MouseListener,
       break;
     case GRIDCOLOR:
       gridColor = color;
+      break;
+    case HIGHLIGHTCOLOR:
+      highlightColor = color;
       break;
     case INTEGRALPLOTCOLOR:
       integralPlotColor = color;
@@ -216,8 +210,11 @@ public class AwtPanel extends JPanel implements Panel, Printable, MouseListener,
     case UNITSCOLOR:
       unitsColor = color;
       break;
+    case ZOOMBOXCOLOR:
+      zoomBoxColor = color;
+      break;
     default:
-      Logger.warn("JSVPanel --- unrecognized DisplayScheme color: " + st);
+      Logger.warn("AwtPanel --- unrecognized color: " + st);
       break;
     }
   }
@@ -618,4 +615,6 @@ public class AwtPanel extends JPanel implements Panel, Printable, MouseListener,
       addMouseMotionListener(this);
     }
   }
+
+  
 }

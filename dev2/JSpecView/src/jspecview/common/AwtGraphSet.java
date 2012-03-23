@@ -23,9 +23,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
-import java.text.NumberFormat;
 import java.util.List;
-import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 
@@ -40,13 +38,13 @@ class AwtGraphSet extends GraphSet {
 
   private AwtPanel jsvp;
   private BufferedImage image2D;
-  protected List<Highlight> highlights = new ArrayList<Highlight>();
   private Color[] plotColors;
 
   @Override
   protected void disposeImage() {
     image2D = null;
     jsvp = null;
+    pd = null;
     highlights = null;
     plotColors = null;
   }
@@ -54,6 +52,7 @@ class AwtGraphSet extends GraphSet {
 
   AwtGraphSet(AwtPanel jsvp) {
     this.jsvp = jsvp;
+    this.pd = jsvp.pd;
   }
 
   protected AwtGraphSet getGraphSet(Object jsvp) {
@@ -98,66 +97,6 @@ class AwtGraphSet extends GraphSet {
     plotColors[0] = (Color) oColor;
   }
 
-  /* -------------------Other methods ------------------------------------*/
-
-  /**
-   * Add information about a region of the displayed spectrum to be highlighted
-   * 
-   * @param x1
-   *        the x value of the coordinate where the highlight should start
-   * @param x2
-   *        the x value of the coordinate where the highlight should end
-   * @param spec
-   * @param color
-   *        the color of the highlight
-   */
-  void addHighlight(double x1, double x2, Graph spec, Object oColor) {
-    if (spec == null)
-      spec = getSpectrumAt(0);
-    Highlight hl = new Highlight(x1, x2, spec, (oColor == null ? jsvp
-        .getHighlightColor() : (Color) oColor));
-    if (!highlights.contains(hl))
-      highlights.add(hl);
-  }
-
-  /**
-   * Remove the highlight at the specified index in the internal list of
-   * highlights The index depends on the order in which the highlights were
-   * added
-   * 
-   * @param index
-   *        the index of the highlight in the list
-   */
-  void removeHighlight(int index) {
-    highlights.remove(index);
-  }
-
-  /**
-   * Remove the highlight specified by the starting and ending x value
-   * 
-   * @param x1
-   *        the x value of the coordinate where the highlight started
-   * @param x2
-   *        the x value of the coordinate where the highlight ended
-   */
-  void removeHighlight(double x1, double x2) {
-    for (int i = highlights.size(); --i >= 0;) {
-      Highlight h = highlights.get(i);
-      if (h.x1 == x1 && h.x2 == x2)
-        highlights.remove(i);
-    }
-  }
-
-  void removeAllHighlights(Graph spec) {
-    if (spec == null)
-      highlights.clear();
-    else
-      for (int i = highlights.size(); --i >= 0;)
-        if (highlights.get(i).spectrum == spec)
-          highlights.remove(i);
-    jsvp.repaint();
-  }
-
   /**
    * Returns the color of the plot at a certain index
    * 
@@ -169,6 +108,14 @@ class AwtGraphSet extends GraphSet {
     if (index >= plotColors.length)
       return null;
     return plotColors[index];
+  }
+
+  @Override
+  protected void setColor(Object g, ScriptToken whatColor) {
+    if (whatColor != null)
+      ((Graphics) g)
+          .setColor(whatColor == ScriptToken.PLOTCOLOR ? plotColors[0] : jsvp
+              .getColor(whatColor));
   }
 
   /////////////// 2D image /////////////////
@@ -228,171 +175,6 @@ class AwtGraphSet extends GraphSet {
   }
 
   @Override
-  void repaint() {
-    jsvp.repaint();
-  }
-
-  @Override
-  void refresh() {
-    jsvp.pd.refresh();
-  }
-
-  @Override
-  protected void notifySubSpectrumChange(int i, JDXSpectrum spectrum) {
-    jsvp.pd.notifySubSpectrumChange(i, spectrum);
-  }
-
-  /**
-   * Private class to represent a Highlighted region of the spectrum display
-   * <p>
-   * Title: JSpecView
-   * </p>
-   * <p>
-   * Description: JSpecView is a graphical viewer for chemical spectra specified
-   * in the JCAMP-DX format
-   * </p>
-   * <p>
-   * Copyright: Copyright (c) 2002
-   * </p>
-   * <p>
-   * Company: Dept. of Chemistry, University of the West Indies, Mona Campus,
-   * Jamaica
-   * </p>
-   * 
-   * @author Debbie-Ann Facey
-   * @author Khari A. Bryan
-   * @author Prof Robert.J. Lancashire
-   * @version 1.0.017032006
-   */
-  private class Highlight {
-    private double x1;
-    private double x2;
-    private Color color = new Color(255, 255, 0, 100);
-    private Graph spectrum;
-
-    /**
-     * Constructor
-     * 
-     * @param x1
-     *        starting x coordinate
-     * @param x2
-     *        ending x coordinate
-     */
-    Highlight(double x1, double x2) {
-      this.x1 = x1;
-      this.x2 = x2;
-    }
-
-    /**
-     * Constructor
-     * 
-     * @param x1
-     *        starting x coordinate
-     * @param x2
-     *        ending x coordinate
-     * @param spec
-     * @param color
-     *        the color of the highlighted region
-     */
-    Highlight(double x1, double x2, Graph spec, Color color) {
-      this(x1, x2);
-      this.color = color;
-      spectrum = spec;
-    }
-
-    /**
-     * Returns the x coordinate where the highlighted region starts
-     * 
-     * @return the x coordinate where the highlighted region starts
-     */
-    double getStartX() {
-      return x1;
-    }
-
-    /**
-     * Returns the x coordinate where the highlighted region ends
-     * 
-     * @return the x coordinate where the highlighted region ends
-     */
-    double getEndX() {
-      return x2;
-    }
-
-    /**
-     * Returns the color of the highlighted region
-     * 
-     * @return the color of the highlighted region
-     */
-    Color getColor() {
-      return color;
-    }
-
-    /**
-     * Overides the equals method in class <code>Object</code>
-     * 
-     * @param obj
-     *        the object that this <code>Highlight<code> is compared to
-     * @return true if equal
-     */
-    @Override
-    public boolean equals(Object obj) {
-      if (!(obj instanceof Highlight))
-        return false;
-      Highlight hl = (Highlight) obj;
-
-      return ((hl.x1 == this.x1) && (hl.x2 == this.x2));
-    }
-  }
-
-  @Override
-  protected String getCoordString() {
-    return jsvp.pd.coordStr;
-  }
-
-  @Override
-  protected void notifyPeakPickedListeners() {
-    jsvp.pd.notifyPeakPickedListeners();
-  }
-
-  @Override
-  protected Coordinate setCoordClicked(double x, double y) {
-    if (Double.isNaN(x)) {
-      jsvp.pd.coordClicked = null;
-      jsvp.pd.coordsClicked = null;
-      return null;
-    }
-    jsvp.pd.coordClicked = new Coordinate(lastClickX = x, y);
-    jsvp.pd.coordsClicked = getSpectrum().getXYCoords();
-    return jsvp.pd.coordClicked;
-  }
-
-  @Override
-  protected void setIntegralDrag(boolean b) {
-    jsvp.pd.isIntegralDrag = b;
-  }
-
-  @Override
-  protected PlotWidget getThisWidget() {
-    return jsvp.pd.thisWidget;
-  }
-
-  @Override
-  protected boolean isIntegralDrag() {
-    return jsvp.pd.isIntegralDrag;
-  }
-
-  @Override
-  protected void setThisWidget(PlotWidget widget) {
-    jsvp.pd.thisWidget = widget;
-  }
-
-  @Override
-  protected void notifyPeakListeners(PeakInfo peak) {
-    jsvp.pd.notifyListeners(new PeakPickEvent(jsvp, jsvp.pd.coordClicked,
-        peak == null ? PeakInfo.nullPeakInfo : peak));
-  }
-
-  @Override
   protected String getInput(String message, String title, String sval) {
     return (String) JOptionPane.showInputDialog(null, message, title,
         JOptionPane.PLAIN_MESSAGE, null, null, sval);
@@ -409,26 +191,6 @@ class AwtGraphSet extends GraphSet {
   @Override
   protected void drawTitle(Object g, int height, int width, String title) {
     jsvp.drawTitle(g, height, width, title);
-  }
-
-  @Override
-  protected void setColor(Object g, ScriptToken whatColor) {
-    if (whatColor != null)
-      ((Graphics) g)
-          .setColor(whatColor == ScriptToken.PLOTCOLOR ? plotColors[0] : jsvp
-              .getColor(whatColor));
-  }
-
-  @Override
-  protected void drawHighlights(Object g, Graph spec) {
-    for (int i = 0; i < highlights.size(); i++) {
-      Highlight hl = highlights.get(i);
-      if (hl.spectrum == spec) {
-        jsvp.setHighlightColor(hl.getColor());
-        drawBar(g, hl.getStartX(), hl.getEndX(), ScriptToken.HIGHLIGHTCOLOR,
-            true);
-      }
-    }
   }
 
   @Override
@@ -453,11 +215,6 @@ class AwtGraphSet extends GraphSet {
   }
 
   @Override
-  protected boolean isCurrentGraphSet() {
-    return (this == jsvp.pd.currentGraphSet);
-  }
-
-  @Override
   protected void setCurrentBoxColor(Object g) {
     ((Graphics) g).setColor(Color.MAGENTA);
   }
@@ -478,17 +235,6 @@ class AwtGraphSet extends GraphSet {
   }
 
   @Override
-  protected NumberFormat getFormatter(String hash) {
-    return jsvp.pd.getFormatter(hash);
-  }
-
-  @Override
-  protected void setFont(Object g, int width, int face, int size,
-                         boolean isLabel) {
-    jsvp.pd.setFont(g, width, face, size, isLabel);
-  }
-
-  @Override
   protected void setAnnotationColor(Object g, Annotation note,
                                     ScriptToken whatColor) {
     if (whatColor != null) {
@@ -501,25 +247,6 @@ class AwtGraphSet extends GraphSet {
     if (color == null)
       color = Color.BLACK;
     ((Graphics) g).setColor(color);
-  }
-
-  @Override
-  protected boolean setStartupPinTip() {
-    if (jsvp.pd.startupPinTip == null)
-      return false;
-    jsvp.setToolTipText(jsvp.pd.startupPinTip);
-    jsvp.pd.startupPinTip = null;
-    return true;
-  }
-
-  @Override
-  protected void setCoordStr(String string) {
-    jsvp.pd.coordStr = string;
-  }
-
-  @Override
-  protected void setToolTipText(String s) {
-    jsvp.setToolTipText(s);
   }
 
 }

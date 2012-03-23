@@ -1790,6 +1790,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
     // just an idea....
     boolean doAppend = (dtde.getDropTargetContext().getDropTarget()
         .getComponent() != this);
+    System.out.println("Mainframe doappend " + doAppend);
     if (!doAppend)
       closeSource(null);
     if (t.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
@@ -1813,7 +1814,7 @@ public class MainFrame extends JFrame implements DropTargetListener,
           for (int i = 0; i < list.size(); i++)
             sb.append("load APPEND "
                 + Escape.escape(files[i].getAbsolutePath()) + ";\n");
-          if (!doAppend && list.size() > 1)
+          if (!doAppend)
             sb.append("overlay *");
           runScript(sb.toString());
           /*          
