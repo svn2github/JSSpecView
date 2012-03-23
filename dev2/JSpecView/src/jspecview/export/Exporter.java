@@ -1,6 +1,8 @@
 package jspecview.export;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Image;
@@ -23,8 +25,8 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 import jspecview.common.JDXSpectrum;
-import jspecview.common.AwtPanel;
 import jspecview.common.JSVFileFilter;
+import jspecview.common.JSVPanel;
 import jspecview.common.ScriptToken;
 import jspecview.util.TextFormat;
 
@@ -86,24 +88,25 @@ public class Exporter {
     }
   }
 
-  public static String exportSpectra(AwtPanel panel, JFrame frame,
+  public static String exportSpectra(JSVPanel selectedJSVPanel, JFrame frame,
                                      JFileChooser fc, String type,
                                      String recentFileName,
                                      String dirLastExported) {
     // From popup menu click SaveAs or Export
     // if JSVPanel has more than one spectrum...Choose which one to export
-    int numOfSpectra = panel.pd.getNumberOfGraphSets();
+    int numOfSpectra = selectedJSVPanel.getPanelData().getNumberOfGraphSets();
     if (numOfSpectra == 1 || type.equals("JPG") || type.equals("PNG"))
-      return exportSpectrumOrImage(panel, type, -1, fc, recentFileName,
+      return exportSpectrumOrImage(selectedJSVPanel, type, -1, fc, recentFileName,
           dirLastExported);
 
     String[] items = new String[numOfSpectra];
     for (int i = 0; i < numOfSpectra; i++)
-      items[i] = panel.getSpectrumAt(i).getTitle();
+      items[i] = selectedJSVPanel.getSpectrumAt(i).getTitle();
 
     final JDialog dialog = new JDialog(frame, "Choose Spectrum", true);
     dialog.setResizable(false);
     dialog.setSize(200, 100);
+    Component panel = (Component) selectedJSVPanel;
     dialog.setLocation((panel.getLocation().x + panel.getSize().width) / 2,
         (panel.getLocation().y + panel.getSize().height) / 2);
     final JComboBox cb = new JComboBox(items);
@@ -125,7 +128,7 @@ public class Exporter {
     final String t = type;
     final String rfn = recentFileName;
     final JFileChooser f = fc;
-    final AwtPanel jsvp = panel;
+    final JSVPanel jsvp = selectedJSVPanel;
     button.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         int index = cb.getSelectedIndex();
@@ -144,7 +147,7 @@ public class Exporter {
    * 
    * @return message for status line
    */
-  public static String exportCmd(AwtPanel jsvp, List<String> tokens, boolean forInkscape) {
+  public static String exportCmd(JSVPanel jsvp, List<String> tokens, boolean forInkscape) {
     // MainFrame or applet EXPORT command
     String mode = "XY";
     String fileName = null;
@@ -193,7 +196,7 @@ public class Exporter {
    * @param dirLastExported
    * @return dirLastExported
    */
-  private static String exportSpectrumOrImage(AwtPanel jsvp, String mode,
+  private static String exportSpectrumOrImage(JSVPanel selectedJSVPanel, String mode,
                                int index, JFileChooser fc, String recentFileName,
                                String dirLastExported) {
     Type imode = Type.getType(mode);
@@ -223,23 +226,23 @@ public class Exporter {
     }
     fc.setFileFilter(filter);
     fc.setSelectedFile(new File(name));
-    int returnVal = fc.showSaveDialog(jsvp);
+    int returnVal = fc.showSaveDialog((Component) selectedJSVPanel);
     if (returnVal != JFileChooser.APPROVE_OPTION)
       return dirLastExported;
     File file = fc.getSelectedFile();
     String dir = file.getParent();
     if (file.exists()) {
-      int option = JOptionPane.showConfirmDialog(jsvp, "Overwrite file?",
+      int option = JOptionPane.showConfirmDialog((Component) selectedJSVPanel, "Overwrite file?",
           "Confirm Overwrite Existing File", JOptionPane.YES_NO_OPTION,
           JOptionPane.QUESTION_MESSAGE);
       if (option == JOptionPane.NO_OPTION)
         return dir;
     }
-    exportSpectrumOrImage(jsvp, imode, index, file.getAbsolutePath());
+    exportSpectrumOrImage(selectedJSVPanel, imode, index, file.getAbsolutePath());
     return dir;
   }
   
-  private static String exportSpectrumOrImage(AwtPanel jsvp, Type imode,
+  private static String exportSpectrumOrImage(JSVPanel jsvp, Type imode,
                                               int index, String path) {
     JDXSpectrum spec;
     if (index < 0) {
@@ -248,15 +251,15 @@ public class Exporter {
     } else {
       spec = jsvp.getSpectrumAt(index);
     }
-    int startIndex = jsvp.pd.getStartDataPointIndices()[index];
-    int endIndex = jsvp.pd.getEndDataPointIndices()[index];
+    int startIndex = jsvp.getPanelData().getStartDataPointIndices()[index];
+    int endIndex = jsvp.getPanelData().getEndDataPointIndices()[index];
     String msg;
     try {
       switch (imode) {
       case PNG:
       case JPG:
-        Image image = jsvp.createImage(jsvp.getWidth(), jsvp.getHeight());
-        jsvp.paint(image.getGraphics());
+        Image image = ((Component) jsvp).createImage(jsvp.getWidth(), jsvp.getHeight());
+        ((Component) jsvp).paint(image.getGraphics());
         ImageIO.write((RenderedImage) image, (imode == Type.PNG ? "png" : "jpg"),
             new File(path));
         msg = " OK";
@@ -266,12 +269,12 @@ public class Exporter {
         msg = (new SVGExporter()).exportAsSVG(path, spec.getXYCoords(), 
             spec.getTitle(), startIndex, endIndex, spec.getXUnits(), 
             spec.getYUnits(), spec.isContinuous(), spec.isIncreasing(), 
-            jsvp.getColor(ScriptToken.PLOTAREACOLOR), jsvp.getBackground(), 
-            jsvp.getPlotColor(0),
-            jsvp.getColor(ScriptToken.GRIDCOLOR),
-            jsvp.getColor(ScriptToken.TITLECOLOR),
-            jsvp.getColor(ScriptToken.SCALECOLOR),
-            jsvp.getColor(ScriptToken.UNITSCOLOR),
+            (Color)jsvp.getColor(ScriptToken.PLOTAREACOLOR), ((Component) jsvp).getBackground(), 
+            (Color)jsvp.getPlotColor(0),
+            (Color)jsvp.getColor(ScriptToken.GRIDCOLOR),
+            (Color)jsvp.getColor(ScriptToken.TITLECOLOR),
+            (Color)jsvp.getColor(ScriptToken.SCALECOLOR),
+            (Color)jsvp.getColor(ScriptToken.UNITSCOLOR),
             imode == Type.SVGI);
         break;
       default:

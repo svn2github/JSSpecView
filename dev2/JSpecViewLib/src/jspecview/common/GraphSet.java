@@ -139,7 +139,7 @@ abstract class GraphSet {
     return (JDXSpectrum) spectra.get(index);
   }
 
-  static List<GraphSet> getGraphSets(Panel jsvp, List<Graph> spectra,
+  static List<GraphSet> getGraphSets(JSVPanel jsvp, List<Graph> spectra,
                                      int startIndex, int endIndex) {
     List<GraphSet> graphSets = new ArrayList<GraphSet>();
     GraphSet graphSet = null;

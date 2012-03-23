@@ -9,8 +9,8 @@ import java.util.List;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVPanelPopupMenu;
+import jspecview.common.JSVSpecNode;
 import jspecview.source.JDXSource;
 
 class JSVAppletPopupMenu extends JSVPanelPopupMenu {
@@ -143,7 +143,7 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
 
   public void setCompoundMenu(JDXSource currentSource,
                               int currentSpectrumIndex,
-                              List<JDXSpectrum> specs, boolean allowSelection,
+                              List<JSVSpecNode> specNodes, boolean allowSelection,
                               ActionListener compoundMenuSelectionListener,
                               ActionListener compoundMenuChooseListener) {
     appletCompoundMenu.removeAll();
@@ -153,12 +153,12 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     appletCompoundMenu.add(overlayAllMenuItem);
     appletCompoundMenu.add(overlayNoneMenuItem);
     appletCompoundMenu.add(overlayMenuItem);
-    if (specs.size() <= 20) {
+    if (specNodes.size() <= 20) {
       // add Menus to navigate
       if (currentSource.isCompoundSource) {
-        for (int i = 0; i < specs.size(); i++) {
+        for (int i = 0; i < specNodes.size(); i++) {
           JCheckBoxMenuItem mi = new JCheckBoxMenuItem((i + 1) + "- "
-              + specs.get(i).getTitleLabel());
+              + specNodes.get(i).getSpectrum().getTitleLabel());
           mi.setSelected(i == currentSpectrumIndex);
           mi.addActionListener(compoundMenuSelectionListener);
           mi.setActionCommand("" + i);

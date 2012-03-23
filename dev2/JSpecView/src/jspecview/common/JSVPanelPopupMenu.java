@@ -19,6 +19,7 @@
 
 package jspecview.common;
 
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -41,7 +42,7 @@ import jspecview.common.JDXSpectrum;
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
- * @see jspecview.common.AwtPanel
+ * @see jspecview.common.JSVPanel
  */
 public class JSVPanelPopupMenu extends JPopupMenu {
 
@@ -49,34 +50,33 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   
   private static final long serialVersionUID = 1L;
 
-  protected AwtPanel jsvp;
   private ScriptInterface scripter;
   
 
   public void dispose() {
-    jsvp = null;
+    pd = null;
     scripter = null;
   }
 
   /**
    * Menu Item that allows user to navigate to the next view of a JSVPanel
    * that has been zoomed
-   * @see jspecview.common.AwtPanel#nextView()
+   * @see jspecview.common.JSVPanel#nextView()
    */
   public JMenuItem nextMenuItem = new JMenuItem();
   /**
    * Menu Item for navigating to previous view
-   * @see jspecview.common.AwtPanel#previousView()
+   * @see jspecview.common.JSVPanel#previousView()
    */
   public JMenuItem previousMenuItem = new JMenuItem();
   /**
    * Allows for all view to be cleared
-   * @see jspecview.common.AwtPanel#clearViews()
+   * @see jspecview.common.JSVPanel#clearViews()
    */
   public JMenuItem clearMenuItem = new JMenuItem();
   /**
    * Allows for the JSVPanel to be reset to it's original display
-   * @see jspecview.common.AwtPanel#reset()
+   * @see jspecview.common.JSVPanel#reset()
    */
   public JMenuItem resetMenuItem = new JMenuItem();
   /**
@@ -233,7 +233,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    * @param e the <code>ActionEvent</code>
    */
   void nextMenuItem_actionPerformed(ActionEvent e) {
-    jsvp.pd.nextView();
+    pd.nextView();
   }
 
   /**
@@ -242,7 +242,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    * @param e the <code>ActionEvent</code>
    */
   void previousMenuItem_actionPerformed(ActionEvent e) {
-    jsvp.pd.previousView();
+    pd.previousView();
   }
 
   /**
@@ -250,7 +250,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    * @param e the <code>ActionEvent</code>
    */
   void resetMenuItem_actionPerformed(ActionEvent e) {
-    jsvp.pd.reset();
+    pd.reset();
   }
 
   /**
@@ -258,7 +258,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    * @param e the <code>ActionEvent</code>
    */
   void clearMenuItem_actionPerformed(ActionEvent e) {
-    jsvp.pd.clearViews();
+    pd.clearViews();
   }
 
   /**
@@ -282,8 +282,8 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    * @param e the <code>ItemEvent</code
    */
   void revPlotCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-    jsvp.pd.setReversePlot((e.getStateChange() == ItemEvent.SELECTED));
-    jsvp.repaint();
+    pd.setReversePlot((e.getStateChange() == ItemEvent.SELECTED));
+    pd.repaint();
   }
 
   /**
@@ -294,7 +294,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    */
   public void properties_actionPerformed(ActionEvent e) {
 
-    JDXSpectrum spectrum = jsvp.getSpectrum();
+    JDXSpectrum spectrum = pd.getSpectrum();
     Object[][] rowData = spectrum.getHeaderRowDataAsArray();
     String[] columnNames = { "Label", "Description" };
     JTable table = new JTable(rowData, columnNames);
@@ -382,6 +382,8 @@ public class JSVPanelPopupMenu extends JPopupMenu {
 
   protected String recentOverlay = "1.1,1.2";
 
+  private PanelData pd;
+
   public void overlay(int n) {
     switch (n) {
     case 0:
@@ -403,21 +405,21 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   }
 
 
-  public void show(AwtPanel jsvp, int x, int y) {
+  public void show(JSVPanel jsvp, int x, int y) {
     setEnables(jsvp);
-    super.show(jsvp, x, y);
+    super.show((Container) jsvp, x, y);
   }
 
-  public void setEnables(AwtPanel jsvp) {
-    this.jsvp = jsvp;
+  public void setEnables(JSVPanel jsvp) {
+    pd = jsvp.getPanelData();
     JDXSpectrum spec0 = jsvp.getSpectrumAt(0);
-    gridCheckBoxMenuItem.setSelected(jsvp.pd.isGridOn());
-    coordsCheckBoxMenuItem.setSelected(jsvp.pd.isCoordinatesOn());
-    reversePlotCheckBoxMenuItem.setSelected(jsvp.pd.isPlotReversed());
+    gridCheckBoxMenuItem.setSelected(pd.isGridOn());
+    coordsCheckBoxMenuItem.setSelected(pd.isCoordinatesOn());
+    reversePlotCheckBoxMenuItem.setSelected(pd.isPlotReversed());
     integrateCheckBoxMenuItem.setSelected(spec0.getIntegrationGraph() != null);
 
-    boolean isOverlaid = jsvp.pd.isOverlaid();
-    boolean isSingle = jsvp.pd.getNumberOfSpectraTotal() == 1;
+    boolean isOverlaid = pd.isOverlaid();
+    boolean isSingle = pd.getNumberOfSpectraTotal() == 1;
     integrateCheckBoxMenuItem.setEnabled(isSingle && spec0.canIntegrate() || spec0.getIntegrationGraph() != null);
     solColMenuItem.setEnabled(isSingle && spec0.canShowSolutionColor());
     transAbsMenuItem.setEnabled(isSingle && spec0.canConvertTransAbs());
@@ -432,7 +434,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
       appletCompoundMenu.setEnabled(
           appletCompoundMenu.isEnabled() && appletCompoundMenu.getItemCount() > 3);
     if (overlayKeyMenuItem != null)
-      overlayKeyMenuItem.setEnabled(isOverlaid && jsvp.pd.getNumberOfGraphSets() == 1);
+      overlayKeyMenuItem.setEnabled(isOverlaid && pd.getNumberOfGraphSets() == 1);
   }
 
   static void addMenuItem(JMenu m, String key,

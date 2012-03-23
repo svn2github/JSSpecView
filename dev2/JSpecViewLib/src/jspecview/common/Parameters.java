@@ -30,7 +30,6 @@ import jspecview.util.Logger;
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
- * @see jspecview.common.AwtPanel
  */
 public class Parameters {
 
@@ -215,7 +214,7 @@ public class Parameters {
     return Boolean.TRUE == htBooleans.get(t);
   }
     
-  public void setFor(Panel jsvp, Parameters ds, boolean includeMeasures) {
+  public void setFor(JSVPanel jsvp, Parameters ds, boolean includeMeasures) {
 
     if (ds == null)
       ds = this;
@@ -232,7 +231,7 @@ public class Parameters {
     jsvp.setColorOrFont(ds, null);
  }
 
-  public void set(Panel jsvp, ScriptToken st, String value) {
+  public void set(JSVPanel jsvp, ScriptToken st, String value) {
     Object param = null;
     List<String> tokens;
     switch (st) {
@@ -331,7 +330,7 @@ public class Parameters {
    * @param st
    * @param b
    */
-  public static void setBoolean(Panel jsvp, Parameters params,
+  public static void setBoolean(JSVPanel jsvp, Parameters params,
                                   ScriptToken st, boolean b) {
     if (params == null)
       params = new Parameters("temp");

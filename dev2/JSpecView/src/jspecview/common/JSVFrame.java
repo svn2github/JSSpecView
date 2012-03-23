@@ -45,7 +45,7 @@ import javax.swing.JInternalFrame;
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-public class JSVFrame extends JInternalFrame {
+public class JSVFrame extends JInternalFrame implements JSVContainer {
 
   private static final long serialVersionUID = 1L;
 

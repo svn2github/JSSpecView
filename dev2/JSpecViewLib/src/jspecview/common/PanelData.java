@@ -62,14 +62,14 @@ import jspecview.util.TextFormat;
 
 public class PanelData {
 
-  PanelData(Panel owner) {
+  PanelData(JSVPanel owner) {
     this.owner = owner;
   }
   
   
   // Critical fields
 
-  Panel owner;
+  JSVPanel owner;
   private ArrayList<PanelListener> listeners = new ArrayList<PanelListener>();
   List<GraphSet> graphSets;
   GraphSet currentGraphSet;
@@ -750,7 +750,7 @@ public class PanelData {
     gs.mouseClickEvent(xPixel, yPixel, clickCount, isControlDown);
   }
   
-  public static Panel checkIntegral(Panel jsvp, 
+  public static JSVPanel checkIntegral(JSVPanel jsvp, 
                                     Parameters parameters, String value) {
     IntegralGraph graph = jsvp.getSpectrum().getIntegrationGraph();
     boolean showMessage = false;//value.equals("?");
@@ -769,7 +769,7 @@ public class PanelData {
         : integrate(jsvp, showMessage, parameters));
   }
 
-  public static Panel removeIntegration(Panel jsvp) {
+  public static JSVPanel removeIntegration(JSVPanel jsvp) {
     JDXSpectrum spectrum = jsvp.getSpectrum();
     if (spectrum.getIntegrationGraph() == null)
       return jsvp;
@@ -790,7 +790,7 @@ public class PanelData {
      * 
      * @return the panel containing the HNMR spectrum with integral displayed
      */
-    public static Panel integrate(Panel jsvp, boolean showDialog,
+    public static JSVPanel integrate(JSVPanel jsvp, boolean showDialog,
                                      Parameters parameters) {
       JDXSpectrum spectrum = jsvp.getSpectrum();
       IntegralGraph graph = spectrum.getIntegrationGraph();
@@ -821,7 +821,7 @@ public class PanelData {
       return jsvp;
     }
 
-  public static Panel taConvert(Panel jsvp, int mode) {
+  public static JSVPanel taConvert(JSVPanel jsvp, int mode) {
     if (jsvp.getPanelData().getNumberOfSpectraTotal() > 1)
       return null;
     JDXSpectrum spectrum = JDXSpectrum.taConvert(jsvp.getSpectrum(), mode);

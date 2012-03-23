@@ -45,13 +45,13 @@ import jspecview.util.FileManager;
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
  */
-public class OverlayLegendDialog extends JDialog {
+public class OverlayLegendDialog extends JDialog implements JSVDialog {
 
   /**
    * 
    */
   private static final long serialVersionUID = 1L;
-  AwtPanel jsvp;
+  JSVPanel jsvp;
 
   /**
    * Initialises the <code>OverlayLegendDialog</code>
@@ -60,7 +60,7 @@ public class OverlayLegendDialog extends JDialog {
    * @param modal the modality
    * @param jsvp the <code>JSVPanel</code>
    */
-  public OverlayLegendDialog(Frame frame, String title, boolean modal, AwtPanel jsvp) {
+  public OverlayLegendDialog(Frame frame, String title, boolean modal, JSVPanel jsvp) {
     super(frame, title, modal);
     this.jsvp = jsvp;
     init();
@@ -72,10 +72,10 @@ public class OverlayLegendDialog extends JDialog {
   /**
    * Initialises a non-modal <code>OverlayLegendDialog</code> with a default title of
    * "Legend: " + jsvp.getTitle() and null parent
-   * @param jsvp the <code>JSVPanel</code>
+   * @param selectedJSVPanel the <code>JSVPanel</code>
    */
-  public OverlayLegendDialog(AwtPanel jsvp) {
-    this(null, ("Legend: " + jsvp.pd.getTitle()), false, jsvp);
+  public OverlayLegendDialog(JSVPanel selectedJSVPanel) {
+    this(null, ("Legend: " + selectedJSVPanel.getTitle()), false, selectedJSVPanel);
   }
 
   /**
@@ -84,8 +84,8 @@ public class OverlayLegendDialog extends JDialog {
    * @param frame the parent frame
    * @param jsvp the <code>JSVPanel</code>
    */
-  public OverlayLegendDialog(Frame frame, AwtPanel jsvp) {
-    this(frame, ("Legend: " + jsvp.pd.getTitle()), false, jsvp);
+  public OverlayLegendDialog(Frame frame, JSVPanel jsvp) {
+    this(frame, ("Legend: " + jsvp.getTitle()), false, jsvp);
   }
 
   /**
@@ -153,7 +153,7 @@ public class OverlayLegendDialog extends JDialog {
           JDXSpectrum spectrum;
           Object[] cols;
 
-          int numSpectra = jsvp.pd.getNumberOfSpectraInCurrentSet();
+          int numSpectra = jsvp.getPanelData().getNumberOfSpectraInCurrentSet();
           data = new Object[numSpectra][];
           String f1 = jsvp.getSpectrumAt(0).getFilePath();
           String f2 = jsvp.getSpectrumAt(numSpectra - 1).getFilePath();
@@ -167,7 +167,7 @@ public class OverlayLegendDialog extends JDialog {
             if (useFileName)
               title = FileManager.getName(spectrum.getFilePath())
                   +  " - " + title;
-            plotColor = jsvp.getPlotColor(index);
+            plotColor = (Color) jsvp.getPlotColor(index);
 
             cols[0] = new Integer(index + 1);
             cols[1] = plotColor;

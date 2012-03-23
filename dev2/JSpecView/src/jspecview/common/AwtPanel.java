@@ -78,7 +78,7 @@ import jspecview.util.Logger;
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-public class AwtPanel extends JPanel implements Panel, Printable, MouseListener,
+public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListener,
     MouseMotionListener, KeyListener {
 
   private static final long serialVersionUID = 1L;
@@ -237,7 +237,7 @@ public class AwtPanel extends JPanel implements Panel, Printable, MouseListener,
     pd.initSingleSpectrum(spectrum);
   }
 
-  public Panel getNewPanel(JDXSpectrum spectrum) {
+  public JSVPanel getNewPanel(JDXSpectrum spectrum) {
     return new AwtPanel(spectrum, popup);
   }
 
@@ -284,7 +284,7 @@ public class AwtPanel extends JPanel implements Panel, Printable, MouseListener,
         .getIntegralPanel(spec));
   }
 
-  public Panel getIntegralPanel(JDXSpectrum spectrum) {
+  public JSVPanel getIntegralPanel(JDXSpectrum spectrum) {
     Graph graph = spectrum.getIntegrationGraph();
     List<Graph> graphs = new ArrayList<Graph>();
     graphs.add(spectrum);
@@ -531,7 +531,7 @@ public class AwtPanel extends JPanel implements Panel, Printable, MouseListener,
 
   public void mouseClicked(MouseEvent e) {
     if (e.getButton() == MouseEvent.BUTTON3) {
-      popup.show(this, e.getX(), e.getY());
+      popup.show((JPanel) this, e.getX(), e.getY());
       return;
     }
     requestFocusInWindow();
@@ -616,5 +616,11 @@ public class AwtPanel extends JPanel implements Panel, Printable, MouseListener,
     }
   }
 
-  
+  public String getTitle() {
+    return pd.getTitle();
+  }
+
+  public void paint(Object graphics) {
+    super.paint((Graphics) graphics);
+  }
 }

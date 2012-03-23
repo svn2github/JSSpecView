@@ -42,7 +42,7 @@ package jspecview.applet;
 import java.util.Properties;
 
 import jspecview.application.MainFrame;
-import jspecview.common.AwtPanel;
+import jspecview.common.JSVPanel;
 
 import org.jmol.api.JSVInterface;
 
@@ -115,7 +115,7 @@ public class JSVAppletPro extends JSVApplet implements JSVInterface {
   @Override
   public void setSpectrumNumber(int n) {
     if (mainFrame != null && mainFrame.isVisible())
-      mainFrame.setSpectrumNumber(n);
+      mainFrame.setSpectrumNumberAndTreeNode(n);
     else
       super.setSpectrumNumber(n);      
   }
@@ -136,7 +136,7 @@ public class JSVAppletPro extends JSVApplet implements JSVInterface {
       super.writeStatus(msg);
   }
 
-  public AwtPanel getSelectedPanel() {
+  public JSVPanel getSelectedPanel() {
     return (mainFrame != null && mainFrame.isVisible() ? mainFrame.getSelectedPanel() 
         : super.getSelectedPanel());
   }

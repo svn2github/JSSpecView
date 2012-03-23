@@ -1,13 +1,13 @@
 package jspecview.common;
 
-interface Panel {
+public interface JSVPanel extends JSVContainer {
 
   boolean requestFocusInWindow();
   void repaint();
 
   Object getColor(ScriptToken st);
-  Panel getNewPanel(JDXSpectrum spectrum);
-  public Panel getIntegralPanel(JDXSpectrum spectrum);
+  JSVPanel getNewPanel(JDXSpectrum spectrum);
+  public JSVPanel getIntegralPanel(JDXSpectrum spectrum);
   GraphSet newGraphSet();
   void setupPlatform();
   void setFont(Object g, String string, int mode, int size);
@@ -22,4 +22,5 @@ interface Panel {
   Object getPopup();
   void setToolTipText(String s);
   void setColor(ScriptToken st, Object color);
+  
 }
