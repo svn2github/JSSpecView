@@ -1339,7 +1339,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
    * called from here or from MainFrame
    * @param msg
    */
-  protected void syncToJmol(String msg) {
+  public void syncToJmol(String msg) {
     System.out.println("syncToJmol " + msg);
     callToJavaScript(syncCallbackFunctionName, new Object[] { fullName, msg });    
   }

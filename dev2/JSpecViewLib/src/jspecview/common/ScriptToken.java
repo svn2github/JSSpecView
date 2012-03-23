@@ -63,6 +63,7 @@ public enum ScriptToken {
   INTEGRATIONRATIOS,
   INTERFACE,
   IRMODE("A or T or ?"),
+  JMOL("...Jmol command..."),
   LABEL("x y [color and/or \"text\"]"),
   LOAD("[APPEND] \"fileName\" [first] [last]; use \"\" to reload current file"),
   MENUON,
@@ -150,12 +151,13 @@ public enum ScriptToken {
     switch (st) {
     default:
       return nextStringToken(params, true);
-    case PLOTCOLORS:
-    case LABEL:
-    case LOAD:
     case CLOSE:
     case EXPORT:
     case INTEGRATE:
+    case JMOL:
+    case LABEL:
+    case LOAD:
+    case PLOTCOLORS:
     case YSCALE:
       // take full command
       return removeCommandName(cmd);

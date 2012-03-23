@@ -131,6 +131,9 @@ public class JSViewer {
               : value.toUpperCase().startsWith("A") ? JDXSpectrum.TO_ABS
                   : JDXSpectrum.IMPLIED);
           break;
+        case JMOL:
+          si.syncToJmol(value);
+          break;
         case LABEL:
           if (jsvp != null)
             jsvp.getPanelData().addAnnotation(ScriptToken.getTokens(value));

@@ -850,7 +850,6 @@ abstract class GraphSet {
         pd.repaint();
       else
         reset();
-
     }
   }
 
@@ -863,8 +862,8 @@ abstract class GraphSet {
     for (int i = spectra.size(); --i >= 0;) {
       if (!(spectra.get(i) instanceof JDXSpectrum))
         continue;
-      if ((filePath == null || getSpectrumAt(i).getFilePathForwardSlash()
-          .equals(filePath))
+      if ((filePath == null 
+          || getSpectrumAt(i).getFilePathForwardSlash().equals(filePath))
           && (getSpectrumAt(i).matchesPeakTypeModel(type, model))) {
         iThisSpectrum = i;
         haveFound = true;

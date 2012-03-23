@@ -2682,7 +2682,11 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
    */
   public void sendScript(String peak) {
     String msg = Escape.jmolSelect(peak);
-    Logger.info("JSpecView MainFrame sendScript: " + msg);
+    syncToJmol(msg);
+  }
+
+  public void syncToJmol(String msg) {
+    Logger.info("JSpecView MainFrame syncToJmol: " + msg);
     if (jmol != null) // MainFrame --> embedding application
       jmol.syncScript(msg);
     if (jsv != null) // MainFrame --> embedding applet
