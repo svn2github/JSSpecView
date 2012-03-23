@@ -125,13 +125,13 @@ public class Visible {
     double y = yup / ydwn;
     double z = zup / zdwn;
 
-    /*        
-            double sumXYZ = x + y + z;
-            double x1 = (x / (sumXYZ));
-            double y1 = (y / (sumXYZ));
-            double z1 = (z / (sumXYZ));
-            System.out.println("x1 = "+x1+", y1 = "+y1+", z1 = "+z1);
-    */
+//            
+//            double sumXYZ = x + y + z;
+//            double x1 = (x / (sumXYZ));
+//            double y1 = (y / (sumXYZ));
+//            double z1 = (z / (sumXYZ));
+//            //System.out.println("x1 = "+x1+", y1 = "+y1+", z1 = "+z1);
+
     double matrixRGB[] = new double[] {
         (x * 3.241) + (y * (-1.5374)) + (z * (-0.4986)),
         (x * (-0.9692)) + (y * 1.876) + (z * 0.0416),
@@ -145,15 +145,15 @@ public class Visible {
     int green = fix(matrixRGB[1]);
     int blue = fix(matrixRGB[2]);
 
-    /*
-            String redv = "" + ("0123456789ABCDEF".charAt( (red - red % 16) / 16)) +
-                ("0123456789ABCDEF".charAt(red % 16));
-            String greenv = "" + ("0123456789ABCDEF".charAt( (green - green % 16) / 16)) +
-                ("0123456789ABCDEF".charAt(green % 16));
-            String bluev = "" + ("0123456789ABCDEF".charAt( (blue - blue % 16) / 16)) +
-                ("0123456789ABCDEF".charAt(blue % 16));
-            System.out.println("#"+ redv + greenv + bluev);
-    */
+//    
+//            String redv = "" + ("0123456789ABCDEF".charAt( (red - red % 16) / 16)) +
+//                ("0123456789ABCDEF".charAt(red % 16));
+//            String greenv = "" + ("0123456789ABCDEF".charAt( (green - green % 16) / 16)) +
+//                ("0123456789ABCDEF".charAt(green % 16));
+//            String bluev = "" + ("0123456789ABCDEF".charAt( (blue - blue % 16) / 16)) +
+//                ("0123456789ABCDEF".charAt(blue % 16));
+//            //System.out.println("#"+ redv + greenv + bluev);
+//    
 
     return ("" + red + "," + green + "," + blue);
   }

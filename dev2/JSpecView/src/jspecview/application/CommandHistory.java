@@ -57,6 +57,7 @@ public class CommandHistory {
       addCommand(cmd);
       scripter.runScript(cmd);
       input.setText("");
+      input.requestFocusInWindow(); 
       return;
     case KeyEvent.VK_UP:
     case KeyEvent.VK_DOWN:

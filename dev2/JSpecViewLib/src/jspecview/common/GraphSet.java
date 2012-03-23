@@ -580,7 +580,7 @@ abstract class GraphSet {
   void mouseReleasedEvent() {
     PlotWidget thisWidget = pd.thisWidget;
     if (pd.isIntegralDrag) {
-      if (!isGoodEvent(zoomBox1D, null, true)) {
+      if (isGoodEvent(zoomBox1D, null, true)) {
         checkIntegral(toX(zoomBox1D.xPixel0), toX(zoomBox1D.xPixel1), true);
         zoomBox1D.xPixel1 = zoomBox1D.xPixel0;
         pd.repaint();
@@ -2031,7 +2031,6 @@ abstract class GraphSet {
     PeakInfo pi;
     for (int i = graphSets.size(); --i >= 0; )
       if ((pi = graphSets.get(i).findPeak(fileName, index)) != null) {
-        System.out.println(" found " + pi);
         return pi;
       }
     return null;

@@ -129,7 +129,8 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     repaint();    
   }
 
-  protected void doRequestFocusInWindow() {
+  public void doRequestFocusInWindow() {
+    System.out.println(this + " requesting focus");
     requestFocusInWindow();
   }
 
@@ -534,7 +535,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
       popup.show((JPanel) this, e.getX(), e.getY());
       return;
     }
-    requestFocusInWindow();
+    doRequestFocusInWindow();
     pd.doMouseClicked(e.getX(), e.getY(), e.getClickCount(), e.isControlDown());
   }
 

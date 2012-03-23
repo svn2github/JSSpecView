@@ -17,4 +17,9 @@ public class Integral {
     this.y1 = y1;
     this.y2 = y2;
   }
+  
+  @Override
+  public String toString() {
+    return "integral val=" + value + " " + x1 + " " + x2;
+  }
 }

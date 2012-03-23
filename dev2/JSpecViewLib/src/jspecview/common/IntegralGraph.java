@@ -356,8 +356,7 @@ public class IntegralGraph implements Graph {
     if (integrals == null)
       integrals = new ArrayList<Integral>();
     Integral in = new Integral(intVal, x1, x2, getYValueAt(x1), getYValueAt(x2));
-    if (isFinal)
-      clearIntegrals(x1, x2);
+    clearIntegrals(x1, x2);
     if (isFinal || integrals.size() == 0) {
       integrals.add(in);
     } else {

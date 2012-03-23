@@ -523,7 +523,8 @@ public class PanelData {
     plotAreaHeight = height - (top + bottom);
     boolean isResized = (thisWidth != width || thisPlotHeight != plotAreaHeight);
     if (isResized) {
-      owner.requestFocusInWindow();
+      // this seems unnecessary, and it prevents focus returning to the script command line
+      //owner.doRequestFocusInWindow();
     }
     thisWidth = width;
     thisPlotHeight = plotAreaHeight;
@@ -716,6 +717,8 @@ public class PanelData {
     if (gs == null)
       return;
     isIntegralDrag = (isControlDown && gs.getSpectrum().getIntegrationGraph() != null);
+    if (isControlDown && !isIntegralDrag)
+      return;
     setCurrentGraphSet(gs);
     gs.checkWidgetEvent(xPixel, yPixel, true);
   }

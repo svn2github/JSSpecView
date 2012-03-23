@@ -2,7 +2,6 @@ package jspecview.common;
 
 public interface JSVPanel extends JSVContainer {
 
-  boolean requestFocusInWindow();
   void repaint();
 
   Object getColor(ScriptToken st);
@@ -22,5 +21,6 @@ public interface JSVPanel extends JSVContainer {
   Object getPopup();
   void setToolTipText(String s);
   void setColor(ScriptToken st, Object color);
+  void doRequestFocusInWindow();
   
 }

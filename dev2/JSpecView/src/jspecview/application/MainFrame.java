@@ -1078,6 +1078,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
       public void keyPressed(KeyEvent e) {
         commandHistory.keyPressed(e.getKeyCode());
         checkCommandLineForTip(e.getKeyChar());
+        commandInput.requestFocusInWindow();
       }
 
       public void keyReleased(KeyEvent e) {
@@ -2644,7 +2645,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
       if (specNodes.get(i).jsvp == selectedPanel)
         break;
     setFrameAndTreeNode(i + n);
-    selectedPanel.requestFocusInWindow();
+    selectedPanel.doRequestFocusInWindow();
   }
 
   static JSVPanel getPanel0(JSVFrame frame) {
@@ -2863,11 +2864,14 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   }
 
   public void execScriptComplete(String msg, boolean isOK) {
-    if (msg == null)
-      commandInput.requestFocusInWindow();
-    else
+    if (msg != null) {
       writeStatus(msg);
-    repaint();
+      if (msg.length() == 0)
+        msg = null;
+    }
+    if (msg == null) {
+      commandInput.requestFocus();
+    }
   }
 
   public JSVPanel execSetSpectrum(String value) {

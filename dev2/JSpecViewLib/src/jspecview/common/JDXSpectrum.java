@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.List;
 
 import jspecview.source.JDXSourceStreamTokenizer;
+import jspecview.util.Logger;
 
 /**
  * <code>JDXSpectrum</code> implements the Interface Spectrum for the display of
@@ -119,16 +120,15 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     peakList = list;
     for (int i = list.size(); --i >= 0; )
       peakList.get(i).spectrum = this;
-    System.out.println("Spectrum " + getTitle() + " peaks: " + list.size());
+    if (Logger.debugging)
+      Logger.info("Spectrum " + getTitle() + " peaks: " + list.size());
     return list.size();
   }
 
   public PeakInfo findPeakByFileIndex(String filePath, String index) {
-    System.out.println("JDXSPECTRUM findPeakByFileIndex " + this);
     if (peakList != null && peakList.size() > 0)
       for (int i = 0; i < peakList.size(); i++)
         if (peakList.get(i).checkFileIndex(filePath, index)) {
-          System.out.println("oK: " + peakList.get(i));
           return (selectedPeak = peakList.get(i));
         }
     return null;

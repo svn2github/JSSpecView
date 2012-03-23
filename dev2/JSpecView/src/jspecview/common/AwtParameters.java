@@ -15,6 +15,7 @@ public class AwtParameters extends Parameters {
   public AwtParameters(String name) {
     super(name);
     setDefaultColors(defaultColors);
+    System.out.println("awtparam init inte " + getColor(ScriptToken.INTEGRALPLOTCOLOR));
     setParamDefaults();
     plotColors = new Color[defaultPlotColors.length];
     System.arraycopy(defaultPlotColors, 0, (Color[])plotColors, 0, defaultPlotColors.length);

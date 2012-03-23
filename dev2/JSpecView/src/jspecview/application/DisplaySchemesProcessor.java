@@ -160,7 +160,7 @@ public class DisplaySchemesProcessor {
         }
         if (theTag.equals("displayscheme")) {
           String name = reader.getAttrValue("name");
-          ds = new Parameters(name);
+          ds = new AwtParameters(name);
           if (name.equals(defaultDS))
             ds.setDefault(true);
           displaySchemes.put(name, ds);
