@@ -14,11 +14,9 @@ import jspecview.util.Parser;
 
 abstract class GraphSet {
 
-  abstract void addHighlight(double x1, double x2, Graph spec, Object oColor);
   abstract protected void disposeImage();
   abstract protected void draw2DImage(Object g);
   abstract protected void drawHandle(Object g, int x, int y);
-  abstract protected void drawHighlights(Object g, Graph spec);
   abstract protected void drawLine(Object g, int x0, int y0, int x1, int y1);
   abstract protected void drawRect(Object g, int xPixel02, int yPixel02,
                                    int xPixels2, int yPixels2);
@@ -32,41 +30,21 @@ abstract class GraphSet {
                                     int offsetX, int offsetY);
   abstract Annotation getAnnotation(List<String> args, Annotation lastAnnotation);
   abstract protected boolean get2DImage();
-  abstract protected String getCoordString();
   abstract protected int getFontHeight(Object g);
-  abstract protected NumberFormat getFormatter(String hash);
   abstract protected GraphSet getGraphSet(Object jsvp);
   abstract protected String getInput(String message, String title, String sval);
-  abstract protected PlotWidget getThisWidget();
   abstract protected int getStringWidth(Object g, String s);
-  abstract protected boolean isCurrentGraphSet();
-  abstract protected boolean isIntegralDrag();
-  abstract protected void notifyPeakPickedListeners();
-  abstract protected void notifyPeakListeners(PeakInfo peak);
-  abstract protected void notifySubSpectrumChange(int i, JDXSpectrum spectrum);
-  abstract void refresh();
-  abstract void removeAllHighlights(Graph graph);
-  abstract void removeHighlight(int index);
-  abstract void removeHighlight(double x1, double x2);
-  abstract void repaint();
   abstract protected void setAnnotationColor(Object g, Annotation note, ScriptToken whatColor);
   abstract protected void setColor(Object g, ScriptToken plotcolor);
-  abstract protected Coordinate setCoordClicked(double x, double y);
-  abstract protected void setCoordStr(String string);
   abstract protected void setCurrentBoxColor(Object g);
-  abstract protected void setFont(Object g, int width, int face, int size,
-                                  boolean b);
-  abstract protected void setIntegralDrag(boolean b);
   abstract protected void setPlotColor(Object g, int i);
   abstract void setPlotColors(Object oColors);
   abstract void setPlotColor0(Object oColor);
-  abstract protected boolean setStartupPinTip();  
-  abstract protected void setThisWidget(PlotWidget widget);
-  abstract protected void setToolTipText(String s);
   abstract boolean update2dImage(boolean b);
 
 
 
+  protected List<Highlight> highlights = new ArrayList<Highlight>();
   protected List<Graph> spectra = new ArrayList<Graph>(2);
 
   int getNumberOfSpectra() {
@@ -82,6 +60,7 @@ abstract class GraphSet {
   protected ImageScaleData isd;
   private List<Graph> graphsTemp = new ArrayList<Graph>();
   protected PlotWidget[] widgets;
+  protected PanelData pd;
 
 
   void dispose() {
@@ -130,7 +109,7 @@ abstract class GraphSet {
   protected int currentZoomIndex;
   protected int nSpectra;
   protected int iThisSpectrum = -1;
-  protected double lastClickX;
+  private double lastClickX;
 
   double userYFactor = 1;
   protected double xFactorForScale, yFactorForScale;
@@ -554,11 +533,11 @@ abstract class GraphSet {
         if (sticky2Dcursor) {
           addAnnotation(
               getAnnotation(isd.toX(xPixel), isd.toSubspectrumIndex(yPixel),
-                  getCoordString(), false, true, 5, 5), true);
+                  pd.coordStr, false, true, 5, 5), true);
         }
         sticky2Dcursor = !sticky2Dcursor;
         set2DCrossHairs(xPixel, yPixel);
-        repaint();
+        pd.repaint();
         return;
       }
       if (isInTopBar(xPixel, yPixel)) {
@@ -580,14 +559,14 @@ abstract class GraphSet {
           .toSubspectrumIndex(yPixel));
       Annotation a = findAnnotation2D(xy);
       if (a != null && setAnnotationText(a)) {
-        repaint();
+        pd.repaint();
         return;
       }
     }
     if (is2D) {
       sticky2Dcursor = false;
       set2DCrossHairs(xPixel, yPixel);
-      repaint();
+      pd.repaint();
       return;
     }
     if (xPixel != fixX(xPixel) || yPixel != fixY(yPixel)) {
@@ -595,18 +574,18 @@ abstract class GraphSet {
     } else {
       setCoordClicked(toX(xPixel), toY(yPixel));
     }
-    notifyPeakPickedListeners();
+    pd.notifyPeakPickedListeners();
   }
 
   void mouseReleasedEvent() {
-    PlotWidget thisWidget = getThisWidget();
-    if (isIntegralDrag()) {
+    PlotWidget thisWidget = pd.thisWidget;
+    if (pd.isIntegralDrag) {
       if (!isGoodEvent(zoomBox1D, null, true)) {
         checkIntegral(toX(zoomBox1D.xPixel0), toX(zoomBox1D.xPixel1), true);
         zoomBox1D.xPixel1 = zoomBox1D.xPixel0;
-        repaint();
+        pd.repaint();
       }
-      setIntegralDrag(false);
+      pd.isIntegralDrag = false;
     } else if (thisWidget == zoomBox2D) {
       if (!isGoodEvent(zoomBox2D, null, true))
         return;
@@ -641,13 +620,13 @@ abstract class GraphSet {
     setToolTipForPixels(xPixel, yPixel, display1D);
     if (isd != null && !display1D && sticky2Dcursor)
       set2DCrossHairs(xPixel, yPixel);
-    repaint();
+    pd.repaint();
   }
 
   boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
     if (!enableZoom)
       return false;
-    PlotWidget widget = getThisWidget();
+    PlotWidget widget = pd.thisWidget;
     if (isPress) {
       widget = getPinSelected(xPixel, yPixel);
       if (widget == null) {
@@ -655,7 +634,7 @@ abstract class GraphSet {
         if (xPixel < xPixel1) {
           xPixel = fixX(xPixel);
           zoomBox1D.setX(toX(xPixel), xPixel);
-          zoomBox1D.yPixel0 = (isIntegralDrag() ? yPixel0 : yPixel);
+          zoomBox1D.yPixel0 = (pd.isIntegralDrag ? yPixel0 : yPixel);
           widget = zoomBox1D;
         } else if (isd != null && xPixel < isd.xPixel1) {
           zoomBox2D.setX(isd.toX(xPixel), isd.fixX(xPixel));
@@ -663,7 +642,7 @@ abstract class GraphSet {
           widget = zoomBox2D;
         }
       }
-      setThisWidget(widget);
+      pd.thisWidget = widget;
       return true;
     }
     if (widget == null)
@@ -672,8 +651,8 @@ abstract class GraphSet {
     // mouse drag with widget
     if (widget == zoomBox1D) {
       zoomBox1D.xPixel1 = fixX(xPixel);
-      zoomBox1D.yPixel1 = (isIntegralDrag() ? yPixel1 : fixY(yPixel));
-      if (isIntegralDrag() && zoomBox1D.xPixel0 != zoomBox1D.xPixel1)
+      zoomBox1D.yPixel1 = (pd.isIntegralDrag ? yPixel1 : fixY(yPixel));
+      if (pd.isIntegralDrag && zoomBox1D.xPixel0 != zoomBox1D.xPixel1)
         checkIntegral(zoomBox1D.getXVal(), toX(zoomBox1D.xPixel1), false);
       return true;
     }
@@ -831,12 +810,12 @@ abstract class GraphSet {
               false);
         } else if (pw == cur2Dy) {
           setCurrentSubSpectrum((int) val);
-          repaint();
+          pd.repaint();
         } else if (pw == pin2Dy0 || pw == pin2Dy1) {
           int val2 = (pw == pin2Dy0 ? pin2Dy1.yPixel0 : pin2Dy0.yPixel0);
           isd.setView0(pin2Dx0.xPixel0, isd.toPixelY((int) val),
               pin2Dx1.xPixel0, val2);
-          repaint();
+          pd.repaint();
         } else {
           double val2 = (pw == pin1Dy0 ? pin1Dy1.getYVal() : pin1Dy0.getYVal());
           doZoom(pin1Dx0.getXVal(), val, pin1Dx1.getXVal(), val2, true, true,
@@ -868,7 +847,7 @@ abstract class GraphSet {
       addHighlight(x1, x2, spec, null);
       if (ScaleData.isWithinRange(x1, multiScaleData)
           && ScaleData.isWithinRange(x2, multiScaleData))
-        repaint();
+        pd.repaint();
       else
         reset();
 
@@ -897,7 +876,6 @@ abstract class GraphSet {
   void toPeak(int istep) {
     istep *= (drawXAxisLeftToRight ? 1 : -1);
     JDXSpectrum spec = getSpectrum();
-    System.out.println(lastClickX);
     Coordinate coord = setCoordClicked(lastClickX, 0);
     int iPeak = spec.setNextPeak(coord, istep);
     if (iPeak < 0)
@@ -908,8 +886,24 @@ abstract class GraphSet {
     notifyPeakListeners(peak);
   }
 
+  private Coordinate setCoordClicked(double x, double y) {
+    if (Double.isNaN(x)) {
+      pd.coordClicked = null;
+      pd.coordsClicked = null;
+      return null;
+    }
+    pd.coordClicked = new Coordinate(lastClickX = x, y);
+    pd.coordsClicked = getSpectrum().getXYCoords();
+    return pd.coordClicked;
+  }
+
+  protected void notifyPeakListeners(PeakInfo peak) {
+    pd.notifyListeners(new PeakPickEvent(pd.owner, pd.coordClicked,
+        peak == null ? PeakInfo.nullPeakInfo : peak));
+  }
+
   void escape() {
-    setThisWidget(null);
+    pd.thisWidget = null;
     zoomBox1D.xPixel0 = zoomBox1D.xPixel1 = zoomBox2D.xPixel0 = zoomBox2D.xPixel1 = 0;
   }
 
@@ -1183,7 +1177,7 @@ abstract class GraphSet {
     if (addZoom)
       addCurrentZoom();
     if (doRepaint)
-      repaint();
+      pd.repaint();
   }
 
   void setCurrentSubSpectrum(int i) {
@@ -1191,7 +1185,7 @@ abstract class GraphSet {
     i = spec0.setCurrentSubSpectrum(i);
     if (spec0.isForcedSubset())
       multiScaleData.setXRange(getSpectrum());
-    notifySubSpectrumChange(i, getSpectrum());
+    pd.notifySubSpectrumChange(i, getSpectrum());
   }
 
 
@@ -1235,7 +1229,7 @@ abstract class GraphSet {
     currentZoomIndex = i;
     multiScaleData = zoomInfoList.get(i);
     resetPinsFromMultiScaleData();
-    refresh();
+    pd.refresh();
   }
 
   /**
@@ -1519,7 +1513,7 @@ abstract class GraphSet {
       setColor(g, ScriptToken.GRIDCOLOR);
       drawRect(g, xPixel0, yPixel0, xPixels, yPixels);
     }
-    if (isCurrentGraphSet() && fracY != 1) {
+    if (this == pd.currentGraphSet && fracY != 1) {
       setCurrentBoxColor(g);
       drawRect(g, xPixel00 + 10, yPixel00 + 1, xPixel11 - xPixel00 - 20,
           yPixel11 - yPixel00 - 2);
@@ -1568,8 +1562,8 @@ abstract class GraphSet {
     List<Integral> integrals = getSpectrum().getIntegrals();
     if (integrals == null)
       return;
-    setFont(g, width, FONT_BOLD, 12, false);
-    NumberFormat formatter = getFormatter("#0.0");
+    pd.setFont(g, width, FONT_BOLD, 12, false);
+    NumberFormat formatter = pd.getFormatter("#0.0");
     setColor(g, ScriptToken.INTEGRALPLOTCOLOR);
 
     for (int i = integrals.size(); --i >= 0;) {
@@ -1606,8 +1600,8 @@ abstract class GraphSet {
     if (multiScaleData.hashNums[0] <= 0)
       hashX = hash1.substring(0, Math.abs(multiScaleData.hashNums[0]) + 3);
 
-    NumberFormat formatter = getFormatter(hashX);
-    setFont(g, width, FONT_PLAIN, 12, false);
+    NumberFormat formatter = pd.getFormatter(hashX);
+    pd.setFont(g, width, FONT_PLAIN, 12, false);
     int y1 = yPixel1;
     int y2 = yPixel1 + 3;
     double maxWidth = Math
@@ -1656,8 +1650,8 @@ abstract class GraphSet {
     String hash1 = "0.00000000";
     if (multiScaleData.hashNums[1] <= 0)
       hashY = hash1.substring(0, Math.abs(multiScaleData.hashNums[1]) + 3);
-    NumberFormat formatter = getFormatter(hashY);
-    setFont(g, width, FONT_PLAIN, 12, false);
+    NumberFormat formatter = pd.getFormatter(hashY);
+    pd.setFont(g, width, FONT_PLAIN, 12, false);
     double max = multiScaleData.maxYOnScale + multiScaleData.yStep / 2;
     for (double val = multiScaleData.minYOnScale; val < max; val += multiScaleData.yStep) {
       int x1 = (int) xPixel0;
@@ -1688,7 +1682,7 @@ abstract class GraphSet {
   private void drawUnits(Object g, int width, String s, int x, int y,
                          double hOff, double vOff) {
     setColor(g, ScriptToken.UNITSCOLOR);
-    setFont(g, width, FONT_ITALIC, 10, false);
+    pd.setFont(g, width, FONT_ITALIC, 10, false);
     drawString(g, s, (int) (x - getStringWidth(g, s) * hOff),
         (int) (y + getFontHeight(g) * vOff));
   }
@@ -1707,11 +1701,143 @@ abstract class GraphSet {
     drawUnits(g, width, spectra.get(0).getYUnits(), 5, yPixel0, 0, -1);
   }
 
+  /**
+   * Private class to represent a Highlighted region of the spectrum display
+   * <p>
+   * Title: JSpecView
+   * </p>
+   * <p>
+   * Description: JSpecView is a graphical viewer for chemical spectra specified
+   * in the JCAMP-DX format
+   * </p>
+   * <p>
+   * Copyright: Copyright (c) 2002
+   * </p>
+   * <p>
+   * Company: Dept. of Chemistry, University of the West Indies, Mona Campus,
+   * Jamaica
+   * </p>
+   * 
+   * @author Debbie-Ann Facey
+   * @author Khari A. Bryan
+   * @author Prof Robert.J. Lancashire
+   * @version 1.0.017032006
+   */
+  private class Highlight {
+    double x1;
+    double x2;
+    Object color;
+    Graph spectrum;
+
+    /**
+     * Constructor
+     * 
+     * @param x1
+     *        starting x coordinate
+     * @param x2
+     *        ending x coordinate
+     * @param spec
+     * @param color
+     *        the color of the highlighted region
+     */
+    Highlight(double x1, double x2, Graph spec, Object color) {
+      this.x1 = x1;
+      this.x2 = x2;
+      this.color = color;
+      spectrum = spec;
+    }
+
+    /**
+     * Overides the equals method in class <code>Object</code>
+     * 
+     * @param obj
+     *        the object that this <code>Highlight<code> is compared to
+     * @return true if equal
+     */
+    @Override
+    public boolean equals(Object obj) {
+      if (!(obj instanceof Highlight))
+        return false;
+      Highlight hl = (Highlight) obj;
+
+      return ((hl.x1 == this.x1) && (hl.x2 == this.x2));
+    }
+  }
+
+  /**
+   * Add information about a region of the displayed spectrum to be highlighted
+   * 
+   * @param x1
+   *        the x value of the coordinate where the highlight should start
+   * @param x2
+   *        the x value of the coordinate where the highlight should end
+   * @param spec
+   * @param color
+   *        the color of the highlight
+   */
+  void addHighlight(double x1, double x2, Graph spec, Object oColor) {
+    if (spec == null)
+      spec = getSpectrumAt(0);
+    Highlight hl = new Highlight(x1, x2, spec, (oColor == null ? 
+        pd.getHighlightColor() : oColor));
+    if (!highlights.contains(hl))
+      highlights.add(hl);
+  }
+
+  /**
+   * Remove the highlight at the specified index in the internal list of
+   * highlights The index depends on the order in which the highlights were
+   * added
+   * 
+   * @param index
+   *        the index of the highlight in the list
+   */
+  void removeHighlight(int index) {
+    highlights.remove(index);
+  }
+
+  /**
+   * Remove the highlight specified by the starting and ending x value
+   * 
+   * @param x1
+   *        the x value of the coordinate where the highlight started
+   * @param x2
+   *        the x value of the coordinate where the highlight ended
+   */
+  void removeHighlight(double x1, double x2) {
+    for (int i = highlights.size(); --i >= 0;) {
+      Highlight h = highlights.get(i);
+      if (h.x1 == x1 && h.x2 == x2)
+        highlights.remove(i);
+    }
+  }
+
+  void removeAllHighlights(Graph spec) {
+    if (spec == null)
+      highlights.clear();
+    else
+      for (int i = highlights.size(); --i >= 0;)
+        if (highlights.get(i).spectrum == spec)
+          highlights.remove(i);
+    pd.repaint();
+  }
+
+  void drawHighlights(Object g, Graph spec) {
+    for (int i = 0; i < highlights.size(); i++) {
+      Highlight hl = highlights.get(i);
+      if (hl.spectrum == spec) {
+        pd.setHighlightColor(hl.color);
+        drawBar(g, hl.x1, hl.x2, ScriptToken.HIGHLIGHTCOLOR,
+            true);
+      }
+    }
+  }
+
   // determine whether there are any ratio annotations to draw
   private void drawAnnotations(Object g, int height, int width,
                                ArrayList<Annotation> annotations,
                                ScriptToken whatColor) {
-    setFont(g, width, FONT_BOLD, 12, false);
+    pd.setFont(g, width, FONT_BOLD, 12, false);
     for (int i = annotations.size(); --i >= 0;) {
       Annotation note = annotations.get(i);
       setAnnotationColor(g, note, whatColor);
@@ -1749,7 +1875,7 @@ abstract class GraphSet {
           true, true, false);
     } else {
       isd.setView0(pin2Dx0.xPixel0, isd.yPixel0, pin2Dx1.xPixel0, isd.yPixel1);
-      repaint();
+      pd.repaint();
     }
   }
 
@@ -1766,7 +1892,7 @@ abstract class GraphSet {
 
   private void clearIntegrals() {
     checkIntegral(Double.NaN, 0, false);
-    repaint();
+    pd.repaint();
   }
 
   private void checkIntegral(double x1, double x2, boolean isFinal) {
@@ -1781,11 +1907,11 @@ abstract class GraphSet {
     String hash1 = "0.00000000";
     if (multiScaleData.hashNums[0] <= 0)
       hashX = hash1.substring(0, Math.abs(multiScaleData.hashNums[0]) + 3);
-    NumberFormat formatterX = getFormatter(hashX);
+    NumberFormat formatterX = pd.getFormatter(hashX);
     String hashY = "#";
     if (multiScaleData.hashNums[1] <= 0)
       hashY = hash1.substring(0, Math.abs(multiScaleData.hashNums[1]) + 3);
-    NumberFormat formatterY = getFormatter(hashY);
+    NumberFormat formatterY = pd.getFormatter(hashY);
 
     PlotWidget pw = getPinSelected(xPixel, yPixel);
     if (pw != null) {
@@ -1813,7 +1939,7 @@ abstract class GraphSet {
       } else {
         s = formatterY.format(pw.getYVal());
       }
-      setToolTipText(s);
+      pd.setToolTipText(s);
       return;
     }
 
@@ -1821,14 +1947,14 @@ abstract class GraphSet {
       int isub = isd.toSubspectrumIndex(yPixel);
       String s = formatterX.format(isd.toX(xPixel)) + " "
           + getSpectrum().getXUnits() + ",  " + get2DYLabel(isub, formatterX);
-      setToolTipText(display1D ? s : "");
-      setCoordStr(s);
+      pd.setToolTipText(display1D ? s : "");
+      pd.coordStr = s;
       return;
     }
 
     if (isd != null && !display1D) {
-      setToolTipText("");
-      setCoordStr("");
+      pd.setToolTipText("");
+      pd.coordStr = "";
       return;
     }
     double xPt = toX(fixX(xPixel));
@@ -1836,8 +1962,8 @@ abstract class GraphSet {
 
     double yPt = (isd != null && isd.isXWithinRange(xPixel) ? isd
         .toSubspectrumIndex(fixY(yPixel)) : toY(fixY(yPixel)));
-    formatterY = getFormatter(hashY);
-    setCoordStr("(" + xx + ", " + formatterY.format(yPt) + ")");
+    formatterY = pd.getFormatter(hashY);
+    pd.coordStr = "(" + xx + ", " + formatterY.format(yPt) + ")";
     if (xPixel != fixX(xPixel) || yPixel != fixY(yPixel)) {
       yPt = Double.NaN;
     } else if (nSpectra == 1) {
@@ -1848,11 +1974,20 @@ abstract class GraphSet {
       //        }
     } else if (getSpectrum().getIntegrationGraph() != null) {
       yPt = spectra.get(1).getPercentYValueAt(xPt);
-      xx += ", " + getFormatter("#0.0").format(yPt);
+      xx += ", " + pd.getFormatter("#0.0").format(yPt);
     }
-    setToolTipText(Double.isNaN(yPt) ? null : xx);
+    pd.setToolTipText(Double.isNaN(yPt) ? null : xx);
   }
   
+  private boolean setStartupPinTip() {
+    if (pd.startupPinTip == null)
+      return false;
+    pd.setToolTipText(pd.startupPinTip);
+    pd.startupPinTip = null;
+    return true;
+  }
+
+
   private String get2DYLabel(int isub, NumberFormat formatterX) {
     JDXSpectrum spec = getSpectrumAt(0).getSubSpectra().get(isub);
     return formatterX.format(spec.getY2D())
@@ -1865,7 +2000,7 @@ abstract class GraphSet {
     int i = spec0.advanceSubSpectrum(dir);
     if (spec0.isForcedSubset())
       multiScaleData.setXRange(getSpectrum());
-    notifySubSpectrumChange(i, getSpectrum());
+    pd.notifySubSpectrumChange(i, getSpectrum());
   }
 
   String getSolutionColor() {

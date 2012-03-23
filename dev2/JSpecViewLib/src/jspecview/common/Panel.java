@@ -20,5 +20,6 @@ interface Panel {
   Object getPlotColor(int i);
   void setPlotColors(Object plotColors);
   Object getPopup();
-
+  void setToolTipText(String s);
+  void setColor(ScriptToken st, Object color);
 }

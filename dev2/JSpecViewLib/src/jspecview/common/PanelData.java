@@ -69,7 +69,7 @@ public class PanelData {
   
   // Critical fields
 
-  private Panel owner;
+  Panel owner;
   private ArrayList<PanelListener> listeners = new ArrayList<PanelListener>();
   List<GraphSet> graphSets;
   GraphSet currentGraphSet;
@@ -828,5 +828,24 @@ public class PanelData {
     return (spectrum == jsvp.getSpectrum() ? null : jsvp.getNewPanel(spectrum));
   }
 
+  public void repaint() {
+    owner.repaint();
+  }
+
+  public void setToolTipText(String s) {
+    owner.setToolTipText(s);
+  }
+
+  public Object getHighlightColor() {
+    return owner.getColor(ScriptToken.HIGHLIGHTCOLOR);
+  }
+
+  public void setHighlightColor(Object color) {
+    owner.setColor(ScriptToken.HIGHLIGHTCOLOR, color);
+  }
+
+  public String getSolutionColor() {
+    return currentGraphSet.getSolutionColor();
+  }
 
 }
