@@ -861,11 +861,12 @@ abstract class GraphSet {
     }
     boolean haveFound = false;
     for (int i = spectra.size(); --i >= 0;) {
+      if (!(spectra.get(i) instanceof JDXSpectrum))
+        continue;
       if ((filePath == null || getSpectrumAt(i).getFilePathForwardSlash()
           .equals(filePath))
           && (getSpectrumAt(i).matchesPeakTypeModel(type, model))) {
         iThisSpectrum = i;
-        System.out.println("have found it -- " + i);
         haveFound = true;
       }
     }
