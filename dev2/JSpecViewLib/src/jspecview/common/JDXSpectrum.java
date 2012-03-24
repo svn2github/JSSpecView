@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2010 The University of the West Indies
+/* Copyright (c) 2002-2012 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -32,6 +32,7 @@ import jspecview.util.Logger;
  * <code>JDXSpectrum</code> implements the Interface Spectrum for the display of
  * JDX Files.
  * 
+ * @author Bob Hanson
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
@@ -336,7 +337,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   }
 
   /**
-   * copy spectrum with new cooordinates
+   * copy spectrum with new coordinates
    * 
    * @param spectrum
    * @param newXYCoords
