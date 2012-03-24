@@ -12,15 +12,19 @@ public class JSViewer {
   public static PeakInfo selectPanelByPeak(ScriptInterface si, String peakScript,
                                            List<JSVSpecNode> specNodes,
                                            JSVPanel selectedPanel) {
+    System.out.println("JSViewer selectPanelByPeak " + peakScript);
     if (specNodes == null)
       return null;
     String file = Parser.getQuotedAttribute(peakScript, "file");
     String index = Parser.getQuotedAttribute(peakScript, "index");
     PeakInfo pi = null;
+    for (int i = specNodes.size(); --i >= 0;) 
+      specNodes.get(i).jsvp.getPanelData().processPeakSelect(null);
     if ((pi = selectedPanel.getPanelData().findPeak(file, index)) == null)
       for (int i = specNodes.size(); --i >= 0;) {
         JSVSpecNode node = specNodes.get(i);
         if ((pi = node.jsvp.getPanelData().findPeak(file, index)) != null) {
+          System.out.println("JSViewer setting spectrum to  " + node);
           si.setSpectrum(i);
           break;
         }
@@ -166,5 +170,32 @@ public class JSViewer {
     return true;
   }
 
+  public static void setOverlayLegendVisibility(ScriptInterface si,
+                                                JSVPanel jsvp, boolean showLegend) {
+    List<JSVSpecNode> specNodes = si.getSpecNodes();
+    JSVSpecNode node = JSVSpecNode.findNode(jsvp, specNodes);
+    for (int i = specNodes.size(); --i >= 0;)
+      showOverlayLegend(si, specNodes.get(i), specNodes.get(i) == node
+          && showLegend);
+  }
+
+  private static void showOverlayLegend(ScriptInterface si, JSVSpecNode node,
+                                        boolean visible) {
+    JSVDialog legend = (JSVDialog) node.legend;
+    if (legend == null && visible) {
+      legend = node.setLegend(node.jsvp.getPanelData()
+          .getNumberOfSpectraInCurrentSet() > 1
+          && node.jsvp.getPanelData().getNumberOfGraphSets() == 1 ? si
+          .getOverlayLegend(node.jsvp) : null);
+    }
+    if (legend != null)
+      legend.setVisible(visible);
+  }
+
+  public static void checkAutoOverlay(ScriptInterface si,
+                                      List<JSVSpecNode> specNodes) {
+    if (specNodes.get(0).jsvp.getSpectrumAt(0).isAutoOverlayFromJmolClick())
+      si.execOverlay("*");
+  }
   
 }

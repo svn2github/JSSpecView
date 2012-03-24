@@ -33,5 +33,6 @@ public interface ScriptInterface {
   public JSVPanel setSpectrum(int i);
   public String setSolutionColor(boolean b);
   public void syncToJmol(String value);
+  public JSVDialog getOverlayLegend(JSVPanel jsvp);
 
 }

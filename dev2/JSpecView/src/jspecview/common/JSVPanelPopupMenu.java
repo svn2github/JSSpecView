@@ -423,7 +423,8 @@ public class JSVPanelPopupMenu extends JPopupMenu {
     integrateCheckBoxMenuItem.setEnabled(isSingle && spec0.canIntegrate() || spec0.getIntegrationGraph() != null);
     solColMenuItem.setEnabled(isSingle && spec0.canShowSolutionColor());
     transAbsMenuItem.setEnabled(isSingle && spec0.canConvertTransAbs());
-    
+    overlayKeyMenuItem.setEnabled(isOverlaid && pd.getNumberOfGraphSets() == 1);
+    // what about its selection???
     if (appletSaveAsJDXMenu != null)
       appletSaveAsJDXMenu.setEnabled(spec0.canSaveAsJDX());
     if (appletExportAsMenu != null)
@@ -433,8 +434,6 @@ public class JSVPanelPopupMenu extends JPopupMenu {
     if (appletCompoundMenu != null) 
       appletCompoundMenu.setEnabled(
           appletCompoundMenu.isEnabled() && appletCompoundMenu.getItemCount() > 3);
-    if (overlayKeyMenuItem != null)
-      overlayKeyMenuItem.setEnabled(isOverlaid && pd.getNumberOfGraphSets() == 1);
   }
 
   static void addMenuItem(JMenu m, String key,

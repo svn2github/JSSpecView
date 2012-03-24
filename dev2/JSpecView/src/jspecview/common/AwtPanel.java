@@ -130,7 +130,6 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   }
 
   public void doRequestFocusInWindow() {
-    System.out.println(this + " requesting focus");
     requestFocusInWindow();
   }
 

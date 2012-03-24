@@ -47,7 +47,6 @@ import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Frame;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.dnd.DropTarget;
@@ -301,7 +300,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   private JButton overlayKeyButton = new JButton();
   private JMenu processingMenu = new JMenu();
   private JMenuItem errorLogMenuItem = new JMenuItem();
-  private JSVInterface jsv;
+  private JSVInterface advancedApplet;
 
   /**
    * Constructor
@@ -310,7 +309,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
    */
   public MainFrame(JSVInterface jsv) {
 
-    this.jsv = jsv;
+    this.advancedApplet = jsv;
     onProgramStart();
 
     // initialise MainFrame as a target for the drag-and-drop action
@@ -341,13 +340,13 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   }
 
   private void exitJSpecView(boolean withDialog) {
-    jsv.saveProperties(properties);
+    advancedApplet.saveProperties(properties);
     if (isEmbedded) {
       setVisible(false);
       return;
     }
     dsp.getDisplaySchemes().remove("Current");
-    jsv.exitJSpecView(withDialog && showExitDialog, this);
+    advancedApplet.exitJSpecView(withDialog && showExitDialog, this);
   }
 
   private Image icon;
@@ -458,7 +457,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     properties.setProperty("integralOffset", "30");
     properties.setProperty("integralPlotColor", "#ff0000");
 
-    jsv.setProperties(properties);
+    advancedApplet.setProperties(properties);
 
     dsp = new DisplaySchemesProcessor();
 
@@ -803,7 +802,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     JSVPanelPopupMenu.setMenuItem(preferencesMenuItem, 'P', "Preferences...",
         0, 0, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            preferencesMenuItem_actionPerformed(e);
+            showPreferencesDialog();
           }
         });
     JSVPanelPopupMenu.setMenuItem(contentsMenuItem, 'C', "Contents...", 112, 0,
@@ -991,7 +990,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     setButton(overlayKeyButton, "Display Key for Overlaid Spectra",
         overlayKeyIcon, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            overlayKeyButton_actionPerformed(e);
+            overlayKeyMenuItem_actionPerformed(e);
           }
         });
     overlayKeyButton.setEnabled(false);
@@ -1451,7 +1450,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
         && selectedPanel.getPanelData().getNumberOfGraphSets() == 1)
       JSVSpecNode.findNode(selectedPanel, specNodes).setLegend(
           new OverlayLegendDialog(this, jsvp));
-
     overlaySplitButton.setIcon(splitIcon);
     overlaySplitButton.setToolTipText("Split Display");
   }
@@ -1639,14 +1637,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
       return;
     spectraTree.setSelectionPath(new TreePath(((JSVTreeNode) node.treeNode)
         .getPath()));
-    setOverlayKeys(node);
-  }
-
-  private void setOverlayKeys(JSVSpecNode node) {
-    boolean showLegends = overlayKeyMenuItem.isSelected();
-    for (int i = specNodes.size(); --i >= 0;)
-      setLegendVisibility(specNodes.get(i), this, specNodes.get(i) == node
-          && showLegends);
+    JSViewer.setOverlayLegendVisibility(this, node.jsvp, overlayKeyMenuItem.isSelected());
   }
 
   /**
@@ -1678,8 +1669,8 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
    * ScriptInterface requires this. In the applet, this would be queued
    */
   public void runScript(String script) {
-    if (jsv != null)
-      jsv.runScript(script);
+    if (advancedApplet != null)
+      advancedApplet.runScript(script);
     else
       runScriptNow(script);
   }
@@ -1730,7 +1721,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   }
 
   private void setFrame(JSVSpecNode specNode, boolean fromTree) {
-    System.out.println("setFrame" + specNode);
     JSVFrame frame = (JSVFrame) specNode.frame;
     selectedPanel = specNode.jsvp;
     frame.setVisible(true);
@@ -1754,11 +1744,10 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   }
 
   public void panelEvent(Object eventObj) {
-    System.out.println("panelEvent " + eventObj);
     if (eventObj instanceof PeakPickEvent) {
       PeakPickEvent e = ((PeakPickEvent) eventObj);
       PeakInfo pi = e.getPeakInfo();
-      selectedPanel = (JSVPanel) e.getSource();
+      setSelectedPanel((JSVPanel) e.getSource());
       selectedPanel.getPanelData().processPeakSelect(pi);
       sendScript(e.toString());
       setMainTitle(pi.getTitle());
@@ -1774,6 +1763,10 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
         // pass on to menu
         advanceSpectrumBy(-e.getSubIndex());
     }
+  }
+
+  private void setSelectedPanel(JSVPanel jsvp) {
+    selectedPanel = jsvp;
   }
 
   private void setMainTitle(String title) {
@@ -1802,8 +1795,13 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
    * @param e
    *        the ActionEvent
    */
-  protected void overlayKeyButton_actionPerformed(ActionEvent e) {
-    overlayKeyMenuItem_actionPerformed(e);
+  protected void overlayKeyMenuItem_actionPerformed(ActionEvent e) {
+    JSVPanel jsvp = getCurrentJSVPanel();
+    if (jsvp == null)
+      return;
+    overlayKeyMenuItem.setSelected(!overlayKeyMenuItem.isSelected());
+    boolean showLegend = overlayKeyMenuItem.isSelected();
+    JSViewer.setOverlayLegendVisibility(this, jsvp, showLegend);
   }
 
   /**
@@ -1863,7 +1861,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
    * @param e
    *        the ActionEvent
    */
-  void preferencesMenuItem_actionPerformed(ActionEvent e) {
+  void showPreferencesDialog() {
     PreferencesDialog pd = new PreferencesDialog(this, "Preferences", true,
         properties, dsp);
     properties = pd.getPreferences();
@@ -2297,20 +2295,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   }
 
   /**
-   * Shows the legend or key for the overlaid spectra
-   * 
-   * @param e
-   *        the ActionEvent
-   */
-  protected void overlayKeyMenuItem_actionPerformed(ActionEvent e) {
-    JSVPanel jsvp = getCurrentJSVPanel();
-    if (jsvp == null)
-      return;
-    overlayKeyMenuItem.setSelected(!overlayKeyMenuItem.isSelected());
-    setOverlayKeys(JSVSpecNode.findNode(jsvp, specNodes));
-  }
-
-  /**
    * Shows dialog to open a file
    * 
    * @param e
@@ -2493,20 +2477,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
   }
 
-  private void setLegendVisibility(JSVSpecNode node, Frame frame,
-                                   boolean visible) {
-    JSVDialog legend = (JSVDialog) node.legend;
-    if (legend == null && visible) {
-      node
-          .setLegend(node.jsvp.getPanelData().getNumberOfSpectraInCurrentSet() > 1
-              && node.jsvp.getPanelData().getNumberOfGraphSets() == 1 ? new OverlayLegendDialog(
-              frame, node.jsvp)
-              : null);
-    }
-    if (legend != null)
-      legend.setVisible(visible);
-  }
-
   /**
    * Listener for a JSVFrame
    */
@@ -2682,16 +2652,15 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
    * @param peak
    */
   public void sendScript(String peak) {
-    String msg = Escape.jmolSelect(peak);
-    syncToJmol(msg);
+    syncToJmol(Escape.jmolSelect(peak));
   }
 
   public void syncToJmol(String msg) {
-    Logger.info("JSpecView MainFrame syncToJmol: " + msg);
+    System.out.println("JSV>Jmol " + msg);
     if (jmol != null) // MainFrame --> embedding application
       jmol.syncScript(msg);
-    if (jsv != null) // MainFrame --> embedding applet
-      jsv.syncToJmol(msg);
+    else if (advancedApplet != null) // MainFrame --> embedding applet
+      advancedApplet.syncToJmol(msg);
   }
 
   /**
@@ -2699,6 +2668,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
    * from Jmol
    */
   public void syncScript(String peakScript) {
+    System.out.println("Jmol>JSV " + peakScript);
     if (peakScript.indexOf("<PeakData") < 0) {
       runScriptNow(peakScript);
       return;
@@ -2707,12 +2677,10 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     String index = Parser.getQuotedAttribute(peakScript, "index");
     if (file == null || index == null)
       return;
-    Logger.info("JSpecView MainFrame.syncScript: " + peakScript);
     if (!selectMostRecentPanelByFileName(file)) {
       closeSource(null);
       openDataOrFile(null, null, null, file, -1, -1);
-      System.out.println("doing overlay now");
-      execOverlay("*");
+      JSViewer.checkAutoOverlay(this, specNodes);
     }
     PeakInfo pi = JSViewer.selectPanelByPeak(this, peakScript, specNodes,
         selectedPanel);
@@ -2898,5 +2866,9 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     return selectedPanel.getPanelData();
   }
 
+  public JSVDialog getOverlayLegend(JSVPanel jsvp) {
+    return new OverlayLegendDialog(this, jsvp);
+  }
+  
 
 }

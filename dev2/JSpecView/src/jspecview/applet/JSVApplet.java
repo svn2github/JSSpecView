@@ -77,6 +77,7 @@ import javax.swing.event.ChangeListener;
 import jspecview.common.AwtPanel;
 import jspecview.common.IntegralGraph;
 import jspecview.common.JSVContainer;
+import jspecview.common.JSVDialog;
 import jspecview.common.JSVDropTargetListener;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSVSpecNode;
@@ -471,7 +472,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
    * 
    */
   public void syncScript(String peakScript) {
-    Logger.info("jsvapplet syncScript " + peakScript);
+    Logger.info("Jmol>JSV " + peakScript);
     if (peakScript.indexOf("<PeakData") < 0) {
       runScript(peakScript);
       return;
@@ -481,8 +482,10 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     //    System.out.println("jsvapplet syncScript file/index " + fileName + " " + index);
     if (file == null || index == null)
       return;
-    if (!JSVSpecNode.isOpen(specNodes, file))
+    if (!JSVSpecNode.isOpen(specNodes, file)) {
       closeAllAndOpenFile(file);
+      JSViewer.checkAutoOverlay(this, specNodes);
+    }
     PeakInfo pi = JSViewer.selectPanelByPeak(this, peakScript, specNodes,
         selectedPanel);
     selectedPanel.getPanelData().processPeakSelect(pi);
@@ -873,13 +876,13 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
   }
 
   /**
-   * Overlays the Spectra
+   * Shows a floating overlay key if possible
    * 
    * @param e
    *        the ActionEvent
    */
-  protected void overlayKeyMenuItem_actionPerformed(ActionEvent e) {
-    new OverlayLegendDialog(selectedPanel);
+  protected void showOverlayKey(boolean visible) {
+    JSViewer.setOverlayLegendVisibility(this, selectedPanel, visible);
   }
 
   private String fullName;
@@ -1340,7 +1343,7 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
    * @param msg
    */
   public void syncToJmol(String msg) {
-    System.out.println("syncToJmol " + msg);
+    System.out.println("JSV>Jmol " + msg);
     callToJavaScript(syncCallbackFunctionName, new Object[] { fullName, msg });    
   }
 
@@ -1352,7 +1355,6 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
       PeakPickEvent e = (PeakPickEvent) eventObj;
       PeakInfo pi = e.getPeakInfo();
       setSelectedPanel((JSVPanel) e.getSource());
-      System.out.println("panelEvent sending to selected panel; " + pi);
       selectedPanel.getPanelData().processPeakSelect(pi);
       sendScript(pi.toString());
       if (!pi.isClearAll())
@@ -1537,6 +1539,10 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
 
   public PanelData getPanelData() {
     return selectedPanel.getPanelData();  
+  }
+
+  public JSVDialog getOverlayLegend(JSVPanel jsvp) {
+    return  new OverlayLegendDialog(null, selectedPanel);
   }
 
 }

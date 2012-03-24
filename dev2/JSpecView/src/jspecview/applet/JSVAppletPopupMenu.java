@@ -86,7 +86,7 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     overlayKeyMenuItem.setText("Show Overlay Key...");
     overlayKeyMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        applet.overlayKeyMenuItem_actionPerformed(e);
+        overlayKeyMenuItem_actionPerformed();
       }
     });
 
@@ -139,6 +139,13 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     zoomMenu.add(clearMenuItem);
     zoomMenu.add(userZoomMenuItem);
     aboutMenu.add(versionMenuItem);
+  }
+
+  protected void overlayKeyMenuItem_actionPerformed() {
+    //TODO: test this -- doesn't account for selected panels? 
+    overlayKeyMenuItem.setSelected(!overlayKeyMenuItem.isSelected());
+    boolean visible = overlayKeyMenuItem.isSelected();
+    applet.showOverlayKey(visible);
   }
 
   public void setCompoundMenu(JDXSource currentSource,

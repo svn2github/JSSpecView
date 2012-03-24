@@ -41,10 +41,11 @@ public class JSVSpecNode {
     return jsvp.getSpectrum();
   }
 
-  public void setLegend(JSVDialog legend) {
+  public JSVDialog setLegend(JSVDialog legend) {
     if (this.legend != null)
       this.legend.dispose();
     this.legend = legend;
+    return legend;
   }
 
   public JSVSpecNode(String id, String fileName, JDXSource source, JSVContainer frame,
@@ -56,7 +57,6 @@ public class JSVSpecNode {
     this.jsvp = jsvp;
     if (jsvp != null)
       jsvp.getSpectrumAt(0).setId(id);
-    //System.out.println("TREE NODE fileName=" + fileName + " source.filePath=" + (source == null ? "null" : source.getFilePath()));
   }
 
   @Override
@@ -221,6 +221,5 @@ public class JSVSpecNode {
           return true;
     return false;
   }
-
 
 }

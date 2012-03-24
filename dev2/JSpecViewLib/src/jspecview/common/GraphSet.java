@@ -829,10 +829,10 @@ abstract class GraphSet {
   void processPeakSelect(PeakInfo peakInfo) {
     for (int i = spectra.size(); --i >= 0;) {
       Graph spec = spectra.get(i);
-      if (!peakInfo.isClearAll() && spec != peakInfo.spectrum)
+      removeAllHighlights(spec);
+      if (peakInfo == null || peakInfo.isClearAll() || spec != peakInfo.spectrum)
         continue;
       String peak = peakInfo.toString();
-      removeAllHighlights(spectra.get(i));
       if (peak == null) {
         continue;
       }
@@ -1778,6 +1778,7 @@ abstract class GraphSet {
   void addHighlight(double x1, double x2, Graph spec, Object oColor) {
     if (spec == null)
       spec = getSpectrumAt(0);
+    System.out.println("GraphSet.addHighlight for " + spec);
     Highlight hl = new Highlight(x1, x2, spec, (oColor == null ? 
         pd.getHighlightColor() : oColor));
     if (!highlights.contains(hl))
