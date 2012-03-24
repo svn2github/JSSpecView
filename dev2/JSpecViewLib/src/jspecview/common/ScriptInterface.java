@@ -34,4 +34,7 @@ public interface ScriptInterface {
   public String setSolutionColor(boolean b);
   public void syncToJmol(String value);
   public JSVDialog getOverlayLegend(JSVPanel jsvp);
+  public void setSelectedPanel(JSVPanel jsvp);
+  public void sendScript(String peakScript);
+  public void closeAllAndOpenFile(String fileName);
 }

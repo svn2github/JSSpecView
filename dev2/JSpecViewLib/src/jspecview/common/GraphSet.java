@@ -616,10 +616,26 @@ abstract class GraphSet {
             .abs(zOrP.yPixel0 - p.yPixel0) > MIN_DRAG_PIXELS);
   }
 
+  private PeakInfo piMouseOver;
+  private final Coordinate coordTemp = new Coordinate();
+  
   void mouseMovedEvent(int xPixel, int yPixel, boolean display1D) {
-    setToolTipForPixels(xPixel, yPixel, display1D);
-    if (isd != null && !display1D && sticky2Dcursor)
-      set2DCrossHairs(xPixel, yPixel);
+    if (!pd.isIntegralDrag) {
+      setToolTipForPixels(xPixel, yPixel, display1D);
+      if (isd == null) {
+        if (iThisSpectrum != Integer.MAX_VALUE) {
+          JDXSpectrum spec = pd.getSpectrum();
+          if (spec.getPeakList() != null) {
+            coordTemp.setXVal(toX(xPixel));
+            coordTemp.setYVal(toY(yPixel));
+            piMouseOver = pd.getSpectrum().findPeakByCoord(coordTemp);
+          }
+        }
+      } else {
+        if (!display1D && sticky2Dcursor)
+          set2DCrossHairs(xPixel, yPixel);
+      }
+    }
     pd.repaint();
   }
 
@@ -869,7 +885,7 @@ abstract class GraphSet {
         haveFound = true;
       }
     }
-    if (!haveFound && iThisSpectrum >= 0)
+    if (!haveFound && iThisSpectrum >= 0 && this != pd.currentGraphSet)
       iThisSpectrum = Integer.MAX_VALUE; // no plots in that case
   }
 
@@ -1275,8 +1291,8 @@ abstract class GraphSet {
       drawWidgets(g, subIndex, isInteractive);
       if (withGrid)
         drawGrid(g, height, width);
-      drawHighlights(g);
       drawPeakTabs(g);
+      drawHighlights(g);
       // scale-related, title, and coordinates
       if (withXScale)
         drawXScale(g, height, width);
@@ -1332,17 +1348,24 @@ abstract class GraphSet {
         .getPeakList()
         : null);
     if (list != null && list.size() > 0) {
+      if (piMouseOver != null) {
+        setColor(g, ScriptToken.GRIDCOLOR);
+        drawPeak(g, piMouseOver, true);
+      }
+      setColor(g, ScriptToken.HIGHLIGHTCOLOR);
       for (int i = list.size(); --i >= 0;) {
-        PeakInfo pi = list.get(i);
-        double xMin = pi.getXMin();
-        double xMax = pi.getXMax();
-        if (xMin != xMax) {
-          drawBar(g, xMin, xMax, null, false);
-        }
+        drawPeak(g, list.get(i), false);
       }
     }
   }
 
+  private void drawPeak(Object g, PeakInfo pi, boolean isFull) {
+    double xMin = pi.getXMin();
+    double xMax = pi.getXMax();
+    if (xMin != xMax) {
+      drawBar(g, xMin, xMax, null, isFull);
+    }
+  }
   /**
    * 
    * Draw sliders, pins, and zoom boxes (only one of which would ever be drawn)
@@ -1429,7 +1452,7 @@ abstract class GraphSet {
     if (x1 == x2)
       return;
     fillBox(g, x1, yPixel0, x2, yPixel0 + (isFullHeight ? yPixels : 5),
-        ScriptToken.HIGHLIGHTCOLOR);
+        whatColor);
   }
 
   /**
@@ -2037,6 +2060,7 @@ abstract class GraphSet {
       }
     return null;
   }
+  
   public boolean hasFileLoaded(String filePath) {
     for (int i = spectra.size(); --i >= 0;)
       if (spectra.get(i).getFilePathForwardSlash().equals(filePath))

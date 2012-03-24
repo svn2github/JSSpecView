@@ -159,8 +159,12 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return null;
   }
   
+  
   public PeakInfo getAssociatedPeakInfo(Coordinate coord) {
-    selectedPeak = null;
+    return (selectedPeak = findPeakByCoord(coord));
+  }
+
+  public PeakInfo findPeakByCoord(Coordinate coord) {
     if (coord != null && peakList != null && peakList.size() > 0)
       for (int i = 0; i < peakList.size(); i++) {
         PeakInfo peak = peakList.get(i);
@@ -168,7 +172,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
         if (xVal >= peak.getXMin() && xVal <= peak.getXMax())
           return (selectedPeak = peak);
       }
-    return null;
+    return null;   
   }
 
   public String getPeakTitle() {

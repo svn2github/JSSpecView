@@ -425,30 +425,8 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
     }
   }
 
-  /**
-   * precede <Peaks here with full name of Jmol applet (including syncID)
-   * 
-   */
   public void syncScript(String peakScript) {
-    Logger.info("Jmol>JSV " + peakScript);
-    if (peakScript.indexOf("<PeakData") < 0) {
-      runScript(peakScript);
-      return;
-    }
-    String file = Parser.getQuotedAttribute(peakScript, "file");
-    String index = Parser.getQuotedAttribute(peakScript, "index");
-    //    System.out.println("jsvapplet syncScript file/index " + fileName + " " + index);
-    if (file == null || index == null)
-      return;
-    if (!JSVSpecNode.isOpen(specNodes, file)) {
-      closeAllAndOpenFile(file);
-      JSViewer.checkAutoOverlay(this, specNodes);
-    }
-    PeakInfo pi = JSViewer.selectPanelByPeak(this, peakScript, specNodes,
-        selectedPanel);
-    selectedPanel.getPanelData().processPeakSelect(pi);
-    JSViewer.selectSpectrumInPanel(this, selectedPanel, peakScript);
-    selectedPanel.repaint();
+    JSViewer.syncScript(this, peakScript);
   }
 
   /**
@@ -696,10 +674,20 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
    */
   private void showSpectrum(int index) {
     JSVPanel jsvp = specNodes.get(index).jsvp;
-    if (jsvp != selectedPanel)
+    if (jsvp != getSelectedPanel())
       setSelectedPanel(jsvp);
-    addPanelToFrame();
     sendFrameChange(jsvp);
+  }
+
+  public void sendFrameChange(JSVPanel jsvp) {
+    if (jsvp == prevPanel)
+      return;
+    prevPanel = jsvp;
+    PeakInfo pi = jsvp.getSpectrum().getSelectedPeak();
+    if (pi == null)
+      pi = PeakInfo.nullPeakInfo;
+    getSelectedPanel().getPanelData().processPeakSelect(pi);
+    sendScript(pi.toString());
   }
 
   private long msTrigger = -1;
@@ -727,7 +715,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
    *        the ActionEvent
    */
   protected void showOverlayKey(boolean visible) {
-    JSViewer.setOverlayLegendVisibility(this, selectedPanel, visible);
+    JSViewer.setOverlayLegendVisibility(this, getSelectedPanel(), visible);
   }
 
   private String fullName;
@@ -745,7 +733,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
    */
   void showHeader() {
     
-    JDXSpectrum spectrum = selectedPanel.getSpectrum();
+    JDXSpectrum spectrum = getSelectedPanel().getSpectrum();
     String[][] rowData = (isOverlaid ? currentSource
         .getHeaderRowDataAsArray(false, 0) : spectrum
         .getHeaderRowDataAsArray());
@@ -767,7 +755,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
       return;
     }
 
-    JSVPanel jsvp = selectedPanel;
+    JSVPanel jsvp = getSelectedPanel();
 
     PrintLayoutDialog ppd = new PrintLayoutDialog(offWindowFrame);
     PrintLayoutDialog.PrintLayout pl = ppd.getPrintLayout();
@@ -821,7 +809,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
    */
   void exportSpectrumViaMenu(String type) {
     if (isSignedApplet)
-      dirLastExported = Exporter.exportSpectra(selectedPanel,
+      dirLastExported = Exporter.exportSpectra(getSelectedPanel(),
           offWindowFrame, jFileChooser, type, recentFileName, dirLastExported);
     else
       Logger.info(export(type, -1));
@@ -916,7 +904,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
    * @param tmpFilePath
    *        String
    */
-  private void closeAllAndOpenFile(String filePath) {
+  public void closeAllAndOpenFile(String filePath) {
     newAppletPanel();
     openDataOrFile(null, null, null, filePath);
     jsvApplet.getContentPane().validate();
@@ -1134,7 +1122,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
   /////////// simple sync functionality //////////
 
   private void runScriptNow(String params) {
-    JSViewer.runScriptNow(this, selectedPanel, params);
+    JSViewer.runScriptNow(this, getSelectedPanel(), params);
   }
 
   private void setSaved(boolean isOverlay) {
@@ -1159,7 +1147,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
    * 
    * @param peak
    */
-  private void sendScript(String peak) {
+  public void sendScript(String peak) {
     if (syncCallbackFunctionName == null)
       return;
     peak = Escape.jmolSelect(peak);
@@ -1182,7 +1170,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
     Coordinate actualCoord = (peakCallbackFunctionName == null ? null
         : new Coordinate());
     // will return true if actualcoord is null (just doing coordCallback)
-    if (!selectedPanel.getPanelData().getPickedCoordinates(coord, actualCoord))
+    if (!getSelectedPanel().getPanelData().getPickedCoordinates(coord, actualCoord))
       return;
     if (actualCoord == null)
       callToJavaScript(coordCallbackFunctionName, new Object[] {
@@ -1196,7 +1184,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
           Integer.valueOf(currentSpectrumIndex + 1) });
   }
 
-  private void setSelectedPanel(JSVPanel jsvp) {
+  public void setSelectedPanel(JSVPanel jsvp) {
     if (jsvp != selectedPanel) {
       if (selectedPanel != null) {
         appletPanel.remove((AwtPanel)selectedPanel);
@@ -1232,10 +1220,10 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
       PeakPickEvent e = (PeakPickEvent) eventObj;
       PeakInfo pi = e.getPeakInfo();
       setSelectedPanel((JSVPanel) e.getSource());
-      selectedPanel.getPanelData().processPeakSelect(pi);
+      getSelectedPanel().getPanelData().processPeakSelect(pi);
       sendScript(pi.toString());
       if (!pi.isClearAll())
-        selectedPanel.getPanelData().selectSpectrum(pi.getFilePath(), pi.getType(), pi.getModel());
+        getSelectedPanel().getPanelData().selectSpectrum(pi.getFilePath(), pi.getType(), pi.getModel());
       checkCallbacks();
     } else if (eventObj instanceof ZoomEvent) {
     } else if (eventObj instanceof SubSpecChangeEvent) {
@@ -1360,7 +1348,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
       JOptionPane.showMessageDialog(jsvApplet, msg, "Predicted Colour",
           JOptionPane.INFORMATION_MESSAGE);
     }
-    return selectedPanel.getPanelData().getSolutionColor(); 
+    return getSelectedPanel().getPanelData().getSolutionColor(); 
   }
 
   public Parameters getParameters() {
@@ -1405,25 +1393,25 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
   }
 
   public PanelData getPanelData() {
-    return selectedPanel.getPanelData();  
+    return getSelectedPanel().getPanelData();  
   }
 
   public JSVDialog getOverlayLegend(JSVPanel jsvp) {
-    return  new OverlayLegendDialog(null, selectedPanel);
+    return  new OverlayLegendDialog(null, getSelectedPanel());
   }
 
   public JSVPanel setSpectrumIndex(int i) {
-    if (i < 1 || i >= specNodes.size())
+    if (i < 0 || i > specNodes.size())
       return null;
-    if (selectedPanel != null) {
+    if (getSelectedPanel() != null) {
       if (theInterface.equals("single")) {
-        showSpectrum(i - 1);
+        showSpectrum(i);
       } else {
-        tabbedDisplayPane.setSelectedIndex(i - 1);
+        tabbedDisplayPane.setSelectedIndex(i);
       }
       jsvApplet.repaint();
     }
-    return selectedPanel;
+    return getSelectedPanel();
   }
 
   public void execOverlay(String value) {
@@ -1434,17 +1422,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
       openDataOrFile(null, s, list, null);
       setSpectrumIndex(0);
     }
-  }
-
-  public void sendFrameChange(JSVPanel jsvp) {
-    if (jsvp == prevPanel)
-      return;
-    prevPanel = jsvp;
-    PeakInfo pi = jsvp.getSpectrum().getSelectedPeak();
-    if (pi == null)
-      pi = PeakInfo.nullPeakInfo;
-    selectedPanel.getPanelData().processPeakSelect(pi);
-    sendScript(pi.toString());
   }
 
   /**

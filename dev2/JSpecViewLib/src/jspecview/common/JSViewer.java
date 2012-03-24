@@ -9,38 +9,6 @@ import jspecview.util.Parser;
 
 public class JSViewer {
 
-  public static PeakInfo selectPanelByPeak(ScriptInterface si, String peakScript,
-                                           List<JSVSpecNode> specNodes,
-                                           JSVPanel selectedPanel) {
-    System.out.println("JSViewer selectPanelByPeak " + peakScript);
-    if (specNodes == null)
-      return null;
-    String file = Parser.getQuotedAttribute(peakScript, "file");
-    String index = Parser.getQuotedAttribute(peakScript, "index");
-    PeakInfo pi = null;
-    for (int i = specNodes.size(); --i >= 0;) 
-      specNodes.get(i).jsvp.getPanelData().processPeakSelect(null);
-    if ((pi = selectedPanel.getPanelData().findPeak(file, index)) == null)
-      for (int i = specNodes.size(); --i >= 0;) {
-        JSVSpecNode node = specNodes.get(i);
-        if ((pi = node.jsvp.getPanelData().findPeak(file, index)) != null) {
-          System.out.println("JSViewer setting spectrum to  " + node);
-          si.setSpectrumIndex(i);
-          break;
-        }
-      }
-    return pi;
-  }
-
-  public static void selectSpectrumInPanel(ScriptInterface si, JSVPanel selectedPanel, 
-                                           String peakScript) {
-    String file = Parser.getQuotedAttribute(peakScript, "file");
-    String type = Parser.getQuotedAttribute(peakScript, "type");
-    String model = Parser.getQuotedAttribute(peakScript, "model");
-    selectedPanel.getPanelData().selectSpectrum(file, type, model);
-    si.sendFrameChange(selectedPanel);
-  }
-
   public static void setYScale(String value, 
                                List<JSVSpecNode> specNodes, 
                                JSVPanel jsvp, JDXSource currentSource) {
@@ -192,11 +160,6 @@ public class JSViewer {
       legend.setVisible(visible);
   }
 
-  public static void checkAutoOverlay(ScriptInterface si,
-                                      List<JSVSpecNode> specNodes) {
-    if (specNodes.get(0).jsvp.getSpectrumAt(0).isAutoOverlayFromJmolClick())
-      si.execOverlay("*");
-  }
 
   /// from JavaScript
   
@@ -206,5 +169,88 @@ public class JSViewer {
     if (jsvp != null)
       jsvp.getPanelData().addHighlight(x1, x2, color);
   }
-  
+
+  /**
+   * incoming script processing of <PeakAssignment file="" type="xxx"...> record
+   * from Jmol
+   */
+
+  public static void syncScript(ScriptInterface si,
+                                String peakScript) {
+    System.out.println("Jmol>JSV " + peakScript);
+    if (peakScript.indexOf("<PeakData") < 0) {
+      runScriptNow(si, si.getSelectedPanel(), peakScript);
+      return;
+    }
+    String file = Parser.getQuotedAttribute(peakScript, "file");
+    String index = Parser.getQuotedAttribute(peakScript, "index");
+    if (file == null || index == null)
+      return;
+    if (!selectMostRecentPanelByFileName(si, file)) {
+      si.closeAllAndOpenFile(file);
+      checkAutoOverlay(si);
+    }
+    JSVPanel jsvp = si.getSelectedPanel();
+    PeakInfo pi = selectPanelByPeak(si, peakScript,
+        jsvp);
+    jsvp.getPanelData().processPeakSelect(pi);
+    selectSpectrumInPanel(si, jsvp, peakScript);
+    jsvp.repaint();
+    // round trip this so that Jmol highlights all equivalent atoms
+    // and appropriately starts or clears vibration
+    si.sendScript(pi.toString());
+  }
+
+  private static boolean selectMostRecentPanelByFileName(
+                                                        ScriptInterface si,
+                                                        String fileName) {
+    
+    List<JSVSpecNode> specNodes = si.getSpecNodes();
+    for (int i = specNodes.size(); --i >= 0;)
+      if (specNodes.get(i).jsvp.getPanelData().hasFileLoaded(fileName)) {
+        si.setSelectedPanel(specNodes.get(i).jsvp);
+        si.sendFrameChange(specNodes.get(i).jsvp);
+        return true;
+      }
+    return false;
+  }
+
+  private static void checkAutoOverlay(ScriptInterface si) {
+    List<JSVSpecNode> specNodes = si.getSpecNodes();
+    if (specNodes.get(0).jsvp.getSpectrumAt(0).isAutoOverlayFromJmolClick())
+      si.execOverlay("*");
+  }
+
+  private static PeakInfo selectPanelByPeak(ScriptInterface si, String peakScript,
+                                           JSVPanel selectedPanel) {
+    List<JSVSpecNode> specNodes = si.getSpecNodes();
+    if (specNodes == null)
+      return null;
+    System.out.println("JSViewer selectPanelByPeak " + peakScript);
+    String file = Parser.getQuotedAttribute(peakScript, "file");
+    String index = Parser.getQuotedAttribute(peakScript, "index");
+    PeakInfo pi = null;
+    for (int i = specNodes.size(); --i >= 0;) 
+      specNodes.get(i).jsvp.getPanelData().processPeakSelect(null);
+    if ((pi = selectedPanel.getPanelData().findPeak(file, index)) == null)
+      for (int i = specNodes.size(); --i >= 0;) {
+        JSVSpecNode node = specNodes.get(i);
+        if ((pi = node.jsvp.getPanelData().findPeak(file, index)) != null) {
+          System.out.println("JSViewer setting spectrum to  " + node);
+          si.setSpectrumIndex(i);
+          break;
+        }
+      }
+    return pi;
+  }
+
+  private static void selectSpectrumInPanel(ScriptInterface si, JSVPanel selectedPanel, 
+                                           String peakScript) {
+    String file = Parser.getQuotedAttribute(peakScript, "file");
+    String type = Parser.getQuotedAttribute(peakScript, "type");
+    String model = Parser.getQuotedAttribute(peakScript, "model");
+    selectedPanel.getPanelData().selectSpectrum(file, type, model);
+    si.sendFrameChange(selectedPanel);
+  }
+
 }

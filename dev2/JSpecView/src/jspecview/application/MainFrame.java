@@ -1204,22 +1204,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   }
 
   /**
-   * Opens and displays a file
-   * 
-   * @param file
-   *        the file
-   */
-  public void openFile(String fileName, boolean closeFirst) {
-    if (closeFirst) { // drag/drop
-      JDXSource source = JSVSpecNode.findSourceByNameOrId((new File(fileName))
-          .getAbsolutePath(), specNodes);
-      if (source != null)
-        closeSource(source);
-    }
-    openDataOrFile(null, null, null, fileName, -1, -1);
-  }
-
-  /**
    * Opens and displays a file, either local or remote
    * 
    * @param fileOrURL
@@ -1670,8 +1654,8 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     runScriptNow(script);
   }
   
-  public void runScriptNow(String script) {
-    JSViewer.runScriptNow(this, selectedPanel, script);
+  public void runScriptNow(String peakScript) {
+    JSViewer.runScriptNow(this, selectedPanel, peakScript);
   }
 
   private void close(String value) {
@@ -1760,7 +1744,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     }
   }
 
-  private void setSelectedPanel(JSVPanel jsvp) {
+  public void setSelectedPanel(JSVPanel jsvp) {
     selectedPanel = jsvp;
   }
 
@@ -2644,47 +2628,32 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
       jmolOrAdvancedApplet.syncToJmol(msg);
   }
 
-  /**
-   * incoming script processing of <PeakAssignment file="" type="xxx"...> record
-   * from Jmol
-   */
   public void syncScript(String peakScript) {
-    System.out.println("Jmol>JSV " + peakScript);
-    if (peakScript.indexOf("<PeakData") < 0) {
-      runScriptNow(peakScript);
-      return;
-    }
-    String file = Parser.getQuotedAttribute(peakScript, "file");
-    String index = Parser.getQuotedAttribute(peakScript, "index");
-    if (file == null || index == null)
-      return;
-    if (!selectMostRecentPanelByFileName(file)) {
-      closeSource(null);
-      openDataOrFile(null, null, null, file, -1, -1);
-      JSViewer.checkAutoOverlay(this, specNodes);
-    }
-    PeakInfo pi = JSViewer.selectPanelByPeak(this, peakScript, specNodes,
-        selectedPanel);
-    System.out.println("Jmol>JSV...processing " + pi);
-    selectedPanel.getPanelData().processPeakSelect(pi);
-    JSViewer.selectSpectrumInPanel(this, selectedPanel, peakScript);
-    selectedPanel.repaint();
-    // round trip this so that Jmol highlights all equivalent atoms
-    // and appropriately starts or clears vibration
-    sendScript(pi.toString());
+    JSViewer.syncScript((ScriptInterface) this, peakScript);
   }
 
-  private boolean selectMostRecentPanelByFileName(String fileName) {
-    for (int i = specNodes.size(); --i >= 0;)
-      if (specNodes.get(i).jsvp.getPanelData().hasFileLoaded(fileName)) {
-        setFrame(specNodes.get(i), false);
-        return true;
-      }
-    System.out.println("mainframe did not find " + fileName);
-    return false;
+  public void closeAllAndOpenFile(String filePath) {
+    closeSource(null);
+    openDataOrFile(null, null, null, filePath, -1, -1);
   }
 
   ////////////////////////// script commands from JSViewer /////////////////
+
+  public void setFrame(JSVSpecNode specNode) {
+    setFrame(specNode, false);
+  }
+  
+  public JDXSource getCurrentSource() {
+    return currentSource;
+  }
+
+  public Parameters getParameters() {
+    return parameters;
+  }
+
+  public List<JSVSpecNode> getSpecNodes() {
+    return specNodes;
+  }
 
   public void execOverlay(String value) {
     List<JDXSpectrum> speclist = new ArrayList<JDXSpectrum>();
@@ -2757,22 +2726,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   public String execExport(JSVPanel jsvp, String value) {
     return Exporter.exportCmd(jsvp, ScriptToken.getTokens(value),
         svgForInkscape);
-  }
-
-  public JDXSource getCurrentSource() {
-    return currentSource;
-  }
-
-  public Parameters getParameters() {
-    return parameters;
-  }
-
-  public List<JSVSpecNode> getSpecNodes() {
-    return specNodes;
-  }
-
-  public void execSetCallback(ScriptToken st, String value) {
-    // ignored
   }
 
   public void execSetIntegrationRatios(String value) {
@@ -2950,5 +2903,26 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   public void toggleIntegration() {
     advancedApplet.toggleIntegration();
   }
-  
+
+  public void execSetCallback(ScriptToken st, String value) {
+    if (advancedApplet != null)
+      advancedApplet.execSetCallback(st, value);
+  }
+
+  /**
+   * Opens and displays a file
+   * 
+   * @param file
+   *        the file
+   */
+  public void openFile(String fileName, boolean closeFirst) {
+    if (closeFirst) { // drag/drop
+      JDXSource source = JSVSpecNode.findSourceByNameOrId((new File(fileName))
+          .getAbsolutePath(), specNodes);
+      if (source != null)
+        closeSource(source);
+    }
+    openDataOrFile(null, null, null, fileName, -1, -1);
+  }
+
 }

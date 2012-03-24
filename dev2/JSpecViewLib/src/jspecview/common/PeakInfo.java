@@ -8,7 +8,8 @@ public class PeakInfo {
 
   private double xMin, xMax, yMin, yMax;
 	private String stringInfo;
-	private String type;
+  private String type;
+  private String type2;
   private String index;
 	private String file;
   private String title;
@@ -62,6 +63,7 @@ public class PeakInfo {
 	  Logger.info("JSpecView found " + stringInfo);
 		this.stringInfo = stringInfo;
 		type = Parser.getQuotedAttribute(stringInfo, "type");
+		type2 = type.substring(type.indexOf("/") + 1);
     index = Parser.getQuotedAttribute(stringInfo, "index");
     file = Parser.getQuotedAttribute(stringInfo, "file");
     model = Parser.getQuotedAttribute(stringInfo, "model");
@@ -88,7 +90,8 @@ public class PeakInfo {
 
   public boolean checkTypeModel(String type, String model) {
     return (type != null && model != null 
-        && type.equals(this.type) && model.equals(this.model));
+        && (type.endsWith(this.type)) //   GC/MS matches MS
+        && model.equals(this.model));
   }
 
   public String getModel() {
