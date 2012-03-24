@@ -29,6 +29,7 @@ public interface ScriptInterface {
   public void execSetAutoIntegrate(boolean b);
   public void execTest(String value);
   public void syncToJmol(String value);
+  public PanelData getPanelData();
 
   //public void exportSpectrum(String actionCommand);
   //public void printView();

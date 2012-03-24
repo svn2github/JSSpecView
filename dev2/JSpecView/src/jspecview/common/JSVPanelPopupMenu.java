@@ -233,7 +233,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    * @param e the <code>ActionEvent</code>
    */
   void nextMenuItem_actionPerformed(ActionEvent e) {
-    pd.nextView();
+    scripter.getPanelData().nextView();
   }
 
   /**
@@ -242,7 +242,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    * @param e the <code>ActionEvent</code>
    */
   void previousMenuItem_actionPerformed(ActionEvent e) {
-    pd.previousView();
+    scripter.getPanelData().previousView();
   }
 
   /**
@@ -250,7 +250,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    * @param e the <code>ActionEvent</code>
    */
   void resetMenuItem_actionPerformed(ActionEvent e) {
-    pd.reset();
+    scripter.getPanelData().reset();
   }
 
   /**
@@ -258,7 +258,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    * @param e the <code>ActionEvent</code>
    */
   void clearMenuItem_actionPerformed(ActionEvent e) {
-    pd.clearViews();
+    scripter.getPanelData().clearViews();
   }
 
   /**
@@ -282,8 +282,8 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    * @param e the <code>ItemEvent</code
    */
   void revPlotCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-    pd.setReversePlot((e.getStateChange() == ItemEvent.SELECTED));
-    pd.repaint();
+    scripter.getPanelData().setReversePlot((e.getStateChange() == ItemEvent.SELECTED));
+    scripter.getPanelData().repaint();
   }
 
   /**
@@ -294,7 +294,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    */
   public void properties_actionPerformed(ActionEvent e) {
 
-    JDXSpectrum spectrum = pd.getSpectrum();
+    JDXSpectrum spectrum = scripter.getPanelData().getSpectrum();
     Object[][] rowData = spectrum.getHeaderRowDataAsArray();
     String[] columnNames = { "Label", "Description" };
     JTable table = new JTable(rowData, columnNames);

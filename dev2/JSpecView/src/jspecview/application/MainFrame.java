@@ -2894,5 +2894,9 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     syncScript("<PeakData file=\"c:/temp/t.jdx\" index=\"2\" type=\"MS\" id=\"2\" title=\"b-caryopholene (~93)\" peakShape=\"sharp\" model=\"caryoph\"  xMax=\"94\" xMin=\"92\"  yMax=\"100\" yMin=\"0\" />");
   }
 
+  public PanelData getPanelData() {
+    return selectedPanel.getPanelData();
+  }
+
 
 }

@@ -1535,4 +1535,8 @@ public class JSVApplet extends JApplet implements PanelListener, ScriptInterface
     
   }
 
+  public PanelData getPanelData() {
+    return selectedPanel.getPanelData();  
+  }
+
 }
