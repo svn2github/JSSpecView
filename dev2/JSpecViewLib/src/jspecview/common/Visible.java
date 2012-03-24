@@ -39,6 +39,8 @@ import java.lang.Math;
 
 public class Visible {
 
+  public final static String noColor = "255,255,255"; 
+
   public static String Colour(Coordinate xyCoords[], String Yunits) {
     int ind400 = 0, ind437 = 0, ind499 = 0, ind700 = 0;
     for (int i = 0; i < xyCoords.length; i++) {

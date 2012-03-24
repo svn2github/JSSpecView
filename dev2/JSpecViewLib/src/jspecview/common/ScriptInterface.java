@@ -30,9 +30,8 @@ public interface ScriptInterface {
   
   public void runScript(String script);
   public void sendFrameChange(JSVPanel jsvp);
-  public JSVPanel setSpectrum(int i);
+  public JSVPanel setSpectrumIndex(int i);
   public String setSolutionColor(boolean b);
   public void syncToJmol(String value);
   public JSVDialog getOverlayLegend(JSVPanel jsvp);
-
 }

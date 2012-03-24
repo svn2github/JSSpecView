@@ -41,7 +41,7 @@
 package jspecview.application;
 
 import java.awt.BorderLayout;
-import java.awt.CardLayout; //import java.awt.Color;
+import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
@@ -112,7 +112,9 @@ import javax.swing.tree.TreeSelectionModel;
 import org.jmol.api.JSVInterface;
 import org.jmol.api.JmolSyncInterface;
 
+import jspecview.applet.JSVAppletPrivatePro;
 import jspecview.common.AwtPanel;
+import jspecview.common.JSVAppletInterface;
 import jspecview.common.JSVDialog;
 import jspecview.common.JSVDropTargetListener;
 import jspecview.common.JSVPanel;
@@ -152,7 +154,7 @@ import jspecview.util.TextFormat;
  * @author Prof Robert J. Lancashire
  */
 public class MainFrame extends JFrame implements JmolSyncInterface,
-    PanelListener, ScriptInterface {
+    PanelListener, ScriptInterface, JSVAppletInterface {
 
   public class JSVTreeNode extends DefaultMutableTreeNode {
 
@@ -300,16 +302,18 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   private JButton overlayKeyButton = new JButton();
   private JMenu processingMenu = new JMenu();
   private JMenuItem errorLogMenuItem = new JMenuItem();
-  private JSVInterface advancedApplet;
+  private JSVInterface jmolOrAdvancedApplet;
+  private JSVAppletPrivatePro advancedApplet;
 
   /**
    * Constructor
    * 
-   * @param jsv
+   * @param jmolOrAdvancedApplet
    */
-  public MainFrame(JSVInterface jsv) {
+  public MainFrame(JSVInterface jmolOrAdvancedApplet) {
 
-    this.advancedApplet = jsv;
+    this.jmolOrAdvancedApplet = jmolOrAdvancedApplet;
+    advancedApplet = (jmolOrAdvancedApplet instanceof JSVAppletPrivatePro ? (JSVAppletPrivatePro) jmolOrAdvancedApplet : null);
     onProgramStart();
 
     // initialise MainFrame as a target for the drag-and-drop action
@@ -340,13 +344,13 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   }
 
   private void exitJSpecView(boolean withDialog) {
-    advancedApplet.saveProperties(properties);
+    jmolOrAdvancedApplet.saveProperties(properties);
     if (isEmbedded) {
       setVisible(false);
       return;
     }
     dsp.getDisplaySchemes().remove("Current");
-    advancedApplet.exitJSpecView(withDialog && showExitDialog, this);
+    jmolOrAdvancedApplet.exitJSpecView(withDialog && showExitDialog, this);
   }
 
   private Image icon;
@@ -457,7 +461,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     properties.setProperty("integralOffset", "30");
     properties.setProperty("integralPlotColor", "#ff0000");
 
-    advancedApplet.setProperties(properties);
+    jmolOrAdvancedApplet.setProperties(properties);
 
     dsp = new DisplaySchemesProcessor();
 
@@ -1226,9 +1230,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
   private int nOverlay;
 
-  public void loadInline(String data) {
-    openDataOrFile(data, null, null, null, -1, -1);
-  }
 
   private int openDataOrFile(String data, String name, List<JDXSpectrum> specs,
                              String url, int firstSpec, int lastSpec) {
@@ -1665,16 +1666,10 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
         : (JSVFrame) (JSVSpecNode.findNode(selectedPanel, specNodes).frame));
   }
 
-  /**
-   * ScriptInterface requires this. In the applet, this would be queued
-   */
-  public void runScript(String script) {
-    if (advancedApplet != null)
-      advancedApplet.runScript(script);
-    else
-      runScriptNow(script);
+  public void processCommand(String script) {
+    runScriptNow(script);
   }
-
+  
   public void runScriptNow(String script) {
     JSViewer.runScriptNow(this, selectedPanel, script);
   }
@@ -1714,7 +1709,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     setFrame(node, false);
   }
 
-  public JSVPanel setSpectrum(int i) {
+  public JSVPanel setSpectrumIndex(int i) {
     if (specNodes != null && i >= 0 && i < specNodes.size())
       setFrame(specNodes.get(i), false);
     return selectedPanel;
@@ -2004,20 +1999,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     dirLastExported = Exporter.exportSpectra(jsvp, this, fc, type,
         recentFileName, dirLastExported);
 
-  }
-
-  /**
-   * Writes a message to the status bar
-   * 
-   * @param msg
-   *        the message
-   */
-  public void writeStatus(String msg) {
-    if (msg == null)
-      msg = "Unexpected Error";
-    if (msg.length() == 0)
-      msg = "Enter a command:";
-    statusLabel.setText(msg);
   }
 
   /**
@@ -2659,8 +2640,8 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     System.out.println("JSV>Jmol " + msg);
     if (jmol != null) // MainFrame --> embedding application
       jmol.syncScript(msg);
-    else if (advancedApplet != null) // MainFrame --> embedding applet
-      advancedApplet.syncToJmol(msg);
+    else if (jmolOrAdvancedApplet != null) // MainFrame --> embedding applet
+      jmolOrAdvancedApplet.syncToJmol(msg);
   }
 
   /**
@@ -2684,9 +2665,13 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     }
     PeakInfo pi = JSViewer.selectPanelByPeak(this, peakScript, specNodes,
         selectedPanel);
+    System.out.println("Jmol>JSV...processing " + pi);
     selectedPanel.getPanelData().processPeakSelect(pi);
     JSViewer.selectSpectrumInPanel(this, selectedPanel, peakScript);
     selectedPanel.repaint();
+    // round trip this so that Jmol highlights all equivalent atoms
+    // and appropriately starts or clears vibration
+    sendScript(pi.toString());
   }
 
   private boolean selectMostRecentPanelByFileName(String fileName) {
@@ -2869,6 +2854,101 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   public JSVDialog getOverlayLegend(JSVPanel jsvp) {
     return new OverlayLegendDialog(this, jsvp);
   }
-  
 
+  // these next patch into the advanced applet routines for JavaScript calls
+  // via JSVAppletInterface
+  
+  public boolean isPro() {
+    return true;
+  }
+
+  public boolean isSigned() {
+    return true;
+  }
+
+  public void addHighlight(double x1, double x2, int r, int g, int b, int a) {
+    advancedApplet.addHighlight(x1, x2, r, g, b, a);
+  }
+
+  public String export(String type, int n) {
+    return advancedApplet.export(type, n);
+  }
+
+  public String getCoordinate() {
+    return advancedApplet.getCoordinate();
+  }
+
+  public String getPropertyAsJSON(String key) {
+    return advancedApplet.getPropertyAsJSON(key);
+  }
+
+  public Map<String, Object> getPropertyAsJavaObject(String key) {
+    return advancedApplet.getPropertyAsJavaObject(key);
+  }
+
+  public String getSolnColour() {
+    return advancedApplet.getSolnColour();
+  }
+
+  public void loadInline(String data) {
+    openDataOrFile(data, null, null, null, -1, -1);
+  }
+  
+  public void setFilePath(String tmpFilePath) {
+    processCommand("load " + tmpFilePath);
+  }
+
+  /**
+   * ScriptInterface requires this. In the applet, this would be queued
+   */
+  public void runScript(String script) {
+    if (advancedApplet != null)
+      advancedApplet.runScript(script);
+    else
+      runScriptNow(script);
+  }
+
+  /**
+   * Writes a message to the status bar
+   * 
+   * @param msg
+   *        the message
+   */
+  public void writeStatus(String msg) {
+    if (msg == null)
+      msg = "Unexpected Error";
+    if (msg.length() == 0)
+      msg = "Enter a command:";
+    statusLabel.setText(msg);
+  }
+
+
+  public void removeAllHighlights() {
+    advancedApplet.removeAllHighlights();
+  }
+
+  public void removeHighlight(double x1, double x2) {
+    advancedApplet.removeHighlight(x1, x2);
+  }
+
+  public void reversePlot() {
+    advancedApplet.reversePlot();
+  }
+
+  public void setSpectrumNumber(int i) {
+    advancedApplet.setSpectrumNumber(i);
+  }
+
+  public void toggleCoordinate() {
+    advancedApplet.toggleCoordinate();
+  }
+
+  public void toggleGrid() {
+    advancedApplet.toggleGrid();
+  }
+
+  public void toggleIntegration() {
+    advancedApplet.toggleIntegration();
+  }
+  
 }

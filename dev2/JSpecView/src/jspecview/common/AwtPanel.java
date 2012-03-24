@@ -52,6 +52,7 @@ import java.awt.print.Paper;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
+import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -64,6 +65,7 @@ import javax.swing.JPanel;
 
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
+import jspecview.export.Exporter;
 import jspecview.util.Logger;
 
 /**
@@ -622,5 +624,20 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 
   public void paint(Object graphics) {
     super.paint((Graphics) graphics);
+  }
+
+  public String export(String type, int n) {
+    if (type == null)
+      type = "XY";
+    if (n < -1 || pd.getNumberOfSpectraInCurrentSet() <= n)
+      return "only " + pd.getNumberOfSpectraInCurrentSet()
+          + " spectra available.";
+    try {
+      JDXSpectrum spec = (n < 0 ? getSpectrum() : getSpectrumAt(n));
+      return Exporter.exportTheSpectrum(Exporter.Type.getType(type), null, spec, 0, spec.getXYCoords().length - 1);
+    } catch (IOException ioe) {
+      // not possible
+    }
+    return null;
   }
 }

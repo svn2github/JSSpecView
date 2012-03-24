@@ -25,7 +25,7 @@ public class JSViewer {
         JSVSpecNode node = specNodes.get(i);
         if ((pi = node.jsvp.getPanelData().findPeak(file, index)) != null) {
           System.out.println("JSViewer setting spectrum to  " + node);
-          si.setSpectrum(i);
+          si.setSpectrumIndex(i);
           break;
         }
       }
@@ -196,6 +196,15 @@ public class JSViewer {
                                       List<JSVSpecNode> specNodes) {
     if (specNodes.get(0).jsvp.getSpectrumAt(0).isAutoOverlayFromJmolClick())
       si.execOverlay("*");
+  }
+
+  /// from JavaScript
+  
+  public static void addHighLight(ScriptInterface si, double x1,
+                                  double x2, Object color) {
+    JSVPanel jsvp = si.getSelectedPanel();
+    if (jsvp != null)
+      jsvp.getPanelData().addHighlight(x1, x2, color);
   }
   
 }

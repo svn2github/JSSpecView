@@ -2005,9 +2005,10 @@ abstract class GraphSet {
   }
 
   String getSolutionColor() {
-    Graph spectrum = getSpectrum();
+    JDXSpectrum spectrum = getSpectrum();
     String Yunits = spectrum.getYUnits();
-    return Visible.Colour(spectrum.getXYCoords(), Yunits);
+    return (spectrum.canShowSolutionColor() ? Visible.Colour(spectrum
+        .getXYCoords(), Yunits) : Visible.noColor);
   }
 
   static boolean getPickedCoordinates(Coordinate[] coordsClicked,

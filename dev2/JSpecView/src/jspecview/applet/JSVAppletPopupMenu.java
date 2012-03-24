@@ -15,9 +15,9 @@ import jspecview.source.JDXSource;
 
 class JSVAppletPopupMenu extends JSVPanelPopupMenu {
 
-  private JSVApplet applet;
+  private JSVAppletPrivate applet;
 
-  JSVAppletPopupMenu(JSVApplet applet, 
+  JSVAppletPopupMenu(JSVAppletPrivate applet, 
       boolean allowMenu, boolean enableZoom) {
     super(applet);
     isApplet = true;
@@ -35,7 +35,7 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
 
   private ActionListener exportActionListener = new ActionListener() {
     public void actionPerformed(ActionEvent e) {
-      applet.exportSpectrum(e.getActionCommand());
+      applet.exportSpectrumViaMenu(e.getActionCommand());
     }
   };
 
@@ -63,7 +63,7 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     printMenuItem.setText("Print...");
     printMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        applet.printMenuItem_actionPerformed(e);
+        applet.print();
       }
     });
     viewMenu.setText("View");
@@ -72,14 +72,14 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     headerMenuItem.setText("Show Header...");
     headerMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        applet.headerMenuItem_actionPerformed(e);
+        applet.showHeader();
       }
     });
 
     windowMenuItem.setText("Window");
     windowMenuItem.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
-        applet.windowMenuItem_itemStateChanged(e);
+        applet.newWindow(e.getStateChange() == ItemEvent.SELECTED);
       }
     });
     overlayKeyMenuItem.setEnabled(false);
@@ -94,7 +94,7 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     appletCompoundMenu.setEnabled(false);
     appletCompoundMenu.setText("Blocks");
 
-    versionMenuItem.setText("<html><h3>" + applet.getAppletInfo() + "</h3></html>");
+    versionMenuItem.setText("<html><h3>" + applet.getJsvApplet().getAppletInfo() + "</h3></html>");
 
     add(fileMenu);
     add(viewMenu);

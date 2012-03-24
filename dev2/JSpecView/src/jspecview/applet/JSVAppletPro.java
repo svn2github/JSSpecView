@@ -39,21 +39,16 @@
 
 package jspecview.applet;
 
-import java.util.Properties;
-
 import jspecview.application.MainFrame;
-import jspecview.common.JSVPanel;
+import jspecview.common.JSVAppletInterface;
 
-import org.jmol.api.JSVInterface;
-
-
-
- /** A signed applet that has an Advanced... menu item that pulls up a MainFrame
+/**
+ * A signed applet that has an Advanced... menu item that pulls up a MainFrame
  * 
  * @author Bob Hanson St. Olaf College hansonr@stolaf.edu
  */
 
-public class JSVAppletPro extends JSVApplet implements JSVInterface {
+public class JSVAppletPro extends JSVApplet {
 
   /*  class interactions:
    * 
@@ -73,109 +68,54 @@ public class JSVAppletPro extends JSVApplet implements JSVInterface {
    * JSVAppletPro and JSVApplet can interact with JmolApplet via JavaScript callbacks
    * 
    */
-  
+
   private static final long serialVersionUID = 1L;
 
   private MainFrame mainFrame;
-
+  private JSVAppletInterface appletPrivate0;
+  
   @Override
   public void init() {
-    super.init();
+    appletPrivate = new JSVAppletPrivatePro(this);
   }
 
   @Override
   public boolean isPro() {
     return true;
   }
-  
+
   @Override
   public String getAppletInfo() {
     return super.getAppletInfo() + " (PRO)";
   }
-  
+
   /**
-   * JSVAppletPro uses "script()" for executing a real script, 
-   * not a parameter initialization. "runScript()" will also work
+   * JSVAppletPro uses "script()" for executing a real script, not a parameter
+   * initialization. "runScript()" will also work
    * 
    */
-  
+
   @Override
   public void script(String script) {
     runScript(script);
   }
 
-  @Override
-  public void loadInline(String data) {
-    if (mainFrame != null && mainFrame.isVisible())
-      mainFrame.loadInline(data);
-    else
-      super.loadInline(data);      
-  }
-
-  @Override
-  public void setSpectrumNumber(int n) {
-    if (mainFrame != null && mainFrame.isVisible())
-      mainFrame.setSpectrumNumberAndTreeNode(n);
-    else
-      super.setSpectrumNumber(n);      
-  }
-
-  @Override
-  public void syncScript(String script) {
-    if (mainFrame != null && mainFrame.isVisible())
-      mainFrame.syncScript(script);
-    else
-      super.syncScript(script);      
-  }
-
-  @Override
-  public void writeStatus(String msg) {
-    if (mainFrame != null && mainFrame.isVisible())
-      mainFrame.writeStatus(msg);
-    else
-      super.writeStatus(msg);
-  }
-
-  public JSVPanel getSelectedPanel() {
-    return (mainFrame != null && mainFrame.isVisible() ? mainFrame.getSelectedPanel() 
-        : super.getSelectedPanel());
-  }
-  
-  /**
-   * executed only by the command processor and menu actions
-   * present only so that processed commands are sent to the right place
-   * 
-   */
-  @Override
-  protected void processCommand(String script) {
-    if (mainFrame != null && mainFrame.isVisible())
-      mainFrame.runScriptNow(script);
-    else
-      super.processCommand(script);
-  } 
-   
-  /////////// JSVInterface ////////////
-  
-  void doAdvanced(String filePath) {
+  public void doAdvanced(String filePath) {
     if (mainFrame == null) {
-      mainFrame = new MainFrame(this);
+      mainFrame = new MainFrame((JSVAppletPrivatePro) appletPrivate);
     }
-    mainFrame.runScript("load \"" + filePath + "\"");
     mainFrame.setVisible(true);
+    if (appletPrivate0 == null)
+      appletPrivate0 = appletPrivate;
+    appletPrivate0.setVisible(false);
+    appletPrivate = mainFrame;
+    mainFrame.runScript("load \"" + filePath + "\"");
   }
 
-  public void exitJSpecView(boolean withDialog, Object frame) {
+  public void doExitJmol() {
+    appletPrivate0.setVisible(true);
     mainFrame.setVisible(false);
-  }
-
-  public void saveProperties(Properties properties) {
-  }
-
-  public void setProperties(Properties properties) {
-  }
-
-  public void syncToJmol(String msg) {
-    super.syncToJmol(msg);
+    appletPrivate = appletPrivate0;
   }
 
 }
