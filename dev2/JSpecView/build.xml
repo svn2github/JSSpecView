@@ -66,9 +66,7 @@
             	<attribute name="Class-Path" value="."/>
                 <attribute name="Main-Class" value="${main-class}"/>
             </manifest>
-        	<fileset dir="${bin.dir}">
-        		<exclude name="jspecview/applet/"/>
-        	</fileset>
+        	<fileset dir="${bin.dir}" />
         	<fileset dir="${jsvlib.dir}"/>
         </jar>
     </target>
