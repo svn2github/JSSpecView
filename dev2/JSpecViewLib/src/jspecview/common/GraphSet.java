@@ -481,7 +481,6 @@ abstract class GraphSet {
                  int height, int width, int left, int right, int top,
                  int bottom, boolean isResized, boolean enableZoom,
                  boolean display1D, boolean display2D) {
-    System.out.println("GraphSet drawing graph for " + getSpectrum());
     // for now, at least, we only allow one 2D image
     this.enableZoom = enableZoom;
     setPositionForFrame(width, height, left, right, top, bottom);
