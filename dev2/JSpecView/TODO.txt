@@ -4,14 +4,14 @@ Put new items at top, please.
 
 ====TODO=========
 
-Use of Ctrl-/ Ctrl+
-OK for when baseline is at the bottom, needs to work as well for spectra 
-where the baseline is at the top of the page 
-
-Dialog Box for overlay colours, not working
+Dialog Box for overlay colours needs checking
 
 
 =====DONE========
+
+Use of Ctrl-/ Ctrl+
+OK for when baseline is at the bottom, needs to work as well for spectra 
+where the baseline is at the top of the page 
 
 DONE for a block file allow overlaying some of the spectra not necessarily all the spectra
 
