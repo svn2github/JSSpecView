@@ -71,6 +71,7 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import jspecview.application.TextDialog;
 import jspecview.common.AwtPanel;
 import jspecview.common.IntegralGraph;
 import jspecview.common.JSVAppletInterface;
@@ -1437,6 +1438,14 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
 
   public void setFrame(JSVSpecNode node) {
     setSpectrumIndex(JSVSpecNode.getNodeIndex(specNodes, node));
+  }
+
+  public void showProperties() {
+    TextDialog.showProperties(jsvApplet, getPanelData().getSpectrum());
+  }
+
+  public void setBoolean(ScriptToken st, boolean TF) {
+    // ignored -- this is for setting buttons and menu items    
   }
 
 }

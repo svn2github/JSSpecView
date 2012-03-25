@@ -59,7 +59,7 @@ public class ScrollableDesktopPane extends JDesktopPane {
   private static int FRAME_OFFSET = 20;
   private MDIDesktopManager manager;
 
-  private WindowMenu windowMenu;
+  //private WindowMenu windowMenu;
 
   public ScrollableDesktopPane() {
     manager = new MDIDesktopManager(this);
@@ -119,7 +119,7 @@ public class ScrollableDesktopPane extends JDesktopPane {
 
   void setMyStyle(int style) {
     this.style = style;
-    windowMenu.setMyStyle(this.style = style);
+    //windowMenu.setMyStyle(this.style = style);
   }
 
   /**
@@ -236,7 +236,7 @@ public class ScrollableDesktopPane extends JDesktopPane {
   }
 
   public void setWindowMenu(WindowMenu windowMenu) {
-    this.windowMenu = windowMenu;
+    //this.windowMenu = windowMenu;
   }
 }
 

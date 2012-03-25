@@ -38,4 +38,6 @@ public interface ScriptInterface {
   public void sendScript(String peakScript);
   public void closeAllAndOpenFile(String fileName);
   public void setFrame(JSVSpecNode findNode);
+  public void showProperties();
+  public void setBoolean(ScriptToken st, boolean TF);
 }

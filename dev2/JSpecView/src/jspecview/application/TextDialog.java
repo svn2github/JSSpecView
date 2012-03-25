@@ -20,18 +20,25 @@
 package jspecview.application;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Frame;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.List;
 
 import javax.swing.JDialog;
 import javax.swing.JEditorPane;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 
+import jspecview.common.JDXSpectrum;
+import jspecview.common.JSVSpecNode;
+import jspecview.source.JDXSource;
 import jspecview.util.FileManager;
 
 /**
@@ -112,5 +119,44 @@ public class TextDialog extends JDialog {
     scrollPane.setPreferredSize(new Dimension(500, 400));
     scrollPane.setMinimumSize(new Dimension(500, 400));
     contentPanel.add(scrollPane,  BorderLayout.CENTER);
+  }
+
+  public static void showProperties(Component c, JDXSpectrum spectrum) {
+    Object[][] rowData = spectrum.getHeaderRowDataAsArray();
+    String[] columnNames = { "Label", "Description" };
+    JTable table = new JTable(rowData, columnNames);
+    table.setPreferredScrollableViewportSize(new Dimension(400, 195));
+    JScrollPane scrollPane = new JScrollPane(table);
+    JOptionPane.showMessageDialog(c, scrollPane, "Header Information",
+        JOptionPane.PLAIN_MESSAGE);
+  }
+
+  public static void showSource(MainFrame mainFrame) {
+    JDXSource currentSource = mainFrame.getCurrentSource();
+    List<JSVSpecNode> specNodes = mainFrame.getSpecNodes();
+    if (currentSource == null) {
+      if (specNodes.size() > 0) {
+        JOptionPane.showMessageDialog(mainFrame, "Please Select a Spectrum",
+            "Select Spectrum", JOptionPane.ERROR_MESSAGE);
+      }
+      return;
+    }
+    try {
+      new TextDialog(mainFrame, currentSource.getFilePath(), true);
+    } catch (IOException ex) {
+      new TextDialog(mainFrame, "File Not Found", "File Not Found", true);
+    }
+  }
+
+  public static void showError(MainFrame mainFrame) {
+    JDXSource currentSource = mainFrame.getCurrentSource();
+    if (currentSource == null) {
+      JOptionPane.showMessageDialog(null, "Please Select a Spectrum",
+          "Select Spectrum", JOptionPane.WARNING_MESSAGE);
+      return;
+    }
+    String errorLog = currentSource.getErrorLog();
+    if (errorLog != null)
+      new TextDialog(mainFrame, currentSource.getFilePath(), errorLog, true);
   }
 }

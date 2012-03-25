@@ -62,6 +62,7 @@ public class JSViewer {
           break;
         default:
           si.getParameters().set(jsvp, st, value);
+          si.setBoolean(st, Parameters.isTrue(value));
           break;
         case PEAKCALLBACKFUNCTIONNAME:
         case SYNCCALLBACKFUNCTIONNAME:

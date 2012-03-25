@@ -582,6 +582,11 @@ public class PanelData {
       graphSets.get(i).clearViews();
   }
 
+  public void fullView() {
+    currentGraphSet.setZoomTo(0);
+  }
+
+
   /**
    * Displays the previous view zoomed
    */

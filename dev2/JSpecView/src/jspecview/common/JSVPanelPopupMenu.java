@@ -20,7 +20,6 @@
 package jspecview.common;
 
 import java.awt.Container;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -32,9 +31,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-
 import jspecview.common.JDXSpectrum;
 
 /**
@@ -52,7 +48,6 @@ public class JSVPanelPopupMenu extends JPopupMenu {
 
   private ScriptInterface scripter;
   
-
   public void dispose() {
     pd = null;
     scripter = null;
@@ -91,7 +86,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   public JMenuItem overlayAllMenuItem = new JMenuItem();
   public JMenuItem overlayNoneMenuItem = new JMenuItem();
 
-  public JCheckBoxMenuItem integrateCheckBoxMenuItem = new JCheckBoxMenuItem();
+  public JMenuItem integrateMenuItem = new JMenuItem();
   public JMenuItem transAbsMenuItem = new JMenuItem();
   public JMenuItem solColMenuItem = new JMenuItem();
   
@@ -266,7 +261,8 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    * @param e the <code>ItemEvent</code
    */
   void gridCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-    scripter.runScript("GRIDON " + (e.getStateChange() == ItemEvent.SELECTED));
+    if (((JCheckBoxMenuItem)e.getSource()).isEnabled())
+      runScript("GRIDON " + (e.getStateChange() == ItemEvent.SELECTED));
   }
 
   /**
@@ -274,7 +270,8 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    * @param e the <code>ItemEvent</code
    */
   void coordsCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-    scripter.runScript("COORDINATESON " + (e.getStateChange() == ItemEvent.SELECTED));
+    if (((JCheckBoxMenuItem)e.getSource()).isEnabled())
+    runScript("COORDINATESON " + (e.getStateChange() == ItemEvent.SELECTED));
   }
 
   /**
@@ -282,6 +279,8 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    * @param e the <code>ItemEvent</code
    */
   void revPlotCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
+    if (!((JCheckBoxMenuItem)e.getSource()).isEnabled())
+      return;
     scripter.getPanelData().setReversePlot((e.getStateChange() == ItemEvent.SELECTED));
     scripter.getPanelData().repaint();
   }
@@ -293,15 +292,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    *        the <code>ActionEvent</code
    */
   public void properties_actionPerformed(ActionEvent e) {
-
-    JDXSpectrum spectrum = scripter.getPanelData().getSpectrum();
-    Object[][] rowData = spectrum.getHeaderRowDataAsArray();
-    String[] columnNames = { "Label", "Description" };
-    JTable table = new JTable(rowData, columnNames);
-    table.setPreferredScrollableViewportSize(new Dimension(400, 195));
-    JScrollPane scrollPane = new JScrollPane(table);
-    JOptionPane.showMessageDialog(this, scrollPane, "Header Information",
-        JOptionPane.PLAIN_MESSAGE);
+    scripter.showProperties();
   }
 
   /**
@@ -327,7 +318,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
     if (zoom == null)
       return;
     recentZoom = zoom;
-    scripter.runScript("zoom " + zoom);
+    runScript("zoom " + zoom);
   }
 
   private String recentScript;
@@ -339,7 +330,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
     if (script == null)
       return;
     recentScript = script;
-    scripter.runScript(script);
+    runScript(script);
   }
 
   public static void setMenuItem(JMenuItem item, char c, String text,
@@ -357,7 +348,8 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   }
 
   public void setProcessingMenu(JMenu menu) {
-    setMenuItem(integrateCheckBoxMenuItem, 'I', "Integrate HNMR", 0, 0,
+    final ScriptInterface scripter = this.scripter;
+    setMenuItem(integrateMenuItem, 'I', "Integrate HNMR", 0, 0,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             scripter.runScript("INTEGRATE ?");
@@ -375,9 +367,16 @@ public class JSVPanelPopupMenu extends JPopupMenu {
             scripter.runScript("GETSOLUTIONCOLOR");
           }
         });
-    menu.add(integrateCheckBoxMenuItem);
+    menu.add(integrateMenuItem);
     menu.add(transAbsMenuItem);
     menu.add(solColMenuItem);
+  }
+
+  protected void runScript(String cmd) {
+    if (scripter == null)
+      System.out.println("scripter was null for " + cmd);
+    else
+      scripter.runScript(cmd);
   }
 
   protected String recentOverlay = "1.1,1.2";
@@ -387,10 +386,10 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   public void overlay(int n) {
     switch (n) {
     case 0:
-      scripter.runScript("overlay NONE");
+      runScript("overlay NONE");
       break;
     case 1:
-      scripter.runScript("overlay ALL");
+      runScript("overlay ALL");
       break;
     default:
       String script = (String) JOptionPane.showInputDialog(null,
@@ -399,7 +398,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
       if (script == null)
         return;
       recentOverlay = script;
-      scripter.runScript("overlay " + script);
+      runScript("overlay " + script);
       break;
     }
   }
@@ -413,14 +412,13 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   public void setEnables(JSVPanel jsvp) {
     pd = jsvp.getPanelData();
     JDXSpectrum spec0 = jsvp.getSpectrumAt(0);
-    gridCheckBoxMenuItem.setSelected(pd.isGridOn());
-    coordsCheckBoxMenuItem.setSelected(pd.isCoordinatesOn());
-    reversePlotCheckBoxMenuItem.setSelected(pd.isPlotReversed());
-    integrateCheckBoxMenuItem.setSelected(spec0.getIntegrationGraph() != null);
+    setSelected(gridCheckBoxMenuItem, pd.isGridOn());
+    setSelected(coordsCheckBoxMenuItem, pd.isCoordinatesOn());
+    setSelected(reversePlotCheckBoxMenuItem, pd.isPlotReversed());
 
     boolean isOverlaid = pd.isOverlaid();
     boolean isSingle = pd.getNumberOfSpectraTotal() == 1;
-    integrateCheckBoxMenuItem.setEnabled(isSingle && spec0.canIntegrate() || spec0.getIntegrationGraph() != null);
+    integrateMenuItem.setEnabled(isSingle && spec0.canIntegrate() || spec0.getIntegrationGraph() != null);
     solColMenuItem.setEnabled(isSingle && spec0.canShowSolutionColor());
     transAbsMenuItem.setEnabled(isSingle && spec0.canConvertTransAbs());
     overlayKeyMenuItem.setEnabled(isOverlaid && pd.getNumberOfGraphSets() == 1);
@@ -434,6 +432,12 @@ public class JSVPanelPopupMenu extends JPopupMenu {
     if (appletCompoundMenu != null) 
       appletCompoundMenu.setEnabled(
           appletCompoundMenu.isEnabled() && appletCompoundMenu.getItemCount() > 3);
+  }
+
+  private void setSelected(JCheckBoxMenuItem item, boolean TF) {
+    item.setEnabled(false);
+    item.setSelected(true);
+    item.setEnabled(false);
   }
 
   static void addMenuItem(JMenu m, String key,
