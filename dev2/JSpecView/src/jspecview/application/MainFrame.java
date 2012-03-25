@@ -1710,8 +1710,8 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     JSVPanel jsvp = getSelectedPanel();
     if (jsvp == null)
       return;
-    boolean showLegend = appMenu.toggleOverlayKeyMenuItem();
-    JSViewer.setOverlayLegendVisibility(this, jsvp, showLegend);
+    //boolean showLegend = appMenu.toggleOverlayKeyMenuItem();
+    JSViewer.setOverlayLegendVisibility(this, jsvp, true);
 
   }
   
