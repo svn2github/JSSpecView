@@ -221,5 +221,11 @@ public class JSVSpecNode {
           return true;
     return false;
   }
+  public static int getNodeIndex(List<JSVSpecNode> specNodes, JSVSpecNode node) {
+    for (int i = specNodes.size(); --i >= 0;)
+      if (node == specNodes.get(i))
+        return i;
+    return -1;
+  }
 
 }

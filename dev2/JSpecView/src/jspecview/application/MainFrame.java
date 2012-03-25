@@ -1727,7 +1727,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
       PeakPickEvent e = ((PeakPickEvent) eventObj);
       PeakInfo pi = e.getPeakInfo();
       setSelectedPanel((JSVPanel) e.getSource());
-      selectedPanel.getPanelData().processPeakSelect(pi);
+      selectedPanel.getPanelData().addPeakHighlight(pi);
       sendScript(e.toString());
       setMainTitle(pi.getTitle());
       selectedPanel.getPanelData().selectSpectrum(pi.getFilePath(),
@@ -1761,7 +1761,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     if (pi == null)
       pi = jsvp.getSpectrum().getModelPeakInfo();
     System.out.println("sendframechange2 " + pi);
-    selectedPanel.getPanelData().processPeakSelect(
+    selectedPanel.getPanelData().addPeakHighlight(
         pi == null ? PeakInfo.nullPeakInfo : pi);
     sendScript(pi == null ? null : pi.toString());
   }

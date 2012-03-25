@@ -686,7 +686,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
     PeakInfo pi = jsvp.getSpectrum().getSelectedPeak();
     if (pi == null)
       pi = PeakInfo.nullPeakInfo;
-    getSelectedPanel().getPanelData().processPeakSelect(pi);
+    getSelectedPanel().getPanelData().addPeakHighlight(pi);
     sendScript(pi.toString());
   }
 
@@ -1185,6 +1185,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
   }
 
   public void setSelectedPanel(JSVPanel jsvp) {
+    System.out.println("Applet setting selected to " + jsvp.getSpectrum());
     if (jsvp != selectedPanel) {
       if (selectedPanel != null) {
         appletPanel.remove((AwtPanel)selectedPanel);
@@ -1200,6 +1201,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
       else 
         specNodes.get(i).jsvp.setEnabled(false);
     jsvp.setEnabled(true);
+    System.out.println("Applet panel vis " + appletPanel.isVisible() + " " + jsvp.isVisible());
   }
 
   ///////////// MISC methods from interfaces /////////////
@@ -1219,8 +1221,9 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
     if (eventObj instanceof PeakPickEvent) {
       PeakPickEvent e = (PeakPickEvent) eventObj;
       PeakInfo pi = e.getPeakInfo();
+      System.out.println("panel event " + pi + " on source " + e.getSource() + " " + ((JSVPanel) e.getSource()).getSpectrum());
       setSelectedPanel((JSVPanel) e.getSource());
-      getSelectedPanel().getPanelData().processPeakSelect(pi);
+      getSelectedPanel().getPanelData().addPeakHighlight(pi);
       sendScript(pi.toString());
       if (!pi.isClearAll())
         getSelectedPanel().getPanelData().selectSpectrum(pi.getFilePath(), pi.getType(), pi.getModel());
@@ -1401,6 +1404,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
   }
 
   public JSVPanel setSpectrumIndex(int i) {
+    System.out.println("jsvappletprivate setting spectrum to " + i);
     if (i < 0 || i > specNodes.size())
       return null;
     if (getSelectedPanel() != null) {
@@ -1433,7 +1437,24 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
   }
 
   public void setVisible(boolean b) {
+    System.out.println("jsvappletpriv setVisible " + b);
     appletPanel.setVisible(b);    
+  }
+
+  public void setFrame(JSVSpecNode node) {
+    setSpectrumIndex(JSVSpecNode.getNodeIndex(specNodes, node));
+    appletPanel.setBackground(Color.BLUE);
+    jsvApplet.setBackground(Color.RED);
+    ((AwtPanel) getSelectedPanel()).setBackground(Color.YELLOW);
+    appletPanel.setVisible(true);
+    ((AwtPanel) getSelectedPanel()).setVisible(true);
+    appletPanel.setEnabled(true);
+    jsvApplet.setEnabled(true);
+    jsvApplet.getContentPane().add(appletPanel);
+    ((AwtPanel) getSelectedPanel()).setEnabled(true);    
+    jsvApplet.repaint();
+    appletPanel.repaint();
+    getSelectedPanel().repaint();
   }
 
 }

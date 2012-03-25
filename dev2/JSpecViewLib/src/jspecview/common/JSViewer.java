@@ -187,14 +187,19 @@ public class JSViewer {
     if (file == null || index == null)
       return;
     if (!selectMostRecentPanelByFileName(si, file)) {
+      System.out.println("JSViewer closing all and reopening");
       si.closeAllAndOpenFile(file);
       checkAutoOverlay(si);
     }
     JSVPanel jsvp = si.getSelectedPanel();
+    System.out.println("OK, so this should be the CNMR spectrum" + jsvp.getSpectrum());
     PeakInfo pi = selectPanelByPeak(si, peakScript,
         jsvp);
-    jsvp.getPanelData().processPeakSelect(pi);
+    System.out.println("JSViewer after selectPanel-- pi=" + pi);
+    jsvp = si.getSelectedPanel();
+    System.out.println("OK, so this should be the HNMR spectrum" + jsvp.getSpectrum());
     selectSpectrumInPanel(si, jsvp, peakScript);
+    jsvp.getPanelData().addPeakHighlight(pi);
     jsvp.repaint();
     // round trip this so that Jmol highlights all equivalent atoms
     // and appropriately starts or clears vibration
@@ -222,7 +227,7 @@ public class JSViewer {
   }
 
   private static PeakInfo selectPanelByPeak(ScriptInterface si, String peakScript,
-                                           JSVPanel selectedPanel) {
+                                           JSVPanel jsvp) {
     List<JSVSpecNode> specNodes = si.getSpecNodes();
     if (specNodes == null)
       return null;
@@ -231,16 +236,26 @@ public class JSViewer {
     String index = Parser.getQuotedAttribute(peakScript, "index");
     PeakInfo pi = null;
     for (int i = specNodes.size(); --i >= 0;) 
-      specNodes.get(i).jsvp.getPanelData().processPeakSelect(null);
-    if ((pi = selectedPanel.getPanelData().findPeak(file, index)) == null)
+      specNodes.get(i).jsvp.getPanelData().addPeakHighlight(null);
+    System.out.println("JSViewer selected panelspec=" + jsvp.getSpectrum());
+    if ((pi = jsvp.getPanelData().findPeak(file, index)) != null) {
+      System.out.println("JSViewer found peak in this spectrum -- " + pi);
+      si.setFrame(JSVSpecNode.findNode(jsvp, specNodes)); 
+    } else {
+      System.out.println("JSViewer did not find a peak for " + file + " " + index);
       for (int i = specNodes.size(); --i >= 0;) {
         JSVSpecNode node = specNodes.get(i);
+        System.out.println("JSViewer looking at " + node );
+        System.out.println(file + " " + index );
+        
         if ((pi = node.jsvp.getPanelData().findPeak(file, index)) != null) {
           System.out.println("JSViewer setting spectrum to  " + node);
           si.setSpectrumIndex(i);
           break;
         }
+        System.out.println("hmm");
       }
+    }
     return pi;
   }
 

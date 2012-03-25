@@ -481,6 +481,7 @@ abstract class GraphSet {
                  int height, int width, int left, int right, int top,
                  int bottom, boolean isResized, boolean enableZoom,
                  boolean display1D, boolean display2D) {
+    System.out.println("GraphSet drawing graph for " + getSpectrum());
     // for now, at least, we only allow one 2D image
     this.enableZoom = enableZoom;
     setPositionForFrame(width, height, left, right, top, bottom);
@@ -842,7 +843,7 @@ abstract class GraphSet {
     }
   }
 
-  void processPeakSelect(PeakInfo peakInfo) {
+  void addPeakHighlight(PeakInfo peakInfo) {
     for (int i = spectra.size(); --i >= 0;) {
       Graph spec = spectra.get(i);
       removeAllHighlights(spec);
@@ -862,10 +863,11 @@ abstract class GraphSet {
         return;
       addHighlight(x1, x2, spec, null);
       if (ScaleData.isWithinRange(x1, multiScaleData)
-          && ScaleData.isWithinRange(x2, multiScaleData))
+          && ScaleData.isWithinRange(x2, multiScaleData)) {
         pd.repaint();
-      else
+      } else {
         reset();
+      }
     }
   }
 
@@ -1752,6 +1754,10 @@ abstract class GraphSet {
     Object color;
     Graph spectrum;
 
+    @Override
+    public String toString() {
+      return "highlight " + x1 + " " + x2 + " " + spectrum;
+    }
     /**
      * Constructor
      * 
@@ -1801,7 +1807,6 @@ abstract class GraphSet {
   void addHighlight(double x1, double x2, Graph spec, Object oColor) {
     if (spec == null)
       spec = getSpectrumAt(0);
-    System.out.println("GraphSet.addHighlight for " + spec);
     Highlight hl = new Highlight(x1, x2, spec, (oColor == null ? 
         pd.getHighlightColor() : oColor));
     if (!highlights.contains(hl))
@@ -1837,13 +1842,13 @@ abstract class GraphSet {
   }
 
   void removeAllHighlights(Graph spec) {
-    if (spec == null)
+    if (spec == null) 
       highlights.clear();
     else
       for (int i = highlights.size(); --i >= 0;)
-        if (highlights.get(i).spectrum == spec)
+        if (highlights.get(i).spectrum == spec) {
           highlights.remove(i);
-    pd.repaint();
+        }
   }
 
   void drawHighlights(Object g, Graph spec) {

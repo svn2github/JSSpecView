@@ -64,6 +64,7 @@ public class PanelData {
 
   PanelData(JSVPanel owner) {
     this.owner = owner;
+    System.out.println("new panelData for " + owner);
   }
   
   
@@ -640,9 +641,10 @@ public class PanelData {
       setTitle(title);
   }
 
-  public void processPeakSelect(PeakInfo peakInfo) {
+  public void addPeakHighlight(PeakInfo peakInfo) {
+    System.out.println("PD checking pd.owner " + owner + "\n with " + owner.getSpectrum() + " for " + peakInfo);
     for (int i = 0; i < graphSets.size(); i++)
-      graphSets.get(i).processPeakSelect(peakInfo);
+      graphSets.get(i).addPeakHighlight(peakInfo);
   }
 
   public PeakInfo findPeak(String fileName, String index) {
