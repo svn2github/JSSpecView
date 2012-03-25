@@ -4,6 +4,14 @@ Put new items at top, please.
 
 ====TODO=========
 
+Loading acetophenone.html and selecting a peak in the IR sends the display into frenzy
+with overlay showing and uncontrollable flashing between spectra.
+Seems to happen as well when you select a peak then use spectrumnumber to change display
+
+Jmol menu. HNMR and CNMR now showing but only hover works.
+Clicking on an option does not give the highlight in the JSV display
+Clicking on a peak in the H or C NMR works
+
 Dialog Box for overlay colours needs checking
 
 
