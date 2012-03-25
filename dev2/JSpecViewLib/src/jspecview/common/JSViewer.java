@@ -54,7 +54,7 @@ public class JSViewer {
       String key = ScriptToken.getKey(eachParam);
       ScriptToken st = ScriptToken.getScriptToken(key);
       String value = ScriptToken.getValue(st, eachParam, token);
-      //System.out.println("KEY-> " + key + " VALUE-> " + value + " : " + st);
+      ////System.out.println("KEY-> " + key + " VALUE-> " + value + " : " + st);
       try {
         switch (st) {
         case UNKNOWN:
@@ -177,7 +177,7 @@ public class JSViewer {
 
   public static void syncScript(ScriptInterface si,
                                 String peakScript) {
-    System.out.println("Jmol>JSV " + peakScript);
+    //System.out.println("Jmol>JSV " + peakScript);
     if (peakScript.indexOf("<PeakData") < 0) {
       runScriptNow(si, si.getSelectedPanel(), peakScript);
       return;
@@ -187,17 +187,17 @@ public class JSViewer {
     if (file == null || index == null)
       return;
     if (!selectMostRecentPanelByFileName(si, file)) {
-      System.out.println("JSViewer closing all and reopening");
+      //System.out.println("JSViewer closing all and reopening");
       si.closeAllAndOpenFile(file);
       checkAutoOverlay(si);
     }
     JSVPanel jsvp = si.getSelectedPanel();
-    System.out.println("OK, so this should be the CNMR spectrum" + jsvp.getSpectrum());
+    //System.out.println("OK, so this should be the CNMR spectrum" + jsvp.getSpectrum());
     PeakInfo pi = selectPanelByPeak(si, peakScript,
         jsvp);
-    System.out.println("JSViewer after selectPanel-- pi=" + pi);
+    //System.out.println("JSViewer after selectPanel-- pi=" + pi);
     jsvp = si.getSelectedPanel();
-    System.out.println("OK, so this should be the HNMR spectrum" + jsvp.getSpectrum());
+    //System.out.println("OK, so this should be the HNMR spectrum" + jsvp.getSpectrum());
     selectSpectrumInPanel(si, jsvp, peakScript);
     jsvp.getPanelData().addPeakHighlight(pi);
     jsvp.repaint();
@@ -231,29 +231,29 @@ public class JSViewer {
     List<JSVSpecNode> specNodes = si.getSpecNodes();
     if (specNodes == null)
       return null;
-    System.out.println("JSViewer selectPanelByPeak " + peakScript);
+    //System.out.println("JSViewer selectPanelByPeak " + peakScript);
     String file = Parser.getQuotedAttribute(peakScript, "file");
     String index = Parser.getQuotedAttribute(peakScript, "index");
     PeakInfo pi = null;
     for (int i = specNodes.size(); --i >= 0;) 
       specNodes.get(i).jsvp.getPanelData().addPeakHighlight(null);
-    System.out.println("JSViewer selected panelspec=" + jsvp.getSpectrum());
+    //System.out.println("JSViewer selected panelspec=" + jsvp.getSpectrum());
     if ((pi = jsvp.getPanelData().findPeak(file, index)) != null) {
-      System.out.println("JSViewer found peak in this spectrum -- " + pi);
+      //System.out.println("JSViewer found peak in this spectrum -- " + pi);
       si.setFrame(JSVSpecNode.findNode(jsvp, specNodes)); 
     } else {
-      System.out.println("JSViewer did not find a peak for " + file + " " + index);
+      //System.out.println("JSViewer did not find a peak for " + file + " " + index);
       for (int i = specNodes.size(); --i >= 0;) {
         JSVSpecNode node = specNodes.get(i);
-        System.out.println("JSViewer looking at " + node );
-        System.out.println(file + " " + index );
+        //System.out.println("JSViewer looking at " + node );
+        //System.out.println(file + " " + index );
         
         if ((pi = node.jsvp.getPanelData().findPeak(file, index)) != null) {
-          System.out.println("JSViewer setting spectrum to  " + node);
-          si.setSpectrumIndex(i);
+          //System.out.println("JSViewer setting spectrum to  " + node);
+          si.setFrame(node); 
           break;
         }
-        System.out.println("hmm");
+        //System.out.println("hmm");
       }
     }
     return pi;

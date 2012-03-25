@@ -506,6 +506,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
   }
   
   private void newAppletPanel() {
+    System.out.println("\n\n----newAppletPanel----\n\n");
     jsvApplet.getContentPane().removeAll();
     appletPanel = new JSVAppletPanel(new BorderLayout());
     jsvApplet.getContentPane().add(appletPanel);
@@ -1410,6 +1411,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
     if (getSelectedPanel() != null) {
       if (theInterface.equals("single")) {
         showSpectrum(i);
+        appletPanel.validate();
       } else {
         tabbedDisplayPane.setSelectedIndex(i);
       }
@@ -1443,18 +1445,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
 
   public void setFrame(JSVSpecNode node) {
     setSpectrumIndex(JSVSpecNode.getNodeIndex(specNodes, node));
-    appletPanel.setBackground(Color.BLUE);
-    jsvApplet.setBackground(Color.RED);
-    ((AwtPanel) getSelectedPanel()).setBackground(Color.YELLOW);
-    appletPanel.setVisible(true);
-    ((AwtPanel) getSelectedPanel()).setVisible(true);
-    appletPanel.setEnabled(true);
-    jsvApplet.setEnabled(true);
-    jsvApplet.getContentPane().add(appletPanel);
-    ((AwtPanel) getSelectedPanel()).setEnabled(true);    
-    jsvApplet.repaint();
-    appletPanel.repaint();
-    getSelectedPanel().repaint();
   }
 
 }
