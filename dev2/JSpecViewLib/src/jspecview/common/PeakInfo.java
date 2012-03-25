@@ -62,8 +62,12 @@ public class PeakInfo {
 	public void setStringInfo(String stringInfo) {
 	  Logger.info("JSpecView found " + stringInfo);
 		this.stringInfo = stringInfo;
-		type = Parser.getQuotedAttribute(stringInfo, "type");
-		type2 = type.substring(type.indexOf("/") + 1);
+		type = Parser.getQuotedAttribute(stringInfo, "type").toUpperCase();
+		type2 = fixType(type.substring(type.indexOf('/') + 1));
+		if (type2.length() > 0)
+		  type = fixType(type.substring(0, type.indexOf('/'))) + "/" + type2;
+		else
+		  type = fixType(type);
     index = Parser.getQuotedAttribute(stringInfo, "index");
     file = Parser.getQuotedAttribute(stringInfo, "file");
     model = Parser.getQuotedAttribute(stringInfo, "model");
@@ -71,7 +75,11 @@ public class PeakInfo {
     title = Parser.getQuotedAttribute(stringInfo, "title");
 	}
 
-	@Override
+	private static String fixType(String type) {
+    return (type.equals("HNMR") ? "1HNMR" : type.equals("CNMR") ? "13CNMR" : type);
+  }
+
+  @Override
 	public String toString() {
 		return stringInfo;
 	}

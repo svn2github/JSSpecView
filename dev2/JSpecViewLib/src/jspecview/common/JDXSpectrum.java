@@ -567,7 +567,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   }
 
   public boolean isAutoOverlayFromJmolClick() {
-    return (dataType.equalsIgnoreCase("GC") || dataType.startsWith("VIS"));
+    return (dataType.startsWith("GC") || dataType.startsWith("VIS"));
   }
 
 
