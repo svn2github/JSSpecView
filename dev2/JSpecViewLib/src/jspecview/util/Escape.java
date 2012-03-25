@@ -44,7 +44,7 @@ public class Escape {
     } else {
       script = "vibration OFF; selectionhalos OFF;";
     }
-    return "Select: " + peak + " script=\"" + script + ";center visible;zoom {visible} 0; zoom * 0.90;zoom\"";
+    return "Select: " + peak + " script=\"" + script;// + ";center visible;zoom {visible} 0; zoom * 0.90;zoom\"";
   }
 
   public static String escape(String str) {
