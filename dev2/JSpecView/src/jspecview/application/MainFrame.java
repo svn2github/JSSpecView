@@ -1760,7 +1760,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     PeakInfo pi = jsvp.getSpectrum().getSelectedPeak();
     if (pi == null)
       pi = jsvp.getSpectrum().getModelPeakInfo();
-    System.out.println("sendframechange2 " + pi);
     selectedPanel.getPanelData().addPeakHighlight(
         pi == null ? PeakInfo.nullPeakInfo : pi);
     sendScript(pi == null ? null : pi.toString());

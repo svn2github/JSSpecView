@@ -506,7 +506,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
   }
   
   private void newAppletPanel() {
-    System.out.println("\n\n----newAppletPanel----\n\n");
     jsvApplet.getContentPane().removeAll();
     appletPanel = new JSVAppletPanel(new BorderLayout());
     jsvApplet.getContentPane().add(appletPanel);
@@ -1186,7 +1185,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
   }
 
   public void setSelectedPanel(JSVPanel jsvp) {
-    System.out.println("Applet setting selected to " + jsvp.getSpectrum());
     if (jsvp != selectedPanel) {
       if (selectedPanel != null) {
         appletPanel.remove((AwtPanel)selectedPanel);
@@ -1202,7 +1200,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
       else 
         specNodes.get(i).jsvp.setEnabled(false);
     jsvp.setEnabled(true);
-    System.out.println("Applet panel vis " + appletPanel.isVisible() + " " + jsvp.isVisible());
   }
 
   ///////////// MISC methods from interfaces /////////////
@@ -1222,7 +1219,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
     if (eventObj instanceof PeakPickEvent) {
       PeakPickEvent e = (PeakPickEvent) eventObj;
       PeakInfo pi = e.getPeakInfo();
-      System.out.println("panel event " + pi + " on source " + e.getSource() + " " + ((JSVPanel) e.getSource()).getSpectrum());
       setSelectedPanel((JSVPanel) e.getSource());
       getSelectedPanel().getPanelData().addPeakHighlight(pi);
       sendScript(pi.toString());
@@ -1241,7 +1237,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
   }
   
   public void runScript(String script) {
-    //System.out.println(getPropertyAsJSON("type"));
     if (scriptQueue == null)
       processCommand(script);
     else
@@ -1265,7 +1260,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
 
   public void execSetIntegrationRatios(String value) {
     // parse the string with a method in JSpecViewUtils
-    //System.out.println("Integration Ratio Parameter: " + value);
     integrationRatios = IntegralGraph
         .getIntegrationRatiosFromString(value);
   }
@@ -1405,7 +1399,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
   }
 
   public JSVPanel setSpectrumIndex(int i) {
-    System.out.println("jsvappletprivate setting spectrum to " + i);
     if (i < 0 || i > specNodes.size())
       return null;
     if (getSelectedPanel() != null) {
@@ -1439,7 +1432,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
   }
 
   public void setVisible(boolean b) {
-    System.out.println("jsvappletpriv setVisible " + b);
     appletPanel.setVisible(b);    
   }
 

@@ -177,7 +177,7 @@ public class JSViewer {
 
   public static void syncScript(ScriptInterface si,
                                 String peakScript) {
-    //System.out.println("Jmol>JSV " + peakScript);
+    System.out.println("Jmol>JSV " + peakScript);
     if (peakScript.indexOf("<PeakData") < 0) {
       runScriptNow(si, si.getSelectedPanel(), peakScript);
       return;
