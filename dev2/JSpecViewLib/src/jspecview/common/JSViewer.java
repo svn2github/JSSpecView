@@ -189,8 +189,7 @@ public class JSViewer {
    * from Jmol
    */
 
-  public static void syncScript(ScriptInterface si,
-                                String peakScript) {
+  public static void syncScript(ScriptInterface si, String peakScript) {
     System.out.println("Jmol>JSV " + peakScript);
     if (peakScript.indexOf("<PeakData") < 0) {
       runScriptNow(si, si.getSelectedPanel(), peakScript);
@@ -200,35 +199,31 @@ public class JSViewer {
     String index = Parser.getQuotedAttribute(peakScript, "index");
     if (file == null || index == null)
       return;
-    if (!selectMostRecentPanelByFileName(si, file)) {
+    if (!checkFileAlreadyLoaded(si, file)) {
       //System.out.println("JSViewer closing all and reopening");
       si.closeAllAndOpenFile(file);
       checkAutoOverlay(si);
     }
+    PeakInfo pi = selectPanelByPeak(si, peakScript, si.getSelectedPanel());
     JSVPanel jsvp = si.getSelectedPanel();
-    //System.out.println("OK, so this should be the CNMR spectrum" + jsvp.getSpectrum());
-    PeakInfo pi = selectPanelByPeak(si, peakScript,
-        jsvp);
-    //System.out.println("JSViewer after selectPanel-- pi=" + pi);
-    jsvp = si.getSelectedPanel();
-    //System.out.println("OK, so this should be the HNMR spectrum" + jsvp.getSpectrum());
     selectSpectrumInPanel(si, jsvp, peakScript);
     jsvp.getPanelData().addPeakHighlight(pi);
     jsvp.repaint();
     // round trip this so that Jmol highlights all equivalent atoms
     // and appropriately starts or clears vibration
-    si.sendScript(pi.toString());
+    si.sendScript("syncScript return trip " + pi.toString());
   }
 
-  private static boolean selectMostRecentPanelByFileName(
+  private static boolean checkFileAlreadyLoaded(
                                                         ScriptInterface si,
                                                         String fileName) {
-    
+    if (si.getSelectedPanel().getPanelData().hasFileLoaded(fileName))
+      return true;
     List<JSVSpecNode> specNodes = si.getSpecNodes();
     for (int i = specNodes.size(); --i >= 0;)
       if (specNodes.get(i).jsvp.getPanelData().hasFileLoaded(fileName)) {
         si.setSelectedPanel(specNodes.get(i).jsvp);
-        si.sendFrameChange(specNodes.get(i).jsvp);
+        //si.sendFrameChange(specNodes.get(i).jsvp); !
         return true;
       }
     return false;
@@ -311,7 +306,7 @@ public class JSViewer {
       pi = e.getPeakInfo();
     }
     si.getSelectedPanel().getPanelData().addPeakHighlight(pi);
-    si.sendScript(pi == null ? null : pi.toString());
+    si.sendScript(" processPeakPickEvent  " + si.getSelectedPanel() + " " + (pi == null ? null : pi.toString()));
     if (pi.isClearAll()) // was not in app version??
       si.getSelectedPanel().repaint();
     else

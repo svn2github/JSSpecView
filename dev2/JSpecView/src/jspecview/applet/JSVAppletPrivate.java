@@ -667,6 +667,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
     JSVPanel jsvp = specNodes.get(index).jsvp;
     if (jsvp != getSelectedPanel())
       setSelectedPanel(jsvp);
+    System.out.println("showSpectrum sending frame change..." + index);
     sendFrameChange(jsvp);
   }
 
@@ -678,7 +679,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
     if (pi == null)
       pi = PeakInfo.nullPeakInfo;
     getSelectedPanel().getPanelData().addPeakHighlight(pi);
-    sendScript(pi.toString());
+    sendScript("sendFrameChange " + jsvp + "  " + pi.toString());
   }
 
   private long msTrigger = -1;

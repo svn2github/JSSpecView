@@ -55,6 +55,11 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     // handled later
   }
 
+  /**
+   * called by super.jbInit()
+   * 
+   */
+  @Override
   protected void setMenu() {
     aboutMenu.setText("About");
 

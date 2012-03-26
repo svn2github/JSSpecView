@@ -1111,7 +1111,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
       pi = jsvp.getSpectrum().getModelPeakInfo();
     getSelectedPanel().getPanelData().addPeakHighlight(
         pi == null ? PeakInfo.nullPeakInfo : pi);
-    sendScript(pi == null ? null : pi.toString());
+    sendScript("mainframe sendFrameChange " + (pi == null ? null : pi.toString()));
   }
 
   ////////// MENU ACTIONS ///////////
