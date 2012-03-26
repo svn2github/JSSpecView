@@ -1080,14 +1080,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
   public void panelEvent(Object eventObj) {
     if (eventObj instanceof PeakPickEvent) {
-      PeakPickEvent e = ((PeakPickEvent) eventObj);
-      PeakInfo pi = e.getPeakInfo();
-      setSelectedPanel((JSVPanel) e.getSource());
-      getSelectedPanel().getPanelData().addPeakHighlight(pi);
-      sendScript(e.toString());
-      setMainTitle(pi.getTitle());
-      getSelectedPanel().getPanelData().selectSpectrum(pi.getFilePath(),
-          pi.getType(), pi.getModel());
+      JSViewer.processPeakPickEvent((ScriptInterface) this, eventObj, true);
     } else if (eventObj instanceof ZoomEvent) {
       writeStatus("Double-Click highlighted spectrum in menu to zoom out; CTRL+/CTRL- to adjust Y scaling.");
     } else if (eventObj instanceof SubSpecChangeEvent) {
@@ -1734,5 +1727,9 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
       pd.resetView();
       break;
     }
+  }
+
+  public void checkCallbacks(String title) {
+    setMainTitle(title);
   }
 }

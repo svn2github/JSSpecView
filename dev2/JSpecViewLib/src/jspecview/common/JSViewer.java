@@ -6,6 +6,7 @@ import java.util.StringTokenizer;
 import jspecview.source.JDXSource;
 import jspecview.util.Logger;
 import jspecview.util.Parser;
+import jspecview.util.TextFormat;
 
 public class JSViewer {
 
@@ -117,6 +118,18 @@ public class JSViewer {
           break;
         case OVERLAY:
           si.execOverlay(value);
+          break;
+        case PEAK:
+          try {
+          List<String> tokens = ScriptToken.getTokens(value);
+          value = " type=\"" + tokens.get(0).toUpperCase() 
+          + "\" _match=\"" + TextFormat.trimQuotes(tokens.get(1).toUpperCase()) + "\"";
+          if (tokens.size() > 2 && tokens.get(2).equalsIgnoreCase("all"))
+            value += " title=\"ALL\"";
+          processPeakPickEvent(si, new PeakInfo(value), false); // false == true here
+          } catch (Exception e) {
+            // ignore
+          }
           break;
         case SPECTRUM:
         case SPECTRUMNUMBER:
@@ -267,6 +280,43 @@ public class JSViewer {
     String model = Parser.getQuotedAttribute(peakScript, "model");
     selectedPanel.getPanelData().selectSpectrum(file, type, model);
     si.sendFrameChange(selectedPanel);
+  }
+
+  public static void processPeakPickEvent(ScriptInterface si, Object eventObj,
+                                          boolean isApp) {
+    PeakInfo pi;
+    if (eventObj instanceof PeakInfo) {
+      // this is a call from the PEAK command, above.
+      pi = (PeakInfo) eventObj;
+      JSVPanel jsvp = si.getSelectedPanel();
+      PeakInfo pi2 = jsvp.getPanelData().findMatchingPeakInfo(pi);
+      if (pi2 == null) {
+        if (!"ALL".equals(pi.getTitle()))
+          return;
+        List<JSVSpecNode> specNodes = si.getSpecNodes();
+        JSVSpecNode node = null;
+        for (int i = 0; i < specNodes.size(); i++)
+          if ((pi2 = specNodes.get(i).jsvp.getPanelData().findMatchingPeakInfo(pi)) != null) {
+            node = specNodes.get(i);
+            break;
+          }
+        if (node == null)
+          return;
+        si.setFrame(node);
+      }
+      pi = pi2;
+    } else {
+      PeakPickEvent e = ((PeakPickEvent) eventObj);
+      si.setSelectedPanel((JSVPanel) e.getSource());
+      pi = e.getPeakInfo();
+    }
+    si.getSelectedPanel().getPanelData().addPeakHighlight(pi);
+    si.sendScript(pi == null ? null : pi.toString());
+    if (!pi.isClearAll()) // was not in app version??
+      si.getSelectedPanel().getPanelData().selectSpectrum(pi.getFilePath(),
+          pi.getType(), pi.getModel());
+    si.checkCallbacks(pi.getTitle());
+
   }
 
 }

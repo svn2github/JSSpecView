@@ -10,10 +10,16 @@ With a dual display of GC at top and MS at bottom what script should I use to
 change the lower display but leaving the top display undisturbed?
 Can they be identified individually?
 
-> need a new command:
+> done:
 
   peak ms model1
   peak ms "204"  -- could look for match in title text?
+> DONE -- needs testing
+
+  peak ms "204" ALL
+       -- added ALL keyword lets you look through  all spectra, otherwise it's just the current panel
+       -- current panel, though, is always checked first.
+
   
 With Jmol application, when loading a Block file the JSV display is automatically showing the LAST Block.
 

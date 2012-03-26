@@ -69,6 +69,7 @@ public enum ScriptToken {
   MENUON,
   OBSCURE,
   OVERLAY("spectrumID[*factor], spectrumID[*factor], ..."),
+  PEAK("<type(IR,CNMR,HNMR,MS, etc)> \"match\" [ALL]"),
   PEAKCALLBACKFUNCTIONNAME,
   PLOTAREACOLOR("C"),
   PLOTCOLOR("C"),
@@ -157,6 +158,7 @@ public enum ScriptToken {
     case JMOL:
     case LABEL:
     case LOAD:
+    case PEAK:
     case PLOTCOLORS:
     case YSCALE:
       // take full command
@@ -179,7 +181,7 @@ public enum ScriptToken {
     String s = params.nextToken();
     if (s.charAt(0) != '"') 
       return s;
-    if (s.endsWith("\""))
+    if (s.endsWith("\"") && s.length() > 1)
       return (removeQuotes ? TextFormat.trimQuotes(s) : s);
     StringBuffer sb = new StringBuffer(s.substring(1));
     s = null;

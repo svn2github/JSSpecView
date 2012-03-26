@@ -187,7 +187,6 @@ public class PanelData {
       break;
     case REVERSEPLOT:
       setReversePlot(isTrue);
-      System.out.println("paneldata reverseplot=" + isTrue + " for " + owner);
       break;
     case TITLEBOLDON:
       titleBoldOn = isTrue;
@@ -640,7 +639,6 @@ public class PanelData {
   }
 
   public void addPeakHighlight(PeakInfo peakInfo) {
-    System.out.println("PD checking pd.owner " + owner + "\n with " + owner.getSpectrum() + " for " + peakInfo);
     for (int i = 0; i < graphSets.size(); i++)
       graphSets.get(i).addPeakHighlight(peakInfo);
   }
@@ -863,6 +861,14 @@ public class PanelData {
 
   public String getSolutionColor() {
     return currentGraphSet.getSolutionColor();
+  }
+
+  public PeakInfo findMatchingPeakInfo(PeakInfo pi) {
+    PeakInfo pi2 = null;
+    for (int i = 0; i < graphSets.size(); i++)
+      if ((pi2 = graphSets.get(i).findMatchingPeakInfo(pi)) != null)
+        break;
+    return pi2;
   }
 
 }

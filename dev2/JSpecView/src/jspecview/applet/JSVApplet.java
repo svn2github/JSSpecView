@@ -42,7 +42,6 @@ package jspecview.applet;
 import java.util.Map;
 
 import javax.swing.JApplet;
-import javax.swing.JFileChooser;
 
 import jspecview.common.JSVAppletInterface;
 

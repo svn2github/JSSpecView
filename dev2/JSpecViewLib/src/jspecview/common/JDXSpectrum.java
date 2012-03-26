@@ -570,5 +570,11 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return (dataType.startsWith("GC") || dataType.startsWith("VIS"));
   }
 
+  public PeakInfo findMatchingPeakInfo(PeakInfo pi) {
+    for (int i = 0; i < peakList.size(); i++)
+      if (peakList.get(i).checkTypeMatch(pi))
+        return peakList.get(i);
+    return null;
+  }
 
 }

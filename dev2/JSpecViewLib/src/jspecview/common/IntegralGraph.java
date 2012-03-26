@@ -305,7 +305,7 @@ public class IntegralGraph implements Graph {
  //   double y0 = xyCoords[xyCoords.length - 1].getYVal();
  //   double y1 = xyCoords[0].getYVal();
  //   return (y - y0) / (y1 - y0) * 100;
-    return getYValueAt(x) * 100;
+    return y * 100;
   }
 
   public double getYValueAt(double x) {

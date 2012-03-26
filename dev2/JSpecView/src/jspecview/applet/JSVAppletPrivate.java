@@ -1205,14 +1205,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
    */
   public void panelEvent(Object eventObj) {
     if (eventObj instanceof PeakPickEvent) {
-      PeakPickEvent e = (PeakPickEvent) eventObj;
-      PeakInfo pi = e.getPeakInfo();
-      setSelectedPanel((JSVPanel) e.getSource());
-      getSelectedPanel().getPanelData().addPeakHighlight(pi);
-      sendScript(pi.toString());
-      if (!pi.isClearAll())
-        getSelectedPanel().getPanelData().selectSpectrum(pi.getFilePath(), pi.getType(), pi.getModel());
-      checkCallbacks();
+      JSViewer.processPeakPickEvent((ScriptInterface) this, eventObj, false);
     } else if (eventObj instanceof ZoomEvent) {
     } else if (eventObj instanceof SubSpecChangeEvent) {
     }
@@ -1433,6 +1426,10 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
 
   public void setBoolean(ScriptToken st, boolean TF) {
     // ignored -- this is for setting buttons and menu items    
+  }
+
+  public void checkCallbacks(String title) {
+    checkCallbacks();
   }
 
 }

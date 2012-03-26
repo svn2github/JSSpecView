@@ -541,11 +541,13 @@ public class FileReader {
       line = discardLinesUntilContains(reader, "<Peaks");
       String type = Parser.getQuotedAttribute(line, "type");
       PeakInfo peak;
-      String path = Escape.escape(filePath.replace('\\','/'));
+      String path = Escape.escape(filePath.replace('\\', '/'));
       while ((line = reader.readLine()) != null
           && !(line = line.trim()).startsWith("</Peaks>")) {
         if (line.startsWith("<PeakData")) {
-
+          peak = new PeakInfo("<PeakData file=" + path + " index=\""
+              + (++index) + "\" type=\"" + type + "\" "
+              + line.substring(9).trim());
           double xMax = Double.parseDouble(Parser.getQuotedAttribute(line,
               "xMax"));
           double xMin = Double.parseDouble(Parser.getQuotedAttribute(line,
@@ -554,13 +556,10 @@ public class FileReader {
               "yMax"));
           double yMin = Double.parseDouble(Parser.getQuotedAttribute(line,
               "yMin"));
-          peak = new PeakInfo();
           peak.setXMax(xMax);
           peak.setXMin(xMin);
           peak.setYMax(yMax);
           peak.setYMin(yMin);
-          peak.setStringInfo("<PeakData file=" + path + " index=\"" + (++index)
-              + "\" type=\"" + type + "\" " + line.substring(9).trim());
           peakData.add(peak);
         }
       }

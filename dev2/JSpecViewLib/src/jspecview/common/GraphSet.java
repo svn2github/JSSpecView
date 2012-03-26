@@ -2080,4 +2080,11 @@ abstract class GraphSet {
         return true;
     return false;
   }
+  public PeakInfo findMatchingPeakInfo(PeakInfo pi) {
+    PeakInfo pi2 = null;
+    for (int i = 0; i < spectra.size(); i++)
+      if (spectra.get(i) instanceof JDXSpectrum && (pi2 = ((JDXSpectrum) spectra.get(i)).findMatchingPeakInfo(pi)) != null)
+        break;
+    return pi2;
+  }
 }

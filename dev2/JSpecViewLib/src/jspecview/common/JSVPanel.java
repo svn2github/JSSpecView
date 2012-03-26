@@ -22,5 +22,4 @@ public interface JSVPanel extends JSVContainer {
   void setToolTipText(String s);
   void setColor(ScriptToken st, Object color);
   void doRequestFocusInWindow();
-  
 }
