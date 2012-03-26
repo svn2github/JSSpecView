@@ -640,4 +640,9 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     }
     return null;
   }
+  
+  @Override
+  public String toString() {
+    return getSpectrumAt(0).toString();
+  }
 }

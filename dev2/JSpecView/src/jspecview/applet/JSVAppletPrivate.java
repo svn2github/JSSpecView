@@ -1181,9 +1181,10 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
       appletPanel.add((AwtPanel)jsvp, BorderLayout.CENTER);
       jsvApplet.addKeyListener((AwtPanel)jsvp);
       selectedPanel = jsvp;
+      appletPanel.validate();
     }
     for (int i = specNodes.size(); --i >= 0; )
-      if (specNodes.get(i) == jsvp)
+      if (specNodes.get(i).jsvp == jsvp)
         currentSpectrumIndex = i;
       else 
         specNodes.get(i).jsvp.setEnabled(false);
