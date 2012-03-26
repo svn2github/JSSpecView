@@ -6,26 +6,26 @@ Put new items at top, please.
 With Jmol application, when loading a Block file the JSV display is automatically showing the LAST Block.
 
 > That's the design -- you want first?
-
+> yes please..
 
 Clicking on the Jmol display shows the peaks, using the Jmol Menu under Spectra gives the hover display
 Selecting an option though gives no change to the JSV display and that Block is not made the front display.
 
 > good idea; no mechanism to do that at present
 
-
 Loading a Block file and switching between Blocks without selecting a peak.
 Having looked at 4 Blocks and returning to the first.
 A PEAK is shown selected and if an IR then Jmol starts vib mode despite not having clicked in the JSV display.
 
 > fixed? I'm not seeing that.
-
+> still happening for me
 
 Loading acetophenone.html and selecting a peak in the IR sends the display into frenzy
 with overlay showing and uncontrollable flashing between spectra.
 Seems to happen as well when you select a peak then use spectrumnumber to change display
 
 > probably fixed.
+> not for me, but will l try another update and clean 
 
 
 Jmol menu. HNMR and CNMR now showing but only hover works.
