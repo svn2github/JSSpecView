@@ -1358,7 +1358,7 @@ abstract class GraphSet {
         : null);
     if (list != null && list.size() > 0) {
       if (piMouseOver != null && pd.isMouseUp()) {
-        setColor(g, 245, 245, 245); // very faint gray box
+        setColor(g, 240, 240, 240); // very faint gray box
         drawPeak(g, piMouseOver, true);
       }
       setColor(g, ScriptToken.HIGHLIGHTCOLOR);
