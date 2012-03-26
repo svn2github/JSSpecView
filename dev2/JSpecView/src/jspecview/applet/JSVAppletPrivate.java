@@ -419,7 +419,11 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
     }
   }
 
+  private String lastScript;
   public void syncScript(String peakScript) {
+    if (peakScript.indexOf("atoms\"") < 0 && peakScript.equals(lastScript))
+      return; // don't cycle to same model again
+    lastScript = peakScript;
     JSViewer.syncScript(this, peakScript);
   }
 
@@ -1205,7 +1209,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
    */
   public void panelEvent(Object eventObj) {
     if (eventObj instanceof PeakPickEvent) {
-      JSViewer.processPeakPickEvent((ScriptInterface) this, eventObj, false);
+      JSViewer.processPeakPickEvent(this, eventObj, false);
     } else if (eventObj instanceof ZoomEvent) {
     } else if (eventObj instanceof SubSpecChangeEvent) {
     }

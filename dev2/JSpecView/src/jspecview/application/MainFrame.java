@@ -1080,7 +1080,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
   public void panelEvent(Object eventObj) {
     if (eventObj instanceof PeakPickEvent) {
-      JSViewer.processPeakPickEvent((ScriptInterface) this, eventObj, true);
+      JSViewer.processPeakPickEvent(this, eventObj, true);
     } else if (eventObj instanceof ZoomEvent) {
       writeStatus("Double-Click highlighted spectrum in menu to zoom out; CTRL+/CTRL- to adjust Y scaling.");
     } else if (eventObj instanceof SubSpecChangeEvent) {
@@ -1343,8 +1343,12 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
       jmolOrAdvancedApplet.syncToJmol(msg);
   }
 
+  private String lastScript;
   public void syncScript(String peakScript) {
-    JSViewer.syncScript((ScriptInterface) this, peakScript);
+    if (peakScript.indexOf("atoms\"") < 0 && peakScript.equals(lastScript))
+      return; // don't cycle to same model again
+    lastScript = peakScript;
+    JSViewer.syncScript(this, peakScript);
   }
 
   public void closeAllAndOpenFile(String filePath) {
