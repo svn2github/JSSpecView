@@ -118,10 +118,10 @@ abstract class GraphSet {
   protected double minYScale;
   protected double widthRatio;
 
-  PeakInfo findPeak(String filePath, String index) {
+  PeakInfo selectPeakByFileIndex(String filePath, String index) {
     // for now we are only checking the base spectrum, but
     // there might be a need to check subspectra at some point?
-    return getSpectrumAt(0).findPeakByFileIndex(filePath, index);
+    return getSpectrumAt(0).selectPeakByFileIndex(filePath, index);
   }
 
   JDXSpectrum getSpectrum() {
@@ -2066,11 +2066,11 @@ abstract class GraphSet {
     return true;
   }
 
-  static PeakInfo findPeak(List<GraphSet> graphSets, String fileName,
+  static PeakInfo selectPeakByFileIndex(List<GraphSet> graphSets, String fileName,
                                   String index) {
     PeakInfo pi;
     for (int i = graphSets.size(); --i >= 0; )
-      if ((pi = graphSets.get(i).findPeak(fileName, index)) != null) {
+      if ((pi = graphSets.get(i).selectPeakByFileIndex(fileName, index)) != null) {
         return pi;
       }
     return null;

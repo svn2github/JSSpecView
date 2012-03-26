@@ -643,8 +643,8 @@ public class PanelData {
       graphSets.get(i).addPeakHighlight(peakInfo);
   }
 
-  public PeakInfo findPeak(String fileName, String index) {
-    return GraphSet.findPeak(graphSets, fileName, index);
+  public PeakInfo selectPeakByFileIndex(String fileName, String index) {
+    return GraphSet.selectPeakByFileIndex(graphSets, fileName, index);
   }
 
   public void selectSpectrum(String fileName, String type, String model) {

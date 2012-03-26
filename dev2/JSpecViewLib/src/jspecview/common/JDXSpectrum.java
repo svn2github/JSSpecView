@@ -126,10 +126,11 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return list.size();
   }
 
-  public PeakInfo findPeakByFileIndex(String filePath, String index) {
+  public PeakInfo selectPeakByFileIndex(String filePath, String index) {
     if (peakList != null && peakList.size() > 0)
       for (int i = 0; i < peakList.size(); i++)
         if (peakList.get(i).checkFileIndex(filePath, index)) {
+          System.out.println("selecting peak in " + this + " " + peakList.get(i));
           return (selectedPeak = peakList.get(i));
         }
     return null;
@@ -170,7 +171,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
         PeakInfo peak = peakList.get(i);
         double xVal = coord.getXVal();
         if (xVal >= peak.getXMin() && xVal <= peak.getXMax())
-          return (selectedPeak = peak);
+          return peak;
       }
     return null;   
   }

@@ -247,7 +247,7 @@ public class JSViewer {
     for (int i = specNodes.size(); --i >= 0;) 
       specNodes.get(i).jsvp.getPanelData().addPeakHighlight(null);
     //System.out.println("JSViewer selected panelspec=" + jsvp.getSpectrum());
-    if ((pi = jsvp.getPanelData().findPeak(file, index)) != null) {
+    if ((pi = jsvp.getPanelData().selectPeakByFileIndex(file, index)) != null) {
       //System.out.println("JSViewer found peak in this spectrum -- " + pi);
       si.setFrame(JSVSpecNode.findNode(jsvp, specNodes)); 
     } else {
@@ -257,7 +257,7 @@ public class JSViewer {
         //System.out.println("JSViewer looking at " + node );
         //System.out.println(file + " " + index );
         
-        if ((pi = node.jsvp.getPanelData().findPeak(file, index)) != null) {
+        if ((pi = node.jsvp.getPanelData().selectPeakByFileIndex(file, index)) != null) {
           //System.out.println("JSViewer setting spectrum to  " + node);
           si.setFrame(node); 
           break;
