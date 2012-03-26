@@ -249,4 +249,10 @@ class AwtGraphSet extends GraphSet {
     ((Graphics) g).setColor(color);
   }
 
+
+  @Override
+  protected void setColor(Object g, int red, int green, int blue) {
+    ((Graphics) g).setColor(new Color(red, green, blue));
+  }
+
 }

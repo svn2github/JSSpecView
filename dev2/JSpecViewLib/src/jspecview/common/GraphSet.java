@@ -38,6 +38,8 @@ abstract class GraphSet {
   abstract protected void setColor(Object g, ScriptToken plotcolor);
   abstract protected void setCurrentBoxColor(Object g);
   abstract protected void setPlotColor(Object g, int i);
+  abstract protected void setColor(Object g, int red, int green, int blue);
+  
   abstract void setPlotColors(Object oColors);
   abstract void setPlotColor0(Object oColor);
   abstract boolean update2dImage(boolean b);
@@ -1296,10 +1298,10 @@ abstract class GraphSet {
       // background stuff
       fillBox(g, xPixel0, yPixel0, xPixel1, yPixel1, ScriptToken.PLOTAREACOLOR);
       drawWidgets(g, subIndex, isInteractive);
-      if (withGrid)
-        drawGrid(g, height, width);
       drawPeakTabs(g);
       drawHighlights(g);
+      if (withGrid)
+        drawGrid(g, height, width);
       // scale-related, title, and coordinates
       if (withXScale)
         drawXScale(g, height, width);
@@ -1356,7 +1358,7 @@ abstract class GraphSet {
         : null);
     if (list != null && list.size() > 0) {
       if (piMouseOver != null && pd.isMouseUp()) {
-        setColor(g, ScriptToken.GRIDCOLOR);
+        setColor(g, 250, 250, 250); // very faint gray box
         drawPeak(g, piMouseOver, true);
       }
       setColor(g, ScriptToken.HIGHLIGHTCOLOR);

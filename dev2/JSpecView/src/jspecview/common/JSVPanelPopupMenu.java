@@ -200,6 +200,13 @@ public class JSVPanelPopupMenu extends JPopupMenu {
       }
     });
     
+    setMenu();
+  }
+
+  /**
+   * overridded in applet
+   */
+  protected void setMenu() {
     add(gridCheckBoxMenuItem);
     add(coordsCheckBoxMenuItem);
     add(reversePlotCheckBoxMenuItem);
@@ -215,7 +222,6 @@ public class JSVPanelPopupMenu extends JPopupMenu {
     addSeparator();
     add(properties);
   }
-
   protected void reboot() {
     if (thisJsvp == null)
       return;
