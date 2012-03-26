@@ -60,6 +60,11 @@ public class JSVAppletPrivatePro extends JSVAppletPrivate implements
   }
   
   @Override
+  public boolean isPro() {
+    return true;
+  }
+  
+  @Override
   void doAdvanced(String filePath) {
     ((JSVAppletPro) jsvApplet).doAdvanced(filePath);
   }

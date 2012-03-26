@@ -363,6 +363,10 @@ abstract class GraphSet {
         - (int) ((yVal * userYFactor - minYScale) / yFactorForScale));
   }
 
+  protected int toPixelYint(double yVal) {
+    return yPixel1 - (int) (Double.isNaN(yVal) ? Integer.MIN_VALUE : yPixels * yVal);
+  }
+
   protected int toPixelY0(double y) {
     MultiScaleData multiScaleData = zoomInfoList.get(0);
     double factor = (multiScaleData.maxYOnScale - multiScaleData.minYOnScale)
@@ -1349,7 +1353,7 @@ abstract class GraphSet {
         .getPeakList()
         : null);
     if (list != null && list.size() > 0) {
-      if (piMouseOver != null) {
+      if (piMouseOver != null && pd.isMouseUp()) {
         setColor(g, ScriptToken.GRIDCOLOR);
         drawPeak(g, piMouseOver, true);
       }
@@ -1472,7 +1476,8 @@ abstract class GraphSet {
                         boolean gridOn, boolean drawY0) {
     // Check if specInfo in null or xyCoords is null
     //Coordinate[] xyCoords = spectra[index].getXYCoords();
-    Coordinate[] xyCoords = spectra.get(index).getXYCoords();
+    Graph spec = spectra.get(index);
+    Coordinate[] xyCoords = spec.getXYCoords();
 
     setPlotColor(g,
         index == 1 && getSpectrum().getIntegrationGraph() != null ? -1
@@ -1482,15 +1487,17 @@ abstract class GraphSet {
     int y0 = toPixelY(0);
     if (drawY0 || index != 0 || y0 != fixY(y0))
       y0 = -1;
-    userYFactor = spectra.get(index).getUserYFactor();
-    if (spectra.get(index).isContinuous()) {
+    
+    boolean isIntegral = (spec instanceof IntegralGraph);
+    userYFactor = spec.getUserYFactor();
+    if (spec.isContinuous()) {
       for (int i = multiScaleData.startDataPointIndices[index]; i < multiScaleData.endDataPointIndices[index]; i++) {
         Coordinate point1 = xyCoords[i];
         Coordinate point2 = xyCoords[i + 1];
         int x1 = toPixelX(point1.getXVal());
-        int y1 = toPixelY(point1.getYVal());
         int x2 = toPixelX(point2.getXVal());
-        int y2 = toPixelY(point2.getYVal());
+        int y1 = (isIntegral ? toPixelYint(point1.getYVal()) : toPixelY(point1.getYVal()));
+        int y2 = (isIntegral ? toPixelYint(point2.getYVal()) : toPixelY(point2.getYVal()));
         if (y1 == Integer.MIN_VALUE || y2 == Integer.MIN_VALUE)
           continue;
         y1 = fixY(y1);
@@ -1596,8 +1603,8 @@ abstract class GraphSet {
         continue;
       String s = "  " + formatter.format(Math.abs(in.value));
       int x = toPixelX(in.x2);
-      int y1 = toPixelY(in.y1);
-      int y2 = toPixelY(in.y2);
+      int y1 = toPixelYint(in.y1);
+      int y2 = toPixelYint(in.y2);
       if (x != fixX(x))
         continue;
       drawLine(g, x, y1, x, y2);

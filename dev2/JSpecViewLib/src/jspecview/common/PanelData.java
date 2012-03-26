@@ -718,7 +718,18 @@ public class PanelData {
 
   /*--------------the rest are all mouse and keyboard interface -----------------------*/
 
+  private enum Mouse {
+    UP, DOWN;
+  }
+  
+  private Mouse mouseState;
+  
+  boolean isMouseUp() {
+    return (mouseState  == PanelData.Mouse.UP);
+  }
+  
   protected void doMousePressed(int xPixel, int yPixel, boolean isControlDown) {
+    mouseState = Mouse.DOWN;
     GraphSet gs = GraphSet.findGraphSet(graphSets, xPixel, yPixel);
     if (gs == null)
       return;
@@ -730,6 +741,7 @@ public class PanelData {
   }
 
   protected void doMouseMoved(int xPixel, int yPixel) {
+    mouseState = Mouse.UP;
     GraphSet gs = GraphSet.findGraphSet(graphSets, xPixel, yPixel);
     if (gs == null)
       return;
@@ -737,6 +749,7 @@ public class PanelData {
   }
 
   protected void doMouseDragged(int xPixel, int yPixel) {
+    mouseState = Mouse.DOWN;
     if (GraphSet.findGraphSet(graphSets, xPixel, yPixel) != currentGraphSet)
       return;
     currentGraphSet.checkWidgetEvent(xPixel, yPixel, false);
@@ -744,6 +757,7 @@ public class PanelData {
   }
 
   protected void doMouseReleased(boolean isButton1) {
+    mouseState = Mouse.UP;
     if (thisWidget == null || !isButton1)
       return;
     currentGraphSet.mouseReleasedEvent();

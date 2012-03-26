@@ -279,11 +279,10 @@ public class IntegralGraph implements Graph {
         integral += y;
     }
 
-    double totalIntegralScalefactor = maxY / integral;
-    double factor = (integralFactor / 100) * totalIntegralScalefactor; // 50%
-    double offset = (percentOffset / 100) * maxY;
+    double factor = (integralFactor / 100) / integral; 
+    double offset = (percentOffset / 100);
 
-    // Calculate Integral Graph
+    // Calculate Integral Graph as a scale from 0 to 1
 
     integral = 0;
     for (int i = xyCoords.length, j = 0; --i >= 0; j++) {
@@ -303,9 +302,10 @@ public class IntegralGraph implements Graph {
    */
   public double getPercentYValueAt(double x) {
     double y = getYValueAt(x);
-    double y0 = xyCoords[xyCoords.length - 1].getYVal();
-    double y1 = xyCoords[0].getYVal();
-    return (y - y0) / (y1 - y0) * 100;
+ //   double y0 = xyCoords[xyCoords.length - 1].getYVal();
+ //   double y1 = xyCoords[0].getYVal();
+ //   return (y - y0) / (y1 - y0) * 100;
+    return getYValueAt(x) * 100;
   }
 
   public double getYValueAt(double x) {

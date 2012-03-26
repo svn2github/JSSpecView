@@ -185,7 +185,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
   private String appletID;
   private String syncID;
   private Thread commandWatcherThread;
-  private boolean isSignedApplet;
   private Boolean obscureTitleFromUser;
   private JFileChooser jFileChooser;
   private JTabbedPane tabbedDisplayPane = new JTabbedPane();
@@ -307,7 +306,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
   }
 
   public void setFilePath(String tmpFilePath) {
-    if (isSignedApplet)
+    if (isSigned())
       processCommand("load " + tmpFilePath);
     else
       closeAllAndOpenFile(tmpFilePath);
@@ -458,7 +457,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
       callToJavaScript(appletReadyCallbackFunctionName, new Object[] {
           appletID, fullName, Boolean.TRUE });
     
-    if (isSignedApplet) {
+    if (isSigned()) {
       new DropTarget(jsvApplet, getDropListener());
     }
   }
@@ -796,7 +795,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
    *        the name of the format to export in
    */
   void exportSpectrumViaMenu(String type) {
-    if (isSignedApplet)
+    if (isSigned())
       dirLastExported = Exporter.exportSpectra(getSelectedPanel(),
           offWindowFrame, jFileChooser, type, recentFileName, dirLastExported);
     else
