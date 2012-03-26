@@ -42,6 +42,7 @@ package jspecview.applet;
 import java.util.Map;
 
 import javax.swing.JApplet;
+import javax.swing.JFileChooser;
 
 import jspecview.common.JSVAppletInterface;
 
@@ -269,5 +270,9 @@ public class JSVApplet extends JApplet implements JSVAppletInterface {
   public String getPropertyAsJSON(String key) {
     return appletPrivate.getPropertyAsJSON(key);
   }
-  
+
+  public void runScriptNow(String script) {
+    appletPrivate.runScriptNow(script);    
+  }
+
 }

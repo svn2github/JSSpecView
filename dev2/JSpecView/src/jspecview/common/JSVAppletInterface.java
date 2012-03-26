@@ -141,4 +141,6 @@ public interface JSVAppletInterface {
 
   public abstract void setVisible(boolean b);
 
+  public abstract void runScriptNow(String script);
+
 }

@@ -1577,9 +1577,9 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
    * ScriptInterface requires this. In the applet, this would be queued
    */
   public void runScript(String script) {
-    if (advancedApplet != null)
-      advancedApplet.runScript(script);
-    else
+    //if (advancedApplet != null)
+    //  advancedApplet.runScript(script);
+    //else
       runScriptNow(script);
   }
 

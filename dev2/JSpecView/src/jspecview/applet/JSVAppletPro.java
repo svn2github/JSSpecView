@@ -118,4 +118,8 @@ public class JSVAppletPro extends JSVApplet {
     appletPrivate = appletPrivate0;
   }
 
+  public void processCommand(String script) {
+    appletPrivate.runScriptNow(script);
+  }
+
 }

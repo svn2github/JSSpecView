@@ -130,12 +130,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
 
   JSVAppletPrivate(JSVApplet jsvApplet) {
     this.jsvApplet = jsvApplet;
-    try {
-      jFileChooser = new JFileChooser();
-      isSignedApplet = true;
-    } catch (Exception e) {
-      // just not a signed applet
-    }
     init();
   }
 
@@ -207,7 +201,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
   private boolean isOverlaid;
 
   public boolean isSigned() {
-    return isSignedApplet;
+    return false;
   }
   
   public boolean isPro() {
@@ -454,13 +448,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
    * 
    */
   private void init() {
-    try {
-      jFileChooser = new JFileChooser();
-      isSignedApplet = true;
-    } catch (Exception e) {
-      // just not a signed applet
-      //e.printStackTrace();
-    }
     scriptQueue = new ArrayList<String>();
     commandWatcherThread = new Thread(new CommandWatcher());
     commandWatcherThread.setName("CommmandWatcherThread");
@@ -1122,7 +1109,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
 
   /////////// simple sync functionality //////////
 
-  private void runScriptNow(String params) {
+  public void runScriptNow(String params) {
     JSViewer.runScriptNow(this, getSelectedPanel(), params);
   }
 

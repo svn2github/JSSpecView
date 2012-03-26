@@ -55,12 +55,22 @@ public class JSVAppletPrivatePro extends JSVAppletPrivate implements
   }
 
   @Override
+  public boolean isSigned() {
+    return true;
+  }
+  
+  @Override
   void doAdvanced(String filePath) {
     ((JSVAppletPro) jsvApplet).doAdvanced(filePath);
   }
 
   public void exitJSpecView(boolean withDialog, Object frame) {
     ((JSVAppletPro) jsvApplet).doExitJmol();
+  }
+
+  @Override
+  protected void processCommand(String script) {
+    ((JSVAppletPro) jsvApplet).processCommand(script);
   }
 
   public void saveProperties(Properties properties) {
