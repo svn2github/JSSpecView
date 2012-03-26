@@ -289,7 +289,9 @@ abstract class GraphSet {
 
   protected void setDrawXAxis() {
     drawXAxisLeftToRight = xAxisLeftToRight ^ reversePlot;
-    getSpectrum().setExportXAxisDirection(drawXAxisLeftToRight);
+    for (int i = 0; i < spectra.size(); i++)
+      if (spectra.get(i) instanceof JDXSpectrum)
+      ((JDXSpectrum) spectra.get(i)).setExportXAxisDirection(drawXAxisLeftToRight);
   }
 
   protected void setScaleFactors(MultiScaleData multiScaleData) {

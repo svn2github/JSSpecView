@@ -1,12 +1,20 @@
 Feel free to add to this file any time! Don't worry about sync problems. 
-
 Put new items at top, please.
 
 ====TODO=========
+
+ReversePlot was disabled; x widgets aren't right with plot reversed.
+
+
 With a dual display of GC at top and MS at bottom what script should I use to
 change the lower display but leaving the top display undisturbed?
 Can they be identified individually?
 
+> need a new command:
+
+  peak ms model1
+  peak ms "204"  -- could look for match in title text?
+  
 With Jmol application, when loading a Block file the JSV display is automatically showing the LAST Block.
 
 > That's the design -- you want first?
@@ -14,7 +22,11 @@ With Jmol application, when loading a Block file the JSV display is automaticall
 
 Clicking on the Jmol display shows the peaks, using the Jmol Menu under Spectra gives the hover display
 Selecting an option though gives no change to the JSV display and that Block is not made the front display.
+Jmol menu. HNMR and CNMR now showing but only hover works.
+Clicking on an option does not give the highlight in the JSV display
+Clicking on a peak in the H or C NMR works
 
+> needs design change.
 > good idea; no mechanism to do that at present
 
 Loading a Block file and switching between Blocks without selecting a peak.
@@ -28,15 +40,8 @@ Loading acetophenone.html and selecting a peak in the IR sends the display into 
 with overlay showing and uncontrollable flashing between spectra.
 Seems to happen as well when you select a peak then use spectrumnumber to change display
 
-> probably fixed.
-> not for me, but will l try another update and clean 
-> still happening
+>> I need an exact case, since I can't reproduce this. 
 
-Jmol menu. HNMR and CNMR now showing but only hover works.
-Clicking on an option does not give the highlight in the JSV display
-Clicking on a peak in the H or C NMR works
-
-> needs design change.
 
 
 Dialog Box for overlay colours needs checking
@@ -45,6 +50,8 @@ Dialog Box for overlay colours needs checking
 frames is not working right  -- just turns off the key entirely.
 
 =====DONE========
+
+Integration should be standard size without changing when you scale Y
 
 Use of Ctrl-/ Ctrl+
 OK for when baseline is at the bottom, needs to work as well for spectra 

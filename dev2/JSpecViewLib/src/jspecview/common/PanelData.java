@@ -132,7 +132,6 @@ public class PanelData {
   boolean display2D = true;
   protected boolean enableZoom = true;
   protected boolean gridOn = false;
-  protected boolean reversePlot = false;
   protected boolean titleBoldOn = false;
   protected boolean titleOn = true;
   protected boolean xScaleOn = true;
@@ -187,7 +186,8 @@ public class PanelData {
       gridOn = isTrue;
       break;
     case REVERSEPLOT:
-      reversePlot = isTrue;
+      setReversePlot(isTrue);
+      System.out.println("paneldata reverseplot=" + isTrue + " for " + owner);
       break;
     case TITLEBOLDON:
       titleBoldOn = isTrue;
@@ -307,13 +307,7 @@ public class PanelData {
    *        true or false
    */
   public void setReversePlot(boolean val) {
-    reversePlot = val;
-    setDrawXAxis();
-  }
-
-  protected void setDrawXAxis() {
-    drawXAxisLeftToRight = xAxisLeftToRight ^ reversePlot;
-    getSpectrum().setExportXAxisDirection(drawXAxisLeftToRight);
+    currentGraphSet.setReversePlot(val);
   }
 
   /* -------------------Other methods ------------------------------------*/
@@ -370,7 +364,7 @@ public class PanelData {
    * @return true if plot is reversed
    */
   public boolean isPlotReversed() {
-    return reversePlot;
+    return currentGraphSet.reversePlot;
   }
 
   /**
@@ -569,14 +563,14 @@ public class PanelData {
   /**
    * Resets the spectrum to it's original view
    */
-  public void reset() {
+  public void clearViews() {
     currentGraphSet.reset();
   }
 
   /**
    * Clears all views in the zoom list
    */
-  public void clearViews() {
+  public void resetView() {
     for (int i = graphSets.size(); --i >= 0;)
       graphSets.get(i).clearViews();
   }

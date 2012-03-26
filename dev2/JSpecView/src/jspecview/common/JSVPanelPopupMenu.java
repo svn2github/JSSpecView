@@ -66,12 +66,12 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   public JMenuItem previousMenuItem = new JMenuItem();
   /**
    * Allows for all view to be cleared
-   * @see jspecview.common.JSVPanel#clearViews()
+   * @see jspecview.common.JSVPanel#resetView()
    */
   public JMenuItem clearMenuItem = new JMenuItem();
   /**
    * Allows for the JSVPanel to be reset to it's original display
-   * @see jspecview.common.JSVPanel#reset()
+   * @see jspecview.common.JSVPanel#clearViews()
    */
   public JMenuItem resetMenuItem = new JMenuItem();
   /**
@@ -86,11 +86,16 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   public JMenuItem overlayAllMenuItem = new JMenuItem();
   public JMenuItem overlayNoneMenuItem = new JMenuItem();
 
-  public JMenuItem integrateMenuItem = new JMenuItem();
+  public JMenuItem integrateMenuItem = new JCheckBoxMenuItem();
   public JMenuItem transAbsMenuItem = new JMenuItem();
   public JMenuItem solColMenuItem = new JMenuItem();
   
-  // applet only:
+  public JCheckBoxMenuItem gridCheckBoxMenuItem = new JCheckBoxMenuItem();
+  public JCheckBoxMenuItem coordsCheckBoxMenuItem = new JCheckBoxMenuItem();
+  public JCheckBoxMenuItem reversePlotCheckBoxMenuItem = new JCheckBoxMenuItem();
+
+
+// applet only:
   
   protected JMenu appletSaveAsJDXMenu; // applet only
   protected JMenu appletExportAsMenu;  // applet only
@@ -109,103 +114,92 @@ public class JSVPanelPopupMenu extends JPopupMenu {
    * @throws Exception
    */
   protected void jbInit() {
+    final ScriptInterface scripter = this.scripter;
     nextMenuItem.setText("Next View");
     nextMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        nextMenuItem_actionPerformed(e);
+        scripter.getPanelData().nextView();
+        reboot();
       }
     });
     previousMenuItem.setText("Previous View");
     previousMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        previousMenuItem_actionPerformed(e);
+        scripter.getPanelData().previousView();
+        reboot();
       }
     });
     clearMenuItem.setText("Clear Views");
     clearMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        clearMenuItem_actionPerformed(e);
+        scripter.getPanelData().clearViews();
       }
     });
     resetMenuItem.setText("Reset View");
     resetMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        resetMenuItem_actionPerformed(e);
+        scripter.getPanelData().resetView();
       }
     });
     overlayMenuItem.setText("Overlay Selected");
     overlayMenuItem.addActionListener(new ActionListener() {
        public void actionPerformed(ActionEvent e) {
-         overlayMenuItem_actionPerformed(e, -1);
+         overlay(-1);
        }
      });
     overlayAllMenuItem.setText("Overlay All");
     overlayAllMenuItem.addActionListener(new ActionListener() {
        public void actionPerformed(ActionEvent e) {
-         overlayMenuItem_actionPerformed(e, 1);
+         overlay(1);
        }
      });
     overlayNoneMenuItem.setText("Overlay None");
     overlayNoneMenuItem.addActionListener(new ActionListener() {
        public void actionPerformed(ActionEvent e) {
-         overlayMenuItem_actionPerformed(e, 0);
+         overlay(0);
        }
      });
     scriptMenuItem.setText("Script...");
     scriptMenuItem.addActionListener(new ActionListener() {
        public void actionPerformed(ActionEvent e) {
-         scriptMenuItem_actionPerformed(e);
+         script();
        }
      });
     userZoomMenuItem.setText("Set Zoom...");
     userZoomMenuItem.addActionListener(new ActionListener() {
        public void actionPerformed(ActionEvent e) {
-         userMenuItem_actionPerformed(e);
+         userZoom();
        }
      });
     properties.setActionCommand("Properties");
     properties.setText("Properties");
     properties.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        properties_actionPerformed(e);
+        scripter.showProperties();
       }
     });
     gridCheckBoxMenuItem.setText("Show Grid");
     gridCheckBoxMenuItem.addItemListener(new java.awt.event.ItemListener() {
       public void itemStateChanged(ItemEvent e) {
-        gridCheckBoxMenuItem_itemStateChanged(e);
+        runScript(scripter, "GRIDON " + (e.getStateChange() == ItemEvent.SELECTED));
+        reboot();
       }
     });
     coordsCheckBoxMenuItem.setText("Show Coordinates");
     coordsCheckBoxMenuItem.addItemListener(new java.awt.event.ItemListener() {
       public void itemStateChanged(ItemEvent e) {
-        coordsCheckBoxMenuItem_itemStateChanged(e);
+        runScript(scripter, "COORDINATESON " + (e.getStateChange() == ItemEvent.SELECTED));
+        reboot();
       }
     });
     reversePlotCheckBoxMenuItem.setText("Reverse Plot");
     reversePlotCheckBoxMenuItem.addItemListener(new java.awt.event.ItemListener() {
       public void itemStateChanged(ItemEvent e) {
-        revPlotCheckBoxMenuItem_itemStateChanged(e);
+        runScript(scripter, "REVERSEPLOT " + (e.getStateChange() == ItemEvent.SELECTED));
+        reboot();
       }
     });
     
-    setMenu();
-  }
-
-  
-  protected void scriptMenuItem_actionPerformed(ActionEvent e) {
-    script();
-  }
-  
-  protected void overlayMenuItem_actionPerformed(ActionEvent e, int n) {
-    overlay(n);
-  }
-  
-  protected void userMenuItem_actionPerformed(ActionEvent e) {
-    userZoom();
-  }
-  
-  protected void setMenu() {
     add(gridCheckBoxMenuItem);
     add(coordsCheckBoxMenuItem);
     add(reversePlotCheckBoxMenuItem);
@@ -222,92 +216,12 @@ public class JSVPanelPopupMenu extends JPopupMenu {
     add(properties);
   }
 
-  /**
-   * Action for nextMenuItem. Shows the next view of the JSVPanel
-   * that has been zoomed
-   * @param e the <code>ActionEvent</code>
-   */
-  void nextMenuItem_actionPerformed(ActionEvent e) {
-    scripter.getPanelData().nextView();
-  }
-
-  /**
-   * Action for the previousMenuItem. Shows the previous view of the JSVPanel
-   * that has been zoomed
-   * @param e the <code>ActionEvent</code>
-   */
-  void previousMenuItem_actionPerformed(ActionEvent e) {
-    scripter.getPanelData().previousView();
-  }
-
-  /**
-   * Action for the resetMenuItem. Resets the JSVpanel to it's original view
-   * @param e the <code>ActionEvent</code>
-   */
-  void resetMenuItem_actionPerformed(ActionEvent e) {
-    scripter.getPanelData().reset();
-  }
-
-  /**
-   * Action for clearMenuItem. Clears the a the views of the JSVPanel.
-   * @param e the <code>ActionEvent</code>
-   */
-  void clearMenuItem_actionPerformed(ActionEvent e) {
-    scripter.getPanelData().clearViews();
-  }
-
-  /**
-   * Toogles the Grid on or off
-   * @param e the <code>ItemEvent</code
-   */
-  void gridCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-    if (((JCheckBoxMenuItem)e.getSource()).isEnabled())
-      runScript("GRIDON " + (e.getStateChange() == ItemEvent.SELECTED));
-  }
-
-  /**
-   * Toggles the coordinates on or off
-   * @param e the <code>ItemEvent</code
-   */
-  void coordsCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-    if (((JCheckBoxMenuItem)e.getSource()).isEnabled())
-    runScript("COORDINATESON " + (e.getStateChange() == ItemEvent.SELECTED));
-  }
-
-  /**
-   * Reverses the spectrum plot
-   * @param e the <code>ItemEvent</code
-   */
-  void revPlotCheckBoxMenuItem_itemStateChanged(ItemEvent e) {
-    if (!((JCheckBoxMenuItem)e.getSource()).isEnabled())
+  protected void reboot() {
+    if (thisJsvp == null)
       return;
-    scripter.getPanelData().setReversePlot((e.getStateChange() == ItemEvent.SELECTED));
-    scripter.getPanelData().repaint();
+    thisJsvp.repaint();
+    show((Container) thisJsvp, thisX, thisY);
   }
-
-  /**
-   * Shows the properties of the Spectrum displayed on the JSVPanel
-   * 
-   * @param e
-   *        the <code>ActionEvent</code
-   */
-  public void properties_actionPerformed(ActionEvent e) {
-    scripter.showProperties();
-  }
-
-  /**
-   * Allows the grid to be toogled
-   */
-  public JCheckBoxMenuItem gridCheckBoxMenuItem = new JCheckBoxMenuItem();
-  /**
-   * Allows the coordinates to be toggled on or off
-   */
-  public JCheckBoxMenuItem coordsCheckBoxMenuItem = new JCheckBoxMenuItem();
-  /**
-   * Allows the plot to be reversed
-   */
-  public JCheckBoxMenuItem reversePlotCheckBoxMenuItem = new JCheckBoxMenuItem();
-
 
   private String recentZoom;
 
@@ -318,7 +232,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
     if (zoom == null)
       return;
     recentZoom = zoom;
-    runScript("zoom " + zoom);
+    runScript(scripter, "zoom " + zoom);
   }
 
   private String recentScript;
@@ -330,7 +244,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
     if (script == null)
       return;
     recentScript = script;
-    runScript(script);
+    runScript(scripter, script);
   }
 
   public static void setMenuItem(JMenuItem item, char c, String text,
@@ -352,19 +266,19 @@ public class JSVPanelPopupMenu extends JPopupMenu {
     setMenuItem(integrateMenuItem, 'I', "Integrate HNMR", 0, 0,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            scripter.runScript("INTEGRATE ?");
+            runScript(scripter, "INTEGRATE ?");
           }
         });
     setMenuItem(transAbsMenuItem, '\0', "Transmittance/Absorbance", 0, 0,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            scripter.runScript("IRMODE IMPLIED");
+            runScript(scripter, "IRMODE IMPLIED");
           }
         });
     setMenuItem(solColMenuItem, '\0', "Predicted Solution Colour", 0, 0,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            scripter.runScript("GETSOLUTIONCOLOR");
+            runScript(scripter, "GETSOLUTIONCOLOR");
           }
         });
     menu.add(integrateMenuItem);
@@ -372,7 +286,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
     menu.add(solColMenuItem);
   }
 
-  protected void runScript(String cmd) {
+  protected static void runScript(ScriptInterface scripter, String cmd) {
     if (scripter == null)
       System.out.println("scripter was null for " + cmd);
     else
@@ -386,10 +300,10 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   public void overlay(int n) {
     switch (n) {
     case 0:
-      runScript("overlay NONE");
+      runScript(scripter, "overlay NONE");
       break;
     case 1:
-      runScript("overlay ALL");
+      runScript(scripter, "overlay ALL");
       break;
     default:
       String script = (String) JOptionPane.showInputDialog(null,
@@ -398,20 +312,27 @@ public class JSVPanelPopupMenu extends JPopupMenu {
       if (script == null)
         return;
       recentOverlay = script;
-      runScript("overlay " + script);
+      runScript(scripter, "overlay " + script);
       break;
     }
   }
 
 
+  private int thisX, thisY;
+  private JSVPanel thisJsvp;
+  
   public void show(JSVPanel jsvp, int x, int y) {
     setEnables(jsvp);
+    thisX = x;
+    thisY = y;
+    thisJsvp = jsvp;
     super.show((Container) jsvp, x, y);
-  }
+ }
 
   public void setEnables(JSVPanel jsvp) {
     pd = jsvp.getPanelData();
     JDXSpectrum spec0 = jsvp.getSpectrumAt(0);
+    System.out.println("ppm setenables " + jsvp + " " + pd.isGridOn() + " " + pd.isCoordinatesOn() + " " + pd.isPlotReversed());
     setSelected(gridCheckBoxMenuItem, pd.isGridOn());
     setSelected(coordsCheckBoxMenuItem, pd.isCoordinatesOn());
     setSelected(reversePlotCheckBoxMenuItem, pd.isPlotReversed());
@@ -436,8 +357,8 @@ public class JSVPanelPopupMenu extends JPopupMenu {
 
   private void setSelected(JCheckBoxMenuItem item, boolean TF) {
     item.setEnabled(false);
-    item.setSelected(true);
-    item.setEnabled(false);
+    item.setSelected(TF);
+    item.setEnabled(true);
   }
 
   static void addMenuItem(JMenu m, String key,

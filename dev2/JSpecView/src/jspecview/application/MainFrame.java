@@ -1731,7 +1731,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
       pd.fullView();
       break;
     default:
-      pd.clearViews();
+      pd.resetView();
       break;
     }
   }

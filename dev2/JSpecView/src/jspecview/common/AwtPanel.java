@@ -533,7 +533,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 
   public void mouseClicked(MouseEvent e) {
     if (e.getButton() == MouseEvent.BUTTON3) {
-      popup.show((JPanel) this, e.getX(), e.getY());
+      popup.show((JSVPanel) this, e.getX(), e.getY());
       return;
     }
     doRequestFocusInWindow();
