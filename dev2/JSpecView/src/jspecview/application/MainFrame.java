@@ -1345,7 +1345,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
   private String lastScript;
   public void syncScript(String peakScript) {
-    if (peakScript.indexOf("atoms\"") < 0 && peakScript.equals(lastScript))
+    if (peakScript.indexOf("atoms=\"") < 0 && peakScript.equals(lastScript))
       return; // don't cycle to same model again
     lastScript = peakScript;
     JSViewer.syncScript(this, peakScript);

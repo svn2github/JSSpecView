@@ -312,7 +312,9 @@ public class JSViewer {
     }
     si.getSelectedPanel().getPanelData().addPeakHighlight(pi);
     si.sendScript(pi == null ? null : pi.toString());
-    if (!pi.isClearAll()) // was not in app version??
+    if (pi.isClearAll()) // was not in app version??
+      si.getSelectedPanel().repaint();
+    else
       si.getSelectedPanel().getPanelData().selectSpectrum(pi.getFilePath(),
           pi.getType(), pi.getModel());
     si.checkCallbacks(pi.getTitle());
