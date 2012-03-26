@@ -5,26 +5,13 @@ Put new items at top, please.
 
 ReversePlot was disabled; x widgets aren't right with plot reversed.
 
-
-With a dual display of GC at top and MS at bottom what script should I use to
-change the lower display but leaving the top display undisturbed?
-Can they be identified individually?
-
-> done:
-
-  peak ms model1
-  peak ms "204"  -- could look for match in title text?
-> DONE -- needs testing
-
-  peak ms "204" ALL
-       -- added ALL keyword lets you look through  all spectra, otherwise it's just the current panel
-       -- current panel, though, is always checked first.
-
-  
 With Jmol application, when loading a Block file the JSV display is automatically showing the LAST Block.
 
 > That's the design -- you want first?
 > yes please..
+
+With JSpecView application, loading a file gives the dialog box and if you sort on date the program crashes.
+
 
 Clicking on the Jmol display shows the peaks, using the Jmol Menu under Spectra gives the hover display
 Selecting an option though gives no change to the JSV display and that Block is not made the front display.
@@ -35,27 +22,41 @@ Clicking on a peak in the H or C NMR works
 > needs design change.
 > good idea; no mechanism to do that at present
 
-Loading a Block file and switching between Blocks without selecting a peak.
-Having looked at 4 Blocks and returning to the first.
-A PEAK is shown selected and if an IR then Jmol starts vib mode despite not having clicked in the JSV display.
-
-> fixed? I'm not seeing that.
-> still happening for me
-
-Loading acetophenone.html and selecting a peak in the IR sends the display into frenzy
-with overlay showing and uncontrollable flashing between spectra.
-Seems to happen as well when you select a peak then use spectrumnumber to change display
-
->> I need an exact case, since I can't reproduce this. 
-
-
-
 Dialog Box for overlay colours needs checking
 
 > overlay keys are working, but they are strange. Switching between 
 frames is not working right  -- just turns off the key entirely.
 
 =====DONE========
+
+With a dual display of GC at top and MS at bottom what script should I use to
+change the lower display but leaving the top display undisturbed?
+Can they be identified individually?
+
+> done:
+For the applet
+overlay 1,3 or 1,4 etc default display is overlay 1,2
+
+  peak ms model1
+  peak ms "204"  -- could look for match in title text?
+> DONE -- needs testing
+
+  peak ms "204" ALL
+       -- added ALL keyword lets you look through  all spectra, otherwise it's just the current panel
+       -- current panel, though, is always checked first.
+
+
+Loading a Block file and switching between Blocks without selecting a peak.
+Having looked at 4 Blocks and returning to the first.
+A PEAK is shown selected and if an IR then Jmol starts vib mode despite not having clicked in the JSV display.
+
+> fixed
+
+Loading acetophenone.html and selecting a peak in the IR sends the display into frenzy
+with overlay showing and uncontrollable flashing between spectra.
+Seems to happen as well when you select a peak then use spectrumnumber to change display
+
+>> fixed 
 
 Integration should be standard size without changing when you scale Y
 
