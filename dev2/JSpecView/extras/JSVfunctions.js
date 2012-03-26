@@ -19,7 +19,7 @@ _JSVSyncID = ("" + Math.random()).substring(3)
 if (!_JSVscript) _JSVscript = ""
 _JSVscript = 'appletID ' + _JSVtarget + ';syncID '+_JSVSyncID+';' + _JSVscript
 
-var myClass = "jspecview.applet.JSVApplet" + (_JSVarchive.indexOf("Pro") >= 0 ? "Pro" : "") + ".class"
+var myClass = "jspecview.applet.JSVApplet" + (_JSVarchive.indexOf("Signed") >= 0 ? "Pro" : "") + ".class"
 var nameParam = '<param name="name" value="'+ _JSVtarget +'" />\n'
 // script for Mozilla
 _JSVMozscript='<object classid="java:' + myClass + '" '
