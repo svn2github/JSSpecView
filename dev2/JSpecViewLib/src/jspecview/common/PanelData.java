@@ -64,7 +64,6 @@ public class PanelData {
 
   PanelData(JSVPanel owner) {
     this.owner = owner;
-    System.out.println("new panelData for " + owner);
   }
   
   

@@ -63,9 +63,10 @@ public class PeakInfo {
 	  Logger.info("JSpecView found " + stringInfo);
 		this.stringInfo = stringInfo;
 		type = Parser.getQuotedAttribute(stringInfo, "type").toUpperCase();
-		type2 = fixType(type.substring(type.indexOf('/') + 1));
-		if (type2.length() > 0)
-		  type = fixType(type.substring(0, type.indexOf('/'))) + "/" + type2;
+		int pt = type.indexOf('/');
+		type2 = (pt < 0 ? "" : fixType(type.substring(type.indexOf('/') + 1)));
+		if (pt >=0 )
+		  type = fixType(type.substring(0, pt)) + "/" + type2;
 		else
 		  type = fixType(type);
     index = Parser.getQuotedAttribute(stringInfo, "index");
