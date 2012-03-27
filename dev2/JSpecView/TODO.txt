@@ -3,6 +3,9 @@ Put new items at top, please.
 
 ====TODO=========
 
+compoundmenuon true gives menu option of Spectra
+compoundmenuon false gives greyed out menu option of Blocks
+
 GC/MS is not tested and probably all messed up.
 
 ReversePlot was disabled; x widgets aren't right with plot reversed.
