@@ -13,7 +13,7 @@ public class PeakPickEvent extends EventObject {
 	public PeakPickEvent(Object source, Coordinate coord, PeakInfo peakInfo) {
 		super(source);
 		this.coord = coord;
-		this.peakInfo = (peakInfo == null ? PeakInfo.basePeakInfo : peakInfo);
+		this.peakInfo = (peakInfo == null ? null : peakInfo);
 	}
 
 	public Coordinate getCoord() {

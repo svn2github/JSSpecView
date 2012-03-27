@@ -299,6 +299,10 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     return ((AwtGraphSet) pd.currentGraphSet).getPlotColor(index);
   }
 
+  public Color getColor(int r, int g, int b, int a) {
+    return new Color(r, g, b, a);
+  }
+  
   public Color getColor(ScriptToken whatColor) {
     switch (whatColor) {
     default:

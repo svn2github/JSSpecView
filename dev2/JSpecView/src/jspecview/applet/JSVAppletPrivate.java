@@ -40,7 +40,6 @@
 package jspecview.applet;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetListener;
@@ -50,7 +49,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -165,7 +163,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
   private String appletReadyCallbackFunctionName;
 
   private AwtParameters parameters = new AwtParameters("applet");
-  private AwtParameters tempParams = new AwtParameters("temp");
    
 
   /*---------------------------------END PARAMETERS------------------------*/
@@ -232,18 +229,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
   // BH - 8.3.2012
   
   public Map<String, Object> getPropertyAsJavaObject(String key) {
-    if ("".equals(key))
-      key = null;
-    List<Map<String, Object>> info = new ArrayList<Map<String, Object>>();
-    for (int i = 0; i < specNodes.size(); i++) {
-      JSVPanel jsvp = specNodes.get(i).jsvp;
-      if (jsvp == null)
-        continue;
-      info.add(jsvp.getPanelData().getInfo(true, key));
-    }
-    Map<String, Object> map = new Hashtable<String, Object>();
-    map.put("items", info);
-    return map;
+    return JSViewer.getPropertyAsJavaObject(this, key);
   }
   
   public String getPropertyAsJSON(String key) {
@@ -259,13 +245,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
    * @return A String representation of the coordinate
    */
   public String getCoordinate() {
-    // important to use getSelectedPanel() here because it may be from MainFrame in PRO
-    if (getSelectedPanel() != null) {
-      Coordinate coord = getSelectedPanel().getPanelData().getClickedCoordinate();
-      if (coord != null)
-        return coord.getXVal() + " " + coord.getYVal();
-    }
-    return "";
+    return JSViewer.getCoordinate(this);
   }
 
   /**
@@ -294,10 +274,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
   }
 
   public void setFilePath(String tmpFilePath) {
-    if (isSigned())
-      processCommand("load " + tmpFilePath);
-    else
-      closeAllAndOpenFile(tmpFilePath);
+    runScript("load " + Escape.escape(tmpFilePath));
   }
 
   /**
@@ -305,20 +282,28 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
    * 
    * @param i
    */
-  public void setSpectrumNumber(int i) {
-    setSpectrumIndex(i - 1);
+  public void setSpectrumNumber(int n) {
+    runScript(ScriptToken.SPECTRUMNUMBER + " " + n);
   }
   
+  /**
+   * Method that can be called from another applet or from javascript that
+   * toggles reversing the plot on a <code>JSVPanel</code>
+   */
+  public void reversePlot() {
+    JSVPanel jsvp = getSelectedPanel();
+    if (jsvp != null) 
+      runScript(ScriptToken.REVERSEPLOT + " " + (!jsvp.getPanelData().isPlotReversed()));
+  }
+
   /**
    * Method that can be called from another applet or from javascript that
    * toggles the grid on a <code>JSVPanel</code>
    */
   public void toggleGrid() {
     JSVPanel jsvp = getSelectedPanel();
-    if (jsvp == null)
-      return;
-    Parameters.setBoolean(jsvp, tempParams, ScriptToken.GRIDON, !jsvp.getPanelData().isGridOn());
-    jsvApplet.repaint();
+    if (jsvp != null)
+      runScript(ScriptToken.GRIDON + " " + !jsvp.getPanelData().isGridOn());
   }
 
   /**
@@ -327,11 +312,8 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
    */
   public void toggleCoordinate() {
     JSVPanel jsvp = getSelectedPanel();
-    if (jsvp == null)
-      return;
-    Parameters.setBoolean(jsvp, tempParams, ScriptToken.COORDINATESON, 
-        !jsvp.getPanelData().isCoordinatesOn());
-    jsvApplet.repaint();
+    if (jsvp != null)
+      runScript(ScriptToken.COORDINATESON + " " + !jsvp.getPanelData().isCoordinatesOn());
   }
 
   /**
@@ -339,7 +321,9 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
    * toggles the integration graph of a <code>JSVPanel</code>.
    */
   public void toggleIntegration() {
-    runScript("integrate ?");
+    JSVPanel jsvp = getSelectedPanel();
+    if (jsvp != null)
+      runScript("integrate ?");
   }
 
 
@@ -361,9 +345,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
    *        the alpha portion of the highlight color
    */
   public void addHighlight(double x1, double x2, int r, int g, int b, int a) {
-    Color color = new Color(r, g, b, a);
-    JSViewer.addHighLight(this, x1, x2, color);
-    jsvApplet.repaint();
+    JSViewer.addHighLight(this, x1, x2, r, g, b, a);
   }
 
   /**
@@ -371,11 +353,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
    * removes all highlights from the plot area of a <code>JSVPanel</code>
    */
   public void removeAllHighlights() {
-    JSVPanel jsvp = getSelectedPanel();
-    if (jsvp != null) {
-      jsvp.getPanelData().removeAllHighlights();
-      jsvApplet.repaint();
-    }
+    JSViewer.removeAllHighlights(this);
   }
 
   /**
@@ -388,23 +366,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
    *        the ending x value
    */
   public void removeHighlight(double x1, double x2) {
-    JSVPanel jsvp = getSelectedPanel();
-    if (jsvp != null) {
-      jsvp.getPanelData().removeHighlight(x1, x2);
-      jsvApplet.repaint();
-    }
-  }
-
-  /**
-   * Method that can be called from another applet or from javascript that
-   * toggles reversing the plot on a <code>JSVPanel</code>
-   */
-  public void reversePlot() {
-    JSVPanel jsvp = getSelectedPanel();
-    if (jsvp != null) {
-      jsvp.getPanelData().setReversePlot(!jsvp.getPanelData().isPlotReversed());
-      jsvApplet.repaint();
-    }
+    JSViewer.removeHighlights(this, x1, x2);
   }
 
   public void syncScript(String peakScript) {
@@ -1147,7 +1109,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
   }
 
   public void execSetInterface(String value) {
-    // ignored
+    interfaceOverlaid = (value.equalsIgnoreCase("overlay"));
   }
 
   public void execScriptComplete(String msg, boolean isOK) {

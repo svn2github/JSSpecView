@@ -15,6 +15,7 @@ public interface JSVPanel extends JSVContainer {
   JDXSpectrum getSpectrum();
   JDXSpectrum getSpectrumAt(int i);
   PanelData getPanelData();
+  Object getColor(int r, int g, int b, int a);
   Object getPlotColor(int i);
   void setPlotColors(Object plotColors);
   Object getPopup();
@@ -22,4 +23,5 @@ public interface JSVPanel extends JSVContainer {
   void setColor(ScriptToken st, Object color);
   void doRequestFocusInWindow();
   void setSpectrum(JDXSpectrum spec);
+
 }

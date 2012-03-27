@@ -5,7 +5,6 @@ import jspecview.util.Parser;
 
 public class PeakInfo {
   public final static PeakInfo nullPeakInfo = new PeakInfo();
-  public final static PeakInfo basePeakInfo = new PeakInfo();
 
   private double xMin, xMax, yMin, yMax;
   private String stringInfo;
@@ -98,7 +97,9 @@ public class PeakInfo {
     index = Parser.getQuotedAttribute(stringInfo, "index");
     file = Parser.getQuotedAttribute(stringInfo, "file");
     model = Parser.getQuotedAttribute(stringInfo, "model");
-    atoms = Parser.getQuotedAttribute(stringInfo, "atoms");
+    boolean isBaseModel = stringInfo.contains("baseModel=\"\"");
+    if (!isBaseModel)
+      atoms = Parser.getQuotedAttribute(stringInfo, "atoms");
     title = Parser.getQuotedAttribute(stringInfo, "title");
     _match = Parser.getQuotedAttribute(stringInfo, "_match"); // PEAK command creates this
   }

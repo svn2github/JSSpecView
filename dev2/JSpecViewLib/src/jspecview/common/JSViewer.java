@@ -1,6 +1,9 @@
 package jspecview.common;
 
+import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import jspecview.source.JDXSource;
@@ -202,10 +205,12 @@ public class JSViewer {
   /// from JavaScript
   
   public static void addHighLight(ScriptInterface si, double x1,
-                                  double x2, Object color) {
+                                  double x2, int r, int g, int b, int a) {
     JSVPanel jsvp = si.getSelectedPanel();
-    if (jsvp != null)
-      jsvp.getPanelData().addHighlight(x1, x2, color);
+    if (jsvp != null) {
+      jsvp.getPanelData().addHighlight(x1, x2, r, g, b, a);
+      jsvp.repaint();
+    }
   }
 
   /**
@@ -332,16 +337,14 @@ public class JSViewer {
     if (pi == null)
       pi = jsvp.getSpectrum().getModelPeakInfoForAutoSelectOnLoad();
     if (pi == null)
-      pi = PeakInfo.basePeakInfo;
+      pi = jsvp.getSpectrum().getBasePeakInfo();
     si.getSelectedPanel().getPanelData().addPeakHighlight(pi);
     si.syncToJmol(jmolSelect(pi));  
   }
 
   public static String jmolSelect(PeakInfo pi) {
     String script = null;
-    if (pi == PeakInfo.basePeakInfo) {
-      script = "vibration off; select none;selectionHalos off;model {basemodel}";
-    } else if ("IR".equals(pi.getType()) || "RAMAN".equals(pi.getType())) {
+    if ("IR".equals(pi.getType()) || "RAMAN".equals(pi.getType())) {
       script = "vibration ON; selectionHalos OFF;";
     } else if (pi.getAtoms() != null) {
       script = "vibration OFF; selectionhalos ON;";
@@ -351,5 +354,46 @@ public class JSViewer {
     return "Select: " + pi + " script=\"" + script;
   }
 
+  public static void removeAllHighlights(ScriptInterface si) {
+    JSVPanel jsvp = si.getSelectedPanel();
+    if (jsvp != null) {
+      jsvp.getPanelData().removeAllHighlights();
+      jsvp.repaint();
+    }
+  }
 
+  public static void removeHighlights(ScriptInterface si,
+                                      double x1, double x2) {
+    JSVPanel jsvp = si.getSelectedPanel();
+    if (jsvp != null) {
+      jsvp.getPanelData().removeHighlight(x1, x2);
+      jsvp.repaint();
+    }
+  }
+
+  public static Map<String, Object> getPropertyAsJavaObject(ScriptInterface si, String key) {
+    if ("".equals(key))
+      key = null;
+    List<Map<String, Object>> info = new ArrayList<Map<String, Object>>();
+    List<JSVSpecNode> specNodes = si.getSpecNodes();    
+    for (int i = 0; i < specNodes.size(); i++) {
+      JSVPanel jsvp = specNodes.get(i).jsvp;
+      if (jsvp == null)
+        continue;
+      info.add(jsvp.getPanelData().getInfo(true, key));
+    }
+    Map<String, Object> map = new Hashtable<String, Object>();
+    map.put("items", info);
+    return map;
+  }
+
+  public static String getCoordinate(ScriptInterface si) {
+    // important to use getSelectedPanel() here because it may be from MainFrame in PRO
+    if (si.getSelectedPanel() != null) {
+      Coordinate coord = si.getSelectedPanel().getPanelData().getClickedCoordinate();
+      if (coord != null)
+        return coord.getXVal() + " " + coord.getYVal();
+    }
+    return "";
+  }
 }

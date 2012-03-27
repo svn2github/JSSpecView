@@ -165,7 +165,8 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   
   
   public PeakInfo getAssociatedPeakInfo(Coordinate coord) {
-    return (selectedPeak = findPeakByCoord(coord));
+    selectedPeak = findPeakByCoord(coord);
+    return (selectedPeak == null ? getBasePeakInfo() : selectedPeak);
   }
 
   public PeakInfo findPeakByCoord(Coordinate coord) {
@@ -612,6 +613,11 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
       if (peakList.get(i).checkTypeMatch(pi))
         return peakList.get(i);
     return null;
+  }
+
+  public PeakInfo getBasePeakInfo() {
+    return (peakList.size() == 0 ? new PeakInfo() : 
+      new PeakInfo(" baseModel=\"\" " + peakList.get(0)));
   }
 
 }

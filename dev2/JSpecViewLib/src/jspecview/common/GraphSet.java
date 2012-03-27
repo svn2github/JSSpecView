@@ -920,7 +920,7 @@ abstract class GraphSet {
   protected void notifyPeakListeners(PeakInfo peak) {
     // see JSViewer.processPeakPickEvent
     pd.notifyListeners(new PeakPickEvent(pd.owner, pd.coordClicked,
-        peak == null ? PeakInfo.basePeakInfo : peak));
+        peak == null ? pd.getSpectrum().getBasePeakInfo() : peak));
   }
 
   void escape() {

@@ -317,9 +317,12 @@ public class PanelData {
    *        the x value of the coordinate where the highlight should end
    * @param color
    *        the color of the highlight
+   * @param a 
+   * @param b 
+   * @param g 
    */
-  public void addHighlight(double x1, double x2, Object color) {
-    currentGraphSet.addHighlight(x1, x2, null, color);
+  public void addHighlight(double x1, double x2, int r, int g, int b, int a) {
+    currentGraphSet.addHighlight(x1, x2, null, owner.getColor(r, g, b, a));
   }
 
   /**
