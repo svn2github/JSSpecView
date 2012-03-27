@@ -54,7 +54,6 @@ import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
 import java.io.IOException;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
 
 import javax.print.attribute.HashPrintRequestAttributeSet;
@@ -116,6 +115,10 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 
   public JDXSpectrum getSpectrum() {
     return pd.getSpectrum();
+  }
+  
+  public void setSpectrum(JDXSpectrum spec) {
+    pd.setSpectrum(spec);    
   }
   
   public JDXSpectrum getSpectrumAt(int i) {
@@ -228,7 +231,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
    *        the spectrum
    * @throws ScalesIncompatibleException
    */
-  public AwtPanel(Graph spectrum, JSVPanelPopupMenu popup) {
+  public AwtPanel(JDXSpectrum spectrum, JSVPanelPopupMenu popup) {
     // standard applet not overlaid and not showing range
     // standard application split spectra
     // removal of integration, taConvert
@@ -244,10 +247,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   }
 
   public static AwtPanel getJSVPanel(List<JDXSpectrum> specs, int startIndex, int endIndex, JSVPanelPopupMenu popup) {
-    List<Graph> graphs = new ArrayList<Graph>(specs.size());
-    for (int i = 0; i < specs.size(); i++)
-      graphs.add(specs.get(i));
-    AwtPanel jsvp = new AwtPanel(graphs, startIndex, endIndex, popup);
+    AwtPanel jsvp = new AwtPanel(specs, startIndex, endIndex, popup);
     jsvp.pd.isOverlaid = (specs.size() > 1);
     return jsvp;
   }
@@ -265,7 +265,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
    * @throws JSpecViewException
    * @throws ScalesIncompatibleException
    */
-  private AwtPanel(List<Graph> spectra, int startIndex,
+  private AwtPanel(List<JDXSpectrum> spectra, int startIndex,
       int endIndex, JSVPanelPopupMenu popup) {
     pd = new PanelData(this);
     this.popup = popup;
@@ -281,20 +281,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
    */
   public static AwtPanel getNewPanel(JDXSpectrum spec,
                                      JSVPanelPopupMenu jsvpPopupMenu) {
-    return (spec.getIntegrationGraph() == null ? new AwtPanel(spec,
-        jsvpPopupMenu) : (AwtPanel) (new AwtPanel(spec, jsvpPopupMenu))
-        .getIntegralPanel(spec));
-  }
-
-  public JSVPanel getIntegralPanel(JDXSpectrum spectrum) {
-    Graph graph = spectrum.getIntegrationGraph();
-    List<Graph> graphs = new ArrayList<Graph>();
-    graphs.add(spectrum);
-    graphs.add(graph);
-    AwtPanel jsvp = new AwtPanel(graphs, 0, 0, popup);
-    jsvp.setTitle(graph.getTitle());
-    jsvp.setPlotColors(new Color[] { getPlotColor(0), getColor(ScriptToken.INTEGRALPLOTCOLOR) });
-    return jsvp;
+    return new AwtPanel(spec, jsvpPopupMenu);
   }
 
   public GraphSet newGraphSet() {

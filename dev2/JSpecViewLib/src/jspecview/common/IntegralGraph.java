@@ -21,9 +21,7 @@ package jspecview.common;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
 import java.util.StringTokenizer;
 
 import jspecview.common.Integral;
@@ -46,16 +44,11 @@ public class IntegralGraph implements Graph {
   public final static double DEFAULT_OFFSET = 30;
 
   private List<Integral> integrals;
-  private Graph sourceGraph;
+  private JDXSpectrum spectrum;
 
   public void dispose() {
     integrals = null;
-    sourceGraph = null;
-  }
-
-
-  public String getFilePath() {
-    return sourceGraph.getFilePath();
+    spectrum = null;
   }
 
   /**
@@ -81,20 +74,6 @@ public class IntegralGraph implements Graph {
   private Coordinate xyCoords[];
 
   /**
-   * value of the x Units. Necessary for the implementation of the
-   * Graph interface
-   * @see jspecview.Graph
-   */
-  private String xUnits = "Arbitrary Units";
-
-  /**
-   * value of the y Units. Necessary for the implementation of the
-   * Graph interface
-   * @see jspecview.Graph
-   */
-  private String yUnits = "Arbitrary Units";
-
-  /**
    * Calculates and initialises the <code>IntegralGraph</code> from an input <code>Graph</code>,
    *  the percentage Minimum Y value, the percent offset and the integral factor
    * @param graph the input graph
@@ -102,129 +81,12 @@ public class IntegralGraph implements Graph {
    * @param percentOffset the percent offset
    * @param integralFactor the integral factor
    */
-  public IntegralGraph(Graph graph, double percentMinY, double percentOffset,
-                       double integralFactor, String xUnits, String yUnits) {
-    this.sourceGraph = graph;
-    this.percentMinY = percentMinY;
-    this.percentOffset = percentOffset;
-    this.integralFactor = integralFactor;
-    this.xUnits = xUnits;
-    this.yUnits = yUnits;
+  public IntegralGraph(JDXSpectrum spectrum, Parameters parameters, String xUnits, String yUnits) {
+    this.spectrum = spectrum;
+    this.percentMinY = parameters.integralMinY;
+    this.percentOffset = parameters.integralOffset;
+    this.integralFactor = parameters.integralFactor;
     xyCoords = calculateIntegral();
-  }
-
-  /**
-   * Sets the percent minimum y value
-   * @param minY the percent minimum y value
-   */
-  public void setPercentMinimumY(double minY){
-    percentMinY = minY;
-  }
-
-  /**
-   * Sets the percent offset
-   * @param offset the percent offset
-   */
-  public void setPercentOffset(double offset){
-    percentOffset = offset;
-  }
-
-  /**
-   * Sets the integral factor
-   * @param factor the integral factor
-   */
-  public void setIntegralFactor(double factor){
-    integralFactor = factor;
-  }
-
-  /**
-   * Returns the percent minimum y value
-   * @return the percent minimum y value
-   */
-  public double getPercentMinimumY(){
-    return percentMinY;
-  }
-
-  /**
-   * Returns the percent offset value
-   * @return the percent offset value
-   */
-  public double getPercentOffset(){
-    return percentOffset;
-  }
-
-  /**
-   * Returns the integral factor
-   * @return the integral factor
-   */
-  public double getIntegralFactor(){
-    return integralFactor;
-  }
-
-  /**
-   * Method from the <code>Graph</code> Interface
-   * Determines if the the <code>IntegralGraph</code> is increasing
-   * Depends on whether the input <code>Graph</code> is increasing
-   * @return true is increasing, false otherwise
-   * @see jspecview.common.Graph#isIncreasing()
-   */
-  public boolean isIncreasing() {
-    return sourceGraph.isIncreasing();
-  }
-
-  /**
-   * Method from the <code>Graph</code> Interface
-   * Determines if the <code>IntegralGraph</code> is continuous
-   * @return true
-   * @see jspecview.common.Graph#isContinuous()
-   */
-  public boolean isContinuous() {
-    return true;
-  }
-
-  /**
-   * Method from the <code>Graph</code> Interface.
-   * Returns the title of the <code>IntegralGraph</code>. The title is the
-   * concatenation of the string "Integral of: " and the title of the input
-   * graph.
-   * @return the title of the <code>IntegralGraph</code>
-   */
-  public String getTitle() {
-    return "Integral of: " + sourceGraph.getTitle();
-  }
-
-  public String getTitleLabel() {
-    return getTitle();
-  }
-
-  /**
-   * Method from the <code>Graph</code> Interface.
-   * Returns the x units of the <code>IntegralGragh</code>.
-   * @return returns the string "Arbitrary Units"
-   * @see jspecview.common.Graph#getXUnits()
-   */
-  public String getXUnits() {
-    return xUnits;
-  }
-
-  /**
-   * Method from the <code>Graph</code> Interface.
-   * Returns the y units of the <code>IntegralGragh</code>.
-   * @return returns the string "Arbitrary Units"
-   * @see jspecview.common.Graph#getYUnits()
-   */
-  public String getYUnits() {
-    return yUnits;
-  }
-
-  /**
-   * Method from the <code>Graph</code> Interface. Returns the number of
-   * coordinates of the <code>IntegralGraph</code>.
-   * @return the number of coordinates of the <code>IntegralGraph</code.
-   * @see jspecview.common.Graph#getNumberOfPoints()
-   */
-  public int getNumberOfPoints() {
-    return xyCoords.length;
   }
 
   /**
@@ -235,22 +97,6 @@ public class IntegralGraph implements Graph {
    */
   public Coordinate[] getXYCoords() {
     return xyCoords;
-  }
-
-  /**
-   * Sets the x units
-   * @param units the x units
-   */
-  public void setXUnits(String units){
-    xUnits = units;
-  }
-
-  /**
-   * Sets the y units
-   * @param units the y units
-   */
-  public void setYUnits(String units){
-    yUnits = units;
   }
 
   /**
@@ -267,7 +113,7 @@ public class IntegralGraph implements Graph {
    * @see jspecview.IntegralGraph#recalculate()
    */
   private Coordinate[] calculateIntegral() {
-    Coordinate[] xyCoords = sourceGraph.getXYCoords();
+    Coordinate[] xyCoords = spectrum.getXYCoords();
     Coordinate[] integralCoords = new Coordinate[xyCoords.length];
 
     double maxY = Coordinate.getMaxY(xyCoords);
@@ -308,7 +154,7 @@ public class IntegralGraph implements Graph {
     return y * 100;
   }
 
-  public double getYValueAt(double x) {
+  private double getYValueAt(double x) {
     if (c == null)
       c = new CoordComparator();
     return Coordinate.getYValueAt(xyCoords, x, c);
@@ -410,27 +256,15 @@ public class IntegralGraph implements Graph {
       }
     }
   }
-
-  public double getUserYFactor() {
-    return 1;
-  }
-
-  public Map<String, Object> getInfo(String key) {
-    Map<String, Object> info = new Hashtable<String, Object>();
-    JDXSpectrum.putInfo(key, info, "type", "integration");
-    JDXSpectrum.putInfo(key, info, "percentMinY", Double.valueOf(percentMinY));
-    JDXSpectrum.putInfo(key, info, "percentOffset", Double.valueOf(percentOffset));
-    JDXSpectrum.putInfo(key, info, "integralFactor", Double.valueOf(integralFactor));
-    //TODO annotations
-    return info;
-  }
-
-  public boolean is1D() {
-    return true;
-  }
-
-  public String getFilePathForwardSlash() {
-    return ""; // don't want to find this one
-  }
+//
+//  public Map<String, Object> getInfo(String key) {
+//    Map<String, Object> info = new Hashtable<String, Object>();
+//    JDXSpectrum.putInfo(key, info, "type", "integration");
+//    JDXSpectrum.putInfo(key, info, "percentMinY", Double.valueOf(percentMinY));
+//    JDXSpectrum.putInfo(key, info, "percentOffset", Double.valueOf(percentOffset));
+//    JDXSpectrum.putInfo(key, info, "integralFactor", Double.valueOf(integralFactor));
+//    //TODO annotations
+//    return info;
+//  }
 
 }

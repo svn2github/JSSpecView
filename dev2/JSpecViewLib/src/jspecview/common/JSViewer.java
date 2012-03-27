@@ -61,7 +61,7 @@ public class JSViewer {
         case INTEGRATE:
           if (jsvp == null)
             continue;
-          si.execIntegrate(value);
+          execIntegrate(si, value);
           break;
         case INTEGRATIONRATIOS:
           si.execSetIntegrationRatios(value);
@@ -72,9 +72,7 @@ public class JSViewer {
         case IRMODE:
           if (jsvp == null)
             continue;
-          si.execTAConvert(value.toUpperCase().startsWith("T") ? JDXSpectrum.TO_TRANS
-              : value.toUpperCase().startsWith("A") ? JDXSpectrum.TO_ABS
-                  : JDXSpectrum.IMPLIED);
+          execTAConvert(si, value);
           break;
         case JMOL:
           si.syncToJmol(value);
@@ -121,6 +119,32 @@ public class JSViewer {
     }
     si.execScriptComplete(msg, true);
     return true;
+  }
+
+  private static void execTAConvert(ScriptInterface si, String value) {
+    int mode = (value.toUpperCase().startsWith("T") ? JDXSpectrum.TO_TRANS
+              : value.toUpperCase().startsWith("A") ? JDXSpectrum.TO_ABS
+                  : JDXSpectrum.IMPLIED);
+    JSVPanel jsvp = si.getSelectedPanel();
+    if (jsvp == null)
+      return;
+    JDXSpectrum spec = jsvp.getSpectrum();
+    JDXSpectrum spec2 = JDXSpectrum.taConvert(spec, mode);
+    if (spec2 == spec)
+      return;
+    jsvp.setSpectrum(spec2);
+    si.execTAConvert(mode);
+    jsvp.repaint();
+  }
+
+  private static void execIntegrate(ScriptInterface si, String value) {
+    JSVPanel jsvp = si.getSelectedPanel();
+    if (jsvp == null)
+      return;
+    JDXSpectrum spec = jsvp.getSpectrum();
+    spec.checkIntegral(si.getParameters(), value);
+    si.execIntegrate(spec);
+    jsvp.repaint();
   }
 
   private static void setYScale(String value, 

@@ -387,7 +387,7 @@ public class Coordinate {
    * @return the minimum x value value from an array of arrays of
    *         <code>Coordinate</code>s
    */
-  public static double getMinX(List<Graph> spectra, int[] startList,
+  public static double getMinX(List<JDXSpectrum> spectra, int[] startList,
                                int[] endList) {
     double min = Double.MAX_VALUE;
     for (int i = 0; i < spectra.size(); i++) {
@@ -453,7 +453,7 @@ public class Coordinate {
    * @return the maximum x value value from an array of arrays of
    *         <code>Coordinate</code>s
    */
-  public static double getMaxX(List<Graph> spectra, int[] startList,
+  public static double getMaxX(List<JDXSpectrum> spectra, int[] startList,
                                int[] endList) {
     double max = -Double.MAX_VALUE;
     for (int i = 0; i < spectra.size(); i++) {
@@ -520,7 +520,7 @@ public class Coordinate {
    * @return the minimum y value value from an array of arrays of
    *         <code>Coordinate</code>s
    */
-  public static double getMinYUser(List<Graph> spectra, int[] startList,
+  public static double getMinYUser(List<JDXSpectrum> spectra, int[] startList,
                                int[] endList) {
     double min = Double.MAX_VALUE;
     for (int i = 0; i < spectra.size(); i++) {
@@ -587,7 +587,7 @@ public class Coordinate {
    * @return the maximum y value value from an array of arrays of
    *         <code>Coordinate</code>s
    */
-  public static double getMaxYUser(List<Graph> spectra, int[] startList,
+  public static double getMaxYUser(List<JDXSpectrum> spectra, int[] startList,
                                int[] endList) {
     double max = -Double.MAX_VALUE;
     for (int i = 0; i < spectra.size(); i++) {

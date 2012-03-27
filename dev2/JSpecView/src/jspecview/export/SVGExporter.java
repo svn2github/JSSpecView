@@ -29,7 +29,7 @@ import java.util.ArrayList;
 
 import jspecview.common.AwtParameters;
 import jspecview.common.Coordinate;
-import jspecview.common.Graph;
+import jspecview.common.JDXSpectrum;
 import jspecview.common.ScaleData;
 import jspecview.util.Logger;
 import jspecview.util.TextFormat;
@@ -68,7 +68,7 @@ class SVGExporter extends FormExporter {
    * @return data if fileName is null
    * @throws IOException
    */
-  String exportAsSVG(String path, Graph graph, int startIndex, int endIndex, boolean forInkscape)
+  String exportAsSVG(String path, JDXSpectrum graph, int startIndex, int endIndex, boolean forInkscape)
       throws IOException {
     return exportAsSVG(path, graph.getXYCoords(), "", startIndex,
         endIndex, graph.getXUnits(), graph.getYUnits(), graph.isContinuous(),

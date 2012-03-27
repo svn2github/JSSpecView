@@ -6,7 +6,6 @@ public interface JSVPanel extends JSVContainer {
 
   Object getColor(ScriptToken st);
   JSVPanel getNewPanel(JDXSpectrum spectrum);
-  public JSVPanel getIntegralPanel(JDXSpectrum spectrum);
   GraphSet newGraphSet();
   void setupPlatform();
   void setFont(Object g, String string, int mode, int size);
@@ -22,4 +21,5 @@ public interface JSVPanel extends JSVContainer {
   void setToolTipText(String s);
   void setColor(ScriptToken st, Object color);
   void doRequestFocusInWindow();
+  void setSpectrum(JDXSpectrum spec);
 }

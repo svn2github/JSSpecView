@@ -41,9 +41,7 @@
 package jspecview.application;
 
 import java.awt.BorderLayout;
-import java.awt.CardLayout;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -706,9 +704,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     specs = currentSource.getSpectra();
     boolean overlay = isOverlay || autoOverlay
         && currentSource.isCompoundSource;
-    overlay &= !JDXSpectrum.process(specs, irMode, !isOverlay && autoIntegrate,
-        parameters.integralMinY, parameters.integralOffset,
-        parameters.integralFactor);
+    JDXSpectrum.process(specs, irMode, autoIntegrate, parameters);
     if (overlay) {
       overlay(currentSource, (isOverlay ? url : null));
     } else {
@@ -1070,7 +1066,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
       getSelectedPanel().setEnabled(true);
     }
     setMenuEnables(specNode);
-    if (getSelectedPanel().getSpectrum().getIntegrationGraph() != null)
+    if (getSelectedPanel().getSpectrum().hasIntegral())
       writeStatus("Use CTRL-LEFT-DRAG to measure an integration value.");
     else
       writeStatus("");
@@ -1367,17 +1363,8 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
    * Allows Integration of an HNMR spectra
    * 
    */
-  public void execIntegrate(String value) {
-    JSVSpecNode node = JSVSpecNode.findNode(getSelectedPanel(), specNodes);
-    JSVPanel jsvpNew = (JSVPanel) PanelData.checkIntegral(getSelectedPanel(),
-        parameters, value);
-    if (jsvpNew == getSelectedPanel())
-      return;
-    ((JSVFrame) node.frame).remove((AwtPanel) getSelectedPanel());
-    ((JSVFrame) node.frame).add((AwtPanel) jsvpNew);
-    setJSVPanelProperties(jsvpNew, true);
-    setSelectedPanel(node.jsvp = jsvpNew);
-    validate();
+  public void execIntegrate(JDXSpectrum spec) {
+    //unnec
   }
 
   /**
@@ -1433,31 +1420,8 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
   }
 
-  /**
-   * Allows Transmittance to Absorbance conversion or vice versa depending on
-   * the value of comm.
-   * 
-   * @param frame
-   *        the selected JSVFrame
-   * @param comm
-   *        the conversion command
-   */
-  public void execTAConvert(int comm) {
+  public void execTAConvert(int mode) {
     irMode = JDXSpectrum.TA_NO_CONVERT;
-    JSVPanel jsvp = getSelectedPanel();
-    if (jsvp == null)
-      return;
-    JSVSpecNode node = JSVSpecNode.findNode(jsvp, specNodes);
-    setSelectedPanel(node.jsvp = PanelData.taConvert(jsvp, comm));
-    setJSVPanelProperties(node.jsvp, true);
-    // Get from properties variable
-    Container contentPane = ((JSVFrame) node.frame).getContentPane();
-    contentPane.remove(0);
-    contentPane.invalidate();
-    if (!(contentPane.getLayout() instanceof CardLayout))
-      contentPane.setLayout(new CardLayout());
-    contentPane.add((Component) node.jsvp, "new");
-    validate();
   }
 
   public void execSetInterface(String value) {

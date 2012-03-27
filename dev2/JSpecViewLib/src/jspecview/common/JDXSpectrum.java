@@ -57,8 +57,11 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
 
   public void dispose() {
     buf2d = null;
+    if (integration != null)
+      integration.dispose();
     integration = null;
-    if (subSpectra != null)
+    integrationRatios = null;
+   if (subSpectra != null)
     for (int i = 0; i < subSpectra.size(); i++)
       if (subSpectra.get(i) != this)
         subSpectra.get(i).dispose();
@@ -229,10 +232,24 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return ipt1;
   }
  
+  /**
+   * Sets the integration ratios that will be displayed
+   * 
+   * @param ratios
+   *        array of the integration ratios
+   */
+  public void setIntegrationRatios(ArrayList<Annotation> ratios) {
+    integrationRatios = ratios;
+  }
+
   public IntegralGraph getIntegrationGraph() {
     return integration;
   }
   
+  public boolean hasIntegral() {
+    return (integration != null);
+  }
+
   public void setIntegrationGraph(IntegralGraph graph) {
     integration = graph;
   }
@@ -395,24 +412,45 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return Math.log(value) / Math.log(10);
   }
 
-  public IntegralGraph integrate(double minY, double offset, double factor) {
+  protected ArrayList<Annotation> integrationRatios;
+
+  public boolean checkIntegral(Parameters parameters, String value) {
     if (!canIntegrate())
-      return null;
-    IntegralGraph graph = new IntegralGraph(this, minY, offset, factor, xUnits,
-        yUnits);
-    setIntegrationGraph(graph);
-    return graph;
+      return false;
+    int mode = IntegralGraph.getMode(value);
+    if (mode == IntegralGraph.INTEGRATE_MARK) {
+      if (integration == null)
+        checkIntegral(parameters, "ON");
+      integration.addMarks(value.substring(5).trim());
+      return true;
+    }
+    integrate(mode == IntegralGraph.INTEGRATE_OFF
+        || mode != IntegralGraph.INTEGRATE_ON && integration != null ? null
+        : parameters);
+    return true;
   }
 
-  public static boolean areScalesCompatible(Graph s1, Graph s2,
+  private boolean integrate(Parameters parameters) {
+    if (parameters == null) {
+      integration = null;
+      return false;
+    }
+    if (!canIntegrate())
+      return false;
+    setIntegrationGraph(new IntegralGraph(this, parameters, xUnits,
+        yUnits));
+    return true;
+  }
+
+  public static boolean areScalesCompatible(JDXSpectrum s1, JDXSpectrum s2,
                                             boolean allow2D2D) {
     if (!((allow2D2D ? s1.is1D() == s2.is1D() : s1.is1D() && s2.is1D()) 
         && s1.getXUnits().equalsIgnoreCase(s2.getXUnits())))
       return false;
     if (!(s1 instanceof JDXSpectrum) || !(s2 instanceof JDXSpectrum))
       return true;
-    JDXSpectrum spec1 = (JDXSpectrum) s1;
-    JDXSpectrum spec2 = (JDXSpectrum) s2;
+    JDXSpectrum spec1 = s1;
+    JDXSpectrum spec2 = s2;
     if (spec1.isHNMR() != spec2.isHNMR())
       return false;
     return true;
@@ -420,16 +458,14 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   }
 
   public static boolean process(List<JDXSpectrum> specs, int irMode,
-                             boolean autoIntegrate, 
-                             double minY, double offset, double factor) {
-    boolean haveIntegral = false;
+                             boolean autoIntegrate, Parameters parameters) {
     if (irMode == TO_ABS || irMode == TO_TRANS)
       for (int i = 0; i < specs.size(); i++)
         specs.set(i, taConvert(specs.get(i), irMode));
     if (autoIntegrate)
       for (int i = 0; i < specs.size(); i++)
-        haveIntegral |= (specs.get(i).integrate(minY, offset, factor) != null);
-    return haveIntegral;
+        specs.get(i).integrate(parameters);
+    return true;
   }
 
   public List<Integral> getIntegrals() {

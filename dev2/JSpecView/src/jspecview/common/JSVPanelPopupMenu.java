@@ -338,14 +338,13 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   public void setEnables(JSVPanel jsvp) {
     pd = jsvp.getPanelData();
     JDXSpectrum spec0 = jsvp.getSpectrumAt(0);
-    System.out.println("ppm setenables " + jsvp + " " + pd.isGridOn() + " " + pd.isCoordinatesOn() + " " + pd.isPlotReversed());
     setSelected(gridCheckBoxMenuItem, pd.isGridOn());
     setSelected(coordsCheckBoxMenuItem, pd.isCoordinatesOn());
     setSelected(reversePlotCheckBoxMenuItem, pd.isPlotReversed());
 
     boolean isOverlaid = pd.isOverlaid();
     boolean isSingle = pd.getNumberOfSpectraTotal() == 1;
-    integrateMenuItem.setEnabled(isSingle && spec0.canIntegrate() || spec0.getIntegrationGraph() != null);
+    integrateMenuItem.setEnabled(isSingle && spec0.canIntegrate() || spec0.hasIntegral());
     solColMenuItem.setEnabled(isSingle && spec0.canShowSolutionColor());
     transAbsMenuItem.setEnabled(isSingle && spec0.canConvertTransAbs());
     overlayKeyMenuItem.setEnabled(isOverlaid && pd.getNumberOfGraphSets() == 1);

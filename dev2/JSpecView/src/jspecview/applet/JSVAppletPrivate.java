@@ -523,7 +523,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
       try {
         for (int i = 0; i < numberOfSpectra; i++) {
           JDXSpectrum spec = specs.get(i);
-          if (spec.getIntegrationGraph() != null) {
+          if (spec.hasIntegral()) {
             jsvp = AwtPanel.getNewPanel(spec, appletPopupMenu);
           } else {
             List<JDXSpectrum> list = new ArrayList<JDXSpectrum>();
@@ -671,24 +671,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
       return;
     prevPanel = jsvp;
     JSViewer.sendFrameChange(this, jsvp);
-  }
-
-  private long msTrigger = -1;
-
-//  private JSVPanel getCurrentPanel() {
-//    return (JSVPanel) appletPanel.getComponent(0);
-//  }
-
-  private void addPanelToFrame() {
-    if (offWindowFrame == null || offWindowFrame.getComponentCount() == 0) {
-      jsvApplet.getContentPane().add(appletPanel);
-      jsvApplet.validate();
-      jsvApplet.repaint();
-    } else {
-      offWindowFrame.add(appletPanel);
-      offWindowFrame.validate();
-      offWindowFrame.setVisible(true);
-    }
   }
 
   /**
@@ -1078,9 +1060,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
     numberOfSpectra = specs.size();
     isOverlaid = isOverlay && !name.equals("NONE")
         || (theInterface.equals("overlay") && numberOfSpectra > 1);
-    isOverlaid &= !JDXSpectrum.process(specs, irMode, !isOverlay && autoIntegrate,
-        parameters.integralMinY, parameters.integralOffset,
-        parameters.integralFactor);
+    JDXSpectrum.process(specs, irMode, autoIntegrate, parameters);
 
     compoundMenuOn = allowCompoundMenu && currentSource.isCompoundSource;
 
@@ -1225,31 +1205,17 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
 
   public void execSetIntegrationRatios(String value) {
     // parse the string with a method in JSpecViewUtils
-    integrationRatios = IntegralGraph
-        .getIntegrationRatiosFromString(value);
+    integrationRatios = IntegralGraph.getIntegrationRatiosFromString(value);
   }
 
   /**
    * Allows Integration of an HNMR spectrum
    * 
    */
-  public void execIntegrate(String value) {
-    JSVPanel jsvp = getSelectedPanel();//getCurrentPanel();
-    JSVPanel jsvpNew = (JSVPanel)PanelData.checkIntegral(jsvp,
-        parameters, value);
-    if (jsvp == jsvpNew) {
-      integrationRatios = null;
-      return;
-    }
-    appletPanel.remove((AwtPanel)jsvp);
-    appletPanel.add((AwtPanel)jsvpNew);
-
-    initProperties(jsvpNew, currentSpectrumIndex);
-    if (integrationRatios != null)
-      jsvpNew.getPanelData().setIntegrationRatios(integrationRatios);
+  public void execIntegrate(JDXSpectrum spec) {
+    if (spec.hasIntegral() && integrationRatios != null)
+      spec.setIntegrationRatios(integrationRatios);
     integrationRatios = null; // first time only
-    jsvpNew.repaint();
-    addPanelToFrame();
   }
 
   /**
@@ -1261,21 +1227,8 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
    * @throws Exception
    */
 
-  public void execTAConvert(int comm) throws Exception {
-    long time = System.currentTimeMillis();
-    if (msTrigger > 0 && time - msTrigger < 100)
-      return;
-    msTrigger = time;
-    JSVPanel jsvp = PanelData.taConvert(getSelectedPanel(), comm);
-    if (jsvp == null)
-      return;
-    initProperties(jsvp, currentSpectrumIndex);
-    jsvp.repaint();
-
-    //  now need to validate and repaint
-    jsvApplet.validate();
-    jsvApplet.repaint();
-
+  public void execTAConvert(int comm) {
+    // unnec
   }
 
   public void execSetCallback(ScriptToken st, String value) {

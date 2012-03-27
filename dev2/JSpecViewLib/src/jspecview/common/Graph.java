@@ -19,8 +19,6 @@
 
 package jspecview.common;
 
-import java.util.Map;
-
 
 /**
  * Interface Graph provides methods that are used for the display by
@@ -34,55 +32,10 @@ import java.util.Map;
 public interface Graph {
 
   /**
-   * Specifies whether the Spectrum is increasing
-   * @return if the Spectrum is increasing or not
-   */
-  public boolean isIncreasing();
-  /**
-   * Specifies whether the Spectrum is continuous
-   * @return if the Spectrum is continuous or not
-   */
-  public boolean isContinuous();
-  /**
-   * Gets the Title of the Spectrum
-   * @return the Title of the Spectrum
-   */
-  public String getTitle();
-
-  /**
-   * Gets the Title of the Spectrum with peak type if available
-   * @return the Title of the Spectrum
-   */
-  public String getTitleLabel();
-
-  /**
-   * Gets the units of the X axis
-   * @return the units of the X axis
-   */
-  public String getXUnits();
-  /**
-   * gets the units of the Y axis
-   * @return the units of the Y axis
-   */
-  public String getYUnits();
-
-  /**
-   * Gets the number of points in the Spectrum
-   * @return the number of points in the Spectrum
-   */
-  public int getNumberOfPoints();
-
-  /**
    * Returns the array of coordinates
    * @return the array of coordinates
    */
   public Coordinate[] getXYCoords();
   public double getPercentYValueAt(double x);
-  public double getUserYFactor();
-  public Map<String, Object> getInfo(String key);
-  public String getFilePath();
-  public boolean is1D();
-  public String getFilePathForwardSlash();
-
   public void dispose();
 }

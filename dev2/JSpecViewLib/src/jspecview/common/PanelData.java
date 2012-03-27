@@ -243,13 +243,13 @@ public class PanelData {
 
   // listeners to handle various events
 
-  protected void initSingleSpectrum(Graph spectrum) {
-    List<Graph> spectra = new ArrayList<Graph>();
+  protected void initSingleSpectrum(JDXSpectrum spectrum) {
+    List<JDXSpectrum> spectra = new ArrayList<JDXSpectrum>();
     spectra.add(spectrum);
     initJSVPanel(spectra, 0, 0);
   }
 
-  protected void initJSVPanel(List<Graph> spectra, int startIndex, int endIndex) {
+  protected void initJSVPanel(List<JDXSpectrum> spectra, int startIndex, int endIndex) {
     owner.setupPlatform();
     nSpectra = spectra.size();
     graphSets = GraphSet.getGraphSets(owner, spectra, startIndex, endIndex);
@@ -268,6 +268,11 @@ public class PanelData {
     return currentGraphSet.getSpectrum().getCurrentSubSpectrum();
   }
 
+  public void setSpectrum(JDXSpectrum spec) {
+    currentGraphSet.setSpectrum(spec);
+  }
+
+
   /**
    * Returns the <code>Spectrum</code> at the specified index
    * 
@@ -277,16 +282,6 @@ public class PanelData {
    */
   public JDXSpectrum getSpectrumAt(int index) {
     return currentGraphSet.getSpectrumAt(index);
-  }
-
-  /**
-   * Sets the integration ratios that will be displayed
-   * 
-   * @param ratios
-   *        array of the integration ratios
-   */
-  public void setIntegrationRatios(ArrayList<Annotation> ratios) {
-    currentGraphSet.setIntegrationRatios(ratios);
   }
 
   public void setDisplay1Dwith2D(boolean TF) {
@@ -525,7 +520,7 @@ public class PanelData {
     for (int i = graphSets.size(); --i >= 0;)
       graphSets.get(i)
           .drawGraph(g, withGrid, withXUnits, withYUnits, withXScale,
-              withYScale, withSliders, !isIntegralDrag, height, width, left,
+              withYScale, withSliders, true, height, width, left,
               right, top, bottom, isResized, enableZoom, display1D, display2D);
     if (withTitle)
       owner.drawTitle(g, height, width, getSpectrum().getPeakTitle());
@@ -725,7 +720,7 @@ public class PanelData {
     GraphSet gs = GraphSet.findGraphSet(graphSets, xPixel, yPixel);
     if (gs == null)
       return;
-    isIntegralDrag = (isControlDown && gs.getSpectrum().getIntegrationGraph() != null);
+    isIntegralDrag = (isControlDown && gs.getSpectrum().hasIntegral());
     if (isControlDown && !isIntegralDrag)
       return;
     setCurrentGraphSet(gs);
@@ -765,84 +760,6 @@ public class PanelData {
     gs.mouseClickEvent(xPixel, yPixel, clickCount, isControlDown);
   }
   
-  public static JSVPanel checkIntegral(JSVPanel jsvp, 
-                                    Parameters parameters, String value) {
-    IntegralGraph graph = jsvp.getSpectrum().getIntegrationGraph();
-    boolean showMessage = false;//value.equals("?");
-    int mode = IntegralGraph.getMode(value);
-    if (mode == IntegralGraph.INTEGRATE_MARK) {
-      if (graph == null) {
-        jsvp = checkIntegral(jsvp, parameters, "ON");
-        graph = jsvp.getSpectrum().getIntegrationGraph();
-      }
-      if (graph != null)
-        graph.addMarks(value.substring(5).trim());
-      return jsvp;
-    }
-    return (mode == IntegralGraph.INTEGRATE_OFF
-        || mode != IntegralGraph.INTEGRATE_ON && graph != null ? removeIntegration(jsvp)
-        : integrate(jsvp, showMessage, parameters));
-  }
-
-  public static JSVPanel removeIntegration(JSVPanel jsvp) {
-    JDXSpectrum spectrum = jsvp.getSpectrum();
-    if (spectrum.getIntegrationGraph() == null)
-      return jsvp;
-    spectrum.setIntegrationGraph(null);
-    return jsvp.getNewPanel(spectrum);
-  }
-
-  /**
-     * Integrates an HNMR spectrum
-     * 
-     * @param frameOrPanel
-     *        the selected frame
-     * @param showDialog
-     *        if true then dialog is shown, otherwise spectrum is integrated with
-     *        default values
-     * @param integrationRatios
-     * 
-     * 
-     * @return the panel containing the HNMR spectrum with integral displayed
-     */
-    public static JSVPanel integrate(JSVPanel jsvp, boolean showDialog,
-                                     Parameters parameters) {
-      JDXSpectrum spectrum = jsvp.getSpectrum();
-      IntegralGraph graph = spectrum.getIntegrationGraph();
-      spectrum.setIntegrationGraph(null);
-      if (graph != null || spectrum.canIntegrate()
-          && jsvp.getPanelData().getNumberOfSpectraInCurrentSet() == 1) {
-  /*      if (showDialog) {
-          IntegrateDialog integDialog;
-          if (graph != null) {
-            integDialog = new IntegrateDialog(jp, "Integration Parameters", true,
-                graph.getPercentMinimumY(), graph.getPercentOffset(), graph
-                    .getIntegralFactor());
-          } else {
-            integDialog = new IntegrateDialog(jp, "Integration Parameters", true,
-                parameters.integralMinY, parameters.integralOffset,
-                parameters.integralFactor);
-          }
-          parameters.integralMinY = integDialog.getMinimumY();
-          parameters.integralOffset = integDialog.getOffset();
-          parameters.integralFactor = integDialog.getFactor();
-        }
-  */      graph = spectrum.integrate(parameters.integralMinY,
-            parameters.integralOffset, parameters.integralFactor);
-  
-        if (graph != null)
-          jsvp = jsvp.getIntegralPanel(spectrum);
-      }
-      return jsvp;
-    }
-
-  public static JSVPanel taConvert(JSVPanel jsvp, int mode) {
-    if (jsvp.getPanelData().getNumberOfSpectraTotal() > 1)
-      return null;
-    JDXSpectrum spectrum = JDXSpectrum.taConvert(jsvp.getSpectrum(), mode);
-    return (spectrum == jsvp.getSpectrum() ? null : jsvp.getNewPanel(spectrum));
-  }
-
   public void repaint() {
     owner.repaint();
   }

@@ -10,7 +10,7 @@ public interface ScriptInterface {
   public String execExport(JSVPanel jsvp, String value);
   public void execClose(String value);
   public void execHidden(boolean b);
-  public void execIntegrate(String value);
+  public void execIntegrate(JDXSpectrum spec);
   public String execLoad(String value);
   public void execOverlay(String value);
   public void execScriptComplete(String msg, boolean isOK);
@@ -19,7 +19,7 @@ public interface ScriptInterface {
   public JSVPanel execSetSpectrum(String value);
   public void execSetIntegrationRatios(String value);
   public void execSetInterface(String value);
-  public void execTAConvert(int iMode) throws Exception;
+  public void execTAConvert(int iMode);
   public void execTest(String value);
 
   public JDXSource getCurrentSource();

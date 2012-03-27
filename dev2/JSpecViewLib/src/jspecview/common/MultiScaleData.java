@@ -54,7 +54,7 @@ public class MultiScaleData extends ScaleData {
    *        the initial number of Y divisions for scale
    * @return returns an instance of <code>MultiScaleData</code>
    */
-  public MultiScaleData(List<Graph> spectra, double yPt1,
+  public MultiScaleData(List<JDXSpectrum> spectra, double yPt1,
       double yPt2, int[] startList, int[] endList,
       int initNumXDivisions, int initNumYDivisions, boolean isContinuous) {
     super(Coordinate.getMinX(spectra, startList, endList), 
@@ -109,7 +109,7 @@ public class MultiScaleData extends ScaleData {
    * @param endIndices    to fill
    * @return
    */
-  public boolean setDataPointIndices(List<Graph> graphsTemp,
+  public boolean setDataPointIndices(List<JDXSpectrum> graphsTemp,
                                             double initX,
                                             double finalX, int minPoints,
                                             int[] startIndices,

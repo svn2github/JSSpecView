@@ -47,7 +47,7 @@ abstract class GraphSet {
 
 
   protected List<Highlight> highlights = new ArrayList<Highlight>();
-  protected List<Graph> spectra = new ArrayList<Graph>(2);
+  protected List<JDXSpectrum> spectra = new ArrayList<JDXSpectrum>(2);
 
   int getNumberOfSpectra() {
     return nSpectra;
@@ -55,12 +55,11 @@ abstract class GraphSet {
 
   MultiScaleData multiScaleData;
   protected List<MultiScaleData> zoomInfoList;
-  protected ArrayList<Annotation> integrationRatios;
   protected ArrayList<Annotation> annotations;
   protected Annotation lastAnnotation;
   protected JDXSource source;
   protected ImageScaleData isd;
-  private List<Graph> graphsTemp = new ArrayList<Graph>();
+  private List<JDXSpectrum> graphsTemp = new ArrayList<JDXSpectrum>();
   protected PlotWidget[] widgets;
   protected PanelData pd;
 
@@ -71,7 +70,6 @@ abstract class GraphSet {
     spectra = null;
     multiScaleData = null;
     zoomInfoList = null;
-    integrationRatios = null;
     annotations = null;
     lastAnnotation = null;
     source = null;
@@ -125,11 +123,19 @@ abstract class GraphSet {
   }
 
   JDXSpectrum getSpectrum() {
-    return getSpectrumAt(
-        iThisSpectrum < 0 || iThisSpectrum == Integer.MAX_VALUE ? 0
-            : iThisSpectrum).getCurrentSubSpectrum();
+    return getSpectrumAt(getSpecIndex()).getCurrentSubSpectrum();
   }
 
+  public void setSpectrum(JDXSpectrum spec) {
+    int pt = getSpecIndex();
+    spectra.remove(pt);
+    spectra.add(pt, spec);
+  }
+
+  private int getSpecIndex() {
+    return (iThisSpectrum < 0 || iThisSpectrum == Integer.MAX_VALUE ? 0
+        : iThisSpectrum);
+  }
   /**
    * Returns the <code>Spectrum</code> at the specified index
    * 
@@ -138,16 +144,16 @@ abstract class GraphSet {
    * @return the <code>Spectrum</code> at the specified index
    */
   JDXSpectrum getSpectrumAt(int index) {
-    return (JDXSpectrum) spectra.get(index);
+    return spectra.get(index);
   }
 
-  static List<GraphSet> getGraphSets(JSVPanel jsvp, List<Graph> spectra,
+  static List<GraphSet> getGraphSets(JSVPanel jsvp, List<JDXSpectrum> spectra,
                                      int startIndex, int endIndex) {
     List<GraphSet> graphSets = new ArrayList<GraphSet>();
     GraphSet graphSet = null;
-    Graph specLast = null;
+    JDXSpectrum specLast = null;
     for (int i = 0; i < spectra.size(); i++) {
-      Graph spec = spectra.get(i);
+      JDXSpectrum spec = spectra.get(i);
       if (specLast == null
           || !JDXSpectrum.areScalesCompatible(spec, specLast, false)) {
         graphSet = jsvp.newGraphSet();
@@ -164,7 +170,7 @@ abstract class GraphSet {
     return graphSets;
   }
 
-  protected void addSpec(Graph spec) {
+  protected void addSpec(JDXSpectrum spec) {
     spectra.add(spec);
     nSpectra++;
   }
@@ -243,7 +249,7 @@ abstract class GraphSet {
 
   protected void getMultiScaleData(double x1, double x2, double y1, double y2,
                                    int[] startIndices, int[] endIndices) {
-    List<Graph> graphs = (graphsTemp.size() == 0 ? spectra : graphsTemp);
+    List<JDXSpectrum> graphs = (graphsTemp.size() == 0 ? spectra : graphsTemp);
     List<JDXSpectrum> subspecs = getSpectrumAt(0).getSubSpectra();
     boolean dontUseSubspecs = (subspecs == null || subspecs.size() == 2);
     //NMR real/imaginary
@@ -293,7 +299,7 @@ abstract class GraphSet {
     drawXAxisLeftToRight = xAxisLeftToRight ^ reversePlot;
     for (int i = 0; i < spectra.size(); i++)
       if (spectra.get(i) instanceof JDXSpectrum)
-      ((JDXSpectrum) spectra.get(i)).setExportXAxisDirection(drawXAxisLeftToRight);
+      (spectra.get(i)).setExportXAxisDirection(drawXAxisLeftToRight);
   }
 
   protected void setScaleFactors(MultiScaleData multiScaleData) {
@@ -456,16 +462,6 @@ abstract class GraphSet {
   }
 
   /**
-   * Sets the integration ratios that will be displayed
-   * 
-   * @param ratios
-   *        array of the integration ratios
-   */
-  void setIntegrationRatios(ArrayList<Annotation> ratios) {
-    integrationRatios = ratios;
-  }
-
-  /**
    * 
    * @param g
    * @param withGrid
@@ -516,8 +512,7 @@ abstract class GraphSet {
   }
 
   protected boolean doPlot(int i) {
-    return (iThisSpectrum < 0 || iThisSpectrum == i || spectra.get(i) instanceof IntegralGraph
-        && iThisSpectrum == i - 1);
+    return (iThisSpectrum < 0 || iThisSpectrum == i);
   }
 
   protected void setImageWindow(boolean display1D) {
@@ -852,7 +847,7 @@ abstract class GraphSet {
 
   void addPeakHighlight(PeakInfo peakInfo) {
     for (int i = spectra.size(); --i >= 0;) {
-      Graph spec = spectra.get(i);
+      JDXSpectrum spec = spectra.get(i);
       removeAllHighlights(spec);
       if (peakInfo == null || peakInfo.isClearAll() || spec != peakInfo.spectrum)
         continue;
@@ -1316,15 +1311,11 @@ abstract class GraphSet {
       // the graphs
       for (int i = nSpectra; --i >= 0;)
         if (doPlot(i)) {
-          drawPlot(g, i, height, width, withGrid, drawY0);
+          drawSpectrum(g, i, height, width, withGrid, drawY0);
           if (iThisSpectrum == i)
             drawTitle(g, height, width, spectra.get(i).getTitle());
         }
 
-      // over-spectrum stuff    
-      if (integrationRatios != null)
-        drawAnnotations(g, height, width, integrationRatios,
-            ScriptToken.INTEGRALPLOTCOLOR);
       drawIntegralValue(g, width);
     } else {
       drawWidgets(g, subIndex, isInteractive);
@@ -1345,16 +1336,16 @@ abstract class GraphSet {
   private void drawHighlights(Object g) {
     if (iThisSpectrum == Integer.MAX_VALUE)
       return;
-    Graph spec = spectra.get(Math.max(iThisSpectrum, 0));
+    JDXSpectrum spec = spectra.get(Math.max(iThisSpectrum, 0));
     drawHighlights(g, spec);
   }
 
   private void drawPeakTabs(Object g) {
     if (iThisSpectrum == Integer.MAX_VALUE)
       return;
-    Graph spec = spectra.get(Math.max(iThisSpectrum, 0));
+    JDXSpectrum spec = spectra.get(Math.max(iThisSpectrum, 0));
     ArrayList<PeakInfo> list = (nSpectra == 1
-        || getSpectrum().getIntegrationGraph() != null || iThisSpectrum >= 0 ? ((JDXSpectrum) spec)
+        || getSpectrum().hasIntegral() || iThisSpectrum >= 0 ? (spec)
         .getPeakList()
         : null);
     if (list != null && list.size() > 0) {
@@ -1477,37 +1468,48 @@ abstract class GraphSet {
    * @param width
    *        the width to be drawn in pixels
    */
-  private void drawPlot(Object g, int index, int height, int width,
+  private void drawSpectrum(Object g, int index, int height, int width,
                         boolean gridOn, boolean drawY0) {
     // Check if specInfo in null or xyCoords is null
     //Coordinate[] xyCoords = spectra[index].getXYCoords();
-    Graph spec = spectra.get(index);
-    Coordinate[] xyCoords = spec.getXYCoords();
-
-    setPlotColor(g,
-        index == 1 && getSpectrum().getIntegrationGraph() != null ? -1
-            : iThisSpectrum == index ? 0 : index);
-
-    // Check if revPLot on
-    int y0 = toPixelY(0);
-    if (drawY0 || index != 0 || y0 != fixY(y0))
-      y0 = -1;
-    
-    boolean isIntegral = (spec instanceof IntegralGraph);
+    JDXSpectrum spec = spectra.get(index);
     userYFactor = spec.getUserYFactor();
-    if (spec.isContinuous()) {
+    drawPlot(g, index, spec, height, width, gridOn, drawY0, spec.isContinuous());
+    if (spec.hasIntegral())
+      drawPlot(g, index, spec.getIntegrationGraph(), height, width, true, false, true);
+    // over-spectrum stuff    
+    if (spec.integrationRatios != null)
+      drawAnnotations(g, height, width, spec.integrationRatios,
+          ScriptToken.INTEGRALPLOTCOLOR);
+
+  }
+
+  private void drawPlot(Object g, int index, Graph spec, int height,
+                        int width, boolean gridOn, boolean drawY0, 
+                        boolean isContinuous) {
+
+    Coordinate[] xyCoords = spec.getXYCoords();
+    boolean isIntegral = (spec instanceof IntegralGraph);
+    boolean fillPeaks = (!isIntegral && pd.isIntegralDrag && spectra.get(index).hasIntegral());
+    setPlotColor(g, isIntegral ? -1 : iThisSpectrum == index ? 0 : index);
+    int y0 = toPixelY(0);
+    if (!drawY0 || index != 0 || y0 != fixY(y0))
+      y0 = -1;
+    if (isContinuous) {
       for (int i = multiScaleData.startDataPointIndices[index]; i < multiScaleData.endDataPointIndices[index]; i++) {
         Coordinate point1 = xyCoords[i];
         Coordinate point2 = xyCoords[i + 1];
         int x1 = toPixelX(point1.getXVal());
         int x2 = toPixelX(point2.getXVal());
-        int y1 = (isIntegral ? toPixelYint(point1.getYVal()) : toPixelY(point1.getYVal()));
-        int y2 = (isIntegral ? toPixelYint(point2.getYVal()) : toPixelY(point2.getYVal()));
+        int y1 = (isIntegral ? toPixelYint(point1.getYVal()) : toPixelY(point1
+            .getYVal()));
+        int y2 = (isIntegral ? toPixelYint(point2.getYVal()) : toPixelY(point2
+            .getYVal()));
         if (y1 == Integer.MIN_VALUE || y2 == Integer.MIN_VALUE)
           continue;
         y1 = fixY(y1);
         y2 = fixY(y2);
-        if (y0 >= 0 && x1 >= zoomBox1D.xPixel0 && x1 <= zoomBox1D.xPixel1) {
+        if (fillPeaks && y0 > 0 && x1 >= zoomBox1D.xPixel0 && x1 <= zoomBox1D.xPixel1) {
           setColor(g, ScriptToken.INTEGRALPLOTCOLOR);
           drawLine(g, x1, y0, x1, y1);
           setColor(g, ScriptToken.PLOTCOLOR);
@@ -1536,8 +1538,8 @@ abstract class GraphSet {
         drawLine(g, xPixel1, y, xPixel0, y);
       }
     }
-  }
 
+  }
   /**
    * 
    * @param g
@@ -1763,7 +1765,7 @@ abstract class GraphSet {
     double x1;
     double x2;
     Object color;
-    Graph spectrum;
+    JDXSpectrum spectrum;
 
     @Override
     public String toString() {
@@ -1780,7 +1782,7 @@ abstract class GraphSet {
      * @param color
      *        the color of the highlighted region
      */
-    Highlight(double x1, double x2, Graph spec, Object color) {
+    Highlight(double x1, double x2, JDXSpectrum spec, Object color) {
       this.x1 = x1;
       this.x2 = x2;
       this.color = color;
@@ -1815,7 +1817,7 @@ abstract class GraphSet {
    * @param color
    *        the color of the highlight
    */
-  void addHighlight(double x1, double x2, Graph spec, Object oColor) {
+  void addHighlight(double x1, double x2, JDXSpectrum spec, Object oColor) {
     if (spec == null)
       spec = getSpectrumAt(0);
     Highlight hl = new Highlight(x1, x2, spec, (oColor == null ? 
@@ -1852,7 +1854,7 @@ abstract class GraphSet {
     }
   }
 
-  void removeAllHighlights(Graph spec) {
+  void removeAllHighlights(JDXSpectrum spec) {
     if (spec == null) 
       highlights.clear();
     else
@@ -1862,7 +1864,7 @@ abstract class GraphSet {
         }
   }
 
-  void drawHighlights(Object g, Graph spec) {
+  void drawHighlights(Object g, JDXSpectrum spec) {
     for (int i = 0; i < highlights.size(); i++) {
       Highlight hl = highlights.get(i);
       if (hl.spectrum == spec) {
@@ -2012,8 +2014,8 @@ abstract class GraphSet {
       //          yPt = spectra[0].getPercentYValueAt(xPt);
       //          xx += ", " + formatterY.format(yPt);
       //        }
-    } else if (getSpectrum().getIntegrationGraph() != null) {
-      yPt = spectra.get(1).getPercentYValueAt(xPt);
+    } else if (getSpectrum().hasIntegral()) {
+      yPt = getSpectrum().getIntegrationGraph().getPercentYValueAt(xPt);
       xx += ", " + pd.getFormatter("#0.0").format(yPt);
     }
     pd.setToolTipText(Double.isNaN(yPt) ? null : xx);
@@ -2086,7 +2088,7 @@ abstract class GraphSet {
   public PeakInfo findMatchingPeakInfo(PeakInfo pi) {
     PeakInfo pi2 = null;
     for (int i = 0; i < spectra.size(); i++)
-      if (spectra.get(i) instanceof JDXSpectrum && (pi2 = ((JDXSpectrum) spectra.get(i)).findMatchingPeakInfo(pi)) != null)
+      if (spectra.get(i) instanceof JDXSpectrum && (pi2 = (spectra.get(i)).findMatchingPeakInfo(pi)) != null)
         break;
     return pi2;
   }
