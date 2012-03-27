@@ -239,6 +239,7 @@ public class PanelData {
   protected boolean printScale = true;
   String printingFont;
   protected String printGraphPosition = "default";
+  boolean titleDrawn;
 
 
   // listeners to handle various events
@@ -516,13 +517,13 @@ public class PanelData {
     }
     thisWidth = width;
     thisPlotHeight = plotAreaHeight;
-
+    titleDrawn = false;
     for (int i = graphSets.size(); --i >= 0;)
       graphSets.get(i)
           .drawGraph(g, withGrid, withXUnits, withYUnits, withXScale,
               withYScale, withSliders, true, height, width, left,
               right, top, bottom, isResized, enableZoom, display1D, display2D);
-    if (withTitle)
+    if (withTitle && !titleDrawn)
       owner.drawTitle(g, height, width, getSpectrum().getPeakTitle());
     if (withCoords)
       owner.drawCoordinates(g, height, width);

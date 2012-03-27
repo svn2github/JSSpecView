@@ -1312,8 +1312,10 @@ abstract class GraphSet {
       for (int i = nSpectra; --i >= 0;)
         if (doPlot(i)) {
           drawSpectrum(g, i, height, width, withGrid, drawY0);
-          if (iThisSpectrum == i)
-            drawTitle(g, height, width, spectra.get(i).getTitle());
+          if (iThisSpectrum == i && this == pd.currentGraphSet) {
+            drawTitle(g, height, width, spectra.get(i).getPeakTitle());
+            pd.titleDrawn = true;
+          }
         }
 
       drawIntegralValue(g, width);

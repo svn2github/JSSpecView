@@ -226,7 +226,6 @@ public class JSViewer {
     if (si.getSpecNodes().size() == 0 || !checkFileAlreadyLoaded(si, file)) {
       //System.out.println("JSViewer closing all and reopening");
       si.closeAllAndOpenFile(file);
-      checkAutoOverlay(si);
     }
     PeakInfo pi = selectPanelByPeak(si, peakScript, si.getSelectedPanel());
     JSVPanel jsvp = si.getSelectedPanel();
@@ -254,12 +253,6 @@ public class JSViewer {
         return true;
       }
     return false;
-  }
-
-  private static void checkAutoOverlay(ScriptInterface si) {
-    List<JSVSpecNode> specNodes = si.getSpecNodes();
-    if (specNodes.get(0).jsvp.getSpectrumAt(0).isAutoOverlayFromJmolClick())
-      si.execOverlay("*");
   }
 
   private static PeakInfo selectPanelByPeak(ScriptInterface si, String peakScript,

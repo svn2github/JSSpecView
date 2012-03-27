@@ -41,7 +41,6 @@ package jspecview.applet;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetListener;
@@ -59,17 +58,11 @@ import java.util.ArrayList;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTabbedPane;
 import javax.swing.JTable;
-import javax.swing.SwingConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import jspecview.application.TextDialog;
 import jspecview.common.AwtPanel;
@@ -165,9 +158,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
   private int spectrumNumber = -1; // blockNumber or nTupleNumber
   private int irMode = JDXSpectrum.TA_NO_CONVERT;
   private boolean autoIntegrate;
-  private int numberOfSpectra;
 
-  private String theInterface = "single"; // either tab, tile, single, overlay
   private String coordCallbackFunctionName;
   private String peakCallbackFunctionName;
   private String syncCallbackFunctionName;
@@ -186,7 +177,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
   private Thread commandWatcherThread;
   private Boolean obscureTitleFromUser;
   private JFileChooser jFileChooser;
-  private JTabbedPane tabbedDisplayPane = new JTabbedPane();
   private JFrame offWindowFrame;
   private JSVAppletPanel appletPanel;
   private JSVAppletPopupMenu appletPopupMenu;  
@@ -196,7 +186,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
   private String recentFileName = "";
   private JSVPanel selectedPanel;
   private JDXSource currentSource;
-  private boolean isOverlaid;
 
   public boolean isSigned() {
     return false;
@@ -497,123 +486,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
     jsvApplet.getContentPane().add(appletPanel);
   }
 
-  /**
-   * Initalizes the <code>specNodes</code> and adds them to the specNodes array
-   * 
-   * @throws JSpecViewException
-   */
-  private void initPanels(List<JDXSpectrum> specs) throws JSpecViewException {
-    AwtPanel jsvp;
-
-    // Initialise specNodes
-
-    if (isOverlaid && startIndex != endIndex) {
-      theInterface = "single";
-      isOverlaid = false;
-    }
-    specNodes = new ArrayList<JSVSpecNode>();
-    if (isOverlaid) {
-      // overlay all spectra on a panel
-      jsvp = AwtPanel.getJSVPanel(specs, startIndex, endIndex, appletPopupMenu);
-      endIndex = startIndex = -1;
-      initProperties(jsvp, -1);
-      specNodes.add(new JSVSpecNode("specs", currentSource.getFilePath(), currentSource, appletPanel, jsvp));
-    } else {
-      // initialise specNodes and add them to the array
-      try {
-        for (int i = 0; i < numberOfSpectra; i++) {
-          JDXSpectrum spec = specs.get(i);
-          if (spec.hasIntegral()) {
-            jsvp = AwtPanel.getNewPanel(spec, appletPopupMenu);
-          } else {
-            List<JDXSpectrum> list = new ArrayList<JDXSpectrum>();
-            list.add(spec);
-            jsvp = AwtPanel.getJSVPanel(list, startIndex, endIndex, appletPopupMenu);
-          }
-          specNodes.add(new JSVSpecNode("" + (i + 1), currentSource.getFilePath(), currentSource, appletPanel, jsvp));
-          initProperties(jsvp, i);
-        }
-      } catch (Exception e) {
-        // TODO
-      }
-    }
-  }
-
-  private void initProperties(JSVPanel jsvp, int oldIndex) {
-    jsvp.getPanelData().addListener(this);
-    parameters.setFor(jsvp, null, true);
-    setSelectedPanel(jsvp);
-  }
-
-  /**
-   * Initializes the interface of the applet depending on the value of the
-   * <i>interface</i> parameter
-   */
-  private void initInterface() {
-    final int numberOfPanels = specNodes.size();
-    boolean canDoTile = (numberOfPanels >= 2 && numberOfPanels <= 10);
-    boolean moreThanOnePanel = (numberOfPanels > 1);
-    boolean showSpectrumNumber = spectrumNumber != -1
-        && spectrumNumber <= numberOfPanels;
-    //appletPanel.setBackground(backgroundColor);
-    if (theInterface.equals("tab") && moreThanOnePanel) {
-      tabbedDisplayPane = new JTabbedPane(SwingConstants.TOP,
-          JTabbedPane.SCROLL_TAB_LAYOUT);
-      appletPanel.add(new JLabel(currentSource.getTitle(),
-          SwingConstants.CENTER), BorderLayout.NORTH);
-      appletPanel.add(tabbedDisplayPane, BorderLayout.CENTER);
-
-      for (int i = 0; i < numberOfPanels; i++) {
-        String title = specNodes.get(i).getSpectrum().getTitleLabel();
-        if (currentSource.type == JDXSource.TYPE_NTUPLE)
-          title = title.substring(title.indexOf(':') + 1);
-        else if (currentSource.type == JDXSource.TYPE_BLOCK)
-          //title = "block " + (i + 1);
-          title = title.substring(0, (title.length() >= 10 ? 10 : title
-              .length()))
-              + "... : ";
-        tabbedDisplayPane.addTab(title, (AwtPanel)specNodes.get(i).jsvp);
-      }
-      // Show the spectrum specified by the spectrumnumber parameter
-      if (showSpectrumNumber) {
-        tabbedDisplayPane.setSelectedIndex(spectrumNumber - 1);
-      }
-      setSelectedPanel((JSVPanel) tabbedDisplayPane.getSelectedComponent());
-      tabbedDisplayPane.addChangeListener(new ChangeListener() {
-        public void stateChanged(ChangeEvent e) {
-          setSelectedPanel((JSVPanel) tabbedDisplayPane.getSelectedComponent());
-        }
-      });
-    } else if (theInterface.equals("tile") && canDoTile) {
-      appletPanel.add(new JLabel(currentSource.getTitle(),
-          SwingConstants.CENTER), BorderLayout.NORTH);
-
-      for (int i = 0; i < numberOfPanels; i++) {
-        JSVPanel jsvp = specNodes.get(i).jsvp;
-        ((Component) jsvp).setMinimumSize(new Dimension(250, 150));
-        ((Component) jsvp).setPreferredSize(new Dimension(300, 200));
-      }
-      JSplitPane splitPane = createSplitPane(specNodes);
-      appletPanel.add(splitPane, BorderLayout.CENTER);
-      //splitPane.setBackground(backgroundColor);
-    } else { // Single or overlay
-      //      compoundMenuOn = true;
-      int spectrumIndex = (showSpectrumNumber ? spectrumNumber - 1 : 0);
-            
-      setSelectedPanel(spectrumIndex >= specNodes.size() ? null : specNodes.get(spectrumIndex).jsvp);
-
-      // Global variable for single interface
-
-      if (isOverlaid && currentSource.isCompoundSource)
-        specNodes.get(spectrumIndex).jsvp.setTitle(currentSource.getTitle());
-      appletPanel.add((AwtPanel)specNodes.get(spectrumIndex).jsvp, BorderLayout.CENTER);      
-      appletPopupMenu.setCompoundMenu(currentSource, spectrumIndex, 
-          (specNodesSaved == null ? specNodes : specNodesSaved), 
-          compoundMenuOn && currentSource.isCompoundSource, 
-          compoundMenuSelectionListener, compoundMenuChooseListener);  
-    }
-  }
-
   private ActionListener compoundMenuChooseListener = new ActionListener() {
     public void actionPerformed(ActionEvent e) {
       resetSaved();
@@ -688,20 +560,18 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
   private boolean compoundMenuOn;
   private boolean allowCompoundMenu = true;
   private String dirLastExported;
+  private boolean interfaceOverlaid;
   
   
   ////////////// JSVAppletPopupMenu calls
-  
-  
+
   /**
    * Shows the header information for the Spectrum
    */
   void showHeader() {
-    
+
     JDXSpectrum spectrum = getSelectedPanel().getSpectrum();
-    String[][] rowData = (isOverlaid ? currentSource
-        .getHeaderRowDataAsArray(false, 0) : spectrum
-        .getHeaderRowDataAsArray());
+    String[][] rowData = spectrum.getHeaderRowDataAsArray();
     String[] columnNames = { "Label", "Description" };
     JTable table = new JTable(rowData, columnNames);
     table.setPreferredScrollableViewportSize(new Dimension(400, 195));
@@ -778,89 +648,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
           offWindowFrame, jFileChooser, type, recentFileName, dirLastExported);
     else
       Logger.info(export(type, -1));
-  }
-
-  /**
-   * Used to tile JSVPanel when the <i>interface</i> parameters is equal to
-   * "tile"
-   * 
-   * @param specNodes
-   *        An array of components to tile
-   * @return a <code>JSplitPane</code> with components tiled
-   */
-  private JSplitPane createSplitPane(List<JSVSpecNode> specNodes) {
-    ComponentListPair pair = createPair(specNodes);
-    return createSplitPaneAux(pair);
-  }
-
-  /**
-   * Auxiliary method for creating a tiled interface
-   * 
-   * @param pair
-   *        the <code>ComponentListPair</code>
-   * @return a <code>JSplitPane</code> with components tiled
-   */
-  private JSplitPane createSplitPaneAux(ComponentListPair pair) {
-    int numTop = pair.top.size();
-    int numBottom = pair.bottom.size();
-    JSplitPane splitPane;
-
-    if (numBottom == 1 && numTop == 1) {
-      splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-      splitPane.setLeftComponent((Component) pair.top.get(0).jsvp);
-      splitPane.setRightComponent((Component) pair.bottom.get(0).jsvp);
-
-    }
-
-    else if (numBottom == 1 && numTop == 2) {
-      splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-      JSplitPane newSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-      newSplitPane.setLeftComponent((Component) pair.top.get(0).jsvp);
-      newSplitPane.setRightComponent((Component) pair.top.get(1).jsvp);
-      splitPane.setLeftComponent(newSplitPane);
-      splitPane.setRightComponent((Component) pair.bottom.get(0).jsvp);
-    } else {
-      splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-      splitPane.setTopComponent(createSplitPaneAux(createPair(pair.top)));
-      splitPane.setBottomComponent(createSplitPaneAux(createPair(pair.bottom)));
-    }
-    return splitPane;
-  }
-
-  /**
-   * Splits the components array in 2 equal or nearly equal arrays and
-   * encapsulates them in a <code>ComponentListPair</code> instance
-   * 
-   * @param specNodes
-   *        an array of components
-   * @return a <code>ComponentListPair</code>
-   */
-  private ComponentListPair createPair(List<JSVSpecNode> specNodes) {
-    int numBottom = (int) (specNodes.size() / 2);
-    int numTop = numBottom + (specNodes.size() % 2);
-    List<JSVSpecNode> top = new ArrayList<JSVSpecNode>();
-    List<JSVSpecNode> bottom = new ArrayList<JSVSpecNode>();
-    int i;
-    for (i = 0; i < numTop; i++)
-      top.add(specNodes.get(i));
-    for (; i < specNodes.size(); i++)
-      bottom.add(specNodes.get(i));
-    return new ComponentListPair(top, bottom);
-  }
-
-  /**
-   * Representation of array[2] of components of equal or nearly equal size
-   * 
-   */
-  private class ComponentListPair {
-    
-    List<JSVSpecNode> top; 
-    List<JSVSpecNode> bottom;
-
-    private ComponentListPair(List<JSVSpecNode> top, List<JSVSpecNode> bottom) {
-      this.top = top;
-      this.bottom = bottom;
-    }
   }
 
   /**
@@ -949,11 +736,9 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
           allowCompoundMenu = Boolean.parseBoolean(value);
           break;
         case INTERFACE:
-          theInterface = value;
-          if (!theInterface.equals("tab") && !theInterface.equals("tile")
-              && !theInterface.equals("single")
-              && !theInterface.equals("overlay"))
-            theInterface = "single";
+          // ignore
+          if (value.equalsIgnoreCase("single") || value.equalsIgnoreCase("overlay"))
+            interfaceOverlaid = value.equalsIgnoreCase("overlay");
           break;
         case ENDINDEX:
           endIndex = Integer.parseInt(value);
@@ -1044,8 +829,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
     }
 
     try {
-      currentSource = (isOverlay ? 
-          JDXSource.createOverlay(fileName, specs)
+      currentSource = (isOverlay ? JDXSource.createOverlay(fileName, specs)
           : FileReader.createJDXSource(FileManager
               .getBufferedReaderForString(data), fileName, base,
               obscureTitleFromUser == Boolean.TRUE, -1, -1));
@@ -1057,25 +841,100 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
     }
 
     specs = currentSource.getSpectra();
-    numberOfSpectra = specs.size();
-    isOverlaid = isOverlay && !name.equals("NONE")
-        || (theInterface.equals("overlay") && numberOfSpectra > 1);
     JDXSpectrum.process(specs, irMode, autoIntegrate, parameters);
+
+    boolean isOverlaid = (isOverlay && !name.equals("NONE"));
 
     compoundMenuOn = allowCompoundMenu && currentSource.isCompoundSource;
 
     try {
-      initPanels(specs);
+      initPanels(specs, isOverlaid);
     } catch (JSpecViewException e1) {
       writeStatus(e1.getMessage());
       return;
     }
 
-    initInterface();
+    initInterface(isOverlaid);
 
     Logger.info(jsvApplet.getAppletInfo() + " File " + fileName
         + " Loaded Successfully");
 
+    if (!isOverlaid
+        && (interfaceOverlaid || specs.get(0).isAutoOverlayFromJmolClick()
+            && startIndex == endIndex))
+      execOverlay("*");
+
+  }
+
+  /**
+   * Initalizes the <code>specNodes</code> and adds them to the specNodes array
+   * 
+   * @throws JSpecViewException
+   */
+  private void initPanels(List<JDXSpectrum> specs, boolean isOverlay) throws JSpecViewException {
+    AwtPanel jsvp;
+
+    // Initialise specNodes
+
+    specNodes = new ArrayList<JSVSpecNode>();
+    if (isOverlay) {
+      // overlay all spectra on a panel
+      jsvp = AwtPanel.getJSVPanel(specs, startIndex, endIndex, appletPopupMenu);
+      endIndex = startIndex = -1;
+      initProperties(jsvp);
+      specNodes.add(new JSVSpecNode("specs", currentSource.getFilePath(), currentSource, appletPanel, jsvp));
+    } else {
+      // initialise specNodes and add them to the array
+      try {
+        for (int i = 0; i < specs.size(); i++) {
+          JDXSpectrum spec = specs.get(i);
+          if (spec.hasIntegral()) {
+            jsvp = AwtPanel.getNewPanel(spec, appletPopupMenu);
+          } else {
+            List<JDXSpectrum> list = new ArrayList<JDXSpectrum>();
+            list.add(spec);
+            jsvp = AwtPanel.getJSVPanel(list, startIndex, endIndex, appletPopupMenu);
+          }
+          specNodes.add(new JSVSpecNode("" + (i + 1), currentSource.getFilePath(), currentSource, appletPanel, jsvp));
+          initProperties(jsvp);
+        }
+      } catch (Exception e) {
+        // TODO
+      }
+    }
+    setSelectedPanel(specNodes.get(0).jsvp);
+  }
+
+  private void initProperties(JSVPanel jsvp) {
+    jsvp.getPanelData().addListener(this);
+    parameters.setFor(jsvp, null, true);
+  }
+
+  /**
+   * Initializes the interface of the applet depending on the value of the
+   * <i>interface</i> parameter
+   */
+  private void initInterface(boolean isOverlaid) {
+    final int numberOfPanels = specNodes.size();
+    if (numberOfPanels == 0)
+      return;
+    boolean showSpectrumNumber = spectrumNumber != -1
+        && spectrumNumber <= numberOfPanels;
+      //      compoundMenuOn = true;
+      int spectrumIndex = (showSpectrumNumber ? spectrumNumber - 1 : 0);
+      if (spectrumIndex >= specNodes.size())
+        spectrumIndex = 0;
+      setSelectedPanel(specNodes.get(spectrumIndex).jsvp);
+
+      // Global variable for single interface
+
+      if (isOverlaid && currentSource.isCompoundSource)
+        specNodes.get(spectrumIndex).jsvp.setTitle(currentSource.getTitle());
+      appletPanel.add((AwtPanel)specNodes.get(spectrumIndex).jsvp, BorderLayout.CENTER);      
+      appletPopupMenu.setCompoundMenu(currentSource, spectrumIndex, 
+          (specNodesSaved == null ? specNodes : specNodesSaved), 
+          compoundMenuOn && currentSource.isCompoundSource, 
+          compoundMenuSelectionListener, compoundMenuChooseListener);  
   }
 
   protected void processCommand(String script) {
@@ -1320,12 +1179,8 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
     if (i < 0 || i > specNodes.size())
       return null;
     if (getSelectedPanel() != null) {
-      if (theInterface.equals("single")) {
-        showSpectrum(i);
-        appletPanel.validate();
-      } else {
-        tabbedDisplayPane.setSelectedIndex(i);
-      }
+      showSpectrum(i);
+      appletPanel.validate();
       jsvApplet.repaint();
     }
     return getSelectedPanel();

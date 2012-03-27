@@ -701,6 +701,8 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
       return FILE_OPEN_NO_DATA;
     }
 
+    boolean autoOverlay = this.autoOverlay || spec.isAutoOverlayFromJmolClick();
+
     specs = currentSource.getSpectra();
     boolean overlay = isOverlay || autoOverlay
         && currentSource.isCompoundSource;
