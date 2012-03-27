@@ -10,35 +10,6 @@ import jspecview.util.TextFormat;
 
 public class JSViewer {
 
-  public static void setYScale(String value, 
-                               List<JSVSpecNode> specNodes, 
-                               JSVPanel jsvp, JDXSource currentSource) {
-    if (jsvp == null)
-      return;
-    List<String> tokens = ScriptToken.getTokens(value);
-    int pt = 0;
-    boolean isAll = false;
-    if (tokens.size() > 1 && tokens.get(0).equalsIgnoreCase("ALL")) {
-      isAll = true;
-      pt++;
-    }
-    double y1 = Double.parseDouble(tokens.get(pt++));
-    double y2 = Double.parseDouble(tokens.get(pt));
-    if (isAll) {
-      JDXSpectrum spec = jsvp.getSpectrum();
-      for (int i = specNodes.size(); --i >= 0;) {
-        JSVSpecNode node = specNodes.get(i);
-        if (node.source != currentSource)
-          continue;
-        if (JDXSpectrum.areScalesCompatible(spec, node.getSpectrum(),
-            false))
-          node.jsvp.getPanelData().setZoom(Double.NaN, y1, Double.NaN, y2);
-      }
-    } else {
-      jsvp.getPanelData().setZoom(Double.NaN, y1, Double.NaN, y2);
-    }
-  }
-
   public static boolean runScriptNow(ScriptInterface si, JSVPanel jsvp,
                                      String script) {
     if (script == null)
@@ -151,6 +122,35 @@ public class JSViewer {
     si.execScriptComplete(msg, true);
     return true;
   }
+
+  private static void setYScale(String value, 
+                                List<JSVSpecNode> specNodes, 
+                                JSVPanel jsvp, JDXSource currentSource) {
+     if (jsvp == null)
+       return;
+     List<String> tokens = ScriptToken.getTokens(value);
+     int pt = 0;
+     boolean isAll = false;
+     if (tokens.size() > 1 && tokens.get(0).equalsIgnoreCase("ALL")) {
+       isAll = true;
+       pt++;
+     }
+     double y1 = Double.parseDouble(tokens.get(pt++));
+     double y2 = Double.parseDouble(tokens.get(pt));
+     if (isAll) {
+       JDXSpectrum spec = jsvp.getSpectrum();
+       for (int i = specNodes.size(); --i >= 0;) {
+         JSVSpecNode node = specNodes.get(i);
+         if (node.source != currentSource)
+           continue;
+         if (JDXSpectrum.areScalesCompatible(spec, node.getSpectrum(),
+             false))
+           node.jsvp.getPanelData().setZoom(Double.NaN, y1, Double.NaN, y2);
+       }
+     } else {
+       jsvp.getPanelData().setZoom(Double.NaN, y1, Double.NaN, y2);
+     }
+   }
 
   public static void setOverlayLegendVisibility(ScriptInterface si,
                                                 JSVPanel jsvp, boolean showLegend) {
