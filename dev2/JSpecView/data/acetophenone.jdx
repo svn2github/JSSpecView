@@ -3774,7 +3774,7 @@ acetophenone
  17 14  1  0  0  0
 M  END
 </ModelData>
-<ModelData id="2" type="MOL">
+<ModelData id="2" type="MOL" baseModel="acetophenone">
 acetophenone m/z 120
   DSViewer          3D                             0
 
