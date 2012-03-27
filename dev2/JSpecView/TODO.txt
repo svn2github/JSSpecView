@@ -3,12 +3,16 @@ Put new items at top, please.
 
 ====TODO=========
 
+GC/MS is not tested and probably all messed up.
+
 ReversePlot was disabled; x widgets aren't right with plot reversed.
 
 With Jmol application, when loading a Block file the JSV display is automatically showing the LAST Block.
 
 > That's the design -- you want first?
 > yes please..
+
+
 
 With JSpecView application, loading a file gives the dialog box and if you sort on date the program crashes.
 
