@@ -1,10 +1,11 @@
 package jspecview.common;
 
-import jspecview.util.Logger;
+//import jspecview.util.Logger;
 import jspecview.util.Parser;
 
 public class PeakInfo {
   public final static PeakInfo nullPeakInfo = new PeakInfo();
+  public final static PeakInfo basePeakInfo = new PeakInfo();
 
   private double xMin, xMax, yMin, yMax;
   private String stringInfo;
@@ -14,11 +15,11 @@ public class PeakInfo {
   private String file;
   private String title;
   private String model;
+  private String atoms;
   public Graph spectrum;
 
   private String _match;
 
-  //private String atoms;
 
   public PeakInfo() {
   }
@@ -33,6 +34,10 @@ public class PeakInfo {
 
   public String getType() {
     return type;
+  }
+
+  public String getAtoms() {
+    return atoms;
   }
 
   public void setXMax(double xMax) {
@@ -79,8 +84,11 @@ public class PeakInfo {
     this.stringInfo = stringInfo;
     if (stringInfo == null)
       return;
-    Logger.info("JSpecView found " + stringInfo);
-    type = Parser.getQuotedAttribute(stringInfo, "type").toUpperCase();
+    //Logger.info("JSpecView found " + stringInfo);
+    type = Parser.getQuotedAttribute(stringInfo, "type");
+    if (type == null)
+      type = "";
+    type = type.toUpperCase();
     int pt = type.indexOf('/');
     type2 = (pt < 0 ? "" : fixType(type.substring(type.indexOf('/') + 1)));
     if (pt >= 0)
@@ -90,7 +98,7 @@ public class PeakInfo {
     index = Parser.getQuotedAttribute(stringInfo, "index");
     file = Parser.getQuotedAttribute(stringInfo, "file");
     model = Parser.getQuotedAttribute(stringInfo, "model");
-    // atoms = Parser.getQuotedAttribute(stringInfo, "atoms");
+    atoms = Parser.getQuotedAttribute(stringInfo, "atoms");
     title = Parser.getQuotedAttribute(stringInfo, "title");
     _match = Parser.getQuotedAttribute(stringInfo, "_match"); // PEAK command creates this
   }
@@ -127,7 +135,7 @@ public class PeakInfo {
   }
 
   private boolean checkType(String type) {
-    return (type != null && type.endsWith(this.type));
+    return (type.endsWith(this.type));
   }
 
   public boolean checkTypeMatch(PeakInfo pi) {
@@ -150,7 +158,7 @@ public class PeakInfo {
    * @return
    */
   public boolean autoSelectOnLoad() {
-    return (type.equalsIgnoreCase("GC"));
+    return (type.startsWith("GC"));
   }
 
 }

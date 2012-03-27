@@ -93,7 +93,6 @@ import jspecview.common.ScriptToken;
 import jspecview.common.Coordinate;
 import jspecview.common.Annotation;
 import jspecview.common.JDXSpectrum;
-import jspecview.common.PeakInfo;
 import jspecview.common.SubSpecChangeEvent;
 import jspecview.common.ZoomEvent;
 import jspecview.exception.JSpecViewException;
@@ -419,11 +418,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
     }
   }
 
-  private String lastScript;
   public void syncScript(String peakScript) {
-    if (peakScript.indexOf("atoms=\"") < 0 && peakScript.equals(lastScript))
-      return; // don't cycle to same model again
-    lastScript = peakScript;
     JSViewer.syncScript(this, peakScript);
   }
 
@@ -675,18 +670,14 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
     if (jsvp == prevPanel)
       return;
     prevPanel = jsvp;
-    PeakInfo pi = jsvp.getSpectrum().getSelectedPeak();
-    if (pi == null)
-      pi = PeakInfo.nullPeakInfo;
-    getSelectedPanel().getPanelData().addPeakHighlight(pi);
-    sendScript("sendFrameChange " + jsvp + "  " + pi.toString());
+    JSViewer.sendFrameChange(this, jsvp);
   }
 
   private long msTrigger = -1;
 
-  private JSVPanel getCurrentPanel() {
-    return (JSVPanel) appletPanel.getComponent(0);
-  }
+//  private JSVPanel getCurrentPanel() {
+//    return (JSVPanel) appletPanel.getComponent(0);
+//  }
 
   private void addPanelToFrame() {
     if (offWindowFrame == null || offWindowFrame.getComponentCount() == 0) {
@@ -1135,18 +1126,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
   
 
   /**
-   *  call when a peak is clicked.
-   * 
-   * @param peak
-   */
-  public void sendScript(String peak) {
-    if (syncCallbackFunctionName == null)
-      return;
-    peak = Escape.jmolSelect(peak);
-    syncToJmol(peak);
-  }
-
-  /**
    * fires peakCallback ONLY if there is a peak found
    * fires coordCallback ONLY if there is no peak found or no peakCallback active
    * 
@@ -1255,7 +1234,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
    * 
    */
   public void execIntegrate(String value) {
-    JSVPanel jsvp = getCurrentPanel();
+    JSVPanel jsvp = getSelectedPanel();//getCurrentPanel();
     JSVPanel jsvpNew = (JSVPanel)PanelData.checkIntegral(jsvp,
         parameters, value);
     if (jsvp == jsvpNew) {
@@ -1287,7 +1266,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
     if (msTrigger > 0 && time - msTrigger < 100)
       return;
     msTrigger = time;
-    JSVPanel jsvp = (JSVPanel) PanelData.taConvert(getCurrentPanel(), comm);
+    JSVPanel jsvp = PanelData.taConvert(getSelectedPanel(), comm);
     if (jsvp == null)
       return;
     initProperties(jsvp, currentSpectrumIndex);
@@ -1412,9 +1391,12 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
   /**
    * @param msg
    */
-  public void syncToJmol(String msg) {
+  public boolean syncToJmol(String msg) {
+    if (syncCallbackFunctionName == null)
+      return false;
     System.out.println("JSV>Jmol " + msg);
-    callToJavaScript(syncCallbackFunctionName, new Object[] { fullName, msg });    
+    callToJavaScript(syncCallbackFunctionName, new Object[] { fullName, msg });
+    return true;
   }
 
   public void setVisible(boolean b) {

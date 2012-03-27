@@ -199,19 +199,22 @@ public class JSViewer {
     String index = Parser.getQuotedAttribute(peakScript, "index");
     if (file == null || index == null)
       return;
-    if (!checkFileAlreadyLoaded(si, file)) {
+    if (si.getSpecNodes().size() == 0 || !checkFileAlreadyLoaded(si, file)) {
       //System.out.println("JSViewer closing all and reopening");
       si.closeAllAndOpenFile(file);
       checkAutoOverlay(si);
     }
     PeakInfo pi = selectPanelByPeak(si, peakScript, si.getSelectedPanel());
     JSVPanel jsvp = si.getSelectedPanel();
-    selectSpectrumInPanel(si, jsvp, peakScript);
+    String type = Parser.getQuotedAttribute(peakScript, "type");
+    String model = Parser.getQuotedAttribute(peakScript, "model");
+    jsvp.getPanelData().selectSpectrum(file, type, model);
+    si.sendFrameChange(jsvp);
     jsvp.getPanelData().addPeakHighlight(pi);
     jsvp.repaint();
     // round trip this so that Jmol highlights all equivalent atoms
     // and appropriately starts or clears vibration
-    si.sendScript("syncScript return trip " + pi.toString());
+    si.syncToJmol(jmolSelect(pi));  
   }
 
   private static boolean checkFileAlreadyLoaded(
@@ -268,15 +271,6 @@ public class JSViewer {
     return pi;
   }
 
-  private static void selectSpectrumInPanel(ScriptInterface si, JSVPanel selectedPanel, 
-                                           String peakScript) {
-    String file = Parser.getQuotedAttribute(peakScript, "file");
-    String type = Parser.getQuotedAttribute(peakScript, "type");
-    String model = Parser.getQuotedAttribute(peakScript, "model");
-    selectedPanel.getPanelData().selectSpectrum(file, type, model);
-    si.sendFrameChange(selectedPanel);
-  }
-
   public static void processPeakPickEvent(ScriptInterface si, Object eventObj,
                                           boolean isApp) {
     PeakInfo pi;
@@ -306,7 +300,7 @@ public class JSViewer {
       pi = e.getPeakInfo();
     }
     si.getSelectedPanel().getPanelData().addPeakHighlight(pi);
-    si.sendScript(" processPeakPickEvent  " + si.getSelectedPanel() + " " + (pi == null ? null : pi.toString()));
+    si.syncToJmol(jmolSelect(pi));  
     if (pi.isClearAll()) // was not in app version??
       si.getSelectedPanel().repaint();
     else
@@ -315,5 +309,30 @@ public class JSViewer {
     si.checkCallbacks(pi.getTitle());
 
   }
+
+  public static void sendFrameChange(ScriptInterface si, JSVPanel jsvp) {
+    PeakInfo pi = jsvp.getSpectrum().getSelectedPeak();
+    if (pi == null)
+      pi = jsvp.getSpectrum().getModelPeakInfoForAutoSelectOnLoad();
+    if (pi == null)
+      pi = PeakInfo.basePeakInfo;
+    si.getSelectedPanel().getPanelData().addPeakHighlight(pi);
+    si.syncToJmol(jmolSelect(pi));  
+  }
+
+  public static String jmolSelect(PeakInfo pi) {
+    String script = null;
+    if (pi == PeakInfo.basePeakInfo) {
+      script = "vibration off; select none;selectionHalos off;model {basemodel}";
+    } else if ("IR".equals(pi.getType()) || "RAMAN".equals(pi.getType())) {
+      script = "vibration ON; selectionHalos OFF;";
+    } else if (pi.getAtoms() != null) {
+      script = "vibration OFF; selectionhalos ON;";
+    } else {
+      script = "vibration OFF; selectionhalos OFF;";
+    }
+    return "Select: " + pi + " script=\"" + script;
+  }
+
 
 }

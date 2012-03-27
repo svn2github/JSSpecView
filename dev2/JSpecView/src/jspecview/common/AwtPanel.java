@@ -368,12 +368,11 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
    */
   public void drawTitle(Object og, int height, int width, String title) {
     Graphics g = (Graphics) og;
-    pd.setFont(g, width, pd.isPrinting || pd.titleBoldOn ? Font.BOLD : Font.PLAIN, 14,
-        true);
+    pd.setFont(g, width, pd.isPrinting || pd.titleBoldOn ? Font.BOLD
+        : Font.PLAIN, 14, true);
     FontMetrics fm = g.getFontMetrics();
     g.setColor(titleColor);
-    g.drawString(title, 5, (int) (height - fm
-        .getHeight() / 2));
+    g.drawString(title, 5, (int) (height - fm.getHeight() / 2));
   }
 
   /**

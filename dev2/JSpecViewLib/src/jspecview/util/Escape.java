@@ -33,20 +33,6 @@ public class Escape {
 
   private final static String escapable = "\\\\\tt\rr\nn\"\""; 
 
-  public static String jmolSelect(String peak) {
-    String script;
-    if (peak == null) {
-      script = "vibration off; select none;selectionHalos off;";
-    } else if (peak.indexOf("\"IR\"") >= 0 || peak.indexOf("\"RAMAN\"") >= 0) {
-      script = "vibration ON; selectionHalos OFF;";
-    } else if (peak.indexOf("atoms=") >= 0) {
-      script = "vibration OFF; selectionhalos ON;";
-    } else {
-      script = "vibration OFF; selectionhalos OFF;";
-    }
-    return "Select: " + peak + " script=\"" + script;// + ";center visible;zoom {visible} 0; zoom * 0.90;zoom\"";
-  }
-
   public static String escape(String str) {
     if (str == null)
       return "\"\"";

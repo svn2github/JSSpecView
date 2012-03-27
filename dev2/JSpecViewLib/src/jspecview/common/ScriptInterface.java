@@ -32,10 +32,9 @@ public interface ScriptInterface {
   public void sendFrameChange(JSVPanel jsvp);
   public JSVPanel setSpectrumIndex(int i);
   public String setSolutionColor(boolean b);
-  public void syncToJmol(String value);
+  public boolean syncToJmol(String value);
   public JSVDialog getOverlayLegend(JSVPanel jsvp);
   public void setSelectedPanel(JSVPanel jsvp);
-  public void sendScript(String peakScript);
   public void closeAllAndOpenFile(String fileName);
   public void setFrame(JSVSpecNode findNode);
   public void showProperties();

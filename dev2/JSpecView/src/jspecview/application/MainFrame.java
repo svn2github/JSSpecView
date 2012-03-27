@@ -117,14 +117,12 @@ import jspecview.common.PrintLayoutDialog;
 import jspecview.common.ScriptInterface;
 import jspecview.common.ScriptToken;
 import jspecview.common.JDXSpectrum;
-import jspecview.common.PeakInfo;
 import jspecview.common.SubSpecChangeEvent;
 import jspecview.common.ZoomEvent;
 import jspecview.exception.ScalesIncompatibleException;
 import jspecview.export.Exporter;
 import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
-import jspecview.util.Escape;
 import jspecview.util.FileManager;
 import jspecview.util.Logger;
 import jspecview.util.Parser;
@@ -1104,14 +1102,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   }
 
   public void sendFrameChange(JSVPanel jsvp) {
-    if (jsvp.getPanelData().getNumberOfGraphSets() == 1)
-      return;
-    PeakInfo pi = jsvp.getSpectrum().getSelectedPeak();
-    if (pi == null)
-      pi = jsvp.getSpectrum().getModelPeakInfo();
-    getSelectedPanel().getPanelData().addPeakHighlight(
-        pi == null ? PeakInfo.nullPeakInfo : pi);
-    sendScript("mainframe sendFrameChange " + (pi == null ? null : pi.toString()));
+    JSViewer.sendFrameChange(this, jsvp);
   }
 
   ////////// MENU ACTIONS ///////////
@@ -1326,28 +1317,18 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     isEmbedded = true;
   }
 
-  /**
-   * outgoing method for return messages to Jmol
-   * 
-   * @param peak
-   */
-  public void sendScript(String peak) {
-    syncToJmol(Escape.jmolSelect(peak));
-  }
-
-  public void syncToJmol(String msg) {
+  public boolean syncToJmol(String msg) {
     System.out.println("JSV>Jmol " + msg);
-    if (jmol != null) // MainFrame --> embedding application
+    if (jmol != null) { // MainFrame --> embedding application
       jmol.syncScript(msg);
-    else if (jmolOrAdvancedApplet != null) // MainFrame --> embedding applet
-      jmolOrAdvancedApplet.syncToJmol(msg);
+      return true;
+    }
+    if (jmolOrAdvancedApplet != null) // MainFrame --> embedding applet
+      return jmolOrAdvancedApplet.syncToJmol(msg);
+    return false;
   }
 
-  private String lastScript;
   public void syncScript(String peakScript) {
-    if (peakScript.indexOf("atoms=\"") < 0 && peakScript.equals(lastScript))
-      return; // don't cycle to same model again
-    lastScript = peakScript;
     JSViewer.syncScript(this, peakScript);
   }
 

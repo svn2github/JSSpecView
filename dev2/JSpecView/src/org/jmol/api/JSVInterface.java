@@ -8,6 +8,6 @@ public interface JSVInterface {
   public void runScript(String script);
   public void saveProperties(Properties properties);
   public void setProperties(Properties properties);  
-  public void syncToJmol(String msg);
+  public boolean syncToJmol(String msg);
   
 }
