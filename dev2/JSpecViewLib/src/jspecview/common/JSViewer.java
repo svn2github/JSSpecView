@@ -238,7 +238,7 @@ public class JSViewer {
       return;
     if (si.getSpecNodes().size() == 0 || !checkFileAlreadyLoaded(si, file)) {
       //System.out.println("JSViewer closing all and reopening");
-      si.closeAllAndOpenFile(file);
+      si.syncLoad(file);
     }
     PeakInfo pi = selectPanelByPeak(si, peakScript, si.getSelectedPanel());
     JSVPanel jsvp = si.getSelectedPanel();

@@ -35,7 +35,7 @@ public interface ScriptInterface {
   public boolean syncToJmol(String value);
   public JSVDialog getOverlayLegend(JSVPanel jsvp);
   public void setSelectedPanel(JSVPanel jsvp);
-  public void closeAllAndOpenFile(String fileName);
+  public void syncLoad(String fileName);
   public void setFrame(JSVSpecNode findNode);
   public void showProperties();
   public void setBoolean(ScriptToken st, boolean TF);

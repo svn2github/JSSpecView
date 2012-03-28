@@ -619,7 +619,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
    * @param tmpFilePath
    *        String
    */
-  public void closeAllAndOpenFile(String filePath) {
+  public void syncLoad(String filePath) {
     newAppletPanel();
     openDataOrFile(null, null, null, filePath);
     jsvApplet.getContentPane().validate();
