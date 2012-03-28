@@ -102,7 +102,7 @@ public class JSVAppletPro extends JSVApplet {
 
   public void doAdvanced(String filePath) {
     if (mainFrame == null) {
-      mainFrame = new MainFrame((JSVAppletPrivatePro) appletPrivate);
+      mainFrame = new MainFrame(null, (JSVAppletPrivatePro) appletPrivate);
     }
     mainFrame.setVisible(true);
     if (appletPrivate0 == null)

@@ -41,7 +41,9 @@
 package jspecview.application;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -219,8 +221,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   private JLabel statusLabel = new JLabel();
   private JTextField commandInput = new JTextField();
   
-  private BorderLayout borderLayout1 = new BorderLayout();
-
   private JFileChooser fc;
 
   private JSVInterface jmolOrAdvancedApplet;
@@ -229,54 +229,52 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   private ImageIcon frameIcon;
   private CommandHistory commandHistory;
   private boolean svgForInkscape;
-
+  private Component jmolDisplay;
+  private Dimension jmolDimensionOld;
+  private Container jmolFrame;
+  private Dimension jmolDimensionNew = new Dimension(250, 200);
 
   /**
    * Constructor
    * 
    * @param jmolOrAdvancedApplet
    */
-  public MainFrame(JSVInterface jmolOrAdvancedApplet) {
-
+  public MainFrame(Component jmolDisplay, JSVInterface jmolOrAdvancedApplet) {
+    this.jmolDisplay = jmolDisplay;
     this.jmolOrAdvancedApplet = jmolOrAdvancedApplet;
     advancedApplet = (jmolOrAdvancedApplet instanceof JSVAppletPrivatePro ? (JSVAppletPrivatePro) jmolOrAdvancedApplet : null);
+
     onProgramStart();
 
-    // initialise MainFrame as a target for the drag-and-drop action
-    new DropTarget(this, getDropListener());
-
-    getIcons();
-    // initialise Spectra tree
-    initSpectraTree();
-
-    // Initialise GUI Components
-    try {
-      jbInit();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-    setApplicationElements();
-    setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-
-    // When application exits ...
-    addWindowListener(new WindowAdapter() {
-      @Override
-      public void windowClosing(WindowEvent we) {
-        windowClosing_actionPerformed();
-      }
-    });
-    setSize(800, 500);
   }
 
   void exitJSpecView(boolean withDialog) {
     jmolOrAdvancedApplet.saveProperties(properties);
     if (isEmbedded) {
-      setVisible(false);
+      awaken(false);
       return;
     }
     dsp.getDisplaySchemes().remove("Current");
     jmolOrAdvancedApplet.exitJSpecView(withDialog && showExitDialog, this);
+  }
+
+  public void awaken(boolean visible) {
+    if (jmolDisplay == null)
+      return;
+    if (visible) {
+      jmolDimensionOld = new Dimension();
+      jmolFrame = jmolDisplay.getParent();
+      jmolDisplay.getSize(jmolDimensionOld);
+      jmolDisplay.setSize(jmolDimensionNew);
+      sideSplitPane.validate();
+      jmolFrame.invalidate();
+    } else {
+      jmolFrame.add(jmolDisplay);
+      jmolDisplay.getSize(jmolDimensionNew);
+      jmolDisplay.setSize(jmolDimensionOld);
+      jmolFrame.validate();
+    }
+    setVisible(visible);
   }
 
   private void getIcons() {
@@ -299,8 +297,21 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
    */
   private void onProgramStart() {
 
-    //boolean loadedOk;
-    //Set Default Properties
+
+    
+    // initialise MainFrame as a target for the drag-and-drop action
+    new DropTarget(this, getDropListener());
+
+    getIcons();
+//    // initialise Spectra tree
+//    initSpectraTree();
+//
+//    // Initialise GUI Components
+    try {
+      //jbInit();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
 
     // Initalize application properties with defaults
     // and load properties from file
@@ -363,6 +374,28 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     filter.addExtension("dx");
     filter.setDescription("JCAMP-DX Files");
     fc.setFileFilter(filter);
+    
+    // initialise Spectra tree
+    initSpectraTree();
+
+    // Initialise GUI Components
+    try {
+      jbInit();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    setApplicationElements();
+    setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+
+    // When application exits ...
+    addWindowListener(new WindowAdapter() {
+      @Override
+      public void windowClosing(WindowEvent we) {
+        windowClosing_actionPerformed();
+      }
+    });
+    setSize(800, 500);
 
   }
 
@@ -496,10 +529,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
     });
     new DropTarget(spectraTree, getDropListener());
-    spectraTreePane = new JScrollPane(spectraTree);
-    if (mainSplitPane != null)
-      mainSplitPane.setLeftComponent(spectraTreePane);
-
   }
 
   private DropTargetListener getDropListener() {
@@ -515,7 +544,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
    */
   private void jbInit() throws Exception {
     toolBar = new AppToolBar(this);
-    appMenu = new AppMenu(this, jsvpPopupMenu);  
+    appMenu = new AppMenu(this, jsvpPopupMenu);
     appMenu.setRecentMenu(recentFilePaths);
     setIconImage(iconImage);
     setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -528,11 +557,12 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     statusLabel.setHorizontalTextPosition(SwingConstants.LEADING);
     statusLabel.setText("  ");
     statusPanel.setBorder(BorderFactory.createEtchedBorder());
-    statusPanel.setLayout(borderLayout1);
+    BorderLayout bl = new BorderLayout();
+    bl.setHgap(2);
+    bl.setVgap(2);
+    statusPanel.setLayout(bl);
     mainSplitPane.setOneTouchExpandable(true);
-    borderLayout1.setHgap(2);
-    borderLayout1.setVgap(2);
-
+    mainSplitPane.setResizeWeight(0.3);
     getContentPane().add(statusPanel, BorderLayout.SOUTH);
     statusPanel.add(statusLabel, BorderLayout.NORTH);
     statusPanel.add(commandInput, BorderLayout.SOUTH);
@@ -558,13 +588,28 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
     getContentPane().add(toolBar, BorderLayout.NORTH);
     getContentPane().add(mainSplitPane, BorderLayout.CENTER);
-    mainSplitPane.setLeftComponent(spectraTreePane);
-    //sideSplitPane.setDividerLocation(350);
-    mainSplitPane.setDividerLocation(200);
+
+    spectraTreePane = new JScrollPane(spectraTree);
+    if (jmolDisplay != null) {
+      JSplitPane leftPanel = new JSplitPane();
+      BorderLayout bl1 = new BorderLayout();
+      leftPanel.setLayout(bl1);
+      JPanel jmolDisplayPanel = new JPanel();
+      jmolDisplayPanel.setBackground(Color.blue);
+      leftPanel.add(jmolDisplayPanel, BorderLayout.SOUTH);
+      leftPanel.add(spectraTreePane, BorderLayout.NORTH);
+      sideSplitPane.setTopComponent(spectraTreePane);
+      sideSplitPane.setBottomComponent(jmolDisplay);
+      sideSplitPane.setDividerLocation(200);
+      sideSplitPane.setResizeWeight(0.6);
+      awaken(true);
+      mainSplitPane.setLeftComponent(sideSplitPane);
+    } else {
+      mainSplitPane.setLeftComponent(spectraTreePane);
+    }
+    //mainSplitPane.setDividerLocation(200);
     scrollPane.getViewport().add(desktopPane);
     mainSplitPane.setRightComponent(scrollPane);
-    //sideSplitPane.setTopComponent(spectraTreePane);
-    //sideSplitPane.setBottomComponent(errorTree);
 
   }
 
@@ -987,8 +1032,8 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   }
 
   private void setMenuEnables(JSVSpecNode node) {
-    appMenu.setMenuEnables(node);
-    toolBar.setMenuEnables(node);
+      appMenu.setMenuEnables(node);
+      toolBar.setMenuEnables(node);
   }
 
   public JSVPanel getSelectedPanel() {
