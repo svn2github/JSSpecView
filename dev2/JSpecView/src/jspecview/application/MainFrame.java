@@ -261,6 +261,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   public void awaken(boolean visible) {
     if (jmolDisplay == null)
       return;
+    try {
     if (visible) {
       jmolDimensionOld = new Dimension();
       jmolFrame = jmolDisplay.getParent();
@@ -273,6 +274,10 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
       jmolDisplay.getSize(jmolDimensionNew);
       jmolDisplay.setSize(jmolDimensionOld);
       jmolFrame.validate();
+    }
+    } catch(Exception e) {
+      // ignore
+      e.printStackTrace();
     }
     setVisible(visible);
   }
@@ -678,21 +683,23 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
    * @param fileOrURL
    */
   public void openFile(String fileOrURL, int firstSpec, int lastSpec) {
-    openDataOrFile(null, null, null, fileOrURL, firstSpec, lastSpec, false);
+    openDataOrFile(null, null, null, fileOrURL, firstSpec, lastSpec);
   }
 
   private int nOverlay;
 
 
   private int openDataOrFile(String data, String name, List<JDXSpectrum> specs,
-                             String url, int firstSpec, int lastSpec, boolean isOverlay) {
+                             String url, int firstSpec, int lastSpec) {
     // name could be "NONE" here from overlay
     writeStatus("");
     String filePath = null;
     String fileName = null;
     File file = null;
+    boolean isOverlay = false;
     if (data != null) {
     } else if (specs != null) {
+      isOverlay = true;
       fileName = filePath = "Overlay" + (++nOverlay);
     } else if (url != null) {
       try {
@@ -1375,7 +1382,11 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
   public void syncLoad(String filePath) {
     closeSource(null);
-    openDataOrFile(null, null, null, filePath, -1, -1, true);
+    openDataOrFile(null, null, null, filePath, -1, -1);
+    if (currentSource == null)
+      return;
+    if (specNodes.get(0).getSpectrum().isAutoOverlayFromJmolClick())
+      execOverlay("*");
   }
 
   ////////////////////////// script commands from JSViewer /////////////////
@@ -1401,7 +1412,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     String strlist = JSVSpecNode.fillSpecList(specNodes, value, speclist,
         getSelectedPanel(), "1.");
     if (speclist.size() > 1)
-      openDataOrFile(null, strlist, speclist, strlist, -1, -1, true);
+      openDataOrFile(null, strlist, speclist, strlist, -1, -1);
   }
 
   /**
@@ -1553,7 +1564,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   }
 
   public void loadInline(String data) {
-    openDataOrFile(data, null, null, null, -1, -1, false);
+    openDataOrFile(data, null, null, null, -1, -1);
   }
   
   public void setFilePath(String tmpFilePath) {
@@ -1631,7 +1642,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
       if (source != null)
         closeSource(source);
     }
-    openDataOrFile(null, null, null, fileName, -1, -1, false);
+    openDataOrFile(null, null, null, fileName, -1, -1);
   }
 
   public void showProperties() {
@@ -1680,7 +1691,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     if (url == null)
       return;
     recentOpenURL = url;
-    openDataOrFile(null, null, null, url, -1, -1, false);
+    openDataOrFile(null, null, null, url, -1, -1);
   }
 
   public void print() {

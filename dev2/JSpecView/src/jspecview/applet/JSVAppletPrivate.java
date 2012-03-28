@@ -825,7 +825,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
         && (interfaceOverlaid || specs.get(0).isAutoOverlayFromJmolClick()
             && startIndex == endIndex))
       execOverlay("*");
-
   }
 
   /**
