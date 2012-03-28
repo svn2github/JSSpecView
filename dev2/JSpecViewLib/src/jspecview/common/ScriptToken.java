@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Map.Entry;
 
-import jspecview.util.TextFormat;
 
 /**
  * ScriptToken takes care of script command processing
@@ -37,71 +36,33 @@ import jspecview.util.TextFormat;
 public enum ScriptToken {
 
   // null tip means DON'T SHOW
-  UNKNOWN,
-  APPLETID,
-  APPLETREADYCALLBACKFUNCTIONNAME,
-  AUTOINTEGRATE("TF"),
-  BACKGROUNDCOLOR("C"),
-  CLOSE("spectrumId or fileName or ALL"),
-  COMPOUNDMENUON("TF"),
-  COORDCALLBACKFUNCTIONNAME,
-  COORDINATESCOLOR("C"),
-  COORDINATESON("TF"),
-  DEBUG("TF"),
-  DISPLAYFONTNAME("fontName"),
-  DISPLAY1D("TF"),
-  DISPLAY2D("TF"),
-  ENABLEZOOM("TF"),
-  ENDINDEX,
-  EXPORT("[XY,DIF,DIFDUP,PAC,FIX,SQZ,AML,CML,JPG,PNG,SVG,SVGI] \"filename\""), 
-  GETSOLUTIONCOLOR,
-  GRIDCOLOR("C"),
-  GRIDON("TF"),
-  HIDDEN("TF"),
-  INTEGRATE("ON/OFF/?/MARK ppm1-ppm2,ppm3-ppm4,..."),
-  INTEGRALPLOTCOLOR,
-  INTEGRATIONRATIOS,
-  INTERFACE,
-  IRMODE("A or T or ?"),
-  JMOL("...Jmol command..."),
-  LABEL("x y [color and/or \"text\"]"),
-  LOAD("[APPEND] \"fileName\" [first] [last]; use \"\" to reload current file"),
-  MENUON,
-  OBSCURE,
-  OVERLAY("spectrumID[*factor], spectrumID[*factor], ..."),
-  PEAK("<type(IR,CNMR,HNMR,MS, etc)> \"match\" [ALL]"),
-  PEAKCALLBACKFUNCTIONNAME,
-  PLOTAREACOLOR("C"),
-  PLOTCOLOR("C"),
-  PLOTCOLORS("color,color,color,..."),
-  REVERSEPLOT("TF"),
-  SCALECOLOR("C"),
-  SPECTRUM("spectrumID"),
-  SPECTRUMNUMBER,
-  STARTINDEX,
-  SYNCCALLBACKFUNCTIONNAME,
-  SYNCID,
-  TEST,
-  TITLEON("TF"), // default OFF for application, ON for applet
-  TITLEBOLDON("TF"),
-  TITLECOLOR("C"),
-  TITLEFONTNAME("fontName"),
-  UNITSCOLOR("C"),
-  VERSION,
-  XSCALEON("TF"),
-  XUNITSON("TF"),
-  YSCALE("[ALL] lowValue highValue"),
-  YSCALEON("TF"),
-  YUNITSON("TF"),
-  ZOOM("OUT or x1,x2 or x1,y1 x2,y2"), 
-  
+  UNKNOWN, APPLETID, APPLETREADYCALLBACKFUNCTIONNAME, AUTOINTEGRATE("TF"), BACKGROUNDCOLOR(
+      "C"), CLOSE("spectrumId or fileName or ALL"), COMPOUNDMENUON("TF"), COORDCALLBACKFUNCTIONNAME, COORDINATESCOLOR(
+      "C"), COORDINATESON("TF"), DEBUG("TF"), DISPLAYFONTNAME("fontName"), DISPLAY1D(
+      "TF"), DISPLAY2D("TF"), ENABLEZOOM("TF"), ENDINDEX, EXPORT(
+      "[XY,DIF,DIFDUP,PAC,FIX,SQZ,AML,CML,JPG,PNG,SVG,SVGI] \"filename\""), GETSOLUTIONCOLOR, GRIDCOLOR(
+      "C"), GRIDON("TF"), HIDDEN("TF"), INTEGRATE(
+      "ON/OFF/?/MARK ppm1-ppm2,ppm3-ppm4,..."), INTEGRALPLOTCOLOR, INTEGRATIONRATIOS, INTERFACE, IRMODE(
+      "A or T or ?"), JMOL("...Jmol command..."), LABEL(
+      "x y [color and/or \"text\"]"), LOAD(
+      "[APPEND] \"fileName\" [first] [last]; use \"\" to reload current file"), MENUON, OBSCURE, OVERLAY(
+      "spectrumID[*factor], spectrumID[*factor], ..."), PEAK(
+      "<type(IR,CNMR,HNMR,MS, etc)> \"match\" [ALL]"), PEAKCALLBACKFUNCTIONNAME, PLOTAREACOLOR(
+      "C"), PLOTCOLOR("C"), PLOTCOLORS("color,color,color,..."), REVERSEPLOT(
+      "TF"), SCALECOLOR("C"), SPECTRUM("spectrumID"), SPECTRUMNUMBER, STARTINDEX, SYNCCALLBACKFUNCTIONNAME, SYNCID, TEST, TITLEON(
+      "TF"), // default OFF for application, ON for applet
+  TITLEBOLDON("TF"), TITLECOLOR("C"), TITLEFONTNAME("fontName"), UNITSCOLOR("C"), VERSION, XSCALEON(
+      "TF"), XUNITSON("TF"), YSCALE("[ALL] lowValue highValue"), YSCALEON("TF"), YUNITSON(
+      "TF"), ZOOM("OUT or x1,x2 or x1,y1 x2,y2"),
+
   HIGHLIGHTCOLOR("C"), // not implemented 
   ZOOMBOXCOLOR; // not implemented
 
   private String tip;
 
   public String getTip() {
-    return "  " + (tip == "TF" ? "TRUE or FALSE" : tip == "C" ? "<color>" : tip);
+    return "  "
+        + (tip == "TF" ? "TRUE or FALSE" : tip == "C" ? "<color>" : tip);
   }
 
   private ScriptToken() {
@@ -123,7 +84,8 @@ public enum ScriptToken {
     return (st == null ? UNKNOWN : st);
   }
 
-  public static List<ScriptToken> getScriptTokenList(String name, boolean isExact) {
+  public static List<ScriptToken> getScriptTokenList(String name,
+                                                     boolean isExact) {
     name = name.toUpperCase();
     List<ScriptToken> list = new ArrayList<ScriptToken>();
     ScriptToken st = getScriptToken(name);
@@ -131,9 +93,9 @@ public enum ScriptToken {
       if (st != null)
         list.add(st);
     } else {
-      for (Entry<String, ScriptToken> entry: htParams.entrySet())
-         if (entry.getKey().startsWith(name) && entry.getValue().tip != null)
-           list.add(entry.getValue());
+      for (Entry<String, ScriptToken> entry : htParams.entrySet())
+        if (entry.getKey().startsWith(name) && entry.getValue().tip != null)
+          list.add(entry.getValue());
     }
     return list;
   }
@@ -146,12 +108,13 @@ public enum ScriptToken {
    * @param cmd
    * @return
    */
-  public static String getValue(ScriptToken st, StringTokenizer params, String cmd) {
+  public static String getValue(ScriptToken st, StringTokenizer params,
+                                String cmd) {
     if (!params.hasMoreTokens())
       return "";
     switch (st) {
     default:
-      return nextStringToken(params, true);
+      return ScriptCommandTokenizer.nextStringToken(params, true);
     case CLOSE:
     case EXPORT:
     case INTEGRATE:
@@ -166,7 +129,7 @@ public enum ScriptToken {
     case OVERLAY:
     case ZOOM:
       // commas to spaces
-      return removeCommandName(cmd).replace(',',' ').trim();
+      return removeCommandName(cmd).replace(',', ' ').trim();
     }
   }
 
@@ -177,36 +140,31 @@ public enum ScriptToken {
     return cmd.substring(pt).trim();
   }
 
-  public static String nextStringToken(StringTokenizer params, boolean removeQuotes) {
-    String s = params.nextToken();
-    if (s.charAt(0) != '"') 
-      return s;
-    if (s.endsWith("\"") && s.length() > 1)
-      return (removeQuotes ? TextFormat.trimQuotes(s) : s);
-    StringBuffer sb = new StringBuffer(s.substring(1));
-    s = null;
-    while (params.hasMoreTokens() && !(s = params.nextToken()).endsWith("\"")) {
-      sb.append(" ").append(s);
-      s = null;
-    }
-    if (s != null)
-      sb.append(" ").append(s.substring(0, s.length() - 1));
-    s = sb.toString();
-    return (removeQuotes ? s : "\"" + s + "\"");
-  }
-
   public static String getKey(StringTokenizer eachParam) {
     String key = eachParam.nextToken();
+    if (key.startsWith("#") || key.startsWith("//"))
+      return null;
     if (key.equalsIgnoreCase("SET"))
       key = eachParam.nextToken();
     return key.toUpperCase();
   }
 
+  /**
+   * read a string for possibly quoted tokens separated by space until // or #
+   * is reached.
+   * 
+   * @param value
+   * @return list of tokens
+   */
   public static List<String> getTokens(String value) {
-    List<String>tokens = new ArrayList<String>();
+    List<String> tokens = new ArrayList<String>();
     StringTokenizer st = new StringTokenizer(value);
-    while (st.hasMoreElements())
-      tokens.add(nextStringToken(st, false));
+    while (st.hasMoreElements()) {
+      String s = ScriptCommandTokenizer.nextStringToken(st, false);
+      if (s.startsWith("//") || s.startsWith("#"))
+        break;
+      tokens.add(s);
+    }
     return tokens;
   }
 

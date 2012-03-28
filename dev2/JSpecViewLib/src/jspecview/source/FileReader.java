@@ -545,21 +545,11 @@ public class FileReader {
       while ((line = reader.readLine()) != null
           && !(line = line.trim()).startsWith("</Peaks>")) {
         if (line.startsWith("<PeakData")) {
-          peak = new PeakInfo("<PeakData file=" + path + " index=\""
-              + (++index) + "\" type=\"" + type + "\" "
-              + line.substring(9).trim());
-          double xMax = Double.parseDouble(Parser.getQuotedAttribute(line,
-              "xMax"));
-          double xMin = Double.parseDouble(Parser.getQuotedAttribute(line,
-              "xMin"));
-          double yMax = Double.parseDouble(Parser.getQuotedAttribute(line,
-              "yMax"));
-          double yMin = Double.parseDouble(Parser.getQuotedAttribute(line,
-              "yMin"));
-          peak.setXMax(xMax);
-          peak.setXMin(xMin);
-          peak.setYMax(yMax);
-          peak.setYMin(yMin);
+          String stringInfo = "<PeakData file=" + path + " index=\""
+          + (++index) + "\" type=\"" + type + "\" "
+          + line.substring(9).trim();
+          Logger.info("JSpecView found " + stringInfo);
+          peak = new PeakInfo(stringInfo);
           peakData.add(peak);
         }
       }

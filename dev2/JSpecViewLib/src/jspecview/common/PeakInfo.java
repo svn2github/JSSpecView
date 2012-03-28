@@ -23,8 +23,30 @@ public class PeakInfo {
   public PeakInfo() {
   }
 
-  public PeakInfo(String peak) {
-    setStringInfo(peak);
+  public PeakInfo(String s) {
+    stringInfo = s;
+    type = Parser.getQuotedAttribute(s, "type");
+    if (type == null)
+      type = "";
+    type = type.toUpperCase();
+    int pt = type.indexOf('/');
+    type2 = (pt < 0 ? "" : fixType(type.substring(type.indexOf('/') + 1)));
+    if (pt >= 0)
+      type = fixType(type.substring(0, pt)) + "/" + type2;
+    else
+      type = fixType(type);
+    index = Parser.getQuotedAttribute(s, "index");
+    file = Parser.getQuotedAttribute(s, "file");
+    model = Parser.getQuotedAttribute(s, "model");
+    boolean isBaseModel = s.contains("baseModel=\"\"");
+    if (!isBaseModel)
+      atoms = Parser.getQuotedAttribute(s, "atoms");
+    title = Parser.getQuotedAttribute(s, "title");
+    _match = Parser.getQuotedAttribute(s, "_match"); // PEAK command creates this
+    xMax = Parser.parseFloat(Parser.getQuotedAttribute(s, "xMax"));
+    xMin = Parser.parseFloat(Parser.getQuotedAttribute(s, "xMin"));
+    yMax = Parser.parseFloat(Parser.getQuotedAttribute(s, "yMax"));
+    yMin = Parser.parseFloat(Parser.getQuotedAttribute(s, "yMin"));
   }
 
   public boolean isClearAll() {
@@ -39,32 +61,16 @@ public class PeakInfo {
     return atoms;
   }
 
-  public void setXMax(double xMax) {
-    this.xMax = xMax;
-  }
-
   public double getXMax() {
     return xMax;
-  }
-
-  public void setXMin(double xMin) {
-    this.xMin = xMin;
   }
 
   public double getXMin() {
     return xMin;
   }
 
-  public void setYMin(double yMin) {
-    this.yMin = yMin;
-  }
-
   public double getYMin() {
     return yMin;
-  }
-
-  public void setYMax(double yMax) {
-    this.yMax = yMax;
   }
 
   public double getYMax() {
@@ -79,31 +85,6 @@ public class PeakInfo {
     return _match;
   }
   
-  public void setStringInfo(String stringInfo) {
-    this.stringInfo = stringInfo;
-    if (stringInfo == null)
-      return;
-    //Logger.info("JSpecView found " + stringInfo);
-    type = Parser.getQuotedAttribute(stringInfo, "type");
-    if (type == null)
-      type = "";
-    type = type.toUpperCase();
-    int pt = type.indexOf('/');
-    type2 = (pt < 0 ? "" : fixType(type.substring(type.indexOf('/') + 1)));
-    if (pt >= 0)
-      type = fixType(type.substring(0, pt)) + "/" + type2;
-    else
-      type = fixType(type);
-    index = Parser.getQuotedAttribute(stringInfo, "index");
-    file = Parser.getQuotedAttribute(stringInfo, "file");
-    model = Parser.getQuotedAttribute(stringInfo, "model");
-    boolean isBaseModel = stringInfo.contains("baseModel=\"\"");
-    if (!isBaseModel)
-      atoms = Parser.getQuotedAttribute(stringInfo, "atoms");
-    title = Parser.getQuotedAttribute(stringInfo, "title");
-    _match = Parser.getQuotedAttribute(stringInfo, "_match"); // PEAK command creates this
-  }
-
   private static String fixType(String type) {
     return (type.equals("HNMR") ? "1HNMR" : type.equals("CNMR") ? "13CNMR"
         : type);

@@ -11,22 +11,32 @@ import jspecview.util.Logger;
 import jspecview.util.Parser;
 import jspecview.util.TextFormat;
 
+/**
+ * This static class encapsulates all general functionality of applet and app.
+ * Most methods include ScriptInterface parameter, which will be
+ * JSVAppletPrivate, JSVAppletPrivatePro, or MainFrame.
+ * 
+ * @author Bob Hanson hansonr@stolaf.edu
+ * 
+ */
 public class JSViewer {
 
-  public static boolean runScriptNow(ScriptInterface si, JSVPanel jsvp,
-                                     String script) {
+  public static boolean runScriptNow(ScriptInterface si, String script) {
     if (script == null)
       script = "";
     String msg = null;
     script = script.trim();
     if (Logger.debugging)
       Logger.info("RUNSCRIPT " + script);
-    StringTokenizer allParamTokens = new StringTokenizer(script, ";");
-    while (allParamTokens.hasMoreTokens()) {
-      String token = allParamTokens.nextToken().trim();
+    ScriptCommandTokenizer commandTokens = new ScriptCommandTokenizer(script, ";\n");
+    JSVPanel jsvp = si.getSelectedPanel();
+    while (commandTokens.hasMoreTokens()) {
+      String token = commandTokens.nextToken();
       // now split the key/value pair
       StringTokenizer eachParam = new StringTokenizer(token);
       String key = ScriptToken.getKey(eachParam);
+      if (key == null)
+        continue;
       ScriptToken st = ScriptToken.getScriptToken(key);
       String value = ScriptToken.getValue(st, eachParam, token);
       ////System.out.println("KEY-> " + key + " VALUE-> " + value + " : " + st);
@@ -93,12 +103,12 @@ public class JSViewer {
           break;
         case PEAK:
           try {
-          List<String> tokens = ScriptToken.getTokens(value);
-          value = " type=\"" + tokens.get(0).toUpperCase() 
-          + "\" _match=\"" + TextFormat.trimQuotes(tokens.get(1).toUpperCase()) + "\"";
-          if (tokens.size() > 2 && tokens.get(2).equalsIgnoreCase("all"))
-            value += " title=\"ALL\"";
-          processPeakPickEvent(si, new PeakInfo(value), false); // false == true here
+            List<String> tokens = ScriptToken.getTokens(value);
+            value = " type=\"" + tokens.get(0).toUpperCase() + "\" _match=\""
+                + TextFormat.trimQuotes(tokens.get(1).toUpperCase()) + "\"";
+            if (tokens.size() > 2 && tokens.get(2).equalsIgnoreCase("all"))
+              value += " title=\"ALL\"";
+            processPeakPickEvent(si, new PeakInfo(value), false); // false == true here
           } catch (Exception e) {
             // ignore
           }
@@ -126,8 +136,8 @@ public class JSViewer {
 
   private static void execTAConvert(ScriptInterface si, String value) {
     int mode = (value.toUpperCase().startsWith("T") ? JDXSpectrum.TO_TRANS
-              : value.toUpperCase().startsWith("A") ? JDXSpectrum.TO_ABS
-                  : JDXSpectrum.IMPLIED);
+        : value.toUpperCase().startsWith("A") ? JDXSpectrum.TO_ABS
+            : JDXSpectrum.IMPLIED);
     JSVPanel jsvp = si.getSelectedPanel();
     if (jsvp == null)
       return;
@@ -150,37 +160,36 @@ public class JSViewer {
     jsvp.repaint();
   }
 
-  private static void setYScale(String value, 
-                                List<JSVSpecNode> specNodes, 
+  private static void setYScale(String value, List<JSVSpecNode> specNodes,
                                 JSVPanel jsvp, JDXSource currentSource) {
-     if (jsvp == null)
-       return;
-     List<String> tokens = ScriptToken.getTokens(value);
-     int pt = 0;
-     boolean isAll = false;
-     if (tokens.size() > 1 && tokens.get(0).equalsIgnoreCase("ALL")) {
-       isAll = true;
-       pt++;
-     }
-     double y1 = Double.parseDouble(tokens.get(pt++));
-     double y2 = Double.parseDouble(tokens.get(pt));
-     if (isAll) {
-       JDXSpectrum spec = jsvp.getSpectrum();
-       for (int i = specNodes.size(); --i >= 0;) {
-         JSVSpecNode node = specNodes.get(i);
-         if (node.source != currentSource)
-           continue;
-         if (JDXSpectrum.areScalesCompatible(spec, node.getSpectrum(),
-             false))
-           node.jsvp.getPanelData().setZoom(Double.NaN, y1, Double.NaN, y2);
-       }
-     } else {
-       jsvp.getPanelData().setZoom(Double.NaN, y1, Double.NaN, y2);
-     }
-   }
+    if (jsvp == null)
+      return;
+    List<String> tokens = ScriptToken.getTokens(value);
+    int pt = 0;
+    boolean isAll = false;
+    if (tokens.size() > 1 && tokens.get(0).equalsIgnoreCase("ALL")) {
+      isAll = true;
+      pt++;
+    }
+    double y1 = Double.parseDouble(tokens.get(pt++));
+    double y2 = Double.parseDouble(tokens.get(pt));
+    if (isAll) {
+      JDXSpectrum spec = jsvp.getSpectrum();
+      for (int i = specNodes.size(); --i >= 0;) {
+        JSVSpecNode node = specNodes.get(i);
+        if (node.source != currentSource)
+          continue;
+        if (JDXSpectrum.areScalesCompatible(spec, node.getSpectrum(), false))
+          node.jsvp.getPanelData().setZoom(Double.NaN, y1, Double.NaN, y2);
+      }
+    } else {
+      jsvp.getPanelData().setZoom(Double.NaN, y1, Double.NaN, y2);
+    }
+  }
 
   public static void setOverlayLegendVisibility(ScriptInterface si,
-                                                JSVPanel jsvp, boolean showLegend) {
+                                                JSVPanel jsvp,
+                                                boolean showLegend) {
     List<JSVSpecNode> specNodes = si.getSpecNodes();
     JSVSpecNode node = JSVSpecNode.findNode(jsvp, specNodes);
     for (int i = specNodes.size(); --i >= 0;)
@@ -201,11 +210,10 @@ public class JSViewer {
       legend.setVisible(visible);
   }
 
-
   /// from JavaScript
-  
-  public static void addHighLight(ScriptInterface si, double x1,
-                                  double x2, int r, int g, int b, int a) {
+
+  public static void addHighLight(ScriptInterface si, double x1, double x2,
+                                  int r, int g, int b, int a) {
     JSVPanel jsvp = si.getSelectedPanel();
     if (jsvp != null) {
       jsvp.getPanelData().addHighlight(x1, x2, r, g, b, a);
@@ -221,7 +229,7 @@ public class JSViewer {
   public static void syncScript(ScriptInterface si, String peakScript) {
     System.out.println("Jmol>JSV " + peakScript);
     if (peakScript.indexOf("<PeakData") < 0) {
-      runScriptNow(si, si.getSelectedPanel(), peakScript);
+      runScriptNow(si, peakScript);
       return;
     }
     String file = Parser.getQuotedAttribute(peakScript, "file");
@@ -242,12 +250,11 @@ public class JSViewer {
     jsvp.repaint();
     // round trip this so that Jmol highlights all equivalent atoms
     // and appropriately starts or clears vibration
-    si.syncToJmol(jmolSelect(pi));  
+    si.syncToJmol(jmolSelect(pi));
   }
 
-  private static boolean checkFileAlreadyLoaded(
-                                                        ScriptInterface si,
-                                                        String fileName) {
+  private static boolean checkFileAlreadyLoaded(ScriptInterface si,
+                                                String fileName) {
     if (si.getSelectedPanel().getPanelData().hasFileLoaded(fileName))
       return true;
     List<JSVSpecNode> specNodes = si.getSpecNodes();
@@ -260,8 +267,8 @@ public class JSViewer {
     return false;
   }
 
-  private static PeakInfo selectPanelByPeak(ScriptInterface si, String peakScript,
-                                           JSVPanel jsvp) {
+  private static PeakInfo selectPanelByPeak(ScriptInterface si,
+                                            String peakScript, JSVPanel jsvp) {
     List<JSVSpecNode> specNodes = si.getSpecNodes();
     if (specNodes == null)
       return null;
@@ -269,22 +276,22 @@ public class JSViewer {
     String file = Parser.getQuotedAttribute(peakScript, "file");
     String index = Parser.getQuotedAttribute(peakScript, "index");
     PeakInfo pi = null;
-    for (int i = specNodes.size(); --i >= 0;) 
+    for (int i = specNodes.size(); --i >= 0;)
       specNodes.get(i).jsvp.getPanelData().addPeakHighlight(null);
     //System.out.println("JSViewer selected panelspec=" + jsvp.getSpectrum());
     if ((pi = jsvp.getPanelData().selectPeakByFileIndex(file, index)) != null) {
       //System.out.println("JSViewer found peak in this spectrum -- " + pi);
-      si.setFrame(JSVSpecNode.findNode(jsvp, specNodes)); 
+      si.setFrame(JSVSpecNode.findNode(jsvp, specNodes));
     } else {
       //System.out.println("JSViewer did not find a peak for " + file + " " + index);
       for (int i = specNodes.size(); --i >= 0;) {
         JSVSpecNode node = specNodes.get(i);
         //System.out.println("JSViewer looking at " + node );
         //System.out.println(file + " " + index );
-        
+
         if ((pi = node.jsvp.getPanelData().selectPeakByFileIndex(file, index)) != null) {
           //System.out.println("JSViewer setting spectrum to  " + node);
-          si.setFrame(node); 
+          si.setFrame(node);
           break;
         }
         //System.out.println("hmm");
@@ -293,6 +300,14 @@ public class JSViewer {
     return pi;
   }
 
+  /**
+   * this method is called as a result of the user clicking on a peak
+   * (eventObject instanceof PeakPickEvent) or from PEAK command execution
+   *  
+   * @param si
+   * @param eventObj
+   * @param isApp
+   */
   public static void processPeakPickEvent(ScriptInterface si, Object eventObj,
                                           boolean isApp) {
     PeakInfo pi;
@@ -307,7 +322,8 @@ public class JSViewer {
         List<JSVSpecNode> specNodes = si.getSpecNodes();
         JSVSpecNode node = null;
         for (int i = 0; i < specNodes.size(); i++)
-          if ((pi2 = specNodes.get(i).jsvp.getPanelData().findMatchingPeakInfo(pi)) != null) {
+          if ((pi2 = specNodes.get(i).jsvp.getPanelData().findMatchingPeakInfo(
+              pi)) != null) {
             node = specNodes.get(i);
             break;
           }
@@ -322,7 +338,7 @@ public class JSViewer {
       pi = e.getPeakInfo();
     }
     si.getSelectedPanel().getPanelData().addPeakHighlight(pi);
-    si.syncToJmol(jmolSelect(pi));  
+    si.syncToJmol(jmolSelect(pi));
     if (pi.isClearAll()) // was not in app version??
       si.getSelectedPanel().repaint();
     else
@@ -339,7 +355,7 @@ public class JSViewer {
     if (pi == null)
       pi = jsvp.getSpectrum().getBasePeakInfo();
     si.getSelectedPanel().getPanelData().addPeakHighlight(pi);
-    si.syncToJmol(jmolSelect(pi));  
+    si.syncToJmol(jmolSelect(pi));
   }
 
   public static String jmolSelect(PeakInfo pi) {
@@ -362,8 +378,7 @@ public class JSViewer {
     }
   }
 
-  public static void removeHighlights(ScriptInterface si,
-                                      double x1, double x2) {
+  public static void removeHighlights(ScriptInterface si, double x1, double x2) {
     JSVPanel jsvp = si.getSelectedPanel();
     if (jsvp != null) {
       jsvp.getPanelData().removeHighlight(x1, x2);
@@ -371,11 +386,12 @@ public class JSViewer {
     }
   }
 
-  public static Map<String, Object> getPropertyAsJavaObject(ScriptInterface si, String key) {
+  public static Map<String, Object> getPropertyAsJavaObject(ScriptInterface si,
+                                                            String key) {
     if ("".equals(key))
       key = null;
     List<Map<String, Object>> info = new ArrayList<Map<String, Object>>();
-    List<JSVSpecNode> specNodes = si.getSpecNodes();    
+    List<JSVSpecNode> specNodes = si.getSpecNodes();
     for (int i = 0; i < specNodes.size(); i++) {
       JSVPanel jsvp = specNodes.get(i).jsvp;
       if (jsvp == null)
@@ -390,7 +406,8 @@ public class JSViewer {
   public static String getCoordinate(ScriptInterface si) {
     // important to use getSelectedPanel() here because it may be from MainFrame in PRO
     if (si.getSelectedPanel() != null) {
-      Coordinate coord = si.getSelectedPanel().getPanelData().getClickedCoordinate();
+      Coordinate coord = si.getSelectedPanel().getPanelData()
+          .getClickedCoordinate();
       if (coord != null)
         return coord.getXVal() + " " + coord.getYVal();
     }
