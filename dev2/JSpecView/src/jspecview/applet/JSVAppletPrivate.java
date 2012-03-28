@@ -79,6 +79,7 @@ import jspecview.common.PanelListener;
 import jspecview.common.Parameters;
 import jspecview.common.PeakPickEvent;
 import jspecview.common.PrintLayoutDialog;
+import jspecview.common.ScriptCommandTokenizer;
 import jspecview.common.ScriptInterface;
 import jspecview.common.ScriptToken;
 import jspecview.common.Coordinate;
@@ -651,12 +652,12 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
   private void parseInitScript(String params) {
     if (params == null)
       params = "";
-    StringTokenizer allParamTokens = new StringTokenizer(params, ";");
+    ScriptCommandTokenizer allParamTokens = new ScriptCommandTokenizer(params, ";\n");
     if (Logger.debugging) {
       Logger.info("Running in DEBUG mode");
     }
     while (allParamTokens.hasMoreTokens()) {
-      String token = allParamTokens.nextToken().trim();
+      String token = allParamTokens.nextToken();
       // now split the key/value pair
       StringTokenizer eachParam = new StringTokenizer(token);
       String key = eachParam.nextToken();
@@ -698,7 +699,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
           allowCompoundMenu = Boolean.parseBoolean(value);
           break;
         case INTERFACE:
-          // ignore
           if (value.equalsIgnoreCase("single") || value.equalsIgnoreCase("overlay"))
             interfaceOverlaid = value.equalsIgnoreCase("overlay");
           break;
@@ -850,13 +850,13 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
       try {
         for (int i = 0; i < specs.size(); i++) {
           JDXSpectrum spec = specs.get(i);
-          if (spec.hasIntegral()) {
-            jsvp = AwtPanel.getNewPanel(spec, appletPopupMenu);
-          } else {
+//          if (spec.hasIntegral()) {
+//            jsvp = AwtPanel.getNewPanel(spec, appletPopupMenu);
+//        } else {
             List<JDXSpectrum> list = new ArrayList<JDXSpectrum>();
             list.add(spec);
             jsvp = AwtPanel.getJSVPanel(list, startIndex, endIndex, appletPopupMenu);
-          }
+//          }
           specNodes.add(new JSVSpecNode("" + (i + 1), currentSource.getFilePath(), currentSource, appletPanel, jsvp));
           initProperties(jsvp);
         }
