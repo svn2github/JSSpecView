@@ -485,13 +485,12 @@ abstract class GraphSet {
                         boolean isInteractive, int height, int width,
                         int left, int right, int top, int bottom,
                         boolean isResized) {
-    // TODO Auto-generated method stub
-    
     // for now, at least, we only allow one 2D image
     setPositionForFrame(width, height, left, right, top, bottom);
     JDXSpectrum spec0 = getSpectrumAt(0);
     userYFactor = getSpectrum().getUserYFactor();
     setScaleFactors(multiScaleData);
+    enableZoom = pd.getBoolean(ScriptToken.ENABLEZOOM);
     if (!getSpectrumAt(0).is1D() 
         && pd.getBoolean(ScriptToken.DISPLAY2D) 
         && (isd != null || get2DImage())) {
