@@ -97,7 +97,7 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
 
     appletCompoundMenu = new JMenu();
     appletCompoundMenu.setEnabled(false);
-    appletCompoundMenu.setText("Blocks");
+    appletCompoundMenu.setText("Spectra");
 
     versionMenuItem.setText("<html><h3>" + applet.getJsvApplet().getAppletInfo() + "</h3></html>");
 
