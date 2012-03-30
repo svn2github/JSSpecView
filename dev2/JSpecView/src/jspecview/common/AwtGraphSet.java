@@ -157,7 +157,7 @@ class AwtGraphSet extends GraphSet {
         BufferedImage.TYPE_BYTE_GRAY);
     WritableRaster raster = image2D.getRaster();
     raster.setSamples(0, 0, isd.imageWidth, isd.imageHeight, 0, buffer);
-    setImageWindow(jsvp.pd.display1D);
+    setImageWindow();
     return true;
   }
 

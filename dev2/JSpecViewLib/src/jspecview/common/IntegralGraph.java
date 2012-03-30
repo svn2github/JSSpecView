@@ -227,7 +227,7 @@ public class IntegralGraph implements Graph {
   }
 
   public static int getMode(String value) {
-    return (value.equals("?") ? INTEGRATE_TOGGLE : value
+    return (value.equalsIgnoreCase("TOGGLE") ? INTEGRATE_TOGGLE : value
         .equalsIgnoreCase("OFF") ? INTEGRATE_OFF : value
         .toUpperCase().startsWith("MARK") ? INTEGRATE_MARK
         : INTEGRATE_ON);

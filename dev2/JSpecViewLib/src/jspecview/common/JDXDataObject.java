@@ -434,7 +434,19 @@ public abstract class JDXDataObject extends JDXHeader {
   }
   
   public boolean canIntegrate() {
-    return (continuous && isHNMR() && is1D());
+    return (continuous && (isHNMR() || isGC()) && is1D());
+  }
+
+  public boolean isAutoOverlayFromJmolClick() {
+    return (isGC() || isUVVis());
+  }
+
+  private boolean isGC() {
+    return dataType.startsWith("GC");
+  }
+
+  private boolean isUVVis() {
+    return dataType.startsWith("VIS") || dataType.startsWith("UV");
   }
 
   public boolean canConvertTransAbs() {

@@ -133,7 +133,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     if (peakList != null && peakList.size() > 0)
       for (int i = 0; i < peakList.size(); i++)
         if (peakList.get(i).checkFileIndex(filePath, index)) {
-          System.out.println("selecting peak in " + this + " " + peakList.get(i));
+          //System.out.println("selecting peak in " + this + " " + peakList.get(i));
           return (selectedPeak = peakList.get(i));
         }
     return null;
@@ -602,10 +602,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   @Override
   public String toString() {
     return getTitleLabel();
-  }
-
-  public boolean isAutoOverlayFromJmolClick() {
-    return (dataType.startsWith("GC") || dataType.startsWith("VIS"));
   }
 
   public PeakInfo findMatchingPeakInfo(PeakInfo pi) {

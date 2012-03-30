@@ -182,7 +182,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   public void setColor(ScriptToken st, Object oColor) {
     Color color = (Color) oColor;
     if (color != null)
-      pd.options.put(st.name(), AwtParameters.colorToHexString(color));
+      pd.options.put(st, AwtParameters.colorToHexString(color));
     switch (st) {
     case BACKGROUNDCOLOR:
       setBackground(color);
@@ -284,7 +284,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     return new AwtPanel(spec, jsvpPopupMenu);
   }
 
-  public GraphSet newGraphSet() {
+  public GraphSet getNewGraphSet() {
     return new AwtGraphSet(this);
   }
 
@@ -359,7 +359,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
    */
   public void drawTitle(Object og, int height, int width, String title) {
     Graphics g = (Graphics) og;
-    pd.setFont(g, width, pd.isPrinting || pd.titleBoldOn ? Font.BOLD
+    pd.setFont(g, width, pd.isPrinting || pd.getBoolean(ScriptToken.TITLEBOLDON) ? Font.BOLD
         : Font.PLAIN, 14, true);
     FontMetrics fm = g.getFontMetrics();
     g.setColor(titleColor);
@@ -470,8 +470,8 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 
     // Set Graph Properties
     pd.printingFont = pl.font;
-    pd.printGrid = pl.showGrid;
-    pd.printTitle = pl.showTitle;
+    pd.gridOn = pl.showGrid;
+    pd.titleOn = pl.showTitle;
     pd.printGraphPosition = pl.position;
 
     /* Create a print job */

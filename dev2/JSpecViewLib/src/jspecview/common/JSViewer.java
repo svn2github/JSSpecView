@@ -47,7 +47,7 @@ public class JSViewer {
           break;
         default:
           si.getParameters().set(jsvp, st, value);
-          si.setBoolean(st, Parameters.isTrue(value));
+          si.updateBoolean(st, Parameters.isTrue(value));
           break;
         case PEAKCALLBACKFUNCTIONNAME:
         case SYNCCALLBACKFUNCTIONNAME:
@@ -227,7 +227,7 @@ public class JSViewer {
    */
 
   public static void syncScript(ScriptInterface si, String peakScript) {
-    System.out.println("Jmol>JSV " + peakScript);
+    Logger.info("Jmol>JSV " + peakScript);
     if (peakScript.indexOf("<PeakData") < 0) {
       runScriptNow(si, peakScript);
       return;

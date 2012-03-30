@@ -185,11 +185,9 @@ public class AppMenu extends JMenuBar {
         JSVPanel jsvp = mainFrame.getSelectedPanel();
         if (jsvp == null)
           return;
-        gridCheckBoxMenuItem.setSelected(jsvp.getPanelData().isGridOn());
-        coordsCheckBoxMenuItem.setSelected(jsvp.getPanelData()
-            .isCoordinatesOn());
-        revPlotCheckBoxMenuItem.setSelected(jsvp.getPanelData()
-            .isPlotReversed());
+        gridCheckBoxMenuItem.setSelected(jsvp.getPanelData().getBoolean(ScriptToken.GRIDON));
+        coordsCheckBoxMenuItem.setSelected(jsvp.getPanelData().getBoolean(ScriptToken.COORDINATESON));
+        revPlotCheckBoxMenuItem.setSelected(jsvp.getPanelData().getBoolean(ScriptToken.REVERSEPLOT));
         jsvpPopupMenu.setEnables(mainFrame.getSelectedPanel());
       }
 
@@ -496,11 +494,7 @@ public class AppMenu extends JMenuBar {
       setSourceEnabled(true);
       JDXSpectrum spec = node.jsvp.getSpectrum();
       PanelData pd = node.jsvp.getPanelData();
-      gridCheckBoxMenuItem.setSelected(pd.isGridOn());
-      coordsCheckBoxMenuItem.setSelected(pd.isCoordinatesOn());
-      revPlotCheckBoxMenuItem.setSelected(pd.isPlotReversed());
-      scaleXCheckBoxMenuItem.setSelected(pd.isXScaleOn());
-      scaleYCheckBoxMenuItem.setSelected(pd.isYScaleOn());
+      setCheckBoxes(pd);
       overlayKeyMenuItem.setEnabled(pd.getNumberOfGraphSets() > 1);
       overlayAllMenuItem.setEnabled(!pd.isOverlaid());
       splitMenuItem.setEnabled(pd.isOverlaid());
@@ -616,14 +610,16 @@ public class AppMenu extends JMenuBar {
     sidePanelCheckBoxMenuItem.setSelected(sidePanelOn);
     toolbarCheckBoxMenuItem.setSelected(toolbarOn);
     statusCheckBoxMenuItem.setSelected(statusbarOn);
-    if (jsvp != null) {
-      PanelData pd = jsvp.getPanelData();
-      gridCheckBoxMenuItem.setSelected(pd.isGridOn());
-      coordsCheckBoxMenuItem.setSelected(pd.isCoordinatesOn());
-      revPlotCheckBoxMenuItem.setSelected(pd.isPlotReversed());
-      scaleXCheckBoxMenuItem.setSelected(pd.isXScaleOn());
-      scaleYCheckBoxMenuItem.setSelected(pd.isYScaleOn());
-    }
+    if (jsvp != null)
+      setCheckBoxes(jsvp.getPanelData());
+  }
+
+  private void setCheckBoxes(PanelData pd) {
+    gridCheckBoxMenuItem.setSelected(pd.getBoolean(ScriptToken.GRIDON));
+    coordsCheckBoxMenuItem.setSelected(pd.getBoolean(ScriptToken.COORDINATESON));
+    revPlotCheckBoxMenuItem.setSelected(pd.getBoolean(ScriptToken.REVERSEPLOT));
+    scaleXCheckBoxMenuItem.setSelected(pd.getBoolean(ScriptToken.XSCALEON));
+    scaleYCheckBoxMenuItem.setSelected(pd.getBoolean(ScriptToken.YSCALEON));
   }
 
   public void setRecentMenu(List<String> recentFilePaths) {

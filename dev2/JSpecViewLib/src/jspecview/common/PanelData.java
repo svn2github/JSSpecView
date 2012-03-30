@@ -45,7 +45,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import jspecview.util.Logger;
 import jspecview.util.TextFormat;
 
 /**
@@ -77,7 +76,7 @@ public class PanelData {
   PlotWidget thisWidget;
   Coordinate coordClicked;
   Coordinate[] coordsClicked;
-  Hashtable<String, Object> options = new Hashtable<String, Object>();
+  Hashtable<ScriptToken, Object> options = new Hashtable<ScriptToken, Object>();
 
   public void dispose() {
     owner = null;
@@ -125,25 +124,11 @@ public class PanelData {
     this.title = title;
   }
 
-  //////// settable parameters //////////
-
-  protected boolean coordinatesOn = true;
-  boolean display1D = false; // with 2D
-  boolean display2D = true;
-  protected boolean enableZoom = true;
-  protected boolean gridOn = false;
-  protected boolean titleBoldOn = false;
-  protected boolean titleOn = true;
-  protected boolean xScaleOn = true;
-  protected boolean xUnitsOn = true;
-  protected boolean yScaleOn = true;
-  protected boolean yUnitsOn = true;
-
   public Map<String, Object> getInfo(boolean isSelected, String key) {
     Map<String, Object> info = new Hashtable<String, Object>();
-    Set<Entry<String, Object>> entries = options.entrySet();
-    for (Entry<String, Object> entry : entries)
-      JDXSpectrum.putInfo(key, info, entry.getKey(), entry.getValue());
+    Set<Entry<ScriptToken, Object>> entries = options.entrySet();
+    for (Entry<ScriptToken, Object> entry : entries)
+      JDXSpectrum.putInfo(key, info, entry.getKey().name(), entry.getValue());
     JDXSpectrum.putInfo(key, info, "selected", Boolean.valueOf(isSelected));
     JDXSpectrum.putInfo(key, info, "type", getSpectrumAt(0).getDataType());
     JDXSpectrum.putInfo(key, info, "title", title);
@@ -165,51 +150,29 @@ public class PanelData {
         setBoolean(parameters, entry.getKey());
       return;
     }
-    boolean isTrue = parameters.getBoolean(st);
-    options.put(st.name(), (isTrue ? Boolean.TRUE : Boolean.FALSE));
+    Boolean isTrue = parameters.getBoolean(st);
+    setBoolean(st, isTrue);
+  }
+
+  public void setBoolean(ScriptToken st, Boolean isTrue) {
+    if (st == ScriptToken.REVERSEPLOT) {
+      currentGraphSet.setReversePlot(isTrue);
+      return;
+    }
+    options.put(st, isTrue);
     switch (st) {
-    case COORDINATESON:
-      coordinatesOn = isTrue;
-      break;
     case DISPLAY1D:
-      display1D = isTrue;
-      thisWidth = 0;
-      break;
     case DISPLAY2D:
-      display2D = isTrue;
       thisWidth = 0;
-      break;
-    case ENABLEZOOM:
-      enableZoom = isTrue;
-      break;
-    case GRIDON:
-      gridOn = isTrue;
-      break;
-    case REVERSEPLOT:
-      setReversePlot(isTrue);
-      break;
-    case TITLEBOLDON:
-      titleBoldOn = isTrue;
-      break;
-    case TITLEON:
-      titleOn = isTrue;
-      break;
-    case XSCALEON:
-      xScaleOn = isTrue;
-      break;
-    case XUNITSON:
-      xUnitsOn = isTrue;
-      break;
-    case YSCALEON:
-      yScaleOn = isTrue;
-      break;
-    case YUNITSON:
-      yUnitsOn = isTrue;
-      break;
-    default:
-      Logger.warn("JSVPanel --- unrecognized Parameter boolean: " + st);
       break;
     }
+  }
+
+  public boolean getBoolean(ScriptToken st) {
+    if (st == ScriptToken.REVERSEPLOT)
+      return currentGraphSet.reversePlot;
+    Object b = options.get(st);
+    return (b != null && (b instanceof Boolean) && ((Boolean) b) == Boolean.TRUE);
   }
 
   ////////// settable colors and fonts //////////
@@ -228,18 +191,16 @@ public class PanelData {
       break;
     }
     if (fontName != null)
-      options.put(st.name(), fontName);
+      options.put(st, fontName);
   }
 
   /////////// print parameters ///////////
 
   boolean isPrinting;
-  protected boolean printGrid = gridOn;
-  protected boolean printTitle = true;
-  protected boolean printScale = true;
   String printingFont;
   protected String printGraphPosition = "default";
   boolean titleDrawn;
+  boolean display1D;
 
 
   // listeners to handle various events
@@ -283,26 +244,6 @@ public class PanelData {
    */
   public JDXSpectrum getSpectrumAt(int index) {
     return currentGraphSet.getSpectrumAt(index);
-  }
-
-  public void setDisplay1Dwith2D(boolean TF) {
-    display1D = TF;
-    thisWidth = 0;
-  }
-
-  public void setDisplay2D(boolean TF) {
-    display2D = TF;
-    thisWidth = 0;
-  }
-
-  /**
-   * Displays plot in reverse if val is true
-   * 
-   * @param val
-   *        true or false
-   */
-  public void setReversePlot(boolean val) {
-    currentGraphSet.setReversePlot(val);
   }
 
   /* -------------------Other methods ------------------------------------*/
@@ -354,60 +295,6 @@ public class PanelData {
    */
   public void removeAllHighlights() {
     currentGraphSet.removeAllHighlights(null);
-  }
-
-  /**
-   * Returns true if plot is reversed
-   * 
-   * @return true if plot is reversed
-   */
-  public boolean isPlotReversed() {
-    return currentGraphSet.reversePlot;
-  }
-
-  /**
-   * Returns true if zoom is enabled
-   * 
-   * @return true if zoom is enabled
-   */
-  public boolean isZoomEnabled() {
-    return enableZoom;
-  }
-
-  /**
-   * Returns true if coordinates are on
-   * 
-   * @return true if coordinates are displayed
-   */
-  public boolean isCoordinatesOn() {
-    return coordinatesOn;
-  }
-
-  /**
-   * Returns true if grid is on
-   * 
-   * @return true if the grid is displayed
-   */
-  public boolean isGridOn() {
-    return gridOn;
-  }
-
-  /**
-   * Returns true if x Scale is on
-   * 
-   * @return true if x Scale is displayed
-   */
-  public boolean isXScaleOn() {
-    return xScaleOn;
-  }
-
-  /**
-   * Returns true if y Scale is on
-   * 
-   * @return true if the y Scale is displayed
-   */
-  public boolean isYScaleOn() {
-    return yScaleOn;
   }
 
   /**
@@ -490,26 +377,14 @@ public class PanelData {
    */
   protected void drawGraph(Object g, int height, int width) {
 
-    boolean withGrid, withTitle, withXUnits, withYUnits, withCoords, withXScale, withYScale, withSliders;
-
+    boolean withCoords;
+    display1D = getBoolean(ScriptToken.DISPLAY1D);
     if (isPrinting) {
       withCoords = false;
-      withTitle = printTitle;
-      withGrid = printGrid;
-      withXScale = printScale;
-      withYScale = printScale;
-      withXUnits = printScale;
-      withYUnits = printScale;
-      withSliders = false;
     } else {
-      withCoords = coordinatesOn;
-      withTitle = titleOn;
-      withGrid = gridOn;
-      withXUnits = xUnitsOn;
-      withYUnits = yUnitsOn;
-      withXScale = xScaleOn;
-      withYScale = yScaleOn;
-      withSliders = true;
+      withCoords = getBoolean(ScriptToken.COORDINATESON);
+      titleOn = getBoolean(ScriptToken.TITLEON);
+      gridOn = getBoolean(ScriptToken.GRIDON);
     }
     plotAreaWidth = width - (right + left);
     plotAreaHeight = height - (top + bottom);
@@ -523,10 +398,9 @@ public class PanelData {
     titleDrawn = false;
     for (int i = graphSets.size(); --i >= 0;)
       graphSets.get(i)
-          .drawGraph(g, withGrid, withXUnits, withYUnits, withXScale,
-              withYScale, withSliders, true, height, width, left,
-              right, top, bottom, isResized, enableZoom, display1D, display2D);
-    if (withTitle && !titleDrawn)
+          .drawGraph(g, !isPrinting, height, width, left,
+              right, top, bottom, isResized);
+    if (titleOn && !titleDrawn)
       owner.drawTitle(g, height, width, getSpectrum().getPeakTitle());
     if (withCoords)
       owner.drawCoordinates(g, height, width);
@@ -714,6 +588,8 @@ public class PanelData {
   }
   
   private Mouse mouseState;
+  public boolean gridOn;
+  public boolean titleOn;
   
   boolean isMouseUp() {
     return (mouseState  == PanelData.Mouse.UP);
@@ -736,7 +612,7 @@ public class PanelData {
     GraphSet gs = GraphSet.findGraphSet(graphSets, xPixel, yPixel);
     if (gs == null)
       return;
-    gs.mouseMovedEvent(xPixel, yPixel, display1D);
+    gs.mouseMovedEvent(xPixel, yPixel);
   }
 
   protected void doMouseDragged(int xPixel, int yPixel) {
@@ -744,7 +620,7 @@ public class PanelData {
     if (GraphSet.findGraphSet(graphSets, xPixel, yPixel) != currentGraphSet)
       return;
     currentGraphSet.checkWidgetEvent(xPixel, yPixel, false);
-    currentGraphSet.mouseMovedEvent(xPixel, yPixel, display1D);
+    currentGraphSet.mouseMovedEvent(xPixel, yPixel);
   }
 
   protected void doMouseReleased(boolean isButton1) {

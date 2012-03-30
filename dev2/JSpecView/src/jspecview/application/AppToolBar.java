@@ -80,11 +80,11 @@ public class AppToolBar extends JToolBar {
 
 
   public void setSelections(JSVPanel jsvp) {
-    if (jsvp != null) {
+    if (jsvp != null) {   
       PanelData pd = jsvp.getPanelData();
-      gridToggleButton.setSelected(pd.isGridOn());
-      coordsToggleButton.setSelected(pd.isCoordinatesOn());
-      revPlotToggleButton.setSelected(pd.isPlotReversed());
+      gridToggleButton.setSelected(pd.getBoolean(ScriptToken.GRIDON));
+      coordsToggleButton.setSelected(pd.getBoolean(ScriptToken.COORDINATESON));
+      revPlotToggleButton.setSelected(pd.getBoolean(ScriptToken.REVERSEPLOT));
     }
   }
 
@@ -226,9 +226,7 @@ public class AppToolBar extends JToolBar {
     if (node == null)
       return;
     PanelData pd = node.jsvp.getPanelData();
-    gridToggleButton.setSelected(pd.isGridOn());
-    coordsToggleButton.setSelected(pd.isCoordinatesOn());
-    revPlotToggleButton.setSelected(pd.isPlotReversed());
+    setSelections(node.jsvp);
     setOverlay(pd.isOverlaid());
   }   
   

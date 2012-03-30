@@ -3,25 +3,24 @@ package jspecview.common;
 public interface JSVPanel extends JSVContainer {
 
   void repaint();
-
-  Object getColor(ScriptToken st);
-  JSVPanel getNewPanel(JDXSpectrum spectrum);
-  GraphSet newGraphSet();
-  void setupPlatform();
-  void setFont(Object g, String string, int mode, int size);
+  
+  void doRequestFocusInWindow();
   void drawCoordinates(Object g, int height, int width);
   void drawTitle(Object g, int height, int width, String title);
-  public void setColorOrFont(Parameters ds, ScriptToken st);
+  Object getColor(ScriptToken st);
+  Object getColor(int r, int g, int b, int a);
+  GraphSet getNewGraphSet();
+  JSVPanel getNewPanel(JDXSpectrum spectrum);
+  PanelData getPanelData();
+  Object getPlotColor(int i);
+  Object getPopup();
   JDXSpectrum getSpectrum();
   JDXSpectrum getSpectrumAt(int i);
-  PanelData getPanelData();
-  Object getColor(int r, int g, int b, int a);
-  Object getPlotColor(int i);
-  void setPlotColors(Object plotColors);
-  Object getPopup();
-  void setToolTipText(String s);
   void setColor(ScriptToken st, Object color);
-  void doRequestFocusInWindow();
+  public void setColorOrFont(Parameters ds, ScriptToken st);
+  void setFont(Object g, String string, int mode, int size);
+  void setPlotColors(Object plotColors);
   void setSpectrum(JDXSpectrum spec);
-
+  void setToolTipText(String s);
+  void setupPlatform();
 }

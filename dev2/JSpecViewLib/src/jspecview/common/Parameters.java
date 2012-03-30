@@ -252,23 +252,21 @@ public class Parameters {
             jsvp.getPanelData().setZoom(0, 0, 0, 0);
           break;
         case 2:
-          jsvp.getPanelData().setZoom(Double.parseDouble(tokens.get(0)), 0, Double
-              .parseDouble(tokens.get(1)), 0);
+          jsvp.getPanelData().setZoom(Double.parseDouble(tokens.get(0)), 0,
+              Double.parseDouble(tokens.get(1)), 0);
           break;
         case 4:
-          jsvp.getPanelData().setZoom(
-              Double.parseDouble(tokens.get(0)), 
-              Double.parseDouble(tokens.get(1)), 
-              Double.parseDouble(tokens.get(2)), 
-              Double.parseDouble(tokens.get(3))); 
+          jsvp.getPanelData().setZoom(Double.parseDouble(tokens.get(0)),
+              Double.parseDouble(tokens.get(1)),
+              Double.parseDouble(tokens.get(2)),
+              Double.parseDouble(tokens.get(3)));
         }
       }
       break;
     case DEBUG:
-      Logger.setLogLevel(value.toLowerCase().equals("high") ? 
-            Logger.LEVEL_DEBUGHIGH
-            : isTrue(value) ? Logger.LEVEL_DEBUG 
-                : Logger.LEVEL_INFO);
+      Logger
+          .setLogLevel(value.toLowerCase().equals("high") ? Logger.LEVEL_DEBUGHIGH
+              : isTrue(value) ? Logger.LEVEL_DEBUG : Logger.LEVEL_INFO);
       return;
     case COORDINATESON:
     case DISPLAY1D:
@@ -282,6 +280,22 @@ public class Parameters {
     case XUNITSON:
     case YSCALEON:
     case YUNITSON:
+      if (value.equalsIgnoreCase("TOGGLE")) {
+        if (jsvp == null)
+          return;
+        boolean b = !jsvp.getPanelData().getBoolean(st);
+        value = (b ? "TRUE" : "FALSE");
+        switch (st) {
+        case XSCALEON:
+          setBoolean(ScriptToken.XUNITSON, b);
+          jsvp.getPanelData().setBoolean(ScriptToken.XUNITSON, b);
+          break;
+        case YSCALEON:
+          setBoolean(ScriptToken.YUNITSON, b);
+          jsvp.getPanelData().setBoolean(ScriptToken.YUNITSON, b);
+          break;
+        }
+      }
       setBoolean(st, value);
       break;
     case BACKGROUNDCOLOR:
@@ -321,22 +335,5 @@ public class Parameters {
     // overridden in AwtParameters
     return null;
   }
-
-  /**
-   * setting of boolean parameters for a panel is only through Parameters
-   * 
-   * @param jsvp
-   * @param params
-   * @param st
-   * @param b
-   */
-  public static void setBoolean(JSVPanel jsvp, Parameters params,
-                                  ScriptToken st, boolean b) {
-    if (params == null)
-      params = new Parameters("temp");
-    params.setBoolean(st, b);
-    jsvp.getPanelData().setBoolean(params, st);
-  }
-
 
 }

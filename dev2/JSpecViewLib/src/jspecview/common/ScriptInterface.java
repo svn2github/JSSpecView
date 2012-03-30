@@ -38,6 +38,6 @@ public interface ScriptInterface {
   public void syncLoad(String fileName);
   public void setFrame(JSVSpecNode findNode);
   public void showProperties();
-  public void setBoolean(ScriptToken st, boolean TF);
+  public void updateBoolean(ScriptToken st, boolean TF);
   public void checkCallbacks(String title);
 }

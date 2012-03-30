@@ -156,7 +156,7 @@ abstract class GraphSet {
       JDXSpectrum spec = spectra.get(i);
       if (specLast == null
           || !JDXSpectrum.areScalesCompatible(spec, specLast, false)) {
-        graphSet = jsvp.newGraphSet();
+        graphSet = jsvp.getNewGraphSet();
         graphSets.add(graphSet);
       }
       graphSet.addSpec(specLast = spec);
@@ -295,6 +295,10 @@ abstract class GraphSet {
     setDrawXAxis();
   }
 
+  boolean getReversePlot() {
+    return  reversePlot;
+  }
+  
   protected void setDrawXAxis() {
     drawXAxisLeftToRight = xAxisLeftToRight ^ reversePlot;
     for (int i = 0; i < spectra.size(); i++)
@@ -477,24 +481,23 @@ abstract class GraphSet {
    * @param isResized
    * @param enableZoom
    */
-  void drawGraph(Object og, boolean withGrid, boolean withXUnits,
-                 boolean withYUnits, boolean withXScale,
-                 boolean withYScale,
-                 boolean isInteractive,
-                 boolean drawY0, //!isIntegralDrag
-                 int height, int width, int left, int right, int top,
-                 int bottom, boolean isResized, boolean enableZoom,
-                 boolean display1D, boolean display2D) {
+  public void drawGraph(Object og, 
+                        boolean isInteractive, int height, int width,
+                        int left, int right, int top, int bottom,
+                        boolean isResized) {
+    // TODO Auto-generated method stub
+    
     // for now, at least, we only allow one 2D image
-    this.enableZoom = enableZoom;
     setPositionForFrame(width, height, left, right, top, bottom);
     JDXSpectrum spec0 = getSpectrumAt(0);
     userYFactor = getSpectrum().getUserYFactor();
     setScaleFactors(multiScaleData);
-    if (!getSpectrumAt(0).is1D() && display2D && (isd != null || get2DImage())) {
-      setImageWindow(display1D);
+    if (!getSpectrumAt(0).is1D() 
+        && pd.getBoolean(ScriptToken.DISPLAY2D) 
+        && (isd != null || get2DImage())) {
+      setImageWindow();
       width = (int) Math.floor(widthRatio * xPixels * 0.8);
-      if (display1D) {
+      if (pd.display1D) {
         xPixels = width;
         xPixel1 = xPixel0 + xPixels - 1;
       } else {
@@ -507,17 +510,16 @@ abstract class GraphSet {
     setScaleFactors(multiScaleData);
     int subIndex = spec0.getSubIndex();
     setWidgets(isResized, subIndex);
-    drawAll(og, height, width, subIndex, spec0, isInteractive, withGrid,
-        withXScale, withYScale, withXUnits, withYUnits, drawY0, display1D);
+    drawAll(og, height, width, subIndex, spec0, isInteractive);
   }
 
   protected boolean doPlot(int i) {
     return (iThisSpectrum < 0 || iThisSpectrum == i);
   }
 
-  protected void setImageWindow(boolean display1D) {
-    isd.setPixelWidthHeight((int) ((display1D ? 0.6 : 1) * xPixels), yPixels);
-    widthRatio = (display1D ? 1.0 * (xPixels - isd.xPixels) / xPixels : 1);
+  protected void setImageWindow() {
+    isd.setPixelWidthHeight((int) ((pd.display1D ? 0.6 : 1) * xPixels), yPixels);
+    widthRatio = (pd.display1D ? 1.0 * (xPixels - isd.xPixels) / xPixels : 1);
     isd.setXY0((int) Math.floor(xPixel1 - isd.xPixels), yPixel0);
   }
 
@@ -622,9 +624,9 @@ abstract class GraphSet {
   private PeakInfo piMouseOver;
   private final Coordinate coordTemp = new Coordinate();
   
-  void mouseMovedEvent(int xPixel, int yPixel, boolean display1D) {
+  void mouseMovedEvent(int xPixel, int yPixel) {
     if (!pd.isIntegralDrag) {
-      setToolTipForPixels(xPixel, yPixel, display1D);
+      setToolTipForPixels(xPixel, yPixel);
       if (isd == null) {
         if (iThisSpectrum != Integer.MAX_VALUE) {
           JDXSpectrum spec = pd.getSpectrum();
@@ -635,7 +637,7 @@ abstract class GraphSet {
           }
         }
       } else {
-        if (!display1D && sticky2Dcursor)
+        if (!pd.display1D && sticky2Dcursor)
           set2DCrossHairs(xPixel, yPixel);
       }
     }
@@ -1280,38 +1282,35 @@ abstract class GraphSet {
   }
 
   protected void drawAll(Object g, int height, int width, int subIndex,
-                         JDXSpectrum spec0, boolean isInteractive,
-                         boolean withGrid, boolean withXScale,
-                         boolean withYScale, boolean withXUnits,
-                         boolean withYUnits, boolean drawY0, boolean display1D) {
+                         JDXSpectrum spec0, boolean isInteractive) {
     if (isd != null)
       draw2DImage(g);
     draw2DUnits(g, width, subIndex, spec0);
-    doDraw1DObjects = (isd == null || display1D);
+    doDraw1DObjects = (isd == null || pd.display1D);
     if (isInteractive)
-      drawFrame(g, height, width, withGrid);
+      drawFrame(g, height, width);
     if (doDraw1DObjects) {
       // background stuff
       fillBox(g, xPixel0, yPixel0, xPixel1, yPixel1, ScriptToken.PLOTAREACOLOR);
       drawWidgets(g, subIndex, isInteractive);
       drawPeakTabs(g);
       drawHighlights(g);
-      if (withGrid)
+      if (pd.gridOn)
         drawGrid(g, height, width);
       // scale-related, title, and coordinates
-      if (withXScale)
+      if (pd.getBoolean(ScriptToken.XSCALEON))
         drawXScale(g, height, width);
-      if (withYScale && allowYScale)
-        drawYScale(g, height, width);
-      if (withXUnits)
+      if (pd.getBoolean(ScriptToken.XUNITSON))
         drawXUnits(g, width);
-      if (withYUnits && allowYScale)
+      if (allowYScale && pd.getBoolean(ScriptToken.YSCALEON))
+        drawYScale(g, height, width);
+      if (allowYScale && pd.getBoolean(ScriptToken.YUNITSON))
         drawYUnits(g, width);
 
       // the graphs
       for (int i = nSpectra; --i >= 0;)
         if (doPlot(i)) {
-          drawSpectrum(g, i, height, width, withGrid, drawY0);
+          drawSpectrum(g, i, height, width);
           if (iThisSpectrum == i && this == pd.currentGraphSet) {
             drawTitle(g, height, width, spectra.get(i).getPeakTitle());
             pd.titleDrawn = true;
@@ -1470,15 +1469,14 @@ abstract class GraphSet {
    * @param width
    *        the width to be drawn in pixels
    */
-  private void drawSpectrum(Object g, int index, int height, int width,
-                        boolean gridOn, boolean drawY0) {
+  private void drawSpectrum(Object g, int index, int height, int width) {
     // Check if specInfo in null or xyCoords is null
     //Coordinate[] xyCoords = spectra[index].getXYCoords();
     JDXSpectrum spec = spectra.get(index);
     userYFactor = spec.getUserYFactor();
-    drawPlot(g, index, spec, height, width, gridOn, drawY0, spec.isContinuous());
+    drawPlot(g, index, spec, height, width, true, spec.isContinuous());
     if (spec.hasIntegral())
-      drawPlot(g, index, spec.getIntegrationGraph(), height, width, true, false, true);
+      drawPlot(g, index, spec.getIntegrationGraph(), height, width, false, true);
     // over-spectrum stuff    
     if (spec.integrationRatios != null)
       drawAnnotations(g, height, width, spec.integrationRatios,
@@ -1487,7 +1485,7 @@ abstract class GraphSet {
   }
 
   private void drawPlot(Object g, int index, Graph spec, int height,
-                        int width, boolean gridOn, boolean drawY0, 
+                        int width, boolean drawY0, 
                         boolean isContinuous) {
 
     Coordinate[] xyCoords = spec.getXYCoords();
@@ -1548,8 +1546,8 @@ abstract class GraphSet {
    * @param height
    * @param width
    */
-  private void drawFrame(Object g, int height, int width, boolean withGrid) {
-    if (!withGrid) {
+  private void drawFrame(Object g, int height, int width) {
+    if (!pd.gridOn) {
       setColor(g, ScriptToken.GRIDCOLOR);
       drawRect(g, xPixel0, yPixel0, xPixels, yPixels);
     }
@@ -1946,7 +1944,7 @@ abstract class GraphSet {
     ig.addIntegral(x1, x2, isFinal);
   }
 
-  private void setToolTipForPixels(int xPixel, int yPixel, boolean display1D) {
+  private void setToolTipForPixels(int xPixel, int yPixel) {
     String hashX = "#";
     String hash1 = "0.00000000";
     if (multiScaleData.hashNums[0] <= 0)
@@ -1991,12 +1989,12 @@ abstract class GraphSet {
       int isub = isd.toSubspectrumIndex(yPixel);
       String s = formatterX.format(isd.toX(xPixel)) + " "
           + getSpectrum().getXUnits() + ",  " + get2DYLabel(isub, formatterX);
-      pd.setToolTipText(display1D ? s : "");
+      pd.setToolTipText(pd.display1D ? s : "");
       pd.coordStr = s;
       return;
     }
 
-    if (isd != null && !display1D) {
+    if (isd != null && !pd.display1D) {
       pd.setToolTipText("");
       pd.coordStr = "";
       return;

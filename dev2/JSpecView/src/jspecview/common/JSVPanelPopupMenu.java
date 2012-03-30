@@ -338,9 +338,9 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   public void setEnables(JSVPanel jsvp) {
     pd = jsvp.getPanelData();
     JDXSpectrum spec0 = jsvp.getSpectrumAt(0);
-    setSelected(gridCheckBoxMenuItem, pd.isGridOn());
-    setSelected(coordsCheckBoxMenuItem, pd.isCoordinatesOn());
-    setSelected(reversePlotCheckBoxMenuItem, pd.isPlotReversed());
+    setSelected(gridCheckBoxMenuItem, pd.getBoolean(ScriptToken.GRIDON));
+    setSelected(coordsCheckBoxMenuItem, pd.getBoolean(ScriptToken.COORDINATESON));
+    setSelected(reversePlotCheckBoxMenuItem, pd.getBoolean(ScriptToken.REVERSEPLOT));
 
     boolean isOverlaid = pd.isOverlaid();
     boolean isSingle = pd.getNumberOfSpectraTotal() == 1;

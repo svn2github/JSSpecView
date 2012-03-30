@@ -292,9 +292,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
    * toggles reversing the plot on a <code>JSVPanel</code>
    */
   public void reversePlot() {
-    JSVPanel jsvp = getSelectedPanel();
-    if (jsvp != null) 
-      runScript(ScriptToken.REVERSEPLOT + " " + (!jsvp.getPanelData().isPlotReversed()));
+    toggle(ScriptToken.REVERSEPLOT);
   }
 
   /**
@@ -302,9 +300,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
    * toggles the grid on a <code>JSVPanel</code>
    */
   public void toggleGrid() {
-    JSVPanel jsvp = getSelectedPanel();
-    if (jsvp != null)
-      runScript(ScriptToken.GRIDON + " " + !jsvp.getPanelData().isGridOn());
+    toggle(ScriptToken.GRIDON);
   }
 
   /**
@@ -312,21 +308,22 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
    * toggles the coordinate on a <code>JSVPanel</code>
    */
   public void toggleCoordinate() {
-    JSVPanel jsvp = getSelectedPanel();
-    if (jsvp != null)
-      runScript(ScriptToken.COORDINATESON + " " + !jsvp.getPanelData().isCoordinatesOn());
+    toggle(ScriptToken.COORDINATESON);
   }
 
-  /**
+ /**
    * Method that can be called from another applet or from javascript that
    * toggles the integration graph of a <code>JSVPanel</code>.
    */
   public void toggleIntegration() {
-    JSVPanel jsvp = getSelectedPanel();
-    if (jsvp != null)
-      runScript("integrate ?");
+    toggle(ScriptToken.INTEGRATE);
   }
 
+  private void toggle(ScriptToken st) {
+    JSVPanel jsvp = getSelectedPanel();
+    if (jsvp != null)
+      runScript(st + " TOGGLE");
+   }
 
   /**
    * Method that can be called from another applet or from javascript that adds
@@ -1180,7 +1177,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
     TextDialog.showProperties(jsvApplet, getPanelData().getSpectrum());
   }
 
-  public void setBoolean(ScriptToken st, boolean TF) {
+  public void updateBoolean(ScriptToken st, boolean TF) {
     // ignored -- this is for setting buttons and menu items    
   }
 

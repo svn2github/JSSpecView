@@ -36,25 +36,62 @@ import java.util.Map.Entry;
 public enum ScriptToken {
 
   // null tip means DON'T SHOW
-  UNKNOWN, APPLETID, APPLETREADYCALLBACKFUNCTIONNAME, AUTOINTEGRATE("TF"), BACKGROUNDCOLOR(
-      "C"), CLOSE("spectrumId or fileName or ALL"), COMPOUNDMENUON("TF"), COORDCALLBACKFUNCTIONNAME, COORDINATESCOLOR(
-      "C"), COORDINATESON("TF"), DEBUG("TF"), DISPLAYFONTNAME("fontName"), DISPLAY1D(
-      "TF"), DISPLAY2D("TF"), ENABLEZOOM("TF"), ENDINDEX, EXPORT(
-      "[XY,DIF,DIFDUP,PAC,FIX,SQZ,AML,CML,JPG,PNG,SVG,SVGI] \"filename\""), GETSOLUTIONCOLOR, GRIDCOLOR(
-      "C"), GRIDON("TF"), HIDDEN("TF"), INTEGRATE(
-      "ON/OFF/?/MARK ppm1-ppm2,ppm3-ppm4,..."), INTEGRALPLOTCOLOR, INTEGRATIONRATIOS, INTERFACE, IRMODE(
-      "A or T or ?"), JMOL("...Jmol command..."), LABEL(
-      "x y [color and/or \"text\"]"), LOAD(
-      "[APPEND] \"fileName\" [first] [last]; use \"\" to reload current file"), MENUON, OBSCURE, OVERLAY(
-      "spectrumID[*factor], spectrumID[*factor], ..."), PEAK(
-      "<type(IR,CNMR,HNMR,MS, etc)> \"match\" [ALL]"), PEAKCALLBACKFUNCTIONNAME, PLOTAREACOLOR(
-      "C"), PLOTCOLOR("C"), PLOTCOLORS("color,color,color,..."), REVERSEPLOT(
-      "TF"), SCALECOLOR("C"), SPECTRUM("spectrumID"), SPECTRUMNUMBER, STARTINDEX, SYNCCALLBACKFUNCTIONNAME, SYNCID, TEST, TITLEON(
-      "TF"), // default OFF for application, ON for applet
-  TITLEBOLDON("TF"), TITLECOLOR("C"), TITLEFONTNAME("fontName"), UNITSCOLOR("C"), VERSION, XSCALEON(
-      "TF"), XUNITSON("TF"), YSCALE("[ALL] lowValue highValue"), YSCALEON("TF"), YUNITSON(
-      "TF"), ZOOM("OUT or x1,x2 or x1,y1 x2,y2"),
-
+  UNKNOWN, 
+  APPLETID, 
+  APPLETREADYCALLBACKFUNCTIONNAME, 
+  AUTOINTEGRATE("TF"), 
+  BACKGROUNDCOLOR("C"), 
+  CLOSE("spectrumId or fileName or ALL"), 
+  COMPOUNDMENUON("TF"), 
+  COORDCALLBACKFUNCTIONNAME, 
+  COORDINATESCOLOR("C"), 
+  COORDINATESON("T"), 
+  DEBUG("TF"), 
+  DISPLAYFONTNAME("fontName"), 
+  DISPLAY1D("T"), 
+  DISPLAY2D("T"), 
+  ENABLEZOOM("T"), 
+  ENDINDEX, 
+  EXPORT("[XY,DIF,DIFDUP,PAC,FIX,SQZ,AML,CML,JPG,PNG,SVG,SVGI] \"filename\""), 
+  GETSOLUTIONCOLOR, 
+  GRIDCOLOR("C"), 
+  GRIDON("T"), 
+  HIDDEN("TF"), 
+  INTEGRATE("ON/OFF/TOGGLE/MARK ppm1-ppm2,ppm3-ppm4,..."), 
+  INTEGRALPLOTCOLOR, 
+  INTEGRATIONRATIOS, 
+  INTERFACE, 
+  IRMODE("A or T or TOGGLE"), 
+  JMOL("...Jmol command..."), 
+  LABEL("x y [color and/or \"text\"]"), 
+  LOAD("[APPEND] \"fileName\" [first] [last]; use \"\" to reload current file"), 
+  MENUON, 
+  OBSCURE, 
+  OVERLAY("spectrumID[*factor], spectrumID[*factor], ..."), 
+  PEAK("<type(IR,CNMR,HNMR,MS, etc)> \"match\" [ALL]"), 
+  PEAKCALLBACKFUNCTIONNAME, 
+  PLOTAREACOLOR("C"), 
+  PLOTCOLOR("C"), 
+  PLOTCOLORS("color,color,color,..."), 
+  REVERSEPLOT("T"), 
+  SCALECOLOR("C"), 
+  SPECTRUM("spectrumID"), 
+  SPECTRUMNUMBER, 
+  STARTINDEX, 
+  SYNCCALLBACKFUNCTIONNAME, 
+  SYNCID, 
+  TEST, 
+  TITLEON("T"), // default OFF for application, ON for applet
+  TITLEBOLDON("T"), 
+  TITLECOLOR("C"), 
+  TITLEFONTNAME("fontName"), 
+  UNITSCOLOR("C"), 
+  VERSION, 
+  XSCALEON("T"), 
+  XUNITSON("T"), 
+  YSCALE("[ALL] lowValue highValue"), 
+  YSCALEON("T"), YUNITSON("T"), 
+  ZOOM("OUT or x1,x2 or x1,y1 x2,y2"),
   HIGHLIGHTCOLOR("C"), // not implemented 
   ZOOMBOXCOLOR; // not implemented
 
@@ -62,7 +99,11 @@ public enum ScriptToken {
 
   public String getTip() {
     return "  "
-        + (tip == "TF" ? "TRUE or FALSE" : tip == "C" ? "<color>" : tip);
+        + (tip == "T" ? "TRUE/FALSE/TOGGLE" 
+            : tip == "TF" ? "TRUE or FALSE" 
+            : tip == "C" ? "<color>" 
+            : tip);
+        		
   }
 
   private ScriptToken() {

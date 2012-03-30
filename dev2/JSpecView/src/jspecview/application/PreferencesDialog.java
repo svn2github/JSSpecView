@@ -657,9 +657,9 @@ public class PreferencesDialog extends JDialog {
           .getResourceAsStream("resources/sample.jdx"), false);
 
       previewPanel = new AwtPanel(source.getSpectra().get(0), null);
-      Parameters.setBoolean(previewPanel, null, ScriptToken.ENABLEZOOM, false);
-      Parameters.setBoolean(previewPanel, null, ScriptToken.GRIDON, true);
-      Parameters.setBoolean(previewPanel, null, ScriptToken.COORDINATESON, true);
+      previewPanel.getPanelData().setBoolean(ScriptToken.ENABLEZOOM, false);
+      previewPanel.getPanelData().setBoolean(ScriptToken.GRIDON, true);
+      previewPanel.getPanelData().setBoolean(ScriptToken.COORDINATESON, true);
     } catch (IOException ioe) {
       ioe.printStackTrace();
       return;

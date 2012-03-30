@@ -185,7 +185,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   private boolean autoIntegrate;
 
   private AwtParameters parameters = new AwtParameters("application");
-  private AwtParameters tempParams = new AwtParameters("temp");
 
   //  ----------------------- Application Attributes ---------------------
 
@@ -1366,7 +1365,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   }
 
   public boolean syncToJmol(String msg) {
-    System.out.println("JSV>Jmol " + msg);
+    Logger.info("JSV>Jmol " + msg);
     if (jmol != null) { // MainFrame --> embedding application
       jmol.syncScript(msg);
       return true;
@@ -1490,6 +1489,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   }
 
   public void execScriptComplete(String msg, boolean isOK) {
+    getSelectedPanel().repaint();
     if (msg != null) {
       writeStatus(msg);
       if (msg.length() == 0)
@@ -1649,25 +1649,15 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     TextDialog.showProperties(this, getPanelData().getSpectrum());
   }
 
-  public void setBoolean(ScriptToken st, boolean TF) {
+  public void updateBoolean(ScriptToken st, boolean TF) {
     JSVPanel jsvp = getSelectedPanel();
     if (jsvp == null)
       return;
     switch(st) {
-    case XSCALEON:
-      Parameters.setBoolean(jsvp, tempParams, ScriptToken.XSCALEON, TF);
-      Parameters.setBoolean(jsvp, tempParams, ScriptToken.XUNITSON, TF);
-      break;
-    case YSCALEON:
-      Parameters.setBoolean(jsvp, tempParams, ScriptToken.YSCALEON, TF);
-      Parameters.setBoolean(jsvp, tempParams, ScriptToken.YUNITSON, TF);
-      break;
     case COORDINATESON:
-      Parameters.setBoolean(jsvp, tempParams, st, TF);
       toolBar.coordsToggleButton.setSelected(TF);
       break;
     case GRIDON:
-      Parameters.setBoolean(jsvp, tempParams, st, TF);
       toolBar.gridToggleButton.setSelected(TF);
       break;
     }
