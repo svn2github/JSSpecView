@@ -3,10 +3,7 @@ Put new items at top, please.
 
 ====TODO=========
 
-compoundmenuon true gives menu option of Spectra
-compoundmenuon false gives greyed out menu option of Blocks
 
-ReversePlot was disabled; x widgets aren't right with plot reversed.
 
 With JSpecView application, loading a file gives the dialog box and if you sort on date the program crashes.
 
@@ -25,6 +22,12 @@ Dialog Box for overlay colours needs checking
 frames is not working right  -- just turns off the key entirely.
 
 =====DONE========
+
+compoundmenuon true gives menu option of Spectra
+compoundmenuon false gives greyed out menu option of Blocks - renamed Spectra as well
+
+ReversePlot was disabled; x widgets aren't right with plot reversed.
+>seems fixed?
 
 GC/MS is not tested and probably all messed up.
 Works if call is to the GCMS.jdx file with overlay ALL
