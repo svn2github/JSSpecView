@@ -1489,7 +1489,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   }
 
   public void execScriptComplete(String msg, boolean isOK) {
-    getSelectedPanel().repaint();
+    repaint();
     if (msg != null) {
       writeStatus(msg);
       if (msg.length() == 0)

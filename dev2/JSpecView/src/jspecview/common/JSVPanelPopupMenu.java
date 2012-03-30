@@ -378,6 +378,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   public static void setMenus(JMenu saveAsMenu, JMenu saveAsJDXMenu,
                               JMenu exportAsMenu, ActionListener actionListener) {
     saveAsMenu.setText("Save As");
+    JSVPanelPopupMenu.addMenuItem(saveAsMenu, "...", actionListener);
     saveAsJDXMenu.setText("JDX");
     JSVPanelPopupMenu.addMenuItem(saveAsJDXMenu, "XY", actionListener);
     JSVPanelPopupMenu.addMenuItem(saveAsJDXMenu, "DIF", actionListener);

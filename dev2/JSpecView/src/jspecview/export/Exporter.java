@@ -9,8 +9,11 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.RenderedImage;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -28,15 +31,18 @@ import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVFileFilter;
 import jspecview.common.JSVPanel;
 import jspecview.common.ScriptToken;
+import jspecview.util.FileManager;
 import jspecview.util.TextFormat;
 
 public class Exporter {
 
   public enum Type {
-    UNK, DIF, FIX, SQZ, PAC, XY, DIFDUP, PNG, JPG, SVG, SVGI, CML, AML;
+    UNK, SOURCE, DIF, FIX, SQZ, PAC, XY, DIFDUP, PNG, JPG, SVG, SVGI, CML, AML;
 
     public static Type getType(String type) {
       type = type.toUpperCase();
+      if (type.equals("..."))
+        return SOURCE;
       if (type.startsWith("XML"))
         return AML;
       for (Type mode : values())
@@ -196,21 +202,29 @@ public class Exporter {
    * @param dirLastExported
    * @return dirLastExported
    */
-  private static String exportSpectrumOrImage(JSVPanel selectedJSVPanel, String mode,
-                               int index, JFileChooser fc, String recentFileName,
-                               String dirLastExported) {
+  private static String exportSpectrumOrImage(JSVPanel selectedJSVPanel,
+                                              String mode, int index,
+                                              JFileChooser fc,
+                                              String recentFileName,
+                                              String dirLastExported) {
     Type imode = Type.getType(mode);
     JSVFileFilter filter = new JSVFileFilter();
-    //TODO: This is flawed. It assumes the file name has one and only one "." in it. 
+    //TODO: This is flawed. It assumes the file name has one and only one "." in it.
+    if (imode == Type.SOURCE) {
+      String fname = selectedJSVPanel.getSpectrum().getFilePath();
+      if (!FileManager.isURL(fname))
+        recentFileName = fname; 
+    }
     int pt = recentFileName.lastIndexOf(".");
     String name = (pt < 0 ? recentFileName : recentFileName.substring(0, pt));
-    switch(imode) {
+    switch (imode) {
     case XY:
     case FIX:
     case PAC:
     case SQZ:
     case DIF:
     case DIFDUP:
+    case SOURCE:
       filter.addExtension("jdx");
       filter.addExtension("dx");
       filter.setDescription("JCAMP-DX Files");
@@ -232,16 +246,36 @@ public class Exporter {
     File file = fc.getSelectedFile();
     String dir = file.getParent();
     if (file.exists()) {
-      int option = JOptionPane.showConfirmDialog((Component) selectedJSVPanel, "Overwrite file?",
-          "Confirm Overwrite Existing File", JOptionPane.YES_NO_OPTION,
-          JOptionPane.QUESTION_MESSAGE);
+      int option = JOptionPane.showConfirmDialog((Component) selectedJSVPanel,
+          "Overwrite " + file.getName() + "?", "Confirm Overwrite Existing File",
+          JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
       if (option == JOptionPane.NO_OPTION)
         return dir;
     }
-    exportSpectrumOrImage(selectedJSVPanel, imode, index, file.getAbsolutePath());
+    if (imode == Type.SOURCE)
+      fileCopy(name, file);
+    else
+      exportSpectrumOrImage(selectedJSVPanel, imode, index, file
+          .getAbsolutePath());
     return dir;
   }
   
+  private static void fileCopy(String name, File file) {
+    try {
+      BufferedReader br = FileManager.getBufferedReaderFromName(name, null,
+          null);
+      FileWriter writer = new FileWriter(file.getAbsolutePath());
+      String line = null;
+      while ((line = br.readLine()) != null) {
+        writer.write(line);
+        writer.write(TextFormat.newLine);
+      }
+      writer.close();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
   private static String exportSpectrumOrImage(JSVPanel jsvp, Type imode,
                                               int index, String path) {
     JDXSpectrum spec;
