@@ -411,21 +411,21 @@ H    -0.22835   -1.78711    0.74040    0.25938   -0.45849    0.81026
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="IR" xUnits="1/cm" yUnits="ABSORBANCE" >
-<PeakData id="1" title="OH stretch (~3400 cm-1)" peakShape="broad" model="1.28" xMax="3375" xMin="3335"  yMax="1" yMin="0" />
-<PeakData id="2" title="asymm stretch of NH2 group (~3290 cm-1)" peakShape="broad" model="1.27" xMax="3310" xMin="3270"  yMax="1" yMin="0" />
-<PeakData id="3" title="symm stretch of NH2 group (~3170 cm-1)" peakShape="broad" model="1.26" xMax="3220" xMin="3120"  yMax="1" yMin="0" />
-<PeakData id="4" title="asymm stretch of CH2 group (~2925 cm-1)" peakShape="broad" model="1.25" xMax="2955" xMin="2895"  yMax="1" yMin="0" />
-<PeakData id="5" title="symm bend of CH2 group (~2858 cm-1)" peakShape="broad" model="1.24" xMax="2888" xMin="2828"  yMax="1" yMin="0" />
-<PeakData id="6" title="Carbonyl stretching band (~1685 cm-1)" peakShape="broad" model="1.21" xMax="1635" xMin="1575"  yMax="1" yMin="0" />
-<PeakData id="7" title="C-C of aromatic group (~1600 cm-1)" peakShape="broad" model="1.20" xMax="1490" xMin="1430"  yMax="1" yMin="0" />
-<PeakData id="8" title="symm stretch of CH3 group (~1450 cm-1)" peakShape="broad" model="1.19" xMax="1395" xMin="1335"  yMax="1" yMin="0" />
-<PeakData id="9" title="C-H twist of methyl group (~1360 cm-1)" peakShape="broad" model="1.16" xMax="1260" xMin="1220"  yMax="1" yMin="0" />
-<PeakData id="10" title="scissors of aromatic C-H groups (~1265 cm-1" peakShape="broad" model="1.13" xMax="1192" xMin="1152"  yMax="1" yMin="0" />
-<PeakData id="11" title="symm stretch of CH3 group (~1080 cm-1)" peakShape="broad" model="1.12" xMax="1095" xMin="1065"  yMax="1" yMin="0" />
-<PeakData id="12" title="symm stretch of CH group (~1025 cm-1)" peakShape="broad" model="1.10" xMax="1050" xMin="1015"  yMax="1" yMin="0" />
-<PeakData id="13" title=" (~955 cm-1" peakShape="broad" model="1.9" xMax="960" xMin="920"  yMax="1" yMin="0" />
-<PeakData id="14" title=" (~760 cm-1)" peakShape="broad" model="1.6" xMax="892" xMin="852"  yMax="1" yMin="0" />
+<Peaks type="IR" xUnitsExpected="1/cm" yUnits="ABSORBANCE" >
+<PeakData id="1" title="OH stretch (~3400 cm-1)" peakShape="broad" model="1.28" xMax="3375" xMin="3335"    />
+<PeakData id="2" title="asymm stretch of NH2 group (~3290 cm-1)" peakShape="broad" model="1.27" xMax="3310" xMin="3270"    />
+<PeakData id="3" title="symm stretch of NH2 group (~3170 cm-1)" peakShape="broad" model="1.26" xMax="3220" xMin="3120"    />
+<PeakData id="4" title="asymm stretch of CH2 group (~2925 cm-1)" peakShape="broad" model="1.25" xMax="2955" xMin="2895"    />
+<PeakData id="5" title="symm bend of CH2 group (~2858 cm-1)" peakShape="broad" model="1.24" xMax="2888" xMin="2828"    />
+<PeakData id="6" title="Carbonyl stretching band (~1685 cm-1)" peakShape="broad" model="1.21" xMax="1635" xMin="1575"    />
+<PeakData id="7" title="C-C of aromatic group (~1600 cm-1)" peakShape="broad" model="1.20" xMax="1490" xMin="1430"    />
+<PeakData id="8" title="symm stretch of CH3 group (~1450 cm-1)" peakShape="broad" model="1.19" xMax="1395" xMin="1335"    />
+<PeakData id="9" title="C-H twist of methyl group (~1360 cm-1)" peakShape="broad" model="1.16" xMax="1260" xMin="1220"    />
+<PeakData id="10" title="scissors of aromatic C-H groups (~1265 cm-1" peakShape="broad" model="1.13" xMax="1192" xMin="1152"    />
+<PeakData id="11" title="symm stretch of CH3 group (~1080 cm-1)" peakShape="broad" model="1.12" xMax="1095" xMin="1065"    />
+<PeakData id="12" title="symm stretch of CH group (~1025 cm-1)" peakShape="broad" model="1.10" xMax="1050" xMin="1015"    />
+<PeakData id="13" title=" (~955 cm-1" peakShape="broad" model="1.9" xMax="960" xMin="920"    />
+<PeakData id="14" title=" (~760 cm-1)" peakShape="broad" model="1.6" xMax="892" xMin="852"    />
 </Peaks>
 ##XUNITS= 1/CM
 ##YUNITS= ABSORBANCE
@@ -1208,22 +1208,22 @@ H    -0.22835   -1.78711    0.74040    0.25938   -0.45849    0.81026
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="RAMAN" xUnits="1/cm" yUnits="RAMAN INTENSITY" >
-<PeakData id="1" title="OH stretch (~3400 cm-1)" peakShape="broad" model="2.28" xMax="3375" xMin="3335"  yMax="1" yMin="0" />
-<PeakData id="2" title="asymm stretch of NH2 group (~3290 cm-1)" peakShape="broad" model="2.27" xMax="3310" xMin="3270"  yMax="1" yMin="0" />
-<PeakData id="3" title="symm stretch of NH2 group (~3170 cm-1)" peakShape="broad" model="2.26" xMax="3220" xMin="3120"  yMax="1" yMin="0" />
-<PeakData id="4" title="asymm stretch of CH2 group (~2925 cm-1)" peakShape="broad" model="2.25" xMax="2955" xMin="2895"  yMax="1" yMin="0" />
-<PeakData id="5" title="symm bend of CH2 group (~2858 cm-1)" peakShape="broad" model="2.24" xMax="2888" xMin="2828"  yMax="1" yMin="0" />
-<PeakData id="6" title="Carbonyl stretching band (~1685 cm-1)" peakShape="broad" model="2.21" xMax="1635" xMin="1575"  yMax="1" yMin="0" />
-<PeakData id="7" title="C-C of aromatic group (~1600 cm-1)" peakShape="broad" model="2.20" xMax="1490" xMin="1430"  yMax="1" yMin="0" />
-<PeakData id="8" title="symm stretch of CH3 group (~1450 cm-1)" peakShape="broad" model="2.19" xMax="1395" xMin="1335"  yMax="1" yMin="0" />
-<PeakData id="9" title="C-H twist of methyl group (~1360 cm-1)" peakShape="broad" model="2.16" xMax="1260" xMin="1220"  yMax="1" yMin="0" />
-<PeakData id="10" title="scissors of aromatic C-H groups (~1265 cm-1" peakShape="broad" model="2.13" xMax="1192" xMin="1152"  yMax="1" yMin="0" />
-<PeakData id="11" title="symm stretch of CH3 group (~1080 cm-1)" peakShape="broad" model="2.12" xMax="1095" xMin="1065"  yMax="1" yMin="0" />
-<PeakData id="12" title="symm stretch of CH group (~1025 cm-1)" peakShape="broad" model="2.10" xMax="1050" xMin="1015"  yMax="1" yMin="0" />
-<PeakData id="13" title=" (~955 cm-1" peakShape="broad" model="2.9" xMax="960" xMin="920"  yMax="1" yMin="0" />
-<PeakData id="14" title=" (~760 cm-1)" peakShape="broad" model="2.7" xMax="892" xMin="852"  yMax="1" yMin="0" />
-<PeakData id="15" title=" (~480 cm-1)" peakShape="broad" model="2.6" xMax="500" xMin="460"  yMax="1" yMin="0" />
+<Peaks type="RAMAN" xUnitsExpected="1/cm" yUnits="RAMAN INTENSITY" >
+<PeakData id="1" title="OH stretch (~3400 cm-1)" peakShape="broad" model="2.28" xMax="3375" xMin="3335"    />
+<PeakData id="2" title="asymm stretch of NH2 group (~3290 cm-1)" peakShape="broad" model="2.27" xMax="3310" xMin="3270"    />
+<PeakData id="3" title="symm stretch of NH2 group (~3170 cm-1)" peakShape="broad" model="2.26" xMax="3220" xMin="3120"    />
+<PeakData id="4" title="asymm stretch of CH2 group (~2925 cm-1)" peakShape="broad" model="2.25" xMax="2955" xMin="2895"    />
+<PeakData id="5" title="symm bend of CH2 group (~2858 cm-1)" peakShape="broad" model="2.24" xMax="2888" xMin="2828"    />
+<PeakData id="6" title="Carbonyl stretching band (~1685 cm-1)" peakShape="broad" model="2.21" xMax="1635" xMin="1575"    />
+<PeakData id="7" title="C-C of aromatic group (~1600 cm-1)" peakShape="broad" model="2.20" xMax="1490" xMin="1430"    />
+<PeakData id="8" title="symm stretch of CH3 group (~1450 cm-1)" peakShape="broad" model="2.19" xMax="1395" xMin="1335"    />
+<PeakData id="9" title="C-H twist of methyl group (~1360 cm-1)" peakShape="broad" model="2.16" xMax="1260" xMin="1220"    />
+<PeakData id="10" title="scissors of aromatic C-H groups (~1265 cm-1" peakShape="broad" model="2.13" xMax="1192" xMin="1152"    />
+<PeakData id="11" title="symm stretch of CH3 group (~1080 cm-1)" peakShape="broad" model="2.12" xMax="1095" xMin="1065"    />
+<PeakData id="12" title="symm stretch of CH group (~1025 cm-1)" peakShape="broad" model="2.10" xMax="1050" xMin="1015"    />
+<PeakData id="13" title=" (~955 cm-1" peakShape="broad" model="2.9" xMax="960" xMin="920"    />
+<PeakData id="14" title=" (~760 cm-1)" peakShape="broad" model="2.7" xMax="892" xMin="852"    />
+<PeakData id="15" title=" (~480 cm-1)" peakShape="broad" model="2.6" xMax="500" xMin="460"    />
 </Peaks>
 ##XUNITS= 1/CM
 ##YUNITS= RAMAN INTENSITY

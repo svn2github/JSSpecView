@@ -72,14 +72,14 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="HNMR" xUnits="ppm" yUnits="arbitrary units" >
-<PeakData id="1" title="methyl group ~1.4" peakShape="singlet" model="etsal" atoms="13,14,15" xMax="1.9" xMin="0.9"  yMax="10000" yMin="0" />
-<PeakData id="2" title="H ~4.4" peakShape="multiplet" model="etsal"  atoms="16,17" xMax="4.9" xMin="3.9"  yMax="10000" yMin="0" />
-<PeakData id="3" title="H ~6.85" peakShape="multiplet" model="etsal" atoms="19" xMax="6.89" xMin="6.75"  yMax="10000" yMin="0" />
-<PeakData id="4" title="H ~6.96" peakShape="multiplet" model="etsal" atoms="21" xMax="7.1" xMin="6.91"  yMax="10000" yMin="0" />
-<PeakData id="5" title="H ~7.4" peakShape="multiplet" model="etsal" atoms="20" xMax="7.55" xMin="7.25"  yMax="10000" yMin="0" />
-<PeakData id="6" title="H ~7.8" peakShape="multiplet" model="etsal" atoms="18" xMax="8.0" xMin="7.65"  yMax="10000" yMin="0" />
-<PeakData id="7" title="H ~10.9" peakShape="multiplet" model="etsal" atoms="22" xMax="11.4" xMin="10.4"  yMax="10000" yMin="0" />
+<Peaks type="HNMR" xUnitsExpected="ppm" yUnits="arbitrary units" >
+<PeakData id="1" title="methyl group ~1.4" peakShape="singlet" model="etsal" atoms="13,14,15" xMax="1.9" xMin="0.9"    />
+<PeakData id="2" title="H ~4.4" peakShape="multiplet" model="etsal"  atoms="16,17" xMax="4.9" xMin="3.9"    />
+<PeakData id="3" title="H ~6.85" peakShape="multiplet" model="etsal" atoms="19" xMax="6.89" xMin="6.75"    />
+<PeakData id="4" title="H ~6.96" peakShape="multiplet" model="etsal" atoms="21" xMax="7.1" xMin="6.91"    />
+<PeakData id="5" title="H ~7.4" peakShape="multiplet" model="etsal" atoms="20" xMax="7.55" xMin="7.25"    />
+<PeakData id="6" title="H ~7.8" peakShape="multiplet" model="etsal" atoms="18" xMax="8.0" xMin="7.65"    />
+<PeakData id="7" title="H ~10.9" peakShape="multiplet" model="etsal" atoms="22" xMax="11.4" xMin="10.4"    />
 </Peaks>
 ##SOLVENT NAME= CHLOROFORM-D
 ##.OBSERVE FREQUENCY= 500.133
@@ -882,16 +882,16 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="13CNMR" xUnits="ppm" yUnits="arbitrary units" >
-<PeakData id="1" title="methyl group ~10" peakShape="singlet" model="etsal" atoms="1" xMax="12" xMin="8"  yMax="10000" yMin="0" />
-<PeakData id="2" title="C3,C5 aromatic ~59.1" peakShape="multiplet" model="etsal"  atoms="2" xMax="61.1" xMin="57.1"  yMax="10000" yMin="0" />
-<PeakData id="3" title="C2,C6 aromatic ~112.3" peakShape="multiplet" model="etsal" atoms="6" xMax="113.5" xMin="111.0"  yMax="10000" yMin="0" />
-<PeakData id="4" title="C4 aromatic ~117.4" peakShape="multiplet" model="etsal" atoms="10" xMax="117.9" xMin="116.4"  yMax="10000" yMin="0" />
-<PeakData id="5" title="C1 aromatic ~119" peakShape="multiplet" model="etsal" atoms="8" xMax="121" xMin="118.1"  yMax="10000" yMin="0" />
-<PeakData id="6" title="carbonyl ~130.3" peakShape="multiplet" model="etsal" atoms="7" xMax="132.3" xMin="128.3"  yMax="10000" yMin="0" />
-<PeakData id="7" title="C4 aromatic ~136.1" peakShape="multiplet" model="etsal" atoms="9" xMax="138.1" xMin="134.1"  yMax="10000" yMin="0" />
-<PeakData id="8" title="C1 aromatic ~163.3" peakShape="multiplet" model="etsal" atoms="11" xMax="165.3" xMin="161.3"  yMax="10000" yMin="0" />
-<PeakData id="9" title="carbonyl ~172" peakShape="multiplet" model="etsal" atoms="4" xMax="174" xMin="170"  yMax="10000" yMin="0" />
+<Peaks type="13CNMR" xUnitsExpected="ppm" yUnits="arbitrary units" >
+<PeakData id="1" title="methyl group ~10" peakShape="singlet" model="etsal" atoms="1" xMax="12" xMin="8"    />
+<PeakData id="2" title="C3,C5 aromatic ~59.1" peakShape="multiplet" model="etsal"  atoms="2" xMax="61.1" xMin="57.1"    />
+<PeakData id="3" title="C2,C6 aromatic ~112.3" peakShape="multiplet" model="etsal" atoms="6" xMax="113.5" xMin="111.0"    />
+<PeakData id="4" title="C4 aromatic ~117.4" peakShape="multiplet" model="etsal" atoms="10" xMax="117.9" xMin="116.4"    />
+<PeakData id="5" title="C1 aromatic ~119" peakShape="multiplet" model="etsal" atoms="8" xMax="121" xMin="118.1"    />
+<PeakData id="6" title="carbonyl ~130.3" peakShape="multiplet" model="etsal" atoms="7" xMax="132.3" xMin="128.3"    />
+<PeakData id="7" title="C4 aromatic ~136.1" peakShape="multiplet" model="etsal" atoms="9" xMax="138.1" xMin="134.1"    />
+<PeakData id="8" title="C1 aromatic ~163.3" peakShape="multiplet" model="etsal" atoms="11" xMax="165.3" xMin="161.3"    />
+<PeakData id="9" title="carbonyl ~172" peakShape="multiplet" model="etsal" atoms="4" xMax="174" xMin="170"    />
 </Peaks>
 ##.OBSERVE FREQUENCY=125.773
 ##.ACQUISITION TIME=1.003

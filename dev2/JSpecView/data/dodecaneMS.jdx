@@ -635,18 +635,18 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="molecular ion (~170)" peakShape="sharp" model="1.1"  xMax="171" xMin="169"  yMax="100" yMin="0" />
-<PeakData id="2" title="fragment 1 (~155)" peakShape="sharp" atoms="10,11" xMax="156" xMin="154"  yMax="100" yMin="0" />
-<PeakData id="3" title="fragment 2 (~141)" peakShape="sharp" model="1.3"  xMax="142" xMin="140"  yMax="100" yMin="0" />
-<PeakData id="4" title="fragment 3 (~127)" peakShape="sharp" model="1.4"  xMax="128" xMin="126"  yMax="100" yMin="0" />
-<PeakData id="5" title="fragment 4 (~113)" peakShape="sharp" model="1.5"  xMax="114" xMin="112"  yMax="100" yMin="0" />
-<PeakData id="6" title="fragment 5 (~99)" peakShape="sharp" model="1.6"  xMax="100" xMin="98"  yMax="100" yMin="0" />
-<PeakData id="7" title="fragment 6 (~85)" peakShape="sharp" model="1.7"  xMax="86" xMin="84"  yMax="100" yMin="0" />
-<PeakData id="8" title="fragment 7 (~71)" peakShape="sharp" model="1.8"  xMax="72" xMin="70"  yMax="100" yMin="0" />
-<PeakData id="9" title="fragment 8 (~57)" peakShape="sharp" model="1.9"  xMax="58" xMin="56"  yMax="100" yMin="0" />
-<PeakData id="10" title="fragment 9 (~43)" peakShape="sharp" model="1.10"  xMax="44" xMin="42"  yMax="100" yMin="0" />
-<PeakData id="11" title="fragment 10 (~29)" peakShape="sharp" model="1.11"  xMax="30" xMin="28"  yMax="100" yMin="0" />
+<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="molecular ion (~170)" peakShape="sharp" model="1.1"  xMax="171" xMin="169"    />
+<PeakData id="2" title="fragment 1 (~155)" peakShape="sharp" atoms="10,11" xMax="156" xMin="154"    />
+<PeakData id="3" title="fragment 2 (~141)" peakShape="sharp" model="1.3"  xMax="142" xMin="140"    />
+<PeakData id="4" title="fragment 3 (~127)" peakShape="sharp" model="1.4"  xMax="128" xMin="126"    />
+<PeakData id="5" title="fragment 4 (~113)" peakShape="sharp" model="1.5"  xMax="114" xMin="112"    />
+<PeakData id="6" title="fragment 5 (~99)" peakShape="sharp" model="1.6"  xMax="100" xMin="98"    />
+<PeakData id="7" title="fragment 6 (~85)" peakShape="sharp" model="1.7"  xMax="86" xMin="84"    />
+<PeakData id="8" title="fragment 7 (~71)" peakShape="sharp" model="1.8"  xMax="72" xMin="70"    />
+<PeakData id="9" title="fragment 8 (~57)" peakShape="sharp" model="1.9"  xMax="58" xMin="56"    />
+<PeakData id="10" title="fragment 9 (~43)" peakShape="sharp" model="1.10"  xMax="44" xMin="42"    />
+<PeakData id="11" title="fragment 10 (~29)" peakShape="sharp" model="1.11"  xMax="30" xMin="28"    />
 </Peaks>
 ##XUNITS=M/Z
 ##YUNITS=RELATIVE ABUNDANCE

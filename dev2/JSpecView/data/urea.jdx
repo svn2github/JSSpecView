@@ -239,25 +239,25 @@ O     0.00000    0.00000    1.41719    0.00000    0.00000    0.00000
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="IR" xUnits="1/cm" yUnits="TRANSMITTANCE" >
-<PeakData id="1" title="A1-asymm stretch of N-H group (~3450 cm-1)" peakShape="broad" model="C1.20" xMax="3470" xMin="3450"  yMax="1" yMin="0" />
-<PeakData id="2" title="B2-asymm stretch of N-H group (~3445 cm-1)" peakShape="broad" model="C1.19" xMax="3450" xMin="3420"  yMax="1" yMin="0" />
-<PeakData id="3" title="A1-sym stretch of N-H group  (~3345 cm-1)" peakShape="broad" model="C1.18" xMax="3370" xMin="3350"  yMax="1" yMin="0" />
-<PeakData id="4" title="B2-sym stretch of N-H group  (~3340 cm-1)" peakShape="broad" model="C1.17" xMax="3350" xMin="3320"  yMax="1" yMin="0" />
-<PeakData id="5" title="A1-sym bend of N-H group (~1683 cm-1)" peakShape="broad" model="C1.16" xMax="1710" xMin="1683"  yMax="1" yMin="0" />
-<PeakData id="6" title="B2-sym bend of N-H group (~1683 cm-1)" peakShape="broad" model="C1.15" xMax="1680" xMin="1645"  yMax="1" yMin="0" />
-<PeakData id="7" title="A1- C=O stretch (~1601 cm-1)" peakShape="broad" model="C1.14" xMax="1620" xMin="1580"  yMax="1" yMin="0" />
-<PeakData id="8" title="B2-(~1366 cm-1)" peakShape="broad" model="C1.13" xMax="720" xMin="670"  yMax="1" yMin="0" />
-<PeakData id="9" title="A1 (~1256 cm-1)" peakShape="broad" model="C1.12" xMax="600" xMin="550"  yMax="1" yMin="0" />
-<PeakData id="10" title="B1-(~996 cm-1)" peakShape="broad" model="C1.11" xMax="3120" xMin="3080"  yMax="1" yMin="0" />
-<PeakData id="11" title="B2- (~960 cm-1)" peakShape="broad" model="C1.10" xMax="3100" xMin="3060"  yMax="1" yMin="0" />
-<PeakData id="12" title="A2-  (~947 cm-1)" peakShape="broad" model="C1.9" xMax="1610" xMin="1570"  yMax="1" yMin="0" />
-<PeakData id="13" title="B1- (~914 cm-1)" peakShape="broad" model="C1.8" xMax="1320" xMin="1280"  yMax="1" yMin="0" />
-<PeakData id="14" title="B1-  (~708 cm-1)" peakShape="broad" model="C1.7" xMax="1243" xMin="1203"  yMax="1" yMin="0" />
-<PeakData id="15" title="A1- (~701 cm-1)" peakShape="broad" model="C1.6" xMax="880" xMin="840"  yMax="1" yMin="0" />
-<PeakData id="16" title="A2- (~670 cm-1)" peakShape="broad" model="C1.5" xMax="785" xMin="740"  yMax="1" yMin="0" />
-<PeakData id="17" title="B2-(~562 cm-1)" peakShape="broad" model="C1.4" xMax="720" xMin="670"  yMax="1" yMin="0" />
-<PeakData id="18" title="A1 (~497 cm-1)" peakShape="broad" model="C1.3" xMax="600" xMin="550"  yMax="1" yMin="0" />
+<Peaks type="IR" xUnitsExpected="1/cm"  >
+<PeakData id="1" title="A1-asymm stretch of N-H group (~3450 cm-1)" peakShape="broad" model="C1.20" xMax="3470" xMin="3450"    />
+<PeakData id="2" title="B2-asymm stretch of N-H group (~3445 cm-1)" peakShape="broad" model="C1.19" xMax="3450" xMin="3420"    />
+<PeakData id="3" title="A1-sym stretch of N-H group  (~3345 cm-1)" peakShape="broad" model="C1.18" xMax="3370" xMin="3350"    />
+<PeakData id="4" title="B2-sym stretch of N-H group  (~3340 cm-1)" peakShape="broad" model="C1.17" xMax="3350" xMin="3320"    />
+<PeakData id="5" title="A1-sym bend of N-H group (~1683 cm-1)" peakShape="broad" model="C1.16" xMax="1710" xMin="1683"    />
+<PeakData id="6" title="B2-sym bend of N-H group (~1683 cm-1)" peakShape="broad" model="C1.15" xMax="1680" xMin="1645"    />
+<PeakData id="7" title="A1- C=O stretch (~1601 cm-1)" peakShape="broad" model="C1.14" xMax="1620" xMin="1580"    />
+<PeakData id="8" title="B2-(~1366 cm-1)" peakShape="broad" model="C1.13" xMax="720" xMin="670"    />
+<PeakData id="9" title="A1 (~1256 cm-1)" peakShape="broad" model="C1.12" xMax="600" xMin="550"    />
+<PeakData id="10" title="B1-(~996 cm-1)" peakShape="broad" model="C1.11" xMax="3120" xMin="3080"    />
+<PeakData id="11" title="B2- (~960 cm-1)" peakShape="broad" model="C1.10" xMax="3100" xMin="3060"    />
+<PeakData id="12" title="A2-  (~947 cm-1)" peakShape="broad" model="C1.9" xMax="1610" xMin="1570"    />
+<PeakData id="13" title="B1- (~914 cm-1)" peakShape="broad" model="C1.8" xMax="1320" xMin="1280"    />
+<PeakData id="14" title="B1-  (~708 cm-1)" peakShape="broad" model="C1.7" xMax="1243" xMin="1203"    />
+<PeakData id="15" title="A1- (~701 cm-1)" peakShape="broad" model="C1.6" xMax="880" xMin="840"    />
+<PeakData id="16" title="A2- (~670 cm-1)" peakShape="broad" model="C1.5" xMax="785" xMin="740"    />
+<PeakData id="17" title="B2-(~562 cm-1)" peakShape="broad" model="C1.4" xMax="720" xMin="670"    />
+<PeakData id="18" title="A1 (~497 cm-1)" peakShape="broad" model="C1.3" xMax="600" xMin="550"    />
 </Peaks>
 ##XUNITS= 1/CM
 ##YUNITS= TRANSMITTANCE
@@ -529,25 +529,25 @@ O     0.00000    0.00000    1.41719    0.00000    0.00000    0.00000
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="RAMAN" xUnits="1/cm" yUnits="TRANSMITTANCE" >
-<PeakData id="1" title="A1-asymm stretch of N-H group (~3450 cm-1)" peakShape="broad" model="C2.20" xMax="3470" xMin="3450"  yMax="1" yMin="0" />
-<PeakData id="2" title="B2-asymm stretch of N-H group (~3445 cm-1)" peakShape="broad" model="C2.19" xMax="3450" xMin="3420"  yMax="1" yMin="0" />
-<PeakData id="3" title="A1-sym stretch of N-H group  (~3345 cm-1)" peakShape="broad" model="C2.18" xMax="3370" xMin="3350"  yMax="1" yMin="0" />
-<PeakData id="4" title="B2-sym stretch of N-H group  (~3340 cm-1)" peakShape="broad" model="C2.17" xMax="3350" xMin="3320"  yMax="1" yMin="0" />
-<PeakData id="5" title="A1-sym bend of N-H group (~1683 cm-1)" peakShape="broad" model="C2.16" xMax="1710" xMin="1683"  yMax="1" yMin="0" />
-<PeakData id="6" title="B2-sym bend of N-H group (~1683 cm-1)" peakShape="broad" model="C2.15" xMax="1680" xMin="1645"  yMax="1" yMin="0" />
-<PeakData id="7" title="A1- C=O stretch (~1601 cm-1)" peakShape="broad" model="C2.14" xMax="1620" xMin="1580"  yMax="1" yMin="0" />
-<PeakData id="8" title="B2-(~1366 cm-1)" peakShape="broad" model="C2.13" xMax="720" xMin="670"  yMax="1" yMin="0" />
-<PeakData id="9" title="A1 (~1256 cm-1)" peakShape="broad" model="C2.12" xMax="600" xMin="550"  yMax="1" yMin="0" />
-<PeakData id="10" title="B1-(~996 cm-1)" peakShape="broad" model="C2.11" xMax="3120" xMin="3080"  yMax="1" yMin="0" />
-<PeakData id="11" title="B2- (~960 cm-1)" peakShape="broad" model="C2.10" xMax="3100" xMin="3060"  yMax="1" yMin="0" />
-<PeakData id="12" title="A2-  (~947 cm-1)" peakShape="broad" model="C2.9" xMax="1610" xMin="1570"  yMax="1" yMin="0" />
-<PeakData id="13" title="B1- (~914 cm-1)" peakShape="broad" model="C2.8" xMax="1320" xMin="1280"  yMax="1" yMin="0" />
-<PeakData id="14" title="B1-  (~708 cm-1)" peakShape="broad" model="C2.7" xMax="1243" xMin="1203"  yMax="1" yMin="0" />
-<PeakData id="15" title="A1- (~701 cm-1)" peakShape="broad" model="C2.6" xMax="880" xMin="840"  yMax="1" yMin="0" />
-<PeakData id="16" title="A2- (~670 cm-1)" peakShape="broad" model="C2.5" xMax="785" xMin="740"  yMax="1" yMin="0" />
-<PeakData id="17" title="B2-(~562 cm-1)" peakShape="broad" model="C2.4" xMax="720" xMin="670"  yMax="1" yMin="0" />
-<PeakData id="18" title="A1 (~497 cm-1)" peakShape="broad" model="C2.3" xMax="600" xMin="550"  yMax="1" yMin="0" /></Peaks>
+<Peaks type="RAMAN" xUnitsExpected="1/cm"  >
+<PeakData id="1" title="A1-asymm stretch of N-H group (~3450 cm-1)" peakShape="broad" model="C2.20" xMax="3470" xMin="3450"    />
+<PeakData id="2" title="B2-asymm stretch of N-H group (~3445 cm-1)" peakShape="broad" model="C2.19" xMax="3450" xMin="3420"    />
+<PeakData id="3" title="A1-sym stretch of N-H group  (~3345 cm-1)" peakShape="broad" model="C2.18" xMax="3370" xMin="3350"    />
+<PeakData id="4" title="B2-sym stretch of N-H group  (~3340 cm-1)" peakShape="broad" model="C2.17" xMax="3350" xMin="3320"    />
+<PeakData id="5" title="A1-sym bend of N-H group (~1683 cm-1)" peakShape="broad" model="C2.16" xMax="1710" xMin="1683"    />
+<PeakData id="6" title="B2-sym bend of N-H group (~1683 cm-1)" peakShape="broad" model="C2.15" xMax="1680" xMin="1645"    />
+<PeakData id="7" title="A1- C=O stretch (~1601 cm-1)" peakShape="broad" model="C2.14" xMax="1620" xMin="1580"    />
+<PeakData id="8" title="B2-(~1366 cm-1)" peakShape="broad" model="C2.13" xMax="720" xMin="670"    />
+<PeakData id="9" title="A1 (~1256 cm-1)" peakShape="broad" model="C2.12" xMax="600" xMin="550"    />
+<PeakData id="10" title="B1-(~996 cm-1)" peakShape="broad" model="C2.11" xMax="3120" xMin="3080"    />
+<PeakData id="11" title="B2- (~960 cm-1)" peakShape="broad" model="C2.10" xMax="3100" xMin="3060"    />
+<PeakData id="12" title="A2-  (~947 cm-1)" peakShape="broad" model="C2.9" xMax="1610" xMin="1570"    />
+<PeakData id="13" title="B1- (~914 cm-1)" peakShape="broad" model="C2.8" xMax="1320" xMin="1280"    />
+<PeakData id="14" title="B1-  (~708 cm-1)" peakShape="broad" model="C2.7" xMax="1243" xMin="1203"    />
+<PeakData id="15" title="A1- (~701 cm-1)" peakShape="broad" model="C2.6" xMax="880" xMin="840"    />
+<PeakData id="16" title="A2- (~670 cm-1)" peakShape="broad" model="C2.5" xMax="785" xMin="740"    />
+<PeakData id="17" title="B2-(~562 cm-1)" peakShape="broad" model="C2.4" xMax="720" xMin="670"    />
+<PeakData id="18" title="A1 (~497 cm-1)" peakShape="broad" model="C2.3" xMax="600" xMin="550"    /></Peaks>
 ##XUNITS= 1/CM
 ##YUNITS= RAMAN INTENSITY
 ##XFACTOR= 1

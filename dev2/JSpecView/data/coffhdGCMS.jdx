@@ -16,33 +16,33 @@
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="GC/MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="2-methylfuran (~11)" peakShape="sharp" model="1mefur.1"  xMax="11.5" xMin="10.5"  yMax="100" yMin="0" />
-<PeakData id="2" title="2-butanone (~13)" peakShape="sharp" model="2but.1"  xMax="13.4" xMin="12.5"  yMax="100" yMin="0" />
-<PeakData id="3" title="2-methylbutanal (~14)" peakShape="sharp" model="3mebut.1"  xMax="14.5" xMin="13.6"  yMax="100" yMin="0" />
-<PeakData id="4" title="2,5-dimethylfuran (~16)" peakShape="sharp" model="4dimeth.1"  xMax="16.5" xMin="15.5"  yMax="100" yMin="0" />
-<PeakData id="5" title="2,3-butanedione (~18)" peakShape="sharp" model="5butdione.1"  xMax="18.5" xMin="17.5"  yMax="100" yMin="0" />
-<PeakData id="6" title="pyrrolidine (~22)" peakShape="sharp" model="6pyrrol.1"  xMax="22.5" xMin="21.5"  yMax="100" yMin="0" />
-<PeakData id="7" title="2,3-pentanedione (~24)" peakShape="sharp" model="7pent.1"  xMax="24.4" xMin="23.5"  yMax="100" yMin="0" />
-<PeakData id="8" title="2-methylthiophene (~25)" peakShape="sharp" model="8methio.1"  xMax="25.4" xMin="24.6"  yMax="100" yMin="0" />
-<PeakData id="9" title="2-methylbutenal (~26)" peakShape="sharp" model="9mebut.1"  xMax="26.5" xMin="25.6"  yMax="100" yMin="0" />
-<PeakData id="10" title="4-methyl-2,3-pentanedione (~31)" peakShape="sharp" model="10mepent.1"  xMax="31.5" xMin="30.5"  yMax="100" yMin="0" />
-<PeakData id="11" title="3-methyl-1-hydroxybenzene (m-cresol) (~33)" peakShape="sharp" model="11mcresol.1"  xMax="33.5" xMin="32.5"  yMax="100" yMin="0" />
-<PeakData id="12" title="pyrazine (~49)" peakShape="sharp" model="12pyraz.1"  xMax="49.5" xMin="48.5"  yMax="100" yMin="0" />
-<PeakData id="13" title="furfurylmethylether (~52)" peakShape="sharp" model="13furfurme.1"  xMax="52.5" xMin="51.5"  yMax="100" yMin="0" />
-<PeakData id="14" title="2-methylpyrazine (~61)" peakShape="sharp" model="14mepyr.1"  xMax="61.5" xMin="60.5"  yMax="100" yMin="0" />
-<PeakData id="15" title="acetoin (~69)" peakShape="sharp" model="15acetoin.1"  xMax="69.5" xMin="68.5"  yMax="100" yMin="0" />
-<PeakData id="16" title="hydroxyacetone (~72)" peakShape="sharp" model="16acetol.1"  xMax="72.4" xMin="71.5"  yMax="100" yMin="0" />
-<PeakData id="17" title="2,5-dimethylpyrazine (~73)" peakShape="sharp" model="17dimepyr.1"  xMax="73.5" xMin="72.6"  yMax="100" yMin="0" />
-<PeakData id="18" title="2,6-dimethylpyrazine (~75)" peakShape="sharp" model="18dimepyr.1"  xMax="75.5" xMin="74.5"  yMax="100" yMin="0" />
-<PeakData id="19" title="furfural (~103)" peakShape="sharp" model="19furfur.1"  xMax="103.5" xMin="102.5"  yMax="100" yMin="0" />
-<PeakData id="20" title="ethyleneglycol diacetate (~107)" peakShape="sharp" model="20egdiac.1"  xMax="107.5" xMin="106.5"  yMax="100" yMin="0" />
-<PeakData id="21" title="furfuryl formate (~111)" peakShape="sharp" model="21furform.1"  xMax="111.4" xMin="110.5"  yMax="100" yMin="0" />
-<PeakData id="22" title="2-acetylfuran (~112)" peakShape="sharp" model="22acfur.1"  xMax="112.5" xMin="111.6"  yMax="100" yMin="0" />
-<PeakData id="23" title="pyrrole (~114)" peakShape="sharp" model="23pyrrole.1"  xMax="114.5" xMin="113.5"  yMax="100" yMin="0" />
-<PeakData id="24" title="furfuryl acetate (~121)" peakShape="sharp" model="24furac.1"  xMax="121.5" xMin="120.5"  yMax="100" yMin="0" />
-<PeakData id="25" title="5-methylfurfural (~128)" peakShape="sharp" model="25mefur.1"  xMax="128.5" xMin="127.5"  yMax="100" yMin="0" />
-<PeakData id="26" title="furfuryl alcohol (~150)" peakShape="sharp" model="26fufol.1"  xMax="150.5" xMin="149.5"  yMax="100" yMin="0" />
+<Peaks type="GC/MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="2-methylfuran (~11)" peakShape="sharp" model="1mefur.1"  xMax="11.5" xMin="10.5"    />
+<PeakData id="2" title="2-butanone (~13)" peakShape="sharp" model="2but.1"  xMax="13.4" xMin="12.5"    />
+<PeakData id="3" title="2-methylbutanal (~14)" peakShape="sharp" model="3mebut.1"  xMax="14.5" xMin="13.6"    />
+<PeakData id="4" title="2,5-dimethylfuran (~16)" peakShape="sharp" model="4dimeth.1"  xMax="16.5" xMin="15.5"    />
+<PeakData id="5" title="2,3-butanedione (~18)" peakShape="sharp" model="5butdione.1"  xMax="18.5" xMin="17.5"    />
+<PeakData id="6" title="pyrrolidine (~22)" peakShape="sharp" model="6pyrrol.1"  xMax="22.5" xMin="21.5"    />
+<PeakData id="7" title="2,3-pentanedione (~24)" peakShape="sharp" model="7pent.1"  xMax="24.4" xMin="23.5"    />
+<PeakData id="8" title="2-methylthiophene (~25)" peakShape="sharp" model="8methio.1"  xMax="25.4" xMin="24.6"    />
+<PeakData id="9" title="2-methylbutenal (~26)" peakShape="sharp" model="9mebut.1"  xMax="26.5" xMin="25.6"    />
+<PeakData id="10" title="4-methyl-2,3-pentanedione (~31)" peakShape="sharp" model="10mepent.1"  xMax="31.5" xMin="30.5"    />
+<PeakData id="11" title="3-methyl-1-hydroxybenzene (m-cresol) (~33)" peakShape="sharp" model="11mcresol.1"  xMax="33.5" xMin="32.5"    />
+<PeakData id="12" title="pyrazine (~49)" peakShape="sharp" model="12pyraz.1"  xMax="49.5" xMin="48.5"    />
+<PeakData id="13" title="furfurylmethylether (~52)" peakShape="sharp" model="13furfurme.1"  xMax="52.5" xMin="51.5"    />
+<PeakData id="14" title="2-methylpyrazine (~61)" peakShape="sharp" model="14mepyr.1"  xMax="61.5" xMin="60.5"    />
+<PeakData id="15" title="acetoin (~69)" peakShape="sharp" model="15acetoin.1"  xMax="69.5" xMin="68.5"    />
+<PeakData id="16" title="hydroxyacetone (~72)" peakShape="sharp" model="16acetol.1"  xMax="72.4" xMin="71.5"    />
+<PeakData id="17" title="2,5-dimethylpyrazine (~73)" peakShape="sharp" model="17dimepyr.1"  xMax="73.5" xMin="72.6"    />
+<PeakData id="18" title="2,6-dimethylpyrazine (~75)" peakShape="sharp" model="18dimepyr.1"  xMax="75.5" xMin="74.5"    />
+<PeakData id="19" title="furfural (~103)" peakShape="sharp" model="19furfur.1"  xMax="103.5" xMin="102.5"    />
+<PeakData id="20" title="ethyleneglycol diacetate (~107)" peakShape="sharp" model="20egdiac.1"  xMax="107.5" xMin="106.5"    />
+<PeakData id="21" title="furfuryl formate (~111)" peakShape="sharp" model="21furform.1"  xMax="111.4" xMin="110.5"    />
+<PeakData id="22" title="2-acetylfuran (~112)" peakShape="sharp" model="22acfur.1"  xMax="112.5" xMin="111.6"    />
+<PeakData id="23" title="pyrrole (~114)" peakShape="sharp" model="23pyrrole.1"  xMax="114.5" xMin="113.5"    />
+<PeakData id="24" title="furfuryl acetate (~121)" peakShape="sharp" model="24furac.1"  xMax="121.5" xMin="120.5"    />
+<PeakData id="25" title="5-methylfurfural (~128)" peakShape="sharp" model="25mefur.1"  xMax="128.5" xMin="127.5"    />
+<PeakData id="26" title="furfuryl alcohol (~150)" peakShape="sharp" model="26fufol.1"  xMax="150.5" xMin="149.5"    />
 </Peaks>
 ##$URL= http://wwwchem.uwimona.edu.jm/lectures/coffee.html
 ##XUNITS= ARBITRARY
@@ -139,8 +139,8 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="molecular ion (~82)" peakShape="sharp" model="1mefur.1"  xMax="83" xMin="81"  yMax="100" yMin="0" />
+<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="molecular ion (~82)" peakShape="sharp" model="1mefur.1"  xMax="83" xMin="81"    />
 </Peaks>
 ##XUNITS=M/Z
 ##YUNITS=RELATIVE ABUNDANCE
@@ -237,8 +237,8 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="molecular ion (~72)" peakShape="sharp" model="2but.1"  xMax="73" xMin="71"  yMax="100" yMin="0" />
+<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="molecular ion (~72)" peakShape="sharp" model="2but.1"  xMax="73" xMin="71"    />
 </Peaks>
 ##XUNITS=M/Z
 ##YUNITS=RELATIVE ABUNDANCE
@@ -345,8 +345,8 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="molecular ion (~86)" peakShape="sharp" model="3mebut.1"  xMax="87" xMin="85"  yMax="100" yMin="0" />
+<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="molecular ion (~86)" peakShape="sharp" model="3mebut.1"  xMax="87" xMin="85"    />
 </Peaks>
 ##XUNITS=M/Z
 ##YUNITS=RELATIVE ABUNDANCE
@@ -455,8 +455,8 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="4dimeth.1"  xMax="137" xMin="135"  yMax="100" yMin="0" />
+<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="4dimeth.1"  xMax="137" xMin="135"    />
 </Peaks>
 ##XUNITS=M/Z
 ##YUNITS=RELATIVE ABUNDANCE
@@ -547,8 +547,8 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="5butdione.1"  xMax="137" xMin="135"  yMax="100" yMin="0" />
+<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="5butdione.1"  xMax="137" xMin="135"    />
 </Peaks>
 ##XUNITS= m/z
 ##YUNITS= relative abundance
@@ -652,8 +652,8 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="6pyrrol.1"  xMax="137" xMin="135"  yMax="100" yMin="0" />
+<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="6pyrrol.1"  xMax="137" xMin="135"    />
 </Peaks>
 ##XUNITS=M/Z
 ##YUNITS=RELATIVE ABUNDANCE
@@ -760,8 +760,8 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="7pent.1"  xMax="137" xMin="135"  yMax="100" yMin="0" />
+<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="7pent.1"  xMax="137" xMin="135"    />
 </Peaks>
 ##XUNITS=M/Z
 ##YUNITS=RELATIVE ABUNDANCE
@@ -856,8 +856,8 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="8methio.1"  xMax="137" xMin="135"  yMax="100" yMin="0" />
+<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="8methio.1"  xMax="137" xMin="135"    />
 </Peaks>
 ##XUNITS=M/Z
 ##YUNITS=RELATIVE ABUNDANCE
@@ -958,8 +958,8 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="9mebut.1"  xMax="137" xMin="135"  yMax="100" yMin="0" />
+<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="9mebut.1"  xMax="137" xMin="135"    />
 </Peaks>
 ##XUNITS=M/Z
 ##YUNITS=RELATIVE ABUNDANCE
@@ -1076,8 +1076,8 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="10mepent.1"  xMax="137" xMin="135"  yMax="100" yMin="0" />
+<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="10mepent.1"  xMax="137" xMin="135"    />
 </Peaks>
 ##XUNITS=M/Z
 ##YUNITS=RELATIVE ABUNDANCE
@@ -1185,8 +1185,8 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="11mcresol.1"  xMax="137" xMin="135"  yMax="100" yMin="0" />
+<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="11mcresol.1"  xMax="137" xMin="135"    />
 </Peaks>
 ##XUNITS=M/Z
 ##YUNITS=RELATIVE ABUNDANCE
@@ -1274,8 +1274,8 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="12pyraz.1"  xMax="137" xMin="135"  yMax="100" yMin="0" />
+<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="12pyraz.1"  xMax="137" xMin="135"    />
 </Peaks>
 ##XUNITS=M/Z
 ##YUNITS=RELATIVE ABUNDANCE
@@ -1380,8 +1380,8 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="13furfurme.1"  xMax="137" xMin="135"  yMax="100" yMin="0" />
+<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="13furfurme.1"  xMax="137" xMin="135"    />
 </Peaks>
 ##XUNITS=M/Z
 ##YUNITS=RELATIVE INTENSITY
@@ -1481,8 +1481,8 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="14mepyr.1"  xMax="137" xMin="135"  yMax="100" yMin="0" />
+<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="14mepyr.1"  xMax="137" xMin="135"    />
 </Peaks>
 ##XUNITS=M/Z
 ##YUNITS=RELATIVE ABUNDANCE
@@ -1581,8 +1581,8 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="15acetoin.1"  xMax="137" xMin="135"  yMax="100" yMin="0" />
+<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="15acetoin.1"  xMax="137" xMin="135"    />
 </Peaks>
 ##XUNITS=M/Z
 ##YUNITS=RELATIVE ABUNDANCE
@@ -1672,8 +1672,8 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="16acetol.1"  xMax="137" xMin="135"  yMax="100" yMin="0" />
+<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="16acetol.1"  xMax="137" xMin="135"    />
 </Peaks>
 ##XUNITS=M/Z
 ##YUNITS=RELATIVE ABUNDANCE
@@ -1783,8 +1783,8 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="17dimepyr.1"  xMax="137" xMin="135"  yMax="100" yMin="0" />
+<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="17dimepyr.1"  xMax="137" xMin="135"    />
 </Peaks>
 ##XUNITS=M/Z
 ##YUNITS=RELATIVE ABUNDANCE
@@ -1893,8 +1893,8 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="18dimepyr.1"  xMax="137" xMin="135"  yMax="100" yMin="0" />
+<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="18dimepyr.1"  xMax="137" xMin="135"    />
 </Peaks>
 ##XUNITS=M/Z
 ##YUNITS=RELATIVE ABUNDANCE
@@ -1983,8 +1983,8 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="19furfur.1"  xMax="137" xMin="135"  yMax="100" yMin="0" />
+<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="19furfur.1"  xMax="137" xMin="135"    />
 </Peaks>
 ##XUNITS=M/Z
 ##YUNITS=RELATIVE ABUNDANCE
@@ -2106,8 +2106,8 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="20egdiac.1"  xMax="137" xMin="135"  yMax="100" yMin="0" />
+<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="20egdiac.1"  xMax="137" xMin="135"    />
 </Peaks>
 ##XUNITS=M/Z
 ##YUNITS=RELATIVE ABUNDANCE
@@ -2217,8 +2217,8 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="21furform.1"  xMax="137" xMin="135"  yMax="100" yMin="0" />
+<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="21furform.1"  xMax="137" xMin="135"    />
 </Peaks>
 ##XUNITS=M/Z
 ##YUNITS=RELATIVE ABUNDANCE
@@ -2318,8 +2318,8 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="22acfur.1"  xMax="137" xMin="135"  yMax="100" yMin="0" />
+<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="22acfur.1"  xMax="137" xMin="135"    />
 </Peaks>
 ##XUNITS=M/Z
 ##YUNITS=RELATIVE ABUNDANCE
@@ -2408,8 +2408,8 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="23pyrrole.1"  xMax="137" xMin="135"  yMax="100" yMin="0" />
+<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="23pyrrole.1"  xMax="137" xMin="135"    />
 </Peaks>
 ##XUNITS=M/Z
 ##YUNITS=RELATIVE ABUNDANCE
@@ -2530,8 +2530,8 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="24furac.1"  xMax="137" xMin="135"  yMax="100" yMin="0" />
+<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="molecular ion (~136)" peakShape="sharp" model="24furac.1"  xMax="137" xMin="135"    />
 </Peaks>
 ##XUNITS=M/Z
 ##YUNITS=RELATIVE ABUNDANCE
@@ -2635,8 +2635,8 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="molecular ion (~110)" peakShape="sharp" model="25mefur.1"  xMax="137" xMin="135"  yMax="100" yMin="0" />
+<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="molecular ion (~110)" peakShape="sharp" model="25mefur.1"  xMax="137" xMin="135"    />
 </Peaks>
 ##XUNITS=M/Z
 ##YUNITS=RELATIVE ABUNDANCE
@@ -2734,8 +2734,8 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="molecular ion (~98)" peakShape="sharp" model="26fufol.1"  xMax="137" xMin="135"  yMax="100" yMin="0" />
+<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="molecular ion (~98)" peakShape="sharp" model="26fufol.1"  xMax="137" xMin="135"    />
 </Peaks>
 ##XUNITS=M/Z
 ##YUNITS=RELATIVE ABUNDANCE

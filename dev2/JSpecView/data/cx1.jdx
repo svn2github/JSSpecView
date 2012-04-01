@@ -1255,15 +1255,15 @@ H     3.198400    0.892300   -0.949300   -0.304060    0.450460    0.807340
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="IR" xUnits="1/cm" yUnits="TRANSMITTANCE" >
-<PeakData id="1" title="asymmetric stretch of CH3 group (~2962 cm-1)" peakShape="broad" model="hex1.46" xMax="2977" xMin="2937"  yMax="1" yMin="0" />
-<PeakData id="2" title="asymmetric stretch of CH2 group (~2925 cm-1)" peakShape="broad" model="hex1.43" xMax="2945" xMin="2905"  yMax="1" yMin="0" />
-<PeakData id="3" title="symmetric stretch of CH3 group (~2875 cm-1)" peakShape="broad" model="hex1.53" xMax="2885" xMin="2865"  yMax="1" yMin="0" />
-<PeakData id="4" title="symmetric stretch of CH2 group (~2860 cm-1)" peakShape="broad" model="hex1.51" xMax="2870" xMin="2850"  yMax="1" yMin="0" />
-<PeakData id="5" title="asymmetric bend of CH3 group (~1468 cm-1)" peakShape="broad" model="hex1.38" xMax="1490" xMin="1460"  yMax="1" yMin="0" />
-<PeakData id="6" title="scissors of CH2 group (~1460 cm-1)" peakShape="broad" model="hex1.36" xMax="1470" xMin="1430"  yMax="1" yMin="0" />
-<PeakData id="7" title="symmetric bend CH3 group (~1379 cm-1)" peakShape="broad" model="hex1.32" xMax="1390" xMin="1370"  yMax="1" yMin="0" />
-<PeakData id="8" title="concerted rocking mode of CH2 groups (~720 cm-1)" peakShape="broad" model="hex1.10" xMax="735" xMin="715"  yMax="1" yMin="0" />
+<Peaks type="IR" xUnitsExpected="1/cm"  >
+<PeakData id="1" title="asymmetric stretch of CH3 group (~2962 cm-1)" peakShape="broad" model="hex1.46" xMax="2977" xMin="2937"    />
+<PeakData id="2" title="asymmetric stretch of CH2 group (~2925 cm-1)" peakShape="broad" model="hex1.43" xMax="2945" xMin="2905"    />
+<PeakData id="3" title="symmetric stretch of CH3 group (~2875 cm-1)" peakShape="broad" model="hex1.53" xMax="2885" xMin="2865"    />
+<PeakData id="4" title="symmetric stretch of CH2 group (~2860 cm-1)" peakShape="broad" model="hex1.51" xMax="2870" xMin="2850"    />
+<PeakData id="5" title="asymmetric bend of CH3 group (~1468 cm-1)" peakShape="broad" model="hex1.38" xMax="1490" xMin="1460"    />
+<PeakData id="6" title="scissors of CH2 group (~1460 cm-1)" peakShape="broad" model="hex1.36" xMax="1470" xMin="1430"    />
+<PeakData id="7" title="symmetric bend CH3 group (~1379 cm-1)" peakShape="broad" model="hex1.32" xMax="1390" xMin="1370"    />
+<PeakData id="8" title="concerted rocking mode of CH2 groups (~720 cm-1)" peakShape="broad" model="hex1.10" xMax="735" xMin="715"    />
 </Peaks>
 ##DELTAX=   .5000000
 ##XUNITS= 1/CM
@@ -2272,10 +2272,10 @@ H    -2.469700   -0.171600   -0.522300   -1.132120   -0.110280   -0.202360
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="IR" xUnits="1/cm" yUnits="TRANSMITTANCE" >
-<PeakData id="1" title="HC=CH - asymmetric stretch (~3063 cm-1)" peakShape="broad" model="cx2.41" xMax="3083" xMin="3043"  yMax="1" yMin="0" />
-<PeakData id="2" title="HC=CH - symmetric stretch (~3024 cm-1)" peakShape="broad" model="cx2.42" xMax="3040" xMin="3010"  yMax="1" yMin="0" />
-<PeakData id="3" title="C=C stretch (~1654 cm-1)" peakShape="broad" model="cx2.32" xMax="1674" xMin="1634"  yMax="1" yMin="0" />
+<Peaks type="IR" xUnitsExpected="1/cm"  >
+<PeakData id="1" title="HC=CH - asymmetric stretch (~3063 cm-1)" peakShape="broad" model="cx2.41" xMax="3083" xMin="3043"    />
+<PeakData id="2" title="HC=CH - symmetric stretch (~3024 cm-1)" peakShape="broad" model="cx2.42" xMax="3040" xMin="3010"    />
+<PeakData id="3" title="C=C stretch (~1654 cm-1)" peakShape="broad" model="cx2.32" xMax="1674" xMin="1634"    />
 </Peaks>
 ##XUNITS= 1/CM
 ##YUNITS= TRANSMITTANCE
@@ -3620,10 +3620,10 @@ H     1.656400    0.140100   -1.678000   -0.312620    0.171360   -0.067520
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="IR" xUnits="1/cm" yUnits="TRANSMITTANCE" >
-<PeakData id="1" title="O-H stretch (~3370 cm-1)" peakShape="broad" model="cxoh3.1" xMax="3420" xMin="3320"  yMax="1" yMin="0" />
-<PeakData id="2" title="C-H asymmetric stretch (~2940 cm-1)" peakShape="broad" model="cxoh3.8" xMax="2960" xMin="2920"  yMax="1" yMin="0" />
-<PeakData id="3" title="C-H symmetric stretch (~2855 cm-1)" peakShape="broad" model="cxoh3.2" xMax="2875" xMin="2845"  yMax="1" yMin="0" />
+<Peaks type="IR" xUnitsExpected="1/cm"  >
+<PeakData id="1" title="O-H stretch (~3370 cm-1)" peakShape="broad" model="cxoh3.1" xMax="3420" xMin="3320"    />
+<PeakData id="2" title="C-H asymmetric stretch (~2940 cm-1)" peakShape="broad" model="cxoh3.8" xMax="2960" xMin="2920"    />
+<PeakData id="3" title="C-H symmetric stretch (~2855 cm-1)" peakShape="broad" model="cxoh3.2" xMax="2875" xMin="2845"    />
 </Peaks>
 ##XUNITS=1/CM
 ##YUNITS= TRANSMITTANCE
@@ -4683,8 +4683,8 @@ H    -2.543600   -0.767200   -0.592300   -0.006040   -0.002920    0.009240
 IRLinks(1712, 1, 30, 11,"Carbonyl stretching band (~1712 cm-1)");
 
 ##$PEAKS=
-<Peaks type="IR" xUnits="1/cm" yUnits="TRANSMITTANCE" >
-<PeakData id="1" title="Carbonyl stretching band (~1712 cm-1)" peakShape="broad" model="cxo4.11" xMax="1742" xMin="1682"  yMax="1" yMin="0" />
+<Peaks type="IR" xUnitsExpected="1/cm"  >
+<PeakData id="1" title="Carbonyl stretching band (~1712 cm-1)" peakShape="broad" model="cxo4.11" xMax="1742" xMin="1682"    />
 </Peaks>
 ##XUNITS= 1/CM
 ##YUNITS= TRANSMITTANCE

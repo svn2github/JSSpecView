@@ -185,26 +185,26 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="13CNMR" xUnits="ppm" yUnits="arbitrary units" >
-<PeakData  id="1" title="peak ~12" peakShape="singlet" model="cholac" atoms="18"  xMax="13" xMin="11"  yMax="10000" yMin="0" />
-<PeakData  id="2" title="peak ~19" peakShape="singlet" model="cholac" atoms="19,21"  xMax="19.5" xMin="18"  yMax="10000" yMin="0" />
-<PeakData  id="3" title="peak ~21" peakShape="singlet" model="cholac" atoms="11,29"  xMax="21.5" xMin="19.5"  yMax="10000" yMin="0" />
-<PeakData  id="4" title="peak ~22" peakShape="singlet" model="cholac" atoms="26,27"  xMax="22.5" xMin="21.5"  yMax="10000" yMin="0" />
-<PeakData  id="5" title="peak ~23" peakShape="singlet" model="cholac" atoms="23"  xMax="23.5" xMin="22.5"  yMax="10000" yMin="0" />
-<PeakData  id="6" title="peak ~24" peakShape="singlet" model="cholac" atoms="15"  xMax="24.5" xMin="23.5"  yMax="10000" yMin="0" />
-<PeakData  id="7" title="peak ~28" peakShape="singlet" model="cholac" atoms="2,16,25"  xMax="29" xMin="27"  yMax="10000" yMin="0" />
-<PeakData  id="8" title="peak ~31.8" peakShape="singlet" model="cholac" atoms="7,8"  xMax="23" xMin="30"  yMax="10000" yMin="0" />
-<PeakData  id="9" title="peak ~36" peakShape="singlet" model="cholac" atoms="20,22"  xMax="36.5" xMin="34.5"  yMax="10000" yMin="0" />
-<PeakData  id="10" title="peak ~37" peakShape="singlet" model="cholac" atoms="1,10"  xMax="37.5" xMin="36.5"  yMax="10000" yMin="0" />
-<PeakData  id="11" title="peak ~38" peakShape="singlet" model="cholac" atoms="4"  xMax="38.5" xMin="37.5"  yMax="10000" yMin="0" />
-<PeakData  id="12" title="peak ~39.5" peakShape="singlet" model="cholac" atoms="12,24"  xMax="41" xMin="38.5"  yMax="10000" yMin="0" />
-<PeakData  id="13" title="peak ~42.5" peakShape="singlet" model="cholac" atoms="13"  xMax="43" xMin="41.5"  yMax="10000" yMin="0" />
-<PeakData  id="14" title="peak ~50" peakShape="singlet" model="cholac" atoms="9"  xMax="51" xMin="49"  yMax="10000" yMin="0" />
-<PeakData  id="15" title="peak ~56" peakShape="singlet" model="cholac" atoms="14,17"  xMax="57" xMin="55"  yMax="10000" yMin="0" />
-<PeakData  id="16" title="peak ~74" peakShape="singlet" model="cholac" atoms="3"  xMax="75" xMin="73"  yMax="10000" yMin="0" />
-<PeakData  id="17" title="peak ~122" peakShape="singlet" model="cholac" atoms="6"  xMax="123" xMin="121"  yMax="10000" yMin="0" />
-<PeakData  id="18" title="peak ~138" peakShape="singlet" model="cholac" atoms="5"  xMax="139" xMin="137"  yMax="10000" yMin="0" />
-<PeakData  id="19" title="peak ~169" peakShape="singlet" model="cholac" atoms="28"  xMax="170" xMin="168"  yMax="10000" yMin="0" />
+<Peaks type="13CNMR" xUnitsExpected="ppm" yUnits="arbitrary units" >
+<PeakData  id="1" title="peak ~12" peakShape="singlet" model="cholac" atoms="18"  xMax="13" xMin="11"    />
+<PeakData  id="2" title="peak ~19" peakShape="singlet" model="cholac" atoms="19,21"  xMax="19.5" xMin="18"    />
+<PeakData  id="3" title="peak ~21" peakShape="singlet" model="cholac" atoms="11,29"  xMax="21.5" xMin="19.5"    />
+<PeakData  id="4" title="peak ~22" peakShape="singlet" model="cholac" atoms="26,27"  xMax="22.5" xMin="21.5"    />
+<PeakData  id="5" title="peak ~23" peakShape="singlet" model="cholac" atoms="23"  xMax="23.5" xMin="22.5"    />
+<PeakData  id="6" title="peak ~24" peakShape="singlet" model="cholac" atoms="15"  xMax="24.5" xMin="23.5"    />
+<PeakData  id="7" title="peak ~28" peakShape="singlet" model="cholac" atoms="2,16,25"  xMax="29" xMin="27"    />
+<PeakData  id="8" title="peak ~31.8" peakShape="singlet" model="cholac" atoms="7,8"  xMax="23" xMin="30"    />
+<PeakData  id="9" title="peak ~36" peakShape="singlet" model="cholac" atoms="20,22"  xMax="36.5" xMin="34.5"    />
+<PeakData  id="10" title="peak ~37" peakShape="singlet" model="cholac" atoms="1,10"  xMax="37.5" xMin="36.5"    />
+<PeakData  id="11" title="peak ~38" peakShape="singlet" model="cholac" atoms="4"  xMax="38.5" xMin="37.5"    />
+<PeakData  id="12" title="peak ~39.5" peakShape="singlet" model="cholac" atoms="12,24"  xMax="41" xMin="38.5"    />
+<PeakData  id="13" title="peak ~42.5" peakShape="singlet" model="cholac" atoms="13"  xMax="43" xMin="41.5"    />
+<PeakData  id="14" title="peak ~50" peakShape="singlet" model="cholac" atoms="9"  xMax="51" xMin="49"    />
+<PeakData  id="15" title="peak ~56" peakShape="singlet" model="cholac" atoms="14,17"  xMax="57" xMin="55"    />
+<PeakData  id="16" title="peak ~74" peakShape="singlet" model="cholac" atoms="3"  xMax="75" xMin="73"    />
+<PeakData  id="17" title="peak ~122" peakShape="singlet" model="cholac" atoms="6"  xMax="123" xMin="121"    />
+<PeakData  id="18" title="peak ~138" peakShape="singlet" model="cholac" atoms="5"  xMax="139" xMin="137"    />
+<PeakData  id="19" title="peak ~169" peakShape="singlet" model="cholac" atoms="28"  xMax="170" xMin="168"    />
 </Peaks>
 ##XUNITS=HZ
 ##YUNITS=ARBITRARY UNITS

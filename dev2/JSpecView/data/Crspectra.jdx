@@ -61,10 +61,10 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="UV-Vis" xUnits="nm" yUnits="arbitrary units" >
-<PeakData id="1" title="Spin Forbidden Band ~672nm" peakShape="singlet" model="alum" xMax="680" xMin="650"  yMax="10000" yMin="0" />
-<PeakData id="2" title="Spin Allowed - delta ~574nm" peakShape="singlet" model="alum" xMax="600" xMin="540"  yMax="10000" yMin="0" />
-<PeakData id="3" title="Spin Allowed ~ 406nm" peakShape="singlet" model="alum" xMax="440" xMin="380"  yMax="10000" yMin="0" />
+<Peaks type="UV-Vis" xUnitsExpected="nm" yUnits="arbitrary units" >
+<PeakData id="1" title="Spin Forbidden Band ~672nm" peakShape="singlet" model="alum" xMax="680" xMin="650"    />
+<PeakData id="2" title="Spin Allowed - delta ~574nm" peakShape="singlet" model="alum" xMax="600" xMin="540"    />
+<PeakData id="3" title="Spin Allowed ~ 406nm" peakShape="singlet" model="alum" xMax="440" xMin="380"    />
 </Peaks>
 ##XUNITS= NANOMETERS
 ##YUNITS= ABSORBANCE
@@ -228,9 +228,9 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="UV-Vis" xUnits="nm" yUnits="arbitrary units" >
-<PeakData id="1" title="Spin Allowed - delta ~520nm" peakShape="singlet" model="cisen"  xMax="560" xMin="480"  yMax="10000" yMin="0" />
-<PeakData id="2" title="Spin Allowed ~ 392nm" peakShape="singlet" model="cisen" xMax="430" xMin="370"  yMax="10000" yMin="0" />
+<Peaks type="UV-Vis" xUnitsExpected="nm" yUnits="arbitrary units" >
+<PeakData id="1" title="Spin Allowed - delta ~520nm" peakShape="singlet" model="cisen"  xMax="560" xMin="480"    />
+<PeakData id="2" title="Spin Allowed ~ 392nm" peakShape="singlet" model="cisen" xMax="430" xMin="370"    />
 </Peaks>
 ##XUNITS= NANOMETERS
 ##YUNITS= ABSORBANCE
@@ -375,9 +375,9 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="UV-Vis" xUnits="nm" yUnits="arbitrary units" >
-<PeakData id="1" title="Spin Allowed - delta ~460nm" peakShape="singlet" model="trisen"  xMax="480" xMin="440"  yMax="10000" yMin="0" />
-<PeakData id="2" title="Spin Allowed ~ 350nm" peakShape="singlet" model="trisen" xMax="370" xMin="330"  yMax="10000" yMin="0" />
+<Peaks type="UV-Vis" xUnitsExpected="nm" yUnits="arbitrary units" >
+<PeakData id="1" title="Spin Allowed - delta ~460nm" peakShape="singlet" model="trisen"  xMax="480" xMin="440"    />
+<PeakData id="2" title="Spin Allowed ~ 350nm" peakShape="singlet" model="trisen" xMax="370" xMin="330"    />
 </Peaks>
 ##XUNITS= NANOMETERS
 ##YUNITS= ABSORBANCE
@@ -671,9 +671,9 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="UV-Vis" xUnits="nm" yUnits="arbitrary units" >
-<PeakData id="1" title="Spin Allowed - delta ~520nm" peakShape="singlet" model="rein"  xMax="560" xMin="480"  yMax="10000" yMin="0" />
-<PeakData id="2" title="Spin Allowed ~ 392nm" peakShape="singlet" model="rein" xMax="430" xMin="370"  yMax="10000" yMin="0" />
+<Peaks type="UV-Vis" xUnitsExpected="nm" yUnits="arbitrary units" >
+<PeakData id="1" title="Spin Allowed - delta ~520nm" peakShape="singlet" model="rein"  xMax="560" xMin="480"    />
+<PeakData id="2" title="Spin Allowed ~ 392nm" peakShape="singlet" model="rein" xMax="430" xMin="370"    />
 </Peaks>
 ##XUNITS= NANOMETERS
 ##YUNITS= ABSORBANCE
@@ -777,10 +777,10 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="UV-Vis" xUnits="nm" yUnits="arbitrary units" >
-<PeakData id="1" title="Spin Forbidden Band ~694nm" peakShape="singlet" model="urea" xMax="710" xMin="670"  yMax="10000" yMin="0" />
-<PeakData id="2" title="Spin Allowed - delta ~624nm" peakShape="singlet" model="urea" xMax="650" xMin="600"  yMax="10000" yMin="0" />
-<PeakData id="3" title="Spin Allowed ~ 447nm" peakShape="singlet" model="urea" xMax="470" xMin="410"  yMax="10000" yMin="0" />
+<Peaks type="UV-Vis" xUnitsExpected="nm" yUnits="arbitrary units" >
+<PeakData id="1" title="Spin Forbidden Band ~694nm" peakShape="singlet" model="urea" xMax="710" xMin="670"    />
+<PeakData id="2" title="Spin Allowed - delta ~624nm" peakShape="singlet" model="urea" xMax="650" xMin="600"    />
+<PeakData id="3" title="Spin Allowed ~ 447nm" peakShape="singlet" model="urea" xMax="470" xMin="410"    />
 </Peaks>
 ##RESOLUTION=   1.000000    
 ##DELTAX=  -1.000000    

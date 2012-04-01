@@ -330,6 +330,8 @@ public class Parser {
   }
 
   public static float parseFloat(String str, int[] next) {
+    if (str == null)
+      return Float.NaN;
     int cch = str.length();
     if (next[0] < 0 || next[0] >= cch)
       return Float.NaN;

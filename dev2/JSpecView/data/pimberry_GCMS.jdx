@@ -17,12 +17,12 @@
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="GC/MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="cineole (~590)" peakShape="sharp" model="2cin.1"  xMax="610" xMin="570"  yMax="100" yMin="0" />
-<PeakData id="2" title="b-caryopholene (~1660)" peakShape="sharp" model="3caryoph.1"  xMax="1680" xMin="1640"  yMax="100" yMin="0" />
-<PeakData id="3" title="terpineol (~1996)" peakShape="sharp" model="4terpineol.1"  xMax="2020" xMin="1976"  yMax="100" yMin="0" />
-<PeakData id="4" title="methyleugenol (~2684)" peakShape="sharp" model="5meeug.1"  xMax="2705" xMin="2664"  yMax="100" yMin="0" />
-<PeakData id="5" title="eugenol (~3043)" peakShape="sharp" model="6eug.1"  xMax="3065" xMin="3023"  yMax="100" yMin="0" />
+<Peaks type="GC/MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="cineole (~590)" peakShape="sharp" model="2cin.1"  xMax="610" xMin="570"    />
+<PeakData id="2" title="b-caryopholene (~1660)" peakShape="sharp" model="3caryoph.1"  xMax="1680" xMin="1640"    />
+<PeakData id="3" title="terpineol (~1996)" peakShape="sharp" model="4terpineol.1"  xMax="2020" xMin="1976"    />
+<PeakData id="4" title="methyleugenol (~2684)" peakShape="sharp" model="5meeug.1"  xMax="2705" xMin="2664"    />
+<PeakData id="5" title="eugenol (~3043)" peakShape="sharp" model="6eug.1"  xMax="3065" xMin="3023"    />
 </Peaks>
 ##XUNITS= minutes
 ##YUNITS= ARBITRARY UNITS
@@ -252,9 +252,9 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="cineole molecular ion (~154)" peakShape="sharp" model="2cin.1"  xMax="155" xMin="153"  yMax="100" yMin="0" />
-<PeakData id="2" title="fragment (~81)" peakShape="sharp" model="2cin.2"  xMax="82" xMin="80"  yMax="100" yMin="0" />
+<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="cineole molecular ion (~154)" peakShape="sharp" model="2cin.1"  xMax="155" xMin="153"    />
+<PeakData id="2" title="fragment (~81)" peakShape="sharp" model="2cin.2"  xMax="82" xMin="80"    />
 </Peaks>
 ##INSTRUMENTAL PARAMETERS= LOW RESOLUTION
 ##.SPECTROMETER TYPE= TRAP
@@ -457,8 +457,8 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="molecular ion (~204)" peakShape="sharp" model="3caryoph.1"  xMax="205" xMin="203"  yMax="100" yMin="0" />
+<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="molecular ion (~204)" peakShape="sharp" model="3caryoph.1"  xMax="205" xMin="203"    />
 </Peaks>
 ##INSTRUMENTAL PARAMETERS= LOW RESOLUTION
 ##.SPECTROMETER TYPE= TRAP
@@ -621,8 +621,8 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="molecular ion (~154)" peakShape="sharp" model="4terpineol.1"  xMax="155" xMin="153"  yMax="100" yMin="0" />
+<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="molecular ion (~154)" peakShape="sharp" model="4terpineol.1"  xMax="155" xMin="153"    />
 </Peaks>
 ##INSTRUMENTAL PARAMETERS= LOW RESOLUTION
 ##.SPECTROMETER TYPE= TRAP
@@ -839,9 +839,9 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="molecular ion (~178)" peakShape="sharp" model="5meeug.1"  xMax="179" xMin="177"  yMax="100" yMin="0" />
-<PeakData id="2" title="molecular ion (~103)" peakShape="sharp" model="5meeug.2"  xMax="104" xMin="102"  yMax="100" yMin="0" />
+<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="molecular ion (~178)" peakShape="sharp" model="5meeug.1"  xMax="179" xMin="177"    />
+<PeakData id="2" title="molecular ion (~103)" peakShape="sharp" model="5meeug.2"  xMax="104" xMin="102"    />
 </Peaks>
 ##INSTRUMENTAL PARAMETERS= LOW RESOLUTION
 ##.SPECTROMETER TYPE= TRAP
@@ -982,8 +982,8 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="molecular ion (~164)" peakShape="sharp" model="6eug.1"  xMax="165" xMin="163"  yMax="100" yMin="0" />
+<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<PeakData id="1" title="molecular ion (~164)" peakShape="sharp" model="6eug.1"  xMax="165" xMin="163"    />
 </Peaks>
 ##INSTRUMENTAL PARAMETERS= LOW RESOLUTION
 ##.SPECTROMETER TYPE= TRAP

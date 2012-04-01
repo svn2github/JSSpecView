@@ -147,19 +147,19 @@ H     0.00000    1.25431    1.89604    0.00000   -0.37000   -0.60000
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="IR" xUnits="1/cm" yUnits="TRANSMITTANCE" >
-<PeakData id="1" title="B1-asymm stretch of C-H group (~3088 cm-1)" peakShape="broad" model="C1.13" xMax="3120" xMin="3080"  yMax="1" yMin="0" />
-<PeakData id="2" title="A1-symm stretch of C-H group (~3080 cm-1)" peakShape="broad" model="C1.14" xMax="3100" xMin="3060"  yMax="1" yMin="0" />
-<PeakData id="3" title="A1- C=C stretch (~1590 cm-1)" peakShape="broad" model="C1.12" xMax="1600" xMin="1555"  yMax="1" yMin="0" />
-<PeakData id="4" title="B1-asymm C-H bend (~1300 cm-1)" peakShape="broad" model="C1.11" xMax="1320" xMin="1240"  yMax="1" yMin="0" />
-<PeakData id="5" title="A1- C-H scissors (~1180 cm-1)" peakShape="broad" model="C1.10" xMax="1210" xMin="1160"  yMax="1" yMin="0" />
-<PeakData id="6" title="Inactive A2- C-H rocking (~875 cm-1)" peakShape="broad" model="C1.8" xMax="900" xMin="860"  yMax="1" yMin="0" />
-<PeakData id="7" title="B1-asymm stretch of C-Cl group (~850 cm-1)" peakShape="broad" model="C1.7" xMax="870" xMin="830"  yMax="1" yMin="0" />
-<PeakData id="8" title="A1-symm stretch of C-Cl group (~715 cm-1)" peakShape="broad" model="C1.6" xMax="735" xMin="695"  yMax="1" yMin="0" />
-<PeakData id="9" title="B2-asym C-H flap (~697 cm-1)" peakShape="broad" model="C1.9" xMax="720" xMin="670"  yMax="1" yMin="0" />
-<PeakData id="10" title="B2-asymm bend of C-Cl group (~571 cm-1)" peakShape="broad" model="C1.5" xMax="590" xMin="550"  yMax="1" yMin="0" />
-<PeakData id="11" title="Inactive A2- Cl-C=C-Cl torsion (~406 cm-1)" peakShape="broad" model="C1.4" xMax="420" xMin="380"  yMax="1" yMin="0" />
-<PeakData id="12" title="A1-symm bend of C-Cl group (~173 cm-1)" peakShape="broad" model="C1.3" xMax="190" xMin="150"  yMax="1" yMin="0" />
+<Peaks type="IR" xUnitsExpected="1/cm"  >
+<PeakData id="1" title="B1-asymm stretch of C-H group (~3088 cm-1)" peakShape="broad" model="C1.13" xMax="3120" xMin="3080"    />
+<PeakData id="2" title="A1-symm stretch of C-H group (~3080 cm-1)" peakShape="broad" model="C1.14" xMax="3100" xMin="3060"    />
+<PeakData id="3" title="A1- C=C stretch (~1590 cm-1)" peakShape="broad" model="C1.12" xMax="1600" xMin="1555"    />
+<PeakData id="4" title="B1-asymm C-H bend (~1300 cm-1)" peakShape="broad" model="C1.11" xMax="1320" xMin="1240"    />
+<PeakData id="5" title="A1- C-H scissors (~1180 cm-1)" peakShape="broad" model="C1.10" xMax="1210" xMin="1160"    />
+<PeakData id="6" title="Inactive A2- C-H rocking (~875 cm-1)" peakShape="broad" model="C1.8" xMax="900" xMin="860"    />
+<PeakData id="7" title="B1-asymm stretch of C-Cl group (~850 cm-1)" peakShape="broad" model="C1.7" xMax="870" xMin="830"    />
+<PeakData id="8" title="A1-symm stretch of C-Cl group (~715 cm-1)" peakShape="broad" model="C1.6" xMax="735" xMin="695"    />
+<PeakData id="9" title="B2-asym C-H flap (~697 cm-1)" peakShape="broad" model="C1.9" xMax="720" xMin="670"    />
+<PeakData id="10" title="B2-asymm bend of C-Cl group (~571 cm-1)" peakShape="broad" model="C1.5" xMax="590" xMin="550"    />
+<PeakData id="11" title="Inactive A2- Cl-C=C-Cl torsion (~406 cm-1)" peakShape="broad" model="C1.4" xMax="420" xMin="380"    />
+<PeakData id="12" title="A1-symm bend of C-Cl group (~173 cm-1)" peakShape="broad" model="C1.3" xMax="190" xMin="150"    />
 </Peaks>
 ##XUNITS= 1/CM
 ##YUNITS= TRANSMITTANCE
@@ -371,19 +371,19 @@ H     0.00000    1.25431    1.89604    0.00000   -0.37000   -0.60000
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="RAMAN" xUnits="1/cm" yUnits="TRANSMITTANCE" >
-<PeakData id="1" title="B1-asymm stretch of C-H group (~3088 cm-1)" peakShape="broad" model="C2.13" xMax="3120" xMin="3080"  yMax="1" yMin="0" />
-<PeakData id="2" title="A1-symm stretch of C-H group (~3080 cm-1)" peakShape="broad" model="C2.14" xMax="3100" xMin="3060"  yMax="1" yMin="0" />
-<PeakData id="3" title="A1- C=C stretch (~1590 cm-1)" peakShape="broad" model="C2.12" xMax="1600" xMin="1555"  yMax="1" yMin="0" />
-<PeakData id="4" title="B1-asymm C-H bend (~1300 cm-1)" peakShape="broad" model="C2.11" xMax="1320" xMin="1240"  yMax="1" yMin="0" />
-<PeakData id="5" title="A1- C-H scissors (~1180 cm-1)" peakShape="broad" model="C2.10" xMax="1210" xMin="1160"  yMax="1" yMin="0" />
-<PeakData id="6" title="A2- C-H rocking (~875 cm-1)" peakShape="broad" model="C2.8" xMax="900" xMin="860"  yMax="1" yMin="0" />
-<PeakData id="7" title="B1-asymm stretch of C-Cl group (~850 cm-1)" peakShape="broad" model="C2.7" xMax="870" xMin="830"  yMax="1" yMin="0" />
-<PeakData id="8" title="A1-symm stretch of C-Cl group (~715 cm-1)" peakShape="broad" model="C2.6" xMax="735" xMin="695"  yMax="1" yMin="0" />
-<PeakData id="9" title="B2-asym C-H flap (~697 cm-1)" peakShape="broad" model="C2.9" xMax="720" xMin="670"  yMax="1" yMin="0" />
-<PeakData id="10" title="B2-asymm bend of C-Cl group (~571 cm-1)" peakShape="broad" model="C2.5" xMax="590" xMin="550"  yMax="1" yMin="0" />
-<PeakData id="11" title="A2- Cl-C=C-Cl torsion (~406 cm-1)" peakShape="broad" model="C2.4" xMax="420" xMin="380"  yMax="1" yMin="0" />
-<PeakData id="12" title="A1-symm bend of C-Cl group (~173 cm-1)" peakShape="broad" model="C2.3" xMax="190" xMin="150"  yMax="1" yMin="0" />
+<Peaks type="RAMAN" xUnitsExpected="1/cm"  >
+<PeakData id="1" title="B1-asymm stretch of C-H group (~3088 cm-1)" peakShape="broad" model="C2.13" xMax="3120" xMin="3080"    />
+<PeakData id="2" title="A1-symm stretch of C-H group (~3080 cm-1)" peakShape="broad" model="C2.14" xMax="3100" xMin="3060"    />
+<PeakData id="3" title="A1- C=C stretch (~1590 cm-1)" peakShape="broad" model="C2.12" xMax="1600" xMin="1555"    />
+<PeakData id="4" title="B1-asymm C-H bend (~1300 cm-1)" peakShape="broad" model="C2.11" xMax="1320" xMin="1240"    />
+<PeakData id="5" title="A1- C-H scissors (~1180 cm-1)" peakShape="broad" model="C2.10" xMax="1210" xMin="1160"    />
+<PeakData id="6" title="A2- C-H rocking (~875 cm-1)" peakShape="broad" model="C2.8" xMax="900" xMin="860"    />
+<PeakData id="7" title="B1-asymm stretch of C-Cl group (~850 cm-1)" peakShape="broad" model="C2.7" xMax="870" xMin="830"    />
+<PeakData id="8" title="A1-symm stretch of C-Cl group (~715 cm-1)" peakShape="broad" model="C2.6" xMax="735" xMin="695"    />
+<PeakData id="9" title="B2-asym C-H flap (~697 cm-1)" peakShape="broad" model="C2.9" xMax="720" xMin="670"    />
+<PeakData id="10" title="B2-asymm bend of C-Cl group (~571 cm-1)" peakShape="broad" model="C2.5" xMax="590" xMin="550"    />
+<PeakData id="11" title="A2- Cl-C=C-Cl torsion (~406 cm-1)" peakShape="broad" model="C2.4" xMax="420" xMin="380"    />
+<PeakData id="12" title="A1-symm bend of C-Cl group (~173 cm-1)" peakShape="broad" model="C2.3" xMax="190" xMin="150"    />
 </Peaks>
 ##XUNITS=1/CM
 ##YUNITS=RAMAN INTENSITY
@@ -554,19 +554,19 @@ Cl   -0.36422   -2.12079    0.00000    0.00000    0.00000    0.00000
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="IR" xUnits="1/cm" yUnits="TRANSMITTANCE" >
-<PeakData id="1" title="Bu- asymm stretch of CH group (~3096 cm-1)" peakShape="broad" model="T1.14" xMax="3130" xMin="3080"  yMax="1" yMin="0" />
-<PeakData id="2" title="Inactive Ag-symm stretch of CH group (~3071 cm-1)" peakShape="broad" model="T1.13" xMax="3090" xMin="3050"  yMax="1" yMin="0" />
-<PeakData id="3" title="Inactive Ag- C=C stretch (~1576 cm-1)" peakShape="broad" model="T1.12" xMax="1600" xMin="1545"  yMax="1" yMin="0" />
-<PeakData id="4" title="Inactive Ag- H-C-H scissors (~1272 cm-1)" peakShape="broad" model="T1.11" xMax="1300" xMin="1230"  yMax="1" yMin="0" />
-<PeakData id="5" title="Bu- C-H scissors (~1205 cm-1)" peakShape="broad" model="T1.10" xMax="1230" xMin="1175"  yMax="1" yMin="0" />
-<PeakData id="6" title="Au- C-H wagging (~900 cm-1)" peakShape="broad" model="T1.9" xMax="920" xMin="880"  yMax="1" yMin="0" />
-<PeakData id="7" title="Inactive Ag-symm stretch of CCl group (~845 cm-1)" peakShape="broad" model="T1.6" xMax="870" xMin="830"  yMax="1" yMin="0" />
-<PeakData id="8" title="Bu- asymm stretch of CCl group (~830 cm-1)" peakShape="broad" model="T1.8" xMax="850" xMin="790"  yMax="1" yMin="0" />
-<PeakData id="9" title="Bg- wag of CH group (~750 cm-1)" peakShape="broad" model="T1.7" xMax="770" xMin="730"  yMax="1" yMin="0" />
-<PeakData id="10" title="Inactive Ag-symm bend of CCl group (~350 cm-1)" peakShape="broad" model="T1.5" xMax="370" xMin="330"  yMax="1" yMin="0" />
-<PeakData id="11" title="Bu-asymm bend of CCl group (~265 cm-1)" peakShape="broad" model="T1.4" xMax="285" xMin="245"  yMax="1" yMin="0" />
-<PeakData id="12" title="Au-Cl-C=C-Cl torsion  (~192 cm-1)" peakShape="broad" model="T1.3" xMax="220" xMin="170"  yMax="1" yMin="0" />
+<Peaks type="IR" xUnitsExpected="1/cm"  >
+<PeakData id="1" title="Bu- asymm stretch of CH group (~3096 cm-1)" peakShape="broad" model="T1.14" xMax="3130" xMin="3080"    />
+<PeakData id="2" title="Inactive Ag-symm stretch of CH group (~3071 cm-1)" peakShape="broad" model="T1.13" xMax="3090" xMin="3050"    />
+<PeakData id="3" title="Inactive Ag- C=C stretch (~1576 cm-1)" peakShape="broad" model="T1.12" xMax="1600" xMin="1545"    />
+<PeakData id="4" title="Inactive Ag- H-C-H scissors (~1272 cm-1)" peakShape="broad" model="T1.11" xMax="1300" xMin="1230"    />
+<PeakData id="5" title="Bu- C-H scissors (~1205 cm-1)" peakShape="broad" model="T1.10" xMax="1230" xMin="1175"    />
+<PeakData id="6" title="Au- C-H wagging (~900 cm-1)" peakShape="broad" model="T1.9" xMax="920" xMin="880"    />
+<PeakData id="7" title="Inactive Ag-symm stretch of CCl group (~845 cm-1)" peakShape="broad" model="T1.6" xMax="870" xMin="830"    />
+<PeakData id="8" title="Bu- asymm stretch of CCl group (~830 cm-1)" peakShape="broad" model="T1.8" xMax="850" xMin="790"    />
+<PeakData id="9" title="Bg- wag of CH group (~750 cm-1)" peakShape="broad" model="T1.7" xMax="770" xMin="730"    />
+<PeakData id="10" title="Inactive Ag-symm bend of CCl group (~350 cm-1)" peakShape="broad" model="T1.5" xMax="370" xMin="330"    />
+<PeakData id="11" title="Bu-asymm bend of CCl group (~265 cm-1)" peakShape="broad" model="T1.4" xMax="285" xMin="245"    />
+<PeakData id="12" title="Au-Cl-C=C-Cl torsion  (~192 cm-1)" peakShape="broad" model="T1.3" xMax="220" xMin="170"    />
 </Peaks>
 ##XUNITS= 1/CM
 ##YUNITS= TRANSMITTANCE
@@ -781,19 +781,19 @@ Cl   -0.36422   -2.12079    0.00000    0.00000    0.00000    0.00000
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="RAMAN" xUnits="1/cm" yUnits="TRANSMITTANCE" >
-<PeakData id="1" title="Inactive Bu- asymm stretch of CH group (~3096 cm-1)" peakShape="broad" model="T2.14" xMax="3130" xMin="3080"  yMax="1" yMin="0" />
-<PeakData id="2" title="Ag-symm stretch of CH group (~3071 cm-1)" peakShape="broad" model="T2.13" xMax="3090" xMin="3050"  yMax="1" yMin="0" />
-<PeakData id="3" title="Ag- C=C stretch (~1576 cm-1)" peakShape="broad" model="T2.12" xMax="1600" xMin="1545"  yMax="1" yMin="0" />
-<PeakData id="4" title="Ag- H-C-H scissors (~1272 cm-1)" peakShape="broad" model="T2.11" xMax="1300" xMin="1230"  yMax="1" yMin="0" />
-<PeakData id="5" title="Inactive Bu- C-H scissors (~1205 cm-1)" peakShape="broad" model="T2.10" xMax="1230" xMin="1175"  yMax="1" yMin="0" />
-<PeakData id="6" title="Inactive Au- C-H wagging (~900 cm-1)" peakShape="broad" model="T2.9" xMax="920" xMin="880"  yMax="1" yMin="0" />
-<PeakData id="7" title="Ag-symm stretch of CCl group (~845 cm-1)" peakShape="broad" model="T2.6" xMax="870" xMin="830"  yMax="1" yMin="0" />
-<PeakData id="8" title="Inactive Bu- asymm stretch of CCl group (~830 cm-1)" peakShape="broad" model="T2.8" xMax="850" xMin="790"  yMax="1" yMin="0" />
-<PeakData id="9" title="Bg- wag of CH group (~750 cm-1)" peakShape="broad" model="T2.7" xMax="770" xMin="730"  yMax="1" yMin="0" />
-<PeakData id="10" title="Ag-symm bend of CCl group (~350 cm-1)" peakShape="broad" model="T2.5" xMax="370" xMin="330"  yMax="1" yMin="0" />
-<PeakData id="11" title="Inactive Bu-asymm bend of CCl group (~265 cm-1)" peakShape="broad" model="T2.4" xMax="285" xMin="245"  yMax="1" yMin="0" />
-<PeakData id="12" title="Inactive Au-Cl-C=C-Cl torsion  (~192 cm-1)" peakShape="broad" model="T2.3" xMax="220" xMin="170"  yMax="1" yMin="0" />
+<Peaks type="RAMAN" xUnitsExpected="1/cm"  >
+<PeakData id="1" title="Inactive Bu- asymm stretch of CH group (~3096 cm-1)" peakShape="broad" model="T2.14" xMax="3130" xMin="3080"    />
+<PeakData id="2" title="Ag-symm stretch of CH group (~3071 cm-1)" peakShape="broad" model="T2.13" xMax="3090" xMin="3050"    />
+<PeakData id="3" title="Ag- C=C stretch (~1576 cm-1)" peakShape="broad" model="T2.12" xMax="1600" xMin="1545"    />
+<PeakData id="4" title="Ag- H-C-H scissors (~1272 cm-1)" peakShape="broad" model="T2.11" xMax="1300" xMin="1230"    />
+<PeakData id="5" title="Inactive Bu- C-H scissors (~1205 cm-1)" peakShape="broad" model="T2.10" xMax="1230" xMin="1175"    />
+<PeakData id="6" title="Inactive Au- C-H wagging (~900 cm-1)" peakShape="broad" model="T2.9" xMax="920" xMin="880"    />
+<PeakData id="7" title="Ag-symm stretch of CCl group (~845 cm-1)" peakShape="broad" model="T2.6" xMax="870" xMin="830"    />
+<PeakData id="8" title="Inactive Bu- asymm stretch of CCl group (~830 cm-1)" peakShape="broad" model="T2.8" xMax="850" xMin="790"    />
+<PeakData id="9" title="Bg- wag of CH group (~750 cm-1)" peakShape="broad" model="T2.7" xMax="770" xMin="730"    />
+<PeakData id="10" title="Ag-symm bend of CCl group (~350 cm-1)" peakShape="broad" model="T2.5" xMax="370" xMin="330"    />
+<PeakData id="11" title="Inactive Bu-asymm bend of CCl group (~265 cm-1)" peakShape="broad" model="T2.4" xMax="285" xMin="245"    />
+<PeakData id="12" title="Inactive Au-Cl-C=C-Cl torsion  (~192 cm-1)" peakShape="broad" model="T2.3" xMax="220" xMin="170"    />
 </Peaks>
 ##XUNITS=1/CM
 ##YUNITS=RAMAN INTENSITY

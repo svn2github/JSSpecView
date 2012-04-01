@@ -113,13 +113,13 @@ Cl    0.00000   -1.43703   -0.22352    0.00000    0.00000    0.00000
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="IR" xUnits="1/cm" yUnits="TRANSMITTANCE" >
-<PeakData id="1" title="B1-asymm stretch of CH group (~3062 cm-1)" peakShape="broad" model="1.11" xMax="3090" xMin="3035"  yMax="1" yMin="0" />
-<PeakData id="2" title="A1-symm stretch of CH group (~2984 cm-1)" peakShape="broad" model="1.10" xMax="3010" xMin="2950"  yMax="1" yMin="0" />
-<PeakData id="3" title="A1- H-C-H scissors (~1276 cm-1)" peakShape="broad" model="1.9" xMax="1290" xMin="1270"  yMax="1" yMin="0" />
-<PeakData id="4" title="B2- H-C-H wagging (~1260 cm-1)" peakShape="broad" model="1.8" xMax="1270" xMin="1250"  yMax="1" yMin="0" />
-<PeakData id="5" title="B2-asymm stretch of CCl group (~745 cm-1)" peakShape="broad" model="1.5" xMax="780" xMin="730"  yMax="1" yMin="0" />
-<PeakData id="6" title="A1-symm stretch of CCl group (~707 cm-1)" peakShape="broad" model="1.4" xMax="730" xMin="670"  yMax="1" yMin="0" />
+<Peaks type="IR" xUnitsExpected="1/cm"  >
+<PeakData id="1" title="B1-asymm stretch of CH group (~3062 cm-1)" peakShape="broad" model="1.11" xMax="3090" xMin="3035"    />
+<PeakData id="2" title="A1-symm stretch of CH group (~2984 cm-1)" peakShape="broad" model="1.10" xMax="3010" xMin="2950"    />
+<PeakData id="3" title="A1- H-C-H scissors (~1276 cm-1)" peakShape="broad" model="1.9" xMax="1290" xMin="1270"    />
+<PeakData id="4" title="B2- H-C-H wagging (~1260 cm-1)" peakShape="broad" model="1.8" xMax="1270" xMin="1250"    />
+<PeakData id="5" title="B2-asymm stretch of CCl group (~745 cm-1)" peakShape="broad" model="1.5" xMax="780" xMin="730"    />
+<PeakData id="6" title="A1-symm stretch of CCl group (~707 cm-1)" peakShape="broad" model="1.4" xMax="730" xMin="670"    />
 </Peaks>
 ##XUNITS=1/CM
 ##YUNITS=TRANSMITTANCE
@@ -303,13 +303,13 @@ Cl    0.00000   -1.43703   -0.22352    0.00000    0.00000    0.00000
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="IR" xUnits="1/cm" yUnits="TRANSMITTANCE" >
-<PeakData id="1" title="B1-asymm stretch of CD group (~2304 cm-1)" peakShape="broad" model="D2.11" xMax="2320" xMin="2280"  yMax="1" yMin="0" />
-<PeakData id="2" title="A1-symm stretch of CD group (~2198 cm-1)" peakShape="broad" model="D2.10" xMax="2220" xMin="2180"  yMax="1" yMin="0" />
-<PeakData id="3" title="B2- H-C-D wagging (~1000 cm-1)" peakShape="broad" model="D2.8" xMax="1015" xMin="985"  yMax="1" yMin="0" />
-<PeakData id="4" title="A1- H-C-D scissors (~955 cm-1)" peakShape="broad" model="D2.9" xMax="975" xMin="935"  yMax="1" yMin="0" />
-<PeakData id="5" title="B2-asymm stretch of CCl group (~714 cm-1)" peakShape="broad" model="D2.5" xMax="735" xMin="695"  yMax="1" yMin="0" />
-<PeakData id="6" title="A1-symm stretch of CCl group (~680 cm-1)" peakShape="broad" model="D2.4" xMax="695" xMin="665"  yMax="1" yMin="0" />
+<Peaks type="IR" xUnitsExpected="1/cm"  >
+<PeakData id="1" title="B1-asymm stretch of CD group (~2304 cm-1)" peakShape="broad" model="D2.11" xMax="2320" xMin="2280"    />
+<PeakData id="2" title="A1-symm stretch of CD group (~2198 cm-1)" peakShape="broad" model="D2.10" xMax="2220" xMin="2180"    />
+<PeakData id="3" title="B2- H-C-D wagging (~1000 cm-1)" peakShape="broad" model="D2.8" xMax="1015" xMin="985"    />
+<PeakData id="4" title="A1- H-C-D scissors (~955 cm-1)" peakShape="broad" model="D2.9" xMax="975" xMin="935"    />
+<PeakData id="5" title="B2-asymm stretch of CCl group (~714 cm-1)" peakShape="broad" model="D2.5" xMax="735" xMin="695"    />
+<PeakData id="6" title="A1-symm stretch of CCl group (~680 cm-1)" peakShape="broad" model="D2.4" xMax="695" xMin="665"    />
 </Peaks>
 ##XUNITS= 1/CM
 ##YUNITS= TRANSMITTANCE
@@ -443,13 +443,13 @@ Cl    1.43703   -0.82967   -0.08960    0.00000    0.00000    0.00000
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="IR" xUnits="1/cm" yUnits="TRANSMITTANCE" >
-<PeakData id="1" title="B1-asymm stretch of aromatic CH group (~3020 cm-1)" peakShape="broad" model="2.11" xMax="3025" xMin="3000"  yMax="1" yMin="0" />
-<PeakData id="2" title="A1-symm stretch of aromatic CH group (~2990 cm-1)" peakShape="broad" model="2.10" xMax="3000" xMin="2980"  yMax="1" yMin="0" />
-<PeakData id="3" title="symm stretch of CH group (~1276 cm-1)" peakShape="broad" model="2.9" xMax="1290" xMin="1270"  yMax="1" yMin="0" />
-<PeakData id="4" title="symm stretch of CH group (~1219 cm-1)" peakShape="broad" model="2.8" xMax="1230" xMin="1210"  yMax="1" yMin="0" />
-<PeakData id="5" title="A1-asymm bend of CCl group (~773 cm-1)" peakShape="broad" model="2.6" xMax="780" xMin="730"  yMax="1" yMin="0" />
-<PeakData id="6" title="A1-symm bend of CCl group (~671 cm-1)" peakShape="broad" model="2.5" xMax="680" xMin="660"  yMax="1" yMin="0" />
+<Peaks type="IR" xUnitsExpected="1/cm"  >
+<PeakData id="1" title="B1-asymm stretch of aromatic CH group (~3020 cm-1)" peakShape="broad" model="2.11" xMax="3025" xMin="3000"    />
+<PeakData id="2" title="A1-symm stretch of aromatic CH group (~2990 cm-1)" peakShape="broad" model="2.10" xMax="3000" xMin="2980"    />
+<PeakData id="3" title="symm stretch of CH group (~1276 cm-1)" peakShape="broad" model="2.9" xMax="1290" xMin="1270"    />
+<PeakData id="4" title="symm stretch of CH group (~1219 cm-1)" peakShape="broad" model="2.8" xMax="1230" xMin="1210"    />
+<PeakData id="5" title="A1-asymm bend of CCl group (~773 cm-1)" peakShape="broad" model="2.6" xMax="780" xMin="730"    />
+<PeakData id="6" title="A1-symm bend of CCl group (~671 cm-1)" peakShape="broad" model="2.5" xMax="680" xMin="660"    />
 </Peaks>
 ##XUNITS=1/CM
 ##YUNITS=TRANSMITTANCE
@@ -794,13 +794,13 @@ Cl    1.43703   -0.82967   -0.08960    0.00000    0.00000    0.00000
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="IR" xUnits="1/cm" yUnits="TRANSMITTANCE" >
-<PeakData id="1" title="B1-asymm stretch of aromatic CD group (~2260 cm-1)" peakShape="broad" model="3.11" xMax="2280" xMin="2240"  yMax="1" yMin="0" />
-<PeakData id="2" title="A1-symm stretch of aromatic CH group (~2250 cm-1)" peakShape="broad" model="3.10" xMax="2270" xMin="2220"  yMax="1" yMin="0" />
-<PeakData id="3" title="symm stretch of CH group (~1276 cm-1)" peakShape="broad" model="3.9" xMax="1290" xMin="1270"  yMax="1" yMin="0" />
-<PeakData id="4" title="symm stretch of CH group (~910 cm-1)" peakShape="broad" model="3.8" xMax="930" xMin="890"  yMax="1" yMin="0" />
-<PeakData id="5" title="A1-asymm bend of CCl group (~773 cm-1)" peakShape="broad" model="3.6" xMax="780" xMin="730"  yMax="1" yMin="0" />
-<PeakData id="6" title="A1-symm bend of CCl group (~671 cm-1)" peakShape="broad" model="3.5" xMax="680" xMin="660"  yMax="1" yMin="0" />
+<Peaks type="IR" xUnitsExpected="1/cm"  >
+<PeakData id="1" title="B1-asymm stretch of aromatic CD group (~2260 cm-1)" peakShape="broad" model="3.11" xMax="2280" xMin="2240"    />
+<PeakData id="2" title="A1-symm stretch of aromatic CH group (~2250 cm-1)" peakShape="broad" model="3.10" xMax="2270" xMin="2220"    />
+<PeakData id="3" title="symm stretch of CH group (~1276 cm-1)" peakShape="broad" model="3.9" xMax="1290" xMin="1270"    />
+<PeakData id="4" title="symm stretch of CH group (~910 cm-1)" peakShape="broad" model="3.8" xMax="930" xMin="890"    />
+<PeakData id="5" title="A1-asymm bend of CCl group (~773 cm-1)" peakShape="broad" model="3.6" xMax="780" xMin="730"    />
+<PeakData id="6" title="A1-symm bend of CCl group (~671 cm-1)" peakShape="broad" model="3.5" xMax="680" xMin="660"    />
 </Peaks>
 ##XUNITS= 1/CM
 ##YUNITS= TRANSMITTANCE
