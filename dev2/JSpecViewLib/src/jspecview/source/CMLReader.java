@@ -405,10 +405,7 @@ class CMLReader extends XMLReader {
   }
 
   private static String checkUnits(String units) {
-    units = units.toUpperCase();
-    Integer pos = Integer.valueOf(units.indexOf(":"));
-    units = units.substring(pos.intValue() + 1,
-        units.length());
+    units = units.substring(units.indexOf(":") + 1).toUpperCase();
     if (units.equals("RELABUNDANCE"))
       units = "RELATIVE ABUNDANCE";
     else if (units.contains("ARBITRARY"))
