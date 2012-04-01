@@ -544,8 +544,8 @@ public class FileReader {
     try {
       line = discardLinesUntilContains(reader, "<Peaks");
       String type = Parser.getQuotedAttribute(line, "type");
-      piUnitsX = Parser.getQuotedAttribute(line, "xUnits");
-      piUnitsY = Parser.getQuotedAttribute(line, "yUnits");
+      piUnitsX = Parser.getQuotedAttribute(line, "xLabel");
+      piUnitsY = Parser.getQuotedAttribute(line, "yLabel");
       PeakInfo peak;
       String path = Escape.escape(filePath.replace('\\', '/'));
       while ((line = reader.readLine()) != null
