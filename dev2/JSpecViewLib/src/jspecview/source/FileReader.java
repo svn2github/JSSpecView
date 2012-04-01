@@ -621,28 +621,26 @@ public class FileReader {
       return true;
     }
 
-    if (label.equals("##XLABEL")) {
-      spectrum.xUnits = t.getValue();
+    if (label.equals("##XUNITS")) {
+      String value = t.getValue();
+      spectrum.setXUnits(value.equals("") ? "ARBITRARY UNITS" : value);
       return true;
     }
 
-    if (label.equals("##XUNITS") && spectrum.xUnits.equals("")) {
+    if (label.equals("##YUNITS")) {
       String value = t.getValue();
-      spectrum.xUnits = (value != null && !value.equals("") ? value
-          : "Arbitrary Units");
+      spectrum.setYUnits(value.equals("") ? "ARBITRARY UNITS" : value);
       return true;
+    }
+
+    if (label.equals("##XLABEL")) {
+      spectrum.setXLabel(t.getValue());
+      return false; // store in hashtable
     }
 
     if (label.equals("##YLABEL")) {
-      spectrum.yUnits = t.getValue();
-      return true;
-    }
-
-    if (label.equals("##YUNITS") && spectrum.yUnits.equals("")) {
-      String value = t.getValue();
-      spectrum.yUnits = (value != null && !value.equals("") ? value
-          : "Arbitrary Units");
-      return true;
+      spectrum.setYLabel(t.getValue());
+      return false; // store in hashtable
     }
 
     // NMR variations: need observedFreq, offset, dataPointNum, and shiftRefType 
@@ -844,8 +842,8 @@ public class FileReader {
       spec.nPointsFile = Integer.parseInt(list.get(index1));
 
       list = nTupleTable.get("##UNITS");
-      spec.xUnits = list.get(index1);
-      spec.yUnits = list.get(index2);
+      spec.setXUnits(list.get(index1));
+      spec.setYUnits(list.get(index2));
 
       if (spec.nucleusX == null && (list = nTupleTable.get("##.NUCLEUS")) != null) {
         spec.setNucleus(list.get(0), false);
@@ -864,8 +862,8 @@ public class FileReader {
       int index2 = list.indexOf(plotSymbols[1]);
 
       list = nTupleTable.get("##UNITS");
-      spec.xUnits = list.get(index1);
-      spec.yUnits = list.get(index2);
+      spec.setXUnits(list.get(index1));
+      spec.setYUnits(list.get(index2));
       spec.setXYCoords(Coordinate.parseDSV(t.getValue(), spec.xFactor, spec.yFactor));
       return true;
     }
@@ -903,10 +901,10 @@ public class FileReader {
               spec.fileLastX, spec.offset, freq, spec.shiftRefType);
     }
 
-    if (freq != JDXDataObject.ERROR && spec.xUnits.toUpperCase().equals("HZ")) {
+    if (freq != JDXDataObject.ERROR && spec.getXUnits().toUpperCase().equals("HZ")) {
       double xScale = freq;
       Coordinate.applyScale(xyCoords, (1 / xScale), 1);
-      spec.xUnits = "PPM";
+      spec.setXUnits("PPM");
       spec.setHZtoPPM(true);
     }
     if (errorLog.length() != errPt) {

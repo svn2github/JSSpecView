@@ -449,7 +449,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   public static boolean areScalesCompatible(JDXSpectrum s1, JDXSpectrum s2,
                                             boolean allow2D2D) {
     if (!((allow2D2D ? s1.is1D() == s2.is1D() : s1.is1D() && s2.is1D()) 
-        && s1.getXUnits().equalsIgnoreCase(s2.getXUnits())))
+        && s1.xUnits.equalsIgnoreCase(s2.xUnits)))
       return false;
     if (!(s1 instanceof JDXSpectrum) || !(s2 instanceof JDXSpectrum))
       return true;
@@ -620,12 +620,19 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
       new PeakInfo(" baseModel=\"\" " + peakList.get(0)));
   }
 
-  public String getUnitsForPlot(boolean isX) {
-    String units = (isX ? getXUnits() : getYUnits());
-    if (isX && piUnitsX != null)
-      units = piUnitsX;
-    else if (!isX && piUnitsY != null)
-      units = piUnitsY;
+  /**
+   * checks in order: (1) Peaks tag attribute xUnits/yUnits, 
+   * then (2) ##XLABEL/##YLABEL, 
+   * then (3) ##XUNITS/##YUNITS 
+   * @param isX
+   * @return  suitable label or ""; never "ARBITRARY UNITS"
+   */
+  public String getAxisLabel(boolean isX) {
+    String units = (isX ? piUnitsX : piUnitsY);
+    if (units == null)
+      units = (isX ? xLabel : yLabel);
+    if (units == null)
+      units = (isX ? xUnits : yUnits);
     return (units == null || units.equalsIgnoreCase("ARBITRARY UNITS") ? ""
         : units);
   }

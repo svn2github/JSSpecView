@@ -104,8 +104,10 @@ public abstract class JDXDataObject extends JDXHeader {
 
   // --------------------Optional Spectral Parameters ------------------------------//
 
-  public String xUnits = "";
-  public String yUnits = "";
+  protected String xUnits = "";
+  protected String yUnits = "";
+  protected String xLabel = null;
+  protected String yLabel = null;
   
   /**
    * Sets the units for the x axis
@@ -143,6 +145,14 @@ public abstract class JDXDataObject extends JDXHeader {
    */
   public String getYUnits() {
     return yUnits;
+  }
+
+  public void setXLabel(String value) {
+    xLabel = value;
+  }
+
+  public void setYLabel(String value) {
+    yLabel = value;
   }
 
   public static final int SCALE_NONE = 0;
@@ -575,8 +585,8 @@ public abstract class JDXDataObject extends JDXHeader {
       rowData[i++] = new String[] { "##.OBSERVE FREQUENCY", "" + observedFreq };
     if (observedNucl != "")
       rowData[i++] = new String[] { "##.OBSERVE NUCLEUS", observedNucl };
-    rowData[i++] = new String[] { "##XUNITS", isHZtoPPM() ? "HZ" : getXUnits() };
-    rowData[i++] = new String[] { "##YUNITS", getYUnits() };
+    rowData[i++] = new String[] { "##XUNITS", isHZtoPPM() ? "HZ" : xUnits };
+    rowData[i++] = new String[] { "##YUNITS", yUnits };
     double x = (isIncreasing() ? getFirstX() : getLastX());
     rowData[i++] = new String[] { "##FIRSTX",
         String.valueOf(isHZtoPPM() ? x * getObservedFreq() : x) };
@@ -721,23 +731,25 @@ public abstract class JDXDataObject extends JDXHeader {
   }
 
   public void copyTo(JDXDataObject newObj) {
-    newObj.setTitle(getTitle());
-    newObj.setJcampdx(getJcampdx());
-    newObj.setOrigin(getOrigin());
-    newObj.setOwner(getOwner());
-    newObj.setDataClass(getDataClass());
-    newObj.setDataType(getDataType());
-    newObj.setHeaderTable(getHeaderTable());
+    newObj.setTitle(title);
+    newObj.setJcampdx(jcampdx);
+    newObj.setOrigin(origin);
+    newObj.setOwner(owner);
+    newObj.setDataClass(dataClass);
+    newObj.setDataType(dataType);
+    newObj.setHeaderTable(headerTable);
 
-    newObj.setXFactor(getXFactor());
-    newObj.setYFactor(getYFactor());
-    newObj.setXUnits(getXUnits());
-    newObj.setYUnits(getYUnits());
+    newObj.setXFactor(xFactor);
+    newObj.setYFactor(yFactor);
+    newObj.setXUnits(xUnits);
+    newObj.setYUnits(yUnits);
+    newObj.setXLabel(xLabel);
+    newObj.setYLabel(yLabel);
 
     //newSpectrum.setPathlength(getPathlength());
     newObj.setXYCoords(xyCoords);
-    newObj.setContinuous(isContinuous());
-    newObj.setIncreasing(isIncreasing());
+    newObj.setContinuous(continuous);
+    newObj.setIncreasing(increasing);
 
     newObj.observedFreq = observedFreq;
     newObj.observedNucl = observedNucl;

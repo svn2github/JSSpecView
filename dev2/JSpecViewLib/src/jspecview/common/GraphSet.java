@@ -1714,7 +1714,7 @@ abstract class GraphSet {
    *        the width to be drawn in pixels
    */
   private void drawXUnits(Object g, int width) {
-    String units = spectra.get(0).getUnitsForPlot(true);
+    String units = spectra.get(0).getAxisLabel(true);
     if (units != null)
       drawUnits(g, width, units, xPixel1, yPixel1 + 5, 0, 1);
   }
@@ -1738,7 +1738,7 @@ abstract class GraphSet {
    *        the width to be drawn in pixels
    */
   private void drawYUnits(Object g, int width) {
-    String units = spectra.get(0).getUnitsForPlot(false);
+    String units = spectra.get(0).getAxisLabel(false);
     if (units != null)
       drawUnits(g, width, units, 5, yPixel0, 0, -1);
   }
