@@ -217,7 +217,7 @@ public class FileReader {
         addHeader(dataLDRTable, t.getRawLabel(), value);
         if (label.equals("##$PEAKS")) {
           source.peakCount += spectrum.setPeakList(readPeakList(value,
-              source.peakCount));
+              source.peakCount), piUnitsX, piUnitsY);
           continue;
         }
       }
@@ -238,6 +238,10 @@ public class FileReader {
   private int nSpec = 0;
 
   private double blockID;
+
+  private String piUnitsX;
+
+  private String piUnitsY;
 
   private boolean addSpectrum(JDXSpectrum spectrum, boolean forceSub) {
     nSpec++;
@@ -358,7 +362,7 @@ public class FileReader {
 
         if (label.equals("##$PEAKS")) {
           source.peakCount += spectrum.setPeakList(readPeakList(value,
-              source.peakCount));
+              source.peakCount), piUnitsX, piUnitsY);
           continue;
         }
 
@@ -540,6 +544,8 @@ public class FileReader {
     try {
       line = discardLinesUntilContains(reader, "<Peaks");
       String type = Parser.getQuotedAttribute(line, "type");
+      piUnitsX = Parser.getQuotedAttribute(line, "xUnits");
+      piUnitsY = Parser.getQuotedAttribute(line, "yUnits");
       PeakInfo peak;
       String path = Escape.escape(filePath.replace('\\', '/'));
       while ((line = reader.readLine()) != null

@@ -1664,7 +1664,8 @@ abstract class GraphSet {
         setColor(g, ScriptToken.SCALECOLOR);
         String s = formatter.format(val);
         int w = getStringWidth(g, s);
-        drawString(g, s, x - w / 2, y2 + getFontHeight(g));
+        int n = (x + w/2 == fixX(x + w/2) ? 2 : 1);
+        drawString(g, s, x - w / n, y2 + getFontHeight(g));
         val += Math.floor(w / maxWidth) * multiScaleData.xStep;
       }
     }
@@ -1713,7 +1714,9 @@ abstract class GraphSet {
    *        the width to be drawn in pixels
    */
   private void drawXUnits(Object g, int width) {
-    drawUnits(g, width, spectra.get(0).getXUnits(), xPixel1, yPixel1 + 5, 0, 1);
+    String units = spectra.get(0).getUnitsForPlot(true);
+    if (units != null)
+      drawUnits(g, width, units, xPixel1, yPixel1 + 5, 0, 1);
   }
 
   private void drawUnits(Object g, int width, String s, int x, int y,
@@ -1735,7 +1738,9 @@ abstract class GraphSet {
    *        the width to be drawn in pixels
    */
   private void drawYUnits(Object g, int width) {
-    drawUnits(g, width, spectra.get(0).getYUnits(), 5, yPixel0, 0, -1);
+    String units = spectra.get(0).getUnitsForPlot(false);
+    if (units != null)
+      drawUnits(g, width, units, 5, yPixel0, 0, -1);
   }
 
   /**

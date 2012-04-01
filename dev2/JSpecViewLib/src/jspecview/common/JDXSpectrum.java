@@ -50,6 +50,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
    */
   private List<JDXSpectrum> subSpectra;
   private ArrayList<PeakInfo> peakList = new ArrayList<PeakInfo>();
+  private String piUnitsX, piUnitsY;
   private JDXSpectrum parent;
   private int[] buf2d;
   private IntegralGraph integration;
@@ -102,7 +103,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   public JDXSpectrum copy() {
     JDXSpectrum newSpectrum = new JDXSpectrum();
     copyTo(newSpectrum);
-    newSpectrum.setPeakList(getPeakList());
+    newSpectrum.setPeakList(peakList, piUnitsX, piUnitsY);
     return newSpectrum;
   }
 
@@ -120,8 +121,10 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return peakList;
   }
 
-  public int setPeakList(ArrayList<PeakInfo> list) {
+  public int setPeakList(ArrayList<PeakInfo> list, String piUnitsX, String piUnitsY) {
     peakList = list;
+    this.piUnitsX = piUnitsX;
+    this.piUnitsY = piUnitsY;
     for (int i = list.size(); --i >= 0; )
       peakList.get(i).spectrum = this;
     if (Logger.debugging)
@@ -614,6 +617,16 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   public PeakInfo getBasePeakInfo() {
     return (peakList.size() == 0 ? new PeakInfo() : 
       new PeakInfo(" baseModel=\"\" " + peakList.get(0)));
+  }
+
+  public String getUnitsForPlot(boolean isX) {
+    String units = (isX ? getXUnits() : getYUnits());
+    if (isX && piUnitsX != null)
+      units = piUnitsX;
+    else if (!isX && piUnitsY != null)
+      units = piUnitsY;
+    return (units == null || units.equalsIgnoreCase("ARBITRARY UNITS") ? ""
+        : units);
   }
 
 }

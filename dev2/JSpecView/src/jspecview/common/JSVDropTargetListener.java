@@ -54,49 +54,47 @@ public class JSVDropTargetListener implements DropTargetListener {
     // idea here is that if the drop is into the panel ('this'), then
     // we want a replacement; if the drop is to the menu, then we want an addition.
     // just an idea....
-    boolean doAppend = (allowAppend && dtde.getDropTargetContext().getDropTarget()
-        .getComponent() != si);
+    boolean doAppend = (allowAppend && dtde.getDropTargetContext()
+        .getDropTarget().getComponent() != si);
     String prefix = (doAppend ? "" : "close ALL;");
     String postfix = (doAppend ? "" : "overlay ALL");
-    String cmd = (doAppend? "LOAD APPEND " : "LOAD ");
+    String cmd = "LOAD APPEND ";
+    String fileToLoad = null;
     if (t.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-      while (true) {
-        Object o = null;
-        try {
-          dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
-          o = t.getTransferData(DataFlavor.javaFileListFlavor);
-          isAccepted = true;
-        } catch (Exception e) {
-          Logger.error("transfer failed");
-        }
-        // if o is still null we had an exception
-        if (o instanceof List) {
-          List<File> list = (List<File>) o;
-          dtde.getDropTargetContext().dropComplete(true);
-          File[] files = (File[]) list.toArray();
-          dtde = null;
-          StringBuffer sb = new StringBuffer(prefix);
-          for (int i = 0; i < list.size(); i++)
-            sb.append(cmd
-                + Escape.escape(files[i].getAbsolutePath()) + ";\n");
-          sb.append(postfix);
-          si.runScript(sb.toString());
-          /*          
-                    
-                    
-                    final int length = fileList.size();
-                    if (length == 1) {
-                      String fileName = fileList.get(0).getAbsolutePath().trim();
-                      if (fileName.endsWith(".bmp"))
-                        break; // try another flavor -- Mozilla bug
-                      dtde.getDropTargetContext().dropComplete(true);
-                      loadFile(fileName);
-                      return;
-                    }
-          */
-          return;
-        }
-        break;
+      Object o = null;
+      try {
+        dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+        o = t.getTransferData(DataFlavor.javaFileListFlavor);
+        isAccepted = true;
+      } catch (Exception e) {
+        Logger.error("transfer failed");
+      }
+      // if o is still null we had an exception
+      if (o instanceof List) {
+        List<File> list = (List<File>) o;
+        dtde.getDropTargetContext().dropComplete(true);
+        dtde = null;
+        StringBuffer sb = new StringBuffer(prefix);
+        for (int i = 0; i < list.size(); i++)
+          sb.append(cmd + Escape.escape(list.get(i).getAbsolutePath()) + ";");
+        sb.append(postfix);
+        cmd = sb.toString();
+        Logger.info("Drop command = " + cmd);
+        si.runScript(cmd);
+        /*          
+                  
+                  
+                  final int length = fileList.size();
+                  if (length == 1) {
+                    String fileName = fileList.get(0).getAbsolutePath().trim();
+                    if (fileName.endsWith(".bmp"))
+                      break; // try another flavor -- Mozilla bug
+                    dtde.getDropTargetContext().dropComplete(true);
+                    loadFile(fileName);
+                    return;
+                  }
+        */
+        return;
       }
     }
 
@@ -145,11 +143,10 @@ public class JSVDropTargetListener implements DropTargetListener {
 
         if (o instanceof String) {
           dtde.getDropTargetContext().dropComplete(true);
-          if (Logger.debugging) {
+          if (Logger.debugging)
             Logger.debug("  String: " + o.toString());
-          }
-          si.runScript(prefix + cmd + Escape.escape(o.toString()) + "\";" + postfix);
-          return;
+          fileToLoad = o.toString();
+          break;
         }
       } else if (flavor.getMimeType().equals(
           "application/x-java-serialized-object; class=java.lang.String")) {
@@ -180,24 +177,25 @@ public class JSVDropTargetListener implements DropTargetListener {
         } catch (Exception e) {
           Logger.error(null, e);
         }
-
         if (o instanceof String) {
           String content = (String) o;
           dtde.getDropTargetContext().dropComplete(true);
-          if (Logger.debugging) {
+          if (Logger.debugging)
             Logger.debug("  String: " + content);
-          }
           if (content.startsWith("file:/")) {
-            si.runScript(prefix + cmd + Escape.escape(content) + "\";" + postfix);
+            fileToLoad = content;
+            break;
           }
-          return;
         }
       }
     }
     if (!isAccepted)
       dtde.rejectDrop();
+    if (fileToLoad != null) {
+      cmd = prefix + cmd + Escape.escape(fileToLoad) + "\";" + postfix;
+      Logger.info("Drop command = " + cmd);
+      si.runScript(cmd);
+    }
   }
-
-
   
 }
