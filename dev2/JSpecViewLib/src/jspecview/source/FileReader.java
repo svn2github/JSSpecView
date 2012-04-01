@@ -622,14 +622,12 @@ public class FileReader {
     }
 
     if (label.equals("##XUNITS")) {
-      String value = t.getValue();
-      spectrum.setXUnits(value.equals("") ? "ARBITRARY UNITS" : value);
+      spectrum.setXUnits(t.getValue());
       return true;
     }
 
     if (label.equals("##YUNITS")) {
-      String value = t.getValue();
-      spectrum.setYUnits(value.equals("") ? "ARBITRARY UNITS" : value);
+      spectrum.setYUnits(t.getValue());
       return true;
     }
 

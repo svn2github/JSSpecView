@@ -85,7 +85,6 @@ public abstract class JDXDataObject extends JDXHeader {
     return yFactor;
   }
 
-
   public void checkRequiredTokens() throws JSpecViewException {
     if (fileFirstX == ERROR)
       throw new JSpecViewException("Error Reading Data Set: ##FIRST not found");
@@ -161,13 +160,11 @@ public abstract class JDXDataObject extends JDXHeader {
   public static final int SCALE_TOP_BOTTOM = 3;
   
   public int getYScaleType() {
-    String datatype = getDataType().toUpperCase();
-    String yUnits = getYUnits().toUpperCase();
-    if (datatype.contains("NMR"))
-      return SCALE_TOP_BOTTOM;
-    if (datatype.startsWith("IR") || datatype.contains("INFRA"))
-      return (yUnits.startsWith("T") ? SCALE_NONE : SCALE_TOP);
-    return SCALE_TOP;
+    String dt = dataType.toUpperCase();
+    String yu = yUnits.toUpperCase();
+    return (dt.contains("NMR") ? SCALE_TOP_BOTTOM
+        : !dt.startsWith("IR") && !dt.contains("INFRA") || !yu.contains("TRANS") ? SCALE_TOP
+        : SCALE_NONE);
   }
   
   // For NMR Spectra:
@@ -523,21 +520,21 @@ public abstract class JDXDataObject extends JDXHeader {
    * @param spectrum
    */
   public boolean shouldDisplayXAxisIncreasing() {
-    String datatype = getDataType().toUpperCase();
-    String xUnits = getXUnits().toUpperCase();
-    if (datatype.contains("NMR") && !(datatype.contains("FID"))) {
+    String dt = dataType.toUpperCase();
+    String xu = xUnits.toUpperCase();
+    if (dt.contains("NMR") && !(dt.contains("FID"))) {
       return false;
-    } else if (datatype.contains("LINK") && xUnits.contains("CM")) {
+    } else if (dt.contains("LINK") && xu.contains("CM")) {
       return false; // I think this was because of a bug where BLOCK files kept type as LINK ?      
-    } else if (datatype.startsWith("IR") || datatype.contains("INFRA")
-        && xUnits.contains("CM")) {
+    } else if (dt.startsWith("IR") || dt.contains("INFRA")
+        && xu.contains("CM")) {
       return false;
-    } else if (datatype.contains("RAMAN") && xUnits.contains("CM")) {
+    } else if (dt.contains("RAMAN") && xu.contains("CM")) {
       return false;
-    } else if (datatype.contains("VIS") && xUnits.contains("NANOMETERS")) {
+    } else if (dt.contains("VIS") && xu.contains("NANOMETERS")) {
       return true;
     }
-    return isIncreasing();
+    return increasing;
   }
 
   private boolean continuous;
@@ -585,16 +582,16 @@ public abstract class JDXDataObject extends JDXHeader {
       rowData[i++] = new String[] { "##.OBSERVE FREQUENCY", "" + observedFreq };
     if (observedNucl != "")
       rowData[i++] = new String[] { "##.OBSERVE NUCLEUS", observedNucl };
-    rowData[i++] = new String[] { "##XUNITS", isHZtoPPM() ? "HZ" : xUnits };
+    rowData[i++] = new String[] { "##XUNITS", isHZtoPPM ? "HZ" : xUnits };
     rowData[i++] = new String[] { "##YUNITS", yUnits };
-    double x = (isIncreasing() ? getFirstX() : getLastX());
+    double x = (increasing ? getFirstX() : getLastX());
     rowData[i++] = new String[] { "##FIRSTX",
-        String.valueOf(isHZtoPPM() ? x * getObservedFreq() : x) };
-    x = (isIncreasing() ? getLastX() : getFirstX());
+        String.valueOf(isHZtoPPM() ? x * observedFreq : x) };
+    x = (increasing ? getLastX() : getFirstX());
     rowData[i++] = new String[] { "##FIRSTY",
-        String.valueOf(isIncreasing() ? getFirstY() : getLastY()) };
+        String.valueOf(increasing ? getFirstY() : getLastY()) };
     rowData[i++] = new String[] { "##LASTX",
-        String.valueOf(isHZtoPPM() ? x * getObservedFreq() : x) };
+        String.valueOf(isHZtoPPM() ? x * observedFreq : x) };
     rowData[i++] = new String[] { "##XFACTOR", String.valueOf(getXFactor()) };
     rowData[i++] = new String[] { "##YFACTOR", String.valueOf(getYFactor()) };
     rowData[i++] = new String[] { "##NPOINTS",

@@ -1992,7 +1992,7 @@ abstract class GraphSet {
     if (isd != null && isd.fixX(xPixel) == xPixel && fixY(yPixel) == yPixel) {
       int isub = isd.toSubspectrumIndex(yPixel);
       String s = formatterX.format(isd.toX(xPixel)) + " "
-          + getSpectrum().getXUnits() + ",  " + get2DYLabel(isub, formatterX);
+          + getSpectrum().getAxisLabel(true) + ",  " + get2DYLabel(isub, formatterX);
       pd.setToolTipText(pd.display1D ? s : "");
       pd.coordStr = s;
       return;
@@ -2051,9 +2051,8 @@ abstract class GraphSet {
 
   String getSolutionColor() {
     JDXSpectrum spectrum = getSpectrum();
-    String Yunits = spectrum.getYUnits();
     return (spectrum.canShowSolutionColor() ? Visible.Colour(spectrum
-        .getXYCoords(), Yunits) : Visible.noColor);
+        .getXYCoords(), spectrum.getYUnits()) : Visible.noColor);
   }
 
   static boolean getPickedCoordinates(Coordinate[] coordsClicked,
