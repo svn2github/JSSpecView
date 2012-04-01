@@ -96,14 +96,14 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   }
 
   /**
-   * Returns a copy of this <code>JDXSpectrum</code>
+   * specifically for Abs/Trans conversion. Note that we do NOT carry over piUnitsY
    * 
    * @return a copy of this <code>JDXSpectrum</code>
    */
   public JDXSpectrum copy() {
     JDXSpectrum newSpectrum = new JDXSpectrum();
     copyTo(newSpectrum);
-    newSpectrum.setPeakList(peakList, piUnitsX, piUnitsY);
+    newSpectrum.setPeakList(peakList, piUnitsX, null);
     return newSpectrum;
   }
 
