@@ -232,7 +232,7 @@ class CMLReader extends XMLReader {
       attrList = reader.getAttributeList();
       if (tagName.equals("array")) {
         
-        checkXUnits(reader.getAttrValue("units"));
+        xUnits = checkUnits(reader.getAttrValue("units"));
         npoints = Integer.parseInt(reader.getAttrValue("size"));
         xaxisData = new double[npoints];
         if (attrList.contains("start")) {
@@ -291,7 +291,7 @@ class CMLReader extends XMLReader {
       tagName = reader.getTagName();
       attrList = reader.getAttributeList();
       if (tagName.equals("array")) {
-        checkYUnits(reader.getAttrValue("units"));
+        yUnits = checkUnits(reader.getAttrValue("units"));
         Integer npointsY = Integer.valueOf(reader.getAttrValue("size"));
         if (npoints != npointsY.intValue())
           System.err.println("npoints variation between X and Y arrays");
@@ -392,11 +392,11 @@ class CMLReader extends XMLReader {
         xy[1] = 50;
         xy[0] = Double.parseDouble(reader.getAttrValue("xValue"));
         if (attrList.contains("xunits"))
-          checkXUnits(reader.getAttrValue("xUnits"));
+          xUnits = checkUnits(reader.getAttrValue("xUnits"));
         if (attrList.contains("yvalue"))
           xy[1] = Double.parseDouble(reader.getAttrValue("yValue"));
         if (attrList.contains("yunits"))
-          checkYUnits(reader.getAttrValue("yUnits"));
+          yUnits = checkUnits(reader.getAttrValue("yUnits"));
         if (attrList.contains("atomrefs"))
           xy[1] = 49 * Parser.getTokens(reader.getAttrValue("atomRefs")).length;
         peakData.add(xy);
@@ -404,28 +404,21 @@ class CMLReader extends XMLReader {
     }
   }
 
-  private void checkXUnits(String units) {
-    xUnits = units.toUpperCase();
-    Integer pos = Integer.valueOf(xUnits.indexOf(":"));
-    xUnits = xUnits.substring(pos.intValue() + 1, xUnits.length())
-        .toUpperCase();
-    if (xUnits.equals("MOVERZ"))
-      xUnits = "M/Z";
-    else if (xUnits.equals("CM-1"))
-      xUnits = "1/CM";
-    else if (xUnits.toLowerCase().equals("NM"))
-      xUnits = "NANOMETERS";
-
-  }
-
-  private void checkYUnits(String units) {
-    yUnits = units.toUpperCase();
-    Integer pos = Integer.valueOf(yUnits.indexOf(":"));
-    yUnits = yUnits.substring(pos.intValue() + 1,
-        yUnits.length());
-    if (yUnits.equals("RELABUNDANCE"))
-      yUnits = "RELATIVE ABUNDANCE";
-    else if (yUnits.contains("ARBITRARY"))
-      yUnits = "ARBITRARY UNITS";
+  private static String checkUnits(String units) {
+    units = units.toUpperCase();
+    Integer pos = Integer.valueOf(units.indexOf(":"));
+    units = units.substring(pos.intValue() + 1,
+        units.length());
+    if (units.equals("RELABUNDANCE"))
+      units = "RELATIVE ABUNDANCE";
+    else if (units.contains("ARBITRARY"))
+      units = "ARBITRARY UNITS";
+    else if (units.equals("MOVERZ"))
+      units = "M/Z";
+    else if (units.equals("CM-1"))
+      units = "1/CM";
+    else if (units.toLowerCase().equals("NM"))
+      units = "NANOMETERS";
+    return units;
   }
 }
