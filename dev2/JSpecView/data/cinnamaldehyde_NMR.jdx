@@ -66,11 +66,11 @@ M  END
 </Models>
 ##$PEAKS=
 <Peaks type="HNMR" xUnits="ppm" yUnits="arbitrary units" >
-<PeakData id="1" title=" group ~6.7" peakShape="singlet" model="cinnam" atoms="12" xMax="6.8" xMin="6.6"  yMax="10000" yMin="0" />
+<PeakData id="1" title=" group ~6.7" peakShape="singlet" model="cinnam" atoms="12" xMax="6.85" xMin="6.55"  yMax="10000" yMin="0" />
 <PeakData id="2" title="H ~7.40" peakShape="multiplet" model="cinnam"  atoms="16,17" xMax="7.45" xMin="7.4"  yMax="10000" yMin="0" />
-<PeakData id="3" title="H ~7.48" peakShape="multiplet" model="cinnam" atoms="18" xMax="7.5" xMin="7.46"  yMax="10000" yMin="0" />
+<PeakData id="3" title="H ~7.48" peakShape="multiplet" model="cinnam" atoms="18" xMax="7.51" xMin="7.455"  yMax="10000" yMin="0" />
 <PeakData id="4" title="H ~7.54" peakShape="multiplet" model="cinnam" atoms="14,15" xMax="7.55" xMin="7.52"  yMax="10000" yMin="0" />
-<PeakData id="5" title="H ~7.56" peakShape="multiplet" model="cinnam" atoms="13" xMax="7.58" xMin="7.55"  yMax="10000" yMin="0" />
+<PeakData id="5" title="H ~7.56" peakShape="multiplet" model="cinnam" atoms="13" xMax="7.6" xMin="7.55"  yMax="10000" yMin="0" />
 <PeakData id="6" title="H ~9.7" peakShape="multiplet" model="cinnam" atoms="11" xMax="10" xMin="9.4"  yMax="10000" yMin="0" />
 </Peaks>
 ##.OBSERVE FREQUENCY= 400.132

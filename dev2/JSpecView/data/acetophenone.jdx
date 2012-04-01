@@ -1090,7 +1090,7 @@ H    -3.492000   -1.179900   -0.005900    0.001020    0.000720   -0.442600
 <Models>
  <ModelData id="acetophenone" type="MOL">
 acetophenone
-  DSViewer          3D                             0
+RLDSViewer          3D                             0
 
  17 17  0  0  0  0  0  0  0  0999 V2000
    -1.6931    0.0078    0.0000 C   0  0  0  0  0  0  0  0  0  1
@@ -1667,7 +1667,7 @@ M  END
 <Models>
  <ModelData id="acetophenone" type="MOL">
 acetophenone
-  DSViewer          3D                             0
+RLDSViewer          3D                             0
 
  17 17  0  0  0  0  0  0  0  0999 V2000
    -1.6931    0.0078    0.0000 C   0  0  0  0  0  0  0  0  0  1
@@ -3735,7 +3735,7 @@ M  END
 <Models>
 <ModelData id="acetophenone" type="MOL">
 acetophenone
-  DSViewer          3D                             0
+RLDSViewer          3D                             0
 
  17 17  0  0  0  0  0  0  0  0999 V2000
    -1.6931    0.0078    0.0000 C   0  0  0  0  0  0  0  0  0  1
@@ -3774,9 +3774,9 @@ acetophenone
  17 14  1  0  0  0
 M  END
 </ModelData>
-<ModelData id="2" type="MOL" baseModel="acetophenone">
+<ModelData id="4" type="MOL" baseModel="acetophenone">
 acetophenone m/z 120
-  DSViewer          3D                             0
+RLDSViewer          3D                             0
 
  17 17  0  0  0  0  0  0  0  0999 V2000
    -1.6931    0.0078    0.0000 C   0  0  0  0  0  0  0  0  0  1
@@ -3878,9 +3878,9 @@ M  END
 </Models>
 ##$PEAKS=
 <Peaks type="MS" xUnits="M/Z" yUnits="RELATIVE ABUNDANCE" >
-<PeakData id="1" title="molecular ion (~120)" peakShape="sharp" model="acetophenone"  xMax="121" xMin="119"  yMax="100" yMin="0" />
-<PeakData id="2" title="fragment 1 (~105)" peakShape="sharp" model="2.2"  xMax="106" xMin="104"  yMax="100" yMin="0" />
-<PeakData id="3" title="fragment 2 (~77)" peakShape="sharp" model="2.3"  xMax="78" xMin="76"  yMax="100" yMin="0" />
+<PeakData id="1" title="molecular ion (~120)" peakShape="sharp" model="4.1"  xMax="121" xMin="119"  yMax="100" yMin="0" />
+<PeakData id="2" title="fragment 1 (~105)" peakShape="sharp" model="4.2"  xMax="106" xMin="104"  yMax="100" yMin="0" />
+<PeakData id="3" title="fragment 2 (~77)" peakShape="sharp" model="4.3"  xMax="78" xMin="76"  yMax="100" yMin="0" />
 </Peaks>
 ##XUNITS= M/Z
 ##YUNITS= RELATIVE ABUNDANCE

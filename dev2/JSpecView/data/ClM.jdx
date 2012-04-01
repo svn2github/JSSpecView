@@ -32,7 +32,7 @@ RLDSViewer          3D                             0
   1  5  1  0  0  0
 M  END
 </ModelData>
-<ModelData id="1" type="XYZVIB" baseModel="ch2cl2" vibrationScale=".5">
+<ModelData id="1" type="XYZVIB" baseModel="ch2cl2" vibrationScale=".2">
 5
 Model[1]: Convg=0.2016D-08;-V/T=2.0004;Energy=NaN;Range=M.O.s;E(RHF)=-957.984015823 A.U.;PATH=Calculation 1;Input
 C     0.00000    0.00000    0.00000
@@ -222,7 +222,7 @@ RLDSViewer          3D                             0
   1  5  1  0  0  0
 M  END
 </ModelData>
-<ModelData id="D2" type="XYZVIB" baseModel="cd2cl2" vibrationScale=".5">
+<ModelData id="D2" type="XYZVIB" baseModel="cd2cl2" vibrationScale=".2">
 5
 Model[1]: Convg=0.2016D-08;-V/T=2.0004;Energy=NaN;Range=M.O.s;E(RHF)=-957.984015823 A.U.;PATH=Calculation 1;Input
 C     0.00000    0.00000    0.00000
@@ -362,7 +362,7 @@ RLDSViewer          3D                             0
   1  4  1  0  0  0
 M  END
 </ModelData>
-<ModelData id="2" type="XYZVIB" baseModel="chcl3" vibrationScale=".5">
+<ModelData id="2" type="XYZVIB" baseModel="chcl3" vibrationScale=".2">
 5
 Model[1]: Convg=0.7033D-08;-V/T=2.0004;Energy=NaN;Range=M.O.s;E(RHF)=-1416.86840659 A.U.;PATH=Calculation 1;Input
 C     0.00000    0.00000    0.00000
@@ -713,7 +713,7 @@ RLDSViewer          3D                             0
   1  4  1  0  0  0
 M  END
 </ModelData>
-<ModelData id="3" type="XYZVIB" baseModel="cdcl3" vibrationScale=".5">
+<ModelData id="3" type="XYZVIB" baseModel="cdcl3" vibrationScale=".2">
 5
 Model[1]: Convg=0.7033D-08;-V/T=2.0004;Energy=NaN;Range=M.O.s;E(RHF)=-1416.86840659 A.U.;PATH=Calculation 1;Input
 C     0.00000    0.00000    0.00000
