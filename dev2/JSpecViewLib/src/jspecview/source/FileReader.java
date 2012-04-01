@@ -673,6 +673,7 @@ public class FileReader {
       spectrum.dataPointNum = 1;
       // varian type
       spectrum.shiftRefType = 2;
+      return false;
     }
 
     else if (label.equals("##.SHIFTREFERENCE")) {
