@@ -151,7 +151,7 @@ abstract class XMLReader {
       xyCoords = Coordinate.reverse(xyCoords);
       
     spectrum.setXUnits(xUnits);
-    spectrum.setYUnits(yUnits.equals("") ? "ARBITRARY UNITS" : yUnits);
+    spectrum.setYUnits(yUnits);
 
     spectrum.setXYCoords(xyCoords);
     source.addJDXSpectrum(filePath, spectrum, false);
