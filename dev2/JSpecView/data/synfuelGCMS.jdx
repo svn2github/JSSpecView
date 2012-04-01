@@ -17,7 +17,7 @@
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="GC/MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<Peaks type="GC/MS" xUnitsExpected="M/Z"  >
 <PeakData id="1" title="2-methylpropene (~3.6)" peakShape="sharp" model="2meprop.1"  xMax="3.8" xMin="3.4"    />
 <PeakData id="2" title="benzene (~6.5)" peakShape="sharp" model="3benz.1"  xMax="6.7" xMin="6.3"    />
 <PeakData id="3" title="toluene (~10.9)" peakShape="sharp" model="4tol.1"  xMax="11.1" xMin="10.7"    />
@@ -193,7 +193,7 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<Peaks type="MS" xUnitsExpected="M/Z"  >
 <PeakData id="1" title="molecular ion (~58)" peakShape="sharp" model="2meprop.1"  xMax="59" xMin="57"    />
 </Peaks>
 ##XUNITS=M/Z
@@ -288,7 +288,7 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<Peaks type="MS" xUnitsExpected="M/Z"  >
 <PeakData id="1" title="molecular ion (~78)" peakShape="sharp" model="3benz.1"  xMax="79" xMin="77"    />
 </Peaks>
 ##XUNITS=M/Z
@@ -390,7 +390,7 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<Peaks type="MS" xUnitsExpected="M/Z"  >
 <PeakData id="1" title="molecular ion (~91)" peakShape="sharp" model="3benz.1"  xMax="92" xMin="90"    />
 </Peaks>
 ##XUNITS=M/Z
@@ -516,7 +516,7 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<Peaks type="MS" xUnitsExpected="M/Z"  >
 <PeakData id="1" title="molecular ion (~106)" peakShape="sharp" model="5etbenz.1"  xMax="107" xMin="105"    />
 </Peaks>
 ##XUNITS=M/Z
@@ -636,7 +636,7 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<Peaks type="MS" xUnitsExpected="M/Z"  >
 <PeakData id="1" title="molecular ion (~106)" peakShape="sharp" model="6mxyl.1"  xMax="107" xMin="105"    />
 </Peaks>
 ##XUNITS=M/Z
@@ -762,7 +762,7 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<Peaks type="MS" xUnitsExpected="M/Z"  >
 <PeakData id="1" title="molecular ion (~106)" peakShape="sharp" model="7oxyl.1"  xMax="107" xMin="105"    />
 </Peaks>
 ##XUNITS=M/Z
@@ -898,7 +898,7 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<Peaks type="MS" xUnitsExpected="M/Z"  >
 <PeakData id="1" title="molecular ion (~120)" peakShape="sharp" model="8EMBenz.1"  xMax="121" xMin="120"    />
 </Peaks>
 ##XUNITS=M/Z

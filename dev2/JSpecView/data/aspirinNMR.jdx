@@ -66,7 +66,7 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="HNMR" xUnitsExpected="ppm" yUnits="arbitrary units" >
+<Peaks type="HNMR" xUnitsExpected="ppm"  >
 <PeakData  id="1" title="methyl group ~2.23" peakShape="singlet" model="aspirin" atoms="19,20,21"  xMax="2.36" xMin="2.1"    />
 <PeakData  id="2" title="OH ~13.10" peakShape="multiplet" model="aspirin" atoms="18"  xMax="13.30" xMin="12.95"    />
 <PeakData  id="3" title="H14 ~7.18" peakShape="multiplet" model="aspirin" atoms="14"  xMax="7.25" xMin="7.07"    />
@@ -1983,7 +1983,7 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="13CNMR" xUnitsExpected="ppm" yUnits="arbitrary units" >
+<Peaks type="13CNMR" xUnitsExpected="ppm"  >
 <PeakData id="1" title="C9  ~21" peakShape="singlet" model="aspirin" atoms="9"  xMax="23" xMin="19"    />
 <PeakData id="2" title="C1 ~123.7" peakShape="singlet" model="aspirin" atoms="1"  xMax="123.8" xMin="123"    />
 <PeakData id="3" title="C3 ~123.9" peakShape="singlet" model="aspirin" atoms="3"  xMax="124.5" xMin="123.85"    />

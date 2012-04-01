@@ -65,7 +65,7 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="HNMR" xUnitsExpected="ppm" yUnits="arbitrary units" >
+<Peaks type="HNMR" xUnitsExpected="ppm"  >
 <PeakData id="1" title=" group ~6.7" peakShape="singlet" model="cinnam" atoms="12" xMax="6.85" xMin="6.55"    />
 <PeakData id="2" title="H ~7.40" peakShape="multiplet" model="cinnam"  atoms="16,17" xMax="7.45" xMin="7.4"    />
 <PeakData id="3" title="H ~7.48" peakShape="multiplet" model="cinnam" atoms="18" xMax="7.51" xMin="7.455"    />
@@ -567,7 +567,7 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="13CNMR" xUnitsExpected="ppm" yUnits="arbitrary units" >
+<Peaks type="13CNMR" xUnitsExpected="ppm"  >
 <PeakData id="1" title="C3,C8,C9 aromatic ~128.4" peakShape="multiplet" model="cinnam"  atoms="3,8,9" xMax="128.65" xMin="128.1"    />
 <PeakData id="2" title="C6,C7 aromatic ~128.9" peakShape="multiplet" model="cinnam" atoms="6,7" xMax="129.4" xMin="128.7"    />
 <PeakData id="3" title="C10 aromatic ~131.1" peakShape="multiplet" model="cinnam" atoms="10" xMax="131.6" xMin="130.6"    />

@@ -185,7 +185,7 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="13CNMR" xUnitsExpected="ppm" yUnits="arbitrary units" >
+<Peaks type="13CNMR" xUnitsExpected="ppm"  >
 <PeakData  id="1" title="peak ~12" peakShape="singlet" model="cholac" atoms="18"  xMax="13" xMin="11"    />
 <PeakData  id="2" title="peak ~19" peakShape="singlet" model="cholac" atoms="19,21"  xMax="19.5" xMin="18"    />
 <PeakData  id="3" title="peak ~21" peakShape="singlet" model="cholac" atoms="11,29"  xMax="21.5" xMin="19.5"    />

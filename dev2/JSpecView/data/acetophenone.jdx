@@ -1131,7 +1131,7 @@ M  END
   </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="HNMR" xUnitsExpected="ppm" yUnits="arbitrary units" >
+<Peaks type="HNMR" xUnitsExpected="ppm"  >
 <PeakData id="1" title="methyl group ~2.6" peakShape="singlet" model="acetophenone" atoms="15,16,17"  xMax="2.7" xMin="2.5"    />
 <PeakData id="2" title="meta H's ~7.4" peakShape="multiplet" model="acetophenone"  atoms="10,11"  xMax="7.5" xMin="7.3"    />
 <PeakData id="3" title="para H ~7.5" peakShape="multiplet" model="acetophenone" atoms="12"   xMax="7.6" xMin="7.4"    />
@@ -1708,7 +1708,7 @@ M  END
   </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="13CNMR" xUnitsExpected="ppm" yUnits="arbitrary units" >
+<Peaks type="13CNMR" xUnitsExpected="ppm"  >
 <PeakData id="1" title="methyl group ~27" peakShape="singlet" model="acetophenone" atoms="14" xMax="28" xMin="26"    />
 <PeakData id="2" title="C3,C5 aromatic ~128" peakShape="multiplet" model="acetophenone"  atoms="6,7" xMax="129" xMin="127"    />
 <PeakData id="3" title="C2,C6 aromatic ~129" peakShape="multiplet" model="acetophenone" atoms="4,5" xMax="130" xMin="128"    />
@@ -3877,7 +3877,7 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<Peaks type="MS" xUnitsExpected="M/Z"  >
 <PeakData id="1" title="molecular ion (~120)" peakShape="sharp" model="4.1"  xMax="121" xMin="119"    />
 <PeakData id="2" title="fragment 1 (~105)" peakShape="sharp" model="4.2"  xMax="106" xMin="104"    />
 <PeakData id="3" title="fragment 2 (~77)" peakShape="sharp" model="4.3"  xMax="78" xMin="76"    />

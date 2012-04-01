@@ -837,7 +837,7 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="13CNMR" xUnitsExpected="ppm" yUnits="arbitrary units" >
+<Peaks type="13CNMR" xUnitsExpected="ppm"  >
 <PeakData id="1" title="amine-C1 ~147" peakShape="singlet" model="pchloroaniline" atoms="3" xMax="148" xMin="146"    />
 <PeakData id="2" title="C2,C6 ~118" peakShape="multiplet" model="pchloroaniline"  atoms="2,4" xMax="119" xMin="117"    />
 <PeakData id="3" title="chloro-C4 ~124" peakShape="multiplet" model="pchloroaniline" atoms="6" xMax="125" xMin="123"    />
@@ -3965,7 +3965,7 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="13CNMR" xUnitsExpected="ppm" yUnits="arbitrary units" >
+<Peaks type="13CNMR" xUnitsExpected="ppm"  >
 <PeakData id="1" title="amine-C1 ~148" peakShape="singlet" model="mchloroaniline" atoms="3" xMax="149" xMin="147"    />
 <PeakData id="2" title="C2 ~115" peakShape="multiplet" model="mchloroaniline"  atoms="4" xMax="116" xMin="114"    />
 <PeakData id="3" title="chloro-C3 ~135" peakShape="multiplet" model="mchloroaniline" atoms="5" xMax="136" xMin="134"    />
@@ -6816,7 +6816,7 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="13CNMR" xUnitsExpected="ppm" yUnits="arbitrary units" >
+<Peaks type="13CNMR" xUnitsExpected="ppm"  >
 <PeakData id="1" title="amine-C1 ~148" peakShape="singlet" model="ochloroaniline" atoms="3" xMax="144" xMin="142"    />
 <PeakData id="2" title="chloro-C2 ~119.5" peakShape="multiplet" model="ochloroaniline"  atoms="4" xMax="120" xMin="119.2"    />
 <PeakData id="3" title="C3 ~130" peakShape="multiplet" model="ochloroaniline" atoms="5" xMax="131" xMin="129"    />

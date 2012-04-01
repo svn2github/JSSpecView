@@ -241,7 +241,7 @@ H     0.87365   -0.50440    1.04833   -0.02000    0.01000   -0.01000
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="IR" xUnitsExpected="1/cm" yUnits="ABSORBANCE" >
+<Peaks type="IR" xUnitsExpected="1/cm"  >
 <PeakData id="1" title="E asymmetric stretch of the B-H group (~3234 cm-1)" peakShape="broad" model="1.20" xMax="3255" xMin="3210"    />
 <PeakData id="2" title="A1 symmetric stretch of the B-H group (~3153 cm-1)" peakShape="broad" model="1.18" xMax="3175" xMin="3125"    />
 <PeakData id="3" title="E asymmetric stretch of the N-H group (~3076 cm-1)" peakShape="broad" model="1.17" xMax="3100" xMin="3050"    />
@@ -616,7 +616,7 @@ H     0.87365   -0.50440    1.04833   -0.02000    0.01000   -0.01000
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="RAMAN" xUnitsExpected="1/cm" yUnits="RAMAN INTENSITY" >
+<Peaks type="RAMAN" xUnitsExpected="1/cm"  >
 <PeakData id="1" title="E (~3234 cm-1)" peakShape="broad" model="2.20" xMax="3255" xMin="3210"    />
 <PeakData id="2" title="A1 (~3153 cm-1)" peakShape="broad" model="2.18" xMax="3175" xMin="3125"    />
 <PeakData id="3" title="E (~3076 cm-1)" peakShape="broad" model="2.17" xMax="3100" xMin="3050"    />
@@ -997,7 +997,7 @@ H     0.87365   -0.50440    1.04833   -0.02000    0.01000   -0.01000
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="IR" xUnitsExpected="1/cm" yUnits="ABSORBANCE" >
+<Peaks type="IR" xUnitsExpected="1/cm"  >
 <PeakData id="1" title="E asymmetric stretch of the N-H group (~3307 cm-1)" peakShape="broad" model="3.17" xMax="3340" xMin="3280"    />
 <PeakData id="2" title="A1 symmetric stretch of the N-H group (~3244 cm-1)" peakShape="broad" model="3.15" xMax="3270" xMin="3215"    />
 <PeakData id="3" title="E asymmetric stretch of the B-H group (~2350 cm-1)" peakShape="broad" model="3.20" xMax="2370" xMin="2320"    />
@@ -1301,7 +1301,7 @@ H     0.87365   -0.50440    1.04833   -0.02000    0.01000   -0.01000
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="RAMAN" xUnitsExpected="1/cm" yUnits="RAMAN INTENSITY" >
+<Peaks type="RAMAN" xUnitsExpected="1/cm"  >
 <PeakData id="1" title="E asymmetric stretch of the N-H group (~3307 cm-1)" peakShape="broad" model="4.17" xMax="3340" xMin="3280"    />
 <PeakData id="2" title="A1 symmetric stretch of the N-H group (~3244 cm-1)" peakShape="broad" model="4.15" xMax="3270" xMin="3215"    />
 <PeakData id="3" title="E asymmetric stretch of the B-H group (~2350 cm-1)" peakShape="broad" model="4.20" xMax="2400" xMin="2340"    />

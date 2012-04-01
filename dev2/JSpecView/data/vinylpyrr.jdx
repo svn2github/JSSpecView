@@ -1102,7 +1102,7 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="HNMR" xUnitsExpected="ppm" yUnits="arbitrary units" >
+<Peaks type="HNMR" xUnitsExpected="ppm"  >
 <PeakData id="1" title="C5 H's ~2.1" peakShape="singlet" model="vinylpyrrolid" atoms="13,14"  xMax="2.2" xMin="2.0"    />
 <PeakData id="2" title="C4 H's ~2.5" peakShape="multiplet" model="vinylpyrrolid"  atoms="11,12"  xMax="2.6" xMin="2.4"    />
 <PeakData id="3" title="C3 H's ~3.5" peakShape="multiplet" model="vinylpyrrolid" atoms="9,10"   xMax="3.6" xMin="3.4"    />
@@ -2154,7 +2154,7 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="13CNMR" xUnitsExpected="ppm" yUnits="arbitrary units" >
+<Peaks type="13CNMR" xUnitsExpected="ppm"  >
 <PeakData id="1" title="C5 ~17" peakShape="singlet" model="vinylpyrrolid" atoms="5"  xMax="18" xMin="16"    />
 <PeakData id="2" title="C4 ~31" peakShape="multiplet" model="vinylpyrrolid"  atoms="4"  xMax="32" xMin="30"    />
 <PeakData id="3" title="C3 ~44" peakShape="multiplet" model="vinylpyrrolid" atoms="3"   xMax="45" xMin="43"    />
@@ -3146,7 +3146,7 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<Peaks type="MS" xUnitsExpected="M/Z"  >
 <PeakData id="1" title="molecular ion  (~111)" peakShape="sharp" model="2.1"  xMax="112" xMin="110"    />
 <PeakData id="2" title="fragment 1 (~56)" peakShape="sharp" model="2.2"  xMax="57" xMin="55"    />
 </Peaks>

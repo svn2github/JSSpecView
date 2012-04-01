@@ -12,7 +12,7 @@
 ##OWNER= public domain
 ##$MODELS=
 ##$PEAKS=
-<Peaks type="GC/MS" xUnitsExpected="TIME" yUnits="ARBITRARY UNITS" >
+<Peaks type="GC/MS" xUnitsExpected="TIME"  >
 <PeakData id="1" title="cineole (~41)" peakShape="sharp" model="2cin.1"  xMax="42" xMin="40"    />
 <PeakData id="2" title="b-caryopholene (~93)" peakShape="sharp" model="3caryoph.1"  xMax="94" xMin="92"    />
 <PeakData id="3" title="terpineol (~103)" peakShape="sharp" model="4terpineol.1"  xMax="104" xMin="102"    />
@@ -241,7 +241,7 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<Peaks type="MS" xUnitsExpected="M/Z"  >
 <PeakData id="1" title="cineole molecular ion (~154)" peakShape="sharp" model="2cin.1"  xMax="155" xMin="153"    />
 <PeakData id="2" title="fragment (~81)" peakShape="sharp" model="2cin.2"  xMax="82" xMin="80"    />
 </Peaks>
@@ -446,7 +446,7 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<Peaks type="MS" xUnitsExpected="M/Z"  >
 <PeakData id="1" title="molecular ion (~204)" peakShape="sharp" model="3caryoph.1"  xMax="205" xMin="203"    />
 </Peaks>
 ##INSTRUMENTAL PARAMETERS= LOW RESOLUTION
@@ -611,7 +611,7 @@ M  END
 </Models>
 
 ##$PEAKS=
-<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<Peaks type="MS" xUnitsExpected="M/Z"  >
 <PeakData id="1" title="molecular ion (~154)" peakShape="sharp" model="4terpineol.1"  xMax="155" xMin="153"    />
 </Peaks>
 ##INSTRUMENTAL PARAMETERS= LOW RESOLUTION
@@ -829,7 +829,7 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<Peaks type="MS" xUnitsExpected="M/Z"  >
 <PeakData id="1" title="molecular ion (~178)" peakShape="sharp" model="5meeug.1"  xMax="179" xMin="177"    />
 <PeakData id="2" title="molecular ion (~103)" peakShape="sharp" model="5meeug.2"  xMax="104" xMin="102"    />
 </Peaks>
@@ -972,7 +972,7 @@ M  END
 </ModelData>
 </Models>
 ##$PEAKS=
-<Peaks type="MS" xUnitsExpected="M/Z" yUnits="RELATIVE ABUNDANCE" >
+<Peaks type="MS" xUnitsExpected="M/Z"  >
 <PeakData id="1" title="molecular ion (~164)" peakShape="sharp" model="6eug.1"  xMax="165" xMin="163"    />
 </Peaks>
 ##INSTRUMENTAL PARAMETERS= LOW RESOLUTION
