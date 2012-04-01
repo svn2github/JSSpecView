@@ -190,10 +190,10 @@ class AnIMLReader extends XMLReader {
       String axisLabel = reader.getAttrValue("name");
       String dependency = reader.getAttrValueLC("dependency");
       if (dependency.equals("independent")) {
-        xaxisLabel = axisLabel;
+        xUnits = axisLabel;
         getXValues();
       } else if (dependency.equals("dependent")) {
-        yaxisLabel = axisLabel;
+        yUnits = axisLabel;
         getYValues();
       }
     } else if (tagName.equals("parameter")) {
@@ -232,7 +232,7 @@ class AnIMLReader extends XMLReader {
     }
     if (!inResult) {
       nextStartTag();
-      xaxisUnit = reader.getAttrValue("label");
+      xUnits = reader.getAttrValue("label");
     }
     increasing = (deltaX > 0 ? true : false);
     continuous = true;
@@ -281,7 +281,7 @@ class AnIMLReader extends XMLReader {
     }
     reader.nextStartTag();
     tagName = reader.getTagName();
-    yaxisUnit = reader.getAttrValue("label");
+    yUnits = reader.getAttrValue("label");
     firstY = yaxisData[0];
   }
 

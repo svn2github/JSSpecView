@@ -53,8 +53,8 @@ abstract class XMLReader {
   protected int npoints = -1, samplenum = -1;
   protected double[] yaxisData;
   protected double[] xaxisData;
-  protected String xaxisLabel = "", xaxisUnit = "", xaxisType = "";
-  protected String yaxisLabel = "", yaxisUnit = "", yaxisType = "";
+  protected String xUnits = "";
+  protected String yUnits = "ARBITRARY UNITS";
   protected String vendor = "na", modelType = "MODEL UNKNOWN", LongDate = "";
   protected String pathlength = "na", identifier = "", plLabel = "";
   protected String resolution = "na", resLabel = "", LocName = "";
@@ -134,8 +134,8 @@ abstract class XMLReader {
     double xScale = 1; // NMR data stored internally as ppm
     if (obFreq != JDXDataObject.ERROR) {
       spectrum.setObservedFreq(obFreq);
-      if (xaxisUnit.toUpperCase().equals("HZ")) {
-        xaxisUnit = "PPM";
+      if (xUnits.toUpperCase().equals("HZ")) {
+        xUnits = "PPM";
         spectrum.setHZtoPPM(true);
         xScale = obFreq;
       }
@@ -150,8 +150,8 @@ abstract class XMLReader {
     if (!increasing)
       xyCoords = Coordinate.reverse(xyCoords);
       
-    spectrum.setXUnits(xaxisUnit);
-    spectrum.setYUnits(yaxisUnit);
+    spectrum.setXUnits(xUnits);
+    spectrum.setYUnits(yUnits.equals("") ? "ARBITRARY UNITS" : yUnits);
 
     spectrum.setXYCoords(xyCoords);
     source.addJDXSpectrum(filePath, spectrum, false);

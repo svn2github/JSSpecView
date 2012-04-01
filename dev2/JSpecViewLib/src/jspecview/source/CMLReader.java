@@ -231,14 +231,8 @@ class CMLReader extends XMLReader {
       tagName = reader.getTagName();
       attrList = reader.getAttributeList();
       if (tagName.equals("array")) {
-        xaxisUnit = reader.getAttrValue("units");
-        Integer pos = Integer.valueOf(xaxisUnit.indexOf(":"));
-        xaxisUnit = xaxisUnit.substring(pos.intValue() + 1, xaxisUnit.length())
-            .toUpperCase();
-        if (xaxisUnit.toLowerCase().equals("cm-1"))
-          xaxisUnit = "1/CM";
-        else if (xaxisUnit.toLowerCase().equals("nm"))
-          xaxisUnit = "NANOMETERS";
+        
+        checkXUnits(reader.getAttrValue("units"));
         npoints = Integer.parseInt(reader.getAttrValue("size"));
         xaxisData = new double[npoints];
         if (attrList.contains("start")) {
@@ -297,12 +291,7 @@ class CMLReader extends XMLReader {
       tagName = reader.getTagName();
       attrList = reader.getAttributeList();
       if (tagName.equals("array")) {
-        yaxisUnit = reader.getAttrValue("units");
-        Integer pos = Integer.valueOf(yaxisUnit.indexOf(":"));
-        yaxisUnit = yaxisUnit.substring(pos.intValue() + 1, yaxisUnit.length())
-            .toUpperCase();
-        if (yaxisUnit.toLowerCase().contains("arbitrary"))
-          yaxisUnit = "ARBITRARY UNITS";
+        checkYUnits(reader.getAttrValue("units"));
         Integer npointsY = Integer.valueOf(reader.getAttrValue("size"));
         if (npoints != npointsY.intValue())
           System.err.println("npoints variation between X and Y arrays");
@@ -402,30 +391,41 @@ class CMLReader extends XMLReader {
         double[] xy = new double[2];
         xy[1] = 50;
         xy[0] = Double.parseDouble(reader.getAttrValue("xValue"));
-        if (attrList.contains("xunits")) {
-          xaxisUnit = reader.getAttrValue("xUnits");
-          Integer pos = Integer.valueOf(xaxisUnit.indexOf(":"));
-          xaxisUnit = xaxisUnit.substring(pos.intValue() + 1,
-              xaxisUnit.length()).toUpperCase();
-          if (xaxisUnit.toLowerCase().equals("moverz"))
-            xaxisUnit = "M/Z";
-        }
+        if (attrList.contains("xunits"))
+          checkXUnits(reader.getAttrValue("xUnits"));
         if (attrList.contains("yvalue"))
           xy[1] = Double.parseDouble(reader.getAttrValue("yValue"));
-        if (attrList.contains("yunits")) {
-          yaxisUnit = reader.getAttrValue("yUnits");
-          Integer pos = Integer.valueOf(yaxisUnit.indexOf(":"));
-          yaxisUnit = yaxisUnit.substring(pos.intValue() + 1,
-              yaxisUnit.length()).toUpperCase();
-          if (yaxisUnit.toLowerCase().equals("relabundance"))
-            yaxisUnit = "RELATIVE ABUNDANCE";
-          if (yaxisUnit.toLowerCase().contains("arbitrary"))
-            yaxisUnit = "ARBITRARY UNITS";
-        }
+        if (attrList.contains("yunits"))
+          checkYUnits(reader.getAttrValue("yUnits"));
         if (attrList.contains("atomrefs"))
           xy[1] = 49 * Parser.getTokens(reader.getAttrValue("atomRefs")).length;
         peakData.add(xy);
       }
     }
+  }
+
+  private void checkXUnits(String units) {
+    xUnits = units.toUpperCase();
+    Integer pos = Integer.valueOf(xUnits.indexOf(":"));
+    xUnits = xUnits.substring(pos.intValue() + 1, xUnits.length())
+        .toUpperCase();
+    if (xUnits.equals("MOVERZ"))
+      xUnits = "M/Z";
+    else if (xUnits.equals("CM-1"))
+      xUnits = "1/CM";
+    else if (xUnits.toLowerCase().equals("NM"))
+      xUnits = "NANOMETERS";
+
+  }
+
+  private void checkYUnits(String units) {
+    yUnits = units.toUpperCase();
+    Integer pos = Integer.valueOf(yUnits.indexOf(":"));
+    yUnits = yUnits.substring(pos.intValue() + 1,
+        yUnits.length());
+    if (yUnits.equals("RELABUNDANCE"))
+      yUnits = "RELATIVE ABUNDANCE";
+    else if (yUnits.contains("ARBITRARY"))
+      yUnits = "ARBITRARY UNITS";
   }
 }
