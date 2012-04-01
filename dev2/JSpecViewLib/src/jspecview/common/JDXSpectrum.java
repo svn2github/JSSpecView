@@ -625,7 +625,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
    * then (2) ##XLABEL/##YLABEL, 
    * then (3) ##XUNITS/##YUNITS 
    * @param isX
-   * @return  suitable label or ""; never "ARBITRARY UNITS"
+   * @return  suitable label or ""
    */
   public String getAxisLabel(boolean isX) {
     String units = (isX ? piUnitsX : piUnitsY);
@@ -633,8 +633,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
       units = (isX ? xLabel : yLabel);
     if (units == null)
       units = (isX ? xUnits : yUnits);
-    return (units == null || units.equalsIgnoreCase("ARBITRARY UNITS") ? ""
-        : units);
+    return (units == null ? "" : units);
   }
 
 }
