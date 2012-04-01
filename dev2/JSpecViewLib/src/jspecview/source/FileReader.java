@@ -540,9 +540,8 @@ public class FileReader {
   private ArrayList<PeakInfo> readPeakList(String peakList, int index) {
     ArrayList<PeakInfo> peakData = new ArrayList<PeakInfo>();
     BufferedReader reader = new BufferedReader(new StringReader(peakList));
-    String line;
     try {
-      line = discardLinesUntilContains(reader, "<Peaks");
+      String line = discardLinesUntilContains(reader, "<Peaks");
       String type = Parser.getQuotedAttribute(line, "type");
       piUnitsX = Parser.getQuotedAttribute(line, "xLabel");
       piUnitsY = Parser.getQuotedAttribute(line, "yLabel");
