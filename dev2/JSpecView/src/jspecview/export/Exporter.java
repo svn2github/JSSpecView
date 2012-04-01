@@ -35,12 +35,13 @@ import jspecview.util.TextFormat;
 
 public class Exporter {
 
+  public final static String sourceLabel = "Source...";
   public enum Type {
     UNK, SOURCE, DIF, FIX, SQZ, PAC, XY, DIFDUP, PNG, JPG, SVG, SVGI, CML, AML;
 
     public static Type getType(String type) {
       type = type.toUpperCase();
-      if (type.equals("..."))
+      if (type.equals(sourceLabel))
         return SOURCE;
       if (type.startsWith("XML"))
         return AML;

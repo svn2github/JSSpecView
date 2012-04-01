@@ -32,6 +32,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import jspecview.common.JDXSpectrum;
+import jspecview.export.Exporter;
 
 /**
  * Popup Menu for JSVPanel.
@@ -378,7 +379,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   public static void setMenus(JMenu saveAsMenu, JMenu saveAsJDXMenu,
                               JMenu exportAsMenu, ActionListener actionListener) {
     saveAsMenu.setText("Save As");
-    JSVPanelPopupMenu.addMenuItem(saveAsMenu, "Source...", actionListener);
+    JSVPanelPopupMenu.addMenuItem(saveAsMenu, Exporter.sourceLabel, actionListener);
     saveAsJDXMenu.setText("JDX");
     JSVPanelPopupMenu.addMenuItem(saveAsJDXMenu, "XY", actionListener);
     JSVPanelPopupMenu.addMenuItem(saveAsJDXMenu, "DIF", actionListener);
