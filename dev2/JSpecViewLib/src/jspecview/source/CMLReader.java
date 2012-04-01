@@ -406,16 +406,11 @@ class CMLReader extends XMLReader {
 
   private static String checkUnits(String units) {
     units = units.substring(units.indexOf(":") + 1).toUpperCase();
-    if (units.equals("RELABUNDANCE"))
-      units = "RELATIVE ABUNDANCE";
-    else if (units.contains("ARBITRARY"))
-      units = "ARBITRARY UNITS";
-    else if (units.equals("MOVERZ"))
-      units = "M/Z";
-    else if (units.equals("CM-1"))
-      units = "1/CM";
-    else if (units.toLowerCase().equals("NM"))
-      units = "NANOMETERS";
-    return units;
+    return (units.equals("RELABUNDANCE") ? "RELATIVE ABUNDANCE"
+        : units.contains("ARBITRARY") ? "ARBITRARY UNITS"
+        : units.equals("MOVERZ") ? "M/Z"
+        : units.equals("CM-1") ? "1/CM"
+        : units.equals("NM") ? "NANOMETERS"
+        : units);
   }
 }
