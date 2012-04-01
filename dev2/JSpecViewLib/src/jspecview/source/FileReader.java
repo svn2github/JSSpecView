@@ -575,7 +575,8 @@ public class FileReader {
   }
 
   private static boolean readDataLabel(JDXDataObject spectrum, String label,
-                                       JDXSourceStreamTokenizer t, StringBuffer errorLog,
+                                       JDXSourceStreamTokenizer t,
+                                       StringBuffer errorLog,
                                        List<String[]> table, boolean obscure) {
 
     if (readHeaderLabel(spectrum, label, t, errorLog, obscure))
@@ -673,10 +674,11 @@ public class FileReader {
       spectrum.dataPointNum = 1;
       // varian type
       spectrum.shiftRefType = 2;
-      return false;
+      return false; // save in file  
     }
-
-    else if (label.equals("##.SHIFTREFERENCE")) {
+    
+    if (label.equals("##.SHIFTREFERENCE")) {
+      //TODO: don't save in file??
       String val = t.getValue();
       if (!(spectrum.dataType.toUpperCase().contains("SPECTRUM")))
         return true;
@@ -693,13 +695,11 @@ public class FileReader {
       } catch (NoSuchElementException nsee) {
         return true;
       }
-
       if (spectrum.dataPointNum <= 0)
         spectrum.dataPointNum = 1;
       spectrum.shiftRefType = 0;
       return true;
     }
-
     return false;
   }
 
