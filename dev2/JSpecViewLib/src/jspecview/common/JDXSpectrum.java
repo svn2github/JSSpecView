@@ -582,6 +582,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     }
     info.put("header", head);
     if (!justHeader) {
+      putInfo(key, info, "titleLabel", getTitleLabel());
       putInfo(key, info, "type", getDataType());
       putInfo(key, info, "isHZToPPM", Boolean.valueOf(isHZtoPPM));
       putInfo(key, info, "subSpectrumCount", Integer
