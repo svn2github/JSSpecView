@@ -240,7 +240,8 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
    */
   public MainFrame(Component jmolDisplay, JSVInterface jmolOrAdvancedApplet) {
     this.jmolDisplay = jmolDisplay;
-    jmolFrame = jmolDisplay.getParent();    
+    if (jmolDisplay != null)
+      jmolFrame = jmolDisplay.getParent();    
     this.jmolOrAdvancedApplet = jmolOrAdvancedApplet;
     advancedApplet = (jmolOrAdvancedApplet instanceof JSVAppletPrivatePro ? (JSVAppletPrivatePro) jmolOrAdvancedApplet : null);
 
