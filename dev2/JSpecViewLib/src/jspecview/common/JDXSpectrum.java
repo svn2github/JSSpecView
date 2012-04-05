@@ -421,16 +421,22 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   public boolean checkIntegral(Parameters parameters, String value) {
     if (!canIntegrate())
       return false;
-    int mode = IntegralGraph.getMode(value);
-    if (mode == IntegralGraph.INTEGRATE_MARK) {
+    switch (IntegralGraph.IntMode.getMode(value)) {
+    case ON:
+      integrate(parameters);
+      break;
+    case OFF:
+      integrate(null);
+      break;
+    case TOGGLE:
+      integrate(integration == null ? parameters : null);
+      break;
+    case MARK:
       if (integration == null)
         checkIntegral(parameters, "ON");
       integration.addMarks(value.substring(5).trim());
-      return true;
+      break;
     }
-    integrate(mode == IntegralGraph.INTEGRATE_OFF
-        || mode != IntegralGraph.INTEGRATE_ON && integration != null ? null
-        : parameters);
     return true;
   }
 

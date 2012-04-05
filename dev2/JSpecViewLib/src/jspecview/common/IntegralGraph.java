@@ -226,13 +226,16 @@ public class IntegralGraph implements Graph {
     return integrals;
   }
 
-  public static int getMode(String value) {
-    return (value.equalsIgnoreCase("TOGGLE") ? INTEGRATE_TOGGLE : value
-        .equalsIgnoreCase("OFF") ? INTEGRATE_OFF : value
-        .toUpperCase().startsWith("MARK") ? INTEGRATE_MARK
-        : INTEGRATE_ON);
+  enum IntMode {
+    OFF, ON, TOGGLE, MARK;
+    static IntMode getMode(String value) {
+      for (IntMode mode: values())
+        if (mode.name().equalsIgnoreCase(value))
+          return mode;
+      return OFF;
+    }
   }
-
+  
   public void addMarks(String ppms) {
     //2-3,4-5,6-7...
     ppms = TextFormat.simpleReplace(" " + ppms, ",", " ");
