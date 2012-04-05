@@ -260,6 +260,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   }
 
   private JPanel nullPanel = new JPanel();
+  private int splitPosition;
   public void awaken(boolean visible) {
     if (jmolDisplay == null)
       return;
@@ -271,11 +272,12 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
       jmolFrame.remove(jmolDisplay);
       jmolFrame.add(nullPanel);
       sideSplitPane.setBottomComponent(jmolDisplay);
-      sideSplitPane.setResizeWeight(0.6);
+      sideSplitPane.setDividerLocation(splitPosition);
       sideSplitPane.validate();
       jmolFrame.validate();
     } else {
       sideSplitPane.setBottomComponent(nullPanel);
+      splitPosition = sideSplitPane.getDividerLocation();
       jmolFrame.add(jmolDisplay);
       jmolDisplay.getSize(jmolDimensionNew);
       jmolDisplay.setSize(jmolDimensionOld);
@@ -611,7 +613,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
       leftPanel.add(jmolDisplayPanel, BorderLayout.SOUTH);
       leftPanel.add(spectraTreePane, BorderLayout.NORTH);
       sideSplitPane.setTopComponent(spectraTreePane);
-      sideSplitPane.setDividerLocation(200);
+      sideSplitPane.setDividerLocation(splitPosition = 200);
       awaken(true);
       mainSplitPane.setLeftComponent(sideSplitPane);
     } else {
