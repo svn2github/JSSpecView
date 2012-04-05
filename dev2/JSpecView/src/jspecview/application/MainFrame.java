@@ -240,6 +240,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
    */
   public MainFrame(Component jmolDisplay, JSVInterface jmolOrAdvancedApplet) {
     this.jmolDisplay = jmolDisplay;
+    jmolFrame = jmolDisplay.getParent();    
     this.jmolOrAdvancedApplet = jmolOrAdvancedApplet;
     advancedApplet = (jmolOrAdvancedApplet instanceof JSVAppletPrivatePro ? (JSVAppletPrivatePro) jmolOrAdvancedApplet : null);
 
@@ -257,21 +258,27 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     jmolOrAdvancedApplet.exitJSpecView(withDialog && showExitDialog, this);
   }
 
+  private JPanel nullPanel = new JPanel();
   public void awaken(boolean visible) {
     if (jmolDisplay == null)
       return;
     try {
     if (visible) {
       jmolDimensionOld = new Dimension();
-      jmolFrame = jmolDisplay.getParent();
       jmolDisplay.getSize(jmolDimensionOld);
       jmolDisplay.setSize(jmolDimensionNew);
+      jmolFrame.remove(jmolDisplay);
+      jmolFrame.add(nullPanel);
+      sideSplitPane.setBottomComponent(jmolDisplay);
+      sideSplitPane.setResizeWeight(0.6);
       sideSplitPane.validate();
-      jmolFrame.invalidate();
+      jmolFrame.validate();
     } else {
+      sideSplitPane.setBottomComponent(nullPanel);
       jmolFrame.add(jmolDisplay);
       jmolDisplay.getSize(jmolDimensionNew);
       jmolDisplay.setSize(jmolDimensionOld);
+      sideSplitPane.validate();
       jmolFrame.validate();
     }
     } catch(Exception e) {
@@ -603,9 +610,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
       leftPanel.add(jmolDisplayPanel, BorderLayout.SOUTH);
       leftPanel.add(spectraTreePane, BorderLayout.NORTH);
       sideSplitPane.setTopComponent(spectraTreePane);
-      sideSplitPane.setBottomComponent(jmolDisplay);
       sideSplitPane.setDividerLocation(200);
-      sideSplitPane.setResizeWeight(0.6);
       awaken(true);
       mainSplitPane.setLeftComponent(sideSplitPane);
     } else {
