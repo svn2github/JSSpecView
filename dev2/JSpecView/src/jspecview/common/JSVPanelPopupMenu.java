@@ -273,7 +273,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
     setMenuItem(integrateMenuItem, 'I', "Integrate HNMR", 0, 0,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            runScript(scripter, "INTEGRATE ?");
+            runScript(scripter, "INTEGRATE TOGGLE");
           }
         });
     setMenuItem(transAbsMenuItem, '\0', "Transmittance/Absorbance", 0, 0,
