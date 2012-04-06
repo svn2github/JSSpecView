@@ -555,6 +555,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     grayFactorLast = grayFactor;
     int pt = width * height;
     int[] buf = new int[pt];
+    double totalGray = 0;
     for (int i = 0; i < nSpec; i++) {
       Coordinate[] points = subSpectra.get(i).xyCoords;
       if (points.length != xyCoords.length)
@@ -562,9 +563,12 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
       double f = subSpectra.get(i).getUserYFactor();
       for (int j = 0; j < xyCoords.length; j++) {
         double y = points[j].getYVal();
-        buf[--pt] = 255 - Coordinate.intoRange((int) ((y* f - isd.minZ) * grayFactor), 0, 255);
+        int gray = 255 - Coordinate.intoRange((int) ((y* f - isd.minZ) * grayFactor), 0, 255); 
+        buf[--pt] = gray;
+        totalGray += gray;
       }
     }
+    System.out.println ("Average gray = " + (totalGray / (width * height) / 255));
     return (buf2d = buf);
   }
 
