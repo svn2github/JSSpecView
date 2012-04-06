@@ -56,17 +56,30 @@ public class IntegralGraph implements Graph {
    */
   private double percentMinY;
 
+  public double getPercentMinimumY() {
+    return percentMinY;
+  }
+
   /**
    * The percentage offset from the baseline of the input graph where the
    * <code>IntegralGraph</code> will be drawn
    */
   private double percentOffset;
 
+  public double getPercentOffset() {
+    return percentOffset;
+  }
+
+
   /**
    * The y factor of input graph by which the <code>IntegralGraph</code>
    * will be drawn
    */
   private double integralFactor;
+
+  public double getIntegralFactor() {
+    return integralFactor;
+  }
 
   /**
    * The array of the <code>IntegralGraph</code> coordinates
@@ -88,7 +101,7 @@ public class IntegralGraph implements Graph {
     this.integralFactor = parameters.integralFactor;
     xyCoords = calculateIntegral();
   }
-
+  
   /**
    * Method from the <code>Graph</code> Interface. Returns an array of
    * Coordinates of the <code>IntegralGraph</code>.

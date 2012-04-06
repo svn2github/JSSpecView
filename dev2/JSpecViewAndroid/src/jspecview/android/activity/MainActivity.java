@@ -17,6 +17,7 @@ import jspecview.android.PreferencesManager;
 import jspecview.common.Coordinate;
 import jspecview.common.IntegralGraph;
 import jspecview.common.JDXSpectrum;
+import jspecview.common.Parameters;
 import jspecview.exception.JSpecViewException;
 import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
@@ -721,13 +722,17 @@ public class MainActivity extends Activity{
     	JDXSpectrum spectrum = mSpectra.get(spectrumIndex);
 		
 		if(integGraph == null){
-			integGraph = new IntegralGraph(spectrum, minY, offset, factor, spectrum.getXUnits(), 
+		  Parameters params = new Parameters("android");
+		  params.integralMinY = minY;
+		  params.integralOffset = offset;
+		  params.integralFactor = factor;
+			integGraph = new IntegralGraph(spectrum, params, spectrum.getXUnits(), 
 			    spectrum.getYUnits());
 			
 			mIntegralGraphs[spectrumIndex] = integGraph;
 		}
 	
-		XYSeries series = new XYSeries(integGraph.getTitle());
+		XYSeries series = new XYSeries("Integral - " + spectrum.getTitle());
 		Coordinate[] integCoords = integGraph.getXYCoords();
 		for(int i = 0; i < integCoords.length; i++){
 			series.add(integCoords[i].getXVal(), integCoords[i].getYVal());
