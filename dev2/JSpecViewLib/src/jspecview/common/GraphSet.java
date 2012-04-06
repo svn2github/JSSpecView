@@ -16,7 +16,7 @@ abstract class GraphSet {
 
   abstract protected void disposeImage();
   abstract protected void draw2DImage(Object g);
-  abstract protected void drawHandle(Object g, int x, int y);
+  abstract protected void drawHandle(Object g, int x, int y, boolean outlineOnly);
   abstract protected void drawLine(Object g, int x0, int y0, int x1, int y1);
   abstract protected void drawRect(Object g, int xPixel02, int yPixel02,
                                    int xPixels2, int yPixels2);
@@ -1054,11 +1054,11 @@ abstract class GraphSet {
   protected void setDerivedPins(int subIndex) {
     pin1Dx01.setX(0, (pin1Dx0.xPixel0 + pin1Dx1.xPixel0) / 2);
     pin1Dy01.setY(0, (pin1Dy0.yPixel0 + pin1Dy1.yPixel0) / 2);
-    pin1Dx01.setEnabled(Math.min(pin1Dx0.xPixel0, pin1Dx1.xPixel0) != xPixel0
-        || Math.max(pin1Dx0.xPixel0, pin1Dx1.xPixel0) != xPixel1);
-    pin1Dy01.setEnabled(Math.min(pin1Dy0.yPixel0, pin1Dy1.yPixel0) != Math.min(
+    pin1Dx01.setEnabled(Math.min(pin1Dx0.xPixel0, pin1Dx1.xPixel0) > xPixel0
+        || Math.max(pin1Dx0.xPixel0, pin1Dx1.xPixel0) < xPixel1);
+    pin1Dy01.setEnabled(Math.min(pin1Dy0.yPixel0, pin1Dy1.yPixel0) > Math.min(
         toPixelY(multiScaleData.minY), toPixelY(multiScaleData.maxY))
-        || Math.max(pin1Dy0.yPixel0, pin1Dy1.yPixel0) != Math.max(
+        || Math.max(pin1Dy0.yPixel0, pin1Dy1.yPixel0) < Math.max(
             toPixelY(multiScaleData.minY), toPixelY(multiScaleData.maxY)));
     if (isd == null)
       return;
@@ -1400,7 +1400,7 @@ System.out.println("dozoom y=" + initY + " " + finalY);
         pin1Dy1.yPixel0, ScriptToken.PLOTCOLOR);
     for (int i = 0; i < widgets.length; i++) {
       PlotWidget pw = widgets[i];
-      if (pw == null || !pw.isEnabled || !pw.isPinOrCursor && !enableZoom
+      if (pw == null || !pw.isPinOrCursor && !enableZoom
           || pw.isPin && !withSliders)
         continue;
       if (pw.is2D) {
@@ -1420,10 +1420,10 @@ System.out.println("dozoom y=" + initY + " " + finalY);
     if (pw.isPinOrCursor) {
       setColor(g, ScriptToken.PLOTCOLOR);
       drawLine(g, pw.xPixel0, pw.yPixel0, pw.xPixel1, pw.yPixel1);
-      drawHandle(g, pw.xPixel0, pw.yPixel0);
+      drawHandle(g, pw.xPixel0, pw.yPixel0, !pw.isEnabled);
     } else if (pw.xPixel1 != pw.xPixel0) {
       fillBox(g, pw.xPixel0, pw.yPixel0, pw.xPixel1, pw.yPixel1,
-          ScriptToken.ZOOMBOXCOLOR);
+         ScriptToken.ZOOMBOXCOLOR);
     }
   }
 

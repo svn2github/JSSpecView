@@ -194,8 +194,11 @@ class AwtGraphSet extends GraphSet {
   }
 
   @Override
-  protected void drawHandle(Object g, int x, int y) {
-    ((Graphics) g).fillRect(x - 2, y - 2, 5, 5);
+  protected void drawHandle(Object g, int x, int y, boolean outlineOnly) {
+    if (outlineOnly)
+      ((Graphics) g).drawRect(x - 2, y - 2, 4, 4);
+    else
+      ((Graphics) g).fillRect(x - 2, y - 2, 5, 5);
   }
 
   @Override
