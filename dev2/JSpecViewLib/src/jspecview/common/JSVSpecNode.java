@@ -87,7 +87,7 @@ public class JSVSpecNode {
   public static JDXSpectrum findSpectrumById(String id, List<JSVSpecNode> specNodes) {
     for (int i = specNodes.size(); --i >= 0;)
       if (id.equals(specNodes.get(i).id))
-        return specNodes.get(i).jsvp.getSpectrum();
+        return specNodes.get(i).jsvp.getSpectrumAt(0);
     return null;
   }
   /**

@@ -254,7 +254,8 @@ abstract class GraphSet {
     boolean dontUseSubspecs = (subspecs == null || subspecs.size() == 2);
     //NMR real/imaginary
     boolean is2D = !getSpectrumAt(0).is1D();
-    if (is2D || dontUseSubspecs && y1 == y2) {
+    boolean useFirstSubSpecOnly = false;
+    if (is2D && useFirstSubSpecOnly || dontUseSubspecs && y1 == y2) {
       // 2D spectrum or startup
       graphs = spectra;
     } else if (y1 == y2) {
@@ -1134,7 +1135,7 @@ abstract class GraphSet {
   protected synchronized void doZoom(double initX, double initY, double finalX,
                                      double finalY, boolean doRepaint,
                                      boolean addZoom, boolean checkRange) {
-
+System.out.println("dozoom y=" + initY + " " + finalY);
     if (!enableZoom)
       return;
     if (initX > finalX) {

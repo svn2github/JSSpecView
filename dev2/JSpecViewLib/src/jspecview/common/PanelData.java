@@ -201,6 +201,9 @@ public class PanelData {
   protected String printGraphPosition = "default";
   boolean titleDrawn;
   boolean display1D;
+  public boolean getDisplay1D() {
+    return display1D;
+  }
 
 
   // listeners to handle various events

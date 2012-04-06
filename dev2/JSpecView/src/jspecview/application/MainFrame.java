@@ -1468,7 +1468,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     openFile(filename, firstSpec, lastSpec);
     if (getSelectedPanel() == null)
       return null;
-    if (!getSelectedPanel().getSpectrum().is1D())
+    if (!getSelectedPanel().getSpectrum().is1D() && getSelectedPanel().getPanelData().getDisplay1D())
       return "Click on the spectrum and use UP or DOWN keys to see subspectra.";
     return null;
   }

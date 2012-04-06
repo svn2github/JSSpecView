@@ -560,8 +560,10 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
       if (points.length != xyCoords.length)
         return null;
       double f = subSpectra.get(i).getUserYFactor();
-      for (int j = 0; j < xyCoords.length; j++)
-        buf[--pt] = 255 - Coordinate.intoRange((int) ((points[j].getYVal()* f - isd.minZ) * grayFactor), 0, 255);
+      for (int j = 0; j < xyCoords.length; j++) {
+        double y = points[j].getYVal();
+        buf[--pt] = 255 - Coordinate.intoRange((int) ((y* f - isd.minZ) * grayFactor), 0, 255);
+      }
     }
     return (buf2d = buf);
   }
