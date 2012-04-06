@@ -588,10 +588,12 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   public void keyTyped(KeyEvent e) {
     if (e.getKeyChar() == 'z') {
       pd.currentGraphSet.previousView();
+      e.consume();
       return;
     }
     if (e.getKeyChar() == 'y') {
       pd.currentGraphSet.nextView();
+      e.consume();
       return;
     }
   }
