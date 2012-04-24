@@ -59,6 +59,7 @@ import jspecview.common.JSVAppletInterface;
  * $LastChangedDate: $
  */
 
+
 public class JSVApplet extends JApplet implements JSVAppletInterface {
 
   protected JSVAppletInterface appletPrivate;
