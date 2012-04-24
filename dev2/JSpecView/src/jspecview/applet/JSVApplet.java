@@ -55,10 +55,9 @@ import jspecview.common.JSVAppletInterface;
  * @author Craig A. D. Walters
  * @author Prof Robert J. Lancashire
  * 
- * $LastChangedRevision: $
- * $LastChangedDate: $
+ * $LastChangedRevision$
+ * $LastChangedDate$
  */
-
 
 public class JSVApplet extends JApplet implements JSVAppletInterface {
 
