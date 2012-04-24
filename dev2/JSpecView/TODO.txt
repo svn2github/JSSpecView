@@ -2,7 +2,14 @@ Feel free to add to this file any time! Don't worry about sync problems.
 Put new items at top, please.
 
 ====TODO=========
+these should get updated automatically if the SVN config file is modified to enable-auto-props = yes
+together with say
+*.java = svn:eol-style=native; svn:keywords='Author Date Id LastChangedDate LastChangedRevision URL'; svn:mime-type=text/plain
+not working for me yet!!!
 
+
+$LastChangedRevision: $
+$LastChangedDate: $
 
 
 With JSpecView application, loading a file gives the dialog box and if you sort on date the program crashes.
