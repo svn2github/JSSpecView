@@ -2,15 +2,16 @@ Feel free to add to this file any time! Don't worry about sync problems.
 Put new items at top, please.
 
 ====TODO=========
-these should get updated automatically if the SVN config file is modified to enable-auto-props = yes
-together with say
-*.java = svn:eol-style=native; svn:keywords='Author Date Id LastChangedDate LastChangedRevision URL'; svn:mime-type=text/plain
-not working for me yet!!!
+Bug:
+Loading a GC/MS file in Jmol application and selecting a menu option in Jmol to choose a frame
+gives JSpecView loading with looping over frames in the Jmol display as well as the JSpecView display 
 
 
-$LastChangedRevision: $
-$LastChangedDate: $
-
+http://blog.gorges.us/2009/03/how-to-enable-keywords-in-eclipse-and-subversion-svn/
+Use 
+$LastChangedRevision$
+$LastChangedDate$
+to set the APPLET_VERSION to include the SVN revision number
 
 With JSpecView application, loading a file gives the dialog box and if you sort on date the program crashes.
 
