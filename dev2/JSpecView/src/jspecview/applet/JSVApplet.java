@@ -74,8 +74,9 @@ public class JSVApplet extends JApplet implements JSVAppletInterface {
     appletPrivate = new JSVAppletPrivate(this);
   }
 
-  public static final String SVN_REV= "$LastChangedRevision$";
-  public static final String APPLET_VERSION = "2.0.20120423-2045"; //
+  private static final String SVN_REV= "$LastChangedRevision::     $";
+  
+  public static final String APPLET_VERSION = "2.0.2012_SVN"+SVN_REV.substring(22,25); //
 //  2.0.yyyymmdd-hhmm format - should be updated to keep track of the latest version (based on Jamaica time)
   
   private static final long serialVersionUID = 1L;
