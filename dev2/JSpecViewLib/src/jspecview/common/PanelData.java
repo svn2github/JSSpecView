@@ -201,6 +201,12 @@ public class PanelData {
   protected String printGraphPosition = "default";
   boolean titleDrawn;
   boolean display1D;
+  private int yStackOffsetPercent;
+  
+  public void setYStackOffsetPercent(int offset) {
+	yStackOffsetPercent = offset;
+  }
+  
   public boolean getDisplay1D() {
     return display1D;
   }
@@ -402,7 +408,7 @@ public class PanelData {
     for (int i = graphSets.size(); --i >= 0;)
       graphSets.get(i)
           .drawGraph(g, !isPrinting, height, width, left,
-              right, top, bottom, isResized);
+              right, top, bottom, isResized, yStackOffsetPercent);
     if (titleOn && !titleDrawn)
       owner.drawTitle(g, height, width, getSpectrum().getPeakTitle());
     if (withCoords)

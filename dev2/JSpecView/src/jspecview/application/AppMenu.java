@@ -118,6 +118,7 @@ public class AppMenu extends JMenuBar {
   private JMenuItem splitMenuItem = new JMenuItem();
   private JMenuItem overlayAllMenuItem = new JMenuItem();
   private JMenuItem overlayMenuItem = new JMenuItem();
+  private JMenuItem overlayStackOffsetYMenuItem = new JMenuItem();
   private JMenuItem sourceMenuItem = new JMenuItem();
   private JMenuItem propertiesMenuItem = new JMenuItem();
 
@@ -335,6 +336,12 @@ public class AppMenu extends JMenuBar {
             jsvpPopupMenu.overlay(-1);
           }
         });
+    JSVPanelPopupMenu.setMenuItem(overlayStackOffsetYMenuItem, 'y', "Overlay Offset...", 0,
+        0, new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            jsvpPopupMenu.overlay(99);
+          }
+        });
     //    JSVPanelPopupMenu.setMenuItem(hideMenuItem, 'H', "Hide", 0, 0,
     //        new ActionListener() {
     //          public void actionPerformed(ActionEvent e) {
@@ -451,6 +458,7 @@ public class AppMenu extends JMenuBar {
     windowMenu.add(splitMenuItem);
     windowMenu.add(overlayAllMenuItem);
     windowMenu.add(overlayMenuItem);
+    windowMenu.add(overlayStackOffsetYMenuItem);
     //windowMenu.addSeparator();
     //windowMenu.add(hideMenuItem);
     //windowMenu.add(hideAllMenuItem);

@@ -940,7 +940,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     //initSpectraTree();
 
     if (source == null) {
-      jsvpPopupMenu.dispose();
+      //jsvpPopupMenu.dispose();
       if (getSelectedPanel() != null)
         getSelectedPanel().dispose();
       if (currentSource != null)

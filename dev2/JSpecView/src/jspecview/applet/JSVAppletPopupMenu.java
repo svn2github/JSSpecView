@@ -165,6 +165,7 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     appletCompoundMenu.add(overlayAllMenuItem);
     appletCompoundMenu.add(overlayNoneMenuItem);
     appletCompoundMenu.add(overlayMenuItem);
+    appletCompoundMenu.add(overlayStackOffsetMenuItem);
     if (specNodes.size() <= 20) {
       // add Menus to navigate
       if (currentSource.isCompoundSource) {

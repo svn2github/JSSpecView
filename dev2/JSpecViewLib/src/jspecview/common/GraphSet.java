@@ -108,6 +108,7 @@ abstract class GraphSet {
 
   protected int currentZoomIndex;
   protected int nSpectra;
+  protected int yOffsetPercent;
   protected int iThisSpectrum = -1;
   private double lastClickX;
 
@@ -485,7 +486,7 @@ abstract class GraphSet {
   public void drawGraph(Object og, 
                         boolean isInteractive, int height, int width,
                         int left, int right, int top, int bottom,
-                        boolean isResized) {
+                        boolean isResized, int yOffsetPercent) {
     // for now, at least, we only allow one 2D image
     setPositionForFrame(width, height, left, right, top, bottom);
     JDXSpectrum spec0 = getSpectrumAt(0);
@@ -510,6 +511,7 @@ abstract class GraphSet {
     setScaleFactors(multiScaleData);
     int subIndex = spec0.getSubIndex();
     setWidgets(isResized, subIndex);
+	this.yOffsetPercent = yOffsetPercent;
     drawAll(og, height, width, subIndex, spec0, isInteractive);
   }
 
@@ -1308,13 +1310,16 @@ System.out.println("dozoom y=" + initY + " " + finalY);
         drawYUnits(g, width);
 
       // the graphs
+      int offset = 0;
+      int yOffsetPixels = (int) (yPixels * (yOffsetPercent / 100f));
       for (int i = nSpectra; --i >= 0;)
         if (doPlot(i)) {
-          drawSpectrum(g, i, height, width);
+          drawSpectrum(g, i, height, width, offset);
           if (iThisSpectrum == i && this == pd.currentGraphSet) {
             drawTitle(g, height, width, spectra.get(i).getPeakTitle());
             pd.titleDrawn = true;
           }
+          offset -= yOffsetPixels;
         }
 
       drawIntegralValue(g, width);
@@ -1469,14 +1474,14 @@ System.out.println("dozoom y=" + initY + " " + finalY);
    * @param width
    *        the width to be drawn in pixels
    */
-  private void drawSpectrum(Object g, int index, int height, int width) {
+  private void drawSpectrum(Object g, int index, int height, int width, int yOffset) {
     // Check if specInfo in null or xyCoords is null
     //Coordinate[] xyCoords = spectra[index].getXYCoords();
     JDXSpectrum spec = spectra.get(index);
     userYFactor = spec.getUserYFactor();
-    drawPlot(g, index, spec, height, width, true, spec.isContinuous());
+    drawPlot(g, index, spec, height, width, true, spec.isContinuous(), yOffset);
     if (spec.hasIntegral())
-      drawPlot(g, index, spec.getIntegrationGraph(), height, width, false, true);
+      drawPlot(g, index, spec.getIntegrationGraph(), height, width, false, true, yOffset);
     // over-spectrum stuff    
     if (spec.integrationRatios != null)
       drawAnnotations(g, height, width, spec.integrationRatios,
@@ -1486,7 +1491,7 @@ System.out.println("dozoom y=" + initY + " " + finalY);
 
   private void drawPlot(Object g, int index, Graph spec, int height,
                         int width, boolean drawY0, 
-                        boolean isContinuous) {
+                        boolean isContinuous, int yOffset) {
 
     Coordinate[] xyCoords = spec.getXYCoords();
     boolean isIntegral = (spec instanceof IntegralGraph);
@@ -1507,8 +1512,8 @@ System.out.println("dozoom y=" + initY + " " + finalY);
             .getYVal()));
         if (y1 == Integer.MIN_VALUE || y2 == Integer.MIN_VALUE)
           continue;
-        y1 = fixY(y1);
-        y2 = fixY(y2);
+        y1 = yOffset + fixY(y1);
+        y2 = yOffset + fixY(y2);
         if (fillPeaks && y0 > 0 && x1 >= zoomBox1D.xPixel0 && x1 <= zoomBox1D.xPixel1) {
           setColor(g, ScriptToken.INTEGRALPLOTCOLOR);
           drawLine(g, x1, y0, x1, y1);

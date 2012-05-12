@@ -119,6 +119,11 @@ public class JSViewer {
           if (jsvp == null)
             return false;
           break;
+        case STACKOFFSETY:
+        	int offset = Parser.parseInt("" + Parser.parseFloat(value));
+        	if (jsvp != null&& offset != Integer.MIN_VALUE)
+        		jsvp.getPanelData().setYStackOffsetPercent(offset);
+        	break;
         case TEST:
           si.execTest(value);
           break;

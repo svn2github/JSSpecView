@@ -33,6 +33,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import jspecview.common.JDXSpectrum;
 import jspecview.export.Exporter;
+import jspecview.util.Parser;
 
 /**
  * Popup Menu for JSVPanel.
@@ -86,6 +87,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   public JMenuItem overlayMenuItem = new JMenuItem();
   public JMenuItem overlayAllMenuItem = new JMenuItem();
   public JMenuItem overlayNoneMenuItem = new JMenuItem();
+  public JMenuItem overlayStackOffsetMenuItem = new JMenuItem();
 
   public JMenuItem integrateMenuItem = new JCheckBoxMenuItem();
   public JMenuItem transAbsMenuItem = new JMenuItem();
@@ -158,6 +160,12 @@ public class JSVPanelPopupMenu extends JPopupMenu {
     overlayNoneMenuItem.addActionListener(new ActionListener() {
        public void actionPerformed(ActionEvent e) {
          overlay(0);
+       }
+     });
+    overlayStackOffsetMenuItem.setText("Overlay Offset...");
+    overlayStackOffsetMenuItem.addActionListener(new ActionListener() {
+       public void actionPerformed(ActionEvent e) {
+         overlay(99);
        }
      });
     scriptMenuItem.setText("Script...");
@@ -301,28 +309,40 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   }
 
   protected String recentOverlay = "1.1,1.2";
+  protected String recentStackPercent = "5";
 
   private PanelData pd;
 
-  public void overlay(int n) {
-    switch (n) {
-    case 0:
-      runScript(scripter, "overlay NONE");
-      break;
-    case 1:
-      runScript(scripter, "overlay ALL");
-      break;
-    default:
-      String script = (String) JOptionPane.showInputDialog(null,
-          "Enter a list of Spectrum IDs separated by commas", "Overlay",
-          JOptionPane.PLAIN_MESSAGE, null, null, recentOverlay);
-      if (script == null)
-        return;
-      recentOverlay = script;
-      runScript(scripter, "overlay " + script);
-      break;
-    }
-  }
+	public void overlay(int n) {
+		switch (n) {
+		case 99:
+			String offset = (String) JOptionPane.showInputDialog(null,
+					"Enter a vertical offset in percent for stacked plots",
+					"Overlay", JOptionPane.PLAIN_MESSAGE, null, null,
+					recentStackPercent);
+			if (offset == null || Float.isNaN(Parser.parseFloat(offset)))
+				return;
+			recentStackPercent = offset;
+			runScript(scripter, ScriptToken.STACKOFFSETY + " " + offset);
+			break;
+		case 0:
+			runScript(scripter, "overlay NONE");
+			break;
+		case 1:
+			runScript(scripter, "overlay ALL");
+			break;
+		default:
+			String script = (String) JOptionPane.showInputDialog(null,
+					"Enter a list of Spectrum IDs separated by commas",
+					"Overlay", JOptionPane.PLAIN_MESSAGE, null, null,
+					recentOverlay);
+			if (script == null)
+				return;
+			recentOverlay = script;
+			runScript(scripter, "overlay " + script);
+			break;
+		}
+	}
 
 
   private int thisX, thisY;
