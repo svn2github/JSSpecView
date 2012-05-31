@@ -701,6 +701,11 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
         case APPLETREADYCALLBACKFUNCTIONNAME:
           appletReadyCallbackFunctionName = value;
           break;
+        case PEAKCALLBACKFUNCTIONNAME:
+        case SYNCCALLBACKFUNCTIONNAME:
+        case COORDCALLBACKFUNCTIONNAME:
+          execSetCallback(st, value);
+          break;
         case MENUON:
           allowMenu = Boolean.parseBoolean(value);
           break;
