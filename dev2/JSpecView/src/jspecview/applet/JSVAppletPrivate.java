@@ -403,7 +403,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
     initParams(jsvApplet.getParameter("script"));
     if (appletReadyCallbackFunctionName != null && fullName != null)
       callToJavaScript(appletReadyCallbackFunctionName, new Object[] {
-          appletID, fullName, Boolean.TRUE });
+          appletID, fullName, Boolean.TRUE, jsvApplet });
     
     if (isSigned()) {
       new DropTarget(jsvApplet, getDropListener());
@@ -632,9 +632,21 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
    * @param parameters
    *        the function arguments as a string in the form "x, y, z..."
    */
-  private void callToJavaScript(String function, Object[] params) {
+  private void callToJavaScript(String callback, Object[] params) {
     try {
-      JSObject.getWindow(jsvApplet).call(function, params);
+      JSObject jso = JSObject.getWindow(jsvApplet);
+      if (callback.length() > 0) {
+        if (callback.indexOf(".") > 0) {
+          String[] mods = TextFormat.split(callback, '.');
+          for (int i = 0; i < mods.length - 1; i++) {
+            jso = (JSObject) jso.getMember(mods[i]);
+          }
+          callback = mods[mods.length - 1];
+        }
+        System.out.println("calling " + jso + " " + callback);
+        jso.call(callback, params);
+      }
+    
     } catch (Exception npe) {
       Logger.warn("EXCEPTION-> " + npe.getMessage());
     }
@@ -774,7 +786,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
     } else if (filePath != null) {
       URL url;
       try {
-        url = new URL(jsvApplet.getCodeBase(), filePath);
+        url = new URL(jsvApplet.getDocumentBase(), filePath);
         fileName = url.toString();
         recentFileName = url.getFile();
         base = jsvApplet.getDocumentBase();
@@ -1109,6 +1121,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
   }
 
   public void execScriptComplete(String msg, boolean isOK) {
+    jsvApplet.validate();
     jsvApplet.repaint();
   }
 
@@ -1138,6 +1151,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
       return null;
     if (getSelectedPanel() != null) {
       showSpectrum(i);
+      jsvApplet.validate();
       appletPanel.validate();
       jsvApplet.repaint();
     }

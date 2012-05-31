@@ -110,8 +110,11 @@ public class JSVApplet extends JApplet implements JSVAppletInterface {
     appletPrivate = null;
   }
 
-  /* (non-Javadoc)
+  /* (non-Javadoc)  
    * @see jspecview.applet.JSVAppletInterface#getParameter(java.lang.String, java.lang.String)
+   * 
+   * not used
+   * 
    */
   public String getParameter(String key, String def) {
     return isStandalone ? System.getProperty(key, def)
