@@ -278,8 +278,8 @@ public class JSVApplet extends JApplet implements JSVAppletInterface {
     return appletPrivate.getPropertyAsJSON(key);
   }
 
-  public void runScriptNow(String script) {
-    appletPrivate.runScriptNow(script);    
+  public boolean runScriptNow(String script) {
+    return appletPrivate.runScriptNow(script);    
   }
 
 }

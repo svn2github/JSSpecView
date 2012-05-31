@@ -918,8 +918,8 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
 
   /////////// simple sync functionality //////////
 
-  public void runScriptNow(String params) {
-    JSViewer.runScriptNow(this, params);
+  public boolean runScriptNow(String params) {
+    return JSViewer.runScriptNow(this, params);
   }
 
   private void setSaved(boolean isOverlay) {

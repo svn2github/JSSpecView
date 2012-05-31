@@ -1063,8 +1063,8 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     runScriptNow(script);
   }
   
-  public void runScriptNow(String peakScript) {
-    JSViewer.runScriptNow(this, peakScript);
+  public boolean runScriptNow(String peakScript) {
+    return JSViewer.runScriptNow(this, peakScript);
   }
 
   private void close(String value) {
