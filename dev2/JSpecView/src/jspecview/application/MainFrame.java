@@ -1735,4 +1735,8 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   public void checkCallbacks(String title) {
     setMainTitle(title);
   }
+
+	public void print(JSVPanel jsvp) {
+		print();
+	}
 }

@@ -559,10 +559,12 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
       ((AwtPanel) jsvp).printSpectrum(pl);
   }
 
+  private boolean isNewWindow;
   /**
    * Shows the applet in a Frame
    */
   void newWindow(boolean isSelected) {
+  	isNewWindow = isSelected;
     if (isSelected) {
       offWindowFrame = new JFrame("JSpecView");
       offWindowFrame.setSize(jsvApplet.getSize());
@@ -585,6 +587,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
           offWindowFrame.removeAll();
           offWindowFrame.dispose();
           appletPopupMenu.windowMenuItem.setSelected(false);
+      		isNewWindow = false;
         }
       });
     } else {
@@ -1203,5 +1206,11 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
   public void checkCallbacks(String title) {
     checkCallbacks();
   }
+
+	public void print(JSVPanel jsvp) {
+		if (!isNewWindow)
+  		newWindow(true);
+		print();
+	}
 
 }

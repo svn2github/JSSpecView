@@ -73,6 +73,7 @@ public enum ScriptToken {
   PLOTAREACOLOR("C"), 
   PLOTCOLOR("C"), 
   PLOTCOLORS("color,color,color,..."), 
+  PRINT,
   REVERSEPLOT("T"), 
   SCALECOLOR("C"), 
   SPECTRUM("spectrumID"), 

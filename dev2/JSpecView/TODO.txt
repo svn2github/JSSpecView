@@ -31,6 +31,8 @@ frames is not working right  -- just turns off the key entirely.
 
 =====DONE========
 
+PRINT command for applet and application
+
 compoundmenuon true gives menu option of Spectra
 compoundmenuon false gives greyed out menu option of Blocks - renamed Spectra as well
 

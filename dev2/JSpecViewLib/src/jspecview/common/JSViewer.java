@@ -30,6 +30,7 @@ public class JSViewer {
       Logger.info("RUNSCRIPT " + script);
     ScriptCommandTokenizer commandTokens = new ScriptCommandTokenizer(script, ";\n");
     JSVPanel jsvp = si.getSelectedPanel();
+    boolean isOK = true;
     while (commandTokens.hasMoreTokens()) {
       String token = commandTokens.nextToken();
       // now split the key/value pair
@@ -39,7 +40,7 @@ public class JSViewer {
         continue;
       ScriptToken st = ScriptToken.getScriptToken(key);
       String value = ScriptToken.getValue(st, eachParam, token);
-      ////System.out.println("KEY-> " + key + " VALUE-> " + value + " : " + st);
+      System.out.println("KEY-> " + key + " VALUE-> " + value + " : " + st);
       try {
         switch (st) {
         case UNKNOWN:
@@ -113,6 +114,11 @@ public class JSViewer {
             // ignore
           }
           break;
+        case PRINT:
+          if (jsvp == null)
+            continue;
+        	si.print(jsvp);
+        	break;
         case SPECTRUM:
         case SPECTRUMNUMBER:
           jsvp = si.execSetSpectrum(value);
@@ -133,13 +139,16 @@ public class JSViewer {
         }
       } catch (Exception e) {
         e.printStackTrace();
+        // should we be returning?
+        isOK = false;
       }
     }
+    System.out.println("JSV runScriptNow2");
     si.execScriptComplete(msg, true);
-    return true;
+    return isOK;
   }
 
-  private static void execTAConvert(ScriptInterface si, String value) {
+	private static void execTAConvert(ScriptInterface si, String value) {
     int mode = (value.toUpperCase().startsWith("T") ? JDXSpectrum.TO_TRANS
         : value.toUpperCase().startsWith("A") ? JDXSpectrum.TO_ABS
             : JDXSpectrum.IMPLIED);
