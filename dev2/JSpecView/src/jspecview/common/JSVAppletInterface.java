@@ -29,6 +29,17 @@ public interface JSVAppletInterface {
    */
   public abstract void loadInline(String data);
 
+  /*
+   * Deprecated -- fails in MSIE object JavaScript
+   * 
+   * @param type
+   * @param n
+   * @return data
+   * 
+  @Deprecated
+  public abstract String export(String type, int n);
+   */
+
   /**
    * Delivers spectrum coded as desired: XY, SQZ, PAC, DIF, DIFDUP, FIX, AML, CML
    * 
@@ -37,7 +48,7 @@ public interface JSVAppletInterface {
    * @return data
    * 
    */
-  public abstract String export(String type, int n);
+  public abstract String exportSpectrum(String type, int n);
 
   public abstract void setFilePath(String tmpFilePath);
 

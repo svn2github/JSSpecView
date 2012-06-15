@@ -450,7 +450,7 @@ public class AppMenu extends JMenuBar {
     JSVPanelPopupMenu.setMenus(saveAsMenu, saveAsJDXMenu, exportAsMenu,
         (new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            mainFrame.exportSpectrum(e.getActionCommand());
+            mainFrame.exportSpectrumViaMenu(e.getActionCommand());
           }
         }));
     windowMenu.setMnemonic('W');

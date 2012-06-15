@@ -1205,7 +1205,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
    * @param command
    *        the name of the format to export in
    */
-  void exportSpectrum(String command) {
+  void exportSpectrumViaMenu(String command) {
     final String type = command;
     JSVPanel jsvp = getSelectedPanel();
     if (jsvp == null)
@@ -1551,8 +1551,8 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     advancedApplet.addHighlight(x1, x2, r, g, b, a);
   }
 
-  public String export(String type, int n) {
-    return advancedApplet.export(type, n);
+  public String exportSpectrum(String type, int n) {
+    return advancedApplet.exportSpectrum(type, n);
   }
 
   public String getCoordinate() {

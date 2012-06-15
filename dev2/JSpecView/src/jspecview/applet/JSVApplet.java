@@ -164,11 +164,16 @@ public class JSVApplet extends JApplet implements JSVAppletInterface {
     appletPrivate.loadInline(data);
   }
 
-  /* (non-Javadoc)
-   * @see jspecview.applet.JSVAppletInterface#export(java.lang.String, int)
-   */
+  @Deprecated
   public String export(String type, int n) {
-    return appletPrivate.export(type, n);
+    return appletPrivate.exportSpectrum(type, n);
+  }
+
+  /* (non-Javadoc)
+   * @see jspecview.applet.JSVAppletInterface#exportSpectrum(java.lang.String, int)
+   */
+  public String exportSpectrum(String type, int n) {
+    return appletPrivate.exportSpectrum(type, n);
   }
 
   /* (non-Javadoc)

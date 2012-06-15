@@ -270,7 +270,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
    * @return data
    * 
    */
-  public String export(String type, int n) {
+  public String exportSpectrum(String type, int n) {
     return ((AwtPanel) getSelectedPanel()).export(type, n);
   }
 
@@ -610,7 +610,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
       dirLastExported = Exporter.exportSpectra(getSelectedPanel(),
           offWindowFrame, jFileChooser, type, recentFileName, dirLastExported);
     else
-      Logger.info(export(type, -1));
+      Logger.info(exportSpectrum(type, -1));
   }
 
   /**
