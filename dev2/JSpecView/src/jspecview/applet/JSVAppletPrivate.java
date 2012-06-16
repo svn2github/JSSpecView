@@ -1074,6 +1074,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
     switch (st) {
     case LOADFILECALLBACKFUNCTIONNAME:
     	loadFileCallbackFunctionName = value;
+    	break;
     case PEAKCALLBACKFUNCTIONNAME:
       peakCallbackFunctionName = value;
       break;
