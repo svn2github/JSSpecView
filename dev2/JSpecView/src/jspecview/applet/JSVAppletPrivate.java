@@ -159,6 +159,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
   private boolean autoIntegrate;
 
   private String coordCallbackFunctionName;
+  private String loadFileCallbackFunctionName;
   private String peakCallbackFunctionName;
   private String syncCallbackFunctionName;
   private String appletReadyCallbackFunctionName;
@@ -707,6 +708,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
         case PEAKCALLBACKFUNCTIONNAME:
         case SYNCCALLBACKFUNCTIONNAME:
         case COORDCALLBACKFUNCTIONNAME:
+        case LOADFILECALLBACKFUNCTIONNAME:
           execSetCallback(st, value);
           break;
         case MENUON:
@@ -1070,6 +1072,8 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
 
   public void execSetCallback(ScriptToken st, String value) {
     switch (st) {
+    case LOADFILECALLBACKFUNCTIONNAME:
+    	loadFileCallbackFunctionName = value;
     case PEAKCALLBACKFUNCTIONNAME:
       peakCallbackFunctionName = value;
       break;
@@ -1117,6 +1121,8 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
     setSaved(false);
     openDataOrFile(null, null, null, TextFormat.trimQuotes(value));
     setSpectrumIndex(0);
+    if (loadFileCallbackFunctionName != null)
+      callToJavaScript(loadFileCallbackFunctionName, new Object[] { appletID, value });
     return null; 
   }
 

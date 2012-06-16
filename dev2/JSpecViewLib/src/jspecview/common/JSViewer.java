@@ -53,6 +53,7 @@ public class JSViewer {
         case PEAKCALLBACKFUNCTIONNAME:
         case SYNCCALLBACKFUNCTIONNAME:
         case COORDCALLBACKFUNCTIONNAME:
+        case LOADFILECALLBACKFUNCTIONNAME:
           si.execSetCallback(st, value);
           break;
         case AUTOINTEGRATE:
