@@ -23,6 +23,7 @@ public interface ScriptInterface {
   public void execTest(String value);
 
   public JDXSource getCurrentSource();
+  public void closeSource(JDXSource source);
   public PanelData getPanelData();
   public Parameters getParameters();
   public JSVPanel getSelectedPanel();

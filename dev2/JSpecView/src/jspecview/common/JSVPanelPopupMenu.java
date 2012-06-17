@@ -339,6 +339,8 @@ public class JSVPanelPopupMenu extends JPopupMenu {
 			if (script == null)
 				return;
 			recentOverlay = script;
+      if (n == -2 && !overlayAllMenuItem.isEnabled()) 
+        scripter.closeSource(scripter.getCurrentSource());
 			runScript(scripter, "overlay " + script);
 			break;
 		}

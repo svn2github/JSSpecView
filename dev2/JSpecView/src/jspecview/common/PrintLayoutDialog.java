@@ -47,125 +47,133 @@ import javax.swing.border.TitledBorder;
  * @author Prof Robert J. Lancashire
  */
 public class PrintLayoutDialog extends JDialog {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
+
+	private static final long serialVersionUID = 1L;
   private TitledBorder titledBorder1;
   private TitledBorder titledBorder2;
   private TitledBorder titledBorder3;
   private TitledBorder titledBorder4;
   private TitledBorder titledBorder5;
-
-  private ImageIcon portraitIcon = new ImageIcon(
-    PrintLayoutDialog.class.getClassLoader().getResource("jspecview/application/icons/portrait.gif"));
-  private ImageIcon landscapeIcon = new ImageIcon(
-    PrintLayoutDialog.class.getClassLoader().getResource("jspecview/application/icons/landscape.gif"));
-  private ImageIcon previewPortraitCenterIcon = new ImageIcon(
-    PrintLayoutDialog.class.getClassLoader().getResource("jspecview/application/icons/portraitCenter.gif"));
-  private ImageIcon previewPortraitDefaultIcon = new ImageIcon(
-    PrintLayoutDialog.class.getClassLoader().getResource("jspecview/application/icons/portraitDefault.gif"));
-  private ImageIcon previewPortraitFitIcon = new ImageIcon(
-    PrintLayoutDialog.class.getClassLoader().getResource("jspecview/application/icons/portraitFit.gif"));
-  private ImageIcon previewLandscapeCenterIcon = new ImageIcon(
-    PrintLayoutDialog.class.getClassLoader().getResource("jspecview/application/icons/landscapeCenter.gif"));
-  private ImageIcon previewLandscapeDefaultIcon = new ImageIcon(
-    PrintLayoutDialog.class.getClassLoader().getResource("jspecview/application/icons/landscapeDefault.gif"));
-  private ImageIcon previewLandscapeFitIcon = new ImageIcon(
-    PrintLayoutDialog.class.getClassLoader().getResource("jspecview/application/icons/landscapeFit.gif"));
-
-
+  private TitledBorder titledBorder6;
+  private TitledBorder titledBorder7;
+  private TitledBorder titledBorder8;
+  private TitledBorder titledBorder9;
+  
   private ButtonGroup layoutButtonGroup = new ButtonGroup();
   private ButtonGroup fontButtonGroup = new ButtonGroup();
   private ButtonGroup positionButtonGroup = new ButtonGroup();
 
   private PrintLayout pl;
+	private PrintLayout plNew;
+
   private JPanel jPanel1 = new JPanel();
+  private JPanel layoutPanel = new JPanel();
+  private JPanel positionPanel = new JPanel();
+  private JPanel layoutContentPanel = new JPanel();
+  private JPanel previewPanel = new JPanel();
+  private JPanel fontPanel = new JPanel();
+  private JPanel elementsPanel = new JPanel();
+  private JPanel jPanel2 = new JPanel();
+
+  private JButton layoutButton = new JButton();
+  private JButton previewButton = new JButton();
   private JButton cancelButton = new JButton();
   private JButton printButton = new JButton();
-  private TitledBorder titledBorder6;
-  private TitledBorder titledBorder7;
-  private TitledBorder titledBorder8;
-
-  private JPanel layoutPanel = new JPanel();
+  
+  private GridBagLayout gridBagLayout7 = new GridBagLayout();
   private GridBagLayout gridBagLayout6 = new GridBagLayout();
   private GridBagLayout gridBagLayout5 = new GridBagLayout();
   private GridBagLayout gridBagLayout4 = new GridBagLayout();
   private GridBagLayout gridBagLayout3 = new GridBagLayout();
-  private JRadioButton landscapeRadioButton = new JRadioButton();
   private GridBagLayout gridBagLayout2 = new GridBagLayout();
   private GridBagLayout gridBagLayout1 = new GridBagLayout();
-  private JPanel positionPanel = new JPanel();
-  private JPanel layoutContentPanel = new JPanel();
-  private JCheckBox scaleCheckBox = new JCheckBox();
-  private JPanel previewPanel = new JPanel();
-  private JButton previewButton = new JButton();
+
+  private JCheckBox scaleXCheckBox = new JCheckBox();
+  private JCheckBox scaleYCheckBox = new JCheckBox();
   private JCheckBox gridCheckBox = new JCheckBox();
+  private JCheckBox titleCheckBox = new JCheckBox();
+  
+  private JRadioButton landscapeRadioButton = new JRadioButton();
   private JRadioButton defaultPosRadioButton = new JRadioButton();
   private JRadioButton centerRadioButton = new JRadioButton();
   private JRadioButton portraitRadioButton = new JRadioButton();
-  private JComboBox fontComboBox = new JComboBox();
   private JRadioButton fitToPageRadioButton = new JRadioButton();
-  private JButton layoutButton = new JButton();
   private JRadioButton chooseFontRadioButton = new JRadioButton();
   private JRadioButton defaultFontRadioButton = new JRadioButton();
-  private JPanel fontPanel = new JPanel();
-  private JCheckBox titleCheckBox = new JCheckBox();
-  private JPanel elementsPanel = new JPanel();
-  private JPanel jPanel2 = new JPanel();
-  private TitledBorder titledBorder9;
-  private GridBagLayout gridBagLayout7 = new GridBagLayout();
-  private JComboBox paperComboBox = new JComboBox();
+
+  private static JComboBox fontComboBox = new JComboBox();
+  private static JComboBox paperComboBox = new JComboBox();
   //private JComboBox printerNameComboBox = new JComboBox();
 
   /**
-   * Initialises a <code>PrintLayoutDialog</code>
+   * Initialises a modal <code>PrintLayoutDialog</code> with a default title
+   * of "Print Layout".
    * @param frame the parent frame
-   * @param title the title
-   * @param modal the modality
+   * @param pl    null or previous layout
    */
-  public PrintLayoutDialog(Frame frame, String title, boolean modal) {
-    super(frame, title, modal);
-
-    // Intialise Paper Names
-    paperComboBox.addItem(MediaSizeName.NA_LETTER);
-    paperComboBox.addItem(MediaSizeName.NA_LEGAL);
-    paperComboBox.addItem(MediaSizeName.ISO_A4);
-    paperComboBox.addItem(MediaSizeName.ISO_B4);
-
+  public PrintLayoutDialog(Frame frame, PrintLayout pl) {
+    super(frame, "Print Layout", true);
+    if (pl == null)
+      pl = new PrintLayout();
+    this.pl = pl;
     try {
       jbInit();
       setSize(320, 400);
       setResizable(false);
-
-      // load names of fonts in fontComboBox
-      GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-      String allFontNames[] = ge.getAvailableFontFamilyNames();
-      for(int i = 0; i < allFontNames.length; i++){
-        fontComboBox.addItem(allFontNames[i]);
-      }
-
       setVisible(true);
     }
     catch(Exception ex) {
       ex.printStackTrace();
     }
   }
+  private static ImageIcon portraitIcon;
+  private static ImageIcon landscapeIcon;
+  private static ImageIcon previewPortraitCenterIcon;
+  private static ImageIcon previewPortraitDefaultIcon;
+  private static ImageIcon previewPortraitFitIcon;
+  private static ImageIcon previewLandscapeCenterIcon;
+  private static ImageIcon previewLandscapeDefaultIcon;
+  private static ImageIcon previewLandscapeFitIcon;
 
-  /**
-   * Initialises a modal <code>PrintLayoutDialog</code> with a default title
-   * of "Print Layout".
-   * @param frame the parent frame
-   */
-  public PrintLayoutDialog(Frame frame) {
-    this(frame, "Print Layout", true);
-  }
+	private static void setStaticElements() {
+		if (previewLandscapeFitIcon != null)
+			return;
+		
+    paperComboBox.addItem(MediaSizeName.NA_LETTER);
+    paperComboBox.addItem(MediaSizeName.NA_LEGAL);
+    paperComboBox.addItem(MediaSizeName.ISO_A4);
+    paperComboBox.addItem(MediaSizeName.ISO_B4);
 
-  /**
+    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    String allFontNames[] = ge.getAvailableFontFamilyNames();
+    for(int i = 0; i < allFontNames.length; i++)
+      fontComboBox.addItem(allFontNames[i]);
+ 		ClassLoader cl = PrintLayoutDialog.class.getClassLoader();
+		String path = "jspecview/application/icons/";
+		portraitIcon = new ImageIcon(cl.getResource(path + "portrait.gif"));
+		landscapeIcon = new ImageIcon(cl.getResource(path + "landscape.gif"));
+		previewPortraitCenterIcon = new ImageIcon(cl.getResource(path
+				+ "portraitCenter.gif"));
+		previewPortraitDefaultIcon = new ImageIcon(cl.getResource(path
+				+ "portraitDefault.gif"));
+		previewPortraitFitIcon = new ImageIcon(cl.getResource(path
+				+ "portraitFit.gif"));
+		previewLandscapeCenterIcon = new ImageIcon(cl.getResource(path
+				+ "landscapeCenter.gif"));
+		previewLandscapeDefaultIcon = new ImageIcon(cl.getResource(path
+				+ "landscapeDefault.gif"));
+		previewLandscapeFitIcon = new ImageIcon(cl.getResource(path
+				+ "landscapeFit.gif"));
+	}
+
+	/**
    * Initalises the GUI components
    * @throws Exception
    */
   private void jbInit() throws Exception {
+
+    setStaticElements();
+    
     titledBorder1 = new TitledBorder("");
     titledBorder2 = new TitledBorder("");
     titledBorder3 = new TitledBorder("");
@@ -204,7 +212,6 @@ public class PrintLayoutDialog extends JDialog {
     layoutPanel.setBorder(titledBorder1);
     layoutPanel.setLayout(gridBagLayout2);
     landscapeRadioButton.setActionCommand("Landscape");
-    landscapeRadioButton.setSelected(true);
     landscapeRadioButton.setText("Landscape");
     landscapeRadioButton.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -214,16 +221,14 @@ public class PrintLayoutDialog extends JDialog {
     positionPanel.setBorder(titledBorder2);
     positionPanel.setLayout(gridBagLayout3);
     layoutContentPanel.setLayout(gridBagLayout1);
-    scaleCheckBox.setSelected(true);
-    scaleCheckBox.setText("Scale");
+    scaleXCheckBox.setText("X-Scale");
+    scaleYCheckBox.setText("Y-Scale");
     previewPanel.setBorder(titledBorder5);
     previewPanel.setLayout(gridBagLayout6);
     previewButton.setBorder(null);
     previewButton.setIcon(previewLandscapeDefaultIcon);
-    gridCheckBox.setSelected(true);
     gridCheckBox.setText("Grid");
     defaultPosRadioButton.setActionCommand("Default");
-    defaultPosRadioButton.setSelected(true);
     defaultPosRadioButton.setText("Default");
     defaultPosRadioButton.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -254,11 +259,9 @@ public class PrintLayoutDialog extends JDialog {
     layoutButton.setBorder(null);
     layoutButton.setIcon(portraitIcon);
     chooseFontRadioButton.setText("Choose font");
-    defaultFontRadioButton.setSelected(true);
     defaultFontRadioButton.setText("Use default");
     fontPanel.setBorder(titledBorder4);
     fontPanel.setLayout(gridBagLayout5);
-    titleCheckBox.setSelected(true);
     titleCheckBox.setText("Title");
     elementsPanel.setBorder(titledBorder3);
     elementsPanel.setLayout(gridBagLayout4);
@@ -294,9 +297,11 @@ public class PrintLayoutDialog extends JDialog {
             ,GridBagConstraints.NORTH, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
     elementsPanel.add(gridCheckBox, new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0
             ,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-    elementsPanel.add(scaleCheckBox, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0
+    elementsPanel.add(scaleXCheckBox, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0
             ,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-    elementsPanel.add(titleCheckBox, new GridBagConstraints(0, 2, 1, 1, 0.0, 1.0
+    elementsPanel.add(scaleYCheckBox, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0
+        ,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+    elementsPanel.add(titleCheckBox, new GridBagConstraints(0, 3, 1, 1, 0.0, 1.0
             ,GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
     layoutContentPanel.add(fontPanel,          new GridBagConstraints(1, 1, 2, 1, 0.0, 0.0
             ,GridBagConstraints.NORTH, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
@@ -317,22 +322,17 @@ public class PrintLayoutDialog extends JDialog {
     positionButtonGroup.add(defaultPosRadioButton);
     fontButtonGroup.add(defaultFontRadioButton);
     fontButtonGroup.add(chooseFontRadioButton);
+    
+    setDefaults();
   }
 
-  /**
+	/**
    * Sets the layout to portrait and changes the preview icon according to the
    * position selected
    * @param e the ActionEvent
    */
   void portraitRadioButton_actionPerformed(ActionEvent e) {
-    layoutButton.setIcon(portraitIcon);
-    String comm = positionButtonGroup.getSelection().getActionCommand();
-    if(comm.equals("Default"))
-      previewButton.setIcon(previewPortraitDefaultIcon);
-    else if(comm.equals("Fit To Page"))
-      previewButton.setIcon(previewPortraitFitIcon);
-    else if(comm.equals("Center"))
-      previewButton.setIcon(previewPortraitCenterIcon);
+    setPreview();
   }
 
   /**
@@ -341,14 +341,7 @@ public class PrintLayoutDialog extends JDialog {
    * @param e the ActionEvent
    */
   void landscapeRadioButton_actionPerformed(ActionEvent e) {
-    layoutButton.setIcon(landscapeIcon);
-    String comm = positionButtonGroup.getSelection().getActionCommand();
-    if(comm.equals("Default"))
-      previewButton.setIcon(previewLandscapeDefaultIcon);
-    else if(comm.equals("Fit To Page"))
-      previewButton.setIcon(previewLandscapeFitIcon);
-    else if(comm.equals("Center"))
-      previewButton.setIcon(previewLandscapeCenterIcon);
+    setPreview();
   }
 
   /**
@@ -357,11 +350,7 @@ public class PrintLayoutDialog extends JDialog {
    * @param e the ActionEvent
    */
   void centerRadioButton_actionPerformed(ActionEvent e) {
-    String comm = layoutButtonGroup.getSelection().getActionCommand();
-    if(comm.equals("Portrait"))
-      previewButton.setIcon(previewPortraitCenterIcon);
-    else if(comm.equals("Landscape"))
-      previewButton.setIcon(previewLandscapeCenterIcon);
+  	setPreview();
   }
 
   /**
@@ -370,100 +359,103 @@ public class PrintLayoutDialog extends JDialog {
    * @param e the ActionEvent
    */
   void fitToPageRadioButton_actionPerformed(ActionEvent e) {
-    String comm = layoutButtonGroup.getSelection().getActionCommand();
-    if(comm.equals("Portrait"))
-      previewButton.setIcon(previewPortraitFitIcon);
-    else if(comm.equals("Landscape"))
-      previewButton.setIcon(previewLandscapeFitIcon);
+  	setPreview();
   }
 
-  /**
-   * Sets the positon to default and changes the preview icon according to the
+  private void setPreview() {
+    int layout = " PL".indexOf(layoutButtonGroup.getSelection().getActionCommand().charAt(0));
+    layoutButton.setIcon(layout == 1 ? portraitIcon : landscapeIcon);
+    int position = " DCF".indexOf(positionButtonGroup.getSelection().getActionCommand().charAt(0));
+    ImageIcon icon = null; 
+    switch ((layout << 4) + position) {
+    default:
+    case 0x11:
+    	icon = previewPortraitDefaultIcon;
+    	break;
+    case 0x12:
+    	icon = previewPortraitCenterIcon;
+    	break;
+    case 0x13:
+    	icon = previewPortraitFitIcon;
+    	break;
+    case 0x21:
+    	icon = previewLandscapeDefaultIcon;
+    	break;
+    case 0x22:
+    	icon = previewLandscapeCenterIcon;
+    	break;
+    case 0x23:
+    	icon = previewLandscapeFitIcon;
+    	break;
+    }
+    previewButton.setIcon(icon);
+	}
+
+	/**
+   * Sets the position to default and changes the preview icon according to the
    * layout selected
    * @param e the ActionEvent
    */
   void defaultPosRadioButton_actionPerformed(ActionEvent e) {
-    String comm = layoutButtonGroup.getSelection().getActionCommand();
-    if(comm.equals("Portrait"))
-      previewButton.setIcon(previewPortraitDefaultIcon);
-    else if(comm.equals("Landscape"))
-      previewButton.setIcon(previewLandscapeDefaultIcon);
+  	setPreview();
   }
 
-  /**
-   * Stored all the layout Information the PrintLayout object and disposes the
-   * dialog
-   * @param e ActionEvent
-   */
-  void printButton_actionPerformed(ActionEvent e) {
-    pl = new PrintLayout();
-    pl.layout = layoutButtonGroup.getSelection().getActionCommand().toLowerCase();
-    if(defaultFontRadioButton.isSelected())
-      pl.font = null;
-    else
-      pl.font = (String)fontComboBox.getSelectedItem();
-    pl.position = positionButtonGroup.getSelection().getActionCommand().toLowerCase();
-    pl.showGrid = gridCheckBox.isSelected();
-    pl.showScale = scaleCheckBox.isSelected();
-    pl.showTitle = titleCheckBox.isSelected();
-    pl.paper = (MediaSizeName)paperComboBox.getSelectedItem();
-    //pl.printer = services[printerNameComboBox.getSelectedIndex()];
-    //pl.numCopies = ((Integer)numCopiesSpinner.getValue()).intValue();
+  private void setDefaults() {
+    landscapeRadioButton.setSelected(pl.layout.equals("landscape"));
+    scaleXCheckBox.setSelected(pl.showXScale);
+    scaleYCheckBox.setSelected(pl.showYScale);
+    gridCheckBox.setSelected(pl.showGrid);
+    titleCheckBox.setSelected(pl.showTitle);    
+    defaultPosRadioButton.setSelected(pl.position.equals("default"));
+    centerRadioButton.setSelected(pl.position.equals("center"));
+    fitToPageRadioButton.setSelected(pl.position.equals("fit to page"));
+    defaultFontRadioButton.setSelected(pl.font == null);
+    if (pl.font != null)
+    	for (int i = fontComboBox.getItemCount(); --i >= 0;) 
+    		if (fontComboBox.getItemAt(i).equals(pl.font)) {
+    			fontComboBox.setSelectedIndex(i);
+    			break;
+    		}
+  	for (int i = 0; i < paperComboBox.getItemCount(); i++) 
+  		if (pl.paper == null || paperComboBox.getItemAt(i).equals(pl.paper)) {
+  		  paperComboBox.setSelectedIndex(i);
+  			break;
+  		}
+    setPreview();
+	}
 
-    dispose();
-  }
+	/**
+	 * Stored all the layout Information the PrintLayout object and disposes the
+	 * dialog
+	 * 
+	 * @param e
+	 *          ActionEvent
+	 */
+	void printButton_actionPerformed(ActionEvent e) {
+		plNew = new PrintLayout();
+		plNew.layout = layoutButtonGroup.getSelection().getActionCommand()
+				.toLowerCase();
+		plNew.font = (defaultFontRadioButton.isSelected() ? null
+				: (String) fontComboBox.getSelectedItem());
+		plNew.position = positionButtonGroup.getSelection().getActionCommand()
+				.toLowerCase();
+		plNew.showGrid = gridCheckBox.isSelected();
+		plNew.showXScale = scaleXCheckBox.isSelected();
+		plNew.showYScale = scaleYCheckBox.isSelected();
+		plNew.showTitle = titleCheckBox.isSelected();
+		plNew.paper = (MediaSizeName) paperComboBox.getSelectedItem();
+		// pl.printer = services[printerNameComboBox.getSelectedIndex()];
+		// pl.numCopies = ((Integer)numCopiesSpinner.getValue()).intValue();
+
+		dispose();
+	}
 
   /**
    * Returns the PrintLayout object
    * @return the PrintLayout object
    */
   public PrintLayout getPrintLayout(){
-    return pl;
-  }
-
-  /**
-   * <code>PrintLayout</code> class stores all the information needed from the
-   * <code>PrintLayoutDialog</code>
-   */
-  public class PrintLayout{
-
-    /**
-     * The paper orientation ("portrait" or "landscape")
-     */
-    public String layout;
-
-    /**
-     * The position of the graph on the paper
-     * ("center", "default", "fit to page")
-     */
-    public String position;
-
-    /**
-     * whether or not the grid should be printed
-     */
-    public boolean showGrid;
-
-    /**
-     * whether or not the scale should be printed
-     */
-    public boolean showScale;
-
-    /**
-     * whether or not the title should be printed
-     */
-    public boolean showTitle;
-
-    /**
-     * The font of the elements
-     */
-    public String font;
-
-    /**
-     * The size of the paper to be printed on
-     */
-    public MediaSizeName paper;
-
-    public PrintLayout(){ }
+    return plNew;
   }
 
   /**
@@ -471,7 +463,6 @@ public class PrintLayoutDialog extends JDialog {
    * @param e the action (event)
    */
   void cancelButton_actionPerformed(ActionEvent e) {
-    pl = null;
     dispose();
   }
 }

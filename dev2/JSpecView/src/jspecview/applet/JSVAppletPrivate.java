@@ -78,6 +78,7 @@ import jspecview.common.PanelData;
 import jspecview.common.PanelListener;
 import jspecview.common.Parameters;
 import jspecview.common.PeakPickEvent;
+import jspecview.common.PrintLayout;
 import jspecview.common.PrintLayoutDialog;
 import jspecview.common.ScriptCommandTokenizer;
 import jspecview.common.ScriptInterface;
@@ -541,24 +542,26 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
         JOptionPane.PLAIN_MESSAGE);
   }
 
-  /**
-   * Opens the print dialog to enable printing
-   */
-  void print() {
-    if (offWindowFrame == null) {
-      System.err
-          .println("Use the View/Window menu to lift the spectrum off the page first.");
-      return;
-    }
+  private PrintLayout lastPrintLayout;
+  
+	/**
+	 * Opens the print dialog to enable printing
+	 */
+	void print() {
+		if (offWindowFrame == null) {
+			System.err
+					.println("Use the View/Window menu to lift the spectrum off the page first.");
+			return;
+		}
 
-    JSVPanel jsvp = getSelectedPanel();
-
-    PrintLayoutDialog ppd = new PrintLayoutDialog(offWindowFrame);
-    PrintLayoutDialog.PrintLayout pl = ppd.getPrintLayout();
-
-    if (pl != null)
-      ((AwtPanel) jsvp).printSpectrum(pl);
-  }
+		JSVPanel jsvp = getSelectedPanel();
+		PrintLayout pl;
+		if ((pl = (new PrintLayoutDialog(offWindowFrame, lastPrintLayout)) 
+				.getPrintLayout()) == null)
+			return;
+		lastPrintLayout = pl;
+		((AwtPanel) jsvp).printSpectrum(pl);
+	}
 
   private boolean isNewWindow;
   /**
@@ -1218,6 +1221,10 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
 		if (!isNewWindow)
   		newWindow(true);
 		print();
+	}
+
+	public void closeSource(JDXSource source) {
+		// ignored by applet
 	}
 
 }

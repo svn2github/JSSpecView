@@ -455,7 +455,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
    * @param pl
    *        the layout of the print job
    */
-  public void printSpectrum(PrintLayoutDialog.PrintLayout pl) {
+  public void printSpectrum(PrintLayout pl) {
 
     PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
 
@@ -470,9 +470,21 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 
     // Set Graph Properties
     pd.printingFont = pl.font;
+    pd.printGraphPosition = pl.position;
+
+    // save original values
+    
+    boolean gridOn = pd.gridOn;
+    boolean titleOn = pd.titleOn;
+    boolean xScaleOn = pd.getBoolean(ScriptToken.XSCALEON); 
+    boolean xUnitsOn = pd.getBoolean(ScriptToken.XUNITSON); 
+    boolean yScaleOn = pd.getBoolean(ScriptToken.YSCALEON); 
+    
     pd.gridOn = pl.showGrid;
     pd.titleOn = pl.showTitle;
-    pd.printGraphPosition = pl.position;
+    pd.setBoolean(ScriptToken.XSCALEON, pl.showXScale);
+    pd.setBoolean(ScriptToken.XUNITSON, pl.showXScale);
+    pd.setBoolean(ScriptToken.YSCALEON, pl.showYScale);
 
     /* Create a print job */
     PrinterJob pj = PrinterJob.getPrinterJob();
@@ -498,6 +510,14 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
       }
     }
 
+    // restore original values
+    
+    pd.gridOn = gridOn;
+    pd.titleOn = titleOn;
+    pd.setBoolean(ScriptToken.XSCALEON, xScaleOn); 
+    pd.setBoolean(ScriptToken.XUNITSON, xUnitsOn); 
+    pd.setBoolean(ScriptToken.YSCALEON, yScaleOn);
+    
   }
 
 

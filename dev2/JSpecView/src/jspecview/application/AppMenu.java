@@ -331,9 +331,7 @@ public class AppMenu extends JMenuBar {
     JSVPanelPopupMenu.setMenuItem(overlayMenuItem, 'O', "Overlay...", 79,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            if (overlayAllMenuItem.isEnabled()) 
-              mainFrame.closeSource(mainFrame.getCurrentSource());
-            jsvpPopupMenu.overlay(-1);
+            jsvpPopupMenu.overlay(-2);
           }
         });
     JSVPanelPopupMenu.setMenuItem(overlayStackOffsetYMenuItem, 'y', "Overlay Offset...", 0,

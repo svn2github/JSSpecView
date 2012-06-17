@@ -113,6 +113,7 @@ import jspecview.common.OverlayLegendDialog;
 import jspecview.common.AwtParameters;
 import jspecview.common.PanelListener;
 import jspecview.common.PeakPickEvent;
+import jspecview.common.PrintLayout;
 import jspecview.common.PrintLayoutDialog;
 import jspecview.common.ScriptInterface;
 import jspecview.common.ScriptToken;
@@ -1692,15 +1693,17 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     openDataOrFile(null, null, null, url, -1, -1);
   }
 
-  public void print() {
-    JSVPanel jsvp = getSelectedPanel();
-    if (jsvp == null)
-      return;
-    PrintLayoutDialog.PrintLayout pl = (new PrintLayoutDialog(this)).getPrintLayout();
-    if (pl != null) {
-      ((AwtPanel) jsvp).printSpectrum(pl);
-    }
-  }
+  private PrintLayout lastPrintLayout;
+  
+	public void print() {
+		JSVPanel jsvp = getSelectedPanel();
+		PrintLayout pl;
+		if (jsvp == null || (pl = (new PrintLayoutDialog(this, lastPrintLayout)) 
+				.getPrintLayout()) == null)
+			return;
+		lastPrintLayout = pl;
+		((AwtPanel) jsvp).printSpectrum(pl);
+	}
 
   public void toggleOverlayKey() {
     JSVPanel jsvp = getSelectedPanel();
