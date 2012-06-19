@@ -547,13 +547,13 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
 	/**
 	 * Opens the print dialog to enable printing
 	 */
-	void print() {
-		if (offWindowFrame == null) {
-			System.err
-					.println("Use the View/Window menu to lift the spectrum off the page first.");
+	public void print() {
+		if (!isSigned())
 			return;
-		}
-
+		boolean needWindow = false; // !isNewWindow;
+		//not sure what this is about. The applet prints fine
+		if (needWindow)
+  		newWindow(true);
 		JSVPanel jsvp = getSelectedPanel();
 		PrintLayout pl;
 		if ((pl = (new PrintLayoutDialog(offWindowFrame, lastPrintLayout)) 
@@ -561,9 +561,11 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
 			return;
 		lastPrintLayout = pl;
 		((AwtPanel) jsvp).printSpectrum(pl);
+		if (needWindow)
+			newWindow(false);
 	}
 
-  private boolean isNewWindow;
+  boolean isNewWindow;
   /**
    * Shows the applet in a Frame
    */
@@ -600,6 +602,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
       jsvApplet.repaint();
       offWindowFrame.removeAll();
       offWindowFrame.dispose();
+      offWindowFrame = null;
     }
   }
 
@@ -1216,12 +1219,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface, JSVAppl
   public void checkCallbacks(String title) {
     checkCallbacks();
   }
-
-	public void print(JSVPanel jsvp) {
-		if (!isNewWindow)
-  		newWindow(true);
-		print();
-	}
 
 	public void closeSource(JDXSource source) {
 		// ignored by applet

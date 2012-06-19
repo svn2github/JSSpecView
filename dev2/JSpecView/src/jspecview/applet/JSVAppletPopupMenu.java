@@ -25,10 +25,14 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     recentOverlay = "none";
     super.jbInit();
     if (!allowMenu) {
-      viewMenu.setEnabled(false);
+    	// all except About and Zoom disabled
       fileMenu.setEnabled(false);
-      appletExportAsMenu.setEnabled(false);
-      saveAsMenu.setEnabled(false);
+      viewMenu.setEnabled(false);
+      appletCompoundMenu.setEnabled(false);
+      scriptMenuItem.setEnabled(false);
+      appletAdvancedMenuItem.setEnabled(false);
+      printMenuItem.setEnabled(false);
+    	// about still allowed
     }
     zoomMenu.setEnabled(enableZoom);
   }
@@ -64,13 +68,15 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     aboutMenu.setText("About");
 
     fileMenu.setText("File");
-    printMenuItem.setActionCommand("Print");
-    printMenuItem.setText("Print...");
-    printMenuItem.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        applet.print();
-      }
-    });
+    //fileMenu.setEnabled(applet.isSigned()); ?
+    fileMenu.add(saveAsMenu);
+    if (applet.isSigned()) {
+      appletExportAsMenu = new JMenu();
+      fileMenu.add(appletExportAsMenu);
+    }
+    appletSaveAsJDXMenu = new JMenu();
+    JSVPanelPopupMenu.setMenus(saveAsMenu, appletSaveAsJDXMenu, appletExportAsMenu, exportActionListener);
+
     viewMenu.setText("View");
     zoomMenu.setText("Zoom");
     
@@ -99,34 +105,25 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     appletCompoundMenu.setEnabled(false);
     appletCompoundMenu.setText("Spectra");
 
-    versionMenuItem.setText("<html><h3>" + applet.getJsvApplet().getAppletInfo() + "</h3></html>");
+    appletAdvancedMenuItem = new JMenuItem();
+    appletAdvancedMenuItem.setText("Advanced...");
+    appletAdvancedMenuItem.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        applet.doAdvanced(applet.getSource().getFilePath());
+      }
+    });
+    appletAdvancedMenuItem.setEnabled(applet.isPro());
 
-    add(fileMenu);
-    add(viewMenu);
-    add(zoomMenu);
-    add(appletCompoundMenu);
-    addSeparator();
-    add(scriptMenuItem);
-    if (applet.isPro()) {
-      appletAdvancedMenuItem = new JMenuItem();
-      appletAdvancedMenuItem.setText("Advanced...");
-      appletAdvancedMenuItem.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          applet.doAdvanced(applet.getSource().getFilePath());
-        }
-      });
-      add(appletAdvancedMenuItem);
-    }
-    addSeparator();
-    add(aboutMenu);
-    fileMenu.add(saveAsMenu);
-    if (applet.isSigned()) {
-      appletExportAsMenu = new JMenu();
-      fileMenu.add(appletExportAsMenu);
-    }
-    appletSaveAsJDXMenu = new JMenu();
-    JSVPanelPopupMenu.setMenus(saveAsMenu, appletSaveAsJDXMenu, appletExportAsMenu, exportActionListener);
-    fileMenu.add(printMenuItem);
+    printMenuItem.setActionCommand("Print");
+    printMenuItem.setEnabled(applet.isSigned());
+    printMenuItem.setText("Print...");
+    printMenuItem.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        applet.print();
+      }
+    });
+    
+    versionMenuItem.setText("<html><h3>" + applet.getJsvApplet().getAppletInfo() + "</h3></html>");
 
     viewMenu.add(gridCheckBoxMenuItem);
     viewMenu.add(coordsCheckBoxMenuItem);
@@ -144,6 +141,19 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     zoomMenu.add(clearMenuItem);
     zoomMenu.add(userZoomMenuItem);
     aboutMenu.add(versionMenuItem);
+
+    add(fileMenu);
+    add(viewMenu);
+    add(zoomMenu);
+    add(appletCompoundMenu);
+    addSeparator();
+    add(scriptMenuItem);
+    add(appletAdvancedMenuItem);
+    addSeparator();
+    add(printMenuItem);
+    addSeparator();
+    add(aboutMenu);
+
   }
 
   protected void overlayKeyMenuItem_actionPerformed() {

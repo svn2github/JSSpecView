@@ -41,5 +41,5 @@ public interface ScriptInterface {
   public void showProperties();
   public void updateBoolean(ScriptToken st, boolean TF);
   public void checkCallbacks(String title);
-	public void print(JSVPanel jsvp);
+	public void print();
 }

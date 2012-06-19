@@ -1739,7 +1739,4 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     setMainTitle(title);
   }
 
-	public void print(JSVPanel jsvp) {
-		print();
-	}
 }

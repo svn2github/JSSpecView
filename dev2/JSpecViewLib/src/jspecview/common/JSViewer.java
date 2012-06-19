@@ -118,7 +118,7 @@ public class JSViewer {
         case PRINT:
           if (jsvp == null)
             continue;
-        	si.print(jsvp);
+        	si.print();
         	break;
         case SPECTRUM:
         case SPECTRUMNUMBER:

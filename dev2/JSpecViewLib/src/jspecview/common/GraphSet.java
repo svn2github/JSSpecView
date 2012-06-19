@@ -1137,7 +1137,6 @@ abstract class GraphSet {
   protected synchronized void doZoom(double initX, double initY, double finalX,
                                      double finalY, boolean doRepaint,
                                      boolean addZoom, boolean checkRange) {
-System.out.println("dozoom y=" + initY + " " + finalY);
     if (!enableZoom)
       return;
     if (initX > finalX) {
@@ -1340,14 +1339,14 @@ System.out.println("dozoom y=" + initY + " " + finalY);
   }
 
   private void drawHighlights(Object g) {
-    if (iThisSpectrum == Integer.MAX_VALUE)
+    if (iThisSpectrum == Integer.MAX_VALUE || pd.isPrinting)
       return;
     JDXSpectrum spec = spectra.get(Math.max(iThisSpectrum, 0));
     drawHighlights(g, spec);
   }
 
   private void drawPeakTabs(Object g) {
-    if (iThisSpectrum == Integer.MAX_VALUE)
+    if (iThisSpectrum == Integer.MAX_VALUE || pd.isPrinting)
       return;
     JDXSpectrum spec = spectra.get(Math.max(iThisSpectrum, 0));
     ArrayList<PeakInfo> list = (nSpectra == 1
@@ -1367,6 +1366,8 @@ System.out.println("dozoom y=" + initY + " " + finalY);
   }
 
   private void drawPeak(Object g, PeakInfo pi, boolean isFull) {
+  	if (pd.isPrinting)
+  		return;
     double xMin = pi.getXMin();
     double xMax = pi.getXMax();
     if (xMin != xMax) {
@@ -1381,6 +1382,8 @@ System.out.println("dozoom y=" + initY + " " + finalY);
    * @param subIndex
    */
   private void drawWidgets(Object g, int subIndex, boolean withSliders) {
+  	if (pd.isPrinting)
+  		return;
     // top/side slider bar backgrounds
     if (withSliders) {
       if (doDraw1DObjects) {
