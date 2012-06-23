@@ -642,16 +642,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 					break;
 				case UNKNOWN:
 					break;
-				case VERSION:
-					break;
-				case OBSCURE:
-					if (obscureTitleFromUser == null) // once only
-						obscureTitleFromUser = Boolean.valueOf(value);
-					break;
-				case SYNCID:
-					syncID = value;
-					fullName = appletID + "__" + syncID + "__";
-					break;
 				case APPLETID:
 					appletID = value;
 					fullName = appletID + "__" + syncID + "__";
@@ -659,25 +649,34 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 				case APPLETREADYCALLBACKFUNCTIONNAME:
 					appletReadyCallbackFunctionName = value;
 					break;
-				case PEAKCALLBACKFUNCTIONNAME:
-				case SYNCCALLBACKFUNCTIONNAME:
-				case COORDCALLBACKFUNCTIONNAME:
-				case LOADFILECALLBACKFUNCTIONNAME:
-					execSetCallback(st, value);
-					break;
-				case MENUON:
-					allowMenu = Boolean.parseBoolean(value);
+				case AUTOINTEGRATE:
+					autoIntegrate = AwtParameters.isTrue(value);
 					break;
 				case COMPOUNDMENUON:
 					allowCompoundMenu = Boolean.parseBoolean(value);
 					break;
-				case INTERFACE:
-					if (value.equalsIgnoreCase("single")
-							|| value.equalsIgnoreCase("overlay"))
-						interfaceOverlaid = value.equalsIgnoreCase("overlay");
+				case COORDCALLBACKFUNCTIONNAME:
+				case LOADFILECALLBACKFUNCTIONNAME:
+				case PEAKCALLBACKFUNCTIONNAME:
+				case SYNCCALLBACKFUNCTIONNAME:
+					execSetCallback(st, value);
 					break;
 				case ENDINDEX:
 					initialEndIndex = Integer.parseInt(value);
+					break;
+				case INTERFACE:
+					execSetInterface(value);
+					break;
+				case IRMODE:
+					irMode = (value.toUpperCase().startsWith("T") ? JDXSpectrum.TO_TRANS
+							: JDXSpectrum.TO_ABS);
+					break;
+				case MENUON:
+					allowMenu = Boolean.parseBoolean(value);
+					break;
+				case OBSCURE:
+					if (obscureTitleFromUser == null) // once only
+						obscureTitleFromUser = Boolean.valueOf(value);
 					break;
 				case STARTINDEX:
 					initialStartIndex = Integer.parseInt(value);
@@ -685,13 +684,12 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 				//case SPECTRUMNUMBER:
 					//initialSpectrumNumber = Integer.parseInt(value);
 					//break;
-				case AUTOINTEGRATE:
-					autoIntegrate = AwtParameters.isTrue(value);
+				case SYNCID:
+					syncID = value;
+					fullName = appletID + "__" + syncID + "__";
 					break;
-				case IRMODE:
-					irMode = (value.toUpperCase().startsWith("T") ? JDXSpectrum.TO_TRANS
-							: JDXSpectrum.TO_ABS);
-
+				case VERSION:
+					break;
 				}
 			} catch (Exception e) {
 			}
@@ -941,7 +939,8 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	public void execSetInterface(String value) {
-		interfaceOverlaid = (value.equalsIgnoreCase("overlay"));
+		interfaceOverlaid = (value.equalsIgnoreCase("single")
+				|| value.equalsIgnoreCase("overlay"));
 	}
 
 	public void execScriptComplete(String msg, boolean isOK) {
