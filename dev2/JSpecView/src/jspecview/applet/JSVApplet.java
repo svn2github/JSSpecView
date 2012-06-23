@@ -36,6 +36,7 @@
 // 08-10-2011 jak - Add a method to toggle integration from a javascript
 //          call. Changed behaviour to remove integration after reset view.
 // 19-06-2012 RMH -changes to printing calls
+// 23-06-2012 RMH -Major change to Applet code to allow multiple file loads
 
 package jspecview.applet;
 
