@@ -54,30 +54,19 @@ public class OverlayLegendDialog extends JDialog implements JSVDialog {
   JSVPanel jsvp;
 
   /**
-   * Initialises the <code>OverlayLegendDialog</code>
-   * @param frame the parent frame
-   * @param title the title
-   * @param modal the modality
-   * @param jsvp the <code>JSVPanel</code>
-   */
-  public OverlayLegendDialog(Frame frame, String title, boolean modal, JSVPanel jsvp) {
-    super(frame, title, modal);
-    this.jsvp = jsvp;
-    init();
-    this.pack();
-    this.setVisible(true);
-
-  }
-
-  /**
    * Initialises a non-modal <code>OverlayLegendDialog</code> with a default title of
    * "Legend: " + jsvp.getTitle() and parent frame
    * @param frame the parent frame
    * @param jsvp the <code>JSVPanel</code>
    */
   public OverlayLegendDialog(Frame frame, JSVPanel jsvp) {
-    this(frame, ("Legend: " + jsvp.getTitle()), false, jsvp);
+    super(frame, "Legend: " + jsvp.getTitle(), false);
+    this.jsvp = jsvp;
+    init();
+    this.pack();
+    setVisible(false);
   }
+
 
   /**
    * Initialises GUI Components

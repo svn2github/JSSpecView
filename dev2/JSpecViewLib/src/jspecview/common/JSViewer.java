@@ -60,7 +60,7 @@ public class JSViewer {
           si.execSetAutoIntegrate(Parameters.isTrue(value));
           break;
         case CLOSE:
-          si.execClose(value);
+          si.execClose(value, true);
           jsvp = si.getSelectedPanel();
           break;
         case EXPORT:
@@ -101,7 +101,7 @@ public class JSViewer {
           jsvp = si.getSelectedPanel();
           break;
         case OVERLAY:
-          si.execOverlay(value);
+          si.execOverlay(value, true);
           break;
         case PEAK:
           try {
@@ -276,7 +276,6 @@ public class JSViewer {
     for (int i = specNodes.size(); --i >= 0;)
       if (specNodes.get(i).jsvp.getPanelData().hasFileLoaded(fileName)) {
         si.setSelectedPanel(specNodes.get(i).jsvp);
-        //si.sendFrameChange(specNodes.get(i).jsvp); !
         return true;
       }
     return false;
@@ -296,7 +295,7 @@ public class JSViewer {
     //System.out.println("JSViewer selected panelspec=" + jsvp.getSpectrum());
     if ((pi = jsvp.getPanelData().selectPeakByFileIndex(file, index)) != null) {
       //System.out.println("JSViewer found peak in this spectrum -- " + pi);
-      si.setFrame(JSVSpecNode.findNode(jsvp, specNodes));
+      si.setNode(JSVSpecNode.findNode(jsvp, specNodes), false);
     } else {
       //System.out.println("JSViewer did not find a peak for " + file + " " + index);
       for (int i = specNodes.size(); --i >= 0;) {
@@ -306,7 +305,7 @@ public class JSViewer {
 
         if ((pi = node.jsvp.getPanelData().selectPeakByFileIndex(file, index)) != null) {
           //System.out.println("JSViewer setting spectrum to  " + node);
-          si.setFrame(node);
+          si.setNode(node, false);
           break;
         }
         //System.out.println("hmm");
@@ -344,7 +343,7 @@ public class JSViewer {
           }
         if (node == null)
           return;
-        si.setFrame(node);
+        si.setNode(node, false);
       }
       pi = pi2;
     } else {
@@ -428,4 +427,5 @@ public class JSViewer {
     }
     return "";
   }
+
 }

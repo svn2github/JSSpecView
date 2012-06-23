@@ -60,6 +60,7 @@ import jspecview.common.PanelData;
 import jspecview.common.JSVPanelPopupMenu;
 import jspecview.common.ScriptToken;
 import jspecview.common.JDXSpectrum;
+import jspecview.common.JSVPanelPopupMenu.EnumOverlay;
 import jspecview.source.JDXSource;
 import jspecview.util.FileManager;
 
@@ -92,7 +93,6 @@ public class AppMenu extends JMenuBar {
   private JMenu saveAsJDXMenu = new JMenu();
   private JMenu exportAsMenu = new JMenu();
   private JMenuItem exitMenuItem = new JMenuItem();
-  JMenu windowMenu = new JMenu();
   private JMenu helpMenu = new JMenu();
   private JMenu optionsMenu = new JMenu();
   private JMenu displayMenu = new JMenu();
@@ -115,10 +115,11 @@ public class AppMenu extends JMenuBar {
   private JCheckBoxMenuItem sidePanelCheckBoxMenuItem = new JCheckBoxMenuItem();
   private JCheckBoxMenuItem statusCheckBoxMenuItem = new JCheckBoxMenuItem();
 
-  private JMenuItem splitMenuItem = new JMenuItem();
-  private JMenuItem overlayAllMenuItem = new JMenuItem();
-  private JMenuItem overlayMenuItem = new JMenuItem();
+//  private JMenuItem splitMenuItem = new JMenuItem();
+//  private JMenuItem overlayAllMenuItem = new JMenuItem();
+//  private JMenuItem overlayMenuItem = new JMenuItem();
   private JMenuItem overlayStackOffsetYMenuItem = new JMenuItem();
+  private JMenuItem overlayCloseMenuItem = new JMenuItem();
   private JMenuItem sourceMenuItem = new JMenuItem();
   private JMenuItem propertiesMenuItem = new JMenuItem();
 
@@ -316,48 +317,39 @@ public class AppMenu extends JMenuBar {
           }
         });
     statusCheckBoxMenuItem.setSelected(true);
-    JSVPanelPopupMenu.setMenuItem(splitMenuItem, 'P', "Split", 83,
+    
+    JSVPanelPopupMenu.setMenuItem(overlayCloseMenuItem, 'O', "Overlay/Close...", 79,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            mainFrame.runScript("CLOSE");
+            jsvpPopupMenu.overlay(JSVPanelPopupMenu.EnumOverlay.DIALOG);
           }
         });
-    JSVPanelPopupMenu.setMenuItem(overlayAllMenuItem, 'Y', "Overlay All", 0, 0,
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            mainFrame.runScript("OVERLAY ALL");
-          }
-        });
-    JSVPanelPopupMenu.setMenuItem(overlayMenuItem, 'O', "Overlay...", 79,
-        InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            jsvpPopupMenu.overlay(-2);
-          }
-        });
+
+//    
+//    JSVPanelPopupMenu.setMenuItem(splitMenuItem, 'P', "Split", 83,
+//        InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
+//          public void actionPerformed(ActionEvent e) {
+//            mainFrame.runScript("CLOSE");
+//          }
+//        });
+//    JSVPanelPopupMenu.setMenuItem(overlayAllMenuItem, 'Y', "Overlay All", 0, 0,
+//        new ActionListener() {
+//          public void actionPerformed(ActionEvent e) {
+//            mainFrame.runScript("OVERLAY ALL");
+//          }
+//        });
+//    JSVPanelPopupMenu.setMenuItem(overlayMenuItem, 'O', "Overlay...", 79,
+//        InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
+//          public void actionPerformed(ActionEvent e) {
+//            jsvpPopupMenu.overlay(-2);
+//          }
+//        });
     JSVPanelPopupMenu.setMenuItem(overlayStackOffsetYMenuItem, 'y', "Overlay Offset...", 0,
         0, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            jsvpPopupMenu.overlay(99);
+            jsvpPopupMenu.overlay(EnumOverlay.OFFSETY);
           }
         });
-    //    JSVPanelPopupMenu.setMenuItem(hideMenuItem, 'H', "Hide", 0, 0,
-    //        new ActionListener() {
-    //          public void actionPerformed(ActionEvent e) {
-    //            hideMenuItem_actionPerformed(e);
-    //          }
-    //        });
-    //    JSVPanelPopupMenu.setMenuItem(hideAllMenuItem, 'L', "Hide All", 0, 0,
-    //        new ActionListener() {
-    //          public void actionPerformed(ActionEvent e) {
-    //            hideAllMenuItem_actionPerformed(e);
-    //          }
-    //        });
-    //    JSVPanelPopupMenu.setMenuItem(showMenuItem, 'S', "Show All", 0, 0,
-    //        new ActionListener() {
-    //          public void actionPerformed(ActionEvent e) {
-    //            showMenuItem_actionPerformed(e);
-    //          }
-    //        });
     JSVPanelPopupMenu.setMenuItem(sourceMenuItem, 'S', "Source ...", 83,
         InputEvent.CTRL_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
@@ -404,7 +396,6 @@ public class AppMenu extends JMenuBar {
     add(displayMenu).setEnabled(false);
     add(optionsMenu);
     add(processingMenu).setEnabled(false);
-    add(windowMenu);
     add(helpMenu);
     fileMenu.add(openMenuItem);
     fileMenu.add(openURLMenuItem);
@@ -424,6 +415,10 @@ public class AppMenu extends JMenuBar {
     fileMenu.add(errorLogMenuItem).setEnabled(false);
     fileMenu.addSeparator();
     fileMenu.add(exitMenuItem);
+    displayMenu.add(overlayCloseMenuItem);
+    displayMenu.add(overlayStackOffsetYMenuItem);
+    displayMenu.add(overlayKeyMenuItem).setEnabled(false);
+    displayMenu.addSeparator();
     displayMenu.add(gridCheckBoxMenuItem);
     displayMenu.add(coordsCheckBoxMenuItem);
     displayMenu.add(scaleXCheckBoxMenuItem);
@@ -433,7 +428,6 @@ public class AppMenu extends JMenuBar {
     displayMenu.add(zoomMenu);
     displayMenu.addSeparator();
     displayMenu.add(propertiesMenuItem);
-    displayMenu.add(overlayKeyMenuItem).setEnabled(false);
     zoomMenu.add(nextZoomMenuItem);
     zoomMenu.add(prevZoomMenuItem);
     zoomMenu.add(fullZoomMenuItem);
@@ -451,19 +445,6 @@ public class AppMenu extends JMenuBar {
             mainFrame.exportSpectrumViaMenu(e.getActionCommand());
           }
         }));
-    windowMenu.setMnemonic('W');
-    windowMenu.setText("Window");
-    windowMenu.add(splitMenuItem);
-    windowMenu.add(overlayAllMenuItem);
-    windowMenu.add(overlayMenuItem);
-    windowMenu.add(overlayStackOffsetYMenuItem);
-    //windowMenu.addSeparator();
-    //windowMenu.add(hideMenuItem);
-    //windowMenu.add(hideAllMenuItem);
-    //windowMenu.add(showMenu);
-    //windowMenu.add(showMenuItem);
-    //windowMenu.addSeparator();
-
   }
 
   protected void setBoolean(ScriptToken st, ItemEvent e) {
@@ -474,7 +455,6 @@ public class AppMenu extends JMenuBar {
   public void setSourceEnabled(boolean b) {
     closeAllMenuItem.setEnabled(b);
     displayMenu.setEnabled(b);
-    windowMenu.setEnabled(b);
     processingMenu.setEnabled(b);
     printMenuItem.setEnabled(b);
     sourceMenuItem.setEnabled(b);
@@ -502,8 +482,8 @@ public class AppMenu extends JMenuBar {
       PanelData pd = node.jsvp.getPanelData();
       setCheckBoxes(pd);
       overlayKeyMenuItem.setEnabled(pd.getNumberOfGraphSets() > 1);
-      overlayAllMenuItem.setEnabled(!pd.isOverlaid());
-      splitMenuItem.setEnabled(pd.isOverlaid());
+      //overlayAllMenuItem.setEnabled(!pd.isOverlaid());
+      //splitMenuItem.setEnabled(pd.isOverlaid());
       setCloseMenuItem(FileManager.getName(node.source.getFilePath()));
       exportAsMenu.setEnabled(true);
       saveAsMenu.setEnabled(true);
@@ -662,16 +642,6 @@ public class AppMenu extends JMenuBar {
     if (source == null) {
       setMenuEnables(null);
     } else {
-      //      List<JDXSpectrum> spectra = source.getSpectra();
-      //      for (int i = 0; i < spectra.size(); i++) {
-      //        String title = spectra.get(i).getTitleLabel();
-      //        for (int j = 0; j < showMenu.getMenuComponentCount(); j++) {
-      //          JMenuItem mi = (JMenuItem) showMenu.getMenuComponent(j);
-      //          if (mi.getText().endsWith(title)) {
-      //            showMenu.remove(mi);
-      //          }
-      //        }
-      //      }
       saveAsJDXMenu.setEnabled(true);
       saveAsMenu.setEnabled(true);
     }

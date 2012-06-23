@@ -137,7 +137,7 @@ public class JDXSource extends JDXHeader {
     return filePath;
   }
 
-  public static JDXSource createOverlay(String name, List<JDXSpectrum> specs) {
+  public static JDXSource createOverlay(List<JDXSpectrum> specs) {
     JDXSource source = new JDXSource(TYPE_OVERLAY, "overlaid");
     for (int i = 0; i < specs.size(); i++)
       source.addJDXSpectrum(specs.get(i).getFilePath(), specs.get(i), false);

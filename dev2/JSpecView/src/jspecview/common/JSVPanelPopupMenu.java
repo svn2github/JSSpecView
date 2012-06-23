@@ -45,7 +45,10 @@ import jspecview.util.Parser;
 public class JSVPanelPopupMenu extends JPopupMenu {
 
   protected boolean isApplet;
+
+  public enum EnumOverlay { DIALOG, OFFSETY };
   
+
   private static final long serialVersionUID = 1L;
 
   private ScriptInterface scripter;
@@ -84,10 +87,9 @@ public class JSVPanelPopupMenu extends JPopupMenu {
 
   protected JMenuItem userZoomMenuItem = new JMenuItem();
   protected JMenuItem scriptMenuItem = new JMenuItem();
-  public JMenuItem overlayMenuItem = new JMenuItem();
-  public JMenuItem overlayAllMenuItem = new JMenuItem();
-  public JMenuItem overlayNoneMenuItem = new JMenuItem();
   public JMenuItem overlayStackOffsetMenuItem = new JMenuItem();
+  //public JMenuItem overlayAllMenuItem = new JMenuItem();
+  //public JMenuItem overlayNoneMenuItem = new JMenuItem();
 
   public JMenuItem integrateMenuItem = new JCheckBoxMenuItem();
   public JMenuItem transAbsMenuItem = new JMenuItem();
@@ -103,7 +105,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   protected JMenu appletSaveAsJDXMenu; // applet only
   protected JMenu appletExportAsMenu;  // applet only
   protected JMenuItem appletAdvancedMenuItem;
-  protected JMenu appletCompoundMenu;
+  protected JMenuItem overlayMenuItem = new JMenuItem();
   public JMenuItem overlayKeyMenuItem = new JMenuItem();
   
   public JSVPanelPopupMenu(ScriptInterface scripter) {
@@ -144,30 +146,9 @@ public class JSVPanelPopupMenu extends JPopupMenu {
         scripter.getPanelData().resetView();
       }
     });
-    overlayMenuItem.setText("Overlay Selected");
-    overlayMenuItem.addActionListener(new ActionListener() {
-       public void actionPerformed(ActionEvent e) {
-         overlay(-1);
-       }
-     });
-    overlayAllMenuItem.setText("Overlay All");
-    overlayAllMenuItem.addActionListener(new ActionListener() {
-       public void actionPerformed(ActionEvent e) {
-         overlay(1);
-       }
-     });
-    overlayNoneMenuItem.setText("Overlay None");
-    overlayNoneMenuItem.addActionListener(new ActionListener() {
-       public void actionPerformed(ActionEvent e) {
-         overlay(0);
-       }
-     });
-    overlayStackOffsetMenuItem.setText("Overlay Offset...");
-    overlayStackOffsetMenuItem.addActionListener(new ActionListener() {
-       public void actionPerformed(ActionEvent e) {
-         overlay(99);
-       }
-     });
+    
+    setOverlayItems();
+    
     scriptMenuItem.setText("Script...");
     scriptMenuItem.addActionListener(new ActionListener() {
        public void actionPerformed(ActionEvent e) {
@@ -209,13 +190,42 @@ public class JSVPanelPopupMenu extends JPopupMenu {
       }
     });
     
-    setMenu();
+    setPopupMenu();
   }
 
-  /**
+  protected void setOverlayItems() {
+    overlayMenuItem.setText("Overlay/Close...");
+    overlayMenuItem.addActionListener(new ActionListener() {
+       public void actionPerformed(ActionEvent e) {
+         overlay(EnumOverlay.DIALOG);
+       }
+     });
+/*
+    overlayAllMenuItem.setText("Overlay All");
+    overlayAllMenuItem.addActionListener(new ActionListener() {
+       public void actionPerformed(ActionEvent e) {
+         overlay(1);
+       }
+     });
+    overlayNoneMenuItem.setText("Overlay None");
+    overlayNoneMenuItem.addActionListener(new ActionListener() {
+       public void actionPerformed(ActionEvent e) {
+         overlay(0);
+       }
+     });
+*/
+    overlayStackOffsetMenuItem.setText("Overlay Offset...");
+    overlayStackOffsetMenuItem.addActionListener(new ActionListener() {
+       public void actionPerformed(ActionEvent e) {
+         overlay(EnumOverlay.OFFSETY);
+       }
+     });
+	}
+
+	/**
    * overridded in applet
    */
-  protected void setMenu() {
+  protected void setPopupMenu() {
     add(gridCheckBoxMenuItem);
     add(coordsCheckBoxMenuItem);
     add(reversePlotCheckBoxMenuItem);
@@ -227,6 +237,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
     add(userZoomMenuItem);
     addSeparator();
     add(overlayMenuItem);
+    add(overlayStackOffsetMenuItem);
     add(scriptMenuItem);
     addSeparator();
     add(properties);
@@ -308,14 +319,16 @@ public class JSVPanelPopupMenu extends JPopupMenu {
       scripter.runScript(cmd);
   }
 
-  protected String recentOverlay = "1.1,1.2";
   protected String recentStackPercent = "5";
 
   private PanelData pd;
 
-	public void overlay(int n) {
-		switch (n) {
-		case 99:
+	public void overlay(EnumOverlay overlay) {
+		switch (overlay) {
+		case DIALOG:
+			scripter.checkOverlay();
+			break;
+		case OFFSETY:
 			String offset = (String) JOptionPane.showInputDialog(null,
 					"Enter a vertical offset in percent for stacked plots",
 					"Overlay", JOptionPane.PLAIN_MESSAGE, null, null,
@@ -324,24 +337,6 @@ public class JSVPanelPopupMenu extends JPopupMenu {
 				return;
 			recentStackPercent = offset;
 			runScript(scripter, ScriptToken.STACKOFFSETY + " " + offset);
-			break;
-		case 0:
-			runScript(scripter, "overlay NONE");
-			break;
-		case 1:
-			runScript(scripter, "overlay ALL");
-			break;
-		default:
-			String script = (String) JOptionPane.showInputDialog(null,
-					"Enter a list of Spectrum IDs separated by commas",
-					"Overlay", JOptionPane.PLAIN_MESSAGE, null, null,
-					recentOverlay);
-			if (script == null)
-				return;
-			recentOverlay = script;
-      if (n == -2 && !overlayAllMenuItem.isEnabled()) 
-        scripter.closeSource(scripter.getCurrentSource());
-			runScript(scripter, "overlay " + script);
 			break;
 		}
 	}
@@ -378,9 +373,9 @@ public class JSVPanelPopupMenu extends JPopupMenu {
       appletExportAsMenu.setEnabled(true);
     if (appletAdvancedMenuItem != null)
       appletAdvancedMenuItem.setEnabled(!isOverlaid);
-    if (appletCompoundMenu != null) 
-      appletCompoundMenu.setEnabled(
-          appletCompoundMenu.isEnabled() && appletCompoundMenu.getItemCount() > 3);
+//    if (appletCompoundMenu != null) 
+  //    appletCompoundMenu.setEnabled(
+    //      appletCompoundMenu.isEnabled() && appletCompoundMenu.getItemCount() > 3);
   }
 
   private void setSelected(JCheckBoxMenuItem item, boolean TF) {

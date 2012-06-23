@@ -6,13 +6,25 @@ package jspecview.common;
 import java.util.ArrayList;
 import java.util.List;
 
-import jspecview.common.JSVContainer;
 import jspecview.common.JSVDialog;
 import jspecview.common.JSVPanel;
 import jspecview.source.JDXSource;
 import jspecview.util.TextFormat;
 
 public class JSVSpecNode {
+
+  private String frameTitle;
+	public JSVSpecNode(String id, String fileName, JDXSource source, JSVPanel jsvp) {
+    this.id = id;
+    this.source = source;
+    this.fileName = fileName;
+    this.jsvp = jsvp;
+    if (jsvp != null) {
+      jsvp.getSpectrumAt(0).setId(id);
+      frameTitle = jsvp.getTitle();
+    }
+
+  }
 
   public Object treeNode;
   public void setTreeNode(Object node) {
@@ -24,10 +36,10 @@ public class JSVSpecNode {
   
   public JDXSource source;
   public String fileName;
-  public JSVContainer frame;
   public JSVPanel jsvp;
   public String id;
   public JSVDialog legend;
+	private boolean isSelected;
 
   public void dispose() {
     source.dispose();
@@ -48,21 +60,9 @@ public class JSVSpecNode {
     return legend;
   }
 
-  public JSVSpecNode(String id, String fileName, JDXSource source, JSVContainer frame,
-      JSVPanel jsvp) {
-    this.id = id;
-    this.source = source;
-    this.fileName = fileName;
-    this.frame = frame;
-    this.jsvp = jsvp;
-    if (jsvp != null)
-      jsvp.getSpectrumAt(0).setId(id);
-  }
-
   @Override
   public String toString() {
-    return ((id == null ? "" : id + ": ") + (frame == null ? fileName : frame
-        .getTitle()));
+    return ((id == null ? "" : id + ": ") + (frameTitle == null ? fileName : frameTitle));
   }
   public static JDXSource findSourceByNameOrId(String id, List<JSVSpecNode> specNodes) {
     for (int i = specNodes.size(); --i >= 0;) {
@@ -101,20 +101,6 @@ public class JSVSpecNode {
   public static JSVSpecNode findNode(JSVPanel jsvp, List<JSVSpecNode> specNodes) {
     for (int i = specNodes.size(); --i >= 0;)
       if (specNodes.get(i).jsvp == jsvp)
-        return specNodes.get(i);
-    return null;
-  }
-  /**
-   * Returns the tree node that is associated with an internal frame
-   * 
-   * @param frame
-   *        the JSVFrame
-   * @param specNodes TODO
-   * @return the tree node that is associated with an internal frame
-   */
-  public static JSVSpecNode findNode(Object frame, List<JSVSpecNode> specNodes) {
-    for (int i = specNodes.size(); --i >= 0;)
-      if (specNodes.get(i).frame == frame)
         return specNodes.get(i);
     return null;
   }
@@ -217,7 +203,8 @@ public class JSVSpecNode {
   public static boolean isOpen(List<JSVSpecNode> specNodes, String filePath) {
     if (filePath != null)
       for (int i = specNodes.size(); --i >= 0;)
-        if (filePath.equals(specNodes.get(i).source.getFilePath()))
+        if (filePath.equals(specNodes.get(i).source.getFilePath())
+        		|| filePath.equals(specNodes.get(i).frameTitle))
           return true;
     return false;
   }
@@ -227,5 +214,27 @@ public class JSVSpecNode {
         return i;
     return -1;
   }
-
+  
+	public boolean isSelected() {
+		return isSelected;
+	}
+	
+	public void setSelected(boolean tf) {
+		isSelected = tf;
+	}
+	public void setFrameTitle(String name) {
+		frameTitle = name;
+	}
+	public static JSVPanel getLastFileFirstNode(List<JSVSpecNode> specNodes) {
+		int n = specNodes.size();
+		JSVSpecNode node = (n == 0 ? null : specNodes.get(n - 1));
+		// first in last file
+		for (int i = specNodes.size(); --i >= 0; ) {
+			if (specNodes.get(i).jsvp == null)
+				break;
+			node = specNodes.get(i);
+		}
+		return (node == null ? null : node.jsvp);
+	}
+	
 }

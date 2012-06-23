@@ -40,14 +40,12 @@
 package jspecview.applet;
 
 import java.awt.BorderLayout;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
@@ -56,22 +54,25 @@ import java.util.ArrayList;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTree;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeSelectionModel;
 
 import jspecview.application.TextDialog;
 import jspecview.common.AwtPanel;
 import jspecview.common.IntegralGraph;
 import jspecview.common.JSVAppletInterface;
-import jspecview.common.JSVContainer;
 import jspecview.common.JSVDialog;
 import jspecview.common.JSVDropTargetListener;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSVSpecNode;
+import jspecview.common.JSVSpectrumPanel;
+import jspecview.common.JSVTreeNode;
 import jspecview.common.JSViewer;
+import jspecview.common.OverlayCloseDialog;
 import jspecview.common.OverlayLegendDialog;
 import jspecview.common.AwtParameters;
 import jspecview.common.PanelData;
@@ -88,14 +89,12 @@ import jspecview.common.Annotation;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.SubSpecChangeEvent;
 import jspecview.common.ZoomEvent;
-import jspecview.exception.JSpecViewException;
 import jspecview.export.Exporter;
 import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
 import jspecview.util.Escape;
 import jspecview.util.FileManager;
 import jspecview.util.Logger;
-import jspecview.util.Parser;
 import jspecview.util.TextFormat;
 import netscape.javascript.JSObject;
 
@@ -126,39 +125,11 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		init();
 	}
 
-	// ///////////// applet panel /////////////////
-
-	private class JSVAppletPanel extends JPanel implements JSVContainer {
-
-		private static final long serialVersionUID = 1L;
-
-		private JSVAppletPanel(BorderLayout borderLayout) {
-			super(borderLayout);
-		}
-
-		public void dispose() {
-		}
-
-		public String getTitle() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		public void setTitle(String title) {
-			// TODO Auto-generated method stub
-
-		}
-
-	}
-
-	/* -------------------- default PARAMETERS ------------------------- */
-
 	private JSVPanel prevPanel;
 	private ArrayList<Annotation> integrationRatios; // Integration Ratio
 																										// Annotations
-	private int startIndex = -1;
-	private int endIndex = -1;
-	private int spectrumNumber = -1; // blockNumber or nTupleNumber
+	private int initialStartIndex = -1;
+	private int initialEndIndex = -1;
 	private int irMode = JDXSpectrum.TA_NO_CONVERT;
 	private boolean autoIntegrate;
 
@@ -180,14 +151,26 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	private Boolean obscureTitleFromUser;
 	private JFileChooser jFileChooser;
 	private JFrame offWindowFrame;
-	private JSVAppletPanel appletPanel;
+	private JSVSpectrumPanel spectrumPanel;
 	private JSVAppletPopupMenu appletPopupMenu;
-	private List<JSVSpecNode> specNodes;
-	private List<JSVSpecNode> specNodesSaved;
-	private int currentSpectrumIndex;
+	public Object getPopupMenu() {
+		return appletPopupMenu;
+	}
+
+  private List<JSVSpecNode> specNodes = new ArrayList<JSVSpecNode>();
+	public List<JSVSpecNode> getSpecNodes() {
+		return specNodes;
+	}
 	private String recentFileName = "";
 	private JSVPanel selectedPanel;
+
 	private JDXSource currentSource;
+	public JDXSource getCurrentSource() {
+		return currentSource;
+	}
+	public void setCurrentSource(JDXSource source) {
+		currentSource = source;
+	}
 
 	public boolean isSigned() {
 		return false;
@@ -195,10 +178,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 
 	public boolean isPro() {
 		return isSigned();
-	}
-
-	JDXSource getSource() {
-		return currentSource;
 	}
 
 	void dispose() {
@@ -212,11 +191,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 				for (int i = specNodes.size(); --i >= 0;) {
 					specNodes.get(i).dispose();
 					specNodes.remove(i);
-				}
-			if (specNodesSaved != null)
-				for (int i = specNodesSaved.size(); --i >= 0;) {
-					specNodesSaved.get(i).dispose();
-					specNodesSaved.remove(i);
 				}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -264,9 +238,9 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	 */
 	public void loadInline(String data) {
 		newAppletPanel();
-		openDataOrFile(data, null, null, null);
+		openDataOrFile(data, null, null, null, -1, -1);
 		jsvApplet.getContentPane().validate();
-		appletPanel.validate();
+		spectrumPanel.validate();
 	}
 
 	/**
@@ -404,6 +378,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	 * 
 	 */
 	private void init() {
+		initSpectraTree();
 		scriptQueue = new ArrayList<String>();
 		commandWatcherThread = new Thread(new CommandWatcher());
 		commandWatcherThread.setName("CommmandWatcherThread");
@@ -452,45 +427,8 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 
 	private void newAppletPanel() {
 		jsvApplet.getContentPane().removeAll();
-		appletPanel = new JSVAppletPanel(new BorderLayout());
-		jsvApplet.getContentPane().add(appletPanel);
-	}
-
-	private ActionListener compoundMenuChooseListener = new ActionListener() {
-		public void actionPerformed(ActionEvent e) {
-			resetSaved();
-			StringBuffer msgStrBuffer = new StringBuffer();
-			msgStrBuffer.append("Choose a number between 1 and ");
-			msgStrBuffer.append(specNodes.size());
-			msgStrBuffer.append(" to display another spectrum");
-
-			String str = JOptionPane.showInputDialog(jsvApplet, msgStrBuffer
-					.toString(), "Spectrum Chooser", JOptionPane.PLAIN_MESSAGE);
-			if (str != null) {
-				int index = 0;
-				try {
-					index = Integer.parseInt(str) - 1;
-				} catch (NumberFormatException nfe) {
-				}
-				if (index > 0 && index < specNodes.size()) {
-					showSpectrum(index);
-					writeStatus(" ");
-				} else
-					writeStatus("Invalid Spectrum Number");
-			}
-		}
-	};
-
-	private ActionListener compoundMenuSelectionListener = new ActionListener() {
-		public void actionPerformed(ActionEvent e) {
-			compoundMenu_itemStateChanged(e);
-		}
-	};
-
-	private void compoundMenu_itemStateChanged(ActionEvent e) {
-		String txt = ((JMenuItem) e.getSource()).getText();
-		resetSaved();
-		showSpectrum(Parser.parseInt(txt) - 1);
+		spectrumPanel = new JSVSpectrumPanel(new BorderLayout());
+		jsvApplet.getContentPane().add(spectrumPanel);
 	}
 
 	/**
@@ -582,21 +520,19 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 			offWindowFrame = new JFrame("JSpecView");
 			offWindowFrame.setSize(jsvApplet.getSize());
 			final Dimension d;
-			d = appletPanel.getSize();
-			offWindowFrame.add(appletPanel);
+			d = spectrumPanel.getSize();
+			offWindowFrame.add(spectrumPanel);
 			offWindowFrame.validate();
 			offWindowFrame.setVisible(true);
-			jsvApplet.remove(appletPanel);
-			jsvApplet.validate();
-			jsvApplet.repaint();
+			jsvApplet.remove(spectrumPanel);
+			validateAndRepaint();
 			offWindowFrame.addWindowListener(new WindowAdapter() {
 				@Override
 				public void windowClosing(WindowEvent e) {
-					appletPanel.setSize(d);
-					jsvApplet.getContentPane().add(appletPanel);
+					spectrumPanel.setSize(d);
+					jsvApplet.getContentPane().add(spectrumPanel);
 					jsvApplet.setVisible(true);
-					jsvApplet.validate();
-					jsvApplet.repaint();
+					validateAndRepaint();
 					offWindowFrame.removeAll();
 					offWindowFrame.dispose();
 					appletPopupMenu.windowMenuItem.setSelected(false);
@@ -604,15 +540,19 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 				}
 			});
 		} else {
-			jsvApplet.getContentPane().add(appletPanel);
-			jsvApplet.validate();
-			jsvApplet.repaint();
+			jsvApplet.getContentPane().add(spectrumPanel);
+			validateAndRepaint();
 			offWindowFrame.removeAll();
 			offWindowFrame.dispose();
 			offWindowFrame = null;
 		}
 	}
 
+	private void validateAndRepaint() {
+		jsvApplet.validate();
+		jsvApplet.repaint();
+	}
+	
 	/**
 	 * Export spectrum in a given format
 	 * 
@@ -635,9 +575,9 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	 */
 	public void syncLoad(String filePath) {
 		newAppletPanel();
-		openDataOrFile(null, null, null, filePath);
+		openDataOrFile(null, null, null, filePath, -1, -1);
 		jsvApplet.getContentPane().validate();
-		appletPanel.validate();
+		spectrumPanel.validate();
 	}
 
 	/**
@@ -737,14 +677,14 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 						interfaceOverlaid = value.equalsIgnoreCase("overlay");
 					break;
 				case ENDINDEX:
-					endIndex = Integer.parseInt(value);
+					initialEndIndex = Integer.parseInt(value);
 					break;
 				case STARTINDEX:
-					startIndex = Integer.parseInt(value);
+					initialStartIndex = Integer.parseInt(value);
 					break;
-				case SPECTRUMNUMBER:
-					spectrumNumber = Integer.parseInt(value);
-					break;
+				//case SPECTRUMNUMBER:
+					//initialSpectrumNumber = Integer.parseInt(value);
+					//break;
 				case AUTOINTEGRATE:
 					autoIntegrate = AwtParameters.isTrue(value);
 					break;
@@ -796,145 +736,27 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	 * private void interruptQueueThreads() { if (commandWatcherThread != null)
 	 * commandWatcherThread.interrupt(); }
 	 */
-	private void openDataOrFile(String data, String name,
-			List<JDXSpectrum> specs, String filePath) {
-		appletPanel.removeAll();
-		String fileName = null;
-		URL base = null;
-		boolean isOverlay = false;
-		if (specs != null) {
-			fileName = "Overlay" + (++nOverlays);
-			isOverlay = true;
-		} else if (data != null) {
-		} else if (filePath != null) {
-			URL url;
-			try {
-				url = new URL(jsvApplet.getDocumentBase(), filePath);
-				fileName = url.toString();
-				recentFileName = url.getFile();
-				base = jsvApplet.getDocumentBase();
-			} catch (MalformedURLException e) {
-				Logger.warn("problem: " + e.getMessage());
-				fileName = filePath;
-			}
-		} else {
-			writeStatus("Please set the 'filepath' or 'load file' parameter");
-			return;
-		}
+	public void openDataOrFile(String data, String name,
+			List<JDXSpectrum> specs, String url, int firstSpec, int lastSpec) {
+  	int status = JSVTreeNode.openDataOrFile((ScriptInterface) this, data, name, specs, url, firstSpec, lastSpec);
+  	if (status == JSVTreeNode.FILE_OPEN_ALREADY)
+  		return;
+    if (status != JSVTreeNode.FILE_OPEN_OK) {
+    	setSelectedPanel(null);
+    	return;
+    }
 
-		try {
-			currentSource = (isOverlay ? JDXSource.createOverlay(fileName, specs)
-					: FileReader.createJDXSource(FileManager
-							.getBufferedReaderForString(data), fileName, base,
-							obscureTitleFromUser == Boolean.TRUE, -1, -1));
-			currentSource.setFilePath(fileName);
-		} catch (Exception e) {
-			writeStatus(e.getMessage());
-			e.printStackTrace();
-			return;
-		}
+    compoundMenuOn = allowCompoundMenu;
 
-		specs = currentSource.getSpectra();
-		JDXSpectrum.process(specs, irMode, autoIntegrate, parameters);
+		appletPopupMenu.setCompoundMenu(getSelectedPanel(), specNodes, compoundMenuOn, 
+				null, null);//compoundMenuSelectionListener, compoundMenuChooseListener);
 
-		boolean isOverlaid = (isOverlay && !name.equals("NONE"));
-
-		compoundMenuOn = allowCompoundMenu && currentSource.isCompoundSource;
-
-		try {
-			initPanels(specs, isOverlaid);
-		} catch (JSpecViewException e1) {
-			writeStatus(e1.getMessage());
-			return;
-		}
-
-		initInterface(isOverlaid);
-
-		Logger.info(jsvApplet.getAppletInfo() + " File " + fileName
+		Logger.info(jsvApplet.getAppletInfo() + " File " + currentSource.getFilePath()
 				+ " Loaded Successfully");
-
-		if (!isOverlaid
-				&& (interfaceOverlaid || specs.get(0).isAutoOverlayFromJmolClick()
-						&& startIndex == endIndex))
-			execOverlay("*");
+		
 	}
 
-	/**
-	 * Initalizes the <code>specNodes</code> and adds them to the specNodes array
-	 * 
-	 * @throws JSpecViewException
-	 */
-	private void initPanels(List<JDXSpectrum> specs, boolean isOverlay)
-			throws JSpecViewException {
-		AwtPanel jsvp;
-
-		// Initialise specNodes
-
-		specNodes = new ArrayList<JSVSpecNode>();
-		if (isOverlay) {
-			// overlay all spectra on a panel
-			jsvp = AwtPanel.getJSVPanel(specs, startIndex, endIndex, appletPopupMenu);
-			endIndex = startIndex = -1;
-			initProperties(jsvp);
-			specNodes.add(new JSVSpecNode("specs", currentSource.getFilePath(),
-					currentSource, appletPanel, jsvp));
-		} else {
-			// initialise specNodes and add them to the array
-			try {
-				for (int i = 0; i < specs.size(); i++) {
-					JDXSpectrum spec = specs.get(i);
-					// if (spec.hasIntegral()) {
-					// jsvp = AwtPanel.getNewPanel(spec, appletPopupMenu);
-					// } else {
-					List<JDXSpectrum> list = new ArrayList<JDXSpectrum>();
-					list.add(spec);
-					jsvp = AwtPanel.getJSVPanel(list, startIndex, endIndex,
-							appletPopupMenu);
-					// }
-					specNodes.add(new JSVSpecNode("" + (i + 1), currentSource
-							.getFilePath(), currentSource, appletPanel, jsvp));
-					initProperties(jsvp);
-				}
-			} catch (Exception e) {
-				// TODO
-			}
-		}
-		setSelectedPanel(specNodes.get(0).jsvp);
-	}
-
-	private void initProperties(JSVPanel jsvp) {
-		jsvp.getPanelData().addListener(this);
-		parameters.setFor(jsvp, null, true);
-	}
-
-	/**
-	 * Initializes the interface of the applet depending on the value of the
-	 * <i>interface</i> parameter
-	 */
-	private void initInterface(boolean isOverlaid) {
-		final int numberOfPanels = specNodes.size();
-		if (numberOfPanels == 0)
-			return;
-		boolean showSpectrumNumber = spectrumNumber != -1
-				&& spectrumNumber <= numberOfPanels;
-		// compoundMenuOn = true;
-		int spectrumIndex = (showSpectrumNumber ? spectrumNumber - 1 : 0);
-		if (spectrumIndex >= specNodes.size())
-			spectrumIndex = 0;
-		setSelectedPanel(specNodes.get(spectrumIndex).jsvp);
-
-		// Global variable for single interface
-
-		if (isOverlaid && currentSource.isCompoundSource)
-			specNodes.get(spectrumIndex).jsvp.setTitle(currentSource.getTitle());
-		appletPanel.add((AwtPanel) specNodes.get(spectrumIndex).jsvp,
-				BorderLayout.CENTER);
-		appletPopupMenu.setCompoundMenu(currentSource, spectrumIndex,
-				(specNodesSaved == null ? specNodes : specNodesSaved), compoundMenuOn
-						&& currentSource.isCompoundSource, compoundMenuSelectionListener,
-				compoundMenuChooseListener);
-	}
-
+	
 	protected void processCommand(String script) {
 		runScriptNow(script);
 	}
@@ -943,22 +765,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 
 	public boolean runScriptNow(String params) {
 		return JSViewer.runScriptNow(this, params);
-	}
-
-	private void setSaved(boolean isOverlay) {
-		if (isOverlay) {
-			if (specNodesSaved == null) {
-				specNodesSaved = specNodes;
-			}
-		} else {
-			specNodesSaved = null;
-		}
-	}
-
-	private void resetSaved() {
-		if (specNodesSaved != null) {
-			specNodes = specNodesSaved;
-		}
 	}
 
 	/**
@@ -981,35 +787,23 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		if (!getSelectedPanel().getPanelData().getPickedCoordinates(coord,
 				actualCoord))
 			return;
+		int iSpec = spectrumPanel.getCurrentSpectrumIndex();
 		if (actualCoord == null)
 			callToJavaScript(coordCallbackFunctionName, new Object[] {
 					Double.valueOf(coord.getXVal()), Double.valueOf(coord.getYVal()),
-					Integer.valueOf(currentSpectrumIndex + 1) });
+					Integer.valueOf(iSpec + 1) });
 		else
 			callToJavaScript(peakCallbackFunctionName, new Object[] {
 					Double.valueOf(coord.getXVal()), Double.valueOf(coord.getYVal()),
 					Double.valueOf(actualCoord.getXVal()),
 					Double.valueOf(actualCoord.getYVal()),
-					Integer.valueOf(currentSpectrumIndex + 1) });
+					Integer.valueOf(iSpec + 1) });
 	}
 
 	public void setSelectedPanel(JSVPanel jsvp) {
-		if (jsvp != selectedPanel) {
-			if (selectedPanel != null) {
-				appletPanel.remove((AwtPanel) selectedPanel);
-				jsvApplet.removeKeyListener((AwtPanel) selectedPanel);
-			}
-			appletPanel.add((AwtPanel) jsvp, BorderLayout.CENTER);
-			jsvApplet.addKeyListener((AwtPanel) jsvp);
-			selectedPanel = jsvp;
-			appletPanel.validate();
-		}
-		for (int i = specNodes.size(); --i >= 0;)
-			if (specNodes.get(i).jsvp == jsvp)
-				currentSpectrumIndex = i;
-			else
-				specNodes.get(i).jsvp.setEnabled(false);
-		jsvp.setEnabled(true);
+		spectrumPanel.setSelectedPanel(jsvp, specNodes);
+  	selectedPanel = jsvp;
+    jsvApplet.validate();
 	}
 
 	// /////////// MISC methods from interfaces /////////////
@@ -1050,14 +844,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		if (jsvp != null && isPro())
 			writeStatus(Exporter.exportCmd(jsvp, ScriptToken.getTokens(value), false));
 		return null;
-	}
-
-	public JDXSource getCurrentSource() {
-		return currentSource;
-	}
-
-	public List<JSVSpecNode> getSpecNodes() {
-		return specNodes;
 	}
 
 	public void execSetIntegrationRatios(String value) {
@@ -1131,20 +917,26 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		return parameters;
 	}
 
-	public void execClose(String value) {
-		setSaved(false);
+	public void execClose(String value, boolean fromScript) {
+		JSVTreeNode.close((ScriptInterface) this, value);
+		if (getSelectedPanel() == null && specNodes.size() > 0)
+			setSelectedPanel(JSVSpecNode.getLastFileFirstNode(specNodes));
+    if (!fromScript)
+    	validateAndRepaint();
 	}
 
-	public String execLoad(String value) {
-		// no APPEND here
-		setSaved(false);
-		openDataOrFile(null, null, null, TextFormat.trimQuotes(value));
-		setSpectrumIndex(0);
+  public String execLoad(String value) {
+  	int nSpec = specNodes.size();
+  	JSVTreeNode.load((ScriptInterface) this, value);
+    if (getSelectedPanel() == null)
+      return null;
+    // probably not right:
+		setSpectrumIndex(nSpec, "execLoad");
 		if (loadFileCallbackFunctionName != null)
 			callToJavaScript(loadFileCallbackFunctionName, new Object[] { appletID,
 					value });
-		return null;
-	}
+    return null;
+  }
 
 	public void execHidden(boolean b) {
 		// ignored
@@ -1155,21 +947,15 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	public void execScriptComplete(String msg, boolean isOK) {
-		jsvApplet.validate();
-		jsvApplet.repaint();
+		validateAndRepaint();
 	}
 
 	public JSVPanel execSetSpectrum(String value) {
-		return setSpectrumIndex(Parser.parseInt(value) - 1);
+  	return JSVTreeNode.setSpectrum((ScriptInterface) this, value);
 	}
 
 	public void execSetAutoIntegrate(boolean b) {
 		autoIntegrate = b;
-	}
-
-	public void execTest(String value) {
-		// TODO Auto-generated method stub
-
 	}
 
 	public PanelData getPanelData() {
@@ -1180,27 +966,26 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		return new OverlayLegendDialog(null, getSelectedPanel());
 	}
 
-	public JSVPanel setSpectrumIndex(int i) {
-    resetSaved();
+	private JSVPanel setSpectrumIndex(int i, String where) {
 		if (i < 0 || i > specNodes.size())
 			return null;
 		if (getSelectedPanel() != null) {
 			showSpectrum(i);
-			jsvApplet.validate();
-			appletPanel.validate();
-			jsvApplet.repaint();
+			spectrumPanel.validate();
+			validateAndRepaint();
 		}
 		return getSelectedPanel();
 	}
 
-	public void execOverlay(String value) {
-		setSaved(true);
-		List<JDXSpectrum> list = new ArrayList<JDXSpectrum>();
-		String s = JSVSpecNode.fillSpecList(specNodesSaved, value, list, null, "");
-		if (list.size() > 1) {
-			openDataOrFile(null, s, list, null);
-			setSpectrumIndex(0);
-		}
+	public void execOverlay(String value, boolean fromScript) {
+    List<JDXSpectrum> speclist = new ArrayList<JDXSpectrum>();
+    String strlist = JSVSpecNode.fillSpecList(specNodes, value, speclist,
+        getSelectedPanel(), "1.");
+    if (speclist.size() > 1)
+      openDataOrFile(null, strlist, speclist, strlist, -1, -1);
+    if (!fromScript) {
+    	validateAndRepaint();
+    }
 	}
 
 	/**
@@ -1215,11 +1000,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	public void setVisible(boolean b) {
-		appletPanel.setVisible(b);
-	}
-
-	public void setFrame(JSVSpecNode node) {
-		setSpectrumIndex(JSVSpecNode.getNodeIndex(specNodes, node));
+		spectrumPanel.setVisible(b);
 	}
 
 	public void showProperties() {
@@ -1234,8 +1015,138 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		checkCallbacks();
 	}
 
-	public void closeSource(JDXSource source) {
-		// ignored by applet
+	///////// multiple source changes ////////
+	
+	
+  private JSVTreeNode rootNode;
+  private DefaultTreeModel spectraTreeModel;
+  private JTree spectraTree;
+	private int fileCount;
+	public int getFileCount() {
+		return fileCount;
 	}
+	public void setFileCount(int n) {
+		fileCount = n;
+	}
+
+  
+  /**
+   * Creates tree representation of files that are opened
+   */
+  private void initSpectraTree() {
+    currentSource = null;
+    rootNode = new JSVTreeNode("Spectra", null);
+    spectraTreeModel = new DefaultTreeModel(rootNode);
+    spectraTree = new JTree(spectraTreeModel);
+    spectraTree.getSelectionModel().setSelectionMode(
+        TreeSelectionModel.SINGLE_TREE_SELECTION);
+  }
+
+  public Object getSpectraTree() {
+  	return spectraTree;
+  }
+  
+	public Object getDefaultTreeModel() {
+		return spectraTreeModel;
+	}
+
+	public Object getRootNode() {
+		return rootNode;
+	}
+
+	public JSVSpecNode setOverlayVisibility(JSVSpecNode node) {
+		JSViewer.setOverlayLegendVisibility(this, getSelectedPanel(),
+				appletPopupMenu.overlayKeyMenuItem.isSelected());
+		return node;
+	}
+
+	public void setNode(JSVSpecNode node, boolean fromTree) {
+		// no JTree visible for Applet, so doesn't matter if it is from a tree click
+		setSpectrumIndex(JSVSpecNode.getNodeIndex(specNodes, node), "setFrame");
+	}
+
+	public void closeSource(JDXSource source) {
+  	JSVTreeNode.closeSource(this, source);
+	}
+
+	public int incrementOverlay(int n) {
+		return nOverlays += n;
+	}
+	
+	public void process(List<JDXSpectrum> specs) {
+    JDXSpectrum.process(specs, irMode, autoIntegrate, parameters);
+	}
+	
+	public void setCursor(Cursor c) {
+		jsvApplet.setCursor(c);
+	}
+
+	public void setRecentFileName(String fileName) {
+		recentFileName = fileName;
+	}
+
+	public boolean getAutoOverlay() {
+		return interfaceOverlaid;
+	}
+	
+	public URL getDocumentBase() {
+		return jsvApplet.getDocumentBase();
+	}
+
+	public JDXSource createSource(String data, String filePath, URL base,
+			int firstSpec, int lastSpec) throws Exception {
+		return FileReader.createJDXSource(FileManager
+				.getBufferedReaderForString(data), filePath, base,
+				obscureTitleFromUser == Boolean.TRUE, -1, -1);
+	}
+
+	public JSVPanel getNewJSVPanel(List<JDXSpectrum> specs) {
+		JSVPanel jsvp = AwtPanel.getJSVPanel(specs, initialStartIndex, initialEndIndex, appletPopupMenu);
+		initialEndIndex = initialStartIndex = -1;
+		jsvp.getPanelData().addListener(this);
+		parameters.setFor(jsvp, null, true);
+		return jsvp;
+	}
+
+	public JSVPanel getNewJSVPanel(JDXSpectrum spec) {
+		if (spec == null) {
+			initialEndIndex = initialStartIndex = -1;
+			return null;
+		}
+		List<JDXSpectrum> specs = new ArrayList<JDXSpectrum>();
+		specs.add(spec);
+		JSVPanel jsvp = AwtPanel.getJSVPanel(specs, initialStartIndex, initialEndIndex, appletPopupMenu);
+		jsvp.getPanelData().addListener(this);
+		parameters.setFor(jsvp, null, true);
+		return jsvp;
+	}
+
+	public JSVSpecNode getNewSpecNode(String id, String fileName, JDXSource source, JSVPanel jsvp) {
+		return new JSVSpecNode(id, fileName, source, jsvp);	
+	}
+
+	// not implemented for applet
+	
+	public boolean getAutoShowLegend() {
+		return false; //option?
+	}
+
+	public void checkOverlay() {
+		new OverlayCloseDialog(this, spectrumPanel, true);
+	}
+
+	// not applicable to applet:
+	
+	public void setLoaded(String fileName, String filePath) {} 
+	public void setMenuEnables(JSVSpecNode node, boolean isSplit) {}
+	public void setRecentURL(String filePath) {}
+	public void setPropertiesFromPreferences(JSVPanel jsvp, boolean includeMeasures) {}
+	public void updateRecentMenus(String filePath) {}
+
+	// debugging
+
+	public void execTest(String value) {
+	}
+
 
 }

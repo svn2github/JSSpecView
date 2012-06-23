@@ -9,9 +9,10 @@ import java.util.List;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+
+import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelPopupMenu;
 import jspecview.common.JSVSpecNode;
-import jspecview.source.JDXSource;
 
 class JSVAppletPopupMenu extends JSVPanelPopupMenu {
 
@@ -22,13 +23,12 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     super(applet);
     isApplet = true;
     this.applet = applet;
-    recentOverlay = "none";
     super.jbInit();
     if (!allowMenu) {
     	// all except About and Zoom disabled
       fileMenu.setEnabled(false);
       viewMenu.setEnabled(false);
-      appletCompoundMenu.setEnabled(false);
+      overlayMenuItem.setEnabled(false);
       scriptMenuItem.setEnabled(false);
       appletAdvancedMenuItem.setEnabled(false);
       printMenuItem.setEnabled(false);
@@ -64,7 +64,7 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
    * 
    */
   @Override
-  protected void setMenu() {
+  protected void setPopupMenu() {
     aboutMenu.setText("About");
 
     fileMenu.setText("File");
@@ -101,15 +101,13 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
       }
     });
 
-    appletCompoundMenu = new JMenu();
-    appletCompoundMenu.setEnabled(false);
-    appletCompoundMenu.setText("Spectra");
+    setOverlayItems();
 
     appletAdvancedMenuItem = new JMenuItem();
     appletAdvancedMenuItem.setText("Advanced...");
     appletAdvancedMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        applet.doAdvanced(applet.getSource().getFilePath());
+        applet.doAdvanced(applet.getCurrentSource().getFilePath());
       }
     });
     appletAdvancedMenuItem.setEnabled(applet.isPro());
@@ -145,7 +143,8 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     add(fileMenu);
     add(viewMenu);
     add(zoomMenu);
-    add(appletCompoundMenu);
+    add(overlayMenuItem);
+    add(overlayStackOffsetMenuItem);
     addSeparator();
     add(scriptMenuItem);
     add(appletAdvancedMenuItem);
@@ -163,40 +162,33 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     applet.showOverlayKey(visible);
   }
 
-  public void setCompoundMenu(JDXSource currentSource,
-                              int currentSpectrumIndex,
-                              List<JSVSpecNode> specNodes, boolean allowSelection,
-                              ActionListener compoundMenuSelectionListener,
-                              ActionListener compoundMenuChooseListener) {
-    appletCompoundMenu.removeAll();
-    if (!allowSelection)
-      return;
-
-    appletCompoundMenu.add(overlayAllMenuItem);
-    appletCompoundMenu.add(overlayNoneMenuItem);
-    appletCompoundMenu.add(overlayMenuItem);
-    appletCompoundMenu.add(overlayStackOffsetMenuItem);
-    if (specNodes.size() <= 20) {
-      // add Menus to navigate
-      if (currentSource.isCompoundSource) {
-        for (int i = 0; i < specNodes.size(); i++) {
-          JCheckBoxMenuItem mi = new JCheckBoxMenuItem((i + 1) + "- "
-              + specNodes.get(i).getSpectrum().getTitleLabel());
-          mi.setSelected(i == currentSpectrumIndex);
-          mi.addActionListener(compoundMenuSelectionListener);
-          mi.setActionCommand("" + i);
-          appletCompoundMenu.add(mi);
-        }
-        appletCompoundMenu.setText("Spectra");
-      }
-      // add compound menu to popup menu
-      add(appletCompoundMenu, 3);
-      appletCompoundMenu.setEnabled(true);
-    } else {
-      // open dialog box
-      JMenuItem compoundMi = new JMenuItem("Choose Spectrum");
-      compoundMi.addActionListener(compoundMenuChooseListener);
-    }
-  }
+	public void setCompoundMenu(JSVPanel jsvp, List<JSVSpecNode> specNodes,
+			boolean allowSelection, ActionListener compoundMenuSelectionListener,
+			ActionListener compoundMenuChooseListener) {
+		overlayMenuItem.setEnabled(allowSelection && specNodes.size() > 1);
+		
+//		appletCompoundMenuItem.removeAll();
+//		if (!allowSelection || specNodes.size() == 1)
+//			return;
+//		appletCompoundMenuItem.add(overlayAllMenuItem);
+//		appletCompoundMenuItem.add(overlayNoneMenuItem);
+//		appletCompoundMenuItem.add(overlayMenuItem);
+//		appletCompoundMenuItem.add(overlayStackOffsetMenuItem);
+//		if (specNodes.size() <= 20) {
+//			// add Menus to navigate
+//			for (int i = 0; i < specNodes.size(); i++) {
+//				JSVSpecNode p = specNodes.get(i);
+//				String label = (p.fileName.startsWith("Overlay") ? p.fileName : p.getSpectrum().getTitleLabel());
+//				JCheckBoxMenuItem mi = new JCheckBoxMenuItem((i + 1) + "- " + label);
+//				mi.setSelected(p.equals(jsvp));
+//				mi.addActionListener(compoundMenuSelectionListener);
+//				mi.setActionCommand("" + i);
+//				appletCompoundMenuItem.add(mi);
+//			}
+//		}
+//		// add compound menu to popup menu
+//		add(appletCompoundMenuItem, 3);
+		overlayMenuItem.setEnabled(true);
+	}
     
 }
