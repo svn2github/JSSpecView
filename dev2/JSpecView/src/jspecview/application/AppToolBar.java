@@ -50,7 +50,7 @@ public class AppToolBar extends JToolBar {
   private ImageIcon informationIcon;
   private ImageIcon aboutIcon;
   private ImageIcon overlayIcon;
-  private ImageIcon splitIcon;
+  //private ImageIcon splitIcon;
   private ImageIcon overlayKeyIcon;
   private ImageIcon errorLogIcon;
   private ImageIcon errorLogYellowIcon;
@@ -70,7 +70,7 @@ public class AppToolBar extends JToolBar {
     informationIcon = new ImageIcon(cl.getResource("icons/information24.gif"));
     aboutIcon = new ImageIcon(cl.getResource("icons/about24.gif"));
     overlayIcon = new ImageIcon(cl.getResource("icons/overlay24.gif"));
-    splitIcon = new ImageIcon(cl.getResource("icons/split24.gif"));
+    //splitIcon = new ImageIcon(cl.getResource("icons/split24.gif"));
     overlayKeyIcon = new ImageIcon(cl.getResource("icons/overlayKey24.gif"));
     errorLogIcon = new ImageIcon(cl.getResource("icons/errorLog24.gif"));
     errorLogRedIcon = new ImageIcon(cl.getResource("icons/errorLogRed24.gif"));
@@ -213,13 +213,13 @@ public class AppToolBar extends JToolBar {
   }
 
   public void setOverlay(boolean b) {
-    if (b) {
-      overlaySplitButton.setIcon(splitIcon);
-      overlaySplitButton.setToolTipText("Split Display");
-    } else {
+   // if (b) {
+   //   overlaySplitButton.setIcon(splitIcon);
+   //   overlaySplitButton.setToolTipText("Split Display");
+   // } else {
       overlaySplitButton.setIcon(overlayIcon);
       overlaySplitButton.setToolTipText("Overlay Display");
-    }
+   // }
   }
 
   public void setMenuEnables(JSVSpecNode node) {
@@ -231,11 +231,14 @@ public class AppToolBar extends JToolBar {
   }   
   
   protected void overlaySplitButton_actionPerformed(ActionEvent e) {
-    if (((JButton) e.getSource()).getIcon() == overlayIcon) {
-      mainFrame.runScript("OVERLAY ALL");
-    } else {
-      mainFrame.runScript("CLOSE");
-    }
+    mainFrame.checkOverlay();
+    //runScript("OVERLAY ALL");
+//    if (((JButton) e.getSource()).getIcon() == overlayIcon) {
+//      mainFrame.runScript("OVERLAY ALL");
+//      mainFrame.runScript("OVERLAY ALL");
+//    } else {
+//      mainFrame.runScript("CLOSE");
+//    }
   }
 
 }

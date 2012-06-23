@@ -180,7 +180,7 @@ public class Parameters {
   public double integralOffset = IntegralGraph.DEFAULT_OFFSET;
 
   protected void setParamDefaults() {
-    setBoolean(ScriptToken.TITLEON, !name.equals("application"));
+    setBoolean(ScriptToken.TITLEON, true);
     setBoolean(ScriptToken.ENABLEZOOM, true);
     setBoolean(ScriptToken.DISPLAY2D, true);
     setBoolean(ScriptToken.COORDINATESON, true);

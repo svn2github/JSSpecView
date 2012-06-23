@@ -190,7 +190,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   public DropTargetListener dtl;
 
 
-  private JScrollPane spectraTreePane;
+  private JScrollPane spectraTreeScrollPane;
   private JPanel statusPanel = new JPanel();
   private JLabel statusLabel = new JLabel();
   private JTextField commandInput = new JTextField();
@@ -572,7 +572,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     getContentPane().add(toolBar, BorderLayout.NORTH);
     getContentPane().add(mainSplitPane, BorderLayout.CENTER);
 
-    spectraTreePane = new JScrollPane(spectraTree);
+    spectraTreeScrollPane = new JScrollPane(spectraTree);
     if (jmolDisplay != null) {
       JSplitPane leftPanel = new JSplitPane();
       BorderLayout bl1 = new BorderLayout();
@@ -580,13 +580,13 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
       JPanel jmolDisplayPanel = new JPanel();
       jmolDisplayPanel.setBackground(Color.blue);
       leftPanel.add(jmolDisplayPanel, BorderLayout.SOUTH);
-      leftPanel.add(spectraTreePane, BorderLayout.NORTH);
-      sideSplitPane.setTopComponent(spectraTreePane);
+      leftPanel.add(spectraTreeScrollPane, BorderLayout.NORTH);
+      sideSplitPane.setTopComponent(spectraTreeScrollPane);
       sideSplitPane.setDividerLocation(splitPosition = 200);
       awaken(true);
       mainSplitPane.setLeftComponent(sideSplitPane);
     } else {
-      mainSplitPane.setLeftComponent(spectraTreePane);
+      mainSplitPane.setLeftComponent(spectraTreeScrollPane);
     }
 		spectrumPanel = new JSVSpectrumPanel(new BorderLayout());
     mainSplitPane.setRightComponent(scrollPane);
@@ -955,7 +955,8 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   public void execClose(String value, boolean fromScript) {
     JSVTreeNode.close(this, TextFormat.trimQuotes(value));
     if (!fromScript) {
-    	
+    	validate();
+    	repaint();    	
     }
   }
 

@@ -919,8 +919,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 
 	public void execClose(String value, boolean fromScript) {
 		JSVTreeNode.close((ScriptInterface) this, value);
-		if (getSelectedPanel() == null && specNodes.size() > 0)
-			setSelectedPanel(JSVSpecNode.getLastFileFirstNode(specNodes));
     if (!fromScript)
     	validateAndRepaint();
 	}

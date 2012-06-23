@@ -20,6 +20,7 @@
 package jspecview.common;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -35,6 +36,8 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTree;
 
 /**
@@ -52,9 +55,9 @@ public class OverlayCloseDialog extends JDialog implements WindowListener {
 	private Insets cbInsets1;
 	private Insets cbInsets2;
 	private JButton closeSelectedButton;
-	private JPanel mainPanel;
 	private Rectangle bounds;
 	private JButton overlaySelectedButton;
+  
   
   /**
     * Initialises the <code>IntegralDialog</code> with the given values for minY, offset
@@ -91,9 +94,6 @@ public class OverlayCloseDialog extends JDialog implements WindowListener {
 
   void jbInit() throws Exception {
     layoutCheckBoxes((JTree) si.getSpectraTree());
-    mainPanel = new JPanel(new BorderLayout());
-    JPanel buttonPanel = new JPanel(new GridBagLayout());
-    JPanel midPanel = new JPanel(new GridBagLayout());
         
     JButton selectAllButton = new JButton();
     JButton selectNoneButton = new JButton();
@@ -140,6 +140,7 @@ public class OverlayCloseDialog extends JDialog implements WindowListener {
 
     Insets buttonInsets = new Insets(5, 5, 5, 5);
 
+    JPanel midPanel = new JPanel(new GridBagLayout());
     midPanel.add(selectAllButton, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
     		GridBagConstraints.CENTER, GridBagConstraints.NONE, buttonInsets, 0, 0));
     
@@ -147,6 +148,7 @@ public class OverlayCloseDialog extends JDialog implements WindowListener {
     		GridBagConstraints.CENTER, GridBagConstraints.NONE, buttonInsets, 0, 0));
     
 
+    JPanel buttonPanel = new JPanel(new GridBagLayout());
     buttonPanel.add(overlaySelectedButton, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
     		GridBagConstraints.CENTER, GridBagConstraints.NONE, buttonInsets, 0, 0));
     
@@ -159,11 +161,24 @@ public class OverlayCloseDialog extends JDialog implements WindowListener {
     //GridBagConstraints(int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty, 
     		// int anchor, int fill, Insets insets, int ipadx, int ipady)
 
-    mainPanel.add(spectrumPanel, BorderLayout.NORTH);
-    mainPanel.add(midPanel, BorderLayout.CENTER);
-    mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+    JPanel lowerPanel = new JPanel(new BorderLayout());
+    lowerPanel.add(midPanel, BorderLayout.NORTH);
+    lowerPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+    JScrollPane scrollPane = new JScrollPane(spectrumPanel);
+
+    JSplitPane mainSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+    mainSplitPane.setOneTouchExpandable(true);
+    mainSplitPane.setResizeWeight(1);
+    mainSplitPane.setTopComponent(scrollPane);
+    mainSplitPane.setBottomComponent(lowerPanel);
+
+    setPreferredSize(new Dimension(350,500));
     getContentPane().removeAll();
-    getContentPane().add(mainPanel);
+    getContentPane().add(mainSplitPane, BorderLayout.CENTER);
+
+
+    //getContentPane().add(mainPanel);
     checkEnables();
   }
 

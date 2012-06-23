@@ -173,31 +173,31 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
 	}
 
 	public static void close(ScriptInterface si, String value) {
-    if (value == null || value.equalsIgnoreCase("all") || value.equals("*")) {
-      si.closeSource(null);
-      return;
-    }
-    List<JSVSpecNode> specNodes = si.getSpecNodes();
-    value = value.replace('\\', '/');
+		if (value == null || value.equalsIgnoreCase("all") || value.equals("*")) {
+			si.closeSource(null);
+			return;
+		}
+		List<JSVSpecNode> specNodes = si.getSpecNodes();
+		value = value.replace('\\', '/');
 		if (value.endsWith("*")) {
-      value = value.substring(0, value.length() - 1);
-      for (int i = specNodes.size(); --i >= 0;)
-        if (i < specNodes.size() && specNodes.get(i).fileName.startsWith(value))
-          si.closeSource(specNodes.get(i).source);
-      return;
-    }
-		if (value.equals("selected")) {
-      for (int i = specNodes.size(); --i >= 0;)
-        if (i < specNodes.size() && specNodes.get(i).isSelected())
-          si.closeSource(specNodes.get(i).source);
-      return;
-    }
-    JDXSource source = (value.length() == 0 ? si.getCurrentSource() 
-    		: JSVSpecNode.findSourceByNameOrId(value, specNodes));
-    if (source == null)
-      return;
-    si.closeSource(source);
-  }
+			value = value.substring(0, value.length() - 1);
+			for (int i = specNodes.size(); --i >= 0;)
+				if (i < specNodes.size() && specNodes.get(i).fileName.startsWith(value))
+					si.closeSource(specNodes.get(i).source);
+		} else if (value.equals("selected")) {
+			for (int i = specNodes.size(); --i >= 0;)
+				if (i < specNodes.size() && specNodes.get(i).isSelected())
+					si.closeSource(specNodes.get(i).source);
+		}	else {
+			JDXSource source = (value.length() == 0 ? si.getCurrentSource()
+					: JSVSpecNode.findSourceByNameOrId(value, specNodes));
+			if (source == null)
+				return;
+			si.closeSource(source);
+		}
+		if (si.getSelectedPanel() == null && specNodes.size() > 0)
+			si.setSelectedPanel(JSVSpecNode.getLastFileFirstNode(specNodes));
+	}
 
 	public static void load(ScriptInterface si, String value) {
     List<String> tokens = ScriptToken.getTokens(value);
@@ -221,7 +221,10 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
 	public static int openDataOrFile(ScriptInterface si,
 			String data, String name, List<JDXSpectrum> specs, String url,
 			int firstSpec, int lastSpec) {
-    // name could be "NONE" here from overlay
+		if ("NONE".equals(name)) {
+			close(si, "Overlay*");
+			return FILE_OPEN_OK;
+		}
     si.writeStatus("");
     String filePath = null;
     String fileName = null;
