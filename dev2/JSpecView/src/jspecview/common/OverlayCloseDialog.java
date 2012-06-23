@@ -70,11 +70,11 @@ public class OverlayCloseDialog extends JDialog implements WindowListener {
   	this.si = si;
     this.setTitle("Overlay/Close Spectra");
     this.setModal(modal);
-    // Sets the location to the middle of the parent frame if it has one
     if(panel != null)
       setLocation( panel.getLocationOnScreen().x,
                    panel.getLocationOnScreen().y);
     setResizable(true);
+    addWindowListener(this);
     setup();
   }
 
@@ -299,18 +299,14 @@ public class OverlayCloseDialog extends JDialog implements WindowListener {
 	}
 
 	public void windowClosed(WindowEvent arg0) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void windowClosing(WindowEvent arg0) {
-		// TODO Auto-generated method stub
-		
+		dispose();
 	}
 
 	public void windowDeactivated(WindowEvent arg0) {
-		// TODO Auto-generated method stub
-		
+		dispose();
 	}
 
 	public void windowDeiconified(WindowEvent arg0) {

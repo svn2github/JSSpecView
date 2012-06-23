@@ -1366,7 +1366,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   }
 
 	public void checkOverlay() {
-		new OverlayCloseDialog(this, spectrumPanel, true);
+		new OverlayCloseDialog(this, spectrumPanel, false);
 	}
 
 }

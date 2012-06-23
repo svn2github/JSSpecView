@@ -145,6 +145,9 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 
 	boolean isStandalone; // not changed
 
+	private OverlayCloseDialog overlayCloseDialog;
+	private OverlayLegendDialog overlayLegendDialog;
+
 	private String appletID;
 	private String syncID;
 	private Thread commandWatcherThread;
@@ -183,6 +186,12 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	void dispose() {
 		jFileChooser = null;
 		try {
+			if (overlayCloseDialog != null)
+	  		overlayCloseDialog.dispose();
+			overlayCloseDialog = null;
+			if (overlayLegendDialog != null)
+				overlayLegendDialog.dispose();
+			overlayLegendDialog = null;
 			if (commandWatcherThread != null) {
 				commandWatcherThread.interrupt();
 				commandWatcherThread = null;
@@ -960,7 +969,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	public JSVDialog getOverlayLegend(JSVPanel jsvp) {
-		return new OverlayLegendDialog(null, getSelectedPanel());
+		return overlayLegendDialog = new OverlayLegendDialog(null, getSelectedPanel());
 	}
 
 	private JSVPanel setSpectrumIndex(int i, String where) {
@@ -1129,7 +1138,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	public void checkOverlay() {
-		new OverlayCloseDialog(this, spectrumPanel, true);
+		overlayCloseDialog = new OverlayCloseDialog(this, spectrumPanel, false);
 	}
 
 	// not applicable to applet:
