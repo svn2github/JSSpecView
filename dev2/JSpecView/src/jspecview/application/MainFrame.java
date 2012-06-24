@@ -926,7 +926,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     List<JDXSpectrum> speclist = new ArrayList<JDXSpectrum>();
     String strlist = JSVSpecNode.fillSpecList(specNodes, value, speclist,
         getSelectedPanel(), "1.");
-    if (speclist.size() > 1)
+    if (speclist.size() > 0)
       openDataOrFile(null, strlist, speclist, strlist, -1, -1);
     if (!fromScript) {
     	validate();

@@ -232,7 +232,7 @@ public class OverlayCloseDialog extends JDialog implements WindowListener {
 				n++;
 			}
 		}
-		overlaySelectedButton.setEnabled(n > 1);
+		overlaySelectedButton.setEnabled(n > 0);
 	}
 	
 	private boolean checking = false; 
@@ -280,7 +280,7 @@ public class OverlayCloseDialog extends JDialog implements WindowListener {
 				sb.append(" ").append(label.substring(0, label.indexOf(":")));
 			}
 		}
-		si.execOverlay(sb.toString(), false);
+		si.execOverlay(sb.toString().trim(), false);
 		setup();
 	}
 
