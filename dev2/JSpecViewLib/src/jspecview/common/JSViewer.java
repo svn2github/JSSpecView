@@ -40,7 +40,7 @@ public class JSViewer {
         continue;
       ScriptToken st = ScriptToken.getScriptToken(key);
       String value = ScriptToken.getValue(st, eachParam, token);
-      System.out.println("KEY-> " + key + " VALUE-> " + value + " : " + st);
+      Logger.info("KEY-> " + key + " VALUE-> " + value + " : " + st);
       try {
         switch (st) {
         case UNKNOWN:
@@ -144,7 +144,6 @@ public class JSViewer {
         isOK = false;
       }
     }
-    System.out.println("JSV runScriptNow2");
     si.execScriptComplete(msg, true);
     return isOK;
   }
@@ -252,7 +251,7 @@ public class JSViewer {
     if (file == null || index == null)
       return;
     if (si.getSpecNodes().size() == 0 || !checkFileAlreadyLoaded(si, file)) {
-      //System.out.println("JSViewer closing all and reopening");
+      Logger.info("file " + file + " not found -- JSViewer closing all and reopening");
       si.syncLoad(file);
     }
     PeakInfo pi = selectPanelByPeak(si, peakScript, si.getSelectedPanel());
@@ -286,29 +285,20 @@ public class JSViewer {
     List<JSVSpecNode> specNodes = si.getSpecNodes();
     if (specNodes == null)
       return null;
-    //System.out.println("JSViewer selectPanelByPeak " + peakScript);
     String file = Parser.getQuotedAttribute(peakScript, "file");
     String index = Parser.getQuotedAttribute(peakScript, "index");
     PeakInfo pi = null;
     for (int i = specNodes.size(); --i >= 0;)
       specNodes.get(i).jsvp.getPanelData().addPeakHighlight(null);
-    //System.out.println("JSViewer selected panelspec=" + jsvp.getSpectrum());
     if ((pi = jsvp.getPanelData().selectPeakByFileIndex(file, index)) != null) {
-      //System.out.println("JSViewer found peak in this spectrum -- " + pi);
       si.setNode(JSVSpecNode.findNode(jsvp, specNodes), false);
     } else {
-      //System.out.println("JSViewer did not find a peak for " + file + " " + index);
       for (int i = specNodes.size(); --i >= 0;) {
         JSVSpecNode node = specNodes.get(i);
-        //System.out.println("JSViewer looking at " + node );
-        //System.out.println(file + " " + index );
-
         if ((pi = node.jsvp.getPanelData().selectPeakByFileIndex(file, index)) != null) {
-          //System.out.println("JSViewer setting spectrum to  " + node);
           si.setNode(node, false);
           break;
         }
-        //System.out.println("hmm");
       }
     }
     return pi;

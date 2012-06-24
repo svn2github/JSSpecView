@@ -33,6 +33,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import jspecview.common.JDXSpectrum;
 import jspecview.export.Exporter;
+import jspecview.util.Logger;
 import jspecview.util.Parser;
 
 /**
@@ -55,7 +56,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   
   public void dispose() {
     pd = null;
-    scripter = null;
+    //scripter = null;
   }
 
   /**
@@ -314,7 +315,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
 
   protected static void runScript(ScriptInterface scripter, String cmd) {
     if (scripter == null)
-      System.out.println("scripter was null for " + cmd);
+      Logger.error("scripter was null for " + cmd);
     else
       scripter.runScript(cmd);
   }

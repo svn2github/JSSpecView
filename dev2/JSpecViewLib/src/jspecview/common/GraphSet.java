@@ -2092,9 +2092,10 @@ abstract class GraphSet {
   }
   
   public boolean hasFileLoaded(String filePath) {
-    for (int i = spectra.size(); --i >= 0;)
+    for (int i = spectra.size(); --i >= 0;) {
       if (spectra.get(i).getFilePathForwardSlash().equals(filePath))
         return true;
+    }
     return false;
   }
   public PeakInfo findMatchingPeakInfo(PeakInfo pi) {

@@ -450,7 +450,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		JSVPanel jsvp = specNodes.get(index).jsvp;
 		if (jsvp != getSelectedPanel())
 			setSelectedPanel(jsvp);
-		System.out.println("showSpectrum sending frame change..." + index);
 		sendFrameChange(jsvp);
 	}
 
@@ -609,7 +608,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 					}
 					callback = mods[mods.length - 1];
 				}
-				System.out.println("calling " + jso + " " + callback);
+				Logger.info("JSVApplet calling " + jso + " " + callback);
 				jso.call(callback, params);
 			}
 
@@ -1000,7 +999,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	public boolean syncToJmol(String msg) {
 		if (syncCallbackFunctionName == null)
 			return false;
-		System.out.println("JSV>Jmol " + msg);
+		Logger.info("JSV>Jmol " + msg);
 		callToJavaScript(syncCallbackFunctionName, new Object[] { fullName, msg });
 		return true;
 	}

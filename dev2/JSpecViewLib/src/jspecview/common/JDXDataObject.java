@@ -445,16 +445,16 @@ public abstract class JDXDataObject extends JDXHeader {
   }
 
   public boolean isAutoOverlayFromJmolClick() {
-    return (isGC() || isUVVis());
+    return (isGC());// || isUVVis());
   }
 
   private boolean isGC() {
     return dataType.startsWith("GC");
   }
 
-  private boolean isUVVis() {
-    return dataType.startsWith("VIS") || dataType.startsWith("UV");
-  }
+//  private boolean isUVVis() {
+//    return dataType.startsWith("VIS") || dataType.startsWith("UV");
+//  }
 
   public boolean canConvertTransAbs() {
     return (continuous && (yUnits.toLowerCase().contains("abs"))
