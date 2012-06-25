@@ -122,17 +122,21 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
     return si.setOverlayVisibility(node);
 	}
 	
-	public static JSVPanel setSpectrum(ScriptInterface si,
-			String value) {
-    if (value.indexOf('.') >= 0) {
-      JSVPanelNode node = JSVPanelNode.findNodeById(value, si.getPanelNodes());
-      if (node == null)
-        return null;
-      si.setNode(node, false);
-    } else {
-      setSpectrumNumberAndTreeNode(si, Integer.parseInt(value));
-    }
-    return si.getSelectedPanel();
+	public static JSVPanel setSpectrum(ScriptInterface si, String value) {
+		if (value.indexOf('.') >= 0) {
+			JSVPanelNode node = JSVPanelNode.findNodeById(value, si.getPanelNodes());
+			if (node == null)
+				return null;
+			si.setNode(node, false);
+		} else {
+			int i = Parser.parseInt(value);
+			if (i <= 0) {
+				si.checkOverlay();
+				return null;
+			}
+			setSpectrumNumberAndTreeNode(si, i);
+		}
+		return si.getSelectedPanel();
 	}
 
 	public static JSVTreeNode createTree(ScriptInterface si,
