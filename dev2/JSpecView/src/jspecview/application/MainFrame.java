@@ -81,6 +81,7 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import org.jmol.api.JSVInterface;
@@ -735,14 +736,24 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   }
 
   public void setSelectedPanel(JSVPanel jsvp) {
+  	System.out.println(jsvp);
   	spectrumPanel.setSelectedPanel(jsvp, specNodes);
   	selectedPanel = jsvp;
+  	if (jsvp != null) {
+      JSVTreeNode treeNode = (JSVTreeNode)JSVSpecNode.findNode(jsvp, specNodes).treeNode;
+	  	spectraTree.scrollPathToVisible(new TreePath(treeNode.getPath()));
+  	  spectraTree.setSelectionPath(new TreePath(treeNode.getPath()));
+  	}
     validate();
   }
 
-  public void sendFrameChange(JSVPanel jsvp) {
-    JSViewer.sendFrameChange(this, jsvp);
-  }
+	private JSVPanel prevPanel;
+	public void sendFrameChange(JSVPanel jsvp) {
+		if (jsvp == prevPanel)
+			return;
+		prevPanel = jsvp;
+		JSViewer.sendFrameChange(this, jsvp);
+	}
 
   ////////// MENU ACTIONS ///////////
 
@@ -905,7 +916,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     if (currentSource == null)
       return;
     if (specNodes.get(0).getSpectrum().isAutoOverlayFromJmolClick())
-      execOverlay("*", false);
+      JSViewer.execOverlay(this, "*", false);
   }
 
   ////////////////////////// script commands from JSViewer /////////////////
@@ -922,18 +933,11 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     return specNodes;
   }
 
-  public void execOverlay(String value, boolean fromScript) {
-    List<JDXSpectrum> speclist = new ArrayList<JDXSpectrum>();
-    String strlist = JSVSpecNode.fillSpecList(specNodes, value, speclist,
-        getSelectedPanel(), "1.");
-    if (speclist.size() > 0)
-      openDataOrFile(null, strlist, speclist, strlist, -1, -1);
-    if (!fromScript) {
-    	validate();
-    	repaint();
-    }
+  public void validateAndRepaint() {
+  	validate();
+  	repaint();
   }
-
+  
   /**
    * Allows Integration of an HNMR spectra
    * 
@@ -1242,7 +1246,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   public void setNode(JSVSpecNode specNode, boolean fromTree) {
     setSelectedPanel(specNode.jsvp);
     if (fromTree) {
-      getSelectedPanel().setEnabled(true);
+      getSelectedPanel().setEnabled(false);
       sendFrameChange(specNode.jsvp);
       getSelectedPanel().setEnabled(true);
     }

@@ -14,7 +14,6 @@ public interface ScriptInterface {
   public void execHidden(boolean b);
   public void execIntegrate(JDXSpectrum spec);
   public String execLoad(String value);
-  public void execOverlay(String value, boolean fromScript);
   public void execScriptComplete(String msg, boolean isOK);
   public void execSetAutoIntegrate(boolean b);
   public void execSetCallback(ScriptToken st, String value);
@@ -74,4 +73,5 @@ public interface ScriptInterface {
 	public void openDataOrFile(String data, String name,
 			List<JDXSpectrum> specs, String url, int firstSpec, int lastSpec);
 	public void checkOverlay();
+	public void validateAndRepaint();
 } 

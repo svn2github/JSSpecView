@@ -125,7 +125,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		init();
 	}
 
-	private JSVPanel prevPanel;
 	private ArrayList<Annotation> integrationRatios; // Integration Ratio
 																										// Annotations
 	private int initialStartIndex = -1;
@@ -453,6 +452,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		sendFrameChange(jsvp);
 	}
 
+	private JSVPanel prevPanel;
 	public void sendFrameChange(JSVPanel jsvp) {
 		if (jsvp == prevPanel)
 			return;
@@ -556,7 +556,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		}
 	}
 
-	private void validateAndRepaint() {
+	public void validateAndRepaint() {
 		jsvApplet.validate();
 		jsvApplet.repaint();
 	}
@@ -980,17 +980,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 			validateAndRepaint();
 		}
 		return getSelectedPanel();
-	}
-
-	public void execOverlay(String value, boolean fromScript) {
-    List<JDXSpectrum> speclist = new ArrayList<JDXSpectrum>();
-    String strlist = JSVSpecNode.fillSpecList(specNodes, value, speclist,
-        getSelectedPanel(), "1.");
-    if (speclist.size() > 1)
-      openDataOrFile(null, strlist, speclist, strlist, -1, -1);
-    if (!fromScript) {
-    	validateAndRepaint();
-    }
 	}
 
 	/**

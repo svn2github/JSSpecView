@@ -140,7 +140,7 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
     return si.getSelectedPanel();
 	}
 
-	public static void createTree(ScriptInterface si,
+	public static JSVTreeNode createTree(ScriptInterface si,
 			JDXSource source, JSVPanel[] panels) {
 		
     DefaultTreeModel spectraTreeModel = (DefaultTreeModel) si.getDefaultTreeModel();
@@ -170,6 +170,7 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
       spectraTree.scrollPathToVisible(new TreePath(treeNode.getPath()));
     }
     selectFrameNode(si, panels[0]);
+    return fileNode;
 	}
 
 	public static void close(ScriptInterface si, String value) {
@@ -186,7 +187,7 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
 					si.closeSource(specNodes.get(i).source);
 		} else if (value.equals("selected")) {
 			for (int i = specNodes.size(); --i >= 0;)
-				if (i < specNodes.size() && specNodes.get(i).isSelected())
+				if (i < specNodes.size() && specNodes.get(i).isSelected)
 					si.closeSource(specNodes.get(i).source);
 		}	else {
 			JDXSource source = (value.length() == 0 ? si.getCurrentSource()
@@ -317,12 +318,12 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
     JSVPanel jsvp = si.getNewJSVPanel(specs);
     jsvp.setTitle(source.getTitle());
     if (jsvp.getTitle().equals(""))
-    	jsvp.setTitle(name);    	
+    	jsvp.setTitle(name);
     si.setPropertiesFromPreferences(jsvp, true);
-    si.setSelectedPanel(jsvp);
-    createTree(si, source, new JSVPanel[] { jsvp });
+    createTree(si, source, new JSVPanel[] { jsvp }).specNode.isOverlay = true;
     JSVSpecNode node = JSVSpecNode.findNode(si.getSelectedPanel(), si.getSpecNodes());
     node.setFrameTitle(name);
+    node.isOverlay = true;
     if (si.getAutoShowLegend()
         && si.getSelectedPanel().getPanelData().getNumberOfGraphSets() == 1)
       node.setLegend(si.getOverlayLegend(jsvp));
@@ -347,10 +348,9 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
       si.setPropertiesFromPreferences(jsvp, true);
       panels[i] = jsvp;
     }
-    si.setSelectedPanel(jsvp);
-    si.getNewJSVPanel((JDXSpectrum) null); // end of operation
     // arrange windows in ascending order
     createTree(si, source, panels);
+    si.getNewJSVPanel((JDXSpectrum) null); // end of operation
     JSVSpecNode node = JSVSpecNode.findNode(si.getSelectedPanel(), si.getSpecNodes());
     si.setMenuEnables(node, true);
   }

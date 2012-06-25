@@ -17,7 +17,7 @@ public interface JSVPanel extends JSVContainer {
   JDXSpectrum getSpectrum();
   JDXSpectrum getSpectrumAt(int i);
   void setColor(ScriptToken st, Object color);
-  public void setColorOrFont(Parameters ds, ScriptToken st);
+  void setColorOrFont(Parameters ds, ScriptToken st);
   void setFont(Object g, String string, int mode, int size);
   void setPlotColors(Object plotColors);
   void setSpectrum(JDXSpectrum spec);

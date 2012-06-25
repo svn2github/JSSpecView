@@ -101,7 +101,7 @@ public class JSViewer {
           jsvp = si.getSelectedPanel();
           break;
         case OVERLAY:
-          si.execOverlay(value, true);
+          execOverlay(si, value, true);
           break;
         case PEAK:
           try {
@@ -147,6 +147,17 @@ public class JSViewer {
     si.execScriptComplete(msg, true);
     return isOK;
   }
+
+	public static void execOverlay(ScriptInterface si, String value, boolean fromScript) {
+    List<JDXSpectrum> speclist = new ArrayList<JDXSpectrum>();
+    String strlist = fillSpecList(si, si.getSpecNodes(), value, speclist,
+        si.getSelectedPanel(), "1.");
+    if (speclist.size() > 0)
+      si.openDataOrFile(null, strlist, speclist, strlist, -1, -1);
+    if (!fromScript) {
+    	si.validateAndRepaint();
+    }
+	}
 
 	private static void execTAConvert(ScriptInterface si, String value) {
     int mode = (value.toUpperCase().startsWith("T") ? JDXSpectrum.TO_TRANS
@@ -418,4 +429,92 @@ public class JSViewer {
     return "";
   }
 
+  /**
+   * originally in MainFrame, this method takes the OVERLAY command option and 
+   * converts it to a list of spectra
+   * 
+   * @param si
+   * @param specNodes
+   * @param value
+   * @param speclist
+   * @param selectedPanel
+   * @param prefix
+   * @return      comma-separated list, for the title
+   */
+  public static String fillSpecList(ScriptInterface si, List<JSVSpecNode> specNodes, String value,
+                                    List<JDXSpectrum> speclist,
+                                    JSVPanel selectedPanel, String prefix) {
+    List<String> list;
+    List<String> list0 = null;
+    boolean isNone = (value.equalsIgnoreCase("NONE"));
+    if (isNone || value.equalsIgnoreCase("all"))
+      value = "*";
+    value = TextFormat.simpleReplace(value, "*", " * ");
+    if (value.equals(" * ")) {
+      list = ScriptToken.getTokens(JSVSpecNode.getSpectrumListAsString(specNodes));
+    } else if (value.startsWith("\"")) {
+      list = ScriptToken.getTokens(value);
+    } else {
+      value = TextFormat.simpleReplace(value, "-", " - ");
+      list = ScriptToken.getTokens(value);
+      list0 = ScriptToken.getTokens(JSVSpecNode.getSpectrumListAsString(specNodes));
+      if (list0.size() == 0)
+        return null;
+    }
+
+    String id0 = (selectedPanel == null ? prefix : JSVSpecNode.findNode(
+        selectedPanel, specNodes).id);
+    id0 = id0.substring(0, id0.indexOf(".") + 1);
+    StringBuffer sb = new StringBuffer();
+    int n = list.size();
+    String idLast = null;
+    for (int i = 0; i < n; i++) {
+      String id = list.get(i);
+      double userYFactor = 1;
+      if (i + 1 < n && list.get(i + 1).equals("*")) {
+        i += 2;
+        try {
+          userYFactor = Double.parseDouble(list.get(i));
+        } catch (NumberFormatException e) {
+        }
+      }
+      if (id.equals("-")) {
+        if (idLast == null)
+          idLast = list0.get(0);
+        id = (i + 1 == n ? list0.get(list0.size() - 1) : list.get(++i));
+        if (!id.contains("."))
+          id = id0 + id;
+        int pt = 0;
+        while (pt < list0.size() && !list0.get(pt).equals(idLast))
+          pt++;
+        pt++;
+        while (pt < list0.size() && !idLast.equals(id)) {
+          speclist.add(JSVSpecNode.findNodeById(idLast = list0.get(pt++),
+              specNodes).jsvp.getSpectrumAt(0));
+          sb.append(",").append(idLast);
+        }
+        continue;
+      }
+      if (!id.contains("."))
+        id = id0 + id;
+      JSVSpecNode node = JSVSpecNode.findNodeById(id, specNodes);
+      if (node == null)
+        continue;
+      JDXSpectrum spec = node.jsvp.getSpectrumAt(0);
+      idLast = id;
+      spec.setUserYFactor(userYFactor);
+      speclist.add(spec);
+      sb.append(",").append(id);
+    }
+    if (speclist.size() == 1) {
+      	JSVSpecNode node = JSVSpecNode.findNodeById(idLast, specNodes);
+      	if (node != null) {
+      		si.setSelectedPanel(node.jsvp);
+      		// possibility of a problem here -- we are not communicating with Jmol our model changes.
+      		speclist.clear();
+      	}
+    }
+    return (isNone ? "NONE" : sb.length() > 0 ? sb.toString().substring(1) : null);
+  }
+  
 }

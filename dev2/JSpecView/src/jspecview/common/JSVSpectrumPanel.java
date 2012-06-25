@@ -14,9 +14,9 @@ public class JSVSpectrumPanel extends JPanel implements JSVContainer {
 
 	private static final long serialVersionUID = 1L;
 	private JSVPanel selectedPanel;
-	private int currentSpectrumIndex;
+	private int currentPanelIndex;
 	public int getCurrentSpectrumIndex() {
-		return currentSpectrumIndex;
+		return currentPanelIndex;
 	}
 
 	public JSVSpectrumPanel(BorderLayout borderLayout) {
@@ -47,12 +47,18 @@ public class JSVSpectrumPanel extends JPanel implements JSVContainer {
 			selectedPanel = jsvp;
 		}
 		for (int i = specNodes.size(); --i >= 0;)
-			if (specNodes.get(i).jsvp == jsvp)
-				currentSpectrumIndex = i;
-			else
+			if (specNodes.get(i).jsvp == jsvp) {
+				currentPanelIndex = i;
+				jsvp.setEnabled(true);
+			} else {
 				specNodes.get(i).jsvp.setEnabled(false);
-		if (jsvp != null)
-  		jsvp.setEnabled(true);		
+			}
+		markSelectedPanels(specNodes);
+	}
+
+	void markSelectedPanels(List<JSVSpecNode> specNodes) {
+		for (int i = specNodes.size(); --i >= 0;)
+			specNodes.get(i).isSelected = (currentPanelIndex == i);
 	}
 
 }

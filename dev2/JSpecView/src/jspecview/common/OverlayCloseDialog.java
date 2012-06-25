@@ -66,13 +66,15 @@ public class OverlayCloseDialog extends JDialog implements WindowListener {
     * @param spectraTree
     * @param modal the modality
    */
-  public OverlayCloseDialog(ScriptInterface si, JPanel panel, boolean modal) {
+  public OverlayCloseDialog(ScriptInterface si, JSVSpectrumPanel panel, boolean modal) {
   	this.si = si;
     this.setTitle("Overlay/Close Spectra");
     this.setModal(modal);
-    if(panel != null)
+    if(panel != null) {
       setLocation( panel.getLocationOnScreen().x,
                    panel.getLocationOnScreen().y);
+      panel.markSelectedPanels(si.getSpecNodes());
+    }
     setResizable(true);
     addWindowListener(this);
     setup();
@@ -198,7 +200,7 @@ public class OverlayCloseDialog extends JDialog implements WindowListener {
       JSVTreeNode treeNode = enume.nextElement();
     	JCheckBox cb = new JCheckBox();
     	JSVSpecNode node = treeNode.specNode;
-    	cb.setSelected(node.isSelected());
+    	cb.setSelected(node.isSelected);
     	cb.setText(node.toString());
     	cb.setActionCommand("" + (treeNodes.size()));
       cb.addActionListener(new java.awt.event.ActionListener() {
@@ -233,6 +235,7 @@ public class OverlayCloseDialog extends JDialog implements WindowListener {
 			}
 		}
 		overlaySelectedButton.setEnabled(n > 0);
+		overlaySelectedButton.setText(n == 1 ? "View Selected" : "Overlay Selected");
 	}
 	
 	private boolean checking = false; 
@@ -241,32 +244,37 @@ public class OverlayCloseDialog extends JDialog implements WindowListener {
 	protected void check(ActionEvent e) {
 		int i = Integer.parseInt(e.getActionCommand());
 		JSVTreeNode node = treeNodes.get(i);
-		JCheckBox cb = (JCheckBox)e.getSource();
+		JCheckBox cb = (JCheckBox) e.getSource();
 		boolean isSelected = cb.isSelected();
 		if (node.specNode.jsvp == null) {
 			if (!checking && isSelected && cb.getText().startsWith("Overlay")) {
 				checking = true;
 				select(false);
 				cb.setSelected(true);
-				node.specNode.setSelected(true);
+				node.specNode.isSelected = true;
 				checking = false;
-			}				
-	    Enumeration<JSVTreeNode> enume = node.children();
-	    while (enume.hasMoreElements()) {
-	      JSVTreeNode treeNode = enume.nextElement();
-	    	checkBoxes.get(treeNode.index).setSelected(isSelected);
-				treeNode.specNode.setSelected(isSelected);
-	    }
+			}
+			Enumeration<JSVTreeNode> enume = node.children();
+			while (enume.hasMoreElements()) {
+				JSVTreeNode treeNode = enume.nextElement();
+				checkBoxes.get(treeNode.index).setSelected(isSelected);
+				treeNode.specNode.isSelected = isSelected;
+			}
 		} else {
-  		node.specNode.setSelected(isSelected);
+			// uncheck all Overlays
+			node.specNode.isSelected = isSelected;
 		}
-    checkEnables();
+		if (isSelected)
+			for (i = treeNodes.size(); --i >= 0;)
+				if (treeNodes.get(i).specNode.isOverlay != node.specNode.isOverlay)
+					checkBoxes.get(treeNodes.get(i).index).setSelected(false);
+		checkEnables();
 	}
 
 	protected void select(boolean mode) {
 		for (int i = checkBoxes.size(); --i >= 0;) {
 			checkBoxes.get(i).setSelected(mode);
-			treeNodes.get(i).specNode.setSelected(mode);
+			treeNodes.get(i).specNode.isSelected = mode;
 		}
 		checkEnables();
 	}
@@ -275,12 +283,13 @@ public class OverlayCloseDialog extends JDialog implements WindowListener {
 		StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < checkBoxes.size(); i++) {
 			JCheckBox cb = checkBoxes.get(i); 
-			if (cb.isSelected() && treeNodes.get(i).specNode.jsvp != null) {
+			if (cb.isSelected() && treeNodes.get(i).specNode.jsvp != null 
+					&& !((JSVTreeNode)treeNodes.get(i).getParent()).specNode.fileName.startsWith("Overlay")) {
 				String label = cb.getText();
 				sb.append(" ").append(label.substring(0, label.indexOf(":")));
 			}
 		}
-		si.execOverlay(sb.toString().trim(), false);
+		JSViewer.execOverlay(si, sb.toString().trim(), false);
 		setup();
 	}
 

@@ -5,6 +5,7 @@ public interface JSVContainer {
   public void setTitle(String title);
   public void dispose();
   public void setEnabled(boolean b);
+  public boolean isEnabled();
   int getWidth();
   int getHeight();
   public boolean isVisible();
