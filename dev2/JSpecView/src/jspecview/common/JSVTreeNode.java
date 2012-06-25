@@ -8,7 +8,6 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.Enumeration;
 import java.util.List;
 
