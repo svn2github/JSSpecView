@@ -37,6 +37,7 @@
 //          call. Changed behaviour to remove integration after reset view.
 // 19-06-2012 RMH -changes to printing calls
 // 23-06-2012 RMH -Major change to Applet code to allow multiple file loads
+// 25-06-2012 RMH -Overlay/close/view spectrum dialog box change
 
 package jspecview.applet;
 
