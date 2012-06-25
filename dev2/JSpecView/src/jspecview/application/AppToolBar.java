@@ -9,7 +9,7 @@ import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 
 import jspecview.common.JSVPanel;
-import jspecview.common.JSVSpecNode;
+import jspecview.common.JSVPanelNode;
 import jspecview.common.PanelData;
 import jspecview.common.ScriptToken;
 
@@ -217,7 +217,7 @@ public class AppToolBar extends JToolBar {
       spectraButton.setToolTipText("Spectrum Display");
   }
 
-  public void setMenuEnables(JSVSpecNode node) {
+  public void setMenuEnables(JSVPanelNode node) {
     if (node == null)
       return;
     PanelData pd = node.jsvp.getPanelData();

@@ -10,10 +10,10 @@ import jspecview.common.JSVDialog;
 import jspecview.common.JSVPanel;
 import jspecview.source.JDXSource;
 
-public class JSVSpecNode {
+public class JSVPanelNode {
 
   private String frameTitle;
-	public JSVSpecNode(String id, String fileName, JDXSource source, JSVPanel jsvp) {
+	public JSVPanelNode(String id, String fileName, JDXSource source, JSVPanel jsvp) {
     this.id = id;
     this.source = source;
     this.fileName = fileName;
@@ -64,69 +64,69 @@ public class JSVSpecNode {
   public String toString() {
     return ((id == null ? "" : id + ": ") + (frameTitle == null ? fileName : frameTitle));
   }
-  public static JDXSource findSourceByNameOrId(String id, List<JSVSpecNode> specNodes) {
-    for (int i = specNodes.size(); --i >= 0;) {
-      JSVSpecNode node = specNodes.get(i);
+  public static JDXSource findSourceByNameOrId(String id, List<JSVPanelNode> panelNodes) {
+    for (int i = panelNodes.size(); --i >= 0;) {
+      JSVPanelNode node = panelNodes.get(i);
       if (id.equals(node.id) || id.equalsIgnoreCase(node.source.getFilePath()))
         return node.source;
     }
     // only if that doesn't work -- check file name for exact case
-    for (int i = specNodes.size(); --i >= 0;) {
-      JSVSpecNode node = specNodes.get(i);
+    for (int i = panelNodes.size(); --i >= 0;) {
+      JSVPanelNode node = panelNodes.get(i);
       if (id.equals(node.fileName))
         return node.source;
     }
     return null;
   }
-  public static JSVSpecNode findNodeById(String id, List<JSVSpecNode> specNodes) {
-    for (int i = specNodes.size(); --i >= 0;)
-      if (id.equals(specNodes.get(i).id))
-        return specNodes.get(i);
+  public static JSVPanelNode findNodeById(String id, List<JSVPanelNode> panelNodes) {
+    for (int i = panelNodes.size(); --i >= 0;)
+      if (id.equals(panelNodes.get(i).id))
+        return panelNodes.get(i);
     return null;
   }
 
   /**
    * Returns the tree node that is associated with a panel
-   * @param specNodes TODO
+   * @param panelNodes TODO
    * @param frame
    *        the JSVFrame
    * 
    * @return the tree node that is associated with a panel
    */
-  public static JSVSpecNode findNode(JSVPanel jsvp, List<JSVSpecNode> specNodes) {
-    for (int i = specNodes.size(); --i >= 0;)
-      if (specNodes.get(i).jsvp == jsvp)
-        return specNodes.get(i);
+  public static JSVPanelNode findNode(JSVPanel jsvp, List<JSVPanelNode> panelNodes) {
+    for (int i = panelNodes.size(); --i >= 0;)
+      if (panelNodes.get(i).jsvp == jsvp)
+        return panelNodes.get(i);
     return null;
   }
 
-	public static String getSpectrumListAsString(List<JSVSpecNode> specNodes) {
+	public static String getSpectrumListAsString(List<JSVPanelNode> panelNodes) {
       StringBuffer sb = new StringBuffer();
-      for (int i = 0; i < specNodes.size(); i++)
-        sb.append(" ").append(specNodes.get(i).id);
+      for (int i = 0; i < panelNodes.size(); i++)
+        sb.append(" ").append(panelNodes.get(i).id);
       return sb.toString().trim();
   }
   
-  public static List<JDXSpectrum> getSpecList(List<JSVSpecNode> specNodes) {
-    if (specNodes == null || specNodes.size() == 0)
+  public static List<JDXSpectrum> getSpecList(List<JSVPanelNode> panelNodes) {
+    if (panelNodes == null || panelNodes.size() == 0)
       return null;
     List<JDXSpectrum> specList = new ArrayList<JDXSpectrum>();
-    for (int i = 0; i < specNodes.size(); i++)
-      specList.add(specNodes.get(i).getSpectrum());
+    for (int i = 0; i < panelNodes.size(); i++)
+      specList.add(panelNodes.get(i).getSpectrum());
     return specList;
   }
  
-  public static boolean isOpen(List<JSVSpecNode> specNodes, String filePath) {
+  public static boolean isOpen(List<JSVPanelNode> panelNodes, String filePath) {
     if (filePath != null)
-      for (int i = specNodes.size(); --i >= 0;)
-        if (filePath.equals(specNodes.get(i).source.getFilePath())
-        		|| filePath.equals(specNodes.get(i).frameTitle))
+      for (int i = panelNodes.size(); --i >= 0;)
+        if (filePath.equals(panelNodes.get(i).source.getFilePath())
+        		|| filePath.equals(panelNodes.get(i).frameTitle))
           return true;
     return false;
   }
-  public static int getNodeIndex(List<JSVSpecNode> specNodes, JSVSpecNode node) {
-    for (int i = specNodes.size(); --i >= 0;)
-      if (node == specNodes.get(i))
+  public static int getNodeIndex(List<JSVPanelNode> panelNodes, JSVPanelNode node) {
+    for (int i = panelNodes.size(); --i >= 0;)
+      if (node == panelNodes.get(i))
         return i;
     return -1;
   }
@@ -134,14 +134,14 @@ public class JSVSpecNode {
 	public void setFrameTitle(String name) {
 		frameTitle = name;
 	}
-	public static JSVPanel getLastFileFirstNode(List<JSVSpecNode> specNodes) {
-		int n = specNodes.size();
-		JSVSpecNode node = (n == 0 ? null : specNodes.get(n - 1));
+	public static JSVPanel getLastFileFirstNode(List<JSVPanelNode> panelNodes) {
+		int n = panelNodes.size();
+		JSVPanelNode node = (n == 0 ? null : panelNodes.get(n - 1));
 		// first in last file
-		for (int i = specNodes.size(); --i >= 0; ) {
-			if (specNodes.get(i).jsvp == null)
+		for (int i = panelNodes.size(); --i >= 0; ) {
+			if (panelNodes.get(i).jsvp == null)
 				break;
-			node = specNodes.get(i);
+			node = panelNodes.get(i);
 		}
 		return (node == null ? null : node.jsvp);
 	}

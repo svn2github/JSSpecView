@@ -37,7 +37,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
 import jspecview.common.JDXSpectrum;
-import jspecview.common.JSVSpecNode;
+import jspecview.common.JSVPanelNode;
 import jspecview.source.JDXSource;
 import jspecview.util.FileManager;
 
@@ -133,9 +133,9 @@ public class TextDialog extends JDialog {
 
   public static void showSource(MainFrame mainFrame) {
     JDXSource currentSource = mainFrame.getCurrentSource();
-    List<JSVSpecNode> specNodes = mainFrame.getSpecNodes();
+    List<JSVPanelNode> panelNodes = mainFrame.getPanelNodes();
     if (currentSource == null) {
-      if (specNodes.size() > 0) {
+      if (panelNodes.size() > 0) {
         JOptionPane.showMessageDialog(mainFrame, "Please Select a Spectrum",
             "Select Spectrum", JOptionPane.ERROR_MESSAGE);
       }

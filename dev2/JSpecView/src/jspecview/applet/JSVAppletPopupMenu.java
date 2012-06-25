@@ -12,7 +12,7 @@ import javax.swing.JMenuItem;
 
 import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelPopupMenu;
-import jspecview.common.JSVSpecNode;
+import jspecview.common.JSVPanelNode;
 
 class JSVAppletPopupMenu extends JSVPanelPopupMenu {
 
@@ -162,22 +162,22 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     applet.showOverlayKey(visible);
   }
 
-	public void setCompoundMenu(JSVPanel jsvp, List<JSVSpecNode> specNodes,
+	public void setCompoundMenu(JSVPanel jsvp, List<JSVPanelNode> panelNodes,
 			boolean allowSelection, ActionListener compoundMenuSelectionListener,
 			ActionListener compoundMenuChooseListener) {
-		spectraMenuItem.setEnabled(allowSelection && specNodes.size() > 1);
+		spectraMenuItem.setEnabled(allowSelection && panelNodes.size() > 1);
 		
 //		appletCompoundMenuItem.removeAll();
-//		if (!allowSelection || specNodes.size() == 1)
+//		if (!allowSelection || panelNodes.size() == 1)
 //			return;
 //		appletCompoundMenuItem.add(overlayAllMenuItem);
 //		appletCompoundMenuItem.add(overlayNoneMenuItem);
 //		appletCompoundMenuItem.add(overlayMenuItem);
 //		appletCompoundMenuItem.add(overlayStackOffsetMenuItem);
-//		if (specNodes.size() <= 20) {
+//		if (panelNodes.size() <= 20) {
 //			// add Menus to navigate
-//			for (int i = 0; i < specNodes.size(); i++) {
-//				JSVSpecNode p = specNodes.get(i);
+//			for (int i = 0; i < panelNodes.size(); i++) {
+//				JSVPanelNode p = panelNodes.get(i);
 //				String label = (p.fileName.startsWith("Overlay") ? p.fileName : p.getSpectrum().getTitleLabel());
 //				JCheckBoxMenuItem mi = new JCheckBoxMenuItem((i + 1) + "- " + label);
 //				mi.setSelected(p.equals(jsvp));

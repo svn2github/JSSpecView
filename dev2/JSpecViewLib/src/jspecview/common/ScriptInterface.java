@@ -27,7 +27,7 @@ public interface ScriptInterface {
   public PanelData getPanelData();
   public Parameters getParameters();
   public JSVPanel getSelectedPanel();
-  public List<JSVSpecNode> getSpecNodes();
+  public List<JSVPanelNode> getPanelNodes();
   
   public void runScript(String script);
   public void sendFrameChange(JSVPanel jsvp);
@@ -47,8 +47,8 @@ public interface ScriptInterface {
 	public Object getSpectraTree();
 	public int getFileCount();
 	public void setFileCount(int max);
-  public void setNode(JSVSpecNode node, boolean fromTree);
-	public JSVSpecNode setOverlayVisibility(JSVSpecNode node);
+  public void setNode(JSVPanelNode node, boolean fromTree);
+	public JSVPanelNode setOverlayVisibility(JSVPanelNode node);
 	public void setCurrentSource(JDXSource source);
 	public int incrementOverlay(int i);
 	public void setRecentURL(String filePath);
@@ -62,12 +62,12 @@ public interface ScriptInterface {
 	public Object getPopupMenu();
 	public void setPropertiesFromPreferences(JSVPanel jsvp, boolean b);
 	public boolean getAutoShowLegend();
-	public void setMenuEnables(JSVSpecNode node, boolean isSplit);
+	public void setMenuEnables(JSVPanelNode node, boolean isSplit);
 	public JDXSource createSource(String data, String filePath, URL base, int firstSpec,
 			int lastSpec) throws Exception;
 	public URL getDocumentBase();
 	public JSVPanel getNewJSVPanel(List<JDXSpectrum> specs);
-	public JSVSpecNode getNewSpecNode(String id, String fileName,
+	public JSVPanelNode getNewPanelNode(String id, String fileName,
 			JDXSource source, JSVPanel jsvp);
 	public JSVPanel getNewJSVPanel(JDXSpectrum spec);
 	public void openDataOrFile(String data, String name,

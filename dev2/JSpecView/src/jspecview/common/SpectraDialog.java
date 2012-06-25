@@ -199,7 +199,7 @@ public class SpectraDialog extends JDialog implements WindowListener {
     while (enume.hasMoreElements()) {
       JSVTreeNode treeNode = enume.nextElement();
     	JCheckBox cb = new JCheckBox();
-    	JSVSpecNode node = treeNode.specNode;
+    	JSVPanelNode node = treeNode.panelNode;
     	cb.setSelected(node.isSelected);
     	cb.setText(node.toString());
     	cb.setActionCommand("" + (treeNodes.size()));
@@ -221,7 +221,7 @@ public class SpectraDialog extends JDialog implements WindowListener {
 	private void checkEnables() {		
 		closeSelectedButton.setEnabled(false);
 		for (int i = 0; i < checkBoxes.size(); i++) {
-			if (checkBoxes.get(i).isSelected() && treeNodes.get(i).specNode.jsvp == null) {
+			if (checkBoxes.get(i).isSelected() && treeNodes.get(i).panelNode.jsvp == null) {
 				closeSelectedButton.setEnabled(true);
 				break;
 			}
@@ -230,7 +230,7 @@ public class SpectraDialog extends JDialog implements WindowListener {
 		overlaySelectedButton.setEnabled(false);
 		int n = 0;
 		for (int i = 0; i < checkBoxes.size(); i++) {
-			if (checkBoxes.get(i).isSelected() && treeNodes.get(i).specNode.jsvp != null) {
+			if (checkBoxes.get(i).isSelected() && treeNodes.get(i).panelNode.jsvp != null) {
 				n++;
 			}
 		}
@@ -246,30 +246,30 @@ public class SpectraDialog extends JDialog implements WindowListener {
 		JSVTreeNode node = treeNodes.get(i);
 		JCheckBox cb = (JCheckBox) e.getSource();
 		boolean isSelected = cb.isSelected();
-		if (node.specNode.jsvp == null) {
+		if (node.panelNode.jsvp == null) {
 			if (!checking && isSelected && cb.getText().startsWith("Overlay")) {
 				checking = true;
 				select(false);
 				cb.setSelected(true);
-				node.specNode.isSelected = true;
+				node.panelNode.isSelected = true;
 				checking = false;
 			}
 			Enumeration<JSVTreeNode> enume = node.children();
 			while (enume.hasMoreElements()) {
 				JSVTreeNode treeNode = enume.nextElement();
 				checkBoxes.get(treeNode.index).setSelected(isSelected);
-				treeNode.specNode.isSelected = isSelected;
-				node.specNode.isSelected = isSelected;
+				treeNode.panelNode.isSelected = isSelected;
+				node.panelNode.isSelected = isSelected;
 			}
 		} else {
 			// uncheck all Overlays
-			node.specNode.isSelected = isSelected;
+			node.panelNode.isSelected = isSelected;
 		}
 		if (isSelected)
 			for (i = treeNodes.size(); --i >= 0;)
-				if (treeNodes.get(i).specNode.isOverlay != node.specNode.isOverlay) {
+				if (treeNodes.get(i).panelNode.isOverlay != node.panelNode.isOverlay) {
 					checkBoxes.get(treeNodes.get(i).index).setSelected(false);
-					treeNodes.get(i).specNode.isSelected = false;
+					treeNodes.get(i).panelNode.isSelected = false;
 				}
 		checkEnables();
 	}
@@ -277,7 +277,7 @@ public class SpectraDialog extends JDialog implements WindowListener {
 	protected void select(boolean mode) {
 		for (int i = checkBoxes.size(); --i >= 0;) {
 			checkBoxes.get(i).setSelected(mode);
-			treeNodes.get(i).specNode.isSelected = mode;
+			treeNodes.get(i).panelNode.isSelected = mode;
 		}
 		checkEnables();
 	}
@@ -286,7 +286,7 @@ public class SpectraDialog extends JDialog implements WindowListener {
 		StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < checkBoxes.size(); i++) {
 			JCheckBox cb = checkBoxes.get(i);
-			JSVSpecNode node = treeNodes.get(i).specNode;
+			JSVPanelNode node = treeNodes.get(i).panelNode;
 			if (cb.isSelected() && node.jsvp != null) {
 				if (node.isOverlay) {
 					si.setNode(node, true);

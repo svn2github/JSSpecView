@@ -16,7 +16,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
-import jspecview.common.JSVSpecNode;
+import jspecview.common.JSVPanelNode;
 import jspecview.exception.ScalesIncompatibleException;
 import jspecview.source.JDXSource;
 import jspecview.util.FileManager;
@@ -37,12 +37,12 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
   public static final int OVERLAY_DIALOG = -1;
 	public static final int OVERLAY_OFFSET = 99;
 	
-  public JSVSpecNode specNode;
+  public JSVPanelNode panelNode;
 	public int index;
 
-  public JSVTreeNode(String text, JSVSpecNode specNode) {
+  public JSVTreeNode(String text, JSVPanelNode panelNode) {
     super(text);
-    this.specNode = specNode;
+    this.panelNode = panelNode;
   }
 
   @SuppressWarnings("unchecked")
@@ -50,7 +50,7 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
 			JDXSource source) {
     // Remove nodes and dispose of frames
 		JSVTreeNode rootNode = (JSVTreeNode) si.getRootNode();
-		List<JSVSpecNode> specNodes = si.getSpecNodes();
+		List<JSVPanelNode> panelNodes = si.getPanelNodes();
 		DefaultTreeModel spectraTreeModel = (DefaultTreeModel) si.getDefaultTreeModel();
 
     String fileName = (source == null ? null : source.getFilePath());
@@ -59,11 +59,11 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
     while (enume.hasMoreElements()) {
       JSVTreeNode node = enume.nextElement();
       if (fileName == null
-          || node.specNode.source.getFilePath().equals(fileName)) {
+          || node.panelNode.source.getFilePath().equals(fileName)) {
         for (Enumeration<JSVTreeNode> e = node.children(); e.hasMoreElements();) {
           JSVTreeNode childNode = e.nextElement();
           toDelete.add(childNode);
-          specNodes.remove(childNode.specNode);
+          panelNodes.remove(childNode.panelNode);
         }
         toDelete.add(node);
         if (fileName != null)
@@ -82,15 +82,15 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
       if (si.getSelectedPanel() != null)
         si.getSelectedPanel().dispose();
     } else {
-      setSpectrumNumberAndTreeNode(si, specNodes.size());
+      setSpectrumNumberAndTreeNode(si, panelNodes.size());
     }
     
     si.setSelectedPanel(null);
     si.setCurrentSource(null);
 
     int max = 0;
-    for (int i = 0; i < specNodes.size(); i++) {
-      float f = Parser.parseFloat(specNodes.get(i).id);
+    for (int i = 0; i < panelNodes.size(); i++) {
+      float f = Parser.parseFloat(panelNodes.get(i).id);
       if (f >= max + 1)
         max = (int) Math.floor(f);
     }
@@ -104,15 +104,15 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
 	}
 
 	public static void setFrameAndTreeNode(ScriptInterface si, int i) {
-    List<JSVSpecNode> specNodes = si.getSpecNodes();
-		if (specNodes  == null || i < 0 || i >= specNodes.size())
+    List<JSVPanelNode> panelNodes = si.getPanelNodes();
+		if (panelNodes  == null || i < 0 || i >= panelNodes.size())
       return;
-    si.setNode(specNodes.get(i), false);
+    si.setNode(panelNodes.get(i), false);
 	}
 
-	public static JSVSpecNode selectFrameNode(ScriptInterface si, JSVPanel jsvp) {
+	public static JSVPanelNode selectFrameNode(ScriptInterface si, JSVPanel jsvp) {
     // Find Node in SpectraTree and select it
-    JSVSpecNode node = JSVSpecNode.findNode(jsvp, si.getSpecNodes());
+    JSVPanelNode node = JSVPanelNode.findNode(jsvp, si.getPanelNodes());
     if (node == null)
       return null;
 
@@ -125,7 +125,7 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
 	public static JSVPanel setSpectrum(ScriptInterface si,
 			String value) {
     if (value.indexOf('.') >= 0) {
-      JSVSpecNode node = JSVSpecNode.findNodeById(value, si.getSpecNodes());
+      JSVPanelNode node = JSVPanelNode.findNodeById(value, si.getPanelNodes());
       if (node == null)
         return null;
       si.setNode(node, false);
@@ -140,13 +140,13 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
 		
     DefaultTreeModel spectraTreeModel = (DefaultTreeModel) si.getDefaultTreeModel();
 		JSVTreeNode rootNode = (JSVTreeNode) si.getRootNode();
-    List<JSVSpecNode> specNodes = si.getSpecNodes();
+    List<JSVPanelNode> panelNodes = si.getPanelNodes();
     JTree spectraTree = (JTree) si.getSpectraTree();
 
     String fileName = FileManager.getName(source.getFilePath());
-    JSVSpecNode specNode = new JSVSpecNode(null, fileName, source, null);
-    JSVTreeNode fileNode = new JSVTreeNode(fileName, specNode);
-    specNode.setTreeNode(fileNode);
+    JSVPanelNode panelNode = new JSVPanelNode(null, fileName, source, null);
+    JSVTreeNode fileNode = new JSVTreeNode(fileName, panelNode);
+    panelNode.setTreeNode(fileNode);
 		spectraTreeModel.insertNodeInto(fileNode, rootNode, rootNode
         .getChildCount());
 		spectraTree.scrollPathToVisible(new TreePath(fileNode.getPath()));
@@ -156,10 +156,10 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
     for (int i = 0; i < panels.length; i++) {
       JSVPanel jsvp = panels[i];
       String id = fileCount + "." + (i + 1);
-      specNode = si.getNewSpecNode(id, fileName, source, jsvp);
-      JSVTreeNode treeNode = new JSVTreeNode(specNode.toString(), specNode);
-      specNode.setTreeNode(treeNode);
-			specNodes.add(specNode);
+      panelNode = si.getNewPanelNode(id, fileName, source, jsvp);
+      JSVTreeNode treeNode = new JSVTreeNode(panelNode.toString(), panelNode);
+      panelNode.setTreeNode(treeNode);
+			panelNodes.add(panelNode);
       spectraTreeModel.insertNodeInto(treeNode, fileNode, fileNode
           .getChildCount());
       spectraTree.scrollPathToVisible(new TreePath(treeNode.getPath()));
@@ -173,19 +173,19 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
 			si.closeSource(null);
 			return;
 		}
-		List<JSVSpecNode> specNodes = si.getSpecNodes();
+		List<JSVPanelNode> panelNodes = si.getPanelNodes();
 		value = value.replace('\\', '/');
 		if (value.endsWith("*")) {
 			value = value.substring(0, value.length() - 1);
-			for (int i = specNodes.size(); --i >= 0;)
-				if (i < specNodes.size() && specNodes.get(i).fileName.startsWith(value))
-					si.closeSource(specNodes.get(i).source);
+			for (int i = panelNodes.size(); --i >= 0;)
+				if (i < panelNodes.size() && panelNodes.get(i).fileName.startsWith(value))
+					si.closeSource(panelNodes.get(i).source);
 		} else if (value.equals("selected")) {
 			List<JDXSource> list = new ArrayList<JDXSource>();
 			JDXSource lastSource = null;
-			for (int i = specNodes.size(); --i >= 0;) {
-				JDXSource source = specNodes.get(i).source;
-				if (specNodes.get(i).isSelected 
+			for (int i = panelNodes.size(); --i >= 0;) {
+				JDXSource source = panelNodes.get(i).source;
+				if (panelNodes.get(i).isSelected 
 						&& (lastSource == null || lastSource != source))
 					list.add(source);
 				lastSource = source;
@@ -194,13 +194,13 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
 				si.closeSource(list.get(i));
 		} else {
 			JDXSource source = (value.length() == 0 ? si.getCurrentSource()
-					: JSVSpecNode.findSourceByNameOrId(value, specNodes));
+					: JSVPanelNode.findSourceByNameOrId(value, panelNodes));
 			if (source == null)
 				return;
 			si.closeSource(source);
 		}
-		if (si.getSelectedPanel() == null && specNodes.size() > 0)
-			si.setSelectedPanel(JSVSpecNode.getLastFileFirstNode(specNodes));
+		if (si.getSelectedPanel() == null && panelNodes.size() > 0)
+			si.setSelectedPanel(JSVPanelNode.getLastFileFirstNode(panelNodes));
 	}
 
 	public static void load(ScriptInterface si, String value) {
@@ -260,7 +260,7 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
       si.setRecentURL(null);
     }
     // TODO could check here for already-open overlay 
-    if (JSVSpecNode.isOpen(si.getSpecNodes(), filePath) || JSVSpecNode.isOpen(si.getSpecNodes(), url)) {
+    if (JSVPanelNode.isOpen(si.getPanelNodes(), filePath) || JSVPanelNode.isOpen(si.getPanelNodes(), url)) {
       si.writeStatus(filePath + " is already open");
       if (isOverlay)
       	 si.incrementOverlay(-1);
@@ -323,8 +323,8 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
     if (jsvp.getTitle().equals(""))
     	jsvp.setTitle(name);
     si.setPropertiesFromPreferences(jsvp, true);
-    createTree(si, source, new JSVPanel[] { jsvp }).specNode.isOverlay = true;
-    JSVSpecNode node = JSVSpecNode.findNode(si.getSelectedPanel(), si.getSpecNodes());
+    createTree(si, source, new JSVPanel[] { jsvp }).panelNode.isOverlay = true;
+    JSVPanelNode node = JSVPanelNode.findNode(si.getSelectedPanel(), si.getPanelNodes());
     node.setFrameTitle(name);
     node.isOverlay = true;
     if (si.getAutoShowLegend()
@@ -354,7 +354,7 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
     // arrange windows in ascending order
     createTree(si, source, panels);
     si.getNewJSVPanel((JDXSpectrum) null); // end of operation
-    JSVSpecNode node = JSVSpecNode.findNode(si.getSelectedPanel(), si.getSpecNodes());
+    JSVPanelNode node = JSVPanelNode.findNode(si.getSelectedPanel(), si.getPanelNodes());
     si.setMenuEnables(node, true);
   }
 

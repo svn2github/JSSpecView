@@ -36,7 +36,7 @@ public class JSVSpectrumPanel extends JPanel implements JSVContainer {
 
 	}
 
-	public void setSelectedPanel(JSVPanel jsvp, List<JSVSpecNode> specNodes) {
+	public void setSelectedPanel(JSVPanel jsvp, List<JSVPanelNode> panelNodes) {
 		if (jsvp != null && jsvp != selectedPanel) {
 			if (selectedPanel != null) {
 				remove((AwtPanel) selectedPanel);
@@ -46,19 +46,19 @@ public class JSVSpectrumPanel extends JPanel implements JSVContainer {
 			//jsvApplet.addKeyListener((AwtPanel) jsvp);
 			selectedPanel = jsvp;
 		}
-		for (int i = specNodes.size(); --i >= 0;)
-			if (specNodes.get(i).jsvp == jsvp) {
+		for (int i = panelNodes.size(); --i >= 0;)
+			if (panelNodes.get(i).jsvp == jsvp) {
 				currentPanelIndex = i;
 				jsvp.setEnabled(true);
 			} else {
-				specNodes.get(i).jsvp.setEnabled(false);
+				panelNodes.get(i).jsvp.setEnabled(false);
 			}
-		markSelectedPanels(specNodes);
+		markSelectedPanels(panelNodes);
 	}
 
-	public void markSelectedPanels(List<JSVSpecNode> specNodes) {
-		for (int i = specNodes.size(); --i >= 0;)
-			specNodes.get(i).isSelected = (currentPanelIndex == i);
+	public void markSelectedPanels(List<JSVPanelNode> panelNodes) {
+		for (int i = panelNodes.size(); --i >= 0;)
+			panelNodes.get(i).isSelected = (currentPanelIndex == i);
 	}
 
 }

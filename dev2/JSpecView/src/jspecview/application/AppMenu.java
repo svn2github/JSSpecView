@@ -55,7 +55,7 @@ import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 
 import jspecview.common.JSVPanel;
-import jspecview.common.JSVSpecNode;
+import jspecview.common.JSVPanelNode;
 import jspecview.common.PanelData;
 import jspecview.common.JSVPanelPopupMenu;
 import jspecview.common.ScriptToken;
@@ -449,7 +449,7 @@ public class AppMenu extends JMenuBar {
     errorLogMenuItem.setEnabled(isError);
   }
 
-  public void setMenuEnables(JSVSpecNode node) {
+  public void setMenuEnables(JSVPanelNode node) {
     if (node == null) {
       setCloseMenuItem(null);
       setSourceEnabled(false);
