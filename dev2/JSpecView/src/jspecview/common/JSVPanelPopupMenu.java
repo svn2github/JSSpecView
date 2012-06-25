@@ -89,8 +89,6 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   protected JMenuItem userZoomMenuItem = new JMenuItem();
   protected JMenuItem scriptMenuItem = new JMenuItem();
   public JMenuItem overlayStackOffsetMenuItem = new JMenuItem();
-  //public JMenuItem overlayAllMenuItem = new JMenuItem();
-  //public JMenuItem overlayNoneMenuItem = new JMenuItem();
 
   public JMenuItem integrateMenuItem = new JCheckBoxMenuItem();
   public JMenuItem transAbsMenuItem = new JMenuItem();
@@ -106,7 +104,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   protected JMenu appletSaveAsJDXMenu; // applet only
   protected JMenu appletExportAsMenu;  // applet only
   protected JMenuItem appletAdvancedMenuItem;
-  protected JMenuItem overlayMenuItem = new JMenuItem();
+  protected JMenuItem spectraMenuItem = new JMenuItem();
   public JMenuItem overlayKeyMenuItem = new JMenuItem();
   
   public JSVPanelPopupMenu(ScriptInterface scripter) {
@@ -195,26 +193,12 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   }
 
   protected void setOverlayItems() {
-    overlayMenuItem.setText("Overlay/Close...");
-    overlayMenuItem.addActionListener(new ActionListener() {
+    spectraMenuItem.setText("Spectra...");
+    spectraMenuItem.addActionListener(new ActionListener() {
        public void actionPerformed(ActionEvent e) {
          overlay(EnumOverlay.DIALOG);
        }
      });
-/*
-    overlayAllMenuItem.setText("Overlay All");
-    overlayAllMenuItem.addActionListener(new ActionListener() {
-       public void actionPerformed(ActionEvent e) {
-         overlay(1);
-       }
-     });
-    overlayNoneMenuItem.setText("Overlay None");
-    overlayNoneMenuItem.addActionListener(new ActionListener() {
-       public void actionPerformed(ActionEvent e) {
-         overlay(0);
-       }
-     });
-*/
     overlayStackOffsetMenuItem.setText("Overlay Offset...");
     overlayStackOffsetMenuItem.addActionListener(new ActionListener() {
        public void actionPerformed(ActionEvent e) {
@@ -237,7 +221,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
     add(resetMenuItem);
     add(userZoomMenuItem);
     addSeparator();
-    add(overlayMenuItem);
+    add(spectraMenuItem);
     add(overlayStackOffsetMenuItem);
     add(scriptMenuItem);
     addSeparator();

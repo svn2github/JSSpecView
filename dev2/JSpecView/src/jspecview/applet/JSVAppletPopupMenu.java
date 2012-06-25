@@ -28,7 +28,7 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     	// all except About and Zoom disabled
       fileMenu.setEnabled(false);
       viewMenu.setEnabled(false);
-      overlayMenuItem.setEnabled(false);
+      spectraMenuItem.setEnabled(false);
       scriptMenuItem.setEnabled(false);
       appletAdvancedMenuItem.setEnabled(false);
       printMenuItem.setEnabled(false);
@@ -143,7 +143,7 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
     add(fileMenu);
     add(viewMenu);
     add(zoomMenu);
-    add(overlayMenuItem);
+    add(spectraMenuItem);
     add(overlayStackOffsetMenuItem);
     addSeparator();
     add(scriptMenuItem);
@@ -165,7 +165,7 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
 	public void setCompoundMenu(JSVPanel jsvp, List<JSVSpecNode> specNodes,
 			boolean allowSelection, ActionListener compoundMenuSelectionListener,
 			ActionListener compoundMenuChooseListener) {
-		overlayMenuItem.setEnabled(allowSelection && specNodes.size() > 1);
+		spectraMenuItem.setEnabled(allowSelection && specNodes.size() > 1);
 		
 //		appletCompoundMenuItem.removeAll();
 //		if (!allowSelection || specNodes.size() == 1)
@@ -188,7 +188,7 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
 //		}
 //		// add compound menu to popup menu
 //		add(appletCompoundMenuItem, 3);
-		overlayMenuItem.setEnabled(true);
+		spectraMenuItem.setEnabled(true);
 	}
     
 }

@@ -35,7 +35,7 @@ public class AppToolBar extends JToolBar {
   private JButton printButton = new JButton();
   private JToggleButton revPlotToggleButton = new JToggleButton();
   private JButton aboutButton = new JButton();
-  private JButton overlaySplitButton = new JButton();
+  private JButton spectraButton = new JButton();
   private JButton overlayKeyButton = new JButton();
 
   private ImageIcon openIcon;
@@ -49,7 +49,7 @@ public class AppToolBar extends JToolBar {
   private ImageIcon clearIcon;
   private ImageIcon informationIcon;
   private ImageIcon aboutIcon;
-  private ImageIcon overlayIcon;
+  private ImageIcon spectrumIcon;
   //private ImageIcon splitIcon;
   private ImageIcon overlayKeyIcon;
   private ImageIcon errorLogIcon;
@@ -69,7 +69,7 @@ public class AppToolBar extends JToolBar {
     clearIcon = new ImageIcon(cl.getResource("icons/clear24.gif"));
     informationIcon = new ImageIcon(cl.getResource("icons/information24.gif"));
     aboutIcon = new ImageIcon(cl.getResource("icons/about24.gif"));
-    overlayIcon = new ImageIcon(cl.getResource("icons/overlay24.gif"));
+    spectrumIcon = new ImageIcon(cl.getResource("icons/overlay24.gif"));
     //splitIcon = new ImageIcon(cl.getResource("icons/split24.gif"));
     overlayKeyIcon = new ImageIcon(cl.getResource("icons/overlayKey24.gif"));
     errorLogIcon = new ImageIcon(cl.getResource("icons/errorLog24.gif"));
@@ -156,10 +156,10 @@ public class AppToolBar extends JToolBar {
         new AboutDialog(mainFrame);
       }
     });
-    setButton(overlaySplitButton, "Overlay Display", overlayIcon,
+    setButton(spectraButton, "Overlay Display", spectrumIcon,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            overlaySplitButton_actionPerformed(e);
+            spectrumButton_actionPerformed(e);
           }
         });
     setButton(overlayKeyButton, "Display Key for Overlaid Spectra",
@@ -182,7 +182,7 @@ public class AppToolBar extends JToolBar {
     add(resetButton, null);
     add(clearButton, null);
     addSeparator();
-    add(overlaySplitButton, null);
+    add(spectraButton, null);
     add(overlayKeyButton, null);
     addSeparator();
     add(propertiesButton, null);
@@ -213,13 +213,8 @@ public class AppToolBar extends JToolBar {
   }
 
   public void setOverlay(boolean b) {
-   // if (b) {
-   //   overlaySplitButton.setIcon(splitIcon);
-   //   overlaySplitButton.setToolTipText("Split Display");
-   // } else {
-      overlaySplitButton.setIcon(overlayIcon);
-      overlaySplitButton.setToolTipText("Overlay Display");
-   // }
+      spectraButton.setIcon(spectrumIcon);
+      spectraButton.setToolTipText("Spectrum Display");
   }
 
   public void setMenuEnables(JSVSpecNode node) {
@@ -230,15 +225,8 @@ public class AppToolBar extends JToolBar {
     setOverlay(pd.isOverlaid());
   }   
   
-  protected void overlaySplitButton_actionPerformed(ActionEvent e) {
+  protected void spectrumButton_actionPerformed(ActionEvent e) {
     mainFrame.checkOverlay();
-    //runScript("OVERLAY ALL");
-//    if (((JButton) e.getSource()).getIcon() == overlayIcon) {
-//      mainFrame.runScript("OVERLAY ALL");
-//      mainFrame.runScript("OVERLAY ALL");
-//    } else {
-//      mainFrame.runScript("CLOSE");
-//    }
   }
 
 }

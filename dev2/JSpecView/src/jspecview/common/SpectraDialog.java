@@ -46,7 +46,7 @@ import javax.swing.JTree;
  * 
  * @author Bob Hanson hansonr@stolaf.edu
  */
-public class OverlayCloseDialog extends JDialog implements WindowListener {
+public class SpectraDialog extends JDialog implements WindowListener {
 
 	private static final long serialVersionUID = 1L;
 	private ScriptInterface si;
@@ -67,9 +67,9 @@ public class OverlayCloseDialog extends JDialog implements WindowListener {
     * @param spectraTree
     * @param modal the modality
    */
-  public OverlayCloseDialog(ScriptInterface si, Component panel, boolean modal) {
+  public SpectraDialog(ScriptInterface si, Component panel, boolean modal) {
   	this.si = si;
-    this.setTitle("Overlay/Close Spectra");
+    this.setTitle("View/Overlay/Close Spectra");
     this.setModal(modal);
     if(panel != null) {
       setLocation( panel.getLocationOnScreen().x,

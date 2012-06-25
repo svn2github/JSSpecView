@@ -115,11 +115,8 @@ public class AppMenu extends JMenuBar {
   private JCheckBoxMenuItem sidePanelCheckBoxMenuItem = new JCheckBoxMenuItem();
   private JCheckBoxMenuItem statusCheckBoxMenuItem = new JCheckBoxMenuItem();
 
-//  private JMenuItem splitMenuItem = new JMenuItem();
-//  private JMenuItem overlayAllMenuItem = new JMenuItem();
-//  private JMenuItem overlayMenuItem = new JMenuItem();
   private JMenuItem overlayStackOffsetYMenuItem = new JMenuItem();
-  private JMenuItem overlayCloseMenuItem = new JMenuItem();
+  private JMenuItem spectraMenuItem = new JMenuItem();
   private JMenuItem sourceMenuItem = new JMenuItem();
   private JMenuItem propertiesMenuItem = new JMenuItem();
 
@@ -318,32 +315,12 @@ public class AppMenu extends JMenuBar {
         });
     statusCheckBoxMenuItem.setSelected(true);
     
-    JSVPanelPopupMenu.setMenuItem(overlayCloseMenuItem, 'O', "Overlay/Close...", 79,
+    JSVPanelPopupMenu.setMenuItem(spectraMenuItem, 'S', "Spectra...", 83,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             jsvpPopupMenu.overlay(JSVPanelPopupMenu.EnumOverlay.DIALOG);
           }
         });
-
-//    
-//    JSVPanelPopupMenu.setMenuItem(splitMenuItem, 'P', "Split", 83,
-//        InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
-//          public void actionPerformed(ActionEvent e) {
-//            mainFrame.runScript("CLOSE");
-//          }
-//        });
-//    JSVPanelPopupMenu.setMenuItem(overlayAllMenuItem, 'Y', "Overlay All", 0, 0,
-//        new ActionListener() {
-//          public void actionPerformed(ActionEvent e) {
-//            mainFrame.runScript("OVERLAY ALL");
-//          }
-//        });
-//    JSVPanelPopupMenu.setMenuItem(overlayMenuItem, 'O', "Overlay...", 79,
-//        InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
-//          public void actionPerformed(ActionEvent e) {
-//            jsvpPopupMenu.overlay(-2);
-//          }
-//        });
     JSVPanelPopupMenu.setMenuItem(overlayStackOffsetYMenuItem, 'y', "Overlay Offset...", 0,
         0, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
@@ -415,7 +392,7 @@ public class AppMenu extends JMenuBar {
     fileMenu.add(errorLogMenuItem).setEnabled(false);
     fileMenu.addSeparator();
     fileMenu.add(exitMenuItem);
-    displayMenu.add(overlayCloseMenuItem);
+    displayMenu.add(spectraMenuItem);
     displayMenu.add(overlayStackOffsetYMenuItem);
     displayMenu.add(overlayKeyMenuItem).setEnabled(false);
     displayMenu.addSeparator();
@@ -482,8 +459,6 @@ public class AppMenu extends JMenuBar {
       PanelData pd = node.jsvp.getPanelData();
       setCheckBoxes(pd);
       overlayKeyMenuItem.setEnabled(pd.getNumberOfGraphSets() > 1);
-      //overlayAllMenuItem.setEnabled(!pd.isOverlaid());
-      //splitMenuItem.setEnabled(pd.isOverlaid());
       setCloseMenuItem(FileManager.getName(node.source.getFilePath()));
       exportAsMenu.setEnabled(true);
       saveAsMenu.setEnabled(true);

@@ -72,7 +72,7 @@ import jspecview.common.JSVSpecNode;
 import jspecview.common.JSVSpectrumPanel;
 import jspecview.common.JSVTreeNode;
 import jspecview.common.JSViewer;
-import jspecview.common.OverlayCloseDialog;
+import jspecview.common.SpectraDialog;
 import jspecview.common.OverlayLegendDialog;
 import jspecview.common.AwtParameters;
 import jspecview.common.PanelData;
@@ -144,7 +144,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 
 	boolean isStandalone; // not changed
 
-	private OverlayCloseDialog overlayCloseDialog;
+	private SpectraDialog spectraDialog;
 	private OverlayLegendDialog overlayLegendDialog;
 
 	private String appletID;
@@ -185,9 +185,9 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	void dispose() {
 		jFileChooser = null;
 		try {
-			if (overlayCloseDialog != null)
-	  		overlayCloseDialog.dispose();
-			overlayCloseDialog = null;
+			if (spectraDialog != null)
+	  		spectraDialog.dispose();
+			spectraDialog = null;
 			if (overlayLegendDialog != null)
 				overlayLegendDialog.dispose();
 			overlayLegendDialog = null;
@@ -1128,7 +1128,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	public void checkOverlay() {
 		if (spectrumPanel != null)
       spectrumPanel.markSelectedPanels(specNodes);
-		overlayCloseDialog = new OverlayCloseDialog(this, spectrumPanel, false);
+		spectraDialog = new SpectraDialog(this, spectrumPanel, false);
 	}
 
 	// not applicable to applet:

@@ -97,7 +97,7 @@ import jspecview.common.JSVSpecNode;
 import jspecview.common.JSVSpectrumPanel;
 import jspecview.common.JSVTreeNode;
 import jspecview.common.JSViewer;
-import jspecview.common.OverlayCloseDialog;
+import jspecview.common.SpectraDialog;
 import jspecview.common.PanelData;
 import jspecview.common.Parameters;
 import jspecview.common.JSVPanelPopupMenu;
@@ -1368,7 +1368,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	public void checkOverlay() {
 		if (spectrumPanel != null)
       spectrumPanel.markSelectedPanels(specNodes);
-		new OverlayCloseDialog(this, spectraTreeScrollPane, false);
+		new SpectraDialog(this, spectraTreeScrollPane, false);
 	}
 
 }
