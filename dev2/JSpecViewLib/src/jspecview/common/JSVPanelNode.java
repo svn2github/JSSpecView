@@ -12,7 +12,6 @@ import jspecview.source.JDXSource;
 
 public class JSVPanelNode {
 
-  private String frameTitle;
 	public JSVPanelNode(String id, String fileName, JDXSource source, JSVPanel jsvp) {
     this.id = id;
     this.source = source;
@@ -40,6 +39,8 @@ public class JSVPanelNode {
   public JSVDialog legend;
 	public boolean isSelected;
 	public boolean isOverlay;
+  public String frameTitle;
+  
 
   public void dispose() {
     source.dispose();
@@ -100,10 +101,14 @@ public class JSVPanelNode {
     return null;
   }
 
-	public static String getSpectrumListAsString(List<JSVPanelNode> panelNodes) {
+	public static String getSpectrumListAsString(List<JSVPanelNode> panelNodes, boolean allowOverlays) {
       StringBuffer sb = new StringBuffer();
-      for (int i = 0; i < panelNodes.size(); i++)
-        sb.append(" ").append(panelNodes.get(i).id);
+      for (int i = 0; i < panelNodes.size(); i++) {
+      	String id = panelNodes.get(i).id;
+      	if (!allowOverlays && panelNodes.get(i).isOverlay)
+      		continue;
+        sb.append(" ").append(id);
+      }
       return sb.toString().trim();
   }
   
