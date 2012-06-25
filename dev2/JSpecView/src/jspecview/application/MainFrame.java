@@ -468,10 +468,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
     spectraTree = new JTree(spectraTreeModel);
     spectraTree.getSelectionModel().setSelectionMode(
         TreeSelectionModel.SINGLE_TREE_SELECTION);
-    
-    // application only:
-    
-    spectraTree.setCellRenderer(new SpectraTreeCellRenderer());
     spectraTree.addTreeSelectionListener(new TreeSelectionListener() {
       public void valueChanged(TreeSelectionEvent e) {
         JSVTreeNode node = (JSVTreeNode) spectraTree
@@ -486,10 +482,14 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
         appMenu.setCloseMenuItem(node.panelNode.fileName);
       }
     });
+    spectraTree.setRootVisible(false);
+
+    // application only:
+    
+    spectraTree.setCellRenderer(new SpectraTreeCellRenderer());
     spectraTree.putClientProperty("JTree.lineStyle", "Angled");
     spectraTree.setShowsRootHandles(true);
     spectraTree.setEditable(false);
-    spectraTree.setRootVisible(false);
     spectraTree.addMouseListener(new MouseListener() {
       public void mouseClicked(MouseEvent e) {
         if (e.getClickCount() == 2 && getSelectedPanel() != null) {
@@ -654,8 +654,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   public void openDataOrFile(String data, String name, List<JDXSpectrum> specs,
                              String url, int firstSpec, int lastSpec) {
   	JSVTreeNode.openDataOrFile((ScriptInterface) this, data, name, specs, url, firstSpec, lastSpec);
-    validate();
-    repaint();
+  	validateAndRepaint();
   }
 
   public void setCurrentSource(JDXSource source) {
@@ -957,8 +956,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   public void execClose(String value, boolean fromScript) {
     JSVTreeNode.close(this, TextFormat.trimQuotes(value));
     if (!fromScript) {
-    	validate();
-    	repaint();    	
+    	validateAndRepaint();
     }
   }
 

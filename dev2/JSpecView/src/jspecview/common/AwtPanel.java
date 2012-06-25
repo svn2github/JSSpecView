@@ -337,7 +337,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
    */
   @Override
   public void paintComponent(Graphics g) {
-    if (!isEnabled() || pd == null || pd.graphSets == null)
+    if (pd == null || pd.graphSets == null)
       return;
     super.paintComponent(g);
     pd.drawGraph(g, getHeight(), getWidth());

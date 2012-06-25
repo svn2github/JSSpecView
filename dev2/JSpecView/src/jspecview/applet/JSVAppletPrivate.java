@@ -58,7 +58,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTree;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import jspecview.application.TextDialog;
@@ -751,7 +754,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
     	setSelectedPanel(null);
     	return;
     }
-
     compoundMenuOn = allowCompoundMenu;
 
 		appletPopupMenu.setCompoundMenu(getSelectedPanel(), panelNodes, compoundMenuOn, 
@@ -809,6 +811,11 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	public void setSelectedPanel(JSVPanel jsvp) {
 		spectrumPanel.setSelectedPanel(jsvp, panelNodes);
   	selectedPanel = jsvp;
+  	if (jsvp != null) {
+      JSVTreeNode treeNode = (JSVTreeNode)JSVPanelNode.findNode(jsvp, panelNodes).treeNode;
+	  	spectraTree.scrollPathToVisible(new TreePath(treeNode.getPath()));
+  	  spectraTree.setSelectionPath(new TreePath(treeNode.getPath()));
+  	}
     jsvApplet.validate();
 	}
 
@@ -974,11 +981,9 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	private JSVPanel setSpectrumIndex(int i, String where) {
 		if (i < 0 || i > panelNodes.size())
 			return null;
-		if (getSelectedPanel() != null) {
-			showSpectrum(i);
-			spectrumPanel.validate();
-			validateAndRepaint();
-		}
+		showSpectrum(i);
+		spectrumPanel.validate();
+		validateAndRepaint();
 		return getSelectedPanel();
 	}
 
@@ -1034,6 +1039,20 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
     spectraTree = new JTree(spectraTreeModel);
     spectraTree.getSelectionModel().setSelectionMode(
         TreeSelectionModel.SINGLE_TREE_SELECTION);
+    spectraTree.addTreeSelectionListener(new TreeSelectionListener() {
+      public void valueChanged(TreeSelectionEvent e) {
+        JSVTreeNode node = (JSVTreeNode) spectraTree
+            .getLastSelectedPathComponent();
+        if (node == null) {
+          return;
+        }
+        if (node.isLeaf()) {
+          setNode(node.panelNode, true);
+        }
+        currentSource = node.panelNode.source;
+      }
+    });
+    spectraTree.setRootVisible(false);
   }
 
   public Object getSpectraTree() {
