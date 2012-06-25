@@ -2,9 +2,9 @@ Feel free to add to this file any time! Don't worry about sync problems.
 Put new items at top, please.
 
 ====TODO=========
-Bug:
-Loading a GC/MS file in Jmol application and selecting a menu option in Jmol to choose a frame
-gives JSpecView loading with looping over frames in the Jmol display as well as the JSpecView display 
+
+Features and Bugs:
+For the overlay/close dialog box, please move the overlay section to the top of the display rather than the bottom
 
 
 http://blog.gorges.us/2009/03/how-to-enable-keywords-in-eclipse-and-subversion-svn/
@@ -30,6 +30,10 @@ Dialog Box for overlay colours needs checking
 frames is not working right  -- just turns off the key entirely.
 
 =====DONE========
+
+Loading a GC/MS file in Jmol application and selecting a menu option in Jmol to choose a frame
+gives JSpecView loading with looping over frames in the Jmol display as well as the JSpecView display 
+
 
 PRINT command for applet and application
 
