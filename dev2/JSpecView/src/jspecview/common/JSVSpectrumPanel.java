@@ -56,7 +56,7 @@ public class JSVSpectrumPanel extends JPanel implements JSVContainer {
 		markSelectedPanels(specNodes);
 	}
 
-	void markSelectedPanels(List<JSVSpecNode> specNodes) {
+	public void markSelectedPanels(List<JSVSpecNode> specNodes) {
 		for (int i = specNodes.size(); --i >= 0;)
 			specNodes.get(i).isSelected = (currentPanelIndex == i);
 	}

@@ -1126,6 +1126,8 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	public void checkOverlay() {
+		if (spectrumPanel != null)
+      spectrumPanel.markSelectedPanels(specNodes);
 		overlayCloseDialog = new OverlayCloseDialog(this, spectrumPanel, false);
 	}
 

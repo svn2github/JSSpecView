@@ -509,7 +509,7 @@ public class JSViewer {
     if (speclist.size() == 1) {
       	JSVSpecNode node = JSVSpecNode.findNodeById(idLast, specNodes);
       	if (node != null) {
-      		si.setSelectedPanel(node.jsvp);
+      		si.setNode(node, true);
       		// possibility of a problem here -- we are not communicating with Jmol our model changes.
       		speclist.clear();
       	}

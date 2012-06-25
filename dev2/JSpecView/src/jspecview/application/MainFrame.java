@@ -187,7 +187,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   private BorderLayout mainborderLayout = new BorderLayout();
   private JSplitPane mainSplitPane = new JSplitPane();
   private JSplitPane sideSplitPane = new JSplitPane();
-  private JScrollPane scrollPane = new JScrollPane();
   public DropTargetListener dtl;
 
 
@@ -590,7 +589,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
       mainSplitPane.setLeftComponent(spectraTreeScrollPane);
     }
 		spectrumPanel = new JSVSpectrumPanel(new BorderLayout());
-    mainSplitPane.setRightComponent(scrollPane);
     mainSplitPane.setRightComponent(spectrumPanel);
   }
 
@@ -1246,9 +1244,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   public void setNode(JSVSpecNode specNode, boolean fromTree) {
     setSelectedPanel(specNode.jsvp);
     if (fromTree) {
-      getSelectedPanel().setEnabled(false);
       sendFrameChange(specNode.jsvp);
-      getSelectedPanel().setEnabled(true);
     }
     setMenuEnables(specNode, false);
     if (getSelectedPanel().getSpectrum().hasIntegral())
@@ -1370,7 +1366,9 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   }
 
 	public void checkOverlay() {
-		new OverlayCloseDialog(this, spectrumPanel, false);
+		if (spectrumPanel != null)
+      spectrumPanel.markSelectedPanels(specNodes);
+		new OverlayCloseDialog(this, spectraTreeScrollPane, false);
 	}
 
 }

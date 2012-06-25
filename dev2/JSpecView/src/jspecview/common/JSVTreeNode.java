@@ -8,6 +8,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -107,12 +108,7 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
     List<JSVSpecNode> specNodes = si.getSpecNodes();
 		if (specNodes  == null || i < 0 || i >= specNodes.size())
       return;
-    setFrameAndTreeNode(si, i, specNodes.get(i));
-	}
-
-	private static void setFrameAndTreeNode(ScriptInterface si,
-			int i, JSVSpecNode node) {
-    si.setNode(node, false);
+    si.setNode(specNodes.get(i), false);
 	}
 
 	public static JSVSpecNode selectFrameNode(ScriptInterface si, JSVPanel jsvp) {
@@ -133,7 +129,7 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
       JSVSpecNode node = JSVSpecNode.findNodeById(value, si.getSpecNodes());
       if (node == null)
         return null;
-      setFrameAndTreeNode(si, -1, node);
+      si.setNode(node, false);
     } else {
       setSpectrumNumberAndTreeNode(si, Integer.parseInt(value));
     }
@@ -186,10 +182,18 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
 				if (i < specNodes.size() && specNodes.get(i).fileName.startsWith(value))
 					si.closeSource(specNodes.get(i).source);
 		} else if (value.equals("selected")) {
-			for (int i = specNodes.size(); --i >= 0;)
-				if (i < specNodes.size() && specNodes.get(i).isSelected)
-					si.closeSource(specNodes.get(i).source);
-		}	else {
+			List<JDXSource> list = new ArrayList<JDXSource>();
+			JDXSource lastSource = null;
+			for (int i = specNodes.size(); --i >= 0;) {
+				JDXSource source = specNodes.get(i).source;
+				if (specNodes.get(i).isSelected 
+						&& (lastSource == null || lastSource != source))
+					list.add(source);
+				lastSource = source;
+			}
+			for (int i = list.size(); --i >= 0;)
+				si.closeSource(list.get(i));
+		} else {
 			JDXSource source = (value.length() == 0 ? si.getCurrentSource()
 					: JSVSpecNode.findSourceByNameOrId(value, specNodes));
 			if (source == null)

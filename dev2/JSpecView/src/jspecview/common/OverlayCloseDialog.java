@@ -20,6 +20,7 @@
 package jspecview.common;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -66,14 +67,13 @@ public class OverlayCloseDialog extends JDialog implements WindowListener {
     * @param spectraTree
     * @param modal the modality
    */
-  public OverlayCloseDialog(ScriptInterface si, JSVSpectrumPanel panel, boolean modal) {
+  public OverlayCloseDialog(ScriptInterface si, Component panel, boolean modal) {
   	this.si = si;
     this.setTitle("Overlay/Close Spectra");
     this.setModal(modal);
     if(panel != null) {
       setLocation( panel.getLocationOnScreen().x,
                    panel.getLocationOnScreen().y);
-      panel.markSelectedPanels(si.getSpecNodes());
     }
     setResizable(true);
     addWindowListener(this);
@@ -259,6 +259,7 @@ public class OverlayCloseDialog extends JDialog implements WindowListener {
 				JSVTreeNode treeNode = enume.nextElement();
 				checkBoxes.get(treeNode.index).setSelected(isSelected);
 				treeNode.specNode.isSelected = isSelected;
+				node.specNode.isSelected = isSelected;
 			}
 		} else {
 			// uncheck all Overlays
@@ -266,8 +267,10 @@ public class OverlayCloseDialog extends JDialog implements WindowListener {
 		}
 		if (isSelected)
 			for (i = treeNodes.size(); --i >= 0;)
-				if (treeNodes.get(i).specNode.isOverlay != node.specNode.isOverlay)
+				if (treeNodes.get(i).specNode.isOverlay != node.specNode.isOverlay) {
 					checkBoxes.get(treeNodes.get(i).index).setSelected(false);
+					treeNodes.get(i).specNode.isSelected = false;
+				}
 		checkEnables();
 	}
 
@@ -282,9 +285,13 @@ public class OverlayCloseDialog extends JDialog implements WindowListener {
 	protected void overlaySelected() {
 		StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < checkBoxes.size(); i++) {
-			JCheckBox cb = checkBoxes.get(i); 
-			if (cb.isSelected() && treeNodes.get(i).specNode.jsvp != null 
-					&& !((JSVTreeNode)treeNodes.get(i).getParent()).specNode.fileName.startsWith("Overlay")) {
+			JCheckBox cb = checkBoxes.get(i);
+			JSVSpecNode node = treeNodes.get(i).specNode;
+			if (cb.isSelected() && node.jsvp != null) {
+				if (node.isOverlay) {
+					si.setNode(node, true);
+					return;
+				}
 				String label = cb.getText();
 				sb.append(" ").append(label.substring(0, label.indexOf(":")));
 			}
