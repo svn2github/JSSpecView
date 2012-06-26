@@ -103,6 +103,10 @@ public class JSViewer {
         case OVERLAY:
           execOverlay(si, value, true);
           break;
+        case OVERLAYSTACKED:
+          if (jsvp != null)
+          	jsvp.splitStack(!Parameters.isTrue(value));
+          break;
         case PEAK:
           try {
             List<String> tokens = ScriptToken.getTokens(value);

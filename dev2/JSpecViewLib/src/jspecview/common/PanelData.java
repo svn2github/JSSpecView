@@ -72,6 +72,7 @@ public class PanelData {
   private ArrayList<PanelListener> listeners = new ArrayList<PanelListener>();
   List<GraphSet> graphSets;
   GraphSet currentGraphSet;
+	int currentSplitPoint;
   private Map<String, NumberFormat> htFormats = new Hashtable<String, NumberFormat>();
   PlotWidget thisWidget;
   Coordinate coordClicked;
@@ -228,11 +229,22 @@ public class PanelData {
     setTitle(getSpectrum().getTitleLabel());
   }
 
-  protected void setCurrentGraphSet(GraphSet gs) {
-    if (currentGraphSet == gs)
-      return;
+  protected void setCurrentGraphSet(GraphSet gs, int xPixel, int yPixel) {
+  	int splitPoint = gs.getSplitPoint(yPixel);
+    if (currentGraphSet == gs) { 
+    	if (gs.nSplit == 1) {
+    		if (!gs.showAllStacked || !gs.checkSpectrumClickEvent(xPixel, yPixel))
+    			return;
+    	} else if (currentSplitPoint == splitPoint) {
+        return;
+    	}
+    }
     currentGraphSet = gs;
-    notifySubSpectrumChange(gs.getSpectrum().getSubIndex(), gs.getSpectrum());
+    currentSplitPoint = splitPoint;
+    if (gs.nSplit > 1 && !gs.showAllStacked)
+    	gs.iThisSpectrum = splitPoint;
+    JDXSpectrum spec = gs.getSpectrum();
+    notifySubSpectrumChange(spec.getSubIndex(), spec);
   }
 
   public JDXSpectrum getSpectrum() {
@@ -325,7 +337,7 @@ public class PanelData {
   }
 
   public int getNumberOfSpectraInCurrentSet() {
-    return currentGraphSet.getNumberOfSpectra();
+    return currentGraphSet.getNSpectra();
   }
 
   /**
@@ -612,7 +624,7 @@ public class PanelData {
     isIntegralDrag = (isControlDown && gs.getSpectrum().hasIntegral());
     if (isControlDown && !isIntegralDrag)
       return;
-    setCurrentGraphSet(gs);
+    setCurrentGraphSet(gs, xPixel, yPixel);
     gs.checkWidgetEvent(xPixel, yPixel, true);
   }
 
@@ -645,7 +657,7 @@ public class PanelData {
     GraphSet gs = GraphSet.findGraphSet(graphSets, xPixel, yPixel);
     if (gs == null)
       return;
-    setCurrentGraphSet(gs);
+    setCurrentGraphSet(gs, xPixel, yPixel);
     gs.mouseClickEvent(xPixel, yPixel, clickCount, isControlDown);
   }
   
@@ -676,5 +688,11 @@ public class PanelData {
         break;
     return pi2;
   }
+
+	public void splitStack(boolean doSplit) {
+  	if (currentGraphSet == null)
+  		return;
+  	currentGraphSet.splitStack(graphSets, doSplit);
+	}
 
 }

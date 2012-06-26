@@ -9,7 +9,7 @@ public interface JSVPanel extends JSVContainer {
   void drawTitle(Object g, int height, int width, String title);
   Object getColor(ScriptToken st);
   Object getColor(int r, int g, int b, int a);
-  GraphSet getNewGraphSet();
+  GraphSet getNewGraphSet(GraphSet gs);
   JSVPanel getNewPanel(JDXSpectrum spectrum);
   PanelData getPanelData();
   Object getPlotColor(int i);
@@ -23,4 +23,6 @@ public interface JSVPanel extends JSVContainer {
   void setSpectrum(JDXSpectrum spec);
   void setToolTipText(String s);
   void setupPlatform();
+
+	void splitStack(boolean doSplit);
 }

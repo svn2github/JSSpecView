@@ -19,8 +19,10 @@
 
 package jspecview.common;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.util.List;
@@ -50,13 +52,9 @@ class AwtGraphSet extends GraphSet {
   }
 
 
-  AwtGraphSet(AwtPanel jsvp) {
+  AwtGraphSet(AwtPanel jsvp, GraphSet superSet) {
     this.jsvp = jsvp;
     this.pd = jsvp.pd;
-  }
-
-  protected AwtGraphSet getGraphSet(Object jsvp) {
-    return new AwtGraphSet((AwtPanel) jsvp);
   }
 
   @Override
@@ -257,5 +255,21 @@ class AwtGraphSet extends GraphSet {
   protected void setColor(Object g, int red, int green, int blue) {
     ((Graphics) g).setColor(new Color(red, green, blue));
   }
+
+  BasicStroke strokeBasic = new BasicStroke();
+  BasicStroke strokeBold = new BasicStroke(2f);
+
+	@Override
+	protected void setStrokeBold(Object g, boolean tf) {
+		((Graphics2D) g).setStroke(tf ? strokeBold : strokeBasic);
+	}
+	
+	@Override
+	protected void fillArrow(Object g, boolean isUp, int x, int y) {
+		int f = (isUp ? -1 : 1);
+		int[] axPoints = new int[] { x - 5,   x - 5, x + 5,   x + 5,   x + 8,        x, x - 8 }; 
+		int[] ayPoints = new int[] { y + 5*f, y - f, y - f, y + 5*f, y + 5*f, y + 10*f, y + 5*f }; 
+		((Graphics)g).fillPolygon(axPoints, ayPoints, 7);
+	}
 
 }

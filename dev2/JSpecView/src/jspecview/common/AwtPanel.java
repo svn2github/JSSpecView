@@ -284,8 +284,8 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     return new AwtPanel(spec, jsvpPopupMenu);
   }
 
-  public GraphSet getNewGraphSet() {
-    return new AwtGraphSet(this);
+  public GraphSet getNewGraphSet(GraphSet superSet) {
+    return new AwtGraphSet(this, superSet);
   }
 
   /**
@@ -657,5 +657,9 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   public String toString() {
     return getSpectrumAt(0).toString();
   }
+
+	public void splitStack(boolean doSplit) {
+		pd.splitStack(doSplit);
+	}
 
 }

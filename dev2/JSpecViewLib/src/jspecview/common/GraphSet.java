@@ -8,7 +8,6 @@ import java.util.Map;
 
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
-import jspecview.source.JDXSource;
 import jspecview.util.Logger;
 import jspecview.util.Parser;
 
@@ -25,13 +24,13 @@ abstract class GraphSet {
                                     String title);
   abstract protected void fillBox(Object g, int x0, int y0, int x1, int y1,
                                   ScriptToken whatColor);
+  abstract protected void fillArrow(Object g, boolean isUp, int x, int y);
   abstract Annotation getAnnotation(double x, double y, String text,
                                     boolean isPixels, boolean is2D,
                                     int offsetX, int offsetY);
   abstract Annotation getAnnotation(List<String> args, Annotation lastAnnotation);
   abstract protected boolean get2DImage();
   abstract protected int getFontHeight(Object g);
-  abstract protected GraphSet getGraphSet(Object jsvp);
   abstract protected String getInput(String message, String title, String sval);
   abstract protected int getStringWidth(Object g, String s);
   abstract protected void setAnnotationColor(Object g, Annotation note, ScriptToken whatColor);
@@ -39,29 +38,47 @@ abstract class GraphSet {
   abstract protected void setCurrentBoxColor(Object g);
   abstract protected void setPlotColor(Object g, int i);
   abstract protected void setColor(Object g, int red, int green, int blue);
+  abstract protected void setStrokeBold(Object g, boolean tf);
   
   abstract void setPlotColors(Object oColors);
   abstract void setPlotColor0(Object oColor);
   abstract boolean update2dImage(boolean b);
 
 
-
   protected List<Highlight> highlights = new ArrayList<Highlight>();
   protected List<JDXSpectrum> spectra = new ArrayList<JDXSpectrum>(2);
 
-  int getNumberOfSpectra() {
+  private int overlayOffset = 0;
+  private int[] spectrumOffsets;
+  private boolean isSplittable = true;
+	boolean showAllStacked = true;
+  private int[] splitSpectrumPointers = new int[] {0};
+
+  int nSplit = 1;
+
+  private ArrayList<Annotation> annotations;
+  private Annotation lastAnnotation;
+  private List<JDXSpectrum> graphsTemp = new ArrayList<JDXSpectrum>();
+  private PlotWidget[] widgets;
+  
+  //needed by PanelData
+  
+  MultiScaleData multiScaleData; 
+  boolean reversePlot;
+  double userYFactor = 1;
+
+  // needed by AwtGraphSet
+  
+  protected List<MultiScaleData> zoomInfoList;
+  protected ImageScaleData isd;
+  protected PanelData pd;
+  protected boolean sticky2Dcursor;
+  protected int nSpectra;
+
+  int getNSpectra() {
     return nSpectra;
   }
 
-  MultiScaleData multiScaleData;
-  protected List<MultiScaleData> zoomInfoList;
-  protected ArrayList<Annotation> annotations;
-  protected Annotation lastAnnotation;
-  protected JDXSource source;
-  protected ImageScaleData isd;
-  private List<JDXSpectrum> graphsTemp = new ArrayList<JDXSpectrum>();
-  protected PlotWidget[] widgets;
-  protected PanelData pd;
 
 
   void dispose() {
@@ -72,16 +89,15 @@ abstract class GraphSet {
     zoomInfoList = null;
     annotations = null;
     lastAnnotation = null;
-    source = null;
     isd = null;
     graphsTemp = null;
     widgets = null;
     disposeImage();
   }
 
-  protected double fracX = 1, fracY = 1, fX0 = 0, fY0 = 0; // take up full screen
+  private double fracX = 1, fracY = 1, fX0 = 0, fY0 = 0; // take up full screen
 
-  protected PlotWidget zoomBox1D, zoomBox2D, pin1Dx0, pin1Dx1, // ppm range -- horizontal bar on 1D spectrum 
+  private PlotWidget zoomBox1D, zoomBox2D, pin1Dx0, pin1Dx1, // ppm range -- horizontal bar on 1D spectrum 
       pin1Dy0, pin1Dy1, // y-scaling -- vertical bar on 1D spectrum and left of 2D when no 1D
       pin1Dx01, pin1Dy01, // center pins for those
       pin2Dx0, pin2Dx1, // ppm range -- horizontal bar on 2D spectrum 
@@ -91,31 +107,26 @@ abstract class GraphSet {
       cur2Dy; // 2D y cursor -- points to currently displayed 1D slice
 
 
-  // for the 1D plot area:
-  protected int xPixel0, yPixel0, xPixel1, yPixel1;
+  private double xFactorForScale, yFactorForScale;
+  private double minYScale;
+  private double widthRatio;
+
+	// for the 1D plot area:
+  private int xPixel0, yPixel0, xPixel1, yPixel1;
   // for the overall panel section:
-  protected int xPixel00, yPixel00, xPixel11, yPixel11;
-  protected int xPixels, yPixels;
+  private int xPixel00, yPixel00, xPixel11, yPixel11, yPixel000;
+  private int xPixels, yPixels;
 
-  protected boolean allowYScale = true;
-  protected boolean drawXAxisLeftToRight;
-  protected boolean xAxisLeftToRight = true;
-  protected boolean doDraw1DObjects = true;
-  protected boolean sticky2Dcursor;
+  private boolean allowYScale = true;
+  private boolean drawXAxisLeftToRight;
+  private boolean xAxisLeftToRight = true;
+  private boolean doDraw1DObjects = true;
 
-  protected boolean reversePlot;
-  protected boolean enableZoom;
-
-  protected int currentZoomIndex;
-  protected int nSpectra;
-  protected int yOffsetPercent;
-  protected int iThisSpectrum = -1;
+  private boolean enableZoom;
+  private int currentZoomIndex;
+  
+  private int yOffsetPercent;
   private double lastClickX;
-
-  double userYFactor = 1;
-  protected double xFactorForScale, yFactorForScale;
-  protected double minYScale;
-  protected double widthRatio;
 
   PeakInfo selectPeakByFileIndex(String filePath, String index) {
     // for now we are only checking the base spectrum, but
@@ -124,13 +135,16 @@ abstract class GraphSet {
   }
 
   JDXSpectrum getSpectrum() {
+    // could be a 2D spectrum or a set of mass spectra
     return getSpectrumAt(getSpecIndex()).getCurrentSubSpectrum();
   }
 
-  public void setSpectrum(JDXSpectrum spec) {
+  void setSpectrum(JDXSpectrum spec) {
+  	// T/A conversion for IR
     int pt = getSpecIndex();
     spectra.remove(pt);
     spectra.add(pt, spec);
+    spectrumScaleFactors[pt] = 1;
   }
 
   private int getSpecIndex() {
@@ -151,18 +165,14 @@ abstract class GraphSet {
   static List<GraphSet> getGraphSets(JSVPanel jsvp, List<JDXSpectrum> spectra,
                                      int startIndex, int endIndex) {
     List<GraphSet> graphSets = new ArrayList<GraphSet>();
-    GraphSet graphSet = null;
-    JDXSpectrum specLast = null;
     for (int i = 0; i < spectra.size(); i++) {
       JDXSpectrum spec = spectra.get(i);
-      if (specLast == null
-          || !JDXSpectrum.areScalesCompatible(spec, specLast, false)) {
-        graphSet = jsvp.getNewGraphSet();
-        graphSets.add(graphSet);
-      }
-      graphSet.addSpec(specLast = spec);
+      GraphSet graphSet = findCompatibleGraphSet(graphSets, spec);
+      if (graphSet == null)
+        graphSets.add(graphSet = jsvp.getNewGraphSet(null));
+      graphSet.addSpec(spec);
     }
-    GraphSet.setFractionalPositions(graphSets);
+    setFractionalPositions(graphSets);
     for (int i = graphSets.size(); --i >= 0;) {
       graphSets.get(i).initGraphSet(startIndex, endIndex);
       Logger.info("JSVGraphSet " + (i + 1) + " nSpectra = "
@@ -171,47 +181,84 @@ abstract class GraphSet {
     return graphSets;
   }
 
-  protected void addSpec(JDXSpectrum spec) {
+  private static GraphSet findCompatibleGraphSet(List<GraphSet> graphSets, JDXSpectrum spec) {
+    for (int i = 0; i < graphSets.size(); i++)
+    	if (JDXSpectrum.areScalesCompatible(spec, graphSets.get(i).getSpectrum(), false))
+    		return graphSets.get(i);
+    return null;
+	}
+  
+	private void addSpec(JDXSpectrum spec) {
     spectra.add(spec);
     nSpectra++;
   }
 
+	void splitStack(List<GraphSet> graphSets, boolean doSplit) {
+		if (doSplit && isSplittable) {
+			nSplit = 0;
+			splitSpectrumPointers = new int[nSpectra];
+			for (int i = 0; i < nSpectra; i++) {
+				splitSpectrumPointers[nSplit] = i;
+				nSplit++;
+			}
+			showAllStacked = false;
+		} else {
+			nSplit = 1;
+			splitSpectrumPointers[0] = 0;
+			showAllStacked = !doSplit;
+		}
+		setFractionalPositions(graphSets);
+	}
+  
   static void setFractionalPositions(List<GraphSet> graphSets) {
     // for now, just a vertical stack
     int n = graphSets.size();
     double f = 0;
     int n2d = 1;
-    for (int i = 0; i < n; i++)
-      f += (graphSets.get(i).getSpectrumAt(0).is1D() ? 1 : n2d);
-    f = 1 / f;
-    double x = 0;
+    GraphSet gs;
     for (int i = 0; i < n; i++) {
-      GraphSet gs = graphSets.get(i);
+    	gs = graphSets.get(i);
+      f += (gs.getSpectrumAt(0).is1D() ? 1 : n2d) * gs.nSplit;
+    }
+    f = 1 / f;
+    double y = 0;
+    for (int i = 0; i < n; i++) {
+      gs = graphSets.get(i);
       double g = (gs.getSpectrumAt(0).is1D() ? f : n2d * f);
       gs.fracY = g;
-      gs.fY0 = x;
-      x += g;
+      gs.fY0 = y;
+      y += g * gs.nSplit;
     }
   }
 
-  protected void setPositionForFrame(int width, int height, int left,
-                                     int right, int top, int bottom) {
+	private void setPositionForFrame(int iSplit) {
+  	
+		int marginalHeight = height - 40;
     xPixel00 = (int) (width * fX0);
-    xPixel11 = (int) (width * (fX0 + fracX)) - 1;
-    yPixel00 = (int) (height * fY0);
-    yPixel11 = (int) (height * (fY0 + fracY)) - 1;
+    xPixel11 = xPixel00 + (int) (width * fracX) - 1;
+    yPixel000 = (int) (height * fY0);
+    yPixel00 = yPixel000 + (int) (marginalHeight * fracY * iSplit);
+    yPixel11 = yPixel00 + (int) (marginalHeight * fracY) - 1;
     xPixel0 = xPixel00 + left / (xPixel00 == 0 ? 1 : 2);
     xPixel1 = xPixel11 - right / (xPixel11 > width - 2 ? 1 : 2);
     yPixel0 = yPixel00 + top / (yPixel00 == 0 ? 1 : 2);
     yPixel1 = yPixel11 - bottom / (yPixel11 > height - 2 ? 1 : 2);
     xPixels = xPixel1 - xPixel0 + 1;
     yPixels = yPixel1 - yPixel0 + 1;
-
   }
 
-  protected boolean hasPoint(int xPixel, int yPixel) {
-    return (xPixel >= xPixel00 && xPixel <= xPixel11 && yPixel >= yPixel00 && yPixel <= yPixel11);
+  private boolean hasPoint(int xPixel, int yPixel) {
+    return (xPixel >= xPixel00 && xPixel <= xPixel11 && yPixel >= yPixel000 && yPixel <= yPixel11 * nSplit);
   }
+
+	int getSplitPoint(int yPixel) {
+		return Math.min((int)((yPixel - yPixel000) / (yPixel11 - yPixel00)), nSplit);
+	}
+
+	boolean isSplitWidget(int xPixel, int yPixel) {
+		return (isSplittable && xPixel >= xPixel11 - 20 && yPixel >= yPixel00 + 1
+				&& xPixel <= xPixel11 - 10 && yPixel <= yPixel00 + 11);
+	}
 
   /**
    * Initializes the graph set
@@ -231,10 +278,15 @@ abstract class GraphSet {
     setDrawXAxis();
     int[] startIndices = new int[nSpectra];
     int[] endIndices = new int[nSpectra];
+    spectrumScaleFactors = new float[nSpectra];
+    //null means use standard offset spectrumOffsets = new int[nSpectra];
     allowYScale = true;
     if (endIndex <= 0)
       endIndex = Integer.MAX_VALUE;
+    isSplittable = true;// for now, could be: getSpectrumAt(0).isSplitable();
+		showAllStacked = (nSpectra > 1);
     for (int i = 0; i < nSpectra; i++) {
+    	spectrumScaleFactors[i] = 1;
       int iLast = spectra.get(i).getXYCoords().length - 1;
       startIndices[i] = Coordinate.intoRange(startIndex, 0, iLast);
       endIndices[i] = Coordinate.intoRange(endIndex, 0, iLast);
@@ -248,7 +300,41 @@ abstract class GraphSet {
     zoomInfoList.add(multiScaleData);
   }
 
-  protected void getMultiScaleData(double x1, double x2, double y1, double y2,
+  int iThisSpectrum = -1;
+	private int height;
+	private int width;
+	private int right;
+	private int top;
+	private int left;
+	private int bottom;
+  /**
+   * here we are selecting a spectrum based on a message from Jmol
+   * matching type and model
+   * 
+   * @param filePath
+   * @param type
+   * @param model
+   */
+  void selectSpectrum(String filePath, String type, String model) {
+    if (nSpectra == 1) {
+      iThisSpectrum = -1;
+      return;
+    }
+    boolean haveFound = false;
+    for (int i = spectra.size(); --i >= 0;)
+      if ((filePath == null 
+          || getSpectrumAt(i).getFilePathForwardSlash().equals(filePath))
+          && (getSpectrumAt(i).matchesPeakTypeModel(type, model))) {
+        iThisSpectrum = i;
+        if (nSplit > 1)
+        	splitStack(pd.graphSets, true);
+        haveFound = true;
+      }
+    if (!haveFound && iThisSpectrum >= 0 && this != pd.currentGraphSet)
+      iThisSpectrum = Integer.MAX_VALUE; // no plots in that case
+  }
+
+  private void getMultiScaleData(double x1, double x2, double y1, double y2,
                                    int[] startIndices, int[] endIndices) {
     List<JDXSpectrum> graphs = (graphsTemp.size() == 0 ? spectra : graphsTemp);
     List<JDXSpectrum> subspecs = getSpectrumAt(0).getSubSpectra();
@@ -278,7 +364,7 @@ abstract class GraphSet {
     return null;
   }
 
-  protected boolean isNearby2D(Coordinate a1, Coordinate a2) {
+  private boolean isNearby2D(Coordinate a1, Coordinate a2) {
     int xp1 = isd.toPixelX(a1.getXVal());
     int yp1 = toPixelY(a1.getYVal());
     int xp2 = isd.toPixelX(a2.getXVal());
@@ -301,14 +387,14 @@ abstract class GraphSet {
     return  reversePlot;
   }
   
-  protected void setDrawXAxis() {
+  private void setDrawXAxis() {
     drawXAxisLeftToRight = xAxisLeftToRight ^ reversePlot;
     for (int i = 0; i < spectra.size(); i++)
       if (spectra.get(i) instanceof JDXSpectrum)
       (spectra.get(i)).setExportXAxisDirection(drawXAxisLeftToRight);
   }
 
-  protected void setScaleFactors(MultiScaleData multiScaleData) {
+  private void setScaleFactors(MultiScaleData multiScaleData) {
     xFactorForScale = (multiScaleData.maxXOnScale - multiScaleData.minXOnScale)
         / xPixels;
     yFactorForScale = (multiScaleData.maxYOnScale - multiScaleData.minYOnScale)
@@ -316,33 +402,33 @@ abstract class GraphSet {
     minYScale = multiScaleData.minYOnScale;
   }
 
-  protected int fixX(int xPixel) {
+  private int fixX(int xPixel) {
     return Coordinate.intoRange(xPixel, xPixel0, xPixel1);
   }
 
-  protected int toPixelX(double dx) {
+  private int toPixelX(double dx) {
     int x = (int) ((dx - multiScaleData.minXOnScale) / xFactorForScale);
     return (int) (drawXAxisLeftToRight ? xPixel0 + x : xPixel1 - x);
   }
 
-  protected boolean isInTopBar(int xPixel, int yPixel) {
+  private boolean isInTopBar(int xPixel, int yPixel) {
     return (xPixel == fixX(xPixel) && yPixel > pin1Dx0.yPixel0 - 2 && yPixel < pin1Dx0.yPixel1);
   }
 
-  protected boolean isInTopBar2D(int xPixel, int yPixel) {
+  private boolean isInTopBar2D(int xPixel, int yPixel) {
     return (isd != null && xPixel == isd.fixX(xPixel)
         && yPixel > pin2Dx0.yPixel0 - 2 && yPixel < pin2Dx0.yPixel1);
   }
 
-  protected boolean isInRightBar(int xPixel, int yPixel) {
+  private boolean isInRightBar(int xPixel, int yPixel) {
     return (yPixel == fixY(yPixel) && xPixel > pin1Dy0.xPixel1 && xPixel < pin1Dy0.xPixel0 + 2);
   }
 
-  protected boolean isInRightBar2D(int xPixel, int yPixel) {
+  private boolean isInRightBar2D(int xPixel, int yPixel) {
     return (isd != null && yPixel == fixY(yPixel) && xPixel > pin2Dy0.xPixel1 && xPixel < pin2Dy0.xPixel0 + 2);
   }
 
-  protected double toX(int xPixel) {
+  private double toX(int xPixel) {
     if (isd != null && isd.isXWithinRange(xPixel))
       return isd.toX(xPixel);
     xPixel = fixX(xPixel);
@@ -351,7 +437,7 @@ abstract class GraphSet {
         + (xPixel1 - xPixel) * xFactorForScale);
   }
 
-  protected double toX0(int xPixel) {
+  private double toX0(int xPixel) {
     xPixel = fixX(xPixel);
     MultiScaleData multiScaleData = zoomInfoList.get(0);
     double factor = (multiScaleData.maxXOnScale - multiScaleData.minXOnScale)
@@ -361,7 +447,7 @@ abstract class GraphSet {
         + (xPixel1 - xPixel) * factor);
   }
 
-  protected int toPixelX0(double x) {
+  private int toPixelX0(double x) {
     MultiScaleData multiScaleData = zoomInfoList.get(0);
     double factor = (multiScaleData.maxXOnScale - multiScaleData.minXOnScale)
         / xPixels;
@@ -370,31 +456,31 @@ abstract class GraphSet {
         - (x - multiScaleData.minXOnScale) / factor);
   }
 
-  protected int fixY(int yPixel) {
+  private int fixY(int yPixel) {
     return Coordinate.intoRange(yPixel, yPixel0, yPixel1);
   }
 
-  protected int toPixelY(double yVal) {
+  private int toPixelY(double yVal) {
     return (Double.isNaN(yVal) ? Integer.MIN_VALUE : yPixel1
         - (int) ((yVal * userYFactor - minYScale) / yFactorForScale));
   }
 
-  protected int toPixelYint(double yVal) {
+  private int toPixelYint(double yVal) {
     return yPixel1 - (int) (Double.isNaN(yVal) ? Integer.MIN_VALUE : yPixels * yVal);
   }
 
-  protected int toPixelY0(double y) {
+  private int toPixelY0(double y) {
     MultiScaleData multiScaleData = zoomInfoList.get(0);
     double factor = (multiScaleData.maxYOnScale - multiScaleData.minYOnScale)
         / yPixels;
     return fixY((int) (yPixel0 + (multiScaleData.maxYOnScale - y) / factor));
   }
 
-  protected double toY(int yPixel) {
+  private double toY(int yPixel) {
     return multiScaleData.maxYOnScale + (yPixel0 - yPixel) * yFactorForScale;
   }
 
-  protected double toY0(int yPixel) {
+  private double toY0(int yPixel) {
     yPixel = fixY(yPixel);
     MultiScaleData multiScaleData = zoomInfoList.get(0);
     double factor = (multiScaleData.maxYOnScale - multiScaleData.minYOnScale)
@@ -444,7 +530,7 @@ abstract class GraphSet {
   }
 
 
-  protected Annotation findAnnotation2D(Coordinate xy) {
+  private Annotation findAnnotation2D(Coordinate xy) {
     for (int i = annotations.size(); --i >= 0;) {
       Annotation a = annotations.get(i);
       if (isNearby2D(a, xy))
@@ -453,7 +539,7 @@ abstract class GraphSet {
     return null;
   }
 
-  protected void addAnnotation(Annotation annotation, boolean isToggle) {
+  private void addAnnotation(Annotation annotation, boolean isToggle) {
     if (annotations == null)
       annotations = new ArrayList<Annotation>();
     boolean removed = false;
@@ -467,57 +553,61 @@ abstract class GraphSet {
       annotations.add(annotation);
   }
 
-  /**
-   * 
-   * @param g
-   * @param withGrid
-   * @param withXUnits
-   * @param withYUnits
-   * @param withXScale
-   * @param withYScale
-   * @param isInteractive
-   * @param drawY0
-   * @param height
-   * @param width
-   * @param plotAreaInsets
-   * @param isResized
-   * @param enableZoom
-   */
-  public void drawGraph(Object og, 
-                        boolean isInteractive, int height, int width,
-                        int left, int right, int top, int bottom,
-                        boolean isResized, int yOffsetPercent) {
-    // for now, at least, we only allow one 2D image
-    setPositionForFrame(width, height, left, right, top, bottom);
-    JDXSpectrum spec0 = getSpectrumAt(0);
-    userYFactor = getSpectrum().getUserYFactor();
-    setScaleFactors(multiScaleData);
-    enableZoom = pd.getBoolean(ScriptToken.ENABLEZOOM);
-    if (!getSpectrumAt(0).is1D() 
-        && pd.getBoolean(ScriptToken.DISPLAY2D) 
-        && (isd != null || get2DImage())) {
-      setImageWindow();
-      width = (int) Math.floor(widthRatio * xPixels * 0.8);
-      if (pd.display1D) {
-        xPixels = width;
-        xPixel1 = xPixel0 + xPixels - 1;
-      } else {
-        xPixels = 0;
-        xPixel1 = isd.xPixel0 - 30;
-      }
-      setScaleFactors(multiScaleData);
-    }
-
-    setScaleFactors(multiScaleData);
-    int subIndex = spec0.getSubIndex();
-    setWidgets(isResized, subIndex);
-	this.yOffsetPercent = yOffsetPercent;
-    drawAll(og, height, width, subIndex, spec0, isInteractive);
-  }
-
-  protected boolean doPlot(int i) {
-    return (iThisSpectrum < 0 || iThisSpectrum == i);
-  }
+	/**
+	 * 
+	 * @param g
+	 * @param withGrid
+	 * @param withXUnits
+	 * @param withYUnits
+	 * @param withXScale
+	 * @param withYScale
+	 * @param isInteractive
+	 * @param drawY0
+	 * @param height
+	 * @param width
+	 * @param plotAreaInsets
+	 * @param isResized
+	 * @param enableZoom
+	 */
+	void drawGraph(Object og, boolean isInteractive, int height,
+			int width, int left, int right, int top, int bottom, boolean isResized,
+			int yOffsetPercent) {
+		JDXSpectrum spec0 = getSpectrumAt(0);
+		int subIndex = spec0.getSubIndex();
+		nucleusX = spec0.nucleusX;
+		nucleusY = spec0.nucleusY;
+		enableZoom = pd.getBoolean(ScriptToken.ENABLEZOOM);
+		this.height = height;
+		this.width= width;
+		this.left = left;
+		this.right= right;
+		this.top = top;
+		this.bottom = bottom;
+		for (int iSplit = 0; iSplit < nSplit; iSplit++) {
+			// for now, at least, we only allow one 2D image
+			setPositionForFrame(iSplit);
+			userYFactor = getSpectrum().getUserYFactor();
+			setScaleFactors(multiScaleData);
+			if (!spec0.is1D() && pd.getBoolean(ScriptToken.DISPLAY2D)
+					&& (isd != null || get2DImage())) {
+				setImageWindow();
+				width = (int) Math.floor(widthRatio * xPixels * 0.8);
+				if (pd.display1D) {
+					xPixels = width;
+					xPixel1 = xPixel0 + xPixels - 1;
+				} else {
+					xPixels = 0;
+					xPixel1 = isd.xPixel0 - 30;
+				}
+				setScaleFactors(multiScaleData);
+			}
+//			setScaleFactors(multiScaleData);
+			setWidgets(isResized || nSplit > 1, subIndex);
+			this.yOffsetPercent = yOffsetPercent;
+			drawAll(og, height, width, subIndex, isInteractive, iSplit);
+		}
+		setPositionForFrame(nSplit > 1 ? pd.currentSplitPoint : 0);
+	}
 
   protected void setImageWindow() {
     isd.setPixelWidthHeight((int) ((pd.display1D ? 0.6 : 1) * xPixels), yPixels);
@@ -527,12 +617,21 @@ abstract class GraphSet {
 
   void mouseClickEvent(int xPixel, int yPixel, int clickCount,
                        boolean isControlDown) {
+  	if (isSplitWidget(xPixel, yPixel)) {
+  		splitStack(pd.graphSets, nSplit == 1);
+      pd.refresh();
+  		return;
+  	}
     PlotWidget pw = getPinSelected(xPixel, yPixel);
     if (pw != null) {
       setWidgetValueByUser(pw);
       return;
     }
+    if (checkScaleUpDown(xPixel, yPixel))
+    	return;
+    
     boolean is2D = (isd != null && xPixel == isd.fixX(xPixel) && yPixel == fixY(yPixel));
+    
     if (isControlDown)
       clearIntegrals();
     else if (clickCount == 2) {
@@ -561,16 +660,16 @@ abstract class GraphSet {
       }
       return;
     }
-    if (is2D && annotations != null) {
-      Coordinate xy = new Coordinate(isd.toX(xPixel), isd
-          .toSubspectrumIndex(yPixel));
-      Annotation a = findAnnotation2D(xy);
-      if (a != null && setAnnotationText(a)) {
-        pd.repaint();
-        return;
-      }
-    }
     if (is2D) {
+      if (annotations != null) {
+        Coordinate xy = new Coordinate(isd.toX(xPixel), isd
+            .toSubspectrumIndex(yPixel));
+        Annotation a = findAnnotation2D(xy);
+        if (a != null && setAnnotationText(a)) {
+          pd.repaint();
+          return;
+        }
+      }
       sticky2Dcursor = false;
       set2DCrossHairs(xPixel, yPixel);
       pd.repaint();
@@ -584,7 +683,25 @@ abstract class GraphSet {
     pd.notifyPeakPickedListeners();
   }
 
-  void mouseReleasedEvent() {
+  private boolean checkScaleUpDown(int xPixel, int yPixel) {
+  	if (nSplit != 1 && !showAllStacked) {
+  		float f = (inScaleArrow(xPixel, yPixel, true) ? 2f 
+  				: inScaleArrow(xPixel, yPixel, false) ? 0.5f : 0);
+  		if (f != 0) {
+      	spectrumScaleFactors[pd.currentSplitPoint] *= f;
+      	pd.refresh();
+      	return true;
+      }
+  	}
+		return false;
+	}
+
+	private boolean inScaleArrow(int xPixel, int yPixel, boolean isUp) {
+		int f = (isUp ? -1 : 1);
+		int pt = (yPixel00 + yPixel11) / 2 + f * 10;
+		return (Math.abs(xPixel11 - 25 - xPixel) < 10 && Math.abs(pt - yPixel) < 10);
+	}
+	void mouseReleasedEvent() {
     PlotWidget thisWidget = pd.thisWidget;
     if (pd.isIntegralDrag) {
       if (isGoodEvent(zoomBox1D, null, true)) {
@@ -625,7 +742,15 @@ abstract class GraphSet {
 
   private PeakInfo piMouseOver;
   private final Coordinate coordTemp = new Coordinate();
+	private String nucleusX;
+	private String nucleusY;
+	private float[] spectrumScaleFactors;
   
+	void resetFactors() {
+		for (int i = 0; i < nSpectra; i++)
+  	  spectrumScaleFactors[i] = 1;
+	}
+	
   void mouseMovedEvent(int xPixel, int yPixel) {
     if (!pd.isIntegralDrag) {
       setToolTipForPixels(xPixel, yPixel);
@@ -877,26 +1002,6 @@ abstract class GraphSet {
     }
   }
 
-  void selectSpectrum(String filePath, String type, String model) {
-    if (nSpectra == 1) {
-      iThisSpectrum = -1;
-      return;
-    }
-    boolean haveFound = false;
-    for (int i = spectra.size(); --i >= 0;) {
-      if (!(spectra.get(i) instanceof JDXSpectrum))
-        continue;
-      if ((filePath == null 
-          || getSpectrumAt(i).getFilePathForwardSlash().equals(filePath))
-          && (getSpectrumAt(i).matchesPeakTypeModel(type, model))) {
-        iThisSpectrum = i;
-        haveFound = true;
-      }
-    }
-    if (!haveFound && iThisSpectrum >= 0 && this != pd.currentGraphSet)
-      iThisSpectrum = Integer.MAX_VALUE; // no plots in that case
-  }
-
   void toPeak(int istep) {
     istep *= (drawXAxisLeftToRight ? 1 : -1);
     JDXSpectrum spec = getSpectrum();
@@ -907,7 +1012,7 @@ abstract class GraphSet {
     PeakInfo peak = spec.getPeakList().get(iPeak);
     spec.setSelectedPeak(peak);
     setCoordClicked(peak.getX(), 0);
-    notifyPeakListeners(peak);
+    pd.notifyListeners(new PeakPickEvent(pd.owner, pd.coordClicked, peak));
   }
 
   private Coordinate setCoordClicked(double x, double y) {
@@ -919,12 +1024,6 @@ abstract class GraphSet {
     pd.coordClicked = new Coordinate(lastClickX = x, y);
     pd.coordsClicked = getSpectrum().getXYCoords();
     return pd.coordClicked;
-  }
-
-  protected void notifyPeakListeners(PeakInfo peak) {
-    // see JSViewer.processPeakPickEvent
-    pd.notifyListeners(new PeakPickEvent(pd.owner, pd.coordClicked,
-        peak == null ? pd.getSpectrum().getBasePeakInfo() : peak));
   }
 
   void escape() {
@@ -942,7 +1041,7 @@ abstract class GraphSet {
    * @param isResized
    * @param subIndex
    */
-  protected void setWidgets(boolean isResized, int subIndex) {
+  private void setWidgets(boolean isResized, int subIndex) {
     if (isResized) {
       if (zoomBox1D == null)
         newPins();
@@ -962,7 +1061,7 @@ abstract class GraphSet {
    * 
    * @param subIndex
    */
-  protected void newPins() {
+  private void newPins() {
     zoomBox1D = new PlotWidget("zoomBox1D");
     pin1Dx0 = new PlotWidget("pin1Dx0");
     pin1Dx1 = new PlotWidget("pin1Dx1");
@@ -997,7 +1096,7 @@ abstract class GraphSet {
         pin2Dy0, pin2Dy01, pin2Dy1, cur2Dx0, cur2Dx1, cur2Dy };
   }
 
-  protected void resetPinsFromMultiScaleData() {
+  private void resetPinsFromMultiScaleData() {
     if (pin1Dx0 == null)
       return;
     pin1Dx0.setX(multiScaleData.minXOnScale,
@@ -1012,7 +1111,7 @@ abstract class GraphSet {
    * use the pin values to find their positions along the slider
    * 
    */
-  protected void resetPinPositions() {
+  private void resetPinPositions() {
     pin1Dx0.setX(pin1Dx0.getXVal(), toPixelX0(pin1Dx0.getXVal()));
     pin1Dx1.setX(pin1Dx1.getXVal(), toPixelX0(pin1Dx1.getXVal()));
     pin1Dy0.setY(pin1Dy0.getYVal(), toPixelY0(pin1Dy0.getYVal()));
@@ -1027,7 +1126,7 @@ abstract class GraphSet {
    * realign sliders to proper locations after resizing
    * 
    */
-  protected void setPinSliderPositions() {
+  private void setPinSliderPositions() {
     pin1Dx0.yPixel0 = pin1Dx1.yPixel0 = pin1Dx01.yPixel0 = yPixel0 - 5;
     pin1Dx0.yPixel1 = pin1Dx1.yPixel1 = pin1Dx01.yPixel1 = yPixel0;
     pin1Dy0.xPixel0 = pin1Dy1.xPixel0 = pin1Dy01.xPixel0 = xPixel1 + 5;
@@ -1053,7 +1152,7 @@ abstract class GraphSet {
    * 
    * @param subIndex
    */
-  protected void setDerivedPins(int subIndex) {
+  private void setDerivedPins(int subIndex) {
     pin1Dx01.setX(0, (pin1Dx0.xPixel0 + pin1Dx1.xPixel0) / 2);
     pin1Dy01.setY(0, (pin1Dy0.yPixel0 + pin1Dy1.yPixel0) / 2);
     pin1Dx01.setEnabled(Math.min(pin1Dx0.xPixel0, pin1Dx1.xPixel0) > xPixel0
@@ -1094,7 +1193,7 @@ abstract class GraphSet {
   /*-------------------- METHODS FOR SCALING AND ZOOM --------------------------*/
 
   // static parameters
-  final static int minNumOfPointsForZoom = 3;
+  private final static int minNumOfPointsForZoom = 3;
 
 
   void setZoom(double x1, double y1, double x2, double y2) {
@@ -1134,7 +1233,7 @@ abstract class GraphSet {
    * @param finalY
    *        the Y end coordinate of the zoom area
    */
-  protected synchronized void doZoom(double initX, double initY, double finalX,
+  private synchronized void doZoom(double initX, double initY, double finalX,
                                      double finalY, boolean doRepaint,
                                      boolean addZoom, boolean checkRange) {
     if (!enableZoom)
@@ -1232,7 +1331,7 @@ abstract class GraphSet {
         multiScaleData.maxX, multiScaleData.maxY / factor2, true, true, false);
   }
 
-  protected void addCurrentZoom() {
+  private void addCurrentZoom() {
     // add to and clean the zoom list
     if (zoomInfoList.size() > currentZoomIndex + 1)
       for (int i = zoomInfoList.size() - 1; i > currentZoomIndex; i--)
@@ -1248,7 +1347,7 @@ abstract class GraphSet {
     setZoomTo(0);
   }
 
-  protected void setZoomTo(int i) {
+  void setZoomTo(int i) {
     isd = null;
     currentZoomIndex = i;
     multiScaleData = zoomInfoList.get(i);
@@ -1282,59 +1381,67 @@ abstract class GraphSet {
       setZoomTo(currentZoomIndex + 1);
   }
 
-  protected void drawAll(Object g, int height, int width, int subIndex,
-                         JDXSpectrum spec0, boolean isInteractive) {
-    if (isd != null)
-      draw2DImage(g);
-    draw2DUnits(g, width, subIndex, spec0);
-    doDraw1DObjects = (isd == null || pd.display1D);
-    if (isInteractive)
-      drawFrame(g, height, width);
-    if (doDraw1DObjects) {
-      // background stuff
-      fillBox(g, xPixel0, yPixel0, xPixel1, yPixel1, ScriptToken.PLOTAREACOLOR);
-      drawWidgets(g, subIndex, isInteractive);
-      drawPeakTabs(g);
-      drawHighlights(g);
-      if (pd.gridOn)
-        drawGrid(g, height, width);
-      // scale-related, title, and coordinates
-      if (pd.getBoolean(ScriptToken.XSCALEON))
-        drawXScale(g, height, width);
-      if (pd.getBoolean(ScriptToken.XUNITSON))
-        drawXUnits(g, width);
-      if (allowYScale && pd.getBoolean(ScriptToken.YSCALEON))
-        drawYScale(g, height, width);
-      if (allowYScale && pd.getBoolean(ScriptToken.YUNITSON))
-        drawYUnits(g, width);
+	private void drawAll(Object g, int height, int width, int subIndex,
+			boolean isInteractive, int iSplit) {
+		if (isd != null)
+			draw2DImage(g);
+		draw2DUnits(g, width, subIndex);
+		doDraw1DObjects = (isd == null || pd.display1D);
+		if (isInteractive)
+			drawFrame(g, height, width, iSplit);
+		if (doDraw1DObjects) {
+			// background stuff
+			fillBox(g, xPixel0, yPixel0, xPixel1, yPixel1, ScriptToken.PLOTAREACOLOR);
+	    if (nSplit == 1 || showAllStacked || iThisSpectrum == iSplit) {
+	    	drawWidgets(g, subIndex, isInteractive);
+				drawPeakTabs(g);
+				drawHighlights(g);
+	    }
+			if (pd.gridOn)
+				drawGrid(g, height, width);
+			// scale-related, title, and coordinates
+			if (pd.getBoolean(ScriptToken.XSCALEON))
+				drawXScale(g, height, width);
+			if (pd.getBoolean(ScriptToken.XUNITSON))
+				drawXUnits(g, width);
+			if (allowYScale && pd.getBoolean(ScriptToken.YSCALEON))
+				drawYScale(g, height, width);
+			if (allowYScale && pd.getBoolean(ScriptToken.YUNITSON))
+				drawYUnits(g, width);
 
-      // the graphs
-      int offset = 0;
-      int yOffsetPixels = (int) (yPixels * (yOffsetPercent / 100f));
-      for (int i = nSpectra; --i >= 0;)
-        if (doPlot(i)) {
-          drawSpectrum(g, i, height, width, offset);
-          if (pd.titleOn && iThisSpectrum == i && this == pd.currentGraphSet) {
-            drawTitle(g, height, width, spectra.get(i).getPeakTitle());
-            pd.titleDrawn = true;
-          }
-          offset -= yOffsetPixels;
-        }
+			// the graphs
+			int offset = 0;
+			int yOffsetPixels = (int) (yPixels * (yOffsetPercent / 100f));
+			for (int i = nSpectra; --i >= 0;)
+				if (doPlot(i, iSplit)) {
+					boolean isBold = (showAllStacked && i == iThisSpectrum);
+					drawSpectrum(g, i, height, width, spectrumOffsets == null  ? offset : spectrumOffsets[i], isBold);
+					if (pd.titleOn && iThisSpectrum == i && this == pd.currentGraphSet) {
+						drawTitle(g, height, width, spectra.get(i).getPeakTitle());
+						pd.titleDrawn = true;
+					}
+					offset -= yOffsetPixels;
+				}
 
-      drawIntegralValue(g, width);
-    } else {
-      drawWidgets(g, subIndex, isInteractive);
-    }
-    if (annotations != null)
-      drawAnnotations(g, height, width, annotations, null);
+			drawIntegralValue(g, width);
+		} else {
+			drawWidgets(g, subIndex, isInteractive);
+		}
+		if (annotations != null)
+			drawAnnotations(g, height, width, annotations, null);
+	}
+
+  private boolean doPlot(int i, int iSplit) {
+  	if (nSplit > 1)
+  		return (i == splitSpectrumPointers[iSplit]);
+    return (showAllStacked || iThisSpectrum < 0 || iThisSpectrum == i);
   }
 
-
-  private void draw2DUnits(Object g, int width, int subIndex, JDXSpectrum spec0) {
+  private void draw2DUnits(Object g, int width, int subIndex) {
     if (subIndex >= 0 && isd != null) {
       setColor(g, ScriptToken.PLOTCOLOR);
-      drawUnits(g, width, spec0.nucleusX, isd.xPixel1 + 5, yPixel1, 1, 1.0);
-      drawUnits(g, width, spec0.nucleusY, isd.xPixel0 - 5, yPixel0, 1, 0);
+      drawUnits(g, width, nucleusX, isd.xPixel1 + 5, yPixel1, 1, 1.0);
+      drawUnits(g, width, nucleusY, isd.xPixel0 - 5, yPixel0, 1, 0);
     }
   }
 
@@ -1348,10 +1455,12 @@ abstract class GraphSet {
   private void drawPeakTabs(Object g) {
     if (iThisSpectrum == Integer.MAX_VALUE || pd.isPrinting)
       return;
-    JDXSpectrum spec = spectra.get(Math.max(iThisSpectrum, 0));
-    ArrayList<PeakInfo> list = (nSpectra == 1
-        || getSpectrum().hasIntegral() || iThisSpectrum >= 0 ? (spec)
-        .getPeakList()
+    JDXSpectrum spec = (iThisSpectrum >= 0 ? spectra.get(iThisSpectrum)
+    		: getSpectrumAt(0));
+    // TODO -- not yet right here; 
+    ArrayList<PeakInfo> list = (
+    		nSpectra == 1 //|| getSpectrum().hasIntegral() 
+        || iThisSpectrum >= 0 ? spec.getPeakList()
         : null);
     if (list != null && list.size() > 0) {
       if (piMouseOver != null && pd.isMouseUp()) {
@@ -1447,7 +1556,7 @@ abstract class GraphSet {
    * @param isFullHeight
    */
 
-  protected void drawBar(Object g, double startX, double endX,
+  private void drawBar(Object g, double startX, double endX,
                          ScriptToken whatColor, boolean isFullHeight) {
     int x1 = toPixelX(startX);
     int x2 = toPixelX(endX);
@@ -1477,14 +1586,17 @@ abstract class GraphSet {
    * @param width
    *        the width to be drawn in pixels
    */
-  private void drawSpectrum(Object g, int index, int height, int width, int yOffset) {
+  private void drawSpectrum(Object g, int index, 
+  		int height, int width, int yOffset, boolean isBold) {
     // Check if specInfo in null or xyCoords is null
     //Coordinate[] xyCoords = spectra[index].getXYCoords();
     JDXSpectrum spec = spectra.get(index);
-    userYFactor = spec.getUserYFactor();
-    drawPlot(g, index, spec, height, width, true, spec.isContinuous(), yOffset);
+    userYFactor = spec.getUserYFactor() * spectrumScaleFactors[index];
+    
+    drawPlot(g, index, spec, height, width, true, 
+    		spec.isContinuous(), yOffset, isBold);
     if (spec.hasIntegral())
-      drawPlot(g, index, spec.getIntegrationGraph(), height, width, false, true, yOffset);
+      drawPlot(g, index, spec.getIntegrationGraph(), height, width, false, true, yOffset, false);
     // over-spectrum stuff    
     if (spec.integrationRatios != null)
       drawAnnotations(g, height, width, spec.integrationRatios,
@@ -1492,81 +1604,95 @@ abstract class GraphSet {
 
   }
 
-  private void drawPlot(Object g, int index, Graph spec, int height,
-                        int width, boolean drawY0, 
-                        boolean isContinuous, int yOffset) {
+	private void drawPlot(Object g, int index, Graph spec, int height, int width,
+			boolean drawY0, boolean isContinuous, int yOffset, boolean isBold) {
 
-    Coordinate[] xyCoords = spec.getXYCoords();
-    boolean isIntegral = (spec instanceof IntegralGraph);
-    boolean fillPeaks = (!isIntegral && pd.isIntegralDrag && spectra.get(index).hasIntegral());
-    setPlotColor(g, isIntegral ? -1 : iThisSpectrum == index ? 0 : index);
-    int y0 = toPixelY(0);
-    if (!drawY0 || index != 0 || y0 != fixY(y0))
-      y0 = -1;
-    if (isContinuous) {
-      for (int i = multiScaleData.startDataPointIndices[index]; i < multiScaleData.endDataPointIndices[index]; i++) {
-        Coordinate point1 = xyCoords[i];
-        Coordinate point2 = xyCoords[i + 1];
-        int x1 = toPixelX(point1.getXVal());
-        int x2 = toPixelX(point2.getXVal());
-        int y1 = (isIntegral ? toPixelYint(point1.getYVal()) : toPixelY(point1
-            .getYVal()));
-        int y2 = (isIntegral ? toPixelYint(point2.getYVal()) : toPixelY(point2
-            .getYVal()));
-        if (y1 == Integer.MIN_VALUE || y2 == Integer.MIN_VALUE)
-          continue;
-        y1 = yOffset + fixY(y1);
-        y2 = yOffset + fixY(y2);
-        if (fillPeaks && y0 > 0 && x1 >= zoomBox1D.xPixel0 && x1 <= zoomBox1D.xPixel1) {
-          setColor(g, ScriptToken.INTEGRALPLOTCOLOR);
-          drawLine(g, x1, y0, x1, y1);
-          setColor(g, ScriptToken.PLOTCOLOR);
-          continue;
-        }
-        if (y1 == y2 && (y1 == yPixel0 || y1 == yPixel1))
-          continue;
-        drawLine(g, x1, y1, x2, y2);
-      }
-    } else {
-      for (int i = multiScaleData.startDataPointIndices[index]; i <= multiScaleData.endDataPointIndices[index]; i++) {
-        Coordinate point = xyCoords[i];
-        int x1 = toPixelX(point.getXVal());
-        int y1 = toPixelY(Math.max(multiScaleData.minYOnScale, 0));
-        int y2 = toPixelY(point.getYVal());
-        if (y2 == Integer.MIN_VALUE)
-          continue;
-        y1 = fixY(y1);
-        y2 = fixY(y2);
-        if (y1 == y2 && (y1 == yPixel0 || y1 == yPixel1))
-          continue;
-        drawLine(g, x1, y1, x1, y2);
-      }
-      if (multiScaleData.isYZeroOnScale()) {
-        int y = toPixelY(0);
-        drawLine(g, xPixel1, y, xPixel0, y);
-      }
-    }
-
-  }
+		if (isBold)
+			setStrokeBold(g, true);
+		Coordinate[] xyCoords = spec.getXYCoords();
+		boolean isIntegral = (spec instanceof IntegralGraph);
+		boolean fillPeaks = (!isIntegral && pd.isIntegralDrag && spectra.get(index)
+				.hasIntegral());
+		setPlotColor(g, isIntegral ? -1 : iThisSpectrum == index && nSplit == 1 && !showAllStacked ? 0 : index);
+		int y0 = toPixelY(0);
+		if (!drawY0 || index != 0 || y0 != fixY(y0))
+			y0 = -1;
+		if (isContinuous) {
+			for (int i = multiScaleData.startDataPointIndices[index]; i < multiScaleData.endDataPointIndices[index]; i++) {
+				Coordinate point1 = xyCoords[i];
+				Coordinate point2 = xyCoords[i + 1];
+				int y1 = (isIntegral ? toPixelYint(point1.getYVal()) : toPixelY(point1
+						.getYVal()));
+				if (y1 == Integer.MIN_VALUE)
+					continue;
+				int y2 = (isIntegral ? toPixelYint(point2.getYVal()) : toPixelY(point2
+						.getYVal()));
+				if (y2 == Integer.MIN_VALUE)
+					continue;
+				int x1 = toPixelX(point1.getXVal());
+				int x2 = toPixelX(point2.getXVal());
+				y1 = yOffset + fixY(y1);
+				y2 = yOffset + fixY(y2);
+				if (fillPeaks && y0 > 0 && x1 >= zoomBox1D.xPixel0
+						&& x1 <= zoomBox1D.xPixel1) {
+					setColor(g, ScriptToken.INTEGRALPLOTCOLOR);
+					drawLine(g, x1, y0, x1, y1);
+					setColor(g, ScriptToken.PLOTCOLOR);
+					continue;
+				}
+				if (y1 == y2 && (y1 == yPixel0 || y1 == yPixel1))
+					continue;
+				drawLine(g, x1, y1, x2, y2);
+			}
+		} else {
+			for (int i = multiScaleData.startDataPointIndices[index]; i <= multiScaleData.endDataPointIndices[index]; i++) {
+				Coordinate point = xyCoords[i];
+				int y2 = toPixelY(point.getYVal());
+				if (y2 == Integer.MIN_VALUE)
+					continue;
+				int x1 = toPixelX(point.getXVal());
+				int y1 = toPixelY(Math.max(multiScaleData.minYOnScale, 0));
+				y1 = fixY(y1);
+				y2 = fixY(y2);
+				if (y1 == y2 && (y1 == yPixel0 || y1 == yPixel1))
+					continue;
+				drawLine(g, x1, y1, x1, y2);
+			}
+			if (multiScaleData.isYZeroOnScale()) {
+				int y = toPixelY(0);
+				drawLine(g, xPixel1, y, xPixel0, y);
+			}
+		}
+		if (isBold)
+			setStrokeBold(g, false);
+	}
   /**
    * 
    * @param g
    * @param height
    * @param width
    */
-  private void drawFrame(Object g, int height, int width) {
+  private void drawFrame(Object g, int height, int width, int iSplit) {
     if (!pd.gridOn) {
       setColor(g, ScriptToken.GRIDCOLOR);
       drawRect(g, xPixel0, yPixel0, xPixels, yPixels);
     }
-    if (this == pd.currentGraphSet && fracY != 1) {
+    if (this == pd.currentGraphSet 
+    		&& (fracY != 1 || isSplittable)
+    		&& (!isSplittable || nSplit == 1 || pd.currentSplitPoint == iSplit)) {
       setCurrentBoxColor(g);
-      drawRect(g, xPixel00 + 10, yPixel00 + 1, xPixel11 - xPixel00 - 20,
-          yPixel11 - yPixel00 - 2);
+      drawRect(g, xPixel00 + 10, yPixel00 + 1, xPixel11 - 20 - xPixel00, yPixel11 - 2 - yPixel00);
+      if (isSplittable) {
+        fillBox(g, xPixel11 - 20, yPixel00 + 1, xPixel11 - 10, yPixel00 + 11, null);
+        if (nSplit > 1 && !showAllStacked) {
+        	fillArrow(g, true, xPixel11 - 25, (yPixel00 + yPixel11)/2 -10);
+        	fillArrow(g, false, xPixel11 - 25, (yPixel00 + yPixel11)/2 + 10);
+        }
+      }
     }
   }
 
-  /**
+	/**
    * Draws the grid on the Panel
    * 
    * @param g
@@ -1600,9 +1726,9 @@ abstract class GraphSet {
     }
   }
 
-  final protected int FONT_PLAIN = 0;
-  final protected int FONT_BOLD = 1;
-  final protected int FONT_ITALIC = 2;
+  final private int FONT_PLAIN = 0;
+  final private int FONT_BOLD = 1;
+  final private int FONT_ITALIC = 2;
 
   private void drawIntegralValue(Object g, int width) {
     List<Integral> integrals = getSpectrum().getIntegrals();
@@ -1784,17 +1910,7 @@ abstract class GraphSet {
     public String toString() {
       return "highlight " + x1 + " " + x2 + " " + spectrum;
     }
-    /**
-     * Constructor
-     * 
-     * @param x1
-     *        starting x coordinate
-     * @param x2
-     *        ending x coordinate
-     * @param spec
-     * @param color
-     *        the color of the highlighted region
-     */
+
     Highlight(double x1, double x2, JDXSpectrum spec, Object color) {
       this.x1 = x1;
       this.x2 = x2;
@@ -2018,7 +2134,7 @@ abstract class GraphSet {
     double yPt = (isd != null && isd.isXWithinRange(xPixel) ? isd
         .toSubspectrumIndex(fixY(yPixel)) : toY(fixY(yPixel)));
     formatterY = pd.getFormatter(hashY);
-    pd.coordStr = "(" + xx + ", " + formatterY.format(yPt) + ")";
+    pd.coordStr = "(" + xx + ", " + formatterY.format(yPt) + ")"  + " " + iThisSpectrum;;;;;
     if (xPixel != fixX(xPixel) || yPixel != fixY(yPixel)) {
       yPt = Double.NaN;
     } else if (nSpectra == 1) {
@@ -2091,18 +2207,92 @@ abstract class GraphSet {
     return null;
   }
   
-  public boolean hasFileLoaded(String filePath) {
+  boolean hasFileLoaded(String filePath) {
     for (int i = spectra.size(); --i >= 0;) {
       if (spectra.get(i).getFilePathForwardSlash().equals(filePath))
         return true;
     }
     return false;
   }
-  public PeakInfo findMatchingPeakInfo(PeakInfo pi) {
+  
+  PeakInfo findMatchingPeakInfo(PeakInfo pi) {
     PeakInfo pi2 = null;
     for (int i = 0; i < spectra.size(); i++)
       if (spectra.get(i) instanceof JDXSpectrum && (pi2 = (spectra.get(i)).findMatchingPeakInfo(pi)) != null)
         break;
     return pi2;
   }
+  
+	private boolean isOnGraph(int xPixel, int yPixel, int index, int cutoff) {
+		JDXSpectrum spec = spectra.get(index);
+		int yOffset = (spectrumOffsets == null ? index
+				* (int) (yPixels * (yOffsetPercent / 100f)) : spectrumOffsets[index]);
+
+		// ONLY getSpectrumAt(0).is1D();
+		Coordinate[] xyCoords = spec.xyCoords;
+		if (spec.isContinuous()) {
+			for (int i = multiScaleData.startDataPointIndices[index]; i < multiScaleData.endDataPointIndices[index]; i++) {
+				Coordinate point1 = xyCoords[i];
+				Coordinate point2 = xyCoords[i + 1];
+				int x1 = toPixelX(point1.getXVal());
+				int x2 = toPixelX(point2.getXVal());
+				int y1 = (toPixelY(point1.getYVal()));
+				int y2 = (toPixelY(point2.getYVal()));
+				if (y1 == Integer.MIN_VALUE || y2 == Integer.MIN_VALUE)
+					continue;
+				y1 = yOffset + fixY(y1);
+				y2 = yOffset + fixY(y2);
+				if (isOnLine(xPixel, yPixel, x1, y1, x2, y2, cutoff))
+					return true;
+			}
+		} else {
+			for (int i = multiScaleData.startDataPointIndices[index]; i <= multiScaleData.endDataPointIndices[index]; i++) {
+				Coordinate point = xyCoords[i];
+				int y2 = toPixelY(point.getYVal());
+				if (y2 == Integer.MIN_VALUE)
+					continue;
+				int x1 = toPixelX(point.getXVal());
+				int y1 = toPixelY(Math.max(multiScaleData.minYOnScale, 0));
+				y1 = fixY(y1);
+				y2 = fixY(y2);
+				if (y1 == y2 && (y1 == yPixel0 || y1 == yPixel1))
+					continue;
+				if (isOnLine(xPixel, yPixel, x1, y1, x1, y2, cutoff))
+					return true;
+			}
+		}
+		return false;
+	}
+	private static boolean isOnLine(int xPixel, int yPixel, int x1, int y1, int x2,
+			int y2, int cutoff) {
+		// near a point
+		int dx1 = Math.abs(x1 - xPixel);
+		if (dx1 < cutoff && Math.abs(y1 - yPixel) < cutoff)
+			return true;
+		int dx2 = x2 - xPixel;
+		if (Math.abs(dx2) < cutoff && Math.abs(y2 - yPixel) < cutoff)
+			return true;
+		// between points
+		int dy12 = y1 - y2;
+		if (Math.abs(dy12) > cutoff && (y1 < yPixel) == (y2 < yPixel))
+			return false;
+		int dx12 = x1 - x2;
+		if (Math.abs(dx12) > cutoff && (x1 < xPixel) == (x2 < xPixel))
+			return false;
+		return (distance(dx1, y1 - yPixel) + distance(dx2, yPixel - y2)
+				< distance(dx12, dy12) + cutoff);
+	}
+
+	private static double distance(int dx, int dy) {
+		return Math.sqrt(dx * dx + dy * dy);
+	}
+	
+	boolean checkSpectrumClickEvent(int xPixel, int yPixel) {
+    if (showAllStacked)
+    	for (int i = 0; i < nSpectra; i++) 
+    		if (isOnGraph(xPixel, yPixel, i, 2))
+    			return (i == iThisSpectrum ? false : i == (iThisSpectrum = i));
+    return false;
+	}
+
 }

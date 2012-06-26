@@ -17,7 +17,6 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
 import jspecview.common.JSVPanelNode;
-import jspecview.exception.ScalesIncompatibleException;
 import jspecview.source.JDXSource;
 import jspecview.util.FileManager;
 import jspecview.util.Logger;
@@ -303,7 +302,7 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
     boolean overlay = isOverlay || autoOverlay
         && currentSource.isCompoundSource;
     if (overlay) {
-      overlay(si, (isOverlay ? url : null));
+      overlaySpectra(si, (isOverlay ? url : null));
     } else {
       splitSpectra(si);
     }
@@ -312,14 +311,7 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
     return FILE_OPEN_OK;
 	}
 
-  /**
-   * Overlays the spectra of the specified <code>JDXSource</code>
-   * 
-   * @param source
-   *        the <code>JDXSource</code>
-   * @throws ScalesIncompatibleException
-   */
-  private static void overlay(ScriptInterface si, String name) {
+  private static void overlaySpectra(ScriptInterface si, String name) {
   	JDXSource source = si.getCurrentSource();
     List<JDXSpectrum> specs = source.getSpectra();
     JSVPanel jsvp = si.getNewJSVPanel(specs);
@@ -337,13 +329,6 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
     si.setMenuEnables(node, false);
   }
 
-  /**
-   * Displays the spectrum of the <code>JDXSource</code> specified by source in
-   * separate windows
-   * 
-   * @param source
-   *        the <code>JDXSource</code>
-   */
   private static void splitSpectra(ScriptInterface si) {
   	JDXSource source = si.getCurrentSource();
     List<JDXSpectrum> specs = source.getSpectra();
