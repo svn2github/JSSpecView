@@ -1735,30 +1735,37 @@ abstract class GraphSet {
 		if (isBold)
 			setStrokeBold(g, false);
 	}
-  /**
-   * 
-   * @param g
-   * @param height
-   * @param width
-   */
-  private void drawFrame(Object g, int height, int width, int iSplit) {
-    if (!pd.gridOn) {
-      setColor(g, ScriptToken.GRIDCOLOR);
-      drawRect(g, xPixel0, yPixel0, xPixels, yPixels);
-    }
-    if (this == pd.currentGraphSet 
-    		&& (fracY != 1 || isSplittable)
-    		&& (!isSplittable || nSplit == 1 || pd.currentSplitPoint == iSplit)) {
-      setCurrentBoxColor(g);
-      drawRect(g, xPixel00 + 10, yPixel00 + 1, xPixel11 - 20 - xPixel00, yPixel11 - 2 - yPixel00);
-      if (isSplittable) {
-        fillBox(g, xPixel11 - 20, yPixel00 + 1, xPixel11 - 10, yPixel00 + 11, null);
-      }
-    	fillArrow(g, ArrowType.UP, xPixel11 - 25, (yPixel00 + yPixel11)/2 - 9);
-    	fillCircle(g, xPixel11 - 25, (yPixel00 + yPixel11)/2);
-    	fillArrow(g, ArrowType.DOWN, xPixel11 - 25, (yPixel00 + yPixel11)/2 + 9);
-    }
-  }
+
+	/**
+	 * 
+	 * @param g
+	 * @param height
+	 * @param width
+	 */
+	private void drawFrame(Object g, int height, int width, int iSplit) {
+		if (!pd.gridOn) {
+			setColor(g, ScriptToken.GRIDCOLOR);
+			drawRect(g, xPixel0, yPixel0, xPixels, yPixels);
+		}
+		setCurrentBoxColor(g);
+		if (this != pd.currentGraphSet || isd != null)
+			return;
+		if ((fracY != 1 || isSplittable)
+				&& (!isSplittable || nSplit == 1 || pd.currentSplitPoint == iSplit)) {
+			drawRect(g, xPixel00 + 10, yPixel00 + 1, xPixel11 - 20 - xPixel00,
+					yPixel11 - 2 - yPixel00);
+			if (isSplittable) {
+				fillBox(g, xPixel11 - 20, yPixel00 + 1, xPixel11 - 10, yPixel00 + 11,
+						null);
+			}
+		}
+
+		if (spectra.get(0).isScalable()) {
+			fillArrow(g, ArrowType.UP, xPixel11 - 25, (yPixel00 + yPixel11) / 2 - 9);
+			fillCircle(g, xPixel11 - 25, (yPixel00 + yPixel11) / 2);
+			fillArrow(g, ArrowType.DOWN, xPixel11 - 25, (yPixel00 + yPixel11) / 2 + 9);
+		}
+	}
 
 	/**
    * Draws the grid on the Panel

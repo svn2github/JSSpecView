@@ -460,6 +460,10 @@ public abstract class JDXDataObject extends JDXHeader {
 		return !isMS();
 	}
 
+	public boolean isScalable() {
+		return !isTransmittance();
+	}
+
 //  private boolean isUVVis() {
 //    return dataType.startsWith("VIS") || dataType.startsWith("UV");
 //  }
