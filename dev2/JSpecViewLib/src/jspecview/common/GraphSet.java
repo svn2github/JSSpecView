@@ -301,7 +301,7 @@ abstract class GraphSet {
     allowYScale = true;
     if (endIndex <= 0)
       endIndex = Integer.MAX_VALUE;
-    isSplittable = true;// for now, could be: getSpectrumAt(0).isSplitable();
+    isSplittable = (nSpectra > 1);// for now, could be: getSpectrumAt(0).isSplitable();
 		allowStacking = (spectra.get(0).isStackable());
     showAllStacked = allowStacking && (nSpectra > 1);
     for (int i = 0; i < nSpectra; i++) {
