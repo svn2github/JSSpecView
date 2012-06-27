@@ -48,9 +48,10 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
 	public static void closeSource(ScriptInterface si,
 			JDXSource source) {
     // Remove nodes and dispose of frames
-		JSVTreeNode rootNode = (JSVTreeNode) si.getRootNode();
 		List<JSVPanelNode> panelNodes = si.getPanelNodes();
-		DefaultTreeModel spectraTreeModel = (DefaultTreeModel) si.getDefaultTreeModel();
+  	JSVTree tree = (JSVTree) si.getSpectraTree();
+		JSVTreeNode rootNode = tree.getRootNode();
+		DefaultTreeModel spectraTreeModel = tree.getDefaultModel();
 
     String fileName = (source == null ? null : source.getFilePath());
     List<JSVTreeNode> toDelete = new ArrayList<JSVTreeNode>();
@@ -140,11 +141,11 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
 
 	public static JSVTreeNode createTree(ScriptInterface si,
 			JDXSource source, JSVPanel[] panels) {
-		
-    DefaultTreeModel spectraTreeModel = (DefaultTreeModel) si.getDefaultTreeModel();
-		JSVTreeNode rootNode = (JSVTreeNode) si.getRootNode();
+
+  	JSVTree tree = (JSVTree) si.getSpectraTree();
+		JSVTreeNode rootNode = tree.getRootNode();
+		DefaultTreeModel spectraTreeModel = tree.getDefaultModel();
     List<JSVPanelNode> panelNodes = si.getPanelNodes();
-    JTree spectraTree = (JTree) si.getSpectraTree();
 
     String fileName = FileManager.getName(source.getFilePath());
     JSVPanelNode panelNode = new JSVPanelNode(null, fileName, source, null);
@@ -152,7 +153,7 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
     panelNode.setTreeNode(fileNode);
 		spectraTreeModel.insertNodeInto(fileNode, rootNode, rootNode
         .getChildCount());
-		spectraTree.scrollPathToVisible(new TreePath(fileNode.getPath()));
+		tree.scrollPathToVisible(new TreePath(fileNode.getPath()));
 
 		int fileCount = si.getFileCount() + 1;
     si.setFileCount(fileCount);
@@ -165,7 +166,7 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
 			panelNodes.add(panelNode);
       spectraTreeModel.insertNodeInto(treeNode, fileNode, fileNode
           .getChildCount());
-      spectraTree.scrollPathToVisible(new TreePath(treeNode.getPath()));
+      tree.scrollPathToVisible(new TreePath(treeNode.getPath()));
     }
     selectFrameNode(si, panels[0]);
     return fileNode;

@@ -42,8 +42,6 @@ public interface ScriptInterface {
 	public void print();
 	
   public void closeSource(JDXSource source);
-	public Object getRootNode();
-	public Object getDefaultTreeModel();
 	public Object getSpectraTree();
 	public int getFileCount();
 	public void setFileCount(int max);

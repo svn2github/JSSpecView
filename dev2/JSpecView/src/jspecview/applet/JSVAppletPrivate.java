@@ -58,11 +58,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTree;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeSelectionModel;
-
 import jspecview.application.TextDialog;
 import jspecview.common.AwtPanel;
 import jspecview.common.IntegralGraph;
@@ -72,6 +67,7 @@ import jspecview.common.JSVDropTargetListener;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelNode;
 import jspecview.common.JSVSpectrumPanel;
+import jspecview.common.JSVTree;
 import jspecview.common.JSVTreeNode;
 import jspecview.common.JSViewer;
 import jspecview.common.SpectraDialog;
@@ -388,7 +384,8 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	 * 
 	 */
 	private void init() {
-		initSpectraTree();
+
+		spectraTree = new JSVTree((ScriptInterface) this);
 		scriptQueue = new ArrayList<String>();
 		commandWatcherThread = new Thread(new CommandWatcher());
 		commandWatcherThread.setName("CommmandWatcherThread");
@@ -990,8 +987,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	///////// multiple source changes ////////
 	
 	
-  private JSVTreeNode rootNode;
-  private DefaultTreeModel spectraTreeModel;
   private JTree spectraTree;
 	private int fileCount;
 	public int getFileCount() {
@@ -1002,44 +997,10 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
   
-  /**
-   * Creates tree representation of files that are opened
-   */
-  private void initSpectraTree() {
-    currentSource = null;
-    rootNode = new JSVTreeNode("Spectra", null);
-    spectraTreeModel = new DefaultTreeModel(rootNode);
-    spectraTree = new JTree(spectraTreeModel);
-    spectraTree.getSelectionModel().setSelectionMode(
-        TreeSelectionModel.SINGLE_TREE_SELECTION);
-    spectraTree.addTreeSelectionListener(new TreeSelectionListener() {
-      public void valueChanged(TreeSelectionEvent e) {
-        JSVTreeNode node = (JSVTreeNode) spectraTree
-            .getLastSelectedPathComponent();
-        if (node == null) {
-          return;
-        }
-        if (node.isLeaf()) {
-          setNode(node.panelNode, true);
-        }
-        currentSource = node.panelNode.source;
-      }
-    });
-    spectraTree.setRootVisible(false);
-  }
-
   public Object getSpectraTree() {
   	return spectraTree;
   }
   
-	public Object getDefaultTreeModel() {
-		return spectraTreeModel;
-	}
-
-	public Object getRootNode() {
-		return rootNode;
-	}
-
 	public JSVPanelNode setOverlayVisibility(JSVPanelNode node) {
 		JSViewer.setOverlayLegendVisibility(this, getSelectedPanel(),
 				appletPopupMenu.overlayKeyMenuItem.isSelected());

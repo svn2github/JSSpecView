@@ -190,7 +190,7 @@ public class SpectraDialog extends JDialog implements WindowListener {
     cbInsets1 = new Insets(0, 0, 2, 2);
     cbInsets2 = new Insets(0, 20, 2, 2);
 		spectrumPanel = new JPanel(new GridBagLayout());
-    addCheckBoxes((JSVTreeNode) si.getRootNode(), 0);
+    addCheckBoxes(((JSVTree) si.getSpectraTree()).getRootNode(), 0);
 	}
 
 	@SuppressWarnings("unchecked")
