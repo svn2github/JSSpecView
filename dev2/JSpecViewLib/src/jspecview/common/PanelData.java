@@ -134,8 +134,6 @@ public class PanelData {
     JDXSpectrum.putInfo(key, info, "type", getSpectrumAt(0).getDataType());
     JDXSpectrum.putInfo(key, info, "title", title);
     JDXSpectrum.putInfo(key, info, "nSets", Integer.valueOf(graphSets.size()));
-    JDXSpectrum.putInfo(key, info, "userYFactor", Double
-        .valueOf(currentGraphSet.userYFactor));
     List<Map<String, Object>> sets = new ArrayList<Map<String, Object>>();
     for (int i = graphSets.size(); --i >= 0;)
       sets.add(graphSets.get(i).getInfo(key,

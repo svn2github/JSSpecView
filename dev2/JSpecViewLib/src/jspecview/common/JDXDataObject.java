@@ -685,7 +685,7 @@ public abstract class JDXDataObject extends JDXHeader {
    * @return the minimum x value in the list of coordinates
    */
   public double getMinX() {
-    return (Double.isNaN(minX) ? (minX = Coordinate.getMinX(xyCoords)) : minX);
+    return (Double.isNaN(minX) ? (minX = Coordinate.getMinX(xyCoords, 0, xyCoords.length)) : minX);
   }
 
   /**
@@ -695,7 +695,7 @@ public abstract class JDXDataObject extends JDXHeader {
    * @return the minimum x value in the list of coordinates
    */
   public double getMinY() {
-    return (Double.isNaN(minY) ? (minY = Coordinate.getMinY(xyCoords)) : minY);
+    return (Double.isNaN(minY) ? (minY = Coordinate.getMinY(xyCoords, 0, xyCoords.length)) : minY);
   }
 
   /**
@@ -705,7 +705,7 @@ public abstract class JDXDataObject extends JDXHeader {
    * @return the maximum x value in the list of coordinates
    */
   public double getMaxX() {
-    return (Double.isNaN(maxX) ? (maxX = Coordinate.getMaxX(xyCoords)) : maxX);
+    return (Double.isNaN(maxX) ? (maxX = Coordinate.getMaxX(xyCoords, 0, xyCoords.length)) : maxX);
   }
 
   /**
@@ -715,7 +715,7 @@ public abstract class JDXDataObject extends JDXHeader {
    * @return the maximum y value in the list of coordinates
    */
   public double getMaxY() {
-    return (Double.isNaN(maxY) ? (maxY = Coordinate.getMaxY(xyCoords)) : maxY);
+    return (Double.isNaN(maxY) ? (maxY = Coordinate.getMaxY(xyCoords, 0, xyCoords.length)) : maxY);
   }
 
   /**

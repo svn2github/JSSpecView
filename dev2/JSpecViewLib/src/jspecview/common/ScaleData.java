@@ -120,45 +120,35 @@ public class ScaleData {
    */
   public int numOfPoints;
 
-  public ScaleData(double minX, double maxX, double minY, double maxY) {
-    this.minX = minX;
-    this.maxX = maxX;
-    this.minY = minY;
-    this.maxY = maxY;
-  }
-
-  /**
-   * Calculates values that <code>JSVPanel</code> needs in order to render a
-   * graph, (eg. scale, min and max values) and stores the values in the
-   * class <code>ScaleData</code>. Note: This
-   * method is not used in the application, instead the more general
-   * {@link jspecview.common.MultiScaleData} is generated with
-   * the
-   * {@link jspecview.common.MultiScaleData#generateScaleData(jspecview.common.Coordinate[][], int[], int[], int, int)}
-   * method
-   * 
-   * @param coords
-   *        the array of coordinates
-   * @param start
-   *        the start index
-   * @param end
-   *        the end index
-   * @param initNumXDivisions
-   *        the initial number of X divisions for scale
-   * @param initNumYDivisions
-   *        the initial number of Y divisions for scale
-   * @return returns an instance of <code>ScaleData</code>
-   */
-  public ScaleData(Coordinate[] coords, int start,
-                                            int end, int initNumXDivisions,
-                                            int initNumYDivisions,
-                                            boolean isContinuous) {
-    this(Coordinate.getMinX(coords, start, end),
-        Coordinate.getMaxX(coords, start, end),
-        Coordinate.getMinY(coords, start, end),
-        Coordinate.getMaxY(coords, start, end));  
-    setScale(initNumXDivisions, initNumYDivisions, isContinuous);
-  }
+	/**
+	 * Calculates values that <code>JSVPanel</code> needs in order to render a
+	 * graph, (eg. scale, min and max values) and stores the values in the class
+	 * <code>ScaleData</code>. Note: This method is not used in the application,
+	 * instead the more general {@link jspecview.common.MultiScaleData} is
+	 * generated with the
+	 * {@link jspecview.common.MultiScaleData#generateScaleData(jspecview.common.Coordinate[][], int[], int[], int, int)}
+	 * method
+	 * 
+	 * @param coords
+	 *          the array of coordinates
+	 * @param start
+	 *          the start index
+	 * @param end
+	 *          the end index
+	 * @param initNumXDivisions
+	 *          the initial number of X divisions for scale
+	 * @param initNumYDivisions
+	 *          the initial number of Y divisions for scale
+	 * @return returns an instance of <code>ScaleData</code>
+	 */
+	public ScaleData(Coordinate[] coords, int start, int end,
+			int initNumXDivisions, int initNumYDivisions, boolean isContinuous) {
+		minX = Coordinate.getMinX(coords, start, end);
+		maxX = Coordinate.getMaxX(coords, start, end);
+		minY = Coordinate.getMinY(coords, start, end);
+		maxY = Coordinate.getMaxY(coords, start, end);
+		setScale(initNumXDivisions, initNumYDivisions, isContinuous);
+	}
 
   /**
    * Initialises a <code>ScaleData</code> from another one
@@ -193,7 +183,10 @@ public class ScaleData {
     numOfPoints = data.numOfPoints;
   }
 
-  protected ScaleData setScale(int initNumXDivisions, int initNumYDivisions, 
+  public ScaleData() {
+	}
+
+	protected ScaleData setScale(int initNumXDivisions, int initNumYDivisions, 
                                boolean isContinuous) {
 
     setXScale(initNumXDivisions);

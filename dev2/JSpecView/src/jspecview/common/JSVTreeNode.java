@@ -347,4 +347,14 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
     si.setMenuEnables(node, true);
   }
 
+	public static void setSelectedPanel(ScriptInterface si, JSVPanel jsvp) {
+		if (jsvp != null) {
+			JSVTreeNode treeNode = (JSVTreeNode) JSVPanelNode.findNode(jsvp, si
+					.getPanelNodes()).treeNode;
+			JTree spectraTree = (JTree) si.getSpectraTree();
+			spectraTree.scrollPathToVisible(new TreePath(treeNode.getPath()));
+			spectraTree.setSelectionPath(new TreePath(treeNode.getPath()));
+		}
+	}
+
 }

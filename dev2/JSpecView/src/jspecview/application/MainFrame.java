@@ -81,7 +81,6 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import org.jmol.api.JSVInterface;
@@ -733,14 +732,9 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   }
 
   public void setSelectedPanel(JSVPanel jsvp) {
-  	System.out.println(jsvp);
   	spectrumPanel.setSelectedPanel(jsvp, panelNodes);
   	selectedPanel = jsvp;
-  	if (jsvp != null) {
-      JSVTreeNode treeNode = (JSVTreeNode)JSVPanelNode.findNode(jsvp, panelNodes).treeNode;
-	  	spectraTree.scrollPathToVisible(new TreePath(treeNode.getPath()));
-  	  spectraTree.setSelectionPath(new TreePath(treeNode.getPath()));
-  	}
+		JSVTreeNode.setSelectedPanel((ScriptInterface) this, jsvp);
     validate();
   }
 

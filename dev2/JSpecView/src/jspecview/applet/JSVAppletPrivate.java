@@ -61,7 +61,6 @@ import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import jspecview.application.TextDialog;
@@ -442,19 +441,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		jsvApplet.getContentPane().add(spectrumPanel);
 	}
 
-	/**
-	 * Shows the </code>JSVPanel</code> at a certain index
-	 * 
-	 * @param index
-	 *          the index
-	 */
-	private void showSpectrum(int index) {
-		JSVPanel jsvp = panelNodes.get(index).jsvp;
-		if (jsvp != getSelectedPanel())
-			setSelectedPanel(jsvp);
-		sendFrameChange(jsvp);
-	}
-
 	private JSVPanel prevPanel;
 	public void sendFrameChange(JSVPanel jsvp) {
 		if (jsvp == prevPanel)
@@ -811,11 +797,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	public void setSelectedPanel(JSVPanel jsvp) {
 		spectrumPanel.setSelectedPanel(jsvp, panelNodes);
   	selectedPanel = jsvp;
-  	if (jsvp != null) {
-      JSVTreeNode treeNode = (JSVTreeNode)JSVPanelNode.findNode(jsvp, panelNodes).treeNode;
-	  	spectraTree.scrollPathToVisible(new TreePath(treeNode.getPath()));
-  	  spectraTree.setSelectionPath(new TreePath(treeNode.getPath()));
-  	}
+		JSVTreeNode.setSelectedPanel((ScriptInterface) this, jsvp);
     jsvApplet.validate();
 	}
 
@@ -937,12 +919,12 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
   public String execLoad(String value) {
-  	int nSpec = panelNodes.size();
+  	//int nSpec = panelNodes.size();
   	JSVTreeNode.load((ScriptInterface) this, value);
     if (getSelectedPanel() == null)
       return null;
-    // probably not right:
-		setSpectrumIndex(nSpec, "execLoad");
+    // probably unnecessary:
+		//setSpectrumIndex(nSpec, "execLoad");
 		if (loadFileCallbackFunctionName != null)
 			callToJavaScript(loadFileCallbackFunctionName, new Object[] { appletID,
 					value });
@@ -981,7 +963,10 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	private JSVPanel setSpectrumIndex(int i, String where) {
 		if (i < 0 || i > panelNodes.size())
 			return null;
-		showSpectrum(i);
+		JSVPanel jsvp = panelNodes.get(i).jsvp;
+		if (jsvp != getSelectedPanel())
+			setSelectedPanel(jsvp);
+		sendFrameChange(jsvp);
 		spectrumPanel.validate();
 		validateAndRepaint();
 		return getSelectedPanel();
