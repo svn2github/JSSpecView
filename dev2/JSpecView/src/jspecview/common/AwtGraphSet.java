@@ -265,11 +265,31 @@ class AwtGraphSet extends GraphSet {
 	}
 	
 	@Override
-	protected void fillArrow(Object g, boolean isUp, int x, int y) {
-		int f = (isUp ? -1 : 1);
+	protected void fillArrow(Object g, ArrowType type, int x, int y) {
+		int f = 1;
+		switch (type) {
+		case LEFT:
+		case UP:
+			f = -1;
+			break;
+		}
 		int[] axPoints = new int[] { x - 5,   x - 5, x + 5,   x + 5,   x + 8,        x, x - 8 }; 
-		int[] ayPoints = new int[] { y + 5*f, y - f, y - f, y + 5*f, y + 5*f, y + 10*f, y + 5*f }; 
-		((Graphics)g).fillPolygon(axPoints, ayPoints, 7);
+		int[] ayPoints = new int[] { y + 5*f, y - f, y - f, y + 5*f, y + 5*f, y + 10*f, y + 5*f };
+		switch (type) {
+		case LEFT:
+		case RIGHT:
+			((Graphics)g).fillPolygon(ayPoints, axPoints, 7);
+			break;
+		case UP:
+		case DOWN:
+			((Graphics)g).fillPolygon(axPoints, ayPoints, 7);
+		}
 	}
+
+	@Override
+	protected void fillCircle(Object g, int x, int y) {
+		((Graphics)g).drawOval(x-5, y-5, 8, 8);
+	}
+
 
 }

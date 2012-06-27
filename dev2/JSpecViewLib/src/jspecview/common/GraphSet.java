@@ -13,6 +13,8 @@ import jspecview.util.Parser;
 
 abstract class GraphSet {
 
+	protected enum ArrowType { LEFT, RIGHT, UP, DOWN, RESET, HOME };
+	
   abstract protected void disposeImage();
   abstract protected void draw2DImage(Object g);
   abstract protected void drawHandle(Object g, int x, int y, boolean outlineOnly);
@@ -22,9 +24,10 @@ abstract class GraphSet {
   abstract protected void drawString(Object g, String s, int x, int y);
   abstract protected void drawTitle(Object g, int height, int width,
                                     String title);
+  abstract protected void fillArrow(Object g, ArrowType type, int x, int y);
   abstract protected void fillBox(Object g, int x0, int y0, int x1, int y1,
                                   ScriptToken whatColor);
-  abstract protected void fillArrow(Object g, boolean isUp, int x, int y);
+	abstract protected void fillCircle(Object g, int x, int y);
   abstract Annotation getAnnotation(double x, double y, String text,
                                     boolean isPixels, boolean is2D,
                                     int offsetX, int offsetY);
@@ -646,7 +649,7 @@ abstract class GraphSet {
       setWidgetValueByUser(pw);
       return;
     }
-    if (checkScaleUpDown(xPixel, yPixel))
+    if (checkArrowUpDownClick(xPixel, yPixel))
     	return;
     
     boolean is2D = (isd != null && xPixel == isd.fixX(xPixel) && yPixel == fixY(yPixel));
@@ -702,23 +705,59 @@ abstract class GraphSet {
     pd.notifyPeakPickedListeners();
   }
 
-  private boolean checkScaleUpDown(int xPixel, int yPixel) {
-  	if (nSplit != 1 && !showAllStacked) {
-  		float f = (inScaleArrow(xPixel, yPixel, true) ? 2f 
-  				: inScaleArrow(xPixel, yPixel, false) ? 0.5f : 0);
-  		if (f != 0) {
-      	multiScaleData.scaleSpectrum(pd.currentSplitPoint, f);
-      	pd.refresh();
+  private final float RT2 = (float) Math.sqrt(2f);
+
+	private boolean checkArrowUpDownClick(int xPixel, int yPixel) {
+		boolean ok = false;
+		float f = (inScaleArrow(xPixel, yPixel, ArrowType.UP) ? RT2 : inScaleArrow(
+				xPixel, yPixel, ArrowType.DOWN) ? 1 / RT2 : 0);
+		if (f != 0) {
+			multiScaleData.scaleSpectrum(nSplit == 1 && showAllStacked ? -1
+					: pd.currentSplitPoint, f);
+			ok = true;
+		} else if (inScaleArrow(xPixel, yPixel, ArrowType.RESET)) {
+			multiScaleData.setScaleFactor(nSplit == 1 && showAllStacked ? -1
+					: pd.currentSplitPoint, 1);
+			ok = true;
+		}
+
+		if (ok)
+			pd.refresh();
+		return ok;
+	}
+
+  private boolean checkArrowLeftRightClick(int xPixel, int yPixel) {
+  	if (nSplit == 1 && showAllStacked) {
+  		int dx = (inScaleArrow(xPixel, yPixel, ArrowType.LEFT) ? -1 
+  				: inScaleArrow(xPixel, yPixel, ArrowType.RIGHT) ? 1 : 0);
+  		if (dx != 0) {
+  			if (iThisSpectrum + dx >= 0 && iThisSpectrum + dx < nSpectra)
+    			iThisSpectrum += dx;
       	return true;
+      } 
+  		if (inScaleArrow(xPixel, yPixel, ArrowType.HOME)) {
+  			iThisSpectrum = -1;
+  			return true;
       }
   	}
 		return false;
 	}
 
-	private boolean inScaleArrow(int xPixel, int yPixel, boolean isUp) {
-		int f = (isUp ? -1 : 1);
-		int pt = (yPixel00 + yPixel11) / 2 + f * 10;
-		return (Math.abs(xPixel11 - 25 - xPixel) < 10 && Math.abs(pt - yPixel) < 10);
+	private boolean inScaleArrow(int xPixel, int yPixel, ArrowType type) {
+		int pt;
+		switch (type) {
+		case UP:
+		case DOWN:
+		case RESET:
+			pt = (yPixel00 + yPixel11) / 2 + (type == ArrowType.UP ? -1 : type == ArrowType.DOWN ? 1 : 0) * 15;
+			return (Math.abs(xPixel11 - 25 - xPixel) < 10 && Math.abs(pt - yPixel) < 10);
+		case LEFT:
+		case RIGHT:
+		case HOME:
+			pt = xPixel00 + 32 + (type == ArrowType.LEFT ? -1 : type == ArrowType.RIGHT ? 1 : 0) * 15;
+			return (Math.abs(pt - xPixel) < 10 && Math.abs(yPixel11 - 10 - yPixel) < 10);
+		}
+		return false;
 	}
 	void mouseReleasedEvent() {
     PlotWidget thisWidget = pd.thisWidget;
@@ -1417,12 +1456,18 @@ abstract class GraphSet {
 			int offset = 0;
 			int yOffsetPixels = (int) (yPixels * (yOffsetPercent / 100f));
 			boolean doYScale = allowYScale;
+			int n = 0;
+			int iSelected = -1;
+			System.out.println("Graphset drawgraph " + System.currentTimeMillis());
 			for (int i = 0; i < nSpectra; i++)
 				if (doPlot(i, iSplit)) {
+					n++;
 					boolean isBold = (allowBold && showAllStacked && i == iThisSpectrum);
+					if (isBold)
+						iSelected = i;
 					double yFactorOld = userYFactor;
 					setUserYFactor(i);
-					doYScale &= (i == 0 || yFactorOld == userYFactor);
+					doYScale &= (n == 1 || yFactorOld == userYFactor);
 					drawSpectrum(g, i, height, width, spectrumOffsets == null  ? offset : spectrumOffsets[i], isBold);
 					if (pd.titleOn && iThisSpectrum == i && this == pd.currentGraphSet) {
 						drawTitle(g, height, width, spectra.get(i).getPeakTitle());
@@ -1430,7 +1475,17 @@ abstract class GraphSet {
 					}
 					offset -= yOffsetPixels;
 				}
+			if (iSelected >= 0) {
+				setUserYFactor(iSelected);
+				//doYScale = true;
+	      setCurrentBoxColor(g);
+				if (iSelected > 0)
+					fillArrow(g, ArrowType.LEFT, yPixel11 - 10, xPixel00 + 23);
+      	fillCircle(g, xPixel00 + 32, yPixel11 - 10);
+      	if (iSelected < nSpectra - 1)
+      		fillArrow(g, ArrowType.RIGHT, yPixel11 - 10, xPixel00 + 41);
 
+			}
 			if (doYScale && pd.getBoolean(ScriptToken.YSCALEON))
 				drawYScale(g, height, width);
 			if (doYScale && pd.getBoolean(ScriptToken.YUNITSON))
@@ -1698,11 +1753,10 @@ abstract class GraphSet {
       drawRect(g, xPixel00 + 10, yPixel00 + 1, xPixel11 - 20 - xPixel00, yPixel11 - 2 - yPixel00);
       if (isSplittable) {
         fillBox(g, xPixel11 - 20, yPixel00 + 1, xPixel11 - 10, yPixel00 + 11, null);
-        if (nSplit > 1 && !showAllStacked) {
-        	fillArrow(g, true, xPixel11 - 25, (yPixel00 + yPixel11)/2 -10);
-        	fillArrow(g, false, xPixel11 - 25, (yPixel00 + yPixel11)/2 + 10);
-        }
       }
+    	fillArrow(g, ArrowType.UP, xPixel11 - 25, (yPixel00 + yPixel11)/2 - 9);
+    	fillCircle(g, xPixel11 - 25, (yPixel00 + yPixel11)/2);
+    	fillArrow(g, ArrowType.DOWN, xPixel11 - 25, (yPixel00 + yPixel11)/2 + 9);
     }
   }
 
@@ -2301,6 +2355,8 @@ abstract class GraphSet {
 	}
 	
 	boolean checkSpectrumClickEvent(int xPixel, int yPixel) {
+    if (checkArrowLeftRightClick(xPixel, yPixel))
+    	return true;
     if (showAllStacked && isInPlotRegion(xPixel, yPixel)) {
     	for (int i = 0; i < nSpectra; i++) 
     		if (isOnSpectrum(xPixel, yPixel, i, 2)) {
@@ -2317,4 +2373,5 @@ abstract class GraphSet {
 		return "gs: " + nSpectra + " " + spectra + " " + spectra.get(0).getFilePath();
 	}
 
+	// TODO: user Y scale needs to be integrated better into the 
 }

@@ -195,15 +195,19 @@ public class ScaleData {
 
     // Y Scale
     
+    setYScale(initNumYDivisions);
+    return this;
+  }
+
+  public void setYScale(int initNumYDivisions) {
     if (minY == 0 && maxY == 0)
       maxY = 1;
     yStep = getStep(minY, maxY, initNumYDivisions, hashNums, 1);
     minYOnScale = yStep * Math.floor(minY / yStep);
     maxYOnScale = yStep * Math.ceil(maxY / yStep);
-    return this;
-  }
+	}
 
-  protected void setXScale(int initNumXDivisions) {
+	protected void setXScale(int initNumXDivisions) {
     // X Scale
     xStep = getStep(minX, maxX, initNumXDivisions, hashNums, 0);
     minXOnScale = xStep * Math.floor(minX / xStep);

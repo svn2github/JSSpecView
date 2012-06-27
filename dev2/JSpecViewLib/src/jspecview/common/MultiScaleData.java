@@ -199,12 +199,21 @@ public class MultiScaleData extends ScaleData {
 	}
 	
  public void setScaleFactor(int i, float f) {
-		if (f != 0 && i >= 0 && i < nSpec)
+		if (f == 0 || i >= nSpec)
+			return;
+		if (i < 0)
+			resetScaleFactors();
+		else
 			spectrumScaleFactors[i] = f;
   }
   
 	public void scaleSpectrum(int i, float f) {
-		if (f != 0 && i >= 0 && i < nSpec)
+		if (f == 0 || i >= nSpec)
+			return;
+		if (i < 0)
+			for (i = 0; i < nSpec; i++)
+				spectrumScaleFactors[i] *= f;
+		else
 			spectrumScaleFactors[i] *= f;
   }
 
