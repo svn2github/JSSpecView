@@ -960,18 +960,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		return overlayLegendDialog = new OverlayLegendDialog(null, getSelectedPanel());
 	}
 
-	private JSVPanel setSpectrumIndex(int i, String where) {
-		if (i < 0 || i > panelNodes.size())
-			return null;
-		JSVPanel jsvp = panelNodes.get(i).jsvp;
-		if (jsvp != getSelectedPanel())
-			setSelectedPanel(jsvp);
-		sendFrameChange(jsvp);
-		spectrumPanel.validate();
-		validateAndRepaint();
-		return getSelectedPanel();
-	}
-
 	/**
 	 * @param msg
 	 */
@@ -1058,9 +1046,12 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		return node;
 	}
 
-	public void setNode(JSVPanelNode node, boolean fromTree) {
-		// no JTree visible for Applet, so doesn't matter if it is from a tree click
-		setSpectrumIndex(JSVPanelNode.getNodeIndex(panelNodes, node), "setFrame");
+	public void setNode(JSVPanelNode panelNode, boolean fromTree) {
+		if (panelNode.jsvp != getSelectedPanel())
+			setSelectedPanel(panelNode.jsvp);
+		sendFrameChange(panelNode.jsvp);
+		spectrumPanel.validate();
+		validateAndRepaint(); // app does not do repaint here
 	}
 
 	public void closeSource(JDXSource source) {

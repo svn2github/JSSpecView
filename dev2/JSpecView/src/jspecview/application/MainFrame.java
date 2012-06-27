@@ -1234,10 +1234,12 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
   public void setNode(JSVPanelNode panelNode, boolean fromTree) {
-    setSelectedPanel(panelNode.jsvp);
-    if (fromTree) {
-      sendFrameChange(panelNode.jsvp);
-    }
+		if (panelNode.jsvp != getSelectedPanel())
+			setSelectedPanel(panelNode.jsvp);
+		sendFrameChange(panelNode.jsvp);
+// was:    setSelectedPanel(panelNode.jsvp);
+//    if (fromTree)
+//      sendFrameChange(panelNode.jsvp);
     setMenuEnables(panelNode, false);
     if (getSelectedPanel().getSpectrum().hasIntegral())
       writeStatus("Use CTRL-LEFT-DRAG to measure an integration value.");
