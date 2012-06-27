@@ -1317,7 +1317,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	// debugging
 
 	public void execTest(String value) {
-		syncScript("<PeakData file=\"c:/temp/t.jdx\" index=\"2\" type=\"MS\" id=\"2\" title=\"b-caryopholene (~93)\" peakShape=\"sharp\" model=\"caryoph\"  xMax=\"94\" xMin=\"92\"  yMax=\"100\" yMin=\"0\" />");
+		syncScript("Jmol>JSV jmolApplet_object__746849053396906__JSpecView: <PeakData file=\"file:/C:/jmol-dev/workspace/Jmol-documentation/script_documentation/examples-12/jspecview/Crspectra.jdx\" index=\"19\" type=\"UV-VIS\" id=\"1\" title=\"Spin Allowed - delta ~565nm\" peakShape=\"singlet\" model=\"ncs\" xMax=\"595\" xMin=\"535\"    />");
 	}
 
 	public void checkOverlay() {

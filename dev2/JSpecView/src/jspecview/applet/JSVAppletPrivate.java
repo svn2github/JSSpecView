@@ -433,6 +433,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	private void newAppletPanel() {
+		System.out.println("newAppletPanel");
 		jsvApplet.getContentPane().removeAll();
 		spectrumPanel = new JSVSpectrumPanel(new BorderLayout());
 		jsvApplet.getContentPane().add(spectrumPanel);
@@ -569,6 +570,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	 */
 	public void syncLoad(String filePath) {
 		newAppletPanel();
+		System.out.println("syncLoad reading " + filePath);
 		openDataOrFile(null, null, null, filePath, -1, -1);
 		jsvApplet.getContentPane().validate();
 		spectrumPanel.validate();
@@ -1059,6 +1061,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	public JSVPanel getNewJSVPanel(JDXSpectrum spec) {
+		System.out.println("getNewJSVPanel " + spec);
 		if (spec == null) {
 			initialEndIndex = initialStartIndex = -1;
 			return null;
@@ -1072,6 +1075,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	public JSVPanelNode getNewPanelNode(String id, String fileName, JDXSource source, JSVPanel jsvp) {
+		System.out.println("getNewPanelNode " + fileName + " " + jsvp);
 		return new JSVPanelNode(id, fileName, source, jsvp);	
 	}
 

@@ -145,9 +145,11 @@ abstract class GraphSet {
   final private int FONT_ITALIC = 2;
 
   PeakInfo selectPeakByFileIndex(String filePath, String index) {
-    // for now we are only checking the base spectrum, but
-    // there might be a need to check subspectra at some point?
-    return getSpectrumAt(0).selectPeakByFileIndex(filePath, index);
+  	PeakInfo pi;
+  	for (int i = spectra.size(); --i >= 0;)
+  		if ((pi = getSpectrumAt(i).selectPeakByFileIndex(filePath, index)) != null)
+  			return pi;
+  	return null;
   }
 
   JDXSpectrum getSpectrum() {
@@ -326,10 +328,11 @@ abstract class GraphSet {
    * @param type
    * @param model
    */
-  void selectSpectrum(String filePath, String type, String model) {
+  boolean selectSpectrum(String filePath, String type, String model) {
+  	System.out.println("selectSpec checking " + type + " " + model + " " + filePath  + "\n in " + this.spectra);
     if (nSpectra == 1) {
       iThisSpectrum = -1;
-      return;
+      return false; // doesn't seem right. Why not OK if only one spectrum?
     }
     boolean haveFound = false;
     for (int i = spectra.size(); --i >= 0;)
@@ -339,10 +342,12 @@ abstract class GraphSet {
         iThisSpectrum = i;
         if (nSplit > 1)
         	splitStack(pd.graphSets, true);
+      	System.out.println("found: " + spectra.get(i));
         haveFound = true;
       }
     if (!haveFound && iThisSpectrum >= 0 && this != pd.currentGraphSet)
       iThisSpectrum = Integer.MAX_VALUE; // no plots in that case
+    return haveFound;
   }
 
 	private void getMultiScaleData(double x1, double x2, double y1, double y2,
@@ -2139,7 +2144,7 @@ abstract class GraphSet {
     double yPt = (isd != null && isd.isXWithinRange(xPixel) ? isd
         .toSubspectrumIndex(fixY(yPixel)) : toY(fixY(yPixel)));
     formatterY = pd.getFormatter(hashY);
-    pd.coordStr = "(" + xx + ", " + formatterY.format(yPt) + ")"  + " " + iThisSpectrum;;;;;
+    pd.coordStr = "(" + xx + ", " + formatterY.format(yPt) + ")"  + " " + iThisSpectrum;
     if (xPixel != fixX(xPixel) || yPixel != fixY(yPixel)) {
       yPt = Double.NaN;
     } else if (nSpectra == 1) {
@@ -2202,15 +2207,17 @@ abstract class GraphSet {
     return true;
   }
 
-  static PeakInfo selectPeakByFileIndex(List<GraphSet> graphSets, String fileName,
-                                  String index) {
-    PeakInfo pi;
-    for (int i = graphSets.size(); --i >= 0; )
-      if ((pi = graphSets.get(i).selectPeakByFileIndex(fileName, index)) != null) {
-        return pi;
-      }
-    return null;
-  }
+	static PeakInfo selectPeakByFileIndex(GraphSet gs, List<GraphSet> graphSets,
+			String filePath, String index) {
+		System.out.println("GraphSet selectPeakByFileIndex with graphsets=" + graphSets);
+		System.out.println("GraphSet selectPeakByFileIndex with gs=" + gs);
+		PeakInfo pi = (gs == null ? null : gs.selectPeakByFileIndex(filePath, index));
+		if (pi != null)
+			for (int i = graphSets.size(); --i >= 0;)
+				if ((pi = graphSets.get(i).selectPeakByFileIndex(filePath, index)) != null)
+					return pi;
+		return null;
+	}
   
   boolean hasFileLoaded(String filePath) {
     for (int i = spectra.size(); --i >= 0;) {
@@ -2303,6 +2310,11 @@ abstract class GraphSet {
     	allowBold  = false;
     }
     return false;
+	}
+	
+	@Override
+	public String toString() {
+		return "gs: " + nSpectra + " " + spectra + " " + spectra.get(0).getFilePath();
 	}
 
 }

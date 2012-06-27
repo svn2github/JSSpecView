@@ -229,6 +229,7 @@ public class JSVTreeNode extends DefaultMutableTreeNode {
 	public static int openDataOrFile(ScriptInterface si,
 			String data, String name, List<JDXSpectrum> specs, String url,
 			int firstSpec, int lastSpec) {
+		System.out.println("JSVTreeNode openDataOrFile " + data + name + specs + url);
 		if ("NONE".equals(name)) {
 			close(si, "Overlay*");
 			return FILE_OPEN_OK;

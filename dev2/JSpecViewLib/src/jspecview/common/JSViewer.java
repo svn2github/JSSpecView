@@ -269,13 +269,20 @@ public class JSViewer {
       Logger.info("file " + file + " not found -- JSViewer closing all and reopening");
       si.syncLoad(file);
     }
-    PeakInfo pi = selectPanelByPeak(si, peakScript, si.getSelectedPanel());
+    System.out.println("syncscript jsvp=" + si.getSelectedPanel() + " s0=" + si.getSelectedPanel().getSpectrum());
+    PeakInfo pi = selectPanelByPeak(si, peakScript);
+    System.out.println("syncscript pi=" + pi);
     JSVPanel jsvp = si.getSelectedPanel();
+    System.out.println("syncscript jsvp=" + jsvp);
     String type = Parser.getQuotedAttribute(peakScript, "type");
     String model = Parser.getQuotedAttribute(peakScript, "model");
+    System.out.println("syncscript --selectSpectrum2 "  + pi + " " + type + " "  + model + " s=" + jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
     jsvp.getPanelData().selectSpectrum(file, type, model);
+    System.out.println("syncscript --selectSpectrum3 "  + pi + " " + type + " "  + model + " s=" + jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
     si.sendFrameChange(jsvp);
+    System.out.println("syncscript --selectSpectrum4 "  + pi + " " + type + " "  + model + " s=" + jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
     jsvp.getPanelData().addPeakHighlight(pi);
+    System.out.println("syncscript --selectSpectrum5 "  + pi + " " + type + " "  + model + " s=" + jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
     jsvp.repaint();
     // round trip this so that Jmol highlights all equivalent atoms
     // and appropriately starts or clears vibration
@@ -296,8 +303,8 @@ public class JSViewer {
   }
 
   private static PeakInfo selectPanelByPeak(ScriptInterface si,
-                                            String peakScript, JSVPanel jsvp) {
-    List<JSVPanelNode> panelNodes = si.getPanelNodes();
+                                            String peakScript) {
+  	List<JSVPanelNode> panelNodes = si.getPanelNodes();
     if (panelNodes == null)
       return null;
     String file = Parser.getQuotedAttribute(peakScript, "file");
@@ -305,9 +312,15 @@ public class JSViewer {
     PeakInfo pi = null;
     for (int i = panelNodes.size(); --i >= 0;)
       panelNodes.get(i).jsvp.getPanelData().addPeakHighlight(null);
-    if ((pi = jsvp.getPanelData().selectPeakByFileIndex(file, index)) != null) {
+  	JSVPanel jsvp = si.getSelectedPanel();
+    System.out.println("JSViewer selectPanelByPeak looking for " + index + " " + file + " in " + jsvp);
+    pi = jsvp.getPanelData().selectPeakByFileIndex(file, index);
+    System.out.println("JSViewer selectPanelByPeak pi = " + pi);
+    if (pi != null) {
+    	// found in current panel
       si.setNode(JSVPanelNode.findNode(jsvp, panelNodes), false);
     } else {
+    	// must look elsewhere
       for (int i = panelNodes.size(); --i >= 0;) {
         JSVPanelNode node = panelNodes.get(i);
         if ((pi = node.jsvp.getPanelData().selectPeakByFileIndex(file, index)) != null) {
@@ -358,6 +371,7 @@ public class JSViewer {
     }
     si.getSelectedPanel().getPanelData().addPeakHighlight(pi);
     si.syncToJmol(jmolSelect(pi));
+    System.out.println("processPeakEvent --selectSpectrum "  + pi);
     if (pi.isClearAll()) // was not in app version??
       si.getSelectedPanel().repaint();
     else
@@ -374,6 +388,7 @@ public class JSViewer {
     if (pi == null)
       pi = jsvp.getSpectrum().getBasePeakInfo();
     si.getSelectedPanel().getPanelData().addPeakHighlight(pi);
+    System.out.println("JSViewer sendFrameChange "  + jsvp);
     si.syncToJmol(jmolSelect(pi));
   }
 

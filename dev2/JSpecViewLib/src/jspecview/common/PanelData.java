@@ -224,6 +224,7 @@ public class PanelData {
     nSpectra = spectra.size();
     graphSets = GraphSet.getGraphSets(owner, spectra, startIndex, endIndex);
     currentGraphSet = graphSets.get(0);
+    System.out.println("PanelData.initJSVPanel " + currentGraphSet);
     setTitle(getSpectrum().getTitleLabel());
   }
 
@@ -238,6 +239,7 @@ public class PanelData {
     	}
     }
     currentGraphSet = gs;
+    System.out.println("setting currentGraphSet to " + gs);
     currentSplitPoint = splitPoint;
     if (gs.nSplit > 1 && !gs.showAllStacked)
     	gs.iThisSpectrum = splitPoint;
@@ -536,13 +538,16 @@ public class PanelData {
   }
 
   public PeakInfo selectPeakByFileIndex(String fileName, String index) {
-    return GraphSet.selectPeakByFileIndex(graphSets, fileName, index);
+    return GraphSet.selectPeakByFileIndex(currentGraphSet, graphSets, fileName, index);
   }
 
-  public void selectSpectrum(String fileName, String type, String model) {
-    for (int i = 0; i < graphSets.size(); i += 1)
-      graphSets.get(i).selectSpectrum(fileName, type, model);
-  }
+	public void selectSpectrum(String filePath, String type, String model) {
+		System.out.println("selectSpectrum: currentGraphSet=" + currentGraphSet);
+		if (currentGraphSet == null
+				|| !currentGraphSet.selectSpectrum(filePath, type, model))
+			for (int i = 0; i < graphSets.size(); i += 1)
+				graphSets.get(i).selectSpectrum(filePath, type, model);
+	}
 
   public boolean hasFileLoaded(String filePath) {
     for (int i = graphSets.size(); --i >= 0;)
