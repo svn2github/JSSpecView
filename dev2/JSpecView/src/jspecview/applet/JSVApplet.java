@@ -35,9 +35,9 @@
 // 24-09-2011 jak - Added parameter for integration ratio annotations.
 // 08-10-2011 jak - Add a method to toggle integration from a javascript
 //          call. Changed behaviour to remove integration after reset view.
-// 19-06-2012 RMH -changes to printing calls
-// 23-06-2012 RMH -Major change to Applet code to allow multiple file loads
-// 25-06-2012 RMH -Overlay/close/view spectrum dialog box change
+// 19-06-2012 BH -changes to printing calls
+// 23-06-2012 BH -Major change to Applet code to allow multiple file loads
+// 26-06-2012 BH -more changes to Overlay/close/view spectrum 
 
 package jspecview.applet;
 
@@ -56,7 +56,8 @@ import jspecview.common.JSVAppletInterface;
  * @author Khari A. Bryan
  * @author Craig A. D. Walters
  * @author Prof Robert J. Lancashire
- * 
+ *
+ * http://blog.gorges.us/2009/03/how-to-enable-keywords-in-eclipse-and-subversion-svn/
  * $LastChangedRevision$
  * $LastChangedDate$
  */
