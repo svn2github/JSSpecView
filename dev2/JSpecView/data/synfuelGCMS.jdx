@@ -391,7 +391,7 @@ M  END
 </Models>
 ##$PEAKS=
 <Peaks type="MS" xUnitsExpected="M/Z"  >
-<PeakData id="1" title="molecular ion (~91)" peakShape="sharp" model="3benz.1"  xMax="92" xMin="90"    />
+<PeakData id="1" title="molecular ion (~91)" peakShape="sharp" model="4tol.1"  xMax="92" xMin="90"    />
 </Peaks>
 ##XUNITS=M/Z
 ##YUNITS=RELATIVE ABUNDANCE
