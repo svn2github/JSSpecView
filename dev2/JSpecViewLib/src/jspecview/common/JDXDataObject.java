@@ -452,6 +452,14 @@ public abstract class JDXDataObject extends JDXHeader {
     return dataType.startsWith("GC");
   }
 
+  private boolean isMS() {
+    return dataType.startsWith("MASS") || dataType.startsWith("MS");
+  }
+
+	public boolean isStackable() {
+		return !isMS();
+	}
+
 //  private boolean isUVVis() {
 //    return dataType.startsWith("VIS") || dataType.startsWith("UV");
 //  }

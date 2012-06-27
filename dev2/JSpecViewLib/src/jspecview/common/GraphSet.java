@@ -50,10 +50,8 @@ abstract class GraphSet {
 
   private int[] spectrumOffsets;
   private boolean isSplittable = true;
-	boolean showAllStacked = true;
+	private boolean allowStacking = true;
   private int[] splitSpectrumPointers = new int[] {0};
-
-  int nSplit = 1;
 
   private ArrayList<Annotation> annotations;
   private Annotation lastAnnotation;
@@ -65,7 +63,9 @@ abstract class GraphSet {
   
   MultiScaleData multiScaleData; 
   boolean reversePlot;
-
+  int nSplit = 1;
+  boolean showAllStacked = true;
+	
   // needed by AwtGraphSet
   
   protected List<MultiScaleData> zoomInfoList;
@@ -74,11 +74,9 @@ abstract class GraphSet {
   protected boolean sticky2Dcursor;
   protected int nSpectra;
 
-  int getNSpectra() {
+  public int getNSpectra() {
     return nSpectra;
   }
-
-
 
   void dispose() {
     for (int i = 0; i < spectra.size(); i++)
@@ -222,7 +220,7 @@ abstract class GraphSet {
 		} else {
 			nSplit = 1;
 			splitSpectrumPointers[0] = 0;
-			showAllStacked = !doSplit;
+			showAllStacked = !doSplit && allowStacking;
 		}
 		setFractionalPositions(graphSets);
 	}
@@ -304,7 +302,8 @@ abstract class GraphSet {
     if (endIndex <= 0)
       endIndex = Integer.MAX_VALUE;
     isSplittable = true;// for now, could be: getSpectrumAt(0).isSplitable();
-		showAllStacked = (nSpectra > 1);
+		allowStacking = (spectra.get(0).isStackable());
+    showAllStacked = allowStacking && (nSpectra > 1);
     for (int i = 0; i < nSpectra; i++) {
       int iLast = spectra.get(i).getXYCoords().length - 1;
       startIndices[i] = Coordinate.intoRange(startIndex, 0, iLast);
