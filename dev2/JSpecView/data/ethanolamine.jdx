@@ -428,7 +428,7 @@ H    -0.22835   -1.78711    0.74040    0.25938   -0.45849    0.81026
 <PeakData id="14" title=" (~760 cm-1)" peakShape="broad" model="1.6" xMax="892" xMin="852"    />
 </Peaks>
 ##XUNITS= 1/CM
-##YUNITS= ABSORBANCE
+##YUNITS= TRANSMITTANCE
 ##XFACTOR= 3.39838861E-3
 ##YFACTOR= 8.76278995E-7
 ##FIRSTX= 599.8394
