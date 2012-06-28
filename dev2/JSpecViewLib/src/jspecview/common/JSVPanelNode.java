@@ -143,8 +143,8 @@ public class JSVPanelNode {
 		int n = panelNodes.size();
 		JSVPanelNode node = (n == 0 ? null : panelNodes.get(n - 1));
 		// first in last file
-		for (int i = panelNodes.size(); --i >= 0; ) {
-			if (panelNodes.get(i).jsvp == null)
+		for (int i = n - 1; --i >= 0; ) {
+			if (panelNodes.get(i).source != node.source)
 				break;
 			node = panelNodes.get(i);
 		}

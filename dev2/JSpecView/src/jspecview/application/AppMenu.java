@@ -17,7 +17,7 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-// CHANGES to 'MainFrame.java' - Main Application GUI
+// CHANGES to 'mainFrame.java' - Main Application GUI
 // University of the West Indies, Mona Campus
 //
 // 20-06-2005 kab - Implemented exporting JPG and PNG image files from the application
@@ -56,6 +56,7 @@ import javax.swing.event.MenuListener;
 
 import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelNode;
+import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
 import jspecview.common.JSVPanelPopupMenu;
 import jspecview.common.ScriptToken;
@@ -232,25 +233,25 @@ public class AppMenu extends JMenuBar {
     JSVPanelPopupMenu.setMenuItem(nextZoomMenuItem, 'N', "Next View", 78,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            mainFrame.zoomTo(1);
+            JSViewer.zoomTo(mainFrame,1);
           }
         });
     JSVPanelPopupMenu.setMenuItem(prevZoomMenuItem, 'P', "Previous View", 80,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            mainFrame.zoomTo(-1);
+            JSViewer.zoomTo(mainFrame,-1);
           }
         });
     JSVPanelPopupMenu.setMenuItem(fullZoomMenuItem, 'F', "Full View", 70,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            mainFrame.zoomTo(Integer.MAX_VALUE);
+            JSViewer.zoomTo(mainFrame,Integer.MAX_VALUE);
           }
         });
     JSVPanelPopupMenu.setMenuItem(clearZoomMenuItem, 'C', "Clear Views", 67,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            mainFrame.zoomTo(0);
+            JSViewer.zoomTo(mainFrame,0);
           }
         });
     JSVPanelPopupMenu.setMenuItem(userZoomMenuItem, 'Z', "Set Zoom...", 90,

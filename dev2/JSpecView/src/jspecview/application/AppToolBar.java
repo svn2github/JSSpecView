@@ -10,6 +10,7 @@ import javax.swing.JToolBar;
 
 import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelNode;
+import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
 import jspecview.common.ScriptToken;
 
@@ -93,22 +94,22 @@ public class AppToolBar extends JToolBar {
     setButton(previousButton, "Previous View", previousIcon,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            mainFrame.zoomTo(-1);
+            JSViewer.zoomTo(mainFrame, -1);
           }
         });
     setButton(nextButton, "Next View", nextIcon, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        mainFrame.zoomTo(1);
+        JSViewer.zoomTo(mainFrame, 1);
       }
     });
     setButton(resetButton, "Reset", resetIcon, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        mainFrame.zoomTo(Integer.MAX_VALUE);
+        JSViewer.zoomTo(mainFrame, Integer.MAX_VALUE);
       }
     });
     setButton(clearButton, "Clear Views", clearIcon, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        mainFrame.zoomTo(0);
+        JSViewer.zoomTo(mainFrame, 0);
       }
     });
 

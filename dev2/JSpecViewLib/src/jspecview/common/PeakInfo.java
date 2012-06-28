@@ -104,6 +104,8 @@ public class PeakInfo {
   }
 
   public boolean checkFileIndex(String filePath, String sIndex) {
+  	System.out.println("PeakInfo " + filePath + "=?=" + file + "/n" + sIndex + "=?=" + index
+  			+ " " + (sIndex.equals(index) && filePath.equals(file)));
     return (sIndex.equals(index) && filePath.equals(file));
   }
 

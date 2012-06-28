@@ -256,7 +256,7 @@ public class JSViewer {
    */
 
   public static void syncScript(ScriptInterface si, String peakScript) {
-    Logger.info("Jmol>JSV " + peakScript);
+    System.out.println(Thread.currentThread() + "Jmol>JSV " + peakScript);
     if (peakScript.indexOf("<PeakData") < 0) {
       runScriptNow(si, peakScript);
       return;
@@ -269,20 +269,20 @@ public class JSViewer {
       Logger.info("file " + file + " not found -- JSViewer closing all and reopening");
       si.syncLoad(file);
     }
-    System.out.println("syncscript jsvp=" + si.getSelectedPanel() + " s0=" + si.getSelectedPanel().getSpectrum());
+    System.out.println(Thread.currentThread() + "syncscript jsvp=" + si.getSelectedPanel() + " s0=" + si.getSelectedPanel().getSpectrum());
     PeakInfo pi = selectPanelByPeak(si, peakScript);
-    System.out.println("syncscript pi=" + pi);
+    System.out.println(Thread.currentThread() + "syncscript pi=" + pi);
     JSVPanel jsvp = si.getSelectedPanel();
-    System.out.println("syncscript jsvp=" + jsvp);
+    System.out.println(Thread.currentThread() + "syncscript jsvp=" + jsvp);
     String type = Parser.getQuotedAttribute(peakScript, "type");
     String model = Parser.getQuotedAttribute(peakScript, "model");
-    System.out.println("syncscript --selectSpectrum2 "  + pi + " " + type + " "  + model + " s=" + jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
+    System.out.println(Thread.currentThread() + "syncscript --selectSpectrum2 "  + pi + " " + type + " "  + model + " s=" + jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
     jsvp.getPanelData().selectSpectrum(file, type, model);
-    System.out.println("syncscript --selectSpectrum3 "  + pi + " " + type + " "  + model + " s=" + jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
+    System.out.println(Thread.currentThread() + "syncscript --selectSpectrum3 "  + pi + " " + type + " "  + model + " s=" + jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
     si.sendFrameChange(jsvp);
-    System.out.println("syncscript --selectSpectrum4 "  + pi + " " + type + " "  + model + " s=" + jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
+    System.out.println(Thread.currentThread() + "syncscript --selectSpectrum4 "  + pi + " " + type + " "  + model + " s=" + jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
     jsvp.getPanelData().addPeakHighlight(pi);
-    System.out.println("syncscript --selectSpectrum5 "  + pi + " " + type + " "  + model + " s=" + jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
+    System.out.println(Thread.currentThread() + "syncscript --selectSpectrum5 "  + pi + " " + type + " "  + model + " s=" + jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
     jsvp.repaint();
     // round trip this so that Jmol highlights all equivalent atoms
     // and appropriately starts or clears vibration
@@ -291,7 +291,8 @@ public class JSViewer {
 
   private static boolean checkFileAlreadyLoaded(ScriptInterface si,
                                                 String fileName) {
-    if (si.getSelectedPanel().getPanelData().hasFileLoaded(fileName))
+  	JSVPanel jsvp = si.getSelectedPanel();
+  	if (jsvp != null && jsvp.getPanelData().hasFileLoaded(fileName))
       return true;
     List<JSVPanelNode> panelNodes = si.getPanelNodes();
     for (int i = panelNodes.size(); --i >= 0;)
@@ -313,22 +314,27 @@ public class JSViewer {
     for (int i = panelNodes.size(); --i >= 0;)
       panelNodes.get(i).jsvp.getPanelData().addPeakHighlight(null);
   	JSVPanel jsvp = si.getSelectedPanel();
-    System.out.println("JSViewer selectPanelByPeak looking for " + index + " " + file + " in " + jsvp);
+    System.out.println(Thread.currentThread() + "JSViewer selectPanelByPeak looking for " + index + " " + file + " in " + jsvp);
     pi = jsvp.getPanelData().selectPeakByFileIndex(file, index);
-    System.out.println("JSViewer selectPanelByPeak pi = " + pi);
+    System.out.println(Thread.currentThread() + "JSViewer selectPanelByPeak pi = " + pi);
     if (pi != null) {
     	// found in current panel
       si.setNode(JSVPanelNode.findNode(jsvp, panelNodes), false);
     } else {
     	// must look elsewhere
+    	System.out.println(Thread.currentThread() + "JSViewer selectPanelByPeak did not find it");
       for (int i = panelNodes.size(); --i >= 0;) {
         JSVPanelNode node = panelNodes.get(i);
+      	System.out.println(Thread.currentThread() + "JSViewer selectPanelByPeak looking at node " + i + " " + node.fileName);
         if ((pi = node.jsvp.getPanelData().selectPeakByFileIndex(file, index)) != null) {
+          System.out.println(Thread.currentThread() + "JSViewer selectPanelByPeak setting node " + i + " pi=" + pi);
           si.setNode(node, false);
+          System.out.println(Thread.currentThread() + "JSViewer selectPanelByPeak setting node " + i + " set node done");
           break;
         }
       }
     }
+    System.out.println(Thread.currentThread() + "JSViewer selectPanelByPeak finally pi = " + pi);
     return pi;
   }
 
@@ -371,7 +377,7 @@ public class JSViewer {
     }
     si.getSelectedPanel().getPanelData().addPeakHighlight(pi);
     si.syncToJmol(jmolSelect(pi));
-    System.out.println("processPeakEvent --selectSpectrum "  + pi);
+    System.out.println(Thread.currentThread() + "processPeakEvent --selectSpectrum "  + pi);
     if (pi.isClearAll()) // was not in app version??
       si.getSelectedPanel().repaint();
     else
@@ -388,7 +394,7 @@ public class JSViewer {
     if (pi == null)
       pi = jsvp.getSpectrum().getBasePeakInfo();
     si.getSelectedPanel().getPanelData().addPeakHighlight(pi);
-    System.out.println("JSViewer sendFrameChange "  + jsvp);
+    System.out.println(Thread.currentThread() + "JSViewer sendFrameChange "  + jsvp);
     si.syncToJmol(jmolSelect(pi));
   }
 
@@ -555,5 +561,25 @@ public class JSViewer {
 		return (isNone ? "NONE" : sb.length() > 0 ? sb.toString().substring(1)
 				: null);
 	}
-  
+	
+	public static void zoomTo(ScriptInterface si, int mode) {
+		JSVPanel jsvp = si.getSelectedPanel();
+		if (jsvp == null)
+			return;
+		PanelData pd = jsvp.getPanelData();
+		switch (mode) {
+		case 1:
+			pd.nextView();
+			break;
+		case -1:
+			pd.previousView();
+			break;
+		case Integer.MAX_VALUE:
+			pd.fullView();
+			break;
+		default:
+			pd.resetView();
+			break;
+		}
+	}
 }

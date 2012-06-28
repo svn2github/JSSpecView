@@ -53,6 +53,7 @@ abstract class GraphSet {
 
   private boolean isSplittable = true;
 	private boolean allowStacking = true;
+	private boolean stackSelected = true;
   private int[] splitSpectrumPointers = new int[] {0};
 
   private ArrayList<Annotation> annotations;
@@ -99,7 +100,7 @@ abstract class GraphSet {
     disposeImage();
   }
 
-  private double fracX = 1, fracY = 1, fX0 = 0, fY0 = 0; // take up full screen
+  private double fracY = 1, fX0 = 0, fY0 = 0; // take up full screen
 
   private PlotWidget zoomBox1D, zoomBox2D, pin1Dx0, pin1Dx1, // ppm range -- horizontal bar on 1D spectrum 
       pin1Dy0, pin1Dy1, // y-scaling -- vertical bar on 1D spectrum and left of 2D when no 1D
@@ -119,7 +120,7 @@ abstract class GraphSet {
   private int xPixel00, yPixel00, xPixel11, yPixel11, yPixel000;
   private int xPixels, yPixels;
 
-  private boolean allowYScale = true;
+  private boolean allowStackedYScale = true;
   private boolean drawXAxisLeftToRight;
   private boolean xAxisLeftToRight = true;
   private boolean doDraw1DObjects = true;
@@ -165,7 +166,6 @@ abstract class GraphSet {
 	private String nucleusX;
 	private String nucleusY;
   private final static int minNumOfPointsForZoom = 3;
-	private boolean stackSelected = true;
 
   final private int FONT_PLAIN = 0;
   final private int FONT_BOLD = 1;
@@ -245,10 +245,12 @@ abstract class GraphSet {
 				nSplit++;
 			}
 			showAllStacked = false;
+			stackSelected = false;
 		} else {
 			nSplit = 1;
 			splitSpectrumPointers[0] = 0;
 			showAllStacked = !doSplit && allowStacking;
+			stackSelected = false;
 		}
 		setFractionalPositions(graphSets);
 	}
@@ -278,7 +280,7 @@ abstract class GraphSet {
   	
 		int marginalHeight = height - 40;
     xPixel00 = (int) (width * fX0);
-    xPixel11 = xPixel00 + (int) (width * fracX) - 1;
+    xPixel11 = xPixel00 + width - 1;
     yPixel000 = (int) (height * fY0);
     yPixel00 = yPixel000 + (int) (marginalHeight * fracY * iSplit);
     yPixel11 = yPixel00 + (int) (marginalHeight * fracY) - 1;
@@ -326,7 +328,7 @@ abstract class GraphSet {
     int[] startIndices = new int[nSpectra];
     int[] endIndices = new int[nSpectra];
     //null means use standard offset spectrumOffsets = new int[nSpectra];
-    allowYScale = true;
+    allowStackedYScale = true;
     if (endIndex <= 0)
       endIndex = Integer.MAX_VALUE;
     isSplittable = (nSpectra > 1);// for now, could be: getSpectrumAt(0).isSplitable();
@@ -336,11 +338,10 @@ abstract class GraphSet {
       int iLast = spectra.get(i).getXYCoords().length - 1;
       startIndices[i] = Coordinate.intoRange(startIndex, 0, iLast);
       endIndices[i] = Coordinate.intoRange(endIndex, 0, iLast);
-      allowYScale &= (spectra.get(i).getYUnits().equals(
+      allowStackedYScale &= (spectra.get(i).getYUnits().equals(
           spectra.get(0).getYUnits()) && spectra.get(i).getUserYFactor() == spectra
           .get(0).getUserYFactor());
     }
-    allowYScale &= (fracY == 1 && fracX == 1);
     getMultiScaleData(0, 0, 0, 0, startIndices, endIndices, null, -1);
     zoomInfoList = new ArrayList<MultiScaleData>();
     zoomInfoList.add(multiScaleData);
@@ -720,6 +721,9 @@ abstract class GraphSet {
 		double f = (inScaleArrow(xPixel, yPixel, ArrowType.UP) ? RT2 : inScaleArrow(
 				xPixel, yPixel, ArrowType.DOWN) ? 1 / RT2 : 0);
 		if (f != 0) {		
+			if ((nSpectra == 1 || iSpectrumSelected >= 0) 
+					&& spectra.get(getFixedSelectedSpectrumIndex()).isTransmittance())
+				f = 1/f;
 			multiScaleData.scaleSpectrum(iSpectrumSelected, f);
 			ok = true;
 		} else if (inScaleArrow(xPixel, yPixel, ArrowType.RESET)) {
@@ -1375,22 +1379,9 @@ abstract class GraphSet {
 
 
   void scaleYBy(double factor) {
-    if (!allowYScale)
-      return;
-    double factor1 = factor;
-    double factor2 = factor;
-    switch (getSpectrum().getYScaleType()) {
-    case JDXDataObject.SCALE_NONE:
-      return;
-    case JDXDataObject.SCALE_TOP:
-      factor1 = 1;
-      break;
-    case JDXDataObject.SCALE_BOTTOM:
-      factor2 = 1;
-      break;
-    }
-    doZoom(multiScaleData.minX, multiScaleData.minY / factor1,
-        multiScaleData.maxX, multiScaleData.maxY / factor2, true, true, false);
+  	multiScaleData.scaleSpectrum(-1, factor);
+   // doZoom(multiScaleData.minX, multiScaleData.minY / factor1,
+     //   multiScaleData.maxX, multiScaleData.maxY / factor2, true, true, false);
   }
 
   private void addCurrentZoom() {
@@ -1450,7 +1441,7 @@ abstract class GraphSet {
 		draw2DUnits(g, width, subIndex);
 		doDraw1DObjects = (isd == null || pd.display1D);
 		
-		int iSelected = (stackSelected ? iSpectrumSelected : -1);		
+		int iSelected = (stackSelected || !showAllStacked ? iSpectrumSelected : -1);		
 	  boolean doYScale = (!showAllStacked || nSpectra == 1 || iSelected >= 0);
 	  iSpecBold = (stackSelected && iSpectrumSelected >= 0 ? iSpectrumSelected : -1);
 		if (doDraw1DObjects) {
@@ -1475,7 +1466,7 @@ abstract class GraphSet {
 			drawFrame(g, height, width, iSplit, iSpec);
 		}
 
-	  haveSingleYScale = (showAllStacked && nSpectra > 1 ? allowYScale && doYScale : true);
+	  haveSingleYScale = (showAllStacked && nSpectra > 1 ? allowStackedYScale && doYScale : true);
 		if (haveSingleYScale) {
 			setUserYFactor(iSelected >= 0 ? iSelected : nSplit > 1 ? iSplit : getFixedSelectedSpectrumIndex());
 			if (pd.gridOn && isd == null)
@@ -1521,7 +1512,7 @@ abstract class GraphSet {
 
 			}
 
-			if (allowYScale && doYScale) {
+			if (haveSingleYScale) {
 				if (pd.getBoolean(ScriptToken.YSCALEON))
 					drawYScale(g, height, width);
 				if (pd.getBoolean(ScriptToken.YUNITSON))
@@ -2310,8 +2301,9 @@ abstract class GraphSet {
 
 	static PeakInfo selectPeakByFileIndex(GraphSet gs, List<GraphSet> graphSets,
 			String filePath, String index) {
-		//System.out.println("GraphSet selectPeakByFileIndex with graphsets=" + graphSets);
-		//System.out.println("GraphSet selectPeakByFileIndex with gs=" + gs);
+		System.out.println("GraphSet selectPeakByFileIndex with graphsets=" + graphSets);
+		System.out.println("GraphSet selectPeakByFileIndex with gs=" + gs);
+		System.out.println("GraphSet selectPeakByFileIndex with filepath/index=" + filePath + " " + index);
 		PeakInfo pi = (gs == null ? null : gs.selectPeakByFileIndex(filePath, index));
 		if (pi != null)
 			for (int i = graphSets.size(); --i >= 0;)

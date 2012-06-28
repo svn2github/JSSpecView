@@ -57,7 +57,6 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTree;
 import jspecview.application.TextDialog;
 import jspecview.common.AwtPanel;
 import jspecview.common.IntegralGraph;
@@ -68,7 +67,6 @@ import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelNode;
 import jspecview.common.JSVSpectrumPanel;
 import jspecview.common.JSVTree;
-import jspecview.common.JSVTreeNode;
 import jspecview.common.JSViewer;
 import jspecview.common.SpectraDialog;
 import jspecview.common.OverlayLegendDialog;
@@ -732,10 +730,10 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	 */
 	public void openDataOrFile(String data, String name,
 			List<JDXSpectrum> specs, String url, int firstSpec, int lastSpec) {
-  	int status = JSVTreeNode.openDataOrFile((ScriptInterface) this, data, name, specs, url, firstSpec, lastSpec);
-  	if (status == JSVTreeNode.FILE_OPEN_ALREADY)
+  	int status = JSVTree.openDataOrFile((ScriptInterface) this, data, name, specs, url, firstSpec, lastSpec);
+  	if (status == JSVTree.FILE_OPEN_ALREADY)
   		return;
-    if (status != JSVTreeNode.FILE_OPEN_OK) {
+    if (status != JSVTree.FILE_OPEN_OK) {
     	setSelectedPanel(null);
     	return;
     }
@@ -796,7 +794,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	public void setSelectedPanel(JSVPanel jsvp) {
 		spectrumPanel.setSelectedPanel(jsvp, panelNodes);
   	selectedPanel = jsvp;
-		JSVTreeNode.setSelectedPanel((ScriptInterface) this, jsvp);
+		spectraTree.setSelectedPanel((ScriptInterface) this, jsvp);
     jsvApplet.validate();
 	}
 
@@ -912,14 +910,14 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	public void execClose(String value, boolean fromScript) {
-		JSVTreeNode.close((ScriptInterface) this, value);
+		JSVTree.close((ScriptInterface) this, value);
     if (!fromScript)
     	validateAndRepaint();
 	}
 
   public String execLoad(String value) {
   	//int nSpec = panelNodes.size();
-  	JSVTreeNode.load((ScriptInterface) this, value);
+  	JSVTree.load((ScriptInterface) this, value);
     if (getSelectedPanel() == null)
       return null;
     // probably unnecessary:
@@ -944,7 +942,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	public JSVPanel execSetSpectrum(String value) {
-  	return JSVTreeNode.setSpectrum((ScriptInterface) this, value);
+  	return JSVTree.setSpectrum((ScriptInterface) this, value);
 	}
 
 	public void execSetAutoIntegrate(boolean b) {
@@ -989,7 +987,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	///////// multiple source changes ////////
 	
 	
-  private JTree spectraTree;
+  private JSVTree spectraTree;
 	private int fileCount;
 	public int getFileCount() {
 		return fileCount;
@@ -1018,7 +1016,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	public void closeSource(JDXSource source) {
-  	JSVTreeNode.closeSource(this, source);
+  	JSVTree.closeSource(this, source);
 	}
 
 	public int incrementOverlay(int n) {

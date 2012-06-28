@@ -159,14 +159,6 @@ public abstract class JDXDataObject extends JDXHeader {
   public static final int SCALE_BOTTOM = 2;
   public static final int SCALE_TOP_BOTTOM = 3;
   
-  public int getYScaleType() {
-    String dt = dataType.toUpperCase();
-    String yu = yUnits.toUpperCase();
-    return (dt.contains("NMR") ? SCALE_TOP_BOTTOM
-        : !dt.startsWith("IR") && !dt.contains("INFRA") || !yu.contains("TRANS") ? SCALE_TOP
-        : SCALE_NONE);
-  }
-  
   // For NMR Spectra:
   public String observedNucl = "";
   public double observedFreq = ERROR;
@@ -461,12 +453,12 @@ public abstract class JDXDataObject extends JDXHeader {
 	}
 
 	public boolean isScalable() {
-		return !isTransmittance();
+		return true;//!isTransmittance();
 	}
 
 
 	public double getYRef() {
-		return (isTransmittance() ? 100.0 : 0.0);
+		return (!isTransmittance() ? 0.0 : Coordinate.getMaxY(xyCoords, 0, xyCoords.length) < 2 ? 1.0 : 100.0);
 	}
 
 	//  private boolean isUVVis() {
