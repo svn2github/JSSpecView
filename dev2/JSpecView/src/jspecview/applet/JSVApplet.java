@@ -37,7 +37,7 @@
 //          call. Changed behaviour to remove integration after reset view.
 // 19-06-2012 BH -changes to printing calls
 // 23-06-2012 BH -Major change to Applet code to allow multiple file loads
-// 26-06-2012 BH -more changes to Overlay/close/view spectrum 
+// 27-06-2012 BH -changes to Overlay/close/view spectrum 
 
 package jspecview.applet;
 
