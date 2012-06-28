@@ -812,7 +812,7 @@ H    -0.22835   -1.78711    0.74040    0.25938   -0.45849    0.81026
 ##SPECTROMETER/DATA SYSTEM= scan
 ##$MODELS=
 <Models>
-<ModelData id="EA" type="MOL">
+<ModelData id="EAR" type="MOL">
 ethanolamine
 RLDSViewer          3D                             0
 
