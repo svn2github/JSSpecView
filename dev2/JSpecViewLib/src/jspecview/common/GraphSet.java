@@ -724,6 +724,7 @@ abstract class GraphSet {
 			ok = true;
 		} else if (inScaleArrow(xPixel, yPixel, ArrowType.RESET)) {
 			clearViews();
+			multiScaleData.setScaleFactor(-1, 1);
 			// did not work: multiScaleData.setScaleFactor(iSpectrumSelected, 1);
 			ok = true;
 		}
@@ -1457,16 +1458,13 @@ abstract class GraphSet {
 			int n = 0;
 			if (iSelected < 0) {
 				doYScale = true;
-				for (int i = 0; i < nSpectra && doYScale; i++)
+				for (int i = 0; i < nSpectra; i++)
 					if (doPlot(i, iSplit)) {
 					  if (stackSelected && iSelected == i)
 					  	iSpecBold = i;
 						if (n++ == 0)
 							continue;
-						double yFactorOld = userYFactor;
-						double yRefOld = yRef;
-						setUserYFactor(i);
-						if (n > 1 && (yFactorOld != userYFactor || yRefOld != yRef))
+						if (doYScale && !multiScaleData.areYScalesSame(i-1, i))
 							doYScale = false;
 					}
 			}
@@ -1538,8 +1536,8 @@ abstract class GraphSet {
 	}
 
   private void setUserYFactor(int i) {
-    userYFactor = spectra.get(i).getUserYFactor();
-    yRef = spectra.get(i).getYRef();
+    userYFactor = multiScaleData.userYFactors[i];
+    yRef = multiScaleData.spectrumYRefs[i];
 		multiScaleData.setAxisScaling(i, xPixels, yPixels);			
 	}
   

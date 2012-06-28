@@ -18,8 +18,9 @@ public class MultiScaleData extends ScaleData {
   public int[] numOfPointsList;
   public double minY2D, maxY2D;
 	private double[] spectrumScaleFactors;
-	private double[] spectrumYRefs; // 0 or 100
-  int[] spectrumOffsets;
+	public double[] userYFactors;
+	double[] spectrumYRefs; // 0 or 100
+  int[] spectrumOffsets; // not yet implemented
 	private int nSpec;
  
   
@@ -74,10 +75,7 @@ public class MultiScaleData extends ScaleData {
 		numOfPointsList = new int[nSpec];
 		for (int j = 0; j < nSpec; j++)
 			numOfPointsList[j] = endList[j] + 1 - startList[j];
-		spectrumScaleFactors = new double[nSpec];
-		resetScaleFactors();
-		setMinMax(spectra, startList, endList);
-		init(yPt1, yPt2, initNumXDivisions, initNumYDivisions, isContinuous);
+		init(spectra, startList, endList, yPt1, yPt2, initNumXDivisions, initNumYDivisions, isContinuous);
 	}
   
 	public MultiScaleData(List<JDXSpectrum> spectra, double yPt1, double yPt2,
@@ -89,10 +87,7 @@ public class MultiScaleData extends ScaleData {
 		startDataPointIndices = new int[] { 0 };
 		endDataPointIndices = new int[] { n - 1 };
 		numOfPointsList = new int[] { n };
-		spectrumScaleFactors = new double[nSpec];
-		resetScaleFactors();
-		setMinMax(spectra, null, null);
-		init(yPt1, yPt2, initNumXDivisions, initNumYDivisions, isContinuous);
+		init(spectra, null, null, yPt1, yPt2, initNumXDivisions, initNumYDivisions, isContinuous);
 	}
 
 	private void setMinMax(List<JDXSpectrum> spectra, int[] startList,
@@ -110,8 +105,17 @@ public class MultiScaleData extends ScaleData {
 		spectrumYRefs[i] = yref;
 	}
 
-  private void init(double yPt1, double yPt2,
-                    int initNumXDivisions, int initNumYDivisions, boolean isContinuous) {
+  private void init(List<JDXSpectrum> spectra, int[] startList, int[] endList, 
+  		double yPt1, double yPt2, int initNumXDivisions, int initNumYDivisions, 
+  		boolean isContinuous) {
+  	
+		spectrumScaleFactors = new double[nSpec];
+		userYFactors = new double[nSpec];
+		for (int i = 0; i < nSpec; i++)
+			userYFactors[i] = spectra.get(i).getUserYFactor();
+		resetScaleFactors();
+		setMinMax(spectra, startList, endList);
+  	
     if (yPt1 != yPt2) {
       minY = yPt1;
       maxY = yPt2;
@@ -217,7 +221,7 @@ public class MultiScaleData extends ScaleData {
 			return;
 		if (i < 0) {
 			resetScaleFactors();
-			setYScale(initMinY, initMaxY, true);
+			//setYScale(initMinY, initMaxY, true);
 		} else {
 			spectrumScaleFactors[i] = f;
 		}
@@ -239,8 +243,11 @@ public class MultiScaleData extends ScaleData {
 
 	public void copyScaleFactors(MultiScaleData msd) {
 		System.arraycopy(msd.spectrumScaleFactors, 0, spectrumScaleFactors, 0, nSpec);
+		System.arraycopy(msd.userYFactors, 0, userYFactors, 0, nSpec);
+		System.arraycopy(msd.spectrumYRefs, 0, spectrumYRefs, 0, nSpec);
 		initMinYOnScale = msd.initMinYOnScale;
 		initMaxYOnScale = msd.initMaxYOnScale;
+		
 	}
 
 	public void setAxisScaling(int i, int xPixels, int yPixels) {
@@ -250,6 +257,12 @@ public class MultiScaleData extends ScaleData {
     double maxY = (f == 1 ? this.maxY : initMaxYOnScale);
 		setYScale((minY - yRef) / f + yRef, (maxY - yRef) / f + yRef, f == 1);
 		setScaleFactors(xPixels, yPixels);		
+	}
+
+	public boolean areYScalesSame(int i, int j) {
+		return spectrumScaleFactors[i] == spectrumScaleFactors[j]
+		  && spectrumYRefs[i] == spectrumYRefs[j] 
+		  && userYFactors[i] == userYFactors[j];
 	}
 	
 
