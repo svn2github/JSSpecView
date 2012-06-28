@@ -37,6 +37,7 @@
 
 package jspecview.common;
 
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Hashtable;
 import java.util.List;
@@ -200,7 +201,7 @@ public class PanelData {
   protected String printGraphPosition = "default";
   boolean titleDrawn;
   boolean display1D;
-  private int yStackOffsetPercent;
+  int yStackOffsetPercent;
   
   public void setYStackOffsetPercent(int offset) {
 	yStackOffsetPercent = offset;
@@ -228,11 +229,11 @@ public class PanelData {
     setTitle(getSpectrum().getTitleLabel());
   }
 
-  protected void setCurrentGraphSet(GraphSet gs, int xPixel, int yPixel) {
+  protected void setCurrentGraphSet(GraphSet gs, int xPixel, int yPixel, boolean isClick) {
   	int splitPoint = gs.getSplitPoint(yPixel);
     if (currentGraphSet == gs) { 
     	if (gs.nSplit == 1) {
-    		if (!gs.showAllStacked || !gs.checkSpectrumClickEvent(xPixel, yPixel))
+    		if (!gs.showAllStacked || isClick && !gs.checkSpectrumClickEvent(xPixel, yPixel))
     			return;
     	} else if (currentSplitPoint == splitPoint) {
         return;
@@ -242,13 +243,14 @@ public class PanelData {
     System.out.println("setting currentGraphSet to " + gs);
     currentSplitPoint = splitPoint;
     if (gs.nSplit > 1 && !gs.showAllStacked)
-    	gs.iThisSpectrum = splitPoint;
+    	gs.setSelectedIndex(splitPoint);
     JDXSpectrum spec = gs.getSpectrum();
     notifySubSpectrumChange(spec.getSubIndex(), spec);
+    refresh();
   }
 
   public JDXSpectrum getSpectrum() {
-    return currentGraphSet.getSpectrum().getCurrentSubSpectrum();
+    return currentGraphSet.getSpectrum();
   }
 
   public void setSpectrum(JDXSpectrum spec) {
@@ -419,18 +421,21 @@ public class PanelData {
     titleDrawn = false;
     for (int i = graphSets.size(); --i >= 0;)
       graphSets.get(i)
-          .drawGraph(g, !isPrinting, height, width, left,
-              right, top, bottom, isResized, yStackOffsetPercent);
+          .drawGraph(g, height, width, left,
+              right, top, bottom, isResized);
     if (titleOn && !titleDrawn)
       owner.drawTitle(g, height, width, getSpectrum().getPeakTitle());
     if (withCoords)
       owner.drawCoordinates(g, height, width);
   }
 
+  final static DecimalFormat SCI_FORMATTER = TextFormat.getDecimalFormat("0.00E0");
+
   NumberFormat getFormatter(String hash) {
     NumberFormat formatter = htFormats.get(hash);
     if (formatter == null)
-      htFormats.put(hash, formatter = TextFormat.getDecimalFormat(hash));
+      htFormats.put(hash, formatter = (hash.equals("") ? 
+      		SCI_FORMATTER : TextFormat.getDecimalFormat(hash)));
     return formatter;
   }
 
@@ -627,7 +632,7 @@ public class PanelData {
     isIntegralDrag = (isControlDown && gs.getSpectrum().hasIntegral());
     if (isControlDown && !isIntegralDrag)
       return;
-    setCurrentGraphSet(gs, xPixel, yPixel);
+    setCurrentGraphSet(gs, xPixel, yPixel, false);
     gs.checkWidgetEvent(xPixel, yPixel, true);
   }
 
@@ -660,7 +665,7 @@ public class PanelData {
     GraphSet gs = GraphSet.findGraphSet(graphSets, xPixel, yPixel);
     if (gs == null)
       return;
-    setCurrentGraphSet(gs, xPixel, yPixel);
+    setCurrentGraphSet(gs, xPixel, yPixel, true);
     gs.mouseClickEvent(xPixel, yPixel, clickCount, isControlDown);
   }
   

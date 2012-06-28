@@ -265,7 +265,7 @@ class AwtGraphSet extends GraphSet {
 	}
 	
 	@Override
-	protected void fillArrow(Object g, ArrowType type, int x, int y) {
+	protected void fillArrow(Object g, ArrowType type, int x, int y, boolean doFill) {
 		int f = 1;
 		switch (type) {
 		case LEFT:
@@ -278,11 +278,18 @@ class AwtGraphSet extends GraphSet {
 		switch (type) {
 		case LEFT:
 		case RIGHT:
-			((Graphics)g).fillPolygon(ayPoints, axPoints, 7);
+			if (doFill)
+				((Graphics)g).fillPolygon(ayPoints, axPoints, 7);
+			else
+				((Graphics)g).drawPolygon(ayPoints, axPoints, 7);
 			break;
 		case UP:
 		case DOWN:
-			((Graphics)g).fillPolygon(axPoints, ayPoints, 7);
+			if (doFill)
+				((Graphics)g).fillPolygon(axPoints, ayPoints, 7);
+			else
+				((Graphics)g).drawPolygon(axPoints, ayPoints, 7);
+
 		}
 	}
 

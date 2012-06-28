@@ -32,12 +32,14 @@ public class ScaleData {
    */
   public double maxX;
 
-//  /**
-//   * The preferred number of X division for the scale
-//   */
-//  protected int numInitXdiv;
+  /**
+   * The preferred number of X division for the scale
+   */
+  protected int numInitXdiv;
 
   /**
+   * never set -- always 0
+   * 
    * The precision (number of decimal places) of the X and Y values
    */
   public int hashNums[] = new int[2];
@@ -58,15 +60,13 @@ public class ScaleData {
    */
   public double minXOnScale;
 
+  public double xFactorForScale;
+  public double yFactorForScale;
+  
   /**
    * the maximim X value on the scale
    */
   public double maxXOnScale;
-
-//  /**
-//   * The actual number of divisons used for X axis
-//   */
-//  public int numOfXDivisions;
 
   // Y variables
   /**
@@ -79,10 +79,10 @@ public class ScaleData {
    */
   public double maxY;
 
-//  /**
-//   * The preferred number of Y division for the scale
-//   */
-//  public int numInitYdiv;
+  /**
+   * The preferred number of Y division for the scale  -- always 10
+   */
+  protected int numInitYdiv = 10;
 
   /**
    * The step value of Y axis of the scale
@@ -99,11 +99,6 @@ public class ScaleData {
    */
   public double maxYOnScale;
 
-//  /**
-//   * The actual number of divisons used X axis
-//   */
-//  public int numOfYDivisions;
-
   // Other
   /**
    * The start index
@@ -119,6 +114,11 @@ public class ScaleData {
    * The number of points
    */
   public int numOfPoints;
+	protected double initMinYOnScale;
+	protected double initMaxYOnScale;
+	protected double initMinY;
+	protected double initMaxY;
+	public double firstY;
 
 	/**
 	 * Calculates values that <code>JSVPanel</code> needs in order to render a
@@ -147,83 +147,94 @@ public class ScaleData {
 		maxX = Coordinate.getMaxX(coords, start, end);
 		minY = Coordinate.getMinY(coords, start, end);
 		maxY = Coordinate.getMaxY(coords, start, end);
-		setScale(initNumXDivisions, initNumYDivisions, isContinuous);
+		numInitXdiv = initNumXDivisions;
+		numInitYdiv = initNumYDivisions;
+		setScale(isContinuous);
 	}
 
-  /**
-   * Initialises a <code>ScaleData</code> from another one
-   * 
-   * @param data
-   *        the <code>ScaleData</code> to copy
-   */
-  public ScaleData(ScaleData data) {
-    minX = data.minX;
-    maxX = data.maxX;
-    //numInitXdiv = data.numInitXdiv;
-
-    hashNums[0] = data.hashNums[0];
-    hashNums[1] = data.hashNums[1];
-    xStep = data.xStep;
-    firstX = data.firstX;
-    minXOnScale = data.minXOnScale;
-    maxXOnScale = data.maxXOnScale;
-    //numOfXDivisions = data.numOfXDivisions;
-
-    minY = data.minY;
-    maxY = data.maxY;
-   // numInitYdiv = data.numInitYdiv;
-
-    yStep = data.yStep;
-    minYOnScale = data.minYOnScale;
-    maxYOnScale = data.maxYOnScale;
-    //numOfYDivisions = data.numOfYDivisions;
-
-    startDataPointIndex = data.startDataPointIndex;
-    endDataPointIndex = data.endDataPointIndex;
-    numOfPoints = data.numOfPoints;
-  }
+//  /**
+//   * never used or tested
+//   * 
+//   * Initialises a <code>ScaleData</code> from another one
+//   * 
+//   * @param data
+//   *        the <code>ScaleData</code> to copy
+//   */
+//  public ScaleData(ScaleData data) {
+//    minX = data.minX;
+//    maxX = data.maxX;
+//    //numInitXdiv = data.numInitXdiv;
+//
+//    hashNums[0] = data.hashNums[0];
+//    hashNums[1] = data.hashNums[1];
+//    xStep = data.xStep;
+//    firstX = data.firstX;
+//    minXOnScale = data.minXOnScale;
+//    maxXOnScale = data.maxXOnScale;
+//    //numOfXDivisions = data.numOfXDivisions;
+//
+//    minY = data.minY;
+//    maxY = data.maxY;
+//   // numInitYdiv = data.numInitYdiv;
+//
+//    yStep = data.yStep;
+//    minYOnScale = data.minYOnScale;
+//    maxYOnScale = data.maxYOnScale;
+//    //numOfYDivisions = data.numOfYDivisions;
+//
+//    startDataPointIndex = data.startDataPointIndex;
+//    endDataPointIndex = data.endDataPointIndex;
+//    numOfPoints = data.numOfPoints;
+//  }
 
   public ScaleData() {
 	}
 
-	protected ScaleData setScale(int initNumXDivisions, int initNumYDivisions, 
-                               boolean isContinuous) {
+	protected ScaleData setScale(boolean isContinuous) {
 
-    setXScale(initNumXDivisions);
+    setXScale();
     if (!isContinuous)
       maxXOnScale += xStep / 2; // MS should not end with line at end
 
     // Y Scale
     
-    setYScale(initNumYDivisions);
+    setYScale(minY, maxY, true);
     return this;
   }
 
-  public void setYScale(int initNumYDivisions) {
-    if (minY == 0 && maxY == 0)
-      maxY = 1;
-    yStep = getStep(minY, maxY, initNumYDivisions, hashNums, 1);
-    minYOnScale = yStep * Math.floor(minY / yStep);
-    maxYOnScale = yStep * Math.ceil(maxY / yStep);
-	}
-
-	protected void setXScale(int initNumXDivisions) {
+	protected void setXScale() {
     // X Scale
-    xStep = getStep(minX, maxX, initNumXDivisions, hashNums, 0);
-    minXOnScale = xStep * Math.floor(minX / xStep);
-    maxXOnScale = xStep * Math.ceil(maxX / xStep);
+    xStep = getStep(minX, maxX, numInitXdiv, hashNums, 0);
     firstX = Math.floor(minX / xStep) * xStep;
     if (Math.abs((minX - firstX) / xStep) > 0.0001)
       firstX += xStep;
     minXOnScale = minX;
     maxXOnScale = maxX;
-    //System.out.println("scaleData xStep minX firstX maxX minXonScale maxXonScale\n"
-    //    + xStep + "\t" + minX + "\t" + firstX + "\t" + maxX + "\t" + minXOnScale + "\t"
-    //    + maxXOnScale);
-    //numOfXDivisions = (int) Math.ceil((maxXOnScale - minXOnScale) / xStep);
   }
 
-  private static double getStep(double min, double max, int nDiv, int[] hashNums, int i) {
+  public void setYScale(double minY, double maxY, boolean setScaleMinMax) {
+    if (minY == 0 && maxY == 0)
+      maxY = 1;
+    yStep = getStep(minY, maxY, numInitYdiv, hashNums, 1);
+    minYOnScale = (setScaleMinMax ? yStep * Math.floor(minY / yStep) : minY);
+    maxYOnScale = (setScaleMinMax ? yStep * Math.ceil(maxY / yStep) : maxY);
+    firstY = Math.floor(minY / yStep) * yStep;
+    if (Math.abs((minY - firstY) / yStep) > 0.0001)
+      firstY += yStep;
+    if (setScaleMinMax) {
+    	initMinYOnScale = minYOnScale;
+    	initMaxYOnScale = maxYOnScale;
+    	initMinY = minY;
+    	initMaxY = maxY;
+    }
+	}
+
+	void setScaleFactors(int xPixels, int yPixels) {
+  	xFactorForScale = (maxXOnScale - minXOnScale) / xPixels;
+	  yFactorForScale = (maxYOnScale - minYOnScale) / yPixels;
+	}
+
+	private static double getStep(double min, double max, int nDiv, int[] hashNums, int i) {
     double spanX = (max - min) / nDiv;
     String strSpanX = SCI_FORMATTER.format(spanX);
     strSpanX = strSpanX.toUpperCase();

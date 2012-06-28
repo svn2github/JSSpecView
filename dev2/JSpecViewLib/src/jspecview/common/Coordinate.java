@@ -477,9 +477,10 @@ public class Coordinate {
     double min = Double.MAX_VALUE;
     for (int i = 0; i < spectra.size(); i++) {
       double u = spectra.get(i).getUserYFactor();
+      double yref = spectra.get(i).getYRef();
     	Coordinate[] xyCoords = spectra.get(i).getXYCoords();
-      double tmp = getMinY(xyCoords, (startList == null ? 0 : startList[i]), 
-      		(endList == null ? xyCoords.length : endList[i] + 1)) * u;
+      double tmp = (getMinY(xyCoords, (startList == null ? 0 : startList[i]), 
+      		(endList == null ? xyCoords.length : endList[i] + 1)) - yref) * u + yref;
       if (tmp < min)
         min = tmp;
     }  
@@ -525,9 +526,10 @@ public class Coordinate {
     double max = -Double.MAX_VALUE;
     for (int i = 0; i < spectra.size(); i++) {
       double u = spectra.get(i).getUserYFactor();
+      double yref = spectra.get(i).getYRef();
     	Coordinate[] xyCoords = spectra.get(i).getXYCoords();
-      double tmp = getMaxY(xyCoords, (startList == null ? 0 : startList[i]), 
-      		(endList == null ? xyCoords.length : endList[i] + 1)) * u;
+      double tmp = (getMaxY(xyCoords, (startList == null ? 0 : startList[i]), 
+      		(endList == null ? xyCoords.length : endList[i] + 1)) - yref) * u + yref;
       if (tmp > max)
         max = tmp;
     }

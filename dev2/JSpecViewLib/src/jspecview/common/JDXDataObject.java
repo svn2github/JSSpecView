@@ -464,7 +464,12 @@ public abstract class JDXDataObject extends JDXHeader {
 		return !isTransmittance();
 	}
 
-//  private boolean isUVVis() {
+
+	public double getYRef() {
+		return (isTransmittance() ? 100.0 : 0.0);
+	}
+
+	//  private boolean isUVVis() {
 //    return dataType.startsWith("VIS") || dataType.startsWith("UV");
 //  }
 

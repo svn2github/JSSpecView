@@ -17,27 +17,33 @@ public class MultiScaleData extends ScaleData {
   public int[] endDataPointIndices;
   public int[] numOfPointsList;
   public double minY2D, maxY2D;
-	private float[] spectrumScaleFactors;
+	private double[] spectrumScaleFactors;
+	private double[] spectrumYRefs; // 0 or 100
+  int[] spectrumOffsets;
 	private int nSpec;
  
   
-  /**
-   * Never utilized?? 
-   * Initialises a <code>MultiScaleData</code> from another one
-   * 
-   * @param data
-   *        the <code>MultiScaleData</code> to copy
-   */
-  public MultiScaleData(MultiScaleData data) {
-    super(data);    
-    startDataPointIndices = data.startDataPointIndices;
-    endDataPointIndices = data.endDataPointIndices;
-    spectrumScaleFactors = new float[data.spectrumScaleFactors.length];
-    System.arraycopy(data.spectrumScaleFactors, 0, spectrumScaleFactors, 0, data.spectrumScaleFactors.length);
-    numOfPointsList = data.numOfPointsList;
-    minY2D = data.minY2D;
-    maxY2D = data.maxY2D;
-  }
+//  /**
+//   * Never used or tested
+//   *  
+//   * Initialises a <code>MultiScaleData</code> from another one
+//   * 
+//   * @param data
+//   *        the <code>MultiScaleData</code> to copy
+//   */
+//  public MultiScaleData(MultiScaleData data) {
+//    super(data);
+//    nSpec = data.nSpec;
+//    startDataPointIndices = data.startDataPointIndices;
+//    endDataPointIndices = data.endDataPointIndices;
+//    spectrumScaleFactors = new double[nSpec];
+//    System.arraycopy(data.spectrumScaleFactors, 0, spectrumScaleFactors, 0, nSpec);
+//    currentScaleFactors = new double[nSpec];
+//    System.arraycopy(data.currentScaleFactors, 0, currentScaleFactors, 0, nSpec);
+//    numOfPointsList = data.numOfPointsList;
+//    minY2D = data.minY2D;
+//    maxY2D = data.maxY2D;
+//  }
 
 	/**
 	 * Calculates values that <code>JSVPanel</code> needs in order to render a
@@ -60,7 +66,7 @@ public class MultiScaleData extends ScaleData {
 	 */
 	public MultiScaleData(List<JDXSpectrum> spectra, double yPt1, double yPt2,
 			int[] startList, int[] endList, int initNumXDivisions,
-			int initNumYDivisions, boolean isContinuous) {
+			int initNumYDivisions, boolean isContinuous, int iSpec) {
 		super();
 		nSpec = spectra.size();
 		startDataPointIndices = startList;
@@ -68,7 +74,7 @@ public class MultiScaleData extends ScaleData {
 		numOfPointsList = new int[nSpec];
 		for (int j = 0; j < nSpec; j++)
 			numOfPointsList[j] = endList[j] + 1 - startList[j];
-		spectrumScaleFactors = new float[nSpec];
+		spectrumScaleFactors = new double[nSpec];
 		resetScaleFactors();
 		setMinMax(spectra, startList, endList);
 		init(yPt1, yPt2, initNumXDivisions, initNumYDivisions, isContinuous);
@@ -83,7 +89,7 @@ public class MultiScaleData extends ScaleData {
 		startDataPointIndices = new int[] { 0 };
 		endDataPointIndices = new int[] { n - 1 };
 		numOfPointsList = new int[] { n };
-		spectrumScaleFactors = new float[nSpec];
+		spectrumScaleFactors = new double[nSpec];
 		resetScaleFactors();
 		setMinMax(spectra, null, null);
 		init(yPt1, yPt2, initNumXDivisions, initNumYDivisions, isContinuous);
@@ -95,6 +101,13 @@ public class MultiScaleData extends ScaleData {
 		maxX = Coordinate.getMaxX(spectra, startList, endList);
 		minY = Coordinate.getMinYUser(spectra, startList, endList);
 		maxY = Coordinate.getMaxYUser(spectra, startList, endList);
+		spectrumYRefs = new double[nSpec];
+		for (int i = nSpec; --i >= 0;)
+			spectrumYRefs[i] = spectra.get(i).getYRef(); // 0 or 100
+	}
+	
+	void setSpectrumYRef(int i, double yref) {
+		spectrumYRefs[i] = yref;
 	}
 
   private void init(double yPt1, double yPt2,
@@ -108,18 +121,20 @@ public class MultiScaleData extends ScaleData {
         maxY = t;
       }
     }
-    setScale(initNumXDivisions, initNumYDivisions, isContinuous);
+		numInitXdiv = initNumXDivisions;
+		numInitYdiv = initNumYDivisions;
+    setScale(isContinuous);
   }
 
   /**
    * 
    * @param graphsTemp
-   * @param scaleData
    * @param initX
    * @param finalX
    * @param minPoints
    * @param startIndices  to fill
    * @param endIndices    to fill
+   * @param scaleData
    * @return
    */
   public boolean setDataPointIndices(List<JDXSpectrum> graphsTemp,
@@ -171,10 +186,9 @@ public class MultiScaleData extends ScaleData {
   }
 
   public void setXRange(double x1, double x2, int initNumXDivisions) {
-    // TODO Auto-generated method stub
     minX = x1;
     maxX = x2;
-    setXScale(initNumXDivisions);
+    setXScale();
   }
 
   public boolean isYZeroOnScale() {
@@ -198,16 +212,18 @@ public class MultiScaleData extends ScaleData {
   	  spectrumScaleFactors[i] = 1;
 	}
 	
- public void setScaleFactor(int i, float f) {
+ public void setScaleFactor(int i, double f) {
 		if (f == 0 || i >= nSpec)
 			return;
-		if (i < 0)
+		if (i < 0) {
 			resetScaleFactors();
-		else
+			setYScale(initMinY, initMaxY, true);
+		} else {
 			spectrumScaleFactors[i] = f;
+		}
   }
   
-	public void scaleSpectrum(int i, float f) {
+	public void scaleSpectrum(int i, double f) {
 		if (f == 0 || i >= nSpec)
 			return;
 		if (i < 0)
@@ -221,8 +237,21 @@ public class MultiScaleData extends ScaleData {
 		return (i >= 0 && i < nSpec ? spectrumScaleFactors[i] : 1);
 	}
 
-	public void setScaleFactors(MultiScaleData msd) {
-		for (int i = 0; i < nSpec; i++)
-			spectrumScaleFactors[i] = msd.spectrumScaleFactors[i];
+	public void copyScaleFactors(MultiScaleData msd) {
+		System.arraycopy(msd.spectrumScaleFactors, 0, spectrumScaleFactors, 0, nSpec);
+		initMinYOnScale = msd.initMinYOnScale;
+		initMaxYOnScale = msd.initMaxYOnScale;
 	}
+
+	public void setAxisScaling(int i, int xPixels, int yPixels) {
+    double f = spectrumScaleFactors[i];
+    double yRef = spectrumYRefs[i];
+    double minY = (f == 1 ? this.minY : initMinYOnScale);
+    double maxY = (f == 1 ? this.maxY : initMaxYOnScale);
+		setYScale((minY - yRef) / f + yRef, (maxY - yRef) / f + yRef, f == 1);
+		setScaleFactors(xPixels, yPixels);		
+	}
+	
+
+
 }
