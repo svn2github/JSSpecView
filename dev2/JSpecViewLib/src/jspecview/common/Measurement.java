@@ -25,12 +25,8 @@
 package jspecview.common;
 
 /**
- * The <code>Annotation</code> class stores the spectral x and pixel y values of an
- * annotation text along with its text
+ * The <code>Measurement</code> class stores an annotation that is a measurement
  * 
- * @author Debbie-Ann Facey
- * @author Khari A. Bryan
- * @author Prof Robert J. Lancashire
  * @author Bob Hanson hansonr@stolaf.edu
  */
 public class Measurement extends Annotation {
