@@ -608,13 +608,32 @@ public abstract class JDXDataObject extends JDXHeader {
     return rowData;
   }
 
+	public String setMeasurementText(GraphSet gs, Measurement m) {
+		if (isNMR()) {
+			if (numDim == 1) {
+        double dx = Math.abs(m.getPt2().getXVal() - m.getXVal());
+				if (isHNMR()) {
+          return gs.getFormattedNumber(dx * observedFreq, "#0.0");
+				} else {
+          return gs.getFormattedNumber(dx, "#0.0");
+				}
+			} else {
+				// 2D?
+			}
+		}
+		return m.toString();
+	}
+
+  public boolean isNMR() {
+    return (dataType.toUpperCase().indexOf("NMR") >= 0);
+  }
   /**
    * Determines if a spectrum is an HNMR spectrum
    * @param spectrum the JDXSpectrum
    * @return true if an HNMR, false otherwise
    */
   public boolean isHNMR() {
-    return (dataType.toUpperCase().indexOf("NMR") >= 0 && observedNucl.toUpperCase().indexOf("H") >= 0);
+    return (isNMR() && observedNucl.toUpperCase().indexOf("H") >= 0);
   }
 
   /**

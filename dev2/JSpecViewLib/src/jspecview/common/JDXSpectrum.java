@@ -418,6 +418,8 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
 
   protected ArrayList<Annotation> integrationRatios;
 
+  protected ArrayList<Measurement> measurements;
+
   public boolean checkIntegral(Parameters parameters, String value) {
     if (!canIntegrate())
       return false;
@@ -647,5 +649,9 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
       units = (isX ? xUnits : yUnits);
     return (units == null ? "" : units);
   }
+
+	public void setMeasurement(Measurement m) {
+		//TODO
+	}
 
 }

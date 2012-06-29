@@ -56,8 +56,10 @@ abstract class GraphSet {
 	private boolean stackSelected = true;
   private int[] splitSpectrumPointers = new int[] {0};
 
-  private ArrayList<Annotation> annotations;
+  private List<Annotation> annotations;
+  private List<Measurement> measurements;
   private Annotation lastAnnotation;
+  private Measurement pendingMeasurement;
   private List<JDXSpectrum> graphsTemp = new ArrayList<JDXSpectrum>();
   private PlotWidget[] widgets;
   private double userYFactor = 1;
@@ -94,6 +96,7 @@ abstract class GraphSet {
     zoomInfoList = null;
     annotations = null;
     lastAnnotation = null;
+    pendingMeasurement = null;
     isd = null;
     graphsTemp = null;
     widgets = null;
@@ -171,6 +174,7 @@ abstract class GraphSet {
   final private int FONT_BOLD = 1;
   final private int FONT_ITALIC = 2;
 	private int iSpectrumMovedTo = 0;
+	private int iSpectrumClicked;
 
   PeakInfo selectPeakByFileIndex(String filePath, String index) {
   	PeakInfo pi;
@@ -192,6 +196,7 @@ abstract class GraphSet {
     spectra.remove(pt);
     spectra.add(pt, spec);
   	multiScaleData.setSpectrumYRef(pt, spec.getYRef());
+  	pendingMeasurement = null;
   }
 
   /**
@@ -637,7 +642,7 @@ abstract class GraphSet {
 					xPixel1 = isd.xPixel0 - 30;
 				}
 			}
-			drawAll(og, height, width, subIndex, iSplit, isResized || nSplit > 1);
+			drawAll(og, subIndex, iSplit, isResized || nSplit > 1);
 		}
 		setPositionForFrame(nSplit > 1 ? pd.currentSplitPoint : 0);
 	}
@@ -648,6 +653,8 @@ abstract class GraphSet {
     isd.setXY0((int) Math.floor(xPixel1 - isd.xPixels), yPixel0);
   }
 
+  int lastDoubleClickX;
+  
   void mouseClickEvent(int xPixel, int yPixel, int clickCount,
                        boolean isControlDown) {
   	if (isSplitWidget(xPixel, yPixel)) {
@@ -679,6 +686,8 @@ abstract class GraphSet {
         pd.repaint();
         return;
       }
+      // 1D double-click
+      
       if (isInTopBar(xPixel, yPixel)) {
         doZoom(toX0(xPixel0), multiScaleData.minY, toX0(xPixel1),
             multiScaleData.maxY, true, true, false);
@@ -690,9 +699,27 @@ abstract class GraphSet {
         reset2D(true);
       } else if (isInRightBar2D(xPixel, yPixel)) {
         reset2D(false);
-      }
+      } else if (pendingMeasurement != null) {
+      	if (distance(xPixel-lastDoubleClickX, 0) < 3) {
+        	lastDoubleClickX = 0;
+      		pendingMeasurement = null;
+      		pd.refresh();
+      		return;
+      	}
+      	lastDoubleClickX = xPixel;
+      	double x = toX(xPixel);
+      	double y = toY(yPixel);
+    		pendingMeasurement.setPt2(this, x, y);
+    		setMeasurement(pendingMeasurement);
+    		pendingMeasurement.setYVal(toY(toPixelY(pendingMeasurement.getYVal()) + 25));
+    		pd.refresh();
+    	} else if (iSpectrumClicked >= 0) {
+      	double x = toX(xPixel);
+      	double y = toY(yPixel);
+        pendingMeasurement = new Measurement(this, spectra.get(iSpectrumClicked), x, y, "", x, y);
+      } 
       return;
-    }
+    }     
     if (is2D) {
       if (annotations != null) {
         Coordinate xy = new Coordinate(isd.toX(xPixel), isd
@@ -716,6 +743,12 @@ abstract class GraphSet {
     pd.notifyPeakPickedListeners();
   }
 
+	private void setMeasurement(Measurement m) {
+		if (measurements == null)
+			measurements = new ArrayList<Measurement>();
+    measurements.add(new Measurement(this, m));
+	}
+	
 	private boolean checkArrowUpDownClick(int xPixel, int yPixel) {
 		boolean ok = false;
 		double f = (inScaleArrow(xPixel, yPixel, ArrowType.UP) ? RT2 : inScaleArrow(
@@ -818,7 +851,12 @@ abstract class GraphSet {
     	if (iSpectrumMovedTo >= 0)
     		setUserYFactor(iSpectrumMovedTo);
   	}
-    if (!pd.isIntegralDrag) {
+    if (pd.isIntegralDrag) {
+    } else if (pendingMeasurement != null && iSpectrumClicked >= 0) {
+    	if (isInPlotRegion(xPixel, yPixel)) {
+    		pendingMeasurement.setPt2(this, toX(xPixel), toY(yPixel));
+    	}
+    } else {
       setToolTipForPixels(xPixel, yPixel);
       if (isd == null) {
         if (!drawNoSpectra()) {
@@ -1418,6 +1456,10 @@ abstract class GraphSet {
       zoomInfoList.remove(i);
   }
 
+	private void clearMeasurements() {
+		measurements = null;
+	}
+	
   /**
    * Displays the previous view zoomed
    */
@@ -1434,7 +1476,7 @@ abstract class GraphSet {
       setZoomTo(currentZoomIndex + 1);
   }
 
-	private void drawAll(Object g, int height, int width, int subIndex,
+	private void drawAll(Object g, int subIndex,
 			int iSplit, boolean needNewPins) {
 		if (isd != null)
 			draw2DImage(g);
@@ -1463,14 +1505,14 @@ abstract class GraphSet {
     //System.out.println("bold: " + iSpecBold + " selcted: " + iSpectrumSelected + " movedto: " + iSpectrumMovedTo);
 	  if (!pd.isPrinting) {
 			int iSpec = (nSpectra == 1 ? 0 : !showAllStacked ? iSpectrumMovedTo : iSpecBold >= 0 ? iSpecBold : iSpectrumSelected);
-			drawFrame(g, height, width, iSplit, iSpec);
+			drawFrame(g, iSplit, iSpec);
 		}
 
 	  haveSingleYScale = (showAllStacked && nSpectra > 1 ? allowStackedYScale && doYScale : true);
 		if (haveSingleYScale) {
 			setUserYFactor(iSelected >= 0 ? iSelected : nSplit > 1 ? iSplit : getFixedSelectedSpectrumIndex());
 			if (pd.gridOn && isd == null)
-				drawGrid(g, height, width);
+				drawGrid(g);
 		}
 	  setWidgets(needNewPins, subIndex);
 		if (doDraw1DObjects) {
@@ -1482,9 +1524,9 @@ abstract class GraphSet {
 			// grid and YScale only if scaling is common to all spectra
 			// scale-related, title, and coordinates
 			if (pd.getBoolean(ScriptToken.XSCALEON))
-				drawXScale(g, height, width);
+				drawXScale(g);
 			if (pd.getBoolean(ScriptToken.XUNITSON))
-				drawXUnits(g, width);
+				drawXUnits(g);
 
 			// the graphs
 			int offset = 0;
@@ -1493,7 +1535,7 @@ abstract class GraphSet {
 				if (doPlot(i, iSplit)) {
 					boolean isBold = (iSpecBold == i);
 					setUserYFactor(i);
-					drawSpectrum(g, i, height, width, multiScaleData.spectrumOffsets == null ? offset
+					drawSpectrum(g, i, multiScaleData.spectrumOffsets == null ? offset
 							: multiScaleData.spectrumOffsets[i], isBold);
 					if (pd.titleOn && iSpectrumSelected == i && this == pd.currentGraphSet) {
 						drawTitle(g, height, width, spectra.get(i).getPeakTitle());
@@ -1514,19 +1556,19 @@ abstract class GraphSet {
 
 			if (haveSingleYScale) {
 				if (pd.getBoolean(ScriptToken.YSCALEON))
-					drawYScale(g, height, width);
+					drawYScale(g);
 				if (pd.getBoolean(ScriptToken.YUNITSON))
-					drawYUnits(g, width);
+					drawYUnits(g);
 			}
-			drawIntegralValue(g, width);
+			drawIntegralValue(g);
 		} else {
 			drawWidgets(g, subIndex);
 		}
 		if (annotations != null)
-			drawAnnotations(g, height, width, annotations, null);
+			drawAnnotations(g, annotations, null);
 	}
 
-  private void setUserYFactor(int i) {
+	private void setUserYFactor(int i) {
     userYFactor = multiScaleData.userYFactors[i];
     yRef = multiScaleData.spectrumYRefs[i];
 		multiScaleData.setAxisScaling(i, xPixels, yPixels);			
@@ -1557,7 +1599,7 @@ abstract class GraphSet {
     if (drawNoSpectra() || pd.isPrinting)
       return;
     JDXSpectrum spec = spectra.get(getFixedSelectedSpectrumIndex());
-    ArrayList<PeakInfo> list = (
+    List<PeakInfo> list = (
     		nSpectra == 1 //|| getSpectrum().hasIntegral() 
         || iSpectrumSelected >= 0 ? spec.getPeakList()
         : null);
@@ -1685,22 +1727,26 @@ abstract class GraphSet {
    *        the width to be drawn in pixels
    */
   private void drawSpectrum(Object g, int index, 
-  		int height, int width, int yOffset, boolean isBold) {
+  		int yOffset, boolean isBold) {
     // Check if specInfo in null or xyCoords is null
     //Coordinate[] xyCoords = spectra[index].getXYCoords();
     JDXSpectrum spec = spectra.get(index);    
-    drawPlot(g, index, spec, height, width, true, 
+    drawPlot(g, index, spec, true, 
     		spec.isContinuous(), yOffset, isBold);
     if (spec.hasIntegral())
-      drawPlot(g, index, spec.getIntegrationGraph(), height, width, false, true, yOffset, false);
+      drawPlot(g, index, spec.getIntegrationGraph(), false, true, yOffset, false);
     // over-spectrum stuff    
     if (spec.integrationRatios != null)
-      drawAnnotations(g, height, width, spec.integrationRatios,
+      drawAnnotations(g, spec.integrationRatios,
           ScriptToken.INTEGRALPLOTCOLOR);
+  	if (pendingMeasurement != null && pendingMeasurement.spec == spec)
+  		drawMeasurement(g, pendingMeasurement);
+		if (measurements != null)
+			drawMeasurements(g, spec);
 
   }
 
-	private void drawPlot(Object g, int index, Graph spec, int height, int width,
+	private void drawPlot(Object g, int index, Graph spec, 
 			boolean drawY0, boolean isContinuous, int yOffset, boolean isBold) {
 		if (isBold)
 			setStrokeBold(g, true);
@@ -1768,7 +1814,7 @@ abstract class GraphSet {
 	 * @param height
 	 * @param width
 	 */
-	private void drawFrame(Object g, int height, int width, int iSplit, int iSpec) {
+	private void drawFrame(Object g, int iSplit, int iSpec) {
 		if (!pd.gridOn) {
 			setColor(g, ScriptToken.GRIDCOLOR);
 			drawRect(g, xPixel0, yPixel0, xPixels, yPixels);
@@ -1810,7 +1856,7 @@ abstract class GraphSet {
    * @param width
    *        the width to be drawn in pixels
    */
-  private void drawGrid(Object g, int height, int width) {
+  private void drawGrid(Object g) {
     setColor(g, ScriptToken.GRIDCOLOR);
     double lastX;
     if (Double.isNaN(multiScaleData.firstX)) {
@@ -1834,7 +1880,7 @@ abstract class GraphSet {
     }
   }
 
-  private void drawIntegralValue(Object g, int width) {
+  private void drawIntegralValue(Object g) {
     List<Integral> integrals = getSpectrum().getIntegrals();
     if (integrals == null)
       return;
@@ -1868,9 +1914,9 @@ abstract class GraphSet {
    * @param width
    *        the width to be drawn in pixels
    */
-  private void drawXScale(Object g, int height, int width) {
+  private void drawXScale(Object g) {
 
-    String hashX = getNumberFormat(0);
+    String hashX = getNumberFormat(multiScaleData.hashNums[0]);
     NumberFormat formatter = pd.getFormatter(hashX);
     pd.setFont(g, width, FONT_PLAIN, 12, false);
     int y1 = yPixel1;
@@ -1905,14 +1951,18 @@ abstract class GraphSet {
     }
   }
 
-	private String getNumberFormat(int i) {
+	private static String getNumberFormat(int n) {
     String hash1 = "0.00000000";
     String hash = "#";
-    if (multiScaleData.hashNums[i] <= 0)
-      hash = hash1.substring(0, Math.abs(multiScaleData.hashNums[i]) + 3);
-    else if (multiScaleData.hashNums[i] > 3)
+    if (n <= 0)
+      hash = hash1.substring(0, Math.abs(n) + 3);
+    else if (n > 3)
     	hash = "";
 		return hash;
+	}
+	
+	String getFormattedNumber(double x, String hash) {
+	  return pd.getFormatter(hash).format(x);
 	}
 	
 	/**
@@ -1925,9 +1975,9 @@ abstract class GraphSet {
 	 * @param width
 	 *          the width to be drawn in pixels
 	 */
-	private void drawYScale(Object g, int height, int width) {
+	private void drawYScale(Object g) {
 
-		String hashY = getNumberFormat(1);
+		String hashY = getNumberFormat(multiScaleData.hashNums[1]);
 		NumberFormat formatter = pd.getFormatter(hashY);
 		pd.setFont(g, width, FONT_PLAIN, 12, false);
 		double max = multiScaleData.maxYOnScale + multiScaleData.yStep / 2;
@@ -1955,7 +2005,7 @@ abstract class GraphSet {
    * @param width
    *        the width to be drawn in pixels
    */
-  private void drawXUnits(Object g, int width) {
+  private void drawXUnits(Object g) {
     String units = spectra.get(0).getAxisLabel(true);
     if (units != null)
       drawUnits(g, width, units, xPixel1, yPixel1 + 5, 0, 1);
@@ -1976,10 +2026,8 @@ abstract class GraphSet {
    *        the <code>Graphics</code> object
    * @param imageHeight
    *        the height to be drawn in pixels
-   * @param width
-   *        the width to be drawn in pixels
    */
-  private void drawYUnits(Object g, int width) {
+  private void drawYUnits(Object g) {
     String units = spectra.get(0).getAxisLabel(false);
     if (units != null)
       drawUnits(g, width, units, 5, yPixel0, 0, -1);
@@ -2112,8 +2160,8 @@ abstract class GraphSet {
   }
 
   // determine whether there are any ratio annotations to draw
-  private void drawAnnotations(Object g, int height, int width,
-                               ArrayList<Annotation> annotations,
+  private void drawAnnotations(Object g,
+                               List<Annotation> annotations,
                                ScriptToken whatColor) {
     pd.setFont(g, width, FONT_BOLD, 12, false);
     for (int i = annotations.size(); --i >= 0;) {
@@ -2127,6 +2175,29 @@ abstract class GraphSet {
       drawString(g, note.getText(), x + note.offsetX, y - note.offsetY);
     }
   }
+
+	private void drawMeasurements(Object g,
+			JDXSpectrum spec) {
+		for (int i = measurements.size(); --i >= 0;)
+			if (measurements.get(i).spec == spec)
+				drawMeasurement(g, measurements.get(i));
+	}
+	
+  private void drawMeasurement(Object g, Measurement m) {
+  	if (m.text.length() == 0)
+  		return;
+    pd.setFont(g, width, FONT_BOLD, 12, false);
+    setColor(g, 0, 0, 0); // black
+    int x1 = toPixelX(m.getXVal());
+    int y1 = toPixelY(m.getYVal());
+    int x2 = toPixelX(m.getPt2().getXVal());
+    int x = (x1 + x2)/2;
+    setStrokeBold(g, true);
+    drawLine(g, x1, y1, x2, y1);
+    setStrokeBold(g, false);
+    drawString(g, m.getText(), x + m.offsetX, y1 - m.offsetY);
+	}
+
 
   PlotWidget getPinSelected(int xPixel, int yPixel) {
     if (widgets != null)
@@ -2181,8 +2252,8 @@ abstract class GraphSet {
   }
 
   private void setToolTipForPixels(int xPixel, int yPixel) {
-    NumberFormat formatterX = pd.getFormatter(getNumberFormat(0));
-    String hashY = getNumberFormat(1);
+    NumberFormat formatterX = pd.getFormatter(getNumberFormat(multiScaleData.hashNums[0]));
+    String hashY = getNumberFormat(multiScaleData.hashNums[1]);
     NumberFormat formatterY = pd.getFormatter(hashY);
 
     PlotWidget pw = getPinSelected(xPixel, yPixel);
@@ -2400,9 +2471,11 @@ abstract class GraphSet {
 			return false;
 		// in the stacked plot area
 		stackSelected = false;
+		iSpectrumClicked = -1;
 		for (int i = 0; i < nSpectra; i++)
 			if (isOnSpectrum(xPixel, yPixel, i, 2)) {
 				stackSelected = true;
+				iSpectrumClicked = i;
 				return (i == iSpectrumSelected ? false : i == setSelectedIndex(i));
 			}
 		// but not on a spectrum

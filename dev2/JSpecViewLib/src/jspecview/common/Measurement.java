@@ -33,45 +33,43 @@ package jspecview.common;
  * @author Prof Robert J. Lancashire
  * @author Bob Hanson hansonr@stolaf.edu
  */
-public class Annotation extends Coordinate {
-  protected String text = "";
-  protected boolean isPixels;
-  public boolean is2D;
-  public int offsetX;
-  public int offsetY;
+public class Measurement extends Annotation {
   
-  /**
-   * Constructor -- note that x is spectral X value, but y is pixels above
-   * baseline
-   * 
-   * @param x
-   *        the x value
-   * @param y
-   *        the y value
-   * @param integralValue
-   *        the integral value
-   */
-  public Annotation(double x, double y, String text, boolean isPixels, boolean is2D, int offsetX, int offsetY) {
-    super(x, y);
-    this.text = text;
-    this.isPixels = isPixels;
-    this.is2D = is2D;
-    this.offsetX = offsetX;
-    this.offsetY = offsetY;
+	private Coordinate pt2 = new Coordinate();
+	JDXSpectrum spec;
+	private double value;
+	
+  public Measurement(GraphSet gs, JDXSpectrum spec, double x, double y, String text, double x1, double y1) {
+		super(x, y, text, false, false, 0, 6);
+		this.spec = spec;
+		setPt2(gs, x1, y1);
+	}
+  
+  public Measurement(GraphSet gs, Measurement m) {
+  	super(m.getXVal(), m.getYVal(), m.text, false, false, m.offsetX, m.offsetY);
+  	this.spec = m.spec;
+  	setPt2(gs, m.pt2.getXVal(), m.pt2.getYVal());
+	}
+
+	public void setPt2(GraphSet gs, double x, double y) {
+		pt2.setXVal(x);
+		pt2.setYVal(y);
+		text = spec.setMeasurementText(gs, this);
+		System.out.println(x + " measure " + y + " " + text);
+  }
+  
+	public JDXSpectrum getSpectrum() {
+		return spec;
+	}
+  
+  public void setValue(double value) {
+  	this.value = value;
   }
 
-  public String getText() {
-    return text;
+  public double getValue() {
+  	return value;
   }
-
-  public void setText(String text) {
-    this.text = text;
-  }
-
-  public boolean isPixels() {
-    return isPixels;
-  }
-
+  
   /**
    * Overrides Objects toString() method
    * 
@@ -79,7 +77,11 @@ public class Annotation extends Coordinate {
    */
   @Override
   public String toString() {
-    return "[" + getXVal() + ", " + getYVal() + "," + text + "]";
+    return "[" + getXVal() + "-" + pt2.getXVal() + "]";
   }
+
+	public Coordinate getPt2() {
+		return pt2;
+	}
 
 }
