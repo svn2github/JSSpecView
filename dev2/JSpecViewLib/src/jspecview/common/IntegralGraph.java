@@ -173,28 +173,28 @@ public class IntegralGraph implements Graph {
     return Coordinate.getYValueAt(xyCoords, x, c);
   }
 
-  /**
-   * Parses integration ratios and x values from a string and returns them as
-   * <code>IntegrationRatio</code> objects
-   * 
-   * @param value
-   * @return ArrayList<IntegrationRatio> object representing integration ratios
-   */
-  public static ArrayList<Annotation> getIntegrationRatiosFromString(
-                                                                           String value) {
-    ArrayList<Annotation> ratios = new ArrayList<Annotation>();
-    // split input into x-value/integral-value pairs
-    StringTokenizer allParamTokens = new StringTokenizer(value, ",");
-    while (allParamTokens.hasMoreTokens()) {
-      String token = allParamTokens.nextToken();
-      // now split the x-value/integral-value pair
-      StringTokenizer eachParam = new StringTokenizer(token, ":");
-      Annotation ratio = new Annotation(Double
-          .parseDouble(eachParam.nextToken()), 0.0, eachParam.nextToken(), true, false, 0, 0);
-      ratios.add(ratio);
-    }
-    return ratios;
-  }
+	/**
+	 * Parses integration ratios and x values from a string and returns them as
+	 * <code>IntegrationRatio</code> objects
+	 * 
+	 * @param value
+	 * @return ArrayList<IntegrationRatio> object representing integration ratios
+	 */
+	public static ArrayList<Annotation> getIntegrationRatiosFromString(
+			String value) {
+		ArrayList<Annotation> ratios = new ArrayList<Annotation>();
+		// split input into x-value/integral-value pairs
+		StringTokenizer allParamTokens = new StringTokenizer(value, ",");
+		while (allParamTokens.hasMoreTokens()) {
+			String token = allParamTokens.nextToken();
+			// now split the x-value/integral-value pair
+			StringTokenizer eachParam = new StringTokenizer(token, ":");
+			Annotation ratio = new Annotation(Double.parseDouble(eachParam
+					.nextToken()), 0.0, eachParam.nextToken(), true, false, 0, 0);
+			ratios.add(ratio);
+		}
+		return ratios;
+	}
 
   public static final int INTEGRATE_MARK = 4;
   public static final int INTEGRATE_TOGGLE = 3;

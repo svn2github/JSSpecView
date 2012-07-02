@@ -51,7 +51,6 @@ public class Measurement extends Annotation {
 		pt2.setXVal(x);
 		pt2.setYVal(y);
 		text = spec.setMeasurementText(gs, this);
-		System.out.println(x + " measure " + y + " " + text);
   }
   
 	public JDXSpectrum getSpectrum() {

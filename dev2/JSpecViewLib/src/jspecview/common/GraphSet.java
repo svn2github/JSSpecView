@@ -950,6 +950,7 @@ abstract class GraphSet {
     if (pd.isIntegralDrag) {
     } else if (pendingMeasurement != null) {
     	processPendingMeasurement(xPixel, yPixel, 0);
+      setToolTipForPixels(xPixel, yPixel);
     } else {
     	iSelectedMeasurement = (inPlotMove ? findMeasurement(xPixel, yPixel, 0) : -1);
       setToolTipForPixels(xPixel, yPixel);
@@ -1228,6 +1229,10 @@ abstract class GraphSet {
 	synchronized void escapeKeyPressed() {
 		if (!inPlotMove)
 			return;
+		if (pendingMeasurement != null) {
+			pendingMeasurement = null;
+			return;
+		}
 		pd.thisWidget = null;
 		pendingMeasurement = null;
 		if (zoomBox1D != null)
@@ -2441,9 +2446,10 @@ abstract class GraphSet {
       yPt = getSpectrum().getIntegrationGraph().getPercentYValueAt(xPt);
       xx += ", " + pd.getFormatter("#0.0").format(yPt);
     }
-    pd.setToolTipText(iSelectedMeasurement >= 0 
-    		? "Press ESC or DEL to delete \"" + measurements.get(iSelectedMeasurement).text + "\"" 
-    		: Double.isNaN(yPt) ? null : xx);
+    pd.setToolTipText(pendingMeasurement != null || iSelectedMeasurement >= 0 
+    		? "Press ESC or DEL to delete " +
+    				(pendingMeasurement == null ? "\"" + measurements.get(iSelectedMeasurement).text + "\"" 
+    						: "measurement")	: Double.isNaN(yPt) ? null : xx);
   }
   
   private String setCoordStr(double xPt, double yPt) {
