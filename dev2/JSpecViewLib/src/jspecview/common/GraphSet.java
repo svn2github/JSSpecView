@@ -746,9 +746,6 @@ abstract class GraphSet {
     		processPendingMeasurement(xPixel, yPixel, 1);
     		return;
     	} 
-    	iSelectedMeasurement = findMeasurement(xPixel, yPixel, 0);
-    	if (iSelectedMeasurement >= 0)
-    		return;
       setCoordClicked(toX(xPixel), toY(yPixel));
     } else {
       setCoordClicked(Double.NaN, 0);
@@ -813,12 +810,16 @@ abstract class GraphSet {
 			int i = findMeasurement(xPixel, yPixel, 1);
 			if (i >= 0)
 				return i;
-			return findMeasurement(xPixel, yPixel, 2);
+			i = findMeasurement(xPixel, yPixel, 2);
+			if (i >= 0)
+				return i;
+			return findMeasurement(xPixel, yPixel, -2);
 		}
 		for (int i = measurements.size(); --i >= 0;) {
 			Measurement m = measurements.get(i);
-			int x = toPixelX(iPt == 1 ? m.getXVal() : m.getPt2().getXVal());
-			int y = toPixelY(iPt == 1 ? m.getYVal() : m.getPt2().getYVal());
+			int x = toPixelX(iPt == -2 ? (m.getXVal() + m.getPt2().getXVal()) / 2 
+					: iPt == 1 ? m.getXVal() : m.getPt2().getXVal());
+			int y = toPixelY(m.getYVal());
 			if (Math.abs(xPixel - x) + Math.abs(yPixel - y) < 3)
 				return i;
 		}
@@ -946,6 +947,7 @@ abstract class GraphSet {
     } else if (pendingMeasurement != null) {
     	processPendingMeasurement(xPixel, yPixel, 0);
     } else {
+    	iSelectedMeasurement = (inPlotMove ? findMeasurement(xPixel, yPixel, 0) : -1);
       setToolTipForPixels(xPixel, yPixel);
       if (isd == null) {
         if (!drawNoSpectra()) {
@@ -2435,7 +2437,9 @@ abstract class GraphSet {
       yPt = getSpectrum().getIntegrationGraph().getPercentYValueAt(xPt);
       xx += ", " + pd.getFormatter("#0.0").format(yPt);
     }
-    pd.setToolTipText(Double.isNaN(yPt) ? null : xx);
+    pd.setToolTipText(iSelectedMeasurement >= 0 
+    		? "Press ESC or DEL to delete \"" + measurements.get(iSelectedMeasurement).text + "\"" 
+    		: Double.isNaN(yPt) ? null : xx);
   }
   
   private String setCoordStr(double xPt, double yPt) {
