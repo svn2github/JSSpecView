@@ -624,6 +624,15 @@ public class PanelData {
     return (mouseState  == PanelData.Mouse.UP);
   }
   
+  protected void doMouseMoved(int xPixel, int yPixel) {
+    mouseState = Mouse.UP;
+    this.clickCount = 0;
+    GraphSet gs = GraphSet.findGraphSet(graphSets, xPixel, yPixel);
+    if (gs == null)
+      return;
+    gs.mouseMovedEvent(xPixel, yPixel);
+  }
+
   protected void doMousePressed(int xPixel, int yPixel, boolean isControlDown) {
     mouseState = Mouse.DOWN;
     GraphSet gs = GraphSet.findGraphSet(graphSets, xPixel, yPixel);
@@ -633,26 +642,21 @@ public class PanelData {
     if (isControlDown && !isIntegralDrag)
       return;
     setCurrentGraphSet(gs, xPixel, yPixel, false);
-    gs.checkWidgetEvent(xPixel, yPixel, true);
+    gs.checkWidgetEvent(xPixel, yPixel, true, ++clickCount);
   }
 
-  protected void doMouseMoved(int xPixel, int yPixel) {
-    mouseState = Mouse.UP;
-    GraphSet gs = GraphSet.findGraphSet(graphSets, xPixel, yPixel);
-    if (gs == null)
-      return;
-    gs.mouseMovedEvent(xPixel, yPixel);
-  }
-
+  int clickCount;
+  
   protected void doMouseDragged(int xPixel, int yPixel) {
     mouseState = Mouse.DOWN;
     if (GraphSet.findGraphSet(graphSets, xPixel, yPixel) != currentGraphSet)
       return;
-    currentGraphSet.checkWidgetEvent(xPixel, yPixel, false);
+    currentGraphSet.checkWidgetEvent(xPixel, yPixel, false, clickCount);
     currentGraphSet.mouseMovedEvent(xPixel, yPixel);
   }
 
   protected void doMouseReleased(boolean isButton1) {
+    System.out.println("doMouseReleased " + this.clickCount);
     mouseState = Mouse.UP;
     if (thisWidget == null || !isButton1)
       return;
@@ -698,9 +702,19 @@ public class PanelData {
   }
 
 	public void splitStack(boolean doSplit) {
+  	if (currentGraphSet != null)
+    	currentGraphSet.splitStack(graphSets, doSplit);
+	}
+
+	public boolean haveSelectedSpectrum() {
   	if (currentGraphSet == null)
-  		return;
-  	currentGraphSet.splitStack(graphSets, doSplit);
+  		return false;
+  	return currentGraphSet.haveSelectedSpectrum();
+	}
+
+	public void setShowIntegration(Boolean tfToggle) {
+  	if (currentGraphSet != null)
+    	currentGraphSet.setShowIntegration(tfToggle);
 	}
 
 }

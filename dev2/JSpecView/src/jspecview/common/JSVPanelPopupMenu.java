@@ -91,6 +91,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   public JMenuItem overlayStackOffsetMenuItem = new JMenuItem();
 
   public JMenuItem integrateMenuItem = new JCheckBoxMenuItem();
+  public JMenuItem integrateShowMenuItem = new JCheckBoxMenuItem();
   public JMenuItem transAbsMenuItem = new JMenuItem();
   public JMenuItem solColMenuItem = new JMenuItem();
   
@@ -280,19 +281,27 @@ public class JSVPanelPopupMenu extends JPopupMenu {
             runScript(scripter, "INTEGRATE TOGGLE");
           }
         });
+    integrateShowMenuItem.setSelected(true);
+    setMenuItem(integrateShowMenuItem, 'S', "Show Integration", 0, 0,
+        new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            runScript(scripter, "set SHOWINTEGRATION " + ((JMenuItem) e.getSource()).isSelected());
+          }
+        });
     setMenuItem(transAbsMenuItem, '\0', "Transmittance/Absorbance", 0, 0,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             runScript(scripter, "IRMODE IMPLIED");
           }
         });
-    setMenuItem(solColMenuItem, '\0', "Predicted Solution Colour", 0, 0,
+    setMenuItem(solColMenuItem, 'C', "Predicted Solution Colour", 0, 0,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             runScript(scripter, "GETSOLUTIONCOLOR");
           }
         });
     menu.add(integrateMenuItem);
+    menu.add(integrateShowMenuItem);
     menu.add(transAbsMenuItem);
     menu.add(solColMenuItem);
   }
@@ -340,14 +349,15 @@ public class JSVPanelPopupMenu extends JPopupMenu {
 
   public void setEnables(JSVPanel jsvp) {
     pd = jsvp.getPanelData();
-    JDXSpectrum spec0 = jsvp.getSpectrumAt(0);
+    JDXSpectrum spec0 = jsvp.getSpectrum();
     setSelected(gridCheckBoxMenuItem, pd.getBoolean(ScriptToken.GRIDON));
     setSelected(coordsCheckBoxMenuItem, pd.getBoolean(ScriptToken.COORDINATESON));
     setSelected(reversePlotCheckBoxMenuItem, pd.getBoolean(ScriptToken.REVERSEPLOT));
 
     boolean isOverlaid = pd.isOverlaid();
-    boolean isSingle = pd.getNumberOfSpectraTotal() == 1;
+    boolean isSingle = pd.haveSelectedSpectrum();
     integrateMenuItem.setEnabled(isSingle && spec0.canIntegrate() || spec0.hasIntegral());
+    integrateShowMenuItem.setEnabled(integrateMenuItem.isEnabled() && integrateMenuItem.isSelected());
     solColMenuItem.setEnabled(isSingle && spec0.canShowSolutionColor());
     transAbsMenuItem.setEnabled(isSingle && spec0.canConvertTransAbs());
     overlayKeyMenuItem.setEnabled(isOverlaid && pd.getNumberOfGraphSets() == 1);

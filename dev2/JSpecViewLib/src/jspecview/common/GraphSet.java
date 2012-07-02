@@ -67,6 +67,7 @@ abstract class GraphSet {
   
   private final double RT2 = Math.sqrt(2.0);
 	private boolean haveSingleYScale;
+
 	private int iSpecBold;
 
   //needed by PanelData
@@ -126,6 +127,9 @@ abstract class GraphSet {
   private boolean drawXAxisLeftToRight;
   private boolean xAxisLeftToRight = true;
   private boolean doDraw1DObjects = true;
+	private int iPreviousSpectrumClicked = -1;
+	private boolean haveSelectedSpectrum;
+	
 
   private boolean enableZoom;
   private int currentZoomIndex;
@@ -666,7 +670,6 @@ abstract class GraphSet {
 	}
 
   private int iSelectedMeasurement = -1;
-  
   synchronized void mouseClickEvent(int xPixel, int yPixel, int clickCount,
                        boolean isControlDown) {
   	iSelectedMeasurement = -1;
@@ -817,14 +820,17 @@ abstract class GraphSet {
 			i = findMeasurement(xPixel, yPixel, 2);
 			if (i >= 0)
 				return i;
-			return findMeasurement(xPixel, yPixel, -2);
+			i = findMeasurement(xPixel, yPixel, -2);
+			if (i >= 0)
+				return i;
+			return findMeasurement(xPixel, yPixel, -3);
 		}
 		for (int i = measurements.size(); --i >= 0;) {
 			Measurement m = measurements.get(i);
-			int x = toPixelX(iPt == -2 ? (m.getXVal() + m.getPt2().getXVal()) / 2 
+			int x = toPixelX(iPt == -2 || iPt == -3 ? (m.getXVal() + m.getPt2().getXVal()) / 2 
 					: iPt == 1 ? m.getXVal() : m.getPt2().getXVal());
-			int y = toPixelY(m.getYVal());
-			if (Math.abs(xPixel - x) + Math.abs(yPixel - y) < 3)
+			int y = (iPt == -3 ? yPixel1 - 2 : toPixelY(m.getYVal()));
+			if (Math.abs(xPixel - x) + Math.abs(yPixel - y) < 4)
 				return i;
 		}
 		return -1;
@@ -936,6 +942,7 @@ abstract class GraphSet {
 	private double xValueMovedTo;
 	private NumberFormat formatterX;
 	private NumberFormat formatterY;
+	private boolean showIntegration = true;
   
   synchronized void mouseMovedEvent(int xPixel, int yPixel) {
   	inPlotMove = isInPlotRegion(xPixel, yPixel);
@@ -971,7 +978,7 @@ abstract class GraphSet {
     pd.repaint();
   }
 
-  boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
+  boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress, int clickCount) {
     if (!enableZoom)
       return false;
     PlotWidget widget = pd.thisWidget;
@@ -1619,6 +1626,7 @@ abstract class GraphSet {
 			drawFrame(g, iSplit, iSpec);
 		}
 
+	  haveSelectedSpectrum = (nSpectra == 1 || iSpecBold >= 0); 
 	  haveSingleYScale = (showAllStacked && nSpectra > 1 ? allowStackedYScale && doYScale : true);
 		if (haveSingleYScale) {
 			setUserYFactor(iSelected >= 0 ? iSelected : nSplit > 1 ? iSplit : getFixedSelectedSpectrumIndex());
@@ -1877,6 +1885,8 @@ abstract class GraphSet {
 			setStrokeBold(g, true);
 		Coordinate[] xyCoords = spec.getXYCoords();
 		boolean isIntegral = (spec instanceof IntegralGraph);
+		if (isIntegral && !showIntegration)
+			return;
 		boolean fillPeaks = (!isIntegral && pd.isIntegralDrag && spectra.get(index)
 				.hasIntegral());
 		setPlotColor(g, isIntegral ? -1 : iSpectrumSelected == index && nSplit == 1 && !showAllStacked ? 0 : index);
@@ -2007,7 +2017,7 @@ abstract class GraphSet {
 
   private void drawIntegralValue(Object g) {
     List<Integral> integrals = getSpectrum().getIntegrals();
-    if (integrals == null)
+    if (integrals == null || !showIntegration)
       return;
     pd.setFont(g, width, FONT_BOLD, 12, false);
     NumberFormat formatter = pd.getFormatter("#0.0");
@@ -2319,11 +2329,17 @@ abstract class GraphSet {
     int x1 = toPixelX(m.getXVal());
     int y1 = toPixelY(m.getYVal());
     int x2 = toPixelX(m.getPt2().getXVal());
+    boolean drawString = (Math.abs((m.getXVal() - m.getPt2().getXVal()) / multiScaleData.xFactorForScale) >= 2);
     int x = (x1 + x2)/2;
     setStrokeBold(g, true);
-    drawLine(g, x1, y1, x2, y1);
+    if (drawString)
+      drawLine(g, x1, y1, x2, y1);
+    drawLine(g, x1 + 1, yPixel1 - 1, x2, yPixel1 - 1);
     setStrokeBold(g, false);
-    drawString(g, m.getText(), x + m.offsetX, y1 - m.offsetY);
+    if (drawString)
+      drawString(g, m.getText(), x + m.offsetX, y1 - m.offsetY);
+    drawLine(g, x1, yPixel1, x1, yPixel1 - 6);
+    drawLine(g, x2, yPixel1, x2, yPixel1 - 6);
 	}
 
 
@@ -2447,7 +2463,7 @@ abstract class GraphSet {
       xx += ", " + pd.getFormatter("#0.0").format(yPt);
     }
     pd.setToolTipText(pendingMeasurement != null || iSelectedMeasurement >= 0 
-    		? "Press ESC or DEL to delete " +
+    		? "Press ESC to delete " +
     				(pendingMeasurement == null ? "\"" + measurements.get(iSelectedMeasurement).text + "\"" 
     						: "measurement")	: Double.isNaN(yPt) ? null : xx);
   }
@@ -2599,8 +2615,6 @@ abstract class GraphSet {
 		return Math.sqrt(dx * dx + dy * dy);
 	}
 
-	private int iPreviousSpectrumClicked = -1;
-	
 	boolean checkSpectrumClickEvent(int xPixel, int yPixel) {
 		if (checkArrowLeftRightClick(xPixel, yPixel))
 			return true;
@@ -2624,6 +2638,13 @@ abstract class GraphSet {
 	public String toString() {
 		return "gs: " + nSpectra + " " + spectra + " " + spectra.get(0).getFilePath();
 	}
+	
+	boolean haveSelectedSpectrum() {
+		return haveSelectedSpectrum;
+	}
 
-	// TODO: user Y scale needs to be integrated better into the 
+	public void setShowIntegration(Boolean tfToggle) {
+		showIntegration = (tfToggle == null ? !showIntegration : tfToggle.booleanValue());
+	}
+
 }

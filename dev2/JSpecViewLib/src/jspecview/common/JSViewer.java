@@ -124,6 +124,10 @@ public class JSViewer {
             continue;
         	si.print();
         	break;
+        case SHOWINTEGRATION:
+        	if (jsvp != null)
+        		jsvp.getPanelData().setShowIntegration(value.equalsIgnoreCase("TOGGLE") ? null : Parameters.isTrue(value) ? Boolean.TRUE : Boolean.FALSE);
+        	break;
         case SPECTRUM:
         case SPECTRUMNUMBER:
           jsvp = si.execSetSpectrum(value);
