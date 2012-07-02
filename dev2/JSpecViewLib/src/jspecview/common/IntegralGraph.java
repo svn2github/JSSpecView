@@ -43,11 +43,11 @@ public class IntegralGraph implements Graph {
   public final static double DEFAULT_FACTOR = 50;
   public final static double DEFAULT_OFFSET = 30;
 
-  private List<Integral> integrals;
+  private List<Integral> integralRegions;
   private JDXSpectrum spectrum;
 
   public void dispose() {
-    integrals = null;
+    integralRegions = null;
     spectrum = null;
   }
 
@@ -201,42 +201,42 @@ public class IntegralGraph implements Graph {
   public static final int INTEGRATE_ON = 2;
   public static final int INTEGRATE_OFF = 1;  
 
-  public void addIntegral(double x1, double x2, boolean isFinal) {
+  public void addIntegralRegion(double x1, double x2, boolean isFinal) {
     if (Double.isNaN(x1)) {
-      integrals = null;
+      integralRegions = null;
       return;
     }
     double intVal = Math.abs(getPercentYValueAt(x2) - getPercentYValueAt(x1));
     if (isFinal) {
-      integrals.get(0).value = 0;
+      integralRegions.get(0).value = 0;
       if (intVal == 0)
         return;
     }
-    if (integrals == null)
-      integrals = new ArrayList<Integral>();
+    if (integralRegions == null)
+      integralRegions = new ArrayList<Integral>();
     Integral in = new Integral(intVal, x1, x2, getYValueAt(x1), getYValueAt(x2));
-    clearIntegrals(x1, x2);
-    if (isFinal || integrals.size() == 0) {
-      integrals.add(in);
+    clearIntegralRegions(x1, x2);
+    if (isFinal || integralRegions.size() == 0) {
+      integralRegions.add(in);
     } else {
-      integrals.set(0, in);
+      integralRegions.set(0, in);
     }
   }
 
-  private void clearIntegrals(double x1, double x2) {
+  private void clearIntegralRegions(double x1, double x2) {
     // no overlapping integrals. Ignore first, which is the temporary one
     
-    for (int i = integrals.size(); --i >= 1;) {
-      Integral in = integrals.get(i);
+    for (int i = integralRegions.size(); --i >= 1;) {
+      Integral in = integralRegions.get(i);
       if (Math.min(in.x1, in.x2) < Math.max(x1, x2) 
           && Math.max(in.x1, in.x2) > Math.min(x1, x2))
-        integrals.remove(i);
+        integralRegions.remove(i);
     }
     
   }
 
-  public List<Integral> getIntegrals() {
-    return integrals;
+  public List<Integral> getIntegralRegions() {
+    return integralRegions;
   }
 
   enum IntMode {
@@ -257,7 +257,7 @@ public class IntegralGraph implements Graph {
     ppms = ppms.replace('-','^');
     ppms = ppms.replace('#','-');
     List<String> tokens = ScriptToken.getTokens(ppms);
-    addIntegral(0, 0, false);
+    addIntegralRegion(0, 0, false);
     for (int i = tokens.size(); --i >= 0;) {
       String s = tokens.get(i);
       int pt = s.indexOf('^');
@@ -266,7 +266,7 @@ public class IntegralGraph implements Graph {
       try {
         double x2 = Double.valueOf(s.substring(0, pt).trim());
         double x1 = Double.valueOf(s.substring(pt + 1).trim());
-        addIntegral(x1, x2, true);
+        addIntegralRegion(x1, x2, true);
       } catch (Exception e) {
         continue;
       }

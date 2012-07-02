@@ -1683,7 +1683,6 @@ abstract class GraphSet {
 				if (pd.getBoolean(ScriptToken.YUNITSON))
 					drawYUnits(g);
 			}
-			drawIntegralValue(g);
 		} else {
 			drawWidgets(g, subIndex);
 		}
@@ -1862,13 +1861,15 @@ abstract class GraphSet {
   private void drawSpectrum(Object g, int index, 
   		int yOffset, boolean isBold) {
     // Check if specInfo in null or xyCoords is null
-    //Coordinate[] xyCoords = spectra[index].getXYCoords();
     JDXSpectrum spec = spectra.get(index);    
     drawPlot(g, index, spec, true, 
     		spec.isContinuous(), yOffset, isBold);
-    if (spec.hasIntegral())
-      drawPlot(g, index, spec.getIntegrationGraph(), false, true, yOffset, false);
-    // over-spectrum stuff    
+    if (showIntegration) {
+    	if (spec.hasIntegral())
+        drawPlot(g, index, spec.getIntegrationGraph(), false, true, yOffset, false);
+      if (spec.getIntegralRegions() != null)
+    		drawIntegralValue(g, spec, yOffset);
+    }
     if (spec.integrationRatios != null)
       drawAnnotations(g, spec.integrationRatios,
           ScriptToken.INTEGRALPLOTCOLOR);
@@ -2015,10 +2016,8 @@ abstract class GraphSet {
     }
   }
 
-  private void drawIntegralValue(Object g) {
-    List<Integral> integrals = getSpectrum().getIntegrals();
-    if (integrals == null || !showIntegration)
-      return;
+  private void drawIntegralValue(Object g, JDXSpectrum spec, int yOffset) {
+    List<Integral> integrals = spec.getIntegralRegions();
     pd.setFont(g, width, FONT_BOLD, 12, false);
     NumberFormat formatter = pd.getFormatter("#0.0");
     setColor(g, ScriptToken.INTEGRALPLOTCOLOR);
@@ -2029,8 +2028,8 @@ abstract class GraphSet {
         continue;
       String s = "  " + formatter.format(Math.abs(in.value));
       int x = toPixelX(in.x2);
-      int y1 = toPixelYint(in.y1);
-      int y2 = toPixelYint(in.y2);
+      int y1 = yOffset + toPixelYint(in.y1);
+      int y2 = yOffset + toPixelYint(in.y2);
       if (x != fixX(x))
         continue;
       drawLine(g, x, y1, x, y2);
@@ -2392,7 +2391,7 @@ abstract class GraphSet {
     IntegralGraph ig = getSpectrum().getIntegrationGraph();
     if (ig == null)
       return;
-    ig.addIntegral(x1, x2, isFinal);
+    ig.addIntegralRegion(x1, x2, isFinal);
   }
 
   private void setFormatters() {

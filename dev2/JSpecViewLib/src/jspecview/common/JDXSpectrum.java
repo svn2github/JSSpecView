@@ -480,8 +480,8 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return true;
   }
 
-  public List<Integral> getIntegrals() {
-   return (integration == null ? null : integration.getIntegrals());
+  public List<Integral> getIntegralRegions() {
+   return (integration == null ? null : integration.getIntegralRegions());
   }
 
   public List<JDXSpectrum> getSubSpectra() {
