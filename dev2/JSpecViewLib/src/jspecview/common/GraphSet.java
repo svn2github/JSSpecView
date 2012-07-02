@@ -670,6 +670,10 @@ abstract class GraphSet {
   synchronized void mouseClickEvent(int xPixel, int yPixel, int clickCount,
                        boolean isControlDown) {
   	iSelectedMeasurement = -1;
+  	if (clickCount == 2 && iSpectrumClicked == -1 && iPreviousSpectrumClicked >= 0) {
+  		setSelectedIndex(iSpectrumClicked = iPreviousSpectrumClicked);
+  		stackSelected = true;
+  	}
   	if (isSplitWidget(xPixel, yPixel)) {
   		splitStack(pd.graphSets, nSplit == 1);
       pd.refresh();
@@ -1638,7 +1642,7 @@ abstract class GraphSet {
 					boolean isBold = (iSpecBold == i);
 					setUserYFactor(i);
 					if (n == 1 || iSpectrumSelected == i && this == pd.currentGraphSet) {
-						if (!pd.isPrinting && xPixelMovedTo >= 0 && (iSpectrumSelected >= 0 || n == 1))
+						if (!pd.isPrinting && xPixelMovedTo >= 0)
 							drawSpectrumPointer(g, i);
 						if (pd.titleOn) {
 							drawTitle(g, height, width, spectra.get(i).getPeakTitle());
@@ -2589,10 +2593,12 @@ abstract class GraphSet {
 		return Math.sqrt(dx * dx + dy * dy);
 	}
 
+	private int iPreviousSpectrumClicked = -1;
+	
 	boolean checkSpectrumClickEvent(int xPixel, int yPixel) {
 		if (checkArrowLeftRightClick(xPixel, yPixel))
 			return true;
-		if (!showAllStacked || !isInPlotRegion(xPixel, yPixel))
+		if (pendingMeasurement != null || !showAllStacked || !isInPlotRegion(xPixel, yPixel))
 			return false;
 		// in the stacked plot area
 		stackSelected = false;
@@ -2600,7 +2606,7 @@ abstract class GraphSet {
 		for (int i = 0; i < nSpectra; i++)
 			if (isOnSpectrum(xPixel, yPixel, i, 2)) {
 				stackSelected = true;
-				iSpectrumClicked = i;
+				iSpectrumClicked = iPreviousSpectrumClicked = i;
 				return (i == iSpectrumSelected ? false : i == setSelectedIndex(i));
 			}
 		// but not on a spectrum
