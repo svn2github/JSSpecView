@@ -73,6 +73,8 @@ public class DisplaySchemesProcessor {
     dsdef.setColor(ScriptToken.UNITSCOLOR, Color.BLACK);
     dsdef.setColor(ScriptToken.SCALECOLOR, Color.BLACK);
     dsdef.setColor(ScriptToken.COORDINATESCOLOR, Color.BLACK);
+    dsdef.setColor(ScriptToken.PEAKTABCOLOR, Color.RED);
+    dsdef.setColor(ScriptToken.HIGHLIGHTCOLOR, Color.DARK_GRAY);
     dsdef.setColor(ScriptToken.GRIDCOLOR, Color.BLACK);
     dsdef.setColor(ScriptToken.PLOTCOLOR, Color.BLACK);
     dsdef.setColor(ScriptToken.PLOTAREACOLOR, Color.WHITE);
@@ -189,6 +191,12 @@ public class DisplaySchemesProcessor {
               case COORDINATESCOLOR:
                 def = "#ff0000";
                 break;
+              case PEAKTABCOLOR:
+                def = "#ff0000";
+                break;
+              case HIGHLIGHTCOLOR:
+                def = "#808080";
+                break;
               case SCALECOLOR:
                 def = "#660000";
                 break;
@@ -272,6 +280,14 @@ public class DisplaySchemesProcessor {
       buffer.write("\t\t<coordinateColor hex = \"" +
                    AwtParameters.colorToHexString(ds.getColor(ScriptToken.COORDINATESCOLOR)) +
                    "\"/>");
+      buffer.newLine();
+      buffer.write("\t\t<highlightColor hex = \"" +
+          AwtParameters.colorToHexString(ds.getColor(ScriptToken.HIGHLIGHTCOLOR)) +
+          "\"/>");
+      buffer.newLine();
+      buffer.write("\t\t<peakTabColor hex = \"" +
+          AwtParameters.colorToHexString(ds.getColor(ScriptToken.PEAKTABCOLOR)) +
+          "\"/>");
       buffer.newLine();
       buffer.write("\t\t<gridColor hex = \"" +
                    AwtParameters.colorToHexString(ds.getColor(ScriptToken.GRIDCOLOR)) +

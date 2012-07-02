@@ -285,10 +285,10 @@ public class PanelData {
    * @param b 
    * @param g 
    */
-  public void addHighlight(double x1, double x2, int r, int g, int b, int a) {
-    currentGraphSet.addHighlight(x1, x2, null, owner.getColor(r, g, b, a));
+  public void addHighlight(double x1, double x2, JDXSpectrum spec, int r, int g, int b, int a) {
+    currentGraphSet.addHighlight(x1, x2, spec, owner.getColor(r, g, b, a));
   }
-
+  
   /**
    * Remove the highlight at the specified index in the internal list of
    * highlights The index depends on the order in which the highlights were
@@ -665,7 +665,7 @@ public class PanelData {
     GraphSet gs = GraphSet.findGraphSet(graphSets, xPixel, yPixel);
     if (gs == null)
       return;
-    setCurrentGraphSet(gs, xPixel, yPixel, true);
+    setCurrentGraphSet(gs, xPixel, yPixel, clickCount == 1);
     gs.mouseClickEvent(xPixel, yPixel, clickCount, isControlDown);
   }
   

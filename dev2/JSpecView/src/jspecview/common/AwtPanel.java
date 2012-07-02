@@ -143,6 +143,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   private Color coordinatesColor;
   private Color gridColor;
   private Color integralPlotColor;
+  private Color peakTabColor;
   private Color plotAreaColor;
   private Color scaleColor;
   private Color titleColor;
@@ -199,6 +200,9 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     case INTEGRALPLOTCOLOR:
       integralPlotColor = color;
       break;
+    case PEAKTABCOLOR:
+    	peakTabColor = color;
+    	break;
     case PLOTCOLOR:
       for (int i = pd.graphSets.size(); --i >= 0;)
         pd.graphSets.get(i).setPlotColor0(color);
@@ -316,6 +320,8 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
       return integralPlotColor;
     case GRIDCOLOR:
       return gridColor;
+    case PEAKTABCOLOR:
+    	return peakTabColor;
     case PLOTAREACOLOR:
       return plotAreaColor;
     case SCALECOLOR:
@@ -377,6 +383,8 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
    *        the width to be drawn in pixels
    */
   public void drawCoordinates(Object og, int height, int width) {
+  	if (pd.coordStr == null)
+  		return;
     Graphics g = (Graphics) og;
     g.setColor(coordinatesColor);
     pd.setFont(g, width, Font.PLAIN, 12, true);
@@ -557,8 +565,9 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   }
 
   public void keyPressed(KeyEvent e) {
-    if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-      pd.currentGraphSet.escape();
+  	// should be only in panel region, though. 
+    if (e.getKeyCode() == KeyEvent.VK_ESCAPE || e.getKeyCode() == KeyEvent.VK_DELETE) {
+      pd.currentGraphSet.escapeKeyPressed();
       pd.isIntegralDrag = false;
       repaint();
       e.consume();

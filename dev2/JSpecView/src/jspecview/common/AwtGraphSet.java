@@ -159,7 +159,8 @@ class AwtGraphSet extends GraphSet {
     return true;
   }
 
-  @Override
+
+	@Override
   Annotation getAnnotation(double x, double y, String text, boolean isPixels,
                            boolean is2d, int offsetX, int offsetY) {
     return new ColoredAnnotation(x, y, text, Color.BLACK, isPixels, is2d,

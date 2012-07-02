@@ -245,7 +245,7 @@ public class JSViewer {
                                   int r, int g, int b, int a) {
     JSVPanel jsvp = si.getSelectedPanel();
     if (jsvp != null) {
-      jsvp.getPanelData().addHighlight(x1, x2, r, g, b, a);
+      jsvp.getPanelData().addHighlight(x1, x2, null, r, g, b, a);
       jsvp.repaint();
     }
   }

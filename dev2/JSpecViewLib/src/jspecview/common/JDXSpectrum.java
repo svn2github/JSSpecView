@@ -263,10 +263,10 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   public double getPercentYValueAt(double x) {
     if (!isContinuous())
       return Double.NaN;
-    return getYValueAt(xyCoords, x);
+    return getYValueAt(x);
   }
 
-  public double getYValueAt(Coordinate[] xyCoords, double x) {
+  public double getYValueAt(double x) {
     if (c == null)
       c = new CoordComparator();
     return Coordinate.getYValueAt(xyCoords, x, c);

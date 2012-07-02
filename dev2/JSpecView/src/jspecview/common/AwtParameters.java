@@ -23,7 +23,7 @@ public class AwtParameters extends Parameters {
   static final Object[] defaultColors = new Object[] { 
     Color.BLACK, Color.RED, Color.BLACK, Color.RED, 
     Color.LIGHT_GRAY, Color.BLUE, Color.WHITE, 
-    new Color(192, 192, 192), Color.RED };
+    new Color(192, 192, 192), Color.RED, Color.RED, Color.darkGray };
  
   public final static Color[] defaultPlotColors = { 
     Color.blue, 

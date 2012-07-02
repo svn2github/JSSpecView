@@ -57,6 +57,7 @@ public enum ScriptToken {
   GRIDCOLOR("C"), 
   GRIDON("T"), 
   HIDDEN("TF"), 
+  HIGHLIGHTCOLOR("C"),
   INTEGRATE("ON/OFF/TOGGLE/MARK ppm1-ppm2,ppm3-ppm4,..."), 
   INTEGRALPLOTCOLOR, 
   INTEGRATIONRATIOS, 
@@ -72,6 +73,7 @@ public enum ScriptToken {
   OVERLAYSTACKED("TF"),
   PEAK("<type(IR,CNMR,HNMR,MS, etc)> \"match\" [ALL]"), 
   PEAKCALLBACKFUNCTIONNAME, 
+  PEAKTABCOLOR("C"),
   PLOTAREACOLOR("C"), 
   PLOTCOLOR("C"), 
   PLOTCOLORS("color,color,color,..."), 
@@ -96,7 +98,6 @@ public enum ScriptToken {
   YSCALE("[ALL] lowValue highValue"), 
   YSCALEON("T"), YUNITSON("T"), 
   ZOOM("OUT or x1,x2 or x1,y1 x2,y2"),
-  HIGHLIGHTCOLOR("C"), // not implemented 
   ZOOMBOXCOLOR; // not implemented
 
   private String tip;

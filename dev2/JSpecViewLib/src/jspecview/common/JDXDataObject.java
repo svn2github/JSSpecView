@@ -609,19 +609,22 @@ public abstract class JDXDataObject extends JDXHeader {
   }
 
 	public String setMeasurementText(GraphSet gs, Measurement m) {
+		double dx = Math.abs(m.getPt2().getXVal() - m.getXVal());
+		String units = "";
 		if (isNMR()) {
 			if (numDim == 1) {
-        double dx = Math.abs(m.getPt2().getXVal() - m.getXVal());
 				if (isHNMR()) {
-          return gs.getFormattedNumber(dx * observedFreq, "#0.0");
+					dx *= observedFreq;
+					units = " Hz";
 				} else {
-          return gs.getFormattedNumber(dx, "#0.0");
+					units = " ppm";
 				}
 			} else {
+				return "";
 				// 2D?
 			}
 		}
-		return m.toString();
+		return (dx < 0.1 ? "" : gs.getFormattedNumber(dx, "#0.0" + units));
 	}
 
   public boolean isNMR() {
