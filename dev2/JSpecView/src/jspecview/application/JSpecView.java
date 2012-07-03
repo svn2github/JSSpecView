@@ -125,9 +125,8 @@ public class JSpecView implements JSVInterface {
     System.exit(0);
   }
 
-  public boolean syncToJmol(String peak) {
+  public void syncToJmol(String peak) {
     // ignore -- this is the stand-alone app
     // will use JmolSyncInterface.syncScript() instead
-    return false;
   }
 }

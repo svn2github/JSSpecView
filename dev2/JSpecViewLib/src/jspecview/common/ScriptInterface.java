@@ -30,9 +30,9 @@ public interface ScriptInterface {
   public List<JSVPanelNode> getPanelNodes();
   
   public void runScript(String script);
-  public void sendFrameChange(JSVPanel jsvp);
+  public void sendPanelChange(JSVPanel jsvp);
   public String setSolutionColor(boolean b);
-  public boolean syncToJmol(String value);
+  public void syncToJmol(String value);
   public JSVDialog getOverlayLegend(JSVPanel jsvp);
   public void setSelectedPanel(JSVPanel jsvp);
   public void syncLoad(String fileName);
@@ -72,4 +72,6 @@ public interface ScriptInterface {
 			List<JDXSpectrum> specs, String url, int firstSpec, int lastSpec);
 	public void checkOverlay();
 	public void validateAndRepaint();
+	public void setReturnFromJmolModel(String model);
+	public String getReturnFromJmolModel();
 } 

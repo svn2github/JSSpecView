@@ -104,10 +104,22 @@ public class PeakInfo {
   }
 
   public boolean checkFileIndex(String filePath, String sIndex) {
-  	System.out.println("PeakInfo " + filePath + "=?=" + file + "/n" + sIndex + "=?=" + index
-  			+ " " + (sIndex.equals(index) && filePath.equals(file)));
     return (sIndex.equals(index) && filePath.equals(file));
   }
+
+  /**
+   * type checks true for MS in GC/MS; reverse of checkType
+   * 
+   * @param filePath
+   * @param type
+   * @param model
+   * @return
+   */
+	public boolean checkFileTypeModel(String filePath, 
+			String type, String model) {
+		return filePath.equals(file) && checkModel(model)
+		  && this.type.endsWith(type);
+	}
 
   public boolean checkTypeModel(String type, String model) {
     return checkType(type) //   GC/MS matches MS

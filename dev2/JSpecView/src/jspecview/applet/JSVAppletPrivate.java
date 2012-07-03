@@ -68,6 +68,7 @@ import jspecview.common.JSVPanelNode;
 import jspecview.common.JSVSpectrumPanel;
 import jspecview.common.JSVTree;
 import jspecview.common.JSViewer;
+import jspecview.common.PeakInfo;
 import jspecview.common.SpectraDialog;
 import jspecview.common.OverlayLegendDialog;
 import jspecview.common.AwtParameters;
@@ -438,11 +439,11 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	private JSVPanel prevPanel;
-	public void sendFrameChange(JSVPanel jsvp) {
+	public void sendPanelChange(JSVPanel jsvp) {
 		if (jsvp == prevPanel)
 			return;
 		prevPanel = jsvp;
-		JSViewer.sendFrameChange(this, jsvp);
+		JSViewer.sendPanelChange(this, jsvp);
 	}
 
 	/**
@@ -960,14 +961,13 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	/**
 	 * @param msg
 	 */
-	public boolean syncToJmol(String msg) {
+	public synchronized void syncToJmol(String msg) {
 		if (syncCallbackFunctionName == null)
-			return false;
+			return;
 		Logger.info("JSV>Jmol " + msg);
 		callToJavaScript(syncCallbackFunctionName, new Object[] { fullName, msg });
-		return true;
 	}
-
+	
 	public void setVisible(boolean b) {
 		spectrumPanel.setVisible(b);
 	}
@@ -1010,7 +1010,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	public void setNode(JSVPanelNode panelNode, boolean fromTree) {
 		if (panelNode.jsvp != getSelectedPanel())
 			setSelectedPanel(panelNode.jsvp);
-		sendFrameChange(panelNode.jsvp);
+		sendPanelChange(panelNode.jsvp);
 		spectrumPanel.validate();
 		validateAndRepaint(); // app does not do repaint here
 	}
@@ -1089,6 +1089,16 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		spectraDialog = new SpectraDialog(this, spectrumPanel, false);
 	}
 
+	private String returnFromJmolModel;
+
+	public void setReturnFromJmolModel(String model) {
+    returnFromJmolModel = model;		
+	}
+
+	public String getReturnFromJmolModel() {
+    return returnFromJmolModel;		
+	}
+
 	// not applicable to applet:
 	
 	public void setLoaded(String fileName, String filePath) {} 
@@ -1101,7 +1111,4 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 
 	public void execTest(String value) {
 	}
-
-
-
 }

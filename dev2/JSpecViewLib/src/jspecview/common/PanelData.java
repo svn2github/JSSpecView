@@ -241,7 +241,7 @@ public class PanelData {
       System.out.println("setting currentSplitPoint to " + splitPoint);
   	if (!isNewSet) {
     	if (gs.nSplit == 1) {
-    		if (!gs.showAllStacked || !isClick || !gs.checkSpectrumClickEvent(xPixel, yPixel))
+    		if (!isClick || !gs.checkSpectrumClickEvent(xPixel, yPixel))
     			return;
     	} else if (!isNewSplitPoint) {
         return;
@@ -295,8 +295,8 @@ public class PanelData {
    * @param b 
    * @param g 
    */
-  public void addHighlight(double x1, double x2, JDXSpectrum spec, int r, int g, int b, int a) {
-    currentGraphSet.addHighlight(x1, x2, spec, owner.getColor(r, g, b, a));
+  public void addHighlight(GraphSet gs, double x1, double x2, JDXSpectrum spec, int r, int g, int b, int a) {
+    (gs == null ? currentGraphSet : gs).addHighlight(x1, x2, spec, owner.getColor(r, g, b, a));
   }
   
   /**
@@ -552,16 +552,23 @@ public class PanelData {
       graphSets.get(i).addPeakHighlight(peakInfo);
   }
 
-  public PeakInfo selectPeakByFileIndex(String fileName, String index) {
-    return GraphSet.selectPeakByFileIndex(currentGraphSet, graphSets, fileName, index);
-  }
+	public PeakInfo selectPeakByFileIndex(String filePath, String index) {
+		PeakInfo pi = (currentGraphSet == null ? null : 
+			currentGraphSet.selectPeakByFileIndex(filePath, index));
+		if (pi == null)
+			for (int i = graphSets.size(); --i >= 0;)
+				if (graphSets.get(i) != currentGraphSet 
+						&& (pi = graphSets.get(i).selectPeakByFileIndex(filePath, index)) != null)
+					break;
+		return pi;
+	}
 
-	public void selectSpectrum(String filePath, String type, String model) {
-		System.out.println("selectSpectrum: currentGraphSet=" + currentGraphSet);
-		if (currentGraphSet == null
-				|| !currentGraphSet.selectSpectrum(filePath, type, model))
+	public void selectSpectrum(String filePath, String type, String model, boolean andCurrent) {
+		if (andCurrent && currentGraphSet != null)
+				currentGraphSet.selectSpectrum(filePath, type, model);
 			for (int i = 0; i < graphSets.size(); i += 1)
-				graphSets.get(i).selectSpectrum(filePath, type, model);
+				if (graphSets.get(i) != currentGraphSet)
+  				graphSets.get(i).selectSpectrum(filePath, type, model);
 	}
 
   public boolean hasFileLoaded(String filePath) {
@@ -604,15 +611,38 @@ public class PanelData {
     notifyListeners(new ZoomEvent(x1, y1, x2, y2));
   }
 
-  /**
-   * Notifies CoordinatePickedListeners
-   * 
-   * @param coord
-   */
-  public void notifyPeakPickedListeners() {
-    notifyListeners(new PeakPickEvent(owner, coordClicked, getSpectrum()
-        .getAssociatedPeakInfo(coordClicked)));
-  }
+	/**
+	 * Notifies CoordinatePickedListeners
+	 * 
+	 * @param coord
+	 */
+	void notifyPeakPickedListeners(PeakPickEvent p) {
+		if (p == null) {
+			p = new PeakPickEvent(owner, coordClicked, getSpectrum()
+					.getAssociatedPeakInfo(coordClicked));
+		}
+		PeakInfo pi = p.getPeakInfo();
+//		if (pi.getAtoms() == null) {
+//			// find matching file/type/model in other panels
+//			String filePath = pi.getFilePath();
+//			String type = pi.getType();
+//			String model = pi.getModel();
+//			for (int i = 0; i < graphSets.size(); i++) {
+//				if (graphSets.get(i) == currentGraphSet)
+//					continue;
+//				// just first spectrum for now -- presumed to be GC/MS
+//				PeakInfo pi2 = graphSets.get(i).getSpectrumAt(0)
+//						.selectPeakByFilePathTypeModel(filePath, type, model);
+//				if (pi2 != null)
+//					graphSets.get(i).addPeakHighlight(pi2);
+//			}
+//		}
+    // problem is that you cannot have two highlights for the same model.
+    // only problem is gc/ms, where we want to select a GC peak based on 
+    // an MS peak.
+
+		notifyListeners(p);
+	}
 
   void notifyListeners(Object eventObj) {
     for (int i = 0; i < listeners.size(); i++)

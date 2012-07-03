@@ -249,7 +249,7 @@ public class JSViewer {
                                   int r, int g, int b, int a) {
     JSVPanel jsvp = si.getSelectedPanel();
     if (jsvp != null) {
-      jsvp.getPanelData().addHighlight(x1, x2, null, r, g, b, a);
+      jsvp.getPanelData().addHighlight(null, x1, x2, null, r, g, b, a);
       jsvp.repaint();
     }
   }
@@ -269,6 +269,13 @@ public class JSViewer {
     String index = Parser.getQuotedAttribute(peakScript, "index");
     if (file == null || index == null)
       return;
+    String model = Parser.getQuotedAttribute(peakScript, "model");
+    String modelSent = si.getReturnFromJmolModel();
+    if (model != null && modelSent != null && !model.equals(modelSent)) {
+    	Logger.info("JSV ignoring model " + model + "; should be " + modelSent);
+    	return;
+    }
+    si.setReturnFromJmolModel(null);
     if (si.getPanelNodes().size() == 0 || !checkFileAlreadyLoaded(si, file)) {
       Logger.info("file " + file + " not found -- JSViewer closing all and reopening");
       si.syncLoad(file);
@@ -279,11 +286,10 @@ public class JSViewer {
     JSVPanel jsvp = si.getSelectedPanel();
     System.out.println(Thread.currentThread() + "syncscript jsvp=" + jsvp);
     String type = Parser.getQuotedAttribute(peakScript, "type");
-    String model = Parser.getQuotedAttribute(peakScript, "model");
     System.out.println(Thread.currentThread() + "syncscript --selectSpectrum2 "  + pi + " " + type + " "  + model + " s=" + jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
-    jsvp.getPanelData().selectSpectrum(file, type, model);
+    jsvp.getPanelData().selectSpectrum(file, type, model, true);
     System.out.println(Thread.currentThread() + "syncscript --selectSpectrum3 "  + pi + " " + type + " "  + model + " s=" + jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
-    si.sendFrameChange(jsvp);
+    si.sendPanelChange(jsvp);
     System.out.println(Thread.currentThread() + "syncscript --selectSpectrum4 "  + pi + " " + type + " "  + model + " s=" + jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
     jsvp.getPanelData().addPeakHighlight(pi);
     System.out.println(Thread.currentThread() + "syncscript --selectSpectrum5 "  + pi + " " + type + " "  + model + " s=" + jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
@@ -352,6 +358,8 @@ public class JSViewer {
    */
   public static void processPeakPickEvent(ScriptInterface si, Object eventObj,
                                           boolean isApp) {
+  	// trouble here is with round trip when peaks are clicked in rapid succession.
+  	
     PeakInfo pi;
     if (eventObj instanceof PeakInfo) {
       // this is a call from the PEAK command, above.
@@ -380,18 +388,24 @@ public class JSViewer {
       pi = e.getPeakInfo();
     }
     si.getSelectedPanel().getPanelData().addPeakHighlight(pi);
-    si.syncToJmol(jmolSelect(pi));
-    System.out.println(Thread.currentThread() + "processPeakEvent --selectSpectrum "  + pi);
+    // the above line is what caused problems with GC/MS selection 
+    syncToJmol(si, pi);
+    //System.out.println(Thread.currentThread() + "processPeakEvent --selectSpectrum "  + pi);
     if (pi.isClearAll()) // was not in app version??
       si.getSelectedPanel().repaint();
     else
       si.getSelectedPanel().getPanelData().selectSpectrum(pi.getFilePath(),
-          pi.getType(), pi.getModel());
+          pi.getType(), pi.getModel(), true);
     si.checkCallbacks(pi.getTitle());
 
   }
 
-  public static void sendFrameChange(ScriptInterface si, JSVPanel jsvp) {
+	private static void syncToJmol(ScriptInterface si, PeakInfo pi) {
+  	si.setReturnFromJmolModel(pi.getModel());
+  	si.syncToJmol(JSViewer.jmolSelect(pi));
+	}
+
+	public static void sendPanelChange(ScriptInterface si, JSVPanel jsvp) {
     PeakInfo pi = jsvp.getSpectrum().getSelectedPeak();
     if (pi == null)
       pi = jsvp.getSpectrum().getModelPeakInfoForAutoSelectOnLoad();
@@ -399,7 +413,7 @@ public class JSViewer {
       pi = jsvp.getSpectrum().getBasePeakInfo();
     si.getSelectedPanel().getPanelData().addPeakHighlight(pi);
     System.out.println(Thread.currentThread() + "JSViewer sendFrameChange "  + jsvp);
-    si.syncToJmol(jmolSelect(pi));
+    syncToJmol(si, pi);
   }
 
   public static String jmolSelect(PeakInfo pi) {

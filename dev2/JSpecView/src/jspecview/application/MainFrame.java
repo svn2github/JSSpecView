@@ -93,6 +93,7 @@ import jspecview.common.JSVSpectrumPanel;
 import jspecview.common.JSVTree;
 import jspecview.common.JSVTreeNode;
 import jspecview.common.JSViewer;
+import jspecview.common.PeakInfo;
 import jspecview.common.SpectraDialog;
 import jspecview.common.PanelData;
 import jspecview.common.Parameters;
@@ -710,11 +711,11 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	private JSVPanel prevPanel;
 
-	public void sendFrameChange(JSVPanel jsvp) {
+	public void sendPanelChange(JSVPanel jsvp) {
 		if (jsvp == prevPanel)
 			return;
 		prevPanel = jsvp;
-		JSViewer.sendFrameChange(this, jsvp);
+		JSViewer.sendPanelChange(this, jsvp);
 	}
 
 	// //////// MENU ACTIONS ///////////
@@ -854,17 +855,16 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		isEmbedded = true;
 	}
 
-	public synchronized boolean syncToJmol(String msg) {
+	public synchronized void syncToJmol(String msg) {
 		Logger.info("JSV>Jmol " + msg);
 		System.out.println(Thread.currentThread() + "MainFrame sync JSV>Jmol 21" + Thread.currentThread());
 		if (jmol != null) { // MainFrame --> embedding application
 			jmol.syncScript(msg);
 			System.out.println(Thread.currentThread() + "MainFrame JSV>Jmol sync 22" + Thread.currentThread());
-			return true;
+			return;
 		}
 		if (jmolOrAdvancedApplet != null) // MainFrame --> embedding applet
-			return jmolOrAdvancedApplet.syncToJmol(msg);
-		return false;
+			jmolOrAdvancedApplet.syncToJmol(msg);
 	}
 
 	public synchronized void syncScript(String peakScript) {
@@ -1181,7 +1181,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	public void setNode(JSVPanelNode panelNode, boolean fromTree) {
 		if (panelNode.jsvp != getSelectedPanel())
 			setSelectedPanel(panelNode.jsvp);
-		sendFrameChange(panelNode.jsvp);
+		sendPanelChange(panelNode.jsvp);
 		setMenuEnables(panelNode, false);
 		if (getSelectedPanel().getSpectrum().hasIntegral())
 			writeStatus("Use CTRL-LEFT-DRAG to measure an integration value.");
@@ -1296,16 +1296,26 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		return new JSVPanelNode(id, fileName, source, jsvp);
 	}
 
-	// debugging
-
-	public void execTest(String value) {
-		syncScript("<PeakData file=\"c:/temp/crspectra.jdx\" index=\"23\" type=\"UV-VIS\" id=\"1\" title=\"Spin Forbidden Band ~694nm\" peakShape=\"singlet\" model=\"urea\" xMax=\"710\" xMin=\"670\"    />");
-	}
-
 	public void checkOverlay() {
 		if (spectrumPanel != null)
 			spectrumPanel.markSelectedPanels(panelNodes);
 		new SpectraDialog(this, spectraTreeScrollPane, false);
+	}
+
+	private String returnFromJmolModel;
+
+	public void setReturnFromJmolModel(String model) {
+    returnFromJmolModel = model;		
+	}
+
+	public String getReturnFromJmolModel() {
+    return returnFromJmolModel;		
+	}
+
+	// debugging
+
+	public void execTest(String value) {
+		syncScript("<PeakData file=\"c:/temp/crspectra.jdx\" index=\"23\" type=\"UV-VIS\" id=\"1\" title=\"Spin Forbidden Band ~694nm\" peakShape=\"singlet\" model=\"urea\" xMax=\"710\" xMin=\"670\"    />");
 	}
 
 }
