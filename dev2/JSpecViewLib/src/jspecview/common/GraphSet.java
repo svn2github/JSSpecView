@@ -1804,6 +1804,7 @@ abstract class GraphSet {
 			// the graphs
 			int offset = 0;
 			int yOffsetPixels = (int) (yPixels * (pd.yStackOffsetPercent / 100f));
+			boolean haveDrawnScale = false;
 			for (int i = 0; i < nSpectra; i++)
 				if (doPlot(i, iSplit)) {
 					boolean isBold = (iSpectrumBold == i);
@@ -1816,11 +1817,12 @@ abstract class GraphSet {
 							pd.titleDrawn = true;
 						}
 					}
-					if (haveSingleYScale && i == iSpectrumForScale) {
+					if (haveSingleYScale && (iSpectrumForScale == -1 || i == iSpectrumForScale)) {
 						if (pd.getBoolean(ScriptToken.YSCALEON))
 							drawYScale(g);
 						if (pd.getBoolean(ScriptToken.YUNITSON))
 							drawYUnits(g);
+						iSpectrumForScale = -2;
 					}
 					drawSpectrum(g, i, view.spectrumOffsets == null ? offset
 							: view.spectrumOffsets[i], isBold);
