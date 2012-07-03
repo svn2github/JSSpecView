@@ -80,7 +80,7 @@ abstract class GraphSet {
 	 *      or to -1     if showAllStacked
 	 *      or to getSplitPoint(yPixel)
    * 
-	 * -- used in doZoom to set spectrum number for the new MultiScaleData object
+	 * -- used in doZoom to set spectrum number for the new View object
 	 *     int iSpec = (iSpecBold >= 0 ? iSpecBold 
 	 *     							: iSpectrumMovedTo);
 	 * 
@@ -100,6 +100,7 @@ abstract class GraphSet {
 	 * iSpectrumClicked
 	 * 
 	 * -- indicates spectrum clicked on by user
+	 * -- when set T/F, also sets iSpectrumSelected T/F
 	 *    
 	 * -- initially 0
 	 * 
@@ -107,9 +108,7 @@ abstract class GraphSet {
 	 *      from PanelData.setCurrentGraphSet
 	 *      when nSplit == 1 && showAllStacked && isClick
 	 *    to spectrum number if on spectrum 
-	 *      (also sets iSpectrumSelected in that case)
 	 *    to -1 if click is not on a spectrum 
-	 *      (also sets iSpectrumSelected in that case)
 	 *  
 	 * -- set in MouseClickEvent
 	 *    to previous spectrum clicked if it is a double click 
@@ -130,8 +129,8 @@ abstract class GraphSet {
 	 * 
 	 */
 	/*very*/private int iSpectrumClicked;
-	private int setSpectrumClicked(int i) {
-		return iSpectrumClicked = i;
+	private void setSpectrumClicked(int i) {
+		iSpectrumClicked = setSpectrumSelected(i);
 	}
   
   /**
@@ -179,7 +178,6 @@ abstract class GraphSet {
    *       when no spectrum is selected, or
    *       when this is the spectrum selected
    *       
-
    */
   
 	/*very*/private int iSpectrumSelected = -1;
@@ -189,13 +187,39 @@ abstract class GraphSet {
 
 	/** iSpectrumBold
 	 * 
-	 * -- sets the selected spectrum to be bold when showAllStacked
+	 * -- indicates the selected spectrum that is bold when showAllStacked
 	 * 
 	 * -- initially -1
+	 * 
+	 * -- set in drawAll
+   *		int iSelected = (stackSelected || !showAllStacked ? iSpectrumSelected : -1);
+	 *    boolean doYScale = (!showAllStacked || nSpectra == 1 || iSelected >= 0);
+	 *    setSpectrumBold(stackSelected && iSpectrumSelected >= 0 ? iSpectrumSelected : -1);
+	 * 
+	 * -- used in doZoom
+	 *     int iSpec = (iSpectrumBold >= 0 ? iSpectrumBold : iSpectrumMovedTo);
+    getView(initX, finalX, initY, finalY, startIndices, endIndices, view, iSpec);
+
+	 * 
+	 * -- used in drawAll to set the frame with the purple boundary
+	 * 		int iSpec = (nSpectra == 1 ? 0 
+	 * 									: !showAllStacked ? iSpectrumMovedTo 
+	 * 									: iSpecBold >= 0 ? iSpecBold 
+	 * 									: iSpectrumSelected);
+
+	  if (
+	  		this == pd.currentGraphSet  // is current set
+	  		&& iSplit == pd.currentSplitPoint
+	  		&& (
+	  		  n < 2                    // just one spectrum to show
+	  		  || iSpectrumBold >= 0         // stacked and selected
+	  		))
+	  	haveSelectedSpectrum = true; 
+
 	 */
 	/*very*/private int iSpectrumBold = -1;
-	private int setSpectrumBold(int i) {
-		return iSpectrumBold = i;
+	private void setSpectrumBold(int i) {
+		iSpectrumBold = i;
 	}
 
 	private boolean stackSelected = true;
@@ -215,7 +239,7 @@ abstract class GraphSet {
 
   // needed by AwtGraphSet
   
-  protected List<View> zoomInfoList;
+  protected List<View> viewList;
   protected ImageView imageView;
   protected PanelData pd;
   protected boolean sticky2Dcursor;
@@ -227,7 +251,7 @@ abstract class GraphSet {
       spectra.get(i).dispose();
     spectra = null;
     view = null;
-    zoomInfoList = null;
+    viewList = null;
     annotations = null;
     lastAnnotation = null;
     pendingMeasurement = null;
@@ -491,9 +515,9 @@ abstract class GraphSet {
           spectra.get(0).getYUnits()) && spectra.get(i).getUserYFactor() == spectra
           .get(0).getUserYFactor());
     }
-    getMultiScaleData(0, 0, 0, 0, startIndices, endIndices, null, -1);
-    zoomInfoList = new ArrayList<View>();
-    zoomInfoList.add(view);
+    getView(0, 0, 0, 0, startIndices, endIndices, null, -1);
+    viewList = new ArrayList<View>();
+    viewList.add(view);
   }
 
 	/**
@@ -527,7 +551,7 @@ abstract class GraphSet {
 		return haveFound;
 	}
 
-	private void getMultiScaleData(double x1, double x2, double y1, double y2,
+	private void getView(double x1, double x2, double y1, double y2,
 			int[] startIndices, int[] endIndices, View msd, int iSpec) {
 		List<JDXSpectrum> graphs = (graphsTemp.size() == 0 ? spectra : graphsTemp);
 		List<JDXSpectrum> subspecs = getSpectrumAt(0).getSubSpectra();
@@ -630,21 +654,21 @@ abstract class GraphSet {
 
   private double toX0(int xPixel) {
     xPixel = fixX(xPixel);
-    View multiScaleData = zoomInfoList.get(0);
-    double factor = (multiScaleData.maxXOnScale - multiScaleData.minXOnScale)
+    View view = viewList.get(0);
+    double factor = (view.maxXOnScale - view.minXOnScale)
         / xPixels;
-    return (drawXAxisLeftToRight ? multiScaleData.maxXOnScale
-        - (xPixel1 - xPixel) * factor : multiScaleData.minXOnScale
+    return (drawXAxisLeftToRight ? view.maxXOnScale
+        - (xPixel1 - xPixel) * factor : view.minXOnScale
         + (xPixel1 - xPixel) * factor);
   }
 
   private int toPixelX0(double x) {
-    View multiScaleData = zoomInfoList.get(0);
-    double factor = (multiScaleData.maxXOnScale - multiScaleData.minXOnScale)
+    View view = viewList.get(0);
+    double factor = (view.maxXOnScale - view.minXOnScale)
         / xPixels;
     return (int) (drawXAxisLeftToRight ? xPixel1
-        - (multiScaleData.maxXOnScale - x) / factor : xPixel1
-        - (x - multiScaleData.minXOnScale) / factor);
+        - (view.maxXOnScale - x) / factor : xPixel1
+        - (x - view.minXOnScale) / factor);
   }
 
   private int fixY(int yPixel) {
@@ -662,10 +686,10 @@ abstract class GraphSet {
   }
 
   private int toPixelY0(double y) {
-    View multiScaleData = zoomInfoList.get(0);
-    double factor = (multiScaleData.maxYOnScale - multiScaleData.minYOnScale)
+    View view = viewList.get(0);
+    double factor = (view.maxYOnScale - view.minYOnScale)
         / yPixels;
-    return fixY((int) (yPixel0 + (multiScaleData.maxYOnScale - y) / factor));
+    return fixY((int) (yPixel0 + (view.maxYOnScale - y) / factor));
   }
 
   private double toY(int yPixel) {
@@ -674,11 +698,11 @@ abstract class GraphSet {
 
   private double toY0(int yPixel) {
     yPixel = fixY(yPixel);
-    View multiScaleData = zoomInfoList.get(0);
-    double factor = (multiScaleData.maxYOnScale - multiScaleData.minYOnScale)
+    View view = viewList.get(0);
+    double factor = (view.maxYOnScale - view.minYOnScale)
         / yPixels;
-    double y = multiScaleData.maxYOnScale + (yPixel0 - yPixel) * factor;
-    return Math.max(multiScaleData.minY, Math.min(y, multiScaleData.maxY));
+    double y = view.maxYOnScale + (yPixel0 - yPixel) * factor;
+    return Math.max(view.minY, Math.min(y, view.maxY));
   }
 
   Map<String, Object> getInfo(String key, boolean isSelected) {
@@ -796,7 +820,7 @@ abstract class GraphSet {
                        boolean isControlDown) {
   	iSelectedMeasurement = -1;
   	if (clickCount == 2 && iSpectrumClicked == -1 && iPreviousSpectrumClicked >= 0) {
-  		setSpectrumSelected(setSpectrumClicked(iPreviousSpectrumClicked));
+  		setSpectrumClicked(iPreviousSpectrumClicked);
   		stackSelected = showAllStacked;
   	}
   	if (isSplitWidget(xPixel, yPixel)) {
@@ -835,8 +859,8 @@ abstract class GraphSet {
         doZoom(toX0(xPixel0), view.minY, toX0(xPixel1),
             view.maxY, true, true, false);
       } else if (isInRightBar(xPixel, yPixel)) {
-        doZoom(view.minXOnScale, zoomInfoList.get(0).minY,
-            view.maxXOnScale, zoomInfoList.get(0).maxY, true, true,
+        doZoom(view.minXOnScale, viewList.get(0).minY,
+            view.maxXOnScale, viewList.get(0).maxY, true, true,
             false);
       } else if (isInTopBar2D(xPixel, yPixel)) {
         reset2D(true);
@@ -977,7 +1001,7 @@ abstract class GraphSet {
 		} else if (isArrowClick(xPixel, yPixel, ArrowType.RESET)) {
 			clearViews();
 			view.setScaleFactor(-1, 1);
-			// did not work: multiScaleData.setScaleFactor(iSpectrumSelected, 1);
+			// did not work: view.setScaleFactor(iSpectrumSelected, 1);
 			ok = true;
 		}
 
@@ -1398,7 +1422,7 @@ abstract class GraphSet {
 
   /**
    * Create new pins and set their default values. Note that we are making a
-   * distinction between multiScaleData.minY and multiScaleData.minYOnScale. For
+   * distinction between view.minY and view.minYOnScale. For
    * X these are now the same, but for Y they are not. This produces a nicer
    * grid, but also an odd jumpiness in the Y slider that is not totally
    * predictable.
@@ -1440,7 +1464,7 @@ abstract class GraphSet {
         pin2Dy0, pin2Dy01, pin2Dy1, cur2Dx0, cur2Dx1, cur2Dy };
   }
 
-  private void resetPinsFromMultiScaleData() {
+  private void resetPinsFromView() {
     if (pin1Dx0 == null)
       return;
     pin1Dx0.setX(view.minXOnScale,
@@ -1607,7 +1631,7 @@ abstract class GraphSet {
         finalX = view.maxX;
       }
     } else {
-      view = zoomInfoList.get(0);
+      view = viewList.get(0);
     }
     int[] startIndices = new int[nSpectra];
     int[] endIndices = new int[nSpectra];
@@ -1628,7 +1652,7 @@ abstract class GraphSet {
     }
 
     int iSpec = (iSpectrumBold >= 0 ? iSpectrumBold : iSpectrumMovedTo);
-    getMultiScaleData(initX, finalX, initY, finalY, startIndices, endIndices, view, iSpec);
+    getView(initX, finalX, initY, finalY, startIndices, endIndices, view, iSpec);
     xPixelMovedTo = -1;
     pin1Dx0.setX(initX, toPixelX0(initX));
     pin1Dx1.setX(finalX, toPixelX0(finalX));
@@ -1659,16 +1683,16 @@ abstract class GraphSet {
 
   void scaleYBy(double factor) {
   	view.scaleSpectrum(-1, factor);
-   // doZoom(multiScaleData.minX, multiScaleData.minY / factor1,
-     //   multiScaleData.maxX, multiScaleData.maxY / factor2, true, true, false);
+   // doZoom(view.minX, view.minY / factor1,
+     //   view.maxX, view.maxY / factor2, true, true, false);
   }
 
   private void addCurrentZoom() {
     // add to and clean the zoom list
-    if (zoomInfoList.size() > currentZoomIndex + 1)
-      for (int i = zoomInfoList.size() - 1; i > currentZoomIndex; i--)
-        zoomInfoList.remove(i);
-    zoomInfoList.add(view);
+    if (viewList.size() > currentZoomIndex + 1)
+      for (int i = viewList.size() - 1; i > currentZoomIndex; i--)
+        viewList.remove(i);
+    viewList.add(view);
     currentZoomIndex++;
   }
 
@@ -1682,8 +1706,8 @@ abstract class GraphSet {
   void setZoomTo(int i) {
     imageView = null;
     currentZoomIndex = i;
-    view = zoomInfoList.get(i);
-    resetPinsFromMultiScaleData();
+    view = viewList.get(i);
+    resetPinsFromView();
     pd.refresh();
   }
 
@@ -1693,8 +1717,8 @@ abstract class GraphSet {
   void clearViews() {
     reset();
     // leave first zoom
-    for (int i = zoomInfoList.size(); --i >= 1;)
-      zoomInfoList.remove(i);
+    for (int i = viewList.size(); --i >= 1;)
+      viewList.remove(i);
   }
 
 	private void clearMeasurements() {
@@ -1713,7 +1737,7 @@ abstract class GraphSet {
    * Displays the next view zoomed
    */
   void nextView() {
-    if (currentZoomIndex + 1 < zoomInfoList.size())
+    if (currentZoomIndex + 1 < viewList.size())
       setZoomTo(currentZoomIndex + 1);
   }
 
@@ -2754,14 +2778,12 @@ abstract class GraphSet {
 			if (!isOnSpectrum(xPixel, yPixel, i, 2))
 				continue;
 			stackSelected = true;
+			boolean isNew = (i != iSpectrumSelected);
 			setSpectrumClicked(iPreviousSpectrumClicked = i);
-			if (iSpectrumClicked == iSpectrumSelected)
-				return false;
-			setSpectrumSelected(iSpectrumClicked);
-			return true;
+			return isNew;
 		}
 		// but not on a spectrum
-		setSpectrumSelected(setSpectrumClicked(-1));
+		setSpectrumClicked(-1);
 		return stackSelected = false;
 	}
 	
