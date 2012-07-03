@@ -52,12 +52,10 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   private ArrayList<PeakInfo> peakList = new ArrayList<PeakInfo>();
   private String piUnitsX, piUnitsY;
   private JDXSpectrum parent;
-  private int[] buf2d;
   private IntegralGraph integration;
   private PeakInfo selectedPeak;
 
   public void dispose() {
-    buf2d = null;
     if (integration != null)
       integration.dispose();
     integration = null;
@@ -72,9 +70,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     selectedPeak = null;
   }
 
-  private int thisWidth,thisHeight;
   private int currentSubSpectrumIndex;
-  private double grayFactorLast;
   private boolean isForcedSubset;
   
   public boolean isForcedSubset() {
@@ -534,44 +530,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   }
   public boolean isExportXAxisLeftToRight() {
     return exportXAxisLeftToRight;
-  }
-
-  /**
-   * 
-   * @param width
-   * @param height
-   * @param isd
-   * @return
-   */
-  public int[] get2dBuffer(int width, int height, ImageScaleData isd, boolean forceNew) {
-    if (subSpectra == null || !subSpectra.get(0).isContinuous())
-      return null;
-    if (!forceNew && thisWidth == width && thisHeight == height)
-      return buf2d;
-    int nSpec = subSpectra.size();
-    thisWidth = width = xyCoords.length;
-    thisHeight = height = nSpec;
-    double grayFactor = 255 / (isd.maxZ - isd.minZ);
-    if (!forceNew && buf2d != null && grayFactor == grayFactorLast)
-      return buf2d;
-    grayFactorLast = grayFactor;
-    int pt = width * height;
-    int[] buf = new int[pt];
-    double totalGray = 0;
-    for (int i = 0; i < nSpec; i++) {
-      Coordinate[] points = subSpectra.get(i).xyCoords;
-      if (points.length != xyCoords.length)
-        return null;
-      double f = subSpectra.get(i).getUserYFactor();
-      for (int j = 0; j < xyCoords.length; j++) {
-        double y = points[j].getYVal();
-        int gray = 255 - Coordinate.intoRange((int) ((y* f - isd.minZ) * grayFactor), 0, 255); 
-        buf[--pt] = gray;
-        totalGray += gray;
-      }
-    }
-    System.out.println ("Average gray = " + (totalGray / (width * height) / 255));
-    return (buf2d = buf);
   }
 
   public Map<String, Object> getInfo(String key) {

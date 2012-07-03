@@ -1,6 +1,8 @@
 package jspecview.common;
 
-public class ImageScaleData {
+import java.util.List;
+
+public class ImageView {
   
   /*
    * The viewPort is related to two coordinate systems, image and screen.
@@ -44,13 +46,13 @@ public class ImageScaleData {
   public int xView1, yView1, xView2, yView2;
   public double minX = Double.NaN, maxX, minZ, maxZ;
   
-  public void setScale(ScaleData scaleData) {
+  public void set(View view) {
     if (Double.isNaN(minX)) {
-      minX = scaleData.minX;
-      maxX = scaleData.maxX;
+      minX = view.minX;
+      maxX = view.maxX;
     }
-    minZ = scaleData.minY;
-    maxZ = scaleData.maxY;
+    minZ = view.minY;
+    maxZ = view.maxY;
   }
 
   public void setZoom(int xPixel1, int yPixel1, int xPixel2, int yPixel2) {
@@ -187,4 +189,48 @@ public class ImageScaleData {
     yView2 = Math.max(y1, y2);
     resetZoom();
   }
+  
+  private int[] buf2d;
+  private int thisWidth,thisHeight;
+  private double grayFactorLast;
+  /**
+   * 
+   * @param width
+   * @param height
+   * @param imageView
+   * @return
+   */
+  public int[] get2dBuffer(int width, int height, JDXSpectrum spec, boolean forceNew) {
+    List<JDXSpectrum> subSpectra = spec.getSubSpectra();
+    if (subSpectra == null || !subSpectra.get(0).isContinuous())
+      return null;
+    if (!forceNew && thisWidth == width && thisHeight == height)
+      return buf2d;
+    Coordinate[] xyCoords = spec.getXYCoords();
+    int nSpec = subSpectra.size();
+    thisWidth = width = xyCoords.length;
+    thisHeight = height = nSpec;
+    double grayFactor = 255 / (maxZ - minZ);
+    if (!forceNew && buf2d != null && grayFactor == grayFactorLast)
+      return buf2d;
+    grayFactorLast = grayFactor;
+    int pt = width * height;
+    int[] buf = new int[pt];
+    double totalGray = 0;
+    for (int i = 0; i < nSpec; i++) {
+      Coordinate[] points = subSpectra.get(i).xyCoords;
+      if (points.length != xyCoords.length)
+        return null;
+      double f = subSpectra.get(i).getUserYFactor();
+      for (int j = 0; j < xyCoords.length; j++) {
+        double y = points[j].getYVal();
+        int gray = 255 - Coordinate.intoRange((int) ((y* f - minZ) * grayFactor), 0, 255); 
+        buf[--pt] = gray;
+        totalGray += gray;
+      }
+    }
+    System.out.println ("Average gray = " + (totalGray / (width * height) / 255));
+    return (buf2d = buf);
+  }
+
 }

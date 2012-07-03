@@ -231,19 +231,28 @@ public class PanelData {
 
   protected void setCurrentGraphSet(GraphSet gs, int xPixel, int yPixel, boolean isClick) {
   	int splitPoint = gs.getSplitPoint(yPixel);
-    if (currentGraphSet == gs) { 
+  	boolean isNewSet = (currentGraphSet != gs);
+  	boolean isNewSplitPoint = (isNewSet || currentSplitPoint != splitPoint);
+    currentGraphSet = gs;
+    currentSplitPoint = splitPoint;
+  	if (isNewSet)
+      System.out.println("setting currentGraphSet to " + gs);
+  	if (isNewSplitPoint)
+      System.out.println("setting currentSplitPoint to " + splitPoint);
+  	if (!isNewSet) {
     	if (gs.nSplit == 1) {
-    		if (!gs.showAllStacked || isClick && !gs.checkSpectrumClickEvent(xPixel, yPixel))
+    		if (!gs.showAllStacked || !isClick || !gs.checkSpectrumClickEvent(xPixel, yPixel))
     			return;
-    	} else if (currentSplitPoint == splitPoint) {
+    	} else if (!isNewSplitPoint) {
         return;
     	}
     }
-    currentGraphSet = gs;
-    System.out.println("setting currentGraphSet to " + gs);
-    currentSplitPoint = splitPoint;
+  	// new set (so also new split point)
+  	// or nSplit > 1 and new split point
+  	// or nSplit == 1 and showAllStacked and isClick and is a spectrum click)
+  	
     if (gs.nSplit > 1 && !gs.showAllStacked)
-    	gs.setSelectedIndex(splitPoint);
+    	gs.setSpectrumSelected(currentSplitPoint);
     JDXSpectrum spec = gs.getSpectrum();
     notifySubSpectrumChange(spec.getSubIndex(), spec);
     refresh();
@@ -339,7 +348,7 @@ public class PanelData {
   }
 
   public int getNumberOfSpectraInCurrentSet() {
-    return currentGraphSet.getNSpectra();
+    return currentGraphSet.nSpectra;
   }
 
   /**
@@ -357,7 +366,7 @@ public class PanelData {
    * @return the start indices of the Scaledata
    */
   public int[] getStartDataPointIndices() {
-    return currentGraphSet.multiScaleData.startDataPointIndices;
+    return currentGraphSet.view.startDataPointIndices;
   }
 
   /**
@@ -366,7 +375,7 @@ public class PanelData {
    * @return the end indices of the Scaledata
    */
   public int[] getEndDataPointIndices() {
-    return currentGraphSet.multiScaleData.endDataPointIndices;
+    return currentGraphSet.view.endDataPointIndices;
   }
 
   /**

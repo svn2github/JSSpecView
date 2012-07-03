@@ -5,8 +5,6 @@ package jspecview.common;
  * which can be locked upon mousePressed events
  * and released upon mouseReleased events
  * We need actual x and y as well as pixel positions here
- * 
- * {@link jspecview.common.ScaleData#generateScaleData(jspecview.common.Coordinate[], int, int, int, int)}
  * .
  */
 class PlotWidget extends Coordinate {

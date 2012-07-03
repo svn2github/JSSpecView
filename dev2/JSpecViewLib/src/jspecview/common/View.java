@@ -4,52 +4,24 @@ import java.util.List;
 
 
 /**
- * Stores information
- * about scale and range that <code>JSVPanel</code> needs to to display a
- * graph with a mutliple plots. You do not need to create an instance of this
- * class manually. Instead call the
- * {@link jspecview.common.MultiScaleData#generateScaleData(jspecview.common.Coordinate[][], int[], int[], int, int)}
- * .
+ * Stores information that <code>GraphSet</code> needs 
+ * to display a view with one or more spectra. 
+ * 
+ * Was "MultiScaleData"
  */
-public class MultiScaleData extends ScaleData {
+class View extends ScaleData {
 
-  public int[] startDataPointIndices;
-  public int[] endDataPointIndices;
-  public int[] numOfPointsList;
-  public double minY2D, maxY2D;
+  int[] startDataPointIndices;
+  int[] endDataPointIndices;
+  int[] numOfPointsList;
+  double minY2D, maxY2D;
 	private double[] spectrumScaleFactors;
-	public double[] userYFactors;
+	double[] userYFactors;
 	double[] spectrumYRefs; // 0 or 100
   int[] spectrumOffsets; // not yet implemented
 	private int nSpec;
  
-  
-//  /**
-//   * Never used or tested
-//   *  
-//   * Initialises a <code>MultiScaleData</code> from another one
-//   * 
-//   * @param data
-//   *        the <code>MultiScaleData</code> to copy
-//   */
-//  public MultiScaleData(MultiScaleData data) {
-//    super(data);
-//    nSpec = data.nSpec;
-//    startDataPointIndices = data.startDataPointIndices;
-//    endDataPointIndices = data.endDataPointIndices;
-//    spectrumScaleFactors = new double[nSpec];
-//    System.arraycopy(data.spectrumScaleFactors, 0, spectrumScaleFactors, 0, nSpec);
-//    currentScaleFactors = new double[nSpec];
-//    System.arraycopy(data.currentScaleFactors, 0, currentScaleFactors, 0, nSpec);
-//    numOfPointsList = data.numOfPointsList;
-//    minY2D = data.minY2D;
-//    maxY2D = data.maxY2D;
-//  }
-
 	/**
-	 * Calculates values that <code>JSVPanel</code> needs in order to render a
-	 * graph, (eg. scale, min and max values) and stores the values in the class
-	 * <code>ScaleData</code>.
 	 * 
 	 * @param spectra
 	 *          an array of spectra
@@ -65,7 +37,7 @@ public class MultiScaleData extends ScaleData {
 	 *          the initial number of Y divisions for scale
 	 * @return returns an instance of <code>MultiScaleData</code>
 	 */
-	public MultiScaleData(List<JDXSpectrum> spectra, double yPt1, double yPt2,
+	View(List<JDXSpectrum> spectra, double yPt1, double yPt2,
 			int[] startList, int[] endList, int initNumXDivisions,
 			int initNumYDivisions, boolean isContinuous, int iSpec) {
 		super();
@@ -78,7 +50,7 @@ public class MultiScaleData extends ScaleData {
 		init(spectra, startList, endList, yPt1, yPt2, initNumXDivisions, initNumYDivisions, isContinuous);
 	}
   
-	public MultiScaleData(List<JDXSpectrum> spectra, double yPt1, double yPt2,
+	View(List<JDXSpectrum> spectra, double yPt1, double yPt2,
 			int initNumXDivisions, int initNumYDivisions, boolean isContinuous) {
 		// forced subsets
 		super();
@@ -141,7 +113,7 @@ public class MultiScaleData extends ScaleData {
    * @param scaleData
    * @return
    */
-  public boolean setDataPointIndices(List<JDXSpectrum> graphsTemp,
+  boolean setDataPointIndices(List<JDXSpectrum> graphsTemp,
                                             double initX,
                                             double finalX, int minPoints,
                                             int[] startIndices,
@@ -182,24 +154,24 @@ public class MultiScaleData extends ScaleData {
     return ptCount;
   }
 
-  public void setXRange(Graph graph) {
+  void setXRange(Graph graph) {
     int n = graph.getXYCoords().length - 1;
     startDataPointIndices[0] = 0;
     endDataPointIndices[0] = n;
     setXRange(0, graph.getXYCoords(), minX, maxX, 0, n, startDataPointIndices, endDataPointIndices);
   }
 
-  public void setXRange(double x1, double x2, int initNumXDivisions) {
+  void setXRange(double x1, double x2, int initNumXDivisions) {
     minX = x1;
     maxX = x2;
     setXScale();
   }
 
-  public boolean isYZeroOnScale() {
+  boolean isYZeroOnScale() {
     return (minYOnScale < 0 && maxYOnScale > 0);
   }
 
-  public void setMinMaxY2D(List<JDXSpectrum> subspectra) {
+  void setMinMaxY2D(List<JDXSpectrum> subspectra) {
     minY2D = Double.MAX_VALUE;
     maxY2D = -Double.MAX_VALUE;
     for (int i = subspectra.size(); --i >= 0; ) {
@@ -211,12 +183,12 @@ public class MultiScaleData extends ScaleData {
     }
   }
 
-	public void resetScaleFactors() {
+	void resetScaleFactors() {
 		for (int i = 0; i < nSpec; i++)
   	  spectrumScaleFactors[i] = 1;
 	}
 	
- public void setScaleFactor(int i, double f) {
+ void setScaleFactor(int i, double f) {
 		if (f == 0 || i >= nSpec)
 			return;
 		if (i < 0) {
@@ -227,7 +199,7 @@ public class MultiScaleData extends ScaleData {
 		}
   }
   
-	public void scaleSpectrum(int i, double f) {
+	void scaleSpectrum(int i, double f) {
 		if (f == 0 || i >= nSpec)
 			return;
 		if (i < 0)
@@ -237,11 +209,11 @@ public class MultiScaleData extends ScaleData {
 			spectrumScaleFactors[i] *= f;
   }
 
-	public double getSpectrumScaleFactor(int i) {
+	double getSpectrumScaleFactor(int i) {
 		return (i >= 0 && i < nSpec ? spectrumScaleFactors[i] : 1);
 	}
 
-	public void copyScaleFactors(MultiScaleData msd) {
+	void copyScaleFactors(View msd) {
 		System.arraycopy(msd.spectrumScaleFactors, 0, spectrumScaleFactors, 0, nSpec);
 		System.arraycopy(msd.userYFactors, 0, userYFactors, 0, nSpec);
 		System.arraycopy(msd.spectrumYRefs, 0, spectrumYRefs, 0, nSpec);
@@ -250,7 +222,7 @@ public class MultiScaleData extends ScaleData {
 		
 	}
 
-	public void setAxisScaling(int i, int xPixels, int yPixels) {
+	void setAxisScaling(int i, int xPixels, int yPixels) {
     double f = spectrumScaleFactors[i];
     double yRef = spectrumYRefs[i];
     double minY = (f == 1 ? this.minY : initMinYOnScale);
@@ -259,7 +231,7 @@ public class MultiScaleData extends ScaleData {
 		setScaleFactors(xPixels, yPixels);		
 	}
 
-	public boolean areYScalesSame(int i, int j) {
+	boolean areYScalesSame(int i, int j) {
 		return spectrumScaleFactors[i] == spectrumScaleFactors[j]
 		  && spectrumYRefs[i] == spectrumYRefs[j] 
 		  && userYFactors[i] == userYFactors[j];

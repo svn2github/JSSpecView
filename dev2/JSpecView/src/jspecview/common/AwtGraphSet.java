@@ -119,45 +119,46 @@ class AwtGraphSet extends GraphSet {
   /////////////// 2D image /////////////////
 
   protected void draw2DImage(Object g) {
-    if (isd != null) {
-      ((Graphics) g).drawImage(image2D, isd.xPixel0, isd.yPixel0, // destination 
-          isd.xPixel0 + isd.xPixels - 1, // destination 
-          isd.yPixel0 + isd.yPixels - 1, // destination 
-          isd.xView1, isd.yView1, isd.xView2, isd.yView2, null); // source
+    if (imageView != null) {
+      ((Graphics) g).drawImage(image2D, imageView.xPixel0, imageView.yPixel0, // destination 
+          imageView.xPixel0 + imageView.xPixels - 1, // destination 
+          imageView.yPixel0 + imageView.yPixels - 1, // destination 
+          imageView.xView1, imageView.yView1, imageView.xView2, imageView.yView2, null); // source
     }
   }
 
   @Override
   protected boolean get2DImage() {
-    isd = new ImageScaleData();
-    isd.setScale(zoomInfoList.get(0));
+    imageView = new ImageView();
+    imageView.set(zoomInfoList.get(0));
     if (!update2dImage(false))
       return false;
-    isd.resetZoom();
+    imageView.resetZoom();
     sticky2Dcursor = true;
     return true;
   }
 
-  @Override
-  protected boolean update2dImage(boolean forceNew) {
-    isd.setScale(multiScaleData);
-    JDXSpectrum spec0 = getSpectrumAt(0);
-    int[] buffer = spec0.get2dBuffer(jsvp.pd.thisWidth, jsvp.pd.thisPlotHeight, isd,
-        forceNew);
-    if (buffer == null) {
-      image2D = null;
-      isd = null;
-      return false;
-    }
-    isd.setImageSize(spec0.getXYCoords().length, spec0.getSubSpectra().size(),
-        !forceNew);
-    image2D = new BufferedImage(isd.imageWidth, isd.imageHeight,
-        BufferedImage.TYPE_BYTE_GRAY);
-    WritableRaster raster = image2D.getRaster();
-    raster.setSamples(0, 0, isd.imageWidth, isd.imageHeight, 0, buffer);
-    setImageWindow();
-    return true;
-  }
+	@Override
+	protected boolean update2dImage(boolean forceNew) {
+		imageView.set(view);
+		JDXSpectrum spec0 = getSpectrumAt(0);
+		int[] buffer = imageView.get2dBuffer(jsvp.pd.thisWidth,
+				jsvp.pd.thisPlotHeight, spec0, forceNew);
+		if (buffer == null) {
+			image2D = null;
+			imageView = null;
+			return false;
+		}
+		imageView.setImageSize(spec0.getXYCoords().length, spec0.getSubSpectra()
+				.size(), !forceNew);
+		image2D = new BufferedImage(imageView.imageWidth, imageView.imageHeight,
+				BufferedImage.TYPE_BYTE_GRAY);
+		WritableRaster raster = image2D.getRaster();
+		raster.setSamples(0, 0, imageView.imageWidth, imageView.imageHeight, 0,
+				buffer);
+		setImageWindow();
+		return true;
+	}
 
 
 	@Override

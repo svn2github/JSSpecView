@@ -129,7 +129,10 @@ public class IntegralGraph implements Graph {
     Coordinate[] xyCoords = spectrum.getXYCoords();
     Coordinate[] integralCoords = new Coordinate[xyCoords.length];
 
-    double maxY = Coordinate.getMaxY(xyCoords, 0, xyCoords.length);
+    //double maxY = Coordinate.getMaxY(xyCoords, 0, xyCoords.length);
+    
+    // this was setting a minimum point, not allowing the integral to 
+    // register negative values
     double minYForIntegral = -Double.MAX_VALUE;//percentMinY / 100 * maxY; // 0.1%
     double integral = 0;
     for (int i = 0; i < xyCoords.length; i++) {
