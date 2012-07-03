@@ -130,7 +130,7 @@ class AwtGraphSet extends GraphSet {
   @Override
   protected boolean get2DImage() {
     imageView = new ImageView();
-    imageView.set(zoomInfoList.get(0));
+    imageView.set(viewList.get(0));
     if (!update2dImage(false))
       return false;
     imageView.resetZoom();
