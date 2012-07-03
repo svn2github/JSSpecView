@@ -163,14 +163,14 @@ class AwtGraphSet extends GraphSet {
 	@Override
   Annotation getAnnotation(double x, double y, String text, boolean isPixels,
                            boolean is2d, int offsetX, int offsetY) {
-    return new ColoredAnnotation(x, y, text, Color.BLACK, isPixels, is2d,
+    return new AwtColoredAnnotation(x, y, text, Color.BLACK, isPixels, is2d,
         offsetX, offsetY);
   }
 
   @Override
   Annotation getAnnotation(List<String> args, Annotation lastAnnotation) {
-    return ColoredAnnotation.getAnnotation(args,
-        (ColoredAnnotation) lastAnnotation);
+    return AwtColoredAnnotation.getAnnotation(args,
+        (AwtColoredAnnotation) lastAnnotation);
   }
 
   @Override
@@ -244,8 +244,8 @@ class AwtGraphSet extends GraphSet {
       return;
     }
     Color color = null;
-    if (note instanceof ColoredAnnotation)
-      color = ((ColoredAnnotation) note).getColor();
+    if (note instanceof AwtColoredAnnotation)
+      color = ((AwtColoredAnnotation) note).getColor();
     if (color == null)
       color = Color.BLACK;
     ((Graphics) g).setColor(color);

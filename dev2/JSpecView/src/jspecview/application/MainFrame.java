@@ -96,7 +96,7 @@ import jspecview.common.JSViewer;
 import jspecview.common.SpectraDialog;
 import jspecview.common.PanelData;
 import jspecview.common.Parameters;
-import jspecview.common.JSVPanelPopupMenu;
+import jspecview.common.JSVPopupMenu;
 import jspecview.common.JSVFileFilter;
 import jspecview.common.OverlayLegendDialog;
 import jspecview.common.AwtParameters;
@@ -172,7 +172,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	private JSVPanel selectedPanel;
 
-	private JSVPanelPopupMenu jsvpPopupMenu = new JSVPanelPopupMenu(this);
+	private JSVPopupMenu jsvpPopupMenu = new JSVPopupMenu(this);
 
 	public Object getPopupMenu() {
 		return jsvpPopupMenu;

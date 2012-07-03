@@ -95,9 +95,9 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     return pd;
   }
 
-  JSVPanelPopupMenu popup;
+  JSVPopupMenu popup;
   
-  public JSVPanelPopupMenu getPopup() {
+  public JSVPopupMenu getPopup() {
     return popup;
   }
 
@@ -235,7 +235,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
    *        the spectrum
    * @throws ScalesIncompatibleException
    */
-  public AwtPanel(JDXSpectrum spectrum, JSVPanelPopupMenu popup) {
+  public AwtPanel(JDXSpectrum spectrum, JSVPopupMenu popup) {
     // standard applet not overlaid and not showing range
     // standard application split spectra
     // removal of integration, taConvert
@@ -250,7 +250,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     return new AwtPanel(spectrum, popup);
   }
 
-  public static AwtPanel getJSVPanel(List<JDXSpectrum> specs, int startIndex, int endIndex, JSVPanelPopupMenu popup) {
+  public static AwtPanel getJSVPanel(List<JDXSpectrum> specs, int startIndex, int endIndex, JSVPopupMenu popup) {
     AwtPanel jsvp = new AwtPanel(specs, startIndex, endIndex, popup);
     jsvp.pd.isOverlaid = (specs.size() > 1);
     return jsvp;
@@ -270,7 +270,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
    * @throws ScalesIncompatibleException
    */
   private AwtPanel(List<JDXSpectrum> spectra, int startIndex,
-      int endIndex, JSVPanelPopupMenu popup) {
+      int endIndex, JSVPopupMenu popup) {
     pd = new PanelData(this);
     this.popup = popup;
     pd.initJSVPanel(spectra, startIndex, endIndex);
@@ -284,7 +284,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
    * @return
    */
   public static AwtPanel getNewPanel(JDXSpectrum spec,
-                                     JSVPanelPopupMenu jsvpPopupMenu) {
+                                     JSVPopupMenu jsvpPopupMenu) {
     return new AwtPanel(spec, jsvpPopupMenu);
   }
 
@@ -534,7 +534,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   public void mousePressed(MouseEvent e) {
     if (e.getButton() != MouseEvent.BUTTON1)
       return;
-    pd.doMousePressed(e.getX(), e.getY(), e.isControlDown());
+    pd.doMousePressed(e.getX(), e.getY(), e.isControlDown(), e.isShiftDown());
   }
 
   public void mouseMoved(MouseEvent e) {

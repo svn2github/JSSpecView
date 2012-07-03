@@ -329,7 +329,7 @@ abstract class GraphSet {
   }
 
 	int getSplitPoint(int yPixel) {
-		return Math.min((int)((yPixel - yPixel000) / (yPixel11 - yPixel00)), nSplit);
+		return Math.min((int)((yPixel - yPixel000) / (yPixel11 - yPixel00)), nSplit - 1);
 	}
 
 	boolean isSplitWidget(int xPixel, int yPixel) {
@@ -656,6 +656,7 @@ abstract class GraphSet {
 		setFormatters();
     is1D2DSplit = (!spec0.is1D() && pd.getBoolean(ScriptToken.DISPLAY2D)
 		&& (isd != null || get2DImage()));
+    haveSelectedSpectrum = false;
 		for (int iSplit = 0; iSplit < nSplit; iSplit++) {
 			// for now, at least, we only allow one 2D image
 			setPositionForFrame(iSplit);
@@ -1626,7 +1627,14 @@ abstract class GraphSet {
 			drawFrame(g, iSplit, iSpec);
 		}
 
-	  haveSelectedSpectrum = (nSpectra == 1 || iSpecBold >= 0); 
+	  if (
+	  		this == pd.currentGraphSet  // is current set
+	  		&& iSplit == pd.currentSplitPoint
+	  		&& (
+	  		  n < 2                    // just one spectrum to show
+	  		  || iSpecBold >= 0         // stacked and selected
+	  		))
+	  	haveSelectedSpectrum = true; 
 	  haveSingleYScale = (showAllStacked && nSpectra > 1 ? allowStackedYScale && doYScale : true);
 		if (haveSingleYScale) {
 			setUserYFactor(iSelected >= 0 ? iSelected : nSplit > 1 ? iSplit : getFixedSelectedSpectrumIndex());
@@ -1664,18 +1672,18 @@ abstract class GraphSet {
 					}
 					drawSpectrum(g, i, multiScaleData.spectrumOffsets == null ? offset
 							: multiScaleData.spectrumOffsets[i], isBold);
+					if (iSelected == i && !pd.isPrinting && this == pd.currentGraphSet) {
+						setUserYFactor(iSelected);
+						setCurrentBoxColor(g);
+						if (iSelected > 0)
+							fillArrow(g, ArrowType.LEFT, yPixel11 - 10, xPixel00 + 23, true);
+						fillCircle(g, xPixel00 + 32, yPixel11 - 10);
+						if (iSelected < nSpectra - 1)
+							fillArrow(g, ArrowType.RIGHT, yPixel11 - 10, xPixel00 + 41, true);
+
+					}
 					offset -= yOffsetPixels;
 				}
-			if (iSelected >= 0 && !pd.isPrinting) {
-				setUserYFactor(iSelected);
-				setCurrentBoxColor(g);
-				if (iSelected > 0)
-					fillArrow(g, ArrowType.LEFT, yPixel11 - 10, xPixel00 + 23, true);
-				fillCircle(g, xPixel00 + 32, yPixel11 - 10);
-				if (iSelected < nSpectra - 1)
-					fillArrow(g, ArrowType.RIGHT, yPixel11 - 10, xPixel00 + 41, true);
-
-			}
 
 			if (haveSingleYScale) {
 				if (pd.getBoolean(ScriptToken.YSCALEON))
@@ -1864,7 +1872,7 @@ abstract class GraphSet {
     JDXSpectrum spec = spectra.get(index);    
     drawPlot(g, index, spec, true, 
     		spec.isContinuous(), yOffset, isBold);
-    if (showIntegration) {
+    if (showIntegration && (!showAllStacked || iSpectrumSelected == index)) {
     	if (spec.hasIntegral())
         drawPlot(g, index, spec.getIntegrationGraph(), false, true, yOffset, false);
       if (spec.getIntegralRegions() != null)
@@ -2642,8 +2650,12 @@ abstract class GraphSet {
 		return haveSelectedSpectrum;
 	}
 
-	public void setShowIntegration(Boolean tfToggle) {
+	void setShowIntegration(Boolean tfToggle) {
 		showIntegration = (tfToggle == null ? !showIntegration : tfToggle.booleanValue());
+	}
+
+	boolean getShowIntegration() {
+		return showIntegration;
 	}
 
 }

@@ -28,18 +28,18 @@ import java.util.List;
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-public class ColoredAnnotation extends Annotation {
+public class AwtColoredAnnotation extends Annotation {
 
   private Color color;
 
-  public ColoredAnnotation(double x, double y, String text, Color color,
+  public AwtColoredAnnotation(double x, double y, String text, Color color,
       boolean isPixels, boolean is2D, int offsetX, int offsetY) {
     super(x, y, text, isPixels, is2D, offsetX, offsetY);
     this.color = color;
   }
 
-  public static ColoredAnnotation getAnnotation(List<String> args,
-                                                ColoredAnnotation lastAnnotation) {
+  public static AwtColoredAnnotation getAnnotation(List<String> args,
+                                                AwtColoredAnnotation lastAnnotation) {
     String arg;
     int xPt = 0;
     int yPt = 1;
@@ -107,7 +107,7 @@ public class ColoredAnnotation extends Annotation {
         if (text.charAt(0) == '\"')
           text = text.substring(1, text.length() - 1);
       }
-      return new ColoredAnnotation(x, y, text, color, false, false, 0, 0);
+      return new AwtColoredAnnotation(x, y, text, color, false, false, 0, 0);
     } catch (Exception e) {
       return null;
     }

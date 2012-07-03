@@ -43,7 +43,7 @@ import jspecview.util.Parser;
  * @author Prof Robert J. Lancashire
  * @see jspecview.common.JSVPanel
  */
-public class JSVPanelPopupMenu extends JPopupMenu {
+public class JSVPopupMenu extends JPopupMenu {
 
   protected boolean isApplet;
 
@@ -108,7 +108,7 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   protected JMenuItem spectraMenuItem = new JMenuItem();
   public JMenuItem overlayKeyMenuItem = new JMenuItem();
   
-  public JSVPanelPopupMenu(ScriptInterface scripter) {
+  public JSVPopupMenu(ScriptInterface scripter) {
     super();
     this.scripter = scripter;
     jbInit();
@@ -357,7 +357,9 @@ public class JSVPanelPopupMenu extends JPopupMenu {
     boolean isOverlaid = pd.isOverlaid();
     boolean isSingle = pd.haveSelectedSpectrum();
     integrateMenuItem.setEnabled(isSingle && spec0.canIntegrate() || spec0.hasIntegral());
+    integrateMenuItem.setSelected(pd.getSpectrum().hasIntegral());
     integrateShowMenuItem.setEnabled(integrateMenuItem.isEnabled() && integrateMenuItem.isSelected());
+    integrateShowMenuItem.setSelected(pd.getShowIntegration());
     solColMenuItem.setEnabled(isSingle && spec0.canShowSolutionColor());
     transAbsMenuItem.setEnabled(isSingle && spec0.canConvertTransAbs());
     overlayKeyMenuItem.setEnabled(isOverlaid && pd.getNumberOfGraphSets() == 1);
@@ -391,22 +393,22 @@ public class JSVPanelPopupMenu extends JPopupMenu {
   public static void setMenus(JMenu saveAsMenu, JMenu saveAsJDXMenu,
                               JMenu exportAsMenu, ActionListener actionListener) {
     saveAsMenu.setText("Save As");
-    JSVPanelPopupMenu.addMenuItem(saveAsMenu, Exporter.sourceLabel, actionListener);
+    JSVPopupMenu.addMenuItem(saveAsMenu, Exporter.sourceLabel, actionListener);
     saveAsJDXMenu.setText("JDX");
-    JSVPanelPopupMenu.addMenuItem(saveAsJDXMenu, "XY", actionListener);
-    JSVPanelPopupMenu.addMenuItem(saveAsJDXMenu, "DIF", actionListener);
-    JSVPanelPopupMenu.addMenuItem(saveAsJDXMenu, "DIFDUP", actionListener);
-    JSVPanelPopupMenu.addMenuItem(saveAsJDXMenu, "FIX", actionListener);
-    JSVPanelPopupMenu.addMenuItem(saveAsJDXMenu, "PAC", actionListener);
-    JSVPanelPopupMenu.addMenuItem(saveAsJDXMenu, "SQZ", actionListener);
+    JSVPopupMenu.addMenuItem(saveAsJDXMenu, "XY", actionListener);
+    JSVPopupMenu.addMenuItem(saveAsJDXMenu, "DIF", actionListener);
+    JSVPopupMenu.addMenuItem(saveAsJDXMenu, "DIFDUP", actionListener);
+    JSVPopupMenu.addMenuItem(saveAsJDXMenu, "FIX", actionListener);
+    JSVPopupMenu.addMenuItem(saveAsJDXMenu, "PAC", actionListener);
+    JSVPopupMenu.addMenuItem(saveAsJDXMenu, "SQZ", actionListener);
     saveAsMenu.add(saveAsJDXMenu);
-    JSVPanelPopupMenu.addMenuItem(saveAsMenu, "CML", actionListener);
-    JSVPanelPopupMenu.addMenuItem(saveAsMenu, "XML (AnIML)", actionListener);
+    JSVPopupMenu.addMenuItem(saveAsMenu, "CML", actionListener);
+    JSVPopupMenu.addMenuItem(saveAsMenu, "XML (AnIML)", actionListener);
     if (exportAsMenu != null) {
       exportAsMenu.setText("Export As");
-      JSVPanelPopupMenu.addMenuItem(exportAsMenu, "JPG", actionListener);
-      JSVPanelPopupMenu.addMenuItem(exportAsMenu, "PNG", actionListener);
-      JSVPanelPopupMenu.addMenuItem(exportAsMenu, "SVG", actionListener);
+      JSVPopupMenu.addMenuItem(exportAsMenu, "JPG", actionListener);
+      JSVPopupMenu.addMenuItem(exportAsMenu, "PNG", actionListener);
+      JSVPopupMenu.addMenuItem(exportAsMenu, "SVG", actionListener);
     }
   }
 

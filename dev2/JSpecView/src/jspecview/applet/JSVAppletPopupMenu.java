@@ -11,10 +11,10 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
 import jspecview.common.JSVPanel;
-import jspecview.common.JSVPanelPopupMenu;
+import jspecview.common.JSVPopupMenu;
 import jspecview.common.JSVPanelNode;
 
-class JSVAppletPopupMenu extends JSVPanelPopupMenu {
+class JSVAppletPopupMenu extends JSVPopupMenu {
 
   private JSVAppletPrivate applet;
 
@@ -75,7 +75,7 @@ class JSVAppletPopupMenu extends JSVPanelPopupMenu {
       fileMenu.add(appletExportAsMenu);
     }
     appletSaveAsJDXMenu = new JMenu();
-    JSVPanelPopupMenu.setMenus(saveAsMenu, appletSaveAsJDXMenu, appletExportAsMenu, exportActionListener);
+    JSVPopupMenu.setMenus(saveAsMenu, appletSaveAsJDXMenu, appletExportAsMenu, exportActionListener);
 
     viewMenu.setText("View");
     zoomMenu.setText("Zoom");

@@ -633,7 +633,7 @@ public class PanelData {
     gs.mouseMovedEvent(xPixel, yPixel);
   }
 
-  protected void doMousePressed(int xPixel, int yPixel, boolean isControlDown) {
+  protected void doMousePressed(int xPixel, int yPixel, boolean isControlDown, boolean isShiftDown) {
     mouseState = Mouse.DOWN;
     GraphSet gs = GraphSet.findGraphSet(graphSets, xPixel, yPixel);
     if (gs == null)
@@ -710,6 +710,12 @@ public class PanelData {
   	if (currentGraphSet == null)
   		return false;
   	return currentGraphSet.haveSelectedSpectrum();
+	}
+
+	public boolean getShowIntegration() {
+  	if (currentGraphSet == null)
+  		return false;
+  	return currentGraphSet.getShowIntegration();
 	}
 
 	public void setShowIntegration(Boolean tfToggle) {

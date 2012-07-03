@@ -58,10 +58,10 @@ import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelNode;
 import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
-import jspecview.common.JSVPanelPopupMenu;
+import jspecview.common.JSVPopupMenu;
 import jspecview.common.ScriptToken;
 import jspecview.common.JDXSpectrum;
-import jspecview.common.JSVPanelPopupMenu.EnumOverlay;
+import jspecview.common.JSVPopupMenu.EnumOverlay;
 import jspecview.source.JDXSource;
 import jspecview.util.FileManager;
 
@@ -76,9 +76,9 @@ public class AppMenu extends JMenuBar {
 
   private static final long serialVersionUID = 1L;
   private MainFrame mainFrame;
-  private JSVPanelPopupMenu jsvpPopupMenu;
+  private JSVPopupMenu jsvpPopupMenu;
 
-  public AppMenu(MainFrame si, JSVPanelPopupMenu popupMenu) throws Exception {
+  public AppMenu(MainFrame si, JSVPopupMenu popupMenu) throws Exception {
     this.mainFrame = si;
     jsvpPopupMenu = popupMenu;
     jbInit();
@@ -135,37 +135,37 @@ public class AppMenu extends JMenuBar {
     fileMenu.setMnemonic('F');
     fileMenu.setText("File");
 
-    JSVPanelPopupMenu.setMenuItem(openMenuItem, 'O', "Open...", 79,
+    JSVPopupMenu.setMenuItem(openMenuItem, 'O', "Open...", 79,
         InputEvent.CTRL_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             mainFrame.showFileOpenDialog();
           }
         });
-    JSVPanelPopupMenu.setMenuItem(openURLMenuItem, 'U', "Open URL...", 85,
+    JSVPopupMenu.setMenuItem(openURLMenuItem, 'U', "Open URL...", 85,
         InputEvent.CTRL_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             mainFrame.openURL();
           }
         });
-    JSVPanelPopupMenu.setMenuItem(printMenuItem, 'P', "Print...", 80,
+    JSVPopupMenu.setMenuItem(printMenuItem, 'P', "Print...", 80,
         InputEvent.CTRL_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             mainFrame.print();
           }
         });
-    JSVPanelPopupMenu.setMenuItem(closeMenuItem, 'C', "Close", 115,
+    JSVPopupMenu.setMenuItem(closeMenuItem, 'C', "Close", 115,
         InputEvent.CTRL_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             mainFrame.runScript("CLOSE");
           }
         });
-    JSVPanelPopupMenu.setMenuItem(closeAllMenuItem, 'L', "Close All", 0,
+    JSVPopupMenu.setMenuItem(closeAllMenuItem, 'L', "Close All", 0,
         InputEvent.CTRL_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             mainFrame.runScript("CLOSE ALL");
           }
         });
-    JSVPanelPopupMenu.setMenuItem(exitMenuItem, 'X', "Exit", 115,
+    JSVPopupMenu.setMenuItem(exitMenuItem, 'X', "Exit", 115,
         InputEvent.ALT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             mainFrame.exitJSpecView(false);
@@ -200,85 +200,85 @@ public class AppMenu extends JMenuBar {
     zoomMenu.setMnemonic('Z');
     zoomMenu.setText("Zoom");
 
-    JSVPanelPopupMenu.setMenuItem(gridCheckBoxMenuItem, 'G', "Grid", 71,
+    JSVPopupMenu.setMenuItem(gridCheckBoxMenuItem, 'G', "Grid", 71,
         InputEvent.CTRL_MASK, new ItemListener() {
           public void itemStateChanged(ItemEvent e) {
             setBoolean(ScriptToken.GRIDON, e);
           }
         });
-    JSVPanelPopupMenu.setMenuItem(coordsCheckBoxMenuItem, 'C', "Coordinates",
+    JSVPopupMenu.setMenuItem(coordsCheckBoxMenuItem, 'C', "Coordinates",
         67, InputEvent.CTRL_MASK, new ItemListener() {
           public void itemStateChanged(ItemEvent e) {
             setBoolean(ScriptToken.COORDINATESON, e);
           }
         });
-    JSVPanelPopupMenu.setMenuItem(revPlotCheckBoxMenuItem, 'R', "Reverse Plot",
+    JSVPopupMenu.setMenuItem(revPlotCheckBoxMenuItem, 'R', "Reverse Plot",
         82, InputEvent.CTRL_MASK, new ItemListener() {
           public void itemStateChanged(ItemEvent e) {
             setBoolean(ScriptToken.REVERSEPLOT, e);
           }
         });
-    JSVPanelPopupMenu.setMenuItem(scaleXCheckBoxMenuItem, 'X', "X Scale", 88,
+    JSVPopupMenu.setMenuItem(scaleXCheckBoxMenuItem, 'X', "X Scale", 88,
         InputEvent.CTRL_MASK, new ItemListener() {
           public void itemStateChanged(ItemEvent e) {
             setBoolean(ScriptToken.XSCALEON, e);
           }
         });
-    JSVPanelPopupMenu.setMenuItem(scaleYCheckBoxMenuItem, 'Y', "Y Scale", 89,
+    JSVPopupMenu.setMenuItem(scaleYCheckBoxMenuItem, 'Y', "Y Scale", 89,
         InputEvent.CTRL_MASK, new ItemListener() {
           public void itemStateChanged(ItemEvent e) {
             setBoolean(ScriptToken.YSCALEON, e);
           };
         });
-    JSVPanelPopupMenu.setMenuItem(nextZoomMenuItem, 'N', "Next View", 78,
+    JSVPopupMenu.setMenuItem(nextZoomMenuItem, 'N', "Next View", 78,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             JSViewer.zoomTo(mainFrame,1);
           }
         });
-    JSVPanelPopupMenu.setMenuItem(prevZoomMenuItem, 'P', "Previous View", 80,
+    JSVPopupMenu.setMenuItem(prevZoomMenuItem, 'P', "Previous View", 80,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             JSViewer.zoomTo(mainFrame,-1);
           }
         });
-    JSVPanelPopupMenu.setMenuItem(fullZoomMenuItem, 'F', "Full View", 70,
+    JSVPopupMenu.setMenuItem(fullZoomMenuItem, 'F', "Full View", 70,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             JSViewer.zoomTo(mainFrame,Integer.MAX_VALUE);
           }
         });
-    JSVPanelPopupMenu.setMenuItem(clearZoomMenuItem, 'C', "Clear Views", 67,
+    JSVPopupMenu.setMenuItem(clearZoomMenuItem, 'C', "Clear Views", 67,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             JSViewer.zoomTo(mainFrame,0);
           }
         });
-    JSVPanelPopupMenu.setMenuItem(userZoomMenuItem, 'Z', "Set Zoom...", 90,
+    JSVPopupMenu.setMenuItem(userZoomMenuItem, 'Z', "Set Zoom...", 90,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             jsvpPopupMenu.userZoom();
           }
         });
-    JSVPanelPopupMenu.setMenuItem(scriptMenuItem, 'T', "Script...", 83,
+    JSVPopupMenu.setMenuItem(scriptMenuItem, 'T', "Script...", 83,
         InputEvent.ALT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             jsvpPopupMenu.script();
           }
         });
-    JSVPanelPopupMenu.setMenuItem(preferencesMenuItem, 'P', "Preferences...",
+    JSVPopupMenu.setMenuItem(preferencesMenuItem, 'P', "Preferences...",
         0, 0, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             showPreferencesDialog();
           }
         });
-    JSVPanelPopupMenu.setMenuItem(contentsMenuItem, 'C', "Contents...", 112, 0,
+    JSVPopupMenu.setMenuItem(contentsMenuItem, 'C', "Contents...", 112, 0,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             mainFrame.showNotImplementedOptionPane();
           }
         });
-    JSVPanelPopupMenu.setMenuItem(aboutMenuItem, 'A', "About", 0, 0,
+    JSVPopupMenu.setMenuItem(aboutMenuItem, 'A', "About", 0, 0,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             new AboutDialog(mainFrame);
@@ -292,7 +292,7 @@ public class AppMenu extends JMenuBar {
     saveAsJDXMenu.setMnemonic('J');
     exportAsMenu.setMnemonic('E');
 
-    JSVPanelPopupMenu.setMenuItem(toolbarCheckBoxMenuItem, 'T', "Toolbar", 84,
+    JSVPopupMenu.setMenuItem(toolbarCheckBoxMenuItem, 'T', "Toolbar", 84,
         InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, new ItemListener() {
           public void itemStateChanged(ItemEvent e) {
             mainFrame.enableToolbar(e.getStateChange() == ItemEvent.SELECTED);
@@ -300,7 +300,7 @@ public class AppMenu extends JMenuBar {
         });
     toolbarCheckBoxMenuItem.setSelected(true);
 
-    JSVPanelPopupMenu.setMenuItem(sidePanelCheckBoxMenuItem, 'S', "Side Panel",
+    JSVPopupMenu.setMenuItem(sidePanelCheckBoxMenuItem, 'S', "Side Panel",
         83, InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, new ItemListener() {
           public void itemStateChanged(ItemEvent e) {
             mainFrame.setSplitPane(e.getStateChange() == ItemEvent.SELECTED);
@@ -308,7 +308,7 @@ public class AppMenu extends JMenuBar {
         });
     sidePanelCheckBoxMenuItem.setSelected(true);
 
-    JSVPanelPopupMenu.setMenuItem(statusCheckBoxMenuItem, 'B', "Status Bar",
+    JSVPopupMenu.setMenuItem(statusCheckBoxMenuItem, 'B', "Status Bar",
         66, InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, new ItemListener() {
           public void itemStateChanged(ItemEvent e) {
             mainFrame.enableStatus(e.getStateChange() == ItemEvent.SELECTED);
@@ -316,39 +316,39 @@ public class AppMenu extends JMenuBar {
         });
     statusCheckBoxMenuItem.setSelected(true);
     
-    JSVPanelPopupMenu.setMenuItem(spectraMenuItem, 'S', "Spectra...", 83,
+    JSVPopupMenu.setMenuItem(spectraMenuItem, 'S', "Spectra...", 83,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            jsvpPopupMenu.overlay(JSVPanelPopupMenu.EnumOverlay.DIALOG);
+            jsvpPopupMenu.overlay(JSVPopupMenu.EnumOverlay.DIALOG);
           }
         });
-    JSVPanelPopupMenu.setMenuItem(overlayStackOffsetYMenuItem, 'y', "Overlay Offset...", 0,
+    JSVPopupMenu.setMenuItem(overlayStackOffsetYMenuItem, 'y', "Overlay Offset...", 0,
         0, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             jsvpPopupMenu.overlay(EnumOverlay.OFFSETY);
           }
         });
-    JSVPanelPopupMenu.setMenuItem(sourceMenuItem, 'S', "Source ...", 83,
+    JSVPopupMenu.setMenuItem(sourceMenuItem, 'S', "Source ...", 83,
         InputEvent.CTRL_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             TextDialog.showSource(mainFrame);
           }
         });
-    JSVPanelPopupMenu.setMenuItem(propertiesMenuItem, 'P', "Properties", 72,
+    JSVPopupMenu.setMenuItem(propertiesMenuItem, 'P', "Properties", 72,
         InputEvent.CTRL_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             mainFrame.showProperties();
           }
         });
     overlayKeyMenuItem = jsvpPopupMenu.overlayKeyMenuItem;
-    JSVPanelPopupMenu.setMenuItem(overlayKeyMenuItem, '\0', "Overlay Key", 0,
+    JSVPopupMenu.setMenuItem(overlayKeyMenuItem, '\0', "Overlay Key", 0,
         0, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             mainFrame.toggleOverlayKey();
           }
         });
 
-    JSVPanelPopupMenu.setMenuItem(errorLogMenuItem, '\0', "Error Log ...", 0,
+    JSVPopupMenu.setMenuItem(errorLogMenuItem, '\0', "Error Log ...", 0,
         0, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             TextDialog.showError(mainFrame);
@@ -417,7 +417,7 @@ public class AppMenu extends JMenuBar {
     optionsMenu.add(sidePanelCheckBoxMenuItem);
     optionsMenu.add(statusCheckBoxMenuItem);
     helpMenu.add(aboutMenuItem);
-    JSVPanelPopupMenu.setMenus(saveAsMenu, saveAsJDXMenu, exportAsMenu,
+    JSVPopupMenu.setMenus(saveAsMenu, saveAsJDXMenu, exportAsMenu,
         (new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             mainFrame.exportSpectrumViaMenu(e.getActionCommand());
