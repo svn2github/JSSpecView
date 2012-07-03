@@ -222,7 +222,7 @@ abstract class GraphSet {
 		iSpectrumBold = i;
 	}
 
-	private boolean stackSelected = true;
+	private boolean stackSelected = false;
 	
 	
 	//needed by PanelData
@@ -1771,6 +1771,7 @@ abstract class GraphSet {
 			int iSpec = (nSpectra == 1 ? 0 : !showAllStacked ? iSpectrumMovedTo : iSpectrumBold >= 0 ? iSpectrumBold : iSpectrumSelected);
 			drawFrame(g, iSplit, iSpec);
 		}
+		int iSpectrumForScale = (n == 1 ? iSplit : iSpectrumSelected);
 
 	  if (
 	  		this == pd.currentGraphSet  // is current set
@@ -1815,27 +1816,26 @@ abstract class GraphSet {
 							pd.titleDrawn = true;
 						}
 					}
+					if (haveSingleYScale && i == iSpectrumForScale) {
+						if (pd.getBoolean(ScriptToken.YSCALEON))
+							drawYScale(g);
+						if (pd.getBoolean(ScriptToken.YUNITSON))
+							drawYUnits(g);
+					}
 					drawSpectrum(g, i, view.spectrumOffsets == null ? offset
 							: view.spectrumOffsets[i], isBold);
-					if (iSelected == i && !pd.isPrinting && this == pd.currentGraphSet) {
+					if (nSpectra > 1 && iSelected == i && !pd.isPrinting && this == pd.currentGraphSet) {
 						setUserYFactor(iSelected);
 						setCurrentBoxColor(g);
 						if (iSelected > 0)
 							fillArrow(g, ArrowType.LEFT, yPixel11 - 10, xPixel00 + 23, true);
-						fillCircle(g, xPixel00 + 32, yPixel11 - 10);
+  					fillCircle(g, xPixel00 + 32, yPixel11 - 10);
 						if (iSelected < nSpectra - 1)
 							fillArrow(g, ArrowType.RIGHT, yPixel11 - 10, xPixel00 + 41, true);
-
 					}
 					offset -= yOffsetPixels;
 				}
 
-			if (haveSingleYScale) {
-				if (pd.getBoolean(ScriptToken.YSCALEON))
-					drawYScale(g);
-				if (pd.getBoolean(ScriptToken.YUNITSON))
-					drawYUnits(g);
-			}
 		} else {
 			drawWidgets(g, subIndex);
 		}
@@ -2481,16 +2481,20 @@ abstract class GraphSet {
     int y1 = toPixelY(m.getYVal());
     int x2 = toPixelX(m.getPt2().getXVal());
     boolean drawString = (Math.abs((m.getXVal() - m.getPt2().getXVal()) / view.xFactorForScale) >= 2);
+    boolean drawBaseLine = view.isYZeroOnScale() && m.spec.isHNMR();
     int x = (x1 + x2)/2;
     setStrokeBold(g, true);
     if (drawString)
       drawLine(g, x1, y1, x2, y1);
-    drawLine(g, x1 + 1, yPixel1 - 1, x2, yPixel1 - 1);
+    if (drawBaseLine)
+      drawLine(g, x1 + 1, yPixel1 - 1, x2, yPixel1 - 1);
     setStrokeBold(g, false);
     if (drawString)
       drawString(g, m.getText(), x + m.offsetX, y1 - m.offsetY);
-    drawLine(g, x1, yPixel1, x1, yPixel1 - 6);
-    drawLine(g, x2, yPixel1, x2, yPixel1 - 6);
+    if (drawBaseLine) {
+      drawLine(g, x1, yPixel1, x1, yPixel1 - 6);
+      drawLine(g, x2, yPixel1, x2, yPixel1 - 6);
+    }
 	}
 
 
