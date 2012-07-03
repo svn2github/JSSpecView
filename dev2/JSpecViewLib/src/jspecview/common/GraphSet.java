@@ -91,7 +91,7 @@ abstract class GraphSet {
 	 * 									: iSpectrumSelected);
 	 * 
 	 */
-	private int iSpectrumMovedTo;
+	/*very*/private int iSpectrumMovedTo;
 	private int setSpectrumMovedTo(int i) {
 		return iSpectrumMovedTo = i;
 	}
@@ -129,7 +129,7 @@ abstract class GraphSet {
 	 *    
 	 * 
 	 */
-	private int iSpectrumClicked;
+	/*very*/private int iSpectrumClicked;
 	private int setSpectrumClicked(int i) {
 		return iSpectrumClicked = i;
 	}
@@ -157,16 +157,46 @@ abstract class GraphSet {
    *    to spectrum clicked on, or
    *    to -1 if clicked off-spectrum
    * 
-   * -- set in mouseClickEvent
+   * -- set in mouseClickEvent along with iSpectrumClicked
+   *    to the previously clicked spectrum when there is a double click. 
+   *    
+   * -- set in selectSpectrum based on filePath, type, and model
+   *    to -1 if nSpectra == 1, or
+   *    to the selected spectrum index if there is a match, or
+   *    to Integer.MIN_VALUE if this isn't the current graph set
+   *       and there is a selected spectrum already ?? 
    * 
+   * -- used all over the place, in checkArrowLeftRightClick,
+   *    checkArrowUpDownClick, checkSpectrum, doPlot, drawAll,
+   *    drawPeakTabs, drawPlot, drawSpectrum, 
+   *    getFixedSelectedSpectrumIndex, isDrawNoSpectra,
+   *    and selectSpectrum,
+   *    
+   * -- used in doPlot
+   *    to return true when
+   *       a split is to be shown, or
+   *       when showAllStacked is true, or
+   *       when no spectrum is selected, or
+   *       when this is the spectrum selected
+   *       
+
    */
   
-	private int iSpectrumSelected = -1;
+	/*very*/private int iSpectrumSelected = -1;
 	int setSpectrumSelected(int i) {
 		return iSpectrumSelected = i;
 	}
 
-	private int iSpecBold;
+	/** iSpectrumBold
+	 * 
+	 * -- sets the selected spectrum to be bold when showAllStacked
+	 * 
+	 * -- initially -1
+	 */
+	/*very*/private int iSpectrumBold = -1;
+	private int setSpectrumBold(int i) {
+		return iSpectrumBold = i;
+	}
 
 	private boolean stackSelected = true;
 	
@@ -239,7 +269,7 @@ abstract class GraphSet {
   
   private double lastClickX;
 
-	private boolean drawNoSpectra() {
+	private boolean isDrawNoSpectra() {
 		return (iSpectrumSelected == Integer.MIN_VALUE);
 	}
 
@@ -767,7 +797,7 @@ abstract class GraphSet {
   	iSelectedMeasurement = -1;
   	if (clickCount == 2 && iSpectrumClicked == -1 && iPreviousSpectrumClicked >= 0) {
   		setSpectrumSelected(setSpectrumClicked(iPreviousSpectrumClicked));
-  		stackSelected = true;
+  		stackSelected = showAllStacked;
   	}
   	if (isSplitWidget(xPixel, yPixel)) {
   		splitStack(pd.graphSets, nSplit == 1);
@@ -1042,7 +1072,7 @@ abstract class GraphSet {
   	if (nSpectra > 1) {
   		int iFrame = getSplitPoint(yPixel);
   		setPositionForFrame(iFrame);
-  		setSpectrumMovedTo(iSpecBold >= 0 ? iSpecBold : showAllStacked ? -1 : iFrame);
+  		setSpectrumMovedTo(iSpectrumBold >= 0 ? iSpectrumBold : showAllStacked ? -1 : iFrame);
     	if (iSpectrumMovedTo >= 0)
     		setUserYFactor(iSpectrumMovedTo);
   	}
@@ -1054,7 +1084,7 @@ abstract class GraphSet {
     	iSelectedMeasurement = (inPlotMove ? findMeasurement(xPixel, yPixel, 0) : -1);
       setToolTipForPixels(xPixel, yPixel);
       if (imageView == null) {
-        if (!drawNoSpectra()) {
+        if (!isDrawNoSpectra()) {
           JDXSpectrum spec = getSpectrum();
           if (spec.getPeakList() != null) {
             coordTemp.setXVal(toX(xPixel));
@@ -1597,7 +1627,7 @@ abstract class GraphSet {
         return;
     }
 
-    int iSpec = (iSpecBold >= 0 ? iSpecBold : iSpectrumMovedTo);
+    int iSpec = (iSpectrumBold >= 0 ? iSpectrumBold : iSpectrumMovedTo);
     getMultiScaleData(initX, finalX, initY, finalY, startIndices, endIndices, view, iSpec);
     xPixelMovedTo = -1;
     pin1Dx0.setX(initX, toPixelX0(initX));
@@ -1696,7 +1726,7 @@ abstract class GraphSet {
 		
 		int iSelected = (stackSelected || !showAllStacked ? iSpectrumSelected : -1);
 	  boolean doYScale = (!showAllStacked || nSpectra == 1 || iSelected >= 0);
-	  iSpecBold = (stackSelected && iSpectrumSelected >= 0 ? iSpectrumSelected : -1);
+	  setSpectrumBold(stackSelected && iSpectrumSelected >= 0 ? iSpectrumSelected : -1);
 		int n = 0;
 		if (doDraw1DObjects) {
 			fillBox(g, xPixel0, yPixel0, xPixel1, yPixel1, ScriptToken.PLOTAREACOLOR);
@@ -1705,7 +1735,7 @@ abstract class GraphSet {
 				for (int i = 0; i < nSpectra; i++)
 					if (doPlot(i, iSplit)) {
 					  if (stackSelected && iSelected == i)
-					  	iSpecBold = i;
+					  	setSpectrumBold(i);
 						if (n++ == 0)
 							continue;
 						if (doYScale && !view.areYScalesSame(i-1, i))
@@ -1714,7 +1744,7 @@ abstract class GraphSet {
 			}
 		}
 	  if (!pd.isPrinting) {
-			int iSpec = (nSpectra == 1 ? 0 : !showAllStacked ? iSpectrumMovedTo : iSpecBold >= 0 ? iSpecBold : iSpectrumSelected);
+			int iSpec = (nSpectra == 1 ? 0 : !showAllStacked ? iSpectrumMovedTo : iSpectrumBold >= 0 ? iSpectrumBold : iSpectrumSelected);
 			drawFrame(g, iSplit, iSpec);
 		}
 
@@ -1723,7 +1753,7 @@ abstract class GraphSet {
 	  		&& iSplit == pd.currentSplitPoint
 	  		&& (
 	  		  n < 2                    // just one spectrum to show
-	  		  || iSpecBold >= 0         // stacked and selected
+	  		  || iSpectrumBold >= 0         // stacked and selected
 	  		))
 	  	haveSelectedSpectrum = true; 
 	  haveSingleYScale = (showAllStacked && nSpectra > 1 ? allowStackedYScale && doYScale : true);
@@ -1751,7 +1781,7 @@ abstract class GraphSet {
 			int yOffsetPixels = (int) (yPixels * (pd.yStackOffsetPercent / 100f));
 			for (int i = 0; i < nSpectra; i++)
 				if (doPlot(i, iSplit)) {
-					boolean isBold = (iSpecBold == i);
+					boolean isBold = (iSpectrumBold == i);
 					setUserYFactor(i);
 					if (n == 1 || iSpectrumSelected == i && this == pd.currentGraphSet) {
 						if (!pd.isPrinting && xPixelMovedTo >= 0)
@@ -1820,19 +1850,18 @@ abstract class GraphSet {
   }
 
   private void drawHighlights(Object g) {
-    if (drawNoSpectra() || pd.isPrinting)
+    if (isDrawNoSpectra() || pd.isPrinting)
       return;
     JDXSpectrum spec = spectra.get(getFixedSelectedSpectrumIndex());
     drawHighlights(g, spec);
   }
 
   private void drawPeakTabs(Object g) {
-    if (drawNoSpectra() || pd.isPrinting)
+    if (isDrawNoSpectra() || pd.isPrinting)
       return;
     JDXSpectrum spec = spectra.get(getFixedSelectedSpectrumIndex());
     List<PeakInfo> list = (
-    		nSpectra == 1 //|| getSpectrum().hasIntegral() 
-        || iSpectrumSelected >= 0 ? spec.getPeakList()
+    		nSpectra == 1 || iSpectrumSelected >= 0 ? spec.getPeakList()
         : null);
     if (list != null && list.size() > 0) {
       if (piMouseOver != null && pd.isMouseUp()) {
@@ -2068,7 +2097,7 @@ abstract class GraphSet {
 			}
 		}
 		if (spectra.get(0).isScalable() && (addCurrentBox || nSpectra == 1)) {
-			if (iSpec >= 0 && !drawNoSpectra()) {
+			if (iSpec >= 0 && !isDrawNoSpectra()) {
 				setPlotColor(g, iSpec);
 				fillArrow(g, ArrowType.UP, xPixel11 - 25, (yPixel00 + yPixel11) / 2 - 9, true);
 				fillArrow(g, ArrowType.DOWN, xPixel11 - 25, (yPixel00 + yPixel11) / 2 + 9, true);
@@ -2569,7 +2598,7 @@ abstract class GraphSet {
   private String setCoordStr(double xPt, double yPt) {
     String xx = formatterX.format(xPt);
     pd.coordStr = "(" + xx 
-      + (haveSingleYScale || iSpecBold >= 0 ? ", " + formatterY.format(yPt) : "") + ")";
+      + (haveSingleYScale || iSpectrumBold >= 0 ? ", " + formatterY.format(yPt) : "") + ")";
     return xx;
 	}
 	private boolean setStartupPinTip() {

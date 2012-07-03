@@ -247,11 +247,12 @@ public class PanelData {
         return;
     	}
     }
+  	
   	// new set (so also new split point)
   	// or nSplit > 1 and new split point
   	// or nSplit == 1 and showAllStacked and isClick and is a spectrum click)
   	
-    if (gs.nSplit > 1 && !gs.showAllStacked)
+    if (gs.nSplit > 1)
     	gs.setSpectrumSelected(currentSplitPoint);
     JDXSpectrum spec = gs.getSpectrum();
     notifySubSpectrumChange(spec.getSubIndex(), spec);
