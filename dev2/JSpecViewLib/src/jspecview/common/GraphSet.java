@@ -2223,7 +2223,7 @@ abstract class GraphSet {
 				drawLine(g, x1, y, x1 - 3, y);
 				setColor(g, ScriptToken.SCALECOLOR);
 				String s = formatter.format(val);
-				if (s.startsWith("0") && !s.startsWith("0."))
+				if (s.startsWith("0") && s.contains("E"))
 					s = "0";
 				drawString(g, s, (x1 - 4 - getStringWidth(g, s)), y + getFontHeight(g)
 						/ 3);
