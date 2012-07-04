@@ -39,6 +39,7 @@
 // 23-06-2012 BH -Major change to Applet code to allow multiple file loads
 // 28-06-2012 BH -Overlay/close/view spectrum dialog working SVN 961
 // 02-07-2012 BH -show distances between peaks
+// 04-07-2012 BH -Ctrl- PgUp/PgDn for 2D spectra 
 
 package jspecview.applet;
 
