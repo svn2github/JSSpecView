@@ -237,12 +237,16 @@ class View extends ScaleData {
 	}
 
 	void setAxisScaling(int i, int xPixels, int yPixels) {
-    double f = spectrumScaleFactors[i];
-    double yRef = spectrumYRefs[i];
-    double minY = (f == 1 ? this.minY : initMinYOnScale);
-    double maxY = (f == 1 ? this.maxY : initMaxYOnScale);
+		double f = spectrumScaleFactors[i];
+		double yRef = spectrumYRefs[i];
+		double minY = (f == 1 ? this.minY : initMinYOnScale);
+		double maxY = (f == 1 ? this.maxY : initMaxYOnScale);
+		if (f != 1 && yRef < minY)
+			yRef = minY;
+		if (f != 1 && yRef > maxY)
+			yRef = maxY;
 		setYScale((minY - yRef) / f + yRef, (maxY - yRef) / f + yRef, f == 1);
-		setScaleFactors(xPixels, yPixels);		
+		setScaleFactors(xPixels, yPixels);
 	}
 
 	boolean areYScalesSame(int i, int j) {
