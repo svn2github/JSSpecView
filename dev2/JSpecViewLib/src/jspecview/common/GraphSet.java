@@ -45,7 +45,7 @@ abstract class GraphSet {
   
   abstract void setPlotColors(Object oColors);
   abstract void setPlotColor0(Object oColor);
-  abstract boolean update2dImage(boolean b);
+  abstract boolean update2dImage(boolean forceNew, boolean isCreation);
 
 
   protected List<Highlight> highlights = new ArrayList<Highlight>();
@@ -1009,7 +1009,7 @@ abstract class GraphSet {
 			if ((nSpectra == 1 || iSpectrumSelected >= 0) 
 					&& spectra.get(getFixedSelectedSpectrumIndex()).isTransmittance())
 				f = 1/f;
-			view.scaleSpectrum(iSpectrumSelected, f);
+  		view.scaleSpectrum(imageView == null ? iSpectrumSelected : -2, f);
 			ok = true;
 		} else if (isArrowClick(xPixel, yPixel, ArrowType.RESET)) {
 			clearViews();
@@ -1018,8 +1018,13 @@ abstract class GraphSet {
 			ok = true;
 		}
 
-		if (ok)
+		if (ok) {
+  		if (imageView != null) {
+        update2dImage(true, false);
+        resetPinsFromView();
+  		}
 			pd.refresh();
+		}
 		return ok;
 	}
 
@@ -1687,7 +1692,7 @@ abstract class GraphSet {
       if (ifix != isub)
         setCurrentSubSpectrum(ifix);
       if (is2DYScaleChange)
-        update2dImage(true);
+        update2dImage(true, false);
     }
     if (addZoom)
       addCurrentZoom();
@@ -2143,18 +2148,10 @@ abstract class GraphSet {
 			drawRect(g, xPixel0, yPixel0, xPixels, yPixels);
 		}
 		setCurrentBoxColor(g);
-		if (this != pd.currentGraphSet || imageView != null)
+		if (this != pd.currentGraphSet)
 			return;
 		boolean addCurrentBox = ((fracY != 1 || isSplittable) && (!isSplittable
 				|| nSplit == 1 || pd.currentSplitPoint == iSplit));
-		if (addCurrentBox) {
-			drawRect(g, xPixel00 + 10, yPixel00 + 1, xPixel11 - 20 - xPixel00,
-					yPixel11 - 2 - yPixel00);
-			if (isSplittable) {
-				fillBox(g, xPixel11 - 20, yPixel00 + 1, xPixel11 - 10, yPixel00 + 11,
-						null);
-			}
-		}
 		if (spectra.get(0).isScalable() && (addCurrentBox || nSpectra == 1)) {
 			if (iSpec >= 0 && !isDrawNoSpectra()) {
 				setPlotColor(g, iSpec);
@@ -2167,6 +2164,16 @@ abstract class GraphSet {
 			fillArrow(g, ArrowType.DOWN, xPixel11 - 25, (yPixel00 + yPixel11) / 2 + 9, false);
 		}
 
+		if (imageView != null)
+			return;
+		if (addCurrentBox) {
+			drawRect(g, xPixel00 + 10, yPixel00 + 1, xPixel11 - 20 - xPixel00,
+					yPixel11 - 2 - yPixel00);
+			if (isSplittable) {
+				fillBox(g, xPixel11 - 20, yPixel00 + 1, xPixel11 - 10, yPixel00 + 11,
+						null);
+			}
+		}
 	}
 
 	/**
@@ -2279,7 +2286,7 @@ abstract class GraphSet {
     String hash1 = "0.00000000";
     String hash = "#";
     if (n <= 0)
-      hash = hash1.substring(0, Math.abs(n) + 3);
+      hash = hash1.substring(0, Math.max(hash1.length(), Math.abs(n) + 3));
     else if (n > 3)
     	hash = "";
 		return hash;

@@ -93,7 +93,6 @@ import jspecview.common.JSVSpectrumPanel;
 import jspecview.common.JSVTree;
 import jspecview.common.JSVTreeNode;
 import jspecview.common.JSViewer;
-import jspecview.common.PeakInfo;
 import jspecview.common.SpectraDialog;
 import jspecview.common.PanelData;
 import jspecview.common.Parameters;

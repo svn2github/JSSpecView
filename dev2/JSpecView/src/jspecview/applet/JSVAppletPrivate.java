@@ -68,7 +68,6 @@ import jspecview.common.JSVPanelNode;
 import jspecview.common.JSVSpectrumPanel;
 import jspecview.common.JSVTree;
 import jspecview.common.JSViewer;
-import jspecview.common.PeakInfo;
 import jspecview.common.SpectraDialog;
 import jspecview.common.OverlayLegendDialog;
 import jspecview.common.AwtParameters;

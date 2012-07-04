@@ -131,7 +131,7 @@ class AwtGraphSet extends GraphSet {
   protected boolean get2DImage() {
     imageView = new ImageView();
     imageView.set(viewList.get(0));
-    if (!update2dImage(false))
+    if (!update2dImage(false, true))
       return false;
     imageView.resetZoom();
     sticky2Dcursor = true;
@@ -139,7 +139,7 @@ class AwtGraphSet extends GraphSet {
   }
 
 	@Override
-	protected boolean update2dImage(boolean forceNew) {
+	protected boolean update2dImage(boolean forceNew, boolean isCreation) {
 		imageView.set(view);
 		JDXSpectrum spec0 = getSpectrumAt(0);
 		int[] buffer = imageView.get2dBuffer(jsvp.pd.thisWidth,
@@ -149,6 +149,8 @@ class AwtGraphSet extends GraphSet {
 			imageView = null;
 			return false;
 		}
+		if (isCreation) 
+			buffer = imageView.adjustView(spec0, view, 0.05, 0.20);
 		imageView.setImageSize(spec0.getXYCoords().length, spec0.getSubSpectra()
 				.size(), !forceNew);
 		image2D = new BufferedImage(imageView.imageWidth, imageView.imageHeight,

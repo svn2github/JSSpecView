@@ -193,6 +193,7 @@ public class ImageView {
   private int[] buf2d;
   private int thisWidth,thisHeight;
   private double grayFactorLast;
+	private double averageGray;
   /**
    * 
    * @param width
@@ -229,8 +230,25 @@ public class ImageView {
         totalGray += gray;
       }
     }
-    System.out.println ("Average gray = " + (totalGray / (width * height) / 255));
+    averageGray = (1 - totalGray / (width * height) / 255);
+    System.out.println ("Average gray = " + averageGray);
     return (buf2d = buf);
+  }
+  
+  private final double RT2 = Math.sqrt(2.0);
+
+  int[] adjustView (JDXSpectrum spec, View view, double minGray, double maxGray) {
+  	//double minGray = 0.05;
+  	//double maxGray = 0.20;
+  	int i = 0;
+  	boolean isLow = false;
+  	while (((isLow = (averageGray < minGray)) || averageGray > maxGray) && i++ < 10) {
+      view.scaleSpectrum(-2, isLow ? 2 : 0.5);
+      set(view);
+      get2dBuffer(thisWidth, thisHeight, spec, true);   
+      System.out.println("ImageView adjustView " + i + " " + minZ + "  " + maxZ );
+  	} 
+  	return buf2d;
   }
 
 }

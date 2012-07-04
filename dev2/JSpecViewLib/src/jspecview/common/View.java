@@ -202,12 +202,26 @@ class View extends ScaleData {
 	void scaleSpectrum(int i, double f) {
 		if (f == 0 || i >= nSpec)
 			return;
+		if (i == -2) {
+			scale2D(f);
+			return;
+		}
 		if (i < 0)
 			for (i = 0; i < nSpec; i++)
 				spectrumScaleFactors[i] *= f;
 		else
 			spectrumScaleFactors[i] *= f;
   }
+
+	private void scale2D(double f) {
+		double dy = maxY - minY;
+		if (f == 1) {
+			maxY = initMaxY;
+			minY = initMinY;
+			return;
+		}
+		maxY = minY + dy / f;
+	}
 
 	double getSpectrumScaleFactor(int i) {
 		return (i >= 0 && i < nSpec ? spectrumScaleFactors[i] : 1);
