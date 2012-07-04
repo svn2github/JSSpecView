@@ -225,7 +225,7 @@ public class PanelData {
     nSpectra = spectra.size();
     graphSets = GraphSet.getGraphSets(owner, spectra, startIndex, endIndex);
     currentGraphSet = graphSets.get(0);
-    System.out.println("PanelData.initJSVPanel " + currentGraphSet);
+    //System.out.println("PanelData.initJSVPanel " + currentGraphSet);
     setTitle(getSpectrum().getTitleLabel());
   }
 
@@ -235,10 +235,10 @@ public class PanelData {
   	boolean isNewSplitPoint = (isNewSet || currentSplitPoint != splitPoint);
     currentGraphSet = gs;
     currentSplitPoint = splitPoint;
-  	if (isNewSet)
-      System.out.println("setting currentGraphSet to " + gs);
-  	if (isNewSplitPoint)
-      System.out.println("setting currentSplitPoint to " + splitPoint);
+//  	if (isNewSet)
+//      System.out.println("setting currentGraphSet to " + gs);
+//  	if (isNewSplitPoint)
+//      System.out.println("setting currentSplitPoint to " + splitPoint);
   	if (!isNewSet) {
     	if (gs.nSplit == 1) {
     		if (!isClick || !gs.checkSpectrumClickEvent(xPixel, yPixel))
@@ -700,7 +700,6 @@ public class PanelData {
   }
 
   protected void doMouseReleased(boolean isButton1) {
-    System.out.println("doMouseReleased " + this.clickCount);
     mouseState = Mouse.UP;
     if (thisWidget == null || !isButton1)
       return;
