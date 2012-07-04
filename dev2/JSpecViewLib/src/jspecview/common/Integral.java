@@ -3,23 +3,15 @@
  */
 package jspecview.common;
 
-public class Integral {
-  double value;
-  double x1;
-  double x2;
-  double y1;
-  double y2;
+import java.util.Comparator;
 
-  Integral(double value, double x1, double x2, double y1, double y2) {
+public class Integral extends Measurement {
+
+  public static Comparator<Measurement> c = new IntegralComparator();
+
+	Integral(JDXSpectrum spec, double value, double x1, double x2, double y1, double y2) {
+  	super(spec, x1, y1, "", x2, y2);
     this.value = value;
-    this.x1 = x1;
-    this.x2 = x2;
-    this.y1 = y1;
-    this.y2 = y2;
   }
   
-  @Override
-  public String toString() {
-    return "integral val=" + value + " " + x1 + " " + x2;
-  }
 }

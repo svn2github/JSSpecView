@@ -1,8 +1,11 @@
 package jspecview.common;
 
+import java.text.DecimalFormat;
+
 import jspecview.exception.JSpecViewException;
 import jspecview.util.Logger;
 import jspecview.util.Parser;
+import jspecview.util.TextFormat;
 
 /**
  * spectrum data AS READ FROM FILE
@@ -608,23 +611,28 @@ public abstract class JDXDataObject extends JDXHeader {
     return rowData;
   }
 
-	public String setMeasurementText(GraphSet gs, Measurement m) {
-		double dx = Math.abs(m.getPt2().getXVal() - m.getXVal());
+	public String setMeasurementText(Measurement m) {
+		double dx = m.getValue();
+		String hash = "#0.0";
 		String units = "";
 		if (isNMR()) {
 			if (numDim == 1) {
-				if (isHNMR()) {
+				boolean isIntegral = (m instanceof Integral);
+				if (isHNMR() || isIntegral) {
 					dx *= observedFreq;
-					units = " Hz";
+					if (!isIntegral)
+  					units = " Hz";
 				} else {
 					units = " ppm";
+					hash = "#0.00";
 				}
 			} else {
 				return "";
 				// 2D?
 			}
 		}
-		return (dx < 0.1 ? "" : gs.getFormattedNumber(dx, "#0.0" + units));
+		DecimalFormat formatter = TextFormat.getDecimalFormat(hash);
+		return (dx < 0.1 ? "" : formatter.format(dx) + units);
 	}
 
   public boolean isNMR() {

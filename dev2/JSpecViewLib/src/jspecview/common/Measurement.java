@@ -33,24 +33,25 @@ public class Measurement extends Annotation {
   
 	private Coordinate pt2 = new Coordinate();
 	JDXSpectrum spec;
-	private double value;
+	protected double value;
 	
-  public Measurement(GraphSet gs, JDXSpectrum spec, double x, double y, String text, double x1, double y1) {
+  public Measurement(JDXSpectrum spec, double x, double y, String text, double x1, double y1) {
 		super(x, y, text, false, false, 0, 6);
 		this.spec = spec;
-		setPt2(gs, x1, y1);
+		setPt2(x1, y1);
 	}
   
-  public Measurement(GraphSet gs, Measurement m) {
+  public Measurement(Measurement m) {
   	super(m.getXVal(), m.getYVal(), m.text, false, false, m.offsetX, m.offsetY);
   	this.spec = m.spec;
-  	setPt2(gs, m.pt2.getXVal(), m.pt2.getYVal());
+  	setPt2(m.pt2.getXVal(), m.pt2.getYVal());
 	}
 
-	public void setPt2(GraphSet gs, double x, double y) {
+	public void setPt2(double x, double y) {
 		pt2.setXVal(x);
 		pt2.setYVal(y);
-		text = spec.setMeasurementText(gs, this);
+		value = (x - getXVal());
+		text = spec.setMeasurementText(this);
   }
   
 	public JDXSpectrum getSpectrum() {
@@ -75,8 +76,12 @@ public class Measurement extends Annotation {
     return "[" + getXVal() + "-" + pt2.getXVal() + "]";
   }
 
-	public Coordinate getPt2() {
-		return pt2;
+	public double getXVal2() {
+		return pt2.getXVal();
+	}
+
+	public double getYVal2() {
+		return pt2.getYVal();
 	}
 
 }

@@ -486,7 +486,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return true;
   }
 
-  public List<Integral> getIntegralRegions() {
+  public List<Measurement> getIntegralRegions() {
    return (integration == null ? null : integration.getIntegralRegions());
   }
 

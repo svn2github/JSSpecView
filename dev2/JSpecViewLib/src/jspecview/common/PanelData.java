@@ -621,7 +621,7 @@ public class PanelData {
 			p = new PeakPickEvent(owner, coordClicked, getSpectrum()
 					.getAssociatedPeakInfo(coordClicked));
 		}
-		PeakInfo pi = p.getPeakInfo();
+//		PeakInfo pi = p.getPeakInfo();
 //		if (pi.getAtoms() == null) {
 //			// find matching file/type/model in other panels
 //			String filePath = pi.getFilePath();

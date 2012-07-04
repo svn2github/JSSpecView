@@ -815,9 +815,12 @@ abstract class GraphSet {
 	}
 
   private int iSelectedMeasurement = -1;
+  private int iSelectedIntegralValue = -1;
+  
   synchronized void mouseClickEvent(int xPixel, int yPixel, int clickCount,
                        boolean isControlDown) {
   	iSelectedMeasurement = -1;
+  	iSelectedIntegralValue = -1;
   	if (clickCount == 2 && iSpectrumClicked == -1 && iPreviousSpectrumClicked >= 0) {
   		setSpectrumClicked(iPreviousSpectrumClicked);
   		stackSelected = showAllStacked;
@@ -915,35 +918,35 @@ abstract class GraphSet {
 		Measurement m;
 		switch (clickCount) {
 		case 0: // move
-    		pendingMeasurement.setPt2(this, toX(xPixel), toY(yPixel));
+    		pendingMeasurement.setPt2(toX(xPixel), toY(yPixel));
     	break;
 		case 2: // first double click
-			int i = findMeasurement(xPixel, yPixel, 1);
+			int i = findMeasurement(measurements, xPixel, yPixel, 1);
 			if (i >= 0) {
 				m = measurements.get(i);
 				xPixel = toPixelX(m.getXVal());
 				yPixel = toPixelY(m.getYVal());
-			} else if ((i = findMeasurement(xPixel, yPixel, 2)) >= 0) {
+			} else if ((i = findMeasurement(measurements, xPixel, yPixel, 2)) >= 0) {
 					m = measurements.get(i);
-					xPixel = toPixelX(m.getPt2().getXVal());
-					yPixel = toPixelY(m.getPt2().getYVal());
+					xPixel = toPixelX(m.getXVal2());
+					yPixel = toPixelY(m.getYVal2());
 			}
     	x = toX(xPixel);
     	y = toY(yPixel);
-      pendingMeasurement = new Measurement(this, spectra.get(iSpectrumClicked), x, y, "", x, y);
+      pendingMeasurement = new Measurement(spectra.get(iSpectrumClicked), x, y, "", x, y);
       break;
 		case 1: // single click -- save and continue
 		case -2: // second double click -- save and quit
 			x = toX(xPixel);
 			y = toY(yPixel);
-			pendingMeasurement.setPt2(this, x, y);
+			pendingMeasurement.setPt2(x, y);
 			if (pendingMeasurement.text.length() == 0) {
   			pendingMeasurement = null;
 			} else {
   			setMeasurement(pendingMeasurement);
   			if (clickCount == 1) {
 	  			setSpectrumClicked(getSpectrumIndex(pendingMeasurement.spec));
-		  		pendingMeasurement = new Measurement(this, pendingMeasurement.spec, x, y, "", x, y);
+		  		pendingMeasurement = new Measurement(pendingMeasurement.spec, x, y, "", x, y);
   			} else {
     			pendingMeasurement = null;
   			}
@@ -955,26 +958,37 @@ abstract class GraphSet {
 	
 	Coordinate ptTemp = new Coordinate();
 
-	private int findMeasurement(int xPixel, int yPixel, int iPt) {
-		if (measurements == null)
+	private int findMeasurement(List<Measurement> measurements, int xPixel, int yPixel, int iPt) {
+		if (measurements == null || measurements.size() == 0)
 			return -1;
 		if (iPt == 0) {
-			int i = findMeasurement(xPixel, yPixel, 1);
+			int i = findMeasurement(measurements, xPixel, yPixel, 1);
 			if (i >= 0)
 				return i;
-			i = findMeasurement(xPixel, yPixel, 2);
+			i = findMeasurement(measurements, xPixel, yPixel, 2);
 			if (i >= 0)
 				return i;
-			i = findMeasurement(xPixel, yPixel, -2);
+			i = findMeasurement(measurements, xPixel, yPixel, -2); // center
 			if (i >= 0)
 				return i;
-			return findMeasurement(xPixel, yPixel, -3);
+			if (measurements.get(0) instanceof Integral)
+				return i;
+			return findMeasurement(measurements, xPixel, yPixel, -3); // lower bar, near baseline
 		}
 		for (int i = measurements.size(); --i >= 0;) {
 			Measurement m = measurements.get(i);
-			int x = toPixelX(iPt == -2 || iPt == -3 ? (m.getXVal() + m.getPt2().getXVal()) / 2 
-					: iPt == 1 ? m.getXVal() : m.getPt2().getXVal());
-			int y = (iPt == -3 ? yPixel1 - 2 : toPixelY(m.getYVal()));
+		  int x;
+			int y;
+			if (m instanceof Integral) {
+				x = toPixelX(m.getXVal2());
+				y = toPixelYint(iPt == -2 ? (m.getYVal() + m.getYVal2()) / 2 
+						: iPt == 1 ? m.getYVal() : m.getYVal2());
+			} else {
+				x = toPixelX(iPt == -2 ? (m.getXVal() + m.getXVal2()) / 2 
+						: iPt == 1 ? m.getXVal() : m.getXVal2());
+			  y = (iPt == -3 ? yPixel1 - 2 : toPixelY(m.getYVal()));
+			}
+
 			if (Math.abs(xPixel - x) + Math.abs(yPixel - y) < 4)
 				return i;
 		}
@@ -984,7 +998,7 @@ abstract class GraphSet {
 	private void setMeasurement(Measurement m) {
 		if (measurements == null)
 			measurements = new ArrayList<Measurement>();
-    measurements.add(new Measurement(this, m));
+    measurements.add(new Measurement(m));
 	}
 	
 	private boolean checkArrowUpDownClick(int xPixel, int yPixel) {
@@ -1105,7 +1119,10 @@ abstract class GraphSet {
     	processPendingMeasurement(xPixel, yPixel, 0);
       setToolTipForPixels(xPixel, yPixel);
     } else {
-    	iSelectedMeasurement = (inPlotMove ? findMeasurement(xPixel, yPixel, 0) : -1);
+    	iSelectedMeasurement = (inPlotMove && measurements != null ? 
+    			findMeasurement(measurements, xPixel, yPixel, 0) : -1);
+    	iSelectedIntegralValue = (inPlotMove && drawnIntegrals != null && iSelectedMeasurement == -1 ? 
+    			findMeasurement(drawnIntegrals, xPixel, yPixel, 0) : -1);
       setToolTipForPixels(xPixel, yPixel);
       if (imageView == null) {
         if (!isDrawNoSpectra()) {
@@ -1397,6 +1414,11 @@ abstract class GraphSet {
 			measurements.remove(iSelectedMeasurement);
 			iSelectedMeasurement = -1;
 		}
+		if (drawnIntegrals != null && iSelectedIntegralValue >= 0
+				&& drawnIntegrals.size() >= iSelectedIntegralValue) {
+			drawnIntegrals.remove(iSelectedIntegralValue);
+			iSelectedIntegralValue = -1;
+		}
 	}
 
   /**
@@ -1683,6 +1705,7 @@ abstract class GraphSet {
 
 
   void scaleYBy(double factor) {
+  	// from CTRL +/-
   	view.scaleSpectrum(-1, factor);
    // doZoom(view.minX, view.minY / factor1,
      //   view.maxX, view.maxY / factor2, true, true, false);
@@ -1747,10 +1770,10 @@ abstract class GraphSet {
 		if (imageView != null)
 			draw2DImage(g);
 		draw2DUnits(g, width, subIndex);
-		boolean doDraw1DObjects = (imageView == null || pd.display1D);
-		
+		drawnIntegrals = null;
 		int iSelected = (stackSelected || !showAllStacked ? iSpectrumSelected : -1);
 	  boolean doYScale = (!showAllStacked || nSpectra == 1 || iSelected >= 0);
+		boolean doDraw1DObjects = (imageView == null || pd.display1D);
 	  setSpectrumBold(stackSelected && iSpectrumSelected >= 0 ? iSpectrumSelected : -1);
 		int n = (iSelected >= 0 ? 1 : 0);
 		int iSpectrumForScale = getFixedSelectedSpectrumIndex();
@@ -2032,7 +2055,7 @@ abstract class GraphSet {
     	if (spec.hasIntegral())
         drawPlot(g, index, spec.getIntegrationGraph(), false, true, yOffset, false);
       if (spec.getIntegralRegions() != null)
-    		drawIntegralValue(g, spec, yOffset);
+    		drawIntegralValues(g, spec, yOffset);
     }
     if (spec.integrationRatios != null)
       drawAnnotations(g, spec.integrationRatios,
@@ -2180,20 +2203,22 @@ abstract class GraphSet {
     }
   }
 
-  private void drawIntegralValue(Object g, JDXSpectrum spec, int yOffset) {
-    List<Integral> integrals = spec.getIntegralRegions();
+  List<Measurement> drawnIntegrals;
+  
+  private void drawIntegralValues(Object g, JDXSpectrum spec, int yOffset) {
+    drawnIntegrals = spec.getIntegralRegions();
     pd.setFont(g, width, FONT_BOLD, 12, false);
     NumberFormat formatter = pd.getFormatter("#0.0");
     setColor(g, ScriptToken.INTEGRALPLOTCOLOR);
 
-    for (int i = integrals.size(); --i >= 0;) {
-      Integral in = integrals.get(i);
+    for (int i = drawnIntegrals.size(); --i >= 0;) {
+      Measurement in = drawnIntegrals.get(i);
       if (in.value == 0)
         continue;
       String s = "  " + formatter.format(Math.abs(in.value));
-      int x = toPixelX(in.x2);
-      int y1 = yOffset + toPixelYint(in.y1);
-      int y2 = yOffset + toPixelYint(in.y2);
+      int x = toPixelX(in.getXVal2());
+      int y1 = yOffset + toPixelYint(in.getYVal());
+      int y2 = yOffset + toPixelYint(in.getYVal2());
       if (x != fixX(x))
         continue;
       drawLine(g, x, y1, x, y2);
@@ -2491,8 +2516,8 @@ abstract class GraphSet {
     setColor(g, 0, 0, 0); // black
     int x1 = toPixelX(m.getXVal());
     int y1 = toPixelY(m.getYVal());
-    int x2 = toPixelX(m.getPt2().getXVal());
-    boolean drawString = (Math.abs((m.getXVal() - m.getPt2().getXVal()) / view.xFactorForScale) >= 2);
+    int x2 = toPixelX(m.getXVal2());
+    boolean drawString = (Math.abs((m.getXVal() - m.getXVal2()) / view.xFactorForScale) >= 2);
     boolean drawBaseLine = view.isYZeroOnScale() && m.spec.isHNMR();
     int x = (x1 + x2)/2;
     setStrokeBold(g, true);
@@ -2556,10 +2581,12 @@ abstract class GraphSet {
   }
 
   private void checkIntegral(double x1, double x2, boolean isFinal) {
-    IntegralGraph ig = getSpectrum().getIntegrationGraph();
+  	JDXSpectrum spec = getSpectrum();
+    IntegralGraph ig = spec.getIntegrationGraph();
     if (ig == null)
       return;
-    ig.addIntegralRegion(x1, x2, isFinal);
+    ig.addIntegralRegion(spec, x1, x2, isFinal);
+    drawnIntegrals = null;
   }
 
   private void setFormatters() {
@@ -2634,12 +2661,15 @@ abstract class GraphSet {
 			yPt = getSpectrum().getIntegrationGraph().getPercentYValueAt(xPt);
 			xx += ", " + pd.getFormatter("#0.0").format(yPt);
 		}
-		pd
-				.setToolTipText(pendingMeasurement != null || iSelectedMeasurement >= 0 ? "Press ESC to delete "
-						+ (pendingMeasurement == null ? "\""
+		pd.setToolTipText(pendingMeasurement != null 
+				|| iSelectedMeasurement >= 0 
+				|| iSelectedIntegralValue >= 0 ? "Press ESC to delete "
+						+ (iSelectedIntegralValue >= 0 ? "integral" 
+								: pendingMeasurement == null ? "\""
 								+ measurements.get(iSelectedMeasurement).text + "\""
 								: "measurement")
-						: Double.isNaN(yPt) ? null : xx);
+						: Double.isNaN(yPt) ? null
+						: xx);
 	}
   
   private String setCoordStr(double xPt, double yPt) {
