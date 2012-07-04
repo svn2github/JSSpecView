@@ -235,8 +235,6 @@ public class ImageView {
     return (buf2d = buf);
   }
   
-  private final double RT2 = Math.sqrt(2.0);
-
   int[] adjustView (JDXSpectrum spec, View view, double minGray, double maxGray) {
   	//double minGray = 0.05;
   	//double maxGray = 0.20;

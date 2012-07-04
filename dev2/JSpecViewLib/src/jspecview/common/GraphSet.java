@@ -64,7 +64,7 @@ abstract class GraphSet {
   private double userYFactor = 1;
   private double yRef = 0;
   
-  private final double RT2 = Math.sqrt(2.0);
+  final static double RT2 = Math.sqrt(2.0);
 	private boolean haveSingleYScale;
 
 	/**
@@ -1711,9 +1711,13 @@ abstract class GraphSet {
 
   void scaleYBy(double factor) {
   	// from CTRL +/-
-  	view.scaleSpectrum(-1, factor);
-   // doZoom(view.minX, view.minY / factor1,
-     //   view.maxX, view.maxY / factor2, true, true, false);
+		view.scaleSpectrum(imageView == null ? iSpectrumSelected : -2, factor);
+		if (imageView != null) {
+      update2dImage(true, false);
+      resetPinsFromView();
+		}
+		pd.refresh();
+  	//view.scaleSpectrum(-1, factor);
   }
 
   private void addCurrentZoom() {
@@ -2286,7 +2290,7 @@ abstract class GraphSet {
     String hash1 = "0.00000000";
     String hash = "#";
     if (n <= 0)
-      hash = hash1.substring(0, Math.max(hash1.length(), Math.abs(n) + 3));
+      hash = hash1.substring(0, Math.min(hash1.length(), Math.abs(n) + 3));
     else if (n > 3)
     	hash = "";
 		return hash;

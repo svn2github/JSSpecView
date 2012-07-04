@@ -364,10 +364,20 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
    *        the width to be drawn in pixels
    */
   public void drawTitle(Object og, int height, int width, String title) {
+  	title = title.replace('\n', ' ');
     Graphics g = (Graphics) og;
     pd.setFont(g, width, pd.isPrinting || pd.getBoolean(ScriptToken.TITLEBOLDON) ? Font.BOLD
         : Font.PLAIN, 14, true);
     FontMetrics fm = g.getFontMetrics();
+    int nPixels = fm.stringWidth(title);
+    if (nPixels > width) {
+    	int size = (int) (14.0 * width / nPixels);
+    	if (size < 10)
+    		size = 10;
+      pd.setFont(g, width, pd.isPrinting || pd.getBoolean(ScriptToken.TITLEBOLDON) ? Font.BOLD
+          : Font.PLAIN, size, true);
+      fm = g.getFontMetrics();
+    }
     g.setColor(titleColor);
     g.drawString(title, 5, (int) (height - fm.getHeight() / 2));
   }
@@ -576,50 +586,43 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 			e.consume();
 			return;
 		}
+		int code = e.getKeyCode();
 		if (e.getModifiers() != 0) {
 			if (e.isControlDown()) {
-				switch (e.getKeyCode()) {
+				switch (code) {
+				case KeyEvent.VK_DOWN:
+				case KeyEvent.VK_UP:
 				case 45: // '-'
-					pd.currentGraphSet.scaleYBy(0.5);
-					e.consume();
-					break;
-				case 61: // '='
-					pd.currentGraphSet.scaleYBy(2);
+				case 61: // '=/+'
+					pd.currentGraphSet.scaleYBy(code == 61 || code == KeyEvent.VK_UP ? GraphSet.RT2 : 1/GraphSet.RT2);
 					e.consume();
 					break;
 				case KeyEvent.VK_LEFT:
-					pd.currentGraphSet.toPeak(-1);
-					e.consume();
-					break;
 				case KeyEvent.VK_RIGHT:
-					pd.currentGraphSet.toPeak(1);
-					e.consume();
-					break;
-				case KeyEvent.VK_DOWN:
-				case KeyEvent.VK_UP:
-					int dir = (e.getKeyCode() == KeyEvent.VK_DOWN ? -1 : 1);
-					if (pd.getSpectrumAt(0).getSubSpectra() == null) {
-						pd.notifySubSpectrumChange(dir, null);
-					} else {
-						pd.currentGraphSet.advanceSubSpectrum(dir);
-						repaint();
-					}
+					pd.currentGraphSet.toPeak(code == KeyEvent.VK_RIGHT ? 1 :-1);
 					e.consume();
 					break;
 				}
 			}
 			return;
 		}
-		switch (e.getKeyCode()) {
+		switch (code) {
 		case KeyEvent.VK_LEFT:
-			pd.doMouseMoved(--pd.mouseX, pd.mouseY);
+		case KeyEvent.VK_RIGHT:
+			pd.doMouseMoved((code == KeyEvent.VK_RIGHT ? ++pd.mouseX : --pd.mouseX), pd.mouseY);
 			e.consume();
 			repaint();
 			break;
-		case KeyEvent.VK_RIGHT:
-			pd.doMouseMoved(++pd.mouseX, pd.mouseY);
+		case KeyEvent.VK_DOWN:
+		case KeyEvent.VK_UP:
+			int dir = (code == KeyEvent.VK_DOWN ? -1 : 1);
+			if (pd.getSpectrumAt(0).getSubSpectra() == null) {
+				pd.notifySubSpectrumChange(dir, null);
+			} else {
+				pd.currentGraphSet.advanceSubSpectrum(dir);
+				repaint();
+			}
 			e.consume();
-			repaint();
 			break;
 		}
 
