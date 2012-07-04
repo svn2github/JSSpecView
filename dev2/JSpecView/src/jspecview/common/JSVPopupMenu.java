@@ -91,7 +91,7 @@ public class JSVPopupMenu extends JPopupMenu {
   public JMenuItem overlayStackOffsetMenuItem = new JMenuItem();
 
   public JMenuItem integrateMenuItem = new JCheckBoxMenuItem();
-  public JMenuItem integrateShowMenuItem = new JCheckBoxMenuItem();
+  public JMenuItem integrateHideMenuItem = new JCheckBoxMenuItem();
   public JMenuItem transAbsMenuItem = new JMenuItem();
   public JMenuItem solColMenuItem = new JMenuItem();
   
@@ -281,11 +281,11 @@ public class JSVPopupMenu extends JPopupMenu {
             runScript(scripter, "INTEGRATE TOGGLE");
           }
         });
-    integrateShowMenuItem.setSelected(true);
-    setMenuItem(integrateShowMenuItem, 'S', "Show Integration", 0, 0,
+    integrateHideMenuItem.setSelected(false);
+    setMenuItem(integrateHideMenuItem, 'H', "Hide Integration", 0, 0,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            runScript(scripter, "set SHOWINTEGRATION " + ((JMenuItem) e.getSource()).isSelected());
+            runScript(scripter, "SHOWINTEGRATION " + !((JMenuItem) e.getSource()).isSelected());
           }
         });
     setMenuItem(transAbsMenuItem, '\0', "Transmittance/Absorbance", 0, 0,
@@ -301,7 +301,7 @@ public class JSVPopupMenu extends JPopupMenu {
           }
         });
     menu.add(integrateMenuItem);
-    menu.add(integrateShowMenuItem);
+    menu.add(integrateHideMenuItem);
     menu.add(transAbsMenuItem);
     menu.add(solColMenuItem);
   }
@@ -358,8 +358,8 @@ public class JSVPopupMenu extends JPopupMenu {
     boolean isSingle = pd.haveSelectedSpectrum();
     integrateMenuItem.setEnabled(isSingle && spec0.canIntegrate() || spec0.hasIntegral());
     integrateMenuItem.setSelected(pd.getSpectrum().hasIntegral());
-    integrateShowMenuItem.setEnabled(integrateMenuItem.isEnabled() && integrateMenuItem.isSelected());
-    integrateShowMenuItem.setSelected(pd.getShowIntegration());
+    integrateHideMenuItem.setEnabled(integrateMenuItem.isEnabled() && integrateMenuItem.isSelected());
+    integrateHideMenuItem.setSelected(!pd.getShowIntegration());
     solColMenuItem.setEnabled(isSingle && spec0.canShowSolutionColor());
     transAbsMenuItem.setEnabled(isSingle && spec0.canConvertTransAbs());
     overlayKeyMenuItem.setEnabled(isOverlaid && pd.getNumberOfGraphSets() == 1);

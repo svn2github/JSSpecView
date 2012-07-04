@@ -664,9 +664,12 @@ public class PanelData {
     return (mouseState  == PanelData.Mouse.UP);
   }
   
+  protected int mouseX, mouseY;
   protected void doMouseMoved(int xPixel, int yPixel) {
+  	mouseX = xPixel;
+  	mouseY = yPixel;
     mouseState = Mouse.UP;
-    this.clickCount = 0;
+    clickCount = 0;
     GraphSet gs = GraphSet.findGraphSet(graphSets, xPixel, yPixel);
     if (gs == null)
       return;
@@ -686,6 +689,7 @@ public class PanelData {
   }
 
   int clickCount;
+	boolean ctrlPressed;
   
   protected void doMouseDragged(int xPixel, int yPixel) {
     mouseState = Mouse.DOWN;

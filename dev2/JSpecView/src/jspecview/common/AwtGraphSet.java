@@ -208,8 +208,18 @@ class AwtGraphSet extends GraphSet {
 
   @Override
   protected void setPlotColor(Object g, int i) {
-    ((Graphics) g)
-        .setColor(i < 0 ? jsvp.getColor(ScriptToken.INTEGRALPLOTCOLOR) : plotColors[i]);
+  	Color c;
+  	switch (i) {
+  	case -2:
+  		c = Color.GRAY;
+  		break;
+  	case -1:
+  		c = jsvp.getColor(ScriptToken.INTEGRALPLOTCOLOR);
+  		break;
+    default:
+    	c = plotColors[i];
+  	}
+    ((Graphics) g).setColor(c);
   }
 
   @Override

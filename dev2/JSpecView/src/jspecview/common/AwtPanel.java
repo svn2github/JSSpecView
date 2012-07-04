@@ -564,54 +564,70 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   public void mouseExited(MouseEvent e) {
   }
 
-  public void keyPressed(KeyEvent e) {
-  	// should be only in panel region, though. 
-    if (e.getKeyCode() == KeyEvent.VK_ESCAPE || e.getKeyCode() == KeyEvent.VK_DELETE) {
-      pd.currentGraphSet.escapeKeyPressed();
-      pd.isIntegralDrag = false;
-      repaint();
-      e.consume();
-      return;
-    }
-    if (e.getModifiers() != 0) {
-      if (e.isControlDown()) {
-        switch (e.getKeyCode()) {
-        case 45: //'-'
-          pd.currentGraphSet.scaleYBy(0.5);
-          e.consume();
-          break;
-        case 61: //'='
-          pd.currentGraphSet.scaleYBy(2);
-          e.consume();
-          break;
-        }
-      }
-      return;
-    }
-    switch (e.getKeyCode()) {
-    case KeyEvent.VK_LEFT:
-      pd.currentGraphSet.toPeak(-1);
-      e.consume();
-      break;
-    case KeyEvent.VK_RIGHT:
-      pd.currentGraphSet.toPeak(1);
-      e.consume();
-      break;
-    case KeyEvent.VK_DOWN:
-    case KeyEvent.VK_UP:
-      int dir = (e.getKeyCode() == KeyEvent.VK_DOWN ? -1 : 1);
-      if (pd.getSpectrumAt(0).getSubSpectra() == null) {
-        pd.notifySubSpectrumChange(dir, null);
-      } else {
-        pd.currentGraphSet.advanceSubSpectrum(dir);
-        repaint();
-      }
-      e.consume();
-      break;
-    }
-  }
+	public void keyPressed(KeyEvent e) {
+		pd.ctrlPressed = (e.getKeyCode() == KeyEvent.VK_CONTROL ? true : e
+				.isControlDown());
+		// should be only in panel region, though.
+		if (e.getKeyCode() == KeyEvent.VK_ESCAPE
+				|| e.getKeyCode() == KeyEvent.VK_DELETE) {
+			pd.currentGraphSet.escapeKeyPressed();
+			pd.isIntegralDrag = false;
+			repaint();
+			e.consume();
+			return;
+		}
+		if (e.getModifiers() != 0) {
+			if (e.isControlDown()) {
+				switch (e.getKeyCode()) {
+				case 45: // '-'
+					pd.currentGraphSet.scaleYBy(0.5);
+					e.consume();
+					break;
+				case 61: // '='
+					pd.currentGraphSet.scaleYBy(2);
+					e.consume();
+					break;
+				case KeyEvent.VK_LEFT:
+					pd.currentGraphSet.toPeak(-1);
+					e.consume();
+					break;
+				case KeyEvent.VK_RIGHT:
+					pd.currentGraphSet.toPeak(1);
+					e.consume();
+					break;
+				case KeyEvent.VK_DOWN:
+				case KeyEvent.VK_UP:
+					int dir = (e.getKeyCode() == KeyEvent.VK_DOWN ? -1 : 1);
+					if (pd.getSpectrumAt(0).getSubSpectra() == null) {
+						pd.notifySubSpectrumChange(dir, null);
+					} else {
+						pd.currentGraphSet.advanceSubSpectrum(dir);
+						repaint();
+					}
+					e.consume();
+					break;
+				}
+			}
+			return;
+		}
+		switch (e.getKeyCode()) {
+		case KeyEvent.VK_LEFT:
+			pd.doMouseMoved(--pd.mouseX, pd.mouseY);
+			e.consume();
+			repaint();
+			break;
+		case KeyEvent.VK_RIGHT:
+			pd.doMouseMoved(++pd.mouseX, pd.mouseY);
+			e.consume();
+			repaint();
+			break;
+		}
+
+	}
 
   public void keyReleased(KeyEvent e) {
+  	if (e.getKeyCode() == KeyEvent.VK_CONTROL)
+    	pd.ctrlPressed = false;  		
   }
 
   public void keyTyped(KeyEvent e) {
