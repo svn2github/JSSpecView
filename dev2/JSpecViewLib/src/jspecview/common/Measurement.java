@@ -35,6 +35,12 @@ public class Measurement extends Annotation {
 	JDXSpectrum spec;
 	protected double value;
 	
+  public Measurement(JDXSpectrum spec, double x, double y) {
+		super(x, y, "", false, false, 0, 6);
+		this.spec = spec;
+		setPt2(x, y);
+	}
+  
   public Measurement(JDXSpectrum spec, double x, double y, String text, double x1, double y1) {
 		super(x, y, text, false, false, 0, 6);
 		this.spec = spec;
@@ -50,7 +56,7 @@ public class Measurement extends Annotation {
 	public void setPt2(double x, double y) {
 		pt2.setXVal(x);
 		pt2.setYVal(y);
-		value = (x - getXVal());
+		value = Math.abs(x - getXVal());
 		text = spec.setMeasurementText(this);
   }
   

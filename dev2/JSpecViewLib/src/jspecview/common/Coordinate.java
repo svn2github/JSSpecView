@@ -536,13 +536,11 @@ public class Coordinate {
     return max;
   }
 
-  public static double getYValueAt(Coordinate[] xyCoords, double xPt,
-                                   Comparator<Coordinate> c) {
-    Coordinate x = new Coordinate(xPt, 0);
-    int i = Arrays.binarySearch(xyCoords, x, c);
-    if (i < 0) i = -1 - i;
-    //System.out.println(i);
-    if (i <= 0 || i >= xyCoords.length)
+  private final static Comparator<Coordinate> c = new CoordComparator();
+  
+  public static double getYValueAt(Coordinate[] xyCoords, double xPt) {
+  	int i = getNearestIndexForX(xyCoords, xPt);
+    if (i == 0 || i == xyCoords.length)
       return Double.NaN;
     double x1 = xyCoords[i].getXVal();
     double x0 = xyCoords[i - 1].getXVal();
@@ -562,12 +560,35 @@ public class Coordinate {
     return Math.max(Math.min(x, x1), x0);
   }
 
-  public static int getNearestIndexForX(Coordinate[] xyCoords, double x) {
-    int pt = 0;
-    for (int i = 0; i < xyCoords.length; i++)
-      if (xyCoords[i].getXVal() > x)
-        return  pt;
-   return pt;
+  public static int getNearestIndexForX(Coordinate[] xyCoords, double xPt) {
+    Coordinate x = new Coordinate(xPt, 0);
+    int i = Arrays.binarySearch(xyCoords, x, c);
+    if (i < 0) i = -1 - i;
+    if (i < 0)
+    	return 0;
+    if (i > xyCoords.length - 1)
+    	return xyCoords.length - 1;
+    return i;
+  }
+  
+  public static double findXForPeakNearest(Coordinate[] xyCoords, double x, 
+  		boolean isMin) {
+  	int pt = getNearestIndexForX(xyCoords, x);
+  	double f = (isMin ? -1 : 1);
+  	while (pt < xyCoords.length - 1 && f * (xyCoords[pt + 1].yVal - xyCoords[pt].yVal) > 0)
+  			pt++;
+  	while (pt >= 1 && f * (xyCoords[pt - 1].yVal - xyCoords[pt].yVal) > 0)
+			pt--;
+  	// now at local max
+  	// could leave it there? 
+  	// see https://ccrma.stanford.edu/~jos/sasp/Quadratic_Interpolation_Spectral_Peaks.html
+  	if (pt == 0 || pt == xyCoords.length - 1)
+  		return xyCoords[pt].xVal;
+  	double alpha = xyCoords[pt - 1].yVal;
+  	double beta = xyCoords[pt].yVal;
+  	double gamma = xyCoords[pt + 1].yVal;
+  	double p = (alpha - gamma) / 2 / (alpha - 2 * beta + gamma);
+  	return xyCoords[pt].xVal + p * (xyCoords[pt + 1].xVal - xyCoords[pt].xVal);
   }
 
 }

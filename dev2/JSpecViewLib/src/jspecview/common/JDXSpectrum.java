@@ -20,7 +20,6 @@
 package jspecview.common;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.List;
@@ -264,8 +263,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     integration = graph;
   }
 
-  private Comparator<Coordinate> c;
-  
   public double getPercentYValueAt(double x) {
     if (!isContinuous())
       return Double.NaN;
@@ -273,9 +270,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   }
 
   public double getYValueAt(double x) {
-    if (c == null)
-      c = new CoordComparator();
-    return Coordinate.getYValueAt(xyCoords, x, c);
+    return Coordinate.getYValueAt(xyCoords, x);
   }
 
   private JDXSpectrum convertedSpectrum;
@@ -618,8 +613,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return (units == null ? "" : units);
   }
 
-	public void setMeasurement(Measurement m) {
-		//TODO
+	public double findXForPeakNearest(double x) {
+		return Coordinate.findXForPeakNearest(xyCoords, x, (getYRef() > 0));
 	}
-
 }

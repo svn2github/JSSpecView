@@ -21,7 +21,6 @@ package jspecview.common;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -158,8 +157,6 @@ public class IntegralGraph implements Graph {
     return integralCoords;
   }
 
-  private static Comparator<Coordinate> c;
-  
   /**
    * returns FRACTIONAL value * 100
    */
@@ -172,9 +169,7 @@ public class IntegralGraph implements Graph {
   }
 
   private double getYValueAt(double x) {
-    if (c == null)
-      c = new CoordComparator();
-    return Coordinate.getYValueAt(xyCoords, x, c);
+    return Coordinate.getYValueAt(xyCoords, x);
   }
 
 	/**

@@ -840,9 +840,14 @@ abstract class GraphSet {
     
     boolean is2D = (imageView != null && xPixel == imageView.fixX(xPixel) && yPixel == fixY(yPixel));
     
-    if (isControlDown)
-      clearIntegrals();
-    else if (clickCount == 2) {
+    if (!is2D && isControlDown) {
+  		setSpectrumClicked(iPreviousSpectrumClicked);
+    	if (findNearestMaxMin())
+    		pd.repaint();
+    	return;
+    }
+    lastXMax = Double.NaN;
+    if (clickCount == 2) {
       if (is2D) {
         if (sticky2Dcursor) {
           addAnnotation(
@@ -908,6 +913,31 @@ abstract class GraphSet {
     pd.notifyPeakPickedListeners(null);
   }
 
+  private double lastXMax = Double.NaN;
+  private int lastSpecClicked = -1;
+
+	private boolean findNearestMaxMin() {
+		if (iSpectrumClicked < 0) {
+			lastXMax = Double.NaN;
+			return false;
+		}
+		xValueMovedTo = getSpectrum().findXForPeakNearest(xValueMovedTo);
+		xPixelMovedTo = toPixelX(xValueMovedTo);
+		if (Double.isNaN(lastXMax) || lastSpecClicked != iSpectrumClicked || pendingMeasurement == null) {
+			lastXMax = xValueMovedTo;
+			lastSpecClicked = iSpectrumClicked;
+			pendingMeasurement = new Measurement(spectra.get(iSpectrumClicked),
+					xValueMovedTo, yValueMovedTo);
+			return true;
+		}
+		pendingMeasurement.setPt2(xValueMovedTo, yValueMovedTo);
+		if (pendingMeasurement.text.length() > 0)
+			setMeasurement(pendingMeasurement);
+		pendingMeasurement = null;
+		lastXMax = Double.NaN;
+		return true;
+	}
+	
 	private void processPendingMeasurement(int xPixel, int yPixel,
 			int clickCount) {
 		if (!isInPlotRegion(xPixel, yPixel)) {
@@ -933,7 +963,7 @@ abstract class GraphSet {
 			}
     	x = toX(xPixel);
     	y = toY(yPixel);
-      pendingMeasurement = new Measurement(spectra.get(iSpectrumClicked), x, y, "", x, y);
+      pendingMeasurement = new Measurement(spectra.get(iSpectrumClicked), x, y);
       break;
 		case 1: // single click -- save and continue
 		case -2: // second double click -- save and quit
@@ -946,7 +976,7 @@ abstract class GraphSet {
   			setMeasurement(pendingMeasurement);
   			if (clickCount == 1) {
 	  			setSpectrumClicked(getSpectrumIndex(pendingMeasurement.spec));
-		  		pendingMeasurement = new Measurement(pendingMeasurement.spec, x, y, "", x, y);
+		  		pendingMeasurement = new Measurement(pendingMeasurement.spec, x, y);
   			} else {
     			pendingMeasurement = null;
   			}
@@ -1112,6 +1142,9 @@ abstract class GraphSet {
   synchronized void mouseMovedEvent(int xPixel, int yPixel) {
   	inPlotMove = isInPlotRegion(xPixel, yPixel);
   	xPixelMovedTo = (inPlotMove ? xPixel: -1);
+  	if (inPlotMove)
+  		xValueMovedTo = toX(xPixelMovedTo);
+
   	if (nSpectra > 1) {
   		int iFrame = getSplitPoint(yPixel);
   		setPositionForFrame(iFrame);
@@ -1369,7 +1402,7 @@ abstract class GraphSet {
         return;
       pd.addHighlight(this, x1, x2, spec, 200, 200, 200, 200);
       if (ScaleData.isWithinRange(x1, view)
-          && ScaleData.isWithinRange(x2, view)) {
+          || ScaleData.isWithinRange(x2, view)  || view.maxX - view.minX > x2 - x1) {
         pd.repaint();
       } else {
         reset();
@@ -1819,16 +1852,15 @@ abstract class GraphSet {
 	  haveSingleYScale = (showAllStacked && nSpectra > 1 ? allowStackedYScale && doYScale : true);
 		if (haveSingleYScale) {
 			setUserYFactor(iSpectrumForScale);
+	    if (!isDrawNoSpectra() && !pd.isPrinting)
+				drawHighlightsAndPeakTabs(g, spectra.get(iSpectrumForScale));
 			if (pd.gridOn && imageView == null)
 				drawGrid(g);
 		}
-	  setWidgets(needNewPins, subIndex, doDraw1DObjects);
-		if (doDraw1DObjects) {
-			if (nSplit == 1 || showAllStacked || iSpectrumSelected == iSplit) {
+	  setWidgets(needNewPins, subIndex, doDraw1DObjects);	  
+	  if (doDraw1DObjects) {
+			if (nSplit == 1 || showAllStacked || iSpectrumSelected == iSplit)
 				drawWidgets(g, subIndex, doDraw1DObjects);
-				drawPeakTabs(g);
-				drawHighlights(g);
-			}
 			if (pd.getBoolean(ScriptToken.XSCALEON))
 				drawXScale(g);
 			if (pd.getBoolean(ScriptToken.XUNITSON))
@@ -1887,7 +1919,6 @@ abstract class GraphSet {
 		IntegralGraph ig = (withIntegration && pd.ctrlPressed && !pd.isIntegralDrag ? spec
 				.getIntegrationGraph()
 				: null);
-		xValueMovedTo = toX(xPixelMovedTo);
 		yValueMovedTo = (ig == null ? spec.getYValueAt(xValueMovedTo) : 
 			ig.getPercentYValueAt(xValueMovedTo));
 		setCoordStr(xValueMovedTo, yValueMovedTo);
@@ -1916,17 +1947,9 @@ abstract class GraphSet {
     }
   }
 
-  private void drawHighlights(Object g) {
+  private void drawPeakTabs(Object g, JDXSpectrum spec) {
     if (isDrawNoSpectra() || pd.isPrinting)
       return;
-    JDXSpectrum spec = spectra.get(getFixedSelectedSpectrumIndex());
-    drawHighlights(g, spec);
-  }
-
-  private void drawPeakTabs(Object g) {
-    if (isDrawNoSpectra() || pd.isPrinting)
-      return;
-    JDXSpectrum spec = spectra.get(getFixedSelectedSpectrumIndex());
     List<PeakInfo> list = (
     		nSpectra == 1 || iSpectrumSelected >= 0 ? spec.getPeakList()
         : null);
@@ -2485,7 +2508,7 @@ abstract class GraphSet {
           highlights.remove(i);
   }
 
-  void drawHighlights(Object g, JDXSpectrum spec) {
+  void drawHighlightsAndPeakTabs(Object g, JDXSpectrum spec) {
     for (int i = 0; i < highlights.size(); i++) {
       Highlight hl = highlights.get(i);
       if (hl.spectrum == spec) {
@@ -2494,6 +2517,7 @@ abstract class GraphSet {
             true);
       }
     }
+		drawPeakTabs(g, spec);
   }
 
   // determine whether there are any ratio annotations to draw
