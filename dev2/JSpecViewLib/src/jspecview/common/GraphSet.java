@@ -182,6 +182,7 @@ abstract class GraphSet {
   
 	/*very*/private int iSpectrumSelected = -1;
 	int setSpectrumSelected(int i) {
+		System.out.println("spec select " + i);
 		return iSpectrumSelected = i;
 	}
 
@@ -1093,6 +1094,8 @@ abstract class GraphSet {
 		return false;
 	}
 	synchronized void mouseReleasedEvent() {
+  	if (iSpectrumMovedTo >= 0)
+  		setUserYFactor(iSpectrumMovedTo);
     PlotWidget thisWidget = pd.thisWidget;
     if (pd.isIntegralDrag) {
       if (isGoodEvent(zoomBox1D, null, true)) {
@@ -1141,11 +1144,6 @@ abstract class GraphSet {
 	private boolean haveLeftRightArrows;
   
   synchronized void mouseMovedEvent(int xPixel, int yPixel) {
-  	inPlotMove = isInPlotRegion(xPixel, yPixel);
-  	xPixelMovedTo = (inPlotMove ? xPixel: -1);
-  	if (inPlotMove)
-  		xValueMovedTo = toX(xPixelMovedTo);
-
   	if (nSpectra > 1) {
   		int iFrame = getSplitPoint(yPixel);
   		setPositionForFrame(iFrame);
@@ -1153,6 +1151,10 @@ abstract class GraphSet {
     	if (iSpectrumMovedTo >= 0)
     		setUserYFactor(iSpectrumMovedTo);
   	}
+  	inPlotMove = isInPlotRegion(xPixel, yPixel);
+  	xPixelMovedTo = (inPlotMove ? xPixel: -1);
+  	if (inPlotMove)
+  		xValueMovedTo = toX(xPixelMovedTo);
     if (pd.isIntegralDrag) {
     } else if (pendingMeasurement != null) {
     	processPendingMeasurement(xPixel, yPixel, 0);
@@ -1713,7 +1715,8 @@ abstract class GraphSet {
           minNumOfPointsForZoom, startIndices, endIndices, false))
         return;
     }
-
+// TODO: after zooming one of two overlaid spectra, 
+    // the zoomBox method fails. 
     int iSpec = (iSpectrumBold >= 0 ? iSpectrumBold : iSpectrumMovedTo);
     getView(initX, finalX, initY, finalY, startIndices, endIndices, view, iSpec);
     xPixelMovedTo = -1;
@@ -1907,7 +1910,6 @@ abstract class GraphSet {
 					}
 					offset -= yOffsetPixels;
 				}
-
 		} else {
 			drawWidgets(g, subIndex, doDraw1DObjects);
 		}
