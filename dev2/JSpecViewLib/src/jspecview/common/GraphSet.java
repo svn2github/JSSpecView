@@ -2,6 +2,7 @@ package jspecview.common;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -2880,6 +2881,13 @@ abstract class GraphSet {
 
 	boolean getShowIntegration() {
 		return showIntegration;
+	}
+	
+	BitSet bsSelected = new BitSet();
+
+	public void scaleSelectedBy(double f) {
+		for (int i = bsSelected.nextSetBit(0); i >= 0; i = bsSelected.nextSetBit(i + 1))
+			view.scaleSpectrum(i, f);
 	}
 
 }

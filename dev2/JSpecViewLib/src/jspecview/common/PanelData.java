@@ -766,4 +766,24 @@ public class PanelData {
     	currentGraphSet.setShowIntegration(tfToggle);
 	}
 
+	public void scaleSelectedBy(double f) {
+		for (int i = graphSets.size(); --i >= 0;)
+			graphSets.get(i).scaleSelectedBy(f);
+		
+	}
+
+	public void select(int iSpec) {
+		for (int i = 0, pt = 0; i < graphSets.size(); i++) {
+			if (iSpec == Integer.MIN_VALUE) {
+				graphSets.get(i).bsSelected.clear();
+				continue;
+			}
+			List<JDXSpectrum> specs = graphSets.get(i).spectra;
+			for (int j = 0; j < specs.size(); j++, pt++)
+				if (iSpec == -1 || iSpec == pt + 1)
+      		graphSets.get(i).bsSelected.set(pt);
+		}
+		
+	}
+
 }

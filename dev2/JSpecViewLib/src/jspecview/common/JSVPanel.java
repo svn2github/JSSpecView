@@ -1,5 +1,7 @@
 package jspecview.common;
 
+import java.util.List;
+
 public interface JSVPanel extends JSVContainer {
 
   void repaint();
@@ -23,6 +25,4 @@ public interface JSVPanel extends JSVContainer {
   void setSpectrum(JDXSpectrum spec);
   void setToolTipText(String s);
   void setupPlatform();
-
-	void splitStack(boolean doSplit);
 }

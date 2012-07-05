@@ -79,7 +79,9 @@ public enum ScriptToken {
   PLOTCOLORS("color,color,color,..."), 
   PRINT,
   REVERSEPLOT("T"), 
+  SCALEBY("factor"),
   SCALECOLOR("C"),
+  SELECT("spectrumID, spectrumID,..."),
   SHOWINTEGRATION("T"),
   SPECTRUM("spectrumID"), 
   SPECTRUMNUMBER,
@@ -173,6 +175,7 @@ public enum ScriptToken {
     case YSCALE:
       // take full command
       return removeCommandName(cmd);
+    case SELECT:
     case OVERLAY:
     case ZOOM:
       // commas to spaces

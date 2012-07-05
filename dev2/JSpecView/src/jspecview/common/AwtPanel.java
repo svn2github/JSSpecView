@@ -686,8 +686,4 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     return getSpectrumAt(0).toString();
   }
 
-	public void splitStack(boolean doSplit) {
-		pd.splitStack(doSplit);
-	}
-
 }

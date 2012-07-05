@@ -105,7 +105,7 @@ public class JSViewer {
           break;
         case OVERLAYSTACKED:
           if (jsvp != null)
-          	jsvp.splitStack(!Parameters.isTrue(value));
+          	jsvp.getPanelData().splitStack(!Parameters.isTrue(value));
           break;
         case PEAK:
           try {
@@ -124,6 +124,12 @@ public class JSViewer {
             continue;
         	si.print();
         	break;
+        case SCALEBY:
+        	scaleBy(si.getPanelNodes(), value);
+        	break;
+        case SELECT:
+          execSelect(si, value);
+          break;
         case SHOWINTEGRATION:
         	if (jsvp != null)
         		jsvp.getPanelData().setShowIntegration(value.equalsIgnoreCase("TOGGLE") ? null : Parameters.isTrue(value) ? Boolean.TRUE : Boolean.FALSE);
@@ -156,10 +162,28 @@ public class JSViewer {
     return isOK;
   }
 
+	private static void scaleBy(List<JSVPanelNode> nodes, String value) {
+		try {
+			double f = Double.parseDouble(value);
+	    for (int i = nodes.size(); --i >= 0;)
+       	nodes.get(i).jsvp.getPanelData().scaleSelectedBy(f);
+		} catch (Exception e) {
+		}
+	}
+
+	public static void execSelect(ScriptInterface si, String value) {
+    List<JSVPanelNode> nodes = si.getPanelNodes();
+    for (int i = nodes.size(); --i >= 0;)
+    	nodes.get(i).jsvp.getPanelData().select(Integer.MIN_VALUE);
+    List<JDXSpectrum> speclist = new ArrayList<JDXSpectrum>();
+    fillSpecList(si, si.getPanelNodes(), value, speclist,
+        si.getSelectedPanel(), "1.", false);
+	}
+
 	public static void execOverlay(ScriptInterface si, String value, boolean fromScript) {
     List<JDXSpectrum> speclist = new ArrayList<JDXSpectrum>();
     String strlist = fillSpecList(si, si.getPanelNodes(), value, speclist,
-        si.getSelectedPanel(), "1.");
+        si.getSelectedPanel(), "1.", true);
     if (speclist.size() > 0)
       si.openDataOrFile(null, strlist, speclist, strlist, -1, -1);
     if (!fromScript) {
@@ -482,27 +506,40 @@ public class JSViewer {
 	 * @param speclist
 	 * @param selectedPanel
 	 * @param prefix
+	 * @param isOverlay
 	 * @return comma-separated list, for the title
 	 */
-	public static String fillSpecList(ScriptInterface si,
+	private static String fillSpecList(ScriptInterface si,
 			List<JSVPanelNode> panelNodes, String value, List<JDXSpectrum> speclist,
-			JSVPanel selectedPanel, String prefix) {
+			JSVPanel selectedPanel, String prefix, boolean isOverlay) {
 		List<String> list;
 		List<String> list0 = null;
 		boolean isNone = (value.equalsIgnoreCase("NONE"));
 		if (isNone || value.equalsIgnoreCase("all"))
 			value = "*";
+		if (value.indexOf("*") < 0 && !isOverlay) {
+			// replace "3.1.1" with "3.1*1"
+			String[] tokens = value.split(" ");
+			StringBuffer sb = new StringBuffer();
+			for (int i = 0; i < tokens.length; i++) {
+				int pt = tokens[i].indexOf('.'); 
+				if (pt != tokens[i].lastIndexOf('.'))
+					tokens[i] = tokens[i].substring(0, pt + 1) + tokens[i].substring(pt + 1).replace('.', '*');
+				sb.append(tokens[i]).append(" ");
+			}
+			value = sb.toString().trim();
+		}
 		value = TextFormat.simpleReplace(value, "*", " * ");
 		if (value.equals(" * ")) {
 			list = ScriptToken.getTokens(JSVPanelNode.getSpectrumListAsString(
-					panelNodes, false));
+					panelNodes, !isOverlay));
 		} else if (value.startsWith("\"")) {
 			list = ScriptToken.getTokens(value);
 		} else {
 			value = TextFormat.simpleReplace(value, "-", " - ");
 			list = ScriptToken.getTokens(value);
 			list0 = ScriptToken.getTokens(JSVPanelNode.getSpectrumListAsString(
-					panelNodes, false));
+					panelNodes, !isOverlay));
 			if (list0.size() == 0)
 				return null;
 		}
@@ -515,7 +552,7 @@ public class JSViewer {
 		String idLast = null;
 		for (int i = 0; i < n; i++) {
 			String id = list.get(i);
-			double userYFactor = 1;
+			double userYFactor = Double.NaN; // also subspectrum number
 			if (i + 1 < n && list.get(i + 1).equals("*")) {
 				i += 2;
 				try {
@@ -547,9 +584,7 @@ public class JSViewer {
 		     node = panelNodes.get(j);
 		      if (node.fileName != null && node.fileName.startsWith(id) 
 		      		|| node.frameTitle != null && node.frameTitle.startsWith(id)) {
-		  			JDXSpectrum spec = node.jsvp.getSpectrumAt(0);
-		  			spec.setUserYFactor(userYFactor);
-		  			speclist.add(spec);
+		      	addSpecToList(node, userYFactor, speclist, isOverlay);
 		      	sb.append(",").append(node.id);
 		      }
 		    }
@@ -561,13 +596,11 @@ public class JSViewer {
 			}
 			if (node == null)
 				continue;
-			JDXSpectrum spec = node.jsvp.getSpectrumAt(0);
 			idLast = id;
-			spec.setUserYFactor(userYFactor);
-			speclist.add(spec);
+    	addSpecToList(node, userYFactor, speclist, isOverlay);
 			sb.append(",").append(id);
 		}
-		if (speclist.size() == 1) {
+		if (isOverlay && speclist.size() == 1) {
 			JSVPanelNode node = JSVPanelNode.findNodeById(idLast, panelNodes);
 			if (node != null) {
 				si.setNode(node, true);
@@ -580,6 +613,18 @@ public class JSViewer {
 				: null);
 	}
 	
+	private static void addSpecToList(JSVPanelNode node, double userYFactor,
+			List<JDXSpectrum> speclist, boolean isOverlay) {
+		if (isOverlay) {
+			JDXSpectrum spec = node.jsvp.getSpectrumAt(0);
+			spec.setUserYFactor(Double.isNaN(userYFactor) ? 1 : userYFactor);
+			if (spec != null)
+				speclist.add(spec);
+		} else {
+			node.jsvp.getPanelData().select(Double.isNaN(userYFactor) ? -1 : (int) userYFactor);
+		}
+	}
+
 	public static void zoomTo(ScriptInterface si, int mode) {
 		JSVPanel jsvp = si.getSelectedPanel();
 		if (jsvp == null)
