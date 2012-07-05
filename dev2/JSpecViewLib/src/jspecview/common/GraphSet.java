@@ -1402,7 +1402,7 @@ abstract class GraphSet {
         return;
       pd.addHighlight(this, x1, x2, spec, 200, 200, 200, 200);
       if (ScaleData.isWithinRange(x1, view)
-          || ScaleData.isWithinRange(x2, view)  || view.maxX - view.minX > x2 - x1) {
+          || ScaleData.isWithinRange(x2, view)  || view.minX > x1 && view.maxX < x2) {
         pd.repaint();
       } else {
         reset();
