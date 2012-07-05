@@ -184,7 +184,6 @@ abstract class GraphSet {
   
 	/*very*/private int iSpectrumSelected = -1;
 	int setSpectrumSelected(int i) {
-		System.out.println("spec select " + i);
 		return iSpectrumSelected = i;
 	}
 
@@ -635,7 +634,7 @@ abstract class GraphSet {
 	}
 
   private int iSelectedMeasurement = -1;
-  private int iSelectedIntegralValue = -1;
+  private int iSelectedIntegral = -1;
   
   private double lastXMax = Double.NaN;
   private int lastSpecClicked = -1;
@@ -1643,14 +1642,13 @@ abstract class GraphSet {
   private void drawIntegralValues(Object g, JDXSpectrum spec, int yOffset) {
     drawnIntegrals = spec.getIntegralRegions();
     pd.setFont(g, width, FONT_BOLD, 12, false);
-    NumberFormat formatter = pd.getFormatter("#0.0");
     setColor(g, ScriptToken.INTEGRALPLOTCOLOR);
 
     for (int i = drawnIntegrals.size(); --i >= 0;) {
       Measurement in = drawnIntegrals.get(i);
-      if (in.value == 0)
+      if (in.getValue() == 0)
         continue;
-      String s = "  " + formatter.format(Math.abs(in.value));
+      String s = "  " + in.getText();
       int x = toPixelX(in.getXVal2());
       int y1 = yOffset + toPixelYint(in.getYVal());
       int y2 = yOffset + toPixelYint(in.getYVal2());
@@ -1964,8 +1962,8 @@ abstract class GraphSet {
 		}
 		pd.setToolTipText(pendingMeasurement != null 
 				|| iSelectedMeasurement >= 0 
-				|| iSelectedIntegralValue >= 0 ? "Press ESC to delete "
-						+ (iSelectedIntegralValue >= 0 ? "integral" 
+				|| iSelectedIntegral >= 0 ? "Press ESC to delete "
+						+ (iSelectedIntegral >= 0 ? "integral or N to normalize" 
 								: pendingMeasurement == null ? "\""
 								+ measurements.get(iSelectedMeasurement).text + "\""
 								: "measurement")
@@ -2499,10 +2497,10 @@ abstract class GraphSet {
 			measurements.remove(iSelectedMeasurement);
 			iSelectedMeasurement = -1;
 		}
-		if (drawnIntegrals != null && iSelectedIntegralValue >= 0
-				&& drawnIntegrals.size() >= iSelectedIntegralValue) {
-			drawnIntegrals.remove(iSelectedIntegralValue);
-			iSelectedIntegralValue = -1;
+		if (drawnIntegrals != null && iSelectedIntegral >= 0
+				&& drawnIntegrals.size() >= iSelectedIntegral) {
+			drawnIntegrals.remove(iSelectedIntegral);
+			iSelectedIntegral = -1;
 		}
 	}
 
@@ -2533,6 +2531,14 @@ abstract class GraphSet {
     return spectraInfo;
   }
 
+  int getSelectedIntegral() {
+  	return iSelectedIntegral;
+  }
+  
+  String getSelectedIntegralText() {
+  	return (iSelectedIntegral >= 0 ? drawnIntegrals.get(iSelectedIntegral).text: "");
+  }
+  
 	boolean getShowIntegration() {
 		return showIntegration;
 	}
@@ -2557,7 +2563,7 @@ abstract class GraphSet {
 	synchronized void mouseClickEvent(int xPixel, int yPixel, int clickCount,
 			boolean isControlDown) {
 		iSelectedMeasurement = -1;
-		iSelectedIntegralValue = -1;
+		iSelectedIntegral = -1;
 		if (checkArrowUpDownClick(xPixel, yPixel))
 			return;
 		if (isSplitWidget(xPixel, yPixel)) {
@@ -2704,7 +2710,7 @@ abstract class GraphSet {
     } else {
     	iSelectedMeasurement = (inPlotMove && measurements != null ? 
     			findMeasurement(measurements, xPixel, yPixel, 0) : -1);
-    	iSelectedIntegralValue = (inPlotMove && drawnIntegrals != null && iSelectedMeasurement == -1 ? 
+    	iSelectedIntegral = (inPlotMove && drawnIntegrals != null && iSelectedMeasurement == -1 ? 
     			findMeasurement(drawnIntegrals, xPixel, yPixel, 0) : -1);
       setToolTipForPixels(xPixel, yPixel);
       if (imageView == null) {
@@ -2831,6 +2837,20 @@ abstract class GraphSet {
 		return null;
 	}
 
+	void setSelectedIntegral(double val) {
+		double val0 = drawnIntegrals.get(iSelectedIntegral).getValue();
+		double factor = val/val0;
+		List<JDXSpectrum> list = new ArrayList<JDXSpectrum>();
+		for (int i = 0; i < drawnIntegrals.size(); i++) {
+			Measurement m = drawnIntegrals.get(i);
+			m.setValue(factor * m.getValue());
+			if (!list.contains(m))
+				list.add(m.spec);
+		}
+	  for (int i = 0; i < list.size(); i++)
+	    list.get(i).getIntegrationGraph().scaleIntegrationBy(factor);
+	}
+	
 	void setShowIntegration(Boolean tfToggle) {
 		showIntegration = (tfToggle == null ? !showIntegration : tfToggle.booleanValue());
 	}
@@ -2907,5 +2927,4 @@ abstract class GraphSet {
 		bsSelected.set(i);
 		setSpectrumClicked(bsSelected.cardinality() == 1 ? i : -1);
 	}
-	
 }

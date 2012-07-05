@@ -619,9 +619,10 @@ public abstract class JDXDataObject extends JDXHeader {
 			if (numDim == 1) {
 				boolean isIntegral = (m instanceof Integral);
 				if (isHNMR() || isIntegral) {
-					dx *= observedFreq;
-					if (!isIntegral)
+					if (!isIntegral) {
+						dx *= observedFreq;
   					units = " Hz";
+					}
 				} else {
 					units = " ppm";
 					hash = "#0.00";

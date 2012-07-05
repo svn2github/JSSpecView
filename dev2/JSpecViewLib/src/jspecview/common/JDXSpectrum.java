@@ -616,4 +616,5 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
 	public double findXForPeakNearest(double x) {
 		return Coordinate.findXForPeakNearest(xyCoords, x, (getYRef() > 0));
 	}
+
 }

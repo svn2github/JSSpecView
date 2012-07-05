@@ -33,7 +33,7 @@ public class Measurement extends Annotation {
   
 	private Coordinate pt2 = new Coordinate();
 	JDXSpectrum spec;
-	protected double value;
+	private double value;
 	
   public Measurement(JDXSpectrum spec, double x, double y) {
 		super(x, y, "", false, false, 0, 6);
@@ -66,6 +66,7 @@ public class Measurement extends Annotation {
   
   public void setValue(double value) {
   	this.value = value;
+		text = spec.setMeasurementText(this);
   }
 
   public double getValue() {

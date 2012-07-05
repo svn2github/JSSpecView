@@ -45,6 +45,12 @@ public class IntegralGraph implements Graph {
 
   private List<Measurement> integralRegions;
   private JDXSpectrum spectrum;
+  
+  private double normalizationFactor = 1;
+  
+	public void scaleIntegrationBy(double factor) {
+		normalizationFactor *= factor;
+	}
 
   public void dispose() {
     integralRegions = null;
@@ -207,13 +213,13 @@ public class IntegralGraph implements Graph {
     }
     double intVal = Math.abs(getPercentYValueAt(x2) - getPercentYValueAt(x1));
     if (isFinal) {
-      integralRegions.get(0).value = 0;
+      integralRegions.get(0).setValue(0);
       if (intVal == 0)
         return;
     }
     if (integralRegions == null)
       integralRegions = new ArrayList<Measurement>();
-    Integral in = new Integral(spectrum, intVal, x1, x2, getYValueAt(x1), getYValueAt(x2));
+    Integral in = new Integral(spectrum, intVal * normalizationFactor, x1, x2, getYValueAt(x1), getYValueAt(x2));
     clearIntegralRegions(x1, x2);
     if (isFinal || integralRegions.size() == 0) {
       integralRegions.add(in);

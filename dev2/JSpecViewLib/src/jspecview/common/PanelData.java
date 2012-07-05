@@ -659,10 +659,22 @@ public class PanelData {
 		
 	}
 
+  public int getSelectedIntegral() {
+  	return currentGraphSet.getSelectedIntegral();
+  }
+  
+  public String getSelectedIntegralText() {
+  	return currentGraphSet.getSelectedIntegralText();
+  }
+  
 	public void advanceSubSpectrum(int dir) {
 		currentGraphSet.advanceSubSpectrum(dir);
 	}
   
+	public void setSelectedIntegral(double val) {
+		currentGraphSet.setSelectedIntegral(val);
+	}
+
 	public void scaleYBy(double f) {
 		currentGraphSet.scaleYBy(f);
 	}
@@ -815,5 +827,4 @@ public class PanelData {
     setCurrentGraphSet(gs, xPixel, yPixel, clickCount == 1);
     gs.mouseClickEvent(xPixel, yPixel, clickCount, isControlDown);
   }
-
 }

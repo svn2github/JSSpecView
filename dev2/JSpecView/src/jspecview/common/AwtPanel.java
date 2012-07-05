@@ -60,6 +60,7 @@ import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet; //import javax.print.attribute.standard.MediaSize;
 import javax.print.attribute.standard.OrientationRequested;
 import javax.swing.BorderFactory;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import jspecview.exception.JSpecViewException;
@@ -634,6 +635,12 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   }
 
   public void keyTyped(KeyEvent e) {
+  	if (e.getKeyChar() == 'n') {
+  		if (pd.getSelectedIntegral() >= 0)
+  			normalizeIntegral();
+  		e.consume();
+  		return;
+  	}
     if (e.getKeyChar() == 'z') {
       pd.previousView();
       e.consume();
@@ -645,6 +652,25 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
       return;
     }
   }
+
+	private void normalizeIntegral() {
+    String sValue = pd.getSelectedIntegralText();
+    if (sValue.length() == 0)
+    	return;
+		String newValue = (String) JOptionPane.showInputDialog(null,
+				"Enter a new value for this integral", "Normalize Integral",
+				JOptionPane.PLAIN_MESSAGE, null, null, sValue);
+		double val;
+		try {
+			val = Double.parseDouble(newValue);
+		} catch (Exception e) {
+			return;
+		}
+		if (val <= 0)
+			return;
+    pd.setSelectedIntegral(val);
+    pd.refresh();
+	}
 
   public void setupPlatform() {
     setBorder(BorderFactory.createLineBorder(Color.lightGray));

@@ -629,7 +629,8 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	public void setCurrentSource(JDXSource source) {
 		currentSource = source;
-  	appMenu.setCloseMenuItem(source == null ? null : FileManager.getName(source.getFilePath()));
+		appMenu.setCloseMenuItem(source == null ? null : FileManager.getName(source
+				.getFilePath()));
 		boolean isError = (source != null && source.getErrorLog().length() > 0);
 		setError(isError, (isError && source.getErrorLog().indexOf("Warning") >= 0));
 	}
@@ -856,10 +857,12 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	public synchronized void syncToJmol(String msg) {
 		Logger.info("JSV>Jmol " + msg);
-		System.out.println(Thread.currentThread() + "MainFrame sync JSV>Jmol 21" + Thread.currentThread());
+		System.out.println(Thread.currentThread() + "MainFrame sync JSV>Jmol 21"
+				+ Thread.currentThread());
 		if (jmol != null) { // MainFrame --> embedding application
 			jmol.syncScript(msg);
-			System.out.println(Thread.currentThread() + "MainFrame JSV>Jmol sync 22" + Thread.currentThread());
+			System.out.println(Thread.currentThread() + "MainFrame JSV>Jmol sync 22"
+					+ Thread.currentThread());
 			return;
 		}
 		if (jmolOrAdvancedApplet != null) // MainFrame --> embedding applet
@@ -867,11 +870,13 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	public synchronized void syncScript(String peakScript) {
-		System.out.println(Thread.currentThread() + "MainFrame Jmol>JSV sync 11" + Thread.currentThread());
+		System.out.println(Thread.currentThread() + "MainFrame Jmol>JSV sync 11"
+				+ Thread.currentThread());
 		spectraTree.setEnabled(false);
 		JSViewer.syncScript(this, peakScript);
 		spectraTree.setEnabled(true);
-		System.out.println(Thread.currentThread() + "MainFrame Jmol>JSV sync 12" + Thread.currentThread());
+		System.out.println(Thread.currentThread() + "MainFrame Jmol>JSV sync 12"
+				+ Thread.currentThread());
 	}
 
 	public void syncLoad(String filePath) {
@@ -966,9 +971,9 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 			if (msg.length() == 0)
 				msg = null;
 		}
-		if (msg == null) {
-			commandInput.requestFocus();
-		}
+		// if (msg == null) {
+		// commandInput.requestFocus();
+		// }
 	}
 
 	public JSVPanel execSetSpectrum(String value) {
@@ -1267,8 +1272,8 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	public void setMenuEnables(JSVPanelNode node, boolean isSplit) {
 		appMenu.setMenuEnables(node);
 		toolBar.setMenuEnables(node);
-		if (isSplit) // not sure why we care...
-			commandInput.requestFocusInWindow();
+		// if (isSplit) // not sure why we care...
+		// commandInput.requestFocusInWindow();
 	}
 
 	public JDXSource createSource(String data, String filePath, URL base,
@@ -1304,11 +1309,11 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	private String returnFromJmolModel;
 
 	public void setReturnFromJmolModel(String model) {
-    returnFromJmolModel = model;		
+		returnFromJmolModel = model;
 	}
 
 	public String getReturnFromJmolModel() {
-    return returnFromJmolModel;		
+		return returnFromJmolModel;
 	}
 
 	// debugging
