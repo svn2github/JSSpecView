@@ -69,7 +69,7 @@ public enum ScriptToken {
   LOADFILECALLBACKFUNCTIONNAME,
   MENUON, 
   OBSCURE, 
-  OVERLAY("spectrumID[*factor], spectrumID[*factor], ..."),
+  OVERLAY("spectrumID[*factor], spectrumID[*factor], ... Example: OVERLAY 3.1, 3.2*2  or  OVERLAY \"acetophenone\""),
   OVERLAYSTACKED("TF"),
   PEAK("<type(IR,CNMR,HNMR,MS, etc)> \"match\" [ALL]"), 
   PEAKCALLBACKFUNCTIONNAME, 

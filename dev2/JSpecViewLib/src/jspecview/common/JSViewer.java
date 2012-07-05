@@ -63,6 +63,11 @@ public class JSViewer {
           si.execClose(value, true);
           jsvp = si.getSelectedPanel();
           break;
+        case DEBUG:
+          Logger
+              .setLogLevel(value.toLowerCase().equals("high") ? Logger.LEVEL_DEBUGHIGH
+                  : Parameters.isTrue(value) ? Logger.LEVEL_DEBUG : Logger.LEVEL_INFO);
+          break;
         case EXPORT:
           msg = si.execExport(jsvp, value);
           return false;
@@ -125,7 +130,7 @@ public class JSViewer {
         	si.print();
         	break;
         case SCALEBY:
-        	scaleBy(si.getPanelNodes(), value);
+        	scaleSelectedBy(si.getPanelNodes(), value);
         	break;
         case SELECT:
           execSelect(si, value);
@@ -149,7 +154,12 @@ public class JSViewer {
           si.execTest(value);
           break;
         case YSCALE:
-          setYScale(value, si.getPanelNodes(), jsvp, si.getCurrentSource());
+        	if (jsvp != null)
+            setYScale(si, value, jsvp);
+          break;
+        case ZOOM:
+        	if (jsvp != null)
+          	isOK = setZoom(value, jsvp);
           break;
         }
       } catch (Exception e) {
@@ -162,7 +172,32 @@ public class JSViewer {
     return isOK;
   }
 
-	private static void scaleBy(List<JSVPanelNode> nodes, String value) {
+	private static boolean setZoom(String value, JSVPanel jsvp) {
+		double x1 = 0, x2 = 0, y1 = 0, y2 = 0;
+		List<String> tokens;
+		tokens = ScriptToken.getTokens(value);
+		switch (tokens.size()) {
+		default:
+			return false;
+		case 1:
+			if (!tokens.get(0).equalsIgnoreCase("out"))
+				return false;
+			break;
+		case 2:
+			x1 = Double.parseDouble(tokens.get(0));
+			x2 = Double.parseDouble(tokens.get(1));
+			break;
+		case 4:
+			x1 = Double.parseDouble(tokens.get(0));
+			y1 = Double.parseDouble(tokens.get(1));
+			x2 = Double.parseDouble(tokens.get(2));
+			y2 = Double.parseDouble(tokens.get(3));
+		}
+		jsvp.getPanelData().setZoom(x1, y1, x2, y2);
+		return true;
+	}
+
+	private static void scaleSelectedBy(List<JSVPanelNode> nodes, String value) {
 		try {
 			double f = Double.parseDouble(value);
 	    for (int i = nodes.size(); --i >= 0;)
@@ -217,11 +252,11 @@ public class JSViewer {
     jsvp.repaint();
   }
 
-  private static void setYScale(String value, List<JSVPanelNode> panelNodes,
-                                JSVPanel jsvp, JDXSource currentSource) {
-    if (jsvp == null)
-      return;
-    List<String> tokens = ScriptToken.getTokens(value);
+  private static void setYScale(ScriptInterface si, String value, 
+                                JSVPanel jsvp) {
+  	List<JSVPanelNode> panelNodes = si.getPanelNodes();
+  	JDXSource currentSource = si.getCurrentSource();
+  	List<String> tokens = ScriptToken.getTokens(value);
     int pt = 0;
     boolean isAll = false;
     if (tokens.size() > 1 && tokens.get(0).equalsIgnoreCase("ALL")) {
@@ -638,10 +673,10 @@ public class JSViewer {
 			pd.previousView();
 			break;
 		case Integer.MAX_VALUE:
-			pd.fullView();
+			pd.resetView();
 			break;
 		default:
-			pd.resetView();
+			pd.clearAllView();
 			break;
 		}
 	}

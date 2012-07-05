@@ -62,22 +62,18 @@ public class JSVPopupMenu extends JPopupMenu {
   /**
    * Menu Item that allows user to navigate to the next view of a JSVPanel
    * that has been zoomed
-   * @see jspecview.common.JSVPanel#nextView()
    */
   public JMenuItem nextMenuItem = new JMenuItem();
   /**
    * Menu Item for navigating to previous view
-   * @see jspecview.common.JSVPanel#previousView()
    */
   public JMenuItem previousMenuItem = new JMenuItem();
   /**
    * Allows for all view to be cleared
-   * @see jspecview.common.JSVPanel#resetView()
    */
   public JMenuItem clearMenuItem = new JMenuItem();
   /**
    * Allows for the JSVPanel to be reset to it's original display
-   * @see jspecview.common.JSVPanel#clearViews()
    */
   public JMenuItem resetMenuItem = new JMenuItem();
   /**
@@ -104,7 +100,7 @@ public class JSVPopupMenu extends JPopupMenu {
   
   protected JMenu appletSaveAsJDXMenu; // applet only
   protected JMenu appletExportAsMenu;  // applet only
-  protected JMenuItem appletAdvancedMenuItem;
+  //protected JMenuItem appletAdvancedMenuItem;
   protected JMenuItem spectraMenuItem = new JMenuItem();
   public JMenuItem overlayKeyMenuItem = new JMenuItem();
   
@@ -137,13 +133,13 @@ public class JSVPopupMenu extends JPopupMenu {
     clearMenuItem.setText("Clear Views");
     clearMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        scripter.getPanelData().clearViews();
+        scripter.getPanelData().resetView();
       }
     });
     resetMenuItem.setText("Reset View");
     resetMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        scripter.getPanelData().resetView();
+        scripter.getPanelData().clearAllView();
       }
     });
     
@@ -368,11 +364,8 @@ public class JSVPopupMenu extends JPopupMenu {
       appletSaveAsJDXMenu.setEnabled(spec0.canSaveAsJDX());
     if (appletExportAsMenu != null)
       appletExportAsMenu.setEnabled(true);
-    if (appletAdvancedMenuItem != null)
-      appletAdvancedMenuItem.setEnabled(!isOverlaid);
-//    if (appletCompoundMenu != null) 
-  //    appletCompoundMenu.setEnabled(
-    //      appletCompoundMenu.isEnabled() && appletCompoundMenu.getItemCount() > 3);
+    //if (appletAdvancedMenuItem != null)
+      //appletAdvancedMenuItem.setEnabled(!isOverlaid);
   }
 
   private void setSelected(JCheckBoxMenuItem item, boolean TF) {

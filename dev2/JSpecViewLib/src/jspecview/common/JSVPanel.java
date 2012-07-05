@@ -1,7 +1,5 @@
 package jspecview.common;
 
-import java.util.List;
-
 public interface JSVPanel extends JSVContainer {
 
   void repaint();

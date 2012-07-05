@@ -30,7 +30,7 @@ class JSVAppletPopupMenu extends JSVPopupMenu {
       viewMenu.setEnabled(false);
       spectraMenuItem.setEnabled(false);
       scriptMenuItem.setEnabled(false);
-      appletAdvancedMenuItem.setEnabled(false);
+      //appletAdvancedMenuItem.setEnabled(false);
       printMenuItem.setEnabled(false);
     	// about still allowed
     }
@@ -103,14 +103,14 @@ class JSVAppletPopupMenu extends JSVPopupMenu {
 
     setOverlayItems();
 
-    appletAdvancedMenuItem = new JMenuItem();
-    appletAdvancedMenuItem.setText("Advanced...");
-    appletAdvancedMenuItem.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        applet.doAdvanced(applet.getCurrentSource().getFilePath());
-      }
-    });
-    appletAdvancedMenuItem.setEnabled(applet.isPro());
+    //appletAdvancedMenuItem = new JMenuItem();
+    //appletAdvancedMenuItem.setText("Advanced...");
+    //appletAdvancedMenuItem.addActionListener(new ActionListener() {
+    //  public void actionPerformed(ActionEvent e) {
+    //    applet.doAdvanced(applet.getCurrentSource().getFilePath());
+    //  }
+    //});
+    //appletAdvancedMenuItem.setEnabled(applet.isPro());
 
     printMenuItem.setActionCommand("Print");
     printMenuItem.setEnabled(applet.isSigned());
@@ -147,7 +147,7 @@ class JSVAppletPopupMenu extends JSVPopupMenu {
     add(overlayStackOffsetMenuItem);
     addSeparator();
     add(scriptMenuItem);
-    add(appletAdvancedMenuItem);
+    //add(appletAdvancedMenuItem);
     addSeparator();
     add(printMenuItem);
     addSeparator();

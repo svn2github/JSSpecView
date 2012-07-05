@@ -591,4 +591,18 @@ public class Coordinate {
   	return xyCoords[pt].xVal + p * (xyCoords[pt + 1].xVal - xyCoords[pt].xVal);
   }
 
+	static boolean getPickedCoordinates(Coordinate[] coordsClicked,
+			Coordinate coordClicked, Coordinate coord, Coordinate actualCoord) {
+		if (coordClicked == null)
+			return false;
+		double x = coordClicked.getXVal();
+		coord.setXVal(x);
+		coord.setYVal(coordClicked.getYVal());
+		if (actualCoord == null)
+			return true;
+		int pt = getNearestIndexForX(coordsClicked, x);
+		actualCoord.setXVal(coordsClicked[pt].getXVal());
+		actualCoord.setYVal(coordsClicked[pt].getYVal());
+		return true;
+	}
 }

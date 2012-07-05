@@ -300,7 +300,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
    * @return the color of the plot
    */
   public Color getPlotColor(int index) {
-    return ((AwtGraphSet) pd.currentGraphSet).getPlotColor(index);
+    return ((AwtGraphSet) pd.getCurrentGraphSet()).getPlotColor(index);
   }
 
   public Color getColor(int r, int g, int b, int a) {
@@ -580,7 +580,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 		// should be only in panel region, though.
 		if (e.getKeyCode() == KeyEvent.VK_ESCAPE
 				|| e.getKeyCode() == KeyEvent.VK_DELETE) {
-			pd.currentGraphSet.escapeKeyPressed();
+			pd.escapeKeyPressed();
 			pd.isIntegralDrag = false;
 			repaint();
 			e.consume();
@@ -594,12 +594,12 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 				case KeyEvent.VK_UP:
 				case 45: // '-'
 				case 61: // '=/+'
-					pd.currentGraphSet.scaleYBy(code == 61 || code == KeyEvent.VK_UP ? GraphSet.RT2 : 1/GraphSet.RT2);
+					pd.scaleYBy(code == 61 || code == KeyEvent.VK_UP ? GraphSet.RT2 : 1/GraphSet.RT2);
 					e.consume();
 					break;
 				case KeyEvent.VK_LEFT:
 				case KeyEvent.VK_RIGHT:
-					pd.currentGraphSet.toPeak(code == KeyEvent.VK_RIGHT ? 1 :-1);
+					pd.toPeak(code == KeyEvent.VK_RIGHT ? 1 :-1);
 					e.consume();
 					break;
 				}
@@ -619,7 +619,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 			if (pd.getSpectrumAt(0).getSubSpectra() == null) {
 				pd.notifySubSpectrumChange(dir, null);
 			} else {
-				pd.currentGraphSet.advanceSubSpectrum(dir);
+				pd.advanceSubSpectrum(dir);
 				repaint();
 			}
 			e.consume();
@@ -635,12 +635,12 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 
   public void keyTyped(KeyEvent e) {
     if (e.getKeyChar() == 'z') {
-      pd.currentGraphSet.previousView();
+      pd.previousView();
       e.consume();
       return;
     }
     if (e.getKeyChar() == 'y') {
-      pd.currentGraphSet.nextView();
+      pd.nextView();
       e.consume();
       return;
     }

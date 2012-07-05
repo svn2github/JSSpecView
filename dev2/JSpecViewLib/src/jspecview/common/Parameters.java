@@ -21,10 +21,7 @@ package jspecview.common;
 
 import java.awt.Color;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
-
-import jspecview.util.Logger;
 
 /**
  * This a representation of the Display Scheme for the spectral display.
@@ -241,7 +238,6 @@ public class Parameters {
 
   public void set(JSVPanel jsvp, ScriptToken st, String value) {
     Object param = null;
-    List<String> tokens;
     switch (st) {
     default:
       return;
@@ -250,31 +246,6 @@ public class Parameters {
         getPlotColors(value);
       else
         jsvp.setPlotColors(getPlotColors(value));
-      return;
-    case ZOOM:
-      if (jsvp != null) {
-        tokens = ScriptToken.getTokens(value);
-        switch (tokens.size()) {
-        case 1:
-          if (tokens.get(0).equalsIgnoreCase("out"))
-            jsvp.getPanelData().setZoom(0, 0, 0, 0);
-          break;
-        case 2:
-          jsvp.getPanelData().setZoom(Double.parseDouble(tokens.get(0)), 0,
-              Double.parseDouble(tokens.get(1)), 0);
-          break;
-        case 4:
-          jsvp.getPanelData().setZoom(Double.parseDouble(tokens.get(0)),
-              Double.parseDouble(tokens.get(1)),
-              Double.parseDouble(tokens.get(2)),
-              Double.parseDouble(tokens.get(3)));
-        }
-      }
-      break;
-    case DEBUG:
-      Logger
-          .setLogLevel(value.toLowerCase().equals("high") ? Logger.LEVEL_DEBUGHIGH
-              : isTrue(value) ? Logger.LEVEL_DEBUG : Logger.LEVEL_INFO);
       return;
     case COORDINATESON:
     case DISPLAY1D:

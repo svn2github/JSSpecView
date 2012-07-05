@@ -69,16 +69,24 @@ public class PanelData {
   
   // Critical fields
 
-  JSVPanel owner;
   private ArrayList<PanelListener> listeners = new ArrayList<PanelListener>();
-  List<GraphSet> graphSets;
-  GraphSet currentGraphSet;
-	int currentSplitPoint;
+  private GraphSet currentGraphSet;
   private Map<String, NumberFormat> htFormats = new Hashtable<String, NumberFormat>();
+
+	GraphSet getCurrentGraphSet() {
+		return currentGraphSet;
+	}
+	boolean isCurrentGraphSet(GraphSet graphSet) {
+		return graphSet == currentGraphSet;
+	}
+
+  Hashtable<ScriptToken, Object> options = new Hashtable<ScriptToken, Object>();
+  JSVPanel owner;
+  List<GraphSet> graphSets;
+	int currentSplitPoint;
   PlotWidget thisWidget;
   Coordinate coordClicked;
   Coordinate[] coordsClicked;
-  Hashtable<ScriptToken, Object> options = new Hashtable<ScriptToken, Object>();
 
   public void dispose() {
     owner = null;
@@ -96,33 +104,33 @@ public class PanelData {
 
   // plot parameters
 
-  protected int defaultHeight = 450;
-  protected int defaultWidth = 280;
-  protected int leftPlotAreaPos = 80, topPlotAreaPos = 30;
-  protected int plotAreaWidth, plotAreaHeight;
-  protected int left = leftPlotAreaPos, right = 50, top = topPlotAreaPos,
+  int defaultHeight = 450;
+  int defaultWidth = 280;
+  int leftPlotAreaPos = 80, topPlotAreaPos = 30;
+  int plotAreaWidth, plotAreaHeight;
+  int left = leftPlotAreaPos, right = 50, top = topPlotAreaPos,
       bottom = 50;
 
   // current values
 
-  protected boolean drawXAxisLeftToRight;
-  protected boolean xAxisLeftToRight = true;
+  boolean drawXAxisLeftToRight;
+  boolean xAxisLeftToRight = true;
   boolean isIntegralDrag;
-  protected boolean isOverlaid;
+  boolean isOverlaid;
 
   public boolean isOverlaid() {
     return isOverlaid;
   }
 
-  protected int nSpectra;
+  int nSpectra;
   int thisWidth;
   int thisPlotHeight;
 
   String coordStr = "";
   String startupPinTip = "Click to set.";
-  protected String title;
+  String title;
 
-  public void setTitle(String title) {
+  void setTitle(String title) {
     this.title = title;
   }
 
@@ -143,7 +151,7 @@ public class PanelData {
     return info;
   }
 
-  public void setBoolean(Parameters parameters, ScriptToken st) {
+  void setBoolean(Parameters parameters, ScriptToken st) {
     if (st == null) {
       Map<ScriptToken, Boolean> booleans = parameters.getBooleans();
       for (Map.Entry<ScriptToken, Boolean> entry : booleans.entrySet())
@@ -181,7 +189,7 @@ public class PanelData {
   private String titleFontName;
 
 
-  public void setFontName(ScriptToken st, String fontName) {    
+  void setFontName(ScriptToken st, String fontName) {    
     switch (st) {
     case DISPLAYFONTNAME:
       displayFontName = fontName;
@@ -198,7 +206,7 @@ public class PanelData {
 
   boolean isPrinting;
   String printingFont;
-  protected String printGraphPosition = "default";
+  String printGraphPosition = "default";
   boolean titleDrawn;
   boolean display1D;
   int yStackOffsetPercent;
@@ -211,25 +219,22 @@ public class PanelData {
     return display1D;
   }
 
-
-  // listeners to handle various events
-
-  protected void initSingleSpectrum(JDXSpectrum spectrum) {
+  void initSingleSpectrum(JDXSpectrum spectrum) {
     List<JDXSpectrum> spectra = new ArrayList<JDXSpectrum>();
     spectra.add(spectrum);
     initJSVPanel(spectra, 0, 0);
   }
 
-  protected void initJSVPanel(List<JDXSpectrum> spectra, int startIndex, int endIndex) {
+  void initJSVPanel(List<JDXSpectrum> spectra, int startIndex, int endIndex) {
     owner.setupPlatform();
     nSpectra = spectra.size();
-    graphSets = GraphSet.getGraphSets(owner, spectra, startIndex, endIndex);
+    graphSets = GraphSet.createGraphSets(owner, spectra, startIndex, endIndex);
     currentGraphSet = graphSets.get(0);
     //System.out.println("PanelData.initJSVPanel " + currentGraphSet);
     setTitle(getSpectrum().getTitleLabel());
   }
 
-  protected void setCurrentGraphSet(GraphSet gs, int xPixel, int yPixel, boolean isClick) {
+  void setCurrentGraphSet(GraphSet gs, int xPixel, int yPixel, boolean isClick) {
   	int splitPoint = gs.getSplitPoint(yPixel);
   	boolean isNewSet = (currentGraphSet != gs);
   	boolean isNewSplitPoint = (isNewSet || currentSplitPoint != splitPoint);
@@ -252,8 +257,7 @@ public class PanelData {
   	// or nSplit > 1 and new split point
   	// or nSplit == 1 and showAllStacked and isClick and is a spectrum click)
   	
-    if (gs.nSplit > 1)
-    	gs.setSpectrumSelected(currentSplitPoint);
+  	gs.setSpectrum(currentSplitPoint);
     JDXSpectrum spec = gs.getSpectrum();
     notifySubSpectrumChange(spec.getSubIndex(), spec);
     refresh();
@@ -327,7 +331,7 @@ public class PanelData {
    * Removes all highlights from the display
    */
   public void removeAllHighlights() {
-    currentGraphSet.removeAllHighlights(null);
+    currentGraphSet.removeAllHighlights();
   }
 
   /**
@@ -408,7 +412,7 @@ public class PanelData {
    * @param width
    *        the width to be drawn in pixels
    */
-  protected void drawGraph(Object g, int height, int width) {
+  void drawGraph(Object g, int height, int width) {
 
     boolean withCoords;
     display1D = getBoolean(ScriptToken.DISPLAY1D);
@@ -468,25 +472,28 @@ public class PanelData {
     notifyZoomListeners(x1, y1, x2, y2);
   }
 
+  public void clearIntegrals() {
+    currentGraphSet.clearIntegrals();
+  }
+
+  public void clearMeasurements() {
+    currentGraphSet.clearMeasurements();
+  }
+
   /**
    * Resets the spectrum to it's original view
    */
-  public void clearViews() {
-    currentGraphSet.reset();
+  public void resetView() {
+    currentGraphSet.resetView();
   }
 
   /**
    * Clears all views in the zoom list
    */
-  public void resetView() {
+  public void clearAllView() {
     for (int i = graphSets.size(); --i >= 0;)
-      graphSets.get(i).clearViews();
+      graphSets.get(i).clearAllViews();
   }
-
-  public void fullView() {
-    currentGraphSet.setZoomTo(0);
-  }
-
 
   /**
    * Displays the previous view zoomed
@@ -523,7 +530,7 @@ public class PanelData {
    * @return
    */
   public boolean getPickedCoordinates(Coordinate coord, Coordinate actualCoord) {
-    return GraphSet.getPickedCoordinates(coordsClicked, coordClicked, coord,
+    return Coordinate.getPickedCoordinates(coordsClicked, coordClicked, coord,
         actualCoord);
   }
 
@@ -533,8 +540,6 @@ public class PanelData {
         + ")><br />Predicted Solution Colour- RGB(" + color
         + ")<br /><br /></body></HTML>";
   }
-
-
 
   public void refresh() {
     thisWidth = 0;
@@ -577,6 +582,97 @@ public class PanelData {
         return true;
     return false;
   }
+
+  public void repaint() {
+    owner.repaint();
+  }
+
+  public void setToolTipText(String s) {
+    owner.setToolTipText(s);
+  }
+
+  public Object getHighlightColor() {
+    return owner.getColor(ScriptToken.HIGHLIGHTCOLOR);
+  }
+
+  public void setHighlightColor(Object color) {
+    owner.setColor(ScriptToken.HIGHLIGHTCOLOR, color);
+  }
+
+  public String getSolutionColor() {
+    return currentGraphSet.getSolutionColor();
+  }
+
+  public PeakInfo findMatchingPeakInfo(PeakInfo pi) {
+    PeakInfo pi2 = null;
+    for (int i = 0; i < graphSets.size(); i++)
+      if ((pi2 = graphSets.get(i).findMatchingPeakInfo(pi)) != null)
+        break;
+    return pi2;
+  }
+
+	public void splitStack(boolean doSplit) {
+  	if (currentGraphSet != null)
+    	currentGraphSet.splitStack(graphSets, doSplit);
+	}
+
+	public boolean haveSelectedSpectrum() {
+  	if (currentGraphSet == null)
+  		return false;
+  	return currentGraphSet.haveSelectedSpectrum();
+	}
+
+	public boolean getShowIntegration() {
+  	if (currentGraphSet == null)
+  		return false;
+  	return currentGraphSet.getShowIntegration();
+	}
+
+	public void setShowIntegration(Boolean tfToggle) {
+  	if (currentGraphSet != null)
+    	currentGraphSet.setShowIntegration(tfToggle);
+	}
+
+	public void scaleSelectedBy(double f) {
+		for (int i = graphSets.size(); --i >= 0;)
+			graphSets.get(i).scaleSelectedBy(f);
+		
+	}
+
+	/**
+	 * sets bsSelected to the specified pointer
+	 * 
+	 * @param iSpec
+	 */
+	public void select(int iSpec) {
+		// note that iSpec is over the entire set
+		for (int i = 0, pt = 0; i < graphSets.size(); i++) {
+			if (iSpec == Integer.MIN_VALUE) {
+				graphSets.get(i).setSelected(-1);
+				continue;
+			}
+			List<JDXSpectrum> specs = graphSets.get(i).spectra;
+			for (int j = 0; j < specs.size(); j++, pt++)
+				if (iSpec == -1 || iSpec == pt + 1)
+      		graphSets.get(i).setSelected(j);   
+		}
+		
+	}
+
+	public void advanceSubSpectrum(int dir) {
+		currentGraphSet.advanceSubSpectrum(dir);
+	}
+  
+	public void scaleYBy(double f) {
+		currentGraphSet.scaleYBy(f);
+	}
+
+	public void toPeak(int i) {
+		currentGraphSet.toPeak(i);
+	}
+
+
+  // listeners to handle various events
 
   /**
    * Adds a PanelListener
@@ -652,20 +748,24 @@ public class PanelData {
 
   /*--------------the rest are all mouse and keyboard interface -----------------------*/
 
+	public void escapeKeyPressed() {
+		currentGraphSet.escapeKeyPressed();
+	}
+
   private enum Mouse {
     UP, DOWN;
   }
   
   private Mouse mouseState;
-  public boolean gridOn;
-  public boolean titleOn;
+  boolean gridOn;
+  boolean titleOn;
   
   boolean isMouseUp() {
     return (mouseState  == PanelData.Mouse.UP);
   }
   
-  protected int mouseX, mouseY;
-  protected void doMouseMoved(int xPixel, int yPixel) {
+  int mouseX, mouseY;
+  void doMouseMoved(int xPixel, int yPixel) {
   	mouseX = xPixel;
   	mouseY = yPixel;
     mouseState = Mouse.UP;
@@ -676,7 +776,7 @@ public class PanelData {
     gs.mouseMovedEvent(xPixel, yPixel);
   }
 
-  protected void doMousePressed(int xPixel, int yPixel, boolean isControlDown, boolean isShiftDown) {
+  void doMousePressed(int xPixel, int yPixel, boolean isControlDown, boolean isShiftDown) {
     mouseState = Mouse.DOWN;
     GraphSet gs = GraphSet.findGraphSet(graphSets, xPixel, yPixel);
     if (gs == null)
@@ -688,10 +788,10 @@ public class PanelData {
     gs.checkWidgetEvent(xPixel, yPixel, true, ++clickCount);
   }
 
-  int clickCount;
+  private int clickCount;
 	boolean ctrlPressed;
   
-  protected void doMouseDragged(int xPixel, int yPixel) {
+  void doMouseDragged(int xPixel, int yPixel) {
     mouseState = Mouse.DOWN;
     if (GraphSet.findGraphSet(graphSets, xPixel, yPixel) != currentGraphSet)
       return;
@@ -699,7 +799,7 @@ public class PanelData {
     currentGraphSet.mouseMovedEvent(xPixel, yPixel);
   }
 
-  protected void doMouseReleased(boolean isButton1) {
+  void doMouseReleased(boolean isButton1) {
     mouseState = Mouse.UP;
     if (thisWidget == null || !isButton1)
       return;
@@ -707,7 +807,7 @@ public class PanelData {
     thisWidget = null;
   }
 
-  protected void doMouseClicked(int xPixel, int yPixel, int clickCount,
+  void doMouseClicked(int xPixel, int yPixel, int clickCount,
                                 boolean isControlDown) {
     GraphSet gs = GraphSet.findGraphSet(graphSets, xPixel, yPixel);
     if (gs == null)
@@ -715,75 +815,5 @@ public class PanelData {
     setCurrentGraphSet(gs, xPixel, yPixel, clickCount == 1);
     gs.mouseClickEvent(xPixel, yPixel, clickCount, isControlDown);
   }
-  
-  public void repaint() {
-    owner.repaint();
-  }
-
-  public void setToolTipText(String s) {
-    owner.setToolTipText(s);
-  }
-
-  public Object getHighlightColor() {
-    return owner.getColor(ScriptToken.HIGHLIGHTCOLOR);
-  }
-
-  public void setHighlightColor(Object color) {
-    owner.setColor(ScriptToken.HIGHLIGHTCOLOR, color);
-  }
-
-  public String getSolutionColor() {
-    return currentGraphSet.getSolutionColor();
-  }
-
-  public PeakInfo findMatchingPeakInfo(PeakInfo pi) {
-    PeakInfo pi2 = null;
-    for (int i = 0; i < graphSets.size(); i++)
-      if ((pi2 = graphSets.get(i).findMatchingPeakInfo(pi)) != null)
-        break;
-    return pi2;
-  }
-
-	public void splitStack(boolean doSplit) {
-  	if (currentGraphSet != null)
-    	currentGraphSet.splitStack(graphSets, doSplit);
-	}
-
-	public boolean haveSelectedSpectrum() {
-  	if (currentGraphSet == null)
-  		return false;
-  	return currentGraphSet.haveSelectedSpectrum();
-	}
-
-	public boolean getShowIntegration() {
-  	if (currentGraphSet == null)
-  		return false;
-  	return currentGraphSet.getShowIntegration();
-	}
-
-	public void setShowIntegration(Boolean tfToggle) {
-  	if (currentGraphSet != null)
-    	currentGraphSet.setShowIntegration(tfToggle);
-	}
-
-	public void scaleSelectedBy(double f) {
-		for (int i = graphSets.size(); --i >= 0;)
-			graphSets.get(i).scaleSelectedBy(f);
-		
-	}
-
-	public void select(int iSpec) {
-		for (int i = 0, pt = 0; i < graphSets.size(); i++) {
-			if (iSpec == Integer.MIN_VALUE) {
-				graphSets.get(i).bsSelected.clear();
-				continue;
-			}
-			List<JDXSpectrum> specs = graphSets.get(i).spectra;
-			for (int j = 0; j < specs.size(); j++, pt++)
-				if (iSpec == -1 || iSpec == pt + 1)
-      		graphSets.get(i).bsSelected.set(pt);
-		}
-		
-	}
 
 }

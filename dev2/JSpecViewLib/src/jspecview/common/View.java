@@ -227,12 +227,12 @@ class View extends ScaleData {
 		return (i >= 0 && i < nSpec ? spectrumScaleFactors[i] : 1);
 	}
 
-	void copyScaleFactors(View msd) {
-		System.arraycopy(msd.spectrumScaleFactors, 0, spectrumScaleFactors, 0, nSpec);
-		System.arraycopy(msd.userYFactors, 0, userYFactors, 0, nSpec);
-		System.arraycopy(msd.spectrumYRefs, 0, spectrumYRefs, 0, nSpec);
-		initMinYOnScale = msd.initMinYOnScale;
-		initMaxYOnScale = msd.initMaxYOnScale;
+	void copyScaleFactors(View view) {
+		System.arraycopy(view.spectrumScaleFactors, 0, spectrumScaleFactors, 0, nSpec);
+		System.arraycopy(view.userYFactors, 0, userYFactors, 0, nSpec);
+		System.arraycopy(view.spectrumYRefs, 0, spectrumYRefs, 0, nSpec);
+		initMinYOnScale = view.initMinYOnScale;
+		initMaxYOnScale = view.initMaxYOnScale;
 		
 	}
 
