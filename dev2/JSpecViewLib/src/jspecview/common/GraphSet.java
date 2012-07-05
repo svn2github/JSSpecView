@@ -917,16 +917,17 @@ abstract class GraphSet {
   private int lastSpecClicked = -1;
 
 	private boolean findNearestMaxMin() {
-		if (iSpectrumClicked < 0) {
+		if (nSpectra > 1 && iSpectrumClicked < 0) {
 			lastXMax = Double.NaN;
 			return false;
 		}
+		int iSpec = getFixedSelectedSpectrumIndex();
 		xValueMovedTo = getSpectrum().findXForPeakNearest(xValueMovedTo);
 		xPixelMovedTo = toPixelX(xValueMovedTo);
-		if (Double.isNaN(lastXMax) || lastSpecClicked != iSpectrumClicked || pendingMeasurement == null) {
+		if (Double.isNaN(lastXMax) || lastSpecClicked != iSpec || pendingMeasurement == null) {
 			lastXMax = xValueMovedTo;
-			lastSpecClicked = iSpectrumClicked;
-			pendingMeasurement = new Measurement(spectra.get(iSpectrumClicked),
+			lastSpecClicked = iSpec;
+			pendingMeasurement = new Measurement(spectra.get(iSpec),
 					xValueMovedTo, yValueMovedTo);
 			return true;
 		}
