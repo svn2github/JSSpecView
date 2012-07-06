@@ -5,6 +5,36 @@ Put new items at top, please.
 
 Updated version of the to do list:
 
+-Measurements:
+  Needs a menu item
+  
+  Measurements>
+    Show/Hide Measurements
+    Clear Measurements
+    Mark Measurements [just calls up a prompt telling how to do that]
+    List Measurements
+    
+
+-Integration:
+  Needs new set of menu items:
+  
+  Integration>
+     Show/Hide Integration
+     Clear Integration
+     Normalize
+     Set Baseline Offset
+     Set Scaling Factor
+     Show/Hide Unmarked Regions
+     Mark Integrals [just calls up a prompt telling how to do that]
+     List Integrals
+
+-in the jsvtest.htm page, when there is a CNMR and IR overlay shown
+nothing happens when a proton is clicked on a molecule in the Jmol
+applet. The viewer should have the option to either add H-NMR with
+current overlay or to load only H-NMR (in this case the viewer could
+have already saved the C-NMR and IR changes as a "view" to return to
+later--could be done through a pop up box
+
 -when in the split overlay version: addition of two boxes next to the
 one to toggle between stacked and split, one to clear the selected
 spectrum (X), and one to minimize it only (-)
@@ -14,16 +44,17 @@ to call up changes to a current overlay similar to "save as," so that
 if one of the used spectra is used in a different file, separate
 changes and analyses can be made without altering the saved view
 
--both jvalues and integration should have the option to
-show/hide/reset: show would pull up the most recently hidden
-measurements, reset would clear the measurements for that "view"
 
--in the jsvtest.htm page, when there is a CNMR and IR overlay shown
-nothing happens when a proton is clicked on a molecule in the Jmol
-applet. The viewer should have the option to either add H-NMR with
-current overlay or to load only H-NMR (in this case the viewer could
-have already saved the C-NMR and IR changes as a "view" to return to
-later--could be done through a pop up box
+
+=====DONE========
+
+http://blog.gorges.us/2009/03/how-to-enable-keywords-in-eclipse-and-subversion-svn/
+Use 
+<dollar>LastChangedRevision: 998 $
+<dollar>LastChangedDate: 2012-07-05 18:21:10 -0500 (Thu, 05 Jul 2012) $
+to set the APPLET_VERSION to include the SVN revision number
+
+-in the jsvtest.htm page, HNMR and CNMR are not distinguished
 
 -when you offset a spectrum the peaks are able to go off the page, the
 user cannot click on the parts of the spectra that are off the grid
@@ -33,48 +64,23 @@ spot that does not have the constants, the constants still show up
 even if their peaks are off the page (they are where the peaks would
 be if the whole spectrum were blown up)
 
+
 -Integration:
  --changing the command from "integrate" to "integration"
    ---also what is the difference between integrate on/off and
 showintegration true/false/toggle?
- --in the right-click file box there is no show integration
-option---might not be necessary, but would be nice for the time being
-due to the mac bug (disables keyboard function when type into the
-right-click script box) we found today making it impossible to operate
-the integration
-
-Bug:
-Loading a GC/MS file in Jmol application and selecting a menu option in Jmol to choose a frame
-gives JSpecView loading with looping over frames in the Jmol display as well as the JSpecView display 
 
 Features and Bugs:
 For the overlay/close dialog box, please move the overlay section to the top of the display rather than the bottom
 
-
-
-http://blog.gorges.us/2009/03/how-to-enable-keywords-in-eclipse-and-subversion-svn/
-Use 
-$LastChangedRevision$
-$LastChangedDate$
-to set the APPLET_VERSION to include the SVN revision number
-
-With JSpecView application, loading a file gives the dialog box and if you sort on date the program crashes.
-
-Clicking on the Jmol display shows the peaks, using the Jmol Menu under Spectra gives the hover display
-Selecting an option though gives no change to the JSV display and that Block is not made the front display.
-Jmol menu. HNMR and CNMR now showing but only hover works.
-Clicking on an option does not give the highlight in the JSV display
-Clicking on a peak in the H or C NMR works
-
-> needs design change.
-> good idea; no mechanism to do that at present
-
 Dialog Box for overlay colours needs checking
+  -- added active clicking in overlay key box
+  
+not observed: With JSpecView application, loading a file gives the dialog box and if you sort on date the program crashes.
 
-> overlay keys are working, but they are strange. Switching between 
-frames is not working right  -- just turns off the key entirely.
-
-=====DONE========
+Bug:
+Loading a GC/MS file in Jmol application and selecting a menu option in Jmol to choose a frame
+gives JSpecView loading with looping over frames in the Jmol display as well as the JSpecView display 
 
 LOADFILECALLBACKNAME added
 
