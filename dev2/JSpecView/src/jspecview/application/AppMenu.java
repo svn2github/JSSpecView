@@ -257,13 +257,13 @@ public class AppMenu extends JMenuBar {
     JSVPopupMenu.setMenuItem(userZoomMenuItem, 'Z', "Set Zoom...", 90,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            jsvpPopupMenu.userZoom();
+            jsvpPopupMenu.userZoom(mainFrame.getSelectedPanel());
           }
         });
     JSVPopupMenu.setMenuItem(scriptMenuItem, 'T', "Script...", 83,
         InputEvent.ALT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            jsvpPopupMenu.script();
+            jsvpPopupMenu.script(mainFrame.getSelectedPanel());
           }
         });
     JSVPopupMenu.setMenuItem(preferencesMenuItem, 'P', "Preferences...",
@@ -319,13 +319,13 @@ public class AppMenu extends JMenuBar {
     JSVPopupMenu.setMenuItem(spectraMenuItem, 'S', "Spectra...", 83,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            jsvpPopupMenu.overlay(JSVPopupMenu.EnumOverlay.DIALOG);
+            jsvpPopupMenu.overlay(mainFrame.getSelectedPanel(), JSVPopupMenu.EnumOverlay.DIALOG);
           }
         });
     JSVPopupMenu.setMenuItem(overlayStackOffsetYMenuItem, 'y', "Overlay Offset...", 0,
         0, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            jsvpPopupMenu.overlay(EnumOverlay.OFFSETY);
+            jsvpPopupMenu.overlay(mainFrame.getSelectedPanel(), EnumOverlay.OFFSETY);
           }
         });
     JSVPopupMenu.setMenuItem(sourceMenuItem, 'S', "Source ...", 83,

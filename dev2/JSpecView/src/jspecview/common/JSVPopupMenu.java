@@ -147,13 +147,13 @@ public class JSVPopupMenu extends JPopupMenu {
     scriptMenuItem.setText("Script...");
     scriptMenuItem.addActionListener(new ActionListener() {
        public void actionPerformed(ActionEvent e) {
-         script();
+         script(thisJsvp);
        }
      });
     userZoomMenuItem.setText("Set Zoom...");
     userZoomMenuItem.addActionListener(new ActionListener() {
        public void actionPerformed(ActionEvent e) {
-         userZoom();
+         userZoom(thisJsvp);
        }
      });
     properties.setActionCommand("Properties");
@@ -192,7 +192,7 @@ public class JSVPopupMenu extends JPopupMenu {
     spectraMenuItem.setText("Views...");
     spectraMenuItem.addActionListener(new ActionListener() {
        public void actionPerformed(ActionEvent e) {
-         overlay(EnumOverlay.DIALOG
+         overlay(thisJsvp, EnumOverlay.DIALOG
         		 );
        }
      });
@@ -200,7 +200,7 @@ public class JSVPopupMenu extends JPopupMenu {
     overlayStackOffsetMenuItem.setText("Overlay Offset...");
     overlayStackOffsetMenuItem.addActionListener(new ActionListener() {
        public void actionPerformed(ActionEvent e) {
-         overlay(EnumOverlay.OFFSETY);
+         overlay(thisJsvp, EnumOverlay.OFFSETY);
        }
      });
 	}
@@ -234,8 +234,10 @@ public class JSVPopupMenu extends JPopupMenu {
 
   private String recentZoom = "";
 
-  public void userZoom() {
-    String zoom = thisJsvp.getInput("Enter zoom range", "Zoom", recentZoom);
+  public void userZoom(JSVPanel jsvp) {
+  	if (jsvp == null)
+  		return;
+    String zoom = jsvp.getInput("Enter zoom range", "Zoom", recentZoom);
     if (zoom == null)
       return;
     recentZoom = zoom;
@@ -244,8 +246,10 @@ public class JSVPopupMenu extends JPopupMenu {
 
   private String recentScript = "";
 
-  public void script() {
-    String script = thisJsvp.getInput("Enter a JSpecView script", 
+  public void script(JSVPanel jsvp) {
+  	if (jsvp == null)
+  		return;
+    String script = jsvp.getInput("Enter a JSpecView script", 
     		"Script", recentScript);
     if (script == null)
       return;
@@ -311,13 +315,15 @@ public class JSVPopupMenu extends JPopupMenu {
 
   private PanelData pd;
 
-	public void overlay(EnumOverlay overlay) {
+	public void overlay(JSVPanel jsvp, EnumOverlay overlay) {
 		switch (overlay) {
 		case DIALOG:
 			scripter.checkOverlay();
 			break;
 		case OFFSETY:
-			String offset = thisJsvp.getInput(
+			if (jsvp == null)
+				return;
+			String offset = jsvp.getInput(
 					"Enter a vertical offset in percent for stacked plots", "Overlay",
 					recentStackPercent);
 			if (offset == null || Float.isNaN(Parser.parseFloat(offset)))
