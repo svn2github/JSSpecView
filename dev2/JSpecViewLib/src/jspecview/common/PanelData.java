@@ -642,6 +642,13 @@ public class PanelData {
   	return currentGraphSet.shiftSpectrum(dx, x1);
 
   }
+  
+	public void findX(double d) {
+		currentGraphSet.setXPointer(d);	
+		repaint();
+	}
+
+
   // called by GraphSet
   
 	boolean isCurrentGraphSet(GraphSet graphSet) {

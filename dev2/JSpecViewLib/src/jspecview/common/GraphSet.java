@@ -1351,16 +1351,17 @@ abstract class GraphSet {
 		IntegralGraph ig = (withIntegration && pd.ctrlPressed && !pd.isIntegralDrag ? spec
 				.getIntegrationGraph()
 				: null);
-		yValueMovedTo = (ig == null ? spec.getYValueAt(xValueMovedTo) : 
-			ig.getPercentYValueAt(xValueMovedTo));
+		double y0 = yValueMovedTo;
+		yValueMovedTo = (ig == null ? spec.getYValueAt(xValueMovedTo) : ig
+				.getPercentYValueAt(xValueMovedTo));
 		setCoordStr(xValueMovedTo, yValueMovedTo);
-		if (pendingMeasurement != null) {
+		if (Double.isNaN(y0) || pendingMeasurement != null) {
 			drawLine(g, xPixelMovedTo, yPixel0, xPixelMovedTo, yPixel1);
-			return;
+		} else {
+			int y = (ig == null ? toPixelY(yValueMovedTo) : toPixelYint(yValueMovedTo));
+			if (y == fixY(y))
+				drawLine(g, xPixelMovedTo, y - 10, xPixelMovedTo, y + 10);
 		}
-		int y = (ig == null ? toPixelY(yValueMovedTo) : toPixelYint(yValueMovedTo));
-		if (y == fixY(y))
-			drawLine(g, xPixelMovedTo, y - 10, xPixelMovedTo, y + 10);
 	}
 	
 	private void setUserYFactor(int i) {
@@ -2504,7 +2505,7 @@ abstract class GraphSet {
 		this.right = right;
 		this.top = top;
 		this.bottom = bottom;
-		yValueMovedTo = Double.MIN_VALUE;
+		//yValueMovedTo = Double.NaN;
 		setFormatters();
     is1D2DSplit = (!spec0.is1D() && pd.getBoolean(ScriptToken.DISPLAY2D)
 		&& (imageView != null || get2DImage()));
@@ -3014,6 +3015,12 @@ abstract class GraphSet {
 	@Override
 	public String toString() {
 		return "gs: " + nSpectra + " " + spectra + " " + spectra.get(0).getFilePath();
+	}
+
+	public void setXPointer(double x) {
+		xValueMovedTo = lastClickX = x;
+		xPixelMovedTo = fixX(toPixelX(x));
+		yValueMovedTo = Double.NaN;
 	}
 	
 }

@@ -71,6 +71,10 @@ public class JSViewer {
         case EXPORT:
           msg = si.execExport(jsvp, value);
           return false;
+        case FINDX:
+        	if (jsvp != null)
+        		jsvp.getPanelData().findX(Double.parseDouble(value));
+        	break;        	
         case GETSOLUTIONCOLOR:
           if (jsvp != null)
             si.setSolutionColor(true);
@@ -133,7 +137,7 @@ public class JSViewer {
         case SELECT:
           execSelect(si, value);
           break;
-        case SETX:
+        case SETPEAK:
         	if (jsvp != null)
         		jsvp.getPanelData().shiftSpectrum(Double.NaN, Double.parseDouble(value));
         	break;        	
