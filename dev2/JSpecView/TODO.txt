@@ -5,6 +5,16 @@ Put new items at top, please.
 
 Updated version of the to do list:
 
+-Peak picking
+  Needs a menu item
+    Peak Picking>
+     Show/Hide Peak Labels
+     Set Units (xxx)
+     Set Decimal Places (0.000)
+  [x]Pick Using Threshold
+  [x]Pick Top N
+  [x]Parabolic Interpolation
+    
 -Measurements:
   Needs a menu item
   
