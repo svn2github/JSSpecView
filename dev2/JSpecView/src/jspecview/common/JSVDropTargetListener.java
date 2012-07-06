@@ -10,6 +10,8 @@ import java.awt.dnd.DropTargetListener;
 import java.io.File;
 import java.util.List;
 
+import javax.swing.JOptionPane;
+
 import jspecview.util.Escape;
 import jspecview.util.Logger;
 
@@ -42,17 +44,22 @@ public class JSVDropTargetListener implements DropTargetListener {
     // Called when the user changes the drag action between copy or move
   }
 
+  static int lastSelection = 0;
+  
   // Called when the user finishes or cancels the drag operation.
   @SuppressWarnings("unchecked")
   public void drop(DropTargetDropEvent dtde) {
     Logger.debug("Drop detected...");
     Transferable t = dtde.getTransferable();
     boolean isAccepted = false;
-    // idea here is that if the drop is into the panel ('this'), then
-    // we want a replacement; if the drop is to the menu, then we want an addition.
-    // just an idea....
-    boolean doAppend = true;//(allowAppend && dtde.getDropTargetContext()
-        //.getDropTarget().getComponent() != si);
+    Object[] options = { "Replace", "Append", "Cancel" };
+    int ret = JOptionPane.showOptionDialog(null, "Select an option", "JSpecView File Drop",
+            JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
+            null, options, options[lastSelection]);
+    if (ret < 0 || ret == 2)
+    	return;
+    boolean doAppend = (ret == 1);
+    lastSelection = ret;
     String prefix = (doAppend ? "" : "close ALL;");
     String postfix = (doAppend ? "" : "overlay ALL");
     String cmd = "LOAD APPEND ";
