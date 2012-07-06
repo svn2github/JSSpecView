@@ -5,6 +5,8 @@ Put new items at top, please.
 
 Updated version of the to do list:
 
+peakMenu showHidePeaks setUnits setDecimal chkPickThresh chk
+
 -Peak picking
   Needs a menu item
     Peak Picking>
@@ -14,6 +16,7 @@ Updated version of the to do list:
   [x]Pick Using Threshold
   [x]Pick Top N
   [x]Parabolic Interpolation
+     List Peaks
     
 -Measurements:
   Needs a menu item
@@ -57,6 +60,18 @@ changes and analyses can be made without altering the saved view
 
 
 =====DONE========
+
+FINDX x.xx
+ -- draws a red vertical line at a given position and acts like a click. 
+
+SETPEAK x.xx command
+ -- NMR only 
+ -- requires prior clicking on a specific spectrum.
+ -- first finds the top of the peak, then assigns chemical shift
+ 
+SHIFTX x.x command
+ -- NMR only
+ -- requires prior clicking on a specific spectrum.
 
 http://blog.gorges.us/2009/03/how-to-enable-keywords-in-eclipse-and-subversion-svn/
 Use 
