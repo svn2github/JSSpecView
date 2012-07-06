@@ -27,8 +27,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.util.List;
 
-import javax.swing.JOptionPane;
-
 /**
  * AwtGraphSet class represents a set of overlaid spectra within some
  * subset of the main JSVPanel. See also GraphSet.java
@@ -174,12 +172,6 @@ class AwtGraphSet extends GraphSet {
   Annotation getAnnotation(List<String> args, Annotation lastAnnotation) {
     return AwtColoredAnnotation.getAnnotation(args,
         (AwtColoredAnnotation) lastAnnotation);
-  }
-
-  @Override
-  protected String getInput(String message, String title, String sval) {
-    return (String) JOptionPane.showInputDialog(null, message, title,
-        JOptionPane.PLAIN_MESSAGE, null, null, sval);
   }
 
   @Override

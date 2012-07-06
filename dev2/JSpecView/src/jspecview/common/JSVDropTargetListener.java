@@ -56,6 +56,7 @@ public class JSVDropTargetListener implements DropTargetListener {
     int ret = JOptionPane.showOptionDialog(null, "Select an option", "JSpecView File Drop",
             JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
             null, options, options[lastSelection]);
+    
     if (ret < 0 || ret == 2)
     	return;
     boolean doAppend = (ret == 1);

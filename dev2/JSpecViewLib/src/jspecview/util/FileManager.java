@@ -36,7 +36,7 @@ import java.util.zip.GZIPInputStream;
 
 public class FileManager {
 
-  private URL appletDocumentBase;
+  //private URL appletDocumentBase;
   private String openErrorMessage;
 
   /**
@@ -47,24 +47,24 @@ public class FileManager {
    */
 
   public FileManager(URL appletDocumentBase) {
-    this.appletDocumentBase = appletDocumentBase;
+    //this.appletDocumentBase = appletDocumentBase;
   }
 
-  public String getFileAsString(String name) throws IOException {
-    if (name == null)
-      throw new IOException("name is null");
-
-    BufferedReader br = getBufferedReaderFromName(name, appletDocumentBase, null);
-
-    StringBuffer sb = new StringBuffer(8192);
-    String line;
-    while ((line = br.readLine()) != null) {
-      sb.append(line);
-      sb.append('\n');
-    }
-    br.close();
-    return sb.toString();
-  }
+//  public String getFileAsString(String name) throws IOException {
+//    if (name == null)
+//      throw new IOException("name is null");
+//
+//    BufferedReader br = getBufferedReaderFromName(name, appletDocumentBase, null);
+//
+//    StringBuffer sb = new StringBuffer(8192);
+//    String line;
+//    while ((line = br.readLine()) != null) {
+//      sb.append(line);
+//      sb.append('\n');
+//    }
+//    br.close();
+//    return sb.toString();
+//  }
 
   public static BufferedReader getBufferedReaderForInputStream(InputStream in)
       throws IOException {

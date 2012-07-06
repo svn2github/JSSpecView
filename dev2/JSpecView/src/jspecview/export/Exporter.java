@@ -32,6 +32,7 @@ import jspecview.common.JSVPanel;
 import jspecview.common.PanelData;
 import jspecview.common.ScriptToken;
 import jspecview.util.FileManager;
+import jspecview.util.Logger;
 import jspecview.util.TextFormat;
 
 public class Exporter {
@@ -279,7 +280,7 @@ public class Exporter {
       }
       writer.close();
     } catch (Exception e) {
-      e.printStackTrace();
+    	Logger.error(e.getMessage());
     }
   }
 

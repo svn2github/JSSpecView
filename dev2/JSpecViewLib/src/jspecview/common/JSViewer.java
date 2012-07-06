@@ -171,6 +171,7 @@ public class JSViewer {
       }
     }
     si.execScriptComplete(msg, true);
+	  //si.getSelectedPanel().requestFocusInWindow(); // could be CLOSE ALL
     return isOK;
   }
 
@@ -211,7 +212,7 @@ public class JSViewer {
 	public static void execSelect(ScriptInterface si, String value) {
     List<JSVPanelNode> nodes = si.getPanelNodes();
     for (int i = nodes.size(); --i >= 0;)
-    	nodes.get(i).jsvp.getPanelData().select(Integer.MIN_VALUE);
+    	nodes.get(i).jsvp.getPanelData().selectFromEntireSet(Integer.MIN_VALUE);
     List<JDXSpectrum> speclist = new ArrayList<JDXSpectrum>();
     fillSpecList(si, si.getPanelNodes(), value, speclist,
         si.getSelectedPanel(), "1.", false);
@@ -658,7 +659,7 @@ public class JSViewer {
 			if (spec != null)
 				speclist.add(spec);
 		} else {
-			node.jsvp.getPanelData().select(Double.isNaN(userYFactor) ? -1 : (int) userYFactor);
+			node.jsvp.getPanelData().selectFromEntireSet(Double.isNaN(userYFactor) ? -1 : (int) userYFactor);
 		}
 	}
 
@@ -682,4 +683,5 @@ public class JSViewer {
 			break;
 		}
 	}
+
 }

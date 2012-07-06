@@ -40,6 +40,7 @@ import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVPanelNode;
 import jspecview.source.JDXSource;
 import jspecview.util.FileManager;
+import jspecview.util.Logger;
 
 /**
  * Dialog that displays String of text or contents of a file in a
@@ -78,7 +79,7 @@ public class TextDialog extends JDialog {
       setVisible(true);
     }
     catch(Exception ex) {
-      ex.printStackTrace();
+    	Logger.error(ex.getMessage());
     }
   }
 

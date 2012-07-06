@@ -781,6 +781,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		}
 		String msg = Exporter.exportSpectra(jsvp, this, fc, type,
 				recentFileName, dirLastExported);
+		jsvp.requestFocusInWindow();
 		if (msg != null)
   		dirLastExported = msg;
 
@@ -924,9 +925,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	 * Calculates the predicted colour of the Spectrum
 	 */
 	public String setSolutionColor(boolean showMessage) {
-		String msg = getSelectedPanel().getPanelData().getSolutionColorHtml();
-		JOptionPane.showMessageDialog(this, msg, "Predicted Colour",
-				JOptionPane.INFORMATION_MESSAGE);
+		getSelectedPanel().showSolutionColor(this);
 		return null;
 	}
 

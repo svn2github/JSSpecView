@@ -70,15 +70,18 @@ public class PanelData {
   // Critical fields
 
   private ArrayList<PanelListener> listeners = new ArrayList<PanelListener>();
-  private GraphSet currentGraphSet;
-  private Map<String, NumberFormat> htFormats = new Hashtable<String, NumberFormat>();
+  public void addListener(PanelListener listener) {
+    if (!listeners.contains(listener)) {
+      listeners.add(listener);
+    }
+  }
 
+  private GraphSet currentGraphSet;
 	GraphSet getCurrentGraphSet() {
 		return currentGraphSet;
 	}
-	boolean isCurrentGraphSet(GraphSet graphSet) {
-		return graphSet == currentGraphSet;
-	}
+
+	private Map<String, NumberFormat> htFormats = new Hashtable<String, NumberFormat>();
 
   Hashtable<ScriptToken, Object> options = new Hashtable<ScriptToken, Object>();
   JSVPanel owner;
@@ -205,14 +208,13 @@ public class PanelData {
   boolean titleDrawn;
   boolean display1D;
 
-  public void setYStackOffsetPercent(int offset) {
-  	currentGraphSet.yStackOffsetPercent = offset;
-  }
-  
   public boolean getDisplay1D() {
     return display1D;
   }
 
+
+  ////// initialization - from AwtPanel
+  
   void initSingleSpectrum(JDXSpectrum spectrum) {
     List<JDXSpectrum> spectra = new ArrayList<JDXSpectrum>();
     spectra.add(spectrum);
@@ -228,6 +230,178 @@ public class PanelData {
     setTitle(getSpectrum().getTitleLabel());
   }
 
+  public PeakInfo findMatchingPeakInfo(PeakInfo pi) {
+    PeakInfo pi2 = null;
+    for (int i = 0; i < graphSets.size(); i++)
+      if ((pi2 = graphSets.get(i).findMatchingPeakInfo(pi)) != null)
+        break;
+    return pi2;
+  }
+
+  /**
+   * Returns the Number of Graph sets
+   * 
+   * @return the Number of graph sets
+   */
+  public int getNumberOfSpectraTotal() {
+    return nSpectra;
+  }
+
+  /**
+   * Returns the Number of Graph sets
+   * 
+   * @return the Number of graph sets
+   */
+  public int getNumberOfGraphSets() {
+    return graphSets.size();
+  }
+
+  /**
+   * Returns the title displayed on the graph
+   * 
+   * @return the title displayed on the graph
+   */
+  public String getTitle() {
+    return title;
+  }
+
+  /**
+   * Returns the name of the font used in the display
+   * 
+   * @return the name of the font used in the display
+   */
+  public String getDisplayFontName() {
+    return displayFontName;
+  }
+
+  /**
+   * Returns the font of the title
+   * 
+   * @return the font of the title
+   */
+  public String getTitleFontName() {
+    return titleFontName;
+  }
+
+  public void refresh() {
+    thisWidth = 0;
+    owner.repaint();
+  }
+
+  public void addAnnotation(List<String> tokens) {
+    String title = currentGraphSet.addAnnotation(tokens, getTitle());
+    if (title != null)
+      setTitle(title);
+  }
+
+  public void addPeakHighlight(PeakInfo peakInfo) {
+    for (int i = 0; i < graphSets.size(); i++)
+      graphSets.get(i).addPeakHighlight(peakInfo);
+  }
+
+	public PeakInfo selectPeakByFileIndex(String filePath, String index) {
+		PeakInfo pi = currentGraphSet.selectPeakByFileIndex(filePath, index);
+		if (pi == null)
+			for (int i = graphSets.size(); --i >= 0;)
+				if (graphSets.get(i) != currentGraphSet
+						&& (pi = graphSets.get(i).selectPeakByFileIndex(filePath, index)) != null)
+					break;
+		return pi;
+	}
+
+	public void selectSpectrum(String filePath, String type, String model, boolean andCurrent) {
+		if (andCurrent)
+				currentGraphSet.selectSpectrum(filePath, type, model);
+			for (int i = 0; i < graphSets.size(); i += 1)
+				if (graphSets.get(i) != currentGraphSet)
+  				graphSets.get(i).selectSpectrum(filePath, type, model);
+	}
+
+  public boolean hasFileLoaded(String filePath) {
+    for (int i = graphSets.size(); --i >= 0;)
+      if (graphSets.get(i).hasFileLoaded(filePath))
+        return true;
+    return false;
+  }
+
+  /**
+   * Clears all views in the zoom list
+   */
+  public void clearAllView() {
+    for (int i = graphSets.size(); --i >= 0;)
+      graphSets.get(i).clearAllViews();
+  }
+
+  /*----------------------- JSVPanel PAINTING METHODS ---------------------*/
+  /**
+   * Draws the Spectrum to the panel
+   * 
+   * @param g
+   *        the <code>Graphics</code> object
+   * @param height
+   *        the height to be drawn in pixels
+   * @param width
+   *        the width to be drawn in pixels
+   */
+  void drawGraph(Object g, int height, int width) {
+
+    boolean withCoords;
+    display1D = getBoolean(ScriptToken.DISPLAY1D);
+    if (isPrinting) {
+      withCoords = false;
+    } else {
+      withCoords = getBoolean(ScriptToken.COORDINATESON);
+      titleOn = getBoolean(ScriptToken.TITLEON);
+      gridOn = getBoolean(ScriptToken.GRIDON);
+    }
+    plotAreaWidth = width - (right + left);
+    plotAreaHeight = height - (top + bottom);
+    boolean isResized = (thisWidth != width || thisPlotHeight != plotAreaHeight);
+    if (isResized) {
+      // this seems unnecessary, and it prevents focus returning to the script command line
+      //owner.doRequestFocusInWindow();
+    }
+    thisWidth = width;
+    thisPlotHeight = plotAreaHeight;
+    titleDrawn = false;
+    for (int i = graphSets.size(); --i >= 0;)
+      graphSets.get(i)
+          .drawGraph(g, height, width, left,
+              right, top, bottom, isResized);
+    if (titleOn && !titleDrawn)
+      owner.drawTitle(g, height, width, getSpectrum().getPeakTitle());
+    if (withCoords)
+      owner.drawCoordinates(g, height, width);
+  }
+
+	/**
+	 * sets bsSelected to the specified pointer
+	 * from "select 3.1*1"
+	 * 
+	 * @param iSpec
+	 */
+	public void selectFromEntireSet(int iSpec) {
+		// note that iSpec is over the entire set
+		for (int i = 0, pt = 0; i < graphSets.size(); i++) {
+			if (iSpec == Integer.MIN_VALUE) {
+				graphSets.get(i).setSelected(-1);
+				continue;
+			}
+			List<JDXSpectrum> specs = graphSets.get(i).spectra;
+			for (int j = 0; j < specs.size(); j++, pt++)
+				if (iSpec == -1 || iSpec == pt + 1)
+      		graphSets.get(i).setSelected(j);   
+		}		
+	}
+
+	public void scaleSelectedBy(double f) {
+		for (int i = graphSets.size(); --i >= 0;)
+			graphSets.get(i).scaleSelectedBy(f);
+		
+	}
+
+////// currentGraphSet methods
+  
   void setCurrentGraphSet(GraphSet gs, int xPixel, int yPixel, int clickCount) {
   	int splitPoint = gs.getSplitPoint(yPixel);
   	boolean isNewSet = (currentGraphSet != gs);
@@ -256,6 +430,42 @@ public class PanelData {
     notifySubSpectrumChange(spec.getSubIndex(), spec);
   }
 
+	public void splitStack(boolean doSplit) {
+    currentGraphSet.splitStack(graphSets, doSplit);
+	}
+
+  public int getNumberOfSpectraInCurrentSet() {
+    return currentGraphSet.nSpectra;
+  }
+
+  public int[] getStartDataPointIndices() {
+    return currentGraphSet.view.startDataPointIndices;
+  }
+
+  public int[] getEndDataPointIndices() {
+    return currentGraphSet.view.endDataPointIndices;
+  }
+
+  public String getSolutionColor() {
+    return currentGraphSet.getSolutionColor();
+  }
+
+	public boolean haveSelectedSpectrum() {
+  	return currentGraphSet.haveSelectedSpectrum();
+	}
+
+	public boolean getShowIntegration() {
+  	return currentGraphSet.getShowIntegration();
+	}
+
+	public void setShowIntegration(Boolean tfToggle) {
+    currentGraphSet.setShowIntegration(tfToggle);
+	}
+
+  public void setYStackOffsetPercent(int offset) {
+  	currentGraphSet.yStackOffsetPercent = offset;
+  }
+
   public void setSpectrum(int iSpec, boolean isSplit) {
   	currentGraphSet.setSpectrum(iSpec, isSplit);
     refresh();
@@ -273,19 +483,13 @@ public class PanelData {
     return currentGraphSet.showAllStacked;
   }
 
+	public int getCurrentSpectrumIndex() {
+		return currentGraphSet.getCurrentSpectrumIndex();
+	}
 
-  /**
-   * Returns the <code>Spectrum</code> at the specified index
-   * 
-   * @param index
-   *        the index of the <code>Spectrum</code>
-   * @return the <code>Spectrum</code> at the specified index
-   */
   public JDXSpectrum getSpectrumAt(int index) {
     return currentGraphSet.getSpectrumAt(index);
   }
-
-  /* -------------------Other methods ------------------------------------*/
 
   /**
    * Add information about a region of the displayed spectrum to be highlighted
@@ -336,142 +540,10 @@ public class PanelData {
     currentGraphSet.removeAllHighlights();
   }
 
-  /**
-   * Returns the Number of Graph sets
-   * 
-   * @return the Number of graph sets
-   */
-  public int getNumberOfSpectraTotal() {
-    return nSpectra;
-  }
-
-  /**
-   * Returns the Number of Graph sets
-   * 
-   * @return the Number of graph sets
-   */
-  public int getNumberOfGraphSets() {
-    return graphSets.size();
-  }
-
-  public int getNumberOfSpectraInCurrentSet() {
-    return currentGraphSet.nSpectra;
-  }
-
-  /**
-   * Returns the title displayed on the graph
-   * 
-   * @return the title displayed on the graph
-   */
-  public String getTitle() {
-    return title;
-  }
-
-  /**
-   * Return the start indices of the Scaledata
-   * 
-   * @return the start indices of the Scaledata
-   */
-  public int[] getStartDataPointIndices() {
-    return currentGraphSet.view.startDataPointIndices;
-  }
-
-  /**
-   * Return the end indices of the Scaledata
-   * 
-   * @return the end indices of the Scaledata
-   */
-  public int[] getEndDataPointIndices() {
-    return currentGraphSet.view.endDataPointIndices;
-  }
-
-  /**
-   * Returns the name of the font used in the display
-   * 
-   * @return the name of the font used in the display
-   */
-  public String getDisplayFontName() {
-    return displayFontName;
-  }
-
-  /**
-   * Returns the font of the title
-   * 
-   * @return the font of the title
-   */
-  public String getTitleFontName() {
-    return titleFontName;
-  }
-
-  /*----------------------- JSVPanel PAINTING METHODS ---------------------*/
-  /**
-   * Draws the Spectrum to the panel
-   * 
-   * @param g
-   *        the <code>Graphics</code> object
-   * @param height
-   *        the height to be drawn in pixels
-   * @param width
-   *        the width to be drawn in pixels
-   */
-  void drawGraph(Object g, int height, int width) {
-
-    boolean withCoords;
-    display1D = getBoolean(ScriptToken.DISPLAY1D);
-    if (isPrinting) {
-      withCoords = false;
-    } else {
-      withCoords = getBoolean(ScriptToken.COORDINATESON);
-      titleOn = getBoolean(ScriptToken.TITLEON);
-      gridOn = getBoolean(ScriptToken.GRIDON);
-    }
-    plotAreaWidth = width - (right + left);
-    plotAreaHeight = height - (top + bottom);
-    boolean isResized = (thisWidth != width || thisPlotHeight != plotAreaHeight);
-    if (isResized) {
-      // this seems unnecessary, and it prevents focus returning to the script command line
-      //owner.doRequestFocusInWindow();
-    }
-    thisWidth = width;
-    thisPlotHeight = plotAreaHeight;
-    titleDrawn = false;
-    for (int i = graphSets.size(); --i >= 0;)
-      graphSets.get(i)
-          .drawGraph(g, height, width, left,
-              right, top, bottom, isResized);
-    if (titleOn && !titleDrawn)
-      owner.drawTitle(g, height, width, getSpectrum().getPeakTitle());
-    if (withCoords)
-      owner.drawCoordinates(g, height, width);
-  }
-
-  final static DecimalFormat SCI_FORMATTER = TextFormat.getDecimalFormat("0.00E0");
-
-  NumberFormat getFormatter(String hash) {
-    NumberFormat formatter = htFormats.get(hash);
-    if (formatter == null)
-      htFormats.put(hash, formatter = (hash.equals("") ? 
-      		SCI_FORMATTER : TextFormat.getDecimalFormat(hash)));
-    return formatter;
-  }
-
-  void setFont(Object g, int width, int mode, int size, boolean isLabel) {
-    if (isLabel) {
-      if (width < 400)
-        size = (int) ((width * size) / 400);
-    } else {
-      if (width < 250)
-        size = (int) ((width * size) / 250);
-    }
-    owner.setFont(g, (isPrinting ? printingFont : displayFontName), mode, size);
-  }
-
-  /*-------------------- METHODS FOR SCALING AND ZOOM --------------------------*/
-
   public void setZoom(double x1, double y1, double x2, double y2) {
     currentGraphSet.setZoom(x1, y1, x2, y2);
     thisWidth = 0;
-    notifyZoomListeners(x1, y1, x2, y2);
+    notifyListeners(new ZoomEvent(x1, y1, x2, y2));
   }
 
   public void clearIntegrals() {
@@ -490,14 +562,6 @@ public class PanelData {
   }
 
   /**
-   * Clears all views in the zoom list
-   */
-  public void clearAllView() {
-    for (int i = graphSets.size(); --i >= 0;)
-      graphSets.get(i).clearAllViews();
-  }
-
-  /**
    * Displays the previous view zoomed
    */
   public void previousView() {
@@ -509,6 +573,37 @@ public class PanelData {
    */
   public void nextView() {
     currentGraphSet.nextView();
+  }
+
+  public int getSelectedIntegral() {
+  	return currentGraphSet.getSelectedIntegral();
+  }
+  
+  public String getSelectedIntegralText() {
+  	return currentGraphSet.getSelectedIntegralText();
+  }
+  
+	public void advanceSubSpectrum(int dir) {
+		currentGraphSet.advanceSubSpectrum(dir);
+	}
+  
+	public void setSelectedIntegral(double val) {
+		currentGraphSet.setSelectedIntegral(val);
+	}
+
+	public void scaleYBy(double f) {
+		currentGraphSet.scaleYBy(f);
+	}
+
+	public void toPeak(int i) {
+		currentGraphSet.toPeak(i);
+	}
+
+  String getSolutionColorHtml() {
+    String color = currentGraphSet.getSolutionColor();
+    return "<HTML><body bgcolor=rgb(" + color
+        + ")><br />Predicted Solution Colour- RGB(" + color
+        + ")<br /><br /></body></HTML>";
   }
 
   /*------------------------- Javascript call functions ---------------------*/
@@ -536,168 +631,48 @@ public class PanelData {
         actualCoord);
   }
 
-  public String getSolutionColorHtml() {
-    String color = currentGraphSet.getSolutionColor();
-    return "<HTML><body bgcolor=rgb(" + color
-        + ")><br />Predicted Solution Colour- RGB(" + color
-        + ")<br /><br /></body></HTML>";
+  // called by GraphSet
+  
+	boolean isCurrentGraphSet(GraphSet graphSet) {
+		return graphSet == currentGraphSet;
+	}
+
+  final static DecimalFormat SCI_FORMATTER = TextFormat.getDecimalFormat("0.00E0");
+
+  NumberFormat getFormatter(String hash) {
+    NumberFormat formatter = htFormats.get(hash);
+    if (formatter == null)
+      htFormats.put(hash, formatter = (hash.equals("") ? 
+      		SCI_FORMATTER : TextFormat.getDecimalFormat(hash)));
+    return formatter;
   }
 
-  public void refresh() {
-    thisWidth = 0;
+
+  void repaint() {
     owner.repaint();
   }
 
-  public void addAnnotation(List<String> tokens) {
-    String title = currentGraphSet.addAnnotation(tokens, getTitle());
-    if (title != null)
-      setTitle(title);
-  }
-
-  public void addPeakHighlight(PeakInfo peakInfo) {
-    for (int i = 0; i < graphSets.size(); i++)
-      graphSets.get(i).addPeakHighlight(peakInfo);
-  }
-
-	public PeakInfo selectPeakByFileIndex(String filePath, String index) {
-		PeakInfo pi = (currentGraphSet == null ? null : 
-			currentGraphSet.selectPeakByFileIndex(filePath, index));
-		if (pi == null)
-			for (int i = graphSets.size(); --i >= 0;)
-				if (graphSets.get(i) != currentGraphSet 
-						&& (pi = graphSets.get(i).selectPeakByFileIndex(filePath, index)) != null)
-					break;
-		return pi;
-	}
-
-	public void selectSpectrum(String filePath, String type, String model, boolean andCurrent) {
-		if (andCurrent && currentGraphSet != null)
-				currentGraphSet.selectSpectrum(filePath, type, model);
-			for (int i = 0; i < graphSets.size(); i += 1)
-				if (graphSets.get(i) != currentGraphSet)
-  				graphSets.get(i).selectSpectrum(filePath, type, model);
-	}
-
-  public boolean hasFileLoaded(String filePath) {
-    for (int i = graphSets.size(); --i >= 0;)
-      if (graphSets.get(i).hasFileLoaded(filePath))
-        return true;
-    return false;
-  }
-
-  public void repaint() {
-    owner.repaint();
-  }
-
-  public void setToolTipText(String s) {
+  void setToolTipText(String s) {
     owner.setToolTipText(s);
   }
 
-  public Object getHighlightColor() {
+  Object getHighlightColor() {
     return owner.getColor(ScriptToken.HIGHLIGHTCOLOR);
   }
 
-  public void setHighlightColor(Object color) {
+  void setHighlightColor(Object color) {
     owner.setColor(ScriptToken.HIGHLIGHTCOLOR, color);
   }
 
-  public String getSolutionColor() {
-    return currentGraphSet.getSolutionColor();
+  String getInput(String message, String title, String sval) {
+  	return owner.getInput(message, title, sval);
+	}
+	
+  void setFont(Object g, int width, int mode, int size, boolean isLabel) {
+    owner.setFont(g, (isPrinting ? printingFont : displayFontName), width, mode, size, isLabel);
   }
 
-  public PeakInfo findMatchingPeakInfo(PeakInfo pi) {
-    PeakInfo pi2 = null;
-    for (int i = 0; i < graphSets.size(); i++)
-      if ((pi2 = graphSets.get(i).findMatchingPeakInfo(pi)) != null)
-        break;
-    return pi2;
-  }
-
-	public void splitStack(boolean doSplit) {
-  	if (currentGraphSet != null)
-    	currentGraphSet.splitStack(graphSets, doSplit);
-	}
-
-	public boolean haveSelectedSpectrum() {
-  	if (currentGraphSet == null)
-  		return false;
-  	return currentGraphSet.haveSelectedSpectrum();
-	}
-
-	public boolean getShowIntegration() {
-  	if (currentGraphSet == null)
-  		return false;
-  	return currentGraphSet.getShowIntegration();
-	}
-
-	public void setShowIntegration(Boolean tfToggle) {
-  	if (currentGraphSet != null)
-    	currentGraphSet.setShowIntegration(tfToggle);
-	}
-
-	public void scaleSelectedBy(double f) {
-		for (int i = graphSets.size(); --i >= 0;)
-			graphSets.get(i).scaleSelectedBy(f);
-		
-	}
-
-	/**
-	 * sets bsSelected to the specified pointer
-	 * 
-	 * @param iSpec
-	 */
-	public void select(int iSpec) {
-		// note that iSpec is over the entire set
-		for (int i = 0, pt = 0; i < graphSets.size(); i++) {
-			if (iSpec == Integer.MIN_VALUE) {
-				graphSets.get(i).setSelected(-1);
-				continue;
-			}
-			List<JDXSpectrum> specs = graphSets.get(i).spectra;
-			for (int j = 0; j < specs.size(); j++, pt++)
-				if (iSpec == -1 || iSpec == pt + 1)
-      		graphSets.get(i).setSelected(j);   
-		}
-		
-	}
-
-  public int getSelectedIntegral() {
-  	return currentGraphSet.getSelectedIntegral();
-  }
-  
-  public String getSelectedIntegralText() {
-  	return currentGraphSet.getSelectedIntegralText();
-  }
-  
-	public void advanceSubSpectrum(int dir) {
-		currentGraphSet.advanceSubSpectrum(dir);
-	}
-  
-	public void setSelectedIntegral(double val) {
-		currentGraphSet.setSelectedIntegral(val);
-	}
-
-	public void scaleYBy(double f) {
-		currentGraphSet.scaleYBy(f);
-	}
-
-	public void toPeak(int i) {
-		currentGraphSet.toPeak(i);
-	}
-
-
-  // listeners to handle various events
-
-  /**
-   * Adds a PanelListener
-   * 
-   * @param listener
-   */
-  public void addListener(PanelListener listener) {
-    if (!listeners.contains(listener)) {
-      listeners.add(listener);
-    }
-  }
+  // listeners to handle various events, from GraphSet or AwtPanel
 
   /**
    * 
@@ -707,18 +682,9 @@ public class PanelData {
    * @param spec
    *        null indicates no subspectra
    */
-  public void notifySubSpectrumChange(int isub, JDXSpectrum spec) {
+  void notifySubSpectrumChange(int isub, JDXSpectrum spec) {
     notifyListeners(new SubSpecChangeEvent(isub, (spec == null ? null : spec
         .getTitleLabel())));
-  }
-
-  /**
-   * Notifies CoordinatePickedListeners
-   * 
-   * @param coord
-   */
-  public void notifyZoomListeners(double x1, double y1, double x2, double y2) {
-    notifyListeners(new ZoomEvent(x1, y1, x2, y2));
   }
 
 	/**
@@ -762,7 +728,7 @@ public class PanelData {
 
   /*--------------the rest are all mouse and keyboard interface -----------------------*/
 
-	public void escapeKeyPressed() {
+	void escapeKeyPressed() {
 		currentGraphSet.escapeKeyPressed();
 	}
 
@@ -829,7 +795,5 @@ public class PanelData {
     setCurrentGraphSet(gs, xPixel, yPixel, clickCount);
     gs.mouseClickedEvent(xPixel, yPixel, clickCount, isControlDown);
   }
-	public int getCurrentSpectrumIndex() {
-		return currentGraphSet.getCurrentSpectrumIndex();
-	}
+
 }

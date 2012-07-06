@@ -29,7 +29,6 @@ import java.util.EventListener;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import jspecview.common.JDXSpectrum;
 import jspecview.export.Exporter;
@@ -233,24 +232,21 @@ public class JSVPopupMenu extends JPopupMenu {
     show((Container) thisJsvp, thisX, thisY);
   }
 
-  private String recentZoom;
+  private String recentZoom = "";
 
   public void userZoom() {
-    String zoom = (String) JOptionPane.showInputDialog(null,
-        "Enter zoom range", "Zoom", JOptionPane.PLAIN_MESSAGE, null, null,
-        (recentZoom == null ? "" : recentZoom));
+    String zoom = thisJsvp.getInput("Enter zoom range", "Zoom", recentZoom);
     if (zoom == null)
       return;
     recentZoom = zoom;
     runScript(scripter, "zoom " + zoom);
   }
 
-  private String recentScript;
+  private String recentScript = "";
 
   public void script() {
-    String script = (String) JOptionPane.showInputDialog(null,
-        "Enter a JSpecView script", "Script", JOptionPane.PLAIN_MESSAGE, null,
-        null, (recentScript == null ? "" : recentScript));
+    String script = thisJsvp.getInput("Enter a JSpecView script", 
+    		"Script", recentScript);
     if (script == null)
       return;
     recentScript = script;
@@ -321,9 +317,8 @@ public class JSVPopupMenu extends JPopupMenu {
 			scripter.checkOverlay();
 			break;
 		case OFFSETY:
-			String offset = (String) JOptionPane.showInputDialog(null,
-					"Enter a vertical offset in percent for stacked plots",
-					"Overlay", JOptionPane.PLAIN_MESSAGE, null, null,
+			String offset = thisJsvp.getInput(
+					"Enter a vertical offset in percent for stacked plots", "Overlay",
 					recentStackPercent);
 			if (offset == null || Float.isNaN(Parser.parseFloat(offset)))
 				return;

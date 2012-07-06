@@ -38,6 +38,8 @@
 package jspecview.common;
 
 import java.awt.Color;
+import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -62,6 +64,8 @@ import javax.print.attribute.standard.OrientationRequested;
 import javax.swing.BorderFactory;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
@@ -345,7 +349,15 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     pd.drawGraph(g, getHeight(), getWidth());
   }
 
-  public void setFont(Object g, String name, int mode, int size) {
+  public void setFont(Object g, String name, int width, int mode, int size,  
+  		boolean isLabel) {
+    if (isLabel) {
+      if (width < 400)
+        size = (int) ((width * size) / 400);
+    } else {
+      if (width < 250)
+        size = (int) ((width * size) / 250);
+    }
     ((Graphics) g).setFont(new Font(name, mode, size));
   }
 
@@ -656,9 +668,8 @@ if (!pd.ctrlPressed)
     String sValue = pd.getSelectedIntegralText();
     if (sValue.length() == 0)
     	return;
-		String newValue = (String) JOptionPane.showInputDialog(null,
-				"Enter a new value for this integral", "Normalize Integral",
-				JOptionPane.PLAIN_MESSAGE, null, null, sValue);
+		String newValue = getInput("Enter a new value for this integral", 
+				"Normalize Integral", sValue);
 		double val;
 		try {
 			val = Double.parseDouble(newValue);
@@ -668,7 +679,7 @@ if (!pd.ctrlPressed)
 		if (val <= 0)
 			return;
     pd.setSelectedIntegral(val);
-    pd.refresh();
+    repaint();
 	}
 
   public void setupPlatform() {
@@ -718,5 +729,33 @@ if (!pd.ctrlPressed)
 	public String getViewTitle() {
 		return (viewTitle == null ? getTitle() : viewTitle);
 	}
+
+  public String getInput(String message, String title, String sval) {
+    String ret = (String) JOptionPane.showInputDialog(this, message, title,
+        JOptionPane.QUESTION_MESSAGE, null, null, sval);
+    requestFocusInWindow();
+    return ret;
+  }
+
+	public void showSolutionColor(Object container) {
+		Container c = (Container) container; 
+		String msg = pd.getSolutionColorHtml();
+		JOptionPane.showMessageDialog(c, msg, "Predicted Colour",
+				JOptionPane.INFORMATION_MESSAGE);			
+		requestFocusInWindow();
+	}
+
+	public void showHeader(Container jsvApplet) {
+		JDXSpectrum spectrum = pd.getSpectrum();
+		String[][] rowData = spectrum.getHeaderRowDataAsArray();
+		String[] columnNames = { "Label", "Description" };
+		JTable table = new JTable(rowData, columnNames);
+		table.setPreferredScrollableViewportSize(new Dimension(400, 195));
+		JScrollPane scrollPane = new JScrollPane(table);
+		JOptionPane.showMessageDialog(jsvApplet, scrollPane, "Header Information",
+				JOptionPane.PLAIN_MESSAGE);
+		requestFocusInWindow();
+	}
+
 
 }

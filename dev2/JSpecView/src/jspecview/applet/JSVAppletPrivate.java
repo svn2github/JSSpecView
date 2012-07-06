@@ -40,6 +40,7 @@
 package jspecview.applet;
 
 import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.dnd.DropTarget;
@@ -54,9 +55,6 @@ import java.util.ArrayList;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import jspecview.application.TextDialog;
 import jspecview.common.AwtPanel;
 import jspecview.common.IntegralGraph;
@@ -468,15 +466,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	 * Shows the header information for the Spectrum
 	 */
 	void showHeader() {
-
-		JDXSpectrum spectrum = getSelectedPanel().getSpectrum();
-		String[][] rowData = spectrum.getHeaderRowDataAsArray();
-		String[] columnNames = { "Label", "Description" };
-		JTable table = new JTable(rowData, columnNames);
-		table.setPreferredScrollableViewportSize(new Dimension(400, 195));
-		JScrollPane scrollPane = new JScrollPane(table);
-		JOptionPane.showMessageDialog(jsvApplet, scrollPane, "Header Information",
-				JOptionPane.PLAIN_MESSAGE);
+    getSelectedPanel().showHeader((Container) jsvApplet);
 	}
 
 	private PrintLayout lastPrintLayout;
@@ -557,8 +547,10 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 			Logger.info(exportSpectrum(type, -1));
 			return;
 		}
-		String msg = Exporter.exportSpectra(getSelectedPanel(), offWindowFrame,
+		JSVPanel jsvp = getSelectedPanel();
+		String msg = Exporter.exportSpectra(jsvp, offWindowFrame,
 				jFileChooser, type, recentFileName, dirLastExported);
+		jsvp.requestFocusInWindow();
 		if (msg != null)
 			dirLastExported = msg;
 	}
@@ -904,11 +896,8 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	 * Calculates the predicted colour of the Spectrum
 	 */
 	public String setSolutionColor(boolean showMessage) {
-		if (showMessage) {
-			String msg = getSelectedPanel().getPanelData().getSolutionColorHtml();
-			JOptionPane.showMessageDialog(jsvApplet, msg, "Predicted Colour",
-					JOptionPane.INFORMATION_MESSAGE);
-		}
+		if (showMessage)
+			getSelectedPanel().showSolutionColor(jsvApplet);
 		return getSelectedPanel().getPanelData().getSolutionColor();
 	}
 

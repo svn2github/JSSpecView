@@ -35,7 +35,6 @@ abstract class GraphSet {
   abstract Annotation getAnnotation(List<String> args, Annotation lastAnnotation);
   abstract protected boolean get2DImage();
   abstract protected int getFontHeight(Object g);
-  abstract protected String getInput(String message, String title, String sval);
   abstract protected int getStringWidth(Object g, String s);
   abstract protected void setAnnotationColor(Object g, Annotation note, ScriptToken whatColor);
   abstract protected void setColor(Object g, ScriptToken plotcolor);
@@ -717,35 +716,38 @@ abstract class GraphSet {
 		if (measurements == null || measurements.size() == 0)
 			return -1;
 		if (iPt == 0) {
-			int i = findMeasurement(measurements, xPixel, yPixel, 1);
-			if (i >= 0)
+			int i = findMeasurement(measurements, xPixel, yPixel, -1);
+			if (i >= 0 || measurements.get(0) instanceof Integral)
 				return i;
-			i = findMeasurement(measurements, xPixel, yPixel, 2);
-			if (i >= 0)
-				return i;
-			i = findMeasurement(measurements, xPixel, yPixel, -2); // center
-			if (i >= 0)
-				return i;
-			if (measurements.get(0) instanceof Integral)
-				return i;
-			return findMeasurement(measurements, xPixel, yPixel, -3); // lower bar, near baseline
+			return findMeasurement(measurements, xPixel, yPixel, -2); // lower bar, near baseline
 		}
 		for (int i = measurements.size(); --i >= 0;) {
 			Measurement m = measurements.get(i);
-		  int x;
-			int y;
+		  int x1, x2, y1, y2;
 			if (m instanceof Integral) {
-				x = toPixelX(m.getXVal2());
-				y = toPixelYint(iPt == -2 ? (m.getYVal() + m.getYVal2()) / 2 
-						: iPt == 1 ? m.getYVal() : m.getYVal2());
+				x1 = x2 = toPixelX(m.getXVal2());
+				y1 = toPixelYint(m.getYVal());
+				y2 = toPixelYint(m.getYVal2());
 			} else {
-				x = toPixelX(iPt == -2 ? (m.getXVal() + m.getXVal2()) / 2 
-						: iPt == 1 ? m.getXVal() : m.getXVal2());
-			  y = (iPt == -3 ? yPixel1 - 2 : toPixelY(m.getYVal()));
+				x1 = toPixelX(m.getXVal());
+				x2 = toPixelX(m.getXVal2());
+			  y1 = y2 = (iPt == -2 ? yPixel1 - 2 : toPixelY(m.getYVal()));
+			}
+			switch (iPt) {
+			case 1:
+				if (Math.abs(xPixel - x1) + Math.abs(yPixel - y1) < 4)
+					return i;
+				break;
+			case 2:
+				if (Math.abs(xPixel - x2) + Math.abs(yPixel - y2) < 4)
+					return i;
+				break;
+		  default:
+		  	if (isOnLine(xPixel, yPixel, x1, y1, x2, y2))
+		  		return i;
+		  	break;
 			}
 
-			if (Math.abs(xPixel - x) + Math.abs(yPixel - y) < 4)
-				return i;
 		}
 		return -1;
 	}
@@ -854,7 +856,7 @@ abstract class GraphSet {
           + (int) Math.max(pin2Dy0.getYVal(), pin2Dy1.getYVal());
     else
       sval = "" + pw.getValue();
-    sval = getInput("New value?", "Set Slider", sval);
+    sval = pd.getInput("New value?", "Set Slider", sval);
     if (sval == null)
       return;
     sval = sval.trim();
@@ -1898,7 +1900,7 @@ abstract class GraphSet {
   }
 
   private boolean setAnnotationText(Annotation a) {
-    String sval = getInput("New text?", "Set Label", a.getText());
+    String sval = pd.getInput("New text?", "Set Label", a.getText());
     if (sval == null)
       return false;
     if (sval.length() == 0)
@@ -2022,7 +2024,7 @@ abstract class GraphSet {
             + formatterX.format(spec.getY2DPPM()) + " PPM)" : "");
   }
 
-	private boolean isOnSpectrum(int xPixel, int yPixel, int index, int cutoff) {
+	private boolean isOnSpectrum(int xPixel, int yPixel, int index) {
 		setUserYFactor(index);
 		int yOffset = (view.spectrumOffsets == null ? index
 				* (int) (yPixels * (yStackOffsetPercent / 100f)) : view.spectrumOffsets[index]);
@@ -2042,7 +2044,7 @@ abstract class GraphSet {
 					continue;
 				y1 = yOffset + fixY(y1);
 				y2 = yOffset + fixY(y2);
-				if (isOnLine(xPixel, yPixel, x1, y1, x2, y2, cutoff))
+				if (isOnLine(xPixel, yPixel, x1, y1, x2, y2))
 					return true;
 			}
 		} else {
@@ -2057,7 +2059,7 @@ abstract class GraphSet {
 				y2 = fixY(y2);
 				if (y1 == y2 && (y1 == yPixel0 || y1 == yPixel1))
 					continue;
-				if (isOnLine(xPixel, yPixel, x1, y1, x1, y2, cutoff))
+				if (isOnLine(xPixel, yPixel, x1, y1, x1, y2))
 					return true;
 			}
 		}
@@ -2094,24 +2096,26 @@ abstract class GraphSet {
             .abs(zOrP.yPixel0 - p.yPixel0) > MIN_DRAG_PIXELS);
   }
   
+  private final static int ONLINE_CUTOFF = 2;
+  
 	private static boolean isOnLine(int xPixel, int yPixel, int x1, int y1, int x2,
-			int y2, int cutoff) {
+			int y2) {
 		// near a point
 		int dx1 = Math.abs(x1 - xPixel);
-		if (dx1 < cutoff && Math.abs(y1 - yPixel) < cutoff)
+		if (dx1 < ONLINE_CUTOFF && Math.abs(y1 - yPixel) < ONLINE_CUTOFF)
 			return true;
 		int dx2 = x2 - xPixel;
-		if (Math.abs(dx2) < cutoff && Math.abs(y2 - yPixel) < cutoff)
+		if (Math.abs(dx2) < ONLINE_CUTOFF && Math.abs(y2 - yPixel) < ONLINE_CUTOFF)
 			return true;
 		// between points
 		int dy12 = y1 - y2;
-		if (Math.abs(dy12) > cutoff && (y1 < yPixel) == (y2 < yPixel))
+		if (Math.abs(dy12) > ONLINE_CUTOFF && (y1 < yPixel) == (y2 < yPixel))
 			return false;
 		int dx12 = x1 - x2;
-		if (Math.abs(dx12) > cutoff && (x1 < xPixel) == (x2 < xPixel))
+		if (Math.abs(dx12) > ONLINE_CUTOFF && (x1 < xPixel) == (x2 < xPixel))
 			return false;
 		return (distance(dx1, y1 - yPixel) + distance(dx2, yPixel - y2)
-				< distance(dx12, dy12) + cutoff);
+				< distance(dx12, dy12) + ONLINE_CUTOFF);
 	}
 
   private static void setFractionalPositions(List<GraphSet> graphSets) {
@@ -2289,7 +2293,7 @@ abstract class GraphSet {
 		// in the stacked plot area
 		stackSelected = false;
 		for (int i = 0; i < nSpectra; i++) {
-			if (!isOnSpectrum(xPixel, yPixel, i, 2))
+			if (!isOnSpectrum(xPixel, yPixel, i))
 				continue;
 			boolean isNew = (i != iSpectrumSelected);
 			setSpectrumClicked(iPreviousSpectrumClicked = i);
