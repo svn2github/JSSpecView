@@ -79,7 +79,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface {
     appletPrivate = new JSVAppletPrivate(this);
   }
 
-  private static final String SVN_REV= "$LastChangedRevision::     $"; 
+  private static final String SVN_REV= "$LastChangedRevision:: 1000$"; 
   
   public static final String APPLET_VERSION = "2.0.2012_SVN"+SVN_REV.substring(22,27); //
 //  2.0.yyyy_SVN xxxx - should be automatically updated with the latest revision number from sourceforge SVN
