@@ -139,11 +139,14 @@ public class JSViewer {
           break;
         case SETPEAK:
         	if (jsvp != null)
-        		jsvp.getPanelData().shiftSpectrum(Double.NaN, Double.parseDouble(value));
+        		jsvp.getPanelData().shiftSpectrum(Double.NaN, 
+        				value.equalsIgnoreCase("NONE") ? Double.MAX_VALUE : Double.parseDouble(value));
         	break;        	
         case SHIFTX:
         	if (jsvp != null)
-        		jsvp.getPanelData().shiftSpectrum(Double.parseDouble(value), Double.NaN);
+        		jsvp.getPanelData().shiftSpectrum(
+        				value.equalsIgnoreCase("NONE") ? Double.MAX_VALUE 
+        						: Double.parseDouble(value), Double.NaN);
         	break;        	
         case SHOWINTEGRATION:
         	if (jsvp != null)

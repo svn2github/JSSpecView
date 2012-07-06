@@ -2956,7 +2956,10 @@ abstract class GraphSet {
 		JDXSpectrum spec = getSpectrum();
 		if (!spec.isNMR())
 			return false;
-		if (Double.isNaN(dx)) {
+		if (x1 == Double.MAX_VALUE || dx == Double.MAX_VALUE) {
+			// setPeak NONE
+			dx = -spec.addSpecShift(0);
+		} else if (Double.isNaN(dx)) {
 			double x0 = getPeakCenter();
 			if (Double.isNaN(x0))
 				return false;
