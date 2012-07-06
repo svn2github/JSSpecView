@@ -16,13 +16,10 @@ import jspecview.util.Logger;
 public class JSVDropTargetListener implements DropTargetListener {
 
   private ScriptInterface si;
-  private boolean allowAppend;
+  //private boolean allowAppend = true;
 
-  public JSVDropTargetListener(ScriptInterface si, boolean allowAppend) {
+  public JSVDropTargetListener(ScriptInterface si) {
     this.si = si;
-    this.allowAppend = allowAppend;
-    
-    // TODO Auto-generated constructor stub
   }
 
   //
@@ -54,8 +51,8 @@ public class JSVDropTargetListener implements DropTargetListener {
     // idea here is that if the drop is into the panel ('this'), then
     // we want a replacement; if the drop is to the menu, then we want an addition.
     // just an idea....
-    boolean doAppend = (allowAppend && dtde.getDropTargetContext()
-        .getDropTarget().getComponent() != si);
+    boolean doAppend = true;//(allowAppend && dtde.getDropTargetContext()
+        //.getDropTarget().getComponent() != si);
     String prefix = (doAppend ? "" : "close ALL;");
     String postfix = (doAppend ? "" : "overlay ALL");
     String cmd = "LOAD APPEND ";

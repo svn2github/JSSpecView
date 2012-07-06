@@ -485,7 +485,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	private DropTargetListener getDropListener() {
 		if (dtl == null)
-			dtl = new JSVDropTargetListener(this, true);
+			dtl = new JSVDropTargetListener(this);
 		return dtl;
 	}
 

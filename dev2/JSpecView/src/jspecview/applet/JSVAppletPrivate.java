@@ -403,7 +403,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 
 	private DropTargetListener getDropListener() {
 		if (dtl == null)
-			dtl = new JSVDropTargetListener(this, false);
+			dtl = new JSVDropTargetListener(this);
 		return dtl;
 	}
 
