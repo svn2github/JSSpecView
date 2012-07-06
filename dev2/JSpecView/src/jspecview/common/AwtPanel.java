@@ -135,10 +135,6 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     repaint();    
   }
 
-  public void doRequestFocusInWindow() {
-    requestFocusInWindow();
-  }
-
   ////////// settable colors //////////
 
   private Color coordinatesColor;
@@ -153,6 +149,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 
   private Color highlightColor = new Color(255, 0, 0, 200);
   private Color zoomBoxColor = new Color(100, 100, 50, 130);
+	private String viewTitle;
 
   public void setPlotColors(Object oColors) {
     Color[] colors = (Color[]) oColors;
@@ -252,9 +249,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   }
 
   public static AwtPanel getJSVPanel(List<JDXSpectrum> specs, int startIndex, int endIndex, JSVPopupMenu popup) {
-    AwtPanel jsvp = new AwtPanel(specs, startIndex, endIndex, popup);
-    jsvp.pd.isOverlaid = (specs.size() > 1);
-    return jsvp;
+    return new AwtPanel(specs, startIndex, endIndex, popup);
   }
 
   /**
@@ -565,11 +560,11 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
       popup.show((JSVPanel) this, e.getX(), e.getY());
       return;
     }
-    doRequestFocusInWindow();
     pd.doMouseClicked(e.getX(), e.getY(), e.getClickCount(), e.isControlDown());
   }
 
   public void mouseEntered(MouseEvent e) {
+    requestFocusInWindow();
   }
 
   public void mouseExited(MouseEvent e) {
@@ -578,6 +573,10 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 	public void keyPressed(KeyEvent e) {
 		pd.ctrlPressed = (e.getKeyCode() == KeyEvent.VK_CONTROL ? true : e
 				.isControlDown());
+		
+if (!pd.ctrlPressed)
+  System.out.println("awtpanel keypress " + e);
+
 		// should be only in panel region, though.
 		if (e.getKeyCode() == KeyEvent.VK_ESCAPE
 				|| e.getKeyCode() == KeyEvent.VK_DELETE) {
@@ -711,5 +710,13 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   public String toString() {
     return getSpectrumAt(0).toString();
   }
+
+	public void setViewTitle(String title) {
+		viewTitle = title;
+	}
+	
+	public String getViewTitle() {
+		return (viewTitle == null ? getTitle() : viewTitle);
+	}
 
 }

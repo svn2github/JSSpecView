@@ -9,7 +9,7 @@ import java.util.List;
  * 
  * Was "MultiScaleData"
  */
-class View extends ScaleData {
+class ViewData extends ScaleData {
 
   int[] startDataPointIndices;
   int[] endDataPointIndices;
@@ -37,7 +37,7 @@ class View extends ScaleData {
 	 *          the initial number of Y divisions for scale
 	 * @return returns an instance of <code>MultiScaleData</code>
 	 */
-	View(List<JDXSpectrum> spectra, double yPt1, double yPt2,
+	ViewData(List<JDXSpectrum> spectra, double yPt1, double yPt2,
 			int[] startList, int[] endList, int initNumXDivisions,
 			int initNumYDivisions, boolean isContinuous, int iSpec) {
 		super();
@@ -50,7 +50,7 @@ class View extends ScaleData {
 		init(spectra, startList, endList, yPt1, yPt2, initNumXDivisions, initNumYDivisions, isContinuous);
 	}
   
-	View(List<JDXSpectrum> spectra, double yPt1, double yPt2,
+	ViewData(List<JDXSpectrum> spectra, double yPt1, double yPt2,
 			int initNumXDivisions, int initNumYDivisions, boolean isContinuous) {
 		// forced subsets
 		super();
@@ -227,7 +227,7 @@ class View extends ScaleData {
 		return (i >= 0 && i < nSpec ? spectrumScaleFactors[i] : 1);
 	}
 
-	void copyScaleFactors(View view) {
+	void copyScaleFactors(ViewData view) {
 		System.arraycopy(view.spectrumScaleFactors, 0, spectrumScaleFactors, 0, nSpec);
 		System.arraycopy(view.userYFactors, 0, userYFactors, 0, nSpec);
 		System.arraycopy(view.spectrumYRefs, 0, spectrumYRefs, 0, nSpec);

@@ -190,12 +190,14 @@ public class JSVPopupMenu extends JPopupMenu {
   }
 
   protected void setOverlayItems() {
-    spectraMenuItem.setText("Spectra...");
+    spectraMenuItem.setText("Views...");
     spectraMenuItem.addActionListener(new ActionListener() {
        public void actionPerformed(ActionEvent e) {
-         overlay(EnumOverlay.DIALOG);
+         overlay(EnumOverlay.DIALOG
+        		 );
        }
      });
+    overlayStackOffsetMenuItem.setEnabled(false);
     overlayStackOffsetMenuItem.setText("Overlay Offset...");
     overlayStackOffsetMenuItem.addActionListener(new ActionListener() {
        public void actionPerformed(ActionEvent e) {
@@ -359,6 +361,7 @@ public class JSVPopupMenu extends JPopupMenu {
     solColMenuItem.setEnabled(isSingle && spec0.canShowSolutionColor());
     transAbsMenuItem.setEnabled(isSingle && spec0.canConvertTransAbs());
     overlayKeyMenuItem.setEnabled(isOverlaid && pd.getNumberOfGraphSets() == 1);
+    overlayStackOffsetMenuItem.setEnabled(isOverlaid);
     // what about its selection???
     if (appletSaveAsJDXMenu != null)
       appletSaveAsJDXMenu.setEnabled(spec0.canSaveAsJDX());

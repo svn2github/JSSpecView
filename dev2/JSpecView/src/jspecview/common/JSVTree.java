@@ -259,9 +259,8 @@ public class JSVTree extends JTree {
 	public static int openDataOrFile(ScriptInterface si,
 			String data, String name, List<JDXSpectrum> specs, String url,
 			int firstSpec, int lastSpec) {
-		System.out.println("JSVTreeNode openDataOrFile " + data + name + specs + url);
 		if ("NONE".equals(name)) {
-			close(si, "Overlay*");
+			close(si, "View*");
 			return FILE_OPEN_OK;
 		}
     si.writeStatus("");
@@ -269,11 +268,11 @@ public class JSVTree extends JTree {
     String fileName = null;
     File file = null;
 		URL base = null;
-    boolean isOverlay = false;
+    boolean isView = false;
     if (data != null) {
     } else if (specs != null) {
-      isOverlay = true;
-      fileName = filePath = "Overlay" + si.incrementOverlay(1);
+      isView = true;
+      fileName = filePath = "View" + si.incrementViewCount(1);
     } else if (url != null) {
       try {
       	base = si.getDocumentBase();
@@ -294,16 +293,16 @@ public class JSVTree extends JTree {
       //recentJmolName = (url == null ? filePath.replace('\\', '/') : url);
       si.setRecentURL(null);
     }
-    // TODO could check here for already-open overlay 
+    // TODO could check here for already-open view 
     if (JSVPanelNode.isOpen(si.getPanelNodes(), filePath) || JSVPanelNode.isOpen(si.getPanelNodes(), url)) {
       si.writeStatus(filePath + " is already open");
-      if (isOverlay)
-      	 si.incrementOverlay(-1);
+      if (isView)
+      	 si.incrementViewCount(-1);
       return FILE_OPEN_ALREADY;
     }
     si.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
     try {
-      si.setCurrentSource(isOverlay ? JDXSource.createOverlay(specs)
+      si.setCurrentSource(isView ? JDXSource.createView(specs)
           : si.createSource(data, filePath, base, firstSpec, lastSpec));
     } catch (Exception e) {
       e.printStackTrace();
@@ -326,35 +325,34 @@ public class JSVTree extends JTree {
     specs = currentSource.getSpectra();
     si.process(specs);
     
-    boolean autoOverlay = si.getAutoOverlay() || spec.isAutoOverlayFromJmolClick();
-
+    boolean autoOverlay = si.getAutoCombine() || spec.isAutoOverlayFromJmolClick();
     
-  //boolean isOverlaid = (isOverlay && !name.equals("NONE"));
-    
-    boolean overlay = isOverlay || autoOverlay
+    boolean combine = isView || autoOverlay
         && currentSource.isCompoundSource;
-    if (overlay) {
-      overlaySpectra(si, (isOverlay ? url : null));
+    if (combine) {
+      combineSpectra(si, (isView ? url : null));
     } else {
       splitSpectra(si);
     }
-    if (!isOverlay)
+    if (!isView)
       si.updateRecentMenus(filePath);
     return FILE_OPEN_OK;
 	}
 
-  private static void overlaySpectra(ScriptInterface si, String name) {
+  private static void combineSpectra(ScriptInterface si, String name) {
   	JDXSource source = si.getCurrentSource();
     List<JDXSpectrum> specs = source.getSpectra();
     JSVPanel jsvp = si.getNewJSVPanel(specs);
     jsvp.setTitle(source.getTitle());
-    if (jsvp.getTitle().equals(""))
+    if (jsvp.getTitle().equals("")) {
+      jsvp.setViewTitle(source.getFilePath());
     	jsvp.setTitle(name);
+    }
     si.setPropertiesFromPreferences(jsvp, true);
-    createTree(si, source, new JSVPanel[] { jsvp }).panelNode.isOverlay = true;
+    createTree(si, source, new JSVPanel[] { jsvp }).panelNode.isView = true;
     JSVPanelNode node = JSVPanelNode.findNode(si.getSelectedPanel(), si.getPanelNodes());
     node.setFrameTitle(name);
-    node.isOverlay = true;
+    node.isView = true;
     if (si.getAutoShowLegend()
         && si.getSelectedPanel().getPanelData().getNumberOfGraphSets() == 1)
       node.setLegend(si.getOverlayLegend(jsvp));

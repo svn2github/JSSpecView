@@ -69,7 +69,7 @@ public enum ScriptToken {
   LOADFILECALLBACKFUNCTIONNAME,
   MENUON, 
   OBSCURE, 
-  OVERLAY("spectrumID[*factor], spectrumID[*factor], ... Example: OVERLAY 3.1, 3.2*2  or  OVERLAY \"acetophenone\""),
+  OVERLAY("deprecated -- see VIEW"),
   OVERLAYSTACKED("TF"),
   PEAK("<type(IR,CNMR,HNMR,MS, etc)> \"match\" [ALL]"), 
   PEAKCALLBACKFUNCTIONNAME, 
@@ -96,6 +96,7 @@ public enum ScriptToken {
   TITLEFONTNAME("fontName"), 
   UNITSCOLOR("C"), 
   VERSION, 
+  VIEW("spectrumID[*factor], spectrumID[*factor], ... Example: VIEW 3.1, 3.2*2  or  VIEW \"acetophenone\""),
   XSCALEON("T"), 
   XUNITSON("T"), 
   YSCALE("[ALL] lowValue highValue"), 
@@ -176,7 +177,8 @@ public enum ScriptToken {
       // take full command
       return removeCommandName(cmd);
     case SELECT:
-    case OVERLAY:
+    case OVERLAY: // deprecated
+    case VIEW:
     case ZOOM:
       // commas to spaces
       return removeCommandName(cmd).replace(',', ' ').trim();

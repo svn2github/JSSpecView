@@ -116,11 +116,6 @@ public class PanelData {
   boolean drawXAxisLeftToRight;
   boolean xAxisLeftToRight = true;
   boolean isIntegralDrag;
-  boolean isOverlaid;
-
-  public boolean isOverlaid() {
-    return isOverlaid;
-  }
 
   int nSpectra;
   int thisWidth;
@@ -209,10 +204,9 @@ public class PanelData {
   String printGraphPosition = "default";
   boolean titleDrawn;
   boolean display1D;
-  int yStackOffsetPercent;
-  
+
   public void setYStackOffsetPercent(int offset) {
-	yStackOffsetPercent = offset;
+  	currentGraphSet.yStackOffsetPercent = offset;
   }
   
   public boolean getDisplay1D() {
@@ -234,7 +228,7 @@ public class PanelData {
     setTitle(getSpectrum().getTitleLabel());
   }
 
-  void setCurrentGraphSet(GraphSet gs, int xPixel, int yPixel, boolean isClick) {
+  void setCurrentGraphSet(GraphSet gs, int xPixel, int yPixel, int clickCount) {
   	int splitPoint = gs.getSplitPoint(yPixel);
   	boolean isNewSet = (currentGraphSet != gs);
   	boolean isNewSplitPoint = (isNewSet || currentSplitPoint != splitPoint);
@@ -246,7 +240,7 @@ public class PanelData {
 //      System.out.println("setting currentSplitPoint to " + splitPoint);
   	if (!isNewSet) {
     	if (gs.nSplit == 1) {
-    		if (!isClick || !gs.checkSpectrumClickEvent(xPixel, yPixel))
+    		if (clickCount == 0 || !gs.checkSpectrumClickedEvent(xPixel, yPixel, clickCount))
     			return;
     	} else if (!isNewSplitPoint) {
         return;
@@ -257,18 +251,26 @@ public class PanelData {
   	// or nSplit > 1 and new split point
   	// or nSplit == 1 and showAllStacked and isClick and is a spectrum click)
   	
-  	gs.setSpectrum(currentSplitPoint);
+  	setSpectrum(currentSplitPoint, true);
     JDXSpectrum spec = gs.getSpectrum();
     notifySubSpectrumChange(spec.getSubIndex(), spec);
-    refresh();
   }
 
-  public JDXSpectrum getSpectrum() {
+  public void setSpectrum(int iSpec, boolean isSplit) {
+  	currentGraphSet.setSpectrum(iSpec, isSplit);
+    refresh();
+	}
+  
+	public JDXSpectrum getSpectrum() {
     return currentGraphSet.getSpectrum();
   }
 
   public void setSpectrum(JDXSpectrum spec) {
     currentGraphSet.setSpectrum(spec);
+  }
+
+  public boolean isOverlaid() {
+    return currentGraphSet.showAllStacked;
   }
 
 
@@ -796,7 +798,7 @@ public class PanelData {
     isIntegralDrag = (isControlDown && gs.getSpectrum().hasIntegral());
     if (isControlDown && !isIntegralDrag)
       return;
-    setCurrentGraphSet(gs, xPixel, yPixel, false);
+    setCurrentGraphSet(gs, xPixel, yPixel, 0);
     gs.checkWidgetEvent(xPixel, yPixel, true, ++clickCount);
   }
 
@@ -824,7 +826,10 @@ public class PanelData {
     GraphSet gs = GraphSet.findGraphSet(graphSets, xPixel, yPixel);
     if (gs == null)
       return;
-    setCurrentGraphSet(gs, xPixel, yPixel, clickCount == 1);
-    gs.mouseClickEvent(xPixel, yPixel, clickCount, isControlDown);
+    setCurrentGraphSet(gs, xPixel, yPixel, clickCount);
+    gs.mouseClickedEvent(xPixel, yPixel, clickCount, isControlDown);
   }
+	public int getCurrentSpectrumIndex() {
+		return currentGraphSet.getCurrentSpectrumIndex();
+	}
 }

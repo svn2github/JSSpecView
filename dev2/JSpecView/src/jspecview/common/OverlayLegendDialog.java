@@ -18,7 +18,6 @@
  */
 
 package jspecview.common;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -30,8 +29,11 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
@@ -60,7 +62,7 @@ public class OverlayLegendDialog extends JDialog implements JSVDialog {
    * @param jsvp the <code>JSVPanel</code>
    */
   public OverlayLegendDialog(Frame frame, JSVPanel jsvp) {
-    super(frame, "Legend: " + jsvp.getTitle(), false);
+    super(frame, jsvp.getViewTitle(), false);
     this.jsvp = jsvp;
     init();
     this.pack();
@@ -75,6 +77,17 @@ public class OverlayLegendDialog extends JDialog implements JSVDialog {
 
     LegendTableModel tableModel = new LegendTableModel();
     JTable table = new JTable(tableModel);
+    
+    
+    table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    ListSelectionModel specSelection = table.getSelectionModel();
+    specSelection.addListSelectionListener(new ListSelectionListener() {
+        public void valueChanged(ListSelectionEvent e) {
+          if (e.getValueIsAdjusting()) return;
+          ListSelectionModel lsm = (ListSelectionModel)e.getSource();
+          jsvp.getPanelData().setSpectrum(lsm.getMinSelectionIndex(), false);
+        }
+      });
     table.setDefaultRenderer(Color.class, new ColorRenderer());
     table.setDefaultRenderer(String.class, new TitleRenderer());
     table.setPreferredScrollableViewportSize(new Dimension(350, 95));

@@ -46,7 +46,7 @@ public class ImageView {
   public int xView1, yView1, xView2, yView2;
   public double minX = Double.NaN, maxX, minZ, maxZ;
   
-  public void set(View view) {
+  public void set(ViewData view) {
     if (Double.isNaN(minX)) {
       minX = view.minX;
       maxX = view.maxX;
@@ -235,7 +235,7 @@ public class ImageView {
     return (buf2d = buf);
   }
   
-  int[] adjustView (JDXSpectrum spec, View view, double minGray, double maxGray) {
+  int[] adjustView (JDXSpectrum spec, ViewData view, double minGray, double maxGray) {
   	//double minGray = 0.05;
   	//double maxGray = 0.20;
   	int i = 0;

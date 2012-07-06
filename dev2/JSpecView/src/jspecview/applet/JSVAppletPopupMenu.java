@@ -165,29 +165,7 @@ class JSVAppletPopupMenu extends JSVPopupMenu {
 	public void setCompoundMenu(JSVPanel jsvp, List<JSVPanelNode> panelNodes,
 			boolean allowSelection, ActionListener compoundMenuSelectionListener,
 			ActionListener compoundMenuChooseListener) {
-		spectraMenuItem.setEnabled(allowSelection && panelNodes.size() > 1);
-		
-//		appletCompoundMenuItem.removeAll();
-//		if (!allowSelection || panelNodes.size() == 1)
-//			return;
-//		appletCompoundMenuItem.add(overlayAllMenuItem);
-//		appletCompoundMenuItem.add(overlayNoneMenuItem);
-//		appletCompoundMenuItem.add(overlayMenuItem);
-//		appletCompoundMenuItem.add(overlayStackOffsetMenuItem);
-//		if (panelNodes.size() <= 20) {
-//			// add Menus to navigate
-//			for (int i = 0; i < panelNodes.size(); i++) {
-//				JSVPanelNode p = panelNodes.get(i);
-//				String label = (p.fileName.startsWith("Overlay") ? p.fileName : p.getSpectrum().getTitleLabel());
-//				JCheckBoxMenuItem mi = new JCheckBoxMenuItem((i + 1) + "- " + label);
-//				mi.setSelected(p.equals(jsvp));
-//				mi.addActionListener(compoundMenuSelectionListener);
-//				mi.setActionCommand("" + i);
-//				appletCompoundMenuItem.add(mi);
-//			}
-//		}
-//		// add compound menu to popup menu
-//		add(appletCompoundMenuItem, 3);
+		spectraMenuItem.setEnabled(allowSelection && panelNodes.size() > 1);		
 		spectraMenuItem.setEnabled(true);
 	}
     

@@ -4,7 +4,6 @@ public interface JSVPanel extends JSVContainer {
 
   void repaint();
   
-  void doRequestFocusInWindow();
   void drawCoordinates(Object g, int height, int width);
   void drawTitle(Object g, int height, int width, String title);
   Object getColor(ScriptToken st);
@@ -16,11 +15,15 @@ public interface JSVPanel extends JSVContainer {
   Object getPopup();
   JDXSpectrum getSpectrum();
   JDXSpectrum getSpectrumAt(int i);
+  String getViewTitle();
   void setColor(ScriptToken st, Object color);
   void setColorOrFont(Parameters ds, ScriptToken st);
   void setFont(Object g, String string, int mode, int size);
   void setPlotColors(Object plotColors);
   void setSpectrum(JDXSpectrum spec);
   void setToolTipText(String s);
+	void setViewTitle(String filePath);
   void setupPlatform();
+
+
 }

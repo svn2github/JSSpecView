@@ -19,7 +19,6 @@
 
 package jspecview.common;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -46,7 +45,7 @@ import javax.swing.JTree;
  * 
  * @author Bob Hanson hansonr@stolaf.edu
  */
-public class SpectraDialog extends JDialog implements WindowListener {
+public class ViewDialog extends JDialog implements WindowListener {
 
 	private static final long serialVersionUID = 1L;
 	private ScriptInterface si;
@@ -57,28 +56,36 @@ public class SpectraDialog extends JDialog implements WindowListener {
 	private Insets cbInsets2;
 	private JButton closeSelectedButton;
 	private Rectangle bounds;
-	private JButton overlaySelectedButton;
+	private JButton combineSelectedButton;
+	private JButton viewSelectedButton;
   
+	private static int posX = Integer.MIN_VALUE, posY;
   
-  /**
-    * Initialises the <code>IntegralDialog</code> with the given values for minY, offset
-    * and factor
-    * @param panel the parent panel
-    * @param spectraTree
-    * @param modal the modality
-   */
-  public SpectraDialog(ScriptInterface si, Component panel, boolean modal) {
-  	this.si = si;
-    this.setTitle("View/Overlay/Close Spectra");
-    this.setModal(modal);
-    if(panel != null) {
-      setLocation( panel.getLocationOnScreen().x,
-                   panel.getLocationOnScreen().y);
-    }
-    setResizable(true);
-    addWindowListener(this);
-    setup();
-  }
+	/**
+	 * Initialises the <code>IntegralDialog</code> with the given values for minY,
+	 * offset and factor
+	 * 
+	 * @param panel
+	 *          the parent panel
+	 * @param spectraTree
+	 * @param modal
+	 *          the modality
+	 */
+	public ViewDialog(ScriptInterface si, Component panel, boolean modal) {
+		this.si = si;
+		this.setTitle("View/Overlay/Close Spectra");
+		this.setModal(modal);
+		if (panel != null) {
+			if (posX == Integer.MIN_VALUE) {
+				posX = panel.getLocationOnScreen().x;
+				posY = panel.getLocationOnScreen().y;
+			}
+			setLocation(posX, posY);
+		}
+		setResizable(true);
+		addWindowListener(this);
+		setup();
+	}
 
 	private void setup() {
     try {
@@ -97,11 +104,12 @@ public class SpectraDialog extends JDialog implements WindowListener {
   void jbInit() throws Exception {
     layoutCheckBoxes((JTree) si.getSpectraTree());
         
-    JButton selectAllButton = new JButton();
-    JButton selectNoneButton = new JButton();
-    overlaySelectedButton = new JButton();
-    closeSelectedButton = new JButton();
-    JButton doneButton = new JButton();
+    JButton selectAllButton = newJButton();
+    JButton selectNoneButton = newJButton();
+    combineSelectedButton = newJButton();
+    viewSelectedButton = newJButton();
+    closeSelectedButton = newJButton();
+    JButton doneButton = newJButton();
 
     selectAllButton.setText("Select All");
     selectAllButton.addActionListener(new java.awt.event.ActionListener() {
@@ -117,18 +125,23 @@ public class SpectraDialog extends JDialog implements WindowListener {
       }
     });
     
-    overlaySelectedButton.setText("Overlay Selected");
-    overlaySelectedButton.addActionListener(new java.awt.event.ActionListener() {
+    viewSelectedButton.setText("View Selected");
+    viewSelectedButton.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
-      	//bounds = getBounds();
-        overlaySelected();
+        viewSelected();
+      }
+    });
+    
+    combineSelectedButton.setText("Combine Selected");
+    combineSelectedButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        combineSelected();
       }
     });
     
     closeSelectedButton.setText("Close Selected");
     closeSelectedButton.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
-      	//bounds = getBounds();
         closeSelected();
       }
     });
@@ -141,48 +154,43 @@ public class SpectraDialog extends JDialog implements WindowListener {
     });
 
     Insets buttonInsets = new Insets(5, 5, 5, 5);
-
-    JPanel midPanel = new JPanel(new GridBagLayout());
-    midPanel.add(selectAllButton, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
-    		GridBagConstraints.CENTER, GridBagConstraints.NONE, buttonInsets, 0, 0));
-    
-    midPanel.add(selectNoneButton, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
-    		GridBagConstraints.CENTER, GridBagConstraints.NONE, buttonInsets, 0, 0));
-    
-
-    JPanel buttonPanel = new JPanel(new GridBagLayout());
-    buttonPanel.add(overlaySelectedButton, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
-    		GridBagConstraints.CENTER, GridBagConstraints.NONE, buttonInsets, 0, 0));
-    
-    buttonPanel.add(closeSelectedButton, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
-    		GridBagConstraints.CENTER, GridBagConstraints.NONE, buttonInsets, 0, 0));
-    
-    buttonPanel.add(doneButton, new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0,
-    		GridBagConstraints.CENTER, GridBagConstraints.NONE, buttonInsets, 0, 0));
+    JPanel leftPanel = new JPanel(new GridBagLayout());
+    int i = 0;
+    addButton(leftPanel, selectAllButton, i++, buttonInsets);
+    addButton(leftPanel, selectNoneButton, i++, buttonInsets);
+    addButton(leftPanel, viewSelectedButton, i++, buttonInsets);
+    addButton(leftPanel, combineSelectedButton, i++, buttonInsets);
+    addButton(leftPanel, closeSelectedButton, i++, buttonInsets);
+    addButton(leftPanel, doneButton, i++, buttonInsets);
         
-    //GridBagConstraints(int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty, 
-    		// int anchor, int fill, Insets insets, int ipadx, int ipady)
-
-    JPanel lowerPanel = new JPanel(new BorderLayout());
-    lowerPanel.add(midPanel, BorderLayout.NORTH);
-    lowerPanel.add(buttonPanel, BorderLayout.SOUTH);
-
     JScrollPane scrollPane = new JScrollPane(spectrumPanel);
 
-    JSplitPane mainSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+    JSplitPane mainSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
     mainSplitPane.setOneTouchExpandable(true);
-    mainSplitPane.setResizeWeight(1);
-    mainSplitPane.setTopComponent(scrollPane);
-    mainSplitPane.setBottomComponent(lowerPanel);
+    mainSplitPane.setResizeWeight(0);
+    mainSplitPane.setRightComponent(scrollPane);
+    mainSplitPane.setLeftComponent(leftPanel);
 
-    setPreferredSize(new Dimension(350,500));
+    setPreferredSize(new Dimension(500,350));
     getContentPane().removeAll();
-    getContentPane().add(mainSplitPane, BorderLayout.CENTER);
+    getContentPane().add(mainSplitPane);//, BorderLayout.CENTER);
 
 
     //getContentPane().add(mainPanel);
     checkEnables();
   }
+
+	private void addButton(JPanel leftPanel, JButton selectAllButton, int i,
+			Insets buttonInsets) {
+    leftPanel.add(selectAllButton, new GridBagConstraints(0, i, 1, 1, 0.0, 0.0,
+    		GridBagConstraints.CENTER, GridBagConstraints.NONE, buttonInsets, 0, 0));    
+	}
+
+	private JButton newJButton() {
+		JButton b = new JButton();
+		b.setPreferredSize(new Dimension(120,25));
+		return b;
+	}
 
 	private void layoutCheckBoxes(JTree spectraTree) {
     checkBoxes = new ArrayList<JCheckBox>();
@@ -190,16 +198,19 @@ public class SpectraDialog extends JDialog implements WindowListener {
     cbInsets1 = new Insets(0, 0, 2, 2);
     cbInsets2 = new Insets(0, 20, 2, 2);
 		spectrumPanel = new JPanel(new GridBagLayout());
-    addCheckBoxes(((JSVTree) si.getSpectraTree()).getRootNode(), 0);
+    addCheckBoxes(((JSVTree) si.getSpectraTree()).getRootNode(), 0, true);
+    addCheckBoxes(((JSVTree) si.getSpectraTree()).getRootNode(), 0, false);
 	}
 
 	@SuppressWarnings("unchecked")
-	private void addCheckBoxes(JSVTreeNode rootNode, int level) {
+	private void addCheckBoxes(JSVTreeNode rootNode, int level, boolean addViews) {
 		Enumeration<JSVTreeNode> enume = rootNode.children();
     while (enume.hasMoreElements()) {
       JSVTreeNode treeNode = enume.nextElement();
-    	JCheckBox cb = new JCheckBox();
     	JSVPanelNode node = treeNode.panelNode;
+    	if (node.isView != addViews)
+    		continue;
+    	JCheckBox cb = new JCheckBox();
     	cb.setSelected(node.isSelected);
     	cb.setText(node.toString());
     	cb.setActionCommand("" + (treeNodes.size()));
@@ -214,7 +225,7 @@ public class SpectraDialog extends JDialog implements WindowListener {
       treeNode.index = treeNodes.size();
     	treeNodes.add(treeNode);
     	checkBoxes.add(cb);
-    	addCheckBoxes(treeNode, level + 1);
+    	addCheckBoxes(treeNode, level + 1, addViews);
     }
 	}
 
@@ -227,15 +238,14 @@ public class SpectraDialog extends JDialog implements WindowListener {
 			}
 		}
 		
-		overlaySelectedButton.setEnabled(false);
 		int n = 0;
 		for (int i = 0; i < checkBoxes.size(); i++) {
 			if (checkBoxes.get(i).isSelected() && treeNodes.get(i).panelNode.jsvp != null) {
 				n++;
 			}
 		}
-		overlaySelectedButton.setEnabled(n > 0);
-		overlaySelectedButton.setText(n == 1 ? "View Selected" : "Overlay Selected");
+		combineSelectedButton.setEnabled(n > 1);
+		viewSelectedButton.setEnabled(n == 1);
 	}
 	
 	private boolean checking = false; 
@@ -267,7 +277,7 @@ public class SpectraDialog extends JDialog implements WindowListener {
 		}
 		if (isSelected)
 			for (i = treeNodes.size(); --i >= 0;)
-				if (treeNodes.get(i).panelNode.isOverlay != node.panelNode.isOverlay) {
+				if (treeNodes.get(i).panelNode.isView != node.panelNode.isView) {
 					checkBoxes.get(treeNodes.get(i).index).setSelected(false);
 					treeNodes.get(i).panelNode.isSelected = false;
 				}
@@ -282,13 +292,13 @@ public class SpectraDialog extends JDialog implements WindowListener {
 		checkEnables();
 	}
 	
-	protected void overlaySelected() {
+	protected void combineSelected() {
 		StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < checkBoxes.size(); i++) {
 			JCheckBox cb = checkBoxes.get(i);
 			JSVPanelNode node = treeNodes.get(i).panelNode;
 			if (cb.isSelected() && node.jsvp != null) {
-				if (node.isOverlay) {
+				if (node.isView) {
 					si.setNode(node, true);
 					return;
 				}
@@ -296,7 +306,25 @@ public class SpectraDialog extends JDialog implements WindowListener {
 				sb.append(" ").append(label.substring(0, label.indexOf(":")));
 			}
 		}
-		JSViewer.execOverlay(si, sb.toString().trim(), false);
+		JSViewer.execView(si, sb.toString().trim(), false);
+		setup();
+	}
+
+	protected void viewSelected() {
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < checkBoxes.size(); i++) {
+			JCheckBox cb = checkBoxes.get(i);
+			JSVPanelNode node = treeNodes.get(i).panelNode;
+			if (cb.isSelected() && node.jsvp != null) {
+				if (node.isView) {
+					si.setNode(node, true);
+					return;
+				}
+				String label = cb.getText();
+				sb.append(" ").append(label.substring(0, label.indexOf(":")));
+			}
+		}
+		JSViewer.execView(si, sb.toString().trim(), false);
 		setup();
 	}
 

@@ -215,7 +215,7 @@ public class AppToolBar extends JToolBar {
 
   public void setOverlay(boolean b) {
       spectraButton.setIcon(spectrumIcon);
-      spectraButton.setToolTipText("Spectrum Display");
+      spectraButton.setToolTipText("View Spectra");
   }
 
   public void setMenuEnables(JSVPanelNode node) {

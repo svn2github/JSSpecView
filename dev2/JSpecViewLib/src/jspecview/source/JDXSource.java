@@ -35,7 +35,7 @@ import jspecview.common.JDXSpectrum;
  */
 public class JDXSource extends JDXHeader {
 
-  public final static int TYPE_OVERLAY = -2;
+  public final static int TYPE_VIEW = -2;
   
   public final static int TYPE_UNKNOWN = -1;
   public final static int TYPE_SIMPLE = 0;
@@ -137,15 +137,11 @@ public class JDXSource extends JDXHeader {
     return filePath;
   }
 
-  public static JDXSource createOverlay(List<JDXSpectrum> specs) {
-    JDXSource source = new JDXSource(TYPE_OVERLAY, "overlaid");
+  public static JDXSource createView(List<JDXSpectrum> specs) {
+    JDXSource source = new JDXSource(TYPE_VIEW, "overlaid");
     for (int i = 0; i < specs.size(); i++)
       source.addJDXSpectrum(specs.get(i).getFilePath(), specs.get(i), false);
     return source;
-  }
-
-  public boolean isOverlay() {
-    return (type == TYPE_OVERLAY);
   }
 
   public String[][] getHeaderRowDataAsArray(boolean addDataClass,

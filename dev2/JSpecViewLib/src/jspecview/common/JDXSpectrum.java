@@ -610,7 +610,7 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
       units = (isX ? xLabel : yLabel);
     if (units == null)
       units = (isX ? xUnits : yUnits);
-    return (units == null ? "" : units);
+    return (units == null ? "" : units.equalsIgnoreCase("WAVENUMBERS") ? "1/CM" : units);
   }
 
 	public double findXForPeakNearest(double x) {

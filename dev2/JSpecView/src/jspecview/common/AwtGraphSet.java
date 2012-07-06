@@ -308,8 +308,11 @@ class AwtGraphSet extends GraphSet {
 	}
 
 	@Override
-	protected void fillCircle(Object g, int x, int y) {
-		((Graphics)g).drawOval(x-5, y-5, 8, 8);
+	protected void fillCircle(Object g, int x, int y, boolean doFill) {
+		if (doFill)
+  		((Graphics)g).fillOval(x-4, y-4, 8, 8);
+		else
+			((Graphics)g).drawOval(x-4, y-4, 8, 8);
 	}
 
 

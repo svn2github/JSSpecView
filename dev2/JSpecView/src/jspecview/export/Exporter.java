@@ -29,6 +29,7 @@ import javax.swing.SwingConstants;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVFileFilter;
 import jspecview.common.JSVPanel;
+import jspecview.common.PanelData;
 import jspecview.common.ScriptToken;
 import jspecview.util.FileManager;
 import jspecview.util.TextFormat;
@@ -94,25 +95,34 @@ public class Exporter {
     }
   }
 
-  public static String exportSpectra(JSVPanel selectedJSVPanel, JFrame frame,
+  /**
+   * 
+   * @param jsvp
+   * @param frame
+   * @param fc
+   * @param type
+   * @param recentFileName
+   * @param dirLastExported
+   * @return null or directory saved to
+   */
+  public static String exportSpectra(JSVPanel jsvp, JFrame frame,
                                      JFileChooser fc, String type,
                                      String recentFileName,
                                      String dirLastExported) {
     // From popup menu click SaveAs or Export
     // if JSVPanel has more than one spectrum...Choose which one to export
-    int numOfSpectra = selectedJSVPanel.getPanelData().getNumberOfGraphSets();
-    if (numOfSpectra == 1 || type.equals("JPG") || type.equals("PNG"))
-      return exportSpectrumOrImage(selectedJSVPanel, type, -1, fc, recentFileName,
+    int nSpectra = jsvp.getPanelData().getNumberOfSpectraInCurrentSet();
+    if (nSpectra == 1 || type.equals("JPG") || type.equals("PNG"))
+      return exportSpectrumOrImage(jsvp, type, -1, fc, recentFileName,
           dirLastExported);
-
-    String[] items = new String[numOfSpectra];
-    for (int i = 0; i < numOfSpectra; i++)
-      items[i] = selectedJSVPanel.getSpectrumAt(i).getTitle();
+    String[] items = new String[nSpectra];
+    for (int i = 0; i < nSpectra; i++)
+      items[i] = jsvp.getSpectrumAt(i).getTitle();
 
     final JDialog dialog = new JDialog(frame, "Choose Spectrum", true);
     dialog.setResizable(false);
     dialog.setSize(200, 100);
-    Component panel = (Component) selectedJSVPanel;
+    Component panel = (Component) jsvp;
     dialog.setLocation((panel.getLocation().x + panel.getSize().width) / 2,
         (panel.getLocation().y + panel.getSize().height) / 2);
     final JComboBox cb = new JComboBox(items);
@@ -130,20 +140,16 @@ public class Exporter {
         BorderLayout.NORTH);
     dialog.getContentPane().add(p);
     String dir = dirLastExported;
-    final String dl = dirLastExported;
-    final String t = type;
-    final String rfn = recentFileName;
-    final JFileChooser f = fc;
-    final JSVPanel jsvp = selectedJSVPanel;
+    final int ret[] = new int[1];
     button.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        int index = cb.getSelectedIndex();
-        dialog.dispose();
-        exportSpectrumOrImage(jsvp, t, index, f, rfn, dl);
+        ret[0] = cb.getSelectedIndex();
       }
     });
     dialog.setVisible(true);
-    return dir;
+    dialog.dispose();
+    String msg = exportSpectrumOrImage(jsvp, type, ret[0], fc, recentFileName, dirLastExported);
+    return (msg == null ? null : dir);
   }
 
   /**
@@ -252,12 +258,13 @@ public class Exporter {
       if (option == JOptionPane.NO_OPTION)
         return dir;
     }
+    String msg = "OK";
     if (imode == Type.SOURCE)
       fileCopy(name, file);
     else
-      exportSpectrumOrImage(selectedJSVPanel, imode, index, file
+      msg = exportSpectrumOrImage(selectedJSVPanel, imode, index, file
           .getAbsolutePath());
-    return dir;
+    return (msg == null ? null : dir);
   }
   
   private static void fileCopy(String name, File file) {
@@ -276,17 +283,23 @@ public class Exporter {
     }
   }
 
+  /**
+   * 
+   * @param jsvp
+   * @param imode
+   * @param index
+   * @param path
+   * @return  status line message
+   */
   private static String exportSpectrumOrImage(JSVPanel jsvp, Type imode,
                                               int index, String path) {
     JDXSpectrum spec;
-    if (index < 0) {
-      index = 0;
-      spec = jsvp.getSpectrum();
-    } else {
-      spec = jsvp.getSpectrumAt(index);
-    }
-    int startIndex = jsvp.getPanelData().getStartDataPointIndices()[index];
-    int endIndex = jsvp.getPanelData().getEndDataPointIndices()[index];
+    PanelData pd = jsvp.getPanelData();
+    if (index < 0 && (index = pd.getCurrentSpectrumIndex()) < 0)
+      return "ERROR: No spectrum selected";
+    spec = pd.getSpectrumAt(index);
+    int startIndex = pd.getStartDataPointIndices()[index];
+    int endIndex = pd.getEndDataPointIndices()[index];
     String msg;
     try {
       switch (imode) {

@@ -48,13 +48,13 @@ public interface ScriptInterface {
   public void setNode(JSVPanelNode node, boolean fromTree);
 	public JSVPanelNode setOverlayVisibility(JSVPanelNode node);
 	public void setCurrentSource(JDXSource source);
-	public int incrementOverlay(int i);
+	public int incrementViewCount(int i);
 	public void setRecentURL(String filePath);
 	public void setRecentFileName(String fileName);
 	public void writeStatus(String msg);
 	public void setCursor(Cursor predefinedCursor);
 	public void setLoaded(String fileName, String filePath);
-	public boolean getAutoOverlay();
+	public boolean getAutoCombine();
 	public void updateRecentMenus(String filePath);
 	public void process(List<JDXSpectrum> specs);
 	public Object getPopupMenu();

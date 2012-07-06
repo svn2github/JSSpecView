@@ -38,7 +38,7 @@ public class JSVPanelNode {
   public String id;
   public JSVDialog legend;
 	public boolean isSelected;
-	public boolean isOverlay;
+	public boolean isView;
   public String frameTitle;
   
 
@@ -101,11 +101,11 @@ public class JSVPanelNode {
     return null;
   }
 
-	public static String getSpectrumListAsString(List<JSVPanelNode> panelNodes, boolean allowOverlays) {
+	public static String getSpectrumListAsString(List<JSVPanelNode> panelNodes, boolean allowViews) {
       StringBuffer sb = new StringBuffer();
       for (int i = 0; i < panelNodes.size(); i++) {
       	String id = panelNodes.get(i).id;
-      	if (!allowOverlays && panelNodes.get(i).isOverlay)
+      	if (!allowViews && panelNodes.get(i).isView)
       		continue;
         sb.append(" ").append(id);
       }

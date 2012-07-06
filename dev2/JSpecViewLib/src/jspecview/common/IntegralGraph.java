@@ -49,6 +49,7 @@ public class IntegralGraph implements Graph {
   private double normalizationFactor = 1;
   
 	public void scaleIntegrationBy(double factor) {
+		System.out.println(" int " + factor + " " + normalizationFactor);
 		normalizationFactor *= factor;
 	}
 
@@ -219,6 +220,7 @@ public class IntegralGraph implements Graph {
     }
     if (integralRegions == null)
       integralRegions = new ArrayList<Measurement>();
+    System.out.println(intVal + " " + normalizationFactor);
     Integral in = new Integral(spectrum, intVal * normalizationFactor, x1, x2, getYValueAt(x1), getYValueAt(x2));
     clearIntegralRegions(x1, x2);
     if (isFinal || integralRegions.size() == 0) {

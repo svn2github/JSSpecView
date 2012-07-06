@@ -65,10 +65,10 @@ import jspecview.common.JSVDialog;
 import jspecview.common.JSVDropTargetListener;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelNode;
-import jspecview.common.JSVSpectrumPanel;
+import jspecview.common.ViewPanel;
 import jspecview.common.JSVTree;
 import jspecview.common.JSViewer;
-import jspecview.common.SpectraDialog;
+import jspecview.common.ViewDialog;
 import jspecview.common.OverlayLegendDialog;
 import jspecview.common.AwtParameters;
 import jspecview.common.PanelData;
@@ -114,7 +114,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		return jsvApplet;
 	}
 
-	int nOverlays;
+	int nViews;
 
 	JSVAppletPrivate(JSVApplet jsvApplet) {
 		this.jsvApplet = jsvApplet;
@@ -140,7 +140,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 
 	boolean isStandalone; // not changed
 
-	private SpectraDialog spectraDialog;
+	private ViewDialog viewDialog;
 	private OverlayLegendDialog overlayLegendDialog;
 
 	private String appletID;
@@ -149,7 +149,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	private Boolean obscureTitleFromUser;
 	private JFileChooser jFileChooser;
 	private JFrame offWindowFrame;
-	private JSVSpectrumPanel spectrumPanel;
+	private ViewPanel spectrumPanel;
 	private JSVAppletPopupMenu appletPopupMenu;
 	public Object getPopupMenu() {
 		return appletPopupMenu;
@@ -181,9 +181,9 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	void dispose() {
 		jFileChooser = null;
 		try {
-			if (spectraDialog != null)
-	  		spectraDialog.dispose();
-			spectraDialog = null;
+			if (viewDialog != null)
+	  		viewDialog.dispose();
+			viewDialog = null;
 			if (overlayLegendDialog != null)
 				overlayLegendDialog.dispose();
 			overlayLegendDialog = null;
@@ -433,7 +433,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	private void newAppletPanel() {
 		System.out.println("newAppletPanel");
 		jsvApplet.getContentPane().removeAll();
-		spectrumPanel = new JSVSpectrumPanel(new BorderLayout());
+		spectrumPanel = new ViewPanel(new BorderLayout());
 		jsvApplet.getContentPane().add(spectrumPanel);
 	}
 
@@ -553,11 +553,14 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	 *          the name of the format to export in
 	 */
 	void exportSpectrumViaMenu(String type) {
-		if (isSigned())
-			dirLastExported = Exporter.exportSpectra(getSelectedPanel(),
-					offWindowFrame, jFileChooser, type, recentFileName, dirLastExported);
-		else
+		if (!isSigned()) {
 			Logger.info(exportSpectrum(type, -1));
+			return;
+		}
+		String msg = Exporter.exportSpectra(getSelectedPanel(), offWindowFrame,
+				jFileChooser, type, recentFileName, dirLastExported);
+		if (msg != null)
+			dirLastExported = msg;
 	}
 
 	/**
@@ -796,6 +799,10 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
   	selectedPanel = jsvp;
 		spectraTree.setSelectedPanel((ScriptInterface) this, jsvp);
     jsvApplet.validate();
+		if (jsvp != null) {
+      jsvp.setEnabled(true);
+      jsvp.setFocusable(true);
+		}
 	}
 
 	// /////////// MISC methods from interfaces /////////////
@@ -1018,8 +1025,8 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
   	JSVTree.closeSource(this, source);
 	}
 
-	public int incrementOverlay(int n) {
-		return nOverlays += n;
+	public int incrementViewCount(int n) {
+		return nViews += n;
 	}
 	
 	public void process(List<JDXSpectrum> specs) {
@@ -1034,7 +1041,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		recentFileName = fileName;
 	}
 
-	public boolean getAutoOverlay() {
+	public boolean getAutoCombine() {
 		return interfaceOverlaid;
 	}
 	
@@ -1085,7 +1092,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	public void checkOverlay() {
 		if (spectrumPanel != null)
       spectrumPanel.markSelectedPanels(panelNodes);
-		spectraDialog = new SpectraDialog(this, spectrumPanel, false);
+		viewDialog = new ViewDialog(this, spectrumPanel, false);
 	}
 
 	private String returnFromJmolModel;

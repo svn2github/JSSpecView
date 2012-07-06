@@ -10,7 +10,7 @@ import javax.swing.JPanel;
 
 import jspecview.common.JSVContainer;
 
-public class JSVSpectrumPanel extends JPanel implements JSVContainer {
+public class ViewPanel extends JPanel implements JSVContainer {
 
 	private static final long serialVersionUID = 1L;
 	private JSVPanel selectedPanel;
@@ -19,7 +19,7 @@ public class JSVSpectrumPanel extends JPanel implements JSVContainer {
 		return currentPanelIndex;
 	}
 
-	public JSVSpectrumPanel(BorderLayout borderLayout) {
+	public ViewPanel(BorderLayout borderLayout) {
 		super(borderLayout);
 	}
 
@@ -46,13 +46,15 @@ public class JSVSpectrumPanel extends JPanel implements JSVContainer {
 			//jsvApplet.addKeyListener((AwtPanel) jsvp);
 			selectedPanel = jsvp;
 		}
-		for (int i = panelNodes.size(); --i >= 0;)
-			if (panelNodes.get(i).jsvp == jsvp) {
+		for (int i = panelNodes.size(); --i >= 0;) {
+			JSVPanel j = panelNodes.get(i).jsvp;
+			if (j == jsvp) {
 				currentPanelIndex = i;
-				jsvp.setEnabled(true);
 			} else {
-				panelNodes.get(i).jsvp.setEnabled(false);
+				j.setEnabled(false);
+				j.setFocusable(false);
 			}
+		}
 		markSelectedPanels(panelNodes);
 	}
 
