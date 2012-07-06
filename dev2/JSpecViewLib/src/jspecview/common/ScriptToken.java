@@ -59,6 +59,7 @@ public enum ScriptToken {
   HIDDEN("TF"), 
   HIGHLIGHTCOLOR("C"),
   INTEGRATE("ON/OFF/TOGGLE/MARK ppm1-ppm2,ppm3-ppm4,..."), 
+  INTEGRATION("ON/OFF/TOGGLE/MARK ppm1-ppm2,ppm3-ppm4,..."), 
   INTEGRALPLOTCOLOR, 
   INTEGRATIONRATIOS, 
   INTERFACE, 
@@ -167,6 +168,7 @@ public enum ScriptToken {
       return ScriptCommandTokenizer.nextStringToken(params, true);
     case CLOSE:
     case EXPORT:
+    case INTEGRATION:
     case INTEGRATE:
     case JMOL:
     case LABEL:

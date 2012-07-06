@@ -78,6 +78,7 @@ public class JSViewer {
         case HIDDEN:
           si.execHidden(Parameters.isTrue(value));
           break;
+        case INTEGRATION:
         case INTEGRATE:
           if (jsvp == null)
             continue;
