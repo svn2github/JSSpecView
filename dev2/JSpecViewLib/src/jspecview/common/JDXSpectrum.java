@@ -242,13 +242,16 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   }
  
   /**
+   * DEPRECATED
+   * 
    * Sets the integration ratios that will be displayed
+   * 
    * 
    * @param ratios
    *        array of the integration ratios
    */
-  public void setIntegrationRatios(ArrayList<Annotation> ratios) {
-    integrationRatios = ratios;
+  public void setIntegrationRatios(String value) {
+  	integrationRatios = IntegralData.getIntegrationRatiosFromString(this, value);
   }
 
   public IntegralGraph getIntegrationGraph() {
@@ -615,6 +618,21 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
 
 	public double findXForPeakNearest(double x) {
 		return Coordinate.findXForPeakNearest(xyCoords, x, (getYRef() > 0));
+	}
+
+  private double specShift = 0;
+  
+	double addSpecShift(double dx) {
+		if (dx != 0) {
+			specShift += dx;
+			Coordinate.shiftX(xyCoords, dx);
+			if (integration != null)
+				integration.addSpecShift(dx);
+			if (subSpectra != null)
+				for (int i = subSpectra.size(); --i >= 0;)
+					subSpectra.get(i).addSpecShift(dx);
+		}
+		return specShift;
 	}
 
 }

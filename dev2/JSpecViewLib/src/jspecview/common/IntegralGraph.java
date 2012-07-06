@@ -71,24 +71,15 @@ public class IntegralGraph implements Graph {
   }
 
 	private IntegralData id;	
-	public IntegralData getIntegralData() {
+	IntegralData getIntegralData() {
 		return id;
+	}
+	void setIntegralData(IntegralData id) {
+		this.id = id;
 	}
 	
   public List<Measurement> getIntegralRegions() {
     return id.integralRegions;
-  }
-
-  public double getPercentMinimumY() {
-    return id.percentMinY;
-  }
-
-  public double getPercentOffset() {
-    return id.percentOffset;
-  }
-
-  public double getIntegralFactor() {
-    return id.factor;
   }
 
   public void addIntegralRegion(double x1, double x2, boolean isFinal) {
@@ -124,5 +115,10 @@ public class IntegralGraph implements Graph {
   double getYValueAt(double x) {
     return Coordinate.getYValueAt(xyCoords, x);
   }
+
+	public void addSpecShift(double dx) {
+		Coordinate.shiftX(xyCoords, dx);
+		id.addSpecShift(dx);
+	}
 
 }

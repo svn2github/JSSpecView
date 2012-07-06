@@ -32,15 +32,15 @@ public class AwtColoredAnnotation extends Annotation {
 
   private Color color;
 
-  public AwtColoredAnnotation(double x, double y, String text, Color color,
+  public AwtColoredAnnotation(JDXSpectrum spec, double x, double y, String text, Color color,
       boolean isPixels, boolean is2D, int offsetX, int offsetY) {
-    super(x, y, text, isPixels, is2D, offsetX, offsetY);
+    super(spec, x, y, text, isPixels, is2D, offsetX, offsetY);
     this.color = color;
   }
 
-  public static AwtColoredAnnotation getAnnotation(List<String> args,
+  public static AwtColoredAnnotation getAnnotation(JDXSpectrum spec, List<String> args,
                                                 AwtColoredAnnotation lastAnnotation) {
-    String arg;
+  	String arg;
     int xPt = 0;
     int yPt = 1;
     int colorPt = 2;
@@ -107,7 +107,7 @@ public class AwtColoredAnnotation extends Annotation {
         if (text.charAt(0) == '\"')
           text = text.substring(1, text.length() - 1);
       }
-      return new AwtColoredAnnotation(x, y, text, color, false, false, 0, 0);
+      return new AwtColoredAnnotation(spec, x, y, text, color, false, false, 0, 0);
     } catch (Exception e) {
       return null;
     }

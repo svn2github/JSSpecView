@@ -15,11 +15,12 @@ class ViewData extends ScaleData {
   int[] endDataPointIndices;
   int[] numOfPointsList;
   double minY2D, maxY2D;
-	private double[] spectrumScaleFactors;
 	double[] userYFactors;
 	double[] spectrumYRefs; // 0 or 100
   int[] spectrumOffsets; // not yet implemented
-	private int nSpec;
+
+  private int nSpec;
+	private double[] spectrumScaleFactors;
  
 	/**
 	 * 
@@ -254,7 +255,15 @@ class ViewData extends ScaleData {
 		  && spectrumYRefs[i] == spectrumYRefs[j] 
 		  && userYFactors[i] == userYFactors[j];
 	}
-	
 
+	private double specShift;
+	public void addSpecShift(double dx) {
+		specShift += dx;
+		minX += dx;
+		maxX += dx;
+		minXOnScale += dx;
+		maxXOnScale += dx;
+		firstX += dx;
+	}
 
 }

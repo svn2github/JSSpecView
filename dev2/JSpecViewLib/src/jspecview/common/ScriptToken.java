@@ -83,6 +83,8 @@ public enum ScriptToken {
   SCALEBY("factor"),
   SCALECOLOR("C"),
   SELECT("spectrumID, spectrumID,..."),
+  SETX("ppm -- NMR only"),
+  SHIFTX("dx (ppm) -- NMR only"),
   SHOWINTEGRATION("T"),
   SPECTRUM("spectrumID"), 
   SPECTRUMNUMBER,

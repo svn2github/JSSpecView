@@ -133,6 +133,14 @@ public class JSViewer {
         case SELECT:
           execSelect(si, value);
           break;
+        case SETX:
+        	if (jsvp != null)
+        		jsvp.getPanelData().shiftSpectrum(Double.NaN, Double.parseDouble(value));
+        	break;        	
+        case SHIFTX:
+        	if (jsvp != null)
+        		jsvp.getPanelData().shiftSpectrum(Double.parseDouble(value), Double.NaN);
+        	break;        	
         case SHOWINTEGRATION:
         	if (jsvp != null)
         		jsvp.getPanelData().setShowIntegration(value.equalsIgnoreCase("TOGGLE") ? null : Parameters.isTrue(value) ? Boolean.TRUE : Boolean.FALSE);

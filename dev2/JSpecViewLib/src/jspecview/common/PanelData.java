@@ -439,11 +439,11 @@ public class PanelData {
   }
 
   public int[] getStartDataPointIndices() {
-    return currentGraphSet.view.startDataPointIndices;
+    return currentGraphSet.viewData.startDataPointIndices;
   }
 
   public int[] getEndDataPointIndices() {
-    return currentGraphSet.view.endDataPointIndices;
+    return currentGraphSet.viewData.endDataPointIndices;
   }
 
   public String getSolutionColor() {
@@ -631,6 +631,17 @@ public class PanelData {
         actualCoord);
   }
 
+  /**
+   * shifts xyCoords for a spectrum by the specified amount
+   * 
+   * @param dx  NaN to determine from x0, x1
+   * @param x1  NaN to query for new value
+   * @return   true if successful
+   */
+  public boolean shiftSpectrum(double dx, double x1) {
+  	return currentGraphSet.shiftSpectrum(dx, x1);
+
+  }
   // called by GraphSet
   
 	boolean isCurrentGraphSet(GraphSet graphSet) {

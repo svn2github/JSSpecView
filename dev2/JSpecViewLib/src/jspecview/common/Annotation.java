@@ -39,20 +39,17 @@ public class Annotation extends Coordinate {
   public boolean is2D;
   public int offsetX;
   public int offsetY;
+  public JDXSpectrum spec;
+  
   
   /**
    * Constructor -- note that x is spectral X value, but y is pixels above
    * baseline
    * 
-   * @param x
-   *        the x value
-   * @param y
-   *        the y value
-   * @param integralValue
-   *        the integral value
    */
-  public Annotation(double x, double y, String text, boolean isPixels, boolean is2D, int offsetX, int offsetY) {
+  public Annotation(JDXSpectrum spec, double x, double y, String text, boolean isPixels, boolean is2D, int offsetX, int offsetY) {
     super(x, y);
+    this.spec = spec;
     this.text = text;
     this.isPixels = isPixels;
     this.is2D = is2D;
@@ -60,6 +57,10 @@ public class Annotation extends Coordinate {
     this.offsetY = offsetY;
   }
 
+	public void addSpecShift(double dx) {
+		setXVal(getXVal() + dx);
+	}
+	
   public String getText() {
     return text;
   }
@@ -81,5 +82,6 @@ public class Annotation extends Coordinate {
   public String toString() {
     return "[" + getXVal() + ", " + getYVal() + "," + text + "]";
   }
+
 
 }

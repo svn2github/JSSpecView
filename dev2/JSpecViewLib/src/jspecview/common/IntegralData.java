@@ -7,6 +7,14 @@ import java.util.StringTokenizer;
 
 import jspecview.util.TextFormat;
 
+/**
+ * 
+ * from IntegralGraph
+ * a data structure for integration settings
+ * 
+ * @author Bob Hanson hansonr@stolaf.edu
+ *
+ */
 public class IntegralData {
 
   List<Measurement> integralRegions;
@@ -64,6 +72,13 @@ public class IntegralData {
     }
     
   }
+
+	public void addSpecShift(double dx) {
+    for (int i = integralRegions.size(); --i >= 1;) {
+      integralRegions.get(i).addSpecShift(dx);
+    }
+		
+	}
 
 	public void addMarks(IntegralGraph ig, String ppms) {
     //2-3,4-5,6-7...
@@ -129,7 +144,7 @@ public class IntegralData {
 	 * @return ArrayList<IntegrationRatio> object representing integration ratios
 	 */
 	public static ArrayList<Annotation> getIntegrationRatiosFromString(
-			String value) {
+			JDXSpectrum spec, String value) {
 		ArrayList<Annotation> ratios = new ArrayList<Annotation>();
 		// split input into x-value/integral-value pairs
 		StringTokenizer allParamTokens = new StringTokenizer(value, ",");
@@ -137,7 +152,7 @@ public class IntegralData {
 			String token = allParamTokens.nextToken();
 			// now split the x-value/integral-value pair
 			StringTokenizer eachParam = new StringTokenizer(token, ":");
-			Annotation ratio = new Annotation(Double.parseDouble(eachParam
+			Annotation ratio = new Annotation(spec, Double.parseDouble(eachParam
 					.nextToken()), 0.0, eachParam.nextToken(), true, false, 0, 0);
 			ratios.add(ratio);
 		}

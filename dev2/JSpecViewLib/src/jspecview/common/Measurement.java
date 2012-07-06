@@ -32,24 +32,20 @@ package jspecview.common;
 public class Measurement extends Annotation {
   
 	private Coordinate pt2 = new Coordinate();
-	JDXSpectrum spec;
 	private double value;
 	
   public Measurement(JDXSpectrum spec, double x, double y) {
-		super(x, y, "", false, false, 0, 6);
-		this.spec = spec;
+		super(spec, x, y, "", false, false, 0, 6);
 		setPt2(x, y);
 	}
   
   public Measurement(JDXSpectrum spec, double x, double y, String text, double x1, double y1) {
-		super(x, y, text, false, false, 0, 6);
-		this.spec = spec;
+		super(spec, x, y, text, false, false, 0, 6);
 		setPt2(x1, y1);
 	}
   
   public Measurement(Measurement m) {
-  	super(m.getXVal(), m.getYVal(), m.text, false, false, m.offsetX, m.offsetY);
-  	this.spec = m.spec;
+  	super(m.spec, m.getXVal(), m.getYVal(), m.text, false, false, m.offsetX, m.offsetY);
   	setPt2(m.pt2.getXVal(), m.pt2.getYVal());
 	}
 
@@ -89,6 +85,11 @@ public class Measurement extends Annotation {
 
 	public double getYVal2() {
 		return pt2.getYVal();
+	}
+
+	public void addSpecShift(double dx) {
+    setXVal(getXVal() + dx);
+    pt2.setXVal(pt2.getXVal() + dx);
 	}
 
 }

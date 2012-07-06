@@ -57,7 +57,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import jspecview.application.TextDialog;
 import jspecview.common.AwtPanel;
-import jspecview.common.IntegralData;
 import jspecview.common.JSVAppletInterface;
 import jspecview.common.JSVDialog;
 import jspecview.common.JSVDropTargetListener;
@@ -79,7 +78,6 @@ import jspecview.common.ScriptCommandTokenizer;
 import jspecview.common.ScriptInterface;
 import jspecview.common.ScriptToken;
 import jspecview.common.Coordinate;
-import jspecview.common.Annotation;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.SubSpecChangeEvent;
 import jspecview.common.ZoomEvent;
@@ -119,8 +117,8 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		init();
 	}
 
-	private ArrayList<Annotation> integrationRatios; // Integration Ratio
-																										// Annotations
+	private String integrationRatios; // deprecated
+															
 	private int initialStartIndex = -1;
 	private int initialEndIndex = -1;
 	private int irMode = JDXSpectrum.TA_NO_CONVERT;
@@ -839,7 +837,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 
 	public void execSetIntegrationRatios(String value) {
 		// parse the string with a method in JSpecViewUtils
-		integrationRatios = IntegralData.getIntegrationRatiosFromString(value);
+		integrationRatios = value;
 	}
 
 	/**

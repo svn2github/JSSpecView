@@ -138,7 +138,7 @@ class AwtGraphSet extends GraphSet {
 
 	@Override
 	protected boolean update2dImage(boolean forceNew, boolean isCreation) {
-		imageView.set(view);
+		imageView.set(viewData);
 		JDXSpectrum spec0 = getSpectrumAt(0);
 		int[] buffer = imageView.get2dBuffer(jsvp.pd.thisWidth,
 				jsvp.pd.thisPlotHeight, spec0, forceNew);
@@ -148,7 +148,7 @@ class AwtGraphSet extends GraphSet {
 			return false;
 		}
 		if (isCreation) 
-			buffer = imageView.adjustView(spec0, view, 0.05, 0.20);
+			buffer = imageView.adjustView(spec0, viewData, 0.05, 0.20);
 		imageView.setImageSize(spec0.getXYCoords().length, spec0.getSubSpectra()
 				.size(), !forceNew);
 		image2D = new BufferedImage(imageView.imageWidth, imageView.imageHeight,
@@ -164,13 +164,13 @@ class AwtGraphSet extends GraphSet {
 	@Override
   Annotation getAnnotation(double x, double y, String text, boolean isPixels,
                            boolean is2d, int offsetX, int offsetY) {
-    return new AwtColoredAnnotation(x, y, text, Color.BLACK, isPixels, is2d,
+    return new AwtColoredAnnotation(getSpectrum(), x, y, text, Color.BLACK, isPixels, is2d,
         offsetX, offsetY);
   }
 
   @Override
   Annotation getAnnotation(List<String> args, Annotation lastAnnotation) {
-    return AwtColoredAnnotation.getAnnotation(args,
+    return AwtColoredAnnotation.getAnnotation(getSpectrum(), args,
         (AwtColoredAnnotation) lastAnnotation);
   }
 

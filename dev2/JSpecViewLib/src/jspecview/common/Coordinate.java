@@ -605,4 +605,9 @@ public class Coordinate {
 		actualCoord.setYVal(coordsClicked[pt].getYVal());
 		return true;
 	}
+
+	static void shiftX(Coordinate[] xyCoords, double dx) {
+  	for (int i = xyCoords.length; --i >= 0;)
+  		xyCoords[i].xVal += dx;
+	}
 }
