@@ -141,7 +141,11 @@ public class JSViewer {
         	if (jsvp != null)
         		jsvp.getPanelData().shiftSpectrum(Double.NaN, 
         				value.equalsIgnoreCase("NONE") ? Double.MAX_VALUE : Double.parseDouble(value));
-        	break;        	
+        	break;
+        case SETX:
+        	if (jsvp != null)
+        		jsvp.getPanelData().shiftSpectrum(Double.MIN_VALUE, Double.parseDouble(value));
+        	break;
         case SHIFTX:
         	if (jsvp != null)
         		jsvp.getPanelData().shiftSpectrum(

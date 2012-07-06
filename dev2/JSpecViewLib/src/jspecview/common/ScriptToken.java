@@ -84,8 +84,10 @@ public enum ScriptToken {
   SCALEBY("factor"),
   SCALECOLOR("C"),
   SELECT("spectrumID, spectrumID,..."),
-  SETPEAK("x (ppm) or NONE -- NMR only"),
+  SETPEAK("x (ppm) or NONE does peak search unlike SETX -- NMR only"),
+  SETX("x (ppm) no peak search as in SETPEAK -- NMR only"),
   SHIFTX("dx (ppm) or NONE -- NMR only"),
+  
   SHOWINTEGRATION("T"),
   SPECTRUM("spectrumID"), 
   SPECTRUMNUMBER,

@@ -249,6 +249,9 @@ class ViewData extends ScaleData {
 		setYScale((minY - yRef) / f + yRef, (maxY - yRef) / f + yRef, f == 1);
 		setScaleFactors(xPixels, yPixels);
 	}
+	public double unScaleY(int iSpec, double y) {
+		return y * spectrumScaleFactors[iSpec];
+	}
 
 	boolean areYScalesSame(int i, int j) {
 		return spectrumScaleFactors[i] == spectrumScaleFactors[j]
@@ -265,5 +268,6 @@ class ViewData extends ScaleData {
 		maxXOnScale += dx;
 		firstX += dx;
 	}
+
 
 }

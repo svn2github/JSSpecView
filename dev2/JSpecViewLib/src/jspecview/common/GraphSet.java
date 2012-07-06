@@ -876,20 +876,20 @@ abstract class GraphSet {
         double val2 = Double.valueOf(sval.substring(pt + 1));
         if (pw == pin1Dx01) {
           doZoom(val1, pin1Dy0.getYVal(), val2, pin1Dy1.getYVal(), true, true,
-              false);
-        } else if (pw == pin1Dy01) {
+              false, true);
+        } else if (pw == pin1Dy01) { // actually for 2D Z
           doZoom(pin1Dx0.getXVal(), val1, pin1Dx1.getXVal(), val2, true, true,
-              false);
+              false, false);
         } else if (pw == pin2Dx01) {
           imageView.setView0(imageView.toPixelX0(val1), pin2Dy0.yPixel0, imageView
               .toPixelX0(val2), pin2Dy1.yPixel0);
           doZoom(val1, pin1Dy0.getYVal(), val2, pin1Dy1.getYVal(), true, true,
-              false);
+              false, false);
         } else if (pw == pin2Dy01) {
           imageView.setView0(pin2Dx0.xPixel0, imageView.toPixelY0(val1), pin2Dx1.xPixel0,
               imageView.toPixelY0(val2));
           doZoom(imageView.toX(imageView.xPixel0), viewData.minY, imageView.toX(imageView.xPixel0
-              + imageView.xPixels - 1), viewData.maxY, true, true, false);
+              + imageView.xPixels - 1), viewData.maxY, true, true, false, false);
         }
       } else {
         double val = Double.valueOf(sval);
@@ -898,7 +898,7 @@ abstract class GraphSet {
               .getXVal()
               : pin1Dx0.getXVal());
           doZoom(val, pin1Dy0.getYVal(), val2, pin1Dy1.getYVal(), true, true,
-              false);
+              false, true);
         } else if (pw == cur2Dy) {
           setCurrentSubSpectrum((int) val);
           pd.repaint();
@@ -910,7 +910,7 @@ abstract class GraphSet {
         } else {
           double val2 = (pw == pin1Dy0 ? pin1Dy1.getYVal() : pin1Dy0.getYVal());
           doZoom(pin1Dx0.getXVal(), val, pin1Dx1.getXVal(), val2, true, true,
-              false);
+              false, false);
         }
       }
     } catch (Exception e) {
@@ -1118,10 +1118,12 @@ abstract class GraphSet {
    *        TODO
    * @param finalY
    *        the Y end coordinate of the zoom area
+   * @param is1D TODO
    */
   private synchronized void doZoom(double initX, double initY, double finalX,
                                      double finalY, boolean doRepaint,
-                                     boolean addZoom, boolean checkRange) {
+                                     boolean addZoom, boolean checkRange, 
+                                     boolean is1D) {
     if (initX > finalX) {
       double tempX = initX;
       initX = finalX;
@@ -1133,10 +1135,11 @@ abstract class GraphSet {
       finalY = tempY;
     }
 
-    boolean is2GrayScaleChange = (imageView != null && (imageView.minZ != initY || imageView.maxZ != finalY));
-
-    if (!zoomEnabled && !is2GrayScaleChange)
+    boolean is2DGrayScaleChange = (imageView != null && (imageView.minZ != initY || imageView.maxZ != finalY));
+    	
+    if (!zoomEnabled && !is2DGrayScaleChange)
       return;
+
     // determine if the range of the area selected for zooming is within the plot
     // area and if not ensure that it is
 
@@ -1169,10 +1172,17 @@ abstract class GraphSet {
           minNumOfPointsForZoom, startIndices, endIndices, false))
         return;
     }
-// TODO: after zooming one of two overlaid spectra, 
-    // the zoomBox method fails. 
     int iSpec = (iSpectrumBold >= 0 ? iSpectrumBold : iSpectrumMovedTo);
-    getView(initX, finalX, initY, finalY, startIndices, endIndices, viewData, iSpec);
+    double f = (!is2DGrayScaleChange && is1D ?
+      	f = viewData.getSpectrumScaleFactor(iSpectrumSelected) : 1);
+    double y1 = initY;
+    double y2 = finalY;
+    if (f != 1) {
+    	// not clear this is right for IR spec or some other cases...
+    	y1 = viewData.unScaleY(iSpectrumSelected, initY);
+    	y2 = viewData.unScaleY(iSpectrumSelected, finalY);
+    }
+    getView(initX, finalX, y1, y2, startIndices, endIndices, viewData, iSpec);
     xPixelMovedTo = -1;
     pin1Dx0.setX(initX, toPixelX0(initX));
     pin1Dx1.setX(finalX, toPixelX0(finalX));
@@ -1183,7 +1193,7 @@ abstract class GraphSet {
       int ifix = imageView.fixSubIndex(isub);
       if (ifix != isub)
         setCurrentSubSpectrum(ifix);
-      if (is2GrayScaleChange)
+      if (is2DGrayScaleChange)
         update2dImage(true, false);
     }
     if (addZoom)
@@ -1900,7 +1910,7 @@ abstract class GraphSet {
     if (isX) {
       imageView.setView0(imageView.xPixel0, pin2Dy0.yPixel0, imageView.xPixel1, pin2Dy1.yPixel0);
       doZoom(imageView.minX, viewData.minY, imageView.maxX, viewData.maxY,
-          true, true, false);
+          true, true, false, true);
     } else {
       imageView.setView0(pin2Dx0.xPixel0, imageView.yPixel0, pin2Dx1.xPixel0, imageView.yPixel1);
       pd.repaint();
@@ -2360,7 +2370,7 @@ abstract class GraphSet {
       widget.setX(imageView.toX(xPixel), xPixel);
       // 2D x zoom change
       doZoom(cur2Dx0.getXVal(), viewData.minY, cur2Dx1.getXVal(),
-          viewData.maxY, false, false, false);
+          viewData.maxY, false, false, false, false);
       return true;
     }
     if (widget == pin1Dx0 || widget == pin1Dx1 || widget == pin1Dx01) {
@@ -2377,7 +2387,7 @@ abstract class GraphSet {
       }
       // 1D x zoom change
       doZoom(pin1Dx0.getXVal(), viewData.minY, pin1Dx1.getXVal(),
-          viewData.maxY, false, false, false);
+          viewData.maxY, false, false, false, false);
       return true;
     }
     if (widget == pin1Dy0 || widget == pin1Dy1 || widget == pin1Dy01) {
@@ -2397,7 +2407,7 @@ abstract class GraphSet {
       }
       // actually only used for 2D intensity change now
       doZoom(viewData.minXOnScale, pin1Dy0.getYVal(),
-          viewData.maxXOnScale, pin1Dy1.getYVal(), false, false, false);
+          viewData.maxXOnScale, pin1Dy1.getYVal(), false, false, false, false);
       return true;
     }
     if (widget == pin2Dx0 || widget == pin2Dx1 || widget == pin2Dx01) {
@@ -2420,7 +2430,7 @@ abstract class GraphSet {
           pin2Dy1.yPixel0);
       // 2D x zoom
       doZoom(pin2Dx0.getXVal(), viewData.minY, pin2Dx1.getXVal(),
-          viewData.maxY, false, false, false);
+          viewData.maxY, false, false, false, false);
       return true;
     }
     if (widget == pin2Dy0 || widget == pin2Dy1 || widget == pin2Dy01) {
@@ -2519,7 +2529,7 @@ abstract class GraphSet {
 	}
 
 	synchronized void escapeKeyPressed() {
-		System.out.println("gs escape inPlotMove=" + inPlotMove + " " + iSelectedMeasurement);
+		//System.out.println("gs escape inPlotMove=" + inPlotMove + " " + iSelectedMeasurement);
 		if (!inPlotMove)
 			return;
 		if (pendingMeasurement != null) {
@@ -2610,7 +2620,6 @@ abstract class GraphSet {
 	
 	synchronized void mouseClickedEvent(int xPixel, int yPixel, int clickCount,
 			boolean isControlDown) {
-		System.out.println("gs mouseclick setting  iselectedmeasurement=-1");
 		iSelectedMeasurement = -1;
 		iSelectedIntegral = -1;
 		if (checkArrowUpDownClick(xPixel, yPixel))
@@ -2656,7 +2665,7 @@ abstract class GraphSet {
 			if (isInTopBar(xPixel, yPixel)) {
 				// 1D x zoom reset to original
 				doZoom(toX0(xPixel0), viewData.minY, toX0(xPixel1), viewData.maxY, true, true,
-						false);
+						false, true);
 				// } else if (isInRightBar(xPixel, yPixel)) {
 				// // no longer possible
 				// doZoom(view.minXOnScale, viewList.get(0).minY,
@@ -2725,17 +2734,13 @@ abstract class GraphSet {
       zoomBox2D.xPixel1 = zoomBox2D.xPixel0;
       // 2D xy zoom
       doZoom(imageView.toX(imageView.xPixel0), viewData.minY, imageView.toX(imageView.xPixel0
-          + imageView.xPixels - 1), viewData.maxY, true, true, false);
+          + imageView.xPixels - 1), viewData.maxY, true, true, false, false);
     } else if (thisWidget == zoomBox1D) {
       if (!isGoodEvent(zoomBox1D, null, true))
         return;
       int x1 = zoomBox1D.xPixel1;
-      // 1D xy zoom -- PROBLEM IS HERE
-      //TODO: FIX THIS
-      double f = viewData.getSpectrumScaleFactor(iSpectrumSelected);
-      double y1 = toY(zoomBox1D.yPixel0) * f;
-      double y2 = toY(zoomBox1D.yPixel1) * f;
-      doZoom(toX(zoomBox1D.xPixel0), y1, toX(x1), y2, true, true, false);
+      // 1D xy zoom 
+      doZoom(toX(zoomBox1D.xPixel0), toY(zoomBox1D.yPixel0), toX(x1), toY(zoomBox1D.yPixel1), true, true, false, true);
       zoomBox1D.xPixel1 = zoomBox1D.xPixel0;
     } else if (thisWidget == pin1Dx0 || thisWidget == pin1Dx1
         || thisWidget == cur2Dx0 || thisWidget == cur2Dx1) {
@@ -2946,12 +2951,23 @@ abstract class GraphSet {
     if (x1 == 0 && x2 == 0) {
       newPins();
     } else {
-      doZoom(x1, y1, x2, y2, false, true, false);
+      doZoom(x1, y1, x2, y2, false, true, false, true);
       return;
     }
     imageView = null;
   }
 
+  /**
+   * result depends upon the values of dx and x1:
+   * x1 NaN --> just use dx
+   * dx NaN --> use value as x1 and nearest peak to last click as x0
+   * dx MIN_VALUE --> use value as x1 and last click exactly as x0
+   * dx or x1 MAX_VALUE --> reset to original (apply dx = -specShift)
+   *   
+   * @param dx
+   * @param x1
+   * @return
+   */
 	boolean shiftSpectrum(double dx, double x1) {
 		JDXSpectrum spec = getSpectrum();
 		if (!spec.isNMR())
@@ -2959,8 +2975,8 @@ abstract class GraphSet {
 		if (x1 == Double.MAX_VALUE || dx == Double.MAX_VALUE) {
 			// setPeak NONE
 			dx = -spec.addSpecShift(0);
-		} else if (Double.isNaN(dx)) {
-			double x0 = getPeakCenter();
+		} else if (Double.isNaN(dx) || dx == Double.MIN_VALUE) {
+			double x0 = (dx == Double.MIN_VALUE ? lastClickX : getPeakCenter());
 			if (Double.isNaN(x0))
 				return false;
 			if (Double.isNaN(x1))
