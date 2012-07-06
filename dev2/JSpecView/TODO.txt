@@ -13,6 +13,7 @@ peakMenu showHidePeaks setUnits setDecimal chkPickThresh chk
      Show/Hide Peak Labels
      Set Units (xxx)
      Set Decimal Places (0.000)
+     Font Size
   [x]Pick Using Threshold
   [x]Pick Top N
   [x]Parabolic Interpolation
@@ -22,10 +23,11 @@ peakMenu showHidePeaks setUnits setDecimal chkPickThresh chk
   Needs a menu item
   
   Measurements>
-    Show/Hide Measurements
-    Clear Measurements
-    Mark Measurements [just calls up a prompt telling how to do that]
-    List Measurements
+     Show/Hide Measurements
+     Clear Measurements
+     Mark Measurements [just calls up a prompt telling how to do that]
+     List Measurements
+     Font Size
     
 
 -Integration:
@@ -39,6 +41,7 @@ peakMenu showHidePeaks setUnits setDecimal chkPickThresh chk
      Set Scaling Factor
      Show/Hide Unmarked Regions
      Mark Integrals [just calls up a prompt telling how to do that]
+     Font Size
      List Integrals
 
 -in the jsvtest.htm page, when there is a CNMR and IR overlay shown
