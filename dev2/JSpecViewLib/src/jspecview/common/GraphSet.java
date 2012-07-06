@@ -1911,11 +1911,10 @@ abstract class GraphSet {
   }
 
   private void checkIntegral(double x1, double x2, boolean isFinal) {
-  	JDXSpectrum spec = getSpectrum();
-    IntegralGraph ig = spec.getIntegrationGraph();
+    IntegralGraph ig = getSpectrum().getIntegrationGraph();
     if (ig == null)
       return;
-    ig.addIntegralRegion(spec, x1, x2, isFinal);
+    ig.addIntegralRegion(x1, x2, isFinal);
     drawnIntegrals = null;
   }
 

@@ -443,17 +443,17 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return true;
   }
 
-  private boolean integrate(Parameters parameters) {
-    if (parameters == null) {
-      integration = null;
-      return false;
-    }
-    if (!canIntegrate())
-      return false;
-    setIntegrationGraph(new IntegralGraph(this, parameters, xUnits,
-        yUnits));
-    return true;
-  }
+	private boolean integrate(Parameters parameters) {
+		if (parameters == null) {
+			integration = null;
+			return false;
+		}
+		if (!canIntegrate())
+			return false;
+		setIntegrationGraph(new IntegralGraph(this, parameters.integralMinY,
+				parameters.integralOffset, parameters.integralFactor, xUnits, yUnits));
+		return true;
+	}
 
   public static boolean areScalesCompatible(JDXSpectrum s1, JDXSpectrum s2,
                                             boolean allow2D2D) {

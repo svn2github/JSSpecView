@@ -180,9 +180,9 @@ public class Parameters {
     }
   }
 
-  public double integralMinY = IntegralGraph.DEFAULT_MINY;
-  public double integralFactor = IntegralGraph.DEFAULT_FACTOR;
-  public double integralOffset = IntegralGraph.DEFAULT_OFFSET;
+  public double integralMinY = IntegralData.DEFAULT_MINY;
+  public double integralFactor = IntegralData.DEFAULT_FACTOR;
+  public double integralOffset = IntegralData.DEFAULT_OFFSET;
 
   protected void setParamDefaults() {
     setBoolean(ScriptToken.TITLEON, true);

@@ -57,7 +57,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import jspecview.application.TextDialog;
 import jspecview.common.AwtPanel;
-import jspecview.common.IntegralGraph;
+import jspecview.common.IntegralData;
 import jspecview.common.JSVAppletInterface;
 import jspecview.common.JSVDialog;
 import jspecview.common.JSVDropTargetListener;
@@ -839,7 +839,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 
 	public void execSetIntegrationRatios(String value) {
 		// parse the string with a method in JSpecViewUtils
-		integrationRatios = IntegralGraph.getIntegrationRatiosFromString(value);
+		integrationRatios = IntegralData.getIntegrationRatiosFromString(value);
 	}
 
 	/**
