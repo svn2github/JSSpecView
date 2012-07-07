@@ -726,7 +726,7 @@ public class MainActivity extends Activity{
 		  params.integralMinY = minY;
 		  params.integralOffset = offset;
 		  params.integralFactor = factor;
-			integGraph = new IntegralGraph(spectrum, params, spectrum.getXUnits(), 
+			integGraph = new IntegralGraph(spectrum, minY, offset, factor, spectrum.getXUnits(), 
 			    spectrum.getYUnits());
 			
 			mIntegralGraphs[spectrumIndex] = integGraph;
