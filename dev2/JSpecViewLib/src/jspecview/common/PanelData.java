@@ -605,11 +605,11 @@ public class PanelData {
 		currentGraphSet.toPeak(i);
 	}
 
-  String getSolutionColorHtml() {
+  public String getSolutionColorHtml() {
     String color = currentGraphSet.getSolutionColor();
-    return "<HTML><body bgcolor=rgb(" + color
+    return "<html><body bgcolor=rgb(" + color
         + ")><br />Predicted Solution Colour- RGB(" + color
-        + ")<br /><br /></body></HTML>";
+        + ")<br /><br /></body></html>";
   }
 
   /*------------------------- Javascript call functions ---------------------*/
@@ -790,7 +790,7 @@ public class PanelData {
     GraphSet gs = GraphSet.findGraphSet(graphSets, xPixel, yPixel);
     if (gs == null)
       return;
-    isIntegralDrag = (isControlDown && gs.haveIntegral(-1));
+    isIntegralDrag = (isControlDown && gs.haveIntegralDisplayed(-1));
     if (isControlDown && !isIntegralDrag)
       return;
     setCurrentGraphSet(gs, xPixel, yPixel, 0);
@@ -814,6 +814,7 @@ public class PanelData {
       return;
     currentGraphSet.mouseReleasedEvent();
     thisWidget = null;
+		isIntegralDrag = false;
   }
 
   void doMouseClicked(int xPixel, int yPixel, int clickCount,
@@ -829,7 +830,7 @@ public class PanelData {
 		return currentGraphSet.hasCurrentMeasurement(type);
 	}
 
-	public Object getDialog(AType type) {
+	public AnnotationData getDialog(AType type) {
 		return currentGraphSet.getDialog(type, -1);
 	}
 
@@ -867,6 +868,10 @@ public class PanelData {
 	public void close() {
 		for (int i = graphSets.size(); --i >= 0;)
 			graphSets.get(i).close();
+	}
+
+	public void removeDialog(AnnotationDialog dialog) {
+		currentGraphSet.removeDialog(dialog);
 	}
 
 }

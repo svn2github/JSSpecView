@@ -25,9 +25,7 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.swing.JButton;
@@ -49,13 +47,13 @@ import jspecview.util.TextFormat;
  * 
  * @author Bob Hanson hansonr@stolaf.edu
  */
-abstract class AnnotationDialog extends JDialog implements AnnotationData {
+abstract class AwtAnnotationDialog extends JDialog implements AnnotationDialog {
 
 	private static final long serialVersionUID = 1L;
 	
 	abstract protected void addControls();
 	abstract protected void checkEnables();
-	abstract protected AnnotationData createData();	
+	abstract protected void createData();	
 	abstract protected int[] getPosXY();
 	abstract protected void updateValues();
 	
@@ -96,7 +94,7 @@ abstract class AnnotationDialog extends JDialog implements AnnotationData {
 	 * @param modal
 	 *          the modality
 	 */
-	protected AnnotationDialog(String title, ScriptInterface si, JDXSpectrum spec, 
+	protected AwtAnnotationDialog(String title, ScriptInterface si, JDXSpectrum spec, 
 			JSVPanel jsvp, Map<String, Object> data) {
 		this.si = si;
 		this.jsvp = jsvp;
@@ -127,6 +125,7 @@ abstract class AnnotationDialog extends JDialog implements AnnotationData {
 
 	protected DialogHelper dialogHelper;
 	protected JTable dataTable;
+	protected String[][] tableData;
 	
 	protected void setup() {
 		getContentPane().removeAll();
@@ -188,8 +187,8 @@ abstract class AnnotationDialog extends JDialog implements AnnotationData {
 
     leftPanel = new JPanel(new GridBagLayout());
 		dialogHelper = new DialogHelper(thisKey, options, leftPanel, eventListener);
-    addTopControls();
     addControls();
+    addTopControls();
     leftPanel.setMinimumSize(new Dimension(150, 300));
     dialogHelper.addButton(applyButton);
     dialogHelper.addButton(showHideButton);
@@ -213,10 +212,13 @@ abstract class AnnotationDialog extends JDialog implements AnnotationData {
     checkEnables();
   }
 
-	protected void loadData(String[] header, String[][] data) {
+	protected void loadData(String[][] data, String[] header, int[] widths) {
 		try {
-		rightPanel.removeAll();
-		rightPanel.add(dataTable = (new DialogHelper()).getDataTable(jsvp, header, data));
+			tableData = data;
+			rightPanel.removeAll();
+			JScrollPane scrollPane = new JScrollPane(dataTable = (new DialogHelper())
+					.getDataTable(this, data, header, widths, leftPanel.getHeight() - 50));
+			rightPanel.add(scrollPane);
 		} catch (Exception e) {
 			// not perfect.
 		}
@@ -232,14 +234,14 @@ abstract class AnnotationDialog extends JDialog implements AnnotationData {
 
 	private void addTopControls() {
 		
-		if (unitPtr != null)
-  		cmbUnits = dialogHelper.addSelectOption("Units", null, unitOptions, unitPtr.intValue());
-		
 		String key = thisKey + "_format";
 		String format = (String) options.get(key);
 		if (format == null)
 			options.put(key, (format = formatOptions[unitPtr == null ? 0 : unitPtr.intValue()]));
-		txtFormat = dialogHelper.addInputOption("numberFormat", "Number Format", format, null, null);	
+		txtFormat = dialogHelper.addInputOption("numberFormat", "Number Format", format, null, null, false);	
+		if (unitPtr != null)
+  		cmbUnits = dialogHelper.addSelectOption("Units", null, unitOptions, unitPtr.intValue(), false);
+    
 		//txtFontSize = ((DialogHelper dialogHelper)).addInputOption("FontSize", "Font Size", null, null, "10");
 	}
 	
@@ -247,19 +249,26 @@ abstract class AnnotationDialog extends JDialog implements AnnotationData {
 		setState(isShow);
 		if (isShow)
 			apply();
+		jsvp.repaint();
 		
 	  //JSViewer.runScriptNow(si, "show" + thisType + (isShow ? " true" : " false"));
 	  checkEnables();
 	}
 
 	protected void clear() {
-  	//something here
-  	updateValues();
+		if (xyData != null) {
+  		xyData.clear();
+	    apply();
+		}
 	}
 	
   protected void done() {
-  	jsvp.getPanelData().addDialog(-1, thisType, this);
+  	jsvp.getPanelData().removeDialog(this);
+  	setState(false);
+  	if (xyData != null)
+  		xyData.setState(false);
   	dispose();
+		jsvp.repaint();
 	}
 
 	protected void doEvent(ActionEvent e) {
@@ -275,9 +284,9 @@ abstract class AnnotationDialog extends JDialog implements AnnotationData {
 	}
 
 	public void reEnable() {
-		updateValues();
-  	checkEnables();
 		setVisible(true);
+		setState(true);
+		apply();
 	}
 	
 	public void apply() {
@@ -302,16 +311,6 @@ abstract class AnnotationDialog extends JDialog implements AnnotationData {
 		return myParams;
 	}
 
-	protected List<Measurement> measurements = new ArrayList<Measurement>();
-	
-	public List<Measurement> getMeasurements() {
-		return measurements;
-	}
-	
-	public void setMeasurements(List<Measurement> measurements) {
-		this.measurements = measurements;
-	}
-
 	public AType getType() {
 		return thisType;
 	}
@@ -320,17 +319,25 @@ abstract class AnnotationDialog extends JDialog implements AnnotationData {
 		return spec;
 	}
 
-	protected AnnotationData xyData;
+	protected MeasurementData xyData;
 	protected DecimalFormat numberFormatter;
+	private String key;
+	public String getKey() {
+		return key;
+	}
+	public void setKey(String key) {
+		this.key = key;		
+	}
 	
-	public AnnotationData getData() {
+	public MeasurementData getData() {
 		if (xyData == null)
-			xyData = createData();
+			createData();
 	  return xyData;	
 	}
 	
 	public void setData(AnnotationData data) {
-		xyData = data;
+		myParams = data.getParameters();
+		xyData = (MeasurementData) data;
 	}
 
 	public void addSpecShift(double dx) {
@@ -345,7 +352,4 @@ abstract class AnnotationDialog extends JDialog implements AnnotationData {
 	 
 	}
 	
-	public void update(Coordinate clicked) {
-	}
-
 }

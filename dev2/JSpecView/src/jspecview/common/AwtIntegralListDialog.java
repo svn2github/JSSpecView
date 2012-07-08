@@ -20,13 +20,15 @@
 package jspecview.common;
 
 import java.awt.event.ActionEvent;
+import java.text.DecimalFormat;
 import java.util.Map;
 
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
 import jspecview.common.Annotation.AType;
+import jspecview.util.TextFormat;
 
 /**
  * Dialog for managing the integral listing 
@@ -35,23 +37,24 @@ import jspecview.common.Annotation.AType;
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-class IntegralListDialog extends AnnotationDialog {
+class AwtIntegralListDialog extends AwtAnnotationDialog {
 
 	private static final long serialVersionUID = 1L;
 	private static int[] posXY = new int[] {Integer.MIN_VALUE, 0};
 	private JTextField txtRange;
 	private JTextField txtOffset;
-	private JTextField txtNormalization;
+	//private JTextField txtNormalization;
 	
-	private JCheckBox chkResets; // not yet implemented
+	private AwtIntegralListDialog dialog;
 
-	protected IntegralListDialog(String title, ScriptInterface si, JDXSpectrum spec, 
+	protected AwtIntegralListDialog(String title, ScriptInterface si, JDXSpectrum spec, 
 			JSVPanel jsvp, Map<String, Object> data) {
 		super(title, si, spec, jsvp, data);
 		thisType = AType.Integration;
 		setTitle("Integration Listing");
 		setup();
-		
+		xyData = new IntegralData(spec, myParams);
+		dialog = this;
 	}
 
 	@Override
@@ -62,21 +65,36 @@ class IntegralListDialog extends AnnotationDialog {
 	private int iSelected = -1;
 	private JButton normalizeButton;
 	
+	protected double lastNorm = 1.0;
+	
+	
 	@Override
 	protected void addControls() {
 		txtRange = dialogHelper.addInputOption("Scale", "Scale", null, "%", ""
-				+ si.getParameters().integralRange);
+				+ si.getParameters().integralRange, true);
 		txtOffset = dialogHelper.addInputOption("BaselineOffset", "Baseline Offset", null, "%",
-				"" + si.getParameters().integralOffset);
-		chkResets = dialogHelper.addCheckBoxOption("BaselineResets", "Baseline Resets", true);
-		txtNormalization = dialogHelper.addInputOption("NormalizationFactor",
-				"Normalization Factor", null, null, "1.0");
+				"" + si.getParameters().integralOffset, true);
+		//chkResets = dialogHelper.addCheckBoxOption("BaselineResets", "Baseline Resets", true);
+		//txtNormalization = dialogHelper.addInputOption("NormalizationFactor",
+			//	"Normalization Factor", null, null, "1.0", true);
 		normalizeButton = newJButton();
 		normalizeButton.setText("Normalize");
 		normalizeButton.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				si.runScript("normalize " + iSelected + " "
-						+ txtNormalization.getText());
+				try {
+			    String ret = (String) JOptionPane.showInputDialog(dialog, 
+			    		"Enter a normalization factor", "Normalize",
+			        JOptionPane.QUESTION_MESSAGE, null, null, "" + lastNorm);
+				double val = Double.parseDouble(ret);
+				if (val <= 0) 
+					return;
+				lastNorm = val;
+				((IntegralData) xyData).setSelectedIntegral(xyData.get(iSelected), val);
+				apply();
+				jsvp.repaint();
+				} catch (Exception ee) {
+					// ignore
+				}
 			}
 		});
 		dialogHelper.addButton(normalizeButton);
@@ -109,14 +127,28 @@ class IntegralListDialog extends AnnotationDialog {
 		super.done();
 	}
 
+	public void update(Coordinate clicked) {
+		updateValues();
+		checkEnables();
+	}
+
 	@Override
 	protected void updateValues() {
-		// TODO Auto-generated method stub
-		
+		loadData();
+	}
+
+	private void loadData() {
+		if (xyData == null)
+			createData();
+		iSelected = -1;
+		String[][] data = xyData.getIntegralListArray();
+		String[] header = new String[] { "peak", "start/ppm", "end/ppm", "value" };
+		int[] widths = new int[] {40, 65, 65, 50};
+		loadData(data, header, widths);
 	}
 
 	protected void clear() {
-		jsvp.getPanelData().checkIntegral(si.getParameters(), "off");
+		//jsvp.getPanelData().checkIntegral(si.getParameters(), "off");
 		super.clear();
 	}
 		
@@ -126,10 +158,20 @@ class IntegralListDialog extends AnnotationDialog {
 	}
 
 	@Override
-	protected AnnotationData createData() {
-		IntegralData data = new IntegralData(spec, myParams);
-		setMeasurements(data);
-		return data;
+	protected void createData() {
+		xyData = new IntegralData(spec, myParams);
+		iSelected = -1;
 	}
 
+	public void tableRowSelectedEvent(int iRow) {
+		DecimalFormat df2 = TextFormat.getDecimalFormat("#0.00");
+		String value = tableData[iRow][1];
+		for (int i = 1; i < xyData.size(); i++) 
+			if (df2.format(xyData.get(i).getXVal()).equals(value)) {
+				iSelected = i;
+				break;
+			}		
+		checkEnables();
+	}
+	
 }

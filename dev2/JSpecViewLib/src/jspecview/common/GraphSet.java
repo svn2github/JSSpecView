@@ -1373,9 +1373,11 @@ abstract class GraphSet {
 
 	private void hideAllDialogsExcept(JDXSpectrum spec) {
 		if (!pd.isPrinting && dialogs != null)
-			for (Map.Entry<String, AnnotationData> e: dialogs.entrySet())
-				if (e.getValue().getSpectrum() != spec)
-						e.getValue().setVisible(false);
+			for (Map.Entry<String, AnnotationData> e: dialogs.entrySet()) {
+				AnnotationData ad = e.getValue();
+				if (ad.getSpectrum() != spec && ad instanceof AnnotationDialog)
+						((AnnotationDialog) ad).setVisible(false);
+			}
 	}
 
 	private void drawSpectrumPointer(Object g, int iSpec, JDXSpectrum spec,
@@ -1418,8 +1420,6 @@ abstract class GraphSet {
 	}
 
 	private void drawPeakTabs(Object g, JDXSpectrum spec) {
-		if (isDrawNoSpectra() || pd.isPrinting)
-			return;
 		List<PeakInfo> list = (nSpectra == 1 || iSpectrumSelected >= 0 ? spec
 				.getPeakList() : null);
 		if (list != null && list.size() > 0) {
@@ -1553,7 +1553,7 @@ abstract class GraphSet {
 		JDXSpectrum spec = spectra.get(index);
 		drawPlot(g, index, spec, true, spec.isContinuous(), yOffset, isGrey);
 		if (withIntegration) {
-			if (haveIntegral(index))
+			if (haveIntegralDisplayed(index))
 				drawPlot(g, index, getIntegrationGraph(index), false, true, yOffset,
 						false);
 			if (getIntegralRegions(index) != null)
@@ -1568,9 +1568,9 @@ abstract class GraphSet {
 
 	}
 
-	private List<Measurement> getIntegralRegions(int iSpec) {
+	private MeasurementData getIntegralRegions(int iSpec) {
 		AnnotationData ad = getDialog(AType.Integration, iSpec);
-		return (ad == null ? null : ad.getMeasurements());
+		return (ad == null ? null : ad.getData());
 	}
 
 	private void drawPlot(Object g, int index, Graph spec, boolean drawY0,
@@ -1579,7 +1579,7 @@ abstract class GraphSet {
 		boolean isIntegral = (spec instanceof IntegralData);
 		if (isIntegral && !getShowIntegration(index))
 			return;
-		boolean fillPeaks = (!isIntegral && pd.isIntegralDrag && haveIntegral(index));
+		boolean fillPeaks = (!isIntegral && pd.isIntegralDrag && haveIntegralDisplayed(index));
 		setPlotColor(g, isGrey ? -2 : isIntegral ? -1 : !allowStacking /*
 																																		 * iSpectrumSelected
 																																		 * == index
@@ -1866,8 +1866,22 @@ abstract class GraphSet {
 	}
 
 	private void drawHighlightsAndPeakTabs(Object g, int iSpec) {
-		if (drawPeakPicks(g, iSpec))
+		if (isDrawNoSpectra() || pd.isPrinting)
 			return;
+	  AnnotationData ad = getDialog(AType.PeakList, iSpec);
+	  if (ad != null && ad.getState()) {
+			setColor(g, ScriptToken.PEAKTABCOLOR);
+			MeasurementData md = (MeasurementData) ad.getData();
+	    for (int i = md.size(); -- i >= 0;) {
+	    	Measurement m = md.get(i);
+	    	int x = toPixelX(m.getXVal());
+	    	drawLine(g, x,yPixel0,x,yPixel0 + 10);
+	    }
+	    int y = toPixelY(md.getThresh());
+	    if (y == fixY(y) && !pd.isPrinting)
+	    	drawLine(g, xPixel0,y,xPixel1,y);  
+	  	return;
+	  }
 		JDXSpectrum spec = spectra.get(iSpec);
 		for (int i = 0; i < highlights.size(); i++) {
 			Highlight hl = highlights.get(i);
@@ -1877,23 +1891,6 @@ abstract class GraphSet {
 			}
 		}
 		drawPeakTabs(g, spec);
-	}
-
-	private boolean drawPeakPicks(Object g, int iSpec) {
-	  AnnotationData ad = getDialog(AType.PeakList, iSpec);
-		if (ad == null)
-			return false;
-		setColor(g, ScriptToken.PEAKTABCOLOR);
-		MeasurementData md = (MeasurementData) ad.getData();
-    for (int i = md.size(); -- i >= 0;) {
-    	Measurement m = md.get(i);
-    	int x = toPixelX(m.getXVal());
-    	drawLine(g, x,yPixel0,x,yPixel0 + 10);
-    }
-    int y = toPixelY(md.getThresh());
-    if (y == fixY(y) && !pd.isPrinting)
-    	drawLine(g, xPixel0,y,xPixel1,y);  
-		return true;
 	}
 
 	// determine whether there are any ratio annotations to draw
@@ -1993,6 +1990,8 @@ abstract class GraphSet {
 		if (ad == null)
 			return;
 		((IntegralData) ad.getData()).addIntegralRegion(x1, x2, isFinal);
+		if (isFinal && ad instanceof AnnotationDialog)
+			((AnnotationDialog) ad).update(null);
 		drawnIntegrals = null;
 	}
 
@@ -2064,7 +2063,7 @@ abstract class GraphSet {
 			// yPt = spectra[0].getPercentYValueAt(xPt);
 			// xx += ", " + formatterY.format(yPt);
 			// }
-		} else if (haveIntegral(iSpec)) {
+		} else if (haveIntegralDisplayed(iSpec)) {
 			yPt = getIntegrationGraph(iSpec).getPercentYValueAt(xPt);
 			xx += ", " + pd.getFormatter("#0.0").format(yPt);
 		}
@@ -2773,7 +2772,7 @@ abstract class GraphSet {
 				return;
 			}
 			setCoordClicked(toX(xPixel), toY(yPixel));
-			updateDialogs();
+			updatePeakPickDialog();
 			
 		} else {
 			setCoordClicked(Double.NaN, 0);
@@ -2781,15 +2780,17 @@ abstract class GraphSet {
 		pd.notifyPeakPickedListeners(null);
 	}
 
-	private void updateDialogs() {
+	private void updatePeakPickDialog() {
 		AnnotationData ad;
 		if (dialogs != null) {
-				for (Map.Entry<String, AnnotationData> e: dialogs.entrySet())
-					if ((ad = e.getValue()).getType().equals(AType.PeakList)
-						&& ad.getState())
-					ad.update(pd.coordClicked);
+			for (Map.Entry<String, AnnotationData> e : dialogs.entrySet()) {
+				if ((ad = e.getValue()).getType().equals(AType.PeakList)
+						&& ad.getState() && ad instanceof AnnotationDialog)
+					((AnnotationDialog) ad).update(pd.coordClicked);
+			}
 		}
 	}
+	
 	synchronized void mouseReleasedEvent() {
 		if (iSpectrumMovedTo >= 0)
 			setUserYFactor(iSpectrumMovedTo);
@@ -2979,15 +2980,8 @@ abstract class GraphSet {
 	}
 
 	void setSelectedIntegral(double val) {
-		double val0 = selectedIntegral.getValue();
-		double factor = val / val0;
 		JDXSpectrum spec = selectedIntegral.getSpectrum();
-		for (int i = 0; i < drawnIntegrals.size(); i++) {
-			Measurement m = drawnIntegrals.get(i);
-			if (m.getSpectrum() == spec)
-  			m.setValue(factor * m.getValue());
-		}
-		getIntegrationGraph(getSpectrumIndex(spec)).scaleIntegrationBy(factor);
+		getIntegrationGraph(getSpectrumIndex(spec)).setSelectedIntegral(selectedIntegral, val);
 	}
 
 	void setShowIntegration(Boolean tfToggle, Parameters parameters) {
@@ -3189,7 +3183,9 @@ abstract class GraphSet {
 	}
 
 	void removeDialog(int iSpec, AType type) {
-		addDialog(iSpec, type, null);
+		if (dialogs == null || iSpec < 0)
+			return;
+		dialogs.remove(type + "_" + iSpec);
 	}
 	
 	void addDialog(int iSpec, AType type, AnnotationData dialog) {
@@ -3200,21 +3196,27 @@ abstract class GraphSet {
 		if (dialogs == null)
 			dialogs = new Hashtable<String, AnnotationData>();
 		String key = type + "_" + iSpec;
-		if (dialog == null)
-			dialogs.remove(key);
-		else
-  		dialogs.put(key, dialog);
+		dialog.setKey(key);
+  	dialogs.put(key, dialog);
+	}
+	
+	void removeDialog(AnnotationDialog dialog) {
+		String key = dialog.getKey();
+		dialogs.remove(key);
+		AnnotationData data = dialog.getData();
+		if (data != null)
+			dialogs.put(key, data);
 	}
 
-	public AnnotationData getPeakListing(Parameters p) {
+	public MeasurementData getPeakListing(Parameters p) {
 		int iSpec = getCurrentSpectrumIndex();
 		if (dialogs == null || iSpec < 0)
 			return null;
 		AnnotationData dialog = getDialog(AType.PeakList, -1);
 		if (dialog == null)
-			dialog = new MeasurementData(AType.PeakList, getSpectrum());
+			addDialog(iSpec, AType.PeakList, dialog = new MeasurementData(AType.PeakList, getSpectrum()));
 		((MeasurementData) dialog).setPeakList(p, null, viewData);
-    return dialog;		
+    return dialog.getData();		
 	}
 
 	public void setPeakListing(Boolean tfToggle) {
@@ -3224,8 +3226,9 @@ abstract class GraphSet {
 		dialog.setState(tfToggle == null ? !dialog.getState() : tfToggle.booleanValue());
 	}
 
-	boolean haveIntegral(int i) {
-		return getDialog(AType.Integration, i) != null;
+	boolean haveIntegralDisplayed(int i) {
+		AnnotationData ad = getDialog(AType.Integration, i);
+		return (ad != null  && ad.getState());
 	}
 	
 	IntegralData getIntegrationGraph(int i) {

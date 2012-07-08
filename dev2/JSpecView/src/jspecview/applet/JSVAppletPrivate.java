@@ -66,14 +66,14 @@ import jspecview.common.ViewPanel;
 import jspecview.common.JSVTree;
 import jspecview.common.JSViewer;
 import jspecview.common.ViewDialog;
-import jspecview.common.OverlayLegendDialog;
+import jspecview.common.AwtOverlayLegendDialog;
 import jspecview.common.AwtParameters;
 import jspecview.common.PanelData;
 import jspecview.common.PanelListener;
 import jspecview.common.Parameters;
 import jspecview.common.PeakPickEvent;
 import jspecview.common.PrintLayout;
-import jspecview.common.PrintLayoutDialog;
+import jspecview.common.AwtPrintLayoutDialog;
 import jspecview.common.ScriptCommandTokenizer;
 import jspecview.common.ScriptInterface;
 import jspecview.common.ScriptToken;
@@ -149,7 +149,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	boolean isStandalone; // not changed
 
 	private ViewDialog viewDialog;
-	private OverlayLegendDialog overlayLegendDialog;
+	private AwtOverlayLegendDialog overlayLegendDialog;
 
 	private String appletID;
 	private String syncID;
@@ -493,7 +493,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 			newWindow(true);
 		JSVPanel jsvp = getSelectedPanel();
 		PrintLayout pl;
-		if ((pl = (new PrintLayoutDialog(offWindowFrame, lastPrintLayout))
+		if ((pl = (new AwtPrintLayoutDialog(offWindowFrame, lastPrintLayout))
 				.getPrintLayout()) == null)
 			return;
 		lastPrintLayout = pl;
@@ -873,15 +873,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		return getSelectedPanel().getPanelData().getSolutionColor();
 	}
 
-	/**
-	 * Calculates the predicted colour of the Spectrum
-	 */
-	public String setSolutionColor(boolean showMessage) {
-		if (showMessage)
-			getSelectedPanel().showSolutionColor(jsvApplet);
-		return getSelectedPanel().getPanelData().getSolutionColor();
-	}
-
 	public Parameters getParameters() {
 		return parameters;
 	}
@@ -931,7 +922,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	public JSVDialog getOverlayLegend(JSVPanel jsvp) {
-		return overlayLegendDialog = new OverlayLegendDialog(null, getSelectedPanel());
+		return overlayLegendDialog = new AwtOverlayLegendDialog(null, getSelectedPanel());
 	}
 
 	/**

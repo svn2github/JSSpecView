@@ -71,7 +71,7 @@ public enum ScriptToken {
   LABEL("x y [color and/or \"text\"]"), 
   LOAD("[APPEND] \"fileName\" [first] [last]; use \"\" to reload current file"),
   LOADFILECALLBACKFUNCTIONNAME,
-  MENUON, 
+  MENUON,
   OBSCURE, 
   OVERLAY, // same as "VIEW"
   OVERLAYSTACKED("TF"),

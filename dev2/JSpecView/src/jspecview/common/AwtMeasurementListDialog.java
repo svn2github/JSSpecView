@@ -30,12 +30,12 @@ import jspecview.common.Annotation.AType;
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-class MeasurementListDialog extends AnnotationDialog {
+class AwtMeasurementListDialog extends AwtAnnotationDialog {
 
 	private static final long serialVersionUID = 1L;
 	private static int[] posXY = new int[] {Integer.MIN_VALUE, 0};
 
-	protected MeasurementListDialog(String title, ScriptInterface si, 
+	protected AwtMeasurementListDialog(String title, ScriptInterface si, 
 			JDXSpectrum spec, JSVPanel jsvp, Map<String, Object> data) {
 		super(title, si, spec, jsvp, data);
 		thisType = AType.Measurements;
@@ -74,9 +74,19 @@ class MeasurementListDialog extends AnnotationDialog {
 	}
 
 	@Override
-	protected AnnotationData createData() {
+	protected void createData() {
 		// TODO Auto-generated method stub
-		return null;
+		
+	}
+
+	public void tableRowSelectedEvent(int minSelectionIndex) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void update(Coordinate clicked) {
+		// TODO Auto-generated method stub
+		
 	}
 
 

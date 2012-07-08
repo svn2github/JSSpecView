@@ -78,7 +78,7 @@ public class JSViewer {
         	break;        	
         case GETSOLUTIONCOLOR:
           if (jsvp != null)
-            si.setSolutionColor(true);
+        		showColorMessage(si);
           break;
         case HIDDEN:
           si.execHidden(Parameters.isTrue(value));
@@ -771,6 +771,11 @@ public class JSViewer {
 			pd.clearAllView();
 			break;
 		}
+	}
+
+	public static void showColorMessage(ScriptInterface si) {
+		JSVPanel jsvp = si.getSelectedPanel();
+		jsvp.showMessage(jsvp.getPanelData().getSolutionColorHtml(), "Predicted Colour");
 	}
 
 }

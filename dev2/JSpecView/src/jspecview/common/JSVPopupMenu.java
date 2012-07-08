@@ -363,9 +363,11 @@ public class JSVPopupMenu extends JPopupMenu {
 
     boolean isOverlaid = pd.isOverlaid();
     boolean isSingle = pd.haveSelectedSpectrum();
-    integrationMenuItem.setEnabled(isSingle && spec0.canIntegrate());
+    
+    integrationMenuItem.setEnabled(jsvp.getSpectrum().canIntegrate());
     measurementsMenuItem.setEnabled(pd.hasCurrentMeasurements(AType.Measurements));
-    peakListMenuItem.setEnabled(isSingle);
+    peakListMenuItem.setEnabled(jsvp.getSpectrum().is1D());
+    
     solColMenuItem.setEnabled(isSingle && spec0.canShowSolutionColor());
     transAbsMenuItem.setEnabled(isSingle && spec0.canConvertTransAbs());
     overlayKeyMenuItem.setEnabled(isOverlaid && pd.getNumberOfGraphSets() == 1);

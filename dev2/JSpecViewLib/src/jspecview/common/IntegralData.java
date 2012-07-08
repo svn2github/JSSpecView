@@ -269,4 +269,14 @@ public class IntegralData extends MeasurementData implements Graph {
 		xyCoords = null;
 	}
 
+	public void setSelectedIntegral(Measurement integral, double val) {
+		double val0 = integral.getValue();
+		double factor = val / val0;
+		for (int i = 1; i < size(); i++) {
+			Measurement m = get(i);
+  		m.setValue(factor * m.getValue());
+		}
+		scaleIntegrationBy(factor);
+	}
+
 }

@@ -736,14 +736,6 @@ if (!pd.ctrlPressed)
     return ret;
   }
 
-	public void showSolutionColor(Object container) {
-		Container c = (Container) container; 
-		String msg = pd.getSolutionColorHtml();
-		JOptionPane.showMessageDialog(c, msg, "Predicted Colour",
-				JOptionPane.INFORMATION_MESSAGE);			
-		requestFocusInWindow();
-	}
-
 	public void showHeader(Container jsvApplet) {
 		JDXSpectrum spectrum = pd.getSpectrum();
 		String[][] rowData = spectrum.getHeaderRowDataAsArray();
@@ -757,29 +749,40 @@ if (!pd.ctrlPressed)
 	}
 
 	public void showDialog(ScriptInterface si, AType type) {
-		AnnotationDialog dialog = (AnnotationDialog) pd.getDialog(type);
-		if (dialog != null) {
-			dialog.reEnable();
+		AwtAnnotationDialog dialog = null; 
+		AnnotationData ad = pd.getDialog(type);
+		if (ad != null && ad instanceof AwtAnnotationDialog) {
+			((AwtAnnotationDialog) ad).reEnable();
 			return;
 		}
+		
 		int iSpec = pd.getCurrentSpectrumIndex();
-		if (iSpec < 0)
+		if (iSpec < 0) {
+			showMessage("To enable " + type + " first select a spectrum by clicking on it.", "" + type);
 			return;
+		}
 		JDXSpectrum spec = getSpectrum();
 		switch (type) {
 		case Integration:
-			dialog = new IntegralListDialog("Integration for " + spec, si, spec, this, null);
+			dialog = new AwtIntegralListDialog("Integration for " + spec, si, spec, this, null);
 			break;
 		case Measurements:
-			dialog = new MeasurementListDialog("Measurements for " + spec, si, spec, this, null);
+			dialog = new AwtMeasurementListDialog("Measurements for " + spec, si, spec, this, null);
 			break;
 		case PeakList:
-			dialog = new PeakListDialog("Peak List for " + spec, si, spec, this, null);
+			dialog = new AwtPeakListDialog("Peak List for " + spec, si, spec, this, null);
 			break;
 		}
+		if (ad != null)
+			dialog.setData(ad);
 		pd.addDialog(iSpec, type, dialog);
 		dialog.reEnable();
 	}
 
+	public void showMessage(String msg, String title) {
+		JOptionPane.showMessageDialog(this, msg, title, (msg.startsWith("<html>") ? JOptionPane.INFORMATION_MESSAGE 
+				: JOptionPane.PLAIN_MESSAGE));	
+		requestFocusInWindow();
+	}
 
 }

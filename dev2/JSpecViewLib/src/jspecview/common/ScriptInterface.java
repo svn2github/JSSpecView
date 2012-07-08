@@ -71,8 +71,6 @@ public interface ScriptInterface {
 
 	public JSVPanel getSelectedPanel();
 
-	public String setSolutionColor(boolean b);
-
 	public Object getSpectraTree();
 
 	public int incrementViewCount(int i);

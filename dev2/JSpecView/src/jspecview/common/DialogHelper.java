@@ -21,7 +21,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
 
 /**
  * just a class I made to separate the construction of the AnnotationDialogs
@@ -69,7 +68,7 @@ public class DialogHelper {
 	}
 
 	protected JTextField addInputOption(String name, String label, String value,
-			String units, String defaultValue) {
+			String units, String defaultValue, boolean visible) {
 		String key = thisKey + "_" + name;
 		if (value == null) {
 			value = (String) options.get(key);
@@ -77,20 +76,24 @@ public class DialogHelper {
 				options.put(key, (value = defaultValue));
 		}
 		JTextField obj = new JTextField((String) value);
-		obj.setPreferredSize(new Dimension(50, 25));
-		obj.addActionListener(eventListener);
-		addPanelLine(name, label, obj, units);
+		if (visible) {
+			obj.setPreferredSize(new Dimension(50, 25));
+			obj.addActionListener(eventListener);
+  		addPanelLine(name, label, obj, units);
+		}
 		return obj;
 	}
 
 	protected JComboBox addSelectOption(String name, String label, String[] info,
-			int iPt) {
+			int iPt, boolean visible) {
 		JComboBox obj = new JComboBox(info);
 		obj.setSelectedIndex(iPt);
-		obj.setActionCommand(name);
-		// obj.setPreferredSize(new Dimension(100, 25));
-		obj.addActionListener(eventListener);
-		addPanelLine(name, label, obj, null);
+		if (visible) {
+			obj.setActionCommand(name);
+			// obj.setPreferredSize(new Dimension(100, 25));
+			obj.addActionListener(eventListener);
+			addPanelLine(name, label, obj, null);
+		}
 		return obj;
 	}
 
@@ -112,11 +115,10 @@ public class DialogHelper {
 		iRow++;
 	}
 
-	protected synchronized JTable getDataTable(JSVPanel jsvp0, String[] columnNames,
-			String[][] data) {
+	protected synchronized JTable getDataTable(AnnotationDialog ad, 
+			String[][] data, String[] columnNames, int[] columnWidths, int height) {
 		
-		final JSVPanel jsvp = jsvp0;
-		final String[][] d = data;
+		final AnnotationDialog adf = ad;
 		
 		LegendTableModel tableModel = new LegendTableModel(columnNames, data);
 		JTable table = new JTable(tableModel);
@@ -130,26 +132,19 @@ public class DialogHelper {
 				if (e.getValueIsAdjusting())
 					return;
 				try {
-				ListSelectionModel lsm = (ListSelectionModel) e.getSource();
-				String value = d[lsm.getMinSelectionIndex()][1];
-				jsvp.getPanelData().findX(Double.parseDouble(value));
-				jsvp.repaint();
+					ListSelectionModel lsm = (ListSelectionModel) e.getSource();
+					adf.tableRowSelectedEvent(lsm.getMinSelectionIndex());
 				} catch (Exception ee) {
-					//ignore
+					// ignore
 				}
 			}
 		});
-		table.setPreferredScrollableViewportSize(new Dimension(350, 95));
-		TableColumn c = table.getColumnModel().getColumn(0);
-		c.setPreferredWidth(30);
-		c = table.getColumnModel().getColumn(1);
-		c.setPreferredWidth(60);
-		c = table.getColumnModel().getColumn(2);
-		c.setPreferredWidth(60);
-		c = table.getColumnModel().getColumn(3);
-		c.setPreferredWidth(60);
-		c = table.getColumnModel().getColumn(4);
-		c.setPreferredWidth(60);
+		int n = 0;
+		for (int i = 0; i < columnNames.length; i++) {
+			table.getColumnModel().getColumn(i).setPreferredWidth(columnWidths[i]);
+			n += columnWidths[i];
+		}
+		table.setPreferredScrollableViewportSize(new Dimension(n, height));
 		return table;
 	}
 
@@ -173,7 +168,7 @@ public class DialogHelper {
                               JTable table, Object title,
                               boolean isSelected, boolean hasFocus,
                               int row, int column) {
-          setHorizontalAlignment(SwingConstants.RIGHT);
+          setHorizontalAlignment(column == 0 ? SwingConstants.CENTER : SwingConstants.RIGHT);
           setText(title.toString());
           if(isSelected)
             setBackground(table.getSelectionBackground());
@@ -213,8 +208,15 @@ public class DialogHelper {
 		}
 
 		public Object getValueAt(int row, int col) {
-			return data[row][col];
+			return " " + data[row][col] + " ";
 		}
+		
+    @Override
+    public Class<?> getColumnClass(int c) {
+        return getValueAt(0, c).getClass();
+    }
+
+
 
 	}
 

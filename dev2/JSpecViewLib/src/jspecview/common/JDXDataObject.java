@@ -833,17 +833,17 @@ public abstract class JDXDataObject extends JDXHeader {
 		return null;
 	}
 
-	public String[] getPeakListArray(int i, Measurement m, double lastx, double minY, double maxY) {
+	public String[] getPeakListArray(int pt, Measurement m, double lastx, double minY, double maxY) {
 		DecimalFormat df4 = TextFormat.getDecimalFormat("#0.0000");
 		DecimalFormat df2 = TextFormat.getDecimalFormat("#0.00");
 		double x = m.getXVal();
 		double y = m.getYVal() / maxY;
 		double dx = Math.abs(x - lastx);
 		if (isNMR()) {
-			return new String[] {"" + i, df4.format(x),df4.format(y), 
+			return new String[] {"" + pt, df4.format(x),df4.format(y), 
 					df2.format(x * observedFreq), (dx * observedFreq > 20 ? "" : df2.format(dx * observedFreq) )}; 			
 		}
-		return new String[] {"" + i,  df2.format(x),df4.format(y) };
+		return new String[] {"" + pt,  df2.format(x),df4.format(y) };
 	}
 
 

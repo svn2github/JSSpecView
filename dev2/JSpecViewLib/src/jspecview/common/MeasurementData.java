@@ -42,7 +42,7 @@ public class MeasurementData extends ArrayList<Measurement> implements Annotatio
 	
 	protected JDXSpectrum spec;
 
-	private boolean isON;
+	private boolean isON = true;
 
 	public boolean getState() {
 		return isON;
@@ -79,21 +79,29 @@ public class MeasurementData extends ArrayList<Measurement> implements Annotatio
 	}
 	
 	public String[][] getPeakListArray() {
-	  String[][] dd = new String[size()][];
-	  double lastx = -1e100;
-	  for (int pt=0, i = size(); --i >= 0;) {
-	  	dd[pt++] = spec.getPeakListArray(i+1, get(i), lastx, minY, maxY);
-	  	lastx = get(i).getXVal();
-	  }		
-		return dd;
+		String[][] data = new String[size()][];
+		double lastx = -1e100;
+		for (int pt = 0, i = size(); --i >= 0;) {
+			data[pt++] = spec.getPeakListArray(pt, get(i), lastx, minY, maxY);
+			lastx = get(i).getXVal();
+		}
+		return data;
 	}
 	
+	public String[][] getIntegralListArray() {
+		DecimalFormat df2 = TextFormat.getDecimalFormat("#0.00");
+		String[][] data = new String[size() - 1][];
+		for (int pt = 0, i = size(); --i >= 1;) // [0] is the pending measurement
+			data[pt++] = new String[] { "" + pt, df2.format(get(i).getXVal()), df2.format(get(i).getXVal2()), get(i).getText() };
+		return data;
+	}
+
 	public void setPeakList(Parameters p, DecimalFormat formatter, ScaleData view) {
 		if (formatter == null)
 			formatter = TextFormat.getDecimalFormat(spec.getPeakPickHash());
 		df = formatter;
 		Coordinate[] xyCoords = spec.getXYCoords();
-		if (false && checkParameters(this, p) || xyCoords.length < 3)
+		if (xyCoords.length < 3)
 			return;
 		clear();
 		myParams.peakListInclude = p.peakListInclude;
@@ -106,10 +114,6 @@ public class MeasurementData extends ArrayList<Measurement> implements Annotatio
 		maxY = view.maxYOnScale;
 		double minX = view.minXOnScale;
 		double maxX = view.maxXOnScale;
-		//thresh = minY
-			//	+ (maxY - minY)
-				//* (isInverted ? 100 - myParams.peakListThreshold
-					//	: myParams.peakListThreshold) / 100.;
 		thresh = myParams.peakListThreshold;
 		double yLast = 0;
 		double[] y3 = new double[] { xyCoords[0].getYVal(),
@@ -172,13 +176,10 @@ public class MeasurementData extends ArrayList<Measurement> implements Annotatio
 		return spec;
 	}
 	
-	public AnnotationData getData() {
+	public MeasurementData getData() {
 		return this;
 	}
-	public void setData(AnnotationData xyData) {
-		// ignore -- this is for the Dialog version
-	}
-	
+
 	public void addSpecShift(double dx) {
 		for (int i = size(); --i >= 0;) {
 			Measurement m = get(i);
@@ -188,18 +189,13 @@ public class MeasurementData extends ArrayList<Measurement> implements Annotatio
 			m.text = df.format(x);
 		}
 	}
-	public void setVisible(boolean b) {
-		// TODO Auto-generated method stub
-		
+
+  private String key;
+	public String getKey() {
+		return key;
 	}
-	public void update() {
-		// TODO Auto-generated method stub
-		
+	public void setKey(String key) {
+		this.key = key;		
 	}
-	public void update(Coordinate clicked) {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	
+
 }

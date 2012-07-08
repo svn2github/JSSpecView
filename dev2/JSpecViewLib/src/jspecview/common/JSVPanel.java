@@ -32,9 +32,9 @@ public interface JSVPanel extends JSVContainer {
   void setToolTipText(String s);
 	void setViewTitle(String filePath);
   void setupPlatform();
-	void showSolutionColor(Object container);
 	void showHeader(Container jsvApplet);
 	void showDialog(ScriptInterface si, AType type);
+	void showMessage(String msg, String title);
 
 
 

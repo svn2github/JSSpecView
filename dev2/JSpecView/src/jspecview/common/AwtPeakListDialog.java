@@ -35,7 +35,7 @@ import jspecview.common.Annotation.AType;
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-class PeakListDialog extends AnnotationDialog implements FocusListener {
+class AwtPeakListDialog extends AwtAnnotationDialog implements FocusListener {
 
 	private static final long serialVersionUID = 1L;
 	private static int[] posXY = new int[] {Integer.MIN_VALUE, 0};
@@ -44,7 +44,7 @@ class PeakListDialog extends AnnotationDialog implements FocusListener {
 //	private JTextField txtSkip;
 	private JComboBox cbInterpolation;
 
-	protected PeakListDialog(String title, ScriptInterface si, JDXSpectrum spec, 
+	protected AwtPeakListDialog(String title, ScriptInterface si, JDXSpectrum spec, 
 			JSVPanel jsvp, Map<String, Object> data) {
 		super(title, si, spec, jsvp, data);
 		thisType = AType.PeakList;
@@ -60,14 +60,14 @@ class PeakListDialog extends AnnotationDialog implements FocusListener {
 	@Override
 	protected void addControls() {
 		txtThreshold = dialogHelper.addInputOption("Threshold", null, null, "",
-				"");
+				"", true);
 		setThreshold();
 //		txtInclude = dialogHelper.addInputOption("IncludeTop", "Include Top", null,
 	//			"peaks", "10");
 //		txtSkip = dialogHelper.addInputOption("SkipHighest", "Skip Highest", null,
 //				"peaks", "0");
 		cbInterpolation = dialogHelper.addSelectOption("Interpolation", null,
-				new String[] { "parabolic", "none" }, 0);
+				new String[] { "parabolic", "none" }, 0, true);
 //		txtThreshold.addFocusListener(this);
 //		txtInclude.addFocusListener(this);
 	}
@@ -83,9 +83,7 @@ class PeakListDialog extends AnnotationDialog implements FocusListener {
 	protected void checkEnables() {
 	}
 
-	
-	
-	
+
 	/*		String script = "PEAKLIST";
 			String s = txtThreshold.getText();
 			if (s.startsWith("("))
@@ -101,7 +99,7 @@ class PeakListDialog extends AnnotationDialog implements FocusListener {
 	@Override
 	public void apply() {
 		setThreshold();
-		xyData = createData();
+		createData();
 		super.apply();
 	}
 
@@ -120,6 +118,10 @@ class PeakListDialog extends AnnotationDialog implements FocusListener {
 		}
 	}
 
+	protected void clear() {
+		super.clear();
+	}
+		
 	@Override
 	protected void done() {
 		super.done();
@@ -127,8 +129,7 @@ class PeakListDialog extends AnnotationDialog implements FocusListener {
 
 	@Override
 	protected void updateValues() {
-		// TODO Auto-generated method stub
-		
+		loadData();
 	}
 
 	public void focusGained(FocusEvent e) {
@@ -158,16 +159,23 @@ class PeakListDialog extends AnnotationDialog implements FocusListener {
 	}
 
 	@Override
-	protected AnnotationData createData() {
+	protected void createData() {
 		setParams();
 		MeasurementData md = new MeasurementData(AType.PeakList, spec);
 	  md.setPeakList(myParams, numberFormatter, jsvp.getPanelData().getView());
-		String[][] data = md.getPeakListArray();
+		xyData = md;
+		loadData();
+	}
+
+	private void loadData() {
+		if (xyData == null)
+			createData();
+		String[][] data = xyData.getPeakListArray();
 		String[] header = (data.length == 0 ? new String[] {}
-		     : data[0].length == 3 ? new String[] { "peak", spec.getXUnits(), spec.getYUnits() }
-		     : new String[] { "peak", "ppm", "intens." , "hz", "Delta_hz" });
-		loadData(header, data);
-		return md;
+    : data[0].length == 3 ? new String[] { "peak", spec.getXUnits(), spec.getYUnits() }
+    : new String[] { "peak", "shift/ppm", "intens" , "shift/hz", "diff/hz" });
+		int[] widths = new int[] {40, 65, 50, 50, 50 };
+		loadData(data, header, widths);
 	}
 
 	public synchronized void update(Coordinate clicked) {
@@ -188,5 +196,11 @@ class PeakListDialog extends AnnotationDialog implements FocusListener {
 				dataTable.getSelectionModel().setSelectionInterval(md.size() - 2 - ipt,
 						md.size() - 1 - ipt);
 		}
+	}
+
+	public void tableRowSelectedEvent(int iRow) {
+		String value = tableData[iRow][1];
+		jsvp.getPanelData().findX(Double.parseDouble(value));
+		jsvp.repaint();
 	}
 }

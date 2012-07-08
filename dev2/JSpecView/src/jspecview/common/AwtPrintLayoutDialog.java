@@ -46,7 +46,7 @@ import javax.swing.border.TitledBorder;
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
  */
-public class PrintLayoutDialog extends JDialog {
+public class AwtPrintLayoutDialog extends JDialog {
 
 	private static final long serialVersionUID = 1L;
   private TitledBorder titledBorder1;
@@ -111,7 +111,7 @@ public class PrintLayoutDialog extends JDialog {
    * @param frame the parent frame
    * @param pl    null or previous layout
    */
-  public PrintLayoutDialog(Frame frame, PrintLayout pl) {
+  public AwtPrintLayoutDialog(Frame frame, PrintLayout pl) {
     super(frame, "Print Layout", true);
     if (pl == null)
       pl = new PrintLayout();
@@ -148,7 +148,7 @@ public class PrintLayoutDialog extends JDialog {
     String allFontNames[] = ge.getAvailableFontFamilyNames();
     for(int i = 0; i < allFontNames.length; i++)
       fontComboBox.addItem(allFontNames[i]);
- 		ClassLoader cl = PrintLayoutDialog.class.getClassLoader();
+ 		ClassLoader cl = AwtPrintLayoutDialog.class.getClassLoader();
 		String path = "jspecview/application/icons/";
 		portraitIcon = new ImageIcon(cl.getResource(path + "portrait.gif"));
 		landscapeIcon = new ImageIcon(cl.getResource(path + "landscape.gif"));

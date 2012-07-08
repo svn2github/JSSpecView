@@ -98,12 +98,12 @@ import jspecview.common.PanelData;
 import jspecview.common.Parameters;
 import jspecview.common.JSVPopupMenu;
 import jspecview.common.JSVFileFilter;
-import jspecview.common.OverlayLegendDialog;
+import jspecview.common.AwtOverlayLegendDialog;
 import jspecview.common.AwtParameters;
 import jspecview.common.PanelListener;
 import jspecview.common.PeakPickEvent;
 import jspecview.common.PrintLayout;
-import jspecview.common.PrintLayoutDialog;
+import jspecview.common.AwtPrintLayoutDialog;
 import jspecview.common.ScriptInterface;
 import jspecview.common.ScriptToken;
 import jspecview.common.JDXSpectrum;
@@ -934,14 +934,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		// unnec
 	}
 
-	/**
-	 * Calculates the predicted colour of the Spectrum
-	 */
-	public String setSolutionColor(boolean showMessage) {
-		getSelectedPanel().showSolutionColor(this);
-		return null;
-	}
-
 	public void execClose(String value, boolean fromScript) {
 		JSVTree.close(this, TextFormat.trimQuotes(value));
 		if (!fromScript) {
@@ -998,7 +990,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	public JSVDialog getOverlayLegend(JSVPanel jsvp) {
-		return new OverlayLegendDialog(this, jsvp);
+		return new AwtOverlayLegendDialog(this, jsvp);
 	}
 
 	// these next patch into the advanced applet routines for JavaScript calls
@@ -1148,7 +1140,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		JSVPanel jsvp = getSelectedPanel();
 		PrintLayout pl;
 		if (jsvp == null
-				|| (pl = (new PrintLayoutDialog(this, lastPrintLayout))
+				|| (pl = (new AwtPrintLayoutDialog(this, lastPrintLayout))
 						.getPrintLayout()) == null)
 			return;
 		lastPrintLayout = pl;
