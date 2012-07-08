@@ -3193,6 +3193,10 @@ abstract class GraphSet {
 	}
 	
 	void addDialog(int iSpec, AType type, AnnotationData dialog) {
+		if (iSpec < 0) {
+			iSpec = getSpectrumIndex(dialog.getSpectrum());
+			dialog = null;
+		}
 		if (dialogs == null)
 			dialogs = new Hashtable<String, AnnotationData>();
 		String key = type + "_" + iSpec;

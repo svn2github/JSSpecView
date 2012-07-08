@@ -258,7 +258,8 @@ abstract class AnnotationDialog extends JDialog implements AnnotationData {
 	}
 	
   protected void done() {
-  	setVisible(false);
+  	jsvp.getPanelData().addDialog(-1, thisType, this);
+  	dispose();
 	}
 
 	protected void doEvent(ActionEvent e) {
