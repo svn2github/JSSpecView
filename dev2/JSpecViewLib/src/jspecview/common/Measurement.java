@@ -49,6 +49,18 @@ public class Measurement extends Annotation {
   	setPt2(m.pt2.getXVal(), m.pt2.getYVal());
 	}
 
+	public Measurement(JDXSpectrum spec, double x, double y, String text, double value) {
+		// peak picking
+		super(spec, x, y, text, false, false, 0, 6);
+		this.value = value;
+		pt2.setXVal(x);
+		pt2.setYVal(y);
+	}
+
+	public Measurement(JDXSpectrum spec, double x, double y, boolean b) {
+		 super(spec, x, y, b);
+	}
+
 	public void setPt2(double x, double y) {
 		pt2.setXVal(x);
 		pt2.setYVal(y);
@@ -90,6 +102,10 @@ public class Measurement extends Annotation {
 	public void addSpecShift(double dx) {
     setXVal(getXVal() + dx);
     pt2.setXVal(pt2.getXVal() + dx);
+	}
+
+	public void setYVal2(double y2) {
+		pt2.setYVal(y2);
 	}
 
 }

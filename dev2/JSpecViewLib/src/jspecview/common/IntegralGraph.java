@@ -19,9 +19,6 @@
 
 package jspecview.common;
 
-import java.util.List;
-
-
 /**
  * class <code>IntegralGraph</code> implements the <code>Graph</code> interface.
  * It constructs an integral <code>Graph</code> from another <code>Graph</code>
@@ -31,94 +28,24 @@ import java.util.List;
  * @see jspecview.common.Graph
  * @see jspecview.common.JDXSpectrum
  */
-public class IntegralGraph implements Graph {
+public class IntegralGraph extends IntegralData {
 
-  enum IntMode {
-    OFF, ON, TOGGLE, MARK;
-    static IntMode getMode(String value) {
-      for (IntMode mode: values())
-        if (mode.name().equalsIgnoreCase(value))
-          return mode;
-      return OFF;
-    }
-  }
-  
-  /**
+	private static final long serialVersionUID = 1L;
+
+	/**
    * Calculates and initialises the <code>IntegralGraph</code> from an input <code>Graph</code>,
    *  the percentage Minimum Y value, the percent offset and the integral factor
+   *  
+   *  // old way -- left for android
+   *  
    * @param graph the input graph
    * @param percentMinY percentage Minimum Y value
    * @param percentOffset the percent offset
-   * @param integralFactor the integral factor
+   * @param integralRange the integral factor
    */
   public IntegralGraph(JDXSpectrum spectrum, 
   		double percentMinY, double percentOffset, double factor, String xUnits, String yUnits) {
-    this.spectrum = spectrum;
-    id = new IntegralData(percentMinY, percentOffset, factor);
-    xyCoords = id.calculateIntegral(this);
+  	super(percentMinY, percentOffset, factor, spectrum);
   }
   
-  public void dispose() {
-    id = null;
-    spectrum = null;
-  }
-
-  JDXSpectrum spectrum;  
-  
-  private Coordinate xyCoords[];
-  public Coordinate[] getXYCoords() {
-    return xyCoords;
-  }
-
-	private IntegralData id;	
-	IntegralData getIntegralData() {
-		return id;
-	}
-	void setIntegralData(IntegralData id) {
-		this.id = id;
-	}
-	
-  public List<Measurement> getIntegralRegions() {
-    return id.integralRegions;
-  }
-
-  public void addIntegralRegion(double x1, double x2, boolean isFinal) {
-  	id.addIntegralRegion(this, x1, x2, isFinal);
-  }
-    
-  public void addMarks(String ppms) {
-  	id.addMarks(this, ppms);
-  }
-
-	public void scaleIntegrationBy(double factor) {
-		id.scaleIntegrationBy(factor);
-	}
-
-  /**
-   * Recalculates the integral normalized to [0 - 1]
-   */
-  public void recalculate(){
-    xyCoords = id.calculateIntegral(this);
-  }
-
-  /**
-   * returns FRACTIONAL value * 100
-   */
-  public double getPercentYValueAt(double x) {
- //   double y = getYValueAt(x);
- //   double y0 = xyCoords[xyCoords.length - 1].getYVal();
- //   double y1 = xyCoords[0].getYVal();
- //   return (y - y0) / (y1 - y0) * 100;
-    return getYValueAt(x) * 100;
-  }
-
-  double getYValueAt(double x) {
-    return Coordinate.getYValueAt(xyCoords, x);
-  }
-
-	public void addSpecShift(double dx) {
-		Coordinate.shiftX(xyCoords, dx);
-		id.addSpecShift(dx);
-	}
-
 }

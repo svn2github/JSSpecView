@@ -584,12 +584,16 @@ public class Coordinate {
   	// see https://ccrma.stanford.edu/~jos/sasp/Quadratic_Interpolation_Spectral_Peaks.html
   	if (pt == 0 || pt == xyCoords.length - 1)
   		return xyCoords[pt].xVal;
+  	return parabolicInterpolation(xyCoords, pt);
+  }
+
+	public static double parabolicInterpolation(Coordinate[] xyCoords, int pt) {
   	double alpha = xyCoords[pt - 1].yVal;
   	double beta = xyCoords[pt].yVal;
   	double gamma = xyCoords[pt + 1].yVal;
   	double p = (alpha - gamma) / 2 / (alpha - 2 * beta + gamma);
   	return xyCoords[pt].xVal + p * (xyCoords[pt + 1].xVal - xyCoords[pt].xVal);
-  }
+	}
 
 	static boolean getPickedCoordinates(Coordinate[] coordsClicked,
 			Coordinate coordClicked, Coordinate coord, Coordinate actualCoord) {

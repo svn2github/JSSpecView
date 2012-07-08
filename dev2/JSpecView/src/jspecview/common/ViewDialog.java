@@ -24,7 +24,6 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
@@ -55,7 +54,6 @@ public class ViewDialog extends JDialog implements WindowListener {
 	private Insets cbInsets1;
 	private Insets cbInsets2;
 	private JButton closeSelectedButton;
-	private Rectangle bounds;
 	private JButton combineSelectedButton;
 	private JButton viewSelectedButton;
   
@@ -73,8 +71,8 @@ public class ViewDialog extends JDialog implements WindowListener {
 	 */
 	public ViewDialog(ScriptInterface si, Component panel, boolean modal) {
 		this.si = si;
-		this.setTitle("View/Overlay/Close Spectra");
-		this.setModal(modal);
+		setTitle("View/Overlay/Close Spectra");
+		setModal(modal);
 		if (panel != null) {
 			if (posX == Integer.MIN_VALUE) {
 				posX = panel.getLocationOnScreen().x;
@@ -91,8 +89,6 @@ public class ViewDialog extends JDialog implements WindowListener {
     try {
       jbInit();
       pack();
-      if (bounds != null)
-      	setBounds(bounds);
       setVisible(true);
     }
     catch(Exception ex) {
@@ -155,6 +151,7 @@ public class ViewDialog extends JDialog implements WindowListener {
 
     Insets buttonInsets = new Insets(5, 5, 5, 5);
     JPanel leftPanel = new JPanel(new GridBagLayout());
+    leftPanel.setMinimumSize(new Dimension(150, 300));
     int i = 0;
     addButton(leftPanel, selectAllButton, i++, buttonInsets);
     addButton(leftPanel, selectNoneButton, i++, buttonInsets);

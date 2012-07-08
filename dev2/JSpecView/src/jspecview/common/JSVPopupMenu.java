@@ -31,6 +31,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import jspecview.common.JDXSpectrum;
+import jspecview.common.Annotation.AType;
 import jspecview.export.Exporter;
 import jspecview.util.Logger;
 import jspecview.util.Parser;
@@ -85,8 +86,9 @@ public class JSVPopupMenu extends JPopupMenu {
   protected JMenuItem scriptMenuItem = new JMenuItem();
   public JMenuItem overlayStackOffsetMenuItem = new JMenuItem();
 
-  public JMenuItem integrateMenuItem = new JCheckBoxMenuItem();
-  public JMenuItem integrateHideMenuItem = new JCheckBoxMenuItem();
+  public JMenuItem integrationMenuItem = new JMenuItem();
+  public JMenuItem measurementsMenuItem = new JMenuItem();
+  public JMenuItem peakListMenuItem = new JMenuItem();
   public JMenuItem transAbsMenuItem = new JMenuItem();
   public JMenuItem solColMenuItem = new JMenuItem();
   
@@ -273,17 +275,22 @@ public class JSVPopupMenu extends JPopupMenu {
 
   public void setProcessingMenu(JMenu menu) {
     final ScriptInterface scripter = this.scripter;
-    setMenuItem(integrateMenuItem, 'I', "Integrate HNMR", 0, 0,
+    setMenuItem(integrationMenuItem, 'I', "Integration", 0, 0,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            runScript(scripter, "INTEGRATE TOGGLE");
+            scripter.getSelectedPanel().showDialog(scripter, AType.Integration);
           }
         });
-    integrateHideMenuItem.setSelected(false);
-    setMenuItem(integrateHideMenuItem, 'H', "Hide Integration", 0, 0,
+    setMenuItem(measurementsMenuItem, 'M', "List Measurements", 0, 0,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            runScript(scripter, "SHOWINTEGRATION " + !((JMenuItem) e.getSource()).isSelected());
+          	scripter.getSelectedPanel().showDialog(scripter, AType.Measurements);
+          }
+        });
+    setMenuItem(peakListMenuItem, 'P', "List Peaks", 0, 0,
+        new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+          	scripter.getSelectedPanel().showDialog(scripter, AType.PeakList);
           }
         });
     setMenuItem(transAbsMenuItem, '\0', "Transmittance/Absorbance", 0, 0,
@@ -298,8 +305,9 @@ public class JSVPopupMenu extends JPopupMenu {
             runScript(scripter, "GETSOLUTIONCOLOR");
           }
         });
-    menu.add(integrateMenuItem);
-    menu.add(integrateHideMenuItem);
+    menu.add(measurementsMenuItem);
+    menu.add(peakListMenuItem);
+    menu.add(integrationMenuItem);
     menu.add(transAbsMenuItem);
     menu.add(solColMenuItem);
   }
@@ -355,10 +363,9 @@ public class JSVPopupMenu extends JPopupMenu {
 
     boolean isOverlaid = pd.isOverlaid();
     boolean isSingle = pd.haveSelectedSpectrum();
-    integrateMenuItem.setEnabled(isSingle && spec0.canIntegrate() || spec0.hasIntegral());
-    integrateMenuItem.setSelected(pd.getSpectrum().hasIntegral());
-    integrateHideMenuItem.setEnabled(integrateMenuItem.isEnabled() && integrateMenuItem.isSelected());
-    integrateHideMenuItem.setSelected(!pd.getShowIntegration());
+    integrationMenuItem.setEnabled(isSingle && spec0.canIntegrate());
+    measurementsMenuItem.setEnabled(pd.hasCurrentMeasurements(AType.Measurements));
+    peakListMenuItem.setEnabled(isSingle);
     solColMenuItem.setEnabled(isSingle && spec0.canShowSolutionColor());
     transAbsMenuItem.setEnabled(isSingle && spec0.canConvertTransAbs());
     overlayKeyMenuItem.setEnabled(isOverlaid && pd.getNumberOfGraphSets() == 1);

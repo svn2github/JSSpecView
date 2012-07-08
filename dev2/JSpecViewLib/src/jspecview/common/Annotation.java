@@ -41,6 +41,7 @@ public class Annotation extends Coordinate {
   public int offsetY;
   public JDXSpectrum spec;
   
+  public enum AType { Integration, PeakList, Measurements }
   
   /**
    * Constructor -- note that x is spectral X value, but y is pixels above
@@ -56,6 +57,11 @@ public class Annotation extends Coordinate {
     this.offsetX = offsetX;
     this.offsetY = offsetY;
   }
+
+	public Annotation(JDXSpectrum spec, double x, double y, boolean b) {
+		super(x,y);
+		this.spec = spec;
+	}
 
 	public void addSpecShift(double dx) {
 		setXVal(getXVal() + dx);

@@ -109,6 +109,7 @@ import jspecview.common.ScriptToken;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.SubSpecChangeEvent;
 import jspecview.common.ZoomEvent;
+import jspecview.common.JDXSpectrum.IRMode;
 import jspecview.export.Exporter;
 import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
@@ -152,8 +153,18 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	private String dirLastExported;
 	private String recentFileName;
 	private String recentURL;
+	private String integrationRatios;
+	public void setIntegrationRatios(String value) {
+		integrationRatios = value;
+	}
+	public String getIntegrationRatios() {
+		return integrationRatios;
+	}
 
-	private int irMode = JDXSpectrum.TA_NO_CONVERT;
+	private IRMode irMode = IRMode.NO_CONVERT;
+	public void setIRMode(IRMode mode) {
+		irMode = mode;
+	}
 	private boolean autoIntegrate;
 
 	private AwtParameters parameters = new AwtParameters("application");
@@ -442,14 +453,14 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 				.getProperty("defaultDisplaySchemeName");
 
 		if (shouldApplySpectrumDisplaySettings) {
-			parameters.setBoolean(ScriptToken.GRIDON, properties
-					.getProperty("showGrid"));
-			parameters.setBoolean(ScriptToken.COORDINATESON, properties
-					.getProperty("showCoordinates"));
-			parameters.setBoolean(ScriptToken.XSCALEON, properties
-					.getProperty("showXScale"));
-			parameters.setBoolean(ScriptToken.YSCALEON, properties
-					.getProperty("showYScale"));
+			parameters.setBoolean(ScriptToken.GRIDON, Parameters.isTrue(properties
+					.getProperty("showGrid")));
+			parameters.setBoolean(ScriptToken.COORDINATESON, Parameters
+					.isTrue(properties.getProperty("showCoordinates")));
+			parameters.setBoolean(ScriptToken.XSCALEON, Parameters.isTrue(properties
+					.getProperty("showXScale")));
+			parameters.setBoolean(ScriptToken.YSCALEON, Parameters.isTrue(properties
+					.getProperty("showYScale")));
 		}
 
 		// TODO: Need to apply Properties to all panels that are opened
@@ -458,9 +469,9 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		// Processing Properties
 		String autoATConversion = properties.getProperty("automaticTAConversion");
 		if (autoATConversion.equals("AtoT")) {
-			irMode = JDXSpectrum.TO_TRANS;
+			irMode = IRMode.TO_TRANS;
 		} else if (autoATConversion.equals("TtoA")) {
-			irMode = JDXSpectrum.TO_ABS;
+			irMode = IRMode.TO_ABS;
 		}
 
 		try {
@@ -468,8 +479,8 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 					.getProperty("automaticallyIntegrate"));
 			parameters.integralMinY = Double.parseDouble(properties
 					.getProperty("integralMinY"));
-			parameters.integralFactor = Double.parseDouble(properties
-					.getProperty("integralFactor"));
+			parameters.integralRange = Double.parseDouble(properties
+					.getProperty("integralRange"));
 			parameters.integralOffset = Double.parseDouble(properties
 					.getProperty("integralOffset"));
 			parameters.set(null, ScriptToken.INTEGRALPLOTCOLOR, properties
@@ -653,6 +664,8 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		jsvp.getPanelData().addListener(this);
 		parameters.setFor(jsvp, (ds == null ? dsp.getDefaultScheme() : ds),
 				includeMeasures);
+		if (autoIntegrate)
+			jsvp.getPanelData().integrateAll(parameters);
 		jsvp.repaint();
 	}
 
@@ -956,14 +969,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 				svgForInkscape);
 	}
 
-	public void execSetIntegrationRatios(String value) {
-		// ignored
-	}
-
-	public void execTAConvert(int mode) {
-		irMode = JDXSpectrum.TA_NO_CONVERT;
-	}
-
 	public void execSetInterface(String value) {
 		interfaceOverlaid = (value.equalsIgnoreCase("overlay"));
 	}
@@ -1191,7 +1196,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 			setSelectedPanel(panelNode.jsvp);
 		sendPanelChange(panelNode.jsvp);
 		setMenuEnables(panelNode, false);
-		if (getSelectedPanel().getSpectrum().hasIntegral())
+		if (getSelectedPanel().getPanelData().getShowIntegration())
 			writeStatus("Use CTRL-LEFT-DRAG to measure an integration value.");
 		else
 			writeStatus("");
@@ -1270,7 +1275,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	public void process(List<JDXSpectrum> specs) {
-		JDXSpectrum.process(specs, irMode, autoIntegrate, parameters);
+		JDXSpectrum.process(specs, irMode, parameters);
 	}
 
 	public void setMenuEnables(JSVPanelNode node, boolean isSplit) {

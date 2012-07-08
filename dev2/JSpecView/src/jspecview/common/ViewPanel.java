@@ -53,6 +53,7 @@ public class ViewPanel extends JPanel implements JSVContainer {
 			} else {
 				j.setEnabled(false);
 				j.setFocusable(false);
+				j.getPanelData().close();
 			}
 		}
 		markSelectedPanels(panelNodes);

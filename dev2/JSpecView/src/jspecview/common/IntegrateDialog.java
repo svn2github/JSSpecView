@@ -34,6 +34,9 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 /**
+ * 
+ * DEPRECATED
+ * 
  * Dialog for providing values for the calculation of the <code>IntegralGraph</code>.
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan

@@ -81,6 +81,7 @@ import jspecview.common.Coordinate;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.SubSpecChangeEvent;
 import jspecview.common.ZoomEvent;
+import jspecview.common.JDXSpectrum.IRMode;
 import jspecview.export.Exporter;
 import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
@@ -117,11 +118,22 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		init();
 	}
 
-	private String integrationRatios; // deprecated
+	private String integrationRatios;
+	public void setIntegrationRatios(String value) {
+		integrationRatios = value;
+	}
+	public String getIntegrationRatios() {
+		return integrationRatios;
+	}
+
 															
 	private int initialStartIndex = -1;
 	private int initialEndIndex = -1;
-	private int irMode = JDXSpectrum.TA_NO_CONVERT;
+	private IRMode irMode = IRMode.NO_CONVERT;
+	public void setIRMode(IRMode mode) {
+		irMode = mode;
+	}
+
 	private boolean autoIntegrate;
 
 	private String coordCallbackFunctionName;
@@ -655,8 +667,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 					execSetInterface(value);
 					break;
 				case IRMODE:
-					irMode = (value.toUpperCase().startsWith("T") ? JDXSpectrum.TO_TRANS
-							: JDXSpectrum.TO_ABS);
+					irMode = IRMode.getMode(value);
 					break;
 				case MENUON:
 					allowMenu = Boolean.parseBoolean(value);
@@ -834,35 +845,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 			writeStatus(Exporter.exportCmd(jsvp, ScriptToken.getTokens(value), false));
 		return null;
 	}
-
-	public void execSetIntegrationRatios(String value) {
-		// parse the string with a method in JSpecViewUtils
-		integrationRatios = value;
-	}
-
-	/**
-	 * Allows Integration of an HNMR spectrum
-	 * 
-	 */
-	public void execIntegrate(JDXSpectrum spec) {
-		if (spec.hasIntegral() && integrationRatios != null)
-			spec.setIntegrationRatios(integrationRatios);
-		integrationRatios = null; // first time only
-	}
-
-	/**
-	 * Allows Transmittance to Absorbance conversion or vice versa depending on
-	 * the value of comm.
-	 * 
-	 * @param comm
-	 *          the conversion command
-	 * @throws Exception
-	 */
-
-	public void execTAConvert(int comm) {
-		// unnec
-	}
-
+	
 	public void execSetCallback(ScriptToken st, String value) {
 		switch (st) {
 		case LOADFILECALLBACKFUNCTIONNAME:
@@ -1017,7 +1000,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 	
 	public void process(List<JDXSpectrum> specs) {
-    JDXSpectrum.process(specs, irMode, autoIntegrate, parameters);
+    JDXSpectrum.process(specs, irMode, parameters);
 	}
 	
 	public void setCursor(Cursor c) {
@@ -1092,12 +1075,16 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
     return returnFromJmolModel;		
 	}
 
+	public void setPropertiesFromPreferences(JSVPanel jsvp, boolean includeMeasures) {
+		if (autoIntegrate)
+			jsvp.getPanelData().integrateAll(parameters);
+	}
+
 	// not applicable to applet:
 	
 	public void setLoaded(String fileName, String filePath) {} 
 	public void setMenuEnables(JSVPanelNode node, boolean isSplit) {}
 	public void setRecentURL(String filePath) {}
-	public void setPropertiesFromPreferences(JSVPanel jsvp, boolean includeMeasures) {}
 	public void updateRecentMenus(String filePath) {}
 
 	// debugging

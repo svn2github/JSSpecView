@@ -59,7 +59,9 @@ public enum ScriptToken {
   GRIDON("T"), 
   HIDDEN("TF"), 
   HIGHLIGHTCOLOR("C"),
-  INTEGRATE("ON/OFF/TOGGLE/MARK ppm1-ppm2,ppm3-ppm4,..."), 
+  INTEGRALOFFSET("percent"),
+  INTEGRALRANGE("percent"),
+  INTEGRATE, // same as INTEGRATION
   INTEGRATION("ON/OFF/TOGGLE/MARK ppm1-ppm2,ppm3-ppm4,..."), 
   INTEGRALPLOTCOLOR, 
   INTEGRATIONRATIOS, 
@@ -71,10 +73,11 @@ public enum ScriptToken {
   LOADFILECALLBACKFUNCTIONNAME,
   MENUON, 
   OBSCURE, 
-  OVERLAY("deprecated -- see VIEW"),
+  OVERLAY, // same as "VIEW"
   OVERLAYSTACKED("TF"),
   PEAK("<type(IR,CNMR,HNMR,MS, etc)> \"match\" [ALL]"), 
-  PEAKCALLBACKFUNCTIONNAME, 
+  PEAKCALLBACKFUNCTIONNAME,
+  PEAKLIST(" Example: PEAKLIST threshold=20 [%, or include=10] skip=0 interpolate=parabolic [or NONE]"),
   PEAKTABCOLOR("C"),
   PLOTAREACOLOR("C"), 
   PLOTCOLOR("C"), 
@@ -84,8 +87,8 @@ public enum ScriptToken {
   SCALEBY("factor"),
   SCALECOLOR("C"),
   SELECT("spectrumID, spectrumID,..."),
-  SETPEAK("x (ppm) or NONE does peak search unlike SETX -- NMR only"),
-  SETX("x (ppm) no peak search as in SETPEAK -- NMR only"),
+  SETPEAK("x (ppm) or NONE does peak search, unlike SETX -- NMR only"),
+  SETX("x (ppm) does no peak search, unlike SETPEAK -- NMR only"),
   SHIFTX("dx (ppm) or NONE -- NMR only"),
   
   SHOWINTEGRATION("T"),
@@ -150,7 +153,8 @@ public enum ScriptToken {
         list.add(st);
     } else {
       for (Entry<String, ScriptToken> entry : htParams.entrySet())
-        if (entry.getKey().startsWith(name) && entry.getValue().tip != null)
+        if (entry.getKey().startsWith(name) 
+        		&& entry.getValue().tip != null)
           list.add(entry.getValue());
     }
     return list;

@@ -2,6 +2,7 @@ package jspecview.common;
 
 import java.text.DecimalFormat;
 
+import jspecview.common.Annotation.AType;
 import jspecview.exception.JSpecViewException;
 import jspecview.util.Logger;
 import jspecview.util.Parser;
@@ -611,6 +612,10 @@ public abstract class JDXDataObject extends JDXHeader {
     return rowData;
   }
 
+	public String getPeakPickHash() {
+		return ("#0.00");
+	}
+
 	public String setMeasurementText(Measurement m) {
 		double dx = m.getValue();
 		String hash = "#0.0";
@@ -802,5 +807,44 @@ public abstract class JDXDataObject extends JDXHeader {
     newObj.filePath = filePath;
 
   }
+
+  public String getTypeLabel() {
+    return (isNMR() ? nucleusX + "NMR" : dataType); 	
+  }
+
+  public static Object[] getDefaultAnnotationInfo(JDXDataObject spec,
+			AType type) {
+		String[] s1, s2;
+		switch (type) {
+		case Integration:
+			return new Object[] { null, new String[] {"0.0"}, null };
+		case Measurements:
+			s1 = (spec.isNMR() ? new String[] { "Hz", "ppm" } : null);
+			s2 = (s1 == null ? null : spec.isHNMR() ? new String[] { "0.0",
+					"0.0000" } : new String[] { "0.0", "0.000" });
+			return new Object[] { s1, s2, Integer.valueOf(0) };
+		case PeakList:
+			s1 = (spec.isNMR() ? new String[] { "Hz", "ppm" } : null);
+			s2 = (s1 == null ? null
+					: spec.isHNMR() ? new String[] { "0.0", "0.00" } : new String[] {
+							"0.0", "0.0" });
+			return new Object[] { s1, s2, Integer.valueOf(1) };
+		}
+		return null;
+	}
+
+	public String[] getPeakListArray(int i, Measurement m, double lastx, double minY, double maxY) {
+		DecimalFormat df4 = TextFormat.getDecimalFormat("#0.0000");
+		DecimalFormat df2 = TextFormat.getDecimalFormat("#0.00");
+		double x = m.getXVal();
+		double y = m.getYVal() / maxY;
+		double dx = Math.abs(x - lastx);
+		if (isNMR()) {
+			return new String[] {"" + i, df4.format(x),df4.format(y), 
+					df2.format(x * observedFreq), (dx * observedFreq > 20 ? "" : df2.format(dx * observedFreq) )}; 			
+		}
+		return new String[] {"" + i,  df2.format(x),df4.format(y) };
+	}
+
 
 }

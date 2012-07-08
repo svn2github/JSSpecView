@@ -2,6 +2,8 @@ package jspecview.common;
 
 import java.awt.Container;
 
+import jspecview.common.Annotation.AType;
+
 public interface JSVPanel extends JSVContainer {
 
   void repaint();
@@ -19,7 +21,10 @@ public interface JSVPanel extends JSVContainer {
   JDXSpectrum getSpectrum();
   JDXSpectrum getSpectrumAt(int i);
   String getViewTitle();
-  void setColor(ScriptToken st, Object color);
+
+	boolean hasFocus();
+
+	void setColor(ScriptToken st, Object color);
   void setColorOrFont(Parameters ds, ScriptToken st);
   void setFont(Object g, String string, int width, int mode, int size, boolean isLabel);
   void setPlotColors(Object plotColors);
@@ -29,6 +34,8 @@ public interface JSVPanel extends JSVContainer {
   void setupPlatform();
 	void showSolutionColor(Object container);
 	void showHeader(Container jsvApplet);
+	void showDialog(ScriptInterface si, AType type);
+
 
 
 }

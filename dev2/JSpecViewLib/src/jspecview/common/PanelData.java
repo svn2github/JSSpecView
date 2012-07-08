@@ -46,6 +46,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import jspecview.common.Annotation.AType;
 import jspecview.util.TextFormat;
 
 /**
@@ -238,7 +239,12 @@ public class PanelData {
     return pi2;
   }
 
-  /**
+	public void integrateAll(Parameters parameters) {
+		for (int i = graphSets.size(); --i >= 0;)
+			graphSets.get(i).integrate(-1, parameters);
+	}
+
+	/**
    * Returns the Number of Graph sets
    * 
    * @return the Number of graph sets
@@ -455,11 +461,11 @@ public class PanelData {
 	}
 
 	public boolean getShowIntegration() {
-  	return currentGraphSet.getShowIntegration();
+  	return currentGraphSet.getShowIntegration(-1);
 	}
 
-	public void setShowIntegration(Boolean tfToggle) {
-    currentGraphSet.setShowIntegration(tfToggle);
+	public void showIntegration(Boolean tfToggle, Parameters parameters) {
+    currentGraphSet.setShowIntegration(tfToggle, parameters);
 	}
 
   public void setYStackOffsetPercent(int offset) {
@@ -575,7 +581,7 @@ public class PanelData {
     currentGraphSet.nextView();
   }
 
-  public int getSelectedIntegral() {
+  public Integral getSelectedIntegral() {
   	return currentGraphSet.getSelectedIntegral();
   }
   
@@ -757,6 +763,11 @@ public class PanelData {
   private Mouse mouseState;
   boolean gridOn;
   boolean titleOn;
+
+  boolean hasFocus() {
+  	owner.requestFocusInWindow();
+  	return owner.hasFocus();
+  }
   
   boolean isMouseUp() {
     return (mouseState  == PanelData.Mouse.UP);
@@ -779,7 +790,7 @@ public class PanelData {
     GraphSet gs = GraphSet.findGraphSet(graphSets, xPixel, yPixel);
     if (gs == null)
       return;
-    isIntegralDrag = (isControlDown && gs.getSpectrum().hasIntegral());
+    isIntegralDrag = (isControlDown && gs.haveIntegral(-1));
     if (isControlDown && !isIntegralDrag)
       return;
     setCurrentGraphSet(gs, xPixel, yPixel, 0);
@@ -813,5 +824,49 @@ public class PanelData {
     setCurrentGraphSet(gs, xPixel, yPixel, clickCount);
     gs.mouseClickedEvent(xPixel, yPixel, clickCount, isControlDown);
   }
+
+	public boolean hasCurrentMeasurements(AType type) {
+		return currentGraphSet.hasCurrentMeasurement(type);
+	}
+
+	public Object getDialog(AType type) {
+		return currentGraphSet.getDialog(type, -1);
+	}
+
+	public void addDialog(int iSpec, AType type, AnnotationData dialog) {
+		currentGraphSet.addDialog(iSpec, type, dialog);
+	}
+
+	public void getPeakListing(Parameters p, Boolean tfToggle) {
+		if (p != null)
+			currentGraphSet.getPeakListing(p);
+		currentGraphSet.setPeakListing(tfToggle);
+	}
+
+	public void checkIntegral(Parameters parameters, String value) {
+		currentGraphSet.checkIntegral(parameters, value);
+	}
+
+  /**
+   * DEPRECATED
+   * 
+   * Sets the integration ratios that will be displayed
+   * 
+   * 
+   * @param ratios
+   *        array of the integration ratios
+   */
+  public void setIntegrationRatios(String value) {
+  	currentGraphSet.setIntegrationRatios(value);
+  }
+
+	public ScaleData getView() {
+		return currentGraphSet.viewData;
+	}
+	
+	public void close() {
+		for (int i = graphSets.size(); --i >= 0;)
+			graphSets.get(i).close();
+	}
 
 }

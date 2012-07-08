@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import jspecview.common.JDXSpectrum.IRMode;
 import jspecview.source.JDXSource;
 import jspecview.util.Logger;
 import jspecview.util.Parser;
@@ -82,14 +83,19 @@ public class JSViewer {
         case HIDDEN:
           si.execHidden(Parameters.isTrue(value));
           break;
+        case INTEGRALOFFSET:
+        case INTEGRALRANGE:
+        	execSetIntegralParameter(si, st, Double.parseDouble(value));
+        	break;
         case INTEGRATION:
         case INTEGRATE:
-          if (jsvp == null)
-            continue;
-          execIntegrate(si, value);
+          if (jsvp != null)
+            execIntegrate(si, value);
           break;
         case INTEGRATIONRATIOS:
-          si.execSetIntegrationRatios(value);
+          si.setIntegrationRatios(value);
+          if (jsvp != null)
+            execIntegrate(si, null);          
           break;
         case INTERFACE:
           si.execSetInterface(value);
@@ -97,7 +103,7 @@ public class JSViewer {
         case IRMODE:
           if (jsvp == null)
             continue;
-          execTAConvert(si, value);
+          execIRMode(si, value);
           break;
         case JMOL:
           si.syncToJmol(value);
@@ -115,17 +121,11 @@ public class JSViewer {
           	jsvp.getPanelData().splitStack(!Parameters.isTrue(value));
           break;
         case PEAK:
-          try {
-            List<String> tokens = ScriptToken.getTokens(value);
-            value = " type=\"" + tokens.get(0).toUpperCase() + "\" _match=\""
-                + TextFormat.trimQuotes(tokens.get(1).toUpperCase()) + "\"";
-            if (tokens.size() > 2 && tokens.get(2).equalsIgnoreCase("all"))
-              value += " title=\"ALL\"";
-            processPeakPickEvent(si, new PeakInfo(value), false); // false == true here
-          } catch (Exception e) {
-            // ignore
-          }
+        	execPeak(si, value);
           break;
+        case PEAKLIST:
+        	execPeakList(si, value);
+        	break;
         case PRINT:
           if (jsvp == null)
             continue;
@@ -153,8 +153,10 @@ public class JSViewer {
         						: Double.parseDouble(value), Double.NaN);
         	break;        	
         case SHOWINTEGRATION:
-        	if (jsvp != null)
-        		jsvp.getPanelData().setShowIntegration(value.equalsIgnoreCase("TOGGLE") ? null : Parameters.isTrue(value) ? Boolean.TRUE : Boolean.FALSE);
+        	if (jsvp == null)
+        		break;
+        	jsvp.getPanelData().showIntegration(Parameters.getTFToggle(value), si.getParameters());
+        	execIntegrate(si, null);
         	break;
         case SPECTRUM:
         case SPECTRUMNUMBER:
@@ -193,6 +195,58 @@ public class JSViewer {
 	  //si.getSelectedPanel().requestFocusInWindow(); // could be CLOSE ALL
     return isOK;
   }
+
+	private static void execPeak(ScriptInterface si, String value) {
+    try {
+      List<String> tokens = ScriptToken.getTokens(value);
+      value = " type=\"" + tokens.get(0).toUpperCase() + "\" _match=\""
+          + TextFormat.trimQuotes(tokens.get(1).toUpperCase()) + "\"";
+      if (tokens.size() > 2 && tokens.get(2).equalsIgnoreCase("all"))
+        value += " title=\"ALL\"";
+      processPeakPickEvent(si, new PeakInfo(value), false); // false == true here
+    } catch (Exception e) {
+      // ignore
+    }
+	}
+
+	private static void execPeakList(ScriptInterface si, String value) {
+		JSVPanel jsvp = si.getSelectedPanel();
+		Parameters p = si.getParameters();
+		Boolean b = Parameters.getTFToggle(value);
+		if (b != null || value.equalsIgnoreCase("TOGGLE")) {
+			if (jsvp != null)
+				jsvp.getPanelData().getPeakListing(null, b);
+		} else {
+			List<String> tokens = ScriptToken.getTokens(value);
+			for (int i = tokens.size(); --i >= 0;) {
+				String token = tokens.get(i);
+				int pt = tokens.indexOf("=");
+				if (pt <= 0)
+					continue;
+				String key = token.substring(0, pt);
+				value = token.substring(pt + 1);
+				try {
+					if (key.startsWith("thr")) {
+						p.peakListThreshold = Double.valueOf(value);
+						p.peakListInclude = -Math.abs(p.peakListInclude);
+					} else if (key.startsWith("inc")) {
+						p.peakListThreshold = Integer.valueOf(value);
+						p.peakListThreshold = -Math.abs(p.peakListThreshold);
+					} else if (key.startsWith("ski")) {
+						p.peakListSkip = Integer.valueOf(value);
+					} else if (key.startsWith("int")) {
+						p.peakListInterpolation = (value.equalsIgnoreCase("none") ? "NONE"
+								: "parabolic");
+					} else if (key.equalsIgnoreCase("OFF"))
+						if (jsvp != null)
+							jsvp.getPanelData().getPeakListing(p, Boolean.TRUE);
+				} catch (Exception e) {
+					// ignore
+				}
+			}
+		}
+
+	}
 
 	private static boolean setZoom(String value, JSVPanel jsvp) {
 		double x1 = 0, x2 = 0, y1 = 0, y2 = 0;
@@ -248,10 +302,8 @@ public class JSViewer {
     }
 	}
 
-	private static void execTAConvert(ScriptInterface si, String value) {
-    int mode = (value.toUpperCase().startsWith("T") ? JDXSpectrum.TO_TRANS
-        : value.toUpperCase().startsWith("A") ? JDXSpectrum.TO_ABS
-            : JDXSpectrum.IMPLIED);
+	private static void execIRMode(ScriptInterface si, String value) {
+    IRMode mode = IRMode.getMode(value); // T, A, or TOGGLE
     JSVPanel jsvp = si.getSelectedPanel();
     if (jsvp == null)
       return;
@@ -260,7 +312,7 @@ public class JSViewer {
     if (spec2 == spec)
       return;
     jsvp.setSpectrum(spec2);
-    si.execTAConvert(mode);
+    si.setIRMode(mode);
     jsvp.repaint();
   }
 
@@ -268,11 +320,29 @@ public class JSViewer {
     JSVPanel jsvp = si.getSelectedPanel();
     if (jsvp == null)
       return;
-    JDXSpectrum spec = jsvp.getSpectrum();
-    spec.checkIntegral(si.getParameters(), value);
-    si.execIntegrate(spec);
+    jsvp.getPanelData().checkIntegral(si.getParameters(), value);
+    String integrationRatios = si.getIntegrationRatios();
+		if (integrationRatios != null)
+			jsvp.getPanelData().setIntegrationRatios(integrationRatios);
+		si.setIntegrationRatios(null); // one time only
     jsvp.repaint();
   }
+
+	private static void execSetIntegralParameter(ScriptInterface si, ScriptToken st, double value) {
+		Parameters p = si.getParameters();
+		switch (st) {
+		case INTEGRALRANGE:
+			p.integralRange = value;
+			break;
+		case INTEGRALOFFSET:
+			p.integralOffset = value;
+			break;
+		}
+    JSVPanel jsvp = si.getSelectedPanel();
+    if (jsvp == null)
+      return;
+    jsvp.getPanelData().checkIntegral(si.getParameters(), "update");
+	}
 
   private static void setYScale(ScriptInterface si, String value, 
                                 JSVPanel jsvp) {

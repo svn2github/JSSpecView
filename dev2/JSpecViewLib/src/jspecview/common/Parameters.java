@@ -181,9 +181,16 @@ public class Parameters {
   }
 
   public double integralMinY = IntegralData.DEFAULT_MINY;
-  public double integralFactor = IntegralData.DEFAULT_FACTOR;
+  public double integralRange = IntegralData.DEFAULT_RANGE;
   public double integralOffset = IntegralData.DEFAULT_OFFSET;
 
+  public double peakListThreshold = 20; // <= 0 disables these
+  public int peakListInclude = -10;     // two 
+  public int peakListSkip = 0;
+  public String peakListInterpolation = "parabolic";
+  public String numberFormat;
+  
+  
   protected void setParamDefaults() {
     setBoolean(ScriptToken.TITLEON, true);
     setBoolean(ScriptToken.ENABLEZOOM, true);
@@ -200,14 +207,15 @@ public class Parameters {
     return (value.length() == 0 || Boolean.parseBoolean(value)); 
   }
   
-  private Map<ScriptToken, Boolean> htBooleans = new Hashtable<ScriptToken, Boolean>();
+	public static Boolean getTFToggle(String value) {
+		return (value.equalsIgnoreCase("TOGGLE") ? null
+				: Parameters.isTrue(value) ? Boolean.TRUE : Boolean.FALSE);
+	}
 
+  private Map<ScriptToken, Boolean> htBooleans = new Hashtable<ScriptToken, Boolean>();
+	
   public Map<ScriptToken, Boolean> getBooleans() {
     return htBooleans;
-  }
-
-  public boolean setBoolean(ScriptToken st, String value) {
-    return setBoolean(st, isTrue(value));
   }
 
   public boolean setBoolean(ScriptToken st, boolean val) {
@@ -236,71 +244,73 @@ public class Parameters {
     jsvp.setColorOrFont(ds, null);
  }
 
-  public void set(JSVPanel jsvp, ScriptToken st, String value) {
-    Object param = null;
-    switch (st) {
-    default:
-      return;
-    case PLOTCOLORS:
-      if (jsvp == null)
-        getPlotColors(value);
-      else
-        jsvp.setPlotColors(getPlotColors(value));
-      return;
-    case COORDINATESON:
-    case DISPLAY1D:
-    case DISPLAY2D:
-    case ENABLEZOOM:
-    case GRIDON:
-    case REVERSEPLOT:
-    case TITLEON:
-    case TITLEBOLDON:
-    case XSCALEON:
-    case XUNITSON:
-    case YSCALEON:
-    case YUNITSON:
-      if (value.equalsIgnoreCase("TOGGLE")) {
-        if (jsvp == null)
-          return;
-        boolean b = !jsvp.getPanelData().getBoolean(st);
-        value = (b ? "TRUE" : "FALSE");
-        switch (st) {
-        case XSCALEON:
-          setBoolean(ScriptToken.XUNITSON, b);
-          jsvp.getPanelData().setBoolean(ScriptToken.XUNITSON, b);
-          break;
-        case YSCALEON:
-          setBoolean(ScriptToken.YUNITSON, b);
-          jsvp.getPanelData().setBoolean(ScriptToken.YUNITSON, b);
-          break;
-        }
-      }
-      setBoolean(st, value);
-      break;
-    case BACKGROUNDCOLOR:
-    case COORDINATESCOLOR:
-    case GRIDCOLOR:
-    case HIGHLIGHTCOLOR:
-    case INTEGRALPLOTCOLOR:
-    case PEAKTABCOLOR:
-    case PLOTAREACOLOR:
-    case PLOTCOLOR:
-    case SCALECOLOR:
-    case TITLECOLOR:
-    case UNITSCOLOR:
-      param = setColorFromString(st, value);
-      break;
-    case TITLEFONTNAME:
-    case DISPLAYFONTNAME:
-      param = getFontName(st, value);
-    }
-    if (jsvp == null)
-      return;
-    if (param != null)
-      jsvp.setColorOrFont(this, st);
-    else
-      jsvp.getPanelData().setBoolean(this, st);
-  }
+	public void set(JSVPanel jsvp, ScriptToken st, String value) {
+		Object param = null;
+		switch (st) {
+		default:
+			return;
+		case PLOTCOLORS:
+			if (jsvp == null)
+				getPlotColors(value);
+			else
+				jsvp.setPlotColors(getPlotColors(value));
+			return;
+		case COORDINATESON:
+		case DISPLAY1D:
+		case DISPLAY2D:
+		case ENABLEZOOM:
+		case GRIDON:
+		case REVERSEPLOT:
+		case TITLEON:
+		case TITLEBOLDON:
+		case XSCALEON:
+		case XUNITSON:
+		case YSCALEON:
+		case YUNITSON:
+			Boolean tfToggle = getTFToggle(value);
+			if (tfToggle != null) {
+				setBoolean(st, tfToggle.booleanValue());
+				break;
+			}
+			if (jsvp == null)
+				return;
+			boolean b = !jsvp.getPanelData().getBoolean(st);
+			switch (st) {
+			case XSCALEON:
+				setBoolean(ScriptToken.XUNITSON, b);
+				jsvp.getPanelData().setBoolean(ScriptToken.XUNITSON, b);
+				break;
+			case YSCALEON:
+				setBoolean(ScriptToken.YUNITSON, b);
+				jsvp.getPanelData().setBoolean(ScriptToken.YUNITSON, b);
+				break;
+			}
+			setBoolean(st, b);
+			break;
+		case BACKGROUNDCOLOR:
+		case COORDINATESCOLOR:
+		case GRIDCOLOR:
+		case HIGHLIGHTCOLOR:
+		case INTEGRALPLOTCOLOR:
+		case PEAKTABCOLOR:
+		case PLOTAREACOLOR:
+		case PLOTCOLOR:
+		case SCALECOLOR:
+		case TITLECOLOR:
+		case UNITSCOLOR:
+			param = setColorFromString(st, value);
+			break;
+		case TITLEFONTNAME:
+		case DISPLAYFONTNAME:
+			param = getFontName(st, value);
+		}
+		if (jsvp == null)
+			return;
+		if (param != null)
+			jsvp.setColorOrFont(this, st);
+		else
+			jsvp.getPanelData().setBoolean(this, st);
+	}
 
   protected Object getPlotColors(String value) {
     // overridden in AwtParameters

@@ -67,16 +67,15 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
+import jspecview.common.Annotation.AType;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
 import jspecview.export.Exporter;
 import jspecview.util.Logger;
 
 /**
- * JSVPanel class draws a plot from the data contained a instance of a
- * <code>Graph</code>.
+ * JSVPanel class represents a View combining one or more GraphSets, each with one or more JDXSpectra.
  * 
- * @see jspecview.common.Graph
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
  * @author Craig A.D. Walters
@@ -647,7 +646,7 @@ if (!pd.ctrlPressed)
 
   public void keyTyped(KeyEvent e) {
   	if (e.getKeyChar() == 'n') {
-  		if (pd.getSelectedIntegral() >= 0)
+  		if (pd.getSelectedIntegral() != null)
   			normalizeIntegral();
   		e.consume();
   		return;
@@ -755,6 +754,31 @@ if (!pd.ctrlPressed)
 		JOptionPane.showMessageDialog(jsvApplet, scrollPane, "Header Information",
 				JOptionPane.PLAIN_MESSAGE);
 		requestFocusInWindow();
+	}
+
+	public void showDialog(ScriptInterface si, AType type) {
+		AnnotationDialog dialog = (AnnotationDialog) pd.getDialog(type);
+		if (dialog != null) {
+			dialog.reEnable();
+			return;
+		}
+		int iSpec = pd.getCurrentSpectrumIndex();
+		if (iSpec < 0)
+			return;
+		JDXSpectrum spec = getSpectrum();
+		switch (type) {
+		case Integration:
+			dialog = new IntegralListDialog("Integration for " + spec, si, spec, this, null);
+			break;
+		case Measurements:
+			dialog = new MeasurementListDialog("Measurements for " + spec, si, spec, this, null);
+			break;
+		case PeakList:
+			dialog = new PeakListDialog("Peak List for " + spec, si, spec, this, null);
+			break;
+		}
+		pd.addDialog(iSpec, type, dialog);
+		dialog.reEnable();
 	}
 
 

@@ -38,6 +38,22 @@ import jspecview.util.Logger;
  */
 public class JDXSpectrum extends JDXDataObject implements Graph {
 
+  public enum IRMode {
+    NO_CONVERT, TO_TRANS, TO_ABS, TOGGLE;
+    public static IRMode getMode(String value) {
+    	switch (value == null ? 'I' : value.toUpperCase().charAt(0)) {
+    	case 'A':
+    		return TO_ABS;
+    	case 'T':
+    		return TO_TRANS;
+    	case 'N':
+    		return NO_CONVERT;
+    	default:
+    		return TOGGLE;
+    	}
+    }
+  }
+  
   @Override
   public void finalize() {
     System.out.println("JDXSpectrum " + this + " finalized " + title);
@@ -51,14 +67,9 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
   private ArrayList<PeakInfo> peakList = new ArrayList<PeakInfo>();
   private String piUnitsX, piUnitsY;
   private JDXSpectrum parent;
-  private IntegralGraph integration;
   private PeakInfo selectedPeak;
 
   public void dispose() {
-    if (integration != null)
-      integration.dispose();
-    integration = null;
-    integrationRatios = null;
    if (subSpectra != null)
     for (int i = 0; i < subSpectra.size(); i++)
       if (subSpectra.get(i) != this)
@@ -241,31 +252,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return ipt1;
   }
  
-  /**
-   * DEPRECATED
-   * 
-   * Sets the integration ratios that will be displayed
-   * 
-   * 
-   * @param ratios
-   *        array of the integration ratios
-   */
-  public void setIntegrationRatios(String value) {
-  	integrationRatios = IntegralData.getIntegrationRatiosFromString(this, value);
-  }
-
-  public IntegralGraph getIntegrationGraph() {
-    return integration;
-  }
-  
-  public boolean hasIntegral() {
-    return (integration != null);
-  }
-
-  public void setIntegrationGraph(IntegralGraph graph) {
-    integration = graph;
-  }
-
   public double getPercentYValueAt(double x) {
     if (!isContinuous())
       return Double.NaN;
@@ -291,10 +277,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return userYFactor;
   }
 
-  public static final int TA_NO_CONVERT = 0;
-  public static final int TO_ABS = 1;
-  public static final int TO_TRANS = 2;
-  public static final int IMPLIED = 3;
   public static final double MAXABS = 4; // maximum absorbance allowed
 
   public JDXSpectrum getConvertedSpectrum() {
@@ -305,10 +287,12 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     convertedSpectrum = spectrum;
   }
 
-  public static JDXSpectrum taConvert(JDXSpectrum spectrum, int mode) {
+  public static JDXSpectrum taConvert(JDXSpectrum spectrum, IRMode mode) {
     if (!spectrum.isContinuous())
       return spectrum;
     switch (mode) {
+    case NO_CONVERT:
+      return spectrum;
     case TO_ABS:
       if (!spectrum.isTransmittance())
         return spectrum;
@@ -317,10 +301,8 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
       if (!spectrum.isAbsorbance())
         return spectrum;
       break;
-    case IMPLIED:
+    case TOGGLE:
       break;
-    default:
-      return spectrum;
     }
     JDXSpectrum spec = spectrum.getConvertedSpectrum();
     return (spec != null ? spec : spectrum.isAbsorbance() ? toT(spectrum) : toA(spectrum));
@@ -420,44 +402,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     return Math.log(value) / Math.log(10);
   }
 
-  protected ArrayList<Annotation> integrationRatios;
-
-  protected ArrayList<Measurement> measurements;
-
-  public boolean checkIntegral(Parameters parameters, String value) {
-    if (!canIntegrate())
-      return false;
-    switch (IntegralGraph.IntMode.getMode(value)) {
-    case ON:
-      integrate(parameters);
-      break;
-    case OFF:
-      integrate(null);
-      break;
-    case TOGGLE:
-      integrate(integration == null ? parameters : null);
-      break;
-    case MARK:
-      if (integration == null)
-        checkIntegral(parameters, "ON");
-      integration.addMarks(value.substring(5).trim());
-      break;
-    }
-    return true;
-  }
-
-	private boolean integrate(Parameters parameters) {
-		if (parameters == null) {
-			integration = null;
-			return false;
-		}
-		if (!canIntegrate())
-			return false;
-		setIntegrationGraph(new IntegralGraph(this, parameters.integralMinY,
-				parameters.integralOffset, parameters.integralFactor, xUnits, yUnits));
-		return true;
-	}
-
   public static boolean areScalesCompatible(JDXSpectrum s1, JDXSpectrum s2,
                                             boolean allow2D2D) {
     if (!((allow2D2D ? s1.is1D() == s2.is1D() : s1.is1D() && s2.is1D()) 
@@ -473,19 +417,12 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
     
   }
 
-  public static boolean process(List<JDXSpectrum> specs, int irMode,
-                             boolean autoIntegrate, Parameters parameters) {
-    if (irMode == TO_ABS || irMode == TO_TRANS)
+  public static boolean process(List<JDXSpectrum> specs, IRMode irMode,
+                             Parameters parameters) {
+    if (irMode == IRMode.TO_ABS || irMode == IRMode.TO_TRANS)
       for (int i = 0; i < specs.size(); i++)
         specs.set(i, taConvert(specs.get(i), irMode));
-    if (autoIntegrate)
-      for (int i = 0; i < specs.size(); i++)
-        specs.get(i).integrate(parameters);
     return true;
-  }
-
-  public List<Measurement> getIntegralRegions() {
-   return (integration == null ? null : integration.getIntegralRegions());
   }
 
   public List<JDXSpectrum> getSubSpectra() {
@@ -626,8 +563,6 @@ public class JDXSpectrum extends JDXDataObject implements Graph {
 		if (dx != 0) {
 			specShift += dx;
 			Coordinate.shiftX(xyCoords, dx);
-			if (integration != null)
-				integration.addSpecShift(dx);
 			if (subSpectra != null)
 				for (int i = subSpectra.size(); --i >= 0;)
 					subSpectra.get(i).addSpecShift(dx);
