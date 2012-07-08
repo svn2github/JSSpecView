@@ -147,11 +147,6 @@ class AwtIntegralListDialog extends AwtAnnotationDialog {
 		loadData(data, header, widths);
 	}
 
-	protected void clear() {
-		//jsvp.getPanelData().checkIntegral(si.getParameters(), "off");
-		super.clear();
-	}
-		
 	public boolean checkParameters(Parameters p) {
 		// TODO Auto-generated method stub
 		return false;

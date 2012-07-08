@@ -771,7 +771,7 @@ abstract class GraphSet {
 		int iSpec = getSpectrumIndex(m.spec);
 		AnnotationData ad = getDialog(AType.Measurements, iSpec);
 		if (ad == null)
-			addDialog(iSpec, AType.PeakList, ad = new MeasurementData(AType.Measurements, m.spec));
+			addDialog(iSpec, AType.Measurements, ad = new MeasurementData(AType.Measurements, m.spec));
 		ad.getData().add(new Measurement(m));
 	}
 
@@ -1257,6 +1257,7 @@ abstract class GraphSet {
 			draw2DImage(g);
 		draw2DUnits(g, width, subIndex);
 		drawnIntegrals = null;
+		drawnMeasurements = null;
 		int iSelected = (stackSelected || !showAllStacked ? iSpectrumSelected : -1);
 		boolean doYScale = (!showAllStacked || nSpectra == 1 || iSelected >= 0);
 		boolean doDraw1DObjects = (imageView == null || pd.display1D);
@@ -1912,11 +1913,12 @@ abstract class GraphSet {
 	}
 
 	private void drawMeasurements(Object g, int iSpec) {
-		drawnMeasurements = getMeasurements(AType.Measurements, iSpec);
-		if (drawnMeasurements == null)
+		MeasurementData md = getMeasurements(AType.Measurements, iSpec);
+		if (md == null)
 			return;
-		for (int i = drawnMeasurements.size(); --i >= 0;)
-			drawMeasurement(g, drawnMeasurements.get(i));
+		for (int i = md.size(); --i >= 0;)
+			drawMeasurement(g, md.get(i));
+		drawnMeasurements = md;
 	}
 
 	private void drawMeasurement(Object g, Measurement m) {

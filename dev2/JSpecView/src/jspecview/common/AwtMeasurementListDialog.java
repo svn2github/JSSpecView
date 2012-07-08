@@ -19,9 +19,11 @@
 
 package jspecview.common;
 
+import java.text.DecimalFormat;
 import java.util.Map;
 
 import jspecview.common.Annotation.AType;
+import jspecview.util.TextFormat;
 
 /**
  * Dialog for managing the measurement list
@@ -40,6 +42,7 @@ class AwtMeasurementListDialog extends AwtAnnotationDialog {
 		super(title, si, spec, jsvp, data);
 		thisType = AType.Measurements;
 		setTitle("Measurement Listing");
+		addUnits = true;
 		setup();
 	}
 
@@ -67,26 +70,30 @@ class AwtMeasurementListDialog extends AwtAnnotationDialog {
 		super.done();
 	}
 
+	public void update(Coordinate clicked) {
+		updateValues();
+		checkEnables();
+	}
+
 	@Override
 	protected void updateValues() {
-		// TODO Auto-generated method stub
-		
+		loadData();
+	}
+
+	private void loadData() {
+		if (xyData == null)
+			return;
+		String[][] data = xyData.getMeasurementListArray(cmbUnits.getSelectedItem().toString());
+		String[] header = new String[] { "peak", "start", "end", "value" };
+		int[] widths = new int[] {40, 65, 65, 50};
+		loadData(data, header, widths);
 	}
 
 	@Override
 	protected void createData() {
-		// TODO Auto-generated method stub
-		
 	}
 
-	public void tableRowSelectedEvent(int minSelectionIndex) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void update(Coordinate clicked) {
-		// TODO Auto-generated method stub
-		
+	public void tableRowSelectedEvent(int iRow) {
 	}
 
 

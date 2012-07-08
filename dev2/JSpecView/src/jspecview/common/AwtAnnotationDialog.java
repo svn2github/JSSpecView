@@ -126,6 +126,7 @@ abstract class AwtAnnotationDialog extends JDialog implements AnnotationDialog {
 	protected DialogHelper dialogHelper;
 	protected JTable dataTable;
 	protected String[][] tableData;
+	protected boolean addUnits;
 	
 	protected void setup() {
 		getContentPane().removeAll();
@@ -240,7 +241,7 @@ abstract class AwtAnnotationDialog extends JDialog implements AnnotationDialog {
 			options.put(key, (format = formatOptions[unitPtr == null ? 0 : unitPtr.intValue()]));
 		txtFormat = dialogHelper.addInputOption("numberFormat", "Number Format", format, null, null, false);	
 		if (unitPtr != null)
-  		cmbUnits = dialogHelper.addSelectOption("Units", null, unitOptions, unitPtr.intValue(), false);
+  		cmbUnits = dialogHelper.addSelectOption("Units", null, unitOptions, unitPtr.intValue(), addUnits);
     
 		//txtFontSize = ((DialogHelper dialogHelper)).addInputOption("FontSize", "Font Size", null, null, "10");
 	}

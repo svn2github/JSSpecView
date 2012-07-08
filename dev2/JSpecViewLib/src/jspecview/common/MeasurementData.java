@@ -96,6 +96,23 @@ public class MeasurementData extends ArrayList<Measurement> implements Annotatio
 		return data;
 	}
 
+	public String[][] getMeasurementListArray(String units) {
+		DecimalFormat dfx = TextFormat.getDecimalFormat(spec.isNMR() ? "#0.0000"
+				: "#0.00");
+		boolean toHz = units.equalsIgnoreCase("HZ");
+		DecimalFormat dfdx = TextFormat
+				.getDecimalFormat(units.equals("ppm") ? "#0.0000" : "#0.00");
+		String[][] data = new String[size()][];
+		for (int pt = 0, i = size(); --i >= 0;) {
+			double y = get(i).getValue();
+			if (toHz)
+				y *= spec.observedFreq;
+			data[pt++] = new String[] { "" + pt, dfx.format(get(i).getXVal()),
+					dfx.format(get(i).getXVal2()), dfdx.format(y) };
+		}
+		return data;
+	}
+
 	public void setPeakList(Parameters p, DecimalFormat formatter, ScaleData view) {
 		if (formatter == null)
 			formatter = TextFormat.getDecimalFormat(spec.getPeakPickHash());
