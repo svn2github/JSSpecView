@@ -36,7 +36,7 @@ public class MeasurementData extends ArrayList<Measurement> implements Annotatio
 	private static final long serialVersionUID = 1L;
 
 	private AType type;
-	public AType getType() {
+	public AType getAType() {
 		return type;
 	}
 	
@@ -174,7 +174,7 @@ public class MeasurementData extends ArrayList<Measurement> implements Annotatio
 		if (md.size() == 0)
 			return false;
 		Parameters myParams = md.getParameters();
-		switch (md.getType()) {
+		switch (md.getAType()) {
 		case Integration:
 			break;
 		case PeakList:

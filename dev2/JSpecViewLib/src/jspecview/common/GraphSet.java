@@ -1221,7 +1221,7 @@ abstract class GraphSet {
 		JDXSpectrum spec0 = getSpectrumAt(0);
 		i = spec0.setCurrentSubSpectrum(i);
 		if (spec0.isForcedSubset())
-			viewData.setXRange(getSpectrum());
+			viewData.setXRange(getSpectrum().getXYCoords());
 		pd.notifySubSpectrumChange(i, getSpectrum());
 	}
 
@@ -1554,11 +1554,11 @@ abstract class GraphSet {
 			boolean withIntegration) {
 		// Check if specInfo in null or xyCoords is null
 		JDXSpectrum spec = spectra.get(index);
-		drawPlot(g, index, spec, true, spec.isContinuous(), yOffset, isGrey);
+		drawPlot(g, index, spec.getXYCoords(), true, spec.isContinuous(), yOffset, isGrey, false);
 		if (withIntegration) {
 			if (haveIntegralDisplayed(index))
-				drawPlot(g, index, getIntegrationGraph(index), false, true, yOffset,
-						false);
+				drawPlot(g, index, getIntegrationGraph(index).getXYCoords(), false, true, yOffset,
+						false, true);
 				drawIntegralValues(g, index, spec, yOffset);
 		}
 		if (getIntegrationRatios(index) != null)
@@ -1574,10 +1574,8 @@ abstract class GraphSet {
 		return (ad == null ? null : ad.getData());
 	}
 
-	private void drawPlot(Object g, int index, Graph spec, boolean drawY0,
-			boolean isContinuous, int yOffset, boolean isGrey) {
-		Coordinate[] xyCoords = spec.getXYCoords();
-		boolean isIntegral = (spec instanceof IntegralData);
+	private void drawPlot(Object g, int index, Coordinate[] xyCoords, boolean drawY0,
+			boolean isContinuous, int yOffset, boolean isGrey, boolean isIntegral) {
 		if (isIntegral && !getShowIntegration(index))
 			return;
 		boolean fillPeaks = (!isIntegral && pd.isIntegralDrag && haveIntegralDisplayed(index));
@@ -2365,7 +2363,7 @@ abstract class GraphSet {
 		JDXSpectrum spec0 = getSpectrumAt(0);
 		int i = spec0.advanceSubSpectrum(dir);
 		if (spec0.isForcedSubset())
-			viewData.setXRange(getSpectrum());
+			viewData.setXRange(getSpectrum().getXYCoords());
 		pd.notifySubSpectrumChange(i, getSpectrum());
 	}
 

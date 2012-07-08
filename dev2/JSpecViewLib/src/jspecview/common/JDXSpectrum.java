@@ -36,7 +36,7 @@ import jspecview.util.Logger;
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
  */
-public class JDXSpectrum extends JDXDataObject implements Graph {
+public class JDXSpectrum extends JDXDataObject {
 
   public enum IRMode {
     NO_CONVERT, TO_TRANS, TO_ABS, TOGGLE;

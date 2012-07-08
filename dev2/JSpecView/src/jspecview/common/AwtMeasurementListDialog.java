@@ -19,11 +19,9 @@
 
 package jspecview.common;
 
-import java.text.DecimalFormat;
 import java.util.Map;
 
 import jspecview.common.Annotation.AType;
-import jspecview.util.TextFormat;
 
 /**
  * Dialog for managing the measurement list

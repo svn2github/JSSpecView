@@ -155,11 +155,11 @@ class ViewData extends ScaleData {
     return ptCount;
   }
 
-  void setXRange(Graph graph) {
-    int n = graph.getXYCoords().length - 1;
+  void setXRange(Coordinate[] xyCoords) {
+    int n = xyCoords.length - 1;
     startDataPointIndices[0] = 0;
     endDataPointIndices[0] = n;
-    setXRange(0, graph.getXYCoords(), minX, maxX, 0, n, startDataPointIndices, endDataPointIndices);
+    setXRange(0, xyCoords, minX, maxX, 0, n, startDataPointIndices, endDataPointIndices);
   }
 
   void setXRange(double x1, double x2, int initNumXDivisions) {

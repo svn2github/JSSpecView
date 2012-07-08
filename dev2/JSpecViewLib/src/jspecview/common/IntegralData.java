@@ -16,9 +16,9 @@ import jspecview.util.TextFormat;
  * @author Bob Hanson hansonr@stolaf.edu
  *
  */
-public class IntegralData extends MeasurementData implements Graph {
+public class IntegralData extends MeasurementData {
 
-	enum IntMode {
+	public enum IntMode {
 	  OFF, ON, TOGGLE, MARK, UPDATE;
 	  static IntMode getMode(String value) {
 	    for (IntMode mode: values())
@@ -59,10 +59,9 @@ public class IntegralData extends MeasurementData implements Graph {
 	 * @param integralMinY  not used
 	 * @param integralOffset
 	 * @param integralRange
-	 * @param iSpec 
 	 * @param spec 
 	 */
-	IntegralData(double integralMinY, double integralOffset, double integralRange, JDXSpectrum spec) {
+	public IntegralData(double integralMinY, double integralOffset, double integralRange, JDXSpectrum spec) {
 		super(AType.Integration, spec);
     percentMinY = integralMinY; // not used.
 		percentOffset = integralOffset;

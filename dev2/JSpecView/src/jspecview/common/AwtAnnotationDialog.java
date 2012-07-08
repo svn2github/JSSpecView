@@ -312,7 +312,7 @@ abstract class AwtAnnotationDialog extends JDialog implements AnnotationDialog {
 		return myParams;
 	}
 
-	public AType getType() {
+	public AType getAType() {
 		return thisType;
 	}
 
@@ -351,6 +351,9 @@ abstract class AwtAnnotationDialog extends JDialog implements AnnotationDialog {
 		 myParams.numberFormat = txtFormat.getText();
 			numberFormatter = TextFormat.getDecimalFormat("#" + myParams.numberFormat);
 	 
+	}
+	public void tableRowSelectedEvent(int minSelectionIndex) {
+		 // depends upon subclass
 	}
 	
 }

@@ -15,7 +15,7 @@ public class PeakInfo {
   private String title;
   private String model;
   private String atoms;
-  public Graph spectrum;
+  public JDXSpectrum spectrum;
 
   private String _match;
 

@@ -6,7 +6,7 @@ public interface AnnotationData {
 
 	Parameters getParameters();
 	JDXSpectrum getSpectrum();
-	AType getType();
+	AType getAType();
 
 	MeasurementData getData();
 

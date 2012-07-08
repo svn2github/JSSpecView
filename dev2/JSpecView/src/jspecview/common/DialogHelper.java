@@ -115,10 +115,10 @@ public class DialogHelper {
 		iRow++;
 	}
 
-	protected synchronized JTable getDataTable(AnnotationDialog ad, 
+	protected synchronized JTable getDataTable(AwtAnnotationDialog ad, 
 			String[][] data, String[] columnNames, int[] columnWidths, int height) {
 		
-		final AnnotationDialog adf = ad;
+		final AwtAnnotationDialog adf = ad;
 		
 		LegendTableModel tableModel = new LegendTableModel(columnNames, data);
 		JTable table = new JTable(tableModel);
