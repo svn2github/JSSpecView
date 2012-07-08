@@ -41,6 +41,7 @@
 // 02-07-2012 BH -show distances between peaks
 // 04-07-2012 BH -Ctrl- PgUp/PgDn for 2D spectra 
 // 06-07-2012 BH -Views menu implemented
+// 08-07-2012 BH -refactoring of Graph, add new NMR dialog boxes
 
 package jspecview.applet;
 
