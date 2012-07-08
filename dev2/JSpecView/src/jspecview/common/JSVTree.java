@@ -300,17 +300,17 @@ public class JSVTree extends JTree {
       	 si.incrementViewCount(-1);
       return FILE_OPEN_ALREADY;
     }
-    si.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+    si.setCursorObject(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
     try {
       si.setCurrentSource(isView ? JDXSource.createView(specs)
           : si.createSource(data, filePath, base, firstSpec, lastSpec));
     } catch (Exception e) {
       e.printStackTrace();
       si.writeStatus(e.getMessage());
-      si.setCursor(Cursor.getDefaultCursor());
+      si.setCursorObject(Cursor.getDefaultCursor());
       return FILE_OPEN_ERROR;
     }
-    si.setCursor(Cursor.getDefaultCursor());
+    si.setCursorObject(Cursor.getDefaultCursor());
     System.gc();
     JDXSource currentSource = si.getCurrentSource();
     currentSource.setFilePath(filePath);

@@ -1,7 +1,5 @@
 package jspecview.common;
 
-import java.awt.Container;
-
 import jspecview.common.Annotation.AType;
 
 public interface JSVPanel extends JSVContainer {
@@ -32,7 +30,7 @@ public interface JSVPanel extends JSVContainer {
   void setToolTipText(String s);
 	void setViewTitle(String filePath);
   void setupPlatform();
-	void showHeader(Container jsvApplet);
+	void showHeader(Object jsvApplet);
 	void showDialog(ScriptInterface si, AType type);
 	void showMessage(String msg, String title);
 

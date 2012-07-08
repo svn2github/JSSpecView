@@ -994,8 +994,8 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
     JDXSpectrum.process(specs, irMode, parameters);
 	}
 	
-	public void setCursor(Cursor c) {
-		jsvApplet.setCursor(c);
+	public void setCursorObject(Object c) {
+		jsvApplet.setCursor((Cursor) c);
 	}
 
 	public void setRecentFileName(String fileName) {

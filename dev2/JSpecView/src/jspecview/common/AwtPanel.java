@@ -736,14 +736,14 @@ if (!pd.ctrlPressed)
     return ret;
   }
 
-	public void showHeader(Container jsvApplet) {
+	public void showHeader(Object jsvApplet) {
 		JDXSpectrum spectrum = pd.getSpectrum();
 		String[][] rowData = spectrum.getHeaderRowDataAsArray();
 		String[] columnNames = { "Label", "Description" };
 		JTable table = new JTable(rowData, columnNames);
 		table.setPreferredScrollableViewportSize(new Dimension(400, 195));
 		JScrollPane scrollPane = new JScrollPane(table);
-		JOptionPane.showMessageDialog(jsvApplet, scrollPane, "Header Information",
+		JOptionPane.showMessageDialog((Container) jsvApplet, scrollPane, "Header Information",
 				JOptionPane.PLAIN_MESSAGE);
 		requestFocusInWindow();
 	}

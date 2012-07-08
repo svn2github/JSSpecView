@@ -1,6 +1,5 @@
 package jspecview.common;
 
-import java.awt.Cursor;
 import java.net.URL;
 import java.util.List;
 
@@ -88,7 +87,7 @@ public interface ScriptInterface {
 
 	public void setCurrentSource(JDXSource source);
 
-	public void setCursor(Cursor predefinedCursor);
+	public void setCursorObject(Object predefinedCursor);
 
 	public void setFileCount(int max);
 

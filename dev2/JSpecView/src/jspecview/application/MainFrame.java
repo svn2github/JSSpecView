@@ -44,6 +44,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Image;
@@ -1317,10 +1318,16 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		return returnFromJmolModel;
 	}
 
+	public void setCursorObject(Object c) {
+		setCursor((Cursor) c);
+	}
+
+
 	// debugging
 
 	public void execTest(String value) {
 		syncScript("<PeakData file=\"c:/temp/crspectra.jdx\" index=\"23\" type=\"UV-VIS\" id=\"1\" title=\"Spin Forbidden Band ~694nm\" peakShape=\"singlet\" model=\"urea\" xMax=\"710\" xMin=\"670\"    />");
 	}
 
+	
 }

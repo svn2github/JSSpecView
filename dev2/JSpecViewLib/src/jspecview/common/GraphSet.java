@@ -81,8 +81,8 @@ abstract class GraphSet {
 	private int[] splitSpectrumPointers = new int[] { 0 };
 
 	private List<Annotation> annotations;
-	private List<Measurement> measurements;
-	private List<Measurement> drawnIntegrals;
+	private MeasurementData drawnMeasurements;
+	private MeasurementData drawnIntegrals;
 	private Annotation lastAnnotation;
 	private Measurement pendingMeasurement;
 	private List<JDXSpectrum> graphsTemp = new ArrayList<JDXSpectrum>();
@@ -692,11 +692,11 @@ abstract class GraphSet {
 			pendingMeasurement.setPt2(toX(xPixel), toY(yPixel));
 			break;
 		case 2: // first double click
-			m = findMeasurement(measurements, xPixel, yPixel, 1);
+			m = findMeasurement(drawnMeasurements, xPixel, yPixel, 1);
 			if (m != null) {
 				xPixel = toPixelX(m.getXVal());
 				yPixel = toPixelY(m.getYVal());
-			} else if ((m = findMeasurement(measurements, xPixel, yPixel, 2)) != null) {
+			} else if ((m = findMeasurement(drawnMeasurements, xPixel, yPixel, 2)) != null) {
 				xPixel = toPixelX(m.getXVal2());
 				yPixel = toPixelY(m.getYVal2());
 			}
@@ -725,7 +725,7 @@ abstract class GraphSet {
 		}
 	}
 
-	private Measurement findMeasurement(List<Measurement> measurements, int xPixel,
+	private Measurement findMeasurement(MeasurementData measurements, int xPixel,
 			int yPixel, int iPt) {
 		if (measurements == null || measurements.size() == 0)
 			return null;
@@ -768,9 +768,11 @@ abstract class GraphSet {
 	}
 
 	private void setMeasurement(Measurement m) {
-		if (measurements == null)
-			measurements = new ArrayList<Measurement>();
-		measurements.add(new Measurement(m));
+		int iSpec = getSpectrumIndex(m.spec);
+		AnnotationData ad = getDialog(AType.Measurements, iSpec);
+		if (ad == null)
+			addDialog(iSpec, AType.PeakList, ad = new MeasurementData(AType.Measurements, m.spec));
+		ad.getData().add(new Measurement(m));
 	}
 
 	private boolean checkArrowUpDownClick(int xPixel, int yPixel) {
@@ -1556,20 +1558,18 @@ abstract class GraphSet {
 			if (haveIntegralDisplayed(index))
 				drawPlot(g, index, getIntegrationGraph(index), false, true, yOffset,
 						false);
-			if (getIntegralRegions(index) != null)
 				drawIntegralValues(g, index, spec, yOffset);
 		}
 		if (getIntegrationRatios(index) != null)
 			drawAnnotations(g, getIntegrationRatios(index), ScriptToken.INTEGRALPLOTCOLOR);
 		if (pendingMeasurement != null && pendingMeasurement.spec == spec)
 			drawMeasurement(g, pendingMeasurement);
-		if (measurements != null)
-			drawMeasurements(g, spec);
+		drawMeasurements(g, index);
 
 	}
 
-	private MeasurementData getIntegralRegions(int iSpec) {
-		AnnotationData ad = getDialog(AType.Integration, iSpec);
+	private MeasurementData getMeasurements(AType type, int iSpec) {
+		AnnotationData ad = getDialog(type, iSpec);
 		return (ad == null ? null : ad.getData());
 	}
 
@@ -1722,7 +1722,9 @@ abstract class GraphSet {
 	}
 
 	private void drawIntegralValues(Object g, int iSpec, JDXSpectrum spec, int yOffset) {
-		drawnIntegrals = getIntegralRegions(iSpec);
+		drawnIntegrals = getMeasurements(AType.Integration, iSpec);
+		if (drawnIntegrals == null)
+			return;
 		if (drawnIntegrals.size() == 0)
 			return;
 		pd.setFont(g, width, FONT_BOLD, 12, false);
@@ -1909,10 +1911,12 @@ abstract class GraphSet {
 		}
 	}
 
-	private void drawMeasurements(Object g, JDXSpectrum spec) {
-		for (int i = measurements.size(); --i >= 0;)
-			if (measurements.get(i).spec == spec)
-				drawMeasurement(g, measurements.get(i));
+	private void drawMeasurements(Object g, int iSpec) {
+		drawnMeasurements = getMeasurements(AType.Measurements, iSpec);
+		if (drawnMeasurements == null)
+			return;
+		for (int i = drawnMeasurements.size(); --i >= 0;)
+			drawMeasurement(g, drawnMeasurements.get(i));
 	}
 
 	private void drawMeasurement(Object g, Measurement m) {
@@ -2530,7 +2534,7 @@ abstract class GraphSet {
 	}
 
 	void clearMeasurements() {
-		measurements = null;
+		removeDialog(getFixedSelectedSpectrumIndex(), AType.Measurements);
 	}
 
 	static List<GraphSet> createGraphSets(JSVPanel jsvp,
@@ -2606,13 +2610,15 @@ abstract class GraphSet {
 			zoomBox1D.xPixel0 = zoomBox1D.xPixel1 = 0;
 		if (zoomBox2D != null)
 			zoomBox2D.xPixel0 = zoomBox2D.xPixel1 = 0;
-		if (measurements != null && selectedMeasurement != null) {
-			measurements.remove(selectedMeasurement);
+		if (drawnMeasurements != null && selectedMeasurement != null) {
+			drawnMeasurements.remove(selectedMeasurement);
 			selectedMeasurement = null;
+			updateDialog(AType.Measurements, -1);
 		}
 		if (drawnIntegrals != null && selectedIntegral != null) {
 			drawnIntegrals.remove(selectedIntegral);
 			selectedIntegral = null;
+			updateDialog(AType.Integration, -1);
 		}
 	}
 
@@ -2772,7 +2778,7 @@ abstract class GraphSet {
 				return;
 			}
 			setCoordClicked(toX(xPixel), toY(yPixel));
-			updatePeakPickDialog();
+			updateDialog(AType.PeakList, -1);
 			
 		} else {
 			setCoordClicked(Double.NaN, 0);
@@ -2780,15 +2786,10 @@ abstract class GraphSet {
 		pd.notifyPeakPickedListeners(null);
 	}
 
-	private void updatePeakPickDialog() {
-		AnnotationData ad;
-		if (dialogs != null) {
-			for (Map.Entry<String, AnnotationData> e : dialogs.entrySet()) {
-				if ((ad = e.getValue()).getType().equals(AType.PeakList)
-						&& ad.getState() && ad instanceof AnnotationDialog)
+	private void updateDialog(AType type, int iSpec) {
+		AnnotationData ad = getDialog(type, iSpec);
+		if (ad != null  && ad.getState() && ad instanceof AnnotationDialog)
 					((AnnotationDialog) ad).update(pd.coordClicked);
-			}
-		}
 	}
 	
 	synchronized void mouseReleasedEvent() {
@@ -2844,8 +2845,8 @@ abstract class GraphSet {
 			processPendingMeasurement(xPixel, yPixel, 0);
 			setToolTipForPixels(xPixel, yPixel);
 		} else {
-			selectedMeasurement = (inPlotMove && measurements != null ? findMeasurement(
-					measurements, xPixel, yPixel, 0)
+			selectedMeasurement = (inPlotMove && drawnMeasurements != null ? findMeasurement(
+					drawnMeasurements, xPixel, yPixel, 0)
 					: null);
 			selectedIntegral = (Integral) (inPlotMove && drawnIntegrals != null
 					&& selectedMeasurement == null ? findMeasurement(drawnIntegrals,
@@ -2981,7 +2982,8 @@ abstract class GraphSet {
 
 	void setSelectedIntegral(double val) {
 		JDXSpectrum spec = selectedIntegral.getSpectrum();
-		getIntegrationGraph(getSpectrumIndex(spec)).setSelectedIntegral(selectedIntegral, val);
+		getIntegrationGraph(getSpectrumIndex(spec)).setSelectedIntegral(
+				selectedIntegral, val);
 	}
 
 	void setShowIntegration(Boolean tfToggle, Parameters parameters) {
@@ -3100,10 +3102,6 @@ abstract class GraphSet {
 		if (dx == 0)
 			return false;
 		spec.addSpecShift(dx);
-		if (measurements != null)
-			for (int i = measurements.size(); --i >= 0;)
-				if (measurements.get(i).spec == spec)
-					measurements.get(i).addSpecShift(dx);
 		if (annotations != null)
 			for (int i = annotations.size(); --i >= 0;)
 				if (annotations.get(i).spec == spec)
@@ -3111,8 +3109,7 @@ abstract class GraphSet {
 		if (dialogs != null)
 			for (Map.Entry<String, AnnotationData> e: dialogs.entrySet())
 				if (e.getValue().getSpectrum() == spec)
-					e.getValue().addSpecShift(dx);
-				
+					e.getValue().addSpecShift(dx);				
 		for (int i = viewList.size(); --i >= 0;)
 			viewList.get(i).addSpecShift(dx);
 		if (!Double.isNaN(lastClickX))
@@ -3160,14 +3157,8 @@ abstract class GraphSet {
 	}
 
 	boolean hasCurrentMeasurement(AType type) {
-		JDXSpectrum spec = getSpectrum();
-		List<Measurement> list = (type == AType.Integration ? drawnIntegrals
-				: measurements);
-		if (list != null)
-			for (int i = list.size(); --i >= 0;)
-				if (list.get(i).spec == spec)
-					return true;
-		return false;
+		return ((type == AType.Integration ? drawnIntegrals
+				: drawnMeasurements) != null);
 	}
 
 	private Map<String, AnnotationData> dialogs;
@@ -3242,6 +3233,12 @@ abstract class GraphSet {
 		aIntegrationRatios[iSpec] = IntegralData.getIntegrationRatiosFromString(getSpectrum(), value);
 	}
 	
+	/**
+	 * deprecated -- or at least not compatible with multiple spectra 
+	 * 
+	 * @param i
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
 	ArrayList<Annotation> getIntegrationRatios(int i) {
 		return (ArrayList<Annotation>) (aIntegrationRatios == null ? null : aIntegrationRatios[i]);

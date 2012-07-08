@@ -19,7 +19,6 @@
 
 package jspecview.common;
 
-import java.awt.Color;
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -171,13 +170,8 @@ public class Parameters {
     setColor(ScriptToken.PLOTAREACOLOR, colors[6]);
     setColor(ScriptToken.BACKGROUNDCOLOR, colors[7]);
     setColor(ScriptToken.INTEGRALPLOTCOLOR, colors[8]);
-    if (colors.length < 9) {
-    	setColor(ScriptToken.PEAKTABCOLOR, Color.RED);
-    	setColor(ScriptToken.HIGHLIGHTCOLOR, Color.DARK_GRAY);
-    } else {
-    	setColor(ScriptToken.PEAKTABCOLOR, colors[9]);
-    	setColor(ScriptToken.HIGHLIGHTCOLOR, colors[10]);
-    }
+    setColor(ScriptToken.PEAKTABCOLOR, colors[9]);
+    setColor(ScriptToken.HIGHLIGHTCOLOR, colors[10]);
   }
 
   public double integralMinY = IntegralData.DEFAULT_MINY;

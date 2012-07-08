@@ -565,7 +565,7 @@ public class MainActivity extends Activity{
     	}    	
     	else{
     		minimumYEditText.setText(String.valueOf(IntegralData.DEFAULT_MINY));
-    		integralFactorEditText.setText(String.valueOf(IntegralData.DEFAULT_FACTOR));
+    		integralFactorEditText.setText(String.valueOf(IntegralData.DEFAULT_RANGE));
     		integralOffsetEditText.setText(String.valueOf(IntegralData.DEFAULT_OFFSET)); 
     	}	
     	
