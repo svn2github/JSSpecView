@@ -30,16 +30,30 @@ public class IntegralData extends MeasurementData implements Graph {
 
 	private static final long serialVersionUID = 1L;
 	
-	double normalizationFactor = 1;
-	double percentOffset;
-	double range;
+	public final static double DEFAULT_OFFSET = 30;
+	public final static double DEFAULT_RANGE = 50;
+	public final static double DEFAULT_MINY = 0.1;
+
+	private double percentMinY; // Android only?  not use in JSpecView	
+  public double getPercentMinimumY() {
+  	return percentMinY;
+  }
+  
+	private double percentOffset;
+  public double getPercentOffset() {
+  	return percentOffset;
+  }  
+
 	private double intRange;
+  public double getIntegralFactor() {
+  	return intRange;
+  }
+  
+  private double normalizationFactor = 1;
+  private double range;
 	private double offset;
 	private int integralTotal;
-	public final static double DEFAULT_MINY = 0.1;
-	public final static double DEFAULT_RANGE = 50;
-	public final static double DEFAULT_OFFSET = 30;
-
+	
 	/**
 	 * 
 	 * @param integralMinY  not used
@@ -50,6 +64,7 @@ public class IntegralData extends MeasurementData implements Graph {
 	 */
 	IntegralData(double integralMinY, double integralOffset, double integralRange, JDXSpectrum spec) {
 		super(AType.Integration, spec);
+    percentMinY = integralMinY; // not used.
 		percentOffset = integralOffset;
 		range = integralRange;
     calculateIntegral();
@@ -62,7 +77,6 @@ public class IntegralData extends MeasurementData implements Graph {
     calculateIntegral();
 	}
 
-	
 	public void update(Parameters parameters) {
 		update(parameters.integralMinY, parameters.integralOffset, parameters.integralRange);
 	}

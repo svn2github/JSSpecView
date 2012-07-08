@@ -15,7 +15,7 @@ import java.util.List;
 import jspecview.android.R;
 import jspecview.android.PreferencesManager;
 import jspecview.common.Coordinate;
-import jspecview.common.IntegralGraph;
+import jspecview.common.IntegralData;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.Parameters;
 import jspecview.exception.JSpecViewException;
@@ -96,7 +96,7 @@ public class MainActivity extends Activity{
     // determines whether integration is enabled for the spectrum
     boolean mIsIntegrated = false;
     // integral graph for all valid spectra
-    IntegralGraph[] mIntegralGraphs;
+    IntegralData[] mIntegralGraphs;
     // Holds the values of the current integration parameters
     // TODO: serialize the IntegralGraph
     double mIntegrationMinY = Double.MIN_VALUE;
@@ -165,7 +165,7 @@ public class MainActivity extends Activity{
 			int numDatasets = mDatasets.length;
 						
 			mRenderers = new XYMultipleSeriesRenderer[numDatasets];
-			mIntegralGraphs = new IntegralGraph[numDatasets];
+			mIntegralGraphs = new IntegralData[numDatasets];
 			
 			// Create a graphical view for each dataset in the mDatasets array
 			// For a Single spectrum, the array will have only one dataset with a single series
@@ -270,7 +270,7 @@ public class MainActivity extends Activity{
     	outState.putBoolean(StateKey.IS_INTEGRATED, mIsIntegrated);
     	outState.putInt(StateKey.CURRENT_SPECTRUM_INDEX, mCurrentSpectrumIndex);
     	if(mIsIntegrated){
-    		IntegralGraph ig = mIntegralGraphs[mCurrentSpectrumIndex];    		
+    		IntegralData ig = mIntegralGraphs[mCurrentSpectrumIndex];    		
     		outState.putDoubleArray(StateKey.INTEGRATION_PARAMS, new double[]{ig.getPercentMinimumY(), ig.getIntegralFactor(), ig.getPercentOffset()});
     	}
     };
@@ -564,9 +564,9 @@ public class MainActivity extends Activity{
     		integralOffsetEditText.setText(String.valueOf(mIntegrationOffset));    		
     	}    	
     	else{
-    		minimumYEditText.setText(String.valueOf(IntegralGraph.DEFAULT_MINY));
-    		integralFactorEditText.setText(String.valueOf(IntegralGraph.DEFAULT_FACTOR));
-    		integralOffsetEditText.setText(String.valueOf(IntegralGraph.DEFAULT_OFFSET)); 
+    		minimumYEditText.setText(String.valueOf(IntegralData.DEFAULT_MINY));
+    		integralFactorEditText.setText(String.valueOf(IntegralData.DEFAULT_FACTOR));
+    		integralOffsetEditText.setText(String.valueOf(IntegralData.DEFAULT_OFFSET)); 
     	}	
     	
     	mIntegrateDialog = dialog;
@@ -718,7 +718,7 @@ public class MainActivity extends Activity{
      */
     private void addIntegrationSeries(int spectrumIndex, XYMultipleSeriesDataset dataset, XYMultipleSeriesRenderer multiRenderer,
     		double minY, double offset, double factor){
-    	IntegralGraph integGraph = mIntegralGraphs[spectrumIndex];
+    	IntegralData integGraph = mIntegralGraphs[spectrumIndex];
     	JDXSpectrum spectrum = mSpectra.get(spectrumIndex);
 		
 		if(integGraph == null){
@@ -726,8 +726,7 @@ public class MainActivity extends Activity{
 		  params.integralMinY = minY;
 		  params.integralOffset = offset;
 		  params.integralFactor = factor;
-			integGraph = new IntegralGraph(spectrum, minY, offset, factor, spectrum.getXUnits(), 
-			    spectrum.getYUnits());
+			integGraph = new IntegralData(minY, offset, factor, spectrum);
 			
 			mIntegralGraphs[spectrumIndex] = integGraph;
 		}
