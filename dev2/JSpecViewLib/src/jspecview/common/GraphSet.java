@@ -1442,6 +1442,8 @@ abstract class GraphSet {
 		yValueMovedTo = (ig == null ? spec.getYValueAt(xValueMovedTo) : ig
 				.getPercentYValueAt(xValueMovedTo));
 		setCoordStr(xValueMovedTo, yValueMovedTo);
+		if (ig != null)
+			setStrokeBold(g, true);
 		if (Double.isNaN(y0) || pendingMeasurement != null) {
 			drawLine(g, xPixelMovedTo, yPixel0, xPixelMovedTo, yPixel1);
 		} else {
@@ -1450,6 +1452,8 @@ abstract class GraphSet {
 			if (y == fixY(y))
 				drawLine(g, xPixelMovedTo, y - 10, xPixelMovedTo, y + 10);
 		}
+		if (ig != null)
+			setStrokeBold(g, false);
 	}
 
 	private void setUserYFactor(int i) {
@@ -1609,7 +1613,7 @@ abstract class GraphSet {
 			if (haveIntegralDisplayed(index))
 				drawPlot(g, index, getIntegrationGraph(index).getXYCoords(), false, true, yOffset,
 						false, true);
-				drawIntegralValues(g, index, spec, yOffset);
+				drawIntegralValues(g, index, yOffset);
 		}
 		if (getIntegrationRatios(index) != null)
 			drawAnnotations(g, getIntegrationRatios(index), ScriptToken.INTEGRALPLOTCOLOR);
@@ -1770,15 +1774,14 @@ abstract class GraphSet {
 		}
 	}
 
-	private void drawIntegralValues(Object g, int iSpec, JDXSpectrum spec, int yOffset) {
+	private void drawIntegralValues(Object g, int iSpec, int yOffset) {
 		drawnIntegrals = getMeasurements(AType.Integration, iSpec);
-		if (drawnIntegrals == null)
-			return;
-		if (drawnIntegrals.size() == 0)
+		if (drawnIntegrals == null || drawnIntegrals.size() == 0)
 			return;
 		pd.setFont(g, width, FONT_BOLD, 12, false);
 		setColor(g, ScriptToken.INTEGRALPLOTCOLOR);
 		int h = getFontHeight(g);
+		setStrokeBold(g, true);
 		for (int i = drawnIntegrals.size(); --i >= 0;) {
 			Measurement in = drawnIntegrals.get(i);
 			if (in.getValue() == 0)
@@ -1788,11 +1791,13 @@ abstract class GraphSet {
 			int y2 = yOffset + toPixelYint(in.getYVal2());
 			if (x != fixX(x) || y1 != fixY(y1) || y2 != fixY(y2))
 				continue;
+			
 			drawLine(g, x, y1, x, y2);
-			drawLine(g, x + 1, y1, x + 1, y2);
+			drawLine(g, x , y1, x, y2);
 			String s = "  " + in.getText();
 			drawString(g, s, x, (y1 + y2) / 2 + h / 3);
 		}
+		setStrokeBold(g, false);
 	}
 
 	/**
