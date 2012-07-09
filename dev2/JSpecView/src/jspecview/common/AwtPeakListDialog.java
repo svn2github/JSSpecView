@@ -27,6 +27,7 @@ import javax.swing.JComboBox;
 import javax.swing.JTextField;
 
 import jspecview.common.Annotation.AType;
+import jspecview.util.TextFormat;
 
 /**
  * Dialog for managing the peak listing 
@@ -76,7 +77,8 @@ class AwtPeakListDialog extends AwtAnnotationDialog implements FocusListener {
 		Coordinate c = jsvp.getPanelData().getClickedCoordinate();
 		double y = (c == null ? (jsvp.getPanelData().getView().maxYOnScale + jsvp.getPanelData().getView().maxYOnScale)/2
 				: c.getYVal());
-		txtThreshold.setText("" + y);
+		String sy = TextFormat.getDecimalFormat(y < 1000 ? "#0.00" : "#0.0E0").format(y);
+		txtThreshold.setText(" " + sy);
 	}
 
 	@Override
@@ -173,8 +175,8 @@ class AwtPeakListDialog extends AwtAnnotationDialog implements FocusListener {
 		String[][] data = xyData.getPeakListArray();
 		String[] header = (data.length == 0 ? new String[] {}
     : data[0].length == 3 ? new String[] { "peak", spec.getXUnits(), spec.getYUnits() }
-    : new String[] { "peak", "shift/ppm", "intens" , "shift/hz", "diff/hz" });
-		int[] widths = new int[] {40, 65, 50, 50, 50 };
+    : new String[] { "peak", "shift/ppm", "intens" , "shift/hz", "diff/hz", "2-diff" });
+		int[] widths = new int[] {40, 65, 50, 50, 50, 50};
 		loadData(data, header, widths);
 	}
 

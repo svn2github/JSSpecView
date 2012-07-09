@@ -91,6 +91,8 @@ public class IntegralData extends MeasurementData {
 			double integralRange) {
 		if (integralRange <= 0 || integralRange == range && integralOffset == percentOffset)
 			return;
+		for (int j = 0; j < size(); j++)
+	  	System.out.println(j + " " + get(j));
 		double intRangeNew = integralRange / 100 / integralTotal;
 		double offsetNew = integralOffset / 100;
 		for (int i = 0; i < xyCoords.length; i++) {
@@ -148,22 +150,19 @@ public class IntegralData extends MeasurementData {
 		Integral in = new Integral(spec, Math.abs(y2 - y1) * 100
 				* normalizationFactor, x1, x2, y1, y2);
 		clearIntegralRegions(x1, x2);
-		if (isFinal || size() == 0) {
-			add(in);
-		} else {
-			set(0, in);
-		}
+		if (in.getValue() >= 0.1)
+  		add(in);
 		Collections.sort(this, Integral.c);
 	}
 
   private void clearIntegralRegions(double x1, double x2) {
     // no overlapping integrals. Ignore first, which is the temporary one
-    
     for (int i = size(); --i >= 1;) {
       Measurement in = get(i);
       if (Math.min(in.getXVal(), in.getXVal2()) < Math.max(x1, x2) 
-          && Math.max(in.getXVal(), in.getXVal2()) > Math.min(x1, x2))
+          && Math.max(in.getXVal(), in.getXVal2()) > Math.min(x1, x2)) {      	
         remove(i);
+      }
     }
     
   }
@@ -172,8 +171,7 @@ public class IntegralData extends MeasurementData {
 		Coordinate.shiftX(xyCoords, dx);
     for (int i = size(); --i >= 1;) {
       get(i).addSpecShift(dx);
-    }
-		
+    }		
 	}
 
 	public void addMarks(String ppms) {
@@ -293,4 +291,11 @@ public class IntegralData extends MeasurementData {
 		scaleIntegrationBy(factor);
 	}
 
+	public void clear() {
+		super.clear();
+	}
+	
+	public Measurement remove(int i) {
+		return super.remove(i);
+	}
 }

@@ -7,7 +7,6 @@ public interface JSVContainer {
   int getHeight();
   public String getTitle();
   public boolean isVisible();
-  public boolean requestFocusInWindow();
   public void setEnabled(boolean b);
 	public void setFocusable(boolean b);
 	public boolean isFocusable();

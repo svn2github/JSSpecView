@@ -691,7 +691,7 @@ abstract class GraphSet {
 		case 0: // move
 			pendingMeasurement.setPt2(toX(xPixel), toY(yPixel));
 			break;
-		case 2: // first double click
+		case 2: // ctrl-click
 			m = findMeasurement(drawnMeasurements, xPixel, yPixel, 1);
 			if (m != null) {
 				xPixel = toPixelX(m.getXVal());
@@ -705,7 +705,7 @@ abstract class GraphSet {
 			pendingMeasurement = new Measurement(spectra.get(iSpectrumClicked), x, y);
 			break;
 		case 1: // single click -- save and continue
-		case -2: // second double click -- save and quit
+		case -2: // second ctrl-click -- save and quit
 			x = toX(xPixel);
 			y = toY(yPixel);
 			pendingMeasurement.setPt2(x, y);
@@ -773,6 +773,7 @@ abstract class GraphSet {
 		if (ad == null)
 			addDialog(iSpec, AType.Measurements, ad = new MeasurementData(AType.Measurements, m.spec));
 		ad.getData().add(new Measurement(m));
+		updateDialog(AType.Measurements, -1);
 	}
 
 	private boolean checkArrowUpDownClick(int xPixel, int yPixel) {
@@ -807,7 +808,7 @@ abstract class GraphSet {
 			int dx = (isArrowClick(xPixel, yPixel, ArrowType.LEFT) ? -1
 					: isArrowClick(xPixel, yPixel, ArrowType.RIGHT) ? 1 : 0);
 			if (dx != 0) {
-				setSpectrumClicked((iSpectrumSelected + dx) % nSpectra);
+				setSpectrumClicked(iSpectrumMovedTo = (iSpectrumSelected + dx) % nSpectra);
 				return true;
 			}
 			if (isArrowClick(xPixel, yPixel, ArrowType.HOME)) {
@@ -1203,7 +1204,10 @@ abstract class GraphSet {
 		pin1Dx1.setX(finalX, toPixelX0(finalX));
 		pin1Dy0.setY(initY, toPixelY0(initY));
 		pin1Dy1.setY(finalY, toPixelY0(finalY));
-		if (imageView != null) {
+		if (imageView == null) {
+			updateDialog(AType.PeakList, -1);
+			updateDialog(AType.Measurements, -1);
+		} else {
 			int isub = getSpectrumAt(0).getSubIndex();
 			int ifix = imageView.fixSubIndex(isub);
 			if (ifix != isub)
@@ -1386,7 +1390,9 @@ abstract class GraphSet {
 	private void drawSpectrumPointer(Object g, int iSpec, JDXSpectrum spec,
 			boolean withIntegration) {
 		setColor(g, ScriptToken.PEAKTABCOLOR);
-		IntegralData ig = (withIntegration && pd.ctrlPressed && !pd.isIntegralDrag ? getIntegrationGraph(iSpec)
+		IntegralData ig = (withIntegration && 
+				isOnSpectrum(pd.mouseX, pd.mouseY, -1) || 
+				pd.ctrlPressed && !pd.isIntegralDrag ? getIntegrationGraph(iSpec)
 				: null);
 		double y0 = yValueMovedTo;
 		yValueMovedTo = (ig == null ? spec.getYValueAt(xValueMovedTo) : ig
@@ -1396,7 +1402,7 @@ abstract class GraphSet {
 			drawLine(g, xPixelMovedTo, yPixel0, xPixelMovedTo, yPixel1);
 		} else {
 			int y = (ig == null ? toPixelY(yValueMovedTo)
-					: toPixelYint(yValueMovedTo));
+					: toPixelYint(yValueMovedTo/100));
 			if (y == fixY(y))
 				drawLine(g, xPixelMovedTo, y - 10, xPixelMovedTo, y + 10);
 		}
@@ -2104,22 +2110,35 @@ abstract class GraphSet {
 	}
 
 	private boolean isOnSpectrum(int xPixel, int yPixel, int index) {
-		setUserYFactor(index);
+		Coordinate[] xyCoords = null;
+		boolean isContinuous = true;
+		boolean isIntegral = (index < 0);
+
+		// ONLY getSpectrumAt(0).is1D();
+		if (isIntegral) {
+			AnnotationData ad = getDialog(AType.Integration, -1);
+			if (ad == null)
+				return false;
+			xyCoords = ((IntegralData) ad.getData()).getXYCoords();
+			index = getFixedSelectedSpectrumIndex();
+		} else {
+			setUserYFactor(index);
+	  	JDXSpectrum spec = spectra.get(index);
+		  xyCoords = spec.xyCoords;
+		  isContinuous = spec.isContinuous();
+		}
 		int yOffset = (viewData.spectrumOffsets == null ? index
 				* (int) (yPixels * (yStackOffsetPercent / 100f))
 				: viewData.spectrumOffsets[index]);
-
-		// ONLY getSpectrumAt(0).is1D();
-		JDXSpectrum spec = spectra.get(index);
-		Coordinate[] xyCoords = spec.xyCoords;
-		if (spec.isContinuous()) {
+		
+		if (isContinuous) {
 			for (int i = viewData.startDataPointIndices[index]; i < viewData.endDataPointIndices[index]; i++) {
 				Coordinate point1 = xyCoords[i];
 				Coordinate point2 = xyCoords[i + 1];
 				int x1 = toPixelX(point1.getXVal());
 				int x2 = toPixelX(point2.getXVal());
-				int y1 = (toPixelY(point1.getYVal()));
-				int y2 = (toPixelY(point2.getYVal()));
+				int y1 = (isIntegral ? toPixelYint(point1.getYVal()) : toPixelY(point1.getYVal()));
+				int y2 = (isIntegral ? toPixelYint(point2.getYVal()) : toPixelY(point2.getYVal()));
 				if (y1 == Integer.MIN_VALUE || y2 == Integer.MIN_VALUE)
 					continue;
 				y1 = yOffset + fixY(y1);
@@ -2368,10 +2387,21 @@ abstract class GraphSet {
 	}
 
 	boolean checkSpectrumClickedEvent(int xPixel, int yPixel, int clickCount) {
-		if (checkArrowLeftRightClick(xPixel, yPixel))
+		if (clickCount > 0 && checkArrowLeftRightClick(xPixel, yPixel))
 			return true;
-		if (clickCount > 1 || pendingMeasurement != null || !showAllStacked
+		if (clickCount > 1 || pendingMeasurement != null
 				|| !isInPlotRegion(xPixel, yPixel))
+			return false;
+    // in the plot area
+		
+		if (clickCount == 0) {
+  		pd.isIntegralDrag = isOnSpectrum(xPixel, yPixel, -1) || 
+  		  haveIntegralDisplayed(-1) && 
+  		  findMeasurement(getIntegrationGraph(-1), xPixel, yPixel, 0) != null;
+    	return false;
+		}
+		
+		if (!showAllStacked)
 			return false;
 		// in the stacked plot area
 		stackSelected = false;
@@ -2744,7 +2774,7 @@ abstract class GraphSet {
 				reset2D(true);
 			} else if (isInRightBar2D(xPixel, yPixel)) {
 				reset2D(false);
-			} else if (pendingMeasurement != null) {
+			} 	 else		if (pendingMeasurement != null) {
 				processPendingMeasurement(xPixel, yPixel, -2);
 			} else if (iSpectrumClicked >= 0) {
 				processPendingMeasurement(xPixel, yPixel, 2);
@@ -3114,6 +3144,7 @@ abstract class GraphSet {
 			viewList.get(i).addSpecShift(dx);
 		if (!Double.isNaN(lastClickX))
 			lastClickX += dx;
+		updateDialog(AType.PeakList, -1);
 		pd.repaint();
 		return true;
 	}
@@ -3224,7 +3255,7 @@ abstract class GraphSet {
 	
 	IntegralData getIntegrationGraph(int i) {
 		AnnotationData ad = getDialog(AType.Integration, i);
-		return (IntegralData) ad.getData();
+		return (ad == null ? null : (IntegralData) ad.getData());
 	}
 	public void setIntegrationRatios(String value) {
 		int iSpec = getFixedSelectedSpectrumIndex();

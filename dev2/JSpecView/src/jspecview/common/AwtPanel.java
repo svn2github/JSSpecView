@@ -44,6 +44,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -66,6 +67,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JToolTip;
+import javax.swing.ToolTipManager;
 
 import jspecview.common.Annotation.AType;
 import jspecview.exception.JSpecViewException;
@@ -110,13 +113,27 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
       popup.dispose();
       popup = null;
     }
+    //toolTip = null;
     pd.dispose();
     pd = null;
     removeKeyListener(this);
     removeMouseListener(this);
     removeMouseMotionListener(this);
   }
-
+//
+//  class AwtToolTip extends JToolTip {
+//
+//		private static final long serialVersionUID = 1L;
+//
+//		AwtToolTip(AwtPanel panel) {
+//			super();
+//			setComponent(panel);
+//			addKeyListener(panel);
+//			setBackground(Color.blue);
+//		}
+//		
+//  }
+  
   public JDXSpectrum getSpectrum() {
     return pd.getSpectrum();
   }
@@ -153,6 +170,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   private Color highlightColor = new Color(255, 0, 0, 200);
   private Color zoomBoxColor = new Color(100, 100, 50, 130);
 	private String viewTitle;
+	private static int MAC_COMMAND = InputEvent.BUTTON1_MASK + InputEvent.BUTTON3_MASK;
 
   public void setPlotColors(Object oColors) {
     Color[] colors = (Color[]) oColors;
@@ -241,7 +259,8 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     // standard application split spectra
     // removal of integration, taConvert
     // Preferences Dialog sample.jdx
-
+  	ToolTipManager.sharedInstance().setInitialDelay(0);
+  	//toolTip = new AwtToolTip(this);
     pd = new PanelData(this);
     this.popup = popup;
     pd.initSingleSpectrum(spectrum);
@@ -272,6 +291,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
       int endIndex, JSVPopupMenu popup) {
     pd = new PanelData(this);
     this.popup = popup;
+  	//toolTip = new AwtToolTip(this);
     pd.initJSVPanel(spectra, startIndex, endIndex);
   }
 
@@ -549,16 +569,29 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   /*--------------the rest are all mouse and keyboard interface -----------------------*/
 
   public void mousePressed(MouseEvent e) {
+  	System.out.println("mousePress " + isControlDown(e) + " " + e);
     if (e.getButton() != MouseEvent.BUTTON1)
       return;
-    pd.doMousePressed(e.getX(), e.getY(), e.isControlDown(), e.isShiftDown());
+    pd.doMousePressed(e.getX(), e.getY(), isControlDown(e), e.isShiftDown());
   }
 
-  public void mouseMoved(MouseEvent e) {
+  private boolean isControlDown(InputEvent e) {
+  	// Mac does not allow Ctrl-drag. The CMD key is indicated using code 157 
+  	return pd.ctrlPressed |= e.isControlDown() || (e.getModifiers() & MAC_COMMAND ) == MAC_COMMAND;
+	}
+
+	public void mouseMoved(MouseEvent e) {
+    getFocusNow();
+		if (e.getButton() != 0) {
+			mouseDragged(e);
+			return;
+		}
+  	System.out.println("mouseMoved " + isControlDown(e) + " " + e);
     pd.doMouseMoved(e.getX(), e.getY());
   }
 
   public void mouseDragged(MouseEvent e) {
+  	System.out.println("mouseDragged " + isControlDown(e) + " " + e);
     pd.doMouseDragged(e.getX(), e.getY());
   }
   
@@ -575,18 +608,17 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   }
 
   public void mouseEntered(MouseEvent e) {
-    requestFocusInWindow();
+    getFocusNow();
   }
 
   public void mouseExited(MouseEvent e) {
   }
 
 	public void keyPressed(KeyEvent e) {
-		pd.ctrlPressed = (e.getKeyCode() == KeyEvent.VK_CONTROL ? true : e
-				.isControlDown());
+		checkControl(e, true);
 		
-if (!pd.ctrlPressed)
-  System.out.println("awtpanel keypress " + e);
+    if (!pd.ctrlPressed)
+      System.out.println("awtpanel keypress " + e);
 
 		// should be only in panel region, though.
 		if (e.getKeyCode() == KeyEvent.VK_ESCAPE
@@ -639,10 +671,20 @@ if (!pd.ctrlPressed)
 
 	}
 
-  public void keyReleased(KeyEvent e) {
-  	if (e.getKeyCode() == KeyEvent.VK_CONTROL)
-    	pd.ctrlPressed = false;  		
+	public void keyReleased(KeyEvent e) {
+		checkControl(e, false);
   }
+
+  private void checkControl(KeyEvent e, boolean isPressed) {
+  	switch(e.getKeyCode()) {
+  	case KeyEvent.VK_CONTROL:
+  	case KeyEvent.VK_META:
+    	pd.ctrlPressed = isPressed;
+    	break;
+    default:
+    	pd.ctrlPressed = isControlDown(e);
+  	}
+	}
 
   public void keyTyped(KeyEvent e) {
   	if (e.getKeyChar() == 'n') {
@@ -732,7 +774,7 @@ if (!pd.ctrlPressed)
   public String getInput(String message, String title, String sval) {
     String ret = (String) JOptionPane.showInputDialog(this, message, title,
         JOptionPane.QUESTION_MESSAGE, null, null, sval);
-    requestFocusInWindow();
+    getFocusNow();
     return ret;
   }
 
@@ -745,7 +787,7 @@ if (!pd.ctrlPressed)
 		JScrollPane scrollPane = new JScrollPane(table);
 		JOptionPane.showMessageDialog((Container) jsvApplet, scrollPane, "Header Information",
 				JOptionPane.PLAIN_MESSAGE);
-		requestFocusInWindow();
+		getFocusNow();
 	}
 
 	public void showDialog(ScriptInterface si, AType type) {
@@ -782,7 +824,11 @@ if (!pd.ctrlPressed)
 	public void showMessage(String msg, String title) {
 		JOptionPane.showMessageDialog(this, msg, title, (msg.startsWith("<html>") ? JOptionPane.INFORMATION_MESSAGE 
 				: JOptionPane.PLAIN_MESSAGE));	
-		requestFocusInWindow();
+		getFocusNow();
+	}
+
+	public boolean getFocusNow() {
+		return requestFocusInWindow();
 	}
 
 }

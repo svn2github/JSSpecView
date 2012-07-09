@@ -560,7 +560,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		JSVPanel jsvp = getSelectedPanel();
 		String msg = Exporter.exportSpectra(jsvp, offWindowFrame,
 				jFileChooser, type, recentFileName, dirLastExported);
-		jsvp.requestFocusInWindow();
+		jsvp.getFocusNow();
 		if (msg != null)
 			dirLastExported = msg;
 	}

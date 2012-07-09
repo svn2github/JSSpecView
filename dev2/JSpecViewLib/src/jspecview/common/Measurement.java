@@ -33,6 +33,8 @@ public class Measurement extends Annotation {
   
 	private Coordinate pt2 = new Coordinate();
 	private double value;
+
+	private boolean isPending;
 	
   public Measurement(JDXSpectrum spec, double x, double y) {
 		super(spec, x, y, "", false, false, 0, 6);

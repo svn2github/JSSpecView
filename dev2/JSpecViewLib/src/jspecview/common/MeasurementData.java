@@ -80,10 +80,9 @@ public class MeasurementData extends ArrayList<Measurement> implements Annotatio
 	
 	public String[][] getPeakListArray() {
 		String[][] data = new String[size()][];
-		double lastx = -1e100;
+		double[] last = new double[] {-1e100, 1e100};
 		for (int pt = 0, i = size(); --i >= 0;) {
-			data[pt++] = spec.getPeakListArray(pt, get(i), lastx, minY, maxY);
-			lastx = get(i).getXVal();
+			data[pt++] = spec.getPeakListArray(pt, get(i), last, minY, maxY);
 		}
 		return data;
 	}
