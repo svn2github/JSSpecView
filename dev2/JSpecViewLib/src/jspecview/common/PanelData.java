@@ -753,8 +753,8 @@ public class PanelData {
 
 	/*--------------the rest are all mouse and keyboard interface -----------------------*/
 
-	void escapeKeyPressed() {
-		currentGraphSet.escapeKeyPressed();
+	void escapeKeyPressed(boolean isDEL) {
+		currentGraphSet.escapeKeyPressed(isDEL);
 	}
 
 	private enum Mouse {

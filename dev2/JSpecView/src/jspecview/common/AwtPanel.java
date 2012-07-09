@@ -623,7 +623,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 		// should be only in panel region, though.
 		if (e.getKeyCode() == KeyEvent.VK_ESCAPE
 				|| e.getKeyCode() == KeyEvent.VK_DELETE) {
-			pd.escapeKeyPressed();
+			pd.escapeKeyPressed(e.getKeyCode() == KeyEvent.VK_DELETE);
 			pd.isIntegralDrag = false;
 			repaint();
 			e.consume();

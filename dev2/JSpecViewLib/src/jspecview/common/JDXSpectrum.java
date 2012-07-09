@@ -554,7 +554,7 @@ public class JDXSpectrum extends JDXDataObject {
   }
 
 	public double findXForPeakNearest(double x) {
-		return Coordinate.findXForPeakNearest(xyCoords, x, (getYRef() > 0));
+		return Coordinate.findXForPeakNearest(xyCoords, x, isInverted());
 	}
 
   private double specShift = 0;

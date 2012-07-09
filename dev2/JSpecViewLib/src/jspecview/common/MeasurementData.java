@@ -125,7 +125,7 @@ public class MeasurementData extends ArrayList<Measurement> implements Annotatio
 		myParams.peakListSkip = p.peakListSkip;
 		myParams.peakListThreshold = p.peakListThreshold;
 		boolean doInterpolate = (myParams.peakListInterpolation.equals("parabolic"));
-		boolean isInverted = (spec.getYRef() != 0); // IR
+		boolean isInverted = spec.isInverted();
 		minY = view.minYOnScale;
 		maxY = view.maxYOnScale;
 		double minX = view.minXOnScale;
@@ -195,6 +195,19 @@ public class MeasurementData extends ArrayList<Measurement> implements Annotatio
 	public MeasurementData getData() {
 		return this;
 	}
+
+  protected void clear(double x1, double x2) {
+    // no overlapping regions. Ignore first, which is the temporary one
+  	int n = (this instanceof IntegralData ? 1 : 0);
+    for (int i = size(); --i >= n;) {
+      Measurement in = get(i);
+      if (Math.min(in.getXVal(), in.getXVal2()) < Math.max(x1, x2) 
+          && Math.max(in.getXVal(), in.getXVal2()) > Math.min(x1, x2)) {      	
+        remove(i);
+      }
+    }
+    
+  }
 
 	public void addSpecShift(double dx) {
 		for (int i = size(); --i >= 0;) {

@@ -587,6 +587,13 @@ public class Coordinate {
   	return parabolicInterpolation(xyCoords, pt);
   }
 
+  /**
+   * 		see https://ccrma.stanford.edu/~jos/sasp/Quadratic_Interpolation_Spectral_Peaks.html
+   *
+   * @param xyCoords
+   * @param pt
+   * @return
+   */
 	public static double parabolicInterpolation(Coordinate[] xyCoords, int pt) {
   	double alpha = xyCoords[pt - 1].yVal;
   	double beta = xyCoords[pt].yVal;
@@ -613,5 +620,30 @@ public class Coordinate {
 	static void shiftX(Coordinate[] xyCoords, double dx) {
   	for (int i = xyCoords.length; --i >= 0;)
   		xyCoords[i].xVal += dx;
+	}
+
+	/**
+	 * discovers nearest peak left or right of x that is above threshold y
+	 *  
+	 * @param xyCoords
+	 * @param x
+	 * @param y
+	 * @param inverted
+	 * @param andGreaterThanX
+	 * @return   interpolated x value or NaN
+	 */
+	public static double getNearestXWithYAbove(Coordinate[] xyCoords, double x,
+			double y, boolean inverted, boolean andGreaterThanX) {
+		int pt = getNearestIndexForX(xyCoords, x);
+		double f = (inverted ? -1 : 1);
+		if (andGreaterThanX)
+			while (pt < xyCoords.length && f * (xyCoords[pt].yVal - y) < 0)
+				pt++;
+		else
+			while (pt >= 0 && f * (xyCoords[pt].yVal - y) < 0)
+				pt--;
+  	if (pt == -1 || pt == xyCoords.length)
+			return Double.NaN;
+  	return findXForPeakNearest(xyCoords, xyCoords[pt].getXVal(), inverted);
 	}
 }

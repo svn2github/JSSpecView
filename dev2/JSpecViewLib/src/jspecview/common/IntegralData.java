@@ -149,23 +149,11 @@ public class IntegralData extends MeasurementData {
 		haveRegions = true;
 		Integral in = new Integral(spec, Math.abs(y2 - y1) * 100
 				* normalizationFactor, x1, x2, y1, y2);
-		clearIntegralRegions(x1, x2);
+		clear(x1, x2);
 		if (in.getValue() >= 0.1)
   		add(in);
 		Collections.sort(this, Integral.c);
 	}
-
-  private void clearIntegralRegions(double x1, double x2) {
-    // no overlapping integrals. Ignore first, which is the temporary one
-    for (int i = size(); --i >= 1;) {
-      Measurement in = get(i);
-      if (Math.min(in.getXVal(), in.getXVal2()) < Math.max(x1, x2) 
-          && Math.max(in.getXVal(), in.getXVal2()) > Math.min(x1, x2)) {      	
-        remove(i);
-      }
-    }
-    
-  }
 
 	public void addSpecShift(double dx) {
 		Coordinate.shiftX(xyCoords, dx);

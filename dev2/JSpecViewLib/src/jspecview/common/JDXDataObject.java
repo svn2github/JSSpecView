@@ -457,7 +457,7 @@ public abstract class JDXDataObject extends JDXHeader {
 	}
 
 	public boolean isScalable() {
-		return true;//!isTransmittance();
+		return true;
 	}
 
 
@@ -465,9 +465,9 @@ public abstract class JDXDataObject extends JDXHeader {
 		return (!isTransmittance() ? 0.0 : Coordinate.getMaxY(xyCoords, 0, xyCoords.length) < 2 ? 1.0 : 100.0);
 	}
 
-	//  private boolean isUVVis() {
-//    return dataType.startsWith("VIS") || dataType.startsWith("UV");
-//  }
+	public boolean isInverted() {
+		return isTransmittance(); // IR
+	}
 
   public boolean canConvertTransAbs() {
     return (continuous && (yUnits.toLowerCase().contains("abs"))
@@ -849,6 +849,7 @@ public abstract class JDXDataObject extends JDXHeader {
 		}
 		return new String[] {"" + pt,  df2.format(x),df4.format(y) };
 	}
+
 
 
 }

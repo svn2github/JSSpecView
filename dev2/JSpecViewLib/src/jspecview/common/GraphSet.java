@@ -657,26 +657,10 @@ abstract class GraphSet {
 	}
 
 	private boolean findNearestMaxMin() {
-		if (nSpectra > 1 && iSpectrumClicked < 0) {
-			lastXMax = Double.NaN;
+		if (nSpectra > 1 && iSpectrumClicked < 0)
 			return false;
-		}
-		int iSpec = getFixedSelectedSpectrumIndex();
 		xValueMovedTo = getSpectrum().findXForPeakNearest(xValueMovedTo);
 		xPixelMovedTo = toPixelX(xValueMovedTo);
-		if (Double.isNaN(lastXMax) || lastSpecClicked != iSpec
-				|| pendingMeasurement == null) {
-			lastXMax = xValueMovedTo;
-			lastSpecClicked = iSpec;
-			pendingMeasurement = new Measurement(spectra.get(iSpec), xValueMovedTo,
-					yValueMovedTo);
-			return true;
-		}
-		pendingMeasurement.setPt2(xValueMovedTo, yValueMovedTo);
-		if (pendingMeasurement.text.length() > 0)
-			setMeasurement(pendingMeasurement);
-		pendingMeasurement = null;
-		lastXMax = Double.NaN;
 		return true;
 	}
 
@@ -691,21 +675,42 @@ abstract class GraphSet {
 		case 0: // move
 			pendingMeasurement.setPt2(toX(xPixel), toY(yPixel));
 			break;
-		case 2: // ctrl-click
-			m = findMeasurement(drawnMeasurements, xPixel, yPixel, 1);
-			if (m != null) {
-				xPixel = toPixelX(m.getXVal());
-				yPixel = toPixelY(m.getYVal());
-			} else if ((m = findMeasurement(drawnMeasurements, xPixel, yPixel, 2)) != null) {
-				xPixel = toPixelX(m.getXVal2());
-				yPixel = toPixelY(m.getYVal2());
+		case 3: // ctrl-click
+		case 2: // 1st double-click
+			JDXSpectrum spec = spectra.get(iSpectrumClicked);
+			if (clickCount == 3) {
+			} else {
+				m = findMeasurement(drawnMeasurements, xPixel, yPixel, 1);
+				if (m != null) {
+					xPixel = toPixelX(m.getXVal());
+					yPixel = toPixelY(m.getYVal());
+				} else if ((m = findMeasurement(drawnMeasurements, xPixel, yPixel, 2)) != null) {
+					xPixel = toPixelX(m.getXVal2());
+					yPixel = toPixelY(m.getYVal2());
+				} else {
+					double[] x2 = new double[2];
+					y = toY(yPixel);
+					if (isBetweenPeaks(spec, toX(xPixel), y, x2)) {
+						pendingMeasurement = new Measurement(spec, x2[0], y, "", x2[1], y);
+						setMeasurement(pendingMeasurement);
+						pendingMeasurement = null;
+						pd.repaint();
+						return;
+					} else if (findNearestMaxMin()) {
+						xPixel = xPixelMovedTo;
+					}
+				}
 			}
 			x = toX(xPixel);
 			y = toY(yPixel);
-			pendingMeasurement = new Measurement(spectra.get(iSpectrumClicked), x, y);
+			pendingMeasurement = new Measurement(spec, x, y);
 			break;
 		case 1: // single click -- save and continue
-		case -2: // second ctrl-click -- save and quit
+		case -2: // second double-click -- save and quit
+		case -3: // second ctrl-click
+			if (clickCount != 3 && findNearestMaxMin()) {
+				xPixel = xPixelMovedTo;
+			}
 			x = toX(xPixel);
 			y = toY(yPixel);
 			pendingMeasurement.setPt2(x, y);
@@ -720,9 +725,48 @@ abstract class GraphSet {
 					pendingMeasurement = null;
 				}
 			}
-			pd.refresh();
+			pd.repaint();
+			break;
+		case 5: // (old) control-click
+			if (findNearestMaxMin()) {
+				int iSpec = getFixedSelectedSpectrumIndex();
+				if (Double.isNaN(lastXMax) || lastSpecClicked != iSpec
+						|| pendingMeasurement == null) {
+					lastXMax = xValueMovedTo;
+					lastSpecClicked = iSpec;
+					pendingMeasurement = new Measurement(spectra.get(iSpec),
+							xValueMovedTo, yValueMovedTo);
+				} else {
+					pendingMeasurement.setPt2(xValueMovedTo, yValueMovedTo);
+					if (pendingMeasurement.text.length() > 0)
+						setMeasurement(pendingMeasurement);
+					pendingMeasurement = null;
+					lastXMax = Double.NaN;
+				}
+				pd.repaint();
+			} else {
+				lastXMax = Double.NaN;
+			}
 			break;
 		}
+	}
+
+	/** search for peaks above(below)
+	 * @param spec 
+	 * 
+	 * @param x
+	 * @param y
+	 * @param x2
+	 * @return
+	 */
+	private boolean isBetweenPeaks(JDXSpectrum spec, double x, double y, double[] x2) {
+	  x2[0] = Coordinate.getNearestXWithYAbove(spec.getXYCoords(), x, y, spec.isInverted(), false);
+	  if (Double.isNaN(x2[0]))
+	  	return false;
+	  x2[1] = Coordinate.getNearestXWithYAbove(spec.getXYCoords(), x, y, spec.isInverted(), true);
+	  if (Double.isNaN(x2[1]))
+	  	return false;
+		return (x2[0] != x2[1]);
 	}
 
 	private Measurement findMeasurement(MeasurementData measurements, int xPixel,
@@ -798,7 +842,7 @@ abstract class GraphSet {
 				update2dImage(true, false);
 				resetPinsFromView();
 			}
-			pd.refresh();
+			pd.repaint();
 		}
 		return ok;
 	}
@@ -2079,9 +2123,9 @@ abstract class GraphSet {
 		}
 		pd.setToolTipText(pendingMeasurement != null || selectedMeasurement != null
 				|| selectedIntegral != null ? (pd.hasFocus() ?  "Press ESC to delete "
-				+ (selectedIntegral != null ? "integral or N to normalize"
+				+ (selectedIntegral != null ? "integral, or N to normalize"
 						: pendingMeasurement == null ? "\""
-								+ selectedMeasurement.text + "\""
+								+ selectedMeasurement.text + "\" or DEL to delete all visible"
 								: "measurement") : "Click spectrum to reactivate") : Double.isNaN(yPt) ? null : xx);
 	}
 
@@ -2625,7 +2669,7 @@ abstract class GraphSet {
 		setPositionForFrame(nSplit > 1 ? pd.currentSplitPoint : 0);
 	}
 
-	synchronized void escapeKeyPressed() {
+	synchronized void escapeKeyPressed(boolean isDEL) {
 		// System.out.println("gs escape inPlotMove=" + inPlotMove + " " +
 		// iSelectedMeasurement);
 		if (!inPlotMove)
@@ -2641,12 +2685,18 @@ abstract class GraphSet {
 		if (zoomBox2D != null)
 			zoomBox2D.xPixel0 = zoomBox2D.xPixel1 = 0;
 		if (drawnMeasurements != null && selectedMeasurement != null) {
-			drawnMeasurements.remove(selectedMeasurement);
+			if (isDEL)
+				drawnMeasurements.clear(viewData.minXOnScale, viewData.maxXOnScale);
+			else
+  			drawnMeasurements.remove(selectedMeasurement);
 			selectedMeasurement = null;
 			updateDialog(AType.Measurements, -1);
 		}
 		if (drawnIntegrals != null && selectedIntegral != null) {
-			drawnIntegrals.remove(selectedIntegral);
+			if (isDEL)
+				drawnIntegrals.clear(viewData.minXOnScale, viewData.maxXOnScale);
+			else
+  			drawnIntegrals.remove(selectedIntegral);
 			selectedIntegral = null;
 			updateDialog(AType.Integration, -1);
 		}
@@ -2726,7 +2776,7 @@ abstract class GraphSet {
 		lastClickX = Double.NaN;
 		if (isSplitWidget(xPixel, yPixel)) {
 			splitStack(pd.graphSets, nSplit == 1);
-			pd.refresh();
+			pd.repaint();
 			return;
 		}
 		PlotWidget pw = getPinSelected(xPixel, yPixel);
@@ -2741,11 +2791,14 @@ abstract class GraphSet {
 		}
 		if (!is2D && isControlDown) {
 			setSpectrumClicked(iPreviousSpectrumClicked);
-			if (findNearestMaxMin())
-				pd.repaint();
+			if (pendingMeasurement != null) {
+				processPendingMeasurement(xPixel, yPixel, -3);
+			} else if (iSpectrumClicked >= 0) {
+				processPendingMeasurement(xPixel, yPixel, 3);
+			}
 			return;
 		}
-		lastXMax = Double.NaN;
+		lastXMax = Double.NaN; // TODO: was for "is2D || !isControlDown
 		if (clickCount == 2) {
 			if (is2D) {
 				if (sticky2Dcursor) {
@@ -2774,7 +2827,7 @@ abstract class GraphSet {
 				reset2D(true);
 			} else if (isInRightBar2D(xPixel, yPixel)) {
 				reset2D(false);
-			} 	 else		if (pendingMeasurement != null) {
+			} else if (pendingMeasurement != null) {
 				processPendingMeasurement(xPixel, yPixel, -2);
 			} else if (iSpectrumClicked >= 0) {
 				processPendingMeasurement(xPixel, yPixel, 2);
@@ -2809,7 +2862,7 @@ abstract class GraphSet {
 			}
 			setCoordClicked(toX(xPixel), toY(yPixel));
 			updateDialog(AType.PeakList, -1);
-			
+
 		} else {
 			setCoordClicked(Double.NaN, 0);
 		}
