@@ -52,7 +52,7 @@ public class IntegralData extends MeasurementData {
   private double normalizationFactor = 1;
   private double range;
 	private double offset;
-	private int integralTotal;
+	private double integralTotal;
 	
 	/**
 	 * 
@@ -89,7 +89,7 @@ public class IntegralData extends MeasurementData {
 	 */
 	public void update(double integralMinY, double integralOffset,
 			double integralRange) {
-		if (integralRange == range && integralOffset == percentOffset)
+		if (integralRange <= 0 || integralRange == range && integralOffset == percentOffset)
 			return;
 		double intRangeNew = integralRange / 100 / integralTotal;
 		double offsetNew = integralOffset / 100;
@@ -215,14 +215,15 @@ public class IntegralData extends MeasurementData {
 	      if (y > minYForIntegral)
 	        integralTotal += y;
 	    }
-
+	    if (range == 0)
+	    	range = 10;
 	    intRange = (range / 100) / integralTotal; 
 	    offset = (percentOffset / 100);
 
 	    // Calculate Integral Graph as a scale from 0 to 1
 
 	    double integral = 0;
-	    for (int i = specXyCoords.length, j = 0; --i >= 0; j++) {
+	    for (int i = specXyCoords.length; --i >= 0;) {
 	      double y = specXyCoords[i].getYVal();
 	      if (y > minYForIntegral)
 	        integral += y;
