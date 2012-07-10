@@ -615,14 +615,16 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 
 	public void keyPressed(KeyEvent e) {
 		checkControl(e, true);
-		
-    if (!pd.ctrlPressed)
-      System.out.println("awtpanel keypress " + e);
+
+		if (!pd.ctrlPressed)
+			System.out.println("awtpanel keypress " + e);
 
 		// should be only in panel region, though.
-		if (e.getKeyCode() == KeyEvent.VK_ESCAPE
-				|| e.getKeyCode() == KeyEvent.VK_DELETE) {
-			pd.escapeKeyPressed(e.getKeyCode() == KeyEvent.VK_DELETE);
+		switch (e.getKeyCode()) {
+		case KeyEvent.VK_ESCAPE:
+		case KeyEvent.VK_DELETE:
+		case KeyEvent.VK_BACK_SPACE: // Mac
+			pd.escapeKeyPressed(e.getKeyCode() != KeyEvent.VK_ESCAPE);
 			pd.isIntegralDrag = false;
 			repaint();
 			e.consume();
@@ -636,12 +638,13 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 				case KeyEvent.VK_UP:
 				case 45: // '-'
 				case 61: // '=/+'
-					pd.scaleYBy(code == 61 || code == KeyEvent.VK_UP ? GraphSet.RT2 : 1/GraphSet.RT2);
+					pd.scaleYBy(code == 61 || code == KeyEvent.VK_UP ? GraphSet.RT2
+							: 1 / GraphSet.RT2);
 					e.consume();
 					break;
 				case KeyEvent.VK_LEFT:
 				case KeyEvent.VK_RIGHT:
-					pd.toPeak(code == KeyEvent.VK_RIGHT ? 1 :-1);
+					pd.toPeak(code == KeyEvent.VK_RIGHT ? 1 : -1);
 					e.consume();
 					break;
 				}
@@ -651,7 +654,8 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 		switch (code) {
 		case KeyEvent.VK_LEFT:
 		case KeyEvent.VK_RIGHT:
-			pd.doMouseMoved((code == KeyEvent.VK_RIGHT ? ++pd.mouseX : --pd.mouseX), pd.mouseY);
+			pd.doMouseMoved((code == KeyEvent.VK_RIGHT ? ++pd.mouseX : --pd.mouseX),
+					pd.mouseY);
 			e.consume();
 			repaint();
 			break;

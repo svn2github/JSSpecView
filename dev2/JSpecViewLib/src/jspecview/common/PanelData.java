@@ -417,6 +417,9 @@ public class PanelData {
 		// if (isNewSplitPoint)
 		// System.out.println("setting currentSplitPoint to " + splitPoint);
 
+		if (isNewSet || gs.nSplit > 1 && isNewSplitPoint)
+			setSpectrum(currentSplitPoint, true);
+
 		if (!isNewSet) {
 			isNewSet = gs.checkSpectrumClickedEvent(mouseX, mouseY, clickCount);
 			if (!isNewSet)

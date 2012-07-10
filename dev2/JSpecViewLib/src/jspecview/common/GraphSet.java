@@ -78,11 +78,11 @@ abstract class GraphSet {
 
 	private boolean isSplittable = true;
 	private boolean allowStacking = true; // not MS
-	private int[] splitSpectrumPointers = new int[] { 0 };
+	private int[] splitPointers = new int[] { 0 };
 
 	private List<Annotation> annotations;
 	private MeasurementData drawnMeasurements;
-	private MeasurementData drawnIntegrals;
+	private MeasurementData selectedSpectrumIntegrals;
 	private Annotation lastAnnotation;
 	private Measurement pendingMeasurement;
 	private List<JDXSpectrum> graphsTemp = new ArrayList<JDXSpectrum>();
@@ -193,8 +193,6 @@ abstract class GraphSet {
 	/* very */private int iSpectrumSelected = -1;
 
 	int setSpectrumSelected(int i) {
-		if (i != iSpectrumSelected)
-  		System.out.println("sel was " + iSpectrumSelected + " now " +  i);
 		return iSpectrumSelected = i;
 	}
 
@@ -370,15 +368,15 @@ abstract class GraphSet {
 	void splitStack(List<GraphSet> graphSets, boolean doSplit) {
 		if (doSplit && isSplittable) {
 			nSplit = 0;
-			splitSpectrumPointers = new int[nSpectra];
+			splitPointers = new int[nSpectra];
 			for (int i = 0; i < nSpectra; i++) {
-				splitSpectrumPointers[nSplit] = i;
+				splitPointers[nSplit] = i;
 				nSplit++;
 			}
 			showAllStacked = false;
 		} else {
 			nSplit = 1;
-			splitSpectrumPointers[0] = 0;
+			splitPointers[0] = 0;
 			showAllStacked = allowStacking && !doSplit;
 		}
 		stackSelected = false;
@@ -1321,8 +1319,7 @@ abstract class GraphSet {
 		if (imageView != null)
 			draw2DImage(g);
 		draw2DUnits(g, width, subIndex);
-		drawnIntegrals = null;
-		drawnMeasurements = null;
+		
 		int iSelected = (stackSelected || !showAllStacked ? iSpectrumSelected : -1);
 		boolean doYScale = (!showAllStacked || nSpectra == 1 || iSelected >= 0);
 		boolean doDraw1DObjects = (imageView == null || pd.display1D);
@@ -1349,6 +1346,7 @@ abstract class GraphSet {
 			iSpectrumForScale = iSpectrumBold;
 		int iSpecForFrame = (nSpectra == 1 ? 0 : !showAllStacked ? iSpectrumMovedTo
 				: iSpectrumBold >= 0 ? iSpectrumBold : iSpectrumSelected);
+		System.out.println("for frame : " + iSpecForFrame);
 		boolean addCurrentBox = ((fracY != 1 || isSplittable) 
 				&& (!isSplittable || nSplit == 1 || pd.currentSplitPoint == iSplit));
 		boolean drawUpDownArrows = (pd.isCurrentGraphSet(this) && zoomEnabled && spectra.get(0).isScalable()
@@ -1494,7 +1492,7 @@ abstract class GraphSet {
 
 	private boolean doPlot(int i, int iSplit) {
 		if (nSplit > 1)
-			return (i == splitSpectrumPointers[iSplit]);
+			return (i == splitPointers[iSplit]);
 		return (showAllStacked || iSpectrumSelected == -1 || iSpectrumSelected == i);
 	}
 
@@ -1607,8 +1605,6 @@ abstract class GraphSet {
 
 	private void drawBar(Object g, double startX, double endX,
 			ScriptToken whatColor, boolean isFullHeight) {
-		if (isFullHeight)
-			System.out.println("drawbar");
 		int x1 = toPixelX(startX);
 		int x2 = toPixelX(endX);
 		if (x1 > x2) {
@@ -1646,7 +1642,10 @@ abstract class GraphSet {
 			if (haveIntegralDisplayed(index))
 				drawPlot(g, index, getIntegrationGraph(index).getXYCoords(), false, true, yOffset,
 						false, ig);
-				drawIntegralValues(g, index, yOffset);
+				MeasurementData integrals = drawIntegralValues(g, index, yOffset);
+				if (index == getFixedSelectedSpectrumIndex()) {
+					selectedSpectrumIntegrals = integrals;
+				}
 		}
 		if (getIntegrationRatios(index) != null)
 			drawAnnotations(g, getIntegrationRatios(index), ScriptToken.INTEGRALPLOTCOLOR);
@@ -1806,16 +1805,16 @@ abstract class GraphSet {
 		}
 	}
 
-	private void drawIntegralValues(Object g, int iSpec, int yOffset) {
-		drawnIntegrals = getMeasurements(AType.Integration, iSpec);
-		if (drawnIntegrals == null || drawnIntegrals.size() == 0)
-			return;
+	private MeasurementData drawIntegralValues(Object g, int iSpec, int yOffset) {
+		MeasurementData integrals = getMeasurements(AType.Integration, iSpec);
+		if (integrals == null || integrals.size() == 0)
+			return null;
 		pd.setFont(g, width, FONT_BOLD, 12, false);
 		setColor(g, ScriptToken.INTEGRALPLOTCOLOR);
 		int h = getFontHeight(g);
 		setStrokeBold(g, true);
-		for (int i = drawnIntegrals.size(); --i >= 0;) {
-			Measurement in = drawnIntegrals.get(i);
+		for (int i = integrals.size(); --i >= 0;) {
+			Measurement in = integrals.get(i);
 			if (in.getValue() == 0)
 				continue;
 			int x = toPixelX(in.getXVal2());
@@ -1830,6 +1829,7 @@ abstract class GraphSet {
 			drawString(g, s, x, (y1 + y2) / 2 + h / 3);
 		}
 		setStrokeBold(g, false);
+		return integrals;
 	}
 
 	/**
@@ -1971,17 +1971,34 @@ abstract class GraphSet {
 		if (ad != null) {
 			setColor(g, ScriptToken.PEAKTABCOLOR);
 			PeakData md = (PeakData) ad.getData();
-			for (int i = md.size(); --i >= 0;) {
-				Measurement m = md.get(i);
-				int x = toPixelX(m.getXVal());
-				drawLine(g, x, yPixel0, x, yPixel0 + 10);
-			}
+			if (pd.isPrinting)
+				printPeakList(g, md);
+			else
+				for (int i = md.size(); --i >= 0;) {
+					Measurement m = md.get(i);
+					int x = toPixelX(m.getXVal());
+					drawLine(g, x, yPixel0, x, yPixel0 + 10);
+				}
 			if (ad instanceof AnnotationDialog && ad.isVisible()) {
 				int y = toPixelY(md.getThresh());
 				if (y == fixY(y) && !pd.isPrinting)
 					drawLine(g, xPixel0, y, xPixel1, y);
 			}
 		}
+	}
+
+	private void printPeakList(Object g, PeakData md) {
+		//int 
+		for (int i = md.size(); --i >= 0;) {
+			Measurement m = md.get(i);
+			int x = toPixelX(m.getXVal());
+			drawLine(g, x, yPixel0, x, yPixel0 + 10);
+		}
+
+		
+		
+		// TODO Auto-generated method stub
+		
 	}
 
 	// determine whether there are any ratio annotations to draw
@@ -2086,7 +2103,7 @@ abstract class GraphSet {
 		((IntegralData) ad.getData()).addIntegralRegion(x1, x2, isFinal);
 		if (isFinal && ad instanceof AnnotationDialog)
 			((AnnotationDialog) ad).update(null);
-		drawnIntegrals = null;
+		selectedSpectrumIntegrals = null;
 	}
 
 	private void setFormatters() {
@@ -2707,6 +2724,8 @@ abstract class GraphSet {
 		setFormatters();
 		is1D2DSplit = (!spec0.is1D() && pd.getBoolean(ScriptToken.DISPLAY2D) && (imageView != null || get2DImage()));
 		haveSelectedSpectrum = false;
+		selectedSpectrumIntegrals = null;
+		drawnMeasurements = null;
 		for (int iSplit = 0; iSplit < nSplit; iSplit++) {
 			// for now, at least, we only allow one 2D image
 			setPositionForFrame(iSplit);
@@ -2716,8 +2735,6 @@ abstract class GraphSet {
 	}
 
 	synchronized void escapeKeyPressed(boolean isDEL) {
-		// System.out.println("gs escape inPlotMove=" + inPlotMove + " " +
-		// iSelectedMeasurement);
 		if (!inPlotMove)
 			return;
 		if (pendingMeasurement != null) {
@@ -2738,11 +2755,11 @@ abstract class GraphSet {
 			selectedMeasurement = null;
 			updateDialog(AType.Measurements, -1);
 		}
-		if (drawnIntegrals != null && selectedIntegral != null) {
+		if (selectedSpectrumIntegrals != null && selectedIntegral != null) {
 			if (isDEL)
-				drawnIntegrals.clear(viewData.minXOnScale, viewData.maxXOnScale);
+				selectedSpectrumIntegrals.clear(viewData.minXOnScale, viewData.maxXOnScale);
 			else
-  			drawnIntegrals.remove(selectedIntegral);
+  			selectedSpectrumIntegrals.remove(selectedIntegral);
 			selectedIntegral = null;
 			updateDialog(AType.Integration, -1);
 		}
@@ -2980,8 +2997,8 @@ abstract class GraphSet {
 			selectedMeasurement = (inPlotMove && drawnMeasurements != null ? findMeasurement(
 					drawnMeasurements, xPixel, yPixel, 0)
 					: null);
-			selectedIntegral = (Integral) (inPlotMove && drawnIntegrals != null
-					&& selectedMeasurement == null ? findMeasurement(drawnIntegrals,
+			selectedIntegral = (Integral) (inPlotMove && selectedSpectrumIntegrals != null
+					&& selectedMeasurement == null ? findMeasurement(selectedSpectrumIntegrals,
 					xPixel, yPixel, 0) : null);
 			setToolTipForPixels(xPixel, yPixel);
 			if (imageView == null) {
@@ -3111,7 +3128,9 @@ abstract class GraphSet {
 			return;
 		}
 		bsSelected.set(i);
-		setSpectrumClicked(bsSelected.cardinality() == 1 ? i : -1);
+		setSpectrumClicked(setSpectrumMovedTo((bsSelected.cardinality() == 1 ? i : -1)));
+		if (nSplit > 1 && i >= 0)
+			pd.currentSplitPoint = i;
 	}
 
 	void setSelectedIntegral(double val) {
@@ -3296,7 +3315,7 @@ abstract class GraphSet {
 	}
 
 	boolean hasCurrentMeasurement(AType type) {
-		return ((type == AType.Integration ? drawnIntegrals
+		return ((type == AType.Integration ? selectedSpectrumIntegrals
 				: drawnMeasurements) != null);
 	}
 

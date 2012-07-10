@@ -649,9 +649,10 @@ public class JSViewer {
 			String[] tokens = value.split(" ");
 			StringBuffer sb = new StringBuffer();
 			for (int i = 0; i < tokens.length; i++) {
-				int pt = tokens[i].indexOf('.'); 
+				int pt = tokens[i].indexOf('.');
 				if (pt != tokens[i].lastIndexOf('.'))
-					tokens[i] = tokens[i].substring(0, pt + 1) + tokens[i].substring(pt + 1).replace('.', '*');
+					tokens[i] = tokens[i].substring(0, pt + 1)
+							+ tokens[i].substring(pt + 1).replace('.', '*');
 				sb.append(tokens[i]).append(" ");
 			}
 			value = sb.toString().trim();
@@ -682,10 +683,7 @@ public class JSViewer {
 			double userYFactor = Double.NaN; // also subspectrum number
 			if (i + 1 < n && list.get(i + 1).equals("*")) {
 				i += 2;
-				try {
-					userYFactor = Double.parseDouble(list.get(i));
-				} catch (NumberFormatException e) {
-				}
+				userYFactor = Double.parseDouble(list.get(i));
 			}
 			if (id.equals("-")) {
 				if (idLast == null)
@@ -707,15 +705,15 @@ public class JSViewer {
 			JSVPanelNode node;
 			if (id.startsWith("\"")) {
 				id = TextFormat.trim(id, "\"");
-		    for (int j = 0; j < panelNodes.size(); j++) {
-		     node = panelNodes.get(j);
-		      if (node.fileName != null && node.fileName.startsWith(id) 
-		      		|| node.frameTitle != null && node.frameTitle.startsWith(id)) {
-		      	addSpecToList(node, userYFactor, speclist, isView);
-		      	sb.append(",").append(node.id);
-		      }
-		    }
-		    continue;
+				for (int j = 0; j < panelNodes.size(); j++) {
+					node = panelNodes.get(j);
+					if (node.fileName != null && node.fileName.startsWith(id)
+							|| node.frameTitle != null && node.frameTitle.startsWith(id)) {
+						addSpecToList(node, userYFactor, speclist, isView);
+						sb.append(",").append(node.id);
+					}
+				}
+				continue;
 			} else {
 				if (!id.contains("."))
 					id = id0 + id;
@@ -724,7 +722,7 @@ public class JSViewer {
 			if (node == null)
 				continue;
 			idLast = id;
-    	addSpecToList(node, userYFactor, speclist, isView);
+			addSpecToList(node, userYFactor, speclist, isView);
 			sb.append(",").append(id);
 		}
 		if (isView && speclist.size() == 1) {

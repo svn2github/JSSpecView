@@ -20,7 +20,6 @@
 package jspecview.common;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.WindowEvent;
 import java.text.DecimalFormat;
 import javax.swing.JButton;
 //import javax.swing.JCheckBox;
