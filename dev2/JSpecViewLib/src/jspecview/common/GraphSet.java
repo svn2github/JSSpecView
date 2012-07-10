@@ -688,6 +688,7 @@ abstract class GraphSet {
 		case 3: // ctrl-click
 		case 2: // 1st double-click
 			JDXSpectrum spec = spectra.get(iSpectrumClicked);
+			setUserYFactor(iSpectrumClicked);
 			if (clickCount == 3) {
 			} else {
 				m = findMeasurement(selectedSpectrumMeasurements, xPixel, yPixel, 1);
@@ -718,6 +719,7 @@ abstract class GraphSet {
 		case 1: // single click -- save and continue
 		case -2: // second double-click -- save and quit
 		case -3: // second ctrl-click
+			setUserYFactor(getSpectrumIndex(pendingMeasurement.spec));
 			if (clickCount != 3 && findNearestMaxMin()) {
 				xPixel = xPixelMovedTo;
 			}
@@ -1713,8 +1715,8 @@ abstract class GraphSet {
 	private void drawPlot(Object g, int index, Coordinate[] xyCoords, boolean drawY0,
 			boolean isContinuous, int yOffset, boolean isGrey, IntegralData ig) {
 		boolean isIntegral = (ig != null);
-		boolean fillPeaks = (!isGrey && !isIntegral && pd.isIntegralDrag && haveIntegralDisplayed(index));
 		BitSet bsDraw = (ig == null ? null : ig.getBitSet());
+		boolean fillPeaks = (!isGrey && !isIntegral && pd.isIntegralDrag && haveIntegralDisplayed(index));
 		//boolean drawAll = (ig == null || !ig.getParameters().integralDrawAll);
 		setPlotColor(g, isGrey ? -2 : isIntegral ? -1 : !allowStacking ? 0 : index);
 		boolean plotOn = true;
