@@ -36,6 +36,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import jspecview.common.Annotation.AType;
 import jspecview.common.AnnotationData;
@@ -47,7 +50,7 @@ import jspecview.util.TextFormat;
  * 
  * @author Bob Hanson hansonr@stolaf.edu
  */
-abstract class AwtAnnotationDialog extends JDialog implements AnnotationDialog {
+abstract class AwtAnnotationDialog extends JDialog implements AnnotationDialog, ListSelectionListener {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -352,8 +355,34 @@ abstract class AwtAnnotationDialog extends JDialog implements AnnotationDialog {
 			numberFormatter = TextFormat.getDecimalFormat("#" + myParams.numberFormat);
 	 
 	}
-	public void tableRowSelectedEvent(int minSelectionIndex) {
+	public void tableRowSelectedEvent(int iRow, int iCol) {
 		 // depends upon subclass
 	}
+
+	private int iRowSelected = -1;
+	private int iColSelected = -1;
+	ListSelectionModel columnSelector;
+	private int iRowColSelected = -1;
 	
+	synchronized public void valueChanged(ListSelectionEvent e) {
+
+		try {
+			ListSelectionModel lsm = (ListSelectionModel) e.getSource();
+			if (e.getValueIsAdjusting()) {
+				if (lsm == columnSelector) {
+					iColSelected = lsm.getLeadSelectionIndex();
+				} else {
+					iRowSelected = lsm.getLeadSelectionIndex();
+				}
+				return;
+			}
+			int icolrow = iRowSelected * 1000 + iColSelected;
+			if (icolrow != iRowColSelected) {
+				tableRowSelectedEvent(iRowSelected, iColSelected);
+				iRowColSelected = icolrow;
+			}
+		} catch (Exception ee) {
+			// ignore
+		}
+	}
 }

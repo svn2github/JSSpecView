@@ -654,6 +654,13 @@ public class PanelData {
 		currentGraphSet.setXPointer(d);
 		repaint();
 	}
+	
+	public void findX2(double d, double d2) {
+		currentGraphSet.setXPointer(d);
+		currentGraphSet.setXPointer2(d2);
+		repaint();
+	}
+
 
 	// called by GraphSet
 
@@ -873,5 +880,6 @@ public class PanelData {
 	public void removeDialog(AnnotationDialog dialog) {
 		currentGraphSet.removeDialog(dialog);
 	}
+
 
 }

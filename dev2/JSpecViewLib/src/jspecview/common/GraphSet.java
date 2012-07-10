@@ -660,8 +660,15 @@ abstract class GraphSet {
 		if (nSpectra > 1 && iSpectrumClicked < 0)
 			return false;
 		xValueMovedTo = getSpectrum().findXForPeakNearest(xValueMovedTo);
-		xPixelMovedTo = toPixelX(xValueMovedTo);
+		setXPixelMovedTo(xValueMovedTo);
 		return true;
+	}
+
+	private void setXPixelMovedTo(double x) {
+		xPixelMovedTo = toPixelX(x);
+		if (fixX(xPixelMovedTo) != xPixelMovedTo)
+			xPixelMovedTo = -1;
+		xPixelMovedTo2 = -1;
 	}
 
 	private void processPendingMeasurement(int xPixel, int yPixel, int clickCount) {
@@ -834,6 +841,7 @@ abstract class GraphSet {
 			clearViews();
 			viewData.setScaleFactor(-1, 1);
 			// did not work: view.setScaleFactor(iSpectrumSelected, 1);
+			updateDialogs();
 			ok = true;
 		}
 
@@ -897,6 +905,7 @@ abstract class GraphSet {
 
 	private boolean inPlotMove;
 	private int xPixelMovedTo = -1;
+	private int xPixelMovedTo2 = -1;
 	private double yValueMovedTo;
 	private double xValueMovedTo;
 	private NumberFormat formatterX;
@@ -1243,14 +1252,13 @@ abstract class GraphSet {
 			y2 = viewData.unScaleY(iSpectrumSelected, finalY);
 		}
 		getView(initX, finalX, y1, y2, startIndices, endIndices, viewData, iSpec);
-		xPixelMovedTo = -1;
+		setXPixelMovedTo(1E10);
 		pin1Dx0.setX(initX, toPixelX0(initX));
 		pin1Dx1.setX(finalX, toPixelX0(finalX));
 		pin1Dy0.setY(initY, toPixelY0(initY));
 		pin1Dy1.setY(finalY, toPixelY0(finalY));
 		if (imageView == null) {
-			updateDialog(AType.PeakList, -1);
-			updateDialog(AType.Measurements, -1);
+			updateDialogs();
 		} else {
 			int isub = getSpectrumAt(0).getSubIndex();
 			int ifix = imageView.fixSubIndex(isub);
@@ -1263,6 +1271,11 @@ abstract class GraphSet {
 			addCurrentZoom();
 		if (doRepaint)
 			pd.repaint();
+	}
+
+	private void updateDialogs() {
+		updateDialog(AType.PeakList, -1);
+		updateDialog(AType.Measurements, -1);
 	}
 
 	private void setCurrentSubSpectrum(int i) {
@@ -1446,6 +1459,8 @@ abstract class GraphSet {
 			setStrokeBold(g, true);
 		if (Double.isNaN(y0) || pendingMeasurement != null) {
 			drawLine(g, xPixelMovedTo, yPixel0, xPixelMovedTo, yPixel1);
+			if (xPixelMovedTo2 >= 0)
+				drawLine(g, xPixelMovedTo2, yPixel0, xPixelMovedTo2, yPixel1);				
 		} else {
 			int y = (ig == null ? toPixelY(yValueMovedTo)
 					: toPixelYint(yValueMovedTo/100));
@@ -2926,6 +2941,7 @@ abstract class GraphSet {
 		}
 		inPlotMove = isInPlotRegion(xPixel, yPixel);
 		xPixelMovedTo = (inPlotMove ? xPixel : -1);
+		xPixelMovedTo2 = -1;
 		if (inPlotMove)
 			xValueMovedTo = toX(xPixelMovedTo);
 		if (pd.isIntegralDrag) {
@@ -3202,7 +3218,7 @@ abstract class GraphSet {
 			viewList.get(i).addSpecShift(dx);
 		if (!Double.isNaN(lastClickX))
 			lastClickX += dx;
-		updateDialog(AType.PeakList, -1);
+		updateDialogs();
 		pd.repaint();
 		return true;
 	}
@@ -3241,8 +3257,12 @@ abstract class GraphSet {
 
 	void setXPointer(double x) {
 		xValueMovedTo = lastClickX = x;
-		xPixelMovedTo = fixX(toPixelX(x));
+		setXPixelMovedTo(x);
 		yValueMovedTo = Double.NaN;
+	}
+
+	void setXPointer2(double x) {
+		xPixelMovedTo2 = toPixelX(x);
 	}
 
 	boolean hasCurrentMeasurement(AType type) {

@@ -158,7 +158,7 @@ class AwtIntegralListDialog extends AwtAnnotationDialog {
 		iSelected = -1;
 	}
 
-	public void tableRowSelectedEvent(int iRow) {
+	public void tableRowSelectedEvent(int iRow, int iCol) {
 		DecimalFormat df2 = TextFormat.getDecimalFormat("#0.00");
 		String value = tableData[iRow][1];
 		for (int i = 1; i < xyData.size(); i++) 

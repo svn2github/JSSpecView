@@ -178,6 +178,7 @@ class AwtPeakListDialog extends AwtAnnotationDialog implements FocusListener {
     : new String[] { "peak", "shift/ppm", "intens" , "shift/hz", "diff/hz", "2-diff" });
 		int[] widths = new int[] {40, 65, 50, 50, 50, 50};
 		loadData(data, header, widths);
+    dataTable.setCellSelectionEnabled(true);
 	}
 
 	public synchronized void update(Coordinate clicked) {
@@ -200,9 +201,22 @@ class AwtPeakListDialog extends AwtAnnotationDialog implements FocusListener {
 		}
 	}
 
-	public void tableRowSelectedEvent(int iRow) {
-		String value = tableData[iRow][1];
-		jsvp.getPanelData().findX(Double.parseDouble(value));
+	public void tableRowSelectedEvent(int iRow, int iCol) {
+		try {
+			String value = tableData[iRow][1];
+			switch (iCol) {
+			case 5:
+			case 4:
+				String value2 = tableData[iRow - (iCol - 3)][1];
+				jsvp.getPanelData().findX2(Double.parseDouble(value),
+						Double.parseDouble(value2));
+				break;
+			default:
+				jsvp.getPanelData().findX(Double.parseDouble(value));
+			}
+		} catch (Exception e) {
+			jsvp.getPanelData().findX(1E100);
+		}
 		jsvp.repaint();
 	}
 }

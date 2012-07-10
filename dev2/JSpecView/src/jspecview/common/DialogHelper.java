@@ -118,27 +118,15 @@ public class DialogHelper {
 	protected synchronized JTable getDataTable(AwtAnnotationDialog ad, 
 			String[][] data, String[] columnNames, int[] columnWidths, int height) {
 		
-		final AwtAnnotationDialog adf = ad;
-		
 		LegendTableModel tableModel = new LegendTableModel(columnNames, data);
 		JTable table = new JTable(tableModel);
 
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     table.setDefaultRenderer(String.class, new TitleRenderer());
-
-    ListSelectionModel specSelection = table.getSelectionModel();
-		specSelection.addListSelectionListener(new ListSelectionListener() {
-			public void valueChanged(ListSelectionEvent e) {
-				if (e.getValueIsAdjusting())
-					return;
-				try {
-					ListSelectionModel lsm = (ListSelectionModel) e.getSource();
-					adf.tableRowSelectedEvent(lsm.getMinSelectionIndex());
-				} catch (Exception ee) {
-					// ignore
-				}
-			}
-		});
+    table.setCellSelectionEnabled(true);
+    table.getSelectionModel().addListSelectionListener(ad);
+    ad.columnSelector = table.getColumnModel().getSelectionModel();
+    ad.columnSelector.addListSelectionListener(ad);
 		int n = 0;
 		for (int i = 0; i < columnNames.length; i++) {
 			table.getColumnModel().getColumn(i).setPreferredWidth(columnWidths[i]);
