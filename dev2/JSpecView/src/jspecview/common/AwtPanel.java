@@ -151,7 +151,8 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   }
 
   protected void doRepaint() {
-    repaint();    
+  	if (!pd.isPrinting)
+      repaint();    
   }
 
   ////////// settable colors //////////
@@ -523,12 +524,14 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     boolean xScaleOn = pd.getBoolean(ScriptToken.XSCALEON); 
     boolean xUnitsOn = pd.getBoolean(ScriptToken.XUNITSON); 
     boolean yScaleOn = pd.getBoolean(ScriptToken.YSCALEON); 
+    boolean yUnitsOn = pd.getBoolean(ScriptToken.YUNITSON); 
     
     pd.gridOn = pl.showGrid;
     pd.titleOn = pl.showTitle;
     pd.setBoolean(ScriptToken.XSCALEON, pl.showXScale);
     pd.setBoolean(ScriptToken.XUNITSON, pl.showXScale);
     pd.setBoolean(ScriptToken.YSCALEON, pl.showYScale);
+    pd.setBoolean(ScriptToken.YUNITSON, pl.showYScale);
 
     /* Create a print job */
     PrinterJob pj = PrinterJob.getPrinterJob();
@@ -561,6 +564,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     pd.setBoolean(ScriptToken.XSCALEON, xScaleOn); 
     pd.setBoolean(ScriptToken.XUNITSON, xUnitsOn); 
     pd.setBoolean(ScriptToken.YSCALEON, yScaleOn);
+    pd.setBoolean(ScriptToken.YUNITSON, yUnitsOn);
     
   }
 
@@ -568,7 +572,8 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   /*--------------the rest are all mouse and keyboard interface -----------------------*/
 
   public void mousePressed(MouseEvent e) {
-  	System.out.println("mousePress " + isControlDown(e) + " " + e);
+		if (pd.isPrinting)
+			return;
     if (e.getButton() != MouseEvent.BUTTON1)
       return;
     pd.doMousePressed(e.getX(), e.getY(), isControlDown(e), e.isShiftDown());
@@ -580,25 +585,31 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 	}
 
 	public void mouseMoved(MouseEvent e) {
+		if (pd.isPrinting)
+			return;
     getFocusNow();
 		if (e.getButton() != 0) {
 			mouseDragged(e);
 			return;
 		}
-  	System.out.println("mouseMoved " + isControlDown(e) + " " + e);
     pd.doMouseMoved(e.getX(), e.getY());
   }
 
   public void mouseDragged(MouseEvent e) {
-  	System.out.println("mouseDragged " + isControlDown(e) + " " + e);
+		if (pd.isPrinting)
+			return;
     pd.doMouseDragged(e.getX(), e.getY());
   }
   
   public void mouseReleased(MouseEvent e) {
+		if (pd.isPrinting)
+			return;
     pd.doMouseReleased(e.getButton() == MouseEvent.BUTTON1);
   }
 
   public void mouseClicked(MouseEvent e) {
+		if (pd.isPrinting)
+			return;
     if (e.getButton() == MouseEvent.BUTTON3) {
       popup.show((JSVPanel) this, e.getX(), e.getY());
       return;
@@ -614,6 +625,8 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   }
 
 	public void keyPressed(KeyEvent e) {
+		if (pd.isPrinting)
+			return;
 		checkControl(e, true);
 
 		if (!pd.ctrlPressed)
@@ -626,7 +639,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 		case KeyEvent.VK_BACK_SPACE: // Mac
 			pd.escapeKeyPressed(e.getKeyCode() != KeyEvent.VK_ESCAPE);
 			pd.isIntegralDrag = false;
-			repaint();
+			doRepaint();
 			e.consume();
 			return;
 		}
@@ -657,7 +670,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 			pd.doMouseMoved((code == KeyEvent.VK_RIGHT ? ++pd.mouseX : --pd.mouseX),
 					pd.mouseY);
 			e.consume();
-			repaint();
+			doRepaint();
 			break;
 		case KeyEvent.VK_DOWN:
 		case KeyEvent.VK_UP:
@@ -666,7 +679,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 				pd.notifySubSpectrumChange(dir, null);
 			} else {
 				pd.advanceSubSpectrum(dir);
-				repaint();
+				doRepaint();
 			}
 			e.consume();
 			break;
@@ -675,6 +688,8 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 	}
 
 	public void keyReleased(KeyEvent e) {
+		if (pd.isPrinting)
+			return;
 		checkControl(e, false);
   }
 
@@ -690,9 +705,11 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 	}
 
   public void keyTyped(KeyEvent e) {
+		if (pd.isPrinting)
+			return;
   	if (e.getKeyChar() == 'n') {
-  		if (pd.getSelectedIntegral() != null)
-  			normalizeIntegral();
+  		pd.normalizeIntegral();
+      doRepaint();
   		e.consume();
   		return;
   	}
@@ -707,24 +724,6 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
       return;
     }
   }
-
-	private void normalizeIntegral() {
-    String sValue = pd.getSelectedIntegralText();
-    if (sValue.length() == 0)
-    	return;
-		String newValue = getInput("Enter a new value for this integral", 
-				"Normalize Integral", sValue);
-		double val;
-		try {
-			val = Double.parseDouble(newValue);
-		} catch (Exception e) {
-			return;
-		}
-		if (val <= 0)
-			return;
-    pd.setSelectedIntegral(val);
-    repaint();
-	}
 
   public void setupPlatform() {
     setBorder(BorderFactory.createLineBorder(Color.lightGray));

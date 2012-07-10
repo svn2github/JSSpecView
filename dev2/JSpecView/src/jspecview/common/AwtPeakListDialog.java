@@ -183,7 +183,7 @@ class AwtPeakListDialog extends AwtAnnotationDialog implements FocusListener {
 
 	public synchronized void update(Coordinate clicked) {
 		apply();
-		if (xyData == null)
+		if (xyData == null || clicked == null)
 			return;
 		int ipt = 0;
 		double dx0 = 1e100;

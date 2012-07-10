@@ -885,5 +885,24 @@ public class PanelData {
 		currentGraphSet.removeDialog(dialog);
 	}
 
+	void normalizeIntegral() {
+		if (getSelectedIntegral() == null)
+			return;
+    String sValue = getSelectedIntegralText();
+    if (sValue.length() == 0)
+    	return;
+		String newValue = getInput("Enter a new value for this integral", 
+				"Normalize Integral", sValue);
+		double val;
+		try {
+			val = Double.parseDouble(newValue);
+		} catch (Exception e) {
+			return;
+		}
+		if (val <= 0)
+			return;
+    setSelectedIntegral(val);
+	}
+
 
 }

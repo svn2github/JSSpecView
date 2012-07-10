@@ -130,6 +130,7 @@ abstract class AwtAnnotationDialog extends JDialog implements AnnotationDialog, 
 	protected JTable dataTable;
 	protected String[][] tableData;
 	protected boolean addUnits;
+	private JSplitPane mainSplitPane;
 	
 	protected void setup() {
 		getContentPane().removeAll();
@@ -193,7 +194,7 @@ abstract class AwtAnnotationDialog extends JDialog implements AnnotationDialog, 
 		dialogHelper = new DialogHelper(thisKey, options, leftPanel, eventListener);
     addControls();
     addTopControls();
-    leftPanel.setMinimumSize(new Dimension(150, 300));
+    leftPanel.setMinimumSize(new Dimension(200, 300));
     dialogHelper.addButton(applyButton);
     dialogHelper.addButton(showHideButton);
     dialogHelper.addButton(clearButton);
@@ -203,13 +204,13 @@ abstract class AwtAnnotationDialog extends JDialog implements AnnotationDialog, 
     rightPanel = new JPanel();
   	JScrollPane scrollPane = new JScrollPane(rightPanel);
 
-    JSplitPane mainSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+    mainSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
     mainSplitPane.setOneTouchExpandable(true);
     mainSplitPane.setResizeWeight(0);
     mainSplitPane.setRightComponent(scrollPane);
     mainSplitPane.setLeftComponent(leftPanel);
 
-    setPreferredSize(new Dimension(500,350));
+    setPreferredSize(new Dimension(566,350)); // golden ratio
     getContentPane().removeAll();
     getContentPane().add(mainSplitPane);
     
@@ -222,7 +223,8 @@ abstract class AwtAnnotationDialog extends JDialog implements AnnotationDialog, 
 			rightPanel.removeAll();
 			JScrollPane scrollPane = new JScrollPane(dataTable = (new DialogHelper())
 					.getDataTable(this, data, header, widths, leftPanel.getHeight() - 50));
-			rightPanel.add(scrollPane);
+	    mainSplitPane.setRightComponent(scrollPane);
+			//.add(scrollPane);
 		} catch (Exception e) {
 			// not perfect.
 		}

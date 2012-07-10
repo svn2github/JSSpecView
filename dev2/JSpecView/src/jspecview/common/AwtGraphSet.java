@@ -244,7 +244,10 @@ class AwtGraphSet extends GraphSet {
     return ((Graphics) g).getFontMetrics().stringWidth(s);
   }
 
-  @Override
+  protected void rotatePlot(Object g, int angle, int x, int y) {
+  	((Graphics2D) g).rotate(Math.PI * angle / 180.0, x, y);
+  }
+
   protected void setAnnotationColor(Object g, Annotation note,
                                     ScriptToken whatColor) {
     if (whatColor != null) {

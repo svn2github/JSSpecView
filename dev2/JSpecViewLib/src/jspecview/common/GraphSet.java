@@ -54,6 +54,8 @@ abstract class GraphSet {
 
 	abstract protected int getStringWidth(Object g, String s);
 
+	abstract protected void rotatePlot(Object g, int i, int j, int y);
+	
 	abstract protected void setAnnotationColor(Object g, Annotation note,
 			ScriptToken whatColor);
 
@@ -81,7 +83,7 @@ abstract class GraphSet {
 	private int[] splitPointers = new int[] { 0 };
 
 	private List<Annotation> annotations;
-	private MeasurementData drawnMeasurements;
+	private MeasurementData selectedSpectrumMeasurements;
 	private MeasurementData selectedSpectrumIntegrals;
 	private Annotation lastAnnotation;
 	private Measurement pendingMeasurement;
@@ -150,7 +152,7 @@ abstract class GraphSet {
 		stackSelected = showAllStacked;
 		if (i < 0 || iSpectrumClicked != i)
 			lastClickX = Double.NaN;
-		iSpectrumClicked = setSpectrumSelected(i);
+		iSpectrumClicked = setSpectrumSelected(setSpectrumMovedTo(i));
 	}
 
 	/**
@@ -669,6 +671,7 @@ abstract class GraphSet {
 		if (fixX(xPixelMovedTo) != xPixelMovedTo)
 			xPixelMovedTo = -1;
 		xPixelMovedTo2 = -1;
+		setSpectrumClicked(getFixedSelectedSpectrumIndex());
 	}
 
 	private void processPendingMeasurement(int xPixel, int yPixel, int clickCount) {
@@ -687,11 +690,11 @@ abstract class GraphSet {
 			JDXSpectrum spec = spectra.get(iSpectrumClicked);
 			if (clickCount == 3) {
 			} else {
-				m = findMeasurement(drawnMeasurements, xPixel, yPixel, 1);
+				m = findMeasurement(selectedSpectrumMeasurements, xPixel, yPixel, 1);
 				if (m != null) {
 					xPixel = toPixelX(m.getXVal());
 					yPixel = toPixelY(m.getYVal());
-				} else if ((m = findMeasurement(drawnMeasurements, xPixel, yPixel, 2)) != null) {
+				} else if ((m = findMeasurement(selectedSpectrumMeasurements, xPixel, yPixel, 2)) != null) {
 					xPixel = toPixelX(m.getXVal2());
 					yPixel = toPixelY(m.getYVal2());
 				} else {
@@ -758,6 +761,20 @@ abstract class GraphSet {
 		}
 	}
 
+	private boolean checkIntegralNormalizationClick(int xPixel, int yPixel) {
+		if (selectedSpectrumIntegrals == null)
+			return false;
+		Integral integral = (Integral) findMeasurement(selectedSpectrumIntegrals, xPixel, yPixel, -5);
+		if (integral == null)
+			return false;
+		selectedIntegral = integral;
+		pd.normalizeIntegral();
+		updateDialog(AType.Integration, -1);
+		setSpectrumClicked(getSpectrumIndex(integral.spec));
+		return true;
+	}
+
+
 	/** search for peaks above(below)
 	 * @param spec 
 	 * 
@@ -808,6 +825,10 @@ abstract class GraphSet {
 				if (Math.abs(xPixel - x2) + Math.abs(yPixel - y2) < 4)
 					return m;
 				break;
+			case -5: // label for integral
+				y1 = y2 = (y1 + y2)/2;
+				x2 = x1 + 20; //estimate only
+				// fall through
 			default:
 				if (isOnLine(xPixel, yPixel, x1, y1, x2, y2))
 					return m;
@@ -862,7 +883,7 @@ abstract class GraphSet {
 			int dx = (isArrowClick(xPixel, yPixel, ArrowType.LEFT) ? -1
 					: isArrowClick(xPixel, yPixel, ArrowType.RIGHT) ? 1 : 0);
 			if (dx != 0) {
-				setSpectrumClicked(iSpectrumMovedTo = (iSpectrumSelected + dx) % nSpectra);
+				setSpectrumClicked((iSpectrumSelected + dx) % nSpectra);
 				return true;
 			}
 			if (isArrowClick(xPixel, yPixel, ArrowType.HOME)) {
@@ -1346,7 +1367,6 @@ abstract class GraphSet {
 			iSpectrumForScale = iSpectrumBold;
 		int iSpecForFrame = (nSpectra == 1 ? 0 : !showAllStacked ? iSpectrumMovedTo
 				: iSpectrumBold >= 0 ? iSpectrumBold : iSpectrumSelected);
-		System.out.println("for frame : " + iSpecForFrame);
 		boolean addCurrentBox = ((fracY != 1 || isSplittable) 
 				&& (!isSplittable || nSplit == 1 || pd.currentSplitPoint == iSplit));
 		boolean drawUpDownArrows = (pd.isCurrentGraphSet(this) && zoomEnabled && spectra.get(0).isScalable()
@@ -1354,9 +1374,7 @@ abstract class GraphSet {
 				&& (nSplit == 1 || pd.currentSplitPoint == iSpectrumMovedTo)
 				&& !isDrawNoSpectra());
 		boolean addSplitBox = isSplittable;
-		if (!pd.isPrinting) {
-			drawFrame(g, iSplit, iSpecForFrame, addCurrentBox, addSplitBox, drawUpDownArrows);
-		}
+		drawFrame(g, iSplit, iSpecForFrame, addCurrentBox, addSplitBox, drawUpDownArrows);
 		if (pd.isCurrentGraphSet(this) // is current set
 				&& iSplit == pd.currentSplitPoint && (n < 2 // just one spectrum to show
 				|| iSpectrumBold >= 0 // stacked and selected
@@ -1364,11 +1382,6 @@ abstract class GraphSet {
 			haveSelectedSpectrum = true;
 		haveSingleYScale = (showAllStacked && nSpectra > 1 ? allowStackedYScale
 				&& doYScale : true);
-		if (haveSingleYScale) {
-			hideAllDialogsExcept(spectra.get(iSpectrumForScale));
-		} else {
-			hideAllDialogsExcept(null);
-		}
 		setWidgets(needNewPins, subIndex, doDraw1DObjects);
 		if (doDraw1DObjects) {
 			if (pd.getBoolean(ScriptToken.XSCALEON))
@@ -1393,14 +1406,14 @@ abstract class GraphSet {
 						drawWidgets(g, subIndex, doDraw1DObjects);
 					if (haveSingleYScale && i == iSpectrumForScale)
 					  drawGrid(g);
-					if (!pd.isPrinting && haveSingleYScale && !isDrawNoSpectra() 
+					if (haveSingleYScale && !isDrawNoSpectra() 
 							&& i == iSpectrumForScale
 							&& (nSpectra == 1 || iSpectrumSelected >= 0))
 						drawHighlightsAndPeakTabs(g, i);
 					if (n == 1 && iSpectrumSelected < 0 || iSpectrumSelected == i
 							&& pd.isCurrentGraphSet(this)) {
 						if (pd.titleOn && !pd.titleDrawn) {
-							drawTitle(g, height, width, spec.getPeakTitle());
+							drawTitle(g, height, width, (pd.isPrinting ? spec.getTitle() : spec.getPeakTitle()));
 							pd.titleDrawn = true;
 						}
 					}
@@ -1450,12 +1463,52 @@ abstract class GraphSet {
 	}
 
 	private void hideAllDialogsExcept(JDXSpectrum spec) {
-		if (!pd.isPrinting && dialogs != null)
-			for (Map.Entry<String, AnnotationData> e: dialogs.entrySet()) {
-				AnnotationData ad = e.getValue();
-				if (ad.getSpectrum() != spec && ad instanceof AnnotationDialog)
-						((AnnotationDialog) ad).setVisible(false);
+		if (dialogs == null)
+			return;
+		
+		boolean getInt = false;
+		boolean getMeas = false;
+		boolean getPeak = false;
+		
+		for (Map.Entry<String, AnnotationData> e : dialogs.entrySet()) {
+			AnnotationData ad = e.getValue();
+			if (ad instanceof AnnotationDialog) {
+				if (ad.isVisible())
+					switch (ad.getAType()) {
+					case Integration:
+						getInt = true;
+						break;
+					case Measurements:
+						getMeas = true;
+						break;
+					case PeakList:
+						getPeak = true;
+						break;
+					}
 			}
+		}
+		for (Map.Entry<String, AnnotationData> e : dialogs.entrySet()) {
+			AnnotationData ad = e.getValue();
+			if (ad instanceof AnnotationDialog) {
+				if (ad.getSpectrum() == spec) {
+					boolean tf = false;
+					switch (ad.getAType()) {
+					case Integration:
+						tf = getInt;
+						break;
+					case Measurements:
+						tf = getMeas;
+						break;
+					case PeakList:
+						tf = getPeak;
+						break;
+					}
+					((AnnotationDialog) ad).setVisible(tf);
+				} else {
+					((AnnotationDialog) ad).setVisible(false);
+				}
+			}
+		}
 	}
 
 	private void drawSpectrumPointer(Object g, int iSpec, JDXSpectrum spec,
@@ -1642,10 +1695,7 @@ abstract class GraphSet {
 			if (haveIntegralDisplayed(index))
 				drawPlot(g, index, getIntegrationGraph(index).getXYCoords(), false, true, yOffset,
 						false, ig);
-				MeasurementData integrals = drawIntegralValues(g, index, yOffset);
-				if (index == getFixedSelectedSpectrumIndex()) {
-					selectedSpectrumIntegrals = integrals;
-				}
+				drawIntegralValues(g, index, yOffset);
 		}
 		if (getIntegrationRatios(index) != null)
 			drawAnnotations(g, getIntegrationRatios(index), ScriptToken.INTEGRALPLOTCOLOR);
@@ -1657,7 +1707,7 @@ abstract class GraphSet {
 
 	private MeasurementData getMeasurements(AType type, int iSpec) {
 		AnnotationData ad = getDialog(type, iSpec);
-		return (ad == null ? null : ad.getData());
+		return (ad == null || ad.getData().size() == 0 ? null : ad.getData());
 	}
 
 	private void drawPlot(Object g, int index, Coordinate[] xyCoords, boolean drawY0,
@@ -1739,6 +1789,8 @@ abstract class GraphSet {
 		if (!pd.gridOn || pd.isPrinting) {
 			setColor(g, ScriptToken.GRIDCOLOR);
 			drawRect(g, xPixel0, yPixel0, xPixels, yPixels);
+			if (pd.isPrinting)
+				return;
 		}
 		setCurrentBoxColor(g);
 		if (drawUpDownArrows) {
@@ -1803,33 +1855,6 @@ abstract class GraphSet {
 			if (y == fixY(y))
 				drawLine(g, xPixel0, y, xPixel1, y);
 		}
-	}
-
-	private MeasurementData drawIntegralValues(Object g, int iSpec, int yOffset) {
-		MeasurementData integrals = getMeasurements(AType.Integration, iSpec);
-		if (integrals == null || integrals.size() == 0)
-			return null;
-		pd.setFont(g, width, FONT_BOLD, 12, false);
-		setColor(g, ScriptToken.INTEGRALPLOTCOLOR);
-		int h = getFontHeight(g);
-		setStrokeBold(g, true);
-		for (int i = integrals.size(); --i >= 0;) {
-			Measurement in = integrals.get(i);
-			if (in.getValue() == 0)
-				continue;
-			int x = toPixelX(in.getXVal2());
-			int y1 = yOffset + toPixelYint(in.getYVal());
-			int y2 = yOffset + toPixelYint(in.getYVal2());
-			if (x != fixX(x) || y1 != fixY(y1) || y2 != fixY(y2))
-				continue;
-			
-			drawLine(g, x, y1, x, y2);
-			drawLine(g, x , y1, x, y2);
-			String s = "  " + in.getText();
-			drawString(g, s, x, (y1 + y2) / 2 + h / 3);
-		}
-		setStrokeBold(g, false);
-		return integrals;
 	}
 
 	/**
@@ -1935,8 +1960,11 @@ abstract class GraphSet {
 			double hOff, double vOff) {
 		setColor(g, ScriptToken.UNITSCOLOR);
 		pd.setFont(g, width, FONT_ITALIC, 10, false);
+		
 		drawString(g, s, (int) (x - getStringWidth(g, s) * hOff),
 				(int) (y + getFontHeight(g) * vOff));
+
+		
 	}
 
 	/**
@@ -1954,10 +1982,16 @@ abstract class GraphSet {
 	}
 
 	private void drawHighlightsAndPeakTabs(Object g, int iSpec) {
-		if (isDrawNoSpectra() || pd.isPrinting)
-			return;
 		AnnotationData ad = getDialog(AType.PeakList, iSpec);
 		JDXSpectrum spec = spectra.get(iSpec);
+		if (pd.isPrinting) {
+			if (ad != null) {
+				setColor(g, ScriptToken.PEAKTABCOLOR);
+				PeakData data = (PeakData) ad.getData();
+				printPeakList(g, spec, data);
+			}
+			return;
+		}
 		if (ad == null || !(ad instanceof AnnotationDialog) || !ad.isVisible()) {
 			for (int i = 0; i < highlights.size(); i++) {
 				Highlight hl = highlights.get(i);
@@ -1970,33 +2004,65 @@ abstract class GraphSet {
 		}
 		if (ad != null) {
 			setColor(g, ScriptToken.PEAKTABCOLOR);
-			PeakData md = (PeakData) ad.getData();
-			if (pd.isPrinting)
-				printPeakList(g, md);
-			else
-				for (int i = md.size(); --i >= 0;) {
-					Measurement m = md.get(i);
-					int x = toPixelX(m.getXVal());
-					drawLine(g, x, yPixel0, x, yPixel0 + 10);
-				}
+			PeakData data = (PeakData) ad.getData();
+			for (int i = data.size(); --i >= 0;) {
+				Measurement m = data.get(i);
+				int x = toPixelX(m.getXVal());
+				drawLine(g, x, yPixel0, x, yPixel0 + 10);
+			}
 			if (ad instanceof AnnotationDialog && ad.isVisible()) {
-				int y = toPixelY(md.getThresh());
+				int y = toPixelY(data.getThresh());
 				if (y == fixY(y) && !pd.isPrinting)
 					drawLine(g, xPixel0, y, xPixel1, y);
 			}
 		}
 	}
 
-	private void printPeakList(Object g, PeakData md) {
-		//int 
-		for (int i = md.size(); --i >= 0;) {
-			Measurement m = md.get(i);
-			int x = toPixelX(m.getXVal());
-			drawLine(g, x, yPixel0, x, yPixel0 + 10);
+	private void printPeakList(Object g, JDXSpectrum spec, PeakData data) {
+		String[][] sdata = data.getPeakListArray();
+		if (sdata.length == 0)
+			return;
+		pd.setFont(g, width, FONT_PLAIN, 8, false);
+		int h = getFontHeight(g);
+		int y4 = getStringWidth(g, "99.9999");
+		int y2 = (sdata[0].length == 6 ? getStringWidth(g, "99.99") : 0);
+		int y = yPixel0 + y2 + y4 + 15;		
+		int[] xs = new int[data.size()];
+		int[] xs0 = new int[data.size()];
+		int dx = 0;
+		for (int i = 0; i < sdata.length; i++) {
+			xs0[i] = toPixelX(Double.parseDouble(sdata[i][1]));
+			if (i == 0) {
+				xs[i] = xs0[i];
+				continue;
+			}
+			xs[i] = Math.max(xs[i - 1] + h, xs0[i] + h);
+			dx += (xs[i] - xs0[i]);
+		}
+		dx /= 2 * sdata.length;
+
+		for (int i = 0; i < sdata.length; i++) {
+			xs[i] -= dx;
+			drawLine(g, xs[i], y, xs[i], y + 5);
+			drawLine(g, xs[i], y + 5, xs0[i], y + 10);
+			drawLine(g, xs0[i], y + 10, xs0[i], y + 15);
+			if (y2 > 0 && sdata[i][4].length() > 0)
+				drawLine(g, (xs[i] + xs[i - 1]) / 2, y - y4 + 5, (xs[i] + xs[i - 1])/2, y - y4 - 5);
 		}
 
-		
-		
+		y -= 2;
+		for (int i = data.size(); --i >= 0;) {
+			rotatePlot(g, -90, xs[i] + h/3, y);
+			drawString(g, sdata[i][1], xs[i] + h/3, y);
+			rotatePlot(g, 90, xs[i] + h/3, y);
+			if (y2 > 0 && sdata[i][4].length() > 0) {
+				int x = (xs[i] + xs[i - 1])/2 + h/3;
+				rotatePlot(g, -90, x, y - y4 - 5);
+				drawString(g, sdata[i][4], x, y - y4 - 5);
+				rotatePlot(g, 90, x, y - y4 - 5);
+			}
+		}
+				
 		// TODO Auto-generated method stub
 		
 	}
@@ -2017,13 +2083,41 @@ abstract class GraphSet {
 		}
 	}
 
+	private void drawIntegralValues(Object g, int iSpec, int yOffset) {
+		MeasurementData integrals = getMeasurements(AType.Integration, iSpec);
+		if (integrals != null) {
+			pd.setFont(g, width, FONT_BOLD, 12, false);
+			setColor(g, ScriptToken.INTEGRALPLOTCOLOR);
+			int h = getFontHeight(g);
+			setStrokeBold(g, true);
+			for (int i = integrals.size(); --i >= 0;) {
+				Measurement in = integrals.get(i);
+				if (in.getValue() == 0)
+					continue;
+				int x = toPixelX(in.getXVal2());
+				int y1 = yOffset + toPixelYint(in.getYVal());
+				int y2 = yOffset + toPixelYint(in.getYVal2());
+				if (x != fixX(x) || y1 != fixY(y1) || y2 != fixY(y2))
+					continue;
+
+				drawLine(g, x, y1, x, y2);
+				drawLine(g, x, y1, x, y2);
+				String s = "  " + in.getText();
+				drawString(g, s, x, (y1 + y2) / 2 + h / 3);
+			}
+			setStrokeBold(g, false);
+		}
+		if (iSpec == getFixedSelectedSpectrumIndex())
+			selectedSpectrumIntegrals = integrals;
+	}
+
 	private void drawMeasurements(Object g, int iSpec) {
 		MeasurementData md = getMeasurements(AType.Measurements, iSpec);
-		if (md == null)
-			return;
-		for (int i = md.size(); --i >= 0;)
-			drawMeasurement(g, md.get(i));
-		drawnMeasurements = md;
+		if (md != null)
+			for (int i = md.size(); --i >= 0;)
+				drawMeasurement(g, md.get(i));
+		if (iSpec == getFixedSelectedSpectrumIndex())
+			selectedSpectrumMeasurements = md;
 	}
 
 	private void drawMeasurement(Object g, Measurement m) {
@@ -2725,13 +2819,21 @@ abstract class GraphSet {
 		is1D2DSplit = (!spec0.is1D() && pd.getBoolean(ScriptToken.DISPLAY2D) && (imageView != null || get2DImage()));
 		haveSelectedSpectrum = false;
 		selectedSpectrumIntegrals = null;
-		drawnMeasurements = null;
+		selectedSpectrumMeasurements = null;
 		for (int iSplit = 0; iSplit < nSplit; iSplit++) {
 			// for now, at least, we only allow one 2D image
 			setPositionForFrame(iSplit);
 			drawAll(og, subIndex, iSplit, isResized || nSplit > 1);
 		}
 		setPositionForFrame(nSplit > 1 ? pd.currentSplitPoint : 0);
+		if (pd.isPrinting)
+			return;
+		if (haveSingleYScale) {
+			hideAllDialogsExcept(getSpectrum());
+		} else {
+			hideAllDialogsExcept(null);
+		}
+
 	}
 
 	synchronized void escapeKeyPressed(boolean isDEL) {
@@ -2747,11 +2849,11 @@ abstract class GraphSet {
 			zoomBox1D.xPixel0 = zoomBox1D.xPixel1 = 0;
 		if (zoomBox2D != null)
 			zoomBox2D.xPixel0 = zoomBox2D.xPixel1 = 0;
-		if (drawnMeasurements != null && selectedMeasurement != null) {
+		if (selectedSpectrumMeasurements != null && selectedMeasurement != null) {
 			if (isDEL)
-				drawnMeasurements.clear(viewData.minXOnScale, viewData.maxXOnScale);
+				selectedSpectrumMeasurements.clear(viewData.minXOnScale, viewData.maxXOnScale);
 			else
-  			drawnMeasurements.remove(selectedMeasurement);
+  			selectedSpectrumMeasurements.remove(selectedMeasurement);
 			selectedMeasurement = null;
 			updateDialog(AType.Measurements, -1);
 		}
@@ -2919,6 +3021,9 @@ abstract class GraphSet {
 		// 1D single click
 
 		if (isInPlotRegion(xPixel, yPixel)) {
+			if (selectedSpectrumIntegrals != null 
+					&& checkIntegralNormalizationClick(xPixel, yPixel))
+				return;
 			if (pendingMeasurement != null) {
 				processPendingMeasurement(xPixel, yPixel, 1);
 				return;
@@ -2994,12 +3099,18 @@ abstract class GraphSet {
 			processPendingMeasurement(xPixel, yPixel, 0);
 			setToolTipForPixels(xPixel, yPixel);
 		} else {
-			selectedMeasurement = (inPlotMove && drawnMeasurements != null ? findMeasurement(
-					drawnMeasurements, xPixel, yPixel, 0)
+			selectedMeasurement = (inPlotMove && selectedSpectrumMeasurements != null ? findMeasurement(
+					selectedSpectrumMeasurements, xPixel, yPixel, 0)
 					: null);
-			selectedIntegral = (Integral) (inPlotMove && selectedSpectrumIntegrals != null
-					&& selectedMeasurement == null ? findMeasurement(selectedSpectrumIntegrals,
-					xPixel, yPixel, 0) : null);
+			selectedIntegral = null;
+			if (inPlotMove && selectedSpectrumIntegrals != null
+					&& selectedMeasurement == null) {
+   			selectedIntegral = (Integral) findMeasurement(selectedSpectrumIntegrals,
+					xPixel, yPixel, 0);
+   			if (selectedIntegral == null)
+   				selectedIntegral = (Integral) findMeasurement(selectedSpectrumIntegrals,
+   						xPixel, yPixel, -5);
+			}
 			setToolTipForPixels(xPixel, yPixel);
 			if (imageView == null) {
 				piMouseOver = null;
@@ -3128,7 +3239,7 @@ abstract class GraphSet {
 			return;
 		}
 		bsSelected.set(i);
-		setSpectrumClicked(setSpectrumMovedTo((bsSelected.cardinality() == 1 ? i : -1)));
+		setSpectrumClicked((bsSelected.cardinality() == 1 ? i : -1));
 		if (nSplit > 1 && i >= 0)
 			pd.currentSplitPoint = i;
 	}
@@ -3183,9 +3294,9 @@ abstract class GraphSet {
 	void setSpectrum(int iSpec, boolean fromSplit) {
 		if (fromSplit) {
 			if (nSplit > 1)
-				setSpectrumSelected(iSpec);
+				setSpectrumClicked(iSpec);
 		} else {
-			setSpectrumClicked(setSpectrumMovedTo(iSpec));
+			setSpectrumClicked(iSpec);
 			stackSelected = false;
 			showAllStacked = false;
 		}
@@ -3316,7 +3427,7 @@ abstract class GraphSet {
 
 	boolean hasCurrentMeasurement(AType type) {
 		return ((type == AType.Integration ? selectedSpectrumIntegrals
-				: drawnMeasurements) != null);
+				: selectedSpectrumMeasurements) != null);
 	}
 
 	private Map<String, AnnotationData> dialogs;

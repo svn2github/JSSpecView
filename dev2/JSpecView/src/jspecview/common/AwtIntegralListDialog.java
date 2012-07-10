@@ -172,6 +172,7 @@ class AwtIntegralListDialog extends AwtAnnotationDialog {
 			if (df2.format(xyData.get(i).getXVal()).equals(value)) {
 				iSelected = i;
 				jsvp.getPanelData().findX2(xyData.get(i).getXVal(), xyData.get(i).getXVal2());
+				jsvp.repaint();
 				break;
 			}		
 		checkEnables();
