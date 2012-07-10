@@ -20,10 +20,10 @@
 package jspecview.common;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowEvent;
 import java.text.DecimalFormat;
-import java.util.Map;
-
 import javax.swing.JButton;
+//import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
@@ -48,8 +48,8 @@ class AwtIntegralListDialog extends AwtAnnotationDialog {
 	private AwtIntegralListDialog dialog;
 
 	protected AwtIntegralListDialog(String title, ScriptInterface si, JDXSpectrum spec, 
-			JSVPanel jsvp, Map<String, Object> data) {
-		super(title, si, spec, jsvp, data);
+			JSVPanel jsvp) {
+		super(title, si, spec, jsvp);
 		thisType = AType.Integration;
 		setTitle("Integration Listing");
 		setup();
@@ -66,6 +66,7 @@ class AwtIntegralListDialog extends AwtAnnotationDialog {
 	private JButton normalizeButton;
 	
 	protected double lastNorm = 1.0;
+	//private JCheckBox chkResets;
 	
 	
 	@Override
@@ -75,34 +76,40 @@ class AwtIntegralListDialog extends AwtAnnotationDialog {
 		txtOffset = dialogHelper.addInputOption("BaselineOffset", "Baseline Offset", null, "%",
 				"" + si.getParameters().integralOffset, true);
 		//chkResets = dialogHelper.addCheckBoxOption("BaselineResets", "Baseline Resets", true);
-		//txtNormalization = dialogHelper.addInputOption("NormalizationFactor",
-			//	"Normalization Factor", null, null, "1.0", true);
 		normalizeButton = newJButton();
 		normalizeButton.setText("Normalize");
 		normalizeButton.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				try {
-			    String ret = (String) JOptionPane.showInputDialog(dialog, 
-			    		"Enter a normalization factor", "Normalize",
-			        JOptionPane.QUESTION_MESSAGE, null, null, "" + lastNorm);
-				double val = Double.parseDouble(ret);
-				if (val <= 0) 
-					return;
-				lastNorm = val;
-				((IntegralData) xyData).setSelectedIntegral(xyData.get(iSelected), val);
-				apply();
-				jsvp.repaint();
-				} catch (Exception ee) {
-					// ignore
-				}
+				normalize();
 			}
 		});
 		dialogHelper.addButton(normalizeButton);
 	}
 
+	protected void normalize() {
+		try {
+			if (iSelected < 0) {
+				JOptionPane.showMessageDialog(dialog,
+						"Select a line on the table first, then click this button.");
+				return;
+			}
+			String ret = (String) JOptionPane.showInputDialog(dialog,
+					"Enter a normalization factor", "Normalize",
+					JOptionPane.QUESTION_MESSAGE, null, null, "" + lastNorm);
+			double val = Double.parseDouble(ret);
+			if (val <= 0)
+				return;
+			lastNorm = val;
+			((IntegralData) xyData).setSelectedIntegral(xyData.get(iSelected), val);
+			apply();
+			jsvp.repaint();
+		} catch (Exception ee) {
+			// ignore
+		}
+	}
+
 	@Override
 	protected void checkEnables() {
-		normalizeButton.setEnabled(iSelected >= 0);
     boolean isShow = si.getSelectedPanel().getPanelData().getShowIntegration();
 		showHideButton.setText(isShow ? "Hide" : "Show");				
 	}
@@ -112,6 +119,7 @@ class AwtIntegralListDialog extends AwtAnnotationDialog {
 		try {
 			myParams.integralOffset = Double.valueOf(txtOffset.getText());
 			myParams.integralRange = Double.valueOf(txtRange.getText());
+			myParams.integralDrawAll = false;//chkResets.isSelected();
 			((IntegralData) getData()).update(myParams);
 			jsvp.repaint();
 			super.apply();
@@ -141,8 +149,8 @@ class AwtIntegralListDialog extends AwtAnnotationDialog {
 		if (xyData == null)
 			createData();
 		iSelected = -1;
-		String[][] data = xyData.getIntegralListArray();
-		String[] header = new String[] { "peak", "start/ppm", "end/ppm", "value" };
+		String[][] data = ((IntegralData) xyData).getIntegralListArray();
+		String[] header = xyData.getDataHeader();
 		int[] widths = new int[] {40, 65, 65, 50};
 		loadData(data, header, widths);
 	}
@@ -158,15 +166,17 @@ class AwtIntegralListDialog extends AwtAnnotationDialog {
 		iSelected = -1;
 	}
 
-	public void tableRowSelectedEvent(int iRow, int iCol) {
+	public void tableCellSelectedEvent(int iRow, int iCol) {
 		DecimalFormat df2 = TextFormat.getDecimalFormat("#0.00");
 		String value = tableData[iRow][1];
-		for (int i = 1; i < xyData.size(); i++) 
+		for (int i = 0; i < xyData.size(); i++) 
 			if (df2.format(xyData.get(i).getXVal()).equals(value)) {
 				iSelected = i;
+				jsvp.getPanelData().findX2(xyData.get(i).getXVal(), xyData.get(i).getXVal2());
 				break;
 			}		
 		checkEnables();
 	}
-	
+
+
 }

@@ -4,6 +4,8 @@ import jspecview.common.Annotation.AType;
 
 public interface AnnotationData {
 
+	boolean isVisible();
+
 	Parameters getParameters();
 	JDXSpectrum getSpectrum();
 	AType getAType();

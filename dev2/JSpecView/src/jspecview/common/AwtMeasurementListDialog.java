@@ -19,8 +19,6 @@
 
 package jspecview.common;
 
-import java.util.Map;
-
 import jspecview.common.Annotation.AType;
 
 /**
@@ -36,8 +34,8 @@ class AwtMeasurementListDialog extends AwtAnnotationDialog {
 	private static int[] posXY = new int[] {Integer.MIN_VALUE, 0};
 
 	protected AwtMeasurementListDialog(String title, ScriptInterface si, 
-			JDXSpectrum spec, JSVPanel jsvp, Map<String, Object> data) {
-		super(title, si, spec, jsvp, data);
+			JDXSpectrum spec, JSVPanel jsvp) {
+		super(title, si, spec, jsvp);
 		thisType = AType.Measurements;
 		setTitle("Measurement Listing");
 		addUnits = true;
@@ -82,7 +80,7 @@ class AwtMeasurementListDialog extends AwtAnnotationDialog {
 		if (xyData == null)
 			return;
 		String[][] data = xyData.getMeasurementListArray(cmbUnits.getSelectedItem().toString());
-		String[] header = new String[] { "peak", "start", "end", "value" };
+		String[] header = xyData.getDataHeader();
 		int[] widths = new int[] {40, 65, 65, 50};
 		loadData(data, header, widths);
 	}
@@ -91,7 +89,8 @@ class AwtMeasurementListDialog extends AwtAnnotationDialog {
 	protected void createData() {
 	}
 
-	public void tableRowSelectedEvent(int iRow) {
+	@Override
+	protected void tableCellSelectedEvent(int iRow, int iCol) {
 	}
 
 

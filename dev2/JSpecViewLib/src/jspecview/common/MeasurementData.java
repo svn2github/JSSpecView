@@ -62,37 +62,16 @@ public class MeasurementData extends ArrayList<Measurement> implements Annotatio
 		// won't happen
 	}
 
-	private Parameters myParams = new Parameters("MeasurementData");
+	protected Parameters myParams = new Parameters("MeasurementData");
 	public Parameters getParameters() {
 		return myParams;
 	}
 
-	private DecimalFormat df;
+	protected DecimalFormat df;
 
-	private double thresh;
-
-	private double minY;
-
-	private double maxY;
-	public double getThresh() {
-		return thresh;
-	}
-	
-	public String[][] getPeakListArray() {
-		String[][] data = new String[size()][];
-		double[] last = new double[] {-1e100, 1e100};
-		for (int pt = 0, i = size(); --i >= 0;) {
-			data[pt++] = spec.getPeakListArray(pt, get(i), last, minY, maxY);
-		}
-		return data;
-	}
-	
-	public String[][] getIntegralListArray() {
-		DecimalFormat df2 = TextFormat.getDecimalFormat("#0.00");
-		String[][] data = new String[size() - 1][];
-		for (int pt = 0, i = size(); --i >= 1;) // [0] is the pending measurement
-			data[pt++] = new String[] { "" + pt, df2.format(get(i).getXVal()), df2.format(get(i).getXVal2()), get(i).getText() };
-		return data;
+	private final static String[] HEADER = new String[] { "peak", "start", "end", "value" };
+	public String[] getDataHeader() {
+		return HEADER;
 	}
 
 	public String[][] getMeasurementListArray(String units) {
@@ -112,63 +91,6 @@ public class MeasurementData extends ArrayList<Measurement> implements Annotatio
 		return data;
 	}
 
-	public void setPeakList(Parameters p, DecimalFormat formatter, ScaleData view) {
-		if (formatter == null)
-			formatter = TextFormat.getDecimalFormat(spec.getPeakPickHash());
-		df = formatter;
-		Coordinate[] xyCoords = spec.getXYCoords();
-		if (xyCoords.length < 3)
-			return;
-		clear();
-		myParams.peakListInclude = p.peakListInclude;
-		myParams.peakListInterpolation = p.peakListInterpolation;
-		myParams.peakListSkip = p.peakListSkip;
-		myParams.peakListThreshold = p.peakListThreshold;
-		boolean doInterpolate = (myParams.peakListInterpolation.equals("parabolic"));
-		boolean isInverted = spec.isInverted();
-		minY = view.minYOnScale;
-		maxY = view.maxYOnScale;
-		double minX = view.minXOnScale;
-		double maxX = view.maxXOnScale;
-		thresh = myParams.peakListThreshold;
-		double yLast = 0;
-		double[] y3 = new double[] { xyCoords[0].getYVal(),
-				yLast = xyCoords[1].getYVal(), 0 };
-		int n = 0;
-		int n2 = 0;
-		if (isInverted)
-			for (int i = 2; i < xyCoords.length; i++) {
-				double y = y3[i % 3] = xyCoords[i].getYVal();
-				if (yLast < thresh && y3[(i - 2) % 3] > yLast && yLast < y) {
-					double x = (doInterpolate ? Coordinate.parabolicInterpolation(
-							xyCoords, i - 1) : xyCoords[i - 1].getXVal());
-					if (x >= minX || x <= maxX) {
-						PeakPick m = new PeakPick(spec, x, y);
-						add(m);
-						if (++n == 100)
-							break;
-					}
-				}
-				yLast = y;
-			}
-		else
-			for (int i = 2; i < xyCoords.length; i++) {
-				double y = y3[i % 3] = xyCoords[i].getYVal();
-				if (yLast > thresh && y3[(i - 2) % 3] < yLast && yLast > y) {
-					n2++;
-					double x = (doInterpolate ? Coordinate.parabolicInterpolation(
-							xyCoords, i - 1) : xyCoords[i - 1].getXVal());
-					if (x >= minX && x <= maxX) {
-						PeakPick m = new PeakPick(spec, x, y, formatter.format(x), x);
-						add(m);
-						if (++n == 100)
-							break;
-					}
-				}
-				yLast = y;
-			}
-	}
-	
 	public static boolean checkParameters(MeasurementData md, Parameters p) {
 		if (md.size() == 0)
 			return false;
@@ -198,10 +120,9 @@ public class MeasurementData extends ArrayList<Measurement> implements Annotatio
 
   protected void clear(double x1, double x2) {
     // no overlapping regions. Ignore first, which is the temporary one
-  	int n = (this instanceof IntegralData ? 1 : 0);
-    for (int i = size(); --i >= n;) {
+    for (int i = size(); --i >= 0;) {
       Measurement in = get(i);
-      if (Math.min(in.getXVal(), in.getXVal2()) < Math.max(x1, x2) 
+      if (in.text.length() == 0 || Math.min(in.getXVal(), in.getXVal2()) < Math.max(x1, x2) 
           && Math.max(in.getXVal(), in.getXVal2()) > Math.min(x1, x2)) {      	
         remove(i);
       }
@@ -227,4 +148,9 @@ public class MeasurementData extends ArrayList<Measurement> implements Annotatio
 		this.key = key;		
 	}
 
+	public boolean isVisible() {
+		return true;
+	}
+
+	
 }

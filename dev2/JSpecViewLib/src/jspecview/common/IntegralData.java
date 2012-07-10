@@ -1,6 +1,8 @@
 package jspecview.common;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Collections;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -141,17 +143,13 @@ public class IntegralData extends MeasurementData {
 		}
 		double y1 = getYValueAt(x1);
 		double y2 = getYValueAt(x2);
-		if (isFinal) {
-			get(0).setValue(0);
-			if (y1 == y2)
-				return;
-		}
 		haveRegions = true;
 		Integral in = new Integral(spec, Math.abs(y2 - y1) * 100
 				* normalizationFactor, x1, x2, y1, y2);
 		clear(x1, x2);
-		if (in.getValue() >= 0.1)
-  		add(in);
+		if (in.getValue() < 0.1)
+			return;
+  	add(in);
 		Collections.sort(this, Integral.c);
 	}
 
@@ -272,7 +270,7 @@ public class IntegralData extends MeasurementData {
 	public void setSelectedIntegral(Measurement integral, double val) {
 		double val0 = integral.getValue();
 		double factor = val / val0;
-		for (int i = 1; i < size(); i++) {
+		for (int i = 0; i < size(); i++) {
 			Measurement m = get(i);
   		m.setValue(factor * m.getValue());
 		}
@@ -286,4 +284,34 @@ public class IntegralData extends MeasurementData {
 	public Measurement remove(int i) {
 		return super.remove(i);
 	}
+
+	public BitSet getBitSet() {
+		BitSet bs = new BitSet(xyCoords.length);
+		if (size() == 0) {
+  		bs.set(0, xyCoords.length);
+  		return bs;
+		}
+		for (int i = size(); --i >= 0;) {
+		  Measurement m = get(i);
+		  int x1 = Coordinate.getNearestIndexForX(xyCoords, m.getXVal());
+		  int x2 = Coordinate.getNearestIndexForX(xyCoords, m.getXVal2());
+		  bs.set(Math.min(x1, x2), Math.max(x1, x2));
+		}
+		return bs;
+	}
+
+	public String[][] getIntegralListArray() {
+		DecimalFormat df2 = TextFormat.getDecimalFormat("#0.00");
+		String[][] data = new String[size()][];
+		for (int pt = 0, i = size(); --i >= 0;)
+			data[pt++] = new String[] { "" + pt, df2.format(get(i).getXVal()), df2.format(get(i).getXVal2()), get(i).getText() };
+		return data;
+	}
+
+	private final static String[] HEADER = new String[] { "peak", "start/ppm", "end/ppm", "value" };
+
+	public String[] getDataHeader() {
+		return HEADER;
+	}
+
 }

@@ -67,7 +67,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JToolTip;
 import javax.swing.ToolTipManager;
 
 import jspecview.common.Annotation.AType;
@@ -806,13 +805,13 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 		JDXSpectrum spec = getSpectrum();
 		switch (type) {
 		case Integration:
-			dialog = new AwtIntegralListDialog("Integration for " + spec, si, spec, this, null);
+			dialog = new AwtIntegralListDialog("Integration for " + spec, si, spec, this);
 			break;
 		case Measurements:
-			dialog = new AwtMeasurementListDialog("Measurements for " + spec, si, spec, this, null);
+			dialog = new AwtMeasurementListDialog("Measurements for " + spec, si, spec, this);
 			break;
 		case PeakList:
-			dialog = new AwtPeakListDialog("Peak List for " + spec, si, spec, this, null);
+			dialog = new AwtPeakListDialog("Peak List for " + spec, si, spec, this);
 			break;
 		}
 		if (ad != null)

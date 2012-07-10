@@ -177,6 +177,7 @@ public class Parameters {
   public double integralMinY = IntegralData.DEFAULT_MINY;
   public double integralRange = IntegralData.DEFAULT_RANGE;
   public double integralOffset = IntegralData.DEFAULT_OFFSET;
+	public boolean integralDrawAll = false;
 
   public double peakListThreshold = 20; // <= 0 disables these
   public int peakListInclude = -10;     // two 

@@ -21,8 +21,6 @@ package jspecview.common;
 
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import java.util.Map;
-
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
 
@@ -44,10 +42,11 @@ class AwtPeakListDialog extends AwtAnnotationDialog implements FocusListener {
 //	private JTextField txtInclude;
 //	private JTextField txtSkip;
 	private JComboBox cbInterpolation;
+	private boolean skipCreate;
 
 	protected AwtPeakListDialog(String title, ScriptInterface si, JDXSpectrum spec, 
-			JSVPanel jsvp, Map<String, Object> data) {
-		super(title, si, spec, jsvp, data);
+			JSVPanel jsvp) {
+		super(title, si, spec, jsvp);
 		thisType = AType.PeakList;
 		setTitle("Peak Listing");
 		setup();
@@ -100,8 +99,11 @@ class AwtPeakListDialog extends AwtAnnotationDialog implements FocusListener {
 
 	@Override
 	public void apply() {
-		setThreshold();
-		createData();
+		if (!skipCreate) {
+  		setThreshold();
+  		createData();
+		}
+		skipCreate = false;
 		super.apply();
 	}
 
@@ -163,7 +165,7 @@ class AwtPeakListDialog extends AwtAnnotationDialog implements FocusListener {
 	@Override
 	protected void createData() {
 		setParams();
-		MeasurementData md = new MeasurementData(AType.PeakList, spec);
+		PeakData md = new PeakData(AType.PeakList, spec);
 	  md.setPeakList(myParams, numberFormatter, jsvp.getPanelData().getView());
 		xyData = md;
 		loadData();
@@ -172,10 +174,8 @@ class AwtPeakListDialog extends AwtAnnotationDialog implements FocusListener {
 	private void loadData() {
 		if (xyData == null)
 			createData();
-		String[][] data = xyData.getPeakListArray();
-		String[] header = (data.length == 0 ? new String[] {}
-    : data[0].length == 3 ? new String[] { "peak", spec.getXUnits(), spec.getYUnits() }
-    : new String[] { "peak", "shift/ppm", "intens" , "shift/hz", "diff/hz", "2-diff" });
+		String[][] data = ((PeakData)xyData).getPeakListArray();
+		String[] header = ((PeakData)xyData).getDataHeader(data);
 		int[] widths = new int[] {40, 65, 50, 50, 50, 50};
 		loadData(data, header, widths);
     dataTable.setCellSelectionEnabled(true);
@@ -188,7 +188,7 @@ class AwtPeakListDialog extends AwtAnnotationDialog implements FocusListener {
 		int ipt = 0;
 		double dx0 = 1e100;
 		double xval = clicked.getXVal();
-		MeasurementData md = (MeasurementData) xyData;
+		PeakData md = (PeakData) xyData;
 		for (int i = md.size(); --i >= 0;) {
 			double dx = Math.abs(xval - md.get(i).getXVal());
 			if (dx < dx0) {
@@ -201,7 +201,7 @@ class AwtPeakListDialog extends AwtAnnotationDialog implements FocusListener {
 		}
 	}
 
-	public void tableRowSelectedEvent(int iRow, int iCol) {
+	public void tableCellSelectedEvent(int iRow, int iCol) {
 		try {
 			String value = tableData[iRow][1];
 			switch (iCol) {
@@ -219,4 +219,11 @@ class AwtPeakListDialog extends AwtAnnotationDialog implements FocusListener {
 		}
 		jsvp.repaint();
 	}
+	
+	public void reEnable() {
+		skipCreate = true;
+		super.reEnable();
+	}
+	
+
 }

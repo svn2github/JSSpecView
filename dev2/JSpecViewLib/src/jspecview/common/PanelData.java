@@ -808,6 +808,7 @@ public class PanelData {
 	boolean ctrlPressed;
 
 	void doMouseDragged(int xPixel, int yPixel) {
+		isIntegralDrag |= ctrlPressed;
 		mouseState = Mouse.DOWN;
 		if (GraphSet.findGraphSet(graphSets, xPixel, yPixel) != currentGraphSet)
 			return;

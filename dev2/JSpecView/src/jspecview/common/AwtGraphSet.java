@@ -200,10 +200,13 @@ class AwtGraphSet extends GraphSet {
     ((Graphics) g).drawLine(x0, y0, x1, y1);
   }
 
+  private static Color veryLightGrey = new Color(230, 230, 230);
   @Override
   protected void setPlotColor(Object g, int i) {
   	Color c;
   	switch (i) {
+  	case -3:
+  		c = veryLightGrey;
   	case -2:
   		c = Color.GRAY;
   		break;

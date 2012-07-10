@@ -24,6 +24,8 @@ import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,7 +52,7 @@ import jspecview.util.TextFormat;
  * 
  * @author Bob Hanson hansonr@stolaf.edu
  */
-abstract class AwtAnnotationDialog extends JDialog implements AnnotationDialog, ListSelectionListener {
+abstract class AwtAnnotationDialog extends JDialog implements AnnotationDialog, ListSelectionListener, WindowListener {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -59,6 +61,7 @@ abstract class AwtAnnotationDialog extends JDialog implements AnnotationDialog, 
 	abstract protected void createData();	
 	abstract protected int[] getPosXY();
 	abstract protected void updateValues();
+	abstract protected void tableCellSelectedEvent(int iRow, int iCol);
 	
 	protected AType thisType;
 	protected String subType;
@@ -67,8 +70,6 @@ abstract class AwtAnnotationDialog extends JDialog implements AnnotationDialog, 
 	protected JSVPanel jsvp;
 	protected JDXSpectrum spec;
 	
-	protected Map<String, Object> data;	
-
 	protected String thisKey;
   
 	private JPanel leftPanel, rightPanel;
@@ -98,11 +99,10 @@ abstract class AwtAnnotationDialog extends JDialog implements AnnotationDialog, 
 	 *          the modality
 	 */
 	protected AwtAnnotationDialog(String title, ScriptInterface si, JDXSpectrum spec, 
-			JSVPanel jsvp, Map<String, Object> data) {
+			JSVPanel jsvp) {
 		this.si = si;
 		this.jsvp = jsvp;
 		this.spec = spec;
-		this.data = data;
 		setModal(false);
 		setPosition((Component)jsvp, getPosXY());
 		setResizable(true);
@@ -355,9 +355,6 @@ abstract class AwtAnnotationDialog extends JDialog implements AnnotationDialog, 
 			numberFormatter = TextFormat.getDecimalFormat("#" + myParams.numberFormat);
 	 
 	}
-	public void tableRowSelectedEvent(int iRow, int iCol) {
-		 // depends upon subclass
-	}
 
 	private int iRowSelected = -1;
 	private int iColSelected = -1;
@@ -378,11 +375,46 @@ abstract class AwtAnnotationDialog extends JDialog implements AnnotationDialog, 
 			}
 			int icolrow = iRowSelected * 1000 + iColSelected;
 			if (icolrow != iRowColSelected) {
-				tableRowSelectedEvent(iRowSelected, iColSelected);
+				tableCellSelectedEvent(iRowSelected, iColSelected);
 				iRowColSelected = icolrow;
 			}
 		} catch (Exception ee) {
 			// ignore
 		}
 	}
+
+	public void windowActivated(WindowEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void windowClosed(WindowEvent arg0) {
+		done();
+	}
+
+	public void windowClosing(WindowEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void windowDeactivated(WindowEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void windowDeiconified(WindowEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void windowIconified(WindowEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void windowOpened(WindowEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+	
 }
