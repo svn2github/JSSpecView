@@ -725,7 +725,7 @@ public class MainActivity extends Activity{
 		  Parameters params = new Parameters("android");
 		  params.integralMinY = minY;
 		  params.integralOffset = offset;
-		  params.integralFactor = factor;
+		  params.integralRange = factor;
 			integGraph = new IntegralData(minY, offset, factor, spectrum);
 			
 			mIntegralGraphs[spectrumIndex] = integGraph;
