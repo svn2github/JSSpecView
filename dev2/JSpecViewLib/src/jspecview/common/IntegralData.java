@@ -106,7 +106,7 @@ public class IntegralData extends MeasurementData {
 		if (normalizationFactor != 1)
       normalizationFactor *= range / integralRange;
     if (haveRegions) {
-  		for (int i = size(); --i >= 1;) { // 0 is pending only
+  		for (int i = size(); --i >= 0;) {
   			Measurement ir = get(i);
 	  		double y1 = getYValueAt(ir.getXVal());
 	  		double y2 = getYValueAt(ir.getXVal2());

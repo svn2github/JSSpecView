@@ -2088,7 +2088,10 @@ abstract class GraphSet {
 	private void drawIntegralValues(Object g, int iSpec, int yOffset) {
 		MeasurementData integrals = getMeasurements(AType.Integration, iSpec);
 		if (integrals != null) {
-			pd.setFont(g, width, FONT_BOLD, 12, false);
+			if (pd.isPrinting)
+  			pd.setFont(g, width, FONT_PLAIN, 8, false);
+			else
+  			pd.setFont(g, width, FONT_BOLD, 12, false);
 			setColor(g, ScriptToken.INTEGRALPLOTCOLOR);
 			int h = getFontHeight(g);
 			setStrokeBold(g, true);
