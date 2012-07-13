@@ -75,7 +75,7 @@ public interface ScriptInterface {
 	public int incrementViewCount(int i);
 
 	public void openDataOrFile(String data, String name, List<JDXSpectrum> specs,
-			String url, int firstSpec, int lastSpec);
+			String url, int firstSpec, int lastSpec, boolean doCheck);
 
 	public void print();
 
@@ -126,4 +126,11 @@ public interface ScriptInterface {
 	public void validateAndRepaint();
 
 	public void writeStatus(String msg);
+
+	public void repaint();
+
+	public void requestRepaint();
+
+	public void repaintCompleted();
+	
 }

@@ -10,7 +10,6 @@ import javax.swing.JToolBar;
 
 import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelNode;
-import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
 import jspecview.common.ScriptToken;
 
@@ -94,22 +93,22 @@ public class AppToolBar extends JToolBar {
     setButton(previousButton, "Previous View", previousIcon,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            JSViewer.zoomTo(mainFrame, -1);
+            mainFrame.runScript("zoom previous");
           }
         });
     setButton(nextButton, "Next View", nextIcon, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        JSViewer.zoomTo(mainFrame, 1);
+        mainFrame.runScript("zoom next");
       }
     });
     setButton(resetButton, "Reset", resetIcon, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        JSViewer.zoomTo(mainFrame, Integer.MAX_VALUE);
+        mainFrame.runScript("zoom out");
       }
     });
     setButton(clearButton, "Clear Views", clearIcon, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        JSViewer.zoomTo(mainFrame, 0);
+        mainFrame.runScript("zoom clear");
       }
     });
 
@@ -133,12 +132,14 @@ public class AppToolBar extends JToolBar {
     setButton(gridToggleButton, "Toggle Grid", gridIcon, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         setBoolean(ScriptToken.GRIDON, e);
+        mainFrame.requestRepaint();
       }
     });
     setButton(coordsToggleButton, "Toggle Coordinates", coordinatesIcon,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             setBoolean(ScriptToken.COORDINATESON, e);
+            mainFrame.requestRepaint();
           }
         });
     setButton(printButton, "Print", printIcon, new ActionListener() {
@@ -150,6 +151,7 @@ public class AppToolBar extends JToolBar {
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             setBoolean(ScriptToken.REVERSEPLOT, e);
+            mainFrame.requestRepaint();
           }
         });
     setButton(aboutButton, "About JSpecView", aboutIcon, new ActionListener() {
@@ -221,9 +223,8 @@ public class AppToolBar extends JToolBar {
   public void setMenuEnables(JSVPanelNode node) {
     if (node == null)
       return;
-    PanelData pd = node.jsvp.getPanelData();
     setSelections(node.jsvp);
-    setOverlay(pd.isOverlaid());
+    setOverlay(node.jsvp.getPanelData().isOverlaid());
   }   
   
   protected void spectrumButton_actionPerformed(ActionEvent e) {

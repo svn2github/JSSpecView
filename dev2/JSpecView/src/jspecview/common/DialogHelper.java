@@ -75,7 +75,7 @@ public class DialogHelper {
 		}
 		JTextField obj = new JTextField((String) value);
 		if (visible) {
-			obj.setPreferredSize(new Dimension(50, 25));
+			obj.setPreferredSize(new Dimension(75, 25));
 			obj.addActionListener(eventListener);
   		addPanelLine(name, label, obj, units);
 		}

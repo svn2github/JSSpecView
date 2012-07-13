@@ -62,10 +62,8 @@ class AwtIntegralListDialog extends AwtAnnotationDialog {
 	}
 
 	private int iSelected = -1;
-	private JButton normalizeButton;
 	
 	protected double lastNorm = 1.0;
-	//private JCheckBox chkResets;
 	
 	
 	@Override
@@ -75,7 +73,16 @@ class AwtIntegralListDialog extends AwtAnnotationDialog {
 		txtOffset = dialogHelper.addInputOption("BaselineOffset", "Baseline Offset", null, "%",
 				"" + si.getParameters().integralOffset, true);
 		//chkResets = dialogHelper.addCheckBoxOption("BaselineResets", "Baseline Resets", true);
-		normalizeButton = newJButton();
+  	JButton autoButton = newJButton();
+    autoButton.setText("Auto");
+    autoButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        si.runScript("integrate auto");
+      }
+    });
+		dialogHelper.addButton(autoButton);
+    
+		JButton normalizeButton = newJButton();
 		normalizeButton.setText("Normalize");
 		normalizeButton.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -83,15 +90,38 @@ class AwtIntegralListDialog extends AwtAnnotationDialog {
 			}
 		});
 		dialogHelper.addButton(normalizeButton);
+		JButton deleteButton = newJButton();
+		deleteButton.setText("Delete");
+		deleteButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				delete();
+			}
+		});
+		dialogHelper.addButton(deleteButton);
+	}
+
+	protected void delete() {
+		if (!checkSelected())
+			return;
+		xyData.remove(iSelected);
+		iSelected = -1;
+		apply();
+		jsvp.doRepaint();
+	}
+
+	private boolean checkSelected() {
+		if (iSelected < 0) {
+			JOptionPane.showMessageDialog(dialog,
+					"Select a line on the table first, then click this button.");
+			return false;
+		}
+		return true;
 	}
 
 	protected void normalize() {
+		if (!checkSelected())
+			return;
 		try {
-			if (iSelected < 0) {
-				JOptionPane.showMessageDialog(dialog,
-						"Select a line on the table first, then click this button.");
-				return;
-			}
 			String ret = (String) JOptionPane.showInputDialog(dialog,
 					"Enter a normalization factor", "Normalize",
 					JOptionPane.QUESTION_MESSAGE, null, null, "" + lastNorm);
@@ -101,16 +131,10 @@ class AwtIntegralListDialog extends AwtAnnotationDialog {
 			lastNorm = val;
 			((IntegralData) xyData).setSelectedIntegral(xyData.get(iSelected), val);
 			apply();
-			jsvp.repaint();
+			jsvp.doRepaint();
 		} catch (Exception ee) {
 			// ignore
 		}
-	}
-
-	@Override
-	protected void checkEnables() {
-    boolean isShow = si.getSelectedPanel().getPanelData().getShowIntegration();
-		showHideButton.setText(isShow ? "Hide" : "Show");				
 	}
 
 	@Override
@@ -120,7 +144,7 @@ class AwtIntegralListDialog extends AwtAnnotationDialog {
 			myParams.integralRange = Double.valueOf(txtRange.getText());
 			myParams.integralDrawAll = false;//chkResets.isSelected();
 			((IntegralData) getData()).update(myParams);
-			jsvp.repaint();
+			jsvp.doRepaint();
 			super.apply();
 		} catch (Exception e) {
 			// ignore?
@@ -171,12 +195,15 @@ class AwtIntegralListDialog extends AwtAnnotationDialog {
 		for (int i = 0; i < xyData.size(); i++) 
 			if (df2.format(xyData.get(i).getXVal()).equals(value)) {
 				iSelected = i;
-				jsvp.getPanelData().findX2(xyData.get(i).getXVal(), xyData.get(i).getXVal2());
-				jsvp.repaint();
+				jsvp.getPanelData().findX2(spec, xyData.get(i).getXVal(), spec, xyData.get(i).getXVal2());
+				jsvp.doRepaint();
 				break;
 			}		
 		checkEnables();
 	}
 
+	public void shiftY(int yOld, int yNew, int yPixel0, int yPixels) {
+		xyData.shiftY(yOld, yNew, yPixel0, yPixels);
+	}
 
 }

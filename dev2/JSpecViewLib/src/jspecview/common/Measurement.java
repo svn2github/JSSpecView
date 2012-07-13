@@ -108,4 +108,9 @@ public class Measurement extends Annotation {
 		pt2.setYVal(y2);
 	}
 
+	public boolean overlaps(double x1, double x2) {
+		return (Math.min(getXVal(), getXVal2()) < Math.max(x1, x2) 
+    && Math.max(getXVal(), getXVal2()) > Math.min(x1, x2));
+	}
+
 }

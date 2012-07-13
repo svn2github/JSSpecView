@@ -62,6 +62,7 @@ import jspecview.common.JSVDialog;
 import jspecview.common.JSVDropTargetListener;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelNode;
+import jspecview.common.RepaintManager;
 import jspecview.common.ViewPanel;
 import jspecview.common.JSVTree;
 import jspecview.common.JSViewer;
@@ -112,9 +113,11 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	int nViews;
+	private RepaintManager repaintManager;
 
 	JSVAppletPrivate(JSVApplet jsvApplet) {
 		this.jsvApplet = jsvApplet;
+		repaintManager = new RepaintManager(this);
 		init();
 	}
 
@@ -249,8 +252,8 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	 *          String
 	 */
 	public void loadInline(String data) {
-		newAppletPanel();
-		openDataOrFile(data, null, null, null, -1, -1);
+		//newAppletPanel();
+		openDataOrFile(data, null, null, null, -1, -1, true);
 		jsvApplet.getContentPane().validate();
 		spectrumPanel.validate();
 	}
@@ -541,6 +544,10 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		}
 	}
 
+	public void repaint() {
+		jsvApplet.repaint();
+	}
+	
 	public void validateAndRepaint() {
 		jsvApplet.validate();
 		jsvApplet.repaint();
@@ -574,7 +581,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	public void syncLoad(String filePath) {
 		newAppletPanel();
 		System.out.println("syncLoad reading " + filePath);
-		openDataOrFile(null, null, null, filePath, -1, -1);
+		openDataOrFile(null, null, null, filePath, -1, -1, false);
 		jsvApplet.getContentPane().validate();
 		spectrumPanel.validate();
 	}
@@ -733,8 +740,8 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	 * commandWatcherThread.interrupt(); }
 	 */
 	public void openDataOrFile(String data, String name,
-			List<JDXSpectrum> specs, String url, int firstSpec, int lastSpec) {
-  	int status = JSVTree.openDataOrFile((ScriptInterface) this, data, name, specs, url, firstSpec, lastSpec);
+			List<JDXSpectrum> specs, String url, int firstSpec, int lastSpec, boolean isAppend) {
+  	int status = JSVTree.openDataOrFile((ScriptInterface) this, data, name, specs, url, firstSpec, lastSpec, isAppend);
   	if (status == JSVTree.FILE_OPEN_ALREADY)
   		return;
     if (status != JSVTree.FILE_OPEN_OK) {
@@ -1018,7 +1025,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	public JSVPanel getNewJSVPanel(List<JDXSpectrum> specs) {
-		JSVPanel jsvp = AwtPanel.getJSVPanel(specs, initialStartIndex, initialEndIndex, appletPopupMenu);
+		JSVPanel jsvp = AwtPanel.getJSVPanel(this, specs, initialStartIndex, initialEndIndex, appletPopupMenu);
 		initialEndIndex = initialStartIndex = -1;
 		jsvp.getPanelData().addListener(this);
 		parameters.setFor(jsvp, null, true);
@@ -1033,7 +1040,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		}
 		List<JDXSpectrum> specs = new ArrayList<JDXSpectrum>();
 		specs.add(spec);
-		JSVPanel jsvp = AwtPanel.getJSVPanel(specs, initialStartIndex, initialEndIndex, appletPopupMenu);
+		JSVPanel jsvp = AwtPanel.getJSVPanel(this, specs, initialStartIndex, initialEndIndex, appletPopupMenu);
 		jsvp.getPanelData().addListener(this);
 		parameters.setFor(jsvp, null, true);
 		return jsvp;
@@ -1069,6 +1076,15 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	public void setPropertiesFromPreferences(JSVPanel jsvp, boolean includeMeasures) {
 		if (autoIntegrate)
 			jsvp.getPanelData().integrateAll(parameters);
+	}
+
+	public void requestRepaint() {
+		if (getSelectedPanel() != null)
+  		repaintManager.refresh();
+	}
+
+	public void repaintCompleted() {
+			repaintManager.repaintDone();
 	}
 
 	// not applicable to applet:

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import jspecview.common.Annotation.AType;
 import jspecview.common.JDXSpectrum.IRMode;
 import jspecview.source.JDXSource;
 import jspecview.util.Logger;
@@ -74,7 +75,7 @@ public class JSViewer {
           return false;
         case FINDX:
         	if (jsvp != null)
-        		jsvp.getPanelData().findX(Double.parseDouble(value));
+        		jsvp.getPanelData().findX(null, Double.parseDouble(value));
         	break;        	
         case GETSOLUTIONCOLOR:
           if (jsvp != null)
@@ -152,11 +153,21 @@ public class JSViewer {
         				value.equalsIgnoreCase("NONE") ? Double.MAX_VALUE 
         						: Double.parseDouble(value), Double.NaN);
         	break;        	
+        case SHOWMEASUREMENTS:
+        	if (jsvp == null)
+        		break;
+        	jsvp.getPanelData().showAnnotation(AType.Measurements, Parameters.getTFToggle(value), si.getParameters());
+        	break;
+        case SHOWPEAKLIST:
+        	if (jsvp == null)
+        		break;
+        	jsvp.getPanelData().showAnnotation(AType.PeakList, Parameters.getTFToggle(value), si.getParameters());
+        	break;
         case SHOWINTEGRATION:
         	if (jsvp == null)
         		break;
-        	jsvp.getPanelData().showIntegration(Parameters.getTFToggle(value), si.getParameters());
-        	execIntegrate(si, null);
+        	jsvp.getPanelData().showAnnotation(AType.Integration, Parameters.getTFToggle(value), si.getParameters());
+        	//execIntegrate(si, null);
         	break;
         case SPECTRUM:
         case SPECTRUMNUMBER:
@@ -182,7 +193,7 @@ public class JSViewer {
           break;
         case ZOOM:
         	if (jsvp != null)
-          	isOK = setZoom(value, jsvp);
+          	isOK = execZoom(value, jsvp);
           break;
         }
       } catch (Exception e) {
@@ -248,7 +259,7 @@ public class JSViewer {
 
 	}
 
-	private static boolean setZoom(String value, JSVPanel jsvp) {
+	private static boolean execZoom(String value, JSVPanel jsvp) {
 		double x1 = 0, x2 = 0, y1 = 0, y2 = 0;
 		List<String> tokens;
 		tokens = ScriptToken.getTokens(value);
@@ -256,8 +267,7 @@ public class JSViewer {
 		default:
 			return false;
 		case 1:
-			if (!tokens.get(0).equalsIgnoreCase("out"))
-				return false;
+			zoomTo(jsvp, tokens.get(0));
 			break;
 		case 2:
 			x1 = Double.parseDouble(tokens.get(0));
@@ -282,7 +292,7 @@ public class JSViewer {
 		}
 	}
 
-	public static void execSelect(ScriptInterface si, String value) {
+	private static void execSelect(ScriptInterface si, String value) {
     List<JSVPanelNode> nodes = si.getPanelNodes();
     for (int i = nodes.size(); --i >= 0;)
     	nodes.get(i).jsvp.getPanelData().selectFromEntireSet(Integer.MIN_VALUE);
@@ -296,7 +306,7 @@ public class JSViewer {
     String strlist = fillSpecList(si, si.getPanelNodes(), value, speclist,
         si.getSelectedPanel(), "1.", true);
     if (speclist.size() > 0)
-      si.openDataOrFile(null, strlist, speclist, strlist, -1, -1);
+      si.openDataOrFile(null, strlist, speclist, strlist, -1, -1, false);
     if (!fromScript) {
     	si.validateAndRepaint();
     }
@@ -313,7 +323,7 @@ public class JSViewer {
       return;
     jsvp.setSpectrum(spec2);
     si.setIRMode(mode);
-    jsvp.repaint();
+    jsvp.doRepaint();
   }
 
   private static void execIntegrate(ScriptInterface si, String value) {
@@ -325,7 +335,7 @@ public class JSViewer {
 		if (integrationRatios != null)
 			jsvp.getPanelData().setIntegrationRatios(integrationRatios);
 		si.setIntegrationRatios(null); // one time only
-    jsvp.repaint();
+    jsvp.doRepaint();
   }
 
 	private static void execSetIntegralParameter(ScriptInterface si, ScriptToken st, double value) {
@@ -401,7 +411,7 @@ public class JSViewer {
     JSVPanel jsvp = si.getSelectedPanel();
     if (jsvp != null) {
       jsvp.getPanelData().addHighlight(null, x1, x2, null, r, g, b, a);
-      jsvp.repaint();
+      jsvp.doRepaint();
     }
   }
 
@@ -421,7 +431,8 @@ public class JSViewer {
     if (file == null || index == null)
       return;
     String model = Parser.getQuotedAttribute(peakScript, "model");
-    String modelSent = si.getReturnFromJmolModel();
+    String jmolSource = Parser.getQuotedAttribute(peakScript, "src");
+    String modelSent = (jmolSource != null && jmolSource.startsWith("Jmol") ? null : si.getReturnFromJmolModel());
     if (model != null && modelSent != null && !model.equals(modelSent)) {
     	Logger.info("JSV ignoring model " + model + "; should be " + modelSent);
     	return;
@@ -444,10 +455,11 @@ public class JSViewer {
     System.out.println(Thread.currentThread() + "syncscript --selectSpectrum4 "  + pi + " " + type + " "  + model + " s=" + jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
     jsvp.getPanelData().addPeakHighlight(pi);
     System.out.println(Thread.currentThread() + "syncscript --selectSpectrum5 "  + pi + " " + type + " "  + model + " s=" + jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
-    jsvp.repaint();
+    jsvp.doRepaint();
     // round trip this so that Jmol highlights all equivalent atoms
     // and appropriately starts or clears vibration
-    si.syncToJmol(jmolSelect(pi));
+    if (jmolSource == null || (pi != null && pi.getAtoms() != null))
+      si.syncToJmol(jmolSelect(pi));
   }
 
   private static boolean checkFileAlreadyLoaded(ScriptInterface si,
@@ -543,7 +555,7 @@ public class JSViewer {
     syncToJmol(si, pi);
     //System.out.println(Thread.currentThread() + "processPeakEvent --selectSpectrum "  + pi);
     if (pi.isClearAll()) // was not in app version??
-      si.getSelectedPanel().repaint();
+      si.getSelectedPanel().doRepaint();
     else
       si.getSelectedPanel().getPanelData().selectSpectrum(pi.getFilePath(),
           pi.getType(), pi.getModel(), true);
@@ -583,7 +595,7 @@ public class JSViewer {
     JSVPanel jsvp = si.getSelectedPanel();
     if (jsvp != null) {
       jsvp.getPanelData().removeAllHighlights();
-      jsvp.repaint();
+      jsvp.doRepaint();
     }
   }
 
@@ -591,7 +603,7 @@ public class JSViewer {
     JSVPanel jsvp = si.getSelectedPanel();
     if (jsvp != null) {
       jsvp.getPanelData().removeHighlight(x1, x2);
-      jsvp.repaint();
+      jsvp.doRepaint();
     }
   }
 
@@ -750,24 +762,18 @@ public class JSViewer {
 		}
 	}
 
-	public static void zoomTo(ScriptInterface si, int mode) {
-		JSVPanel jsvp = si.getSelectedPanel();
-		if (jsvp == null)
-			return;
+	private static void zoomTo(JSVPanel jsvp, String value) {
 		PanelData pd = jsvp.getPanelData();
-		switch (mode) {
-		case 1:
-			pd.nextView();
-			break;
-		case -1:
+			if (value.equalsIgnoreCase("next")) {
+				pd.nextView();
+		} else if (value.toLowerCase().startsWith("prev")) {
 			pd.previousView();
-			break;
-		case Integer.MAX_VALUE:
+			
+		} else if (value.equalsIgnoreCase("out")) {
 			pd.resetView();
-			break;
-		default:
+			
+		} else if (value.equalsIgnoreCase("clear")) {
 			pd.clearAllView();
-			break;
 		}
 	}
 

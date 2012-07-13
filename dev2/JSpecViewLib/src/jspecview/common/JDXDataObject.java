@@ -842,10 +842,13 @@ public abstract class JDXDataObject extends JDXHeader {
 		last[0] = x;
 		double ddx = dx + last[1];
 		last[1] = dx;
+		double dddx = ddx + last[2];
+		last[2] = ddx;
 		if (isNMR()) {
 			return new String[] {"" + pt, df4.format(x),df4.format(y), 
 					df2.format(x * observedFreq), (dx * observedFreq > 20 ? "" : df2.format(dx * observedFreq))
-			, (ddx * observedFreq > 20 ? "" : df2.format(ddx * observedFreq))}; 			
+			, (ddx * observedFreq > 20 ? "" : df2.format(ddx * observedFreq))
+			, (dddx * observedFreq > 20 ? "" : df2.format(dddx * observedFreq))}; 			
 		}
 		return new String[] {"" + pt,  df2.format(x),df4.format(y) };
 	}

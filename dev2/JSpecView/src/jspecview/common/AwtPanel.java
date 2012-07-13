@@ -95,6 +95,8 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     Logger.info("JSVPanel " + this + " finalized");
   }
 
+  ScriptInterface si;
+
   public PanelData pd;
 
   public PanelData getPanelData() {
@@ -150,9 +152,10 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     setName(title);
   }
 
-  protected void doRepaint() {
+  
+  public void doRepaint() {
   	if (!pd.isPrinting)
-      repaint();    
+      si.requestRepaint();
   }
 
   ////////// settable colors //////////
@@ -254,24 +257,25 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
    *        the spectrum
    * @throws ScalesIncompatibleException
    */
-  public AwtPanel(JDXSpectrum spectrum, JSVPopupMenu popup) {
+  public AwtPanel(ScriptInterface si, JDXSpectrum spectrum, JSVPopupMenu popup) {
     // standard applet not overlaid and not showing range
     // standard application split spectra
     // removal of integration, taConvert
     // Preferences Dialog sample.jdx
   	ToolTipManager.sharedInstance().setInitialDelay(0);
   	//toolTip = new AwtToolTip(this);
+  	this.si = si;
     pd = new PanelData(this);
     this.popup = popup;
     pd.initSingleSpectrum(spectrum);
   }
 
-  public JSVPanel getNewPanel(JDXSpectrum spectrum) {
-    return new AwtPanel(spectrum, popup);
+  public JSVPanel getNewPanel(ScriptInterface si, JDXSpectrum spectrum) {
+    return new AwtPanel(si, spectrum, popup);
   }
 
-  public static AwtPanel getJSVPanel(List<JDXSpectrum> specs, int startIndex, int endIndex, JSVPopupMenu popup) {
-    return new AwtPanel(specs, startIndex, endIndex, popup);
+  public static AwtPanel getJSVPanel(ScriptInterface si, List<JDXSpectrum> specs, int startIndex, int endIndex, JSVPopupMenu popup) {
+    return new AwtPanel(si, specs, startIndex, endIndex, popup);
   }
 
   /**
@@ -287,9 +291,10 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
    * @throws JSpecViewException
    * @throws ScalesIncompatibleException
    */
-  private AwtPanel(List<JDXSpectrum> spectra, int startIndex,
+  private AwtPanel(ScriptInterface si, List<JDXSpectrum> spectra, int startIndex,
       int endIndex, JSVPopupMenu popup) {
     pd = new PanelData(this);
+    this.si = si;
     this.popup = popup;
   	//toolTip = new AwtToolTip(this);
     pd.initJSVPanel(spectra, startIndex, endIndex);
@@ -302,9 +307,9 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
    * @param jsvpPopupMenu
    * @return
    */
-  public static AwtPanel getNewPanel(JDXSpectrum spec,
+  public static AwtPanel getNewPanel(ScriptInterface si, JDXSpectrum spec,
                                      JSVPopupMenu jsvpPopupMenu) {
-    return new AwtPanel(spec, jsvpPopupMenu);
+    return new AwtPanel(si, spec, jsvpPopupMenu);
   }
 
   public GraphSet getNewGraphSet(GraphSet superSet) {
@@ -354,6 +359,9 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 
   /*----------------------- JSVPanel PAINTING METHODS ---------------------*/
 
+  public void update(Graphics g) {
+  	super.update(g);  	
+  }
   /**
    * Overides paintComponent in class JPanel in order to draw the spectrum
    * 
@@ -362,10 +370,12 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
    */
   @Override
   public void paintComponent(Graphics g) {
-    if (pd == null || pd.graphSets == null)
+    if (pd == null || pd.graphSets == null || pd.isPrinting)
       return;
     super.paintComponent(g);
+    //System.out.println(g.getClipBounds());
     pd.drawGraph(g, getHeight(), getWidth());
+    si.repaintCompleted();
   }
 
   public void setFont(Object g, String name, int width, int mode, int size,  
@@ -593,18 +603,22 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 			return;
 		}
     pd.doMouseMoved(e.getX(), e.getY());
+    if (pd.coordStr != null)
+      doRepaint();
   }
 
   public void mouseDragged(MouseEvent e) {
 		if (pd.isPrinting)
 			return;
     pd.doMouseDragged(e.getX(), e.getY());
+    doRepaint();
   }
   
   public void mouseReleased(MouseEvent e) {
 		if (pd.isPrinting)
 			return;
     pd.doMouseReleased(e.getButton() == MouseEvent.BUTTON1);
+    doRepaint();
   }
 
   public void mouseClicked(MouseEvent e) {
@@ -622,6 +636,9 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   }
 
   public void mouseExited(MouseEvent e) {
+		pd.thisWidget = null;
+		pd.isIntegralDrag = false;
+		pd.integralShiftMode = 0;
   }
 
 	public void keyPressed(KeyEvent e) {
@@ -792,18 +809,18 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 		getFocusNow();
 	}
 
-	public void showDialog(ScriptInterface si, AType type) {
+	public AnnotationDialog showDialog(AType type) {
 		AwtAnnotationDialog dialog = null; 
 		AnnotationData ad = pd.getDialog(type);
 		if (ad != null && ad instanceof AwtAnnotationDialog) {
 			((AwtAnnotationDialog) ad).reEnable();
-			return;
+			return (AnnotationDialog) ad;
 		}
 		
 		int iSpec = pd.getCurrentSpectrumIndex();
 		if (iSpec < 0) {
 			showMessage("To enable " + type + " first select a spectrum by clicking on it.", "" + type);
-			return;
+			return null;
 		}
 		JDXSpectrum spec = getSpectrum();
 		switch (type) {
@@ -821,6 +838,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 			dialog.setData(ad);
 		pd.addDialog(iSpec, type, dialog);
 		dialog.reEnable();
+		return dialog;
 	}
 
 	public void showMessage(String msg, String title) {

@@ -53,10 +53,6 @@ class AwtMeasurementListDialog extends AwtAnnotationDialog {
 	}
 
 	@Override
-	protected void checkEnables() {
-	}
-
-	@Override
 	public void apply() {
 		super.apply();
   }

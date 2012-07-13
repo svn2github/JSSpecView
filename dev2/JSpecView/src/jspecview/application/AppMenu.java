@@ -233,25 +233,25 @@ public class AppMenu extends JMenuBar {
     JSVPopupMenu.setMenuItem(nextZoomMenuItem, 'N', "Next View", 78,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            JSViewer.zoomTo(mainFrame,1);
+            mainFrame.runScript("zoom next");
           }
         });
     JSVPopupMenu.setMenuItem(prevZoomMenuItem, 'P', "Previous View", 80,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            JSViewer.zoomTo(mainFrame,-1);
+            mainFrame.runScript("zoom previous");
           }
         });
     JSVPopupMenu.setMenuItem(fullZoomMenuItem, 'F', "Full View", 70,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            JSViewer.zoomTo(mainFrame,Integer.MAX_VALUE);
+            mainFrame.runScript("zoom out");
           }
         });
     JSVPopupMenu.setMenuItem(clearZoomMenuItem, 'C', "Clear Views", 67,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            JSViewer.zoomTo(mainFrame,0);
+            mainFrame.runScript("zoom clear");
           }
         });
     JSVPopupMenu.setMenuItem(userZoomMenuItem, 'Z', "Set Zoom...", 90,

@@ -4,7 +4,7 @@ import jspecview.common.Annotation.AType;
 
 public interface JSVPanel extends JSVContainer {
 
-  void repaint();
+	public void doRepaint();
   
   void drawCoordinates(Object g, int height, int width);
   void drawTitle(Object g, int height, int width, String title);
@@ -13,7 +13,7 @@ public interface JSVPanel extends JSVContainer {
   boolean getFocusNow();
   String getInput(String message, String title, String sval);
   GraphSet getNewGraphSet(GraphSet gs);
-  JSVPanel getNewPanel(JDXSpectrum spectrum);
+  JSVPanel getNewPanel(ScriptInterface si, JDXSpectrum spectrum);
   PanelData getPanelData();
   Object getPlotColor(int i);
   Object getPopup();
@@ -32,8 +32,9 @@ public interface JSVPanel extends JSVContainer {
 	void setViewTitle(String filePath);
   void setupPlatform();
 	void showHeader(Object jsvApplet);
-	void showDialog(ScriptInterface si, AType type);
+	AnnotationDialog showDialog(AType type);
 	void showMessage(String msg, String title);
+
 
 
 

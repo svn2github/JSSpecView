@@ -123,10 +123,12 @@ public class JSVPanelNode {
  
   public static boolean isOpen(List<JSVPanelNode> panelNodes, String filePath) {
     if (filePath != null)
-      for (int i = panelNodes.size(); --i >= 0;)
+      for (int i = panelNodes.size(); --i >= 0;) {
+      	System.out.println("JSVPanelNode " + filePath + " " + panelNodes.get(i).source.getFilePath());
         if (filePath.equals(panelNodes.get(i).source.getFilePath())
         		|| filePath.equals(panelNodes.get(i).frameTitle))
           return true;
+      }
     return false;
   }
   public static int getNodeIndex(List<JSVPanelNode> panelNodes, JSVPanelNode node) {

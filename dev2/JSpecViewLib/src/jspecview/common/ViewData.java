@@ -155,7 +155,7 @@ class ViewData extends ScaleData {
     return ptCount;
   }
 
-  void setXRange(Coordinate[] xyCoords) {
+  void setXRangeForSubSpectrum(Coordinate[] xyCoords) {
     int n = xyCoords.length - 1;
     startDataPointIndices[0] = 0;
     endDataPointIndices[0] = n;
@@ -261,7 +261,8 @@ class ViewData extends ScaleData {
 		  && userYFactors[i] == userYFactors[j];
 	}
 
-	private double specShift;
+	double specShift;
+	
 	public void addSpecShift(double dx) {
 		specShift += dx;
 		minX += dx;

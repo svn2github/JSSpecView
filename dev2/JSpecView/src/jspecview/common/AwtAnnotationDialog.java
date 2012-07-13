@@ -32,7 +32,6 @@ import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -47,35 +46,37 @@ import jspecview.common.AnnotationData;
 import jspecview.util.TextFormat;
 
 /**
- * Dialog for managing peak, integral, and measurement listings
- * for a Spectrum within a GraphSet
+ * Dialog for managing peak, integral, and measurement listings for a Spectrum
+ * within a GraphSet
  * 
  * @author Bob Hanson hansonr@stolaf.edu
  */
-abstract class AwtAnnotationDialog extends JDialog implements AnnotationDialog, ListSelectionListener, WindowListener {
+abstract class AwtAnnotationDialog extends AwtDialog implements AnnotationDialog,
+		ListSelectionListener, WindowListener {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	abstract protected void addControls();
-	abstract protected void checkEnables();
-	abstract protected void createData();	
-	abstract protected int[] getPosXY();
+
+	abstract protected void createData();
+
 	abstract protected void updateValues();
+
 	abstract protected void tableCellSelectedEvent(int iRow, int iCol);
-	
+
 	protected AType thisType;
 	protected String subType;
-	
+
 	protected ScriptInterface si;
 	protected JSVPanel jsvp;
 	protected JDXSpectrum spec;
-	
+
 	protected String thisKey;
-  
+
 	private JPanel leftPanel, rightPanel;
 	protected JButton showHideButton;
 
-	private JButton clearButton, applyButton, doneButton;	
+	private JButton clearButton, applyButton, doneButton;
 	protected final static Map<String, Object> options = new HashMap<String, Object>();
 
 	private Object[] myOptions;
@@ -86,7 +87,6 @@ abstract class AwtAnnotationDialog extends JDialog implements AnnotationDialog, 
 	protected JTextField txtFormat;
 	protected JTextField txtFontSize;
 	protected JComboBox cmbUnits;
-	
 
 	/**
 	 * Initialises the <code>IntegralDialog</code> with the given values for minY,
@@ -98,40 +98,29 @@ abstract class AwtAnnotationDialog extends JDialog implements AnnotationDialog, 
 	 * @param modal
 	 *          the modality
 	 */
-	protected AwtAnnotationDialog(String title, ScriptInterface si, JDXSpectrum spec, 
-			JSVPanel jsvp) {
+	protected AwtAnnotationDialog(String title, ScriptInterface si,
+			JDXSpectrum spec, JSVPanel jsvp) {
 		this.si = si;
 		this.jsvp = jsvp;
 		this.spec = spec;
 		setModal(false);
-		setPosition((Component)jsvp, getPosXY());
+		setPosition((Component) jsvp, getPosXY());
 		setResizable(true);
 		// after specific constructor, run setup()
 	}
 
-	private void setPosition(Component panel, int[] posXY) {
-		if (panel != null) {
-			if (posXY[0] == Integer.MIN_VALUE) {
-				posXY[0] = panel.getLocationOnScreen().x;
-				posXY[1] = panel.getLocationOnScreen().y + panel.getHeight() - 20;
-			}
-			setLocation(posXY[0], posXY[1]);
-		}
-	}
-
 	ActionListener eventListener = new ActionListener() {
-    public void actionPerformed(ActionEvent e) {
-      doEvent(e);
-    }
-  };
-
+		public void actionPerformed(ActionEvent e) {
+			doEvent(e);
+		}
+	};
 
 	protected DialogHelper dialogHelper;
 	protected JTable dataTable;
 	protected String[][] tableData;
 	protected boolean addUnits;
 	private JSplitPane mainSplitPane;
-	
+
 	protected void setup() {
 		getContentPane().removeAll();
 		subType = spec.getTypeLabel();
@@ -155,67 +144,73 @@ abstract class AwtAnnotationDialog extends JDialog implements AnnotationDialog, 
 		}
 	}
 
-  void jbInit() throws Exception {
+	void jbInit() throws Exception {
 
 		showHideButton = newJButton();
-    showHideButton.setText("Show");
-    showHideButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-      	JButton b = (JButton) e.getSource();
+		showHideButton.setText("Show");
+		showHideButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JButton b = (JButton) e.getSource();
 				showHide(b.getText().equals("Show"));
-      }
-    });
-    
-  	clearButton = newJButton();
-    clearButton.setText("Clear");
-    clearButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        clear();
-      }
-    });
-    
-  	applyButton = newJButton();
-    applyButton.setText("Apply");
-    applyButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        apply();
-      }
-    });
-    
-    doneButton = newJButton();
-    doneButton.setText("Done");
-    doneButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        done();
-      }
-    });
+			}
+		});
 
-    leftPanel = new JPanel(new GridBagLayout());
+		clearButton = newJButton();
+		clearButton.setText("Clear");
+		clearButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				clear();
+			}
+		});
+
+		applyButton = newJButton();
+		applyButton.setText("Apply");
+		applyButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				apply();
+			}
+		});
+
+		doneButton = newJButton();
+		doneButton.setText("Done");
+		doneButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				done();
+			}
+		});
+
+		leftPanel = new JPanel(new GridBagLayout());
 		dialogHelper = new DialogHelper(thisKey, options, leftPanel, eventListener);
-    addControls();
-    addTopControls();
-    leftPanel.setMinimumSize(new Dimension(200, 300));
-    dialogHelper.addButton(applyButton);
-    dialogHelper.addButton(showHideButton);
-    dialogHelper.addButton(clearButton);
-    dialogHelper.addButton(doneButton);
-    dialogHelper = null;
-        
-    rightPanel = new JPanel();
-  	JScrollPane scrollPane = new JScrollPane(rightPanel);
+		addControls();
+		addTopControls();
+		leftPanel.setMinimumSize(new Dimension(200, 300));
+		dialogHelper.addButton(applyButton);
+		dialogHelper.addButton(showHideButton);
+		dialogHelper.addButton(clearButton);
+		// dialogHelper.addButton(doneButton);
+		dialogHelper = null;
 
-    mainSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-    mainSplitPane.setOneTouchExpandable(true);
-    mainSplitPane.setResizeWeight(0);
-    mainSplitPane.setRightComponent(scrollPane);
-    mainSplitPane.setLeftComponent(leftPanel);
+		rightPanel = new JPanel();
+		JScrollPane scrollPane = new JScrollPane(rightPanel);
 
-    setPreferredSize(new Dimension(566,350)); // golden ratio
-    getContentPane().removeAll();
-    getContentPane().add(mainSplitPane);
-    
-    checkEnables();
-  }
+		mainSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		mainSplitPane.setOneTouchExpandable(true);
+		mainSplitPane.setResizeWeight(0);
+		mainSplitPane.setRightComponent(scrollPane);
+		mainSplitPane.setLeftComponent(leftPanel);
+
+		setPreferredSize(new Dimension(600, 370)); // golden ratio
+		getContentPane().removeAll();
+		getContentPane().add(mainSplitPane);
+
+		checkEnables();
+	}
+
+	protected void checkEnables() {
+		boolean isShow = si.getSelectedPanel().getPanelData().getShowAnnotation(
+				thisType);
+		showHideButton.setText(isShow ? "Hide" : "Show");
+	}
 
 	protected void loadData(String[][] data, String[] header, int[] widths) {
 		try {
@@ -223,8 +218,8 @@ abstract class AwtAnnotationDialog extends JDialog implements AnnotationDialog, 
 			rightPanel.removeAll();
 			JScrollPane scrollPane = new JScrollPane(dataTable = (new DialogHelper())
 					.getDataTable(this, data, header, widths, leftPanel.getHeight() - 50));
-	    mainSplitPane.setRightComponent(scrollPane);
-			//.add(scrollPane);
+			mainSplitPane.setRightComponent(scrollPane);
+			// .add(scrollPane);
 		} catch (Exception e) {
 			// not perfect.
 		}
@@ -234,47 +229,52 @@ abstract class AwtAnnotationDialog extends JDialog implements AnnotationDialog, 
 
 	protected JButton newJButton() {
 		JButton b = new JButton();
-		b.setPreferredSize(new Dimension(120,25));
+		b.setPreferredSize(new Dimension(120, 25));
 		return b;
 	}
 
 	private void addTopControls() {
-		
+
 		String key = thisKey + "_format";
 		String format = (String) options.get(key);
 		if (format == null)
-			options.put(key, (format = formatOptions[unitPtr == null ? 0 : unitPtr.intValue()]));
-		txtFormat = dialogHelper.addInputOption("numberFormat", "Number Format", format, null, null, false);	
+			options.put(key, (format = formatOptions[unitPtr == null ? 0 : unitPtr
+					.intValue()]));
+		txtFormat = dialogHelper.addInputOption("numberFormat", "Number Format",
+				format, null, null, false);
 		if (unitPtr != null)
-  		cmbUnits = dialogHelper.addSelectOption("Units", null, unitOptions, unitPtr.intValue(), addUnits);
-    
-		//txtFontSize = ((DialogHelper dialogHelper)).addInputOption("FontSize", "Font Size", null, null, "10");
+			cmbUnits = dialogHelper.addSelectOption("Units", null, unitOptions,
+					unitPtr.intValue(), addUnits);
+
+		// txtFontSize = ((DialogHelper dialogHelper)).addInputOption("FontSize",
+		// "Font Size", null, null, "10");
 	}
-	
+
 	protected void showHide(boolean isShow) {
 		setState(isShow);
 		if (isShow)
 			apply();
-		jsvp.repaint();
-		
-	  //JSViewer.runScriptNow(si, "show" + thisType + (isShow ? " true" : " false"));
-	  checkEnables();
+		jsvp.doRepaint();
+
+		// JSViewer.runScriptNow(si, "show" + thisType + (isShow ? " true" :
+		// " false"));
+		checkEnables();
 	}
 
 	protected void clear() {
 		if (xyData != null) {
-  		xyData.clear();
-	    apply();
+			xyData.clear();
+			apply();
 		}
 	}
-	
-  protected void done() {
-  	jsvp.getPanelData().removeDialog(this);
-  	setState(false);
-  	if (xyData != null)
-  		xyData.setState(false);
-  	dispose();
-		jsvp.repaint();
+
+	protected void done() {
+		jsvp.getPanelData().removeDialog(this);
+		// setState(false);
+		if (xyData != null)
+			xyData.setState(isON);
+		dispose();
+		jsvp.doRepaint();
 	}
 
 	protected void doEvent(ActionEvent e) {
@@ -286,7 +286,7 @@ abstract class AwtAnnotationDialog extends JDialog implements AnnotationDialog, 
 			apply();
 			return;
 		}
-		
+
 	}
 
 	public void reEnable() {
@@ -294,25 +294,25 @@ abstract class AwtAnnotationDialog extends JDialog implements AnnotationDialog, 
 		setState(true);
 		apply();
 	}
-	
+
 	public void apply() {
 		updateValues();
-  	checkEnables();
-  	jsvp.repaint();
+		checkEnables();
+		jsvp.doRepaint();
 	}
-	
+
 	private boolean isON = true;
-	
+
 	public boolean getState() {
-	  return isON;	
+		return isON;
 	}
-	
+
 	public void setState(boolean b) {
 		isON = b;
 	}
-	
 
 	protected Parameters myParams = new Parameters("MeasurementData");
+
 	public Parameters getParameters() {
 		return myParams;
 	}
@@ -328,19 +328,21 @@ abstract class AwtAnnotationDialog extends JDialog implements AnnotationDialog, 
 	protected MeasurementData xyData;
 	protected DecimalFormat numberFormatter;
 	private String key;
+
 	public String getKey() {
 		return key;
 	}
+
 	public void setKey(String key) {
-		this.key = key;		
+		this.key = key;
 	}
-	
+
 	public MeasurementData getData() {
 		if (xyData == null)
 			createData();
-	  return xyData;	
+		return xyData;
 	}
-	
+
 	public void setData(AnnotationData data) {
 		myParams = data.getParameters();
 		xyData = (MeasurementData) data;
@@ -351,17 +353,18 @@ abstract class AwtAnnotationDialog extends JDialog implements AnnotationDialog, 
 			xyData.addSpecShift(dx);
 	}
 
-	
 	protected void setParams() {
-		 myParams.numberFormat = txtFormat.getText();
-			numberFormatter = TextFormat.getDecimalFormat("#" + myParams.numberFormat);
-	 
+		myParams.numberFormat = txtFormat.getText();
+		numberFormatter = TextFormat.getDecimalFormat("#" + myParams.numberFormat);
+
 	}
 
 	private int iRowSelected = -1;
 	private int iColSelected = -1;
 	ListSelectionModel columnSelector;
 	private int iRowColSelected = -1;
+
+	private int lastChanged = 0;
 	
 	synchronized public void valueChanged(ListSelectionEvent e) {
 
@@ -370,11 +373,15 @@ abstract class AwtAnnotationDialog extends JDialog implements AnnotationDialog, 
 			if (e.getValueIsAdjusting()) {
 				if (lsm == columnSelector) {
 					iColSelected = lsm.getLeadSelectionIndex();
+					lastChanged = 1;
 				} else {
 					iRowSelected = lsm.getLeadSelectionIndex();
+					lastChanged = 2;
 				}
 				return;
 			}
+			if ((lsm == columnSelector) != (lastChanged == 1))
+				return;
 			int icolrow = iRowSelected * 1000 + iColSelected;
 			if (icolrow != iRowColSelected) {
 				tableCellSelectedEvent(iRowSelected, iColSelected);
@@ -387,7 +394,7 @@ abstract class AwtAnnotationDialog extends JDialog implements AnnotationDialog, 
 
 	public void windowActivated(WindowEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void windowClosed(WindowEvent arg0) {
@@ -396,27 +403,31 @@ abstract class AwtAnnotationDialog extends JDialog implements AnnotationDialog, 
 
 	public void windowClosing(WindowEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void windowDeactivated(WindowEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void windowDeiconified(WindowEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void windowIconified(WindowEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void windowOpened(WindowEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
+	public void shiftY(int yOld, int yNew, int yPixel0, int yPixels) {
+		xyData.shiftY(yOld, yNew, yPixel0, yPixels);
+	}
+
 }

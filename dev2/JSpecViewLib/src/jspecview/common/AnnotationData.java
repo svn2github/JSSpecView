@@ -19,5 +19,7 @@ public interface AnnotationData {
 	void setState(boolean b);
 
 	void addSpecShift(double dx);
+
+	void shiftY(int yOld, int yNew, int yPixel0, int yPixels);
 	
 }

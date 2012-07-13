@@ -120,6 +120,7 @@ public class PanelData {
 	boolean drawXAxisLeftToRight;
 	boolean xAxisLeftToRight = true;
 	boolean isIntegralDrag;
+	int integralShiftMode;
 
 	int nSpectra;
 	int thisWidth;
@@ -289,7 +290,7 @@ public class PanelData {
 
 	public void refresh() {
 		thisWidth = 0;
-		owner.repaint();
+		//repaint();
 	}
 
 	public void addAnnotation(List<String> tokens) {
@@ -460,12 +461,12 @@ public class PanelData {
 		return currentGraphSet.haveSelectedSpectrum();
 	}
 
-	public boolean getShowIntegration() {
-		return currentGraphSet.getShowIntegration(-1);
+	public boolean getShowAnnotation(AType type) {
+		return currentGraphSet.getShowAnnotation(type, -1);
 	}
 
-	public void showIntegration(Boolean tfToggle, Parameters parameters) {
-		currentGraphSet.setShowIntegration(tfToggle, parameters);
+	public void showAnnotation(AType type, Boolean tfToggle, Parameters parameters) {
+		currentGraphSet.setShowAnnotation(type, tfToggle, parameters);
 	}
 
 	public void setYStackOffsetPercent(int offset) {
@@ -474,7 +475,7 @@ public class PanelData {
 
 	public void setSpectrum(int iSpec, boolean isSplit) {
 		currentGraphSet.setSpectrum(iSpec, isSplit);
-		refresh();
+		//repaint();
 	}
 
 	public JDXSpectrum getSpectrum() {
@@ -587,10 +588,6 @@ public class PanelData {
 		return currentGraphSet.getSelectedIntegral();
 	}
 
-	public String getSelectedIntegralText() {
-		return currentGraphSet.getSelectedIntegralText();
-	}
-
 	public void advanceSubSpectrum(int dir) {
 		currentGraphSet.advanceSubSpectrum(dir);
 	}
@@ -653,15 +650,15 @@ public class PanelData {
 
 	}
 
-	public void findX(double d) {
-		currentGraphSet.setXPointer(d);
-		repaint();
+	public void findX(JDXSpectrum spec, double d) {
+		currentGraphSet.setXPointer(spec, d);
+		//repaint();
 	}
 	
-	public void findX2(double d, double d2) {
-		currentGraphSet.setXPointer(d);
-		currentGraphSet.setXPointer2(d2);
-		repaint();
+	public void findX2(JDXSpectrum spec, double d, JDXSpectrum spec2, double d2) {
+		currentGraphSet.setXPointer(spec, d);
+		currentGraphSet.setXPointer2(spec2, d2);
+		//repaint();
 	}
 
 
@@ -683,7 +680,7 @@ public class PanelData {
 	}
 
 	void repaint() {
-		owner.repaint();
+		owner.doRepaint();
 	}
 
 	void setToolTipText(String s) {
@@ -826,6 +823,8 @@ public class PanelData {
 		currentGraphSet.mouseReleasedEvent();
 		thisWidget = null;
 		isIntegralDrag = false;
+		integralShiftMode = 0;
+    //repaint();
 	}
 
 	void doMouseClicked(int xPixel, int yPixel, int clickCount,
@@ -886,11 +885,12 @@ public class PanelData {
 	}
 
 	void normalizeIntegral() {
-		if (getSelectedIntegral() == null)
+		Integral integral = getSelectedIntegral();
+		if (integral == null)
 			return;
-    String sValue = getSelectedIntegralText();
+    String sValue = integral.getText();
     if (sValue.length() == 0)
-    	return;
+    	sValue = "" + integral.getValue();
 		String newValue = getInput("Enter a new value for this integral", 
 				"Normalize Integral", sValue);
 		double val;
@@ -903,6 +903,5 @@ public class PanelData {
 			return;
     setSelectedIntegral(val);
 	}
-
 
 }

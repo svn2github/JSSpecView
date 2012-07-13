@@ -174,13 +174,13 @@ public class FileManager {
       URL url = (isApplet ? new URL(appletDocumentBase, name) : new URL(name));
       name = url.toString();
       if (showMsg)
-        Logger.info("FileManager opening URL " + url.toString());
+        Logger.info("JSVFileManager opening URL " + url.toString());
       URLConnection conn = url.openConnection();
       length = conn.getContentLength();
       in = conn.getInputStream();
     } else {
       if (showMsg)
-        Logger.info("FileManager opening file " + name);
+        Logger.info("JSVFileManager opening file " + name);
       File file = new File(name);
       length = (int) file.length();
       in = new FileInputStream(file);

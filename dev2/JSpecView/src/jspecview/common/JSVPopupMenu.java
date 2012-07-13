@@ -230,7 +230,7 @@ public class JSVPopupMenu extends JPopupMenu {
   protected void reboot() {
     if (thisJsvp == null)
       return;
-    thisJsvp.repaint();
+    thisJsvp.doRepaint();
     show((Container) thisJsvp, thisX, thisY);
   }
 
@@ -278,19 +278,19 @@ public class JSVPopupMenu extends JPopupMenu {
     setMenuItem(integrationMenuItem, 'I', "Integration", 0, 0,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            scripter.getSelectedPanel().showDialog(scripter, AType.Integration);
+            scripter.getSelectedPanel().showDialog(AType.Integration);
           }
         });
     setMenuItem(measurementsMenuItem, 'M', "List Measurements", 0, 0,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-          	scripter.getSelectedPanel().showDialog(scripter, AType.Measurements);
+          	scripter.getSelectedPanel().showDialog(AType.Measurements);
           }
         });
     setMenuItem(peakListMenuItem, 'P', "List Peaks", 0, 0,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-          	scripter.getSelectedPanel().showDialog(scripter, AType.PeakList);
+          	scripter.getSelectedPanel().showDialog(AType.PeakList);
           }
         });
     setMenuItem(transAbsMenuItem, '\0', "Transmittance/Absorbance", 0, 0,

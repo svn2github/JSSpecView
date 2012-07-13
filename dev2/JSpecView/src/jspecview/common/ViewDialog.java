@@ -33,7 +33,6 @@ import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -44,7 +43,7 @@ import javax.swing.JTree;
  * 
  * @author Bob Hanson hansonr@stolaf.edu
  */
-public class ViewDialog extends JDialog implements WindowListener {
+public class ViewDialog extends AwtDialog implements WindowListener {
 
 	private static final long serialVersionUID = 1L;
 	private ScriptInterface si;
@@ -57,7 +56,7 @@ public class ViewDialog extends JDialog implements WindowListener {
 	private JButton combineSelectedButton;
 	private JButton viewSelectedButton;
   
-	private static int posX = Integer.MIN_VALUE, posY;
+	private static int[] posXY = new int[] {Integer.MIN_VALUE, 0};
   
 	/**
 	 * Initialises the <code>IntegralDialog</code> with the given values for minY,
@@ -71,18 +70,17 @@ public class ViewDialog extends JDialog implements WindowListener {
 	 */
 	public ViewDialog(ScriptInterface si, Component panel, boolean modal) {
 		this.si = si;
-		setTitle("View/Overlay/Close Spectra");
+		setTitle("View/Combine/Close Spectra");
 		setModal(modal);
-		if (panel != null) {
-			if (posX == Integer.MIN_VALUE) {
-				posX = panel.getLocationOnScreen().x;
-				posY = panel.getLocationOnScreen().y;
-			}
-			setLocation(posX, posY);
-		}
+		setPosition(panel, getPosXY());
 		setResizable(true);
 		addWindowListener(this);
 		setup();
+	}
+
+	@Override
+	protected int[] getPosXY() {
+		return posXY;
 	}
 
 	private void setup() {

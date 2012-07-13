@@ -19,8 +19,6 @@
 
 package jspecview.common;
 
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
 
@@ -34,7 +32,7 @@ import jspecview.util.TextFormat;
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-class AwtPeakListDialog extends AwtAnnotationDialog implements FocusListener {
+class AwtPeakListDialog extends AwtAnnotationDialog {
 
 	private static final long serialVersionUID = 1L;
 	private static int[] posXY = new int[] {Integer.MIN_VALUE, 0};
@@ -62,14 +60,8 @@ class AwtPeakListDialog extends AwtAnnotationDialog implements FocusListener {
 		txtThreshold = dialogHelper.addInputOption("Threshold", null, null, "",
 				"", true);
 		setThreshold();
-//		txtInclude = dialogHelper.addInputOption("IncludeTop", "Include Top", null,
-	//			"peaks", "10");
-//		txtSkip = dialogHelper.addInputOption("SkipHighest", "Skip Highest", null,
-//				"peaks", "0");
 		cbInterpolation = dialogHelper.addSelectOption("Interpolation", null,
 				new String[] { "parabolic", "none" }, 0, true);
-//		txtThreshold.addFocusListener(this);
-//		txtInclude.addFocusListener(this);
 	}
 
 	private void setThreshold() {
@@ -80,9 +72,7 @@ class AwtPeakListDialog extends AwtAnnotationDialog implements FocusListener {
 		txtThreshold.setText(" " + sy);
 	}
 
-	@Override
-	protected void checkEnables() {
-	}
+
 
 
 	/*		String script = "PEAKLIST";
@@ -136,32 +126,6 @@ class AwtPeakListDialog extends AwtAnnotationDialog implements FocusListener {
 		loadData();
 	}
 
-	public void focusGained(FocusEvent e) {
-//		if (e.getSource() == txtThreshold) {
-//			setEnabled(txtThreshold, txtInclude);
-//		} else {
-//			setEnabled(txtInclude, txtThreshold);
-//		}
-		// TODO Auto-generated method stub
-		
-	}
-
-//	private static void setEnabled(JTextField txtEnabled, JTextField txtDisabled) {
-//		txtEnabled.setText(cleanText(txtEnabled));
-//		txtDisabled.setText("(" + cleanText(txtDisabled) + ")");
-//		txtDisabled.setBackground(Color.lightGray);
-//		txtEnabled.setBackground(Color.white);
-//	}
-
-//	private static String cleanText(JTextField t) {
-//		return t.getText().replace('(',' ').replace(')', ' ').trim();
-//	}
-
-	public void focusLost(FocusEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
 	@Override
 	protected void createData() {
 		setParams();
@@ -176,7 +140,7 @@ class AwtPeakListDialog extends AwtAnnotationDialog implements FocusListener {
 			createData();
 		String[][] data = ((PeakData)xyData).getPeakListArray();
 		String[] header = ((PeakData)xyData).getDataHeader(data);
-		int[] widths = new int[] {40, 65, 50, 50, 50, 50};
+		int[] widths = new int[] {40, 65, 50, 50, 50, 50, 50};
 		loadData(data, header, widths);
     dataTable.setCellSelectionEnabled(true);
 	}
@@ -205,19 +169,20 @@ class AwtPeakListDialog extends AwtAnnotationDialog implements FocusListener {
 		try {
 			String value = tableData[iRow][1];
 			switch (iCol) {
+			case 6:
 			case 5:
 			case 4:
-				String value2 = tableData[iRow - (iCol - 3)][1];
-				jsvp.getPanelData().findX2(Double.parseDouble(value),
-						Double.parseDouble(value2));
+				String value2 = tableData[iRow + 3 - iCol][1];
+				jsvp.getPanelData().findX2(spec, Double.parseDouble(value),
+						spec, Double.parseDouble(value2));
 				break;
 			default:
-				jsvp.getPanelData().findX(Double.parseDouble(value));
+				jsvp.getPanelData().findX(spec, Double.parseDouble(value));
 			}
 		} catch (Exception e) {
-			jsvp.getPanelData().findX(1E100);
+			jsvp.getPanelData().findX(spec, 1E100);
 		}
-		jsvp.repaint();
+		jsvp.doRepaint();
 	}
 	
 	public void reEnable() {

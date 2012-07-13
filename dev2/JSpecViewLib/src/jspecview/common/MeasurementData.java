@@ -122,8 +122,7 @@ public class MeasurementData extends ArrayList<Measurement> implements Annotatio
     // no overlapping regions. Ignore first, which is the temporary one
     for (int i = size(); --i >= 0;) {
       Measurement in = get(i);
-      if (in.text.length() == 0 || Math.min(in.getXVal(), in.getXVal2()) < Math.max(x1, x2) 
-          && Math.max(in.getXVal(), in.getXVal2()) > Math.min(x1, x2)) {      	
+      if (in.text.length() == 0 || in.overlaps(x1, x2)) {      	
         remove(i);
       }
     }
@@ -151,6 +150,10 @@ public class MeasurementData extends ArrayList<Measurement> implements Annotatio
 	public boolean isVisible() {
 		return true;
 	}
+
+	public void shiftY(int yOld, int yNew, int yPixel0, int yPixels) {
+	  // n/a
+  }
 
 	
 }

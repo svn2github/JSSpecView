@@ -32,7 +32,7 @@ public class PeakData extends MeasurementData {
 		return thresh;
 	}
 	
-	private final static String[] NMR_HEADER = new String[] { "peak", "shift/ppm", "intens" , "shift/hz", "diff/hz", "2-diff" };
+	private final static String[] NMR_HEADER = new String[] { "peak", "shift/ppm", "intens" , "shift/hz", "diff/hz", "2-diff", "3-diff" };
 
 	public String[] getDataHeader(String[][] data) {
 		return (data.length == 0 ? new String[] {}
@@ -42,7 +42,7 @@ public class PeakData extends MeasurementData {
 
 	public String[][] getPeakListArray() {
 		String[][] data = new String[size()][];
-		double[] last = new double[] {-1e100, 1e100};
+		double[] last = new double[] {-1e100, 1e100, 1e100};
 		for (int pt = 0, i = size(); --i >= 0;) {
 			data[pt++] = spec.getPeakListArray(pt, get(i), last, minY, maxY);
 		}

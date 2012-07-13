@@ -241,9 +241,11 @@ public class JSVTree extends JTree {
     List<String> tokens = ScriptToken.getTokens(value);
     String filename = tokens.get(0);
     int pt = 0;
-    if (filename.equalsIgnoreCase("APPEND")) {
+    boolean isAppend = filename.equalsIgnoreCase("APPEND");
+    boolean isCheck = filename.equalsIgnoreCase("CHECK");
+    if (isAppend || isCheck) {
       filename = tokens.get(++pt);
-    } else {
+    } else { 
       if (filename.equals("\"\"") && si.getCurrentSource() != null)
         filename = si.getCurrentSource().getFilePath();
       close(si, "all");
@@ -253,12 +255,12 @@ public class JSVTree extends JTree {
         : -1);
     int lastSpec = (pt + 1 < tokens.size() ? Integer.valueOf(tokens.get(++pt))
         : firstSpec);
-    si.openDataOrFile(null, null, null, filename, firstSpec, lastSpec);
+    si.openDataOrFile(null, null, null, filename, firstSpec, lastSpec, isAppend);
 	}
 
 	public static int openDataOrFile(ScriptInterface si,
 			String data, String name, List<JDXSpectrum> specs, String url,
-			int firstSpec, int lastSpec) {
+			int firstSpec, int lastSpec, boolean isAppend) {
 		if ("NONE".equals(name)) {
 			close(si, "View*");
 			return FILE_OPEN_OK;
@@ -300,6 +302,8 @@ public class JSVTree extends JTree {
       	 si.incrementViewCount(-1);
       return FILE_OPEN_ALREADY;
     }
+    if (!isAppend)
+      close(si, "all"); // with CHECK we may still need to do this
     si.setCursorObject(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
     try {
       si.setCurrentSource(isView ? JDXSource.createView(specs)

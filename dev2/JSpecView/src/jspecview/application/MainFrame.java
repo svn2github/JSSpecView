@@ -90,6 +90,7 @@ import jspecview.common.JSVDialog;
 import jspecview.common.JSVDropTargetListener;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelNode;
+import jspecview.common.RepaintManager;
 import jspecview.common.ViewPanel;
 import jspecview.common.JSVTree;
 import jspecview.common.JSVTreeNode;
@@ -214,6 +215,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	private Dimension jmolDimensionOld;
 	private Container jmolFrame;
 	private Dimension jmolDimensionNew = new Dimension(250, 200);
+	private RepaintManager repaintManager;
 
 	/**
 	 * Constructor
@@ -221,6 +223,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	 * @param jmolOrAdvancedApplet
 	 */
 	public MainFrame(Component jmolDisplay, JSVInterface jmolOrAdvancedApplet) {
+		repaintManager = new RepaintManager(this);
 		this.jmolDisplay = jmolDisplay;
 		if (jmolDisplay != null)
 			jmolFrame = jmolDisplay.getParent();
@@ -633,9 +636,9 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	public void openDataOrFile(String data, String name, List<JDXSpectrum> specs,
-			String url, int firstSpec, int lastSpec) {
+			String url, int firstSpec, int lastSpec, boolean isAppend) {
 		JSVTree.openDataOrFile((ScriptInterface) this, data, name, specs, url,
-				firstSpec, lastSpec);
+				firstSpec, lastSpec, isAppend);
 		validateAndRepaint();
 	}
 
@@ -667,7 +670,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 				includeMeasures);
 		if (autoIntegrate)
 			jsvp.getPanelData().integrateAll(parameters);
-		jsvp.repaint();
+		jsvp.doRepaint();
 	}
 
 	private boolean isEmbedded;
@@ -890,18 +893,18 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	public synchronized void syncScript(String peakScript) {
-		System.out.println(Thread.currentThread() + "MainFrame Jmol>JSV sync 11"
-				+ Thread.currentThread());
+		//System.out.println(Thread.currentThread() + "MainFrame Jmol>JSV sync 11"
+			//	+ Thread.currentThread());
 		spectraTree.setEnabled(false);
 		JSViewer.syncScript(this, peakScript);
 		spectraTree.setEnabled(true);
-		System.out.println(Thread.currentThread() + "MainFrame Jmol>JSV sync 12"
-				+ Thread.currentThread());
+		//System.out.println(Thread.currentThread() + "MainFrame Jmol>JSV sync 12"
+			//	+ Thread.currentThread());
 	}
 
 	public void syncLoad(String filePath) {
 		closeSource(null);
-		openDataOrFile(null, null, null, filePath, -1, -1);
+		openDataOrFile(null, null, null, filePath, -1, -1, false);
 		if (currentSource == null)
 			return;
 		if (panelNodes.get(0).getSpectrum().isAutoOverlayFromJmolClick())
@@ -924,7 +927,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	public void validateAndRepaint() {
 		validate();
-		repaint();
+		requestRepaint();
 	}
 
 	/**
@@ -967,7 +970,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	public void execScriptComplete(String msg, boolean isOK) {
-		repaint();
+		requestRepaint();
 		if (msg != null) {
 			writeStatus(msg);
 			if (msg.length() == 0)
@@ -1030,7 +1033,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	public void loadInline(String data) {
-		openDataOrFile(data, null, null, null, -1, -1);
+		openDataOrFile(data, null, null, null, -1, -1, true);
 	}
 
 	public void setFilePath(String tmpFilePath) {
@@ -1093,7 +1096,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 			if (source != null)
 				closeSource(source);
 		}
-		openDataOrFile(null, null, null, fileName, -1, -1);
+		openDataOrFile(null, null, null, fileName, -1, -1, false);
 	}
 
 	public void showProperties() {
@@ -1132,7 +1135,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		if (url == null)
 			return;
 		recentOpenURL = url;
-		openDataOrFile(null, null, null, url, -1, -1);
+		openDataOrFile(null, null, null, url, -1, -1, false);
 	}
 
 	private PrintLayout lastPrintLayout;
@@ -1189,10 +1192,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 			setSelectedPanel(panelNode.jsvp);
 		sendPanelChange(panelNode.jsvp);
 		setMenuEnables(panelNode, false);
-		if (getSelectedPanel().getPanelData().getShowIntegration())
-			writeStatus("Use CTRL-LEFT-DRAG to measure an integration value.");
-		else
-			writeStatus("");
+		writeStatus("");
 	}
 
 	/**
@@ -1290,11 +1290,11 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	public JSVPanel getNewJSVPanel(List<JDXSpectrum> specs) {
-		return AwtPanel.getJSVPanel(specs, 0, 0, jsvpPopupMenu);
+		return AwtPanel.getJSVPanel(this, specs, 0, 0, jsvpPopupMenu);
 	}
 
 	public JSVPanel getNewJSVPanel(JDXSpectrum spec) {
-		return (spec == null ? null : AwtPanel.getNewPanel(spec, jsvpPopupMenu));
+		return (spec == null ? null : AwtPanel.getNewPanel(this, spec, jsvpPopupMenu));
 	}
 
 	public JSVPanelNode getNewPanelNode(String id, String fileName,
@@ -1326,8 +1326,15 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	// debugging
 
 	public void execTest(String value) {
-		syncScript("<PeakData file=\"c:/temp/crspectra.jdx\" index=\"23\" type=\"UV-VIS\" id=\"1\" title=\"Spin Forbidden Band ~694nm\" peakShape=\"singlet\" model=\"urea\" xMax=\"710\" xMin=\"670\"    />");
+		syncScript("Jmol sending to JSpecView: jmolApplet_object__5768809713073075__JSpecView: <PeakData file=\"file:/C:/jmol-dev/workspace/Jmol-documentation/script_documentation/examples-12/jspecview/acetophenone.jdx\" index=\"31\" type=\"13CNMR\" id=\"6\" title=\"carbonyl ~200\" peakShape=\"multiplet\" model=\"acetophenone\" atoms=\"1\" xMax=\"199\" xMin=\"197\"  yMax=\"10000\" yMin=\"0\" />");
+	}
+	public void requestRepaint() {
+		if (getSelectedPanel() != null)
+  		repaintManager.refresh();
 	}
 
+	public void repaintCompleted() {
+			repaintManager.repaintDone();
+	}
 	
 }

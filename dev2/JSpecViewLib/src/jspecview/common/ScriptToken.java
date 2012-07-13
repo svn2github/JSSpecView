@@ -92,6 +92,8 @@ public enum ScriptToken {
   SHIFTX("dx (ppm) or NONE -- NMR only"),
   
   SHOWINTEGRATION("T"),
+  SHOWMEASUREMENTS("T"),
+  SHOWPEAKLIST("T"),
   SPECTRUM("spectrumID"), 
   SPECTRUMNUMBER,
   STACKOFFSETY("percent"),

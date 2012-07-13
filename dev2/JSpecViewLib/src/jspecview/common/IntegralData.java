@@ -21,7 +21,7 @@ import jspecview.util.TextFormat;
 public class IntegralData extends MeasurementData {
 
 	public enum IntMode {
-	  OFF, ON, TOGGLE, MARK, UPDATE;
+	  OFF, ON, TOGGLE, AUTO, MARK, UPDATE;
 	  static IntMode getMode(String value) {
 	    for (IntMode mode: values())
 	      if (mode.name().equalsIgnoreCase(value))
@@ -52,7 +52,7 @@ public class IntegralData extends MeasurementData {
   }
   
   private double normalizationFactor = 1;
-  private double range;
+  private double percentRange;
 	private double offset;
 	private double integralTotal;
 	
@@ -67,14 +67,14 @@ public class IntegralData extends MeasurementData {
 		super(AType.Integration, spec);
     percentMinY = integralMinY; // not used.
 		percentOffset = integralOffset;
-		range = integralRange;
+		percentRange = integralRange;
     calculateIntegral();
 	}
 
 	public IntegralData(JDXSpectrum spec, Parameters parameters) {
 		super(AType.Integration, spec);
 		percentOffset = parameters.integralOffset;
-		range = parameters.integralRange;
+		percentRange = parameters.integralRange;
     calculateIntegral();
 	}
 
@@ -91,10 +91,14 @@ public class IntegralData extends MeasurementData {
 	 */
 	public void update(double integralMinY, double integralOffset,
 			double integralRange) {
-		if (integralRange <= 0 || integralRange == range && integralOffset == percentOffset)
+		double percentRange0 = percentRange;
+		if (integralRange <= 0 || integralRange == percentRange && integralOffset == percentOffset)
 			return;
-		for (int j = 0; j < size(); j++)
-	  	System.out.println(j + " " + get(j));
+		percentOffset = integralOffset;
+		percentRange = integralRange;
+		checkRange();
+		//for (int j = 0; j < size(); j++)
+	  	//System.out.println(j + " " + get(j));
 		double intRangeNew = integralRange / 100 / integralTotal;
 		double offsetNew = integralOffset / 100;
 		for (int i = 0; i < xyCoords.length; i++) {
@@ -104,7 +108,7 @@ public class IntegralData extends MeasurementData {
 		}
 
 		if (normalizationFactor != 1)
-      normalizationFactor *= range / integralRange;
+      normalizationFactor *= percentRange0 / integralRange;
     if (haveRegions) {
   		for (int i = size(); --i >= 0;) {
   			Measurement ir = get(i);
@@ -115,11 +119,8 @@ public class IntegralData extends MeasurementData {
 	  		ir.setValue(Math.abs(y2 - y1) * 100 * normalizationFactor);
 		  }
 		}
-		
-		percentOffset = integralOffset;
-		range = integralRange;
     intRange = intRangeNew; 
-    offset = offsetNew;
+    offset = offsetNew;		
 	}
 
 	public void scaleIntegrationBy(double f) {
@@ -134,12 +135,12 @@ public class IntegralData extends MeasurementData {
     return Coordinate.getYValueAt(xyCoords, x);
   }
 
-	public void addIntegralRegion(double x1, double x2,
+	public Integral addIntegralRegion(double x1, double x2,
 			boolean isFinal) {
 		if (Double.isNaN(x1)) {
 			haveRegions = false;
 			clear();
-			return;
+			return null;
 		}
 		double y1 = getYValueAt(x1);
 		double y2 = getYValueAt(x2);
@@ -147,10 +148,11 @@ public class IntegralData extends MeasurementData {
 		Integral in = new Integral(spec, Math.abs(y2 - y1) * 100
 				* normalizationFactor, x1, x2, y1, y2);
 		clear(x1, x2);
-		if (in.getValue() < 0.1)
-			return;
+		//if (in.getValue() < 0.1) -- no, need this for tiny integrals with a water peak, for instance
+			//return null;
   	add(in);
 		Collections.sort(this, Integral.c);
+		return in;
 	}
 
 	public void addSpecShift(double dx) {
@@ -194,14 +196,13 @@ public class IntegralData extends MeasurementData {
 	    // register negative values
 	    double minYForIntegral = -Double.MAX_VALUE;//percentMinY / 100 * maxY; // 0.1%
 	    integralTotal = 0;
+	    checkRange();
 	    for (int i = 0; i < specXyCoords.length; i++) {
 	      double y = specXyCoords[i].getYVal();
 	      if (y > minYForIntegral)
 	        integralTotal += y;
 	    }
-	    if (range == 0)
-	    	range = 10;
-	    intRange = (range / 100) / integralTotal; 
+	    intRange = (percentRange / 100) / integralTotal; 
 	    offset = (percentOffset / 100);
 
 	    // Calculate Integral Graph as a scale from 0 to 1
@@ -215,6 +216,11 @@ public class IntegralData extends MeasurementData {
 	          * intRange + offset);
 	    }
 	    return xyCoords;
+	}
+
+	private void checkRange() {
+    percentOffset = Math.max(5, percentOffset);
+    percentRange = Math.max(10, percentRange);
 	}
 
 	/**
@@ -243,17 +249,6 @@ public class IntegralData extends MeasurementData {
 	public Coordinate[] getXYCoords() {
 		return xyCoords;
 	}
-
-	//
-//public Map<String, Object> getInfo(String key) {
-//  Map<String, Object> info = new Hashtable<String, Object>();
-//  JDXSpectrum.putInfo(key, info, "type", "integration");
-//  JDXSpectrum.putInfo(key, info, "percentMinY", Double.valueOf(percentMinY));
-//  JDXSpectrum.putInfo(key, info, "percentOffset", Double.valueOf(percentOffset));
-//  JDXSpectrum.putInfo(key, info, "integralRange", Double.valueOf(integralRange));
-//  //TODO annotations
-//  return info;
-//}
 
   /**
    * returns FRACTIONAL value * 100
@@ -313,5 +308,80 @@ public class IntegralData extends MeasurementData {
 	public String[] getDataHeader() {
 		return HEADER;
 	}
+
+	public void shiftY(int yOld, int yNew, int yPixel0, int yPixels) {
+		// yOld sign -1 indicates RANGE change
+		double pt = (int) (100.0 * (yPixel0 + yPixels - yNew) / yPixels);
+		if (yOld < 0)
+			pt -=  percentOffset;
+		if (yOld < 0) { // end point
+			update(0, percentOffset, pt);
+		} else {
+			update(0, pt, percentRange);
+		}
+	}
+
+	public void autoIntegrate() {
+		if (xyCoords.length == 0)
+			return;
+		clear();
+		int iStart = -1;
+		double cutoff = 0.0001;
+		int nCount = 0;
+		int nMin = 20;
+		double y0 = xyCoords[xyCoords.length - 1].getYVal();
+		for (int i = xyCoords.length - 1; --i >= 0;) {
+			double y = xyCoords[i].getYVal();
+			nCount++;
+			if ((y - y0) < cutoff && iStart < 0) {
+				if (y < y0) {
+					// decreasing -- reset
+					y0 = y;
+					nCount = 0;
+				}
+				continue;
+			}
+			if (iStart < 0) {
+				// but y - y0 >= cutoff
+				iStart = i + Math.min(nCount, nMin);
+				//System.out.println(" setting " + iStart + " y0=" + y0 + " " + y);
+				y0 = y;
+				nCount = 0;
+				continue;
+			}
+			// in peak;
+			if ((y - y0) < cutoff) {
+				// and leveled off
+				if (nCount == 1)
+					y0 = y;
+				//System.out.println(i + " " + xyCoords[i] + "  " + y0);
+				if (nCount >= nMin) {
+					//System.out.println(iStart + " " + i + " " + xyCoords[iStart] +  " "  + xyCoords[i]);
+					addIntegralRegion(xyCoords[iStart].getXVal(), xyCoords[i].getXVal(),
+							true);
+					iStart = -1;
+					y0 = y;
+					nCount = 0;
+				}
+			} else {
+				// still rising
+				nCount = 0;
+				y0 = y;
+			}
+
+		}
+	}
+
+	/*	
+	public Map<String, Object> getInfo(String key) {
+	  Map<String, Object> info = new Hashtable<String, Object>();
+	  JDXSpectrum.putInfo(key, info, "type", "integration");
+	  JDXSpectrum.putInfo(key, info, "percentMinY", Double.valueOf(percentMinY));
+	  JDXSpectrum.putInfo(key, info, "percentOffset", Double.valueOf(percentOffset));
+	  JDXSpectrum.putInfo(key, info, "integralRange", Double.valueOf(integralRange));
+	  //TODO annotations
+	  return info;
+	}
+	*/
 
 }
