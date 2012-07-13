@@ -719,7 +719,11 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		}
 	}
 
+  private int mainSplitPosition = 200;
+	
 	public void setSelectedPanel(JSVPanel jsvp) {
+		if (selectedPanel != null)
+      mainSplitPosition = mainSplitPane.getDividerLocation();
 		spectrumPanel.setSelectedPanel(jsvp, panelNodes);
 		selectedPanel = jsvp;
 		spectraTree.setSelectedPanel((ScriptInterface) this, jsvp);
@@ -728,6 +732,8 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
       jsvp.setEnabled(true);
       jsvp.setFocusable(true);
 		}
+		if (mainSplitPosition != 0)
+  		mainSplitPane.setDividerLocation(mainSplitPosition);
 	}
 
 	private JSVPanel prevPanel;
@@ -1206,6 +1212,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		appMenu.clearSourceMenu(source);
 		setError(false, false);
 		setTitle("JSpecView");
+		validateAndRepaint();			
 	}
 
 	private int nOverlays;

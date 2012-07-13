@@ -37,12 +37,13 @@ public class ViewPanel extends JPanel implements JSVContainer {
 	}
 
 	public void setSelectedPanel(JSVPanel jsvp, List<JSVPanelNode> panelNodes) {
-		if (jsvp != null && jsvp != selectedPanel) {
+		if (jsvp != selectedPanel) {
 			if (selectedPanel != null) {
 				remove((AwtPanel) selectedPanel);
 				//jsvApplet.removeKeyListener((AwtPanel) selectedPanel);
 			}
-			add((AwtPanel) jsvp, BorderLayout.CENTER);
+			if (jsvp != null)
+  			add((AwtPanel) jsvp, BorderLayout.CENTER);
 			//jsvApplet.addKeyListener((AwtPanel) jsvp);
 			selectedPanel = jsvp;
 		}
@@ -57,6 +58,7 @@ public class ViewPanel extends JPanel implements JSVContainer {
 			}
 		}
 		markSelectedPanels(panelNodes);
+		setVisible(jsvp != null);
 	}
 
 	public void markSelectedPanels(List<JSVPanelNode> panelNodes) {
