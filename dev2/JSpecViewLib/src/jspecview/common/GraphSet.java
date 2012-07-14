@@ -929,8 +929,8 @@ abstract class GraphSet {
 	private NumberFormat formatterX;
 	private NumberFormat formatterY;
 	private boolean haveLeftRightArrows;
-	private int xPixelPlot0;
 	private int xPixelPlot1;
+	private int xPixelPlot0;
 	private int yPixelPlot0;
 	private int yPixelPlot1;
 
@@ -1507,7 +1507,7 @@ abstract class GraphSet {
 		setCoordStr(xValueMovedTo, yValueMovedTo);
 		if (iHandle != 0) {
 			setPlotColor(g, 0);
-			int x = (iHandle < 0 ? xPixelPlot0 : xPixelPlot1);
+			int x = (iHandle < 0 ? xPixelPlot1 : xPixelPlot0);
 			int y = (iHandle < 0 ? yPixelPlot0 : yPixelPlot1);
 			drawHandle(g, x, y, false);
 			return;
@@ -1703,7 +1703,7 @@ abstract class GraphSet {
 
 	private MeasurementData getMeasurements(AType type, int iSpec) {
 		AnnotationData ad = getDialog(type, iSpec);
-		return (ad == null || ad.getData().size() == 0 ? null : ad.getData());
+		return (ad == null || ad.getData().size() == 0 || !ad.getState() ? null : ad.getData());
 	}
 
 	private void drawPlot(Object g, int index, Coordinate[] xyCoords,
@@ -1742,10 +1742,10 @@ abstract class GraphSet {
 				y2 = fixY(yOffset + y2);
 				if (isIntegral) {
 					if (i == iFirst) {
-						xPixelPlot0 = x1;
+						xPixelPlot1 = x1;
 						yPixelPlot0 = y1;
 					}
-					xPixelPlot1 = x2;
+					xPixelPlot0 = x2;
 					yPixelPlot1 = y2;
 				}
 				if (fillPeaks
@@ -1995,17 +1995,16 @@ abstract class GraphSet {
 	}
 
 	private void drawHighlightsAndPeakTabs(Object g, int iSpec) {
-		AnnotationData ad = getDialog(AType.PeakList, iSpec);
+		MeasurementData md = getMeasurements(AType.PeakList, iSpec);
 		JDXSpectrum spec = spectra.get(iSpec);
 		if (pd.isPrinting) {
-			if (ad != null && ad.getState()) {
+			if (md != null) {
 				setColor(g, ScriptToken.PEAKTABCOLOR);
-				PeakData data = (PeakData) ad.getData();
-				printPeakList(g, spec, data);
+				printPeakList(g, spec, (PeakData) md);
 			}
 			return;
 		}
-		if (ad == null || !isVisible(ad)) {
+		if (md == null) {
 			for (int i = 0; i < highlights.size(); i++) {
 				Highlight hl = highlights.get(i);
 				if (hl.spectrum == spec) {
@@ -2016,17 +2015,16 @@ abstract class GraphSet {
 			drawPeakTabs(g, spec);
 		}
 		int y;
-		if (ad != null && ad.getState()) {
+		if (md != null) {
 			y = (spec.isInverted() ? yPixel1 - 10 : yPixel0);
 			setColor(g, ScriptToken.PEAKTABCOLOR);
-			PeakData data = (PeakData) ad.getData();
-			for (int i = data.size(); --i >= 0;) {
-				Measurement m = data.get(i);
+			for (int i = md.size(); --i >= 0;) {
+				Measurement m = md.get(i);
 				int x = toPixelX(m.getXVal());
 				drawLine(g, x, y, x, y + 10);
 			}
-			if (isVisible(ad)) {
-				y = toPixelY(data.getThresh());
+			if (isVisible(getDialog(AType.PeakList, iSpec))) {
+				y = toPixelY(((PeakData) md).getThresh());
 				if (y == fixY(y) && !pd.isPrinting)
 					drawLine(g, xPixel0, y, xPixel1, y);
 			}
@@ -2676,10 +2674,7 @@ abstract class GraphSet {
 	}
 
 	private boolean isStartEndIntegral(int xPixel, boolean isEnd) {
-		Coordinate[] xyCoords = ((IntegralData) getDialog(AType.Integration, -1)
-				.getData()).getXYCoords();
-		int x = (isEnd ? xPixelPlot0 : xPixelPlot1);
-		return (isEnd ? x - xPixel < 20 : xPixel - x < 20);
+		return (isEnd ? xPixelPlot1 - xPixel < 20 : xPixel - xPixelPlot0 < 20);
 	}
 
 	boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress,
