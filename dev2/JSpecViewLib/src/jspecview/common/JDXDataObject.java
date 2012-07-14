@@ -812,23 +812,23 @@ public abstract class JDXDataObject extends JDXHeader {
     return (isNMR() ? nucleusX + "NMR" : dataType); 	
   }
 
-  public static Object[] getDefaultAnnotationInfo(JDXDataObject spec,
-			AType type) {
+  public Object[] getDefaultAnnotationInfo(AType type) {
 		String[] s1, s2;
+		boolean isNMR = isNMR();
 		switch (type) {
 		case Integration:
 			return new Object[] { null, new String[] {"0.0"}, null };
 		case Measurements:
-			s1 = (spec.isNMR() ? new String[] { "Hz", "ppm" } : null);
-			s2 = (s1 == null ? null : spec.isHNMR() ? new String[] { "0.0",
+			s1 = (isNMR ? new String[] { "Hz", "ppm" } : null);
+			s2 = (s1 == null ? null : isHNMR() ? new String[] { "0.0",
 					"0.0000" } : new String[] { "0.0", "0.000" });
 			return new Object[] { s1, s2, Integer.valueOf(0) };
 		case PeakList:
-			s1 = (spec.isNMR() ? new String[] { "Hz", "ppm" } : null);
+			s1 = (isNMR ? new String[] { "Hz", "ppm" } : new String[] {""} );
 			s2 = (s1 == null ? null
-					: spec.isHNMR() ? new String[] { "0.0", "0.00" } : new String[] {
+					: isHNMR() ? new String[] { "0.0", "0.00" } : new String[] {
 							"0.0", "0.0" });
-			return new Object[] { s1, s2, Integer.valueOf(1) };
+			return new Object[] { s1, s2, Integer.valueOf(isNMR ? 1 : 0) };
 		}
 		return null;
 	}

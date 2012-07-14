@@ -127,8 +127,7 @@ abstract class AwtAnnotationDialog extends AwtDialog implements AnnotationDialog
 		thisKey = thisType + "_" + subType;
 		myOptions = (Object[]) options.get(thisKey);
 		if (myOptions == null)
-			options.put(thisKey, myOptions = JDXDataObject.getDefaultAnnotationInfo(
-					spec, thisType));
+			options.put(thisKey, myOptions = spec.getDefaultAnnotationInfo(thisType));
 		unitOptions = (String[]) myOptions[0];
 		formatOptions = (String[]) myOptions[1];
 		unitPtr = (Integer) options.get(thisKey + "_unitPtr");

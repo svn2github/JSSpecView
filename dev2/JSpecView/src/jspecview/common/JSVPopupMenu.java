@@ -281,13 +281,13 @@ public class JSVPopupMenu extends JPopupMenu {
             scripter.getSelectedPanel().showDialog(AType.Integration);
           }
         });
-    setMenuItem(measurementsMenuItem, 'M', "List Measurements", 0, 0,
+    setMenuItem(measurementsMenuItem, 'M', "Measurements", 0, 0,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
           	scripter.getSelectedPanel().showDialog(AType.Measurements);
           }
         });
-    setMenuItem(peakListMenuItem, 'P', "List Peaks", 0, 0,
+    setMenuItem(peakListMenuItem, 'P', "Peaks", 0, 0,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
           	scripter.getSelectedPanel().showDialog(AType.PeakList);

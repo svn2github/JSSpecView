@@ -1998,7 +1998,7 @@ abstract class GraphSet {
 		AnnotationData ad = getDialog(AType.PeakList, iSpec);
 		JDXSpectrum spec = spectra.get(iSpec);
 		if (pd.isPrinting) {
-			if (ad != null) {
+			if (ad != null && ad.getState()) {
 				setColor(g, ScriptToken.PEAKTABCOLOR);
 				PeakData data = (PeakData) ad.getData();
 				printPeakList(g, spec, data);
@@ -2015,16 +2015,18 @@ abstract class GraphSet {
 			}
 			drawPeakTabs(g, spec);
 		}
-		if (ad != null) {
+		int y;
+		if (ad != null && ad.getState()) {
+			y = (spec.isInverted() ? yPixel1 - 10 : yPixel0);
 			setColor(g, ScriptToken.PEAKTABCOLOR);
 			PeakData data = (PeakData) ad.getData();
 			for (int i = data.size(); --i >= 0;) {
 				Measurement m = data.get(i);
 				int x = toPixelX(m.getXVal());
-				drawLine(g, x, yPixel0, x, yPixel0 + 10);
+				drawLine(g, x, y, x, y + 10);
 			}
 			if (isVisible(ad)) {
-				int y = toPixelY(data.getThresh());
+				y = toPixelY(data.getThresh());
 				if (y == fixY(y) && !pd.isPrinting)
 					drawLine(g, xPixel0, y, xPixel1, y);
 			}
@@ -2037,9 +2039,6 @@ abstract class GraphSet {
 			return;
 		pd.setFont(g, width, FONT_PLAIN, 8, false);
 		int h = getFontHeight(g);
-		int y4 = getStringWidth(g, "99.9999");
-		int y2 = (sdata[0].length >= 6 ? getStringWidth(g, "99.99") : 0);
-		int y = yPixel0 + y2 + y4 + 15;
 		int[] xs = new int[data.size()];
 		int[] xs0 = new int[data.size()];
 		int dx = 0;
@@ -2058,21 +2057,29 @@ abstract class GraphSet {
 		for (int i = 0; i < sdata.length; i++)
 			xs[i] -= dx;
 
+		boolean inverted = spec.isInverted();
+		int y4 = getStringWidth(g, "99.9999");
+		int y2 = (sdata[0].length >= 6 ? getStringWidth(g, "99.99") : 0);
+		int f = (inverted ? -1 : 1);
+		
+		int y = (inverted ? yPixel1 : yPixel0) + f * (y2 + y4 + 15);
 		for (int i = 0; i < sdata.length; i++) {
-			drawLine(g, xs[i], y, xs[i], y + 5);
-			drawLine(g, xs[i], y + 5, xs0[i], y + 10);
-			drawLine(g, xs0[i], y + 10, xs0[i], y + 15);
+			drawLine(g, xs[i], y, xs[i], y + 5 * f);
+			drawLine(g, xs[i], y + 5 * f, xs0[i], y + 10 * f);
+			drawLine(g, xs0[i], y + 10 * f, xs0[i], y + 15 * f);
 			if (y2 > 0 && sdata[i][4].length() > 0)
 				drawLine(g, (xs[i] + xs[i - 1]) / 2, y - y4 + 5,
 						(xs[i] + xs[i - 1]) / 2, y - y4 - 5);
 		}
 
-		y -= 2;
+		y -= f * 2;
 
-		drawStringRotated(g, 90, xs[0] - 15, y, "  ppm");
-		drawStringRotated(g, 90, xs[0] - 15, y - y4 - 5, " Hz");
+		if (y2 > 0) {
+  		drawStringRotated(g, 90, xs[0] - 15, y, "  ppm");
+	  	drawStringRotated(g, 90, xs[0] - 15, y - y4 - 5, " Hz");
+		}
 		for (int i = data.size(); --i >= 0;) {
-			drawStringRotated(g, 90, xs[i] + h / 3, y, sdata[i][1]);
+			drawStringRotated(g, 90 * f, xs[i] + f * h / 3, y, sdata[i][1]);
 			if (y2 > 0 && sdata[i][4].length() > 0) {
 				int x = (xs[i] + xs[i - 1]) / 2 + h / 3;
 				drawStringRotated(g, 90, x, y - y4 - 5, sdata[i][4]);
