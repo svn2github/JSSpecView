@@ -253,9 +253,11 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 
   /**
    * Constructs a new JSVPanel
+   * @param si 
    * 
    * @param spectrum
    *        the spectrum
+   * @param popup 
    * @throws ScalesIncompatibleException
    */
   public AwtPanel(ScriptInterface si, JDXSpectrum spectrum, JSVPopupMenu popup) {
@@ -282,13 +284,15 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   /**
    * Constructs a <code>JSVPanel</code> with List of spectra and corresponding
    * start and end indices of data points that should be displayed
+   * @param si 
    * 
    * @param spectra
    *        the List of <code>Graph</code> instances
-   * @param startIndices
-   *        the start indices
-   * @param endIndices
-   *        the end indices
+   * @param startIndex
+   *        the start index
+   * @param endIndex
+   *        the end index
+   * @param popup 
    * @throws JSpecViewException
    * @throws ScalesIncompatibleException
    */
@@ -303,10 +307,11 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 
   /**
    * generates a single panel or an integrated panel, as appropriate
+   * @param si 
    * 
    * @param spec
    * @param jsvpPopupMenu
-   * @return
+   * @return new panel
    */
   public static AwtPanel getNewPanel(ScriptInterface si, JDXSpectrum spec,
                                      JSVPopupMenu jsvpPopupMenu) {

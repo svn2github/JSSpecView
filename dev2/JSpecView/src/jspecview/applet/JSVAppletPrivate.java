@@ -459,6 +459,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 
 	/**
 	 * Shows a floating overlay key if possible
+	 * @param visible 
 	 * 
 	 * @param e
 	 *          the ActionEvent
@@ -510,6 +511,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 
 	/**
 	 * Shows the applet in a Frame
+	 * @param isSelected 
 	 */
 	void newWindow(boolean isSelected) {
 		isNewWindow = isSelected;
@@ -556,6 +558,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	
 	/**
 	 * Export spectrum in a given format
+	 * @param type 
 	 * 
 	 * @param command
 	 *          the name of the format to export in
@@ -590,11 +593,9 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	/**
 	 * Calls a javascript function given by the function name passing to it the
 	 * string parameters as arguments
+	 * @param callback 
+	 * @param params 
 	 * 
-	 * @param function
-	 *          the javascript function name
-	 * @param parameters
-	 *          the function arguments as a string in the form "x, y, z..."
 	 */
 	private void callToJavaScript(String callback, Object[] params) {
 		try {

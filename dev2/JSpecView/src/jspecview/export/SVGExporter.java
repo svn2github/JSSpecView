@@ -85,7 +85,7 @@ class SVGExporter extends FormExporter {
    * @param endDataPointIndex the end index of the coordinates
    * @param xUnits the units of the x axis
    * @param yUnits the units of the y axis
-   * @param continuous true if the graph is continuous, otherwise false
+   * @param isContinuous true if the graph is continuous, otherwise false
    * @param increasing true is the graph is increasing, otherwise false
    * @param plotAreaColor the color of the plot area
    * @param backgroundColor the color of the background
@@ -94,6 +94,7 @@ class SVGExporter extends FormExporter {
    * @param titleColor the color of the title
    * @param scaleColor the color of the scales
    * @param unitsColor the color of the units
+   * @param exportForInkscape 
    * @return data if fileName is null
    * @throws IOException
    */

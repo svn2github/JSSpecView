@@ -446,7 +446,8 @@ public class AppMenu extends JMenuBar {
   }
 
   /**
-	 * @param isWarningOnly  
+	 * @param isError 
+   * @param isWarningOnly  
 	 */
   void setError(boolean isError, boolean isWarningOnly) {
     errorLogMenuItem.setEnabled(isError);

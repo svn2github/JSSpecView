@@ -60,6 +60,7 @@ public class ViewDialog extends AwtDialog implements WindowListener {
 	/**
 	 * Initialises the <code>IntegralDialog</code> with the given values for minY,
 	 * offset and factor
+	 * @param si 
 	 * 
 	 * @param panel
 	 *          the parent panel

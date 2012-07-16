@@ -140,9 +140,7 @@ public class DisplaySchemesProcessor {
   /**
    * Loads the display schemes into memory and stores them in a
    * <code>Vector</code>
-   * 
-   * @param dispSchemeInputStream
-   *        the input stream to load
+   * @param br 
    * @throws Exception
    * @return true if loaded successfully
    */

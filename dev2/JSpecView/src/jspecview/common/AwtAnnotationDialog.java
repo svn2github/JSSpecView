@@ -91,6 +91,8 @@ abstract class AwtAnnotationDialog extends AwtDialog implements AnnotationDialog
 	/**
 	 * Initialises the <code>IntegralDialog</code> with the given values for minY,
 	 * offset and factor
+	 * @param si 
+	 * @param spec 
 	 * 
 	 * @param jsvp
 	 *          the parent panel

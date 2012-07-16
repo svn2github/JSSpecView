@@ -185,9 +185,12 @@ public class JDXExporter {
 
   /**
    * Returns the String for the header of the spectrum
+   * @param spec 
    * 
    * @param tmpDataClass
    *        the dataclass
+   * @param minY 
+   * @param maxY 
    * @param tmpXFactor
    *        the x factor
    * @param tmpYFactor

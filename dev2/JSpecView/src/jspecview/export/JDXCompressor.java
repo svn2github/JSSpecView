@@ -50,6 +50,7 @@ class JDXCompressor {
    *        the start index of the array of Coordinates to be compressed
    * @param endIndex
    *        the end index of the array of Coordinates to be compressed
+   * @param step 
    * @param xFactor
    *        x factor for compression
    * @param yFactor
@@ -125,6 +126,7 @@ class JDXCompressor {
    * @param startIndex
    *        startIndex the start index of the array of Coordinates to be
    *        compressed
+   * @param step 
    * @param endIndex
    *        endIndex the end index of the array of Coordinates to be compressed
    * @param xFactor
@@ -174,6 +176,7 @@ class JDXCompressor {
    *        compressed
    * @param endIndex
    *        endIndex the end index of the array of Coordinates to be compressed
+   * @param step 
    * @param xFactor
    *        x factor for compression
    * @param yFactor
@@ -211,6 +214,7 @@ class JDXCompressor {
    *        compressed
    * @param endIndex
    *        endIndex the end index of the array of Coordinates to be compressed
+   * @param step 
    * @param xFactor
    *        x factor for compression
    * @param yFactor
@@ -266,11 +270,8 @@ class JDXCompressor {
 
   /**
    * Makes a DIF Character
+   * @param dy 
    * 
-   * @param y2
-   *        the second y value
-   * @param y1
-   *        the first y value
    * @return the DIF Character
    */
   private static String makeDIF(long dy) {
@@ -279,6 +280,7 @@ class JDXCompressor {
 
   /**
    * Makes a DUP Character
+   * @param y 
    * 
    * @param sNum
    *        the input number as a string
@@ -294,7 +296,7 @@ class JDXCompressor {
    * @param y
    * @param strPos
    * @param strNeg
-   * @return
+   * @return compressed string
    */
   private static String compress(long y, String strPos, String strNeg) {
     boolean negative = false;
@@ -320,6 +322,7 @@ class JDXCompressor {
    *        that start index
    * @param endIndex
    *        the end index
+   * @param step 
    * @return returns the list of Coordinates as a string
    */
   static String getXYList(Coordinate[] xyCoords, int startIndex, int endIndex,

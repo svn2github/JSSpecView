@@ -222,6 +222,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	/**
 	 * Constructor
+	 * @param jmolDisplay 
 	 * 
 	 * @param jmolOrAdvancedApplet
 	 */
@@ -425,6 +426,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	/**
 	 * Sets the preferences or properties of the application that is loaded from a
 	 * properties file.
+	 * @param shouldApplySpectrumDisplaySettings 
 	 */
 	private void setApplicationProperties(
 			boolean shouldApplySpectrumDisplaySettings) {
@@ -1075,9 +1077,9 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	/**
 	 * Opens and displays a file
+	 * @param fileName 
+	 * @param closeFirst 
 	 * 
-	 * @param file
-	 *          the file
 	 */
 	public void openFile(String fileName, boolean closeFirst) {
 		if (closeFirst) { // drag/drop

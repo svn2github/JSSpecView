@@ -130,6 +130,7 @@ public interface JSVAppletInterface {
 
   /**
    * precede <Peaks here with full name of Jmol applet (including syncID)
+   * @param peakScript 
    * 
    */
   public abstract void syncScript(String peakScript);

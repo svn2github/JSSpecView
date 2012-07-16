@@ -64,13 +64,12 @@ public class Exporter {
 
   /**
    * returns message if path is not null, otherwise full string of text (unsigned applet)
-   * 
-   * @param type
+   * @param mode 
    * @param path
    * @param spec
    * @param startIndex
    * @param endIndex
-   * @return
+   * @return message or text
    * @throws IOException
    */
   public static String exportTheSpectrum(Type mode, String path, 
@@ -155,8 +154,9 @@ public class Exporter {
 
   /**
    * from EXPORT command
-   * 
+   * @param jsvp 
    * @param tokens
+   * @param forInkscape 
    * 
    * @return message for status line
    */
@@ -196,20 +196,18 @@ public class Exporter {
 
   /**
    * Auxiliary Export method
-   * 
-   * @param spec
-   *        the spectrum to export
-   * @param fc
-   *        file chooser to use
+   * @param jsvp 
    * @param mode
    *        the format to export in
    * @param index
    *        the index of the spectrum
+   * @param fc
+   *        file chooser to use
    * @param recentFileName
    * @param dirLastExported
    * @return dirLastExported
    */
-	private static String exportSpectrumOrImage(JSVPanel selectedJSVPanel,
+	private static String exportSpectrumOrImage(JSVPanel jsvp,
                                               String mode, int index,
                                               JFileChooser fc,
                                               String recentFileName,
@@ -218,7 +216,7 @@ public class Exporter {
     JSVFileFilter filter = new JSVFileFilter();
     //TODO: This is flawed. It assumes the file name has one and only one "." in it.
     if (imode == Type.SOURCE) {
-      String fname = selectedJSVPanel.getSpectrum().getFilePath();
+      String fname = jsvp.getSpectrum().getFilePath();
       if (!FileManager.isURL(fname))
         recentFileName = fname; 
     }
@@ -247,13 +245,13 @@ public class Exporter {
     }
     fc.setFileFilter(filter);
     fc.setSelectedFile(new File(name));
-    int returnVal = fc.showSaveDialog((Component) selectedJSVPanel);
+    int returnVal = fc.showSaveDialog((Component) jsvp);
     if (returnVal != JFileChooser.APPROVE_OPTION)
       return dirLastExported;
     File file = fc.getSelectedFile();
     String dir = file.getParent();
     if (file.exists()) {
-      int option = JOptionPane.showConfirmDialog((Component) selectedJSVPanel,
+      int option = JOptionPane.showConfirmDialog((Component) jsvp,
           "Overwrite " + file.getName() + "?", "Confirm Overwrite Existing File",
           JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
       if (option == JOptionPane.NO_OPTION)
@@ -263,7 +261,7 @@ public class Exporter {
     if (imode == Type.SOURCE)
       fileCopy(name, file);
     else
-      msg = exportSpectrumOrImage(selectedJSVPanel, imode, index, file
+      msg = exportSpectrumOrImage(jsvp, imode, index, file
           .getAbsolutePath());
     return (msg == null ? null : dir);
   }

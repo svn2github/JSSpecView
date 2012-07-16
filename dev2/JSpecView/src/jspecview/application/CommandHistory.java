@@ -71,7 +71,7 @@ public class CommandHistory {
   /**
    * 
    * @param isPrevious
-   * @return
+   * @return command
    */
   private synchronized String recallCommand(boolean isPrevious) {
     cmdOffset = 0;

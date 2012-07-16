@@ -93,7 +93,7 @@ public class AwtParameters extends Parameters {
   /**
    * Returns a hex string representation of a <code>Color</color> object
    * 
-   * @param color
+   * @param oColor
    *        the Color
    * @return a hex string representation of a <code>Color</color> object
    */
@@ -126,6 +126,7 @@ public class AwtParameters extends Parameters {
    * "255-255-255"
    * "255.255.255"
    * </pre>
+   * @param strColor 
    * 
    * @param string
    *        the color as a string
