@@ -79,9 +79,11 @@ public class JDXSource extends JDXHeader {
 
   /**
    * Adds a Spectrum to the list
+   * @param filePath 
    * 
    * @param spectrum
    *        the spectrum to be added
+   * @param forceSub 
    */
   public void addJDXSpectrum(String filePath, JDXSpectrum spectrum, boolean forceSub) {
     if (filePath == null)

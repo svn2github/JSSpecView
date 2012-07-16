@@ -133,7 +133,8 @@ public class ScaleData {
 	 *          the initial number of X divisions for scale
 	 * @param initNumYDivisions
 	 *          the initial number of Y divisions for scale
-	 * @return returns an instance of <code>ScaleData</code>
+	 * @param isContinuous 
+	 * @returns an instance of <code>ScaleData</code>
 	 */
 	public ScaleData(Coordinate[] coords, int start, int end,
 			int initNumXDivisions, int initNumYDivisions, boolean isContinuous) {

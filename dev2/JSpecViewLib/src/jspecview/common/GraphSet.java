@@ -1,5 +1,6 @@
 package jspecview.common;
 
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -12,6 +13,7 @@ import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
 import jspecview.util.Logger;
 import jspecview.util.Parser;
+import jspecview.util.TextFormat;
 
 abstract class GraphSet {
 
@@ -420,6 +422,8 @@ abstract class GraphSet {
 
 	/**
 	 * Initializes the graph set
+	 * @param startIndex 
+	 * @param endIndex 
 	 * 
 	 * @param spectra
 	 *          the array of spectra
@@ -770,7 +774,7 @@ abstract class GraphSet {
 	 * @param x
 	 * @param y
 	 * @param x2
-	 * @return
+	 * @return true or false
 	 */
 	private boolean isBetweenPeaks(JDXSpectrum spec, double x, double y,
 			double[] x2) {
@@ -925,8 +929,8 @@ abstract class GraphSet {
 	private int xPixelMovedTo2 = -1;
 	private double yValueMovedTo;
 	private double xValueMovedTo;
-	private NumberFormat formatterX;
-	private NumberFormat formatterY;
+	private DecimalFormat formatterX;
+	private DecimalFormat formatterY;
 	private boolean haveLeftRightArrows;
 	private int xPixelPlot1;
 	private int xPixelPlot0;
@@ -1032,9 +1036,11 @@ abstract class GraphSet {
 	 * time through, we have to create new pins. When the frame is resized, we
 	 * need to reset their positions along the slider based on their values, and
 	 * we need to also move the sliders to the right place.
+	 * @param needNewPins 
 	 * 
 	 * @param isResized
 	 * @param subIndex
+	 * @param doDraw1DObjects 
 	 */
 	private void setWidgets(boolean needNewPins, int subIndex,
 			boolean doDraw1DObjects) {
@@ -1207,6 +1213,8 @@ abstract class GraphSet {
 	 *          TODO
 	 * @param finalY
 	 *          the Y end coordinate of the zoom area
+	 * @param addZoom 
+	 * @param checkRange 
 	 * @param is1D
 	 *          TODO
 	 */
@@ -1576,6 +1584,7 @@ abstract class GraphSet {
 	 * 
 	 * @param g
 	 * @param subIndex
+	 * @param needNewPins 
 	 * @param doDraw1DObjects
 	 */
 	private void drawWidgets(Object g, int subIndex, boolean needNewPins,
@@ -1643,6 +1652,7 @@ abstract class GraphSet {
 	 *          units
 	 * @param endX
 	 *          units
+	 * @param whatColor 
 	 * @param color
 	 * @param isFullHeight
 	 */
@@ -1672,6 +1682,9 @@ abstract class GraphSet {
 	 *          the <code>Graphics</code> object
 	 * @param index
 	 *          the index of the Spectrum to draw
+	 * @param yOffset 
+	 * @param isGrey 
+	 * @param ig 
 	 * @param height
 	 *          the height to be drawn in pixels
 	 * @param width
@@ -1792,6 +1805,10 @@ abstract class GraphSet {
 	/**
 	 * 
 	 * @param g
+	 * @param iSpec 
+	 * @param addCurrentBox 
+	 * @param addSplitBox 
+	 * @param drawUpDownArrows 
 	 * @param height
 	 * @param width
 	 */
@@ -1881,7 +1898,7 @@ abstract class GraphSet {
 	private void drawXScale(Object g) {
 
 		String hashX = getNumberFormat(viewData.hashNums[0]);
-		NumberFormat formatter = pd.getFormatter(hashX);
+		DecimalFormat formatter = TextFormat.getDecimalFormat(hashX);
 		pd.setFont(g, width, FONT_PLAIN, 12, false);
 		int y1 = yPixel1;
 		int y2 = yPixel1 + 3;
@@ -1929,7 +1946,7 @@ abstract class GraphSet {
 	private void drawYScale(Object g) {
 
 		String hashY = getNumberFormat(viewData.hashNums[1]);
-		NumberFormat formatter = pd.getFormatter(hashY);
+		DecimalFormat formatter = TextFormat.getDecimalFormat(hashY);
 		pd.setFont(g, width, FONT_PLAIN, 12, false);
 		int h = getFontHeight(g);
 		double max = viewData.maxYOnScale + viewData.yStep / 2;
@@ -2230,9 +2247,8 @@ abstract class GraphSet {
 	}
 
 	private void setFormatters() {
-		formatterX = pd.getFormatter(getNumberFormat(viewData.hashNums[0]));
-		String hashY = getNumberFormat(viewData.hashNums[1]);
-		formatterY = pd.getFormatter(hashY);
+		formatterX = TextFormat.getDecimalFormat(getNumberFormat(viewData.hashNums[0]));
+		formatterY = TextFormat.getDecimalFormat(getNumberFormat(viewData.hashNums[1]));
 	}
 
 	private void setToolTipForPixels(int xPixel, int yPixel) {
@@ -2299,7 +2315,7 @@ abstract class GraphSet {
 			// }
 		} else if (haveIntegralDisplayed(iSpec)) {
 			yPt = getIntegrationGraph(iSpec).getPercentYValueAt(xPt);
-			xx += ", " + pd.getFormatter("#0.0").format(yPt);
+			xx += ", " + TextFormat.getDecimalFormat("#0.0").format(yPt);
 		}
 		pd
 				.setToolTipText((pendingMeasurement != null
@@ -2569,7 +2585,7 @@ abstract class GraphSet {
 	 * @param x2
 	 *          the x value of the coordinate where the highlight should end
 	 * @param spec
-	 * @param color
+	 * @param oColor 
 	 *          the color of the highlight
 	 */
 	void addHighlight(double x1, double x2, JDXSpectrum spec, Object oColor) {
@@ -2843,6 +2859,7 @@ abstract class GraphSet {
 
 	/**
 	 * 
+	 * @param og 
 	 * @param g
 	 * @param withGrid
 	 * @param withXUnits
@@ -2852,6 +2869,10 @@ abstract class GraphSet {
 	 * @param drawY0
 	 * @param height
 	 * @param width
+	 * @param left 
+	 * @param right 
+	 * @param top 
+	 * @param bottom 
 	 * @param plotAreaInsets
 	 * @param isResized
 	 */
@@ -3253,6 +3274,7 @@ abstract class GraphSet {
 	 * @param filePath
 	 * @param type
 	 * @param model
+	 * @return haveFound
 	 */
 	boolean selectSpectrum(String filePath, String type, String model) {
 		boolean haveFound = false;
@@ -3416,7 +3438,7 @@ abstract class GraphSet {
 	 * 
 	 * @param dx
 	 * @param x1
-	 * @return
+	 * @return true if accomplished
 	 */
 	boolean shiftSpectrum(double dx, double x1) {
 		JDXSpectrum spec = getSpectrum();
@@ -3593,7 +3615,7 @@ abstract class GraphSet {
 	 * deprecated -- or at least not compatible with multiple spectra
 	 * 
 	 * @param i
-	 * @return
+	 * @return list 
 	 */
 	@SuppressWarnings("unchecked")
 	ArrayList<Annotation> getIntegrationRatios(int i) {

@@ -27,6 +27,8 @@ package jspecview.util;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.Hashtable;
+import java.util.Map;
 
 public class TextFormat {
 
@@ -41,7 +43,10 @@ public class TextFormat {
    * The line separator for the system that the program is running on
    */
   public static final String newLine = System.getProperty("line.separator");
-  {
+
+	private static Map<String, DecimalFormat> htFormats = new Hashtable<String, DecimalFormat>();
+
+	{
     useNumberLocalization[0] = Boolean.TRUE;
   }
   
@@ -467,15 +472,22 @@ public class TextFormat {
     return true;
   }
 
-  /**
-   * If the applet is used for teaching, then we may need to obscure the title of
-   * the spectrum
-   */
-  
-  public static DecimalFormat getDecimalFormat(String hash) {
-    return new DecimalFormat(hash, new DecimalFormatSymbols(java.util.Locale.US));
-  }
+	/**
+	 * If the applet is used for teaching, then we may need to obscure the title
+	 * of the spectrum
+	 * 
+	 * @param hash
+	 * @return a new decimal format
+	 */
 
+	public static DecimalFormat getDecimalFormat(String hash) {
+		DecimalFormat df = htFormats.get(hash);
+		if (df == null)
+			htFormats.put(hash, df = new DecimalFormat(hash.equals("") ? "0.00E0"
+					: hash, new DecimalFormatSymbols(java.util.Locale.US)));
+		return df;
+	}
+  
   public static String trimQuotes(String value) {
     return (value.length() > 1 && value.startsWith("\"")
         && value.endsWith("\"") ? value.substring(1, value.length() - 1)
@@ -489,7 +501,7 @@ public class TextFormat {
    * not Java's 1.5E3 or 1.5E-2
    * 
    * @param x
-   * @return
+   * @return exponent fixed
    */
   public static String fixExponent(double x) {
     String s = formatter1.format(x);

@@ -43,6 +43,7 @@ class CMLReader extends XMLReader {
   /**
    * Does the actual work of initializing the CMLSource
    * @param filePath 
+   * @param br 
    * @param in an InputStream of the CML document
    * @return an instance of a CMLSource
    */

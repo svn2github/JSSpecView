@@ -92,7 +92,7 @@ public class FileManager {
    * 
    * @param name
    * @param appletDocumentBase
-   * @return
+   * @return name
    * @throws MalformedURLException
    */
   public static String classifyName(String name, URL appletDocumentBase)

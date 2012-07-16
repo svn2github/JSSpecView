@@ -354,7 +354,7 @@ public class JDXSpectrum extends JDXDataObject {
    * @param spectrum
    * @param newXYCoords
    * @param units
-   * @return
+   * @return new spectrum
    */
   public static JDXSpectrum newSpectrum(JDXSpectrum spectrum,
                                          Coordinate[] newXYCoords,
@@ -443,7 +443,8 @@ public class JDXSpectrum extends JDXDataObject {
    * These spectra can be iterated over using the UP and DOWN keys.
    * 
    * @param spectrum
-   * @return
+   * @param forceSub 
+   * @return true if was possible
    */
   public boolean addSubSpectrum(JDXSpectrum spectrum, boolean forceSub) {
     if (!forceSub && (numDim < 2 || blockID != spectrum.blockID)

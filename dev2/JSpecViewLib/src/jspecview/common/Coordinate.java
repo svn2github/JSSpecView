@@ -366,6 +366,7 @@ public class Coordinate {
   /**
    * Returns the minimum x value value from an array of arrays of
    * <code>Coordinate</code>s.
+   * @param spectra 
    * @param startList
    *        the start indices
    * @param endList
@@ -414,6 +415,7 @@ public class Coordinate {
   /**
    * Returns the maximum x value value from an array of arrays of
    * <code>Coordinate</code>s.
+   * @param spectra 
    * 
    * @param coordLists
    *        the 2d coordinate array
@@ -462,6 +464,7 @@ public class Coordinate {
   /**
    * Returns the minimum y value value from an array of arrays of
    * <code>Coordinate</code>s.
+   * @param spectra 
    * 
    * @param coordLists
    *        the 2d coordinate array
@@ -511,6 +514,7 @@ public class Coordinate {
   /**
    * Returns the maximum y value value from an array of arrays of
    * <code>Coordinate</code>s.
+   * @param spectra 
    * 
    * @param coordLists
    *        the 2d coordinate array
@@ -592,7 +596,7 @@ public class Coordinate {
    *
    * @param xyCoords
    * @param pt
-   * @return
+   * @return center
    */
 	public static double parabolicInterpolation(Coordinate[] xyCoords, int pt) {
   	double alpha = xyCoords[pt - 1].yVal;

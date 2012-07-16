@@ -36,7 +36,8 @@ class ViewData extends ScaleData {
 	 *          the initial number of X divisions for scale
 	 * @param initNumYDivisions
 	 *          the initial number of Y divisions for scale
-	 * @return returns an instance of <code>MultiScaleData</code>
+	 * @param isContinuous 
+	 * @returns an instance of <code>MultiScaleData</code>
 	 */
 	ViewData(List<JDXSpectrum> spectra, double yPt1, double yPt2,
 			int[] startList, int[] endList, int initNumXDivisions,
@@ -111,8 +112,9 @@ class ViewData extends ScaleData {
    * @param minPoints
    * @param startIndices  to fill
    * @param endIndices    to fill
+   * @param useRange 
    * @param scaleData
-   * @return
+   * @return true if OK
    */
   boolean setDataPointIndices(List<JDXSpectrum> graphsTemp,
                                             double initX,

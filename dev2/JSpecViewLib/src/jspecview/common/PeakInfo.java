@@ -113,7 +113,7 @@ public class PeakInfo {
    * @param filePath
    * @param type
    * @param model
-   * @return
+   * @return true for MS in GC/MS; reverse of checkType
    */
 	public boolean checkFileTypeModel(String filePath, 
 			String type, String model) {
@@ -151,7 +151,7 @@ public class PeakInfo {
    * a spectrum which, when loaded, should fire a message to load first peak --
    * GC for now
    * 
-   * @return
+   * @return can autoselect on loading
    */
   public boolean autoSelectOnLoad() {
     return (type.startsWith("GC"));

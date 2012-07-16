@@ -118,6 +118,7 @@ public class Parameters {
 
   /**
    * Gets the color of an element in the scheme
+   * @param st 
    * @param element the name of the element
    * @return the <code>Color</code> of the element
    */
@@ -129,8 +130,10 @@ public class Parameters {
 
   /**
    * Sets the color of an element
+   * @param st 
    * @param element the name of the element
    * @param color the color the element should have
+   * @return color object 
    */
   public Object setColor(ScriptToken st, Object color){
     if (color != null)
@@ -307,6 +310,7 @@ public class Parameters {
 
   /**
 	 * @param value  
+   * @return Color[]
 	 */
   protected Object getPlotColors(String value) {
     // overridden in AwtParameters
@@ -316,6 +320,7 @@ public class Parameters {
   /**
 	 * @param st  
    * @param value 
+   * @return color object
 	 */
   protected Object setColorFromString(ScriptToken st, String value) {
     // overridden in AwtParameters
@@ -325,6 +330,7 @@ public class Parameters {
   /**
 	 * @param st 
    * @param value  
+   * @return font object
 	 */
   protected Object getFontName(ScriptToken st, String value) {
     // overridden in AwtParameters

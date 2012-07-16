@@ -232,6 +232,7 @@ public class IntegralData extends MeasurementData {
 	/**
 	 * Parses integration ratios and x values from a string and returns them as
 	 * <code>IntegrationRatio</code> objects
+	 * @param spec 
 	 * 
 	 * @param value
 	 * @return ArrayList<IntegrationRatio> object representing integration ratios
@@ -257,7 +258,8 @@ public class IntegralData extends MeasurementData {
 	}
 
   /**
-   * returns FRACTIONAL value * 100
+   * @param x 
+   * @return FRACTIONAL value * 100
    */
   public double getPercentYValueAt(double x) {
     return getYValueAt(x) * 100;

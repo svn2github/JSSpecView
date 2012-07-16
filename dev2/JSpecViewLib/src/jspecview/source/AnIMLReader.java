@@ -41,6 +41,7 @@ class AnIMLReader extends XMLReader {
   /**
    * Does the actual work of initializing the XMLSource
    * @param filePath 
+   * @param br 
    * @param in an InputStream of the AnIML document
    * @return an instance of a AnIMLSource
    */

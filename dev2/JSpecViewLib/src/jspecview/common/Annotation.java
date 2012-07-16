@@ -46,6 +46,14 @@ public class Annotation extends Coordinate {
   /**
    * Constructor -- note that x is spectral X value, but y is pixels above
    * baseline
+   * @param spec 
+   * @param x 
+   * @param y 
+   * @param text 
+   * @param isPixels 
+   * @param is2D 
+   * @param offsetX 
+   * @param offsetY 
    * 
    */
   public Annotation(JDXSpectrum spec, double x, double y, String text, boolean isPixels, boolean is2D, int offsetX, int offsetY) {

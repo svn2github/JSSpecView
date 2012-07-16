@@ -198,8 +198,10 @@ public class ImageView {
    * 
    * @param width
    * @param height
+   * @param spec 
+   * @param forceNew 
    * @param imageView
-   * @return
+   * @return image buffer
    */
   public int[] get2dBuffer(int width, int height, JDXSpectrum spec, boolean forceNew) {
     List<JDXSpectrum> subSpectra = spec.getSubSpectra();

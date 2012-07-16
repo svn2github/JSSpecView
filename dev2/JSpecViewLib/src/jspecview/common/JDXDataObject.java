@@ -531,6 +531,7 @@ public abstract class JDXDataObject extends JDXHeader {
    * Determines if the plot should be displayed decreasing by default
    * 
    * @param spectrum
+   * @return true or false
    */
   public boolean shouldDisplayXAxisIncreasing() {
     String dt = dataType.toUpperCase();

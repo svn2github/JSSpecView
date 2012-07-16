@@ -37,8 +37,6 @@
 
 package jspecview.common;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.ArrayList;
@@ -47,7 +45,6 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 import jspecview.common.Annotation.AType;
-import jspecview.util.TextFormat;
 
 /**
  * JSVPanel class draws a plot from the data contained a instance of a
@@ -83,8 +80,6 @@ public class PanelData {
 		return currentGraphSet;
 	}
 
-	private Map<String, NumberFormat> htFormats = new Hashtable<String, NumberFormat>();
-
 	Hashtable<ScriptToken, Object> options = new Hashtable<ScriptToken, Object>();
 	JSVPanel owner;
 	List<GraphSet> graphSets;
@@ -99,7 +94,6 @@ public class PanelData {
 			graphSets.get(i).dispose();
 		graphSets = null;
 		currentGraphSet = null;
-		htFormats = null;
 		coordClicked = null;
 		coordsClicked = null;
 		thisWidget = null;
@@ -512,11 +506,14 @@ public class PanelData {
 	/**
 	 * Add information about a region of the displayed spectrum to be highlighted
 	 * applet only right now
+	 * @param gs 
 	 * 
 	 * @param x1
 	 *          the x value of the coordinate where the highlight should start
 	 * @param x2
 	 *          the x value of the coordinate where the highlight should end
+	 * @param spec 
+	 * @param r 
 	 * @param color
 	 *          the color of the highlight
 	 * @param a
@@ -636,11 +633,11 @@ public class PanelData {
 	}
 
 	/**
-	 * moving panel click event processing to JSVPanel from applet
+	 * click event processing
 	 * 
 	 * @param coord
 	 * @param actualCoord
-	 * @return
+	 * @return true if a coordinate was picked and fills in coord and actualCoord
 	 */
 	public boolean getPickedCoordinates(Coordinate coord, Coordinate actualCoord) {
 		return Coordinate.getPickedCoordinates(coordsClicked, coordClicked, coord,
@@ -677,17 +674,6 @@ public class PanelData {
 
 	boolean isCurrentGraphSet(GraphSet graphSet) {
 		return graphSet == currentGraphSet;
-	}
-
-	final static DecimalFormat SCI_FORMATTER = TextFormat
-			.getDecimalFormat("0.00E0");
-
-	NumberFormat getFormatter(String hash) {
-		NumberFormat formatter = htFormats.get(hash);
-		if (formatter == null)
-			htFormats.put(hash, formatter = (hash.equals("") ? SCI_FORMATTER
-					: TextFormat.getDecimalFormat(hash)));
-		return formatter;
 	}
 
 	void repaint() {
@@ -732,8 +718,8 @@ public class PanelData {
 
 	/**
 	 * Notifies CoordinatePickedListeners
+	 * @param p 
 	 * 
-	 * @param coord
 	 */
 	void notifyPeakPickedListeners(PeakPickEvent p) {
 		if (p == null) {
@@ -873,6 +859,7 @@ public class PanelData {
 	 * DEPRECATED
 	 * 
 	 * Sets the integration ratios that will be displayed
+	 * @param value 
 	 * 
 	 * 
 	 * @param ratios

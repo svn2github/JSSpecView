@@ -102,7 +102,7 @@ public class FileReader {
    * 
    * @param in
    * @param obscure
-   * @return
+   * @return source
    * @throws IOException
    * @throws JSpecViewException
    */
@@ -121,7 +121,7 @@ public class FileReader {
    * @param obscure
    * @param iSpecFirst TODO
    * @param iSpecLast TODO
-   * @return
+   * @return source
    * @throws IOException
    * @throws JSpecViewException
    */
@@ -168,6 +168,7 @@ public class FileReader {
 
   /**
    * starting point for reading all data
+   * @param br 
    * 
    * @param sourceContents
    *        the contents of the source as a String
@@ -390,6 +391,7 @@ public class FileReader {
    * 
    * @param sourceLDRTable
    * @param spectrum0
+   * @param label 
    * @param haveVarLabel
    * 
    * @throws JSpecViewException

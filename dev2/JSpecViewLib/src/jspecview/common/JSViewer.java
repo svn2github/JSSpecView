@@ -419,6 +419,8 @@ public class JSViewer {
   /**
    * incoming script processing of <PeakAssignment file="" type="xxx"...> record
    * from Jmol
+   * @param si 
+   * @param peakScript 
    */
 
   public static void syncScript(ScriptInterface si, String peakScript) {

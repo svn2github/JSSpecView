@@ -169,7 +169,7 @@ public enum ScriptToken {
    * @param st
    * @param params
    * @param cmd
-   * @return
+   * @return adjusted value
    */
   public static String getValue(ScriptToken st, StringTokenizer params,
                                 String cmd) {
