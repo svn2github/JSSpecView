@@ -209,7 +209,7 @@ public class Exporter {
    * @param dirLastExported
    * @return dirLastExported
    */
-  private static String exportSpectrumOrImage(JSVPanel selectedJSVPanel,
+	private static String exportSpectrumOrImage(JSVPanel selectedJSVPanel,
                                               String mode, int index,
                                               JFileChooser fc,
                                               String recentFileName,
@@ -239,7 +239,7 @@ public class Exporter {
       break;
     case AML:
       mode = "XML";
-      // fall through
+      //$FALL-THROUGH$
     default:
       filter.addExtension(mode);
       filter.setDescription(mode + " Files");

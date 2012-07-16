@@ -179,13 +179,10 @@ public class Parameters {
   public double integralOffset = IntegralData.DEFAULT_OFFSET;
 	public boolean integralDrawAll = false;
 
-  public double peakListThreshold = 20; // <= 0 disables these
-  public int peakListInclude = -10;     // two 
-  public int peakListSkip = 0;
+  public double peakListThreshold = Double.NaN; // <= 0 disables these
   public String peakListInterpolation = "parabolic";
-  public String numberFormat;
-  
-  
+  public String numberFormat = "0.00";
+    
   protected void setParamDefaults() {
     setBoolean(ScriptToken.TITLEON, true);
     setBoolean(ScriptToken.ENABLEZOOM, true);
@@ -239,6 +236,7 @@ public class Parameters {
     jsvp.setColorOrFont(ds, null);
  }
 
+	@SuppressWarnings("incomplete-switch")
 	public void set(JSVPanel jsvp, ScriptToken st, String value) {
 		Object param = null;
 		switch (st) {
@@ -307,19 +305,40 @@ public class Parameters {
 			jsvp.getPanelData().setBoolean(this, st);
 	}
 
+  /**
+	 * @param value  
+	 */
   protected Object getPlotColors(String value) {
     // overridden in AwtParameters
     return null;
   }
 
+  /**
+	 * @param st  
+   * @param value 
+	 */
   protected Object setColorFromString(ScriptToken st, String value) {
     // overridden in AwtParameters
     return null;
   }
 
+  /**
+	 * @param st 
+   * @param value  
+	 */
   protected Object getFontName(ScriptToken st, String value) {
     // overridden in AwtParameters
     return null;
   }
+
+	static boolean isMatch(String match, String key) {
+		return match == null || key.equalsIgnoreCase(match);
+	}
+
+	public static void putInfo(String match, Map<String, Object> info,
+	                           String key, Object value) {
+	  if (value != null && Parameters.isMatch(match, key))
+	    info.put(match == null ? key : match, value);
+	}
 
 }

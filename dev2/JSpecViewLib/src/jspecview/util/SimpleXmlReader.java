@@ -282,7 +282,7 @@ public class SimpleXmlReader {
 
   private class XmlEvent {
 
-    private int eventType = TAG_NONE;
+    int eventType = TAG_NONE;
     private int ptr = 0;
     private Tag tag;
     private String data;

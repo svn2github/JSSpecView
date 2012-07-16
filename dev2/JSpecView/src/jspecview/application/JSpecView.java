@@ -73,7 +73,7 @@ public class JSpecView implements JSVInterface {
     }
 
     JSpecView jsv = new JSpecView();
-    jsv.mainFrame = new MainFrame(null, (JSVInterface) jsv);
+    jsv.mainFrame = new MainFrame(null, jsv);
 
     if (args.length > 0) {
       // check for command-line arguments

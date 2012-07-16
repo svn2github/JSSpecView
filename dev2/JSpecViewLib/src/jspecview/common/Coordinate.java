@@ -235,7 +235,7 @@ public class Coordinate {
     }
     
     Coordinate[] coord = new Coordinate[xyCoords.size()];
-    return (Coordinate[]) xyCoords.toArray(coord);
+    return xyCoords.toArray(coord);
   }
 
   /**

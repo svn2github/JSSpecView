@@ -1,6 +1,8 @@
 package jspecview.common;
 
 import java.text.DecimalFormat;
+import java.util.Hashtable;
+import java.util.Map;
 
 import jspecview.common.Annotation.AType;
 import jspecview.util.TextFormat;
@@ -32,23 +34,31 @@ public class PeakData extends MeasurementData {
 		return thresh;
 	}
 	
-	private final static String[] NMR_HEADER = new String[] { "peak", "shift/ppm", "intens" , "shift/hz", "diff/hz", "2-diff", "3-diff" };
+	private final static String[] HNMR_HEADER = new String[] { "peak", "shift/ppm", "intens" , "shift/hz", "diff/hz", "2-diff", "3-diff" };
 
-	public String[] getDataHeader(String[][] data) {
-		return (data.length == 0 ? new String[] {}
-	  : data[0].length == 3 ? new String[] { "peak", spec.getXUnits(), spec.getYUnits() }
-	  : NMR_HEADER); 		
+	@Override
+	public String[] getDataHeader() {
+		return (spec.isHNMR() ? HNMR_HEADER : new String[] { "peak", spec.getXUnits(), spec.getYUnits() }); 		
 	}
 
-	public String[][] getPeakListArray() {
+	@Override
+	public String[][] getMeasurementListArray(String units) {
 		String[][] data = new String[size()][];
 		double[] last = new double[] {-1e100, 1e100, 1e100};
 		for (int pt = 0, i = size(); --i >= 0;) {
-			data[pt++] = spec.getPeakListArray(pt, get(i), last, minY, maxY);
+			data[pt++] = spec.getPeakListArray(pt, get(i), last, maxY);
 		}
 		return data;
 	}
 	
+	@Override
+	public Map<String, Object> getParams() {
+		Map<String, Object> info = new Hashtable<String, Object>();
+		info.put("interpolation", myParams.peakListInterpolation);
+		info.put("threshold", Double.valueOf(myParams.peakListThreshold));
+		return info;
+	}
+
 	public void setPeakList(Parameters p, DecimalFormat formatter, ScaleData view) {
 		if (formatter == null)
 			formatter = TextFormat.getDecimalFormat(spec.getPeakPickHash());
@@ -57,10 +67,10 @@ public class PeakData extends MeasurementData {
 		if (xyCoords.length < 3)
 			return;
 		clear();
-		myParams.peakListInclude = p.peakListInclude;
-		myParams.peakListInterpolation = p.peakListInterpolation;
-		myParams.peakListSkip = p.peakListSkip;
-		myParams.peakListThreshold = p.peakListThreshold;
+		if (p != null) {
+  		myParams.peakListInterpolation = p.peakListInterpolation;
+	  	myParams.peakListThreshold = p.peakListThreshold;
+		}
 		boolean doInterpolate = (myParams.peakListInterpolation.equals("parabolic"));
 		boolean isInverted = spec.isInverted();
 		minY = view.minYOnScale;
@@ -68,6 +78,8 @@ public class PeakData extends MeasurementData {
 		double minX = view.minXOnScale;
 		double maxX = view.maxXOnScale;
 		thresh = myParams.peakListThreshold;
+		if (Double.isNaN(thresh))
+			thresh = myParams.peakListThreshold = (minY + maxY) / 2;
 		double yLast = 0;
 		double[] y3 = new double[] { xyCoords[0].getYVal(),
 				yLast = xyCoords[1].getYVal(), 0 };

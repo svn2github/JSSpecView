@@ -171,7 +171,7 @@ public class DisplaySchemesProcessor {
           continue;
         if (theTag.equals("font")) {
           attr = reader.getAttrValue("face");
-          if (attr.length() > 0 && ds != null)
+          if (attr.length() > 0)
             ds.setDisplayFont(attr);
         } else {
           if (theTag.equals("coordinateColor"))

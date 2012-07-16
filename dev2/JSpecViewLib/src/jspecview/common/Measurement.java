@@ -57,8 +57,10 @@ public class Measurement extends Annotation {
 		pt2.setYVal(y);
 	}
 
-	public Measurement(JDXSpectrum spec, double x, double y, boolean b) {
-		 super(spec, x, y, b);
+	public Measurement(JDXSpectrum spec, double x, double y, boolean doSetPt2) {
+		 super(spec, x, y);
+		 if (doSetPt2)
+				setPt2(x, y);
 	}
 
 	public void setPt2(double x, double y) {
@@ -99,6 +101,7 @@ public class Measurement extends Annotation {
 		return pt2.getYVal();
 	}
 
+	@Override
 	public void addSpecShift(double dx) {
     setXVal(getXVal() + dx);
     pt2.setXVal(pt2.getXVal() + dx);

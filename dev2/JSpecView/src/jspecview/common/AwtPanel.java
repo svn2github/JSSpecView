@@ -182,7 +182,8 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   }
 
 
-  public void setColorOrFont(Parameters ds, ScriptToken st) {
+  @SuppressWarnings("incomplete-switch")
+	public void setColorOrFont(Parameters ds, ScriptToken st) {
     if (st == null) {
       Map<ScriptToken, Object> colors = ds.getColors();
       for (Map.Entry<ScriptToken, Object> entry : colors.entrySet())
@@ -312,8 +313,8 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     return new AwtPanel(si, spec, jsvpPopupMenu);
   }
 
-  public GraphSet getNewGraphSet(GraphSet superSet) {
-    return new AwtGraphSet(this, superSet);
+  public GraphSet getNewGraphSet() {
+    return new AwtGraphSet(this);
   }
 
   /**
@@ -359,7 +360,8 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 
   /*----------------------- JSVPanel PAINTING METHODS ---------------------*/
 
-  public void update(Graphics g) {
+  @Override
+	public void update(Graphics g) {
   	super.update(g);  	
   }
   /**
@@ -382,10 +384,10 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   		boolean isLabel) {
     if (isLabel) {
       if (width < 400)
-        size = (int) ((width * size) / 400);
+        size = ((width * size) / 400);
     } else {
       if (width < 250)
-        size = (int) ((width * size) / 250);
+        size = ((width * size) / 250);
     }
     ((Graphics) g).setFont(new Font(name, mode, size));
   }
@@ -416,7 +418,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
       fm = g.getFontMetrics();
     }
     g.setColor(titleColor);
-    g.drawString(title, 5, (int) (height - fm.getHeight() / 2));
+    g.drawString(title, 5, (height - fm.getHeight() / 2));
   }
 
   /**
@@ -436,7 +438,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     g.setColor(coordinatesColor);
     pd.setFont(g, width, Font.PLAIN, 12, true);
     g.drawString(pd.coordStr, (int) ((pd.plotAreaWidth + pd.leftPlotAreaPos) * 0.85),
-        (int) (pd.topPlotAreaPos - 10));
+        (pd.topPlotAreaPos - 10));
   }
 
   /*----------------- METHODS IN INTERFACE Printable ---------------------- */
@@ -586,7 +588,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 			return;
     if (e.getButton() != MouseEvent.BUTTON1)
       return;
-    pd.doMousePressed(e.getX(), e.getY(), isControlDown(e), e.isShiftDown());
+    pd.doMousePressed(e.getX(), e.getY());
   }
 
   private boolean isControlDown(InputEvent e) {

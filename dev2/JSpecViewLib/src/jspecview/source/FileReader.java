@@ -211,7 +211,7 @@ public class FileReader {
         }
         if (spectrum == null)
           spectrum = new JDXSpectrum();
-        if (readDataLabel(spectrum, label, t, errorLog, dataLDRTable, obscure))
+        if (readDataLabel(spectrum, label, t, errorLog, obscure))
           continue;
         String value = t.getValue();
         addHeader(dataLDRTable, t.getRawLabel(), value);
@@ -295,7 +295,7 @@ public class FileReader {
     List<String[]> dataLDRTable;
     JDXSpectrum spectrum = new JDXSpectrum();
     dataLDRTable = new ArrayList<String[]>();
-    readDataLabel(spectrum, label, t, errorLog, dataLDRTable, obscure);
+    readDataLabel(spectrum, label, t, errorLog, obscure);
 
     try {
       String tmp;
@@ -343,8 +343,7 @@ public class FileReader {
           }
         }
 
-        if (readDataLabel(spectrum, label, t, errorLog, dataLDRTable,
-            obscure))
+        if (readDataLabel(spectrum, label, t, errorLog, obscure))
           continue;
 
         // Process Block
@@ -429,7 +428,7 @@ public class FileReader {
         attrList.add(st.nextToken().trim());
       nTupleTable.put(label, attrList);
     }//Finished With Page Data
-    ArrayList<String> symbols = (ArrayList<String>) nTupleTable.get("##SYMBOL");
+    ArrayList<String> symbols = nTupleTable.get("##SYMBOL");
     if (!label.equals("##PAGE"))
       throw new JSpecViewException("Error Reading NTuple Source");
     String page = t.getValue();
@@ -511,8 +510,7 @@ public class FileReader {
 
       setTabularDataType(spectrum, "##" + (continuous ? "XYDATA" : "PEAKTABLE"));
 
-      if (!readNTUPLECoords(spectrum, nTupleTable, plotSymbols, spectrum
-          .getDataType(), minMaxY))
+      if (!readNTUPLECoords(spectrum, nTupleTable, plotSymbols, minMaxY))
         throw new JDXSourceException("Unable to read Ntuple Source");
       spectrum0.nucleusX = spectrum.nucleusX;
       spectrum0.nucleusY = spectrum.nucleusY;
@@ -575,8 +573,7 @@ public class FileReader {
 
   private static boolean readDataLabel(JDXDataObject spectrum, String label,
                                        JDXSourceStreamTokenizer t,
-                                       StringBuffer errorLog,
-                                       List<String[]> table, boolean obscure) {
+                                       StringBuffer errorLog, boolean obscure) {
 
     if (readHeaderLabel(spectrum, label, t, errorLog, obscure))
       return true;
@@ -816,7 +813,7 @@ public class FileReader {
   private boolean readNTUPLECoords(JDXDataObject spec, 
                                           Map<String, ArrayList<String>> nTupleTable,
                                           String[] plotSymbols,
-                                          String dataType, double[] minMaxY) {
+                                          double[] minMaxY) {
     ArrayList<String> list;
     if (spec.dataClass.equals("XYDATA")) {
       // Get Label Values

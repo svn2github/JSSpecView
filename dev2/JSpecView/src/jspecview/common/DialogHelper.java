@@ -8,7 +8,7 @@ import java.awt.event.ActionListener;
 import java.util.Map;
 
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
+//import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -53,17 +53,17 @@ public class DialogHelper {
 				0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, buttonInsets,
 				0, 0));
 	}
-
-	protected JCheckBox addCheckBoxOption(String name, String label,
-			boolean isSelected) {
-		JCheckBox obj = new JCheckBox();
-		obj.setText(label == null ? name : label);
-		obj.addActionListener(eventListener);
-		leftPanel.add(obj, new GridBagConstraints(1, iRow, 2, 1, 0.0, 0.0,
-				GridBagConstraints.WEST, GridBagConstraints.NONE, cbInsets, 0, 0));
-		iRow++;
-		return obj;
-	}
+//
+//	protected JCheckBox addCheckBoxOption(String name, String label,
+//			boolean isSelected) {
+//		JCheckBox obj = new JCheckBox();
+//		obj.setText(label == null ? name : label);
+//		obj.addActionListener(eventListener);
+//		leftPanel.add(obj, new GridBagConstraints(1, iRow, 2, 1, 0.0, 0.0,
+//				GridBagConstraints.WEST, GridBagConstraints.NONE, cbInsets, 0, 0));
+//		iRow++;
+//		return obj;
+//	}
 
 	protected JTextField addInputOption(String name, String label, String value,
 			String units, String defaultValue, boolean visible) {
@@ -73,7 +73,7 @@ public class DialogHelper {
 			if (value == null)
 				options.put(key, (value = defaultValue));
 		}
-		JTextField obj = new JTextField((String) value);
+		JTextField obj = new JTextField(value);
 		if (visible) {
 			obj.setPreferredSize(new Dimension(75, 25));
 			obj.addActionListener(eventListener);

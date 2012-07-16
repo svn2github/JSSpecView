@@ -42,6 +42,9 @@ abstract class XMLReader {
   //  private XMLEventReader fer;
   //  private XMLEvent e;
 
+  abstract protected boolean processTag(int tagId) throws Exception;
+  abstract protected void processEndTag(int tagId) throws Exception;
+
   protected JDXSource source;
   protected String filePath = "";
   
@@ -275,15 +278,6 @@ abstract class XMLReader {
       Logger.error(msg);
       errorLog.append(msg + "\n");
     }
-  }
-
-  protected boolean processTag(int tagId) throws Exception {
-    // overridden
-    return true;
-  }
-
-  protected void processEndTag(int tagId) throws Exception {
-    // overridden
   }
 
 }

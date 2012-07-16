@@ -407,8 +407,6 @@ public class JDXSpectrum extends JDXDataObject {
     if (!((allow2D2D ? s1.is1D() == s2.is1D() : s1.is1D() && s2.is1D()) 
         && s1.xUnits.equalsIgnoreCase(s2.xUnits)))
       return false;
-    if (!(s1 instanceof JDXSpectrum) || !(s2 instanceof JDXSpectrum))
-      return true;
     JDXSpectrum spec1 = s1;
     JDXSpectrum spec2 = s2;
     if (spec1.isHNMR() != spec2.isHNMR())
@@ -417,8 +415,7 @@ public class JDXSpectrum extends JDXDataObject {
     
   }
 
-  public static boolean process(List<JDXSpectrum> specs, IRMode irMode,
-                             Parameters parameters) {
+  public static boolean process(List<JDXSpectrum> specs, IRMode irMode) {
     if (irMode == IRMode.TO_ABS || irMode == IRMode.TO_TRANS)
       for (int i = 0; i < specs.size(); i++)
         specs.set(i, taConvert(specs.get(i), irMode));
@@ -499,10 +496,10 @@ public class JDXSpectrum extends JDXDataObject {
     }
     info.put("header", head);
     if (!justHeader) {
-      putInfo(key, info, "titleLabel", getTitleLabel());
-      putInfo(key, info, "type", getDataType());
-      putInfo(key, info, "isHZToPPM", Boolean.valueOf(isHZtoPPM));
-      putInfo(key, info, "subSpectrumCount", Integer
+      Parameters.putInfo(key, info, "titleLabel", getTitleLabel());
+      Parameters.putInfo(key, info, "type", getDataType());
+      Parameters.putInfo(key, info, "isHZToPPM", Boolean.valueOf(isHZtoPPM));
+      Parameters.putInfo(key, info, "subSpectrumCount", Integer
           .valueOf(subSpectra == null ? 0 : subSpectra.size()));
     }
     return info;
@@ -514,12 +511,6 @@ public class JDXSpectrum extends JDXDataObject {
     return info;
   }
 
-  public static void putInfo(String match, Map<String, Object> info,
-                             String key, Object value) {
-    if (match == null || key.equalsIgnoreCase(match))
-      info.put(key, value);
-  }
-  
   @Override
   public String toString() {
     return getTitleLabel();

@@ -58,7 +58,7 @@ public class Annotation extends Coordinate {
     this.offsetY = offsetY;
   }
 
-	public Annotation(JDXSpectrum spec, double x, double y, boolean b) {
+	public Annotation(JDXSpectrum spec, double x, double y) {
 		super(x,y);
 		this.spec = spec;
 	}

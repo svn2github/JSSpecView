@@ -10,13 +10,12 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
-import jspecview.common.JSVPanel;
 import jspecview.common.JSVPopupMenu;
 import jspecview.common.JSVPanelNode;
 
 class JSVAppletPopupMenu extends JSVPopupMenu {
 
-  private JSVAppletPrivate applet;
+  JSVAppletPrivate applet;
 
   JSVAppletPopupMenu(JSVAppletPrivate applet, 
       boolean allowMenu, boolean enableZoom) {
@@ -55,7 +54,8 @@ class JSVAppletPopupMenu extends JSVPopupMenu {
   private JMenuItem headerMenuItem = new JMenuItem();
   JCheckBoxMenuItem windowMenuItem = new JCheckBoxMenuItem();
 
-  protected void jbInit() {
+  @Override
+	protected void jbInit() {
     // handled later
   }
 
@@ -162,9 +162,8 @@ class JSVAppletPopupMenu extends JSVPopupMenu {
     applet.showOverlayKey(visible);
   }
 
-	public void setCompoundMenu(JSVPanel jsvp, List<JSVPanelNode> panelNodes,
-			boolean allowSelection, ActionListener compoundMenuSelectionListener,
-			ActionListener compoundMenuChooseListener) {
+	public void setCompoundMenu(List<JSVPanelNode> panelNodes,
+			boolean allowSelection) {
 		spectraMenuItem.setEnabled(allowSelection && panelNodes.size() > 1);		
 		spectraMenuItem.setEnabled(true);
 	}

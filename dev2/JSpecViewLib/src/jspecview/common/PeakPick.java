@@ -9,6 +9,5 @@ public class PeakPick extends Measurement {
 
 	public PeakPick(JDXSpectrum spec, double x, double y) {
 		super(spec, x, y, false);
-		// TODO Auto-generated constructor stub
 	}
 }

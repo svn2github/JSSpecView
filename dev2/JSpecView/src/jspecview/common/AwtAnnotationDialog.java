@@ -98,7 +98,7 @@ abstract class AwtAnnotationDialog extends AwtDialog implements AnnotationDialog
 	 * @param modal
 	 *          the modality
 	 */
-	protected AwtAnnotationDialog(String title, ScriptInterface si,
+	protected AwtAnnotationDialog(ScriptInterface si,
 			JDXSpectrum spec, JSVPanel jsvp) {
 		this.si = si;
 		this.jsvp = jsvp;
@@ -355,7 +355,6 @@ abstract class AwtAnnotationDialog extends AwtDialog implements AnnotationDialog
 	protected void setParams() {
 		myParams.numberFormat = txtFormat.getText();
 		numberFormatter = TextFormat.getDecimalFormat("#" + myParams.numberFormat);
-
 	}
 
 	private int iRowSelected = -1;
@@ -423,10 +422,6 @@ abstract class AwtAnnotationDialog extends AwtDialog implements AnnotationDialog
 	public void windowOpened(WindowEvent arg0) {
 		// TODO Auto-generated method stub
 
-	}
-
-	public void shiftY(int yOld, int yNew, int yPixel0, int yPixels) {
-		xyData.shiftY(yOld, yNew, yPixel0, yPixels);
 	}
 
 }

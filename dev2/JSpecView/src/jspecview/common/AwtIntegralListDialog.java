@@ -21,6 +21,7 @@ package jspecview.common;
 
 import java.awt.event.ActionEvent;
 import java.text.DecimalFormat;
+
 import javax.swing.JButton;
 //import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
@@ -48,10 +49,12 @@ class AwtIntegralListDialog extends AwtAnnotationDialog {
 
 	protected AwtIntegralListDialog(String title, ScriptInterface si, JDXSpectrum spec, 
 			JSVPanel jsvp) {
-		super(title, si, spec, jsvp);
+		super(si, spec, jsvp);
 		thisType = AType.Integration;
-		setTitle("Integration Listing");
+		setTitle(title);
 		setup();
+		myParams.integralOffset = si.getParameters().integralOffset;
+		myParams.integralRange = si.getParameters().integralRange;
 		xyData = new IntegralData(spec, myParams);
 		dialog = this;
 	}
@@ -140,8 +143,8 @@ class AwtIntegralListDialog extends AwtAnnotationDialog {
 	@Override
 	public void apply() {
 		try {
-			myParams.integralOffset = Double.valueOf(txtOffset.getText());
-			myParams.integralRange = Double.valueOf(txtRange.getText());
+			myParams.integralOffset = Double.valueOf(txtOffset.getText()).doubleValue();
+			myParams.integralRange = Double.valueOf(txtRange.getText()).doubleValue();
 			myParams.integralDrawAll = false;//chkResets.isSelected();
 			((IntegralData) getData()).update(myParams);
 			jsvp.doRepaint();
@@ -172,15 +175,10 @@ class AwtIntegralListDialog extends AwtAnnotationDialog {
 		if (xyData == null)
 			createData();
 		iSelected = -1;
-		String[][] data = ((IntegralData) xyData).getIntegralListArray();
+		String[][] data = ((IntegralData) xyData).getMeasurementListArray(null);
 		String[] header = xyData.getDataHeader();
 		int[] widths = new int[] {40, 65, 65, 50};
 		loadData(data, header, widths);
-	}
-
-	public boolean checkParameters(Parameters p) {
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 	@Override
@@ -189,6 +187,7 @@ class AwtIntegralListDialog extends AwtAnnotationDialog {
 		iSelected = -1;
 	}
 
+	@Override
 	public void tableCellSelectedEvent(int iRow, int iCol) {
 		DecimalFormat df2 = TextFormat.getDecimalFormat("#0.00");
 		String value = tableData[iRow][1];
@@ -200,10 +199,6 @@ class AwtIntegralListDialog extends AwtAnnotationDialog {
 				break;
 			}		
 		checkEnables();
-	}
-
-	public void shiftY(int yOld, int yNew, int yPixel0, int yPixels) {
-		xyData.shiftY(yOld, yNew, yPixel0, yPixels);
 	}
 
 }

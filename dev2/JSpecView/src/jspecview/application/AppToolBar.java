@@ -16,7 +16,7 @@ import jspecview.common.ScriptToken;
 public class AppToolBar extends JToolBar {
 
   private static final long serialVersionUID = 1L;
-  private MainFrame mainFrame;
+  MainFrame mainFrame;
 
   public AppToolBar(MainFrame mainFrame) {
     this.mainFrame = mainFrame;
@@ -215,18 +215,17 @@ public class AppToolBar extends JToolBar {
     mainFrame.runScript(st + " " + isOn);
   }
 
-  public void setOverlay(boolean b) {
-      spectraButton.setIcon(spectrumIcon);
-      spectraButton.setToolTipText("View Spectra");
-  }
-
   public void setMenuEnables(JSVPanelNode node) {
     if (node == null)
       return;
     setSelections(node.jsvp);
-    setOverlay(node.jsvp.getPanelData().isOverlaid());
+    spectraButton.setIcon(spectrumIcon);
+    spectraButton.setToolTipText("View Spectra");
   }   
   
+  /**
+	 * @param e  
+	 */
   protected void spectrumButton_actionPerformed(ActionEvent e) {
     mainFrame.checkOverlay();
   }

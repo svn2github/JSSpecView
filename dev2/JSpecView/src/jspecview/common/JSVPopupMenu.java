@@ -47,7 +47,7 @@ public class JSVPopupMenu extends JPopupMenu {
 
   protected boolean isApplet;
 
-  public enum EnumOverlay { DIALOG, OFFSETY };
+  public enum EnumOverlay { DIALOG, OFFSETY }
   
 
   private static final long serialVersionUID = 1L;
@@ -344,7 +344,7 @@ public class JSVPopupMenu extends JPopupMenu {
 
 
   private int thisX, thisY;
-  private JSVPanel thisJsvp;
+  JSVPanel thisJsvp;
   
   public void show(JSVPanel jsvp, int x, int y) {
     setEnables(jsvp);

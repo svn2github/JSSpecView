@@ -17,7 +17,7 @@ public class AwtParameters extends Parameters {
     setDefaultColors(defaultColors);
     setParamDefaults();
     plotColors = new Color[defaultPlotColors.length];
-    System.arraycopy(defaultPlotColors, 0, (Color[])plotColors, 0, defaultPlotColors.length);
+    System.arraycopy(defaultPlotColors, 0, plotColors, 0, defaultPlotColors.length);
   }
 
   static final Object[] defaultColors = new Object[] { 
@@ -55,7 +55,7 @@ public class AwtParameters extends Parameters {
     } catch (NumberFormatException nfe) {
       return null;
     }
-    return (Color[]) colors.toArray(new Color[colors.size()]);
+    return colors.toArray(new Color[colors.size()]);
   }
 
   @Override
@@ -63,7 +63,8 @@ public class AwtParameters extends Parameters {
     return setColor(st, AwtParameters.getColorFromString(value));
   }
 
-  @Override
+  @SuppressWarnings("incomplete-switch")
+	@Override
   protected Object getFontName(ScriptToken st, String value) {
     switch (st) {
     case TITLEFONTNAME:

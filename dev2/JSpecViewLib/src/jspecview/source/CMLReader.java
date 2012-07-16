@@ -130,7 +130,11 @@ class CMLReader extends XMLReader {
     }
   }
 
-  private void processSpectrum() throws Exception {
+	@Override
+	protected void processEndTag(int tagId) throws Exception {
+	}
+
+	private void processSpectrum() throws Exception {
     // title OR id here
     if (attrList.contains("title"))
       title = reader.getAttrValue("title");
@@ -413,4 +417,5 @@ class CMLReader extends XMLReader {
         : units.equals("NM") ? "NANOMETERS"
         : units);
   }
+
 }

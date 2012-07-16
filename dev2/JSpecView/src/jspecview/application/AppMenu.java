@@ -56,7 +56,6 @@ import javax.swing.event.MenuListener;
 
 import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelNode;
-import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
 import jspecview.common.JSVPopupMenu;
 import jspecview.common.ScriptToken;
@@ -75,8 +74,8 @@ import jspecview.util.FileManager;
 public class AppMenu extends JMenuBar {
 
   private static final long serialVersionUID = 1L;
-  private MainFrame mainFrame;
-  private JSVPopupMenu jsvpPopupMenu;
+  protected MainFrame mainFrame;
+  JSVPopupMenu jsvpPopupMenu;
 
   public AppMenu(MainFrame si, JSVPopupMenu popupMenu) throws Exception {
     this.mainFrame = si;
@@ -98,9 +97,9 @@ public class AppMenu extends JMenuBar {
   private JMenu optionsMenu = new JMenu();
   private JMenu displayMenu = new JMenu();
   private JMenu zoomMenu = new JMenu();
-  private JCheckBoxMenuItem gridCheckBoxMenuItem = new JCheckBoxMenuItem();
-  private JCheckBoxMenuItem coordsCheckBoxMenuItem = new JCheckBoxMenuItem();
-  private JCheckBoxMenuItem revPlotCheckBoxMenuItem = new JCheckBoxMenuItem();
+  JCheckBoxMenuItem gridCheckBoxMenuItem = new JCheckBoxMenuItem();
+  JCheckBoxMenuItem coordsCheckBoxMenuItem = new JCheckBoxMenuItem();
+  JCheckBoxMenuItem revPlotCheckBoxMenuItem = new JCheckBoxMenuItem();
   private JCheckBoxMenuItem scaleXCheckBoxMenuItem = new JCheckBoxMenuItem();
   private JCheckBoxMenuItem scaleYCheckBoxMenuItem = new JCheckBoxMenuItem();
   private JMenuItem nextZoomMenuItem = new JMenuItem();
@@ -228,7 +227,7 @@ public class AppMenu extends JMenuBar {
         InputEvent.CTRL_MASK, new ItemListener() {
           public void itemStateChanged(ItemEvent e) {
             setBoolean(ScriptToken.YSCALEON, e);
-          };
+          }
         });
     JSVPopupMenu.setMenuItem(nextZoomMenuItem, 'N', "Next View", 78,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
@@ -446,6 +445,9 @@ public class AppMenu extends JMenuBar {
     closeMenuItem.setText(fileName == null ? "Close" : "Close " + fileName);
   }
 
+  /**
+	 * @param isWarningOnly  
+	 */
   void setError(boolean isError, boolean isWarningOnly) {
     errorLogMenuItem.setEnabled(isError);
   }

@@ -26,7 +26,9 @@ package jspecview.common;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 import jspecview.common.Annotation.AType;
 import jspecview.util.TextFormat;
@@ -58,7 +60,7 @@ public class MeasurementData extends ArrayList<Measurement> implements Annotatio
 	public List<Measurement> getMeasurements() {
 		return this;
 	}
-	public void setMeasurements(List<Measurement> measurements) {
+	public void setMeasurements(@SuppressWarnings("unused") List<Measurement> measurements) {
 		// won't happen
 	}
 
@@ -74,12 +76,15 @@ public class MeasurementData extends ArrayList<Measurement> implements Annotatio
 		return HEADER;
 	}
 
+	protected String units;
+	
 	public String[][] getMeasurementListArray(String units) {
+		this.units = units;
 		DecimalFormat dfx = TextFormat.getDecimalFormat(spec.isNMR() ? "#0.0000"
 				: "#0.00");
-		boolean toHz = units.equalsIgnoreCase("HZ");
+		boolean toHz = spec.isNMR() && units.equalsIgnoreCase("HZ");
 		DecimalFormat dfdx = TextFormat
-				.getDecimalFormat(units.equals("ppm") ? "#0.0000" : "#0.00");
+				.getDecimalFormat(spec.isHNMR() && units.equals("ppm") ? "#0.0000" : "#0.00");
 		String[][] data = new String[size()][];
 		for (int pt = 0, i = size(); --i >= 0;) {
 			double y = get(i).getValue();
@@ -100,9 +105,7 @@ public class MeasurementData extends ArrayList<Measurement> implements Annotatio
 			break;
 		case PeakList:
 			return (
-					p.peakListInclude == myParams.peakListInclude
-					&& p.peakListInterpolation.equals(myParams.peakListInterpolation)
-					&& p.peakListSkip == myParams.peakListSkip
+					p.peakListInterpolation.equals(myParams.peakListInterpolation)
 					&& p.peakListThreshold == myParams.peakListThreshold);
 		case Measurements:
 			break;
@@ -151,9 +154,12 @@ public class MeasurementData extends ArrayList<Measurement> implements Annotatio
 		return true;
 	}
 
-	public void shiftY(int yOld, int yNew, int yPixel0, int yPixels) {
-	  // n/a
-  }
+	public Map<String, Object> getParams() {
+		Map<String, Object> info = new Hashtable<String, Object>();
+		if (units != null)
+			info.put("units", units);
+		return info;
+	}
 
 	
 }

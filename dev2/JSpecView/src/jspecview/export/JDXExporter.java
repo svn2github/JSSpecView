@@ -28,6 +28,7 @@ import java.util.List;
 
 
 import jspecview.common.Coordinate;
+import jspecview.common.JDXDataObject;
 import jspecview.common.JDXSpectrum;
 import jspecview.source.FileReader;
 import jspecview.util.TextFormat;
@@ -152,6 +153,22 @@ public class JDXExporter {
     case XY:
       tabDataSet = JDXCompressor.getXYList(newXYCoords, startIndex, endIndex, step);
       break;
+		case AML:
+			break;
+		case CML:
+			break;
+		case JPG:
+			break;
+		case PNG:
+			break;
+		case SOURCE:
+			break;
+		case SVG:
+			break;
+		case SVGI:
+			break;
+		case UNK:
+			break;
     }
 
     int index = Arrays.binarySearch(FileReader.VAR_LIST_TABLE[0],
@@ -229,7 +246,7 @@ public class JDXExporter {
     if (!spec.is1D())
       buffer.append("##NUM DIM= ").append(spec.numDim).append(
           TextFormat.newLine);
-    if (observedFreq != JDXSpectrum.ERROR)
+    if (observedFreq != JDXDataObject.ERROR)
       buffer.append("##.OBSERVE FREQUENCY= ").append(observedFreq).append(
           TextFormat.newLine);
     if (spec.observedNucl != "")

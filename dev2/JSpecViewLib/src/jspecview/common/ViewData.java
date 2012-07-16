@@ -40,7 +40,7 @@ class ViewData extends ScaleData {
 	 */
 	ViewData(List<JDXSpectrum> spectra, double yPt1, double yPt2,
 			int[] startList, int[] endList, int initNumXDivisions,
-			int initNumYDivisions, boolean isContinuous, int iSpec) {
+			int initNumYDivisions, boolean isContinuous) {
 		super();
 		nSpec = spectra.size();
 		startDataPointIndices = startList;
@@ -162,7 +162,7 @@ class ViewData extends ScaleData {
     setXRange(0, xyCoords, minX, maxX, 0, n, startDataPointIndices, endDataPointIndices);
   }
 
-  void setXRange(double x1, double x2, int initNumXDivisions) {
+  void setXRange(double x1, double x2) {
     minX = x1;
     maxX = x2;
     setXScale();

@@ -12,7 +12,7 @@ public interface JSVPanel extends JSVContainer {
   Object getColor(int r, int g, int b, int a);
   boolean getFocusNow();
   String getInput(String message, String title, String sval);
-  GraphSet getNewGraphSet(GraphSet gs);
+  GraphSet getNewGraphSet();
   JSVPanel getNewPanel(ScriptInterface si, JDXSpectrum spectrum);
   PanelData getPanelData();
   Object getPlotColor(int i);

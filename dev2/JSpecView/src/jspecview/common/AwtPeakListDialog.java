@@ -44,9 +44,9 @@ class AwtPeakListDialog extends AwtAnnotationDialog {
 
 	protected AwtPeakListDialog(String title, ScriptInterface si, JDXSpectrum spec, 
 			JSVPanel jsvp) {
-		super(title, si, spec, jsvp);
+		super(si, spec, jsvp);
 		thisType = AType.PeakList;
-		setTitle("Peak Listing");
+		setTitle(title);
 		setup();
 	}
 
@@ -103,7 +103,7 @@ class AwtPeakListDialog extends AwtAnnotationDialog {
 //			String s = txtInclude.getText();
 //			 myParams.peakListInclude = (s.startsWith("(") ? -1 :  Integer.valueOf(s));
 			 String s = txtThreshold.getText();
-			 myParams.peakListThreshold = (/*s.startsWith("(") ? -1 : */ Double.valueOf(s));
+			 myParams.peakListThreshold = (/*s.startsWith("(") ? -1 : */ Double.valueOf(s)).doubleValue();
 //			 myParams.peakListSkip = Integer.valueOf(txtSkip.getText());
 			 myParams.peakListInterpolation = cbInterpolation.getSelectedItem().toString();
 			 super.setParams();
@@ -112,6 +112,7 @@ class AwtPeakListDialog extends AwtAnnotationDialog {
 		}
 	}
 
+	@Override
 	protected void clear() {
 		super.clear();
 	}
@@ -138,8 +139,8 @@ class AwtPeakListDialog extends AwtAnnotationDialog {
 	private void loadData() {
 		if (xyData == null)
 			createData();
-		String[][] data = ((PeakData)xyData).getPeakListArray();
-		String[] header = ((PeakData)xyData).getDataHeader(data);
+		String[][] data = ((PeakData)xyData).getMeasurementListArray(null);
+		String[] header = ((PeakData)xyData).getDataHeader();
 		int[] widths = new int[] {40, 65, 50, 50, 50, 50, 50};
 		loadData(data, header, widths);
     dataTable.setCellSelectionEnabled(true);
@@ -165,6 +166,7 @@ class AwtPeakListDialog extends AwtAnnotationDialog {
 		}
 	}
 
+	@Override
 	public void tableCellSelectedEvent(int iRow, int iCol) {
 		try {
 			String value = tableData[iRow][1];
@@ -185,6 +187,7 @@ class AwtPeakListDialog extends AwtAnnotationDialog {
 		jsvp.doRepaint();
 	}
 	
+	@Override
 	public void reEnable() {
 		skipCreate = true;
 		super.reEnable();

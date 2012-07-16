@@ -70,18 +70,18 @@ public class Escape {
   }
   
   @SuppressWarnings("unchecked")
-  public static String toJSON(String infoType, Object info) {
+  public static String toJSON(String infoType, Object info, boolean addCR) {
 
     //Logger.debug(infoType+" -- "+info);
 
     StringBuilder sb = new StringBuilder();
     String sep = "";
     if (info == null)
-      return packageJSON(infoType, (String) null);
+      return packageJSON(infoType, (String) null, addCR);
     if (info instanceof Integer || info instanceof Float || info instanceof Double)
-      return packageJSON(infoType, info.toString());
+      return packageJSON(infoType, info.toString(), addCR);
     if (info instanceof String)
-      return packageJSON(infoType, fixString((String) info));
+      return packageJSON(infoType, fixString((String) info), addCR);
     if (info instanceof String[]) {
       sb.append("[");
       int imax = ((String[]) info).length;
@@ -90,7 +90,7 @@ public class Escape {
         sep = ",";
       }
       sb.append("]");
-      return packageJSON(infoType, sb);
+      return packageJSON(infoType, sb, addCR);
     }
     if (info instanceof int[]) {
       sb.append("[");
@@ -100,7 +100,7 @@ public class Escape {
         sep = ",";
       }
       sb.append("]");
-      return packageJSON(infoType, sb);
+      return packageJSON(infoType, sb, addCR);
     }
     if (info instanceof float[]) {
       sb.append("[");
@@ -110,57 +110,71 @@ public class Escape {
         sep = ",";
       }
       sb.append("]");
-      return packageJSON(infoType, sb);
+      return packageJSON(infoType, sb, addCR);
     }
     if (info instanceof String[][]) {
       sb.append("[");
+      if (addCR)
+      	sb.append('\n');
       int imax = ((String[][]) info).length;
       for (int i = 0; i < imax; i++) {
-        sb.append(sep).append(toJSON(null, ((String[][]) info)[i]));
+        sb.append(sep).append(toJSON(null, ((String[][]) info)[i], addCR));
+        if (addCR)
+        	sb.append('\n');
         sep = ",";
       }
       sb.append("]");
-      return packageJSON(infoType, sb);
+      return packageJSON(infoType, sb, addCR);
     }
     if (info instanceof int[][]) {
       sb.append("[");
       int imax = ((int[][]) info).length;
       for (int i = 0; i < imax; i++) {
-        sb.append(sep).append(toJSON(null, ((int[][]) info)[i]));
+        sb.append(sep).append(toJSON(null, ((int[][]) info)[i], addCR));
         sep = ",";
       }
       sb.append("]");
-      return packageJSON(infoType, sb);
+      return packageJSON(infoType, sb, addCR);
     }
     if (info instanceof float[][]) {
       sb.append("[");
       int imax = ((float[][]) info).length;
       for (int i = 0; i < imax; i++) {
-        sb.append(sep).append(toJSON(null, ((float[][]) info)[i]));
+        sb.append(sep).append(toJSON(null, ((float[][]) info)[i], addCR));
         sep = ",";
       }
       sb.append("]");
-      return packageJSON(infoType, sb);
+      return packageJSON(infoType, sb, addCR);
     }
     if (info instanceof float[][][]) {
       sb.append("[");
       int imax = ((float[][][]) info).length;
       for (int i = 0; i < imax; i++) {
-        sb.append(sep).append(toJSON(null, ((float[][][]) info)[i]));
+        sb.append(sep).append(toJSON(null, ((float[][][]) info)[i], addCR));
         sep = ",";
       }
       sb.append("]");
-      return packageJSON(infoType, sb);
+      return packageJSON(infoType, sb, addCR);
+    }
+    if (info instanceof Object[]) {
+      sb.append("[");
+      int imax = ((Object[]) info).length;
+      for (int i = 0; i < imax; i++) {
+        sb.append(sep).append(toJSON(null, ((Object[]) info)[i], addCR));
+        sep = ",";
+      }
+      sb.append("]");
+      return packageJSON(infoType, sb, addCR);
     }
     if (info instanceof List) {
       sb.append("[ ");
       int imax = ((List<?>) info).size();
       for (int i = 0; i < imax; i++) {
-        sb.append(sep).append(toJSON(null, ((List<?>) info).get(i)));
+        sb.append(sep).append(toJSON(null, ((List<?>) info).get(i), addCR));
         sep = ",";
       }
       sb.append(" ]");
-      return packageJSON(infoType, sb);
+      return packageJSON(infoType, sb, addCR);
     }
     if (info instanceof Map) {
       sb.append("{ ");
@@ -168,13 +182,13 @@ public class Escape {
       while (e.hasNext()) {
         String key = e.next();
         sb.append(sep)
-            .append(packageJSON(key, toJSON(null, ((Map<?, ?>) info).get(key))));
+            .append(packageJSON(key, toJSON(null, ((Map<?, ?>) info).get(key), addCR), addCR));
         sep = ",";
       }
       sb.append(" }");
-      return packageJSON(infoType, sb);
+      return packageJSON(infoType, sb, addCR);
     }
-    return packageJSON(infoType, fixString(info.toString()));
+    return packageJSON(infoType, fixString(info.toString()), addCR);
   }
 
   private static String fixString(String s) {
@@ -185,14 +199,14 @@ public class Escape {
     return "\"" + s + "\"";
   }
 
-  private static String packageJSON(String infoType, StringBuilder sb) {
-    return packageJSON(infoType, sb.toString());
+  private static String packageJSON(String infoType, StringBuilder sb, boolean addCR) {
+    return packageJSON(infoType, sb.toString(), addCR);
   }
 
-  private static String packageJSON(String infoType, String info) {
+  private static String packageJSON(String infoType, String info, boolean addCR) {
     if (infoType == null)
       return info;
-    return "\"" + infoType + "\": " + info;
+    return "\"" + infoType + "\": " + info + (addCR ? "\n" : "");
   }
 
 

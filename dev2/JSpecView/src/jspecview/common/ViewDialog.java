@@ -36,7 +36,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.JTree;
 
 /**
  * Dialog for managing overlaying spectra and closing files
@@ -96,7 +95,7 @@ public class ViewDialog extends AwtDialog implements WindowListener {
 	}
 
   void jbInit() throws Exception {
-    layoutCheckBoxes((JTree) si.getSpectraTree());
+    layoutCheckBoxes();
         
     JButton selectAllButton = newJButton();
     JButton selectNoneButton = newJButton();
@@ -187,7 +186,7 @@ public class ViewDialog extends AwtDialog implements WindowListener {
 		return b;
 	}
 
-	private void layoutCheckBoxes(JTree spectraTree) {
+	private void layoutCheckBoxes() {
     checkBoxes = new ArrayList<JCheckBox>();
     treeNodes = new ArrayList<JSVTreeNode>();
     cbInsets1 = new Insets(0, 0, 2, 2);

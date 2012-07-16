@@ -136,18 +136,28 @@ public class PanelData {
 
 	public Map<String, Object> getInfo(boolean isSelected, String key) {
 		Map<String, Object> info = new Hashtable<String, Object>();
-		Set<Entry<ScriptToken, Object>> entries = options.entrySet();
-		for (Entry<ScriptToken, Object> entry : entries)
-			JDXSpectrum.putInfo(key, info, entry.getKey().name(), entry.getValue());
-		JDXSpectrum.putInfo(key, info, "selected", Boolean.valueOf(isSelected));
-		JDXSpectrum.putInfo(key, info, "type", getSpectrumAt(0).getDataType());
-		JDXSpectrum.putInfo(key, info, "title", title);
-		JDXSpectrum.putInfo(key, info, "nSets", Integer.valueOf(graphSets.size()));
-		List<Map<String, Object>> sets = new ArrayList<Map<String, Object>>();
-		for (int i = graphSets.size(); --i >= 0;)
-			sets.add(graphSets.get(i).getInfo(key,
-					isSelected && graphSets.get(i) == currentGraphSet));
-		info.put("sets", sets);
+		if (!isSelected && "PeakList".equalsIgnoreCase(key)
+				&& Parameters.isMatch(key, "PeakList")) {
+			Parameters.putInfo(key, info, "PeakList", currentGraphSet.getDataTable(
+					AType.PeakList, -1));
+		} else if (!isSelected && "Integration".equalsIgnoreCase(key)
+				&& Parameters.isMatch(key, "Integration")) {
+			Parameters.putInfo(key, info, "Integration", currentGraphSet.getDataTable(
+					AType.Integration, -1));
+		} else {
+			Set<Entry<ScriptToken, Object>> entries = options.entrySet();
+			for (Entry<ScriptToken, Object> entry : entries)
+				Parameters.putInfo(key, info, entry.getKey().name(), entry.getValue());
+			Parameters.putInfo(key, info, "selected", Boolean.valueOf(isSelected));
+			Parameters.putInfo(key, info, "type", getSpectrumAt(0).getDataType());
+			Parameters.putInfo(key, info, "title", title);
+			Parameters.putInfo(key, info, "nSets", Integer.valueOf(graphSets.size()));
+			List<Map<String, Object>> sets = new ArrayList<Map<String, Object>>();
+			for (int i = graphSets.size(); --i >= 0;)
+				sets.add(graphSets.get(i).getInfo(key,
+						isSelected && graphSets.get(i) == currentGraphSet));
+			info.put("sets", sets);
+		}
 		return info;
 	}
 
@@ -158,16 +168,16 @@ public class PanelData {
 				setBoolean(parameters, entry.getKey());
 			return;
 		}
-		Boolean isTrue = parameters.getBoolean(st);
-		setBoolean(st, isTrue);
+		setBoolean(st, parameters.getBoolean(st));
 	}
 
-	public void setBoolean(ScriptToken st, Boolean isTrue) {
+	@SuppressWarnings("incomplete-switch")
+	public void setBoolean(ScriptToken st, boolean isTrue) {
 		if (st == ScriptToken.REVERSEPLOT) {
 			currentGraphSet.setReversePlot(isTrue);
 			return;
 		}
-		options.put(st, isTrue);
+		options.put(st, Boolean.valueOf(isTrue));
 		switch (st) {
 		case DISPLAY1D:
 		case DISPLAY2D:
@@ -188,6 +198,7 @@ public class PanelData {
 	private String displayFontName;
 	private String titleFontName;
 
+	@SuppressWarnings("incomplete-switch")
 	void setFontName(ScriptToken st, String fontName) {
 		switch (st) {
 		case DISPLAYFONTNAME:
@@ -407,7 +418,7 @@ public class PanelData {
 
 	// //// currentGraphSet methods
 
-	void setCurrentGraphSet(GraphSet gs, int xPixel, int yPixel, int clickCount) {
+	void setCurrentGraphSet(GraphSet gs, int yPixel, int clickCount) {
 		int splitPoint = gs.getSplitPoint(yPixel);
 		boolean isNewSet = (currentGraphSet != gs);
 		boolean isNewSplitPoint = (isNewSet || currentSplitPoint != splitPoint);
@@ -465,8 +476,8 @@ public class PanelData {
 		return currentGraphSet.getShowAnnotation(type, -1);
 	}
 
-	public void showAnnotation(AType type, Boolean tfToggle, Parameters parameters) {
-		currentGraphSet.setShowAnnotation(type, tfToggle, parameters);
+	public void showAnnotation(AType type, Boolean tfToggle) {
+		currentGraphSet.setShowAnnotation(type, tfToggle);
 	}
 
 	public void setYStackOffsetPercent(int offset) {
@@ -794,14 +805,14 @@ public class PanelData {
 		gs.mouseMovedEvent(xPixel, yPixel);
 	}
 
-	void doMousePressed(int xPixel, int yPixel, boolean isControlDown,
-			boolean isShiftDown) {
+	void doMousePressed(int xPixel, int yPixel) {
 		mouseState = Mouse.DOWN;
 		GraphSet gs = GraphSet.findGraphSet(graphSets, xPixel, yPixel);
 		if (gs == null)
 			return;
-		setCurrentGraphSet(gs, xPixel, yPixel, 0);
-		gs.checkWidgetEvent(xPixel, yPixel, true, ++clickCount);
+		setCurrentGraphSet(gs, yPixel, 0);
+		++clickCount;
+		gs.checkWidgetEvent(xPixel, yPixel, true);
 	}
 
 	private int clickCount;
@@ -812,7 +823,7 @@ public class PanelData {
 		mouseState = Mouse.DOWN;
 		if (GraphSet.findGraphSet(graphSets, xPixel, yPixel) != currentGraphSet)
 			return;
-		currentGraphSet.checkWidgetEvent(xPixel, yPixel, false, clickCount);
+		currentGraphSet.checkWidgetEvent(xPixel, yPixel, false);
 		currentGraphSet.mouseMovedEvent(xPixel, yPixel);
 	}
 
@@ -832,7 +843,7 @@ public class PanelData {
 		GraphSet gs = GraphSet.findGraphSet(graphSets, xPixel, yPixel);
 		if (gs == null)
 			return;
-		setCurrentGraphSet(gs, xPixel, yPixel, clickCount);
+		setCurrentGraphSet(gs, yPixel, clickCount);
 		gs.mouseClickedEvent(xPixel, yPixel, clickCount, isControlDown);
 	}
 
@@ -850,7 +861,7 @@ public class PanelData {
 
 	public void getPeakListing(Parameters p, Boolean tfToggle) {
 		if (p != null)
-			currentGraphSet.getPeakListing(p);
+			currentGraphSet.getPeakListing(-1, p);
 		currentGraphSet.setPeakListing(tfToggle);
 	}
 

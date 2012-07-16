@@ -40,7 +40,6 @@
 package jspecview.applet;
 
 import java.awt.BorderLayout;
-import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.dnd.DropTarget;
@@ -136,6 +135,9 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	public void setIRMode(IRMode mode) {
 		irMode = mode;
 	}
+	public IRMode getIRMode() {
+		return irMode;
+	}
 
 	private boolean autoIntegrate;
 
@@ -156,12 +158,12 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 
 	private String appletID;
 	private String syncID;
-	private Thread commandWatcherThread;
+	protected Thread commandWatcherThread;
 	private Boolean obscureTitleFromUser;
 	private JFileChooser jFileChooser;
-	private JFrame offWindowFrame;
-	private ViewPanel spectrumPanel;
-	private JSVAppletPopupMenu appletPopupMenu;
+	JFrame offWindowFrame;
+	ViewPanel spectrumPanel;
+	JSVAppletPopupMenu appletPopupMenu;
 	public Object getPopupMenu() {
 		return appletPopupMenu;
 	}
@@ -230,8 +232,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	public String getPropertyAsJSON(String key) {
-		Map<String, Object> map = getPropertyAsJavaObject(key);
-		return Escape.toJSON(null, map);
+		return Escape.toJSON(null, getPropertyAsJavaObject(key), false);
 	}
 
 	/**
@@ -394,7 +395,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	 */
 	private void init() {
 
-		spectraTree = new JSVTree((ScriptInterface) this);
+		spectraTree = new JSVTree(this);
 		scriptQueue = new ArrayList<String>();
 		commandWatcherThread = new Thread(new CommandWatcher());
 		commandWatcherThread.setName("CommmandWatcherThread");
@@ -479,7 +480,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	 * Shows the header information for the Spectrum
 	 */
 	void showHeader() {
-    getSelectedPanel().showHeader((Container) jsvApplet);
+    getSelectedPanel().showHeader(jsvApplet);
 	}
 
 	private PrintLayout lastPrintLayout;
@@ -656,7 +657,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 					appletReadyCallbackFunctionName = value;
 					break;
 				case AUTOINTEGRATE:
-					autoIntegrate = AwtParameters.isTrue(value);
+					autoIntegrate = Parameters.isTrue(value);
 					break;
 				case COMPOUNDMENUON:
 					allowCompoundMenu = Boolean.parseBoolean(value);
@@ -703,9 +704,9 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 
 	// for the signed applet to load a remote file, it must
 	// be using a thread started by the initiating thread;
-	private List<String> scriptQueue;
+	List<String> scriptQueue;
 
-	private class CommandWatcher implements Runnable {
+	class CommandWatcher implements Runnable {
 		public void run() {
 			Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
 			int commandDelay = 200;
@@ -741,7 +742,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	 */
 	public void openDataOrFile(String data, String name,
 			List<JDXSpectrum> specs, String url, int firstSpec, int lastSpec, boolean isAppend) {
-  	int status = JSVTree.openDataOrFile((ScriptInterface) this, data, name, specs, url, firstSpec, lastSpec, isAppend);
+  	int status = JSVTree.openDataOrFile(this, data, name, specs, url, firstSpec, lastSpec, isAppend);
   	if (status == JSVTree.FILE_OPEN_ALREADY)
   		return;
     if (status != JSVTree.FILE_OPEN_OK) {
@@ -750,8 +751,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
     }
     compoundMenuOn = allowCompoundMenu;
 
-		appletPopupMenu.setCompoundMenu(getSelectedPanel(), panelNodes, compoundMenuOn, 
-				null, null);//compoundMenuSelectionListener, compoundMenuChooseListener);
+		appletPopupMenu.setCompoundMenu(panelNodes, compoundMenuOn);
 
 		Logger.info(jsvApplet.getAppletInfo() + " File " + currentSource.getFilePath()
 				+ " Loaded Successfully");
@@ -805,7 +805,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	public void setSelectedPanel(JSVPanel jsvp) {
 		spectrumPanel.setSelectedPanel(jsvp, panelNodes);
   	selectedPanel = jsvp;
-		spectraTree.setSelectedPanel((ScriptInterface) this, jsvp);
+		spectraTree.setSelectedPanel(this, jsvp);
     jsvApplet.validate();
 		if (jsvp != null) {
       jsvp.setEnabled(true);
@@ -815,7 +815,11 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 
 	// /////////// MISC methods from interfaces /////////////
 
-	// called by Pro's popup window Advanced...
+	/**
+	 * called by Pro's popup window Advanced...
+	 * 
+	 * @param filePath  
+	 */
 	void doAdvanced(String filePath) {
 		// only for JSVAppletPro
 	}
@@ -853,6 +857,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		return null;
 	}
 	
+	@SuppressWarnings("incomplete-switch")
 	public void execSetCallback(ScriptToken st, String value) {
 		switch (st) {
 		case LOADFILECALLBACKFUNCTIONNAME:
@@ -885,14 +890,14 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	public void execClose(String value, boolean fromScript) {
-		JSVTree.close((ScriptInterface) this, value);
+		JSVTree.close(this, value);
     if (!fromScript)
     	validateAndRepaint();
 	}
 
   public String execLoad(String value) {
   	//int nSpec = panelNodes.size();
-  	JSVTree.load((ScriptInterface) this, value);
+  	JSVTree.load(this, value);
     if (getSelectedPanel() == null)
       return null;
     // probably unnecessary:
@@ -916,8 +921,8 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		validateAndRepaint();
 	}
 
-	public JSVPanel execSetSpectrum(String value) {
-  	return JSVTree.setSpectrum((ScriptInterface) this, value);
+	public JSVPanel setSpectrum(String value) {
+  	return JSVTree.setSpectrum(this, value);
 	}
 
 	public void execSetAutoIntegrate(boolean b) {
@@ -998,7 +1003,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 	
 	public void process(List<JDXSpectrum> specs) {
-    JDXSpectrum.process(specs, irMode, parameters);
+    JDXSpectrum.process(specs, irMode);
 	}
 	
 	public void setCursorObject(Object c) {

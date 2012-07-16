@@ -38,15 +38,16 @@ public class AwtColoredAnnotation extends Annotation {
     this.color = color;
   }
 
-  public static AwtColoredAnnotation getAnnotation(JDXSpectrum spec, List<String> args,
+	public static AwtColoredAnnotation getAnnotation(JDXSpectrum spec, List<String> args,
                                                 AwtColoredAnnotation lastAnnotation) {
   	String arg;
     int xPt = 0;
     int yPt = 1;
     int colorPt = 2;
     int textPt = 3;
+    int nArgs = args.size();
     try {
-      switch (args.size()) {
+      switch (nArgs) {
       default:
         return null;
       case 1:
@@ -72,17 +73,17 @@ public class AwtColoredAnnotation extends Annotation {
         }
         break;
       case 3:
+      case 4:
         // x y "text" or x y color
+        // x y color "text" or x y "text" color
         arg = args.get(2);
         if (arg.charAt(0) == '\"') {
           textPt = 2;
-          colorPt = -1;
+          colorPt = (nArgs == 4 ? 3 : -1);
         } else {
           colorPt = 2;
-          textPt = -1;
+          textPt = (nArgs == 4 ? 3 : -1);
         }
-      case 4:
-        // x y color "text" or x y "text" color
         arg = args.get(2);
         if (arg.charAt(0) == '\"') {
           textPt = 2;
@@ -95,8 +96,8 @@ public class AwtColoredAnnotation extends Annotation {
       if (lastAnnotation == null && 
           (xPt < 0 || yPt < 0 || textPt < 0 || colorPt < 0))
         return null;
-      double x = (xPt < 0 ? lastAnnotation.getXVal() : Double.valueOf(args.get(xPt)));
-      double y = (yPt < 0 ? lastAnnotation.getYVal() : Double.valueOf(args.get(yPt)));
+      double x = (xPt < 0 ? lastAnnotation.getXVal() : Double.valueOf(args.get(xPt)).doubleValue());
+      double y = (yPt < 0 ? lastAnnotation.getYVal() : Double.valueOf(args.get(yPt)).doubleValue());
       Color color =(colorPt < 0 ? lastAnnotation.getColor() : AwtParameters
           .getColorFromString(args.get(colorPt)));
       String text;

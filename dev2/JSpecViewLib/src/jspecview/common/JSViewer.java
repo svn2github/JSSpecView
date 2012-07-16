@@ -9,6 +9,7 @@ import java.util.StringTokenizer;
 import jspecview.common.Annotation.AType;
 import jspecview.common.JDXSpectrum.IRMode;
 import jspecview.source.JDXSource;
+import jspecview.util.Escape;
 import jspecview.util.Logger;
 import jspecview.util.Parser;
 import jspecview.util.TextFormat;
@@ -76,7 +77,12 @@ public class JSViewer {
         case FINDX:
         	if (jsvp != null)
         		jsvp.getPanelData().findX(null, Double.parseDouble(value));
-        	break;        	
+        	break; 
+        case GETPROPERTY:
+        	Map<String, Object> info = (jsvp == null ? null : getPropertyAsJavaObject(si, value));
+        	if (info != null)
+        		jsvp.showMessage(Escape.toJSON(null, info, true), value);
+        	break;
         case GETSOLUTIONCOLOR:
           if (jsvp != null)
         		showColorMessage(si);
@@ -156,22 +162,22 @@ public class JSViewer {
         case SHOWMEASUREMENTS:
         	if (jsvp == null)
         		break;
-        	jsvp.getPanelData().showAnnotation(AType.Measurements, Parameters.getTFToggle(value), si.getParameters());
+        	jsvp.getPanelData().showAnnotation(AType.Measurements, Parameters.getTFToggle(value));
         	break;
         case SHOWPEAKLIST:
         	if (jsvp == null)
         		break;
-        	jsvp.getPanelData().showAnnotation(AType.PeakList, Parameters.getTFToggle(value), si.getParameters());
+        	jsvp.getPanelData().showAnnotation(AType.PeakList, Parameters.getTFToggle(value));
         	break;
         case SHOWINTEGRATION:
         	if (jsvp == null)
         		break;
-        	jsvp.getPanelData().showAnnotation(AType.Integration, Parameters.getTFToggle(value), si.getParameters());
+        	jsvp.getPanelData().showAnnotation(AType.Integration, Parameters.getTFToggle(value));
         	//execIntegrate(si, null);
         	break;
         case SPECTRUM:
         case SPECTRUMNUMBER:
-          jsvp = si.execSetSpectrum(value);
+          jsvp = si.setSpectrum(value);
           if (jsvp == null)
             return false;
           break;
@@ -238,13 +244,7 @@ public class JSViewer {
 				value = token.substring(pt + 1);
 				try {
 					if (key.startsWith("thr")) {
-						p.peakListThreshold = Double.valueOf(value);
-						p.peakListInclude = -Math.abs(p.peakListInclude);
-					} else if (key.startsWith("inc")) {
-						p.peakListThreshold = Integer.valueOf(value);
-						p.peakListThreshold = -Math.abs(p.peakListThreshold);
-					} else if (key.startsWith("ski")) {
-						p.peakListSkip = Integer.valueOf(value);
+						p.peakListThreshold = Double.valueOf(value).doubleValue();
 					} else if (key.startsWith("int")) {
 						p.peakListInterpolation = (value.equalsIgnoreCase("none") ? "NONE"
 								: "parabolic");
@@ -338,6 +338,7 @@ public class JSViewer {
     jsvp.doRepaint();
   }
 
+	@SuppressWarnings("incomplete-switch")
 	private static void execSetIntegralParameter(ScriptInterface si, ScriptToken st, double value) {
 		Parameters p = si.getParameters();
 		switch (st) {
@@ -393,7 +394,7 @@ public class JSViewer {
 
   private static void showOverlayLegend(ScriptInterface si, JSVPanelNode node,
                                         boolean visible) {
-    JSVDialog legend = (JSVDialog) node.legend;
+    JSVDialog legend = node.legend;
     if (legend == null && visible) {
       legend = node.setLegend(node.jsvp.getPanelData()
           .getNumberOfSpectraInCurrentSet() > 1
@@ -609,9 +610,20 @@ public class JSViewer {
 
   public static Map<String, Object> getPropertyAsJavaObject(ScriptInterface si,
                                                             String key) {
+  	boolean isAll = false;
+  	if (key != null && key.toUpperCase().startsWith("ALL ") || "all".equalsIgnoreCase(key)) {
+  		key = key.substring(3).trim();
+  		isAll = true;
+  	}
     if ("".equals(key))
       key = null;
-    List<Map<String, Object>> info = new ArrayList<Map<String, Object>>();
+    Map<String, Object>map = new Hashtable<String, Object>();
+		Map<String, Object> map0 = JSViewer.getCurrentProperty(si, key);
+		if (!isAll)
+			return map0;
+		if (map0 != null)
+		  map.put("current", map0);
+   List<Map<String, Object>> info = new ArrayList<Map<String, Object>>();
     List<JSVPanelNode> panelNodes = si.getPanelNodes();
     for (int i = 0; i < panelNodes.size(); i++) {
       JSVPanel jsvp = panelNodes.get(i).jsvp;
@@ -619,7 +631,6 @@ public class JSViewer {
         continue;
       info.add(jsvp.getPanelData().getInfo(true, key));
     }
-    Map<String, Object> map = new Hashtable<String, Object>();
     map.put("items", info);
     return map;
   }
@@ -726,11 +737,10 @@ public class JSViewer {
 					}
 				}
 				continue;
-			} else {
-				if (!id.contains("."))
-					id = id0 + id;
-				node = JSVPanelNode.findNodeById(id, panelNodes);
-			}
+			} 
+			if (!id.contains("."))
+				id = id0 + id;
+			node = JSVPanelNode.findNodeById(id, panelNodes);
 			if (node == null)
 				continue;
 			idLast = id;
@@ -780,6 +790,14 @@ public class JSViewer {
 	public static void showColorMessage(ScriptInterface si) {
 		JSVPanel jsvp = si.getSelectedPanel();
 		jsvp.showMessage(jsvp.getPanelData().getSolutionColorHtml(), "Predicted Colour");
+	}
+
+	public static Map<String, Object> getCurrentProperty(
+			ScriptInterface si, String key) {
+		return ("PeakList".equalsIgnoreCase(key)
+				|| "Integration".equalsIgnoreCase(key) ? 
+						si.getSelectedPanel().getPanelData().getInfo(false, key)
+						: null);
 	}
 
 }

@@ -50,7 +50,7 @@ class AwtGraphSet extends GraphSet {
   }
 
 
-  AwtGraphSet(AwtPanel jsvp, GraphSet superSet) {
+  AwtGraphSet(AwtPanel jsvp) {
     this.jsvp = jsvp;
     this.pd = jsvp.pd;
   }
@@ -61,7 +61,8 @@ class AwtGraphSet extends GraphSet {
     super.initGraphSet(startIndex, endIndex);
   }
 
-  void setPlotColors(Object oColors) {
+  @Override
+	void setPlotColors(Object oColors) {
     Color[] colors = (Color[]) oColors;
     if (colors.length > nSpectra) {
       Color[] tmpPlotColors = new Color[nSpectra];
@@ -89,7 +90,8 @@ class AwtGraphSet extends GraphSet {
     }
   }
 
-  void setPlotColor0(Object oColor) {
+  @Override
+	void setPlotColor0(Object oColor) {
     plotColors[0] = (Color) oColor;
   }
 
@@ -116,7 +118,8 @@ class AwtGraphSet extends GraphSet {
 
   /////////////// 2D image /////////////////
 
-  protected void draw2DImage(Object g) {
+  @Override
+	protected void draw2DImage(Object g) {
     if (imageView != null) {
       ((Graphics) g).drawImage(image2D, imageView.xPixel0, imageView.yPixel0, // destination 
           imageView.xPixel0 + imageView.xPixels - 1, // destination 
@@ -246,11 +249,13 @@ class AwtGraphSet extends GraphSet {
     return ((Graphics) g).getFontMetrics().stringWidth(s);
   }
 
-  protected void rotatePlot(Object g, int angle, int x, int y) {
+  @Override
+	protected void rotatePlot(Object g, int angle, int x, int y) {
   	((Graphics2D) g).rotate(Math.PI * angle / 180.0, x, y);
   }
 
-  protected void setAnnotationColor(Object g, Annotation note,
+  @Override
+	protected void setAnnotationColor(Object g, Annotation note,
                                     ScriptToken whatColor) {
     if (whatColor != null) {
       setColor(g, whatColor);
@@ -278,6 +283,7 @@ class AwtGraphSet extends GraphSet {
 		((Graphics2D) g).setStroke(tf ? strokeBold : strokeBasic);
 	}
 	
+	@SuppressWarnings("incomplete-switch")
 	@Override
 	protected void fillArrow(Object g, ArrowType type, int x, int y, boolean doFill) {
 		int f = 1;

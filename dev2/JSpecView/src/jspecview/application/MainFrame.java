@@ -60,7 +60,6 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -167,6 +166,10 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	public void setIRMode(IRMode mode) {
 		irMode = mode;
 	}
+	public IRMode getIRMode() {
+		return irMode;
+	}
+	
 	private boolean autoIntegrate;
 
 	private AwtParameters parameters = new AwtParameters("application");
@@ -202,14 +205,14 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	private JScrollPane spectraTreeScrollPane;
 	private JPanel statusPanel = new JPanel();
 	private JLabel statusLabel = new JLabel();
-	private JTextField commandInput = new JTextField();
+	JTextField commandInput = new JTextField();
 
 	private JFileChooser fc;
 
 	private JSVInterface jmolOrAdvancedApplet;
 	private JSVAppletPrivatePro advancedApplet;
 	private Image iconImage;
-	private CommandHistory commandHistory;
+	CommandHistory commandHistory;
 	private boolean svgForInkscape;
 	private Component jmolDisplay;
 	private Dimension jmolDimensionOld;
@@ -370,7 +373,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 		// initialise Spectra tree
 
-		spectraTree = new JSVTree((ScriptInterface) this);
+		spectraTree = new JSVTree(this);
 		spectraTree.setCellRenderer(new SpectraTreeCellRenderer());
 		spectraTree.putClientProperty("JTree.lineStyle", "Angled");
 		spectraTree.setShowsRootHandles(true);
@@ -637,7 +640,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	public void openDataOrFile(String data, String name, List<JDXSpectrum> specs,
 			String url, int firstSpec, int lastSpec, boolean isAppend) {
-		JSVTree.openDataOrFile((ScriptInterface) this, data, name, specs, url,
+		JSVTree.openDataOrFile(this, data, name, specs, url,
 				firstSpec, lastSpec, isAppend);
 		validateAndRepaint();
 	}
@@ -726,7 +729,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
       mainSplitPosition = mainSplitPane.getDividerLocation();
 		spectrumPanel.setSelectedPanel(jsvp, panelNodes);
 		selectedPanel = jsvp;
-		spectraTree.setSelectedPanel((ScriptInterface) this, jsvp);
+		spectraTree.setSelectedPanel(this, jsvp);
 		validate();
 		if (jsvp != null) {
       jsvp.setEnabled(true);
@@ -861,18 +864,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	public Map<String, Object> getProperty(String key) {
-		if ("".equals(key))
-			key = null;
-		List<Map<String, Object>> info = new ArrayList<Map<String, Object>>();
-		for (int i = 0; i < panelNodes.size(); i++) {
-			JSVPanel jsvp = panelNodes.get(i).jsvp;
-			if (jsvp == null)
-				continue;
-			info.add(jsvp.getPanelData().getInfo(jsvp == getSelectedPanel(), key));
-		}
-		Map<String, Object> map = new Hashtable<String, Object>();
-		map.put("items", info);
-		return map;
+		return JSViewer.getPropertyAsJavaObject(this, key);
 	}
 
 	/**
@@ -936,14 +928,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		requestRepaint();
 	}
 
-	/**
-	 * Allows Integration of an HNMR spectra
-	 * 
-	 */
-	public void execIntegrate(JDXSpectrum spec) {
-		// unnec
-	}
-
 	public void execClose(String value, boolean fromScript) {
 		JSVTree.close(this, TextFormat.trimQuotes(value));
 		if (!fromScript) {
@@ -957,7 +941,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	public String execLoad(String value) {
-		JSVTree.load((ScriptInterface) this, value);
+		JSVTree.load(this, value);
 		if (getSelectedPanel() == null)
 			return null;
 		if (!getSelectedPanel().getSpectrum().is1D()
@@ -987,8 +971,8 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		// }
 	}
 
-	public JSVPanel execSetSpectrum(String value) {
-		return JSVTree.setSpectrum((ScriptInterface) this, value);
+	public JSVPanel setSpectrum(String value) {
+  	return JSVTree.setSpectrum(this, value);
 	}
 
 	public void execSetAutoIntegrate(boolean b) {
@@ -1109,6 +1093,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		TextDialog.showProperties(this, getPanelData().getSpectrum());
 	}
 
+	@SuppressWarnings("incomplete-switch")
 	public void updateBoolean(ScriptToken st, boolean TF) {
 		JSVPanel jsvp = getSelectedPanel();
 		if (jsvp == null)
@@ -1272,10 +1257,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		properties.setProperty("recentFilePaths", (n == 0 ? "" : filePaths
 				.substring(2)));
 		appMenu.updateRecentMenus(recentFilePaths);
-	}
-
-	public void process(List<JDXSpectrum> specs) {
-		JDXSpectrum.process(specs, irMode, parameters);
 	}
 
 	public void setMenuEnables(JSVPanelNode node, boolean isSplit) {

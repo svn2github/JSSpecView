@@ -191,8 +191,8 @@ class FormContext {
     return strError;
   }
 
-  @SuppressWarnings("unchecked")
-  public String merge(FileWriter writer) {
+   @SuppressWarnings("unchecked")
+	public String merge(FileWriter writer) {
     StringBuffer sb = (writer == null ? new StringBuffer() : null);
     int ptr;
     for (int i = 0; i < formTokens.size() && strError == null; i++) {
@@ -236,7 +236,7 @@ class FormContext {
           continue;
         case VT_FOREACH:
           foreach(vt);
-        // fall through
+        //$FALL-THROUGH$
         case VT_END:
           if ((vt = formTokens.get(vt.cmdPtr)).cmdType != VT_FOREACH)
             continue;
@@ -254,7 +254,7 @@ class FormContext {
             context.put(vt.var + ".yVal", new Double(c.getYVal()));
             context.put(vt.var + ".getXString()", c.getXString());
             context.put(vt.var + ".getYString()", c.getYString());
-          } else if (varData instanceof Map) {
+          } else if (varData instanceof Map<?,?>) {
             for (Map.Entry<String, String> entry: ((Map<String, String>) varData).entrySet())
               context.put(vt.var + "." + entry.getKey(), entry.getValue());
           }
@@ -298,6 +298,9 @@ class FormContext {
     return -1;
   }
 
+  /**
+	 * @param isIf  
+	 */
   private boolean evaluate(String data, boolean isIf) {
     int pt = data.indexOf("(");
     if (pt < 0) {

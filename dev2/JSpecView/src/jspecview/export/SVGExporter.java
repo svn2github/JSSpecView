@@ -302,9 +302,9 @@ class SVGExporter extends FormExporter {
 
     context.put("xUnits", xUnits);
     context.put("yUnits", yUnits);
-    context.put("firstX", firstX);
-    context.put("firstY", firstY);
-    context.put("lastX", lastX);
+    context.put("firstX", Double.valueOf(firstX));
+    context.put("firstY", Double.valueOf(firstY));
+    context.put("lastX", Double.valueOf(lastX));
 
     int xUnitLabelX = rightPlotArea - 50;
     int xUnitLabelY = bottomPlotArea + 30;

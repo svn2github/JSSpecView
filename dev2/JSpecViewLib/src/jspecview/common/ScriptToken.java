@@ -54,6 +54,7 @@ public enum ScriptToken {
   ENDINDEX, 
   EXPORT("[XY,DIF,DIFDUP,PAC,FIX,SQZ,AML,CML,JPG,PNG,SVG,SVGI] \"filename\""),
   FINDX("x-value"),
+  GETPROPERTY("[ALL] [propertyName]"),
   GETSOLUTIONCOLOR, 
   GRIDCOLOR("C"), 
   GRIDON("T"), 

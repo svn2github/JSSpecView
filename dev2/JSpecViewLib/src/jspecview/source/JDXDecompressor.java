@@ -366,7 +366,7 @@ public class JDXDecompressor {
   private int getDifDup(int i) {
     int ich0 = ich;
     skipTo(allDelim);
-    return (ich0 == ich ? i : Integer.valueOf(i + line.substring(ich0, ich)));
+    return (ich0 == ich ? i : Integer.valueOf(i + line.substring(ich0, ich)).intValue());
   }
 
   private double getValue() {
@@ -435,7 +435,7 @@ public class JDXDecompressor {
     switch (ch) {
     case '-':
       factor = -1;
-      //fall through
+      //$FALL-THROUGH$
     case '+':
       ich0 = ++ich;
       break;

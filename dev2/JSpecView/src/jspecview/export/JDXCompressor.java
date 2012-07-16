@@ -68,7 +68,7 @@ class JDXCompressor {
       yStr.setLength(0);
       if (Logger.debugging)
         Logger.info("" + i + '\t' + xyCoords[i].getXVal() + '\t' + xyCoords[i].getYVal());
-      long y1 = (long) Math.round(xyCoords[i].getYVal() / yFactor);
+      long y1 = Math.round(xyCoords[i].getYVal() / yFactor);
       yStr.append(makeSQZ(y1));
       String lastDif = "";
       int nDif = 0;
@@ -79,7 +79,7 @@ class JDXCompressor {
       } else {
         while (i + step != endIndex && yStr.length() < 50) {
           // Print remaining Y values on a line
-          long y2 = (long) Math.round(xyCoords[i].getYVal() / yFactor);
+          long y2 = Math.round(xyCoords[i].getYVal() / yFactor);
           // Calculate DIF value here
           String temp = makeDIF(y2 - y1);
           if (isDIFDUP && temp.equals(lastDif)) {
@@ -144,11 +144,11 @@ class JDXCompressor {
       if (xStr.length() < 20)
         xStr += spaces.substring(0, (14 - xStr.length()));
       buffer.append(xStr).append(" ");
-      format10(buffer, (long) Math.round(xyCoords[i].getYVal() / yFactor),
+      format10(buffer, Math.round(xyCoords[i].getYVal() / yFactor),
           formatter);
       i += step;
       for (int j = 0; j < 5 && i != endIndex; j++) {
-        format10(buffer, (long) Math.round(xyCoords[i].getYVal() / yFactor),
+        format10(buffer, Math.round(xyCoords[i].getYVal() / yFactor),
             formatter);
         i += step;
       }
@@ -250,7 +250,7 @@ class JDXCompressor {
    * @return the SQZ character
    */
   private static String makeSQZ(Coordinate pt, double yFactor) {
-    return makeSQZ((long) Math.round(pt.getYVal() / yFactor));
+    return makeSQZ(Math.round(pt.getYVal() / yFactor));
   }
 
   /**

@@ -251,9 +251,9 @@ public class JSVTree extends JTree {
       close(si, "all");
     }
     filename = TextFormat.trimQuotes(filename);
-    int firstSpec = (pt + 1 < tokens.size() ? Integer.valueOf(tokens.get(++pt))
+    int firstSpec = (pt + 1 < tokens.size() ? Integer.valueOf(tokens.get(++pt)).intValue()
         : -1);
-    int lastSpec = (pt + 1 < tokens.size() ? Integer.valueOf(tokens.get(++pt))
+    int lastSpec = (pt + 1 < tokens.size() ? Integer.valueOf(tokens.get(++pt)).intValue()
         : firstSpec);
     si.openDataOrFile(null, null, null, filename, firstSpec, lastSpec, isAppend);
 	}
@@ -327,9 +327,9 @@ public class JSVTree extends JTree {
     }
 
     specs = currentSource.getSpectra();
-    si.process(specs);
-    
-    boolean autoOverlay = si.getAutoCombine() || spec.isAutoOverlayFromJmolClick();
+		JDXSpectrum.process(specs, si.getIRMode());
+
+		boolean autoOverlay = si.getAutoCombine() || spec.isAutoOverlayFromJmolClick();
     
     boolean combine = isView || autoOverlay
         && currentSource.isCompoundSource;

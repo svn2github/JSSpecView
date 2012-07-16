@@ -833,7 +833,7 @@ public abstract class JDXDataObject extends JDXHeader {
 		return null;
 	}
 
-	public String[] getPeakListArray(int pt, Measurement m, double[]last, double minY, double maxY) {
+	public String[] getPeakListArray(int pt, Measurement m, double[]last, double maxY) {
 		DecimalFormat df4 = TextFormat.getDecimalFormat("#0.0000");
 		DecimalFormat df2 = TextFormat.getDecimalFormat("#0.00");
 		double x = m.getXVal();

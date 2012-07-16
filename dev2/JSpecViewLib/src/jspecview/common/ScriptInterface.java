@@ -33,8 +33,6 @@ public interface ScriptInterface {
 
 	public void execSetInterface(String value);
 
-	public JSVPanel execSetSpectrum(String value);
-
 	public void execTest(String value);
 
 	public boolean getAutoCombine();
@@ -49,6 +47,8 @@ public interface ScriptInterface {
 
 	public String getIntegrationRatios();
 
+	public IRMode getIRMode();
+	
 	public JSVPanel getNewJSVPanel(JDXSpectrum spec);
 
 	public JSVPanel getNewJSVPanel(List<JDXSpectrum> specs);
@@ -79,7 +79,11 @@ public interface ScriptInterface {
 
 	public void print();
 
-	public void process(List<JDXSpectrum> specs);
+	public void requestRepaint();
+
+	public void repaint();
+
+	public void repaintCompleted();
 
 	public void runScript(String script);
 
@@ -113,6 +117,8 @@ public interface ScriptInterface {
 
 	public void setSelectedPanel(JSVPanel jsvp);
 
+	public JSVPanel setSpectrum(String value);
+
 	public void showProperties();
 
 	public void syncLoad(String fileName);
@@ -127,10 +133,4 @@ public interface ScriptInterface {
 
 	public void writeStatus(String msg);
 
-	public void repaint();
-
-	public void requestRepaint();
-
-	public void repaintCompleted();
-	
 }

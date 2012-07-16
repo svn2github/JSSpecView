@@ -4,7 +4,9 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import jspecview.common.Annotation.AType;
@@ -71,11 +73,15 @@ public class IntegralData extends MeasurementData {
     calculateIntegral();
 	}
 
-	public IntegralData(JDXSpectrum spec, Parameters parameters) {
+	public IntegralData(JDXSpectrum spec, Parameters p) {
 		super(AType.Integration, spec);
-		percentOffset = parameters.integralOffset;
-		percentRange = parameters.integralRange;
-    calculateIntegral();
+		if (p == null) {
+			autoIntegrate();
+			return;
+		}
+		percentOffset = p.integralOffset;
+		percentRange = p.integralRange;
+		calculateIntegral();
 	}
 
 	public void update(Parameters parameters) {
@@ -135,8 +141,7 @@ public class IntegralData extends MeasurementData {
     return Coordinate.getYValueAt(xyCoords, x);
   }
 
-	public Integral addIntegralRegion(double x1, double x2,
-			boolean isFinal) {
+	public Integral addIntegralRegion(double x1, double x2) {
 		if (Double.isNaN(x1)) {
 			haveRegions = false;
 			clear();
@@ -155,6 +160,7 @@ public class IntegralData extends MeasurementData {
 		return in;
 	}
 
+	@Override
 	public void addSpecShift(double dx) {
 		Coordinate.shiftX(xyCoords, dx);
     for (int i = size(); --i >= 1;) {
@@ -170,16 +176,16 @@ public class IntegralData extends MeasurementData {
     ppms = ppms.replace('-','^');
     ppms = ppms.replace('#','-');
     List<String> tokens = ScriptToken.getTokens(ppms);
-    addIntegralRegion(0, 0, false);
+    addIntegralRegion(0, 0);
     for (int i = tokens.size(); --i >= 0;) {
       String s = tokens.get(i);
       int pt = s.indexOf('^');
       if (pt < 0)
         continue;
       try {
-        double x2 = Double.valueOf(s.substring(0, pt).trim());
-        double x1 = Double.valueOf(s.substring(pt + 1).trim());
-        addIntegralRegion(x1, x2, true);
+        double x2 = Double.valueOf(s.substring(0, pt).trim()).doubleValue();
+        double x1 = Double.valueOf(s.substring(pt + 1).trim()).doubleValue();
+        addIntegralRegion(x1, x2);
       } catch (Exception e) {
         continue;
       }
@@ -272,10 +278,12 @@ public class IntegralData extends MeasurementData {
 		scaleIntegrationBy(factor);
 	}
 
+	@Override
 	public void clear() {
 		super.clear();
 	}
 	
+	@Override
 	public Measurement remove(int i) {
 		return super.remove(i);
 	}
@@ -295,7 +303,8 @@ public class IntegralData extends MeasurementData {
 		return bs;
 	}
 
-	public String[][] getIntegralListArray() {
+	@Override
+	public String[][] getMeasurementListArray(String units) {
 		DecimalFormat df2 = TextFormat.getDecimalFormat("#0.00");
 		String[][] data = new String[size()][];
 		for (int pt = 0, i = size(); --i >= 0;)
@@ -305,6 +314,7 @@ public class IntegralData extends MeasurementData {
 
 	private final static String[] HEADER = new String[] { "peak", "start/ppm", "end/ppm", "value" };
 
+	@Override
 	public String[] getDataHeader() {
 		return HEADER;
 	}
@@ -357,8 +367,7 @@ public class IntegralData extends MeasurementData {
 				//System.out.println(i + " " + xyCoords[i] + "  " + y0);
 				if (nCount >= nMin) {
 					//System.out.println(iStart + " " + i + " " + xyCoords[iStart] +  " "  + xyCoords[i]);
-					addIntegralRegion(xyCoords[iStart].getXVal(), xyCoords[i].getXVal(),
-							true);
+					addIntegralRegion(xyCoords[iStart].getXVal(), xyCoords[i].getXVal());
 					iStart = -1;
 					y0 = y;
 					nCount = 0;
@@ -372,16 +381,13 @@ public class IntegralData extends MeasurementData {
 		}
 	}
 
-	/*	
-	public Map<String, Object> getInfo(String key) {
-	  Map<String, Object> info = new Hashtable<String, Object>();
-	  JDXSpectrum.putInfo(key, info, "type", "integration");
-	  JDXSpectrum.putInfo(key, info, "percentMinY", Double.valueOf(percentMinY));
-	  JDXSpectrum.putInfo(key, info, "percentOffset", Double.valueOf(percentOffset));
-	  JDXSpectrum.putInfo(key, info, "integralRange", Double.valueOf(integralRange));
-	  //TODO annotations
-	  return info;
+	@Override
+	public Map<String, Object> getParams() {
+		Map<String, Object> info = new Hashtable<String, Object>();
+		info.put("offset", Double.valueOf(myParams.integralOffset));
+		info.put("range", Double.valueOf(myParams.integralRange));
+		return info;
 	}
-	*/
+
 
 }

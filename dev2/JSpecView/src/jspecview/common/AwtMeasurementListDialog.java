@@ -35,9 +35,9 @@ class AwtMeasurementListDialog extends AwtAnnotationDialog {
 
 	protected AwtMeasurementListDialog(String title, ScriptInterface si, 
 			JDXSpectrum spec, JSVPanel jsvp) {
-		super(title, si, spec, jsvp);
+		super(si, spec, jsvp);
 		thisType = AType.Measurements;
-		setTitle("Measurement Listing");
+		setTitle(title);
 		addUnits = true;
 		setup();
 	}
