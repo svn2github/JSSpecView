@@ -76,7 +76,7 @@ abstract class AwtAnnotationDialog extends AwtDialog implements AnnotationDialog
 	private JPanel leftPanel, rightPanel;
 	protected JButton showHideButton;
 
-	private JButton clearButton, applyButton, doneButton;
+	private JButton clearButton, applyButton;
 	protected final static Map<String, Object> options = new HashMap<String, Object>();
 
 	private Object[] myOptions;
@@ -172,14 +172,6 @@ abstract class AwtAnnotationDialog extends AwtDialog implements AnnotationDialog
 			}
 		});
 
-		doneButton = newJButton();
-		doneButton.setText("Done");
-		doneButton.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				done();
-			}
-		});
-
 		leftPanel = new JPanel(new GridBagLayout());
 		dialogHelper = new DialogHelper(thisKey, options, leftPanel, eventListener);
 		addControls();
@@ -187,8 +179,8 @@ abstract class AwtAnnotationDialog extends AwtDialog implements AnnotationDialog
 		leftPanel.setMinimumSize(new Dimension(200, 300));
 		dialogHelper.addButton(applyButton);
 		dialogHelper.addButton(showHideButton);
-		dialogHelper.addButton(clearButton);
-		// dialogHelper.addButton(doneButton);
+		if (!(this instanceof AwtPeakListDialog))
+	  	dialogHelper.addButton(clearButton);
 		dialogHelper = null;
 
 		rightPanel = new JPanel();

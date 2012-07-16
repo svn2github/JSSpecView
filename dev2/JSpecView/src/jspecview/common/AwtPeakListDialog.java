@@ -114,7 +114,7 @@ class AwtPeakListDialog extends AwtAnnotationDialog {
 
 	@Override
 	protected void clear() {
-		super.clear();
+		// n/a
 	}
 		
 	@Override
