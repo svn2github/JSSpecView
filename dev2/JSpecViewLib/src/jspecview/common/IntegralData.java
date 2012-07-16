@@ -4,7 +4,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -26,7 +25,7 @@ public class IntegralData extends MeasurementData {
 	  OFF, ON, TOGGLE, AUTO, MARK, UPDATE;
 	  static IntMode getMode(String value) {
 	    for (IntMode mode: values())
-	      if (mode.name().equalsIgnoreCase(value))
+	      if (value.startsWith(mode.name()))
 	        return mode;
 	    return ON;
 	  }
@@ -147,6 +146,8 @@ public class IntegralData extends MeasurementData {
 			clear();
 			return null;
 		}
+		if(x1 == x2)
+			return null;
 		double y1 = getYValueAt(x1);
 		double y2 = getYValueAt(x2);
 		haveRegions = true;
@@ -168,6 +169,13 @@ public class IntegralData extends MeasurementData {
     }		
 	}
 
+	/**
+	 * INTEGRATION MARK list
+	 * where list is a comma-separated list of ppm1-ppm2
+	 * with  :x.x added to normalize one of them
+	 * and starting with  0-0 clears the integration 
+	 * @param ppms
+	 */
 	public void addMarks(String ppms) {
     //2-3,4-5,6-7...
     ppms = TextFormat.simpleReplace(" " + ppms, ",", " ");
@@ -176,16 +184,27 @@ public class IntegralData extends MeasurementData {
     ppms = ppms.replace('-','^');
     ppms = ppms.replace('#','-');
     List<String> tokens = ScriptToken.getTokens(ppms);
-    addIntegralRegion(0, 0);
-    for (int i = tokens.size(); --i >= 0;) {
-      String s = tokens.get(i);
-      int pt = s.indexOf('^');
-      if (pt < 0)
-        continue;
+    for (int i = 0; i < tokens.size(); i++) {
       try {
+        String s = tokens.get(i);
+        double norm = 0;
+        int pt = s.indexOf('^');
+        if (pt < 0)
+          continue;
+      	int pt2 = s.indexOf(':');
+      	if (pt2 > pt) {
+      		norm = Double.valueOf(s.substring(pt2 + 1).trim()).doubleValue();
+      		s = s.substring(0, pt2).trim();      		
+      	}
         double x2 = Double.valueOf(s.substring(0, pt).trim()).doubleValue();
         double x1 = Double.valueOf(s.substring(pt + 1).trim()).doubleValue();
-        addIntegralRegion(x1, x2);
+        if (x1 == 0 && x2 == 0) 
+        	clear();
+        if (x1 == x2)
+        	continue;
+        Measurement m = addIntegralRegion(Math.max(x1, x2), Math.min(x1, x2));
+        if (m != null && norm > 0)
+        	setSelectedIntegral(m, norm);
       } catch (Exception e) {
         continue;
       }
@@ -384,11 +403,10 @@ public class IntegralData extends MeasurementData {
 	}
 
 	@Override
-	public Map<String, Object> getParams() {
-		Map<String, Object> info = new Hashtable<String, Object>();
+	public void getInfo(Map<String, Object> info) {
 		info.put("offset", Double.valueOf(myParams.integralOffset));
 		info.put("range", Double.valueOf(myParams.integralRange));
-		return info;
+		super.getInfo(info);
 	}
 
 

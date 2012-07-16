@@ -478,6 +478,7 @@ public class JDXSpectrum extends JDXDataObject {
   public Map<String, Object> getInfo(String key) {
     Map<String, Object> info = new Hashtable<String, Object>();
     info.put("id", id);
+    Parameters.putInfo(key, info, "specShift", Double.valueOf(specShift));
     boolean justHeader = ("header" == key);
     Map<String, Object> head = new Hashtable<String, Object>();
     String[][] list = getHeaderRowDataAsArray();
@@ -495,7 +496,8 @@ public class JDXSpectrum extends JDXDataObject {
         info.put(label, val);
       }
     }
-    info.put("header", head);
+    if (head.size() > 0)
+      info.put("header", head);
     if (!justHeader) {
       Parameters.putInfo(key, info, "titleLabel", getTitleLabel());
       Parameters.putInfo(key, info, "type", getDataType());

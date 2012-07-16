@@ -128,30 +128,21 @@ public class PanelData {
 		this.title = title;
 	}
 
-	public Map<String, Object> getInfo(boolean isSelected, String key) {
+	public Map<String, Object> getInfo(boolean selectedOnly, String key) {
 		Map<String, Object> info = new Hashtable<String, Object>();
-		if (!isSelected && "PeakList".equalsIgnoreCase(key)
-				&& Parameters.isMatch(key, "PeakList")) {
-			Parameters.putInfo(key, info, "PeakList", currentGraphSet.getDataTable(
-					AType.PeakList, -1));
-		} else if (!isSelected && "Integration".equalsIgnoreCase(key)
-				&& Parameters.isMatch(key, "Integration")) {
-			Parameters.putInfo(key, info, "Integration", currentGraphSet.getDataTable(
-					AType.Integration, -1));
-		} else {
-			Set<Entry<ScriptToken, Object>> entries = options.entrySet();
-			for (Entry<ScriptToken, Object> entry : entries)
-				Parameters.putInfo(key, info, entry.getKey().name(), entry.getValue());
-			Parameters.putInfo(key, info, "selected", Boolean.valueOf(isSelected));
-			Parameters.putInfo(key, info, "type", getSpectrumAt(0).getDataType());
-			Parameters.putInfo(key, info, "title", title);
-			Parameters.putInfo(key, info, "nSets", Integer.valueOf(graphSets.size()));
-			List<Map<String, Object>> sets = new ArrayList<Map<String, Object>>();
-			for (int i = graphSets.size(); --i >= 0;)
-				sets.add(graphSets.get(i).getInfo(key,
-						isSelected && graphSets.get(i) == currentGraphSet));
-			info.put("sets", sets);
-		}
+		List<Map<String, Object>> sets = null;
+		if (selectedOnly)
+			return currentGraphSet.getInfo(key, getCurrentSpectrumIndex());
+		Set<Entry<ScriptToken, Object>> entries = options.entrySet();
+		for (Entry<ScriptToken, Object> entry : entries)
+			Parameters.putInfo(key, info, entry.getKey().name(), entry.getValue());
+		Parameters.putInfo(key, info, "type", getSpectrumAt(0).getDataType());
+		Parameters.putInfo(key, info, "title", title);
+		Parameters.putInfo(key, info, "nSets", Integer.valueOf(graphSets.size()));
+		sets = new ArrayList<Map<String, Object>>();
+		for (int i = graphSets.size(); --i >= 0;)
+			sets.add(graphSets.get(i).getInfo(key, -1));
+		info.put("sets", sets);
 		return info;
 	}
 

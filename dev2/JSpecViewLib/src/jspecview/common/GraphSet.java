@@ -3354,7 +3354,7 @@ abstract class GraphSet {
 		AnnotationData ad = getDialog(AType.Integration, -1);
 		if (value == null && ad != null)
 			return true;
-		switch (IntegralData.IntMode.getMode(value)) {
+		switch (IntegralData.IntMode.getMode(value.toUpperCase())) {
 		case ON:
 			integrate(iSpec, parameters);
 			break;
@@ -3378,7 +3378,7 @@ abstract class GraphSet {
 				ad = getDialog(AType.Integration, -1);
 			}
 			if (ad != null)
-				((IntegralData) ad.getData()).addMarks(value.substring(5).trim());
+				((IntegralData) ad.getData()).addMarks(value.substring(4).trim());
 			break;
 		case UPDATE:
 			if (ad != null)
@@ -3644,7 +3644,7 @@ abstract class GraphSet {
 		return (IntegralData) dialog.getData();
 	}
 
-	public Object[] getDataTable(AType type, int iSpec) {
+	public Map<String, Object> getMeasurementInfo(AType type, int iSpec) {
 	  MeasurementData md;	
 		switch (type) {
 		case PeakList:
@@ -3656,21 +3656,31 @@ abstract class GraphSet {
 		default:
 			return null;
 		}
-		return (md == null ? null : new Object[] { md.getDataHeader(), md.getMeasurementListArray("ppm"), md.getParams() });		
+		if (md == null)
+			return null;
+		Map<String, Object> info = new Hashtable<String, Object>();
+		md.getInfo(info);
+		return info;
 	}
 	
-	Map<String, Object> getInfo(String key, boolean isSelected) {
+	Map<String, Object> getInfo(String key, int iSpec) {
 		Map<String, Object> spectraInfo = new Hashtable<String, Object>();
 		List<Map<String, Object>> specInfo = new ArrayList<Map<String, Object>>();
 		spectraInfo.put("spectra", specInfo);
 		for (int i = 0; i < nSpectra; i++) {
-			Map<String, Object> info = spectra.get(i).getInfo(key);
-			if (viewData.specShift != 0)
-				Parameters.putInfo(key, info, "specShift", Double.valueOf(viewData.specShift));
-			Parameters.putInfo(key, info, "selected", Boolean.valueOf(isSelected));
-			Parameters.putInfo(key, info, "titleLabel", spectra.get(i).getTitleLabel());
-		  Parameters.putInfo(key, info, "PeakList", (Parameters.isMatch(key, "PeakList") ? getDataTable(AType.PeakList, i) : null));
-		  Parameters.putInfo(key, info, "Integration", (Parameters.isMatch(key, "Integration") ? getDataTable(AType.Integration, i) : null));
+			if (iSpec >= 0 && i != iSpec)
+				continue;
+			JDXSpectrum spec = spectra.get(i);
+			Map<String, Object> info = spec.getInfo(key);
+			Parameters.putInfo(key, info, "type", spec.getDataType());
+			Parameters.putInfo(key, info, "titleLabel", spec.getTitleLabel());
+			Parameters.putInfo(key, info, "filePath", spec.getFilePath().replace('\\', '/'));
+			Parameters.putInfo(key, info, "PeakList", (Parameters.isMatch(key,
+					"PeakList") ? getMeasurementInfo(AType.PeakList, i) : null));
+			Parameters.putInfo(key, info, "Integration", (Parameters.isMatch(key,
+					"Integration") ? getMeasurementInfo(AType.Integration, i) : null));
+			if (iSpec >= 0)
+				return info;
 			specInfo.add(info);
 		}
 		return spectraInfo;

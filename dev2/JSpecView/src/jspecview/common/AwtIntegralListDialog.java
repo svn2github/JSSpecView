@@ -85,14 +85,6 @@ class AwtIntegralListDialog extends AwtAnnotationDialog {
     });
 		dialogHelper.addButton(autoButton);
     
-		JButton normalizeButton = newJButton();
-		normalizeButton.setText("Normalize");
-		normalizeButton.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				normalize();
-			}
-		});
-		dialogHelper.addButton(normalizeButton);
 		JButton deleteButton = newJButton();
 		deleteButton.setText("Delete");
 		deleteButton.addActionListener(new java.awt.event.ActionListener() {
@@ -101,6 +93,15 @@ class AwtIntegralListDialog extends AwtAnnotationDialog {
 			}
 		});
 		dialogHelper.addButton(deleteButton);
+
+		JButton normalizeButton = newJButton();
+		normalizeButton.setText("Normalize");
+		normalizeButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				normalize();
+			}
+		});
+		dialogHelper.addButton(normalizeButton);
 	}
 
 	protected void delete() {
@@ -108,6 +109,7 @@ class AwtIntegralListDialog extends AwtAnnotationDialog {
 			return;
 		xyData.remove(iSelected);
 		iSelected = -1;
+		iRowColSelected = -1;
 		apply();
 		jsvp.doRepaint();
 	}

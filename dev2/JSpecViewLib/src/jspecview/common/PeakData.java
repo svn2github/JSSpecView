@@ -1,7 +1,6 @@
 package jspecview.common;
 
 import java.text.DecimalFormat;
-import java.util.Hashtable;
 import java.util.Map;
 
 import jspecview.common.Annotation.AType;
@@ -52,11 +51,10 @@ public class PeakData extends MeasurementData {
 	}
 	
 	@Override
-	public Map<String, Object> getParams() {
-		Map<String, Object> info = new Hashtable<String, Object>();
+	public void getInfo(Map<String, Object> info) {
 		info.put("interpolation", myParams.peakListInterpolation);
 		info.put("threshold", Double.valueOf(myParams.peakListThreshold));
-		return info;
+		super.getInfo(info);
 	}
 
 	public void setPeakList(Parameters p, DecimalFormat formatter, ScaleData view) {

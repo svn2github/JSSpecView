@@ -23,6 +23,21 @@ changes and analyses can be made without altering the saved view
 
 =====DONE========
 
+getProperty key # implies selected; key is optional
+getProperty ALL key # all spectra; key is optional
+
+integrationRegion xx (%)
+integrationOffset xx (%)
+
+integration MARK command
+
+	 * INTEGRATION MARK list
+	 * where list is a comma-separated list of ppm1-ppm2
+	 * with  :x.x added to normalize one of them
+	 * and starting with  0-0 clears the integration 
+	 * for example: integration mark 0-0,8.25-7.75:2,7.75-7.25 
+
+
 swap double click and ctrl click for measurements
 show/hide measurements
 

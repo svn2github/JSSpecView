@@ -354,7 +354,7 @@ abstract class AwtAnnotationDialog extends AwtDialog implements AnnotationDialog
 	private int iRowSelected = -1;
 	private int iColSelected = -1;
 	ListSelectionModel columnSelector;
-	private int iRowColSelected = -1;
+	protected int iRowColSelected = -1;
 
 	private int lastChanged = 0;
 	

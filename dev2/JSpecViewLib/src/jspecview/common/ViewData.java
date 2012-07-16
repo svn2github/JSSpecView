@@ -238,6 +238,7 @@ class ViewData extends ScaleData {
 		System.arraycopy(view.spectrumYRefs, 0, spectrumYRefs, 0, nSpec);
 		initMinYOnScale = view.initMinYOnScale;
 		initMaxYOnScale = view.initMaxYOnScale;
+		specShift = view.specShift;
 		
 	}
 

@@ -620,8 +620,8 @@ public class JSViewer {
     if ("".equals(key))
       key = null;
     Map<String, Object>map = new Hashtable<String, Object>();
-		Map<String, Object> map0 = JSViewer.getCurrentProperty(si, key);
-		if (!isAll)
+		Map<String, Object> map0 = si.getSelectedPanel().getPanelData().getInfo(true, key);
+		if (!isAll && map0 != null)
 			return map0;
 		if (map0 != null)
 		  map.put("current", map0);
@@ -631,7 +631,7 @@ public class JSViewer {
       JSVPanel jsvp = panelNodes.get(i).jsvp;
       if (jsvp == null)
         continue;
-      info.add(jsvp.getPanelData().getInfo(true, key));
+      info.add(jsvp.getPanelData().getInfo(false, key));
     }
     map.put("items", info);
     return map;
@@ -792,14 +792,6 @@ public class JSViewer {
 	public static void showColorMessage(ScriptInterface si) {
 		JSVPanel jsvp = si.getSelectedPanel();
 		jsvp.showMessage(jsvp.getPanelData().getSolutionColorHtml(), "Predicted Colour");
-	}
-
-	public static Map<String, Object> getCurrentProperty(
-			ScriptInterface si, String key) {
-		return ("PeakList".equalsIgnoreCase(key)
-				|| "Integration".equalsIgnoreCase(key) ? 
-						si.getSelectedPanel().getPanelData().getInfo(false, key)
-						: null);
 	}
 
 }

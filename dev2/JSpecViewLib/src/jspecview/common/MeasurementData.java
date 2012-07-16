@@ -26,7 +26,6 @@ package jspecview.common;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -154,11 +153,11 @@ public class MeasurementData extends ArrayList<Measurement> implements Annotatio
 		return true;
 	}
 
-	public Map<String, Object> getParams() {
-		Map<String, Object> info = new Hashtable<String, Object>();
+	public void getInfo(Map<String, Object> info) {
+		info.put("header", getDataHeader());
+		info.put("table", getMeasurementListArray("ppm"));
 		if (units != null)
 			info.put("units", units);
-		return info;
 	}
 
 	
