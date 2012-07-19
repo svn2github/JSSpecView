@@ -689,13 +689,15 @@ abstract class GraphSet {
 					yPixel = toPixelY(m.getYVal2());
 				} else {
 					double[] x2 = new double[2];
+					x = toX(xPixel);
 					y = toY(yPixel);
-					if (isBetweenPeaks(spec, toX(xPixel), y, x2)) {
-						pendingMeasurement = new Measurement(spec, x2[0], y, "", x2[1], y);
-						setMeasurement(pendingMeasurement);
-						pendingMeasurement = null;
-						// pd.repaint();
-						return;
+					if (isBetweenPeaks(spec, x, y, x2)) {
+						pendingMeasurement = new Measurement(spec, 
+								x2[Math.abs(x2[0] - x) < Math.abs(x2[1] - x) ? 0 : 1], y);
+						//setMeasurement(pendingMeasurement);
+						//pendingMeasurement = null;
+						pd.repaint();
+						break;
 					} else if (findNearestMaxMin()) {
 						xPixel = xPixelMovedTo;
 					}
@@ -936,6 +938,7 @@ abstract class GraphSet {
 	private int xPixelPlot0;
 	private int yPixelPlot0;
 	private int yPixelPlot1;
+	private boolean nextClickForSetPeak;
 
 	private void setWidgetValueByUser(PlotWidget pw) {
 		String sval;
@@ -1020,6 +1023,8 @@ abstract class GraphSet {
 	}
 
 	private Coordinate setCoordClicked(double x, double y) {
+		if (y == 0)
+			nextClickForSetPeak = false;
 		if (Double.isNaN(x)) {
 			pd.coordClicked = null;
 			pd.coordsClicked = null;
@@ -2318,12 +2323,12 @@ abstract class GraphSet {
 			xx += ", " + TextFormat.getDecimalFormat("#0.0").format(yPt);
 		}
 		pd
-				.setToolTipText((pendingMeasurement != null
-						|| selectedMeasurement != null || selectedIntegral != null ? (pd
-						.hasFocus() ? "Press ESC to delete "
-						+ (selectedIntegral != null ? "integral, DEL to delete all visible, or N to normalize"
-								: pendingMeasurement == null ? "\"" + selectedMeasurement.text
-										+ "\" or DEL to delete all visible" : "measurement")
+				.setToolTipText(
+						(pendingMeasurement != null || selectedMeasurement != null || selectedIntegral != null ? 
+								(pd.hasFocus() ? "Press ESC to delete "	
+										+ (selectedIntegral != null ? "integral, DEL to delete all visible, or N to normalize" 
+													: pendingMeasurement == null ? "\"" + selectedMeasurement.text + "\" or DEL to delete all visible" 
+															: "measurement")
 						: "Click spectrum to reactivate")
 						: Double.isNaN(yPt) ? null : xx)
 
@@ -2692,7 +2697,7 @@ abstract class GraphSet {
 	boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		if (!zoomEnabled)
 			return false;
-		PlotWidget widget = pd.thisWidget;
+		PlotWidget widget;
 		if (isPress) {
 			widget = getPinSelected(xPixel, yPixel);
 			if (widget == null) {
@@ -2711,6 +2716,8 @@ abstract class GraphSet {
 			pd.thisWidget = widget;
 			return true;
 		}
+		nextClickForSetPeak = false;
+		widget = pd.thisWidget;
 		if (widget == null)
 			return false;
 
@@ -2987,6 +2994,8 @@ abstract class GraphSet {
 			boolean isControlDown) {
 		selectedMeasurement = null;
 		selectedIntegral = null;
+		boolean isNextClick = nextClickForSetPeak;
+		nextClickForSetPeak = false;
 		if (checkArrowUpDownClick(xPixel, yPixel))
 			return;
 		lastClickX = Double.NaN;
@@ -3081,7 +3090,11 @@ abstract class GraphSet {
 			}
 			setCoordClicked(toX(xPixel), toY(yPixel));
 			updateDialog(AType.PeakList, -1);
-
+			if (isNextClick) {
+				getPeakCenter();
+				shiftSpectrum(Double.NaN, Double.NaN);
+				return;
+			}
 		} else {
 			setCoordClicked(Double.NaN, 0);
 		}
@@ -3441,20 +3454,43 @@ abstract class GraphSet {
 	 * @return true if accomplished
 	 */
 	boolean shiftSpectrum(double dx, double x1) {
+  	// setpeak NONE     Double.NaN,       Double.MAX_VALUE
+  	// shiftx  NONE     Double.MAX_VALUE, Double.NaN
+
+		// setpeak  ?       Double.NaN,       Double.MIN_VALUE
+
+		// setpeak x.x      Double.NaN,       value
+		// setpeak          Double.NaN,       Double.NaN
+  	// setx    x.x			Double.MIN_VALUE, value
+    // setx       			Double.MIN_VALUE, Double.NaN
+
+		// shiftx  x.x      value,            Double.NaN
+
 		JDXSpectrum spec = getSpectrum();
-		if (!spec.isNMR())
+		if (!spec.isNMR() || !spec.is1D())
 			return false;
 		if (x1 == Double.MAX_VALUE || dx == Double.MAX_VALUE) {
-			// setPeak NONE
+			// setPeak NONE or setX NONE
 			dx = -spec.addSpecShift(0);
+		} else if (x1 == Double.MIN_VALUE) {
+			// setpeak ? -- set for setpeak Double.NaN,       Double.NaN after click
+			nextClickForSetPeak = true;
+			pd.owner.showMessage("Click on or near a peak to set its chemical shift.", "Set Reference");
+			return false;
 		} else if (Double.isNaN(dx) || dx == Double.MIN_VALUE) {
+			// setpeak     or setx
+			// setpeak x.x or setx x.x
 			double x0 = (dx == Double.MIN_VALUE ? lastClickX : getPeakCenter());
 			if (Double.isNaN(x0))
 				return false;
 			if (Double.isNaN(x1))
 				try {
-					x1 = Double.parseDouble(pd.getInput("New chemical shift for ",
-							"Set Reference", "" + x0));
+					String s = pd.getInput("New chemical shift (set blank to reset)",
+							"Set Reference", "" + x0).trim();
+					if (s.length() == 0)
+						x1 = x0 - spec.addSpecShift(0);
+					else		
+					  x1 = Double.parseDouble(s);
 				} catch (Exception e) {
 					return false;
 				}
@@ -3481,6 +3517,7 @@ abstract class GraphSet {
 		updateDialogs();
 		doZoom(viewData.minXOnScale, viewData.minYOnScale, viewData.maxXOnScale,
 				viewData.maxYOnScale, false, false, true);
+		pd.repaint();
 		return true;
 	}
 
@@ -3585,15 +3622,21 @@ abstract class GraphSet {
 					getSpectrum()));
 		}
 		((PeakData) dialog.getData()).setPeakList(p, null, viewData);
+		if (dialog instanceof AnnotationDialog)
+			((AnnotationDialog) dialog).setFields();
 		return dialog.getData();
 	}
 
 	public void setPeakListing(Boolean tfToggle) {
 		AnnotationData dialog = getDialog(AType.PeakList, -1);
-		if (dialog == null)
-			return;
-		dialog.setState(tfToggle == null ? !dialog.getState() : tfToggle
-				.booleanValue());
+		AnnotationDialog ad = (dialog instanceof AnnotationDialog ? (AnnotationDialog) dialog : null);
+		boolean isON = (tfToggle == null ? ad == null || !ad.isVisible() : tfToggle.booleanValue());
+		if (isON) {
+			pd.owner.showDialog(AType.PeakList);
+		} else {
+			if (dialog instanceof AnnotationDialog)
+				((AnnotationDialog) dialog).setVisible(false);
+		}
 	}
 
 	boolean haveIntegralDisplayed(int i) {

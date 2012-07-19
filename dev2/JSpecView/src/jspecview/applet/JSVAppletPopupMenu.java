@@ -130,8 +130,6 @@ class JSVAppletPopupMenu extends JSVPopupMenu {
     viewMenu.add(headerMenuItem);
     viewMenu.add(overlayKeyMenuItem);
     viewMenu.addSeparator();
-    setProcessingMenu(viewMenu);
-    viewMenu.addSeparator();
     viewMenu.add(windowMenuItem);
     zoomMenu.add(nextMenuItem);
     zoomMenu.add(previousMenuItem);
@@ -145,6 +143,8 @@ class JSVAppletPopupMenu extends JSVPopupMenu {
     add(zoomMenu);
     add(spectraMenuItem);
     add(overlayStackOffsetMenuItem);
+    addSeparator();
+    setProcessingMenu(this);
     addSeparator();
     add(scriptMenuItem);
     //add(appletAdvancedMenuItem);

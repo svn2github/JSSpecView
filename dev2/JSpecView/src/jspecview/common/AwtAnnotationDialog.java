@@ -168,7 +168,7 @@ abstract class AwtAnnotationDialog extends AwtDialog implements AnnotationDialog
 		applyButton.setText("Apply");
 		applyButton.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				apply();
+				applyButtonPressed();
 			}
 		});
 
@@ -197,6 +197,10 @@ abstract class AwtAnnotationDialog extends AwtDialog implements AnnotationDialog
 		getContentPane().add(mainSplitPane);
 
 		checkEnables();
+	}
+
+	protected void applyButtonPressed() {
+		apply();
 	}
 
 	protected void checkEnables() {
@@ -276,7 +280,7 @@ abstract class AwtAnnotationDialog extends AwtDialog implements AnnotationDialog
 			return;
 		}
 		if (e.getSource() instanceof JTextField) {
-			apply();
+			applyButtonPressed();
 			return;
 		}
 
@@ -308,6 +312,9 @@ abstract class AwtAnnotationDialog extends AwtDialog implements AnnotationDialog
 
 	public Parameters getParameters() {
 		return myParams;
+	}
+
+	public void setFields() {
 	}
 
 	public AType getAType() {

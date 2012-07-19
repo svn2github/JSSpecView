@@ -23,6 +23,44 @@ changes and analyses can be made without altering the saved view
 
 =====DONE========
 
+creating a view was closing files
+
+peaklist command fixed (and separate from showPeakList TRUE/FALSE)
+
+peaklist command options: threshold=x.x interpolation=[PARABOLIC|NONE]
+
+double-clicking does not complete a measurement, just starts/ends it. 
+
+getProperty viewInfo
+
+{ 
+ "maxY": 236826.159599058
+,"maxX": 10.179782090604432
+,"maxXOnScale": 10.179782090604432
+,"minXOnScale": -1.320253057688545
+,"minY": -280.022400942
+,"minX": -1.320253057688545
+,"minYOnScale": -25000.0
+,"specShift": 0.0
+,"maxYOnScale": 250000.0
+ }
+
+getProperty integration
+
+{"integration": { 
+"range": 50.0
+,"table": [
+	 ["1","8.12","7.88","2.0"]
+	,["2","7.66","7.36","3.0"]
+	,["3","2.70","2.49","3.0"]
+]
+,"offset": 30.0
+,"header": ["peak","start/ppm","end/ppm","value"]
+ }
+,"id": "1.1"
+ }
+
+
 getProperty key # implies selected; key is optional
 getProperty ALL key # all spectra; key is optional
 

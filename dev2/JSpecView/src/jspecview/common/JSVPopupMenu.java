@@ -27,6 +27,7 @@ import java.awt.event.ItemListener;
 import java.util.EventListener;
 
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
@@ -273,7 +274,7 @@ public class JSVPopupMenu extends JPopupMenu {
       item.addItemListener((ItemListener) el);
   }
 
-  public void setProcessingMenu(JMenu menu) {
+  public void setProcessingMenu(JComponent menu) {
     final ScriptInterface scripter = this.scripter;
     setMenuItem(integrationMenuItem, 'I', "Integration", 0, 0,
         new ActionListener() {

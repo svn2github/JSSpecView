@@ -145,9 +145,17 @@ public class JSViewer {
           execSelect(si, value);
           break;
         case SETPEAK:
+        	// setpeak NONE     Double.NaN,       Double.MAX_VALUE
+        	// shiftx  NONE     Double.MAX_VALUE, Double.NaN
+        	// setpeak x.x      Double.NaN,       value
+        	// setx 	 x.x			Double.MIN_VALUE, value
+        	// shiftx  x.x      value,            Double.NaN
+        	// setpeak  ?       Double.NaN,       Double.MIN_VALUE
         	if (jsvp != null)
         		jsvp.getPanelData().shiftSpectrum(Double.NaN, 
-        				value.equalsIgnoreCase("NONE") ? Double.MAX_VALUE : Double.parseDouble(value));
+        				value.equalsIgnoreCase("NONE") ? Double.MAX_VALUE 
+        						: value.equalsIgnoreCase("?") ? Double.MIN_VALUE 
+        								: Double.parseDouble(value));
         	break;
         case SETX:
         	if (jsvp != null)
@@ -230,14 +238,14 @@ public class JSViewer {
 		JSVPanel jsvp = si.getSelectedPanel();
 		Parameters p = si.getParameters();
 		Boolean b = Parameters.getTFToggle(value);
-		if (b != null || value.equalsIgnoreCase("TOGGLE")) {
+		if (value.indexOf("=") < 0) {
 			if (jsvp != null)
 				jsvp.getPanelData().getPeakListing(null, b);
 		} else {
 			List<String> tokens = ScriptToken.getTokens(value);
 			for (int i = tokens.size(); --i >= 0;) {
 				String token = tokens.get(i);
-				int pt = tokens.indexOf("=");
+				int pt = token.indexOf("=");
 				if (pt <= 0)
 					continue;
 				String key = token.substring(0, pt);
@@ -248,9 +256,9 @@ public class JSViewer {
 					} else if (key.startsWith("int")) {
 						p.peakListInterpolation = (value.equalsIgnoreCase("none") ? "NONE"
 								: "parabolic");
-					} else if (key.equalsIgnoreCase("OFF"))
-						if (jsvp != null)
-							jsvp.getPanelData().getPeakListing(p, Boolean.TRUE);
+					}
+					if (jsvp != null)
+						jsvp.getPanelData().getPeakListing(p, Boolean.TRUE);
 				} catch (Exception e) {
 					// ignore
 				}

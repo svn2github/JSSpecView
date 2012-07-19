@@ -59,16 +59,19 @@ class AwtPeakListDialog extends AwtAnnotationDialog {
 	protected void addControls() {
 		txtThreshold = dialogHelper.addInputOption("Threshold", null, null, "",
 				"", true);
-		setThreshold();
+		setThreshold(Double.NaN);
 		cbInterpolation = dialogHelper.addSelectOption("Interpolation", null,
 				new String[] { "parabolic", "none" }, 0, true);
 	}
 
-	private void setThreshold() {
-		Coordinate c = jsvp.getPanelData().getClickedCoordinate();
-		double y = (c == null ? (jsvp.getPanelData().getView().maxYOnScale + jsvp.getPanelData().getView().maxYOnScale)/2
-				: c.getYVal());
-		String sy = TextFormat.getDecimalFormat(y < 1000 ? "#0.00" : "#0.0E0").format(y);
+	private void setThreshold(double y) {
+		if (Double.isNaN(y)) {
+			Coordinate c = jsvp.getPanelData().getClickedCoordinate();
+			y = (c == null ? (jsvp.getPanelData().getView().maxYOnScale + jsvp
+					.getPanelData().getView().maxYOnScale) / 2 : c.getYVal());
+		}
+		String sy = TextFormat.getDecimalFormat(y < 1000 ? "#0.00" : "0.00E0")
+				.format(y);
 		txtThreshold.setText(" " + sy);
 	}
 
@@ -88,15 +91,30 @@ class AwtPeakListDialog extends AwtAnnotationDialog {
 	*/		
 
 	@Override
+	protected void applyButtonPressed() {
+		createData();
+		skipCreate = true;
+		apply();
+	}
+
+	@Override
 	public void apply() {
 		if (!skipCreate) {
-  		setThreshold();
+  		setThreshold(Double.NaN);
   		createData();
 		}
 		skipCreate = false;
 		super.apply();
 	}
 
+	@Override
+	public void setFields() {
+		myParams = xyData.getParameters();
+		setThreshold(myParams.peakListThreshold);
+		cbInterpolation.setSelectedIndex(myParams.peakListInterpolation.equals("none") ? 1 : 0);
+		createData();
+	}
+	
 	@Override
 	protected void setParams() {
 		try {
