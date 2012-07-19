@@ -268,7 +268,7 @@ public class JSViewer {
 			return false;
 		case 1:
 			zoomTo(jsvp, tokens.get(0));
-			break;
+			return true;
 		case 2:
 			x1 = Double.parseDouble(tokens.get(0));
 			x2 = Double.parseDouble(tokens.get(1));
