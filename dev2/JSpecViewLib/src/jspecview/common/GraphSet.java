@@ -667,7 +667,9 @@ abstract class GraphSet {
 			pendingMeasurement = null;
 			return;
 		}
-		double x, y;
+		double x = toX(xPixel);
+		double y = toY(yPixel);
+		double x0 = x;
 		Measurement m;
 		switch (clickCount) {
 		case 0: // move
@@ -681,31 +683,28 @@ abstract class GraphSet {
 			} else {
 				m = findMeasurement(selectedSpectrumMeasurements, xPixel, yPixel, 1);
 				if (m != null) {
-					xPixel = toPixelX(m.getXVal());
-					yPixel = toPixelY(m.getYVal());
+					x = m.getXVal();
+					y = m.getYVal();
 				} else if ((m = findMeasurement(selectedSpectrumMeasurements, xPixel,
 						yPixel, 2)) != null) {
-					xPixel = toPixelX(m.getXVal2());
-					yPixel = toPixelY(m.getYVal2());
+					x = m.getXVal2();
+					y = m.getYVal2();
 				} else {
 					double[] x2 = new double[2];
-					x = toX(xPixel);
-					y = toY(yPixel);
-					if (isBetweenPeaks(spec, x, y, x2)) {
-						pendingMeasurement = new Measurement(spec, 
-								x2[Math.abs(x2[0] - x) < Math.abs(x2[1] - x) ? 0 : 1], y);
-						//setMeasurement(pendingMeasurement);
-						//pendingMeasurement = null;
-						pd.repaint();
-						break;
-					} else if (findNearestMaxMin()) {
-						xPixel = xPixelMovedTo;
+					getNearestPeaks(spec, x, y, x2);
+					if (Double.isNaN(x2[0])) {
+						if (Double.isNaN(x2[1]))
+							break;
+						x = x2[1];
+					} else if (Double.isNaN(x2[1])) {
+						x = x2[0];
+					} else {
+						x = x2[(Math.abs(x2[0] - x) < Math.abs(x2[1] - x) ? 0 : 1)];
 					}
 				}
 			}
-			x = toX(xPixel);
-			y = toY(yPixel);
 			pendingMeasurement = new Measurement(spec, x, y);
+			pendingMeasurement.setPt2(x0, y);
 			break;
 		case 1: // single click -- save and continue
 		case -2: // second double-click -- save and quit
@@ -776,19 +775,13 @@ abstract class GraphSet {
 	 * @param x
 	 * @param y
 	 * @param x2
-	 * @return true or false
 	 */
-	private boolean isBetweenPeaks(JDXSpectrum spec, double x, double y,
+	private void getNearestPeaks(JDXSpectrum spec, double x, double y,
 			double[] x2) {
 		x2[0] = Coordinate.getNearestXWithYAbove(spec.getXYCoords(), x, y, spec
 				.isInverted(), false);
-		if (Double.isNaN(x2[0]))
-			return false;
 		x2[1] = Coordinate.getNearestXWithYAbove(spec.getXYCoords(), x, y, spec
 				.isInverted(), true);
-		if (Double.isNaN(x2[1]))
-			return false;
-		return (x2[0] != x2[1]);
 	}
 
 	private Measurement findMeasurement(MeasurementData measurements, int xPixel,
@@ -1753,6 +1746,8 @@ abstract class GraphSet {
 					continue;
 				int x1 = toPixelX(point1.getXVal());
 				int x2 = toPixelX(point2.getXVal());
+				if (x2 == x1 && y1 == y2)
+					continue;
 				y1 = fixY(yOffset + y1);
 				y2 = fixY(yOffset + y2);
 				if (isIntegral) {
@@ -2322,8 +2317,7 @@ abstract class GraphSet {
 			yPt = getIntegrationGraph(iSpec).getPercentYValueAt(xPt);
 			xx += ", " + TextFormat.getDecimalFormat("#0.0").format(yPt);
 		}
-		pd
-				.setToolTipText(
+		pd.setToolTipText(
 						(pendingMeasurement != null || selectedMeasurement != null || selectedIntegral != null ? 
 								(pd.hasFocus() ? "Press ESC to delete "	
 										+ (selectedIntegral != null ? "integral, DEL to delete all visible, or N to normalize" 

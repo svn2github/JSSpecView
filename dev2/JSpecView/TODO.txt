@@ -23,6 +23,9 @@ changes and analyses can be made without altering the saved view
 
 =====DONE========
 
+FINALLY!!! bug found in AwtPanel.update() with huge performance issues with Mac applet.
+update() Should not call super.update() because this is an opaque applet
+
 creating a view was closing files
 
 peaklist command fixed (and separate from showPeakList TRUE/FALSE)

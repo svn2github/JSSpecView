@@ -222,7 +222,6 @@ public class PanelData {
 		nSpectra = spectra.size();
 		graphSets = GraphSet.createGraphSets(owner, spectra, startIndex, endIndex);
 		currentGraphSet = graphSets.get(0);
-		// System.out.println("PanelData.initJSVPanel " + currentGraphSet);
 		setTitle(getSpectrum().getTitleLabel());
 	}
 
@@ -346,7 +345,6 @@ public class PanelData {
 	 *          the width to be drawn in pixels
 	 */
 	synchronized void drawGraph(Object g, int height, int width) {
-
 		boolean withCoords;
 		display1D = getBoolean(ScriptToken.DISPLAY1D);
 		if (isPrinting) {
@@ -409,14 +407,8 @@ public class PanelData {
 		boolean isNewSplitPoint = (isNewSet || currentSplitPoint != splitPoint);
 		currentGraphSet = gs;
 		currentSplitPoint = splitPoint;
-		// if (isNewSet)
-		// System.out.println("setting currentGraphSet to " + gs);
-		// if (isNewSplitPoint)
-		// System.out.println("setting currentSplitPoint to " + splitPoint);
-
 		if (isNewSet || gs.nSplit > 1 && isNewSplitPoint)
 			setSpectrum(currentSplitPoint, true);
-
 		if (!isNewSet) {
 			isNewSet = gs.checkSpectrumClickedEvent(mouseX, mouseY, clickCount);
 			if (!isNewSet)
@@ -761,7 +753,6 @@ public class PanelData {
 	boolean titleOn;
 
 	boolean hasFocus() {
-		owner.getFocusNow();
 		return owner.hasFocus();
 	}
 
@@ -822,6 +813,7 @@ public class PanelData {
 			return;
 		setCurrentGraphSet(gs, yPixel, clickCount);
 		gs.mouseClickedEvent(xPixel, yPixel, clickCount, isControlDown);
+		repaint();
 	}
 
 	public boolean hasCurrentMeasurements(AType type) {

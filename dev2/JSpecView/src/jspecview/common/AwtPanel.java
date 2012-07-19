@@ -67,7 +67,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 
 import jspecview.common.Annotation.AType;
@@ -175,7 +174,6 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   private Color zoomBoxColor = new Color(100, 100, 50, 130);
 	private String viewTitle;
 
-	private RequestThread requestThread;
 	private static int MAC_COMMAND = InputEvent.BUTTON1_MASK + InputEvent.BUTTON3_MASK;
 
   public void setPlotColors(Object oColors) {
@@ -306,20 +304,8 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     this.popup = popup;
   	//toolTip = new AwtToolTip(this);
     pd.initJSVPanel(spectra, startIndex, endIndex);
-    this.requestThread = new RequestThread();
   }
 
-	static boolean requestRunning;
-	
-  class RequestThread implements Runnable {
-		public void run() {
-			if (requestRunning)
-				return;
-			requestRunning = true;
-			requestFocusInWindow();
-			requestRunning = false;
-		}
-  }
   /**
    * generates a single panel or an integrated panel, as appropriate
    * @param si 
@@ -382,10 +368,11 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 
   @Override
 	public void update(Graphics g) {
-  	super.update(g);  	
+  	// System: Do not clear rectangle -- we are opaque and will take care of that.
+      paint(g);
   }
   /**
-   * Overides paintComponent in class JPanel in order to draw the spectrum
+   * Overrides paintComponent in class JPanel in order to draw the spectrum
    * 
    * @param g
    *        the <code>Graphics</code> object
@@ -395,7 +382,6 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     if (pd == null || pd.graphSets == null || pd.isPrinting)
       return;
     super.paintComponent(g);
-    //System.out.println(g.getClipBounds());
     pd.drawGraph(g, getHeight(), getWidth());
     si.repaintCompleted();
   }
@@ -668,9 +654,6 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 			return;
 		checkControl(e, true);
 
-		if (!pd.ctrlPressed)
-			System.out.println("awtpanel keypress " + e);
-
 		// should be only in panel region, though.
 		switch (e.getKeyCode()) {
 		case KeyEvent.VK_ESCAPE:
@@ -871,7 +854,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 	}
 
 	public void getFocusNow() {
-		SwingUtilities.invokeLater(requestThread);
+		requestFocusInWindow();
 	}
 
 }
