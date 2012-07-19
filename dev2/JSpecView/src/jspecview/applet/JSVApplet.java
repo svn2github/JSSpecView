@@ -43,6 +43,7 @@
 // 06-07-2012 BH -Views menu implemented
 // 08-07-2012 BH -refactoring of Graph, add new NMR dialog boxes
 // 14-07-2012 BH -IR peak listing
+// 17-07-2012 BH -getProperty key
 
 package jspecview.applet;
 
