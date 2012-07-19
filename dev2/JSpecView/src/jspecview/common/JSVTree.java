@@ -302,7 +302,7 @@ public class JSVTree extends JTree {
       	 si.incrementViewCount(-1);
       return FILE_OPEN_ALREADY;
     }
-    if (!isAppend)
+    if (!isAppend && !isView)
       close(si, "all"); // with CHECK we may still need to do this
     si.setCursorObject(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
     try {

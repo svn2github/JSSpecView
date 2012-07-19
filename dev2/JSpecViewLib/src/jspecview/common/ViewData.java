@@ -1,6 +1,7 @@
 package jspecview.common;
 
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -273,6 +274,19 @@ class ViewData extends ScaleData {
 		minXOnScale += dx;
 		maxXOnScale += dx;
 		firstX += dx;
+	}
+
+	public Map<String, Object> getInfo(Map<String, Object> info) {
+		info.put("specShift", Double.valueOf(specShift));
+		info.put("minX", Double.valueOf(minX));
+		info.put("maxX", Double.valueOf(maxX));
+		info.put("minXOnScale", Double.valueOf(minXOnScale));
+		info.put("maxXOnScale", Double.valueOf(maxXOnScale));
+		info.put("minY", Double.valueOf(minY));
+		info.put("maxY", Double.valueOf(maxY));
+		info.put("minYOnScale", Double.valueOf(minYOnScale));
+		info.put("maxYOnScale", Double.valueOf(maxYOnScale));
+		return info;
 	}
 
 

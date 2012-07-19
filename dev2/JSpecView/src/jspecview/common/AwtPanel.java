@@ -849,6 +849,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 	}
 
 	public void showMessage(String msg, String title) {
+		Logger.info(msg);
 		JOptionPane.showMessageDialog(this, msg, title, (msg.startsWith("<html>") ? JOptionPane.INFORMATION_MESSAGE 
 				: JOptionPane.PLAIN_MESSAGE));	
 		getFocusNow();

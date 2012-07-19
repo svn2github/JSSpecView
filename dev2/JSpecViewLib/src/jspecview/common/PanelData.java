@@ -838,7 +838,7 @@ public class PanelData {
 
 	public void getPeakListing(Parameters p, Boolean tfToggle) {
 		if (p != null)
-			currentGraphSet.getPeakListing(-1, p);
+			currentGraphSet.getPeakListing(-1, p, true);
 		currentGraphSet.setPeakListing(tfToggle);
 	}
 

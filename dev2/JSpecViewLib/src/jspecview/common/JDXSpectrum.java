@@ -70,14 +70,17 @@ public class JDXSpectrum extends JDXDataObject {
   private PeakInfo selectedPeak;
 
   public void dispose() {
-   if (subSpectra != null)
-    for (int i = 0; i < subSpectra.size(); i++)
-      if (subSpectra.get(i) != this)
-        subSpectra.get(i).dispose();
-    subSpectra = null;
-    parent = null;
-    peakList = null;
-    selectedPeak = null;
+  	// NO! NEVER DO THIS!!! 
+  	// Just because a spectrum is no longer needed by a graphSet does not mean it 
+  	// is gone. 
+//   if (subSpectra != null)
+//    for (int i = 0; i < subSpectra.size(); i++)
+//      if (subSpectra.get(i) != this)
+//        subSpectra.get(i).dispose();
+//    subSpectra = null;
+//    parent = null;
+//    peakList = null;
+//    selectedPeak = null;
   }
 
   private int currentSubSpectrumIndex;
@@ -129,6 +132,9 @@ public class JDXSpectrum extends JDXDataObject {
 
   public int setPeakList(ArrayList<PeakInfo> list, String piUnitsX, String piUnitsY) {
     peakList = list;
+    System.out.println("setting peaklist for " + this + " to " + list);
+    if (peakList == null)
+    	System.out.println("ohoh");
     this.piUnitsX = piUnitsX;
     this.piUnitsY = piUnitsY;
     for (int i = list.size(); --i >= 0; )
@@ -176,9 +182,10 @@ public class JDXSpectrum extends JDXDataObject {
   }
 
   public PeakInfo getModelPeakInfoForAutoSelectOnLoad() {
-    for (int i = 0; i < peakList.size(); i++)
-      if (peakList.get(i).autoSelectOnLoad())
-        return peakList.get(i);
+  	if (peakList != null)
+	    for (int i = 0; i < peakList.size(); i++)
+	      if (peakList.get(i).autoSelectOnLoad())
+	        return peakList.get(i);
     return null;
   }
   

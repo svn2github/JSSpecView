@@ -353,6 +353,8 @@ public class IntegralData extends MeasurementData {
 	}
 
 	public void autoIntegrate() {
+		if (xyCoords == null)
+			calculateIntegral();
 		if (xyCoords.length == 0)
 			return;
 		clear();
@@ -406,6 +408,7 @@ public class IntegralData extends MeasurementData {
 	public void getInfo(Map<String, Object> info) {
 		info.put("offset", Double.valueOf(myParams.integralOffset));
 		info.put("range", Double.valueOf(myParams.integralRange));
+		info.put("normalizationFactor", Double.valueOf(normalizationFactor));
 		super.getInfo(info);
 	}
 

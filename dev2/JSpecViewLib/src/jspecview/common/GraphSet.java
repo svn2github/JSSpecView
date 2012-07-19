@@ -243,8 +243,8 @@ abstract class GraphSet {
 	}
 
 	void dispose() {
-		for (int i = 0; i < spectra.size(); i++)
-			spectra.get(i).dispose();
+//		for (int i = 0; i < spectra.size(); i++)
+//			spectra.get(i).dispose();
 		spectra = null;
 		viewData = null;
 		viewList = null;
@@ -1328,7 +1328,7 @@ abstract class GraphSet {
 		currentZoomIndex = i;
 		viewData = viewList.get(i);
 		resetPinsFromView();
-		pd.refresh();
+		//pd.refresh();
 	}
 
 	/**
@@ -3572,15 +3572,18 @@ abstract class GraphSet {
 			dialogs.put(key, data);
 	}
 
-	public MeasurementData getPeakListing(int iSpec, Parameters p) {
+	public MeasurementData getPeakListing(int iSpec, Parameters p, boolean forceNew) {
 		if (iSpec < 0)
 			iSpec = getCurrentSpectrumIndex();
-		if (dialogs == null || iSpec < 0)
+		if (iSpec < 0)
 			return null;
 		AnnotationData dialog = getDialog(AType.PeakList, -1);
-		if (dialog == null)
+		if (dialog == null) {
+			if (!forceNew)
+				return null;
 			addDialog(iSpec, AType.PeakList, dialog = new PeakData(AType.PeakList,
 					getSpectrum()));
+		}
 		((PeakData) dialog.getData()).setPeakList(p, null, viewData);
 		return dialog.getData();
 	}
@@ -3633,14 +3636,17 @@ abstract class GraphSet {
 		return true;
 	}
 
-	public IntegralData getIntegration(int iSpec, Parameters p) {
+	public IntegralData getIntegration(int iSpec, Parameters p, boolean forceNew) {
 		if (iSpec < 0)
 			iSpec = getCurrentSpectrumIndex();
-		if (dialogs == null || iSpec < 0)
+		if (iSpec < 0)
 			return null;
 		AnnotationData dialog = getDialog(AType.Integration, -1);
-		if (dialog == null)
+		if (dialog == null) {
+			if (!forceNew)
+				return null;
 			addDialog(iSpec, AType.Integration, new IntegralData(getSpectrum(), p));
+		}
 		return (IntegralData) dialog.getData();
 	}
 
@@ -3648,10 +3654,10 @@ abstract class GraphSet {
 	  MeasurementData md;	
 		switch (type) {
 		case PeakList:
-			md = getPeakListing(iSpec, null);
+			md = getPeakListing(iSpec, null, false);
   		break;
 		case Integration:
-			md = getIntegration(iSpec, null);
+			md = getIntegration(iSpec, null, false);
 			break;
 		default:
 			return null;
@@ -3665,7 +3671,9 @@ abstract class GraphSet {
 	
 	Map<String, Object> getInfo(String key, int iSpec) {
 		Map<String, Object> spectraInfo = new Hashtable<String, Object>();
-		List<Map<String, Object>> specInfo = new ArrayList<Map<String, Object>>();
+		if ("viewInfo".equalsIgnoreCase(key))
+			return viewData.getInfo(spectraInfo);
+		List<Map<String, Object>> specInfo = new ArrayList<Map<String, Object>>();		
 		spectraInfo.put("spectra", specInfo);
 		for (int i = 0; i < nSpectra; i++) {
 			if (iSpec >= 0 && i != iSpec)
