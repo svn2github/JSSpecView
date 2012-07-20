@@ -115,7 +115,8 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
       popup = null;
     }
     //toolTip = null;
-    pd.dispose();
+    if (pd != null)
+      pd.dispose();
     pd = null;
     removeKeyListener(this);
     removeMouseListener(this);

@@ -255,6 +255,13 @@ abstract class GraphSet {
 		graphsTemp = null;
 		widgets = null;
 		disposeImage();
+		if (dialogs != null)
+			for (Map.Entry<String, AnnotationData> e : dialogs.entrySet()) {
+				AnnotationData ad = e.getValue();
+				if (ad instanceof AnnotationDialog)
+					((AnnotationDialog) ad).dispose();
+			}
+		dialogs = null;
 	}
 
 	private double fracY = 1, fX0 = 0, fY0 = 0; // take up full screen
@@ -854,7 +861,8 @@ abstract class GraphSet {
 			ok = true;
 		} else if (isArrowClick(xPixel, yPixel, ArrowType.RESET)) {
 			clearViews();
-			closeDialogs();
+			if (showAllStacked && !stackSelected)
+  			closeDialogs();
 			viewData.setScaleFactor(-1, 1);
 			// did not work: view.setScaleFactor(iSpectrumSelected, 1);
 			updateDialogs();

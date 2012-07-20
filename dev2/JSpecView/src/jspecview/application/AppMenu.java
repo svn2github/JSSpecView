@@ -543,7 +543,7 @@ public class AppMenu extends JMenuBar {
       saveAsJDXMenu.setEnabled(true);
       saveAsMenu.setEnabled(true);
     }
-    setCloseMenuItem(null);
+    //setCloseMenuItem(null);
 
   }
 

@@ -56,7 +56,7 @@ public class JSVTree extends JTree {
     addTreeSelectionListener(new TreeSelectionListener() {
       public void valueChanged(TreeSelectionEvent e) {
         JSVTreeNode node = (JSVTreeNode) getLastSelectedPathComponent();
-        if (node == null) {
+       if (node == null) {
           return;
         }
         if (node.isLeaf()) {
@@ -104,8 +104,9 @@ public class JSVTree extends JTree {
           break;
       }
     }
-    for (int i = 0; i < toDelete.size(); i++)
+    for (int i = 0; i < toDelete.size(); i++) {
       spectraTreeModel.removeNodeFromParent(toDelete.get(i));
+    }
 
     if (source == null) {
       JDXSource currentSource = si.getCurrentSource();
@@ -119,8 +120,10 @@ public class JSVTree extends JTree {
       //setFrameAndTreeNode(si, panelNodes.size() - 1);
     }
     
-    si.setSelectedPanel(null);
-    si.setCurrentSource(null);
+    if(si.getCurrentSource() == source) {
+      si.setSelectedPanel(null);
+      si.setCurrentSource(null);
+    }
 
     int max = 0;
     for (int i = 0; i < panelNodes.size(); i++) {

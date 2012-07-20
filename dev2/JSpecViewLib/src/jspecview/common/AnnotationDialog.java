@@ -6,4 +6,5 @@ public interface AnnotationDialog extends AnnotationData {
 	void setVisible(boolean b);
 	void update(Coordinate clicked);
 	void setFields();
+	void dispose();
 }

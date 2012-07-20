@@ -649,8 +649,8 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	public void setCurrentSource(JDXSource source) {
 		currentSource = source;
-		appMenu.setCloseMenuItem(source == null ? null : FileManager.getName(source
-				.getFilePath()));
+		if (source != null)
+		  appMenu.setCloseMenuItem(FileManager.getName(source.getFilePath()));
 		boolean isError = (source != null && source.getErrorLog().length() > 0);
 		setError(isError, (isError && source.getErrorLog().indexOf("Warning") >= 0));
 	}
@@ -880,12 +880,12 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	public synchronized void syncToJmol(String msg) {
 		Logger.info("JSV>Jmol " + msg);
-		System.out.println(Thread.currentThread() + "MainFrame sync JSV>Jmol 21"
-				+ Thread.currentThread());
+		//System.out.println(Thread.currentThread() + "MainFrame sync JSV>Jmol 21"
+			//	+ Thread.currentThread());
 		if (jmol != null) { // MainFrame --> embedding application
 			jmol.syncScript(msg);
-			System.out.println(Thread.currentThread() + "MainFrame JSV>Jmol sync 22"
-					+ Thread.currentThread());
+			//System.out.println(Thread.currentThread() + "MainFrame JSV>Jmol sync 22"
+				//	+ Thread.currentThread());
 			return;
 		}
 		if (jmolOrAdvancedApplet != null) // MainFrame --> embedding applet
@@ -1088,7 +1088,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 			if (source != null)
 				closeSource(source);
 		}
-		openDataOrFile(null, null, null, fileName, -1, -1, false);
+		openDataOrFile(null, null, null, fileName, -1, -1, true);
 	}
 
 	public void showProperties() {

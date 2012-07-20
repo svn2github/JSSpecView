@@ -44,7 +44,8 @@ public class JSVPanelNode {
 
   public void dispose() {
     source.dispose();
-    jsvp.dispose();
+    if (jsvp != null)
+    	jsvp.dispose();
     source = null;
     jsvp = null;
     legend = null;
@@ -125,7 +126,7 @@ public class JSVPanelNode {
   public static boolean isOpen(List<JSVPanelNode> panelNodes, String filePath) {
     if (filePath != null)
       for (int i = panelNodes.size(); --i >= 0;) {
-      	System.out.println("JSVPanelNode " + filePath + " " + panelNodes.get(i).source.getFilePath());
+      	//System.out.println("JSVPanelNode " + filePath + " " + panelNodes.get(i).source.getFilePath());
         if (filePath.equals(panelNodes.get(i).source.getFilePath())
         		|| filePath.equals(panelNodes.get(i).frameTitle))
           return true;
