@@ -250,7 +250,7 @@ abstract class AwtAnnotationDialog extends AwtDialog implements AnnotationDialog
 	protected void showHide(boolean isShow) {
 		setState(isShow);
 		if (isShow)
-			apply();
+			applyButtonPressed();
 		jsvp.doRepaint();
 
 		// JSViewer.runScriptNow(si, "show" + thisType + (isShow ? " true" :

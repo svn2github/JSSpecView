@@ -809,7 +809,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		}
 		String msg = Exporter.exportSpectra(jsvp, this, fc, type,
 				recentFileName, dirLastExported);
-		jsvp.getFocusNow();
+		jsvp.getFocusNow(true);
 		if (msg != null)
   		dirLastExported = msg;
 
@@ -862,7 +862,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 			if (panelNodes.get(i).jsvp == getSelectedPanel())
 				break;
 		JSVTree.setFrameAndTreeNode(this, i + n);
-		getSelectedPanel().getFocusNow();
+		getSelectedPanel().getFocusNow(false);
 	}
 
 	public Map<String, Object> getProperty(String key) {

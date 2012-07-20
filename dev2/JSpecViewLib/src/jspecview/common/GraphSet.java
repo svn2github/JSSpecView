@@ -2324,7 +2324,7 @@ abstract class GraphSet {
 										+ (selectedIntegral != null ? "integral, DEL to delete all visible, or N to normalize" 
 													: pendingMeasurement == null ? "\"" + selectedMeasurement.text + "\" or DEL to delete all visible" 
 															: "measurement")
-						: "Click spectrum to reactivate")
+						: "")
 						: Double.isNaN(yPt) ? null : xx)
 
 				// + " :" + iSpectrumSelected + " :" + iSpectrumMovedTo

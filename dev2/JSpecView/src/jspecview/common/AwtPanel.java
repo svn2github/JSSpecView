@@ -67,6 +67,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 
 import jspecview.common.Annotation.AType;
@@ -606,7 +607,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 	public void mouseMoved(MouseEvent e) {
 		if (pd.isPrinting)
 			return;
-    getFocusNow();
+    getFocusNow(false);
 		if (e.getButton() != 0) {
 			mouseDragged(e);
 			return;
@@ -641,7 +642,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   }
 
   public void mouseEntered(MouseEvent e) {
-    getFocusNow();
+    getFocusNow(false);
   }
 
   public void mouseExited(MouseEvent e) {
@@ -799,9 +800,16 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   public String getInput(String message, String title, String sval) {
     String ret = (String) JOptionPane.showInputDialog(this, message, title,
         JOptionPane.QUESTION_MESSAGE, null, null, sval);
-    getFocusNow();
+    getFocusNow(true);
     return ret;
   }
+
+	public void showMessage(String msg, String title) {
+		Logger.info(msg);
+		JOptionPane.showMessageDialog(this, msg, title, (msg.startsWith("<html>") ? JOptionPane.INFORMATION_MESSAGE 
+				: JOptionPane.PLAIN_MESSAGE));	
+		getFocusNow(true);
+	}
 
 	public void showHeader(Object jsvApplet) {
 		JDXSpectrum spectrum = pd.getSpectrum();
@@ -812,7 +820,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 		JScrollPane scrollPane = new JScrollPane(table);
 		JOptionPane.showMessageDialog((Container) jsvApplet, scrollPane, "Header Information",
 				JOptionPane.PLAIN_MESSAGE);
-		getFocusNow();
+		getFocusNow(true);
 	}
 
 	public AnnotationDialog showDialog(AType type) {
@@ -847,15 +855,17 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 		return dialog;
 	}
 
-	public void showMessage(String msg, String title) {
-		Logger.info(msg);
-		JOptionPane.showMessageDialog(this, msg, title, (msg.startsWith("<html>") ? JOptionPane.INFORMATION_MESSAGE 
-				: JOptionPane.PLAIN_MESSAGE));	
-		getFocusNow();
+	public void getFocusNow(boolean asThread) {
+		if (asThread)
+			SwingUtilities.invokeLater(new RequestThread());
+		else
+  		requestFocusInWindow();
 	}
 
-	public void getFocusNow() {
-		requestFocusInWindow();
-	}
+  public class RequestThread implements Runnable {
+		public void run() {
+			requestFocusInWindow();
+		}
+  }
 
 }
