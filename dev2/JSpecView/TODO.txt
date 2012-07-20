@@ -3,6 +3,12 @@ Put new items at top, please.
 
 ====TODO=========
 
+Set the SVN version number in TODO.txt rather than JSVapplet.java
+This would mean making a comment when changes were made and submitting each time
+so that the Help About dialog box code was updated as well.
+
+
+
 -in the jsvtest.htm page, when there is a CNMR and IR overlay shown
 nothing happens when a proton is clicked on a molecule in the Jmol
 applet. The viewer should have the option to either add H-NMR with
@@ -26,7 +32,7 @@ changes and analyses can be made without altering the saved view
 fix for hide/show in peak dialog
 fix for spectral shift
 
-fix for integration handles broken yesterday
+fix for integration handles broken yesterday (18th July)
 
 getProperty integration
 
