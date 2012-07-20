@@ -565,8 +565,11 @@ public class JDXSpectrum extends JDXDataObject {
 			specShift += dx;
 			Coordinate.shiftX(xyCoords, dx);
 			if (subSpectra != null)
-				for (int i = subSpectra.size(); --i >= 0;)
-					subSpectra.get(i).addSpecShift(dx);
+				for (int i = subSpectra.size(); --i >= 0;) {
+					JDXSpectrum spec = subSpectra.get(i); 
+					if (spec != this && spec != parent)
+						spec.addSpecShift(dx);
+				}
 		}
 		return specShift;
 	}

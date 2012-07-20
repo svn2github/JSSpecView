@@ -2636,6 +2636,8 @@ abstract class GraphSet {
 	}
 
 	boolean checkSpectrumClickedEvent(int xPixel, int yPixel, int clickCount) {
+		if (nextClickForSetPeak)
+			return false;
 		if (clickCount > 0 && checkArrowLeftRightClick(xPixel, yPixel))
 			return true;
 		if (clickCount > 1 || pendingMeasurement != null

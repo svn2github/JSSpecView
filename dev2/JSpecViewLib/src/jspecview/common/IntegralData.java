@@ -417,6 +417,7 @@ public class IntegralData extends MeasurementData {
 		info.put("offset", Double.valueOf(myParams.integralOffset));
 		info.put("range", Double.valueOf(myParams.integralRange));
 		info.put("normalizationFactor", Double.valueOf(normalizationFactor));
+		info.put("integralTotal", Double.valueOf(integralTotal));
 		super.getInfo(info);
 	}
 
