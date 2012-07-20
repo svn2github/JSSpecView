@@ -44,6 +44,7 @@
 // 08-07-2012 BH -refactoring of Graph, add new NMR dialog boxes
 // 14-07-2012 BH -IR peak listing
 // 17-07-2012 BH -getProperty key
+// 18-07-2012 BH -MAC fix for repaint
 
 package jspecview.applet;
 
