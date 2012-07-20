@@ -112,6 +112,16 @@ public class Escape {
       sb.append("]");
       return packageJSON(infoType, sb, addCR);
     }
+    if (info instanceof double[]) {
+      sb.append("[");
+      int imax = ((double[]) info).length;
+      for (int i = 0; i < imax; i++) {
+        sb.append(sep).append(((double[]) info)[i]);
+        sep = ",";
+      }
+      sb.append("]");
+      return packageJSON(infoType, sb, addCR);
+    }
     if (info instanceof String[][]) {
       sb.append("[");
       if (addCR)
@@ -141,6 +151,16 @@ public class Escape {
       int imax = ((float[][]) info).length;
       for (int i = 0; i < imax; i++) {
         sb.append(sep).append(toJSON(null, ((float[][]) info)[i], addCR));
+        sep = ",";
+      }
+      sb.append("]");
+      return packageJSON(infoType, sb, addCR);
+    }
+    if (info instanceof double[][]) {
+      sb.append("[");
+      int imax = ((double[][]) info).length;
+      for (int i = 0; i < imax; i++) {
+        sb.append(sep).append(toJSON(null, ((double[][]) info)[i], addCR));
         sep = ",";
       }
       sb.append("]");

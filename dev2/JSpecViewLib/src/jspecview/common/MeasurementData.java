@@ -79,18 +79,26 @@ public class MeasurementData extends ArrayList<Measurement> implements Annotatio
 	
 	public String[][] getMeasurementListArray(String units) {
 		this.units = units;
+		double[][] ddata = getMeasurementListArrayReal(units);
 		DecimalFormat dfx = TextFormat.getDecimalFormat(spec.isNMR() ? "#0.0000"
 				: "#0.00");
-		boolean toHz = spec.isNMR() && units.equalsIgnoreCase("HZ");
 		DecimalFormat dfdx = TextFormat
 				.getDecimalFormat(spec.isHNMR() && units.equals("ppm") ? "#0.0000" : "#0.00");
 		String[][] data = new String[size()][];
+		for (int i = size(); --i >= 0;)
+			data[i] = new String[] { "" + (i + 1), dfx.format(ddata[i][0]),
+							dfx.format(ddata[i][1]), dfdx.format(ddata[i][2]) };
+		return data;
+	}
+
+	public double[][] getMeasurementListArrayReal(String units) {
+		boolean toHz = spec.isNMR() && units.equalsIgnoreCase("HZ");
+		double[][] data = new double[size()][];
 		for (int pt = 0, i = size(); --i >= 0;) {
 			double y = get(i).getValue();
 			if (toHz)
 				y *= spec.observedFreq;
-			data[pt++] = new String[] { "" + pt, dfx.format(get(i).getXVal()),
-					dfx.format(get(i).getXVal2()), dfdx.format(y) };
+			data[pt++] = new double[] { get(i).getXVal(), get(i).getXVal2(), y };
 		}
 		return data;
 	}
@@ -155,7 +163,7 @@ public class MeasurementData extends ArrayList<Measurement> implements Annotatio
 
 	public void getInfo(Map<String, Object> info) {
 		info.put("header", getDataHeader());
-		info.put("table", getMeasurementListArray("ppm"));
+		info.put("table", getMeasurementListArrayReal("ppm"));
 		if (units != null)
 			info.put("units", units);
 	}

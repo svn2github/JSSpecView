@@ -333,6 +333,14 @@ public class IntegralData extends MeasurementData {
 		return data;
 	}
 
+	@Override
+	public double[][] getMeasurementListArrayReal(String units) {
+		double[][] data = new double[size()][];
+		for (int pt = 0, i = size(); --i >= 0; pt++)
+			data[pt] = new double[] { get(i).getXVal(), get(i).getXVal2(), get(i).getValue() };
+		return data;
+	}
+
 	private final static String[] HEADER = new String[] { "peak", "start/ppm", "end/ppm", "value" };
 
 	@Override

@@ -646,11 +646,11 @@ abstract class GraphSet {
 	private double lastXMax = Double.NaN;
 	private int lastSpecClicked = -1;
 
-	private double getPeakCenter() {
-		if (nSpectra > 1 && iSpectrumClicked < 0 || Double.isNaN(lastClickX))
-			return Double.NaN;
-		return getSpectrum().findXForPeakNearest(lastClickX);
-	}
+//	private double getPeakCenter() {
+//		if (nSpectra > 1 && iSpectrumClicked < 0 || Double.isNaN(lastClickX))
+//			return Double.NaN;
+//		return getSpectrum().findXForPeakNearest(lastClickX);
+//	}
 
 	private boolean findNearestMaxMin() {
 		if (nSpectra > 1 && iSpectrumClicked < 0)
@@ -697,17 +697,7 @@ abstract class GraphSet {
 					x = m.getXVal2();
 					y = m.getYVal2();
 				} else {
-					double[] x2 = new double[2];
-					getNearestPeaks(spec, x, y, x2);
-					if (Double.isNaN(x2[0])) {
-						if (Double.isNaN(x2[1]))
-							break;
-						x = x2[1];
-					} else if (Double.isNaN(x2[1])) {
-						x = x2[0];
-					} else {
-						x = x2[(Math.abs(x2[0] - x) < Math.abs(x2[1] - x) ? 0 : 1)];
-					}
+					x = getNearestPeak(spec, x, y);
 				}
 			}
 			pendingMeasurement = new Measurement(spec, x, y);
@@ -775,20 +765,22 @@ abstract class GraphSet {
 	}
 
 	/**
-	 * search for peaks above(below)
+	 * search for the nearest peak above/below the given y value
 	 * 
 	 * @param spec
 	 * 
 	 * @param x
 	 * @param y
 	 * @param x2
+	 * @return  nearest x value
 	 */
-	private void getNearestPeaks(JDXSpectrum spec, double x, double y,
-			double[] x2) {
-		x2[0] = Coordinate.getNearestXWithYAbove(spec.getXYCoords(), x, y, spec
+	private double getNearestPeak(JDXSpectrum spec, double x, double y) {
+		double x0 = Coordinate.getNearestXWithYAbove(spec.getXYCoords(), x, y, spec
 				.isInverted(), false);
-		x2[1] = Coordinate.getNearestXWithYAbove(spec.getXYCoords(), x, y, spec
+		double x1 = Coordinate.getNearestXWithYAbove(spec.getXYCoords(), x, y, spec
 				.isInverted(), true);
+		return (Double.isNaN(x0) ? x1 : Double.isNaN(x1) ? x0
+				: Math.abs(x0 - x) < Math.abs(x1 - x) ? x0 : x1);
 	}
 
 	private Measurement findMeasurement(MeasurementData measurements, int xPixel,
@@ -1520,6 +1512,7 @@ abstract class GraphSet {
 			setPlotColor(g, 0);
 			int x = (iHandle < 0 ? xPixelPlot1 : xPixelPlot0);
 			int y = (iHandle < 0 ? yPixelPlot0 : yPixelPlot1);
+			System.out.println("draw handle " + iHandle + " " + x + " " + y);
 			drawHandle(g, x, y, false);
 			return;
 		}
@@ -1754,8 +1747,6 @@ abstract class GraphSet {
 					continue;
 				int x1 = toPixelX(point1.getXVal());
 				int x2 = toPixelX(point2.getXVal());
-				if (x2 == x1 && y1 == y2)
-					continue;
 				y1 = fixY(yOffset + y1);
 				y2 = fixY(yOffset + y2);
 				if (isIntegral) {
@@ -1766,6 +1757,8 @@ abstract class GraphSet {
 					xPixelPlot0 = x2;
 					yPixelPlot1 = y2;
 				}
+				if (x2 == x1 && y1 == y2)
+					continue;
 				if (fillPeaks
 						&& pendingIntegral.overlaps(point1.getXVal(), point2.getXVal())) {
 					setColor(g, ScriptToken.INTEGRALPLOTCOLOR);
@@ -2693,6 +2686,7 @@ abstract class GraphSet {
 	}
 
 	private boolean isStartEndIntegral(int xPixel, boolean isEnd) {
+		System.out.println("istartend " + xPixelPlot1 + " " + xPixel + " " + xPixelPlot0);
 		return (isEnd ? xPixelPlot1 - xPixel < 20 : xPixel - xPixelPlot0 < 20);
 	}
 
@@ -3093,7 +3087,6 @@ abstract class GraphSet {
 			setCoordClicked(toX(xPixel), toY(yPixel));
 			updateDialog(AType.PeakList, -1);
 			if (isNextClick) {
-				getPeakCenter();
 				shiftSpectrum(Double.NaN, Double.NaN);
 				return;
 			}
@@ -3462,8 +3455,8 @@ abstract class GraphSet {
 		// setpeak  ?       Double.NaN,       Double.MIN_VALUE
 
 		// setpeak x.x      Double.NaN,       value
-		// setpeak          Double.NaN,       Double.NaN
   	// setx    x.x			Double.MIN_VALUE, value
+		// setpeak          Double.NaN,       Double.NaN
     // setx       			Double.MIN_VALUE, Double.NaN
 
 		// shiftx  x.x      value,            Double.NaN
@@ -3477,13 +3470,13 @@ abstract class GraphSet {
 		} else if (x1 == Double.MIN_VALUE) {
 			// setpeak ? -- set for setpeak Double.NaN,       Double.NaN after click
 			nextClickForSetPeak = true;
-			pd.owner.showMessage("Click on or near a peak to set its chemical shift.", "Set Reference");
+			pd.owner.showMessage("Click on or beside a peak to set its chemical shift.", "Set Reference");
 			return false;
 		} else if (Double.isNaN(dx) || dx == Double.MIN_VALUE) {
 			// setpeak     or setx
 			// setpeak x.x or setx x.x
-			double x0 = (dx == Double.MIN_VALUE ? lastClickX : getPeakCenter());
-			if (Double.isNaN(x0))
+			double x0 = (dx == Double.MIN_VALUE ? lastClickX : getNearestPeak(spec, lastClickX, toY(pd.mouseY)));
+ 			if (Double.isNaN(x0))
 				return false;
 			if (Double.isNaN(x1))
 				try {

@@ -40,16 +40,45 @@ public class PeakData extends MeasurementData {
 		return (spec.isHNMR() ? HNMR_HEADER : new String[] { "peak", spec.getXUnits(), spec.getYUnits() }); 		
 	}
 
+
 	@Override
 	public String[][] getMeasurementListArray(String units) {
+		DecimalFormat df4 = TextFormat.getDecimalFormat("#0.0000");
+		DecimalFormat df2 = TextFormat.getDecimalFormat("#0.00");
 		String[][] data = new String[size()][];
 		double[] last = new double[] {-1e100, 1e100, 1e100};
-		for (int pt = 0, i = size(); --i >= 0;) {
-			data[pt++] = spec.getPeakListArray(pt, get(i), last, maxY);
+		double[] ddata;
+		for (int pt = 0, i = size(); --i >= 0; pt++) {
+			ddata = spec.getPeakListArray(get(i), last, maxY);
+			if (ddata.length == 2)
+				data[pt] = new String[] {
+					"" + (pt + 1),  
+					df2.format(ddata[0]),
+					df4.format(ddata[1]) 
+				};
+			else // 1HNMR
+				data[pt] = new String[] {
+					"" + (pt + 1), 
+					df4.format(ddata[0]),
+					df4.format(ddata[1]), 
+					df2.format(ddata[2]), 
+					(ddata[3] == 0 ? "" : df2.format(ddata[3])),
+					(ddata[4] == 0 ? "" : df2.format(ddata[4])),
+					(ddata[5] == 0 ? "" : df2.format(ddata[5]))
+				};
 		}
 		return data;
 	}
 	
+	@Override
+	public double[][] getMeasurementListArrayReal(String units) {
+		double[][] data = new double[size()][];
+		double[] last = new double[] {-1e100, 1e100, 1e100};
+		for (int pt = 0, i = size(); --i >= 0; pt++)
+			data[pt] = spec.getPeakListArray(get(i), last, maxY);
+		return data;
+	}
+
 	@Override
 	public void getInfo(Map<String, Object> info) {
 		info.put("interpolation", myParams.peakListInterpolation);

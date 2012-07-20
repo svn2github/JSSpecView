@@ -23,6 +23,40 @@ changes and analyses can be made without altering the saved view
 
 =====DONE========
 
+fix for integration handles broken yesterday
+
+getProperty integration
+
+{ "integration": { "normalizationFactor": 1.0
+,"range": 50.0
+,"table": [
+	[7.192226512510311,6.9246496588731645,4.926643236225048],
+	[4.526840366120152,4.247738137695028,11.036230573260724],
+	[3.6325143648219447,3.358270687071215,11.083311665174023],
+	[2.5828624962660385,2.3231806309339547,11.342257977394365],
+	[2.2497695140375464,1.9457959058590926,11.037903913352398]]
+,"offset": 30.0
+,"header": ["peak","start/ppm","end/ppm","value"]
+ }
+,"id": "2.2"
+ }
+
+{ "peaklist": { 
+"threshold": 11000.0
+,"interpolation": "parabolic"
+,"table": [
+	[7.965197485241784,0.069523326261312,1589.7269625789845,0.0,0.0,0.0],
+	[7.9583260963520965,0.08002807854864,1588.355542446773,1.3714201322116837,0.0,0.0],
+	[7.950097960627121,0.047604282372504,1586.7133371859504,1.6422052608222724,3.013625393033956,0.0],
+	[7.924291666857321,0.119271048519096,1581.5628106502181,5.150526535732331,6.7927317965546035,9.80635718958856],
+	[7.916298405529351,0.08384643650356799,1579.9674825901723,1.5953280600459387,6.74585459577827,13.538586392332872],
+	... 
+	]
+,"header": ["peak","shift/ppm","intens","shift/hz","diff/hz","2-diff","3-diff"]
+ }
+,"id": "3.1"
+ }
+
 close command fix for losing track of selected panel
 fix for integral dialogs not closing or disappearing and not coming back
 
@@ -49,21 +83,6 @@ getProperty viewInfo
 ,"minYOnScale": -25000.0
 ,"specShift": 0.0
 ,"maxYOnScale": 250000.0
- }
-
-getProperty integration
-
-{"integration": { 
-"range": 50.0
-,"table": [
-	 ["1","8.12","7.88","2.0"]
-	,["2","7.66","7.36","3.0"]
-	,["3","2.70","2.49","3.0"]
-]
-,"offset": 30.0
-,"header": ["peak","start/ppm","end/ppm","value"]
- }
-,"id": "1.1"
  }
 
 
