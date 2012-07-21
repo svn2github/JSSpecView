@@ -15,7 +15,7 @@
 		  - cleanup
 		-->	
 	
-	<property file="src/jspecview/common/TODO.txt" prefix="TODO.txt" />
+	<property file="TODO.txt" prefix="TODO.txt" />
 	<property file="build_info.properties"/>
 	<property name="build.number" 		value="${build.major.number}.${build.minor.number}.${build.revision.number}"/>	
 	<property name="src.dir"     		value="src"/>
