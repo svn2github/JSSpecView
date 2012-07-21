@@ -56,7 +56,9 @@ public class JSVersion {
 		}
 		version = (tmpVersion != null ? tmpVersion : "(Unknown version)");
 		date = (tmpDate != null ? tmpDate : "(Unknown date)");
-	}
+
+		System.out.println("JSVersion test");
+}
 
   public static final String VERSION = version + "/SVN"+SVN_REV.substring(22,27) + "/" + date;
   

@@ -4,6 +4,8 @@ Put new items at top, please.
 
 ___date=$Date: 2012-07-21 11:01:21 -0500 (Sat, 21 Jul 2012) $
 
+Sometimes the date changes, and sometimes it does not. I have no idea why!
+
 ====TODO=========
 
 -in the jsvtest.htm page, when there is a CNMR and IR overlay shown
