@@ -4,7 +4,6 @@ Put new items at top, please.
 
 ___date=$Date$
 
-(Needed the Eclipse...Team...ShowProperties...ModifyProperty)
 ====TODO=========
 
 -in the jsvtest.htm page, when there is a CNMR and IR overlay shown
