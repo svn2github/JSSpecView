@@ -1380,10 +1380,6 @@ abstract class GraphSet {
 		haveSingleYScale = (showAllStacked && nSpectra > 1 ? allowStackedYScale
 				&& doYScale : true);
 		if (doDraw1DObjects) {
-			if (pd.getBoolean(ScriptToken.XSCALEON))
-				drawXScale(g);
-			if (pd.getBoolean(ScriptToken.XUNITSON))
-				drawXUnits(g);
 			int yOffsetPixels = (int) (yPixels * (yStackOffsetPercent / 100f));
 			haveLeftRightArrows = false;
 			for (int i = 0, offset = 0; i < nSpectra; i++)
@@ -1452,6 +1448,10 @@ abstract class GraphSet {
 					}
 					offset -= yOffsetPixels;
 				}
+			if (pd.getBoolean(ScriptToken.XSCALEON))
+				drawXScale(g);
+			if (pd.getBoolean(ScriptToken.XUNITSON))
+				drawXUnits(g);
 		} else {
 			drawWidgets(g, subIndex, needNewPins, doDraw1DObjects);
 		}
@@ -1512,7 +1512,6 @@ abstract class GraphSet {
 			setPlotColor(g, 0);
 			int x = (iHandle < 0 ? xPixelPlot1 : xPixelPlot0);
 			int y = (iHandle < 0 ? yPixelPlot0 : yPixelPlot1);
-			System.out.println("draw handle " + iHandle + " " + x + " " + y);
 			drawHandle(g, x, y, false);
 			return;
 		}
@@ -1886,6 +1885,8 @@ abstract class GraphSet {
 		}
 	}
 
+	Map<Double, String> mapX = new Hashtable<Double, String>();
+
 	/**
 	 * Draws the x Scale
 	 * 
@@ -1902,35 +1903,86 @@ abstract class GraphSet {
 		DecimalFormat formatter = TextFormat.getDecimalFormat(hashX);
 		pd.setFont(g, width, FONT_PLAIN, 12, false);
 		int y1 = yPixel1;
-		int y2 = yPixel1 + 3;
+		int y2 = yPixel1 + 4;
+		int y3 = yPixel1 + 2;
+
 		int h = getFontHeight(g);
 		double maxWidth = Math.abs((toPixelX(viewData.xStep) - toPixelX(0)) * 0.95);
 		double lastX;
-		if (Double.isNaN(viewData.firstX)) {
-			lastX = viewData.maxXOnScale + viewData.xStep / 2;
-			for (double val = viewData.minXOnScale, vald = viewData.maxXOnScale; val < lastX; val += viewData.xStep, vald -= viewData.xStep) {
-				int x = (int) (xPixel0 + (((drawXAxisLeftToRight ? val : vald) - viewData.minXOnScale) / viewData.xFactorForScale));
-				setColor(g, ScriptToken.SCALECOLOR);
-				drawLine(g, x, y1, x, y2);
-				setColor(g, ScriptToken.SCALECOLOR);
-				String s = formatter.format(val);
-				int w = getStringWidth(g, s);
-				drawString(g, s, x - w / 2, y2 + h);
-			}
-		} else {
-			lastX = viewData.maxXOnScale * 1.0001;
+		// if (Double.isNaN(viewData.firstX)) {
+		// lastX = viewData.maxXOnScale + viewData.xStep / 2;
+		// for (double val = viewData.minXOnScale, vald = viewData.maxXOnScale; val
+		// < lastX; val += viewData.xStep, vald -= viewData.xStep) {
+		// int x = (int) (xPixel0 + (((drawXAxisLeftToRight ? val : vald) -
+		// viewData.minXOnScale) / viewData.xFactorForScale));
+		// setColor(g, ScriptToken.SCALECOLOR);
+		// drawLine(g, x, y1, x, y2);
+		// setColor(g, ScriptToken.SCALECOLOR);
+		// String s = formatter.format(val);
+		// int w = getStringWidth(g, s);
+		// drawString(g, s, x - w / 2, y2 + h);
+		// }
+		// } else {
+		lastX = viewData.maxXOnScale * 1.0001;
+		setColor(g, ScriptToken.SCALECOLOR);
+		for (int pass = 0; pass < 2; pass++) {
+			if (pass == 1)
+				fixScale(mapX);
+			double xLast = 1e10;
 			for (double val = viewData.firstX; val <= lastX; val += viewData.xStep) {
 				int x = toPixelX(val);
-				setColor(g, ScriptToken.SCALECOLOR);
-				drawLine(g, x, y1, x, y2);
-				setColor(g, ScriptToken.SCALECOLOR);
-				String s = formatter.format(val);
-				int w = getStringWidth(g, s);
-				int n = (x + w / 2 == fixX(x + w / 2) ? 2 : 0);
-				if (n > 0)
-					drawString(g, s, x - w / n, y2 + h);
-				val += Math.floor(w / maxWidth) * viewData.xStep;
+				if (x != fixX(x))
+					continue;
+				Double d = Double.valueOf(val);
+				String s;
+				switch (pass) {
+				case 0:
+					s = formatter.format(val);
+					mapX.put(d, s);
+					drawLine(g, x, y1, x, y2);
+					double dx = Math.abs(xLast - val);
+					int ntic = 0;
+					if (dx == 1) {
+						ntic = 10;
+					}else if (dx == 0.5) {
+						ntic = 5;
+					}
+					for (int i = 1; i < ntic; i++) {
+						x = toPixelX(val - i/10.0); 
+						drawLine(g, x, y1, x, y3);
+					}
+
+					xLast = val;
+					continue;
+				case 1:
+					s = mapX.get(d);
+					int w = getStringWidth(g, s);
+					int n = (x + w / 2 == fixX(x + w / 2) ? 2 : 0);
+					if (n > 0)
+						drawString(g, s, x - w / n, y2 + h);
+					val += Math.floor(w / maxWidth) * viewData.xStep;
+					break;
+				}
 			}
+		}
+		mapX.clear();
+	}
+
+	private static void fixScale(Map<Double, String> map) {
+		if (map.isEmpty())
+			return;
+		while (true) {
+			for (Map.Entry<Double, String> entry : map.entrySet()) {
+				String s = entry.getValue();
+				if (s.indexOf("E") >= 0 || s.indexOf(".") < 0)
+					return;
+				if (!s.endsWith("0") && !s.endsWith("."))
+					return;
+			}
+			for (Map.Entry<Double, String> entry : map.entrySet()) {
+				String s = entry.getValue();
+				entry.setValue(s.substring(0, s.length() - 1));
+			}			
 		}
 	}
 
@@ -1952,21 +2004,37 @@ abstract class GraphSet {
 		int h = getFontHeight(g);
 		double max = viewData.maxYOnScale + viewData.yStep / 2;
 		int yLast = Integer.MIN_VALUE;
-		for (double val = viewData.firstY; val < max; val += viewData.yStep) {
-			int x1 = xPixel0;
-			int y = toPixelY(val);// was * userYFactor);
-			if (y == fixY(y)) {
-				setColor(g, ScriptToken.SCALECOLOR);
-				drawLine(g, x1, y, x1 - 3, y);
+		setColor(g, ScriptToken.SCALECOLOR);
+		for (int pass = 0; pass < 2; pass++) {
+			if (pass == 1)
+				fixScale(mapX);
+			for (double val = viewData.firstY; val < max; val += viewData.yStep) {
+				Double d = Double.valueOf(val);
+				int x1 = xPixel0;
+				int y = toPixelY(val);
+				if (y != fixY(y))
+					continue;
+				String s;
+				if (pass == 0)
+					drawLine(g, x1, y, x1 - 3, y);
 				if (Math.abs(y - yLast) <= h)
 					continue;
 				yLast = y;
-				String s = formatter.format(val);
-				if (s.startsWith("0") && s.contains("E"))
-					s = "0";
-				drawString(g, s, (x1 - 4 - getStringWidth(g, s)), y + h / 3);
+				switch (pass) {
+				case 0:
+					s = formatter.format(val);
+					mapX.put(d, s);
+					break;
+				case 1:
+					s = mapX.get(d);
+					if (s.startsWith("0") && s.contains("E"))
+						s = "0";
+					drawString(g, s, (x1 - 4 - getStringWidth(g, s)), y + h / 3);
+					break;
+				}
 			}
 		}
+		mapX.clear();
 	}
 
 	/**

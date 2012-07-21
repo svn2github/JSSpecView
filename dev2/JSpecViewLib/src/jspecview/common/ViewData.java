@@ -188,7 +188,6 @@ class ViewData extends ScaleData {
   }
 
 	void resetScaleFactors() {
-		System.out.println("reset scale factors");
 		for (int i = 0; i < nSpec; i++)
   	  spectrumScaleFactors[i] = 1;
 	}

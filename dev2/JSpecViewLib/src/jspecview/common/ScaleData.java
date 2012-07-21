@@ -12,7 +12,7 @@ import jspecview.util.TextFormat;
  */
 public class ScaleData {
 
-  private final static double[] UNITS = { 1.5, 2.0, 2.5, 4.0, 5.0, 8.0, 10.0 };
+  private final static double[] UNITS = { 2.0, 5.0, 10.0 };
   private final static DecimalFormat SCI_FORMATTER = TextFormat.getDecimalFormat("0.###E0");
 
   // X variables
@@ -230,6 +230,7 @@ public class ScaleData {
 	}
 
 	private static double getStep(double min, double max, int nDiv, int[] hashNums, int i) {
+		nDiv = 14;
     double spanX = (max - min) / nDiv;
     String strSpanX = SCI_FORMATTER.format(spanX);
     strSpanX = strSpanX.toUpperCase();
