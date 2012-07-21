@@ -50,6 +50,11 @@ public abstract class JDXDataObject extends JDXHeader {
 
   public double xFactor = ERROR;
   public double yFactor = ERROR;
+  
+  public String varName = "";
+  public boolean isImaginary() {
+  	return varName.contains("IMAG");
+  }
 
   /**
    * Sets the original xfactor

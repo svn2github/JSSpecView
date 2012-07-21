@@ -7,6 +7,10 @@ Set the SVN version number in TODO.txt rather than JSVapplet.java
 This would mean making a comment when changes were made and submitting each time
 so that the Help About dialog box code was updated as well.
 
+I think in order for that to work, we have to include TODO.txt in the JAR file
+as is done in Jmol with Jmol.properties. We filter out all lines not including "#"
+in that case. Here we could include all lines WITH version info
+
 
 
 -in the jsvtest.htm page, when there is a CNMR and IR overlay shown
@@ -29,10 +33,13 @@ changes and analyses can be made without altering the saved view
 
 =====DONE========
 
+SET LOADIMAGINARY T/F   -- default F - we can't process the imaginary spec anyway
+acceptable?
+ 
 fix for hide/show in peak dialog
 fix for spectral shift
 
-fix for integration handles broken yesterday (18th July)
+fix for integration handles broken yesterday (18th July 2012)
 
 getProperty integration
 

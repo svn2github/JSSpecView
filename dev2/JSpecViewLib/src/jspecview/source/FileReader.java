@@ -88,12 +88,16 @@ public class FileReader {
   private boolean isZipFile;
 
   private String filePath;
+
+  private boolean loadImaginary = true;
   
-  private FileReader(String filePath, boolean obscure, int iSpecFirst, int iSpecLast) {
+  private FileReader(String filePath, boolean obscure, boolean loadImaginary,
+  		int iSpecFirst, int iSpecLast) {
     this.filePath = (filePath == null ? "string data" : filePath);
     this.obscure = obscure;
     firstSpec = iSpecFirst;
     lastSpec = iSpecLast;
+    this.loadImaginary = loadImaginary;
   }
   
   
@@ -102,14 +106,15 @@ public class FileReader {
    * 
    * @param in
    * @param obscure
+   * @param loadImaginary 
    * @return source
    * @throws IOException
    * @throws JSpecViewException
    */
-  public static JDXSource createJDXSource(InputStream in, boolean obscure)
+  public static JDXSource createJDXSource(InputStream in, boolean obscure, boolean loadImaginary)
       throws IOException, JSpecViewException {
     return createJDXSource(FileManager.getBufferedReaderForInputStream(in),
-        null, null, obscure, -1, -1);
+        null, null, obscure, loadImaginary, -1, -1);
   }
 
   /**
@@ -119,6 +124,7 @@ public class FileReader {
    * @param filePath
    * @param appletDocumentBase
    * @param obscure
+   * @param loadImaginary 
    * @param iSpecFirst TODO
    * @param iSpecLast TODO
    * @return source
@@ -128,7 +134,8 @@ public class FileReader {
   public static JDXSource createJDXSource(BufferedReader br,
                                           String filePath,
                                           URL appletDocumentBase,
-                                          boolean obscure, int iSpecFirst, int iSpecLast) throws IOException,
+                                          boolean obscure, boolean loadImaginary,
+                                          int iSpecFirst, int iSpecLast) throws IOException,
       JSpecViewException {
     
     try {
@@ -148,7 +155,7 @@ public class FileReader {
           return xmlSource;
         throw new JSpecViewException("File type not recognized");
       }
-      return (new FileReader(filePath, obscure, iSpecFirst, iSpecLast)).getJDXSource(br);
+      return (new FileReader(filePath, obscure, loadImaginary, iSpecFirst, iSpecLast)).getJDXSource(br);
     } catch (JSpecViewException e) {
       br.close();
       throw new JSpecViewException("Error reading JDX format: "
@@ -245,6 +252,10 @@ public class FileReader {
   private String piUnitsY;
 
   private boolean addSpectrum(JDXSpectrum spectrum, boolean forceSub) {
+  	if (!loadImaginary && spectrum.isImaginary()) {
+  		Logger.info("FileReader skipping imaginary spectrum -- use LOADIMAGINARY TRUE to load this spectrum.");
+  		return true;
+  	}
     nSpec++;
     if (firstSpec > 0 && nSpec < firstSpec)
       return true;
@@ -406,8 +417,8 @@ public class FileReader {
     if (firstSpec > 0)
       spectrum0.numDim = 1; // don't display in 2D if only loading some spectra
 
-    boolean haveFirstLabel = !label.equals("##NTUPLES");
-    if (!haveFirstLabel) {
+    boolean isVARNAME = label.equals("##VARNAME");
+    if (!isVARNAME) {
       label = "";
       t.getValue();
     }
@@ -422,8 +433,8 @@ public class FileReader {
     }
 
     // Read NTuple Table
-    while (!(label = (haveFirstLabel ? label : t.getLabel())).equals("##PAGE")) {
-      haveFirstLabel = false;
+    while (!(label = (isVARNAME ? label : t.getLabel())).equals("##PAGE")) {
+      isVARNAME = false;
       StringTokenizer st = new StringTokenizer(t.getValue(), ",");
       ArrayList<String> attrList = new ArrayList<String>();
       while (st.hasMoreTokens())
@@ -823,6 +834,9 @@ public class FileReader {
       list = nTupleTable.get("##SYMBOL");
       int index1 = list.indexOf(plotSymbols[0]);
       int index2 = list.indexOf(plotSymbols[1]);
+
+      list = nTupleTable.get("##VARNAME");
+      spec.varName = list.get(index2).toUpperCase();
 
       list = nTupleTable.get("##FACTOR");
       spec.xFactor = Double.parseDouble(list.get(index1));

@@ -36,7 +36,7 @@ import java.util.Map.Entry;
 public enum ScriptToken {
 
   // null tip means DON'T SHOW
-  UNKNOWN, 
+  UNKNOWN,
   APPLETID, 
   APPLETREADYCALLBACKFUNCTIONNAME, 
   AUTOINTEGRATE("TF"), 
@@ -72,6 +72,7 @@ public enum ScriptToken {
   LABEL("x y [color and/or \"text\"]"), 
   LOAD("[APPEND] \"fileName\" [first] [last]; use \"\" to reload current file"),
   LOADFILECALLBACKFUNCTIONNAME,
+  LOADIMAGINARY("T/F - default is to NOT load imaginary spectra"),
   MENUON,
   OBSCURE, 
   OVERLAY, // same as "VIEW"

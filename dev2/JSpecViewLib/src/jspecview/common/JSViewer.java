@@ -123,6 +123,9 @@ public class JSViewer {
           msg = si.execLoad(value);
           jsvp = si.getSelectedPanel();
           break;
+        case LOADIMAGINARY:
+        	si.setLoadImaginary(Parameters.isTrue(value));
+        	break;
         case OVERLAYSTACKED:
           if (jsvp != null)
           	jsvp.getPanelData().splitStack(!Parameters.isTrue(value));

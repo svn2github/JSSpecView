@@ -133,4 +133,6 @@ public interface ScriptInterface {
 
 	public void writeStatus(String msg);
 
+	public void setLoadImaginary(boolean TF);
+
 }

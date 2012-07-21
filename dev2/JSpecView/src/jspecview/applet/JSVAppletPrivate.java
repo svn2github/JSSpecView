@@ -160,6 +160,10 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	private String syncID;
 	protected Thread commandWatcherThread;
 	private Boolean obscureTitleFromUser;
+	private boolean loadImaginary = false;
+	public void setLoadImaginary(boolean TF) {
+		loadImaginary = TF;
+	}
 	private JFileChooser jFileChooser;
 	JFrame offWindowFrame;
 	ViewPanel spectrumPanel;
@@ -1027,7 +1031,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 			int firstSpec, int lastSpec) throws Exception {
 		return FileReader.createJDXSource(FileManager
 				.getBufferedReaderForString(data), filePath, base,
-				obscureTitleFromUser == Boolean.TRUE, -1, -1);
+				obscureTitleFromUser == Boolean.TRUE, loadImaginary, -1, -1);
 	}
 
 	public JSVPanel getNewJSVPanel(List<JDXSpectrum> specs) {

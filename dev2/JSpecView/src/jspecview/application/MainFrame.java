@@ -1203,6 +1203,10 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	private int nOverlays;
+	private boolean loadImaginary = false;
+	public void setLoadImaginary(boolean TF) {
+		loadImaginary  = TF;
+	}
 
 	public int incrementViewCount(int n) {
 		return nOverlays += n;
@@ -1271,7 +1275,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	public JDXSource createSource(String data, String filePath, URL base,
 			int firstSpec, int lastSpec) throws Exception {
 		return FileReader.createJDXSource(FileManager
-				.getBufferedReaderForString(data), filePath, null, false, firstSpec,
+				.getBufferedReaderForString(data), filePath, null, false, loadImaginary , firstSpec,
 				lastSpec);
 	}
 
