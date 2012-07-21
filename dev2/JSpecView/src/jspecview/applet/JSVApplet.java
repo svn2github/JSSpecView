@@ -48,15 +48,12 @@
 
 package jspecview.applet;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.swing.JApplet;
 
 import jspecview.common.JSVAppletInterface;
+import jspecview.common.JSVersion;
 
 /**
  * JSpecView Applet class. For a list of parameters and scripting functionality
@@ -88,57 +85,6 @@ public class JSVApplet extends JApplet implements JSVAppletInterface {
     appletPrivate = new JSVAppletPrivate(this);
   }
 
-  private static final String SVN_REV= "$LastChangedRevision::      $";  
-  //  2.0.yyyy_SVN xxxx - should be automatically updated with the latest revision number from sourceforge SVN
-
-  public final static String version;
-  public final static String date;
-
-	static {
-		String tmpVersion = null;
-		String tmpDate = null;
-		Properties props = new Properties();
-
-		// Reading version from resource inside jar
-		BufferedInputStream bis = null;
-		InputStream is = null;
-		try {
-			is = JSVApplet.class.getClassLoader().getResourceAsStream(
-					"jspecview/common/TODO.txt");
-			bis = new BufferedInputStream(is);
-			props.load(bis);
-			tmpVersion = props.getProperty("___version", tmpVersion);
-			tmpDate = props.getProperty("___date", tmpDate);
-			if (tmpDate != null) {
-				tmpDate = tmpDate.substring(7, 23);
-				// NOTE : date is update in the properties by SVN, and is in the
-				// format
-				// $Date$"
-			}
-		} catch (IOException e) {
-			// Nothing to do
-		} finally {
-			if (bis != null) {
-				try {
-					bis.close();
-				} catch (IOException e) {
-					// Nothing to do
-				}
-			}
-			if (is != null) {
-				try {
-					is.close();
-				} catch (IOException e) {
-					// Nothing to do
-				}
-			}
-		}
-		version = (tmpVersion != null ? tmpVersion : "(Unknown version)");
-		date = (tmpDate != null ? tmpDate : "(Unknown date)");
-	}
-
-  public static final String APPLET_VERSION = version + "/SVN"+SVN_REV.substring(22,27) + "/" + date;
-  
   private static final long serialVersionUID = 1L;
 
   public boolean isPro() {
@@ -182,22 +128,13 @@ public class JSVApplet extends JApplet implements JSVAppletInterface {
   }
 
   /**
-   * Returns the current internal version of the Applet
-   * 
-   * @return String
-   */
-  public String getAppletVersion() {
-    return JSVApplet.APPLET_VERSION;
-  }
-
-  /**
    * Get Applet information
    * 
    * @return the String "JSpecView Applet"
    */
   @Override
   public String getAppletInfo() {
-    return "JSpecView Applet " + getAppletVersion();
+    return "JSpecView Applet " + JSVersion.VERSION;
   }
   
   ///////////////// JSpecView JavaScript calls ///////////////////

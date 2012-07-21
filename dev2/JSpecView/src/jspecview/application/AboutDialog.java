@@ -36,7 +36,7 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 
-import jspecview.applet.JSVApplet;
+import jspecview.common.JSVersion;
 
 /**
  * The <code>About Dialog</code> class is the <i>help | about</i> window for the
@@ -106,7 +106,7 @@ public class AboutDialog extends JDialog {
     p = new JPanel();
     p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
 
-    String message = "JSpecView Application\n" + "Version " + JSVApplet.APPLET_VERSION;
+    String message = "JSpecView Application\n" + "Version " + JSVersion.VERSION;
     txt = drawMessage(message, "Helvetica", Font.BOLD, 12);
     p.add(txt);
 

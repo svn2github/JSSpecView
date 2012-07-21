@@ -700,8 +700,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 					syncID = value;
 					fullName = appletID + "__" + syncID + "__";
 					break;
-				case VERSION:
-					break;
 				}
 			} catch (Exception e) {
 			}
