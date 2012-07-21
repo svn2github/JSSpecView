@@ -2688,7 +2688,6 @@ abstract class GraphSet {
 	}
 
 	private boolean isStartEndIntegral(int xPixel, boolean isEnd) {
-		System.out.println("istartend " + xPixelPlot1 + " " + xPixel + " " + xPixelPlot0);
 		return (isEnd ? xPixelPlot1 - xPixel < 20 : xPixel - xPixelPlot0 < 20);
 	}
 
@@ -3112,6 +3111,7 @@ abstract class GraphSet {
 		if (pd.integralShiftMode != 0) {
 			pd.integralShiftMode = 0;
 			zoomBox1D.xPixel1 = zoomBox1D.xPixel0;
+			pendingIntegral = null;
 			// pd.repaint();
 			return;
 		}
