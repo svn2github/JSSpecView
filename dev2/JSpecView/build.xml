@@ -77,7 +77,7 @@
 		<antcall target="revision"></antcall>
         <mkdir dir="${build.applet.dir}"/>
 	    <copy todir="${bin.dir}/jspecview/common" >
-	      <fileset dir=".">
+	      <fileset dir="src/jspecview/common">
 	        <include name="TODO.txt" />
 	      </fileset>
 	      <filterchain>
