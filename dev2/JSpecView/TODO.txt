@@ -4,8 +4,7 @@ Put new items at top, please.
 
 ___date=$Date$
 
-Sometimes the date changes, and sometimes it does not. I have no idea why!
-
+(Needed the Eclipse...Team...ShowProperties...ModifyProperty)
 ====TODO=========
 
 -in the jsvtest.htm page, when there is a CNMR and IR overlay shown
