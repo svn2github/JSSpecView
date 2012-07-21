@@ -108,6 +108,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	protected JSVApplet jsvApplet;
 
 	JSVApplet getJsvApplet() {
+		System.out.println("testing TODO");
 		return jsvApplet;
 	}
 
