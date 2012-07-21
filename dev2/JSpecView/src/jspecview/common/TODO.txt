@@ -1,17 +1,11 @@
+___date=$Date: 2012-07-21 09:03:56 -0500 (Sat, 21 Jul 2012) $
+
 Feel free to add to this file any time! Don't worry about sync problems. 
 Put new items at top, please.
 
+___version=2.0.1
+
 ====TODO=========
-
-Set the SVN version number in TODO.txt rather than JSVapplet.java
-This would mean making a comment when changes were made and submitting each time
-so that the Help About dialog box code was updated as well.
-
-I think in order for that to work, we have to include TODO.txt in the JAR file
-as is done in Jmol with Jmol.properties. We filter out all lines not including "#"
-in that case. Here we could include all lines WITH version info
-
-
 
 -in the jsvtest.htm page, when there is a CNMR and IR overlay shown
 nothing happens when a proton is clicked on a molecule in the Jmol
@@ -29,9 +23,13 @@ to call up changes to a current overlay similar to "save as," so that
 if one of the used spectra is used in a different file, separate
 changes and analyses can be made without altering the saved view
 
-
+  - in OleNMR this will be handled by saving $$JSVCMD into the procs file, I think.
 
 =====DONE========
+
+Set the SVN version number in TODO.txt rather than JSVapplet.java
+This would mean making a comment when changes were made and submitting each time
+so that the Help About dialog box code was updated as well.
 
 SET LOADIMAGINARY T/F   -- default F - we can't process the imaginary spec anyway
 acceptable?

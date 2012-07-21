@@ -15,6 +15,7 @@
 		  - cleanup
 		-->	
 	
+	<property file="src/jspecview/common/TODO.txt" prefix="TODO.txt" />
 	<property file="build_info.properties"/>
 	<property name="build.number" 		value="${build.major.number}.${build.minor.number}.${build.revision.number}"/>	
 	<property name="src.dir"     		value="src"/>
@@ -75,6 +76,16 @@
 	<target name="make-applet-jar" description="Make unsigned JSpecView applet jar">
 		<antcall target="revision"></antcall>
         <mkdir dir="${build.applet.dir}"/>
+	    <copy todir="${buid.applet.dir}" >
+	      <fileset dir="src">
+	        <include name="jspecview/common/TODO.txt" />
+	      </fileset>
+	      <filterchain>
+	        <linecontains>
+	          <contains value="___" />
+	        </linecontains>
+	      </filterchain>
+	    </copy>
         <jar destfile="${build.applet.dir}/${ant.project.name}.applet.${build.number}.jar">
             <manifest>
             	<attribute name="Class-Path" value=". plugin.jar"/>
