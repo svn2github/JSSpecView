@@ -76,9 +76,9 @@
 	<target name="make-applet-jar" description="Make unsigned JSpecView applet jar">
 		<antcall target="revision"></antcall>
         <mkdir dir="${build.applet.dir}"/>
-	    <copy todir="${bin.dir}" >
-	      <fileset dir="src">
-	        <include name="jspecview/common/TODO.txt" />
+	    <copy todir="${bin.dir}/jspecview/common" >
+	      <fileset dir=".">
+	        <include name="TODO.txt" />
 	      </fileset>
 	      <filterchain>
 	        <linecontains>
