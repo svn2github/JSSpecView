@@ -3,8 +3,6 @@ ___date=$Date: 2012-07-21 09:03:56 -0500 (Sat, 21 Jul 2012) $
 Feel free to add to this file any time! Don't worry about sync problems. 
 Put new items at top, please.
 
-___version=2.0.1
-
 ====TODO=========
 
 -in the jsvtest.htm page, when there is a CNMR and IR overlay shown
@@ -26,6 +24,8 @@ changes and analyses can be made without altering the saved view
   - in OleNMR this will be handled by saving $$JSVCMD into the procs file, I think.
 
 =====DONE========
+
+___version=2.0.1
 
 Set the SVN version number in TODO.txt rather than JSVapplet.java
 This would mean making a comment when changes were made and submitting each time
