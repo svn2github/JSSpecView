@@ -3179,7 +3179,6 @@ abstract class GraphSet {
 		if (pd.integralShiftMode != 0) {
 			pd.integralShiftMode = 0;
 			zoomBox1D.xPixel1 = zoomBox1D.xPixel0;
-			pendingIntegral = null;
 			// pd.repaint();
 			return;
 		}
@@ -3191,6 +3190,7 @@ abstract class GraphSet {
 				checkIntegral(toX(zoomBox1D.xPixel0), toX(zoomBox1D.xPixel1), true);
 			}
 			zoomBox1D.xPixel1 = zoomBox1D.xPixel0 = 0;
+			pendingIntegral = null;
 			pd.isIntegralDrag = false;
 			// pd.repaint();
 		} else if (thisWidget == zoomBox2D) {
