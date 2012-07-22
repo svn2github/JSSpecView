@@ -131,9 +131,8 @@ class AwtIntegralListDialog extends AwtAnnotationDialog {
 					"Enter a normalization factor", "Normalize",
 					JOptionPane.QUESTION_MESSAGE, null, null, "" + lastNorm);
 			double val = Double.parseDouble(ret);
-			if (val <= 0)
-				return;
-			lastNorm = val;
+			if (val > 0)
+  			lastNorm = val;
 			((IntegralData) xyData).setSelectedIntegral(xyData.get(iSelected), val);
 			apply();
 			jsvp.doRepaint();

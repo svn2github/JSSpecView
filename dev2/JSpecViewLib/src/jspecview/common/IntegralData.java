@@ -128,8 +128,11 @@ public class IntegralData extends MeasurementData {
     offset = offsetNew;		
 	}
 
-	public void scaleIntegrationBy(double f) {
-		normalizationFactor *= f;
+	private void scaleIntegrationBy(double f) {
+		if (f <= 0)
+			normalizationFactor = 1;
+		else
+  		normalizationFactor *= f;
 	}
 
 	boolean haveRegions;
@@ -291,12 +294,12 @@ public class IntegralData extends MeasurementData {
 
 	public void setSelectedIntegral(Measurement integral, double val) {
 		double val0 = integral.getValue();
-		double factor = val / val0;
+		double factor = (val <= 0 ? 1/normalizationFactor : val / val0);
 		for (int i = 0; i < size(); i++) {
 			Measurement m = get(i);
   		m.setValue(factor * m.getValue());
 		}
-		scaleIntegrationBy(factor);
+		scaleIntegrationBy(val <= 0 ? 0 : factor);
 	}
 
 	@Override

@@ -874,15 +874,10 @@ public class PanelData {
     	sValue = "" + integral.getValue();
 		String newValue = getInput("Enter a new value for this integral", 
 				"Normalize Integral", sValue);
-		double val;
 		try {
-			val = Double.parseDouble(newValue);
+		  setSelectedIntegral(Double.parseDouble(newValue));
 		} catch (Exception e) {
-			return;
 		}
-		if (val <= 0)
-			return;
-    setSelectedIntegral(val);
 	}
 
 }

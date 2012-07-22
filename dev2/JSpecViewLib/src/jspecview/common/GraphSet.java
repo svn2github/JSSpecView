@@ -3753,6 +3753,12 @@ abstract class GraphSet {
 				continue;
 			JDXSpectrum spec = spectra.get(i);
 			Map<String, Object> info = spec.getInfo(key);
+			if (iSpec >= 0 && key != null 
+					&& (info.size() == 2 || key.equalsIgnoreCase("id"))) {
+				if (info.size() == 2)
+					info.remove("id");
+				return info;
+			}
 			Parameters.putInfo(key, info, "type", spec.getDataType());
 			Parameters.putInfo(key, info, "titleLabel", spec.getTitleLabel());
 			Parameters.putInfo(key, info, "filePath", spec.getFilePath().replace('\\', '/'));

@@ -584,6 +584,15 @@ public class FileReader {
     return line;
   }
 
+  /**
+   * 
+   * @param spectrum
+   * @param label
+   * @param t
+   * @param errorLog
+   * @param obscure
+   * @return  true to skip saving this key in the spectrum headerTable
+   */
   private static boolean readDataLabel(JDXDataObject spectrum, String label,
                                        JDXSourceStreamTokenizer t,
                                        StringBuffer errorLog, boolean obscure) {
@@ -674,7 +683,7 @@ public class FileReader {
       spectrum.dataPointNum = 1;
       // bruker type
       spectrum.shiftRefType = 1;
-      return true;
+      return false;
     }
 
     if ((label.equals("##$REFERENCEPOINT")) && (spectrum.shiftRefType != 0)) {
