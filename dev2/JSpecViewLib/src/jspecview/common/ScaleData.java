@@ -197,11 +197,12 @@ public class ScaleData {
     if (minY == 0 && maxY == 0)
       maxY = 1;
     double yStep = setScaleParams(minY, maxY, 1);
-    minYOnScale = (setScaleMinMax ? yStep * Math.floor(minY / yStep) : minY);
-    maxYOnScale = (setScaleMinMax ? yStep * Math.ceil(maxY / yStep) : maxY);
-    firstY = Math.floor(minY / yStep) * yStep;
-    if (Math.abs((minY - firstY) / yStep) > 0.0001)
-      firstY += yStep;
+    double dy = yStep / 4;
+    minYOnScale = (setScaleMinMax ? dy * Math.floor(minY / dy) : minY);
+    maxYOnScale = (setScaleMinMax ? yStep * Math.ceil(maxY * 1.05 / yStep) : maxY);
+    firstY = Math.floor(minY / dy) * dy;
+    if (Math.abs((minY - firstY) / dy) > 0.0001)
+      firstY += dy;
     if (setScaleMinMax) {
     	initMinYOnScale = minYOnScale;
     	initMaxYOnScale = maxYOnScale;
