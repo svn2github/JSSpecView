@@ -9,9 +9,7 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.RenderedImage;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
@@ -30,20 +28,20 @@ import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVFileFilter;
 import jspecview.common.JSVPanel;
 import jspecview.common.PanelData;
+import jspecview.common.ScriptInterface;
 import jspecview.common.ScriptToken;
 import jspecview.util.FileManager;
-import jspecview.util.Logger;
 import jspecview.util.TextFormat;
 
 public class Exporter {
 
-  public final static String sourceLabel = "Source...";
+  public final static String sourceLabel = "Original...";
   public enum Type {
     UNK, SOURCE, DIF, FIX, SQZ, PAC, XY, DIFDUP, PNG, JPG, SVG, SVGI, CML, AML;
 
     public static Type getType(String type) {
       type = type.toUpperCase();
-      if (type.equals(sourceLabel))
+      if (type.equalsIgnoreCase(sourceLabel))
         return SOURCE;
       if (type.startsWith("XML"))
         return AML;
@@ -97,24 +95,31 @@ public class Exporter {
 
   /**
    * 
-   * @param jsvp
+   * @param si 
    * @param frame
    * @param fc
    * @param type
-   * @param recentFileName
    * @param dirLastExported
    * @return null or directory saved to
    */
-  public static String exportSpectra(JSVPanel jsvp, JFrame frame,
+  public static String exportSpectra(ScriptInterface si, JFrame frame,
                                      JFileChooser fc, String type,
-                                     String recentFileName,
                                      String dirLastExported) {
+  	
+  	JSVPanel jsvp = si.getSelectedPanel();
+  	boolean isView = si.getCurrentSource().isView;
     // From popup menu click SaveAs or Export
     // if JSVPanel has more than one spectrum...Choose which one to export
     int nSpectra = jsvp.getPanelData().getNumberOfSpectraInCurrentSet();
-    if (nSpectra == 1 || type.equals("JPG") || type.equals("PNG"))
-      return exportSpectrumOrImage(jsvp, type, -1, fc, recentFileName,
-          dirLastExported);
+    if (nSpectra == 1 
+    		|| type.equals("JPG") 
+    		|| type.equals("PNG")
+    		|| !isView && type.equals(sourceLabel) 
+    		|| jsvp.getPanelData().getCurrentSpectrumIndex() >= 0 
+    		)
+      return exportSpectrumOrImage(si, type, -1, fc, dirLastExported);
+    
+    
     String[] items = new String[nSpectra];
     for (int i = 0; i < nSpectra; i++)
       items[i] = jsvp.getSpectrumAt(i).getTitle();
@@ -140,16 +145,20 @@ public class Exporter {
         BorderLayout.NORTH);
     dialog.getContentPane().add(p);
     String dir = dirLastExported;
-    final int ret[] = new int[1];
+    final int ret[] = new int[] { -1 };
     button.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         ret[0] = cb.getSelectedIndex();
+        dialog.dispose();
       }
     });
     dialog.setVisible(true);
     dialog.dispose();
-    String msg = exportSpectrumOrImage(jsvp, type, ret[0], fc, recentFileName, dirLastExported);
+    if (ret[0] < 0)
+    	return null;    
+    String msg = exportSpectrumOrImage(si, type, ret[0], fc, dirLastExported);
     return (msg == null ? null : dir);
+    
   }
 
   /**
@@ -196,32 +205,30 @@ public class Exporter {
 
   /**
    * Auxiliary Export method
-   * @param jsvp 
+   * @param si 
    * @param mode
    *        the format to export in
    * @param index
    *        the index of the spectrum
    * @param fc
    *        file chooser to use
-   * @param recentFileName
    * @param dirLastExported
    * @return dirLastExported
    */
-	private static String exportSpectrumOrImage(JSVPanel jsvp,
+	private static String exportSpectrumOrImage(ScriptInterface si,
                                               String mode, int index,
                                               JFileChooser fc,
-                                              String recentFileName,
                                               String dirLastExported) {
+		JSVPanel jsvp = si.getSelectedPanel();
     Type imode = Type.getType(mode);
     JSVFileFilter filter = new JSVFileFilter();
-    //TODO: This is flawed. It assumes the file name has one and only one "." in it.
-    if (imode == Type.SOURCE) {
-      String fname = jsvp.getSpectrum().getFilePath();
-      if (!FileManager.isURL(fname))
-        recentFileName = fname; 
-    }
-    int pt = recentFileName.lastIndexOf(".");
-    String name = (pt < 0 ? recentFileName : recentFileName.substring(0, pt));
+    String sourcePath = jsvp.getSpectrum().getFilePath();
+    String newName = FileManager.getName(sourcePath);
+
+    int pt = newName.lastIndexOf(".");
+    String name = (pt < 0 ? newName : newName.substring(0, pt));
+    if (si.getCurrentSource().isView)
+    	name += si.getCurrentSource().getFilePath();
     switch (imode) {
     case XY:
     case FIX:
@@ -259,29 +266,15 @@ public class Exporter {
     }
     String msg = "OK";
     if (imode == Type.SOURCE)
-      fileCopy(name, file);
+      FileManager.fileCopy(sourcePath, file);
     else
       msg = exportSpectrumOrImage(jsvp, imode, index, file
           .getAbsolutePath());
+    if (msg != null)
+    	si.updateRecentMenus(file.getAbsolutePath());
     return (msg == null ? null : dir);
   }
   
-  private static void fileCopy(String name, File file) {
-    try {
-      BufferedReader br = FileManager.getBufferedReaderFromName(name, null,
-          null);
-      FileWriter writer = new FileWriter(file.getAbsolutePath());
-      String line = null;
-      while ((line = br.readLine()) != null) {
-        writer.write(line);
-        writer.write(TextFormat.newLine);
-      }
-      writer.close();
-    } catch (Exception e) {
-    	Logger.error(e.getMessage());
-    }
-  }
-
   /**
    * 
    * @param jsvp

@@ -177,7 +177,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	public List<JSVPanelNode> getPanelNodes() {
 		return panelNodes;
 	}
-	private String recentFileName = "";
 	private JSVPanel selectedPanel;
 
 	private JDXSource currentSource;
@@ -573,9 +572,9 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 			Logger.info(exportSpectrum(type, -1));
 			return;
 		}
+		String msg = Exporter.exportSpectra(this, offWindowFrame,
+				jFileChooser, type, dirLastExported);
 		JSVPanel jsvp = getSelectedPanel();
-		String msg = Exporter.exportSpectra(jsvp, offWindowFrame,
-				jFileChooser, type, recentFileName, dirLastExported);
 		jsvp.getFocusNow(true);
 		if (msg != null)
 			dirLastExported = msg;
@@ -1012,10 +1011,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	
 	public void setCursorObject(Object c) {
 		jsvApplet.setCursor((Cursor) c);
-	}
-
-	public void setRecentFileName(String fileName) {
-		recentFileName = fileName;
 	}
 
 	public boolean getAutoCombine() {

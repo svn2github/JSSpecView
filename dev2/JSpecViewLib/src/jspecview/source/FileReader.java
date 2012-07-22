@@ -102,7 +102,7 @@ public class FileReader {
   
   
   /**
-   * used only for preferences display
+   * used only for preferences display and Android
    * 
    * @param in
    * @param obscure
@@ -944,7 +944,7 @@ public class FileReader {
         entry[1] = value;
         return;
       }
-    table.add(new String[] { label, value });
+    table.add(new String[] { label, value, JDXSourceStreamTokenizer.cleanLabel(label) });
   }
 
 }

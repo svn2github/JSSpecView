@@ -486,7 +486,16 @@ public class JDXSpectrum extends JDXDataObject {
     Map<String, Object> info = new Hashtable<String, Object>();
     info.put("id", id);
     Parameters.putInfo(key, info, "specShift", Double.valueOf(specShift));
-    boolean justHeader = ("header" == key);
+    boolean justHeader = ("header".equals(key));
+    if (!justHeader && key != null) {
+      for (int i = headerTable.size(); --i >= 0;) {
+      	String[] entry = headerTable.get(i);
+      	if (entry[0].equalsIgnoreCase(key) || entry[2].equalsIgnoreCase(key)) {
+      		info.put(key, entry[1]);
+      		return info;
+      	}      		
+      }
+    }
     Map<String, Object> head = new Hashtable<String, Object>();
     String[][] list = getHeaderRowDataAsArray();
     for (int i = 0; i < list.length; i++) {

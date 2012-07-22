@@ -24,6 +24,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -250,6 +251,23 @@ public class FileManager {
       return null;
     }
   }
+
+  public static void fileCopy(String name, File file) {
+    try {
+      BufferedReader br = FileManager.getBufferedReaderFromName(name, null,
+          null);
+      FileWriter writer = new FileWriter(file.getAbsolutePath());
+      String line = null;
+      while ((line = br.readLine()) != null) {
+        writer.write(line);
+        writer.write(TextFormat.newLine);
+      }
+      writer.close();
+    } catch (Exception e) {
+    	Logger.error(e.getMessage());
+    }
+  }
+
 }
 
 class MonitorInputStream extends FilterInputStream {

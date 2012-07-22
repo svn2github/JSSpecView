@@ -109,8 +109,6 @@ public interface ScriptInterface {
 
 	public void setPropertiesFromPreferences(JSVPanel jsvp, boolean b);
 
-	public void setRecentFileName(String fileName);
-
 	public void setRecentURL(String filePath);
 
 	public void setReturnFromJmolModel(String model);

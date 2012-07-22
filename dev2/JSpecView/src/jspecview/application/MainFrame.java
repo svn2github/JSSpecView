@@ -152,7 +152,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	private boolean useDirLastExported;
 	private String dirLastOpened;
 	private String dirLastExported;
-	private String recentFileName;
 	private String recentURL;
 	private String integrationRatios;
 	public void setIntegrationRatios(String value) {
@@ -795,7 +794,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	 *          the name of the format to export in
 	 */
 	void exportSpectrumViaMenu(String command) {
-		final String type = command;
 		JSVPanel jsvp = getSelectedPanel();
 		if (jsvp == null)
 			return;
@@ -807,8 +805,8 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		} else if (useDirLastExported) {
 			fc.setCurrentDirectory(new File(dirLastExported));
 		}
-		String msg = Exporter.exportSpectra(jsvp, this, fc, type,
-				recentFileName, dirLastExported);
+		String msg = Exporter.exportSpectra(this, this, fc, command,
+				dirLastExported);
 		jsvp.getFocusNow(true);
 		if (msg != null)
   		dirLastExported = msg;
@@ -1214,10 +1212,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	public void setRecentURL(String filePath) {
 		recentURL = filePath;
-	}
-
-	public void setRecentFileName(String fileName) {
-		recentFileName = fileName;
 	}
 
 	/**

@@ -285,15 +285,12 @@ public class JSVTree extends JTree {
         filePath = u.toString();
         si.setRecentURL(filePath);
         fileName = FileManager.getName(url);
-        if (base != null)
-        	si.setRecentFileName(fileName);
       } catch (MalformedURLException e) {
         file = new File(url);
       }
     }
     if (file != null) {
       fileName = file.getName();
-      si.setRecentFileName(fileName);
       filePath = file.getAbsolutePath();
       //recentJmolName = (url == null ? filePath.replace('\\', '/') : url);
       si.setRecentURL(null);

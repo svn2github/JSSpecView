@@ -56,11 +56,12 @@ public class JDXSource extends JDXHeader {
   }
   
   public int peakCount;
-  
+
+	public boolean isView;
   
   public JDXSource(int type, String filePath) {
     this.type = type;
-    this.filePath = filePath;
+    setFilePath(filePath);
     headerTable = new ArrayList<String[]>();
     jdxSpectra = new ArrayList<JDXSpectrum>();
     isCompoundSource = (type != TYPE_SIMPLE);
@@ -140,7 +141,8 @@ public class JDXSource extends JDXHeader {
   }
 
   public static JDXSource createView(List<JDXSpectrum> specs) {
-    JDXSource source = new JDXSource(TYPE_VIEW, "overlaid");
+    JDXSource source = new JDXSource(TYPE_VIEW, "view");
+    source.isView = true;
     for (int i = 0; i < specs.size(); i++)
       source.addJDXSpectrum(specs.get(i).getFilePath(), specs.get(i), false);
     return source;
