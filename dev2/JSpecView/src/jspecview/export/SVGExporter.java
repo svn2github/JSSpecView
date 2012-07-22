@@ -72,7 +72,7 @@ class SVGExporter extends FormExporter {
       throws IOException {
     return exportAsSVG(path, graph.getXYCoords(), "", startIndex,
         endIndex, graph.getXUnits(), graph.getYUnits(), graph.isContinuous(),
-        graph.isIncreasing(), Color.lightGray, Color.white, Color.black,
+        graph.isXIncreasing(), graph.isInverted(), Color.lightGray, Color.white, Color.black,
         Color.gray, Color.black, Color.black, Color.black, forInkscape);
   }
 
@@ -101,7 +101,7 @@ class SVGExporter extends FormExporter {
   String exportAsSVG(String fileName, Coordinate[] xyCoords, String title,
                            int startDataPointIndex, int endDataPointIndex,
                            String xUnits, String yUnits, boolean isContinuous,
-                           boolean increasing, Color plotAreaColor,
+                           boolean increasing, boolean isInverted, Color plotAreaColor,
                            Color backgroundColor, Color plotColor,
                            Color gridColor, Color titleColor, Color scaleColor,
                            Color unitsColor, boolean exportForInkscape) throws IOException {
@@ -110,7 +110,7 @@ class SVGExporter extends FormExporter {
 
     DecimalFormat formatter2 = TextFormat.getDecimalFormat("0.######");
 
-    ScaleData scaleData = new ScaleData(xyCoords, startDataPointIndex, endDataPointIndex, isContinuous);
+    ScaleData scaleData = new ScaleData(xyCoords, startDataPointIndex, endDataPointIndex, isContinuous, isInverted);
 
     double maxXOnScale = scaleData.maxXOnScale;
     double minXOnScale = scaleData.minXOnScale;

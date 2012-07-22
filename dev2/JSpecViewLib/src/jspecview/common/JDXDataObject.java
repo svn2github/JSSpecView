@@ -511,7 +511,7 @@ public abstract class JDXDataObject extends JDXHeader {
     isHZtoPPM = val;
   }
 
-  private boolean increasing = true;
+  private boolean xIncreases = true;
 
   /**
    * Sets value to true if spectrum is increasing
@@ -520,7 +520,7 @@ public abstract class JDXDataObject extends JDXHeader {
    *        true if spectrum is increasing
    */
   public void setIncreasing(boolean val) {
-    increasing = val;
+    xIncreases = val;
   }
 
   /**
@@ -528,8 +528,8 @@ public abstract class JDXDataObject extends JDXHeader {
    * 
    * @return true if the spectrum is increasing
    */
-  public boolean isIncreasing() {
-    return increasing;
+  public boolean isXIncreasing() {
+    return xIncreases;
   }
 
   /**
@@ -553,7 +553,7 @@ public abstract class JDXDataObject extends JDXHeader {
     } else if (dt.contains("VIS") && xu.contains("NANOMETERS")) {
       return true;
     }
-    return increasing;
+    return xIncreases;
   }
 
   private boolean continuous;
@@ -603,12 +603,12 @@ public abstract class JDXDataObject extends JDXHeader {
       rowData[i++] = new String[] { "##.OBSERVE NUCLEUS", observedNucl };
     rowData[i++] = new String[] { "##XUNITS", isHZtoPPM ? "HZ" : xUnits };
     rowData[i++] = new String[] { "##YUNITS", yUnits };
-    double x = (increasing ? getFirstX() : getLastX());
+    double x = (xIncreases ? getFirstX() : getLastX());
     rowData[i++] = new String[] { "##FIRSTX",
         String.valueOf(isHZtoPPM() ? x * observedFreq : x) };
-    x = (increasing ? getLastX() : getFirstX());
+    x = (xIncreases ? getLastX() : getFirstX());
     rowData[i++] = new String[] { "##FIRSTY",
-        String.valueOf(increasing ? getFirstY() : getLastY()) };
+        String.valueOf(xIncreases ? getFirstY() : getLastY()) };
     rowData[i++] = new String[] { "##LASTX",
         String.valueOf(isHZtoPPM() ? x * observedFreq : x) };
     rowData[i++] = new String[] { "##XFACTOR", String.valueOf(getXFactor()) };
@@ -797,7 +797,7 @@ public abstract class JDXDataObject extends JDXHeader {
     //newSpectrum.setPathlength(getPathlength());
     newObj.setXYCoords(xyCoords);
     newObj.setContinuous(continuous);
-    newObj.setIncreasing(increasing);
+    newObj.setIncreasing(xIncreases);
 
     newObj.observedFreq = observedFreq;
     newObj.observedNucl = observedNucl;

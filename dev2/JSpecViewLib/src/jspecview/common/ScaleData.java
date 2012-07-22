@@ -156,18 +156,18 @@ public class ScaleData {
 	 * @param isContinuous 
 	 * @returns an instance of <code>ScaleData</code>
 	 */
-	public ScaleData(Coordinate[] coords, int start, int end, boolean isContinuous) {
+	public ScaleData(Coordinate[] coords, int start, int end, boolean isContinuous, boolean isInverted) {
 		minX = Coordinate.getMinX(coords, start, end);
 		maxX = Coordinate.getMaxX(coords, start, end);
 		minY = Coordinate.getMinY(coords, start, end);
 		maxY = Coordinate.getMaxY(coords, start, end);
-		setScale(isContinuous);
+		setScale(isContinuous, isInverted);
 	}
 
   ScaleData() {
 	}
 
-	protected ScaleData setScale(boolean isContinuous) {
+	protected ScaleData setScale(boolean isContinuous, boolean isInverted) {
 
     setXScale();
     if (!isContinuous)
@@ -175,7 +175,7 @@ public class ScaleData {
 
     // Y Scale
     
-    setYScale(minY, maxY, true);
+    setYScale(minY, maxY, true, isInverted);
     return this;
   }
 
@@ -193,13 +193,14 @@ public class ScaleData {
     return (minYOnScale < 0 && maxYOnScale > 0);
   }
 
-  void setYScale(double minY, double maxY, boolean setScaleMinMax) {
+  void setYScale(double minY, double maxY, boolean setScaleMinMax, boolean isInverted) {
     if (minY == 0 && maxY == 0)
       maxY = 1;
     double yStep = setScaleParams(minY, maxY, 1);
-    double dy = yStep / 4;
+    double dy = (isInverted ? yStep / 2 : yStep / 4);
+    double dy2 = (isInverted ? yStep / 4 : yStep / 2);
     minYOnScale = (setScaleMinMax ? dy * Math.floor(minY / dy) : minY);
-    maxYOnScale = (setScaleMinMax ? yStep * Math.ceil(maxY * 1.05 / yStep) : maxY);
+    maxYOnScale = (setScaleMinMax ? dy2 * Math.ceil(maxY * 1.05 / dy2) : maxY);
     firstY = Math.floor(minY / dy) * dy;
     if (Math.abs((minY - firstY) / dy) > 0.0001)
       firstY += dy;

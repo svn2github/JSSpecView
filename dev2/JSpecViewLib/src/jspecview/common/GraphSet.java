@@ -482,12 +482,12 @@ abstract class GraphSet {
 			graphs = spectra;
 		} else if (y1 == y2) {
 			// start up, forced subsets (too many spectra)
-			viewData = new ViewData(subspecs, y1, y2, getSpectrum().isContinuous());
+			viewData = new ViewData(subspecs, y1, y2, getSpectrum().isContinuous(), getSpectrum().isInverted());
 			graphs = null;
 		}
 		if (graphs != null) {
 			viewData = new ViewData(graphs, y1, y2, startIndices, endIndices,
-					getSpectrumAt(0).isContinuous());
+					getSpectrumAt(0).isContinuous(), getSpectrumAt(0).isInverted());
 			if (x1 != x2)
 				viewData.setXRange(x1, x2);
 		}
@@ -1532,7 +1532,7 @@ abstract class GraphSet {
 	private void setUserYFactor(int i) {
 		userYFactor = viewData.userYFactors[i];
 		yRef = viewData.spectrumYRefs[i];
-		viewData.setAxisScaling(i, xPixels, yPixels);
+		viewData.setAxisScaling(i, xPixels, yPixels, spectra.get(i).isInverted());
 	}
 
 	private boolean doPlot(int i, int iSplit) {

@@ -28,6 +28,8 @@ changes and analyses can be made without altering the saved view
 
 ___version=2.0.2
 
+y-axis shift to bring 0 closer to bottom
+
 app file save As Source... fixed (and changed to "Original..."
 refactoring ViewData.java and ScaleData.java; better minor X-ticks
 xScale tweak adds minor ticks and changes allowed markings to 2, 5, 10 only

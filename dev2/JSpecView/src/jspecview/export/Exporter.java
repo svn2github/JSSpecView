@@ -307,7 +307,7 @@ public class Exporter {
       case SVGI:
         msg = (new SVGExporter()).exportAsSVG(path, spec.getXYCoords(), 
             spec.getTitle(), startIndex, endIndex, spec.getXUnits(), 
-            spec.getYUnits(), spec.isContinuous(), spec.isIncreasing(), 
+            spec.getYUnits(), spec.isContinuous(), spec.isXIncreasing(), spec.isInverted(), 
             (Color)jsvp.getColor(ScriptToken.PLOTAREACOLOR), ((Component) jsvp).getBackground(), 
             (Color)jsvp.getPlotColor(0),
             (Color)jsvp.getColor(ScriptToken.GRIDCOLOR),
