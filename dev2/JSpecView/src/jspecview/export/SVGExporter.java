@@ -110,16 +110,14 @@ class SVGExporter extends FormExporter {
 
     DecimalFormat formatter2 = TextFormat.getDecimalFormat("0.######");
 
-    ScaleData scaleData = new ScaleData(xyCoords, startDataPointIndex, endDataPointIndex, 10, 10, isContinuous);
+    ScaleData scaleData = new ScaleData(xyCoords, startDataPointIndex, endDataPointIndex, isContinuous);
 
     double maxXOnScale = scaleData.maxXOnScale;
     double minXOnScale = scaleData.minXOnScale;
     double maxYOnScale = scaleData.maxYOnScale;
     double minYOnScale = scaleData.minYOnScale;
-    double xStep = scaleData.xStep;
-    double yStep = scaleData.yStep;
-    int hashNumX = scaleData.hashNums[0];
-    int hashNumY = scaleData.hashNums[1];
+    double xStep = scaleData.steps[0];
+    double yStep = scaleData.steps[1];
     int plotAreaWidth = svgWidth - leftInset - rightInset;
     int plotAreaHeight = svgHeight - topInset - bottomInset;
     double xScaleFactor = (plotAreaWidth / (maxXOnScale - minXOnScale));
@@ -165,15 +163,8 @@ class SVGExporter extends FormExporter {
     List<Map<String, String>> xScaleList = new ArrayList<Map<String, String>>();
     List<Map<String, String>> xScaleListReversed = new ArrayList<Map<String, String>>();
     List<Map<String, String>> yScaleList = new ArrayList<Map<String, String>>();
-    String hashX = "#";
-    String hashY = "#";
-    String hash1 = "0.00000000";
-    if (hashNumX <= 0)
-      hashX = hash1.substring(0, Math.abs(hashNumX) + 3);
-    DecimalFormat displayXFormatter = TextFormat.getDecimalFormat(hashX);
-    if (hashNumY <= 0)
-      hashY = hash1.substring(0, Math.abs(hashNumY) + 3);
-    DecimalFormat displayYFormatter = TextFormat.getDecimalFormat(hashY);
+    DecimalFormat displayXFormatter = scaleData.formatters[0];
+    DecimalFormat displayYFormatter = scaleData.formatters[1];
     for (double i = minXOnScale; i < (maxXOnScale + xStep / 2); i += xStep) {
       xPt = leftPlotArea + ((i - minXOnScale) * xScaleFactor);
       xPt -= 10; // shift to left by 10
@@ -319,8 +310,8 @@ class SVGExporter extends FormExporter {
     context.put("yUnitLabelX", "" + yUnitLabelX);
     context.put("yUnitLabelY", "" + yUnitLabelY);
 
-    context.put("numDecimalPlacesX", new Integer(Math.abs(hashNumX)));
-    context.put("numDecimalPlacesY", new Integer(Math.abs(hashNumY)));
+    context.put("numDecimalPlacesX", new Integer(Math.abs(scaleData.hashNums[0])));
+    context.put("numDecimalPlacesY", new Integer(Math.abs(scaleData.hashNums[1])));
 
     String vm = (exportForInkscape ? "plot_ink.vm" : "plot.vm");
     Logger.info("SVGExporter using " + vm);

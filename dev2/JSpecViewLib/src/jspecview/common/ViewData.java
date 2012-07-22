@@ -1,28 +1,25 @@
 package jspecview.common;
 
 import java.util.List;
-import java.util.Map;
 
 
 /**
  * Stores information that <code>GraphSet</code> needs 
  * to display a view with one or more spectra. 
  * 
- * Was "MultiScaleData"
  */
 class ViewData extends ScaleData {
 
   int[] startDataPointIndices;
   int[] endDataPointIndices;
   int[] numOfPointsList;
-  double minY2D, maxY2D;
 	double[] userYFactors;
 	double[] spectrumYRefs; // 0 or 100
   int[] spectrumOffsets; // not yet implemented
 
   private int nSpec;
 	private double[] spectrumScaleFactors;
- 
+
 	/**
 	 * 
 	 * @param spectra
@@ -33,16 +30,11 @@ class ViewData extends ScaleData {
 	 *          the start indices
 	 * @param endList
 	 *          the end indices
-	 * @param initNumXDivisions
-	 *          the initial number of X divisions for scale
-	 * @param initNumYDivisions
-	 *          the initial number of Y divisions for scale
 	 * @param isContinuous 
 	 * @returns an instance of <code>MultiScaleData</code>
 	 */
 	ViewData(List<JDXSpectrum> spectra, double yPt1, double yPt2,
-			int[] startList, int[] endList, int initNumXDivisions,
-			int initNumYDivisions, boolean isContinuous) {
+			int[] startList, int[] endList, boolean isContinuous) {
 		super();
 		nSpec = spectra.size();
 		startDataPointIndices = startList;
@@ -50,11 +42,10 @@ class ViewData extends ScaleData {
 		numOfPointsList = new int[nSpec];
 		for (int j = 0; j < nSpec; j++)
 			numOfPointsList[j] = endList[j] + 1 - startList[j];
-		init(spectra, startList, endList, yPt1, yPt2, initNumXDivisions, initNumYDivisions, isContinuous);
+		init(spectra, startList, endList, yPt1, yPt2, isContinuous);
 	}
   
-	ViewData(List<JDXSpectrum> spectra, double yPt1, double yPt2,
-			int initNumXDivisions, int initNumYDivisions, boolean isContinuous) {
+	ViewData(List<JDXSpectrum> spectra, double yPt1, double yPt2, boolean isContinuous) {
 		// forced subsets
 		super();
 		nSpec = spectra.size();
@@ -62,7 +53,7 @@ class ViewData extends ScaleData {
 		startDataPointIndices = new int[] { 0 };
 		endDataPointIndices = new int[] { n - 1 };
 		numOfPointsList = new int[] { n };
-		init(spectra, null, null, yPt1, yPt2, initNumXDivisions, initNumYDivisions, isContinuous);
+		init(spectra, null, null, yPt1, yPt2, isContinuous);
 	}
 
 	private void setMinMax(List<JDXSpectrum> spectra, int[] startList,
@@ -81,8 +72,7 @@ class ViewData extends ScaleData {
 	}
 
   private void init(List<JDXSpectrum> spectra, int[] startList, int[] endList, 
-  		double yPt1, double yPt2, int initNumXDivisions, int initNumYDivisions, 
-  		boolean isContinuous) {
+  		double yPt1, double yPt2, boolean isContinuous) {
   	
 		spectrumScaleFactors = new double[nSpec];
 		userYFactors = new double[nSpec];
@@ -100,8 +90,6 @@ class ViewData extends ScaleData {
         maxY = t;
       }
     }
-		numInitXdiv = initNumXDivisions;
-		numInitYdiv = initNumYDivisions;
     setScale(isContinuous);
   }
 
@@ -135,56 +123,11 @@ class ViewData extends ScaleData {
     return (nSpectraOK == nSpectra);
   }
 
-  private static int setXRange(int i, Coordinate[] xyCoords, double initX, double finalX, int iStart, int iEnd, int[] startIndices, int[] endIndices) {
-    int index = 0;
-    int ptCount = 0;
-    for (index = iStart; index <= iEnd; index++) {
-      double x = xyCoords[index].getXVal();
-      if (x >= initX) {
-        startIndices[i] = index;
-        break;
-      }
-    }
-
-    // determine endDataPointIndex
-    for (; index <= iEnd; index++) {
-      double x = xyCoords[index].getXVal();
-      ptCount++;
-      if (x >= finalX) {
-        break;
-      }
-    }
-    endIndices[i] = index - 1;
-    return ptCount;
-  }
-
   void setXRangeForSubSpectrum(Coordinate[] xyCoords) {
     int n = xyCoords.length - 1;
     startDataPointIndices[0] = 0;
     endDataPointIndices[0] = n;
     setXRange(0, xyCoords, minX, maxX, 0, n, startDataPointIndices, endDataPointIndices);
-  }
-
-  void setXRange(double x1, double x2) {
-    minX = x1;
-    maxX = x2;
-    setXScale();
-  }
-
-  boolean isYZeroOnScale() {
-    return (minYOnScale < 0 && maxYOnScale > 0);
-  }
-
-  void setMinMaxY2D(List<JDXSpectrum> subspectra) {
-    minY2D = Double.MAX_VALUE;
-    maxY2D = -Double.MAX_VALUE;
-    for (int i = subspectra.size(); --i >= 0; ) {
-      double d = subspectra.get(i).getY2D();
-      if (d < minY2D)
-        minY2D = d;
-      else if (d > maxY2D)
-        maxY2D = d;
-    }
   }
 
 	void resetScaleFactors() {
@@ -193,7 +136,6 @@ class ViewData extends ScaleData {
 	}
 	
  void setScaleFactor(int i, double f) {
-	 System.out.println("Set Scale Factor " + i + " to " + f);
 		if (f == 0 || i >= nSpec)
 			return;
 		if (i < 0) {
@@ -217,16 +159,6 @@ class ViewData extends ScaleData {
 		else
 			spectrumScaleFactors[i] *= f;
   }
-
-	private void scale2D(double f) {
-		double dy = maxY - minY;
-		if (f == 1) {
-			maxY = initMaxY;
-			minY = initMinY;
-			return;
-		}
-		maxY = minY + dy / f;
-	}
 
 	double getSpectrumScaleFactor(int i) {
 		return (i >= 0 && i < nSpec ? spectrumScaleFactors[i] : 1);
@@ -254,6 +186,7 @@ class ViewData extends ScaleData {
 		setYScale((minY - yRef) / f + yRef, (maxY - yRef) / f + yRef, f == 1);
 		setScaleFactors(xPixels, yPixels);
 	}
+	
 	public double unScaleY(int iSpec, double y) {
 		return y * spectrumScaleFactors[iSpec];
 	}
@@ -263,30 +196,5 @@ class ViewData extends ScaleData {
 		  && spectrumYRefs[i] == spectrumYRefs[j] 
 		  && userYFactors[i] == userYFactors[j];
 	}
-
-	double specShift;
-	
-	public void addSpecShift(double dx) {
-		specShift += dx;
-		minX += dx;
-		maxX += dx;
-		minXOnScale += dx;
-		maxXOnScale += dx;
-		firstX += dx;
-	}
-
-	public Map<String, Object> getInfo(Map<String, Object> info) {
-		info.put("specShift", Double.valueOf(specShift));
-		info.put("minX", Double.valueOf(minX));
-		info.put("maxX", Double.valueOf(maxX));
-		info.put("minXOnScale", Double.valueOf(minXOnScale));
-		info.put("maxXOnScale", Double.valueOf(maxXOnScale));
-		info.put("minY", Double.valueOf(minY));
-		info.put("maxY", Double.valueOf(maxY));
-		info.put("minYOnScale", Double.valueOf(minYOnScale));
-		info.put("maxYOnScale", Double.valueOf(maxYOnScale));
-		return info;
-	}
-
 
 }

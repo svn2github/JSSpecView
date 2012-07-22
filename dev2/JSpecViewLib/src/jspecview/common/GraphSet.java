@@ -482,12 +482,11 @@ abstract class GraphSet {
 			graphs = spectra;
 		} else if (y1 == y2) {
 			// start up, forced subsets (too many spectra)
-			viewData = new ViewData(subspecs, y1, y2, 10, 10, getSpectrum()
-					.isContinuous());
+			viewData = new ViewData(subspecs, y1, y2, getSpectrum().isContinuous());
 			graphs = null;
 		}
 		if (graphs != null) {
-			viewData = new ViewData(graphs, y1, y2, startIndices, endIndices, 10, 10,
+			viewData = new ViewData(graphs, y1, y2, startIndices, endIndices,
 					getSpectrumAt(0).isContinuous());
 			if (x1 != x2)
 				viewData.setXRange(x1, x2);
@@ -924,8 +923,6 @@ abstract class GraphSet {
 	private int xPixelMovedTo2 = -1;
 	private double yValueMovedTo;
 	private double xValueMovedTo;
-	private DecimalFormat formatterX;
-	private DecimalFormat formatterY;
 	private boolean haveLeftRightArrows;
 	private int xPixelPlot1;
 	private int xPixelPlot0;
@@ -1240,12 +1237,12 @@ abstract class GraphSet {
 
 		ViewData view0 = viewData;
 		if (checkRange) {
-			if (!ScaleData.isWithinRange(initX, viewData)
-					&& !ScaleData.isWithinRange(finalX, viewData))
+			if (!viewData.isInRangeX(initX)
+					&& !viewData.isInRangeX(finalX))
 				return;
-			if (!ScaleData.isWithinRange(initX, viewData)) {
+			if (!viewData.isInRangeX(initX)) {
 				initX = viewData.minX;
-			} else if (!ScaleData.isWithinRange(finalX, viewData)) {
+			} else if (!viewData.isInRangeX(finalX)) {
 				finalX = viewData.maxX;
 			}
 		} else {
@@ -1865,20 +1862,20 @@ abstract class GraphSet {
 		setColor(g, ScriptToken.GRIDCOLOR);
 		double lastX;
 		if (Double.isNaN(viewData.firstX)) {
-			lastX = viewData.maxXOnScale + viewData.xStep / 2;
-			for (double val = viewData.minXOnScale; val < lastX; val += viewData.xStep) {
+			lastX = viewData.maxXOnScale + viewData.steps[0] / 2;
+			for (double val = viewData.minXOnScale; val < lastX; val += viewData.steps[0]) {
 				int x = toPixelX(val);
 				drawLine(g, x, yPixel0, x, yPixel1);
 			}
 		} else {
 			lastX = viewData.maxXOnScale * 1.0001;
-			for (double val = viewData.firstX; val <= lastX; val += viewData.xStep) {
+			for (double val = viewData.firstX; val <= lastX; val += viewData.steps[0]) {
 				int x = toPixelX(val);
 				drawLine(g, x, yPixel0, x, yPixel1);
 			}
 		}
 		for (double val = viewData.firstY; val < viewData.maxYOnScale
-				+ viewData.yStep / 2; val += viewData.yStep) {
+				+ viewData.steps[1] / 2; val += viewData.steps[1]) {
 			int y = toPixelY(val);
 			if (y == fixY(y))
 				drawLine(g, xPixel0, y, xPixel1, y);
@@ -1899,20 +1896,18 @@ abstract class GraphSet {
 	 */
 	private void drawXScale(Object g) {
 
-		String hashX = getNumberFormat(viewData.hashNums[0]);
-		DecimalFormat formatter = TextFormat.getDecimalFormat(hashX);
+		DecimalFormat formatter = viewData.formatters[0];
 		pd.setFont(g, width, FONT_PLAIN, 12, false);
 		int y1 = yPixel1;
 		int y2 = yPixel1 + 4;
 		int y3 = yPixel1 + 2;
 
 		int h = getFontHeight(g);
-		double maxWidth = Math.abs((toPixelX(viewData.xStep) - toPixelX(0)) * 0.95);
-		double lastX;
+		double maxWidth = Math.abs((toPixelX(viewData.steps[0]) - toPixelX(0)) * 0.95);
 		// if (Double.isNaN(viewData.firstX)) {
-		// lastX = viewData.maxXOnScale + viewData.xStep / 2;
+		// lastX = viewData.maxXOnScale + viewData.steps[0] / 2;
 		// for (double val = viewData.minXOnScale, vald = viewData.maxXOnScale; val
-		// < lastX; val += viewData.xStep, vald -= viewData.xStep) {
+		// < lastX; val += viewData.steps[0], vald -= viewData.steps[0]) {
 		// int x = (int) (xPixel0 + (((drawXAxisLeftToRight ? val : vald) -
 		// viewData.minXOnScale) / viewData.xFactorForScale));
 		// setColor(g, ScriptToken.SCALECOLOR);
@@ -1923,44 +1918,42 @@ abstract class GraphSet {
 		// drawString(g, s, x - w / 2, y2 + h);
 		// }
 		// } else {
-		lastX = viewData.maxXOnScale * 1.0001;
+
+		// we go overboard for ticks
+		double firstX = viewData.firstX - viewData.steps[0];
+		double lastX = (viewData.maxXOnScale + viewData.steps[0]) * 1.0001;
 		setColor(g, ScriptToken.SCALECOLOR);
 		for (int pass = 0; pass < 2; pass++) {
 			if (pass == 1)
-				fixScale(mapX);
-			double xLast = 1e10;
-			for (double val = viewData.firstX; val <= lastX; val += viewData.xStep) {
+				ScaleData.fixScale(mapX);
+			double prevX = 1e10;
+			for (double val = firstX; val <= lastX; val += viewData.steps[0]) {
 				int x = toPixelX(val);
-				if (x != fixX(x))
-					continue;
 				Double d = Double.valueOf(val);
 				String s;
 				switch (pass) {
 				case 0:
 					s = formatter.format(val);
 					mapX.put(d, s);
-					drawLine(g, x, y1, x, y2);
-					double dx = Math.abs(xLast - val);
-					int ntic = 0;
-					if (dx == 1) {
-						ntic = 10;
-					}else if (dx == 0.5) {
-						ntic = 5;
+					drawTick(g, x, y1, y2);
+					double dx = Math.abs(prevX - val);
+					int ntick = viewData.minorTickCounts[0];
+					if (ntick != 0) {
+						double step = dx / ntick;
+						for (int i = 1; i < ntick; i++)
+							drawTick(g, toPixelX(val - i * step), y1, y3);
 					}
-					for (int i = 1; i < ntic; i++) {
-						x = toPixelX(val - i/10.0); 
-						drawLine(g, x, y1, x, y3);
-					}
-
-					xLast = val;
+					prevX = val;
 					continue;
 				case 1:
+					if (x != fixX(x))
+						continue;
 					s = mapX.get(d);
 					int w = getStringWidth(g, s);
 					int n = (x + w / 2 == fixX(x + w / 2) ? 2 : 0);
 					if (n > 0)
 						drawString(g, s, x - w / n, y2 + h);
-					val += Math.floor(w / maxWidth) * viewData.xStep;
+					val += Math.floor(w / maxWidth) * viewData.steps[0];
 					break;
 				}
 			}
@@ -1968,22 +1961,9 @@ abstract class GraphSet {
 		mapX.clear();
 	}
 
-	private static void fixScale(Map<Double, String> map) {
-		if (map.isEmpty())
-			return;
-		while (true) {
-			for (Map.Entry<Double, String> entry : map.entrySet()) {
-				String s = entry.getValue();
-				if (s.indexOf("E") >= 0 || s.indexOf(".") < 0)
-					return;
-				if (!s.endsWith("0") && !s.endsWith("."))
-					return;
-			}
-			for (Map.Entry<Double, String> entry : map.entrySet()) {
-				String s = entry.getValue();
-				entry.setValue(s.substring(0, s.length() - 1));
-			}			
-		}
+	private void drawTick(Object g, int x, int y1, int y2) {
+		if (x == fixX(x))
+			drawLine(g, x, y1, x, y2);
 	}
 
 	/**
@@ -1998,17 +1978,16 @@ abstract class GraphSet {
 	 */
 	private void drawYScale(Object g) {
 
-		String hashY = getNumberFormat(viewData.hashNums[1]);
-		DecimalFormat formatter = TextFormat.getDecimalFormat(hashY);
+		DecimalFormat formatter = viewData.formatters[1];
 		pd.setFont(g, width, FONT_PLAIN, 12, false);
 		int h = getFontHeight(g);
-		double max = viewData.maxYOnScale + viewData.yStep / 2;
+		double max = viewData.maxYOnScale + viewData.steps[1] / 2;
 		int yLast = Integer.MIN_VALUE;
 		setColor(g, ScriptToken.SCALECOLOR);
 		for (int pass = 0; pass < 2; pass++) {
 			if (pass == 1)
-				fixScale(mapX);
-			for (double val = viewData.firstY; val < max; val += viewData.yStep) {
+				ScaleData.fixScale(mapX);
+			for (double val = viewData.firstY; val < max; val += viewData.steps[1]) {
 				Double d = Double.valueOf(val);
 				int x1 = xPixel0;
 				int y = toPixelY(val);
@@ -2315,19 +2294,16 @@ abstract class GraphSet {
 		pendingIntegral = (isFinal ? null : integral);
 	}
 
-	private void setFormatters() {
-		formatterX = TextFormat.getDecimalFormat(getNumberFormat(viewData.hashNums[0]));
-		formatterY = TextFormat.getDecimalFormat(getNumberFormat(viewData.hashNums[1]));
-	}
-
 	private void setToolTipForPixels(int xPixel, int yPixel) {
 		PlotWidget pw = getPinSelected(xPixel, yPixel);
+		NumberFormat formatterX = viewData.formatters[0];
+		NumberFormat formatterY = viewData.formatters[1];
 		if (pw != null) {
 			if (setStartupPinTip())
 				return;
 			String s;
 			if (pw == pin1Dx01 || pw == pin2Dx01) {
-				s = formatterX.format(Math.min(pin1Dx0.getXVal(), pin1Dx1.getXVal()))
+				s = formatterX .format(Math.min(pin1Dx0.getXVal(), pin1Dx1.getXVal()))
 						+ " - "
 						+ formatterX.format(Math.max(pin1Dx0.getXVal(), pin1Dx1.getXVal()));
 			} else if (pw == pin1Dy01) {
@@ -2401,11 +2377,11 @@ abstract class GraphSet {
 	}
 
 	private String setCoordStr(double xPt, double yPt) {
-		String xx = formatterX.format(xPt);
+		String xx = viewData.formatters[0].format(xPt);
 		pd.coordStr = "("
 				+ xx
 				+ (haveSingleYScale || iSpectrumSelected >= 0 ? ", "
-						+ formatterY.format(yPt) : "") + ")";
+						+ viewData.formatters[1].format(yPt) : "") + ")";
 		return xx;
 	}
 
@@ -2495,16 +2471,6 @@ abstract class GraphSet {
 					false))
 				return graphSets.get(i);
 		return null;
-	}
-
-	private static String getNumberFormat(int n) {
-		String hash1 = "0.00000000";
-		String hash = "#";
-		if (n <= 0)
-			hash = hash1.substring(0, Math.min(hash1.length(), Math.abs(n) + 3));
-		else if (n > 3)
-			hash = "";
-		return hash;
 	}
 
 	private static boolean isGoodEvent(PlotWidget zOrP, PlotWidget p, boolean asX) {
@@ -2685,8 +2651,8 @@ abstract class GraphSet {
 			if (Float.isNaN(x1) || Float.isNaN(x2))
 				return;
 			pd.addHighlight(this, x1, x2, spec, 200, 200, 200, 200);
-			if (ScaleData.isWithinRange(x1, viewData)
-					|| ScaleData.isWithinRange(x2, viewData) || x1 < viewData.minX
+			if (viewData.isInRangeX(x1)
+					|| viewData.isInRangeX(x2) || x1 < viewData.minX
 					&& viewData.maxX < x2) {
 				// pd.repaint();
 			} else {
@@ -2962,7 +2928,6 @@ abstract class GraphSet {
 		this.top = top;
 		this.bottom = bottom;
 		// yValueMovedTo = Double.NaN;
-		setFormatters();
 		is1D2DSplit = (!spec0.is1D() && pd.getBoolean(ScriptToken.DISPLAY2D) && (imageView != null || get2DImage()));
 		haveSelectedSpectrum = false;
 		selectedSpectrumIntegrals = null;
