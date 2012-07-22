@@ -347,6 +347,8 @@ public class ScaleData {
 		info.put("maxY", Double.valueOf(maxY));
 		info.put("minYOnScale", Double.valueOf(minYOnScale));
 		info.put("maxYOnScale", Double.valueOf(maxYOnScale));
+		info.put("minorTickCountX", Integer.valueOf(minorTickCounts[0]));
+		info.put("xStep", Double.valueOf(steps[0]));
 		return info;
 	}
 
