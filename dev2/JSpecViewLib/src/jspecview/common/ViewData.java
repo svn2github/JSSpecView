@@ -31,11 +31,10 @@ class ViewData extends ScaleData {
 	 * @param endList
 	 *          the end indices
 	 * @param isContinuous 
-	 * @param isInverted 
 	 * @returns an instance of <code>MultiScaleData</code>
 	 */
 	ViewData(List<JDXSpectrum> spectra, double yPt1, double yPt2,
-			int[] startList, int[] endList, boolean isContinuous, boolean isInverted) {
+			int[] startList, int[] endList, boolean isContinuous) {
 		super();
 		nSpec = spectra.size();
 		startDataPointIndices = startList;
@@ -43,11 +42,11 @@ class ViewData extends ScaleData {
 		numOfPointsList = new int[nSpec];
 		for (int j = 0; j < nSpec; j++)
 			numOfPointsList[j] = endList[j] + 1 - startList[j];
-		init(spectra, startList, endList, yPt1, yPt2, isContinuous, isInverted);
+		init(spectra, startList, endList, yPt1, yPt2, isContinuous);
 	}
   
 	ViewData(List<JDXSpectrum> spectra, double yPt1, double yPt2, 
-			boolean isContinuous, boolean isInverted) {
+			boolean isContinuous) {
 		// forced subsets
 		super();
 		nSpec = spectra.size();
@@ -55,7 +54,11 @@ class ViewData extends ScaleData {
 		startDataPointIndices = new int[] { 0 };
 		endDataPointIndices = new int[] { n - 1 };
 		numOfPointsList = new int[] { n };
-		init(spectra, null, null, yPt1, yPt2, isContinuous, isInverted);
+		init(spectra, null, null, yPt1, yPt2, isContinuous);
+	}
+
+	void newSpectrum(List<JDXSpectrum> spectra) {
+		setMinMax(spectra, startDataPointIndices, endDataPointIndices);
 	}
 
 	private void setMinMax(List<JDXSpectrum> spectra, int[] startList,
@@ -69,12 +72,8 @@ class ViewData extends ScaleData {
 			spectrumYRefs[i] = spectra.get(i).getYRef(); // 0 or 100
 	}
 	
-	void setSpectrumYRef(int i, double yref) {
-		spectrumYRefs[i] = yref;
-	}
-
   private void init(List<JDXSpectrum> spectra, int[] startList, int[] endList, 
-  		double yPt1, double yPt2, boolean isContinuous, boolean isInverted) {
+  		double yPt1, double yPt2, boolean isContinuous) {
   	
 		spectrumScaleFactors = new double[nSpec];
 		userYFactors = new double[nSpec];
@@ -92,6 +91,7 @@ class ViewData extends ScaleData {
         maxY = t;
       }
     }
+    boolean isInverted = spectra.get(0).isInverted();
     setScale(isContinuous, isInverted);
   }
 

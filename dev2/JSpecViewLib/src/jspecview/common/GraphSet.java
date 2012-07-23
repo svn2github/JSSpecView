@@ -480,12 +480,12 @@ abstract class GraphSet {
 			graphs = spectra;
 		} else if (y1 == y2) {
 			// start up, forced subsets (too many spectra)
-			viewData = new ViewData(subspecs, y1, y2, getSpectrum().isContinuous(), getSpectrum().isInverted());
+			viewData = new ViewData(subspecs, y1, y2, getSpectrum().isContinuous());
 			graphs = null;
 		}
 		if (graphs != null) {
 			viewData = new ViewData(graphs, y1, y2, startIndices, endIndices,
-					getSpectrumAt(0).isContinuous(), getSpectrumAt(0).isInverted());
+					getSpectrumAt(0).isContinuous());
 			if (x1 != x2)
 				viewData.setXRange(x1, x2);
 		}
@@ -1326,6 +1326,7 @@ abstract class GraphSet {
 
 	/**
 	 * Clears all views in the zoom list
+	 * @param andResetCompletely 
 	 */
 	private void clearViews() {
 		setZoomTo(0);
@@ -3440,12 +3441,12 @@ abstract class GraphSet {
 
 	void setSpectrum(JDXSpectrum spec) {
 		// T/A conversion for IR
-		clearViews();
 		int pt = getFixedSelectedSpectrumIndex();
 		spectra.remove(pt);
 		spectra.add(pt, spec);
-		viewData.setSpectrumYRef(pt, spec.getYRef());
 		pendingMeasurement = null;
+		clearViews();
+		viewData.newSpectrum(spectra);
 	}
 
 	void setZoom(double x1, double y1, double x2, double y2) {
