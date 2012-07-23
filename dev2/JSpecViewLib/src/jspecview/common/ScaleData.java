@@ -161,6 +161,8 @@ public class ScaleData {
 		minX = Coordinate.getMinX(coords, start, end);
 		maxX = Coordinate.getMaxX(coords, start, end);
 		minY = Coordinate.getMinY(coords, start, end);
+		if (minY > 0 && !isContinuous)
+			minY = 0; // assumed to be MS data -- we want 0 to be at the bottom
 		maxY = Coordinate.getMaxY(coords, start, end);
 		setScale(isContinuous, isInverted);
 	}
@@ -194,23 +196,32 @@ public class ScaleData {
     return (minYOnScale < 0 && maxYOnScale > 0);
   }
 
-  void setYScale(double minY, double maxY, boolean setScaleMinMax, boolean isInverted) {
-    if (minY == 0 && maxY == 0)
-      maxY = 1;
-    double yStep = setScaleParams(minY, maxY, 1);
-    double dy = (isInverted ? yStep / 2 : yStep / 4);
-    double dy2 = (isInverted ? yStep / 4 : yStep / 2);
-    minYOnScale = (setScaleMinMax ? dy * Math.floor(minY / dy) : minY);
-    maxYOnScale = (setScaleMinMax ? dy2 * Math.ceil(maxY * 1.05 / dy2) : maxY);
-    firstY = Math.floor(minY / dy) * dy;
-    if (Math.abs((minY - firstY) / dy) > 0.0001)
-      firstY += dy;
-    if (setScaleMinMax) {
-    	initMinYOnScale = minYOnScale;
-    	initMaxYOnScale = maxYOnScale;
-    	initMinY = minY;
-    	initMaxY = maxY;
-    }
+	void setYScale(double minY, double maxY, boolean setScaleMinMax,
+			boolean isInverted) {
+		if (minY == 0 && maxY == 0)
+			maxY = 1;
+		double yStep = setScaleParams(minY, maxY, 1);
+		double dy = (isInverted ? yStep / 2 : yStep / 4);
+		double dy2 = (isInverted ? yStep / 4 : yStep / 2);
+		minYOnScale = (minY == 0 ? 0 : setScaleMinMax ? dy * Math.floor(minY / dy)
+				: minY);
+		maxYOnScale = (setScaleMinMax ? dy2 * Math.ceil(maxY * 1.05 / dy2) : maxY);
+		firstY = (minY == 0 ? 0 : Math.floor(minY / dy) * dy);
+		if (minYOnScale < 0 && maxYOnScale > 0) {
+			// set a Y value to be 0;
+			firstY = 0;
+			while (firstY - yStep > minYOnScale)
+				firstY -= yStep;
+		} else if (minYOnScale != 0 && Math.abs((minY - firstY) / dy) > 0.0001) {
+			firstY += dy;
+		}
+
+		if (setScaleMinMax) {
+			initMinYOnScale = minYOnScale;
+			initMaxYOnScale = maxYOnScale;
+			initMinY = minY;
+			initMaxY = maxY;
+		}
 	}
 
 	protected void scale2D(double f) {

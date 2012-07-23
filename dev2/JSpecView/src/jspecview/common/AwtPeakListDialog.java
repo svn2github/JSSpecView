@@ -66,9 +66,10 @@ class AwtPeakListDialog extends AwtAnnotationDialog {
 
 	private void setThreshold(double y) {
 		if (Double.isNaN(y)) {
+			double f = (jsvp.getSpectrum().isInverted() ? 0.8  : 0.2);
 			Coordinate c = jsvp.getPanelData().getClickedCoordinate();
-			y = (c == null ? (jsvp.getPanelData().getView().maxYOnScale + jsvp
-					.getPanelData().getView().maxYOnScale) / 2 : c.getYVal());
+			y = (c == null ? (jsvp.getPanelData().getView().minYOnScale * f 
+					+ jsvp.getPanelData().getView().maxYOnScale) * (1 -f) : c.getYVal());
 		}
 		String sy = TextFormat.getDecimalFormat(y < 1000 ? "#0.00" : "0.00E0")
 				.format(y);

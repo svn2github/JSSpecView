@@ -29,6 +29,8 @@ changes and analyses can be made without altering the saved view
 
 ___version=2.0.2
 
+peak list not coming up with peaks initially
+
 integration LIST command option brings up dialog
 versioning fixed -- all now in TODO.txt
 T/A switching does not update min/max Y
