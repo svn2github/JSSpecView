@@ -629,7 +629,7 @@ public class MainActivity extends Activity{
      */
 	private List<JDXSpectrum> readSpectrum(InputStream stream) throws IOException, JSpecViewException {
 		boolean loadImaginary = false;
-		boolean obscureName = false;
+		boolean obscureTitle = false;
 		JDXSource source = FileReader.createJDXSource(stream, obscureTitle, loadImaginary);             	
     	JDXSource jdxSource = (JDXSource)source;
     	List<JDXSpectrum> jdxSpectra = jdxSource.getSpectra();        	
