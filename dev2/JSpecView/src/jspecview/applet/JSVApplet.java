@@ -67,8 +67,8 @@ import jspecview.util.Logger;
  * @author Prof Robert J. Lancashire
  *
  * http://blog.gorges.us/2009/03/how-to-enable-keywords-in-eclipse-and-subversion-svn/
- * $LastChangedRevision$
- * $LastChangedDate$
+ * $LastChangedRevision: 1097 $
+ * $LastChangedDate: 2012-07-23 11:10:30 -0500 (Mon, 23 Jul 2012) $
  */
 
 public class JSVApplet extends JApplet implements JSVAppletInterface {

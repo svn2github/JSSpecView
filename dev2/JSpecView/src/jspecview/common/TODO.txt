@@ -3,7 +3,7 @@ Feel free to add to this file any time! Don't worry about sync problems.
 Put new items at top, please.
 
 ___date=$Date$
-___svnRev=$LastChangedRevision:: 1085 $  
+___svnRev=$LastChangedRevision::      $  
 
 ====TODO=========
 
@@ -29,7 +29,8 @@ changes and analyses can be made without altering the saved view
 
 ___version=2.0.2
 
-Versioning fixed -- all now in TODO.txt
+integration LIST command option brings up dialog
+versioning fixed -- all now in TODO.txt
 T/A switching does not update min/max Y
 print job name, optional title change, mandatory file name display.
 on-screen title display fix for views.

@@ -22,7 +22,7 @@ import jspecview.util.TextFormat;
 public class IntegralData extends MeasurementData {
 
 	public enum IntMode {
-	  OFF, ON, TOGGLE, AUTO, MARK, UPDATE;
+	  OFF, ON, TOGGLE, AUTO, LIST, MARK, UPDATE;
 	  static IntMode getMode(String value) {
 	    for (IntMode mode: values())
 	      if (value.startsWith(mode.name()))

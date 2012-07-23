@@ -3412,6 +3412,9 @@ abstract class GraphSet {
 			if (ad != null)
 				((IntegralData) ad.getData()).autoIntegrate();
 			break;
+		case LIST:
+			pd.owner.showDialog(AType.Integration);
+			break;
 		case MARK:
 			if (ad == null) {
 				checkIntegral(parameters, "ON");
