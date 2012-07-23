@@ -6,8 +6,9 @@ public interface JSVPanel extends JSVContainer {
 
 	public void doRepaint();
   
-  void drawCoordinates(Object g, int height, int width);
-  void drawTitle(Object g, int height, int width, String title);
+  void drawCoordinates(Object g);
+  void drawFilePath(Object g, int pageHeight, String filePath);
+  void drawTitle(Object g, int pageHeight, int pageWidth, String title);
   Object getColor(ScriptToken st);
   Object getColor(int r, int g, int b, int a);
   void getFocusNow(boolean asThread);
@@ -19,9 +20,8 @@ public interface JSVPanel extends JSVContainer {
   Object getPopup();
   JDXSpectrum getSpectrum();
   JDXSpectrum getSpectrumAt(int i);
-  String getViewTitle();
 
-	boolean hasFocus();
+  boolean hasFocus();
 
 	void setColor(ScriptToken st, Object color);
   void setColorOrFont(Parameters ds, ScriptToken st);
@@ -29,13 +29,10 @@ public interface JSVPanel extends JSVContainer {
   void setPlotColors(Object plotColors);
   void setSpectrum(JDXSpectrum spec);
   void setToolTipText(String s);
-	void setViewTitle(String filePath);
   void setupPlatform();
 	void showHeader(Object jsvApplet);
 	AnnotationDialog showDialog(AType type);
 	void showMessage(String msg, String title);
-
-
 
 
 }

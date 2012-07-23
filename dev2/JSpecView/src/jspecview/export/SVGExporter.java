@@ -87,6 +87,7 @@ class SVGExporter extends FormExporter {
    * @param yUnits the units of the y axis
    * @param isContinuous true if the graph is continuous, otherwise false
    * @param increasing true is the graph is increasing, otherwise false
+   * @param isInverted 
    * @param plotAreaColor the color of the plot area
    * @param backgroundColor the color of the background
    * @param plotColor the color of the plot

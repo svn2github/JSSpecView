@@ -68,7 +68,7 @@ public class AwtOverlayLegendDialog extends JDialog implements JSVDialog {
 	 *          the <code>JSVPanel</code>
 	 */
 	public AwtOverlayLegendDialog(Frame frame, JSVPanel jsvp) {
-		super(frame, jsvp.getViewTitle(), false);
+		super(frame, jsvp.getPanelData().getViewTitle(), false);
 		this.jsvp = jsvp;
 		init();
 		this.pack();

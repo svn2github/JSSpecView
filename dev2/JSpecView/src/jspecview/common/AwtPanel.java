@@ -75,6 +75,7 @@ import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
 import jspecview.export.Exporter;
 import jspecview.util.Logger;
+import jspecview.util.TextFormat;
 
 /**
  * JSVPanel class represents a View combining one or more GraphSets, each with one or more JDXSpectra.
@@ -150,7 +151,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   }
   
   public void setTitle(String title) {
-    pd.setTitle(title);
+    pd.title = title;
     setName(title);
   }
 
@@ -174,7 +175,6 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 
   private Color highlightColor = new Color(255, 0, 0, 200);
   private Color zoomBoxColor = new Color(100, 100, 50, 130);
-	private String viewTitle;
 
 	private static int MAC_COMMAND = InputEvent.BUTTON1_MASK + InputEvent.BUTTON3_MASK;
 
@@ -384,7 +384,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     if (pd == null || pd.graphSets == null || pd.isPrinting)
       return;
     super.paintComponent(g);
-    pd.drawGraph(g, getHeight(), getWidth());
+    pd.drawGraph(g, getHeight(), getWidth(), false);
     si.repaintCompleted();
   }
 
@@ -401,35 +401,6 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   }
 
   /**
-   * Draws Title
-   * 
-   * @param g
-   *        the <code>Graphics</code> object
-   * @param height
-   *        the height to be drawn in pixels
-   * @param width
-   *        the width to be drawn in pixels
-   */
-  public void drawTitle(Object og, int height, int width, String title) {
-  	title = title.replace('\n', ' ');
-    Graphics g = (Graphics) og;
-    pd.setFont(g, width, pd.isPrinting || pd.getBoolean(ScriptToken.TITLEBOLDON) ? Font.BOLD
-        : Font.PLAIN, 14, true);
-    FontMetrics fm = g.getFontMetrics();
-    int nPixels = fm.stringWidth(title);
-    if (nPixels > width) {
-    	int size = (int) (14.0 * width / nPixels);
-    	if (size < 10)
-    		size = 10;
-      pd.setFont(g, width, pd.isPrinting || pd.getBoolean(ScriptToken.TITLEBOLDON) ? Font.BOLD
-          : Font.PLAIN, size, true);
-      fm = g.getFontMetrics();
-    }
-    g.setColor(titleColor);
-    g.drawString(title, 5, (height - fm.getHeight() / 2));
-  }
-
-  /**
    * Draws the Coordinates
    * 
    * @param g
@@ -439,15 +410,58 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
    * @param width
    *        the width to be drawn in pixels
    */
-  public void drawCoordinates(Object og, int height, int width) {
+  public void drawCoordinates(Object og) {
   	if (pd.coordStr == null)
   		return;
     Graphics g = (Graphics) og;
     g.setColor(coordinatesColor);
-    pd.setFont(g, width, Font.PLAIN, 12, true);
-    g.drawString(pd.coordStr, (int) ((pd.plotAreaWidth + pd.leftPlotAreaPos) * 0.85),
-        (pd.topPlotAreaPos - 10));
+    pd.setFont(g, getWidth(), Font.PLAIN, 12, true);
+    g.drawString(pd.coordStr, (int) ((pd.plotAreaWidth + pd.left) * 0.85),
+        (pd.top - 10));
   }
+
+  /**
+   * draws the file path only for printing
+   */
+  
+	public void drawFilePath(Object og, int pageHeight, String filePath) {
+    Graphics g = (Graphics) og;
+    g.setColor(Color.BLACK);
+    pd.setFont(g, getWidth(), Font.PLAIN, 9, true);
+    FontMetrics fm = g.getFontMetrics();
+    g.drawString(filePath, pd.left, pageHeight - fm.getHeight());
+	}
+
+  /**
+   * Draws Title
+   * 
+   * @param g
+   *        the <code>Graphics</code> object
+   * @param height
+   *        the height to be drawn in pixels
+   * @param pageWidth
+   *        the width to be drawn in pixels
+   */
+  public void drawTitle(Object og, int pageHeight, int pageWidth, String title) {
+  	title = title.replace('\n', ' ');
+    Graphics g = (Graphics) og;
+    pd.setFont(g, pageWidth, pd.isPrinting || pd.getBoolean(ScriptToken.TITLEBOLDON) ? Font.BOLD
+        : Font.PLAIN, 14, true);
+    FontMetrics fm = g.getFontMetrics();
+    int nPixels = fm.stringWidth(title);
+    if (nPixels > pageWidth) {
+    	int size = (int) (14.0 * pageWidth / nPixels);
+    	if (size < 10)
+    		size = 10;
+      pd.setFont(g, pageWidth, pd.isPrinting || pd.getBoolean(ScriptToken.TITLEBOLDON) ? Font.BOLD
+          : Font.PLAIN, size, true);
+      fm = g.getFontMetrics();
+    }
+    g.setColor(titleColor);
+    g.drawString(title, (pd.isPrinting ? pd.left : 5), pageHeight - fm.getHeight() * (pd.isPrinting ? 2 : 1));
+  }
+
+
 
   /*----------------- METHODS IN INTERFACE Printable ---------------------- */
 
@@ -469,18 +483,19 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
       pd.isPrinting = true;
 
       double height, width;
-
+      boolean addFilePath = false;
       if (pd.printGraphPosition.equals("default")) {
         g2D.translate(pf.getImageableX(), pf.getImageableY());
         if (pf.getOrientation() == PageFormat.PORTRAIT) {
-          height = pd.defaultHeight;
-          width = pd.defaultWidth;
+          height = PanelData.defaultPrintHeight;
+          width = PanelData.defaultPrintWidth;
         } else {
-          height = pd.defaultWidth;
-          width = pd.defaultHeight;
+          height = PanelData.defaultPrintWidth;
+          width = PanelData.defaultPrintHeight;
         }
       } else if (pd.printGraphPosition.equals("fit to page")) {
         g2D.translate(pf.getImageableX(), pf.getImageableY());
+        addFilePath = true;
         height = pf.getImageableHeight();
         width = pf.getImageableWidth();
       } else { // center
@@ -490,20 +505,20 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
         int x, y;
 
         if (pf.getOrientation() == PageFormat.PORTRAIT) {
-          height = pd.defaultHeight;
-          width = pd.defaultWidth;
+          height = PanelData.defaultPrintHeight;
+          width = PanelData.defaultPrintWidth;
           x = (int) (paperWidth - width) / 2;
           y = (int) (paperHeight - height) / 2;
         } else {
-          height = pd.defaultWidth;
-          width = pd.defaultHeight;
-          y = (int) (paperWidth - pd.defaultWidth) / 2;
-          x = (int) (paperHeight - pd.defaultHeight) / 2;
+          height = PanelData.defaultPrintWidth;
+          width = PanelData.defaultPrintHeight;
+          y = (int) (paperWidth - PanelData.defaultPrintWidth) / 2;
+          x = (int) (paperHeight - PanelData.defaultPrintHeight) / 2;
         }
         g2D.translate(x, y);
       }
 
-      pd.drawGraph(g2D, (int) height, (int) width);
+      pd.drawGraph(g2D, (int) height, (int) width, addFilePath);
 
       pd.isPrinting = false;
       return Printable.PAGE_EXISTS;
@@ -555,25 +570,28 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 
     /* Create a print job */
     PrinterJob pj = PrinterJob.getPrinterJob();
-    //    PageFormat pf = pj.defaultPage();
-    //    pf.setOrientation(PageFormat.LANDSCAPE);
-    //    pf = pj.pageDialog(pf);
-    //
-    //    PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
-    //
-    //    if(pf.getOrientation() == pf.LANDSCAPE){
-    //      aset.add(OrientationRequested.LANDSCAPE);
-    //    }else{
-    //      aset.add(OrientationRequested.PORTRAIT);
-    //    }
-
+    String printJobTitle = pd.getPrintJobTitle();
+    if (pl.showTitle) {
+      printJobTitle = getInput("Title?", "Print Job Title", printJobTitle);
+      if (printJobTitle == null)
+      	return;
+    }
+    pd.printJobTitle = printJobTitle;
+    if (printJobTitle.length() > 30)
+    	printJobTitle = printJobTitle.substring(0, 30);
+    pj.setJobName(printJobTitle);
     pj.setPrintable(this);
 
     if (pj.printDialog()) {
       try {
         pj.print(aset);
       } catch (PrinterException ex) {
-        ex.printStackTrace();
+      	String s = ex.getMessage();
+      	if (s == null)
+      		return;
+      	s = TextFormat.simpleReplace(s, "not accepting job.", "not accepting jobs.");
+      	// not my fault -- Windows grammar error!
+        showMessage(s, "Printer Error");
       }
     }
 
@@ -788,14 +806,6 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   public String toString() {
     return getSpectrumAt(0).toString();
   }
-
-	public void setViewTitle(String title) {
-		viewTitle = title;
-	}
-	
-	public String getViewTitle() {
-		return (viewTitle == null ? getTitle() : viewTitle);
-	}
 
   public String getInput(String message, String title, String sval) {
     String ret = (String) JOptionPane.showInputDialog(this, message, title,

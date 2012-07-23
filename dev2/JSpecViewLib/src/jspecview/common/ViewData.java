@@ -31,6 +31,7 @@ class ViewData extends ScaleData {
 	 * @param endList
 	 *          the end indices
 	 * @param isContinuous 
+	 * @param isInverted 
 	 * @returns an instance of <code>MultiScaleData</code>
 	 */
 	ViewData(List<JDXSpectrum> spectra, double yPt1, double yPt2,

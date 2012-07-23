@@ -103,11 +103,14 @@ public class PanelData {
 
 	// plot parameters
 
-	int defaultHeight = 450;
-	int defaultWidth = 280;
-	int leftPlotAreaPos = 80, topPlotAreaPos = 30;
+	static final int defaultPrintHeight = 450, defaultPrintWidth = 280;
+	static final int topMargin = 30, bottomMargin = 50, leftMargin = 80, rightMargin = 50;
+	
 	int plotAreaWidth, plotAreaHeight;
-	int left = leftPlotAreaPos, right = 50, top = topPlotAreaPos, bottom = 50;
+	int top = topMargin;
+	int bottom = bottomMargin;
+	int left = leftMargin;
+	int right = rightMargin;
 
 	// current values
 
@@ -119,13 +122,19 @@ public class PanelData {
 	int nSpectra;
 	int thisWidth;
 	int thisPlotHeight;
+	private String commonFilePath;
 
 	String coordStr = "";
 	String startupPinTip = "Click to set.";
 	String title;
 
-	void setTitle(String title) {
-		this.title = title;
+	private String viewTitle;
+	public void setViewTitle(String title) {
+		viewTitle = title;
+	}
+	
+	public String getViewTitle() {
+		return (viewTitle == null ? getTitle() : viewTitle);
 	}
 
 	public Map<String, Object> getInfo(boolean selectedOnly, String key) {
@@ -204,6 +213,8 @@ public class PanelData {
 	String printGraphPosition = "default";
 	boolean titleDrawn;
 	boolean display1D;
+	String printJobTitle;
+	boolean addFilePath;
 
 	public boolean getDisplay1D() {
 		return display1D;
@@ -222,7 +233,13 @@ public class PanelData {
 		nSpectra = spectra.size();
 		graphSets = GraphSet.createGraphSets(owner, spectra, startIndex, endIndex);
 		currentGraphSet = graphSets.get(0);
-		setTitle(getSpectrum().getTitleLabel());
+		title = getSpectrum().getTitleLabel();
+		commonFilePath = getSpectrum().getFilePath();
+		for (int i = 0; i < nSpectra; i++)
+			if (!commonFilePath.equalsIgnoreCase(spectra.get(i).getFilePath())) {
+				commonFilePath = null;
+				break;
+			}
 	}
 
 	public PeakInfo findMatchingPeakInfo(PeakInfo pi) {
@@ -291,7 +308,7 @@ public class PanelData {
 	public void addAnnotation(List<String> tokens) {
 		String title = currentGraphSet.addAnnotation(tokens, getTitle());
 		if (title != null)
-			setTitle(title);
+			this.title = title;
 	}
 
 	public void addPeakHighlight(PeakInfo peakInfo) {
@@ -343,11 +360,19 @@ public class PanelData {
 	 *          the height to be drawn in pixels
 	 * @param width
 	 *          the width to be drawn in pixels
+	 * @param addFilePath 
 	 */
-	synchronized void drawGraph(Object g, int height, int width) {
+	synchronized void drawGraph(Object g, int height, int width, boolean addFilePath) {
 		boolean withCoords;
+		this.addFilePath = addFilePath;
 		display1D = getBoolean(ScriptToken.DISPLAY1D);
+		top = topMargin;
+		bottom = bottomMargin;
 		if (isPrinting) {
+			if (addFilePath) {
+				top *= 2;  // for three-hole punching
+				bottom *= 2;
+			}
 			withCoords = false;
 		} else {
 			withCoords = getBoolean(ScriptToken.COORDINATESON);
@@ -366,12 +391,22 @@ public class PanelData {
 		thisPlotHeight = plotAreaHeight;
 		titleDrawn = false;
 		for (int i = graphSets.size(); --i >= 0;)
-			graphSets.get(i).drawGraph(g, height, width, left, right, top, bottom,
+			graphSets.get(i).drawGraphSet(g, height, width, left, right, top, bottom,
 					isResized);
 		if (titleOn && !titleDrawn)
-			owner.drawTitle(g, height, width, getSpectrum().getPeakTitle());
+			owner.drawTitle(g, height, width, getDrawTitle());
 		if (withCoords)
-			owner.drawCoordinates(g, height, width);
+			owner.drawCoordinates(g);
+		if (addFilePath) {
+			String s = (commonFilePath != null ? commonFilePath 
+					: graphSets.size() == 1 && currentGraphSet.getPrintJobTitle() != null 
+					? getSpectrum().getFilePath() : null);
+			if (s != null) {
+				if (s.indexOf("?") > 0)
+					s = s.substring(s.indexOf("?") + 1);
+  			owner.drawFilePath(g, height, s);
+			}
+		}
 	}
 
 	/**
@@ -880,4 +915,39 @@ public class PanelData {
 		}
 	}
 
+	String getDrawTitle() {
+		String title = null;
+		if (isPrinting)
+			title = printJobTitle;
+		else if (getNumberOfSpectraTotal() == 1) {
+    	title = getSpectrum().getPeakTitle();
+	  } else if (viewTitle != null) {
+	  	if (currentGraphSet.getPrintJobTitle() != null) // check if common title
+	  		title = getSpectrum().getPeakTitle();
+      if (title == null)
+      	title = viewTitle; // "View 1"
+    } else {
+      title = owner.getTitle().trim();
+    }
+    if (title.indexOf("\n") >= 0)
+    	title = title.substring(0, title.indexOf("\n")).trim();
+    return title;
+	}
+
+	public String getPrintJobTitle() {
+		String title = null;
+    if (getNumberOfSpectraTotal() == 1) {
+    	title = getSpectrum().getTitle();
+	  } else if (viewTitle != null) {
+	  	if (graphSets.size() == 1)
+      	title = currentGraphSet.getPrintJobTitle();
+      if (title == null)
+      	title = viewTitle; // "View 1"
+    } else {
+      title = owner.getTitle().trim();
+    }
+    if (title.indexOf("\n") >= 0)
+    	title = title.substring(0, title.indexOf("\n")).trim();
+    return title;
+	}
 }

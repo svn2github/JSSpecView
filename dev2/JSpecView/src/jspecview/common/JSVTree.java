@@ -349,7 +349,7 @@ public class JSVTree extends JTree {
     JSVPanel jsvp = si.getNewJSVPanel(specs);
     jsvp.setTitle(source.getTitle());
     if (jsvp.getTitle().equals("")) {
-      jsvp.setViewTitle(source.getFilePath());
+      jsvp.getPanelData().setViewTitle(source.getFilePath());
     	jsvp.setTitle(name);
     }
     si.setPropertiesFromPreferences(jsvp, true);

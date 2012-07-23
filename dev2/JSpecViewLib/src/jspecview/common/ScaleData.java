@@ -154,6 +154,7 @@ public class ScaleData {
 	 * @param end
 	 *          the end index
 	 * @param isContinuous 
+	 * @param isInverted 
 	 * @returns an instance of <code>ScaleData</code>
 	 */
 	public ScaleData(Coordinate[] coords, int start, int end, boolean isContinuous, boolean isInverted) {
