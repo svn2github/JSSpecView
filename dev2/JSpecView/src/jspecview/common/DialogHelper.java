@@ -275,7 +275,7 @@ public class DialogHelper {
 			    : new FileOutputStream(pdfFileName));
 			String printJobTitle = jsvp.getPanelData().getPrintJobTitle();
 			if (pl.showTitle) {
-				printJobTitle = jsvp.getInput("Title?", "Print Job Title", printJobTitle);
+				printJobTitle = jsvp.getInput("Title?", "Title for Printing", printJobTitle);
 				if (printJobTitle == null)
 					return null;
 			}
