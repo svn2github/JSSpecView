@@ -107,6 +107,7 @@
 	<target name="make-signed-applet-jar" depends="make-applet-jar" description="Make signed JSpecView applet jar">
     <antcall target="revision"></antcall>
         <mkdir dir="${build.applet.dir}"/>
+	    <unjar dest="${bin.dir}" src="${itext.jar}"/>
         <jar destfile="${build.applet.dir}/temp.jar">
             <manifest>
               <attribute name="Class-Path" value=". plugin.jar"/>
