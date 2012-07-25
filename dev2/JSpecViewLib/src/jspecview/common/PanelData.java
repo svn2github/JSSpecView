@@ -391,18 +391,16 @@ public class PanelData {
 			graphSets.get(i).drawGraphSet(g, width, height, left, right, top, bottom,
 					isResized);
 		if (titleOn && !titleDrawn)
-			owner.drawTitle(g, height, width, getDrawTitle());
+			owner.drawTitle(g, height, width, getDrawTitle(isPrinting));
 		if (withCoords)
 			owner.drawCoordinates(g);
 		if (addFilePath) {
 			String s = (commonFilePath != null ? commonFilePath
-					: graphSets.size() == 1 && currentGraphSet.getPrintJobTitle() != null ? getSpectrum()
+					: graphSets.size() == 1 && currentGraphSet.getTitle(true) != null ? getSpectrum()
 							.getFilePath()
 							: null);
 			if (s != null) {
-				if (s.indexOf("?") > 0)
-					s = s.substring(s.indexOf("?") + 1);
-				owner.printFilePath(g, height, s);
+				owner.printFilePath(g, left, height, s);
 			}
 		}
 		if (isPrinting)
@@ -510,7 +508,7 @@ public class PanelData {
 		currentGraphSet.setSpectrum(spec);
 	}
 
-	public boolean isOverlaid() {
+	public boolean isShowAllStacked() {
 		return currentGraphSet.showAllStacked;
 	}
 
@@ -916,14 +914,14 @@ public class PanelData {
 		}
 	}
 
-	String getDrawTitle() {
+	String getDrawTitle(boolean isPrinting) {
 		String title = null;
 		if (isPrinting)
 			title = printJobTitle;
 		else if (getNumberOfSpectraTotal() == 1) {
     	title = getSpectrum().getPeakTitle();
 	  } else if (viewTitle != null) {
-	  	if (currentGraphSet.getPrintJobTitle() != null) // check if common title
+	  	if (currentGraphSet.getTitle(false) != null) // check if common title
 	  		title = getSpectrum().getPeakTitle();
       if (title == null)
       	title = viewTitle; // "View 1"
@@ -935,13 +933,13 @@ public class PanelData {
     return title;
 	}
 
-	public String getPrintJobTitle() {
+	public String getPrintJobTitle(boolean isPrinting) {
 		String title = null;
     if (getNumberOfSpectraTotal() == 1) {
     	title = getSpectrum().getTitle();
 	  } else if (viewTitle != null) {
 	  	if (graphSets.size() == 1)
-      	title = currentGraphSet.getPrintJobTitle();
+      	title = currentGraphSet.getTitle(isPrinting);
       if (title == null)
       	title = viewTitle; // "View 1"
     } else {

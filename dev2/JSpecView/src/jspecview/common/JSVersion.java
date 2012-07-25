@@ -27,6 +27,7 @@ import jspecview.applet.JSVApplet;
 public class JSVersion {
 
   public static final String VERSION;
+	public static final String VERSION_SHORT;
 
 	static {
 		String tmpVersion = null;
@@ -67,8 +68,8 @@ public class JSVersion {
 				}
 			}
 		}
-		VERSION = (tmpVersion != null ? tmpVersion : "(Unknown version)")
-			 + "/SVN" + tmpSVN + "/" + (tmpDate != null ? tmpDate : "(Unknown date)");
+		VERSION_SHORT = (tmpVersion != null ? tmpVersion : "(Unknown version)");
+		VERSION = VERSION_SHORT + "/SVN" + tmpSVN + "/" + (tmpDate != null ? tmpDate : "(Unknown date)");
   }
 
   

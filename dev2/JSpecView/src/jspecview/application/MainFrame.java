@@ -97,7 +97,7 @@ import jspecview.common.JSViewer;
 import jspecview.common.ViewDialog;
 import jspecview.common.PanelData;
 import jspecview.common.Parameters;
-import jspecview.common.JSVPopupMenu;
+import jspecview.common.AwtPopupMenu;
 import jspecview.common.AwtOverlayLegendDialog;
 import jspecview.common.AwtParameters;
 import jspecview.common.PanelListener;
@@ -181,7 +181,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	private JSVPanel selectedPanel;
 
-	private JSVPopupMenu jsvpPopupMenu = new JSVPopupMenu(this);
+	private AwtPopupMenu jsvpPopupMenu = new AwtPopupMenu(this);
 
 	public Object getPopupMenu() {
 		return jsvpPopupMenu;

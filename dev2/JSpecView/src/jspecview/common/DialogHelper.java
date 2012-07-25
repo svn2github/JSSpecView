@@ -273,7 +273,7 @@ public class DialogHelper {
 		try {
 			OutputStream os = (isJob ? null : isBase64 ? new ByteArrayOutputStream() 
 			    : new FileOutputStream(pdfFileName));
-			String printJobTitle = jsvp.getPanelData().getPrintJobTitle();
+			String printJobTitle = jsvp.getPanelData().getPrintJobTitle(true);
 			if (pl.showTitle) {
 				printJobTitle = jsvp.getInput("Title?", "Title for Printing", printJobTitle);
 				if (printJobTitle == null)
@@ -386,8 +386,8 @@ public class DialogHelper {
     String newName = FileManager.getName(sourcePath);
     int pt = newName.lastIndexOf(".");
     String name = (pt < 0 ? newName : newName.substring(0, pt));
-    if (si.getCurrentSource().isView && jsvp.getPanelData().getCurrentSpectrumIndex() < 0)
-    	name = si.getCurrentSource().getFilePath();
+    String ext = ".jdx";
+    boolean isPrint = false;
     switch (imode) {
     case XY:
     case FIX:
@@ -396,14 +396,22 @@ public class DialogHelper {
     case DIF:
     case DIFDUP:
     case SOURCE:
-      name += ".jdx";
+      ext = ".jdx";
       break;
     case AML:
-    	name += ".xml";
+    	ext = ".xml";
     	break;
-    default:
-      name += "." + imode.toString().toLowerCase();
+    case JPG:
+    case PNG:
+    case PDF:
+    	isPrint = true;
+			//$FALL-THROUGH$
+		default:
+      ext = "." + imode.toString().toLowerCase();
     }
+    if (si.getCurrentSource().isView)
+    	name = jsvp.getPanelData().getPrintJobTitle(isPrint);
+    name += ext;
     return name;
 	}
 }

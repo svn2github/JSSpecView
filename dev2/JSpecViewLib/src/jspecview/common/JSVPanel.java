@@ -23,7 +23,7 @@ public interface JSVPanel extends JSVContainer {
 
   boolean hasFocus();
 
-  void printFilePath(Object g, int pageHeight, String filePath);
+  void printFilePath(Object g, int x, int y, String filePath);
 	void printVersion(Object g, int height);
 
 	void setColor(ScriptToken st, Object color);

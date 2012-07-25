@@ -44,7 +44,7 @@ import jspecview.util.Parser;
  * @author Prof Robert J. Lancashire
  * @see jspecview.common.JSVPanel
  */
-public class JSVPopupMenu extends JPopupMenu {
+public class AwtPopupMenu extends JPopupMenu {
 
   protected boolean isApplet;
 
@@ -106,7 +106,7 @@ public class JSVPopupMenu extends JPopupMenu {
   protected JMenuItem spectraMenuItem = new JMenuItem();
   public JMenuItem overlayKeyMenuItem = new JMenuItem();
   
-  public JSVPopupMenu(ScriptInterface scripter) {
+  public AwtPopupMenu(ScriptInterface scripter) {
     super();
     this.scripter = scripter;
     jbInit();
@@ -362,7 +362,7 @@ public class JSVPopupMenu extends JPopupMenu {
     setSelected(coordsCheckBoxMenuItem, pd.getBoolean(ScriptToken.COORDINATESON));
     setSelected(reversePlotCheckBoxMenuItem, pd.getBoolean(ScriptToken.REVERSEPLOT));
 
-    boolean isOverlaid = pd.isOverlaid();
+    boolean isOverlaid = pd.isShowAllStacked();
     boolean isSingle = pd.haveSelectedSpectrum();
     
     integrationMenuItem.setEnabled(jsvp.getSpectrum().canIntegrate());
@@ -388,36 +388,37 @@ public class JSVPopupMenu extends JPopupMenu {
     item.setEnabled(true);
   }
 
-  static void addMenuItem(JMenu m, String key,
-                                  ActionListener actionListener) {
-    JMenuItem jmi = new JMenuItem();
-    jmi.setMnemonic(key.charAt(0));
-    jmi.setText(key);
-    jmi.addActionListener(actionListener);
-    m.add(jmi);
-  }
-
   public static void setMenus(JMenu saveAsMenu, JMenu saveAsJDXMenu,
                               JMenu exportAsMenu, ActionListener actionListener) {
     saveAsMenu.setText("Save As");
-    JSVPopupMenu.addMenuItem(saveAsMenu, Exporter.sourceLabel, actionListener);
+    addMenuItem(saveAsMenu, Exporter.sourceLabel, '\0', actionListener);
     saveAsJDXMenu.setText("JDX");
-    JSVPopupMenu.addMenuItem(saveAsJDXMenu, "XY", actionListener);
-    JSVPopupMenu.addMenuItem(saveAsJDXMenu, "DIF", actionListener);
-    JSVPopupMenu.addMenuItem(saveAsJDXMenu, "DIFDUP", actionListener);
-    JSVPopupMenu.addMenuItem(saveAsJDXMenu, "FIX", actionListener);
-    JSVPopupMenu.addMenuItem(saveAsJDXMenu, "PAC", actionListener);
-    JSVPopupMenu.addMenuItem(saveAsJDXMenu, "SQZ", actionListener);
+    addMenuItem(saveAsJDXMenu, "XY", '\0', actionListener);
+    addMenuItem(saveAsJDXMenu, "DIF", '\0', actionListener);
+    addMenuItem(saveAsJDXMenu, "DIFDUP", 'U', actionListener);
+    addMenuItem(saveAsJDXMenu, "FIX", '\0', actionListener);
+    addMenuItem(saveAsJDXMenu, "PAC", '\0', actionListener);
+    addMenuItem(saveAsJDXMenu, "SQZ", '\0', actionListener);
     saveAsMenu.add(saveAsJDXMenu);
-    JSVPopupMenu.addMenuItem(saveAsMenu, "CML", actionListener);
-    JSVPopupMenu.addMenuItem(saveAsMenu, "XML (AnIML)", actionListener);
+    addMenuItem(saveAsMenu, "CML", '\0', actionListener);
+    addMenuItem(saveAsMenu, "XML (AnIML)", '\0', actionListener);
     if (exportAsMenu != null) {
       exportAsMenu.setText("Export As");
-      JSVPopupMenu.addMenuItem(exportAsMenu, "JPG", actionListener);
-      JSVPopupMenu.addMenuItem(exportAsMenu, "PNG", actionListener);
-      JSVPopupMenu.addMenuItem(exportAsMenu, "SVG", actionListener);
-      JSVPopupMenu.addMenuItem(exportAsMenu, "PDF", actionListener);
+      addMenuItem(exportAsMenu, "JPG", '\0', actionListener);
+      addMenuItem(exportAsMenu, "PNG", 'N', actionListener);
+      addMenuItem(exportAsMenu, "SVG", '\0', actionListener);
+      addMenuItem(exportAsMenu, "PDF", '\0', actionListener);
     }
   }
+
+	private static void addMenuItem(JMenu m, String key, char keyChar,
+			ActionListener actionListener) {
+		JMenuItem jmi = new JMenuItem();
+		jmi.setMnemonic(keyChar == '\0' ? key.charAt(0) : keyChar);
+		jmi.setText(key);
+		jmi.addActionListener(actionListener);
+		m.add(jmi);
+	}
+
 
 }

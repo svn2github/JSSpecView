@@ -380,11 +380,11 @@ abstract class GraphSet {
 
 	private void setPositionForFrame(int iSplit) {
 
-		int marginalHeight = height - 40;
+		int marginalHeight = height - 50;
 		xPixel00 = (int) (width * fX0);
 		xPixel11 = xPixel00 + width - 1;
 		yPixel000 = (int) (height * fY0);
-		yPixel00 = yPixel000 + (int) (marginalHeight * fracY * iSplit);
+		yPixel00 = yPixel000 + 25 + (int) (marginalHeight * fracY * iSplit);
 		yPixel11 = yPixel00 + (int) (marginalHeight * fracY) - 1;
 		xPixel0 = xPixel00 + left / (xPixel00 == 0 ? 1 : 2);
 		xPixel10 = xPixel1 = xPixel11 - right / (xPixel11 > width - 2 ? 1 : 2);
@@ -1398,15 +1398,18 @@ abstract class GraphSet {
 				}
 				if (nSplit == 1 || showAllStacked || iSpectrumSelected == iSplit)
 					drawWidgets(g, subIndex, needNewPins, doDraw1DObjects);
-				if (haveSingleYScale && i == iSpectrumForScale)
+				if (haveSingleYScale && i == iSpectrumForScale) {
 					drawGrid(g);
+					if (pd.isPrinting && nSplit > 1)
+						drawSpectrumSource(g, i);
+				}
 				if (haveSingleYScale && !isDrawNoSpectra() && i == iSpectrumForScale
 						&& (nSpectra == 1 || iSpectrumSelected >= 0))
 					drawHighlightsAndPeakTabs(g, i);
 				if (n == 1 && iSpectrumSelected < 0 || iSpectrumSelected == i
 						&& pd.isCurrentGraphSet(this)) {
 					if (pd.titleOn && !pd.titleDrawn) {
-						drawTitle(g, height, width, pd.getDrawTitle());
+						drawTitle(g, height, width, pd.getDrawTitle(pd.isPrinting));
 						pd.titleDrawn = true;
 					}
 				}
@@ -1456,6 +1459,10 @@ abstract class GraphSet {
 		}
 		if (annotations != null)
 			drawAnnotations(g, annotations, null);
+	}
+
+	private void drawSpectrumSource(Object g, int i) {
+		pd.owner.printFilePath(g, pd.left + pd.plotAreaWidth, yPixel0, spectra.get(i).getFilePath());
 	}
 
 	private boolean doPlot(int i, int iSplit) {
@@ -2053,7 +2060,7 @@ abstract class GraphSet {
 	private void drawYUnits(Object g) {
 		String units = spectra.get(0).getAxisLabel(false);
 		if (units != null)
-			drawUnits(g, width, units, (pd.isPrinting ? 30 : 5), yPixel0, 0, -1);
+			drawUnits(g, width, units, (pd.isPrinting ? 30 : 5), (pd.isPrinting ? yPixel0 : yPixel0 + 10), 0, -1);
 	}
 
 	private void drawHighlightsAndPeakTabs(Object g, int iSpec) {
@@ -3775,11 +3782,12 @@ abstract class GraphSet {
 
 	/**
 	 * 
+	 * @param forPrinting  (could be preparing to print)
 	 * @return null if ambiguous, otherwise JDXSpectrum.getTitle()
 	 * 
 	 */
-	String getPrintJobTitle() {
-		return (nSpectra == 1 || iSpectrumSelected >= 0 ?
+	String getTitle(boolean forPrinting) {
+		return (nSpectra == 1 || iSpectrumSelected >= 0 && (!forPrinting || nSplit == 1) ?
 			getSpectrum().getTitle() : null);
 	}
 

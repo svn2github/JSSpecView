@@ -10,10 +10,10 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
-import jspecview.common.JSVPopupMenu;
+import jspecview.common.AwtPopupMenu;
 import jspecview.common.JSVPanelNode;
 
-class JSVAppletPopupMenu extends JSVPopupMenu {
+class JSVAppletPopupMenu extends AwtPopupMenu {
 
   JSVAppletPrivate applet;
 
@@ -75,7 +75,7 @@ class JSVAppletPopupMenu extends JSVPopupMenu {
       fileMenu.add(appletExportAsMenu);
     }
     appletSaveAsJDXMenu = new JMenu();
-    JSVPopupMenu.setMenus(saveAsMenu, appletSaveAsJDXMenu, appletExportAsMenu, exportActionListener);
+    AwtPopupMenu.setMenus(saveAsMenu, appletSaveAsJDXMenu, appletExportAsMenu, exportActionListener);
 
     viewMenu.setText("View");
     zoomMenu.setText("Zoom");

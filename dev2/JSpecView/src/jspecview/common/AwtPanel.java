@@ -115,9 +115,9 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     return pd;
   }
 
-  JSVPopupMenu popup;
+  AwtPopupMenu popup;
   
-  public JSVPopupMenu getPopup() {
+  public AwtPopupMenu getPopup() {
     return popup;
   }
 
@@ -273,7 +273,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
    * @param popup 
    * @throws ScalesIncompatibleException
    */
-  public AwtPanel(ScriptInterface si, JDXSpectrum spectrum, JSVPopupMenu popup) {
+  public AwtPanel(ScriptInterface si, JDXSpectrum spectrum, AwtPopupMenu popup) {
     // standard applet not overlaid and not showing range
     // standard application split spectra
     // removal of integration, taConvert
@@ -290,7 +290,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     return new AwtPanel(si, spectrum, popup);
   }
 
-  public static AwtPanel getJSVPanel(ScriptInterface si, List<JDXSpectrum> specs, int startIndex, int endIndex, JSVPopupMenu popup) {
+  public static AwtPanel getJSVPanel(ScriptInterface si, List<JDXSpectrum> specs, int startIndex, int endIndex, AwtPopupMenu popup) {
     return new AwtPanel(si, specs, startIndex, endIndex, popup);
   }
 
@@ -310,7 +310,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
    * @throws ScalesIncompatibleException
    */
   private AwtPanel(ScriptInterface si, List<JDXSpectrum> spectra, int startIndex,
-      int endIndex, JSVPopupMenu popup) {
+      int endIndex, AwtPopupMenu popup) {
     pd = new PanelData(this);
     this.si = si;
     this.popup = popup;
@@ -327,7 +327,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
    * @return new panel
    */
   public static AwtPanel getNewPanel(ScriptInterface si, JDXSpectrum spec,
-                                     JSVPopupMenu jsvpPopupMenu) {
+                                     AwtPopupMenu jsvpPopupMenu) {
     return new AwtPanel(si, spec, jsvpPopupMenu);
   }
 
@@ -432,14 +432,24 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 
 	/**
 	 * draws the file path only for printing
+	 * @param og 
+	 * @param x 
+	 * @param y 
+	 * @param filePath 
 	 */
 
-	public void printFilePath(Object og, int pageHeight, String filePath) {
+	public void printFilePath(Object og, int x, int y, String s) {
+		if (s.indexOf("?") > 0)
+			s = s.substring(s.indexOf("?") + 1);
+		s = s.substring(s.lastIndexOf("/") + 1);
+		s = s.substring(s.lastIndexOf("\\") + 1);
 		Graphics g = (Graphics) og;
 		g.setColor(Color.BLACK);
 		pd.setFont(g, 1000, Font.PLAIN, 9, true);
 		FontMetrics fm = g.getFontMetrics();
-		g.drawString(filePath, pd.left, pageHeight - fm.getHeight());
+		if (x != pd.left)
+			x -= fm.stringWidth(s);
+		g.drawString(s, x, y - fm.getHeight());
 	}
 
 	public void printVersion(Object og, int pageHeight) {
@@ -447,9 +457,10 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 		g.setColor(Color.BLACK);
 		pd.setFont(g, 1000, Font.PLAIN, 9, true);
 		FontMetrics fm = g.getFontMetrics();
-		g.drawString("printed " + DateFormat.getInstance().format(new Date())
-				+ " using JSpecView " + JSVersion.VERSION, pd.left + pd.plotAreaWidth
-				/ 2, pageHeight - fm.getHeight());
+		String s = DateFormat.getInstance().format(new Date())
+		+ " JSpecView " + JSVersion.VERSION_SHORT;
+		int w = fm.stringWidth(s);
+		g.drawString(s, pd.left + pd.plotAreaWidth - w, pageHeight - fm.getHeight());
 	}
 
 
@@ -479,7 +490,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
       fm = g.getFontMetrics();
     }
     g.setColor(titleColor);
-    g.drawString(title, (pd.isPrinting ? pd.left : 5), pageHeight - fm.getHeight() * (pd.isPrinting ? 2 : 1));
+    g.drawString(title, (pd.isPrinting ? pd.left : 5), (int) (pageHeight - fm.getHeight() * (pd.isPrinting ? 2 : 0.5)));
   }
 
 
