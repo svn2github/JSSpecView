@@ -37,7 +37,6 @@
 
 package jspecview.common;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -73,12 +72,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
-
-import com.lowagie.text.Document;
-import com.lowagie.text.PageSize;
-import com.lowagie.text.pdf.PdfContentByte;
-import com.lowagie.text.pdf.PdfTemplate;
-import com.lowagie.text.pdf.PdfWriter;
 
 import jspecview.common.Annotation.AType;
 import jspecview.exception.JSpecViewException;
@@ -503,34 +496,10 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
    * @param pl 
    */
   private void createPdfDocument(OutputStream os, PrintLayout pl) {
-  	boolean isLandscape = pl.layout.equals("landscape");
-    Document document = new Document(isLandscape ? PageSize.LETTER.rotate() : PageSize.LETTER);
-    Dimension d = PrintLayout.getDimension(pl.paper);
-    int w = (isLandscape ? d.height : d.width);
-    int h = (isLandscape ? d.width : d.height);
-    PageFormat pf = new PageFormat();
-    Paper p = new Paper();      
-    p.setImageableArea(0, 0, d.width, d.height);
-    pf.setPaper(p);
-    pf.setOrientation(pl.layout.equals("landscape") ? PageFormat.LANDSCAPE : PageFormat.PORTRAIT);
-    try {
-      PdfWriter writer = PdfWriter.getInstance(document, os);
-      document.open();
-      PdfContentByte cb = writer.getDirectContent();
-      PdfTemplate tp = cb.createTemplate(w, h);
-      
-      Graphics2D g2 = tp.createGraphics(w, h);
-      g2.setStroke(new BasicStroke(0.1f));
-      tp.setWidth(w);
-      tp.setHeight(h);
-      print(g2, pf, 0);
-      //g2.drawImage(image, 0, 0, w, h, 0, 0, w, h, null);
-      g2.dispose();
-      cb.addTemplate(tp, 0, 0);
-    } catch (Exception e) {
-      showMessage(e.getMessage(), "PDF Creation Error");
-    }
-    document.close();
+  	PdfCreatorInterface pdfCreator = (PdfCreatorInterface) Interface.getInterface("jspecview.common.PdfCreator");
+  	if (pdfCreator == null)
+  		return;
+  	pdfCreator.createPdfDocument(this, pl, os);
   }
 
 	/**
