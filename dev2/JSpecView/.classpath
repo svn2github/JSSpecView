@@ -2,7 +2,8 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/JSpecViewLib"/>
-	<classpathentry kind="lib" path="libs/plugin.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="libs/itext-1.4.5-min.jar"/>
+	<classpathentry kind="lib" path="libs/plugin.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
