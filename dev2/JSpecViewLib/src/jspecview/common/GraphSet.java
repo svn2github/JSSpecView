@@ -1904,7 +1904,7 @@ abstract class GraphSet {
 	private void drawXScale(Object g) {
 
 		DecimalFormat formatter = viewData.formatters[0];
-		pd.setFont(g, width, FONT_PLAIN, 12, false);
+		pd.setFont(g, width, FONT_PLAIN, pd.isPrinting ? 10 : 12, false);
 		int y1 = yPixel1;
 		int y2 = yPixel1 + 4;
 		int y3 = yPixel1 + 2;
@@ -1986,7 +1986,7 @@ abstract class GraphSet {
 	private void drawYScale(Object g) {
 
 		DecimalFormat formatter = viewData.formatters[1];
-		pd.setFont(g, width, FONT_PLAIN, 12, false);
+		pd.setFont(g, width, FONT_PLAIN, pd.isPrinting ? 10 : 12, false);
 		int h = getFontHeight(g);
 		double max = viewData.maxYOnScale + viewData.steps[1] / 2;
 		int yLast = Integer.MIN_VALUE;
