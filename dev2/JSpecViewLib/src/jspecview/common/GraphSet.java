@@ -229,15 +229,11 @@ abstract class GraphSet {
 	protected boolean sticky2Dcursor;
 	protected int nSpectra; // also needed by PanelData
 
-	void close() {
-		closeDialogs();
-	}
-
-	private void closeDialogs() {
+	void closeDialogsExcept(AType type) {
 		if (dialogs != null)
 			for (Map.Entry<String, AnnotationData> e : dialogs.entrySet()) {
 				AnnotationData ad = e.getValue();
-				if (ad instanceof AnnotationDialog)
+				if (ad instanceof AnnotationDialog && (type == AType.NONE || ad.getAType() != type))
 					((AnnotationDialog) ad).setVisible(false);
 			}
 	}
@@ -513,7 +509,7 @@ abstract class GraphSet {
 	void setReversePlot(boolean val) {
 		reversePlot = val;
 		if (reversePlot)
-			closeDialogs();
+			closeDialogsExcept(AType.NONE);
 		setDrawXAxis();
 	}
 
@@ -851,7 +847,7 @@ abstract class GraphSet {
 		} else if (isArrowClick(xPixel, yPixel, ArrowType.RESET)) {
 			clearViews();
 			if (showAllStacked && !stackSelected)
-  			closeDialogs();
+  			closeDialogsExcept(AType.NONE);
 			viewData.setScaleFactor(-1, 1);
 			// did not work: view.setScaleFactor(iSpectrumSelected, 1);
 			updateDialogs();
@@ -1493,6 +1489,7 @@ abstract class GraphSet {
 				case PeakList:
 					getPeak = true;
 					break;
+				case NONE:
 				}
 			}
 		}
@@ -3791,5 +3788,9 @@ abstract class GraphSet {
 			getSpectrum().getTitle() : null);
 	}
 
+	public ScaleData getCurrentView() {
+		setUserYFactor(getFixedSelectedSpectrumIndex());
+		return viewData;
+	}
 
 }

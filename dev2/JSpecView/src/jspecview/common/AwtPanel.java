@@ -871,6 +871,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 	public AnnotationDialog showDialog(AType type) {
 		AwtAnnotationDialog dialog = null; 
 		AnnotationData ad = pd.getDialog(type);
+		pd.closeAllDialogsExcept(type);
 		if (ad != null && ad instanceof AwtAnnotationDialog) {
 			((AwtAnnotationDialog) ad).reEnable();
 			return (AnnotationDialog) ad;
@@ -892,6 +893,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 		case PeakList:
 			dialog = new AwtPeakListDialog("Peak List for " + spec, si, spec, this);
 			break;
+		case NONE:
 		}
 		if (ad != null)
 			dialog.setData(ad);

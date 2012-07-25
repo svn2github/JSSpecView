@@ -7,6 +7,8 @@ ___svnRev=$LastChangedRevision::      $
 
 ====TODO=========
 
+-Linked graphsets from 2D data. 
+
 -in the jsvtest.htm page, when there is a CNMR and IR overlay shown
 nothing happens when a proton is clicked on a molecule in the Jmol
 applet. The viewer should have the option to either add H-NMR with
@@ -25,10 +27,15 @@ changes and analyses can be made without altering the saved view
 
   - in OleNMR this will be handled by saving $$JSVCMD into the procs file, I think.
 
+
+
 =====DONE========
 
 ___version=2.0.2
 
+bug fix: opening peak dialog without clicking spectra doesn't place cursor correctly
+bug fix: closing all dialogs except the type chosen; otherwise it gets too cluttered 
+bug fix: need to close all dialogs when the print dialog comes up
 bug fix: issues with printing split spectra
 PDF printing from signed applet and application
  

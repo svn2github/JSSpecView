@@ -116,6 +116,7 @@ public class MeasurementData extends ArrayList<Measurement> implements Annotatio
 					&& p.peakListThreshold == myParams.peakListThreshold);
 		case Measurements:
 			break;
+		case NONE:
 		}
 		return false;
 	}

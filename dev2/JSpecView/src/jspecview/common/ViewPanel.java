@@ -9,6 +9,7 @@ import java.util.List;
 import javax.swing.JPanel;
 
 import jspecview.common.JSVContainer;
+import jspecview.common.Annotation.AType;
 
 public class ViewPanel extends JPanel implements JSVContainer {
 
@@ -54,7 +55,7 @@ public class ViewPanel extends JPanel implements JSVContainer {
 			} else {
 				j.setEnabled(false);
 				j.setFocusable(false);
-				j.getPanelData().close();
+				j.getPanelData().closeAllDialogsExcept(AType.NONE);
 			}
 		}
 		markSelectedPanels(panelNodes);

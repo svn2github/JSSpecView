@@ -887,12 +887,12 @@ public class PanelData {
 	}
 
 	public ScaleData getView() {
-		return currentGraphSet.viewData;
+		return currentGraphSet.getCurrentView();
 	}
 
-	public void close() {
+	public void closeAllDialogsExcept(AType type) {
 		for (int i = graphSets.size(); --i >= 0;)
-			graphSets.get(i).close();
+			graphSets.get(i).closeDialogsExcept(type);
 	}
 
 	public void removeDialog(AnnotationDialog dialog) {
@@ -949,4 +949,5 @@ public class PanelData {
     	title = title.substring(0, title.indexOf("\n")).trim();
     return title;
 	}
+
 }

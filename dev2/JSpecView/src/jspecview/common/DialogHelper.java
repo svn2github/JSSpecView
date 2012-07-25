@@ -32,6 +32,7 @@ import javax.swing.SwingConstants;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 
+import jspecview.common.Annotation.AType;
 import jspecview.export.Exporter;
 import jspecview.export.Exporter.ExportType;
 import jspecview.util.Base64;
@@ -252,10 +253,11 @@ public class DialogHelper {
 		boolean isJob = (pdfFileName == null || pdfFileName.length() == 0);
 		boolean isBase64 = (!isJob && pdfFileName.toLowerCase().startsWith("base64"));
 		JSVPanel jsvp = si.getSelectedPanel();
-		PrintLayout pl;
-		if (jsvp == null
-				|| (pl = (new AwtPrintLayoutDialog(frame, lastPrintLayout))
-						.getPrintLayout()) == null)
+		if (jsvp == null)
+			return null;
+    jsvp.getPanelData().closeAllDialogsExcept(AType.NONE);
+		PrintLayout pl = new AwtPrintLayoutDialog(frame, lastPrintLayout).getPrintLayout();
+		if (pl == null)
 			return null;
 		lastPrintLayout = pl;
 		

@@ -41,7 +41,7 @@ public class Annotation extends Coordinate {
   public int offsetY;
   public JDXSpectrum spec;
   
-  public enum AType { Integration, PeakList, Measurements }
+  public enum AType { Integration, PeakList, Measurements, NONE }
   
   /**
    * Constructor -- note that x is spectral X value, but y is pixels above
