@@ -37,7 +37,7 @@
     </path>
     <path id="jspecview.classpath">
         <pathelement location="bin"/>
-        <pathelement location="libs/plugin.jar"/>
+        <pathelement location="libs/netscape.jar"/>
     	<pathelement location="libs/${itext.jar}"/>
         <path refid="jspecviewlib.classpath"/>
     </path>
@@ -92,7 +92,7 @@
 	    <!--unjar dest="${bin.dir}" src="${itext.jar}"/ -->
         <jar destfile="${build.applet.dir}/${ant.project.name}.applet.${build.number}.jar">
             <manifest>
-            	<attribute name="Class-Path" value=". plugin.jar"/>
+            	<attribute name="Class-Path" value=". netscape.jar"/>
             </manifest>
         	<fileset dir="${bin.dir}">
         		<exclude name="jspecview/application/**"/>
@@ -110,7 +110,7 @@
 	    <unjar dest="${bin.dir}" src="${itext.jar}"/>
         <jar destfile="${build.applet.dir}/temp.jar">
             <manifest>
-              <attribute name="Class-Path" value=". plugin.jar"/>
+              <attribute name="Class-Path" value=". netscape.jar"/>
             </manifest>
           <fileset dir="${bin.dir}">
           </fileset>
