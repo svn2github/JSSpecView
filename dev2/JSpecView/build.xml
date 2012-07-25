@@ -96,6 +96,7 @@
             </manifest>
         	<fileset dir="${bin.dir}">
         		<exclude name="jspecview/application/**"/>
+        		<exclude name="com/lowagie/**"/>
         	</fileset>
         	<fileset dir="${jsvlib.dir}"/>
         </jar>		
