@@ -484,7 +484,7 @@ public class JDXSpectrum extends JDXDataObject {
 
   public Map<String, Object> getInfo(String key) {
     Map<String, Object> info = new Hashtable<String, Object>();
-    if (key.equalsIgnoreCase("id")) {
+    if ("id".equalsIgnoreCase(key)) {
     	info.put(key, id);
     	return info;
     }
