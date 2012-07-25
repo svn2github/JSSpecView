@@ -77,7 +77,11 @@ public interface ScriptInterface {
 	public void openDataOrFile(String data, String name, List<JDXSpectrum> specs,
 			String url, int firstSpec, int lastSpec, boolean doCheck);
 
-	public void print();
+	/**
+	 * @param pdfFileName
+	 * @return "OK" if signedApplet or app; Base64-encoded string if unsigned applet or null if problem
+	 */
+	public String print(String pdfFileName);
 
 	public void requestRepaint();
 
@@ -132,5 +136,9 @@ public interface ScriptInterface {
 	public void writeStatus(String msg);
 
 	public void setLoadImaginary(boolean TF);
+
+	public void setProperty(String key, String value);
+
+	public boolean isSigned();
 
 }

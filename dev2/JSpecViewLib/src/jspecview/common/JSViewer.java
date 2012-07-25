@@ -139,7 +139,7 @@ public class JSViewer {
         case PRINT:
           if (jsvp == null)
             continue;
-        	si.print();
+        	si.print(value);
         	break;
         case SCALEBY:
         	scaleSelectedBy(si.getPanelNodes(), value);

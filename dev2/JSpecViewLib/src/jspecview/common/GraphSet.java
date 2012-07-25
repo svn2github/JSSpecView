@@ -2053,7 +2053,7 @@ abstract class GraphSet {
 	private void drawYUnits(Object g) {
 		String units = spectra.get(0).getAxisLabel(false);
 		if (units != null)
-			drawUnits(g, width, units, 5, yPixel0, 0, -1);
+			drawUnits(g, width, units, (pd.isPrinting ? 30 : 5), yPixel0, 0, -1);
 	}
 
 	private void drawHighlightsAndPeakTabs(Object g, int iSpec) {
@@ -2900,6 +2900,13 @@ abstract class GraphSet {
 	 * entry point for a repaint
 	 * 
 	 * @param og 
+	 * @param width
+	 * @param height
+	 * @param left 
+	 * @param right 
+	 * @param top 
+	 * @param bottom 
+	 * @param isResized
 	 * @param g
 	 * @param withGrid
 	 * @param withXUnits
@@ -2907,16 +2914,9 @@ abstract class GraphSet {
 	 * @param withXScale
 	 * @param withYScale
 	 * @param drawY0
-	 * @param height
-	 * @param width
-	 * @param left 
-	 * @param right 
-	 * @param top 
-	 * @param bottom 
 	 * @param plotAreaInsets
-	 * @param isResized
 	 */
-	void drawGraphSet(Object og, int height, int width, int left, int right,
+	void drawGraphSet(Object og, int width, int height, int left, int right,
 			int top, int bottom, boolean isResized) {
 		zoomEnabled = pd.getBoolean(ScriptToken.ENABLEZOOM);
 		this.height = height;

@@ -214,7 +214,6 @@ public class PanelData {
 	boolean titleDrawn;
 	boolean display1D;
 	String printJobTitle;
-	boolean addFilePath;
 
 	public boolean getDisplay1D() {
 		return display1D;
@@ -356,23 +355,21 @@ public class PanelData {
 	 * 
 	 * @param g
 	 *          the <code>Graphics</code> object
-	 * @param height
-	 *          the height to be drawn in pixels
 	 * @param width
 	 *          the width to be drawn in pixels
-	 * @param addFilePath 
+	 * @param height
+	 *          the height to be drawn in pixels
+	 * @param addFilePath
 	 */
-	synchronized void drawGraph(Object g, int height, int width, boolean addFilePath) {
+	synchronized void drawGraph(Object g, int width, int height,
+			boolean addFilePath) {
 		boolean withCoords;
-		this.addFilePath = addFilePath;
 		display1D = getBoolean(ScriptToken.DISPLAY1D);
 		top = topMargin;
 		bottom = bottomMargin;
 		if (isPrinting) {
-			if (addFilePath) {
-				top *= 2;  // for three-hole punching
-				bottom *= 2;
-			}
+			top *= 2; // for three-hole punching
+			bottom *= 2;
 			withCoords = false;
 		} else {
 			withCoords = getBoolean(ScriptToken.COORDINATESON);
@@ -391,22 +388,26 @@ public class PanelData {
 		thisPlotHeight = plotAreaHeight;
 		titleDrawn = false;
 		for (int i = graphSets.size(); --i >= 0;)
-			graphSets.get(i).drawGraphSet(g, height, width, left, right, top, bottom,
+			graphSets.get(i).drawGraphSet(g, width, height, left, right, top, bottom,
 					isResized);
 		if (titleOn && !titleDrawn)
 			owner.drawTitle(g, height, width, getDrawTitle());
 		if (withCoords)
 			owner.drawCoordinates(g);
 		if (addFilePath) {
-			String s = (commonFilePath != null ? commonFilePath 
-					: graphSets.size() == 1 && currentGraphSet.getPrintJobTitle() != null 
-					? getSpectrum().getFilePath() : null);
+			String s = (commonFilePath != null ? commonFilePath
+					: graphSets.size() == 1 && currentGraphSet.getPrintJobTitle() != null ? getSpectrum()
+							.getFilePath()
+							: null);
 			if (s != null) {
 				if (s.indexOf("?") > 0)
 					s = s.substring(s.indexOf("?") + 1);
-  			owner.drawFilePath(g, height, s);
+				owner.printFilePath(g, height, s);
 			}
 		}
+		if (isPrinting)
+			owner.printVersion(g, height);
+
 	}
 
 	/**

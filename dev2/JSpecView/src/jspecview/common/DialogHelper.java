@@ -247,9 +247,10 @@ public class DialogHelper {
 	}
 
 	public String print(Frame frame, String pdfFileName) {
+		if (!si.isSigned())
+			return "Error: Applet must be signed for the PRINT command.";
 		boolean isJob = (pdfFileName == null || pdfFileName.length() == 0);
-		boolean isEmail = (!isJob && pdfFileName.toLowerCase().startsWith("email"));
-		boolean isSigned = si.isSigned();
+		boolean isBase64 = (!isJob && pdfFileName.toLowerCase().startsWith("base64"));
 		JSVPanel jsvp = si.getSelectedPanel();
 		PrintLayout pl;
 		if (jsvp == null
@@ -258,7 +259,7 @@ public class DialogHelper {
 			return null;
 		lastPrintLayout = pl;
 		
-		if (!isEmail && !isJob && isSigned) {
+		if (!isBase64 && !isJob) {
 			setFileChooser(ExportType.PDF);
 			if (pdfFileName.equals("?") || pdfFileName.equalsIgnoreCase("PDF"))
   			pdfFileName = getSuggestedFileName(ExportType.PDF);
@@ -270,7 +271,7 @@ public class DialogHelper {
 		}
 		String s = null;
 		try {
-			OutputStream os = (isJob ? null : isEmail || !isSigned ? new ByteArrayOutputStream() 
+			OutputStream os = (isJob ? null : isBase64 ? new ByteArrayOutputStream() 
 			    : new FileOutputStream(pdfFileName));
 			String printJobTitle = jsvp.getPanelData().getPrintJobTitle();
 			if (pl.showTitle) {
@@ -279,8 +280,8 @@ public class DialogHelper {
 					return null;
 			}
 			((AwtPanel) jsvp).printPanel(pl, os, printJobTitle);
-			s = (isSigned && !isEmail ? "OK" : Base64.getBase64(
-					((ByteArrayOutputStream) os).toByteArray()).toString());
+			s = (isBase64 ? Base64.getBase64(
+					((ByteArrayOutputStream) os).toByteArray()).toString() : "OK");
 		} catch (Exception e) {
 			jsvp.showMessage(e.getMessage(), "File Error");
 		}
