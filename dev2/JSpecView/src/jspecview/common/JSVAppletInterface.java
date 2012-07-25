@@ -50,7 +50,9 @@ public interface JSVAppletInterface {
    */
   public abstract String exportSpectrum(String type, int n);
 
-  public abstract void setFilePath(String tmpFilePath);
+	public String print(String pdfFileName);
+
+	public abstract void setFilePath(String tmpFilePath);
 
   /**
    * Sets the spectrum to the specified block number

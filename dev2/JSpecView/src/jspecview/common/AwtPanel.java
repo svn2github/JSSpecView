@@ -37,6 +37,7 @@
 
 package jspecview.common;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -56,6 +57,9 @@ import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -69,6 +73,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
+
+import com.lowagie.text.Document;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.pdf.PdfContentByte;
+import com.lowagie.text.pdf.PdfTemplate;
+import com.lowagie.text.pdf.PdfWriter;
 
 import jspecview.common.Annotation.AType;
 import jspecview.exception.JSpecViewException;
@@ -384,7 +394,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     if (pd == null || pd.graphSets == null || pd.isPrinting)
       return;
     super.paintComponent(g);
-    pd.drawGraph(g, getHeight(), getWidth(), false);
+    pd.drawGraph(g, getWidth(), getHeight(), false);
     si.repaintCompleted();
   }
 
@@ -420,17 +430,28 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
         (pd.top - 10));
   }
 
-  /**
-   * draws the file path only for printing
-   */
-  
-	public void drawFilePath(Object og, int pageHeight, String filePath) {
-    Graphics g = (Graphics) og;
-    g.setColor(Color.BLACK);
-    pd.setFont(g, getWidth(), Font.PLAIN, 9, true);
-    FontMetrics fm = g.getFontMetrics();
-    g.drawString(filePath, pd.left, pageHeight - fm.getHeight());
+	/**
+	 * draws the file path only for printing
+	 */
+
+	public void printFilePath(Object og, int pageHeight, String filePath) {
+		Graphics g = (Graphics) og;
+		g.setColor(Color.BLACK);
+		pd.setFont(g, 1000, Font.PLAIN, 9, true);
+		FontMetrics fm = g.getFontMetrics();
+		g.drawString(filePath, pd.left, pageHeight - fm.getHeight());
 	}
+
+	public void printVersion(Object og, int pageHeight) {
+		Graphics g = (Graphics) og;
+		g.setColor(Color.BLACK);
+		pd.setFont(g, 1000, Font.PLAIN, 9, true);
+		FontMetrics fm = g.getFontMetrics();
+		g.drawString("printed " + DateFormat.getInstance().format(new Date())
+				+ " using JSpecView " + JSVersion.VERSION, pd.left + pd.plotAreaWidth
+				/ 2, pageHeight - fm.getHeight());
+	}
+
 
   /**
    * Draws Title
@@ -464,6 +485,118 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 
 
   /*----------------- METHODS IN INTERFACE Printable ---------------------- */
+
+  /**
+   * uses itext to create the document, either to a file or a byte stream
+   * @param os 
+   * @param pl 
+   */
+  private void createPdfDocument(OutputStream os, PrintLayout pl) {
+  	boolean isLandscape = pl.layout.equals("landscape");
+    Document document = new Document(isLandscape ? PageSize.LETTER.rotate() : PageSize.LETTER);
+    Dimension d = PrintLayout.getDimension(pl.paper);
+    int w = (isLandscape ? d.height : d.width);
+    int h = (isLandscape ? d.width : d.height);
+    PageFormat pf = new PageFormat();
+    Paper p = new Paper();      
+    p.setImageableArea(0, 0, d.width, d.height);
+    pf.setPaper(p);
+    pf.setOrientation(pl.layout.equals("landscape") ? PageFormat.LANDSCAPE : PageFormat.PORTRAIT);
+    try {
+      PdfWriter writer = PdfWriter.getInstance(document, os);
+      document.open();
+      PdfContentByte cb = writer.getDirectContent();
+      PdfTemplate tp = cb.createTemplate(w, h);
+      
+      Graphics2D g2 = tp.createGraphics(w, h);
+      g2.setStroke(new BasicStroke(0.1f));
+      tp.setWidth(w);
+      tp.setHeight(h);
+      print(g2, pf, 0);
+      //g2.drawImage(image, 0, 0, w, h, 0, 0, w, h, null);
+      g2.dispose();
+      cb.addTemplate(tp, 0, 0);
+    } catch (Exception e) {
+      showMessage(e.getMessage(), "PDF Creation Error");
+    }
+    document.close();
+  }
+
+	/**
+	 * Send a print job of the spectrum to the default printer on the system
+	 * 
+	 * @param pl
+	 *          the layout of the print job
+	 * @param os
+	 * @param title 
+	 */
+	public void printPanel(PrintLayout pl, OutputStream os, String title) {
+
+		// MediaSize size = MediaSize.getMediaSizeForName(pl.paper);
+
+		// Set Graph Properties
+		pd.printingFont = pl.font;
+		pd.printGraphPosition = pl.position;
+
+		// save original values
+
+		boolean gridOn = pd.gridOn;
+		boolean titleOn = pd.titleOn;
+		boolean xScaleOn = pd.getBoolean(ScriptToken.XSCALEON);
+		boolean xUnitsOn = pd.getBoolean(ScriptToken.XUNITSON);
+		boolean yScaleOn = pd.getBoolean(ScriptToken.YSCALEON);
+		boolean yUnitsOn = pd.getBoolean(ScriptToken.YUNITSON);
+
+		pd.gridOn = pl.showGrid;
+		pd.titleOn = pl.showTitle;
+		pd.setBoolean(ScriptToken.XSCALEON, pl.showXScale);
+		pd.setBoolean(ScriptToken.XUNITSON, pl.showXScale);
+		pd.setBoolean(ScriptToken.YSCALEON, pl.showYScale);
+		pd.setBoolean(ScriptToken.YUNITSON, pl.showYScale);
+
+		/* Create a print job */
+
+		PrinterJob pj = (os == null ? PrinterJob.getPrinterJob() : null);
+		pd.printJobTitle = title;
+		if (title.length() > 30)
+			title = title.substring(0, 30);
+		if (pj != null) {
+			pj.setJobName(title);
+			pj.setPrintable(this);
+		}
+		if (pj == null || pj.printDialog()) {
+			try {
+				if (pj == null) {
+					createPdfDocument(os, pl);
+				} else {
+					PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
+					aset.add(pl.layout.equals("landscape") ? OrientationRequested.LANDSCAPE
+									: OrientationRequested.PORTRAIT);
+					aset.add(pl.paper);
+					pj.print(aset);
+				}
+			} catch (PrinterException ex) {
+				String s = ex.getMessage();
+				if (s == null)
+					return;
+				s = TextFormat.simpleReplace(s, "not accepting job.",
+						"not accepting jobs.");
+				// not my fault -- Windows grammar error!
+				showMessage(s, "Printer Error");
+			}
+		}
+
+		// restore original values
+
+		pd.gridOn = gridOn;
+		pd.titleOn = titleOn;
+		pd.setBoolean(ScriptToken.XSCALEON, xScaleOn);
+		pd.setBoolean(ScriptToken.XUNITSON, xUnitsOn);
+		pd.setBoolean(ScriptToken.YSCALEON, yScaleOn);
+		pd.setBoolean(ScriptToken.YUNITSON, yUnitsOn);
+
+	}
+
 
   /**
    * Implements method print in interface printable
@@ -518,7 +651,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
         g2D.translate(x, y);
       }
 
-      pd.drawGraph(g2D, (int) height, (int) width, addFilePath);
+      pd.drawGraph(g2D, (int) width, (int) height, addFilePath);
 
       pd.isPrinting = false;
       return Printable.PAGE_EXISTS;
@@ -528,84 +661,6 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   }
 
   /*--------------------------------------------------------------------------*/
-
-  /**
-   * Send a print job of the spectrum to the default printer on the system
-   * 
-   * @param pl
-   *        the layout of the print job
-   */
-  public void printSpectrum(PrintLayout pl) {
-
-    PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
-
-    if (pl.layout.equals("landscape"))
-      aset.add(OrientationRequested.LANDSCAPE);
-    else
-      aset.add(OrientationRequested.PORTRAIT);
-
-    aset.add(pl.paper);
-
-    //MediaSize size = MediaSize.getMediaSizeForName(pl.paper);
-
-    // Set Graph Properties
-    pd.printingFont = pl.font;
-    pd.printGraphPosition = pl.position;
-
-    // save original values
-    
-    boolean gridOn = pd.gridOn;
-    boolean titleOn = pd.titleOn;
-    boolean xScaleOn = pd.getBoolean(ScriptToken.XSCALEON); 
-    boolean xUnitsOn = pd.getBoolean(ScriptToken.XUNITSON); 
-    boolean yScaleOn = pd.getBoolean(ScriptToken.YSCALEON); 
-    boolean yUnitsOn = pd.getBoolean(ScriptToken.YUNITSON); 
-    
-    pd.gridOn = pl.showGrid;
-    pd.titleOn = pl.showTitle;
-    pd.setBoolean(ScriptToken.XSCALEON, pl.showXScale);
-    pd.setBoolean(ScriptToken.XUNITSON, pl.showXScale);
-    pd.setBoolean(ScriptToken.YSCALEON, pl.showYScale);
-    pd.setBoolean(ScriptToken.YUNITSON, pl.showYScale);
-
-    /* Create a print job */
-    PrinterJob pj = PrinterJob.getPrinterJob();
-    String printJobTitle = pd.getPrintJobTitle();
-    if (pl.showTitle) {
-      printJobTitle = getInput("Title?", "Print Job Title", printJobTitle);
-      if (printJobTitle == null)
-      	return;
-    }
-    pd.printJobTitle = printJobTitle;
-    if (printJobTitle.length() > 30)
-    	printJobTitle = printJobTitle.substring(0, 30);
-    pj.setJobName(printJobTitle);
-    pj.setPrintable(this);
-
-    if (pj.printDialog()) {
-      try {
-        pj.print(aset);
-      } catch (PrinterException ex) {
-      	String s = ex.getMessage();
-      	if (s == null)
-      		return;
-      	s = TextFormat.simpleReplace(s, "not accepting job.", "not accepting jobs.");
-      	// not my fault -- Windows grammar error!
-        showMessage(s, "Printer Error");
-      }
-    }
-
-    // restore original values
-    
-    pd.gridOn = gridOn;
-    pd.titleOn = titleOn;
-    pd.setBoolean(ScriptToken.XSCALEON, xScaleOn); 
-    pd.setBoolean(ScriptToken.XUNITSON, xUnitsOn); 
-    pd.setBoolean(ScriptToken.YSCALEON, yScaleOn);
-    pd.setBoolean(ScriptToken.YUNITSON, yUnitsOn);
-    
-  }
-
 
   /*--------------the rest are all mouse and keyboard interface -----------------------*/
 
@@ -795,7 +850,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
           + " spectra available.";
     try {
       JDXSpectrum spec = (n < 0 ? getSpectrum() : getSpectrumAt(n));
-      return Exporter.exportTheSpectrum(Exporter.Type.getType(type), null, spec, 0, spec.getXYCoords().length - 1);
+      return Exporter.exportTheSpectrum(Exporter.ExportType.getType(type), null, spec, 0, spec.getXYCoords().length - 1);
     } catch (IOException ioe) {
       // not possible
     }

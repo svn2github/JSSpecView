@@ -1,5 +1,7 @@
 package jspecview.common;
 
+import java.awt.Dimension;
+
 import javax.print.attribute.standard.MediaSizeName;
 
 /**
@@ -41,5 +43,18 @@ public class PrintLayout {
 	 * The size of the paper to be printed on
 	 */
 	public MediaSizeName paper;
+	public static Dimension getDimension(MediaSizeName paper) {
+		// ftp://ftp.pwg.org/pub/pwg/media-sizes/pwg-media-size-03.pdf
+		// at 72 dpi we have...
+		if (paper == MediaSizeName.NA_LETTER) {
+			return new Dimension((int) (8.5 * 72), 11 * 72);
+		} else if (paper == MediaSizeName.NA_LEGAL) {
+			return new Dimension((int) (8.5 * 72), 14 * 72);
+		} else if (paper == MediaSizeName.ISO_A4) {
+			return new Dimension((int) (210 / 25.4 * 72), (int) (297 / 25.4 * 72));
+		} else {// if (paper == MediaSizeName.ISO_B4) {
+			return new Dimension((int) (250 / 25.4 * 72), (int) (353 / 25.4 * 72));
+		}
+	}
 
 }

@@ -144,7 +144,7 @@ public class AppToolBar extends JToolBar {
         });
     setButton(printButton, "Print", printIcon, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        mainFrame.print();
+        mainFrame.print("");
       }
     });
     setButton(revPlotToggleButton, "Reverse Plot", reverseIcon,

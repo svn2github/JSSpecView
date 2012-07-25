@@ -416,6 +416,7 @@ public class JSVPopupMenu extends JPopupMenu {
       JSVPopupMenu.addMenuItem(exportAsMenu, "JPG", actionListener);
       JSVPopupMenu.addMenuItem(exportAsMenu, "PNG", actionListener);
       JSVPopupMenu.addMenuItem(exportAsMenu, "SVG", actionListener);
+      JSVPopupMenu.addMenuItem(exportAsMenu, "PDF", actionListener);
     }
   }
 

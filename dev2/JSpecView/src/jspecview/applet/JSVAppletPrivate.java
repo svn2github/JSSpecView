@@ -52,10 +52,11 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.ArrayList;
 
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+
 import jspecview.application.TextDialog;
 import jspecview.common.AwtPanel;
+import jspecview.common.DialogHelper;
 import jspecview.common.JSVAppletInterface;
 import jspecview.common.JSVDialog;
 import jspecview.common.JSVDropTargetListener;
@@ -72,8 +73,6 @@ import jspecview.common.PanelData;
 import jspecview.common.PanelListener;
 import jspecview.common.Parameters;
 import jspecview.common.PeakPickEvent;
-import jspecview.common.PrintLayout;
-import jspecview.common.AwtPrintLayoutDialog;
 import jspecview.common.ScriptCommandTokenizer;
 import jspecview.common.ScriptInterface;
 import jspecview.common.ScriptToken;
@@ -114,10 +113,12 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 
 	int nViews;
 	private RepaintManager repaintManager;
+	private DialogHelper dialogHelper;
 
 	JSVAppletPrivate(JSVApplet jsvApplet) {
 		this.jsvApplet = jsvApplet;
 		repaintManager = new RepaintManager(this);
+		dialogHelper = new DialogHelper(this);
 		init();
 	}
 
@@ -165,7 +166,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	public void setLoadImaginary(boolean TF) {
 		loadImaginary = TF;
 	}
-	private JFileChooser jFileChooser;
+
 	JFrame offWindowFrame;
 	ViewPanel spectrumPanel;
 	JSVAppletPopupMenu appletPopupMenu;
@@ -196,7 +197,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	void dispose() {
-		jFileChooser = null;
+		dialogHelper = null;
 		try {
 			if (viewDialog != null)
 	  		viewDialog.dispose();
@@ -476,7 +477,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	private boolean allowMenu = true;
 	private boolean compoundMenuOn;
 	private boolean allowCompoundMenu = true;
-	private String dirLastExported;
 	private boolean interfaceOverlaid;
 
 	// //////////// JSVAppletPopupMenu calls
@@ -488,27 +488,25 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
     getSelectedPanel().showHeader(jsvApplet);
 	}
 
-	private PrintLayout lastPrintLayout;
-
 	/**
 	 * Opens the print dialog to enable printing
 	 */
 	public void print() {
-		if (!isSigned())
-			return;
+	  print("");
+	}
+
+		/**
+	 * Opens the print dialog to enable printing
+	 */
+	public String print(String pdfFileName) {
 		boolean needWindow = false; // !isNewWindow;
 		// not sure what this is about. The applet prints fine
 		if (needWindow)
 			newWindow(true);
-		JSVPanel jsvp = getSelectedPanel();
-		PrintLayout pl;
-		if ((pl = (new AwtPrintLayoutDialog(offWindowFrame, lastPrintLayout))
-				.getPrintLayout()) == null)
-			return;
-		lastPrintLayout = pl;
-		((AwtPanel) jsvp).printSpectrum(pl);
+		String s = dialogHelper.print(offWindowFrame, pdfFileName);
 		if (needWindow)
 			newWindow(false);
+		return s;
 	}
 
 	boolean isNewWindow;
@@ -572,12 +570,8 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 			Logger.info(exportSpectrum(type, -1));
 			return;
 		}
-		String msg = Exporter.exportSpectra(this, offWindowFrame,
-				jFileChooser, type, dirLastExported);
-		JSVPanel jsvp = getSelectedPanel();
-		jsvp.getFocusNow(true);
-		if (msg != null)
-			dirLastExported = msg;
+		dialogHelper.exportSpectrum(offWindowFrame, type);
+		getSelectedPanel().getFocusNow(true);
 	}
 
 	/**
@@ -1100,4 +1094,9 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 
 	public void execTest(String value) {
 	}
+	
+	public void setProperty(String key, String value) {
+		// n/a
+	}
+
 }

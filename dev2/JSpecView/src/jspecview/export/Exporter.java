@@ -5,27 +5,22 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
+import jspecview.common.DialogHelper;
 import jspecview.common.JDXSpectrum;
-import jspecview.common.JSVFileFilter;
 import jspecview.common.JSVPanel;
 import jspecview.common.PanelData;
 import jspecview.common.ScriptInterface;
@@ -36,16 +31,16 @@ import jspecview.util.TextFormat;
 public class Exporter {
 
   public final static String sourceLabel = "Original...";
-  public enum Type {
-    UNK, SOURCE, DIF, FIX, SQZ, PAC, XY, DIFDUP, PNG, JPG, SVG, SVGI, CML, AML;
+  public enum ExportType {
+    UNK, SOURCE, DIF, FIX, SQZ, PAC, XY, DIFDUP, PNG, JPG, SVG, SVGI, CML, AML, PDF;
 
-    public static Type getType(String type) {
+    public static ExportType getType(String type) {
       type = type.toUpperCase();
       if (type.equalsIgnoreCase(sourceLabel))
         return SOURCE;
       if (type.startsWith("XML"))
         return AML;
-      for (Type mode : values())
+      for (ExportType mode : values())
         if (mode.name().equals(type)) 
           return mode;
       return UNK;
@@ -70,7 +65,7 @@ public class Exporter {
    * @return message or text
    * @throws IOException
    */
-  public static String exportTheSpectrum(Type mode, String path, 
+  public static String exportTheSpectrum(ExportType mode, String path, 
                                          JDXSpectrum spec, int startIndex, int endIndex)
       throws IOException {
     switch (mode) {
@@ -83,7 +78,7 @@ public class Exporter {
       return JDXExporter.export(mode, path, spec, startIndex, endIndex);      
     case SVG:
     case SVGI:
-      return (new SVGExporter()).exportAsSVG(path, spec, startIndex, endIndex, mode == Type.SVGI);
+      return (new SVGExporter()).exportAsSVG(path, spec, startIndex, endIndex, mode == ExportType.SVGI);
     case CML:
       return (new CMLExporter()).exportAsCML(path, spec, startIndex, endIndex);
     case AML:
@@ -97,14 +92,12 @@ public class Exporter {
    * 
    * @param si 
    * @param frame
-   * @param fc
+   * @param dialogHelper
    * @param type
-   * @param dirLastExported
-   * @return null or directory saved to
+   * @return directory saved to or a message starting with "Error:" 
    */
-  public static String exportSpectra(ScriptInterface si, JFrame frame,
-                                     JFileChooser fc, String type,
-                                     String dirLastExported) {
+  public static String exportSpectrum(ScriptInterface si, JFrame frame,
+                                     DialogHelper dialogHelper, String type) {
   	
   	JSVPanel jsvp = si.getSelectedPanel();
   	boolean isView = si.getCurrentSource().isView;
@@ -112,19 +105,17 @@ public class Exporter {
     // if JSVPanel has more than one spectrum...Choose which one to export
     int nSpectra = jsvp.getPanelData().getNumberOfSpectraInCurrentSet();
     if (nSpectra == 1 
-    		|| type.equals("JPG") 
-    		|| type.equals("PNG")
     		|| !isView && type.equals(sourceLabel) 
     		|| jsvp.getPanelData().getCurrentSpectrumIndex() >= 0 
     		)
-      return exportSpectrumOrImage(si, type, -1, fc, dirLastExported);
+      return exportSpectrum(si, type, -1, dialogHelper);
     
     
     String[] items = new String[nSpectra];
     for (int i = 0; i < nSpectra; i++)
       items[i] = jsvp.getSpectrumAt(i).getTitle();
 
-    final JDialog dialog = new JDialog(frame, "Choose Spectrum", true);
+    final JDialog dialog = new JDialog(frame, "Export", true);
     dialog.setResizable(false);
     dialog.setSize(200, 100);
     Component panel = (Component) jsvp;
@@ -144,7 +135,6 @@ public class Exporter {
         new JLabel("Choose Spectrum to export", SwingConstants.CENTER),
         BorderLayout.NORTH);
     dialog.getContentPane().add(p);
-    String dir = dirLastExported;
     final int ret[] = new int[] { -1 };
     button.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -156,9 +146,7 @@ public class Exporter {
     dialog.dispose();
     if (ret[0] < 0)
     	return null;    
-    String msg = exportSpectrumOrImage(si, type, ret[0], fc, dirLastExported);
-    return (msg == null ? null : dir);
-    
+    return exportSpectrum(si, type, ret[0], dialogHelper);    
   }
 
   /**
@@ -192,14 +180,14 @@ public class Exporter {
     if (ext.equals("JDX")) {
       if (mode == null)
         mode = "XY";
-    } else if (Type.isExportMode(ext)) {
+    } else if (ExportType.isExportMode(ext)) {
       mode = ext;
-    } else if (Type.isExportMode(mode)){
+    } else if (ExportType.isExportMode(mode)){
       fileName += "."  + mode;
     }
-    Type type = Type.getType(mode);
-    if (forInkscape && type == Type.SVG)
-      type = Type.SVGI;
+    ExportType type = ExportType.getType(mode);
+    if (forInkscape && type == ExportType.SVG)
+      type = ExportType.SVGI;
     return exportSpectrumOrImage(jsvp, type, -1, fileName);
   }
 
@@ -210,69 +198,28 @@ public class Exporter {
    *        the format to export in
    * @param index
    *        the index of the spectrum
-   * @param fc
-   *        file chooser to use
-   * @param dirLastExported
-   * @return dirLastExported
+   * @param dialogHelper 
+   * @return message or null if canceled
    */
-	private static String exportSpectrumOrImage(ScriptInterface si,
+	private static String exportSpectrum(ScriptInterface si,
                                               String mode, int index,
-                                              JFileChooser fc,
-                                              String dirLastExported) {
+                                              DialogHelper dialogHelper) {
 		JSVPanel jsvp = si.getSelectedPanel();
-    Type imode = Type.getType(mode);
-    JSVFileFilter filter = new JSVFileFilter();
-    String sourcePath = jsvp.getSpectrum().getFilePath();
-    String newName = FileManager.getName(sourcePath);
-
-    int pt = newName.lastIndexOf(".");
-    String name = (pt < 0 ? newName : newName.substring(0, pt));
-    if (si.getCurrentSource().isView)
-    	name += si.getCurrentSource().getFilePath();
-    switch (imode) {
-    case XY:
-    case FIX:
-    case PAC:
-    case SQZ:
-    case DIF:
-    case DIFDUP:
-    case SOURCE:
-      filter.addExtension("jdx");
-      filter.addExtension("dx");
-      filter.setDescription("JCAMP-DX Files");
-      name += ".jdx";
-      break;
-    case AML:
-      mode = "XML";
-      //$FALL-THROUGH$
-    default:
-      filter.addExtension(mode);
-      filter.setDescription(mode + " Files");
-      name += "." + mode.toLowerCase();
-    }
-    fc.setFileFilter(filter);
-    fc.setSelectedFile(new File(name));
-    int returnVal = fc.showSaveDialog((Component) jsvp);
-    if (returnVal != JFileChooser.APPROVE_OPTION)
-      return dirLastExported;
-    File file = fc.getSelectedFile();
-    String dir = file.getParent();
-    if (file.exists()) {
-      int option = JOptionPane.showConfirmDialog((Component) jsvp,
-          "Overwrite " + file.getName() + "?", "Confirm Overwrite Existing File",
-          JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-      if (option == JOptionPane.NO_OPTION)
-        return dir;
-    }
+    ExportType imode = ExportType.getType(mode);
+		String name = dialogHelper.getSuggestedFileName(imode);
+    File file = dialogHelper.getFile(name, (Component) jsvp, true);
+    if (file == null)
+    	return null;
     String msg = "OK";
-    if (imode == Type.SOURCE)
-      FileManager.fileCopy(sourcePath, file);
+    if (imode == ExportType.SOURCE)
+      FileManager.fileCopy(jsvp.getSpectrum().getFilePath(), file);
     else
       msg = exportSpectrumOrImage(jsvp, imode, index, file
           .getAbsolutePath());
-    if (msg != null)
+    boolean isOK = msg.startsWith("OK");
+    if (isOK)
     	si.updateRecentMenus(file.getAbsolutePath());
-    return (msg == null ? null : dir);
+    return msg;
   }
   
   /**
@@ -283,26 +230,19 @@ public class Exporter {
    * @param path
    * @return  status line message
    */
-  private static String exportSpectrumOrImage(JSVPanel jsvp, Type imode,
+  private static String exportSpectrumOrImage(JSVPanel jsvp, ExportType imode,
                                               int index, String path) {
     JDXSpectrum spec;
     PanelData pd = jsvp.getPanelData();
+    
     if (index < 0 && (index = pd.getCurrentSpectrumIndex()) < 0)
-      return "ERROR: No spectrum selected";
+      return "Error exporting spectrum: No spectrum selected";
     spec = pd.getSpectrumAt(index);
     int startIndex = pd.getStartDataPointIndices()[index];
     int endIndex = pd.getEndDataPointIndices()[index];
     String msg;
     try {
       switch (imode) {
-      case PNG:
-      case JPG:
-        Image image = ((Component) jsvp).createImage(jsvp.getWidth(), jsvp.getHeight());
-        ((Component) jsvp).paint(image.getGraphics());
-        ImageIO.write((RenderedImage) image, (imode == Type.PNG ? "png" : "jpg"),
-            new File(path));
-        msg = " OK";
-        break;
       case SVG:
       case SVGI:
         msg = (new SVGExporter()).exportAsSVG(path, spec.getXYCoords(), 
@@ -314,12 +254,12 @@ public class Exporter {
             (Color)jsvp.getColor(ScriptToken.TITLECOLOR),
             (Color)jsvp.getColor(ScriptToken.SCALECOLOR),
             (Color)jsvp.getColor(ScriptToken.UNITSCOLOR),
-            imode == Type.SVGI);
+            imode == ExportType.SVGI);
         break;
       default:
         msg = exportTheSpectrum(imode, path, spec, startIndex, endIndex);
       }
-      return "Exported " + imode.name() + ": " + path + msg;
+      return "OK - Exported " + imode.name() + ": " + path + msg;
     } catch (IOException ioe) {
       return "Error exporting " + path + ": " + ioe.getMessage();
     }

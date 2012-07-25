@@ -66,7 +66,6 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 
 import javax.swing.BorderFactory;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -84,6 +83,7 @@ import org.jmol.api.JmolSyncInterface;
 
 import jspecview.applet.JSVAppletPrivatePro;
 import jspecview.common.AwtPanel;
+import jspecview.common.DialogHelper;
 import jspecview.common.JSVAppletInterface;
 import jspecview.common.JSVDialog;
 import jspecview.common.JSVDropTargetListener;
@@ -98,13 +98,10 @@ import jspecview.common.ViewDialog;
 import jspecview.common.PanelData;
 import jspecview.common.Parameters;
 import jspecview.common.JSVPopupMenu;
-import jspecview.common.JSVFileFilter;
 import jspecview.common.AwtOverlayLegendDialog;
 import jspecview.common.AwtParameters;
 import jspecview.common.PanelListener;
 import jspecview.common.PeakPickEvent;
-import jspecview.common.PrintLayout;
-import jspecview.common.AwtPrintLayoutDialog;
 import jspecview.common.ScriptInterface;
 import jspecview.common.ScriptToken;
 import jspecview.common.JDXSpectrum;
@@ -149,10 +146,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	private String defaultDisplaySchemeName;
 	private boolean interfaceOverlaid;
 	private boolean autoShowLegend;
-	private boolean useDirLastOpened;
-	private boolean useDirLastExported;
-	private String dirLastOpened;
-	private String dirLastExported;
 	private String recentURL;
 	private String integrationRatios;
 	public void setIntegrationRatios(String value) {
@@ -207,8 +200,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	private JLabel statusLabel = new JLabel();
 	JTextField commandInput = new JTextField();
 
-	private JFileChooser fc;
-
 	private JSVInterface jmolOrAdvancedApplet;
 	private JSVAppletPrivatePro advancedApplet;
 	private Image iconImage;
@@ -219,6 +210,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	private Container jmolFrame;
 	private Dimension jmolDimensionNew = new Dimension(250, 200);
 	private RepaintManager repaintManager;
+	private DialogHelper dialogHelper;
 
 	/**
 	 * Constructor
@@ -228,6 +220,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	 */
 	public MainFrame(Component jmolDisplay, JSVInterface jmolOrAdvancedApplet) {
 		repaintManager = new RepaintManager(this);
+		dialogHelper = new DialogHelper(this);
 		this.jmolDisplay = jmolDisplay;
 		if (jmolDisplay != null)
 			jmolFrame = jmolDisplay.getParent();
@@ -353,25 +346,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 		setApplicationProperties(true);
 		tempDS = defaultDisplaySchemeName;
-		fc = (Logger.debugging ? new JFileChooser("C:/temp")
-				: useDirLastOpened ? new JFileChooser(dirLastOpened)
-						: new JFileChooser());
-
-		JSVFileFilter filter = new JSVFileFilter();
-
-		filter = new JSVFileFilter();
-		filter.addExtension("xml");
-		filter.addExtension("aml");
-		filter.addExtension("cml");
-		filter.setDescription("CML/XML Files");
-		fc.setFileFilter(filter);
-
-		filter = new JSVFileFilter();
-		filter.addExtension("jdx");
-		filter.addExtension("dx");
-		filter.setDescription("JCAMP-DX Files");
-		fc.setFileFilter(filter);
-
+		
 		// initialise Spectra tree
 
 		spectraTree = new JSVTree(this);
@@ -446,12 +421,12 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		autoShowLegend = Boolean.parseBoolean(properties
 				.getProperty("automaticallyShowLegend"));
 
-		useDirLastOpened = Boolean.parseBoolean(properties
+		dialogHelper.useDirLastOpened = Boolean.parseBoolean(properties
 				.getProperty("useDirectoryLastOpenedFile"));
-		useDirLastExported = Boolean.parseBoolean(properties
+		dialogHelper.useDirLastExported = Boolean.parseBoolean(properties
 				.getProperty("useDirectoryLastExportedFile"));
-		dirLastOpened = properties.getProperty("directoryLastOpenedFile");
-		dirLastExported = properties.getProperty("directoryLastExportedFile");
+		dialogHelper.dirLastOpened = properties.getProperty("directoryLastOpenedFile");
+		dialogHelper.dirLastExported = properties.getProperty("directoryLastExportedFile");
 
 		sidePanelOn = Boolean.parseBoolean(properties.getProperty("showSidePanel"));
 		toolbarOn = Boolean.parseBoolean(properties.getProperty("showToolBar"));
@@ -633,11 +608,9 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	 * Shows dialog to open a file
 	 */
 	void showFileOpenDialog() {
-		if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-			File file = fc.getSelectedFile();
-			properties.setProperty("directoryLastOpenedFile", file.getParent());
+		File file = dialogHelper.showFileOpenDialog(this);
+		if (file != null)
 			openFile(file.getAbsolutePath(), true);
-		}
 	}
 
 	public void openDataOrFile(String data, String name, List<JDXSpectrum> specs,
@@ -795,23 +768,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	 *          the name of the format to export in
 	 */
 	void exportSpectrumViaMenu(String command) {
-		JSVPanel jsvp = getSelectedPanel();
-		if (jsvp == null)
-			return;
-		if (fc == null)
-			return;
-
-		if (Logger.debugging) {
-			fc.setCurrentDirectory(new File("C:\\JCAMPDX"));
-		} else if (useDirLastExported) {
-			fc.setCurrentDirectory(new File(dirLastExported));
-		}
-		String msg = Exporter.exportSpectra(this, this, fc, command,
-				dirLastExported);
-		jsvp.getFocusNow(true);
-		if (msg != null)
-  		dirLastExported = msg;
-
+		dialogHelper.exportSpectrum(this, command);
 	}
 
 	protected void windowClosing_actionPerformed() {
@@ -1130,19 +1087,10 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		openDataOrFile(null, null, null, url, -1, -1, false);
 	}
 
-	private PrintLayout lastPrintLayout;
-
-	public void print() {
-		JSVPanel jsvp = getSelectedPanel();
-		PrintLayout pl;
-		if (jsvp == null
-				|| (pl = (new AwtPrintLayoutDialog(this, lastPrintLayout))
-						.getPrintLayout()) == null)
-			return;
-		lastPrintLayout = pl;
-		((AwtPanel) jsvp).printSpectrum(pl);
+	public String print(String pdfFileName) {
+		return dialogHelper.print(this, pdfFileName);
 	}
-
+	
 	public void toggleOverlayKey() {
 		JSVPanel jsvp = getSelectedPanel();
 		if (jsvp == null)
@@ -1325,6 +1273,9 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	public void repaintCompleted() {
 			repaintManager.repaintDone();
+	}
+	public void setProperty(String key, String value) {
+		properties.setProperty(key, value);
 	}
 	
 }

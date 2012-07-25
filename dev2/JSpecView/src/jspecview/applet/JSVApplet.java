@@ -286,4 +286,8 @@ public class JSVApplet extends JApplet implements JSVAppletInterface {
     return appletPrivate.runScriptNow(script);    
   }
 
+	public String print(String pdfFileName) {
+		return appletPrivate.print(pdfFileName);
+	}
+
 }

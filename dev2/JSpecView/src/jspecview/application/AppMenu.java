@@ -149,7 +149,7 @@ public class AppMenu extends JMenuBar {
     JSVPopupMenu.setMenuItem(printMenuItem, 'P', "Print...", 80,
         InputEvent.CTRL_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            mainFrame.print();
+            mainFrame.print("");
           }
         });
     JSVPopupMenu.setMenuItem(closeMenuItem, 'C', "Close", 115,

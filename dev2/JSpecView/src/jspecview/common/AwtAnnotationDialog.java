@@ -213,7 +213,7 @@ abstract class AwtAnnotationDialog extends AwtDialog implements AnnotationDialog
 		try {
 			tableData = data;
 			rightPanel.removeAll();
-			JScrollPane scrollPane = new JScrollPane(dataTable = (new DialogHelper())
+			JScrollPane scrollPane = new JScrollPane(dataTable = (new DialogHelper(si))
 					.getDataTable(this, data, header, widths, leftPanel.getHeight() - 50));
 			mainSplitPane.setRightComponent(scrollPane);
 			// .add(scrollPane);
