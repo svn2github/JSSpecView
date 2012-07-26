@@ -54,11 +54,11 @@ abstract class FormExporter {
   }
 
   protected String writeForm(String templateFile) throws IOException {
-    FileManager fm = new FileManager(null);
-    String template = fm.getResourceString(this, templateFile, true);
+    String[] error = new String[1];
+    String template = FileManager.getResourceString(this, templateFile, error);
     if (template == null) {
-      Logger.error(fm.getErrorMessage());
-      return fm.getErrorMessage();
+      Logger.error(error[0]);
+      return error[0];
     }
     errMsg = context.setTemplate(template);
     if (errMsg != null) {

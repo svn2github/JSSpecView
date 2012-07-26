@@ -100,16 +100,16 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     Logger.info("JSVPanel " + this + " finalized");
   }
 
-  ScriptInterface si;
+  private AwtPopupMenu popup;
+  private ScriptInterface si;
 
   public PanelData pd;
 
+  
   public PanelData getPanelData() {
     return pd;
   }
 
-  AwtPopupMenu popup;
-  
   public AwtPopupMenu getPopup() {
     return popup;
   }
@@ -127,20 +127,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     removeMouseListener(this);
     removeMouseMotionListener(this);
   }
-//
-//  class AwtToolTip extends JToolTip {
-//
-//		private static final long serialVersionUID = 1L;
-//
-//		AwtToolTip(AwtPanel panel) {
-//			super();
-//			setComponent(panel);
-//			addKeyListener(panel);
-//			setBackground(Color.blue);
-//		}
-//		
-//  }
-  
+
   public JDXSpectrum getSpectrum() {
     return pd.getSpectrum();
   }
@@ -153,17 +140,16 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     return pd.getSpectrumAt(i);
   }
   
+  public String getTitle() {
+    return pd.getTitle();
+  }
+
   public void setTitle(String title) {
     pd.title = title;
     setName(title);
   }
 
   
-  public void doRepaint() {
-  	if (!pd.isPrinting)
-      si.requestRepaint();
-  }
-
   ////////// settable colors //////////
 
   private Color coordinatesColor;
@@ -371,11 +357,21 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 
   /*----------------------- JSVPanel PAINTING METHODS ---------------------*/
 
+  public void doRepaint() {
+  	// to the system
+  	if (!pd.isPrinting)
+      si.requestRepaint();
+  }
+  
   @Override
 	public void update(Graphics g) {
+  	// from the system
   	// System: Do not clear rectangle -- we are opaque and will take care of that.
+  	// seems unnecessary, but apparently for the Mac it is critical. Still not totally convinced!
       paint(g);
   }
+ 
+
   /**
    * Overrides paintComponent in class JPanel in order to draw the spectrum
    * 
@@ -384,9 +380,14 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
    */
   @Override
   public void paintComponent(Graphics g) {
+  	
+  	// from the system, via update or applet/app repaint
+  	
     if (si == null || pd == null || pd.graphSets == null || pd.isPrinting)
       return;
-    super.paintComponent(g);
+    
+    super.paintComponent(g); // paint background 
+    
     pd.drawGraph(g, getWidth(), getHeight(), false);
     si.repaintCompleted();
   }
@@ -408,10 +409,6 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
    * 
    * @param g
    *        the <code>Graphics</code> object
-   * @param height
-   *        the height to be drawn in pixels
-   * @param width
-   *        the width to be drawn in pixels
    */
   public void drawCoordinates(Object og) {
   	if (pd.coordStr == null)
@@ -419,8 +416,8 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     Graphics g = (Graphics) og;
     g.setColor(coordinatesColor);
     pd.setFont(g, getWidth(), Font.PLAIN, 12, true);
-    g.drawString(pd.coordStr, (int) ((pd.plotAreaWidth + pd.left) * 0.85),
-        (pd.top - 10));
+    g.drawString(pd.coordStr, (int) ((pd.thisWidth - pd.right) * 0.85),
+        (pd.top - 20));
   }
 
 	/**
@@ -453,7 +450,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 		String s = DateFormat.getInstance().format(new Date())
 		+ " JSpecView " + JSVersion.VERSION_SHORT;
 		int w = fm.stringWidth(s);
-		g.drawString(s, pd.left + pd.plotAreaWidth - w, pageHeight - fm.getHeight());
+		g.drawString(s, pd.thisWidth - pd.right - w, pageHeight - fm.getHeight());
 	}
 
 
@@ -462,7 +459,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
    * 
    * @param g
    *        the <code>Graphics</code> object
-   * @param height
+   * @param pageHeight
    *        the height to be drawn in pixels
    * @param pageWidth
    *        the width to be drawn in pixels
@@ -515,7 +512,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 		// MediaSize size = MediaSize.getMediaSizeForName(pl.paper);
 
 		// Set Graph Properties
-		pd.printingFont = pl.font;
+		pd.printingFont = (os == null ? pl.font : "Helvetica");
 		pd.printGraphPosition = pl.position;
 
 		// save original values
@@ -640,7 +637,111 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     return Printable.NO_SUCH_PAGE;
   }
 
-  /*--------------------------------------------------------------------------*/
+  
+  public void setupPlatform() {
+    setBorder(BorderFactory.createLineBorder(Color.lightGray));
+    if (popup == null) {
+      // preferences dialog
+      pd.coordStr = "(0,0)";
+    } else {
+      addKeyListener(this);
+      addMouseListener(this);
+      addMouseMotionListener(this);
+    }
+  }
+
+  public String export(String type, int n) {
+    if (type == null)
+      type = "XY";
+    if (n < -1 || pd.getNumberOfSpectraInCurrentSet() <= n)
+      return "only " + pd.getNumberOfSpectraInCurrentSet()
+          + " spectra available.";
+    try {
+      JDXSpectrum spec = (n < 0 ? getSpectrum() : getSpectrumAt(n));
+      return Exporter.exportTheSpectrum(Exporter.ExportType.getType(type), null, spec, 0, spec.getXYCoords().length - 1);
+    } catch (IOException ioe) {
+      // not possible
+    }
+    return null;
+  }
+  
+  @Override
+  public String toString() {
+    return getSpectrumAt(0).toString();
+  }
+
+  public String getInput(String message, String title, String sval) {
+    String ret = (String) JOptionPane.showInputDialog(this, message, title,
+        JOptionPane.QUESTION_MESSAGE, null, null, sval);
+    getFocusNow(true);
+    return ret;
+  }
+
+	public void showMessage(String msg, String title) {
+		Logger.info(msg);
+		JOptionPane.showMessageDialog(this, msg, title, (msg.startsWith("<html>") ? JOptionPane.INFORMATION_MESSAGE 
+				: JOptionPane.PLAIN_MESSAGE));	
+		getFocusNow(true);
+	}
+
+	public void showHeader(Object jsvApplet) {
+		JDXSpectrum spectrum = pd.getSpectrum();
+		String[][] rowData = spectrum.getHeaderRowDataAsArray();
+		String[] columnNames = { "Label", "Description" };
+		JTable table = new JTable(rowData, columnNames);
+		table.setPreferredScrollableViewportSize(new Dimension(400, 195));
+		JScrollPane scrollPane = new JScrollPane(table);
+		JOptionPane.showMessageDialog((Container) jsvApplet, scrollPane, "Header Information",
+				JOptionPane.PLAIN_MESSAGE);
+		getFocusNow(true);
+	}
+
+	public AnnotationDialog showDialog(AType type) {
+		AwtAnnotationDialog dialog = null; 
+		AnnotationData ad = pd.getDialog(type);
+		pd.closeAllDialogsExcept(type);
+		if (ad != null && ad instanceof AwtAnnotationDialog) {
+			((AwtAnnotationDialog) ad).reEnable();
+			return (AnnotationDialog) ad;
+		}
+		
+		int iSpec = pd.getCurrentSpectrumIndex();
+		if (iSpec < 0) {
+			showMessage("To enable " + type + " first select a spectrum by clicking on it.", "" + type);
+			return null;
+		}
+		JDXSpectrum spec = getSpectrum();
+		switch (type) {
+		case Integration:
+			dialog = new AwtIntegralListDialog("Integration for " + spec, si, spec, this);
+			break;
+		case Measurements:
+			dialog = new AwtMeasurementListDialog("Measurements for " + spec, si, spec, this);
+			break;
+		case PeakList:
+			dialog = new AwtPeakListDialog("Peak List for " + spec, si, spec, this);
+			break;
+		case NONE:
+		}
+		if (ad != null)
+			dialog.setData(ad);
+		pd.addDialog(iSpec, type, dialog);
+		dialog.reEnable();
+		return dialog;
+	}
+
+	public void getFocusNow(boolean asThread) {
+		if (asThread)
+			SwingUtilities.invokeLater(new RequestThread());
+		else
+  		requestFocusInWindow();
+	}
+
+  public class RequestThread implements Runnable {
+		public void run() {
+			requestFocusInWindow();
+		}
+  }
 
   /*--------------the rest are all mouse and keyboard interface -----------------------*/
 
@@ -802,117 +903,5 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     }
   }
 
-  public void setupPlatform() {
-    setBorder(BorderFactory.createLineBorder(Color.lightGray));
-    if (popup == null) {
-      // preferences dialog
-      pd.coordStr = "(0,0)";
-    } else {
-      addKeyListener(this);
-      addMouseListener(this);
-      addMouseMotionListener(this);
-    }
-  }
-
-  public String getTitle() {
-    return pd.getTitle();
-  }
-
-  public void paint(Object graphics) {
-    super.paint((Graphics) graphics);
-  }
-
-  public String export(String type, int n) {
-    if (type == null)
-      type = "XY";
-    if (n < -1 || pd.getNumberOfSpectraInCurrentSet() <= n)
-      return "only " + pd.getNumberOfSpectraInCurrentSet()
-          + " spectra available.";
-    try {
-      JDXSpectrum spec = (n < 0 ? getSpectrum() : getSpectrumAt(n));
-      return Exporter.exportTheSpectrum(Exporter.ExportType.getType(type), null, spec, 0, spec.getXYCoords().length - 1);
-    } catch (IOException ioe) {
-      // not possible
-    }
-    return null;
-  }
-  
-  @Override
-  public String toString() {
-    return getSpectrumAt(0).toString();
-  }
-
-  public String getInput(String message, String title, String sval) {
-    String ret = (String) JOptionPane.showInputDialog(this, message, title,
-        JOptionPane.QUESTION_MESSAGE, null, null, sval);
-    getFocusNow(true);
-    return ret;
-  }
-
-	public void showMessage(String msg, String title) {
-		Logger.info(msg);
-		JOptionPane.showMessageDialog(this, msg, title, (msg.startsWith("<html>") ? JOptionPane.INFORMATION_MESSAGE 
-				: JOptionPane.PLAIN_MESSAGE));	
-		getFocusNow(true);
-	}
-
-	public void showHeader(Object jsvApplet) {
-		JDXSpectrum spectrum = pd.getSpectrum();
-		String[][] rowData = spectrum.getHeaderRowDataAsArray();
-		String[] columnNames = { "Label", "Description" };
-		JTable table = new JTable(rowData, columnNames);
-		table.setPreferredScrollableViewportSize(new Dimension(400, 195));
-		JScrollPane scrollPane = new JScrollPane(table);
-		JOptionPane.showMessageDialog((Container) jsvApplet, scrollPane, "Header Information",
-				JOptionPane.PLAIN_MESSAGE);
-		getFocusNow(true);
-	}
-
-	public AnnotationDialog showDialog(AType type) {
-		AwtAnnotationDialog dialog = null; 
-		AnnotationData ad = pd.getDialog(type);
-		pd.closeAllDialogsExcept(type);
-		if (ad != null && ad instanceof AwtAnnotationDialog) {
-			((AwtAnnotationDialog) ad).reEnable();
-			return (AnnotationDialog) ad;
-		}
-		
-		int iSpec = pd.getCurrentSpectrumIndex();
-		if (iSpec < 0) {
-			showMessage("To enable " + type + " first select a spectrum by clicking on it.", "" + type);
-			return null;
-		}
-		JDXSpectrum spec = getSpectrum();
-		switch (type) {
-		case Integration:
-			dialog = new AwtIntegralListDialog("Integration for " + spec, si, spec, this);
-			break;
-		case Measurements:
-			dialog = new AwtMeasurementListDialog("Measurements for " + spec, si, spec, this);
-			break;
-		case PeakList:
-			dialog = new AwtPeakListDialog("Peak List for " + spec, si, spec, this);
-			break;
-		case NONE:
-		}
-		if (ad != null)
-			dialog.setData(ad);
-		pd.addDialog(iSpec, type, dialog);
-		dialog.reEnable();
-		return dialog;
-	}
-
-	public void getFocusNow(boolean asThread) {
-		if (asThread)
-			SwingUtilities.invokeLater(new RequestThread());
-		else
-  		requestFocusInWindow();
-	}
-
-  public class RequestThread implements Runnable {
-		public void run() {
-			requestFocusInWindow();
-		}
-  }
 
 }

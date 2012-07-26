@@ -8,6 +8,7 @@ import java.util.StringTokenizer;
 
 import jspecview.common.Annotation.AType;
 import jspecview.common.JDXSpectrum.IRMode;
+import jspecview.common.PanelData.LinkMode;
 import jspecview.source.JDXSource;
 import jspecview.util.Escape;
 import jspecview.util.Logger;
@@ -24,7 +25,12 @@ import jspecview.util.TextFormat;
  */
 public class JSViewer {
 
+	// ALL STATIC METHODS
+	
+	private final static int NLEVEL_MAX = 100;
+	
   public static boolean runScriptNow(ScriptInterface si, String script) {
+		si.incrementViewCount(1);		
     if (script == null)
       script = "";
     String msg = null;
@@ -34,7 +40,8 @@ public class JSViewer {
     ScriptCommandTokenizer commandTokens = new ScriptCommandTokenizer(script, ";\n");
     JSVPanel jsvp = si.getSelectedPanel();
     boolean isOK = true;
-    while (commandTokens.hasMoreTokens()) {
+    int nErrorsLeft = 10;
+    while (commandTokens.hasMoreTokens() && nErrorsLeft > 0) {
       String token = commandTokens.nextToken();
       // now split the key/value pair
       StringTokenizer eachParam = new StringTokenizer(token);
@@ -48,6 +55,7 @@ public class JSViewer {
         switch (st) {
         case UNKNOWN:
           Logger.info("Unrecognized parameter: " + key);
+          --nErrorsLeft;
           break;
         default:
           si.getParameters().set(jsvp, st, value);
@@ -119,6 +127,10 @@ public class JSViewer {
           if (jsvp != null)
             jsvp.getPanelData().addAnnotation(ScriptToken.getTokens(value));
           break;
+        case LINK:
+        	if (jsvp != null)
+      			jsvp.getPanelData().linkSpectra(LinkMode.getMode(value));
+          break;
         case LOAD:
           msg = si.execLoad(value);
           jsvp = si.getSelectedPanel();
@@ -143,6 +155,11 @@ public class JSViewer {
         	break;
         case SCALEBY:
         	scaleSelectedBy(si.getPanelNodes(), value);
+        	break;
+        case SCRIPT:
+        	String s = si.getFileAsString(value);
+        	if (s != null && si.incrementScriptLevelCount(0) < NLEVEL_MAX)
+        		runScriptNow(si, s);
         	break;
         case SELECT:
           execSelect(si, value);
@@ -203,6 +220,7 @@ public class JSViewer {
         case OVERLAY: // deprecated
         case VIEW:
           execView(si, value, true);
+          jsvp = si.getSelectedPanel();
           break;
         case YSCALE:
         	if (jsvp != null)
@@ -214,11 +232,14 @@ public class JSViewer {
           break;
         }
       } catch (Exception e) {
-        e.printStackTrace();
-        // should we be returning?
+        Logger.error(e.getMessage());
+        if (Logger.debugging)
+        	e.printStackTrace();
         isOK = false;
+        --nErrorsLeft;
       }
     }
+		si.incrementViewCount(-1);		
     si.execScriptComplete(msg, true);
 	  //si.getSelectedPanel().requestFocusInWindow(); // could be CLOSE ALL
     return isOK;
@@ -385,7 +406,7 @@ public class JSViewer {
         JSVPanelNode node = panelNodes.get(i);
         if (node.source != currentSource)
           continue;
-        if (JDXSpectrum.areScalesCompatible(spec, node.getSpectrum(), false))
+        if (JDXSpectrum.areXScalesCompatible(spec, node.getSpectrum(), false, false))
           node.jsvp.getPanelData().setZoom(Double.NaN, y1, Double.NaN, y2);
       }
     } else {

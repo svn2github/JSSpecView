@@ -37,35 +37,33 @@ import java.util.zip.GZIPInputStream;
 
 public class FileManager {
 
-  //private URL appletDocumentBase;
-  private String openErrorMessage;
+	// ALL STATIC METHODS
+	
+	/**
+	 * @param name 
+	 * @param appletDocumentBase
+	 * @return file as string
+	 * 
+	 */
 
-  /**
-   * From org.jmol.viewer.FileManager
-   * 
-   * @param appletDocumentBase
-   * 
-   */
-
-  public FileManager(URL appletDocumentBase) {
-    //this.appletDocumentBase = appletDocumentBase;
-  }
-
-//  public String getFileAsString(String name) throws IOException {
-//    if (name == null)
-//      throw new IOException("name is null");
-//
-//    BufferedReader br = getBufferedReaderFromName(name, appletDocumentBase, null);
-//
-//    StringBuffer sb = new StringBuffer(8192);
-//    String line;
-//    while ((line = br.readLine()) != null) {
-//      sb.append(line);
-//      sb.append('\n');
-//    }
-//    br.close();
-//    return sb.toString();
-//  }
+	public static String getFileAsString(String name, URL appletDocumentBase) {
+		if (name == null)
+			return null;
+		BufferedReader br;
+		StringBuffer sb = new StringBuffer(8192);
+		try {
+			br = getBufferedReaderFromName(name, appletDocumentBase, null);
+			String line;
+			while ((line = br.readLine()) != null) {
+				sb.append(line);
+				sb.append('\n');
+			}
+			br.close();
+		} catch (Exception e) {
+			return null;
+		}
+		return sb.toString();
+	}
 
   public static BufferedReader getBufferedReaderForInputStream(InputStream in)
       throws IOException {
@@ -189,23 +187,23 @@ public class FileManager {
     return new MonitorInputStream(in, length);
   }
 
-  public URL getResource(Object object, String fileName, boolean flagError) {
+  private static URL getResource(Object object, String fileName, String[] error) {
     URL url = null;
     try {
-      if ((url = object.getClass().getResource("resources/" + fileName)) == null
-          && flagError)
-        openErrorMessage = "Couldn't find file: " + fileName;
+      if ((url = object.getClass().getResource("resources/" + fileName)) == null)
+        error[0] = "Couldn't find file: " + fileName;
     } catch (Exception e) {
-      openErrorMessage = "Exception " + e.getMessage() + " in getResource "
+    	
+      error[0] = "Exception " + e.getMessage() + " in getResource "
           + fileName;
     }
     return url;
   }
 
-  public String getResourceString(Object object, String name, boolean flagError) {
-    URL url = getResource(object, name, flagError);
+  public static String getResourceString(Object object, String name, String[] error) {
+    URL url = getResource(object, name, error);
     if (url == null) {
-      openErrorMessage = "Error loading resource " + name;
+      error[0] = "Error loading resource " + name;
       return null;
     }
     StringBuffer sb = new StringBuffer();
@@ -221,14 +219,10 @@ public class FileManager {
         sb.append(line).append("\n");
       br.close();
     } catch (Exception e) {
-      openErrorMessage = e.getMessage();
+      error[0] = e.getMessage();
     }
     String str = sb.toString();
     return str;
-  }
-
-  public String getErrorMessage() {
-    return openErrorMessage;
   }
 
   public static String getJmolFilePath(String filePath, URL appletDocumentBase) {

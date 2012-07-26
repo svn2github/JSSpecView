@@ -9,17 +9,21 @@ import java.util.List;
 import java.util.Map;
 
 import jspecview.common.Annotation.AType;
+import jspecview.common.PanelData.LinkMode;
 import jspecview.exception.JSpecViewException;
 import jspecview.exception.ScalesIncompatibleException;
 import jspecview.util.Logger;
 import jspecview.util.Parser;
 import jspecview.util.TextFormat;
 
-abstract class GraphSet {
+abstract class GraphSet implements XScaleConverter {
 
 	protected enum ArrowType {
 		LEFT, RIGHT, UP, DOWN, RESET, HOME
 	}
+
+	GraphSet gs2dLinkedX;
+	GraphSet gs2dLinkedY;
 
 	abstract protected void disposeImage();
 
@@ -75,7 +79,7 @@ abstract class GraphSet {
 
 	abstract void setPlotColor0(Object oColor);
 
-	abstract boolean update2dImage(boolean forceNew, boolean isCreation);
+	abstract boolean update2dImage(boolean isCreation);
 
 	protected List<Highlight> highlights = new ArrayList<Highlight>();
 	protected List<JDXSpectrum> spectra = new ArrayList<JDXSpectrum>(2);
@@ -94,6 +98,8 @@ abstract class GraphSet {
 	private PlotWidget[] widgets;
 	private double userYFactor = 1;
 	private double yRef = 0;
+	private boolean isLinked;
+
 
 	final static double RT2 = Math.sqrt(2.0);
 	private boolean haveSingleYScale;
@@ -260,7 +266,7 @@ abstract class GraphSet {
 		dialogs = null;
 	}
 
-	private double fracY = 1, fX0 = 0, fY0 = 0; // take up full screen
+	private double fracX = 1, fracY = 1, fX0 = 0, fY0 = 0; // take up full screen
 
 	private PlotWidget zoomBox1D, zoomBox2D, pin1Dx0, pin1Dx1, // ppm range --
 			// horizontal bar
@@ -273,10 +279,11 @@ abstract class GraphSet {
 			pin2Dx01, pin2Dy01, // center pins for those
 			cur2Dx0, cur2Dx1, // 2D x cursors -- derived from pin1Dx0 and pin1Dx1
 			// values
+			cur1D2x1, cur1D2x2, // 1D cursors derived from 2D cursors
 			cur2Dy; // 2D y cursor -- points to currently displayed 1D slice
 
 	// for the 1D plot area:
-	private int xPixel0, yPixel0, xPixel1, yPixel1;
+	private int xPixel0, yPixel0, xPixel1, yPixel1, xVArrows, xHArrows, yHArrows;
 	// for the overall panel section:
 	private int xPixel00, yPixel00, xPixel11, yPixel11, yPixel000;
 	private int xPixels, yPixels;
@@ -322,7 +329,7 @@ abstract class GraphSet {
 	final private int FONT_BOLD = 1;
 	final private int FONT_ITALIC = 2;
 
-	private boolean is1D2DSplit;
+	private boolean is2DSpectrum;
 
 	JDXSpectrum getSpectrum() {
 		// could be a 2D spectrum or a set of mass spectra
@@ -371,24 +378,28 @@ abstract class GraphSet {
 			setSpectrumClicked(-1);
 		}
 		stackSelected = false;
-		setFractionalPositions(graphSets);
+		setFractionalPositions(pd, graphSets, LinkMode.NONE);
 	}
 
 	private void setPositionForFrame(int iSplit) {
-
 		int marginalHeight = height - 50;
 		xPixel00 = (int) (width * fX0);
-		xPixel11 = xPixel00 + width - 1;
-		yPixel000 = (int) (height * fY0);
-		yPixel00 = yPixel000 + 25 + (int) (marginalHeight * fracY * iSplit);
-		yPixel11 = yPixel00 + (int) (marginalHeight * fracY) - 1;
-		xPixel0 = xPixel00 + left / (xPixel00 == 0 ? 1 : 2);
-		xPixel10 = xPixel1 = xPixel11 - right / (xPixel11 > width - 2 ? 1 : 2);
-		yPixel0 = yPixel00 + top / (yPixel00 == 0 ? 1 : 2);
-		yPixel1 = yPixel11 - bottom / (yPixel11 > height - 2 ? 1 : 2);
+		xPixel11 = (int) (xPixel00 + width * fracX - 1);
+		xHArrows = xPixel00 + 25;
+		xVArrows = xPixel11 - right / 2;
+		xPixel0 = xPixel00 + (int) ( left * (1 - fX0));
+		xPixel10 = xPixel1 = xPixel11 - right;
 		xPixels0 = xPixels = xPixel1 - xPixel0 + 1;
+		// only the very top spectrum needs an offset
+		// -- to move it below the coordinate string
+		yPixel000 = (fY0 == 0 ? 25 : 0) + (int) (height * fY0);
+		yPixel00 = yPixel000 + (int) (marginalHeight * fracY * iSplit);
+		yPixel11 = yPixel00 + (int) (marginalHeight * fracY) - 1;
+		yHArrows = yPixel11 - 12;
+		yPixel0 = yPixel00 + top / 2;
+		yPixel1 = yPixel11 - bottom / 2;
 		yPixels = yPixel1 - yPixel0 + 1;
-		if (imageView != null && is1D2DSplit) {
+		if (imageView != null && is2DSpectrum) {
 			setImageWindow();
 			if (pd.display1D) {
 				double widthRatio = (pd.display1D ? 1.0
@@ -489,13 +500,13 @@ abstract class GraphSet {
 			viewData.copyScaleFactors(view0);
 	}
 
-	private boolean isNearby(Coordinate a1, Coordinate a2, ImageView imageView,
+	private boolean isNearby(Coordinate a1, Coordinate a2, XScaleConverter c,
 			int range) {
 		double x = a1.getXVal();
-		int xp1 = (imageView == null ? toPixelX(x) : imageView.toPixelX(x));
+		int xp1 = c.toPixelX(x);
 		int yp1 = toPixelY(a1.getYVal());
 		x = a2.getXVal();
-		int xp2 = (imageView == null ? toPixelX(x) : imageView.toPixelX(x));
+		int xp2 = c.toPixelX(x);
 		int yp2 = toPixelY(a2.getYVal());
 		return (Math.abs(xp1 - xp2) + Math.abs(yp1 - yp2) < range);
 	}
@@ -519,11 +530,11 @@ abstract class GraphSet {
 			(spectra.get(i)).setExportXAxisDirection(drawXAxisLeftToRight);
 	}
 
-	private int fixX(int xPixel) {
+	public int fixX(int xPixel) {
 		return Coordinate.intoRange(xPixel, xPixel0, xPixel1);
 	}
 
-	private int toPixelX(double dx) {
+  public int toPixelX(double dx) {
 		int x = (int) ((dx - viewData.minXOnScale) / viewData.xFactorForScale);
 		return (drawXAxisLeftToRight ? xPixel0 + x : xPixel1 - x);
 	}
@@ -547,7 +558,11 @@ abstract class GraphSet {
 				&& xPixel > pin2Dy0.xPixel1 && xPixel < pin2Dy0.xPixel0 + 2);
 	}
 
-	private double toX(int xPixel) {
+  public int getXPixels() {
+  	return xPixels;
+  }
+  
+  public double toX(int xPixel) {
 		if (imageView != null && imageView.isXWithinRange(xPixel))
 			return imageView.toX(xPixel);
 		xPixel = fixX(xPixel);
@@ -649,17 +664,30 @@ abstract class GraphSet {
 		if (nSpectra > 1 && iSpectrumClicked < 0)
 			return false;
 		xValueMovedTo = getSpectrum().findXForPeakNearest(xValueMovedTo);
-		setXPixelMovedTo(xValueMovedTo);
+		setXPixelMovedTo(xValueMovedTo, Double.MAX_VALUE, 0, 0);
 		return true;
 	}
 
-	private void setXPixelMovedTo(double x) {
-		xPixelMovedTo = toPixelX(x);
-		if (fixX(xPixelMovedTo) != xPixelMovedTo)
-			xPixelMovedTo = -1;
-		xPixelMovedTo2 = -1;
-		if (x != 1e10)
-			setSpectrumClicked(getFixedSelectedSpectrumIndex());
+	void setXPixelMovedTo(double x1, double x2, int xPixel1, int xPixel2) {
+		if (x1 == Double.MAX_VALUE && x2 == Double.MAX_VALUE) {
+			xPixelMovedTo = xPixel1;
+			xPixelMovedTo2 = xPixel2;
+			if (isLinked && sticky2Dcursor) {
+				pd.setlinkedXMove(this, toX(xPixelMovedTo), false);
+			}
+			return;
+		} 
+		if (x1 != Double.MAX_VALUE) {
+			xPixelMovedTo = toPixelX(x1);
+			if (fixX(xPixelMovedTo) != xPixelMovedTo)
+				xPixelMovedTo = -1;
+			xPixelMovedTo2 = -1;
+			if (x1 != 1e10)
+				setSpectrumClicked(getFixedSelectedSpectrumIndex());
+		}
+		if (x2 != Double.MAX_VALUE) {
+			xPixelMovedTo2 = toPixelX(x2);
+		}
 	}
 
 	private void processPendingMeasurement(int xPixel, int yPixel, int clickCount) {
@@ -856,7 +884,7 @@ abstract class GraphSet {
 
 		if (ok) {
 			if (imageView != null) {
-				update2dImage(true, false);
+				update2dImage(false);
 				resetPinsFromView();
 			}
 			// pd.repaint();
@@ -897,14 +925,14 @@ abstract class GraphSet {
 		case RESET:
 			pt = (yPixel00 + yPixel11) / 2
 					+ (type == ArrowType.UP ? -1 : type == ArrowType.DOWN ? 1 : 0) * 15;
-			return (Math.abs(xPixel11 - 25 - xPixel) < 10 && Math.abs(pt - yPixel) < 10);
+			return (Math.abs(xVArrows - xPixel) < 10 && Math.abs(pt - yPixel) < 10);
 		case LEFT:
 		case RIGHT:
 		case HOME:
-			pt = xPixel00 + 32
+			pt = xHArrows
 					+ (type == ArrowType.LEFT ? -1 : type == ArrowType.RIGHT ? 1 : 0)
 					* 15;
-			return (Math.abs(pt - xPixel) < 10 && Math.abs(yPixel11 - 10 - yPixel) < 10);
+			return (Math.abs(pt - xPixel) < 10 && Math.abs(yHArrows - yPixel) < 10);
 		}
 		return false;
 	}
@@ -915,6 +943,8 @@ abstract class GraphSet {
 	private boolean inPlotMove;
 	private int xPixelMovedTo = -1;
 	private int xPixelMovedTo2 = -1;
+	private double xValueAt2D = Double.MAX_VALUE;
+	private double yValueAt2D = Double.MAX_VALUE;
 	private double yValueMovedTo;
 	private double xValueMovedTo;
 	private boolean haveLeftRightArrows;
@@ -955,21 +985,21 @@ abstract class GraphSet {
 				double val2 = Double.valueOf(sval.substring(pt + 1)).doubleValue();
 				if (pw == pin1Dx01) {
 					doZoom(val1, pin1Dy0.getYVal(), val2, pin1Dy1.getYVal(), true, false,
-							true);
+							true, true);
 				} else if (pw == pin1Dy01) { // actually for 2D Z
 					doZoom(pin1Dx0.getXVal(), val1, pin1Dx1.getXVal(), val2, true, false,
-							false);
+							false, true);
 				} else if (pw == pin2Dx01) {
 					imageView.setView0(imageView.toPixelX0(val1), pin2Dy0.yPixel0,
 							imageView.toPixelX0(val2), pin2Dy1.yPixel0);
 					doZoom(val1, pin1Dy0.getYVal(), val2, pin1Dy1.getYVal(), true, false,
-							false);
+							false, true);
 				} else if (pw == pin2Dy01) {
 					imageView.setView0(pin2Dx0.xPixel0, imageView.toPixelY0(val1),
 							pin2Dx1.xPixel0, imageView.toPixelY0(val2));
 					doZoom(imageView.toX(imageView.xPixel0), viewData.minY, imageView
 							.toX(imageView.xPixel0 + imageView.xPixels - 1), viewData.maxY,
-							true, false, false);
+							true, false, false, true);
 				}
 			} else {
 				double val = Double.valueOf(sval).doubleValue();
@@ -978,7 +1008,7 @@ abstract class GraphSet {
 							.getXVal()
 							: pin1Dx0.getXVal());
 					doZoom(val, pin1Dy0.getYVal(), val2, pin1Dy1.getYVal(), true, false,
-							true);
+							true, true);
 				} else if (pw == cur2Dy) {
 					setCurrentSubSpectrum((int) val);
 					// pd.repaint();
@@ -990,7 +1020,7 @@ abstract class GraphSet {
 				} else {
 					double val2 = (pw == pin1Dy0 ? pin1Dy1.getYVal() : pin1Dy0.getYVal());
 					doZoom(pin1Dx0.getXVal(), val, pin1Dx1.getXVal(), val2, true, false,
-							false);
+							false, true);
 				}
 			}
 		} catch (Exception e) {
@@ -1033,7 +1063,7 @@ abstract class GraphSet {
 	 */
 	private void setWidgets(boolean needNewPins, int subIndex,
 			boolean doDraw1DObjects) {
-		if (needNewPins) {
+		if (needNewPins || pin1Dx0 == null) {
 			if (zoomBox1D == null)
 				newPins();
 			else
@@ -1059,6 +1089,10 @@ abstract class GraphSet {
 		pin1Dy1 = new PlotWidget("pin1Dy1");
 		pin1Dx01 = new PlotWidget("pin1Dx01");
 		pin1Dy01 = new PlotWidget("pin1Dy01");
+		cur1D2x1 = new PlotWidget("cur1D2x1");
+		cur1D2x1.color = ScriptToken.PEAKTABCOLOR;
+		cur1D2x2 = new PlotWidget("cur1D2x2");
+		cur1D2x2.color = ScriptToken.PEAKTABCOLOR;
 		if (imageView != null) {
 			zoomBox2D = new PlotWidget("zoomBox2D");
 			// these pins only present when no 1D is present
@@ -1077,22 +1111,31 @@ abstract class GraphSet {
 			int n = getSpectrumAt(0).getSubSpectra().size();
 			pin2Dy1.setY(n, imageView.toPixelY0(n));
 		}
-		pin1Dx0.setX(viewData.minX, toPixelX0(viewData.minX));
-		pin1Dx1.setX(viewData.maxX, toPixelX0(viewData.maxX));
-		pin1Dy0.setY(viewData.minY, toPixelY0(viewData.minY));
-		pin1Dy1.setY(viewData.maxY, toPixelY0(viewData.maxY));
+		setWidgetX(pin1Dx0, viewData.minX);
+		setWidgetX(pin1Dx1, viewData.maxX);
+		setWidgetY(pin1Dy0, viewData.minY);
+		setWidgetY(pin1Dy1, viewData.maxY);
+		
 		widgets = new PlotWidget[] { zoomBox1D, zoomBox2D, pin1Dx0, pin1Dx01,
 				pin1Dx1, pin1Dy0, pin1Dy01, pin1Dy1, pin2Dx0, pin2Dx01, pin2Dx1,
-				pin2Dy0, pin2Dy01, pin2Dy1, cur2Dx0, cur2Dx1, cur2Dy };
+				pin2Dy0, pin2Dy01, pin2Dy1, cur2Dx0, cur2Dx1, cur2Dy, cur1D2x1, cur1D2x2 };
+	}
+
+	private void setWidgetX(PlotWidget pw, double x) {
+		pw.setX(x, toPixelX0(x));
+	}
+
+	private void setWidgetY(PlotWidget pw, double y) {
+		pw.setY(y, toPixelY0(y));
 	}
 
 	private void resetPinsFromView() {
 		if (pin1Dx0 == null)
 			return;
-		pin1Dx0.setX(viewData.minXOnScale, toPixelX0(viewData.minXOnScale));
-		pin1Dx1.setX(viewData.maxXOnScale, toPixelX0(viewData.maxXOnScale));
-		pin1Dy0.setY(viewData.minY, toPixelY0(viewData.minY));
-		pin1Dy1.setY(viewData.maxY, toPixelY0(viewData.maxY));
+		setWidgetX(pin1Dx0, viewData.minXOnScale);
+		setWidgetX(pin1Dx1, viewData.maxXOnScale);
+		setWidgetY(pin1Dy0, viewData.minY);
+		setWidgetY(pin1Dy1, viewData.maxY);
 	}
 
 	/**
@@ -1100,14 +1143,27 @@ abstract class GraphSet {
 	 * 
 	 */
 	private void resetPinPositions() {
-		pin1Dx0.setX(pin1Dx0.getXVal(), toPixelX0(pin1Dx0.getXVal()));
-		pin1Dx1.setX(pin1Dx1.getXVal(), toPixelX0(pin1Dx1.getXVal()));
-		pin1Dy0.setY(pin1Dy0.getYVal(), toPixelY0(pin1Dy0.getYVal()));
-		pin1Dy1.setY(pin1Dy1.getYVal(), toPixelY0(pin1Dy1.getYVal()));
-		if (imageView != null) {
+	  resetX(pin1Dx0);
+	  resetY(pin1Dy0);
+	  resetY(pin1Dy1);
+		if (imageView == null) {
+			if (gs2dLinkedX != null)
+				setWidgetX(cur1D2x1, cur1D2x1.getXVal());
+			if (gs2dLinkedY != null)
+				setWidgetX(cur1D2x2, cur1D2x2.getXVal());
+			resetX(pin1Dx0);
+		} else {
 			pin2Dy0.setY(pin2Dy0.getYVal(), imageView.toPixelY0(pin2Dy0.getYVal()));
 			pin2Dy1.setY(pin2Dy1.getYVal(), imageView.toPixelY0(pin2Dy1.getYVal()));
 		}
+	}
+
+	private void resetX(PlotWidget p) {
+		setWidgetX(p, p.getXVal());
+	}
+
+	private void resetY(PlotWidget p) {
+		setWidgetY(p, p.getYVal());
 	}
 
 	/**
@@ -1121,17 +1177,19 @@ abstract class GraphSet {
 		pin1Dx0.yPixel1 = pin1Dx1.yPixel1 = pin1Dx01.yPixel1 = yPixel0;
 		pin1Dy0.xPixel0 = pin1Dy1.xPixel0 = pin1Dy01.xPixel0 = xPixel1 + 5;
 		pin1Dy0.xPixel1 = pin1Dy1.xPixel1 = pin1Dy01.xPixel1 = xPixel1;
+		cur1D2x1.yPixel1 = cur1D2x2.yPixel1 = yPixel0 - 5;
+		cur1D2x1.yPixel0 = cur1D2x2.yPixel0 = yPixel1 + 6;
 		if (imageView != null) {
 			pin2Dx0.yPixel0 = pin2Dx1.yPixel0 = pin2Dx01.yPixel0 = yPixel0 - 5;
 			pin2Dx0.yPixel1 = pin2Dx1.yPixel1 = pin2Dx01.yPixel1 = yPixel0;
 			pin2Dy0.xPixel0 = pin2Dy1.xPixel0 = pin2Dy01.xPixel0 = imageView.xPixel1 + 5;
 			pin2Dy0.xPixel1 = pin2Dy1.xPixel1 = pin2Dy01.xPixel1 = imageView.xPixel1;
-			cur2Dx0.yPixel0 = cur2Dx1.yPixel0 = yPixel1 + 15;
+			cur2Dx0.yPixel0 = cur2Dx1.yPixel0 = yPixel1 + 6;
 			cur2Dx0.yPixel1 = cur2Dx1.yPixel1 = yPixel0 - 5;
-			cur2Dx0.yPixel0 = cur2Dx1.yPixel0 = yPixel1 + 15;
+			cur2Dx0.yPixel0 = cur2Dx1.yPixel0 = yPixel1 + 6;
 			cur2Dx1.yPixel1 = cur2Dx1.yPixel1 = yPixel0 - 5;
 			cur2Dy.xPixel0 = (doDraw1DObjects ? (xPixel1 + imageView.xPixel0) / 2
-					: imageView.xPixel0 - 15);
+					: imageView.xPixel0 - 6);
 			cur2Dy.xPixel1 = imageView.xPixel1 + 5;
 		}
 	}
@@ -1143,6 +1201,11 @@ abstract class GraphSet {
 	 * @param subIndex
 	 */
 	private void setDerivedPins(int subIndex) {
+		if (gs2dLinkedX != null)
+			cur1D2x1.setX(cur1D2x1.getXVal(), toPixelX(cur1D2x1.getXVal()));
+		if (gs2dLinkedY != null)
+			cur1D2x2.setX(cur1D2x2.getXVal(), toPixelX(cur1D2x2.getXVal()));
+		
 		pin1Dx01.setX(0, (pin1Dx0.xPixel0 + pin1Dx1.xPixel0) / 2);
 		pin1Dy01.setY(0, (pin1Dy0.yPixel0 + pin1Dy1.yPixel0) / 2);
 		pin1Dx01.setEnabled(Math.min(pin1Dx0.xPixel0, pin1Dx1.xPixel0) > xPixel0
@@ -1206,9 +1269,13 @@ abstract class GraphSet {
 	 * @param checkRange 
 	 * @param is1D
 	 *          TODO
+	 * @param checkLinked TODO
 	 */
-	private synchronized void doZoom(double initX, double initY, double finalX,
-			double finalY, boolean addZoom, boolean checkRange, boolean is1D) {
+	synchronized void doZoom(double initX, double initY, double finalX,
+			double finalY, boolean addZoom, boolean checkRange, boolean is1D, boolean checkLinked) {
+		
+		if (isLinked)
+		  pd.doZoomLinked(this, initX, initY, finalX, finalY, addZoom, checkRange, is1D);
 		if (initX > finalX) {
 			double tempX = initX;
 			initX = finalX;
@@ -1242,6 +1309,8 @@ abstract class GraphSet {
 		} else {
 			viewData = viewList.get(0);
 		}
+		
+		
 		int[] startIndices = new int[nSpectra];
 		int[] endIndices = new int[nSpectra];
 		graphsTemp.clear();
@@ -1263,17 +1332,18 @@ abstract class GraphSet {
 				.getSpectrumScaleFactor(iSpectrumSelected) : 1);
 		double y1 = initY;
 		double y2 = finalY;
-		if (f != 1) {
+		if (Math.abs(f - 1) < 0.0001) {
 			// not clear this is right for IR spec or some other cases...
 			y1 = viewData.unScaleY(iSpectrumSelected, initY);
 			y2 = viewData.unScaleY(iSpectrumSelected, finalY);
 		}
 		getView(initX, finalX, y1, y2, startIndices, endIndices, view0);
-		setXPixelMovedTo(1E10);
-		pin1Dx0.setX(initX, toPixelX0(initX));
-		pin1Dx1.setX(finalX, toPixelX0(finalX));
-		pin1Dy0.setY(initY, toPixelY0(initY));
-		pin1Dy1.setY(finalY, toPixelY0(finalY));
+		setXPixelMovedTo(1E10, Double.MAX_VALUE, 0, 0);
+		setWidgetX(pin1Dx0, initX);
+		setWidgetX(pin1Dx1, finalX);
+		setWidgetY(pin1Dy0, initY);
+		setWidgetY(pin1Dy1, finalY);
+		System.out.println("zoom " + initY + " " + finalY + " " + y1 + " " + y2);
 		if (imageView == null) {
 			updateDialogs();
 		} else {
@@ -1282,7 +1352,7 @@ abstract class GraphSet {
 			if (ifix != isub)
 				setCurrentSubSpectrum(ifix);
 			if (is2DGrayScaleChange)
-				update2dImage(true, false);
+				update2dImage(false);
 		}
 		if (addZoom)
 			addCurrentZoom();
@@ -1324,7 +1394,10 @@ abstract class GraphSet {
 	 * Clears all views in the zoom list
 	 * @param andResetCompletely 
 	 */
-	private void clearViews() {
+	void clearViews() {
+		if (isLinked) {
+			pd.clearLinkViews(this);
+		}
 		setZoomTo(0);
 		// leave first zoom
 		for (int i = viewList.size(); --i >= 1;)
@@ -1333,11 +1406,16 @@ abstract class GraphSet {
 
 	private void drawAll(Object g, int iSplit, boolean needNewPins) {
 		int subIndex = getSpectrumAt(0).getSubIndex();
-		is1D2DSplit = (!getSpectrumAt(0).is1D() && pd.getBoolean(ScriptToken.DISPLAY2D) && (imageView != null || get2DImage()));
+		is2DSpectrum = (!getSpectrumAt(0).is1D() 
+				&& (isLinked || pd.getBoolean(ScriptToken.DISPLAY2D)) 
+				&& (imageView != null 
+						|| get2DImage()));
 		if (imageView != null) {
-			if (is1D2DSplit)
+			if (is2DSpectrum)
   			setPositionForFrame(iSplit);
 			draw2DImage(g);
+			if (pd.getBoolean(ScriptToken.XSCALEON))
+				drawXScale(g, imageView);
 			if (subIndex >= 0)
 				draw2DUnits(g);
 		}
@@ -1361,8 +1439,8 @@ abstract class GraphSet {
 		}
 		int iSpecForFrame = (nSpectra == 1 ? 0 : !showAllStacked ? iSpectrumMovedTo
 				: iSpectrumSelected);
-		boolean addCurrentBox = ((fracY != 1 || isSplittable) && (!isSplittable
-				|| nSplit == 1 || pd.currentSplitPoint == iSplit));
+		boolean addCurrentBox = (!isLinked && (isSplittable)
+				&& (!isSplittable || nSplit == 1 || pd.currentSplitPoint == iSplit));
 		boolean drawUpDownArrows = (pd.isCurrentGraphSet(this) && zoomEnabled
 				&& spectra.get(0).isScalable() && (addCurrentBox || nSpectra == 1)
 				&& (nSplit == 1 || pd.currentSplitPoint == iSpectrumMovedTo) && !isDrawNoSpectra());
@@ -1417,7 +1495,7 @@ abstract class GraphSet {
 				}
 				drawSpectrum(g, i, viewData.spectrumOffsets == null ? offset
 						: viewData.spectrumOffsets[i], isGrey, ig);
-				if ((nSplit > 1 ? i == iSpectrumMovedTo : i == iSpectrumForScale)
+				if ((nSplit > 1 ? i == iSpectrumMovedTo : isLinked || i == iSpectrumForScale)
 						&& !pd.isPrinting && xPixelMovedTo >= 0 && spec.isContinuous()) {
 					drawSpectrumPointer(g, spec, ig);
 				}
@@ -1428,26 +1506,26 @@ abstract class GraphSet {
 						iSpecForFrame = (iSpectrumSelected);
 						if (nSpectra != 2) {
 							setPlotColor(g, (iSpecForFrame + nSpectra - 1) % nSpectra);
-							fillArrow(g, ArrowType.LEFT, yPixel11 - 10, xPixel00 + 23, true);
+							fillArrow(g, ArrowType.LEFT, yHArrows, xHArrows - 9, true);
 							setCurrentBoxColor(g);
-							fillArrow(g, ArrowType.LEFT, yPixel11 - 10, xPixel00 + 23, false);
+							fillArrow(g, ArrowType.LEFT, yHArrows, xHArrows - 9, false);
 						}
 						if (iSpecForFrame >= 0) {
 							setPlotColor(g, iSpecForFrame);
-							fillCircle(g, xPixel00 + 32, yPixel11 - 10, true);
+							fillCircle(g, xHArrows, yHArrows, true);
 						}
 						setCurrentBoxColor(g);
-						fillCircle(g, xPixel00 + 32, yPixel11 - 10, false);
+						fillCircle(g, xHArrows, yHArrows, false);
 						setPlotColor(g, (iSpecForFrame + 1) % nSpectra);
-						fillArrow(g, ArrowType.RIGHT, yPixel11 - 10, xPixel00 + 41, true);
+						fillArrow(g, ArrowType.RIGHT, yHArrows, xHArrows + 9, true);
 						setCurrentBoxColor(g);
-						fillArrow(g, ArrowType.RIGHT, yPixel11 - 10, xPixel00 + 41, false);
+						fillArrow(g, ArrowType.RIGHT, yHArrows, xHArrows + 9, false);
 					}
 				}
 				offset -= yOffsetPixels;
 			}
 			if (pd.getBoolean(ScriptToken.XSCALEON))
-				drawXScale(g);
+				drawXScale(g, this);
 			if (pd.getBoolean(ScriptToken.XUNITSON))
 				drawXUnits(g);
 		} else {
@@ -1458,7 +1536,7 @@ abstract class GraphSet {
 	}
 
 	private void drawSpectrumSource(Object g, int i) {
-		pd.owner.printFilePath(g, pd.left + pd.plotAreaWidth, yPixel0, spectra.get(i).getFilePath());
+		pd.owner.printFilePath(g, pd.thisWidth - pd.right, yPixel0, spectra.get(i).getFilePath());
 	}
 
 	private boolean doPlot(int i, int iSplit) {
@@ -1551,8 +1629,8 @@ abstract class GraphSet {
 		String nucleusX = getSpectrumAt(0).nucleusX;
 		String nucleusY = getSpectrumAt(0).nucleusY;
 		setColor(g, ScriptToken.PLOTCOLOR);
-		drawUnits(g, width, nucleusX, imageView.xPixel1 + 5, yPixel1, 1, 1.0);
-		drawUnits(g, width, nucleusY, imageView.xPixel0 - 5, yPixel0, 1, 0);
+		drawUnits(g, nucleusX, imageView.xPixel1 + 5, yPixel1, 1, 1.0);
+		drawUnits(g, nucleusY, imageView.xPixel0 - 5, yPixel0, 1, 0);
 	}
 
 	private void drawPeakTabs(Object g, JDXSpectrum spec) {
@@ -1586,7 +1664,7 @@ abstract class GraphSet {
 	 * 
 	 * @param g
 	 * @param subIndex
-	 * @param needNewPins 
+	 * @param needNewPins
 	 * @param doDraw1DObjects
 	 */
 	private void drawWidgets(Object g, int subIndex, boolean needNewPins,
@@ -1601,6 +1679,7 @@ abstract class GraphSet {
 			fillBox(g, pin1Dx0.xPixel0, pin1Dx0.yPixel1, pin1Dx1.xPixel0,
 					pin1Dx1.yPixel1 + 2, ScriptToken.PLOTCOLOR);
 		} else {
+
 			fillBox(g, imageView.xPixel0, pin2Dx0.yPixel1, imageView.xPixel1,
 					pin2Dx0.yPixel1 + 2, ScriptToken.GRIDCOLOR);
 			fillBox(g, pin2Dx0.xPixel0, pin2Dx0.yPixel1, pin2Dx1.xPixel0,
@@ -1612,7 +1691,7 @@ abstract class GraphSet {
 		}
 		fillBox(g, pin1Dy0.xPixel1, yPixel1, pin1Dy1.xPixel1 + 2, yPixel0,
 				ScriptToken.GRIDCOLOR);
-		if (!doDraw1DObjects) {
+		if (isLinked || !doDraw1DObjects) {
 			fillBox(g, pin1Dy0.xPixel1, pin1Dy0.yPixel1, pin1Dy1.xPixel1 + 2,
 					pin1Dy1.yPixel0, ScriptToken.PLOTCOLOR);
 		}
@@ -1621,30 +1700,33 @@ abstract class GraphSet {
 			if (pw == null || !pw.isPinOrCursor && !zoomEnabled)
 				continue;
 			if (pw.is2D) {
-				if (pw == cur2Dx0 && !doDraw1DObjects)// || pw.is2Donly &&
-					// doDraw1DObjects)
+				if (pw == cur2Dx0 && (isLinked || !doDraw1DObjects))
 					continue;
-			} else if (doDraw1DObjects == (pw == pin1Dy0 || pw == pin1Dy1 || pw == pin1Dy01)
+			} else if (
+					(doDraw1DObjects == (
+							pw == pin1Dy0 || pw == pin1Dy1 || pw == pin1Dy01)) 
+					||
+					pw == cur1D2x1
+					&& gs2dLinkedX == null
+					|| pw == cur1D2x2
+					&& gs2dLinkedY == null
 					|| pw == zoomBox1D
 					&& (pd.isIntegralDrag || pd.integralShiftMode != 0)) {
+				if (!isLinked || imageView != null)
 				continue;
 			}
-			drawWidget(g, pw);
+			if (pw.isPinOrCursor) {
+				setColor(g, pw.color);
+				drawLine(g, pw.xPixel0, pw.yPixel0, pw.xPixel1, pw.yPixel1);
+				if (pw.isPin)
+					drawHandle(g, pw.xPixel0, pw.yPixel0, !pw.isEnabled);
+			} else if (pw.xPixel1 != pw.xPixel0) {
+				fillBox(g, pw.xPixel0, pw.yPixel0, pw.xPixel1, pw.yPixel1,
+						ScriptToken.ZOOMBOXCOLOR);
+			}
 		}
 	}
 
-	private void drawWidget(Object g, PlotWidget pw) {
-		if (pw == null)
-			return;
-		if (pw.isPinOrCursor) {
-			setColor(g, ScriptToken.PLOTCOLOR);
-			drawLine(g, pw.xPixel0, pw.yPixel0, pw.xPixel1, pw.yPixel1);
-			drawHandle(g, pw.xPixel0, pw.yPixel0, !pw.isEnabled);
-		} else if (pw.xPixel1 != pw.xPixel0) {
-			fillBox(g, pw.xPixel0, pw.yPixel0, pw.xPixel1, pw.yPixel1,
-					ScriptToken.ZOOMBOXCOLOR);
-		}
-	}
 
 	/**
 	 * draw a bar, but not necessarily full height
@@ -1687,10 +1769,6 @@ abstract class GraphSet {
 	 * @param yOffset 
 	 * @param isGrey 
 	 * @param ig 
-	 * @param height
-	 *          the height to be drawn in pixels
-	 * @param width
-	 *          the width to be drawn in pixels
 	 */
 	private void drawSpectrum(Object g, int index, int yOffset, boolean isGrey,
 			IntegralData ig) {
@@ -1810,8 +1888,6 @@ abstract class GraphSet {
 	 * @param addCurrentBox 
 	 * @param addSplitBox 
 	 * @param drawUpDownArrows 
-	 * @param height
-	 * @param width
 	 */
 	private void drawFrame(Object g, int iSpec,
 			boolean addCurrentBox, boolean addSplitBox, boolean drawUpDownArrows) {
@@ -1825,24 +1901,30 @@ abstract class GraphSet {
 		if (drawUpDownArrows) {
 			if (iSpec >= 0) {
 				setPlotColor(g, iSpec);
-				fillArrow(g, ArrowType.UP, xPixel11 - 25,
+				fillArrow(g, ArrowType.UP, xVArrows,
 						(yPixel00 + yPixel11) / 2 - 9, true);
-				fillArrow(g, ArrowType.DOWN, xPixel11 - 25,
+				fillArrow(g, ArrowType.DOWN, xVArrows,
 						(yPixel00 + yPixel11) / 2 + 9, true);
 				setCurrentBoxColor(g);
 			}
-			fillArrow(g, ArrowType.UP, xPixel11 - 25, (yPixel00 + yPixel11) / 2 - 9,
+			fillArrow(g, ArrowType.UP, xVArrows, (yPixel00 + yPixel11) / 2 - 9,
 					false);
-			fillCircle(g, xPixel11 - 25, (yPixel00 + yPixel11) / 2, false);
-			fillArrow(g, ArrowType.DOWN, xPixel11 - 25,
+			fillCircle(g, xVArrows, (yPixel00 + yPixel11) / 2, false);
+			fillArrow(g, ArrowType.DOWN, xVArrows,
 					(yPixel00 + yPixel11) / 2 + 9, false);
 		}
 
 		if (imageView != null)
 			return;
 		if (addCurrentBox) {
-			drawRect(g, xPixel00 + 10, yPixel00 + 1, xPixel11 - 20 - xPixel00,
-					yPixel11 - 2 - yPixel00);
+			int x1 = xPixel00 + 10;
+			int x2 = xPixel11 - 10;
+			int y1 = yPixel00 + 1;
+			int y2 = yPixel11 - 2;
+ 
+			drawLine(g, x1, y1, x2, y1); 
+			drawLine(g, x2, y1, x2, y2); 
+			drawLine(g, x1, y2, x2, y2); 
 			if (addSplitBox) {
 				fillBox(g, xPixel11 - 20, yPixel00 + 1, xPixel11 - 10, yPixel00 + 11,
 						null);
@@ -1855,10 +1937,6 @@ abstract class GraphSet {
 	 * 
 	 * @param g
 	 *          the <code>Graphics</code> object
-	 * @param height
-	 *          the height to be drawn in pixels
-	 * @param width
-	 *          the width to be drawn in pixels
 	 */
 	private void drawGrid(Object g) {
 		if (!pd.gridOn || imageView != null)
@@ -1893,21 +1971,20 @@ abstract class GraphSet {
 	 * 
 	 * @param g
 	 *          the <code>Graphics</code> object
-	 * @param height
-	 *          the height to be drawn in pixels
-	 * @param width
-	 *          the width to be drawn in pixels
+	 * @param c
+	 *          could be 'this' or imageView
 	 */
-	private void drawXScale(Object g) {
+	private void drawXScale(Object g, XScaleConverter c) {
 
 		DecimalFormat formatter = viewData.formatters[0];
-		pd.setFont(g, width, FONT_PLAIN, pd.isPrinting ? 10 : 12, false);
+		pd.setFont(g, c.getXPixels(), FONT_PLAIN, pd.isPrinting ? 10 : 12, false);
 		int y1 = yPixel1;
 		int y2 = yPixel1 + 4;
 		int y3 = yPixel1 + 2;
 
 		int h = getFontHeight(g);
-		double maxWidth = Math.abs((toPixelX(viewData.steps[0]) - toPixelX(0)) * 0.95);
+		double dx = c.toPixelX(viewData.steps[0]) - c.toPixelX(0);
+		double maxWidth = Math.abs(dx * 0.95);
 		// if (Double.isNaN(viewData.firstX)) {
 		// lastX = viewData.maxXOnScale + viewData.steps[0] / 2;
 		// for (double val = viewData.minXOnScale, vald = viewData.maxXOnScale; val
@@ -1932,29 +2009,31 @@ abstract class GraphSet {
 				ScaleData.fixScale(mapX);
 			double prevX = 1e10;
 			for (double val = firstX; val <= lastX; val += viewData.steps[0]) {
-				int x = toPixelX(val);
+				int x = c.toPixelX(val);
 				Double d = Double.valueOf(val);
 				String s;
 				switch (pass) {
 				case 0:
 					s = formatter.format(val);
 					mapX.put(d, s);
-					drawTick(g, x, y1, y2);
-					double dx = Math.abs(prevX - val);
+					drawTick(g, x, y1, y2, c);
+					dx = Math.abs(prevX - val);
 					int ntick = viewData.minorTickCounts[0];
 					if (ntick != 0) {
 						double step = dx / ntick;
-						for (int i = 1; i < ntick; i++)
-							drawTick(g, toPixelX(val - i * step), y1, y3);
+						for (int i = 1; i < ntick; i++) {
+							double x1 = val - i * step;
+							drawTick(g, c.toPixelX(x1), y1, y3, c);
+						}
 					}
 					prevX = val;
 					continue;
 				case 1:
-					if (x != fixX(x))
-						continue;
 					s = mapX.get(d);
+					if (s == null || x != c.fixX(x))
+						continue;
 					int w = getStringWidth(g, s);
-					int n = (x + w / 2 == fixX(x + w / 2) ? 2 : 0);
+					int n = (x + w / 2 == c.fixX(x + w / 2) ? 2 : 0);
 					if (n > 0)
 						drawString(g, s, x - w / n, y2 + h);
 					val += Math.floor(w / maxWidth) * viewData.steps[0];
@@ -1965,8 +2044,8 @@ abstract class GraphSet {
 		mapX.clear();
 	}
 
-	private void drawTick(Object g, int x, int y1, int y2) {
-		if (x == fixX(x))
+	private void drawTick(Object g, int x, int y1, int y2, XScaleConverter c) {
+		if (x == c.fixX(x))
 			drawLine(g, x, y1, x, y2);
 	}
 
@@ -1975,15 +2054,11 @@ abstract class GraphSet {
 	 * 
 	 * @param g
 	 *          the <code>Graphics</code> object
-	 * @param height
-	 *          the height to be drawn in pixels
-	 * @param width
-	 *          the width to be drawn in pixels
 	 */
 	private void drawYScale(Object g) {
 
 		DecimalFormat formatter = viewData.formatters[1];
-		pd.setFont(g, width, FONT_PLAIN, pd.isPrinting ? 10 : 12, false);
+		pd.setFont(g, xPixels, FONT_PLAIN, pd.isPrinting ? 10 : 12, false);
 		int h = getFontHeight(g);
 		double max = viewData.maxYOnScale + viewData.steps[1] / 2;
 		int yLast = Integer.MIN_VALUE;
@@ -2025,21 +2100,17 @@ abstract class GraphSet {
 	 * 
 	 * @param g
 	 *          the <code>Graphics</code> object
-	 * @param imageHeight
-	 *          the height to be drawn in pixels
-	 * @param width
-	 *          the width to be drawn in pixels
 	 */
 	private void drawXUnits(Object g) {
 		String units = spectra.get(0).getAxisLabel(true);
 		if (units != null)
-			drawUnits(g, width, units, xPixel1, yPixel1 + 5, 0, 1);
+			drawUnits(g, units, xPixel1, yPixel1 + 5, 0, 1);
 	}
 
-	private void drawUnits(Object g, int width, String s, int x, int y,
-			double hOff, double vOff) {
+	private void drawUnits(Object g, String s, int x, int y, double hOff,
+			double vOff) {
 		setColor(g, ScriptToken.UNITSCOLOR);
-		pd.setFont(g, width, FONT_ITALIC, 10, false);
+		pd.setFont(g, xPixels, FONT_ITALIC, 10, false);
 
 		drawString(g, s, (int) (x - getStringWidth(g, s) * hOff),
 				(int) (y + getFontHeight(g) * vOff));
@@ -2057,7 +2128,7 @@ abstract class GraphSet {
 	private void drawYUnits(Object g) {
 		String units = spectra.get(0).getAxisLabel(false);
 		if (units != null)
-			drawUnits(g, width, units, (pd.isPrinting ? 30 : 5), (pd.isPrinting ? yPixel0 : yPixel0 + 10), 0, -1);
+			drawUnits(g, units, (pd.isPrinting ? 30 : 5), (pd.isPrinting ? yPixel0 : yPixel0 + 5), 0, -1);
 	}
 
 	private void drawHighlightsAndPeakTabs(Object g, int iSpec) {
@@ -2101,7 +2172,7 @@ abstract class GraphSet {
 		String[][] sdata = data.getMeasurementListArray(null);
 		if (sdata.length == 0)
 			return;
-		pd.setFont(g, width, FONT_PLAIN, 8, false);
+		pd.setFont(g, xPixels, FONT_PLAIN, 8, false);
 		int h = getFontHeight(g);
 		int[] xs = new int[data.size()];
 		int[] xs0 = new int[data.size()];
@@ -2163,12 +2234,12 @@ abstract class GraphSet {
 	// determine whether there are any ratio annotations to draw
 	private void drawAnnotations(Object g, List<Annotation> annotations,
 			ScriptToken whatColor) {
-		pd.setFont(g, width, FONT_BOLD, 12, false);
+		pd.setFont(g, xPixels, FONT_BOLD, 12, false);
 		for (int i = annotations.size(); --i >= 0;) {
 			Annotation note = annotations.get(i);
 			setAnnotationColor(g, note, whatColor);
-			int x = (note.is2D ? imageView.toPixelX(note.getXVal()) : toPixelX(note
-					.getXVal()));
+			XScaleConverter c = (note.is2D ? imageView : this);
+			int x = c.toPixelX(note.getXVal());
 			int y = (note.isPixels() ? (int) (yPixel0 + 10 - note.getYVal())
 					: note.is2D ? imageView.toPixelY((int) note.getYVal())
 							: toPixelY(note.getYVal()));
@@ -2180,9 +2251,9 @@ abstract class GraphSet {
 		MeasurementData integrals = getMeasurements(AType.Integration, iSpec);
 		if (integrals != null) {
 			if (pd.isPrinting)
-				pd.setFont(g, width, FONT_PLAIN, 8, false);
+				pd.setFont(g, xPixels, FONT_PLAIN, 8, false);
 			else
-				pd.setFont(g, width, FONT_BOLD, 12, false);
+				pd.setFont(g, xPixels, FONT_BOLD, 12, false);
 			setColor(g, ScriptToken.INTEGRALPLOTCOLOR);
 			int h = getFontHeight(g);
 			setStrokeBold(g, true);
@@ -2219,7 +2290,7 @@ abstract class GraphSet {
 	private void drawMeasurement(Object g, Measurement m) {
 		if (m.text.length() == 0 && m != pendingMeasurement)
 			return;
-		pd.setFont(g, width, FONT_BOLD, 12, false);
+		pd.setFont(g, xPixels, FONT_BOLD, 12, false);
 		setColor(g, 0, 0, 0); // black
 		int x1 = toPixelX(m.getXVal());
 		int y1 = toPixelY(m.getYVal());
@@ -2255,11 +2326,16 @@ abstract class GraphSet {
 		return null;
 	}
 
-	private void set2DCrossHairs(int xPixel, int yPixel) {
+  void set2DCrossHairs(int xPixel, int yPixel) {
+  	double x;
 		if (xPixel == imageView.fixX(xPixel) && yPixel == fixY(yPixel)) {
-			pin1Dx1.setX(imageView.toX(xPixel), toPixelX(imageView.toX(xPixel)));
-			cur2Dx1.setX(imageView.toX(xPixel), xPixel);
+			pin1Dx1.setX(x = imageView.toX(xPixel), toPixelX(x));
+			cur2Dx1.setX(x, xPixel);
 			setCurrentSubSpectrum(imageView.toSubspectrumIndex(yPixel));
+		  if (isLinked) {
+		  	double y = imageView.toY(yPixel);
+		  	pd.set2DCrossHairsLinked(this, x, y);
+		  }
 		}
 	}
 
@@ -2268,7 +2344,7 @@ abstract class GraphSet {
 			imageView.setView0(imageView.xPixel0, pin2Dy0.yPixel0, imageView.xPixel1,
 					pin2Dy1.yPixel0);
 			doZoom(imageView.minX, viewData.minY, imageView.maxX, viewData.maxY,
-					true, false, true);
+					true, false, true, true);
 		} else {
 			imageView.setView0(pin2Dx0.xPixel0, imageView.yPixel0, pin2Dx1.xPixel0,
 					imageView.yPixel1);
@@ -2471,8 +2547,8 @@ abstract class GraphSet {
 	private static GraphSet findCompatibleGraphSet(List<GraphSet> graphSets,
 			JDXSpectrum spec) {
 		for (int i = 0; i < graphSets.size(); i++)
-			if (JDXSpectrum.areScalesCompatible(spec, graphSets.get(i).getSpectrum(),
-					false))
+			if (JDXSpectrum.areXScalesCompatible(spec, graphSets.get(i).getSpectrum(),
+					false, false))
 				return graphSets.get(i);
 		return null;
 	}
@@ -2507,27 +2583,79 @@ abstract class GraphSet {
 				+ ONLINE_CUTOFF);
 	}
 
-	private static void setFractionalPositions(List<GraphSet> graphSets) {
-		// for now, just a vertical stack
+	private static void setFractionalPositions(PanelData pd, List<GraphSet> graphSets,
+			LinkMode linkMode) {
+
 		int n = graphSets.size();
 		double f = 0;
 		int n2d = 1;
 		GraphSet gs;
-		for (int i = 0; i < n; i++) {
-			gs = graphSets.get(i);
-			f += (gs.getSpectrumAt(0).is1D() ? 1 : n2d) * gs.nSplit;
-		}
-		f = 1 / f;
 		double y = 0;
-		for (int i = 0; i < n; i++) {
-			gs = graphSets.get(i);
-			double g = (gs.getSpectrumAt(0).is1D() ? f : n2d * f);
-			gs.fracY = g;
-			gs.fY0 = y;
-			y += g * gs.nSplit;
+		pd.isLinked = (linkMode != LinkMode.NONE);
+		if (linkMode == LinkMode.NONE) {
+			// for now, just a vertical stack
+			for (int i = 0; i < n; i++) {
+				gs = graphSets.get(i);
+				f += (gs.getSpectrumAt(0).is1D() ? 1 : n2d) * gs.nSplit;
+			}
+			f = 1 / f;
+			for (int i = 0; i < n; i++) {
+				gs = graphSets.get(i);
+				gs.isLinked = false;
+				double g = (gs.getSpectrumAt(0).is1D() ? f : n2d * f);
+				gs.fX0 = 0;
+				gs.fY0 = y;
+				gs.fracX = 1;
+				gs.fracY = g;
+				y += g * gs.nSplit;
+			}
+		} else {
+			GraphSet gs2d = null;
+			int i2d = -1;
+			if (n == 2 || n == 3)
+				for (int i = 0; i < n; i++) {
+					gs = graphSets.get(i);
+					if (!gs.getSpectrum().is1D()) {
+						gs2d = gs;
+						if (i2d >= 0)
+							i = -2;
+						i2d = i;
+						break;
+					}
+				}
+			if (i2d == -2 || i2d == -1 && n != 2) {
+				setFractionalPositions(pd, graphSets, LinkMode.NONE);
+				return;
+			}
+			for (int i = 0; i < n; i++) {
+				gs = graphSets.get(i);
+				gs.isLinked = true;
+				JDXSpectrum s1 = gs.getSpectrumAt(0);
+				boolean is1D = s1.is1D();
+				if (is1D) {
+					JDXSpectrum s2 = gs2d.getSpectrumAt(0);					
+					if (gs2d != null) {
+						if (JDXSpectrum.areLinkableX(s1, s2))
+  					  gs.gs2dLinkedX = gs2d;
+						if (JDXSpectrum.areLinkableY(s1, s2))
+							gs.gs2dLinkedY = gs2d;
+					}
+					gs.fX0 = 0;
+					gs.fY0 = y;
+					gs.fracX = (gs2d == null ? 1 : 0.5);
+					gs.fracY = (n == 3 || gs2d == null ? 0.5 : 1);
+			  	y += 0.5;
+				} else {
+					gs.fX0 = 0.5;
+					gs.fY0 = 0;
+					gs.fracX = 0.5;
+					gs.fracY = 1;
+					
+				}
+			}
 		}
-	}
 
+	}
 	// highlight class
 
 	/**
@@ -2673,7 +2801,7 @@ abstract class GraphSet {
 		pd.notifySubSpectrumChange(i, getSpectrum());
 	}
 
-	boolean checkSpectrumClickedEvent(int xPixel, int yPixel, int clickCount) {
+	synchronized boolean checkSpectrumClickedEvent(int xPixel, int yPixel, int clickCount) {
 		if (nextClickForSetPeak)
 			return false;
 		if (clickCount > 0 && checkArrowLeftRightClick(xPixel, yPixel))
@@ -2729,7 +2857,7 @@ abstract class GraphSet {
 		return (isEnd ? xPixelPlot1 - xPixel < 20 : xPixel - xPixelPlot0 < 20);
 	}
 
-	boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
+	synchronized boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		if (!zoomEnabled)
 			return false;
 		PlotWidget widget;
@@ -2776,11 +2904,11 @@ abstract class GraphSet {
 			return true;
 		}
 		if (widget == cur2Dx0 || widget == cur2Dx1) {
-			xPixel = imageView.fixX(xPixel);
-			widget.setX(imageView.toX(xPixel), xPixel);
+			//xPixel = imageView.fixX(xPixel);
+			//widget.setX(imageView.toX(xPixel), xPixel);
 			// 2D x zoom change
-			doZoom(cur2Dx0.getXVal(), viewData.minY, cur2Dx1.getXVal(),
-					viewData.maxY, false, false, false);
+			//doZoom(cur2Dx0.getXVal(), viewData.minY, cur2Dx1.getXVal(),
+			//		viewData.maxY, false, false, false, true);
 			return true;
 		}
 		if (widget == pin1Dx0 || widget == pin1Dx1 || widget == pin1Dx01) {
@@ -2797,7 +2925,7 @@ abstract class GraphSet {
 			}
 			// 1D x zoom change
 			doZoom(pin1Dx0.getXVal(), viewData.minY, pin1Dx1.getXVal(),
-					viewData.maxY, false, false, false);
+					viewData.maxY, false, false, false, true);
 			return true;
 		}
 		if (widget == pin1Dy0 || widget == pin1Dy1 || widget == pin1Dy01) {
@@ -2817,7 +2945,7 @@ abstract class GraphSet {
 			}
 			// actually only used for 2D intensity change now
 			doZoom(viewData.minXOnScale, pin1Dy0.getYVal(), viewData.maxXOnScale,
-					pin1Dy1.getYVal(), false, false, false);
+					pin1Dy1.getYVal(), false, false, isLinked && imageView == null, true);
 			return true;
 		}
 		if (widget == pin2Dx0 || widget == pin2Dx1 || widget == pin2Dx01) {
@@ -2841,7 +2969,7 @@ abstract class GraphSet {
 					pin2Dy1.yPixel0);
 			// 2D x zoom
 			doZoom(pin2Dx0.getXVal(), viewData.minY, pin2Dx1.getXVal(),
-					viewData.maxY, false, false, false);
+					viewData.maxY, false, false, false, true);
 			return true;
 		}
 		if (widget == pin2Dy0 || widget == pin2Dy1 || widget == pin2Dy01) {
@@ -2880,17 +3008,17 @@ abstract class GraphSet {
 		removeDialog(getFixedSelectedSpectrumIndex(), AType.Measurements);
 	}
 
-	static List<GraphSet> createGraphSets(JSVPanel jsvp,
-			List<JDXSpectrum> spectra, int startIndex, int endIndex) {
+	static List<GraphSet> createGraphSetsAndSetLinkMode(PanelData pd, JSVPanel jsvp,
+			List<JDXSpectrum> spectra, int startIndex, int endIndex, LinkMode linkMode) {
 		List<GraphSet> graphSets = new ArrayList<GraphSet>();
 		for (int i = 0; i < spectra.size(); i++) {
 			JDXSpectrum spec = spectra.get(i);
-			GraphSet graphSet = findCompatibleGraphSet(graphSets, spec);
+			GraphSet graphSet = (linkMode == LinkMode.NONE ? findCompatibleGraphSet(graphSets, spec) : null);
 			if (graphSet == null)
 				graphSets.add(graphSet = jsvp.getNewGraphSet());
 			graphSet.addSpec(spec);
 		}
-		setFractionalPositions(graphSets);
+		setFractionalPositions(pd, graphSets, linkMode);
 		for (int i = graphSets.size(); --i >= 0;) {
 			graphSets.get(i).initGraphSet(startIndex, endIndex);
 			Logger.info("JSVGraphSet " + (i + 1) + " nSpectra = "
@@ -2920,8 +3048,9 @@ abstract class GraphSet {
 	 * @param drawY0
 	 * @param plotAreaInsets
 	 */
-	void drawGraphSet(Object og, int width, int height, int left, int right,
+	synchronized void drawGraphSet(Object og, int width, int height, int left, int right,
 			int top, int bottom, boolean isResized) {
+
 		zoomEnabled = pd.getBoolean(ScriptToken.ENABLEZOOM);
 		this.height = height;
 		this.width = width;
@@ -3073,7 +3202,7 @@ abstract class GraphSet {
 			if (isInTopBar(xPixel, yPixel)) {
 				// 1D x zoom reset to original
 				doZoom(toX0(xPixel0), viewData.minY, toX0(xPixel1), viewData.maxY,
-						true, false, true);
+						true, false, true, true);
 				// } else if (isInRightBar(xPixel, yPixel)) {
 				// // no longer possible
 				// doZoom(view.minXOnScale, viewList.get(0).minY,
@@ -3168,14 +3297,14 @@ abstract class GraphSet {
 			// 2D xy zoom
 			doZoom(imageView.toX(imageView.xPixel0), viewData.minY, imageView
 					.toX(imageView.xPixel0 + imageView.xPixels - 1), viewData.maxY, true,
-					false, false);
+					false, false, true);
 		} else if (thisWidget == zoomBox1D) {
 			if (!isGoodEvent(zoomBox1D, null, true))
 				return;
 			int x1 = zoomBox1D.xPixel1;
 			// 1D xy zoom
 			doZoom(toX(zoomBox1D.xPixel0), toY(zoomBox1D.yPixel0), toX(x1),
-					toY(zoomBox1D.yPixel1), true, false, true);
+					toY(zoomBox1D.yPixel1), true, false, true, true);
 			zoomBox1D.xPixel1 = zoomBox1D.xPixel0;
 		} else if (thisWidget == pin1Dx0 || thisWidget == pin1Dx1
 				|| thisWidget == cur2Dx0 || thisWidget == cur2Dx1) {
@@ -3192,8 +3321,7 @@ abstract class GraphSet {
 				setUserYFactor(iSpectrumMovedTo);
 		}
 		inPlotMove = isInPlotRegion(xPixel, yPixel);
-		xPixelMovedTo = (inPlotMove ? xPixel : -1);
-		xPixelMovedTo2 = -1;
+		setXPixelMovedTo(Double.MAX_VALUE, Double.MAX_VALUE, (inPlotMove ? xPixel : -1), -1);
 		if (inPlotMove) {
 			xValueMovedTo = toX(xPixelMovedTo);
 			yValueMovedTo = getSpectrum().getYValueAt(xValueMovedTo);
@@ -3304,7 +3432,7 @@ abstract class GraphSet {
 		// from CTRL +/-
 		viewData.scaleSpectrum(imageView == null ? iSpectrumSelected : -2, factor);
 		if (imageView != null) {
-			update2dImage(true, false);
+			update2dImage(false);
 			resetPinsFromView();
 		}
 		pd.refresh();
@@ -3471,7 +3599,7 @@ abstract class GraphSet {
 		if (x1 == 0 && x2 == 0) {
 			newPins();
 		} else {
-			doZoom(x1, y1, x2, y2, true, false, true);
+			doZoom(x1, y1, x2, y2, true, false, true, true);
 			return;
 		}
 		imageView = null;
@@ -3550,7 +3678,7 @@ abstract class GraphSet {
 			lastClickX += dx;
 		updateDialogs();
 		doZoom(viewData.minXOnScale, viewData.minYOnScale, viewData.maxXOnScale,
-				viewData.maxYOnScale, false, false, true);
+				viewData.maxYOnScale, false, false, true, true);
 		pd.repaint();
 		return true;
 	}
@@ -3591,14 +3719,14 @@ abstract class GraphSet {
 		if (spec != null)
 			setSpectrumClicked(getSpectrumIndex(spec));
 		xValueMovedTo = lastClickX = x;
-		setXPixelMovedTo(x);
+		setXPixelMovedTo(x, Double.MAX_VALUE, 0, 0);
 		yValueMovedTo = Double.NaN;
 	}
 
 	void setXPointer2(JDXSpectrum spec, double x) {
 		if (spec != null)
 			setSpectrumClicked(getSpectrumIndex(spec));
-		xPixelMovedTo2 = toPixelX(x);
+		setXPixelMovedTo(Double.MAX_VALUE, x, 0, 0);
 	}
 
 	boolean hasCurrentMeasurement(AType type) {
@@ -3791,6 +3919,13 @@ abstract class GraphSet {
 	public ScaleData getCurrentView() {
 		setUserYFactor(getFixedSelectedSpectrumIndex());
 		return viewData;
+	}
+
+	public void set2DXY(double x, double y) {
+		if (gs2dLinkedX != null)
+  		cur1D2x1.setX(x, toPixelX(x));
+		if (gs2dLinkedY != null)
+  		cur1D2x2.setX(y, toPixelX(y));
 	}
 
 }

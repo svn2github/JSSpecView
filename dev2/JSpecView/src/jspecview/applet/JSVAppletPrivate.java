@@ -104,17 +104,6 @@ import netscape.javascript.JSObject;
 public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		JSVAppletInterface {
 
-	protected JSVApplet jsvApplet;
-
-	JSVApplet getJsvApplet() {
-		System.out.println("testing TODO");
-		return jsvApplet;
-	}
-
-	int nViews;
-	private RepaintManager repaintManager;
-	private DialogHelper dialogHelper;
-
 	JSVAppletPrivate(JSVApplet jsvApplet) {
 		this.jsvApplet = jsvApplet;
 		repaintManager = new RepaintManager(this);
@@ -122,7 +111,78 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		init();
 	}
 
-	private String integrationRatios;
+	private JSVAppletPopupMenu     appletPopupMenu;
+	protected Thread               commandWatcherThread;
+	private JDXSource              currentSource;
+	private DialogHelper           dialogHelper;
+	protected JSVApplet            jsvApplet;
+	private JFrame                 offWindowFrame;
+	private AwtOverlayLegendDialog overlayLegendDialog;
+  private List<JSVPanelNode>     panelNodes = new ArrayList<JSVPanelNode>();  
+	private AwtParameters          parameters = new AwtParameters("applet");
+	private RepaintManager         repaintManager;
+	private JSVPanel               selectedPanel;
+  private JSVTree                spectraTree;
+	private ViewPanel              spectrumPanel;
+  private ViewDialog             viewDialog;
+
+	private String appletID;
+	private String fullName;
+	private String syncID;
+	
+	private int fileCount;
+	private int nViews;
+	private int scriptLevelCount;
+	
+	boolean isNewWindow;
+
+
+	//------- settable parameters ------------
+
+	private IRMode irMode = IRMode.NO_CONVERT;
+
+	private boolean allowCompoundMenu = true;
+	private boolean allowMenu = true;
+	private boolean autoIntegrate;
+	private boolean interfaceOverlaid;
+	private boolean loadImaginary = false;
+	private Boolean obscureTitleFromUser;
+
+	private int initialStartIndex = -1;
+	private int initialEndIndex = -1;
+	
+	private String integrationRatios;	
+
+	private String appletReadyCallbackFunctionName;
+	private String coordCallbackFunctionName;
+	private String loadFileCallbackFunctionName;
+	private String peakCallbackFunctionName;
+	private String syncCallbackFunctionName;
+
+	/////// parameter set/get methods
+	
+	public boolean isPro() {
+		return isSigned();
+	}
+
+	public boolean isSigned() {
+		return false;
+	}
+
+	public JDXSource getCurrentSource() {
+		return currentSource;
+	}
+	public void setCurrentSource(JDXSource source) {
+		currentSource = source;
+	}
+
+	public int getFileCount() {
+		return fileCount;
+	}
+	public void setFileCount(int n) {
+		fileCount = n;
+	}
+
 	public void setIntegrationRatios(String value) {
 		integrationRatios = value;
 	}
@@ -131,9 +191,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 															
-	private int initialStartIndex = -1;
-	private int initialEndIndex = -1;
-	private IRMode irMode = IRMode.NO_CONVERT;
 	public void setIRMode(IRMode mode) {
 		irMode = mode;
 	}
@@ -141,61 +198,45 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		return irMode;
 	}
 
-	private boolean autoIntegrate;
+	JSVApplet getJsvApplet() {
+		return jsvApplet;
+	}
 
-	private String coordCallbackFunctionName;
-	private String loadFileCallbackFunctionName;
-	private String peakCallbackFunctionName;
-	private String syncCallbackFunctionName;
-	private String appletReadyCallbackFunctionName;
-
-	private AwtParameters parameters = new AwtParameters("applet");
-
-	/*---------------------------------END PARAMETERS------------------------*/
-
-	boolean isStandalone; // not changed
-
-	private ViewDialog viewDialog;
-	private AwtOverlayLegendDialog overlayLegendDialog;
-
-	private String appletID;
-	private String syncID;
-	protected Thread commandWatcherThread;
-	private Boolean obscureTitleFromUser;
-	private boolean loadImaginary = false;
 	public void setLoadImaginary(boolean TF) {
 		loadImaginary = TF;
 	}
 
-	JFrame offWindowFrame;
-	ViewPanel spectrumPanel;
-	JSVAppletPopupMenu appletPopupMenu;
+	public List<JSVPanelNode> getPanelNodes() {
+		return panelNodes;
+	}
+	
+	public Parameters getParameters() {
+		return parameters;
+	}
+
 	public Object getPopupMenu() {
 		return appletPopupMenu;
 	}
 
-  private List<JSVPanelNode> panelNodes = new ArrayList<JSVPanelNode>();
-	public List<JSVPanelNode> getPanelNodes() {
-		return panelNodes;
+	public int incrementScriptLevelCount(int n) {
+		return scriptLevelCount += n;
 	}
-	private JSVPanel selectedPanel;
-
-	private JDXSource currentSource;
-	public JDXSource getCurrentSource() {
-		return currentSource;
-	}
-	public void setCurrentSource(JDXSource source) {
-		currentSource = source;
+	
+	public JSVPanel getSelectedPanel() {
+		return selectedPanel;
 	}
 
-	public boolean isSigned() {
-		return false;
-	}
+  public Object getSpectraTree() {
+  	return spectraTree;
+  }
+  
 
-	public boolean isPro() {
-		return isSigned();
+	public int incrementViewCount(int n) {
+		return nViews += n;
 	}
-
+	
+	/////////////////////////////////////////
+	
 	void dispose() {
 		dialogHelper = null;
 		try {
@@ -473,12 +514,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		JSViewer.setOverlayLegendVisibility(this, getSelectedPanel(), visible);
 	}
 
-	private String fullName;
-	private boolean allowMenu = true;
-	private boolean compoundMenuOn;
-	private boolean allowCompoundMenu = true;
-	private boolean interfaceOverlaid;
-
 	// //////////// JSVAppletPopupMenu calls
 
 	/**
@@ -509,8 +544,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		return s;
 	}
 
-	boolean isNewWindow;
-
 	/**
 	 * Shows the applet in a Frame
 	 * @param isSelected 
@@ -530,14 +563,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 			offWindowFrame.addWindowListener(new WindowAdapter() {
 				@Override
 				public void windowClosing(WindowEvent e) {
-					spectrumPanel.setSize(d);
-					jsvApplet.getContentPane().add(spectrumPanel);
-					jsvApplet.setVisible(true);
-					validateAndRepaint();
-					offWindowFrame.removeAll();
-					offWindowFrame.dispose();
-					appletPopupMenu.windowMenuItem.setSelected(false);
-					isNewWindow = false;
+					windowClosingEvent(d);
 				}
 			});
 		} else {
@@ -547,6 +573,17 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 			offWindowFrame.dispose();
 			offWindowFrame = null;
 		}
+	}
+
+	protected void windowClosingEvent(Dimension d) {
+		spectrumPanel.setSize(d);
+		jsvApplet.getContentPane().add(spectrumPanel);
+		jsvApplet.setVisible(true);
+		validateAndRepaint();
+		offWindowFrame.removeAll();
+		offWindowFrame.dispose();
+		appletPopupMenu.windowMenuItem.setSelected(false);
+		isNewWindow = false;
 	}
 
 	public void repaint() {
@@ -746,9 +783,8 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
     	setSelectedPanel(null);
     	return;
     }
-    compoundMenuOn = allowCompoundMenu;
 
-		appletPopupMenu.setCompoundMenu(panelNodes, compoundMenuOn);
+    appletPopupMenu.setCompoundMenu(panelNodes, allowCompoundMenu);
 
 		Logger.info(jsvApplet.getAppletInfo() + " File " + currentSource.getFilePath()
 				+ " Loaded Successfully");
@@ -837,9 +873,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	// ///////////// ScriptInterface execution from JSViewer.runScriptNow and
 	// menus
 
-	public JSVPanel getSelectedPanel() {
-		return selectedPanel;
-	}
 
 	public void runScript(String script) {
 		if (scriptQueue == null)
@@ -880,10 +913,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 
 	public String getSolnColour() {
 		return getSelectedPanel().getPanelData().getSolutionColor();
-	}
-
-	public Parameters getParameters() {
-		return parameters;
 	}
 
 	public void execClose(String value, boolean fromScript) {
@@ -963,20 +992,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	///////// multiple source changes ////////
 	
 	
-  private JSVTree spectraTree;
-	private int fileCount;
-	public int getFileCount() {
-		return fileCount;
-	}
-	public void setFileCount(int n) {
-		fileCount = n;
-	}
-
-  
-  public Object getSpectraTree() {
-  	return spectraTree;
-  }
-  
 	public JSVPanelNode setOverlayVisibility(JSVPanelNode node) {
 		JSViewer.setOverlayLegendVisibility(this, getSelectedPanel(),
 				appletPopupMenu.overlayKeyMenuItem.isSelected());
@@ -995,10 +1010,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
   	JSVTree.closeSource(this, source);
 	}
 
-	public int incrementViewCount(int n) {
-		return nViews += n;
-	}
-	
 	public void process(List<JDXSpectrum> specs) {
     JDXSpectrum.process(specs, irMode);
 	}
@@ -1099,4 +1110,8 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		// n/a
 	}
 
+	public String getFileAsString(String value) {
+		return FileManager.getFileAsString(value, jsvApplet.getDocumentBase());
+	}
+	
 }

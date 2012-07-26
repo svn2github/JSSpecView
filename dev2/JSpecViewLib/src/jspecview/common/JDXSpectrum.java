@@ -409,19 +409,6 @@ public class JDXSpectrum extends JDXDataObject {
     return Math.log(value) / Math.log(10);
   }
 
-  public static boolean areScalesCompatible(JDXSpectrum s1, JDXSpectrum s2,
-                                            boolean allow2D2D) {
-    if (!((allow2D2D ? s1.is1D() == s2.is1D() : s1.is1D() && s2.is1D()) 
-        && s1.xUnits.equalsIgnoreCase(s2.xUnits)))
-      return false;
-    JDXSpectrum spec1 = s1;
-    JDXSpectrum spec2 = s2;
-    if (spec1.isHNMR() != spec2.isHNMR())
-      return false;
-    return true;
-    
-  }
-
   public static boolean process(List<JDXSpectrum> specs, IRMode irMode) {
     if (irMode == IRMode.TO_ABS || irMode == IRMode.TO_TRANS)
       for (int i = 0; i < specs.size(); i++)
@@ -455,7 +442,7 @@ public class JDXSpectrum extends JDXDataObject {
    */
   public boolean addSubSpectrum(JDXSpectrum spectrum, boolean forceSub) {
     if (!forceSub && (numDim < 2 || blockID != spectrum.blockID)
-        || !areScalesCompatible(this, spectrum, true))
+        || !areXScalesCompatible(this, spectrum, true, false))
       return false;
     isForcedSubset = forceSub; // too many blocks (>100)
     if (subSpectra == null) {
@@ -585,6 +572,26 @@ public class JDXSpectrum extends JDXDataObject {
 				}
 		}
 		return specShift;
+	}
+
+	public static boolean areXScalesCompatible(JDXSpectrum s1, JDXSpectrum s2,
+			boolean allow2D2D, boolean allow1D2D) {
+		if (!allow1D2D && 
+				!((allow2D2D ? s1.is1D() == s2.is1D() : s1.is1D() && s2.is1D()) 
+				&& s1.xUnits.equalsIgnoreCase(s2.xUnits)))
+			return false;
+		if (s1.isHNMR() != s2.isHNMR())
+			return false;
+		return true;
+
+	}
+
+  public static boolean areLinkableX(JDXSpectrum s1, JDXSpectrum s2) {
+		return (s1.isNMR() && s2.isNMR() && Math.abs(s1.observedFreq - s2.freq2dX) < 0.1);
+	}
+
+	public static boolean areLinkableY(JDXSpectrum s1, JDXSpectrum s2) {
+		return (s1.isNMR() && s2.isNMR() && Math.abs(s1.observedFreq - s2.freq2dY) < 0.1);
 	}
 
 }

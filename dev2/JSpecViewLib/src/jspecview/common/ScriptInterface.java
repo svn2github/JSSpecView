@@ -74,6 +74,8 @@ public interface ScriptInterface {
 
 	public int incrementViewCount(int i);
 
+	public int incrementScriptLevelCount(int i);
+
 	public void openDataOrFile(String data, String name, List<JDXSpectrum> specs,
 			String url, int firstSpec, int lastSpec, boolean doCheck);
 
@@ -140,5 +142,7 @@ public interface ScriptInterface {
 	public void setProperty(String key, String value);
 
 	public boolean isSigned();
+
+	public String getFileAsString(String value);
 
 }

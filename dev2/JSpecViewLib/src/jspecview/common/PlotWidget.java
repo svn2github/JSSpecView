@@ -22,6 +22,8 @@ class PlotWidget extends Coordinate {
   boolean isEnabled = true;
   
   private String name;
+	
+  ScriptToken color = ScriptToken.PLOTCOLOR;
   
   @Override
   public String toString() {

@@ -47,7 +47,6 @@ import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetListener;
@@ -138,79 +137,157 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	private final static long serialVersionUID = 1L;
 	private final static int MAX_RECENT = 10;
 
-	private boolean toolbarOn;
-	private boolean sidePanelOn;
-	private boolean statusbarOn;
-	private boolean showExitDialog;
+	// ----------------------------------------------------------------------
 
-	private String defaultDisplaySchemeName;
-	private boolean interfaceOverlaid;
+	private AppMenu         appMenu;
+	private AppToolBar      toolBar;
+	private JTextField      commandInput = new JTextField();
+	private BorderLayout    mainborderLayout = new BorderLayout();
+	private JSplitPane      mainSplitPane = new JSplitPane();
+	private final JPanel    nullPanel = new JPanel();
+	private JSplitPane      sideSplitPane = new JSplitPane();
+	
+	private JSVAppletPrivatePro     advancedApplet;
+	private CommandHistory          commandHistory;
+	private JDXSource               currentSource;
+	private DialogHelper            dialogHelper;
+	private DisplaySchemesProcessor dsp;
+	public DropTargetListener       dtl;
+	private JmolSyncInterface       jmol;
+	private Component               jmolDisplay;
+	private Dimension               jmolDimensionOld;
+	private Container               jmolFrame;
+	private Dimension               jmolDimensionNew = new Dimension(250, 200);
+	private JSVInterface            jmolOrAdvancedApplet;
+	private AwtPopupMenu            jsvpPopupMenu = new AwtPopupMenu(this);
+	private List<JSVPanelNode>      panelNodes = new ArrayList<JSVPanelNode>();
+	private AwtParameters           parameters = new AwtParameters("application");
+	private JSVPanel                prevPanel;
+	private Properties              properties;
+	private List<String>            recentFilePaths = new ArrayList<String>(MAX_RECENT);
+	private RepaintManager          repaintManager;
+	private JSVPanel                selectedPanel;
+	private JSVTree                 spectraTree;
+	private JScrollPane             spectraTreeScrollPane;
+	private ViewPanel               spectrumPanel;
+	private JPanel                  statusPanel = new JPanel();
+	private JLabel                  statusLabel = new JLabel();
+
+	private IRMode irMode = IRMode.NO_CONVERT;
+
+	private boolean autoIntegrate;
 	private boolean autoShowLegend;
+	private boolean isEmbedded;
+	private boolean isHidden;
+	private boolean interfaceOverlaid;
+	private boolean loadImaginary = false;
+	private boolean sidePanelOn;
+	private boolean showExitDialog;
+	private boolean statusbarOn;
+	private boolean svgForInkscape = false;
+	private boolean toolbarOn;
+
+
+  private int mainSplitPosition = 200;
+	private int fileCount;
+	private int nViews;
+	private int scriptLevelCount;
+	private int splitPosition;
+
+	private String tempDS;
+	private String returnFromJmolModel;
+	private String recentOpenURL = "http://";
+	private String defaultDisplaySchemeName;
 	private String recentURL;
 	private String integrationRatios;
-	public void setIntegrationRatios(String value) {
-		integrationRatios = value;
+	
+	
+	
+	////////////////////// get/set methods
+	
+	public boolean isPro() {
+		return true;
 	}
+
+	public boolean isSigned() {
+		return true;
+	}
+
+	public boolean getAutoCombine() {
+		return interfaceOverlaid;
+	}
+
+	public boolean getAutoShowLegend() {
+		return autoShowLegend;
+	}
+
+	public JDXSource getCurrentSource() {
+		return currentSource;
+	}
+
+	public int getFileCount() {
+		return fileCount;
+	}
+
+	public void setFileCount(int n) {
+		fileCount = n;
+	}
+
 	public String getIntegrationRatios() {
 		return integrationRatios;
 	}
 
-	private IRMode irMode = IRMode.NO_CONVERT;
-	public void setIRMode(IRMode mode) {
-		irMode = mode;
+	public void setIntegrationRatios(String value) {
+		integrationRatios = value;
 	}
+	
 	public IRMode getIRMode() {
 		return irMode;
 	}
 	
-	private boolean autoIntegrate;
+	public void setIRMode(IRMode mode) {
+		irMode = mode;
+	}
+	
+	public void setLoadImaginary(boolean TF) {
+		loadImaginary  = TF;
+	}
 
-	private AwtParameters parameters = new AwtParameters("application");
+	public List<JSVPanelNode> getPanelNodes() {
+		return panelNodes;
+	}
 
-	// ----------------------- Application Attributes ---------------------
-
-	private JmolSyncInterface jmol;
-	private List<JSVPanelNode> panelNodes = new ArrayList<JSVPanelNode>();
-	private List<String> recentFilePaths = new ArrayList<String>(MAX_RECENT);
-	private JDXSource currentSource;
-	private Properties properties;
-	private DisplaySchemesProcessor dsp;
-	private String tempDS;
-
-	// ----------------------------------------------------------------------
-
-	private JSVPanel selectedPanel;
-
-	private AwtPopupMenu jsvpPopupMenu = new AwtPopupMenu(this);
+	public Parameters getParameters() {
+		return parameters;
+	}
 
 	public Object getPopupMenu() {
 		return jsvpPopupMenu;
 	}
 
-	private AppMenu appMenu;
-	private AppToolBar toolBar;
+	public void setReturnFromJmolModel(String model) {
+		returnFromJmolModel = model;
+	}
 
-	private BorderLayout mainborderLayout = new BorderLayout();
-	private JSplitPane mainSplitPane = new JSplitPane();
-	private JSplitPane sideSplitPane = new JSplitPane();
-	public DropTargetListener dtl;
+	public String getReturnFromJmolModel() {
+		return returnFromJmolModel;
+	}
 
-	private JScrollPane spectraTreeScrollPane;
-	private JPanel statusPanel = new JPanel();
-	private JLabel statusLabel = new JLabel();
-	JTextField commandInput = new JTextField();
+	public JSVPanel getSelectedPanel() {
+		return selectedPanel;
+	}
 
-	private JSVInterface jmolOrAdvancedApplet;
-	private JSVAppletPrivatePro advancedApplet;
-	private Image iconImage;
-	CommandHistory commandHistory;
-	private boolean svgForInkscape;
-	private Component jmolDisplay;
-	private Dimension jmolDimensionOld;
-	private Container jmolFrame;
-	private Dimension jmolDimensionNew = new Dimension(250, 200);
-	private RepaintManager repaintManager;
-	private DialogHelper dialogHelper;
+	public Object getSpectraTree() {
+		return spectraTree;
+	}
+
+	public int incrementScriptLevelCount(int n) {
+		return scriptLevelCount += n;
+	}
+	
+	public int incrementViewCount(int n) {
+		return nViews += n;
+	}
 
 	/**
 	 * Constructor
@@ -242,10 +319,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		jmolOrAdvancedApplet.exitJSpecView(withDialog && showExitDialog, this);
 	}
 
-	private JPanel nullPanel = new JPanel();
-	private int splitPosition;
-	private ViewPanel spectrumPanel;
-
 	public void awaken(boolean visible) {
 		if (jmolDisplay == null)
 			return;
@@ -276,22 +349,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		setVisible(visible);
 	}
 
-	private void getIcons() {
-		Class<? extends MainFrame> cl = getClass();
-		URL iconURL = cl.getResource("icons/spec16.gif"); // imageIcon
-		iconImage = Toolkit.getDefaultToolkit().getImage(iconURL);
-		// frameIcon = new ImageIcon(iconURL);
-	}
-
-	/**
-	 * Shows or hides certain GUI elements
-	 */
-	private void setApplicationElements() {
-		appMenu.setSelections(sidePanelOn, toolbarOn, statusbarOn,
-				getSelectedPanel());
-		toolBar.setSelections(getSelectedPanel());
-	}
-
 	/**
 	 * Task to do when program starts
 	 */
@@ -300,7 +357,9 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		// initialise MainFrame as a target for the drag-and-drop action
 		new DropTarget(this, getDropListener());
 
-		getIcons();
+		Class<? extends MainFrame> cl = getClass();
+		URL iconURL = cl.getResource("icons/spec16.gif"); // imageIcon
+		setIconImage(Toolkit.getDefaultToolkit().getImage(iconURL));
 
 		// Initalize application properties with defaults
 		// and load properties from file
@@ -399,6 +458,15 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	/**
+	 * Shows or hides certain GUI elements
+	 */
+	private void setApplicationElements() {
+		appMenu.setSelections(sidePanelOn, toolbarOn, statusbarOn,
+				getSelectedPanel());
+		toolBar.setSelections(getSelectedPanel());
+	}
+
+	/**
 	 * Sets the preferences or properties of the application that is loaded from a
 	 * properties file.
 	 * @param shouldApplySpectrumDisplaySettings 
@@ -493,7 +561,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		toolBar = new AppToolBar(this);
 		appMenu = new AppMenu(this, jsvpPopupMenu);
 		appMenu.setRecentMenu(recentFilePaths);
-		setIconImage(iconImage);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setJMenuBar(appMenu);
 		setTitle("JSpecView");
@@ -517,18 +584,13 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		commandInput.setFocusTraversalKeysEnabled(false);
 		commandInput.addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e) {
-				commandHistory.keyPressed(e.getKeyCode());
-				checkCommandLineForTip(e.getKeyChar());
-				commandInput.requestFocusInWindow();
+				keyPressedEvent(e.getKeyCode(), e.getKeyChar());
 			}
 
 			public void keyReleased(KeyEvent e) {
-				// TODO Auto-generated method stub
-
 			}
 
 			public void keyTyped(KeyEvent e) {
-				// checkCommandLineForTip(e.getKeyChar());
 			}
 
 		});
@@ -555,6 +617,12 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		spectrumPanel = new ViewPanel(new BorderLayout());
 		mainSplitPane.setRightComponent(spectrumPanel);
 	}
+
+	protected void keyPressedEvent(int keyCode, char keyChar) {
+		commandHistory.keyPressed(keyCode);	
+		checkCommandLineForTip(keyChar);
+		commandInput.requestFocusInWindow();
+  }
 
 	protected void checkCommandLineForTip(char c) {
 		if (c != '\t' && (c == '\n' || c < 32 || c > 126))
@@ -651,8 +719,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		jsvp.doRepaint();
 	}
 
-	private boolean isEmbedded;
-	private boolean isHidden;
 
 	/**
 	 * Shows a dialog with the message "Not Yet Implemented"
@@ -660,21 +726,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	public void showNotImplementedOptionPane() {
 		JOptionPane.showMessageDialog(this, "Not Yet Implemented",
 				"Not Yet Implemented", JOptionPane.INFORMATION_MESSAGE);
-	}
-
-	/*  *//**
-	 * Does the necessary actions and cleaning up when JSVFrame closes
-	 * 
-	 * @param frame
-	 *          the JSVFrame
-	 */
-	/*
-	 * private void doInternalFrameClosing(final JInternalFrame frame) {
-	 * closeSource(currentSource); setCurrentSource(null); if (panelNodes.size()
-	 * == 0) setMenuEnables(null, false); }
-	 */
-	public JSVPanel getSelectedPanel() {
-		return selectedPanel;
 	}
 
 	public void processCommand(String script) {
@@ -697,8 +748,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		}
 	}
 
-  private int mainSplitPosition = 200;
-	
+
 	public void setSelectedPanel(JSVPanel jsvp) {
 		if (selectedPanel != null)
       mainSplitPosition = mainSplitPane.getDividerLocation();
@@ -714,7 +764,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
   		mainSplitPane.setDividerLocation(mainSplitPosition);
 	}
 
-	private JSVPanel prevPanel;
 
 	public void sendPanelChange(JSVPanel jsvp) {
 		if (jsvp == prevPanel)
@@ -869,18 +918,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	// //////////////////////// script commands from JSViewer /////////////////
 
-	public JDXSource getCurrentSource() {
-		return currentSource;
-	}
-
-	public Parameters getParameters() {
-		return parameters;
-	}
-
-	public List<JSVPanelNode> getPanelNodes() {
-		return panelNodes;
-	}
-
 	public void validateAndRepaint() {
 		validate();
 		requestRepaint();
@@ -943,17 +980,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	public JSVDialog getOverlayLegend(JSVPanel jsvp) {
 		return new AwtOverlayLegendDialog(this, jsvp);
-	}
-
-	// these next patch into the advanced applet routines for JavaScript calls
-	// via JSVAppletInterface
-
-	public boolean isPro() {
-		return true;
-	}
-
-	public boolean isSigned() {
-		return true;
 	}
 
 	public void addHighlight(double x1, double x2, int r, int g, int b, int a) {
@@ -1074,8 +1100,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		validate();
 	}
 
-	private String recentOpenURL = "http://";
-
 	public void openURL() {
 		String msg = (recentURL == null ? recentOpenURL : recentURL);
 		String url = (String) JOptionPane.showInputDialog(null,
@@ -1106,21 +1130,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	// /// JSVPanelNode tree model methods (can be left unimplemented for Android)
 
-	private JSVTree spectraTree;
-	private int fileCount = 0;
-
-	public int getFileCount() {
-		return fileCount;
-	}
-
-	public void setFileCount(int n) {
-		fileCount = n;
-	}
-
-	public Object getSpectraTree() {
-		return spectraTree;
-	}
-
 	public JSVPanelNode setOverlayVisibility(JSVPanelNode node) {
 		JSViewer.setOverlayLegendVisibility(this, node.jsvp,
 				appMenu.overlayKeyMenuItem.isSelected());
@@ -1149,16 +1158,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		validateAndRepaint();			
 	}
 
-	private int nOverlays;
-	private boolean loadImaginary = false;
-	public void setLoadImaginary(boolean TF) {
-		loadImaginary  = TF;
-	}
-
-	public int incrementViewCount(int n) {
-		return nOverlays += n;
-	}
-
 	public void setRecentURL(String filePath) {
 		recentURL = filePath;
 	}
@@ -1181,14 +1180,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		appMenu.setCloseMenuItem(fileName);
 		setTitle("JSpecView - " + filePath);
 		appMenu.setSourceEnabled(true);
-	}
-
-	public boolean getAutoCombine() {
-		return interfaceOverlaid;
-	}
-
-	public boolean getAutoShowLegend() {
-		return autoShowLegend;
 	}
 
 	public void updateRecentMenus(String filePath) {
@@ -1245,16 +1236,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		new ViewDialog(this, spectraTreeScrollPane, false);
 	}
 
-	private String returnFromJmolModel;
-
-	public void setReturnFromJmolModel(String model) {
-		returnFromJmolModel = model;
-	}
-
-	public String getReturnFromJmolModel() {
-		return returnFromJmolModel;
-	}
-
 	public void setCursorObject(Object c) {
 		setCursor((Cursor) c);
 	}
@@ -1276,6 +1257,10 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 	public void setProperty(String key, String value) {
 		properties.setProperty(key, value);
+	}
+
+	public String getFileAsString(String value) {
+		return FileManager.getFileAsString(value, null);
 	}
 	
 }

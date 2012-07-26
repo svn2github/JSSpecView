@@ -104,35 +104,37 @@ public class PanelData {
 	// plot parameters
 
 	static final int defaultPrintHeight = 450, defaultPrintWidth = 280;
-	static final int topMargin = 30, bottomMargin = 50, leftMargin = 80, rightMargin = 50;
-	
-	int plotAreaWidth, plotAreaHeight;
+	static final int topMargin = 40, bottomMargin = 50, leftMargin = 60,
+			rightMargin = 50;
+
+	boolean ctrlPressed;
+	boolean drawXAxisLeftToRight;
+	boolean isIntegralDrag;
+	boolean xAxisLeftToRight = true;
+
+	int integralShiftMode;
 	int top = topMargin;
 	int bottom = bottomMargin;
 	int left = leftMargin;
 	int right = rightMargin;
 
-	// current values
-
-	boolean drawXAxisLeftToRight;
-	boolean xAxisLeftToRight = true;
-	boolean isIntegralDrag;
-	int integralShiftMode;
-
-	int nSpectra;
-	int thisWidth;
-	int thisPlotHeight;
-	private String commonFilePath;
-
 	String coordStr = "";
 	String startupPinTip = "Click to set.";
 	String title;
-
+	
+	private int clickCount;
+	private int nSpectra;
+	int thisWidth;
+	private int thisHeight;
+	
+	private String commonFilePath;
 	private String viewTitle;
+
+
 	public void setViewTitle(String title) {
 		viewTitle = title;
 	}
-	
+
 	public String getViewTitle() {
 		return (viewTitle == null ? getTitle() : viewTitle);
 	}
@@ -175,7 +177,7 @@ public class PanelData {
 		switch (st) {
 		case DISPLAY1D:
 		case DISPLAY2D:
-			thisWidth = 0;
+			doReset = true;
 			break;
 		}
 	}
@@ -209,10 +211,14 @@ public class PanelData {
 	// ///////// print parameters ///////////
 
 	boolean isPrinting;
+	
+	private boolean doReset = true;
+	
 	String printingFont;
 	String printGraphPosition = "default";
 	boolean titleDrawn;
 	boolean display1D;
+	boolean isLinked;
 	String printJobTitle;
 
 	public boolean getDisplay1D() {
@@ -221,24 +227,44 @@ public class PanelData {
 
 	// //// initialization - from AwtPanel
 
+	List<JDXSpectrum> spectra;
+	
 	void initSingleSpectrum(JDXSpectrum spectrum) {
-		List<JDXSpectrum> spectra = new ArrayList<JDXSpectrum>();
+		spectra = new ArrayList<JDXSpectrum>();
 		spectra.add(spectrum);
 		initJSVPanel(spectra, 0, 0);
 	}
 
+	int startIndex, endIndex;
+
+	enum LinkMode {NONE, AB, BA, ABC, BAC, CAB, CBA;
+		public static LinkMode getMode(String abc) {
+			for (LinkMode mode : values())
+				if (mode.name().equalsIgnoreCase(abc))
+					return mode;
+			return NONE;
+		}    
+	}
+		
 	void initJSVPanel(List<JDXSpectrum> spectra, int startIndex, int endIndex) {
+		this.startIndex = startIndex;
+		this.endIndex = endIndex;
 		owner.setupPlatform();
 		nSpectra = spectra.size();
-		graphSets = GraphSet.createGraphSets(owner, spectra, startIndex, endIndex);
-		currentGraphSet = graphSets.get(0);
-		title = getSpectrum().getTitleLabel();
-		commonFilePath = getSpectrum().getFilePath();
+		this.spectra = spectra;
+		commonFilePath = spectra.get(0).getFilePath();
 		for (int i = 0; i < nSpectra; i++)
 			if (!commonFilePath.equalsIgnoreCase(spectra.get(i).getFilePath())) {
 				commonFilePath = null;
 				break;
 			}
+		setGraphSets(LinkMode.NONE);
+	}
+
+	private void setGraphSets(LinkMode linkMode) {
+		graphSets = GraphSet.createGraphSetsAndSetLinkMode(this, owner, spectra, startIndex, endIndex, linkMode);
+		currentGraphSet = graphSets.get(0);
+		title = getSpectrum().getTitleLabel();
 	}
 
 	public PeakInfo findMatchingPeakInfo(PeakInfo pi) {
@@ -300,8 +326,7 @@ public class PanelData {
 	}
 
 	public void refresh() {
-		thisWidth = 0;
-		//repaint();
+		doReset = true;
 	}
 
 	public void addAnnotation(List<String> tokens) {
@@ -364,7 +389,7 @@ public class PanelData {
 	synchronized void drawGraph(Object g, int width, int height,
 			boolean addFilePath) {
 		boolean withCoords;
-		display1D = getBoolean(ScriptToken.DISPLAY1D);
+		display1D = !isLinked && getBoolean(ScriptToken.DISPLAY1D);
 		top = topMargin;
 		bottom = bottomMargin;
 		if (isPrinting) {
@@ -376,17 +401,11 @@ public class PanelData {
 			titleOn = getBoolean(ScriptToken.TITLEON);
 			gridOn = getBoolean(ScriptToken.GRIDON);
 		}
-		plotAreaWidth = width - (right + left);
-		plotAreaHeight = height - (top + bottom);
-		boolean isResized = (thisWidth != width || thisPlotHeight != plotAreaHeight);
-		if (isResized) {
-			// this seems unnecessary, and it prevents focus returning to the script
-			// command line
-			// owner.doRequestFocusInWindow();
-		}
-		thisWidth = width;
-		thisPlotHeight = plotAreaHeight;
+		boolean isResized = (isPrinting || doReset || thisWidth != width || thisHeight != height);
+		doReset = false;
 		titleDrawn = false;
+		thisWidth = width;
+		thisHeight = height;
 		for (int i = graphSets.size(); --i >= 0;)
 			graphSets.get(i).drawGraphSet(g, width, height, left, right, top, bottom,
 					isResized);
@@ -497,7 +516,7 @@ public class PanelData {
 
 	public void setSpectrum(int iSpec, boolean isSplit) {
 		currentGraphSet.setSpectrum(iSpec, isSplit);
-		//repaint();
+		// repaint();
 	}
 
 	public JDXSpectrum getSpectrum() {
@@ -523,14 +542,15 @@ public class PanelData {
 	/**
 	 * Add information about a region of the displayed spectrum to be highlighted
 	 * applet only right now
-	 * @param gs 
+	 * 
+	 * @param gs
 	 * 
 	 * @param x1
 	 *          the x value of the coordinate where the highlight should start
 	 * @param x2
 	 *          the x value of the coordinate where the highlight should end
-	 * @param spec 
-	 * @param r 
+	 * @param spec
+	 * @param r
 	 * @param color
 	 *          the color of the highlight
 	 * @param a
@@ -576,7 +596,7 @@ public class PanelData {
 
 	public void setZoom(double x1, double y1, double x2, double y2) {
 		currentGraphSet.setZoom(x1, y1, x2, y2);
-		thisWidth = 0;
+		doReset = true;
 		notifyListeners(new ZoomEvent(x1, y1, x2, y2));
 	}
 
@@ -677,15 +697,14 @@ public class PanelData {
 
 	public void findX(JDXSpectrum spec, double d) {
 		currentGraphSet.setXPointer(spec, d);
-		//repaint();
+		// repaint();
 	}
-	
+
 	public void findX2(JDXSpectrum spec, double d, JDXSpectrum spec2, double d2) {
 		currentGraphSet.setXPointer(spec, d);
 		currentGraphSet.setXPointer2(spec2, d2);
-		//repaint();
+		// repaint();
 	}
-
 
 	// called by GraphSet
 
@@ -698,6 +717,8 @@ public class PanelData {
 	}
 
 	void setToolTipText(String s) {
+    if (true)
+    	return;
 		owner.setToolTipText(s);
 	}
 
@@ -735,7 +756,8 @@ public class PanelData {
 
 	/**
 	 * Notifies CoordinatePickedListeners
-	 * @param p 
+	 * 
+	 * @param p
 	 * 
 	 */
 	void notifyPeakPickedListeners(PeakPickEvent p) {
@@ -817,9 +839,6 @@ public class PanelData {
 		gs.checkWidgetEvent(xPixel, yPixel, true);
 	}
 
-	private int clickCount;
-	boolean ctrlPressed;
-
 	void doMouseDragged(int xPixel, int yPixel) {
 		isIntegralDrag |= ctrlPressed;
 		mouseState = Mouse.DOWN;
@@ -837,7 +856,7 @@ public class PanelData {
 		thisWidget = null;
 		isIntegralDrag = false;
 		integralShiftMode = 0;
-    //repaint();
+		// repaint();
 	}
 
 	void doMouseClicked(int xPixel, int yPixel, int clickCount,
@@ -876,7 +895,8 @@ public class PanelData {
 	 * DEPRECATED
 	 * 
 	 * Sets the integration ratios that will be displayed
-	 * @param value 
+	 * 
+	 * @param value
 	 * 
 	 * 
 	 * @param ratios
@@ -903,13 +923,13 @@ public class PanelData {
 		Integral integral = getSelectedIntegral();
 		if (integral == null)
 			return;
-    String sValue = integral.getText();
-    if (sValue.length() == 0)
-    	sValue = "" + integral.getValue();
-		String newValue = getInput("Enter a new value for this integral", 
+		String sValue = integral.getText();
+		if (sValue.length() == 0)
+			sValue = "" + integral.getValue();
+		String newValue = getInput("Enter a new value for this integral",
 				"Normalize Integral", sValue);
 		try {
-		  setSelectedIntegral(Double.parseDouble(newValue));
+			setSelectedIntegral(Double.parseDouble(newValue));
 		} catch (Exception e) {
 		}
 	}
@@ -919,35 +939,100 @@ public class PanelData {
 		if (isPrinting)
 			title = printJobTitle;
 		else if (getNumberOfSpectraTotal() == 1) {
-    	title = getSpectrum().getPeakTitle();
-	  } else if (viewTitle != null) {
-	  	if (currentGraphSet.getTitle(false) != null) // check if common title
-	  		title = getSpectrum().getPeakTitle();
-      if (title == null)
-      	title = viewTitle; // "View 1"
-    } else {
-      title = owner.getTitle().trim();
-    }
-    if (title.indexOf("\n") >= 0)
-    	title = title.substring(0, title.indexOf("\n")).trim();
-    return title;
+			title = getSpectrum().getPeakTitle();
+		} else if (viewTitle != null) {
+			if (currentGraphSet.getTitle(false) != null) // check if common title
+				title = getSpectrum().getPeakTitle();
+			if (title == null)
+				title = viewTitle; // "View 1"
+		} else {
+			title = owner.getTitle().trim();
+		}
+		if (title.indexOf("\n") >= 0)
+			title = title.substring(0, title.indexOf("\n")).trim();
+		return title;
 	}
 
 	public String getPrintJobTitle(boolean isPrinting) {
 		String title = null;
-    if (getNumberOfSpectraTotal() == 1) {
-    	title = getSpectrum().getTitle();
-	  } else if (viewTitle != null) {
-	  	if (graphSets.size() == 1)
-      	title = currentGraphSet.getTitle(isPrinting);
-      if (title == null)
-      	title = viewTitle; // "View 1"
-    } else {
-      title = owner.getTitle().trim();
-    }
-    if (title.indexOf("\n") >= 0)
-    	title = title.substring(0, title.indexOf("\n")).trim();
-    return title;
+		if (getNumberOfSpectraTotal() == 1) {
+			title = getSpectrum().getTitle();
+		} else if (viewTitle != null) {
+			if (graphSets.size() == 1)
+				title = currentGraphSet.getTitle(isPrinting);
+			if (title == null)
+				title = viewTitle; // "View 1"
+		} else {
+			title = owner.getTitle().trim();
+		}
+		if (title.indexOf("\n") >= 0)
+			title = title.substring(0, title.indexOf("\n")).trim();
+		return title;
 	}
 
+	public synchronized void linkSpectra(LinkMode mode) {
+		if (mode != LinkMode.NONE && mode.toString().length() != nSpectra)
+			return;
+		setGraphSets(mode);
+	}
+
+	private boolean linking;
+	public void doZoomLinked(GraphSet graphSet, double initX, double initY,
+			double finalX, double finalY, boolean addZoom, boolean checkRange,
+			boolean is1d) {
+		if (linking)
+			return;
+		linking = true;
+		JDXSpectrum spec = graphSet.getSpectrum();
+		for (int i = graphSets.size(); --i >= 0;) {
+			GraphSet gs = graphSets.get(i);
+			if (gs != graphSet && JDXSpectrum.areXScalesCompatible(spec, graphSets.get(i).getSpectrum(),
+					false, false))
+				gs.doZoom(initX, 0, finalX, 0, addZoom, checkRange, is1d, false);
+		}
+		linking = false;
+	}
+
+	public void clearLinkViews(GraphSet graphSet) {
+		if (linking)
+			return;
+		linking = true;
+		JDXSpectrum spec = graphSet.getSpectrum();
+		for (int i = graphSets.size(); --i >= 0;) {
+			GraphSet gs = graphSets.get(i);
+			if (gs != graphSet && JDXSpectrum.areXScalesCompatible(spec, graphSets.get(i).getSpectrum(),
+					false, false))
+				gs.clearViews();
+		}
+		linking = false;
+	}
+
+	public void setlinkedXMove(GraphSet graphSet, double x, boolean isX2) {
+		if (linking)
+			return;
+		linking = true;
+		JDXSpectrum spec = graphSet.getSpectrum();
+		for (int i = graphSets.size(); --i >= 0;) {
+			GraphSet gs = graphSets.get(i);
+			if (gs != graphSet && JDXSpectrum.areXScalesCompatible(spec, graphSets.get(i).getSpectrum(),
+					false, true)) {
+				if (isX2) {
+					gs.setXPixelMovedTo(Double.MAX_VALUE, x, 0, 0);
+				} else {
+					gs.setXPixelMovedTo(x, Double.MAX_VALUE, 0, 0);
+				}
+			}
+		}
+		linking = false;
+	}
+
+	public void set2DCrossHairsLinked(GraphSet graphSet, double x, double y) {
+		if (Math.abs(x - y) < 0.1)
+			x = y = Double.MAX_VALUE;
+		for (int i = graphSets.size(); --i >= 0;) {
+			GraphSet gs = graphSets.get(i);
+			if (gs != graphSet)
+				gs.set2DXY(x, y);
+		}
+	}
 }

@@ -33,6 +33,19 @@ changes and analyses can be made without altering the saved view
 
 ___version=2.0.2
 
+
+new feature: linking of 2D spectra with 1D counterpars -- not fully tested.
+
+	view 1.1,2.1
+    link ab
+	
+or
+
+	view 1.1,2.1,3.1
+    link abc
+	
+new feature: script foo.jsv (or whatever extension you want, Robert)
+
 bug fix: opening peak dialog without clicking spectra doesn't place cursor correctly
 bug fix: closing all dialogs except the type chosen; otherwise it gets too cluttered 
 bug fix: need to close all dialogs when the print dialog comes up

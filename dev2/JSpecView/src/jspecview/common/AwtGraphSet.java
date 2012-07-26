@@ -132,28 +132,28 @@ class AwtGraphSet extends GraphSet {
   protected boolean get2DImage() {
     imageView = new ImageView();
     imageView.set(viewList.get(0));
-    if (!update2dImage(false, true))
+    if (!update2dImage(true))
       return false;
     imageView.resetZoom();
-    sticky2Dcursor = true;
+    sticky2Dcursor = true;// I don't know why
     return true;
   }
 
 	@Override
-	protected boolean update2dImage(boolean forceNew, boolean isCreation) {
+	protected boolean update2dImage(boolean isCreation) {
 		imageView.set(viewData);
-		JDXSpectrum spec0 = getSpectrumAt(0);
-		int[] buffer = imageView.get2dBuffer(jsvp.pd.thisWidth,
-				jsvp.pd.thisPlotHeight, spec0, forceNew);
+		JDXSpectrum spec = getSpectrumAt(0);
+		imageView.setMinMaxY(spec);
+		int[] buffer = imageView.get2dBuffer(spec, !isCreation);
 		if (buffer == null) {
 			image2D = null;
 			imageView = null;
 			return false;
 		}
-		if (isCreation) 
-			buffer = imageView.adjustView(spec0, viewData, 0.05, 0.20);
-		imageView.setImageSize(spec0.getXYCoords().length, spec0.getSubSpectra()
-				.size(), !forceNew);
+		if (isCreation) {
+			buffer = imageView.adjustView(spec, viewData, 0.003, 0.20);
+			imageView.resetView();
+		}
 		image2D = new BufferedImage(imageView.imageWidth, imageView.imageHeight,
 				BufferedImage.TYPE_BYTE_GRAY);
 		WritableRaster raster = image2D.getRaster();
@@ -246,6 +246,8 @@ class AwtGraphSet extends GraphSet {
 
   @Override
   protected int getStringWidth(Object g, String s) {
+  	if (s == null)
+  		return 0;
     return ((Graphics) g).getFontMetrics().stringWidth(s);
   }
 

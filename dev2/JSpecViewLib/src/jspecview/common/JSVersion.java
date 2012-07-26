@@ -22,8 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import jspecview.applet.JSVApplet;
-
 public class JSVersion {
 
   public static final String VERSION;
@@ -39,7 +37,7 @@ public class JSVersion {
 		BufferedInputStream bis = null;
 		InputStream is = null;
 		try {
-			is = JSVApplet.class.getClassLoader().getResourceAsStream(
+			is = JSVersion.class.getClassLoader().getResourceAsStream(
 					"jspecview/common/TODO.txt");
 			bis = new BufferedInputStream(is);
 			props.load(bis);

@@ -296,10 +296,9 @@ public class JSVTree extends JTree {
       si.setRecentURL(null);
     }
     // TODO could check here for already-open view 
-    if (JSVPanelNode.isOpen(si.getPanelNodes(), filePath) || JSVPanelNode.isOpen(si.getPanelNodes(), url)) {
-      si.writeStatus(filePath + " is already open");
-      if (isView)
-      	 si.incrementViewCount(-1);
+    if (!isView)
+      if (JSVPanelNode.isOpen(si.getPanelNodes(), filePath) || JSVPanelNode.isOpen(si.getPanelNodes(), url)) {
+        si.writeStatus(filePath + " is already open");
       return FILE_OPEN_ALREADY;
     }
     if (!isAppend && !isView)
@@ -309,7 +308,7 @@ public class JSVTree extends JTree {
       si.setCurrentSource(isView ? JDXSource.createView(specs)
           : si.createSource(data, filePath, base, firstSpec, lastSpec));
     } catch (Exception e) {
-      e.printStackTrace();
+      Logger.error(e.getMessage());
       si.writeStatus(e.getMessage());
       si.setCursorObject(Cursor.getDefaultCursor());
       return FILE_OPEN_ERROR;
