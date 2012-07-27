@@ -70,7 +70,7 @@ public enum ScriptToken {
   IRMODE("A or T or TOGGLE"), 
   JMOL("...Jmol command..."), 
   LABEL("x y [color and/or \"text\"]"),
-  LINK("AB or ABC or NONE (in development)"),
+  LINK("AB or ABC or NONE or ALL"),
   LOAD("[APPEND] \"fileName\" [first] [last]; use \"\" to reload current file"),
   LOADFILECALLBACKFUNCTIONNAME,
   LOADIMAGINARY("T/F - default is to NOT load imaginary spectra"),

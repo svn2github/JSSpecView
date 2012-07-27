@@ -126,6 +126,8 @@ public class PanelData {
 	private int nSpectra;
 	int thisWidth;
 	private int thisHeight;
+	private int startIndex, endIndex;
+
 	
 	private String commonFilePath;
 	private String viewTitle;
@@ -235,10 +237,13 @@ public class PanelData {
 		initJSVPanel(spectra, 0, 0);
 	}
 
-	int startIndex, endIndex;
-
-	enum LinkMode {NONE, AB, BA, ABC, BAC, CAB, CBA;
+	enum LinkMode {	
+		
+		ALL, NONE, AB, ABC;
+		
 		public static LinkMode getMode(String abc) {
+			if (abc == "*")
+				return ALL;
 			for (LinkMode mode : values())
 				if (mode.name().equalsIgnoreCase(abc))
 					return mode;
@@ -969,6 +974,8 @@ public class PanelData {
 	}
 
 	public synchronized void linkSpectra(LinkMode mode) {
+		if (mode == LinkMode.ALL)
+			mode = (nSpectra == 2 ? LinkMode.AB : nSpectra == 3 ? LinkMode.ABC : LinkMode.NONE);
 		if (mode != LinkMode.NONE && mode.toString().length() != nSpectra)
 			return;
 		setGraphSets(mode);
