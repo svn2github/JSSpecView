@@ -242,7 +242,7 @@ public class PanelData {
 		ALL, NONE, AB, ABC;
 		
 		public static LinkMode getMode(String abc) {
-			if (abc == "*")
+			if (abc.equals("*"))
 				return ALL;
 			for (LinkMode mode : values())
 				if (mode.name().equalsIgnoreCase(abc))
