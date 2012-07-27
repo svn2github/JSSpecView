@@ -33,6 +33,8 @@ changes and analyses can be made without altering the saved view
 
 ___version=2.0.2
 
+bug fix: smoother "always-in-front" peak/integration/measurement dialogs
+demo: http://chemapps.stolaf.edu/nmr/viewspec2  now fully functional. 
 new feature: LINK command options "*", "AB", "ABC", "NONE"
 bug fix: Reading offset in Bruker 2D 13C/1H HMBC spectra incorrectly
          (must only read the first ##$OFFSET record)

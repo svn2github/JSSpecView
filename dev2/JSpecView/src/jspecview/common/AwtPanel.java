@@ -737,6 +737,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 			SwingUtilities.invokeLater(new RequestThread());
 		else
   		requestFocusInWindow();
+    pd.dialogsToFront();
 	}
 
   public class RequestThread implements Runnable {
@@ -750,6 +751,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   public void mousePressed(MouseEvent e) {
 		if (pd.isPrinting)
 			return;
+		System.out.println("mousePressed " + e);
     if (e.getButton() != MouseEvent.BUTTON1)
       return;
     pd.doMousePressed(e.getX(), e.getY());
@@ -783,6 +785,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   public void mouseReleased(MouseEvent e) {
 		if (pd.isPrinting)
 			return;
+		System.out.println("mouseReleased " + e);
     pd.doMouseReleased(e.getButton() == MouseEvent.BUTTON1);
     doRepaint();
   }
@@ -790,6 +793,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   public void mouseClicked(MouseEvent e) {
 		if (pd.isPrinting)
 			return;
+		System.out.println("mouseClicked " + e);
     if (e.getButton() == MouseEvent.BUTTON3) {
       popup.show((JSVPanel) this, e.getX(), e.getY());
       return;

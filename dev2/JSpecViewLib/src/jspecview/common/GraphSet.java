@@ -1358,7 +1358,6 @@ abstract class GraphSet implements XYScaleConverter {
 		setWidgetX(pin1Dx1, finalX);
 		setWidgetY(pin1Dy0, initY);
 		setWidgetY(pin1Dy1, finalY);
-		//System.out.println("zoom " + initY + " " + finalY + " " + y1 + " " + y2);
 		if (imageView == null) {
 			updateDialogs();
 		} else {
@@ -1688,12 +1687,12 @@ abstract class GraphSet implements XYScaleConverter {
 	 * @param subIndex
 	 * @param needNewPins
 	 * @param doDraw1DObjects
-	 * @param postGrid 
+	 * @param postGrid
 	 */
 	private void drawWidgets(Object g, int subIndex, boolean needNewPins,
 			boolean doDraw1DObjects, boolean postGrid) {
 		setWidgets(needNewPins, subIndex, doDraw1DObjects);
-		if (pd.isPrinting && (viewData == null ? !cur1D2Locked : sticky2Dcursor))
+		if (pd.isPrinting && (imageView == null ? !cur1D2Locked : sticky2Dcursor))
 			return;
 		if (!pd.isPrinting && !postGrid) {
 			// top/side slider bar backgrounds
@@ -1724,19 +1723,25 @@ abstract class GraphSet implements XYScaleConverter {
 			PlotWidget pw = widgets[i];
 			if (pw == null || !pw.isPinOrCursor && !zoomEnabled)
 				continue;
-			boolean isLockedCursor = (pw == cur1D2x1 || pw == cur1D2x2 || pw == cur2Dx0 || pw == cur2Dx1 || pw == cur2Dy);
+			boolean isLockedCursor = (pw == cur1D2x1 || pw == cur1D2x2
+					|| pw == cur2Dx0 || pw == cur2Dx1 || pw == cur2Dy);
 			if ((pw.isPin || !pw.isPinOrCursor) == postGrid)
-			  continue;
+				continue;
 			if (pw.is2D) {
 				if (pw == cur2Dx0 && !doDraw1DObjects)
 					continue;
-			} else if ((doDraw1DObjects == (pw == pin1Dy0 || pw == pin1Dy1 || pw == pin1Dy01))
-					|| pw == cur1D2x1 && gs2dLinkedX == null
-					|| pw == cur1D2x2 && gs2dLinkedY == null
-					|| pw == zoomBox1D && (pd.isIntegralDrag || pd.integralShiftMode != 0)
-				) {
-				if (!isLinked || imageView != null)
-					continue;
+			} else {
+				if ((doDraw1DObjects == (pw == pin1Dy0 || pw == pin1Dy1 || pw == pin1Dy01))
+
+						|| pw == cur1D2x1
+						&& gs2dLinkedX == null
+						|| pw == cur1D2x2
+						&& gs2dLinkedY == null
+						|| pw == zoomBox1D
+						&& (pd.isIntegralDrag || pd.integralShiftMode != 0)) {
+					if (!isLinked || imageView != null)
+						continue;
+				}
 			}
 			if (pd.isPrinting && !isLockedCursor)
 				continue;
@@ -3942,6 +3947,16 @@ abstract class GraphSet implements XYScaleConverter {
 		if (gs2dLinkedY != null)
   		cur1D2x2.setX(y, toPixelX(y));
 		cur1D2Locked = isLocked;
+	}
+
+	public void dialogsToFront() {
+		if (dialogs == null)
+			return;
+		for (Map.Entry<String, AnnotationData> e : dialogs.entrySet()) {
+			AnnotationData ad = e.getValue();
+			if (isVisible(ad))
+				((AnnotationDialog) ad).setVisible(true);
+		}
 	}
 
 }

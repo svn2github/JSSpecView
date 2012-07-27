@@ -74,6 +74,7 @@ class AwtPeakListDialog extends AwtAnnotationDialog {
 		String sy = TextFormat.getDecimalFormat(y < 1000 ? "#0.00" : "0.00E0")
 				.format(y);
 		txtThreshold.setText(" " + sy);
+		//setVisible(true);
 	}
 
 

@@ -1040,4 +1040,8 @@ public class PanelData {
 				gs.set2DXY(x, y, isLocked);
 		}
 	}
+
+	public void dialogsToFront() {
+		currentGraphSet.dialogsToFront();		
+	}
 }
