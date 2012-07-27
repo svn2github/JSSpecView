@@ -474,7 +474,7 @@ public class FileReader {
       if (spectrum == null) {
         spectrum = new JDXSpectrum();
         spectrum0.copyTo(spectrum);
-        spectrum.setTitle(spectrum0.getTitle() + " : " + page);
+        spectrum.setTitle(spectrum0.getTitle());
         if (!spectrum.is1D()) {
           int pt = page.indexOf('=');
           if (pt >= 0)
@@ -727,7 +727,7 @@ public class FileReader {
                                          boolean obscure) {
     if (label.equals("##TITLE")) {
       String value = t.getValue();
-      jdxHeader.title = (obscure || value == null || value.equals("") ? "Unknown"
+      jdxHeader.setTitle(obscure || value == null || value.equals("") ? "Unknown"
           : value);
       return true;
     }
@@ -929,7 +929,7 @@ public class FileReader {
       spec.setHZtoPPM(true);
     }
     if (errorLog.length() != errPt) {
-      errorLog.append(spec.title).append("\n");
+      errorLog.append(spec.getTitle()).append("\n");
       errorLog.append("firstX: " + spec.fileFirstX + " Found " + firstLastX[0]
           + "\n");
       errorLog.append("lastX from Header " + spec.fileLastX + " Found "

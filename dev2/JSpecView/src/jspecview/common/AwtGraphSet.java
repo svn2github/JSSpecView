@@ -150,7 +150,7 @@ class AwtGraphSet extends GraphSet {
 			return false;
 		}
 		if (isCreation) {
-			buffer = imageView.adjustView(spec, viewData, 0.003, 0.20);
+			buffer = imageView.adjustView(spec, viewData);
 			imageView.resetView();
 		}
 		image2D = new BufferedImage(imageView.imageWidth, imageView.imageHeight,

@@ -122,6 +122,30 @@ public class JDXHeader {
     return title;
   }
 
+  final static String[] typeNames = {
+  	"ND NMR SPECTRUM   NMR",
+  	"NMR SPECTRUM      NMR",
+  	"INFRARED SPECTRUM IR",
+  	"MASS SPECTRUM     MS",
+  	"RAMAN SPECTRUM    RAMAN",
+  	"GAS CHROMATOGRAM  GC",
+  	"UV/VIS SPECTRUM   UV/VIS"
+  };
+  
+  private String qualifiedType;
+  
+  static String getTypeName(String type) {
+  	type = type.toUpperCase();
+  	for (int i = 0; i < typeNames.length; i++)
+  		if (typeNames[i].startsWith(type)) {
+  			return typeNames[i].substring(18);
+  		}
+  	return type;
+  }
+
+  public String getQualifiedDataType() {
+  	return (qualifiedType == null ? (qualifiedType = getTypeName(dataType)) : qualifiedType);
+  }
   /**
    * Getter for property jcampdx.
    * 

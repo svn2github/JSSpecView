@@ -231,12 +231,15 @@ class ImageView implements XYScaleConverter {
     return (buf2d = buf);
   }
   
-  int[] adjustView (JDXSpectrum spec, ViewData view, double minGray, double maxGray) {
+  private static final double DEFAULT_MIN_GRAY = 0.05;
+	private static final double DEFAULT_MAX_GRAY = 0.30;
+	
+	int[] adjustView (JDXSpectrum spec, ViewData view) {
   	//double minGray = 0.05;
   	//double maxGray = 0.20;
   	int i = 0;
   	boolean isLow = false;
-  	while (((isLow = (averageGray < minGray)) || averageGray > maxGray) && i++ < 10) {
+  	while (((isLow = (averageGray < DEFAULT_MIN_GRAY)) || averageGray > DEFAULT_MAX_GRAY) && i++ < 10) {
       view.scaleSpectrum(-2, isLow ? 2 : 0.5);
       set(view);
       get2dBuffer(spec, false); 

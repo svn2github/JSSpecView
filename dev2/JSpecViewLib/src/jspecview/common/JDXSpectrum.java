@@ -211,11 +211,10 @@ public class JDXSpectrum extends JDXDataObject {
   }
 
   public String getTitleLabel() {
-    String type = (peakList == null || peakList.size() == 0 ? dataType
-        : peakList.get(0).getType());
+    String type = (peakList == null || peakList.size() == 0 ? 
+    		getQualifiedDataType() : peakList.get(0).getType());
     return (type != null && type.length() > 0 ? type + " " : "") 
-    + getTitle() 
-    + (parent == null ? "" : " (" + parent.subSpectra.size() + ")");
+    + getTitle();
   }
 
   public int setNextPeak(Coordinate coord, int istep) {
@@ -451,7 +450,6 @@ public class JDXSpectrum extends JDXDataObject {
     }
     subSpectra.add(spectrum);
     spectrum.parent = this;
-    spectrum.setTitle(subSpectra.size() + ": " + spectrum.title);
     //System.out.println("Added subspectrum " + subSpectra.size() + ": " + spectrum.y2D);
     return true;
   }
