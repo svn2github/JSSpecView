@@ -2,7 +2,7 @@ package jspecview.common;
 
 import java.util.List;
 
-class ImageView implements XScaleConverter {
+class ImageView implements XYScaleConverter {
   
   /*
    * The viewPort is related to two coordinate systems, image and screen.
@@ -49,6 +49,7 @@ class ImageView implements XScaleConverter {
   int xPixelZoom1, yPixelZoom1, xPixelZoom2, yPixelZoom2;
   int xView1, yView1, xView2, yView2;
   double minX = Double.NaN, maxX, minY, maxY, minZ, maxZ;
+	private ScaleData scaleData; // for paper Y axis
   
   void set(ViewData view) {
     if (Double.isNaN(minX)) {
@@ -57,6 +58,8 @@ class ImageView implements XScaleConverter {
     }
     minZ = view.minY;
     maxZ = view.maxY;
+    
+    scaleData = new ScaleData();
   }
 
   void setZoom(int xPixel1, int yPixel1, int xPixel2, int yPixel2) {
@@ -67,11 +70,12 @@ class ImageView implements XScaleConverter {
     setView();
   }
   
-  void setXY0(int xPixel, int yPixel) {
+  void setXY0(JDXSpectrum spec, int xPixel, int yPixel) {
     xPixel0 = xPixel;
     yPixel0 = yPixel;
     xPixel1 = xPixel0 + xPixels - 1;
     yPixel1 = yPixel0 + yPixels - 1;
+    setMinMaxY(spec);
   }
  
   void setPixelWidthHeight (int xPixels, int yPixels) {
@@ -97,7 +101,7 @@ class ImageView implements XScaleConverter {
     yView1 = Math.min(y1, y2);
     xView2 = Math.max(x1, x2);
     yView2 = Math.max(y1, y2);
-
+    setScaleData();
     resetZoom();
   }
 
@@ -240,17 +244,6 @@ class ImageView implements XScaleConverter {
   	return buf2d;
   }
 
-  public int getXPixels() {
-  	return xPixels;
-  }
-  
-	double toY(int yPixel) {
-		int isub = toSubspectrumIndex(yPixel);
-		double y = maxY + (minY - maxY) * isub / (imageWidth - 1);
-		System.out.println("y is " + y);
-    return y;
-	}
-
 	void setMinMaxY(JDXSpectrum spec) {
     List<JDXSpectrum> subSpectra = spec.getSubSpectra();
     JDXSpectrum spec0 = subSpectra.get(0); 
@@ -260,6 +253,45 @@ class ImageView implements XScaleConverter {
     	maxY /= spec0.freq2dY;
     	minY /= spec0.freq2dY;
     }
-    	
+    setScaleData();
+	}
+
+
+	private void setScaleData() {
+    scaleData.minY = minY;
+    scaleData.maxY = maxY;
+    scaleData.setYScale(toY(yPixel0), toY(yPixel1), false, false);
+	}
+
+	// XYScaleConverter interface
+	
+	public ScaleData getScaleData() {
+		return scaleData;
+	}
+	
+	public int getYPixels() {
+  	return yPixels;
+  }
+  
+	public int getXPixels() {
+  	return xPixels;
+  }
+  
+  public int getXPixel0() {
+  	return xPixel0;
+  }
+  
+	public double toY(int yPixel) {
+		int isub = toSubspectrumIndex(yPixel);
+    return maxY + (minY - maxY) * isub / (imageWidth - 1);
+	}
+
+	public int fixY(int yPixel) {
+		return Coordinate.intoRange(yPixel, yPixel0, yPixel1);
+	}
+
+	public int toPixelY(double y) {
+		double f = (y - scaleData.minYOnScale) / (scaleData.maxYOnScale - scaleData.minYOnScale); 
+		return (int) (yPixel0 + f * yPixels);
 	}
 }

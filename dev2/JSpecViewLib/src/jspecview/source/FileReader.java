@@ -678,7 +678,8 @@ public class FileReader {
     }
 
     if (label.equals("##$OFFSET") && spectrum.shiftRefType != 0) {
-      spectrum.offset = Double.parseDouble(t.getValue());
+    	if (spectrum.offset == JDXDataObject.ERROR)
+        spectrum.offset = Double.parseDouble(t.getValue());
       // bruker doesn't need dataPointNum
       spectrum.dataPointNum = 1;
       // bruker type
@@ -700,7 +701,7 @@ public class FileReader {
       String val = t.getValue();
       if (!(spectrum.dataType.toUpperCase().contains("SPECTRUM")))
         return true;
-      StringTokenizer srt = new StringTokenizer(val, ",");
+      StringTokenizer srt =   new StringTokenizer(val, ",");
       if (srt.countTokens() != 4)
         return true;
       try {

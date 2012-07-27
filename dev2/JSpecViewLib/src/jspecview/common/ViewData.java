@@ -31,12 +31,13 @@ class ViewData extends ScaleData {
 	 * @param endList
 	 *          the end indices
 	 * @param isContinuous 
+	 * @param is2D 
 	 * @returns an instance of <code>MultiScaleData</code>
 	 */
 	ViewData(List<JDXSpectrum> spectra, double yPt1, double yPt2,
-			int[] startList, int[] endList, boolean isContinuous) {
+			int[] startList, int[] endList, boolean isContinuous, boolean is2D) {
 		super();
-		nSpec = spectra.size();
+		nSpec = (is2D ? 1 : spectra.size());
 		startDataPointIndices = startList;
 		endDataPointIndices = endList;
 		numOfPointsList = new int[nSpec];
@@ -74,7 +75,6 @@ class ViewData extends ScaleData {
 	
   private void init(List<JDXSpectrum> spectra, int[] startList, int[] endList, 
   		double yPt1, double yPt2, boolean isContinuous) {
-  	
 		spectrumScaleFactors = new double[nSpec];
 		userYFactors = new double[nSpec];
 		for (int i = 0; i < nSpec; i++)
@@ -167,12 +167,16 @@ class ViewData extends ScaleData {
 	}
 
 	void copyScaleFactors(ViewData view) {
+		try {
 		System.arraycopy(view.spectrumScaleFactors, 0, spectrumScaleFactors, 0, nSpec);
 		System.arraycopy(view.userYFactors, 0, userYFactors, 0, nSpec);
 		System.arraycopy(view.spectrumYRefs, 0, spectrumYRefs, 0, nSpec);
 		initMinYOnScale = view.initMinYOnScale;
 		initMaxYOnScale = view.initMaxYOnScale;
 		specShift = view.specShift;
+		} catch (Exception e) {
+			System.out.println("Unknown error cause here. TODO");
+		}
 		
 	}
 

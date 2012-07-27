@@ -416,8 +416,10 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     Graphics g = (Graphics) og;
     g.setColor(coordinatesColor);
     pd.setFont(g, getWidth(), Font.PLAIN, 12, true);
-    g.drawString(pd.coordStr, (int) ((pd.thisWidth - pd.right) * 0.85),
-        (pd.top - 20));
+    FontMetrics fm = g.getFontMetrics();
+    g.drawString(pd.coordStr, 
+    		pd.thisWidth - pd.right - fm.stringWidth(pd.coordStr), 
+    		pd.top - 20);
   }
 
 	/**

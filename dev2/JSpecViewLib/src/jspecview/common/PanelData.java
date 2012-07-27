@@ -717,8 +717,6 @@ public class PanelData {
 	}
 
 	void setToolTipText(String s) {
-    if (true)
-    	return;
 		owner.setToolTipText(s);
 	}
 
@@ -977,8 +975,8 @@ public class PanelData {
 	}
 
 	private boolean linking;
-	public void doZoomLinked(GraphSet graphSet, double initX, double initY,
-			double finalX, double finalY, boolean addZoom, boolean checkRange,
+	public void doZoomLinked(GraphSet graphSet, double initX,
+			double finalX, boolean addZoom, boolean checkRange,
 			boolean is1d) {
 		if (linking)
 			return;
@@ -1026,13 +1024,13 @@ public class PanelData {
 		linking = false;
 	}
 
-	public void set2DCrossHairsLinked(GraphSet graphSet, double x, double y) {
+	public void set2DCrossHairsLinked(GraphSet graphSet, double x, double y, boolean isLocked) {
 		if (Math.abs(x - y) < 0.1)
 			x = y = Double.MAX_VALUE;
 		for (int i = graphSets.size(); --i >= 0;) {
 			GraphSet gs = graphSets.get(i);
 			if (gs != graphSet)
-				gs.set2DXY(x, y);
+				gs.set2DXY(x, y, isLocked);
 		}
 	}
 }

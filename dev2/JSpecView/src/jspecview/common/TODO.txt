@@ -33,8 +33,18 @@ changes and analyses can be made without altering the saved view
 
 ___version=2.0.2
 
+bug fix: Reading offset in Bruker 2D 13C/1H HMBC spectra incorrectly
+         (must only read the first ##$OFFSET record)
+new feature: X- and Y-scales for 2D NMR spectra 
+new feature: "lockable/annotatable" 2D cursor -- click to set; double-click to annotate or release
+new feature: linking of 2D spectra with 1D counterparts
+		tested for 1H/1H COSY and 1H/13C HMBC
 
-new feature: linking of 2D spectra with 1D counterpars -- not fully tested.
+		Wow -- I can't believe how easy it is to understand HMBC!
+		see http://chemapps.stolaf.edu/nmr/doc/HMBC_example.pdf
+		see http://chemapps.stolaf.edu/nmr/doc/COSY_example.pdf
+		
+		
 
 	view 1.1,2.1
     link ab

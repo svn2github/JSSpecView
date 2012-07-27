@@ -143,7 +143,6 @@ class AwtGraphSet extends GraphSet {
 	protected boolean update2dImage(boolean isCreation) {
 		imageView.set(viewData);
 		JDXSpectrum spec = getSpectrumAt(0);
-		imageView.setMinMaxY(spec);
 		int[] buffer = imageView.get2dBuffer(spec, !isCreation);
 		if (buffer == null) {
 			image2D = null;
@@ -200,7 +199,7 @@ class AwtGraphSet extends GraphSet {
 
   @Override
   protected void drawLine(Object g, int x0, int y0, int x1, int y1) {
-    ((Graphics) g).drawLine(x0, y0, x1, y1);
+  	((Graphics) g).drawLine(x0, y0, x1, y1);
   }
 
   private static Color veryLightGrey = new Color(200, 200, 200);

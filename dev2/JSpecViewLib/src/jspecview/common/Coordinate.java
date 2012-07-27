@@ -550,7 +550,6 @@ public class Coordinate {
     double x0 = xyCoords[i - 1].getXVal();
     double y1 = xyCoords[i].getYVal();
     double y0 = xyCoords[i - 1].getYVal();
-    //System.out.println(x0 + " " + xPt + " " + x1);
     if (x1 == x0)
       return y1; 
     return y0 + (y1 - y0) / (x1 - x0) * (xPt - x0);
