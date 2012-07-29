@@ -459,8 +459,8 @@ public class AppMenu extends JMenuBar {
       setSourceEnabled(false);
     } else {
       setSourceEnabled(true);
-      JDXSpectrum spec = node.jsvp.getSpectrum();
       PanelData pd = node.jsvp.getPanelData();
+      JDXSpectrum spec = pd.getSpectrum();
       setCheckBoxes(pd);
       overlayKeyMenuItem.setEnabled(pd.getNumberOfGraphSets() > 1);
       setCloseMenuItem(FileManager.getName(node.source.getFilePath()));

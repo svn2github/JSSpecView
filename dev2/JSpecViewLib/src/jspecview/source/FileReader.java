@@ -525,7 +525,8 @@ public class FileReader {
 
       if (!readNTUPLECoords(spectrum, nTupleTable, plotSymbols, minMaxY))
         throw new JDXSourceException("Unable to read Ntuple Source");
-      spectrum0.nucleusX = spectrum.nucleusX;
+      if (!spectrum.nucleusX.equals("?"))
+        spectrum0.nucleusX = spectrum.nucleusX;
       spectrum0.nucleusY = spectrum.nucleusY;
       spectrum0.freq2dX = spectrum.freq2dX;
       spectrum0.freq2dY = spectrum.freq2dY;
@@ -673,7 +674,7 @@ public class FileReader {
     }
 
     if (label.equals("##.OBSERVENUCLEUS")) {
-      spectrum.observedNucl = t.getValue();
+      spectrum.setObservedNucleus(t.getValue());
       return true;
     }
 
@@ -870,7 +871,8 @@ public class FileReader {
         spec.setNucleus(list.get(0), false);
         spec.setNucleus(list.get(index1), true);
       } else {
-        spec.nucleusX = "?";
+      	if (spec.nucleusX == null)
+          spec.nucleusX = "?";
       }
 
       decompressData(spec, minMaxY);

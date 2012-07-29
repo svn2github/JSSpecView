@@ -18,8 +18,6 @@ public interface JSVPanel extends JSVContainer {
   PanelData getPanelData();
   Object getPlotColor(int i);
   Object getPopup();
-  JDXSpectrum getSpectrum();
-  JDXSpectrum getSpectrumAt(int i);
 
   boolean hasFocus();
 
@@ -30,7 +28,6 @@ public interface JSVPanel extends JSVContainer {
   void setColorOrFont(Parameters ds, ScriptToken st);
   void setFont(Object g, String string, int width, int mode, int size, boolean isLabel);
   void setPlotColors(Object plotColors);
-  void setSpectrum(JDXSpectrum spec);
   void setToolTipText(String s);
   void setupPlatform();
 	void showHeader(Object jsvApplet);

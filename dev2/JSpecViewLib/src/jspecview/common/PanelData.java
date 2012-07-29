@@ -446,11 +446,17 @@ public class PanelData {
 			}
 			List<JDXSpectrum> specs = graphSets.get(i).spectra;
 			for (int j = 0; j < specs.size(); j++, pt++)
-				if (iSpec == -1 || iSpec == pt + 1)
+				if (iSpec < 0 || iSpec == pt)
 					graphSets.get(i).setSelected(j);
 		}
 	}
 
+  public void addToList(int iSpec, List<JDXSpectrum> list) {
+		for (int i = 0; i < spectra.size(); i++)
+			if (iSpec < 0 || i == iSpec)
+				list.add(spectra.get(i));
+	}
+	
 	public void scaleSelectedBy(double f) {
 		for (int i = graphSets.size(); --i >= 0;)
 			graphSets.get(i).scaleSelectedBy(f);
@@ -529,7 +535,11 @@ public class PanelData {
 	}
 
 	public void setSpectrum(JDXSpectrum spec) {
+		JDXSpectrum spec0 = currentGraphSet.getSpectrum();
 		currentGraphSet.setSpectrum(spec);
+		for (int i = 0; i < spectra.size(); i++)
+			if (spectra.get(i) == spec0)
+				spectra.set(i, spec);
 	}
 
 	public boolean isShowAllStacked() {
@@ -985,14 +995,14 @@ public class PanelData {
 	public void doZoomLinked(GraphSet graphSet, double initX,
 			double finalX, boolean addZoom, boolean checkRange,
 			boolean is1d) {
-		if (linking)
+	if (linking)
 			return;
 		linking = true;
-		JDXSpectrum spec = graphSet.getSpectrum();
+		JDXSpectrum spec = graphSet.getSpectrumAt(0);
 		for (int i = graphSets.size(); --i >= 0;) {
 			GraphSet gs = graphSets.get(i);
-			if (gs != graphSet && JDXSpectrum.areXScalesCompatible(spec, graphSets.get(i).getSpectrum(),
-					false, false))
+			if (gs != graphSet && JDXSpectrum.areXScalesCompatible(spec, graphSets.get(i).getSpectrumAt(0),
+					false, true))
 				gs.doZoom(initX, 0, finalX, 0, addZoom, checkRange, is1d, false);
 		}
 		linking = false;
@@ -1006,7 +1016,7 @@ public class PanelData {
 		for (int i = graphSets.size(); --i >= 0;) {
 			GraphSet gs = graphSets.get(i);
 			if (gs != graphSet && JDXSpectrum.areXScalesCompatible(spec, graphSets.get(i).getSpectrum(),
-					false, false))
+					false, true))
 				gs.clearViews();
 		}
 		linking = false;
@@ -1019,13 +1029,15 @@ public class PanelData {
 		JDXSpectrum spec = graphSet.getSpectrum();
 		for (int i = graphSets.size(); --i >= 0;) {
 			GraphSet gs = graphSets.get(i);
-			if (gs != graphSet && JDXSpectrum.areXScalesCompatible(spec, graphSets.get(i).getSpectrum(),
-					false, true)) {
-				if (isX2) {
-					gs.setXPixelMovedTo(Double.MAX_VALUE, x, 0, 0);
-				} else {
-					gs.setXPixelMovedTo(x, Double.MAX_VALUE, 0, 0);
-				}
+			if (gs != graphSet
+					&& JDXSpectrum.areXScalesCompatible(spec, graphSets.get(i)
+							.getSpectrum(), false, true)) {
+				if (gs.imageView == null)
+					if (isX2) {
+						gs.setXPixelMovedTo(Double.MAX_VALUE, x, 0, 0);
+					} else {
+						gs.setXPixelMovedTo(x, Double.MAX_VALUE, 0, 0);
+					}
 			}
 		}
 		linking = false;

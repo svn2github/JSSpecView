@@ -207,7 +207,10 @@ public class ViewDialog extends AwtDialog implements WindowListener {
     		continue;
     	JCheckBox cb = new JCheckBox();
     	cb.setSelected(node.isSelected);
-    	cb.setText(node.toString());
+    	String title = node.toString();
+    	if (title.indexOf("\n") >= 0)
+    		title = title.substring(0, title.indexOf('\n'));
+    	cb.setText(title);
     	cb.setActionCommand("" + (treeNodes.size()));
       cb.addActionListener(new java.awt.event.ActionListener() {
         public void actionPerformed(ActionEvent e) {

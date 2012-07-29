@@ -110,6 +110,10 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     return pd;
   }
 
+  public String getTitle() {
+  	return pd.getTitle();
+  }
+  
   public AwtPopupMenu getPopup() {
     return popup;
   }
@@ -126,22 +130,6 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     removeKeyListener(this);
     removeMouseListener(this);
     removeMouseMotionListener(this);
-  }
-
-  public JDXSpectrum getSpectrum() {
-    return pd.getSpectrum();
-  }
-  
-  public void setSpectrum(JDXSpectrum spec) {
-    pd.setSpectrum(spec);    
-  }
-  
-  public JDXSpectrum getSpectrumAt(int i) {
-    return pd.getSpectrumAt(i);
-  }
-  
-  public String getTitle() {
-    return pd.getTitle();
   }
 
   public void setTitle(String title) {
@@ -659,7 +647,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
       return "only " + pd.getNumberOfSpectraInCurrentSet()
           + " spectra available.";
     try {
-      JDXSpectrum spec = (n < 0 ? getSpectrum() : getSpectrumAt(n));
+      JDXSpectrum spec = (n < 0 ? pd.getSpectrum() : pd.getSpectrumAt(n));
       return Exporter.exportTheSpectrum(Exporter.ExportType.getType(type), null, spec, 0, spec.getXYCoords().length - 1);
     } catch (IOException ioe) {
       // not possible
@@ -669,7 +657,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   
   @Override
   public String toString() {
-    return getSpectrumAt(0).toString();
+    return pd.getSpectrumAt(0).toString();
   }
 
   public String getInput(String message, String title, String sval) {
@@ -712,7 +700,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 			showMessage("To enable " + type + " first select a spectrum by clicking on it.", "" + type);
 			return null;
 		}
-		JDXSpectrum spec = getSpectrum();
+		JDXSpectrum spec = pd.getSpectrum();
 		switch (type) {
 		case Integration:
 			dialog = new AwtIntegralListDialog("Integration for " + spec, si, spec, this);

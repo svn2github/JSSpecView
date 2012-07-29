@@ -152,14 +152,15 @@ public class AwtOverlayLegendDialog extends JDialog implements JSVDialog {
 
 			int numSpectra = jsvp.getPanelData().getNumberOfSpectraInCurrentSet();
 			data = new Object[numSpectra][];
-			String f1 = jsvp.getSpectrumAt(0).getFilePath();
-			String f2 = jsvp.getSpectrumAt(numSpectra - 1).getFilePath();
+			PanelData pd = jsvp.getPanelData();
+			String f1 = pd.getSpectrumAt(0).getFilePath();
+			String f2 = pd.getSpectrumAt(numSpectra - 1).getFilePath();
 			boolean useFileName = !f1.equals(f2);
 
 			for (int index = 0; index < numSpectra; index++) {
 				cols = new Object[3];
 
-				spectrum = jsvp.getSpectrumAt(index);
+				spectrum = pd.getSpectrumAt(index);
 				title = spectrum.getTitle();
 				if (useFileName)
 					title = FileManager.getName(spectrum.getFilePath()) + " - " + title;

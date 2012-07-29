@@ -111,7 +111,7 @@ public enum ScriptToken {
   TITLEFONTNAME("fontName"), 
   UNITSCOLOR("C"), 
   VERSION, 
-  VIEW("spectrumID[*factor], spectrumID[*factor], ... Example: VIEW 3.1, 3.2*2  or  VIEW \"acetophenone\""),
+  VIEW("spectrumID, spectrumID, ... Example: VIEW 3.1, 3.2  or  VIEW \"acetophenone\""),
   XSCALEON("T"), 
   XUNITSON("T"), 
   YSCALE("[ALL] lowValue highValue"), 
@@ -191,6 +191,7 @@ public enum ScriptToken {
     case PEAK:
     case PLOTCOLORS:
     case YSCALE:
+    case GETPROPERTY:
       // take full command
       return removeCommandName(cmd);
     case SELECT:

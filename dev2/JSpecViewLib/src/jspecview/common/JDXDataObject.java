@@ -171,6 +171,14 @@ public abstract class JDXDataObject extends JDXHeader {
   // For NMR Spectra:
   public String observedNucl = "";
   public double observedFreq = ERROR;
+  protected JDXSpectrum parent;
+
+	public void setObservedNucleus(String value) {
+		observedNucl = value;
+		if (numDim == 1)
+  		parent.nucleusX = nucleusX = TextFormat.trim(value,"[]^<>");
+	}
+
   /**
    * Sets the Observed Frequency (for NMR Spectra)
    * 
@@ -206,6 +214,7 @@ public abstract class JDXDataObject extends JDXHeader {
   public double freq2dX = Double.NaN;
   public double freq2dY = Double.NaN;
   private double y2D = Double.NaN;
+  
 
   public void setY2D(double d) {
     y2D = d;
@@ -856,7 +865,5 @@ public abstract class JDXDataObject extends JDXHeader {
 		}
 		return new double[] { x, y };
 	}
-
-
 
 }

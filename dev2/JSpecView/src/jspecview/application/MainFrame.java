@@ -925,8 +925,9 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	public void execClose(String value, boolean fromScript) {
 		JSVTree.close(this, TextFormat.trimQuotes(value));
-		if (!fromScript) {
-			validateAndRepaint();
+		if (!fromScript || panelNodes.size() == 0) {
+			validate();
+			repaint();
 		}
 	}
 
@@ -939,8 +940,8 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		JSVTree.load(this, value);
 		if (getSelectedPanel() == null)
 			return null;
-		if (!getSelectedPanel().getSpectrum().is1D()
-				&& getSelectedPanel().getPanelData().getDisplay1D())
+		PanelData pd = getSelectedPanel().getPanelData();
+		if (!pd.getSpectrum().is1D() && pd.getDisplay1D())
 			return "Click on the spectrum and use UP or DOWN keys to see subspectra.";
 		return null;
 	}

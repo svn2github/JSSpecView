@@ -66,7 +66,6 @@ public class JDXSpectrum extends JDXDataObject {
   private List<JDXSpectrum> subSpectra;
   private ArrayList<PeakInfo> peakList = new ArrayList<PeakInfo>();
   private String piUnitsX, piUnitsY;
-  private JDXSpectrum parent;
   private PeakInfo selectedPeak;
 
   public void dispose() {
@@ -102,6 +101,7 @@ public class JDXSpectrum extends JDXDataObject {
     //System.out.println("initialize JDXSpectrum " + this);
     headerTable = new ArrayList<String[]>();
     xyCoords = new Coordinate[0];
+    parent = this;
   }
 
   /**
@@ -271,7 +271,7 @@ public class JDXSpectrum extends JDXDataObject {
   private JDXSpectrum convertedSpectrum;
 
   /**
-   * when the user click VK_UP or VK_DOWN
+   * based YFactor used in View command
    * 
    */
   private double userYFactor = 1;
@@ -441,7 +441,7 @@ public class JDXSpectrum extends JDXDataObject {
    */
   public boolean addSubSpectrum(JDXSpectrum spectrum, boolean forceSub) {
     if (!forceSub && (numDim < 2 || blockID != spectrum.blockID)
-        || !areXScalesCompatible(this, spectrum, true, false))
+        || !allowSubSpec(this, spectrum))
       return false;
     isForcedSubset = forceSub; // too many blocks (>100)
     if (subSpectra == null) {
@@ -572,24 +572,44 @@ public class JDXSpectrum extends JDXDataObject {
 		return specShift;
 	}
 
-	public static boolean areXScalesCompatible(JDXSpectrum s1, JDXSpectrum s2,
-			boolean allow2D2D, boolean allow1D2D) {
-		if (!allow1D2D && 
-				!((allow2D2D ? s1.is1D() == s2.is1D() : s1.is1D() && s2.is1D()) 
-				&& s1.xUnits.equalsIgnoreCase(s2.xUnits)))
-			return false;
-		if (s1.isHNMR() != s2.isHNMR())
-			return false;
-		return true;
-
+	public static boolean allowSubSpec(JDXSpectrum s1, JDXSpectrum s2) {
+		return (s1.is1D() == s2.is1D() 
+				&& s1.xUnits.equalsIgnoreCase(s2.xUnits)
+				&& s1.isHNMR() == s2.isHNMR());
 	}
 
-  public static boolean areLinkableX(JDXSpectrum s1, JDXSpectrum s2) {
-		return (s1.isNMR() && s2.isNMR() && Math.abs(s1.observedFreq - s2.freq2dX) < 0.1);
+	public static boolean areXScalesCompatible(JDXSpectrum s1, JDXSpectrum s2,
+			boolean isSubspecCheck, boolean isLinkCheck) {
+		boolean isNMR1 = s1.isNMR();
+		// must be both NMR or both not NMR
+		if (isNMR1 != s2.isNMR())
+			return false;
+		// must have same xUnits if not a link check
+		if (!isLinkCheck && !s1.xUnits.equalsIgnoreCase(s2.xUnits))
+			return false;
+		if (isSubspecCheck) {
+			// must both be 1D (or both be 2D?) for adding subspectra
+			if (s1.is1D() != s2.is1D())
+				return false;
+		} else if (isLinkCheck) {
+			if (!isNMR1)
+				return true;
+			// we allow 1D/2D here
+		} else if (!s1.is1D() || !s2.is1D()) {
+			// otherwise we don't want to consider any 2D spectra
+			return false;
+		}
+		// done if this is not NMR comparison
+		// or check same nuclei // for now not going 1D-->2D
+		return (!isNMR1 || s2.is1D() && s1.parent.nucleusX.equals(s2.parent.nucleusX));
+	}
+
+	public static boolean areLinkableX(JDXSpectrum s1, JDXSpectrum s2) {
+		return (s1.isNMR() && s2.isNMR() && s1.nucleusX.equals(s2.nucleusX));
 	}
 
 	public static boolean areLinkableY(JDXSpectrum s1, JDXSpectrum s2) {
-		return (s1.isNMR() && s2.isNMR() && Math.abs(s1.observedFreq - s2.freq2dY) < 0.1);
+		return (s1.isNMR() && s2.isNMR() && s1.nucleusX.equals(s2.nucleusY));
 	}
 
 }

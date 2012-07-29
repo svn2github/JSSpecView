@@ -357,7 +357,7 @@ public class AwtPopupMenu extends JPopupMenu {
 
   public void setEnables(JSVPanel jsvp) {
     pd = jsvp.getPanelData();
-    JDXSpectrum spec0 = jsvp.getSpectrum();
+    JDXSpectrum spec0 = pd.getSpectrum();
     setSelected(gridCheckBoxMenuItem, pd.getBoolean(ScriptToken.GRIDON));
     setSelected(coordsCheckBoxMenuItem, pd.getBoolean(ScriptToken.COORDINATESON));
     setSelected(reversePlotCheckBoxMenuItem, pd.getBoolean(ScriptToken.REVERSEPLOT));
@@ -365,9 +365,9 @@ public class AwtPopupMenu extends JPopupMenu {
     boolean isOverlaid = pd.isShowAllStacked();
     boolean isSingle = pd.haveSelectedSpectrum();
     
-    integrationMenuItem.setEnabled(jsvp.getSpectrum().canIntegrate());
+    integrationMenuItem.setEnabled(pd.getSpectrum().canIntegrate());
     measurementsMenuItem.setEnabled(pd.hasCurrentMeasurements(AType.Measurements));
-    peakListMenuItem.setEnabled(jsvp.getSpectrum().is1D());
+    peakListMenuItem.setEnabled(pd.getSpectrum().is1D());
     
     solColMenuItem.setEnabled(isSingle && spec0.canShowSolutionColor());
     transAbsMenuItem.setEnabled(isSingle && spec0.canConvertTransAbs());

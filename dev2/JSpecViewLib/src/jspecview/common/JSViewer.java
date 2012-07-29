@@ -232,6 +232,7 @@ public class JSViewer {
           break;
         }
       } catch (Exception e) {
+      	System.out.println(e.getMessage());
         Logger.error(e.getMessage());
         if (Logger.debugging)
         	e.printStackTrace();
@@ -329,14 +330,12 @@ public class JSViewer {
     for (int i = nodes.size(); --i >= 0;)
     	nodes.get(i).jsvp.getPanelData().selectFromEntireSet(Integer.MIN_VALUE);
     List<JDXSpectrum> speclist = new ArrayList<JDXSpectrum>();
-    fillSpecList(si, si.getPanelNodes(), value, speclist,
-        si.getSelectedPanel(), "1.", false);
+    fillSpecList(si, value, speclist, false);
 	}
 
 	public static void execView(ScriptInterface si, String value, boolean fromScript) {
     List<JDXSpectrum> speclist = new ArrayList<JDXSpectrum>();
-    String strlist = fillSpecList(si, si.getPanelNodes(), value, speclist,
-        si.getSelectedPanel(), "1.", true);
+    String strlist = fillSpecList(si, value, speclist, true);
     if (speclist.size() > 0)
       si.openDataOrFile(null, strlist, speclist, strlist, -1, -1, false);
     if (!fromScript) {
@@ -346,16 +345,14 @@ public class JSViewer {
 
 	private static void execIRMode(ScriptInterface si, String value) {
     IRMode mode = IRMode.getMode(value); // T, A, or TOGGLE
-    JSVPanel jsvp = si.getSelectedPanel();
-    if (jsvp == null)
-      return;
-    JDXSpectrum spec = jsvp.getSpectrum();
+    PanelData pd = si.getSelectedPanel().getPanelData();
+    JDXSpectrum spec = pd.getSpectrum();
     JDXSpectrum spec2 = JDXSpectrum.taConvert(spec, mode);
     if (spec2 == spec)
       return;
-    jsvp.setSpectrum(spec2);
+    pd.setSpectrum(spec2);
     si.setIRMode(mode);
-    jsvp.doRepaint();
+    //jsvp.doRepaint();
   }
 
   private static void execIntegrate(ScriptInterface si, String value) {
@@ -401,16 +398,16 @@ public class JSViewer {
     double y1 = Double.parseDouble(tokens.get(pt++));
     double y2 = Double.parseDouble(tokens.get(pt));
     if (isAll) {
-      JDXSpectrum spec = jsvp.getSpectrum();
+      JDXSpectrum spec = jsvp.getPanelData().getSpectrum();
       for (int i = panelNodes.size(); --i >= 0;) {
         JSVPanelNode node = panelNodes.get(i);
         if (node.source != currentSource)
           continue;
         if (JDXSpectrum.areXScalesCompatible(spec, node.getSpectrum(), false, false))
-          node.jsvp.getPanelData().setZoom(Double.NaN, y1, Double.NaN, y2);
+          node.jsvp.getPanelData().setZoom(0, y1, 0, y2);
       }
     } else {
-      jsvp.getPanelData().setZoom(Double.NaN, y1, Double.NaN, y2);
+      jsvp.getPanelData().setZoom(0, y1, 0, y2);
     }
   }
 
@@ -604,12 +601,14 @@ public class JSViewer {
 	}
 
 	public static void sendPanelChange(ScriptInterface si, JSVPanel jsvp) {
-    PeakInfo pi = jsvp.getSpectrum().getSelectedPeak();
+		PanelData pd = jsvp.getPanelData();
+		JDXSpectrum spec = pd.getSpectrum();
+    PeakInfo pi = spec.getSelectedPeak();
     if (pi == null)
-      pi = jsvp.getSpectrum().getModelPeakInfoForAutoSelectOnLoad();
+      pi = spec.getModelPeakInfoForAutoSelectOnLoad();
     if (pi == null)
-      pi = jsvp.getSpectrum().getBasePeakInfo();
-    si.getSelectedPanel().getPanelData().addPeakHighlight(pi);
+      pi = spec.getBasePeakInfo();
+    pd.addPeakHighlight(pi);
     Logger.info(Thread.currentThread() + "JSViewer sendFrameChange "  + jsvp);
     syncToJmol(si, pi);
   }
@@ -663,7 +662,7 @@ public class JSViewer {
       JSVPanel jsvp = panelNodes.get(i).jsvp;
       if (jsvp == null)
         continue;
-      info.add(jsvp.getPanelData().getInfo(false, key));
+			info.add(panelNodes.get(i).getInfo(key));      
     }
     map.put("items", info);
     return map;
@@ -685,23 +684,23 @@ public class JSViewer {
 	 * converts it to a list of spectra
 	 * 
 	 * @param si
-	 * @param panelNodes
 	 * @param value
 	 * @param speclist
-	 * @param selectedPanel
-	 * @param prefix
 	 * @param isView
 	 * @return comma-separated list, for the title
 	 */
-	private static String fillSpecList(ScriptInterface si,
-			List<JSVPanelNode> panelNodes, String value, List<JDXSpectrum> speclist,
-			JSVPanel selectedPanel, String prefix, boolean isView) {
+	private static String fillSpecList(ScriptInterface si, String value,
+			List<JDXSpectrum> speclist, boolean isView) {
+
+		List<JSVPanelNode> panelNodes = si.getPanelNodes();
+		JSVPanel selectedPanel = si.getSelectedPanel();
+		String prefix = "1.";
 		List<String> list;
 		List<String> list0 = null;
 		boolean isNone = (value.equalsIgnoreCase("NONE"));
 		if (isNone || value.equalsIgnoreCase("all"))
 			value = "*";
-		if (value.indexOf("*") < 0 && !isView) {
+		if (value.indexOf("*") < 0) {
 			// replace "3.1.1" with "3.1*1"
 			String[] tokens = value.split(" ");
 			StringBuffer sb = new StringBuffer();
@@ -709,22 +708,22 @@ public class JSViewer {
 				int pt = tokens[i].indexOf('.');
 				if (pt != tokens[i].lastIndexOf('.'))
 					tokens[i] = tokens[i].substring(0, pt + 1)
-							+ tokens[i].substring(pt + 1).replace('.', '*');
+							+ tokens[i].substring(pt + 1).replace('.', '_');
 				sb.append(tokens[i]).append(" ");
 			}
 			value = sb.toString().trim();
 		}
-		value = TextFormat.simpleReplace(value, "*", " * ");
-		if (value.equals(" * ")) {
-			list = ScriptToken.getTokens(JSVPanelNode.getSpectrumListAsString(
-					panelNodes, !isView));
+		if (value.equals("*")) {
+			list = ScriptToken.getTokens(JSVPanelNode
+					.getSpectrumListAsString(panelNodes));
 		} else if (value.startsWith("\"")) {
 			list = ScriptToken.getTokens(value);
 		} else {
+			value = TextFormat.simpleReplace(value, "_", " _ ");
 			value = TextFormat.simpleReplace(value, "-", " - ");
 			list = ScriptToken.getTokens(value);
-			list0 = ScriptToken.getTokens(JSVPanelNode.getSpectrumListAsString(
-					panelNodes, !isView));
+			list0 = ScriptToken.getTokens(JSVPanelNode
+					.getSpectrumListAsString(panelNodes));
 			if (list0.size() == 0)
 				return null;
 		}
@@ -737,10 +736,14 @@ public class JSViewer {
 		String idLast = null;
 		for (int i = 0; i < n; i++) {
 			String id = list.get(i);
-			double userYFactor = Double.NaN; // also subspectrum number
+			double userYFactor = Double.NaN;
+			int isubspec = -1;
 			if (i + 1 < n && list.get(i + 1).equals("*")) {
 				i += 2;
 				userYFactor = Double.parseDouble(list.get(i));
+			} else if (i + 1 < n && list.get(i + 1).equals("_")) {
+				i += 2;
+				isubspec = Integer.parseInt(list.get(i));
 			}
 			if (id.equals("-")) {
 				if (idLast == null)
@@ -754,7 +757,7 @@ public class JSViewer {
 				pt++;
 				while (pt < list0.size() && !idLast.equals(id)) {
 					speclist.add(JSVPanelNode.findNodeById(idLast = list0.get(pt++),
-							panelNodes).jsvp.getSpectrumAt(0));
+							panelNodes).jsvp.getPanelData().getSpectrumAt(0));
 					sb.append(",").append(idLast);
 				}
 				continue;
@@ -766,20 +769,24 @@ public class JSViewer {
 					node = panelNodes.get(j);
 					if (node.fileName != null && node.fileName.startsWith(id)
 							|| node.frameTitle != null && node.frameTitle.startsWith(id)) {
-						addSpecToList(node, userYFactor, speclist, isView);
+						addSpecToList(node.jsvp.getPanelData(), userYFactor, -1, speclist,
+								isView);
 						sb.append(",").append(node.id);
 					}
 				}
 				continue;
-			} 
+			}
 			if (!id.contains("."))
 				id = id0 + id;
 			node = JSVPanelNode.findNodeById(id, panelNodes);
 			if (node == null)
 				continue;
 			idLast = id;
-			addSpecToList(node, userYFactor, speclist, isView);
+			addSpecToList(node.jsvp.getPanelData(), userYFactor, isubspec, speclist,
+					isView);
 			sb.append(",").append(id);
+			if (isubspec > 0)
+				sb.append(".").append(isubspec);
 		}
 		if (isView && speclist.size() == 1) {
 			JSVPanelNode node = JSVPanelNode.findNodeById(idLast, panelNodes);
@@ -793,16 +800,15 @@ public class JSViewer {
 		return (isNone ? "NONE" : sb.length() > 0 ? sb.toString().substring(1)
 				: null);
 	}
-	
-	private static void addSpecToList(JSVPanelNode node, double userYFactor,
-			List<JDXSpectrum> speclist, boolean isView) {
+
+	private static void addSpecToList(PanelData pd, double userYFactor, int isubspec,
+			List<JDXSpectrum> list, boolean isView) {
 		if (isView) {
-			JDXSpectrum spec = node.jsvp.getSpectrumAt(0);
+			JDXSpectrum spec = pd.getSpectrumAt(0);
 			spec.setUserYFactor(Double.isNaN(userYFactor) ? 1 : userYFactor);
-			if (spec != null)
-				speclist.add(spec);
+			pd.addToList(isubspec - 1, list);
 		} else {
-			node.jsvp.getPanelData().selectFromEntireSet(Double.isNaN(userYFactor) ? -1 : (int) userYFactor);
+			pd.selectFromEntireSet(isubspec - 1);
 		}
 	}
 

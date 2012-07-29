@@ -467,8 +467,9 @@ abstract class GraphSet implements XYScaleConverter {
 			startIndices[i] = Coordinate.intoRange(startIndex, 0, iLast);
 			endIndices[i] = Coordinate.intoRange(endIndex, 0, iLast);
 			allowStackedYScale &= (spectra.get(i).getYUnits().equals(
-					spectra.get(0).getYUnits()) && spectra.get(i).getUserYFactor() == spectra
-					.get(0).getUserYFactor());
+					spectra.get(0).getYUnits())
+					&& spectra.get(i).getUserYFactor() == spectra.get(0).getUserYFactor()
+					);
 		}
 		getView(0, 0, 0, 0, startIndices, endIndices, null);
 		viewList = new ArrayList<ViewData>();
@@ -498,7 +499,7 @@ abstract class GraphSet implements XYScaleConverter {
 				viewData.setXRange(x1, x2);
 		}
 		if (view0 != null)
-			viewData.copyScaleFactors(view0);
+			viewData.copyScaleFactors(view0, y1 == y2);
 	}
 
 	private boolean isNearby(Coordinate a1, Coordinate a2, XYScaleConverter c,
@@ -997,9 +998,9 @@ abstract class GraphSet implements XYScaleConverter {
 				if (pw == pin1Dx01) {
 					doZoom(val1, pin1Dy0.getYVal(), val2, pin1Dy1.getYVal(), true, false,
 							true, true);
-				} else if (pw == pin1Dy01) { // actually for 2D Z
+				} else if (pw == pin1Dy01) { // also for 2D Z-range zoom
 					doZoom(pin1Dx0.getXVal(), val1, pin1Dx1.getXVal(), val2, true, false,
-							false, true);
+							false, false);
 				} else if (pw == pin2Dx01) {
 					imageView.setView0(imageView.toPixelX0(val1), pin2Dy0.yPixel0,
 							imageView.toPixelX0(val2), pin2Dy1.yPixel0);
@@ -1010,7 +1011,7 @@ abstract class GraphSet implements XYScaleConverter {
 							pin2Dx1.xPixel0, imageView.toPixelY0(val2));
 					doZoom(imageView.toX(imageView.xPixel0), viewData.minY, imageView
 							.toX(imageView.xPixel0 + imageView.xPixels - 1), viewData.maxY,
-							true, false, false, true);
+							true, false, false, false);
 				}
 			} else {
 				double val = Double.valueOf(sval).doubleValue();
@@ -1018,6 +1019,7 @@ abstract class GraphSet implements XYScaleConverter {
 					double val2 = (pw == pin1Dx0 || pw == cur2Dx0 || pw == pin2Dx0 ? pin1Dx1
 							.getXVal()
 							: pin1Dx0.getXVal());
+					// 
 					doZoom(val, pin1Dy0.getYVal(), val2, pin1Dy1.getYVal(), true, false,
 							true, true);
 				} else if (pw == cur2Dy) {
@@ -1029,9 +1031,10 @@ abstract class GraphSet implements XYScaleConverter {
 							pin2Dx1.xPixel0, val2);
 					// pd.repaint();
 				} else {
+					// 1D y-zoom
 					double val2 = (pw == pin1Dy0 ? pin1Dy1.getYVal() : pin1Dy0.getYVal());
 					doZoom(pin1Dx0.getXVal(), val, pin1Dx1.getXVal(), val2, true, false,
-							false, true);
+							false, false);
 				}
 			}
 		} catch (Exception e) {
@@ -1288,7 +1291,10 @@ abstract class GraphSet implements XYScaleConverter {
 	synchronized void doZoom(double initX, double initY, double finalX,
 			double finalY, boolean addZoom, boolean checkRange, boolean is1D, boolean checkLinked) {
 		
-		if (isLinked)
+		if (initX == finalX) {
+			initX = viewData.minXOnScale;
+		  finalX = viewData.maxXOnScale;
+		} else if (isLinked && checkLinked)
 		  pd.doZoomLinked(this, initX, finalX, addZoom, checkRange, is1D);
 		if (initX > finalX) {
 			double tempX = initX;
@@ -1348,6 +1354,10 @@ abstract class GraphSet implements XYScaleConverter {
 		double y1 = initY;
 		double y2 = finalY;
 		if (Math.abs(f - 1) < 0.0001) {
+			if (initY == finalY) {
+				initY = viewData.minYOnScale;
+			  finalY = viewData.maxYOnScale;
+			}
 			// not clear this is right for IR spec or some other cases...
 			y1 = viewData.unScaleY(iSpec, initY);
 			y2 = viewData.unScaleY(iSpec, finalY);
@@ -1397,7 +1407,7 @@ abstract class GraphSet implements XYScaleConverter {
 	}
 
 	private void setZoomTo(int i) {
-		imageView = null;
+		//imageView = null;
 		currentZoomIndex = i;
 		viewData = viewList.get(i);
 		resetPinsFromView();
@@ -1412,7 +1422,7 @@ abstract class GraphSet implements XYScaleConverter {
 		if (isLinked) {
 			pd.clearLinkViews(this);
 		}
-		setZoomTo(0);
+		setZoom(0, 0, 0, 0);
 		// leave first zoom
 		for (int i = viewList.size(); --i >= 1;)
 			viewList.remove(i);
@@ -2125,7 +2135,7 @@ abstract class GraphSet implements XYScaleConverter {
 	private void drawXUnits(Object g) {
 		String units = spectra.get(0).getAxisLabel(true);
 		if (units != null)
-			drawUnits(g, units, xPixel1, yPixel1 + 5, 0, 1);
+			drawUnits(g, units, xPixel1 + 25, yPixel1 + 5, 1, 1);
 	}
 
 	private void drawUnits(Object g, String s, int x, int y, double hOff,
@@ -2363,8 +2373,8 @@ abstract class GraphSet implements XYScaleConverter {
 		if (isX) {
 			imageView.setView0(imageView.xPixel0, pin2Dy0.yPixel0, imageView.xPixel1,
 					pin2Dy1.yPixel0);
-			doZoom(imageView.minX, viewData.minY, imageView.maxX, viewData.maxY,
-					true, false, true, true);
+			doZoom(0, viewData.minY, 0, viewData.maxY,
+					true, false, true, false);
 		} else {
 			imageView.setView0(pin2Dx0.xPixel0, imageView.yPixel0, pin2Dx1.xPixel0,
 					imageView.yPixel1);
@@ -2653,8 +2663,8 @@ abstract class GraphSet implements XYScaleConverter {
 				JDXSpectrum s1 = gs.getSpectrumAt(0);
 				boolean is1D = s1.is1D();
 				if (is1D) {
-					JDXSpectrum s2 = gs2d.getSpectrumAt(0);					
 					if (gs2d != null) {
+						JDXSpectrum s2 = gs2d.getSpectrumAt(0);					
 						if (JDXSpectrum.areLinkableX(s1, s2))
   					  gs.gs2dLinkedX = gs2d;
 						if (JDXSpectrum.areLinkableY(s1, s2))
@@ -2963,9 +2973,9 @@ abstract class GraphSet implements XYScaleConverter {
 				pin1Dy0.setY(y0, yPixel);
 				pin1Dy1.setY(y1, yPixel1);
 			}
-			// actually only used for 2D intensity change now
-			doZoom(viewData.minXOnScale, pin1Dy0.getYVal(), viewData.maxXOnScale,
-					pin1Dy1.getYVal(), false, false, isLinked && imageView == null, true);
+			// y-only zoom
+			doZoom(0, pin1Dy0.getYVal(), 0,
+					pin1Dy1.getYVal(), false, false, isLinked && imageView == null, false);
 			return true;
 		}
 		if (widget == pin2Dx0 || widget == pin2Dx1 || widget == pin2Dx01) {
@@ -3010,6 +3020,7 @@ abstract class GraphSet implements XYScaleConverter {
 			}
 			imageView.setView0(pin2Dx0.xPixel0, pin2Dy0.yPixel0, pin2Dx1.xPixel1,
 					pin2Dy1.yPixel1);
+			update2dImage(false);
 			return true;
 		}
 		return false;
@@ -3322,9 +3333,9 @@ abstract class GraphSet implements XYScaleConverter {
 			if (!isGoodEvent(zoomBox1D, null, true))
 				return;
 			int x1 = zoomBox1D.xPixel1;
-			// 1D xy zoom
-			doZoom(toX(zoomBox1D.xPixel0), toY(zoomBox1D.yPixel0), toX(x1),
-					toY(zoomBox1D.yPixel1), true, false, true, true);
+			// 1D x zoom by zoomBox
+			doZoom(toX(zoomBox1D.xPixel0), 0, toX(x1),
+					0, true, false, true, true);
 			zoomBox1D.xPixel1 = zoomBox1D.xPixel0;
 		} else if (thisWidget == pin1Dx0 || thisWidget == pin1Dx1
 				|| thisWidget == cur2Dx0 || thisWidget == cur2Dx1) {
@@ -3607,22 +3618,23 @@ abstract class GraphSet implements XYScaleConverter {
 	void setZoom(double x1, double y1, double x2, double y2) {
 		// called by
 		// 1. double-clicking on a tree node in the application to reset (0,0,0,0)
-		// 2. the YSCALE command (NaN,y1,NaN,y2)
+		// 2. the YSCALE command (0,y1,0,y2)
 		// 3. the ZOOM command (0,0,0,0) or (x1, 0, x2, 0) or (x1, y1, x2, y2)
 		setZoomTo(0);
-		if (Double.isNaN(x1)) {
-			// y zoom only
-			x1 = viewData.minX;
-			x2 = viewData.maxX;
+		if (x1 == 0 && x2 == 0 && y1 == 0 && y2 == 0) {
+	 		newPins();
+		  // reset gray-factors as well
 			imageView = null;
-		}
-		if (x1 == 0 && x2 == 0) {
-			newPins();
+			// in case this is linked, transmit the x-zoom to linked spectra
+			x1 = viewData.minXOnScale;
+			x2 = viewData.maxXOnScale;
+		//} else if (x1 == 0 && x2 == 0) {
+		//	// y zoom only
+		//	x1 = x2 = 0;
+		//	imageView = null;
 		} else {
 			doZoom(x1, y1, x2, y2, true, false, true, true);
-			return;
 		}
-		imageView = null;
 	}
 
 	/**
@@ -3697,7 +3709,7 @@ abstract class GraphSet implements XYScaleConverter {
 		if (!Double.isNaN(lastClickX))
 			lastClickX += dx;
 		updateDialogs();
-		doZoom(viewData.minXOnScale, viewData.minYOnScale, viewData.maxXOnScale,
+		doZoom(0, viewData.minYOnScale, 0,
 				viewData.maxYOnScale, false, false, true, true);
 		pd.repaint();
 		return true;

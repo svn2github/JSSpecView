@@ -383,8 +383,8 @@ public class DialogHelper {
 	}
 
 	public String getSuggestedFileName(ExportType imode) {
-		JSVPanel jsvp = si.getSelectedPanel();
-    String sourcePath = jsvp.getSpectrum().getFilePath();
+		PanelData pd = si.getSelectedPanel().getPanelData();
+    String sourcePath = pd.getSpectrum().getFilePath();
     String newName = FileManager.getName(sourcePath);
     int pt = newName.lastIndexOf(".");
     String name = (pt < 0 ? newName : newName.substring(0, pt));
@@ -412,7 +412,7 @@ public class DialogHelper {
       ext = "." + imode.toString().toLowerCase();
     }
     if (si.getCurrentSource().isView)
-    	name = jsvp.getPanelData().getPrintJobTitle(isPrint);
+    	name = pd.getPrintJobTitle(isPrint);
     name += ext;
     return name;
 	}

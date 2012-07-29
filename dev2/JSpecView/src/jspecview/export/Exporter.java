@@ -113,7 +113,7 @@ public class Exporter {
     
     String[] items = new String[nSpectra];
     for (int i = 0; i < nSpectra; i++)
-      items[i] = jsvp.getSpectrumAt(i).getTitle();
+      items[i] = jsvp.getPanelData().getSpectrumAt(i).getTitle();
 
     final JDialog dialog = new JDialog(frame, "Export", true);
     dialog.setResizable(false);
@@ -212,7 +212,7 @@ public class Exporter {
     	return null;
     String msg = "OK";
     if (imode == ExportType.SOURCE)
-      FileManager.fileCopy(jsvp.getSpectrum().getFilePath(), file);
+      FileManager.fileCopy(jsvp.getPanelData().getSpectrum().getFilePath(), file);
     else
       msg = exportSpectrumOrImage(jsvp, imode, index, file
           .getAbsolutePath());

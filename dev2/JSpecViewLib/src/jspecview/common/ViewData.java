@@ -166,18 +166,22 @@ class ViewData extends ScaleData {
 		return (i >= 0 && i < nSpec ? spectrumScaleFactors[i] : 1);
 	}
 
-	void copyScaleFactors(ViewData view) {
+	void copyScaleFactors(ViewData view, boolean resetMinMaxY) {
+		System.out.println("testing");
 		try {
-		System.arraycopy(view.spectrumScaleFactors, 0, spectrumScaleFactors, 0, nSpec);
-		System.arraycopy(view.userYFactors, 0, userYFactors, 0, nSpec);
-		System.arraycopy(view.spectrumYRefs, 0, spectrumYRefs, 0, nSpec);
-		initMinYOnScale = view.initMinYOnScale;
-		initMaxYOnScale = view.initMaxYOnScale;
-		specShift = view.specShift;
+			System.arraycopy(view.spectrumScaleFactors, 0, spectrumScaleFactors, 0,
+					nSpec);
+			System.arraycopy(view.userYFactors, 0, userYFactors, 0, nSpec);
+			System.arraycopy(view.spectrumYRefs, 0, spectrumYRefs, 0, nSpec);
+			if (resetMinMaxY) {
+				initMinYOnScale = view.initMinYOnScale;
+				initMaxYOnScale = view.initMaxYOnScale;
+			}
+			specShift = view.specShift;
 		} catch (Exception e) {
 			System.out.println("Unknown error cause here. TODO");
 		}
-		
+
 	}
 
 	void setAxisScaling(int i, int xPixels, int yPixels, boolean isInverted) {
