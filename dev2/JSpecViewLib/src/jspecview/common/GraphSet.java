@@ -1704,6 +1704,7 @@ abstract class GraphSet implements XYScaleConverter {
 		setWidgets(needNewPins, subIndex, doDraw1DObjects);
 		if (pd.isPrinting && (imageView == null ? !cur1D2Locked : sticky2Dcursor))
 			return;
+		//boolean allowPin1y = (nSplit > 1 || iSpectrumSelected < 0 || nSpectra == 1 || nSplit == 1 && !stackSelected);
 		if (!pd.isPrinting && !postGrid) {
 			// top/side slider bar backgrounds
 			if (doDraw1DObjects) {
@@ -1755,7 +1756,7 @@ abstract class GraphSet implements XYScaleConverter {
 			}
 			if (pd.isPrinting && !isLockedCursor)
 				continue;
-			if (pw.isPinOrCursor) {
+		if (pw.isPinOrCursor) {
 				setColor(g, pw.color);
 				drawLine(g, pw.xPixel0, pw.yPixel0, pw.xPixel1, pw.yPixel1);
 				if (pw.isPin)
@@ -3334,8 +3335,12 @@ abstract class GraphSet implements XYScaleConverter {
 				return;
 			int x1 = zoomBox1D.xPixel1;
 			// 1D x zoom by zoomBox
-			doZoom(toX(zoomBox1D.xPixel0), 0, toX(x1),
-					0, true, false, true, true);
+			boolean doY = (pd.shiftPressed && nSplit == 1 && iSpectrumSelected < 0);
+			doZoom(toX(zoomBox1D.xPixel0), 
+					(doY ? toY(zoomBox1D.yPixel0) : 0),
+					toX(x1),
+					(doY ? toY(zoomBox1D.yPixel1) : 0), 
+					true, false, true, true);
 			zoomBox1D.xPixel1 = zoomBox1D.xPixel0;
 		} else if (thisWidget == pin1Dx0 || thisWidget == pin1Dx1
 				|| thisWidget == cur2Dx0 || thisWidget == cur2Dx1) {

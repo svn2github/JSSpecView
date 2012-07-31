@@ -108,6 +108,7 @@ public class PanelData {
 			rightMargin = 50;
 
 	boolean ctrlPressed;
+	boolean shiftPressed;
 	boolean drawXAxisLeftToRight;
 	boolean isIntegralDrag;
 	boolean xAxisLeftToRight = true;
