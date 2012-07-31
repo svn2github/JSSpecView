@@ -3335,7 +3335,7 @@ abstract class GraphSet implements XYScaleConverter {
 				return;
 			int x1 = zoomBox1D.xPixel1;
 			// 1D x zoom by zoomBox
-			boolean doY = (pd.shiftPressed && nSplit == 1 && iSpectrumSelected < 0);
+			boolean doY = (pd.shiftPressed && nSplit == 1 && iSpectrumSelected < 0 && haveSingleYScale);
 			doZoom(toX(zoomBox1D.xPixel0), 
 					(doY ? toY(zoomBox1D.yPixel0) : 0),
 					toX(x1),
