@@ -7,6 +7,10 @@ ___svnRev=$LastChangedRevision::      $
 
 ====TODO=========
 
+Shift-drag to zoom with both X and Y scaling.
+Drag alone to only give X scaling
+Need to use different colour for background for each
+
 -in the jsvtest.htm page, when there is a CNMR and IR overlay shown
 nothing happens when a proton is clicked on a molecule in the Jmol
 applet. The viewer should have the option to either add H-NMR with
