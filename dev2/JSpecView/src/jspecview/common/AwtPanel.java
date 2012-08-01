@@ -871,8 +871,12 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   	case KeyEvent.VK_META:
     	pd.ctrlPressed = isPressed;
     	break;
+  	case KeyEvent.VK_SHIFT:
+  		pd.shiftPressed = isPressed;
+  		break;
     default:
     	pd.ctrlPressed = isControlDown(e);
+  		pd.shiftPressed = e.isShiftDown();
   	}
 	}
 
