@@ -131,6 +131,11 @@ class ImageView implements XYScaleConverter {
   boolean isXWithinRange(int xPixel) {
     return (xPixel >= xPixel0 - 5 && xPixel < xPixel0 + xPixels + 5);
   }
+
+  int toSubspectrumIndex(int yPixel) {
+    return Coordinate.intoRange(imageHeight - 1 - toImageY(yPixel), 0, imageHeight - 1);
+  }
+
   
   double toX0(int xPixel) {
     return maxX + (minX - maxX) * (fixX(xPixel) - xPixel0) / (xPixels - 1);
@@ -141,10 +146,6 @@ class ImageView implements XYScaleConverter {
     return xPixel1 - (int) ((x - minX) / (maxX - minX) * (xPixels - 1));
   }
   
-  int toSubspectrumIndex(int yPixel) {
-    return Coordinate.intoRange(imageHeight - 1 - toImageY(yPixel), 0, imageHeight - 1);
-  }
-
   int toPixelY0(double ysub) {
     return yPixel1 - (int) (ysub / (imageHeight - 1) * (yPixels - 1));
   }

@@ -1729,7 +1729,7 @@ abstract class GraphSet implements XYScaleConverter {
 					continue;
 			} else {
 				if (
-						(doDraw1DObjects == (pw == pin1Dy0 || pw == pin1Dy1 || pw == pin1Dy01))
+						(imageView != null && doDraw1DObjects == (pw == pin1Dy0 || pw == pin1Dy1 || pw == pin1Dy01))
 
 						|| 
 						
