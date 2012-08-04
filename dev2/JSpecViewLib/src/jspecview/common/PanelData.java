@@ -498,12 +498,12 @@ public class PanelData {
 		return currentGraphSet.nSpectra;
 	}
 
-	public int[] getStartDataPointIndices() {
-		return currentGraphSet.viewData.startDataPointIndices;
+	public int getStartingPointIndex(int index) {
+		return currentGraphSet.viewData.getStartingPointIndex(index);
 	}
 
-	public int[] getEndDataPointIndices() {
-		return currentGraphSet.viewData.endDataPointIndices;
+	public int getEndingPointIndex(int index) {
+		return currentGraphSet.viewData.getEndingPointIndex(index);
 	}
 
 	public String getSolutionColor() {

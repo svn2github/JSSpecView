@@ -67,6 +67,8 @@ public class JDXSpectrum extends JDXDataObject {
   private ArrayList<PeakInfo> peakList = new ArrayList<PeakInfo>();
   private String piUnitsX, piUnitsY;
   private PeakInfo selectedPeak;
+  private double specShift = 0;
+  
 
   public void dispose() {
   	// NO! NEVER DO THIS!!! 
@@ -549,15 +551,16 @@ public class JDXSpectrum extends JDXDataObject {
       units = (isX ? xLabel : yLabel);
     if (units == null)
       units = (isX ? xUnits : yUnits);
-    return (units == null ? "" : units.equalsIgnoreCase("WAVENUMBERS") ? "1/CM" : units);
+    return (units == null ? "" 
+    		: units.equalsIgnoreCase("WAVENUMBERS") ? "1/cm"
+    	  : units.equalsIgnoreCase("nanometers") ? "nm"
+   			: units);
   }
 
 	public double findXForPeakNearest(double x) {
 		return Coordinate.findXForPeakNearest(xyCoords, x, isInverted());
 	}
 
-  private double specShift = 0;
-  
 	double addSpecShift(double dx) {
 		if (dx != 0) {
 			specShift += dx;

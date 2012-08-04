@@ -42,8 +42,13 @@ public class ScaleData {
 	}
 
 
+
+	/**
+	 * for NMR, the adjustment in chemical shift applied using SHIFTX or SETPEAK or SETX
+	 */
 	
-	// X variables
+	double specShift;
+  
   /**
    * The minimum X value in the list of coordinates of the graph
    */
@@ -104,8 +109,12 @@ public class ScaleData {
    */
   double maxY;
 
-  double xFactorForScale;
-  double yFactorForScale;
+  protected double xFactorForScale;
+  protected double yFactorForScale;
+  
+  protected double spectrumScaleFactor = 1;
+  protected double spectrumYRef = 0;
+  protected double userYFactor = 1;
   
   /**
    * the minimum Y value on the scale
@@ -131,7 +140,8 @@ public class ScaleData {
   /**
    * The number of points
    */
-  int numOfPoints;
+  int pointCount;
+  
 	protected double initMinYOnScale;
 	protected double initMaxYOnScale;
 	protected double initMinY;
@@ -168,6 +178,12 @@ public class ScaleData {
 	}
 
   ScaleData() {
+	}
+
+	protected ScaleData(int iStart, int iEnd) {
+		startDataPointIndex = iStart;
+		endDataPointIndex = iEnd;
+		pointCount = endDataPointIndex - startDataPointIndex + 1;
 	}
 
 	protected ScaleData setScale(boolean isContinuous, boolean isInverted) {
@@ -291,8 +307,11 @@ public class ScaleData {
 		// set step for numbers
     int j = 0;
     double dec = Math.pow(10, log - exp);
-    while (dec > NTICKS[j])
+    while (dec > NTICKS[j]) {
       j++;
+      if (j > 3)
+      	System.out.println("OHOH");
+    }
     steps[i] = Math.pow(10, exp) * NTICKS[j];
     
     // set minor ticks count
@@ -310,11 +329,6 @@ public class ScaleData {
 		
   }
 
-	void setScaleFactors(int xPixels, int yPixels) {
-  	xFactorForScale = (maxXOnScale - minXOnScale) / xPixels;
-	  yFactorForScale = (maxYOnScale - minYOnScale) / yPixels;
-	}
-
 	/**
    * Determines if the x coordinate is within the range of coordinates in the
    * coordinate list
@@ -326,8 +340,6 @@ public class ScaleData {
     return (x >= minX && x <= maxX);
   }
 
-	double specShift;
-  
 	public void addSpecShift(double dx) {
 		specShift += dx;
 		minX += dx;
@@ -365,6 +377,83 @@ public class ScaleData {
 		info.put("xStep", Double.valueOf(steps[0]));
 		return info;
 	}
+
+	public void setMinMax(double minX, double maxX, double minY, double maxY) {
+		this.minX = minX;
+		this.maxX = maxX;
+		this.minY = minY;
+		this.maxY = maxY;
+	}
+	
+	double toY(int yPixel, int yPixel0) {		
+		return maxYOnScale + (yPixel0 - yPixel) * yFactorForScale;
+	}
+
+	double toY0(int yPixel, int yPixel0, int yPixel1) {
+		double factor = (maxYOnScale - minYOnScale) / (yPixel1 - yPixel0);
+		double y = maxYOnScale + (yPixel0 - yPixel) * factor;
+		return Math.max(minY, Math.min(y, maxY));
+	}
+
+	int toPixelY(double yVal, int yPixel1) {
+		return (Double.isNaN(yVal) ? Integer.MIN_VALUE
+				: yPixel1
+						- (int) (((yVal - spectrumYRef) * userYFactor + spectrumYRef - minYOnScale) / yFactorForScale));
+	}
+
+	int toPixelY0(double y, int yPixel0, int yPixel1) {
+		double factor = (maxYOnScale - minYOnScale) / (yPixel1 - yPixel0);
+		return (int) (yPixel0 + (maxYOnScale - y) / factor);
+	}
+
+	public void setScale(int xPixels, int yPixels, boolean isInverted) {
+		double yRef = spectrumYRef;
+		double f = spectrumScaleFactor;
+		double minY = (f == 1 ? this.minY : initMinYOnScale);
+		double maxY = (f == 1 ? this.maxY : initMaxYOnScale);
+		if (f != 1 && yRef < minY)
+			yRef = minY;
+		if (f != 1 && yRef > maxY)
+			yRef = maxY;
+		setYScale((minY - yRef) / f + yRef, (maxY - yRef) / f + yRef, f == 1, isInverted);
+  	xFactorForScale = (maxXOnScale - minXOnScale) / (xPixels - 1);
+  	yFactorForScale = (maxYOnScale - minYOnScale) / (yPixels - 1);
+  	System.out.println("scaledata yfactor max min " + yFactorForScale +" " + maxYOnScale +" " +  minYOnScale);
+	}
+
+  double toX(int xPixel, int xPixel1, boolean drawXAxisLeftToRight) {
+		return toX(xPixel, xPixel1, drawXAxisLeftToRight, xFactorForScale);
+	}
+
+	double toX0(int xPixel, int xPixel0, int xPixel1, boolean drawXAxisLeftToRight) {
+		return toX(xPixel, xPixel1, drawXAxisLeftToRight,
+				(maxXOnScale - minXOnScale) / (xPixel1 - xPixel0));
+	}
+
+	private double toX(int xPixel, int xPixel1, boolean drawXAxisLeftToRight,
+			double factor) {
+		return (
+				drawXAxisLeftToRight ? maxXOnScale - (xPixel1 - xPixel) * factor 
+						                 : minXOnScale + (xPixel1 - xPixel) * factor
+						);
+	}
+
+	int toPixelX(double dx, int xPixel0, int xPixel1,
+			boolean drawXAxisLeftToRight) {
+		return toPixelX(dx, xPixel0, xPixel1, drawXAxisLeftToRight, xFactorForScale);
+	}
+
+	int toPixelX0(double dx, int xPixel0, int xPixel1, boolean drawXAxisLeftToRight) {
+		return toPixelX(dx, xPixel0, xPixel1, drawXAxisLeftToRight, (maxXOnScale - minXOnScale) / (xPixel1 - xPixel0));
+	}
+
+	private int toPixelX(double dx, int xPixel0, int xPixel1, boolean drawXAxisLeftToRight,
+			double factor) {
+		int x = (int) ((dx - minXOnScale) / factor);
+		return (drawXAxisLeftToRight ? xPixel0 + x : xPixel1 - x);
+	}
+
+
 
 
 

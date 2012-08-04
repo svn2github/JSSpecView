@@ -51,7 +51,7 @@ class ImageView implements XYScaleConverter {
   double minX = Double.NaN, maxX, minY, maxY, minZ, maxZ;
 	private ScaleData scaleData; // for paper Y axis
   
-  void set(ViewData view) {
+  void set(ScaleData view) {
     if (Double.isNaN(minX)) {
       minX = view.minX;
       maxX = view.maxX;
@@ -241,7 +241,7 @@ class ImageView implements XYScaleConverter {
   	boolean isLow = false;
   	while (((isLow = (averageGray < DEFAULT_MIN_GRAY)) || averageGray > DEFAULT_MAX_GRAY) && i++ < 10) {
       view.scaleSpectrum(-2, isLow ? 2 : 0.5);
-      set(view);
+      set(view.getScaleData());
       get2dBuffer(spec, false); 
   	} 
   	return buf2d;

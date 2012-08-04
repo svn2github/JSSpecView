@@ -367,24 +367,18 @@ public class Coordinate {
    * Returns the minimum x value value from an array of arrays of
    * <code>Coordinate</code>s.
    * @param spectra 
-   * @param startList
-   *        the start indices
-   * @param endList
-   *        the end indices
-   * @param scaleFactors TODO
+   * @param vd 
    * @param coordLists
    *        the 2d coordinate array
    * 
    * @return the minimum x value value from an array of arrays of
    *         <code>Coordinate</code>s
    */
-  public static double getMinX(List<JDXSpectrum> spectra, int[] startList,
-                               int[] endList) {
+  public static double getMinX(List<JDXSpectrum> spectra, ViewData vd) {
     double min = Double.MAX_VALUE;
     for (int i = 0; i < spectra.size(); i++) {
     	Coordinate[] xyCoords = spectra.get(i).getXYCoords();
-      double tmp = getMinX(xyCoords, (startList == null ? 0 : startList[i]), 
-      		(endList == null ? xyCoords.length : endList[i] + 1));
+      double tmp = getMinX(xyCoords, vd.getStartingPointIndex(i), vd.getEndingPointIndex(i));
       if (tmp < min)
         min = tmp;
     }
@@ -416,23 +410,15 @@ public class Coordinate {
    * Returns the maximum x value value from an array of arrays of
    * <code>Coordinate</code>s.
    * @param spectra 
-   * 
-   * @param coordLists
-   *        the 2d coordinate array
-   * @param startList
-   *        the start indices
-   * @param endList
-   *        the end indices
+   * @param vd 
    * @return the maximum x value value from an array of arrays of
    *         <code>Coordinate</code>s
    */
-  public static double getMaxX(List<JDXSpectrum> spectra, int[] startList,
-                               int[] endList) {
+  public static double getMaxX(List<JDXSpectrum> spectra, ViewData vd) {
     double max = -Double.MAX_VALUE;
     for (int i = 0; i < spectra.size(); i++) {
     	Coordinate[] xyCoords = spectra.get(i).getXYCoords();
-      double tmp = getMaxX(xyCoords, (startList == null ? 0 : startList[i]), 
-      		(endList == null ? xyCoords.length : endList[i] + 1));
+      double tmp = getMaxX(xyCoords, vd.getStartingPointIndex(i), vd.getEndingPointIndex(i));
       if (tmp > max)
         max = tmp;
     }
@@ -465,25 +451,17 @@ public class Coordinate {
    * Returns the minimum y value value from an array of arrays of
    * <code>Coordinate</code>s.
    * @param spectra 
-   * 
-   * @param coordLists
-   *        the 2d coordinate array
-   * @param startList
-   *        the start indices
-   * @param endList
-   *        the end indices
+   * @param vd 
    * @return the minimum y value value from an array of arrays of
    *         <code>Coordinate</code>s
    */
-  public static double getMinYUser(List<JDXSpectrum> spectra, int[] startList,
-                               int[] endList) {
+  public static double getMinYUser(List<JDXSpectrum> spectra, ViewData vd) {
     double min = Double.MAX_VALUE;
     for (int i = 0; i < spectra.size(); i++) {
       double u = spectra.get(i).getUserYFactor();
       double yref = spectra.get(i).getYRef();
     	Coordinate[] xyCoords = spectra.get(i).getXYCoords();
-      double tmp = (getMinY(xyCoords, (startList == null ? 0 : startList[i]), 
-      		(endList == null ? xyCoords.length : endList[i] + 1)) - yref) * u + yref;
+      double tmp = (getMinY(xyCoords, vd.getStartingPointIndex(i), vd.getEndingPointIndex(i)) - yref) * u + yref;
       if (tmp < min)
         min = tmp;
     }  
@@ -515,25 +493,17 @@ public class Coordinate {
    * Returns the maximum y value value from an array of arrays of
    * <code>Coordinate</code>s.
    * @param spectra 
-   * 
-   * @param coordLists
-   *        the 2d coordinate array
-   * @param startList
-   *        the start indices
-   * @param endList
-   *        the end indices
+   * @param vd 
    * @return the maximum y value value from an array of arrays of
    *         <code>Coordinate</code>s
    */
-  public static double getMaxYUser(List<JDXSpectrum> spectra, int[] startList,
-                               int[] endList) {
+  public static double getMaxYUser(List<JDXSpectrum> spectra, ViewData vd) {
     double max = -Double.MAX_VALUE;
     for (int i = 0; i < spectra.size(); i++) {
       double u = spectra.get(i).getUserYFactor();
       double yref = spectra.get(i).getYRef();
     	Coordinate[] xyCoords = spectra.get(i).getXYCoords();
-      double tmp = (getMaxY(xyCoords, (startList == null ? 0 : startList[i]), 
-      		(endList == null ? xyCoords.length : endList[i] + 1)) - yref) * u + yref;
+      double tmp = (getMaxY(xyCoords, vd.getStartingPointIndex(i), vd.getEndingPointIndex(i)) - yref) * u + yref;
       if (tmp > max)
         max = tmp;
     }
