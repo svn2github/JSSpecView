@@ -162,6 +162,10 @@ public class ScaleData {
 			boolean isInverted) {
 		if (minY == 0 && maxY == 0)
 			maxY = 1;
+		if (isShiftZoomedY) {
+			minY = minYOnScale;
+			maxY = maxYOnScale;
+		}			
 		double yStep = setScaleParams(minY, maxY, 1);
 		double dy = (isInverted ? yStep / 2 : yStep / 4);
 		double dy2 = (isInverted ? yStep / 4 : yStep / 2);
@@ -368,7 +372,7 @@ public class ScaleData {
 	double toY0(int yPixel, int yPixel0, int yPixel1) {
 		double factor = (maxYOnScale - minYOnScale) / (yPixel1 - yPixel0);
 		double y = maxYOnScale + (yPixel0 - yPixel) * factor;
-		return Math.max(initMinY, Math.min(y, initMaxY));
+		return Math.max(minYOnScale, Math.min(y, maxYOnScale));
 	}
 
 	int toPixelY(double yVal, int yPixel1) {

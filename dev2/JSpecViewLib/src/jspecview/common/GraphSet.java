@@ -1134,8 +1134,8 @@ abstract class GraphSet implements XYScaleConverter {
 			return;
 		setWidgetX(pin1Dx0, getScale().minXOnScale);
 		setWidgetX(pin1Dx1, getScale().maxXOnScale);
-		setWidgetY(pin1Dy0, getScale().minY);
-		setWidgetY(pin1Dy1, getScale().maxY);
+		setWidgetY(pin1Dy0, getScale().minYOnScale);
+		setWidgetY(pin1Dy1, getScale().maxYOnScale);
 	}
 
 	/**
@@ -1145,13 +1145,12 @@ abstract class GraphSet implements XYScaleConverter {
 	private void resetPinPositions() {
 	  resetX(pin1Dx0);
 	  resetY(pin1Dy0);
-	  resetY(pin1Dy1);
+	  resetY(pin1Dy1);		  	  
 		if (imageView == null) {
 			if (gs2dLinkedX != null)
-				setWidgetX(cur1D2x1, cur1D2x1.getXVal());
+				resetX(cur1D2x1);
 			if (gs2dLinkedY != null)
-				setWidgetX(cur1D2x2, cur1D2x2.getXVal());
-			resetX(pin1Dx0);
+				resetX(cur1D2x2);
 		} else {
 			pin2Dy0.setY(pin2Dy0.getYVal(), imageView.toPixelY0(pin2Dy0.getYVal()));
 			pin2Dy1.setY(pin2Dy1.getYVal(), imageView.toPixelY0(pin2Dy1.getYVal()));
@@ -1441,8 +1440,7 @@ abstract class GraphSet implements XYScaleConverter {
 					if (doPlot(i, iSplit)) {
 						if (n++ == 0)
 							continue;
-						if (doYScale && !viewData.areYScalesSame(i - 1, i))
-							doYScale = false;
+						doYScale &= viewData.areYScalesSame(i - 1, i);
 					}
 			}
 		}
@@ -1479,16 +1477,19 @@ abstract class GraphSet implements XYScaleConverter {
 				if (nSplit > 1) {
 					iSpectrumForScale = i;
 				}
-				boolean doDrawWidgets = (nSplit == 1 || showAllStacked || iSpectrumSelected == iSplit);
-				if (doDrawWidgets)
-					drawWidgets(g, subIndex, needNewPins, doDraw1DObjects, false);
+				boolean doDrawWidgets = !isGrey && (nSplit == 1 || showAllStacked || iSpectrumSelected == iSplit);
+				boolean doDraw1DY = (doDrawWidgets && haveSingleYScale && i == iSpectrumForScale);
+				if (doDrawWidgets) {
+					resetPinsFromView();
+					drawWidgets(g, subIndex, needNewPins, doDraw1DObjects, doDraw1DY, false);
+				}
 				if (haveSingleYScale && i == iSpectrumForScale) {
 					drawGrid(g);
 					if (pd.isPrinting && nSplit > 1)
 						drawSpectrumSource(g, i);
 				}
 				if (doDrawWidgets)
-					drawWidgets(g, subIndex, false, doDraw1DObjects, true);
+					drawWidgets(g, subIndex, false, doDraw1DObjects, doDraw1DY, true);
 				if (haveSingleYScale && !isDrawNoSpectra() && i == iSpectrumForScale
 						&& (nSpectra == 1 || iSpectrumSelected >= 0))
 					drawHighlightsAndPeakTabs(g, i);
@@ -1546,9 +1547,9 @@ abstract class GraphSet implements XYScaleConverter {
 				drawYScale(g, imageView);
 			if (subIndex >= 0)
 				draw2DUnits(g);
-			drawWidgets(g, subIndex, needNewPins, doDraw1DObjects, false);
+			drawWidgets(g, subIndex, needNewPins, doDraw1DObjects, true, false);
 			// no 2D grid?
-			drawWidgets(g, subIndex, needNewPins, doDraw1DObjects, true);
+			drawWidgets(g, subIndex, needNewPins, doDraw1DObjects, true, true);
 		}
 		if (annotations != null)
 			drawAnnotations(g, annotations, null);
@@ -1683,14 +1684,17 @@ abstract class GraphSet implements XYScaleConverter {
 	 * @param subIndex
 	 * @param needNewPins
 	 * @param doDraw1DObjects
+	 * @param doDraw1DY
+	 *          TODO
 	 * @param postGrid
 	 */
 	private void drawWidgets(Object g, int subIndex, boolean needNewPins,
-			boolean doDraw1DObjects, boolean postGrid) {
+			boolean doDraw1DObjects, boolean doDraw1DY, boolean postGrid) {
 		setWidgets(needNewPins, subIndex, doDraw1DObjects);
 		if (pd.isPrinting && (imageView == null ? !cur1D2Locked : sticky2Dcursor))
 			return;
-		//boolean allowPin1y = true;//(nSplit > 1 || iSpectrumSelected < 0 || nSpectra == 1 || nSplit == 1 && !stackSelected);
+		// boolean allowPin1y = true;//(nSplit > 1 || iSpectrumSelected < 0 ||
+		// nSpectra == 1 || nSplit == 1 && !stackSelected);
 		if (!pd.isPrinting && !postGrid) {
 			// top/side slider bar backgrounds
 			if (doDraw1DObjects) {
@@ -1711,10 +1715,9 @@ abstract class GraphSet implements XYScaleConverter {
 			}
 			fillBox(g, pin1Dy0.xPixel1, yPixel1, pin1Dy1.xPixel1 + 2, yPixel0,
 					ScriptToken.GRIDCOLOR);
-			if (true) {//isLinked || !doDraw1DObjects) {
+			if (doDraw1DY)
 				fillBox(g, pin1Dy0.xPixel1, pin1Dy0.yPixel1, pin1Dy1.xPixel1 + 2,
 						pin1Dy1.yPixel0, ScriptToken.PLOTCOLOR);
-			}
 		}
 		for (int i = 0; i < widgets.length; i++) {
 			PlotWidget pw = widgets[i];
@@ -1728,24 +1731,20 @@ abstract class GraphSet implements XYScaleConverter {
 				if (pw == cur2Dx0 && !doDraw1DObjects)
 					continue;
 			} else {
-				if (
-						(imageView != null && doDraw1DObjects == (pw == pin1Dy0 || pw == pin1Dy1 || pw == pin1Dy01))
-
-						|| 
-						
-						pw == cur1D2x1
-						&& gs2dLinkedX == null
-						|| pw == cur1D2x2
-						&& gs2dLinkedY == null
-						|| pw == zoomBox1D
-						&& (pd.isIntegralDrag || pd.integralShiftMode != 0)) {
+				boolean isPin1Dy = (pw == pin1Dy0 || pw == pin1Dy1 || pw == pin1Dy01);
+				if ((imageView != null && doDraw1DObjects == isPin1Dy)
+				|| isPin1Dy && !doDraw1DY
+				|| pw == cur1D2x1 && gs2dLinkedX == null 
+				|| pw == cur1D2x2	&& gs2dLinkedY == null 
+				|| pw == zoomBox1D && (pd.isIntegralDrag || pd.integralShiftMode != 0)
+				) {
 					if (!isLinked || imageView != null)
 						continue;
 				}
 			}
 			if (pd.isPrinting && !isLockedCursor)
 				continue;
-		if (pw.isPinOrCursor) {
+			if (pw.isPinOrCursor) {
 				setColor(g, pw.color);
 				drawLine(g, pw.xPixel0, pw.yPixel0, pw.xPixel1, pw.yPixel1);
 				pw.isVisible = true;

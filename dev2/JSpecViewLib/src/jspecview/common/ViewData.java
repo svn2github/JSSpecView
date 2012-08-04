@@ -150,18 +150,6 @@ class ViewData {
       scaleData[i % scaleData.length].scaleBy(f);
   }
 
-	double getSpectrumScaleFactor(int i) {
-		return (i >= 0 && i < nSpectra ? scaleData[i % scaleData.length].spectrumScaleFactor : 1);
-	}
-
-	double getSpectrumYRef(int i) {
-		return scaleData[i % scaleData.length].spectrumYRef;
-	}
-	
-	double getUserYFactor(int i) {
-		return scaleData[i % scaleData.length].userYFactor;
-	}
-	
 	ScaleData[] getScaleData() {
 		return scaleData;
 	}
@@ -170,10 +158,13 @@ class ViewData {
 		return thisScale;
 	}
 
+	
+	
 	boolean areYScalesSame(int i, int j) {
-		return getSpectrumScaleFactor(i) == getSpectrumScaleFactor(j)
-		  && getSpectrumYRef(i) == getSpectrumYRef(j)
-		  && getUserYFactor(i) == getUserYFactor(j);
+		i %= scaleData.length;
+		j %= scaleData.length;
+		return (scaleData[i].minYOnScale == scaleData[j].minYOnScale
+		 && scaleData[i].maxYOnScale == scaleData[j].maxYOnScale);
 	}
 
 	void setScale(int i, int xPixels, int yPixels, boolean isInverted) {
