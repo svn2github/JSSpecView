@@ -1729,9 +1729,9 @@ abstract class GraphSet implements XYScaleConverter {
 					continue;
 			} else {
 				if (
-						//(doDraw1DObjects == (pw == pin1Dy0 || pw == pin1Dy1 || pw == pin1Dy01))
+						(doDraw1DObjects == (pw == pin1Dy0 || pw == pin1Dy1 || pw == pin1Dy01))
 
-						///|| 
+						|| 
 						
 						pw == cur1D2x1
 						&& gs2dLinkedX == null
@@ -2968,7 +2968,8 @@ abstract class GraphSet implements XYScaleConverter {
 			}
 			// y-only zoom
 			doZoom(0, pin1Dy0.getYVal(), 0,
-					pin1Dy1.getYVal(), imageView == null, imageView == null, false, false, false);
+					pin1Dy1.getYVal(), imageView == null, imageView == null, 
+					false, false, false);
 			return true;
 		}
 		if (widget == pin2Dx0 || widget == pin2Dx1 || widget == pin2Dx01) {

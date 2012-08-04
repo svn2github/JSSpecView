@@ -368,7 +368,7 @@ public class ScaleData {
 	double toY0(int yPixel, int yPixel0, int yPixel1) {
 		double factor = (maxYOnScale - minYOnScale) / (yPixel1 - yPixel0);
 		double y = maxYOnScale + (yPixel0 - yPixel) * factor;
-		return Math.max(minY, Math.min(y, maxY));
+		return Math.max(initMinY, Math.min(y, initMaxY));
 	}
 
 	int toPixelY(double yVal, int yPixel1) {
