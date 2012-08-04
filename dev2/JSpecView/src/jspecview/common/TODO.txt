@@ -7,6 +7,7 @@ ___svnRev=$LastChangedRevision::      $
 
 ====TODO=========
 
+testing date update
 
 -in the jsvtest.htm page, when there is a CNMR and IR overlay shown
 nothing happens when a proton is clicked on a molecule in the Jmol
