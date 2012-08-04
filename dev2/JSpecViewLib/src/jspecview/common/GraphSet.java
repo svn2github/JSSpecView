@@ -1480,10 +1480,6 @@ abstract class GraphSet implements XYScaleConverter {
 					iSpectrumForScale = i;
 				}
 				boolean doDrawWidgets = (nSplit == 1 || showAllStacked || iSpectrumSelected == iSplit);
-				if (!pd.isPrinting && widgets != null)
-  				for (int j = 0; j < widgets.length; j++)
-  					if (widgets[j] != null)
-  	  				widgets[j].isVisible = false;
 				if (doDrawWidgets)
 					drawWidgets(g, subIndex, needNewPins, doDraw1DObjects, false);
 				if (haveSingleYScale && i == iSpectrumForScale) {
@@ -3090,6 +3086,10 @@ abstract class GraphSet implements XYScaleConverter {
 		haveSelectedSpectrum = false;
 		selectedSpectrumIntegrals = null;
 		selectedSpectrumMeasurements = null;
+		if (!pd.isPrinting && widgets != null)
+			for (int j = 0; j < widgets.length; j++)
+				if (widgets[j] != null)
+  				widgets[j].isVisible = false;
 		for (int iSplit = 0; iSplit < nSplit; iSplit++) {
 			// for now, at least, we only allow one 2D image
 			setPositionForFrame(iSplit);

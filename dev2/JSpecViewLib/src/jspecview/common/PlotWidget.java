@@ -44,7 +44,8 @@ class PlotWidget extends Coordinate {
   }
 
   boolean selected(int xPixel, int yPixel) {
-    return (isVisible && Math.abs(xPixel - xPixel0) < 5 && Math.abs(yPixel - yPixel0) < 5);
+    return (isVisible 
+    		&& Math.abs(xPixel - xPixel0) < 5 && Math.abs(yPixel - yPixel0) < 5);
   }
 
   void setX(double x, int xPixel) {
