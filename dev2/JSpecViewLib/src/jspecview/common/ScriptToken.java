@@ -117,7 +117,7 @@ public enum ScriptToken {
   YSCALE("[ALL] lowValue highValue"), 
   YSCALEON("T"), YUNITSON("T"), 
   ZOOM("OUT or x1,x2 or x1,y1 x2,y2"),
-  ZOOMBOXCOLOR; // not implemented
+  ZOOMBOXCOLOR, ZOOMBOXCOLOR2; // not implemented
 
   private String tip;
 

@@ -151,7 +151,8 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   // potentially settable; 
 
   private Color highlightColor = new Color(255, 0, 0, 200);
-  private Color zoomBoxColor = new Color(100, 100, 50, 130);
+  private Color zoomBoxColor = new Color(150, 150, 100, 130);
+  private Color zoomBoxColor2 = new Color(150, 100, 100, 130);
 
 	private static int MAC_COMMAND = InputEvent.BUTTON1_MASK + InputEvent.BUTTON3_MASK;
 
@@ -322,6 +323,8 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     default:
       Logger.error("awtgraphset missing color " + whatColor);
       return Color.BLACK;
+    case ZOOMBOXCOLOR2:
+      return zoomBoxColor2;
     case ZOOMBOXCOLOR:
       return zoomBoxColor;
     case HIGHLIGHTCOLOR:

@@ -1751,8 +1751,8 @@ abstract class GraphSet implements XYScaleConverter {
 				if (pw.isPin)
 					drawHandle(g, pw.xPixel0, pw.yPixel0, !pw.isEnabled);
 			} else if (pw.xPixel1 != pw.xPixel0) {
-				fillBox(g, pw.xPixel0, pw.yPixel0, pw.xPixel1, pw.yPixel1,
-						ScriptToken.ZOOMBOXCOLOR);
+				fillBox(g, pw.xPixel0, pw.yPixel0, pw.xPixel1, pw.yPixel1, 
+						pw == zoomBox1D && pd.shiftPressed ? ScriptToken.ZOOMBOXCOLOR2 : ScriptToken.ZOOMBOXCOLOR);
 			}
 		}
 	}
