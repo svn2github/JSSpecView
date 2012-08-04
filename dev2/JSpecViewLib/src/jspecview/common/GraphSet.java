@@ -205,8 +205,10 @@ abstract class GraphSet implements XYScaleConverter {
 	int setSpectrumSelected(int i) {
 		boolean isNew = (i != iSpectrumSelected);
 		iSpectrumSelected = i;
-		if (isNew)
+		if (isNew) {
 			hideAllDialogsExceptCurrent();
+			getCurrentView();
+		}
 		return iSpectrumSelected;
 	}
 
@@ -469,16 +471,17 @@ abstract class GraphSet implements XYScaleConverter {
 					&& spectra.get(i).getUserYFactor() == spectra.get(0).getUserYFactor()
 					);
 		}
-		getView(0, 0, 0, 0, startIndices, endIndices, null);
+		getView(0, 0, 0, 0, startIndices, endIndices, null, null);
 		viewList = new ArrayList<ViewData>();
 		viewList.add(viewData);
 	}
 
 	private synchronized void getView(double x1, double x2, double y1, double y2,
-			int[] startIndices, int[] endIndices, ViewData view0) {
+			int[] startIndices, int[] endIndices, ScaleData[] viewScales, ScaleData[] yScales) {
 		List<JDXSpectrum> graphs = (graphsTemp.size() == 0 ? spectra : graphsTemp);
 		List<JDXSpectrum> subspecs = getSpectrumAt(0).getSubSpectra();
-		boolean dontUseSubspecs = (subspecs == null || subspecs.size() == 2 && subspecs.get(1).isImaginary());
+		boolean dontUseSubspecs = (subspecs == null || subspecs.size() == 2
+				&& subspecs.get(1).isImaginary());
 		// NMR real/imaginary
 		boolean is2D = !getSpectrumAt(0).is1D();
 		boolean useFirstSubSpecOnly = false;
@@ -494,10 +497,14 @@ abstract class GraphSet implements XYScaleConverter {
 			viewData = new ViewData(graphs, y1, y2, startIndices, endIndices,
 					getSpectrumAt(0).isContinuous(), is2D);
 			if (x1 != x2)
-				getScaleData().setXRange(x1, x2);
+				getScale().setXRange(x1, x2);
 		}
-		if (view0 != null)
-			viewData.copyScaleFactors(view0, y1 == y2);
+		if (viewScales != null) {
+			ScaleData.copyScaleFactors(viewScales, viewData.getScaleData());
+			if (yScales != null)
+				ScaleData.copyYScales(yScales, viewData.getScaleData());
+			getCurrentView();
+		}
 	}
 
 	private boolean isNearby(Coordinate a1, Coordinate a2, XYScaleConverter c,
@@ -543,18 +550,18 @@ abstract class GraphSet implements XYScaleConverter {
 				&& yPixel > pin2Dx0.yPixel0 - 2 && yPixel < pin2Dx0.yPixel1);
 	}
 
-	// private boolean isInRightBar(int xPixel, int yPixel) {
-	// return (yPixel == fixY(yPixel) && xPixel > pin1Dy0.xPixel1 && xPixel <
-	// pin1Dy0.xPixel0 + 2);
-	// }
+	private boolean isInRightBar(int xPixel, int yPixel) {
+	 return (yPixel == fixY(yPixel) && xPixel > pin1Dy0.xPixel1 && xPixel <
+	 pin1Dy0.xPixel0 + 2);
+ }
 
 	private boolean isInRightBar2D(int xPixel, int yPixel) {
 		return (imageView != null && yPixel == fixY(yPixel)
 				&& xPixel > pin2Dy0.xPixel1 && xPixel < pin2Dy0.xPixel0 + 2);
 	}
 
-	public ScaleData getScaleData() {
-		return viewData.getScaleData();
+	public ScaleData getScale() {
+		return viewData.getScale();
 	}
 	
   public int getXPixels() {
@@ -572,35 +579,35 @@ abstract class GraphSet implements XYScaleConverter {
   public double toX(int xPixel) {
 		if (imageView != null && imageView.isXWithinRange(xPixel))
 			return imageView.toX(xPixel);
-		return getScaleData().toX(fixX(xPixel), xPixel1, drawXAxisLeftToRight);
+		return getScale().toX(fixX(xPixel), xPixel1, drawXAxisLeftToRight);
 	}
 
 	private double toX0(int xPixel) {
-		return viewList.get(0).getScaleData().toX0(fixX(xPixel), xPixel0, xPixel1, drawXAxisLeftToRight);
+		return viewList.get(0).getScale().toX0(fixX(xPixel), xPixel0, xPixel1, drawXAxisLeftToRight);
 	}
 
   public int toPixelX(double dx) {
-  	return getScaleData().toPixelX(dx, xPixel0, xPixel1, drawXAxisLeftToRight);
+  	return getScale().toPixelX(dx, xPixel0, xPixel1, drawXAxisLeftToRight);
 	}
 
 	private int toPixelX0(double x) {
-		return viewList.get(0).getScaleData().toPixelX0(x, xPixel0, xPixel1, drawXAxisLeftToRight);
+		return viewList.get(0).getScale().toPixelX0(x, xPixel0, xPixel1, drawXAxisLeftToRight);
 	}
 
 	public double toY(int yPixel) {
-		return getScaleData().toY(yPixel, yPixel0);
+		return getScale().toY(yPixel, yPixel0);
 	}
 
 	public int toPixelY(double yVal) {
-		return getScaleData().toPixelY(yVal, yPixel1);
+		return getScale().toPixelY(yVal, yPixel1);
 	}
 
 	private double toY0(int yPixel) {
-		return viewList.get(0).getScaleData().toY0(fixY(yPixel), yPixel0, yPixel1);
+		return viewList.get(0).getScale().toY0(fixY(yPixel), yPixel0, yPixel1);
 	}
 
 	private int toPixelY0(double y) {
-		return fixY(viewList.get(0).getScaleData().toPixelY0(y, yPixel0, yPixel1));
+		return fixY(viewList.get(0).getScale().toPixelY0(y, yPixel0, yPixel1));
 	}
 
 	public int fixY(int yPixel) {
@@ -869,7 +876,7 @@ abstract class GraphSet implements XYScaleConverter {
 			clearViews();
 			if (showAllStacked && !stackSelected)
   			closeDialogsExcept(AType.NONE);
-			viewData.setScaleFactor(-1, 1);
+			viewData.resetScaleFactors();
 			// did not work: view.setScaleFactor(iSpectrumSelected, 1);
 			updateDialogs();
 			ok = true;
@@ -976,21 +983,21 @@ abstract class GraphSet implements XYScaleConverter {
 				double val2 = Double.valueOf(sval.substring(pt + 1)).doubleValue();
 				if (pw == pin1Dx01) {
 					doZoom(val1, pin1Dy0.getYVal(), val2, pin1Dy1.getYVal(), true, false,
-							true, true);
+							false, true, true);
 				} else if (pw == pin1Dy01) { // also for 2D Z-range zoom
-					doZoom(pin1Dx0.getXVal(), val1, pin1Dx1.getXVal(), val2, true, false,
-							false, false);
+					doZoom(pin1Dx0.getXVal(), val1, pin1Dx1.getXVal(), val2, imageView == null, imageView == null,
+							false, false, true);
 				} else if (pw == pin2Dx01) {
 					imageView.setView0(imageView.toPixelX0(val1), pin2Dy0.yPixel0,
 							imageView.toPixelX0(val2), pin2Dy1.yPixel0);
-					doZoom(val1, pin1Dy0.getYVal(), val2, pin1Dy1.getYVal(), true, false,
-							false, true);
+					doZoom(val1, pin1Dy0.getYVal(), val2, pin1Dy1.getYVal(), false, false,
+							false, true, true);
 				} else if (pw == pin2Dy01) {
 					imageView.setView0(pin2Dx0.xPixel0, imageView.toPixelY0(val1),
 							pin2Dx1.xPixel0, imageView.toPixelY0(val2));
-					doZoom(imageView.toX(imageView.xPixel0), getScaleData().minY, imageView
-							.toX(imageView.xPixel0 + imageView.xPixels - 1), getScaleData().maxY,
-							true, false, false, false);
+					doZoom(imageView.toX(imageView.xPixel0), getScale().minY, imageView
+							.toX(imageView.xPixel0 + imageView.xPixels - 1), getScale().maxY,
+							false, false, false, false, true);
 				}
 			} else {
 				double val = Double.valueOf(sval).doubleValue();
@@ -999,8 +1006,8 @@ abstract class GraphSet implements XYScaleConverter {
 							.getXVal()
 							: pin1Dx0.getXVal());
 					// 
-					doZoom(val, pin1Dy0.getYVal(), val2, pin1Dy1.getYVal(), true, false,
-							true, true);
+					doZoom(val, 0, val2, 0, !pw.is2D, false,
+							false, true, true);
 				} else if (pw == cur2Dy) {
 					setCurrentSubSpectrum((int) val);
 					// pd.repaint();
@@ -1012,8 +1019,8 @@ abstract class GraphSet implements XYScaleConverter {
 				} else {
 					// 1D y-zoom
 					double val2 = (pw == pin1Dy0 ? pin1Dy1.getYVal() : pin1Dy0.getYVal());
-					doZoom(pin1Dx0.getXVal(), val, pin1Dx1.getXVal(), val2, true, false,
-							false, false);
+					doZoom(pin1Dx0.getXVal(), val, pin1Dx1.getXVal(), val2, imageView == null, imageView == null,
+						 false, false, true);
 				}
 			}
 		} catch (Exception e) {
@@ -1104,10 +1111,10 @@ abstract class GraphSet implements XYScaleConverter {
 			int n = getSpectrumAt(0).getSubSpectra().size();
 			pin2Dy1.setY(n, imageView.toPixelY0(n));
 		}
-		setWidgetX(pin1Dx0, getScaleData().minX);
-		setWidgetX(pin1Dx1, getScaleData().maxX);
-		setWidgetY(pin1Dy0, getScaleData().minY);
-		setWidgetY(pin1Dy1, getScaleData().maxY);
+		setWidgetX(pin1Dx0, getScale().minX);
+		setWidgetX(pin1Dx1, getScale().maxX);
+		setWidgetY(pin1Dy0, getScale().minY);
+		setWidgetY(pin1Dy1, getScale().maxY);
 		
 		widgets = new PlotWidget[] { zoomBox1D, zoomBox2D, pin1Dx0, pin1Dx01,
 				pin1Dx1, pin1Dy0, pin1Dy01, pin1Dy1, pin2Dx0, pin2Dx01, pin2Dx1,
@@ -1125,10 +1132,10 @@ abstract class GraphSet implements XYScaleConverter {
 	private void resetPinsFromView() {
 		if (pin1Dx0 == null)
 			return;
-		setWidgetX(pin1Dx0, getScaleData().minXOnScale);
-		setWidgetX(pin1Dx1, getScaleData().maxXOnScale);
-		setWidgetY(pin1Dy0, getScaleData().minY);
-		setWidgetY(pin1Dy1, getScaleData().maxY);
+		setWidgetX(pin1Dx0, getScale().minXOnScale);
+		setWidgetX(pin1Dx1, getScale().maxXOnScale);
+		setWidgetY(pin1Dy0, getScale().minY);
+		setWidgetY(pin1Dy1, getScale().maxY);
 	}
 
 	/**
@@ -1210,9 +1217,9 @@ abstract class GraphSet implements XYScaleConverter {
 		// in a stacked set, this will be wrong. Perhaps no showing this pin1Dy01
 		// then?
 		pin1Dy01.setEnabled(Math.min(pin1Dy0.yPixel0, pin1Dy1.yPixel0) > Math.min(
-				toPixelY(getScaleData().minY), toPixelY(getScaleData().maxY))
+				toPixelY(getScale().minY), toPixelY(getScale().maxY))
 				|| Math.max(pin1Dy0.yPixel0, pin1Dy1.yPixel0) < Math.max(
-						toPixelY(getScaleData().minY), toPixelY(getScaleData().maxY)));
+						toPixelY(getScale().minY), toPixelY(getScale().maxY)));
 		if (imageView == null)
 			return;
 		double x = pin1Dx0.getXVal();
@@ -1261,18 +1268,20 @@ abstract class GraphSet implements XYScaleConverter {
 	 *          TODO
 	 * @param finalY
 	 *          the Y end coordinate of the zoom area
-	 * @param addZoom 
-	 * @param checkRange 
 	 * @param is1D
 	 *          TODO
+	 * @param is1DY TODO
+	 * @param checkRange 
 	 * @param checkLinked TODO
+	 * @param addZoom 
 	 */
 	synchronized void doZoom(double initX, double initY, double finalX,
-			double finalY, boolean addZoom, boolean checkRange, boolean is1D, boolean checkLinked) {
+			double finalY, boolean is1D, boolean is1DY, 
+			boolean checkRange, boolean checkLinked, boolean addZoom) {
 		
 		if (initX == finalX) {
-			initX = getScaleData().minXOnScale;
-		  finalX = getScaleData().maxXOnScale;
+			initX = getScale().minXOnScale;
+		  finalX = getScale().maxXOnScale;
 		} else if (isLinked && checkLinked)
 		  pd.doZoomLinked(this, initX, finalX, addZoom, checkRange, is1D);
 		if (initX > finalX) {
@@ -1286,7 +1295,7 @@ abstract class GraphSet implements XYScaleConverter {
 			finalY = tempY;
 		}
 
-		boolean is2DGrayScaleChange = (imageView != null && (imageView.minZ != initY || imageView.maxZ != finalY));
+		boolean is2DGrayScaleChange = (!is1D && imageView != null && (imageView.minZ != initY || imageView.maxZ != finalY));
 
 		if (!zoomEnabled && !is2DGrayScaleChange)
 			return;
@@ -1295,19 +1304,19 @@ abstract class GraphSet implements XYScaleConverter {
 		// plot
 		// area and if not ensure that it is
 
-		ViewData view0 = viewData;
 		if (checkRange) {
-			if (!getScaleData().isInRangeX(initX)
-					&& !getScaleData().isInRangeX(finalX))
+			if (!getScale().isInRangeX(initX)
+					&& !getScale().isInRangeX(finalX))
 				return;
-			if (!getScaleData().isInRangeX(initX)) {
-				initX = getScaleData().minX;
-			} else if (!getScaleData().isInRangeX(finalX)) {
-				finalX = getScaleData().maxX;
+			if (!getScale().isInRangeX(initX)) {
+				initX = getScale().minX;
+			} else if (!getScale().isInRangeX(finalX)) {
+				finalX = getScale().maxX;
 			}
 		} else {
-			viewData = viewList.get(0);
+			//viewData = viewList.get(0);
 		}
+		ScaleData[] viewScales = viewData.getScaleData();
 		
 		
 		int[] startIndices = new int[nSpectra];
@@ -1319,32 +1328,35 @@ abstract class GraphSet implements XYScaleConverter {
 		boolean is2D = !getSpectrumAt(0).is1D();
 		if (!is2D && !dontUseSubspecs) {
 			graphsTemp.add(getSpectrum());
-			if (!viewData.setDataPointIndices(graphsTemp, initX, finalX,
-					minNumOfPointsForZoom, startIndices, endIndices, false))
+			if (!ScaleData.setDataPointIndices(graphsTemp, initX, finalX,
+					minNumOfPointsForZoom, startIndices, endIndices))
 				return;
 		} else {
-			if (!viewData.setDataPointIndices(spectra, initX, finalX,
-					minNumOfPointsForZoom, startIndices, endIndices, false))
+			if (!ScaleData.setDataPointIndices(spectra, initX, finalX,
+					minNumOfPointsForZoom, startIndices, endIndices))
 				return;
 		}
-		double f = (!is2DGrayScaleChange && is1D ? f = getScaleData().spectrumScaleFactor : 1);
 		double y1 = initY;
 		double y2 = finalY;
-		if (Math.abs(f - 1) < 0.0001) {
-			if (initY == finalY) {
-				initY = getScaleData().minYOnScale;
-			  finalY = getScaleData().maxYOnScale;
+		boolean isXOnly = (y1 == y2);
+		if (isXOnly) {
+			double f = (!is2DGrayScaleChange && is1D ? f = getScale().spectrumScaleFactor : 1);
+			if (Math.abs(f - 1) < 0.0001) {
+				y1 = getScale().minYOnScale;
+			  y2 = getScale().maxYOnScale;
 			}
-			// not clear this is right for IR spec or some other cases...
-			y1 = viewData.unScaleY(initY);
-			y2 = viewData.unScaleY(finalY);
 		}
-		getView(initX, finalX, y1, y2, startIndices, endIndices, view0);
+		ScaleData[] yScales = null;
+		if (isXOnly || is1DY) {
+			getCurrentView();
+			yScales = viewData.getNewScales(iSpectrumSelected, isXOnly, y1, y2);
+		}
+		getView(initX, finalX, y1, y2, startIndices, endIndices, viewScales, yScales);
 		setXPixelMovedTo(1E10, Double.MAX_VALUE, 0, 0);
 		setWidgetX(pin1Dx0, initX);
 		setWidgetX(pin1Dx1, finalX);
-		setWidgetY(pin1Dy0, initY);
-		setWidgetY(pin1Dy1, finalY);
+		setWidgetY(pin1Dy0, y1);
+		setWidgetY(pin1Dy1, y2);
 		if (imageView == null) {
 			updateDialogs();
 		} else {
@@ -1467,7 +1479,11 @@ abstract class GraphSet implements XYScaleConverter {
 				if (nSplit > 1) {
 					iSpectrumForScale = i;
 				}
-				boolean doDrawWidgets = (nSplit == 1 || showAllStacked || iSpectrumSelected == iSplit); 
+				boolean doDrawWidgets = (nSplit == 1 || showAllStacked || iSpectrumSelected == iSplit);
+				if (!pd.isPrinting && widgets != null)
+  				for (int j = 0; j < widgets.length; j++)
+  					if (widgets[j] != null)
+  	  				widgets[j].isVisible = false;
 				if (doDrawWidgets)
 					drawWidgets(g, subIndex, needNewPins, doDraw1DObjects, false);
 				if (haveSingleYScale && i == iSpectrumForScale) {
@@ -1634,8 +1650,8 @@ abstract class GraphSet implements XYScaleConverter {
 		String nucleusX = getSpectrumAt(0).nucleusX;
 		String nucleusY = getSpectrumAt(0).nucleusY;
 		setColor(g, ScriptToken.PLOTCOLOR);
-		drawUnits(g, nucleusX, imageView.xPixel1 + 5, yPixel1, 1, 1.0);
-		drawUnits(g, nucleusY, imageView.xPixel0 - 5, yPixel0, 1, 0);
+		drawUnits(g, nucleusX, imageView.xPixel1 + 5 * pd.scalingFactor, yPixel1, 1, 1.0);
+		drawUnits(g, nucleusY, imageView.xPixel0 - 5 * pd.scalingFactor, yPixel0, 1, 0);
 	}
 
 	private void drawPeakTabs(Object g, JDXSpectrum spec) {
@@ -1678,7 +1694,7 @@ abstract class GraphSet implements XYScaleConverter {
 		setWidgets(needNewPins, subIndex, doDraw1DObjects);
 		if (pd.isPrinting && (imageView == null ? !cur1D2Locked : sticky2Dcursor))
 			return;
-		//boolean allowPin1y = (nSplit > 1 || iSpectrumSelected < 0 || nSpectra == 1 || nSplit == 1 && !stackSelected);
+		//boolean allowPin1y = true;//(nSplit > 1 || iSpectrumSelected < 0 || nSpectra == 1 || nSplit == 1 && !stackSelected);
 		if (!pd.isPrinting && !postGrid) {
 			// top/side slider bar backgrounds
 			if (doDraw1DObjects) {
@@ -1699,7 +1715,7 @@ abstract class GraphSet implements XYScaleConverter {
 			}
 			fillBox(g, pin1Dy0.xPixel1, yPixel1, pin1Dy1.xPixel1 + 2, yPixel0,
 					ScriptToken.GRIDCOLOR);
-			if (isLinked || !doDraw1DObjects) {
+			if (true) {//isLinked || !doDraw1DObjects) {
 				fillBox(g, pin1Dy0.xPixel1, pin1Dy0.yPixel1, pin1Dy1.xPixel1 + 2,
 						pin1Dy1.yPixel0, ScriptToken.PLOTCOLOR);
 			}
@@ -1716,9 +1732,12 @@ abstract class GraphSet implements XYScaleConverter {
 				if (pw == cur2Dx0 && !doDraw1DObjects)
 					continue;
 			} else {
-				if ((doDraw1DObjects == (pw == pin1Dy0 || pw == pin1Dy1 || pw == pin1Dy01))
+				if (
+						//(doDraw1DObjects == (pw == pin1Dy0 || pw == pin1Dy1 || pw == pin1Dy01))
 
-						|| pw == cur1D2x1
+						///|| 
+						
+						pw == cur1D2x1
 						&& gs2dLinkedX == null
 						|| pw == cur1D2x2
 						&& gs2dLinkedY == null
@@ -1733,6 +1752,7 @@ abstract class GraphSet implements XYScaleConverter {
 		if (pw.isPinOrCursor) {
 				setColor(g, pw.color);
 				drawLine(g, pw.xPixel0, pw.yPixel0, pw.xPixel1, pw.yPixel1);
+				pw.isVisible = true;
 				if (pw.isPin)
 					drawHandle(g, pw.xPixel0, pw.yPixel0, !pw.isEnabled);
 			} else if (pw.xPixel1 != pw.xPixel0) {
@@ -1881,15 +1901,15 @@ abstract class GraphSet implements XYScaleConverter {
 				if (y2 == Integer.MIN_VALUE)
 					continue;
 				int x1 = toPixelX(point.getXVal());
-				int y1 = toPixelY(Math.max(getScaleData().minYOnScale, 0));
+				int y1 = toPixelY(Math.max(getScale().minYOnScale, 0));
 				y1 = fixY(yOffset + y1);
 				y2 = fixY(yOffset + y2);
 				if (y1 == y2 && (y1 == yPixel0 || y1 == yPixel1))
 					continue;
 				drawLine(g, x1, y1, x1, y2);
 			}
-			if (getScaleData().isYZeroOnScale()) {
-				int y = yOffset + toPixelY(0);
+			if (getScale().isYZeroOnScale()) {
+				int y = yOffset + toPixelY(getScale().spectrumYRef);
 				if (y == fixY(y))
 					drawLine(g, xPixel1, y, xPixel0, y);
 			}
@@ -1958,21 +1978,21 @@ abstract class GraphSet implements XYScaleConverter {
 			return;
 		setColor(g, ScriptToken.GRIDCOLOR);
 		double lastX;
-		if (Double.isNaN(getScaleData().firstX)) {
-			lastX = getScaleData().maxXOnScale + getScaleData().steps[0] / 2;
-			for (double val = getScaleData().minXOnScale; val < lastX; val += getScaleData().steps[0]) {
+		if (Double.isNaN(getScale().firstX)) {
+			lastX = getScale().maxXOnScale + getScale().steps[0] / 2;
+			for (double val = getScale().minXOnScale; val < lastX; val += getScale().steps[0]) {
 				int x = toPixelX(val);
 				drawLine(g, x, yPixel0, x, yPixel1);
 			}
 		} else {
-			lastX = getScaleData().maxXOnScale * 1.0001;
-			for (double val = getScaleData().firstX; val <= lastX; val += getScaleData().steps[0]) {
+			lastX = getScale().maxXOnScale * 1.0001;
+			for (double val = getScale().firstX; val <= lastX; val += getScale().steps[0]) {
 				int x = toPixelX(val);
 				drawLine(g, x, yPixel0, x, yPixel1);
 			}
 		}
-		for (double val = getScaleData().firstY; val < getScaleData().maxYOnScale
-				+ getScaleData().steps[1] / 2; val += getScaleData().steps[1]) {
+		for (double val = getScale().firstY; val < getScale().maxYOnScale
+				+ getScale().steps[1] / 2; val += getScale().steps[1]) {
 			int y = toPixelY(val);
 			if (y == fixY(y))
 				drawLine(g, xPixel0, y, xPixel1, y);
@@ -1994,23 +2014,23 @@ abstract class GraphSet implements XYScaleConverter {
 		setColor(g, ScriptToken.SCALECOLOR);
 		if (pd.isPrinting)
 			drawLine(g, c.getXPixel0(), yPixel1, c.getXPixel0() + c.getXPixels() - 1, yPixel1);
-		DecimalFormat formatter = getScaleData().formatters[0];
+		DecimalFormat formatter = getScale().formatters[0];
 		pd.setFont(g, c.getXPixels(), FONT_PLAIN, pd.isPrinting ? 10 : 12, false);
 		int y1 = yPixel1;
-		int y2 = yPixel1 + 4;
-		int y3 = yPixel1 + 2;
+		int y2 = yPixel1 + 4 * pd.scalingFactor;
+		int y3 = yPixel1 + 2 * pd.scalingFactor;
 
 		int h = getFontHeight(g);
-		double dx = c.toPixelX(getScaleData().steps[0]) - c.toPixelX(0);
+		double dx = c.toPixelX(getScale().steps[0]) - c.toPixelX(0);
 		double maxWidth = Math.abs(dx * 0.95);
 		// we go overboard for ticks
-		double firstX = getScaleData().firstX - getScaleData().steps[0];
-		double lastX = (getScaleData().maxXOnScale + getScaleData().steps[0]) * 1.0001;
+		double firstX = getScale().firstX - getScale().steps[0];
+		double lastX = (getScale().maxXOnScale + getScale().steps[0]) * 1.0001;
 		for (int pass = 0; pass < 2; pass++) {
 			if (pass == 1)
 				ScaleData.fixScale(mapX);
 			double prevX = 1e10;
-			for (double val = firstX; val <= lastX; val += getScaleData().steps[0]) {
+			for (double val = firstX; val <= lastX; val += getScale().steps[0]) {
 				int x = c.toPixelX(val);
 				Double d = Double.valueOf(val);
 				String s;
@@ -2020,7 +2040,7 @@ abstract class GraphSet implements XYScaleConverter {
 					mapX.put(d, s);
 					drawTick(g, x, y1, y2, c);
 					dx = Math.abs(prevX - val);
-					int ntick = getScaleData().minorTickCounts[0];
+					int ntick = getScale().minorTickCounts[0];
 					if (ntick != 0) {
 						double step = dx / ntick;
 						for (int i = 1; i < ntick; i++) {
@@ -2038,7 +2058,7 @@ abstract class GraphSet implements XYScaleConverter {
 					int n = (x + w / 2 == c.fixX(x + w / 2) ? 2 : 0);
 					if (n > 0)
 						drawString(g, s, x - w / n, y2 + h);
-					val += Math.floor(w / maxWidth) * getScaleData().steps[0];
+					val += Math.floor(w / maxWidth) * getScale().steps[0];
 					break;
 				}
 			}
@@ -2060,7 +2080,7 @@ abstract class GraphSet implements XYScaleConverter {
 	 */
 	private void drawYScale(Object g, XYScaleConverter c) {
 
-		ScaleData sd = c.getScaleData();
+		ScaleData sd = c.getScale();
 		DecimalFormat formatter = sd.formatters[1];
 		pd.setFont(g, c.getXPixels(), FONT_PLAIN, pd.isPrinting ? 10 : 12, false);
 		int h = getFontHeight(g);
@@ -2078,7 +2098,7 @@ abstract class GraphSet implements XYScaleConverter {
 					continue;
 				String s;
 				if (pass == 0)
-					drawLine(g, x1, y, x1 - 3, y);
+					drawLine(g, x1, y, x1 - 3 * pd.scalingFactor, y);
 				if (Math.abs(y - yLast) <= h)
 					continue;
 				yLast = y;
@@ -2093,7 +2113,7 @@ abstract class GraphSet implements XYScaleConverter {
 						continue;
 					if (s.startsWith("0") && s.contains("E"))
 						s = "0";
-					drawString(g, s, (x1 - 4 - getStringWidth(g, s)), y + h / 3);
+					drawString(g, s, (x1 - 4 * pd.scalingFactor - getStringWidth(g, s)), y + h / 3);
 					break;
 				}
 			}
@@ -2110,7 +2130,7 @@ abstract class GraphSet implements XYScaleConverter {
 	private void drawXUnits(Object g) {
 		String units = spectra.get(0).getAxisLabel(true);
 		if (units != null)
-			drawUnits(g, units, xPixel1 + 25, yPixel1 + 5, 1, 1);
+			drawUnits(g, units, xPixel1 + 25 * pd.scalingFactor, yPixel1 + 5 * pd.scalingFactor, 1, 1);
 	}
 
 	private void drawUnits(Object g, String s, int x, int y, double hOff,
@@ -2133,7 +2153,7 @@ abstract class GraphSet implements XYScaleConverter {
 	private void drawYUnits(Object g) {
 		String units = spectra.get(0).getAxisLabel(false);
 		if (units != null)
-			drawUnits(g, units, (pd.isPrinting ? 30 : 5), (pd.isPrinting ? yPixel0 : yPixel0 + 5), 0, -1);
+			drawUnits(g, units, (pd.isPrinting ? 30 : 5) * pd.scalingFactor, yPixel0 + (pd.isPrinting ? 0 : 5)  * pd.scalingFactor, 0, -1);
 	}
 
 	private void drawHighlightsAndPeakTabs(Object g, int iSpec) {
@@ -2182,6 +2202,10 @@ abstract class GraphSet implements XYScaleConverter {
 		int[] xs = new int[data.size()];
 		int[] xs0 = new int[data.size()];
 		int dx = 0;
+		int s5 = 5 * pd.scalingFactor;
+		int s10 = 10 * pd.scalingFactor;
+		int s15 = 15 * pd.scalingFactor;
+		int s25 = 25 * pd.scalingFactor;
 		for (int i = 0; i < sdata.length; i++) {
 			xs0[i] = toPixelX(Double.parseDouble(sdata[i][1]));
 			if (i == 0) {
@@ -2192,8 +2216,8 @@ abstract class GraphSet implements XYScaleConverter {
 			dx += (xs[i] - xs0[i]);
 		}
 		dx /= 2 * sdata.length;
-		if (xs[0] - dx < xPixel0 + 25)
-			dx = xs[0] - (xPixel0 + 25);
+		if (xs[0] - dx < xPixel0 + s25)
+			dx = xs[0] - (xPixel0 + s25);
 		for (int i = 0; i < sdata.length; i++)
 			xs[i] -= dx;
 
@@ -2202,32 +2226,29 @@ abstract class GraphSet implements XYScaleConverter {
 		int y2 = (sdata[0].length >= 6 ? getStringWidth(g, "99.99") : 0);
 		int f = (inverted ? -1 : 1);
 		
-		int y = (inverted ? yPixel1 : yPixel0) + f * (y2 + y4 + 15);
+		int y = (inverted ? yPixel1 : yPixel0) + f * (y2 + y4 + s15);
 		for (int i = 0; i < sdata.length; i++) {
-			drawLine(g, xs[i], y, xs[i], y + 5 * f);
-			drawLine(g, xs[i], y + 5 * f, xs0[i], y + 10 * f);
-			drawLine(g, xs0[i], y + 10 * f, xs0[i], y + 15 * f);
+			drawLine(g, xs[i], y, xs[i], y + s5 * f);
+			drawLine(g, xs[i], y + 5 * f, xs0[i], y + s10 * f);
+			drawLine(g, xs0[i], y + 10 * f, xs0[i], y + s15 * f);
 			if (y2 > 0 && sdata[i][4].length() > 0)
-				drawLine(g, (xs[i] + xs[i - 1]) / 2, y - y4 + 5,
-						(xs[i] + xs[i - 1]) / 2, y - y4 - 5);
+				drawLine(g, (xs[i] + xs[i - 1]) / 2, y - y4 + s5,
+						(xs[i] + xs[i - 1]) / 2, y - y4 - s5);
 		}
 
 		y -= f * 2;
 
 		if (y2 > 0) {
-  		drawStringRotated(g, 90, xs[0] - 15, y, "  ppm");
-	  	drawStringRotated(g, 90, xs[0] - 15, y - y4 - 5, " Hz");
+  		drawStringRotated(g, 90, xs[0] - s15, y, "  ppm");
+	  	drawStringRotated(g, 90, xs[0] - s15, y - y4 - s5, " Hz");
 		}
 		for (int i = data.size(); --i >= 0;) {
 			drawStringRotated(g, 90 * f, xs[i] + f * h / 3, y, sdata[i][1]);
 			if (y2 > 0 && sdata[i][4].length() > 0) {
 				int x = (xs[i] + xs[i - 1]) / 2 + h / 3;
-				drawStringRotated(g, 90, x, y - y4 - 5, sdata[i][4]);
+				drawStringRotated(g, 90, x, y - y4 - s5, sdata[i][4]);
 			}
 		}
-
-		// TODO Auto-generated method stub
-
 	}
 
 	private void drawStringRotated(Object g, int angle, int x, int y, String s) {
@@ -2303,7 +2324,7 @@ abstract class GraphSet implements XYScaleConverter {
 		if (x1 != fixX(x1) || x2 != fixX(x2))
 			return;
 		boolean drawString = (Math.abs(x1 - x2) >= 2);
-		boolean drawBaseLine = getScaleData().isYZeroOnScale() && m.spec.isHNMR();
+		boolean drawBaseLine = getScale().isYZeroOnScale() && m.spec.isHNMR();
 		int x = (x1 + x2) / 2;
 		setStrokeBold(g, true);
 		if (drawString)
@@ -2347,8 +2368,8 @@ abstract class GraphSet implements XYScaleConverter {
 		if (isX) {
 			imageView.setView0(imageView.xPixel0, pin2Dy0.yPixel0, imageView.xPixel1,
 					pin2Dy1.yPixel0);
-			doZoom(0, getScaleData().minY, 0, getScaleData().maxY,
-					true, false, true, false);
+			doZoom(0, getScale().minY, 0, getScale().maxY,
+					true, false, false, false, true);
 		} else {
 			imageView.setView0(pin2Dx0.xPixel0, imageView.yPixel0, pin2Dx1.xPixel0,
 					imageView.yPixel1);
@@ -2380,8 +2401,8 @@ abstract class GraphSet implements XYScaleConverter {
 
 	private void setToolTipForPixels(int xPixel, int yPixel) {
 		PlotWidget pw = getPinSelected(xPixel, yPixel);
-		NumberFormat formatterX = getScaleData().formatters[0];
-		NumberFormat formatterY = getScaleData().formatters[1];
+		NumberFormat formatterX = getScale().formatters[0];
+		NumberFormat formatterY = getScale().formatters[1];
 		if (pw != null) {
 			if (setStartupPinTip())
 				return;
@@ -2461,11 +2482,11 @@ abstract class GraphSet implements XYScaleConverter {
 	}
 
 	private String setCoordStr(double xPt, double yPt) {
-		String xx = getScaleData().formatters[0].format(xPt);
+		String xx = getScale().formatters[0].format(xPt);
 		pd.coordStr = "("
 				+ xx
 				+ (haveSingleYScale || iSpectrumSelected >= 0 ? ", "
-						+ getScaleData().formatters[1].format(yPt) : "") + ")";
+						+ getScale().formatters[1].format(yPt) : "") + ")";
 		return xx;
 	}
 
@@ -2530,7 +2551,7 @@ abstract class GraphSet implements XYScaleConverter {
 				if (y2 == Integer.MIN_VALUE)
 					continue;
 				int x1 = toPixelX(point.getXVal());
-				int y1 = toPixelY(Math.max(getScaleData().minYOnScale, 0));
+				int y1 = toPixelY(Math.max(getScale().minYOnScale, 0));
 				y1 = fixY(y1);
 				y2 = fixY(y2);
 				if (y1 == y2 && (y1 == yPixel0 || y1 == yPixel1))
@@ -2730,8 +2751,8 @@ abstract class GraphSet implements XYScaleConverter {
 		}
 		if (args.size() < 4 && lastAnnotation == null)
 			lastAnnotation = getAnnotation(
-					(getScaleData().maxXOnScale + getScaleData().minXOnScale) / 2,
-					(getScaleData().maxYOnScale + getScaleData().minYOnScale) / 2, title, false,
+					(getScale().maxXOnScale + getScale().minXOnScale) / 2,
+					(getScale().maxYOnScale + getScale().minYOnScale) / 2, title, false,
 					false, 0, 0);
 		Annotation annotation = getAnnotation(args, lastAnnotation);
 		if (annotation == null)
@@ -2787,9 +2808,9 @@ abstract class GraphSet implements XYScaleConverter {
 			if (Float.isNaN(x1) || Float.isNaN(x2))
 				return;
 			pd.addHighlight(this, x1, x2, spec, 200, 200, 200, 200);
-			if (getScaleData().isInRangeX(x1)
-					|| getScaleData().isInRangeX(x2) || x1 < getScaleData().minX
-					&& getScaleData().maxX < x2) {
+			if (getScale().isInRangeX(x1)
+					|| getScale().isInRangeX(x2) || x1 < getScale().minX
+					&& getScale().maxX < x2) {
 				// pd.repaint();
 			} else {
 				setZoomTo(0);
@@ -2870,6 +2891,8 @@ abstract class GraphSet implements XYScaleConverter {
 			if (widget == null) {
 				yPixel = fixY(yPixel);
 				if (xPixel < xPixel1) {
+					if (pd.shiftPressed)
+  					setSpectrumClicked(iPreviousSpectrumClicked);
 					xPixel = fixX(xPixel);
 					zoomBox1D.setX(toX(xPixel), xPixel);
 					zoomBox1D.yPixel0 = yPixel;
@@ -2911,8 +2934,8 @@ abstract class GraphSet implements XYScaleConverter {
 			//xPixel = imageView.fixX(xPixel);
 			//widget.setX(imageView.toX(xPixel), xPixel);
 			// 2D x zoom change
-			//doZoom(cur2Dx0.getXVal(), getScaleData().minY, cur2Dx1.getXVal(),
-			//		getScaleData().maxY, false, false, false, true);
+			//doZoom(cur2Dx0.getXVal(), getScale().minY, cur2Dx1.getXVal(),
+			//		getScale().maxY, false, false, false, true);
 			return true;
 		}
 		if (widget == pin1Dx0 || widget == pin1Dx1 || widget == pin1Dx01) {
@@ -2929,7 +2952,7 @@ abstract class GraphSet implements XYScaleConverter {
 			}
 			// 1D x zoom change
 			doZoom(pin1Dx0.getXVal(), 0, pin1Dx1.getXVal(),
-					0, false, false, false, true);
+					0, true, false, false, true, false);
 			return true;
 		}
 		if (widget == pin1Dy0 || widget == pin1Dy1 || widget == pin1Dy01) {
@@ -2941,15 +2964,15 @@ abstract class GraphSet implements XYScaleConverter {
 				int yPixel1 = pin1Dy1.yPixel0 + dp;
 				double y0 = toY0(yPixel);
 				double y1 = toY0(yPixel1);
-				if (Math.min(y0, y1) == getScaleData().minY
-						|| Math.max(y0, y1) == getScaleData().maxY)
+				if (Math.min(y0, y1) == getScale().minY
+						|| Math.max(y0, y1) == getScale().maxY)
 					return true;
 				pin1Dy0.setY(y0, yPixel);
 				pin1Dy1.setY(y1, yPixel1);
 			}
 			// y-only zoom
 			doZoom(0, pin1Dy0.getYVal(), 0,
-					pin1Dy1.getYVal(), false, false, isLinked && imageView == null, false);
+					pin1Dy1.getYVal(), imageView == null, imageView == null, false, false, false);
 			return true;
 		}
 		if (widget == pin2Dx0 || widget == pin2Dx1 || widget == pin2Dx01) {
@@ -2972,8 +2995,8 @@ abstract class GraphSet implements XYScaleConverter {
 			imageView.setView0(pin2Dx0.xPixel0, pin2Dy0.yPixel0, pin2Dx1.xPixel0,
 					pin2Dy1.yPixel0);
 			// 2D x zoom
-			doZoom(pin2Dx0.getXVal(), getScaleData().minY, pin2Dx1.getXVal(),
-					getScaleData().maxY, false, false, false, true);
+			doZoom(pin2Dx0.getXVal(), getScale().minY, pin2Dx1.getXVal(),
+					getScale().maxY, false, false, false, true, false);
 			return true;
 		}
 		if (widget == pin2Dy0 || widget == pin2Dy1 || widget == pin2Dy01) {
@@ -3057,12 +3080,12 @@ abstract class GraphSet implements XYScaleConverter {
 			int top, int bottom, boolean isResized) {
 
 		zoomEnabled = pd.getBoolean(ScriptToken.ENABLEZOOM);
-		this.height = height;
-		this.width = width;
-		this.left = left;
-		this.right = right;
-		this.top = top;
-		this.bottom = bottom;
+		this.height = height * pd.scalingFactor;
+		this.width = width * pd.scalingFactor;
+		this.left = left * pd.scalingFactor;
+		this.right = right * pd.scalingFactor;
+		this.top = top * pd.scalingFactor;
+		this.bottom = bottom * pd.scalingFactor;
 		// yValueMovedTo = Double.NaN;
 		haveSelectedSpectrum = false;
 		selectedSpectrumIntegrals = null;
@@ -3092,8 +3115,8 @@ abstract class GraphSet implements XYScaleConverter {
 		pendingMeasurement = null;
 		if (selectedSpectrumMeasurements != null && selectedMeasurement != null) {
 			if (isDEL)
-				selectedSpectrumMeasurements.clear(getScaleData().minXOnScale,
-						getScaleData().maxXOnScale);
+				selectedSpectrumMeasurements.clear(getScale().minXOnScale,
+						getScale().maxXOnScale);
 			else
 				selectedSpectrumMeasurements.remove(selectedMeasurement);
 			selectedMeasurement = null;
@@ -3101,8 +3124,8 @@ abstract class GraphSet implements XYScaleConverter {
 		}
 		if (selectedSpectrumIntegrals != null && selectedIntegral != null) {
 			if (isDEL)
-				selectedSpectrumIntegrals.clear(getScaleData().minXOnScale,
-						getScaleData().maxXOnScale);
+				selectedSpectrumIntegrals.clear(getScale().minXOnScale,
+						getScale().maxXOnScale);
 			else
 				selectedSpectrumIntegrals.remove(selectedIntegral);
 			selectedIntegral = null;
@@ -3206,13 +3229,12 @@ abstract class GraphSet implements XYScaleConverter {
 
 			if (isInTopBar(xPixel, yPixel)) {
 				// 1D x zoom reset to original
-				doZoom(toX0(xPixel0), getScaleData().minY, toX0(xPixel1), getScaleData().maxY,
-						true, false, true, true);
-				// } else if (isInRightBar(xPixel, yPixel)) {
-				// // no longer possible
-				// doZoom(view.minXOnScale, viewList.get(0).minY,
-				// view.maxXOnScale, viewList.get(0).maxY, true, true,
-				// false);
+				doZoom(toX0(xPixel0), 0, toX0(xPixel1), 0, true, false, false, true,
+						true);
+				} else if (isInRightBar(xPixel, yPixel)) {
+				  doZoom(getScale().minXOnScale, viewList.get(0).getScale().minYOnScale,
+				  		getScale().maxXOnScale, viewList.get(0).getScale().maxYOnScale, 
+				  		true, true, false, false, false);
 			} else if (isInTopBar2D(xPixel, yPixel)) {
 				reset2D(true);
 			} else if (isInRightBar2D(xPixel, yPixel)) {
@@ -3300,20 +3322,20 @@ abstract class GraphSet implements XYScaleConverter {
 					zoomBox2D.xPixel1, zoomBox2D.yPixel1);
 			zoomBox2D.xPixel1 = zoomBox2D.xPixel0;
 			// 2D xy zoom
-			doZoom(imageView.toX(imageView.xPixel0), getScaleData().minY, imageView
-					.toX(imageView.xPixel0 + imageView.xPixels - 1), getScaleData().maxY, true,
-					false, false, true);
+			doZoom(imageView.toX(imageView.xPixel0), getScale().minY, imageView
+					.toX(imageView.xPixel0 + imageView.xPixels - 1), getScale().maxY, false,
+					false, false, true, true);
 		} else if (thisWidget == zoomBox1D) {
 			if (!isGoodEvent(zoomBox1D, null, true))
 				return;
 			int x1 = zoomBox1D.xPixel1;
 			// 1D x zoom by zoomBox
-			boolean doY = (pd.shiftPressed && nSplit == 1 && iSpectrumSelected < 0 && haveSingleYScale);
+			boolean doY = (pd.shiftPressed);
 			doZoom(toX(zoomBox1D.xPixel0), 
 					(doY ? toY(zoomBox1D.yPixel0) : 0),
 					toX(x1),
 					(doY ? toY(zoomBox1D.yPixel1) : 0), 
-					true, false, true, true);
+					true, doY, true, true, true);
 			zoomBox1D.xPixel1 = zoomBox1D.xPixel0;
 		} else if (thisWidget == pin1Dx0 || thisWidget == pin1Dx1
 				|| thisWidget == cur2Dx0 || thisWidget == cur2Dx1) {
@@ -3604,14 +3626,14 @@ abstract class GraphSet implements XYScaleConverter {
 		  // reset gray-factors as well
 			imageView = null;
 			// in case this is linked, transmit the x-zoom to linked spectra
-			x1 = getScaleData().minXOnScale;
-			x2 = getScaleData().maxXOnScale;
+			x1 = getScale().minXOnScale;
+			x2 = getScale().maxXOnScale;
 		//} else if (x1 == 0 && x2 == 0) {
 		//	// y zoom only
 		//	x1 = x2 = 0;
 		//	imageView = null;
 		} else {
-			doZoom(x1, y1, x2, y2, true, false, true, true);
+			doZoom(x1, y1, x2, y2, true, (y1 != y2), false, true, true);
 		}
 	}
 
@@ -3679,16 +3701,16 @@ abstract class GraphSet implements XYScaleConverter {
 			for (Map.Entry<String, AnnotationData> e : dialogs.entrySet())
 				if (e.getValue().getSpectrum() == spec)
 					e.getValue().addSpecShift(dx);
-		//double dx0 = getScaleData().specShift;
+		//double dx0 = getScale().specShift;
 		//for (int i = viewList.size(); --i >= 0;)
 			//viewList.get(i).addSpecShift(dx);
-		//if (getScaleData().specShift == dx0)
-			getScaleData().addSpecShift(dx);
+		//if (getScale().specShift == dx0)
+			getScale().addSpecShift(dx);
 		if (!Double.isNaN(lastClickX))
 			lastClickX += dx;
 		updateDialogs();
-		doZoom(0, getScaleData().minYOnScale, 0,
-				getScaleData().maxYOnScale, false, false, true, true);
+		doZoom(0, getScale().minYOnScale, 0,
+				getScale().maxYOnScale, true, true, false, true, false);
 		pd.repaint();
 		return true;
 	}
@@ -3793,7 +3815,7 @@ abstract class GraphSet implements XYScaleConverter {
 			addDialog(iSpec, AType.PeakList, dialog = new PeakData(AType.PeakList,
 					getSpectrum()));
 		}
-		((PeakData) dialog.getData()).setPeakList(p, null, viewData.getScaleData());
+		((PeakData) dialog.getData()).setPeakList(p, null, viewData.getScale());
 		if (dialog instanceof AnnotationDialog)
 			((AnnotationDialog) dialog).setFields();
 		return dialog.getData();
@@ -3887,7 +3909,7 @@ abstract class GraphSet implements XYScaleConverter {
 	Map<String, Object> getInfo(String key, int iSpec) {
 		Map<String, Object> spectraInfo = new Hashtable<String, Object>();
 		if ("viewInfo".equalsIgnoreCase(key))
-			return getScaleData().getInfo(spectraInfo);
+			return getScale().getInfo(spectraInfo);
 		List<Map<String, Object>> specInfo = new ArrayList<Map<String, Object>>();		
 		spectraInfo.put("spectra", specInfo);
 		for (int i = 0; i < nSpectra; i++) {
@@ -3928,7 +3950,7 @@ abstract class GraphSet implements XYScaleConverter {
 
 	public ScaleData getCurrentView() {
 		setScale(getFixedSelectedSpectrumIndex());
-		return viewData.getScaleData();
+		return viewData.getScale();
 	}
 
 	public void set2DXY(double x, double y, boolean isLocked) {

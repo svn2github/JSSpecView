@@ -102,35 +102,6 @@ class ViewData {
 		init(spectra, 0, 0, false);
 	}
 
-  /**
-   * 
-   * @param graphsTemp
-   * @param initX
-   * @param finalX
-   * @param minPoints
-   * @param startIndices  to fill
-   * @param endIndices    to fill
-   * @param useRange 
-   * @param scaleData
-   * @return true if OK
-   */
-  boolean setDataPointIndices(List<JDXSpectrum> graphsTemp,
-                                            double initX,
-                                            double finalX, int minPoints,
-                                            int[] startIndices,
-                                            int[] endIndices, boolean useRange) {
-    int nSpectraOK = 0;
-    int nSpectra = graphsTemp.size();
-    for (int i = 0; i < nSpectra; i++) {
-      Coordinate[] xyCoords = graphsTemp.get(i).getXYCoords();
-      int iStart = (useRange ? getStartingPointIndex(i) : 0);
-      int iEnd = (useRange ? getEndingPointIndex(i) : xyCoords.length - 1);
-      if (ScaleData.setXRange(i, xyCoords, initX, finalX, iStart, iEnd, startIndices, endIndices) >= minPoints)
-        nSpectraOK++;
-    }
-    return (nSpectraOK == nSpectra);
-  }
-
   void setXRangeForSubSpectrum(Coordinate[] xyCoords) {
   	// forced subspectra only
     setXRange(0, xyCoords, scaleData[0].minX, scaleData[0].maxX, 0, xyCoords.length - 1);
@@ -165,19 +136,8 @@ class ViewData {
   	  scaleData[i].spectrumScaleFactor = 1;
 	}
 	
-	void setScaleFactor(int i, double f) {
-		if (f == 0 || i >= nSpectra)
-			return;
-		if (i < 0) {
-			resetScaleFactors();
-			// setYScale(initMinY, initMaxY, true);
-		} else {
-			scaleData[i % scaleData.length].spectrumScaleFactor = f;
-		}
-	}
-  
 	void scaleSpectrum(int i, double f) {
-		if (f == 0 || i >= nSpectra)
+		if (f <= 0 || i >= nSpectra)
 			return;
 		if (i == -2) {
 			thisScale.scale2D(f);
@@ -185,9 +145,9 @@ class ViewData {
 		}
 		if (i < 0)
 			for (i = 0; i < scaleData.length; i++)
-				scaleData[i].spectrumScaleFactor *= f;
+				scaleData[i].scaleBy(f);
 		else
-      scaleData[i % scaleData.length].spectrumScaleFactor *= f;
+      scaleData[i % scaleData.length].scaleBy(f);
   }
 
 	double getSpectrumScaleFactor(int i) {
@@ -202,6 +162,14 @@ class ViewData {
 		return scaleData[i % scaleData.length].userYFactor;
 	}
 	
+	ScaleData[] getScaleData() {
+		return scaleData;
+	}
+
+	ScaleData getScale() {
+		return thisScale;
+	}
+
 	boolean areYScalesSame(int i, int j) {
 		return getSpectrumScaleFactor(i) == getSpectrumScaleFactor(j)
 		  && getSpectrumYRef(i) == getSpectrumYRef(j)
@@ -211,36 +179,30 @@ class ViewData {
 	void setScale(int i, int xPixels, int yPixels, boolean isInverted) {
 		iThisScale = i % scaleData.length;
 		thisScale = scaleData[iThisScale];
-		System.out.println(i + "-0 " + thisScale.minY + " " + thisScale.maxY + " ? " + thisScale.minYOnScale + " " + thisScale.maxYOnScale);
 		thisScale.setScale(xPixels, yPixels, isInverted);
-		System.out.println(i + "-1 " + thisScale.minY + " " + thisScale.maxY + " ? " + thisScale.minYOnScale + " " + thisScale.maxYOnScale);
 	}
 
-	void copyScaleFactors(ViewData view0, boolean resetMinMaxY) {
-		for (int i = 0; i < scaleData.length; i++) {
-			scaleData[i].spectrumScaleFactor = view0.scaleData[i].spectrumScaleFactor;
-			scaleData[i].spectrumYRef = view0.scaleData[i].spectrumYRef;
-			scaleData[i].userYFactor = view0.scaleData[i].userYFactor;
-			scaleData[i].specShift = view0.scaleData[i].specShift;
-			if (resetMinMaxY) {
-				System.out.println("resetminmax" + i + " " + scaleData[i].minYOnScale +" to " + view0.scaleData[i].minYOnScale);
-				scaleData[i].initMinYOnScale = view0.scaleData[i].initMinYOnScale;
-				scaleData[i].initMaxYOnScale = view0.scaleData[i].initMaxYOnScale;
-				scaleData[i].minY = view0.scaleData[i].minY;
-				scaleData[i].maxY = view0.scaleData[i].maxY;
-			}
-		}
+	ScaleData[] getNewScales(int iSelected, boolean isXOnly, double y1, double y2) {
+		if (isXOnly)
+  		return scaleData;
+		iSelected = iSelected % scaleData.length;
+		// y1 and y2 are in terms of only the current scale. 
+		// We must precalculate all the min/max Y for the scale of all scaleData.
+  	double f1 = (y1 - thisScale.minYOnScale) / (thisScale.maxYOnScale - thisScale.minYOnScale);
+  	double f2 = (y2 - thisScale.minYOnScale) / (thisScale.maxYOnScale - thisScale.minYOnScale);
+	  ScaleData[] sd = new ScaleData[scaleData.length];
+  	for (int i = 0; i < scaleData.length; i++)
+	  	sd[i] = (iSelected >= 0 && i != iSelected ? scaleData[i] :  new ScaleData());
+	  ScaleData.copyScaleFactors(scaleData, sd);
+  	ScaleData.copyYScales(scaleData, sd);
+  	for (int i = 0; i < scaleData.length; i++) {
+  		if (iSelected >= 0 && i != iSelected)
+  			continue;
+	  	sd[i].isShiftZoomedY = true;
+  		sd[i].minYOnScale = scaleData[i].minYOnScale * (1 - f1) + f1 * scaleData[i].maxYOnScale;
+  		sd[i].maxYOnScale = scaleData[i].minYOnScale * (1 - f2) + f2 * scaleData[i].maxYOnScale;
+  	}
+    return sd;	  
 	}
-	
-	double unScaleY(double y) {
-		//TODO  this can't be good
-		// it's important for NMR spectra, though.
-		return y * thisScale.spectrumScaleFactor;
-	}
-
-	public ScaleData getScaleData() {
-		return thisScale;
-	}
-
 
 }

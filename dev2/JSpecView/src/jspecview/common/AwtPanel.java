@@ -419,6 +419,8 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 	 */
 
 	public void printFilePath(Object og, int x, int y, String s) {
+		x *= pd.scalingFactor;
+		y *= pd.scalingFactor;
 		if (s.indexOf("?") > 0)
 			s = s.substring(s.indexOf("?") + 1);
 		s = s.substring(s.lastIndexOf("/") + 1);
@@ -427,7 +429,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 		g.setColor(Color.BLACK);
 		pd.setFont(g, 1000, Font.PLAIN, 9, true);
 		FontMetrics fm = g.getFontMetrics();
-		if (x != pd.left)
+		if (x != pd.left * pd.scalingFactor)
 			x -= fm.stringWidth(s);
 		g.drawString(s, x, y - fm.getHeight());
 	}
@@ -437,10 +439,11 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 		g.setColor(Color.BLACK);
 		pd.setFont(g, 1000, Font.PLAIN, 9, true);
 		FontMetrics fm = g.getFontMetrics();
-		String s = DateFormat.getInstance().format(new Date())
-		+ " JSpecView " + JSVersion.VERSION_SHORT;
+		String s = DateFormat.getInstance().format(new Date()) + " JSpecView "
+				+ JSVersion.VERSION_SHORT;
 		int w = fm.stringWidth(s);
-		g.drawString(s, pd.thisWidth - pd.right - w, pageHeight - fm.getHeight());
+		g.drawString(s, (pd.thisWidth - pd.right) * pd.scalingFactor - w,
+				pageHeight * pd.scalingFactor - fm.getHeight());
 	}
 
 
@@ -470,7 +473,8 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
       fm = g.getFontMetrics();
     }
     g.setColor(titleColor);
-    g.drawString(title, (pd.isPrinting ? pd.left : 5), (int) (pageHeight - fm.getHeight() * (pd.isPrinting ? 2 : 0.5)));
+    g.drawString(title, (pd.isPrinting ? pd.left * pd.scalingFactor : 5), 
+    		(int) (pageHeight - fm.getHeight() * (pd.isPrinting ? 2 * pd.scalingFactor : 0.5)));
   }
 
 
@@ -573,7 +577,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
    * @param pf
    *        the <code>PageFormat</code> object
    * @param pi
-   *        the page index
+   *        the page index -- -1 for PDF creation
    * @return an int that depends on whether a print was successful
    * @throws PrinterException
    */
@@ -618,6 +622,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
         g2D.translate(x, y);
       }
 
+      g2D.scale(0.1, 0.1); // high resolution vector graphics for PDF
       pd.drawGraph(g2D, (int) width, (int) height, addFilePath);
 
       pd.isPrinting = false;
@@ -739,7 +744,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   public void mousePressed(MouseEvent e) {
 		if (pd.isPrinting)
 			return;
-		System.out.println("mousePressed " + e);
+		//System.out.println("mousePressed " + e);
     if (e.getButton() != MouseEvent.BUTTON1)
       return;
     pd.doMousePressed(e.getX(), e.getY());
@@ -773,7 +778,6 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   public void mouseReleased(MouseEvent e) {
 		if (pd.isPrinting)
 			return;
-		System.out.println("mouseReleased " + e);
     pd.doMouseReleased(e.getButton() == MouseEvent.BUTTON1);
     doRepaint();
   }
@@ -781,7 +785,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   public void mouseClicked(MouseEvent e) {
 		if (pd.isPrinting)
 			return;
-		System.out.println("mouseClicked " + e);
+		//System.out.println("mouseClicked " + e);
     if (e.getButton() == MouseEvent.BUTTON3) {
       popup.show((JSVPanel) this, e.getX(), e.getY());
       return;

@@ -131,7 +131,7 @@ class AwtGraphSet extends GraphSet {
   @Override
   protected boolean get2DImage() {
     imageView = new ImageView();
-    imageView.set(viewList.get(0));
+    imageView.set(viewList.get(0).getScale());
     if (!update2dImage(true))
       return false;
     imageView.resetZoom();
@@ -141,7 +141,7 @@ class AwtGraphSet extends GraphSet {
 
 	@Override
 	protected boolean update2dImage(boolean isCreation) {
-		imageView.set(viewData);
+		imageView.set(viewData.getScale());
 		JDXSpectrum spec = getSpectrumAt(0);
 		int[] buffer = imageView.get2dBuffer(spec, !isCreation);
 		if (buffer == null) {
@@ -224,8 +224,8 @@ class AwtGraphSet extends GraphSet {
   }
 
   @Override
-  protected void drawRect(Object g, int x0, int y0, int x1, int y1) {
-    ((Graphics) g).drawRect(x0, y0, x1, y1);
+  protected void drawRect(Object g, int x0, int y0, int nx, int ny) {
+    ((Graphics) g).drawRect(x0, y0, nx, ny);
   }
 
   @Override

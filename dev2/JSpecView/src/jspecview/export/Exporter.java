@@ -238,8 +238,8 @@ public class Exporter {
     if (index < 0 && (index = pd.getCurrentSpectrumIndex()) < 0)
       return "Error exporting spectrum: No spectrum selected";
     spec = pd.getSpectrumAt(index);
-    int startIndex = pd.getStartDataPointIndices()[index];
-    int endIndex = pd.getEndDataPointIndices()[index];
+    int startIndex = pd.getStartingPointIndex(index);
+    int endIndex = pd.getEndingPointIndex(index);
     String msg;
     try {
       switch (imode) {

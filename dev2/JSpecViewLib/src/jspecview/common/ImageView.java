@@ -241,7 +241,7 @@ class ImageView implements XYScaleConverter {
   	boolean isLow = false;
   	while (((isLow = (averageGray < DEFAULT_MIN_GRAY)) || averageGray > DEFAULT_MAX_GRAY) && i++ < 10) {
       view.scaleSpectrum(-2, isLow ? 2 : 0.5);
-      set(view.getScaleData());
+      set(view.getScale());
       get2dBuffer(spec, false); 
   	} 
   	return buf2d;
@@ -268,7 +268,7 @@ class ImageView implements XYScaleConverter {
 
 	// XYScaleConverter interface
 	
-	public ScaleData getScaleData() {
+	public ScaleData getScale() {
 		return scaleData;
 	}
 	

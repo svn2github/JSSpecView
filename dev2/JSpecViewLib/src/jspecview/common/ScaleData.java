@@ -1,6 +1,7 @@
 package jspecview.common;
 
 import java.text.DecimalFormat;
+import java.util.List;
 import java.util.Map;
 
 import jspecview.util.TextFormat;
@@ -16,32 +17,34 @@ public class ScaleData {
   private final static int[] NTICKS = { 2, 5, 10, 10 };
   private final static double[] LOGTICKS = { Math.log10(2), Math.log10(5), 0, 1 };
 
-	static void fixScale(Map<Double, String> map) {
-		if (map.isEmpty())
-			return;
-		while (true) {
-			for (Map.Entry<Double, String> entry : map.entrySet()) {
-				String s = entry.getValue();
-				int pt = s.indexOf("E");
-				if (pt >= 0)
-					s = s.substring(0, pt);
-				if (s.indexOf(".") < 0)
-					return;
-				if (!s.endsWith("0") && !s.endsWith("."))
-					return;
-			}
-			for (Map.Entry<Double, String> entry : map.entrySet()) {
-				String s = entry.getValue();
-				int pt = s.indexOf("E");
-				if (pt >= 0)
-  				entry.setValue(s.substring(0, pt - 1) + s.substring(pt));
-				else
-  				entry.setValue(s.substring(0, s.length() - 1));
-			}			
-		}
-	}
+	protected double initMinYOnScale;
+	protected double initMaxYOnScale;
+	protected double initMinY;
+	protected double initMaxY;
 
+	// values for the current expansion in X:
+	
+  int startDataPointIndex;
+  int endDataPointIndex;
+  int pointCount;
+  double minX;
+  double maxX;
 
+	/**
+   * First grid x value
+   */
+  double firstX = Double.NaN;
+  
+
+  /**
+   * the minimum X value on the scale, usually minX
+   */
+  public double minXOnScale;
+
+  /**
+   * the maximim X value on the scale, usually maxX
+   */
+  public double maxXOnScale;
 
 	/**
 	 * for NMR, the adjustment in chemical shift applied using SHIFTX or SETPEAK or SETX
@@ -50,24 +53,14 @@ public class ScaleData {
 	double specShift;
   
   /**
-   * The minimum X value in the list of coordinates of the graph
-   */
-  double minX;
-
-  /**
-   * The maximum X value in the list of coordinates of the graph
-   */
-  double maxX;
-
-  /**
    * 
    * The precision (number of decimal places) of the X and Y values
    */
   public int hashNums[] = new int[2];
 
-
   /**
    * The formatter for the X and Y scales
+   * If the array is null, then this is a temporary set for 1D ZoomBox
    */
 	public DecimalFormat[] formatters = new DecimalFormat[2];
 	
@@ -81,22 +74,6 @@ public class ScaleData {
    * the minor tick counts for the X and Y scales
    */
 	int[] minorTickCounts = new int[2];
-
-	/**
-   * First grid x value
-   */
-  double firstX = Double.NaN;
-  
-
-  /**
-   * the minimum X value on the scale
-   */
-  public double minXOnScale;
-
-  /**
-   * the maximim X value on the scale
-   */
-  public double maxXOnScale;
 
   // Y variables
   /**
@@ -116,37 +93,21 @@ public class ScaleData {
   protected double spectrumYRef = 0;
   protected double userYFactor = 1;
   
-  /**
-   * the minimum Y value on the scale
-   */
+	protected boolean isShiftZoomedY;
   public double minYOnScale;
-
-  /**
-   * the maximim Y value on the scale
-   */
   public double maxYOnScale;
-
-  // Other
-  /**
-   * The start index
-   */
-  int startDataPointIndex;
-
-  /**
-   * the end index
-   */
-  int endDataPointIndex;
-
-  /**
-   * The number of points
-   */
-  int pointCount;
-  
-	protected double initMinYOnScale;
-	protected double initMaxYOnScale;
-	protected double initMinY;
-	protected double initMaxY;
 	double firstY;
+  double minY2D, maxY2D;
+
+
+  ScaleData() {
+	}
+
+	protected ScaleData(int iStart, int iEnd) {
+		startDataPointIndex = iStart;
+		endDataPointIndex = iEnd;
+		pointCount = endDataPointIndex - startDataPointIndex + 1;
+	}
 
 	/**
 	 * Calculates values that <code>JSVPanel</code> needs in order to render a
@@ -177,29 +138,14 @@ public class ScaleData {
 		setScale(isContinuous, isInverted);
 	}
 
-  ScaleData() {
-	}
-
-	protected ScaleData(int iStart, int iEnd) {
-		startDataPointIndex = iStart;
-		endDataPointIndex = iEnd;
-		pointCount = endDataPointIndex - startDataPointIndex + 1;
-	}
-
-	protected ScaleData setScale(boolean isContinuous, boolean isInverted) {
-
+	protected void setScale(boolean isContinuous, boolean isInverted) {
     setXScale();
     if (!isContinuous)
       maxXOnScale += steps[0] / 2; // MS should not end with line at end
-
-    // Y Scale
-    
     setYScale(minY, maxY, true, isInverted);
-    return this;
   }
 
 	protected void setXScale() {
-    // X Scale
     double xStep = setScaleParams(minX, maxX, 0);
     firstX = Math.floor(minX / xStep) * xStep;
     if (Math.abs((minX - firstX) / xStep) > 0.0001)
@@ -209,7 +155,7 @@ public class ScaleData {
   }
 
   boolean isYZeroOnScale() {
-    return (minYOnScale < 0 && maxYOnScale > 0);
+    return (minYOnScale < spectrumYRef && maxYOnScale > spectrumYRef);
   }
 
 	void setYScale(double minY, double maxY, boolean setScaleMinMax,
@@ -219,9 +165,11 @@ public class ScaleData {
 		double yStep = setScaleParams(minY, maxY, 1);
 		double dy = (isInverted ? yStep / 2 : yStep / 4);
 		double dy2 = (isInverted ? yStep / 4 : yStep / 2);
-		minYOnScale = (minY == 0 ? 0 : setScaleMinMax ? dy * Math.floor(minY / dy)
-				: minY);
-		maxYOnScale = (setScaleMinMax ? dy2 * Math.ceil(maxY * 1.05 / dy2) : maxY);
+		if (!isShiftZoomedY) {
+  		minYOnScale = (minY == 0 ? 0 : setScaleMinMax ? dy * Math.floor(minY / dy)
+	  			: minY);
+		  maxYOnScale = (setScaleMinMax ? dy2 * Math.ceil(maxY * 1.05 / dy2) : maxY);
+		}
 		firstY = (minY == 0 ? 0 : Math.floor(minY / dy) * dy);
 		if (minYOnScale < 0 && maxYOnScale > 0) {
 			// set a Y value to be 0;
@@ -256,7 +204,7 @@ public class ScaleData {
     setXScale();
   }
 
-  protected static int setXRange(int i, Coordinate[] xyCoords, double initX, double finalX, int iStart, int iEnd, int[] startIndices, int[] endIndices) {
+  protected static int getXRange(int i, Coordinate[] xyCoords, double initX, double finalX, int iStart, int iEnd, int[] startIndices, int[] endIndices) {
     int index = 0;
     int ptCount = 0;
     for (index = iStart; index <= iEnd; index++) {
@@ -309,8 +257,6 @@ public class ScaleData {
     double dec = Math.pow(10, log - exp);
     while (dec > NTICKS[j]) {
       j++;
-      if (j > 3)
-      	System.out.println("OHOH");
     }
     steps[i] = Math.pow(10, exp) * NTICKS[j];
     
@@ -349,8 +295,6 @@ public class ScaleData {
 		firstX += dx;
 	}
 
-  double minY2D, maxY2D;
-
 //  void setMinMaxY2D(List<JDXSpectrum> subspectra) {
 //    minY2D = Double.MAX_VALUE;
 //    maxY2D = -Double.MAX_VALUE;
@@ -363,7 +307,7 @@ public class ScaleData {
 //    }
 //  }
 
-	public Map<String, Object> getInfo(Map<String, Object> info) {
+	Map<String, Object> getInfo(Map<String, Object> info) {
 		info.put("specShift", Double.valueOf(specShift));
 		info.put("minX", Double.valueOf(minX));
 		info.put("maxX", Double.valueOf(maxX));
@@ -385,42 +329,6 @@ public class ScaleData {
 		this.maxY = maxY;
 	}
 	
-	double toY(int yPixel, int yPixel0) {		
-		return maxYOnScale + (yPixel0 - yPixel) * yFactorForScale;
-	}
-
-	double toY0(int yPixel, int yPixel0, int yPixel1) {
-		double factor = (maxYOnScale - minYOnScale) / (yPixel1 - yPixel0);
-		double y = maxYOnScale + (yPixel0 - yPixel) * factor;
-		return Math.max(minY, Math.min(y, maxY));
-	}
-
-	int toPixelY(double yVal, int yPixel1) {
-		return (Double.isNaN(yVal) ? Integer.MIN_VALUE
-				: yPixel1
-						- (int) (((yVal - spectrumYRef) * userYFactor + spectrumYRef - minYOnScale) / yFactorForScale));
-	}
-
-	int toPixelY0(double y, int yPixel0, int yPixel1) {
-		double factor = (maxYOnScale - minYOnScale) / (yPixel1 - yPixel0);
-		return (int) (yPixel0 + (maxYOnScale - y) / factor);
-	}
-
-	public void setScale(int xPixels, int yPixels, boolean isInverted) {
-		double yRef = spectrumYRef;
-		double f = spectrumScaleFactor;
-		double minY = (f == 1 ? this.minY : initMinYOnScale);
-		double maxY = (f == 1 ? this.maxY : initMaxYOnScale);
-		if (f != 1 && yRef < minY)
-			yRef = minY;
-		if (f != 1 && yRef > maxY)
-			yRef = maxY;
-		setYScale((minY - yRef) / f + yRef, (maxY - yRef) / f + yRef, f == 1, isInverted);
-  	xFactorForScale = (maxXOnScale - minXOnScale) / (xPixels - 1);
-  	yFactorForScale = (maxYOnScale - minYOnScale) / (yPixels - 1);
-  	System.out.println("scaledata yfactor max min " + yFactorForScale +" " + maxYOnScale +" " +  minYOnScale);
-	}
-
   double toX(int xPixel, int xPixel1, boolean drawXAxisLeftToRight) {
 		return toX(xPixel, xPixel1, drawXAxisLeftToRight, xFactorForScale);
 	}
@@ -453,8 +361,126 @@ public class ScaleData {
 		return (drawXAxisLeftToRight ? xPixel0 + x : xPixel1 - x);
 	}
 
+	double toY(int yPixel, int yPixel0) {		
+		return maxYOnScale + (yPixel0 - yPixel) * yFactorForScale;
+	}
 
+	double toY0(int yPixel, int yPixel0, int yPixel1) {
+		double factor = (maxYOnScale - minYOnScale) / (yPixel1 - yPixel0);
+		double y = maxYOnScale + (yPixel0 - yPixel) * factor;
+		return Math.max(minY, Math.min(y, maxY));
+	}
 
+	int toPixelY(double yVal, int yPixel1) {
+		return (Double.isNaN(yVal) ? Integer.MIN_VALUE
+				: yPixel1
+						- (int) (((yVal - spectrumYRef) * userYFactor + spectrumYRef - minYOnScale) / yFactorForScale));
+	}
 
+	int toPixelY0(double y, int yPixel0, int yPixel1) {
+		double factor = (maxYOnScale - minYOnScale) / (yPixel1 - yPixel0);
+		return (int) (yPixel0 + (maxYOnScale - y) / factor);
+	}
 
+	void setScale(int xPixels, int yPixels, boolean isInverted) {
+		double yRef = spectrumYRef;
+		double f = spectrumScaleFactor;
+		boolean useInit = (f != 1 || isShiftZoomedY); 
+		double minY = (useInit ? initMinYOnScale :  this.minY);
+		double maxY = (useInit ? initMaxYOnScale :  this.maxY);
+		if (useInit && yRef < minY)
+			yRef = minY;
+		if (useInit && yRef > maxY)
+			yRef = maxY;
+		setYScale((minY - yRef) / f + yRef, (maxY - yRef) / f + yRef, f == 1, isInverted);
+  	xFactorForScale = (maxXOnScale - minXOnScale) / (xPixels - 1);
+  	yFactorForScale = (maxYOnScale - minYOnScale) / (yPixels - 1);
+	}
+
+	static void copyScaleFactors(ScaleData[] sdFrom, ScaleData[] sdTo) {
+		for (int i = 0; i < sdFrom.length; i++) {
+			sdTo[i].spectrumScaleFactor = sdFrom[i].spectrumScaleFactor;
+			sdTo[i].spectrumYRef = sdFrom[i].spectrumYRef;
+			sdTo[i].userYFactor = sdFrom[i].userYFactor;
+			sdTo[i].specShift = sdFrom[i].specShift;
+			sdTo[i].isShiftZoomedY = sdFrom[i].isShiftZoomedY;
+		}
+	}
+	
+	static void copyYScales(ScaleData[] sdFrom, ScaleData[] sdTo) {
+		for (int i = 0; i < sdFrom.length; i++) {
+			sdTo[i].initMinYOnScale = sdFrom[i].initMinYOnScale;
+			sdTo[i].initMaxYOnScale = sdFrom[i].initMaxYOnScale;
+			sdTo[i].minY = sdFrom[i].minY;
+			sdTo[i].maxY = sdFrom[i].maxY;
+			if (sdFrom[i].isShiftZoomedY) {
+				// precalculated from shift-zoomBox1D or pin1Dy
+				sdTo[i].isShiftZoomedY = true;
+			  sdTo[i].minYOnScale = sdFrom[i].minYOnScale;
+				sdTo[i].maxYOnScale = sdFrom[i].maxYOnScale;
+			}
+		}
+	}
+
+  /**
+   * 
+   * @param graphsTemp
+   * @param initX
+   * @param finalX
+   * @param minPoints
+   * @param startIndices  to fill
+   * @param endIndices    to fill
+   * @param useRange 
+   * @param scaleData
+   * @return true if OK
+   */
+	static boolean setDataPointIndices(List<JDXSpectrum> graphsTemp,
+			double initX, double finalX, int minPoints, int[] startIndices,
+			int[] endIndices) {
+		int nSpectraOK = 0;
+		int nSpectra = graphsTemp.size();
+		for (int i = 0; i < nSpectra; i++) {
+			Coordinate[] xyCoords = graphsTemp.get(i).getXYCoords();
+			if (ScaleData.getXRange(i, xyCoords, initX, finalX, 0,
+					xyCoords.length - 1, startIndices, endIndices) >= minPoints)
+				nSpectraOK++;
+		}
+		return (nSpectraOK == nSpectra);
+	}
+
+  
+	static void fixScale(Map<Double, String> map) {
+		if (map.isEmpty())
+			return;
+		while (true) {
+			for (Map.Entry<Double, String> entry : map.entrySet()) {
+				String s = entry.getValue();
+				int pt = s.indexOf("E");
+				if (pt >= 0)
+					s = s.substring(0, pt);
+				if (s.indexOf(".") < 0)
+					return;
+				if (!s.endsWith("0") && !s.endsWith("."))
+					return;
+			}
+			for (Map.Entry<Double, String> entry : map.entrySet()) {
+				String s = entry.getValue();
+				int pt = s.indexOf("E");
+				if (pt >= 0)
+  				entry.setValue(s.substring(0, pt - 1) + s.substring(pt));
+				else
+  				entry.setValue(s.substring(0, s.length() - 1));
+			}			
+		}
+	}
+
+	public void scaleBy(double f) {
+		if (isShiftZoomedY) {
+			double center = (isYZeroOnScale() ? spectrumYRef : (minYOnScale + maxYOnScale) / 2);
+			minYOnScale = center - (center - minYOnScale) / f;
+			maxYOnScale = center - (center - maxYOnScale) / f;
+		} else {
+			spectrumScaleFactor *= f;	
+		}
+	}
 }

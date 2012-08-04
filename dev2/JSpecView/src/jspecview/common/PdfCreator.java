@@ -64,7 +64,6 @@ public class PdfCreator implements PdfCreatorInterface {
       tp.setWidth(w);
       tp.setHeight(h);
       awtPanel.print(g2, pf, 0);
-      //g2.drawImage(image, 0, 0, w, h, 0, 0, w, h, null);
       g2.dispose();
       cb.addTemplate(tp, 0, 0);
     } catch (Exception e) {

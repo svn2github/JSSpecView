@@ -13,5 +13,5 @@ interface XYScaleConverter {
 	int getYPixels();
 	int getXPixel0();
 
-	ScaleData getScaleData();
+	ScaleData getScale();
 }

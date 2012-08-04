@@ -20,6 +20,7 @@ class PlotWidget extends Coordinate {
   boolean is2D;
   boolean is2Donly;
   boolean isEnabled = true;
+  boolean isVisible = false;
   
   private String name;
 	
@@ -43,7 +44,7 @@ class PlotWidget extends Coordinate {
   }
 
   boolean selected(int xPixel, int yPixel) {
-    return (Math.abs(xPixel - xPixel0) < 5 && Math.abs(yPixel - yPixel0) < 5);
+    return (isVisible && Math.abs(xPixel - xPixel0) < 5 && Math.abs(yPixel - yPixel0) < 5);
   }
 
   void setX(double x, int xPixel) {

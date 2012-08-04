@@ -113,6 +113,7 @@ public class PanelData {
 	boolean isIntegralDrag;
 	boolean xAxisLeftToRight = true;
 
+	int scalingFactor = 1;  // will be 10 for printing
 	int integralShiftMode;
 	int top = topMargin;
 	int bottom = bottomMargin;
@@ -401,8 +402,10 @@ public class PanelData {
 		if (isPrinting) {
 			top *= 2; // for three-hole punching
 			bottom *= 2;
+      scalingFactor = 10;
 			withCoords = false;
 		} else {
+			scalingFactor = 1;
 			withCoords = getBoolean(ScriptToken.COORDINATESON);
 			titleOn = getBoolean(ScriptToken.TITLEON);
 			gridOn = getBoolean(ScriptToken.GRIDON);
@@ -750,7 +753,7 @@ public class PanelData {
 
 	void setFont(Object g, int width, int mode, int size, boolean isLabel) {
 		owner.setFont(g, (isPrinting ? printingFont : displayFontName), width,
-				mode, size, isLabel);
+				mode, size * scalingFactor, isLabel);
 	}
 
 	// listeners to handle various events, from GraphSet or AwtPanel
@@ -993,6 +996,7 @@ public class PanelData {
 	}
 
 	private boolean linking;
+	
 	public void doZoomLinked(GraphSet graphSet, double initX,
 			double finalX, boolean addZoom, boolean checkRange,
 			boolean is1d) {
@@ -1004,7 +1008,7 @@ public class PanelData {
 			GraphSet gs = graphSets.get(i);
 			if (gs != graphSet && JDXSpectrum.areXScalesCompatible(spec, graphSets.get(i).getSpectrumAt(0),
 					false, true))
-				gs.doZoom(initX, 0, finalX, 0, addZoom, checkRange, is1d, false);
+				gs.doZoom(initX, 0, finalX, 0, is1d, false, checkRange, false, addZoom);
 		}
 		linking = false;
 	}
