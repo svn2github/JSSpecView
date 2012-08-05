@@ -62,7 +62,7 @@
 -->
 
 	<target name="make-application-jar" description="Make JSpecView application jar">
-		<antcall target="revision"></antcall>
+		<antcall target="revision" />
         <mkdir dir="${build.app.dir}"/>
 	    <copy todir="${bin.dir}/jspecview/common" >
 	      <fileset dir="src/jspecview/common">
@@ -81,13 +81,13 @@
                 <attribute name="Main-Class" value="${main-class}"/>
             </manifest>
         	<fileset dir="${bin.dir}" />
-        	<fileset dir="${jsvlib.dir}"/>
+        	<fileset dir="${jsvlib.dir}" />
         </jar>
     </target>
 <!---
 -->
 	<target name="make-applet-jar" description="Make unsigned JSpecView applet jar">
-		<antcall target="revision"></antcall>
+		<antcall target="revision" />
         <mkdir dir="${build.applet.dir}"/>
 	    <copy todir="${bin.dir}/jspecview/common" >
 	      <fileset dir="src/jspecview/common">
@@ -115,33 +115,32 @@
 -->
 
 	<target name="make-signed-applet-jar" depends="make-applet-jar" description="Make signed JSpecView applet jar">
-    <antcall target="revision"></antcall>
+    <antcall target="revision" />
         <mkdir dir="${build.applet.dir}"/>
 	    <unjar dest="${bin.dir}" src="${itext.jar}"/>
         <jar destfile="${build.applet.dir}/temp.jar">
             <manifest>
               <attribute name="Class-Path" value=". netscape.jar"/>
             </manifest>
-          <fileset dir="${bin.dir}">
-          </fileset>
-          <fileset dir="${jsvlib.dir}"/>
+          <fileset dir="${bin.dir}" />
+          <fileset dir="${jsvlib.dir}" />
         </jar>    
       <signjar jar="${build.applet.dir}/temp.jar"
                signedjar="${build.applet.dir}/${ant.project.name}.applet.signed.${build.number}.jar"
                keystore="certificate/JSVcertificate.store"
                storepass="JSV2012" alias="JSVcertificate" />
     <delete>
-      <fileset dir="${build.applet.dir}" includes = "temp.jar"/>
+      <fileset dir="${build.applet.dir}" includes = "temp.jar" />
     </delete>
   </target>
 <!---
 -->
 
 	<target name="make-distribution-zip-file" depends="make-application-jar,make-applet-jar,make-signed-applet-jar" description="Create jspecview.zip for distribution">
-    	<dirname property="dist.dir" file="${applet.jar}"/>
+    	<dirname property="dist.dir" file="${applet.jar}" />
         <mkdir dir="${dist.dir}"/>
   	    <delete quiet="true">
-	    	<fileset dir="${dist.dir}" includes = "*.*"/>
+	    	<fileset dir="${dist.dir}" includes = "*.*" />
 	    </delete>
         <jar jarfile="${dist.zip}" compress="${jar.compress}">
         	<fileset dir="${extras.dir}"/>
