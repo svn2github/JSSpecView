@@ -79,6 +79,7 @@ public class AwtPrintLayoutDialog extends JDialog {
   private JButton previewButton = new JButton();
   private JButton cancelButton = new JButton();
   private JButton printButton = new JButton();
+  private JButton pdfButton = new JButton();
   
   private GridBagLayout gridBagLayout7 = new GridBagLayout();
   private GridBagLayout gridBagLayout6 = new GridBagLayout();
@@ -110,14 +111,15 @@ public class AwtPrintLayoutDialog extends JDialog {
    * of "Print Layout".
    * @param frame the parent frame
    * @param pl    null or previous layout
+   * @param isJob 
    */
-  public AwtPrintLayoutDialog(Frame frame, PrintLayout pl) {
+  public AwtPrintLayoutDialog(Frame frame, PrintLayout pl, boolean isJob) {
     super(frame, "Print Layout", true);
     if (pl == null)
       pl = new PrintLayout();
     this.pl = pl;
     try {
-      jbInit();
+      jbInit(isJob);
       setSize(320, 400);
       setResizable(false);
       setVisible(true);
@@ -168,9 +170,10 @@ public class AwtPrintLayoutDialog extends JDialog {
 
 	/**
    * Initalises the GUI components
+	 * @param isJob 
    * @throws Exception
    */
-  private void jbInit() throws Exception {
+  private void jbInit(boolean isJob) throws Exception {
 
     setStaticElements();
     
@@ -203,7 +206,14 @@ public class AwtPrintLayoutDialog extends JDialog {
     printButton.setText("Print");
     printButton.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        printButton_actionPerformed(e);
+        printButton_actionPerformed(false);
+      }
+    });
+    pdfButton.setToolTipText("");
+    pdfButton.setText("Create PDF");
+    pdfButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        printButton_actionPerformed(true);
       }
     });
     titledBorder6.setTitle("Printers");
@@ -270,7 +280,9 @@ public class AwtPrintLayoutDialog extends JDialog {
     titledBorder9.setTitle("Paper");
     titledBorder9.setTitleJustification(2);
     this.getContentPane().add(jPanel1,  BorderLayout.SOUTH);
-    jPanel1.add(printButton, null);
+    if (isJob)
+      jPanel1.add(printButton, null);
+    jPanel1.add(pdfButton, null);
     jPanel1.add(cancelButton, null);
     this.getContentPane().add(layoutContentPanel,  BorderLayout.CENTER);
     layoutContentPanel.add(previewPanel,   new GridBagConstraints(0, 2, 2, 1, 0.0, 1.0
@@ -427,11 +439,10 @@ public class AwtPrintLayoutDialog extends JDialog {
 	/**
 	 * Stored all the layout Information the PrintLayout object and disposes the
 	 * dialog
+	 * @param asPDF 
 	 * 
-	 * @param e
-	 *          ActionEvent
 	 */
-	void printButton_actionPerformed(ActionEvent e) {
+	void printButton_actionPerformed(boolean asPDF) {
 		plNew = new PrintLayout();
 		plNew.layout = layoutButtonGroup.getSelection().getActionCommand()
 				.toLowerCase();
@@ -446,6 +457,7 @@ public class AwtPrintLayoutDialog extends JDialog {
 		plNew.paper = (MediaSizeName) paperComboBox.getSelectedItem();
 		// pl.printer = services[printerNameComboBox.getSelectedIndex()];
 		// pl.numCopies = ((Integer)numCopiesSpinner.getValue()).intValue();
+		plNew.asPDF = asPDF;
 
 		dispose();
 	}

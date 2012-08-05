@@ -115,8 +115,6 @@ public class PanelData {
 
 	int scalingFactor = 1;  // will be 10 for printing
 	int integralShiftMode;
-	int top = topMargin;
-	int bottom = bottomMargin;
 	int left = leftMargin;
 	int right = rightMargin;
 
@@ -397,12 +395,12 @@ public class PanelData {
 			boolean addFilePath) {
 		boolean withCoords;
 		display1D = !isLinked && getBoolean(ScriptToken.DISPLAY1D);
-		top = topMargin;
-		bottom = bottomMargin;
+		int top = topMargin;
+		int bottom = bottomMargin;
 		if (isPrinting) {
-			top *= 2; // for three-hole punching
-			bottom *= 2;
-      scalingFactor = 10;
+			top *= 3; // for three-hole punching
+			bottom *= 3; // for file name
+      scalingFactor = 10; // for high resolution (zooming in within PDF)
 			withCoords = false;
 		} else {
 			scalingFactor = 1;
@@ -419,9 +417,9 @@ public class PanelData {
 			graphSets.get(i).drawGraphSet(g, width, height, left, right, top, bottom,
 					isResized);
 		if (titleOn && !titleDrawn)
-			owner.drawTitle(g, height, width, getDrawTitle(isPrinting));
+			owner.drawTitle(g, height * scalingFactor, width * scalingFactor, getDrawTitle(isPrinting));
 		if (withCoords)
-			owner.drawCoordinates(g);
+			owner.drawCoordinates(g, top);
 		if (addFilePath) {
 			String s = (commonFilePath != null ? commonFilePath
 					: graphSets.size() == 1 && currentGraphSet.getTitle(true) != null ? getSpectrum()

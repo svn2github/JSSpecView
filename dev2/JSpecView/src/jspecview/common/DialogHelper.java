@@ -256,11 +256,14 @@ public class DialogHelper {
 		if (jsvp == null)
 			return null;
     jsvp.getPanelData().closeAllDialogsExcept(AType.NONE);
-		PrintLayout pl = new AwtPrintLayoutDialog(frame, lastPrintLayout).getPrintLayout();
+		PrintLayout pl = new AwtPrintLayoutDialog(frame, lastPrintLayout, isJob).getPrintLayout();
 		if (pl == null)
 			return null;
 		lastPrintLayout = pl;
-		
+		if (isJob && pl.asPDF) {
+			isJob = false;
+			pdfFileName = "PDF";
+		}		
 		if (!isBase64 && !isJob) {
 			setFileChooser(ExportType.PDF);
 			if (pdfFileName.equals("?") || pdfFileName.equalsIgnoreCase("PDF"))

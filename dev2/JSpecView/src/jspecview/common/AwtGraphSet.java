@@ -117,15 +117,11 @@ class AwtGraphSet extends GraphSet {
   }
 
   private static Color veryLightGrey = new Color(200, 200, 200);
-  private static Color translucentGrey = new Color(200, 200, 200, 200);
 
   @Override
   protected void setPlotColor(Object g, int i) {
   	Color c;
   	switch (i) {
-  	case -5:
-  		c = translucentGrey; // shift-zoom box
-  		break;
   	case -3:
   		c = veryLightGrey;
   		break;

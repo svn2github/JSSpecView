@@ -226,6 +226,9 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     case ZOOMBOXCOLOR:
       zoomBoxColor = color;
       break;
+    case ZOOMBOXCOLOR2:
+      zoomBoxColor2 = color;
+      break;
     default:
       Logger.warn("AwtPanel --- unrecognized color: " + st);
       break;
@@ -397,11 +400,11 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 
   /**
    * Draws the Coordinates
-   * 
-   * @param g
+   * @param og 
    *        the <code>Graphics</code> object
+   * @param top 
    */
-  public void drawCoordinates(Object og) {
+  public void drawCoordinates(Object og, int top) {
   	if (pd.coordStr == null)
   		return;
     Graphics g = (Graphics) og;
@@ -410,7 +413,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     FontMetrics fm = g.getFontMetrics();
     g.drawString(pd.coordStr, 
     		pd.thisWidth - pd.right - fm.stringWidth(pd.coordStr), 
-    		pd.top - 20);
+    		top - 20);
   }
 
 	/**
@@ -456,9 +459,9 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
    * @param g
    *        the <code>Graphics</code> object
    * @param pageHeight
-   *        the height to be drawn in pixels
+   *        the height to be drawn in pixels -- after scaling
    * @param pageWidth
-   *        the width to be drawn in pixels
+   *        the width to be drawn in pixels -- after scaling
    */
   public void drawTitle(Object og, int pageHeight, int pageWidth, String title) {
   	title = title.replace('\n', ' ');
@@ -477,7 +480,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     }
     g.setColor(titleColor);
     g.drawString(title, (pd.isPrinting ? pd.left * pd.scalingFactor : 5), 
-    		(int) (pageHeight - fm.getHeight() * (pd.isPrinting ? 2 * pd.scalingFactor : 0.5)));
+    		pageHeight - (int) (fm.getHeight() * (pd.isPrinting ? 2 : 0.5)));
   }
 
 

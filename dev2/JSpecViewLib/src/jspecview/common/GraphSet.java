@@ -1478,7 +1478,7 @@ abstract class GraphSet implements XYScaleConverter {
 					iSpectrumForScale = i;
 				}
 				boolean doDrawWidgets = !isGrey && (nSplit == 1 || showAllStacked || iSpectrumSelected == iSplit);
-				boolean doDraw1DY = (doDrawWidgets && haveSingleYScale && i == iSpectrumForScale);
+				boolean doDraw1DY = (doDrawWidgets && haveSelectedSpectrum && i == iSpectrumForScale);
 				if (doDrawWidgets) {
 					resetPinsFromView();
 					drawWidgets(g, subIndex, needNewPins, doDraw1DObjects, doDraw1DY, false);

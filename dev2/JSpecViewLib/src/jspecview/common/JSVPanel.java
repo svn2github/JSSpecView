@@ -6,7 +6,7 @@ public interface JSVPanel extends JSVContainer {
 
 	public void doRepaint();
   
-  void drawCoordinates(Object g);
+  void drawCoordinates(Object g, int top);
   void drawTitle(Object g, int pageHeight, int pageWidth, String title);
 	
   Object getColor(ScriptToken st);

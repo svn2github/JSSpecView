@@ -43,6 +43,7 @@ public class PrintLayout {
 	 * The size of the paper to be printed on
 	 */
 	public MediaSizeName paper;
+	public boolean asPDF;
 	public static Dimension getDimension(MediaSizeName paper) {
 		// ftp://ftp.pwg.org/pub/pwg/media-sizes/pwg-media-size-03.pdf
 		// at 72 dpi we have...
