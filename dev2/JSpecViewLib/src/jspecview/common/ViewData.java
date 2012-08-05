@@ -11,30 +11,19 @@ import java.util.List;
 class ViewData {
 
 	private ScaleData[] scaleData;
+	
+	ScaleData[] getScaleData() {
+		return scaleData;
+	}
+
+	private ScaleData thisScale;
+ 
+	ScaleData getScale() {
+		return thisScale;
+	}
+
   private int nSpectra;
   private int iThisScale;
-	private ScaleData thisScale;
-	
-	/**
-	 * in some cases, there is only one scaleData, but there are more than that number of spectra
-	 * this is no problem -- we just use mod to set this to 0
-	 * @param i
-	 * @return starting point data index
-	 */
-  int getStartingPointIndex(int i) {
-  	return scaleData[i % scaleData.length].startDataPointIndex;
-  }
-  
-	/**
-	 * in some cases, there is only one scaleData, but there are more than that number of spectra
-	 * this is no problem -- we just use mod to set this to 0
-	 * @param i
-	 * @return ending point data index
-	 */
-  int getEndingPointIndex(int i) {
-  	return scaleData[i % scaleData.length].endDataPointIndex;
-  }
-  
 
 	/**
 	 * 
@@ -130,6 +119,38 @@ class ViewData {
     return ptCount;
   }
 
+  /**
+	 * in some cases, there is only one scaleData, but there are more than that number of spectra
+	 * this is no problem -- we just use mod to set this to 0
+	 * @param i
+	 * @return starting point data index
+	 */
+  int getStartingPointIndex(int i) {
+  	return scaleData[i % scaleData.length].startDataPointIndex;
+  }
+  
+	/**
+	 * in some cases, there is only one scaleData, but there are more than that number of spectra
+	 * this is no problem -- we just use mod to set this to 0
+	 * @param i
+	 * @return ending point data index
+	 */
+  int getEndingPointIndex(int i) {
+  	return scaleData[i % scaleData.length].endDataPointIndex;
+  }
+  
+	boolean areYScalesSame(int i, int j) {
+		i %= scaleData.length;
+		j %= scaleData.length;
+		return (scaleData[i].minYOnScale == scaleData[j].minYOnScale
+		    && scaleData[i].maxYOnScale == scaleData[j].maxYOnScale);
+	}
+
+	void setScale(int i, int xPixels, int yPixels, boolean isInverted) {
+		iThisScale = i % scaleData.length;
+		thisScale = scaleData[iThisScale];
+		thisScale.setScale(xPixels, yPixels, isInverted);
+	}
 
 	void resetScaleFactors() {
 		for (int i = 0; i < scaleData.length; i++)
@@ -150,33 +171,10 @@ class ViewData {
       scaleData[i % scaleData.length].scaleBy(f);
   }
 
-	ScaleData[] getScaleData() {
-		return scaleData;
-	}
-
-	ScaleData getScale() {
-		return thisScale;
-	}
-
-	
-	
-	boolean areYScalesSame(int i, int j) {
-		i %= scaleData.length;
-		j %= scaleData.length;
-		return (scaleData[i].minYOnScale == scaleData[j].minYOnScale
-		 && scaleData[i].maxYOnScale == scaleData[j].maxYOnScale);
-	}
-
-	void setScale(int i, int xPixels, int yPixels, boolean isInverted) {
-		iThisScale = i % scaleData.length;
-		thisScale = scaleData[iThisScale];
-		thisScale.setScale(xPixels, yPixels, isInverted);
-	}
-
 	ScaleData[] getNewScales(int iSelected, boolean isXOnly, double y1, double y2) {
 		if (isXOnly)
   		return scaleData;
-		iSelected = iSelected % scaleData.length;
+		iSelected %= scaleData.length;
 		// y1 and y2 are in terms of only the current scale. 
 		// We must precalculate all the min/max Y for the scale of all scaleData.
   	double f1 = (y1 - thisScale.minYOnScale) / (thisScale.maxYOnScale - thisScale.minYOnScale);

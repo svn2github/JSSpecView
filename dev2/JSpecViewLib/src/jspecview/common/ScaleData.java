@@ -17,10 +17,10 @@ public class ScaleData {
   private final static int[] NTICKS = { 2, 5, 10, 10 };
   private final static double[] LOGTICKS = { Math.log10(2), Math.log10(5), 0, 1 };
 
-	protected double initMinYOnScale;
-	protected double initMaxYOnScale;
-	protected double initMinY;
-	protected double initMaxY;
+	private double initMinYOnScale;
+	private double initMaxYOnScale;
+	private double initMinY;
+	private double initMaxY;
 
 	// values for the current expansion in X:
 	
@@ -76,6 +76,10 @@ public class ScaleData {
 	int[] minorTickCounts = new int[2];
 
   // Y variables
+
+  public double minYOnScale;
+  public double maxYOnScale;
+
   /**
    * The minimum Y value in the list of coordinates of the graph
    */
@@ -86,24 +90,22 @@ public class ScaleData {
    */
   double maxY;
 
-  protected double xFactorForScale;
-  protected double yFactorForScale;
-  
-  protected double spectrumScaleFactor = 1;
-  protected double spectrumYRef = 0;
-  protected double userYFactor = 1;
-  
-	protected boolean isShiftZoomedY;
-  public double minYOnScale;
-  public double maxYOnScale;
+	boolean isShiftZoomedY;
+
+  double spectrumScaleFactor = 1;
+  double spectrumYRef = 0;
+  double userYFactor = 1;  
 	double firstY;
   double minY2D, maxY2D;
 
+  private double xFactorForScale;
+  private double yFactorForScale;
+  
 
   ScaleData() {
 	}
 
-	protected ScaleData(int iStart, int iEnd) {
+	ScaleData(int iStart, int iEnd) {
 		startDataPointIndex = iStart;
 		endDataPointIndex = iEnd;
 		pointCount = endDataPointIndex - startDataPointIndex + 1;
@@ -138,14 +140,14 @@ public class ScaleData {
 		setScale(isContinuous, isInverted);
 	}
 
-	protected void setScale(boolean isContinuous, boolean isInverted) {
+	void setScale(boolean isContinuous, boolean isInverted) {
     setXScale();
     if (!isContinuous)
       maxXOnScale += steps[0] / 2; // MS should not end with line at end
     setYScale(minY, maxY, true, isInverted);
   }
 
-	protected void setXScale() {
+	private void setXScale() {
     double xStep = setScaleParams(minX, maxX, 0);
     firstX = Math.floor(minX / xStep) * xStep;
     if (Math.abs((minX - firstX) / xStep) > 0.0001)
@@ -192,7 +194,7 @@ public class ScaleData {
 		}
 	}
 
-	protected void scale2D(double f) {
+  void scale2D(double f) {
 		double dy = maxY - minY;
 		if (f == 1) {
 			maxY = initMaxY;
@@ -208,7 +210,7 @@ public class ScaleData {
     setXScale();
   }
 
-  protected static int getXRange(int i, Coordinate[] xyCoords, double initX, double finalX, int iStart, int iEnd, int[] startIndices, int[] endIndices) {
+  private static int getXRange(int i, Coordinate[] xyCoords, double initX, double finalX, int iStart, int iEnd, int[] startIndices, int[] endIndices) {
     int index = 0;
     int ptCount = 0;
     for (index = iStart; index <= iEnd; index++) {
@@ -290,7 +292,7 @@ public class ScaleData {
     return (x >= minX && x <= maxX);
   }
 
-	public void addSpecShift(double dx) {
+	void addSpecShift(double dx) {
 		specShift += dx;
 		minX += dx;
 		maxX += dx;
@@ -326,7 +328,7 @@ public class ScaleData {
 		return info;
 	}
 
-	public void setMinMax(double minX, double maxX, double minY, double maxY) {
+	void setMinMax(double minX, double maxX, double minY, double maxY) {
 		this.minX = minX;
 		this.maxX = maxX;
 		this.minY = minY;
@@ -478,7 +480,7 @@ public class ScaleData {
 		}
 	}
 
-	public void scaleBy(double f) {
+	void scaleBy(double f) {
 		if (isShiftZoomedY) {
 			double center = (isYZeroOnScale() ? spectrumYRef : (minYOnScale + maxYOnScale) / 2);
 			minYOnScale = center - (center - minYOnScale) / f;
