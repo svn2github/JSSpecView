@@ -2173,12 +2173,12 @@ abstract class GraphSet implements XYScaleConverter {
 		}
 		int y;
 		if (md != null) {
-			y = (spec.isInverted() ? yPixel1 - 10 : yPixel0);
+			y = (spec.isInverted() ? yPixel1 - 10 * pd.scalingFactor : yPixel0);
 			setColor(g, ScriptToken.PEAKTABCOLOR);
 			for (int i = md.size(); --i >= 0;) {
 				Measurement m = md.get(i);
 				int x = toPixelX(m.getXVal());
-				drawLine(g, x, y, x, y + 10);
+				drawLine(g, x, y, x, y + 10 * pd.scalingFactor);
 			}
 			if (isVisible(getDialog(AType.PeakList, iSpec))) {
 				y = toPixelY(((PeakData) md).getThresh());
@@ -2224,14 +2224,14 @@ abstract class GraphSet implements XYScaleConverter {
 		int y = (inverted ? yPixel1 : yPixel0) + f * (y2 + y4 + s15);
 		for (int i = 0; i < sdata.length; i++) {
 			drawLine(g, xs[i], y, xs[i], y + s5 * f);
-			drawLine(g, xs[i], y + 5 * f, xs0[i], y + s10 * f);
-			drawLine(g, xs0[i], y + 10 * f, xs0[i], y + s15 * f);
+			drawLine(g, xs[i], y + s5 * f, xs0[i], y + s10 * f);
+			drawLine(g, xs0[i], y + s10 * f, xs0[i], y + s15 * f);
 			if (y2 > 0 && sdata[i][4].length() > 0)
 				drawLine(g, (xs[i] + xs[i - 1]) / 2, y - y4 + s5,
 						(xs[i] + xs[i - 1]) / 2, y - y4 - s5);
 		}
 
-		y -= f * 2;
+		y -= f * 2 * pd.scalingFactor;
 
 		if (y2 > 0) {
   		drawStringRotated(g, 90, xs[0] - s15, y, "  ppm");
@@ -2261,10 +2261,10 @@ abstract class GraphSet implements XYScaleConverter {
 			setAnnotationColor(g, note, whatColor);
 			XYScaleConverter c = (note.is2D ? imageView : this);
 			int x = c.toPixelX(note.getXVal());
-			int y = (note.isPixels() ? (int) (yPixel0 + 10 - note.getYVal())
+			int y = (note.isPixels() ? (int) (yPixel0 + 10 * pd.scalingFactor - note.getYVal())
 					: note.is2D ? imageView.toPixelY((int) note.getYVal())
 							: toPixelY(note.getYVal()));
-			drawString(g, note.getText(), x + note.offsetX, y - note.offsetY);
+			drawString(g, note.getText(), x + note.offsetX * pd.scalingFactor, y - note.offsetY * pd.scalingFactor);
 		}
 	}
 
@@ -2283,8 +2283,8 @@ abstract class GraphSet implements XYScaleConverter {
 				if (in.getValue() == 0)
 					continue;
 				int x = toPixelX(in.getXVal2());
-				int y1 = yOffset + toPixelYint(in.getYVal());
-				int y2 = yOffset + toPixelYint(in.getYVal2());
+				int y1 = yOffset * pd.scalingFactor + toPixelYint(in.getYVal());
+				int y2 = yOffset * pd.scalingFactor + toPixelYint(in.getYVal2());
 				if (x != fixX(x) || y1 != fixY(y1) || y2 != fixY(y2))
 					continue;
 
@@ -2330,8 +2330,8 @@ abstract class GraphSet implements XYScaleConverter {
 		if (drawString)
 			drawString(g, m.getText(), x + m.offsetX, y1 - m.offsetY);
 		if (drawBaseLine) {
-			drawLine(g, x1, yPixel1, x1, yPixel1 - 6);
-			drawLine(g, x2, yPixel1, x2, yPixel1 - 6);
+			drawLine(g, x1, yPixel1, x1, yPixel1 - 6 * pd.scalingFactor);
+			drawLine(g, x2, yPixel1, x2, yPixel1 - 6 * pd.scalingFactor);
 		}
 	}
 
