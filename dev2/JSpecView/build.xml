@@ -64,6 +64,16 @@
 	<target name="make-application-jar" description="Make JSpecView application jar">
 		<antcall target="revision"></antcall>
         <mkdir dir="${build.app.dir}"/>
+	    <copy todir="${bin.dir}/jspecview/common" >
+	      <fileset dir="src/jspecview/common">
+	        <include name="TODO.txt" />
+	      </fileset>
+	      <filterchain>
+	        <linecontains>
+	          <contains value="___" />
+	        </linecontains>
+	      </filterchain>
+	    </copy>
 	    <unjar dest="${bin.dir}" src="${itext.jar}"/>
         <jar destfile="${build.app.dir}/${ant.project.name}.app.${build.number}.jar">
             <manifest>
