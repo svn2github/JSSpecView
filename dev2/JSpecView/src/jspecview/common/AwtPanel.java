@@ -74,8 +74,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 
 import jspecview.common.Annotation.AType;
-import jspecview.exception.JSpecViewException;
-import jspecview.exception.ScalesIncompatibleException;
 import jspecview.export.Exporter;
 import jspecview.util.Logger;
 import jspecview.util.TextFormat;
@@ -242,7 +240,6 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
    * @param spectrum
    *        the spectrum
    * @param popup 
-   * @throws ScalesIncompatibleException
    */
   public AwtPanel(ScriptInterface si, JDXSpectrum spectrum, AwtPopupMenu popup) {
     // standard applet not overlaid and not showing range
@@ -277,8 +274,6 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
    * @param endIndex
    *        the end index
    * @param popup 
-   * @throws JSpecViewException
-   * @throws ScalesIncompatibleException
    */
   private AwtPanel(ScriptInterface si, List<JDXSpectrum> spectra, int startIndex,
       int endIndex, AwtPopupMenu popup) {
@@ -421,7 +416,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 	 * @param og 
 	 * @param x 
 	 * @param y 
-	 * @param filePath 
+	 * @param s
 	 */
 
 	public void printFilePath(Object og, int x, int y, String s) {
@@ -456,8 +451,6 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   /**
    * Draws Title
    * 
-   * @param g
-   *        the <code>Graphics</code> object
    * @param pageHeight
    *        the height to be drawn in pixels -- after scaling
    * @param pageWidth

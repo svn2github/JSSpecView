@@ -128,8 +128,6 @@ public class AwtParameters extends Parameters {
    * </pre>
    * @param strColor 
    * 
-   * @param string
-   *        the color as a string
    * @return a <code>Color</code> from a string representation
    */
   public static Color getColorFromString(String strColor) {

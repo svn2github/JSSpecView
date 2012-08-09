@@ -177,9 +177,6 @@ public class FileReader {
    * starting point for reading all data
    * @param br 
    * 
-   * @param sourceContents
-   *        the contents of the source as a String
-   * 
    * @return source
    * @throws JSpecViewException
    */
@@ -403,7 +400,6 @@ public class FileReader {
    * @param sourceLDRTable
    * @param spectrum0
    * @param label 
-   * @param haveVarLabel
    * 
    * @throws JSpecViewException
    * @return source

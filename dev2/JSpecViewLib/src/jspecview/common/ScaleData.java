@@ -114,11 +114,7 @@ public class ScaleData {
 	/**
 	 * Calculates values that <code>JSVPanel</code> needs in order to render a
 	 * graph, (eg. scale, min and max values) and stores the values in the class
-	 * <code>ScaleData</code>. Note: This method is not used in the application,
-	 * instead the more general {@link jspecview.common.ViewData} is
-	 * generated with the
-	 * {@link jspecview.common.ViewData#generateScaleData(jspecview.common.Coordinate[][], int[], int[], int, int)}
-	 * method
+	 * <code>ScaleData</code>. 
 	 * 
 	 * @param coords
 	 *          the array of coordinates
@@ -436,8 +432,6 @@ public class ScaleData {
    * @param minPoints
    * @param startIndices  to fill
    * @param endIndices    to fill
-   * @param useRange 
-   * @param scaleData
    * @return true if OK
    */
 	static boolean setDataPointIndices(List<JDXSpectrum> graphsTemp,

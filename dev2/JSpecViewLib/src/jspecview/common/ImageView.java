@@ -195,9 +195,7 @@ class ImageView implements XYScaleConverter {
   /**
    * 
    * @param spec
-   * @param sizeChanged 
    * @param forceNew 
-   * @param imageView
    * @return image buffer
    */
   synchronized int[] get2dBuffer(JDXSpectrum spec, boolean forceNew) {

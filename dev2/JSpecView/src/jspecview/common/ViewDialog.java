@@ -64,7 +64,6 @@ public class ViewDialog extends AwtDialog implements WindowListener {
 	 * 
 	 * @param panel
 	 *          the parent panel
-	 * @param spectraTree
 	 * @param modal
 	 *          the modality
 	 */

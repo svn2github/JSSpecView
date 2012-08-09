@@ -26,7 +26,6 @@ import jspecview.common.JDXSpectrum;
  * class <code>CMLExporter</code> contains static methods to export a Graph as
  * as CIML. <code>CMLExporter</code> uses a template file called 'cml_tmp.vm'
  *  or 'cml_nmr.vm'. So any changes in design should be done in these files.
- * @see jspecview.common.Graph
  * @author Prof Robert J. Lancashire
  * @author Bob Hanson, hansonr@stolaf.edu
  */

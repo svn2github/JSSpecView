@@ -91,9 +91,7 @@ public class JSVPanelNode {
   /**
    * Returns the tree node that is associated with a panel
    * @param jsvp 
-   * @param panelNodes TODO
-   * @param frame
-   *        the JSVFrame
+   * @param panelNodes 
    * 
    * @return the tree node that is associated with a panel
    */

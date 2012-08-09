@@ -325,7 +325,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	/**
 	 * Sets the spectrum to the specified block number
 	 * 
-	 * @param i
+	 * @param n
 	 */
 	public void setSpectrumNumber(int n) {
 		runScript(ScriptToken.SPECTRUMNUMBER + " " + n);
@@ -507,8 +507,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	 * Shows a floating overlay key if possible
 	 * @param visible 
 	 * 
-	 * @param e
-	 *          the ActionEvent
 	 */
 	protected void showOverlayKey(boolean visible) {
 		JSViewer.setOverlayLegendVisibility(this, getSelectedPanel(), visible);
@@ -599,8 +597,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	 * Export spectrum in a given format
 	 * @param type 
 	 * 
-	 * @param command
-	 *          the name of the format to export in
 	 */
 	void exportSpectrumViaMenu(String type) {
 		if (!isSigned()) {
@@ -614,8 +610,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	/**
 	 * Loads a new file into the existing applet window
 	 * 
-	 * @param tmpFilePath
-	 *          String
+	 * @param filePath
 	 */
 	public void syncLoad(String filePath) {
 		newAppletPanel();

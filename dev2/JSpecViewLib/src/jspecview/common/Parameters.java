@@ -119,7 +119,6 @@ public class Parameters {
   /**
    * Gets the color of an element in the scheme
    * @param st 
-   * @param element the name of the element
    * @return the <code>Color</code> of the element
    */
   public Object getColor(ScriptToken st){
@@ -131,7 +130,6 @@ public class Parameters {
   /**
    * Sets the color of an element
    * @param st 
-   * @param element the name of the element
    * @param color the color the element should have
    * @return color object 
    */

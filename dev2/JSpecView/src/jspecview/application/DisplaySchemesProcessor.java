@@ -63,7 +63,6 @@ public class DisplaySchemesProcessor {
 
   /**
    * Load a default DisplayScheme if xml file not found
-   * @param dispSchemeFileName String
    * @return boolean
    */
   public Parameters loadDefault() {
@@ -122,7 +121,6 @@ public class DisplaySchemesProcessor {
   /**
    * Loads the display schemes into memory and stores them in a <code>Vector</code>
    * @param dispSchemeFileName the name of the file to load
-   * @throws Exception
    * @return true if loaded successfully
    */
   public boolean load(String dispSchemeFileName){
@@ -141,7 +139,6 @@ public class DisplaySchemesProcessor {
    * Loads the display schemes into memory and stores them in a
    * <code>Vector</code>
    * @param br 
-   * @throws Exception
    * @return true if loaded successfully
    */
   public boolean load(BufferedReader br) {

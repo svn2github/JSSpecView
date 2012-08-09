@@ -97,7 +97,6 @@ public class TextDialog extends JDialog {
   /**
    * Intialises <code>TextDialog</code> with the contents of a file
    * @param frame the parent frame
-   * @param title the title of the dialog
    * @param file the file to write to the JEditorPane
    * @param modal true if modal, false otherwise
    * @throws IOException

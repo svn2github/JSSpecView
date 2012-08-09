@@ -481,8 +481,6 @@ public class AppMenu extends JMenuBar {
   /**
    * Shows the preferences dialog
    * 
-   * @param e
-   *        the ActionEvent
    */
   void showPreferencesDialog() {
     mainFrame.showPreferences();

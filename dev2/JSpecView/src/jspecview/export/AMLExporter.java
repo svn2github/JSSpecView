@@ -26,7 +26,6 @@ import jspecview.common.JDXSpectrum;
  * class <code>AnIMLExporter</code> contains static methods to export a Graph as
  * as AnIML. <code>AnIMLExporter</code> uses a template file called 'animl_tmp.vm'
  * or 'animl_nmr.vm'. So any changes in design should be done in these files.
- * @see jspecview.common.Graph
  * @author Prof Robert J. Lancashire
  * @author Bob Hanson, hansonr@stolaf.edu
  */

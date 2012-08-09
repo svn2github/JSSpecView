@@ -50,7 +50,6 @@ import jspecview.common.Annotation.AType;
  * JSVPanel class draws a plot from the data contained a instance of a
  * <code>Graph</code>.
  * 
- * @see jspecview.common.Graph
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
  * @author Craig A.D. Walters
@@ -568,8 +567,6 @@ public class PanelData {
 	 *          the x value of the coordinate where the highlight should end
 	 * @param spec
 	 * @param r
-	 * @param color
-	 *          the color of the highlight
 	 * @param a
 	 * @param b
 	 * @param g
@@ -912,10 +909,6 @@ public class PanelData {
 	 * Sets the integration ratios that will be displayed
 	 * 
 	 * @param value
-	 * 
-	 * 
-	 * @param ratios
-	 *          array of the integration ratios
 	 */
 	public void setIntegrationRatios(String value) {
 		currentGraphSet.setIntegrationRatios(value);

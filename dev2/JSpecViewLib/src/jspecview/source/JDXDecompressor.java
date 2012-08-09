@@ -41,7 +41,6 @@ import jspecview.util.Parser;
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
  * @author Bob Hanson - hansonr@stolaf.edu
- * @see jspecview.export.JDXCompressor
  */
 public class JDXDecompressor {
 
@@ -112,8 +111,6 @@ public class JDXDecompressor {
    *        the delta X value
    * @param nPoints
    *        the expected number of points
-   * @param lineNumber
-   *        the starting line number
    */
   public JDXDecompressor(JDXSourceStreamTokenizer t, double firstX, double xFactor,
       double yFactor, double deltaX, int nPoints) {

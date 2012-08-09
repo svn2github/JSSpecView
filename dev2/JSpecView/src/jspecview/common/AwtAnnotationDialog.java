@@ -93,12 +93,8 @@ abstract class AwtAnnotationDialog extends AwtDialog implements AnnotationDialog
 	 * offset and factor
 	 * @param si 
 	 * @param spec 
-	 * 
 	 * @param jsvp
 	 *          the parent panel
-	 * @param spectraTree
-	 * @param modal
-	 *          the modality
 	 */
 	protected AwtAnnotationDialog(ScriptInterface si,
 			JDXSpectrum spec, JSVPanel jsvp) {

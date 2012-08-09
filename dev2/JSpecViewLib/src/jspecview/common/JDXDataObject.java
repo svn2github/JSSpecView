@@ -544,7 +544,6 @@ public abstract class JDXDataObject extends JDXHeader {
   /**
    * Determines if the plot should be displayed decreasing by default
    * 
-   * @param spectrum
    * @return true or false
    */
   public boolean shouldDisplayXAxisIncreasing() {
@@ -661,7 +660,6 @@ public abstract class JDXDataObject extends JDXHeader {
   }
   /**
    * Determines if a spectrum is an HNMR spectrum
-   * @param spectrum the JDXSpectrum
    * @return true if an HNMR, false otherwise
    */
   public boolean isHNMR() {

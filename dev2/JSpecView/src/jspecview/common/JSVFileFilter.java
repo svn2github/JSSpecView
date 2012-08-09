@@ -27,8 +27,6 @@ import javax.swing.filechooser.FileFilter;
 /**
  * A implementation of the <code>FileFilter</code> that filters out all files
  * except those with extensions that are added.
- * @see jspecview.common.JSVFileFilter#JSpecViewFileFilter(java.lang.String[])
- * @see jspecview.common.JSVFileFilter#JSpecViewFileFilter(java.lang.String[], java.lang.String)
  * @see jspecview.common.JSVFileFilter#addExtension(java.lang.String)
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan

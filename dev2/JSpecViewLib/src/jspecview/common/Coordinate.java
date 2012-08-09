@@ -368,8 +368,6 @@ public class Coordinate {
    * <code>Coordinate</code>s.
    * @param spectra 
    * @param vd 
-   * @param coordLists
-   *        the 2d coordinate array
    * 
    * @return the minimum x value value from an array of arrays of
    *         <code>Coordinate</code>s

@@ -42,7 +42,6 @@ import jspecview.util.TextFormat;
  * Modified 
  * 6 Oct 2010  added lastX for Inkscape SVG export so baseline could be printed
  * 
- * @see jspecview.common.Graph
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
  * @author Craig A.D. Walters

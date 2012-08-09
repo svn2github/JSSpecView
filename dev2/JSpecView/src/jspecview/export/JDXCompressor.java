@@ -282,8 +282,6 @@ class JDXCompressor {
    * Makes a DUP Character
    * @param y 
    * 
-   * @param sNum
-   *        the input number as a string
    * @return the DUP character
    */
   private static String makeDUP(long y) {

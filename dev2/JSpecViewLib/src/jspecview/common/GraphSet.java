@@ -10,8 +10,6 @@ import java.util.Map;
 
 import jspecview.common.Annotation.AType;
 import jspecview.common.PanelData.LinkMode;
-import jspecview.exception.JSpecViewException;
-import jspecview.exception.ScalesIncompatibleException;
 import jspecview.util.Logger;
 import jspecview.util.Parser;
 import jspecview.util.TextFormat;
@@ -437,15 +435,6 @@ abstract class GraphSet implements XYScaleConverter {
 	 * Initializes the graph set
 	 * @param startIndex 
 	 * @param endIndex 
-	 * 
-	 * @param spectra
-	 *          the array of spectra
-	 * @param startIndices
-	 *          the index of the start data point
-	 * @param endIndices
-	 *          the index of the end data point
-	 * @throws JSpecViewException
-	 * @throws ScalesIncompatibleException
 	 */
 
 	void initGraphSet(int startIndex, int endIndex) {
@@ -792,7 +781,6 @@ abstract class GraphSet implements XYScaleConverter {
 	 * 
 	 * @param x
 	 * @param y
-	 * @param x2
 	 * @return  nearest x value
 	 */
 	private double getNearestPeak(JDXSpectrum spec, double x, double y) {
@@ -1056,8 +1044,6 @@ abstract class GraphSet implements XYScaleConverter {
 	 * need to reset their positions along the slider based on their values, and
 	 * we need to also move the sliders to the right place.
 	 * @param needNewPins 
-	 * 
-	 * @param isResized
 	 * @param subIndex
 	 * @param doDraw1DObjects 
 	 */
@@ -1079,7 +1065,6 @@ abstract class GraphSet implements XYScaleConverter {
 	 * same, but for Y they are not. This produces a nicer grid, but also an odd
 	 * jumpiness in the Y slider that is not totally predictable.
 	 * 
-	 * @param subIndex
 	 */
 	private void newPins() {
 		zoomBox1D = new PlotWidget("zoomBox1D");
@@ -1252,19 +1237,11 @@ abstract class GraphSet implements XYScaleConverter {
 	 * Zooms the spectrum between two coordinates
 	 * 
 	 * @param initX
-	 *          TODO
-	 * @param initX
 	 *          the X start coordinate of the zoom area
-	 * @param initY
-	 *          TODO
 	 * @param initY
 	 *          the Y start coordinate of the zoom area
 	 * @param finalX
-	 *          TODO
-	 * @param finalX
 	 *          the X end coordinate of the zoom area
-	 * @param finalY
-	 *          TODO
 	 * @param finalY
 	 *          the Y end coordinate of the zoom area
 	 * @param is1D
@@ -1404,7 +1381,6 @@ abstract class GraphSet implements XYScaleConverter {
 
 	/**
 	 * Clears all views in the zoom list
-	 * @param andResetCompletely 
 	 */
 	void clearViews() {
 		if (isLinked) {
@@ -1767,7 +1743,6 @@ abstract class GraphSet implements XYScaleConverter {
 	 * @param endX
 	 *          units
 	 * @param whatColor 
-	 * @param color
 	 * @param isFullHeight
 	 */
 
@@ -2142,8 +2117,6 @@ abstract class GraphSet implements XYScaleConverter {
 	 * 
 	 * @param g
 	 *          the <code>Graphics</code> object
-	 * @param imageHeight
-	 *          the height to be drawn in pixels
 	 */
 	private void drawYUnits(Object g) {
 		String units = spectra.get(0).getAxisLabel(false);
@@ -3063,14 +3036,6 @@ abstract class GraphSet implements XYScaleConverter {
 	 * @param top 
 	 * @param bottom 
 	 * @param isResized
-	 * @param g
-	 * @param withGrid
-	 * @param withXUnits
-	 * @param withYUnits
-	 * @param withXScale
-	 * @param withYScale
-	 * @param drawY0
-	 * @param plotAreaInsets
 	 */
 	synchronized void drawGraphSet(Object og, int width, int height, int left, int right,
 			int top, int bottom, boolean isResized) {

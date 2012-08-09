@@ -114,7 +114,6 @@ public class AwtPopupMenu extends JPopupMenu {
 
   /**
    * Initialises GUI components
-   * @throws Exception
    */
   protected void jbInit() {
     final ScriptInterface scripter = this.scripter;
