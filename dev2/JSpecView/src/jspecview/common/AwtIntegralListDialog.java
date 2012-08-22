@@ -41,7 +41,7 @@ class AwtIntegralListDialog extends AwtAnnotationDialog {
 
 	private static final long serialVersionUID = 1L;
 	private static int[] posXY = new int[] {Integer.MIN_VALUE, 0};
-	private JTextField txtRange;
+	private JTextField txtScale;
 	private JTextField txtOffset;
 	//private JTextField txtNormalization;
 	
@@ -71,7 +71,7 @@ class AwtIntegralListDialog extends AwtAnnotationDialog {
 	
 	@Override
 	protected void addControls() {
-		txtRange = dialogHelper.addInputOption("Scale", "Scale", null, "%", ""
+		txtScale = dialogHelper.addInputOption("Scale", "Scale", null, "%", ""
 				+ si.getParameters().integralRange, true);
 		txtOffset = dialogHelper.addInputOption("BaselineOffset", "Baseline Offset", null, "%",
 				"" + si.getParameters().integralOffset, true);
@@ -101,8 +101,18 @@ class AwtIntegralListDialog extends AwtAnnotationDialog {
 				normalize();
 			}
 		});
+
 		dialogHelper.addButton(normalizeButton);
+		JButton minButton = newJButton();
+		minButton.setText("Minimum");
+		minButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				setMinimum();
+			}
+		});
+		dialogHelper.addButton(minButton);
 	}
+
 
 	protected void delete() {
 		if (!checkSelected())
@@ -141,11 +151,25 @@ class AwtIntegralListDialog extends AwtAnnotationDialog {
 		}
 	}
 
+	double lastMin = 0;
+	protected void setMinimum() {
+		try {
+			String ret = (String) JOptionPane.showInputDialog(dialog,
+					"Minimum value?", "Set Minimum Value",
+					JOptionPane.QUESTION_MESSAGE, null, null, "" + lastMin);
+			double val = Double.parseDouble(ret);
+			((IntegralData) xyData).setMinimumIntegral(val);
+			apply();
+			jsvp.doRepaint();
+		} catch (Exception ee) {
+			// ignore
+		}
+	}
 	@Override
 	public void apply() {
 		try {
 			myParams.integralOffset = Double.valueOf(txtOffset.getText()).doubleValue();
-			myParams.integralRange = Double.valueOf(txtRange.getText()).doubleValue();
+			myParams.integralRange = Double.valueOf(txtScale.getText()).doubleValue();
 			myParams.integralDrawAll = false;//chkResets.isSelected();
 			((IntegralData) getData()).update(myParams);
 			jsvp.doRepaint();

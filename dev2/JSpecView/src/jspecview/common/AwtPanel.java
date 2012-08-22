@@ -819,47 +819,55 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 			return;
 		}
 		int code = e.getKeyCode();
-		if (e.getModifiers() != 0) {
-			if (e.isControlDown()) {
-				switch (code) {
-				case KeyEvent.VK_DOWN:
-				case KeyEvent.VK_UP:
-				case 45: // '-'
-				case 61: // '=/+'
-					pd.scaleYBy(code == 61 || code == KeyEvent.VK_UP ? GraphSet.RT2
-							: 1 / GraphSet.RT2);
-					e.consume();
-					break;
-				case KeyEvent.VK_LEFT:
-				case KeyEvent.VK_RIGHT:
-					pd.toPeak(code == KeyEvent.VK_RIGHT ? 1 : -1);
-					e.consume();
-					break;
-				}
-			}
-			return;
-		}
-		switch (code) {
-		case KeyEvent.VK_LEFT:
-		case KeyEvent.VK_RIGHT:
-			pd.doMouseMoved((code == KeyEvent.VK_RIGHT ? ++pd.mouseX : --pd.mouseX),
-					pd.mouseY);
-			e.consume();
-			doRepaint();
-			break;
-		case KeyEvent.VK_DOWN:
-		case KeyEvent.VK_UP:
-			int dir = (code == KeyEvent.VK_DOWN ? -1 : 1);
-			if (pd.getSpectrumAt(0).getSubSpectra() == null) {
-				pd.notifySubSpectrumChange(dir, null);
-			} else {
-				pd.advanceSubSpectrum(dir);
+		double scaleFactor = 0;
+		if (e.getModifiers() == 0) {
+			switch (code) {
+			case KeyEvent.VK_LEFT:
+			case KeyEvent.VK_RIGHT:
+				pd.doMouseMoved(
+						(code == KeyEvent.VK_RIGHT ? ++pd.mouseX : --pd.mouseX), pd.mouseY);
+				e.consume();
 				doRepaint();
+				break;
+			case KeyEvent.VK_PAGE_UP:
+			case KeyEvent.VK_PAGE_DOWN:
+				scaleFactor = (code == KeyEvent.VK_PAGE_UP ? GraphSet.RT2
+						: 1 / GraphSet.RT2);
+				e.consume();
+				break;
+			case KeyEvent.VK_DOWN:
+			case KeyEvent.VK_UP:
+				int dir = (code == KeyEvent.VK_DOWN ? -1 : 1);
+				if (pd.getSpectrumAt(0).getSubSpectra() == null) {
+					pd.notifySubSpectrumChange(dir, null);
+				} else {
+					pd.advanceSubSpectrum(dir);
+					doRepaint();
+				}
+				e.consume();
+				break;
 			}
-			e.consume();
-			break;
+		} else if (e.isControlDown()) {
+			switch (code) {
+			case KeyEvent.VK_DOWN:
+			case KeyEvent.VK_UP:
+			case 45: // '-'
+			case 61: // '=/+'
+				scaleFactor = (code == 61 || code == KeyEvent.VK_UP ? GraphSet.RT2
+						: 1 / GraphSet.RT2);
+				e.consume();
+				break;
+			case KeyEvent.VK_LEFT:
+			case KeyEvent.VK_RIGHT:
+				pd.toPeak(code == KeyEvent.VK_RIGHT ? 1 : -1);
+				e.consume();
+				break;
+			}
 		}
-
+		if (scaleFactor != 0) {
+			pd.scaleYBy(scaleFactor);
+			doRepaint();
+		}
 	}
 
 	public void keyReleased(KeyEvent e) {
