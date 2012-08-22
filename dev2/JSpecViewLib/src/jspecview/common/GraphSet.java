@@ -3551,6 +3551,16 @@ abstract class GraphSet implements XYScaleConverter {
 			if (ad != null)
 				((IntegralData) ad.getData()).addMarks(value.substring(4).trim());
 			break;
+		case MIN:
+			if (ad != null) {
+				try {
+					double val = Double.parseDouble(ScriptToken.getTokens(value).get(1));
+					((IntegralData) ad.getData()).setMinimumIntegral(val);
+				} catch (Exception e) {
+					// ignore
+				}
+			}
+			break;
 		case UPDATE:
 			if (ad != null)
 				((IntegralData) ad.getData()).update(parameters);

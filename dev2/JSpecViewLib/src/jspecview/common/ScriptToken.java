@@ -63,7 +63,7 @@ public enum ScriptToken {
   INTEGRALOFFSET("percent"),
   INTEGRALRANGE("percent"),
   INTEGRATE, // same as INTEGRATION
-  INTEGRATION("ON/OFF/AUTO/TOGGLE/MARK ppm1-ppm2:norm,ppm3-ppm4,... (start with 0-0 to clear)"), 
+  INTEGRATION("ON/OFF/AUTO/TOGGLE/MIN value/MARK ppm1-ppm2:norm,ppm3-ppm4,... (start with 0-0 to clear)"), 
   INTEGRALPLOTCOLOR, 
   INTEGRATIONRATIOS, 
   INTERFACE, 

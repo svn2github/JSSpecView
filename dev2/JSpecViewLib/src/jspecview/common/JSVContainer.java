@@ -1,14 +1,14 @@
 package jspecview.common;
 
 public interface JSVContainer {
-  public void dispose();
-  public boolean isEnabled();
+  void dispose();
+  boolean isEnabled();
   int getWidth();
   int getHeight();
-  public String getTitle();
-  public boolean isVisible();
-  public void setEnabled(boolean b);
-	public void setFocusable(boolean b);
-	public boolean isFocusable();
-  public void setTitle(String title);
+  String getTitle();
+  boolean isVisible();
+  void setEnabled(boolean b);
+	void setFocusable(boolean b);
+	boolean isFocusable();
+  void setTitle(String title);
 }

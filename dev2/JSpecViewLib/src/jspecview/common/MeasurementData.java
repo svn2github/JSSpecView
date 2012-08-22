@@ -32,7 +32,7 @@ import java.util.Map;
 import jspecview.common.Annotation.AType;
 import jspecview.util.TextFormat;
 
-public class MeasurementData extends ArrayList<Measurement> implements AnnotationData {
+class MeasurementData extends ArrayList<Measurement> implements AnnotationData {
 
 	private static final long serialVersionUID = 1L;
 
@@ -48,22 +48,24 @@ public class MeasurementData extends ArrayList<Measurement> implements Annotatio
 	public boolean getState() {
 		return isON;
 	}
+	
 	public void setState(boolean b) {
 		isON = b;
 	}
 	
-	public MeasurementData(AType type, JDXSpectrum spec) {
+	MeasurementData(AType type, JDXSpectrum spec) {
 		this.type = type;
 		this.spec = spec;
 	}
-	public List<Measurement> getMeasurements() {
+	List<Measurement> getMeasurements() {
 		return this;
 	}
-	public void setMeasurements(@SuppressWarnings("unused") List<Measurement> measurements) {
+	void setMeasurements(@SuppressWarnings("unused") List<Measurement> measurements) {
 		// won't happen
 	}
 
 	protected Parameters myParams = new Parameters("MeasurementData");
+	
 	public Parameters getParameters() {
 		return myParams;
 	}
@@ -71,13 +73,13 @@ public class MeasurementData extends ArrayList<Measurement> implements Annotatio
 	protected DecimalFormat df;
 
 	private final static String[] HEADER = new String[] { "peak", "start", "end", "value" };
-	public String[] getDataHeader() {
+	String[] getDataHeader() {
 		return HEADER;
 	}
 
 	protected String units;
 	
-	public String[][] getMeasurementListArray(String units) {
+	String[][] getMeasurementListArray(String units) {
 		this.units = units;
 		double[][] ddata = getMeasurementListArrayReal(units);
 		DecimalFormat dfx = TextFormat.getDecimalFormat(spec.isNMR() ? "#0.0000"
@@ -91,7 +93,7 @@ public class MeasurementData extends ArrayList<Measurement> implements Annotatio
 		return data;
 	}
 
-	public double[][] getMeasurementListArrayReal(String units) {
+	double[][] getMeasurementListArrayReal(String units) {
 		boolean toHz = spec.isNMR() && units.equalsIgnoreCase("HZ");
 		double[][] data = new double[size()][];
 		for (int pt = 0, i = size(); --i >= 0;) {
@@ -103,7 +105,7 @@ public class MeasurementData extends ArrayList<Measurement> implements Annotatio
 		return data;
 	}
 
-	public static boolean checkParameters(MeasurementData md, Parameters p) {
+	static boolean checkParameters(MeasurementData md, Parameters p) {
 		if (md.size() == 0)
 			return false;
 		Parameters myParams = md.getParameters();
@@ -140,7 +142,7 @@ public class MeasurementData extends ArrayList<Measurement> implements Annotatio
     
   }
 
-	public void addSpecShift(double dx) {
+  public void addSpecShift(double dx) {
 		for (int i = size(); --i >= 0;) {
 			Measurement m = get(i);
 			double x = m.getXVal() + dx;
@@ -151,18 +153,20 @@ public class MeasurementData extends ArrayList<Measurement> implements Annotatio
 	}
 
   private String key;
-	public String getKey() {
+	
+  public String getKey() {
 		return key;
 	}
-	public void setKey(String key) {
+
+  public void setKey(String key) {
 		this.key = key;		
 	}
 
-	public boolean isVisible() {
+  public boolean isVisible() {
 		return true;
 	}
 
-	public void getInfo(Map<String, Object> info) {
+	void getInfo(Map<String, Object> info) {
 		info.put("header", getDataHeader());
 		info.put("table", getMeasurementListArrayReal("ppm"));
 		if (units != null)

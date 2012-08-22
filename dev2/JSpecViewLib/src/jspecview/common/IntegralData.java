@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -22,7 +23,7 @@ import jspecview.util.TextFormat;
 public class IntegralData extends MeasurementData {
 
 	public enum IntMode {
-	  OFF, ON, TOGGLE, AUTO, LIST, MARK, UPDATE;
+	  OFF, ON, TOGGLE, AUTO, LIST, MARK, MIN, UPDATE;
 	  static IntMode getMode(String value) {
 	    for (IntMode mode: values())
 	      if (value.startsWith(mode.name()))
@@ -160,9 +161,11 @@ public class IntegralData extends MeasurementData {
 		//if (in.getValue() < 0.1) -- no, need this for tiny integrals with a water peak, for instance
 			//return null;
   	add(in);
-		Collections.sort(this, Integral.c);
+		Collections.sort(this, c);
 		return in;
 	}
+
+  private static Comparator<Measurement> c = new IntegralComparator();
 
 	@Override
 	public void addSpecShift(double dx) {
@@ -424,5 +427,10 @@ public class IntegralData extends MeasurementData {
 		super.getInfo(info);
 	}
 
+	void setMinimumIntegral(double val) {
+		for (int i = size(); --i >= 0;)
+			if (get(i).getValue() < val)
+				remove(i);
+	}
 
 }

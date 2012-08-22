@@ -29,27 +29,27 @@ package jspecview.common;
  * 
  * @author Bob Hanson hansonr@stolaf.edu
  */
-public class Measurement extends Annotation {
+class Measurement extends Annotation {
   
 	private Coordinate pt2 = new Coordinate();
 	private double value;
 
-  public Measurement(JDXSpectrum spec, double x, double y) {
+  Measurement(JDXSpectrum spec, double x, double y) {
 		super(spec, x, y, "", false, false, 0, 6);
 		setPt2(x, y);
 	}
   
-  public Measurement(JDXSpectrum spec, double x, double y, String text, double x1, double y1) {
+  Measurement(JDXSpectrum spec, double x, double y, String text, double x1, double y1) {
 		super(spec, x, y, text, false, false, 0, 6);
 		setPt2(x1, y1);
 	}
   
-  public Measurement(Measurement m) {
+  Measurement(Measurement m) {
   	super(m.spec, m.getXVal(), m.getYVal(), m.text, false, false, m.offsetX, m.offsetY);
   	setPt2(m.pt2.getXVal(), m.pt2.getYVal());
 	}
 
-	public Measurement(JDXSpectrum spec, double x, double y, String text, double value) {
+	Measurement(JDXSpectrum spec, double x, double y, String text, double value) {
 		// peak picking
 		super(spec, x, y, text, false, false, 0, 6);
 		this.value = value;
@@ -57,32 +57,55 @@ public class Measurement extends Annotation {
 		pt2.setYVal(y);
 	}
 
-	public Measurement(JDXSpectrum spec, double x, double y, boolean doSetPt2) {
+	Measurement(JDXSpectrum spec, double x, double y, boolean doSetPt2) {
 		 super(spec, x, y);
 		 if (doSetPt2)
 				setPt2(x, y);
 	}
 
-	public void setPt2(double x, double y) {
+	void setPt2(double x, double y) {
 		pt2.setXVal(x);
 		pt2.setYVal(y);
 		value = Math.abs(x - getXVal());
 		text = spec.setMeasurementText(this);
   }
   
-	public JDXSpectrum getSpectrum() {
+ JDXSpectrum getSpectrum() {
 		return spec;
 	}
   
-  public void setValue(double value) {
+  void setValue(double value) {
   	this.value = value;
 		text = spec.setMeasurementText(this);
   }
 
-  public double getValue() {
+  double getValue() {
   	return value;
   }
   
+	double getXVal2() {
+		return pt2.getXVal();
+	}
+
+	double getYVal2() {
+		return pt2.getYVal();
+	}
+
+	@Override
+	void addSpecShift(double dx) {
+    setXVal(getXVal() + dx);
+    pt2.setXVal(pt2.getXVal() + dx);
+	}
+
+	void setYVal2(double y2) {
+		pt2.setYVal(y2);
+	}
+
+  boolean overlaps(double x1, double x2) {
+		return (Math.min(getXVal(), getXVal2()) < Math.max(x1, x2) 
+    && Math.max(getXVal(), getXVal2()) > Math.min(x1, x2));
+	}
+
   /**
    * Overrides Objects toString() method
    * 
@@ -93,27 +116,5 @@ public class Measurement extends Annotation {
     return "[" + getXVal() + "-" + pt2.getXVal() + "]";
   }
 
-	public double getXVal2() {
-		return pt2.getXVal();
-	}
-
-	public double getYVal2() {
-		return pt2.getYVal();
-	}
-
-	@Override
-	public void addSpecShift(double dx) {
-    setXVal(getXVal() + dx);
-    pt2.setXVal(pt2.getXVal() + dx);
-	}
-
-	public void setYVal2(double y2) {
-		pt2.setYVal(y2);
-	}
-
-	public boolean overlaps(double x1, double x2) {
-		return (Math.min(getXVal(), getXVal2()) < Math.max(x1, x2) 
-    && Math.max(getXVal(), getXVal2()) > Math.min(x1, x2));
-	}
 
 }

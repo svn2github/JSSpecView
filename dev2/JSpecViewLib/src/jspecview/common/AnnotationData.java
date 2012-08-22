@@ -4,20 +4,18 @@ import jspecview.common.Annotation.AType;
 
 public interface AnnotationData {
 
-	boolean isVisible();
+	void addSpecShift(double dx);
 
+	AType getAType();
+	MeasurementData getData();
+	String getKey();
 	Parameters getParameters();
 	JDXSpectrum getSpectrum();
-	AType getAType();
-
-	MeasurementData getData();
-
-	String getKey();
-	void setKey(String key);
-
 	boolean getState();
-	void setState(boolean b);
 
-	void addSpecShift(double dx);
+	boolean isVisible();
+
+	void setKey(String key);
+	void setState(boolean b);
 
 }
