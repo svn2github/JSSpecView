@@ -15,6 +15,7 @@ public class PeakInfo {
   private String title;
   private String model;
   private String atoms;
+  private String id;
   public JDXSpectrum spectrum;
 
   private String _match;
@@ -35,6 +36,7 @@ public class PeakInfo {
       type = fixType(type.substring(0, pt)) + "/" + type2;
     else
       type = fixType(type);
+    id = Parser.getQuotedAttribute(s, "id");
     index = Parser.getQuotedAttribute(s, "index");
     file = Parser.getQuotedAttribute(s, "file");
     model = Parser.getQuotedAttribute(s, "model");
@@ -136,10 +138,16 @@ public class PeakInfo {
 
   public boolean checkTypeMatch(PeakInfo pi) {
     return (checkType(pi.type) 
-        && (checkModel(pi._match) || title.toUpperCase().indexOf(pi._match) >= 0));
+        && (checkId(pi._match) || checkModel(pi._match) || title.toUpperCase().indexOf(pi._match) >= 0));
   }
 
-  public String getModel() {
+	private boolean checkId(String match) {
+		return (id != null && match != null
+				&& match.toUpperCase().startsWith("ID=") && match.substring(3).equals(
+				id));
+	}
+
+	public String getModel() {
     return model;
   }
 

@@ -2776,6 +2776,7 @@ abstract class GraphSet implements XYScaleConverter {
 			if (Float.isNaN(x1) || Float.isNaN(x2))
 				return;
 			pd.addHighlight(this, x1, x2, spec, 200, 200, 200, 200);
+			spec.setSelectedPeak(peakInfo);
 			if (getScale().isInRangeX(x1)
 					|| getScale().isInRangeX(x2) || x1 < getScale().minX
 					&& getScale().maxX < x2) {

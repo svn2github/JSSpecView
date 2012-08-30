@@ -78,7 +78,7 @@ public enum ScriptToken {
   OBSCURE, 
   OVERLAY, // same as "VIEW"
   OVERLAYSTACKED("TF"),
-  PEAK("<type(IR,CNMR,HNMR,MS, etc)> \"match\" [ALL]"), 
+  PEAK("<type(IR,CNMR,HNMR,MS, etc)> id=xxx or \"match\" [ALL], for example: PEAK HNMR id=3"), 
   PEAKCALLBACKFUNCTIONNAME,
   PEAKLIST(" Example: PEAKLIST threshold=20 [%, or include=10] skip=0 interpolate=parabolic [or NONE]"),
   PEAKTABCOLOR("C"),
