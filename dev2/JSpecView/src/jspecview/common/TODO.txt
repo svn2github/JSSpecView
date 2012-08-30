@@ -31,6 +31,7 @@ changes and analyses can be made without altering the saved view
 
 ___version=2.0.2
 
+new feature: PEAK HNMR id=3 
 new feature: (Tony Williams suggestion) PAGE_UP/PAGE_DOWN keys for scaling
 new feature: integration MIN value -- removes integrations less than the specified value
 bug fix: Y-slider problems; print title still not quite right
