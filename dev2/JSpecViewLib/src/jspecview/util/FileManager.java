@@ -234,7 +234,11 @@ public class FileManager {
     return (appletDocumentBase == null ? filePath.replace('\\', '/') : filePath);
   }
 
+  private static int stringCount;
+  
   public static String getName(String file) {
+  	if (file == null)
+  		return "String" + (++stringCount);
     try {
       if (isURL(file)) {
         String name = (new URL(file)).getFile();
