@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="jspecview" basedir="." default="clean">
 	 <description>
-		    A JAVA based JCAMP-DX and XML Spectroscopy Viewer
+		    A JAVA based JCAMP-DX and XML Spectroscopy Viewer (test)
 	 </description>
 		<!--
 		For the purpose of easier reading the script is divided into following sections:
