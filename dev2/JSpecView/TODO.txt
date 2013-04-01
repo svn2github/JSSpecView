@@ -1,0 +1,100 @@
+Feel free to add to this file any time! Don't worry about sync problems. 
+Put new items at top, please.
+
+====TODO=========
+Bug:
+Loading a GC/MS file in Jmol application and selecting a menu option in Jmol to choose a frame
+gives JSpecView loading with looping over frames in the Jmol display as well as the JSpecView display 
+
+
+http://blog.gorges.us/2009/03/how-to-enable-keywords-in-eclipse-and-subversion-svn/
+Use 
+$LastChangedRevision: 907 $
+$LastChangedDate: 2012-04-25 16:22:01 -0500 (Wed, 25 Apr 2012) $
+to set the APPLET_VERSION to include the SVN revision number
+
+With JSpecView application, loading a file gives the dialog box and if you sort on date the program crashes.
+
+Clicking on the Jmol display shows the peaks, using the Jmol Menu under Spectra gives the hover display
+Selecting an option though gives no change to the JSV display and that Block is not made the front display.
+Jmol menu. HNMR and CNMR now showing but only hover works.
+Clicking on an option does not give the highlight in the JSV display
+Clicking on a peak in the H or C NMR works
+
+> needs design change.
+> good idea; no mechanism to do that at present
+
+Dialog Box for overlay colours needs checking
+
+> overlay keys are working, but they are strange. Switching between 
+frames is not working right  -- just turns off the key entirely.
+
+=====DONE========
+
+compoundmenuon true gives menu option of Spectra
+compoundmenuon false gives greyed out menu option of Blocks - renamed Spectra as well
+
+ReversePlot was disabled; x widgets aren't right with plot reversed.
+>seems fixed?
+
+GC/MS is not tested and probably all messed up.
+Works if call is to the GCMS.jdx file with overlay ALL
+
+With Jmol application, when loading a Block file the JSV display is automatically showing the LAST Block.
+>Changed to display First Block
+
+
+With a dual display of GC at top and MS at bottom what script should I use to
+change the lower display but leaving the top display undisturbed?
+Can they be identified individually?
+
+> done:
+For the applet
+overlay 1,3 or 1,4 etc default display is overlay 1,2
+
+  peak ms model1
+  peak ms "204"  -- could look for match in title text?
+> DONE -- needs testing
+
+  peak ms "204" ALL
+       -- added ALL keyword lets you look through  all spectra, otherwise it's just the current panel
+       -- current panel, though, is always checked first.
+
+
+Loading a Block file and switching between Blocks without selecting a peak.
+Having looked at 4 Blocks and returning to the first.
+A PEAK is shown selected and if an IR then Jmol starts vib mode despite not having clicked in the JSV display.
+
+> fixed
+
+Loading acetophenone.html and selecting a peak in the IR sends the display into frenzy
+with overlay showing and uncontrollable flashing between spectra.
+Seems to happen as well when you select a peak then use spectrumnumber to change display
+
+>> fixed 
+
+Integration should be standard size without changing when you scale Y
+
+Use of Ctrl-/ Ctrl+
+OK for when baseline is at the bottom, needs to work as well for spectra 
+where the baseline is at the top of the page 
+
+DONE for a block file allow overlaying some of the spectra not necessarily all the spectra
+
+  command:   OVERLAY 1.1,1.2 for instance
+
+6th Mar turn off RED error icon when file is closed.
+Done
+
+done 8.3.12
+
+bug:
+If I open a file then open another file then open another file
+The drop down file type in the file open dialog box always defaults to JCAMP-DX (not a problem)
+BUT instead of it showing 1 JDX type it keeps on increasing in the
+list so jcamp-dx shows up 3 times
+and every time I open another file it seems to add another jcamp-dx to
+the drop down file type list.
+
+done 8.3.12
+ 
