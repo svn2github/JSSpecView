@@ -128,7 +128,7 @@
       <signjar jar="${build.applet.dir}/temp.jar"
                signedjar="${build.applet.dir}/${ant.project.name}.applet.signed.${build.number}.jar"
                keystore="certificate/JSVcertificate.store"
-               storepass="JSV2012" alias="JSVcertificate" />
+               storepass="JSV2013" alias="JSVcertificate" />
     <delete>
       <fileset dir="${build.applet.dir}" includes = "temp.jar" />
     </delete>
