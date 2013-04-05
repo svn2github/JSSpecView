@@ -58,10 +58,13 @@
         <javac srcdir="${src.dir}" destdir="${classes.dir}"/>
     </target>
 -->
-<!---
--->
 
-	<target name="make-application-jar" description="Make JSpecView application jar">
+	<target name="build">
+          <mkdir dir="${bin.dir}"/>
+          <javac srcdir="${src.dir}" destdir="${bin.dir}" includeantruntime="false" classpathref="jspecview.classpath"/>
+	</target>
+
+	<target name="make-application-jar" description="Make JSpecView application jar" depends="build">
 		<antcall target="revision" />
         <mkdir dir="${build.app.dir}"/>
 	    <copy todir="${bin.dir}/jspecview/common" >
@@ -86,7 +89,7 @@
     </target>
 <!---
 -->
-	<target name="make-applet-jar" description="Make unsigned JSpecView applet jar">
+	<target name="make-applet-jar" description="Make unsigned JSpecView applet jar" depends="build">
 		<antcall target="revision" />
         <mkdir dir="${build.applet.dir}"/>
 	    <copy todir="${bin.dir}/jspecview/common" >
