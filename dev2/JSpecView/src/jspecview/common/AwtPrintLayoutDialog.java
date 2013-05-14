@@ -102,8 +102,8 @@ public class AwtPrintLayoutDialog extends JDialog {
   private JRadioButton chooseFontRadioButton = new JRadioButton();
   private JRadioButton defaultFontRadioButton = new JRadioButton();
 
-  private static JComboBox fontComboBox = new JComboBox();
-  private static JComboBox paperComboBox = new JComboBox();
+  private static JComboBox<String> fontComboBox = new JComboBox<String>();
+  private static JComboBox<MediaSizeName> paperComboBox = new JComboBox<MediaSizeName>();
   //private JComboBox printerNameComboBox = new JComboBox();
 
   /**

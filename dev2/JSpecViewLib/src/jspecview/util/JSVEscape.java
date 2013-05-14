@@ -29,7 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class Escape {
+public class JSVEscape {
 
   private final static String escapable = "\\\\\tt\rr\nn\"\""; 
 
@@ -214,8 +214,8 @@ public class Escape {
   private static String fixString(String s) {
     if (s == null || s.indexOf("{\"") == 0) //don't doubly fix JSON strings when retrieving status
       return s;
-    s = TextFormat.simpleReplace(s, "\"", "''");
-    s = TextFormat.simpleReplace(s, "\n", " | ");
+    s = JSVTextFormat.simpleReplace(s, "\"", "''");
+    s = JSVTextFormat.simpleReplace(s, "\n", " | ");
     return "\"" + s + "\"";
   }
 

@@ -32,9 +32,9 @@ import java.util.TreeMap;
 import jspecview.common.AwtParameters;
 import jspecview.common.Parameters;
 import jspecview.common.ScriptToken;
-import jspecview.util.FileManager;
-import jspecview.util.SimpleXmlReader;
-import jspecview.util.TextFormat;
+import jspecview.util.JSVFileManager;
+import jspecview.util.JSVXmlReader;
+import jspecview.util.JSVTextFormat;
 
 /**
  * <code>DisplaySchemesProcessor</code> loads and saves the display schemes of
@@ -52,7 +52,7 @@ public class DisplaySchemesProcessor {
   /** The list of displaySchemes that is loaded from file */
   private TreeMap<String, Parameters> displaySchemes;
 
-  private SimpleXmlReader reader;
+  private JSVXmlReader reader;
 
   /**
    * Initialises the <code>DisplaySchemesProcessor</code>
@@ -112,7 +112,7 @@ public class DisplaySchemesProcessor {
 
   public boolean load(InputStream stream) {
     try {
-      return load(FileManager.getBufferedReaderForInputStream(stream));
+      return load(JSVFileManager.getBufferedReaderForInputStream(stream));
     } catch (IOException e) {
       return false;
     }
@@ -126,7 +126,7 @@ public class DisplaySchemesProcessor {
   public boolean load(String dispSchemeFileName){
     fileName = dispSchemeFileName;        
     try{
-      BufferedReader br = FileManager.getBufferedReaderFromName(fileName, null, "##TITLE");
+      BufferedReader br = JSVFileManager.getBufferedReaderFromName(fileName, null, "##TITLE");
     	return load(br);
     }
     catch(IOException e){
@@ -143,13 +143,13 @@ public class DisplaySchemesProcessor {
    */
   public boolean load(BufferedReader br) {
 
-    reader = new SimpleXmlReader(br);
+    reader = new JSVXmlReader(br);
     String defaultDS = "Default";
     Parameters ds = null;
     String attr;
     try {
       while (reader.hasNext()) {
-        if (reader.nextEvent() != SimpleXmlReader.START_ELEMENT)
+        if (reader.nextEvent() != JSVXmlReader.START_ELEMENT)
           continue;
         String theTag = reader.getTagName();
         if (theTag.equals("displayschemes")) {
@@ -308,8 +308,8 @@ public class DisplaySchemesProcessor {
     buffer.flush();
 
     StringBuffer outBuffer = new StringBuffer();
-    outBuffer.append("<?xml version=\"1.0\"?>" + TextFormat.newLine);
-    outBuffer.append("<displaySchemes default=\""+ defaultDSName +"\">" + TextFormat.newLine);
+    outBuffer.append("<?xml version=\"1.0\"?>" + JSVTextFormat.newLine);
+    outBuffer.append("<displaySchemes default=\""+ defaultDSName +"\">" + JSVTextFormat.newLine);
     outBuffer.append(sw.getBuffer());
 
     writer.write(outBuffer.toString());

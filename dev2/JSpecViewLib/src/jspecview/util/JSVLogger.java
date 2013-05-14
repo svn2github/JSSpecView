@@ -28,9 +28,9 @@ package jspecview.util;
 /**
  * Logger mechanism.
  */
-public final class Logger {
+public final class JSVLogger {
 
-  private static LoggerInterface _logger = new DefaultLogger();
+  private static JSVLoggerInterface _logger = new JSVDefaultLogger();
 
   public final static int LEVEL_FATAL = 1;
   public final static int LEVEL_ERROR = 2;
@@ -71,7 +71,7 @@ public final class Logger {
    * 
    * @param logger New logger implementation.
    */
-  public static void setLogger(LoggerInterface logger) {
+  public static void setLogger(JSVLoggerInterface logger) {
     _logger = logger;
     debugging = isActiveLevel(LEVEL_DEBUG) || isActiveLevel(LEVEL_DEBUGHIGH);
   }

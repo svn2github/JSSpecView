@@ -40,7 +40,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
 import jspecview.common.JDXSpectrum;
-import jspecview.util.FileManager;
+import jspecview.util.JSVFileManager;
 
 /**
  * Dialog for showing the legend or key for overlaid plots in a
@@ -163,7 +163,7 @@ public class AwtOverlayLegendDialog extends JDialog implements JSVDialog {
 				spectrum = pd.getSpectrumAt(index);
 				title = spectrum.getTitle();
 				if (useFileName)
-					title = FileManager.getName(spectrum.getFilePath()) + " - " + title;
+					title = JSVFileManager.getName(spectrum.getFilePath()) + " - " + title;
 				plotColor = (Color) jsvp.getPlotColor(index);
 
 				cols[0] = new Integer(index + 1);

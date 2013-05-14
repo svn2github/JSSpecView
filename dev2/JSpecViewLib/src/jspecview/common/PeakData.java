@@ -4,7 +4,7 @@ import java.text.DecimalFormat;
 import java.util.Map;
 
 import jspecview.common.Annotation.AType;
-import jspecview.util.TextFormat;
+import jspecview.util.JSVTextFormat;
 
 /**
  * 
@@ -43,8 +43,8 @@ public class PeakData extends MeasurementData {
 
 	@Override
 	public String[][] getMeasurementListArray(String units) {
-		DecimalFormat df4 = TextFormat.getDecimalFormat("#0.0000");
-		DecimalFormat df2 = TextFormat.getDecimalFormat("#0.00");
+		DecimalFormat df4 = JSVTextFormat.getDecimalFormat("#0.0000");
+		DecimalFormat df2 = JSVTextFormat.getDecimalFormat("#0.00");
 		String[][] data = new String[size()][];
 		double[] last = new double[] {-1e100, 1e100, 1e100};
 		double[] ddata;
@@ -88,7 +88,7 @@ public class PeakData extends MeasurementData {
 
 	public void setPeakList(Parameters p, DecimalFormat formatter, ScaleData view) {
 		if (formatter == null)
-			formatter = TextFormat.getDecimalFormat(spec.getPeakPickHash());
+			formatter = JSVTextFormat.getDecimalFormat(spec.getPeakPickHash());
 		df = formatter;
 		Coordinate[] xyCoords = spec.getXYCoords();
 		if (xyCoords.length < 3)

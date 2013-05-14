@@ -62,7 +62,7 @@ import jspecview.common.ScriptToken;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.AwtPopupMenu.EnumOverlay;
 import jspecview.source.JDXSource;
-import jspecview.util.FileManager;
+import jspecview.util.JSVFileManager;
 
 /**
  * The Main Class or Entry point of the JSpecView Application.
@@ -463,7 +463,7 @@ public class AppMenu extends JMenuBar {
       JDXSpectrum spec = pd.getSpectrum();
       setCheckBoxes(pd);
       overlayKeyMenuItem.setEnabled(pd.getNumberOfGraphSets() > 1);
-      setCloseMenuItem(FileManager.getName(node.source.getFilePath()));
+      setCloseMenuItem(JSVFileManager.getName(node.source.getFilePath()));
       exportAsMenu.setEnabled(true);
       saveAsMenu.setEnabled(true);
       saveAsJDXMenu.setEnabled(spec.canSaveAsJDX());

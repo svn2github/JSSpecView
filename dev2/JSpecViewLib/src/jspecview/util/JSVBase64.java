@@ -14,7 +14,7 @@
 
 package jspecview.util;
 
-public class Base64 {
+public class JSVBase64 {
 
   //                              0         1         2         3         4         5         6
   //                              0123456789012345678901234567890123456789012345678901234567890123

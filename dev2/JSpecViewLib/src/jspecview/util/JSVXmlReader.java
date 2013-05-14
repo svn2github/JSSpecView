@@ -23,7 +23,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Hashtable;
 
-public class SimpleXmlReader {
+public class JSVXmlReader {
 
   /*
    * A simple very light-weight XML reader
@@ -46,7 +46,7 @@ public class SimpleXmlReader {
   public final static int EOF = 8;
 
 
-  public SimpleXmlReader(BufferedReader br) {
+  public JSVXmlReader(BufferedReader br) {
     buffer = new Buffer(br);
   }
 
@@ -87,7 +87,7 @@ public class SimpleXmlReader {
   }
 
   public void nextTag() throws IOException {
-    while ((thisEvent = buffer.nextTag()).eventType == SimpleXmlReader.COMMENT) {
+    while ((thisEvent = buffer.nextTag()).eventType == JSVXmlReader.COMMENT) {
     }
   }
 

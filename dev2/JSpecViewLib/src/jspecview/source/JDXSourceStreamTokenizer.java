@@ -22,7 +22,7 @@ package jspecview.source;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-import jspecview.util.Logger;
+import jspecview.util.JSVLogger;
 
 /**
  * @author Debbie-Ann Facey
@@ -85,7 +85,7 @@ public class JDXSourceStreamTokenizer {
     int pt = line.indexOf("=");
     if (pt < 0) {
       if (isGet)
-        Logger.info("BAD JDX LINE -- no '=' (line " + lineNo + "): " + line);
+        JSVLogger.info("BAD JDX LINE -- no '=' (line " + lineNo + "): " + line);
       label = line;
       if (!isGet)
         line = ""; 
@@ -95,8 +95,8 @@ public class JDXSourceStreamTokenizer {
         line = line.substring(pt + 1);
     }
     labelLineNo = lineNo;
-    if (Logger.debugging)
-      Logger.info(label);
+    if (JSVLogger.debugging)
+      JSVLogger.info(label);
     return cleanLabel(label);
   }
   
@@ -154,8 +154,8 @@ public class JDXSourceStreamTokenizer {
       e.printStackTrace();
     }
     value = trimLines(sb);
-    if (Logger.debugging)
-      Logger.info(value);
+    if (JSVLogger.debugging)
+      JSVLogger.info(value);
     return value;
   }
 

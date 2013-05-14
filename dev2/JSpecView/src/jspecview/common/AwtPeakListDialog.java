@@ -23,7 +23,7 @@ import javax.swing.JComboBox;
 import javax.swing.JTextField;
 
 import jspecview.common.Annotation.AType;
-import jspecview.util.TextFormat;
+import jspecview.util.JSVTextFormat;
 
 /**
  * Dialog for managing the peak listing 
@@ -39,7 +39,7 @@ class AwtPeakListDialog extends AwtAnnotationDialog {
 	private JTextField txtThreshold;
 //	private JTextField txtInclude;
 //	private JTextField txtSkip;
-	private JComboBox cbInterpolation;
+	private JComboBox<String> cbInterpolation;
 	private boolean skipCreate;
 
 	protected AwtPeakListDialog(String title, ScriptInterface si, JDXSpectrum spec, 
@@ -72,7 +72,7 @@ class AwtPeakListDialog extends AwtAnnotationDialog {
 			y = (c == null ? (pd.getView().minYOnScale * f 
 					+ pd.getView().maxYOnScale) * (1 -f) : c.getYVal());
 		}
-		String sy = TextFormat.getDecimalFormat(y < 1000 ? "#0.00" : "0.00E0")
+		String sy = JSVTextFormat.getDecimalFormat(y < 1000 ? "#0.00" : "0.00E0")
 				.format(y);
 		txtThreshold.setText(" " + sy);
 		//setVisible(true);

@@ -75,8 +75,8 @@ import javax.swing.ToolTipManager;
 
 import jspecview.common.Annotation.AType;
 import jspecview.export.Exporter;
-import jspecview.util.Logger;
-import jspecview.util.TextFormat;
+import jspecview.util.JSVLogger;
+import jspecview.util.JSVTextFormat;
 
 /**
  * JSVPanel class represents a View combining one or more GraphSets, each with one or more JDXSpectra.
@@ -95,7 +95,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 
   @Override
   public void finalize() {
-    Logger.info("JSVPanel " + this + " finalized");
+    JSVLogger.info("JSVPanel " + this + " finalized");
   }
 
   private AwtPopupMenu popup;
@@ -228,7 +228,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
       zoomBoxColor2 = color;
       break;
     default:
-      Logger.warn("AwtPanel --- unrecognized color: " + st);
+      JSVLogger.warn("AwtPanel --- unrecognized color: " + st);
       break;
     }
   }
@@ -319,7 +319,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   public Color getColor(ScriptToken whatColor) {
     switch (whatColor) {
     default:
-      Logger.error("awtgraphset missing color " + whatColor);
+      JSVLogger.error("awtgraphset missing color " + whatColor);
       return Color.BLACK;
     case ZOOMBOXCOLOR2:
       return zoomBoxColor2;
@@ -549,7 +549,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 				String s = ex.getMessage();
 				if (s == null)
 					return;
-				s = TextFormat.simpleReplace(s, "not accepting job.",
+				s = JSVTextFormat.simpleReplace(s, "not accepting job.",
 						"not accepting jobs.");
 				// not my fault -- Windows grammar error!
 				showMessage(s, "Printer Error");
@@ -672,7 +672,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   }
 
 	public void showMessage(String msg, String title) {
-		Logger.info(msg);
+		JSVLogger.info(msg);
 		JOptionPane.showMessageDialog(this, msg, title, (msg.startsWith("<html>") ? JOptionPane.INFORMATION_MESSAGE 
 				: JOptionPane.PLAIN_MESSAGE));	
 		getFocusNow(true);

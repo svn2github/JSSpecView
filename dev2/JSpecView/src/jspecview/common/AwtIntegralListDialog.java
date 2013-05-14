@@ -28,7 +28,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
 import jspecview.common.Annotation.AType;
-import jspecview.util.TextFormat;
+import jspecview.util.JSVTextFormat;
 
 /**
  * Dialog for managing the integral listing 
@@ -214,7 +214,7 @@ class AwtIntegralListDialog extends AwtAnnotationDialog {
 
 	@Override
 	public void tableCellSelectedEvent(int iRow, int iCol) {
-		DecimalFormat df2 = TextFormat.getDecimalFormat("#0.00");
+		DecimalFormat df2 = JSVTextFormat.getDecimalFormat("#0.00");
 		String value = tableData[iRow][1];
 		for (int i = 0; i < xyData.size(); i++) 
 			if (df2.format(xyData.get(i).getXVal()).equals(value)) {

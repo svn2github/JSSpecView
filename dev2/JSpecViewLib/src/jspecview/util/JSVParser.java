@@ -28,7 +28,7 @@ package jspecview.util;
 import java.util.BitSet;
 
 
-public class Parser {
+public class JSVParser {
 
   /// general static string-parsing class ///
 
@@ -103,9 +103,9 @@ public class Parser {
 
   private static String fixDataString(String str) {
     str = str.replace(';', str.indexOf('\n') < 0 ? '\n' : ' ');
-    str = TextFormat.trim(str, "\n \t");
-    str = TextFormat.simpleReplace(str, "\n ", "\n");
-    str = TextFormat.simpleReplace(str, "\n\n", "\n");
+    str = JSVTextFormat.trim(str, "\n \t");
+    str = JSVTextFormat.simpleReplace(str, "\n ", "\n");
+    str = JSVTextFormat.simpleReplace(str, "\n\n", "\n");
     return str;    
   }
   
@@ -147,7 +147,7 @@ public class Parser {
       } 
     }
     if (iX != nX) {
-      Logger.info("Error reading 3D data -- nX = " + nX + ", but only " + iX + " blocks read");      
+      JSVLogger.info("Error reading 3D data -- nX = " + nX + ", but only " + iX + " blocks read");      
       return new float[1][1][1];
     }
     return data;

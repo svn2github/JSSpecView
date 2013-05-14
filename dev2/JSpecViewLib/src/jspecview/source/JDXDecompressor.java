@@ -27,8 +27,8 @@ package jspecview.source;
 import java.io.IOException;
 
 import jspecview.common.Coordinate;
-import jspecview.util.Logger;
-import jspecview.util.Parser;
+import jspecview.util.JSVLogger;
+import jspecview.util.JSVParser;
 
 /**
  * JDXDecompressor contains static methods to decompress the data part of
@@ -121,7 +121,7 @@ public class JDXDecompressor {
     this.deltaX = deltaX;
     this.nPoints = nPoints;
     this.lineNumber = t.getLabelLineNo();
-    debugging = Logger.isActiveLevel(Logger.LEVEL_DEBUGHIGH);
+    debugging = JSVLogger.isActiveLevel(JSVLogger.LEVEL_DEBUGHIGH);
 
     //Logger.checkMemory();
   }
@@ -249,7 +249,7 @@ public class JDXDecompressor {
 
   private void logError(String s) {
     if (debugging)
-      Logger.debug(s);
+      JSVLogger.debug(s);
     errorLog.append(s).append('\n');  
   }
 
@@ -269,7 +269,7 @@ public class JDXDecompressor {
       return Double.NaN;
     char ch = line.charAt(ich);
     if (debugging)
-      Logger.info("" + ch);
+      JSVLogger.info("" + ch);
     switch (ch) {
     case '%':
       difVal = 0;
@@ -451,7 +451,7 @@ public class JDXDecompressor {
   }
 
   private char skipTo(String delim) {
-    int pos = Parser.findOneOf(line.substring(ich), delim);
+    int pos = JSVParser.findOneOf(line.substring(ich), delim);
     if (pos < 0) {
       ich = lineLen;
       return '\0';

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
-import jspecview.util.ColorUtil;
+import jspecview.util.JSVColorUtil;
 
 public class AwtParameters extends Parameters {
 
@@ -131,7 +131,7 @@ public class AwtParameters extends Parameters {
    * @return a <code>Color</code> from a string representation
    */
   public static Color getColorFromString(String strColor) {
-    return new Color(ColorUtil.getArgbFromString(strColor.trim()));
+    return new Color(JSVColorUtil.getArgbFromString(strColor.trim()));
   }
 
 }

@@ -54,7 +54,7 @@ import javax.swing.JApplet;
 
 import jspecview.common.JSVAppletInterface;
 import jspecview.common.JSVersion;
-import jspecview.util.Logger;
+import jspecview.util.JSVLogger;
 
 /**
  * JSpecView Applet class. For a list of parameters and scripting functionality
@@ -84,7 +84,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface {
   @Override
   public void init() {
     appletPrivate = new JSVAppletPrivate(this);
-    Logger.info(getAppletInfo());
+    JSVLogger.info(getAppletInfo());
   }
 
   private static final long serialVersionUID = 1L;

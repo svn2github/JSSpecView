@@ -16,10 +16,10 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import jspecview.source.JDXSource;
-import jspecview.util.FileManager;
-import jspecview.util.Logger;
-import jspecview.util.Parser;
-import jspecview.util.TextFormat;
+import jspecview.util.JSVFileManager;
+import jspecview.util.JSVLogger;
+import jspecview.util.JSVParser;
+import jspecview.util.JSVTextFormat;
 
 public class JSVTree extends JTree {
 
@@ -127,13 +127,13 @@ public class JSVTree extends JTree {
 
     int max = 0;
     for (int i = 0; i < panelNodes.size(); i++) {
-      float f = Parser.parseFloat(panelNodes.get(i).id);
+      float f = JSVParser.parseFloat(panelNodes.get(i).id);
       if (f >= max + 1)
         max = (int) Math.floor(f);
     }
     si.setFileCount(max);
     System.gc();
-    Logger.checkMemory();
+    JSVLogger.checkMemory();
 	}
 
 	public static void setFrameAndTreeNode(ScriptInterface si, int i) {
@@ -162,7 +162,7 @@ public class JSVTree extends JTree {
 				return null;
 			si.setNode(node, false);
 		} else {
-			int n = Parser.parseInt(value);
+			int n = JSVParser.parseInt(value);
 			if (n <= 0) {
 				si.checkOverlay();
 				return null;
@@ -180,7 +180,7 @@ public class JSVTree extends JTree {
 		DefaultTreeModel spectraTreeModel = tree.getDefaultModel();
     List<JSVPanelNode> panelNodes = si.getPanelNodes();
 
-    String fileName = FileManager.getName(source.getFilePath());
+    String fileName = JSVFileManager.getName(source.getFilePath());
     JSVPanelNode panelNode = new JSVPanelNode(null, fileName, source, null);
     JSVTreeNode fileNode = new JSVTreeNode(fileName, panelNode);
     panelNode.setTreeNode(fileNode);
@@ -253,7 +253,7 @@ public class JSVTree extends JTree {
         filename = si.getCurrentSource().getFilePath();
       close(si, "all");
     }
-    filename = TextFormat.trimQuotes(filename);
+    filename = JSVTextFormat.trimQuotes(filename);
     int firstSpec = (pt + 1 < tokens.size() ? Integer.valueOf(tokens.get(++pt)).intValue()
         : -1);
     int lastSpec = (pt + 1 < tokens.size() ? Integer.valueOf(tokens.get(++pt)).intValue()
@@ -284,7 +284,7 @@ public class JSVTree extends JTree {
         URL u = (base == null ? new URL(url) : new URL(base, url));
         filePath = u.toString();
         si.setRecentURL(filePath);
-        fileName = FileManager.getName(url);
+        fileName = JSVFileManager.getName(url);
       } catch (MalformedURLException e) {
         file = new File(url);
       }
@@ -308,7 +308,7 @@ public class JSVTree extends JTree {
       si.setCurrentSource(isView ? JDXSource.createView(specs)
           : si.createSource(data, filePath, base, firstSpec, lastSpec));
     } catch (Exception e) {
-      Logger.error(e.getMessage());
+      JSVLogger.error(e.getMessage());
       si.writeStatus(e.getMessage());
       si.setCursorObject(Cursor.getDefaultCursor());
       return FILE_OPEN_ERROR;

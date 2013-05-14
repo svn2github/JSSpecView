@@ -30,7 +30,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.Hashtable;
 import java.util.Map;
 
-public class TextFormat {
+public class JSVTextFormat {
 
   private final static DecimalFormat[] formatters = new DecimalFormat[10];
 
@@ -75,8 +75,8 @@ public class TextFormat {
       }
       String s = ("" + d).toUpperCase();
       int i = s.indexOf("E");
-      n = Parser.parseInt(s.substring(i + 1)) + n;
-      return (i < 0 ? "" + value : formatDecimal(Parser.parseFloat(s.substring(
+      n = JSVParser.parseInt(s.substring(i + 1)) + n;
+      return (i < 0 ? "" + value : formatDecimal(JSVParser.parseFloat(s.substring(
           0, i)), decimalDigits - 1)
           + "E" + (n >= 0 ? "+" : "") + n);
     }

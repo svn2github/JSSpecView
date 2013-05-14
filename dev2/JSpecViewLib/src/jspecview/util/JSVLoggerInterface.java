@@ -28,7 +28,7 @@ package jspecview.util;
 /**
  * Interface used for the logging mechanism.
  */
-public interface LoggerInterface {
+public interface JSVLoggerInterface {
 
   /**
    * Writes a log at DEBUG level.

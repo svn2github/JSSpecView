@@ -35,7 +35,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.zip.GZIPInputStream;
 
-public class FileManager {
+public class JSVFileManager {
 
 	// ALL STATIC METHODS
 	
@@ -131,7 +131,7 @@ public class FileManager {
       throws IOException {
     String[] subFileList = null;
     if (name.indexOf("|") >= 0) {
-      subFileList = TextFormat.split(name, "|");
+      subFileList = JSVTextFormat.split(name, "|");
       if (subFileList != null && subFileList.length > 0)
         name = subFileList[0];
     }
@@ -139,8 +139,8 @@ public class FileManager {
     BufferedInputStream bis = new BufferedInputStream(in, 8192);
     if (isGzip(bis)) {
       return new BufferedReader(new InputStreamReader(new GZIPInputStream(bis)));
-    } else if (ZipUtil.isZipFile(bis)) {
-      return new ZipFileSequentialReader(bis, subFileList, startCode);
+    } else if (JSVZipUtil.isZipFile(bis)) {
+      return new JSVZipFileSequentialReader(bis, subFileList, startCode);
       //danger -- converting bytes to String here.
       //we lose 128-156 or so.
       //String s = (String) ZipUtil.getZipFileContents(bis, subFileList, 1);
@@ -173,18 +173,18 @@ public class FileManager {
       URL url = (isApplet ? new URL(appletDocumentBase, name) : new URL(name));
       name = url.toString();
       if (showMsg)
-        Logger.info("JSVFileManager opening URL " + url.toString());
+        JSVLogger.info("JSVFileManager opening URL " + url.toString());
       URLConnection conn = url.openConnection();
       length = conn.getContentLength();
       in = conn.getInputStream();
     } else {
       if (showMsg)
-        Logger.info("JSVFileManager opening file " + name);
+        JSVLogger.info("JSVFileManager opening file " + name);
       File file = new File(name);
       length = (int) file.length();
       in = new FileInputStream(file);
     }
-    return new MonitorInputStream(in, length);
+    return new JSVMonitorInputStream(in, length);
   }
 
   private static URL getResource(Object object, String fileName, String[] error) {
@@ -252,29 +252,29 @@ public class FileManager {
 
   public static void fileCopy(String name, File file) {
     try {
-      BufferedReader br = FileManager.getBufferedReaderFromName(name, null,
+      BufferedReader br = JSVFileManager.getBufferedReaderFromName(name, null,
           null);
       FileWriter writer = new FileWriter(file.getAbsolutePath());
       String line = null;
       while ((line = br.readLine()) != null) {
         writer.write(line);
-        writer.write(TextFormat.newLine);
+        writer.write(JSVTextFormat.newLine);
       }
       writer.close();
     } catch (Exception e) {
-    	Logger.error(e.getMessage());
+    	JSVLogger.error(e.getMessage());
     }
   }
 
 }
 
-class MonitorInputStream extends FilterInputStream {
+class JSVMonitorInputStream extends FilterInputStream {
   int length;
   int position;
   int markPosition;
   int readEventCount;
 
-  MonitorInputStream(InputStream in, int length) {
+  JSVMonitorInputStream(InputStream in, int length) {
     super(in);
     this.length = length;
     this.position = 0;

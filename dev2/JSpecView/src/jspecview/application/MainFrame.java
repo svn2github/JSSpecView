@@ -110,10 +110,10 @@ import jspecview.common.JDXSpectrum.IRMode;
 import jspecview.export.Exporter;
 import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
-import jspecview.util.Escape;
-import jspecview.util.FileManager;
-import jspecview.util.Logger;
-import jspecview.util.TextFormat;
+import jspecview.util.JSVEscape;
+import jspecview.util.JSVFileManager;
+import jspecview.util.JSVLogger;
+import jspecview.util.JSVTextFormat;
 
 /**
  * The Main Class or Entry point of the JSpecView Application.
@@ -691,7 +691,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	public void setCurrentSource(JDXSource source) {
 		currentSource = source;
 		if (source != null)
-		  appMenu.setCloseMenuItem(FileManager.getName(source.getFilePath()));
+		  appMenu.setCloseMenuItem(JSVFileManager.getName(source.getFilePath()));
 		boolean isError = (source != null && source.getErrorLog().length() > 0);
 		setError(isError, (isError && source.getErrorLog().indexOf("Warning") >= 0));
 	}
@@ -884,7 +884,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	public synchronized void syncToJmol(String msg) {
-		Logger.info("JSV>Jmol " + msg);
+		JSVLogger.info("JSV>Jmol " + msg);
 		//System.out.println(Thread.currentThread() + "MainFrame sync JSV>Jmol 21"
 			//	+ Thread.currentThread());
 		if (jmol != null) { // MainFrame --> embedding application
@@ -924,7 +924,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	public void execClose(String value, boolean fromScript) {
-		JSVTree.close(this, TextFormat.trimQuotes(value));
+		JSVTree.close(this, JSVTextFormat.trimQuotes(value));
 		if (!fromScript || panelNodes.size() == 0) {
 			validate();
 			repaint();
@@ -1209,7 +1209,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	public JDXSource createSource(String data, String filePath, URL base,
 			int firstSpec, int lastSpec) throws Exception {
-		return FileReader.createJDXSource(FileManager
+		return FileReader.createJDXSource(JSVFileManager
 				.getBufferedReaderForString(data), filePath, null, false, loadImaginary , firstSpec,
 				lastSpec);
 	}
@@ -1245,7 +1245,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	// debugging
 
 	public void execTest(String value) {
-		System.out.println(Escape.toJSON(null, JSViewer.getPropertyAsJavaObject(this, value), false));
+		System.out.println(JSVEscape.toJSON(null, JSViewer.getPropertyAsJavaObject(this, value), false));
 		//syncScript("Jmol sending to JSpecView: jmolApplet_object__5768809713073075__JSpecView: <PeakData file=\"file:/C:/jmol-dev/workspace/Jmol-documentation/script_documentation/examples-12/jspecview/acetophenone.jdx\" index=\"31\" type=\"13CNMR\" id=\"6\" title=\"carbonyl ~200\" peakShape=\"multiplet\" model=\"acetophenone\" atoms=\"1\" xMax=\"199\" xMin=\"197\"  yMax=\"10000\" yMin=\"0\" />");
 	}
 	public void requestRepaint() {
@@ -1261,7 +1261,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	public String getFileAsString(String value) {
-		return FileManager.getFileAsString(value, null);
+		return JSVFileManager.getFileAsString(value, null);
 	}
 	
 }

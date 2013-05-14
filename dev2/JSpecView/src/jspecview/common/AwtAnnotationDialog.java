@@ -43,7 +43,7 @@ import javax.swing.event.ListSelectionListener;
 
 import jspecview.common.Annotation.AType;
 import jspecview.common.AnnotationData;
-import jspecview.util.TextFormat;
+import jspecview.util.JSVTextFormat;
 
 /**
  * Dialog for managing peak, integral, and measurement listings for a Spectrum
@@ -86,7 +86,7 @@ abstract class AwtAnnotationDialog extends AwtDialog implements AnnotationDialog
 	private Integer unitPtr;
 	protected JTextField txtFormat;
 	protected JTextField txtFontSize;
-	protected JComboBox cmbUnits;
+	protected JComboBox<String> cmbUnits;
 
 	/**
 	 * Initialises the <code>IntegralDialog</code> with the given values for minY,
@@ -351,7 +351,7 @@ abstract class AwtAnnotationDialog extends AwtDialog implements AnnotationDialog
 
 	protected void setParams() {
 		myParams.numberFormat = txtFormat.getText();
-		numberFormatter = TextFormat.getDecimalFormat("#" + myParams.numberFormat);
+		numberFormatter = JSVTextFormat.getDecimalFormat("#" + myParams.numberFormat);
 	}
 
 	private int iRowSelected = -1;

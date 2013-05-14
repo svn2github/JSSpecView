@@ -27,9 +27,9 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import jspecview.common.Coordinate;
-import jspecview.util.Logger;
-import jspecview.util.Parser;
-import jspecview.util.TextFormat;
+import jspecview.util.JSVLogger;
+import jspecview.util.JSVParser;
+import jspecview.util.JSVTextFormat;
 
 /**
  * A simple Velocity-like template form filler
@@ -144,7 +144,7 @@ class FormContext {
           formTokens.get(cmdPtr).endPtr = ptr;
           cmds.add(0, new Integer(ptr));
         } else {
-          Logger.warn("??? " + token);
+          JSVLogger.warn("??? " + token);
         }
         if (checkIf) {
           FormToken vt = formTokens.get(cmdPtr);
@@ -161,12 +161,12 @@ class FormContext {
   private String getFormTokens(String template) {
     formTokens = new ArrayList<FormToken>();
     if (template.indexOf("\r\n") >= 0)
-      template = TextFormat.replaceAllCharacters(template, "\r\n", '\n');
+      template = JSVTextFormat.replaceAllCharacters(template, "\r\n", '\n');
     template = template.replace('\r', '\n');
     String[] lines = template.split("\n");
     String token = "";
     for (int i = 0; i < lines.length && strError == null; i++) {
-      String line = TextFormat.rtrim(lines[i], " \n");
+      String line = JSVTextFormat.rtrim(lines[i], " \n");
       if (line.length() == 0)
         continue;
       int firstChar = -1;
@@ -273,7 +273,7 @@ class FormContext {
     String data = vt.data;
     data = data.replace('(', ' ');
     data = data.replace(')', ' ');
-    String[] tokens = Parser.getTokens(data);
+    String[] tokens = JSVParser.getTokens(data);
     if (tokens.length != 4) {
       return;
     }
@@ -316,15 +316,15 @@ class FormContext {
       return false;
     }
     data = data.substring(0, pt);
-    data = TextFormat.simpleReplace(data, "=", " = ");
-    data = TextFormat.simpleReplace(data, "!", " ! ");
-    data = TextFormat.simpleReplace(data, "<", " < ");
-    data = TextFormat.simpleReplace(data, ">", " > ");
-    data = TextFormat.simpleReplace(data, "=  =", "==");
-    data = TextFormat.simpleReplace(data, "<  =", "<=");
-    data = TextFormat.simpleReplace(data, ">  =", ">=");
-    data = TextFormat.simpleReplace(data, "!  =", "!=");
-    String[] tokens = Parser.getTokens(data);
+    data = JSVTextFormat.simpleReplace(data, "=", " = ");
+    data = JSVTextFormat.simpleReplace(data, "!", " ! ");
+    data = JSVTextFormat.simpleReplace(data, "<", " < ");
+    data = JSVTextFormat.simpleReplace(data, ">", " > ");
+    data = JSVTextFormat.simpleReplace(data, "=  =", "==");
+    data = JSVTextFormat.simpleReplace(data, "<  =", "<=");
+    data = JSVTextFormat.simpleReplace(data, ">  =", ">=");
+    data = JSVTextFormat.simpleReplace(data, "!  =", "!=");
+    String[] tokens = JSVParser.getTokens(data);
     String key = tokens[0].substring(1);
     boolean isNot = false;
     boolean x = false;
@@ -339,16 +339,16 @@ class FormContext {
     case 2:
       // #if(!$x)
       if (key.equals("!")) {
-        key = TextFormat.trim(tokens[1], "$ ");
+        key = JSVTextFormat.trim(tokens[1], "$ ");
         value = getValue(key);
         return (value.equals("false") || value.equals(""));
       }
       break;
     case 3:
       // #if($x op "y")
-      key = TextFormat.trim(tokens[0], "$ ");
+      key = JSVTextFormat.trim(tokens[0], "$ ");
       value = getValue(key);
-      compare = TextFormat.trim(tokens[2], " \"");
+      compare = JSVTextFormat.trim(tokens[2], " \"");
       switch (findOp(tokens[1])) {
       case OP_EQ:
       case OP_EEQ:
@@ -356,12 +356,12 @@ class FormContext {
       case OP_NE:
         return (!value.equals(compare));
       default:
-        Logger.warn("???? " + key + " " + compare + " " + value);
+        JSVLogger.warn("???? " + key + " " + compare + " " + value);
       }
       break;
     }
     } catch (Exception e) {
-      Logger.warn(e.getMessage() + " in VelocityContext.merge");
+      JSVLogger.warn(e.getMessage() + " in VelocityContext.merge");
     }
 //    if (value != null) {
   //    x = !value.equalsIgnoreCase("false") && !value.equalsIgnoreCase("0");

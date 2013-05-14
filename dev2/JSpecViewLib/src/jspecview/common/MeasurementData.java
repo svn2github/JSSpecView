@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import jspecview.common.Annotation.AType;
-import jspecview.util.TextFormat;
+import jspecview.util.JSVTextFormat;
 
 class MeasurementData extends ArrayList<Measurement> implements AnnotationData {
 
@@ -82,9 +82,9 @@ class MeasurementData extends ArrayList<Measurement> implements AnnotationData {
 	String[][] getMeasurementListArray(String units) {
 		this.units = units;
 		double[][] ddata = getMeasurementListArrayReal(units);
-		DecimalFormat dfx = TextFormat.getDecimalFormat(spec.isNMR() ? "#0.0000"
+		DecimalFormat dfx = JSVTextFormat.getDecimalFormat(spec.isNMR() ? "#0.0000"
 				: "#0.00");
-		DecimalFormat dfdx = TextFormat
+		DecimalFormat dfdx = JSVTextFormat
 				.getDecimalFormat(spec.isHNMR() && units.equals("ppm") ? "#0.0000" : "#0.00");
 		String[][] data = new String[size()][];
 		for (int i = size(); --i >= 0;)

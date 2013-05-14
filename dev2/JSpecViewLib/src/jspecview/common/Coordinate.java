@@ -26,7 +26,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import jspecview.util.TextFormat;
+import jspecview.util.JSVTextFormat;
 
 
 /**
@@ -43,7 +43,7 @@ public class Coordinate {
   private double yVal = 0;
 
   /** the format of the string returned by getXString() and getYString() */
-  private static DecimalFormat formatter = TextFormat.getDecimalFormat("0.########");
+  private static DecimalFormat formatter = JSVTextFormat.getDecimalFormat("0.########");
 
   /**
    * Constructor

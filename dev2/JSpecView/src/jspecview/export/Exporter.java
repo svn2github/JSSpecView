@@ -25,8 +25,8 @@ import jspecview.common.JSVPanel;
 import jspecview.common.PanelData;
 import jspecview.common.ScriptInterface;
 import jspecview.common.ScriptToken;
-import jspecview.util.FileManager;
-import jspecview.util.TextFormat;
+import jspecview.util.JSVFileManager;
+import jspecview.util.JSVTextFormat;
 
 public class Exporter {
 
@@ -121,7 +121,7 @@ public class Exporter {
     Component panel = (Component) jsvp;
     dialog.setLocation((panel.getLocation().x + panel.getSize().width) / 2,
         (panel.getLocation().y + panel.getSize().height) / 2);
-    final JComboBox cb = new JComboBox(items);
+    final JComboBox<Object> cb = new JComboBox<Object>(items);
     Dimension d = new Dimension(120, 25);
     cb.setPreferredSize(d);
     cb.setMaximumSize(d);
@@ -165,14 +165,14 @@ public class Exporter {
     default:
       return "EXPORT what?";
     case 1:
-      fileName = TextFormat.trimQuotes(tokens.get(0));
+      fileName = JSVTextFormat.trimQuotes(tokens.get(0));
       int pt = fileName.indexOf(".");
       if (pt < 0)
         return "EXPORT mode?";
       break;
     case 2:
       mode = tokens.get(0).toUpperCase();
-      fileName = TextFormat.trimQuotes(tokens.get(1));
+      fileName = JSVTextFormat.trimQuotes(tokens.get(1));
       break;
     }
     String ext = fileName.substring(fileName.lastIndexOf(".") + 1)
@@ -212,7 +212,7 @@ public class Exporter {
     	return null;
     String msg = "OK";
     if (imode == ExportType.SOURCE)
-      FileManager.fileCopy(jsvp.getPanelData().getSpectrum().getFilePath(), file);
+      JSVFileManager.fileCopy(jsvp.getPanelData().getSpectrum().getFilePath(), file);
     else
       msg = exportSpectrumOrImage(jsvp, imode, index, file
           .getAbsolutePath());

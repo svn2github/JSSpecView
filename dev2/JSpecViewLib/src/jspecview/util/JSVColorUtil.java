@@ -26,7 +26,7 @@ package jspecview.util;
 import java.util.Hashtable;
 import java.util.Map;
 
- public class ColorUtil {
+ public class JSVColorUtil {
 
   /**
    * accepts [xRRGGBB] or [0xRRGGBB] or [0xFFRRGGBB] or #RRGGBB or
@@ -40,7 +40,7 @@ import java.util.Map;
     if (strColor == null || (len = strColor.length()) == 0)
       return 0;
     float red, grn, blu;
-    strColor = TextFormat.replaceAllCharacters(strColor, " ;", ',');
+    strColor = JSVTextFormat.replaceAllCharacters(strColor, " ;", ',');
     if (strColor.indexOf(',') >= 0) {
       strColor = "[" + strColor + "]";
       len += 2;
@@ -48,14 +48,14 @@ import java.util.Map;
     if (strColor.charAt(0) == '[' && strColor.charAt(len - 1) == ']') {
       String check;
       if (strColor.indexOf(",") >= 0) {
-        String[] tokens = TextFormat.split(strColor.substring(1, strColor
+        String[] tokens = JSVTextFormat.split(strColor.substring(1, strColor
             .length() - 1), ",");
         if (tokens.length != 3)
           return 0;
-        red = Parser.parseFloat(tokens[0]);
-        grn = Parser.parseFloat(tokens[1]);
-        blu = Parser.parseFloat(tokens[2]);
-        return ColorUtil.colorTriadToInt(red, grn, blu);
+        red = JSVParser.parseFloat(tokens[0]);
+        grn = JSVParser.parseFloat(tokens[1]);
+        blu = JSVParser.parseFloat(tokens[2]);
+        return JSVColorUtil.colorTriadToInt(red, grn, blu);
       }
       switch (len) {
       case 9:
@@ -77,7 +77,7 @@ import java.util.Map;
         red = Integer.parseInt(strColor.substring(1, 3), 16);
         grn = Integer.parseInt(strColor.substring(3, 5), 16);
         blu = Integer.parseInt(strColor.substring(5, 7), 16);
-        return ColorUtil.colorTriadToInt(red, grn, blu);
+        return JSVColorUtil.colorTriadToInt(red, grn, blu);
       } catch (NumberFormatException e) {
         return 0;
       }

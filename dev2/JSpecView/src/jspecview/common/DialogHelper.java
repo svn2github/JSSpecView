@@ -35,8 +35,8 @@ import javax.swing.table.TableCellRenderer;
 import jspecview.common.Annotation.AType;
 import jspecview.export.Exporter;
 import jspecview.export.Exporter.ExportType;
-import jspecview.util.Base64;
-import jspecview.util.FileManager;
+import jspecview.util.JSVBase64;
+import jspecview.util.JSVFileManager;
 
 /**
  * just a class I made to separate the construction of the AnnotationDialogs
@@ -103,9 +103,9 @@ public class DialogHelper {
 		return obj;
 	}
 
-	protected JComboBox addSelectOption(String name, String label, String[] info,
+	protected JComboBox<String> addSelectOption(String name, String label, String[] info,
 			int iPt, boolean visible) {
-		JComboBox obj = new JComboBox(info);
+		JComboBox<String> obj = new JComboBox<String>(info);
 		obj.setSelectedIndex(iPt);
 		if (visible) {
 			obj.setActionCommand(name);
@@ -285,7 +285,7 @@ public class DialogHelper {
 					return null;
 			}
 			((AwtPanel) jsvp).printPanel(pl, os, printJobTitle);
-			s = (isBase64 ? Base64.getBase64(
+			s = (isBase64 ? JSVBase64.getBase64(
 					((ByteArrayOutputStream) os).toByteArray()).toString() : "OK");
 		} catch (Exception e) {
 			jsvp.showMessage(e.getMessage(), "File Error");
@@ -388,7 +388,7 @@ public class DialogHelper {
 	public String getSuggestedFileName(ExportType imode) {
 		PanelData pd = si.getSelectedPanel().getPanelData();
     String sourcePath = pd.getSpectrum().getFilePath();
-    String newName = FileManager.getName(sourcePath);
+    String newName = JSVFileManager.getName(sourcePath);
     int pt = newName.lastIndexOf(".");
     String name = (pt < 0 ? newName : newName.substring(0, pt));
     String ext = ".jdx";

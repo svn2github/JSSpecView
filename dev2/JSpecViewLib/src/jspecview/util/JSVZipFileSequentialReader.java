@@ -35,7 +35,7 @@ import java.util.zip.ZipInputStream;
  * @author Bob Hanson hansonr@stolaf.edu
  *
  */
-public class ZipFileSequentialReader extends BufferedReader {
+public class JSVZipFileSequentialReader extends BufferedReader {
 
   private String[] subFileList;
   private ZipInputStream zis;
@@ -45,7 +45,7 @@ public class ZipFileSequentialReader extends BufferedReader {
   private String startCode;
   private int lineCount;
   
-  public ZipFileSequentialReader(BufferedInputStream bis, String[] subFileList, String startCode) {
+  public JSVZipFileSequentialReader(BufferedInputStream bis, String[] subFileList, String startCode) {
     super(new StringReader(""));
     this.subFileList = subFileList;
     zis = new ZipInputStream(bis);
@@ -117,10 +117,10 @@ public class ZipFileSequentialReader extends BufferedReader {
       return true;
     for (int i = subFileList.length; --i >= 0; )
       if (subFileList[i].equals(name)) {
-        Logger.info("...reading zip entry " + name);        
+        JSVLogger.info("...reading zip entry " + name);        
         return true;
       }
-    Logger.info("...skipping zip entry " + name);        
+    JSVLogger.info("...skipping zip entry " + name);        
     return false;
   }
 

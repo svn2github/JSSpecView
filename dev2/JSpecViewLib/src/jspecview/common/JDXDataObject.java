@@ -4,9 +4,9 @@ import java.text.DecimalFormat;
 
 import jspecview.common.Annotation.AType;
 import jspecview.exception.JSpecViewException;
-import jspecview.util.Logger;
-import jspecview.util.Parser;
-import jspecview.util.TextFormat;
+import jspecview.util.JSVLogger;
+import jspecview.util.JSVParser;
+import jspecview.util.JSVTextFormat;
 
 /**
  * spectrum data AS READ FROM FILE
@@ -176,7 +176,7 @@ public abstract class JDXDataObject extends JDXHeader {
 	public void setObservedNucleus(String value) {
 		observedNucl = value;
 		if (numDim == 1)
-  		parent.nucleusX = nucleusX = TextFormat.trim(value,"[]^<>");
+  		parent.nucleusX = nucleusX = JSVTextFormat.trim(value,"[]^<>");
 	}
 
   /**
@@ -254,7 +254,7 @@ public abstract class JDXDataObject extends JDXHeader {
       freq2dX = freq;
     else
       freq2dY = freq;
-    Logger.info("Freq for " + nuc + " = " + freq);
+    JSVLogger.info("Freq for " + nuc + " = " + freq);
   }
 
 
@@ -426,7 +426,7 @@ public abstract class JDXDataObject extends JDXHeader {
     int pt = 0;
     while (pt < nuc.length() && !Character.isDigit(nuc.charAt(pt)))
       pt++;
-    pt = Parser.parseInt(nuc.substring(pt));
+    pt = JSVParser.parseInt(nuc.substring(pt));
     int i = 0;
     for (; i < gyroData.length; i += 2)
       if (gyroData[i] >= pt)
@@ -651,7 +651,7 @@ public abstract class JDXDataObject extends JDXHeader {
 				// 2D?
 			}
 		}
-		DecimalFormat formatter = TextFormat.getDecimalFormat(hash);
+		DecimalFormat formatter = JSVTextFormat.getDecimalFormat(hash);
 		return (dx < 0.1 ? "" : formatter.format(dx) + units);
 	}
 

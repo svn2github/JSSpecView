@@ -4,7 +4,7 @@ import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
 
-import jspecview.util.TextFormat;
+import jspecview.util.JSVTextFormat;
 
 /**
  * Stores information
@@ -252,7 +252,7 @@ public class ScaleData {
 				exp <= 0 ? hash1.substring(0, Math.min(hash1.length(), Math.abs(exp) + 3))
 				: exp > 3 ? "" 
 				: "#");
-		formatters[i] = TextFormat.getDecimalFormat(hash);
+		formatters[i] = JSVTextFormat.getDecimalFormat(hash);
 		
 		// set step for numbers
     int j = 0;

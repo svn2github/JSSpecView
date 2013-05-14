@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-public class ZipUtil {
+public class JSVZipUtil {
 
   public static boolean isZipFile(InputStream is) throws IOException {
     byte[] abMagic = new byte[4];
@@ -124,7 +124,7 @@ public class ZipUtil {
       s = getZipDirectoryOrErrorAndClose(is, false);
       is.close();
     } catch (Exception e) { 
-      Logger.error(e.getMessage());
+      JSVLogger.error(e.getMessage());
     }
     for (int i = 0; i < s.length; i++)
       sb.append(s[i]).append('\n');
@@ -137,7 +137,7 @@ public class ZipUtil {
       s = getZipDirectoryOrErrorAndClose(is, addManifest);
       is.close();
     } catch (Exception e) { 
-      Logger.error(e.getMessage());
+      JSVLogger.error(e.getMessage());
     }
     return s;
   }
@@ -184,7 +184,7 @@ public class ZipUtil {
     while (zis.available() == 1 && (len = zis.read(buf)) > 0) {
       totalLen += len;
       if (totalLen >= bytes.length)
-        bytes = ArrayUtil.ensureLength(bytes, totalLen * 2);
+        bytes = JSVArrayUtil.ensureLength(bytes, totalLen * 2);
       System.arraycopy(buf, 0, bytes, totalLen - len, len);
     }
     buf = new byte[totalLen];
@@ -200,7 +200,7 @@ public class ZipUtil {
     while ((len = bis.read(buf)) > 0) {
       totalLen += len;
       if (totalLen >= bytes.length)
-        bytes = ArrayUtil.ensureLength(bytes, totalLen * 2);
+        bytes = JSVArrayUtil.ensureLength(bytes, totalLen * 2);
       System.arraycopy(buf, 0, bytes, totalLen - len, len);
     }
     buf = new byte[totalLen];

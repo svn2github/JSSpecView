@@ -49,7 +49,7 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 import jspecview.common.JSVersion;
-import jspecview.util.Logger;
+import jspecview.util.JSVLogger;
 
 import org.jmol.api.JSVInterface;
 
@@ -75,7 +75,7 @@ public class JSpecView implements JSVInterface {
     } catch (Exception e) {
     }
 
-		Logger.info("JSpecView Application " + JSVersion.VERSION);
+		JSVLogger.info("JSpecView Application " + JSVersion.VERSION);
     JSpecView jsv = new JSpecView();
     jsv.mainFrame = new MainFrame(null, jsv);
 

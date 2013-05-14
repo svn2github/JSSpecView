@@ -10,9 +10,9 @@ import java.util.Map;
 
 import jspecview.common.Annotation.AType;
 import jspecview.common.PanelData.LinkMode;
-import jspecview.util.Logger;
-import jspecview.util.Parser;
-import jspecview.util.TextFormat;
+import jspecview.util.JSVLogger;
+import jspecview.util.JSVParser;
+import jspecview.util.JSVTextFormat;
 
 abstract class GraphSet implements XYScaleConverter {
 
@@ -2433,7 +2433,7 @@ abstract class GraphSet implements XYScaleConverter {
 			// }
 		} else if (haveIntegralDisplayed(iSpec)) {
 			yPt = getIntegrationGraph(iSpec).getPercentYValueAt(xPt);
-			xx += ", " + TextFormat.getDecimalFormat("#0.0").format(yPt);
+			xx += ", " + JSVTextFormat.getDecimalFormat("#0.0").format(yPt);
 		}
 		pd.setToolTipText(
 						(pendingMeasurement != null || selectedMeasurement != null || selectedIntegral != null ? 
@@ -2767,12 +2767,12 @@ abstract class GraphSet implements XYScaleConverter {
 			if (peak == null) {
 				continue;
 			}
-			String xMin = Parser.getQuotedAttribute(peak, "xMin");
-			String xMax = Parser.getQuotedAttribute(peak, "xMax");
+			String xMin = JSVParser.getQuotedAttribute(peak, "xMin");
+			String xMax = JSVParser.getQuotedAttribute(peak, "xMax");
 			if (xMin == null || xMax == null)
 				return;
-			float x1 = Parser.parseFloat(xMin);
-			float x2 = Parser.parseFloat(xMax);
+			float x1 = JSVParser.parseFloat(xMin);
+			float x2 = JSVParser.parseFloat(xMax);
 			if (Float.isNaN(x1) || Float.isNaN(x2))
 				return;
 			pd.addHighlight(this, x1, x2, spec, 200, 200, 200, 200);
@@ -3019,7 +3019,7 @@ abstract class GraphSet implements XYScaleConverter {
 		setFractionalPositions(pd, graphSets, linkMode);
 		for (int i = graphSets.size(); --i >= 0;) {
 			graphSets.get(i).initGraphSet(startIndex, endIndex);
-			Logger.info("JSVGraphSet " + (i + 1) + " nSpectra = "
+			JSVLogger.info("JSVGraphSet " + (i + 1) + " nSpectra = "
 					+ graphSets.get(i).nSpectra);
 		}
 		return graphSets;

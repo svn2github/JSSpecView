@@ -39,11 +39,11 @@ import jspecview.common.JDXSpectrum;
 import jspecview.common.PeakInfo;
 import jspecview.exception.JDXSourceException;
 import jspecview.exception.JSpecViewException;
-import jspecview.util.Escape;
-import jspecview.util.FileManager;
-import jspecview.util.Logger;
-import jspecview.util.Parser;
-import jspecview.util.ZipFileSequentialReader;
+import jspecview.util.JSVEscape;
+import jspecview.util.JSVFileManager;
+import jspecview.util.JSVLogger;
+import jspecview.util.JSVParser;
+import jspecview.util.JSVZipFileSequentialReader;
 
 /**
  * <code>JDXFileReader</code> reads JDX data, including complex BLOCK files that
@@ -113,7 +113,7 @@ public class FileReader {
    */
   public static JDXSource createJDXSource(InputStream in, boolean obscure, boolean loadImaginary)
       throws IOException, JSpecViewException {
-    return createJDXSource(FileManager.getBufferedReaderForInputStream(in),
+    return createJDXSource(JSVFileManager.getBufferedReaderForInputStream(in),
         null, null, obscure, loadImaginary, -1, -1);
   }
 
@@ -140,7 +140,7 @@ public class FileReader {
     
     try {
       if (filePath != null)
-        br = FileManager.getBufferedReaderFromName(filePath, appletDocumentBase, "##TITLE");
+        br = JSVFileManager.getBufferedReaderFromName(filePath, appletDocumentBase, "##TITLE");
       br.mark(400);
       char[] chs = new char[400];
       br.read(chs);
@@ -183,7 +183,7 @@ public class FileReader {
   private JDXSource getJDXSource(BufferedReader br) throws JSpecViewException {
 
     source = new JDXSource(JDXSource.TYPE_SIMPLE, filePath);
-    isZipFile = (br instanceof ZipFileSequentialReader);
+    isZipFile = (br instanceof JSVZipFileSequentialReader);
     t = new JDXSourceStreamTokenizer(br);
     errorLog = new StringBuffer();
 
@@ -250,7 +250,7 @@ public class FileReader {
 
   private boolean addSpectrum(JDXSpectrum spectrum, boolean forceSub) {
   	if (!loadImaginary && spectrum.isImaginary()) {
-  		Logger.info("FileReader skipping imaginary spectrum -- use LOADIMAGINARY TRUE to load this spectrum.");
+  		JSVLogger.info("FileReader skipping imaginary spectrum -- use LOADIMAGINARY TRUE to load this spectrum.");
   		return true;
   	}
     nSpec++;
@@ -274,7 +274,7 @@ public class FileReader {
   private JDXSource getBlockSpectra(List<String[]> sourceLDRTable)
       throws JSpecViewException {
 
-    Logger.debug("--JDX block start--");
+    JSVLogger.debug("--JDX block start--");
     String label = "";
     boolean isNew = (source.type == JDXSource.TYPE_SIMPLE);
     boolean forceSub = false;
@@ -287,7 +287,7 @@ public class FileReader {
         t.getValue();
       }
       if (label.equals("##BLOCKS")) {
-        int nBlocks = Parser.parseInt(t.getValue());
+        int nBlocks = JSVParser.parseInt(t.getValue());
         if (nBlocks > 100 && firstSpec <=0)
           forceSub = true;
       }
@@ -310,7 +310,7 @@ public class FileReader {
       String tmp;
       while ((tmp = t.getLabel()) != null) {
           if (label.equals("##END") && isEnd(tmp)) {
-            Logger.debug("##END= " + t.getValue());
+            JSVLogger.debug("##END= " + t.getValue());
             break;
           }
         label = tmp;
@@ -382,7 +382,7 @@ public class FileReader {
     }
     addErrorLogSeparator();
     source.setErrorLog(errorLog.toString());
-    Logger.debug("--JDX block end--");
+    JSVLogger.debug("--JDX block end--");
     return source;
   }
 
@@ -541,7 +541,7 @@ public class FileReader {
     }
     addErrorLogSeparator();
     source.setErrorLog(errorLog.toString());
-    Logger.info("NTUPLE MIN/MAX Y = " + minMaxY[0] + " " + minMaxY[1]);
+    JSVLogger.info("NTUPLE MIN/MAX Y = " + minMaxY[0] + " " + minMaxY[1]);
     return source;
   }
 
@@ -550,18 +550,18 @@ public class FileReader {
     BufferedReader reader = new BufferedReader(new StringReader(peakList));
     try {
       String line = discardLinesUntilContains(reader, "<Peaks");
-      String type = Parser.getQuotedAttribute(line, "type");
-      piUnitsX = Parser.getQuotedAttribute(line, "xLabel");
-      piUnitsY = Parser.getQuotedAttribute(line, "yLabel");
+      String type = JSVParser.getQuotedAttribute(line, "type");
+      piUnitsX = JSVParser.getQuotedAttribute(line, "xLabel");
+      piUnitsY = JSVParser.getQuotedAttribute(line, "yLabel");
       PeakInfo peak;
-      String path = Escape.escape(filePath.replace('\\', '/'));
+      String path = JSVEscape.escape(filePath.replace('\\', '/'));
       while ((line = reader.readLine()) != null
           && !(line = line.trim()).startsWith("</Peaks>")) {
         if (line.startsWith("<PeakData")) {
           String stringInfo = "<PeakData file=" + path + " index=\""
           + (++index) + "\" type=\"" + type + "\" "
           + line.substring(9).trim();
-          Logger.info("JSpecView found " + stringInfo);
+          JSVLogger.info("JSpecView found " + stringInfo);
           peak = new PeakInfo(stringInfo);
           peakData.add(peak);
         }
@@ -731,7 +731,7 @@ public class FileReader {
     if (label.equals("##JCAMPDX")) {
       String value = t.getValue();
       jdxHeader.jcampdx = value;
-      float version = Parser.parseFloat(value);
+      float version = JSVParser.parseFloat(value);
       if (version >= 6.0 || Float.isNaN(version)) {
         if (errorLog != null)
           errorLog
@@ -939,7 +939,7 @@ public class FileReader {
       //errorLog.append("No Errors decompressing data\n");
     }
 
-    if (Logger.debugging) {
+    if (JSVLogger.debugging) {
       System.err.println(errorLog.toString());
     }
 

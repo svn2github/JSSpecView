@@ -99,7 +99,7 @@ public class PreferencesDialog extends JDialog {
   JPanel buttonPanel = new JPanel();
   JButton okButton = new JButton();
   private BorderLayout borderLayout6 = new BorderLayout();
-  private DefaultListModel elModel = new DefaultListModel();
+  private DefaultListModel<String> elModel = new DefaultListModel<String>();
   private JPanel topPanel = new JPanel();
   private JPanel displayFontPanel = new JPanel();
   private JPanel colorSchemePanel = new JPanel();
@@ -107,16 +107,16 @@ public class PreferencesDialog extends JDialog {
   private JLabel elementLabel = new JLabel();
   private GridBagLayout gridBagLayout1 = new GridBagLayout();
   private JCheckBox defaultFontCheckBox = new JCheckBox();
-  private JComboBox fontComboBox = new JComboBox();
+  private JComboBox<String> fontComboBox = new JComboBox<String>();
   private GridBagLayout gridBagLayout2 = new GridBagLayout();
   private JPanel colorPanel = new JPanel();
-  private JComboBox schemeComboBox = new JComboBox();
+  private JComboBox<String> schemeComboBox = new JComboBox<String>();
   private GridLayout gridLayout1 = new GridLayout();
   private JCheckBox defaultColorCheckBox = new JCheckBox();
   private JButton customButton = new JButton();
   private GridBagLayout gridBagLayout3 = new GridBagLayout();
   private JScrollPane listScrollPane = new JScrollPane();
-  JList elementList = new JList();
+  JList<String> elementList = new JList<String>();
   private JButton colorButton8 = new JButton();
   private JButton colorButton7 = new JButton();
   private JButton colorButton6 = new JButton();
@@ -645,7 +645,7 @@ public class PreferencesDialog extends JDialog {
 
     // load names of fonts in fontComboBox
     GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-    String allFontNames[] = ge.getAvailableFontFamilyNames();
+    String[] allFontNames = ge.getAvailableFontFamilyNames();
     for (int i = 0; i < allFontNames.length; i++)
       fontComboBox.addItem(allFontNames[i]);
 
@@ -761,7 +761,7 @@ public class PreferencesDialog extends JDialog {
       JButton button = (JButton)ae.getSource();
       Color color = button.getBackground();
       currentColorButton.setBackground(color);
-      String element = (String)elementList.getSelectedValue();
+      String element = elementList.getSelectedValue();
       currentDS.setColor(ScriptToken.getScriptToken(element), color);
       // kludge
       currentDS.setName("Current");
@@ -781,10 +781,11 @@ public class PreferencesDialog extends JDialog {
      * @param lse
      *        the ListSelectionEvent
      */
-    public void valueChanged(ListSelectionEvent lse) {
+    @SuppressWarnings("unchecked")
+		public void valueChanged(ListSelectionEvent lse) {
       currentColorButton.setBackground((Color) currentDS
-          .getColor(ScriptToken.getScriptToken((String) ((JList) lse
-              .getSource()).getSelectedValue())));
+          .getColor(ScriptToken.getScriptToken(
+          		((JList<String>)lse.getSource()).getSelectedValue())));
     }
   }
 
@@ -889,7 +890,7 @@ public class PreferencesDialog extends JDialog {
     Color color = JColorChooser.showDialog(this, "Choose Color", Color.black);
     if(color != null){
       currentColorButton.setBackground(color);
-      currentDS.setColor(ScriptToken.getScriptToken((String)elementList.getSelectedValue()), color);
+      currentDS.setColor(ScriptToken.getScriptToken(elementList.getSelectedValue()), color);
       currentDS.setName("Current");
       updatePreviewPanel();
     }
@@ -954,7 +955,7 @@ public class PreferencesDialog extends JDialog {
       boolean found = false;
       // add if not already in combobox
       for (int i=0; i < schemeComboBox.getItemCount(); i++) {
-        String item = (String)schemeComboBox.getItemAt(i);
+        String item = schemeComboBox.getItemAt(i);
         if(item.equals(input)){
           found = true;
           break;
@@ -976,8 +977,9 @@ public class PreferencesDialog extends JDialog {
    * chosen
    * @param e the ActionEvent
    */
-  void schemeComboBox_actionPerformed(ActionEvent e) {
-    JComboBox schemeCB = (JComboBox)e.getSource();
+  @SuppressWarnings("unchecked")
+	void schemeComboBox_actionPerformed(ActionEvent e) {
+    JComboBox<String> schemeCB = (JComboBox<String>)e.getSource();
     String schemeName = (String)schemeCB.getSelectedItem();
     Parameters ds = null;
 
@@ -1015,8 +1017,9 @@ public class PreferencesDialog extends JDialog {
    * Changes the font of the current DisplayScheme
    * @param e the ActionEvent
    */
-  void fontComboBox_actionPerformed(ActionEvent e) {
-    String fontName = (String)((JComboBox)e.getSource()).getSelectedItem();
+  @SuppressWarnings("unchecked")
+	void fontComboBox_actionPerformed(ActionEvent e) {
+    String fontName = (String)((JComboBox<String>)e.getSource()).getSelectedItem();
     currentDS.setDisplayFont(fontName);
     // kludge
     currentDS.setName("Current");

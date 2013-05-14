@@ -2,7 +2,7 @@ package jspecview.common;
 
 import java.util.StringTokenizer;
 
-import jspecview.util.TextFormat;
+import jspecview.util.JSVTextFormat;
 
 public class ScriptCommandTokenizer extends StringTokenizer {
 
@@ -16,7 +16,7 @@ public class ScriptCommandTokenizer extends StringTokenizer {
     if (s.charAt(0) != '"')
       return s;
     if (s.endsWith("\"") && s.length() > 1)
-      return (removeQuotes ? TextFormat.trimQuotes(s) : s);
+      return (removeQuotes ? JSVTextFormat.trimQuotes(s) : s);
     StringBuffer sb = new StringBuffer(s.substring(1));
     s = null;
     while (params.hasMoreTokens() && !(s = params.nextToken()).endsWith("\"")) {

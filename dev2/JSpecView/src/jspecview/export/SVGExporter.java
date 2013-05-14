@@ -31,8 +31,8 @@ import jspecview.common.AwtParameters;
 import jspecview.common.Coordinate;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.ScaleData;
-import jspecview.util.Logger;
-import jspecview.util.TextFormat;
+import jspecview.util.JSVLogger;
+import jspecview.util.JSVTextFormat;
 
 /**
  * class <code>SVGExporter</code> contains static methods to export a Graph as
@@ -108,7 +108,7 @@ class SVGExporter extends FormExporter {
 
     initForm(fileName);
 
-    DecimalFormat formatter2 = TextFormat.getDecimalFormat("0.######");
+    DecimalFormat formatter2 = JSVTextFormat.getDecimalFormat("0.######");
 
     ScaleData scaleData = new ScaleData(xyCoords, startDataPointIndex, endDataPointIndex, isContinuous, isInverted);
 
@@ -314,7 +314,7 @@ class SVGExporter extends FormExporter {
     context.put("numDecimalPlacesY", new Integer(Math.abs(scaleData.hashNums[1])));
 
     String vm = (exportForInkscape ? "plot_ink.vm" : "plot.vm");
-    Logger.info("SVGExporter using " + vm);
+    JSVLogger.info("SVGExporter using " + vm);
     return writeForm(vm);
   }
   

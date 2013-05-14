@@ -24,8 +24,8 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-import jspecview.util.FileManager;
-import jspecview.util.Logger;
+import jspecview.util.JSVFileManager;
+import jspecview.util.JSVLogger;
 
 /**
  * The XMLExporter should be a totally generic exporter
@@ -55,14 +55,14 @@ abstract class FormExporter {
 
   protected String writeForm(String templateFile) throws IOException {
     String[] error = new String[1];
-    String template = FileManager.getResourceString(this, templateFile, error);
+    String template = JSVFileManager.getResourceString(this, templateFile, error);
     if (template == null) {
-      Logger.error(error[0]);
+      JSVLogger.error(error[0]);
       return error[0];
     }
     errMsg = context.setTemplate(template);
     if (errMsg != null) {
-      Logger.error(errMsg);
+      JSVLogger.error(errMsg);
       return errMsg;
     }
 
@@ -72,7 +72,7 @@ abstract class FormExporter {
     if (writer == null)
       return errMsg;
     if (errMsg != null) {
-      Logger.error(errMsg);
+      JSVLogger.error(errMsg);
       throw new IOException(errMsg);
     }
 

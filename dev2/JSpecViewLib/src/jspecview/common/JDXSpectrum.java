@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.List;
 
 import jspecview.source.JDXSourceStreamTokenizer;
-import jspecview.util.Logger;
+import jspecview.util.JSVLogger;
 
 /**
  * <code>JDXSpectrum</code> implements the Interface Spectrum for the display of
@@ -141,8 +141,8 @@ public class JDXSpectrum extends JDXDataObject {
     this.piUnitsY = piUnitsY;
     for (int i = list.size(); --i >= 0; )
       peakList.get(i).spectrum = this;
-    if (Logger.debugging)
-      Logger.info("Spectrum " + getTitle() + " peaks: " + list.size());
+    if (JSVLogger.debugging)
+      JSVLogger.info("Spectrum " + getTitle() + " peaks: " + list.size());
     return list.size();
   }
 

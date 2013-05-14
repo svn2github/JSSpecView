@@ -25,7 +25,7 @@ package jspecview.util;
 
 import java.lang.reflect.Array;
 
-final public class ArrayUtil {
+final public class JSVArrayUtil {
 
   public static Object ensureLength(Object array, int minimumLength) {
     if (array != null && Array.getLength(array) >= minimumLength)
