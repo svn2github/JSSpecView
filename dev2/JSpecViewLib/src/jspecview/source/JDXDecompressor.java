@@ -238,7 +238,7 @@ public class JDXDecompressor {
     } catch (IOException ioe) {
     }
     if (nPoints != ipt) {
-      logError("Decompressor did not find " + nPoints
+      logError("Decompr	essor did not find " + nPoints
           + " points -- instead " + ipt);
       Coordinate[] temp = new Coordinate[ipt];
       System.arraycopy(xyCoords, 0, temp, 0, ipt);

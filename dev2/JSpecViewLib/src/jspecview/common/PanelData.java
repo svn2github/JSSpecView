@@ -730,7 +730,7 @@ public class PanelData {
 	void notifyPeakPickedListeners(PeakPickEvent p) {
 		if (p == null) {
 			p = new PeakPickEvent(owner, coordClicked, getSpectrum()
-					.getAssociatedPeakInfo(coordClicked));
+					.getAssociatedPeakInfo(xPixelClicked, coordClicked));
 		}
 		// PeakInfo pi = p.getPeakInfo();
 		// if (pi.getAtoms() == null) {
@@ -942,6 +942,7 @@ public class PanelData {
 	}
 
 	private boolean linking;
+	public int xPixelClicked;
 	
   void doZoomLinked(GraphSet graphSet, double initX,
 			double finalX, boolean addZoom, boolean checkRange,

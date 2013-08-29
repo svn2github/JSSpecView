@@ -7,6 +7,7 @@ public class PeakInfo {
   public final static PeakInfo nullPeakInfo = new PeakInfo();
 
   private double xMin, xMax, yMin, yMax;
+  private int px0, px1;
   private String stringInfo;
   private String type;
   private String type2;
@@ -165,4 +166,21 @@ public class PeakInfo {
     return (type.startsWith("GC"));
   }
 
+  public void setPixelRange(int x0, int x1) {
+  	px0 = x0;
+  	px1 = x1;
+  }
+  
+  public double checkRange(int xPixel, double xVal) {
+    if (xPixel != Integer.MAX_VALUE ? (px0 <= xPixel && px1 >= xPixel) : 
+    	xVal >= xMin && xVal <= xMax) {
+    	return Math.abs(xVal - getX());
+    }
+    return 1e100;
+  }
+
+	public int getXPixel() {
+		return (px0 + px1) / 2;
+	}
+  
 }

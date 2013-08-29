@@ -29,16 +29,23 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Hashtable;
+import java.util.Map;
 import java.util.zip.GZIPInputStream;
+
+import jspecview.common.JSVersion;
 
 public class JSVFileManager {
 
 	// ALL STATIC METHODS
 	
+	public static String SIMULATION_PROTOCOL = "http://SIMULATION/";
+
 	/**
 	 * @param name 
 	 * @param appletDocumentBase
@@ -115,18 +122,16 @@ public class JSVFileManager {
     return file.getAbsolutePath();
   }
 
-  private final static String[] urlPrefixes = { "http:", "https:", "ftp:",
-      "file:" };
+  private final static String[] urlPrefixes = { "http:", "https:", "ftp:", 
+  	SIMULATION_PROTOCOL, "file:" };
 
   public static boolean isURL(String name) {
-    for (String prefix : urlPrefixes) {
-      if (name.startsWith(prefix)) {
-        return true;
-      }
-    }
+  	for (int i = urlPrefixes.length; --i >= 0;)
+  		if (name.startsWith(urlPrefixes[i]))
+  			return true;
     return false;
   }
-
+  
   private static BufferedReader getUnzippedBufferedReaderFromName(String name, URL appletDocumentBase, String startCode)
       throws IOException {
     String[] subFileList = null;
@@ -135,6 +140,8 @@ public class JSVFileManager {
       if (subFileList != null && subFileList.length > 0)
         name = subFileList[0];
     }
+		if (name.startsWith(SIMULATION_PROTOCOL))
+			return getBufferedReaderForString(getSimulationJCampDX(name.substring(SIMULATION_PROTOCOL.length())));
     InputStream in = getInputStream(name, true, appletDocumentBase);
     BufferedInputStream bis = new BufferedInputStream(in, 8192);
     if (isGzip(bis)) {
@@ -158,36 +165,95 @@ public class JSVFileManager {
     return (countRead == 4 && abMagic[0] == (byte) 0x1F && abMagic[1] == (byte) 0x8B);
   }
 
-  public static InputStream getInputStream(String name, boolean showMsg,
-                                           URL appletDocumentBase)
-      throws IOException, MalformedURLException {
-    int iurlPrefix;
-    for (iurlPrefix = urlPrefixes.length; --iurlPrefix >= 0;)
-      if (name.startsWith(urlPrefixes[iurlPrefix]))
-        break;
-    boolean isURL = (iurlPrefix >= 0);
-    boolean isApplet = (appletDocumentBase != null);
-    InputStream in;
-    int length;
-    if (isApplet || isURL) {
-      URL url = (isApplet ? new URL(appletDocumentBase, name) : new URL(name));
-      name = url.toString();
-      if (showMsg)
-        JSVLogger.info("JSVFileManager opening URL " + url.toString());
-      URLConnection conn = url.openConnection();
-      length = conn.getContentLength();
-      in = conn.getInputStream();
-    } else {
-      if (showMsg)
-        JSVLogger.info("JSVFileManager opening file " + name);
-      File file = new File(name);
-      length = (int) file.length();
-      in = new FileInputStream(file);
-    }
-    return new JSVMonitorInputStream(in, length);
-  }
+	public static InputStream getInputStream(String name, boolean showMsg,
+			URL appletDocumentBase) throws IOException, MalformedURLException {
+		boolean isURL = isURL(name);
+		boolean isApplet = (appletDocumentBase != null);
+		InputStream in;
+		int length;
+		String post = null;
+		int iurl;
+		if (isURL && (iurl = name.indexOf("?POST?")) >= 0) {
+			post = name.substring(iurl + 6);
+			name = name.substring(0, iurl);
+		}
+		if (isApplet || isURL) {
+			URL url = (isApplet ? new URL(appletDocumentBase, name) : new URL(name));
+			name = url.toString();
+			if (showMsg)
+				JSVLogger.info("JSVFileManager opening URL " + url.toString());
+			URLConnection conn = url.openConnection();
+			if (post != null) {
+				conn.setRequestProperty("Content-Type",
+						"application/x-www-form-urlencoded");
+				conn.setDoOutput(true);
+				OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+				wr.write(post);
+				wr.flush();
+			}
+			length = conn.getContentLength();
+			in = conn.getInputStream();
+		} else {
+			if (showMsg)
+				JSVLogger.info("JSVFileManager opening file " + name);
+			File file = new File(name);
+			length = (int) file.length();
+			in = new FileInputStream(file);
+		}
+		return new JSVMonitorInputStream(in, length);
+	}
 
-  private static URL getResource(Object object, String fileName, String[] error) {
+	private static String nciResolver = "http://cactus.nci.nih.gov/chemical/structure/%FILE/file?format=sdf&get3d=True";
+	private static String nmrdbServer = "http://www.nmrdb.org/tools/jmol/predict.php?POST?molfile=";
+
+	private static Map<String, String> htSimulate;
+	
+	private static String getSimulationJCampDX(String name) {
+		if (htSimulate == null)
+			htSimulate = new Hashtable<String, String>();
+		String key = name.substring(name.indexOf("V2000") + 1);
+		String jcamp = htSimulate.get(key);
+		if (jcamp == null) {
+			System.out.println("creating " + name);
+			boolean isInline = name.startsWith("MOL=");
+			String molFile = (isInline ? JSVTextFormat.simpleReplace(name
+					.substring(4), "\\n", "\n")
+					: getFileAsString(JSVTextFormat.simpleReplace(nciResolver, "%FILE",
+							JSVEscape.escapeUrl(name)), null));
+			int pt = molFile.indexOf("\n");
+			molFile = "/JSpecView " + JSVersion.VERSION + molFile.substring(pt);
+			molFile = JSVTextFormat.replaceAllCharacters(molFile, "?", '_');
+			String json = getFileAsString(nmrdbServer + molFile, null);
+			System.out.println(json);
+			json = JSVTextFormat.simpleReplace(json, "\\r\\n", "\n");
+			json = JSVTextFormat.simpleReplace(json, "\\t", "\t");
+			json = JSVTextFormat.simpleReplace(json, "\\n", "\n");
+			molFile = JSVParser.getQuotedJSONAttribute(json, "molfile", null);
+			String xml = JSVParser.getQuotedJSONAttribute(json, "xml", null);
+			xml = JSVTextFormat.simpleReplace(xml, "</", "\n</");
+			xml = JSVTextFormat.simpleReplace(xml, "><", ">\n<");
+			xml = JSVTextFormat.simpleReplace(xml, "\\\"", "\"");
+			jcamp = JSVParser.getQuotedJSONAttribute(json, "jcamp", null);
+			jcamp = "##TITLE=" + (isInline ? "JMOL SIMULATION" : name) + "\n"
+					+ jcamp.substring(jcamp.indexOf("\n##") + 1);
+			JSVLogger
+					.info(jcamp.substring(0, jcamp.indexOf("##XYDATA") + 40) + "...");
+			pt = 0;
+			pt = jcamp.indexOf("##.");
+			String id = name;
+			int pt1 = id.indexOf("id='");
+			if (isInline && pt1 > 0)
+				id = id.substring(pt1 + 4, (id + "'").indexOf("'", pt1 + 4));
+			jcamp = jcamp.substring(0, pt) + "##$MODELS=\n<Models>\n"
+					+ "<ModelData id=" + JSVEscape.escape(id) + "\n type=\"MOL\">\n"
+					+ molFile + "</ModelData>\n</Models>\n" + "##$SIGNALS=\n" + xml
+					+ "\n" + jcamp.substring(pt);
+			htSimulate.put(key, jcamp);
+		}
+		return jcamp;
+	}
+
+	private static URL getResource(Object object, String fileName, String[] error) {
     URL url = null;
     try {
       if ((url = object.getClass().getResource("resources/" + fileName)) == null)
@@ -241,6 +307,8 @@ public class JSVFileManager {
   		return "String" + (++stringCount);
     try {
       if (isURL(file)) {
+      	if (file.startsWith(SIMULATION_PROTOCOL))
+      		return file.substring(0, Math.min(file.length(), 30)) + "...";
         String name = (new URL(file)).getFile();
         return name.substring(name.lastIndexOf('/') + 1);
       }

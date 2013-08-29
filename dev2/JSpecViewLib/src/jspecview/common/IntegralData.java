@@ -129,13 +129,6 @@ public class IntegralData extends MeasurementData {
     offset = offsetNew;		
 	}
 
-	private void scaleIntegrationBy(double f) {
-		if (f <= 0)
-			normalizationFactor = 1;
-		else
-  		normalizationFactor *= f;
-	}
-
 	boolean haveRegions;
 
 	private Coordinate[] xyCoords;
@@ -228,10 +221,17 @@ public class IntegralData extends MeasurementData {
 	    double minYForIntegral = -Double.MAX_VALUE;//percentMinY / 100 * maxY; // 0.1%
 	    integralTotal = 0;
 	    checkRange();
+	    double minY = 1E100;
+	    for (int i = 0; i < specXyCoords.length; i++) {
+	      double y = specXyCoords[i].getYVal();
+	      if (y < minY && y >= 0)
+	        minY = y;
+	    }
+
 	    for (int i = 0; i < specXyCoords.length; i++) {
 	      double y = specXyCoords[i].getYVal();
 	      if (y > minYForIntegral)
-	        integralTotal += y;
+	        integralTotal += (y - minY);
 	    }
 	    intRange = (percentRange / 100) / integralTotal; 
 	    offset = (percentOffset / 100);
@@ -242,7 +242,7 @@ public class IntegralData extends MeasurementData {
 	    for (int i = specXyCoords.length; --i >= 0;) {
 	      double y = specXyCoords[i].getYVal();
 	      if (y > minYForIntegral)
-	        integral += y;
+	        integral += (y - minY);
 	      xyCoords[i] = new Coordinate(specXyCoords[i].getXVal(), integral
 	          * intRange + offset);
 	    }
@@ -298,11 +298,15 @@ public class IntegralData extends MeasurementData {
 	public void setSelectedIntegral(Measurement integral, double val) {
 		double val0 = integral.getValue();
 		double factor = (val <= 0 ? 1/normalizationFactor : val / val0);
+		factorAllIntegrals(factor, val <= 0);
+	}
+
+	private void factorAllIntegrals(double factor, boolean isReset) {
 		for (int i = 0; i < size(); i++) {
 			Measurement m = get(i);
-  		m.setValue(factor * m.getValue());
+			m.setValue(factor * m.getValue());
 		}
-		scaleIntegrationBy(val <= 0 ? 0 : factor);
+		normalizationFactor = (isReset ? 1 : normalizationFactor * factor);
 	}
 
 	@Override
@@ -381,8 +385,10 @@ public class IntegralData extends MeasurementData {
 			double y = xyCoords[i].getYVal();
 			nCount++;
 			if ((y - y0) < cutoff && iStart < 0) {
+				// not in peak and not increasing much
 				if (y < y0) {
 					// decreasing -- reset
+					//System.out.println(" reset " + nCount + " " + iStart + " y0=" + y0 + " " + y);
 					y0 = y;
 					nCount = 0;
 				}
@@ -401,7 +407,6 @@ public class IntegralData extends MeasurementData {
 				// and leveled off
 				if (nCount == 1)
 					y0 = y;
-				//System.out.println(i + " " + xyCoords[i] + "  " + y0);
 				if (nCount >= nMin) {
 					//System.out.println(iStart + " " + i + " " + xyCoords[iStart] +  " "  + xyCoords[i]);
 					addIntegralRegion(xyCoords[iStart].getXVal(), xyCoords[i].getXVal());
@@ -413,9 +418,11 @@ public class IntegralData extends MeasurementData {
 				// still rising
 				nCount = 0;
 				y0 = y;
+				//System.out.println(i + " reset istart=" + iStart + " " + xyCoords[i] + "  " + y0);
 			}
-
 		}
+		if (spec.nH > 0)
+			factorAllIntegrals(spec.nH / percentRange, false);
 	}
 
 	@Override

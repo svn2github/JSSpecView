@@ -587,6 +587,17 @@ public class JSVParser {
     return (i < 0 ? null : getNextQuotedString(info, i));
   }
 
+	public static String getQuotedJSONAttribute(String json, String key1,
+			String key2) {
+		if (key2 == null)
+			key2 = key1;
+		key1 = "\"" + key1 + "\":";
+		key2 = "\"" + key2 + "\":";
+		int pt1 = json.indexOf(key1);
+		int pt2 = json.indexOf(key2, pt1);
+		return (pt1 < 0 || pt2 < 0 ? null : getNextQuotedString(json, pt2 + key2.length()));
+	}
+	
   /**
    * Finds a character that is in one string in another and returns the index
    * 
@@ -603,4 +614,5 @@ public class JSVParser {
         return i;
     return  -1;
   }
+
 }

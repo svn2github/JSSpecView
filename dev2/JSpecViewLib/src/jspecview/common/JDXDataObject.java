@@ -116,6 +116,7 @@ public abstract class JDXDataObject extends JDXHeader {
   protected String yUnits = "";
   protected String xLabel = null;
   protected String yLabel = null;
+	public int nH;
   
   /**
    * Sets the units for the x axis
@@ -818,6 +819,7 @@ public abstract class JDXDataObject extends JDXHeader {
     newObj.freq2dX = freq2dX;
     newObj.freq2dY = freq2dY;
     newObj.filePath = filePath;
+    newObj.nH = nH;
 
   }
 

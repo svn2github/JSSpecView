@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.Map.Entry;
 
 
@@ -174,13 +173,13 @@ public enum ScriptToken {
    * @param cmd
    * @return adjusted value
    */
-  public static String getValue(ScriptToken st, StringTokenizer params,
+  public static String getValue(ScriptToken st, ScriptTokenizer params,
                                 String cmd) {
     if (!params.hasMoreTokens())
       return "";
     switch (st) {
     default:
-      return ScriptCommandTokenizer.nextStringToken(params, true);
+      return ScriptTokenizer.nextStringToken(params, true);
     case CLOSE:
     case EXPORT:
     case INTEGRATION:
@@ -210,7 +209,7 @@ public enum ScriptToken {
     return cmd.substring(pt).trim();
   }
 
-  public static String getKey(StringTokenizer eachParam) {
+  public static String getKey(ScriptTokenizer eachParam) {
     String key = eachParam.nextToken();
     if (key.startsWith("#") || key.startsWith("//"))
       return null;
@@ -228,9 +227,9 @@ public enum ScriptToken {
    */
   public static List<String> getTokens(String value) {
     List<String> tokens = new ArrayList<String>();
-    StringTokenizer st = new StringTokenizer(value);
-    while (st.hasMoreElements()) {
-      String s = ScriptCommandTokenizer.nextStringToken(st, false);
+    ScriptTokenizer st = new ScriptTokenizer(value, false);
+    while (st.hasMoreTokens()) {
+      String s = ScriptTokenizer.nextStringToken(st, false);
       if (s.startsWith("//") || s.startsWith("#"))
         break;
       tokens.add(s);

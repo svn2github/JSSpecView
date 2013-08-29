@@ -25,6 +25,7 @@
 
 package jspecview.util;
 
+import java.util.BitSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -229,6 +230,74 @@ public class JSVEscape {
     return "\"" + infoType + "\": " + info + (addCR ? "\n" : "");
   }
 
+  public static String escapeUrl(String url) {
+    url = JSVTextFormat.simpleReplace(url, "\n", "");
+    url = JSVTextFormat.simpleReplace(url, "%", "%25");
+    url = JSVTextFormat.simpleReplace(url, "[", "%5B");
+    url = JSVTextFormat.simpleReplace(url, "]", "%5D");
+    url = JSVTextFormat.simpleReplace(url, " ", "%20");
+    url = JSVTextFormat.simpleReplace(url, "?", "%3F");
+    return url;
+  }
 
-
+	public static BitSet unescapeBitSet(String str) {
+    char ch;
+    int len;
+    if (str == null || (len = (str = str.trim()).length()) < 4
+        || str.equalsIgnoreCase("({null})") 
+        || (ch = str.charAt(0)) != '(' && ch != '[' 
+        || str.charAt(len - 1) != (ch == '(' ? ')' : ']')
+        || str.charAt(1) != '{' || str.indexOf('}') != len - 2)
+      return null;
+    len -= 2;
+    for (int i = len; --i >= 2;)
+      if (!Character.isDigit(ch = str.charAt(i)) && ch != ' ' && ch != '\t'
+          && ch != ':')
+        return null;
+    int lastN = len;
+    while (Character.isDigit(str.charAt(--lastN))) {
+      // loop
+    }
+    if (++lastN == len)
+      lastN = 0;
+    else
+      try {
+        lastN = Integer.parseInt(str.substring(lastN, len));
+      } catch (NumberFormatException e) {
+        return null;
+      }
+    BitSet bs = new BitSet(lastN);
+    lastN = -1;
+    int iPrev = -1;
+    int iThis = -2;
+    for (int i = 2; i <= len; i++) {
+      switch (ch = str.charAt(i)) {
+      case '\t':
+      case ' ':
+      case '}':
+        if (iThis < 0)
+          break;
+        if (iThis < lastN)
+          return null;
+        lastN = iThis;
+        if (iPrev < 0)
+          iPrev = iThis;
+        bs.set(iPrev, iThis + 1);
+        iPrev = -1;
+        iThis = -2;
+        break;
+      case ':':
+        iPrev = lastN = iThis;
+        iThis = -2;
+        break;
+      default:
+        if (Character.isDigit(ch)) {
+          if (iThis < 0)
+            iThis = 0;
+          iThis = (iThis * 10) + (ch - 48);
+        }
+      }
+    }
+    return (iPrev >= 0 ? null : bs);
+	}
 }

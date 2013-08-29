@@ -66,7 +66,7 @@ public class JDXSpectrum extends JDXDataObject {
   private List<JDXSpectrum> subSpectra;
   private ArrayList<PeakInfo> peakList = new ArrayList<PeakInfo>();
   private String piUnitsX, piUnitsY;
-  private PeakInfo selectedPeak;
+  private PeakInfo selectedPeak, highlightedPeak;
   private double specShift = 0;
   
 
@@ -179,6 +179,10 @@ public class JDXSpectrum extends JDXDataObject {
     selectedPeak = peak;
   }
   
+  public void setHighlightedPeak(PeakInfo peak) {
+    highlightedPeak = peak;
+  }
+  
   public PeakInfo getSelectedPeak() {
     return selectedPeak;
   }
@@ -192,24 +196,31 @@ public class JDXSpectrum extends JDXDataObject {
   }
   
   
-  public PeakInfo getAssociatedPeakInfo(Coordinate coord) {
-    selectedPeak = findPeakByCoord(coord);
+  public PeakInfo getAssociatedPeakInfo(int xPixel, Coordinate coord) {
+    selectedPeak = findPeakByCoord(xPixel, coord);
     return (selectedPeak == null ? getBasePeakInfo() : selectedPeak);
   }
 
-  public PeakInfo findPeakByCoord(Coordinate coord) {
-    if (coord != null && peakList != null && peakList.size() > 0)
+  public PeakInfo findPeakByCoord(int xPixel, Coordinate coord) {
+    if (coord != null && peakList != null && peakList.size() > 0) {
+      double xVal = coord.getXVal();
+      int iBest = -1;
+      double dBest = 1e100;
       for (int i = 0; i < peakList.size(); i++) {
-        PeakInfo peak = peakList.get(i);
-        double xVal = coord.getXVal();
-        if (xVal >= peak.getXMin() && xVal <= peak.getXMax())
-          return peak;
+        double d = peakList.get(i).checkRange(xPixel, xVal);
+        if (d < dBest) {
+        	dBest = d;
+        	iBest = i;
+        }
       }
+      if (iBest >= 0)
+      	return peakList.get(iBest);
+    }
     return null;   
   }
 
   public String getPeakTitle() {
-    return (selectedPeak == null ? getTitleLabel() : selectedPeak.getTitle());
+    return (selectedPeak != null ? selectedPeak.getTitle() : highlightedPeak != null ? highlightedPeak.getTitle() : getTitleLabel());
   }
 
   public String getTitleLabel() {
@@ -613,6 +624,10 @@ public class JDXSpectrum extends JDXDataObject {
 
 	public static boolean areLinkableY(JDXSpectrum s1, JDXSpectrum s2) {
 		return (s1.isNMR() && s2.isNMR() && s1.nucleusX.equals(s2.nucleusY));
+	}
+
+	public void setNHydrogens(int nH) {
+		this.nH = nH;
 	}
 
 }

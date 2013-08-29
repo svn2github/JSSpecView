@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 import jspecview.common.Annotation.AType;
 import jspecview.common.JDXSpectrum.IRMode;
@@ -37,14 +36,14 @@ public class JSViewer {
     script = script.trim();
     if (JSVLogger.debugging)
       JSVLogger.info("RUNSCRIPT " + script);
-    ScriptCommandTokenizer commandTokens = new ScriptCommandTokenizer(script, ";\n");
     JSVPanel jsvp = si.getSelectedPanel();
     boolean isOK = true;
     int nErrorsLeft = 10;
+    ScriptTokenizer commandTokens = new ScriptTokenizer(script, true);
     while (commandTokens.hasMoreTokens() && nErrorsLeft > 0) {
       String token = commandTokens.nextToken();
       // now split the key/value pair
-      StringTokenizer eachParam = new StringTokenizer(token);
+      ScriptTokenizer eachParam = new ScriptTokenizer(token, false);
       String key = ScriptToken.getKey(eachParam);
       if (key == null)
         continue;

@@ -156,8 +156,10 @@ abstract class GraphSet implements XYScaleConverter {
 
 	private void setSpectrumClicked(int i) {
 		stackSelected = showAllStacked;
-		if (i < 0 || iSpectrumClicked != i)
+		if (i < 0 || iSpectrumClicked != i) {
 			lastClickX = Double.NaN;
+			lastPixelX = Integer.MAX_VALUE;
+		}
 		iSpectrumClicked = setSpectrumSelected(setSpectrumMovedTo(i));
 	}
 
@@ -298,6 +300,7 @@ abstract class GraphSet implements XYScaleConverter {
 	private int currentZoomIndex;
 
 	private double lastClickX = Double.NaN;
+	private int lastPixelX = Integer.MAX_VALUE;
 
 	private boolean isDrawNoSpectra() {
 		return (iSpectrumSelected == Integer.MIN_VALUE);
@@ -1024,7 +1027,7 @@ abstract class GraphSet implements XYScaleConverter {
 					highlights.remove(i);
 	}
 
-	private Coordinate setCoordClicked(double x, double y) {
+	private Coordinate setCoordClicked(int xPixel, double x, double y) {
 		if (y == 0)
 			nextClickForSetPeak = false;
 		if (Double.isNaN(x)) {
@@ -1034,6 +1037,7 @@ abstract class GraphSet implements XYScaleConverter {
 		}
 		pd.coordClicked = new Coordinate(lastClickX = x, y);
 		pd.coordsClicked = getSpectrum().getXYCoords();
+		pd.xPixelClicked = (lastPixelX = xPixel);
 		return pd.coordClicked;
 	}
 
@@ -1634,6 +1638,9 @@ abstract class GraphSet implements XYScaleConverter {
 			if (piMouseOver != null && piMouseOver.spectrum == spec && pd.isMouseUp()) {
 				setColor(g, 240, 240, 240); // very faint gray box
 				drawPeak(g, piMouseOver, true);
+				spec.setHighlightedPeak(piMouseOver);
+			} else {
+			  spec.setHighlightedPeak(null);
 			}
 			setColor(g, ScriptToken.PEAKTABCOLOR);
 			for (int i = list.size(); --i >= 0;) {
@@ -1648,7 +1655,7 @@ abstract class GraphSet implements XYScaleConverter {
 		double xMin = pi.getXMin();
 		double xMax = pi.getXMax();
 		if (xMin != xMax) {
-			drawBar(g, xMin, xMax, null, isFull);
+			drawBar(g, pi, xMin, xMax, null, isFull);
 		}
 	}
 
@@ -1738,6 +1745,7 @@ abstract class GraphSet implements XYScaleConverter {
 	 * draw a bar, but not necessarily full height
 	 * 
 	 * @param g
+	 * @param pi 
 	 * @param startX
 	 *          units
 	 * @param endX
@@ -1746,7 +1754,7 @@ abstract class GraphSet implements XYScaleConverter {
 	 * @param isFullHeight
 	 */
 
-	private void drawBar(Object g, double startX, double endX,
+	private void drawBar(Object g, PeakInfo pi, double startX, double endX,
 			ScriptToken whatColor, boolean isFullHeight) {
 		int x1 = toPixelX(startX);
 		int x2 = toPixelX(endX);
@@ -1758,10 +1766,20 @@ abstract class GraphSet implements XYScaleConverter {
 		// if either pixel is outside of plot area
 		x1 = fixX(x1);
 		x2 = fixX(x2);
-		if (x1 == x2)
-			return;
+		if (x2 - x1 < 3) {
+			x1 -= 2;
+			x2 += 2;
+		}
+		if (pi != null)
+			pi.setPixelRange(x1, x2);
 		fillBox(g, x1, yPixel0, x2, yPixel0 + (isFullHeight ? yPixels : 5),
 				whatColor);
+		if (pi != null && !isFullHeight) {
+			x1 = (x1 + x2) / 2;
+			fillBox(g, x1-1, yPixel0, x1+1, yPixel0 + 7,
+					whatColor);
+		}
+			
 	}
 
 	/**
@@ -2139,7 +2157,7 @@ abstract class GraphSet implements XYScaleConverter {
 				Highlight hl = highlights.get(i);
 				if (hl.spectrum == spec) {
 					pd.setHighlightColor(hl.color);
-					drawBar(g, hl.x1, hl.x2, ScriptToken.HIGHLIGHTCOLOR, true);
+					drawBar(g, null, hl.x1, hl.x2, ScriptToken.HIGHLIGHTCOLOR, true);
 				}
 			}
 			drawPeakTabs(g, spec);
@@ -3153,6 +3171,7 @@ abstract class GraphSet implements XYScaleConverter {
 		if (checkArrowUpDownClick(xPixel, yPixel))
 			return;
 		lastClickX = Double.NaN;
+		lastPixelX = Integer.MAX_VALUE;
 		if (isSplitWidget(xPixel, yPixel)) {
 			splitStack(pd.graphSets, nSplit == 1);
 			// pd.repaint();
@@ -3241,14 +3260,14 @@ abstract class GraphSet implements XYScaleConverter {
 				processPendingMeasurement(xPixel, yPixel, 1);
 				return;
 			}
-			setCoordClicked(toX(xPixel), toY(yPixel));
+			setCoordClicked(xPixel, toX(xPixel), toY(yPixel));
 			updateDialog(AType.PeakList, -1);
 			if (isNextClick) {
 				shiftSpectrum(Double.NaN, Double.NaN);
 				return;
 			}
 		} else {
-			setCoordClicked(Double.NaN, 0);
+			setCoordClicked(0, Double.NaN, 0);
 		}
 		pd.notifyPeakPickedListeners(null);
 	}
@@ -3357,7 +3376,7 @@ abstract class GraphSet implements XYScaleConverter {
 					if (spec.getPeakList() != null) {
 						coordTemp.setXVal(toX(xPixel));
 						coordTemp.setYVal(toY(yPixel));
-						piMouseOver = spec.findPeakByCoord(coordTemp);
+						piMouseOver = spec.findPeakByCoord(xPixel, coordTemp);
 					}
 				}
 			} else {
@@ -3694,15 +3713,15 @@ abstract class GraphSet implements XYScaleConverter {
 	void toPeak(int istep) {
 		istep *= (drawXAxisLeftToRight ? 1 : -1);
 		if (Double.isNaN(lastClickX))
-			lastClickX = 0;
+			lastClickX = lastPixelX = 0;
 		JDXSpectrum spec = getSpectrum();
-		Coordinate coord = setCoordClicked(lastClickX, 0);
+		Coordinate coord = setCoordClicked(lastPixelX, lastClickX, 0);
 		int iPeak = spec.setNextPeak(coord, istep);
 		if (iPeak < 0)
 			return;
 		PeakInfo peak = spec.getPeakList().get(iPeak);
 		spec.setSelectedPeak(peak);
-		setCoordClicked(peak.getX(), 0);
+		setCoordClicked(peak.getXPixel(), peak.getX(), 0);
 		pd.notifyPeakPickedListeners(new PeakPickEvent(pd.owner, pd.coordClicked,
 				peak));
 	}
@@ -3727,6 +3746,7 @@ abstract class GraphSet implements XYScaleConverter {
 		if (spec != null)
 			setSpectrumClicked(getSpectrumIndex(spec));
 		xValueMovedTo = lastClickX = x;
+		lastPixelX = toPixelX(x);
 		setXPixelMovedTo(x, Double.MAX_VALUE, 0, 0);
 		yValueMovedTo = Double.NaN;
 	}
