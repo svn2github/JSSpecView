@@ -258,8 +258,10 @@ public class JSVTree extends JTree {
 			close(si, "all");
 		}
 		filename = JSVTextFormat.trimQuotes(filename);
-		if (filename.startsWith("$"))
-			filename = JSVFileManager.SIMULATION_PROTOCOL + filename.substring(1);
+		if (filename.startsWith("$")) {
+			isSimulation = true;
+			filename = JSVFileManager.SIMULATION_PROTOCOL + filename;
+		}
 		int firstSpec = (pt + 1 < tokens.size() ? Integer.valueOf(tokens.get(++pt))
 				.intValue() : -1);
 		int lastSpec = (pt + 1 < tokens.size() ? Integer.valueOf(tokens.get(++pt))
@@ -269,85 +271,92 @@ public class JSVTree extends JTree {
 						isAppend);
 	}
 
-	public static int openDataOrFile(ScriptInterface si,
-			String data, String name, List<JDXSpectrum> specs, String url,
-			int firstSpec, int lastSpec, boolean isAppend) {
+	public static int openDataOrFile(ScriptInterface si, String data,
+			String name, List<JDXSpectrum> specs, String url, int firstSpec,
+			int lastSpec, boolean isAppend) {
 		if ("NONE".equals(name)) {
 			close(si, "View*");
 			return FILE_OPEN_OK;
 		}
-    si.writeStatus("");
-    String filePath = null;
-    String fileName = null;
-    File file = null;
+		si.writeStatus("");
+		String filePath = null;
+		String newPath = null;
+		String fileName = null;
+		File file = null;
 		URL base = null;
-    boolean isView = false;
-    if (data != null) {
-    } else if (specs != null) {
-      isView = true;
-      fileName = filePath = "View" + si.incrementViewCount(1);
-    } else if (url != null) {
-      try {
-      	base = si.getDocumentBase();
-        URL u = (base == null ? new URL(url) : new URL(base, url));
-        filePath = u.toString();
-        si.setRecentURL(filePath);
-        fileName = JSVFileManager.getName(url);
-      } catch (MalformedURLException e) {
-        file = new File(url);
-      }
-    }
-    if (file != null) {
-      fileName = file.getName();
-      filePath = file.getAbsolutePath();
-      //recentJmolName = (url == null ? filePath.replace('\\', '/') : url);
-      si.setRecentURL(null);
-    }
-    // TODO could check here for already-open view 
-    if (!isView)
-      if (JSVPanelNode.isOpen(si.getPanelNodes(), filePath) || JSVPanelNode.isOpen(si.getPanelNodes(), url)) {
-        si.writeStatus(filePath + " is already open");
-      return FILE_OPEN_ALREADY;
-    }
-    if (!isAppend && !isView)
-      close(si, "all"); // with CHECK we may still need to do this
-    si.setCursorObject(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-    try {
-      si.setCurrentSource(isView ? JDXSource.createView(specs)
-          : si.createSource(data, filePath, base, firstSpec, lastSpec));
-    } catch (Exception e) {
-      JSVLogger.error(e.getMessage());
-      si.writeStatus(e.getMessage());
-      si.setCursorObject(Cursor.getDefaultCursor());
-      return FILE_OPEN_ERROR;
-    }
-    si.setCursorObject(Cursor.getDefaultCursor());
-    System.gc();
-    JDXSource currentSource = si.getCurrentSource();
-    currentSource.setFilePath(filePath);
-    JDXSpectrum spec = si.getCurrentSource().getJDXSpectrum(0);
+		boolean isView = false;
+		if (data != null) {
+		} else if (specs != null) {
+			isView = true;
+			newPath = fileName = filePath = "View" + si.incrementViewCount(1);
+		} else if (url != null) {
+			try {
+				base = si.getDocumentBase();
+				URL u = (base == null ? new URL(url) : new URL(base, url));
+				filePath = u.toString();
+				si.setRecentURL(filePath);
+				fileName = JSVFileManager.getName(url);
+			} catch (MalformedURLException e) {
+				file = new File(url);
+			}
+		}
+		if (file != null) {
+			fileName = file.getName();
+			newPath = filePath = file.getAbsolutePath();
+			// recentJmolName = (url == null ? filePath.replace('\\', '/') : url);
+			si.setRecentURL(null);
+		}
+		// TODO could check here for already-open view
+		if (!isView)
+			if (JSVPanelNode.isOpen(si.getPanelNodes(), filePath)
+					|| JSVPanelNode.isOpen(si.getPanelNodes(), url)) {
+				si.writeStatus(filePath + " is already open");
+				return FILE_OPEN_ALREADY;
+			}
+		if (!isAppend && !isView)
+			close(si, "all"); // with CHECK we may still need to do this
+		si.setCursorObject(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		try {
+			si.setCurrentSource(isView ? JDXSource.createView(specs) : si
+					.createSource(data, filePath, base, firstSpec, lastSpec));
+		} catch (Exception e) {
+			JSVLogger.error(e.getMessage());
+			si.writeStatus(e.getMessage());
+			si.setCursorObject(Cursor.getDefaultCursor());
+			return FILE_OPEN_ERROR;
+		}
+		si.setCursorObject(Cursor.getDefaultCursor());
+		System.gc();
+		JDXSource currentSource = si.getCurrentSource();
+		if (newPath == null) {
+			newPath = currentSource.getFilePath();
+			if (newPath != null)
+				fileName = newPath.substring(newPath.lastIndexOf("/") + 1);
+		} else {
+			currentSource.setFilePath(newPath);
+		}
+		si.setLoaded(fileName, newPath);
 
-    si.setLoaded(fileName, filePath);
+		JDXSpectrum spec = si.getCurrentSource().getJDXSpectrum(0);
+		if (spec == null) {
+			return FILE_OPEN_NO_DATA;
+		}
 
-    if (spec == null) {
-      return FILE_OPEN_NO_DATA;
-    }
-
-    specs = currentSource.getSpectra();
+		specs = currentSource.getSpectra();
 		JDXSpectrum.process(specs, si.getIRMode());
 
-		boolean autoOverlay = si.getAutoCombine() || spec.isAutoOverlayFromJmolClick();
-    
-    boolean combine = isView || autoOverlay
-        && currentSource.isCompoundSource;
-    if (combine) {
-      combineSpectra(si, (isView ? url : null));
-    } else {
-      splitSpectra(si);
-    }
-    if (!isView)
-      si.updateRecentMenus(filePath);
-    return FILE_OPEN_OK;
+		boolean autoOverlay = si.getAutoCombine()
+				|| spec.isAutoOverlayFromJmolClick();
+
+		boolean combine = isView || autoOverlay && currentSource.isCompoundSource;
+		if (combine) {
+			combineSpectra(si, (isView ? url : null));
+		} else {
+			splitSpectra(si);
+		}
+		if (!isView)
+			si.updateRecentMenus(filePath);
+		return FILE_OPEN_OK;
 	}
 
   private static void combineSpectra(ScriptInterface si, String name) {

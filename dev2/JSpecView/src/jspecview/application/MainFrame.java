@@ -1126,7 +1126,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		if (name == null)
 			return;
 		//recentOpenURL = url;
-		openDataOrFile(null, null, null, JSVFileManager.SIMULATION_PROTOCOL + name, -1, -1, true);
+		openDataOrFile(null, null, null, JSVFileManager.SIMULATION_PROTOCOL + "$" + name, -1, -1, true);
 	}
 
 	public String print(String pdfFileName) {
