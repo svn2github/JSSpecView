@@ -5,6 +5,13 @@ Put new items at top, please.
 ___date=$Date$
 ___svnRev=$LastChangedRevision::      $  
 
+
+___JmolVersion="13.3.5_dev_2013.08.29"
+
+new feature: show NMR taps into NMRDB directly
+ -- for now, application only
+
+
 ====TODO=========
 
 -in the jsvtest.htm page, when there is a CNMR and IR overlay shown

@@ -241,24 +241,32 @@ public class JSVTree extends JTree {
 	}
 
 	public static void load(ScriptInterface si, String value) {
-    List<String> tokens = ScriptToken.getTokens(value);
-    String filename = tokens.get(0);
-    int pt = 0;
-    boolean isAppend = filename.equalsIgnoreCase("APPEND");
-    boolean isCheck = filename.equalsIgnoreCase("CHECK");
-    if (isAppend || isCheck) {
-      filename = tokens.get(++pt);
-    } else { 
-      if (filename.equals("\"\"") && si.getCurrentSource() != null)
-        filename = si.getCurrentSource().getFilePath();
-      close(si, "all");
-    }
-    filename = JSVTextFormat.trimQuotes(filename);
-    int firstSpec = (pt + 1 < tokens.size() ? Integer.valueOf(tokens.get(++pt)).intValue()
-        : -1);
-    int lastSpec = (pt + 1 < tokens.size() ? Integer.valueOf(tokens.get(++pt)).intValue()
-        : firstSpec);
-    si.openDataOrFile(null, null, null, filename, firstSpec, lastSpec, isAppend);
+		List<String> tokens = ScriptToken.getTokens(value);
+		String filename = tokens.get(0);
+		int pt = 0;
+		boolean isAppend = filename.equalsIgnoreCase("APPEND");
+		boolean isCheck = filename.equalsIgnoreCase("CHECK");
+		if (isAppend || isCheck)
+			filename = tokens.get(++pt);
+		boolean isSimulation = filename.equalsIgnoreCase("MOL");
+		if (isSimulation)
+			filename = JSVFileManager.SIMULATION_PROTOCOL + "MOL="
+					+ JSVTextFormat.trimQuotes(tokens.get(++pt));
+		if (!isCheck) {
+			if (filename.equals("\"\"") && si.getCurrentSource() != null)
+				filename = si.getCurrentSource().getFilePath();
+			close(si, "all");
+		}
+		filename = JSVTextFormat.trimQuotes(filename);
+		if (filename.startsWith("$"))
+			filename = JSVFileManager.SIMULATION_PROTOCOL + filename.substring(1);
+		int firstSpec = (pt + 1 < tokens.size() ? Integer.valueOf(tokens.get(++pt))
+				.intValue() : -1);
+		int lastSpec = (pt + 1 < tokens.size() ? Integer.valueOf(tokens.get(++pt))
+				.intValue() : firstSpec);
+		si
+				.openDataOrFile(null, null, null, filename, firstSpec, lastSpec,
+						isAppend);
 	}
 
 	public static int openDataOrFile(ScriptInterface si,
@@ -379,8 +387,5 @@ public class JSVTree extends JTree {
     JSVPanelNode node = JSVPanelNode.findNode(si.getSelectedPanel(), si.getPanelNodes());
     si.setMenuEnables(node, true);
   }
-
-
-	
 
 }

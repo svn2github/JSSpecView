@@ -90,8 +90,8 @@ public class JSpecView implements JSVInterface {
         }
     }
     jsv.mainFrame.setVisible(true);
-    if (args.length == 0)
-      jsv.mainFrame.showFileOpenDialog();
+    //if (args.length == 0)
+      //jsv.mainFrame.showFileOpenDialog();
   }
 
   private static String propertiesFileName = "jspecview.properties";

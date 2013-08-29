@@ -86,6 +86,7 @@ public class AppMenu extends JMenuBar {
   private JMenu fileMenu = new JMenu();
   private JMenuItem openMenuItem = new JMenuItem();
   private JMenuItem openURLMenuItem = new JMenuItem();
+  private JMenuItem simulateMenuItem = new JMenuItem();
   private JMenuItem printMenuItem = new JMenuItem();
   private JMenuItem closeMenuItem = new JMenuItem();
   private JMenuItem closeAllMenuItem = new JMenuItem();
@@ -144,6 +145,12 @@ public class AppMenu extends JMenuBar {
         InputEvent.CTRL_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             mainFrame.openURL();
+          }
+        });
+    AwtPopupMenu.setMenuItem(simulateMenuItem, 'I', "Simulate...", 73,
+        InputEvent.CTRL_MASK, new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            mainFrame.simulate();
           }
         });
     AwtPopupMenu.setMenuItem(printMenuItem, 'P', "Print...", 80,
@@ -377,6 +384,7 @@ public class AppMenu extends JMenuBar {
     fileMenu.add(openMenuItem);
     fileMenu.add(openURLMenuItem);
     fileMenu.add(openRecentMenu);
+    fileMenu.add(simulateMenuItem);
     fileMenu.addSeparator();
     fileMenu.add(closeMenuItem).setEnabled(false);
     fileMenu.add(closeAllMenuItem).setEnabled(false);

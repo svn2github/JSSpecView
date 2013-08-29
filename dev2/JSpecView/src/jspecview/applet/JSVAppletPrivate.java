@@ -49,7 +49,6 @@ import java.awt.event.WindowEvent;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
@@ -73,7 +72,7 @@ import jspecview.common.PanelData;
 import jspecview.common.PanelListener;
 import jspecview.common.Parameters;
 import jspecview.common.PeakPickEvent;
-import jspecview.common.ScriptCommandTokenizer;
+import jspecview.common.ScriptTokenizer;
 import jspecview.common.ScriptInterface;
 import jspecview.common.ScriptToken;
 import jspecview.common.Coordinate;
@@ -656,15 +655,15 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	private void parseInitScript(String params) {
 		if (params == null)
 			params = "";
-		ScriptCommandTokenizer allParamTokens = new ScriptCommandTokenizer(params,
-				";\n");
+		ScriptTokenizer allParamTokens = new ScriptTokenizer(params,
+				true);
 		if (JSVLogger.debugging) {
 			JSVLogger.info("Running in DEBUG mode");
 		}
 		while (allParamTokens.hasMoreTokens()) {
 			String token = allParamTokens.nextToken();
 			// now split the key/value pair
-			StringTokenizer eachParam = new StringTokenizer(token);
+			ScriptTokenizer eachParam = new ScriptTokenizer(token, false);
 			String key = eachParam.nextToken();
 			if (key.equalsIgnoreCase("SET"))
 				key = eachParam.nextToken();

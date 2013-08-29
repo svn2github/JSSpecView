@@ -15,6 +15,8 @@
 		  - cleanup
 		-->	
 	
+	<property name="jmol.path" value="../Jmol" />
+
 	<property file="TODO.txt" prefix="TODO.txt" />
 	<property file="build_info.properties"/>
 	<property name="build.number" 		value="${build.major.number}.${build.minor.number}.${build.revision.number}"/>	
@@ -79,6 +81,14 @@
 	    </copy>
 	    <unjar dest="${bin.dir}" src="${itext.jar}"/>
         <jar destfile="${build.app.dir}/${ant.project.name}.app.${build.number}.jar">
+            <manifest>
+            	<attribute name="Class-Path" value="."/>
+                <attribute name="Main-Class" value="${main-class}"/>
+            </manifest>
+        	<fileset dir="${bin.dir}" />
+        	<fileset dir="${jsvlib.dir}" />
+        </jar>
+        <jar destfile="${jmol.path}/jars/JSpecView.jar">
             <manifest>
             	<attribute name="Class-Path" value="."/>
                 <attribute name="Main-Class" value="${main-class}"/>

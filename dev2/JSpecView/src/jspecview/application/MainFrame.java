@@ -319,10 +319,14 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		jmolOrAdvancedApplet.exitJSpecView(withDialog && showExitDialog, this);
 	}
 
+	private boolean isAwake;
+	
 	public void awaken(boolean visible) {
-		if (jmolDisplay == null)
+		System.out.println("MAINFRAME visible/awake" + visible + " " + isAwake + " " + jmolDisplay);
+		if (jmolDisplay == null || isAwake == visible)
 			return;
 		try {
+      isAwake = visible;
 			if (visible) {
 				jmolDimensionOld = new Dimension();
 				jmolDisplay.getSize(jmolDimensionOld);
@@ -333,6 +337,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 				sideSplitPane.setDividerLocation(splitPosition);
 				sideSplitPane.validate();
 				jmolFrame.validate();
+				System.out.println("awakened");
 			} else {
 				sideSplitPane.setBottomComponent(nullPanel);
 				splitPosition = sideSplitPane.getDividerLocation();
@@ -341,6 +346,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 				jmolDisplay.setSize(jmolDimensionOld);
 				sideSplitPane.validate();
 				jmolFrame.validate();
+        System.out.println("sleeping");
 			}
 		} catch (Exception e) {
 			// ignore
@@ -1112,6 +1118,17 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		openDataOrFile(null, null, null, url, -1, -1, false);
 	}
 
+	public void simulate() {
+		String msg = "";
+		String name = (String) JOptionPane.showInputDialog(null,
+				"Enter the name of a compound", "Simulate",
+				JOptionPane.PLAIN_MESSAGE, null, null, msg);
+		if (name == null)
+			return;
+		//recentOpenURL = url;
+		openDataOrFile(null, null, null, JSVFileManager.SIMULATION_PROTOCOL + name, -1, -1, true);
+	}
+
 	public String print(String pdfFileName) {
 		return dialogHelper.print(this, pdfFileName);
 	}
@@ -1179,7 +1196,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	public void setLoaded(String fileName, String filePath) {
 		appMenu.setCloseMenuItem(fileName);
-		setTitle("JSpecView - " + filePath);
+		setTitle("JSpecView - " + (filePath.startsWith(JSVFileManager.SIMULATION_PROTOCOL) ? "SIMULATION" : filePath));
 		appMenu.setSourceEnabled(true);
 	}
 
