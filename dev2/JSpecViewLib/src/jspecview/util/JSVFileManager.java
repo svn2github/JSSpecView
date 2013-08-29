@@ -211,7 +211,7 @@ public class JSVFileManager {
 	private static String getSimulationJCampDX(String name) {
 		if (htSimulate == null)
 			htSimulate = new Hashtable<String, String>();
-		String key = name.substring(name.indexOf("V2000") + 1);
+		String key = "" + name.substring(name.indexOf("V2000") + 1).hashCode();
 		String jcamp = htSimulate.get(key);
 		if (jcamp == null) {
 			System.out.println("creating " + name);
@@ -219,7 +219,7 @@ public class JSVFileManager {
 			String molFile = (isInline ? JSVTextFormat.simpleReplace(name
 					.substring(4), "\\n", "\n")
 					: getFileAsString(JSVTextFormat.simpleReplace(nciResolver, "%FILE",
-							JSVEscape.escapeUrl(name)), null));
+							JSVEscape.escapeUrl(name.substring(1))), null));
 			int pt = molFile.indexOf("\n");
 			molFile = "/JSpecView " + JSVersion.VERSION + molFile.substring(pt);
 			molFile = JSVTextFormat.replaceAllCharacters(molFile, "?", '_');
@@ -307,7 +307,7 @@ public class JSVFileManager {
   		return "String" + (++stringCount);
     try {
       if (isURL(file)) {
-      	if (file.startsWith(SIMULATION_PROTOCOL))
+      	if (file.startsWith(SIMULATION_PROTOCOL) && file.length() > 100)
       		return file.substring(0, Math.min(file.length(), 30)) + "...";
         String name = (new URL(file)).getFile();
         return name.substring(name.lastIndexOf('/') + 1);

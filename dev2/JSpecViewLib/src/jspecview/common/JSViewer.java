@@ -122,6 +122,9 @@ public class JSViewer {
         case JMOL:
           si.syncToJmol(value);
           break;
+        case JSV:
+        	syncScript(si, JSVTextFormat.trimQuotes(value));
+        	break;
         case LABEL:
           if (jsvp != null)
             jsvp.getPanelData().addAnnotation(ScriptToken.getTokens(value));
@@ -444,6 +447,7 @@ public class JSViewer {
     }
   }
 
+  private static String testScript = "<PeakData  index=\"1\" title=\"\" model=\"~1.1\" type=\"1HNMR\" xMin=\"3.2915\" xMax=\"3.2965\" atoms=\"15,16,17,18,19,20\" multiplicity=\"\" integral=\"1\"> src=\"JPECVIEW\" file=\"http://SIMULATION/$caffeine\"";
   /**
    * incoming script processing of <PeakAssignment file="" type="xxx"...> record
    * from Jmol
@@ -452,9 +456,30 @@ public class JSViewer {
    */
 
   public static void syncScript(ScriptInterface si, String peakScript) {
+  	if (peakScript.equals("TEST"))
+  		peakScript = testScript;
     JSVLogger.info(Thread.currentThread() + "Jmol>JSV " + peakScript);
     if (peakScript.indexOf("<PeakData") < 0) {
       runScriptNow(si, peakScript);
+      if (peakScript.indexOf("#SYNC_PEAKS") >= 0) {
+      	JDXSource source = si.getCurrentSource();
+      	if (source == null)
+      		return;
+      	String file = "file=" + JSVEscape.escape(source.getFilePath());
+      	ArrayList<PeakInfo> peaks = source.getSpectra().get(0).getPeakList();
+      	StringBuffer sb = new StringBuffer();
+      	sb.append("[");
+      	int n = peaks.size();
+      	for (int i = 0; i < n; i++) {
+      		String s = peaks.get(i).toString();
+      		s = s + " " + file;
+      		sb.append(JSVEscape.escape(s));
+      		if (i > 0)
+      			sb.append(",");
+      	}
+      	sb.append("]");
+      	si.syncToJmol("Peaks: " + sb);
+      }
       return;
     }
     String file = JSVParser.getQuotedAttribute(peakScript, "file");
@@ -464,6 +489,7 @@ public class JSViewer {
     String model = JSVParser.getQuotedAttribute(peakScript, "model");
     String jmolSource = JSVParser.getQuotedAttribute(peakScript, "src");
     String modelSent = (jmolSource != null && jmolSource.startsWith("Jmol") ? null : si.getReturnFromJmolModel());
+    
     if (model != null && modelSent != null && !model.equals(modelSent)) {
     	JSVLogger.info("JSV ignoring model " + model + "; should be " + modelSent);
     	return;
@@ -520,7 +546,7 @@ public class JSViewer {
   	JSVPanel jsvp = si.getSelectedPanel();
     //System.out.println(Thread.currentThread() + "JSViewer selectPanelByPeak looking for " + index + " " + file + " in " + jsvp);
     pi = jsvp.getPanelData().selectPeakByFileIndex(file, index);
-    //System.out.println(Thread.currentThread() + "JSViewer selectPanelByPeak pi = " + pi);
+    System.out.println(Thread.currentThread() + "JSViewer selectPanelByPeak pi = " + pi);
     if (pi != null) {
     	// found in current panel
       si.setNode(JSVPanelNode.findNode(jsvp, panelNodes), false);
@@ -621,7 +647,9 @@ public class JSViewer {
     } else {
       script = "vibration OFF; selectionhalos OFF;";
     }
-    return "Select: " + pi + " script=\"" + script;
+    script = "Select: " + pi + " script=\"" + script;
+    System.out.println("JSpecView jmolSelect " + script);
+    return script;
   }
 
   public static void removeAllHighlights(ScriptInterface si) {

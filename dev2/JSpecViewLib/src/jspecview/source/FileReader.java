@@ -95,7 +95,8 @@ public class FileReader {
   
   private FileReader(String filePath, boolean obscure, boolean loadImaginary,
   		int iSpecFirst, int iSpecLast) {
-    this.filePath = (filePath == null ? "string data" : filePath);
+    this.filePath = (filePath.startsWith(JSVFileManager.SIMULATION_PROTOCOL + "MOL=") ? 
+    		JSVFileManager.SIMULATION_PROTOCOL + "MOL=" + Math.abs(filePath.hashCode()) : filePath);
     this.obscure = obscure;
     firstSpec = iSpecFirst;
     lastSpec = iSpecLast;
@@ -698,8 +699,7 @@ public class FileReader {
 	}
 
 	private String getPeakFilePath() {
-  	return (filePath.startsWith(JSVFileManager.SIMULATION_PROTOCOL) ? ""
-				: " file=" + JSVEscape.escape(filePath.replace('\\', '/')));
+				return " file=" + JSVEscape.escape(filePath.replace('\\', '/'));
 	}
 
 
@@ -718,7 +718,7 @@ public class FileReader {
 	}
   
 	private int getPeakIndex() {
-  	return peakIndex++;
+  	return ++peakIndex;
 	}
 
   /**

@@ -13,6 +13,8 @@ public class PeakInfo {
   private String type2;
   private String index;
   private String file;
+  private String filePathForwardSlash;
+
   private String title;
   private String model;
   private String atoms;
@@ -40,6 +42,9 @@ public class PeakInfo {
     id = JSVParser.getQuotedAttribute(s, "id");
     index = JSVParser.getQuotedAttribute(s, "index");
     file = JSVParser.getQuotedAttribute(s, "file");
+    System.out.println("pi file=" + file);
+    filePathForwardSlash = (file == null ? null : file.replace('\\','/'));
+
     model = JSVParser.getQuotedAttribute(s, "model");
     boolean isBaseModel = s.contains("baseModel=\"\"");
     if (!isBaseModel)
@@ -106,9 +111,10 @@ public class PeakInfo {
     return title;
   }
 
-  public boolean checkFileIndex(String filePath, String sIndex) {
-    return (sIndex.equals(index) && filePath.equals(file));
-  }
+	public boolean checkFileIndex(String filePath, String sIndex) {
+		return (sIndex.equals(index) && (filePath.equals(file) || filePath
+				.equals(filePathForwardSlash)));
+	}
 
   /**
    * type checks true for MS in GC/MS; reverse of checkType
@@ -182,5 +188,5 @@ public class PeakInfo {
 	public int getXPixel() {
 		return (px0 + px1) / 2;
 	}
-  
+
 }
