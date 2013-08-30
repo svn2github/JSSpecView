@@ -95,6 +95,8 @@ public class FileReader {
   
   private FileReader(String filePath, boolean obscure, boolean loadImaginary,
   		int iSpecFirst, int iSpecLast) {
+  	System.out.println("FileReader filePath=" + filePath + "<<");
+  	filePath = JSVTextFormat.trimQuotes(filePath);
     this.filePath = (filePath.startsWith(JSVFileManager.SIMULATION_PROTOCOL + "MOL=") ? 
     		JSVFileManager.SIMULATION_PROTOCOL + "MOL=" + Math.abs(filePath.hashCode()) : filePath);
     this.obscure = obscure;
@@ -577,6 +579,8 @@ public class FileReader {
 		ArrayList<PeakInfo> peakData = new ArrayList<PeakInfo>();
 		BufferedReader reader = new BufferedReader(new StringReader(peakList));
 		try {
+			int offset = (isSignals ? 1 : 0);
+			System.out.println("offset is " + offset + " isSignals=" + isSignals);
 			String tag1 = (isSignals ? "Signals" : "Peaks");
 			String tag2 = (isSignals ? "<Signal" : "<PeakData");
 			String line = discardUntil(reader, tag1);
@@ -635,6 +639,7 @@ public class FileReader {
 					if (bs != null) {
 						atoms = atoms.replace(',', ' ');
 						bs.or(unescapeBitSet("({" + atoms + "})"));
+						System.out.println("bs is  " + bs);
 					}
 				}
 			}
@@ -647,9 +652,10 @@ public class FileReader {
 						+ getPeakIndex());
 				BitSet bs = (BitSet) o[1];
 				if (bs != null) {
+					System.out.println("bs " + i + " is " + bs);
 					String s = "";
 					for (int j = bs.nextSetBit(0); j >= 0; j = bs.nextSetBit(j + 1))
-						s += "," + (j + 1);
+						s += "," + (j + offset);
 					int na = bs.cardinality();
 					nH += na;
 					stringInfo = simpleReplace(stringInfo, "%ATOMS%", s
@@ -699,7 +705,7 @@ public class FileReader {
 	}
 
 	private String getPeakFilePath() {
-				return " file=" + JSVEscape.escape(filePath.replace('\\', '/'));
+				return " file=" + JSVEscape.escape(JSVTextFormat.trimQuotes(filePath).replace('\\', '/'));
 	}
 
 

@@ -50,6 +50,7 @@ class PlotWidget extends Coordinate {
 
   void setX(double x, int xPixel) {
     setXVal(x);
+    //System.out.println("widget " + this);
     xPixel0 = xPixel1 = xPixel;
   }
 

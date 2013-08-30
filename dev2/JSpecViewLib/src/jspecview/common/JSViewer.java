@@ -482,7 +482,10 @@ public class JSViewer {
       }
       return;
     }
+    // todo: why the quotes??
+    peakScript = JSVTextFormat.simpleReplace(peakScript, "\\\"", "");
     String file = JSVParser.getQuotedAttribute(peakScript, "file");
+    System.out.println("file2=" + file);
     String index = JSVParser.getQuotedAttribute(peakScript, "index");
     if (file == null || index == null)
       return;

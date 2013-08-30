@@ -1192,6 +1192,7 @@ abstract class GraphSet implements XYScaleConverter {
 	 * @param subIndex
 	 */
 	private void setDerivedPins(int subIndex) {
+		triggered = true;
 		if (gs2dLinkedX != null)
 			cur1D2x1.setX(cur1D2x1.getXVal(), toPixelX(cur1D2x1.getXVal()));
 		if (gs2dLinkedY != null)
@@ -1234,7 +1235,6 @@ abstract class GraphSet implements XYScaleConverter {
 						|| Math.max(pin2Dx0.xPixel0, pin2Dx1.xPixel1) != imageView.xPixel1);
 		pin2Dy01.setEnabled(Math.min(pin2Dy0.yPixel0, pin2Dy1.yPixel0) != yPixel0
 				|| Math.max(pin2Dy0.yPixel0, pin2Dy1.yPixel1) != yPixel1);
-
 	}
 
 	/**
@@ -1258,7 +1258,7 @@ abstract class GraphSet implements XYScaleConverter {
 	synchronized void doZoom(double initX, double initY, double finalX,
 			double finalY, boolean is1D, boolean is1DY, 
 			boolean checkRange, boolean checkLinked, boolean addZoom) {
-		
+		System.out.println("xoZoom " + initX + " " + finalX + " dif=" + (initX - finalX));
 		if (initX == finalX) {
 			initX = getScale().minXOnScale;
 		  finalX = getScale().maxXOnScale;
@@ -2869,9 +2869,11 @@ abstract class GraphSet implements XYScaleConverter {
 		return (isEnd ? xPixelPlot1 - xPixel < 20 : xPixel - xPixelPlot0 < 20);
 	}
 
-	synchronized boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
-		if (!zoomEnabled)
+	private boolean triggered = true;
+synchronized boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
+		if (!zoomEnabled || !triggered)
 			return false;
+		triggered = false;
 		PlotWidget widget;
 		if (isPress) {
 			widget = getPinSelected(xPixel, yPixel);
@@ -2929,13 +2931,20 @@ abstract class GraphSet implements XYScaleConverter {
 			xPixel = fixX(xPixel);
 			widget.setX(toX0(xPixel), xPixel);
 			if (widget == pin1Dx01) {
-				int dp = xPixel - (pin1Dx0.xPixel0 + pin1Dx1.xPixel0) / 2 + 1;
-				xPixel = pin1Dx0.xPixel0 + dp;
-				int xPixel1 = pin1Dx1.xPixel0 + dp;
-				if (fixX(xPixel) != xPixel || fixX(xPixel1) != xPixel1)
+				int dp = xPixel - ((pin1Dx0.xPixel0 + pin1Dx1.xPixel0) / 2);
+				System.out.println("dif1: " + (toX0(pin1Dx1.xPixel0) - toX0(pin1Dx0.xPixel0)) + " " + dp);
+				System.out.println("dif1: " + (toX0(pin1Dx0.xPixel0) - toX0(pin1Dx0.xPixel0 + dp)));
+				int dp1 = (dp < 0 ? dp : dp);
+				int dp2 = (dp < 0 ? dp : dp);
+				xPixel = pin1Dx0.xPixel0 + dp2;
+				int xPixel1 = pin1Dx1.xPixel0 + dp1;
+				if (dp == 0 || fixX(xPixel) != xPixel || fixX(xPixel1) != xPixel1)
 					return true;
+				//System.out.println("pin1Dx01 drag x0 x1 " + toX0(xPixel) + " " + toX0(xPixel1));
+				//System.out.println("pin1Dx01 drag diff " + (toX0(xPixel) - toX0(xPixel1)));
 				pin1Dx0.setX(toX0(xPixel), xPixel);
 				pin1Dx1.setX(toX0(xPixel1), xPixel1);
+				
 			}
 			// 1D x zoom change
 			doZoom(pin1Dx0.getXVal(), 0, pin1Dx1.getXVal(),
