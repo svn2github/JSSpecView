@@ -170,7 +170,7 @@
        </java>
    	</target>
 
-    <target name="clean" >
+	<target name="clean" >
        <delete quiet="true">
          <fileset dir ="${build.dir}" includes= "**/*.class" />
          <!-- fileset dir="${build.dir}" includes= "*.jar" 
