@@ -206,6 +206,7 @@ public class JSVTree extends JTree {
 	}
 
 	public static void close(ScriptInterface si, String value) {
+		System.out.println("JSVTree close " + value);
 		if (value == null || value.equalsIgnoreCase("all") || value.equals("*")) {
 			si.closeSource(null);
 			return;
@@ -252,7 +253,7 @@ public class JSVTree extends JTree {
 		if (isSimulation)
 			filename = JSVFileManager.SIMULATION_PROTOCOL + "MOL="
 					+ JSVTextFormat.trimQuotes(tokens.get(++pt));
-		if (!isCheck) {
+		if (!isCheck && !isAppend) {
 			if (filename.equals("\"\"") && si.getCurrentSource() != null)
 				filename = si.getCurrentSource().getFilePath();
 			close(si, "all");

@@ -484,8 +484,11 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		recentFilePaths.clear();
 		if (!recentFilesString.equals("")) {
 			StringTokenizer st = new StringTokenizer(recentFilesString, ",");
-			while (st.hasMoreTokens())
-				recentFilePaths.add(st.nextToken().trim());
+			while (st.hasMoreTokens()) {
+				String file = st.nextToken().trim();
+				if (file.length() < 100)
+					recentFilePaths.add(file);
+			}
 		}
 		showExitDialog = Boolean.parseBoolean(properties
 				.getProperty("confirmBeforeExit"));
@@ -1203,6 +1206,8 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	public void updateRecentMenus(String filePath) {
 
 		// ADD TO RECENT FILE PATHS
+		if (filePath.length() > 100)
+			return;
 		if (recentFilePaths.size() >= MAX_RECENT)
 			recentFilePaths.remove(MAX_RECENT - 1);
 		if (recentFilePaths.contains(filePath))

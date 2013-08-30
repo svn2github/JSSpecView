@@ -1001,6 +1001,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	public void closeSource(JDXSource source) {
+	   System.out.println("JSVAppletrivate closeSource " + source);
   	JSVTree.closeSource(this, source);
 	}
 
