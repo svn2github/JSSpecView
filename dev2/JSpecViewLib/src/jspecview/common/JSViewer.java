@@ -465,6 +465,7 @@ public class JSViewer {
       	JDXSource source = si.getCurrentSource();
       	if (source == null)
       		return;
+      	try {
       	String file = "file=" + JSVEscape.escape(source.getFilePath());
       	ArrayList<PeakInfo> peaks = source.getSpectra().get(0).getPeakList();
       	StringBuffer sb = new StringBuffer();
@@ -479,6 +480,9 @@ public class JSViewer {
       	}
       	sb.append("]");
       	si.syncToJmol("Peaks: " + sb);
+      	} catch (Exception e) {
+      		// ignore bad structures -- no spectrum
+      	}
       }
       return;
     }
