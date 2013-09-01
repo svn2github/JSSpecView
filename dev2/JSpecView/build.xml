@@ -64,6 +64,13 @@
 	<target name="build">
           <mkdir dir="${bin.dir}"/>
           <javac srcdir="${src.dir}" destdir="${bin.dir}" includeantruntime="false" classpathref="jspecview.classpath"/>
+        <copy todir="${bin.dir}/jspecview/application/icons">
+          <fileset dir="${src.dir}/jspecview/application/icons"/>
+        </copy>
+        <mkdir dir="${bin.dir}/jspecview/application/resources"/>
+        <copy todir="${bin.dir}/jspecview/application/resources">
+          <fileset dir="${src.dir}/jspecview/application/resources"/>
+        </copy>	
 	</target>
 
 	<target name="make-application-jar" description="Make JSpecView application jar" depends="build">
