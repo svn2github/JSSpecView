@@ -95,14 +95,9 @@
         	<fileset dir="${bin.dir}" />
         	<fileset dir="${jsvlib.dir}" />
         </jar>
-        <jar destfile="${jmol.path}/jars/JSpecView.jar">
-            <manifest>
-            	<attribute name="Class-Path" value="."/>
-                <attribute name="Main-Class" value="${main-class}"/>
-            </manifest>
-        	<fileset dir="${bin.dir}" />
-        	<fileset dir="${jsvlib.dir}" />
-        </jar>
+		<copy overwrite="true" file="${build.app.dir}/${ant.project.name}.app.${build.number}.jar"
+			tofile="${jmol.path}/jars/JSpecView.jar">
+		</copy>
     </target>
 <!---
 -->
