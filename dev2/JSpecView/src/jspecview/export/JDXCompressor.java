@@ -143,9 +143,9 @@ class JDXCompressor {
     for (int i = startIndex; i != endIndex;) {
       String xStr = JSVTextFormat
           .fixIntNoExponent(xyCoords[i].getXVal() / xFactor);
-      if (xStr.length() < 20)
-        xStr += spaces.substring(0, (20 - xStr.length()));
-      buffer.append(xStr);
+      if (xStr.length() < 14)
+        xStr += spaces.substring(0, (14 - xStr.length()));
+      buffer.append(xStr.substring(0,14));
       for (int j = 0; j < 6 && i != endIndex; j++) {
         format10(buffer, Math.round(xyCoords[i].getYVal() / yFactor),
             formatter);
@@ -160,7 +160,7 @@ class JDXCompressor {
   private static void format10(StringBuffer buffer, long y,
                                DecimalFormat formatter) {
     String s = formatter.format(y);
-    buffer.append(spaces.substring(0, (9 - s.length()))).append(s).append(" ");
+    buffer.append(spaces.substring(0, (10 - s.length()))).append(s).append(" ");
   }
 
   /**

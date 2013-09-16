@@ -38,7 +38,7 @@ changes and analyses can be made without altering the saved view
 
 ___version=2.0.2
 
-
+correct FIX export bug: X values now max of 14 wide Y values 10 wide
 apply changes to build.xml to allow command line ANT compilation for use in Fedora (Thanks to Susi Lehtola)
 
 update signing certificate (now valid for 10 years)
