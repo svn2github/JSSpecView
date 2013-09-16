@@ -135,8 +135,8 @@ class JDXCompressor {
    *        y factor for compression
    * @return A String representing the compressed data
    */
-  static String compressFIX(Coordinate[] xyCoords, int startIndex, int step,
-                            int endIndex, double xFactor, double yFactor) {
+  static String compressFIX(Coordinate[] xyCoords, int startIndex, 
+                            int endIndex, int step, double xFactor, double yFactor) {
     endIndex += step;
     DecimalFormat formatter = JSVTextFormat.getDecimalFormat("#");
     StringBuffer buffer = new StringBuffer();
@@ -144,12 +144,9 @@ class JDXCompressor {
       String xStr = JSVTextFormat
           .fixIntNoExponent(xyCoords[i].getXVal() / xFactor);
       if (xStr.length() < 20)
-        xStr += spaces.substring(0, (14 - xStr.length()));
-      buffer.append(xStr).append(" ");
-      format10(buffer, Math.round(xyCoords[i].getYVal() / yFactor),
-          formatter);
-      i += step;
-      for (int j = 0; j < 5 && i != endIndex; j++) {
+        xStr += spaces.substring(0, (20 - xStr.length()));
+      buffer.append(xStr);
+      for (int j = 0; j < 6 && i != endIndex; j++) {
         format10(buffer, Math.round(xyCoords[i].getYVal() / yFactor),
             formatter);
         i += step;
@@ -163,7 +160,7 @@ class JDXCompressor {
   private static void format10(StringBuffer buffer, long y,
                                DecimalFormat formatter) {
     String s = formatter.format(y);
-    buffer.append(spaces.substring(0, (10 - s.length()))).append(s).append(" ");
+    buffer.append(spaces.substring(0, (9 - s.length()))).append(s).append(" ");
   }
 
   /**

@@ -401,6 +401,8 @@ public class DialogHelper {
     case DIF:
     case DIFDUP:
     case SOURCE:
+    	if (!(name.endsWith("_" + imode)))
+    		name += "_" + imode;    		
       ext = ".jdx";
       break;
     case AML:

@@ -125,6 +125,9 @@
         	</fileset>
         	<fileset dir="${jsvlib.dir}"/>
         </jar>		
+		<copy overwrite="true" file="${build.applet.dir}/${ant.project.name}.applet.${build.number}.jar"
+			tofile="${jmol.path}/appletweb/JSpecViewApplet.jar">
+		</copy>
     </target>
 <!---
 -->
@@ -144,6 +147,9 @@
                signedjar="${build.applet.dir}/${ant.project.name}.applet.signed.${build.number}.jar"
                keystore="certificate/JSVcertificate.store"
                storepass="JSV2013" alias="JSVcertificate" />
+		<copy overwrite="true" file="${build.applet.dir}/${ant.project.name}.applet.signed.${build.number}.jar"
+			tofile="${jmol.path}/appletweb/JSpecViewAppletSigned.jar">
+		</copy>
     <delete>
       <fileset dir="${build.applet.dir}" includes = "temp.jar" />
     </delete>
