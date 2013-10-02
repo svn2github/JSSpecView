@@ -36,6 +36,14 @@ changes and analyses can be made without altering the saved view
 
 =====DONE========
 
+in preparation for JavaScript version:
+
+-- 10/1/2013 BH
+-- Replaced all references to DecimalFormat with JSVTextFormat.formatDecimal or JSVTextFormat.formatDecimalTrimmed
+-- Replaced all references to StringBuilder and StringBuffer with JSVSB
+
+
+
 ___version=2.0.2
 
 correct FIX export bug: X values now max of 14 wide Y values 10 wide
