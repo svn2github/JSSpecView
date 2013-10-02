@@ -14,6 +14,7 @@ import javax.swing.JOptionPane;
 
 import jspecview.util.JSVEscape;
 import jspecview.util.JSVLogger;
+import jspecview.util.JSVSB;
 
 public class JSVDropTargetListener implements DropTargetListener {
 
@@ -82,7 +83,8 @@ public class JSVDropTargetListener implements DropTargetListener {
 				List<File> list = (List<File>) o;
 				dtde.getDropTargetContext().dropComplete(true);
 				dtde = null;
-				StringBuffer sb = new StringBuffer(prefix);
+				JSVSB sb = new JSVSB();
+				sb.append(prefix);
 				for (int i = 0; i < list.size(); i++)
 					sb.append(cmd + JSVEscape.escape(list.get(i).getAbsolutePath()) + ";");
 				sb.append(postfix);

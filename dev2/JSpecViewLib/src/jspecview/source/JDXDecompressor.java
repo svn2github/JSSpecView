@@ -29,6 +29,7 @@ import java.io.IOException;
 import jspecview.common.Coordinate;
 import jspecview.util.JSVLogger;
 import jspecview.util.JSVParser;
+import jspecview.util.JSVSB;
 
 /**
  * JDXDecompressor contains static methods to decompress the data part of
@@ -130,7 +131,7 @@ public class JDXDecompressor {
   private int ipt;
   private String line, lastLine;
   private int lineLen;
-  private StringBuffer errorLog;
+  private JSVSB errorLog;
 
   private void addPoint(Coordinate pt) {
     if (ipt == xyCoords.length) {
@@ -168,7 +169,7 @@ public class JDXDecompressor {
    * @param firstLastX 
    * @return the array of <code>Coordinate</code>s
    */
-  public Coordinate[] decompressData(StringBuffer errorLog, double[] firstLastX) {
+  public Coordinate[] decompressData(JSVSB errorLog, double[] firstLastX) {
 
     this.errorLog = errorLog;
     this.firstLastX = firstLastX;
@@ -250,7 +251,7 @@ public class JDXDecompressor {
   private void logError(String s) {
     if (debugging)
       JSVLogger.debug(s);
-    errorLog.append(s).append('\n');  
+    errorLog.append(s).appendC('\n');  
   }
 
   private double getYValue() {

@@ -28,6 +28,7 @@ import jspecview.common.Coordinate;
 import jspecview.common.JDXDataObject;
 import jspecview.common.JDXSpectrum;
 import jspecview.util.JSVLogger;
+import jspecview.util.JSVSB;
 import jspecview.util.JSVXmlReader;
 
 /**
@@ -75,7 +76,7 @@ abstract class XMLReader {
   protected double refPoint = JDXDataObject.ERROR;
   protected String casRN = "";
   protected String sampleID;
-  protected StringBuffer errorLog = new StringBuffer();
+  protected JSVSB errorLog = new JSVSB();
 
   public XMLReader(String filePath) {
     this.filePath = filePath;

@@ -49,10 +49,10 @@ public class JSVEscape {
         int pt = -1;
         char ch = escapable.charAt(i++);
         char ch2 = escapable.charAt(i++);
-        StringBuffer sb = new StringBuffer();
+        JSVSB sb = new JSVSB();
         int pt0 = 0;
         while ((pt = str.indexOf(ch, pt + 1)) >= 0) {
-          sb.append(str.substring(pt0, pt)).append('\\').append(ch2);
+          sb.append(str.substring(pt0, pt)).appendC('\\').appendC(ch2);
           pt0 = pt + 1;
         }
         sb.append(str.substring(pt0, str.length()));
@@ -75,7 +75,7 @@ public class JSVEscape {
 
     //Logger.debug(infoType+" -- "+info);
 
-    StringBuilder sb = new StringBuilder();
+    JSVSB sb = new JSVSB();
     String sep = "";
     if (info == null)
       return packageJSON(infoType, (String) null, addCR);
@@ -97,7 +97,7 @@ public class JSVEscape {
       sb.append("[");
       int imax = ((int[]) info).length;
       for (int i = 0; i < imax; i++) {
-        sb.append(sep).append(((int[]) info)[i]);
+        sb.append(sep).appendI(((int[]) info)[i]);
         sep = ",";
       }
       sb.append("]");
@@ -107,7 +107,7 @@ public class JSVEscape {
       sb.append("[");
       int imax = ((float[]) info).length;
       for (int i = 0; i < imax; i++) {
-        sb.append(sep).append(((float[]) info)[i]);
+        sb.append(sep).appendF(((float[]) info)[i]);
         sep = ",";
       }
       sb.append("]");
@@ -117,7 +117,7 @@ public class JSVEscape {
       sb.append("[");
       int imax = ((double[]) info).length;
       for (int i = 0; i < imax; i++) {
-        sb.append(sep).append(((double[]) info)[i]);
+        sb.append(sep).appendD(((double[]) info)[i]);
         sep = ",";
       }
       sb.append("]");
@@ -126,12 +126,12 @@ public class JSVEscape {
     if (info instanceof String[][]) {
       sb.append("[");
       if (addCR)
-      	sb.append('\n');
+      	sb.append("\n");
       int imax = ((String[][]) info).length;
       for (int i = 0; i < imax; i++) {
         sb.append(sep).append(toJSON(null, ((String[][]) info)[i], addCR));
         if (addCR)
-        	sb.append('\n');
+        	sb.append("\n");
         sep = ",";
       }
       sb.append("]");
@@ -220,7 +220,7 @@ public class JSVEscape {
     return "\"" + s + "\"";
   }
 
-  private static String packageJSON(String infoType, StringBuilder sb, boolean addCR) {
+  private static String packageJSON(String infoType, JSVSB sb, boolean addCR) {
     return packageJSON(infoType, sb.toString(), addCR);
   }
 

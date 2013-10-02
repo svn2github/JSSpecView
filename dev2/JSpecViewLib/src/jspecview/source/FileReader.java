@@ -44,6 +44,7 @@ import jspecview.util.JSVEscape;
 import jspecview.util.JSVFileManager;
 import jspecview.util.JSVLogger;
 import jspecview.util.JSVParser;
+import jspecview.util.JSVSB;
 import jspecview.util.JSVTextFormat;
 import jspecview.util.JSVZipFileSequentialReader;
 
@@ -82,7 +83,7 @@ public class FileReader {
   }
   private JDXSource source;
   private JDXSourceStreamTokenizer t;
-  private StringBuffer errorLog;
+  private JSVSB errorLog;
   private boolean obscure;
 
   private boolean done;
@@ -190,7 +191,7 @@ public class FileReader {
     source = new JDXSource(JDXSource.TYPE_SIMPLE, filePath);
     isZipFile = (br instanceof JSVZipFileSequentialReader);
     t = new JDXSourceStreamTokenizer(br);
-    errorLog = new StringBuffer();
+    errorLog = new JSVSB();
 
     String label = null;
 
@@ -738,7 +739,7 @@ public class FileReader {
    */
   private static boolean readDataLabel(JDXDataObject spectrum, String label,
                                        JDXSourceStreamTokenizer t,
-                                       StringBuffer errorLog, boolean obscure) {
+                                       JSVSB errorLog, boolean obscure) {
 
     if (readHeaderLabel(spectrum, label, t, errorLog, obscure))
       return true;
@@ -866,7 +867,7 @@ public class FileReader {
   }
 
   private static boolean readHeaderLabel(JDXHeader jdxHeader, String label,
-                                         JDXSourceStreamTokenizer t, StringBuffer errorLog,
+                                         JDXSourceStreamTokenizer t, JSVSB errorLog,
                                          boolean obscure) {
     if (label.equals("##TITLE")) {
       String value = t.getValue();

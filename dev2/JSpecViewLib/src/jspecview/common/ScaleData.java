@@ -1,10 +1,7 @@
 package jspecview.common;
 
-import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
-
-import jspecview.util.JSVTextFormat;
 
 /**
  * Stores information
@@ -56,14 +53,10 @@ public class ScaleData {
    * 
    * The precision (number of decimal places) of the X and Y values
    */
-  public int hashNums[] = new int[2];
+	public int[] precision = new int[2]; 
+  public int exportPrecision[] = new int[2];
+  
 
-  /**
-   * The formatter for the X and Y scales
-   * If the array is null, then this is a temporary set for 1D ZoomBox
-   */
-	public DecimalFormat[] formatters = new DecimalFormat[2];
-	
 
   /**
    * The step values for the X and Y scales
@@ -244,15 +237,17 @@ public class ScaleData {
 		int exp = (int) Math.floor(log);
 		
 		// set number of decimal places
-		hashNums[i] = exp;
+		exportPrecision[i] = exp;
+		precision[i] = (exp <= 0 ? Math.min(8, 1 - exp) : exp > 3 ? -2 : 0); 
 
 		// set number formatter
-		String hash1 = "0.00000000";
-		String hash = (
-				exp <= 0 ? hash1.substring(0, Math.min(hash1.length(), Math.abs(exp) + 3))
-				: exp > 3 ? "" 
-				: "#");
-		formatters[i] = JSVTextFormat.getDecimalFormat(hash);
+//		String hash1 = "0.00000000"; // 8
+//		String hash = (
+//      0 --> 0.0; 1 --> 0.00, etc.
+//				exp <= 0 ? hash1.substring(0, Math.min(hash1.length(), Math.abs(exp) + 3))
+//				: exp > 3 ? "0.00E0" //-2 
+//				: "#"); // 0
+//		formatters[i] = JSVTextFormat.getDecimalFormat(hash);
 		
 		// set step for numbers
     int j = 0;

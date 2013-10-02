@@ -64,7 +64,7 @@ public class JSVZipUtil {
    */
   static public Object getZipFileContents(InputStream is, String[] list,
                                           int listPtr) {
-    StringBuffer ret = new StringBuffer();
+    JSVSB ret = new JSVSB();
     if (list == null || listPtr >= list.length)
       return getZipDirectoryAsStringAndClose(is);
     String fileName = list[listPtr];
@@ -76,7 +76,7 @@ public class JSVZipUtil {
         while ((ze = zis.getNextEntry()) != null) {
           String name = ze.getName();
           if (isAll || name.startsWith(fileName))
-            ret.append(name).append('\n');
+            ret.append(name).appendC('\n');
         }
         return ret.toString();
       }
@@ -118,7 +118,7 @@ public class JSVZipUtil {
   }
   
   static public String getZipDirectoryAsStringAndClose(InputStream is) {
-    StringBuffer sb = new StringBuffer();
+    JSVSB sb = new JSVSB();
     String[] s = new String[0];
     try {
       s = getZipDirectoryOrErrorAndClose(is, false);
@@ -127,7 +127,7 @@ public class JSVZipUtil {
       JSVLogger.error(e.getMessage());
     }
     for (int i = 0; i < s.length; i++)
-      sb.append(s[i]).append('\n');
+      sb.append(s[i]).appendC('\n');
     return sb.toString();
   }
   
@@ -165,7 +165,7 @@ public class JSVZipUtil {
   }
   
   public static String getZipEntryAsString(ZipInputStream zis) throws IOException {
-    StringBuffer sb = new StringBuffer();
+    JSVSB sb = new JSVSB();
     byte[] buf = new byte[1024];
     int len;
     while (zis.available() == 1 && (len = zis.read(buf)) > 0)

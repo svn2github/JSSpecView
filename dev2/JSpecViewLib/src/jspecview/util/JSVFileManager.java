@@ -57,13 +57,13 @@ public class JSVFileManager {
 		if (name == null)
 			return null;
 		BufferedReader br;
-		StringBuffer sb = new StringBuffer(8192);
+		JSVSB sb = new JSVSB();
 		try {
 			br = getBufferedReaderFromName(name, appletDocumentBase, null);
 			String line;
 			while ((line = br.readLine()) != null) {
 				sb.append(line);
-				sb.append('\n');
+				sb.appendC('\n');
 			}
 			br.close();
 		} catch (Exception e) {
@@ -272,7 +272,7 @@ public class JSVFileManager {
       error[0] = "Error loading resource " + name;
       return null;
     }
-    StringBuffer sb = new StringBuffer();
+    JSVSB sb = new JSVSB();
     try {
       //  turns out from the Jar file
       //   it's a sun.net.www.protocol.jar.JarURLConnection$JarURLInputStream

@@ -19,7 +19,6 @@
 
 package jspecview.common;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -41,9 +40,6 @@ public class Coordinate {
   private double xVal = 0;
   /** the y value */
   private double yVal = 0;
-
-  /** the format of the string returned by getXString() and getYString() */
-  private static DecimalFormat formatter = JSVTextFormat.getDecimalFormat("0.########");
 
   /**
    * Constructor
@@ -90,7 +86,7 @@ public class Coordinate {
    *         eight decimal places
    */
   public String getXString() {
-    return formatter.format(xVal);
+    return JSVTextFormat.formatDecimalTrimmed(xVal, 8);
   }
 
   /**
@@ -101,7 +97,7 @@ public class Coordinate {
    *         eight decimal places
    */
   public String getYString() {
-    return formatter.format(yVal);
+    return JSVTextFormat.formatDecimalTrimmed(yVal, 8);
   }
 
   /**

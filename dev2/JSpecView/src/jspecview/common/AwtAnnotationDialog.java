@@ -26,7 +26,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,7 +42,6 @@ import javax.swing.event.ListSelectionListener;
 
 import jspecview.common.Annotation.AType;
 import jspecview.common.AnnotationData;
-import jspecview.util.JSVTextFormat;
 
 /**
  * Dialog for managing peak, integral, and measurement listings for a Spectrum
@@ -81,16 +79,16 @@ abstract class AwtAnnotationDialog extends AwtDialog implements AnnotationDialog
 
 	private Object[] myOptions;
 	private String[] unitOptions;
-	private String[] formatOptions;
+	private int[] formatOptions;
 
 	private Integer unitPtr;
-	protected JTextField txtFormat;
-	protected JTextField txtFontSize;
-	protected JComboBox<String> cmbUnits;
+	protected int precision = 1;
+	//private JTextField txtFormat;
+	//protected JTextField txtFontSize;
+	protected JComboBox<String> cmbUnits; // measurement listing
 
 	/**
-	 * Initialises the <code>IntegralDialog</code> with the given values for minY,
-	 * offset and factor
+	 * Initialises the AwtIntegralListDialog, AwtMeasurementListDialog, or AwtPeakListDialog 
 	 * @param si 
 	 * @param spec 
 	 * @param jsvp
@@ -127,7 +125,7 @@ abstract class AwtAnnotationDialog extends AwtDialog implements AnnotationDialog
 		if (myOptions == null)
 			options.put(thisKey, myOptions = spec.getDefaultAnnotationInfo(thisType));
 		unitOptions = (String[]) myOptions[0];
-		formatOptions = (String[]) myOptions[1];
+		formatOptions = (int[]) myOptions[1];
 		unitPtr = (Integer) options.get(thisKey + "_unitPtr");
 		if (unitPtr == null)
 			unitPtr = (Integer) myOptions[2];
@@ -229,12 +227,12 @@ abstract class AwtAnnotationDialog extends AwtDialog implements AnnotationDialog
 	private void addTopControls() {
 
 		String key = thisKey + "_format";
-		String format = (String) options.get(key);
+		Integer format = (Integer) options.get(key);
 		if (format == null)
-			options.put(key, (format = formatOptions[unitPtr == null ? 0 : unitPtr
+			options.put(key, format = Integer.valueOf(formatOptions[unitPtr == null ? 0 : unitPtr
 					.intValue()]));
-		txtFormat = dialogHelper.addInputOption("numberFormat", "Number Format",
-				format, null, null, false);
+		//txtFormat = dialogHelper.addInputOption("numberFormat", "Number Format",
+			//	format, null, null, false);
 		if (unitPtr != null)
 			cmbUnits = dialogHelper.addSelectOption("Units", null, unitOptions,
 					unitPtr.intValue(), addUnits);
@@ -272,7 +270,7 @@ abstract class AwtAnnotationDialog extends AwtDialog implements AnnotationDialog
 
 	protected void doEvent(ActionEvent e) {
 		if (e.getActionCommand().equals("Units")) {
-			txtFormat.setText(formatOptions[cmbUnits.getSelectedIndex()]);
+			precision = formatOptions[cmbUnits.getSelectedIndex()];
 			return;
 		}
 		if (e.getSource() instanceof JTextField) {
@@ -322,7 +320,6 @@ abstract class AwtAnnotationDialog extends AwtDialog implements AnnotationDialog
 	}
 
 	protected MeasurementData xyData;
-	protected DecimalFormat numberFormatter;
 	private String key;
 
 	public String getKey() {
@@ -350,8 +347,7 @@ abstract class AwtAnnotationDialog extends AwtDialog implements AnnotationDialog
 	}
 
 	protected void setParams() {
-		myParams.numberFormat = txtFormat.getText();
-		numberFormatter = JSVTextFormat.getDecimalFormat("#" + myParams.numberFormat);
+		myParams.precision = precision;
 	}
 
 	private int iRowSelected = -1;

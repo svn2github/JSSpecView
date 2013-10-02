@@ -24,7 +24,6 @@
 
 package jspecview.common;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +69,7 @@ class MeasurementData extends ArrayList<Measurement> implements AnnotationData {
 		return myParams;
 	}
 
-	protected DecimalFormat df;
+	protected int precision;
 
 	private final static String[] HEADER = new String[] { "peak", "start", "end", "value" };
 	String[] getDataHeader() {
@@ -82,14 +81,14 @@ class MeasurementData extends ArrayList<Measurement> implements AnnotationData {
 	String[][] getMeasurementListArray(String units) {
 		this.units = units;
 		double[][] ddata = getMeasurementListArrayReal(units);
-		DecimalFormat dfx = JSVTextFormat.getDecimalFormat(spec.isNMR() ? "#0.0000"
-				: "#0.00");
-		DecimalFormat dfdx = JSVTextFormat
-				.getDecimalFormat(spec.isHNMR() && units.equals("ppm") ? "#0.0000" : "#0.00");
+		int precisionX = (spec.isNMR() ? 4 : 2);
+		int precisionDX = (spec.isHNMR() && units.equals("ppm") ? 4 : 2);
 		String[][] data = new String[size()][];
 		for (int i = size(); --i >= 0;)
-			data[i] = new String[] { "" + (i + 1), dfx.format(ddata[i][0]),
-							dfx.format(ddata[i][1]), dfdx.format(ddata[i][2]) };
+			data[i] = new String[] { "" + (i + 1),
+					JSVTextFormat.formatDecimal(ddata[i][0], precisionX),
+					JSVTextFormat.formatDecimal(ddata[i][1], precisionX),
+					JSVTextFormat.formatDecimal(ddata[i][2], precisionDX) };
 		return data;
 	}
 
@@ -148,7 +147,7 @@ class MeasurementData extends ArrayList<Measurement> implements AnnotationData {
 			double x = m.getXVal() + dx;
 			m.setXVal(x);
 			m.setValue(x);
-			m.text = df.format(x);
+			m.text = JSVTextFormat.formatDecimal(x, precision);
 		}
 	}
 

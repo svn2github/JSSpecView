@@ -25,26 +25,19 @@
 
 package jspecview.util;
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.util.Hashtable;
-import java.util.Map;
-
 public class JSVTextFormat {
-
-  private final static DecimalFormat[] formatters = new DecimalFormat[10];
 
   private final static String[] formattingStrings = { "0", "0.0", "0.00", "0.000",
       "0.0000", "0.00000", "0.000000", "0.0000000", "0.00000000", "0.000000000" };
 
+  private final static String zeros = "0000000000000000000000000000000000000000";
+
+  private final static float[] formatAdds = { 0.5f, 0.05f, 0.005f, 0.0005f,
+  	0.00005f, 0.000005f, 0.0000005f, 0.00000005f, 0.000000005f, 0.0000000005f };
+
   private final static Boolean[] useNumberLocalization = new Boolean[1];
 
-  /**
-   * The line separator for the system that the program is running on
-   */
   public static final String newLine = System.getProperty("line.separator");
-
-	private static Map<String, DecimalFormat> htFormats = new Hashtable<String, DecimalFormat>();
 
 	{
     useNumberLocalization[0] = Boolean.TRUE;
@@ -54,17 +47,39 @@ public class JSVTextFormat {
     useNumberLocalization[0] = (TF ? Boolean.TRUE : Boolean.FALSE);
   }
 
-  public static String formatDecimal(float value, int decimalDigits) {
-    if (decimalDigits == Integer.MAX_VALUE)
+  /**
+   * A simple alternative to DecimalFormat (which Java2Script does not have
+   * and which is quite too complex for our use here).
+   * 
+   * Slightly different from Jmol's TextFormat.formatDecimal so as to 
+   * better mimic DecimalFormat:
+   * 
+   * (a) -n means n digits AFTER the decimal place, not total # of digits
+   * 
+   * (b) no "+" after E
+   * 
+   * (c) to-even rounding of xx.xx5 
+   * 
+   * Limited support for scientific notation. 
+   * Note that the last 0 in "0.00E00" is ignored.
+   * 
+   * @param value
+   * @param decimalDigits
+   * @return  formatted decimal
+   */
+  public static String formatDecimal(double value, int decimalDigits) {
+    if (decimalDigits == Integer.MAX_VALUE 
+        || value == Double.NEGATIVE_INFINITY || value == Double.POSITIVE_INFINITY || Double.isNaN(value))
       return "" + value;
+    int n;
     if (decimalDigits < 0) {
-      decimalDigits = -decimalDigits;
+      decimalDigits = 1 - decimalDigits;
       if (decimalDigits > formattingStrings.length)
         decimalDigits = formattingStrings.length;
       if (value == 0)
-        return formattingStrings[decimalDigits] + "E+0";
+        return formattingStrings[decimalDigits] + "E0";
       //scientific notation
-      int n = 0;
+      n = 0;
       double d;
       if (Math.abs(value) < 1) {
         n = 10;
@@ -78,20 +93,63 @@ public class JSVTextFormat {
       n = JSVParser.parseInt(s.substring(i + 1)) + n;
       return (i < 0 ? "" + value : formatDecimal(JSVParser.parseFloat(s.substring(
           0, i)), decimalDigits - 1)
-          + "E" + (n >= 0 ? "+" : "") + n);
+          + "E" + n);
     }
 
     if (decimalDigits >= formattingStrings.length)
       decimalDigits = formattingStrings.length - 1;
-    DecimalFormat formatter = formatters[decimalDigits];
-    if (formatter == null)
-      formatter = formatters[decimalDigits] = new DecimalFormat(
-          formattingStrings[decimalDigits]);
-    String s = formatter.format(value);
-    return (Boolean.TRUE.equals(useNumberLocalization[0]) ? s : s.replace(',','.'));
+    String s1 = ("" + value).toUpperCase();
+    boolean isNeg = s1.startsWith("-");
+    if (isNeg)
+      s1 = s1.substring(1);
+    int pt = s1.indexOf(".");
+    if (pt < 0)
+      return s1 + formattingStrings[decimalDigits].substring(1);
+    int pt1 = s1.indexOf("E-");
+    if (pt1 > 0) {
+      n = JSVParser.parseInt(s1.substring(pt1 + 1));
+      // 3.567E-2
+      // 0.03567
+      s1 = "0." + zeros.substring(0, -n - 1) + s1.substring(0, 1) + s1.substring(2, pt1);
+      pt = 1; 
+    }
+
+    pt1 = s1.indexOf("E");
+    // 3.5678E+3
+    // 3567.800000000
+    // 1.234E10 %3.8f -> 12340000000.00000000
+    if (pt1 > 0) {
+      n = JSVParser.parseInt(s1.substring(pt1 + 1));
+      s1 = s1.substring(0, 1) + s1.substring(2, pt1) + zeros;
+      s1 = s1.substring(0, n + 1) + "." + s1.substring(n + 1);
+      pt = s1.indexOf(".");
+    } 
+    // "234.345667  len == 10; pt = 3
+    // "  0.0 "  decimalDigits = 1
+    
+    int len = s1.length();
+    int pt2 = decimalDigits + pt + 1;
+    char ch;
+    if (pt2 < len && ((ch = s1.charAt(pt2)) > '5' || ch == '5' 
+    	&& (pt2 > 0 && (0 + ((ch = s1.charAt(pt2 - 1)) == '.' ? s1.charAt(pt2 - 2) : ch) % 2 == 1)))) {
+      return formatDecimal(
+          value + (isNeg ? -1 : 1) * formatAdds[decimalDigits], decimalDigits);
+    }
+
+    JSVSB sb = JSVSB.newS(s1.substring(0, (decimalDigits == 0 ? pt
+        : ++pt)));
+    for (int i = 0; i < decimalDigits; i++, pt++) {
+      if (pt < len)
+        sb.appendC(s1.charAt(pt));
+      else
+        sb.appendC('0');
+    }
+    s1 = (isNeg ? "-" : "") + sb;
+    return (Boolean.TRUE.equals(useNumberLocalization[0]) ? s1 : s1.replace(',',
+        '.'));
   }
 
-  public static String format(float value, int width, int precision,
+  public static String formatNumber(double value, int width, int precision,
                               boolean alignLeft, boolean zeroPad) {
     return format(formatDecimal(value, precision), width, 0, alignLeft, zeroPad);
   }
@@ -113,28 +171,16 @@ public class JSVTextFormat {
     char padChar = (zeroPad ? '0' : ' ');
     char padChar0 = (isNeg ? '-' : padChar);
 
-    StringBuffer sb = new StringBuffer();
+    JSVSB sb = new JSVSB();
     if (alignLeft)
       sb.append(value);
-    sb.append(padChar0);
+    sb.appendC(padChar0);
     for (int i = padLength; --i > 0;)
       // this is correct, not >= 0
-      sb.append(padChar);
+      sb.appendC(padChar);
     if (!alignLeft)
       sb.append(isNeg ? padChar + value.substring(1) : value);
     return sb.toString();
-  }
-
-  public static String formatString(String strFormat, String key, String strT) {
-    return formatString(strFormat, key, strT, Float.NaN);
-  }
-
-  public static String formatString(String strFormat, String key, float floatT) {
-    return formatString(strFormat, key, null, floatT);
-  }
-
-  public static String formatString(String strFormat, String key, int intT) {
-    return formatString(strFormat, key, "" + intT, Float.NaN);
   }
   
   public static String sprintf(String strFormat, Object[] values) {
@@ -240,7 +286,7 @@ public class JSVTextFormat {
         }
         ich += len;
         if (!Float.isNaN(floatT))
-          strLabel += format(floatT, width, precision, alignLeft,
+          strLabel += formatNumber(floatT, width, precision, alignLeft,
               zeroPad);
         else if (strT != null)
           strLabel += format(strT, width, precision, alignLeft,
@@ -349,7 +395,7 @@ public class JSVTextFormat {
     boolean isOnce = (strTo.indexOf(strFrom) >= 0);
     int ipt;
     while (str.indexOf(strFrom) >= 0) {
-      StringBuffer s = new StringBuffer();
+      JSVSB s = new JSVSB();
       int ipt0 = 0;
       while ((ipt = str.indexOf(strFrom, ipt0)) >= 0) {
         s.append(str.substring(ipt0, ipt)).append(strTo);
@@ -390,18 +436,18 @@ public class JSVTextFormat {
     return split(text, "" + ch);
   }
   
-  public static void lFill(StringBuffer s, String s1, String s2) {
-    s.append(s2);
-    int n = s1.length() - s2.length();
+  public static void leftJustify(JSVSB s, String sFill, String sVal) {
+    s.append(sVal);
+    int n = sFill.length() - sVal.length();
     if (n > 0)
-      s.append(s1.substring(0, n));
+      s.append(sFill.substring(0, n));
   }
   
-  public static void rFill(StringBuffer s, String s1, String s2) {
-    int n = s1.length() - s2.length();
+  public static void rightJustify(JSVSB s, String sFill, String sVal) {
+    int n = sFill.length() - sVal.length();
     if (n > 0)
-      s.append(s1.substring(0, n));
-    s.append(s2);
+      s.append(sFill.substring(0, n));
+    s.append(sVal);
   }
   
   public static String safeTruncate(float f, int n) {
@@ -472,21 +518,18 @@ public class JSVTextFormat {
     return true;
   }
 
-	/**
-	 * If the applet is used for teaching, then we may need to obscure the title
-	 * of the spectrum
-	 * 
-	 * @param hash
-	 * @return a new decimal format
-	 */
-
-	public static DecimalFormat getDecimalFormat(String hash) {
-		DecimalFormat df = htFormats.get(hash);
-		if (df == null)
-			htFormats.put(hash, df = new DecimalFormat(hash.equals("") ? "0.00E0"
-					: hash, new DecimalFormatSymbols(java.util.Locale.US)));
-		return df;
-	}
+//	private static Map<String, DecimalFormat> htFormats = new Hashtable<String, DecimalFormat>();
+  
+//	public static DecimalFormat getDecimalFormat(String hash) {
+//		DecimalFormat df = htFormats.get(hash);
+//		if (df == null) {
+//	  	System.out.println("JSVTextFormat using DF " + hash);
+//			if (hash.length() == 0)
+//				hash = "0.00E0";
+//			htFormats.put(hash, df = new DecimalFormat(hash, new DecimalFormatSymbols(java.util.Locale.US)));
+//		}
+//		return df;
+//	}
   
   public static String trimQuotes(String value) {
     return (value.length() > 1 && value.startsWith("\"")
@@ -494,8 +537,22 @@ public class JSVTextFormat {
         : value);
   }
 
-  static DecimalFormat formatter1 = getDecimalFormat("0.000000E00");
-  static DecimalFormat formatter2 = getDecimalFormat("0.0000000000");
+	public static String formatDecimalTrimmed(double x, int precision) {
+	  return JSVTextFormat.rtrim(JSVTextFormat.formatDecimal(x, precision), "0"); // 0.##...
+	}  
+
+  public static String fixExponentInt(double x) {
+    return (x == Math.floor(x) ? String.valueOf((int) x) : simpleReplace(fixExponent(x), "E+00", ""));
+  }
+
+  public static String fixIntNoExponent(double x) {
+    return (x == Math.floor(x) ? String.valueOf((int) x) : formatDecimalTrimmed(x, 10));
+  }
+  
+  public static boolean isAlmostInteger(double x) {
+    return (x != 0 && Math.abs(x - Math.floor(x)) / x > 1e-8);
+  }
+
   /**
    * JCAMP-DX requires 1.5E[+|-]nn or 1.5E[+|-]nnn only
    * not Java's 1.5E3 or 1.5E-2
@@ -503,8 +560,8 @@ public class JSVTextFormat {
    * @param x
    * @return exponent fixed
    */
-  public static String fixExponent(double x) {
-    String s = formatter1.format(x);
+  private static String fixExponent(double x) {
+    String s = formatDecimal(x, -6);
     int pt = s.indexOf("E");
     if (pt < 0) {
       return s;
@@ -524,17 +581,40 @@ public class JSVTextFormat {
     return s;
   }
 
-  public static String fixExponentInt(double x) {
-    return (x == Math.floor(x) ? String.valueOf((long) x) : simpleReplace(fixExponent(x), "E+00", ""));
-  }
-
-  public static String fixIntNoExponent(double x) {
-    return (x == Math.floor(x) ? String.valueOf((long) x) : rtrim(formatter2.format(x),"0"));
-  }
-  
-  public static boolean isAlmostInteger(double x) {
-    return (x != 0 && Math.abs(x - Math.floor(x)) / x > 1e-8);
-  }  
+//	static {
+//  	DecimalFormat df =  new DecimalFormat("0.00E0", new DecimalFormatSymbols(java.util.Locale.US));
+//  	System.out.println(df.format(-1.0) + " " + formatDecimal(-1.0, -2));
+//  	System.out.println(df.format(-1.3467E-10) + " " + formatDecimal(-1.3467E-10, -2));
+//  	System.out.println(df.format(-1.3467E10) + " " + formatDecimal(-1.3467E10, -2));
+//  	System.out.println(df.format(-1.3467) + " " + formatDecimal(-1.3467, -2));
+//		df = new DecimalFormat("#0.00", new DecimalFormatSymbols(java.util.Locale.US));
+//		System.out.println(df.format(-1.3467) + " " + formatDecimal(-1.3467, 2));
+//		System.out.println(df.format(-1.456) + " " + formatDecimal(-1.456, 2));
+//		System.out.println(df.format(-1.535) + " " + formatDecimal(-1.535, 2));
+//		System.out.println(df.format(-1.545) + " " + formatDecimal(-1.545, 2));
+//		System.out.println(df.format(0) + " " + formatDecimal(0, 2));
+//		df = new DecimalFormat("#", new DecimalFormatSymbols(java.util.Locale.US));
+//		System.out.println(df.format(-1.3467) + " " + formatDecimal(-1.3467, 0));
+//		System.out.println(df.format(-1.45) + " " + formatDecimal(-1.45, 0));
+//		System.out.println(df.format(-1.5) + " " + formatDecimal(-1.5, 0));
+//		System.out.println(df.format(-1.1) + " " + formatDecimal(-1.1, 0));
+//		System.out.println(df.format(0) + " " + formatDecimal(0, 0));
+//		
+////		-1.00E0 -1.00E0
+////		-1.35E-10 -1.35E-10
+////		-1.35E10 -1.35E10
+////		-1.35E0 -1.35E0
+////		-1.35 -1.35
+////		-1.46 -1.46
+////		-1.54 -1.54
+////		-1.54 -1.54
+////		0.00 0.00
+////		-1 -1
+////		-1 -1
+////		-2 -2
+////		-1 -1
+////		0 0
+//	}
   
 //  static {
 //    System.out.println("TEST TextFormat.java");

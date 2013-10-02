@@ -31,6 +31,7 @@ import jspecview.common.Coordinate;
 import jspecview.common.JDXDataObject;
 import jspecview.common.JDXSpectrum;
 import jspecview.source.FileReader;
+import jspecview.util.JSVSB;
 import jspecview.util.JSVTextFormat;
 
 /**
@@ -88,7 +89,7 @@ public class JDXExporter {
                                     int startIndex, int endIndex) {
 
     //String dataType = spectrum.getDataType();
-    StringBuffer buffer = new StringBuffer();
+    JSVSB buffer = new JSVSB();
     Coordinate[] newXYCoords = spectrum.getXYCoords();
     String tabDataSet = "", tmpDataClass = "XYDATA";
 
@@ -194,7 +195,7 @@ public class JDXExporter {
 
     //final String CORE_STR = "TITLE,ORIGIN,OWNER,DATE,TIME,DATATYPE,JCAMPDX";
 
-    StringBuffer buffer = new StringBuffer();
+    JSVSB buffer = new JSVSB();
     // start of header
     buffer.append("##TITLE= ").append(spec.getTitle()).append(
         JSVTextFormat.newLine);
@@ -233,10 +234,10 @@ public class JDXExporter {
     }
     double observedFreq = spec.getObservedFreq();
     if (!spec.is1D())
-      buffer.append("##NUM DIM= ").append(spec.numDim).append(
+      buffer.append("##NUM DIM= ").appendI(spec.numDim).append(
           JSVTextFormat.newLine);
     if (observedFreq != JDXDataObject.ERROR)
-      buffer.append("##.OBSERVE FREQUENCY= ").append(observedFreq).append(
+      buffer.append("##.OBSERVE FREQUENCY= ").appendD(observedFreq).append(
           JSVTextFormat.newLine);
     if (spec.observedNucl != "")
       buffer.append("##.OBSERVE NUCLEUS= ").append(spec.observedNucl).append(
@@ -266,7 +267,7 @@ public class JDXExporter {
     buffer.append("##LASTX= ").append(
         JSVTextFormat.fixExponentInt(xyCoords[endIndex].getXVal() * f)).append(
         JSVTextFormat.newLine);
-    buffer.append("##NPOINTS= ").append((Math.abs(endIndex - startIndex) + 1))
+    buffer.append("##NPOINTS= ").appendI((Math.abs(endIndex - startIndex) + 1))
         .append(JSVTextFormat.newLine);
     buffer.append("##MINY= ").append(JSVTextFormat.fixExponentInt(minY)).append(
         JSVTextFormat.newLine);

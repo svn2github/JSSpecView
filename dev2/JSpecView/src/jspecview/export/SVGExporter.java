@@ -21,7 +21,6 @@ package jspecview.export;
 
 import java.awt.Color;
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.Map;
 import java.util.Hashtable;
 import java.util.List;
@@ -108,8 +107,6 @@ class SVGExporter extends FormExporter {
 
     initForm(fileName);
 
-    DecimalFormat formatter2 = JSVTextFormat.getDecimalFormat("0.######");
-
     ScaleData scaleData = new ScaleData(xyCoords, startDataPointIndex, endDataPointIndex, isContinuous, isInverted);
 
     double maxXOnScale = scaleData.maxXOnScale;
@@ -139,8 +136,8 @@ class SVGExporter extends FormExporter {
     for (double i = minXOnScale; i < maxXOnScale + xStep / 2; i += xStep) {
       xPt = leftPlotArea + ((i - minXOnScale) * xScaleFactor);
       yPt = topPlotArea;
-      xStr = formatter2.format(xPt);
-      yStr = formatter2.format(yPt);
+      xStr = JSVTextFormat.formatDecimalTrimmed(xPt, 6);
+      yStr = JSVTextFormat.formatDecimalTrimmed(yPt, 6);
       Map<String, String> hash = new Hashtable<String, String>();
       hash.put("xVal", xStr);
       hash.put("yVal", yStr);
@@ -150,8 +147,8 @@ class SVGExporter extends FormExporter {
     for (double i = minYOnScale; i < maxYOnScale + yStep / 2; i += yStep) {
       xPt = leftPlotArea;
       yPt = topPlotArea + ((i - minYOnScale) * yScaleFactor);
-      xStr = formatter2.format(xPt);
-      yStr = formatter2.format(yPt);
+      xStr = JSVTextFormat.formatDecimalTrimmed(xPt, 6);
+      yStr = JSVTextFormat.formatDecimalTrimmed(yPt, 6);
       Map<String, String> hash = new Hashtable<String, String>();
       hash.put("xVal", xStr);
       hash.put("yVal", yStr);
@@ -163,15 +160,15 @@ class SVGExporter extends FormExporter {
     List<Map<String, String>> xScaleList = new ArrayList<Map<String, String>>();
     List<Map<String, String>> xScaleListReversed = new ArrayList<Map<String, String>>();
     List<Map<String, String>> yScaleList = new ArrayList<Map<String, String>>();
-    DecimalFormat displayXFormatter = scaleData.formatters[0];
-    DecimalFormat displayYFormatter = scaleData.formatters[1];
+    int precisionX = scaleData.precision[0];
+    int precisionY = scaleData.precision[1];
     for (double i = minXOnScale; i < (maxXOnScale + xStep / 2); i += xStep) {
       xPt = leftPlotArea + ((i - minXOnScale) * xScaleFactor);
       xPt -= 10; // shift to left by 10
       yPt = bottomPlotArea + 15; // shift down by 15
-      xStr = formatter2.format(xPt);
-      yStr = formatter2.format(yPt);
-      String iStr = displayXFormatter.format(i);
+      xStr = JSVTextFormat.formatDecimalTrimmed(xPt, 6);
+      yStr = JSVTextFormat.formatDecimalTrimmed(yPt, 6);
+      String iStr = JSVTextFormat.formatDecimal(i, precisionX);
       Map<String, String> hash = new Hashtable<String, String>();
       hash.put("xVal", xStr);
       hash.put("yVal", yStr);
@@ -182,9 +179,9 @@ class SVGExporter extends FormExporter {
       xPt = leftPlotArea + ((j - minXOnScale) * xScaleFactor);
       xPt -= 10;
       yPt = bottomPlotArea + 15; // shift down by 15
-      xStr = formatter2.format(xPt);
-      yStr = formatter2.format(yPt);
-      String iStr = displayXFormatter.format(i);
+      xStr = JSVTextFormat.formatDecimalTrimmed(xPt, 6);
+      yStr = JSVTextFormat.formatDecimalTrimmed(yPt, 6);
+      String iStr = JSVTextFormat.formatDecimal(i, precisionX);
 
       Map<String, String> hash = new Hashtable<String, String>();
       hash.put("xVal", xStr);
@@ -198,9 +195,9 @@ class SVGExporter extends FormExporter {
       xPt = leftPlotArea - 55;
       yPt = bottomPlotArea - ((i - minYOnScale) * yScaleFactor);
       yPt += 3; // shift down by three
-      xStr = formatter2.format(xPt);
-      yStr = formatter2.format(yPt);
-      String iStr = displayYFormatter.format(i);
+      xStr = JSVTextFormat.formatDecimalTrimmed(xPt, 6);
+      yStr = JSVTextFormat.formatDecimalTrimmed(yPt, 6);
+      String iStr = JSVTextFormat.formatDecimal(i, precisionY);
 
       Map<String, String> hash = new Hashtable<String, String>();
       hash.put("xVal", xStr);
@@ -310,14 +307,14 @@ class SVGExporter extends FormExporter {
     context.put("yUnitLabelX", "" + yUnitLabelX);
     context.put("yUnitLabelY", "" + yUnitLabelY);
 
-    context.put("numDecimalPlacesX", new Integer(Math.abs(scaleData.hashNums[0])));
-    context.put("numDecimalPlacesY", new Integer(Math.abs(scaleData.hashNums[1])));
+    context.put("numDecimalPlacesX", new Integer(Math.abs(scaleData.exportPrecision[0])));
+    context.put("numDecimalPlacesY", new Integer(Math.abs(scaleData.exportPrecision[1])));
 
     String vm = (exportForInkscape ? "plot_ink.vm" : "plot.vm");
     JSVLogger.info("SVGExporter using " + vm);
     return writeForm(vm);
   }
-  
+
   /**
    * Export an overlaid graph as SVG with specified Coordinates and Colors
    * @param fileName
@@ -441,8 +438,8 @@ class SVGExporter extends FormExporter {
     for (double i = minXOnScale; i < maxXOnScale + xStep / 2; i += xStep) {
       xPt = leftPlotArea + ((i - minXOnScale) * xScaleFactor);
       yPt = topPlotArea;
-      xStr = formatter2.format(xPt);
-      yStr = formatter2.format(yPt);
+      xStr = JSVTextFormat.formatDecimalTrimmed(xPt);
+      yStr = JSVTextFormat.formatDecimalTrimmed(yPt);
 
       Map<String, String> hash = new Hashtable<String, String>();
       hash.put("xVal", xStr);
@@ -454,8 +451,8 @@ class SVGExporter extends FormExporter {
     for (double i = minYOnScale; i < maxYOnScale + yStep / 2; i += yStep) {
       xPt = leftPlotArea;
       yPt = topPlotArea + ((i - minYOnScale) * yScaleFactor);
-      xStr = formatter2.format(xPt);
-      yStr = formatter2.format(yPt);
+      xStr = JSVTextFormat.formatDecimalTrimmed(xPt);
+      yStr = JSVTextFormat.formatDecimalTrimmed(yPt);
 
       Map<String, String> hash = new Hashtable<String, String>();
       hash.put("xVal", xStr);
@@ -488,8 +485,8 @@ class SVGExporter extends FormExporter {
       xPt = leftPlotArea + ((i - minXOnScale) * xScaleFactor);
       xPt -= 10; // shift to left by 10
       yPt = bottomPlotArea + 15; // shift down by 15
-      xStr = formatter2.format(xPt);
-      yStr = formatter2.format(yPt);
+      xStr = JSVTextFormat.formatDecimalTrimmed(xPt);
+      yStr = JSVTextFormat.formatDecimalTrimmed(yPt);
       String iStr = displayXFormatter.format(i);
 
       Map<String, String> hash = new Hashtable<String, String>();
@@ -503,8 +500,8 @@ class SVGExporter extends FormExporter {
       xPt = leftPlotArea + ((j - minXOnScale) * xScaleFactor);
       xPt -= 10;
       yPt = bottomPlotArea + 15; // shift down by 15
-      xStr = formatter2.format(xPt);
-      yStr = formatter2.format(yPt);
+      xStr = JSVTextFormat.formatDecimalTrimmed(xPt);
+      yStr = JSVTextFormat.formatDecimalTrimmed(yPt);
       String iStr = displayXFormatter.format(i);
 
       Map<String, String> hash = new Hashtable<String, String>();
@@ -519,8 +516,8 @@ class SVGExporter extends FormExporter {
       xPt = leftPlotArea - 55;
       yPt = bottomPlotArea - ((i - minYOnScale) * yScaleFactor);
       yPt += 3; // shift down by three
-      xStr = formatter2.format(xPt);
-      yStr = formatter2.format(yPt);
+      xStr = JSVTextFormat.formatDecimalTrimmed(xPt, 6);
+      yStr = JSVTextFormat.formatDecimalTrimmed(yPt, 6);
       String iStr = displayYFormatter.format(i);
 
       Map<String, String> hash = new Hashtable<String, String>();

@@ -130,7 +130,7 @@ public class JSVZipFileSequentialReader extends BufferedReader {
   private char cr = '\0';
 
   private String getEntryLine() throws IOException {
-    StringBuffer line = null;
+    JSVSB line = null;
     while (len >= 0 && (pt < len || zis.available() == 1)) {
       int pt0 = pt;
       char ch = ' ';
@@ -151,7 +151,7 @@ public class JSVZipFileSequentialReader extends BufferedReader {
         }
       }
       if (line == null)
-        line = new StringBuffer(pt - pt0);
+        line = new JSVSB();
       if (pt != pt0)
         line.append(data.substring(pt0, pt + (ch == cr ? -1 : 0)));
       if (ch == cr || zis.available() != 1 || (len = zis.read(buf)) < 0) {

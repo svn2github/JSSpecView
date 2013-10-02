@@ -35,7 +35,7 @@ public class JSVXmlReader {
    */
 
   private XmlEvent thisEvent = new XmlEvent(TAG_NONE);
-  private Buffer buffer;
+  private DataBuffer buffer;
 
   public final static int TAG_NONE = 0;
   public final static int START_ELEMENT = 1;
@@ -47,11 +47,11 @@ public class JSVXmlReader {
 
 
   public JSVXmlReader(BufferedReader br) {
-    buffer = new Buffer(br);
+    buffer = new DataBuffer(br);
   }
 
   public String getBufferData() {
-    return (buffer == null ? null : buffer.data.substring(0, buffer.ptr));
+    return (buffer == null ? null : buffer.data.toString().substring(0, buffer.ptr));
   }
 
   /**
@@ -133,7 +133,7 @@ public class JSVXmlReader {
   }
 
   public String getCharacters() throws IOException {
-    StringBuffer sb = new StringBuffer();
+    JSVSB sb = new JSVSB();
     thisEvent = buffer.peek();
     int eventType = thisEvent.getEventType();
 
@@ -148,10 +148,9 @@ public class JSVXmlReader {
     return sb.toString();
   }
 
+  private class DataBuffer extends DataString {
 
-  private class Buffer extends DataString {
-
-    Buffer(BufferedReader br) {
+    DataBuffer(BufferedReader br) {
       reader = br;
     }
 
@@ -206,16 +205,16 @@ public class JSVXmlReader {
 
   private class DataString {
 
-    StringBuffer data;
+    JSVSB data;
     protected BufferedReader reader;
     int ptr;
     int ptEnd;
 
     DataString() {
-      this.data = new StringBuffer();
+      this.data = new JSVSB();
     }
 
-    DataString(StringBuffer data) {
+    DataString(JSVSB data) {
       this.data = data;
       ptEnd = data.length();
     }
@@ -227,7 +226,7 @@ public class JSVXmlReader {
     protected void flush() {
       if (data.length() < 1000 || ptEnd - ptr > 100)
         return;
-      data = new StringBuffer(data.substring(ptr));
+      data = new JSVSB().append(data.substring(ptr));
       //System.out.println(data);
       ptr = 0;
       ptEnd = data.length();
@@ -235,7 +234,7 @@ public class JSVXmlReader {
     }
 
     String substring(int i, int j) {
-      return data.substring(i, j);
+      return data.toString().substring(i, j);
     }
 
     int skipOver(char c, boolean inQuotes) throws IOException {
@@ -296,7 +295,7 @@ public class JSVXmlReader {
       this.eventType = eventType;
     }
 
-    XmlEvent(Buffer b) throws IOException {
+    XmlEvent(DataBuffer b) throws IOException {
       ptr = b.ptr;
       int n = b.getNCharactersRemaining();
       eventType = (n == 0 ? EOF : n == 1
@@ -309,7 +308,7 @@ public class JSVXmlReader {
         data = b.data.toString().substring(ptr, b.ptr);
       } else {
         b.skipOver('>', false);
-        String s = b.data.substring(ptr, b.ptr);
+        String s = b.data.toString().substring(ptr, b.ptr);
         if (s.startsWith("<!--"))
           eventType = COMMENT;
         //System.out.println("new tag: " + s);
@@ -379,7 +378,7 @@ public class JSVXmlReader {
     private void getAttributes() {
       attributes = new Hashtable<String, String>();
       DataString d = new DataString(
-          new StringBuffer(text));
+          new JSVSB().append(text));
       try {
         if (d.skipTo(' ', false) < 0)
           return;

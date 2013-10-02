@@ -37,6 +37,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 
+import jspecview.util.JSVSB;
+
 /**
  * Dialog for managing overlaying spectra and closing files
  * 
@@ -290,7 +292,7 @@ public class ViewDialog extends AwtDialog implements WindowListener {
 	}
 	
 	protected void combineSelected() {
-		StringBuffer sb = new StringBuffer();
+		JSVSB sb = new JSVSB();
 		for (int i = 0; i < checkBoxes.size(); i++) {
 			JCheckBox cb = checkBoxes.get(i);
 			JSVPanelNode node = treeNodes.get(i).panelNode;
@@ -308,7 +310,7 @@ public class ViewDialog extends AwtDialog implements WindowListener {
 	}
 
 	protected void viewSelected() {
-		StringBuffer sb = new StringBuffer();
+		JSVSB sb = new JSVSB();
 		for (int i = 0; i < checkBoxes.size(); i++) {
 			JCheckBox cb = checkBoxes.get(i);
 			JSVPanelNode node = treeNodes.get(i).panelNode;

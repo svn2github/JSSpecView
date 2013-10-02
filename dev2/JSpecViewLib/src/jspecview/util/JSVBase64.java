@@ -37,13 +37,13 @@ public class JSVBase64 {
     41,42,43,44, 45,46,47,48, 49,50,51,0,  0,0,0,0,      //0x70-0x7F
   };
     
-  public static StringBuffer getBase64(StringBuffer str) {
+  public static JSVSB getBase64(JSVSB str) {
     return getBase64(toBytes(str));  
   }
 
-  public static StringBuffer getBase64(byte[] bytes) {
+  public static JSVSB getBase64(byte[] bytes) {
     long nBytes = bytes.length;
-    StringBuffer sout = new StringBuffer();
+    JSVSB sout = new JSVSB();
     if (nBytes == 0)
       return sout;
     for (int i = 0, nPad = 0; i < nBytes && nPad == 0;) {
@@ -54,10 +54,10 @@ public class JSVBase64 {
           | ((nPad == 2 ? 0 : (bytes[i++]) << 8) & 0x00FF00)
           | ((nPad >= 1 ? 0 : (int) bytes[i++]) & 0x0000FF);
       //System.out.println(Integer.toHexString(outbytes));
-      sout.append(base64.charAt((outbytes >> 18) & 0x3F));
-      sout.append(base64.charAt((outbytes >> 12) & 0x3F));
-      sout.append(nPad == 2 ? '=' : base64.charAt((outbytes >> 6) & 0x3F));
-      sout.append(nPad >= 1 ? '=' : base64.charAt(outbytes & 0x3F));
+      sout.appendC(base64.charAt((outbytes >> 18) & 0x3F));
+      sout.appendC(base64.charAt((outbytes >> 12) & 0x3F));
+      sout.appendC(nPad == 2 ? '=' : base64.charAt((outbytes >> 6) & 0x3F));
+      sout.appendC(nPad >= 1 ? '=' : base64.charAt(outbytes & 0x3F));
     }
     return sout;
   }
@@ -99,7 +99,7 @@ public class JSVBase64 {
     return bytes;
   }  
   
-  public static byte[] toBytes(StringBuffer sb) {
+  public static byte[] toBytes(JSVSB sb) {
     byte[] b = new byte[sb.length()];
     for (int i = sb.length(); --i >= 0;)
       b[i] = (byte) sb.charAt(i);

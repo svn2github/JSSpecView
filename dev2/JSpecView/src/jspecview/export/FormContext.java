@@ -29,6 +29,7 @@ import java.util.Map;
 import jspecview.common.Coordinate;
 import jspecview.util.JSVLogger;
 import jspecview.util.JSVParser;
+import jspecview.util.JSVSB;
 import jspecview.util.JSVTextFormat;
 
 /**
@@ -193,7 +194,7 @@ class FormContext {
 
    @SuppressWarnings("unchecked")
 	public String merge(FileWriter writer) {
-    StringBuffer sb = (writer == null ? new StringBuffer() : null);
+    JSVSB sb = (writer == null ? new JSVSB() : null);
     int ptr;
     for (int i = 0; i < formTokens.size() && strError == null; i++) {
       FormToken vt = formTokens.get(i);

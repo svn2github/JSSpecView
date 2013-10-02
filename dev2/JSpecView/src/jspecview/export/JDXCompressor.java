@@ -19,10 +19,9 @@
 
 package jspecview.export;
 
-import java.text.DecimalFormat;
-
 import jspecview.common.Coordinate;
 import jspecview.util.JSVLogger;
+import jspecview.util.JSVSB;
 import jspecview.util.JSVTextFormat;
 
 /**
@@ -61,8 +60,8 @@ class JDXCompressor {
   static String compressDIF(Coordinate[] xyCoords, int startIndex,
                             int endIndex, int step, double xFactor,
                             double yFactor, boolean isDIFDUP) {
-    StringBuffer yStr = new StringBuffer();
-    StringBuffer buffer = new StringBuffer();
+    JSVSB yStr = new JSVSB();
+    JSVSB buffer = new JSVSB();
     for (int i = startIndex; i != endIndex;) {
       buffer.append(JSVTextFormat
           .fixIntNoExponent(xyCoords[i].getXVal() / xFactor));
@@ -105,7 +104,7 @@ class JDXCompressor {
         if (JSVLogger.debugging)
           JSVLogger.info("" + i + '\t' + xyCoords[i].getXVal() + '\t' + xyCoords[i].getYVal() + '\t' + nDif + '\t' + yStr);
       }
-      buffer.append(yStr).append(JSVTextFormat.newLine);
+      buffer.append(yStr.toString()).append(JSVTextFormat.newLine);
       i += step;
     }
     // Get checksum line -- for an X-sequence check only
@@ -118,50 +117,42 @@ class JDXCompressor {
 
   final static String spaces = "                    ";
 
-  /**
-   * Compresses the <code>Coordinate<code>s into FIX format
-   * 
-   * @param xyCoords
-   *        the array of <code>Coordinate</code>s
-   * @param startIndex
-   *        startIndex the start index of the array of Coordinates to be
-   *        compressed
-   * @param step 
-   * @param endIndex
-   *        endIndex the end index of the array of Coordinates to be compressed
-   * @param xFactor
-   *        x factor for compression
-   * @param yFactor
-   *        y factor for compression
-   * @return A String representing the compressed data
-   */
-  static String compressFIX(Coordinate[] xyCoords, int startIndex, 
-                            int endIndex, int step, double xFactor, double yFactor) {
-    endIndex += step;
-    DecimalFormat formatter = JSVTextFormat.getDecimalFormat("#");
-    StringBuffer buffer = new StringBuffer();
-    for (int i = startIndex; i != endIndex;) {
-      String xStr = JSVTextFormat
-          .fixIntNoExponent(xyCoords[i].getXVal() / xFactor);
-      if (xStr.length() < 14)
-        xStr += spaces.substring(0, (14 - xStr.length()));
-      buffer.append(xStr.substring(0,14));
-      for (int j = 0; j < 6 && i != endIndex; j++) {
-        format10(buffer, Math.round(xyCoords[i].getYVal() / yFactor),
-            formatter);
-        i += step;
-      }
-      buffer.append(JSVTextFormat.newLine);
-    }
+	/**
+	 * Compresses the <code>Coordinate<code>s into FIX format
+	 * 
+	 * @param xyCoords
+	 *          the array of <code>Coordinate</code>s
+	 * @param startIndex
+	 *          startIndex the start index of the array of Coordinates to be
+	 *          compressed
+	 * @param step
+	 * @param endIndex
+	 *          endIndex the end index of the array of Coordinates to be
+	 *          compressed
+	 * @param xFactor
+	 *          x factor for compression
+	 * @param yFactor
+	 *          y factor for compression
+	 * @return A String representing the compressed data
+	 */
+	static String compressFIX(Coordinate[] xyCoords, int startIndex,
+			int endIndex, int step, double xFactor, double yFactor) {
+		endIndex += step;
+		JSVSB buffer = new JSVSB();
+		for (int i = startIndex; i != endIndex;) {
+			JSVTextFormat.leftJustify(buffer, "              ", JSVTextFormat
+					.fixIntNoExponent(xyCoords[i].getXVal() / xFactor)); // 14 spaces
+			for (int j = 0; j < 6 && i != endIndex; j++) {
+				JSVTextFormat.rightJustify(buffer, "          ", ""
+						+ Math.round(xyCoords[i].getYVal() / yFactor));
+				buffer.append(" ");
+				i += step;
+			}
+			buffer.append(JSVTextFormat.newLine);
+		}
 
-    return buffer.toString();
-  }
-
-  private static void format10(StringBuffer buffer, long y,
-                               DecimalFormat formatter) {
-    String s = formatter.format(y);
-    buffer.append(spaces.substring(0, (10 - s.length()))).append(s).append(" ");
-  }
+		return buffer.toString();
+	}
 
   /**
    * Compresses the <code>Coordinate<code>s into SQZ format
@@ -183,9 +174,9 @@ class JDXCompressor {
   static String compressSQZ(Coordinate[] xyCoords, int startIndex,
                             int endIndex, int step, double xFactor,
                             double yFactor) {
-    StringBuffer yStr = new StringBuffer();
+    JSVSB yStr = new JSVSB();
     endIndex += step;
-    StringBuffer buffer = new StringBuffer();
+    JSVSB buffer = new JSVSB();
     for (int i = startIndex; i == startIndex || i != endIndex;) {
       buffer.append(JSVTextFormat
           .fixIntNoExponent(xyCoords[i].getXVal() / xFactor));
@@ -196,7 +187,7 @@ class JDXCompressor {
         yStr.append(makeSQZ(xyCoords[i], yFactor));
         i += step;
       }
-      buffer.append(yStr).append(JSVTextFormat.newLine);
+      buffer.append(yStr.toString()).append(JSVTextFormat.newLine);
     }
     return buffer.toString();
   }
@@ -221,7 +212,7 @@ class JDXCompressor {
   static String compressPAC(Coordinate[] xyCoords, int startIndex,
                             int endIndex, int step, double xFactor,
                             double yFactor) {
-    StringBuffer buffer = new StringBuffer();
+    JSVSB buffer = new JSVSB();
     endIndex += step;
     for (int i = startIndex; i != endIndex;) {
       buffer.append(
@@ -323,7 +314,7 @@ class JDXCompressor {
   static String getXYList(Coordinate[] xyCoords, int startIndex, int endIndex,
                           int step) {
     endIndex += step;
-    StringBuffer buffer = new StringBuffer();
+    JSVSB buffer = new JSVSB();
     for (int i = startIndex; i != endIndex; i += step) {
       Coordinate point = xyCoords[i];
       buffer.append(JSVTextFormat.fixIntNoExponent(point.getXVal())).append(", ")

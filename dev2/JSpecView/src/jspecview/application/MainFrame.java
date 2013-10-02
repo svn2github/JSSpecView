@@ -113,6 +113,7 @@ import jspecview.source.JDXSource;
 import jspecview.util.JSVEscape;
 import jspecview.util.JSVFileManager;
 import jspecview.util.JSVLogger;
+import jspecview.util.JSVSB;
 import jspecview.util.JSVTextFormat;
 
 /**
@@ -1213,7 +1214,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		if (recentFilePaths.contains(filePath))
 			recentFilePaths.remove(filePath);
 		recentFilePaths.add(0, filePath);
-		StringBuffer filePaths = new StringBuffer();
+		JSVSB filePaths = new JSVSB();
 		int n = recentFilePaths.size();
 		for (int index = 0; index < n; index++)
 			filePaths.append(", ").append(recentFilePaths.get(index));

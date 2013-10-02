@@ -9,6 +9,7 @@ import java.util.Map;
 import jspecview.common.JSVDialog;
 import jspecview.common.JSVPanel;
 import jspecview.source.JDXSource;
+import jspecview.util.JSVSB;
 
 public class JSVPanelNode {
 
@@ -103,7 +104,7 @@ public class JSVPanelNode {
   }
 
 	static String getSpectrumListAsString(List<JSVPanelNode> panelNodes) {
-      StringBuffer sb = new StringBuffer();
+      JSVSB sb = new JSVSB();
       for (int i = 0; i < panelNodes.size(); i++) {
       	String id = panelNodes.get(i).id;
         sb.append(" ").append(id);

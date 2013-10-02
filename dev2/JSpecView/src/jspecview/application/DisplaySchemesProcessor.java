@@ -33,6 +33,7 @@ import jspecview.common.AwtParameters;
 import jspecview.common.Parameters;
 import jspecview.common.ScriptToken;
 import jspecview.util.JSVFileManager;
+import jspecview.util.JSVSB;
 import jspecview.util.JSVXmlReader;
 import jspecview.util.JSVTextFormat;
 
@@ -307,10 +308,10 @@ public class DisplaySchemesProcessor {
     buffer.write("</displaySchemes>");
     buffer.flush();
 
-    StringBuffer outBuffer = new StringBuffer();
+    JSVSB outBuffer = new JSVSB();
     outBuffer.append("<?xml version=\"1.0\"?>" + JSVTextFormat.newLine);
     outBuffer.append("<displaySchemes default=\""+ defaultDSName +"\">" + JSVTextFormat.newLine);
-    outBuffer.append(sw.getBuffer());
+    outBuffer.append(sw.getBuffer().toString());
 
     writer.write(outBuffer.toString());
     writer.flush();

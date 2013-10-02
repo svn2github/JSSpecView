@@ -23,6 +23,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 
 import jspecview.util.JSVLogger;
+import jspecview.util.JSVSB;
 
 /**
  * @author Debbie-Ann Facey
@@ -111,7 +112,7 @@ public class JDXSourceStreamTokenizer {
     if (label == null)
       return null;
     int i;
-    StringBuffer str = new StringBuffer();
+    JSVSB str = new JSVSB();
 
     for (i = 0; i < label.length(); i++) {
       switch (label.charAt(i)) {
@@ -122,7 +123,7 @@ public class JDXSourceStreamTokenizer {
       case '_':
         break;
       default:
-        str.append(label.charAt(i));
+        str.appendC(label.charAt(i));
         break;
       }
     }
@@ -140,14 +141,14 @@ public class JDXSourceStreamTokenizer {
   public String getValue() {
     if (value != null)
       return value;
-    StringBuffer sb = new StringBuffer(line);
+    JSVSB sb = new JSVSB().append(line);
     if (sb.length() > 0)
-      sb.append('\n');
+      sb.appendC('\n');
     try {
       while (readLine() != null) {
         if (line.indexOf("##") >= 0 && line.trim().startsWith("##"))
           break;
-        sb.append(line).append('\n');
+        sb.append(line).appendC('\n');
       }
     } catch (IOException e) {
       // TODO Auto-generated catch block
@@ -165,12 +166,12 @@ public class JDXSourceStreamTokenizer {
       return null;
     if (line.indexOf("$$") < 0)
       return line.trim();
-    StringBuffer sb = new StringBuffer(line);
+    JSVSB sb = new JSVSB().append(line);
     return trimLines(sb);
   }
 
   String flushLine() {
-    StringBuffer sb = new StringBuffer(line);
+    JSVSB sb = new JSVSB().append(line);
     line = null;
     return trimLines(sb);
   }
@@ -181,7 +182,7 @@ public class JDXSourceStreamTokenizer {
     return line;
   }
 
-  private static String trimLines(StringBuffer v) {
+  private static String trimLines(JSVSB v) {
     int n = v.length();
     int ilast = n - 1;
     int vpt = ptNonWhite(v, 0, n);
@@ -192,7 +193,7 @@ public class JDXSourceStreamTokenizer {
       n = v.lastIndexOf(">") + 1;
       if (n == 0)
         n = v.length();
-      return v.substring(vpt, n);
+      return v.toString().substring(vpt, n);
     }
     char[] buffer = new char[n - vpt];
     int pt = 0;
@@ -228,19 +229,19 @@ public class JDXSourceStreamTokenizer {
     return (new String(buffer)).substring(0, pt).trim();
   }
 
-  private static int ptNonWhite(StringBuffer v, int pt, int n) {
+  private static int ptNonWhite(JSVSB v, int pt, int n) {
     while (pt < n && Character.isWhitespace(v.charAt(pt))) 
       pt++;
     return pt;
   }
 
-  private static int ptNonSpace(StringBuffer v, int pt, int n) {
+  private static int ptNonSpace(JSVSB v, int pt, int n) {
     while (pt < n && (v.charAt(pt) == ' ' || v.charAt(pt) == '\t'))
       pt++;
     return pt;
   }
 
-  private static int ptNonSpaceRev(StringBuffer v, int pt) {
+  private static int ptNonSpaceRev(JSVSB v, int pt) {
     while (--pt >= 0 && (v.charAt(pt) == ' ' || v.charAt(pt) == '\t')) {
       // move on back one character
     }

@@ -1,6 +1,5 @@
 package jspecview.common;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
@@ -336,10 +335,10 @@ public class IntegralData extends MeasurementData {
 
 	@Override
 	public String[][] getMeasurementListArray(String units) {
-		DecimalFormat df2 = JSVTextFormat.getDecimalFormat("#0.00");
 		String[][] data = new String[size()][];
 		for (int pt = 0, i = size(); --i >= 0;)
-			data[pt++] = new String[] { "" + pt, df2.format(get(i).getXVal()), df2.format(get(i).getXVal2()), get(i).getText() };
+			data[pt++] = new String[] { "" + pt, JSVTextFormat.formatDecimal(get(i).getXVal(), 2), 
+				JSVTextFormat.formatDecimal(get(i).getXVal2(), 2), get(i).getText() };
 		return data;
 	}
 

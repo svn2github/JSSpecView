@@ -20,7 +20,6 @@
 package jspecview.common;
 
 import java.awt.event.ActionEvent;
-import java.text.DecimalFormat;
 
 import javax.swing.JButton;
 //import javax.swing.JCheckBox;
@@ -214,10 +213,9 @@ class AwtIntegralListDialog extends AwtAnnotationDialog {
 
 	@Override
 	public void tableCellSelectedEvent(int iRow, int iCol) {
-		DecimalFormat df2 = JSVTextFormat.getDecimalFormat("#0.00");
 		String value = tableData[iRow][1];
 		for (int i = 0; i < xyData.size(); i++) 
-			if (df2.format(xyData.get(i).getXVal()).equals(value)) {
+			if (JSVTextFormat.formatDecimal(xyData.get(i).getXVal(), 2).equals(value)) {
 				iSelected = i;
 				jsvp.getPanelData().findX2(spec, xyData.get(i).getXVal(), spec, xyData.get(i).getXVal2());
 				jsvp.doRepaint();

@@ -12,6 +12,7 @@ import jspecview.source.JDXSource;
 import jspecview.util.JSVEscape;
 import jspecview.util.JSVLogger;
 import jspecview.util.JSVParser;
+import jspecview.util.JSVSB;
 import jspecview.util.JSVTextFormat;
 
 /**
@@ -468,7 +469,7 @@ public class JSViewer {
       	try {
       	String file = "file=" + JSVEscape.escape(source.getFilePath());
       	ArrayList<PeakInfo> peaks = source.getSpectra().get(0).getPeakList();
-      	StringBuffer sb = new StringBuffer();
+      	JSVSB sb = new JSVSB();
       	sb.append("[");
       	int n = peaks.size();
       	for (int i = 0; i < n; i++) {
@@ -737,7 +738,7 @@ public class JSViewer {
 		if (value.indexOf("*") < 0) {
 			// replace "3.1.1" with "3.1*1"
 			String[] tokens = value.split(" ");
-			StringBuffer sb = new StringBuffer();
+			JSVSB sb = new JSVSB();
 			for (int i = 0; i < tokens.length; i++) {
 				int pt = tokens[i].indexOf('.');
 				if (pt != tokens[i].lastIndexOf('.'))
@@ -765,7 +766,7 @@ public class JSViewer {
 		String id0 = (selectedPanel == null ? prefix : JSVPanelNode.findNode(
 				selectedPanel, panelNodes).id);
 		id0 = id0.substring(0, id0.indexOf(".") + 1);
-		StringBuffer sb = new StringBuffer();
+		JSVSB sb = new JSVSB();
 		int n = list.size();
 		String idLast = null;
 		for (int i = 0; i < n; i++) {
@@ -820,7 +821,7 @@ public class JSViewer {
 					isView);
 			sb.append(",").append(id);
 			if (isubspec > 0)
-				sb.append(".").append(isubspec);
+				sb.append(".").appendI(isubspec);
 		}
 		if (isView && speclist.size() == 1) {
 			JSVPanelNode node = JSVPanelNode.findNodeById(idLast, panelNodes);

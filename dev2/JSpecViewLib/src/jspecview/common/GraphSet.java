@@ -1,7 +1,5 @@
 package jspecview.common;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Hashtable;
@@ -2002,7 +2000,7 @@ abstract class GraphSet implements XYScaleConverter {
 		setColor(g, ScriptToken.SCALECOLOR);
 		if (pd.isPrinting)
 			drawLine(g, c.getXPixel0(), yPixel1, c.getXPixel0() + c.getXPixels() - 1, yPixel1);
-		DecimalFormat formatter = getScale().formatters[0];
+		int precision = getScale().precision[0];
 		pd.setFont(g, c.getXPixels(), FONT_PLAIN, pd.isPrinting ? 10 : 12, false);
 		int y1 = yPixel1;
 		int y2 = yPixel1 + 4 * pd.scalingFactor;
@@ -2024,7 +2022,7 @@ abstract class GraphSet implements XYScaleConverter {
 				String s;
 				switch (pass) {
 				case 0:
-					s = formatter.format(val);
+					s = JSVTextFormat.formatDecimal(val, precision);
 					mapX.put(d, s);
 					drawTick(g, x, y1, y2, c);
 					dx = Math.abs(prevX - val);
@@ -2069,7 +2067,7 @@ abstract class GraphSet implements XYScaleConverter {
 	private void drawYScale(Object g, XYScaleConverter c) {
 
 		ScaleData sd = c.getScale();
-		DecimalFormat formatter = sd.formatters[1];
+		int precision = sd.precision[1];
 		pd.setFont(g, c.getXPixels(), FONT_PLAIN, pd.isPrinting ? 10 : 12, false);
 		int h = getFontHeight(g);
 		double max = sd.maxYOnScale + sd.steps[1] / 2;
@@ -2092,7 +2090,7 @@ abstract class GraphSet implements XYScaleConverter {
 				yLast = y;
 				switch (pass) {
 				case 0:
-					s = formatter.format(val);
+					s = JSVTextFormat.formatDecimal(val, precision);
 					mapX.put(d, s);
 					break;
 				case 1:
@@ -2387,32 +2385,32 @@ abstract class GraphSet implements XYScaleConverter {
 
 	private void setToolTipForPixels(int xPixel, int yPixel) {
 		PlotWidget pw = getPinSelected(xPixel, yPixel);
-		NumberFormat formatterX = getScale().formatters[0];
-		NumberFormat formatterY = getScale().formatters[1];
+		int precisionX = getScale().precision[0];
+	  int precisionY = getScale().precision[1];
 		if (pw != null) {
 			if (setStartupPinTip())
 				return;
 			String s;
 			if (pw == pin1Dx01 || pw == pin2Dx01) {
-				s = formatterX .format(Math.min(pin1Dx0.getXVal(), pin1Dx1.getXVal()))
+				s = JSVTextFormat.formatDecimal(Math.min(pin1Dx0.getXVal(), pin1Dx1.getXVal()), precisionX)
 						+ " - "
-						+ formatterX.format(Math.max(pin1Dx0.getXVal(), pin1Dx1.getXVal()));
+						+ JSVTextFormat.formatDecimal(Math.max(pin1Dx0.getXVal(), pin1Dx1.getXVal()), precisionX);
 			} else if (pw == pin1Dy01) {
-				s = formatterY.format(Math.min(pin1Dy0.getYVal(), pin1Dy1.getYVal()))
+				s = JSVTextFormat.formatDecimal(Math.min(pin1Dy0.getYVal(), pin1Dy1.getYVal()), precisionY)
 						+ " - "
-						+ formatterX.format(Math.max(pin1Dy0.getYVal(), pin1Dy1.getYVal()));
+						+ JSVTextFormat.formatDecimal(Math.max(pin1Dy0.getYVal(), pin1Dy1.getYVal()), precisionY);
 			} else if (pw == cur2Dy) {
 				int isub = imageView.toSubspectrumIndex(pw.yPixel0);
-				s = get2DYLabel(isub, formatterX);
+				s = get2DYLabel(isub, precisionX);
 			} else if (pw == pin2Dy01) {
 				s = "" + (int) Math.min(pin2Dy0.getYVal(), pin2Dy1.getYVal()) + " - "
 						+ (int) Math.max(pin2Dy0.getYVal(), pin2Dy1.getYVal());
 			} else if (pw.isXtype) {
-				s = formatterX.format(pw.getXVal());
+				s = JSVTextFormat.formatDecimal(pw.getXVal(), precisionX);
 			} else if (pw.is2D) {
 				s = "" + (int) pw.getYVal();
 			} else {
-				s = formatterY.format(pw.getYVal());
+				s = JSVTextFormat.formatDecimal(pw.getYVal(), precisionY);
 			}
 			pd.setToolTipText(s);
 			return;
@@ -2423,9 +2421,9 @@ abstract class GraphSet implements XYScaleConverter {
 			if (imageView.fixX(xPixel) == xPixel && fixY(yPixel) == yPixel) {
 
 				int isub = imageView.toSubspectrumIndex(yPixel);
-				String s = formatterX.format(imageView.toX(xPixel)) + " "
+				String s = JSVTextFormat.formatDecimal(imageView.toX(xPixel), precisionX) + " "
 						+ getSpectrum().getAxisLabel(true) + ",  "
-						+ get2DYLabel(isub, formatterX);
+						+ get2DYLabel(isub, precisionX);
 				pd.setToolTipText(pd.display1D ? s : "");
 				pd.coordStr = s;
 				return;
@@ -2451,7 +2449,7 @@ abstract class GraphSet implements XYScaleConverter {
 			// }
 		} else if (haveIntegralDisplayed(iSpec)) {
 			yPt = getIntegrationGraph(iSpec).getPercentYValueAt(xPt);
-			xx += ", " + JSVTextFormat.getDecimalFormat("#0.0").format(yPt);
+			xx += ", " + JSVTextFormat.formatDecimal(yPt, 1);
 		}
 		pd.setToolTipText(
 						(pendingMeasurement != null || selectedMeasurement != null || selectedIntegral != null ? 
@@ -2468,11 +2466,11 @@ abstract class GraphSet implements XYScaleConverter {
 	}
 
 	private String setCoordStr(double xPt, double yPt) {
-		String xx = getScale().formatters[0].format(xPt);
+		String xx = JSVTextFormat.formatDecimal(xPt, getScale().precision[0]);
 		pd.coordStr = "("
 				+ xx
 				+ (haveSingleYScale || iSpectrumSelected >= 0 ? ", "
-						+ getScale().formatters[1].format(yPt) : "") + ")";
+						+ JSVTextFormat.formatDecimal(yPt, getScale().precision[1]) : "") + ")";
 		return xx;
 	}
 
@@ -2484,11 +2482,11 @@ abstract class GraphSet implements XYScaleConverter {
 		return true;
 	}
 
-	private String get2DYLabel(int isub, NumberFormat formatterX) {
+	private String get2DYLabel(int isub, int precision) {
 		JDXSpectrum spec = getSpectrumAt(0).getSubSpectra().get(isub);
-		return formatterX.format(spec.getY2D())
+		return JSVTextFormat.formatDecimal(spec.getY2D(), precision)
 				+ (spec.y2DUnits.equals("HZ") ? " HZ ("
-						+ formatterX.format(spec.getY2DPPM()) + " PPM)" : "");
+						+ JSVTextFormat.formatDecimal(spec.getY2DPPM(), precision) + " PPM)" : "");
 	}
 
 	private boolean isOnSpectrum(int xPixel, int yPixel, int index) {
@@ -3820,7 +3818,7 @@ synchronized boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 			addDialog(iSpec, AType.PeakList, dialog = new PeakData(AType.PeakList,
 					getSpectrum()));
 		}
-		((PeakData) dialog.getData()).setPeakList(p, null, viewData.getScale());
+		((PeakData) dialog.getData()).setPeakList(p, Integer.MIN_VALUE, viewData.getScale());
 		if (dialog instanceof AnnotationDialog)
 			((AnnotationDialog) dialog).setFields();
 		return dialog.getData();

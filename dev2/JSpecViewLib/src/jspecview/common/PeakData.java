@@ -1,6 +1,5 @@
 package jspecview.common;
 
-import java.text.DecimalFormat;
 import java.util.Map;
 
 import jspecview.common.Annotation.AType;
@@ -43,8 +42,6 @@ public class PeakData extends MeasurementData {
 
 	@Override
 	public String[][] getMeasurementListArray(String units) {
-		DecimalFormat df4 = JSVTextFormat.getDecimalFormat("#0.0000");
-		DecimalFormat df2 = JSVTextFormat.getDecimalFormat("#0.00");
 		String[][] data = new String[size()][];
 		double[] last = new double[] {-1e100, 1e100, 1e100};
 		double[] ddata;
@@ -53,18 +50,18 @@ public class PeakData extends MeasurementData {
 			if (ddata.length == 2)
 				data[pt] = new String[] {
 					"" + (pt + 1),  
-					df2.format(ddata[0]),
-					df4.format(ddata[1]) 
+					JSVTextFormat.formatDecimal(ddata[0], 2),
+					JSVTextFormat.formatDecimal(ddata[1], 4) 
 				};
 			else // 1HNMR
 				data[pt] = new String[] {
 					"" + (pt + 1), 
-					df4.format(ddata[0]),
-					df4.format(ddata[1]), 
-					df2.format(ddata[2]), 
-					(ddata[3] == 0 ? "" : df2.format(ddata[3])),
-					(ddata[4] == 0 ? "" : df2.format(ddata[4])),
-					(ddata[5] == 0 ? "" : df2.format(ddata[5]))
+					JSVTextFormat.formatDecimal(ddata[0], 4),
+					JSVTextFormat.formatDecimal(ddata[1], 4), 
+					JSVTextFormat.formatDecimal(ddata[2], 2), 
+					(ddata[3] == 0 ? "" : JSVTextFormat.formatDecimal(ddata[3], 2)),
+					(ddata[4] == 0 ? "" : JSVTextFormat.formatDecimal(ddata[4], 2)),
+					(ddata[5] == 0 ? "" : JSVTextFormat.formatDecimal(ddata[5], 2))
 				};
 		}
 		return data;
@@ -86,10 +83,8 @@ public class PeakData extends MeasurementData {
 		super.getInfo(info);
 	}
 
-	public void setPeakList(Parameters p, DecimalFormat formatter, ScaleData view) {
-		if (formatter == null)
-			formatter = JSVTextFormat.getDecimalFormat(spec.getPeakPickHash());
-		df = formatter;
+	public void setPeakList(Parameters p, int precision, ScaleData view) {
+		this.precision = (precision == Integer.MIN_VALUE ? spec.getDefaultUnitPrecision() : precision);
 		Coordinate[] xyCoords = spec.getXYCoords();
 		if (xyCoords.length < 3)
 			return;
@@ -135,7 +130,7 @@ public class PeakData extends MeasurementData {
 					double x = (doInterpolate ? Coordinate.parabolicInterpolation(
 							xyCoords, i - 1) : xyCoords[i - 1].getXVal());
 					if (x >= minX && x <= maxX) {
-						PeakPick m = new PeakPick(spec, x, y, formatter.format(x), x);
+						PeakPick m = new PeakPick(spec, x, y, JSVTextFormat.formatDecimal(x, precision), x);
 						add(m);
 						if (++n == 100)
 							break;

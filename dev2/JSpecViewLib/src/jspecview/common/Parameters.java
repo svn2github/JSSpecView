@@ -182,7 +182,7 @@ public class Parameters {
 
   public double peakListThreshold = Double.NaN; // <= 0 disables these
   public String peakListInterpolation = "parabolic";
-  public String numberFormat = "0.00";
+  public int precision = 2;
     
   protected void setParamDefaults() {
     setBoolean(ScriptToken.TITLEON, true);

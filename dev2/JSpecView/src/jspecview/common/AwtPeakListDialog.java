@@ -71,9 +71,8 @@ class AwtPeakListDialog extends AwtAnnotationDialog {
 			Coordinate c = pd.getClickedCoordinate();
 			y = (c == null ? (pd.getView().minYOnScale * f 
 					+ pd.getView().maxYOnScale) * (1 -f) : c.getYVal());
-		}
-		String sy = JSVTextFormat.getDecimalFormat(y < 1000 ? "#0.00" : "0.00E0")
-				.format(y);
+		}		
+		String sy = JSVTextFormat.formatDecimal(y, y < 1000 ? 2 : -2); //  "#0.00" : "0.00E0"
 		txtThreshold.setText(" " + sy);
 		//setVisible(true);
 	}
@@ -152,7 +151,7 @@ class AwtPeakListDialog extends AwtAnnotationDialog {
 	protected void createData() {
 		setParams();
 		PeakData md = new PeakData(AType.PeakList, spec);
-	  md.setPeakList(myParams, numberFormatter, jsvp.getPanelData().getView());
+	  md.setPeakList(myParams, precision, jsvp.getPanelData().getView());
 		xyData = md;
 		loadData();
 	}

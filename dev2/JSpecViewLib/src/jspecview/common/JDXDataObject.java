@@ -1,7 +1,5 @@
 package jspecview.common;
 
-import java.text.DecimalFormat;
-
 import jspecview.common.Annotation.AType;
 import jspecview.exception.JSpecViewException;
 import jspecview.util.JSVLogger;
@@ -627,13 +625,13 @@ public abstract class JDXDataObject extends JDXHeader {
     return rowData;
   }
 
-	public String getPeakPickHash() {
-		return ("#0.00");
+	public int getDefaultUnitPrecision() {
+		return 2;
 	}
 
 	public String setMeasurementText(Measurement m) {
 		double dx = m.getValue();
-		String hash = "#0.0";
+		int precision = 1;
 		String units = "";
 		if (isNMR()) {
 			if (numDim == 1) {
@@ -645,15 +643,14 @@ public abstract class JDXDataObject extends JDXHeader {
 					}
 				} else {
 					units = " ppm";
-					hash = "#0.00";
+					precision = 2;
 				}
 			} else {
 				return "";
 				// 2D?
 			}
 		}
-		DecimalFormat formatter = JSVTextFormat.getDecimalFormat(hash);
-		return (dx < 0.1 ? "" : formatter.format(dx) + units);
+		return (dx < 0.1 ? "" : JSVTextFormat.formatDecimal(dx, precision) + units);
 	}
 
   public boolean isNMR() {
@@ -828,21 +825,21 @@ public abstract class JDXDataObject extends JDXHeader {
   }
 
   public Object[] getDefaultAnnotationInfo(AType type) {
-		String[] s1, s2;
+		String[] s1;
+		int[] s2;
 		boolean isNMR = isNMR();
 		switch (type) {
 		case Integration:
 			return new Object[] { null, new String[] {"0.0"}, null };
 		case Measurements:
 			s1 = (isNMR ? new String[] { "Hz", "ppm" } : null);
-			s2 = (s1 == null ? null : isHNMR() ? new String[] { "0.0",
-					"0.0000" } : new String[] { "0.0", "0.000" });
+			s2 = (s1 == null ? null : isHNMR() ? new int[] { 1, 4 }
+			: new int[] { 1, 3 });
 			return new Object[] { s1, s2, Integer.valueOf(0) };
 		case PeakList:
 			s1 = (isNMR ? new String[] { "Hz", "ppm" } : new String[] {""} );
 			s2 = (s1 == null ? null
-					: isHNMR() ? new String[] { "0.0", "0.00" } : new String[] {
-							"0.0", "0.0" });
+					: isHNMR() ? new int[] { 1, 2 } : new int[] { 1, 1 });
 			return new Object[] { s1, s2, Integer.valueOf(isNMR ? 1 : 0) };
 		case NONE:
 		}

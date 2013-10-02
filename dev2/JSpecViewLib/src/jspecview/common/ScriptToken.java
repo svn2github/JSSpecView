@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import jspecview.util.JSVSB;
+
 
 /**
  * ScriptToken takes care of script command processing
@@ -241,9 +243,9 @@ public enum ScriptToken {
   public static String getNameList(List<ScriptToken> list) {
     if (list.size() == 0)
       return "";
-    StringBuffer sb = new StringBuffer();
+    JSVSB sb = new JSVSB();
     for (int i = 0; i < list.size(); i++)
-      sb.append(",").append(list.get(i));
+      sb.append(",").append(list.get(i).toString());
     return sb.toString().substring(1);
   }
 
