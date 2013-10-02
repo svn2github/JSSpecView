@@ -486,7 +486,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
    * @param pl 
    */
   private void createPdfDocument(OutputStream os, PrintLayout pl) {
-  	PdfCreatorInterface pdfCreator = (PdfCreatorInterface) Interface.getInterface("jspecview.common.PdfCreator");
+  	PdfCreatorInterface pdfCreator = (PdfCreatorInterface) JSVInterface.getInterface("jspecview.common.PdfCreator");
   	if (pdfCreator == null)
   		return;
   	pdfCreator.createPdfDocument(this, pl, os);

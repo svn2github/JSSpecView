@@ -27,7 +27,7 @@ package jspecview.common;
 
 import jspecview.util.JSVLogger;
 
-public class Interface {
+public class JSVInterface {
 
   public static Object getInterface(String name) {
     try {
