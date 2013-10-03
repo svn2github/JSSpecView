@@ -31,7 +31,7 @@ import org.jmol.util.SB;
 import jspecview.common.Coordinate;
 import jspecview.common.JDXDataObject;
 import jspecview.common.JDXSpectrum;
-import jspecview.util.XmlReader;
+import jspecview.util.JXVXmlReader;
 
 /**
  * Representation of a XML Source.
@@ -51,7 +51,7 @@ abstract class XMLReader {
   protected JDXSource source;
   protected String filePath = "";
   
-  protected XmlReader reader;
+  protected JXVXmlReader reader;
 
   protected String tagName = "START", attrList = "",
       title = "", owner = "UNKNOWN", origin = "UNKNOWN";
@@ -85,11 +85,11 @@ abstract class XMLReader {
   }
 
   protected void getSimpleXmlReader(BufferedReader br) {
-    reader = new XmlReader(br);
+    reader = new JXVXmlReader(br);
   }
 
   protected void checkStart() throws Exception {
-    if (reader.peek() == XmlReader.START_ELEMENT)
+    if (reader.peek() == JXVXmlReader.START_ELEMENT)
       return;
     String errMsg = "Error: XML <xxx> not found at beginning of file; not an XML document?";
     errorLog.append(errMsg);
@@ -230,7 +230,7 @@ abstract class XMLReader {
 
   protected void processXML(int i0, int i1) throws Exception {
     while (reader.hasNext()) {
-      if (reader.nextEvent() != XmlReader.START_ELEMENT)
+      if (reader.nextEvent() != JXVXmlReader.START_ELEMENT)
         continue;
       String theTag = reader.getTagName();
       boolean requiresEndTag = reader.requiresEndTag();
@@ -260,13 +260,13 @@ abstract class XMLReader {
         switch (reader.nextEvent()) {
         default:
           continue;
-        case XmlReader.END_ELEMENT:
+        case JXVXmlReader.END_ELEMENT:
           if (reader.getEndTag().equals(thisTagName)) {
             processEndTag(tagId);
             return;
           }
           continue;
-        case XmlReader.START_ELEMENT:
+        case JXVXmlReader.START_ELEMENT:
           break;
         }
         tagName = reader.getTagName();

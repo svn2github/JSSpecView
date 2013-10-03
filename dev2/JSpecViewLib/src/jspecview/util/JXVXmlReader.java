@@ -25,7 +25,7 @@ import java.util.Hashtable;
 import org.jmol.util.SB;
 
 
-public class XmlReader {
+public class JXVXmlReader {
 
   /*
    * A simple very light-weight XML reader
@@ -48,7 +48,7 @@ public class XmlReader {
   public final static int EOF = 8;
 
 
-  public XmlReader(BufferedReader br) {
+  public JXVXmlReader(BufferedReader br) {
     buffer = new DataBuffer(br);
   }
 
@@ -89,7 +89,7 @@ public class XmlReader {
   }
 
   public void nextTag() throws Exception {
-    while ((thisEvent = buffer.nextTag()).eventType == XmlReader.COMMENT) {
+    while ((thisEvent = buffer.nextTag()).eventType == JXVXmlReader.COMMENT) {
     }
   }
 
