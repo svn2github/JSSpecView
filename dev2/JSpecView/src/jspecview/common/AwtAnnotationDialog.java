@@ -40,6 +40,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import jspecview.api.ScriptInterface;
 import jspecview.common.Annotation.AType;
 import jspecview.common.AnnotationData;
 

@@ -35,6 +35,7 @@ import javax.swing.JPopupMenu;
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
 
+import jspecview.api.ScriptInterface;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.Annotation.AType;
 import jspecview.export.Exporter;

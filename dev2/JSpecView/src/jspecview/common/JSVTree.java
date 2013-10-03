@@ -18,6 +18,7 @@ import javax.swing.tree.TreeSelectionModel;
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
 
+import jspecview.api.ScriptInterface;
 import jspecview.source.JDXSource;
 import jspecview.util.JSVFileManager;
 import jspecview.util.JSVTxt;

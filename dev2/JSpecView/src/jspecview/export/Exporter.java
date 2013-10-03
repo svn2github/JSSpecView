@@ -21,11 +21,11 @@ import javax.swing.SwingConstants;
 
 import org.jmol.util.JmolList;
 
+import jspecview.api.ScriptInterface;
 import jspecview.common.DialogHelper;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVPanel;
 import jspecview.common.PanelData;
-import jspecview.common.ScriptInterface;
 import jspecview.common.ScriptToken;
 import jspecview.util.JSVFileManager;
 import jspecview.util.JSVTxt;

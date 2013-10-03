@@ -24,6 +24,7 @@ import javax.swing.JTextField;
 
 import org.jmol.util.Txt;
 
+import jspecview.api.ScriptInterface;
 import jspecview.common.Annotation.AType;
 
 /**

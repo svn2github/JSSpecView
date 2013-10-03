@@ -53,10 +53,10 @@ import org.jmol.util.JmolList;
 
 import javax.swing.JFrame;
 
-import org.jmol.util.Escape;
 import org.jmol.util.Logger;
 import org.jmol.util.Txt;
 
+import jspecview.api.ScriptInterface;
 import jspecview.application.TextDialog;
 import jspecview.common.AwtPanel;
 import jspecview.common.DialogHelper;
@@ -77,7 +77,6 @@ import jspecview.common.PanelListener;
 import jspecview.common.Parameters;
 import jspecview.common.PeakPickEvent;
 import jspecview.common.ScriptTokenizer;
-import jspecview.common.ScriptInterface;
 import jspecview.common.ScriptToken;
 import jspecview.common.Coordinate;
 import jspecview.common.JDXSpectrum;
@@ -87,6 +86,7 @@ import jspecview.common.JDXSpectrum.IRMode;
 import jspecview.export.Exporter;
 import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
+import jspecview.util.JSVEscape;
 import jspecview.util.JSVFileManager;
 import netscape.javascript.JSObject;
 
@@ -278,7 +278,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	public String getPropertyAsJSON(String key) {
-		return Escape.toJSON(null, getPropertyAsJavaObject(key), false);
+		return JSVEscape.toJSON(null, getPropertyAsJavaObject(key), false);
 	}
 
 	/**
@@ -319,7 +319,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	public void setFilePath(String tmpFilePath) {
-		runScript("load " + Escape.escape(tmpFilePath));
+		runScript("load " + JSVEscape.eS(tmpFilePath));
 	}
 
 	/**

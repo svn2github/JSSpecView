@@ -23,18 +23,22 @@
  *  02110-1301, USA.
  */
 
-package org.jmol.util;
+package jspecview.util;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.jmol.util.BS;
+import org.jmol.util.SB;
+import org.jmol.util.Txt;
 
-public class Escape {
+
+public class JSVEscape {
 
   private final static String escapable = "\\\\\tt\rr\nn\"\""; 
 
-  public static String escape(String str) {
+  public static String eS(String str) {
     if (str == null)
       return "\"\"";
     boolean haveEscape = false;
@@ -300,4 +304,16 @@ public class Escape {
     }
     return (iPrev >= 0 ? null : bs);
 	}
+	
+  public static boolean isAB(Object x) {
+    /**
+     * @j2sNative
+     *  return Clazz.isAI(x);
+     */
+    {
+    return x instanceof byte[];
+    }
+  }
+  
+
 }

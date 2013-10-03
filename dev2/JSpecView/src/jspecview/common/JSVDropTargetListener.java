@@ -12,7 +12,9 @@ import java.io.File;
 
 import javax.swing.JOptionPane;
 
-import org.jmol.util.Escape;
+import jspecview.api.ScriptInterface;
+import jspecview.util.JSVEscape;
+
 import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
 import org.jmol.util.SB;
@@ -88,7 +90,7 @@ public class JSVDropTargetListener implements DropTargetListener {
 				SB sb = new SB();
 				sb.append(prefix);
 				for (int i = 0; i < list.size(); i++)
-					sb.append(cmd + Escape.escape(list.get(i).getAbsolutePath()) + ";");
+					sb.append(cmd + JSVEscape.eS(list.get(i).getAbsolutePath()) + ";");
 				sb.append(postfix);
 				cmd = sb.toString();
 				Logger.info("Drop command = " + cmd);
@@ -198,7 +200,7 @@ public class JSVDropTargetListener implements DropTargetListener {
 		if (!isAccepted)
 			dtde.rejectDrop();
 		if (fileToLoad != null) {
-			cmd = prefix + cmd + Escape.escape(fileToLoad) + "\";" + postfix;
+			cmd = prefix + cmd + JSVEscape.eS(fileToLoad) + "\";" + postfix;
 			Logger.info("Drop command = " + cmd);
 			si.runScript(cmd);
 		}

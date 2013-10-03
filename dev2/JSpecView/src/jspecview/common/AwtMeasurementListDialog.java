@@ -19,6 +19,7 @@
 
 package jspecview.common;
 
+import jspecview.api.ScriptInterface;
 import jspecview.common.Annotation.AType;
 
 /**

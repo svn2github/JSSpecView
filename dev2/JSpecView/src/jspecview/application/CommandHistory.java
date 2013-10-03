@@ -25,7 +25,7 @@ import org.jmol.util.JmolList;
 
 import javax.swing.JTextField;
 
-import jspecview.common.ScriptInterface;
+import jspecview.api.ScriptInterface;
 
 /**
  * CommandHistory keeps a command history and responds to key events

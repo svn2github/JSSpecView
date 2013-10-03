@@ -36,6 +36,8 @@ import java.awt.print.PageFormat;
 import java.awt.print.Paper;
 import java.io.OutputStream;
 
+import jspecview.api.PdfCreatorInterface;
+
 public class PdfCreator implements PdfCreatorInterface {
   
   public PdfCreator() {

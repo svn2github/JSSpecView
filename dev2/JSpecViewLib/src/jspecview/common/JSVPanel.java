@@ -1,5 +1,6 @@
 package jspecview.common;
 
+import jspecview.api.ScriptInterface;
 import jspecview.common.Annotation.AType;
 
 public interface JSVPanel extends JSVContainer {

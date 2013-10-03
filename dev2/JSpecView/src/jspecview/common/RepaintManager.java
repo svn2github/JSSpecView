@@ -2,6 +2,8 @@ package jspecview.common;
 
 import javax.swing.JPanel;
 
+import jspecview.api.ScriptInterface;
+
 public class RepaintManager {
 
 	public RepaintManager(ScriptInterface si) {

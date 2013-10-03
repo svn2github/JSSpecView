@@ -5,16 +5,17 @@ import java.util.Hashtable;
 
 import java.util.Map;
 
-import org.jmol.util.Escape;
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
 import org.jmol.util.SB;
 import org.jmol.util.Txt;
 
+import jspecview.api.ScriptInterface;
 import jspecview.common.Annotation.AType;
 import jspecview.common.JDXSpectrum.IRMode;
 import jspecview.common.PanelData.LinkMode;
 import jspecview.source.JDXSource;
+import jspecview.util.JSVEscape;
 import jspecview.util.JSVTxt;
 
 /**
@@ -91,7 +92,7 @@ public class JSViewer {
         case GETPROPERTY:
         	Map<String, Object> info = (jsvp == null ? null : getPropertyAsJavaObject(si, value));
         	if (info != null)
-        		jsvp.showMessage(Escape.toJSON(null, info, true), value);
+        		jsvp.showMessage(JSVEscape.toJSON(null, info, true), value);
         	break;
         case GETSOLUTIONCOLOR:
           if (jsvp != null)
@@ -469,7 +470,7 @@ public class JSViewer {
       	if (source == null)
       		return;
       	try {
-      	String file = "file=" + Escape.escape(source.getFilePath());
+      	String file = "file=" + JSVEscape.eS(source.getFilePath());
       	JmolList<PeakInfo> peaks = source.getSpectra().get(0).getPeakList();
       	SB sb = new SB();
       	sb.append("[");
@@ -477,7 +478,7 @@ public class JSViewer {
       	for (int i = 0; i < n; i++) {
       		String s = peaks.get(i).toString();
       		s = s + " " + file;
-      		sb.append(Escape.escape(s));
+      		sb.append(JSVEscape.eS(s));
       		if (i > 0)
       			sb.append(",");
       	}

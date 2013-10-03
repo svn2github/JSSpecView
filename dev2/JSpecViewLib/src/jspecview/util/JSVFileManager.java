@@ -38,7 +38,6 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
-import org.jmol.util.Escape;
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
 import org.jmol.util.SB;
@@ -224,7 +223,7 @@ public class JSVFileManager {
 			String molFile = (isInline ? Txt.simpleReplace(name
 					.substring(4), "\\n", "\n")
 					: getFileAsString(Txt.simpleReplace(nciResolver, "%FILE",
-							Escape.escapeUrl(name.substring(1))), null));
+							JSVEscape.escapeUrl(name.substring(1))), null));
 			int pt = molFile.indexOf("\n");
 			molFile = "/JSpecView " + JSVersion.VERSION + molFile.substring(pt);
 			molFile = Txt.simpleReplace(molFile, "?", "_");
@@ -250,7 +249,7 @@ public class JSVFileManager {
 			if (isInline && pt1 > 0)
 				id = id.substring(pt1 + 4, (id + "'").indexOf("'", pt1 + 4));
 			jcamp = jcamp.substring(0, pt) + "##$MODELS=\n<Models>\n"
-					+ "<ModelData id=" + Escape.escape(id) + "\n type=\"MOL\">\n"
+					+ "<ModelData id=" + JSVEscape.eS(id) + "\n type=\"MOL\">\n"
 					+ molFile + "</ModelData>\n</Models>\n" + "##$SIGNALS=\n" + xml
 					+ "\n" + jcamp.substring(pt);
 			htSimulate.put(key, jcamp);

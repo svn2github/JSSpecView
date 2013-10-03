@@ -34,7 +34,6 @@ import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
 import org.jmol.util.BS;
-import org.jmol.util.Escape;
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
 import org.jmol.util.SB;
@@ -47,6 +46,7 @@ import jspecview.common.JDXSpectrum;
 import jspecview.common.PeakInfo;
 import jspecview.exception.JDXSourceException;
 import jspecview.exception.JSpecViewException;
+import jspecview.util.JSVEscape;
 import jspecview.util.JSVFileManager;
 import jspecview.util.JSVTxt;
 import jspecview.util.JSVZipFileSequentialReader;
@@ -692,7 +692,7 @@ public class FileReader {
 
 
 	private BS unescapeBitSet(String s) {
-		return Escape.unescapeBitSet(s);
+		return JSVEscape.unescapeBitSet(s);
 	}
 
 	private float parseFloatStr(String s) {
@@ -704,7 +704,7 @@ public class FileReader {
 	}
 
 	private String escape(String s) {
-		return Escape.escape(s);
+		return JSVEscape.eS(s);
 	}
 
 	private String getQuotedAttribute(String s, String attr) {
@@ -712,7 +712,7 @@ public class FileReader {
 	}
 
 	private String getPeakFilePath() {
-				return " file=" + Escape.escape(JSVTxt.trimQuotes(filePath).replace('\\', '/'));
+				return " file=" + JSVEscape.eS(JSVTxt.trimQuotes(filePath).replace('\\', '/'));
 	}
 
 
