@@ -35,75 +35,25 @@
 //					draw integration ratio annotations
 // 03-06-2012 rmh - Full overhaul; code simplification; added support for Jcamp 6 nD spectra
 
-package jspecview.java;
+package jspecview.js2d;
 
-import java.awt.Color;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.print.PageFormat;
-import java.awt.print.Paper;
-import java.awt.print.Printable;
-import java.awt.print.PrinterException;
-import java.awt.print.PrinterJob;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.text.DateFormat;
-import java.util.Date;
-
-import java.util.Map;
-
-import javax.print.attribute.HashPrintRequestAttributeSet;
-import javax.print.attribute.PrintRequestAttributeSet; //import javax.print.attribute.standard.MediaSize;
-import javax.print.attribute.standard.OrientationRequested;
-import javax.swing.BorderFactory;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.SwingUtilities;
-import javax.swing.ToolTipManager;
-
-import org.jmol.api.ApiPlatform;
-import org.jmol.api.Event;
 import org.jmol.api.EventManager;
-import org.jmol.api.Interface;
-import org.jmol.api.JmolMouseInterface;
 import org.jmol.api.PlatformViewer;
-import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
-import org.jmol.util.Txt;
 
-import jspecview.api.PdfCreatorInterface;
 import jspecview.api.ScriptInterface;
-import jspecview.common.AnnotationData;
-import jspecview.common.AnnotationDialog;
-import jspecview.common.GraphSet;
-import jspecview.common.JDXSpectrum;
-import jspecview.common.JSVInterface;
 import jspecview.common.JSVPanel;
-import jspecview.common.JSVersion;
 import jspecview.common.PanelData;
-import jspecview.common.Parameters;
-import jspecview.common.ScriptToken;
-import jspecview.common.Annotation.AType;
-import jspecview.export.Exporter;
-import jspecview.util.JSVFileManager;
 
 /**
- * JSVPanel class represents a View combining one or more GraphSets, each with one or more JDXSpectra.
+ * A JavaScript equivalent of AwtPanel
  * 
- * @author Debbie-Ann Facey
- * @author Khari A. Bryan
- * @author Craig A.D. Walters
- * @author Prof Robert J. Lancashire
+ * not implemented yet.
+ * 
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManager, PlatformViewer {
+public class JsPanel implements JSVPanel, EventManager, PlatformViewer {
 //, MouseListener,  MouseMotionListener, KeyListener
   private static final long serialVersionUID = 1L;
 
@@ -112,7 +62,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
     Logger.info("JSVPanel " + this + " finalized");
   }
 
-  private AwtPopupMenu popup;
+  private JSPopupMenu popup;
   private ScriptInterface si;
 
   public PanelData pd;
@@ -247,7 +197,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
    *        the spectrum
    * @param popup 
    */
-  public AwtPanel(ScriptInterface si, JDXSpectrum spectrum, AwtPopupMenu popup) {
+  public JsPanel(ScriptInterface si, JDXSpectrum spectrum, AwtPopupMenu popup) {
     // standard applet not overlaid and not showing range
     // standard application split spectra
     // removal of integration, taConvert
@@ -261,11 +211,11 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
   }
 
   public JSVPanel getNewPanel(ScriptInterface si, JDXSpectrum spectrum) {
-    return new AwtPanel(si, spectrum, popup);
+    return new JsPanel(si, spectrum, popup);
   }
 
-  public static AwtPanel getJSVPanel(ScriptInterface si, JmolList<JDXSpectrum> specs, int startIndex, int endIndex, AwtPopupMenu popup) {
-    return new AwtPanel(si, specs, startIndex, endIndex, popup);
+  public static JsPanel getJSVPanel(ScriptInterface si, JmolList<JDXSpectrum> specs, int startIndex, int endIndex, AwtPopupMenu popup) {
+    return new JsPanel(si, specs, startIndex, endIndex, popup);
   }
 
   /**
@@ -281,7 +231,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
    *        the end index
    * @param popup 
    */
-  private AwtPanel(ScriptInterface si, JmolList<JDXSpectrum> spectra, int startIndex,
+  private JsPanel(ScriptInterface si, JmolList<JDXSpectrum> spectra, int startIndex,
       int endIndex, AwtPopupMenu popup) {
     pd = new PanelData(this);
     this.si = si;
@@ -298,9 +248,9 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
    * @param jsvpPopupMenu
    * @return new panel
    */
-  public static AwtPanel getNewPanel(ScriptInterface si, JDXSpectrum spec,
+  public static JsPanel getNewPanel(ScriptInterface si, JDXSpectrum spec,
                                      AwtPopupMenu jsvpPopupMenu) {
-    return new AwtPanel(si, spec, jsvpPopupMenu);
+    return new JsPanel(si, spec, jsvpPopupMenu);
   }
 
   public GraphSet getNewGraphSet() {
