@@ -28,7 +28,7 @@ import org.jmol.util.JmolList;
 
 import java.util.Map;
 
-import org.jmol.util.TextFormat;
+import org.jmol.util.Txt;
 
 import jspecview.common.Annotation.AType;
 
@@ -87,9 +87,9 @@ class MeasurementData extends JmolList<Measurement> implements AnnotationData {
 		String[][] data = new String[size()][];
 		for (int i = size(); --i >= 0;)
 			data[i] = new String[] { "" + (i + 1),
-					TextFormat.formatDecimal(ddata[i][0], precisionX),
-					TextFormat.formatDecimal(ddata[i][1], precisionX),
-					TextFormat.formatDecimal(ddata[i][2], precisionDX) };
+					Txt.formatDecimalDbl(ddata[i][0], precisionX),
+					Txt.formatDecimalDbl(ddata[i][1], precisionX),
+					Txt.formatDecimalDbl(ddata[i][2], precisionDX) };
 		return data;
 	}
 
@@ -148,7 +148,7 @@ class MeasurementData extends JmolList<Measurement> implements AnnotationData {
 			double x = m.getXVal() + dx;
 			m.setXVal(x);
 			m.setValue(x);
-			m.text = TextFormat.formatDecimal(x, precision);
+			m.text = Txt.formatDecimalDbl(x, precision);
 		}
 	}
 

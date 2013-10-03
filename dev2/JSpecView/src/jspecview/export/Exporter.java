@@ -20,7 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 import org.jmol.util.JmolList;
-import org.jmol.util.TextFormat;
+import org.jmol.util.Txt;
 
 import jspecview.common.DialogHelper;
 import jspecview.common.JDXSpectrum;
@@ -167,14 +167,14 @@ public class Exporter {
     default:
       return "EXPORT what?";
     case 1:
-      fileName = TextFormat.trimQuotes(tokens.get(0));
+      fileName = Txt.trimQuotes(tokens.get(0));
       int pt = fileName.indexOf(".");
       if (pt < 0)
         return "EXPORT mode?";
       break;
     case 2:
       mode = tokens.get(0).toUpperCase();
-      fileName = TextFormat.trimQuotes(tokens.get(1));
+      fileName = Txt.trimQuotes(tokens.get(1));
       break;
     }
     String ext = fileName.substring(fileName.lastIndexOf(".") + 1)

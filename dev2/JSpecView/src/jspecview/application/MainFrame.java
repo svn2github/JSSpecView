@@ -82,7 +82,7 @@ import org.jmol.api.JmolSyncInterface;
 import org.jmol.util.Escape;
 import org.jmol.util.Logger;
 import org.jmol.util.SB;
-import org.jmol.util.TextFormat;
+import org.jmol.util.Txt;
 
 import jspecview.applet.JSVAppletPrivatePro;
 import jspecview.common.AwtPanel;
@@ -934,7 +934,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	public void execClose(String value, boolean fromScript) {
-		JSVTree.close(this, TextFormat.trimQuotes(value));
+		JSVTree.close(this, Txt.trimQuotes(value));
 		if (!fromScript || panelNodes.size() == 0) {
 			validate();
 			repaint();

@@ -27,7 +27,7 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import org.jmol.util.Parser;
-import org.jmol.util.TextFormat;
+import org.jmol.util.Txt;
 
  public class JSVColorUtil {
 
@@ -43,7 +43,7 @@ import org.jmol.util.TextFormat;
     if (strColor == null || (len = strColor.length()) == 0)
       return 0;
     float red, grn, blu;
-    strColor = TextFormat.replaceAllCharacters(strColor, " ;", ',');
+    strColor = Txt.replaceAllCharacters(strColor, " ;", ",");
     if (strColor.indexOf(',') >= 0) {
       strColor = "[" + strColor + "]";
       len += 2;
@@ -51,13 +51,13 @@ import org.jmol.util.TextFormat;
     if (strColor.charAt(0) == '[' && strColor.charAt(len - 1) == ']') {
       String check;
       if (strColor.indexOf(",") >= 0) {
-        String[] tokens = TextFormat.split(strColor.substring(1, strColor
+        String[] tokens = Txt.split(strColor.substring(1, strColor
             .length() - 1), ",");
         if (tokens.length != 3)
           return 0;
-        red = Parser.parseFloatStr(tokens[0]);
-        grn = Parser.parseFloatStr(tokens[1]);
-        blu = Parser.parseFloatStr(tokens[2]);
+        red = Parser.parseFloat(tokens[0]);
+        grn = Parser.parseFloat(tokens[1]);
+        blu = Parser.parseFloat(tokens[2]);
         return JSVColorUtil.colorTriadToInt(red, grn, blu);
       }
       switch (len) {

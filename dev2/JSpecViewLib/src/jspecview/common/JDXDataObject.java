@@ -2,7 +2,7 @@ package jspecview.common;
 
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
-import org.jmol.util.TextFormat;
+import org.jmol.util.Txt;
 
 import jspecview.common.Annotation.AType;
 import jspecview.exception.JSpecViewException;
@@ -176,7 +176,7 @@ public abstract class JDXDataObject extends JDXHeader {
 	public void setObservedNucleus(String value) {
 		observedNucl = value;
 		if (numDim == 1)
-  		parent.nucleusX = nucleusX = TextFormat.trim(value,"[]^<>");
+  		parent.nucleusX = nucleusX = Txt.trim(value,"[]^<>");
 	}
 
   /**
@@ -426,7 +426,7 @@ public abstract class JDXDataObject extends JDXHeader {
     int pt = 0;
     while (pt < nuc.length() && !Character.isDigit(nuc.charAt(pt)))
       pt++;
-    pt = Parser.parseIntStr(nuc.substring(pt));
+    pt = Parser.parseInt(nuc.substring(pt));
     int i = 0;
     for (; i < gyroData.length; i += 2)
       if (gyroData[i] >= pt)
@@ -651,7 +651,7 @@ public abstract class JDXDataObject extends JDXHeader {
 				// 2D?
 			}
 		}
-		return (dx < 0.1 ? "" : TextFormat.formatDecimal(dx, precision) + units);
+		return (dx < 0.1 ? "" : Txt.formatDecimalDbl(dx, precision) + units);
 	}
 
   public boolean isNMR() {

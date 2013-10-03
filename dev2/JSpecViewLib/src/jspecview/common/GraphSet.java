@@ -8,7 +8,7 @@ import java.util.Map;
 import org.jmol.util.BS;
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
-import org.jmol.util.TextFormat;
+import org.jmol.util.Txt;
 
 import jspecview.common.Annotation.AType;
 import jspecview.common.PanelData.LinkMode;
@@ -2023,7 +2023,7 @@ abstract class GraphSet implements XYScaleConverter {
 				String s;
 				switch (pass) {
 				case 0:
-					s = TextFormat.formatDecimal(val, precision);
+					s = Txt.formatDecimalDbl(val, precision);
 					mapX.put(d, s);
 					drawTick(g, x, y1, y2, c);
 					dx = Math.abs(prevX - val);
@@ -2091,7 +2091,7 @@ abstract class GraphSet implements XYScaleConverter {
 				yLast = y;
 				switch (pass) {
 				case 0:
-					s = TextFormat.formatDecimal(val, precision);
+					s = Txt.formatDecimalDbl(val, precision);
 					mapX.put(d, s);
 					break;
 				case 1:
@@ -2393,13 +2393,13 @@ abstract class GraphSet implements XYScaleConverter {
 				return;
 			String s;
 			if (pw == pin1Dx01 || pw == pin2Dx01) {
-				s = TextFormat.formatDecimal(Math.min(pin1Dx0.getXVal(), pin1Dx1.getXVal()), precisionX)
+				s = Txt.formatDecimalDbl(Math.min(pin1Dx0.getXVal(), pin1Dx1.getXVal()), precisionX)
 						+ " - "
-						+ TextFormat.formatDecimal(Math.max(pin1Dx0.getXVal(), pin1Dx1.getXVal()), precisionX);
+						+ Txt.formatDecimalDbl(Math.max(pin1Dx0.getXVal(), pin1Dx1.getXVal()), precisionX);
 			} else if (pw == pin1Dy01) {
-				s = TextFormat.formatDecimal(Math.min(pin1Dy0.getYVal(), pin1Dy1.getYVal()), precisionY)
+				s = Txt.formatDecimalDbl(Math.min(pin1Dy0.getYVal(), pin1Dy1.getYVal()), precisionY)
 						+ " - "
-						+ TextFormat.formatDecimal(Math.max(pin1Dy0.getYVal(), pin1Dy1.getYVal()), precisionY);
+						+ Txt.formatDecimalDbl(Math.max(pin1Dy0.getYVal(), pin1Dy1.getYVal()), precisionY);
 			} else if (pw == cur2Dy) {
 				int isub = imageView.toSubspectrumIndex(pw.yPixel0);
 				s = get2DYLabel(isub, precisionX);
@@ -2407,11 +2407,11 @@ abstract class GraphSet implements XYScaleConverter {
 				s = "" + (int) Math.min(pin2Dy0.getYVal(), pin2Dy1.getYVal()) + " - "
 						+ (int) Math.max(pin2Dy0.getYVal(), pin2Dy1.getYVal());
 			} else if (pw.isXtype) {
-				s = TextFormat.formatDecimal(pw.getXVal(), precisionX);
+				s = Txt.formatDecimalDbl(pw.getXVal(), precisionX);
 			} else if (pw.is2D) {
 				s = "" + (int) pw.getYVal();
 			} else {
-				s = TextFormat.formatDecimal(pw.getYVal(), precisionY);
+				s = Txt.formatDecimalDbl(pw.getYVal(), precisionY);
 			}
 			pd.setToolTipText(s);
 			return;
@@ -2422,7 +2422,7 @@ abstract class GraphSet implements XYScaleConverter {
 			if (imageView.fixX(xPixel) == xPixel && fixY(yPixel) == yPixel) {
 
 				int isub = imageView.toSubspectrumIndex(yPixel);
-				String s = TextFormat.formatDecimal(imageView.toX(xPixel), precisionX) + " "
+				String s = Txt.formatDecimalDbl(imageView.toX(xPixel), precisionX) + " "
 						+ getSpectrum().getAxisLabel(true) + ",  "
 						+ get2DYLabel(isub, precisionX);
 				pd.setToolTipText(pd.display1D ? s : "");
@@ -2450,7 +2450,7 @@ abstract class GraphSet implements XYScaleConverter {
 			// }
 		} else if (haveIntegralDisplayed(iSpec)) {
 			yPt = getIntegrationGraph(iSpec).getPercentYValueAt(xPt);
-			xx += ", " + TextFormat.formatDecimal(yPt, 1);
+			xx += ", " + Txt.formatDecimalDbl(yPt, 1);
 		}
 		pd.setToolTipText(
 						(pendingMeasurement != null || selectedMeasurement != null || selectedIntegral != null ? 
@@ -2467,11 +2467,11 @@ abstract class GraphSet implements XYScaleConverter {
 	}
 
 	private String setCoordStr(double xPt, double yPt) {
-		String xx = TextFormat.formatDecimal(xPt, getScale().precision[0]);
+		String xx = Txt.formatDecimalDbl(xPt, getScale().precision[0]);
 		pd.coordStr = "("
 				+ xx
 				+ (haveSingleYScale || iSpectrumSelected >= 0 ? ", "
-						+ TextFormat.formatDecimal(yPt, getScale().precision[1]) : "") + ")";
+						+ Txt.formatDecimalDbl(yPt, getScale().precision[1]) : "") + ")";
 		return xx;
 	}
 
@@ -2485,9 +2485,9 @@ abstract class GraphSet implements XYScaleConverter {
 
 	private String get2DYLabel(int isub, int precision) {
 		JDXSpectrum spec = getSpectrumAt(0).getSubSpectra().get(isub);
-		return TextFormat.formatDecimal(spec.getY2D(), precision)
+		return Txt.formatDecimalDbl(spec.getY2D(), precision)
 				+ (spec.y2DUnits.equals("HZ") ? " HZ ("
-						+ TextFormat.formatDecimal(spec.getY2DPPM(), precision) + " PPM)" : "");
+						+ Txt.formatDecimalDbl(spec.getY2DPPM(), precision) + " PPM)" : "");
 	}
 
 	private boolean isOnSpectrum(int xPixel, int yPixel, int index) {
@@ -2788,8 +2788,8 @@ abstract class GraphSet implements XYScaleConverter {
 			String xMax = Parser.getQuotedAttribute(peak, "xMax");
 			if (xMin == null || xMax == null)
 				return;
-			float x1 = Parser.parseFloatStr(xMin);
-			float x2 = Parser.parseFloatStr(xMax);
+			float x1 = Parser.parseFloat(xMin);
+			float x2 = Parser.parseFloat(xMax);
 			if (Float.isNaN(x1) || Float.isNaN(x2))
 				return;
 			pd.addHighlight(this, x1, x2, spec, 200, 200, 200, 200);

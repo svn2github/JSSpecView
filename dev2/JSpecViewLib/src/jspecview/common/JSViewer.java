@@ -9,7 +9,7 @@ import org.jmol.util.Escape;
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
 import org.jmol.util.SB;
-import org.jmol.util.TextFormat;
+import org.jmol.util.Txt;
 
 import jspecview.common.Annotation.AType;
 import jspecview.common.JDXSpectrum.IRMode;
@@ -125,7 +125,7 @@ public class JSViewer {
           si.syncToJmol(value);
           break;
         case JSV:
-        	syncScript(si, TextFormat.trimQuotes(value));
+        	syncScript(si, Txt.trimQuotes(value));
         	break;
         case LABEL:
           if (jsvp != null)
@@ -214,7 +214,7 @@ public class JSViewer {
             return false;
           break;
         case STACKOFFSETY:
-        	int offset = Parser.parseIntStr("" + Parser.parseFloatStr(value));
+        	int offset = Parser.parseInt("" + Parser.parseFloat(value));
         	if (jsvp != null&& offset != Integer.MIN_VALUE)
         		jsvp.getPanelData().setYStackOffsetPercent(offset);
         	break;
@@ -254,7 +254,7 @@ public class JSViewer {
     try {
       JmolList<String> tokens = ScriptToken.getTokens(value);
       value = " type=\"" + tokens.get(0).toUpperCase() + "\" _match=\""
-          + TextFormat.trimQuotes(tokens.get(1).toUpperCase()) + "\"";
+          + Txt.trimQuotes(tokens.get(1).toUpperCase()) + "\"";
       if (tokens.size() > 2 && tokens.get(2).equalsIgnoreCase("all"))
         value += " title=\"ALL\"";
       processPeakPickEvent(si, new PeakInfo(value), false); // false == true here
@@ -489,7 +489,7 @@ public class JSViewer {
       return;
     }
     // todo: why the quotes??
-    peakScript = TextFormat.simpleReplace(peakScript, "\\\"", "");
+    peakScript = Txt.simpleReplace(peakScript, "\\\"", "");
     String file = Parser.getQuotedAttribute(peakScript, "file");
     System.out.println("file2=" + file);
     String index = Parser.getQuotedAttribute(peakScript, "index");
@@ -755,8 +755,8 @@ public class JSViewer {
 		} else if (value.startsWith("\"")) {
 			list = ScriptToken.getTokens(value);
 		} else {
-			value = TextFormat.simpleReplace(value, "_", " _ ");
-			value = TextFormat.simpleReplace(value, "-", " - ");
+			value = Txt.simpleReplace(value, "_", " _ ");
+			value = Txt.simpleReplace(value, "-", " - ");
 			list = ScriptToken.getTokens(value);
 			list0 = ScriptToken.getTokens(JSVPanelNode
 					.getSpectrumListAsString(panelNodes));
@@ -800,7 +800,7 @@ public class JSViewer {
 			}
 			JSVPanelNode node;
 			if (id.startsWith("\"")) {
-				id = TextFormat.trim(id, "\"");
+				id = Txt.trim(id, "\"");
 				for (int j = 0; j < panelNodes.size(); j++) {
 					node = panelNodes.get(j);
 					if (node.fileName != null && node.fileName.startsWith(id)

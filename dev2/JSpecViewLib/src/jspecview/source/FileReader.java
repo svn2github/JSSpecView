@@ -38,7 +38,7 @@ import org.jmol.util.Escape;
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
 import org.jmol.util.SB;
-import org.jmol.util.TextFormat;
+import org.jmol.util.Txt;
 
 import jspecview.common.Coordinate;
 import jspecview.common.JDXDataObject;
@@ -99,7 +99,7 @@ public class FileReader {
   private FileReader(String filePath, boolean obscure, boolean loadImaginary,
   		int iSpecFirst, int iSpecLast) {
   	System.out.println("FileReader filePath=" + filePath + "<<");
-  	filePath = TextFormat.trimQuotes(filePath);
+  	filePath = Txt.trimQuotes(filePath);
     this.filePath = (filePath.startsWith(JSVFileManager.SIMULATION_PROTOCOL + "MOL=") ? 
     		JSVFileManager.SIMULATION_PROTOCOL + "MOL=" + Math.abs(filePath.hashCode()) : filePath);
     this.obscure = obscure;
@@ -296,7 +296,7 @@ public class FileReader {
 				t.getValue();
 			}
 			if (label.equals("##BLOCKS")) {
-				int nBlocks = Parser.parseIntStr(t.getValue());
+				int nBlocks = Parser.parseInt(t.getValue());
 				if (nBlocks > 100 && firstSpec <= 0)
 					forceSub = true;
 			}
@@ -695,11 +695,11 @@ public class FileReader {
 	}
 
 	private float parseFloatStr(String s) {
-  	return Parser.parseFloatStr(s);
+  	return Parser.parseFloat(s);
   }
 
 	private String simpleReplace(String s, String sfrom, String sto) {
-		return TextFormat.simpleReplace(s, sfrom, sto);
+		return Txt.simpleReplace(s, sfrom, sto);
 	}
 
 	private String escape(String s) {
@@ -711,7 +711,7 @@ public class FileReader {
 	}
 
 	private String getPeakFilePath() {
-				return " file=" + Escape.escape(TextFormat.trimQuotes(filePath).replace('\\', '/'));
+				return " file=" + Escape.escape(Txt.trimQuotes(filePath).replace('\\', '/'));
 	}
 
 
@@ -883,7 +883,7 @@ public class FileReader {
     if (label.equals("##JCAMPDX")) {
       String value = t.getValue();
       jdxHeader.jcampdx = value;
-      float version = Parser.parseFloatStr(value);
+      float version = Parser.parseFloat(value);
       if (version >= 6.0 || Float.isNaN(version)) {
         if (errorLog != null)
           errorLog

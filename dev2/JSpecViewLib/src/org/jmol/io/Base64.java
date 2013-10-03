@@ -16,7 +16,6 @@ package org.jmol.io;
 
 import org.jmol.util.SB;
 
-
 public class Base64 {
 
   //                              0         1         2         3         4         5         6
@@ -40,6 +39,20 @@ public class Base64 {
     41,42,43,44, 45,46,47,48, 49,50,51,0,  0,0,0,0,      //0x70-0x7F
   };
     
+//  public static void write(byte[] bytes, JmolOutputChannel out) {
+//    SB sb = getBase64(bytes);
+//    int len = sb.length();
+//    byte[] b = new byte[1];
+//    for (int i = 0; i < len; i++) {
+//      b[0] = (byte) sb.charAt(i);
+//      out.write(b, 0, 1);
+//    }
+//  }
+
+  public static byte[] getBytes64(byte[] bytes) {
+    return getBase64(bytes).toBytes(0, -1);
+  }
+
   public static SB getBase64(byte[] bytes) {
     long nBytes = bytes.length;
     SB sout = new SB();
@@ -49,8 +62,8 @@ public class Base64 {
       if (i % 75 == 0 && i != 0)
         sout.append("\r\n");
       nPad = (i + 2 == nBytes ? 1 : i + 1 == nBytes ? 2 : 0);
-      int outbytes = (((bytes[i++]) << 16) & 0xFF0000)
-          | ((nPad == 2 ? 0 : (bytes[i++]) << 8) & 0x00FF00)
+      int outbytes = ((bytes[i++] << 16) & 0xFF0000)
+          | ((nPad == 2 ? 0 : bytes[i++] << 8) & 0x00FF00)
           | ((nPad >= 1 ? 0 : (int) bytes[i++]) & 0x0000FF);
       //System.out.println(Integer.toHexString(outbytes));
       sout.appendC(base64.charAt((outbytes >> 18) & 0x3F));
@@ -96,12 +109,5 @@ public class Base64 {
       }
     }
     return bytes;
-  }  
-  
-//  public static byte[] toBytes(SB sb) {
-//    byte[] b = new byte[sb.length()];
-//    for (int i = sb.length(); --i >= 0;)
-//      b[i] = (byte) sb.charAt(i);
-//    return b;
-//  }  
+  }    
 }

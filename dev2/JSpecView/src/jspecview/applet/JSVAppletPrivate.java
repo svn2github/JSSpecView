@@ -55,7 +55,7 @@ import javax.swing.JFrame;
 
 import org.jmol.util.Escape;
 import org.jmol.util.Logger;
-import org.jmol.util.TextFormat;
+import org.jmol.util.Txt;
 
 import jspecview.application.TextDialog;
 import jspecview.common.AwtPanel;
@@ -632,7 +632,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 			JSObject jso = JSObject.getWindow(jsvApplet);
 			if (callback.length() > 0) {
 				if (callback.indexOf(".") > 0) {
-					String[] mods = TextFormat.split(callback, '.');
+					String[] mods = Txt.split(callback, ".");
 					for (int i = 0; i < mods.length - 1; i++) {
 						jso = (JSObject) jso.getMember(mods[i]);
 					}

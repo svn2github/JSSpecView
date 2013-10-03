@@ -17,7 +17,7 @@ import javax.swing.tree.TreeSelectionModel;
 
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
-import org.jmol.util.TextFormat;
+import org.jmol.util.Txt;
 
 import jspecview.source.JDXSource;
 import jspecview.util.JSVFileManager;
@@ -128,7 +128,7 @@ public class JSVTree extends JTree {
 
     int max = 0;
     for (int i = 0; i < panelNodes.size(); i++) {
-      float f = Parser.parseFloatStr(panelNodes.get(i).id);
+      float f = Parser.parseFloat(panelNodes.get(i).id);
       if (f >= max + 1)
         max = (int) Math.floor(f);
     }
@@ -163,7 +163,7 @@ public class JSVTree extends JTree {
 				return null;
 			si.setNode(node, false);
 		} else {
-			int n = Parser.parseIntStr(value);
+			int n = Parser.parseInt(value);
 			if (n <= 0) {
 				si.checkOverlay();
 				return null;
@@ -253,13 +253,13 @@ public class JSVTree extends JTree {
 		boolean isSimulation = filename.equalsIgnoreCase("MOL");
 		if (isSimulation)
 			filename = JSVFileManager.SIMULATION_PROTOCOL + "MOL="
-					+ TextFormat.trimQuotes(tokens.get(++pt));
+					+ Txt.trimQuotes(tokens.get(++pt));
 		if (!isCheck && !isAppend) {
 			if (filename.equals("\"\"") && si.getCurrentSource() != null)
 				filename = si.getCurrentSource().getFilePath();
 			close(si, "all");
 		}
-		filename = TextFormat.trimQuotes(filename);
+		filename = Txt.trimQuotes(filename);
 		if (filename.startsWith("$")) {
 			isSimulation = true;
 			filename = JSVFileManager.SIMULATION_PROTOCOL + filename;

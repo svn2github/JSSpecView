@@ -42,7 +42,7 @@ import org.jmol.util.Escape;
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
 import org.jmol.util.SB;
-import org.jmol.util.TextFormat;
+import org.jmol.util.Txt;
 
 import jspecview.common.JSVersion;
 
@@ -141,7 +141,7 @@ public class JSVFileManager {
       throws IOException {
     String[] subFileList = null;
     if (name.indexOf("|") >= 0) {
-      subFileList = TextFormat.split(name, "|");
+      subFileList = Txt.split(name, "|");
       if (subFileList != null && subFileList.length > 0)
         name = subFileList[0];
     }
@@ -221,23 +221,23 @@ public class JSVFileManager {
 		if (jcamp == null) {
 			System.out.println("creating " + name);
 			boolean isInline = name.startsWith("MOL=");
-			String molFile = (isInline ? TextFormat.simpleReplace(name
+			String molFile = (isInline ? Txt.simpleReplace(name
 					.substring(4), "\\n", "\n")
-					: getFileAsString(TextFormat.simpleReplace(nciResolver, "%FILE",
+					: getFileAsString(Txt.simpleReplace(nciResolver, "%FILE",
 							Escape.escapeUrl(name.substring(1))), null));
 			int pt = molFile.indexOf("\n");
 			molFile = "/JSpecView " + JSVersion.VERSION + molFile.substring(pt);
-			molFile = TextFormat.replaceAllCharacters(molFile, "?", '_');
+			molFile = Txt.simpleReplace(molFile, "?", "_");
 			String json = getFileAsString(nmrdbServer + molFile, null);
 			System.out.println(json);
-			json = TextFormat.simpleReplace(json, "\\r\\n", "\n");
-			json = TextFormat.simpleReplace(json, "\\t", "\t");
-			json = TextFormat.simpleReplace(json, "\\n", "\n");
+			json = Txt.simpleReplace(json, "\\r\\n", "\n");
+			json = Txt.simpleReplace(json, "\\t", "\t");
+			json = Txt.simpleReplace(json, "\\n", "\n");
 			molFile = JSVFileManager.getQuotedJSONAttribute(json, "molfile", null);
 			String xml = JSVFileManager.getQuotedJSONAttribute(json, "xml", null);
-			xml = TextFormat.simpleReplace(xml, "</", "\n</");
-			xml = TextFormat.simpleReplace(xml, "><", ">\n<");
-			xml = TextFormat.simpleReplace(xml, "\\\"", "\"");
+			xml = Txt.simpleReplace(xml, "</", "\n</");
+			xml = Txt.simpleReplace(xml, "><", ">\n<");
+			xml = Txt.simpleReplace(xml, "\\\"", "\"");
 			jcamp = JSVFileManager.getQuotedJSONAttribute(json, "jcamp", null);
 			jcamp = "##TITLE=" + (isInline ? "JMOL SIMULATION" : name) + "\n"
 					+ jcamp.substring(jcamp.indexOf("\n##") + 1);
@@ -331,7 +331,7 @@ public class JSVFileManager {
       String line = null;
       while ((line = br.readLine()) != null) {
         writer.write(line);
-        writer.write(TextFormat.newLine);
+        writer.write(JSVTextFormat.newLine);
       }
       writer.close();
     } catch (Exception e) {

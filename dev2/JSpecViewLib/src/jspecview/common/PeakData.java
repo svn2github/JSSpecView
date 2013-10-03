@@ -2,7 +2,7 @@ package jspecview.common;
 
 import java.util.Map;
 
-import org.jmol.util.TextFormat;
+import org.jmol.util.Txt;
 
 import jspecview.common.Annotation.AType;
 
@@ -51,18 +51,18 @@ public class PeakData extends MeasurementData {
 			if (ddata.length == 2)
 				data[pt] = new String[] {
 					"" + (pt + 1),  
-					TextFormat.formatDecimal(ddata[0], 2),
-					TextFormat.formatDecimal(ddata[1], 4) 
+					Txt.formatDecimalDbl(ddata[0], 2),
+					Txt.formatDecimalDbl(ddata[1], 4) 
 				};
 			else // 1HNMR
 				data[pt] = new String[] {
 					"" + (pt + 1), 
-					TextFormat.formatDecimal(ddata[0], 4),
-					TextFormat.formatDecimal(ddata[1], 4), 
-					TextFormat.formatDecimal(ddata[2], 2), 
-					(ddata[3] == 0 ? "" : TextFormat.formatDecimal(ddata[3], 2)),
-					(ddata[4] == 0 ? "" : TextFormat.formatDecimal(ddata[4], 2)),
-					(ddata[5] == 0 ? "" : TextFormat.formatDecimal(ddata[5], 2))
+					Txt.formatDecimalDbl(ddata[0], 4),
+					Txt.formatDecimalDbl(ddata[1], 4), 
+					Txt.formatDecimalDbl(ddata[2], 2), 
+					(ddata[3] == 0 ? "" : Txt.formatDecimalDbl(ddata[3], 2)),
+					(ddata[4] == 0 ? "" : Txt.formatDecimalDbl(ddata[4], 2)),
+					(ddata[5] == 0 ? "" : Txt.formatDecimalDbl(ddata[5], 2))
 				};
 		}
 		return data;
@@ -131,7 +131,7 @@ public class PeakData extends MeasurementData {
 					double x = (doInterpolate ? Coordinate.parabolicInterpolation(
 							xyCoords, i - 1) : xyCoords[i - 1].getXVal());
 					if (x >= minX && x <= maxX) {
-						PeakPick m = new PeakPick(spec, x, y, TextFormat.formatDecimal(x, precision), x);
+						PeakPick m = new PeakPick(spec, x, y, Txt.formatDecimalDbl(x, precision), x);
 						addLast(m);
 						if (++n == 100)
 							break;

@@ -32,7 +32,7 @@ public class Parser {
   // next[0] tracks the pointer within the string so these can all be static.
   // but the methods parseFloat, parseInt, parseToken, parseTrimmed, and getTokens do not require this.
 	
-  public static float parseFloatStr(String str) {
+  public static float parseFloat(String str) {
     return parseFloatNext(str, new int[] {0});
   }
 
@@ -44,7 +44,7 @@ public class Parser {
     return parseFloatChecked(str, cch, new int[] {0}, true);
   }
 
-  public static int parseIntStr(String str) {
+  public static int parseInt(String str) {
     return parseIntNext(str, new int[] {0});
   }
 

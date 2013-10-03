@@ -75,7 +75,7 @@ import javax.swing.ToolTipManager;
 
 import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
-import org.jmol.util.TextFormat;
+import org.jmol.util.Txt;
 
 import jspecview.common.Annotation.AType;
 import jspecview.export.Exporter;
@@ -551,7 +551,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 				String s = ex.getMessage();
 				if (s == null)
 					return;
-				s = TextFormat.simpleReplace(s, "not accepting job.",
+				s = Txt.simpleReplace(s, "not accepting job.",
 						"not accepting jobs.");
 				// not my fault -- Windows grammar error!
 				showMessage(s, "Printer Error");

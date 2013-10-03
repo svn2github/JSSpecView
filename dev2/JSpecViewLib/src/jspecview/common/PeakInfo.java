@@ -51,10 +51,10 @@ public class PeakInfo {
       atoms = Parser.getQuotedAttribute(s, "atoms");
     title = Parser.getQuotedAttribute(s, "title");
     _match = Parser.getQuotedAttribute(s, "_match"); // PEAK command creates this
-    xMax = Parser.parseFloatStr(Parser.getQuotedAttribute(s, "xMax"));
-    xMin = Parser.parseFloatStr(Parser.getQuotedAttribute(s, "xMin"));
-    yMax = Parser.parseFloatStr(Parser.getQuotedAttribute(s, "yMax"));
-    yMin = Parser.parseFloatStr(Parser.getQuotedAttribute(s, "yMin"));
+    xMax = Parser.parseFloat(Parser.getQuotedAttribute(s, "xMax"));
+    xMin = Parser.parseFloat(Parser.getQuotedAttribute(s, "xMin"));
+    yMax = Parser.parseFloat(Parser.getQuotedAttribute(s, "yMax"));
+    yMin = Parser.parseFloat(Parser.getQuotedAttribute(s, "yMin"));
   }
 
   public boolean isClearAll() {

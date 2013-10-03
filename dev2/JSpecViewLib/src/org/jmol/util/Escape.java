@@ -215,8 +215,8 @@ public class Escape {
   private static String fixString(String s) {
     if (s == null || s.indexOf("{\"") == 0) //don't doubly fix JSON strings when retrieving status
       return s;
-    s = TextFormat.simpleReplace(s, "\"", "''");
-    s = TextFormat.simpleReplace(s, "\n", " | ");
+    s = Txt.simpleReplace(s, "\"", "''");
+    s = Txt.simpleReplace(s, "\n", " | ");
     return "\"" + s + "\"";
   }
 
@@ -231,12 +231,12 @@ public class Escape {
   }
 
   public static String escapeUrl(String url) {
-    url = TextFormat.simpleReplace(url, "\n", "");
-    url = TextFormat.simpleReplace(url, "%", "%25");
-    url = TextFormat.simpleReplace(url, "[", "%5B");
-    url = TextFormat.simpleReplace(url, "]", "%5D");
-    url = TextFormat.simpleReplace(url, " ", "%20");
-    url = TextFormat.simpleReplace(url, "?", "%3F");
+    url = Txt.simpleReplace(url, "\n", "");
+    url = Txt.simpleReplace(url, "%", "%25");
+    url = Txt.simpleReplace(url, "[", "%5B");
+    url = Txt.simpleReplace(url, "]", "%5D");
+    url = Txt.simpleReplace(url, " ", "%20");
+    url = Txt.simpleReplace(url, "?", "%3F");
     return url;
   }
 

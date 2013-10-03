@@ -29,9 +29,10 @@ import java.util.Map;
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
 import org.jmol.util.SB;
-import org.jmol.util.TextFormat;
+import org.jmol.util.Txt;
 
 import jspecview.common.Coordinate;
+import jspecview.util.JSVTextFormat;
 
 /**
  * A simple Velocity-like template form filler
@@ -163,12 +164,12 @@ class FormContext {
   private String getFormTokens(String template) {
     formTokens = new JmolList<FormToken>();
     if (template.indexOf("\r\n") >= 0)
-      template = TextFormat.replaceAllCharacters(template, "\r\n", '\n');
+      template = Txt.replaceAllCharacters(template, "\r\n", "\n");
     template = template.replace('\r', '\n');
     String[] lines = template.split("\n");
     String token = "";
     for (int i = 0; i < lines.length && strError == null; i++) {
-      String line = TextFormat.rtrim(lines[i], " \n");
+      String line = JSVTextFormat.rtrim(lines[i], " \n");
       if (line.length() == 0)
         continue;
       int firstChar = -1;
@@ -318,14 +319,14 @@ class FormContext {
       return false;
     }
     data = data.substring(0, pt);
-    data = TextFormat.simpleReplace(data, "=", " = ");
-    data = TextFormat.simpleReplace(data, "!", " ! ");
-    data = TextFormat.simpleReplace(data, "<", " < ");
-    data = TextFormat.simpleReplace(data, ">", " > ");
-    data = TextFormat.simpleReplace(data, "=  =", "==");
-    data = TextFormat.simpleReplace(data, "<  =", "<=");
-    data = TextFormat.simpleReplace(data, ">  =", ">=");
-    data = TextFormat.simpleReplace(data, "!  =", "!=");
+    data = Txt.simpleReplace(data, "=", " = ");
+    data = Txt.simpleReplace(data, "!", " ! ");
+    data = Txt.simpleReplace(data, "<", " < ");
+    data = Txt.simpleReplace(data, ">", " > ");
+    data = Txt.simpleReplace(data, "=  =", "==");
+    data = Txt.simpleReplace(data, "<  =", "<=");
+    data = Txt.simpleReplace(data, ">  =", ">=");
+    data = Txt.simpleReplace(data, "!  =", "!=");
     String[] tokens = Parser.getTokens(data);
     String key = tokens[0].substring(1);
     boolean isNot = false;
@@ -341,16 +342,16 @@ class FormContext {
     case 2:
       // #if(!$x)
       if (key.equals("!")) {
-        key = TextFormat.trim(tokens[1], "$ ");
+        key = Txt.trim(tokens[1], "$ ");
         value = getValue(key);
         return (value.equals("false") || value.equals(""));
       }
       break;
     case 3:
       // #if($x op "y")
-      key = TextFormat.trim(tokens[0], "$ ");
+      key = Txt.trim(tokens[0], "$ ");
       value = getValue(key);
-      compare = TextFormat.trim(tokens[2], " \"");
+      compare = Txt.trim(tokens[2], " \"");
       switch (findOp(tokens[1])) {
       case OP_EQ:
       case OP_EEQ:
