@@ -25,12 +25,18 @@
 
 package org.jmol.util;
 
+import java.util.Hashtable;
+import java.util.Map;
+
 
 /**
  * Logger mechanism.
  */
+@J2SIgnoreImport({Runtime.class})
 public final class Logger {
 
+  private Logger(){}
+  
   private static LoggerInterface _logger = new DefaultLogger();
 
   public final static int LEVEL_FATAL = 1;
@@ -40,10 +46,12 @@ public final class Logger {
   public final static int LEVEL_DEBUG = 5;
   public final static int LEVEL_DEBUGHIGH = 6;
   public final static int LEVEL_MAX = 7;
-
+  
   private final static boolean[] _activeLevels = new boolean[LEVEL_MAX];
   private       static boolean   _logLevel = false;
   public static boolean debugging;
+  public static boolean debuggingHigh;
+  
   static {
     _activeLevels[LEVEL_DEBUGHIGH] = getProperty("debugHigh",    false);
     _activeLevels[LEVEL_DEBUG] = getProperty("debug",    false);
@@ -53,13 +61,14 @@ public final class Logger {
     _activeLevels[LEVEL_FATAL] = getProperty("fatal",    true);
     _logLevel                  = getProperty("logLevel", false);
     debugging = (_logger != null && (_activeLevels[LEVEL_DEBUG] || _activeLevels[LEVEL_DEBUGHIGH]));
+    debuggingHigh = (debugging && _activeLevels[LEVEL_DEBUGHIGH]);
   }
 
   private static boolean getProperty(String level, boolean defaultValue) {
     try {
-      String property = System.getProperty("jmol.logger." + level);
+      String property = System.getProperty("jmol.logger." + level, null);
       if (property != null) {
-        return Boolean.TRUE.equals(Boolean.valueOf(property));
+        return (property.equalsIgnoreCase("true"));
       }
     } catch (Exception e) {
       // applet can't do this.
@@ -75,6 +84,7 @@ public final class Logger {
   public static void setLogger(LoggerInterface logger) {
     _logger = logger;
     debugging = isActiveLevel(LEVEL_DEBUG) || isActiveLevel(LEVEL_DEBUGHIGH);
+    debuggingHigh = (debugging && _activeLevels[LEVEL_DEBUGHIGH]);
   }
 
   /**
@@ -101,6 +111,7 @@ public final class Logger {
       level = LEVEL_MAX - 1;
     _activeLevels[level] = active;
     debugging = isActiveLevel(LEVEL_DEBUG) || isActiveLevel(LEVEL_DEBUGHIGH);
+    debuggingHigh = (debugging && _activeLevels[LEVEL_DEBUGHIGH]);
   }
 
   /**
@@ -151,7 +162,7 @@ public final class Logger {
    * 
    * @param log Indicator.
    */
-  public static void logLevel(boolean log) {
+  public static void doLogLevel(boolean log) {
     _logLevel = log;
   }
 
@@ -171,7 +182,7 @@ public final class Logger {
   }
 
   /**
-   * Writes a log at INFO level.
+   og* Writes a log at INFO level.
    * 
    * @param txt String to write.
    */
@@ -206,7 +217,7 @@ public final class Logger {
    * @param txt String to write.
    * @param e Exception.
    */
-  public static void warn(String txt, Throwable e) {
+  public static void warnEx(String txt, Throwable e) {
     try {
       if (isActiveLevel(LEVEL_WARN)) {
         _logger.warnEx(txt, e);
@@ -216,17 +227,6 @@ public final class Logger {
     }
   }
 
-
-  static String strError;
-  
-  public static String checkForError() {
-    if (strError == null)
-      return null;
-    String err = strError;
-    strError = null;
-    return err;  
-  }
-  
   /**
    * Writes a log at ERROR level.
    * 
@@ -234,7 +234,6 @@ public final class Logger {
    */
   public static void error(String txt) {
     try {
-      strError = txt;
       if (isActiveLevel(LEVEL_ERROR)) {
         _logger.error(txt);
       }
@@ -249,7 +248,7 @@ public final class Logger {
    * @param txt String to write.
    * @param e Exception.
    */
-  public static void error(String txt, Throwable e) {
+  public static void errorEx(String txt, Throwable e) {
     try {
       if (isActiveLevel(LEVEL_ERROR)) {
         _logger.errorEx(txt, e);
@@ -257,6 +256,13 @@ public final class Logger {
     } catch (Throwable t) {
       //
     }
+  }
+
+  public static int getLogLevel() {
+    for (int i = LEVEL_MAX; --i >= 0;)
+      if (isActiveLevel(i))
+        return i;
+    return 0;
   }
 
   /**
@@ -280,7 +286,7 @@ public final class Logger {
    * @param txt String to write.
    * @param e Exception.
    */
-  public static void fatal(String txt, Throwable e) {
+  public static void fatalEx(String txt, Throwable e) {
     try {
       if (isActiveLevel(LEVEL_FATAL)) {
         _logger.fatalEx(txt, e);
@@ -290,30 +296,47 @@ public final class Logger {
     }
   }
 
-  static long startTime;
-  public static void startTimer() {
-    startTime = System.currentTimeMillis();  
+  static Map<String,Long>htTiming = new Hashtable<String, Long>();
+  public static void startTimer(String msg) {
+    if (msg != null)
+      htTiming.put(msg, Long.valueOf(System.currentTimeMillis()));
   }
 
-  public static long checkTimer(String msg) {
-    long time = System.currentTimeMillis() - startTime;
-    if (msg != null)
-      info(msg + ": " + (time) + " ms");
+  public static String getTimerMsg(String msg, long time) {
+    if (time == 0)
+      time = getTimeFrom(msg);
+    return "Time for " + msg + ": " + (time) + " ms";
+  }
+  
+  private static int getTimeFrom(String msg) {
+    Long t;
+    return (msg == null || (t = htTiming.get(msg)) == null ? -1 : (int) (System
+        .currentTimeMillis() - t.longValue()));
+  }
+
+  public static int checkTimer(String msg, boolean andReset) {
+    int time = getTimeFrom(msg);
+    if (time >= 0 && !msg.startsWith("("))
+        info(getTimerMsg(msg, time));
+    if (andReset)
+      startTimer(msg);
     return time;
   }
-
+  
   public static void checkMemory() {
-    Runtime runtime = Runtime.getRuntime();
-    runtime.gc();
-    long bTotal = runtime.totalMemory();
-    long bFree = runtime.freeMemory();
-    long bMax = 0;
-    try {
+    long bTotal = 0, bFree = 0, bMax = 0;
+    /**
+     * @j2sIgnore
+     */
+    {
+      Runtime runtime = Runtime.getRuntime();
+      runtime.gc();
+      bTotal = runtime.totalMemory();
+      bFree = runtime.freeMemory();
       bMax = runtime.maxMemory();
-    } catch (Exception e) {
     }
     info("Memory: Total-Free="+ (bTotal - bFree)+"; Total=" +  bTotal + "; Free=" + bFree 
         + "; Max=" + bMax);
   }
-
+  
 }

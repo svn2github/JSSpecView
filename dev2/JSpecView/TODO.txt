@@ -52,6 +52,7 @@ Adding org.jmol.util.J2SIgnoreImport, J2SRequireImport
 Base64 moved to org.jmol.io
 Replacing org.jmol.util.ArrayUtil, Base64, Escape, Logger LoggerInterface, Parse, TextFormat, XmlReader with Jmol's.
 Adding org.jmol.util.P3 and Tuple3f (required for Jmol's ArrayUtil)
+XMLReader moved to org.jmol.io
  
 ___version=2.0.2
 

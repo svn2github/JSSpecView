@@ -42,12 +42,14 @@ public class DefaultLogger implements LoggerInterface {
    * @param e Exception.
    */
   protected void log(PrintStream out, int level, String txt, Throwable e) {
+    if (out == System.err)
+      System.out.flush();
     if ((out != null) && ((txt != null) || (e != null))) {
       txt = (txt != null ? txt : "");
       out.println(
           (Logger.logLevel() ? "[" + Logger.getLevel(level) + "] " : "") +
           txt +
-          (e != null ? ": " + e.getMessage() : ""));
+          (e != null ? ": " + e.toString() : ""));
       if (e != null) {
         StackTraceElement[] elements = e.getStackTrace();
         if (elements != null) {
@@ -60,6 +62,8 @@ public class DefaultLogger implements LoggerInterface {
         }
       }
     }
+    if (out == System.err)
+      System.err.flush();
   }
 
   /* (non-Javadoc)

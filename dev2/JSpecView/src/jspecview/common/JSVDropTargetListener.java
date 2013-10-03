@@ -145,7 +145,7 @@ public class JSVDropTargetListener implements DropTargetListener {
 					isAccepted = true;
 					o = t.getTransferData(flavor);
 				} catch (Exception e) {
-					Logger.error(null, e);
+					Logger.errorEx(null, e);
 				}
 
 				if (o instanceof String) {
@@ -181,7 +181,7 @@ public class JSVDropTargetListener implements DropTargetListener {
 					isAccepted = true;
 					o = t.getTransferData(df[i]);
 				} catch (Exception e) {
-					Logger.error(null, e);
+					Logger.errorEx(null, e);
 				}
 				if (o instanceof String) {
 					String content = (String) o;
