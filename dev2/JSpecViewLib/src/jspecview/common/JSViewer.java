@@ -1,8 +1,8 @@
 package jspecview.common;
 
-import java.util.ArrayList;
+import org.jmol.util.JmolList;
 import java.util.Hashtable;
-import java.util.List;
+
 import java.util.Map;
 
 import org.jmol.util.Escape;
@@ -252,7 +252,7 @@ public class JSViewer {
 
 	private static void execPeak(ScriptInterface si, String value) {
     try {
-      List<String> tokens = ScriptToken.getTokens(value);
+      JmolList<String> tokens = ScriptToken.getTokens(value);
       value = " type=\"" + tokens.get(0).toUpperCase() + "\" _match=\""
           + TextFormat.trimQuotes(tokens.get(1).toUpperCase()) + "\"";
       if (tokens.size() > 2 && tokens.get(2).equalsIgnoreCase("all"))
@@ -271,7 +271,7 @@ public class JSViewer {
 			if (jsvp != null)
 				jsvp.getPanelData().getPeakListing(null, b);
 		} else {
-			List<String> tokens = ScriptToken.getTokens(value);
+			JmolList<String> tokens = ScriptToken.getTokens(value);
 			for (int i = tokens.size(); --i >= 0;) {
 				String token = tokens.get(i);
 				int pt = token.indexOf("=");
@@ -298,7 +298,7 @@ public class JSViewer {
 
 	private static boolean execZoom(String value, JSVPanel jsvp) {
 		double x1 = 0, x2 = 0, y1 = 0, y2 = 0;
-		List<String> tokens;
+		JmolList<String> tokens;
 		tokens = ScriptToken.getTokens(value);
 		switch (tokens.size()) {
 		default:
@@ -320,7 +320,7 @@ public class JSViewer {
 		return true;
 	}
 
-	private static void scaleSelectedBy(List<JSVPanelNode> nodes, String value) {
+	private static void scaleSelectedBy(JmolList<JSVPanelNode> nodes, String value) {
 		try {
 			double f = Double.parseDouble(value);
 	    for (int i = nodes.size(); --i >= 0;)
@@ -330,15 +330,15 @@ public class JSViewer {
 	}
 
 	private static void execSelect(ScriptInterface si, String value) {
-    List<JSVPanelNode> nodes = si.getPanelNodes();
+    JmolList<JSVPanelNode> nodes = si.getPanelNodes();
     for (int i = nodes.size(); --i >= 0;)
     	nodes.get(i).jsvp.getPanelData().selectFromEntireSet(Integer.MIN_VALUE);
-    List<JDXSpectrum> speclist = new ArrayList<JDXSpectrum>();
+    JmolList<JDXSpectrum> speclist = new JmolList<JDXSpectrum>();
     fillSpecList(si, value, speclist, false);
 	}
 
 	public static void execView(ScriptInterface si, String value, boolean fromScript) {
-    List<JDXSpectrum> speclist = new ArrayList<JDXSpectrum>();
+    JmolList<JDXSpectrum> speclist = new JmolList<JDXSpectrum>();
     String strlist = fillSpecList(si, value, speclist, true);
     if (speclist.size() > 0)
       si.openDataOrFile(null, strlist, speclist, strlist, -1, -1, false);
@@ -390,9 +390,9 @@ public class JSViewer {
 
   private static void setYScale(ScriptInterface si, String value, 
                                 JSVPanel jsvp) {
-  	List<JSVPanelNode> panelNodes = si.getPanelNodes();
+  	JmolList<JSVPanelNode> panelNodes = si.getPanelNodes();
   	JDXSource currentSource = si.getCurrentSource();
-  	List<String> tokens = ScriptToken.getTokens(value);
+  	JmolList<String> tokens = ScriptToken.getTokens(value);
     int pt = 0;
     boolean isAll = false;
     if (tokens.size() > 1 && tokens.get(0).equalsIgnoreCase("ALL")) {
@@ -418,7 +418,7 @@ public class JSViewer {
   public static void setOverlayLegendVisibility(ScriptInterface si,
                                                 JSVPanel jsvp,
                                                 boolean showLegend) {
-    List<JSVPanelNode> panelNodes = si.getPanelNodes();
+    JmolList<JSVPanelNode> panelNodes = si.getPanelNodes();
     JSVPanelNode node = JSVPanelNode.findNode(jsvp, panelNodes);
     for (int i = panelNodes.size(); --i >= 0;)
       showOverlayLegend(si, panelNodes.get(i), panelNodes.get(i) == node
@@ -469,7 +469,7 @@ public class JSViewer {
       		return;
       	try {
       	String file = "file=" + Escape.escape(source.getFilePath());
-      	ArrayList<PeakInfo> peaks = source.getSpectra().get(0).getPeakList();
+      	JmolList<PeakInfo> peaks = source.getSpectra().get(0).getPeakList();
       	SB sb = new SB();
       	sb.append("[");
       	int n = peaks.size();
@@ -533,7 +533,7 @@ public class JSViewer {
   	JSVPanel jsvp = si.getSelectedPanel();
   	if (jsvp != null && jsvp.getPanelData().hasFileLoaded(fileName))
       return true;
-    List<JSVPanelNode> panelNodes = si.getPanelNodes();
+    JmolList<JSVPanelNode> panelNodes = si.getPanelNodes();
     for (int i = panelNodes.size(); --i >= 0;)
       if (panelNodes.get(i).jsvp.getPanelData().hasFileLoaded(fileName)) {
         si.setSelectedPanel(panelNodes.get(i).jsvp);
@@ -544,7 +544,7 @@ public class JSViewer {
 
   private static PeakInfo selectPanelByPeak(ScriptInterface si,
                                             String peakScript) {
-  	List<JSVPanelNode> panelNodes = si.getPanelNodes();
+  	JmolList<JSVPanelNode> panelNodes = si.getPanelNodes();
     if (panelNodes == null)
       return null;
     String file = Parser.getQuotedAttribute(peakScript, "file");
@@ -598,7 +598,7 @@ public class JSViewer {
       if (pi2 == null) {
         if (!"ALL".equals(pi.getTitle()))
           return;
-        List<JSVPanelNode> panelNodes = si.getPanelNodes();
+        JmolList<JSVPanelNode> panelNodes = si.getPanelNodes();
         JSVPanelNode node = null;
         for (int i = 0; i < panelNodes.size(); i++)
           if ((pi2 = panelNodes.get(i).jsvp.getPanelData().findMatchingPeakInfo(
@@ -692,13 +692,13 @@ public class JSViewer {
 			return map0;
 		if (map0 != null)
 		  map.put("current", map0);
-   List<Map<String, Object>> info = new ArrayList<Map<String, Object>>();
-    List<JSVPanelNode> panelNodes = si.getPanelNodes();
+   JmolList<Map<String, Object>> info = new JmolList<Map<String, Object>>();
+    JmolList<JSVPanelNode> panelNodes = si.getPanelNodes();
     for (int i = 0; i < panelNodes.size(); i++) {
       JSVPanel jsvp = panelNodes.get(i).jsvp;
       if (jsvp == null)
         continue;
-			info.add(panelNodes.get(i).getInfo(key));      
+			info.addLast(panelNodes.get(i).getInfo(key));      
     }
     map.put("items", info);
     return map;
@@ -726,13 +726,13 @@ public class JSViewer {
 	 * @return comma-separated list, for the title
 	 */
 	private static String fillSpecList(ScriptInterface si, String value,
-			List<JDXSpectrum> speclist, boolean isView) {
+			JmolList<JDXSpectrum> speclist, boolean isView) {
 
-		List<JSVPanelNode> panelNodes = si.getPanelNodes();
+		JmolList<JSVPanelNode> panelNodes = si.getPanelNodes();
 		JSVPanel selectedPanel = si.getSelectedPanel();
 		String prefix = "1.";
-		List<String> list;
-		List<String> list0 = null;
+		JmolList<String> list;
+		JmolList<String> list0 = null;
 		boolean isNone = (value.equalsIgnoreCase("NONE"));
 		if (isNone || value.equalsIgnoreCase("all"))
 			value = "*";
@@ -792,7 +792,7 @@ public class JSViewer {
 					pt++;
 				pt++;
 				while (pt < list0.size() && !idLast.equals(id)) {
-					speclist.add(JSVPanelNode.findNodeById(idLast = list0.get(pt++),
+					speclist.addLast(JSVPanelNode.findNodeById(idLast = list0.get(pt++),
 							panelNodes).jsvp.getPanelData().getSpectrumAt(0));
 					sb.append(",").append(idLast);
 				}
@@ -838,7 +838,7 @@ public class JSViewer {
 	}
 
 	private static void addSpecToList(PanelData pd, double userYFactor, int isubspec,
-			List<JDXSpectrum> list, boolean isView) {
+			JmolList<JDXSpectrum> list, boolean isView) {
 		if (isView) {
 			JDXSpectrum spec = pd.getSpectrumAt(0);
 			spec.setUserYFactor(Double.isNaN(userYFactor) ? 1 : userYFactor);

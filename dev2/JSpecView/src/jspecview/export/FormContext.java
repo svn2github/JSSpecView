@@ -22,8 +22,8 @@ package jspecview.export;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Hashtable;
-import java.util.List;
-import java.util.ArrayList;
+
+import org.jmol.util.JmolList;
 import java.util.Map;
 
 import org.jmol.util.Logger;
@@ -45,7 +45,7 @@ class FormContext {
 
   String[] tokens;
   Hashtable<String, Object> context = new Hashtable<String, Object>();
-  List<FormToken> formTokens;
+  JmolList<FormToken> formTokens;
 
   FormContext() {
   }
@@ -64,7 +64,7 @@ class FormContext {
   }
 
   int commandLevel;
-  List<Integer> cmds = new ArrayList<Integer>();
+  JmolList<Integer> cmds = new JmolList<Integer>();
   String strError;
 
   final static int VT_DATA = 0;
@@ -83,7 +83,7 @@ class FormContext {
     int endPtr = -1;
     int ptr;
     String var;
-    List<Object> vc;
+    JmolList<Object> vc;
     int pointCount;
     String data;
 
@@ -91,7 +91,7 @@ class FormContext {
       hasVariable = token.indexOf("$") >= 0;
       data = token;
       if (token.indexOf("#") != firstChar) {
-        formTokens.add(this);
+        formTokens.addLast(this);
         return;
       }
       //System.out.println(firstChar + " " + token);
@@ -119,7 +119,7 @@ class FormContext {
           if (token.indexOf("#end") > 0) {
             int pt = token.indexOf(")") + 1;
             data = token.substring(0, pt);
-            formTokens.add(this);
+            formTokens.addLast(this);
             new FormToken(token.substring(pt, token.indexOf("#end")), 0);
             new FormToken("#end", 0);
             return;
@@ -156,12 +156,12 @@ class FormContext {
           }
         }
       }
-      formTokens.add(this);
+      formTokens.addLast(this);
     }
   }
 
   private String getFormTokens(String template) {
-    formTokens = new ArrayList<FormToken>();
+    formTokens = new JmolList<FormToken>();
     if (template.indexOf("\r\n") >= 0)
       template = TextFormat.replaceAllCharacters(template, "\r\n", '\n');
     template = template.replace('\r', '\n');
@@ -282,8 +282,8 @@ class FormContext {
     // #foreach  $xxx in XXX
     vt.var = tokens[1].substring(1);
     Object vc = context.get(tokens[3].substring(1));
-    if (vc instanceof List)
-      vt.vc = (List<Object>) vc;
+    if (vc instanceof JmolList)
+      vt.vc = (JmolList<Object>) vc;
     vt.cmdPtr = vt.ptr;
     vt.pointCount = -1;
   }

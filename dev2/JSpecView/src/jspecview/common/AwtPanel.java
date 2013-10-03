@@ -59,7 +59,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DateFormat;
 import java.util.Date;
-import java.util.List;
+
 import java.util.Map;
 
 import javax.print.attribute.HashPrintRequestAttributeSet;
@@ -73,6 +73,7 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 
+import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
 import org.jmol.util.TextFormat;
 
@@ -259,7 +260,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     return new AwtPanel(si, spectrum, popup);
   }
 
-  public static AwtPanel getJSVPanel(ScriptInterface si, List<JDXSpectrum> specs, int startIndex, int endIndex, AwtPopupMenu popup) {
+  public static AwtPanel getJSVPanel(ScriptInterface si, JmolList<JDXSpectrum> specs, int startIndex, int endIndex, AwtPopupMenu popup) {
     return new AwtPanel(si, specs, startIndex, endIndex, popup);
   }
 
@@ -276,7 +277,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
    *        the end index
    * @param popup 
    */
-  private AwtPanel(ScriptInterface si, List<JDXSpectrum> spectra, int startIndex,
+  private AwtPanel(ScriptInterface si, JmolList<JDXSpectrum> spectra, int startIndex,
       int endIndex, AwtPopupMenu popup) {
     pd = new PanelData(this);
     this.si = si;

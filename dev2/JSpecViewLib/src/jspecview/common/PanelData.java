@@ -38,13 +38,13 @@
 package jspecview.common;
 
 import java.util.Hashtable;
-import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
 import jspecview.common.Annotation.AType;
+
+import org.jmol.util.JmolList;
 
 /**
  * JSVPanel class draws a plot from the data contained a instance of a
@@ -65,11 +65,11 @@ public class PanelData {
 
 	// Critical fields
 
-	private ArrayList<PanelListener> listeners = new ArrayList<PanelListener>();
+	private JmolList<PanelListener> listeners = new JmolList<PanelListener>();
 
 	public void addListener(PanelListener listener) {
 		if (!listeners.contains(listener)) {
-			listeners.add(listener);
+			listeners.addLast(listener);
 		}
 	}
 
@@ -81,7 +81,7 @@ public class PanelData {
 
 	Hashtable<ScriptToken, Object> options = new Hashtable<ScriptToken, Object>();
 	JSVPanel owner;
-	List<GraphSet> graphSets;
+	JmolList<GraphSet> graphSets;
 	int currentSplitPoint;
 	PlotWidget thisWidget;
 	Coordinate coordClicked;
@@ -142,7 +142,7 @@ public class PanelData {
 
 	Map<String, Object> getInfo(boolean selectedOnly, String key) {
 		Map<String, Object> info = new Hashtable<String, Object>();
-		List<Map<String, Object>> sets = null;
+		JmolList<Map<String, Object>> sets = null;
 		if (selectedOnly)
 			return currentGraphSet.getInfo(key, getCurrentSpectrumIndex());
 		Set<Entry<ScriptToken, Object>> entries = options.entrySet();
@@ -151,9 +151,9 @@ public class PanelData {
 		Parameters.putInfo(key, info, "type", getSpectrumAt(0).getDataType());
 		Parameters.putInfo(key, info, "title", title);
 		Parameters.putInfo(key, info, "nSets", Integer.valueOf(graphSets.size()));
-		sets = new ArrayList<Map<String, Object>>();
+		sets = new JmolList<Map<String, Object>>();
 		for (int i = graphSets.size(); --i >= 0;)
-			sets.add(graphSets.get(i).getInfo(key, -1));
+			sets.addLast(graphSets.get(i).getInfo(key, -1));
 		info.put("sets", sets);
 		return info;
 	}
@@ -230,11 +230,11 @@ public class PanelData {
 
 	// //// initialization - from AwtPanel
 
-	List<JDXSpectrum> spectra;
+	JmolList<JDXSpectrum> spectra;
 	
 	void initSingleSpectrum(JDXSpectrum spectrum) {
-		spectra = new ArrayList<JDXSpectrum>();
-		spectra.add(spectrum);
+		spectra = new JmolList<JDXSpectrum>();
+		spectra.addLast(spectrum);
 		initJSVPanel(spectra, 0, 0);
 	}
 
@@ -252,7 +252,7 @@ public class PanelData {
 		}    
 	}
 		
-	void initJSVPanel(List<JDXSpectrum> spectra, int startIndex, int endIndex) {
+	void initJSVPanel(JmolList<JDXSpectrum> spectra, int startIndex, int endIndex) {
 		this.startIndex = startIndex;
 		this.endIndex = endIndex;
 		owner.setupPlatform();
@@ -308,7 +308,7 @@ public class PanelData {
 		doReset = true;
 	}
 
-	void addAnnotation(List<String> tokens) {
+	void addAnnotation(JmolList<String> tokens) {
 		String title = currentGraphSet.addAnnotation(tokens, getTitle());
 		if (title != null)
 			this.title = title;
@@ -420,17 +420,17 @@ public class PanelData {
 				graphSets.get(i).setSelected(-1);
 				continue;
 			}
-			List<JDXSpectrum> specs = graphSets.get(i).spectra;
+			JmolList<JDXSpectrum> specs = graphSets.get(i).spectra;
 			for (int j = 0; j < specs.size(); j++, pt++)
 				if (iSpec < 0 || iSpec == pt)
 					graphSets.get(i).setSelected(j);
 		}
 	}
 
-  void addToList(int iSpec, List<JDXSpectrum> list) {
+  void addToList(int iSpec, JmolList<JDXSpectrum> list) {
 		for (int i = 0; i < spectra.size(); i++)
 			if (iSpec < 0 || i == iSpec)
-				list.add(spectra.get(i));
+				list.addLast(spectra.get(i));
 	}
 	
 	void scaleSelectedBy(double f) {

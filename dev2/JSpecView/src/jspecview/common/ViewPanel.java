@@ -4,9 +4,11 @@
 package jspecview.common;
 
 import java.awt.BorderLayout;
-import java.util.List;
+
 
 import javax.swing.JPanel;
+
+import org.jmol.util.JmolList;
 
 import jspecview.common.JSVContainer;
 import jspecview.common.Annotation.AType;
@@ -37,7 +39,7 @@ public class ViewPanel extends JPanel implements JSVContainer {
 
 	}
 
-	public void setSelectedPanel(JSVPanel jsvp, List<JSVPanelNode> panelNodes) {
+	public void setSelectedPanel(JSVPanel jsvp, JmolList<JSVPanelNode> panelNodes) {
 		if (jsvp != selectedPanel) {
 			if (selectedPanel != null) {
 				remove((AwtPanel) selectedPanel);
@@ -62,7 +64,7 @@ public class ViewPanel extends JPanel implements JSVContainer {
 		setVisible(jsvp != null);
 	}
 
-	public void markSelectedPanels(List<JSVPanelNode> panelNodes) {
+	public void markSelectedPanels(JmolList<JSVPanelNode> panelNodes) {
 		for (int i = panelNodes.size(); --i >= 0;)
 			panelNodes.get(i).isSelected = (currentPanelIndex == i);
 	}

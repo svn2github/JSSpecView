@@ -19,9 +19,9 @@
 
 package jspecview.common;
 
-import java.util.ArrayList;
+import org.jmol.util.JmolList;
 import java.util.Hashtable;
-import java.util.List;
+
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -152,19 +152,19 @@ public enum ScriptToken {
     return (st == null ? UNKNOWN : st);
   }
 
-  public static List<ScriptToken> getScriptTokenList(String name,
+  public static JmolList<ScriptToken> getScriptTokenList(String name,
                                                      boolean isExact) {
     name = name.toUpperCase();
-    List<ScriptToken> list = new ArrayList<ScriptToken>();
+    JmolList<ScriptToken> list = new JmolList<ScriptToken>();
     ScriptToken st = getScriptToken(name);
     if (isExact) {
       if (st != null)
-        list.add(st);
+        list.addLast(st);
     } else {
       for (Entry<String, ScriptToken> entry : htParams.entrySet())
         if (entry.getKey().startsWith(name) 
         		&& entry.getValue().tip != null)
-          list.add(entry.getValue());
+          list.addLast(entry.getValue());
     }
     return list;
   }
@@ -229,19 +229,19 @@ public enum ScriptToken {
    * @param value
    * @return list of tokens
    */
-  public static List<String> getTokens(String value) {
-    List<String> tokens = new ArrayList<String>();
+  public static JmolList<String> getTokens(String value) {
+    JmolList<String> tokens = new JmolList<String>();
     ScriptTokenizer st = new ScriptTokenizer(value, false);
     while (st.hasMoreTokens()) {
       String s = ScriptTokenizer.nextStringToken(st, false);
       if (s.startsWith("//") || s.startsWith("#"))
         break;
-      tokens.add(s);
+      tokens.addLast(s);
     }
     return tokens;
   }
 
-  public static String getNameList(List<ScriptToken> list) {
+  public static String getNameList(JmolList<ScriptToken> list) {
     if (list.size() == 0)
       return "";
     SB sb = new SB();

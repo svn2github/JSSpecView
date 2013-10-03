@@ -23,8 +23,8 @@ import java.awt.Color;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Hashtable;
-import java.util.List;
-import java.util.ArrayList;
+
+import org.jmol.util.JmolList;
 
 import org.jmol.util.Logger;
 import org.jmol.util.TextFormat;
@@ -131,8 +131,8 @@ class SVGExporter extends FormExporter {
     String xStr, yStr;
 
     //Grid
-    List<Map<String, String>> vertGridCoords = new ArrayList<Map<String, String>>();
-    List<Map<String, String>> horizGridCoords = new ArrayList<Map<String, String>>();
+    JmolList<Map<String, String>> vertGridCoords = new JmolList<Map<String, String>>();
+    JmolList<Map<String, String>> horizGridCoords = new JmolList<Map<String, String>>();
 
     for (double i = minXOnScale; i < maxXOnScale + xStep / 2; i += xStep) {
       xPt = leftPlotArea + ((i - minXOnScale) * xScaleFactor);
@@ -142,7 +142,7 @@ class SVGExporter extends FormExporter {
       Map<String, String> hash = new Hashtable<String, String>();
       hash.put("xVal", xStr);
       hash.put("yVal", yStr);
-      vertGridCoords.add(hash);
+      vertGridCoords.addLast(hash);
     }
 
     for (double i = minYOnScale; i < maxYOnScale + yStep / 2; i += yStep) {
@@ -153,14 +153,14 @@ class SVGExporter extends FormExporter {
       Map<String, String> hash = new Hashtable<String, String>();
       hash.put("xVal", xStr);
       hash.put("yVal", yStr);
-      horizGridCoords.add(hash);
+      horizGridCoords.addLast(hash);
     }
 
     // Scale
 
-    List<Map<String, String>> xScaleList = new ArrayList<Map<String, String>>();
-    List<Map<String, String>> xScaleListReversed = new ArrayList<Map<String, String>>();
-    List<Map<String, String>> yScaleList = new ArrayList<Map<String, String>>();
+    JmolList<Map<String, String>> xScaleList = new JmolList<Map<String, String>>();
+    JmolList<Map<String, String>> xScaleListReversed = new JmolList<Map<String, String>>();
+    JmolList<Map<String, String>> yScaleList = new JmolList<Map<String, String>>();
     int precisionX = scaleData.precision[0];
     int precisionY = scaleData.precision[1];
     for (double i = minXOnScale; i < (maxXOnScale + xStep / 2); i += xStep) {
@@ -174,7 +174,7 @@ class SVGExporter extends FormExporter {
       hash.put("xVal", xStr);
       hash.put("yVal", yStr);
       hash.put("number", iStr);
-      xScaleList.add(hash);
+      xScaleList.addLast(hash);
     }
     for (double i = minXOnScale, j = maxXOnScale; i < (maxXOnScale + xStep / 2); i += xStep, j -= xStep) {
       xPt = leftPlotArea + ((j - minXOnScale) * xScaleFactor);
@@ -188,7 +188,7 @@ class SVGExporter extends FormExporter {
       hash.put("xVal", xStr);
       hash.put("yVal", yStr);
       hash.put("number", iStr);
-      xScaleListReversed.add(hash);
+      xScaleListReversed.addLast(hash);
 
     }
 
@@ -204,7 +204,7 @@ class SVGExporter extends FormExporter {
       hash.put("xVal", xStr);
       hash.put("yVal", yStr);
       hash.put("number", iStr);
-      yScaleList.add(hash);
+      yScaleList.addLast(hash);
     }
 
     double firstTranslateX, firstTranslateY, secondTranslateX, secondTranslateY;
@@ -262,9 +262,9 @@ class SVGExporter extends FormExporter {
     context.put("verticalGridCoords", vertGridCoords);
     context.put("horizontalGridCoords", horizGridCoords);
 
-    List<Coordinate> newXYCoords = new ArrayList<Coordinate>();
+    JmolList<Coordinate> newXYCoords = new JmolList<Coordinate>();
     for (int i = startDataPointIndex; i <= endDataPointIndex; i++)
-      newXYCoords.add(xyCoords[i]);
+      newXYCoords.addLast(xyCoords[i]);
 
     double firstX, firstY, lastX;
     firstX=xyCoords[startDataPointIndex].getXVal();
@@ -433,8 +433,8 @@ class SVGExporter extends FormExporter {
     String xStr, yStr;
 
     //Grid
-    List<Map<String, String>> vertGridCoords = new ArrayList<Map<String, String>>();
-    List<Map<String, String>> horizGridCoords = new ArrayList<Map<String, String>>();
+    JmolList<Map<String, String>> vertGridCoords = new JmolList<Map<String, String>>();
+    JmolList<Map<String, String>> horizGridCoords = new JmolList<Map<String, String>>();
 
     for (double i = minXOnScale; i < maxXOnScale + xStep / 2; i += xStep) {
       xPt = leftPlotArea + ((i - minXOnScale) * xScaleFactor);
@@ -464,9 +464,9 @@ class SVGExporter extends FormExporter {
 
     // Scale
 
-    List<Map<String, String>> xScaleList = new ArrayList<Map<String, String>>();
-    List<Map<String, String>> xScaleListReversed = new ArrayList<Map<String, String>>();
-    List<Map<String, String>> yScaleList = new ArrayList<Map<String, String>>();
+    JmolList<Map<String, String>> xScaleList = new JmolList<Map<String, String>>();
+    JmolList<Map<String, String>> xScaleListReversed = new JmolList<Map<String, String>>();
+    JmolList<Map<String, String>> yScaleList = new JmolList<Map<String, String>>();
 
     String hashX = "#";
     String hashY = "#";
@@ -576,8 +576,8 @@ class SVGExporter extends FormExporter {
     context.put("verticalGridCoords", vertGridCoords);
     context.put("horizontalGridCoords", horizGridCoords);
 
-    List<List<Coordinate>> newXYCoordsList = new ArrayList<List<Coordinate>>();
-    List<Coordinate> coords = new ArrayList<Coordinate>();
+    JmolList<JmolList<Coordinate>> newXYCoordsList = new JmolList<JmolList<Coordinate>>();
+    JmolList<Coordinate> coords = new JmolList<Coordinate>();
     for (int i = 0; i < spectra.length; i++) {
       Coordinate[] xyCoords = spectra[i].getXYCoords();
       for (int j = startDataPointIndices[i]; j <= endDataPointIndices[i]; j++)

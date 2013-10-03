@@ -21,8 +21,8 @@ package jspecview.source;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import org.jmol.util.JmolList;
+
 
 import org.jmol.util.Logger;
 import org.jmol.util.SB;
@@ -99,7 +99,7 @@ abstract class XMLReader {
     // end of import of CML document
     // now populate all the JSpecView spectrum variables.....
 
-    List<String[]> LDRTable = new ArrayList<String[]>(20);
+    JmolList<String[]> LDRTable = new JmolList<String[]>();
     JDXSpectrum spectrum = new JDXSpectrum();
 
     spectrum.setTitle(title);

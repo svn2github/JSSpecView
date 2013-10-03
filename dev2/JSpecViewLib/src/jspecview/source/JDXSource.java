@@ -19,8 +19,8 @@
 
 package jspecview.source;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.jmol.util.JmolList;
+
 
 import jspecview.common.JDXHeader;
 import jspecview.common.JDXSpectrum;
@@ -45,7 +45,7 @@ public class JDXSource extends JDXHeader {
   public int type = TYPE_SIMPLE;
   public boolean isCompoundSource = false;
   
-  private List<JDXSpectrum> jdxSpectra;
+  private JmolList<JDXSpectrum> jdxSpectra;
   private String errors = "";
   private String filePath;
 
@@ -62,8 +62,8 @@ public class JDXSource extends JDXHeader {
   public JDXSource(int type, String filePath) {
     this.type = type;
     setFilePath(filePath);
-    headerTable = new ArrayList<String[]>();
-    jdxSpectra = new ArrayList<JDXSpectrum>();
+    headerTable = new JmolList<String[]>();
+    jdxSpectra = new JmolList<JDXSpectrum>();
     isCompoundSource = (type != TYPE_SIMPLE);
   }
 
@@ -92,7 +92,7 @@ public class JDXSource extends JDXHeader {
     spectrum.setFilePath(filePath);
     int n = jdxSpectra.size();
     if (n == 0 || !jdxSpectra.get(n - 1).addSubSpectrum(spectrum, forceSub))
-      jdxSpectra.add(spectrum);
+      jdxSpectra.addLast(spectrum);
   }
 
   /**
@@ -109,7 +109,7 @@ public class JDXSource extends JDXHeader {
    * 
    * @return the Vector of Spectra
    */
-  public List<JDXSpectrum> getSpectra() {
+  public JmolList<JDXSpectrum> getSpectra() {
     return jdxSpectra;
   }
 
@@ -140,7 +140,7 @@ public class JDXSource extends JDXHeader {
     return filePath;
   }
 
-  public static JDXSource createView(List<JDXSpectrum> specs) {
+  public static JDXSource createView(JmolList<JDXSpectrum> specs) {
     JDXSource source = new JDXSource(TYPE_VIEW, "view");
     source.isView = true;
     for (int i = 0; i < specs.size(); i++)

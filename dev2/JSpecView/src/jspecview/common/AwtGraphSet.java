@@ -25,7 +25,9 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
-import java.util.List;
+
+import org.jmol.util.JmolList;
+
 
 /**
  * AwtGraphSet class represents a set of overlaid spectra within some
@@ -193,7 +195,7 @@ class AwtGraphSet extends GraphSet {
   }
 
   @Override
-  Annotation getAnnotation(List<String> args, Annotation lastAnnotation) {
+  Annotation getAnnotation(JmolList<String> args, Annotation lastAnnotation) {
     return AwtColoredAnnotation.getAnnotation(getSpectrum(), args,
         (AwtColoredAnnotation) lastAnnotation);
   }

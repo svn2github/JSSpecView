@@ -9,7 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
+
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -19,6 +19,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
+import org.jmol.util.JmolList;
 import org.jmol.util.TextFormat;
 
 import jspecview.common.DialogHelper;
@@ -158,7 +159,7 @@ public class Exporter {
    * 
    * @return message for status line
    */
-  public static String exportCmd(JSVPanel jsvp, List<String> tokens, boolean forInkscape) {
+  public static String exportCmd(JSVPanel jsvp, JmolList<String> tokens, boolean forInkscape) {
     // MainFrame or applet EXPORT command
     String mode = "XY";
     String fileName = null;

@@ -84,7 +84,8 @@ public class Parser {
     return f;
   }
   
-  public static int parseFloatArray(String[] tokens, BitSet bs, float[] data) {
+  @SuppressWarnings("null")
+	public static int parseFloatArray(String[] tokens, BitSet bs, float[] data) {
     int len = data.length;
     int nTokens = tokens.length;
     int n = 0;

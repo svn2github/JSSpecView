@@ -23,7 +23,6 @@ import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -98,9 +97,9 @@ public class DisplaySchemesProcessor {
 
   /**
    * Saves the display schemes to file in XML format
-   * @throws IOException
+   * @throws Exception
    */
-  public void store() throws IOException{
+  public void store() throws Exception{
     serializeDisplaySchemes(new FileWriter(fileName));
   }
 
@@ -115,7 +114,7 @@ public class DisplaySchemesProcessor {
   public boolean load(InputStream stream) {
     try {
       return load(JSVFileManager.getBufferedReaderForInputStream(stream));
-    } catch (IOException e) {
+    } catch (Exception e) {
       return false;
     }
   }
@@ -131,7 +130,7 @@ public class DisplaySchemesProcessor {
       BufferedReader br = JSVFileManager.getBufferedReaderFromName(fileName, null, "##TITLE");
     	return load(br);
     }
-    catch(IOException e){
+    catch(Exception e){
     	return false;
     }
     
@@ -142,8 +141,9 @@ public class DisplaySchemesProcessor {
    * <code>Vector</code>
    * @param br 
    * @return true if loaded successfully
+   * @throws Exception 
    */
-  public boolean load(BufferedReader br) {
+  public boolean load(BufferedReader br) throws Exception {
 
     reader = new XmlReader(br);
     String defaultDS = "Default";
@@ -221,7 +221,7 @@ public class DisplaySchemesProcessor {
           }
         }
       }
-    } catch (IOException e) {
+    } catch (Exception e) {
       return false;
     }
     return true;
@@ -241,9 +241,9 @@ public class DisplaySchemesProcessor {
   /**
    * Serializes the display schemes to the given writer
    * @param writer the writer for the output
-   * @throws IOException
+   * @throws Exception
    */
-  public void serializeDisplaySchemes(Writer writer) throws IOException{
+  public void serializeDisplaySchemes(Writer writer) throws Exception{
     if(displaySchemes.size() == 0){
       return;
     }

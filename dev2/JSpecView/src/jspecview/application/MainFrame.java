@@ -58,8 +58,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
+import org.jmol.util.JmolList;
+
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -161,11 +161,11 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	private Dimension               jmolDimensionNew = new Dimension(250, 200);
 	private JSVInterface            jmolOrAdvancedApplet;
 	private AwtPopupMenu            jsvpPopupMenu = new AwtPopupMenu(this);
-	private List<JSVPanelNode>      panelNodes = new ArrayList<JSVPanelNode>();
+	private JmolList<JSVPanelNode>      panelNodes = new JmolList<JSVPanelNode>();
 	private AwtParameters           parameters = new AwtParameters("application");
 	private JSVPanel                prevPanel;
 	private Properties              properties;
-	private List<String>            recentFilePaths = new ArrayList<String>(MAX_RECENT);
+	private JmolList<String>        recentFilePaths = new JmolList<String>();
 	private RepaintManager          repaintManager;
 	private JSVPanel                selectedPanel;
 	private JSVTree                 spectraTree;
@@ -254,7 +254,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		loadImaginary  = TF;
 	}
 
-	public List<JSVPanelNode> getPanelNodes() {
+	public JmolList<JSVPanelNode> getPanelNodes() {
 		return panelNodes;
 	}
 
@@ -488,7 +488,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 			while (st.hasMoreTokens()) {
 				String file = st.nextToken().trim();
 				if (file.length() < 100)
-					recentFilePaths.add(file);
+					recentFilePaths.addLast(file);
 			}
 		}
 		showExitDialog = Boolean.parseBoolean(properties
@@ -647,11 +647,11 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		if (cmd.length() == 0) {
 			tip = "Enter a command:";
 		} else {
-			List<String> tokens = ScriptToken.getTokens(cmd);
+			JmolList<String> tokens = ScriptToken.getTokens(cmd);
 			if (tokens.size() == 0)
 				return;
 			boolean isExact = (cmd.endsWith(" ") || tokens.size() > 1);
-			List<ScriptToken> list = ScriptToken.getScriptTokenList(tokens.get(0),
+			JmolList<ScriptToken> list = ScriptToken.getScriptTokenList(tokens.get(0),
 					isExact);
 			switch (list.size()) {
 			case 0:
@@ -691,7 +691,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 			openFile(file.getAbsolutePath(), true);
 	}
 
-	public void openDataOrFile(String data, String name, List<JDXSpectrum> specs,
+	public void openDataOrFile(String data, String name, JmolList<JDXSpectrum> specs,
 			String url, int firstSpec, int lastSpec, boolean isAppend) {
 		JSVTree.openDataOrFile(this, data, name, specs, url,
 				firstSpec, lastSpec, isAppend);
@@ -1241,7 +1241,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		return null;
 	}
 
-	public JSVPanel getNewJSVPanel(List<JDXSpectrum> specs) {
+	public JSVPanel getNewJSVPanel(JmolList<JDXSpectrum> specs) {
 		return AwtPanel.getJSVPanel(this, specs, 0, 0, jsvpPopupMenu);
 	}
 

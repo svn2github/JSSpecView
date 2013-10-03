@@ -27,9 +27,9 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.util.ArrayList;
+import org.jmol.util.JmolList;
 import java.util.Enumeration;
-import java.util.List;
+
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -49,8 +49,8 @@ public class ViewDialog extends AwtDialog implements WindowListener {
 
 	private static final long serialVersionUID = 1L;
 	private ScriptInterface si;
-	private List<JSVTreeNode> treeNodes;
-	private List<JCheckBox> checkBoxes;
+	private JmolList<JSVTreeNode> treeNodes;
+	private JmolList<JCheckBox> checkBoxes;
 	private JPanel spectrumPanel;
 	private Insets cbInsets1;
 	private Insets cbInsets2;
@@ -190,8 +190,8 @@ public class ViewDialog extends AwtDialog implements WindowListener {
 	}
 
 	private void layoutCheckBoxes() {
-    checkBoxes = new ArrayList<JCheckBox>();
-    treeNodes = new ArrayList<JSVTreeNode>();
+    checkBoxes = new JmolList<JCheckBox>();
+    treeNodes = new JmolList<JSVTreeNode>();
     cbInsets1 = new Insets(0, 0, 2, 2);
     cbInsets2 = new Insets(0, 20, 2, 2);
 		spectrumPanel = new JPanel(new GridBagLayout());
@@ -223,8 +223,8 @@ public class ViewDialog extends AwtDialog implements WindowListener {
       spectrumPanel.add(cb, new GridBagConstraints(0, checkBoxes.size(), 1, 1, 0.0, 0.0,
       		GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));
       treeNode.index = treeNodes.size();
-    	treeNodes.add(treeNode);
-    	checkBoxes.add(cb);
+    	treeNodes.addLast(treeNode);
+    	checkBoxes.addLast(cb);
     	addCheckBoxes(treeNode, level + 1, addViews);
     }
 	}

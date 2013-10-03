@@ -1,6 +1,8 @@
 package jspecview.common;
 
-import java.util.List;
+import org.jmol.util.JmolList;
+
+
 
 
 /**
@@ -39,7 +41,7 @@ class ViewData {
 	 * @param is2D 
 	 * @returns an instance of <code>MultiScaleData</code>
 	 */
-	ViewData(List<JDXSpectrum> spectra, double yPt1, double yPt2,
+	ViewData(JmolList<JDXSpectrum> spectra, double yPt1, double yPt2,
 			int[] startList, int[] endList, boolean isContinuous, boolean is2D) {
 		nSpectra = (is2D ? 1 : spectra.size());
 		scaleData = new ScaleData[nSpectra];
@@ -48,7 +50,7 @@ class ViewData {
 		init(spectra, yPt1, yPt2, isContinuous);
 	}
   
-	ViewData(List<JDXSpectrum> spectra, double yPt1, double yPt2, 
+	ViewData(JmolList<JDXSpectrum> spectra, double yPt1, double yPt2, 
 			boolean isContinuous) {
 		// forced subsets
 		nSpectra = spectra.size();
@@ -58,7 +60,7 @@ class ViewData {
 		init(spectra, yPt1, yPt2, isContinuous);
 	}
 
-  private void init(List<JDXSpectrum> spectra, 
+  private void init(JmolList<JDXSpectrum> spectra, 
   		double yPt1, double yPt2, boolean isContinuous) {
 		thisScale = scaleData[iThisScale = 0];
 		for (int i = 0; i < scaleData.length; i++) {
@@ -87,7 +89,7 @@ class ViewData {
 		}
   }
 
-	void newSpectrum(List<JDXSpectrum> spectra) {
+	void newSpectrum(JmolList<JDXSpectrum> spectra) {
 		init(spectra, 0, 0, false);
 	}
 

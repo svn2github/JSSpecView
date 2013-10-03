@@ -1,10 +1,10 @@
 package jspecview.common;
 
-import java.util.ArrayList;
+import org.jmol.util.JmolList;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
+
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -153,7 +153,7 @@ public class IntegralData extends MeasurementData {
 		clear(x1, x2);
 		//if (in.getValue() < 0.1) -- no, need this for tiny integrals with a water peak, for instance
 			//return null;
-  	add(in);
+  	addLast(in);
 		Collections.sort(this, c);
 		return in;
 	}
@@ -182,7 +182,7 @@ public class IntegralData extends MeasurementData {
     ppms = TextFormat.simpleReplace(ppms, "--","-#");
     ppms = ppms.replace('-','^');
     ppms = ppms.replace('#','-');
-    List<String> tokens = ScriptToken.getTokens(ppms);
+    JmolList<String> tokens = ScriptToken.getTokens(ppms);
     for (int i = 0; i < tokens.size(); i++) {
       try {
         String s = tokens.get(i);
@@ -260,11 +260,11 @@ public class IntegralData extends MeasurementData {
 	 * @param spec 
 	 * 
 	 * @param value
-	 * @return ArrayList<IntegrationRatio> object representing integration ratios
+	 * @return JmolList<IntegrationRatio> object representing integration ratios
 	 */
-	public static ArrayList<Annotation> getIntegrationRatiosFromString(
+	public static JmolList<Annotation> getIntegrationRatiosFromString(
 			JDXSpectrum spec, String value) {
-		ArrayList<Annotation> ratios = new ArrayList<Annotation>();
+		JmolList<Annotation> ratios = new JmolList<Annotation>();
 		// split input into x-value/integral-value pairs
 		StringTokenizer allParamTokens = new StringTokenizer(value, ",");
 		while (allParamTokens.hasMoreTokens()) {
@@ -273,7 +273,7 @@ public class IntegralData extends MeasurementData {
 			StringTokenizer eachParam = new StringTokenizer(token, ":");
 			Annotation ratio = new Annotation(spec, Double.parseDouble(eachParam
 					.nextToken()), 0.0, eachParam.nextToken(), true, false, 0, 0);
-			ratios.add(ratio);
+			ratios.addLast(ratio);
 		}
 		return ratios;
 	}

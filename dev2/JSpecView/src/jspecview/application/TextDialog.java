@@ -27,7 +27,7 @@ import java.awt.Frame;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-import java.util.List;
+
 
 import javax.swing.JDialog;
 import javax.swing.JEditorPane;
@@ -36,6 +36,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
+import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
 
 import jspecview.common.JDXSpectrum;
@@ -134,7 +135,7 @@ public class TextDialog extends JDialog {
 
   public static void showSource(MainFrame mainFrame) {
     JDXSource currentSource = mainFrame.getCurrentSource();
-    List<JSVPanelNode> panelNodes = mainFrame.getPanelNodes();
+    JmolList<JSVPanelNode> panelNodes = mainFrame.getPanelNodes();
     if (currentSource == null) {
       if (panelNodes.size() > 0) {
         JOptionPane.showMessageDialog(mainFrame, "Please Select a Spectrum",

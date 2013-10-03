@@ -29,8 +29,8 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import org.jmol.util.JmolList;
+
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -111,7 +111,7 @@ public class JSVZipUtil {
         if (!fileName.equals(ze.getName()))
           continue;
         byte[] bytes = getZipEntryAsBytes(zis);
-        if (isZipFile(bytes) && list != null && ++listPtr < list.length)
+        if (isZipFile(bytes) && ++listPtr < list.length)
           return getZipFileContentsAsBytes(new BufferedInputStream(
               new ByteArrayInputStream(bytes)), list, listPtr);
         return bytes;
@@ -147,7 +147,7 @@ public class JSVZipUtil {
   }
   
   private static String[] getZipDirectoryOrErrorAndClose(InputStream is, boolean addManifest) throws IOException {
-    List<String> v = new ArrayList<String>();
+    JmolList<String> v = new JmolList<String>();
     ZipInputStream zis = new ZipInputStream(is);
     ZipEntry ze;
     String manifest = null;
@@ -156,7 +156,7 @@ public class JSVZipUtil {
       if (addManifest && fileName.equals("JmolManifest"))
         manifest = getZipEntryAsString(zis); 
       else
-        v.add(fileName);
+        v.addLast(fileName);
     }
     zis.close();
     if (addManifest)
@@ -188,7 +188,7 @@ public class JSVZipUtil {
     while (zis.available() == 1 && (len = zis.read(buf)) > 0) {
       totalLen += len;
       if (totalLen >= bytes.length)
-        bytes = ArrayUtil.ensureLength(bytes, totalLen * 2);
+        bytes = ArrayUtil.ensureLengthByte(bytes, totalLen * 2);
       System.arraycopy(buf, 0, bytes, totalLen - len, len);
     }
     buf = new byte[totalLen];
@@ -204,7 +204,7 @@ public class JSVZipUtil {
     while ((len = bis.read(buf)) > 0) {
       totalLen += len;
       if (totalLen >= bytes.length)
-        bytes = ArrayUtil.ensureLength(bytes, totalLen * 2);
+        bytes = ArrayUtil.ensureLengthByte(bytes, totalLen * 2);
       System.arraycopy(buf, 0, bytes, totalLen - len, len);
     }
     buf = new byte[totalLen];

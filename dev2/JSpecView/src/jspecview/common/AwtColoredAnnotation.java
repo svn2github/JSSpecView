@@ -20,7 +20,9 @@
 package jspecview.common;
 
 import java.awt.Color;
-import java.util.List;
+
+
+import org.jmol.util.JmolList;
 
 /**
  * ColoredAnnotation is a label on the spectrum; not an integralRegion
@@ -38,7 +40,7 @@ public class AwtColoredAnnotation extends Annotation {
     this.color = color;
   }
 
-	public static AwtColoredAnnotation getAnnotation(JDXSpectrum spec, List<String> args,
+	public static AwtColoredAnnotation getAnnotation(JDXSpectrum spec, JmolList<String> args,
                                                 AwtColoredAnnotation lastAnnotation) {
   	String arg;
     int xPt = 0;

@@ -1,9 +1,9 @@
 package jspecview.common;
 
-import java.util.ArrayList;
+import org.jmol.util.JmolList;
 import java.util.BitSet;
 import java.util.Hashtable;
-import java.util.List;
+
 import java.util.Map;
 
 import org.jmol.util.Logger;
@@ -50,7 +50,7 @@ abstract class GraphSet implements XYScaleConverter {
 	abstract Annotation getAnnotation(double x, double y, String text,
 			boolean isPixels, boolean is2D, int offsetX, int offsetY);
 
-	abstract Annotation getAnnotation(List<String> args, Annotation lastAnnotation);
+	abstract Annotation getAnnotation(JmolList<String> args, Annotation lastAnnotation);
 
 	abstract protected boolean get2DImage();
 
@@ -79,20 +79,20 @@ abstract class GraphSet implements XYScaleConverter {
 
 	abstract boolean update2dImage(boolean isCreation);
 
-	protected List<Highlight> highlights = new ArrayList<Highlight>();
-	protected List<JDXSpectrum> spectra = new ArrayList<JDXSpectrum>(2);
+	protected JmolList<Highlight> highlights = new JmolList<Highlight>();
+	protected JmolList<JDXSpectrum> spectra = new JmolList<JDXSpectrum>();
 
 	private boolean isSplittable = true;
 	private boolean allowStacking = true; // not MS
 	private int[] splitPointers = new int[] { 0 };
 
-	private List<Annotation> annotations;
+	private JmolList<Annotation> annotations;
 	private MeasurementData selectedSpectrumMeasurements;
 	private MeasurementData selectedSpectrumIntegrals;
 	private Annotation lastAnnotation;
 	private Measurement pendingMeasurement;
 	private Integral pendingIntegral;
-	private List<JDXSpectrum> graphsTemp = new ArrayList<JDXSpectrum>();
+	private JmolList<JDXSpectrum> graphsTemp = new JmolList<JDXSpectrum>();
 	private PlotWidget[] widgets;
 	private boolean isLinked;
 
@@ -229,7 +229,7 @@ abstract class GraphSet implements XYScaleConverter {
 
 	// needed by AwtGraphSet
 
-	protected List<ViewData> viewList;
+	protected JmolList<ViewData> viewList;
 	protected ImageView imageView;
 	protected PanelData pd;
 	protected boolean sticky2Dcursor;
@@ -357,11 +357,11 @@ abstract class GraphSet implements XYScaleConverter {
 	}
 
 	private void addSpec(JDXSpectrum spec) {
-		spectra.add(spec);
+		spectra.addLast(spec);
 		nSpectra++;
 	}
 
-	void splitStack(List<GraphSet> graphSets, boolean doSplit) {
+	void splitStack(JmolList<GraphSet> graphSets, boolean doSplit) {
 		if (doSplit && isSplittable) {
 			// nSplit = 0;
 			// splitPointers = new int[nSpectra];
@@ -463,14 +463,14 @@ abstract class GraphSet implements XYScaleConverter {
 					);
 		}
 		getView(0, 0, 0, 0, startIndices, endIndices, null, null);
-		viewList = new ArrayList<ViewData>();
-		viewList.add(viewData);
+		viewList = new JmolList<ViewData>();
+		viewList.addLast(viewData);
 	}
 
 	private synchronized void getView(double x1, double x2, double y1, double y2,
 			int[] startIndices, int[] endIndices, ScaleData[] viewScales, ScaleData[] yScales) {
-		List<JDXSpectrum> graphs = (graphsTemp.size() == 0 ? spectra : graphsTemp);
-		List<JDXSpectrum> subspecs = getSpectrumAt(0).getSubSpectra();
+		JmolList<JDXSpectrum> graphs = (graphsTemp.size() == 0 ? spectra : graphsTemp);
+		JmolList<JDXSpectrum> subspecs = getSpectrumAt(0).getSubSpectra();
 		boolean dontUseSubspecs = (subspecs == null || subspecs.size() == 2
 				&& subspecs.get(1).isImaginary());
 		// NMR real/imaginary
@@ -621,7 +621,7 @@ abstract class GraphSet implements XYScaleConverter {
 
 	private void addAnnotation(Annotation annotation, boolean isToggle) {
 		if (annotations == null)
-			annotations = new ArrayList<Annotation>();
+			annotations = new JmolList<Annotation>();
 		boolean removed = false;
 		for (int i = annotations.size(); --i >= 0;)
 			if (annotation.is2D ? isNearby(annotations.get(i), annotation, imageView,
@@ -630,7 +630,7 @@ abstract class GraphSet implements XYScaleConverter {
 				annotations.remove(i);
 			}
 		if (annotation.getText().length() > 0 && (!removed || !isToggle))
-			annotations.add(annotation);
+			annotations.addLast(annotation);
 	}
 
 	protected void setImageWindow() {
@@ -846,7 +846,7 @@ abstract class GraphSet implements XYScaleConverter {
 		if (ad == null)
 			addDialog(iSpec, AType.Measurements, ad = new MeasurementData(
 					AType.Measurements, m.spec));
-		ad.getData().add(new Measurement(m));
+		ad.getData().addLast(new Measurement(m));
 		updateDialog(AType.Measurements, -1);
 	}
 
@@ -1301,12 +1301,12 @@ abstract class GraphSet implements XYScaleConverter {
 		int[] startIndices = new int[nSpectra];
 		int[] endIndices = new int[nSpectra];
 		graphsTemp.clear();
-		List<JDXSpectrum> subspecs = getSpectrumAt(0).getSubSpectra();
+		JmolList<JDXSpectrum> subspecs = getSpectrumAt(0).getSubSpectra();
 		boolean dontUseSubspecs = (subspecs == null || subspecs.size() == 2);
 		// NMR real/imaginary
 		boolean is2D = !getSpectrumAt(0).is1D();
 		if (!is2D && !dontUseSubspecs) {
-			graphsTemp.add(getSpectrum());
+			graphsTemp.addLast(getSpectrum());
 			if (!ScaleData.setDataPointIndices(graphsTemp, initX, finalX,
 					minNumOfPointsForZoom, startIndices, endIndices))
 				return;
@@ -1370,7 +1370,7 @@ abstract class GraphSet implements XYScaleConverter {
 		if (viewList.size() > currentZoomIndex + 1)
 			for (int i = viewList.size() - 1; i > currentZoomIndex; i--)
 				viewList.remove(i);
-		viewList.add(viewData);
+		viewList.addLast(viewData);
 		currentZoomIndex++;
 	}
 
@@ -1631,7 +1631,7 @@ abstract class GraphSet implements XYScaleConverter {
 	}
 
 	private void drawPeakTabs(Object g, JDXSpectrum spec) {
-		List<PeakInfo> list = (nSpectra == 1 || iSpectrumSelected >= 0 ? spec
+		JmolList<PeakInfo> list = (nSpectra == 1 || iSpectrumSelected >= 0 ? spec
 				.getPeakList() : null);
 		if (list != null && list.size() > 0) {
 			if (piMouseOver != null && piMouseOver.spectrum == spec && pd.isMouseUp()) {
@@ -2243,7 +2243,7 @@ abstract class GraphSet implements XYScaleConverter {
 	}
 
 	// determine whether there are any ratio annotations to draw
-	private void drawAnnotations(Object g, List<Annotation> annotations,
+	private void drawAnnotations(Object g, JmolList<Annotation> annotations,
 			ScriptToken whatColor) {
 		pd.setFont(g, xPixels, FONT_BOLD, 12, false);
 		for (int i = annotations.size(); --i >= 0;) {
@@ -2554,7 +2554,7 @@ abstract class GraphSet implements XYScaleConverter {
 		return Math.sqrt(dx * dx + dy * dy);
 	}
 
-	private static GraphSet findCompatibleGraphSet(List<GraphSet> graphSets,
+	private static GraphSet findCompatibleGraphSet(JmolList<GraphSet> graphSets,
 			JDXSpectrum spec) {
 		for (int i = 0; i < graphSets.size(); i++)
 			if (JDXSpectrum.areXScalesCompatible(spec, graphSets.get(i).getSpectrum(),
@@ -2593,7 +2593,7 @@ abstract class GraphSet implements XYScaleConverter {
 				+ ONLINE_CUTOFF);
 	}
 
-	private static void setFractionalPositions(PanelData pd, List<GraphSet> graphSets,
+	private static void setFractionalPositions(PanelData pd, JmolList<GraphSet> graphSets,
 			LinkMode linkMode) {
 
 		int n = graphSets.size();
@@ -2727,7 +2727,7 @@ abstract class GraphSet implements XYScaleConverter {
 
 	// called only by PanelData
 
-	String addAnnotation(List<String> args, String title) {
+	String addAnnotation(JmolList<String> args, String title) {
 		if (args.size() == 0 || args.size() == 1
 				&& args.get(0).equalsIgnoreCase("none")) {
 			annotations = null;
@@ -2770,7 +2770,7 @@ abstract class GraphSet implements XYScaleConverter {
 		Highlight hl = new Highlight(x1, x2, spec, (oColor == null ? pd
 				.getHighlightColor() : oColor));
 		if (!highlights.contains(hl))
-			highlights.add(hl);
+			highlights.addLast(hl);
 	}
 
 	void addPeakHighlight(PeakInfo peakInfo) {
@@ -3032,14 +3032,14 @@ synchronized boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		removeDialog(getFixedSelectedSpectrumIndex(), AType.Measurements);
 	}
 
-	static List<GraphSet> createGraphSetsAndSetLinkMode(PanelData pd, JSVPanel jsvp,
-			List<JDXSpectrum> spectra, int startIndex, int endIndex, LinkMode linkMode) {
-		List<GraphSet> graphSets = new ArrayList<GraphSet>();
+	static JmolList<GraphSet> createGraphSetsAndSetLinkMode(PanelData pd, JSVPanel jsvp,
+		JmolList<JDXSpectrum> spectra, int startIndex, int endIndex, LinkMode linkMode) {
+		JmolList<GraphSet> graphSets = new JmolList<GraphSet>();
 		for (int i = 0; i < spectra.size(); i++) {
 			JDXSpectrum spec = spectra.get(i);
 			GraphSet graphSet = (linkMode == LinkMode.NONE ? findCompatibleGraphSet(graphSets, spec) : null);
 			if (graphSet == null)
-				graphSets.add(graphSet = jsvp.getNewGraphSet());
+				graphSets.addLast(graphSet = jsvp.getNewGraphSet());
 			graphSet.addSpec(spec);
 		}
 		setFractionalPositions(pd, graphSets, linkMode);
@@ -3125,7 +3125,7 @@ synchronized boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		}
 	}
 
-	static GraphSet findGraphSet(List<GraphSet> graphSets, int xPixel, int yPixel) {
+	static GraphSet findGraphSet(JmolList<GraphSet> graphSets, int xPixel, int yPixel) {
 		for (int i = graphSets.size(); --i >= 0;)
 			if (graphSets.get(i).hasPoint(xPixel, yPixel))
 				return graphSets.get(i);
@@ -3548,7 +3548,7 @@ synchronized boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 			return false;
 		int iSpec = getFixedSelectedSpectrumIndex();
 		AnnotationData ad = getDialog(AType.Integration, -1);
-		if (value == null && ad != null)
+		if (value == null)// && ad != null)
 			return true;
 		switch (IntegralData.IntMode.getMode(value.toUpperCase())) {
 		case ON:
@@ -3862,8 +3862,8 @@ synchronized boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 	 * @return list 
 	 */
 	@SuppressWarnings("unchecked")
-	ArrayList<Annotation> getIntegrationRatios(int i) {
-		return (ArrayList<Annotation>) (aIntegrationRatios == null ? null
+	JmolList<Annotation> getIntegrationRatios(int i) {
+		return (JmolList<Annotation>) (aIntegrationRatios == null ? null
 				: aIntegrationRatios[i]);
 	}
 
@@ -3914,7 +3914,7 @@ synchronized boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		Map<String, Object> spectraInfo = new Hashtable<String, Object>();
 		if ("viewInfo".equalsIgnoreCase(key))
 			return getScale().getInfo(spectraInfo);
-		List<Map<String, Object>> specInfo = new ArrayList<Map<String, Object>>();		
+		JmolList<Map<String, Object>> specInfo = new JmolList<Map<String, Object>>();		
 		spectraInfo.put("spectra", specInfo);
 		for (int i = 0; i < nSpectra; i++) {
 			if (iSpec >= 0 && i != iSpec)
@@ -3936,7 +3936,7 @@ synchronized boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 					"Integration") ? getMeasurementInfo(AType.Integration, i) : null));
 			if (iSpec >= 0)
 				return info;
-			specInfo.add(info);
+			specInfo.addLast(info);
 		}
 		return spectraInfo;
 	}

@@ -116,7 +116,7 @@ public class PeakData extends MeasurementData {
 							xyCoords, i - 1) : xyCoords[i - 1].getXVal());
 					if (x >= minX || x <= maxX) {
 						PeakPick m = new PeakPick(spec, x, y);
-						add(m);
+						addLast(m);
 						if (++n == 100)
 							break;
 					}
@@ -132,7 +132,7 @@ public class PeakData extends MeasurementData {
 							xyCoords, i - 1) : xyCoords[i - 1].getXVal());
 					if (x >= minX && x <= maxX) {
 						PeakPick m = new PeakPick(spec, x, y, TextFormat.formatDecimal(x, precision), x);
-						add(m);
+						addLast(m);
 						if (++n == 100)
 							break;
 					}

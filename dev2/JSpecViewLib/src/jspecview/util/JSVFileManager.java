@@ -78,8 +78,7 @@ public class JSVFileManager {
 		return sb.toString();
 	}
 
-  public static BufferedReader getBufferedReaderForInputStream(InputStream in)
-      throws IOException {
+  public static BufferedReader getBufferedReaderForInputStream(InputStream in) {
     return new BufferedReader(new InputStreamReader(in));
   }
   
@@ -390,13 +389,13 @@ class JSVMonitorInputStream extends FilterInputStream {
   }
 
   @Override
-  public void mark(int readlimit) {
+  public synchronized void mark(int readlimit) {
     super.mark(readlimit);
     markPosition = position;
   }
 
   @Override
-  public void reset() throws IOException {
+  public synchronized void reset() throws IOException {
     position = markPosition;
     super.reset();
   }

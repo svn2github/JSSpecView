@@ -4,9 +4,9 @@ import java.awt.Cursor;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
+import org.jmol.util.JmolList;
 import java.util.Enumeration;
-import java.util.List;
+
 
 import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
@@ -83,13 +83,13 @@ public class JSVTree extends JTree {
 	public static void closeSource(ScriptInterface si,
 			JDXSource source) {
     // Remove nodes and dispose of frames
-		List<JSVPanelNode> panelNodes = si.getPanelNodes();
+		JmolList<JSVPanelNode> panelNodes = si.getPanelNodes();
   	JSVTree tree = (JSVTree) si.getSpectraTree();
 		JSVTreeNode rootNode = tree.getRootNode();
 		DefaultTreeModel spectraTreeModel = tree.getDefaultModel();
 
     String fileName = (source == null ? null : source.getFilePath());
-    List<JSVTreeNode> toDelete = new ArrayList<JSVTreeNode>();
+    JmolList<JSVTreeNode> toDelete = new JmolList<JSVTreeNode>();
     Enumeration<JSVTreeNode> enume = rootNode.children();
     while (enume.hasMoreElements()) {
       JSVTreeNode node = enume.nextElement();
@@ -97,10 +97,10 @@ public class JSVTree extends JTree {
           || node.panelNode.source.getFilePath().equals(fileName)) {
         for (Enumeration<JSVTreeNode> e = node.children(); e.hasMoreElements();) {
           JSVTreeNode childNode = e.nextElement();
-          toDelete.add(childNode);
+          toDelete.addLast(childNode);
           panelNodes.remove(childNode.panelNode);
         }
-        toDelete.add(node);
+        toDelete.addLast(node);
         if (fileName != null)
           break;
       }
@@ -138,7 +138,7 @@ public class JSVTree extends JTree {
 	}
 
 	public static void setFrameAndTreeNode(ScriptInterface si, int i) {
-    List<JSVPanelNode> panelNodes = si.getPanelNodes();
+    JmolList<JSVPanelNode> panelNodes = si.getPanelNodes();
 		if (panelNodes  == null || i < 0 || i >= panelNodes.size())
       return;
     si.setNode(panelNodes.get(i), false);
@@ -179,7 +179,7 @@ public class JSVTree extends JTree {
   	JSVTree tree = (JSVTree) si.getSpectraTree();
 		JSVTreeNode rootNode = tree.getRootNode();
 		DefaultTreeModel spectraTreeModel = tree.getDefaultModel();
-    List<JSVPanelNode> panelNodes = si.getPanelNodes();
+    JmolList<JSVPanelNode> panelNodes = si.getPanelNodes();
 
     String fileName = JSVFileManager.getName(source.getFilePath());
     JSVPanelNode panelNode = new JSVPanelNode(null, fileName, source, null);
@@ -197,7 +197,7 @@ public class JSVTree extends JTree {
       panelNode = si.getNewPanelNode(id, fileName, source, jsvp);
       JSVTreeNode treeNode = new JSVTreeNode(panelNode.toString(), panelNode);
       panelNode.setTreeNode(treeNode);
-			panelNodes.add(panelNode);
+			panelNodes.addLast(panelNode);
       spectraTreeModel.insertNodeInto(treeNode, fileNode, fileNode
           .getChildCount());
       tree.scrollPathToVisible(new TreePath(treeNode.getPath()));
@@ -212,7 +212,7 @@ public class JSVTree extends JTree {
 			si.closeSource(null);
 			return;
 		}
-		List<JSVPanelNode> panelNodes = si.getPanelNodes();
+		JmolList<JSVPanelNode> panelNodes = si.getPanelNodes();
 		value = value.replace('\\', '/');
 		if (value.endsWith("*")) {
 			value = value.substring(0, value.length() - 1);
@@ -220,13 +220,13 @@ public class JSVTree extends JTree {
 				if (i < panelNodes.size() && panelNodes.get(i).fileName.startsWith(value))
 					si.closeSource(panelNodes.get(i).source);
 		} else if (value.equals("selected")) {
-			List<JDXSource> list = new ArrayList<JDXSource>();
+			JmolList<JDXSource> list = new JmolList<JDXSource>();
 			JDXSource lastSource = null;
 			for (int i = panelNodes.size(); --i >= 0;) {
 				JDXSource source = panelNodes.get(i).source;
 				if (panelNodes.get(i).isSelected 
 						&& (lastSource == null || lastSource != source))
-					list.add(source);
+					list.addLast(source);
 				lastSource = source;
 			}
 			for (int i = list.size(); --i >= 0;)
@@ -243,7 +243,7 @@ public class JSVTree extends JTree {
 	}
 
 	public static void load(ScriptInterface si, String value) {
-		List<String> tokens = ScriptToken.getTokens(value);
+		JmolList<String> tokens = ScriptToken.getTokens(value);
 		String filename = tokens.get(0);
 		int pt = 0;
 		boolean isAppend = filename.equalsIgnoreCase("APPEND");
@@ -274,7 +274,7 @@ public class JSVTree extends JTree {
 	}
 
 	public static int openDataOrFile(ScriptInterface si, String data,
-			String name, List<JDXSpectrum> specs, String url, int firstSpec,
+			String name, JmolList<JDXSpectrum> specs, String url, int firstSpec,
 			int lastSpec, boolean isAppend) {
 		if ("NONE".equals(name)) {
 			close(si, "View*");
@@ -363,7 +363,7 @@ public class JSVTree extends JTree {
 
   private static void combineSpectra(ScriptInterface si, String name) {
   	JDXSource source = si.getCurrentSource();
-    List<JDXSpectrum> specs = source.getSpectra();
+    JmolList<JDXSpectrum> specs = source.getSpectra();
     JSVPanel jsvp = si.getNewJSVPanel(specs);
     jsvp.setTitle(source.getTitle());
     if (jsvp.getTitle().equals("")) {
@@ -383,7 +383,7 @@ public class JSVTree extends JTree {
 
   private static void splitSpectra(ScriptInterface si) {
   	JDXSource source = si.getCurrentSource();
-    List<JDXSpectrum> specs = source.getSpectra();
+    JmolList<JDXSpectrum> specs = source.getSpectra();
     JSVPanel[] panels = new JSVPanel[specs.size()];
     JSVPanel jsvp = null;
     for (int i = 0; i < specs.size(); i++) {

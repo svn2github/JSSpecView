@@ -45,7 +45,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.List;
 
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
@@ -53,6 +52,8 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
+
+import org.jmol.util.JmolList;
 
 import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelNode;
@@ -512,7 +513,7 @@ public class AppMenu extends JMenuBar {
     scaleYCheckBoxMenuItem.setSelected(pd.getBoolean(ScriptToken.YSCALEON));
   }
 
-  public void setRecentMenu(List<String> recentFilePaths) {
+  public void setRecentMenu(JmolList<String> recentFilePaths) {
     openRecentMenu.removeAll();
     for (int i = 0; i < recentFilePaths.size(); i++) {
       String path = recentFilePaths.get(i);
@@ -527,7 +528,7 @@ public class AppMenu extends JMenuBar {
     }
   }
 
-  public void updateRecentMenus(List<String> recentFilePaths) {
+  public void updateRecentMenus(JmolList<String> recentFilePaths) {
     JMenuItem menuItem;
     openRecentMenu.removeAll();
     for (int i = 0; i < recentFilePaths.size(); i++) {

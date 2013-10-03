@@ -20,7 +20,6 @@
 package org.jmol.util;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.Hashtable;
 
 
@@ -59,9 +58,9 @@ public class XmlReader {
    * for value without surrounding tag
    *
    * @return value
-   * @throws IOException
+   * @throws Exception
    */
-  public String thisValue() throws IOException {
+  public String thisValue() throws Exception {
     return buffer.nextEvent().toString().trim();
   }
 
@@ -69,16 +68,16 @@ public class XmlReader {
    * for &lt;xxxx&gt; value &lt;/xxxx&gt;
    *
    * @return value
-   * @throws IOException
+   * @throws Exception
    */
-  public String qualifiedValue() throws IOException {
+  public String qualifiedValue() throws Exception {
     buffer.nextTag();
     String value = buffer.nextEvent().toString().trim();
     buffer.nextTag();
     return value;
   }
 
-  public int peek() throws IOException {
+  public int peek() throws Exception {
     thisEvent = buffer.peek();
     return thisEvent.getEventType();
   }
@@ -87,17 +86,17 @@ public class XmlReader {
     return buffer.hasNext();
   }
 
-  public void nextTag() throws IOException {
+  public void nextTag() throws Exception {
     while ((thisEvent = buffer.nextTag()).eventType == XmlReader.COMMENT) {
     }
   }
 
-  public int nextEvent() throws IOException {
+  public int nextEvent() throws Exception {
     thisEvent = buffer.nextEvent();
     return thisEvent.getEventType();
   }
 
-  public void nextStartTag() throws IOException {
+  public void nextStartTag() throws Exception {
     thisEvent = buffer.nextTag();
     while (!thisEvent.isStartElement())
       thisEvent = buffer.nextTag();
@@ -115,7 +114,7 @@ public class XmlReader {
     return thisEvent.getTagName();
   }
 
-  public String nextValue() throws IOException {
+  public String nextValue() throws Exception {
     buffer.nextTag();
     return buffer.nextEvent().toString().trim();
   }
@@ -133,7 +132,7 @@ public class XmlReader {
     return (a == null ? "" : a);
   }
 
-  public String getCharacters() throws IOException {
+  public String getCharacters() throws Exception {
     SB sb = new SB();
     thisEvent = buffer.peek();
     int eventType = thisEvent.getEventType();
@@ -159,14 +158,14 @@ public class XmlReader {
       if (ptr == ptEnd)
         try {
           readLine();
-        } catch (IOException e) {
+        } catch (Exception e) {
           return false;
         }
       return ptr < ptEnd;
     }
 
     @Override
-    public boolean readLine() throws IOException {
+    public boolean readLine() throws Exception {
       String s = reader.readLine();
       if (s == null) {
         return false;
@@ -176,11 +175,11 @@ public class XmlReader {
       return true;
     }
 
-    XmlEvent peek() throws IOException {
+    XmlEvent peek() throws Exception {
       if (ptEnd - ptr < 2)
         try {
           readLine();
-        } catch (IOException e) {
+        } catch (Exception e) {
           return new XmlEvent(EOF);
         }
       int pt0 = ptr;
@@ -189,14 +188,14 @@ public class XmlReader {
       return e;
     }
 
-    XmlEvent nextTag() throws IOException {
+    XmlEvent nextTag() throws Exception {
       flush();
       skipTo('<', false);
       XmlEvent e = new XmlEvent(this);
       return e;
     }
 
-    XmlEvent nextEvent() throws IOException {
+    XmlEvent nextEvent() throws Exception {
       flush();
       // cursor is always left after the last element
       return new XmlEvent(this);
@@ -238,14 +237,14 @@ public class XmlReader {
       return data.toString().substring(i, j);
     }
 
-    int skipOver(char c, boolean inQuotes) throws IOException {
+    int skipOver(char c, boolean inQuotes) throws Exception {
       if (skipTo(c, inQuotes) > 0 && ptr != ptEnd) {
         ptr++;
       }
       return ptr;
     }
 
-    int skipTo(char toWhat, boolean inQuotes) throws IOException {
+    int skipTo(char toWhat, boolean inQuotes) throws Exception {
       if (data == null)
         return -1;
       char ch;
@@ -275,7 +274,7 @@ public class XmlReader {
       return ptr;
     }
 
-    public boolean readLine() throws IOException {
+    public boolean readLine() throws Exception {
       return false;
     }
   }
@@ -296,7 +295,7 @@ public class XmlReader {
       this.eventType = eventType;
     }
 
-    XmlEvent(DataBuffer b) throws IOException {
+    XmlEvent(DataBuffer b) throws Exception {
       ptr = b.ptr;
       int n = b.getNCharactersRemaining();
       eventType = (n == 0 ? EOF : n == 1
@@ -400,7 +399,7 @@ public class XmlReader {
           }
 
         }
-      } catch (IOException e) {
+      } catch (Exception e) {
         // not relavent
       }
     }

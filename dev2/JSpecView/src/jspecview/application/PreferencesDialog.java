@@ -915,7 +915,7 @@ public class PreferencesDialog extends JDialog {
 		 try{
 		 	dsp.store();
 		 }
-		 catch (IOException ex) {
+		 catch (Exception ex) {
 		     JOptionPane.showMessageDialog(this, "There was an error deleting the Display Scheme",
 		                                    "Error Deleting Scheme", JOptionPane.ERROR_MESSAGE);
 		 }
@@ -966,7 +966,7 @@ public class PreferencesDialog extends JDialog {
         schemeComboBox.addItem(input);
       schemeComboBox.setSelectedItem(input);
     }
-    catch (IOException ex) {
+    catch (Exception ex) {
       JOptionPane.showMessageDialog(this, "There was an error saving the Display Scheme",
                                     "Error Saving Scheme", JOptionPane.ERROR_MESSAGE);
     }

@@ -2,8 +2,9 @@ package jspecview.common;
 
 import java.awt.Color;
 import java.awt.GraphicsEnvironment;
-import java.util.ArrayList;
+import org.jmol.util.JmolList;
 import java.util.Arrays;
+
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
@@ -44,11 +45,11 @@ public class AwtParameters extends Parameters {
       return plotColors;
     }
     StringTokenizer st = new StringTokenizer(plotColorsStr, ",;.- ");
-    List<Color> colors = new ArrayList<Color>();
+    JmolList<Color> colors = new JmolList<Color>();
     try {
       while (st.hasMoreTokens()) {
         String token = st.nextToken();
-        colors.add(AwtParameters.getColorFromString(token));
+        colors.addLast(AwtParameters.getColorFromString(token));
       }
     } catch (NoSuchElementException nsee) {
       return null;

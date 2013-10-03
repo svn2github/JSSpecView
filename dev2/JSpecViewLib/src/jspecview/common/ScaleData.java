@@ -1,7 +1,9 @@
 package jspecview.common;
 
-import java.util.List;
+
 import java.util.Map;
+
+import org.jmol.util.JmolList;
 
 /**
  * Stores information
@@ -292,7 +294,7 @@ public class ScaleData {
 		firstX += dx;
 	}
 
-//  void setMinMaxY2D(List<JDXSpectrum> subspectra) {
+//  void setMinMaxY2D(JmolList<JDXSpectrum> subspectra) {
 //    minY2D = Double.MAX_VALUE;
 //    maxY2D = -Double.MAX_VALUE;
 //    for (int i = subspectra.size(); --i >= 0; ) {
@@ -429,7 +431,7 @@ public class ScaleData {
    * @param endIndices    to fill
    * @return true if OK
    */
-	static boolean setDataPointIndices(List<JDXSpectrum> graphsTemp,
+	static boolean setDataPointIndices(JmolList<JDXSpectrum> graphsTemp,
 			double initX, double finalX, int minPoints, int[] startIndices,
 			int[] endIndices) {
 		int nSpectraOK = 0;

@@ -20,8 +20,8 @@
 package jspecview.export;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.ArrayList;
+
+import org.jmol.util.JmolList;
 
 import jspecview.common.Coordinate;
 import jspecview.common.JDXSpectrum;
@@ -77,7 +77,7 @@ abstract class XMLExporter extends FormExporter {
   protected Coordinate[] xyCoords;
   protected int npoints;
 
-  protected List<Coordinate> newXYCoords = new ArrayList<Coordinate>();
+  protected JmolList<Coordinate> newXYCoords = new JmolList<Coordinate>();
 
   protected boolean setup(JDXSpectrum spec, String fileName, int startIndex,
                              int endIndex) {
@@ -98,7 +98,7 @@ abstract class XMLExporter extends FormExporter {
     xyCoords = spec.getXYCoords();
     npoints = endIndex - startIndex + 1;
     for (int i = startIndex; i <= endIndex; i++)
-      newXYCoords.add(xyCoords[i]);
+      newXYCoords.addLast(xyCoords[i]);
 
     title = spec.getTitle();
 
@@ -200,7 +200,7 @@ abstract class XMLExporter extends FormExporter {
     return -1;
   }
 
-  private void setParams(List<String[]> table) {
+  private void setParams(JmolList<String[]> table) {
     for (int i = 0; i < table.size(); i++) {
       String[] entry = table.get(i);
       String val = entry[1];

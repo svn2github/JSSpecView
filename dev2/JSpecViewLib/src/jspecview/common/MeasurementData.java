@@ -24,15 +24,15 @@
 
 package jspecview.common;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.jmol.util.JmolList;
+
 import java.util.Map;
 
 import org.jmol.util.TextFormat;
 
 import jspecview.common.Annotation.AType;
 
-class MeasurementData extends ArrayList<Measurement> implements AnnotationData {
+class MeasurementData extends JmolList<Measurement> implements AnnotationData {
 
 	private static final long serialVersionUID = 1L;
 
@@ -57,10 +57,10 @@ class MeasurementData extends ArrayList<Measurement> implements AnnotationData {
 		this.type = type;
 		this.spec = spec;
 	}
-	List<Measurement> getMeasurements() {
+	JmolList<Measurement> getMeasurements() {
 		return this;
 	}
-	void setMeasurements(@SuppressWarnings("unused") List<Measurement> measurements) {
+	void setMeasurements(@SuppressWarnings("unused") JmolList<Measurement> measurements) {
 		// won't happen
 	}
 

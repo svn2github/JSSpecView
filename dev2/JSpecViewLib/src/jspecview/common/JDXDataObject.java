@@ -839,8 +839,7 @@ public abstract class JDXDataObject extends JDXHeader {
 			return new Object[] { s1, s2, Integer.valueOf(0) };
 		case PeakList:
 			s1 = (isNMR ? new String[] { "Hz", "ppm" } : new String[] {""} );
-			s2 = (s1 == null ? null
-					: isHNMR() ? new int[] { 1, 2 } : new int[] { 1, 1 });
+			s2 = (isHNMR() ? new int[] { 1, 2 } : new int[] { 1, 1 });
 			return new Object[] { s1, s2, Integer.valueOf(isNMR ? 1 : 0) };
 		case NONE:
 		}

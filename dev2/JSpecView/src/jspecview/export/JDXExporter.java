@@ -24,8 +24,9 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.List;
 
+
+import org.jmol.util.JmolList;
 import org.jmol.util.SB;
 import org.jmol.util.TextFormat;
 
@@ -223,7 +224,7 @@ public class JDXExporter {
     buffer.append("##LONGDATE= ").append(longdate).append(TextFormat.newLine);
 
     // optional header
-    List<String[]> headerTable = spec.getHeaderTable();
+    JmolList<String[]> headerTable = spec.getHeaderTable();
     for (int i = 0; i < headerTable.size(); i++) {
       String[] entry = headerTable.get(i);
       String label = entry[0];

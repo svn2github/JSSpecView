@@ -4,11 +4,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.List;
+
 
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+
+import org.jmol.util.JmolList;
 
 import jspecview.common.AwtPopupMenu;
 import jspecview.common.JSVPanelNode;
@@ -162,7 +164,7 @@ class JSVAppletPopupMenu extends AwtPopupMenu {
     applet.showOverlayKey(visible);
   }
 
-	public void setCompoundMenu(List<JSVPanelNode> panelNodes,
+	public void setCompoundMenu(JmolList<JSVPanelNode> panelNodes,
 			boolean allowSelection) {
 		spectraMenuItem.setEnabled(allowSelection && panelNodes.size() > 1);		
 		spectraMenuItem.setEnabled(true);

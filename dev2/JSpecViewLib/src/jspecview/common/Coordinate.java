@@ -19,10 +19,10 @@
 
 package jspecview.common;
 
-import java.util.ArrayList;
+import org.jmol.util.JmolList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
+
 import java.util.StringTokenizer;
 
 import org.jmol.util.TextFormat;
@@ -215,7 +215,7 @@ public class Coordinate {
     Coordinate point;
     double xval = 0;
     double yval = 0;
-    ArrayList<Coordinate> xyCoords = new ArrayList<Coordinate>(1024);
+    JmolList<Coordinate> xyCoords = new JmolList<Coordinate>();
   
     String delim = " \t\n\r\f,;";
     StringTokenizer st = new StringTokenizer(dataPoints, delim);
@@ -228,7 +228,7 @@ public class Coordinate {
       xval = Double.parseDouble(tmp1);
       yval = Double.parseDouble(tmp2);
       point = new Coordinate((xval * xFactor), (yval * yFactor));
-      xyCoords.add(point);
+      xyCoords.addLast(point);
     }
     
     Coordinate[] coord = new Coordinate[xyCoords.size()];
@@ -369,7 +369,7 @@ public class Coordinate {
    * @return the minimum x value value from an array of arrays of
    *         <code>Coordinate</code>s
    */
-  public static double getMinX(List<JDXSpectrum> spectra, ViewData vd) {
+  public static double getMinX(JmolList<JDXSpectrum> spectra, ViewData vd) {
     double min = Double.MAX_VALUE;
     for (int i = 0; i < spectra.size(); i++) {
     	Coordinate[] xyCoords = spectra.get(i).getXYCoords();
@@ -409,7 +409,7 @@ public class Coordinate {
    * @return the maximum x value value from an array of arrays of
    *         <code>Coordinate</code>s
    */
-  public static double getMaxX(List<JDXSpectrum> spectra, ViewData vd) {
+  public static double getMaxX(JmolList<JDXSpectrum> spectra, ViewData vd) {
     double max = -Double.MAX_VALUE;
     for (int i = 0; i < spectra.size(); i++) {
     	Coordinate[] xyCoords = spectra.get(i).getXYCoords();
@@ -450,7 +450,7 @@ public class Coordinate {
    * @return the minimum y value value from an array of arrays of
    *         <code>Coordinate</code>s
    */
-  public static double getMinYUser(List<JDXSpectrum> spectra, ViewData vd) {
+  public static double getMinYUser(JmolList<JDXSpectrum> spectra, ViewData vd) {
     double min = Double.MAX_VALUE;
     for (int i = 0; i < spectra.size(); i++) {
       double u = spectra.get(i).getUserYFactor();
@@ -492,7 +492,7 @@ public class Coordinate {
    * @return the maximum y value value from an array of arrays of
    *         <code>Coordinate</code>s
    */
-  public static double getMaxYUser(List<JDXSpectrum> spectra, ViewData vd) {
+  public static double getMaxYUser(JmolList<JDXSpectrum> spectra, ViewData vd) {
     double max = -Double.MAX_VALUE;
     for (int i = 0; i < spectra.size(); i++) {
       double u = spectra.get(i).getUserYFactor();

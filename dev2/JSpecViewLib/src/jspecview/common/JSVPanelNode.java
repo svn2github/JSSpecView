@@ -3,9 +3,9 @@
  */
 package jspecview.common;
 
-import java.util.List;
 import java.util.Map;
 
+import org.jmol.util.JmolList;
 import org.jmol.util.SB;
 
 import jspecview.common.JSVDialog;
@@ -68,7 +68,7 @@ public class JSVPanelNode {
   public String toString() {
     return ((id == null ? "" : id + ": ") + (frameTitle == null ? fileName : frameTitle));
   }
-  public static JDXSource findSourceByNameOrId(String id, List<JSVPanelNode> panelNodes) {
+  public static JDXSource findSourceByNameOrId(String id, JmolList<JSVPanelNode> panelNodes) {
     for (int i = panelNodes.size(); --i >= 0;) {
       JSVPanelNode node = panelNodes.get(i);
       if (id.equals(node.id) || id.equalsIgnoreCase(node.source.getFilePath()))
@@ -83,7 +83,7 @@ public class JSVPanelNode {
     return null;
   }
   
-  static JSVPanelNode findNodeById(String id, List<JSVPanelNode> panelNodes) {
+  static JSVPanelNode findNodeById(String id, JmolList<JSVPanelNode> panelNodes) {
     for (int i = panelNodes.size(); --i >= 0;)
       if (id.equals(panelNodes.get(i).id))
         return panelNodes.get(i);
@@ -97,14 +97,14 @@ public class JSVPanelNode {
    * 
    * @return the tree node that is associated with a panel
    */
-  static JSVPanelNode findNode(JSVPanel jsvp, List<JSVPanelNode> panelNodes) {
+  static JSVPanelNode findNode(JSVPanel jsvp, JmolList<JSVPanelNode> panelNodes) {
     for (int i = panelNodes.size(); --i >= 0;)
       if (panelNodes.get(i).jsvp == jsvp)
         return panelNodes.get(i);
     return null;
   }
 
-	static String getSpectrumListAsString(List<JSVPanelNode> panelNodes) {
+	static String getSpectrumListAsString(JmolList<JSVPanelNode> panelNodes) {
       SB sb = new SB();
       for (int i = 0; i < panelNodes.size(); i++) {
       	String id = panelNodes.get(i).id;
@@ -113,16 +113,16 @@ public class JSVPanelNode {
       return sb.toString().trim();
   }
   
-//  static List<JDXSpectrum> getSpecList(List<JSVPanelNode> panelNodes) {
+//  static JmolList<JDXSpectrum> getSpecList(JmolList<JSVPanelNode> panelNodes) {
 //    if (panelNodes == null || panelNodes.size() == 0)
 //      return null;
-//    List<JDXSpectrum> specList = new ArrayList<JDXSpectrum>();
+//    JmolList<JDXSpectrum> specList = new JmolList<JDXSpectrum>();
 //    for (int i = 0; i < panelNodes.size(); i++)
 //      specList.add(panelNodes.get(i).getSpectrum());
 //    return specList;
 //  }
  
-  static boolean isOpen(List<JSVPanelNode> panelNodes, String filePath) {
+  static boolean isOpen(JmolList<JSVPanelNode> panelNodes, String filePath) {
     if (filePath != null)
       for (int i = panelNodes.size(); --i >= 0;) {
       	//System.out.println("JSVPanelNode " + filePath + " " + panelNodes.get(i).source.getFilePath());
@@ -133,7 +133,7 @@ public class JSVPanelNode {
     return false;
   }
   
-//  static int getNodeIndex(List<JSVPanelNode> panelNodes, JSVPanelNode node) {
+//  static int getNodeIndex(JmolList<JSVPanelNode> panelNodes, JSVPanelNode node) {
 //    for (int i = panelNodes.size(); --i >= 0;)
 //      if (node == panelNodes.get(i))
 //        return i;
@@ -143,7 +143,7 @@ public class JSVPanelNode {
 	void setFrameTitle(String name) {
 		frameTitle = name;
 	}
-	static JSVPanel getLastFileFirstNode(List<JSVPanelNode> panelNodes) {
+	static JSVPanel getLastFileFirstNode(JmolList<JSVPanelNode> panelNodes) {
 		int n = panelNodes.size();
 		JSVPanelNode node = (n == 0 ? null : panelNodes.get(n - 1));
 		// first in last file

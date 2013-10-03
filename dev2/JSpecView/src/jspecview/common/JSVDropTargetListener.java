@@ -8,11 +8,12 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.io.File;
-import java.util.List;
+
 
 import javax.swing.JOptionPane;
 
 import org.jmol.util.Escape;
+import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
 import org.jmol.util.SB;
 
@@ -80,8 +81,8 @@ public class JSVDropTargetListener implements DropTargetListener {
 				Logger.error("transfer failed");
 			}
 			// if o is still null we had an exception
-			if (o instanceof List) {
-				List<File> list = (List<File>) o;
+			if (o instanceof JmolList) {
+				JmolList<File> list = (JmolList<File>) o;
 				dtde.getDropTargetContext().dropComplete(true);
 				dtde = null;
 				SB sb = new SB();

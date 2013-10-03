@@ -1,7 +1,9 @@
 package jspecview.common;
 
 import java.net.URL;
-import java.util.List;
+
+import org.jmol.util.JmolList;
+
 
 import jspecview.common.JDXSpectrum.IRMode;
 import jspecview.source.JDXSource;
@@ -51,7 +53,7 @@ public interface ScriptInterface {
 	
 	public JSVPanel getNewJSVPanel(JDXSpectrum spec);
 
-	public JSVPanel getNewJSVPanel(List<JDXSpectrum> specs);
+	public JSVPanel getNewJSVPanel(JmolList<JDXSpectrum> specs);
 
 	public JSVPanelNode getNewPanelNode(String id, String fileName,
 			JDXSource source, JSVPanel jsvp);
@@ -60,7 +62,7 @@ public interface ScriptInterface {
 
 	public PanelData getPanelData();
 
-	public List<JSVPanelNode> getPanelNodes();
+	public JmolList<JSVPanelNode> getPanelNodes();
 
 	public Parameters getParameters();
 
@@ -76,7 +78,7 @@ public interface ScriptInterface {
 
 	public int incrementScriptLevelCount(int i);
 
-	public void openDataOrFile(String data, String name, List<JDXSpectrum> specs,
+	public void openDataOrFile(String data, String name, JmolList<JDXSpectrum> specs,
 			String url, int firstSpec, int lastSpec, boolean doCheck);
 
 	/**

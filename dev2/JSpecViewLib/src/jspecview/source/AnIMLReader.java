@@ -221,7 +221,7 @@ class AnIMLReader extends XMLReader {
     }
   }
 
-  private void getXValues() throws IOException {
+  private void getXValues() throws Exception {
     reader.nextTag();
     if (reader.getTagName().equals("autoincrementedvalueset")) {
       reader.nextTag();
@@ -242,14 +242,14 @@ class AnIMLReader extends XMLReader {
     lastX = xaxisData[npoints - 1];
   }
 
-  private void nextStartTag() throws IOException {
+  private void nextStartTag() throws Exception {
     reader.nextStartTag();
     while (reader.getTagType() == XmlReader.COMMENT) {
       reader.nextStartTag();
     }
   }
 
-  private void getYValues() throws IOException {
+  private void getYValues() throws Exception {
     String vectorType = reader.getAttrValueLC("type");
     if (vectorType.length() == 0)
       vectorType = reader.getAttrValueLC("vectorType");
@@ -286,7 +286,7 @@ class AnIMLReader extends XMLReader {
     firstY = yaxisData[0];
   }
 
-  private void processAuthor() throws IOException {
+  private void processAuthor() throws Exception {
     if (tagName.equals("name"))
       owner = reader.thisValue();
     else if (tagName.contains("location"))

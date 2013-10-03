@@ -47,9 +47,9 @@ import java.awt.dnd.DropTargetListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.net.URL;
-import java.util.List;
+
 import java.util.Map;
-import java.util.ArrayList;
+import org.jmol.util.JmolList;
 
 import javax.swing.JFrame;
 
@@ -118,7 +118,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	protected JSVApplet            jsvApplet;
 	private JFrame                 offWindowFrame;
 	private AwtOverlayLegendDialog overlayLegendDialog;
-  private List<JSVPanelNode>     panelNodes = new ArrayList<JSVPanelNode>();  
+  private JmolList<JSVPanelNode>     panelNodes = new JmolList<JSVPanelNode>();  
 	private AwtParameters          parameters = new AwtParameters("applet");
 	private RepaintManager         repaintManager;
 	private JSVPanel               selectedPanel;
@@ -206,7 +206,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		loadImaginary = TF;
 	}
 
-	public List<JSVPanelNode> getPanelNodes() {
+	public JmolList<JSVPanelNode> getPanelNodes() {
 		return panelNodes;
 	}
 	
@@ -442,7 +442,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	private void init() {
 
 		spectraTree = new JSVTree(this);
-		scriptQueue = new ArrayList<String>();
+		scriptQueue = new JmolList<String>();
 		commandWatcherThread = new Thread(new CommandWatcher());
 		commandWatcherThread.setName("CommmandWatcherThread");
 		commandWatcherThread.start();
@@ -733,7 +733,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 
 	// for the signed applet to load a remote file, it must
 	// be using a thread started by the initiating thread;
-	List<String> scriptQueue;
+	JmolList<String> scriptQueue;
 
 	class CommandWatcher implements Runnable {
 		public void run() {
@@ -770,7 +770,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	 * commandWatcherThread.interrupt(); }
 	 */
 	public void openDataOrFile(String data, String name,
-			List<JDXSpectrum> specs, String url, int firstSpec, int lastSpec, boolean isAppend) {
+			JmolList<JDXSpectrum> specs, String url, int firstSpec, int lastSpec, boolean isAppend) {
   	int status = JSVTree.openDataOrFile(this, data, name, specs, url, firstSpec, lastSpec, isAppend);
   	if (status == JSVTree.FILE_OPEN_ALREADY)
   		return;
@@ -873,7 +873,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		if (scriptQueue == null)
 			processCommand(script);
 		else
-			scriptQueue.add(script);
+			scriptQueue.addLast(script);
 	}
 
 	public String execExport(JSVPanel jsvp, String value) {
@@ -1006,7 +1006,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
   	JSVTree.closeSource(this, source);
 	}
 
-	public void process(List<JDXSpectrum> specs) {
+	public void process(JmolList<JDXSpectrum> specs) {
     JDXSpectrum.process(specs, irMode);
 	}
 	
@@ -1029,7 +1029,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 				obscureTitleFromUser == Boolean.TRUE, loadImaginary, -1, -1);
 	}
 
-	public JSVPanel getNewJSVPanel(List<JDXSpectrum> specs) {
+	public JSVPanel getNewJSVPanel(JmolList<JDXSpectrum> specs) {
 		JSVPanel jsvp = AwtPanel.getJSVPanel(this, specs, initialStartIndex, initialEndIndex, appletPopupMenu);
 		initialEndIndex = initialStartIndex = -1;
 		jsvp.getPanelData().addListener(this);
@@ -1042,8 +1042,8 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 			initialEndIndex = initialStartIndex = -1;
 			return null;
 		}
-		List<JDXSpectrum> specs = new ArrayList<JDXSpectrum>();
-		specs.add(spec);
+		JmolList<JDXSpectrum> specs = new JmolList<JDXSpectrum>();
+		specs.addLast(spec);
 		JSVPanel jsvp = AwtPanel.getJSVPanel(this, specs, initialStartIndex, initialEndIndex, appletPopupMenu);
 		jsvp.getPanelData().addListener(this);
 		parameters.setFor(jsvp, null, true);
