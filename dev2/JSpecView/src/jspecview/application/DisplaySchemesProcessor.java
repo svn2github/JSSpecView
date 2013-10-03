@@ -35,7 +35,7 @@ import jspecview.common.Parameters;
 import jspecview.common.ScriptToken;
 import jspecview.util.JSVFileManager;
 import jspecview.util.JSVTxt;
-import jspecview.util.XmlReader;
+import jspecview.util.JXVXmlReader;
 
 /**
  * <code>DisplaySchemesProcessor</code> loads and saves the display schemes of
@@ -53,7 +53,7 @@ public class DisplaySchemesProcessor {
   /** The list of displaySchemes that is loaded from file */
   private TreeMap<String, Parameters> displaySchemes;
 
-  private XmlReader reader;
+  private JXVXmlReader reader;
 
   /**
    * Initialises the <code>DisplaySchemesProcessor</code>
@@ -145,13 +145,13 @@ public class DisplaySchemesProcessor {
    */
   public boolean load(BufferedReader br) throws Exception {
 
-    reader = new XmlReader(br);
+    reader = new JXVXmlReader(br);
     String defaultDS = "Default";
     Parameters ds = null;
     String attr;
     try {
       while (reader.hasNext()) {
-        if (reader.nextEvent() != XmlReader.START_ELEMENT)
+        if (reader.nextEvent() != JXVXmlReader.START_ELEMENT)
           continue;
         String theTag = reader.getTagName();
         if (theTag.equals("displayschemes")) {
