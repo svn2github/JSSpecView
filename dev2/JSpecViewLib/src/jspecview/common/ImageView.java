@@ -4,7 +4,7 @@ package jspecview.common;
 
 import org.jmol.util.JmolList;
 
-class ImageView implements XYScaleConverter {
+public class ImageView implements XYScaleConverter {
   
   /*
    * The viewPort is related to two coordinate systems, image and screen.
@@ -46,14 +46,16 @@ class ImageView implements XYScaleConverter {
   private double grayFactorLast;
 	private double averageGray;
 
-	int xPixel0, yPixel0, xPixel1, yPixel1;
-  int imageWidth, imageHeight, xPixels, yPixels;
-  int xPixelZoom1, yPixelZoom1, xPixelZoom2, yPixelZoom2;
-  int xView1, yView1, xView2, yView2;
-  double minX = Double.NaN, maxX, minY, maxY, minZ, maxZ;
+	public int xPixel0;
+	public int yPixel0, xPixel1, yPixel1;
+	public int imageWidth, imageHeight, xPixels, yPixels;
+	public int xPixelZoom1, yPixelZoom1, xPixelZoom2, yPixelZoom2;
+	public int xView1, yView1, xView2, yView2;
+	public double minX = Double.NaN, maxX, minY, maxY, minZ, maxZ;
+	
 	private ScaleData scaleData; // for paper Y axis
   
-  void set(ScaleData view) {
+	public void set(ScaleData view) {
     if (Double.isNaN(minX)) {
       minX = view.minX;
       maxX = view.maxX;
@@ -64,7 +66,7 @@ class ImageView implements XYScaleConverter {
     scaleData = new ScaleData();
   }
 
-  void setZoom(int xPixel1, int yPixel1, int xPixel2, int yPixel2) {
+	public void setZoom(int xPixel1, int yPixel1, int xPixel2, int yPixel2) {
     xPixelZoom1 = Math.min(xPixel1, xPixel2);
     yPixelZoom1 = Math.min(yPixel1, yPixel2);
     xPixelZoom2 = Math.max(xPixel1, xPixel2);
@@ -72,7 +74,7 @@ class ImageView implements XYScaleConverter {
     setView();
   }
   
-  void setXY0(JDXSpectrum spec, int xPixel, int yPixel) {
+	public void setXY0(JDXSpectrum spec, int xPixel, int yPixel) {
     xPixel0 = xPixel;
     yPixel0 = yPixel;
     xPixel1 = xPixel0 + xPixels - 1;
@@ -80,19 +82,19 @@ class ImageView implements XYScaleConverter {
     setMinMaxY(spec);
   }
  
-  void setPixelWidthHeight (int xPixels, int yPixels) {
+	public void setPixelWidthHeight (int xPixels, int yPixels) {
     this.xPixels = xPixels;
     this.yPixels = yPixels;
   }
   
-  void resetView() {
+	public void resetView() {
     xView1 = 0;
     yView1 = 0;
     xView2 = imageWidth - 1;
     yView2 = imageHeight - 1;
   }
   
-  void setView() {
+	public void setView() {
     if (xPixelZoom1 == 0)
       resetZoom();
     int x1 = toImageX(xPixelZoom1);    
@@ -107,56 +109,56 @@ class ImageView implements XYScaleConverter {
     resetZoom();
   }
 
-  void resetZoom() {
+	public void resetZoom() {
     xPixelZoom1 = xPixel0;
     yPixelZoom1 = yPixel0;
     xPixelZoom2 = xPixel1;
     yPixelZoom2 = yPixel1;
   }
 
-  int toImageX(int xPixel) {
+	public int toImageX(int xPixel) {
     return xView1 + (int) Math.floor((xPixel - xPixel0) / (xPixels - 1.0) * (xView2 - xView1));
   }
 
-  int toImageY(int yPixel) {
+	public int toImageY(int yPixel) {
     return yView1 + (int) Math.floor((yPixel - yPixel0) / (yPixels - 1.0) * (yView2 - yView1));
   }
 
-  int toImageX0(int xPixel) {
+	public int toImageX0(int xPixel) {
     return Coordinate.intoRange((int) ((1.0 * xPixel - xPixel0) / (xPixels - 1) * (imageWidth - 1)), 0, imageWidth - 1);
   }
 
-  int toImageY0(int yPixel) {
+	public int toImageY0(int yPixel) {
     return Coordinate.intoRange((int) ((1.0 * yPixel - yPixel0) / (yPixels - 1) * (imageHeight - 1)), 0, imageHeight - 1);
   }
 
-  boolean isXWithinRange(int xPixel) {
+	public boolean isXWithinRange(int xPixel) {
     return (xPixel >= xPixel0 - 5 && xPixel < xPixel0 + xPixels + 5);
   }
 
-  int toSubspectrumIndex(int yPixel) {
+	public int toSubspectrumIndex(int yPixel) {
     return Coordinate.intoRange(imageHeight - 1 - toImageY(yPixel), 0, imageHeight - 1);
   }
 
   
-  double toX0(int xPixel) {
+	public double toX0(int xPixel) {
     return maxX + (minX - maxX) * (fixX(xPixel) - xPixel0) / (xPixels - 1);
   }
   
-  int toPixelX0(double x) {
+	public int toPixelX0(double x) {
     //TODO -- assumes reverse axis
     return xPixel1 - (int) ((x - minX) / (maxX - minX) * (xPixels - 1));
   }
   
-  int toPixelY0(double ysub) {
+	public int toPixelY0(double ysub) {
     return yPixel1 - (int) (ysub / (imageHeight - 1) * (yPixels - 1));
   }
 
-  int toPixelX(int imageX) {
+	public int toPixelX(int imageX) {
     return xPixel0 + (int) ((xPixels - 1) *(1 - 1.0 *  imageX / (imageWidth - 1))); 
   }
 
-  int toPixelY(int subIndex) {
+	public int toPixelY(int subIndex) {
     // yView2 > yView1, but these are imageHeight - 1 - subIndex
     
     double f = 1.0 * (imageHeight - 1 - subIndex - yView1) / (yView2 - yView1);
@@ -164,7 +166,7 @@ class ImageView implements XYScaleConverter {
     return y; 
   }
 
-  int fixSubIndex(int subIndex) {
+	public int fixSubIndex(int subIndex) {
     return Coordinate.intoRange(subIndex, imageHeight - 1 - yView2, imageHeight - 1 - yView1);
   }
 
@@ -182,7 +184,7 @@ class ImageView implements XYScaleConverter {
     return xPixel0 + (int) ((x - x0) / (x1 - x0) * (xPixels - 1));
   }
   
-  void setView0(int xp1, int yp1, int xp2, int yp2) {
+  public void setView0(int xp1, int yp1, int xp2, int yp2) {
     int x1 = toImageX0(xp1);
     int y1 = toImageY0(yp1);
     int x2 = toImageX0(xp2);
@@ -200,7 +202,7 @@ class ImageView implements XYScaleConverter {
    * @param forceNew 
    * @return image buffer
    */
-  synchronized int[] get2dBuffer(JDXSpectrum spec, boolean forceNew) {
+  public synchronized int[] get2dBuffer(JDXSpectrum spec, boolean forceNew) {
     JmolList<JDXSpectrum> subSpectra = spec.getSubSpectra();
     if (subSpectra == null || !subSpectra.get(0).isContinuous())
       return null;
@@ -235,7 +237,7 @@ class ImageView implements XYScaleConverter {
   private static final double DEFAULT_MIN_GRAY = 0.05;
 	private static final double DEFAULT_MAX_GRAY = 0.30;
 	
-	int[] adjustView (JDXSpectrum spec, ViewData view) {
+	public int[] adjustView (JDXSpectrum spec, ViewData view) {
   	//double minGray = 0.05;
   	//double maxGray = 0.20;
   	int i = 0;
@@ -248,7 +250,7 @@ class ImageView implements XYScaleConverter {
   	return buf2d;
   }
 
-	void setMinMaxY(JDXSpectrum spec) {
+	public void setMinMaxY(JDXSpectrum spec) {
     JmolList<JDXSpectrum> subSpectra = spec.getSubSpectra();
     JDXSpectrum spec0 = subSpectra.get(0); 
     maxY = spec0.getY2D();

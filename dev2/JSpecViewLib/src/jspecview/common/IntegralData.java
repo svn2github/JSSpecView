@@ -434,7 +434,7 @@ public class IntegralData extends MeasurementData {
 		super.getInfo(info);
 	}
 
-	void setMinimumIntegral(double val) {
+	public void setMinimumIntegral(double val) {
 		for (int i = size(); --i >= 0;)
 			if (get(i).getValue() < val)
 				remove(i);

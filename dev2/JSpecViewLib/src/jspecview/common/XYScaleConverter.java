@@ -1,6 +1,6 @@
 package jspecview.common;
 
-interface XYScaleConverter {
+public interface XYScaleConverter {
 	
   int fixX(int xPixel);
   double toX(int xPixel);  

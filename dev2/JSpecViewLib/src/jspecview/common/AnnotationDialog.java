@@ -1,6 +1,6 @@
 package jspecview.common;
 
-abstract interface AnnotationDialog extends AnnotationData {
+public abstract interface AnnotationDialog extends AnnotationData {
 
 	void setData(AnnotationData xyData);
 	void setVisible(boolean b);

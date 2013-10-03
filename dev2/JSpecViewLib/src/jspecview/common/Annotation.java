@@ -33,7 +33,7 @@ package jspecview.common;
  * @author Prof Robert J. Lancashire
  * @author Bob Hanson hansonr@stolaf.edu
  */
-class Annotation extends Coordinate {
+public class Annotation extends Coordinate {
   protected String text = "";
   protected boolean isPixels;
   boolean is2D;
@@ -41,7 +41,7 @@ class Annotation extends Coordinate {
   int offsetY;
   JDXSpectrum spec;
   
-  enum AType { Integration, PeakList, Measurements, NONE }
+  public enum AType { Integration, PeakList, Measurements, NONE }
   
   /**
    * Constructor -- note that x is spectral X value, but y is pixels above
@@ -56,7 +56,7 @@ class Annotation extends Coordinate {
    * @param offsetY 
    * 
    */
-  Annotation(JDXSpectrum spec, double x, double y, String text, boolean isPixels, boolean is2D, int offsetX, int offsetY) {
+  protected Annotation(JDXSpectrum spec, double x, double y, String text, boolean isPixels, boolean is2D, int offsetX, int offsetY) {
     super(x, y);
     this.spec = spec;
     this.text = text;
@@ -75,7 +75,7 @@ class Annotation extends Coordinate {
 		setXVal(getXVal() + dx);
 	}
 	
-  String getText() {
+  protected String getText() {
     return text;
   }
 

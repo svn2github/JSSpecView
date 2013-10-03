@@ -44,6 +44,8 @@ import java.util.Map.Entry;
 
 import jspecview.common.Annotation.AType;
 
+import org.jmol.api.Event;
+import org.jmol.api.EventManager;
 import org.jmol.util.JmolList;
 
 /**
@@ -57,9 +59,9 @@ import org.jmol.util.JmolList;
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-public class PanelData {
+public class PanelData implements EventManager {
 
-	PanelData(JSVPanel owner) {
+	public PanelData(JSVPanel owner) {
 		this.owner = owner;
 	}
 
@@ -75,19 +77,19 @@ public class PanelData {
 
 	private GraphSet currentGraphSet;
 
-	GraphSet getCurrentGraphSet() {
+	public GraphSet getCurrentGraphSet() {
 		return currentGraphSet;
 	}
 
-	Hashtable<ScriptToken, Object> options = new Hashtable<ScriptToken, Object>();
-	JSVPanel owner;
-	JmolList<GraphSet> graphSets;
-	int currentSplitPoint;
-	PlotWidget thisWidget;
-	Coordinate coordClicked;
-	Coordinate[] coordsClicked;
+	public Hashtable<ScriptToken, Object> options = new Hashtable<ScriptToken, Object>();
+	public JSVPanel owner;
+	public JmolList<GraphSet> graphSets;
+	public int currentSplitPoint;
+	public PlotWidget thisWidget;
+	public Coordinate coordClicked;
+	public Coordinate[] coordsClicked;
 
-	void dispose() {
+	public void dispose() {
 		owner = null;
 		for (int i = 0; i < graphSets.size(); i++)
 			graphSets.get(i).dispose();
@@ -102,28 +104,28 @@ public class PanelData {
 
 	// plot parameters
 
-	static final int defaultPrintHeight = 450, defaultPrintWidth = 280;
-	static final int topMargin = 40, bottomMargin = 50, leftMargin = 60,
+	public static final int defaultPrintHeight = 450, defaultPrintWidth = 280;
+	public static final int topMargin = 40, bottomMargin = 50, leftMargin = 60,
 			rightMargin = 50;
 
-	boolean ctrlPressed;
-	boolean shiftPressed;
-	boolean drawXAxisLeftToRight;
-	boolean isIntegralDrag;
-	boolean xAxisLeftToRight = true;
+	public boolean ctrlPressed;
+	public boolean shiftPressed;
+	public boolean drawXAxisLeftToRight;
+	public boolean isIntegralDrag;
+	public boolean xAxisLeftToRight = true;
 
-	int scalingFactor = 1;  // will be 10 for printing
-	int integralShiftMode;
-	int left = leftMargin;
-	int right = rightMargin;
+	public int scalingFactor = 1;  // will be 10 for printing
+	public int integralShiftMode;
+	public int left = leftMargin;
+	public int right = rightMargin;
 
-	String coordStr = "";
-	String startupPinTip = "Click to set.";
-	String title;
+	public String coordStr = "";
+	public String startupPinTip = "Click to set.";
+	public String title;
 	
 	private int clickCount;
 	private int nSpectra;
-	int thisWidth;
+	public int thisWidth;
 	private int thisHeight;
 	private int startIndex, endIndex;
 
@@ -132,15 +134,15 @@ public class PanelData {
 	private String viewTitle;
 
 
-	void setViewTitle(String title) {
+	public void setViewTitle(String title) {
 		viewTitle = title;
 	}
 
-	String getViewTitle() {
+	public String getViewTitle() {
 		return (viewTitle == null ? getTitle() : viewTitle);
 	}
 
-	Map<String, Object> getInfo(boolean selectedOnly, String key) {
+	public Map<String, Object> getInfo(boolean selectedOnly, String key) {
 		Map<String, Object> info = new Hashtable<String, Object>();
 		JmolList<Map<String, Object>> sets = null;
 		if (selectedOnly)
@@ -158,7 +160,7 @@ public class PanelData {
 		return info;
 	}
 
-	void setBoolean(Parameters parameters, ScriptToken st) {
+	public void setBoolean(Parameters parameters, ScriptToken st) {
 		if (st == null) {
 			Map<ScriptToken, Boolean> booleans = parameters.getBooleans();
 			for (Map.Entry<ScriptToken, Boolean> entry : booleans.entrySet())
@@ -198,7 +200,7 @@ public class PanelData {
 	private String titleFontName;
 
 	@SuppressWarnings("incomplete-switch")
-	void setFontName(ScriptToken st, String fontName) {
+	public void setFontName(ScriptToken st, String fontName) {
 		switch (st) {
 		case DISPLAYFONTNAME:
 			displayFontName = fontName;
@@ -213,16 +215,16 @@ public class PanelData {
 
 	// ///////// print parameters ///////////
 
-	boolean isPrinting;
+	public boolean isPrinting;
 	
 	private boolean doReset = true;
 	
-	String printingFont;
-	String printGraphPosition = "default";
-	boolean titleDrawn;
-	boolean display1D;
-	boolean isLinked;
-	String printJobTitle;
+	public String printingFont;
+	public String printGraphPosition = "default";
+	public boolean titleDrawn;
+	public boolean display1D;
+	public boolean isLinked;
+	public String printJobTitle;
 
 	public boolean getDisplay1D() {
 		return display1D;
@@ -230,19 +232,19 @@ public class PanelData {
 
 	// //// initialization - from AwtPanel
 
-	JmolList<JDXSpectrum> spectra;
+	public JmolList<JDXSpectrum> spectra;
 	
-	void initSingleSpectrum(JDXSpectrum spectrum) {
+	public void initSingleSpectrum(JDXSpectrum spectrum) {
 		spectra = new JmolList<JDXSpectrum>();
 		spectra.addLast(spectrum);
 		initJSVPanel(spectra, 0, 0);
 	}
 
-	enum LinkMode {	
+	public enum LinkMode {	
 		
 		ALL, NONE, AB, ABC;
 		
-		static LinkMode getMode(String abc) {
+		public static LinkMode getMode(String abc) {
 			if (abc.equals("*"))
 				return ALL;
 			for (LinkMode mode : values())
@@ -252,7 +254,7 @@ public class PanelData {
 		}    
 	}
 		
-	void initJSVPanel(JmolList<JDXSpectrum> spectra, int startIndex, int endIndex) {
+	public void initJSVPanel(JmolList<JDXSpectrum> spectra, int startIndex, int endIndex) {
 		this.startIndex = startIndex;
 		this.endIndex = endIndex;
 		owner.setupPlatform();
@@ -273,7 +275,7 @@ public class PanelData {
 		title = getSpectrum().getTitleLabel();
 	}
 
-	PeakInfo findMatchingPeakInfo(PeakInfo pi) {
+	public PeakInfo findMatchingPeakInfo(PeakInfo pi) {
 		PeakInfo pi2 = null;
 		for (int i = 0; i < graphSets.size(); i++)
 			if ((pi2 = graphSets.get(i).findMatchingPeakInfo(pi)) != null)
@@ -300,26 +302,26 @@ public class PanelData {
 	 * 
 	 * @return the title displayed on the graph
 	 */
-	String getTitle() {
+	public String getTitle() {
 		return title;
 	}
 
-	void refresh() {
+	public void refresh() {
 		doReset = true;
 	}
 
-	void addAnnotation(JmolList<String> tokens) {
+	public void addAnnotation(JmolList<String> tokens) {
 		String title = currentGraphSet.addAnnotation(tokens, getTitle());
 		if (title != null)
 			this.title = title;
 	}
 
-	void addPeakHighlight(PeakInfo peakInfo) {
+	public void addPeakHighlight(PeakInfo peakInfo) {
 		for (int i = 0; i < graphSets.size(); i++)
 			graphSets.get(i).addPeakHighlight(peakInfo);
 	}
 
-	PeakInfo selectPeakByFileIndex(String filePath, String index) {
+	public PeakInfo selectPeakByFileIndex(String filePath, String index) {
 		PeakInfo pi = currentGraphSet.selectPeakByFileIndex(filePath, index);
 		if (pi == null)
 			for (int i = graphSets.size(); --i >= 0;)
@@ -329,7 +331,7 @@ public class PanelData {
 		return pi;
 	}
 
-	void selectSpectrum(String filePath, String type, String model,
+	public void selectSpectrum(String filePath, String type, String model,
 			boolean andCurrent) {
 		if (andCurrent)
 			currentGraphSet.selectSpectrum(filePath, type, model);
@@ -338,7 +340,7 @@ public class PanelData {
 				graphSets.get(i).selectSpectrum(filePath, type, model);
 	}
 
-	boolean hasFileLoaded(String filePath) {
+	public boolean hasFileLoaded(String filePath) {
 		for (int i = graphSets.size(); --i >= 0;)
 			if (graphSets.get(i).hasFileLoaded(filePath))
 				return true;
@@ -348,7 +350,7 @@ public class PanelData {
 	/**
 	 * Clears all views in the zoom list
 	 */
-	void clearAllView() {
+	public void clearAllView() {
 		for (int i = graphSets.size(); --i >= 0;)
 			graphSets.get(i).clearAllViews();
 	}
@@ -365,7 +367,7 @@ public class PanelData {
 	 *          the height to be drawn in pixels
 	 * @param addFilePath
 	 */
-	synchronized void drawGraph(Object g, int width, int height,
+	public synchronized void drawGraph(Object g, int width, int height,
 			boolean addFilePath) {
 		boolean withCoords;
 		display1D = !isLinked && getBoolean(ScriptToken.DISPLAY1D);
@@ -413,7 +415,7 @@ public class PanelData {
 	 * 
 	 * @param iSpec
 	 */
-	void selectFromEntireSet(int iSpec) {
+	public void selectFromEntireSet(int iSpec) {
 		// note that iSpec is over the entire set
 		for (int i = 0, pt = 0; i < graphSets.size(); i++) {
 			if (iSpec == Integer.MIN_VALUE) {
@@ -427,13 +429,13 @@ public class PanelData {
 		}
 	}
 
-  void addToList(int iSpec, JmolList<JDXSpectrum> list) {
+	public void addToList(int iSpec, JmolList<JDXSpectrum> list) {
 		for (int i = 0; i < spectra.size(); i++)
 			if (iSpec < 0 || i == iSpec)
 				list.addLast(spectra.get(i));
 	}
 	
-	void scaleSelectedBy(double f) {
+	public void scaleSelectedBy(double f) {
 		for (int i = graphSets.size(); --i >= 0;)
 			graphSets.get(i).scaleSelectedBy(f);
 
@@ -441,7 +443,7 @@ public class PanelData {
 
 	// //// currentGraphSet methods
 
-	void setCurrentGraphSet(GraphSet gs, int yPixel, int clickCount) {
+	public void setCurrentGraphSet(GraphSet gs, int yPixel, int clickCount) {
 		int splitPoint = gs.getSplitPoint(yPixel);
 		boolean isNewSet = (currentGraphSet != gs);
 		boolean isNewSplitPoint = (isNewSet || currentSplitPoint != splitPoint);
@@ -465,7 +467,7 @@ public class PanelData {
 		notifySubSpectrumChange(spec.getSubIndex(), spec);
 	}
 
-	void splitStack(boolean doSplit) {
+	public void splitStack(boolean doSplit) {
 		currentGraphSet.splitStack(graphSets, doSplit);
 	}
 
@@ -485,23 +487,23 @@ public class PanelData {
 		return currentGraphSet.getSolutionColor();
 	}
 
-	boolean haveSelectedSpectrum() {
+	public boolean haveSelectedSpectrum() {
 		return currentGraphSet.haveSelectedSpectrum();
 	}
 
-	boolean getShowAnnotation(AType type) {
+	public boolean getShowAnnotation(AType type) {
 		return currentGraphSet.getShowAnnotation(type, -1);
 	}
 
-	void showAnnotation(AType type, Boolean tfToggle) {
+	public void showAnnotation(AType type, Boolean tfToggle) {
 		currentGraphSet.setShowAnnotation(type, tfToggle);
 	}
 
-	void setYStackOffsetPercent(int offset) {
+	public void setYStackOffsetPercent(int offset) {
 		currentGraphSet.yStackOffsetPercent = offset;
 	}
 
-	void setSpectrum(int iSpec, boolean isSplit) {
+	public void setSpectrum(int iSpec, boolean isSplit) {
 		currentGraphSet.setSpectrum(iSpec, isSplit);
 		// repaint();
 	}
@@ -510,15 +512,15 @@ public class PanelData {
 		return currentGraphSet.getSpectrum();
 	}
 
-	void setSpectrum(JDXSpectrum spec) {
+	public void setSpectrum(JDXSpectrum spec) {
 		JDXSpectrum spec0 = currentGraphSet.getSpectrum();
-		currentGraphSet.setSpectrum(spec);
+		currentGraphSet.setSpectrumJDX(spec);
 		for (int i = 0; i < spectra.size(); i++)
 			if (spectra.get(i) == spec0)
 				spectra.set(i, spec);
 	}
 
-  boolean isShowAllStacked() {
+	public boolean isShowAllStacked() {
 		return currentGraphSet.showAllStacked;
 	}
 
@@ -546,7 +548,7 @@ public class PanelData {
 	 * @param b
 	 * @param g
 	 */
-	void addHighlight(GraphSet gs, double x1, double x2, JDXSpectrum spec,
+	public void addHighlight(GraphSet gs, double x1, double x2, JDXSpectrum spec,
 			int r, int g, int b, int a) {
 		(gs == null ? currentGraphSet : gs).addHighlight(x1, x2, spec, owner
 				.getColor(r, g, b, a));
@@ -560,14 +562,14 @@ public class PanelData {
 	 * @param x2
 	 *          the x value of the coordinate where the highlight ended
 	 */
-	void removeHighlight(double x1, double x2) {
+	public void removeHighlight(double x1, double x2) {
 		currentGraphSet.removeHighlight(x1, x2);
 	}
 
 	/**
 	 * Removes all highlights from the display
 	 */
-	void removeAllHighlights() {
+	public void removeAllHighlights() {
 		currentGraphSet.removeAllHighlights();
 	}
 
@@ -580,45 +582,45 @@ public class PanelData {
 	/**
 	 * Resets the spectrum to it's original view
 	 */
-	void resetView() {
+	public void resetView() {
 		currentGraphSet.resetView();
 	}
 
 	/**
 	 * Displays the previous view zoomed
 	 */
-	void previousView() {
+	public void previousView() {
 		currentGraphSet.previousView();
 	}
 
 	/**
 	 * Displays the next view zoomed
 	 */
-	void nextView() {
+	public void nextView() {
 		currentGraphSet.nextView();
 	}
 
-	Integral getSelectedIntegral() {
+	public Integral getSelectedIntegral() {
 		return currentGraphSet.getSelectedIntegral();
 	}
 
-	void advanceSubSpectrum(int dir) {
+	public void advanceSubSpectrum(int dir) {
 		currentGraphSet.advanceSubSpectrum(dir);
 	}
 
-	void setSelectedIntegral(double val) {
+	public void setSelectedIntegral(double val) {
 		currentGraphSet.setSelectedIntegral(val);
 	}
 
-	void scaleYBy(double f) {
+	public void scaleYBy(double f) {
 		currentGraphSet.scaleYBy(f);
 	}
 
-	void toPeak(int i) {
+	public void toPeak(int i) {
 		currentGraphSet.toPeak(i);
 	}
 
-	String getSolutionColorHtml() {
+	public String getSolutionColorHtml() {
 		String color = currentGraphSet.getSolutionColor();
 		return "<html><body bgcolor=rgb(" + color
 				+ ")><br />Predicted Solution Colour- RGB(" + color
@@ -634,7 +636,7 @@ public class PanelData {
 	 * @return the spectrum coordinate of the point on the display that was
 	 *         clicked
 	 */
-	Coordinate getClickedCoordinate() {
+	public Coordinate getClickedCoordinate() {
 		return coordClicked;
 	}
 
@@ -659,17 +661,17 @@ public class PanelData {
 	 *          NaN to query for new value
 	 * @return true if successful
 	 */
-	boolean shiftSpectrum(double dx, double x1) {
+	public boolean shiftSpectrum(double dx, double x1) {
 		return currentGraphSet.shiftSpectrum(dx, x1);
 
 	}
 
-	void findX(JDXSpectrum spec, double d) {
+	public void findX(JDXSpectrum spec, double d) {
 		currentGraphSet.setXPointer(spec, d);
 		// repaint();
 	}
 
-	void findX2(JDXSpectrum spec, double d, JDXSpectrum spec2, double d2) {
+	public void findX2(JDXSpectrum spec, double d, JDXSpectrum spec2, double d2) {
 		currentGraphSet.setXPointer(spec, d);
 		currentGraphSet.setXPointer2(spec2, d2);
 		// repaint();
@@ -677,23 +679,23 @@ public class PanelData {
 
 	// called by GraphSet
 
-	boolean isCurrentGraphSet(GraphSet graphSet) {
+	public boolean isCurrentGraphSet(GraphSet graphSet) {
 		return graphSet == currentGraphSet;
 	}
 
-	void repaint() {
+	public void repaint() {
 		owner.doRepaint();
 	}
 
-	void setToolTipText(String s) {
+	public void setToolTipText(String s) {
 		owner.setToolTipText(s);
 	}
 
-	Object getHighlightColor() {
+	public Object getHighlightColor() {
 		return owner.getColor(ScriptToken.HIGHLIGHTCOLOR);
 	}
 
-	void setHighlightColor(Object color) {
+	public void setHighlightColor(Object color) {
 		owner.setColor(ScriptToken.HIGHLIGHTCOLOR, color);
 	}
 
@@ -701,7 +703,7 @@ public class PanelData {
 		return owner.getInput(message, title, sval);
 	}
 
-	void setFont(Object g, int width, int mode, int size, boolean isLabel) {
+	public void setFont(Object g, int width, int mode, int size, boolean isLabel) {
 		owner.setFont(g, (isPrinting ? printingFont : displayFontName), width,
 				mode, size * scalingFactor, isLabel);
 	}
@@ -716,7 +718,7 @@ public class PanelData {
 	 * @param spec
 	 *          null indicates no subspectra
 	 */
-	void notifySubSpectrumChange(int isub, JDXSpectrum spec) {
+	public void notifySubSpectrumChange(int isub, JDXSpectrum spec) {
 		notifyListeners(new SubSpecChangeEvent(isub, (spec == null ? null : spec
 				.getTitleLabel())));
 	}
@@ -727,7 +729,7 @@ public class PanelData {
 	 * @param p
 	 * 
 	 */
-	void notifyPeakPickedListeners(PeakPickEvent p) {
+	public void notifyPeakPickedListeners(PeakPickEvent p) {
 		if (p == null) {
 			p = new PeakPickEvent(owner, coordClicked, getSpectrum()
 					.getAssociatedPeakInfo(xPixelClicked, coordClicked));
@@ -755,7 +757,7 @@ public class PanelData {
 		notifyListeners(p);
 	}
 
-	void notifyListeners(Object eventObj) {
+	public void notifyListeners(Object eventObj) {
 		for (int i = 0; i < listeners.size(); i++)
 			if (listeners.get(i) != null)
 				listeners.get(i).panelEvent(eventObj);
@@ -763,7 +765,7 @@ public class PanelData {
 
 	/*--------------the rest are all mouse and keyboard interface -----------------------*/
 
-	void escapeKeyPressed(boolean isDEL) {
+	public void escapeKeyPressed(boolean isDEL) {
 		currentGraphSet.escapeKeyPressed(isDEL);
 	}
 
@@ -772,20 +774,20 @@ public class PanelData {
 	}
 
 	private Mouse mouseState;
-	boolean gridOn;
-	boolean titleOn;
+	public boolean gridOn;
+	public boolean titleOn;
 
-	boolean hasFocus() {
+	public boolean hasFocus() {
 		return owner.hasFocus();
 	}
 
-	boolean isMouseUp() {
+	public boolean isMouseUp() {
 		return (mouseState == PanelData.Mouse.UP);
 	}
 
-	int mouseX, mouseY;
+	public int mouseX, mouseY;
 
-	void doMouseMoved(int xPixel, int yPixel) {
+	public void doMouseMoved(int xPixel, int yPixel) {
 		mouseX = xPixel;
 		mouseY = yPixel;
 		mouseState = Mouse.UP;
@@ -796,7 +798,7 @@ public class PanelData {
 		gs.mouseMovedEvent(xPixel, yPixel);
 	}
 
-	void doMousePressed(int xPixel, int yPixel) {
+	public void doMousePressed(int xPixel, int yPixel) {
 		mouseState = Mouse.DOWN;
 		GraphSet gs = GraphSet.findGraphSet(graphSets, xPixel, yPixel);
 		if (gs == null)
@@ -806,7 +808,7 @@ public class PanelData {
 		gs.checkWidgetEvent(xPixel, yPixel, true);
 	}
 
-	void doMouseDragged(int xPixel, int yPixel) {
+	public void doMouseDragged(int xPixel, int yPixel) {
 		isIntegralDrag |= ctrlPressed;
 		mouseState = Mouse.DOWN;
 		if (GraphSet.findGraphSet(graphSets, xPixel, yPixel) != currentGraphSet)
@@ -815,7 +817,7 @@ public class PanelData {
 		currentGraphSet.mouseMovedEvent(xPixel, yPixel);
 	}
 
-	void doMouseReleased(boolean isButton1) {
+	public void doMouseReleased(boolean isButton1) {
 		mouseState = Mouse.UP;
 		if (thisWidget == null || !isButton1)
 			return;
@@ -826,7 +828,7 @@ public class PanelData {
 		// repaint();
 	}
 
-	void doMouseClicked(int xPixel, int yPixel, int clickCount,
+	public void doMouseClicked(int xPixel, int yPixel, int clickCount,
 			boolean isControlDown) {
 		GraphSet gs = GraphSet.findGraphSet(graphSets, xPixel, yPixel);
 		if (gs == null)
@@ -836,25 +838,25 @@ public class PanelData {
 		repaint();
 	}
 
-	boolean hasCurrentMeasurements(AType type) {
+	public boolean hasCurrentMeasurements(AType type) {
 		return currentGraphSet.hasCurrentMeasurement(type);
 	}
 
-	AnnotationData getDialog(AType type) {
+	public AnnotationData getDialog(AType type) {
 		return currentGraphSet.getDialog(type, -1);
 	}
 
-	void addDialog(int iSpec, AType type, AnnotationData dialog) {
+	public void addDialog(int iSpec, AType type, AnnotationData dialog) {
 		currentGraphSet.addDialog(iSpec, type, dialog);
 	}
 
-	void getPeakListing(Parameters p, Boolean tfToggle) {
+	public void getPeakListing(Parameters p, Boolean tfToggle) {
 		if (p != null)
 			currentGraphSet.getPeakListing(-1, p, true);
 		currentGraphSet.setPeakListing(tfToggle);
 	}
 
-	void checkIntegral(Parameters parameters, String value) {
+	public void checkIntegral(Parameters parameters, String value) {
 		currentGraphSet.checkIntegral(parameters, value);
 	}
 
@@ -865,24 +867,24 @@ public class PanelData {
 	 * 
 	 * @param value
 	 */
-	void setIntegrationRatios(String value) {
+	public void setIntegrationRatios(String value) {
 		currentGraphSet.setIntegrationRatios(value);
 	}
 
-	ScaleData getView() {
+	public ScaleData getView() {
 		return currentGraphSet.getCurrentView();
 	}
 
-	void closeAllDialogsExcept(AType type) {
+	public void closeAllDialogsExcept(AType type) {
 		for (int i = graphSets.size(); --i >= 0;)
 			graphSets.get(i).closeDialogsExcept(type);
 	}
 
-	void removeDialog(AnnotationDialog dialog) {
+	public void removeDialog(AnnotationDialog dialog) {
 		currentGraphSet.removeDialog(dialog);
 	}
 
-	void normalizeIntegral() {
+	public void normalizeIntegral() {
 		Integral integral = getSelectedIntegral();
 		if (integral == null)
 			return;
@@ -897,7 +899,7 @@ public class PanelData {
 		}
 	}
 
-	String getDrawTitle(boolean isPrinting) {
+	public String getDrawTitle(boolean isPrinting) {
 		String title = null;
 		if (isPrinting)
 			title = printJobTitle;
@@ -916,7 +918,7 @@ public class PanelData {
 		return title;
 	}
 
-	String getPrintJobTitle(boolean isPrinting) {
+	public String getPrintJobTitle(boolean isPrinting) {
 		String title = null;
 		if (nSpectra == 1) {
 			title = getSpectrum().getTitle();
@@ -933,7 +935,7 @@ public class PanelData {
 		return title;
 	}
 
-	synchronized void linkSpectra(LinkMode mode) {
+	public synchronized void linkSpectra(LinkMode mode) {
 		if (mode == LinkMode.ALL)
 			mode = (nSpectra == 2 ? LinkMode.AB : nSpectra == 3 ? LinkMode.ABC : LinkMode.NONE);
 		if (mode != LinkMode.NONE && mode.toString().length() != nSpectra)
@@ -944,7 +946,7 @@ public class PanelData {
 	private boolean linking;
 	public int xPixelClicked;
 	
-  void doZoomLinked(GraphSet graphSet, double initX,
+	public void doZoomLinked(GraphSet graphSet, double initX,
 			double finalX, boolean addZoom, boolean checkRange,
 			boolean is1d) {
 	if (linking)
@@ -960,7 +962,7 @@ public class PanelData {
 		linking = false;
 	}
 
-	void clearLinkViews(GraphSet graphSet) {
+  public void clearLinkViews(GraphSet graphSet) {
 		if (linking)
 			return;
 		linking = true;
@@ -974,7 +976,7 @@ public class PanelData {
 		linking = false;
 	}
 
-	void setlinkedXMove(GraphSet graphSet, double x, boolean isX2) {
+	public void setlinkedXMove(GraphSet graphSet, double x, boolean isX2) {
 		if (linking)
 			return;
 		linking = true;
@@ -995,7 +997,7 @@ public class PanelData {
 		linking = false;
 	}
 
-	void set2DCrossHairsLinked(GraphSet graphSet, double x, double y, boolean isLocked) {
+	public void set2DCrossHairsLinked(GraphSet graphSet, double x, double y, boolean isLocked) {
 		if (Math.abs(x - y) < 0.1)
 			x = y = Double.MAX_VALUE;
 		for (int i = graphSets.size(); --i >= 0;) {
@@ -1005,7 +1007,167 @@ public class PanelData {
 		}
 	}
 
-	void dialogsToFront() {
+	public void dialogsToFront() {
 		currentGraphSet.dialogsToFront();		
 	}
+
+	public boolean keyPressed(int code, int modifiers) {
+		checkKeyControl(code, true);
+		// should be only in panel region, though.
+		switch (code) {
+		case Event.VK_ESCAPE:
+		case Event.VK_DELETE:
+		case Event.VK_BACK_SPACE: // Mac
+			escapeKeyPressed(code != Event.VK_ESCAPE);
+			isIntegralDrag = false;
+			repaint();
+			return true;
+		}
+		double scaleFactor = 0;
+		boolean doConsume = false;
+		if (modifiers == 0) {
+			switch (code) {
+			case Event.VK_LEFT:
+			case Event.VK_RIGHT:
+				doMouseMoved((code == Event.VK_RIGHT ? ++mouseX : --mouseX), mouseY);
+				repaint();
+				doConsume = true;
+				break;
+			case Event.VK_PAGE_UP:
+			case Event.VK_PAGE_DOWN:
+				scaleFactor = (code == Event.VK_PAGE_UP ? GraphSet.RT2
+						: 1 / GraphSet.RT2);
+				doConsume = true;
+				break;
+			case Event.VK_DOWN:
+			case Event.VK_UP:
+				int dir = (code == Event.VK_DOWN ? -1 : 1);
+				if (getSpectrumAt(0).getSubSpectra() == null) {
+					notifySubSpectrumChange(dir, null);
+				} else {
+					advanceSubSpectrum(dir);
+					repaint();
+				}
+				doConsume = true;
+				break;
+			}
+		} else if (checkMod(code, Event.CTRL_MASK)) {
+			switch (code) {
+			case Event.VK_DOWN:
+			case Event.VK_UP:
+			case 45: // '-'
+			case 61: // '=/+'
+				scaleFactor = (code == 61 || code == Event.VK_UP ? GraphSet.RT2
+						: 1 / GraphSet.RT2);
+				doConsume = true;
+				break;
+			case Event.VK_LEFT:
+			case Event.VK_RIGHT:
+				toPeak(code == Event.VK_RIGHT ? 1 : -1);
+				doConsume = true;
+				break;
+			}
+		}
+		if (scaleFactor != 0) {
+			scaleYBy(scaleFactor);
+			repaint();
+		}
+		return doConsume;
+	}
+
+	public void keyReleased(int keyCode) {
+		checkKeyControl(keyCode, false);
+	}
+
+	public void mouseAction(int mode, long time, int x, int y, int count,
+			int buttonMods) {
+		switch (mode) {
+		case Event.PRESSED:
+			//System.out.println("mousePressed " + e);
+	    if (!checkMod(buttonMods, Event.MOUSE_LEFT))
+	      return;
+	    doMousePressed(x, y);
+	    break;
+		case Event.RELEASED:
+	    doMouseReleased(checkMod(buttonMods, Event.MOUSE_LEFT));
+	    repaint();
+	    break;
+		case Event.DRAGGED:
+	    doMouseDragged(x, y);
+	    repaint();
+	    break;
+		case Event.MOVED:
+			if ((buttonMods & Event.BUTTON_MASK) != 0) {
+		    doMouseDragged(x, y);
+		    repaint();
+				return;
+			}
+	    doMouseMoved(x, y);
+	    if (coordStr != null)
+	      repaint();
+	    break;
+		case Event.CLICKED:
+			//System.out.println("mouseClicked " + e);
+	    doMouseClicked(x, y, count, updateControlPressed(buttonMods));
+	    break;
+		}
+	}
+
+  public void checkKeyControl(int keyCode, boolean isPressed) {
+  	switch(keyCode) {
+  	case Event.VK_CONTROL:
+  	case Event.VK_META:
+    	ctrlPressed = isPressed;
+    	break;
+  	case Event.VK_SHIFT:
+  		shiftPressed = isPressed;
+  		break;
+    default:
+    	ctrlPressed = updateControlPressed(keyCode);
+  		shiftPressed = checkMod(keyCode, Event.SHIFT_MASK);
+  	}
+	}
+
+  public boolean updateControlPressed(int mods) {
+  	// Mac does not allow Ctrl-drag. The CMD key is indicated using code 157 
+  	return (ctrlPressed |= checkMod(mods, Event.CTRL_MASK) || checkMod(mods, Event.MAC_COMMAND));
+	}
+
+	public boolean checkMod(int buttonMods, int mask) {
+		return ((buttonMods & mask) == mask);
+	}
+
+	public void mouseEnterExit(long time, int x, int y, boolean isExit) {
+		if (isExit) {
+			thisWidget = null;
+			isIntegralDrag = false;
+		  integralShiftMode = 0;
+		} 
+	}
+
+	public boolean keyTyped(int ch, int mods) {
+		switch (ch) {
+		case 'n':
+			if (mods != 0)
+				break;
+			normalizeIntegral();
+			return true;
+		case 26: // ctrl-Z
+			if (mods != Event.CTRL_MASK)
+				break;
+			previousView();
+			repaint();
+			return true;
+		case 25: // ctrl-y
+			if (mods != Event.CTRL_MASK)
+				break;
+			nextView();
+			repaint();
+			return true;
+		}
+		return false;
+	}
+
+
+
 }

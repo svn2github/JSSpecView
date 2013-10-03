@@ -32,7 +32,7 @@ import org.jmol.util.Txt;
 
 import jspecview.common.Annotation.AType;
 
-class MeasurementData extends JmolList<Measurement> implements AnnotationData {
+public class MeasurementData extends JmolList<Measurement> implements AnnotationData {
 
 	private static final long serialVersionUID = 1L;
 
@@ -73,13 +73,13 @@ class MeasurementData extends JmolList<Measurement> implements AnnotationData {
 	protected int precision;
 
 	private final static String[] HEADER = new String[] { "peak", "start", "end", "value" };
-	String[] getDataHeader() {
+	public String[] getDataHeader() {
 		return HEADER;
 	}
 
 	protected String units;
 	
-	String[][] getMeasurementListArray(String units) {
+	public String[][] getMeasurementListArray(String units) {
 		this.units = units;
 		double[][] ddata = getMeasurementListArrayReal(units);
 		int precisionX = (spec.isNMR() ? 4 : 2);

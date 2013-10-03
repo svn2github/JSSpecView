@@ -13,9 +13,9 @@ import org.jmol.util.Txt;
 import jspecview.common.Annotation.AType;
 import jspecview.common.PanelData.LinkMode;
 
-abstract class GraphSet implements XYScaleConverter {
+public abstract class GraphSet implements XYScaleConverter {
 
-	protected enum ArrowType {
+	public enum ArrowType {
 		LEFT, RIGHT, UP, DOWN, RESET, HOME
 	}
 
@@ -47,10 +47,10 @@ abstract class GraphSet implements XYScaleConverter {
 
 	abstract protected void fillCircle(Object g, int x, int y, boolean doFill);
 
-	abstract Annotation getAnnotation(double x, double y, String text,
+	abstract public Annotation getAnnotation(double x, double y, String text,
 			boolean isPixels, boolean is2D, int offsetX, int offsetY);
 
-	abstract Annotation getAnnotation(JmolList<String> args, Annotation lastAnnotation);
+	abstract public Annotation getAnnotation(JmolList<String> args, Annotation lastAnnotation);
 
 	abstract protected boolean get2DImage();
 
@@ -63,7 +63,7 @@ abstract class GraphSet implements XYScaleConverter {
 	abstract protected void setAnnotationColor(Object g, Annotation note,
 			ScriptToken whatColor);
 
-	abstract protected void setColor(Object g, ScriptToken plotcolor);
+	abstract protected void setColorFromToken(Object g, ScriptToken plotcolor);
 
 	abstract protected void setCurrentBoxColor(Object g);
 
@@ -73,11 +73,11 @@ abstract class GraphSet implements XYScaleConverter {
 
 	abstract protected void setStrokeBold(Object g, boolean tf);
 
-	abstract void setPlotColors(Object oColors);
+	abstract public void setPlotColors(Object oColors);
 
-	abstract void setPlotColor0(Object oColor);
+	abstract public void setPlotColor0(Object oColor);
 
-	abstract boolean update2dImage(boolean isCreation);
+	abstract protected boolean update2dImage(boolean isCreation);
 
 	protected JmolList<Highlight> highlights = new JmolList<Highlight>();
 	protected JmolList<JDXSpectrum> spectra = new JmolList<JDXSpectrum>();
@@ -97,7 +97,7 @@ abstract class GraphSet implements XYScaleConverter {
 	private boolean isLinked;
 
 
-	final static double RT2 = Math.sqrt(2.0);
+	public final static double RT2 = Math.sqrt(2.0);
 	private boolean haveSingleYScale;
 
 	/**
@@ -201,7 +201,7 @@ abstract class GraphSet implements XYScaleConverter {
 
 	/* very */private int iSpectrumSelected = -1;
 
-	int setSpectrumSelected(int i) {
+	private int setSpectrumSelected(int i) {
 		boolean isNew = (i != iSpectrumSelected);
 		iSpectrumSelected = i;
 		if (isNew) {
@@ -216,26 +216,26 @@ abstract class GraphSet implements XYScaleConverter {
 
 	// needed by PanelData
 
-	ViewData viewData;
-	boolean reversePlot;
-	int nSplit = 1;
-	int yStackOffsetPercent = 0;
+	public ViewData viewData; 
+	public boolean reversePlot;
+	public int nSplit = 1;
+	public int yStackOffsetPercent = 0;
 
 	/**
 	 * if nSplit > 1, then showAllStacked is false, but if nSplit == 1, then
 	 * showAllStacked may be true or false
 	 */
-	boolean showAllStacked = true;
+	public boolean showAllStacked = true;
 
 	// needed by AwtGraphSet
 
-	protected JmolList<ViewData> viewList;
+	public JmolList<ViewData> viewList;
 	protected ImageView imageView;
 	protected PanelData pd;
 	protected boolean sticky2Dcursor;
 	protected int nSpectra; // also needed by PanelData
 
-	void closeDialogsExcept(AType type) {
+	public void closeDialogsExcept(AType type) {
 		if (dialogs != null)
 			for (Map.Entry<String, AnnotationData> e : dialogs.entrySet()) {
 				AnnotationData ad = e.getValue();
@@ -244,7 +244,7 @@ abstract class GraphSet implements XYScaleConverter {
 			}
 	}
 
-	void dispose() {
+	public void dispose() {
 //		for (int i = 0; i < spectra.size(); i++)
 //			spectra.get(i).dispose();
 		spectra = null;
@@ -332,7 +332,7 @@ abstract class GraphSet implements XYScaleConverter {
 
 	private boolean is2DSpectrum;
 
-	JDXSpectrum getSpectrum() {
+	protected JDXSpectrum getSpectrum() {
 		// could be a 2D spectrum or a set of mass spectra
 		return getSpectrumAt(getFixedSelectedSpectrumIndex())
 				.getCurrentSubSpectrum();
@@ -345,7 +345,7 @@ abstract class GraphSet implements XYScaleConverter {
 	 *          the index of the <code>Spectrum</code>
 	 * @return the <code>Spectrum</code> at the specified index
 	 */
-	JDXSpectrum getSpectrumAt(int index) {
+	public JDXSpectrum getSpectrumAt(int index) {
 		return spectra.get(index);
 	}
 
@@ -439,7 +439,7 @@ abstract class GraphSet implements XYScaleConverter {
 	 * @param endIndex 
 	 */
 
-	void initGraphSet(int startIndex, int endIndex) {
+	protected void initGraphSet(int startIndex, int endIndex) {
 		xAxisLeftToRight = getSpectrumAt(0).shouldDisplayXAxisIncreasing();
 		setDrawXAxis();
 		int[] startIndices = new int[nSpectra];
@@ -1581,7 +1581,7 @@ abstract class GraphSet implements XYScaleConverter {
 
 	private void drawSpectrumPointer(Object g, JDXSpectrum spec,
 			IntegralData ig) {
-		setColor(g, ScriptToken.PEAKTABCOLOR);
+		setColorFromToken(g, ScriptToken.PEAKTABCOLOR);
 		int iHandle = pd.integralShiftMode;
 		if (ig != null) {
 			if ((!pd.ctrlPressed || pd.isIntegralDrag)
@@ -1618,14 +1618,14 @@ abstract class GraphSet implements XYScaleConverter {
 			setStrokeBold(g, false);
 	}
 
-	private void setScale(int i) {
+	public void setScale(int i) {
 		viewData.setScale(i, xPixels, yPixels, spectra.get(i).isInverted());
 	}
 
 	private void draw2DUnits(Object g) {
 		String nucleusX = getSpectrumAt(0).nucleusX;
 		String nucleusY = getSpectrumAt(0).nucleusY;
-		setColor(g, ScriptToken.PLOTCOLOR);
+		setColorFromToken(g, ScriptToken.PLOTCOLOR);
 		drawUnits(g, nucleusX, imageView.xPixel1 + 5 * pd.scalingFactor, yPixel1, 1, 1.0);
 		drawUnits(g, nucleusY, imageView.xPixel0 - 5 * pd.scalingFactor, yPixel0, 1, 0);
 	}
@@ -1641,7 +1641,7 @@ abstract class GraphSet implements XYScaleConverter {
 			} else {
 			  spec.setHighlightedPeak(null);
 			}
-			setColor(g, ScriptToken.PEAKTABCOLOR);
+			setColorFromToken(g, ScriptToken.PEAKTABCOLOR);
 			for (int i = list.size(); --i >= 0;) {
 				drawPeak(g, list.get(i), false);
 			}
@@ -1727,7 +1727,7 @@ abstract class GraphSet implements XYScaleConverter {
 			if (pd.isPrinting && !isLockedCursor)
 				continue;
 			if (pw.isPinOrCursor) {
-				setColor(g, pw.color);
+				setColorFromToken(g, pw.color);
 				drawLine(g, pw.xPixel0, pw.yPixel0, pw.xPixel1, pw.yPixel1);
 				pw.isVisible = true;
 				if (pw.isPin)
@@ -1861,7 +1861,7 @@ abstract class GraphSet implements XYScaleConverter {
 					continue;
 				if (fillPeaks
 						&& pendingIntegral.overlaps(point1.getXVal(), point2.getXVal())) {
-					setColor(g, ScriptToken.INTEGRALPLOTCOLOR);
+					setColorFromToken(g, ScriptToken.INTEGRALPLOTCOLOR);
 					drawLine(g, x1, y0, x1, y1);
 					setPlotColor(g, iColor);
 					continue;
@@ -1873,7 +1873,7 @@ abstract class GraphSet implements XYScaleConverter {
 					if (!pd.isPrinting && pd.integralShiftMode != 0)
 						setPlotColor(g, 0);
 					else if (plotOn)
-						setColor(g, ScriptToken.INTEGRALPLOTCOLOR);
+						setColorFromToken(g, ScriptToken.INTEGRALPLOTCOLOR);
 					else
 						setPlotColor(g, -3);
 				}
@@ -1914,7 +1914,7 @@ abstract class GraphSet implements XYScaleConverter {
 	private void drawFrame(Object g, int iSpec,
 			boolean addCurrentBox, boolean addSplitBox, boolean drawUpDownArrows) {
 		if (!pd.gridOn || pd.isPrinting) {
-			setColor(g, ScriptToken.GRIDCOLOR);
+			setColorFromToken(g, ScriptToken.GRIDCOLOR);
 			drawRect(g, xPixel0, yPixel0, xPixels, yPixels);
 			if (pd.isPrinting)
 				return;
@@ -1963,7 +1963,7 @@ abstract class GraphSet implements XYScaleConverter {
 	private void drawGrid(Object g) {
 		if (!pd.gridOn || imageView != null)
 			return;
-		setColor(g, ScriptToken.GRIDCOLOR);
+		setColorFromToken(g, ScriptToken.GRIDCOLOR);
 		double lastX;
 		if (Double.isNaN(getScale().firstX)) {
 			lastX = getScale().maxXOnScale + getScale().steps[0] / 2;
@@ -1998,7 +1998,7 @@ abstract class GraphSet implements XYScaleConverter {
 	 */
 	private void drawXScale(Object g, XYScaleConverter c) {
 
-		setColor(g, ScriptToken.SCALECOLOR);
+		setColorFromToken(g, ScriptToken.SCALECOLOR);
 		if (pd.isPrinting)
 			drawLine(g, c.getXPixel0(), yPixel1, c.getXPixel0() + c.getXPixels() - 1, yPixel1);
 		int precision = getScale().precision[0];
@@ -2073,7 +2073,7 @@ abstract class GraphSet implements XYScaleConverter {
 		int h = getFontHeight(g);
 		double max = sd.maxYOnScale + sd.steps[1] / 2;
 		int yLast = Integer.MIN_VALUE;
-		setColor(g, ScriptToken.SCALECOLOR);
+		setColorFromToken(g, ScriptToken.SCALECOLOR);
 		for (int pass = 0; pass < 2; pass++) {
 			if (pass == 1)
 				ScaleData.fixScale(mapX);
@@ -2122,7 +2122,7 @@ abstract class GraphSet implements XYScaleConverter {
 
 	private void drawUnits(Object g, String s, int x, int y, double hOff,
 			double vOff) {
-		setColor(g, ScriptToken.UNITSCOLOR);
+		setColorFromToken(g, ScriptToken.UNITSCOLOR);
 		pd.setFont(g, (imageView == null ? this : imageView).getXPixels(), FONT_ITALIC, 10, false);
 		drawString(g, s, (int) (x - getStringWidth(g, s) * hOff),
 				(int) (y + getFontHeight(g) * vOff));
@@ -2146,7 +2146,7 @@ abstract class GraphSet implements XYScaleConverter {
 		JDXSpectrum spec = spectra.get(iSpec);
 		if (pd.isPrinting) {
 			if (md != null) {
-				setColor(g, ScriptToken.PEAKTABCOLOR);
+				setColorFromToken(g, ScriptToken.PEAKTABCOLOR);
 				printPeakList(g, spec, (PeakData) md);
 			}
 			return;
@@ -2164,7 +2164,7 @@ abstract class GraphSet implements XYScaleConverter {
 		int y;
 		if (md != null) {
 			y = (spec.isInverted() ? yPixel1 - 10 * pd.scalingFactor : yPixel0);
-			setColor(g, ScriptToken.PEAKTABCOLOR);
+			setColorFromToken(g, ScriptToken.PEAKTABCOLOR);
 			for (int i = md.size(); --i >= 0;) {
 				Measurement m = md.get(i);
 				int x = toPixelX(m.getXVal());
@@ -2265,7 +2265,7 @@ abstract class GraphSet implements XYScaleConverter {
 				pd.setFont(g, xPixels, FONT_PLAIN, 8, false);
 			else
 				pd.setFont(g, xPixels, FONT_BOLD, 12, false);
-			setColor(g, ScriptToken.INTEGRALPLOTCOLOR);
+			setColorFromToken(g, ScriptToken.INTEGRALPLOTCOLOR);
 			int h = getFontHeight(g);
 			setStrokeBold(g, true);
 			for (int i = integrals.size(); --i >= 0;) {
@@ -3608,7 +3608,7 @@ synchronized boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		}
 	}
 
-	void setSpectrum(JDXSpectrum spec) {
+	void setSpectrumJDX(JDXSpectrum spec) {
 		// T/A conversion for IR
 		int pt = getFixedSelectedSpectrumIndex();
 		spectra.remove(pt);

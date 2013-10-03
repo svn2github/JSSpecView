@@ -57,7 +57,7 @@ public class JSVPanelNode {
     return jsvp.getPanelData().getSpectrum();
   }
 
-  JSVDialog setLegend(JSVDialog legend) {
+  public JSVDialog setLegend(JSVDialog legend) {
     if (this.legend != null)
       this.legend.dispose();
     this.legend = legend;
@@ -83,7 +83,7 @@ public class JSVPanelNode {
     return null;
   }
   
-  static JSVPanelNode findNodeById(String id, JmolList<JSVPanelNode> panelNodes) {
+  public static JSVPanelNode findNodeById(String id, JmolList<JSVPanelNode> panelNodes) {
     for (int i = panelNodes.size(); --i >= 0;)
       if (id.equals(panelNodes.get(i).id))
         return panelNodes.get(i);
@@ -97,14 +97,14 @@ public class JSVPanelNode {
    * 
    * @return the tree node that is associated with a panel
    */
-  static JSVPanelNode findNode(JSVPanel jsvp, JmolList<JSVPanelNode> panelNodes) {
+  static public JSVPanelNode findNode(JSVPanel jsvp, JmolList<JSVPanelNode> panelNodes) {
     for (int i = panelNodes.size(); --i >= 0;)
       if (panelNodes.get(i).jsvp == jsvp)
         return panelNodes.get(i);
     return null;
   }
 
-	static String getSpectrumListAsString(JmolList<JSVPanelNode> panelNodes) {
+	static public String getSpectrumListAsString(JmolList<JSVPanelNode> panelNodes) {
       SB sb = new SB();
       for (int i = 0; i < panelNodes.size(); i++) {
       	String id = panelNodes.get(i).id;
@@ -122,7 +122,7 @@ public class JSVPanelNode {
 //    return specList;
 //  }
  
-  static boolean isOpen(JmolList<JSVPanelNode> panelNodes, String filePath) {
+	public static boolean isOpen(JmolList<JSVPanelNode> panelNodes, String filePath) {
     if (filePath != null)
       for (int i = panelNodes.size(); --i >= 0;) {
       	//System.out.println("JSVPanelNode " + filePath + " " + panelNodes.get(i).source.getFilePath());
@@ -140,10 +140,10 @@ public class JSVPanelNode {
 //    return -1;
 //  }
   
-	void setFrameTitle(String name) {
+  public void setFrameTitle(String name) {
 		frameTitle = name;
 	}
-	static JSVPanel getLastFileFirstNode(JmolList<JSVPanelNode> panelNodes) {
+	public static JSVPanel getLastFileFirstNode(JmolList<JSVPanelNode> panelNodes) {
 		int n = panelNodes.size();
 		JSVPanelNode node = (n == 0 ? null : panelNodes.get(n - 1));
 		// first in last file

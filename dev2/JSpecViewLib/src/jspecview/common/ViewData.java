@@ -10,17 +10,17 @@ import org.jmol.util.JmolList;
  * to display a view with one or more spectra. 
  * 
  */
-class ViewData {
+public class ViewData {
 
 	private ScaleData[] scaleData;
 	
-	ScaleData[] getScaleData() {
+	public ScaleData[] getScaleData() {
 		return scaleData;
 	}
 
 	private ScaleData thisScale;
  
-	ScaleData getScale() {
+	public ScaleData getScale() {
 		return thisScale;
 	}
 
@@ -41,7 +41,7 @@ class ViewData {
 	 * @param is2D 
 	 * @returns an instance of <code>MultiScaleData</code>
 	 */
-	ViewData(JmolList<JDXSpectrum> spectra, double yPt1, double yPt2,
+  public ViewData(JmolList<JDXSpectrum> spectra, double yPt1, double yPt2,
 			int[] startList, int[] endList, boolean isContinuous, boolean is2D) {
 		nSpectra = (is2D ? 1 : spectra.size());
 		scaleData = new ScaleData[nSpectra];
@@ -50,7 +50,7 @@ class ViewData {
 		init(spectra, yPt1, yPt2, isContinuous);
 	}
   
-	ViewData(JmolList<JDXSpectrum> spectra, double yPt1, double yPt2, 
+  public ViewData(JmolList<JDXSpectrum> spectra, double yPt1, double yPt2, 
 			boolean isContinuous) {
 		// forced subsets
 		nSpectra = spectra.size();
@@ -89,11 +89,11 @@ class ViewData {
 		}
   }
 
-	void newSpectrum(JmolList<JDXSpectrum> spectra) {
+  public void newSpectrum(JmolList<JDXSpectrum> spectra) {
 		init(spectra, 0, 0, false);
 	}
 
-  void setXRangeForSubSpectrum(Coordinate[] xyCoords) {
+	public void setXRangeForSubSpectrum(Coordinate[] xyCoords) {
   	// forced subspectra only
     setXRange(0, xyCoords, scaleData[0].minX, scaleData[0].maxX, 0, xyCoords.length - 1);
   }
@@ -127,7 +127,7 @@ class ViewData {
 	 * @param i
 	 * @return starting point data index
 	 */
-  int getStartingPointIndex(int i) {
+  public int getStartingPointIndex(int i) {
   	return scaleData[i % scaleData.length].startDataPointIndex;
   }
   
@@ -137,29 +137,29 @@ class ViewData {
 	 * @param i
 	 * @return ending point data index
 	 */
-  int getEndingPointIndex(int i) {
+  public int getEndingPointIndex(int i) {
   	return scaleData[i % scaleData.length].endDataPointIndex;
   }
   
-	boolean areYScalesSame(int i, int j) {
+  public boolean areYScalesSame(int i, int j) {
 		i %= scaleData.length;
 		j %= scaleData.length;
 		return (scaleData[i].minYOnScale == scaleData[j].minYOnScale
 		    && scaleData[i].maxYOnScale == scaleData[j].maxYOnScale);
 	}
 
-	void setScale(int i, int xPixels, int yPixels, boolean isInverted) {
+  public void setScale(int i, int xPixels, int yPixels, boolean isInverted) {
 		iThisScale = i % scaleData.length;
 		thisScale = scaleData[iThisScale];
 		thisScale.setScale(xPixels, yPixels, isInverted);
 	}
 
-	void resetScaleFactors() {
+  public void resetScaleFactors() {
 		for (int i = 0; i < scaleData.length; i++)
   	  scaleData[i].spectrumScaleFactor = 1;
 	}
 	
-	void scaleSpectrum(int i, double f) {
+  public void scaleSpectrum(int i, double f) {
 		if (f <= 0 || i >= nSpectra)
 			return;
 		if (i == -2) {
@@ -173,7 +173,7 @@ class ViewData {
       scaleData[i % scaleData.length].scaleBy(f);
   }
 
-	ScaleData[] getNewScales(int iSelected, boolean isXOnly, double y1, double y2) {
+  public ScaleData[] getNewScales(int iSelected, boolean isXOnly, double y1, double y2) {
 		if (isXOnly)
   		return scaleData;
 		iSelected %= scaleData.length;
