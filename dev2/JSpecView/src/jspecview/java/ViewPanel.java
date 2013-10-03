@@ -1,7 +1,7 @@
 /**
  * 
  */
-package jspecview.common;
+package jspecview.java;
 
 import java.awt.BorderLayout;
 
@@ -11,6 +11,8 @@ import javax.swing.JPanel;
 import org.jmol.util.JmolList;
 
 import jspecview.common.JSVContainer;
+import jspecview.common.JSVPanel;
+import jspecview.common.JSVPanelNode;
 import jspecview.common.Annotation.AType;
 
 public class ViewPanel extends JPanel implements JSVContainer {

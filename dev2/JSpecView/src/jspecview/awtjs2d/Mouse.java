@@ -27,6 +27,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 
+import org.jmol.api.EventManager;
 import org.jmol.api.JmolMouseInterface;
 import org.jmol.api.Event;
 import org.jmol.api.PlatformViewer;
@@ -45,15 +46,15 @@ public class Mouse implements JmolMouseInterface {
 
   //private double privateKey;
 
-  private PlatformViewer viewer;
+  private EventManager manager;
 
 	/**
    * @param privateKey -- not used in JavaScript  
-   * @param viewer 
+   * @param viewer -- not used in JavaScript
    */
   public Mouse(double privateKey, PlatformViewer viewer) {
     //this.privateKey = privateKey; could be used for clipboard access
-    this.viewer = viewer;
+    //this.viewer = viewer;
   }
 
   public void clear() {
@@ -63,6 +64,8 @@ public class Mouse implements JmolMouseInterface {
   public void dispose() {
     // nothing to do here
   }
+
+  private int xWhenPressed, yWhenPressed, modifiersWhenPressed10;
 
   public boolean handleOldJvm10Event(int id, int x, int y, int modifiers, long time) {
     if (id != -1)
@@ -149,48 +152,32 @@ public class Mouse implements JmolMouseInterface {
   }
 
   public void keyTyped(KeyEvent ke) {
-    ke.consume();
+    char ch = ke.getKeyChar();
+    int modifiers = ke.getModifiers();
+    // for whatever reason, CTRL may also drop the 6- and 7-bits,
+    // so we are in the ASCII non-printable region 1-31
+    if (Logger.debuggingHigh || true)
+      Logger.info("MouseManager keyTyped: " + ch + " " + (0+ch) + " " + modifiers);
+    if (manager.keyTyped(ch, modifiers))
+  		ke.consume();
   }
 
   public void keyPressed(KeyEvent ke) {
+    if (manager.keyPressed(ke.getKeyCode(), ke.getModifiers()))
+    	ke.consume();
   }
 
   public void keyReleased(KeyEvent ke) {
+    manager.keyReleased(ke.getKeyCode());
   }
 
-  private String keyBuffer = "";
-
-  private void clearKeyBuffer() {
-    if (keyBuffer.length() == 0)
-      return;
-    keyBuffer = "";
-  }
-
-  private void addKeyBuffer(char ch) {
-    if (ch == 10) {
-      sendKeyBuffer();
-      return;
-    }
-    if (ch == 8) {
-      if (keyBuffer.length() > 0)
-        keyBuffer = keyBuffer.substring(0, keyBuffer.length() - 1);
-    } else {
-      keyBuffer += ch;
-    }
-  }
-
-  private void sendKeyBuffer() {
-    String kb = keyBuffer;
-    clearKeyBuffer();
-    //viewer.evalStringQuietSync(kb, false, true);
-  }
 
   private void entered(long time, int x, int y) {
-    //actionManager.mouseEnterExit(time, x, y, false);
+    manager.mouseEnterExit(time, x, y, false);
   }
 
   private void exited(long time, int x, int y) {
-    //actionManager.mouseEnterExit(time, x, y, true);
+    manager.mouseEnterExit(time, x, y, true);
   }
   /**
    * 
@@ -201,25 +188,22 @@ public class Mouse implements JmolMouseInterface {
    * @param clickCount
    */
   private void clicked(long time, int x, int y, int modifiers, int clickCount) {
-    clearKeyBuffer();
     // clickedCount is not reliable on some platforms
     // so we will just deal with it ourselves
-    //actionManager.mouseAction(Event.CLICKED, time, x, y, 1, modifiers);
+    manager.mouseAction(Event.CLICKED, time, x, y, 1, modifiers);
   }
 
   private boolean isMouseDown; // Macintosh may not recognize CTRL-SHIFT-LEFT as drag, only move
   
   private void moved(long time, int x, int y, int modifiers) {
-    clearKeyBuffer();
-//    if (isMouseDown)
-//      actionManager.mouseAction(Event.DRAGGED, time, x, y, 0, applyLeftMouse(modifiers));
-//    else
-//      actionManager.mouseAction(Event.MOVED, time, x, y, 0, modifiers);
+    if (isMouseDown)
+      manager.mouseAction(Event.DRAGGED, time, x, y, 0, applyLeftMouse(modifiers));
+    else
+      manager.mouseAction(Event.MOVED, time, x, y, 0, modifiers);
   }
 
   private void wheeled(long time, int rotation, int modifiers) {
-    clearKeyBuffer();
-//    actionManager.mouseAction(Event.WHEELED, time, 0, rotation, 0, modifiers);
+    manager.mouseAction(Event.WHEELED, time, 0, rotation, 0, modifiers);
   }
 
   /**
@@ -232,20 +216,19 @@ public class Mouse implements JmolMouseInterface {
    */
   private void pressed(long time, int x, int y, int modifiers,
                     boolean isPopupTrigger) {
-    clearKeyBuffer();
     isMouseDown = true;
-//    actionManager.mouseAction(Event.PRESSED, time, x, y, 0, modifiers);
+    manager.mouseAction(Event.PRESSED, time, x, y, 0, modifiers);
   }
 
   private void released(long time, int x, int y, int modifiers) {
     isMouseDown = false;
-//    actionManager.mouseAction(Event.RELEASED, time, x, y, 0, modifiers);
+    manager.mouseAction(Event.RELEASED, time, x, y, 0, modifiers);
   }
 
   private void dragged(long time, int x, int y, int modifiers) {
     if ((modifiers & Event.MAC_COMMAND) == Event.MAC_COMMAND)
       modifiers = modifiers & ~Event.MOUSE_RIGHT | Event.CTRL_MASK; 
-//    actionManager.mouseAction(Event.DRAGGED, time, x, y, 0, modifiers);
+    manager.mouseAction(Event.DRAGGED, time, x, y, 0, modifiers);
   }
 
   private static int applyLeftMouse(int modifiers) {
@@ -254,6 +237,5 @@ public class Mouse implements JmolMouseInterface {
         : modifiers;
   }
 
-  private int xWhenPressed, yWhenPressed, modifiersWhenPressed10;
 
 }

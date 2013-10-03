@@ -58,10 +58,10 @@ import org.jmol.util.JmolList;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelNode;
 import jspecview.common.PanelData;
-import jspecview.common.AwtPopupMenu;
 import jspecview.common.ScriptToken;
 import jspecview.common.JDXSpectrum;
-import jspecview.common.AwtPopupMenu.EnumOverlay;
+import jspecview.java.AwtPopupMenu;
+import jspecview.java.AwtPopupMenu.EnumOverlay;
 import jspecview.source.JDXSource;
 import jspecview.util.JSVFileManager;
 

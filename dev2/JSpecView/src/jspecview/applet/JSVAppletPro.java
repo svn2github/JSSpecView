@@ -40,7 +40,7 @@
 package jspecview.applet;
 
 import jspecview.application.MainFrame;
-import jspecview.common.JSVAppletInterface;
+import jspecview.java.JSVAppletInterface;
 
 /**
  * A signed applet that has an Advanced... menu item that pulls up a MainFrame

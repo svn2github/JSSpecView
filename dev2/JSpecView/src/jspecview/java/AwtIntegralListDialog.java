@@ -17,7 +17,7 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package jspecview.common;
+package jspecview.java;
 
 import java.awt.event.ActionEvent;
 
@@ -29,6 +29,10 @@ import javax.swing.JTextField;
 import org.jmol.util.Txt;
 
 import jspecview.api.ScriptInterface;
+import jspecview.common.Coordinate;
+import jspecview.common.IntegralData;
+import jspecview.common.JDXSpectrum;
+import jspecview.common.JSVPanel;
 import jspecview.common.Annotation.AType;
 
 /**
@@ -38,7 +42,7 @@ import jspecview.common.Annotation.AType;
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-class AwtIntegralListDialog extends AwtAnnotationDialog {
+public class AwtIntegralListDialog extends AwtAnnotationDialog {
 
 	private static final long serialVersionUID = 1L;
 	private static int[] posXY = new int[] {Integer.MIN_VALUE, 0};

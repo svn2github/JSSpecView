@@ -1,4 +1,4 @@
-package jspecview.common;
+package jspecview.java;
 
 import java.awt.Cursor;
 import java.io.File;
@@ -20,6 +20,10 @@ import org.jmol.util.Parser;
 import org.jmol.util.Txt;
 
 import jspecview.api.ScriptInterface;
+import jspecview.common.JDXSpectrum;
+import jspecview.common.JSVPanel;
+import jspecview.common.JSVPanelNode;
+import jspecview.common.ScriptToken;
 import jspecview.source.JDXSource;
 import jspecview.util.JSVFileManager;
 

@@ -17,7 +17,7 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package jspecview.common;
+package jspecview.java;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -40,6 +40,9 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
 import jspecview.common.JDXSpectrum;
+import jspecview.common.JSVDialog;
+import jspecview.common.JSVPanel;
+import jspecview.common.PanelData;
 import jspecview.util.JSVFileManager;
 
 /**

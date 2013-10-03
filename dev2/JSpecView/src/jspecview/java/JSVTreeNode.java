@@ -1,7 +1,7 @@
 /**
  * 
  */
-package jspecview.common;
+package jspecview.java;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import jspecview.common.JSVPanelNode;

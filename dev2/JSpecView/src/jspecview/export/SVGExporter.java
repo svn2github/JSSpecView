@@ -29,10 +29,10 @@ import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
 import org.jmol.util.Txt;
 
-import jspecview.common.AwtParameters;
 import jspecview.common.Coordinate;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.ScaleData;
+import jspecview.java.AwtParameters;
 import jspecview.util.JSVTxt;
 
 /**

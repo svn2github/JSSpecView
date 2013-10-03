@@ -35,7 +35,7 @@
 //					draw integration ratio annotations
 // 03-06-2012 rmh - Full overhaul; code simplification; added support for Jcamp 6 nD spectra
 
-package jspecview.common;
+package jspecview.java;
 
 import java.awt.Color;
 import java.awt.Container;
@@ -44,12 +44,6 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.awt.print.PageFormat;
 import java.awt.print.Paper;
 import java.awt.print.Printable;
@@ -73,14 +67,31 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 
+import org.jmol.api.ApiPlatform;
+import org.jmol.api.Event;
+import org.jmol.api.EventManager;
+import org.jmol.api.Interface;
+import org.jmol.api.JmolMouseInterface;
+import org.jmol.api.PlatformViewer;
 import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
 import org.jmol.util.Txt;
 
 import jspecview.api.PdfCreatorInterface;
 import jspecview.api.ScriptInterface;
+import jspecview.common.AnnotationData;
+import jspecview.common.AnnotationDialog;
+import jspecview.common.GraphSet;
+import jspecview.common.JDXSpectrum;
+import jspecview.common.JSVInterface;
+import jspecview.common.JSVPanel;
+import jspecview.common.JSVersion;
+import jspecview.common.PanelData;
+import jspecview.common.Parameters;
+import jspecview.common.ScriptToken;
 import jspecview.common.Annotation.AType;
 import jspecview.export.Exporter;
+import jspecview.util.JSVFileManager;
 
 /**
  * JSVPanel class represents a View combining one or more GraphSets, each with one or more JDXSpectra.
@@ -92,9 +103,8 @@ import jspecview.export.Exporter;
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListener,
-    MouseMotionListener, KeyListener {
-
+public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManager, PlatformViewer {
+//, MouseListener,  MouseMotionListener, KeyListener
   private static final long serialVersionUID = 1L;
 
   @Override
@@ -129,9 +139,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
     if (pd != null)
       pd.dispose();
     pd = null;
-    removeKeyListener(this);
-    removeMouseListener(this);
-    removeMouseMotionListener(this);
+    mouse.dispose();
   }
 
   public void setTitle(String title) {
@@ -155,8 +163,6 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   private Color highlightColor = new Color(255, 0, 0, 200);
   private Color zoomBoxColor = new Color(150, 150, 100, 130);
   private Color zoomBoxColor2 = new Color(150, 100, 100, 130);
-
-	private static int MAC_COMMAND = InputEvent.BUTTON1_MASK + InputEvent.BUTTON3_MASK;
 
   public void setPlotColors(Object oColors) {
     Color[] colors = (Color[]) oColors;
@@ -636,15 +642,18 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   }
 
   
-  public void setupPlatform() {
+	private ApiPlatform apiPlatform;
+	private JmolMouseInterface mouse;
+
+	public void setupPlatform() {
+		apiPlatform = (ApiPlatform) Interface.getInterface("jspecview.awt.Platform");
+		apiPlatform.setViewer(this, this);
     setBorder(BorderFactory.createLineBorder(Color.lightGray));
     if (popup == null) {
       // preferences dialog
       pd.coordStr = "(0,0)";
     } else {
-      addKeyListener(this);
-      addMouseListener(this);
-      addMouseMotionListener(this);
+    	mouse = apiPlatform.getMouseManager(0);
     }
   }
 
@@ -744,177 +753,53 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 
   /*--------------the rest are all mouse and keyboard interface -----------------------*/
 
-  public void mousePressed(MouseEvent e) {
-		if (pd.isPrinting)
-			return;
-		//System.out.println("mousePressed " + e);
-    if (e.getButton() != MouseEvent.BUTTON1)
-      return;
-    pd.doMousePressed(e.getX(), e.getY());
-  }
-
-  private boolean isControlDown(InputEvent e) {
-  	// Mac does not allow Ctrl-drag. The CMD key is indicated using code 157 
-  	return pd.ctrlPressed |= e.isControlDown() || (e.getModifiers() & MAC_COMMAND ) == MAC_COMMAND;
+	public boolean keyPressed(int keyCode, int modifiers) {
+		return (!pd.isPrinting && pd.keyPressed(keyCode, modifiers));
 	}
 
-	public void mouseMoved(MouseEvent e) {
+	public void keyReleased(int keyCode) {
 		if (pd.isPrinting)
 			return;
-    getFocusNow(false);
-		if (e.getButton() != 0) {
-			mouseDragged(e);
-			return;
-		}
-    pd.doMouseMoved(e.getX(), e.getY());
-    if (pd.coordStr != null)
-      doRepaint();
-  }
-
-  public void mouseDragged(MouseEvent e) {
-		if (pd.isPrinting)
-			return;
-    pd.doMouseDragged(e.getX(), e.getY());
-    doRepaint();
-  }
-  
-  public void mouseReleased(MouseEvent e) {
-		if (pd.isPrinting)
-			return;
-    pd.doMouseReleased(e.getButton() == MouseEvent.BUTTON1);
-    doRepaint();
-  }
-
-  public void mouseClicked(MouseEvent e) {
-		if (pd.isPrinting)
-			return;
-		//System.out.println("mouseClicked " + e);
-    if (e.getButton() == MouseEvent.BUTTON3) {
-      popup.show((JSVPanel) this, e.getX(), e.getY());
-      return;
-    }
-    pd.doMouseClicked(e.getX(), e.getY(), e.getClickCount(), e.isControlDown());
-  }
-
-  public void mouseEntered(MouseEvent e) {
-    getFocusNow(false);
-  }
-
-  public void mouseExited(MouseEvent e) {
-		pd.thisWidget = null;
-		pd.isIntegralDrag = false;
-		pd.integralShiftMode = 0;
-  }
-
-	public void keyPressed(KeyEvent e) {
-		if (pd.isPrinting)
-			return;
-		checkControl(e, true);
-
-		// should be only in panel region, though.
-		switch (e.getKeyCode()) {
-		case KeyEvent.VK_ESCAPE:
-		case KeyEvent.VK_DELETE:
-		case KeyEvent.VK_BACK_SPACE: // Mac
-			pd.escapeKeyPressed(e.getKeyCode() != KeyEvent.VK_ESCAPE);
-			pd.isIntegralDrag = false;
-			doRepaint();
-			e.consume();
-			return;
-		}
-		int code = e.getKeyCode();
-		double scaleFactor = 0;
-		if (e.getModifiers() == 0) {
-			switch (code) {
-			case KeyEvent.VK_LEFT:
-			case KeyEvent.VK_RIGHT:
-				pd.doMouseMoved(
-						(code == KeyEvent.VK_RIGHT ? ++pd.mouseX : --pd.mouseX), pd.mouseY);
-				e.consume();
-				doRepaint();
-				break;
-			case KeyEvent.VK_PAGE_UP:
-			case KeyEvent.VK_PAGE_DOWN:
-				scaleFactor = (code == KeyEvent.VK_PAGE_UP ? GraphSet.RT2
-						: 1 / GraphSet.RT2);
-				e.consume();
-				break;
-			case KeyEvent.VK_DOWN:
-			case KeyEvent.VK_UP:
-				int dir = (code == KeyEvent.VK_DOWN ? -1 : 1);
-				if (pd.getSpectrumAt(0).getSubSpectra() == null) {
-					pd.notifySubSpectrumChange(dir, null);
-				} else {
-					pd.advanceSubSpectrum(dir);
-					doRepaint();
-				}
-				e.consume();
-				break;
-			}
-		} else if (e.isControlDown()) {
-			switch (code) {
-			case KeyEvent.VK_DOWN:
-			case KeyEvent.VK_UP:
-			case 45: // '-'
-			case 61: // '=/+'
-				scaleFactor = (code == 61 || code == KeyEvent.VK_UP ? GraphSet.RT2
-						: 1 / GraphSet.RT2);
-				e.consume();
-				break;
-			case KeyEvent.VK_LEFT:
-			case KeyEvent.VK_RIGHT:
-				pd.toPeak(code == KeyEvent.VK_RIGHT ? 1 : -1);
-				e.consume();
-				break;
-			}
-		}
-		if (scaleFactor != 0) {
-			pd.scaleYBy(scaleFactor);
-			doRepaint();
-		}
+		pd.keyReleased(keyCode);
 	}
 
-	public void keyReleased(KeyEvent e) {
-		if (pd.isPrinting)
-			return;
-		checkControl(e, false);
+  public boolean keyTyped(int ch, int modifiers) {
+		return (!pd.isPrinting && pd.keyTyped(ch, modifiers));
   }
 
-  private void checkControl(KeyEvent e, boolean isPressed) {
-  	switch(e.getKeyCode()) {
-  	case KeyEvent.VK_CONTROL:
-  	case KeyEvent.VK_META:
-    	pd.ctrlPressed = isPressed;
-    	break;
-  	case KeyEvent.VK_SHIFT:
-  		pd.shiftPressed = isPressed;
-  		break;
-    default:
-    	pd.ctrlPressed = isControlDown(e);
-  		pd.shiftPressed = e.isShiftDown();
-  	}
+	public void mouseAction(int mode, long time, int x, int y, int count,
+			int buttonMods) {
+		if (pd.isPrinting)
+			return;
+		switch (mode) {
+		case Event.PRESSED:
+		case Event.RELEASED:
+		case Event.DRAGGED:
+	    break;
+		case Event.MOVED:
+	    getFocusNow(false);
+	    break;
+		case Event.CLICKED:
+	    if (pd.checkMod(buttonMods, Event.MOUSE_RIGHT)) {
+	      popup.show((JSVPanel) this, x, y);
+	      return;
+	    }
+	    break;
+		}
+		pd.mouseAction(mode, time, x, y, count, buttonMods);
 	}
 
-  public void keyTyped(KeyEvent e) {
-		if (pd.isPrinting)
-			return;
-  	if (e.getKeyChar() == 'n') {
-  		pd.normalizeIntegral();
-      doRepaint();
-  		e.consume();
-  		return;
-  	}
-    if (e.getKeyChar() == 'z') {
-      pd.previousView();
-      e.consume();
-      return;
-    }
-    if (e.getKeyChar() == 'y') {
-      pd.nextView();
-      e.consume();
-      return;
-    }
-  }
+	public void mouseEnterExit(long time, int x, int y, boolean isExit) {
+		if (isExit) {
+			pd.mouseEnterExit(time, x, y, isExit);
+		} else {
+	    getFocusNow(false);
+		}			
+	}
+
+	public boolean isApplet() {
+		return (JSVFileManager.appletDocumentBase != null);
+	}
 
 
 }

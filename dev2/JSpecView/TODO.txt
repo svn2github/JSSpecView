@@ -56,6 +56,8 @@ Replaced org.jmol.util.ArrayUtil, Base64, Escape, Parser, Txt with Jmol's.
 Replaced org.jmol.util.DefaultLogger, Logger, LoggerInterface, with Jmol's.
 Created jspecview.awt, jspecview.awtjs2d; populated with template methods
 Created EventManager
+Implemented jspecview.awt.Mouse and jspecview.awtjs2d.Mouse
+  - note that in JSpecView, each panel is its own PlatformViewer and EventManager and display Component
 
 ___version="2.1.0"
 

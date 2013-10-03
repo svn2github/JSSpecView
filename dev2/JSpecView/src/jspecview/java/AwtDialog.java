@@ -1,4 +1,4 @@
-package jspecview.common;
+package jspecview.java;
 
 import java.awt.Component;
 

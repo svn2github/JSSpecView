@@ -1,4 +1,4 @@
-package jspecview.common;
+package jspecview.java;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -35,6 +35,8 @@ import javax.swing.table.TableCellRenderer;
 import org.jmol.io.Base64;
 
 import jspecview.api.ScriptInterface;
+import jspecview.common.JSVPanel;
+import jspecview.common.PanelData;
 import jspecview.common.Annotation.AType;
 import jspecview.export.Exporter;
 import jspecview.export.Exporter.ExportType;

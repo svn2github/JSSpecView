@@ -1,4 +1,4 @@
-package jspecview.common;
+package jspecview.java;
 
 import java.awt.Color;
 import java.awt.GraphicsEnvironment;
@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
+import jspecview.common.Parameters;
+import jspecview.common.ScriptToken;
 import jspecview.util.JSVColorUtil;
 
 public class AwtParameters extends Parameters {

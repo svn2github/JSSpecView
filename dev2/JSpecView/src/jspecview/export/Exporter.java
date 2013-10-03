@@ -23,11 +23,11 @@ import org.jmol.util.JmolList;
 import org.jmol.util.Txt;
 
 import jspecview.api.ScriptInterface;
-import jspecview.common.DialogHelper;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVPanel;
 import jspecview.common.PanelData;
 import jspecview.common.ScriptToken;
+import jspecview.java.DialogHelper;
 import jspecview.util.JSVFileManager;
 
 public class Exporter {

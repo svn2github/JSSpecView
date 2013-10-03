@@ -12,8 +12,8 @@ import javax.swing.JMenuItem;
 
 import org.jmol.util.JmolList;
 
-import jspecview.common.AwtPopupMenu;
 import jspecview.common.JSVPanelNode;
+import jspecview.java.AwtPopupMenu;
 
 class JSVAppletPopupMenu extends AwtPopupMenu {
 

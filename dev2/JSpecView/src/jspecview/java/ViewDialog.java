@@ -17,7 +17,7 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package jspecview.common;
+package jspecview.java;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -38,6 +38,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 
 import jspecview.api.ScriptInterface;
+import jspecview.common.JSVPanelNode;
+import jspecview.common.JSViewer;
 
 import org.jmol.util.SB;
 

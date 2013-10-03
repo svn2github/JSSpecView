@@ -17,7 +17,7 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package jspecview.common;
+package jspecview.java;
 
 import java.awt.BorderLayout;
 import java.awt.Frame;
@@ -39,6 +39,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 //import javax.swing.SpinnerNumberModel;
 import javax.swing.border.TitledBorder;
+
 
 /**
  * Dialog to set print preferences for JSpecview.

@@ -17,7 +17,7 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package jspecview.common;
+package jspecview.java;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -25,6 +25,12 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
+
+import jspecview.common.Annotation;
+import jspecview.common.GraphSet;
+import jspecview.common.ImageView;
+import jspecview.common.JDXSpectrum;
+import jspecview.common.ScriptToken;
 
 import org.jmol.util.JmolList;
 
@@ -36,7 +42,7 @@ import org.jmol.util.JmolList;
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-class AwtGraphSet extends GraphSet {
+public class AwtGraphSet extends GraphSet {
 
   private AwtPanel jsvp;
   private BufferedImage image2D;
@@ -64,7 +70,7 @@ class AwtGraphSet extends GraphSet {
   }
 
   @Override
-	void setPlotColors(Object oColors) {
+  public void setPlotColors(Object oColors) {
     Color[] colors = (Color[]) oColors;
     if (colors.length > nSpectra) {
       Color[] tmpPlotColors = new Color[nSpectra];
@@ -93,7 +99,7 @@ class AwtGraphSet extends GraphSet {
   }
 
   @Override
-	void setPlotColor0(Object oColor) {
+	public void setPlotColor0(Object oColor) {
     plotColors[0] = (Color) oColor;
   }
 
@@ -111,7 +117,7 @@ class AwtGraphSet extends GraphSet {
   }
 
   @Override
-  protected void setColor(Object g, ScriptToken whatColor) {
+  protected void setColorFromToken(Object g, ScriptToken whatColor) {
     if (whatColor != null)
       ((Graphics) g)
           .setColor(whatColor == ScriptToken.PLOTCOLOR ? plotColors[0] : jsvp
@@ -188,6 +194,7 @@ class AwtGraphSet extends GraphSet {
 
 
 	@Override
+	public
   Annotation getAnnotation(double x, double y, String text, boolean isPixels,
                            boolean is2d, int offsetX, int offsetY) {
     return new AwtColoredAnnotation(getSpectrum(), x, y, text, Color.BLACK, isPixels, is2d,
@@ -195,6 +202,7 @@ class AwtGraphSet extends GraphSet {
   }
 
   @Override
+	public
   Annotation getAnnotation(JmolList<String> args, Annotation lastAnnotation) {
     return AwtColoredAnnotation.getAnnotation(getSpectrum(), args,
         (AwtColoredAnnotation) lastAnnotation);
@@ -203,7 +211,7 @@ class AwtGraphSet extends GraphSet {
   @Override
   protected void fillBox(Object g, int x0, int y0, int x1, int y1,
                          ScriptToken whatColor) {
-    setColor(g, whatColor);
+    setColorFromToken(g, whatColor);
     ((Graphics) g).fillRect(Math.min(x0, x1), Math.min(y0, y1), Math.abs(x0
         - x1), Math.abs(y0 - y1));
   }
@@ -262,7 +270,7 @@ class AwtGraphSet extends GraphSet {
 	protected void setAnnotationColor(Object g, Annotation note,
                                     ScriptToken whatColor) {
     if (whatColor != null) {
-      setColor(g, whatColor);
+      setColorFromToken(g, whatColor);
       return;
     }
     Color color = null;

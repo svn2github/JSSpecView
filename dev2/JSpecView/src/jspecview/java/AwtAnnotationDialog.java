@@ -17,7 +17,7 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package jspecview.common;
+package jspecview.java;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -43,6 +43,11 @@ import javax.swing.event.ListSelectionListener;
 import jspecview.api.ScriptInterface;
 import jspecview.common.Annotation.AType;
 import jspecview.common.AnnotationData;
+import jspecview.common.AnnotationDialog;
+import jspecview.common.JDXSpectrum;
+import jspecview.common.JSVPanel;
+import jspecview.common.MeasurementData;
+import jspecview.common.Parameters;
 
 /**
  * Dialog for managing peak, integral, and measurement listings for a Spectrum
@@ -50,7 +55,7 @@ import jspecview.common.AnnotationData;
  * 
  * @author Bob Hanson hansonr@stolaf.edu
  */
-abstract class AwtAnnotationDialog extends AwtDialog implements AnnotationDialog,
+public abstract class AwtAnnotationDialog extends AwtDialog implements AnnotationDialog,
 		ListSelectionListener, WindowListener {
 
 	private static final long serialVersionUID = 1L;

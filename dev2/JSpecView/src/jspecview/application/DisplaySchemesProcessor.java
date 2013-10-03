@@ -30,9 +30,9 @@ import java.util.TreeMap;
 
 import org.jmol.util.SB;
 
-import jspecview.common.AwtParameters;
 import jspecview.common.Parameters;
 import jspecview.common.ScriptToken;
+import jspecview.java.AwtParameters;
 import jspecview.util.JSVFileManager;
 import jspecview.util.JSVTxt;
 import jspecview.util.JXVXmlReader;

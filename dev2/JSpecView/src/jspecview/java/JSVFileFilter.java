@@ -17,7 +17,7 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package jspecview.common;
+package jspecview.java;
 
 import java.io.File;
 import java.util.Hashtable;
@@ -27,7 +27,7 @@ import javax.swing.filechooser.FileFilter;
 /**
  * A implementation of the <code>FileFilter</code> that filters out all files
  * except those with extensions that are added.
- * @see jspecview.common.JSVFileFilter#addExtension(java.lang.String)
+ * @see jspecview.java.JSVFileFilter#addExtension(java.lang.String)
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire

@@ -2,8 +2,8 @@ package jspecview.api;
 
 import java.io.OutputStream;
 
-import jspecview.common.AwtPanel;
-import jspecview.common.PrintLayout;
+import jspecview.java.AwtPanel;
+import jspecview.java.PrintLayout;
 
 public interface PdfCreatorInterface {
 
