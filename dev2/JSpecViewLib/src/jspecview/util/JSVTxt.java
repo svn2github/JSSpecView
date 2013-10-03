@@ -85,12 +85,6 @@ public class JSVTxt {
 	  return str.substring(0, m + 1);
 	}
 
-	public static String trimQuotes(String value) {
-	  return (value.length() > 1 && value.startsWith("\"")
-	      && value.endsWith("\"") ? value.substring(1, value.length() - 1)
-	      : value);
-	}
-
 //static {
 //DecimalFormat df =  new DecimalFormat("0.00E0", new DecimalFormatSymbols(java.util.Locale.US));
 //System.out.println(df.format(-1.0) + " " + formatDecimal(-1.0, -2));

@@ -50,8 +50,6 @@ public interface ScriptInterface {
 
 	public JDXSource getCurrentSource();
 
-	public URL getDocumentBase();
-
 	public int getFileCount();
 
 	public String getIntegrationRatios();

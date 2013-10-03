@@ -48,7 +48,6 @@ import jspecview.exception.JDXSourceException;
 import jspecview.exception.JSpecViewException;
 import jspecview.util.JSVEscape;
 import jspecview.util.JSVFileManager;
-import jspecview.util.JSVTxt;
 import jspecview.util.JSVZipFileSequentialReader;
 
 /**
@@ -100,7 +99,7 @@ public class FileReader {
   private FileReader(String filePath, boolean obscure, boolean loadImaginary,
   		int iSpecFirst, int iSpecLast) {
   	System.out.println("FileReader filePath=" + filePath + "<<");
-  	filePath = JSVTxt.trimQuotes(filePath);
+  	filePath = Txt.trimQuotes(filePath);
     this.filePath = (filePath.startsWith(JSVFileManager.SIMULATION_PROTOCOL + "MOL=") ? 
     		JSVFileManager.SIMULATION_PROTOCOL + "MOL=" + Math.abs(filePath.hashCode()) : filePath);
     this.obscure = obscure;
@@ -712,7 +711,7 @@ public class FileReader {
 	}
 
 	private String getPeakFilePath() {
-				return " file=" + JSVEscape.eS(JSVTxt.trimQuotes(filePath).replace('\\', '/'));
+				return " file=" + JSVEscape.eS(Txt.trimQuotes(filePath).replace('\\', '/'));
 	}
 
 

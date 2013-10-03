@@ -49,8 +49,11 @@ public class JSVFileManager {
 
 	// ALL STATIC METHODS
 	
-	public static String SIMULATION_PROTOCOL = "http://SIMULATION/";
+	public final static String SIMULATION_PROTOCOL = "http://SIMULATION/";
 
+	public static URL appletDocumentBase;
+  
+  public static String jsDocumentBase = "";
 	/**
 	 * @param name 
 	 * @param appletDocumentBase
@@ -129,6 +132,9 @@ public class JSVFileManager {
   private final static String[] urlPrefixes = { "http:", "https:", "ftp:", 
   	SIMULATION_PROTOCOL, "file:" };
 
+  public final static int URL_LOCAL = 4;
+
+
   public static boolean isURL(String name) {
   	for (int i = urlPrefixes.length; --i >= 0;)
   		if (name.startsWith(urlPrefixes[i]))
@@ -136,6 +142,23 @@ public class JSVFileManager {
     return false;
   }
   
+  public static int urlTypeIndex(String name) {
+    for (int i = 0; i < urlPrefixes.length; ++i) {
+      if (name.startsWith(urlPrefixes[i])) {
+        return i;
+      }
+    }
+    return -1;
+  }
+  
+  public static boolean isLocal(String fileName) {
+    if (fileName == null)
+      return false;
+    int itype = urlTypeIndex(fileName);
+    return (itype < 0 || itype == URL_LOCAL);
+  }
+
+
   private static BufferedReader getUnzippedBufferedReaderFromName(String name, URL appletDocumentBase, String startCode)
       throws IOException {
     String[] subFileList = null;
@@ -305,7 +328,7 @@ public class JSVFileManager {
   }
 
   private static int stringCount;
-  
+
   public static String getName(String file) {
   	if (file == null)
   		return "String" + (++stringCount);
@@ -347,6 +370,10 @@ public class JSVFileManager {
 		int pt1 = json.indexOf(key1);
 		int pt2 = json.indexOf(key2, pt1);
 		return (pt1 < 0 || pt2 < 0 ? null : Parser.getQuotedStringAt(json, pt2 + key2.length()));
+	}
+
+	public static void setDocumentBase(URL documentBase) {
+		appletDocumentBase = documentBase;
 	}
 
 }
@@ -421,5 +448,6 @@ class JSVMonitorInputStream extends FilterInputStream {
   int getPercentageRead() {
     return position * 100 / length;
   }
+
 
 }

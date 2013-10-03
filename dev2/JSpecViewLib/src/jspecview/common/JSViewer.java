@@ -16,7 +16,6 @@ import jspecview.common.JDXSpectrum.IRMode;
 import jspecview.common.PanelData.LinkMode;
 import jspecview.source.JDXSource;
 import jspecview.util.JSVEscape;
-import jspecview.util.JSVTxt;
 
 /**
  * This static class encapsulates all general functionality of applet and app.
@@ -127,7 +126,7 @@ public class JSViewer {
           si.syncToJmol(value);
           break;
         case JSV:
-        	syncScript(si, JSVTxt.trimQuotes(value));
+        	syncScript(si, Txt.trimQuotes(value));
         	break;
         case LABEL:
           if (jsvp != null)
@@ -256,7 +255,7 @@ public class JSViewer {
     try {
       JmolList<String> tokens = ScriptToken.getTokens(value);
       value = " type=\"" + tokens.get(0).toUpperCase() + "\" _match=\""
-          + JSVTxt.trimQuotes(tokens.get(1).toUpperCase()) + "\"";
+          + Txt.trimQuotes(tokens.get(1).toUpperCase()) + "\"";
       if (tokens.size() > 2 && tokens.get(2).equalsIgnoreCase("all"))
         value += " title=\"ALL\"";
       processPeakPickEvent(si, new PeakInfo(value), false); // false == true here

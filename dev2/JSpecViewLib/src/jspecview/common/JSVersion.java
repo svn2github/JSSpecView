@@ -22,6 +22,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import org.jmol.util.Txt;
+
+
 public class JSVersion {
 
   public static final String VERSION;
@@ -38,12 +41,12 @@ public class JSVersion {
 		InputStream is = null;
 		try {
 			is = JSVersion.class.getClassLoader().getResourceAsStream(
-					"jspecview/common/TODO.txt");
+					"jspecview/TODO.txt");
 			bis = new BufferedInputStream(is);
 			props.load(bis);
-			tmpVersion = props.getProperty("___version", tmpVersion);
-			tmpDate = props.getProperty("___date", tmpDate);
-			tmpSVN = props.getProperty("___svnRev", tmpSVN);
+			tmpVersion = Txt.trimQuotes(props.getProperty("___version", tmpVersion));
+			tmpDate = Txt.trimQuotes(props.getProperty("___date", tmpDate));
+			tmpSVN = Txt.trimQuotes(props.getProperty("___svnRev", tmpSVN));
 			if (tmpDate != null)
 				tmpDate = tmpDate.substring(7, 23);
 			if (tmpSVN != null)
