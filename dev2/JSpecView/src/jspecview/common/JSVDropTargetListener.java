@@ -23,7 +23,6 @@ import org.jmol.util.SB;
 public class JSVDropTargetListener implements DropTargetListener {
 
   private ScriptInterface si;
-  //private boolean allowAppend = true;
 
   public JSVDropTargetListener(ScriptInterface si) {
     this.si = si;
@@ -95,15 +94,6 @@ public class JSVDropTargetListener implements DropTargetListener {
 				cmd = sb.toString();
 				Logger.info("Drop command = " + cmd);
 				si.runScript(cmd);
-				/*
-				 * 
-				 * 
-				 * final int length = fileList.size(); if (length == 1) { String
-				 * fileName = fileList.get(0).getAbsolutePath().trim(); if
-				 * (fileName.endsWith(".bmp")) break; // try another flavor -- Mozilla
-				 * bug dtde.getDropTargetContext().dropComplete(true);
-				 * loadFile(fileName); return; }
-				 */
 				return;
 			}
 		}
