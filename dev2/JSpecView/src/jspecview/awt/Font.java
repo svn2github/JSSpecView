@@ -1,4 +1,4 @@
-package jspecview.awtjsv;
+package jspecview.awt;
 
 import java.awt.FontMetrics;
 import java.awt.Graphics;

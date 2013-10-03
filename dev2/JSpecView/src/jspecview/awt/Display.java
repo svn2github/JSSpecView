@@ -1,4 +1,4 @@
-package jspecview.awtjsv;
+package jspecview.awt;
 
 import java.awt.Component;
 import java.awt.Container;
