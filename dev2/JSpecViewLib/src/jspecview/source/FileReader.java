@@ -723,8 +723,8 @@ public class FileReader {
 
 	private String discardUntil(BufferedReader reader, String tag) 
     throws Exception {
-      String line = reader.readLine();
-      while (line != null && line.indexOf("<" + tag) < 0 && line.indexOf("##") < 0) {
+      String line;
+      while ((line = reader.readLine()) != null && line.indexOf("<" + tag) < 0 && line.indexOf("##") < 0) {
       }
       return line;
 	}

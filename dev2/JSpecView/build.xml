@@ -76,7 +76,6 @@
 	<target name="make-application-jar" description="Make JSpecView application jar" depends="build">
 		<antcall target="revision" />
         <mkdir dir="${build.app.dir}"/>
-		
 	    <copy todir="${bin.dir}/jspecview/common" >
 	      <fileset dir="">
 	        <include name="TODO.txt" />
