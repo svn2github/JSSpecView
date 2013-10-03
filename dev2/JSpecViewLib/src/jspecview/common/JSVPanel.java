@@ -18,7 +18,6 @@ public interface JSVPanel extends JSVContainer {
   JSVPanel getNewPanel(ScriptInterface si, JDXSpectrum spectrum);
   PanelData getPanelData();
   Object getPlotColor(int i);
-  Object getPopup();
 
   boolean hasFocus();
 
