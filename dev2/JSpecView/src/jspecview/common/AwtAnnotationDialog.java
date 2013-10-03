@@ -26,7 +26,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 
 import javax.swing.JButton;
@@ -75,7 +75,7 @@ abstract class AwtAnnotationDialog extends AwtDialog implements AnnotationDialog
 	protected JButton showHideButton;
 
 	private JButton clearButton, applyButton;
-	protected final static Map<String, Object> options = new HashMap<String, Object>();
+	protected final static Map<String, Object> options = new Hashtable<String, Object>();
 
 	private Object[] myOptions;
 	private String[] unitOptions;
