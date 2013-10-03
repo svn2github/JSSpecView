@@ -1,4 +1,4 @@
-package org.jmol.awtjsv;
+package jspecview.awtjsv;
 
 import java.awt.Container;
 import java.awt.Frame;

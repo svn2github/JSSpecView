@@ -1,4 +1,4 @@
-package org.jmol.awtjsv;
+package jspecview.awtjsv;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -13,7 +13,7 @@ import org.jmol.api.JmolFileInterface;
 /**
  * a subclass of File allowing extension to JavaScript
  * 
- * private to org.jmol.awt
+ * private to jspecview.awt
  * 
  */
 

@@ -1,4 +1,4 @@
-package org.jmol.awtjsv;
+package jspecview.awtjsv;
 
 import java.awt.Component;
 import java.awt.Container;
@@ -19,7 +19,7 @@ import org.jmol.util.Txt;
 /**
  * methods required by Jmol that access java.awt.Component
  * 
- * private to org.jmol.awt
+ * private to jspecview.awt
  * 
  */
 

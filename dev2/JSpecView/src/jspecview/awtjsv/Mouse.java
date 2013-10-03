@@ -21,7 +21,7 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package org.jmol.awtjsv;
+package jspecview.awtjsv;
 
 import java.awt.Component;
 
@@ -45,7 +45,7 @@ import org.jmol.util.Logger;
  * 
  * methods required by Jmol that access java.awt.event
  * 
- * private to org.jmol.awt
+ * private to jspecview.awt
  * 
  */
 

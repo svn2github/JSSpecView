@@ -23,7 +23,7 @@
  *  02110-1301, USA.
  */
 
-package org.jmol.awtjsv;
+package jspecview.awtjsv;
 
 import java.awt.Image;
 import java.awt.Toolkit;

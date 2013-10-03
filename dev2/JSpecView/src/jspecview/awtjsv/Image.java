@@ -23,7 +23,7 @@
  *  02110-1301, USA.
  */
 
-package org.jmol.awtjsv;
+package jspecview.awtjsv;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
@@ -53,7 +53,7 @@ import org.jmol.util.JmolFont;
 /**
  * methods required by Jmol that access java.awt.Image
  * 
- * private to org.jmol.awt
+ * private to jspecview.awt
  * 
  */
 class Image {

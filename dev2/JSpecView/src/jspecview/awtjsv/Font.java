@@ -1,4 +1,4 @@
-package org.jmol.awtjsv;
+package jspecview.awtjsv;
 
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -12,7 +12,7 @@ import org.jmol.util.JmolFont;
 /**
  * methods required by Jmol that access java.awt.Font
  * 
- * private to org.jmol.awt
+ * private to jspecview.awt
  * 
  */
 
