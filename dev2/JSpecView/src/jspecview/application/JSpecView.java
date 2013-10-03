@@ -51,7 +51,7 @@ import javax.swing.UIManager;
 import jspecview.common.JSVersion;
 
 import org.jmol.api.JSVInterface;
-import org.jmol.util.JSVLogger;
+import org.jmol.util.Logger;
 
 
 
@@ -75,7 +75,7 @@ public class JSpecView implements JSVInterface {
     } catch (Exception e) {
     }
 
-		JSVLogger.info("JSpecView Application " + JSVersion.VERSION);
+		Logger.info("JSpecView Application " + JSVersion.VERSION);
     JSpecView jsv = new JSpecView();
     jsv.mainFrame = new MainFrame(null, jsv);
 

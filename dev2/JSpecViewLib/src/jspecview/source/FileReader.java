@@ -33,11 +33,11 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
-import org.jmol.util.JSVEscape;
-import org.jmol.util.JSVLogger;
-import org.jmol.util.JSVParser;
-import org.jmol.util.JSVSB;
-import org.jmol.util.JSVTextFormat;
+import org.jmol.util.Escape;
+import org.jmol.util.Logger;
+import org.jmol.util.Parser;
+import org.jmol.util.SB;
+import org.jmol.util.TextFormat;
 
 import jspecview.common.Coordinate;
 import jspecview.common.JDXDataObject;
@@ -84,7 +84,7 @@ public class FileReader {
   }
   private JDXSource source;
   private JDXSourceStreamTokenizer t;
-  private JSVSB errorLog;
+  private SB errorLog;
   private boolean obscure;
 
   private boolean done;
@@ -98,7 +98,7 @@ public class FileReader {
   private FileReader(String filePath, boolean obscure, boolean loadImaginary,
   		int iSpecFirst, int iSpecLast) {
   	System.out.println("FileReader filePath=" + filePath + "<<");
-  	filePath = JSVTextFormat.trimQuotes(filePath);
+  	filePath = TextFormat.trimQuotes(filePath);
     this.filePath = (filePath.startsWith(JSVFileManager.SIMULATION_PROTOCOL + "MOL=") ? 
     		JSVFileManager.SIMULATION_PROTOCOL + "MOL=" + Math.abs(filePath.hashCode()) : filePath);
     this.obscure = obscure;
@@ -192,7 +192,7 @@ public class FileReader {
     source = new JDXSource(JDXSource.TYPE_SIMPLE, filePath);
     isZipFile = (br instanceof JSVZipFileSequentialReader);
     t = new JDXSourceStreamTokenizer(br);
-    errorLog = new JSVSB();
+    errorLog = new SB();
 
     String label = null;
 
@@ -258,7 +258,7 @@ public class FileReader {
 
   private boolean addSpectrum(JDXSpectrum spectrum, boolean forceSub) {
   	if (!loadImaginary && spectrum.isImaginary()) {
-  		JSVLogger.info("FileReader skipping imaginary spectrum -- use LOADIMAGINARY TRUE to load this spectrum.");
+  		Logger.info("FileReader skipping imaginary spectrum -- use LOADIMAGINARY TRUE to load this spectrum.");
   		return true;
   	}
     nSpec++;
@@ -282,7 +282,7 @@ public class FileReader {
   private JDXSource getBlockSpectra(List<String[]> sourceLDRTable)
       throws JSpecViewException {
 
-    JSVLogger.debug("--JDX block start--");
+    Logger.debug("--JDX block start--");
     String label = "";
     boolean isNew = (source.type == JDXSource.TYPE_SIMPLE);
     boolean forceSub = false;
@@ -295,7 +295,7 @@ public class FileReader {
         t.getValue();
       }
       if (label.equals("##BLOCKS")) {
-        int nBlocks = JSVParser.parseInt(t.getValue());
+        int nBlocks = Parser.parseInt(t.getValue());
         if (nBlocks > 100 && firstSpec <=0)
           forceSub = true;
       }
@@ -318,7 +318,7 @@ public class FileReader {
       String tmp;
       while ((tmp = t.getLabel()) != null) {
           if (label.equals("##END") && isEnd(tmp)) {
-            JSVLogger.debug("##END= " + t.getValue());
+            Logger.debug("##END= " + t.getValue());
             break;
           }
         label = tmp;
@@ -385,7 +385,7 @@ public class FileReader {
     }
     addErrorLogSeparator();
     source.setErrorLog(errorLog.toString());
-    JSVLogger.debug("--JDX block end--");
+    Logger.debug("--JDX block end--");
     return source;
   }
 
@@ -396,7 +396,7 @@ public class FileReader {
 		default:
 			return false;
 		case 0:
-			thisModelID = JSVParser.getQuotedAttribute(value, "id");
+			thisModelID = Parser.getQuotedAttribute(value, "id");
 			return true;
 		case 10:
 		case 20:
@@ -562,7 +562,7 @@ public class FileReader {
     }
     addErrorLogSeparator();
     source.setErrorLog(errorLog.toString());
-    JSVLogger.info("NTUPLE MIN/MAX Y = " + minMaxY[0] + " " + minMaxY[1]);
+    Logger.info("NTUPLE MIN/MAX Y = " + minMaxY[0] + " " + minMaxY[1]);
     return source;
   }
 
@@ -682,32 +682,32 @@ public class FileReader {
 	}
 
 	private void info(String s) {
-  	JSVLogger.info(s);
+  	Logger.info(s);
 	}
 
 
 	private BitSet unescapeBitSet(String s) {
-		return JSVEscape.unescapeBitSet(s);
+		return Escape.unescapeBitSet(s);
 	}
 
 	private float parseFloatStr(String s) {
-  	return JSVParser.parseFloat(s);
+  	return Parser.parseFloat(s);
   }
 
 	private String simpleReplace(String s, String sfrom, String sto) {
-		return JSVTextFormat.simpleReplace(s, sfrom, sto);
+		return TextFormat.simpleReplace(s, sfrom, sto);
 	}
 
 	private String escape(String s) {
-		return JSVEscape.escape(s);
+		return Escape.escape(s);
 	}
 
 	private String getQuotedAttribute(String s, String attr) {
-		return JSVParser.getQuotedAttribute(s, attr);
+		return Parser.getQuotedAttribute(s, attr);
 	}
 
 	private String getPeakFilePath() {
-				return " file=" + JSVEscape.escape(JSVTextFormat.trimQuotes(filePath).replace('\\', '/'));
+				return " file=" + Escape.escape(TextFormat.trimQuotes(filePath).replace('\\', '/'));
 	}
 
 
@@ -740,7 +740,7 @@ public class FileReader {
    */
   private static boolean readDataLabel(JDXDataObject spectrum, String label,
                                        JDXSourceStreamTokenizer t,
-                                       JSVSB errorLog, boolean obscure) {
+                                       SB errorLog, boolean obscure) {
 
     if (readHeaderLabel(spectrum, label, t, errorLog, obscure))
       return true;
@@ -868,7 +868,7 @@ public class FileReader {
   }
 
   private static boolean readHeaderLabel(JDXHeader jdxHeader, String label,
-                                         JDXSourceStreamTokenizer t, JSVSB errorLog,
+                                         JDXSourceStreamTokenizer t, SB errorLog,
                                          boolean obscure) {
     if (label.equals("##TITLE")) {
       String value = t.getValue();
@@ -879,7 +879,7 @@ public class FileReader {
     if (label.equals("##JCAMPDX")) {
       String value = t.getValue();
       jdxHeader.jcampdx = value;
-      float version = JSVParser.parseFloat(value);
+      float version = Parser.parseFloat(value);
       if (version >= 6.0 || Float.isNaN(version)) {
         if (errorLog != null)
           errorLog
@@ -1087,7 +1087,7 @@ public class FileReader {
       //errorLog.append("No Errors decompressing data\n");
     }
 
-    if (JSVLogger.debugging) {
+    if (Logger.debugging) {
       System.err.println(errorLog.toString());
     }
 

@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.util.Hashtable;
 
 
-public class JSVXmlReader {
+public class XmlReader {
 
   /*
    * A simple very light-weight XML reader
@@ -47,7 +47,7 @@ public class JSVXmlReader {
   public final static int EOF = 8;
 
 
-  public JSVXmlReader(BufferedReader br) {
+  public XmlReader(BufferedReader br) {
     buffer = new DataBuffer(br);
   }
 
@@ -88,7 +88,7 @@ public class JSVXmlReader {
   }
 
   public void nextTag() throws IOException {
-    while ((thisEvent = buffer.nextTag()).eventType == JSVXmlReader.COMMENT) {
+    while ((thisEvent = buffer.nextTag()).eventType == XmlReader.COMMENT) {
     }
   }
 
@@ -134,7 +134,7 @@ public class JSVXmlReader {
   }
 
   public String getCharacters() throws IOException {
-    JSVSB sb = new JSVSB();
+    SB sb = new SB();
     thisEvent = buffer.peek();
     int eventType = thisEvent.getEventType();
 
@@ -206,16 +206,16 @@ public class JSVXmlReader {
 
   private class DataString {
 
-    JSVSB data;
+    SB data;
     protected BufferedReader reader;
     int ptr;
     int ptEnd;
 
     DataString() {
-      this.data = new JSVSB();
+      this.data = new SB();
     }
 
-    DataString(JSVSB data) {
+    DataString(SB data) {
       this.data = data;
       ptEnd = data.length();
     }
@@ -227,7 +227,7 @@ public class JSVXmlReader {
     protected void flush() {
       if (data.length() < 1000 || ptEnd - ptr > 100)
         return;
-      data = new JSVSB().append(data.substring(ptr));
+      data = new SB().append(data.substring(ptr));
       //System.out.println(data);
       ptr = 0;
       ptEnd = data.length();
@@ -379,7 +379,7 @@ public class JSVXmlReader {
     private void getAttributes() {
       attributes = new Hashtable<String, String>();
       DataString d = new DataString(
-          new JSVSB().append(text));
+          new SB().append(text));
       try {
         if (d.skipTo(' ', false) < 0)
           return;

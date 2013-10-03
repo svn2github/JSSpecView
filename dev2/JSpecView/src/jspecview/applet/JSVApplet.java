@@ -52,7 +52,7 @@ import java.util.Map;
 
 import javax.swing.JApplet;
 
-import org.jmol.util.JSVLogger;
+import org.jmol.util.Logger;
 
 import jspecview.common.JSVAppletInterface;
 import jspecview.common.JSVersion;
@@ -85,7 +85,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface {
   @Override
   public void init() {
     appletPrivate = new JSVAppletPrivate(this);
-    JSVLogger.info(getAppletInfo());
+    Logger.info(getAppletInfo());
   }
 
   private static final long serialVersionUID = 1L;

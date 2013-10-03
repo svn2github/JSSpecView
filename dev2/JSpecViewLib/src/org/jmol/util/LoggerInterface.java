@@ -28,7 +28,7 @@ package org.jmol.util;
 /**
  * Interface used for the logging mechanism.
  */
-public interface JSVLoggerInterface {
+public interface LoggerInterface {
 
   /**
    * Writes a log at DEBUG level.

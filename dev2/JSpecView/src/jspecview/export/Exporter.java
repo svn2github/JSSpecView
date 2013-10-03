@@ -19,7 +19,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
-import org.jmol.util.JSVTextFormat;
+import org.jmol.util.TextFormat;
 
 import jspecview.common.DialogHelper;
 import jspecview.common.JDXSpectrum;
@@ -166,14 +166,14 @@ public class Exporter {
     default:
       return "EXPORT what?";
     case 1:
-      fileName = JSVTextFormat.trimQuotes(tokens.get(0));
+      fileName = TextFormat.trimQuotes(tokens.get(0));
       int pt = fileName.indexOf(".");
       if (pt < 0)
         return "EXPORT mode?";
       break;
     case 2:
       mode = tokens.get(0).toUpperCase();
-      fileName = JSVTextFormat.trimQuotes(tokens.get(1));
+      fileName = TextFormat.trimQuotes(tokens.get(1));
       break;
     }
     String ext = fileName.substring(fileName.lastIndexOf(".") + 1)

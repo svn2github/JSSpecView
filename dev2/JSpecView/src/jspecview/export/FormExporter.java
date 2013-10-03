@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-import org.jmol.util.JSVLogger;
+import org.jmol.util.Logger;
 
 import jspecview.util.JSVFileManager;
 
@@ -58,12 +58,12 @@ abstract class FormExporter {
     String[] error = new String[1];
     String template = JSVFileManager.getResourceString(this, templateFile, error);
     if (template == null) {
-      JSVLogger.error(error[0]);
+      Logger.error(error[0]);
       return error[0];
     }
     errMsg = context.setTemplate(template);
     if (errMsg != null) {
-      JSVLogger.error(errMsg);
+      Logger.error(errMsg);
       return errMsg;
     }
 
@@ -73,7 +73,7 @@ abstract class FormExporter {
     if (writer == null)
       return errMsg;
     if (errMsg != null) {
-      JSVLogger.error(errMsg);
+      Logger.error(errMsg);
       throw new IOException(errMsg);
     }
 

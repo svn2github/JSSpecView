@@ -37,7 +37,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 
-import org.jmol.util.JSVSB;
+import org.jmol.util.SB;
 
 
 /**
@@ -293,7 +293,7 @@ public class ViewDialog extends AwtDialog implements WindowListener {
 	}
 	
 	protected void combineSelected() {
-		JSVSB sb = new JSVSB();
+		SB sb = new SB();
 		for (int i = 0; i < checkBoxes.size(); i++) {
 			JCheckBox cb = checkBoxes.get(i);
 			JSVPanelNode node = treeNodes.get(i).panelNode;
@@ -311,7 +311,7 @@ public class ViewDialog extends AwtDialog implements WindowListener {
 	}
 
 	protected void viewSelected() {
-		JSVSB sb = new JSVSB();
+		SB sb = new SB();
 		for (int i = 0; i < checkBoxes.size(); i++) {
 			JCheckBox cb = checkBoxes.get(i);
 			JSVPanelNode node = treeNodes.get(i).panelNode;

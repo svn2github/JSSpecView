@@ -36,7 +36,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
-import org.jmol.util.JSVLogger;
+import org.jmol.util.Logger;
 
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVPanelNode;
@@ -80,7 +80,7 @@ public class TextDialog extends JDialog {
       setVisible(true);
     }
     catch(Exception ex) {
-    	JSVLogger.error(ex.getMessage());
+    	Logger.error(ex.getMessage());
     }
   }
 

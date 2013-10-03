@@ -25,7 +25,7 @@
 
 package jspecview.common;
 
-import org.jmol.util.JSVLogger;
+import org.jmol.util.Logger;
 
 public class JSVInterface {
 
@@ -33,7 +33,7 @@ public class JSVInterface {
     try {
       return Class.forName(name).newInstance();
     } catch (Exception e) {
-      JSVLogger.error("Interface.java Error creating instance for " + name + ": \n" + e.getMessage());
+      Logger.error("Interface.java Error creating instance for " + name + ": \n" + e.getMessage());
       return null;
     }
   }

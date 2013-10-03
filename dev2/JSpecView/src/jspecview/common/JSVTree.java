@@ -15,9 +15,9 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import org.jmol.util.JSVLogger;
-import org.jmol.util.JSVParser;
-import org.jmol.util.JSVTextFormat;
+import org.jmol.util.Logger;
+import org.jmol.util.Parser;
+import org.jmol.util.TextFormat;
 
 import jspecview.source.JDXSource;
 import jspecview.util.JSVFileManager;
@@ -128,13 +128,13 @@ public class JSVTree extends JTree {
 
     int max = 0;
     for (int i = 0; i < panelNodes.size(); i++) {
-      float f = JSVParser.parseFloat(panelNodes.get(i).id);
+      float f = Parser.parseFloat(panelNodes.get(i).id);
       if (f >= max + 1)
         max = (int) Math.floor(f);
     }
     si.setFileCount(max);
     System.gc();
-    JSVLogger.checkMemory();
+    Logger.checkMemory();
 	}
 
 	public static void setFrameAndTreeNode(ScriptInterface si, int i) {
@@ -163,7 +163,7 @@ public class JSVTree extends JTree {
 				return null;
 			si.setNode(node, false);
 		} else {
-			int n = JSVParser.parseInt(value);
+			int n = Parser.parseInt(value);
 			if (n <= 0) {
 				si.checkOverlay();
 				return null;
@@ -253,13 +253,13 @@ public class JSVTree extends JTree {
 		boolean isSimulation = filename.equalsIgnoreCase("MOL");
 		if (isSimulation)
 			filename = JSVFileManager.SIMULATION_PROTOCOL + "MOL="
-					+ JSVTextFormat.trimQuotes(tokens.get(++pt));
+					+ TextFormat.trimQuotes(tokens.get(++pt));
 		if (!isCheck && !isAppend) {
 			if (filename.equals("\"\"") && si.getCurrentSource() != null)
 				filename = si.getCurrentSource().getFilePath();
 			close(si, "all");
 		}
-		filename = JSVTextFormat.trimQuotes(filename);
+		filename = TextFormat.trimQuotes(filename);
 		if (filename.startsWith("$")) {
 			isSimulation = true;
 			filename = JSVFileManager.SIMULATION_PROTOCOL + filename;
@@ -322,7 +322,7 @@ public class JSVTree extends JTree {
 			si.setCurrentSource(isView ? JDXSource.createView(specs) : si
 					.createSource(data, filePath, base, firstSpec, lastSpec));
 		} catch (Exception e) {
-			JSVLogger.error(e.getMessage());
+			Logger.error(e.getMessage());
 			si.writeStatus(e.getMessage());
 			si.setCursorObject(Cursor.getDefaultCursor());
 			return FILE_OPEN_ERROR;

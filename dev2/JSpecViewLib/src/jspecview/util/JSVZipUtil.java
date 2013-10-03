@@ -34,9 +34,9 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.jmol.util.JSVArrayUtil;
-import org.jmol.util.JSVLogger;
-import org.jmol.util.JSVSB;
+import org.jmol.util.ArrayUtil;
+import org.jmol.util.Logger;
+import org.jmol.util.SB;
 
 public class JSVZipUtil {
 
@@ -68,7 +68,7 @@ public class JSVZipUtil {
    */
   static public Object getZipFileContents(InputStream is, String[] list,
                                           int listPtr) {
-    JSVSB ret = new JSVSB();
+    SB ret = new SB();
     if (list == null || listPtr >= list.length)
       return getZipDirectoryAsStringAndClose(is);
     String fileName = list[listPtr];
@@ -122,13 +122,13 @@ public class JSVZipUtil {
   }
   
   static public String getZipDirectoryAsStringAndClose(InputStream is) {
-    JSVSB sb = new JSVSB();
+    SB sb = new SB();
     String[] s = new String[0];
     try {
       s = getZipDirectoryOrErrorAndClose(is, false);
       is.close();
     } catch (Exception e) { 
-      JSVLogger.error(e.getMessage());
+      Logger.error(e.getMessage());
     }
     for (int i = 0; i < s.length; i++)
       sb.append(s[i]).appendC('\n');
@@ -141,7 +141,7 @@ public class JSVZipUtil {
       s = getZipDirectoryOrErrorAndClose(is, addManifest);
       is.close();
     } catch (Exception e) { 
-      JSVLogger.error(e.getMessage());
+      Logger.error(e.getMessage());
     }
     return s;
   }
@@ -169,7 +169,7 @@ public class JSVZipUtil {
   }
   
   public static String getZipEntryAsString(ZipInputStream zis) throws IOException {
-    JSVSB sb = new JSVSB();
+    SB sb = new SB();
     byte[] buf = new byte[1024];
     int len;
     while (zis.available() == 1 && (len = zis.read(buf)) > 0)
@@ -188,7 +188,7 @@ public class JSVZipUtil {
     while (zis.available() == 1 && (len = zis.read(buf)) > 0) {
       totalLen += len;
       if (totalLen >= bytes.length)
-        bytes = JSVArrayUtil.ensureLength(bytes, totalLen * 2);
+        bytes = ArrayUtil.ensureLength(bytes, totalLen * 2);
       System.arraycopy(buf, 0, bytes, totalLen - len, len);
     }
     buf = new byte[totalLen];
@@ -204,7 +204,7 @@ public class JSVZipUtil {
     while ((len = bis.read(buf)) > 0) {
       totalLen += len;
       if (totalLen >= bytes.length)
-        bytes = JSVArrayUtil.ensureLength(bytes, totalLen * 2);
+        bytes = ArrayUtil.ensureLength(bytes, totalLen * 2);
       System.arraycopy(buf, 0, bytes, totalLen - len, len);
     }
     buf = new byte[totalLen];

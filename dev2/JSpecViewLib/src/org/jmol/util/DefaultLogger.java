@@ -31,7 +31,7 @@ import java.io.PrintStream;
 /**
  * Default implementation of the logger.
  */
-public class JSVDefaultLogger implements JSVLoggerInterface {
+public class DefaultLogger implements LoggerInterface {
 
   /**
    * Method to output a log.
@@ -45,7 +45,7 @@ public class JSVDefaultLogger implements JSVLoggerInterface {
     if ((out != null) && ((txt != null) || (e != null))) {
       txt = (txt != null ? txt : "");
       out.println(
-          (JSVLogger.logLevel() ? "[" + JSVLogger.getLevel(level) + "] " : "") +
+          (Logger.logLevel() ? "[" + Logger.getLevel(level) + "] " : "") +
           txt +
           (e != null ? ": " + e.getMessage() : ""));
       if (e != null) {
@@ -66,55 +66,55 @@ public class JSVDefaultLogger implements JSVLoggerInterface {
    * @see org.jmol.util.LoggerInterface#debug(java.lang.String)
    */
   public void debug(String txt) {
-    log(System.out, JSVLogger.LEVEL_DEBUG, txt, null);
+    log(System.out, Logger.LEVEL_DEBUG, txt, null);
   }
 
   /* (non-Javadoc)
    * @see org.jmol.util.LoggerInterface#info(java.lang.String)
    */
   public void info(String txt) {
-    log(System.out, JSVLogger.LEVEL_INFO, txt, null);
+    log(System.out, Logger.LEVEL_INFO, txt, null);
   }
 
   /* (non-Javadoc)
    * @see org.jmol.util.LoggerInterface#warn(java.lang.String)
    */
   public void warn(String txt) {
-    log(System.out, JSVLogger.LEVEL_WARN, txt, null);
+    log(System.out, Logger.LEVEL_WARN, txt, null);
   }
 
   /* (non-Javadoc)
    * @see org.jmol.util.LoggerInterface#warn(java.lang.String, java.lang.Throwable)
    */
   public void warn(String txt, Throwable e) {
-    log(System.out, JSVLogger.LEVEL_WARN, txt, e);
+    log(System.out, Logger.LEVEL_WARN, txt, e);
   }
 
   /* (non-Javadoc)
    * @see org.jmol.util.LoggerInterface#error(java.lang.String)
    */
   public void error(String txt) {
-    log(System.err, JSVLogger.LEVEL_ERROR, txt, null);
+    log(System.err, Logger.LEVEL_ERROR, txt, null);
   }
 
   /* (non-Javadoc)
    * @see org.jmol.util.LoggerInterface#error(java.lang.String, java.lang.Exception)
    */
   public void error(String txt, Throwable e) {
-    log(System.err, JSVLogger.LEVEL_ERROR, txt, e);
+    log(System.err, Logger.LEVEL_ERROR, txt, e);
   }
 
   /* (non-Javadoc)
    * @see org.jmol.util.LoggerInterface#fatal(java.lang.String)
    */
   public void fatal(String txt) {
-    log(System.err, JSVLogger.LEVEL_FATAL, txt, null);
+    log(System.err, Logger.LEVEL_FATAL, txt, null);
   }
 
   /* (non-Javadoc)
    * @see org.jmol.util.LoggerInterface#fatal(java.lang.String, java.lang.Exception)
    */
   public void fatal(String txt, Throwable e) {
-    log(System.err, JSVLogger.LEVEL_FATAL, txt, e);
+    log(System.err, Logger.LEVEL_FATAL, txt, e);
   }
 }

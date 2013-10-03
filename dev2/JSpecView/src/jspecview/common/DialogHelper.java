@@ -32,7 +32,7 @@ import javax.swing.SwingConstants;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 
-import org.jmol.util.JSVBase64;
+import org.jmol.util.Base64;
 
 import jspecview.common.Annotation.AType;
 import jspecview.export.Exporter;
@@ -286,7 +286,7 @@ public class DialogHelper {
 					return null;
 			}
 			((AwtPanel) jsvp).printPanel(pl, os, printJobTitle);
-			s = (isBase64 ? JSVBase64.getBase64(
+			s = (isBase64 ? Base64.getBase64(
 					((ByteArrayOutputStream) os).toByteArray()).toString() : "OK");
 		} catch (Exception e) {
 			jsvp.showMessage(e.getMessage(), "File Error");

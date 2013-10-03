@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.jmol.util.JSVTextFormat;
+import org.jmol.util.TextFormat;
 
 import jspecview.common.Annotation.AType;
 
@@ -177,9 +177,9 @@ public class IntegralData extends MeasurementData {
 	 */
 	public void addMarks(String ppms) {
     //2-3,4-5,6-7...
-    ppms = JSVTextFormat.simpleReplace(" " + ppms, ",", " ");
-    ppms = JSVTextFormat.simpleReplace(ppms, " -"," #");
-    ppms = JSVTextFormat.simpleReplace(ppms, "--","-#");
+    ppms = TextFormat.simpleReplace(" " + ppms, ",", " ");
+    ppms = TextFormat.simpleReplace(ppms, " -"," #");
+    ppms = TextFormat.simpleReplace(ppms, "--","-#");
     ppms = ppms.replace('-','^');
     ppms = ppms.replace('#','-');
     List<String> tokens = ScriptToken.getTokens(ppms);
@@ -338,8 +338,8 @@ public class IntegralData extends MeasurementData {
 	public String[][] getMeasurementListArray(String units) {
 		String[][] data = new String[size()][];
 		for (int pt = 0, i = size(); --i >= 0;)
-			data[pt++] = new String[] { "" + pt, JSVTextFormat.formatDecimal(get(i).getXVal(), 2), 
-				JSVTextFormat.formatDecimal(get(i).getXVal2(), 2), get(i).getText() };
+			data[pt++] = new String[] { "" + pt, TextFormat.formatDecimal(get(i).getXVal(), 2), 
+				TextFormat.formatDecimal(get(i).getXVal2(), 2), get(i).getText() };
 		return data;
 	}
 

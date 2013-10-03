@@ -29,9 +29,9 @@ package org.jmol.util;
 /**
  * Logger mechanism.
  */
-public final class JSVLogger {
+public final class Logger {
 
-  private static JSVLoggerInterface _logger = new JSVDefaultLogger();
+  private static LoggerInterface _logger = new DefaultLogger();
 
   public final static int LEVEL_FATAL = 1;
   public final static int LEVEL_ERROR = 2;
@@ -72,7 +72,7 @@ public final class JSVLogger {
    * 
    * @param logger New logger implementation.
    */
-  public static void setLogger(JSVLoggerInterface logger) {
+  public static void setLogger(LoggerInterface logger) {
     _logger = logger;
     debugging = isActiveLevel(LEVEL_DEBUG) || isActiveLevel(LEVEL_DEBUGHIGH);
   }

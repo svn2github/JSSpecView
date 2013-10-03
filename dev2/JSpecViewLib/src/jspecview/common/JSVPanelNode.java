@@ -6,7 +6,7 @@ package jspecview.common;
 import java.util.List;
 import java.util.Map;
 
-import org.jmol.util.JSVSB;
+import org.jmol.util.SB;
 
 import jspecview.common.JSVDialog;
 import jspecview.common.JSVPanel;
@@ -105,7 +105,7 @@ public class JSVPanelNode {
   }
 
 	static String getSpectrumListAsString(List<JSVPanelNode> panelNodes) {
-      JSVSB sb = new JSVSB();
+      SB sb = new SB();
       for (int i = 0; i < panelNodes.size(); i++) {
       	String id = panelNodes.get(i).id;
         sb.append(" ").append(id);

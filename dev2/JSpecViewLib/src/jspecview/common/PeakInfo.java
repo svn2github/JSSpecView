@@ -1,7 +1,7 @@
 package jspecview.common;
 
 //import jspecview.util.Logger;
-import org.jmol.util.JSVParser;
+import org.jmol.util.Parser;
 
 public class PeakInfo {
   public final static PeakInfo nullPeakInfo = new PeakInfo();
@@ -29,7 +29,7 @@ public class PeakInfo {
 
   public PeakInfo(String s) {
     stringInfo = s;
-    type = JSVParser.getQuotedAttribute(s, "type");
+    type = Parser.getQuotedAttribute(s, "type");
     if (type == null)
       type = "";
     type = type.toUpperCase();
@@ -39,22 +39,22 @@ public class PeakInfo {
       type = fixType(type.substring(0, pt)) + "/" + type2;
     else
       type = fixType(type);
-    id = JSVParser.getQuotedAttribute(s, "id");
-    index = JSVParser.getQuotedAttribute(s, "index");
-    file = JSVParser.getQuotedAttribute(s, "file");
+    id = Parser.getQuotedAttribute(s, "id");
+    index = Parser.getQuotedAttribute(s, "index");
+    file = Parser.getQuotedAttribute(s, "file");
     System.out.println("pi file=" + file);
     filePathForwardSlash = (file == null ? null : file.replace('\\','/'));
 
-    model = JSVParser.getQuotedAttribute(s, "model");
+    model = Parser.getQuotedAttribute(s, "model");
     boolean isBaseModel = s.contains("baseModel=\"\"");
     if (!isBaseModel)
-      atoms = JSVParser.getQuotedAttribute(s, "atoms");
-    title = JSVParser.getQuotedAttribute(s, "title");
-    _match = JSVParser.getQuotedAttribute(s, "_match"); // PEAK command creates this
-    xMax = JSVParser.parseFloat(JSVParser.getQuotedAttribute(s, "xMax"));
-    xMin = JSVParser.parseFloat(JSVParser.getQuotedAttribute(s, "xMin"));
-    yMax = JSVParser.parseFloat(JSVParser.getQuotedAttribute(s, "yMax"));
-    yMin = JSVParser.parseFloat(JSVParser.getQuotedAttribute(s, "yMin"));
+      atoms = Parser.getQuotedAttribute(s, "atoms");
+    title = Parser.getQuotedAttribute(s, "title");
+    _match = Parser.getQuotedAttribute(s, "_match"); // PEAK command creates this
+    xMax = Parser.parseFloat(Parser.getQuotedAttribute(s, "xMax"));
+    xMin = Parser.parseFloat(Parser.getQuotedAttribute(s, "xMin"));
+    yMax = Parser.parseFloat(Parser.getQuotedAttribute(s, "yMax"));
+    yMin = Parser.parseFloat(Parser.getQuotedAttribute(s, "yMin"));
   }
 
   public boolean isClearAll() {

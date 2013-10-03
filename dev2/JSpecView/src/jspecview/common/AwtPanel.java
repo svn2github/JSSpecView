@@ -73,8 +73,8 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 
-import org.jmol.util.JSVLogger;
-import org.jmol.util.JSVTextFormat;
+import org.jmol.util.Logger;
+import org.jmol.util.TextFormat;
 
 import jspecview.common.Annotation.AType;
 import jspecview.export.Exporter;
@@ -96,7 +96,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 
   @Override
   public void finalize() {
-    JSVLogger.info("JSVPanel " + this + " finalized");
+    Logger.info("JSVPanel " + this + " finalized");
   }
 
   private AwtPopupMenu popup;
@@ -229,7 +229,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
       zoomBoxColor2 = color;
       break;
     default:
-      JSVLogger.warn("AwtPanel --- unrecognized color: " + st);
+      Logger.warn("AwtPanel --- unrecognized color: " + st);
       break;
     }
   }
@@ -320,7 +320,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   public Color getColor(ScriptToken whatColor) {
     switch (whatColor) {
     default:
-      JSVLogger.error("awtgraphset missing color " + whatColor);
+      Logger.error("awtgraphset missing color " + whatColor);
       return Color.BLACK;
     case ZOOMBOXCOLOR2:
       return zoomBoxColor2;
@@ -550,7 +550,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
 				String s = ex.getMessage();
 				if (s == null)
 					return;
-				s = JSVTextFormat.simpleReplace(s, "not accepting job.",
+				s = TextFormat.simpleReplace(s, "not accepting job.",
 						"not accepting jobs.");
 				// not my fault -- Windows grammar error!
 				showMessage(s, "Printer Error");
@@ -673,7 +673,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, MouseListen
   }
 
 	public void showMessage(String msg, String title) {
-		JSVLogger.info(msg);
+		Logger.info(msg);
 		JOptionPane.showMessageDialog(this, msg, title, (msg.startsWith("<html>") ? JOptionPane.INFORMATION_MESSAGE 
 				: JOptionPane.PLAIN_MESSAGE));	
 		getFocusNow(true);

@@ -38,11 +38,11 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
-import org.jmol.util.JSVEscape;
-import org.jmol.util.JSVLogger;
-import org.jmol.util.JSVParser;
-import org.jmol.util.JSVSB;
-import org.jmol.util.JSVTextFormat;
+import org.jmol.util.Escape;
+import org.jmol.util.Logger;
+import org.jmol.util.Parser;
+import org.jmol.util.SB;
+import org.jmol.util.TextFormat;
 
 import jspecview.common.JSVersion;
 
@@ -63,7 +63,7 @@ public class JSVFileManager {
 		if (name == null)
 			return null;
 		BufferedReader br;
-		JSVSB sb = new JSVSB();
+		SB sb = new SB();
 		try {
 			br = getBufferedReaderFromName(name, appletDocumentBase, null);
 			String line;
@@ -142,7 +142,7 @@ public class JSVFileManager {
       throws IOException {
     String[] subFileList = null;
     if (name.indexOf("|") >= 0) {
-      subFileList = JSVTextFormat.split(name, "|");
+      subFileList = TextFormat.split(name, "|");
       if (subFileList != null && subFileList.length > 0)
         name = subFileList[0];
     }
@@ -187,7 +187,7 @@ public class JSVFileManager {
 			URL url = (isApplet ? new URL(appletDocumentBase, name) : new URL(name));
 			name = url.toString();
 			if (showMsg)
-				JSVLogger.info("JSVFileManager opening URL " + url.toString());
+				Logger.info("JSVFileManager opening URL " + url.toString());
 			URLConnection conn = url.openConnection();
 			if (post != null) {
 				conn.setRequestProperty("Content-Type",
@@ -201,7 +201,7 @@ public class JSVFileManager {
 			in = conn.getInputStream();
 		} else {
 			if (showMsg)
-				JSVLogger.info("JSVFileManager opening file " + name);
+				Logger.info("JSVFileManager opening file " + name);
 			File file = new File(name);
 			length = (int) file.length();
 			in = new FileInputStream(file);
@@ -222,27 +222,27 @@ public class JSVFileManager {
 		if (jcamp == null) {
 			System.out.println("creating " + name);
 			boolean isInline = name.startsWith("MOL=");
-			String molFile = (isInline ? JSVTextFormat.simpleReplace(name
+			String molFile = (isInline ? TextFormat.simpleReplace(name
 					.substring(4), "\\n", "\n")
-					: getFileAsString(JSVTextFormat.simpleReplace(nciResolver, "%FILE",
-							JSVEscape.escapeUrl(name.substring(1))), null));
+					: getFileAsString(TextFormat.simpleReplace(nciResolver, "%FILE",
+							Escape.escapeUrl(name.substring(1))), null));
 			int pt = molFile.indexOf("\n");
 			molFile = "/JSpecView " + JSVersion.VERSION + molFile.substring(pt);
-			molFile = JSVTextFormat.replaceAllCharacters(molFile, "?", '_');
+			molFile = TextFormat.replaceAllCharacters(molFile, "?", '_');
 			String json = getFileAsString(nmrdbServer + molFile, null);
 			System.out.println(json);
-			json = JSVTextFormat.simpleReplace(json, "\\r\\n", "\n");
-			json = JSVTextFormat.simpleReplace(json, "\\t", "\t");
-			json = JSVTextFormat.simpleReplace(json, "\\n", "\n");
-			molFile = JSVParser.getQuotedJSONAttribute(json, "molfile", null);
-			String xml = JSVParser.getQuotedJSONAttribute(json, "xml", null);
-			xml = JSVTextFormat.simpleReplace(xml, "</", "\n</");
-			xml = JSVTextFormat.simpleReplace(xml, "><", ">\n<");
-			xml = JSVTextFormat.simpleReplace(xml, "\\\"", "\"");
-			jcamp = JSVParser.getQuotedJSONAttribute(json, "jcamp", null);
+			json = TextFormat.simpleReplace(json, "\\r\\n", "\n");
+			json = TextFormat.simpleReplace(json, "\\t", "\t");
+			json = TextFormat.simpleReplace(json, "\\n", "\n");
+			molFile = Parser.getQuotedJSONAttribute(json, "molfile", null);
+			String xml = Parser.getQuotedJSONAttribute(json, "xml", null);
+			xml = TextFormat.simpleReplace(xml, "</", "\n</");
+			xml = TextFormat.simpleReplace(xml, "><", ">\n<");
+			xml = TextFormat.simpleReplace(xml, "\\\"", "\"");
+			jcamp = Parser.getQuotedJSONAttribute(json, "jcamp", null);
 			jcamp = "##TITLE=" + (isInline ? "JMOL SIMULATION" : name) + "\n"
 					+ jcamp.substring(jcamp.indexOf("\n##") + 1);
-			JSVLogger
+			Logger
 					.info(jcamp.substring(0, jcamp.indexOf("##XYDATA") + 40) + "...");
 			pt = 0;
 			pt = jcamp.indexOf("##.");
@@ -251,7 +251,7 @@ public class JSVFileManager {
 			if (isInline && pt1 > 0)
 				id = id.substring(pt1 + 4, (id + "'").indexOf("'", pt1 + 4));
 			jcamp = jcamp.substring(0, pt) + "##$MODELS=\n<Models>\n"
-					+ "<ModelData id=" + JSVEscape.escape(id) + "\n type=\"MOL\">\n"
+					+ "<ModelData id=" + Escape.escape(id) + "\n type=\"MOL\">\n"
 					+ molFile + "</ModelData>\n</Models>\n" + "##$SIGNALS=\n" + xml
 					+ "\n" + jcamp.substring(pt);
 			htSimulate.put(key, jcamp);
@@ -278,7 +278,7 @@ public class JSVFileManager {
       error[0] = "Error loading resource " + name;
       return null;
     }
-    JSVSB sb = new JSVSB();
+    SB sb = new SB();
     try {
       //  turns out from the Jar file
       //   it's a sun.net.www.protocol.jar.JarURLConnection$JarURLInputStream
@@ -332,11 +332,11 @@ public class JSVFileManager {
       String line = null;
       while ((line = br.readLine()) != null) {
         writer.write(line);
-        writer.write(JSVTextFormat.newLine);
+        writer.write(TextFormat.newLine);
       }
       writer.close();
     } catch (Exception e) {
-    	JSVLogger.error(e.getMessage());
+    	Logger.error(e.getMessage());
     }
   }
 

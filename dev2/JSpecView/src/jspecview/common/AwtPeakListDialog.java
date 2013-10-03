@@ -22,7 +22,7 @@ package jspecview.common;
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
 
-import org.jmol.util.JSVTextFormat;
+import org.jmol.util.TextFormat;
 
 import jspecview.common.Annotation.AType;
 
@@ -73,7 +73,7 @@ class AwtPeakListDialog extends AwtAnnotationDialog {
 			y = (c == null ? (pd.getView().minYOnScale * f 
 					+ pd.getView().maxYOnScale) * (1 -f) : c.getYVal());
 		}		
-		String sy = JSVTextFormat.formatDecimal(y, y < 1000 ? 2 : -2); //  "#0.00" : "0.00E0"
+		String sy = TextFormat.formatDecimal(y, y < 1000 ? 2 : -2); //  "#0.00" : "0.00E0"
 		txtThreshold.setText(" " + sy);
 		//setVisible(true);
 	}

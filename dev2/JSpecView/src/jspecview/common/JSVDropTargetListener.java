@@ -12,9 +12,9 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
-import org.jmol.util.JSVEscape;
-import org.jmol.util.JSVLogger;
-import org.jmol.util.JSVSB;
+import org.jmol.util.Escape;
+import org.jmol.util.Logger;
+import org.jmol.util.SB;
 
 
 public class JSVDropTargetListener implements DropTargetListener {
@@ -51,7 +51,7 @@ public class JSVDropTargetListener implements DropTargetListener {
 	// Called when the user finishes or cancels the drag operation.
 	@SuppressWarnings("unchecked")
 	public void drop(DropTargetDropEvent dtde) {
-		JSVLogger.debug("Drop detected...");
+		Logger.debug("Drop detected...");
 		Transferable t = dtde.getTransferable();
 		boolean isAccepted = false;
 		boolean doAppend = false;
@@ -77,20 +77,20 @@ public class JSVDropTargetListener implements DropTargetListener {
 				o = t.getTransferData(DataFlavor.javaFileListFlavor);
 				isAccepted = true;
 			} catch (Exception e) {
-				JSVLogger.error("transfer failed");
+				Logger.error("transfer failed");
 			}
 			// if o is still null we had an exception
 			if (o instanceof List) {
 				List<File> list = (List<File>) o;
 				dtde.getDropTargetContext().dropComplete(true);
 				dtde = null;
-				JSVSB sb = new JSVSB();
+				SB sb = new SB();
 				sb.append(prefix);
 				for (int i = 0; i < list.size(); i++)
-					sb.append(cmd + JSVEscape.escape(list.get(i).getAbsolutePath()) + ";");
+					sb.append(cmd + Escape.escape(list.get(i).getAbsolutePath()) + ";");
 				sb.append(postfix);
 				cmd = sb.toString();
-				JSVLogger.info("Drop command = " + cmd);
+				Logger.info("Drop command = " + cmd);
 				si.runScript(cmd);
 				/*
 				 * 
@@ -105,7 +105,7 @@ public class JSVDropTargetListener implements DropTargetListener {
 			}
 		}
 
-		JSVLogger.debug("browsing supported flavours to find something useful...");
+		Logger.debug("browsing supported flavours to find something useful...");
 		DataFlavor[] df = t.getTransferDataFlavors();
 
 		if (df == null || df.length == 0)
@@ -114,9 +114,9 @@ public class JSVDropTargetListener implements DropTargetListener {
 			DataFlavor flavor = df[i];
 			Object o = null;
 			if (true) {
-				JSVLogger.info("df " + i + " flavor " + flavor);
-				JSVLogger.info("  class: " + flavor.getRepresentationClass().getName());
-				JSVLogger.info("  mime : " + flavor.getMimeType());
+				Logger.info("df " + i + " flavor " + flavor);
+				Logger.info("  class: " + flavor.getRepresentationClass().getName());
+				Logger.info("  mime : " + flavor.getMimeType());
 			}
 
 			if (flavor.getMimeType().startsWith("text/uri-list")
@@ -144,13 +144,13 @@ public class JSVDropTargetListener implements DropTargetListener {
 					isAccepted = true;
 					o = t.getTransferData(flavor);
 				} catch (Exception e) {
-					JSVLogger.error(null, e);
+					Logger.error(null, e);
 				}
 
 				if (o instanceof String) {
 					dtde.getDropTargetContext().dropComplete(true);
-					if (JSVLogger.debugging)
-						JSVLogger.debug("  String: " + o.toString());
+					if (Logger.debugging)
+						Logger.debug("  String: " + o.toString());
 					fileToLoad = o.toString();
 					break;
 				}
@@ -180,13 +180,13 @@ public class JSVDropTargetListener implements DropTargetListener {
 					isAccepted = true;
 					o = t.getTransferData(df[i]);
 				} catch (Exception e) {
-					JSVLogger.error(null, e);
+					Logger.error(null, e);
 				}
 				if (o instanceof String) {
 					String content = (String) o;
 					dtde.getDropTargetContext().dropComplete(true);
-					if (JSVLogger.debugging)
-						JSVLogger.debug("  String: " + content);
+					if (Logger.debugging)
+						Logger.debug("  String: " + content);
 					if (content.startsWith("file:/")) {
 						fileToLoad = content;
 						break;
@@ -197,8 +197,8 @@ public class JSVDropTargetListener implements DropTargetListener {
 		if (!isAccepted)
 			dtde.rejectDrop();
 		if (fileToLoad != null) {
-			cmd = prefix + cmd + JSVEscape.escape(fileToLoad) + "\";" + postfix;
-			JSVLogger.info("Drop command = " + cmd);
+			cmd = prefix + cmd + Escape.escape(fileToLoad) + "\";" + postfix;
+			Logger.info("Drop command = " + cmd);
 			si.runScript(cmd);
 		}
 	}

@@ -30,7 +30,7 @@ import java.util.BitSet;
 
 
 
-public class JSVParser {
+public class Parser {
 
   /// general static string-parsing class ///
 
@@ -105,9 +105,9 @@ public class JSVParser {
 
   private static String fixDataString(String str) {
     str = str.replace(';', str.indexOf('\n') < 0 ? '\n' : ' ');
-    str = JSVTextFormat.trim(str, "\n \t");
-    str = JSVTextFormat.simpleReplace(str, "\n ", "\n");
-    str = JSVTextFormat.simpleReplace(str, "\n\n", "\n");
+    str = TextFormat.trim(str, "\n \t");
+    str = TextFormat.simpleReplace(str, "\n ", "\n");
+    str = TextFormat.simpleReplace(str, "\n\n", "\n");
     return str;    
   }
   
@@ -149,7 +149,7 @@ public class JSVParser {
       } 
     }
     if (iX != nX) {
-      JSVLogger.info("Error reading 3D data -- nX = " + nX + ", but only " + iX + " blocks read");      
+      Logger.info("Error reading 3D data -- nX = " + nX + ", but only " + iX + " blocks read");      
       return new float[1][1][1];
     }
     return data;

@@ -29,9 +29,9 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.TreeMap;
 
-import org.jmol.util.JSVSB;
-import org.jmol.util.JSVTextFormat;
-import org.jmol.util.JSVXmlReader;
+import org.jmol.util.SB;
+import org.jmol.util.TextFormat;
+import org.jmol.util.XmlReader;
 
 import jspecview.common.AwtParameters;
 import jspecview.common.Parameters;
@@ -54,7 +54,7 @@ public class DisplaySchemesProcessor {
   /** The list of displaySchemes that is loaded from file */
   private TreeMap<String, Parameters> displaySchemes;
 
-  private JSVXmlReader reader;
+  private XmlReader reader;
 
   /**
    * Initialises the <code>DisplaySchemesProcessor</code>
@@ -145,13 +145,13 @@ public class DisplaySchemesProcessor {
    */
   public boolean load(BufferedReader br) {
 
-    reader = new JSVXmlReader(br);
+    reader = new XmlReader(br);
     String defaultDS = "Default";
     Parameters ds = null;
     String attr;
     try {
       while (reader.hasNext()) {
-        if (reader.nextEvent() != JSVXmlReader.START_ELEMENT)
+        if (reader.nextEvent() != XmlReader.START_ELEMENT)
           continue;
         String theTag = reader.getTagName();
         if (theTag.equals("displayschemes")) {
@@ -309,9 +309,9 @@ public class DisplaySchemesProcessor {
     buffer.write("</displaySchemes>");
     buffer.flush();
 
-    JSVSB outBuffer = new JSVSB();
-    outBuffer.append("<?xml version=\"1.0\"?>" + JSVTextFormat.newLine);
-    outBuffer.append("<displaySchemes default=\""+ defaultDSName +"\">" + JSVTextFormat.newLine);
+    SB outBuffer = new SB();
+    outBuffer.append("<?xml version=\"1.0\"?>" + TextFormat.newLine);
+    outBuffer.append("<displaySchemes default=\""+ defaultDSName +"\">" + TextFormat.newLine);
     outBuffer.append(sw.getBuffer().toString());
 
     writer.write(outBuffer.toString());

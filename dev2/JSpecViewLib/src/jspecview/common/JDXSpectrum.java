@@ -24,7 +24,7 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.List;
 
-import org.jmol.util.JSVLogger;
+import org.jmol.util.Logger;
 
 import jspecview.source.JDXSourceStreamTokenizer;
 
@@ -142,8 +142,8 @@ public class JDXSpectrum extends JDXDataObject {
     this.piUnitsY = piUnitsY;
     for (int i = list.size(); --i >= 0; )
       peakList.get(i).spectrum = this;
-    if (JSVLogger.debugging)
-      JSVLogger.info("Spectrum " + getTitle() + " peaks: " + list.size());
+    if (Logger.debugging)
+      Logger.info("Spectrum " + getTitle() + " peaks: " + list.size());
     return list.size();
   }
 

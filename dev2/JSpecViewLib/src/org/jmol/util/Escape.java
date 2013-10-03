@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public class JSVEscape {
+public class Escape {
 
   private final static String escapable = "\\\\\tt\rr\nn\"\""; 
 
@@ -50,7 +50,7 @@ public class JSVEscape {
         int pt = -1;
         char ch = escapable.charAt(i++);
         char ch2 = escapable.charAt(i++);
-        JSVSB sb = new JSVSB();
+        SB sb = new SB();
         int pt0 = 0;
         while ((pt = str.indexOf(ch, pt + 1)) >= 0) {
           sb.append(str.substring(pt0, pt)).appendC('\\').appendC(ch2);
@@ -76,7 +76,7 @@ public class JSVEscape {
 
     //Logger.debug(infoType+" -- "+info);
 
-    JSVSB sb = new JSVSB();
+    SB sb = new SB();
     String sep = "";
     if (info == null)
       return packageJSON(infoType, (String) null, addCR);
@@ -216,12 +216,12 @@ public class JSVEscape {
   private static String fixString(String s) {
     if (s == null || s.indexOf("{\"") == 0) //don't doubly fix JSON strings when retrieving status
       return s;
-    s = JSVTextFormat.simpleReplace(s, "\"", "''");
-    s = JSVTextFormat.simpleReplace(s, "\n", " | ");
+    s = TextFormat.simpleReplace(s, "\"", "''");
+    s = TextFormat.simpleReplace(s, "\n", " | ");
     return "\"" + s + "\"";
   }
 
-  private static String packageJSON(String infoType, JSVSB sb, boolean addCR) {
+  private static String packageJSON(String infoType, SB sb, boolean addCR) {
     return packageJSON(infoType, sb.toString(), addCR);
   }
 
@@ -232,12 +232,12 @@ public class JSVEscape {
   }
 
   public static String escapeUrl(String url) {
-    url = JSVTextFormat.simpleReplace(url, "\n", "");
-    url = JSVTextFormat.simpleReplace(url, "%", "%25");
-    url = JSVTextFormat.simpleReplace(url, "[", "%5B");
-    url = JSVTextFormat.simpleReplace(url, "]", "%5D");
-    url = JSVTextFormat.simpleReplace(url, " ", "%20");
-    url = JSVTextFormat.simpleReplace(url, "?", "%3F");
+    url = TextFormat.simpleReplace(url, "\n", "");
+    url = TextFormat.simpleReplace(url, "%", "%25");
+    url = TextFormat.simpleReplace(url, "[", "%5B");
+    url = TextFormat.simpleReplace(url, "]", "%5D");
+    url = TextFormat.simpleReplace(url, " ", "%20");
+    url = TextFormat.simpleReplace(url, "?", "%3F");
     return url;
   }
 

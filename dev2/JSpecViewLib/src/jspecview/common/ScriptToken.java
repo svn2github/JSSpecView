@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.jmol.util.JSVSB;
+import org.jmol.util.SB;
 
 
 
@@ -244,7 +244,7 @@ public enum ScriptToken {
   public static String getNameList(List<ScriptToken> list) {
     if (list.size() == 0)
       return "";
-    JSVSB sb = new JSVSB();
+    SB sb = new SB();
     for (int i = 0; i < list.size(); i++)
       sb.append(",").append(list.get(i).toString());
     return sb.toString().substring(1);

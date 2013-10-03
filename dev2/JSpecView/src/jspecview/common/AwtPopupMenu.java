@@ -32,8 +32,8 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
-import org.jmol.util.JSVLogger;
-import org.jmol.util.JSVParser;
+import org.jmol.util.Logger;
+import org.jmol.util.Parser;
 
 import jspecview.common.JDXSpectrum;
 import jspecview.common.Annotation.AType;
@@ -316,7 +316,7 @@ public class AwtPopupMenu extends JPopupMenu {
 
   protected static void runScript(ScriptInterface scripter, String cmd) {
     if (scripter == null)
-      JSVLogger.error("scripter was null for " + cmd);
+      Logger.error("scripter was null for " + cmd);
     else
       scripter.runScript(cmd);
   }
@@ -336,7 +336,7 @@ public class AwtPopupMenu extends JPopupMenu {
 			String offset = jsvp.getInput(
 					"Enter a vertical offset in percent for stacked plots", "Overlay",
 					recentStackPercent);
-			if (offset == null || Float.isNaN(JSVParser.parseFloat(offset)))
+			if (offset == null || Float.isNaN(Parser.parseFloat(offset)))
 				return;
 			recentStackPercent = offset;
 			runScript(scripter, ScriptToken.STACKOFFSETY + " " + offset);

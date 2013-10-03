@@ -26,8 +26,8 @@ import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 
-import org.jmol.util.JSVBase64;
-import org.jmol.util.JSVXmlReader;
+import org.jmol.util.Base64;
+import org.jmol.util.XmlReader;
 
 
 
@@ -244,7 +244,7 @@ class AnIMLReader extends XMLReader {
 
   private void nextStartTag() throws IOException {
     reader.nextStartTag();
-    while (reader.getTagType() == JSVXmlReader.COMMENT) {
+    while (reader.getTagType() == XmlReader.COMMENT) {
       reader.nextStartTag();
     }
   }
@@ -261,7 +261,7 @@ class AnIMLReader extends XMLReader {
       System.out.println(npoints + " individual Y values now read");
     } else if (tagName.equals("encodedvalueset")) {
       attrList = reader.getCharacters();
-      byte[] dataArray = JSVBase64.decodeBase64(attrList);
+      byte[] dataArray = Base64.decodeBase64(attrList);
       int ij = 0;
       if (dataArray.length != 0) {
         ByteBuffer byte_buffer = ByteBuffer.wrap(dataArray).order(

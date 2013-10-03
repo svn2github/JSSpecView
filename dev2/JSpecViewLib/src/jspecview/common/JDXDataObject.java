@@ -1,8 +1,8 @@
 package jspecview.common;
 
-import org.jmol.util.JSVLogger;
-import org.jmol.util.JSVParser;
-import org.jmol.util.JSVTextFormat;
+import org.jmol.util.Logger;
+import org.jmol.util.Parser;
+import org.jmol.util.TextFormat;
 
 import jspecview.common.Annotation.AType;
 import jspecview.exception.JSpecViewException;
@@ -176,7 +176,7 @@ public abstract class JDXDataObject extends JDXHeader {
 	public void setObservedNucleus(String value) {
 		observedNucl = value;
 		if (numDim == 1)
-  		parent.nucleusX = nucleusX = JSVTextFormat.trim(value,"[]^<>");
+  		parent.nucleusX = nucleusX = TextFormat.trim(value,"[]^<>");
 	}
 
   /**
@@ -254,7 +254,7 @@ public abstract class JDXDataObject extends JDXHeader {
       freq2dX = freq;
     else
       freq2dY = freq;
-    JSVLogger.info("Freq for " + nuc + " = " + freq);
+    Logger.info("Freq for " + nuc + " = " + freq);
   }
 
 
@@ -426,7 +426,7 @@ public abstract class JDXDataObject extends JDXHeader {
     int pt = 0;
     while (pt < nuc.length() && !Character.isDigit(nuc.charAt(pt)))
       pt++;
-    pt = JSVParser.parseInt(nuc.substring(pt));
+    pt = Parser.parseInt(nuc.substring(pt));
     int i = 0;
     for (; i < gyroData.length; i += 2)
       if (gyroData[i] >= pt)
@@ -651,7 +651,7 @@ public abstract class JDXDataObject extends JDXHeader {
 				// 2D?
 			}
 		}
-		return (dx < 0.1 ? "" : JSVTextFormat.formatDecimal(dx, precision) + units);
+		return (dx < 0.1 ? "" : TextFormat.formatDecimal(dx, precision) + units);
 	}
 
   public boolean isNMR() {

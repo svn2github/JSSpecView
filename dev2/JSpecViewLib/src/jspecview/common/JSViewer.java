@@ -5,11 +5,11 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import org.jmol.util.JSVEscape;
-import org.jmol.util.JSVLogger;
-import org.jmol.util.JSVParser;
-import org.jmol.util.JSVSB;
-import org.jmol.util.JSVTextFormat;
+import org.jmol.util.Escape;
+import org.jmol.util.Logger;
+import org.jmol.util.Parser;
+import org.jmol.util.SB;
+import org.jmol.util.TextFormat;
 
 import jspecview.common.Annotation.AType;
 import jspecview.common.JDXSpectrum.IRMode;
@@ -36,8 +36,8 @@ public class JSViewer {
       script = "";
     String msg = null;
     script = script.trim();
-    if (JSVLogger.debugging)
-      JSVLogger.info("RUNSCRIPT " + script);
+    if (Logger.debugging)
+      Logger.info("RUNSCRIPT " + script);
     JSVPanel jsvp = si.getSelectedPanel();
     boolean isOK = true;
     int nErrorsLeft = 10;
@@ -51,11 +51,11 @@ public class JSViewer {
         continue;
       ScriptToken st = ScriptToken.getScriptToken(key);
       String value = ScriptToken.getValue(st, eachParam, token);
-      JSVLogger.info("KEY-> " + key + " VALUE-> " + value + " : " + st);
+      Logger.info("KEY-> " + key + " VALUE-> " + value + " : " + st);
       try {
         switch (st) {
         case UNKNOWN:
-          JSVLogger.info("Unrecognized parameter: " + key);
+          Logger.info("Unrecognized parameter: " + key);
           --nErrorsLeft;
           break;
         default:
@@ -76,9 +76,9 @@ public class JSViewer {
           jsvp = si.getSelectedPanel();
           break;
         case DEBUG:
-          JSVLogger
-              .setLogLevel(value.toLowerCase().equals("high") ? JSVLogger.LEVEL_DEBUGHIGH
-                  : Parameters.isTrue(value) ? JSVLogger.LEVEL_DEBUG : JSVLogger.LEVEL_INFO);
+          Logger
+              .setLogLevel(value.toLowerCase().equals("high") ? Logger.LEVEL_DEBUGHIGH
+                  : Parameters.isTrue(value) ? Logger.LEVEL_DEBUG : Logger.LEVEL_INFO);
           break;
         case EXPORT:
           msg = si.execExport(jsvp, value);
@@ -90,7 +90,7 @@ public class JSViewer {
         case GETPROPERTY:
         	Map<String, Object> info = (jsvp == null ? null : getPropertyAsJavaObject(si, value));
         	if (info != null)
-        		jsvp.showMessage(JSVEscape.toJSON(null, info, true), value);
+        		jsvp.showMessage(Escape.toJSON(null, info, true), value);
         	break;
         case GETSOLUTIONCOLOR:
           if (jsvp != null)
@@ -125,7 +125,7 @@ public class JSViewer {
           si.syncToJmol(value);
           break;
         case JSV:
-        	syncScript(si, JSVTextFormat.trimQuotes(value));
+        	syncScript(si, TextFormat.trimQuotes(value));
         	break;
         case LABEL:
           if (jsvp != null)
@@ -214,7 +214,7 @@ public class JSViewer {
             return false;
           break;
         case STACKOFFSETY:
-        	int offset = JSVParser.parseInt("" + JSVParser.parseFloat(value));
+        	int offset = Parser.parseInt("" + Parser.parseFloat(value));
         	if (jsvp != null&& offset != Integer.MIN_VALUE)
         		jsvp.getPanelData().setYStackOffsetPercent(offset);
         	break;
@@ -237,8 +237,8 @@ public class JSViewer {
         }
       } catch (Exception e) {
       	System.out.println(e.getMessage());
-        JSVLogger.error(e.getMessage());
-        if (JSVLogger.debugging)
+        Logger.error(e.getMessage());
+        if (Logger.debugging)
         	e.printStackTrace();
         isOK = false;
         --nErrorsLeft;
@@ -254,7 +254,7 @@ public class JSViewer {
     try {
       List<String> tokens = ScriptToken.getTokens(value);
       value = " type=\"" + tokens.get(0).toUpperCase() + "\" _match=\""
-          + JSVTextFormat.trimQuotes(tokens.get(1).toUpperCase()) + "\"";
+          + TextFormat.trimQuotes(tokens.get(1).toUpperCase()) + "\"";
       if (tokens.size() > 2 && tokens.get(2).equalsIgnoreCase("all"))
         value += " title=\"ALL\"";
       processPeakPickEvent(si, new PeakInfo(value), false); // false == true here
@@ -460,7 +460,7 @@ public class JSViewer {
   public static void syncScript(ScriptInterface si, String peakScript) {
   	if (peakScript.equals("TEST"))
   		peakScript = testScript;
-    JSVLogger.info(Thread.currentThread() + "Jmol>JSV " + peakScript);
+    Logger.info(Thread.currentThread() + "Jmol>JSV " + peakScript);
     if (peakScript.indexOf("<PeakData") < 0) {
       runScriptNow(si, peakScript);
       if (peakScript.indexOf("#SYNC_PEAKS") >= 0) {
@@ -468,15 +468,15 @@ public class JSViewer {
       	if (source == null)
       		return;
       	try {
-      	String file = "file=" + JSVEscape.escape(source.getFilePath());
+      	String file = "file=" + Escape.escape(source.getFilePath());
       	ArrayList<PeakInfo> peaks = source.getSpectra().get(0).getPeakList();
-      	JSVSB sb = new JSVSB();
+      	SB sb = new SB();
       	sb.append("[");
       	int n = peaks.size();
       	for (int i = 0; i < n; i++) {
       		String s = peaks.get(i).toString();
       		s = s + " " + file;
-      		sb.append(JSVEscape.escape(s));
+      		sb.append(Escape.escape(s));
       		if (i > 0)
       			sb.append(",");
       	}
@@ -489,23 +489,23 @@ public class JSViewer {
       return;
     }
     // todo: why the quotes??
-    peakScript = JSVTextFormat.simpleReplace(peakScript, "\\\"", "");
-    String file = JSVParser.getQuotedAttribute(peakScript, "file");
+    peakScript = TextFormat.simpleReplace(peakScript, "\\\"", "");
+    String file = Parser.getQuotedAttribute(peakScript, "file");
     System.out.println("file2=" + file);
-    String index = JSVParser.getQuotedAttribute(peakScript, "index");
+    String index = Parser.getQuotedAttribute(peakScript, "index");
     if (file == null || index == null)
       return;
-    String model = JSVParser.getQuotedAttribute(peakScript, "model");
-    String jmolSource = JSVParser.getQuotedAttribute(peakScript, "src");
+    String model = Parser.getQuotedAttribute(peakScript, "model");
+    String jmolSource = Parser.getQuotedAttribute(peakScript, "src");
     String modelSent = (jmolSource != null && jmolSource.startsWith("Jmol") ? null : si.getReturnFromJmolModel());
     
     if (model != null && modelSent != null && !model.equals(modelSent)) {
-    	JSVLogger.info("JSV ignoring model " + model + "; should be " + modelSent);
+    	Logger.info("JSV ignoring model " + model + "; should be " + modelSent);
     	return;
     }
     si.setReturnFromJmolModel(null);
     if (si.getPanelNodes().size() == 0 || !checkFileAlreadyLoaded(si, file)) {
-      JSVLogger.info("file " + file + " not found -- JSViewer closing all and reopening");
+      Logger.info("file " + file + " not found -- JSViewer closing all and reopening");
       si.syncLoad(file);
     }
     //System.out.println(Thread.currentThread() + "syncscript jsvp=" + si.getSelectedPanel() + " s0=" + si.getSelectedPanel().getSpectrum());
@@ -513,7 +513,7 @@ public class JSViewer {
     //System.out.println(Thread.currentThread() + "syncscript pi=" + pi);
     JSVPanel jsvp = si.getSelectedPanel();
     //System.out.println(Thread.currentThread() + "syncscript jsvp=" + jsvp);
-    String type = JSVParser.getQuotedAttribute(peakScript, "type");
+    String type = Parser.getQuotedAttribute(peakScript, "type");
     //System.out.println(Thread.currentThread() + "syncscript --selectSpectrum2 "  + pi + " " + type + " "  + model + " s=" + jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
     jsvp.getPanelData().selectSpectrum(file, type, model, true);
     //System.out.println(Thread.currentThread() + "syncscript --selectSpectrum3 "  + pi + " " + type + " "  + model + " s=" + jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
@@ -547,8 +547,8 @@ public class JSViewer {
   	List<JSVPanelNode> panelNodes = si.getPanelNodes();
     if (panelNodes == null)
       return null;
-    String file = JSVParser.getQuotedAttribute(peakScript, "file");
-    String index = JSVParser.getQuotedAttribute(peakScript, "index");
+    String file = Parser.getQuotedAttribute(peakScript, "file");
+    String index = Parser.getQuotedAttribute(peakScript, "index");
     PeakInfo pi = null;
     for (int i = panelNodes.size(); --i >= 0;)
       panelNodes.get(i).jsvp.getPanelData().addPeakHighlight(null);
@@ -643,7 +643,7 @@ public class JSViewer {
     if (pi == null)
       pi = spec.getBasePeakInfo();
     pd.addPeakHighlight(pi);
-    JSVLogger.info(Thread.currentThread() + "JSViewer sendFrameChange "  + jsvp);
+    Logger.info(Thread.currentThread() + "JSViewer sendFrameChange "  + jsvp);
     syncToJmol(si, pi);
   }
 
@@ -739,7 +739,7 @@ public class JSViewer {
 		if (value.indexOf("*") < 0) {
 			// replace "3.1.1" with "3.1*1"
 			String[] tokens = value.split(" ");
-			JSVSB sb = new JSVSB();
+			SB sb = new SB();
 			for (int i = 0; i < tokens.length; i++) {
 				int pt = tokens[i].indexOf('.');
 				if (pt != tokens[i].lastIndexOf('.'))
@@ -755,8 +755,8 @@ public class JSViewer {
 		} else if (value.startsWith("\"")) {
 			list = ScriptToken.getTokens(value);
 		} else {
-			value = JSVTextFormat.simpleReplace(value, "_", " _ ");
-			value = JSVTextFormat.simpleReplace(value, "-", " - ");
+			value = TextFormat.simpleReplace(value, "_", " _ ");
+			value = TextFormat.simpleReplace(value, "-", " - ");
 			list = ScriptToken.getTokens(value);
 			list0 = ScriptToken.getTokens(JSVPanelNode
 					.getSpectrumListAsString(panelNodes));
@@ -767,7 +767,7 @@ public class JSViewer {
 		String id0 = (selectedPanel == null ? prefix : JSVPanelNode.findNode(
 				selectedPanel, panelNodes).id);
 		id0 = id0.substring(0, id0.indexOf(".") + 1);
-		JSVSB sb = new JSVSB();
+		SB sb = new SB();
 		int n = list.size();
 		String idLast = null;
 		for (int i = 0; i < n; i++) {
@@ -800,7 +800,7 @@ public class JSViewer {
 			}
 			JSVPanelNode node;
 			if (id.startsWith("\"")) {
-				id = JSVTextFormat.trim(id, "\"");
+				id = TextFormat.trim(id, "\"");
 				for (int j = 0; j < panelNodes.size(); j++) {
 					node = panelNodes.get(j);
 					if (node.fileName != null && node.fileName.startsWith(id)

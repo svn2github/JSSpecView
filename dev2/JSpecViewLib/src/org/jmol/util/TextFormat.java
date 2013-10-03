@@ -26,7 +26,7 @@
 package org.jmol.util;
 
 
-public class JSVTextFormat {
+public class TextFormat {
 
   private final static String[] formattingStrings = { "0", "0.0", "0.00", "0.000",
       "0.0000", "0.00000", "0.000000", "0.0000000", "0.00000000", "0.000000000" };
@@ -91,8 +91,8 @@ public class JSVTextFormat {
       }
       String s = ("" + d).toUpperCase();
       int i = s.indexOf("E");
-      n = JSVParser.parseInt(s.substring(i + 1)) + n;
-      return (i < 0 ? "" + value : formatDecimal(JSVParser.parseFloat(s.substring(
+      n = Parser.parseInt(s.substring(i + 1)) + n;
+      return (i < 0 ? "" + value : formatDecimal(Parser.parseFloat(s.substring(
           0, i)), decimalDigits - 1)
           + "E" + n);
     }
@@ -108,7 +108,7 @@ public class JSVTextFormat {
       return s1 + formattingStrings[decimalDigits].substring(1);
     int pt1 = s1.indexOf("E-");
     if (pt1 > 0) {
-      n = JSVParser.parseInt(s1.substring(pt1 + 1));
+      n = Parser.parseInt(s1.substring(pt1 + 1));
       // 3.567E-2
       // 0.03567
       s1 = "0." + zeros.substring(0, -n - 1) + s1.substring(0, 1) + s1.substring(2, pt1);
@@ -120,7 +120,7 @@ public class JSVTextFormat {
     // 3567.800000000
     // 1.234E10 %3.8f -> 12340000000.00000000
     if (pt1 > 0) {
-      n = JSVParser.parseInt(s1.substring(pt1 + 1));
+      n = Parser.parseInt(s1.substring(pt1 + 1));
       s1 = s1.substring(0, 1) + s1.substring(2, pt1) + zeros;
       s1 = s1.substring(0, n + 1) + "." + s1.substring(n + 1);
       pt = s1.indexOf(".");
@@ -137,7 +137,7 @@ public class JSVTextFormat {
           value + (isNeg ? -1 : 1) * formatAdds[decimalDigits], decimalDigits);
     }
 
-    JSVSB sb = JSVSB.newS(s1.substring(0, (decimalDigits == 0 ? pt
+    SB sb = SB.newS(s1.substring(0, (decimalDigits == 0 ? pt
         : ++pt)));
     for (int i = 0; i < decimalDigits; i++, pt++) {
       if (pt < len)
@@ -172,7 +172,7 @@ public class JSVTextFormat {
     char padChar = (zeroPad ? '0' : ' ');
     char padChar0 = (isNeg ? '-' : padChar);
 
-    JSVSB sb = new JSVSB();
+    SB sb = new SB();
     if (alignLeft)
       sb.append(value);
     sb.appendC(padChar0);
@@ -396,7 +396,7 @@ public class JSVTextFormat {
     boolean isOnce = (strTo.indexOf(strFrom) >= 0);
     int ipt;
     while (str.indexOf(strFrom) >= 0) {
-      JSVSB s = new JSVSB();
+      SB s = new SB();
       int ipt0 = 0;
       while ((ipt = str.indexOf(strFrom, ipt0)) >= 0) {
         s.append(str.substring(ipt0, ipt)).append(strTo);
@@ -437,14 +437,14 @@ public class JSVTextFormat {
     return split(text, "" + ch);
   }
   
-  public static void leftJustify(JSVSB s, String sFill, String sVal) {
+  public static void leftJustify(SB s, String sFill, String sVal) {
     s.append(sVal);
     int n = sFill.length() - sVal.length();
     if (n > 0)
       s.append(sFill.substring(0, n));
   }
   
-  public static void rightJustify(JSVSB s, String sFill, String sVal) {
+  public static void rightJustify(SB s, String sFill, String sVal) {
     int n = sFill.length() - sVal.length();
     if (n > 0)
       s.append(sFill.substring(0, n));
@@ -539,7 +539,7 @@ public class JSVTextFormat {
   }
 
 	public static String formatDecimalTrimmed(double x, int precision) {
-	  return JSVTextFormat.rtrim(JSVTextFormat.formatDecimal(x, precision), "0"); // 0.##...
+	  return TextFormat.rtrim(TextFormat.formatDecimal(x, precision), "0"); // 0.##...
 	}  
 
   public static String fixExponentInt(double x) {

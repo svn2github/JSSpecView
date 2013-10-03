@@ -25,7 +25,7 @@ package org.jmol.util;
 
 import java.lang.reflect.Array;
 
-final public class JSVArrayUtil {
+final public class ArrayUtil {
 
   public static Object ensureLength(Object array, int minimumLength) {
     if (array != null && Array.getLength(array) >= minimumLength)

@@ -79,10 +79,10 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 
 import org.jmol.api.JSVInterface;
 import org.jmol.api.JmolSyncInterface;
-import org.jmol.util.JSVEscape;
-import org.jmol.util.JSVLogger;
-import org.jmol.util.JSVSB;
-import org.jmol.util.JSVTextFormat;
+import org.jmol.util.Escape;
+import org.jmol.util.Logger;
+import org.jmol.util.SB;
+import org.jmol.util.TextFormat;
 
 import jspecview.applet.JSVAppletPrivatePro;
 import jspecview.common.AwtPanel;
@@ -894,7 +894,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	public synchronized void syncToJmol(String msg) {
-		JSVLogger.info("JSV>Jmol " + msg);
+		Logger.info("JSV>Jmol " + msg);
 		//System.out.println(Thread.currentThread() + "MainFrame sync JSV>Jmol 21"
 			//	+ Thread.currentThread());
 		if (jmol != null) { // MainFrame --> embedding application
@@ -934,7 +934,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	public void execClose(String value, boolean fromScript) {
-		JSVTree.close(this, JSVTextFormat.trimQuotes(value));
+		JSVTree.close(this, TextFormat.trimQuotes(value));
 		if (!fromScript || panelNodes.size() == 0) {
 			validate();
 			repaint();
@@ -1214,7 +1214,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		if (recentFilePaths.contains(filePath))
 			recentFilePaths.remove(filePath);
 		recentFilePaths.add(0, filePath);
-		JSVSB filePaths = new JSVSB();
+		SB filePaths = new SB();
 		int n = recentFilePaths.size();
 		for (int index = 0; index < n; index++)
 			filePaths.append(", ").append(recentFilePaths.get(index));
@@ -1268,7 +1268,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	// debugging
 
 	public void execTest(String value) {
-		System.out.println(JSVEscape.toJSON(null, JSViewer.getPropertyAsJavaObject(this, value), false));
+		System.out.println(Escape.toJSON(null, JSViewer.getPropertyAsJavaObject(this, value), false));
 		//syncScript("Jmol sending to JSpecView: jmolApplet_object__5768809713073075__JSpecView: <PeakData file=\"file:/C:/jmol-dev/workspace/Jmol-documentation/script_documentation/examples-12/jspecview/acetophenone.jdx\" index=\"31\" type=\"13CNMR\" id=\"6\" title=\"carbonyl ~200\" peakShape=\"multiplet\" model=\"acetophenone\" atoms=\"1\" xMax=\"199\" xMin=\"197\"  yMax=\"10000\" yMin=\"0\" />");
 	}
 	public void requestRepaint() {

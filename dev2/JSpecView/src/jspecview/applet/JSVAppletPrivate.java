@@ -53,9 +53,9 @@ import java.util.ArrayList;
 
 import javax.swing.JFrame;
 
-import org.jmol.util.JSVEscape;
-import org.jmol.util.JSVLogger;
-import org.jmol.util.JSVTextFormat;
+import org.jmol.util.Escape;
+import org.jmol.util.Logger;
+import org.jmol.util.TextFormat;
 
 import jspecview.application.TextDialog;
 import jspecview.common.AwtPanel;
@@ -278,7 +278,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	public String getPropertyAsJSON(String key) {
-		return JSVEscape.toJSON(null, getPropertyAsJavaObject(key), false);
+		return Escape.toJSON(null, getPropertyAsJavaObject(key), false);
 	}
 
 	/**
@@ -319,7 +319,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	public void setFilePath(String tmpFilePath) {
-		runScript("load " + JSVEscape.escape(tmpFilePath));
+		runScript("load " + Escape.escape(tmpFilePath));
 	}
 
 	/**
@@ -422,7 +422,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	 *          the message
 	 */
 	public void writeStatus(String msg) {
-		JSVLogger.info(msg);
+		Logger.info(msg);
 		// statusTextLabel.setText(msg);
 	}
 
@@ -489,7 +489,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	private void newAppletPanel() {
-		JSVLogger.info("newAppletPanel");
+		Logger.info("newAppletPanel");
 		jsvApplet.getContentPane().removeAll();
 		spectrumPanel = new ViewPanel(new BorderLayout());
 		jsvApplet.getContentPane().add(spectrumPanel);
@@ -600,7 +600,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	 */
 	void exportSpectrumViaMenu(String type) {
 		if (!isSigned()) {
-			JSVLogger.info(exportSpectrum(type, -1));
+			Logger.info(exportSpectrum(type, -1));
 			return;
 		}
 		dialogHelper.exportSpectrum(offWindowFrame, type);
@@ -614,7 +614,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	 */
 	public void syncLoad(String filePath) {
 		newAppletPanel();
-		JSVLogger.info("JSVP syncLoad reading " + filePath);
+		Logger.info("JSVP syncLoad reading " + filePath);
 		openDataOrFile(null, null, null, filePath, -1, -1, false);
 		jsvApplet.getContentPane().validate();
 		spectrumPanel.validate();
@@ -632,18 +632,18 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 			JSObject jso = JSObject.getWindow(jsvApplet);
 			if (callback.length() > 0) {
 				if (callback.indexOf(".") > 0) {
-					String[] mods = JSVTextFormat.split(callback, '.');
+					String[] mods = TextFormat.split(callback, '.');
 					for (int i = 0; i < mods.length - 1; i++) {
 						jso = (JSObject) jso.getMember(mods[i]);
 					}
 					callback = mods[mods.length - 1];
 				}
-				JSVLogger.info("JSVApplet calling " + jso + " " + callback);
+				Logger.info("JSVApplet calling " + jso + " " + callback);
 				jso.call(callback, params);
 			}
 
 		} catch (Exception npe) {
-			JSVLogger.warn("EXCEPTION-> " + npe.getMessage());
+			Logger.warn("EXCEPTION-> " + npe.getMessage());
 		}
 	}
 
@@ -658,8 +658,8 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 			params = "";
 		ScriptTokenizer allParamTokens = new ScriptTokenizer(params,
 				true);
-		if (JSVLogger.debugging) {
-			JSVLogger.info("Running in DEBUG mode");
+		if (Logger.debugging) {
+			Logger.info("Running in DEBUG mode");
 		}
 		while (allParamTokens.hasMoreTokens()) {
 			String token = allParamTokens.nextToken();
@@ -671,8 +671,8 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 			key = key.toUpperCase();
 			ScriptToken st = ScriptToken.getScriptToken(key);
 			String value = ScriptToken.getValue(st, eachParam, token);
-			if (JSVLogger.debugging)
-				JSVLogger.info("KEY-> " + key + " VALUE-> " + value + " : " + st);
+			if (Logger.debugging)
+				Logger.info("KEY-> " + key + " VALUE-> " + value + " : " + st);
 			try {
 				switch (st) {
 				default:
@@ -750,14 +750,14 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 						}
 					}
 				} catch (InterruptedException ie) {
-					JSVLogger.info("CommandWatcher InterruptedException!");
+					Logger.info("CommandWatcher InterruptedException!");
 					break;
 				} catch (Exception ie) {
 					String s = "script processing ERROR:\n\n" + ie.toString();
 					for (int i = 0; i < ie.getStackTrace().length; i++) {
 						s += "\n" + ie.getStackTrace()[i].toString();
 					}
-					JSVLogger.info("CommandWatcher Exception! " + s);
+					Logger.info("CommandWatcher Exception! " + s);
 					break;
 				}
 			}
@@ -781,7 +781,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 
     appletPopupMenu.setCompoundMenu(panelNodes, allowCompoundMenu);
 
-		JSVLogger.info(jsvApplet.getAppletInfo() + " File " + currentSource.getFilePath()
+		Logger.info(jsvApplet.getAppletInfo() + " File " + currentSource.getFilePath()
 				+ " Loaded Successfully");
 		
 	}
@@ -964,7 +964,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	public synchronized void syncToJmol(String msg) {
 		if (syncCallbackFunctionName == null)
 			return;
-		JSVLogger.info("JSV>Jmol " + msg);
+		Logger.info("JSV>Jmol " + msg);
 		callToJavaScript(syncCallbackFunctionName, new Object[] { fullName, msg });
 	}
 	

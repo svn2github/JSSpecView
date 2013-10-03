@@ -19,9 +19,9 @@
 
 package jspecview.export;
 
-import org.jmol.util.JSVLogger;
-import org.jmol.util.JSVSB;
-import org.jmol.util.JSVTextFormat;
+import org.jmol.util.Logger;
+import org.jmol.util.SB;
+import org.jmol.util.TextFormat;
 
 import jspecview.common.Coordinate;
 
@@ -61,14 +61,14 @@ class JDXCompressor {
   static String compressDIF(Coordinate[] xyCoords, int startIndex,
                             int endIndex, int step, double xFactor,
                             double yFactor, boolean isDIFDUP) {
-    JSVSB yStr = new JSVSB();
-    JSVSB buffer = new JSVSB();
+    SB yStr = new SB();
+    SB buffer = new SB();
     for (int i = startIndex; i != endIndex;) {
-      buffer.append(JSVTextFormat
+      buffer.append(TextFormat
           .fixIntNoExponent(xyCoords[i].getXVal() / xFactor));
       yStr.setLength(0);
-      if (JSVLogger.debugging)
-        JSVLogger.info("" + i + '\t' + xyCoords[i].getXVal() + '\t' + xyCoords[i].getYVal());
+      if (Logger.debugging)
+        Logger.info("" + i + '\t' + xyCoords[i].getXVal() + '\t' + xyCoords[i].getYVal());
       long y1 = Math.round(xyCoords[i].getYVal() / yFactor);
       yStr.append(makeSQZ(y1));
       String lastDif = "";
@@ -93,8 +93,8 @@ class JDXCompressor {
             }
             yStr.append(temp);
           }
-          if (JSVLogger.debugging)
-            JSVLogger.info("" + i + '\t' + xyCoords[i].getXVal() + '\t' + xyCoords[i].getYVal() + '\t' + y2 + '\t' + nDif + '\t' + yStr);
+          if (Logger.debugging)
+            Logger.info("" + i + '\t' + xyCoords[i].getXVal() + '\t' + xyCoords[i].getYVal() + '\t' + y2 + '\t' + nDif + '\t' + yStr);
           y1 = y2;
           i += step;
         }
@@ -102,17 +102,17 @@ class JDXCompressor {
           yStr.append(makeDUP(nDif + 1));
         // convert last digit of string to SQZ
         yStr.append(makeSQZ(xyCoords[i], yFactor));
-        if (JSVLogger.debugging)
-          JSVLogger.info("" + i + '\t' + xyCoords[i].getXVal() + '\t' + xyCoords[i].getYVal() + '\t' + nDif + '\t' + yStr);
+        if (Logger.debugging)
+          Logger.info("" + i + '\t' + xyCoords[i].getXVal() + '\t' + xyCoords[i].getYVal() + '\t' + nDif + '\t' + yStr);
       }
-      buffer.append(yStr.toString()).append(JSVTextFormat.newLine);
+      buffer.append(yStr.toString()).append(TextFormat.newLine);
       i += step;
     }
     // Get checksum line -- for an X-sequence check only
     buffer.append(
-        JSVTextFormat.fixIntNoExponent(xyCoords[endIndex].getXVal() / xFactor))
+        TextFormat.fixIntNoExponent(xyCoords[endIndex].getXVal() / xFactor))
         .append(makeSQZ(xyCoords[endIndex], yFactor));
-    buffer.append("  $$checkpoint").append(JSVTextFormat.newLine);
+    buffer.append("  $$checkpoint").append(TextFormat.newLine);
     return buffer.toString();
   }
 
@@ -139,17 +139,17 @@ class JDXCompressor {
 	static String compressFIX(Coordinate[] xyCoords, int startIndex,
 			int endIndex, int step, double xFactor, double yFactor) {
 		endIndex += step;
-		JSVSB buffer = new JSVSB();
+		SB buffer = new SB();
 		for (int i = startIndex; i != endIndex;) {
-			JSVTextFormat.leftJustify(buffer, "              ", JSVTextFormat
+			TextFormat.leftJustify(buffer, "              ", TextFormat
 					.fixIntNoExponent(xyCoords[i].getXVal() / xFactor)); // 14 spaces
 			for (int j = 0; j < 6 && i != endIndex; j++) {
-				JSVTextFormat.rightJustify(buffer, "          ", ""
+				TextFormat.rightJustify(buffer, "          ", ""
 						+ Math.round(xyCoords[i].getYVal() / yFactor));
 				buffer.append(" ");
 				i += step;
 			}
-			buffer.append(JSVTextFormat.newLine);
+			buffer.append(TextFormat.newLine);
 		}
 
 		return buffer.toString();
@@ -175,11 +175,11 @@ class JDXCompressor {
   static String compressSQZ(Coordinate[] xyCoords, int startIndex,
                             int endIndex, int step, double xFactor,
                             double yFactor) {
-    JSVSB yStr = new JSVSB();
+    SB yStr = new SB();
     endIndex += step;
-    JSVSB buffer = new JSVSB();
+    SB buffer = new SB();
     for (int i = startIndex; i == startIndex || i != endIndex;) {
-      buffer.append(JSVTextFormat
+      buffer.append(TextFormat
           .fixIntNoExponent(xyCoords[i].getXVal() / xFactor));
       yStr.setLength(0);
       yStr.append(makeSQZ(xyCoords[i], yFactor));
@@ -188,7 +188,7 @@ class JDXCompressor {
         yStr.append(makeSQZ(xyCoords[i], yFactor));
         i += step;
       }
-      buffer.append(yStr.toString()).append(JSVTextFormat.newLine);
+      buffer.append(yStr.toString()).append(TextFormat.newLine);
     }
     return buffer.toString();
   }
@@ -213,11 +213,11 @@ class JDXCompressor {
   static String compressPAC(Coordinate[] xyCoords, int startIndex,
                             int endIndex, int step, double xFactor,
                             double yFactor) {
-    JSVSB buffer = new JSVSB();
+    SB buffer = new SB();
     endIndex += step;
     for (int i = startIndex; i != endIndex;) {
       buffer.append(
-          JSVTextFormat.fixIntNoExponent(xyCoords[i].getXVal() / xFactor)).append(
+          TextFormat.fixIntNoExponent(xyCoords[i].getXVal() / xFactor)).append(
           fixPacY(xyCoords[i].getYVal() / yFactor));
       i += step;
       for (int j = 0; j < 4 && i != endIndex; j++) {
@@ -225,13 +225,13 @@ class JDXCompressor {
         buffer.append(fixPacY(xyCoords[i].getYVal() / yFactor));
         i += step;
       }
-      buffer.append(JSVTextFormat.newLine);
+      buffer.append(TextFormat.newLine);
     }
     return buffer.toString();
   }
 
   private static String fixPacY(double y) {
-    return (y < 0 ? "" : " ") + JSVTextFormat.fixIntNoExponent(y);
+    return (y < 0 ? "" : " ") + TextFormat.fixIntNoExponent(y);
   }
 
   /**
@@ -315,12 +315,12 @@ class JDXCompressor {
   static String getXYList(Coordinate[] xyCoords, int startIndex, int endIndex,
                           int step) {
     endIndex += step;
-    JSVSB buffer = new JSVSB();
+    SB buffer = new SB();
     for (int i = startIndex; i != endIndex; i += step) {
       Coordinate point = xyCoords[i];
-      buffer.append(JSVTextFormat.fixIntNoExponent(point.getXVal())).append(", ")
-          .append(JSVTextFormat.fixIntNoExponent(point.getYVal())).append(
-              JSVTextFormat.newLine);
+      buffer.append(TextFormat.fixIntNoExponent(point.getXVal())).append(", ")
+          .append(TextFormat.fixIntNoExponent(point.getYVal())).append(
+              TextFormat.newLine);
     }
     return buffer.toString();
   }

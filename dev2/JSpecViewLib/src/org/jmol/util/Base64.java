@@ -15,7 +15,7 @@
 package org.jmol.util;
 
 
-public class JSVBase64 {
+public class Base64 {
 
   //                              0         1         2         3         4         5         6
   //                              0123456789012345678901234567890123456789012345678901234567890123
@@ -38,13 +38,13 @@ public class JSVBase64 {
     41,42,43,44, 45,46,47,48, 49,50,51,0,  0,0,0,0,      //0x70-0x7F
   };
     
-  public static JSVSB getBase64(JSVSB str) {
+  public static SB getBase64(SB str) {
     return getBase64(toBytes(str));  
   }
 
-  public static JSVSB getBase64(byte[] bytes) {
+  public static SB getBase64(byte[] bytes) {
     long nBytes = bytes.length;
-    JSVSB sout = new JSVSB();
+    SB sout = new SB();
     if (nBytes == 0)
       return sout;
     for (int i = 0, nPad = 0; i < nBytes && nPad == 0;) {
@@ -100,7 +100,7 @@ public class JSVBase64 {
     return bytes;
   }  
   
-  public static byte[] toBytes(JSVSB sb) {
+  public static byte[] toBytes(SB sb) {
     byte[] b = new byte[sb.length()];
     for (int i = sb.length(); --i >= 0;)
       b[i] = (byte) sb.charAt(i);

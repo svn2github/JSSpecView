@@ -26,9 +26,9 @@ package jspecview.source;
 
 import java.io.IOException;
 
-import org.jmol.util.JSVLogger;
-import org.jmol.util.JSVParser;
-import org.jmol.util.JSVSB;
+import org.jmol.util.Logger;
+import org.jmol.util.Parser;
+import org.jmol.util.SB;
 
 import jspecview.common.Coordinate;
 
@@ -123,7 +123,7 @@ public class JDXDecompressor {
     this.deltaX = deltaX;
     this.nPoints = nPoints;
     this.lineNumber = t.getLabelLineNo();
-    debugging = JSVLogger.isActiveLevel(JSVLogger.LEVEL_DEBUGHIGH);
+    debugging = Logger.isActiveLevel(Logger.LEVEL_DEBUGHIGH);
 
     //Logger.checkMemory();
   }
@@ -132,7 +132,7 @@ public class JDXDecompressor {
   private int ipt;
   private String line, lastLine;
   private int lineLen;
-  private JSVSB errorLog;
+  private SB errorLog;
 
   private void addPoint(Coordinate pt) {
     if (ipt == xyCoords.length) {
@@ -170,7 +170,7 @@ public class JDXDecompressor {
    * @param firstLastX 
    * @return the array of <code>Coordinate</code>s
    */
-  public Coordinate[] decompressData(JSVSB errorLog, double[] firstLastX) {
+  public Coordinate[] decompressData(SB errorLog, double[] firstLastX) {
 
     this.errorLog = errorLog;
     this.firstLastX = firstLastX;
@@ -251,7 +251,7 @@ public class JDXDecompressor {
 
   private void logError(String s) {
     if (debugging)
-      JSVLogger.debug(s);
+      Logger.debug(s);
     errorLog.append(s).appendC('\n');  
   }
 
@@ -271,7 +271,7 @@ public class JDXDecompressor {
       return Double.NaN;
     char ch = line.charAt(ich);
     if (debugging)
-      JSVLogger.info("" + ch);
+      Logger.info("" + ch);
     switch (ch) {
     case '%':
       difVal = 0;
@@ -453,7 +453,7 @@ public class JDXDecompressor {
   }
 
   private char skipTo(String delim) {
-    int pos = JSVParser.findOneOf(line.substring(ich), delim);
+    int pos = Parser.findOneOf(line.substring(ich), delim);
     if (pos < 0) {
       ich = lineLen;
       return '\0';

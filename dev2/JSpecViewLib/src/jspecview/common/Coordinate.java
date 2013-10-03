@@ -25,7 +25,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import org.jmol.util.JSVTextFormat;
+import org.jmol.util.TextFormat;
 
 
 
@@ -87,7 +87,7 @@ public class Coordinate {
    *         eight decimal places
    */
   public String getXString() {
-    return JSVTextFormat.formatDecimalTrimmed(xVal, 8);
+    return TextFormat.formatDecimalTrimmed(xVal, 8);
   }
 
   /**
@@ -98,7 +98,7 @@ public class Coordinate {
    *         eight decimal places
    */
   public String getYString() {
-    return JSVTextFormat.formatDecimalTrimmed(yVal, 8);
+    return TextFormat.formatDecimalTrimmed(yVal, 8);
   }
 
   /**

@@ -24,9 +24,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jmol.util.JSVLogger;
-import org.jmol.util.JSVSB;
-import org.jmol.util.JSVXmlReader;
+import org.jmol.util.Logger;
+import org.jmol.util.SB;
+import org.jmol.util.XmlReader;
 
 import jspecview.common.Coordinate;
 import jspecview.common.JDXDataObject;
@@ -50,7 +50,7 @@ abstract class XMLReader {
   protected JDXSource source;
   protected String filePath = "";
   
-  protected JSVXmlReader reader;
+  protected XmlReader reader;
 
   protected String tagName = "START", attrList = "",
       title = "", owner = "UNKNOWN", origin = "UNKNOWN";
@@ -77,18 +77,18 @@ abstract class XMLReader {
   protected double refPoint = JDXDataObject.ERROR;
   protected String casRN = "";
   protected String sampleID;
-  protected JSVSB errorLog = new JSVSB();
+  protected SB errorLog = new SB();
 
   public XMLReader(String filePath) {
     this.filePath = filePath;
   }
 
   protected void getSimpleXmlReader(BufferedReader br) {
-    reader = new JSVXmlReader(br);
+    reader = new XmlReader(br);
   }
 
   protected void checkStart() throws Exception {
-    if (reader.peek() == JSVXmlReader.START_ELEMENT)
+    if (reader.peek() == XmlReader.START_ELEMENT)
       return;
     String errMsg = "Error: XML <xxx> not found at beginning of file; not an XML document?";
     errorLog.append(errMsg);
@@ -229,12 +229,12 @@ abstract class XMLReader {
 
   protected void processXML(int i0, int i1) throws Exception {
     while (reader.hasNext()) {
-      if (reader.nextEvent() != JSVXmlReader.START_ELEMENT)
+      if (reader.nextEvent() != XmlReader.START_ELEMENT)
         continue;
       String theTag = reader.getTagName();
       boolean requiresEndTag = reader.requiresEndTag();
-      if (JSVLogger.debugging)
-        JSVLogger.info(tagName);
+      if (Logger.debugging)
+        Logger.info(tagName);
       for (int i = i0; i <= i1; i++)
         if (theTag.equals(tagNames[i])) {
           process(i, requiresEndTag);
@@ -259,13 +259,13 @@ abstract class XMLReader {
         switch (reader.nextEvent()) {
         default:
           continue;
-        case JSVXmlReader.END_ELEMENT:
+        case XmlReader.END_ELEMENT:
           if (reader.getEndTag().equals(thisTagName)) {
             processEndTag(tagId);
             return;
           }
           continue;
-        case JSVXmlReader.START_ELEMENT:
+        case XmlReader.START_ELEMENT:
           break;
         }
         tagName = reader.getTagName();
@@ -277,7 +277,7 @@ abstract class XMLReader {
       }
     } catch (Exception e) {
       String msg = "error reading " + tagName + " section: " + e.getMessage() + "\n" + e.getStackTrace();
-      JSVLogger.error(msg);
+      Logger.error(msg);
       errorLog.append(msg + "\n");
     }
   }

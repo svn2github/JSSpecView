@@ -26,7 +26,7 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
-import org.jmol.util.JSVTextFormat;
+import org.jmol.util.TextFormat;
 
 import jspecview.common.Annotation.AType;
 
@@ -216,7 +216,7 @@ class AwtIntegralListDialog extends AwtAnnotationDialog {
 	public void tableCellSelectedEvent(int iRow, int iCol) {
 		String value = tableData[iRow][1];
 		for (int i = 0; i < xyData.size(); i++) 
-			if (JSVTextFormat.formatDecimal(xyData.get(i).getXVal(), 2).equals(value)) {
+			if (TextFormat.formatDecimal(xyData.get(i).getXVal(), 2).equals(value)) {
 				iSelected = i;
 				jsvp.getPanelData().findX2(spec, xyData.get(i).getXVal(), spec, xyData.get(i).getXVal2());
 				jsvp.doRepaint();
