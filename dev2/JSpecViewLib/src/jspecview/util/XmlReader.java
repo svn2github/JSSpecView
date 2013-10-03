@@ -17,7 +17,7 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package org.jmol.io;
+package jspecview.util;
 
 import java.io.BufferedReader;
 import java.util.Hashtable;

@@ -22,7 +22,6 @@ package jspecview.source;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-import org.jmol.io.XmlReader;
 import org.jmol.util.JmolList;
 
 
@@ -32,6 +31,7 @@ import org.jmol.util.SB;
 import jspecview.common.Coordinate;
 import jspecview.common.JDXDataObject;
 import jspecview.common.JDXSpectrum;
+import jspecview.util.XmlReader;
 
 /**
  * Representation of a XML Source.

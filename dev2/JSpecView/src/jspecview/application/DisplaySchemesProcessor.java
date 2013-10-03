@@ -28,7 +28,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.TreeMap;
 
-import org.jmol.io.XmlReader;
 import org.jmol.util.SB;
 
 import jspecview.common.AwtParameters;
@@ -36,6 +35,7 @@ import jspecview.common.Parameters;
 import jspecview.common.ScriptToken;
 import jspecview.util.JSVFileManager;
 import jspecview.util.JSVTxt;
+import jspecview.util.XmlReader;
 
 /**
  * <code>DisplaySchemesProcessor</code> loads and saves the display schemes of

@@ -48,11 +48,12 @@ Replaced Hashmap with Hashtable
 -- 10/3/2013 BH
 Disambiguated Parser
 Replaced BitSet with org.jmol.util.BS
-Adding org.jmol.util.J2SIgnoreImport, J2SRequireImport
+Added org.jmol.util.J2SIgnoreImport, J2SRequireImport
 Base64 moved to org.jmol.io
-Replacing org.jmol.util.ArrayUtil, Base64, Escape, Logger LoggerInterface, Parse, TextFormat, XmlReader with Jmol's.
-Adding org.jmol.util.P3 and Tuple3f (required for Jmol's ArrayUtil)
+Added org.jmol.util.P3 and Tuple3f (required for Jmol's ArrayUtil)
 XMLReader moved to org.jmol.io
+Replaced org.jmol.util.ArrayUtil, Base64, Escape, Parser, Txt with Jmol's.
+Replaced org.jmol.util.DefaultLogger, Logger, LoggerInterface, with Jmol's.
  
 ___version=2.0.2
 
