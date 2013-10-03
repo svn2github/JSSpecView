@@ -233,12 +233,12 @@ public class JSVFileManager {
 			json = TextFormat.simpleReplace(json, "\\r\\n", "\n");
 			json = TextFormat.simpleReplace(json, "\\t", "\t");
 			json = TextFormat.simpleReplace(json, "\\n", "\n");
-			molFile = Parser.getQuotedJSONAttribute(json, "molfile", null);
-			String xml = Parser.getQuotedJSONAttribute(json, "xml", null);
+			molFile = JSVFileManager.getQuotedJSONAttribute(json, "molfile", null);
+			String xml = JSVFileManager.getQuotedJSONAttribute(json, "xml", null);
 			xml = TextFormat.simpleReplace(xml, "</", "\n</");
 			xml = TextFormat.simpleReplace(xml, "><", ">\n<");
 			xml = TextFormat.simpleReplace(xml, "\\\"", "\"");
-			jcamp = Parser.getQuotedJSONAttribute(json, "jcamp", null);
+			jcamp = JSVFileManager.getQuotedJSONAttribute(json, "jcamp", null);
 			jcamp = "##TITLE=" + (isInline ? "JMOL SIMULATION" : name) + "\n"
 					+ jcamp.substring(jcamp.indexOf("\n##") + 1);
 			Logger
@@ -338,6 +338,17 @@ public class JSVFileManager {
     	Logger.error(e.getMessage());
     }
   }
+
+	public static String getQuotedJSONAttribute(String json, String key1,
+			String key2) {
+		if (key2 == null)
+			key2 = key1;
+		key1 = "\"" + key1 + "\":";
+		key2 = "\"" + key2 + "\":";
+		int pt1 = json.indexOf(key1);
+		int pt2 = json.indexOf(key2, pt1);
+		return (pt1 < 0 || pt2 < 0 ? null : Parser.getQuotedStringAt(json, pt2 + key2.length()));
+	}
 
 }
 

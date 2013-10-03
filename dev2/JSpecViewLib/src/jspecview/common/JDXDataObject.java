@@ -426,7 +426,7 @@ public abstract class JDXDataObject extends JDXHeader {
     int pt = 0;
     while (pt < nuc.length() && !Character.isDigit(nuc.charAt(pt)))
       pt++;
-    pt = Parser.parseInt(nuc.substring(pt));
+    pt = Parser.parseIntStr(nuc.substring(pt));
     int i = 0;
     for (; i < gyroData.length; i += 2)
       if (gyroData[i] >= pt)

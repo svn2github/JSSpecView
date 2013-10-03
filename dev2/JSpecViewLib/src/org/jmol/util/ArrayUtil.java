@@ -23,12 +23,18 @@
  */
 package org.jmol.util;
 
+
 import java.lang.reflect.Array;
+
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Map;
 
+import org.jmol.util.JmolList;
+
+
 final public class ArrayUtil {
+
   /**
    * Very important that this not be used with Int32Array or Float32Array,
    * because it is not initialized to all zeros in MSIE 9.
@@ -195,6 +201,18 @@ final public class ArrayUtil {
 
   public static int[][] arrayCopyII(int[][] array, int newLength) {
     int[][] t = newInt2(newLength);
+    if (array != null) {
+      int oldLength = array.length;
+      System.arraycopy(array, 0, t, 0, oldLength < newLength ? oldLength
+          : newLength);
+    }
+    return t;
+  }
+
+  public static P3[] arrayCopyPt(P3[] array, int newLength) {
+    if (newLength < 0)
+      newLength = array.length;
+    P3[] t = new P3[newLength];
     if (array != null) {
       int oldLength = array.length;
       System.arraycopy(array, 0, t, 0, oldLength < newLength ? oldLength
@@ -469,5 +487,22 @@ final public class ArrayUtil {
     return new double[n][];
     }
   }
+
+  /**
+   * remove all keys from a map that start with given root
+   * @param map
+   * @param root
+   * @return number removed
+   */
+  public static int removeMapKeys(Map<String, ?> map, String root) {
+    JmolList<String> list = new JmolList<String>();
+    for (String key: map.keySet())
+      if (key.startsWith(root))
+        list.addLast(key);
+    for (int i = list.size(); --i >= 0;)
+      map.remove(list.get(i));
+    return list.size();
+  }
+
 
 }

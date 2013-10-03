@@ -25,7 +25,6 @@
 
 package org.jmol.util;
 
-import java.util.BitSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -241,7 +240,7 @@ public class Escape {
     return url;
   }
 
-	public static BitSet unescapeBitSet(String str) {
+	public static BS unescapeBitSet(String str) {
     char ch;
     int len;
     if (str == null || (len = (str = str.trim()).length()) < 4
@@ -267,7 +266,7 @@ public class Escape {
       } catch (NumberFormatException e) {
         return null;
       }
-    BitSet bs = new BitSet(lastN);
+    BS bs = BS.newN(lastN);
     lastN = -1;
     int iPrev = -1;
     int iThis = -2;
@@ -283,7 +282,7 @@ public class Escape {
         lastN = iThis;
         if (iPrev < 0)
           iPrev = iThis;
-        bs.set(iPrev, iThis + 1);
+        bs.setBits(iPrev, iThis + 1);
         iPrev = -1;
         iThis = -2;
         break;

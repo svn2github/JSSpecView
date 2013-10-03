@@ -55,9 +55,9 @@ import org.jmol.util.TextFormat;
             .length() - 1), ",");
         if (tokens.length != 3)
           return 0;
-        red = Parser.parseFloat(tokens[0]);
-        grn = Parser.parseFloat(tokens[1]);
-        blu = Parser.parseFloat(tokens[2]);
+        red = Parser.parseFloatStr(tokens[0]);
+        grn = Parser.parseFloatStr(tokens[1]);
+        blu = Parser.parseFloatStr(tokens[2]);
         return JSVColorUtil.colorTriadToInt(red, grn, blu);
       }
       switch (len) {

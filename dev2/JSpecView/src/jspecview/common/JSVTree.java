@@ -128,7 +128,7 @@ public class JSVTree extends JTree {
 
     int max = 0;
     for (int i = 0; i < panelNodes.size(); i++) {
-      float f = Parser.parseFloat(panelNodes.get(i).id);
+      float f = Parser.parseFloatStr(panelNodes.get(i).id);
       if (f >= max + 1)
         max = (int) Math.floor(f);
     }
@@ -163,7 +163,7 @@ public class JSVTree extends JTree {
 				return null;
 			si.setNode(node, false);
 		} else {
-			int n = Parser.parseInt(value);
+			int n = Parser.parseIntStr(value);
 			if (n <= 0) {
 				si.checkOverlay();
 				return null;

@@ -27,7 +27,6 @@ package jspecview.source;
 import java.io.IOException;
 
 import org.jmol.util.Logger;
-import org.jmol.util.Parser;
 import org.jmol.util.SB;
 
 import jspecview.common.Coordinate;
@@ -453,7 +452,7 @@ public class JDXDecompressor {
   }
 
   private char skipTo(String delim) {
-    int pos = Parser.findOneOf(line.substring(ich), delim);
+    int pos = JDXDecompressor.findOneOf(line.substring(ich), delim);
     if (pos < 0) {
       ich = lineLen;
       return '\0';
@@ -470,4 +469,21 @@ public class JDXDecompressor {
        System.out.println(line.substring(0, ich) + "\n" + ipt++ + " " + (yval = getYValue()));
      ipt= 0;
 */  }
+
+	/**
+	 * Finds a character that is in one string in another and returns the index
+	 * 
+	 * @param str
+	 *        the string to search
+	 * @param delim
+	 *        the string from which to find the characters to search for
+	 * @return the index of the of the character found,
+	 */
+	public static int findOneOf(String str, String delim) {
+	  int n = str.length();
+	  for (int i = 0; i < n; i++)
+	    if (delim.indexOf(str.charAt(i)) >= 0)
+	      return i;
+	  return  -1;
+	}
 }

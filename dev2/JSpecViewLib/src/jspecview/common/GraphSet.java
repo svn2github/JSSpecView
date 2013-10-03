@@ -1,11 +1,11 @@
 package jspecview.common;
 
 import org.jmol.util.JmolList;
-import java.util.BitSet;
 import java.util.Hashtable;
 
 import java.util.Map;
 
+import org.jmol.util.BS;
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
 import org.jmol.util.TextFormat;
@@ -212,7 +212,7 @@ abstract class GraphSet implements XYScaleConverter {
 	}
 
 	private boolean stackSelected = false;
-	private BitSet bsSelected = new BitSet();
+	private BS bsSelected = new BS();
 
 	// needed by PanelData
 
@@ -444,7 +444,7 @@ abstract class GraphSet implements XYScaleConverter {
 		setDrawXAxis();
 		int[] startIndices = new int[nSpectra];
 		int[] endIndices = new int[nSpectra];
-		bsSelected.set(0, nSpectra);
+		bsSelected.setBits(0, nSpectra);
 		// null means use standard offset spectrumOffsets = new int[nSpectra];
 		allowStackedYScale = true;
 		if (endIndex <= 0)
@@ -1821,7 +1821,7 @@ abstract class GraphSet implements XYScaleConverter {
 	private void drawPlot(Object g, int index, Coordinate[] xyCoords,
 			boolean isContinuous, int yOffset, boolean isGrey, IntegralData ig) {
 		boolean isIntegral = (ig != null);
-		BitSet bsDraw = (ig == null ? null : ig.getBitSet());
+		BS bsDraw = (ig == null ? null : ig.getBitSet());
 		boolean fillPeaks = (!isIntegral && !isGrey && !isIntegral
 				&& pendingIntegral != null && pendingIntegral.spec == spectra
 				.get(index));
@@ -2788,8 +2788,8 @@ abstract class GraphSet implements XYScaleConverter {
 			String xMax = Parser.getQuotedAttribute(peak, "xMax");
 			if (xMin == null || xMax == null)
 				return;
-			float x1 = Parser.parseFloat(xMin);
-			float x2 = Parser.parseFloat(xMax);
+			float x1 = Parser.parseFloatStr(xMin);
+			float x2 = Parser.parseFloatStr(xMax);
 			if (Float.isNaN(x1) || Float.isNaN(x2))
 				return;
 			pd.addHighlight(this, x1, x2, spec, 200, 200, 200, 200);
@@ -3499,7 +3499,7 @@ synchronized boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 
 	void setSelected(int i) {
 		if (i < 0) {
-			bsSelected.clear();
+			bsSelected.clearAll();
 			setSpectrumClicked(-1);
 			return;
 		}
@@ -3528,8 +3528,8 @@ synchronized boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		if (tfToggle == null) {
 			// exists and "TOGGLE"
 			if (id instanceof AnnotationDialog)
-				((AnnotationDialog) id).setVisible(tfToggle != null
-						&& ((AnnotationDialog) id).isVisible());
+				((AnnotationDialog) id).setVisible(false); 
+				// was tfToggle != null && ((AnnotationDialog) id).isVisible());
 			else
 				id.setState(!id.getState());
 			return;
@@ -3776,27 +3776,25 @@ synchronized boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 	AnnotationData getDialog(AType type, int iSpec) {
 		if (iSpec == -1)
 			iSpec = getCurrentSpectrumIndex();
-		if (dialogs == null || iSpec < 0)
-			return null;
-		return dialogs.get(type + "_" + iSpec);
+		return (dialogs == null || iSpec < 0 ? null : dialogs.get(type + "_" + iSpec));
 	}
 
 	void removeDialog(int iSpec, AType type) {
-		if (dialogs == null || iSpec < 0)
-			return;
-		dialogs.remove(type + "_" + iSpec);
+		if (dialogs != null && iSpec >= 0)
+			dialogs.remove(type + "_" + iSpec);
 	}
 
-	void addDialog(int iSpec, AType type, AnnotationData dialog) {
-		if (iSpec < 0) {
-			iSpec = getSpectrumIndex(dialog.getSpectrum());
-			dialog = null;
-		}
+	AnnotationData addDialog(int iSpec, AType type, AnnotationData dialog) {
+//		if (iSpec < 0) {
+//			iSpec = getSpectrumIndex(dialog.getSpectrum());
+//			dialog = null;
+//		}
 		if (dialogs == null)
 			dialogs = new Hashtable<String, AnnotationData>();
 		String key = type + "_" + iSpec;
 		dialog.setKey(key);
 		dialogs.put(key, dialog);
+		return dialog;
 	}
 
 	void removeDialog(AnnotationDialog dialog) {
@@ -3886,7 +3884,7 @@ synchronized boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		if (dialog == null) {
 			if (!forceNew)
 				return null;
-			addDialog(iSpec, AType.Integration, new IntegralData(getSpectrum(), p));
+			dialog = addDialog(iSpec, AType.Integration, new IntegralData(getSpectrum(), p));
 		}
 		return (IntegralData) dialog.getData();
 	}

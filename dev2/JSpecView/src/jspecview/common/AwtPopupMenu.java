@@ -336,7 +336,7 @@ public class AwtPopupMenu extends JPopupMenu {
 			String offset = jsvp.getInput(
 					"Enter a vertical offset in percent for stacked plots", "Overlay",
 					recentStackPercent);
-			if (offset == null || Float.isNaN(Parser.parseFloat(offset)))
+			if (offset == null || Float.isNaN(Parser.parseFloatStr(offset)))
 				return;
 			recentStackPercent = offset;
 			runScript(scripter, ScriptToken.STACKOFFSETY + " " + offset);

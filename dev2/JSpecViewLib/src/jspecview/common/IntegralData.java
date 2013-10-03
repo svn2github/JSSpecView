@@ -1,7 +1,7 @@
 package jspecview.common;
 
+import org.jmol.util.BS;
 import org.jmol.util.JmolList;
-import java.util.BitSet;
 import java.util.Collections;
 import java.util.Comparator;
 
@@ -319,17 +319,17 @@ public class IntegralData extends MeasurementData {
 		return super.remove(i);
 	}
 
-	public BitSet getBitSet() {
-		BitSet bs = new BitSet(xyCoords.length);
+	public BS getBitSet() {
+		BS bs = BS.newN(xyCoords.length);
 		if (size() == 0) {
-  		bs.set(0, xyCoords.length);
+  		bs.setBits(0, xyCoords.length);
   		return bs;
 		}
 		for (int i = size(); --i >= 0;) {
 		  Measurement m = get(i);
 		  int x1 = Coordinate.getNearestIndexForX(xyCoords, m.getXVal());
 		  int x2 = Coordinate.getNearestIndexForX(xyCoords, m.getXVal2());
-		  bs.set(Math.min(x1, x2), Math.max(x1, x2));
+		  bs.setBits(Math.min(x1, x2), Math.max(x1, x2));
 		}
 		return bs;
 	}

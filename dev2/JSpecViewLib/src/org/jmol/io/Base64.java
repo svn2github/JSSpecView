@@ -12,7 +12,9 @@
 // Jpeg Group's Jpeg 6a library, Copyright Thomas G. Lane.
 // See license.txt for details.
 
-package org.jmol.util;
+package org.jmol.io;
+
+import org.jmol.util.SB;
 
 
 public class Base64 {
@@ -38,10 +40,6 @@ public class Base64 {
     41,42,43,44, 45,46,47,48, 49,50,51,0,  0,0,0,0,      //0x70-0x7F
   };
     
-  public static SB getBase64(SB str) {
-    return getBase64(toBytes(str));  
-  }
-
   public static SB getBase64(byte[] bytes) {
     long nBytes = bytes.length;
     SB sout = new SB();
@@ -100,10 +98,10 @@ public class Base64 {
     return bytes;
   }  
   
-  public static byte[] toBytes(SB sb) {
-    byte[] b = new byte[sb.length()];
-    for (int i = sb.length(); --i >= 0;)
-      b[i] = (byte) sb.charAt(i);
-    return b;
-  }  
+//  public static byte[] toBytes(SB sb) {
+//    byte[] b = new byte[sb.length()];
+//    for (int i = sb.length(); --i >= 0;)
+//      b[i] = (byte) sb.charAt(i);
+//    return b;
+//  }  
 }

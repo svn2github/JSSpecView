@@ -25,261 +25,15 @@
 
 package org.jmol.util;
 
-import java.util.BitSet;
-
-
-
-
 public class Parser {
 
   /// general static string-parsing class ///
 
   // next[0] tracks the pointer within the string so these can all be static.
   // but the methods parseFloat, parseInt, parseToken, parseTrimmed, and getTokens do not require this.
-
-  /**
-   * parses a "dirty" string for floats. If there are non-float tokens, 
-   * they are ignored. A bitset is used to assign values only to specific 
-   * atoms in the set, not changing the values of the data array for other atoms.
-   * thus, a data set can be incrementally added to in this way.
-   * 
-   *  @param str     the string to parse
-   *  @param bs      the atom positions to assign
-   *  @param data    the (sparce) array to fill
-   * @return  number of floats
-   */
-  public static int parseStringInfestedFloatArray(String str, BitSet bs, float[] data) {
-    return parseFloatArray(getTokens(str), bs, data);
-  }
-
-  public static float[] parseFloatArray(String str) {
-    return parseFloatArray(str, new int[1]);
-  }
-
-  /**
-   * @param str 
-   * @param next 
-   * @return array of float values
-   *
-   */
-  public static float[] parseFloatArray(String str, int[] next) {
-    int pt = next[0];
-    if (pt < 0)
-      return new float[0];
-    pt = str.indexOf("[", pt);
-    if (pt >= 0)
-      str = str.substring(pt + 1);
-    next[0] = pt + 1;
-    pt = str.indexOf("]");
-    if (pt < 0)
-      pt = str.length();
-    else
-      str = str.substring(0, pt);
-    next[0] += pt + 1;
-    String[] tokens = getTokens(str);
-    float[] f = new float[tokens.length];
-    int n = parseFloatArray(tokens, null, f);
-    for (int i = n; i < f.length; i++)
-      f[i] = Float.NaN;
-    return f;
-  }
-  
-  @SuppressWarnings("null")
-	public static int parseFloatArray(String[] tokens, BitSet bs, float[] data) {
-    int len = data.length;
-    int nTokens = tokens.length;
-    int n = 0;
-    int max = 0;
-    boolean haveBitSet = (bs != null);
-    for (int i = (haveBitSet ? bs.nextSetBit(0) : 0); i >= 0 && i < len && n < nTokens; i = (haveBitSet ? bs.nextSetBit(i + 1) : i + 1)) {
-      float f;
-      while (Float.isNaN(f = parseFloat(tokens[n++])) 
-          && n < nTokens) {
-      }
-      if (!Float.isNaN(f))
-        data[(max = i)] = f;
-      if (n == nTokens)
-        break;
-    }
-    return max + 1;
-  }
-
-  private static String fixDataString(String str) {
-    str = str.replace(';', str.indexOf('\n') < 0 ? '\n' : ' ');
-    str = TextFormat.trim(str, "\n \t");
-    str = TextFormat.simpleReplace(str, "\n ", "\n");
-    str = TextFormat.simpleReplace(str, "\n\n", "\n");
-    return str;    
-  }
-  
-  public static float[][] parseFloatArray2d(String str) {
-    str = fixDataString(str);
-    int[] lines = markLines(str, '\n');
-    int nLines = lines.length;
-    float[][] data = new float[nLines][];
-    for (int iLine = 0, pt = 0; iLine < nLines; pt = lines[iLine++]) {
-      String[] tokens = getTokens(str.substring(pt, lines[iLine]));
-      parseFloatArray(tokens, data[iLine] = new float[tokens.length]);
-    }
-    return data;
-  }
-
-  public static float[][][] parseFloatArray3d(String str) {
-    str = fixDataString(str);
-    int[] lines = markLines(str, '\n');
-    int nLines = lines.length;
-    String[] tokens = getTokens(str.substring(0, lines[0]));
-    if (tokens.length != 3)
-      return new float[0][0][0];
-    int nX = parseInt(tokens[0]);
-    int nY = parseInt(tokens[1]);
-    int nZ = parseInt(tokens[2]);
-    if (nX < 1 || nY < 1 || nZ < 1)
-      return new float[1][1][1];
-    float[][][] data = new float[nX][nY][];
-    int iX = 0;
-    int iY = 0;
-    for (int iLine = 1, pt = lines[0]; iLine < nLines && iX < nX; pt = lines[iLine++]) {
-      tokens = getTokens(str.substring(pt, lines[iLine]));
-      if (tokens.length < nZ)
-        continue;
-      parseFloatArray(tokens, data[iX][iY] = new float[tokens.length]);
-      if (++iY == nY) {
-        iX++;
-        iY = 0;
-      } 
-    }
-    if (iX != nX) {
-      Logger.info("Error reading 3D data -- nX = " + nX + ", but only " + iX + " blocks read");      
-      return new float[1][1][1];
-    }
-    return data;
-  }
-
-  /**
-   * 
-   * @param f
-   * @param bs
-   * @param data
-   */
-  public static void setSelectedFloats(float f, BitSet bs, float[] data) {
-    boolean isAll = (bs == null);
-    int i0 = (isAll ? 0 : bs.nextSetBit(0));
-    for (int i = i0; i >= 0 && i < data.length; i = (isAll ? i + 1 : bs.nextSetBit(i + 1)))
-      data[i] = f;
-  }
-  
-  public static float[] extractData(String data, int field, int nBytes,
-                                    int firstLine) {
-    return parseFloatArrayFromMatchAndField(data, null, 0, 0, null, field,
-        nBytes, null, firstLine);
-  }
-
-  /**
-   * the major lifter here.
-   * 
-   * @param str         string containing the data 
-   * @param bs          selects specific rows of the data 
-   * @param fieldMatch  a free-format field pointer, or a column pointer
-   * @param fieldMatchColumnCount specifies a column count -- not free-format
-   * @param matchData   an array of data to match (atom numbers)
-   * @param field       a free-format field pointer, or a column pointer
-   * @param fieldColumnCount specifies a column count -- not free-format
-   * @param data        float array to modify or null if size unknown
-   * @param firstLine   first line to parse (1 indicates all)
-   * @return            data
-   */
-  public static float[] parseFloatArrayFromMatchAndField(
-                                                         String str,
-                                                         BitSet bs,
-                                                         int fieldMatch,
-                                                         int fieldMatchColumnCount,
-                                                         int[] matchData,
-                                                         int field,
-                                                         int fieldColumnCount,
-                                                         float[] data, int firstLine) {
-    float f;
-    int i = -1;
-    boolean isMatch = (matchData != null);
-    int[] lines = markLines(str, (str.indexOf('\n') >= 0 ? '\n' : ';'));
-    int iLine = (firstLine <= 1 || firstLine >= lines.length ? 0 : firstLine - 1);
-    int pt = (iLine == 0 ? 0 : lines[iLine - 1]);
-    int nLines = lines.length;
-    if (data == null)
-      data = new float[nLines - iLine];
-    int len = data.length;
-    int minLen = (fieldColumnCount <= 0 ? Math.max(field, fieldMatch) : Math
-        .max(field + fieldColumnCount, fieldMatch + fieldMatchColumnCount) - 1);
-    boolean haveBitSet = (bs != null);
-    for (; iLine < nLines; iLine++) {
-      String line = str.substring(pt, lines[iLine]).trim();
-      pt = lines[iLine];
-      String[] tokens = (fieldColumnCount <= 0 ? getTokens(line) : null);
-      // check for inappropriate data -- line too short or too few tokens or NaN for data
-      // and parse data
-      if (fieldColumnCount <= 0) {
-        if (tokens.length < minLen
-            || Float.isNaN(f = parseFloat(tokens[field - 1])))
-          continue;
-      } else {
-        if (line.length() < minLen
-            || Float.isNaN(f = parseFloat(line.substring(field - 1, field
-                + fieldColumnCount - 1))))
-          continue;
-      }
-      int iData;
-      if (isMatch) {
-        iData = parseInt(tokens == null ? line.substring(fieldMatch - 1,
-            fieldMatch + fieldMatchColumnCount - 1) : tokens[fieldMatch - 1]);
-        // in the fieldMatch column we have an integer pointing into matchData
-        // we replace that number then with the corresponding number in matchData
-        if (iData == Integer.MIN_VALUE || iData < 0 || iData >= len
-            || (iData = matchData[iData]) < 0)
-          continue;
-        // and we set bs to indicate we are updating that value
-        if (haveBitSet)
-          bs.set(iData);
-      } else {
-        // no match data
-        // bs here indicates the specific data elements that need filling
-        if (haveBitSet) 
-          i = bs.nextSetBit(i + 1);
-        else
-          i++;
-        if (i < 0 || i >= len)
-          return data;
-        iData = i;
-      }
-      data[iData] = f;
-      //System.out.println("data[" + iData + "] = " + data[iData]);
-    }
-    return data;
-  }
-  
-  /**
-   * parses a string array for floats. Returns NaN for nonfloats.
-   * 
-   *  @param tokens  the strings to parse
-   *  @param data    the array to fill
-   */
-  public static void parseFloatArray(String[] tokens, float[] data) {
-    parseFloatArray(tokens, data, data.length);
-  }
-  
-  /**
-   * parses a string array for floats. Returns NaN for nonfloats or missing data.
-   * 
-   *  @param tokens  the strings to parse
-   *  @param data    the array to fill
-   *  @param nData   the number of elements
-   */
-  public static void parseFloatArray(String[] tokens, float[] data, int nData) {
-    for (int i = nData; --i >= 0;)
-      data[i] = (i >= tokens.length ? Float.NaN : parseFloat(tokens[i]));
-  }
- 
-  public static float parseFloat(String str) {
-    return parseFloat(str, new int[] {0});
+	
+  public static float parseFloatStr(String str) {
+    return parseFloatNext(str, new int[] {0});
   }
 
   public static float parseFloatStrict(String str) {
@@ -290,27 +44,27 @@ public class Parser {
     return parseFloatChecked(str, cch, new int[] {0}, true);
   }
 
-  public static int parseInt(String str) {
-    return parseInt(str, new int[] {0});
+  public static int parseIntStr(String str) {
+    return parseIntNext(str, new int[] {0});
   }
 
   public static String[] getTokens(String line) {
-    return getTokens(line, 0);
+    return getTokensAt(line, 0);
   }
 
   public static String parseToken(String str) {
-    return parseToken(str, new int[] {0});
+    return parseTokenNext(str, new int[] {0});
   }
 
   public static String parseTrimmed(String str) {
-    return parseTrimmed(str, 0, str.length());
+    return parseTrimmedRange(str, 0, str.length());
   }
   
-  public static String parseTrimmed(String str, int ichStart) {
-    return parseTrimmed(str, ichStart, str.length());
+  public static String parseTrimmedAt(String str, int ichStart) {
+    return parseTrimmedRange(str, ichStart, str.length());
   }
   
-  public static String parseTrimmed(String str, int ichStart, int ichMax) {
+  public static String parseTrimmedRange(String str, int ichStart, int ichMax) {
     int cch = str.length();
     if (ichMax < cch)
       cch = ichMax;
@@ -332,7 +86,7 @@ public class Parser {
     return lines;
   }
 
-  public static float parseFloat(String str, int[] next) {
+  public static float parseFloatNext(String str, int[] next) {
     if (str == null)
       return Float.NaN;
     int cch = str.length();
@@ -341,7 +95,7 @@ public class Parser {
     return parseFloatChecked(str, cch, next, false);
   }
 
-  public static float parseFloat(String str, int ichMax, int[] next) {
+  public static float parseFloatRange(String str, int ichMax, int[] next) {
     int cch = str.length();
     if (ichMax > cch)
       ichMax = cch;
@@ -355,12 +109,24 @@ public class Parser {
 
   private final static float[] tensScale = { 10, 100, 1000, 10000, 100000, 1000000 };
 
-  private static float parseFloatChecked(String str, int ichMax, int[] next, boolean isStrict) {
+
+  /**
+   * A float parser that is 30% faster than Float.parseFloat(x) and also accepts
+   * x.yD+-n
+   * 
+   * @param str
+   * @param ichMax
+   * @param next
+   *        pointer; incremented
+   * @param isStrict
+   * @return value or Float.NaN
+   */
+  private static float parseFloatChecked(String str, int ichMax, int[] next,
+                                         boolean isStrict) {
     boolean digitSeen = false;
-    float value = 0;
     int ich = next[0];
     if (isStrict && str.indexOf('\n') != str.lastIndexOf('\n'))
-        return Float.NaN;
+      return Float.NaN;
     while (ich < ichMax && isWhiteSpace(str, ich))
       ++ich;
     boolean negative = false;
@@ -368,29 +134,74 @@ public class Parser {
       ++ich;
       negative = true;
     }
-    char ch = 0;
-    while (ich < ichMax && (ch = str.charAt(ich)) >= '0' && ch <= '9') {
-      value = value * 10 + (ch - '0');
+    // looks crazy, but if we don't do this, Google Closure Compiler will 
+    // write code that Safari will misinterpret in a VERY nasty way -- 
+    // getting totally confused as to long integers and double values
+    
+    // This is Safari figuring out the values of the numbers on the line (x, y, then z):
+
+    //  ATOM 1241 CD1 LEU A 64 -2.206 36.532 31.576 1.00 60.60 C
+    //  e=1408749273
+    //  -e =-1408749273
+    //  ATOM 1241 CD1 LEU A 64 -2.206 36.532 31.576 1.00 60.60 C
+    //  e=-1821066134
+    //  e=36.532
+    //  ATOM 1241 CD1 LEU A 64 -2.206 36.532 31.576 1.00 60.60 C
+    //  e=-1133871366
+    //  e=31.576
+    //
+    //  "e" values are just before and after the "value = -value" statement.
+    
+    int ch = 0;
+    float ival = 0f;
+    float ival2 = 0f;
+    while (ich < ichMax && (ch = str.charAt(ich)) >= 48 && ch <= 57) {
+      ival = (ival * 10f) + (ch - 48)*1f;
       ++ich;
       digitSeen = true;
     }
     boolean isDecimal = false;
+    int iscale = 0;
+    int nzero = (ival == 0 ? -1 : 0);
     if (ch == '.') {
       isDecimal = true;
-      int iscale = 0;
-      while (++ich < ichMax && (ch = str.charAt(ich)) >= '0' && ch <= '9') {
-        if (iscale < decimalScale.length)
-          value += (ch - '0') * decimalScale[iscale];
-        ++iscale;
+      while (++ich < ichMax && (ch = str.charAt(ich)) >= 48 && ch <= 57) {
         digitSeen = true;
+        if (nzero < 0) {
+          if (ch == 48) { 
+            nzero--;
+            continue;
+          }
+          nzero = -nzero;
+        } 
+        if (iscale  < decimalScale.length) {
+          ival2 = (ival2 * 10f) + (ch - 48)*1f;
+          iscale++;
+        }
       }
     }
-    boolean isExponent = false;
-    if (!digitSeen)
+    float value;
+    
+    // Safari breaks here intermittently converting integers to floats 
+    
+    if (!digitSeen) {
       value = Float.NaN;
-    else if (negative)
-      value = -value;
-    if (ich < ichMax && (ch == 'E' || ch == 'e' || ch == 'D')) {
+    } else if (ival2 > 0) {
+      value = ival2 * decimalScale[iscale - 1];
+      if (nzero > 1) {
+        if (nzero - 2 < decimalScale.length) {
+          value *= decimalScale[nzero - 2];
+        } else {
+          value *= Math.pow(10, 1 - nzero);
+        }
+      } else {
+        value += ival;
+      }
+    } else {
+      value = ival;
+    }
+    boolean isExponent = false;
+    if (ich < ichMax && (ch == 69 || ch == 101 || ch == 68)) { // E e D
       isExponent = true;
       if (++ich >= ichMax)
         return Float.NaN;
@@ -401,22 +212,23 @@ public class Parser {
       int exponent = parseIntChecked(str, ichMax, next);
       if (exponent == Integer.MIN_VALUE)
         return Float.NaN;
-      if (exponent > 0)
-        value *= ((exponent < tensScale.length) ? tensScale[exponent - 1]
-            : Math.pow(10, exponent));
-      else if (exponent < 0)
-        value *= ((-exponent < decimalScale.length) ? decimalScale[-exponent - 1]
-            : Math.pow(10, exponent));
+      if (exponent > 0 && exponent <= tensScale.length)
+        value *= tensScale[exponent - 1];
+      else if (exponent < 0 && -exponent <= decimalScale.length)
+        value *= decimalScale[-exponent - 1];
+      else if (exponent != 0)
+        value *= Math.pow(10, exponent);
     } else {
-       next[0] = ich; // the exponent code finds its own ichNextParse
+      next[0] = ich; // the exponent code finds its own ichNextParse
     }
-    if (value == Float.NEGATIVE_INFINITY)
-      value = -Float.MAX_VALUE;
-    else if (value == Float.POSITIVE_INFINITY)
-      value= Float.MAX_VALUE;
-    return (!isStrict 
-        || (!isExponent || isDecimal) && checkTrailingText(str, next[0], ichMax) 
-        ? value : Float.NaN);
+    // believe it or not, Safari reports the long-equivalent of the 
+    // float value here, then later the float value, after no operation!
+    if (negative)
+      value = -value;
+    if (value == Float.POSITIVE_INFINITY)
+      value = Float.MAX_VALUE;
+    return (!isStrict || (!isExponent || isDecimal)
+        && checkTrailingText(str, next[0], ichMax) ? value : Float.NaN);
   }
 
   private static boolean checkTrailingText(String str, int ich, int ichMax) {
@@ -428,14 +240,14 @@ public class Parser {
     return (ich == ichMax);
   }
   
-  public static int parseInt(String str, int[] next) {
+  public static int parseIntNext(String str, int[] next) {
     int cch = str.length();
     if (next[0] < 0 || next[0] >= cch)
       return Integer.MIN_VALUE;
     return parseIntChecked(str, cch, next);
   }
 
-  public static int parseInt(String str, int ichMax, int[] next) {
+  public static int parseIntRange(String str, int ichMax, int[] next) {
     int cch = str.length();
     if (ichMax > cch)
       ichMax = cch;
@@ -471,7 +283,7 @@ public class Parser {
     return value;
   }
 
-  public static String[] getTokens(String line, int ich) {
+  public static String[] getTokensAt(String line, int ich) {
     if (line == null)
       return null;
     int cchLine = line.length();
@@ -504,14 +316,14 @@ public class Parser {
     return tokenCount;
   }
 
-  public static String parseToken(String str, int[] next) {
+  public static String parseTokenNext(String str, int[] next) {
     int cch = str.length();
     if (next[0] < 0 || next[0] >= cch)
       return null;
     return parseTokenChecked(str, cch, next);
   }
 
-  public static String parseToken(String str, int ichMax, int[] next) {
+  public static String parseTokenRange(String str, int ichMax, int[] next) {
     int cch = str.length();
     if (ichMax > cch)
       ichMax = cch;
@@ -556,12 +368,12 @@ public class Parser {
     return str;
   }
   
-  public static String getNextQuotedString(String line, int ipt0) {
+  public static String getQuotedStringAt(String line, int ipt0) {
     int[] next = new int[] { ipt0 };
-    return getNextQuotedString(line, next);
+    return getQuotedStringNext(line, next);
   }
   
-  public static String getNextQuotedString(String line, int[] next) {
+  public static String getQuotedStringNext(String line, int[] next) {
     String value = line;
     int i = next[0];
     if (i < 0 || (i = value.indexOf("\"", i)) < 0)
@@ -587,35 +399,7 @@ public class Parser {
 
   public static String getQuotedAttribute(String info, String name) {
     int i = info.indexOf(name + "=");
-    return (i < 0 ? null : getNextQuotedString(info, i));
-  }
-
-	public static String getQuotedJSONAttribute(String json, String key1,
-			String key2) {
-		if (key2 == null)
-			key2 = key1;
-		key1 = "\"" + key1 + "\":";
-		key2 = "\"" + key2 + "\":";
-		int pt1 = json.indexOf(key1);
-		int pt2 = json.indexOf(key2, pt1);
-		return (pt1 < 0 || pt2 < 0 ? null : getNextQuotedString(json, pt2 + key2.length()));
-	}
-	
-  /**
-   * Finds a character that is in one string in another and returns the index
-   * 
-   * @param str
-   *        the string to search
-   * @param delim
-   *        the string from which to find the characters to search for
-   * @return the index of the of the character found,
-   */
-  public static int findOneOf(String str, String delim) {
-    int n = str.length();
-    for (int i = 0; i < n; i++)
-      if (delim.indexOf(str.charAt(i)) >= 0)
-        return i;
-    return  -1;
+    return (i < 0 ? null : getQuotedStringAt(info, i));
   }
 
 }
