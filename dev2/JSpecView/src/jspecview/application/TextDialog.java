@@ -36,11 +36,12 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
+import org.jmol.util.JSVLogger;
+
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVPanelNode;
 import jspecview.source.JDXSource;
 import jspecview.util.JSVFileManager;
-import jspecview.util.JSVLogger;
 
 /**
  * Dialog that displays String of text or contents of a file in a

@@ -53,6 +53,10 @@ import java.util.ArrayList;
 
 import javax.swing.JFrame;
 
+import org.jmol.util.JSVEscape;
+import org.jmol.util.JSVLogger;
+import org.jmol.util.JSVTextFormat;
+
 import jspecview.application.TextDialog;
 import jspecview.common.AwtPanel;
 import jspecview.common.DialogHelper;
@@ -83,10 +87,7 @@ import jspecview.common.JDXSpectrum.IRMode;
 import jspecview.export.Exporter;
 import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
-import jspecview.util.JSVEscape;
 import jspecview.util.JSVFileManager;
-import jspecview.util.JSVLogger;
-import jspecview.util.JSVTextFormat;
 import netscape.javascript.JSObject;
 
 /**

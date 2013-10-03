@@ -24,8 +24,9 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+import org.jmol.util.JSVLogger;
+
 import jspecview.util.JSVFileManager;
-import jspecview.util.JSVLogger;
 
 /**
  * The XMLExporter should be a totally generic exporter

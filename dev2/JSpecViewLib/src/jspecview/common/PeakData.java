@@ -2,8 +2,9 @@ package jspecview.common;
 
 import java.util.Map;
 
+import org.jmol.util.JSVTextFormat;
+
 import jspecview.common.Annotation.AType;
-import jspecview.util.JSVTextFormat;
 
 /**
  * 

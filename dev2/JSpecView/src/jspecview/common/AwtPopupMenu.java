@@ -31,11 +31,13 @@ import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+
+import org.jmol.util.JSVLogger;
+import org.jmol.util.JSVParser;
+
 import jspecview.common.JDXSpectrum;
 import jspecview.common.Annotation.AType;
 import jspecview.export.Exporter;
-import jspecview.util.JSVLogger;
-import jspecview.util.JSVParser;
 
 /**
  * Popup Menu for JSVPanel.

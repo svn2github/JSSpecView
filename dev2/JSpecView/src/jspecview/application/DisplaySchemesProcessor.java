@@ -29,13 +29,14 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.TreeMap;
 
+import org.jmol.util.JSVSB;
+import org.jmol.util.JSVTextFormat;
+import org.jmol.util.JSVXmlReader;
+
 import jspecview.common.AwtParameters;
 import jspecview.common.Parameters;
 import jspecview.common.ScriptToken;
 import jspecview.util.JSVFileManager;
-import jspecview.util.JSVSB;
-import jspecview.util.JSVXmlReader;
-import jspecview.util.JSVTextFormat;
 
 /**
  * <code>DisplaySchemesProcessor</code> loads and saves the display schemes of

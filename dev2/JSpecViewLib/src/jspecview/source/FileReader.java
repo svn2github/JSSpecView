@@ -33,6 +33,12 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
+import org.jmol.util.JSVEscape;
+import org.jmol.util.JSVLogger;
+import org.jmol.util.JSVParser;
+import org.jmol.util.JSVSB;
+import org.jmol.util.JSVTextFormat;
+
 import jspecview.common.Coordinate;
 import jspecview.common.JDXDataObject;
 import jspecview.common.JDXHeader;
@@ -40,12 +46,7 @@ import jspecview.common.JDXSpectrum;
 import jspecview.common.PeakInfo;
 import jspecview.exception.JDXSourceException;
 import jspecview.exception.JSpecViewException;
-import jspecview.util.JSVEscape;
 import jspecview.util.JSVFileManager;
-import jspecview.util.JSVLogger;
-import jspecview.util.JSVParser;
-import jspecview.util.JSVSB;
-import jspecview.util.JSVTextFormat;
 import jspecview.util.JSVZipFileSequentialReader;
 
 /**

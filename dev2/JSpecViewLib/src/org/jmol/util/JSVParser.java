@@ -23,9 +23,11 @@
  *  02110-1301, USA.
  */
 
-package jspecview.util;
+package org.jmol.util;
 
 import java.util.BitSet;
+
+
 
 
 public class JSVParser {

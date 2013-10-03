@@ -26,6 +26,9 @@ package jspecview.util;
 import java.util.Hashtable;
 import java.util.Map;
 
+import org.jmol.util.JSVParser;
+import org.jmol.util.JSVTextFormat;
+
  public class JSVColorUtil {
 
   /**

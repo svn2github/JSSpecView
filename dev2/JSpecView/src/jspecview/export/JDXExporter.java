@@ -26,13 +26,14 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
+import org.jmol.util.JSVSB;
+import org.jmol.util.JSVTextFormat;
+
 
 import jspecview.common.Coordinate;
 import jspecview.common.JDXDataObject;
 import jspecview.common.JDXSpectrum;
 import jspecview.source.FileReader;
-import jspecview.util.JSVSB;
-import jspecview.util.JSVTextFormat;
 
 /**
  * class <code>JDXExporter</code> contains static methods for exporting a

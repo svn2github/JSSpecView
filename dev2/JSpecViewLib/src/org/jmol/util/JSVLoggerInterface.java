@@ -23,7 +23,7 @@
  *  02110-1301, USA.
  */
 
-package jspecview.util;
+package org.jmol.util;
 
 /**
  * Interface used for the logging mechanism.

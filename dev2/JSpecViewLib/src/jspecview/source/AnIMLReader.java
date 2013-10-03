@@ -26,8 +26,9 @@ import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 
-import jspecview.util.JSVBase64;
-import jspecview.util.JSVXmlReader;
+import org.jmol.util.JSVBase64;
+import org.jmol.util.JSVXmlReader;
+
 
 
 /**

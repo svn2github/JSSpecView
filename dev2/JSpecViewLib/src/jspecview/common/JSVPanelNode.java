@@ -6,10 +6,11 @@ package jspecview.common;
 import java.util.List;
 import java.util.Map;
 
+import org.jmol.util.JSVSB;
+
 import jspecview.common.JSVDialog;
 import jspecview.common.JSVPanel;
 import jspecview.source.JDXSource;
-import jspecview.util.JSVSB;
 
 public class JSVPanelNode {
 

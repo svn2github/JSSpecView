@@ -22,8 +22,9 @@ package jspecview.common;
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
 
+import org.jmol.util.JSVTextFormat;
+
 import jspecview.common.Annotation.AType;
-import jspecview.util.JSVTextFormat;
 
 /**
  * Dialog for managing the peak listing 

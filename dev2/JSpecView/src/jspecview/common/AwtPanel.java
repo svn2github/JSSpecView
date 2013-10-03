@@ -73,10 +73,11 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 
+import org.jmol.util.JSVLogger;
+import org.jmol.util.JSVTextFormat;
+
 import jspecview.common.Annotation.AType;
 import jspecview.export.Exporter;
-import jspecview.util.JSVLogger;
-import jspecview.util.JSVTextFormat;
 
 /**
  * JSVPanel class represents a View combining one or more GraphSets, each with one or more JDXSpectra.

@@ -23,9 +23,10 @@
  *  02110-1301, USA.
  */
 
-package jspecview.util;
+package org.jmol.util;
 
 import java.io.PrintStream;
+
 
 /**
  * Default implementation of the logger.

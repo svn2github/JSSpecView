@@ -1,6 +1,6 @@
 package jspecview.common;
 
-import jspecview.util.JSVTextFormat;
+import org.jmol.util.JSVTextFormat;
 
 public class ScriptTokenizer {
 

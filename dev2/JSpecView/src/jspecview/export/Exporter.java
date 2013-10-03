@@ -19,6 +19,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
+import org.jmol.util.JSVTextFormat;
+
 import jspecview.common.DialogHelper;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVPanel;
@@ -26,7 +28,6 @@ import jspecview.common.PanelData;
 import jspecview.common.ScriptInterface;
 import jspecview.common.ScriptToken;
 import jspecview.util.JSVFileManager;
-import jspecview.util.JSVTextFormat;
 
 public class Exporter {
 

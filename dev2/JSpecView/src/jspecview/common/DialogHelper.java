@@ -32,10 +32,11 @@ import javax.swing.SwingConstants;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 
+import org.jmol.util.JSVBase64;
+
 import jspecview.common.Annotation.AType;
 import jspecview.export.Exporter;
 import jspecview.export.Exporter.ExportType;
-import jspecview.util.JSVBase64;
 import jspecview.util.JSVFileManager;
 
 /**

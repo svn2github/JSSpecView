@@ -49,9 +49,9 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 import jspecview.common.JSVersion;
-import jspecview.util.JSVLogger;
 
 import org.jmol.api.JSVInterface;
+import org.jmol.util.JSVLogger;
 
 
 

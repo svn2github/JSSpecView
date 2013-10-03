@@ -38,6 +38,12 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
+import org.jmol.util.JSVEscape;
+import org.jmol.util.JSVLogger;
+import org.jmol.util.JSVParser;
+import org.jmol.util.JSVSB;
+import org.jmol.util.JSVTextFormat;
+
 import jspecview.common.JSVersion;
 
 public class JSVFileManager {

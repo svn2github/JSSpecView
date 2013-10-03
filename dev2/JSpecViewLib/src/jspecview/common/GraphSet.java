@@ -6,11 +6,12 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import org.jmol.util.JSVLogger;
+import org.jmol.util.JSVParser;
+import org.jmol.util.JSVTextFormat;
+
 import jspecview.common.Annotation.AType;
 import jspecview.common.PanelData.LinkMode;
-import jspecview.util.JSVLogger;
-import jspecview.util.JSVParser;
-import jspecview.util.JSVTextFormat;
 
 abstract class GraphSet implements XYScaleConverter {
 

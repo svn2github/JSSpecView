@@ -19,10 +19,11 @@
 
 package jspecview.export;
 
+import org.jmol.util.JSVLogger;
+import org.jmol.util.JSVSB;
+import org.jmol.util.JSVTextFormat;
+
 import jspecview.common.Coordinate;
-import jspecview.util.JSVLogger;
-import jspecview.util.JSVSB;
-import jspecview.util.JSVTextFormat;
 
 /**
  * <code>JDXCompressor</code> takes an array of <code>Coordinates<code> and

@@ -22,8 +22,9 @@ package jspecview.source;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-import jspecview.util.JSVLogger;
-import jspecview.util.JSVSB;
+import org.jmol.util.JSVLogger;
+import org.jmol.util.JSVSB;
+
 
 /**
  * @author Debbie-Ann Facey

@@ -1,10 +1,11 @@
 package jspecview.common;
 
+import org.jmol.util.JSVLogger;
+import org.jmol.util.JSVParser;
+import org.jmol.util.JSVTextFormat;
+
 import jspecview.common.Annotation.AType;
 import jspecview.exception.JSpecViewException;
-import jspecview.util.JSVLogger;
-import jspecview.util.JSVParser;
-import jspecview.util.JSVTextFormat;
 
 /**
  * spectrum data AS READ FROM FILE

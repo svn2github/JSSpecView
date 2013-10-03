@@ -27,6 +27,9 @@ import java.io.StringReader;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.jmol.util.JSVLogger;
+import org.jmol.util.JSVSB;
+
 /**
  * Reads the entire contents of a ZIP file as though it were one straight file
  * Skips and entry that contains '\0' 

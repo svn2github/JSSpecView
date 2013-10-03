@@ -12,7 +12,8 @@
 // Jpeg Group's Jpeg 6a library, Copyright Thomas G. Lane.
 // See license.txt for details.
 
-package jspecview.util;
+package org.jmol.util;
+
 
 public class JSVBase64 {
 

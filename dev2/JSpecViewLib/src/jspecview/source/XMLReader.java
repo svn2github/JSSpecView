@@ -24,12 +24,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jmol.util.JSVLogger;
+import org.jmol.util.JSVSB;
+import org.jmol.util.JSVXmlReader;
+
 import jspecview.common.Coordinate;
 import jspecview.common.JDXDataObject;
 import jspecview.common.JDXSpectrum;
-import jspecview.util.JSVLogger;
-import jspecview.util.JSVSB;
-import jspecview.util.JSVXmlReader;
 
 /**
  * Representation of a XML Source.

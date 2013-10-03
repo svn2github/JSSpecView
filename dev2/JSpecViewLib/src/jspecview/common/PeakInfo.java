@@ -1,7 +1,7 @@
 package jspecview.common;
 
 //import jspecview.util.Logger;
-import jspecview.util.JSVParser;
+import org.jmol.util.JSVParser;
 
 public class PeakInfo {
   public final static PeakInfo nullPeakInfo = new PeakInfo();

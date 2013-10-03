@@ -5,15 +5,16 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import org.jmol.util.JSVEscape;
+import org.jmol.util.JSVLogger;
+import org.jmol.util.JSVParser;
+import org.jmol.util.JSVSB;
+import org.jmol.util.JSVTextFormat;
+
 import jspecview.common.Annotation.AType;
 import jspecview.common.JDXSpectrum.IRMode;
 import jspecview.common.PanelData.LinkMode;
 import jspecview.source.JDXSource;
-import jspecview.util.JSVEscape;
-import jspecview.util.JSVLogger;
-import jspecview.util.JSVParser;
-import jspecview.util.JSVSB;
-import jspecview.util.JSVTextFormat;
 
 /**
  * This static class encapsulates all general functionality of applet and app.

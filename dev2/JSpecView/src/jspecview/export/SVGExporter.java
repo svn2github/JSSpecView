@@ -26,12 +26,13 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.ArrayList;
 
+import org.jmol.util.JSVLogger;
+import org.jmol.util.JSVTextFormat;
+
 import jspecview.common.AwtParameters;
 import jspecview.common.Coordinate;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.ScaleData;
-import jspecview.util.JSVLogger;
-import jspecview.util.JSVTextFormat;
 
 /**
  * class <code>SVGExporter</code> contains static methods to export a Graph as

@@ -26,11 +26,12 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 
+import org.jmol.util.JSVLogger;
+import org.jmol.util.JSVParser;
+import org.jmol.util.JSVSB;
+import org.jmol.util.JSVTextFormat;
+
 import jspecview.common.Coordinate;
-import jspecview.util.JSVLogger;
-import jspecview.util.JSVParser;
-import jspecview.util.JSVSB;
-import jspecview.util.JSVTextFormat;
 
 /**
  * A simple Velocity-like template form filler

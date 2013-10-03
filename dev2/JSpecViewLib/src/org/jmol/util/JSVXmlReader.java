@@ -17,11 +17,12 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package jspecview.util;
+package org.jmol.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Hashtable;
+
 
 public class JSVXmlReader {
 

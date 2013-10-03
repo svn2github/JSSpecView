@@ -26,10 +26,11 @@ package jspecview.source;
 
 import java.io.IOException;
 
+import org.jmol.util.JSVLogger;
+import org.jmol.util.JSVParser;
+import org.jmol.util.JSVSB;
+
 import jspecview.common.Coordinate;
-import jspecview.util.JSVLogger;
-import jspecview.util.JSVParser;
-import jspecview.util.JSVSB;
 
 /**
  * JDXDecompressor contains static methods to decompress the data part of

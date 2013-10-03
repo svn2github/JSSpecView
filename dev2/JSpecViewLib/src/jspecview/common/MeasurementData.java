@@ -28,8 +28,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.jmol.util.JSVTextFormat;
+
 import jspecview.common.Annotation.AType;
-import jspecview.util.JSVTextFormat;
 
 class MeasurementData extends ArrayList<Measurement> implements AnnotationData {
 

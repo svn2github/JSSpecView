@@ -23,12 +23,13 @@
  *  02110-1301, USA.
  */
 
-package jspecview.util;
+package org.jmol.util;
 
 import java.util.BitSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 
 public class JSVEscape {
 

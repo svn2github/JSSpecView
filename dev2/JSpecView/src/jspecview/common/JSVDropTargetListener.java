@@ -12,9 +12,10 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
-import jspecview.util.JSVEscape;
-import jspecview.util.JSVLogger;
-import jspecview.util.JSVSB;
+import org.jmol.util.JSVEscape;
+import org.jmol.util.JSVLogger;
+import org.jmol.util.JSVSB;
+
 
 public class JSVDropTargetListener implements DropTargetListener {
 

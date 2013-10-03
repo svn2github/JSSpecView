@@ -37,7 +37,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 
-import jspecview.util.JSVSB;
+import org.jmol.util.JSVSB;
+
 
 /**
  * Dialog for managing overlaying spectra and closing files

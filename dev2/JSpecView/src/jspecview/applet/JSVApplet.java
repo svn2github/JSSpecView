@@ -52,9 +52,10 @@ import java.util.Map;
 
 import javax.swing.JApplet;
 
+import org.jmol.util.JSVLogger;
+
 import jspecview.common.JSVAppletInterface;
 import jspecview.common.JSVersion;
-import jspecview.util.JSVLogger;
 
 /**
  * JSpecView Applet class. For a list of parameters and scripting functionality

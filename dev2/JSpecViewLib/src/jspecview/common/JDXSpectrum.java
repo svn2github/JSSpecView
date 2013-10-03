@@ -24,8 +24,9 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.List;
 
+import org.jmol.util.JSVLogger;
+
 import jspecview.source.JDXSourceStreamTokenizer;
-import jspecview.util.JSVLogger;
 
 /**
  * <code>JDXSpectrum</code> implements the Interface Spectrum for the display of

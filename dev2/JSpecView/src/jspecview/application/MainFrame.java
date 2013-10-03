@@ -79,6 +79,10 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 
 import org.jmol.api.JSVInterface;
 import org.jmol.api.JmolSyncInterface;
+import org.jmol.util.JSVEscape;
+import org.jmol.util.JSVLogger;
+import org.jmol.util.JSVSB;
+import org.jmol.util.JSVTextFormat;
 
 import jspecview.applet.JSVAppletPrivatePro;
 import jspecview.common.AwtPanel;
@@ -110,11 +114,7 @@ import jspecview.common.JDXSpectrum.IRMode;
 import jspecview.export.Exporter;
 import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
-import jspecview.util.JSVEscape;
 import jspecview.util.JSVFileManager;
-import jspecview.util.JSVLogger;
-import jspecview.util.JSVSB;
-import jspecview.util.JSVTextFormat;
 
 /**
  * The Main Class or Entry point of the JSpecView Application.

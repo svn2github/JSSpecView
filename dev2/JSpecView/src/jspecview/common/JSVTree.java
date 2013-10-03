@@ -15,11 +15,12 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import org.jmol.util.JSVLogger;
+import org.jmol.util.JSVParser;
+import org.jmol.util.JSVTextFormat;
+
 import jspecview.source.JDXSource;
 import jspecview.util.JSVFileManager;
-import jspecview.util.JSVLogger;
-import jspecview.util.JSVParser;
-import jspecview.util.JSVTextFormat;
 
 public class JSVTree extends JTree {
 

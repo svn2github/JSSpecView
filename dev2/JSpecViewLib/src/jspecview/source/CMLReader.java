@@ -23,8 +23,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Vector;
 
-import jspecview.util.JSVParser;
-//import javax.xml.stream.*;
+import org.jmol.util.JSVParser;
+
 
 /**
  * Representation of a XML Source.

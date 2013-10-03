@@ -34,6 +34,10 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.jmol.util.JSVArrayUtil;
+import org.jmol.util.JSVLogger;
+import org.jmol.util.JSVSB;
+
 public class JSVZipUtil {
 
   public static boolean isZipFile(InputStream is) throws IOException {

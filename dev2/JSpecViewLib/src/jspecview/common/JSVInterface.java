@@ -25,7 +25,7 @@
 
 package jspecview.common;
 
-import jspecview.util.JSVLogger;
+import org.jmol.util.JSVLogger;
 
 public class JSVInterface {
 
