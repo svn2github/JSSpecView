@@ -17,11 +17,11 @@ import javax.swing.tree.TreeSelectionModel;
 
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
+import org.jmol.util.Txt;
 
 import jspecview.api.ScriptInterface;
 import jspecview.source.JDXSource;
 import jspecview.util.JSVFileManager;
-import jspecview.util.JSVTxt;
 
 public class JSVTree extends JTree {
 
@@ -254,13 +254,13 @@ public class JSVTree extends JTree {
 		boolean isSimulation = filename.equalsIgnoreCase("MOL");
 		if (isSimulation)
 			filename = JSVFileManager.SIMULATION_PROTOCOL + "MOL="
-					+ JSVTxt.trimQuotes(tokens.get(++pt));
+					+ Txt.trimQuotes(tokens.get(++pt));
 		if (!isCheck && !isAppend) {
 			if (filename.equals("\"\"") && si.getCurrentSource() != null)
 				filename = si.getCurrentSource().getFilePath();
 			close(si, "all");
 		}
-		filename = JSVTxt.trimQuotes(filename);
+		filename = Txt.trimQuotes(filename);
 		if (filename.startsWith("$")) {
 			isSimulation = true;
 			filename = JSVFileManager.SIMULATION_PROTOCOL + filename;
@@ -294,7 +294,7 @@ public class JSVTree extends JTree {
 			newPath = fileName = filePath = "View" + si.incrementViewCount(1);
 		} else if (url != null) {
 			try {
-				base = si.getDocumentBase();
+				base = JSVFileManager.appletDocumentBase;
 				URL u = (base == null ? new URL(url) : new URL(base, url));
 				filePath = u.toString();
 				si.setRecentURL(filePath);

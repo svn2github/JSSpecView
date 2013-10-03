@@ -108,6 +108,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		this.jsvApplet = jsvApplet;
 		repaintManager = new RepaintManager(this);
 		dialogHelper = new DialogHelper(this);
+		JSVFileManager.setDocumentBase(jsvApplet.getDocumentBase());
 		init();
 	}
 
@@ -1018,10 +1019,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		return interfaceOverlaid;
 	}
 	
-	public URL getDocumentBase() {
-		return jsvApplet.getDocumentBase();
-	}
-
 	public JDXSource createSource(String data, String filePath, URL base,
 			int firstSpec, int lastSpec) throws Exception {
 		return FileReader.createJDXSource(JSVFileManager

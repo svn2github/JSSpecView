@@ -81,6 +81,7 @@ import org.jmol.api.JSVInterface;
 import org.jmol.api.JmolSyncInterface;
 import org.jmol.util.Logger;
 import org.jmol.util.SB;
+import org.jmol.util.Txt;
 
 import jspecview.api.ScriptInterface;
 import jspecview.applet.JSVAppletPrivatePro;
@@ -114,7 +115,6 @@ import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
 import jspecview.util.JSVEscape;
 import jspecview.util.JSVFileManager;
-import jspecview.util.JSVTxt;
 
 /**
  * The Main Class or Entry point of the JSpecView Application.
@@ -934,7 +934,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	public void execClose(String value, boolean fromScript) {
-		JSVTree.close(this, JSVTxt.trimQuotes(value));
+		JSVTree.close(this, Txt.trimQuotes(value));
 		if (!fromScript || panelNodes.size() == 0) {
 			validate();
 			repaint();
@@ -1235,10 +1235,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		return FileReader.createJDXSource(JSVFileManager
 				.getBufferedReaderForString(data), filePath, null, false, loadImaginary , firstSpec,
 				lastSpec);
-	}
-
-	public URL getDocumentBase() {
-		return null;
 	}
 
 	public JSVPanel getNewJSVPanel(JmolList<JDXSpectrum> specs) {

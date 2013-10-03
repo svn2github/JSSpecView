@@ -2,8 +2,8 @@
 Feel free to add to this file any time! Don't worry about sync problems. 
 Put new items at top, please.
 
-___date=$Date$
-___svnRev=$LastChangedRevision::      $  
+___date="$Date$"
+___svnRev="$LastChangedRevision::      $"  
 
 
 ___JmolVersion="13.3.5_dev_2013.08.29"
@@ -54,8 +54,10 @@ Added org.jmol.util.P3 and Tuple3f (required for Jmol's ArrayUtil)
 XMLReader moved to org.jmol.io
 Replaced org.jmol.util.ArrayUtil, Base64, Escape, Parser, Txt with Jmol's.
 Replaced org.jmol.util.DefaultLogger, Logger, LoggerInterface, with Jmol's.
- 
-___version=2.0.2
+Created jspecview.awt, jspecview.awtjs2d; populated with template methods
+Created EventManager
+
+___version="2.1.0"
 
 correct FIX export bug: X values now max of 14 wide Y values 10 wide
 apply changes to build.xml to allow command line ANT compilation for use in Fedora (Thanks to Susi Lehtola)
