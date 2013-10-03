@@ -34,7 +34,7 @@ import jspecview.common.Coordinate;
 import jspecview.common.JDXDataObject;
 import jspecview.common.JDXSpectrum;
 import jspecview.source.FileReader;
-import jspecview.util.JSVTextFormat;
+import jspecview.util.JSVTxt;
 
 /**
  * class <code>JDXExporter</code> contains static methods for exporting a
@@ -165,7 +165,7 @@ public class JDXExporter {
     String varList = FileReader.VAR_LIST_TABLE[1][index];
     buffer.append(getHeaderString(spectrum, tmpDataClass, minY, maxY,
         xCompFactor, yCompFactor, startIndex, endIndex));
-    buffer.append("##" + tmpDataClass + "= " + varList + JSVTextFormat.newLine);
+    buffer.append("##" + tmpDataClass + "= " + varList + JSVTxt.newLine);
     buffer.append(tabDataSet);
     buffer.append("##END=");
 
@@ -200,16 +200,16 @@ public class JDXExporter {
     SB buffer = new SB();
     // start of header
     buffer.append("##TITLE= ").append(spec.getTitle()).append(
-        JSVTextFormat.newLine);
-    buffer.append("##JCAMP-DX= 5.01").append(JSVTextFormat.newLine); /*+ getJcampdx()*/
+        JSVTxt.newLine);
+    buffer.append("##JCAMP-DX= 5.01").append(JSVTxt.newLine); /*+ getJcampdx()*/
     buffer.append("##DATA TYPE= ").append(spec.getDataType()).append(
-        JSVTextFormat.newLine);
+        JSVTxt.newLine);
     buffer.append("##DATA CLASS= ").append(tmpDataClass).append(
-        JSVTextFormat.newLine);
+        JSVTxt.newLine);
     buffer.append("##ORIGIN= ").append(spec.getOrigin()).append(
-        JSVTextFormat.newLine);
+        JSVTxt.newLine);
     buffer.append("##OWNER= ").append(spec.getOwner()).append(
-        JSVTextFormat.newLine);
+        JSVTxt.newLine);
     String d = spec.getDate();
     String longdate = "";
     String currentTime = (new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSSS ZZZZ"))
@@ -221,7 +221,7 @@ public class JDXExporter {
     } else {
       longdate = spec.getLongDate();
     }
-    buffer.append("##LONGDATE= ").append(longdate).append(JSVTextFormat.newLine);
+    buffer.append("##LONGDATE= ").append(longdate).append(JSVTxt.newLine);
 
     // optional header
     JmolList<String[]> headerTable = spec.getHeaderTable();
@@ -229,21 +229,21 @@ public class JDXExporter {
       String[] entry = headerTable.get(i);
       String label = entry[0];
       String dataSet = entry[1];
-      String nl = (dataSet.startsWith("<") && dataSet.contains("</") ? JSVTextFormat.newLine
+      String nl = (dataSet.startsWith("<") && dataSet.contains("</") ? JSVTxt.newLine
           : "");
       buffer.append(label).append("= ").append(nl).append(dataSet).append(
-          JSVTextFormat.newLine);
+          JSVTxt.newLine);
     }
     double observedFreq = spec.getObservedFreq();
     if (!spec.is1D())
       buffer.append("##NUM DIM= ").appendI(spec.numDim).append(
-          JSVTextFormat.newLine);
+          JSVTxt.newLine);
     if (observedFreq != JDXDataObject.ERROR)
       buffer.append("##.OBSERVE FREQUENCY= ").appendD(observedFreq).append(
-          JSVTextFormat.newLine);
+          JSVTxt.newLine);
     if (spec.observedNucl != "")
       buffer.append("##.OBSERVE NUCLEUS= ").append(spec.observedNucl).append(
-          JSVTextFormat.newLine);
+          JSVTxt.newLine);
     //now need to put pathlength here
 
     // last part of header
@@ -251,30 +251,30 @@ public class JDXExporter {
     //boolean toHz = (observedFreq != JDXSpectrum.ERROR && !spec.getDataType()
       //  .toUpperCase().contains("FID"));
     buffer.append("##XUNITS= ").append(spec.isHZtoPPM() ? "HZ" : spec.getXUnits()).append(
-        JSVTextFormat.newLine);
+        JSVTxt.newLine);
     buffer.append("##YUNITS= ").append(spec.getYUnits()).append(
-        JSVTextFormat.newLine);
-    buffer.append("##XFACTOR= ").append(JSVTextFormat.fixExponentInt(tmpXFactor))
-        .append(JSVTextFormat.newLine);
-    buffer.append("##YFACTOR= ").append(JSVTextFormat.fixExponentInt(tmpYFactor))
-        .append(JSVTextFormat.newLine);
+        JSVTxt.newLine);
+    buffer.append("##XFACTOR= ").append(JSVTxt.fixExponentInt(tmpXFactor))
+        .append(JSVTxt.newLine);
+    buffer.append("##YFACTOR= ").append(JSVTxt.fixExponentInt(tmpYFactor))
+        .append(JSVTxt.newLine);
     double f = (spec.isHZtoPPM() ? observedFreq : 1);
     Coordinate[] xyCoords = spec.getXYCoords();
     buffer.append("##FIRSTX= ").append(
-        JSVTextFormat.fixExponentInt(xyCoords[startIndex].getXVal() * f)).append(
-        JSVTextFormat.newLine);
+        JSVTxt.fixExponentInt(xyCoords[startIndex].getXVal() * f)).append(
+        JSVTxt.newLine);
     buffer.append("##FIRSTY= ").append(
-        JSVTextFormat.fixExponentInt(xyCoords[startIndex].getYVal())).append(
-        JSVTextFormat.newLine);
+        JSVTxt.fixExponentInt(xyCoords[startIndex].getYVal())).append(
+        JSVTxt.newLine);
     buffer.append("##LASTX= ").append(
-        JSVTextFormat.fixExponentInt(xyCoords[endIndex].getXVal() * f)).append(
-        JSVTextFormat.newLine);
+        JSVTxt.fixExponentInt(xyCoords[endIndex].getXVal() * f)).append(
+        JSVTxt.newLine);
     buffer.append("##NPOINTS= ").appendI((Math.abs(endIndex - startIndex) + 1))
-        .append(JSVTextFormat.newLine);
-    buffer.append("##MINY= ").append(JSVTextFormat.fixExponentInt(minY)).append(
-        JSVTextFormat.newLine);
-    buffer.append("##MAXY= ").append(JSVTextFormat.fixExponentInt(maxY)).append(
-        JSVTextFormat.newLine);
+        .append(JSVTxt.newLine);
+    buffer.append("##MINY= ").append(JSVTxt.fixExponentInt(minY)).append(
+        JSVTxt.newLine);
+    buffer.append("##MAXY= ").append(JSVTxt.fixExponentInt(maxY)).append(
+        JSVTxt.newLine);
     return buffer.toString();
   }
 
@@ -282,7 +282,7 @@ public class JDXExporter {
                                      int endIndex, double factor, boolean isX) {
     for (int i = startIndex; i <= endIndex; i++) {
       double x = (isX ? xyCoords[i].getXVal() : xyCoords[i].getYVal()) / factor;
-      if (JSVTextFormat.isAlmostInteger(x))
+      if (JSVTxt.isAlmostInteger(x))
           return false;
     }
     return true;

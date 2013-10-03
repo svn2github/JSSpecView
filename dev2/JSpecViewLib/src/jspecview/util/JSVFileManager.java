@@ -331,7 +331,7 @@ public class JSVFileManager {
       String line = null;
       while ((line = br.readLine()) != null) {
         writer.write(line);
-        writer.write(JSVTextFormat.newLine);
+        writer.write(JSVTxt.newLine);
       }
       writer.close();
     } catch (Exception e) {

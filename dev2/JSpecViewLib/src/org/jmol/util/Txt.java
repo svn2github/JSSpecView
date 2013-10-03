@@ -25,19 +25,20 @@
 
 package org.jmol.util;
 
+import java.util.List;
 
 public class Txt {
 
+//  private final static DecimalFormat[] formatters = new DecimalFormat[10];
+
   private final static String[] formattingStrings = { "0", "0.0", "0.00", "0.000",
       "0.0000", "0.00000", "0.000000", "0.0000000", "0.00000000", "0.000000000" };
-
   private final static String zeros = "0000000000000000000000000000000000000000";
 
   private final static float[] formatAdds = { 0.5f, 0.05f, 0.005f, 0.0005f,
-  	0.00005f, 0.000005f, 0.0000005f, 0.00000005f, 0.000000005f, 0.0000000005f };
+    0.00005f, 0.000005f, 0.0000005f, 0.00000005f, 0.000000005f, 0.0000000005f };
 
   private final static Boolean[] useNumberLocalization = new Boolean[1];
-
   {
     useNumberLocalization[0] = Boolean.TRUE;
   }
@@ -46,129 +47,143 @@ public class Txt {
     useNumberLocalization[0] = (TF ? Boolean.TRUE : Boolean.FALSE);
   }
 
-	public static String formatDecimalDbl(double value, int decimalDigits) {
-		if (decimalDigits == Integer.MAX_VALUE 
-				|| value == Double.NEGATIVE_INFINITY
-				|| value == Double.POSITIVE_INFINITY 
-				|| Double.isNaN(value))
-			return "" + value;
-		return formatDecimal((float) value, decimalDigits);
-	}
-	
-	/**
-	 * A simple alternative to DecimalFormat (which Java2Script does not have and
-	 * which is quite too complex for our use here).
-	 * 
-	 * Limited support for scientific notation. Note that the last 0 in "0.00E00"
-	 * is ignored.
-	 * 
-	 * To-even rounding for xxxx.xx5, as in java.text.DecimalFormat
-	 * 
-	 * 
-	 * @param value
-	 * @param decimalDigits
-	 *          TOTAL number of digits; neg for scientific notation (3 1.35; -3,
-	 *          "1.35E-20")
-	 * @return formatted decimal
-	 */
+  public static String formatDecimalDbl(double value, int decimalDigits) {
+    if (decimalDigits == Integer.MAX_VALUE 
+        || value == Double.NEGATIVE_INFINITY
+        || value == Double.POSITIVE_INFINITY 
+        || Double.isNaN(value))
+      return "" + value;
+    return formatDecimal((float) value, decimalDigits);
+  }
+  
+  /**
+   * a simple alternative to DecimalFormat (which Java2Script does not have
+   * and which is quite too complex for our use here.
+   * 
+   * @param value
+   * @param decimalDigits
+   * @return  formatted decimal
+   */
   public static String formatDecimal(float value, int decimalDigits) {
     if (decimalDigits == Integer.MAX_VALUE 
         || value == Float.NEGATIVE_INFINITY || value == Float.POSITIVE_INFINITY || Float.isNaN(value))
       return "" + value;
-		int n;
-		if (decimalDigits < 0) {
-			decimalDigits = -decimalDigits;
-			if (decimalDigits > formattingStrings.length)
-				decimalDigits = formattingStrings.length;
-			if (value == 0)
-				return formattingStrings[decimalDigits] + "E0";
-			// scientific notation
-			n = 0;
-			double d;
-			if (Math.abs(value) < 1) {
-				n = 10;
-				d = value * 1e-10;
-			} else {
-				n = -10;
-				d = value * 1e10;
-			}
-			String s = ("" + d).toUpperCase();
-			int i = s.indexOf("E");
-			n = Parser.parseInt(s.substring(i + 1)) + n;
-			return (i < 0 ? "" + value : formatDecimalDbl(Parser.parseFloat(s.substring(
-					0, i)), decimalDigits - 1)
-					+ "E" + n);
-		}
+    int n;
+    if (decimalDigits < 0) {
+      decimalDigits = -decimalDigits;
+      if (decimalDigits > formattingStrings.length)
+        decimalDigits = formattingStrings.length;
+      if (value == 0)
+        return formattingStrings[decimalDigits] + "E+0";
+      //scientific notation
+      n = 0;
+      double d;
+      if (Math.abs(value) < 1) {
+        n = 10;
+        d = value * 1e-10;
+      } else {
+        n = -10;
+        d = value * 1e10;
+      }
+      String s = ("" + d).toUpperCase();
+      int i = s.indexOf("E");
+      n = Parser.parseInt(s.substring(i + 1)) + n;
+      return (i < 0 ? "" + value : formatDecimal(Parser.parseFloat(s.substring(
+          0, i)), decimalDigits - 1)
+          + "E" + (n >= 0 ? "+" : "") + n);
+    }
 
-		if (decimalDigits >= formattingStrings.length)
-			decimalDigits = formattingStrings.length - 1;
-		String s1 = ("" + value).toUpperCase();
-		boolean isNeg = s1.startsWith("-");
-		if (isNeg)
-			s1 = s1.substring(1);
-		int pt = s1.indexOf(".");
-		if (pt < 0)
-			return s1 + formattingStrings[decimalDigits].substring(1);
-		int pt1 = s1.indexOf("E-");
-		if (pt1 > 0) {
-			n = Parser.parseInt(s1.substring(pt1 + 1));
-			// 3.567E-2
-			// 0.03567
-			s1 = "0." + zeros.substring(0, -n - 1) + s1.substring(0, 1)
-					+ s1.substring(2, pt1);
-			pt = 1;
-		}
+    if (decimalDigits >= formattingStrings.length)
+      decimalDigits = formattingStrings.length - 1;
+    String s1 = ("" + value).toUpperCase();
+    boolean isNeg = s1.startsWith("-");
+    if (isNeg)
+      s1 = s1.substring(1);
+    int pt = s1.indexOf(".");
+    if (pt < 0)
+      return s1 + formattingStrings[decimalDigits].substring(1);
+    int pt1 = s1.indexOf("E-");
+    if (pt1 > 0) {
+      n = Parser.parseInt(s1.substring(pt1 + 1));
+      // 3.567E-2
+      // 0.03567
+      s1 = "0." + zeros.substring(0, -n - 1) + s1.substring(0, 1) + s1.substring(2, pt1);
+      pt = 1; 
+    }
 
-		pt1 = s1.indexOf("E");
-		// 3.5678E+3
-		// 3567.800000000
-		// 1.234E10 %3.8f -> 12340000000.00000000
-		if (pt1 > 0) {
-			n = Parser.parseInt(s1.substring(pt1 + 1));
-			s1 = s1.substring(0, 1) + s1.substring(2, pt1) + zeros;
-			s1 = s1.substring(0, n + 1) + "." + s1.substring(n + 1);
-			pt = s1.indexOf(".");
-		}
-		// "234.345667 len == 10; pt = 3
-		// "  0.0 " decimalDigits = 1
+    pt1 = s1.indexOf("E");
+    // 3.5678E+3
+    // 3567.800000000
+    // 1.234E10 %3.8f -> 12340000000.00000000
+    if (pt1 > 0) {
+      n = Parser.parseInt(s1.substring(pt1 + 1));
+      s1 = s1.substring(0, 1) + s1.substring(2, pt1) + zeros;
+      s1 = s1.substring(0, n + 1) + "." + s1.substring(n + 1);
+      pt = s1.indexOf(".");
+    } 
+    // "234.345667  len == 10; pt = 3
+    // "  0.0 "  decimalDigits = 1
+    
+    int len = s1.length();
+    int pt2 = decimalDigits + pt + 1;
+    if (pt2 < len && s1.charAt(pt2) >= '5') {
+      return formatDecimal(
+          value + (isNeg ? -1 : 1) * formatAdds[decimalDigits], decimalDigits);
+    }
 
-		int len = s1.length();
-		int pt2 = decimalDigits + pt + 1;
-		char ch;
-		if (pt2 < len
-				&& ((ch = s1.charAt(pt2)) > '5' || ch == '5'
-						&& (pt2 > 0 && (0 + ((ch = s1.charAt(pt2 - 1)) == '.' ? s1
-								.charAt(pt2 - 2) : ch) % 2 == 1)))) {
-			return formatDecimalDbl(value + (isNeg ? -1 : 1) * formatAdds[decimalDigits],
-					decimalDigits);
-		}
-
-		SB sb = SB.newS(s1.substring(0, (decimalDigits == 0 ? pt : ++pt)));
-		for (int i = 0; i < decimalDigits; i++, pt++) {
-			if (pt < len)
-				sb.appendC(s1.charAt(pt));
-			else
-				sb.appendC('0');
-		}
-		s1 = (isNeg ? "-" : "") + sb;
-		return (Boolean.TRUE.equals(useNumberLocalization[0]) ? s1 : s1.replace(
-				',', '.'));
-	}
-
-  public static String formatNumber(double value, int width, int precision,
-                              boolean alignLeft, boolean zeroPad) {
-    return format(formatDecimalDbl(value, precision), width, 0, alignLeft, zeroPad);
+    SB sb = SB.newS(s1.substring(0, (decimalDigits == 0 ? pt
+        : ++pt)));
+    for (int i = 0; i < decimalDigits; i++, pt++) {
+      if (pt < len)
+        sb.appendC(s1.charAt(pt));
+      else
+        sb.appendC('0');
+    }
+    s1 = (isNeg ? "-" : "") + sb;
+    return (Boolean.TRUE.equals(useNumberLocalization[0]) ? s1 : s1.replace(',',
+        '.'));
   }
 
-  public static String format(String value, int width, int precision,
+  public static String formatF(float value, int width, int precision,
+                              boolean alignLeft, boolean zeroPad) {
+    return formatS(formatDecimal(value, precision), width, 0, alignLeft, zeroPad);
+  }
+
+  /**
+   * 
+   * @param value
+   * @param width
+   * @param precision
+   * @param alignLeft
+   * @param zeroPad
+   * @param allowOverflow IGNORED
+   * @return formatted string
+   */
+  public static String formatD(double value, int width, int precision,
+                              boolean alignLeft, boolean zeroPad, boolean allowOverflow) {
+    return formatS(formatDecimal((float)value, -1 - precision), width, 0, alignLeft, zeroPad);
+  }
+
+  /**
+   * 
+   * @param value       
+   * @param width       number of columns
+   * @param precision   precision > 0 ==> precision = number of characters max from left
+   *                    precision < 0 ==> -1 - precision = number of char. max from right
+   * @param alignLeft
+   * @param zeroPad     generally for numbers turned strings
+   * @return            formatted string
+   */
+  public static String formatS(String value, int width, int precision,
                               boolean alignLeft, boolean zeroPad) {
     if (value == null)
       return "";
+    int len = value.length();
     if (precision != Integer.MAX_VALUE && precision > 0
-        && precision < value.length())
+        && precision < len)
       value = value.substring(0, precision);
-    else if (precision < 0 && -precision < value.length())
-      value = value.substring(value.length() + precision);
+    else if (precision < 0 && len + precision >= 0)
+      value = value.substring(len + precision + 1);
 
     int padLength = width - value.length();
     if (padLength <= 0)
@@ -188,42 +203,112 @@ public class Txt {
       sb.append(isNeg ? padChar + value.substring(1) : value);
     return sb.toString();
   }
-  
-  public static String sprintf(String strFormat, Object[] values) {
+
+  public static String formatStringS(String strFormat, String key, String strT) {
+    return formatString(strFormat, key, strT, Float.NaN, Double.NaN, false);
+  }
+
+  public static String formatStringF(String strFormat, String key, float floatT) {
+    return formatString(strFormat, key, null, floatT, Double.NaN, false);
+  }
+
+  public static String formatStringI(String strFormat, String key, int intT) {
+    return formatString(strFormat, key, "" + intT, Float.NaN, Double.NaN, false);
+  }
+   
+  /**
+   * sprintf emulation uses (almost) c++ standard string formats 's' string 'i'
+   * or 'd' integer 'f' float/decimal 'p' point3f 'q' quaternion/plane/axisangle
+   * ' with added "i" in addition to the insipid "d" (digits?)
+   * 
+   * @param strFormat
+   * @param list
+   * @param values
+   * @return formatted string
+   */
+  public static String sprintf(String strFormat, String list, Object[] values) {
     if (values == null)
       return strFormat;
-    for (int o = 0; o < values.length; o++)
-      if (values[o] != null) {
-        if (values[o] instanceof String[]) {
-          String[] sVal = (String[]) values[o];
-          for (int i = 0; i < sVal.length; i++)
-            strFormat = formatString(strFormat, "s", sVal[i], Float.NaN, true);
-        } else if (values[o] instanceof float[]) {
-          float[] fVal = (float[]) values[o];
-          for (int i = 0; i < fVal.length; i++)
-            strFormat = formatString(strFormat, "f", null, fVal[i], true);
-        } else if (values[o] instanceof int[]) {
-          int[] iVal = (int[]) values[o];
-          for (int i = 0; i < iVal.length; i++)
-            strFormat = formatString(strFormat, "d", "" + iVal[i], Float.NaN,
+    int n = list.length();
+    if (n == values.length)
+      try {
+        for (int o = 0; o < n; o++) {
+          if (values[o] == null)
+            continue;
+          switch (list.charAt(o)) {
+          case 's':
+            strFormat = formatString(strFormat, "s", (String) values[o],
+                Float.NaN, Double.NaN, true);
+            break;
+          case 'f':
+            strFormat = formatString(strFormat, "f", null, ((Float) values[o])
+                .floatValue(), Double.NaN, true);
+            break;
+          case 'i':
+            strFormat = formatString(strFormat, "d", "" + values[o], Float.NaN,
+                Double.NaN, true);
+            strFormat = formatString(strFormat, "i", "" + values[o], Float.NaN,
+                Double.NaN, true);
+            break;
+          case 'd':
+            strFormat = formatString(strFormat, "e", null, Float.NaN,
+                ((Double) values[o]).doubleValue(), true);
+            break;
+          case 'p':
+            P3 pVal = (P3) values[o];
+            strFormat = formatString(strFormat, "p", null, pVal.x, Double.NaN,
                 true);
+            strFormat = formatString(strFormat, "p", null, pVal.y, Double.NaN,
+                true);
+            strFormat = formatString(strFormat, "p", null, pVal.z, Double.NaN,
+                true);
+            break;
+          case 'q':
+            P4 qVal = (P4) values[o];
+            strFormat = formatString(strFormat, "q", null, qVal.x, Double.NaN,
+                true);
+            strFormat = formatString(strFormat, "q", null, qVal.y, Double.NaN,
+                true);
+            strFormat = formatString(strFormat, "q", null, qVal.z, Double.NaN,
+                true);
+            strFormat = formatString(strFormat, "q", null, qVal.w, Double.NaN,
+                true);
+            break;
+          case 'S':
+            String[] sVal = (String[]) values[o];
+            for (int i = 0; i < sVal.length; i++)
+              strFormat = formatString(strFormat, "s", sVal[i], Float.NaN,
+                  Double.NaN, true);
+            break;
+          case 'F':
+            float[] fVal = (float[]) values[o];
+            for (int i = 0; i < fVal.length; i++)
+              strFormat = formatString(strFormat, "f", null, fVal[i],
+                  Double.NaN, true);
+            break;
+          case 'I':
+            int[] iVal = (int[]) values[o];
+            for (int i = 0; i < iVal.length; i++)
+              strFormat = formatString(strFormat, "d", "" + iVal[i], Float.NaN,
+                  Double.NaN, true);
+            for (int i = 0; i < iVal.length; i++)
+              strFormat = formatString(strFormat, "i", "" + iVal[i], Float.NaN,
+                  Double.NaN, true);
+            break;
+          case 'D':
+            double[] dVal = (double[]) values[o];
+            for (int i = 0; i < dVal.length; i++)
+              strFormat = formatString(strFormat, "e", null, Float.NaN,
+                  dVal[i], true);
+          }
+
         }
+        return simpleReplace(strFormat, "%%", "%");
+      } catch (Exception e) {
+        //
       }
-    return strFormat;
-  }
-
-  public static String sprintf(String strFormat, String[] sVal, float[] fVal) {
-    return sprintf(strFormat, new Object[] {sVal, fVal});
-  }
-  
-  public static String sprintf(String strFormat, String[] sVal, float[] fVal, 
-                               int[] iVal) {
-    return sprintf(strFormat, new Object[] {sVal, fVal, iVal});
-  }
-
-  public static String formatString(String strFormat, String key, String strT,
-                                    float floatT) {
-    return formatString(strFormat, key, strT, floatT, false);
+    System.out.println("TextFormat.sprintf error " + list + " " + strFormat);
+    return simpleReplace(strFormat, "%", "?");
   }
 
   /**
@@ -234,12 +319,13 @@ public class Txt {
    * @param key      any string to match
    * @param strT     replacement string or null
    * @param floatT   replacement float or Float.NaN
+   * @param doubleT  replacement double or Double.NaN -- for exponential
    * @param doOne    mimic sprintf    
    * @return         formatted string
    */
 
   private static String formatString(String strFormat, String key, String strT,
-                                    float floatT, boolean doOne) {
+                                    float floatT, double doubleT, boolean doOne) {
     if (strFormat == null)
       return null;
     if ("".equals(strFormat))
@@ -277,12 +363,19 @@ public class Txt {
           ++ich;
         }
         int precision = Integer.MAX_VALUE;
+        boolean isExponential = false;
         if (strFormat.charAt(ich) == '.') {
           ++ich;
-          if ((ch = strFormat.charAt(ich)) >= '0' && (ch <= '9')) {
+          if ((ch = strFormat.charAt(ich)) == '-') {
+            isExponential = true;
+            ++ich;
+          } 
+          if ((ch = strFormat.charAt(ich)) >= '0' && ch <= '9') {
             precision = ch - '0';
             ++ich;
           }
+          if (isExponential)
+            precision = -precision - (strT == null ? 1 : 0);
         }
         String st = strFormat.substring(ich, ich + len);
         if (!st.equals(key)) {
@@ -292,11 +385,14 @@ public class Txt {
         }
         ich += len;
         if (!Float.isNaN(floatT))
-          strLabel += formatNumber(floatT, width, precision, alignLeft,
+          strLabel += formatF(floatT, width, precision, alignLeft,
               zeroPad);
         else if (strT != null)
-          strLabel += format(strT, width, precision, alignLeft,
+          strLabel += formatS(strT, width, precision, alignLeft,
               zeroPad);
+        else if (!Double.isNaN(doubleT))
+          strLabel += formatD(doubleT, width, precision, alignLeft,
+              zeroPad, true);
         if (doOne)
           break;
       } catch (IndexOutOfBoundsException ioobe) {
@@ -312,6 +408,74 @@ public class Txt {
 
   /**
    * 
+   * formatCheck   checks p and q formats and duplicates if necessary
+   *               "%10.5p xxxx" ==> "%10.5p%10.5p%10.5p xxxx" 
+   * 
+   * @param strFormat
+   * @return    f or dupicated format
+   */
+  public static String formatCheck(String strFormat) {
+    if (strFormat == null || strFormat.indexOf('p') < 0 && strFormat.indexOf('q') < 0)
+      return strFormat;
+    strFormat = simpleReplace(strFormat, "%%", "\1");
+    strFormat = simpleReplace(strFormat, "%p", "%6.2p");
+    strFormat = simpleReplace(strFormat, "%q", "%6.2q");
+    String[] format = split(strFormat, "%");
+    SB sb = new SB();
+    sb.append(format[0]);
+    for (int i = 1; i < format.length; i++) {
+      String f = "%" + format[i];
+      int pt;
+      if (f.length() >= 3) {
+        if ((pt = f.indexOf('p')) >= 0)
+          f = fdup(f, pt, 3);
+        if ((pt = f.indexOf('q')) >= 0)
+          f = fdup(f, pt, 4);
+      }
+      sb.append(f);
+    }
+    return sb.toString().replace('\1', '%');
+  }
+
+  /**
+   * 
+   * fdup      duplicates p or q formats for formatCheck
+   *           and the format() function.
+   * 
+   * @param f
+   * @param pt
+   * @param n
+   * @return     %3.5q%3.5q%3.5q%3.5q or %3.5p%3.5p%3.5p
+   */
+  private static String fdup(String f, int pt, int n) {
+    char ch;
+    int count = 0;
+    for (int i = pt; --i >= 1; ) {
+      if (Character.isDigit(ch = f.charAt(i)))
+        continue;
+      switch (ch) {
+      case '.':
+        if (count++ != 0)
+          return f;
+        continue;
+      case '-':
+        if (i != 1)
+          return f;
+        continue;
+      default:
+        return f;
+      }
+    }
+    String s = f.substring(0, pt + 1);
+    SB sb = new SB();
+    for (int i = 0; i < n; i++)
+      sb.append(s);
+    sb.append(f.substring(pt + 1));
+    return sb.toString();
+  }
+
+  /**
+   * 
    *  proper splitting, even for Java 1.3 -- if the text ends in the run,
    *  no new line is appended.
    * 
@@ -320,6 +484,8 @@ public class Txt {
    * @return  String array
    */
   public static String[] split(String text, String run) {
+    if (text.length() == 0)
+      return new String[0];
     int n = 1;
     int i = text.indexOf(run);
     String[] lines;
@@ -375,47 +541,49 @@ public class Txt {
    * @param chTo
    * @return  replaced string
    */
-  public static String replaceAllCharacters(String str, String strFrom,
+  public static String replaceAllCharacter(String str, String strFrom,
                                             char chTo) {
+    if (str == null)
+      return null;
     for (int i = strFrom.length(); --i >= 0;)
       str = str.replace(strFrom.charAt(i), chTo);
     return str;
   }
   
   /**
-   * Does a clean replace of strFrom in str with strTo
-   * If strTo contains strFrom, then only a single pass is done.
-   * Otherwise, multiple passes are made until no more replacements can be made.
+   * Does a clean replace of strFrom in str with strTo. This method has far
+   * faster performance than just String.replace() when str does not contain
+   * strFrom, but is about 15% slower when it does. (Note that
+   * String.replace(CharSeq, CharSeq) was introduced in Java 1.5. Finally
+   * getting around to using it in Jmol!)
    * 
    * @param str
    * @param strFrom
    * @param strTo
-   * @return  replaced string
+   * @return replaced string
    */
   public static String simpleReplace(String str, String strFrom, String strTo) {
-    if (str == null || str.indexOf(strFrom) < 0 || strFrom.equals(strTo))
-      return str;
-    int fromLength = strFrom.length();
-    if (fromLength == 0)
+    if (str == null || strFrom.length() == 0 || str.indexOf(strFrom) < 0)
       return str;
     boolean isOnce = (strTo.indexOf(strFrom) >= 0);
-    int ipt;
-    while (str.indexOf(strFrom) >= 0) {
-      SB s = new SB();
-      int ipt0 = 0;
-      while ((ipt = str.indexOf(strFrom, ipt0)) >= 0) {
-        s.append(str.substring(ipt0, ipt)).append(strTo);
-        ipt0 = ipt + fromLength;
-      }
-      s.append(str.substring(ipt0));
-      str = s.toString();
-      if (isOnce)
-        break;
-    }
-
+    do {
+      str = str.replace(strFrom, strTo);
+    } while (!isOnce && str.indexOf(strFrom) >= 0);
     return str;
   }
+  
 
+//  static {
+//    long t = System.currentTimeMillis();
+//    for (int i = 0; i < 100000; i++)
+//      simpleReplace("2329823jadf", "a", "b");
+//    System.out.println(System.currentTimeMillis() - t);
+//    t = System.currentTimeMillis();
+//    for (int i = 0; i < 100000; i++)
+//      "2329823jadf".replace("a", "b");
+//    System.out.println(System.currentTimeMillis() - t);
+//  }
+  
   public static String trim(String str, String chars) {
     if (chars.length() == 0)
       return str.trim();
@@ -429,18 +597,18 @@ public class Txt {
     return str.substring(k, m + 1);
   }
 
-  public static void leftJustify(SB s, String sFill, String sVal) {
-    s.append(sVal);
-    int n = sFill.length() - sVal.length();
+  public static void leftJustify(SB s, String s1, String s2) {
+    s.append(s2);
+    int n = s1.length() - s2.length();
     if (n > 0)
-      s.append(sFill.substring(0, n));
+      s.append(s1.substring(0, n));
   }
   
-  public static void rightJustify(SB s, String sFill, String sVal) {
-    int n = sFill.length() - sVal.length();
+  public static void rightJustify(SB s, String s1, String s2) {
+    int n = s1.length() - s2.length();
     if (n > 0)
-      s.append(sFill.substring(0, n));
-    s.append(sVal);
+      s.append(s1.substring(0, n));
+    s.append(s2);
   }
   
   public static String safeTruncate(float f, int n) {
@@ -450,17 +618,16 @@ public class Txt {
   }
 
   public static boolean isWild(String s) {
-    return s.indexOf("*") >= 0 || s.indexOf("?") >= 0;
+    return s != null && (s.indexOf("*") >= 0 || s.indexOf("?") >= 0);
   }
 
   public static boolean isMatch(String s, String strWildcard,
                                 boolean checkStar, boolean allowInitialStar) {
-
     int ich = 0;
     int cchWildcard = strWildcard.length();
     int cchs = s.length();
     if (cchs == 0 || cchWildcard == 0)
-      return false;
+      return (cchs == cchWildcard || cchWildcard == 1 && strWildcard.charAt(0) == '*');
     boolean isStar0 = (checkStar && allowInitialStar ? strWildcard.charAt(0) == '*' : false);
     if (isStar0 && strWildcard.charAt(cchWildcard - 1) == '*')
       return (cchWildcard < 3 || s.indexOf(strWildcard.substring(1,
@@ -505,29 +672,84 @@ public class Txt {
       char charWild = strWildcard.charAt(ich + i);
       if (charWild == '?')
         continue;
-      if (charWild != s.charAt(i))
-        return false;
+      if (charWild != s.charAt(i) && (charWild != '\1' || s.charAt(i) != '?'))
+          return false;
     }
     return true;
   }
 
-//	private static Map<String, DecimalFormat> htFormats = new Hashtable<String, DecimalFormat>();
-  
-//	public static DecimalFormat getDecimalFormat(String hash) {
-//		DecimalFormat df = htFormats.get(hash);
-//		if (df == null) {
-//	  	System.out.println("JSVTextFormat using DF " + hash);
-//			if (hash.length() == 0)
-//				hash = "0.00E0";
-//			htFormats.put(hash, df = new DecimalFormat(hash, new DecimalFormatSymbols(java.util.Locale.US)));
-//		}
-//		return df;
-//	}
-  
-  public static String trimQuotes(String value) {
-    return (value.length() > 1 && value.startsWith("\"")
-        && value.endsWith("\"") ? value.substring(1, value.length() - 1)
-        : value);
+  public static String join(String[] s, char c, int i0) {
+    if (s.length < i0)
+      return null;
+    SB sb = new SB();
+    sb.append(s[i0++]);
+    for (int i = i0; i < s.length; i++)
+      sb.appendC(c).append(s[i]);
+    return sb.toString();
+  }
+
+  public static String replaceQuotedStrings(String s, List<String> list,
+                                            List<String> newList) {
+    int n = list.size();
+    for (int i = 0; i < n; i++) {
+      String name = list.get(i);
+      String newName = newList.get(i);
+      if (!newName.equals(name))
+        s = simpleReplace(s, "\"" + name + "\"", "\"" + newName
+            + "\"");
+    }
+    return s;
+  }
+
+  public static String replaceStrings(String s, List<String> list,
+                                      List<String> newList) {
+    int n = list.size();
+    for (int i = 0; i < n; i++) {
+      String name = list.get(i);
+      String newName = newList.get(i);
+      if (!newName.equals(name))
+        s = simpleReplace(s, name, newName);
+    }
+    return s;
+  }
+
+  /**
+   * For @{....}
+   * 
+   * @param script
+   * @param ichT
+   * @param len
+   * @return     position of "}"
+   */
+  public static int ichMathTerminator(String script, int ichT, int len) {
+    int nP = 1;
+    char chFirst = '\0';
+    char chLast = '\0';
+    while (nP > 0 && ++ichT < len) {
+      char ch = script.charAt(ichT);
+      if (chFirst != '\0') {
+        if (chLast == '\\') {
+          ch = '\0';
+        } else if (ch == chFirst) {
+          chFirst = '\0';
+        }
+        chLast = ch;
+        continue;
+      }
+      switch(ch) {
+      case '\'':
+      case '"':
+        chFirst = ch;
+        break;
+      case '{':
+        nP++;
+        break;
+      case '}':
+        nP--;
+        break;
+      }
+    }
+    return ichT;
   }
 
 }

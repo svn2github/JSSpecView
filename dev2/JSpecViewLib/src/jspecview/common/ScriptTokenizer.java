@@ -1,6 +1,6 @@
 package jspecview.common;
 
-import org.jmol.util.Txt;
+import jspecview.util.JSVTxt;
 
 public class ScriptTokenizer {
 
@@ -19,7 +19,7 @@ public class ScriptTokenizer {
   static String nextStringToken(ScriptTokenizer eachParam,
                                         boolean removeQuotes) {
     String s = eachParam.nextToken();
-    return (removeQuotes && s.charAt(0) == '"' && s.endsWith("\"") && s.length() > 1 ? Txt.trimQuotes(s) : s);
+    return (removeQuotes && s.charAt(0) == '"' && s.endsWith("\"") && s.length() > 1 ? JSVTxt.trimQuotes(s) : s);
   }
 
   public String nextToken() {

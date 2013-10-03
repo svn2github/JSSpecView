@@ -82,7 +82,6 @@ import org.jmol.api.JmolSyncInterface;
 import org.jmol.util.Escape;
 import org.jmol.util.Logger;
 import org.jmol.util.SB;
-import org.jmol.util.Txt;
 
 import jspecview.applet.JSVAppletPrivatePro;
 import jspecview.common.AwtPanel;
@@ -115,6 +114,7 @@ import jspecview.export.Exporter;
 import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
 import jspecview.util.JSVFileManager;
+import jspecview.util.JSVTxt;
 
 /**
  * The Main Class or Entry point of the JSpecView Application.
@@ -934,7 +934,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	public void execClose(String value, boolean fromScript) {
-		JSVTree.close(this, Txt.trimQuotes(value));
+		JSVTree.close(this, JSVTxt.trimQuotes(value));
 		if (!fromScript || panelNodes.size() == 0) {
 			validate();
 			repaint();

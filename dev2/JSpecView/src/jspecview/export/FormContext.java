@@ -32,7 +32,7 @@ import org.jmol.util.SB;
 import org.jmol.util.Txt;
 
 import jspecview.common.Coordinate;
-import jspecview.util.JSVTextFormat;
+import jspecview.util.JSVTxt;
 
 /**
  * A simple Velocity-like template form filler
@@ -169,7 +169,7 @@ class FormContext {
     String[] lines = template.split("\n");
     String token = "";
     for (int i = 0; i < lines.length && strError == null; i++) {
-      String line = JSVTextFormat.rtrim(lines[i], " \n");
+      String line = JSVTxt.rtrim(lines[i], " \n");
       if (line.length() == 0)
         continue;
       int firstChar = -1;

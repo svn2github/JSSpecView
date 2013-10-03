@@ -17,10 +17,12 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package org.jmol.util;
+package org.jmol.io;
 
 import java.io.BufferedReader;
 import java.util.Hashtable;
+
+import org.jmol.util.SB;
 
 
 public class XmlReader {

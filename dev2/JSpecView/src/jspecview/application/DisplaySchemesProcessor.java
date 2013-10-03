@@ -28,14 +28,14 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.TreeMap;
 
+import org.jmol.io.XmlReader;
 import org.jmol.util.SB;
-import org.jmol.util.XmlReader;
 
 import jspecview.common.AwtParameters;
 import jspecview.common.Parameters;
 import jspecview.common.ScriptToken;
 import jspecview.util.JSVFileManager;
-import jspecview.util.JSVTextFormat;
+import jspecview.util.JSVTxt;
 
 /**
  * <code>DisplaySchemesProcessor</code> loads and saves the display schemes of
@@ -310,8 +310,8 @@ public class DisplaySchemesProcessor {
     buffer.flush();
 
     SB outBuffer = new SB();
-    outBuffer.append("<?xml version=\"1.0\"?>" + JSVTextFormat.newLine);
-    outBuffer.append("<displaySchemes default=\""+ defaultDSName +"\">" + JSVTextFormat.newLine);
+    outBuffer.append("<?xml version=\"1.0\"?>" + JSVTxt.newLine);
+    outBuffer.append("<displaySchemes default=\""+ defaultDSName +"\">" + JSVTxt.newLine);
     outBuffer.append(sw.getBuffer().toString());
 
     writer.write(outBuffer.toString());

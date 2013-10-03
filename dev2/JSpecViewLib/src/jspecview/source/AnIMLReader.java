@@ -27,7 +27,7 @@ import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 
 import org.jmol.io.Base64;
-import org.jmol.util.XmlReader;
+import org.jmol.io.XmlReader;
 
 
 

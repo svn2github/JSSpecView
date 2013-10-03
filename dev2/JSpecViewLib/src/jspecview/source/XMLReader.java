@@ -21,12 +21,13 @@ package jspecview.source;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+
+import org.jmol.io.XmlReader;
 import org.jmol.util.JmolList;
 
 
 import org.jmol.util.Logger;
 import org.jmol.util.SB;
-import org.jmol.util.XmlReader;
 
 import jspecview.common.Coordinate;
 import jspecview.common.JDXDataObject;

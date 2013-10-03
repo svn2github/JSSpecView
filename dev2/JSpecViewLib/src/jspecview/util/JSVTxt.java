@@ -28,16 +28,16 @@ package jspecview.util;
 import org.jmol.util.Txt;
 
 
-public class JSVTextFormat {
+public class JSVTxt {
 
 	public static final String newLine = System.getProperty("line.separator");
 
 	public static String fixExponentInt(double x) {
-	  return (x == Math.floor(x) ? String.valueOf((int) x) : Txt.simpleReplace(JSVTextFormat.fixExponent(x), "E+00", ""));
+	  return (x == Math.floor(x) ? String.valueOf((int) x) : Txt.simpleReplace(JSVTxt.fixExponent(x), "E+00", ""));
 	}
 
 	public static String fixIntNoExponent(double x) {
-	  return (x == Math.floor(x) ? String.valueOf((int) x) : JSVTextFormat.formatDecimalTrimmed(x, 10));
+	  return (x == Math.floor(x) ? String.valueOf((int) x) : JSVTxt.formatDecimalTrimmed(x, 10));
 	}
 
 	public static boolean isAlmostInteger(double x) {
@@ -73,7 +73,7 @@ public class JSVTextFormat {
 	}
 
 	public static String formatDecimalTrimmed(double x, int precision) {
-	  return JSVTextFormat.rtrim(Txt.formatDecimalDbl(x, precision), "0"); // 0.##...
+	  return JSVTxt.rtrim(Txt.formatDecimalDbl(x, precision), "0"); // 0.##...
 	}
 
 	public static String rtrim(String str, String chars) {
@@ -83,6 +83,12 @@ public class JSVTextFormat {
 	  while (m >= 0 && chars.indexOf(str.charAt(m)) >= 0)
 	    m--;
 	  return str.substring(0, m + 1);
+	}
+
+	public static String trimQuotes(String value) {
+	  return (value.length() > 1 && value.startsWith("\"")
+	      && value.endsWith("\"") ? value.substring(1, value.length() - 1)
+	      : value);
 	}
 
 //static {
