@@ -209,7 +209,7 @@ public final class Logger {
   public static void warn(String txt, Throwable e) {
     try {
       if (isActiveLevel(LEVEL_WARN)) {
-        _logger.warn(txt, e);
+        _logger.warnEx(txt, e);
       }
     } catch (Throwable t) {
       //
@@ -252,7 +252,7 @@ public final class Logger {
   public static void error(String txt, Throwable e) {
     try {
       if (isActiveLevel(LEVEL_ERROR)) {
-        _logger.error(txt, e);
+        _logger.errorEx(txt, e);
       }
     } catch (Throwable t) {
       //
@@ -283,7 +283,7 @@ public final class Logger {
   public static void fatal(String txt, Throwable e) {
     try {
       if (isActiveLevel(LEVEL_FATAL)) {
-        _logger.fatal(txt, e);
+        _logger.fatalEx(txt, e);
       }
     } catch (Throwable t) {
       //
