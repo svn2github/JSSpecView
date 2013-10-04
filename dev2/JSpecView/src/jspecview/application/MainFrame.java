@@ -41,6 +41,7 @@
 package jspecview.application;
 
 import java.awt.BorderLayout;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -85,26 +86,27 @@ import org.jmol.util.Txt;
 
 import jspecview.api.ScriptInterface;
 import jspecview.applet.JSVAppletPrivatePro;
+import jspecview.common.JSVAppletInterface;
 import jspecview.common.JSVDialog;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelNode;
 import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
-import jspecview.common.Parameters;
+import jspecview.common.ColorParameters;
 import jspecview.common.PanelListener;
+import jspecview.common.Parameters;
 import jspecview.common.PeakPickEvent;
 import jspecview.common.ScriptToken;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.SubSpecChangeEvent;
 import jspecview.common.ZoomEvent;
 import jspecview.common.JDXSpectrum.IRMode;
-import jspecview.export.Exporter;
+import jspecview.java.AwtExportDialog;
 import jspecview.java.AwtOverlayLegendDialog;
 import jspecview.java.AwtPanel;
 import jspecview.java.AwtParameters;
 import jspecview.java.AwtPopupMenu;
 import jspecview.java.DialogHelper;
-import jspecview.java.JSVAppletInterface;
 import jspecview.java.JSVDropTargetListener;
 import jspecview.java.JSVTree;
 import jspecview.java.JSVTreeNode;
@@ -113,6 +115,7 @@ import jspecview.java.ViewDialog;
 import jspecview.java.ViewPanel;
 import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
+import jspecview.util.JSVColorUtil;
 import jspecview.util.JSVEscape;
 import jspecview.util.JSVFileManager;
 
@@ -258,7 +261,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		return panelNodes;
 	}
 
-	public Parameters getParameters() {
+	public ColorParameters getParameters() {
 		return parameters;
 	}
 
@@ -614,7 +617,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 			BorderLayout bl1 = new BorderLayout();
 			leftPanel.setLayout(bl1);
 			JPanel jmolDisplayPanel = new JPanel();
-			jmolDisplayPanel.setBackground(Color.blue);
+			jmolDisplayPanel.setBackground(Color.BLACK);
 			leftPanel.add(jmolDisplayPanel, BorderLayout.SOUTH);
 			leftPanel.add(spectraTreeScrollPane, BorderLayout.NORTH);
 			sideSplitPane.setTopComponent(spectraTreeScrollPane);
@@ -663,7 +666,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 				if (tip.indexOf("TRUE") >= 0)
 					tip = " (" + parameters.getBoolean(st) + ")";
 				else if (st.name().indexOf("COLOR") >= 0)
-					tip = " (" + AwtParameters.colorToHexString(parameters.getColor(st))
+					tip = " (" + JSVColorUtil.colorToHexString(parameters.getElementColor(st))
 							+ ")";
 				else
 					tip = "";
@@ -720,7 +723,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	 */
 	public void setPropertiesFromPreferences(JSVPanel jsvp,
 			boolean includeMeasures) {
-		Parameters ds = dsp.getDisplaySchemes().get(defaultDisplaySchemeName);
+		ColorParameters ds = dsp.getDisplaySchemes().get(defaultDisplaySchemeName);
 		jsvp.getPanelData().addListener(this);
 		parameters.setFor(jsvp, (ds == null ? dsp.getDefaultScheme() : ds),
 				includeMeasures);
@@ -957,7 +960,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	public String execExport(JSVPanel jsvp, String value) {
-		return Exporter.exportCmd(jsvp, ScriptToken.getTokens(value),
+		return AwtExportDialog.exportCmd(jsvp, ScriptToken.getTokens(value),
 				svgForInkscape);
 	}
 

@@ -37,13 +37,17 @@
 
 package jspecview.java;
 
+import jspecview.util.JSVColor;
+
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
 import java.awt.print.PageFormat;
 import java.awt.print.Paper;
 import java.awt.print.Printable;
@@ -51,8 +55,6 @@ import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.text.DateFormat;
-import java.util.Date;
 
 import java.util.Map;
 
@@ -73,25 +75,24 @@ import org.jmol.api.EventManager;
 import org.jmol.api.Interface;
 import org.jmol.api.JmolMouseInterface;
 import org.jmol.api.PlatformViewer;
+import org.jmol.util.JmolFont;
 import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
 import org.jmol.util.Txt;
 
 import jspecview.api.PdfCreatorInterface;
 import jspecview.api.ScriptInterface;
+import jspecview.common.Annotation;
 import jspecview.common.AnnotationData;
 import jspecview.common.AnnotationDialog;
 import jspecview.common.GraphSet;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVInterface;
 import jspecview.common.JSVPanel;
-import jspecview.common.JSVersion;
 import jspecview.common.PanelData;
-import jspecview.common.Parameters;
+import jspecview.common.ColorParameters;
 import jspecview.common.ScriptToken;
 import jspecview.common.Annotation.AType;
-import jspecview.export.Exporter;
-import jspecview.util.JSVFileManager;
 
 /**
  * JSVPanel class represents a View combining one or more GraphSets, each with one or more JDXSpectra.
@@ -116,8 +117,8 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
   private ScriptInterface si;
 
   public PanelData pd;
+	private JSVColor bgcolor;
 
-  
   public PanelData getPanelData() {
     return pd;
   }
@@ -144,34 +145,19 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
   }
 
   
-  ////////// settable colors //////////
-
-  private Color coordinatesColor;
-  private Color gridColor;
-  private Color integralPlotColor;
-  private Color peakTabColor;
-  private Color plotAreaColor;
-  private Color scaleColor;
-  private Color titleColor;
-  private Color unitsColor;
-  // potentially settable; 
-
-  private Color highlightColor = new Color(255, 0, 0, 200);
-  private Color zoomBoxColor = new Color(150, 150, 100, 130);
-  private Color zoomBoxColor2 = new Color(150, 100, 100, 130);
 
   public void setPlotColors(Object oColors) {
-    Color[] colors = (Color[]) oColors;
+    JSVColor[] colors = (JSVColor[]) oColors;
     for (int i = pd.graphSets.size(); --i >= 0;)
       pd.graphSets.get(i).setPlotColors(colors);
   }
 
 
   @SuppressWarnings("incomplete-switch")
-	public void setColorOrFont(Parameters ds, ScriptToken st) {
+	public void setColorOrFont(ColorParameters ds, ScriptToken st) {
     if (st == null) {
-      Map<ScriptToken, Object> colors = ds.getColors();
-      for (Map.Entry<ScriptToken, Object> entry : colors.entrySet())
+      Map<ScriptToken, JSVColor> colors = ds.elementColors;
+      for (Map.Entry<ScriptToken, JSVColor> entry : colors.entrySet())
         setColorOrFont(ds, entry.getKey());
       setColorOrFont(ds, ScriptToken.DISPLAYFONTNAME);
       setColorOrFont(ds, ScriptToken.TITLEFONTNAME);
@@ -179,64 +165,25 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
     }
     switch (st) {
     case DISPLAYFONTNAME:
-      pd.setFontName(st, ds.getDisplayFont());
+      pd.setFontName(st, ds.displayFontName);
       return;
     case TITLEFONTNAME:
-      pd.setFontName(st, ds.getTitleFont());
+      pd.setFontName(st, ds.titleFontName);
       return;
     }
-    setColor(st, ds.getColor(st));
+    setColor(st, ds.getElementColor(st));
   }
 
-  public void setColor(ScriptToken st, Object oColor) {
-    Color color = (Color) oColor;
-    if (color != null)
-      pd.options.put(st, AwtParameters.colorToHexString(color));
-    switch (st) {
-    case BACKGROUNDCOLOR:
-      setBackground(color);
-      break;
-    case COORDINATESCOLOR:
-      coordinatesColor = color;
-      break;
-    case GRIDCOLOR:
-      gridColor = color;
-      break;
-    case HIGHLIGHTCOLOR:
-      highlightColor = color;
-      break;
-    case INTEGRALPLOTCOLOR:
-      integralPlotColor = color;
-      break;
-    case PEAKTABCOLOR:
-    	peakTabColor = color;
-    	break;
-    case PLOTCOLOR:
-      for (int i = pd.graphSets.size(); --i >= 0;)
-        pd.graphSets.get(i).setPlotColor0(color);
-      break;
-    case PLOTAREACOLOR:
-      plotAreaColor = color;
-      break;
-    case SCALECOLOR:
-      scaleColor = color;
-      break;
-    case TITLECOLOR:
-      titleColor = color;
-      break;
-    case UNITSCOLOR:
-      unitsColor = color;
-      break;
-    case ZOOMBOXCOLOR:
-      zoomBoxColor = color;
-      break;
-    case ZOOMBOXCOLOR2:
-      zoomBoxColor2 = color;
-      break;
-    default:
-      Logger.warn("AwtPanel --- unrecognized color: " + st);
-      break;
-    }
+  public void setBackgroundColor(JSVColor color) {
+  	setBackground((Color) (bgcolor = color));
+  }
+  
+  public JSVColor getBackgroundColor() {
+  	return bgcolor;
+  }
+  
+  public void setColor(ScriptToken st, JSVColor c) {
+  	pd.setColor(st, c);
   }
 
   /**
@@ -246,29 +193,40 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
    * @param spectrum
    *        the spectrum
    * @param popup 
+   * @return this
    */
-  public AwtPanel(ScriptInterface si, JDXSpectrum spectrum, AwtPopupMenu popup) {
+  public AwtPanel setOne(ScriptInterface si, JDXSpectrum spectrum, AwtPopupMenu popup) {
     // standard applet not overlaid and not showing range
     // standard application split spectra
     // removal of integration, taConvert
     // Preferences Dialog sample.jdx
   	ToolTipManager.sharedInstance().setInitialDelay(0);
   	//toolTip = new AwtToolTip(this);
-  	this.si = si;
-    pd = new PanelData(this);
-    this.popup = popup;
+  	set(si, popup);
     pd.initSingleSpectrum(spectrum);
+    return this;
   }
 
+  private void set(ScriptInterface si, AwtPopupMenu popup) {
+  	this.si = si;
+    this.popup = popup;
+    pd = new PanelData(this);
+    pd.BLACK = new AwtColor(0);
+	}
+
   public JSVPanel getNewPanel(ScriptInterface si, JDXSpectrum spectrum) {
-    return new AwtPanel(si, spectrum, popup);
+    return new AwtPanel().setOne(si, spectrum, popup);
   }
 
   public static AwtPanel getJSVPanel(ScriptInterface si, JmolList<JDXSpectrum> specs, int startIndex, int endIndex, AwtPopupMenu popup) {
-    return new AwtPanel(si, specs, startIndex, endIndex, popup);
+    return new AwtPanel().setMany(si, specs, startIndex, endIndex, popup);
   }
 
-  /**
+
+  public AwtPanel() {
+	}
+
+	/**
    * Constructs a <code>JSVPanel</code> with List of spectra and corresponding
    * start and end indices of data points that should be displayed
    * @param si 
@@ -280,17 +238,19 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
    * @param endIndex
    *        the end index
    * @param popup 
+   * @return this
    */
-  private AwtPanel(ScriptInterface si, JmolList<JDXSpectrum> spectra, int startIndex,
+  private AwtPanel setMany(ScriptInterface si, JmolList<JDXSpectrum> spectra, int startIndex,
       int endIndex, AwtPopupMenu popup) {
     pd = new PanelData(this);
     this.si = si;
     this.popup = popup;
   	//toolTip = new AwtToolTip(this);
     pd.initJSVPanel(spectra, startIndex, endIndex);
+    return this;
   }
 
-  /**
+	/**
    * generates a single panel or an integrated panel, as appropriate
    * @param si 
    * 
@@ -300,11 +260,11 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
    */
   public static AwtPanel getNewPanel(ScriptInterface si, JDXSpectrum spec,
                                      AwtPopupMenu jsvpPopupMenu) {
-    return new AwtPanel(si, spec, jsvpPopupMenu);
+    return new AwtPanel().setOne(si, spec, jsvpPopupMenu);
   }
 
   public GraphSet getNewGraphSet() {
-    return new AwtGraphSet(this);
+    return new GraphSet(this.pd);
   }
 
   /**
@@ -314,42 +274,22 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
    *        the index
    * @return the color of the plot
    */
-  public Color getPlotColor(int index) {
-    return ((AwtGraphSet) pd.getCurrentGraphSet()).getPlotColor(index);
+  public JSVColor getPlotColor(int index) {
+    return pd.getCurrentGraphSet().getPlotColor(index);
   }
 
-  public Color getColor(int r, int g, int b, int a) {
-    return new Color(r, g, b, a);
+  public JSVColor getColor(ScriptToken whatColor) {
+  	return pd.getColor(whatColor);
+  }
+
+  public JSVColor getColor4(int r, int g, int b, int a) {
+    return new AwtColor(r, g, b, a);
   }
   
-  public Color getColor(ScriptToken whatColor) {
-    switch (whatColor) {
-    default:
-      Logger.error("awtgraphset missing color " + whatColor);
-      return Color.BLACK;
-    case ZOOMBOXCOLOR2:
-      return zoomBoxColor2;
-    case ZOOMBOXCOLOR:
-      return zoomBoxColor;
-    case HIGHLIGHTCOLOR:
-      return highlightColor;
-    case INTEGRALPLOTCOLOR:
-      return integralPlotColor;
-    case GRIDCOLOR:
-      return gridColor;
-    case PEAKTABCOLOR:
-    	return peakTabColor;
-    case PLOTAREACOLOR:
-      return plotAreaColor;
-    case SCALECOLOR:
-      return scaleColor;
-    case TITLECOLOR:
-      return titleColor;
-    case UNITSCOLOR:
-      return unitsColor;
-    }
+  public JSVColor getColor3(int r, int g, int b) {
+    return new AwtColor(r, g, b);
   }
-
+  
   /*----------------------- JSVPanel PAINTING METHODS ---------------------*/
 
   public void doRepaint() {
@@ -387,264 +327,18 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
     si.repaintCompleted();
   }
 
-  public void setFont(Object g, String name, int width, int mode, int size,  
-  		boolean isLabel) {
-    if (isLabel) {
-      if (width < 400)
-        size = ((width * size) / 400);
-    } else {
-      if (width < 250)
-        size = ((width * size) / 250);
-    }
-    ((Graphics) g).setFont(new Font(name, mode, size));
-  }
-
-  /**
-   * Draws the Coordinates
-   * @param og 
-   *        the <code>Graphics</code> object
-   * @param top 
-   */
-  public void drawCoordinates(Object og, int top) {
-  	if (pd.coordStr == null)
-  		return;
-    Graphics g = (Graphics) og;
-    g.setColor(coordinatesColor);
-    pd.setFont(g, getWidth(), Font.PLAIN, 12, true);
-    FontMetrics fm = g.getFontMetrics();
-    g.drawString(pd.coordStr, 
-    		pd.thisWidth - pd.right - fm.stringWidth(pd.coordStr), 
-    		top - 20);
-  }
-
-	/**
-	 * draws the file path only for printing
-	 * @param og 
-	 * @param x 
-	 * @param y 
-	 * @param s
-	 */
-
-	public void printFilePath(Object og, int x, int y, String s) {
-		x *= pd.scalingFactor;
-		y *= pd.scalingFactor;
-		if (s.indexOf("?") > 0)
-			s = s.substring(s.indexOf("?") + 1);
-		s = s.substring(s.lastIndexOf("/") + 1);
-		s = s.substring(s.lastIndexOf("\\") + 1);
-		Graphics g = (Graphics) og;
-		g.setColor(Color.BLACK);
-		pd.setFont(g, 1000, Font.PLAIN, 9, true);
-		FontMetrics fm = g.getFontMetrics();
-		if (x != pd.left * pd.scalingFactor)
-			x -= fm.stringWidth(s);
-		g.drawString(s, x, y - fm.getHeight());
-	}
-
-	public void printVersion(Object og, int pageHeight) {
-		Graphics g = (Graphics) og;
-		g.setColor(Color.BLACK);
-		pd.setFont(g, 1000, Font.PLAIN, 9, true);
-		FontMetrics fm = g.getFontMetrics();
-		String s = DateFormat.getInstance().format(new Date()) + " JSpecView "
-				+ JSVersion.VERSION_SHORT;
-		int w = fm.stringWidth(s);
-		g.drawString(s, (pd.thisWidth - pd.right) * pd.scalingFactor - w,
-				pageHeight * pd.scalingFactor - fm.getHeight());
-	}
-
-
-  /**
-   * Draws Title
-   * 
-   * @param pageHeight
-   *        the height to be drawn in pixels -- after scaling
-   * @param pageWidth
-   *        the width to be drawn in pixels -- after scaling
-   */
-  public void drawTitle(Object og, int pageHeight, int pageWidth, String title) {
-  	title = title.replace('\n', ' ');
-    Graphics g = (Graphics) og;
-    pd.setFont(g, pageWidth, pd.isPrinting || pd.getBoolean(ScriptToken.TITLEBOLDON) ? Font.BOLD
-        : Font.PLAIN, 14, true);
-    FontMetrics fm = g.getFontMetrics();
-    int nPixels = fm.stringWidth(title);
-    if (nPixels > pageWidth) {
-    	int size = (int) (14.0 * pageWidth / nPixels);
-    	if (size < 10)
-    		size = 10;
-      pd.setFont(g, pageWidth, pd.isPrinting || pd.getBoolean(ScriptToken.TITLEBOLDON) ? Font.BOLD
-          : Font.PLAIN, size, true);
-      fm = g.getFontMetrics();
-    }
-    g.setColor(titleColor);
-    g.drawString(title, (pd.isPrinting ? pd.left * pd.scalingFactor : 5), 
-    		pageHeight - (int) (fm.getHeight() * (pd.isPrinting ? 2 : 0.5)));
-  }
-
-
-
-  /*----------------- METHODS IN INTERFACE Printable ---------------------- */
-
-  /**
-   * uses itext to create the document, either to a file or a byte stream
-   * @param os 
-   * @param pl 
-   */
-  private void createPdfDocument(OutputStream os, PrintLayout pl) {
-  	PdfCreatorInterface pdfCreator = (PdfCreatorInterface) JSVInterface.getInterface("jspecview.common.PdfCreator");
-  	if (pdfCreator == null)
-  		return;
-  	pdfCreator.createPdfDocument(this, pl, os);
-  }
-
-	/**
-	 * Send a print job of the spectrum to the default printer on the system
-	 * 
-	 * @param pl
-	 *          the layout of the print job
-	 * @param os
-	 * @param title 
-	 */
-	public void printPanel(PrintLayout pl, OutputStream os, String title) {
-
-		// MediaSize size = MediaSize.getMediaSizeForName(pl.paper);
-
-		// Set Graph Properties
-		pd.printingFont = (os == null ? pl.font : "Helvetica");
-		pd.printGraphPosition = pl.position;
-
-		// save original values
-
-		boolean gridOn = pd.gridOn;
-		boolean titleOn = pd.titleOn;
-		boolean xScaleOn = pd.getBoolean(ScriptToken.XSCALEON);
-		boolean xUnitsOn = pd.getBoolean(ScriptToken.XUNITSON);
-		boolean yScaleOn = pd.getBoolean(ScriptToken.YSCALEON);
-		boolean yUnitsOn = pd.getBoolean(ScriptToken.YUNITSON);
-
-		pd.gridOn = pl.showGrid;
-		pd.titleOn = pl.showTitle;
-		pd.setBoolean(ScriptToken.XSCALEON, pl.showXScale);
-		pd.setBoolean(ScriptToken.XUNITSON, pl.showXScale);
-		pd.setBoolean(ScriptToken.YSCALEON, pl.showYScale);
-		pd.setBoolean(ScriptToken.YUNITSON, pl.showYScale);
-
-		/* Create a print job */
-
-		PrinterJob pj = (os == null ? PrinterJob.getPrinterJob() : null);
-		pd.printJobTitle = title;
-		if (title.length() > 30)
-			title = title.substring(0, 30);
-		if (pj != null) {
-			pj.setJobName(title);
-			pj.setPrintable(this);
-		}
-		if (pj == null || pj.printDialog()) {
-			try {
-				if (pj == null) {
-					createPdfDocument(os, pl);
-				} else {
-					PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
-					aset.add(pl.layout.equals("landscape") ? OrientationRequested.LANDSCAPE
-									: OrientationRequested.PORTRAIT);
-					aset.add(pl.paper);
-					pj.print(aset);
-				}
-			} catch (PrinterException ex) {
-				String s = ex.getMessage();
-				if (s == null)
-					return;
-				s = Txt.simpleReplace(s, "not accepting job.",
-						"not accepting jobs.");
-				// not my fault -- Windows grammar error!
-				showMessage(s, "Printer Error");
-			}
-		}
-
-		// restore original values
-
-		pd.gridOn = gridOn;
-		pd.titleOn = titleOn;
-		pd.setBoolean(ScriptToken.XSCALEON, xScaleOn);
-		pd.setBoolean(ScriptToken.XUNITSON, xUnitsOn);
-		pd.setBoolean(ScriptToken.YSCALEON, yScaleOn);
-		pd.setBoolean(ScriptToken.YUNITSON, yUnitsOn);
-
-	}
-
-
-  /**
-   * Implements method print in interface printable
-   * 
-   * @param g
-   *        the <code>Graphics</code> object
-   * @param pf
-   *        the <code>PageFormat</code> object
-   * @param pi
-   *        the page index -- -1 for PDF creation
-   * @return an int that depends on whether a print was successful
-   * @throws PrinterException
-   */
-  public int print(Graphics g, PageFormat pf, int pi) throws PrinterException {
-    if (pi == 0) {
-      Graphics2D g2D = (Graphics2D) g;
-      pd.isPrinting = true;
-
-      double height, width;
-      boolean addFilePath = false;
-      if (pd.printGraphPosition.equals("default")) {
-        g2D.translate(pf.getImageableX(), pf.getImageableY());
-        if (pf.getOrientation() == PageFormat.PORTRAIT) {
-          height = PanelData.defaultPrintHeight;
-          width = PanelData.defaultPrintWidth;
-        } else {
-          height = PanelData.defaultPrintWidth;
-          width = PanelData.defaultPrintHeight;
-        }
-      } else if (pd.printGraphPosition.equals("fit to page")) {
-        g2D.translate(pf.getImageableX(), pf.getImageableY());
-        addFilePath = true;
-        height = pf.getImageableHeight();
-        width = pf.getImageableWidth();
-      } else { // center
-        Paper paper = pf.getPaper();
-        double paperHeight = paper.getHeight();
-        double paperWidth = paper.getWidth();
-        int x, y;
-
-        if (pf.getOrientation() == PageFormat.PORTRAIT) {
-          height = PanelData.defaultPrintHeight;
-          width = PanelData.defaultPrintWidth;
-          x = (int) (paperWidth - width) / 2;
-          y = (int) (paperHeight - height) / 2;
-        } else {
-          height = PanelData.defaultPrintWidth;
-          width = PanelData.defaultPrintHeight;
-          y = (int) (paperWidth - PanelData.defaultPrintWidth) / 2;
-          x = (int) (paperHeight - PanelData.defaultPrintHeight) / 2;
-        }
-        g2D.translate(x, y);
-      }
-
-      g2D.scale(0.1, 0.1); // high resolution vector graphics for PDF
-      pd.drawGraph(g2D, (int) width, (int) height, addFilePath);
-
-      pd.isPrinting = false;
-      return Printable.PAGE_EXISTS;
-    }
-    pd.isPrinting = false;
-    return Printable.NO_SUCH_PAGE;
-  }
-
   
 	private ApiPlatform apiPlatform;
+	public ApiPlatform getApiPlatform() {
+		return apiPlatform;
+	}
+	
 	private JmolMouseInterface mouse;
 
 	public void setupPlatform() {
-		apiPlatform = (ApiPlatform) Interface.getInterface("jspecview.awt.Platform");
+		pd.apiPlatform = apiPlatform = (ApiPlatform) Interface.getInterface("jspecview.awt.Platform");
 		apiPlatform.setViewer(this, this);
-    setBorder(BorderFactory.createLineBorder(Color.lightGray));
+    setBorder(BorderFactory.createLineBorder(Color.BLACK));
     if (popup == null) {
       // preferences dialog
       pd.coordStr = "(0,0)";
@@ -661,7 +355,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
           + " spectra available.";
     try {
       JDXSpectrum spec = (n < 0 ? pd.getSpectrum() : pd.getSpectrumAt(n));
-      return Exporter.exportTheSpectrum(Exporter.ExportType.getType(type), null, spec, 0, spec.getXYCoords().length - 1);
+      return AwtExportDialog.exportTheSpectrum(AwtExportDialog.ExportType.getType(type), null, spec, 0, spec.getXYCoords().length - 1);
     } catch (IOException ioe) {
       // not possible
     }
@@ -747,7 +441,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
 		}
   }
 
-  /*--------------the rest are all mouse and keyboard interface -----------------------*/
+  /*--------------mouse and keyboard interface -----------------------*/
 
 	public boolean keyPressed(int keyCode, int modifiers) {
 		return (!pd.isPrinting && pd.keyPressed(keyCode, modifiers));
@@ -793,9 +487,254 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
 		}			
 	}
 
-	public boolean isApplet() {
-		return (JSVFileManager.appletDocumentBase != null);
+  /*-----------------GRAPHICS METHODS----------------------------------- */
+	public void drawString(Object g, String text, int x, int y) {
+		((Graphics) g).drawString(text, x, y);
 	}
 
 
+	public void setGraphicsColor(Object g, JSVColor c) {
+		((Graphics) g).setColor((Color) c);
+	}
+
+	public void setGraphicsFont(Object g, JmolFont font) {
+		// TODO Auto-generated method stub
+		
+	}
+
+  public void setPlotColors(JSVColor[] colors) {
+  	pd.setPlotColors(colors);
+  }
+
+  /*----------------- METHODS IN INTERFACE Printable ---------------------- */
+
+  /**
+   * uses itext to create the document, either to a file or a byte stream
+   * @param os 
+   * @param pl 
+   */
+  private void createPdfDocument(OutputStream os, PrintLayout pl) {
+  	PdfCreatorInterface pdfCreator = (PdfCreatorInterface) JSVInterface.getInterface("jspecview.common.PdfCreator");
+  	if (pdfCreator == null)
+  		return;
+  	pdfCreator.createPdfDocument(this, pl, os);
+  }
+
+	/**
+	 * Send a print job of the spectrum to the default printer on the system
+	 * 
+	 * @param pl
+	 *          the layout of the print job
+	 * @param os
+	 * @param title 
+	 */
+	public void printPanel(PrintLayout pl, OutputStream os, String title) {
+
+		// MediaSize size = MediaSize.getMediaSizeForName(pl.paper);
+
+		// Set Graph Properties
+		pd.printingFontName = (os == null ? pl.font : "Helvetica");
+		pd.printGraphPosition = pl.position;
+
+		// save original values
+
+		boolean gridOn = pd.gridOn;
+		boolean titleOn = pd.titleOn;
+		boolean xScaleOn = pd.getBoolean(ScriptToken.XSCALEON);
+		boolean xUnitsOn = pd.getBoolean(ScriptToken.XUNITSON);
+		boolean yScaleOn = pd.getBoolean(ScriptToken.YSCALEON);
+		boolean yUnitsOn = pd.getBoolean(ScriptToken.YUNITSON);
+
+		pd.gridOn = pl.showGrid;
+		pd.titleOn = pl.showTitle;
+		pd.setBoolean(ScriptToken.XSCALEON, pl.showXScale);
+		pd.setBoolean(ScriptToken.XUNITSON, pl.showXScale);
+		pd.setBoolean(ScriptToken.YSCALEON, pl.showYScale);
+		pd.setBoolean(ScriptToken.YUNITSON, pl.showYScale);
+
+		/* Create a print job */
+
+		PrinterJob pj = (os == null ? PrinterJob.getPrinterJob() : null);
+		pd.printJobTitle = title;
+		if (title.length() > 30)
+			title = title.substring(0, 30);
+		if (pj != null) {
+			pj.setJobName(title);
+			pj.setPrintable(this);
+		}
+		if (pj == null || pj.printDialog()) {
+			try {
+				if (pj == null) {
+					createPdfDocument(os, pl);
+				} else {
+					PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
+					aset.add(pl.layout.equals("landscape") ? OrientationRequested.LANDSCAPE
+									: OrientationRequested.PORTRAIT);
+					aset.add(pl.paper);
+					pj.print(aset);
+				}
+			} catch (PrinterException ex) {
+				String s = ex.getMessage();
+				if (s == null)
+					return;
+				s = Txt.simpleReplace(s, "not accepting job.",
+						"not accepting jobs.");
+				// not my fault -- Windows grammar error!
+				showMessage(s, "Printer Error");
+			}
+		}
+
+		// restore original values
+
+		pd.gridOn = gridOn;
+		pd.titleOn = titleOn;
+		pd.setBoolean(ScriptToken.XSCALEON, xScaleOn);
+		pd.setBoolean(ScriptToken.XUNITSON, xUnitsOn);
+		pd.setBoolean(ScriptToken.YSCALEON, yScaleOn);
+		pd.setBoolean(ScriptToken.YUNITSON, yUnitsOn);
+	}
+
+
+  /**
+   * Implements method print in interface printable
+   * 
+   * @param g
+   *        the <code>Graphics</code> object
+   * @param pf
+   *        the <code>PageFormat</code> object
+   * @param pi
+   *        the page index -- -1 for PDF creation
+   * @return an int that depends on whether a print was successful
+   * @throws PrinterException
+   */
+  public int print(Graphics g, PageFormat pf, int pi) throws PrinterException {
+    if (pi == 0) {
+      Graphics2D g2D = (Graphics2D) g;
+      pd.isPrinting = true;
+
+      double height, width;
+      boolean addFilePath = false;
+      if (pd.printGraphPosition.equals("default")) {
+        g2D.translate(pf.getImageableX(), pf.getImageableY());
+        if (pf.getOrientation() == PageFormat.PORTRAIT) {
+          height = PanelData.defaultPrintHeight;
+          width = PanelData.defaultPrintWidth;
+        } else {
+          height = PanelData.defaultPrintWidth;
+          width = PanelData.defaultPrintHeight;
+        }
+      } else if (pd.printGraphPosition.equals("fit to page")) {
+        g2D.translate(pf.getImageableX(), pf.getImageableY());
+        addFilePath = true;
+        height = pf.getImageableHeight();
+        width = pf.getImageableWidth();
+      } else { // center
+        Paper paper = pf.getPaper();
+        double paperHeight = paper.getHeight();
+        double paperWidth = paper.getWidth();
+        int x, y;
+
+        if (pf.getOrientation() == PageFormat.PORTRAIT) {
+          height = PanelData.defaultPrintHeight;
+          width = PanelData.defaultPrintWidth;
+          x = (int) (paperWidth - width) / 2;
+          y = (int) (paperHeight - height) / 2;
+        } else {
+          height = PanelData.defaultPrintWidth;
+          width = PanelData.defaultPrintHeight;
+          y = (int) (paperWidth - PanelData.defaultPrintWidth) / 2;
+          x = (int) (paperHeight - PanelData.defaultPrintHeight) / 2;
+        }
+        g2D.translate(x, y);
+      }
+
+      g2D.scale(0.1, 0.1); // high resolution vector graphics for PDF
+      pd.drawGraph(g2D, (int) width, (int) height, addFilePath);
+
+      pd.isPrinting = false;
+      return Printable.PAGE_EXISTS;
+    }
+    pd.isPrinting = false;
+    return Printable.NO_SUCH_PAGE;
+  }
+
+	public void draw2DImage(Object g, Object image2d, int destX, int destY,
+			int destWidth, int destHeight, int srcX0, int srcY0, int srcX1, int srcY1) {		
+		((Graphics) g).drawImage((Image) image2d, destX, destY, destWidth, destHeight, srcX0, srcY0, srcX1, srcY1, null);
+	}
+
+	public Annotation getColoredAnnotation(JDXSpectrum spectrum, double x,
+			double y, String text, JSVColor c, boolean isPixels, boolean is2d,
+			int offsetX, int offsetY) {
+		return new AwtColoredAnnotation(x, y).set(spectrum, text, c, isPixels,
+				is2d, offsetX, offsetY);
+	}
+
+	public Annotation getNextAnnotation(JDXSpectrum spectrum,
+			JmolList<String> args, Annotation lastAnnotation) {
+		return AwtColoredAnnotation.getAnnotation(spectrum, args, lastAnnotation);
+	}
+
+	public Object newImage(int width, int height, int[] buffer) {
+		BufferedImage image2D = new BufferedImage(width, height,
+				BufferedImage.TYPE_BYTE_GRAY);
+		WritableRaster raster = image2D.getRaster();
+		raster.setSamples(0, 0, width, height, 0,
+				buffer);
+		return image2D;
+	}
+
+	public void fillRect(Object g, int x, int y, int width, int height) {
+		((Graphics) g).fillRect(x, y, width, height);	
+	}
+
+	public void drawLine(Object g, int x0, int y0, int x1, int y1) {
+		((Graphics) g).drawLine(x0, y0, x1, y1);
+	}
+
+	public void drawRect(Object g, int x, int y, int xPixels,
+			int yPixels) {
+		((Graphics) g).drawRect(x, y, xPixels, yPixels);
+	}
+
+	public int getFontHeight(Object g) {
+    return ((Graphics) g).getFontMetrics().getHeight();
+	}
+
+	public int getStringWidth(Object g, String s) {
+  	return (s == null ? 0 : ((Graphics) g).getFontMetrics().stringWidth(s));
+	}
+
+	public void drawOval(Object g, int x, int y, int width, int height) {
+		((Graphics) g).drawOval(x, y, width, height);
+	}
+
+	public void drawPolygon(Object g, int[] ayPoints, int[] axPoints, int nPoints) {
+		((Graphics) g).drawPolygon(ayPoints, axPoints, nPoints);
+	}
+
+	public void fillOval(Object g, int x, int y, int width, int height) {
+		((Graphics) g).fillOval(x, y, width, height);
+	}
+
+	public void fillPolygon(Object g, int[] ayPoints, int[] axPoints, int nPoints) {
+		((Graphics) g).fillPolygon(ayPoints, axPoints, nPoints);
+	}
+
+	public void rotatePlot(Object g, int angle, int x, int y) {
+  	((Graphics2D) g).rotate(Math.PI * angle / 180.0, x, y);
+  }
+
+  
+	BasicStroke strokeBasic = new BasicStroke();
+  BasicStroke strokeBold = new BasicStroke(2f);
+
+	
+	public void setStrokeBold(Object g, boolean tf) {
+		((Graphics2D) g).setStroke(tf ? strokeBold : strokeBasic);
+	}
+
+	public int getFontFaceID(String name) {
+		return JmolFont.getFontFaceID("SansSerif");
+	}
 }

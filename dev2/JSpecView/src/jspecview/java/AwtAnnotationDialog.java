@@ -308,7 +308,7 @@ public abstract class AwtAnnotationDialog extends AwtDialog implements Annotatio
 		isON = b;
 	}
 
-	protected Parameters myParams = new Parameters("MeasurementData");
+	protected Parameters myParams = new AwtParameters("MeasurementData");
 
 	public Parameters getParameters() {
 		return myParams;

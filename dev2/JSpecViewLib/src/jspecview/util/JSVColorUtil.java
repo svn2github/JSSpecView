@@ -32,6 +32,16 @@ import org.jmol.util.Txt;
  public class JSVColorUtil {
 
   /**
+   * Returns a hex string representation of a <code>Color</color> object
+   * 
+   * @param color
+   * @return a hex string representation of a <code>Color</color> object
+   */
+  public static String colorToHexString(JSVColor color) {
+    return (color == null ? "" : JSVEscape.getHexColorFromRGB(color.getRGB()));
+  }
+	  
+  /**
    * accepts [xRRGGBB] or [0xRRGGBB] or [0xFFRRGGBB] or #RRGGBB or
    * [red,green,blue] or a valid JavaScript color
    * 
@@ -446,7 +456,5 @@ import org.jmol.util.Txt;
     for (int i = colorNames.length; --i >= 0; )
       mapJavaScriptColors.put(colorNames[i], Integer.valueOf(colorArgbs[i]));
   }
-
-
   
 }

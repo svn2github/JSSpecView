@@ -53,6 +53,10 @@ public class JSVFileManager {
 
 	public static URL appletDocumentBase;
   
+	public boolean isApplet() {
+		return (appletDocumentBase != null);
+	}
+
   public static String jsDocumentBase = "";
 	/**
 	 * @param name 

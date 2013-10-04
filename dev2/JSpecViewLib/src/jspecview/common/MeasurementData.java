@@ -105,7 +105,7 @@ public class MeasurementData extends JmolList<Measurement> implements Annotation
 		return data;
 	}
 
-	static boolean checkParameters(MeasurementData md, Parameters p) {
+	static boolean checkParameters(MeasurementData md, ColorParameters p) {
 		if (md.size() == 0)
 			return false;
 		Parameters myParams = md.getParameters();

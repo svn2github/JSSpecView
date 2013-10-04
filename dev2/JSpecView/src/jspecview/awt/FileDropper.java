@@ -23,9 +23,7 @@
  */
 package jspecview.awt;
 
-import java.awt.Component;
 import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetListener;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetDropEvent;

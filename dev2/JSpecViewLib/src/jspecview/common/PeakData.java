@@ -115,7 +115,7 @@ public class PeakData extends MeasurementData {
 					double x = (doInterpolate ? Coordinate.parabolicInterpolation(
 							xyCoords, i - 1) : xyCoords[i - 1].getXVal());
 					if (x >= minX || x <= maxX) {
-						PeakPick m = new PeakPick(spec, x, y);
+						PeakPick m = new PeakPick(x, y).setNoValue(spec);
 						addLast(m);
 						if (++n == 100)
 							break;
@@ -131,7 +131,7 @@ public class PeakData extends MeasurementData {
 					double x = (doInterpolate ? Coordinate.parabolicInterpolation(
 							xyCoords, i - 1) : xyCoords[i - 1].getXVal());
 					if (x >= minX && x <= maxX) {
-						PeakPick m = new PeakPick(spec, x, y, Txt.formatDecimalDbl(x, precision), x);
+						PeakPick m = new PeakPick(x, y).setValue(spec, Txt.formatDecimalDbl(x, precision), x);
 						addLast(m);
 						if (++n == 100)
 							break;

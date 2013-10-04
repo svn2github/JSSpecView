@@ -14,7 +14,6 @@ import javax.swing.JDialog;
 import netscape.javascript.JSObject;
 
 import org.jmol.api.ApiPlatform;
-import org.jmol.api.Interface;
 import org.jmol.api.JmolFileInterface;
 import org.jmol.api.JmolMouseInterface;
 import org.jmol.api.JmolPopupInterface;

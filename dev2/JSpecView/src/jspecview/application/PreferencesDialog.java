@@ -20,6 +20,9 @@
 package jspecview.application;
 
 import java.awt.BorderLayout;
+import jspecview.util.JSVColorUtil;
+import jspecview.util.JSVEscape;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
@@ -56,9 +59,10 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import jspecview.common.Parameters;
+import jspecview.common.ColorParameters;
 import jspecview.common.ScriptToken;
 import jspecview.exception.JSpecViewException;
+import jspecview.java.AwtColor;
 import jspecview.java.AwtPanel;
 import jspecview.java.AwtParameters;
 import jspecview.source.FileReader;
@@ -154,7 +158,7 @@ public class PreferencesDialog extends JDialog {
   private JRadioButton AtoTRadioButton = new JRadioButton();
   private ButtonGroup conversionButtonGroup = new ButtonGroup();
 
-  Parameters currentDS = new Parameters("Current");
+  ColorParameters currentDS = new AwtParameters("Current");
   private DisplaySchemesProcessor dsp;
   private AwtPanel previewPanel = null;
   private String defaultDSName = "";
@@ -287,13 +291,13 @@ public class PreferencesDialog extends JDialog {
     
     applicationPanel = new JPanel();
     applicationPanel.setLayout(null);
-    applicationPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Application", TitledBorder.CENTER, TitledBorder.TOP, null, new Color(0, 0, 0)));
+    applicationPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Application", TitledBorder.CENTER, TitledBorder.TOP, null, Color.BLACK));
     applicationPanel.setBounds(12, 5, 437, 157);
     generalPanel.add(applicationPanel);
         
     uiPanel = new JPanel();
     uiPanel.setLayout(null);
-    uiPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "User Interface", TitledBorder.CENTER, TitledBorder.TOP, null, new Color(0, 0, 0)));
+    uiPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "User Interface", TitledBorder.CENTER, TitledBorder.TOP, null, Color.BLACK));
     uiPanel.setBounds(12, 164, 437, 101);
     generalPanel.add(uiPanel);
        
@@ -389,22 +393,22 @@ public class PreferencesDialog extends JDialog {
     elementList.setVisibleRowCount(4);
     listScrollPane.setMinimumSize(new Dimension(125, 110));
     listScrollPane.setPreferredSize(new Dimension(125, 110));
-    colorButton8.setBackground(Color.magenta);
+    colorButton8.setBackground(Color.BLACK);
     colorButton8.setBorder(BorderFactory.createLoweredBevelBorder());
     colorButton7.setBackground(new Color(0, 92, 0));
     colorButton7.setBorder(BorderFactory.createLoweredBevelBorder());
     colorButton6.setBackground(new Color(0, 0, 64));
     colorButton6.setBorder(BorderFactory.createLoweredBevelBorder());
-    colorButton5.setBackground(Color.red);
+    colorButton5.setBackground(Color.BLACK);
     colorButton5.setBorder(BorderFactory.createLoweredBevelBorder());
-    colorButton4.setBackground(Color.blue);
+    colorButton4.setBackground(Color.BLACK);
     colorButton4.setBorder(BorderFactory.createLoweredBevelBorder());
-    colorButton3.setBackground(Color.gray);
+    colorButton3.setBackground(Color.BLACK);
     colorButton3.setBorder(BorderFactory.createLoweredBevelBorder());
     colorButton3.setText(" ");
-    colorButton2.setBackground(Color.white);
+    colorButton2.setBackground(Color.BLACK);
     colorButton2.setBorder(BorderFactory.createLoweredBevelBorder());
-    colorButton1.setBackground(Color.black);
+    colorButton1.setBackground(Color.BLACK);
     colorButton1.setBorder(BorderFactory.createLoweredBevelBorder());
     currentColorButton.setBorder(BorderFactory.createLoweredBevelBorder());
     currentColorButton.setMaximumSize(new Dimension(50, 11));
@@ -456,30 +460,30 @@ public class PreferencesDialog extends JDialog {
     });
     AutoConvertCheckBox.setToolTipText("");
     AutoConvertCheckBox.setText("Automatically Convert");
-    plotColorButton.setBackground(Color.green);
+    plotColorButton.setBackground(Color.BLACK);
     plotColorButton.setBorder(null);
     plotColorButton.setPreferredSize(new Dimension(30, 21));
     colorPanel1.setBorder(BorderFactory.createRaisedBevelBorder());
     colorPanel1.setLayout(gridLayout2);
-    procColorButton8.setBackground(Color.magenta);
+    procColorButton8.setBackground(Color.BLACK);
     procColorButton8.setBorder(BorderFactory.createLoweredBevelBorder());
     procColorButton7.setBackground(new Color(0, 92, 0));
     procColorButton7.setBorder(BorderFactory.createLoweredBevelBorder());
     procColorButton6.setBackground(new Color(0, 0, 64));
     procColorButton6.setBorder(BorderFactory.createLoweredBevelBorder());
-    procColorButton5.setBackground(Color.red);
+    procColorButton5.setBackground(Color.BLACK);
     procColorButton5.setBorder(BorderFactory.createLoweredBevelBorder());
-    procColorButton4.setBackground(Color.blue);
+    procColorButton4.setBackground(Color.BLACK);
     procColorButton4.setBorder(BorderFactory.createLoweredBevelBorder());
-    procColorButton3.setBackground(Color.gray);
+    procColorButton3.setBackground(Color.BLACK);
     procColorButton3.setBorder(BorderFactory.createLoweredBevelBorder());
     procColorButton3.setText(" ");
-    procColorButton2.setBackground(Color.white);
+    procColorButton2.setBackground(Color.BLACK);
     procColorButton2.setBorder(BorderFactory.createLoweredBevelBorder());
     gridLayout2.setHgap(2);
     gridLayout2.setRows(2);
     gridLayout2.setVgap(2);
-    procColorButton1.setBackground(Color.black);
+    procColorButton1.setBackground(Color.BLACK);
     procColorButton1.setBorder(BorderFactory.createLoweredBevelBorder());
     procColorButton1.setMaximumSize(new Dimension(20, 20));
     procColorButton1.setMinimumSize(new Dimension(20, 20));
@@ -543,11 +547,11 @@ public class PreferencesDialog extends JDialog {
     
     JLabel lblTheFollowingProperties = new JLabel("The spectrum display properties above will apply for new spectra");
     lblTheFollowingProperties.setFont(new Font("Tahoma", Font.ITALIC, 11));
-    lblTheFollowingProperties.setForeground(Color.DARK_GRAY);
+    lblTheFollowingProperties.setForeground(Color.BLACK);
     lblTheFollowingProperties.setBounds(6, 74, 389, 14);
     spectrumPanel.add(lblTheFollowingProperties);
     spectrumDisplayApplyNowCheckBox.setFont(new Font("Tahoma", Font.ITALIC, 11));
-    spectrumDisplayApplyNowCheckBox.setForeground(Color.DARK_GRAY);
+    spectrumDisplayApplyNowCheckBox.setForeground(Color.BLACK);
     spectrumDisplayApplyNowCheckBox.setBounds(6, 87, 220, 23);
     
     spectrumPanel.add(spectrumDisplayApplyNowCheckBox);
@@ -635,7 +639,7 @@ public class PreferencesDialog extends JDialog {
    * Initialise the Display Tab, where display schemes are created or set
    */
   private void initDisplayTab() {
-    TreeMap<String, Parameters> displaySchemes = dsp.getDisplaySchemes();
+    TreeMap<String, ColorParameters> displaySchemes = dsp.getDisplaySchemes();
 
     defaultDSName = preferences.getProperty("defaultDisplaySchemeName");
 
@@ -656,7 +660,7 @@ public class PreferencesDialog extends JDialog {
       JDXSource source = FileReader.createJDXSource(getClass()
           .getResourceAsStream("resources/sample.jdx"), false, false);
 
-      previewPanel = new AwtPanel(null, source.getSpectra().get(0), null);
+      previewPanel = new AwtPanel().setOne(null, source.getSpectra().get(0), null);
       previewPanel.getPanelData().setBoolean(ScriptToken.ENABLEZOOM, false);
       previewPanel.getPanelData().setBoolean(ScriptToken.GRIDON, true);
       previewPanel.getPanelData().setBoolean(ScriptToken.COORDINATESON, true);
@@ -674,8 +678,8 @@ public class PreferencesDialog extends JDialog {
           BorderLayout.CENTER);
     }
 
-    schemeComboBox.setSelectedItem(currentDS.getName());
-    fontComboBox.setSelectedItem(currentDS.getDisplayFont());
+    schemeComboBox.setSelectedItem(currentDS.name);
+    fontComboBox.setSelectedItem(currentDS.displayFontName);
 
     repaint();
   }
@@ -690,7 +694,7 @@ public class PreferencesDialog extends JDialog {
     integFactorTextField.setText(preferences.getProperty("integralFactor"));
     integOffsetTextField.setText(preferences.getProperty("integralOffset"));
     plotColorButton.setBackground(
-        AwtParameters.getColorFromString(preferences.getProperty("integralPlotColor")));
+        new Color(JSVColorUtil.getArgbFromString(preferences.getProperty("integralPlotColor"))));
     autoIntegrateCheckBox.setSelected(
        Boolean.parseBoolean(preferences.getProperty("automaticallyIntegrate")));
     String autoConvert =
@@ -762,9 +766,8 @@ public class PreferencesDialog extends JDialog {
       Color color = button.getBackground();
       currentColorButton.setBackground(color);
       String element = elementList.getSelectedValue();
-      currentDS.setColor(ScriptToken.getScriptToken(element), color);
-      // kludge
-      currentDS.setName("Current");
+      setCurrentColor(element, color);
+      currentDS.name = "Current";
       updatePreviewPanel();
     }
   }
@@ -784,7 +787,7 @@ public class PreferencesDialog extends JDialog {
     @SuppressWarnings("unchecked")
 		public void valueChanged(ListSelectionEvent lse) {
       currentColorButton.setBackground((Color) currentDS
-          .getColor(ScriptToken.getScriptToken(
+          .getElementColor(ScriptToken.getScriptToken(
           		((JList<String>)lse.getSource()).getSelectedValue())));
     }
   }
@@ -798,7 +801,11 @@ public class PreferencesDialog extends JDialog {
     dispose();
   }
 
-  /**
+  public void setCurrentColor(String element, Color color) {
+    currentDS.setColor(ScriptToken.getScriptToken(element), new AwtColor(color.getRGB()));
+	}
+
+	/**
    * Updates the preferences that were set to the <code>Properties</code> passed
    * in the constructor
    * @param e the ActionEvent
@@ -857,16 +864,16 @@ public class PreferencesDialog extends JDialog {
     preferences.setProperty("integralFactor", integFactorTextField.getText());
     preferences.setProperty("integralOffset", integOffsetTextField.getText());
     preferences.setProperty("integralPlotColor",
-                           AwtParameters.colorToHexString(plotColorButton.getBackground()));
+    		JSVEscape.getHexColorFromRGB(plotColorButton.getBackground().getRGB()));
 
     // Display Schemes Tab
-    preferences.setProperty("defaultDisplaySchemeName", currentDS.getName());
-//    System.out.println(currentDS.getName());
+    preferences.setProperty("defaultDisplaySchemeName", currentDS.name);
+//    System.out.println(currentDS.name);
 
     //TreeMap<String,DisplayScheme> dispSchemes;
-    if(currentDS.getName().equals("Current")){
+    if(currentDS.name.equals("Current")){
       //@SuppressWarnings("unchecked")
-      TreeMap<String, Parameters> dispSchemes = dsp.getDisplaySchemes();
+      TreeMap<String, ColorParameters> dispSchemes = dsp.getDisplaySchemes();
       dispSchemes.put("Current", currentDS);
     }
 
@@ -887,11 +894,11 @@ public class PreferencesDialog extends JDialog {
    * @param e the ActionEvent
    */
   void customButton_actionPerformed(ActionEvent e) {
-    Color color = JColorChooser.showDialog(this, "Choose Color", Color.black);
+    Color color = JColorChooser.showDialog(this, "Choose Color", Color.BLACK);
     if(color != null){
       currentColorButton.setBackground(color);
-      currentDS.setColor(ScriptToken.getScriptToken(elementList.getSelectedValue()), color);
-      currentDS.setName("Current");
+      setCurrentColor(elementList.getSelectedValue(), color);
+      currentDS.name = "Current";
       updatePreviewPanel();
     }
   }
@@ -902,12 +909,12 @@ public class PreferencesDialog extends JDialog {
    */
   void deleteButton_actionPerformed(ActionEvent e) {
 	 
-	 int option = JOptionPane.showConfirmDialog(this, "Do you really want to delete '" + currentDS.getName() + "'? This cannot be undone.",
+	 int option = JOptionPane.showConfirmDialog(this, "Do you really want to delete '" + currentDS.name + "'? This cannot be undone.",
 			  "Delete Scheme", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 	 if(option == JOptionPane.YES_OPTION){
-		 TreeMap<String, Parameters> dispSchemes = dsp.getDisplaySchemes();
+		 TreeMap<String, ColorParameters> dispSchemes = dsp.getDisplaySchemes();
 
-		 dispSchemes.remove(currentDS.getName());
+		 dispSchemes.remove(currentDS.name);
 	
 		 int selectedIndex = schemeComboBox.getSelectedIndex();
 		 schemeComboBox.removeItemAt(selectedIndex);
@@ -936,17 +943,14 @@ public class PreferencesDialog extends JDialog {
     if(input == null)
       return;
 
-    // set Name
-    currentDS.setName(input);
-
-    // get font Info
+    currentDS.name = input;
     boolean isdefault = defaultFontCheckBox.isSelected();
     if(!isdefault){
       String fontName = (String)fontComboBox.getSelectedItem();
-      currentDS.setDisplayFont(fontName);
+      currentDS.displayFontName = fontName;
     }
 
-    TreeMap<String, Parameters> dispSchemes = dsp.getDisplaySchemes();
+    TreeMap<String, ColorParameters> dispSchemes = dsp.getDisplaySchemes();
 
     dispSchemes.put(input, currentDS);
 
@@ -981,12 +985,12 @@ public class PreferencesDialog extends JDialog {
 	void schemeComboBox_actionPerformed(ActionEvent e) {
     JComboBox<String> schemeCB = (JComboBox<String>)e.getSource();
     String schemeName = (String)schemeCB.getSelectedItem();
-    Parameters ds = null;
+    ColorParameters ds = null;
 
-    TreeMap<String, Parameters> schemes = dsp.getDisplaySchemes();
-    for (Map.Entry<String, Parameters> entry: schemes.entrySet()) {
+    TreeMap<String, ColorParameters> schemes = dsp.getDisplaySchemes();
+    for (Map.Entry<String, ColorParameters> entry: schemes.entrySet()) {
       ds = entry.getValue();
-      if(ds.getName().equals(schemeName)){
+      if(ds.name.equals(schemeName)){
         currentDS = ds.copy();
         break;
       }
@@ -994,12 +998,9 @@ public class PreferencesDialog extends JDialog {
     elementList.getSelectionModel().setSelectionInterval(0, 0);
 
     // Update Selected Font
-    String fontName = currentDS.getDisplayFont();
+    String fontName = currentDS.displayFontName;
     fontComboBox.setSelectedItem(fontName);
-
-    // kludge
-    currentDS.setName(ds.getName());
-
+    currentDS.name = ds.name;
     updatePreviewPanel();
   }
 
@@ -1020,9 +1021,8 @@ public class PreferencesDialog extends JDialog {
   @SuppressWarnings("unchecked")
 	void fontComboBox_actionPerformed(ActionEvent e) {
     String fontName = (String)((JComboBox<String>)e.getSource()).getSelectedItem();
-    currentDS.setDisplayFont(fontName);
-    // kludge
-    currentDS.setName("Current");
+    currentDS.displayFontName = fontName;
+    currentDS.name = "Current";
     updatePreviewPanel();
   }
 
@@ -1035,9 +1035,8 @@ public class PreferencesDialog extends JDialog {
     if(cb.isSelected()){
       fontComboBox.setSelectedItem("Default");
       fontComboBox.setEnabled(false);
-      currentDS.setDisplayFont("Default");
-      // kludge
-      currentDS.setName("Current");
+      currentDS.displayFontName = "Default";
+      currentDS.name = "Current";
       updatePreviewPanel();
     }else{
       fontComboBox.setEnabled(true);
@@ -1090,7 +1089,7 @@ public class PreferencesDialog extends JDialog {
    * Retruns the current Display Scheme
    * @return the current Display Scheme
    */
-  public Parameters getSelectedDisplayScheme(){
+  public ColorParameters getSelectedDisplayScheme(){
     return currentDS;
   }
 
@@ -1111,7 +1110,7 @@ public class PreferencesDialog extends JDialog {
    * @param e ActionEvent
    */
   void processingCustomButton_actionPerformed(ActionEvent e) {
-    Color color = JColorChooser.showDialog(this, "Choose Color", Color.black);
+    Color color = JColorChooser.showDialog(this, "Choose Color", Color.BLACK);
     if(color != null)
       plotColorButton.setBackground(color);
   }

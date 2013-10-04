@@ -58,6 +58,12 @@ Created jspecview.awt, jspecview.awtjs2d; populated with template methods
 Created EventManager
 Implemented jspecview.awt.Mouse and jspecview.awtjs2d.Mouse
   - note that in JSpecView, each panel is its own PlatformViewer and EventManager and display Component
+-- 10/4/2013 BH
+Removed need for AwtGraphSet
+AwtPanel slimmed down to only the essentials for drawing -- rest left in GraphSet or PanelData
+Clean up of Measurement, Integral, Peak constructors
+Easy part is done now....
+
 
 ___version="2.1.0"
 

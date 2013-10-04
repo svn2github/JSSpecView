@@ -26,6 +26,7 @@
 package jspecview.awt;
 
 import java.awt.AlphaComposite;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
@@ -43,9 +44,9 @@ import java.awt.image.Raster;
 import java.awt.image.SinglePixelPackedSampleModel;
 import java.net.URL;
 
-import javax.swing.JPanel;
-
 import jspecview.util.JSVEscape;
+
+import jspecview.java.AwtColor;
 
 import org.jmol.api.PlatformViewer;
 import org.jmol.util.JmolFont;
@@ -114,7 +115,7 @@ class Image {
     if (g instanceof Graphics2D) {
       ((Graphics2D) g).setComposite(AlphaComposite.getInstance(
           AlphaComposite.SRC_IN, 1.0f));
-      g.setColor(bgcolor == 0 ? new Color(0, 0, 0, 0) : new Color(bgcolor));
+      g.setColor(bgcolor == 0 ? new AwtColor(0, 0, 0, 0) : new AwtColor(bgcolor));
       g.fillRect(0, 0, width, height);
       ((Graphics2D) g).setComposite(AlphaComposite.getInstance(
           AlphaComposite.SRC_OVER, 1.0f));

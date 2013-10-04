@@ -1,7 +1,6 @@
-package jspecview.export;
+package jspecview.java;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -27,10 +26,13 @@ import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVPanel;
 import jspecview.common.PanelData;
 import jspecview.common.ScriptToken;
-import jspecview.java.DialogHelper;
+import jspecview.export.AMLExporter;
+import jspecview.export.CMLExporter;
+import jspecview.export.JDXExporter;
+import jspecview.export.SVGExporter;
 import jspecview.util.JSVFileManager;
 
-public class Exporter {
+public class AwtExportDialog {
 
   public final static String sourceLabel = "Original...";
   public enum ExportType {
@@ -53,7 +55,7 @@ public class Exporter {
     }
   }
   
-  public Exporter() {
+  public AwtExportDialog() {
   }
 
 
@@ -250,12 +252,13 @@ public class Exporter {
         msg = (new SVGExporter()).exportAsSVG(path, spec.getXYCoords(), 
             spec.getTitle(), startIndex, endIndex, spec.getXUnits(), 
             spec.getYUnits(), spec.isContinuous(), spec.isXIncreasing(), spec.isInverted(), 
-            (Color)jsvp.getColor(ScriptToken.PLOTAREACOLOR), ((Component) jsvp).getBackground(), 
-            (Color)jsvp.getPlotColor(0),
-            (Color)jsvp.getColor(ScriptToken.GRIDCOLOR),
-            (Color)jsvp.getColor(ScriptToken.TITLECOLOR),
-            (Color)jsvp.getColor(ScriptToken.SCALECOLOR),
-            (Color)jsvp.getColor(ScriptToken.UNITSCOLOR),
+            jsvp.getColor(ScriptToken.PLOTAREACOLOR), 
+            jsvp.getBackgroundColor(), 
+            jsvp.getPlotColor(0),
+            jsvp.getColor(ScriptToken.GRIDCOLOR),
+            jsvp.getColor(ScriptToken.TITLECOLOR),
+            jsvp.getColor(ScriptToken.SCALECOLOR),
+            jsvp.getColor(ScriptToken.UNITSCOLOR),
             imode == ExportType.SVGI);
         break;
       default:

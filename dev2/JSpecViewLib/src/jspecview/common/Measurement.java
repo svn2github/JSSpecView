@@ -32,35 +32,30 @@ package jspecview.common;
 public class Measurement extends Annotation {
   
 	private Coordinate pt2 = new Coordinate();
-	private double value;
+	protected double value;
 
-	public Measurement(JDXSpectrum spec, double x, double y) {
-		super(spec, x, y, "", false, false, 0, 6);
-		setPt2(x, y);
+	public Measurement(double x, double y) {
+		super(x, y);
 	}
   
-	public Measurement(JDXSpectrum spec, double x, double y, String text, double x1, double y1) {
-		super(spec, x, y, text, false, false, 0, 6);
-		setPt2(x1, y1);
-	}
-  
-	public Measurement(Measurement m) {
-  	super(m.spec, m.getXVal(), m.getYVal(), m.text, false, false, m.offsetX, m.offsetY);
-  	setPt2(m.pt2.getXVal(), m.pt2.getYVal());
+	public Measurement setM1(JDXSpectrum spec) {
+		setAll(spec, "", false, false, 0, 6);
+		setPt2(getXVal(), getYVal());
+		return this;
 	}
 
-	public Measurement(JDXSpectrum spec, double x, double y, String text, double value) {
-		// peak picking
-		super(spec, x, y, text, false, false, 0, 6);
-		this.value = value;
-		pt2.setXVal(x);
-		pt2.setYVal(y);
+	public Measurement copyM() {
+		Measurement m = new Measurement(getXVal(), getYVal());
+		m.setAll(spec, text, false, false, offsetX, offsetY);
+  	m.setPt2(pt2.getXVal(), pt2.getYVal());
+  	return m;
 	}
 
-	public Measurement(JDXSpectrum spec, double x, double y, boolean doSetPt2) {
-		 super(spec, x, y);
+	public Measurement setPt2(JDXSpectrum spec, boolean doSetPt2) {
+		this.spec = spec;
 		 if (doSetPt2)
-				setPt2(x, y);
+				setPt2(getXVal(), getYVal());
+		 return this;
 	}
 
 	public void setPt2(double x, double y) {

@@ -58,12 +58,14 @@ import org.jmol.util.Txt;
 
 import jspecview.api.ScriptInterface;
 import jspecview.application.TextDialog;
+import jspecview.common.JSVAppletInterface;
 import jspecview.common.JSVDialog;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelNode;
 import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
 import jspecview.common.PanelListener;
+import jspecview.common.ColorParameters;
 import jspecview.common.Parameters;
 import jspecview.common.PeakPickEvent;
 import jspecview.common.ScriptTokenizer;
@@ -73,12 +75,11 @@ import jspecview.common.JDXSpectrum;
 import jspecview.common.SubSpecChangeEvent;
 import jspecview.common.ZoomEvent;
 import jspecview.common.JDXSpectrum.IRMode;
-import jspecview.export.Exporter;
+import jspecview.java.AwtExportDialog;
 import jspecview.java.AwtOverlayLegendDialog;
 import jspecview.java.AwtPanel;
 import jspecview.java.AwtParameters;
 import jspecview.java.DialogHelper;
-import jspecview.java.JSVAppletInterface;
 import jspecview.java.JSVDropTargetListener;
 import jspecview.java.JSVTree;
 import jspecview.java.RepaintManager;
@@ -211,7 +212,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		return panelNodes;
 	}
 	
-	public Parameters getParameters() {
+	public ColorParameters getParameters() {
 		return parameters;
 	}
 
@@ -879,7 +880,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 
 	public String execExport(JSVPanel jsvp, String value) {
 		if (jsvp != null && isPro())
-			writeStatus(Exporter.exportCmd(jsvp, ScriptToken.getTokens(value), false));
+			writeStatus(AwtExportDialog.exportCmd(jsvp, ScriptToken.getTokens(value), false));
 		return null;
 	}
 	

@@ -3,11 +3,20 @@ package jspecview.common;
 
 class PeakPick extends Measurement {
 
-	PeakPick(JDXSpectrum spec, double x, double y, String text, double value) {
-		super(spec, x, y, text, value);
+	PeakPick(double x, double y) {
+		super(x, y);
+	} 
+	
+	public PeakPick setValue(JDXSpectrum spec, String text, double value) {
+		// peak picking
+		setAll(spec, text, false, false, 0, 6);
+		this.value = value;
+		setPt2(getXVal(), getYVal());
+		return this;
 	}
 
-	PeakPick(JDXSpectrum spec, double x, double y) {
-		super(spec, x, y, false);
+	PeakPick setNoValue(JDXSpectrum spec) {
+		setPt2(spec, false);
+		return this;
 	}
 }

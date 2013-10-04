@@ -54,8 +54,8 @@ import javax.swing.JApplet;
 
 import org.jmol.util.Logger;
 
+import jspecview.common.JSVAppletInterface;
 import jspecview.common.JSVersion;
-import jspecview.java.JSVAppletInterface;
 
 /**
  * JSpecView Applet class. For a list of parameters and scripting functionality

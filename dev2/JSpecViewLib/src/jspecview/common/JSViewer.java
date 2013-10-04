@@ -266,7 +266,7 @@ public class JSViewer {
 
 	private static void execPeakList(ScriptInterface si, String value) {
 		JSVPanel jsvp = si.getSelectedPanel();
-		Parameters p = si.getParameters();
+		ColorParameters p = si.getParameters();
 		Boolean b = Parameters.getTFToggle(value);
 		if (value.indexOf("=") < 0) {
 			if (jsvp != null)
@@ -374,7 +374,7 @@ public class JSViewer {
 
 	@SuppressWarnings("incomplete-switch")
 	private static void execSetIntegralParameter(ScriptInterface si, ScriptToken st, double value) {
-		Parameters p = si.getParameters();
+		ColorParameters p = si.getParameters();
 		switch (st) {
 		case INTEGRALRANGE:
 			p.integralRange = value;

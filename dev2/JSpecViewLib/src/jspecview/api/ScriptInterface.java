@@ -10,7 +10,7 @@ import jspecview.common.JSVDialog;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelNode;
 import jspecview.common.PanelData;
-import jspecview.common.Parameters;
+import jspecview.common.ColorParameters;
 import jspecview.common.ScriptToken;
 import jspecview.common.JDXSpectrum.IRMode;
 import jspecview.source.JDXSource;
@@ -69,7 +69,7 @@ public interface ScriptInterface {
 
 	public JmolList<JSVPanelNode> getPanelNodes();
 
-	public Parameters getParameters();
+	public ColorParameters getParameters();
 
 	public Object getPopupMenu();
 

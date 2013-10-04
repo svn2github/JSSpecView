@@ -19,7 +19,9 @@
 
 package jspecview.export;
 
-import java.awt.Color;
+import jspecview.util.JSVColor;
+import jspecview.util.JSVColorUtil;
+
 import java.io.IOException;
 import java.util.Map;
 import java.util.Hashtable;
@@ -29,10 +31,10 @@ import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
 import org.jmol.util.Txt;
 
+import jspecview.common.ColorParameters;
 import jspecview.common.Coordinate;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.ScaleData;
-import jspecview.java.AwtParameters;
 import jspecview.util.JSVTxt;
 
 /**
@@ -48,7 +50,7 @@ import jspecview.util.JSVTxt;
  * @author Craig A.D. Walters
  * @author Prof Robert J. Lancashire
  */
-class SVGExporter extends FormExporter {
+public class SVGExporter extends FormExporter {
 
   private static int svgWidth = 850;
   private static int svgHeight = 400;
@@ -68,12 +70,12 @@ class SVGExporter extends FormExporter {
    * @return data if fileName is null
    * @throws IOException
    */
-  String exportAsSVG(String path, JDXSpectrum graph, int startIndex, int endIndex, boolean forInkscape)
+  public String exportAsSVG(String path, JDXSpectrum graph, int startIndex, int endIndex, boolean forInkscape)
       throws IOException {
     return exportAsSVG(path, graph.getXYCoords(), "", startIndex,
         endIndex, graph.getXUnits(), graph.getYUnits(), graph.isContinuous(),
-        graph.isXIncreasing(), graph.isInverted(), Color.lightGray, Color.white, Color.black,
-        Color.gray, Color.black, Color.black, Color.black, forInkscape);
+        graph.isXIncreasing(), graph.isInverted(), ColorParameters.BLACK, ColorParameters.BLACK, ColorParameters.BLACK,
+        ColorParameters.BLACK, ColorParameters.BLACK, ColorParameters.BLACK, ColorParameters.BLACK, forInkscape);
   }
 
   /**
@@ -99,13 +101,13 @@ class SVGExporter extends FormExporter {
    * @return data if fileName is null
    * @throws IOException
    */
-  String exportAsSVG(String fileName, Coordinate[] xyCoords, String title,
+  public String exportAsSVG(String fileName, Coordinate[] xyCoords, String title,
                            int startDataPointIndex, int endDataPointIndex,
                            String xUnits, String yUnits, boolean isContinuous,
-                           boolean increasing, boolean isInverted, Color plotAreaColor,
-                           Color backgroundColor, Color plotColor,
-                           Color gridColor, Color titleColor, Color scaleColor,
-                           Color unitsColor, boolean exportForInkscape) throws IOException {
+                           boolean increasing, boolean isInverted, JSVColor plotAreaColor,
+                           JSVColor backgroundColor, JSVColor plotColor,
+                           JSVColor gridColor, JSVColor titleColor, JSVColor scaleColor,
+                           JSVColor unitsColor, boolean exportForInkscape) throws IOException {
 
     initForm(fileName);
 
@@ -231,14 +233,14 @@ class SVGExporter extends FormExporter {
  double yTickB= yStep/5;
  
     context
-        .put("plotAreaColor", AwtParameters.colorToHexString(plotAreaColor));
-    context.put("backgroundColor", AwtParameters
+        .put("plotAreaColor", JSVColorUtil.colorToHexString(plotAreaColor));
+    context.put("backgroundColor", JSVColorUtil
         .colorToHexString(backgroundColor));
-    context.put("plotColor", AwtParameters.colorToHexString(plotColor));
-    context.put("gridColor", AwtParameters.colorToHexString(gridColor));
-    context.put("titleColor", AwtParameters.colorToHexString(titleColor));
-    context.put("scaleColor", AwtParameters.colorToHexString(scaleColor));
-    context.put("unitsColor", AwtParameters.colorToHexString(unitsColor));
+    context.put("plotColor", JSVColorUtil.colorToHexString(plotColor));
+    context.put("gridColor", JSVColorUtil.colorToHexString(gridColor));
+    context.put("titleColor", JSVColorUtil.colorToHexString(titleColor));
+    context.put("scaleColor", JSVColorUtil.colorToHexString(scaleColor));
+    context.put("unitsColor", JSVColorUtil.colorToHexString(unitsColor));
 
     context.put("svgHeight", new Integer(svgHeight));
     context.put("svgWidth", new Integer(svgWidth));

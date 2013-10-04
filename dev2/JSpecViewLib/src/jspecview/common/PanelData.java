@@ -43,10 +43,15 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 import jspecview.common.Annotation.AType;
+import jspecview.util.JSVColor;
+import jspecview.util.JSVColorUtil;
 
+import org.jmol.api.ApiPlatform;
 import org.jmol.api.Event;
 import org.jmol.api.EventManager;
+import org.jmol.util.JmolFont;
 import org.jmol.util.JmolList;
+import org.jmol.util.Logger;
 
 /**
  * JSVPanel class draws a plot from the data contained a instance of a
@@ -61,8 +66,13 @@ import org.jmol.util.JmolList;
 
 public class PanelData implements EventManager {
 
-	public PanelData(JSVPanel owner) {
-		this.owner = owner;
+	public ApiPlatform apiPlatform;
+
+	public PanelData(JSVPanel panel) {
+		this.jsvp = panel;
+    highlightColor = panel.getColor4(255, 0, 0, 200);
+    zoomBoxColor = panel.getColor4(150, 150, 100, 130);
+    zoomBoxColor2 = panel.getColor4(150, 100, 100, 130);
 	}
 
 	// Critical fields
@@ -82,7 +92,7 @@ public class PanelData implements EventManager {
 	}
 
 	public Hashtable<ScriptToken, Object> options = new Hashtable<ScriptToken, Object>();
-	public JSVPanel owner;
+	public JSVPanel jsvp;
 	public JmolList<GraphSet> graphSets;
 	public int currentSplitPoint;
 	public PlotWidget thisWidget;
@@ -90,7 +100,7 @@ public class PanelData implements EventManager {
 	public Coordinate[] coordsClicked;
 
 	public void dispose() {
-		owner = null;
+		jsvp = null;
 		for (int i = 0; i < graphSets.size(); i++)
 			graphSets.get(i).dispose();
 		graphSets = null;
@@ -219,7 +229,7 @@ public class PanelData implements EventManager {
 	
 	private boolean doReset = true;
 	
-	public String printingFont;
+	public String printingFontName;
 	public String printGraphPosition = "default";
 	public boolean titleDrawn;
 	public boolean display1D;
@@ -257,7 +267,7 @@ public class PanelData implements EventManager {
 	public void initJSVPanel(JmolList<JDXSpectrum> spectra, int startIndex, int endIndex) {
 		this.startIndex = startIndex;
 		this.endIndex = endIndex;
-		owner.setupPlatform();
+		jsvp.setupPlatform();
 		nSpectra = spectra.size();
 		this.spectra = spectra;
 		commonFilePath = spectra.get(0).getFilePath();
@@ -270,7 +280,7 @@ public class PanelData implements EventManager {
 	}
 
 	private void setGraphSets(LinkMode linkMode) {
-		graphSets = GraphSet.createGraphSetsAndSetLinkMode(this, owner, spectra, startIndex, endIndex, linkMode);
+		graphSets = GraphSet.createGraphSetsAndSetLinkMode(this, jsvp, spectra, startIndex, endIndex, linkMode);
 		currentGraphSet = graphSets.get(0);
 		title = getSpectrum().getTitleLabel();
 	}
@@ -283,7 +293,7 @@ public class PanelData implements EventManager {
 		return pi2;
 	}
 
-	public void integrateAll(Parameters parameters) {
+	public void integrateAll(ColorParameters parameters) {
 		for (int i = graphSets.size(); --i >= 0;)
 			graphSets.get(i).integrate(-1, parameters);
 	}
@@ -331,6 +341,11 @@ public class PanelData implements EventManager {
 		return pi;
 	}
 
+	public void setPlotColors(JSVColor[] colors) {
+    for (int i = graphSets.size(); --i >= 0;)
+      graphSets.get(i).setPlotColors(colors);
+	}
+
 	public void selectSpectrum(String filePath, String type, String model,
 			boolean andCurrent) {
 		if (andCurrent)
@@ -376,7 +391,7 @@ public class PanelData implements EventManager {
 		if (isPrinting) {
 			top *= 3; // for three-hole punching
 			bottom *= 3; // for file name
-      scalingFactor = 10; // for high resolution (zooming in within PDF)
+			scalingFactor = 10; // for high resolution (zooming in within PDF)
 			withCoords = false;
 		} else {
 			scalingFactor = 1;
@@ -393,23 +408,101 @@ public class PanelData implements EventManager {
 			graphSets.get(i).drawGraphSet(g, width, height, left, right, top, bottom,
 					isResized);
 		if (titleOn && !titleDrawn)
-			owner.drawTitle(g, height * scalingFactor, width * scalingFactor, getDrawTitle(isPrinting));
-		if (withCoords)
-			owner.drawCoordinates(g, top);
+			drawTitle(g, height * scalingFactor, width * scalingFactor,
+					getDrawTitle(isPrinting));
+		if (withCoords && coordStr != null)
+			drawCoordinates(g, top, thisWidth - right, top - 20);
 		if (addFilePath) {
 			String s = (commonFilePath != null ? commonFilePath
 					: graphSets.size() == 1 && currentGraphSet.getTitle(true) != null ? getSpectrum()
 							.getFilePath()
 							: null);
 			if (s != null) {
-				owner.printFilePath(g, left, height, s);
+			  printFilePath(g, left, height, s);
 			}
 		}
 		if (isPrinting)
-			owner.printVersion(g, height);
+			printVersion(g, height);
 
 	}
 
+  /**
+	 * @param g 
+   * @param top  
+   * @param x 
+   * @param y 
+	 */
+  public void drawCoordinates(Object g, int top, int x, int y) {
+  	jsvp.setGraphicsColor(g, coordinatesColor);
+    JmolFont font = setFont(g, jsvp.getWidth(), JmolFont.FONT_STYLE_PLAIN, 12, true);
+    jsvp.drawString(g, coordStr, x - font.stringWidth(coordStr), y);
+  }
+
+	public JmolFont setFont(Object g, int width, int style, float size, boolean isLabel) {
+		JmolFont font = getFont(g, width, style, size, isLabel);
+    jsvp.setGraphicsFont(g, font);
+    return font;
+	}
+
+
+  
+	public void printFilePath(Object g, int x, int y, String s) {
+		x *= scalingFactor;
+		y *= scalingFactor;
+		if (s.indexOf("?") > 0)
+			s = s.substring(s.indexOf("?") + 1);
+		s = s.substring(s.lastIndexOf("/") + 1);
+		s = s.substring(s.lastIndexOf("\\") + 1);
+		jsvp.setGraphicsColor(g, BLACK);
+		JmolFont font = setFont(g, 1000, JmolFont.FONT_STYLE_PLAIN, 9, true);
+		if (x != left * scalingFactor)
+			x -= font.stringWidth(s);
+		jsvp.drawString(g, s, x, y - font.getHeight());
+	}
+
+	public void printVersion(Object g, int pageHeight) {
+		jsvp.setGraphicsColor(g, BLACK);
+		JmolFont font = setFont(g, 100, JmolFont.FONT_STYLE_PLAIN, 9, true);
+		String s = apiPlatform.getDateFormat() + " JSpecView "
+				+ JSVersion.VERSION_SHORT;
+		int w = font.stringWidth(s);
+		jsvp.drawString(g, s, (thisWidth - right) * scalingFactor - w,
+				pageHeight * scalingFactor - font.getHeight());
+	}
+
+
+  /**
+   * Draws Title
+   * @param g 
+   * 
+   * @param pageHeight
+   *        the height to be drawn in pixels -- after scaling
+   * @param pageWidth
+   *        the width to be drawn in pixels -- after scaling
+   * @param title 
+   */
+  public void drawTitle(Object g, int pageHeight, int pageWidth, String title) {
+  	title = title.replace('\n', ' ');
+    JmolFont font = getFont(g, pageWidth, isPrinting ||getBoolean(ScriptToken.TITLEBOLDON) ? JmolFont.FONT_STYLE_BOLD
+        : JmolFont.FONT_STYLE_PLAIN, 14, true);
+    int nPixels = font.stringWidth(title);
+    if (nPixels > pageWidth) {
+    	int size = (int) (14.0 * pageWidth / nPixels);
+    	if (size < 10)
+    		size = 10;
+    	font = getFont(g, pageWidth, isPrinting ||getBoolean(ScriptToken.TITLEBOLDON) ? JmolFont.FONT_STYLE_BOLD
+          : JmolFont.FONT_STYLE_PLAIN, size, true);
+    }
+    jsvp.setGraphicsColor(g, titleColor);
+    jsvp.setGraphicsFont(g, font);
+    jsvp.drawString(g, title, (isPrinting ? left * scalingFactor : 5), 
+    		pageHeight - (int) (font.getHeight() * (isPrinting ? 2 : 0.5)));
+  }
+
+
+
+  
+  
 	/**
 	 * sets bsSelected to the specified pointer from "select 3.1*1"
 	 * 
@@ -550,8 +643,8 @@ public class PanelData implements EventManager {
 	 */
 	public void addHighlight(GraphSet gs, double x1, double x2, JDXSpectrum spec,
 			int r, int g, int b, int a) {
-		(gs == null ? currentGraphSet : gs).addHighlight(x1, x2, spec, owner
-				.getColor(r, g, b, a));
+		(gs == null ? currentGraphSet : gs).addHighlight(x1, x2, spec, jsvp
+				.getColor4(r, g, b, a));
 	}
 
 	/**
@@ -684,30 +777,38 @@ public class PanelData implements EventManager {
 	}
 
 	public void repaint() {
-		owner.doRepaint();
+		jsvp.doRepaint();
 	}
 
 	public void setToolTipText(String s) {
-		owner.setToolTipText(s);
+		jsvp.setToolTipText(s);
 	}
 
-	public Object getHighlightColor() {
-		return owner.getColor(ScriptToken.HIGHLIGHTCOLOR);
+	public JSVColor getHighlightColor() {
+		return jsvp.getColor(ScriptToken.HIGHLIGHTCOLOR);
 	}
 
-	public void setHighlightColor(Object color) {
-		owner.setColor(ScriptToken.HIGHLIGHTCOLOR, color);
+	public void setHighlightColor(JSVColor color) {
+		jsvp.setColor(ScriptToken.HIGHLIGHTCOLOR, color);
 	}
 
 	String getInput(String message, String title, String sval) {
-		return owner.getInput(message, title, sval);
+		return jsvp.getInput(message, title, sval);
 	}
 
-	public void setFont(Object g, int width, int mode, int size, boolean isLabel) {
-		owner.setFont(g, (isPrinting ? printingFont : displayFontName), width,
-				mode, size * scalingFactor, isLabel);
+	public JmolFont getFont(Object g, int width, int style, float size, boolean isLabel) {
+		size *= scalingFactor;
+    if (isLabel) {
+      if (width < 400)
+        size = ((width * size) / 400);
+    } else {
+      if (width < 250)
+        size = ((width * size) / 250);
+    }
+    int face = jsvp.getFontFaceID(isPrinting ? printingFontName : displayFontName);
+    return JmolFont.createFont3D(face, style, size, size, apiPlatform, g);
 	}
-
+	
 	// listeners to handle various events, from GraphSet or AwtPanel
 
 	/**
@@ -731,7 +832,7 @@ public class PanelData implements EventManager {
 	 */
 	public void notifyPeakPickedListeners(PeakPickEvent p) {
 		if (p == null) {
-			p = new PeakPickEvent(owner, coordClicked, getSpectrum()
+			p = new PeakPickEvent(jsvp, coordClicked, getSpectrum()
 					.getAssociatedPeakInfo(xPixelClicked, coordClicked));
 		}
 		// PeakInfo pi = p.getPeakInfo();
@@ -778,7 +879,7 @@ public class PanelData implements EventManager {
 	public boolean titleOn;
 
 	public boolean hasFocus() {
-		return owner.hasFocus();
+		return jsvp.hasFocus();
 	}
 
 	public boolean isMouseUp() {
@@ -888,7 +989,7 @@ public class PanelData implements EventManager {
 		Integral integral = getSelectedIntegral();
 		if (integral == null)
 			return;
-		String sValue = integral.getText();
+		String sValue = integral.text;
 		if (sValue.length() == 0)
 			sValue = "" + integral.getValue();
 		String newValue = getInput("Enter a new value for this integral",
@@ -911,7 +1012,7 @@ public class PanelData implements EventManager {
 			if (title == null)
 				title = viewTitle; // "View 1"
 		} else {
-			title = owner.getTitle().trim();
+			title = jsvp.getTitle().trim();
 		}
 		if (title.indexOf("\n") >= 0)
 			title = title.substring(0, title.indexOf("\n")).trim();
@@ -928,7 +1029,7 @@ public class PanelData implements EventManager {
 			if (title == null)
 				title = viewTitle; // "View 1"
 		} else {
-			title = owner.getTitle().trim();
+			title = jsvp.getTitle().trim();
 		}
 		if (title.indexOf("\n") >= 0)
 			title = title.substring(0, title.indexOf("\n")).trim();
@@ -1169,5 +1270,100 @@ public class PanelData implements EventManager {
 	}
 
 
+	
+  ////////// settable colors //////////
+
+  public JSVColor coordinatesColor;
+  public JSVColor gridColor;
+  public JSVColor integralPlotColor;
+  public JSVColor peakTabColor;
+  public JSVColor plotAreaColor;
+  public JSVColor scaleColor;
+  public JSVColor titleColor;
+  public JSVColor unitsColor;
+  // potentially settable; 
+
+  public JSVColor highlightColor;
+  public JSVColor zoomBoxColor;
+  public JSVColor zoomBoxColor2;
+	public JSVColor BLACK;
+
+	public void setColor(ScriptToken st, JSVColor color) {
+    if (color != null)
+      options.put(st, JSVColorUtil.colorToHexString(color));
+    switch (st) {
+    case BACKGROUNDCOLOR:
+      jsvp.setBackgroundColor(color);
+      break;
+    case COORDINATESCOLOR:
+      coordinatesColor = color;
+      break;
+    case GRIDCOLOR:
+      gridColor = color;
+      break;
+    case HIGHLIGHTCOLOR:
+      highlightColor = color;
+      break;
+    case INTEGRALPLOTCOLOR:
+      integralPlotColor = color;
+      break;
+    case PEAKTABCOLOR:
+    	peakTabColor = color;
+    	break;
+    case PLOTCOLOR:
+      for (int i = graphSets.size(); --i >= 0;)
+        graphSets.get(i).setPlotColor0(color);
+      break;
+    case PLOTAREACOLOR:
+      plotAreaColor = color;
+      break;
+    case SCALECOLOR:
+      scaleColor = color;
+      break;
+    case TITLECOLOR:
+      titleColor = color;
+      break;
+    case UNITSCOLOR:
+      unitsColor = color;
+      break;
+    case ZOOMBOXCOLOR:
+      zoomBoxColor = color;
+      break;
+    case ZOOMBOXCOLOR2:
+      zoomBoxColor2 = color;
+      break;
+    default:
+      Logger.warn("AwtPanel --- unrecognized color: " + st);
+      break;
+    }
+	}
+
+	public JSVColor getColor(ScriptToken whatColor) {
+    switch (whatColor) {
+    default:
+      Logger.error("awtgraphset missing color " + whatColor);
+      return BLACK;
+    case ZOOMBOXCOLOR2:
+      return zoomBoxColor2;
+    case ZOOMBOXCOLOR:
+      return zoomBoxColor;
+    case HIGHLIGHTCOLOR:
+      return highlightColor;
+    case INTEGRALPLOTCOLOR:
+      return integralPlotColor;
+    case GRIDCOLOR:
+      return gridColor;
+    case PEAKTABCOLOR:
+    	return peakTabColor;
+    case PLOTAREACOLOR:
+      return plotAreaColor;
+    case SCALECOLOR:
+      return scaleColor;
+    case TITLECOLOR:
+      return titleColor;
+    case UNITSCOLOR:
+      return unitsColor;
+    }
+	}
 
 }

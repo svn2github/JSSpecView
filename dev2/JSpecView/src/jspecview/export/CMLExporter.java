@@ -29,7 +29,7 @@ import jspecview.common.JDXSpectrum;
  * @author Prof Robert J. Lancashire
  * @author Bob Hanson, hansonr@stolaf.edu
  */
-class CMLExporter extends XMLExporter {
+public class CMLExporter extends XMLExporter {
 
   /**
    * Exports the Spectrum that is displayed by JSVPanel to a file given by fileName
@@ -41,7 +41,7 @@ class CMLExporter extends XMLExporter {
    * @return data if fileName is null
    * @throws IOException
    */
-  String exportAsCML(String fileName, JDXSpectrum spec, int startIndex,
+  public String exportAsCML(String fileName, JDXSpectrum spec, int startIndex,
                    int endIndex) throws IOException {
 
     if (!setup(spec, fileName, startIndex, endIndex))

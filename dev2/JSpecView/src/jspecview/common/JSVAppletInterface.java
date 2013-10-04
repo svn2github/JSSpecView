@@ -1,4 +1,4 @@
-package jspecview.java;
+package jspecview.common;
 
 import java.util.Map;
 

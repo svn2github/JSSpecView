@@ -20,6 +20,8 @@
 package jspecview.java;
 
 import java.awt.BorderLayout;
+import jspecview.util.JSVColor;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -96,7 +98,7 @@ public class AwtOverlayLegendDialog extends JDialog implements JSVDialog {
 				jsvp.getPanelData().setSpectrum(lsm.getMinSelectionIndex(), false);
 			}
 		});
-		table.setDefaultRenderer(Color.class, new ColorRenderer());
+		table.setDefaultRenderer(JSVColor.class, new ColorRenderer());
 		table.setDefaultRenderer(String.class, new TitleRenderer());
 		table.setPreferredScrollableViewportSize(new Dimension(350, 95));
 		TableColumn column = null;
@@ -148,7 +150,7 @@ public class AwtOverlayLegendDialog extends JDialog implements JSVDialog {
 		}
 
 		private void init() {
-			Color plotColor;
+			JSVColor plotColor;
 			String title;
 			JDXSpectrum spectrum;
 			Object[] cols;
@@ -167,7 +169,7 @@ public class AwtOverlayLegendDialog extends JDialog implements JSVDialog {
 				title = spectrum.getTitle();
 				if (useFileName)
 					title = JSVFileManager.getName(spectrum.getFilePath()) + " - " + title;
-				plotColor = (Color) jsvp.getPlotColor(index);
+				plotColor = jsvp.getPlotColor(index);
 
 				cols[0] = new Integer(index + 1);
 				cols[1] = plotColor;

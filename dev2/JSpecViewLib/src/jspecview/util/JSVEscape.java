@@ -74,6 +74,18 @@ public class JSVEscape {
     return "\\u" + s.substring(s.length() - 4);
   }
   
+  public static String getHexColorFromRGB(int argb) {
+    if (argb == 0)
+      return null;
+    String r  = "00" + Integer.toHexString((argb >> 16) & 0xFF);
+    r = r.substring(r.length() - 2);
+    String g  = "00" + Integer.toHexString((argb >> 8) & 0xFF);
+    g = g.substring(g.length() - 2);
+    String b  = "00" + Integer.toHexString(argb & 0xFF);
+    b = b.substring(b.length() - 2);
+    return r + g + b;
+  }
+
   @SuppressWarnings("unchecked")
   public static String toJSON(String infoType, Object info, boolean addCR) {
 

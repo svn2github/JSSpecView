@@ -19,9 +19,11 @@
 
 package jspecview.java;
 
-import java.awt.Color;
+import jspecview.util.JSVColor;
+import jspecview.util.JSVColorUtil;
 
 import jspecview.common.Annotation;
+import jspecview.common.ColoredAnnotation;
 import jspecview.common.JDXSpectrum;
 
 
@@ -33,18 +35,28 @@ import org.jmol.util.JmolList;
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-public class AwtColoredAnnotation extends Annotation {
+public class AwtColoredAnnotation extends Annotation implements ColoredAnnotation {
 
-  private Color color;
+  private JSVColor color;
 
-  public AwtColoredAnnotation(JDXSpectrum spec, double x, double y, String text, Color color,
+  public JSVColor getColor() {
+    return color;
+  }
+
+  public AwtColoredAnnotation(double x, double y) {
+  	super(x, y);
+  }
+  
+  public AwtColoredAnnotation set(
+	JDXSpectrum spec, String text, JSVColor color,
       boolean isPixels, boolean is2D, int offsetX, int offsetY) {
-    super(spec, x, y, text, isPixels, is2D, offsetX, offsetY);
+    setAll(spec, text, isPixels, is2D, offsetX, offsetY);
     this.color = color;
+    return this;
   }
 
 	public static AwtColoredAnnotation getAnnotation(JDXSpectrum spec, JmolList<String> args,
-                                                AwtColoredAnnotation lastAnnotation) {
+                                                Annotation lastAnnotation) {
   	String arg;
     int xPt = 0;
     int yPt = 1;
@@ -103,24 +115,20 @@ public class AwtColoredAnnotation extends Annotation {
         return null;
       double x = (xPt < 0 ? lastAnnotation.getXVal() : Double.valueOf(args.get(xPt)).doubleValue());
       double y = (yPt < 0 ? lastAnnotation.getYVal() : Double.valueOf(args.get(yPt)).doubleValue());
-      Color color =(colorPt < 0 ? lastAnnotation.getColor() : AwtParameters
-          .getColorFromString(args.get(colorPt)));
+      JSVColor color =(colorPt < 0 ? ((ColoredAnnotation) lastAnnotation).getColor() : 
+      	new AwtColor(JSVColorUtil.getArgbFromString(args.get(colorPt))));
       String text;
       if (textPt < 0) {
-        text = lastAnnotation.getText();
+        text = lastAnnotation.text;
       } else {
         text = args.get(textPt);
         if (text.charAt(0) == '\"')
           text = text.substring(1, text.length() - 1);
       }
-      return new AwtColoredAnnotation(spec, x, y, text, color, false, false, 0, 0);
+      return new AwtColoredAnnotation(x, y).set(spec, text, color, false, false, 0, 0);
     } catch (Exception e) {
       return null;
     }
-  }
-
-  public Color getColor() {
-    return color;
   }
 
 }

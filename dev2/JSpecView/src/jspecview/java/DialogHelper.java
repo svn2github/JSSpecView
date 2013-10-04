@@ -38,8 +38,7 @@ import jspecview.api.ScriptInterface;
 import jspecview.common.JSVPanel;
 import jspecview.common.PanelData;
 import jspecview.common.Annotation.AType;
-import jspecview.export.Exporter;
-import jspecview.export.Exporter.ExportType;
+import jspecview.java.AwtExportDialog.ExportType;
 import jspecview.util.JSVFileManager;
 
 /**
@@ -356,7 +355,7 @@ public class DialogHelper {
 			break;
 		default:
 			setFileChooser(itype);
-			Exporter.exportSpectrum(si, frame, this, type);
+			AwtExportDialog.exportSpectrum(si, frame, this, type);
 			jsvp.getFocusNow(true);
 		}
 	}

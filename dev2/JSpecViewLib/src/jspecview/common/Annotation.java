@@ -34,7 +34,7 @@ package jspecview.common;
  * @author Bob Hanson hansonr@stolaf.edu
  */
 public class Annotation extends Coordinate {
-  protected String text = "";
+  public String text = "";
   protected boolean isPixels;
   boolean is2D;
   int offsetX;
@@ -46,43 +46,33 @@ public class Annotation extends Coordinate {
   /**
    * Constructor -- note that x is spectral X value, but y is pixels above
    * baseline
-   * @param spec 
    * @param x 
    * @param y 
-   * @param text 
-   * @param isPixels 
-   * @param is2D 
-   * @param offsetX 
-   * @param offsetY 
    * 
    */
-  protected Annotation(JDXSpectrum spec, double x, double y, String text, boolean isPixels, boolean is2D, int offsetX, int offsetY) {
+  protected Annotation(double x, double y) {
     super(x, y);
+  }
+  
+  protected Annotation setAll(JDXSpectrum spec, String text, boolean isPixels, boolean is2D, int offsetX, int offsetY) {
     this.spec = spec;
     this.text = text;
     this.isPixels = isPixels;
     this.is2D = is2D;
     this.offsetX = offsetX;
     this.offsetY = offsetY;
+    return this;
   }
 
-	Annotation(JDXSpectrum spec, double x, double y) {
-		super(x,y);
+	Annotation setSpec(JDXSpectrum spec) {
 		this.spec = spec;
+		return this;
 	}
 
 	void addSpecShift(double dx) {
 		setXVal(getXVal() + dx);
 	}
 	
-  protected String getText() {
-    return text;
-  }
-
-  void setText(String text) {
-    this.text = text;
-  }
-
   boolean isPixels() {
     return isPixels;
   }

@@ -41,7 +41,6 @@ import jspecview.common.JSVPanel;
 import jspecview.common.PanelData;
 import jspecview.common.ScriptToken;
 import jspecview.common.Annotation.AType;
-import jspecview.export.Exporter;
 
 /**
  * Popup Menu for JSVPanel.
@@ -396,7 +395,7 @@ public class AwtPopupMenu extends JPopupMenu {
   public static void setMenus(JMenu saveAsMenu, JMenu saveAsJDXMenu,
                               JMenu exportAsMenu, ActionListener actionListener) {
     saveAsMenu.setText("Save As");
-    addMenuItem(saveAsMenu, Exporter.sourceLabel, '\0', actionListener);
+    addMenuItem(saveAsMenu, AwtExportDialog.sourceLabel, '\0', actionListener);
     saveAsJDXMenu.setText("JDX");
     addMenuItem(saveAsJDXMenu, "XY", '\0', actionListener);
     addMenuItem(saveAsJDXMenu, "DIF", '\0', actionListener);

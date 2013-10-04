@@ -148,8 +148,8 @@ public class IntegralData extends MeasurementData {
 		double y1 = getYValueAt(x1);
 		double y2 = getYValueAt(x2);
 		haveRegions = true;
-		Integral in = new Integral(spec, Math.abs(y2 - y1) * 100
-				* normalizationFactor, x1, x2, y1, y2);
+		Integral in = new Integral(x1, y1).setInt(spec, Math.abs(y2 - y1) * 100
+				* normalizationFactor, x2, y2);
 		clear(x1, x2);
 		//if (in.getValue() < 0.1) -- no, need this for tiny integrals with a water peak, for instance
 			//return null;
@@ -271,8 +271,8 @@ public class IntegralData extends MeasurementData {
 			String token = allParamTokens.nextToken();
 			// now split the x-value/integral-value pair
 			StringTokenizer eachParam = new StringTokenizer(token, ":");
-			Annotation ratio = new Annotation(spec, Double.parseDouble(eachParam
-					.nextToken()), 0.0, eachParam.nextToken(), true, false, 0, 0);
+			Annotation ratio = new Annotation(Double.parseDouble(eachParam
+					.nextToken()), 0.0).setAll(spec, eachParam.nextToken(), true, false, 0, 0);
 			ratios.addLast(ratio);
 		}
 		return ratios;
@@ -339,7 +339,7 @@ public class IntegralData extends MeasurementData {
 		String[][] data = new String[size()][];
 		for (int pt = 0, i = size(); --i >= 0;)
 			data[pt++] = new String[] { "" + pt, Txt.formatDecimalDbl(get(i).getXVal(), 2), 
-				Txt.formatDecimalDbl(get(i).getXVal2(), 2), get(i).getText() };
+				Txt.formatDecimalDbl(get(i).getXVal2(), 2), get(i).text };
 		return data;
 	}
 

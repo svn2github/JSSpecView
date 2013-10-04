@@ -831,7 +831,7 @@ public abstract class JDXDataObject extends JDXHeader {
 		boolean isNMR = isNMR();
 		switch (type) {
 		case Integration:
-			return new Object[] { null, new String[] {"0.0"}, null };
+			return new Object[] { null, new int[] { 1 }, null };
 		case Measurements:
 			s1 = (isNMR ? new String[] { "Hz", "ppm" } : null);
 			s2 = (s1 == null ? null : isHNMR() ? new int[] { 1, 4 }
