@@ -20,11 +20,11 @@ import org.jmol.util.Logger;
 import org.jmol.util.SB;
 
 
-public class JSVDropTargetListener implements DropTargetListener {
+public class AwtDropTargetListener implements DropTargetListener {
 
   private ScriptInterface si;
 
-  public JSVDropTargetListener(ScriptInterface si) {
+  public AwtDropTargetListener(ScriptInterface si) {
     this.si = si;
   }
 

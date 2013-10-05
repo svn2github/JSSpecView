@@ -33,7 +33,6 @@ import org.jmol.util.SB;
 import jspecview.common.Coordinate;
 import jspecview.common.JDXDataObject;
 import jspecview.common.JDXSpectrum;
-import jspecview.java.AwtExportDialog;
 import jspecview.source.FileReader;
 import jspecview.util.JSVTxt;
 
@@ -65,7 +64,7 @@ public class JDXExporter {
    * @return data if path is null
    * @throws IOException
    */
-  public static String export(AwtExportDialog.ExportType type, String path, JDXSpectrum spectrum, int startIndex, int endIndex) throws IOException{
+  public static String export(Exporter.ExportType type, String path, JDXSpectrum spectrum, int startIndex, int endIndex) throws IOException{
     String data = toStringAux(type, spectrum, startIndex, endIndex);
     if (path == null)
       return data;
@@ -88,7 +87,7 @@ public class JDXExporter {
    * @return the spectrum string for the type of compression specified by
    *         <code>type</code>
    */
-  private static String toStringAux(AwtExportDialog.ExportType type, JDXSpectrum spectrum,
+  private static String toStringAux(Exporter.ExportType type, JDXSpectrum spectrum,
                                     int startIndex, int endIndex) {
 
     //String dataType = spectrum.getDataType();
@@ -140,7 +139,7 @@ public class JDXExporter {
     case DIF:
     case DIFDUP:
       tabDataSet = JDXCompressor.compressDIF(newXYCoords, startIndex, endIndex, step, 
-          xCompFactor, yCompFactor, type == AwtExportDialog.ExportType.DIFDUP);
+          xCompFactor, yCompFactor, type == Exporter.ExportType.DIFDUP);
       break;
     case FIX:
       tabDataSet = JDXCompressor.compressFIX(newXYCoords, startIndex, endIndex, step, 

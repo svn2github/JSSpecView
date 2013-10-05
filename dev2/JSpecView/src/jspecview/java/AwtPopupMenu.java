@@ -35,12 +35,14 @@ import javax.swing.JPopupMenu;
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
 
+import jspecview.api.JSVPopupMenu;
 import jspecview.api.ScriptInterface;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVPanel;
 import jspecview.common.PanelData;
 import jspecview.common.ScriptToken;
 import jspecview.common.Annotation.AType;
+import jspecview.export.Exporter;
 
 /**
  * Popup Menu for JSVPanel.
@@ -49,7 +51,7 @@ import jspecview.common.Annotation.AType;
  * @author Prof Robert J. Lancashire
  * @see jspecview.common.JSVPanel
  */
-public class AwtPopupMenu extends JPopupMenu {
+public class AwtPopupMenu extends JPopupMenu implements JSVPopupMenu {
 
   protected boolean isApplet;
 
@@ -395,7 +397,7 @@ public class AwtPopupMenu extends JPopupMenu {
   public static void setMenus(JMenu saveAsMenu, JMenu saveAsJDXMenu,
                               JMenu exportAsMenu, ActionListener actionListener) {
     saveAsMenu.setText("Save As");
-    addMenuItem(saveAsMenu, AwtExportDialog.sourceLabel, '\0', actionListener);
+    addMenuItem(saveAsMenu, Exporter.sourceLabel, '\0', actionListener);
     saveAsJDXMenu.setText("JDX");
     addMenuItem(saveAsJDXMenu, "XY", '\0', actionListener);
     addMenuItem(saveAsJDXMenu, "DIF", '\0', actionListener);

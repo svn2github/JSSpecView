@@ -12,6 +12,8 @@ import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.MutableTreeNode;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
@@ -23,11 +25,13 @@ import jspecview.api.ScriptInterface;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelNode;
+import jspecview.common.JSVTree;
+import jspecview.common.JSVTreeNode;
 import jspecview.common.ScriptToken;
 import jspecview.source.JDXSource;
 import jspecview.util.JSVFileManager;
 
-public class JSVTree extends JTree {
+public class AwtTree extends JTree implements JSVTree {
 
   public final static int FILE_OPEN_OK = 0;
   public final static int FILE_OPEN_ALREADY = -1;
@@ -51,11 +55,11 @@ public class JSVTree extends JTree {
 		return spectraTreeModel;
 	}
 
-	public JSVTree(final ScriptInterface si) {
+	public AwtTree(final ScriptInterface si) {
 		super();
 		this.si = si;
-    rootNode = new JSVTreeNode("Spectra", null);
-    spectraTreeModel = new DefaultTreeModel(rootNode);
+    rootNode = new AwtTreeNode("Spectra", null);
+    spectraTreeModel = new DefaultTreeModel((TreeNode) rootNode);
     setModel(spectraTreeModel);
     getSelectionModel().setSelectionMode(
         TreeSelectionModel.SINGLE_TREE_SELECTION);
@@ -66,9 +70,9 @@ public class JSVTree extends JTree {
           return;
         }
         if (node.isLeaf()) {
-          si.setNode(node.panelNode, true);
+          si.setNode(node.getPanelNode(), true);
         }
-        si.setCurrentSource(node.panelNode.source);
+        si.setCurrentSource(node.getPanelNode().source);
       }
     });
     setRootVisible(false);
@@ -84,12 +88,11 @@ public class JSVTree extends JTree {
 		}
 	}
 	
-  @SuppressWarnings("unchecked")
 	public static void closeSource(ScriptInterface si,
 			JDXSource source) {
     // Remove nodes and dispose of frames
 		JmolList<JSVPanelNode> panelNodes = si.getPanelNodes();
-  	JSVTree tree = (JSVTree) si.getSpectraTree();
+  	AwtTree tree = (AwtTree) si.getSpectraTree();
 		JSVTreeNode rootNode = tree.getRootNode();
 		DefaultTreeModel spectraTreeModel = tree.getDefaultModel();
 
@@ -99,11 +102,11 @@ public class JSVTree extends JTree {
     while (enume.hasMoreElements()) {
       JSVTreeNode node = enume.nextElement();
       if (fileName == null
-          || node.panelNode.source.getFilePath().equals(fileName)) {
+          || node.getPanelNode().source.getFilePath().equals(fileName)) {
         for (Enumeration<JSVTreeNode> e = node.children(); e.hasMoreElements();) {
           JSVTreeNode childNode = e.nextElement();
           toDelete.addLast(childNode);
-          panelNodes.remove(childNode.panelNode);
+          panelNodes.remove(childNode.getPanelNode());
         }
         toDelete.addLast(node);
         if (fileName != null)
@@ -111,7 +114,7 @@ public class JSVTree extends JTree {
       }
     }
     for (int i = 0; i < toDelete.size(); i++) {
-      spectraTreeModel.removeNodeFromParent(toDelete.get(i));
+      spectraTreeModel.removeNodeFromParent((MutableTreeNode) toDelete.get(i));
     }
 
     if (source == null) {
@@ -181,16 +184,16 @@ public class JSVTree extends JTree {
 	public static JSVTreeNode createTree(ScriptInterface si,
 			JDXSource source, JSVPanel[] panels) {
 
-  	JSVTree tree = (JSVTree) si.getSpectraTree();
+  	AwtTree tree = (AwtTree) si.getSpectraTree();
 		JSVTreeNode rootNode = tree.getRootNode();
 		DefaultTreeModel spectraTreeModel = tree.getDefaultModel();
     JmolList<JSVPanelNode> panelNodes = si.getPanelNodes();
 
     String fileName = JSVFileManager.getName(source.getFilePath());
     JSVPanelNode panelNode = new JSVPanelNode(null, fileName, source, null);
-    JSVTreeNode fileNode = new JSVTreeNode(fileName, panelNode);
+    JSVTreeNode fileNode = new AwtTreeNode(fileName, panelNode);
     panelNode.setTreeNode(fileNode);
-		spectraTreeModel.insertNodeInto(fileNode, rootNode, rootNode
+		spectraTreeModel.insertNodeInto((MutableTreeNode) fileNode, (MutableTreeNode) rootNode, rootNode
         .getChildCount());
 		tree.scrollPathToVisible(new TreePath(fileNode.getPath()));
 
@@ -200,10 +203,10 @@ public class JSVTree extends JTree {
       JSVPanel jsvp = panels[i];
       String id = fileCount + "." + (i + 1);
       panelNode = si.getNewPanelNode(id, fileName, source, jsvp);
-      JSVTreeNode treeNode = new JSVTreeNode(panelNode.toString(), panelNode);
+      JSVTreeNode treeNode = new AwtTreeNode(panelNode.toString(), panelNode);
       panelNode.setTreeNode(treeNode);
 			panelNodes.addLast(panelNode);
-      spectraTreeModel.insertNodeInto(treeNode, fileNode, fileNode
+      spectraTreeModel.insertNodeInto((MutableTreeNode) treeNode, (MutableTreeNode) fileNode, fileNode
           .getChildCount());
       tree.scrollPathToVisible(new TreePath(treeNode.getPath()));
     }
@@ -376,7 +379,7 @@ public class JSVTree extends JTree {
     	jsvp.setTitle(name);
     }
     si.setPropertiesFromPreferences(jsvp, true);
-    createTree(si, source, new JSVPanel[] { jsvp }).panelNode.isView = true;
+    createTree(si, source, new JSVPanel[] { jsvp }).getPanelNode().isView = true;
     JSVPanelNode node = JSVPanelNode.findNode(si.getSelectedPanel(), si.getPanelNodes());
     node.setFrameTitle(name);
     node.isView = true;

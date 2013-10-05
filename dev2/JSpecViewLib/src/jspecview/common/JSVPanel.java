@@ -8,12 +8,15 @@ import jspecview.api.ScriptInterface;
 import jspecview.common.Annotation.AType;
 import jspecview.util.JSVColor;
 
-public interface JSVPanel extends JSVContainer {
+public interface JSVPanel extends JSVViewPanel {
+
+	public void repaint();
 
 	public void doRepaint();
   
-  JSVColor getColor(ScriptToken st);
+	JSVColor getColor1(int argb);
   JSVColor getColor4(int r, int g, int b, int a);
+
   void getFocusNow(boolean asThread);
   String getInput(String message, String title, String sval);
   GraphSet getNewGraphSet();
@@ -22,11 +25,6 @@ public interface JSVPanel extends JSVContainer {
 
   boolean hasFocus();
 
-  JSVColor getPlotColor(int i);
-	void setColor(ScriptToken st, JSVColor color);
-  void setColorOrFont(ColorParameters ds, ScriptToken st);
-  void setPlotColors(JSVColor[] plotColors);
-  
   void setToolTipText(String s);
   void setupPlatform();
 	void showHeader(Object jsvApplet);
@@ -46,20 +44,24 @@ public interface JSVPanel extends JSVContainer {
 	
 	void draw2DImage(Object og, Object image2D, int destX, int destY, int destWidth, int destHeight, int srcX0, int srcY0, int srcX1, int srcY1);
 
-	public Annotation getColoredAnnotation(JDXSpectrum spectrum, double x,
+	Annotation getColoredAnnotation(JDXSpectrum spectrum, double x,
 			double y, String text, JSVColor bLACK, boolean isPixels, boolean is2d,
 			int offsetX, int offsetY);
 
-	public Annotation getNextAnnotation(JDXSpectrum spectrum, JmolList<String> args, Annotation lastAnnotation);
+	Annotation getNextAnnotation(JDXSpectrum spectrum, JmolList<String> args, Annotation lastAnnotation);
 
-	public Object newImage(int width, int height, int[] buffer);
+	Annotation newAnnotation(double x, double y,
+			JDXSpectrum spec, String text, JSVColor color, boolean isPixels, boolean is2D,
+			int offsetX, int offsetY);
+
+	Object newImage(int width, int height, int[] buffer);
 
 	void drawLine(Object g, int x0, int y0, int x1, int y1);
 
 	void drawRect(Object g, int xPixel, int yPixel,
 			int xPixels, int yPixels);
 
-	public void fillRect(Object og, int x, int y, int width, int height);
+	void fillRect(Object og, int x, int y, int width, int height);
 
 	void drawString(Object g, String s, int x, int y);
 
@@ -67,18 +69,23 @@ public interface JSVPanel extends JSVContainer {
 
 	int getFontHeight(Object g);
 
-	public int getStringWidth(Object g, String s);
+	int getStringWidth(Object g, String s);
 
-	public void fillPolygon(Object g, int[] ayPoints, int[] axPoints, int nPoints);
+	void fillPolygon(Object g, int[] ayPoints, int[] axPoints, int nPoints);
 
-	public void drawPolygon(Object g, int[] ayPoints, int[] axPoints, int nPoints);
+	void drawPolygon(Object g, int[] ayPoints, int[] axPoints, int nPoints);
 
-	public void fillOval(Object g, int x, int y, int width, int height);
+	void fillOval(Object g, int x, int y, int width, int height);
 
-	public void drawOval(Object g, int x, int y, int width, int height);
+	void drawOval(Object g, int x, int y, int width, int height);
 
-	public void rotatePlot(Object g, int angle, int x, int y);
+	void rotatePlot(Object g, int angle, int x, int y);
 
-	public int getFontFaceID(String name);
+	int getFontFaceID(String name);
+
+	public int geOptionFromDialog(Object frame, String[] items,
+			String dialogName, String labelName);
+
+	public Object[][] getOverlayLegendData();
 
 }

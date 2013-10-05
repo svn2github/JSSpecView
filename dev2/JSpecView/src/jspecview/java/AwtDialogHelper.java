@@ -1,11 +1,14 @@
 package jspecview.java;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.Image;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.RenderedImage;
 import java.io.ByteArrayOutputStream;
@@ -20,6 +23,7 @@ import javax.swing.JButton;
 //import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -29,17 +33,16 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 
 import org.jmol.io.Base64;
 
 import jspecview.api.ScriptInterface;
 import jspecview.common.JSVPanel;
-import jspecview.common.PanelData;
+import jspecview.common.PrintLayout;
 import jspecview.common.Annotation.AType;
-import jspecview.java.AwtExportDialog.ExportType;
-import jspecview.util.JSVFileManager;
+import jspecview.export.Exporter;
+import jspecview.export.Exporter.ExportType;
 
 /**
  * just a class I made to separate the construction of the AnnotationDialogs
@@ -48,7 +51,7 @@ import jspecview.util.JSVFileManager;
  * @author Bob Hanson hansonr@stolaf.edu
  * 
  */
-public class DialogHelper {
+public class AwtDialogHelper {
 
 	private String thisKey;
 	private ActionListener eventListener;
@@ -59,12 +62,12 @@ public class DialogHelper {
 	private int iRow;
 	private ScriptInterface si;
 
-	public DialogHelper(ScriptInterface si) {
+	public AwtDialogHelper(ScriptInterface si) {
 		this.si = si;
 	}
 
 	
-	public DialogHelper(String thisKey, Map<String, Object> options,
+	public AwtDialogHelper(String thisKey, Map<String, Object> options,
 			JPanel leftPanel, ActionListener eventListener) {
 		this.thisKey = thisKey;
 		this.options = options;
@@ -72,10 +75,15 @@ public class DialogHelper {
 		this.eventListener = eventListener;
 	}
 
-	protected void addButton(JButton selectAllButton) {
-		leftPanel.add(selectAllButton, new GridBagConstraints(0, iRow++, 3, 1, 0.0,
+	protected JButton addButton(String text, ActionListener a) {
+		JButton	btn = new JButton();
+		btn.setPreferredSize(new Dimension(120, 25));
+		btn.setText(text);
+		btn.addActionListener(a);
+		leftPanel.add(btn, new GridBagConstraints(0, iRow++, 3, 1, 0.0,
 				0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, buttonInsets,
 				0, 0));
+		return btn;
 	}
 //
 //	protected JCheckBox addCheckBoxOption(String name, String label,
@@ -140,7 +148,7 @@ public class DialogHelper {
 	protected synchronized JTable getDataTable(AwtAnnotationDialog ad, 
 			String[][] data, String[] columnNames, int[] columnWidths, int height) {
 		
-		LegendTableModel tableModel = new LegendTableModel(columnNames, data);
+		AwtDialogTableModel tableModel = new AwtDialogTableModel(columnNames, data, true);
 		JTable table = new JTable(tableModel);
 
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -188,46 +196,6 @@ public class DialogHelper {
           return this;
       }
   }
-	/**
-	 * The Table Model for Legend
-	 */
-	class LegendTableModel extends AbstractTableModel {
-		/**
-     * 
-     */
-		private static final long serialVersionUID = 1L;
-		String[] columnNames;
-		Object[][] data;
-
-		public LegendTableModel(String[] columnNames, String[][] data) {
-			this.columnNames = columnNames;
-			this.data = data;
-		}
-
-		public int getColumnCount() {
-			return columnNames.length;
-		}
-
-		public int getRowCount() {
-			return data.length;
-		}
-
-		@Override
-		public String getColumnName(int col) {
-			return columnNames[col];
-		}
-
-		public Object getValueAt(int row, int col) {
-			return " " + data[row][col] + " ";
-		}
-		
-    @Override
-    public Class<?> getColumnClass(int c) {
-        return getValueAt(0, c).getClass();
-    }
-
-	}
-
 	private PrintLayout lastPrintLayout;
 	private JFileChooser fc;
 	public String dirLastOpened;
@@ -235,10 +203,11 @@ public class DialogHelper {
 	public boolean useDirLastExported;
 	public String dirLastExported;
 
-	private void saveImage(JSVPanel jsvp, ExportType itype) {
+	private void saveImage(ExportType itype) {
+  	JSVPanel jsvp = si.getSelectedPanel();
 		setFileChooser(itype);
-		String name = getSuggestedFileName(itype);
-		File file = getFile(name, (Component) jsvp, true);
+		String name = Exporter.getSuggestedFileName(si, itype);
+		File file = getFile(name, jsvp, true);
 		if (file == null)
 			return;
     Image image = ((Component) jsvp).createImage(jsvp.getWidth(), jsvp.getHeight());
@@ -250,7 +219,7 @@ public class DialogHelper {
 		}
 	}
 
-	public String print(Frame frame, String pdfFileName) {
+	public String print(ScriptInterface si, Frame frame, String pdfFileName) {
 		if (!si.isSigned())
 			return "Error: Applet must be signed for the PRINT command.";
 		boolean isJob = (pdfFileName == null || pdfFileName.length() == 0);
@@ -259,7 +228,7 @@ public class DialogHelper {
 		if (jsvp == null)
 			return null;
     jsvp.getPanelData().closeAllDialogsExcept(AType.NONE);
-		PrintLayout pl = new AwtPrintLayoutDialog(frame, lastPrintLayout, isJob).getPrintLayout();
+		PrintLayout pl = new AwtDialogPrint(frame, lastPrintLayout, isJob).getPrintLayout();
 		if (pl == null)
 			return null;
 		lastPrintLayout = pl;
@@ -270,8 +239,8 @@ public class DialogHelper {
 		if (!isBase64 && !isJob) {
 			setFileChooser(ExportType.PDF);
 			if (pdfFileName.equals("?") || pdfFileName.equalsIgnoreCase("PDF"))
-  			pdfFileName = getSuggestedFileName(ExportType.PDF);
-			File file = getFile(pdfFileName, (Component) jsvp, true);
+  			pdfFileName = Exporter.getSuggestedFileName(si, ExportType.PDF);
+			File file = getFile(pdfFileName, jsvp, true);
 			if (file == null)
 				return null;
 			si.setProperty("directoryLastExporteFile", dirLastExported = file.getParent());
@@ -296,21 +265,20 @@ public class DialogHelper {
 		return s;
 	}
 
-
 	public void setFileChooser(ExportType imode) {
 		if (fc == null)
 		  fc = new JFileChooser();
-    JSVFileFilter filter = new JSVFileFilter();
+    AwtDialogFileFilter filter = new AwtDialogFileFilter();
     fc.resetChoosableFileFilters();
     switch (imode) {
     case UNK:
-  		filter = new JSVFileFilter();
+  		filter = new AwtDialogFileFilter();
   		filter.addExtension("xml");
   		filter.addExtension("aml");
   		filter.addExtension("cml");
   		filter.setDescription("CML/XML Files");
   		fc.setFileFilter(filter);
-  		filter = new JSVFileFilter();
+  		filter = new AwtDialogFileFilter();
   		filter.addExtension("jdx");
   		filter.addExtension("dx");
   		filter.setDescription("JCAMP-DX Files");
@@ -344,23 +312,41 @@ public class DialogHelper {
 		JSVPanel jsvp = si.getSelectedPanel();
 		if (jsvp == null)
 			return;
-		ExportType itype = ExportType.getType(type);
-		switch (itype) {
+		ExportType eType = ExportType.getType(type);
+		switch (eType) {
 		case PDF:
-			print(frame, "PDF");
+			print(si, frame, "PDF");
 			break;
 		case PNG:
 		case JPG:
-			saveImage(jsvp, itype);
+			saveImage(eType);
 			break;
 		default:
-			setFileChooser(itype);
-			AwtExportDialog.exportSpectrum(si, frame, this, type);
+			exportSpectrumAsk(si, frame, eType);
 			jsvp.getFocusNow(true);
 		}
 	}
 
-	public File getFile(String name, Component c, boolean isSave) {
+	/**
+	 * 
+	 * @param si
+	 * @param frame
+	 * @param eType
+	 * @return directory saved to or a message starting with "Error:"
+	 */
+	private String exportSpectrumAsk(ScriptInterface si, Object frame, ExportType eType) {
+		setFileChooser(eType);
+		String[] items = Exporter.getExportableItems(si, eType.equals(ExportType.SOURCE));
+		JSVPanel jsvp = si.getSelectedPanel();
+		int index = (items == null ? -1 : jsvp.geOptionFromDialog(frame, items, "Export", "Choose a spectrum to export"));
+		if (index == Integer.MIN_VALUE)
+			return null;
+		File file = getFile(Exporter.getSuggestedFileName(si, eType), jsvp, true);
+		return Exporter.exportSpectrum(si, eType, index, file);
+	}
+
+	public File getFile(String name, Object panelOrFrame, boolean isSave) {
+		Component c = (Component) panelOrFrame;
 		fc.setSelectedFile(new File(name));
 		if (isSave) {
 			if (useDirLastExported)
@@ -388,40 +374,39 @@ public class DialogHelper {
 		return file;
 	}
 
-	public String getSuggestedFileName(ExportType imode) {
-		PanelData pd = si.getSelectedPanel().getPanelData();
-    String sourcePath = pd.getSpectrum().getFilePath();
-    String newName = JSVFileManager.getName(sourcePath);
-    int pt = newName.lastIndexOf(".");
-    String name = (pt < 0 ? newName : newName.substring(0, pt));
-    String ext = ".jdx";
-    boolean isPrint = false;
-    switch (imode) {
-    case XY:
-    case FIX:
-    case PAC:
-    case SQZ:
-    case DIF:
-    case DIFDUP:
-    case SOURCE:
-    	if (!(name.endsWith("_" + imode)))
-    		name += "_" + imode;    		
-      ext = ".jdx";
-      break;
-    case AML:
-    	ext = ".xml";
-    	break;
-    case JPG:
-    case PNG:
-    case PDF:
-    	isPrint = true;
-			//$FALL-THROUGH$
-		default:
-      ext = "." + imode.toString().toLowerCase();
-    }
-    if (si.getCurrentSource().isView)
-    	name = pd.getPrintJobTitle(isPrint);
-    name += ext;
-    return name;
+	public int geOptionFromDialog(Object frame, String[] items,
+			JSVPanel jsvp, String dialogName, String labelName) {
+		final JDialog dialog = new JDialog((JFrame) frame, dialogName, true);
+		dialog.setResizable(false);
+		dialog.setSize(200, 100);
+		Component panel = (Component) jsvp;
+		dialog.setLocation((panel.getLocation().x + panel.getSize().width) / 2,
+				(panel.getLocation().y + panel.getSize().height) / 2);
+		final JComboBox<Object> cb = new JComboBox<Object>(items);
+		Dimension d = new Dimension(120, 25);
+		cb.setPreferredSize(d);
+		cb.setMaximumSize(d);
+		cb.setMinimumSize(d);
+		JPanel p = new JPanel(new FlowLayout());
+		JButton button = new JButton("OK");
+		p.add(cb);
+		p.add(button);
+		dialog.getContentPane().setLayout(new BorderLayout());
+		dialog.getContentPane().add(
+				new JLabel(labelName, SwingConstants.CENTER),
+				BorderLayout.NORTH);
+		dialog.getContentPane().add(p);
+		final int ret[] = new int[] { Integer.MIN_VALUE };
+		button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				ret[0] = cb.getSelectedIndex();
+				dialog.dispose();
+			}
+		});
+		dialog.setVisible(true);
+		dialog.dispose();
+		return ret[0];
 	}
+
+
 }

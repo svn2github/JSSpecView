@@ -10,21 +10,22 @@ import javax.swing.JPanel;
 
 import org.jmol.util.JmolList;
 
-import jspecview.common.JSVContainer;
+import jspecview.common.JSVMainPanel;
+import jspecview.common.JSVViewPanel;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelNode;
 import jspecview.common.Annotation.AType;
 
-public class ViewPanel extends JPanel implements JSVContainer {
+public class AwtViewPanel extends JPanel implements JSVViewPanel, JSVMainPanel {
 
 	private static final long serialVersionUID = 1L;
 	private JSVPanel selectedPanel;
 	private int currentPanelIndex;
-	public int getCurrentSpectrumIndex() {
+	public int getCurrentPanelIndex() {
 		return currentPanelIndex;
 	}
 
-	public ViewPanel(BorderLayout borderLayout) {
+	public AwtViewPanel(BorderLayout borderLayout) {
 		super(borderLayout);
 	}
 

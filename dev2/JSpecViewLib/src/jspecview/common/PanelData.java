@@ -45,6 +45,7 @@ import java.util.Map.Entry;
 import jspecview.common.Annotation.AType;
 import jspecview.util.JSVColor;
 import jspecview.util.JSVColorUtil;
+import jspecview.util.JSVFileManager;
 
 import org.jmol.api.ApiPlatform;
 import org.jmol.api.Event;
@@ -764,10 +765,9 @@ public class PanelData implements EventManager {
 		// repaint();
 	}
 
-	public void findX2(JDXSpectrum spec, double d, JDXSpectrum spec2, double d2) {
-		currentGraphSet.setXPointer(spec, d);
-		currentGraphSet.setXPointer2(spec2, d2);
-		// repaint();
+	public void setXPointers(JDXSpectrum spec, double x1, JDXSpectrum spec2, double x2) {
+		currentGraphSet.setXPointer(spec, x1);
+		currentGraphSet.setXPointer2(spec2, x2);
 	}
 
 	// called by GraphSet
@@ -784,12 +784,8 @@ public class PanelData implements EventManager {
 		jsvp.setToolTipText(s);
 	}
 
-	public JSVColor getHighlightColor() {
-		return jsvp.getColor(ScriptToken.HIGHLIGHTCOLOR);
-	}
-
 	public void setHighlightColor(JSVColor color) {
-		jsvp.setColor(ScriptToken.HIGHLIGHTCOLOR, color);
+		jsvp.getPanelData().setColor(ScriptToken.HIGHLIGHTCOLOR, color);
 	}
 
 	String getInput(String message, String title, String sval) {
@@ -1364,6 +1360,54 @@ public class PanelData implements EventManager {
     case UNITSCOLOR:
       return unitsColor;
     }
+	}
+
+	public Object[][] getOverlayLegendData() {
+		int numSpectra = jsvp.getPanelData().getNumberOfSpectraInCurrentSet();
+		Object[][] data = new Object[numSpectra][];
+		PanelData pd = jsvp.getPanelData();
+		String f1 = pd.getSpectrumAt(0).getFilePath();
+		String f2 = pd.getSpectrumAt(numSpectra - 1).getFilePath();
+		boolean useFileName = !f1.equals(f2);
+
+		for (int index = 0; index < numSpectra; index++) {
+			Object[] cols = new Object[3];
+			JDXSpectrum spectrum = pd.getSpectrumAt(index);
+			title = spectrum.getTitle();
+			if (useFileName)
+				title = JSVFileManager.getName(spectrum.getFilePath()) + " - " + title;
+			JSVColor plotColor = getCurrentPlotColor(index);
+			cols[0] = new Integer(index + 1);
+			cols[1] = plotColor;
+			cols[2] = " " + title;
+			data[index] = cols;
+		}
+		return data;
+	}
+
+	@SuppressWarnings("incomplete-switch")
+	public void setColorOrFont(ColorParameters ds, ScriptToken st) {
+    if (st == null) {
+      Map<ScriptToken, JSVColor> colors = ds.elementColors;
+      for (Map.Entry<ScriptToken, JSVColor> entry : colors.entrySet())
+        setColorOrFont(ds, entry.getKey());
+      setColorOrFont(ds, ScriptToken.DISPLAYFONTNAME);
+      setColorOrFont(ds, ScriptToken.TITLEFONTNAME);
+      return;
+    }
+    switch (st) {
+    case DISPLAYFONTNAME:
+      setFontName(st, ds.displayFontName);
+      return;
+    case TITLEFONTNAME:
+      setFontName(st, ds.titleFontName);
+      return;
+    }
+    setColor(st, ds.getElementColor(st));
+	}
+
+	public JSVColor getCurrentPlotColor(int i) {
+		return currentGraphSet.getPlotColor(i);
 	}
 
 }

@@ -27,18 +27,18 @@ import javax.swing.filechooser.FileFilter;
 /**
  * A implementation of the <code>FileFilter</code> that filters out all files
  * except those with extensions that are added.
- * @see jspecview.java.JSVFileFilter#addExtension(java.lang.String)
+ * @see jspecview.java.AwtDialogFileFilter#addExtension(java.lang.String)
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
  */
-public class JSVFileFilter extends FileFilter
+public class AwtDialogFileFilter extends FileFilter
 {
 
   /**
    * A list of file extensions
    */
-  private Hashtable<String, JSVFileFilter> filters = null;
+  private Hashtable<String, AwtDialogFileFilter> filters = null;
 
   /**
    * Description of the filter
@@ -48,8 +48,8 @@ public class JSVFileFilter extends FileFilter
   /**
    * Intialises a <code>JSpecViewFileFilter</code>
    */
-  public JSVFileFilter() {
-    filters = new Hashtable<String, JSVFileFilter>();
+  public AwtDialogFileFilter() {
+    filters = new Hashtable<String, AwtDialogFileFilter>();
   }
 
   /**
@@ -57,7 +57,7 @@ public class JSVFileFilter extends FileFilter
    * to filter
    * @param filters a <code>String</code> of filters
    */
-  public JSVFileFilter(String[] filters) {
+  public AwtDialogFileFilter(String[] filters) {
     this(filters, null);
   }
 
@@ -67,7 +67,7 @@ public class JSVFileFilter extends FileFilter
    * @param filters the array of file extensions
    * @param description the description
    */
-  public JSVFileFilter(String[] filters, String description) {
+  public AwtDialogFileFilter(String[] filters, String description) {
     this();
     for (int i = 0; i < filters.length; i++) {
 	    addExtension(filters[i]);
@@ -112,7 +112,7 @@ public class JSVFileFilter extends FileFilter
    */
   public void addExtension(String extension) {
 	if(filters == null) {
-	    filters = new Hashtable<String, JSVFileFilter>(5);
+	    filters = new Hashtable<String, AwtDialogFileFilter>(5);
 	}
 	filters.put(extension.toLowerCase(), this);
   }

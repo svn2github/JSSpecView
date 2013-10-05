@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2008 The University of the West Indies
+/* Copyright (c) 2002-2012 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -19,37 +19,36 @@
 
 package jspecview.java;
 
-import jspecview.util.JSVColor;
-
-import jspecview.common.Annotation;
-import jspecview.common.ColoredAnnotation;
+import jspecview.api.ScriptInterface;
 import jspecview.common.JDXSpectrum;
-
+import jspecview.common.Annotation.AType;
 
 /**
- * ColoredAnnotation is a label on the spectrum; not an integralRegion
- * 
+ * Dialog for managing the measurement list
+ * for a Spectrum within a GraphSet
+
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-public class AwtColoredAnnotation extends Annotation implements ColoredAnnotation {
+public class AwtDialogMeasurements extends AwtAnnotationDialog {
 
-  private JSVColor color;
+	private static final long serialVersionUID = 1L;
+	private static int[] posXY = new int[] {Integer.MIN_VALUE, 0};
 
-  public JSVColor getColor() {
-    return color;
-  }
+	protected AwtDialogMeasurements(String title, ScriptInterface si, 
+			JDXSpectrum spec) {
+		super(title, si, spec, AType.Measurements);
+	}
 
-  public AwtColoredAnnotation(double x, double y) {
-  	super(x, y);
-  }
-  
-  public AwtColoredAnnotation set(
-	JDXSpectrum spec, String text, JSVColor color,
-      boolean isPixels, boolean is2D, int offsetX, int offsetY) {
-    setAll(spec, text, isPixels, is2D, offsetX, offsetY);
-    this.color = color;
-    return this;
-  }
+	public int[] getPosXY() {
+		return posXY;
+	}
+	
+	// from DialogParams:
+
+	@Override
+	public void loadDataFromFields() {
+		params.loadData(combo1.getSelectedItem());
+	}
 
 }

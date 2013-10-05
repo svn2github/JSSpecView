@@ -25,6 +25,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import org.jmol.util.JmolList;
@@ -39,6 +40,7 @@ import javax.swing.JSplitPane;
 
 import jspecview.api.ScriptInterface;
 import jspecview.common.JSVPanelNode;
+import jspecview.common.JSVTreeNode;
 import jspecview.common.JSViewer;
 
 import org.jmol.util.SB;
@@ -49,11 +51,13 @@ import org.jmol.util.SB;
  * 
  * @author Bob Hanson hansonr@stolaf.edu
  */
-public class ViewDialog extends AwtDialog implements WindowListener {
+public class AwtDialogView extends AwtDialog implements WindowListener {
 
 	private static final long serialVersionUID = 1L;
 	private ScriptInterface si;
 	private JmolList<JSVTreeNode> treeNodes;
+	
+	
 	private JmolList<JCheckBox> checkBoxes;
 	private JPanel spectrumPanel;
 	private Insets cbInsets1;
@@ -74,18 +78,17 @@ public class ViewDialog extends AwtDialog implements WindowListener {
 	 * @param modal
 	 *          the modality
 	 */
-	public ViewDialog(ScriptInterface si, Component panel, boolean modal) {
+	public AwtDialogView(ScriptInterface si, Component panel, boolean modal) {
+		super(null, "View/Combine/Close Spectra", modal);
 		this.si = si;
-		setTitle("View/Combine/Close Spectra");
-		setModal(modal);
-		setPosition(panel, getPosXY());
+		params.disposeOnDone = true;
+		restoreDialogPosition(panel, getPosXY());
 		setResizable(true);
 		addWindowListener(this);
 		setup();
 	}
 
-	@Override
-	protected int[] getPosXY() {
+	public int[] getPosXY() {
 		return posXY;
 	}
 
@@ -112,42 +115,42 @@ public class ViewDialog extends AwtDialog implements WindowListener {
     JButton doneButton = newJButton();
 
     selectAllButton.setText("Select All");
-    selectAllButton.addActionListener(new java.awt.event.ActionListener() {
+    selectAllButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         select(true);
       }
     });
     
     selectNoneButton.setText("Select None");
-    selectNoneButton.addActionListener(new java.awt.event.ActionListener() {
+    selectNoneButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         select(false);
       }
     });
     
     viewSelectedButton.setText("View Selected");
-    viewSelectedButton.addActionListener(new java.awt.event.ActionListener() {
+    viewSelectedButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         viewSelected();
       }
     });
     
     combineSelectedButton.setText("Combine Selected");
-    combineSelectedButton.addActionListener(new java.awt.event.ActionListener() {
+    combineSelectedButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         combineSelected();
       }
     });
     
     closeSelectedButton.setText("Close Selected");
-    closeSelectedButton.addActionListener(new java.awt.event.ActionListener() {
+    closeSelectedButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         closeSelected();
       }
     });
     
     doneButton.setText("Done");
-    doneButton.addActionListener(new java.awt.event.ActionListener() {
+    doneButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         done();
       }
@@ -199,16 +202,15 @@ public class ViewDialog extends AwtDialog implements WindowListener {
     cbInsets1 = new Insets(0, 0, 2, 2);
     cbInsets2 = new Insets(0, 20, 2, 2);
 		spectrumPanel = new JPanel(new GridBagLayout());
-    addCheckBoxes(((JSVTree) si.getSpectraTree()).getRootNode(), 0, true);
-    addCheckBoxes(((JSVTree) si.getSpectraTree()).getRootNode(), 0, false);
+    addCheckBoxes(((AwtTree) si.getSpectraTree()).getRootNode(), 0, true);
+    addCheckBoxes(((AwtTree) si.getSpectraTree()).getRootNode(), 0, false);
 	}
 
-	@SuppressWarnings("unchecked")
 	private void addCheckBoxes(JSVTreeNode rootNode, int level, boolean addViews) {
 		Enumeration<JSVTreeNode> enume = rootNode.children();
     while (enume.hasMoreElements()) {
       JSVTreeNode treeNode = enume.nextElement();
-    	JSVPanelNode node = treeNode.panelNode;
+    	JSVPanelNode node = treeNode.getPanelNode();
     	if (node.isView != addViews)
     		continue;
     	JCheckBox cb = new JCheckBox();
@@ -218,7 +220,7 @@ public class ViewDialog extends AwtDialog implements WindowListener {
     		title = title.substring(0, title.indexOf('\n'));
     	cb.setText(title);
     	cb.setActionCommand("" + (treeNodes.size()));
-      cb.addActionListener(new java.awt.event.ActionListener() {
+      cb.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           check(e);
         }
@@ -226,7 +228,7 @@ public class ViewDialog extends AwtDialog implements WindowListener {
       Insets insets = (level < 1 ? cbInsets1 : cbInsets2);
       spectrumPanel.add(cb, new GridBagConstraints(0, checkBoxes.size(), 1, 1, 0.0, 0.0,
       		GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));
-      treeNode.index = treeNodes.size();
+      treeNode.setIndex(treeNodes.size());
     	treeNodes.addLast(treeNode);
     	checkBoxes.addLast(cb);
     	addCheckBoxes(treeNode, level + 1, addViews);
@@ -236,7 +238,7 @@ public class ViewDialog extends AwtDialog implements WindowListener {
 	private void checkEnables() {		
 		closeSelectedButton.setEnabled(false);
 		for (int i = 0; i < checkBoxes.size(); i++) {
-			if (checkBoxes.get(i).isSelected() && treeNodes.get(i).panelNode.jsvp == null) {
+			if (checkBoxes.get(i).isSelected() && treeNodes.get(i).getPanelNode().jsvp == null) {
 				closeSelectedButton.setEnabled(true);
 				break;
 			}
@@ -244,7 +246,7 @@ public class ViewDialog extends AwtDialog implements WindowListener {
 		
 		int n = 0;
 		for (int i = 0; i < checkBoxes.size(); i++) {
-			if (checkBoxes.get(i).isSelected() && treeNodes.get(i).panelNode.jsvp != null) {
+			if (checkBoxes.get(i).isSelected() && treeNodes.get(i).getPanelNode().jsvp != null) {
 				n++;
 			}
 		}
@@ -254,36 +256,35 @@ public class ViewDialog extends AwtDialog implements WindowListener {
 	
 	private boolean checking = false; 
 	
-	@SuppressWarnings("unchecked")
 	protected void check(ActionEvent e) {
 		int i = Integer.parseInt(e.getActionCommand());
 		JSVTreeNode node = treeNodes.get(i);
 		JCheckBox cb = (JCheckBox) e.getSource();
 		boolean isSelected = cb.isSelected();
-		if (node.panelNode.jsvp == null) {
+		if (node.getPanelNode().jsvp == null) {
 			if (!checking && isSelected && cb.getText().startsWith("Overlay")) {
 				checking = true;
 				select(false);
 				cb.setSelected(true);
-				node.panelNode.isSelected = true;
+				node.getPanelNode().isSelected = true;
 				checking = false;
 			}
 			Enumeration<JSVTreeNode> enume = node.children();
 			while (enume.hasMoreElements()) {
 				JSVTreeNode treeNode = enume.nextElement();
-				checkBoxes.get(treeNode.index).setSelected(isSelected);
-				treeNode.panelNode.isSelected = isSelected;
-				node.panelNode.isSelected = isSelected;
+				checkBoxes.get(treeNode.getIndex()).setSelected(isSelected);
+				treeNode.getPanelNode().isSelected = isSelected;
+				node.getPanelNode().isSelected = isSelected;
 			}
 		} else {
 			// uncheck all Overlays
-			node.panelNode.isSelected = isSelected;
+			node.getPanelNode().isSelected = isSelected;
 		}
 		if (isSelected)
 			for (i = treeNodes.size(); --i >= 0;)
-				if (treeNodes.get(i).panelNode.isView != node.panelNode.isView) {
-					checkBoxes.get(treeNodes.get(i).index).setSelected(false);
-					treeNodes.get(i).panelNode.isSelected = false;
+				if (treeNodes.get(i).getPanelNode().isView != node.getPanelNode().isView) {
+					checkBoxes.get(treeNodes.get(i).getIndex()).setSelected(false);
+					treeNodes.get(i).getPanelNode().isSelected = false;
 				}
 		checkEnables();
 	}
@@ -291,7 +292,7 @@ public class ViewDialog extends AwtDialog implements WindowListener {
 	protected void select(boolean mode) {
 		for (int i = checkBoxes.size(); --i >= 0;) {
 			checkBoxes.get(i).setSelected(mode);
-			treeNodes.get(i).panelNode.isSelected = mode;
+			treeNodes.get(i).getPanelNode().isSelected = mode;
 		}
 		checkEnables();
 	}
@@ -300,7 +301,7 @@ public class ViewDialog extends AwtDialog implements WindowListener {
 		SB sb = new SB();
 		for (int i = 0; i < checkBoxes.size(); i++) {
 			JCheckBox cb = checkBoxes.get(i);
-			JSVPanelNode node = treeNodes.get(i).panelNode;
+			JSVPanelNode node = treeNodes.get(i).getPanelNode();
 			if (cb.isSelected() && node.jsvp != null) {
 				if (node.isView) {
 					si.setNode(node, true);
@@ -318,7 +319,7 @@ public class ViewDialog extends AwtDialog implements WindowListener {
 		SB sb = new SB();
 		for (int i = 0; i < checkBoxes.size(); i++) {
 			JCheckBox cb = checkBoxes.get(i);
-			JSVPanelNode node = treeNodes.get(i).panelNode;
+			JSVPanelNode node = treeNodes.get(i).getPanelNode();
 			if (cb.isSelected() && node.jsvp != null) {
 				if (node.isView) {
 					si.setNode(node, true);

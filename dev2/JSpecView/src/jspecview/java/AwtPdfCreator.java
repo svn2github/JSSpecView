@@ -36,18 +36,21 @@ import java.awt.print.PageFormat;
 import java.awt.print.Paper;
 import java.io.OutputStream;
 
-import jspecview.api.PdfCreatorInterface;
+import javax.print.attribute.standard.MediaSizeName;
 
-public class PdfCreator implements PdfCreatorInterface {
+import jspecview.api.PdfCreatorInterface;
+import jspecview.common.PrintLayout;
+
+public class AwtPdfCreator implements PdfCreatorInterface {
   
-  public PdfCreator() {
+  public AwtPdfCreator() {
    // for Class.forName  
   }
 
 	public void createPdfDocument(AwtPanel awtPanel, PrintLayout pl, OutputStream os) {
   	boolean isLandscape = pl.layout.equals("landscape");
     Document document = new Document(isLandscape ? PageSize.LETTER.rotate() : PageSize.LETTER);
-    Dimension d = PrintLayout.getDimension(pl.paper);
+    Dimension d = getDimension(pl.paper);
     PageFormat pf = new PageFormat();
     Paper p = new Paper();      
     p.setImageableArea(0, 0, d.width, d.height);
@@ -72,6 +75,23 @@ public class PdfCreator implements PdfCreatorInterface {
       awtPanel.showMessage(e.getMessage(), "PDF Creation Error");
     }
     document.close();
+	}
+
+	private Dimension getDimension(Object opaper) {
+		MediaSizeName paper = (MediaSizeName) opaper;
+		// ftp://ftp.pwg.org/pub/pwg/media-sizes/pwg-media-size-03.pdf
+		// at 72 dpi we have...
+		if (paper == MediaSizeName.NA_LETTER) {
+			return new Dimension((int) (8.5 * 72), 11 * 72);
+		}
+		if (paper == MediaSizeName.NA_LEGAL) {
+			return new Dimension((int) (8.5 * 72), 14 * 72);
+		}
+		if (paper == MediaSizeName.ISO_A4) {
+			return new Dimension((int) (210 / 25.4 * 72), (int) (297 / 25.4 * 72));
+		}
+		// if (paper == MediaSizeName.ISO_B4) {
+		return new Dimension((int) (250 / 25.4 * 72), (int) (353 / 25.4 * 72));
 	}
   
 }

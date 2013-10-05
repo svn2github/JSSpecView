@@ -142,7 +142,7 @@ public class MeasurementData extends JmolList<Measurement> implements Annotation
     
   }
 
-  public void addSpecShift(double dx) {
+  public void setSpecShift(double dx) {
 		for (int i = size(); --i >= 0;) {
 			Measurement m = get(i);
 			double x = m.getXVal() + dx;

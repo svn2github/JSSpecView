@@ -28,7 +28,6 @@ import java.awt.Dimension;
 import java.awt.Frame;
 
 import javax.swing.BorderFactory;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -37,15 +36,9 @@ import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
 
-import jspecview.common.JDXSpectrum;
-import jspecview.common.JSVDialog;
 import jspecview.common.JSVPanel;
-import jspecview.common.PanelData;
-import jspecview.util.JSVFileManager;
 
 /**
  * Dialog for showing the legend or key for overlaid plots in a
@@ -55,13 +48,10 @@ import jspecview.util.JSVFileManager;
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
  */
-public class AwtOverlayLegendDialog extends JDialog implements JSVDialog {
+public class AwtDialogOverlayLegend extends AwtDialog {
 
-	/**
-   * 
-   */
 	private static final long serialVersionUID = 1L;
-	JSVPanel jsvp;
+	protected JSVPanel jsvp;
 
 	/**
 	 * Initialises a non-modal <code>OverlayLegendDialog</code> with a default
@@ -72,22 +62,18 @@ public class AwtOverlayLegendDialog extends JDialog implements JSVDialog {
 	 * @param jsvp
 	 *          the <code>JSVPanel</code>
 	 */
-	public AwtOverlayLegendDialog(Frame frame, JSVPanel jsvp) {
+	public AwtDialogOverlayLegend(Frame frame, JSVPanel jsvp) {
 		super(frame, jsvp.getPanelData().getViewTitle(), false);
 		this.jsvp = jsvp;
-		init();
-		this.pack();
+		initDialog();
+		pack();
 		setVisible(false);
 	}
 
-	/**
-	 * Initialises GUI Components
-	 */
-	private void init() {
-
-		LegendTableModel tableModel = new LegendTableModel();
+	private void initDialog() {
+		AwtDialogTableModel tableModel = new AwtDialogTableModel(new String[] {
+				"No.", "Plot Color", "Title" }, jsvp.getOverlayLegendData(), false);
 		JTable table = new JTable(tableModel);
-
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		ListSelectionModel specSelection = table.getSelectionModel();
 		specSelection.addListSelectionListener(new ListSelectionListener() {
@@ -101,83 +87,15 @@ public class AwtOverlayLegendDialog extends JDialog implements JSVDialog {
 		table.setDefaultRenderer(JSVColor.class, new ColorRenderer());
 		table.setDefaultRenderer(String.class, new TitleRenderer());
 		table.setPreferredScrollableViewportSize(new Dimension(350, 95));
-		TableColumn column = null;
-		column = table.getColumnModel().getColumn(0);
-		column.setPreferredWidth(30);
-		column = table.getColumnModel().getColumn(1);
-		column.setPreferredWidth(60);
-		column = table.getColumnModel().getColumn(2);
-		column.setPreferredWidth(250);
+		setColWidth(table, 0, 30);
+		setColWidth(table, 1, 60);
+		setColWidth(table, 2, 250);
 		JScrollPane scrollPane = new JScrollPane(table);
 		getContentPane().add(scrollPane, BorderLayout.CENTER);
 	}
 
-	/**
-	 * The Table Model for Legend
-	 */
-	class LegendTableModel extends AbstractTableModel {
-		/**
-     * 
-     */
-		private static final long serialVersionUID = 1L;
-		String[] columnNames = { "No.", "Plot Color", "Title" };
-		Object[][] data;
-
-		public LegendTableModel() {
-			init();
-		}
-
-		public int getColumnCount() {
-			return columnNames.length;
-		}
-
-		public int getRowCount() {
-			return data.length;
-		}
-
-		@Override
-		public String getColumnName(int col) {
-			return columnNames[col];
-		}
-
-		public Object getValueAt(int row, int col) {
-			return data[row][col];
-		}
-
-		@Override
-		public Class<?> getColumnClass(int c) {
-			return getValueAt(0, c).getClass();
-		}
-
-		private void init() {
-			JSVColor plotColor;
-			String title;
-			JDXSpectrum spectrum;
-			Object[] cols;
-
-			int numSpectra = jsvp.getPanelData().getNumberOfSpectraInCurrentSet();
-			data = new Object[numSpectra][];
-			PanelData pd = jsvp.getPanelData();
-			String f1 = pd.getSpectrumAt(0).getFilePath();
-			String f2 = pd.getSpectrumAt(numSpectra - 1).getFilePath();
-			boolean useFileName = !f1.equals(f2);
-
-			for (int index = 0; index < numSpectra; index++) {
-				cols = new Object[3];
-
-				spectrum = pd.getSpectrumAt(index);
-				title = spectrum.getTitle();
-				if (useFileName)
-					title = JSVFileManager.getName(spectrum.getFilePath()) + " - " + title;
-				plotColor = jsvp.getPlotColor(index);
-
-				cols[0] = new Integer(index + 1);
-				cols[1] = plotColor;
-				cols[2] = " " + title;
-
-				data[index] = cols;
-			}
-		}
+	private static void setColWidth(JTable table, int i, int width) {
+		table.getColumnModel().getColumn(i).setPreferredWidth(width);
 	}
 
 	/**
@@ -185,9 +103,6 @@ public class AwtOverlayLegendDialog extends JDialog implements JSVDialog {
 	 */
 	class ColorRenderer extends JLabel implements TableCellRenderer {
 
-		/**
-       * 
-       */
 		private static final long serialVersionUID = 1L;
 
 		public ColorRenderer() {
@@ -207,7 +122,6 @@ public class AwtOverlayLegendDialog extends JDialog implements JSVDialog {
 						.getBackground());
 				setBorder(border);
 			}
-
 			return this;
 		}
 	}
@@ -216,9 +130,7 @@ public class AwtOverlayLegendDialog extends JDialog implements JSVDialog {
 	 * TableCellRenderer that aligns text in the center of a JTable Cell
 	 */
 	class TitleRenderer extends JLabel implements TableCellRenderer {
-		/**
-       * 
-       */
+
 		private static final long serialVersionUID = 1L;
 
 		public TitleRenderer() {
@@ -229,14 +141,10 @@ public class AwtOverlayLegendDialog extends JDialog implements JSVDialog {
 				boolean isSelected, boolean hasFocus, int row, int column) {
 			setHorizontalAlignment(SwingConstants.LEFT);
 			setText(title.toString());
-			// setText("   " + title.toString());
-
-			if (isSelected)
-				setBackground(table.getSelectionBackground());
-			else
-				setBackground(table.getBackground());
-
+			setBackground(isSelected ? table.getSelectionBackground() : table
+					.getBackground());
 			return this;
 		}
 	}
+
 }

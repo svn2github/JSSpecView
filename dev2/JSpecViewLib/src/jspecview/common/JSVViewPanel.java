@@ -1,6 +1,6 @@
 package jspecview.common;
 
-public interface JSVContainer {
+public interface JSVViewPanel {
   void dispose();
   boolean isEnabled();
   int getWidth();

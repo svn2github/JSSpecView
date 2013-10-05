@@ -40,6 +40,7 @@
 package jspecview.applet;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.dnd.DropTarget;
@@ -60,14 +61,17 @@ import jspecview.api.ScriptInterface;
 import jspecview.application.TextDialog;
 import jspecview.common.JSVAppletInterface;
 import jspecview.common.JSVDialog;
+import jspecview.common.JSVMainPanel;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelNode;
+import jspecview.common.JSVTree;
 import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
 import jspecview.common.PanelListener;
 import jspecview.common.ColorParameters;
 import jspecview.common.Parameters;
 import jspecview.common.PeakPickEvent;
+import jspecview.common.RepaintManager;
 import jspecview.common.ScriptTokenizer;
 import jspecview.common.ScriptToken;
 import jspecview.common.Coordinate;
@@ -75,16 +79,15 @@ import jspecview.common.JDXSpectrum;
 import jspecview.common.SubSpecChangeEvent;
 import jspecview.common.ZoomEvent;
 import jspecview.common.JDXSpectrum.IRMode;
-import jspecview.java.AwtExportDialog;
-import jspecview.java.AwtOverlayLegendDialog;
+import jspecview.export.Exporter;
+import jspecview.java.AwtDialogOverlayLegend;
 import jspecview.java.AwtPanel;
 import jspecview.java.AwtParameters;
-import jspecview.java.DialogHelper;
-import jspecview.java.JSVDropTargetListener;
-import jspecview.java.JSVTree;
-import jspecview.java.RepaintManager;
-import jspecview.java.ViewDialog;
-import jspecview.java.ViewPanel;
+import jspecview.java.AwtDialogHelper;
+import jspecview.java.AwtDropTargetListener;
+import jspecview.java.AwtTree;
+import jspecview.java.AwtDialogView;
+import jspecview.java.AwtViewPanel;
 import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
 import jspecview.util.JSVEscape;
@@ -108,7 +111,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	JSVAppletPrivate(JSVApplet jsvApplet) {
 		this.jsvApplet = jsvApplet;
 		repaintManager = new RepaintManager(this);
-		dialogHelper = new DialogHelper(this);
+		dialogHelper = new AwtDialogHelper(this);
 		JSVFileManager.setDocumentBase(jsvApplet.getDocumentBase());
 		init();
 	}
@@ -116,17 +119,18 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	private JSVAppletPopupMenu     appletPopupMenu;
 	protected Thread               commandWatcherThread;
 	private JDXSource              currentSource;
-	private DialogHelper           dialogHelper;
+	private AwtDialogHelper           dialogHelper;
 	protected JSVApplet            jsvApplet;
 	private JFrame                 offWindowFrame;
-	private AwtOverlayLegendDialog overlayLegendDialog;
+	private Component              spectrumPanel;
   private JmolList<JSVPanelNode>     panelNodes = new JmolList<JSVPanelNode>();  
-	private AwtParameters          parameters = new AwtParameters("applet");
+	private ColorParameters        parameters = new AwtParameters("applet");
 	private RepaintManager         repaintManager;
 	private JSVPanel               selectedPanel;
   private JSVTree                spectraTree;
-	private ViewPanel              spectrumPanel;
-  private ViewDialog             viewDialog;
+	private JSVMainPanel           viewPanel;
+  private JSVDialog              viewDialog;
+	private JSVDialog              overlayLegendDialog;
 
 	private String appletID;
 	private String fullName;
@@ -443,7 +447,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	 */
 	private void init() {
 
-		spectraTree = new JSVTree(this);
+		spectraTree = new AwtTree(this);
 		scriptQueue = new JmolList<String>();
 		commandWatcherThread = new Thread(new CommandWatcher());
 		commandWatcherThread.setName("CommmandWatcherThread");
@@ -463,7 +467,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 
 	private DropTargetListener getDropListener() {
 		if (dtl == null)
-			dtl = new JSVDropTargetListener(this);
+			dtl = new AwtDropTargetListener(this);
 		return dtl;
 	}
 
@@ -493,7 +497,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	private void newAppletPanel() {
 		Logger.info("newAppletPanel");
 		jsvApplet.getContentPane().removeAll();
-		spectrumPanel = new ViewPanel(new BorderLayout());
+		spectrumPanel = (Component) (viewPanel = new AwtViewPanel(new BorderLayout()));
 		jsvApplet.getContentPane().add(spectrumPanel);
 	}
 
@@ -538,7 +542,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		// not sure what this is about. The applet prints fine
 		if (needWindow)
 			newWindow(true);
-		String s = dialogHelper.print(offWindowFrame, pdfFileName);
+		String s = dialogHelper.print(this, offWindowFrame, pdfFileName);
 		if (needWindow)
 			newWindow(false);
 		return s;
@@ -773,10 +777,10 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	 */
 	public void openDataOrFile(String data, String name,
 			JmolList<JDXSpectrum> specs, String url, int firstSpec, int lastSpec, boolean isAppend) {
-  	int status = JSVTree.openDataOrFile(this, data, name, specs, url, firstSpec, lastSpec, isAppend);
-  	if (status == JSVTree.FILE_OPEN_ALREADY)
+  	int status = AwtTree.openDataOrFile(this, data, name, specs, url, firstSpec, lastSpec, isAppend);
+  	if (status == AwtTree.FILE_OPEN_ALREADY)
   		return;
-    if (status != JSVTree.FILE_OPEN_OK) {
+    if (status != AwtTree.FILE_OPEN_OK) {
     	setSelectedPanel(null);
     	return;
     }
@@ -819,7 +823,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		if (!getSelectedPanel().getPanelData().getPickedCoordinates(coord,
 				actualCoord))
 			return;
-		int iSpec = spectrumPanel.getCurrentSpectrumIndex();
+		int iSpec = viewPanel.getCurrentPanelIndex();
 		if (actualCoord == null)
 			callToJavaScript(coordCallbackFunctionName, new Object[] {
 					Double.valueOf(coord.getXVal()), Double.valueOf(coord.getYVal()),
@@ -833,7 +837,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	public void setSelectedPanel(JSVPanel jsvp) {
-		spectrumPanel.setSelectedPanel(jsvp, panelNodes);
+		viewPanel.setSelectedPanel(jsvp, panelNodes);
   	selectedPanel = jsvp;
 		spectraTree.setSelectedPanel(this, jsvp);
     jsvApplet.validate();
@@ -880,7 +884,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 
 	public String execExport(JSVPanel jsvp, String value) {
 		if (jsvp != null && isPro())
-			writeStatus(AwtExportDialog.exportCmd(jsvp, ScriptToken.getTokens(value), false));
+			writeStatus(Exporter.exportCmd(jsvp, ScriptToken.getTokens(value), false));
 		return null;
 	}
 	
@@ -913,14 +917,14 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	public void execClose(String value, boolean fromScript) {
-		JSVTree.close(this, value);
+		AwtTree.close(this, value);
     if (!fromScript)
     	validateAndRepaint();
 	}
 
   public String execLoad(String value) {
   	//int nSpec = panelNodes.size();
-  	JSVTree.load(this, value);
+  	AwtTree.load(this, value);
     if (getSelectedPanel() == null)
       return null;
     // probably unnecessary:
@@ -945,7 +949,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	public JSVPanel setSpectrum(String value) {
-  	return JSVTree.setSpectrum(this, value);
+  	return AwtTree.setSpectrum(this, value);
 	}
 
 	public void execSetAutoIntegrate(boolean b) {
@@ -957,7 +961,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	public JSVDialog getOverlayLegend(JSVPanel jsvp) {
-		return overlayLegendDialog = new AwtOverlayLegendDialog(null, getSelectedPanel());
+		return overlayLegendDialog = new AwtDialogOverlayLegend(null, getSelectedPanel());
 	}
 
 	/**
@@ -1005,7 +1009,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 
 	public void closeSource(JDXSource source) {
 	   System.out.println("JSVAppletrivate closeSource " + source);
-  	JSVTree.closeSource(this, source);
+  	AwtTree.closeSource(this, source);
 	}
 
 	public void process(JmolList<JDXSpectrum> specs) {
@@ -1059,9 +1063,9 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	public void checkOverlay() {
-		if (spectrumPanel != null)
-      spectrumPanel.markSelectedPanels(panelNodes);
-		viewDialog = new ViewDialog(this, spectrumPanel, false);
+		if (viewPanel != null)
+      viewPanel.markSelectedPanels(panelNodes);
+		viewDialog = new AwtDialogView(this, spectrumPanel, false);
 	}
 
 	private String returnFromJmolModel;

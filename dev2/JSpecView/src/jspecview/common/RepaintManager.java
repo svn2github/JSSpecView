@@ -1,6 +1,4 @@
-package jspecview.java;
-
-import javax.swing.JPanel;
+package jspecview.common;
 
 import jspecview.api.ScriptInterface;
 
@@ -22,7 +20,7 @@ public class RepaintManager {
       return false;
     }
     repaintPending = true;
-    	((JPanel) si.getSelectedPanel()).repaint();
+    	si.getSelectedPanel().repaint();
     return true;
   }
 

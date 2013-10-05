@@ -24,6 +24,11 @@
 
 package jspecview.common;
 
+import jspecview.util.JSVColor;
+import jspecview.util.JSVColorUtil;
+
+import org.jmol.util.JmolList;
+
 /**
  * The <code>Annotation</code> class stores the spectral x and pixel y values of an
  * annotation text along with its text
@@ -86,6 +91,86 @@ public class Annotation extends Coordinate {
   public String toString() {
     return "[" + getXVal() + ", " + getYVal() + "," + text + "]";
   }
+
+
+	public static Annotation getColoredAnnotation(JSVPanel jsvp,
+			JDXSpectrum spec, JmolList<String> args, Annotation lastAnnotation) {
+		String arg;
+		int xPt = 0;
+		int yPt = 1;
+		int colorPt = 2;
+		int textPt = 3;
+		int nArgs = args.size();
+		try {
+			switch (nArgs) {
+			default:
+				return null;
+			case 1:
+				arg = args.get(0);
+				xPt = yPt = -1;
+				if (arg.charAt(0) == '\"') {
+					textPt = 0;
+					colorPt = -1;
+				} else {
+					colorPt = 0;
+					textPt = -1;
+				}
+				break;
+			case 2:
+				xPt = yPt = -1;
+				arg = args.get(0);
+				if (arg.charAt(0) == '\"') {
+					textPt = 0;
+					colorPt = 1;
+				} else {
+					colorPt = 0;
+					textPt = 1;
+				}
+				break;
+			case 3:
+			case 4:
+				// x y "text" or x y color
+				// x y color "text" or x y "text" color
+				arg = args.get(2);
+				if (arg.charAt(0) == '\"') {
+					textPt = 2;
+					colorPt = (nArgs == 4 ? 3 : -1);
+				} else {
+					colorPt = 2;
+					textPt = (nArgs == 4 ? 3 : -1);
+				}
+				arg = args.get(2);
+				if (arg.charAt(0) == '\"') {
+					textPt = 2;
+					colorPt = -1;
+				} else {
+					colorPt = 2;
+					textPt = -1;
+				}
+			}
+			if (lastAnnotation == null
+					&& (xPt < 0 || yPt < 0 || textPt < 0 || colorPt < 0))
+				return null;
+			double x = (xPt < 0 ? lastAnnotation.getXVal() : Double.valueOf(
+					args.get(xPt)).doubleValue());
+			double y = (yPt < 0 ? lastAnnotation.getYVal() : Double.valueOf(
+					args.get(yPt)).doubleValue());
+			JSVColor color = (colorPt < 0 ? ((ColoredAnnotation) lastAnnotation)
+					.getColor() : jsvp.getColor1(JSVColorUtil.getArgbFromString(args
+					.get(colorPt))));
+			String text;
+			if (textPt < 0) {
+				text = lastAnnotation.text;
+			} else {
+				text = args.get(textPt);
+				if (text.charAt(0) == '\"')
+					text = text.substring(1, text.length() - 1);
+			}
+			return jsvp.newAnnotation(x, y, spec, text, color, false, false, 0, 0);
+		} catch (Exception e) {
+			return null;
+		}
+	}
 
 
 }

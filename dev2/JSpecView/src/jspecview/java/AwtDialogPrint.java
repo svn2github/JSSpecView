@@ -40,6 +40,8 @@ import javax.swing.JRadioButton;
 //import javax.swing.SpinnerNumberModel;
 import javax.swing.border.TitledBorder;
 
+import jspecview.common.PrintLayout;
+
 
 /**
  * Dialog to set print preferences for JSpecview.
@@ -47,7 +49,7 @@ import javax.swing.border.TitledBorder;
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
  */
-public class AwtPrintLayoutDialog extends JDialog {
+public class AwtDialogPrint extends JDialog {
 
 	private static final long serialVersionUID = 1L;
   private TitledBorder titledBorder1;
@@ -114,7 +116,7 @@ public class AwtPrintLayoutDialog extends JDialog {
    * @param pl    null or previous layout
    * @param isJob 
    */
-  public AwtPrintLayoutDialog(Frame frame, PrintLayout pl, boolean isJob) {
+  public AwtDialogPrint(Frame frame, PrintLayout pl, boolean isJob) {
     super(frame, "Print Layout", true);
     if (pl == null)
       pl = new PrintLayout();
@@ -151,7 +153,7 @@ public class AwtPrintLayoutDialog extends JDialog {
     String allFontNames[] = ge.getAvailableFontFamilyNames();
     for(int i = 0; i < allFontNames.length; i++)
       fontComboBox.addItem(allFontNames[i]);
- 		ClassLoader cl = AwtPrintLayoutDialog.class.getClassLoader();
+ 		ClassLoader cl = AwtDialogPrint.class.getClassLoader();
 		String path = "jspecview/application/icons/";
 		portraitIcon = new ImageIcon(cl.getResource(path + "portrait.gif"));
 		landscapeIcon = new ImageIcon(cl.getResource(path + "landscape.gif"));
@@ -455,7 +457,7 @@ public class AwtPrintLayoutDialog extends JDialog {
 		plNew.showXScale = scaleXCheckBox.isSelected();
 		plNew.showYScale = scaleYCheckBox.isSelected();
 		plNew.showTitle = titleCheckBox.isSelected();
-		plNew.paper = (MediaSizeName) paperComboBox.getSelectedItem();
+		plNew.paper = paperComboBox.getSelectedItem();
 		// pl.printer = services[printerNameComboBox.getSelectedIndex()];
 		// pl.numCopies = ((Integer)numCopiesSpinner.getValue()).intValue();
 		plNew.asPDF = asPDF;

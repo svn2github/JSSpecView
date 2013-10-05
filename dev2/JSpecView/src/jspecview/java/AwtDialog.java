@@ -1,16 +1,33 @@
 package jspecview.java;
 
 import java.awt.Component;
+import java.awt.Frame;
 
 import javax.swing.JDialog;
 
-abstract public class AwtDialog extends JDialog {
+import jspecview.common.DialogParams;
+import jspecview.common.JSVDialog;
+
+abstract public class AwtDialog extends JDialog implements JSVDialog {
 
 	private static final long serialVersionUID = 1L;
+	
+	protected DialogParams params;
+	
+  public AwtDialog(Frame frame, String title, boolean isModal) {
+  	super(frame, title, isModal);
+	}
 
-	abstract protected int[] getPosXY();
-
-	protected void setPosition(Component panel, int[] posXY) {
+  /**
+   *   
+   * @param opanel
+   * 							a JPanel (Applet) or a JScrollPane (MainFrame)
+   * 
+   * @param posXY
+   * 							static for a given dialog
+   */
+	public void restoreDialogPosition(Object opanel, int[] posXY) {
+		Component panel = (Component) opanel;
 		if (panel != null) {
 			if (posXY[0] == Integer.MIN_VALUE) {
 				posXY[0] = panel.getLocationOnScreen().x;
@@ -19,8 +36,4 @@ abstract public class AwtDialog extends JDialog {
 			setLocation(posXY[0], posXY[1]);
 		}
 	}
-
-	
-
-
 }

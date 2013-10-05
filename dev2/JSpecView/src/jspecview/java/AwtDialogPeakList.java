@@ -20,78 +20,43 @@
 package jspecview.java;
 
 import jspecview.api.ScriptInterface;
-import jspecview.common.Coordinate;
 import jspecview.common.JDXSpectrum;
-import jspecview.common.JSVPanel;
 import jspecview.common.Annotation.AType;
 
 /**
- * Dialog for managing the measurement list
+ * Dialog for managing the peak listing 
  * for a Spectrum within a GraphSet
-
+ * 
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-public class AwtMeasurementListDialog extends AwtAnnotationDialog {
+public class AwtDialogPeakList extends AwtAnnotationDialog {
 
 	private static final long serialVersionUID = 1L;
 	private static int[] posXY = new int[] {Integer.MIN_VALUE, 0};
 
-	protected AwtMeasurementListDialog(String title, ScriptInterface si, 
-			JDXSpectrum spec, JSVPanel jsvp) {
-		super(si, spec, jsvp);
-		thisType = AType.Measurements;
-		setTitle(title);
-		addUnits = true;
-		setup();
+	protected AwtDialogPeakList(String title, ScriptInterface si, JDXSpectrum spec) {
+		super(title, si, spec, AType.PeakList);
 	}
 
-	@Override
-	protected int[] getPosXY() {
+	public int[] getPosXY() {
 		return posXY;
 	}
 
 	@Override
-	protected void addControls() {
-		// none required
+	public void addUniqueControls(AwtDialogHelper dialogHelper) {
+		txt1 = dialogHelper.addInputOption("Threshold", null, null, "",
+				"", true);
+		setThreshold(Double.NaN);
+		chkbox1 = dialogHelper.addSelectOption("Interpolation", null,
+				new String[] { "parabolic", "none" }, 0, true);
 	}
+
+	// from DialogParams:
 
 	@Override
-	public void apply() {
-		super.apply();
-  }
-
-	@Override
-	protected void done() {
-		super.done();
+	public void setParamsFromFields() {
+		params.setParams(new Object[] {txt1.getText(), chkbox1.getSelectedItem().toString()});
 	}
-
-	public void update(Coordinate clicked) {
-		updateValues();
-		checkEnables();
-	}
-
-	@Override
-	protected void updateValues() {
-		loadData();
-	}
-
-	private void loadData() {
-		if (xyData == null)
-			return;
-		String[][] data = xyData.getMeasurementListArray(cmbUnits.getSelectedItem().toString());
-		String[] header = xyData.getDataHeader();
-		int[] widths = new int[] {40, 65, 65, 50};
-		loadData(data, header, widths);
-	}
-
-	@Override
-	protected void createData() {
-	}
-
-	@Override
-	protected void tableCellSelectedEvent(int iRow, int iCol) {
-	}
-
 
 }

@@ -40,12 +40,16 @@ package jspecview.java;
 import jspecview.util.JSVColor;
 
 import java.awt.BasicStroke;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.awt.print.PageFormat;
@@ -56,16 +60,21 @@ import java.awt.print.PrinterJob;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import java.util.Map;
-
+import javax.print.attribute.Attribute;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet; //import javax.print.attribute.standard.MediaSize;
 import javax.print.attribute.standard.OrientationRequested;
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 
@@ -80,6 +89,7 @@ import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
 import org.jmol.util.Txt;
 
+import jspecview.api.JSVPopupMenu;
 import jspecview.api.PdfCreatorInterface;
 import jspecview.api.ScriptInterface;
 import jspecview.common.Annotation;
@@ -91,8 +101,10 @@ import jspecview.common.JSVInterface;
 import jspecview.common.JSVPanel;
 import jspecview.common.PanelData;
 import jspecview.common.ColorParameters;
+import jspecview.common.PrintLayout;
 import jspecview.common.ScriptToken;
 import jspecview.common.Annotation.AType;
+import jspecview.export.Exporter;
 
 /**
  * JSVPanel class represents a View combining one or more GraphSets, each with one or more JDXSpectra.
@@ -113,7 +125,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
     Logger.info("JSVPanel " + this + " finalized");
   }
 
-  private AwtPopupMenu popup;
+  private JSVPopupMenu popup;
   private ScriptInterface si;
 
   public PanelData pd;
@@ -144,34 +156,8 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
     setName(title);
   }
 
-  
-
-  public void setPlotColors(Object oColors) {
-    JSVColor[] colors = (JSVColor[]) oColors;
-    for (int i = pd.graphSets.size(); --i >= 0;)
-      pd.graphSets.get(i).setPlotColors(colors);
-  }
-
-
-  @SuppressWarnings("incomplete-switch")
 	public void setColorOrFont(ColorParameters ds, ScriptToken st) {
-    if (st == null) {
-      Map<ScriptToken, JSVColor> colors = ds.elementColors;
-      for (Map.Entry<ScriptToken, JSVColor> entry : colors.entrySet())
-        setColorOrFont(ds, entry.getKey());
-      setColorOrFont(ds, ScriptToken.DISPLAYFONTNAME);
-      setColorOrFont(ds, ScriptToken.TITLEFONTNAME);
-      return;
-    }
-    switch (st) {
-    case DISPLAYFONTNAME:
-      pd.setFontName(st, ds.displayFontName);
-      return;
-    case TITLEFONTNAME:
-      pd.setFontName(st, ds.titleFontName);
-      return;
-    }
-    setColor(st, ds.getElementColor(st));
+  	pd.setColorOrFont(ds, st);
   }
 
   public void setBackgroundColor(JSVColor color) {
@@ -182,10 +168,6 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
   	return bgcolor;
   }
   
-  public void setColor(ScriptToken st, JSVColor c) {
-  	pd.setColor(st, c);
-  }
-
   /**
    * Constructs a new JSVPanel
    * @param si 
@@ -195,7 +177,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
    * @param popup 
    * @return this
    */
-  public AwtPanel setOne(ScriptInterface si, JDXSpectrum spectrum, AwtPopupMenu popup) {
+  public AwtPanel setOne(ScriptInterface si, JDXSpectrum spectrum, JSVPopupMenu popup) {
     // standard applet not overlaid and not showing range
     // standard application split spectra
     // removal of integration, taConvert
@@ -207,7 +189,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
     return this;
   }
 
-  private void set(ScriptInterface si, AwtPopupMenu popup) {
+  private void set(ScriptInterface si, JSVPopupMenu popup) {
   	this.si = si;
     this.popup = popup;
     pd = new PanelData(this);
@@ -267,27 +249,16 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
     return new GraphSet(this.pd);
   }
 
-  /**
-   * Returns the color of the plot at a certain index
-   * 
-   * @param index
-   *        the index
-   * @return the color of the plot
-   */
-  public JSVColor getPlotColor(int index) {
-    return pd.getCurrentGraphSet().getPlotColor(index);
-  }
-
-  public JSVColor getColor(ScriptToken whatColor) {
-  	return pd.getColor(whatColor);
-  }
-
   public JSVColor getColor4(int r, int g, int b, int a) {
     return new AwtColor(r, g, b, a);
   }
   
   public JSVColor getColor3(int r, int g, int b) {
     return new AwtColor(r, g, b);
+  }
+  
+  public JSVColor getColor1(int rgb) {
+    return new AwtColor(rgb);
   }
   
   /*----------------------- JSVPanel PAINTING METHODS ---------------------*/
@@ -355,7 +326,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
           + " spectra available.";
     try {
       JDXSpectrum spec = (n < 0 ? pd.getSpectrum() : pd.getSpectrumAt(n));
-      return AwtExportDialog.exportTheSpectrum(AwtExportDialog.ExportType.getType(type), null, spec, 0, spec.getXYCoords().length - 1);
+      return Exporter.exportTheSpectrum(type, null, spec, 0, spec.getXYCoords().length - 1);
     } catch (IOException ioe) {
       // not possible
     }
@@ -398,7 +369,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
 		AnnotationData ad = pd.getDialog(type);
 		pd.closeAllDialogsExcept(type);
 		if (ad != null && ad instanceof AwtAnnotationDialog) {
-			((AwtAnnotationDialog) ad).reEnable();
+			((AwtAnnotationDialog) ad).params.reEnable();
 			return (AnnotationDialog) ad;
 		}
 		
@@ -410,20 +381,20 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
 		JDXSpectrum spec = pd.getSpectrum();
 		switch (type) {
 		case Integration:
-			dialog = new AwtIntegralListDialog("Integration for " + spec, si, spec, this);
+			dialog = new AwtDialogIntegrals("Integration for " + spec, si, spec);
 			break;
 		case Measurements:
-			dialog = new AwtMeasurementListDialog("Measurements for " + spec, si, spec, this);
+			dialog = new AwtDialogMeasurements("Measurements for " + spec, si, spec);
 			break;
 		case PeakList:
-			dialog = new AwtPeakListDialog("Peak List for " + spec, si, spec, this);
+			dialog = new AwtDialogPeakList("Peak List for " + spec, si, spec);
 			break;
 		case NONE:
 		}
 		if (ad != null)
-			dialog.setData(ad);
+			dialog.params.setData(ad);
 		pd.addDialog(iSpec, type, dialog);
-		dialog.reEnable();
+		dialog.params.reEnable();
 		return dialog;
 	}
 
@@ -471,7 +442,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
 	    break;
 		case Event.CLICKED:
 	    if (pd.checkMod(buttonMods, Event.MOUSE_RIGHT)) {
-	      popup.show((JSVPanel) this, x, y);
+	      popup.show(this, x, y);
 	      return;
 	    }
 	    break;
@@ -570,7 +541,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
 					PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
 					aset.add(pl.layout.equals("landscape") ? OrientationRequested.LANDSCAPE
 									: OrientationRequested.PORTRAIT);
-					aset.add(pl.paper);
+					aset.add((Attribute) pl.paper);
 					pj.print(aset);
 				}
 			} catch (PrinterException ex) {
@@ -672,7 +643,14 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
 
 	public Annotation getNextAnnotation(JDXSpectrum spectrum,
 			JmolList<String> args, Annotation lastAnnotation) {
-		return AwtColoredAnnotation.getAnnotation(spectrum, args, lastAnnotation);
+		return Annotation.getColoredAnnotation(this, spectrum, args, lastAnnotation);
+	}
+	
+	public Annotation newAnnotation(double x, double y, JDXSpectrum spec,
+			String text, JSVColor color, boolean isPixels, boolean is2D, int offsetX,
+			int offsetY) {
+		return new AwtColoredAnnotation(x, y).set(spec, text, color, isPixels,
+				is2D, offsetX, offsetY);
 	}
 
 	public Object newImage(int width, int height, int[] buffer) {
@@ -737,4 +715,48 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
 	public int getFontFaceID(String name) {
 		return JmolFont.getFontFaceID("SansSerif");
 	}
+	
+	public int geOptionFromDialog(Object frame, String[] items,
+			String dialogName, String labelName) {
+		final JDialog dialog = new JDialog((JFrame) frame, dialogName, true);
+		dialog.setResizable(false);
+		dialog.setSize(200, 100);
+		dialog.setLocation(getLocation().x + getSize().width / 2,
+				getLocation().y + getSize().height / 2);
+		// Q: why (x + w)/2, (y + h)/2?? 
+		final JComboBox<Object> cb = new JComboBox<Object>(items);
+		Dimension d = new Dimension(120, 25);
+		cb.setPreferredSize(d);
+		cb.setMaximumSize(d);
+		cb.setMinimumSize(d);
+		JPanel p = new JPanel(new FlowLayout());
+		JButton button = new JButton("OK");
+		p.add(cb);
+		p.add(button);
+		dialog.getContentPane().setLayout(new BorderLayout());
+		dialog.getContentPane().add(
+				new JLabel(labelName, SwingConstants.CENTER),
+				BorderLayout.NORTH);
+		dialog.getContentPane().add(p);
+		final int ret[] = new int[] { Integer.MIN_VALUE };
+		button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				ret[0] = cb.getSelectedIndex();
+				dialog.dispose();
+			}
+		});
+		dialog.setVisible(true);
+		dialog.dispose();
+		return ret[0];
+	}
+
+	public Object[][] getOverlayLegendData() {
+	  return pd.getOverlayLegendData();
+	}
+
+	public int getCurrentSpectrumIndex() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }

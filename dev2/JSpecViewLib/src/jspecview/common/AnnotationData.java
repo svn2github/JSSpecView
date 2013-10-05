@@ -4,7 +4,7 @@ import jspecview.common.Annotation.AType;
 
 public interface AnnotationData {
 
-	void addSpecShift(double dx);
+	void setSpecShift(double dx);
 
 	AType getAType();
 	MeasurementData getData();

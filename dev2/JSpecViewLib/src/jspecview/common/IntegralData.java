@@ -161,7 +161,7 @@ public class IntegralData extends MeasurementData {
   private static Comparator<Measurement> c = new IntegralComparator();
 
 	@Override
-	public void addSpecShift(double dx) {
+	public void setSpecShift(double dx) {
 		Coordinate.shiftX(xyCoords, dx);
     for (int i = size(); --i >= 1;) {
       get(i).addSpecShift(dx);

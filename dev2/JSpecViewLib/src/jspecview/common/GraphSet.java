@@ -157,7 +157,7 @@ public class GraphSet implements XYScaleConverter {
 		boolean isNew = (i != iSpectrumSelected);
 		iSpectrumSelected = i;
 		if (isNew) {
-			hideAllDialogsExceptCurrent();
+			//hideAllDialogsExceptCurrent();
 			getCurrentView();
 		}
 		return iSpectrumSelected;
@@ -1500,40 +1500,40 @@ public class GraphSet implements XYScaleConverter {
 		return (nSplit > 1 ? i == iSplit : ok && (!pd.isPrinting || !isGrey));
 	}
 
-	private void hideAllDialogsExceptCurrent() {
-		if (dialogs == null)
-			return;
-		boolean getInt = false;
-		boolean getMeas = false;
-		boolean getPeak = false;
-		AnnotationData ad;
-
-		for (Map.Entry<String, AnnotationData> e : dialogs.entrySet()) {
-			ad = e.getValue();
-			if (isVisible(ad)) {
-				// ((AnnotationDialog) ad).setVisible(false);
-				switch (ad.getAType()) {
-				case Integration:
-					getInt = true;
-					break;
-				case Measurements:
-					getMeas = true;
-					break;
-				case PeakList:
-					getPeak = true;
-					break;
-				case NONE:
-				}
-			}
-		}
-		if (getInt)
-			ad = jsvp.showDialog(AType.Integration);
-		if (getMeas)
-			ad = jsvp.showDialog(AType.Measurements);
-		if (getPeak)
-			ad = jsvp.showDialog(AType.PeakList);
-
-	}
+//	private void hideAllDialogsExceptCurrent() {
+//		if (dialogs == null)
+//			return;
+//		boolean getInt = false;
+//		boolean getMeas = false;
+//		boolean getPeak = false;
+//		AnnotationData ad;
+//
+//		for (Map.Entry<String, AnnotationData> e : dialogs.entrySet()) {
+//			ad = e.getValue();
+//			if (isVisible(ad)) {
+//				// ((AnnotationDialog) ad).setVisible(false);
+//				switch (ad.getAType()) {
+//				case Integration:
+//					getInt = true;
+//					break;
+//				case Measurements:
+//					getMeas = true;
+//					break;
+//				case PeakList:
+//					getPeak = true;
+//					break;
+//				case NONE:
+//				}
+//			}
+//		}
+//		if (getInt)
+//			ad = jsvp.showDialog(AType.Integration);
+//		if (getMeas)
+//			ad = jsvp.showDialog(AType.Measurements);
+//		if (getPeak)
+//			ad = jsvp.showDialog(AType.PeakList);
+//
+//	}
 
 	private void drawSpectrumPointer(Object g, JDXSpectrum spec,
 			IntegralData ig) {
@@ -2725,7 +2725,7 @@ public class GraphSet implements XYScaleConverter {
 		if (spec == null)
 			spec = getSpectrumAt(0);
 		Highlight hl = new Highlight(x1, x2, spec, (color == null ? pd
-				.getHighlightColor() : color));
+				.getColor(ScriptToken.HIGHLIGHTCOLOR) : color));
 		if (!highlights.contains(hl))
 			highlights.addLast(hl);
 	}
@@ -3660,7 +3660,7 @@ synchronized boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		if (dialogs != null)
 			for (Map.Entry<String, AnnotationData> e : dialogs.entrySet())
 				if (e.getValue().getSpectrum() == spec)
-					e.getValue().addSpecShift(dx);
+					e.getValue().setSpecShift(dx);
 		//double dx0 = getScale().specShift;
 		//for (int i = viewList.size(); --i >= 0;)
 			//viewList.get(i).addSpecShift(dx);
@@ -3995,11 +3995,12 @@ synchronized boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
   }
 
   
-  private void setColorFromToken(Object og, ScriptToken whatColor) {
-    if (whatColor != null)
-    	jsvp.setGraphicsColor(og, whatColor == ScriptToken.PLOTCOLOR ? plotColors[0] : jsvp
-              .getColor(whatColor));
-  }
+	private void setColorFromToken(Object og, ScriptToken whatColor) {
+		if (whatColor != null)
+			jsvp.setGraphicsColor(og,
+					whatColor == ScriptToken.PLOTCOLOR ? plotColors[0] : pd
+							.getColor(whatColor));
+	}
 
   private void setPlotColor(Object og, int i) {
   	JSVColor c;
@@ -4011,7 +4012,7 @@ synchronized boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
   		c = pd.BLACK;
   		break;
   	case -1:
-  		c = jsvp.getColor(ScriptToken.INTEGRALPLOTCOLOR);
+  		c = pd.getColor(ScriptToken.INTEGRALPLOTCOLOR);
   		break;
     default:
     	c = plotColors[i];
