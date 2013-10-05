@@ -38,9 +38,9 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 
+import jspecview.api.JSVTreeNode;
 import jspecview.api.ScriptInterface;
 import jspecview.common.JSVPanelNode;
-import jspecview.common.JSVTreeNode;
 import jspecview.common.JSViewer;
 
 import org.jmol.util.SB;

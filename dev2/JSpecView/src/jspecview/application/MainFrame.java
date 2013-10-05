@@ -84,13 +84,13 @@ import org.jmol.util.Logger;
 import org.jmol.util.SB;
 import org.jmol.util.Txt;
 
+import jspecview.api.JSVAppletInterface;
+import jspecview.api.JSVTreeNode;
 import jspecview.api.ScriptInterface;
 import jspecview.applet.JSVAppletPrivatePro;
-import jspecview.common.JSVAppletInterface;
 import jspecview.common.JSVDialog;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelNode;
-import jspecview.common.JSVTreeNode;
 import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
 import jspecview.common.ColorParameters;

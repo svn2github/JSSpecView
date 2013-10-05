@@ -1,4 +1,7 @@
-package jspecview.common;
+package jspecview.api;
+
+import jspecview.common.JSVPanel;
+import jspecview.common.JSVPanelNode;
 
 import org.jmol.util.JmolList;
 

@@ -54,7 +54,7 @@ import javax.swing.JApplet;
 
 import org.jmol.util.Logger;
 
-import jspecview.common.JSVAppletInterface;
+import jspecview.api.JSVAppletInterface;
 import jspecview.common.JSVersion;
 
 /**

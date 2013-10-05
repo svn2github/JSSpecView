@@ -2,8 +2,8 @@ package jspecview.java;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import jspecview.api.JSVTreeNode;
 import jspecview.common.JSVPanelNode;
-import jspecview.common.JSVTreeNode;
 
 @SuppressWarnings("unchecked")
 public class AwtTreeNode extends

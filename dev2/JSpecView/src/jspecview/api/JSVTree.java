@@ -1,6 +1,7 @@
-package jspecview.common;
+package jspecview.api;
 
 import jspecview.api.ScriptInterface;
+import jspecview.common.JSVPanel;
 
 public interface JSVTree {
 	

@@ -10,7 +10,7 @@ import javax.swing.JPanel;
 
 import org.jmol.util.JmolList;
 
-import jspecview.common.JSVMainPanel;
+import jspecview.api.JSVMainPanel;
 import jspecview.common.JSVViewPanel;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelNode;

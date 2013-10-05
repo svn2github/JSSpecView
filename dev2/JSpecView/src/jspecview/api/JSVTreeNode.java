@@ -1,7 +1,7 @@
 /**
  * 
  */
-package jspecview.common;
+package jspecview.api;
 
 import java.util.Enumeration;
 

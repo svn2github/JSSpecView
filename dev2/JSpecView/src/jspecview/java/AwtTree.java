@@ -21,12 +21,12 @@ import org.jmol.util.Logger;
 import org.jmol.util.Parser;
 import org.jmol.util.Txt;
 
+import jspecview.api.JSVTree;
+import jspecview.api.JSVTreeNode;
 import jspecview.api.ScriptInterface;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelNode;
-import jspecview.common.JSVTree;
-import jspecview.common.JSVTreeNode;
 import jspecview.common.ScriptToken;
 import jspecview.source.JDXSource;
 import jspecview.util.JSVFileManager;

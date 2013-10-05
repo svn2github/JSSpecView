@@ -57,14 +57,14 @@ import javax.swing.JFrame;
 import org.jmol.util.Logger;
 import org.jmol.util.Txt;
 
+import jspecview.api.JSVAppletInterface;
+import jspecview.api.JSVMainPanel;
+import jspecview.api.JSVTree;
 import jspecview.api.ScriptInterface;
 import jspecview.application.TextDialog;
-import jspecview.common.JSVAppletInterface;
 import jspecview.common.JSVDialog;
-import jspecview.common.JSVMainPanel;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelNode;
-import jspecview.common.JSVTree;
 import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
 import jspecview.common.PanelListener;
