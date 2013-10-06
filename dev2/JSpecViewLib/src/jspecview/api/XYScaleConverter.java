@@ -1,4 +1,6 @@
-package jspecview.common;
+package jspecview.api;
+
+import jspecview.common.ScaleData;
 
 public interface XYScaleConverter {
 	

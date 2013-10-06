@@ -24,7 +24,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.table.TableCellRenderer;
 
-import jspecview.common.JSVPanel;
+import jspecview.api.JSVPanel;
 
 /**
  * just a class I made to separate the construction of the AnnotationDialogs

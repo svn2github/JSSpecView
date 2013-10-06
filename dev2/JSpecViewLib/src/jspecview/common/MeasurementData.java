@@ -30,6 +30,7 @@ import java.util.Map;
 
 import org.jmol.util.Txt;
 
+import jspecview.api.AnnotationData;
 import jspecview.common.Annotation.AType;
 
 public class MeasurementData extends JmolList<Measurement> implements AnnotationData {

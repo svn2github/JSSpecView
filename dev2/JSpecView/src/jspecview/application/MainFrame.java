@@ -85,16 +85,18 @@ import org.jmol.util.SB;
 import org.jmol.util.Txt;
 
 import jspecview.api.JSVAppletInterface;
+import jspecview.api.JSVDialog;
+import jspecview.api.JSVMainPanel;
+import jspecview.api.JSVPanel;
+import jspecview.api.JSVTree;
 import jspecview.api.JSVTreeNode;
+import jspecview.api.PanelListener;
 import jspecview.api.ScriptInterface;
 import jspecview.applet.JSVAppletPrivatePro;
-import jspecview.common.JSVDialog;
-import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelNode;
 import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
 import jspecview.common.ColorParameters;
-import jspecview.common.PanelListener;
 import jspecview.common.Parameters;
 import jspecview.common.PeakPickEvent;
 import jspecview.common.PrintLayout;
@@ -102,7 +104,6 @@ import jspecview.common.RepaintManager;
 import jspecview.common.ScriptToken;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.SubSpecChangeEvent;
-import jspecview.common.Temp;
 import jspecview.common.ZoomEvent;
 import jspecview.common.JDXSpectrum.IRMode;
 import jspecview.export.Exporter;
@@ -146,6 +147,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	// ----------------------------------------------------------------------
 
+	private JSViewer        viewer;
 	private AppMenu         appMenu;
 	private AppToolBar      toolBar;
 	private JTextField      commandInput = new JTextField();
@@ -157,7 +159,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	private JSVAppletPrivatePro     advancedApplet;
 	private CommandHistory          commandHistory;
 	private JDXSource               currentSource;
-	private AwtFileHelper              fileHelper;
+	private AwtFileHelper           fileHelper;
 	private DisplaySchemesProcessor dsp;
 	public DropTargetListener       dtl;
 	private JmolSyncInterface       jmol;
@@ -174,11 +176,14 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	private JmolList<String>        recentFilePaths = new JmolList<String>();
 	private RepaintManager          repaintManager;
 	private JSVPanel                selectedPanel;
-	private AwtTree                 spectraTree;
+	private JSVTree                 spectraTree;
 	private JScrollPane             spectraTreeScrollPane;
-	private AwtViewPanel               spectrumPanel;
+	private Component               spectrumPanel;
 	private JPanel                  statusPanel = new JPanel();
 	private JLabel                  statusLabel = new JLabel();
+
+	private AwtTree tree; // alias for spectraTree, because here it is visible
+	private JSVMainPanel           viewPanel; // alias for spectrumPanel
 
 	private IRMode irMode = IRMode.NO_CONVERT;
 
@@ -284,7 +289,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		return selectedPanel;
 	}
 
-	public Object getSpectraTree() {
+	public JSVTree getSpectraTree() {
 		return spectraTree;
 	}
 
@@ -303,6 +308,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	 * @param jmolOrAdvancedApplet
 	 */
 	public MainFrame(Component jmolDisplay, JSVInterface jmolOrAdvancedApplet) {
+		viewer = new JSViewer(this);
 		repaintManager = new RepaintManager(this);
 		fileHelper = new AwtFileHelper(this);
 		this.jmolDisplay = jmolDisplay;
@@ -420,13 +426,12 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		tempDS = defaultDisplaySchemeName;
 		
 		// initialise Spectra tree
-
-		spectraTree = new AwtTree(this);
-		spectraTree.setCellRenderer(new SpectraTreeCellRenderer());
-		spectraTree.putClientProperty("JTree.lineStyle", "Angled");
-		spectraTree.setShowsRootHandles(true);
-		spectraTree.setEditable(false);
-		spectraTree.addMouseListener(new MouseListener() {
+		spectraTree = tree = new AwtTree(viewer);
+		tree.setCellRenderer(new SpectraTreeCellRenderer());
+		tree.putClientProperty("JTree.lineStyle", "Angled");
+		tree.setShowsRootHandles(true);
+		tree.setEditable(false);
+		tree.addMouseListener(new MouseListener() {
 			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() == 2 && getSelectedPanel() != null) {
 					getSelectedPanel().getPanelData().setZoom(0, 0, 0, 0);
@@ -447,7 +452,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 			}
 
 		});
-		new DropTarget(spectraTree, getDropListener());
+		new DropTarget(tree, getDropListener());
 
 		// Initialise GUI Components
 		try {
@@ -614,7 +619,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		getContentPane().add(toolBar, BorderLayout.NORTH);
 		getContentPane().add(mainSplitPane, BorderLayout.CENTER);
 
-		spectraTreeScrollPane = new JScrollPane(spectraTree);
+		spectraTreeScrollPane = new JScrollPane(tree);
 		if (jmolDisplay != null) {
 			JSplitPane leftPanel = new JSplitPane();
 			BorderLayout bl1 = new BorderLayout();
@@ -630,7 +635,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		} else {
 			mainSplitPane.setLeftComponent(spectraTreeScrollPane);
 		}
-		spectrumPanel = new AwtViewPanel(new BorderLayout());
+		spectrumPanel = (Component) (viewPanel = new AwtViewPanel(new BorderLayout()));
 		mainSplitPane.setRightComponent(spectrumPanel);
 	}
 
@@ -699,7 +704,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	public void openDataOrFile(String data, String name, JmolList<JDXSpectrum> specs,
 			String url, int firstSpec, int lastSpec, boolean isAppend) {
-		Temp.openDataOrFile(this, data, name, specs, url,
+		viewer.openDataOrFile(data, name, specs, url,
 				firstSpec, lastSpec, isAppend);
 		validateAndRepaint();
 	}
@@ -749,12 +754,12 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	public boolean runScriptNow(String peakScript) {
-		return JSViewer.runScriptNow(this, peakScript);
+		return viewer.runScriptNow(peakScript);
 	}
 
 	public void panelEvent(Object eventObj) {
 		if (eventObj instanceof PeakPickEvent) {
-			JSViewer.processPeakPickEvent(this, eventObj, true);
+			viewer.processPeakPickEvent(eventObj, true);
 		} else if (eventObj instanceof ZoomEvent) {
 			writeStatus("Double-Click highlighted spectrum in menu to zoom out; CTRL+/CTRL- to adjust Y scaling.");
 		} else if (eventObj instanceof SubSpecChangeEvent) {
@@ -768,7 +773,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	public void setSelectedPanel(JSVPanel jsvp) {
 		if (selectedPanel != null)
       mainSplitPosition = mainSplitPane.getDividerLocation();
-		spectrumPanel.setSelectedPanel(jsvp, panelNodes);
+		viewPanel.setSelectedPanel(jsvp, panelNodes);
 		selectedPanel = jsvp;
 		spectraTree.setSelectedPanel(this, jsvp);
 		validate();
@@ -785,7 +790,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		if (jsvp == prevPanel)
 			return;
 		prevPanel = jsvp;
-		JSViewer.sendPanelChange(this, jsvp);
+		viewer.sendPanelChange(jsvp);
 	}
 
 	// //////// MENU ACTIONS ///////////
@@ -882,12 +887,12 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		for (; --i >= 0;)
 			if (panelNodes.get(i).jsvp == getSelectedPanel())
 				break;
-		AwtTree.setFrameAndTreeNode(this, i + n);
+		viewer.setFrameAndTreeNode(i + n);
 		getSelectedPanel().getFocusNow(false);
 	}
 
 	public Map<String, Object> getProperty(String key) {
-		return JSViewer.getPropertyAsJavaObject(this, key);
+		return viewer.getPropertyAsJavaObject(key);
 	}
 
 	/**
@@ -916,9 +921,9 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	public synchronized void syncScript(String peakScript) {
 		//System.out.println(Thread.currentThread() + "MainFrame Jmol>JSV sync 11"
 			//	+ Thread.currentThread());
-		spectraTree.setEnabled(false);
-		JSViewer.syncScript(this, peakScript);
-		spectraTree.setEnabled(true);
+		tree.setEnabled(false);
+		viewer.syncScript(peakScript);
+		tree.setEnabled(true);
 		//System.out.println(Thread.currentThread() + "MainFrame Jmol>JSV sync 12"
 			//	+ Thread.currentThread());
 	}
@@ -929,7 +934,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		if (currentSource == null)
 			return;
 		if (panelNodes.get(0).getSpectrum().isAutoOverlayFromJmolClick())
-			JSViewer.execView(this, "*", false);
+			viewer.execView("*", false);
 	}
 
 	// //////////////////////// script commands from JSViewer /////////////////
@@ -940,7 +945,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	public void execClose(String value, boolean fromScript) {
-		Temp.close(this, Txt.trimQuotes(value));
+		viewer.close(Txt.trimQuotes(value));
 		if (!fromScript || panelNodes.size() == 0) {
 			validate();
 			repaint();
@@ -953,7 +958,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	public String execLoad(String value) {
-		Temp.load(this, value);
+		viewer.load(value);
 		if (getSelectedPanel() == null)
 			return null;
 		PanelData pd = getSelectedPanel().getPanelData();
@@ -981,10 +986,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		// if (msg == null) {
 		// commandInput.requestFocus();
 		// }
-	}
-
-	public JSVPanel setSpectrum(String value) {
-  	return AwtTree.setSpectrum(this, value);
 	}
 
 	public void execSetAutoIntegrate(boolean b) {
@@ -1148,7 +1149,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		if (jsvp == null)
 			return;
 		// boolean showLegend = appMenu.toggleOverlayKeyMenuItem();
-		JSViewer.setOverlayLegendVisibility(this, jsvp, true);
+		viewer.setOverlayLegendVisibility(jsvp, true);
 
 	}
 
@@ -1159,7 +1160,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	// /// JSVPanelNode tree model methods (can be left unimplemented for Android)
 
 	public JSVPanelNode setOverlayVisibility(JSVPanelNode node) {
-		JSViewer.setOverlayLegendVisibility(this, node.jsvp,
+		viewer.setOverlayLegendVisibility(node.jsvp,
 				appMenu.overlayKeyMenuItem.isSelected());
 		return node;
 	}
@@ -1179,7 +1180,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	 *          the <code>JDXSource</code>
 	 */
 	public void closeSource(JDXSource source) {
-		AwtTree.closeSource(this, source);
+		viewer.closeSource(source);
 		appMenu.clearSourceMenu(source);
 		setError(false, false);
 		setTitle("JSpecView");
@@ -1258,7 +1259,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	public void checkOverlay() {
 		if (spectrumPanel != null)
-			spectrumPanel.markSelectedPanels(panelNodes);
+			viewPanel.markSelectedPanels(panelNodes);
 		new AwtDialogView(this, spectraTreeScrollPane, false);
 	}
 
@@ -1270,7 +1271,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	// debugging
 
 	public void execTest(String value) {
-		System.out.println(JSVEscape.toJSON(null, JSViewer.getPropertyAsJavaObject(this, value), false));
+		System.out.println(JSVEscape.toJSON(null, viewer.getPropertyAsJavaObject(value), false));
 		//syncScript("Jmol sending to JSpecView: jmolApplet_object__5768809713073075__JSpecView: <PeakData file=\"file:/C:/jmol-dev/workspace/Jmol-documentation/script_documentation/examples-12/jspecview/acetophenone.jdx\" index=\"31\" type=\"13CNMR\" id=\"6\" title=\"carbonyl ~200\" peakShape=\"multiplet\" model=\"acetophenone\" atoms=\"1\" xMax=\"199\" xMin=\"197\"  yMax=\"10000\" yMin=\"0\" />");
 	}
 	public void requestRepaint() {
@@ -1295,5 +1296,13 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		if (pl != null)
 			lastPrintLayout = pl;
 		return pl;
+	}
+  
+	public JSVTreeNode createTree(JDXSource source, JSVPanel[] jsvPanels) {
+		return tree.createTree(this, source, jsvPanels);
+	}
+
+	public JSViewer getViewer() {
+		return viewer;
 	}
 }

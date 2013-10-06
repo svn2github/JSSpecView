@@ -35,10 +35,10 @@ import javax.swing.JPopupMenu;
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
 
+import jspecview.api.JSVPanel;
 import jspecview.api.JSVPopupMenu;
 import jspecview.api.ScriptInterface;
 import jspecview.common.JDXSpectrum;
-import jspecview.common.JSVPanel;
 import jspecview.common.PanelData;
 import jspecview.common.ScriptToken;
 import jspecview.common.Annotation.AType;
@@ -49,7 +49,7 @@ import jspecview.export.Exporter;
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
- * @see jspecview.common.JSVPanel
+ * @see jspecview.api.JSVPanel
  */
 public class AwtPopupMenu extends JPopupMenu implements JSVPopupMenu {
 

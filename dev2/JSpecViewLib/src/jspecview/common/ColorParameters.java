@@ -25,6 +25,7 @@ import java.util.StringTokenizer;
 
 import org.jmol.util.JmolList;
 
+import jspecview.api.JSVPanel;
 import jspecview.util.JSVColor;
 import jspecview.util.JSVColorUtil;
 

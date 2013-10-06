@@ -65,6 +65,7 @@ public class AwtDialogView extends AwtDialog implements WindowListener {
 	private JButton closeSelectedButton;
 	private JButton combineSelectedButton;
 	private JButton viewSelectedButton;
+	private JSViewer viewer;
   
 	private static int[] posXY = new int[] {Integer.MIN_VALUE, 0};
   
@@ -81,6 +82,7 @@ public class AwtDialogView extends AwtDialog implements WindowListener {
 	public AwtDialogView(ScriptInterface si, Component panel, boolean modal) {
 		super(null, "View/Combine/Close Spectra", modal);
 		this.si = si;
+		this.viewer = si.getViewer();
 		params.disposeOnDone = true;
 		restoreDialogPosition(panel, getPosXY());
 		setResizable(true);
@@ -311,7 +313,7 @@ public class AwtDialogView extends AwtDialog implements WindowListener {
 				sb.append(" ").append(label.substring(0, label.indexOf(":")));
 			}
 		}
-		JSViewer.execView(si, sb.toString().trim(), false);
+		viewer.execView(sb.toString().trim(), false);
 		setup();
 	}
 
@@ -329,7 +331,7 @@ public class AwtDialogView extends AwtDialog implements WindowListener {
 				sb.append(" ").append(label.substring(0, label.indexOf(":")));
 			}
 		}
-		JSViewer.execView(si, sb.toString().trim(), false);
+		viewer.execView(sb.toString().trim(), false);
 		setup();
 	}
 

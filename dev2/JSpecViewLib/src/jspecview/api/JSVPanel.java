@@ -1,10 +1,16 @@
-package jspecview.common;
+package jspecview.api;
+
+import java.io.OutputStream;
 
 import org.jmol.api.ApiPlatform;
 import org.jmol.util.JmolFont;
 import org.jmol.util.JmolList;
 
-import jspecview.api.ScriptInterface;
+import jspecview.common.Annotation;
+import jspecview.common.GraphSet;
+import jspecview.common.JDXSpectrum;
+import jspecview.common.PanelData;
+import jspecview.common.PrintLayout;
 import jspecview.common.Annotation.AType;
 import jspecview.util.JSVColor;
 
@@ -83,9 +89,13 @@ public interface JSVPanel extends JSVViewPanel {
 
 	int getFontFaceID(String name);
 
-	public int geOptionFromDialog(Object frame, String[] items,
+  int getOptionFromDialog(Object frame, String[] items,
 			String dialogName, String labelName);
 
-	public Object[][] getOverlayLegendData();
+	Object[][] getOverlayLegendData();
+
+  void saveImage(String type, Object file);
+
+	public void printPanel(PrintLayout pl, OutputStream os, String printJobTitle);
 
 }

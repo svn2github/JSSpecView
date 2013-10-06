@@ -1,6 +1,12 @@
 package jspecview.common;
 
+import org.jmol.api.ApiPlatform;
 import org.jmol.util.JmolList;
+
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Enumeration;
 import java.util.Hashtable;
 
 import java.util.Map;
@@ -10,261 +16,288 @@ import org.jmol.util.Parser;
 import org.jmol.util.SB;
 import org.jmol.util.Txt;
 
+import jspecview.api.JSVDialog;
+import jspecview.api.JSVPanel;
+import jspecview.api.JSVTree;
+import jspecview.api.JSVTreeNode;
 import jspecview.api.ScriptInterface;
 import jspecview.common.Annotation.AType;
 import jspecview.common.JDXSpectrum.IRMode;
 import jspecview.common.PanelData.LinkMode;
 import jspecview.source.JDXSource;
 import jspecview.util.JSVEscape;
+import jspecview.util.JSVFileManager;
 
 /**
- * This static class encapsulates all general functionality of applet and app.
- * Most methods include ScriptInterface parameter, which will be
- * JSVAppletPrivate, JSVAppletPrivatePro, or MainFrame.
+ * This class encapsulates all general functionality of applet and app. Most
+ * methods include ScriptInterface parameter, which will be JSVAppletPrivate,
+ * JSVAppletPrivatePro, or MainFrame.
  * 
  * @author Bob Hanson hansonr@stolaf.edu
  * 
  */
 public class JSViewer {
 
-	// ALL STATIC METHODS
-	
-	private final static int NLEVEL_MAX = 100;
-	
-  public static boolean runScriptNow(ScriptInterface si, String script) {
-		si.incrementViewCount(1);		
-    if (script == null)
-      script = "";
-    String msg = null;
-    script = script.trim();
-    if (Logger.debugging)
-      Logger.info("RUNSCRIPT " + script);
-    JSVPanel jsvp = si.getSelectedPanel();
-    boolean isOK = true;
-    int nErrorsLeft = 10;
-    ScriptTokenizer commandTokens = new ScriptTokenizer(script, true);
-    while (commandTokens.hasMoreTokens() && nErrorsLeft > 0) {
-      String token = commandTokens.nextToken();
-      // now split the key/value pair
-      ScriptTokenizer eachParam = new ScriptTokenizer(token, false);
-      String key = ScriptToken.getKey(eachParam);
-      if (key == null)
-        continue;
-      ScriptToken st = ScriptToken.getScriptToken(key);
-      String value = ScriptToken.getValue(st, eachParam, token);
-      Logger.info("KEY-> " + key + " VALUE-> " + value + " : " + st);
-      try {
-        switch (st) {
-        case UNKNOWN:
-          Logger.info("Unrecognized parameter: " + key);
-          --nErrorsLeft;
-          break;
-        default:
-          si.getParameters().set(jsvp, st, value);
-          si.updateBoolean(st, Parameters.isTrue(value));
-          break;
-        case PEAKCALLBACKFUNCTIONNAME:
-        case SYNCCALLBACKFUNCTIONNAME:
-        case COORDCALLBACKFUNCTIONNAME:
-        case LOADFILECALLBACKFUNCTIONNAME:
-          si.execSetCallback(st, value);
-          break;
-        case AUTOINTEGRATE:
-          si.execSetAutoIntegrate(Parameters.isTrue(value));
-          break;
-        case CLOSE:
-          si.execClose(value, true);
-          jsvp = si.getSelectedPanel();
-          break;
-        case DEBUG:
-          Logger
-              .setLogLevel(value.toLowerCase().equals("high") ? Logger.LEVEL_DEBUGHIGH
-                  : Parameters.isTrue(value) ? Logger.LEVEL_DEBUG : Logger.LEVEL_INFO);
-          break;
-        case EXPORT:
-          msg = si.execExport(jsvp, value);
-          return false;
-        case FINDX:
-        	if (jsvp != null)
-        		jsvp.getPanelData().findX(null, Double.parseDouble(value));
-        	break; 
-        case GETPROPERTY:
-        	Map<String, Object> info = (jsvp == null ? null : getPropertyAsJavaObject(si, value));
-        	if (info != null)
-        		jsvp.showMessage(JSVEscape.toJSON(null, info, true), value);
-        	break;
-        case GETSOLUTIONCOLOR:
-          if (jsvp != null)
-        		showColorMessage(si);
-          break;
-        case HIDDEN:
-          si.execHidden(Parameters.isTrue(value));
-          break;
-        case INTEGRALOFFSET:
-        case INTEGRALRANGE:
-        	execSetIntegralParameter(si, st, Double.parseDouble(value));
-        	break;
-        case INTEGRATION:
-        case INTEGRATE:
-          if (jsvp != null)
-            execIntegrate(si, value);
-          break;
-        case INTEGRATIONRATIOS:
-          si.setIntegrationRatios(value);
-          if (jsvp != null)
-            execIntegrate(si, null);          
-          break;
-        case INTERFACE:
-          si.execSetInterface(value);
-          break;
-        case IRMODE:
-          if (jsvp == null)
-            continue;
-          execIRMode(si, value);
-          break;
-        case JMOL:
-          si.syncToJmol(value);
-          break;
-        case JSV:
-        	syncScript(si, Txt.trimQuotes(value));
-        	break;
-        case LABEL:
-          if (jsvp != null)
-            jsvp.getPanelData().addAnnotation(ScriptToken.getTokens(value));
-          break;
-        case LINK:
-        	if (jsvp != null)
-      			jsvp.getPanelData().linkSpectra(LinkMode.getMode(value));
-          break;
-        case LOAD:
-          msg = si.execLoad(value);
-          jsvp = si.getSelectedPanel();
-          break;
-        case LOADIMAGINARY:
-        	si.setLoadImaginary(Parameters.isTrue(value));
-        	break;
-        case OVERLAYSTACKED:
-          if (jsvp != null)
-          	jsvp.getPanelData().splitStack(!Parameters.isTrue(value));
-          break;
-        case PEAK:
-        	execPeak(si, value);
-          break;
-        case PEAKLIST:
-        	execPeakList(si, value);
-        	break;
-        case PRINT:
-          if (jsvp == null)
-            continue;
-        	si.print(value);
-        	break;
-        case SCALEBY:
-        	scaleSelectedBy(si.getPanelNodes(), value);
-        	break;
-        case SCRIPT:
-        	String s = si.getFileAsString(value);
-        	if (s != null && si.incrementScriptLevelCount(0) < NLEVEL_MAX)
-        		runScriptNow(si, s);
-        	break;
-        case SELECT:
-          execSelect(si, value);
-          break;
-        case SETPEAK:
-        	// setpeak NONE     Double.NaN,       Double.MAX_VALUE
-        	// shiftx  NONE     Double.MAX_VALUE, Double.NaN
-        	// setpeak x.x      Double.NaN,       value
-        	// setx 	 x.x			Double.MIN_VALUE, value
-        	// shiftx  x.x      value,            Double.NaN
-        	// setpeak  ?       Double.NaN,       Double.MIN_VALUE
-        	if (jsvp != null)
-        		jsvp.getPanelData().shiftSpectrum(Double.NaN, 
-        				value.equalsIgnoreCase("NONE") ? Double.MAX_VALUE 
-        						: value.equalsIgnoreCase("?") ? Double.MIN_VALUE 
-        								: Double.parseDouble(value));
-        	break;
-        case SETX:
-        	if (jsvp != null)
-        		jsvp.getPanelData().shiftSpectrum(Double.MIN_VALUE, Double.parseDouble(value));
-        	break;
-        case SHIFTX:
-        	if (jsvp != null)
-        		jsvp.getPanelData().shiftSpectrum(
-        				value.equalsIgnoreCase("NONE") ? Double.MAX_VALUE 
-        						: Double.parseDouble(value), Double.NaN);
-        	break;        	
-        case SHOWMEASUREMENTS:
-        	if (jsvp == null)
-        		break;
-        	jsvp.getPanelData().showAnnotation(AType.Measurements, Parameters.getTFToggle(value));
-        	break;
-        case SHOWPEAKLIST:
-        	if (jsvp == null)
-        		break;
-        	jsvp.getPanelData().showAnnotation(AType.PeakList, Parameters.getTFToggle(value));
-        	break;
-        case SHOWINTEGRATION:
-        	if (jsvp == null)
-        		break;
-        	jsvp.getPanelData().showAnnotation(AType.Integration, Parameters.getTFToggle(value));
-        	//execIntegrate(si, null);
-        	break;
-        case SPECTRUM:
-        case SPECTRUMNUMBER:
-          jsvp = si.setSpectrum(value);
-          if (jsvp == null)
-            return false;
-          break;
-        case STACKOFFSETY:
-        	int offset = Parser.parseInt("" + Parser.parseFloat(value));
-        	if (jsvp != null&& offset != Integer.MIN_VALUE)
-        		jsvp.getPanelData().setYStackOffsetPercent(offset);
-        	break;
-        case TEST:
-          si.execTest(value);
-          break;
-        case OVERLAY: // deprecated
-        case VIEW:
-          execView(si, value, true);
-          jsvp = si.getSelectedPanel();
-          break;
-        case YSCALE:
-        	if (jsvp != null)
-            setYScale(si, value, jsvp);
-          break;
-        case ZOOM:
-        	if (jsvp != null)
-          	isOK = execZoom(value, jsvp);
-          break;
-        }
-      } catch (Exception e) {
-      	System.out.println(e.getMessage());
-        Logger.error(e.getMessage());
-        if (Logger.debugging)
-        	e.printStackTrace();
-        isOK = false;
-        --nErrorsLeft;
-      }
-    }
-		si.incrementViewCount(-1);		
-    si.execScriptComplete(msg, true);
-	  //si.getSelectedPanel().requestFocusInWindow(); // could be CLOSE ALL
-    return isOK;
-  }
+	public final static int FILE_OPEN_OK = 0;
+	public final static int FILE_OPEN_ALREADY = -1;
+	// private final static int FILE_OPEN_URLERROR = -2;
+	public final static int FILE_OPEN_ERROR = -3;
+	public final static int FILE_OPEN_NO_DATA = -4;
+	public static final int OVERLAY_DIALOG = -1;
+	public static final int OVERLAY_OFFSET = 99;
 
-	private static void execPeak(ScriptInterface si, String value) {
-    try {
-      JmolList<String> tokens = ScriptToken.getTokens(value);
-      value = " type=\"" + tokens.get(0).toUpperCase() + "\" _match=\""
-          + Txt.trimQuotes(tokens.get(1).toUpperCase()) + "\"";
-      if (tokens.size() > 2 && tokens.get(2).equalsIgnoreCase("all"))
-        value += " title=\"ALL\"";
-      processPeakPickEvent(si, new PeakInfo(value), false); // false == true here
-    } catch (Exception e) {
-      // ignore
-    }
+	private static String testScript = "<PeakData  index=\"1\" title=\"\" model=\"~1.1\" type=\"1HNMR\" xMin=\"3.2915\" xMax=\"3.2965\" atoms=\"15,16,17,18,19,20\" multiplicity=\"\" integral=\"1\"> src=\"JPECVIEW\" file=\"http://SIMULATION/$caffeine\"";
+
+	private final static int NLEVEL_MAX = 100;
+
+
+	private ScriptInterface si;
+
+	public JSViewer(ScriptInterface si) {
+		this.si = si;
 	}
 
-	private static void execPeakList(ScriptInterface si, String value) {
+	public boolean runScriptNow(String script) {
+		si.incrementViewCount(1);
+		if (script == null)
+			script = "";
+		String msg = null;
+		script = script.trim();
+		if (Logger.debugging)
+			Logger.info("RUNSCRIPT " + script);
+		JSVPanel jsvp = si.getSelectedPanel();
+		boolean isOK = true;
+		int nErrorsLeft = 10;
+		ScriptTokenizer commandTokens = new ScriptTokenizer(script, true);
+		while (commandTokens.hasMoreTokens() && nErrorsLeft > 0) {
+			String token = commandTokens.nextToken();
+			// now split the key/value pair
+			ScriptTokenizer eachParam = new ScriptTokenizer(token, false);
+			String key = ScriptToken.getKey(eachParam);
+			if (key == null)
+				continue;
+			ScriptToken st = ScriptToken.getScriptToken(key);
+			String value = ScriptToken.getValue(st, eachParam, token);
+			Logger.info("KEY-> " + key + " VALUE-> " + value + " : " + st);
+			try {
+				switch (st) {
+				case UNKNOWN:
+					Logger.info("Unrecognized parameter: " + key);
+					--nErrorsLeft;
+					break;
+				default:
+					si.getParameters().set(jsvp, st, value);
+					si.updateBoolean(st, Parameters.isTrue(value));
+					break;
+				case PEAKCALLBACKFUNCTIONNAME:
+				case SYNCCALLBACKFUNCTIONNAME:
+				case COORDCALLBACKFUNCTIONNAME:
+				case LOADFILECALLBACKFUNCTIONNAME:
+					si.execSetCallback(st, value);
+					break;
+				case AUTOINTEGRATE:
+					si.execSetAutoIntegrate(Parameters.isTrue(value));
+					break;
+				case CLOSE:
+					si.execClose(value, true);
+					jsvp = si.getSelectedPanel();
+					break;
+				case DEBUG:
+					Logger
+							.setLogLevel(value.toLowerCase().equals("high") ? Logger.LEVEL_DEBUGHIGH
+									: Parameters.isTrue(value) ? Logger.LEVEL_DEBUG
+											: Logger.LEVEL_INFO);
+					break;
+				case EXPORT:
+					msg = si.execExport(jsvp, value);
+					return false;
+				case FINDX:
+					if (jsvp != null)
+						jsvp.getPanelData().findX(null, Double.parseDouble(value));
+					break;
+				case GETPROPERTY:
+					Map<String, Object> info = (jsvp == null ? null
+							: getPropertyAsJavaObject(value));
+					if (info != null)
+						jsvp.showMessage(JSVEscape.toJSON(null, info, true), value);
+					break;
+				case GETSOLUTIONCOLOR:
+					if (jsvp != null)
+						showColorMessage();
+					break;
+				case HIDDEN:
+					si.execHidden(Parameters.isTrue(value));
+					break;
+				case INTEGRALOFFSET:
+				case INTEGRALRANGE:
+					execSetIntegralParameter(st, Double.parseDouble(value));
+					break;
+				case INTEGRATION:
+				case INTEGRATE:
+					if (jsvp != null)
+						execIntegrate(value);
+					break;
+				case INTEGRATIONRATIOS:
+					si.setIntegrationRatios(value);
+					if (jsvp != null)
+						execIntegrate(null);
+					break;
+				case INTERFACE:
+					si.execSetInterface(value);
+					break;
+				case IRMODE:
+					if (jsvp == null)
+						continue;
+					execIRMode(value);
+					break;
+				case JMOL:
+					si.syncToJmol(value);
+					break;
+				case JSV:
+					syncScript(Txt.trimQuotes(value));
+					break;
+				case LABEL:
+					if (jsvp != null)
+						jsvp.getPanelData().addAnnotation(ScriptToken.getTokens(value));
+					break;
+				case LINK:
+					if (jsvp != null)
+						jsvp.getPanelData().linkSpectra(LinkMode.getMode(value));
+					break;
+				case LOAD:
+					msg = si.execLoad(value);
+					jsvp = si.getSelectedPanel();
+					break;
+				case LOADIMAGINARY:
+					si.setLoadImaginary(Parameters.isTrue(value));
+					break;
+				case OVERLAYSTACKED:
+					if (jsvp != null)
+						jsvp.getPanelData().splitStack(!Parameters.isTrue(value));
+					break;
+				case PEAK:
+					execPeak(value);
+					break;
+				case PEAKLIST:
+					execPeakList(value);
+					break;
+				case PRINT:
+					if (jsvp == null)
+						continue;
+					si.print(value);
+					break;
+				case SCALEBY:
+					scaleSelectedBy(si.getPanelNodes(), value);
+					break;
+				case SCRIPT:
+					String s = si.getFileAsString(value);
+					if (s != null && si.incrementScriptLevelCount(0) < NLEVEL_MAX)
+						runScriptNow(s);
+					break;
+				case SELECT:
+					execSelect(value);
+					break;
+				case SETPEAK:
+					// setpeak NONE Double.NaN, Double.MAX_VALUE
+					// shiftx NONE Double.MAX_VALUE, Double.NaN
+					// setpeak x.x Double.NaN, value
+					// setx x.x Double.MIN_VALUE, value
+					// shiftx x.x value, Double.NaN
+					// setpeak ? Double.NaN, Double.MIN_VALUE
+					if (jsvp != null)
+						jsvp.getPanelData().shiftSpectrum(
+								Double.NaN,
+								value.equalsIgnoreCase("NONE") ? Double.MAX_VALUE : value
+										.equalsIgnoreCase("?") ? Double.MIN_VALUE : Double
+										.parseDouble(value));
+					break;
+				case SETX:
+					if (jsvp != null)
+						jsvp.getPanelData().shiftSpectrum(Double.MIN_VALUE,
+								Double.parseDouble(value));
+					break;
+				case SHIFTX:
+					if (jsvp != null)
+						jsvp.getPanelData().shiftSpectrum(
+								value.equalsIgnoreCase("NONE") ? Double.MAX_VALUE : Double
+										.parseDouble(value), Double.NaN);
+					break;
+				case SHOWMEASUREMENTS:
+					if (jsvp == null)
+						break;
+					jsvp.getPanelData().showAnnotation(AType.Measurements,
+							Parameters.getTFToggle(value));
+					break;
+				case SHOWPEAKLIST:
+					if (jsvp == null)
+						break;
+					jsvp.getPanelData().showAnnotation(AType.PeakList,
+							Parameters.getTFToggle(value));
+					break;
+				case SHOWINTEGRATION:
+					if (jsvp == null)
+						break;
+					jsvp.getPanelData().showAnnotation(AType.Integration,
+							Parameters.getTFToggle(value));
+					// execIntegrate(null);
+					break;
+				case SPECTRUM:
+				case SPECTRUMNUMBER:
+					jsvp = setSpectrum(value);
+					if (jsvp == null)
+						return false;
+					break;
+				case STACKOFFSETY:
+					int offset = Parser.parseInt("" + Parser.parseFloat(value));
+					if (jsvp != null && offset != Integer.MIN_VALUE)
+						jsvp.getPanelData().setYStackOffsetPercent(offset);
+					break;
+				case TEST:
+					si.execTest(value);
+					break;
+				case OVERLAY: // deprecated
+				case VIEW:
+					execView(value, true);
+					jsvp = si.getSelectedPanel();
+					break;
+				case YSCALE:
+					if (jsvp != null)
+						setYScale(value, jsvp);
+					break;
+				case ZOOM:
+					if (jsvp != null)
+						isOK = execZoom(value, jsvp);
+					break;
+				}
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
+				Logger.error(e.getMessage());
+				if (Logger.debugging)
+					e.printStackTrace();
+				isOK = false;
+				--nErrorsLeft;
+			}
+		}
+		si.incrementViewCount(-1);
+		si.execScriptComplete(msg, true);
+		// si.getSelectedPanel().requestFocusInWindow(); // could be CLOSE ALL
+		return isOK;
+	}
+
+	private void execPeak(String value) {
+		try {
+			JmolList<String> tokens = ScriptToken.getTokens(value);
+			value = " type=\"" + tokens.get(0).toUpperCase() + "\" _match=\""
+					+ Txt.trimQuotes(tokens.get(1).toUpperCase()) + "\"";
+			if (tokens.size() > 2 && tokens.get(2).equalsIgnoreCase("all"))
+				value += " title=\"ALL\"";
+			processPeakPickEvent(new PeakInfo(value), false); // false == true here
+		} catch (Exception e) {
+			// ignore
+		}
+	}
+
+	private void execPeakList(String value) {
 		JSVPanel jsvp = si.getSelectedPanel();
 		ColorParameters p = si.getParameters();
 		Boolean b = Parameters.getTFToggle(value);
@@ -297,7 +330,7 @@ public class JSViewer {
 
 	}
 
-	private static boolean execZoom(String value, JSVPanel jsvp) {
+	private boolean execZoom(String value, JSVPanel jsvp) {
 		double x1 = 0, x2 = 0, y1 = 0, y2 = 0;
 		JmolList<String> tokens;
 		tokens = ScriptToken.getTokens(value);
@@ -321,59 +354,59 @@ public class JSViewer {
 		return true;
 	}
 
-	private static void scaleSelectedBy(JmolList<JSVPanelNode> nodes, String value) {
+	private void scaleSelectedBy(JmolList<JSVPanelNode> nodes, String value) {
 		try {
 			double f = Double.parseDouble(value);
-	    for (int i = nodes.size(); --i >= 0;)
-       	nodes.get(i).jsvp.getPanelData().scaleSelectedBy(f);
+			for (int i = nodes.size(); --i >= 0;)
+				nodes.get(i).jsvp.getPanelData().scaleSelectedBy(f);
 		} catch (Exception e) {
 		}
 	}
 
-	private static void execSelect(ScriptInterface si, String value) {
-    JmolList<JSVPanelNode> nodes = si.getPanelNodes();
-    for (int i = nodes.size(); --i >= 0;)
-    	nodes.get(i).jsvp.getPanelData().selectFromEntireSet(Integer.MIN_VALUE);
-    JmolList<JDXSpectrum> speclist = new JmolList<JDXSpectrum>();
-    fillSpecList(si, value, speclist, false);
+	private void execSelect(String value) {
+		JmolList<JSVPanelNode> nodes = si.getPanelNodes();
+		for (int i = nodes.size(); --i >= 0;)
+			nodes.get(i).jsvp.getPanelData().selectFromEntireSet(Integer.MIN_VALUE);
+		JmolList<JDXSpectrum> speclist = new JmolList<JDXSpectrum>();
+		fillSpecList(value, speclist, false);
 	}
 
-	public static void execView(ScriptInterface si, String value, boolean fromScript) {
-    JmolList<JDXSpectrum> speclist = new JmolList<JDXSpectrum>();
-    String strlist = fillSpecList(si, value, speclist, true);
-    if (speclist.size() > 0)
-      si.openDataOrFile(null, strlist, speclist, strlist, -1, -1, false);
-    if (!fromScript) {
-    	si.validateAndRepaint();
-    }
+	public void execView(String value, boolean fromScript) {
+		JmolList<JDXSpectrum> speclist = new JmolList<JDXSpectrum>();
+		String strlist = fillSpecList(value, speclist, true);
+		if (speclist.size() > 0)
+			si.openDataOrFile(null, strlist, speclist, strlist, -1, -1, false);
+		if (!fromScript) {
+			si.validateAndRepaint();
+		}
 	}
 
-	private static void execIRMode(ScriptInterface si, String value) {
-    IRMode mode = IRMode.getMode(value); // T, A, or TOGGLE
-    PanelData pd = si.getSelectedPanel().getPanelData();
-    JDXSpectrum spec = pd.getSpectrum();
-    JDXSpectrum spec2 = JDXSpectrum.taConvert(spec, mode);
-    if (spec2 == spec)
-      return;
-    pd.setSpectrum(spec2);
-    si.setIRMode(mode);
-    //jsvp.doRepaint();
-  }
+	private void execIRMode(String value) {
+		IRMode mode = IRMode.getMode(value); // T, A, or TOGGLE
+		PanelData pd = si.getSelectedPanel().getPanelData();
+		JDXSpectrum spec = pd.getSpectrum();
+		JDXSpectrum spec2 = JDXSpectrum.taConvert(spec, mode);
+		if (spec2 == spec)
+			return;
+		pd.setSpectrum(spec2);
+		si.setIRMode(mode);
+		// jsvp.doRepaint();
+	}
 
-  private static void execIntegrate(ScriptInterface si, String value) {
-    JSVPanel jsvp = si.getSelectedPanel();
-    if (jsvp == null)
-      return;
-    jsvp.getPanelData().checkIntegral(si.getParameters(), value);
-    String integrationRatios = si.getIntegrationRatios();
+	private void execIntegrate(String value) {
+		JSVPanel jsvp = si.getSelectedPanel();
+		if (jsvp == null)
+			return;
+		jsvp.getPanelData().checkIntegral(si.getParameters(), value);
+		String integrationRatios = si.getIntegrationRatios();
 		if (integrationRatios != null)
 			jsvp.getPanelData().setIntegrationRatios(integrationRatios);
 		si.setIntegrationRatios(null); // one time only
-    jsvp.doRepaint();
-  }
+		jsvp.doRepaint();
+	}
 
 	@SuppressWarnings("incomplete-switch")
-	private static void execSetIntegralParameter(ScriptInterface si, ScriptToken st, double value) {
+	private void execSetIntegralParameter(ScriptToken st, double value) {
 		ColorParameters p = si.getParameters();
 		switch (st) {
 		case INTEGRALRANGE:
@@ -383,351 +416,349 @@ public class JSViewer {
 			p.integralOffset = value;
 			break;
 		}
-    JSVPanel jsvp = si.getSelectedPanel();
-    if (jsvp == null)
-      return;
-    jsvp.getPanelData().checkIntegral(si.getParameters(), "update");
+		JSVPanel jsvp = si.getSelectedPanel();
+		if (jsvp == null)
+			return;
+		jsvp.getPanelData().checkIntegral(si.getParameters(), "update");
 	}
 
-  private static void setYScale(ScriptInterface si, String value, 
-                                JSVPanel jsvp) {
-  	JmolList<JSVPanelNode> panelNodes = si.getPanelNodes();
-  	JDXSource currentSource = si.getCurrentSource();
-  	JmolList<String> tokens = ScriptToken.getTokens(value);
-    int pt = 0;
-    boolean isAll = false;
-    if (tokens.size() > 1 && tokens.get(0).equalsIgnoreCase("ALL")) {
-      isAll = true;
-      pt++;
-    }
-    double y1 = Double.parseDouble(tokens.get(pt++));
-    double y2 = Double.parseDouble(tokens.get(pt));
-    if (isAll) {
-      JDXSpectrum spec = jsvp.getPanelData().getSpectrum();
-      for (int i = panelNodes.size(); --i >= 0;) {
-        JSVPanelNode node = panelNodes.get(i);
-        if (node.source != currentSource)
-          continue;
-        if (JDXSpectrum.areXScalesCompatible(spec, node.getSpectrum(), false, false))
-          node.jsvp.getPanelData().setZoom(0, y1, 0, y2);
-      }
-    } else {
-      jsvp.getPanelData().setZoom(0, y1, 0, y2);
-    }
-  }
-
-  public static void setOverlayLegendVisibility(ScriptInterface si,
-                                                JSVPanel jsvp,
-                                                boolean showLegend) {
-    JmolList<JSVPanelNode> panelNodes = si.getPanelNodes();
-    JSVPanelNode node = JSVPanelNode.findNode(jsvp, panelNodes);
-    for (int i = panelNodes.size(); --i >= 0;)
-      showOverlayLegend(si, panelNodes.get(i), panelNodes.get(i) == node
-          && showLegend);
-  }
-
-  private static void showOverlayLegend(ScriptInterface si, JSVPanelNode node,
-                                        boolean visible) {
-    JSVDialog legend = node.legend;
-    if (legend == null && visible) {
-      legend = node.setLegend(node.jsvp.getPanelData()
-          .getNumberOfSpectraInCurrentSet() > 1
-          && node.jsvp.getPanelData().getNumberOfGraphSets() == 1 ? si
-          .getOverlayLegend(node.jsvp) : null);
-    }
-    if (legend != null)
-      legend.setVisible(visible);
-  }
-
-  /// from JavaScript
-
-  public static void addHighLight(ScriptInterface si, double x1, double x2,
-                                  int r, int g, int b, int a) {
-    JSVPanel jsvp = si.getSelectedPanel();
-    if (jsvp != null) {
-      jsvp.getPanelData().addHighlight(null, x1, x2, null, r, g, b, a);
-      jsvp.doRepaint();
-    }
-  }
-
-  private static String testScript = "<PeakData  index=\"1\" title=\"\" model=\"~1.1\" type=\"1HNMR\" xMin=\"3.2915\" xMax=\"3.2965\" atoms=\"15,16,17,18,19,20\" multiplicity=\"\" integral=\"1\"> src=\"JPECVIEW\" file=\"http://SIMULATION/$caffeine\"";
-  /**
-   * incoming script processing of <PeakAssignment file="" type="xxx"...> record
-   * from Jmol
-   * @param si 
-   * @param peakScript 
-   */
-
-  public static void syncScript(ScriptInterface si, String peakScript) {
-  	if (peakScript.equals("TEST"))
-  		peakScript = testScript;
-    Logger.info(Thread.currentThread() + "Jmol>JSV " + peakScript);
-    if (peakScript.indexOf("<PeakData") < 0) {
-      runScriptNow(si, peakScript);
-      if (peakScript.indexOf("#SYNC_PEAKS") >= 0) {
-      	JDXSource source = si.getCurrentSource();
-      	if (source == null)
-      		return;
-      	try {
-      	String file = "file=" + JSVEscape.eS(source.getFilePath());
-      	JmolList<PeakInfo> peaks = source.getSpectra().get(0).getPeakList();
-      	SB sb = new SB();
-      	sb.append("[");
-      	int n = peaks.size();
-      	for (int i = 0; i < n; i++) {
-      		String s = peaks.get(i).toString();
-      		s = s + " " + file;
-      		sb.append(JSVEscape.eS(s));
-      		if (i > 0)
-      			sb.append(",");
-      	}
-      	sb.append("]");
-      	si.syncToJmol("Peaks: " + sb);
-      	} catch (Exception e) {
-      		// ignore bad structures -- no spectrum
-      	}
-      }
-      return;
-    }
-    // todo: why the quotes??
-    peakScript = Txt.simpleReplace(peakScript, "\\\"", "");
-    String file = Parser.getQuotedAttribute(peakScript, "file");
-    System.out.println("file2=" + file);
-    String index = Parser.getQuotedAttribute(peakScript, "index");
-    if (file == null || index == null)
-      return;
-    String model = Parser.getQuotedAttribute(peakScript, "model");
-    String jmolSource = Parser.getQuotedAttribute(peakScript, "src");
-    String modelSent = (jmolSource != null && jmolSource.startsWith("Jmol") ? null : si.getReturnFromJmolModel());
-    
-    if (model != null && modelSent != null && !model.equals(modelSent)) {
-    	Logger.info("JSV ignoring model " + model + "; should be " + modelSent);
-    	return;
-    }
-    si.setReturnFromJmolModel(null);
-    if (si.getPanelNodes().size() == 0 || !checkFileAlreadyLoaded(si, file)) {
-      Logger.info("file " + file + " not found -- JSViewer closing all and reopening");
-      si.syncLoad(file);
-    }
-    //System.out.println(Thread.currentThread() + "syncscript jsvp=" + si.getSelectedPanel() + " s0=" + si.getSelectedPanel().getSpectrum());
-    PeakInfo pi = selectPanelByPeak(si, peakScript);
-    //System.out.println(Thread.currentThread() + "syncscript pi=" + pi);
-    JSVPanel jsvp = si.getSelectedPanel();
-    //System.out.println(Thread.currentThread() + "syncscript jsvp=" + jsvp);
-    String type = Parser.getQuotedAttribute(peakScript, "type");
-    //System.out.println(Thread.currentThread() + "syncscript --selectSpectrum2 "  + pi + " " + type + " "  + model + " s=" + jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
-    jsvp.getPanelData().selectSpectrum(file, type, model, true);
-    //System.out.println(Thread.currentThread() + "syncscript --selectSpectrum3 "  + pi + " " + type + " "  + model + " s=" + jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
-    si.sendPanelChange(jsvp);
-    //System.out.println(Thread.currentThread() + "syncscript --selectSpectrum4 "  + pi + " " + type + " "  + model + " s=" + jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
-    jsvp.getPanelData().addPeakHighlight(pi);
-    //System.out.println(Thread.currentThread() + "syncscript --selectSpectrum5 "  + pi + " " + type + " "  + model + " s=" + jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
-    jsvp.doRepaint();
-    // round trip this so that Jmol highlights all equivalent atoms
-    // and appropriately starts or clears vibration
-    if (jmolSource == null || (pi != null && pi.getAtoms() != null))
-      si.syncToJmol(jmolSelect(pi));
-  }
-
-  private static boolean checkFileAlreadyLoaded(ScriptInterface si,
-                                                String fileName) {
-  	JSVPanel jsvp = si.getSelectedPanel();
-  	if (jsvp != null && jsvp.getPanelData().hasFileLoaded(fileName))
-      return true;
-    JmolList<JSVPanelNode> panelNodes = si.getPanelNodes();
-    for (int i = panelNodes.size(); --i >= 0;)
-      if (panelNodes.get(i).jsvp.getPanelData().hasFileLoaded(fileName)) {
-        si.setSelectedPanel(panelNodes.get(i).jsvp);
-        return true;
-      }
-    return false;
-  }
-
-  private static PeakInfo selectPanelByPeak(ScriptInterface si,
-                                            String peakScript) {
-  	JmolList<JSVPanelNode> panelNodes = si.getPanelNodes();
-    if (panelNodes == null)
-      return null;
-    String file = Parser.getQuotedAttribute(peakScript, "file");
-    String index = Parser.getQuotedAttribute(peakScript, "index");
-    PeakInfo pi = null;
-    for (int i = panelNodes.size(); --i >= 0;)
-      panelNodes.get(i).jsvp.getPanelData().addPeakHighlight(null);
-  	JSVPanel jsvp = si.getSelectedPanel();
-    //System.out.println(Thread.currentThread() + "JSViewer selectPanelByPeak looking for " + index + " " + file + " in " + jsvp);
-    pi = jsvp.getPanelData().selectPeakByFileIndex(file, index);
-    System.out.println(Thread.currentThread() + "JSViewer selectPanelByPeak pi = " + pi);
-    if (pi != null) {
-    	// found in current panel
-      si.setNode(JSVPanelNode.findNode(jsvp, panelNodes), false);
-    } else {
-    	// must look elsewhere
-    	//System.out.println(Thread.currentThread() + "JSViewer selectPanelByPeak did not find it");
-      for (int i = panelNodes.size(); --i >= 0;) {
-        JSVPanelNode node = panelNodes.get(i);
-      	//System.out.println(Thread.currentThread() + "JSViewer selectPanelByPeak looking at node " + i + " " + node.fileName);
-        if ((pi = node.jsvp.getPanelData().selectPeakByFileIndex(file, index)) != null) {
-          //System.out.println(Thread.currentThread() + "JSViewer selectPanelByPeak setting node " + i + " pi=" + pi);
-          si.setNode(node, false);
-          //System.out.println(Thread.currentThread() + "JSViewer selectPanelByPeak setting node " + i + " set node done");
-          break;
-        }
-      }
-    }
-    //System.out.println(Thread.currentThread() + "JSViewer selectPanelByPeak finally pi = " + pi);
-    return pi;
-  }
-
-  /**
-   * this method is called as a result of the user clicking on a peak
-   * (eventObject instanceof PeakPickEvent) or from PEAK command execution
-   *  
-   * @param si
-   * @param eventObj
-   * @param isApp
-   */
-  public static void processPeakPickEvent(ScriptInterface si, Object eventObj,
-                                          boolean isApp) {
-  	// trouble here is with round trip when peaks are clicked in rapid succession.
-  	
-    PeakInfo pi;
-    if (eventObj instanceof PeakInfo) {
-      // this is a call from the PEAK command, above.
-      pi = (PeakInfo) eventObj;
-      JSVPanel jsvp = si.getSelectedPanel();
-      PeakInfo pi2 = jsvp.getPanelData().findMatchingPeakInfo(pi);
-      if (pi2 == null) {
-        if (!"ALL".equals(pi.getTitle()))
-          return;
-        JmolList<JSVPanelNode> panelNodes = si.getPanelNodes();
-        JSVPanelNode node = null;
-        for (int i = 0; i < panelNodes.size(); i++)
-          if ((pi2 = panelNodes.get(i).jsvp.getPanelData().findMatchingPeakInfo(
-              pi)) != null) {
-            node = panelNodes.get(i);
-            break;
-          }
-        if (node == null)
-          return;
-        si.setNode(node, false);
-      }
-      pi = pi2;
-    } else {
-      PeakPickEvent e = ((PeakPickEvent) eventObj);
-      si.setSelectedPanel((JSVPanel) e.getSource());
-      pi = e.getPeakInfo();
-    }
-    si.getSelectedPanel().getPanelData().addPeakHighlight(pi);
-    // the above line is what caused problems with GC/MS selection 
-    syncToJmol(si, pi);
-    //System.out.println(Thread.currentThread() + "processPeakEvent --selectSpectrum "  + pi);
-    if (pi.isClearAll()) // was not in app version??
-      si.getSelectedPanel().doRepaint();
-    else
-      si.getSelectedPanel().getPanelData().selectSpectrum(pi.getFilePath(),
-          pi.getType(), pi.getModel(), true);
-    si.checkCallbacks(pi.getTitle());
-
-  }
-
-	private static void syncToJmol(ScriptInterface si, PeakInfo pi) {
-  	si.setReturnFromJmolModel(pi.getModel());
-  	si.syncToJmol(JSViewer.jmolSelect(pi));
+	private void setYScale(String value, JSVPanel jsvp) {
+		JmolList<JSVPanelNode> panelNodes = si.getPanelNodes();
+		JDXSource currentSource = si.getCurrentSource();
+		JmolList<String> tokens = ScriptToken.getTokens(value);
+		int pt = 0;
+		boolean isAll = false;
+		if (tokens.size() > 1 && tokens.get(0).equalsIgnoreCase("ALL")) {
+			isAll = true;
+			pt++;
+		}
+		double y1 = Double.parseDouble(tokens.get(pt++));
+		double y2 = Double.parseDouble(tokens.get(pt));
+		if (isAll) {
+			JDXSpectrum spec = jsvp.getPanelData().getSpectrum();
+			for (int i = panelNodes.size(); --i >= 0;) {
+				JSVPanelNode node = panelNodes.get(i);
+				if (node.source != currentSource)
+					continue;
+				if (JDXSpectrum.areXScalesCompatible(spec, node.getSpectrum(), false,
+						false))
+					node.jsvp.getPanelData().setZoom(0, y1, 0, y2);
+			}
+		} else {
+			jsvp.getPanelData().setZoom(0, y1, 0, y2);
+		}
 	}
 
-	public static void sendPanelChange(ScriptInterface si, JSVPanel jsvp) {
+	public void setOverlayLegendVisibility(JSVPanel jsvp, boolean showLegend) {
+		JmolList<JSVPanelNode> panelNodes = si.getPanelNodes();
+		JSVPanelNode node = JSVPanelNode.findNode(jsvp, panelNodes);
+		for (int i = panelNodes.size(); --i >= 0;)
+			showOverlayLegend(panelNodes.get(i), panelNodes.get(i) == node
+					&& showLegend);
+	}
+
+	private void showOverlayLegend(JSVPanelNode node, boolean visible) {
+		JSVDialog legend = node.legend;
+		if (legend == null && visible) {
+			legend = node.setLegend(node.jsvp.getPanelData()
+					.getNumberOfSpectraInCurrentSet() > 1
+					&& node.jsvp.getPanelData().getNumberOfGraphSets() == 1 ? si
+					.getOverlayLegend(node.jsvp) : null);
+		}
+		if (legend != null)
+			legend.setVisible(visible);
+	}
+
+	// / from JavaScript
+
+	public void addHighLight(double x1, double x2, int r, int g, int b, int a) {
+		JSVPanel jsvp = si.getSelectedPanel();
+		if (jsvp != null) {
+			jsvp.getPanelData().addHighlight(null, x1, x2, null, r, g, b, a);
+			jsvp.doRepaint();
+		}
+	}
+
+	/**
+	 * incoming script processing of <PeakAssignment file="" type="xxx"...> record
+	 * from Jmol
+	 * 
+	 * @param peakScript
+	 */
+
+	public void syncScript(String peakScript) {
+		if (peakScript.equals("TEST"))
+			peakScript = testScript;
+		Logger.info(Thread.currentThread() + "Jmol>JSV " + peakScript);
+		if (peakScript.indexOf("<PeakData") < 0) {
+			runScriptNow(peakScript);
+			if (peakScript.indexOf("#SYNC_PEAKS") >= 0) {
+				JDXSource source = si.getCurrentSource();
+				if (source == null)
+					return;
+				try {
+					String file = "file=" + JSVEscape.eS(source.getFilePath());
+					JmolList<PeakInfo> peaks = source.getSpectra().get(0).getPeakList();
+					SB sb = new SB();
+					sb.append("[");
+					int n = peaks.size();
+					for (int i = 0; i < n; i++) {
+						String s = peaks.get(i).toString();
+						s = s + " " + file;
+						sb.append(JSVEscape.eS(s));
+						if (i > 0)
+							sb.append(",");
+					}
+					sb.append("]");
+					si.syncToJmol("Peaks: " + sb);
+				} catch (Exception e) {
+					// ignore bad structures -- no spectrum
+				}
+			}
+			return;
+		}
+		// todo: why the quotes??
+		peakScript = Txt.simpleReplace(peakScript, "\\\"", "");
+		String file = Parser.getQuotedAttribute(peakScript, "file");
+		System.out.println("file2=" + file);
+		String index = Parser.getQuotedAttribute(peakScript, "index");
+		if (file == null || index == null)
+			return;
+		String model = Parser.getQuotedAttribute(peakScript, "model");
+		String jmolSource = Parser.getQuotedAttribute(peakScript, "src");
+		String modelSent = (jmolSource != null && jmolSource.startsWith("Jmol") ? null
+				: si.getReturnFromJmolModel());
+
+		if (model != null && modelSent != null && !model.equals(modelSent)) {
+			Logger.info("JSV ignoring model " + model + "; should be " + modelSent);
+			return;
+		}
+		si.setReturnFromJmolModel(null);
+		if (si.getPanelNodes().size() == 0 || !checkFileAlreadyLoaded(file)) {
+			Logger.info("file " + file
+					+ " not found -- JSViewer closing all and reopening");
+			si.syncLoad(file);
+		}
+		// System.out.println(Thread.currentThread() + "syncscript jsvp=" +
+		// si.getSelectedPanel() + " s0=" + si.getSelectedPanel().getSpectrum());
+		PeakInfo pi = selectPanelByPeak(peakScript);
+		// System.out.println(Thread.currentThread() + "syncscript pi=" + pi);
+		JSVPanel jsvp = si.getSelectedPanel();
+		// System.out.println(Thread.currentThread() + "syncscript jsvp=" + jsvp);
+		String type = Parser.getQuotedAttribute(peakScript, "type");
+		// System.out.println(Thread.currentThread() +
+		// "syncscript --selectSpectrum2 " + pi + " " + type + " " + model + " s=" +
+		// jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
+		jsvp.getPanelData().selectSpectrum(file, type, model, true);
+		// System.out.println(Thread.currentThread() +
+		// "syncscript --selectSpectrum3 " + pi + " " + type + " " + model + " s=" +
+		// jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
+		si.sendPanelChange(jsvp);
+		// System.out.println(Thread.currentThread() +
+		// "syncscript --selectSpectrum4 " + pi + " " + type + " " + model + " s=" +
+		// jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
+		jsvp.getPanelData().addPeakHighlight(pi);
+		// System.out.println(Thread.currentThread() +
+		// "syncscript --selectSpectrum5 " + pi + " " + type + " " + model + " s=" +
+		// jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
+		jsvp.doRepaint();
+		// round trip this so that Jmol highlights all equivalent atoms
+		// and appropriately starts or clears vibration
+		if (jmolSource == null || (pi != null && pi.getAtoms() != null))
+			si.syncToJmol(jmolSelect(pi));
+	}
+
+	private boolean checkFileAlreadyLoaded(String fileName) {
+		JSVPanel jsvp = si.getSelectedPanel();
+		if (jsvp != null && jsvp.getPanelData().hasFileLoaded(fileName))
+			return true;
+		JmolList<JSVPanelNode> panelNodes = si.getPanelNodes();
+		for (int i = panelNodes.size(); --i >= 0;)
+			if (panelNodes.get(i).jsvp.getPanelData().hasFileLoaded(fileName)) {
+				si.setSelectedPanel(panelNodes.get(i).jsvp);
+				return true;
+			}
+		return false;
+	}
+
+	private PeakInfo selectPanelByPeak(String peakScript) {
+		JmolList<JSVPanelNode> panelNodes = si.getPanelNodes();
+		if (panelNodes == null)
+			return null;
+		String file = Parser.getQuotedAttribute(peakScript, "file");
+		String index = Parser.getQuotedAttribute(peakScript, "index");
+		PeakInfo pi = null;
+		for (int i = panelNodes.size(); --i >= 0;)
+			panelNodes.get(i).jsvp.getPanelData().addPeakHighlight(null);
+		JSVPanel jsvp = si.getSelectedPanel();
+		// System.out.println(Thread.currentThread() +
+		// "JSViewer selectPanelByPeak looking for " + index + " " + file + " in " +
+		// jsvp);
+		pi = jsvp.getPanelData().selectPeakByFileIndex(file, index);
+		System.out.println(Thread.currentThread()
+				+ "JSViewer selectPanelByPeak pi = " + pi);
+		if (pi != null) {
+			// found in current panel
+			si.setNode(JSVPanelNode.findNode(jsvp, panelNodes), false);
+		} else {
+			// must look elsewhere
+			// System.out.println(Thread.currentThread() +
+			// "JSViewer selectPanelByPeak did not find it");
+			for (int i = panelNodes.size(); --i >= 0;) {
+				JSVPanelNode node = panelNodes.get(i);
+				// System.out.println(Thread.currentThread() +
+				// "JSViewer selectPanelByPeak looking at node " + i + " " +
+				// node.fileName);
+				if ((pi = node.jsvp.getPanelData().selectPeakByFileIndex(file, index)) != null) {
+					// System.out.println(Thread.currentThread() +
+					// "JSViewer selectPanelByPeak setting node " + i + " pi=" + pi);
+					si.setNode(node, false);
+					// System.out.println(Thread.currentThread() +
+					// "JSViewer selectPanelByPeak setting node " + i + " set node done");
+					break;
+				}
+			}
+		}
+		// System.out.println(Thread.currentThread() +
+		// "JSViewer selectPanelByPeak finally pi = " + pi);
+		return pi;
+	}
+
+	/**
+	 * this method is called as a result of the user clicking on a peak
+	 * (eventObject instanceof PeakPickEvent) or from PEAK command execution
+	 * 
+	 * @param eventObj
+	 * @param isApp
+	 */
+	public void processPeakPickEvent(Object eventObj, boolean isApp) {
+		// trouble here is with round trip when peaks are clicked in rapid
+		// succession.
+
+		PeakInfo pi;
+		if (eventObj instanceof PeakInfo) {
+			// this is a call from the PEAK command, above.
+			pi = (PeakInfo) eventObj;
+			JSVPanel jsvp = si.getSelectedPanel();
+			PeakInfo pi2 = jsvp.getPanelData().findMatchingPeakInfo(pi);
+			if (pi2 == null) {
+				if (!"ALL".equals(pi.getTitle()))
+					return;
+				JmolList<JSVPanelNode> panelNodes = si.getPanelNodes();
+				JSVPanelNode node = null;
+				for (int i = 0; i < panelNodes.size(); i++)
+					if ((pi2 = panelNodes.get(i).jsvp.getPanelData()
+							.findMatchingPeakInfo(pi)) != null) {
+						node = panelNodes.get(i);
+						break;
+					}
+				if (node == null)
+					return;
+				si.setNode(node, false);
+			}
+			pi = pi2;
+		} else {
+			PeakPickEvent e = ((PeakPickEvent) eventObj);
+			si.setSelectedPanel((JSVPanel) e.getSource());
+			pi = e.getPeakInfo();
+		}
+		si.getSelectedPanel().getPanelData().addPeakHighlight(pi);
+		// the above line is what caused problems with GC/MS selection
+		syncToJmol(pi);
+		// System.out.println(Thread.currentThread() +
+		// "processPeakEvent --selectSpectrum " + pi);
+		if (pi.isClearAll()) // was not in app version??
+			si.getSelectedPanel().doRepaint();
+		else
+			si.getSelectedPanel().getPanelData().selectSpectrum(pi.getFilePath(),
+					pi.getType(), pi.getModel(), true);
+		si.checkCallbacks(pi.getTitle());
+
+	}
+
+	private void syncToJmol(PeakInfo pi) {
+		si.setReturnFromJmolModel(pi.getModel());
+		si.syncToJmol(jmolSelect(pi));
+	}
+
+	public void sendPanelChange(JSVPanel jsvp) {
 		PanelData pd = jsvp.getPanelData();
 		JDXSpectrum spec = pd.getSpectrum();
-    PeakInfo pi = spec.getSelectedPeak();
-    if (pi == null)
-      pi = spec.getModelPeakInfoForAutoSelectOnLoad();
-    if (pi == null)
-      pi = spec.getBasePeakInfo();
-    pd.addPeakHighlight(pi);
-    Logger.info(Thread.currentThread() + "JSViewer sendFrameChange "  + jsvp);
-    syncToJmol(si, pi);
-  }
+		PeakInfo pi = spec.getSelectedPeak();
+		if (pi == null)
+			pi = spec.getModelPeakInfoForAutoSelectOnLoad();
+		if (pi == null)
+			pi = spec.getBasePeakInfo();
+		pd.addPeakHighlight(pi);
+		Logger.info(Thread.currentThread() + "JSViewer sendFrameChange " + jsvp);
+		syncToJmol(pi);
+	}
 
-  public static String jmolSelect(PeakInfo pi) {
-    String script = null;
-    if ("IR".equals(pi.getType()) || "RAMAN".equals(pi.getType())) {
-      script = "vibration ON; selectionHalos OFF;";
-    } else if (pi.getAtoms() != null) {
-      script = "vibration OFF; selectionhalos ON;";
-    } else {
-      script = "vibration OFF; selectionhalos OFF;";
-    }
-    script = "Select: " + pi + " script=\"" + script;
-    System.out.println("JSpecView jmolSelect " + script);
-    return script;
-  }
+	private String jmolSelect(PeakInfo pi) {
+		String script = null;
+		if ("IR".equals(pi.getType()) || "RAMAN".equals(pi.getType())) {
+			script = "vibration ON; selectionHalos OFF;";
+		} else if (pi.getAtoms() != null) {
+			script = "vibration OFF; selectionhalos ON;";
+		} else {
+			script = "vibration OFF; selectionhalos OFF;";
+		}
+		script = "Select: " + pi + " script=\"" + script;
+		System.out.println("JSpecView jmolSelect " + script);
+		return script;
+	}
 
-  public static void removeAllHighlights(ScriptInterface si) {
-    JSVPanel jsvp = si.getSelectedPanel();
-    if (jsvp != null) {
-      jsvp.getPanelData().removeAllHighlights();
-      jsvp.doRepaint();
-    }
-  }
-
-  public static void removeHighlights(ScriptInterface si, double x1, double x2) {
-    JSVPanel jsvp = si.getSelectedPanel();
-    if (jsvp != null) {
-      jsvp.getPanelData().removeHighlight(x1, x2);
-      jsvp.doRepaint();
-    }
-  }
-
-  public static Map<String, Object> getPropertyAsJavaObject(ScriptInterface si,
-                                                            String key) {
-  	boolean isAll = false;
-  	if (key != null && key.toUpperCase().startsWith("ALL ") || "all".equalsIgnoreCase(key)) {
-  		key = key.substring(3).trim();
-  		isAll = true;
-  	}
-    if ("".equals(key))
-      key = null;
-    Map<String, Object>map = new Hashtable<String, Object>();
-		Map<String, Object> map0 = si.getSelectedPanel().getPanelData().getInfo(true, key);
+	public Map<String, Object> getPropertyAsJavaObject(String key) {
+		boolean isAll = false;
+		if (key != null && key.toUpperCase().startsWith("ALL ")
+				|| "all".equalsIgnoreCase(key)) {
+			key = key.substring(3).trim();
+			isAll = true;
+		}
+		if ("".equals(key))
+			key = null;
+		Map<String, Object> map = new Hashtable<String, Object>();
+		Map<String, Object> map0 = si.getSelectedPanel().getPanelData().getInfo(
+				true, key);
 		if (!isAll && map0 != null)
 			return map0;
 		if (map0 != null)
-		  map.put("current", map0);
-   JmolList<Map<String, Object>> info = new JmolList<Map<String, Object>>();
-    JmolList<JSVPanelNode> panelNodes = si.getPanelNodes();
-    for (int i = 0; i < panelNodes.size(); i++) {
-      JSVPanel jsvp = panelNodes.get(i).jsvp;
-      if (jsvp == null)
-        continue;
-			info.addLast(panelNodes.get(i).getInfo(key));      
-    }
-    map.put("items", info);
-    return map;
-  }
+			map.put("current", map0);
+		JmolList<Map<String, Object>> info = new JmolList<Map<String, Object>>();
+		JmolList<JSVPanelNode> panelNodes = si.getPanelNodes();
+		for (int i = 0; i < panelNodes.size(); i++) {
+			JSVPanel jsvp = panelNodes.get(i).jsvp;
+			if (jsvp == null)
+				continue;
+			info.addLast(panelNodes.get(i).getInfo(key));
+		}
+		map.put("items", info);
+		return map;
+	}
 
-  public static String getCoordinate(ScriptInterface si) {
-    // important to use getSelectedPanel() here because it may be from MainFrame in PRO
-    if (si.getSelectedPanel() != null) {
-      Coordinate coord = si.getSelectedPanel().getPanelData()
-          .getClickedCoordinate();
-      if (coord != null)
-        return coord.getXVal() + " " + coord.getYVal();
-    }
-    return "";
-  }
+	public String getCoordinate() {
+		// important to use getSelectedPanel() here because it may be from MainFrame
+		// in PRO
+		if (si.getSelectedPanel() != null) {
+			Coordinate coord = si.getSelectedPanel().getPanelData()
+					.getClickedCoordinate();
+			if (coord != null)
+				return coord.getXVal() + " " + coord.getYVal();
+		}
+		return "";
+	}
 
 	/**
 	 * originally in MainFrame, this method takes the OVERLAY command option and
 	 * converts it to a list of spectra
 	 * 
-	 * @param si
 	 * @param value
 	 * @param speclist
 	 * @param isView
 	 * @return comma-separated list, for the title
 	 */
-	private static String fillSpecList(ScriptInterface si, String value,
-			JmolList<JDXSpectrum> speclist, boolean isView) {
+	private String fillSpecList(String value, JmolList<JDXSpectrum> speclist,
+			boolean isView) {
 
 		JmolList<JSVPanelNode> panelNodes = si.getPanelNodes();
 		JSVPanel selectedPanel = si.getSelectedPanel();
@@ -838,7 +869,7 @@ public class JSViewer {
 				: null);
 	}
 
-	private static void addSpecToList(PanelData pd, double userYFactor, int isubspec,
+	private void addSpecToList(PanelData pd, double userYFactor, int isubspec,
 			JmolList<JDXSpectrum> list, boolean isView) {
 		if (isView) {
 			JDXSpectrum spec = pd.getSpectrumAt(0);
@@ -849,24 +880,332 @@ public class JSViewer {
 		}
 	}
 
-	private static void zoomTo(JSVPanel jsvp, String value) {
+	private void zoomTo(JSVPanel jsvp, String value) {
 		PanelData pd = jsvp.getPanelData();
-			if (value.equalsIgnoreCase("next")) {
-				pd.nextView();
+		if (value.equalsIgnoreCase("next")) {
+			pd.nextView();
 		} else if (value.toLowerCase().startsWith("prev")) {
 			pd.previousView();
-			
+
 		} else if (value.equalsIgnoreCase("out")) {
 			pd.resetView();
-			
+
 		} else if (value.equalsIgnoreCase("clear")) {
 			pd.clearAllView();
 		}
 	}
 
-	public static void showColorMessage(ScriptInterface si) {
+	public void showColorMessage() {
 		JSVPanel jsvp = si.getSelectedPanel();
-		jsvp.showMessage(jsvp.getPanelData().getSolutionColorHtml(), "Predicted Colour");
+		jsvp.showMessage(jsvp.getPanelData().getSolutionColorHtml(),
+				"Predicted Colour");
+	}
+
+	public int openDataOrFile(String data, String name,
+			JmolList<JDXSpectrum> specs, String url, int firstSpec, int lastSpec,
+			boolean isAppend) {
+		if ("NONE".equals(name)) {
+			close("View*");
+			return FILE_OPEN_OK;
+		}
+		si.writeStatus("");
+		String filePath = null;
+		String newPath = null;
+		String fileName = null;
+		File file = null;
+		URL base = null;
+		boolean isView = false;
+		if (data != null) {
+		} else if (specs != null) {
+			isView = true;
+			newPath = fileName = filePath = "View" + si.incrementViewCount(1);
+		} else if (url != null) {
+			try {
+				base = JSVFileManager.appletDocumentBase;
+				URL u = (base == null ? new URL(url) : new URL(base, url));
+				filePath = u.toString();
+				si.setRecentURL(filePath);
+				fileName = JSVFileManager.getName(url);
+			} catch (MalformedURLException e) {
+				file = new File(url);
+			}
+		}
+		if (file != null) {
+			fileName = file.getName();
+			newPath = filePath = file.getAbsolutePath();
+			// recentJmolName = (url == null ? filePath.replace('\\', '/') : url);
+			si.setRecentURL(null);
+		}
+		// TODO could check here for already-open view
+		if (!isView)
+			if (JSVPanelNode.isOpen(si.getPanelNodes(), filePath)
+					|| JSVPanelNode.isOpen(si.getPanelNodes(), url)) {
+				si.writeStatus(filePath + " is already open");
+				return FILE_OPEN_ALREADY;
+			}
+		if (!isAppend && !isView)
+			close("all"); // with CHECK we may still need to do this
+		si.setCursor(ApiPlatform.CURSOR_WAIT);
+		try {
+			si.setCurrentSource(isView ? JDXSource.createView(specs) : si
+					.createSource(data, filePath, base, firstSpec, lastSpec));
+		} catch (Exception e) {
+			Logger.error(e.getMessage());
+			si.writeStatus(e.getMessage());
+			si.setCursor(ApiPlatform.CURSOR_DEFAULT);
+			return FILE_OPEN_ERROR;
+		}
+		si.setCursor(ApiPlatform.CURSOR_DEFAULT);
+		System.gc();
+		JDXSource currentSource = si.getCurrentSource();
+		if (newPath == null) {
+			newPath = currentSource.getFilePath();
+			if (newPath != null)
+				fileName = newPath.substring(newPath.lastIndexOf("/") + 1);
+		} else {
+			currentSource.setFilePath(newPath);
+		}
+		si.setLoaded(fileName, newPath);
+
+		JDXSpectrum spec = si.getCurrentSource().getJDXSpectrum(0);
+		if (spec == null) {
+			return FILE_OPEN_NO_DATA;
+		}
+
+		specs = currentSource.getSpectra();
+		JDXSpectrum.process(specs, si.getIRMode());
+
+		boolean autoOverlay = si.getAutoCombine()
+				|| spec.isAutoOverlayFromJmolClick();
+
+		boolean combine = isView || autoOverlay && currentSource.isCompoundSource;
+		if (combine) {
+			combineSpectra((isView ? url : null));
+		} else {
+			splitSpectra();
+		}
+		if (!isView)
+			si.updateRecentMenus(filePath);
+		return FILE_OPEN_OK;
+	}
+
+	public void close(String value) {
+		if (value == null || value.equalsIgnoreCase("all") || value.equals("*")) {
+			si.closeSource(null);
+			return;
+		}
+		JmolList<JSVPanelNode> panelNodes = si.getPanelNodes();
+		value = value.replace('\\', '/');
+		if (value.endsWith("*")) {
+			value = value.substring(0, value.length() - 1);
+			for (int i = panelNodes.size(); --i >= 0;)
+				if (i < panelNodes.size()
+						&& panelNodes.get(i).fileName.startsWith(value))
+					si.closeSource(panelNodes.get(i).source);
+		} else if (value.equals("selected")) {
+			JmolList<JDXSource> list = new JmolList<JDXSource>();
+			JDXSource lastSource = null;
+			for (int i = panelNodes.size(); --i >= 0;) {
+				JDXSource source = panelNodes.get(i).source;
+				if (panelNodes.get(i).isSelected
+						&& (lastSource == null || lastSource != source))
+					list.addLast(source);
+				lastSource = source;
+			}
+			for (int i = list.size(); --i >= 0;)
+				si.closeSource(list.get(i));
+		} else {
+			JDXSource source = (value.length() == 0 ? si.getCurrentSource()
+					: JSVPanelNode.findSourceByNameOrId(value, panelNodes));
+			if (source == null)
+				return;
+			si.closeSource(source);
+		}
+		if (si.getSelectedPanel() == null && panelNodes.size() > 0)
+			si.setSelectedPanel(JSVPanelNode.getLastFileFirstNode(panelNodes));
+	}
+
+	public void load(String value) {
+		JmolList<String> tokens = ScriptToken.getTokens(value);
+		String filename = tokens.get(0);
+		int pt = 0;
+		boolean isAppend = filename.equalsIgnoreCase("APPEND");
+		boolean isCheck = filename.equalsIgnoreCase("CHECK");
+		if (isAppend || isCheck)
+			filename = tokens.get(++pt);
+		boolean isSimulation = filename.equalsIgnoreCase("MOL");
+		if (isSimulation)
+			filename = JSVFileManager.SIMULATION_PROTOCOL + "MOL="
+					+ Txt.trimQuotes(tokens.get(++pt));
+		if (!isCheck && !isAppend) {
+			if (filename.equals("\"\"") && si.getCurrentSource() != null)
+				filename = si.getCurrentSource().getFilePath();
+			close("all");
+		}
+		filename = Txt.trimQuotes(filename);
+		if (filename.startsWith("$")) {
+			isSimulation = true;
+			filename = JSVFileManager.SIMULATION_PROTOCOL + filename;
+		}
+		int firstSpec = (pt + 1 < tokens.size() ? Integer.valueOf(tokens.get(++pt))
+				.intValue() : -1);
+		int lastSpec = (pt + 1 < tokens.size() ? Integer.valueOf(tokens.get(++pt))
+				.intValue() : firstSpec);
+		si
+				.openDataOrFile(null, null, null, filename, firstSpec, lastSpec,
+						isAppend);
+	}
+
+	public void combineSpectra(String name) {
+		JDXSource source = si.getCurrentSource();
+		JmolList<JDXSpectrum> specs = source.getSpectra();
+		JSVPanel jsvp = si.getNewJSVPanel(specs);
+		jsvp.setTitle(source.getTitle());
+		if (jsvp.getTitle().equals("")) {
+			jsvp.getPanelData().setViewTitle(source.getFilePath());
+			jsvp.setTitle(name);
+		}
+		si.setPropertiesFromPreferences(jsvp, true);
+		si.createTree(source, new JSVPanel[] { jsvp }).getPanelNode().isView = true;
+		JSVPanelNode node = JSVPanelNode.findNode(si.getSelectedPanel(), si
+				.getPanelNodes());
+		node.setFrameTitle(name);
+		node.isView = true;
+		if (si.getAutoShowLegend()
+				&& si.getSelectedPanel().getPanelData().getNumberOfGraphSets() == 1)
+			node.setLegend(si.getOverlayLegend(jsvp));
+		si.setMenuEnables(node, false);
+	}
+
+	public void closeSource(JDXSource source) {
+		// Remove nodes and dispose of frames
+		JmolList<JSVPanelNode> panelNodes = si.getPanelNodes();
+		JSVTree tree = si.getSpectraTree();
+		JSVTreeNode rootNode = tree.getRootNode();
+		String fileName = (source == null ? null : source.getFilePath());
+		JmolList<JSVTreeNode> toDelete = new JmolList<JSVTreeNode>();
+		Enumeration<JSVTreeNode> enume = rootNode.children();
+		while (enume.hasMoreElements()) {
+			JSVTreeNode node = enume.nextElement();
+			if (fileName == null
+					|| node.getPanelNode().source.getFilePath().equals(fileName)) {
+				for (Enumeration<JSVTreeNode> e = node.children(); e.hasMoreElements();) {
+					JSVTreeNode childNode = e.nextElement();
+					toDelete.addLast(childNode);
+					panelNodes.remove(childNode.getPanelNode());
+				}
+				toDelete.addLast(node);
+				if (fileName != null)
+					break;
+			}
+		}
+		tree.deleteNodes(toDelete);
+		if (source == null) {
+			JDXSource currentSource = si.getCurrentSource();
+			// jsvpPopupMenu.dispose();
+			if (currentSource != null)
+				currentSource.dispose();
+			// jsvpPopupMenu.dispose();
+			if (si.getSelectedPanel() != null)
+				si.getSelectedPanel().dispose();
+		} else {
+			// setFrameAndTreeNode(panelNodes.size() - 1);
+		}
+
+		if (si.getCurrentSource() == source) {
+			si.setSelectedPanel(null);
+			si.setCurrentSource(null);
+		}
+
+		int max = 0;
+		for (int i = 0; i < panelNodes.size(); i++) {
+			float f = Parser.parseFloat(panelNodes.get(i).id);
+			if (f >= max + 1)
+				max = (int) Math.floor(f);
+		}
+		si.setFileCount(max);
+		System.gc();
+		Logger.checkMemory();
+	}
+
+	public void setFrameAndTreeNode(int i) {
+		JmolList<JSVPanelNode> panelNodes = si.getPanelNodes();
+		if (panelNodes == null || i < 0 || i >= panelNodes.size())
+			return;
+		si.setNode(panelNodes.get(i), false);
+	}
+
+	public JSVPanelNode selectFrameNode(JSVPanel jsvp) {
+		// Find Node in SpectraTree and select it
+		JSVPanelNode node = JSVPanelNode.findNode(jsvp, si.getPanelNodes());
+		if (node == null)
+			return null;
+
+		JSVTree spectraTree = si.getSpectraTree();
+		spectraTree.setPath(spectraTree.newTreePath(node.treeNode.getPath()));
+		return si.setOverlayVisibility(node);
+	}
+
+	public JSVPanel setSpectrum(String value) {
+		if (value.indexOf('.') >= 0) {
+			JSVPanelNode node = JSVPanelNode.findNodeById(value, si.getPanelNodes());
+			if (node == null)
+				return null;
+			si.setNode(node, false);
+		} else {
+			int n = Parser.parseInt(value);
+			if (n <= 0) {
+				si.checkOverlay();
+				return null;
+			}
+			setFrameAndTreeNode(n - 1);
+		}
+		return si.getSelectedPanel();
+	}
+
+	public void splitSpectra() {
+		JDXSource source = si.getCurrentSource();
+		JmolList<JDXSpectrum> specs = source.getSpectra();
+		JSVPanel[] panels = new JSVPanel[specs.size()];
+		JSVPanel jsvp = null;
+		for (int i = 0; i < specs.size(); i++) {
+			JDXSpectrum spec = specs.get(i);
+			jsvp = si.getNewJSVPanel(spec);
+			si.setPropertiesFromPreferences(jsvp, true);
+			panels[i] = jsvp;
+		}
+		// arrange windows in ascending order
+		si.createTree(source, panels);
+		si.getNewJSVPanel((JDXSpectrum) null); // end of operation
+		JSVPanelNode node = JSVPanelNode.findNode(si.getSelectedPanel(), si
+				.getPanelNodes());
+		si.setMenuEnables(node, true);
+	}
+
+	public void selectedTreeNode(JSVTreeNode node) {
+		if (node == null) {
+			return;
+		}
+		if (node.isLeaf()) {
+			si.setNode(node.getPanelNode(), true);
+		}
+		si.setCurrentSource(node.getPanelNode().source);
+	}
+
+	public void removeAllHighlights() {
+		JSVPanel jsvp = si.getSelectedPanel();
+		if (jsvp != null) {
+			jsvp.getPanelData().removeAllHighlights();
+			jsvp.doRepaint();
+		}
+	}
+
+	public void removeHighlight(double x1, double x2) {
+		JSVPanel jsvp = si.getSelectedPanel();
+		if (jsvp != null) {
+			jsvp.getPanelData().removeHighlight(x1, x2);
+			jsvp.doRepaint();
+		}
 	}
 
 }

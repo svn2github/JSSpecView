@@ -1,4 +1,6 @@
-package jspecview.common;
+package jspecview.api;
+
+import jspecview.common.Coordinate;
 
 public abstract interface AnnotationDialog extends AnnotationData {
 

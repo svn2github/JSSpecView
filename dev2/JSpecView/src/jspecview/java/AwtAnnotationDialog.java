@@ -38,8 +38,8 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import jspecview.api.AnnotationDialog;
 import jspecview.api.ScriptInterface;
-import jspecview.common.AnnotationDialog;
 import jspecview.common.Coordinate;
 import jspecview.common.DialogParams;
 import jspecview.common.JDXSpectrum;

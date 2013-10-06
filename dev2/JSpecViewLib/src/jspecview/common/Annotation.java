@@ -24,6 +24,8 @@
 
 package jspecview.common;
 
+import jspecview.api.ColoredAnnotation;
+import jspecview.api.JSVPanel;
 import jspecview.util.JSVColor;
 import jspecview.util.JSVColorUtil;
 

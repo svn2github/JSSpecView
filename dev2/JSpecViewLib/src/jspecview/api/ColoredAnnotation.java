@@ -1,4 +1,4 @@
-package jspecview.common;
+package jspecview.api;
 
 import jspecview.util.JSVColor;
 

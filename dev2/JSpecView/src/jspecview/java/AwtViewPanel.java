@@ -11,8 +11,8 @@ import javax.swing.JPanel;
 import org.jmol.util.JmolList;
 
 import jspecview.api.JSVMainPanel;
-import jspecview.common.JSVViewPanel;
-import jspecview.common.JSVPanel;
+import jspecview.api.JSVPanel;
+import jspecview.api.JSVViewPanel;
 import jspecview.common.JSVPanelNode;
 import jspecview.common.Annotation.AType;
 

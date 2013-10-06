@@ -1,6 +1,5 @@
 package jspecview.api;
 
-import jspecview.common.JSVPanel;
 
 public interface JSVPopupMenu {
 

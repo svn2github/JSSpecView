@@ -2,6 +2,8 @@ package jspecview.common;
 
 
 
+import jspecview.api.XYScaleConverter;
+
 import org.jmol.util.JmolList;
 
 public class ImageView implements XYScaleConverter {

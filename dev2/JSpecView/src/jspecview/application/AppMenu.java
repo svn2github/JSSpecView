@@ -55,7 +55,7 @@ import javax.swing.event.MenuListener;
 
 import org.jmol.util.JmolList;
 
-import jspecview.common.JSVPanel;
+import jspecview.api.JSVPanel;
 import jspecview.common.JSVPanelNode;
 import jspecview.common.PanelData;
 import jspecview.common.ScriptToken;

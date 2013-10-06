@@ -8,7 +8,7 @@ import javax.swing.JButton;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 
-import jspecview.common.JSVPanel;
+import jspecview.api.JSVPanel;
 import jspecview.common.JSVPanelNode;
 import jspecview.common.PanelData;
 import jspecview.common.ScriptToken;

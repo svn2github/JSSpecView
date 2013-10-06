@@ -3,6 +3,8 @@ package jspecview.common;
 import java.util.Hashtable;
 import java.util.Map;
 
+import jspecview.api.JSVPanel;
+
 public class Parameters {
 
 	public String name;

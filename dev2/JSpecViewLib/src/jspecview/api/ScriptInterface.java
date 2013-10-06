@@ -6,9 +6,8 @@ import org.jmol.util.JmolList;
 
 
 import jspecview.common.JDXSpectrum;
-import jspecview.common.JSVDialog;
-import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelNode;
+import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
 import jspecview.common.ColorParameters;
 import jspecview.common.ScriptToken;
@@ -77,7 +76,7 @@ public interface ScriptInterface {
 
 	public JSVPanel getSelectedPanel();
 
-	public Object getSpectraTree();
+	public JSVTree getSpectraTree();
 
 	public int incrementViewCount(int i);
 
@@ -104,7 +103,7 @@ public interface ScriptInterface {
 
 	public void setCurrentSource(JDXSource source);
 
-	public void setCursorObject(Object predefinedCursor);
+	public void setCursor(int id);
 
 	public void setFileCount(int max);
 
@@ -128,8 +127,6 @@ public interface ScriptInterface {
 
 	public void setSelectedPanel(JSVPanel jsvp);
 
-	public JSVPanel setSpectrum(String value);
-
 	public void showProperties();
 
 	public void syncLoad(String fileName);
@@ -151,5 +148,11 @@ public interface ScriptInterface {
 	public boolean isSigned();
 
 	public String getFileAsString(String value);
+
+	public Object getPrintLayout(boolean isJob);
+
+	public JSVTreeNode createTree(JDXSource source, JSVPanel[] jsvPanels);
+
+	public JSViewer getViewer();
 
 }

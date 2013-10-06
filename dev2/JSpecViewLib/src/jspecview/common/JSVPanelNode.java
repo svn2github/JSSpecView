@@ -8,8 +8,9 @@ import java.util.Map;
 import org.jmol.util.JmolList;
 import org.jmol.util.SB;
 
-import jspecview.common.JSVDialog;
-import jspecview.common.JSVPanel;
+import jspecview.api.JSVDialog;
+import jspecview.api.JSVPanel;
+import jspecview.api.JSVTreeNode;
 import jspecview.source.JDXSource;
 
 public class JSVPanelNode {
@@ -26,8 +27,8 @@ public class JSVPanelNode {
 
   }
 
-  public Object treeNode;
-  public void setTreeNode(Object node) {
+  public JSVTreeNode treeNode;
+  public void setTreeNode(JSVTreeNode node) {
     treeNode = node;
   }
   public Object getTreeNode() {

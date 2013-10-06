@@ -59,17 +59,18 @@ import org.jmol.util.Logger;
 import org.jmol.util.Txt;
 
 import jspecview.api.JSVAppletInterface;
+import jspecview.api.JSVDialog;
 import jspecview.api.JSVMainPanel;
+import jspecview.api.JSVPanel;
 import jspecview.api.JSVTree;
+import jspecview.api.JSVTreeNode;
+import jspecview.api.PanelListener;
 import jspecview.api.ScriptInterface;
 import jspecview.application.TextDialog;
 import jspecview.awt.Platform;
-import jspecview.common.JSVDialog;
-import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelNode;
 import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
-import jspecview.common.PanelListener;
 import jspecview.common.ColorParameters;
 import jspecview.common.Parameters;
 import jspecview.common.PeakPickEvent;
@@ -80,7 +81,6 @@ import jspecview.common.ScriptToken;
 import jspecview.common.Coordinate;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.SubSpecChangeEvent;
-import jspecview.common.Temp;
 import jspecview.common.ZoomEvent;
 import jspecview.common.JDXSpectrum.IRMode;
 import jspecview.export.Exporter;
@@ -136,7 +136,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	private RepaintManager         repaintManager;
 	private JSVPanel               selectedPanel;
   private JSVTree                spectraTree;
-	private JSVMainPanel           viewPanel;
+	private JSVMainPanel           viewPanel; // alias for spectrumPanel
   private JSVDialog              viewDialog;
 	private JSVDialog              overlayLegendDialog;
 
@@ -172,6 +172,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	private String loadFileCallbackFunctionName;
 	private String peakCallbackFunctionName;
 	private String syncCallbackFunctionName;
+	private JSViewer viewer;
 
 	/////// parameter set/get methods
 	
@@ -240,7 +241,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		return selectedPanel;
 	}
 
-  public Object getSpectraTree() {
+  public JSVTree getSpectraTree() {
   	return spectraTree;
   }
   
@@ -288,7 +289,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	// BH - 8.3.2012
 
 	public Map<String, Object> getPropertyAsJavaObject(String key) {
-		return JSViewer.getPropertyAsJavaObject(this, key);
+		return viewer.getPropertyAsJavaObject(key);
 	}
 
 	public String getPropertyAsJSON(String key) {
@@ -303,7 +304,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	 * @return A String representation of the coordinate
 	 */
 	public String getCoordinate() {
-		return JSViewer.getCoordinate(this);
+		return viewer.getCoordinate();
 	}
 
 	/**
@@ -401,7 +402,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	 *          the alpha portion of the highlight color
 	 */
 	public void addHighlight(double x1, double x2, int r, int g, int b, int a) {
-		JSViewer.addHighLight(this, x1, x2, r, g, b, a);
+		viewer.addHighLight(x1, x2, r, g, b, a);
 	}
 
 	/**
@@ -409,7 +410,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	 * removes all highlights from the plot area of a <code>JSVPanel</code>
 	 */
 	public void removeAllHighlights() {
-		JSViewer.removeAllHighlights(this);
+		viewer.removeAllHighlights();
 	}
 
 	/**
@@ -422,11 +423,11 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	 *          the ending x value
 	 */
 	public void removeHighlight(double x1, double x2) {
-		JSViewer.removeHighlights(this, x1, x2);
+		viewer.removeHighlight(x1, x2);
 	}
 
 	public void syncScript(String peakScript) {
-		JSViewer.syncScript(this, peakScript);
+		viewer.syncScript(peakScript);
 	}
 
 	/**
@@ -455,7 +456,8 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	 */
 	private void init() {
 
-		spectraTree = new AwtTree(this);
+		viewer = new JSViewer(this);
+		spectraTree = new AwtTree(viewer);
 		scriptQueue = new JmolList<String>();
 		commandWatcherThread = new Thread(new CommandWatcher());
 		commandWatcherThread.setName("CommmandWatcherThread");
@@ -514,7 +516,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		if (jsvp == prevPanel)
 			return;
 		prevPanel = jsvp;
-		JSViewer.sendPanelChange(this, jsvp);
+		viewer.sendPanelChange(jsvp);
 	}
 
 	/**
@@ -523,7 +525,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	 * 
 	 */
 	protected void showOverlayKey(boolean visible) {
-		JSViewer.setOverlayLegendVisibility(this, getSelectedPanel(), visible);
+		viewer.setOverlayLegendVisibility(getSelectedPanel(), visible);
 	}
 
 	// //////////// JSVAppletPopupMenu calls
@@ -785,10 +787,10 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	 */
 	public void openDataOrFile(String data, String name,
 			JmolList<JDXSpectrum> specs, String url, int firstSpec, int lastSpec, boolean isAppend) {
-  	int status = Temp.openDataOrFile(this, data, name, specs, url, firstSpec, lastSpec, isAppend);
-  	if (status == Temp.FILE_OPEN_ALREADY)
+  	int status = viewer.openDataOrFile(data, name, specs, url, firstSpec, lastSpec, isAppend);
+  	if (status == JSViewer.FILE_OPEN_ALREADY)
   		return;
-    if (status != Temp.FILE_OPEN_OK) {
+    if (status != JSViewer.FILE_OPEN_OK) {
     	setSelectedPanel(null);
     	return;
     }
@@ -808,7 +810,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	// ///////// simple sync functionality //////////
 
 	public boolean runScriptNow(String params) {
-		return JSViewer.runScriptNow(this, params);
+		return viewer.runScriptNow(params);
 	}
 
 	/**
@@ -873,7 +875,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	 */
 	public void panelEvent(Object eventObj) {
 		if (eventObj instanceof PeakPickEvent) {
-			JSViewer.processPeakPickEvent(this, eventObj, false);
+			viewer.processPeakPickEvent(eventObj, false);
 		} else if (eventObj instanceof ZoomEvent) {
 		} else if (eventObj instanceof SubSpecChangeEvent) {
 		}
@@ -925,14 +927,14 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	public void execClose(String value, boolean fromScript) {
-		Temp.close(this, value);
+		viewer.close(value);
     if (!fromScript)
     	validateAndRepaint();
 	}
 
   public String execLoad(String value) {
   	//int nSpec = panelNodes.size();
-  	Temp.load(this, value);
+  	viewer.load(value);
     if (getSelectedPanel() == null)
       return null;
     // probably unnecessary:
@@ -954,10 +956,6 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 
 	public void execScriptComplete(String msg, boolean isOK) {
 		validateAndRepaint();
-	}
-
-	public JSVPanel setSpectrum(String value) {
-  	return AwtTree.setSpectrum(this, value);
 	}
 
 	public void execSetAutoIntegrate(boolean b) {
@@ -1002,7 +1000,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	
 	
 	public JSVPanelNode setOverlayVisibility(JSVPanelNode node) {
-		JSViewer.setOverlayLegendVisibility(this, getSelectedPanel(),
+		viewer.setOverlayLegendVisibility(getSelectedPanel(),
 				appletPopupMenu.overlayKeyMenuItem.isSelected());
 		return node;
 	}
@@ -1016,8 +1014,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	public void closeSource(JDXSource source) {
-	   System.out.println("JSVAppletrivate closeSource " + source);
-  	AwtTree.closeSource(this, source);
+  	viewer.closeSource(source);
 	}
 
 	public void process(JmolList<JDXSpectrum> specs) {
@@ -1130,5 +1127,13 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 			lastPrintLayout = pl;
 		return pl;
 	}
-	
+
+	public JSVTreeNode createTree(JDXSource source, JSVPanel[] jsvPanels) {
+		return ((AwtTree) spectraTree).createTree(this, source, jsvPanels);
+	}
+
+	public JSViewer getViewer() {
+		return viewer;
+	}
+
 }

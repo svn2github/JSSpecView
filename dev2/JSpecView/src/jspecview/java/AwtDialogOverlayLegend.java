@@ -38,7 +38,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableCellRenderer;
 
-import jspecview.common.JSVPanel;
+import jspecview.api.JSVPanel;
 
 /**
  * Dialog for showing the legend or key for overlaid plots in a

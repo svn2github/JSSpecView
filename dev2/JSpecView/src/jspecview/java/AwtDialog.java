@@ -5,8 +5,8 @@ import java.awt.Frame;
 
 import javax.swing.JDialog;
 
+import jspecview.api.JSVDialog;
 import jspecview.common.DialogParams;
-import jspecview.common.JSVDialog;
 
 abstract public class AwtDialog extends JDialog implements JSVDialog {
 

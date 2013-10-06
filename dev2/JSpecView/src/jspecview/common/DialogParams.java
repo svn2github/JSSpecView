@@ -5,6 +5,9 @@ import java.util.Map;
 
 import org.jmol.util.Txt;
 
+import jspecview.api.AnnotationData;
+import jspecview.api.AnnotationDialog;
+import jspecview.api.JSVPanel;
 import jspecview.api.ScriptInterface;
 import jspecview.common.Annotation.AType;
 

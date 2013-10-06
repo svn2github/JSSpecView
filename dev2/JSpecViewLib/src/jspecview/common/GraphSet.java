@@ -12,6 +12,11 @@ import org.jmol.util.Logger;
 import org.jmol.util.Parser;
 import org.jmol.util.Txt;
 
+import jspecview.api.AnnotationData;
+import jspecview.api.AnnotationDialog;
+import jspecview.api.ColoredAnnotation;
+import jspecview.api.JSVPanel;
+import jspecview.api.XYScaleConverter;
 import jspecview.common.Annotation.AType;
 import jspecview.common.PanelData.LinkMode;
 import jspecview.util.JSVColor;
@@ -1213,7 +1218,6 @@ public class GraphSet implements XYScaleConverter {
 	synchronized void doZoom(double initX, double initY, double finalX,
 			double finalY, boolean is1D, boolean is1DY, 
 			boolean checkRange, boolean checkLinked, boolean addZoom) {
-		System.out.println("xoZoom " + initX + " " + finalX + " dif=" + (initX - finalX));
 		if (initX == finalX) {
 			initX = getScale().minXOnScale;
 		  finalX = getScale().maxXOnScale;
@@ -1958,7 +1962,7 @@ public class GraphSet implements XYScaleConverter {
 		if (pd.isPrinting)
 			jsvp.drawLine(g, c.getXPixel0(), yPixel1, c.getXPixel0() + c.getXPixels() - 1, yPixel1);
 		int precision = getScale().precision[0];
-		JmolFont font = pd.getFont(g, c.getXPixels(), FONT_PLAIN, pd.isPrinting ? 10 : 12, false);
+		JmolFont font = pd.setFont(g, c.getXPixels(), FONT_PLAIN, pd.isPrinting ? 10 : 12, false);
 		int y1 = yPixel1;
 		int y2 = yPixel1 + 4 * pd.scalingFactor;
 		int y3 = yPixel1 + 2 * pd.scalingFactor;
@@ -2025,7 +2029,7 @@ public class GraphSet implements XYScaleConverter {
 
 		ScaleData sd = c.getScale();
 		int precision = sd.precision[1];
-		JmolFont font = pd.getFont(g, c.getXPixels(), FONT_PLAIN, pd.isPrinting ? 10 : 12, false);
+		JmolFont font = pd.setFont(g, c.getXPixels(), FONT_PLAIN, pd.isPrinting ? 10 : 12, false);
 		int h = font.getHeight();
 		double max = sd.maxYOnScale + sd.steps[1] / 2;
 		int yLast = Integer.MIN_VALUE;
@@ -2888,8 +2892,6 @@ synchronized boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 			widget.setX(toX0(xPixel), xPixel);
 			if (widget == pin1Dx01) {
 				int dp = xPixel - ((pin1Dx0.xPixel0 + pin1Dx1.xPixel0) / 2);
-				System.out.println("dif1: " + (toX0(pin1Dx1.xPixel0) - toX0(pin1Dx0.xPixel0)) + " " + dp);
-				System.out.println("dif1: " + (toX0(pin1Dx0.xPixel0) - toX0(pin1Dx0.xPixel0 + dp)));
 				int dp1 = (dp < 0 ? dp : dp);
 				int dp2 = (dp < 0 ? dp : dp);
 				xPixel = pin1Dx0.xPixel0 + dp2;

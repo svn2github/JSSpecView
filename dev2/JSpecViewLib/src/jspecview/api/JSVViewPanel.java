@@ -1,4 +1,4 @@
-package jspecview.common;
+package jspecview.api;
 
 public interface JSVViewPanel {
   void dispose();

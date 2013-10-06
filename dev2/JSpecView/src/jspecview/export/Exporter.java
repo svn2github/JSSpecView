@@ -10,9 +10,9 @@ import org.jmol.io.Base64;
 import org.jmol.util.JmolList;
 import org.jmol.util.Txt;
 
+import jspecview.api.JSVPanel;
 import jspecview.api.ScriptInterface;
 import jspecview.common.JDXSpectrum;
-import jspecview.common.JSVPanel;
 import jspecview.common.PanelData;
 import jspecview.common.PrintLayout;
 import jspecview.common.ScriptToken;
