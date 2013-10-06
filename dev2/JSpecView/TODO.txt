@@ -1,18 +1,19 @@
 
-Feel free to add to this file any time! Don't worry about sync problems. 
-Put new items at top, please.
-
 ___date="$Date$"
 ___svnRev="$LastChangedRevision::      $"  
 
 
 ___JmolVersion="13.3.5_dev_2013.08.29"
 
+Feel free to add to this file any time! Don't worry about sync problems. 
+Put new items at top, please.
+
 new feature: show NMR taps into NMRDB directly
  -- for now, application only
 
 
 ====TODO=========
+version and revision number have stopped showing in About Dialog Box
 
 -in the jsvtest.htm page, when there is a CNMR and IR overlay shown
 nothing happens when a proton is clicked on a molecule in the Jmol
