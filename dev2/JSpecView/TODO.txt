@@ -1,41 +1,16 @@
 
+Feel free to add to this file any time! Don't worry about sync problems. 
+Put new items at top, please.
+
 ___date="$Date$"
-___svnRev="$LastChangedRevision::      $"  
+___svnRev="$LastChangedRevision:: 1224 $"  
 
 
 ___JmolVersion="13.3.5_dev_2013.08.29"
 
-Feel free to add to this file any time! Don't worry about sync problems. 
-Put new items at top, please.
-
 new feature: show NMR taps into NMRDB directly
  -- for now, application only
 
-
-====TODO=========
-version and revision number have stopped showing in About Dialog Box
-
--in the jsvtest.htm page, when there is a CNMR and IR overlay shown
-nothing happens when a proton is clicked on a molecule in the Jmol
-applet. The viewer should have the option to either add H-NMR with
-current overlay or to load only H-NMR (in this case the viewer could
-have already saved the C-NMR and IR changes as a "view" to return to
-later--could be done through a pop up box
-
--when in the split overlay version: addition of two boxes next to the
-one to toggle between stacked and split, one to clear the selected
-spectrum (X), and one to minimize it only (-)
-
--a save "view" (overlay) option: writes a jdx file that will be able
-to call up changes to a current overlay similar to "save as," so that
-if one of the used spectra is used in a different file, separate
-changes and analyses can be made without altering the saved view
-
-  - in OleNMR this will be handled by saving $$JSVCMD into the procs file, I think.
-
-
-
-=====DONE========
 
 in preparation for JavaScript version:
 
@@ -63,7 +38,39 @@ Implemented jspecview.awt.Mouse and jspecview.awtjs2d.Mouse
 Removed need for AwtGraphSet
 AwtPanel slimmed down to only the essentials for drawing -- rest left in GraphSet or PanelData
 Clean up of Measurement, Integral, Peak constructors
-Easy part is done now....
+Removed need for AwtExportDialog
+-- 10/5/2013 BH
+Refactored dialogs
+Added JSVMainPanel, JSVTree interfaces
+Added DialogParams, FileHelper
+Moved AWT printing/saving operations to AwtPanel
+Created AwtTree, AwtTreeNode, AwtTreePath, JSVTree, JSVTreeNode, JSVTreePath
+Made JSViewer non-static
+
+====TODO=========
+
+version and revision number have stopped showing in About Dialog Box
+
+-in the jsvtest.htm page, when there is a CNMR and IR overlay shown
+nothing happens when a proton is clicked on a molecule in the Jmol
+applet. The viewer should have the option to either add H-NMR with
+current overlay or to load only H-NMR (in this case the viewer could
+have already saved the C-NMR and IR changes as a "view" to return to
+later--could be done through a pop up box
+
+-when in the split overlay version: addition of two boxes next to the
+one to toggle between stacked and split, one to clear the selected
+spectrum (X), and one to minimize it only (-)
+
+-a save "view" (overlay) option: writes a jdx file that will be able
+to call up changes to a current overlay similar to "save as," so that
+if one of the used spectra is used in a different file, separate
+changes and analyses can be made without altering the saved view
+
+  - in OleNMR this will be handled by saving $$JSVCMD into the procs file, I think.
+
+
+=====DONE========
 
 
 ___version="2.1.0"
