@@ -97,22 +97,25 @@ import jspecview.common.ColorParameters;
 import jspecview.common.PanelListener;
 import jspecview.common.Parameters;
 import jspecview.common.PeakPickEvent;
+import jspecview.common.PrintLayout;
 import jspecview.common.RepaintManager;
 import jspecview.common.ScriptToken;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.SubSpecChangeEvent;
+import jspecview.common.Temp;
 import jspecview.common.ZoomEvent;
 import jspecview.common.JDXSpectrum.IRMode;
 import jspecview.export.Exporter;
 import jspecview.java.AwtDialogOverlayLegend;
+import jspecview.java.AwtDialogPrint;
 import jspecview.java.AwtPanel;
 import jspecview.java.AwtParameters;
 import jspecview.java.AwtPopupMenu;
-import jspecview.java.AwtDialogHelper;
 import jspecview.java.AwtDropTargetListener;
 import jspecview.java.AwtTree;
 import jspecview.java.AwtDialogView;
 import jspecview.java.AwtViewPanel;
+import jspecview.java.AwtFileHelper;
 import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
 import jspecview.util.JSVColorUtil;
@@ -154,7 +157,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	private JSVAppletPrivatePro     advancedApplet;
 	private CommandHistory          commandHistory;
 	private JDXSource               currentSource;
-	private AwtDialogHelper            dialogHelper;
+	private AwtFileHelper              fileHelper;
 	private DisplaySchemesProcessor dsp;
 	public DropTargetListener       dtl;
 	private JmolSyncInterface       jmol;
@@ -301,7 +304,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	 */
 	public MainFrame(Component jmolDisplay, JSVInterface jmolOrAdvancedApplet) {
 		repaintManager = new RepaintManager(this);
-		dialogHelper = new AwtDialogHelper(this);
+		fileHelper = new AwtFileHelper(this);
 		this.jmolDisplay = jmolDisplay;
 		if (jmolDisplay != null)
 			jmolFrame = jmolDisplay.getParent();
@@ -502,12 +505,12 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		autoShowLegend = Boolean.parseBoolean(properties
 				.getProperty("automaticallyShowLegend"));
 
-		dialogHelper.useDirLastOpened = Boolean.parseBoolean(properties
+		fileHelper.useDirLastOpened = Boolean.parseBoolean(properties
 				.getProperty("useDirectoryLastOpenedFile"));
-		dialogHelper.useDirLastExported = Boolean.parseBoolean(properties
+		fileHelper.useDirLastExported = Boolean.parseBoolean(properties
 				.getProperty("useDirectoryLastExportedFile"));
-		dialogHelper.dirLastOpened = properties.getProperty("directoryLastOpenedFile");
-		dialogHelper.dirLastExported = properties.getProperty("directoryLastExportedFile");
+		fileHelper.dirLastOpened = properties.getProperty("directoryLastOpenedFile");
+		fileHelper.dirLastExported = properties.getProperty("directoryLastExportedFile");
 
 		sidePanelOn = Boolean.parseBoolean(properties.getProperty("showSidePanel"));
 		toolbarOn = Boolean.parseBoolean(properties.getProperty("showToolBar"));
@@ -689,14 +692,14 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	 * Shows dialog to open a file
 	 */
 	void showFileOpenDialog() {
-		File file = dialogHelper.showFileOpenDialog(this);
+		File file = fileHelper.showFileOpenDialog(this);
 		if (file != null)
 			openFile(file.getAbsolutePath(), true);
 	}
 
 	public void openDataOrFile(String data, String name, JmolList<JDXSpectrum> specs,
 			String url, int firstSpec, int lastSpec, boolean isAppend) {
-		AwtTree.openDataOrFile(this, data, name, specs, url,
+		Temp.openDataOrFile(this, data, name, specs, url,
 				firstSpec, lastSpec, isAppend);
 		validateAndRepaint();
 	}
@@ -830,7 +833,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	 *          the name of the format to export in
 	 */
 	void exportSpectrumViaMenu(String command) {
-		dialogHelper.exportSpectrum(this, command);
+		Exporter.exportSpectrum(this, fileHelper, command);
 	}
 
 	protected void windowClosing_actionPerformed() {
@@ -937,7 +940,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	public void execClose(String value, boolean fromScript) {
-		AwtTree.close(this, Txt.trimQuotes(value));
+		Temp.close(this, Txt.trimQuotes(value));
 		if (!fromScript || panelNodes.size() == 0) {
 			validate();
 			repaint();
@@ -950,7 +953,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	public String execLoad(String value) {
-		AwtTree.load(this, value);
+		Temp.load(this, value);
 		if (getSelectedPanel() == null)
 			return null;
 		PanelData pd = getSelectedPanel().getPanelData();
@@ -1137,7 +1140,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	public String print(String pdfFileName) {
-		return dialogHelper.print(this, this, pdfFileName);
+		return Exporter.print(this, fileHelper, pdfFileName);
 	}
 	
 	public void toggleOverlayKey() {
@@ -1285,5 +1288,12 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	public String getFileAsString(String value) {
 		return JSVFileManager.getFileAsString(value, null);
 	}
-	
+
+	private PrintLayout lastPrintLayout;
+  public Object getPrintLayout(boolean isJob) {
+		PrintLayout pl = new AwtDialogPrint(this, lastPrintLayout, isJob).getPrintLayout();
+		if (pl != null)
+			lastPrintLayout = pl;
+		return pl;
+	}
 }

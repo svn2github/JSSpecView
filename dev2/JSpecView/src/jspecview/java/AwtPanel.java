@@ -45,21 +45,25 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
 import java.awt.print.PageFormat;
 import java.awt.print.Paper;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import javax.imageio.ImageIO;
 import javax.print.attribute.Attribute;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet; //import javax.print.attribute.standard.MediaSize;
@@ -469,8 +473,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
 	}
 
 	public void setGraphicsFont(Object g, JmolFont font) {
-		// TODO Auto-generated method stub
-		
+		((Graphics) g).setFont((Font) font.font);
 	}
 
   public void setPlotColors(JSVColor[] colors) {
@@ -485,7 +488,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
    * @param pl 
    */
   private void createPdfDocument(OutputStream os, PrintLayout pl) {
-  	PdfCreatorInterface pdfCreator = (PdfCreatorInterface) JSVInterface.getInterface("jspecview.common.PdfCreator");
+  	PdfCreatorInterface pdfCreator = (PdfCreatorInterface) JSVInterface.getInterface("jspecview.java.AwtPdfCreator");
   	if (pdfCreator == null)
   		return;
   	pdfCreator.createPdfDocument(this, pl, os);
@@ -497,72 +500,51 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
 	 * @param pl
 	 *          the layout of the print job
 	 * @param os
-	 * @param title 
+	 * @param title
 	 */
 	public void printPanel(PrintLayout pl, OutputStream os, String title) {
 
 		// MediaSize size = MediaSize.getMediaSizeForName(pl.paper);
 
-		// Set Graph Properties
-		pd.printingFontName = (os == null ? pl.font : "Helvetica");
-		pd.printGraphPosition = pl.position;
-
-		// save original values
-
-		boolean gridOn = pd.gridOn;
-		boolean titleOn = pd.titleOn;
-		boolean xScaleOn = pd.getBoolean(ScriptToken.XSCALEON);
-		boolean xUnitsOn = pd.getBoolean(ScriptToken.XUNITSON);
-		boolean yScaleOn = pd.getBoolean(ScriptToken.YSCALEON);
-		boolean yUnitsOn = pd.getBoolean(ScriptToken.YUNITSON);
-
-		pd.gridOn = pl.showGrid;
-		pd.titleOn = pl.showTitle;
-		pd.setBoolean(ScriptToken.XSCALEON, pl.showXScale);
-		pd.setBoolean(ScriptToken.XUNITSON, pl.showXScale);
-		pd.setBoolean(ScriptToken.YSCALEON, pl.showYScale);
-		pd.setBoolean(ScriptToken.YUNITSON, pl.showYScale);
+		pl.title = title;
+		pd.setPrint(pl, os == null ? pl.font : "Helvetica");
 
 		/* Create a print job */
 
-		PrinterJob pj = (os == null ? PrinterJob.getPrinterJob() : null);
-		pd.printJobTitle = title;
-		if (title.length() > 30)
-			title = title.substring(0, 30);
-		if (pj != null) {
-			pj.setJobName(title);
-			pj.setPrintable(this);
-		}
-		if (pj == null || pj.printDialog()) {
-			try {
-				if (pj == null) {
-					createPdfDocument(os, pl);
-				} else {
-					PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
-					aset.add(pl.layout.equals("landscape") ? OrientationRequested.LANDSCAPE
-									: OrientationRequested.PORTRAIT);
-					aset.add((Attribute) pl.paper);
-					pj.print(aset);
-				}
-			} catch (PrinterException ex) {
-				String s = ex.getMessage();
-				if (s == null)
-					return;
-				s = Txt.simpleReplace(s, "not accepting job.",
-						"not accepting jobs.");
-				// not my fault -- Windows grammar error!
-				showMessage(s, "Printer Error");
+		try {
+			PrinterJob pj = (os == null ? PrinterJob.getPrinterJob() : null);
+			if (pj != null) {
+				if (title.length() > 30)
+					title = title.substring(0, 30);
+				pj.setJobName(title);
+				pj.setPrintable(this);
 			}
+			if (pj == null || pj.printDialog()) {
+				try {
+					if (pj == null) {
+						createPdfDocument(os, pl);
+					} else {
+						PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
+						aset
+								.add(pl.layout.equals("landscape") ? OrientationRequested.LANDSCAPE
+										: OrientationRequested.PORTRAIT);
+						aset.add((Attribute) pl.paper);
+						pj.print(aset);
+					}
+				} catch (PrinterException ex) {
+					String s = ex.getMessage();
+					if (s == null)
+						return;
+					s = Txt.simpleReplace(s, "not accepting job.", "not accepting jobs.");
+					// not my fault -- Windows grammar error!
+					showMessage(s, "Printer Error");
+				}
+			}
+		} catch (Exception e) {
+			// too bad
+		} finally {
+			pd.setPrint(null, null);
 		}
-
-		// restore original values
-
-		pd.gridOn = gridOn;
-		pd.titleOn = titleOn;
-		pd.setBoolean(ScriptToken.XSCALEON, xScaleOn);
-		pd.setBoolean(ScriptToken.XUNITSON, xUnitsOn);
-		pd.setBoolean(ScriptToken.YSCALEON, yScaleOn);
-		pd.setBoolean(ScriptToken.YUNITSON, yUnitsOn);
 	}
 
 
@@ -716,7 +698,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
 		return JmolFont.getFontFaceID("SansSerif");
 	}
 	
-	public int geOptionFromDialog(Object frame, String[] items,
+	public int getOptionFromDialog(Object frame, String[] items,
 			String dialogName, String labelName) {
 		final JDialog dialog = new JDialog((JFrame) frame, dialogName, true);
 		dialog.setResizable(false);
@@ -754,9 +736,14 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
 	  return pd.getOverlayLegendData();
 	}
 
-	public int getCurrentSpectrumIndex() {
-		// TODO Auto-generated method stub
-		return 0;
+	public void saveImage(String type, Object file) {
+    Image image = createImage(getWidth(), getHeight());
+    paint(image.getGraphics());
+    try {
+			ImageIO.write((RenderedImage) image, type, (File) file);
+		} catch (IOException e) {
+			showMessage(e.getMessage(), "Error Saving Image");
+		}
 	}
 
 }

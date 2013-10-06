@@ -1,8 +1,12 @@
 package jspecview.export;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
+import org.jmol.io.Base64;
 import org.jmol.util.JmolList;
 import org.jmol.util.Txt;
 
@@ -10,7 +14,10 @@ import jspecview.api.ScriptInterface;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVPanel;
 import jspecview.common.PanelData;
+import jspecview.common.PrintLayout;
 import jspecview.common.ScriptToken;
+import jspecview.common.Annotation.AType;
+import jspecview.java.AwtFileHelper;
 import jspecview.util.JSVFileManager;
 
 public class Exporter {
@@ -238,6 +245,97 @@ public class Exporter {
 		return items;
 	}
 
+	public static void exportSpectrum(ScriptInterface si, AwtFileHelper helper, String type) {
+		JSVPanel jsvp = si.getSelectedPanel();
+		if (jsvp == null)
+			return;
+		ExportType eType = ExportType.getType(type);
+		switch (eType) {
+		case PDF:
+			print(si, helper, "PDF");
+			break;
+		case PNG:
+		case JPG:
+			saveImage(si, helper, eType);
+			break;
+		default:
+			exportSpectrumAsk(si, helper, eType);
+			jsvp.getFocusNow(true);
+		}
+	}
+
+	public static String print(ScriptInterface si, AwtFileHelper helper, String pdfFileName) {		
+		if (!si.isSigned())
+			return "Error: Applet must be signed for the PRINT command.";
+		boolean isJob = (pdfFileName == null || pdfFileName.length() == 0);
+		boolean isBase64 = (!isJob && pdfFileName.toLowerCase().startsWith("base64"));
+		JSVPanel jsvp = si.getSelectedPanel();
+		if (jsvp == null)
+			return null;
+		// this has been disabled:
+    jsvp.getPanelData().closeAllDialogsExcept(AType.NONE);
+		PrintLayout pl = (PrintLayout) si.getPrintLayout(isJob);
+		if (pl == null)
+			return null;
+		if (isJob && pl.asPDF) {
+			isJob = false;
+			pdfFileName = "PDF";
+		}		
+		if (!isBase64 && !isJob) {
+			helper.setFileChooser(ExportType.PDF);
+			if (pdfFileName.equals("?") || pdfFileName.equalsIgnoreCase("PDF"))
+  			pdfFileName = getSuggestedFileName(si, ExportType.PDF);
+			File file = helper.getFile(pdfFileName, jsvp, true);
+			if (file == null)
+				return null;
+			si.setProperty("directoryLastExporteFile", helper.dirLastExported = file.getParent());
+			pdfFileName = file.getAbsolutePath();
+		}
+		String s = null;
+		try {
+			OutputStream os = (isJob ? null : isBase64 ? new ByteArrayOutputStream() 
+			    : new FileOutputStream(pdfFileName));
+			String printJobTitle = jsvp.getPanelData().getPrintJobTitle(true);
+			if (pl.showTitle) {
+				printJobTitle = jsvp.getInput("Title?", "Title for Printing", printJobTitle);
+				if (printJobTitle == null)
+					return null;
+			}
+			jsvp.printPanel(pl, os, printJobTitle);
+			s = (isBase64 ? Base64.getBase64(
+					((ByteArrayOutputStream) os).toByteArray()).toString() : "OK");
+		} catch (Exception e) {
+			jsvp.showMessage(e.getMessage(), "File Error");
+		}
+		return s;
+	}
+	
+	private static void saveImage(ScriptInterface si, AwtFileHelper helper, ExportType itype) {
+  	JSVPanel jsvp = si.getSelectedPanel();
+		helper.setFileChooser(itype);
+		String name = getSuggestedFileName(si, itype);
+		Object file = helper.getFile(name, jsvp, true);
+		if (file != null)
+			jsvp.saveImage(itype.toString().toLowerCase(), file);
+	}
+
+	/**
+	 * 
+	 * @param si
+	 * @param helper
+	 * @param eType
+	 * @return directory saved to or a message starting with "Error:"
+	 */
+	private static String exportSpectrumAsk(ScriptInterface si, AwtFileHelper helper, ExportType eType) {
+		helper.setFileChooser(eType);
+		String[] items = getExportableItems(si, eType.equals(ExportType.SOURCE));
+		JSVPanel jsvp = si.getSelectedPanel();
+		int index = (items == null ? -1 : jsvp.getOptionFromDialog(si, items, "Export", "Choose a spectrum to export"));
+		if (index == Integer.MIN_VALUE)
+			return null;
+		File file = helper.getFile(getSuggestedFileName(si, eType), jsvp, true);
+		return exportSpectrum(si, eType, index, file);
+	}
 
 
 }

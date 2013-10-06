@@ -41,7 +41,6 @@ package jspecview.applet;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetListener;
@@ -50,6 +49,8 @@ import java.awt.event.WindowEvent;
 import java.net.URL;
 
 import java.util.Map;
+
+import org.jmol.api.ApiPlatform;
 import org.jmol.util.JmolList;
 
 import javax.swing.JFrame;
@@ -62,6 +63,7 @@ import jspecview.api.JSVMainPanel;
 import jspecview.api.JSVTree;
 import jspecview.api.ScriptInterface;
 import jspecview.application.TextDialog;
+import jspecview.awt.Platform;
 import jspecview.common.JSVDialog;
 import jspecview.common.JSVPanel;
 import jspecview.common.JSVPanelNode;
@@ -71,23 +73,26 @@ import jspecview.common.PanelListener;
 import jspecview.common.ColorParameters;
 import jspecview.common.Parameters;
 import jspecview.common.PeakPickEvent;
+import jspecview.common.PrintLayout;
 import jspecview.common.RepaintManager;
 import jspecview.common.ScriptTokenizer;
 import jspecview.common.ScriptToken;
 import jspecview.common.Coordinate;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.SubSpecChangeEvent;
+import jspecview.common.Temp;
 import jspecview.common.ZoomEvent;
 import jspecview.common.JDXSpectrum.IRMode;
 import jspecview.export.Exporter;
 import jspecview.java.AwtDialogOverlayLegend;
+import jspecview.java.AwtDialogPrint;
 import jspecview.java.AwtPanel;
 import jspecview.java.AwtParameters;
-import jspecview.java.AwtDialogHelper;
 import jspecview.java.AwtDropTargetListener;
 import jspecview.java.AwtTree;
 import jspecview.java.AwtDialogView;
 import jspecview.java.AwtViewPanel;
+import jspecview.java.AwtFileHelper;
 import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
 import jspecview.util.JSVEscape;
@@ -108,18 +113,21 @@ import netscape.javascript.JSObject;
 public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		JSVAppletInterface {
 
+	private ApiPlatform apiPlatform;
+
 	JSVAppletPrivate(JSVApplet jsvApplet) {
 		this.jsvApplet = jsvApplet;
 		repaintManager = new RepaintManager(this);
-		dialogHelper = new AwtDialogHelper(this);
+		fileHelper = new AwtFileHelper(this);
 		JSVFileManager.setDocumentBase(jsvApplet.getDocumentBase());
+		apiPlatform = new Platform();
 		init();
 	}
 
 	private JSVAppletPopupMenu     appletPopupMenu;
 	protected Thread               commandWatcherThread;
 	private JDXSource              currentSource;
-	private AwtDialogHelper           dialogHelper;
+	private AwtFileHelper             fileHelper;
 	protected JSVApplet            jsvApplet;
 	private JFrame                 offWindowFrame;
 	private Component              spectrumPanel;
@@ -244,7 +252,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	/////////////////////////////////////////
 	
 	void dispose() {
-		dialogHelper = null;
+		fileHelper = null;
 		try {
 			if (viewDialog != null)
 	  		viewDialog.dispose();
@@ -542,7 +550,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 		// not sure what this is about. The applet prints fine
 		if (needWindow)
 			newWindow(true);
-		String s = dialogHelper.print(this, offWindowFrame, pdfFileName);
+		String s = Exporter.print(this, fileHelper, pdfFileName);
 		if (needWindow)
 			newWindow(false);
 		return s;
@@ -609,7 +617,7 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 			Logger.info(exportSpectrum(type, -1));
 			return;
 		}
-		dialogHelper.exportSpectrum(offWindowFrame, type);
+		Exporter.exportSpectrum(this, fileHelper, type);
 		getSelectedPanel().getFocusNow(true);
 	}
 
@@ -777,10 +785,10 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	 */
 	public void openDataOrFile(String data, String name,
 			JmolList<JDXSpectrum> specs, String url, int firstSpec, int lastSpec, boolean isAppend) {
-  	int status = AwtTree.openDataOrFile(this, data, name, specs, url, firstSpec, lastSpec, isAppend);
-  	if (status == AwtTree.FILE_OPEN_ALREADY)
+  	int status = Temp.openDataOrFile(this, data, name, specs, url, firstSpec, lastSpec, isAppend);
+  	if (status == Temp.FILE_OPEN_ALREADY)
   		return;
-    if (status != AwtTree.FILE_OPEN_OK) {
+    if (status != Temp.FILE_OPEN_OK) {
     	setSelectedPanel(null);
     	return;
     }
@@ -917,14 +925,14 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 	}
 
 	public void execClose(String value, boolean fromScript) {
-		AwtTree.close(this, value);
+		Temp.close(this, value);
     if (!fromScript)
     	validateAndRepaint();
 	}
 
   public String execLoad(String value) {
   	//int nSpec = panelNodes.size();
-  	AwtTree.load(this, value);
+  	Temp.load(this, value);
     if (getSelectedPanel() == null)
       return null;
     // probably unnecessary:
@@ -1016,8 +1024,8 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
     JDXSpectrum.process(specs, irMode);
 	}
 	
-	public void setCursorObject(Object c) {
-		jsvApplet.setCursor((Cursor) c);
+	public void setCursor(int id) {
+		apiPlatform.setCursor(id, jsvApplet);
 	}
 
 	public boolean getAutoCombine() {
@@ -1112,6 +1120,15 @@ public class JSVAppletPrivate implements PanelListener, ScriptInterface,
 
 	public String getFileAsString(String value) {
 		return JSVFileManager.getFileAsString(value, jsvApplet.getDocumentBase());
+	}
+
+	private PrintLayout lastPrintLayout;
+
+	public Object getPrintLayout(boolean isJob) {
+		PrintLayout pl = new AwtDialogPrint(offWindowFrame, lastPrintLayout, isJob).getPrintLayout();
+		if (pl != null)
+			lastPrintLayout = pl;
+		return pl;
 	}
 	
 }

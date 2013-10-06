@@ -55,7 +55,6 @@ public class DialogParams {
 		this.thisType = type;
 		this.dialog = dialog;
 		this.si = si;
-		System.out.println("restart -- iselected = " + iSelected);
 		jsvp = si.getSelectedPanel();
 		this.spec = spec;
 		this.myParams = myParams;
@@ -258,7 +257,6 @@ public class DialogParams {
 				for (int i = 0; i < xyData.size(); i++)
 					if (Txt.formatDecimalDbl(xyData.get(i).getXVal(), 2).equals(value)) {
 						iSelected = i;
-						System.out.println("iselected = " + i);
 						jsvp.getPanelData().setXPointers(spec, xyData.get(i).getXVal(),
 								spec, xyData.get(i).getXVal2());
 						jsvp.doRepaint();
@@ -302,7 +300,6 @@ public class DialogParams {
 		case Integration:
 			if (xyData == null)
 				createData();
-			System.out.println("loaddata iselected = -1");
 			iSelected = -1;
 			data = ((IntegralData) xyData).getMeasurementListArray(null);
 			header = xyData.getDataHeader();

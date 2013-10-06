@@ -102,7 +102,7 @@ public abstract class AwtAnnotationDialog extends AwtDialog implements
 	private void initDialog() {
 		leftPanel = new JPanel(new GridBagLayout());
 		leftPanel.setMinimumSize(new Dimension(200, 300));
-		AwtDialogHelper dialogHelper = new AwtDialogHelper(params.thisKey,
+		AwtDialogHelper dialogHelper = new AwtDialogHelper().set(params.thisKey,
 				params.options, leftPanel, new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						if (e.getActionCommand().equals("Units")) {
@@ -163,7 +163,6 @@ public abstract class AwtAnnotationDialog extends AwtDialog implements
 		// int and peak only
 	}
 
-
 	// ///// action interfaces /////////
 
 	synchronized public void valueChanged(ListSelectionEvent e) {
@@ -192,7 +191,7 @@ public abstract class AwtAnnotationDialog extends AwtDialog implements
 	public AType getAType() {
 		return params.thisType;
 	}
-	
+
 	public void setSpecShift(double dx) {
 		params.setSpecShift(dx);
 	}
@@ -241,10 +240,9 @@ public abstract class AwtAnnotationDialog extends AwtDialog implements
 			params.tableData = data;
 			rightPanel.removeAll();
 			JScrollPane scrollPane = new JScrollPane(
-					dataTable = (new AwtDialogHelper(params.si)).getDataTable(this, data,
-							header, widths, leftPanel.getHeight() - 50));
+					dataTable = new AwtDialogHelper().getDataTable(this, data, header,
+							widths, leftPanel.getHeight() - 50));
 			mainSplitPane.setRightComponent(scrollPane);
-			// .add(scrollPane);
 		} catch (Exception e) {
 			// not perfect.
 		}
