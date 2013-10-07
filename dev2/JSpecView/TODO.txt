@@ -1,9 +1,9 @@
 
-Feel free to add to this file any time! Don't worry about sync problems. 
+Feel free to add to this file any time! Don't worry about sync problems.
 Put new items at top, please.
 
 ___date="$Date$"
-___svnRev="$LastChangedRevision:: 1224 $"  
+___svnRev="$LastChangedRevision::      $"
 ___version="2.1.0"
 
 
@@ -12,16 +12,26 @@ ___JmolVersion="13.3.5_dev_2013.08.29"
 new feature: show NMR taps into NMRDB directly
  -- for now, application only
 
+in preparation for JavaScript version (add to top):
 
-in preparation for JavaScript version:
-
--- 10/1/2013 BH
-Replaced all references to DecimalFormat with JSVTextFormat.formatDecimal or JSVTextFormat.formatDecimalTrimmed
-Replaced all references to StringBuilder and StringBuffer with JSVSB
--- 10/2/2013 BH
-Replaced all List and ArrayList with  JmolList to avoid overloaded .add(x)
-Moved and renamed methods from jspecview/util to org/jmol/util (applets can share this code)
-Replaced Hashmap with Hashtable
+-- 10/6/2013 BH
+Renamed JSVAppletPrivate(Pro) to JSVApp(pro)
+Moved all AWT references of JSVApp into JSVApplet
+Moved JSVApp into jspecview/app
+Cleaned jspecview/java directory -- all AWT-dependent classes here
+Fixed Build.xml
+-- 10/5/2013 BH
+Refactored dialogs
+Added JSVMainPanel, JSVTree interfaces
+Added DialogParams, FileHelper
+Moved AWT printing/saving operations to AwtPanel
+Created AwtTree, AwtTreeNode, AwtTreePath, JSVTree, JSVTreeNode, JSVTreePath
+Made JSViewer non-static
+-- 10/4/2013 BH
+Removed need for AwtGraphSet
+AwtPanel slimmed down to only the essentials for drawing -- rest left in GraphSet or PanelData
+Clean up of Measurement, Integral, Peak constructors
+Removed need for AwtExportDialog
 -- 10/3/2013 BH
 Disambiguated Parser
 Replaced BitSet with org.jmol.util.BS
@@ -35,27 +45,17 @@ Created jspecview.awt, jspecview.awtjs2d; populated with template methods
 Created EventManager
 Implemented jspecview.awt.Mouse and jspecview.awtjs2d.Mouse
   - note that in JSpecView, each panel is its own PlatformViewer and EventManager and display Component
--- 10/4/2013 BH
-Removed need for AwtGraphSet
-AwtPanel slimmed down to only the essentials for drawing -- rest left in GraphSet or PanelData
-Clean up of Measurement, Integral, Peak constructors
-Removed need for AwtExportDialog
--- 10/5/2013 BH
-Refactored dialogs
-Added JSVMainPanel, JSVTree interfaces
-Added DialogParams, FileHelper
-Moved AWT printing/saving operations to AwtPanel
-Created AwtTree, AwtTreeNode, AwtTreePath, JSVTree, JSVTreeNode, JSVTreePath
-Made JSViewer non-static
--- 10/6/2013 BH
-Renamed JSVAppletPrivate(Pro) to JSVApp(pro)
-Moved all AWT references of JSVApp into JSVApplet
-Moved JSVApp into jspecview/app
-Cleaned jspecview/java directory -- all AWT-dependent classes here
-Fixed Build.xml
+-- 10/2/2013 BH
+Replaced all List and ArrayList with  JmolList to avoid overloaded .add(x)
+Moved and renamed methods from jspecview/util to org/jmol/util (applets can share this code)
+Replaced Hashmap with Hashtable
+-- 10/1/2013 BH
+Replaced all references to DecimalFormat with JSVTextFormat.formatDecimal or JSVTextFormat.formatDecimalTrimmed
+Replaced all references to StringBuilder and StringBuffer with JSVSB
 
- 
 ====TODO=========
+
+-fix for Block files of same data type that can be overlaid
 
 -double-clicking 1HNMR is not starting a measurement
 
