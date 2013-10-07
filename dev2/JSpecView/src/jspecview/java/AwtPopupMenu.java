@@ -32,17 +32,18 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
+import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
 
 import jspecview.api.JSVPanel;
 import jspecview.api.JSVPopupMenu;
-import jspecview.api.ScriptInterface;
 import jspecview.common.JDXSpectrum;
+import jspecview.common.JSVPanelNode;
+import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
 import jspecview.common.ScriptToken;
 import jspecview.common.Annotation.AType;
-import jspecview.export.Exporter;
 
 /**
  * Popup Menu for JSVPanel.
@@ -60,7 +61,7 @@ public class AwtPopupMenu extends JPopupMenu implements JSVPopupMenu {
 
   private static final long serialVersionUID = 1L;
 
-  private ScriptInterface scripter;
+  protected JSViewer viewer;
   
   public void dispose() {
     pd = null;
@@ -93,6 +94,7 @@ public class AwtPopupMenu extends JPopupMenu implements JSVPopupMenu {
   protected JMenuItem userZoomMenuItem = new JMenuItem();
   protected JMenuItem scriptMenuItem = new JMenuItem();
   public JMenuItem overlayStackOffsetMenuItem = new JMenuItem();
+  protected JCheckBoxMenuItem windowMenuItem = new JCheckBoxMenuItem();
 
   public JMenuItem integrationMenuItem = new JMenuItem();
   public JMenuItem measurementsMenuItem = new JMenuItem();
@@ -110,44 +112,45 @@ public class AwtPopupMenu extends JPopupMenu implements JSVPopupMenu {
   protected JMenu appletSaveAsJDXMenu; // applet only
   protected JMenu appletExportAsMenu;  // applet only
   //protected JMenuItem appletAdvancedMenuItem;
-  protected JMenuItem spectraMenuItem = new JMenuItem();
+  public JMenuItem spectraMenuItem = new JMenuItem();
   public JMenuItem overlayKeyMenuItem = new JMenuItem();
   
-  public AwtPopupMenu(ScriptInterface scripter) {
+  public AwtPopupMenu(JSViewer viewer, boolean doInit) {
     super();
-    this.scripter = scripter;
-    jbInit();
+    this.viewer = viewer;
+    if (doInit)
+    	jbInit();
   }
 
   /**
    * Initialises GUI components
    */
   protected void jbInit() {
-    final ScriptInterface scripter = this.scripter;
+    final JSViewer scripter = this.viewer;
     nextMenuItem.setText("Next View");
     nextMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        scripter.getPanelData().nextView();
+        viewer.getPanelData().nextView();
         reboot();
       }
     });
     previousMenuItem.setText("Previous View");
     previousMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        scripter.getPanelData().previousView();
+        viewer.getPanelData().previousView();
         reboot();
       }
     });
     clearMenuItem.setText("Clear Views");
     clearMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        scripter.getPanelData().resetView();
+        viewer.getPanelData().resetView();
       }
     });
     resetMenuItem.setText("Reset View");
     resetMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        scripter.getPanelData().clearAllView();
+        viewer.getPanelData().clearAllView();
       }
     });
     
@@ -169,7 +172,7 @@ public class AwtPopupMenu extends JPopupMenu implements JSVPopupMenu {
     properties.setText("Properties");
     properties.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        scripter.showProperties();
+        viewer.showProperties();
       }
     });
     gridCheckBoxMenuItem.setText("Show Grid");
@@ -250,7 +253,7 @@ public class AwtPopupMenu extends JPopupMenu implements JSVPopupMenu {
     if (zoom == null)
       return;
     recentZoom = zoom;
-    runScript(scripter, "zoom " + zoom);
+    runScript(viewer, "zoom " + zoom);
   }
 
   private String recentScript = "";
@@ -263,7 +266,7 @@ public class AwtPopupMenu extends JPopupMenu implements JSVPopupMenu {
     if (script == null)
       return;
     recentScript = script;
-    runScript(scripter, script);
+    runScript(viewer, script);
   }
 
   public static void setMenuItem(JMenuItem item, char c, String text,
@@ -281,35 +284,34 @@ public class AwtPopupMenu extends JPopupMenu implements JSVPopupMenu {
   }
 
   public void setProcessingMenu(JComponent menu) {
-    final ScriptInterface scripter = this.scripter;
     setMenuItem(integrationMenuItem, 'I', "Integration", 0, 0,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            scripter.getSelectedPanel().showDialog(AType.Integration);
+            viewer.selectedPanel.showDialog(AType.Integration);
           }
         });
     setMenuItem(measurementsMenuItem, 'M', "Measurements", 0, 0,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-          	scripter.getSelectedPanel().showDialog(AType.Measurements);
+          	viewer.selectedPanel.showDialog(AType.Measurements);
           }
         });
     setMenuItem(peakListMenuItem, 'P', "Peaks", 0, 0,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-          	scripter.getSelectedPanel().showDialog(AType.PeakList);
+          	viewer.selectedPanel.showDialog(AType.PeakList);
           }
         });
     setMenuItem(transAbsMenuItem, '\0', "Transmittance/Absorbance", 0, 0,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            runScript(scripter, "IRMODE IMPLIED");
+            runScript(viewer, "IRMODE IMPLIED");
           }
         });
     setMenuItem(solColMenuItem, 'C', "Predicted Solution Colour", 0, 0,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            runScript(scripter, "GETSOLUTIONCOLOR");
+            runScript(viewer, "GETSOLUTIONCOLOR");
           }
         });
     menu.add(measurementsMenuItem);
@@ -319,11 +321,11 @@ public class AwtPopupMenu extends JPopupMenu implements JSVPopupMenu {
     menu.add(solColMenuItem);
   }
 
-  protected static void runScript(ScriptInterface scripter, String cmd) {
-    if (scripter == null)
+  protected static void runScript(JSViewer viewer, String cmd) {
+    if (viewer == null)
       Logger.error("scripter was null for " + cmd);
     else
-      scripter.runScript(cmd);
+      viewer.runScript(cmd);
   }
 
   protected String recentStackPercent = "5";
@@ -333,7 +335,7 @@ public class AwtPopupMenu extends JPopupMenu implements JSVPopupMenu {
 	public void overlay(JSVPanel jsvp, EnumOverlay overlay) {
 		switch (overlay) {
 		case DIALOG:
-			scripter.checkOverlay();
+			viewer.checkOverlay();
 			break;
 		case OFFSETY:
 			if (jsvp == null)
@@ -344,7 +346,7 @@ public class AwtPopupMenu extends JPopupMenu implements JSVPopupMenu {
 			if (offset == null || Float.isNaN(Parser.parseFloat(offset)))
 				return;
 			recentStackPercent = offset;
-			runScript(scripter, ScriptToken.STACKOFFSETY + " " + offset);
+			runScript(viewer, ScriptToken.STACKOFFSETY + " " + offset);
 			break;
 		}
 	}
@@ -397,7 +399,7 @@ public class AwtPopupMenu extends JPopupMenu implements JSVPopupMenu {
   public static void setMenus(JMenu saveAsMenu, JMenu saveAsJDXMenu,
                               JMenu exportAsMenu, ActionListener actionListener) {
     saveAsMenu.setText("Save As");
-    addMenuItem(saveAsMenu, Exporter.sourceLabel, '\0', actionListener);
+    addMenuItem(saveAsMenu, JSViewer.sourceLabel, '\0', actionListener);
     saveAsJDXMenu.setText("JDX");
     addMenuItem(saveAsJDXMenu, "XY", '\0', actionListener);
     addMenuItem(saveAsJDXMenu, "DIF", '\0', actionListener);
@@ -425,6 +427,24 @@ public class AwtPopupMenu extends JPopupMenu implements JSVPopupMenu {
 		jmi.addActionListener(actionListener);
 		m.add(jmi);
 	}
+
+	public void setCompoundMenu(JmolList<JSVPanelNode> panelNodes,
+			boolean allowSelection) {
+		spectraMenuItem.setEnabled(allowSelection && panelNodes.size() > 1);		
+		spectraMenuItem.setEnabled(true);
+	}
+
+	public boolean getSelected(String key) {
+		if (key.equals("overlay"))
+			return overlayKeyMenuItem.isSelected();
+		return false;
+	}
+	
+	public void setSelected(String key, boolean b) {
+		if (key.equals("window"))
+			windowMenuItem.setSelected(false);
+	}
+
 
 
 }

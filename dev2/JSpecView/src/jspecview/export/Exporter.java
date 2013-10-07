@@ -10,42 +10,22 @@ import org.jmol.io.Base64;
 import org.jmol.util.JmolList;
 import org.jmol.util.Txt;
 
+import jspecview.api.JSVFileHelper;
 import jspecview.api.JSVPanel;
-import jspecview.api.ScriptInterface;
+import jspecview.common.ExportType;
 import jspecview.common.JDXSpectrum;
+import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
 import jspecview.common.PrintLayout;
 import jspecview.common.ScriptToken;
 import jspecview.common.Annotation.AType;
-import jspecview.java.AwtFileHelper;
 import jspecview.util.JSVFileManager;
 
 public class Exporter {
 
-  public final static String sourceLabel = "Original...";
-  public enum ExportType {
-    UNK, SOURCE, DIF, FIX, SQZ, PAC, XY, DIFDUP, PNG, JPG, SVG, SVGI, CML, AML, PDF;
-
-    public static ExportType getType(String type) {
-      type = type.toUpperCase();
-      if (type.equalsIgnoreCase(sourceLabel))
-        return SOURCE;
-      if (type.startsWith("XML"))
-        return AML;
-      for (ExportType mode : values())
-        if (mode.name().equals(type)) 
-          return mode;
-      return UNK;
-    }    
-    
-    public static boolean isExportMode(String ext) {
-      return (getType(ext) != UNK);
-    }
-  }
-  
   /**
    * Auxiliary Export method
-   * @param si 
+   * @param viewer 
    * @param type
    *        the format to export in
    * @param index
@@ -53,12 +33,12 @@ public class Exporter {
    * @param file
    * @return message or null if canceled
    */
-	public static String exportSpectrum(ScriptInterface si,
+	public static String exportSpectrum(JSViewer viewer,
                                               ExportType type, int index,
                                               File file) {
 		if (file == null)
 			return null;
-		JSVPanel jsvp = si.getSelectedPanel();
+		JSVPanel jsvp = viewer.selectedPanel;
     String msg = "OK";
     if (type == ExportType.SOURCE)
       JSVFileManager.fileCopy(jsvp.getPanelData().getSpectrum().getFilePath(), file);
@@ -67,12 +47,12 @@ public class Exporter {
           .getAbsolutePath());
     boolean isOK = msg.startsWith("OK");
     if (isOK)
-    	si.updateRecentMenus(file.getAbsolutePath());
+    	viewer.si.siUpdateRecentMenus(file.getAbsolutePath());
     return msg;
   }
   
-	public static String getSuggestedFileName(ScriptInterface si, ExportType imode) {
-		PanelData pd = si.getSelectedPanel().getPanelData();
+	public static String getSuggestedFileName(JSViewer viewer, ExportType imode) {
+		PanelData pd = viewer.selectedPanel.getPanelData();
     String sourcePath = pd.getSpectrum().getFilePath();
     String newName = JSVFileManager.getName(sourcePath);
     int pt = newName.lastIndexOf(".");
@@ -102,7 +82,7 @@ public class Exporter {
 		default:
       ext = "." + imode.toString().toLowerCase();
     }
-    if (si.getCurrentSource().isView)
+    if (viewer.currentSource.isView)
     	name = pd.getPrintJobTitle(isPrint);
     name += ext;
     return name;
@@ -229,10 +209,10 @@ public class Exporter {
     }
   }
 
-	public static String[] getExportableItems(ScriptInterface si,
+	public static String[] getExportableItems(JSViewer viewer,
 			boolean isSameType) {
-		JSVPanel jsvp = si.getSelectedPanel();
-		boolean isView = si.getCurrentSource().isView;
+		JSVPanel jsvp = viewer.selectedPanel;
+		boolean isView = viewer.currentSource.isView;
 		// From popup menu click SaveAs or Export
 		// if JSVPanel has more than one spectrum...Choose which one to export
 		int nSpectra = jsvp.getPanelData().getNumberOfSpectraInCurrentSet();
@@ -245,36 +225,36 @@ public class Exporter {
 		return items;
 	}
 
-	public static void exportSpectrum(ScriptInterface si, AwtFileHelper helper, String type) {
-		JSVPanel jsvp = si.getSelectedPanel();
+	public static void exportSpectrum(JSViewer viewer, String type) {
+		JSVPanel jsvp = viewer.selectedPanel;
 		if (jsvp == null)
 			return;
 		ExportType eType = ExportType.getType(type);
 		switch (eType) {
 		case PDF:
-			print(si, helper, "PDF");
+			printPDF(viewer, "PDF");
 			break;
 		case PNG:
 		case JPG:
-			saveImage(si, helper, eType);
+			saveImage(viewer, eType);
 			break;
 		default:
-			exportSpectrumAsk(si, helper, eType);
+			exportSpectrumAsk(viewer, eType);
 			jsvp.getFocusNow(true);
 		}
 	}
 
-	public static String print(ScriptInterface si, AwtFileHelper helper, String pdfFileName) {		
-		if (!si.isSigned())
+	public static String printPDF(JSViewer viewer, String pdfFileName) {		
+		if (!viewer.si.isSigned())
 			return "Error: Applet must be signed for the PRINT command.";
 		boolean isJob = (pdfFileName == null || pdfFileName.length() == 0);
 		boolean isBase64 = (!isJob && pdfFileName.toLowerCase().startsWith("base64"));
-		JSVPanel jsvp = si.getSelectedPanel();
+		JSVPanel jsvp = viewer.selectedPanel;
 		if (jsvp == null)
 			return null;
 		// this has been disabled:
     jsvp.getPanelData().closeAllDialogsExcept(AType.NONE);
-		PrintLayout pl = (PrintLayout) si.getPrintLayout(isJob);
+		PrintLayout pl = viewer.si.siGetPrintLayout(isJob);
 		if (pl == null)
 			return null;
 		if (isJob && pl.asPDF) {
@@ -282,13 +262,14 @@ public class Exporter {
 			pdfFileName = "PDF";
 		}		
 		if (!isBase64 && !isJob) {
+			JSVFileHelper helper = viewer.fileHelper;
 			helper.setFileChooser(ExportType.PDF);
 			if (pdfFileName.equals("?") || pdfFileName.equalsIgnoreCase("PDF"))
-  			pdfFileName = getSuggestedFileName(si, ExportType.PDF);
+  			pdfFileName = getSuggestedFileName(viewer, ExportType.PDF);
 			File file = helper.getFile(pdfFileName, jsvp, true);
 			if (file == null)
 				return null;
-			si.setProperty("directoryLastExporteFile", helper.dirLastExported = file.getParent());
+			viewer.setProperty("directoryLastExporteFile", helper.setDirLastExported(file.getParent()));
 			pdfFileName = file.getAbsolutePath();
 		}
 		String s = null;
@@ -310,31 +291,30 @@ public class Exporter {
 		return s;
 	}
 	
-	private static void saveImage(ScriptInterface si, AwtFileHelper helper, ExportType itype) {
-  	JSVPanel jsvp = si.getSelectedPanel();
-		helper.setFileChooser(itype);
-		String name = getSuggestedFileName(si, itype);
-		Object file = helper.getFile(name, jsvp, true);
+	private static void saveImage(JSViewer viewer, ExportType itype) {
+  	JSVPanel jsvp = viewer.selectedPanel;
+		viewer.fileHelper.setFileChooser(itype);
+		String name = getSuggestedFileName(viewer, itype);
+		Object file = viewer.fileHelper.getFile(name, jsvp, true);
 		if (file != null)
 			jsvp.saveImage(itype.toString().toLowerCase(), file);
 	}
 
 	/**
 	 * 
-	 * @param si
-	 * @param helper
+	 * @param viewer 
 	 * @param eType
 	 * @return directory saved to or a message starting with "Error:"
 	 */
-	private static String exportSpectrumAsk(ScriptInterface si, AwtFileHelper helper, ExportType eType) {
-		helper.setFileChooser(eType);
-		String[] items = getExportableItems(si, eType.equals(ExportType.SOURCE));
-		JSVPanel jsvp = si.getSelectedPanel();
-		int index = (items == null ? -1 : jsvp.getOptionFromDialog(si, items, "Export", "Choose a spectrum to export"));
+	private static String exportSpectrumAsk(JSViewer viewer, ExportType eType) {
+		viewer.fileHelper.setFileChooser(eType);
+		String[] items = getExportableItems(viewer, eType.equals(ExportType.SOURCE));
+		JSVPanel jsvp = viewer.selectedPanel;
+		int index = (items == null ? -1 : jsvp.getOptionFromDialog(viewer.si, items, "Export", "Choose a spectrum to export"));
 		if (index == Integer.MIN_VALUE)
 			return null;
-		File file = helper.getFile(getSuggestedFileName(si, eType), jsvp, true);
-		return exportSpectrum(si, eType, index, file);
+		File file = viewer.fileHelper.getFile(getSuggestedFileName(viewer, eType), jsvp, true);
+		return exportSpectrum(viewer, eType, index, file);
 	}
 
 

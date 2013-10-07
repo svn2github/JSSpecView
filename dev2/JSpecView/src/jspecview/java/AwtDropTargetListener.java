@@ -9,10 +9,9 @@ import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.io.File;
 
-
 import javax.swing.JOptionPane;
 
-import jspecview.api.ScriptInterface;
+import jspecview.common.JSViewer;
 import jspecview.util.JSVEscape;
 
 import org.jmol.util.JmolList;
@@ -22,10 +21,10 @@ import org.jmol.util.SB;
 
 public class AwtDropTargetListener implements DropTargetListener {
 
-  private ScriptInterface si;
+  private JSViewer viewer;
 
-  public AwtDropTargetListener(ScriptInterface si) {
-    this.si = si;
+	public AwtDropTargetListener(JSViewer viewer) {
+    this.viewer = viewer;
   }
 
   //
@@ -57,7 +56,7 @@ public class AwtDropTargetListener implements DropTargetListener {
 		Transferable t = dtde.getTransferable();
 		boolean isAccepted = false;
 		boolean doAppend = false;
-		if (si.getCurrentSource() != null) {
+		if (viewer.currentSource != null) {
 			Object[] options = { "Replace", "Append", "Cancel" };
 			int ret = JOptionPane.showOptionDialog(null, "Select an option",
 					"JSpecView File Drop", JOptionPane.DEFAULT_OPTION,
@@ -93,7 +92,7 @@ public class AwtDropTargetListener implements DropTargetListener {
 				sb.append(postfix);
 				cmd = sb.toString();
 				Logger.info("Drop command = " + cmd);
-				si.runScript(cmd);
+				viewer.runScript(cmd);
 				return;
 			}
 		}
@@ -192,7 +191,7 @@ public class AwtDropTargetListener implements DropTargetListener {
 		if (fileToLoad != null) {
 			cmd = prefix + cmd + JSVEscape.eS(fileToLoad) + "\";" + postfix;
 			Logger.info("Drop command = " + cmd);
-			si.runScript(cmd);
+			viewer.runScriptNow(cmd);
 		}
 	}
   

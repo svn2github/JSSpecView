@@ -19,8 +19,8 @@
 
 package jspecview.java;
 
-import jspecview.api.ScriptInterface;
 import jspecview.common.JDXSpectrum;
+import jspecview.common.JSViewer;
 import jspecview.common.Annotation.AType;
 
 /**
@@ -35,9 +35,9 @@ public class AwtDialogMeasurements extends AwtAnnotationDialog {
 	private static final long serialVersionUID = 1L;
 	private static int[] posXY = new int[] {Integer.MIN_VALUE, 0};
 
-	protected AwtDialogMeasurements(String title, ScriptInterface si, 
+	protected AwtDialogMeasurements(String title, JSViewer viewer, 
 			JDXSpectrum spec) {
-		super(title, si, spec, AType.Measurements);
+		super(title, viewer, spec, AType.Measurements);
 	}
 
 	public int[] getPosXY() {

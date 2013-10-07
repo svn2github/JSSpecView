@@ -41,7 +41,7 @@ public class JSVersion {
 		InputStream is = null;
 		try {
 			is = JSVersion.class.getClassLoader().getResourceAsStream(
-					"jspecview/TODO.txt");
+					"jspecview/common/TODO.txt");
 			bis = new BufferedInputStream(is);
 			props.load(bis);
 			tmpVersion = Txt.trimQuotes(props.getProperty("___version", tmpVersion));

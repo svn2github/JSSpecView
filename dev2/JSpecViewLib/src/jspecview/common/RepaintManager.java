@@ -1,16 +1,14 @@
 package jspecview.common;
 
-import jspecview.api.ScriptInterface;
-
 public class RepaintManager {
 
-	public RepaintManager(ScriptInterface si) {
-		this.si = si;
+	public RepaintManager(JSViewer viewer) {
+		this.viewer = viewer;
 	}
   /////////// thread management ///////////
   
   boolean repaintPending;
-	private ScriptInterface si;
+	private JSViewer viewer;
 
   private int n;
   public boolean refresh() {
@@ -20,7 +18,7 @@ public class RepaintManager {
       return false;
     }
     repaintPending = true;
-    	si.getSelectedPanel().repaint();
+    	viewer.selectedPanel.repaint();
     return true;
   }
 

@@ -17,7 +17,7 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package jspecview.application;
+package jspecview.java;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -36,11 +36,10 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
-import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
 
+import jspecview.application.MainFrame;
 import jspecview.common.JDXSpectrum;
-import jspecview.common.JSVPanelNode;
 import jspecview.source.JDXSource;
 import jspecview.util.JSVFileManager;
 
@@ -52,7 +51,7 @@ import jspecview.util.JSVFileManager;
  * @author Prof Robert J. Lancashire
  */
 
-public class TextDialog extends JDialog {
+public class AwtDialogText extends JDialog {
   /**
    * 
    */
@@ -71,7 +70,7 @@ public class TextDialog extends JDialog {
    * @param modal true if modal, otherwise false
    * @param reader the Reader
    */
-  public TextDialog(Frame frame, String title, boolean modal, Reader reader) {
+  public AwtDialogText(Frame frame, String title, boolean modal, Reader reader) {
     super(frame, title, modal);
     try {
       this.reader = (reader == null ? JSVFileManager.getBufferedReaderFromName(title, null, null) : reader);
@@ -92,7 +91,7 @@ public class TextDialog extends JDialog {
    * @param string the string to write to the JEditorPane
    * @param modal true if modal, false otherwise
    */
-  public TextDialog(Frame frame, String title, String string, boolean modal) {
+  public AwtDialogText(Frame frame, String title, String string, boolean modal) {
     this(frame, title, modal, new StringReader(string));
   }
 
@@ -103,7 +102,7 @@ public class TextDialog extends JDialog {
    * @param modal true if modal, false otherwise
    * @throws IOException
    */
-  public TextDialog(Frame frame, String file, boolean modal) throws IOException{
+  public AwtDialogText(Frame frame, String file, boolean modal) throws IOException{
     this(frame, file, modal, null);
   }
 
@@ -134,24 +133,23 @@ public class TextDialog extends JDialog {
   }
 
   public static void showSource(MainFrame mainFrame) {
-    JDXSource currentSource = mainFrame.getCurrentSource();
-    JmolList<JSVPanelNode> panelNodes = mainFrame.getPanelNodes();
+    JDXSource currentSource = mainFrame.viewer.currentSource;
     if (currentSource == null) {
-      if (panelNodes.size() > 0) {
+      if (mainFrame.viewer.panelNodes.size() > 0) {
         JOptionPane.showMessageDialog(mainFrame, "Please Select a Spectrum",
             "Select Spectrum", JOptionPane.ERROR_MESSAGE);
       }
       return;
     }
     try {
-      new TextDialog(mainFrame, currentSource.getFilePath(), true);
+      new AwtDialogText(mainFrame, currentSource.getFilePath(), true);
     } catch (IOException ex) {
-      new TextDialog(mainFrame, "File Not Found", "File Not Found", true);
+      new AwtDialogText(mainFrame, "File Not Found", "File Not Found", true);
     }
   }
 
   public static void showError(MainFrame mainFrame) {
-    JDXSource currentSource = mainFrame.getCurrentSource();
+    JDXSource currentSource = mainFrame.viewer.currentSource;
     if (currentSource == null) {
       JOptionPane.showMessageDialog(null, "Please Select a Spectrum",
           "Select Spectrum", JOptionPane.WARNING_MESSAGE);
@@ -159,6 +157,6 @@ public class TextDialog extends JDialog {
     }
     String errorLog = currentSource.getErrorLog();
     if (errorLog != null)
-      new TextDialog(mainFrame, currentSource.getFilePath(), errorLog, true);
+      new AwtDialogText(mainFrame, currentSource.getFilePath(), errorLog, true);
   }
 }

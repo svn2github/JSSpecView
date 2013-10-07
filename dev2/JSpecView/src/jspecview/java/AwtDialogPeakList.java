@@ -19,8 +19,8 @@
 
 package jspecview.java;
 
-import jspecview.api.ScriptInterface;
 import jspecview.common.JDXSpectrum;
+import jspecview.common.JSViewer;
 import jspecview.common.Annotation.AType;
 
 /**
@@ -35,8 +35,8 @@ public class AwtDialogPeakList extends AwtAnnotationDialog {
 	private static final long serialVersionUID = 1L;
 	private static int[] posXY = new int[] {Integer.MIN_VALUE, 0};
 
-	protected AwtDialogPeakList(String title, ScriptInterface si, JDXSpectrum spec) {
-		super(title, si, spec, AType.PeakList);
+	protected AwtDialogPeakList(String title, JSViewer viewer, JDXSpectrum spec) {
+		super(title, viewer, spec, AType.PeakList);
 	}
 
 	public int[] getPosXY() {

@@ -72,17 +72,16 @@ public class AwtDialogView extends AwtDialog implements WindowListener {
 	/**
 	 * Initialises the <code>IntegralDialog</code> with the given values for minY,
 	 * offset and factor
-	 * @param si 
+	 * @param viewer 
 	 * 
 	 * @param panel
 	 *          the parent panel
 	 * @param modal
 	 *          the modality
 	 */
-	public AwtDialogView(ScriptInterface si, Component panel, boolean modal) {
+	public AwtDialogView(JSViewer viewer, Component panel, boolean modal) {
 		super(null, "View/Combine/Close Spectra", modal);
-		this.si = si;
-		this.viewer = si.getViewer();
+		this.viewer = viewer;
 		params.disposeOnDone = true;
 		restoreDialogPosition(panel, getPosXY());
 		setResizable(true);
@@ -204,8 +203,8 @@ public class AwtDialogView extends AwtDialog implements WindowListener {
     cbInsets1 = new Insets(0, 0, 2, 2);
     cbInsets2 = new Insets(0, 20, 2, 2);
 		spectrumPanel = new JPanel(new GridBagLayout());
-    addCheckBoxes(((AwtTree) si.getSpectraTree()).getRootNode(), 0, true);
-    addCheckBoxes(((AwtTree) si.getSpectraTree()).getRootNode(), 0, false);
+    addCheckBoxes(((AwtTree) viewer.spectraTree).getRootNode(), 0, true);
+    addCheckBoxes(((AwtTree) viewer.spectraTree).getRootNode(), 0, false);
 	}
 
 	private void addCheckBoxes(JSVTreeNode rootNode, int level, boolean addViews) {
@@ -306,7 +305,7 @@ public class AwtDialogView extends AwtDialog implements WindowListener {
 			JSVPanelNode node = treeNodes.get(i).getPanelNode();
 			if (cb.isSelected() && node.jsvp != null) {
 				if (node.isView) {
-					si.setNode(node, true);
+					si.siSetNode(node, true);
 					return;
 				}
 				String label = cb.getText();
@@ -324,7 +323,7 @@ public class AwtDialogView extends AwtDialog implements WindowListener {
 			JSVPanelNode node = treeNodes.get(i).getPanelNode();
 			if (cb.isSelected() && node.jsvp != null) {
 				if (node.isView) {
-					si.setNode(node, true);
+					si.siSetNode(node, true);
 					return;
 				}
 				String label = cb.getText();
@@ -336,7 +335,7 @@ public class AwtDialogView extends AwtDialog implements WindowListener {
 	}
 
 	protected void closeSelected() {
-		si.execClose("selected", false);
+		si.siExecClose("selected", false);
     setup();
 	}
 

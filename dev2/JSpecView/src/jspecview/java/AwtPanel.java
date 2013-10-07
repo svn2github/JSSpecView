@@ -98,11 +98,11 @@ import jspecview.api.AnnotationDialog;
 import jspecview.api.JSVPanel;
 import jspecview.api.JSVPopupMenu;
 import jspecview.api.PdfCreatorInterface;
-import jspecview.api.ScriptInterface;
 import jspecview.common.Annotation;
 import jspecview.common.GraphSet;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVInterface;
+import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
 import jspecview.common.ColorParameters;
 import jspecview.common.PrintLayout;
@@ -130,10 +130,11 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
   }
 
   private JSVPopupMenu popup;
-  private ScriptInterface si;
 
   public PanelData pd;
 	private JSVColor bgcolor;
+
+	private JSViewer viewer;
 
   public PanelData getPanelData() {
     return pd;
@@ -174,38 +175,38 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
   
   /**
    * Constructs a new JSVPanel
-   * @param si 
+   * @param viewer 
    * 
    * @param spectrum
    *        the spectrum
    * @param popup 
    * @return this
    */
-  public AwtPanel setOne(ScriptInterface si, JDXSpectrum spectrum, JSVPopupMenu popup) {
+  public AwtPanel setOne(JSViewer viewer, JDXSpectrum spectrum, JSVPopupMenu popup) {
     // standard applet not overlaid and not showing range
     // standard application split spectra
     // removal of integration, taConvert
     // Preferences Dialog sample.jdx
   	ToolTipManager.sharedInstance().setInitialDelay(0);
   	//toolTip = new AwtToolTip(this);
-  	set(si, popup);
+  	set(viewer, popup);
     pd.initSingleSpectrum(spectrum);
     return this;
   }
 
-  private void set(ScriptInterface si, JSVPopupMenu popup) {
-  	this.si = si;
+  private void set(JSViewer viewer, JSVPopupMenu popup) {
+  	this.viewer = viewer;
     this.popup = popup;
     pd = new PanelData(this);
     pd.BLACK = new AwtColor(0);
 	}
 
-  public JSVPanel getNewPanel(ScriptInterface si, JDXSpectrum spectrum) {
-    return new AwtPanel().setOne(si, spectrum, popup);
+  public JSVPanel getNewPanel(JSViewer viewer, JDXSpectrum spectrum) {
+    return new AwtPanel().setOne(viewer, spectrum, popup);
   }
 
-  public static AwtPanel getJSVPanel(ScriptInterface si, JmolList<JDXSpectrum> specs, int startIndex, int endIndex, AwtPopupMenu popup) {
-    return new AwtPanel().setMany(si, specs, startIndex, endIndex, popup);
+  public static AwtPanel getJSVPanel(JSViewer viewer, JmolList<JDXSpectrum> specs, int startIndex, int endIndex, JSVPopupMenu popup) {
+    return new AwtPanel().setMany(viewer, specs, startIndex, endIndex, popup);
   }
 
 
@@ -215,7 +216,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
 	/**
    * Constructs a <code>JSVPanel</code> with List of spectra and corresponding
    * start and end indices of data points that should be displayed
-   * @param si 
+   * @param viewer 
    * 
    * @param spectra
    *        the List of <code>Graph</code> instances
@@ -226,10 +227,10 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
    * @param popup 
    * @return this
    */
-  private AwtPanel setMany(ScriptInterface si, JmolList<JDXSpectrum> spectra, int startIndex,
-      int endIndex, AwtPopupMenu popup) {
+  private AwtPanel setMany(JSViewer viewer, JmolList<JDXSpectrum> spectra, int startIndex,
+      int endIndex, JSVPopupMenu popup) {
     pd = new PanelData(this);
-    this.si = si;
+    this.viewer = viewer;
     this.popup = popup;
   	//toolTip = new AwtToolTip(this);
     pd.initJSVPanel(spectra, startIndex, endIndex);
@@ -238,15 +239,14 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
 
 	/**
    * generates a single panel or an integrated panel, as appropriate
-   * @param si 
-   * 
+   * @param viewer 
    * @param spec
    * @param jsvpPopupMenu
    * @return new panel
    */
-  public static AwtPanel getNewPanel(ScriptInterface si, JDXSpectrum spec,
+  public static AwtPanel getNewPanel(JSViewer viewer, JDXSpectrum spec,
                                      AwtPopupMenu jsvpPopupMenu) {
-    return new AwtPanel().setOne(si, spec, jsvpPopupMenu);
+    return new AwtPanel().setOne(viewer, spec, jsvpPopupMenu);
   }
 
   public GraphSet getNewGraphSet() {
@@ -270,7 +270,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
   public void doRepaint() {
   	// to the system
   	if (!pd.isPrinting)
-      si.requestRepaint();
+      viewer.requestRepaint();
   }
   
   @Override
@@ -293,13 +293,13 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
   	
   	// from the system, via update or applet/app repaint
   	
-    if (si == null || pd == null || pd.graphSets == null || pd.isPrinting)
+    if (viewer == null || pd == null || pd.graphSets == null || pd.isPrinting)
       return;
     
     super.paintComponent(g); // paint background 
     
     pd.drawGraph(g, getWidth(), getHeight(), false);
-    si.repaintCompleted();
+    viewer.repaintDone();
   }
 
   
@@ -385,13 +385,13 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
 		JDXSpectrum spec = pd.getSpectrum();
 		switch (type) {
 		case Integration:
-			dialog = new AwtDialogIntegrals("Integration for " + spec, si, spec);
+			dialog = new AwtDialogIntegrals("Integration for " + spec, viewer, spec);
 			break;
 		case Measurements:
-			dialog = new AwtDialogMeasurements("Measurements for " + spec, si, spec);
+			dialog = new AwtDialogMeasurements("Measurements for " + spec, viewer, spec);
 			break;
 		case PeakList:
-			dialog = new AwtDialogPeakList("Peak List for " + spec, si, spec);
+			dialog = new AwtDialogPeakList("Peak List for " + spec, viewer, spec);
 			break;
 		case NONE:
 		}
@@ -744,6 +744,10 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
 		} catch (IOException e) {
 			showMessage(e.getMessage(), "Error Saving Image");
 		}
+	}
+
+	public void showProperties() {
+		AwtDialogText.showProperties(this, pd.getSpectrum());
 	}
 
 }

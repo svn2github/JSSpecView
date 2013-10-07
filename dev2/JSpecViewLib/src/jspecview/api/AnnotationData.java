@@ -1,6 +1,5 @@
 package jspecview.api;
 
-import jspecview.common.Annotation;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.MeasurementData;
 import jspecview.common.Parameters;

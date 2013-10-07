@@ -8,151 +8,132 @@ import org.jmol.util.JmolList;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVPanelNode;
 import jspecview.common.JSViewer;
-import jspecview.common.PanelData;
-import jspecview.common.ColorParameters;
+import jspecview.common.PrintLayout;
 import jspecview.common.ScriptToken;
 import jspecview.common.JDXSpectrum.IRMode;
 import jspecview.source.JDXSource;
 
 public interface ScriptInterface {
 
-	public void checkCallbacks(String title);
+	// java.awt.Component methods
+	public void repaint();
+	public void setCursor(int id);
 
-	public void checkOverlay();
+	// from JSVAppletInterface or JSVInterface
+	
+	public boolean isSigned();
+	public void runScript(String script);
+	public boolean runScriptNow(String script);
+	public void syncToJmol(String value);
+	public void writeStatus(String msg);
+	
+	// JSpecView methods
+	public void siCheckCallbacks(String title);
 
-	public void closeSource(JDXSource source);
+	public void siCloseSource(JDXSource source);
 
-	public JDXSource createSource(String data, String filePath, URL base,
+	public JDXSource siCreateSource(String data, String filePath, URL base,
 			int firstSpec, int lastSpec) throws Exception;
 
-	public void execClose(String value, boolean fromScript);
+	public JSVTreeNode siCreateTree(JDXSource source, JSVPanel[] jsvPanels);
 
-	public String execExport(JSVPanel jsvp, String value);
+	public void siExecClose(String value, boolean fromScript);
 
-	public void execHidden(boolean b);
+	public String siExecExport(JSVPanel jsvp, String value);
 
-	public String execLoad(String value);
+	public void siExecHidden(boolean b);
 
-	public void execScriptComplete(String msg, boolean isOK);
+	public String siExecLoad(String value);
 
-	public void execSetAutoIntegrate(boolean b);
+	public void siExecScriptComplete(String msg, boolean isOK);
 
-	public void execSetCallback(ScriptToken st, String value);
+	public void siExecSetAutoIntegrate(boolean b);
 
-	public void execSetInterface(String value);
+	public void siExecSetCallback(ScriptToken st, String value);
 
-	public void execTest(String value);
+	public void siExecSetInterface(String value);
 
-	public boolean getAutoCombine();
+	public void siExecTest(String value);
 
-	public boolean getAutoShowLegend();
+	public boolean siGetAutoCombine();
 
-	public JDXSource getCurrentSource();
+	public boolean siGetAutoShowLegend();
 
-	public int getFileCount();
+	public int siGetFileCount();
 
-	public String getIntegrationRatios();
+	public String siGetIntegrationRatios();
 
-	public IRMode getIRMode();
+	public IRMode siGetIRMode();
 	
-	public JSVPanel getNewJSVPanel(JDXSpectrum spec);
+	public JSVPanel siGetNewJSVPanel(JDXSpectrum spec);
 
-	public JSVPanel getNewJSVPanel(JmolList<JDXSpectrum> specs);
+	public JSVPanel siGetNewJSVPanel2(JmolList<JDXSpectrum> specs);
 
-	public JSVPanelNode getNewPanelNode(String id, String fileName,
+	public JSVPanelNode siGetNewPanelNode(String id, String fileName,
 			JDXSource source, JSVPanel jsvp);
 
-	public JSVDialog getOverlayLegend(JSVPanel jsvp);
+	public JSVPopupMenu siGetPopupMenu();
 
-	public PanelData getPanelData();
+	public PrintLayout siGetPrintLayout(boolean isJob);
 
-	public JmolList<JSVPanelNode> getPanelNodes();
+	public String siGetReturnFromJmolModel();
 
-	public ColorParameters getParameters();
+	public JSViewer siGetViewer();
 
-	public Object getPopupMenu();
+	public int siIncrementViewCount(int i);
 
-	public String getReturnFromJmolModel();
+	public int siIncrementScriptLevelCount(int i);
 
-	public JSVPanel getSelectedPanel();
-
-	public JSVTree getSpectraTree();
-
-	public int incrementViewCount(int i);
-
-	public int incrementScriptLevelCount(int i);
-
-	public void openDataOrFile(String data, String name, JmolList<JDXSpectrum> specs,
+	public void siOpenDataOrFile(String data, String name, JmolList<JDXSpectrum> specs,
 			String url, int firstSpec, int lastSpec, boolean doCheck);
 
 	/**
-	 * @param pdfFileName
+	 * @param fileName
 	 * @return "OK" if signedApplet or app; Base64-encoded string if unsigned applet or null if problem
 	 */
-	public String print(String pdfFileName);
+	public String siPrintPDF(String fileName);
 
-	public void requestRepaint();
+	public void siProcessCommand(String script);
+	
+	public void siSendPanelChange(JSVPanel jsvp);
 
-	public void repaint();
+	public void siSetCurrentSource(JDXSource source);
 
-	public void repaintCompleted();
+	public String siSetFileAsString(String value);
 
-	public void runScript(String script);
+	public void siSetFileCount(int max);
 
-	public void sendPanelChange(JSVPanel jsvp);
+	public void siSetIntegrationRatios(String value);
 
-	public void setCurrentSource(JDXSource source);
+	public void siSetIRMode(IRMode iMode);
 
-	public void setCursor(int id);
+	public void siSetLoaded(String fileName, String filePath);
 
-	public void setFileCount(int max);
+	public void siSetLoadImaginary(boolean TF);
 
-	public void setIntegrationRatios(String value);
+	public void siSetMenuEnables(JSVPanelNode node, boolean isSplit);
 
-	public void setIRMode(IRMode iMode);
+	public void siSetNode(JSVPanelNode node, boolean fromTree);
 
-	public void setLoaded(String fileName, String filePath);
+	public JSVPanelNode siSetOverlayVisibility(JSVPanelNode node);
 
-	public void setMenuEnables(JSVPanelNode node, boolean isSplit);
+	public void siSetPropertiesFromPreferences(JSVPanel jsvp, boolean b);
 
-	public void setNode(JSVPanelNode node, boolean fromTree);
+	public void siSetRecentURL(String filePath);
 
-	public JSVPanelNode setOverlayVisibility(JSVPanelNode node);
+	public void siSetReturnFromJmolModel(String model);
 
-	public void setPropertiesFromPreferences(JSVPanel jsvp, boolean b);
+	public void siSetSelectedPanel(JSVPanel jsvp);
 
-	public void setRecentURL(String filePath);
+	public void siSyncLoad(String fileName);
 
-	public void setReturnFromJmolModel(String model);
+	public void siUpdateBoolean(ScriptToken st, boolean TF);
 
-	public void setSelectedPanel(JSVPanel jsvp);
+	public void siUpdateRecentMenus(String filePath);
 
-	public void showProperties();
+	public void siValidateAndRepaint();
+	
+	public JSVDialog siNewDialog(String type, JSVPanel jsvp);
 
-	public void syncLoad(String fileName);
-
-	public void syncToJmol(String value);
-
-	public void updateBoolean(ScriptToken st, boolean TF);
-
-	public void updateRecentMenus(String filePath);
-
-	public void validateAndRepaint();
-
-	public void writeStatus(String msg);
-
-	public void setLoadImaginary(boolean TF);
-
-	public void setProperty(String key, String value);
-
-	public boolean isSigned();
-
-	public String getFileAsString(String value);
-
-	public Object getPrintLayout(boolean isJob);
-
-	public JSVTreeNode createTree(JDXSource source, JSVPanel[] jsvPanels);
-
-	public JSViewer getViewer();
 
 }

@@ -39,7 +39,7 @@
 
 package jspecview.applet;
 
-import jspecview.api.JSVAppletInterface;
+import jspecview.api.JSVAppInterface;
 import jspecview.application.MainFrame;
 
 /**
@@ -63,20 +63,20 @@ public class JSVAppletPro extends JSVApplet {
       //           JmolApplet       Jmol
       // 
    * 
-   * JSVAppletPro and JSpecView can create a MainFrame
+   * AwtAppletPro and JSpecView can create a MainFrame
    * MainFrame can interface with Jmol via JmolSyncInterface and JSVInterface
-   * JSVAppletPro and JSVApplet can interact with JmolApplet via JavaScript callbacks
+   * AwtAppletPro and AwtApplet can interact with JmolApplet via JavaScript callbacks
    * 
    */
 
   private static final long serialVersionUID = 1L;
 
   private MainFrame mainFrame;
-  private JSVAppletInterface appletPrivate0;
+  private JSVAppInterface app0;
   
   @Override
   public void init() {
-    appletPrivate = new JSVAppletPrivatePro(this);
+    app = new JSVAppPro(this);
   }
 
   @Override
@@ -102,24 +102,20 @@ public class JSVAppletPro extends JSVApplet {
 
   public void doAdvanced(String filePath) {
     if (mainFrame == null) {
-      mainFrame = new MainFrame(null, (JSVAppletPrivatePro) appletPrivate);
+      mainFrame = new MainFrame(null, (JSVAppPro) app);
     }
     mainFrame.setVisible(true);
-    if (appletPrivate0 == null)
-      appletPrivate0 = appletPrivate;
-    appletPrivate0.setVisible(false);
-    appletPrivate = mainFrame;
+    if (app0 == null)
+      app0 = app;
+    app0.setVisible(false);
+    app = mainFrame;
     mainFrame.runScript("load \"" + filePath + "\"");
   }
 
   public void doExitJmol() {
-    appletPrivate0.setVisible(true);
+    app0.setVisible(true);
     mainFrame.setVisible(false);
-    appletPrivate = appletPrivate0;
-  }
-
-  public void processCommand(String script) {
-    appletPrivate.runScriptNow(script);
+    app = app0;
   }
 
 }

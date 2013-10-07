@@ -25,7 +25,7 @@ import org.jmol.util.JmolList;
 
 import javax.swing.JTextField;
 
-import jspecview.api.ScriptInterface;
+import jspecview.common.JSViewer;
 
 /**
  * CommandHistory keeps a command history and responds to key events
@@ -35,14 +35,14 @@ import jspecview.api.ScriptInterface;
 
 public class CommandHistory {
 
-  private ScriptInterface scripter;
+  private JSViewer viewer;
   private JTextField input;
   private JmolList<String> cmdList = new JmolList<String>();
   private int cmdPt = -1;
   private int cmdOffset = 0;
 
-  public CommandHistory(ScriptInterface scriptInterface, JTextField commandInput) {
-    scripter = scriptInterface;
+  public CommandHistory(JSViewer viewer, JTextField commandInput) {
+    this.viewer = viewer;
     input = commandInput;
     // TODO Auto-generated constructor stub
   }
@@ -55,7 +55,7 @@ public class CommandHistory {
     case KeyEvent.VK_ENTER:
       String cmd = input.getText();
       addCommand(cmd);
-      scripter.runScript(cmd);
+      viewer.runScript(cmd);
       input.setText("");
       input.requestFocusInWindow(); 
       return;

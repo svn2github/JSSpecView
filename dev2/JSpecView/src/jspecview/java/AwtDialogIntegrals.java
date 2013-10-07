@@ -25,8 +25,8 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JOptionPane;
 
-import jspecview.api.ScriptInterface;
 import jspecview.common.JDXSpectrum;
+import jspecview.common.JSViewer;
 import jspecview.common.Annotation.AType;
 
 /**
@@ -42,8 +42,8 @@ public class AwtDialogIntegrals extends AwtAnnotationDialog {
 	
 	private static int[] posXY = new int[] {Integer.MIN_VALUE, 0};
 	
-	protected AwtDialogIntegrals(String title, ScriptInterface si, JDXSpectrum spec) {
-		super(title, si, spec, AType.Integration);
+	protected AwtDialogIntegrals(String title, JSViewer viewer, JDXSpectrum spec) {
+		super(title, viewer, spec, AType.Integration);
 	}
 
 	public int[] getPosXY() {
@@ -53,14 +53,14 @@ public class AwtDialogIntegrals extends AwtAnnotationDialog {
 	@Override
 	public void addUniqueControls(AwtDialogHelper dialogHelper) {
 		txt1 = dialogHelper.addInputOption("BaselineOffset", "Baseline Offset", null, "%",
-				"" + params.si.getParameters().integralOffset, true);
+				"" + params.viewer.parameters.integralOffset, true);
 		txt2 = dialogHelper.addInputOption("Scale", "Scale", null, "%", ""
-				+ params.si.getParameters().integralRange, true);
+				+ params.viewer.parameters.integralRange, true);
 		//chkResets = dialogHelper.addCheckBoxOption("BaselineResets", "Baseline Resets", true);
 		
 		dialogHelper.addButton("Auto", new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        params.si.runScript("integrate auto");
+        params.viewer.runScript("integrate auto");
       }
     });
     

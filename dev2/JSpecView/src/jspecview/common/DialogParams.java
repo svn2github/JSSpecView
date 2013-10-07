@@ -8,7 +8,6 @@ import org.jmol.util.Txt;
 import jspecview.api.AnnotationData;
 import jspecview.api.AnnotationDialog;
 import jspecview.api.JSVPanel;
-import jspecview.api.ScriptInterface;
 import jspecview.common.Annotation.AType;
 
 /**
@@ -26,7 +25,7 @@ public class DialogParams {
 	public AType thisType;
 	public String subType;
 
-	public ScriptInterface si;
+	public JSViewer viewer;
 	public JSVPanel jsvp;
 	public JDXSpectrum spec;
 
@@ -53,12 +52,12 @@ public class DialogParams {
 	public boolean isON = true;
 
 
-	public DialogParams(AType type, AnnotationDialog dialog, ScriptInterface si,
+	public DialogParams(AType type, AnnotationDialog dialog, JSViewer viewer,
 			JDXSpectrum spec, Parameters myParams) {
 		this.thisType = type;
 		this.dialog = dialog;
-		this.si = si;
-		jsvp = si.getSelectedPanel();
+		this.viewer = viewer;
+		jsvp = viewer.selectedPanel;
 		this.spec = spec;
 		this.myParams = myParams;
 		options = new Hashtable<String, Object>();
@@ -101,7 +100,7 @@ public class DialogParams {
 	}
 
 	public boolean checkVisible() {
-		return si.getSelectedPanel().getPanelData().getShowAnnotation(thisType);
+		return viewer.selectedPanel.getPanelData().getShowAnnotation(thisType);
 	}
 
 	public void getUnitOptions() {

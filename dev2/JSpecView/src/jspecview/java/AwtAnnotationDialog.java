@@ -39,10 +39,10 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import jspecview.api.AnnotationDialog;
-import jspecview.api.ScriptInterface;
 import jspecview.common.Coordinate;
 import jspecview.common.DialogParams;
 import jspecview.common.JDXSpectrum;
+import jspecview.common.JSViewer;
 import jspecview.common.MeasurementData;
 import jspecview.common.Parameters;
 import jspecview.common.Annotation.AType;
@@ -77,19 +77,19 @@ public abstract class AwtAnnotationDialog extends AwtDialog implements
 	 * AwtPeakListDialog
 	 * 
 	 * @param title
-	 * @param si
+	 * @param viewer
 	 * @param spec
 	 *          the parent panel
 	 * @param type
 	 */
-	protected AwtAnnotationDialog(String title, ScriptInterface si,
+	protected AwtAnnotationDialog(String title, JSViewer viewer,
 			JDXSpectrum spec, AType type) {
 		super(null, title, false);
 		addCombo1 = type.equals(AType.Measurements);
 		addClearBtn = !type.equals(AType.PeakList);
 
 		setResizable(true);
-		params = new DialogParams(type, this, si, spec, new AwtParameters(
+		params = new DialogParams(type, this, viewer, spec, new AwtParameters(
 				"MeasurementData"));
 		params.setup();
 		initDialog();

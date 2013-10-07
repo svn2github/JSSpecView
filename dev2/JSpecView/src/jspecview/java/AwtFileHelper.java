@@ -7,23 +7,22 @@ import java.io.File;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
+import jspecview.api.JSVFileHelper;
+import jspecview.common.ExportType;
+import jspecview.common.JSViewer;
 
-import jspecview.api.ScriptInterface;
-import jspecview.export.Exporter.ExportType;
-
-public class AwtFileHelper {
+public class AwtFileHelper implements JSVFileHelper {
 	
-	public ScriptInterface si;
-
 	public String dirLastOpened;
 	public boolean useDirLastOpened;
 	public boolean useDirLastExported;
 	public String dirLastExported;
 
 	private JFileChooser fc;
+	private JSViewer viewer;
 
-	public AwtFileHelper(ScriptInterface si) {
-		this.si = si;
+	public AwtFileHelper(JSViewer viewer) {
+		this.viewer = viewer;
 	}
 	
 	public void setFileChooser(ExportType imode) {
@@ -83,7 +82,7 @@ public class AwtFileHelper {
 			return null;
 		File file = fc.getSelectedFile();
 		if (isSave) {
-			si.setProperty("directoryLastExportedFile", dirLastExported = file.getParent());
+			viewer.setProperty("directoryLastExportedFile", dirLastExported = file.getParent());
 	    if (file.exists()) {
 	      int option = JOptionPane.showConfirmDialog(c,
 	          "Overwrite " + file.getName() + "?", "Confirm Overwrite Existing File",
@@ -92,9 +91,13 @@ public class AwtFileHelper {
 	        return null;
 	    }
 		} else {
-			si.setProperty("directoryLastOpenedFile", dirLastOpened = file.getParent());
+			viewer.setProperty("directoryLastOpenedFile", dirLastOpened = file.getParent());
 		}
 		return file;
+	}
+
+	public String setDirLastExported(String name) {
+		return dirLastExported = name;
 	}
 
 

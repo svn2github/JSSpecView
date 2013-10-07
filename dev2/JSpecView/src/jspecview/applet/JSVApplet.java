@@ -48,16 +48,49 @@
 
 package jspecview.applet;
 
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.dnd.DropTargetListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.Map;
 
 import javax.swing.JApplet;
+import javax.swing.JFrame;
 
+import netscape.javascript.JSObject;
+
+import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
+import org.jmol.util.Txt;
 
+import jspecview.api.AppletFrame;
+import jspecview.api.JSVAppInterface;
 import jspecview.api.JSVAppletInterface;
+import jspecview.api.JSVDialog;
+import jspecview.api.JSVPanel;
+import jspecview.api.JSVPopupMenu;
+import jspecview.app.JSVApp;
+import jspecview.awt.Platform;
+import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVersion;
+import jspecview.common.JSViewer;
+import jspecview.common.PrintLayout;
+import jspecview.java.AwtDialogOverlayLegend;
+import jspecview.java.AwtDialogPrint;
+import jspecview.java.AwtDialogView;
+import jspecview.java.AwtDropTargetListener;
+import jspecview.java.AwtFileHelper;
+import jspecview.java.AwtPanel;
+import jspecview.java.AwtParameters;
+import jspecview.java.AwtTree;
+import jspecview.java.AwtViewPanel;
 
 /**
+ * 
+ * Entry point for the web.
+ * 
  * JSpecView Applet class. For a list of parameters and scripting functionality
  * see the file JSpecView_Applet_Specification.html.
  * 
@@ -66,229 +99,444 @@ import jspecview.common.JSVersion;
  * @author Khari A. Bryan
  * @author Craig A. D. Walters
  * @author Prof Robert J. Lancashire
- *
- * http://blog.gorges.us/2009/03/how-to-enable-keywords-in-eclipse-and-subversion-svn/
- * $LastChangedRevision: 1097 $
- * $LastChangedDate: 2012-07-23 11:10:30 -0500 (Mon, 23 Jul 2012) $
+ * 
+ *         http://blog.gorges.us/2009/03/how-to-enable-keywords-in-eclipse-and-
+ *         subversion-svn/ $LastChangedRevision: 1097 $ $LastChangedDate:
+ *         2012-07-23 11:10:30 -0500 (Mon, 23 Jul 2012) $
  */
 
-public class JSVApplet extends JApplet implements JSVAppletInterface {
+public class JSVApplet extends JApplet implements JSVAppletInterface,
+		AppletFrame {
 
-  protected JSVAppletInterface appletPrivate;
-  private boolean isStandalone = false;
+	protected Thread commandWatcherThread;
 
-  /**
-   * Initializes applet with parameters and load the <code>JDXSource</code> 
-   * called by the browser
-   * 
-   */
-  @Override
-  public void init() {
-    appletPrivate = new JSVAppletPrivate(this);
-    Logger.info(getAppletInfo());
-  }
+	protected JSVAppInterface app;
+	private boolean isStandalone = false;
 
-  private static final long serialVersionUID = 1L;
-
-  public boolean isPro() {
-    return appletPrivate.isPro();
-  }
-  
-  public boolean isSigned() {
-    return appletPrivate.isSigned();
-  }
-  
-///////////// public methods called from page or browser ////////////////
-  //
-  //
-  // Notice that in all of these we use getSelectedPanel(), not selectedJSVPanel
-  // That's because the methods aren't overridden in JSVAppletPro, and in that case
-  // we want to select the panel from MainFrame, not here. Thus, when the Advanced...
-  // tab is open, actions from outside of Jmol act on the MainFrame, not here. 
-  //
-  // BH - 8.3.2012
-  
-  @Override
-  public void finalize() {
-    System.out.println("JSpecView " + this + " finalized");
-  }
-
-  @Override
-  public void destroy() {
-    ((JSVAppletPrivate) appletPrivate).dispose();
-    appletPrivate = null;
-  }
-
-  /* (non-Javadoc)  
-   * @see jspecview.applet.JSVAppletInterface#getParameter(java.lang.String, java.lang.String)
-   * 
-   * not used
-   * 
-   */
-  public String getParameter(String key, String def) {
-    return isStandalone ? System.getProperty(key, def)
-        : (getParameter(key) != null ? getParameter(key) : def);
-  }
-
-  /**
-   * Get Applet information
-   * 
-   * @return the String "JSpecView Applet"
-   */
-  @Override
-  public String getAppletInfo() {
-    return "JSpecView Applet " + JSVersion.VERSION;
-  }
-  
-  ///////////////// JSpecView JavaScript calls ///////////////////
-  
-  /* (non-Javadoc)
-   * @see jspecview.applet.JSVAppletInterface#getSolnColour()
-   */
-
-  public String getSolnColour() {
-    return appletPrivate.getSolnColour();
-  }
-
-  /* (non-Javadoc)
-   * @see jspecview.applet.JSVAppletInterface#getCoordinate()
-   */
-  public String getCoordinate() {
-    return appletPrivate.getCoordinate();
-  }
-
-  /* (non-Javadoc)
-   * @see jspecview.applet.JSVAppletInterface#loadInline(java.lang.String)
-   */
-  public void loadInline(String data) {
-    appletPrivate.loadInline(data);
-  }
-
-  @Deprecated
-  public String export(String type, int n) {
-    return appletPrivate.exportSpectrum(type, n);
-  }
-
-  /* (non-Javadoc)
-   * @see jspecview.applet.JSVAppletInterface#exportSpectrum(java.lang.String, int)
-   */
-  public String exportSpectrum(String type, int n) {
-    return appletPrivate.exportSpectrum(type, n);
-  }
-
-  /* (non-Javadoc)
-   * @see jspecview.applet.JSVAppletInterface#setFilePath(java.lang.String)
-   */
-  public void setFilePath(String tmpFilePath) {
-    appletPrivate.setFilePath(tmpFilePath);
-  }
-
-  /* (non-Javadoc)
-   * @see jspecview.applet.JSVAppletInterface#setSpectrumNumber(int)
-   */
-  public void setSpectrumNumber(int i) {
-    appletPrivate.setSpectrumNumber(i);
-  }
-  
-  /* (non-Javadoc)
-   * @see jspecview.applet.JSVAppletInterface#toggleGrid()
-   */
-  public void toggleGrid() {
-    appletPrivate.toggleGrid();
-  }
-
-  /* (non-Javadoc)
-   * @see jspecview.applet.JSVAppletInterface#toggleCoordinate()
-   */
-  public void toggleCoordinate() {
-    appletPrivate.toggleCoordinate();
-  }
-
-  /* (non-Javadoc)
-   * @see jspecview.applet.JSVAppletInterface#toggleIntegration()
-   */
-  public void toggleIntegration() {
-    appletPrivate.toggleIntegration();
-  }
-
-
-  /* (non-Javadoc)
-   * @see jspecview.applet.JSVAppletInterface#addHighlight(double, double, int, int, int, int)
-   */
-  public void addHighlight(double x1, double x2, int r, int g, int b, int a) {
-    appletPrivate.addHighlight(x1, x2, r, g, b, a);
-  }
-
-  /* (non-Javadoc)
-   * @see jspecview.applet.JSVAppletInterface#removeAllHighlights()
-   */
-  public void removeAllHighlights() {
-    appletPrivate.removeAllHighlights();
-  }
-
-  /* (non-Javadoc)
-   * @see jspecview.applet.JSVAppletInterface#removeHighlight(double, double)
-   */
-  public void removeHighlight(double x1, double x2) {
-    appletPrivate.removeHighlight(x1, x2);
-  }
-
-  /* (non-Javadoc)
-   * @see jspecview.applet.JSVAppletInterface#reversePlot()
-   */
-  public void reversePlot() {
-    appletPrivate.reversePlot();
-  }
-
-  /* (non-Javadoc)
-   * @see jspecview.applet.JSVAppletInterface#script(java.lang.String)
-   */
-  @Deprecated
-  public void script(String script) {
-    ((JSVAppletPrivate) appletPrivate).initParams(script);
-  }
-
-  /* (non-Javadoc)
-   * @see jspecview.applet.JSVAppletInterface#runScript(java.lang.String)
-   */
-  public void runScript(String script) {
-    appletPrivate.runScript(script);
-  }
-
-  /* (non-Javadoc)
-   * @see jspecview.applet.JSVAppletInterface#syncScript(java.lang.String)
-   */
-  public void syncScript(String peakScript) {
-    appletPrivate.syncScript(peakScript);
-  }
-
-  /* (non-Javadoc)
-   * @see jspecview.applet.JSVAppletInterface#writeStatus(java.lang.String)
-   */
-  public void writeStatus(String msg) {
-    appletPrivate.writeStatus(msg);
-  }
-
-  /* (non-Javadoc)
-   * @see jspecview.applet.JSVAppletInterface#getPropertyAsJavaObject(java.lang.String)
-   */
-  public Map<String, Object> getPropertyAsJavaObject(String key) {
-    return appletPrivate.getPropertyAsJavaObject(key);
-  }
-  
-  /* (non-Javadoc)
-   * @see jspecview.applet.JSVAppletInterface#getPropertyAsJSON(java.lang.String)
-   */
-  public String getPropertyAsJSON(String key) {
-    return appletPrivate.getPropertyAsJSON(key);
-  }
-
-  public boolean runScriptNow(String script) {
-    return appletPrivate.runScriptNow(script);    
-  }
-
-	public String print(String pdfFileName) {
-		return appletPrivate.print(pdfFileName);
+	/**
+	 * 
+	 * Initializes applet with parameters and load the <code>JDXSource</code>
+	 * called by the browser
+	 * 
+	 */
+	@Override
+	public void init() {
+		app = new JSVApp(this, new Platform());
+		commandWatcherThread = new Thread(new CommandWatcher());
+		commandWatcherThread.setName("CommmandWatcherThread");
+		commandWatcherThread.start();
+		Logger.info(getAppletInfo());
 	}
+
+	private static final long serialVersionUID = 1L;
+
+	public boolean isPro() {
+		return app.isPro();
+	}
+
+	public boolean isSigned() {
+		return app.isSigned();
+	}
+
+	// /////////// public methods called from page or browser ////////////////
+	//
+	//
+	// Notice that in all of these we use getSelectedPanel(), not selectedJSVPanel
+	// That's because the methods aren't overridden in JSVAppletPro, and in that
+	// case
+	// we want to select the panel from MainFrame, not here. Thus, when the
+	// Advanced...
+	// tab is open, actions from outside of Jmol act on the MainFrame, not here.
+	//
+	// BH - 8.3.2012
+
+	@Override
+	public void finalize() {
+		System.out.println("JSpecView " + this + " finalized");
+	}
+
+	@Override
+	public void destroy() {
+		if (commandWatcherThread != null) {
+			commandWatcherThread.interrupt();
+			commandWatcherThread = null;
+		}
+		((JSVApp) app).dispose();
+		app = null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see jspecview.applet.JSVAppletInterface#getParameter(java.lang.String,
+	 * java.lang.String)
+	 * 
+	 * not used
+	 */
+	public String getParameter(String key, String def) {
+		return isStandalone ? System.getProperty(key, def)
+				: (getParameter(key) != null ? getParameter(key) : def);
+	}
+
+	/**
+	 * Get Applet information
+	 * 
+	 * @return the String "JSpecView Applet"
+	 */
+	@Override
+	public String getAppletInfo() {
+		return "JSpecView Applet " + JSVersion.VERSION;
+	}
+
+	// /////////////// JSpecView JavaScript calls ///////////////////
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see jspecview.applet.JSVAppletInterface#getSolnColour()
+	 */
+
+	public String getSolnColour() {
+		return app.getSolnColour();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see jspecview.applet.JSVAppletInterface#getCoordinate()
+	 */
+	public String getCoordinate() {
+		return app.getCoordinate();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see jspecview.applet.JSVAppletInterface#loadInline(java.lang.String)
+	 */
+	public void loadInline(String data) {
+		app.loadInline(data);
+	}
+
+	@Deprecated
+	public String export(String type, int n) {
+		return app.exportSpectrum(type, n);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see jspecview.applet.JSVAppletInterface#exportSpectrum(java.lang.String,
+	 * int)
+	 */
+	public String exportSpectrum(String type, int n) {
+		return app.exportSpectrum(type, n);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see jspecview.applet.JSVAppletInterface#setFilePath(java.lang.String)
+	 */
+	public void setFilePath(String tmpFilePath) {
+		app.setFilePath(tmpFilePath);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see jspecview.applet.JSVAppletInterface#setSpectrumNumber(int)
+	 */
+	public void setSpectrumNumber(int i) {
+		app.setSpectrumNumber(i);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see jspecview.applet.JSVAppletInterface#toggleGrid()
+	 */
+	public void toggleGrid() {
+		app.toggleGrid();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see jspecview.applet.JSVAppletInterface#toggleCoordinate()
+	 */
+	public void toggleCoordinate() {
+		app.toggleCoordinate();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see jspecview.applet.JSVAppletInterface#toggleIntegration()
+	 */
+	public void toggleIntegration() {
+		app.toggleIntegration();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see jspecview.applet.JSVAppletInterface#addHighlight(double, double, int,
+	 * int, int, int)
+	 */
+	public void addHighlight(double x1, double x2, int r, int g, int b, int a) {
+		app.addHighlight(x1, x2, r, g, b, a);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see jspecview.applet.JSVAppletInterface#removeAllHighlights()
+	 */
+	public void removeAllHighlights() {
+		app.removeAllHighlights();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see jspecview.applet.JSVAppletInterface#removeHighlight(double, double)
+	 */
+	public void removeHighlight(double x1, double x2) {
+		app.removeHighlight(x1, x2);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see jspecview.applet.JSVAppletInterface#reversePlot()
+	 */
+	public void reversePlot() {
+		app.reversePlot();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see jspecview.applet.JSVAppletInterface#script(java.lang.String)
+	 */
+	@Deprecated
+	public void script(String script) {
+		((JSVApp) app).initParams(script);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see jspecview.applet.JSVAppletInterface#runScript(java.lang.String)
+	 */
+	public void runScript(String script) {
+		app.runScript(script);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see jspecview.applet.JSVAppletInterface#syncScript(java.lang.String)
+	 */
+	public void syncScript(String peakScript) {
+		app.syncScript(peakScript);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see jspecview.applet.JSVAppletInterface#writeStatus(java.lang.String)
+	 */
+	public void writeStatus(String msg) {
+		app.writeStatus(msg);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * jspecview.applet.JSVAppletInterface#getPropertyAsJavaObject(java.lang.String
+	 * )
+	 */
+	public Map<String, Object> getPropertyAsJavaObject(String key) {
+		return app.getPropertyAsJavaObject(key);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * jspecview.applet.JSVAppletInterface#getPropertyAsJSON(java.lang.String)
+	 */
+	public String getPropertyAsJSON(String key) {
+		return app.getPropertyAsJSON(key);
+	}
+
+	public boolean runScriptNow(String script) {
+		return app.runScriptNow(script);
+	}
+
+	public String siPrintPDF(String pdfFileName) {
+		return app.siPrintPDF(pdfFileName);
+	}
+
+	private DropTargetListener dtl;
+	private Component spectrumPanel;
+	private JFrame offWindowFrame;
+
+	public void setPlatformFields(boolean isSigned, JSViewer viewer) {
+		if (dtl == null && isSigned)
+			dtl = new AwtDropTargetListener(viewer);
+		viewer.parameters = new AwtParameters("applet");
+		viewer.spectraTree = new AwtTree(viewer);
+		viewer.fileHelper = new AwtFileHelper(viewer);
+	}
+
+	public void validateContent(int mode) {
+		if ((mode & 1) == 1)
+			getContentPane().validate();
+		if ((mode & 2) == 2)
+			spectrumPanel.validate();
+	}
+
+	public void addNewPanel(JSViewer viewer) {
+		getContentPane().removeAll();
+		spectrumPanel = (Component) (viewer.viewPanel = new AwtViewPanel(
+				new BorderLayout()));
+		getContentPane().add(spectrumPanel);
+	}
+
+	public void newWindow(boolean isSelected) {
+		if (isSelected) {
+			offWindowFrame = new JFrame("JSpecView");
+			offWindowFrame.setSize(getSize());
+			final Dimension d = spectrumPanel.getSize();
+			offWindowFrame.add(spectrumPanel);
+			offWindowFrame.validate();
+			offWindowFrame.setVisible(true);
+			remove(spectrumPanel);
+			app.siValidateAndRepaint();
+			offWindowFrame.addWindowListener(new WindowAdapter() {
+				@Override
+				public void windowClosing(WindowEvent e) {
+					windowClosingEvent(d);
+				}
+			});
+		} else {
+			getContentPane().add(spectrumPanel);
+			app.siValidateAndRepaint();
+			offWindowFrame.removeAll();
+			offWindowFrame.dispose();
+			offWindowFrame = null;
+		}
+	}
+
+	protected void windowClosingEvent(Dimension d) {
+		spectrumPanel.setSize(d);
+		getContentPane().add(spectrumPanel);
+		setVisible(true);
+		app.siValidateAndRepaint();
+		offWindowFrame.removeAll();
+		offWindowFrame.dispose();
+		app.newWindow(false, true);
+	}
+
+	/**
+	 * Calls a javascript function given by the function name passing to it the
+	 * string parameters as arguments
+	 * 
+	 * @param callback
+	 * @param params
+	 * 
+	 */
+	public void callToJavaScript(String callback, Object[] params) {
+		try {
+			JSObject jso = JSObject.getWindow(this);
+			if (callback.length() > 0) {
+				if (callback.indexOf(".") > 0) {
+					String[] mods = Txt.split(callback, ".");
+					for (int i = 0; i < mods.length - 1; i++) {
+						jso = (JSObject) jso.getMember(mods[i]);
+					}
+					callback = mods[mods.length - 1];
+				}
+				Logger.info("JSVApplet calling " + jso + " " + callback);
+				jso.call(callback, params);
+			}
+
+		} catch (Exception npe) {
+			Logger.warn("EXCEPTION-> " + npe.getMessage());
+		}
+	}
+
+	public void setPanelVisible(boolean b) {
+		spectrumPanel.setVisible(b);
+	}
+
+	private PrintLayout lastPrintLayout;
+	
+	public PrintLayout getDialogPrint(boolean isJob) {
+		PrintLayout pl = new AwtDialogPrint(offWindowFrame, lastPrintLayout, isJob)
+				.getPrintLayout();
+		if (pl != null)
+			lastPrintLayout = pl;
+		return pl;
+
+	}
+
+	public JSVPanel getJSVPanel(JSViewer viewer, JmolList<JDXSpectrum> specs,
+			int initialStartIndex, int initialEndIndex, JSVPopupMenu appletPopupMenu) {
+		return AwtPanel.getJSVPanel(viewer, specs, initialStartIndex,
+				initialEndIndex, appletPopupMenu);
+	}
+
+	public JSVDialog newDialog(JSViewer viewer, String type) {
+		if (type.equals("legend"))
+			return new AwtDialogOverlayLegend(null, viewer.selectedPanel);
+		if (type.equals("view"))
+			return new AwtDialogView(viewer, spectrumPanel, false);
+		return null;
+	}
+
+	public JSVPopupMenu newAppletPopupMenu(JSViewer viewer, boolean allowMenu,
+			boolean zoomEnabled) {
+		return new AwtAppletPopupMenu(viewer, allowMenu, zoomEnabled);
+	}
+
+	// for the signed applet to load a remote file, it must
+	// be using a thread started by the initiating thread;
+
+	class CommandWatcher implements Runnable {
+		public void run() {
+			Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+			int commandDelay = 200;
+			while (commandWatcherThread != null) {
+				try {
+					Thread.sleep(commandDelay);
+					if (commandWatcherThread != null) {
+						JmolList<String> q = app.getScriptQueue();
+						if (q.size() > 0) {
+							String scriptItem = q.remove(0);
+							if (scriptItem != null)
+								app.siProcessCommand(scriptItem);
+						}
+					}
+				} catch (InterruptedException ie) {
+					Logger.info("CommandWatcher InterruptedException!");
+					break;
+				} catch (Exception ie) {
+					String s = "script processing ERROR:\n\n" + ie.toString();
+					for (int i = 0; i < ie.getStackTrace().length; i++) {
+						s += "\n" + ie.getStackTrace()[i].toString();
+					}
+					Logger.info("CommandWatcher Exception! " + s);
+					break;
+				}
+			}
+			commandWatcherThread = null;
+		}
+	}
+
 
 }

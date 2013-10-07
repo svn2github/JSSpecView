@@ -6,24 +6,22 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
 
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
-import org.jmol.util.JmolList;
-
-import jspecview.common.JSVPanelNode;
+import jspecview.app.JSVApp;
+import jspecview.common.JSViewer;
 import jspecview.java.AwtPopupMenu;
 
-class JSVAppletPopupMenu extends AwtPopupMenu {
+class AwtAppletPopupMenu extends AwtPopupMenu {
 
-  JSVAppletPrivate applet;
+  JSVApp app;
 
-  JSVAppletPopupMenu(JSVAppletPrivate applet, 
+  AwtAppletPopupMenu(JSViewer viewer, 
       boolean allowMenu, boolean enableZoom) {
-    super(applet);
+    super(viewer, false);
     isApplet = true;
-    this.applet = applet;
+    app = (JSVApp) viewer.si;
     super.jbInit();
     if (!allowMenu) {
     	// all except About and Zoom disabled
@@ -40,7 +38,7 @@ class JSVAppletPopupMenu extends AwtPopupMenu {
 
   private ActionListener exportActionListener = new ActionListener() {
     public void actionPerformed(ActionEvent e) {
-      applet.exportSpectrumViaMenu(e.getActionCommand());
+      app.exportSpectrumViaMenu(e.getActionCommand());
     }
   };
 
@@ -54,7 +52,6 @@ class JSVAppletPopupMenu extends AwtPopupMenu {
   private JMenu zoomMenu = new JMenu();
   private JMenuItem versionMenuItem = new JMenuItem();
   private JMenuItem headerMenuItem = new JMenuItem();
-  JCheckBoxMenuItem windowMenuItem = new JCheckBoxMenuItem();
 
   @Override
 	protected void jbInit() {
@@ -72,7 +69,7 @@ class JSVAppletPopupMenu extends AwtPopupMenu {
     fileMenu.setText("File");
     //fileMenu.setEnabled(applet.isSigned()); ?
     fileMenu.add(saveAsMenu);
-    if (applet.isSigned()) {
+    if (app.isSigned()) {
       appletExportAsMenu = new JMenu();
       fileMenu.add(appletExportAsMenu);
     }
@@ -85,14 +82,14 @@ class JSVAppletPopupMenu extends AwtPopupMenu {
     headerMenuItem.setText("Show Header...");
     headerMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        applet.showHeader();
+        app.showHeader();
       }
     });
 
     windowMenuItem.setText("Window");
     windowMenuItem.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
-        applet.newWindow(e.getStateChange() == ItemEvent.SELECTED);
+        app.newWindow(e.getStateChange() == ItemEvent.SELECTED, false);
       }
     });
     overlayKeyMenuItem.setEnabled(false);
@@ -115,15 +112,15 @@ class JSVAppletPopupMenu extends AwtPopupMenu {
     //appletAdvancedMenuItem.setEnabled(applet.isPro());
 
     printMenuItem.setActionCommand("Print");
-    printMenuItem.setEnabled(applet.isSigned());
+    printMenuItem.setEnabled(app.isSigned());
     printMenuItem.setText("Print...");
     printMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        applet.print();
+        app.print();
       }
     });
     
-    versionMenuItem.setText("<html><h3>" + applet.getJsvApplet().getAppletInfo() + "</h3></html>");
+    versionMenuItem.setText("<html><h3>" + app.getAppletFrame().getAppletInfo() + "</h3></html>");
 
     viewMenu.add(gridCheckBoxMenuItem);
     viewMenu.add(coordsCheckBoxMenuItem);
@@ -161,13 +158,7 @@ class JSVAppletPopupMenu extends AwtPopupMenu {
     //TODO: test this -- doesn't account for selected panels? 
     overlayKeyMenuItem.setSelected(!overlayKeyMenuItem.isSelected());
     boolean visible = overlayKeyMenuItem.isSelected();
-    applet.showOverlayKey(visible);
+    app.showOverlayKey(visible);
   }
 
-	public void setCompoundMenu(JmolList<JSVPanelNode> panelNodes,
-			boolean allowSelection) {
-		spectraMenuItem.setEnabled(allowSelection && panelNodes.size() > 1);		
-		spectraMenuItem.setEnabled(true);
-	}
-    
 }

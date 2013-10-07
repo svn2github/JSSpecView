@@ -50,7 +50,7 @@ public interface JSVAppletInterface {
    */
   public abstract String exportSpectrum(String type, int n);
 
-	public String print(String pdfFileName);
+	public String siPrintPDF(String pdfFileName);
 
 	public abstract void setFilePath(String tmpFilePath);
 

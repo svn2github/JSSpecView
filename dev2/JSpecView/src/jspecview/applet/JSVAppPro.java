@@ -41,17 +41,20 @@ package jspecview.applet;
 
 import java.util.Properties;
 
+import jspecview.app.JSVApp;
+import jspecview.awt.Platform;
+
 import org.jmol.api.JSVInterface;
 
 /**
  * @author Bob Hanson
  */
 
-public class JSVAppletPrivatePro extends JSVAppletPrivate implements
+public class JSVAppPro extends JSVApp implements
     JSVInterface {
 
-  JSVAppletPrivatePro(JSVApplet jsvApplet) {
-    super(jsvApplet);
+  JSVAppPro(JSVApplet jsvApplet) {
+    super(jsvApplet, new Platform());
   }
 
   @Override
@@ -65,17 +68,17 @@ public class JSVAppletPrivatePro extends JSVAppletPrivate implements
   }
   
   @Override
-  void doAdvanced(String filePath) {
-    ((JSVAppletPro) jsvApplet).doAdvanced(filePath);
+  public void doAdvanced(String filePath) {
+    ((JSVAppletPro) appletFrame).doAdvanced(filePath);
   }
 
   public void exitJSpecView(boolean withDialog, Object frame) {
-    ((JSVAppletPro) jsvApplet).doExitJmol();
+    ((JSVAppletPro) appletFrame).doExitJmol();
   }
 
   @Override
-  protected void processCommand(String script) {
-    ((JSVAppletPro) jsvApplet).processCommand(script);
+  public void siProcessCommand(String script) {
+    ((JSVAppletPro) appletFrame).app.runScriptNow(script);
   }
 
   public void saveProperties(Properties properties) {

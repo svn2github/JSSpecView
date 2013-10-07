@@ -10,16 +10,20 @@ import javax.swing.JToolBar;
 
 import jspecview.api.JSVPanel;
 import jspecview.common.JSVPanelNode;
+import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
 import jspecview.common.ScriptToken;
+import jspecview.java.AwtDialogText;
 
 public class AppToolBar extends JToolBar {
 
   private static final long serialVersionUID = 1L;
-  MainFrame mainFrame;
+  protected MainFrame mainFrame;
+  protected JSViewer viewer;
 
   public AppToolBar(MainFrame mainFrame) {
     this.mainFrame = mainFrame;
+    this.viewer = mainFrame.viewer;
     jbInit();
   }
 
@@ -93,22 +97,22 @@ public class AppToolBar extends JToolBar {
     setButton(previousButton, "Previous View", previousIcon,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            mainFrame.runScript("zoom previous");
+            viewer.runScript("zoom previous");
           }
         });
     setButton(nextButton, "Next View", nextIcon, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        mainFrame.runScript("zoom next");
+        viewer.runScript("zoom next");
       }
     });
     setButton(resetButton, "Reset", resetIcon, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        mainFrame.runScript("zoom out");
+        viewer.runScript("zoom out");
       }
     });
     setButton(clearButton, "Clear Views", clearIcon, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        mainFrame.runScript("zoom clear");
+        viewer.runScript("zoom clear");
       }
     });
 
@@ -120,38 +124,38 @@ public class AppToolBar extends JToolBar {
     setButton(propertiesButton, "Properties", informationIcon,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            mainFrame.showProperties();
+            mainFrame.viewer.showProperties();
           }
         });
     setButton(errorLogButton, "Error Log", errorLogIcon, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        TextDialog.showError(mainFrame);
+        AwtDialogText.showError(mainFrame);
       }
     });
 
     setButton(gridToggleButton, "Toggle Grid", gridIcon, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         setBoolean(ScriptToken.GRIDON, e);
-        mainFrame.requestRepaint();
+        viewer.requestRepaint();
       }
     });
     setButton(coordsToggleButton, "Toggle Coordinates", coordinatesIcon,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             setBoolean(ScriptToken.COORDINATESON, e);
-            mainFrame.requestRepaint();
+            viewer.requestRepaint();
           }
         });
     setButton(printButton, "Print", printIcon, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        mainFrame.print("");
+        mainFrame.siPrintPDF("");
       }
     });
     setButton(revPlotToggleButton, "Reverse Plot", reverseIcon,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             setBoolean(ScriptToken.REVERSEPLOT, e);
-            mainFrame.requestRepaint();
+            viewer.requestRepaint();
           }
         });
     setButton(aboutButton, "About JSpecView", aboutIcon, new ActionListener() {
@@ -212,7 +216,7 @@ public class AppToolBar extends JToolBar {
 
   protected void setBoolean(ScriptToken st, ActionEvent e) {
     boolean isOn = ((JToggleButton) e.getSource()).isSelected();
-    mainFrame.runScript(st + " " + isOn);
+    viewer.runScript(st + " " + isOn);
   }
 
   public void setMenuEnables(JSVPanelNode node) {
@@ -227,7 +231,7 @@ public class AppToolBar extends JToolBar {
 	 * @param e  
 	 */
   protected void spectrumButton_actionPerformed(ActionEvent e) {
-    mainFrame.checkOverlay();
+    viewer.checkOverlay();
   }
 
 }
