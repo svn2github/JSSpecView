@@ -54,6 +54,10 @@ Replaced all references to DecimalFormat with JSVTextFormat.formatDecimal or JSV
 Replaced all references to StringBuilder and StringBuffer with JSVSB
 
 ====TODO=========
+-from Jmol, using Tools/JSpecView gives a String out of bounds error
+-opened acetophenone, links from IR, NMR did not seem to work
+-tried MS and clicked lowest annotated peak, display changed then all menus greyed out and could only close app.
+
 -Preferences for Application no longer showing sample spectrum with colour schemes
 -default colours changed
 
