@@ -54,6 +54,8 @@ Replaced all references to DecimalFormat with JSVTextFormat.formatDecimal or JSV
 Replaced all references to StringBuilder and StringBuffer with JSVSB
 
 ====TODO=========
+-Preferences for Application no longer showing sample spectrum with colour schemes
+-default colours changed
 
 -fix for Block files of same data type that can be overlaid
 
