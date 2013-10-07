@@ -99,6 +99,7 @@ import jspecview.api.JSVPanel;
 import jspecview.api.JSVPopupMenu;
 import jspecview.api.PdfCreatorInterface;
 import jspecview.common.Annotation;
+import jspecview.common.ColoredAnnotation;
 import jspecview.common.GraphSet;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVInterface;
@@ -369,11 +370,11 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
 	}
 
 	public AnnotationDialog showDialog(AType type) {
-		AwtAnnotationDialog dialog = null; 
+		AwtDialogAnnotation dialog = null; 
 		AnnotationData ad = pd.getDialog(type);
 		pd.closeAllDialogsExcept(type);
-		if (ad != null && ad instanceof AwtAnnotationDialog) {
-			((AwtAnnotationDialog) ad).params.reEnable();
+		if (ad != null && ad instanceof AwtDialogAnnotation) {
+			((AwtDialogAnnotation) ad).params.reEnable();
 			return (AnnotationDialog) ad;
 		}
 		
@@ -619,7 +620,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
 	public Annotation getColoredAnnotation(JDXSpectrum spectrum, double x,
 			double y, String text, JSVColor c, boolean isPixels, boolean is2d,
 			int offsetX, int offsetY) {
-		return new AwtColoredAnnotation(x, y).set(spectrum, text, c, isPixels,
+		return new ColoredAnnotation(x, y).set(spectrum, text, c, isPixels,
 				is2d, offsetX, offsetY);
 	}
 
@@ -631,7 +632,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
 	public Annotation newAnnotation(double x, double y, JDXSpectrum spec,
 			String text, JSVColor color, boolean isPixels, boolean is2D, int offsetX,
 			int offsetY) {
-		return new AwtColoredAnnotation(x, y).set(spec, text, color, isPixels,
+		return new ColoredAnnotation(x, y).set(spec, text, color, isPixels,
 				is2D, offsetX, offsetY);
 	}
 

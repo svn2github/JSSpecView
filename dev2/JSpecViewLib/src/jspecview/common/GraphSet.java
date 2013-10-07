@@ -14,7 +14,6 @@ import org.jmol.util.Txt;
 
 import jspecview.api.AnnotationData;
 import jspecview.api.AnnotationDialog;
-import jspecview.api.ColoredAnnotation;
 import jspecview.api.JSVPanel;
 import jspecview.api.XYScaleConverter;
 import jspecview.common.Annotation.AType;

@@ -53,7 +53,7 @@ import jspecview.common.Annotation.AType;
  * 
  * @author Bob Hanson hansonr@stolaf.edu
  */
-public abstract class AwtAnnotationDialog extends AwtDialog implements
+public abstract class AwtDialogAnnotation extends AwtDialog implements
 		AnnotationDialog, ListSelectionListener, WindowListener {
 
 	private static final long serialVersionUID = 1L;
@@ -82,7 +82,7 @@ public abstract class AwtAnnotationDialog extends AwtDialog implements
 	 *          the parent panel
 	 * @param type
 	 */
-	protected AwtAnnotationDialog(String title, JSViewer viewer,
+	protected AwtDialogAnnotation(String title, JSViewer viewer,
 			JDXSpectrum spec, AType type) {
 		super(null, title, false);
 		addCombo1 = type.equals(AType.Measurements);

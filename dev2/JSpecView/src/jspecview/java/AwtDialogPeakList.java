@@ -30,7 +30,7 @@ import jspecview.common.Annotation.AType;
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-public class AwtDialogPeakList extends AwtAnnotationDialog {
+public class AwtDialogPeakList extends AwtDialogAnnotation {
 
 	private static final long serialVersionUID = 1L;
 	private static int[] posXY = new int[] {Integer.MIN_VALUE, 0};

@@ -65,7 +65,6 @@ class AwtAppletPopupMenu extends AwtPopupMenu {
   @Override
   protected void setPopupMenu() {
     aboutMenu.setText("About");
-
     fileMenu.setText("File");
     //fileMenu.setEnabled(applet.isSigned()); ?
     fileMenu.add(saveAsMenu);

@@ -36,7 +36,7 @@ import jspecview.common.Annotation.AType;
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-public class AwtDialogIntegrals extends AwtAnnotationDialog {
+public class AwtDialogIntegrals extends AwtDialogAnnotation {
 
 	private static final long serialVersionUID = 1L;
 	

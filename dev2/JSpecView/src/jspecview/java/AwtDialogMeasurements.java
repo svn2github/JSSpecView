@@ -30,7 +30,7 @@ import jspecview.common.Annotation.AType;
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-public class AwtDialogMeasurements extends AwtAnnotationDialog {
+public class AwtDialogMeasurements extends AwtDialogAnnotation {
 
 	private static final long serialVersionUID = 1L;
 	private static int[] posXY = new int[] {Integer.MIN_VALUE, 0};

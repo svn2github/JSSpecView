@@ -122,7 +122,7 @@ public class AwtDialogHelper {
 		iRow++;
 	}
 
-	protected synchronized JTable getDataTable(AwtAnnotationDialog ad,
+	protected synchronized JTable getDataTable(AwtDialogAnnotation ad,
 			String[][] data, String[] columnNames, int[] columnWidths, int height) {
 		
 		AwtDialogTableModel tableModel = new AwtDialogTableModel(columnNames, data, true);

@@ -17,11 +17,10 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package jspecview.java;
+package jspecview.common;
 
 import jspecview.util.JSVColor;
 
-import jspecview.api.ColoredAnnotation;
 import jspecview.common.Annotation;
 import jspecview.common.JDXSpectrum;
 
@@ -32,7 +31,7 @@ import jspecview.common.JDXSpectrum;
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-public class AwtColoredAnnotation extends Annotation implements ColoredAnnotation {
+public class ColoredAnnotation extends Annotation {
 
   private JSVColor color;
 
@@ -40,11 +39,11 @@ public class AwtColoredAnnotation extends Annotation implements ColoredAnnotatio
     return color;
   }
 
-  public AwtColoredAnnotation(double x, double y) {
+  public ColoredAnnotation(double x, double y) {
   	super(x, y);
   }
   
-  public AwtColoredAnnotation set(
+  public ColoredAnnotation set(
 	JDXSpectrum spec, String text, JSVColor color,
       boolean isPixels, boolean is2D, int offsetX, int offsetY) {
     setAll(spec, text, isPixels, is2D, offsetX, offsetY);
