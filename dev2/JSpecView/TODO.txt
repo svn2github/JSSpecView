@@ -14,6 +14,11 @@ new feature: show NMR taps into NMRDB directly
 
 in preparation for JavaScript version (add to top):
 
+-- 10/9/2013 BH
+Removed AwtAppletPopupMenu, AwtPopupMenu
+Modified the popupMenus to all work through apiPlatform and JSViewer.runScript();
+Added commands: SHOWERRORS, SHOWKEY, SHOWMENU, SHOWPROPERTIES, SHOWSOURCE
+
 -- 10/8/2013 BH
 Added Jmol's menuing system
 

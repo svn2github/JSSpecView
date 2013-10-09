@@ -35,11 +35,10 @@ public interface AppletFrame {
 	void validateContent(int mode);
 
 	JSVPanel getJSVPanel(JSViewer viewer, JmolList<JDXSpectrum> specs,
-			int initialStartIndex, int initialEndIndex, JSVPopupMenu appletPopupMenu);
+			int initialStartIndex, int initialEndIndex);
 
 	JSVDialog newDialog(JSViewer viewer, String type);
 
-	JSVPopupMenu newAppletPopupMenu(JSViewer viewer, boolean allowMenu,
-			boolean zoomEnabled);
+	void showWhat(JSViewer viewer, String what);
 
 }

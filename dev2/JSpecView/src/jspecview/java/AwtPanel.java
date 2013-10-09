@@ -42,7 +42,6 @@ import jspecview.util.JSVColor;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -76,18 +75,13 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 
-import org.jmol.api.ApiPlatform;
 import org.jmol.api.Event;
 import org.jmol.api.EventManager;
-import org.jmol.api.Interface;
 import org.jmol.api.JmolMouseInterface;
-import org.jmol.api.PlatformViewer;
 import org.jmol.util.JmolFont;
 import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
@@ -95,8 +89,8 @@ import org.jmol.util.Txt;
 
 import jspecview.api.AnnotationData;
 import jspecview.api.AnnotationDialog;
+import jspecview.api.JSVApiPlatform;
 import jspecview.api.JSVPanel;
-import jspecview.api.JSVPopupMenu;
 import jspecview.api.PdfCreatorInterface;
 import jspecview.common.Annotation;
 import jspecview.common.ColoredAnnotation;
@@ -121,7 +115,7 @@ import jspecview.export.Exporter;
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManager, PlatformViewer {
+public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManager {
 //, MouseListener,  MouseMotionListener, KeyListener
   private static final long serialVersionUID = 1L;
 
@@ -129,8 +123,6 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
   public void finalize() {
     Logger.info("JSVPanel " + this + " finalized");
   }
-
-  private JSVPopupMenu popup;
 
   public PanelData pd;
 	private JSVColor bgcolor;
@@ -146,10 +138,6 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
   }
   
   public void dispose() {
-    if (popup != null) {
-      popup.dispose();
-      popup = null;
-    }
     //toolTip = null;
     if (pd != null)
       pd.dispose();
@@ -180,34 +168,32 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
    * 
    * @param spectrum
    *        the spectrum
-   * @param popup 
    * @return this
    */
-  public AwtPanel setOne(JSViewer viewer, JDXSpectrum spectrum, JSVPopupMenu popup) {
+  public AwtPanel setOne(JSViewer viewer, JDXSpectrum spectrum) {
     // standard applet not overlaid and not showing range
     // standard application split spectra
     // removal of integration, taConvert
     // Preferences Dialog sample.jdx
   	ToolTipManager.sharedInstance().setInitialDelay(0);
   	//toolTip = new AwtToolTip(this);
-  	set(viewer, popup);
+  	set(viewer);
     pd.initSingleSpectrum(spectrum);
     return this;
   }
 
-  private void set(JSViewer viewer, JSVPopupMenu popup) {
+  private void set(JSViewer viewer) {
   	this.viewer = viewer;
-    this.popup = popup;
     pd = new PanelData(this);
     pd.BLACK = new AwtColor(0);
 	}
 
-  public JSVPanel getNewPanel(JSViewer viewer, JDXSpectrum spectrum) {
-    return new AwtPanel().setOne(viewer, spectrum, popup);
+  public static AwtPanel getAwtPanel(JSViewer viewer, JDXSpectrum spectrum) {
+    return new AwtPanel().setOne(viewer, spectrum);
   }
 
-  public static AwtPanel getJSVPanel(JSViewer viewer, JmolList<JDXSpectrum> specs, int startIndex, int endIndex, JSVPopupMenu popup) {
-    return new AwtPanel().setMany(viewer, specs, startIndex, endIndex, popup);
+  public static AwtPanel getAwtPanel(JSViewer viewer, JmolList<JDXSpectrum> specs, int startIndex, int endIndex) {
+    return new AwtPanel().setMany(viewer, specs, startIndex, endIndex);
   }
 
 
@@ -225,29 +211,16 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
    *        the start index
    * @param endIndex
    *        the end index
-   * @param popup 
    * @return this
    */
   private AwtPanel setMany(JSViewer viewer, JmolList<JDXSpectrum> spectra, int startIndex,
-      int endIndex, JSVPopupMenu popup) {
+      int endIndex) {
     pd = new PanelData(this);
     this.viewer = viewer;
-    this.popup = popup;
+    this.apiPlatform = viewer.si.getApiPlatform();
   	//toolTip = new AwtToolTip(this);
     pd.initJSVPanel(spectra, startIndex, endIndex);
     return this;
-  }
-
-	/**
-   * generates a single panel or an integrated panel, as appropriate
-   * @param viewer 
-   * @param spec
-   * @param jsvpPopupMenu
-   * @return new panel
-   */
-  public static AwtPanel getNewPanel(JSViewer viewer, JDXSpectrum spec,
-                                     AwtPopupMenuOld jsvpPopupMenu) {
-    return new AwtPanel().setOne(viewer, spec, jsvpPopupMenu);
   }
 
   public GraphSet getNewGraphSet() {
@@ -304,23 +277,17 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
   }
 
   
-	private ApiPlatform apiPlatform;
-	public ApiPlatform getApiPlatform() {
+	private JSVApiPlatform apiPlatform;
+	public JSVApiPlatform getApiPlatform() {
 		return apiPlatform;
 	}
 	
 	private JmolMouseInterface mouse;
 
 	public void setupPlatform() {
-		pd.apiPlatform = apiPlatform = (ApiPlatform) Interface.getInterface("jspecview.awt.Platform");
-		apiPlatform.setViewer(this, this);
+  	this.apiPlatform = viewer.si.getApiPlatform();
     setBorder(BorderFactory.createLineBorder(Color.BLACK));
-    if (popup == null) {
-      // preferences dialog
-      pd.coordStr = "(0,0)";
-    } else {
-    	mouse = apiPlatform.getMouseManager(0);
-    }
+    mouse = apiPlatform.getMouseManager(this);
   }
 
   public String export(String type, int n) {
@@ -354,18 +321,6 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
 		Logger.info(msg);
 		JOptionPane.showMessageDialog(this, msg, title, (msg.startsWith("<html>") ? JOptionPane.INFORMATION_MESSAGE 
 				: JOptionPane.PLAIN_MESSAGE));	
-		getFocusNow(true);
-	}
-
-	public void showHeader(Object jsvApplet) {
-		JDXSpectrum spectrum = pd.getSpectrum();
-		String[][] rowData = spectrum.getHeaderRowDataAsArray();
-		String[] columnNames = { "Label", "Description" };
-		JTable table = new JTable(rowData, columnNames);
-		table.setPreferredScrollableViewportSize(new Dimension(400, 195));
-		JScrollPane scrollPane = new JScrollPane(table);
-		JOptionPane.showMessageDialog((Container) jsvApplet, scrollPane, "Header Information",
-				JOptionPane.PLAIN_MESSAGE);
 		getFocusNow(true);
 	}
 
@@ -447,7 +402,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
 	    break;
 		case Event.CLICKED:
 	    if (pd.checkMod(buttonMods, Event.MOUSE_RIGHT)) {
-	      popup.show(this, x, y);
+	    	viewer.showMenu(x, y);
 	      return;
 	    }
 	    break;
@@ -745,10 +700,6 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
 		} catch (IOException e) {
 			showMessage(e.getMessage(), "Error Saving Image");
 		}
-	}
-
-	public void showProperties() {
-		AwtDialogText.showProperties(this, pd.getSpectrum());
 	}
 
 	public Object getDisplay() {

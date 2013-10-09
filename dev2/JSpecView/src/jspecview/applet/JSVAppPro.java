@@ -67,10 +67,10 @@ public class JSVAppPro extends JSVApp implements
     return true;
   }
   
-  @Override
-  public void doAdvanced(String filePath) {
-    ((JSVAppletPro) appletFrame).doAdvanced(filePath);
-  }
+//  @Override
+//  public void doAdvanced(String filePath) {
+//    ((JSVAppletPro) appletFrame).doAdvanced(filePath);
+//  }
 
   public void exitJSpecView(boolean withDialog, Object frame) {
     ((JSVAppletPro) appletFrame).doExitJmol();

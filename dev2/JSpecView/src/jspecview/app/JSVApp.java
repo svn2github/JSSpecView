@@ -43,12 +43,11 @@ import java.net.URL;
 
 import java.util.Map;
 
-import org.jmol.api.ApiPlatform;
-
 import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
 
 import jspecview.api.AppletFrame;
+import jspecview.api.JSVApiPlatform;
 import jspecview.api.JSVAppInterface;
 import jspecview.api.JSVDialog;
 import jspecview.api.JSVPanel;
@@ -91,9 +90,12 @@ import jspecview.util.JSVFileManager;
 
 public class JSVApp implements PanelListener, JSVAppInterface {
 
-	private ApiPlatform apiPlatform;
+	private JSVApiPlatform apiPlatform;
+	public JSVApiPlatform getApiPlatform() {
+		return apiPlatform;
+	}
 
-	public JSVApp(AppletFrame appletFrame, ApiPlatform apiPlatform) {
+	public JSVApp(AppletFrame appletFrame, JSVApiPlatform apiPlatform) {
 		this.appletFrame = appletFrame;
 		JSVFileManager.setDocumentBase(appletFrame.getDocumentBase());
 		this.apiPlatform = apiPlatform;
@@ -103,7 +105,9 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 
 	private void initViewer() {
 		viewer = new JSViewer(this, true, false);
+		apiPlatform.setViewer(viewer, null);
 		viewer.panelNodes = new JmolList<JSVPanelNode>();
+		viewer.jsvpPopupMenu = appletPopupMenu; 
 		viewer.scriptQueue = new JmolList<String>();
 		viewer.repaintManager = new RepaintManager(viewer);
 		appletFrame.setPlatformFields(isSigned(), viewer);
@@ -192,10 +196,6 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 
 	public void siSetLoadImaginary(boolean TF) {
 		loadImaginary = TF;
-	}
-
-	public JSVPopupMenu siGetPopupMenu() {
-		return appletPopupMenu;
 	}
 
 	public int siIncrementScriptLevelCount(int n) {
@@ -428,8 +428,10 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	public void initParams(String params) {
 		parseInitScript(params);
 		newAppletPanel();
-		appletPopupMenu = appletFrame.newAppletPopupMenu(viewer, allowMenu, viewer.parameters
+		appletPopupMenu = apiPlatform.getJSVMenuPopup("appletMenu");//getPappletFrame.newAppletPopupMenu(viewer);
+		appletPopupMenu.setEnabled(allowMenu, viewer.parameters
 				.getBoolean(ScriptToken.ENABLEZOOM));
+		viewer.jsvpPopupMenu = appletPopupMenu;
 		runScriptNow(params);
 	}
 
@@ -447,31 +449,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 		viewer.sendPanelChange(jsvp);
 	}
 
-	/**
-	 * Shows a floating overlay key if possible
-	 * 
-	 * @param visible
-	 * 
-	 */
-	public void showOverlayKey(boolean visible) {
-		viewer.setOverlayLegendVisibility(viewer.selectedPanel, visible);
-	}
-
 	// //////////// JSVAppletPopupMenu calls
-
-	/**
-	 * Shows the header information for the Spectrum
-	 */
-	public void showHeader() {
-		viewer.selectedPanel.showHeader(appletFrame);
-	}
-
-	/**
-	 * Opens the print dialog to enable printing
-	 */
-	public void print() {
-		siPrintPDF("");
-	}
 
 	/**
 	 * Opens the print dialog to enable printing
@@ -480,10 +458,10 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 		boolean needWindow = false; // !isNewWindow;
 		// not sure what this is about. The applet prints fine
 		if (needWindow)
-			newWindow(true, false);
+			siNewWindow(true, false);
 		String s = Exporter.printPDF(viewer, pdfFileName);
 		if (needWindow)
-			newWindow(false, false);
+			siNewWindow(false, false);
 		return s;
 	}
 
@@ -492,10 +470,10 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	 * 
 	 * @param isSelected
 	 */
-	public void newWindow(boolean isSelected, boolean fromFrame) {
+	public void siNewWindow(boolean isSelected, boolean fromFrame) {
 		isNewWindow = isSelected;
 		if (fromFrame)
-			this.appletPopupMenu.setSelected("window", false);
+			this.appletPopupMenu.setSelected("Window", false);
 		else
 			appletFrame.newWindow(isSelected);
 	}
@@ -821,12 +799,6 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 
 	// /////// multiple source changes ////////
 
-	public JSVPanelNode siSetOverlayVisibility(JSVPanelNode node) {
-		viewer.setOverlayLegendVisibility(viewer.selectedPanel,
-				appletPopupMenu.getSelected("overlay"));
-		return node;
-	}
-
 	public void siSetNode(JSVPanelNode panelNode, boolean fromTree) {
 		if (panelNode.jsvp != viewer.selectedPanel)
 			siSetSelectedPanel(panelNode.jsvp);
@@ -860,7 +832,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 
 	public JSVPanel siGetNewJSVPanel2(JmolList<JDXSpectrum> specs) {
 		JSVPanel jsvp = appletFrame.getJSVPanel(viewer, specs, initialStartIndex,
-				initialEndIndex, appletPopupMenu);
+				initialEndIndex);
 		initialEndIndex = initialStartIndex = -1;
 		jsvp.getPanelData().addListener(this);
 		viewer.parameters.setFor(jsvp, null, true);
@@ -875,7 +847,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 		JmolList<JDXSpectrum> specs = new JmolList<JDXSpectrum>();
 		specs.addLast(spec);
 		JSVPanel jsvp = appletFrame.getJSVPanel(viewer, specs, initialStartIndex,
-				initialEndIndex, appletPopupMenu);
+				initialEndIndex);
 		jsvp.getPanelData().addListener(this);
 		viewer.parameters.setFor(jsvp, null, true);
 		return jsvp;
@@ -960,4 +932,9 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	public JmolList<String> getScriptQueue() {
 		return viewer.scriptQueue;
 	}
+	
+	public void siShow(String what) {
+		appletFrame.showWhat(viewer, what);
+	}
+
 }

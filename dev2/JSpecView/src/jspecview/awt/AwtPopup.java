@@ -24,6 +24,7 @@
 package jspecview.awt;
 
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -41,7 +42,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 
-import org.jmol.api.PlatformViewer;
 import org.jmol.util.Logger;
 import org.jmol.util.SB;
 
@@ -66,10 +66,10 @@ public class AwtPopup extends JSVGenericPopup {
     // required by reflection
   }
 
-  public void jpiInitialize(PlatformViewer viewer, String menu) {
+  public void initialize(JSViewer viewer, String menu) {
     //boolean doTranslate = GT.setDoTranslate(true);
     PopupResource bundle = new JSVPopupResourceBundle();
-    initialize((JSViewer) viewer, bundle, bundle.getMenuName());
+    initialize(viewer, bundle, menu);
     //GT.setDoTranslate(doTranslate);
   }
 
@@ -103,8 +103,8 @@ public class AwtPopup extends JSVGenericPopup {
   }
 
   public void updateSpecialMenuItem(Object menuItem) {
-    AbstractButton m = (AbstractButton) menuItem;
-    m.setText(getSpecialLabel(m.getName(), m.getText()));
+//    AbstractButton m = (AbstractButton) menuItem;
+//    m.setText(getSpecialLabel(m.getName(), m.getText()));
   }
 
   private Object newMenuItem(JMenuItem jmi, Object menu, String entry,
@@ -292,6 +292,15 @@ public class AwtPopup extends JSVGenericPopup {
     }
   }
 
+	public boolean menuIsEnabled(Object m) {
+    if (m instanceof JMenu)
+    	return ((JMenu) m).isEnabled();
+    if (m instanceof JMenuItem)
+    	return ((JMenuItem) m).isEnabled();
+    return false;
+	}
+
+ 
   public String menuGetId(Object menu) {
     return ((Component) menu).getName();
   }
@@ -379,13 +388,9 @@ public class AwtPopup extends JSVGenericPopup {
     mfl = new MenuMouseListener();
   }
   
-  public void menuShowPopup(Object popup, int x, int y) {
-    try {
-      ((JPopupMenu)popup).show((Component) viewer.getDisplay(), x, y);
-    } catch (Exception e) {
-      // ignore
-    }
-  }
+	public void menuShowPopup(Object popup, int x, int y) {
+		((JPopupMenu) popup).show((Container) thisJsvp, x, y);
+	}
 
 
 }

@@ -53,9 +53,9 @@ public class JSVAppletPro extends JSVApplet {
   /*  class interactions:
    * 
       //           JSVAppletPro    JSpecView
-      //             /   |    \       /
-      //     [extension] |  [instantiation]
-      //           /     |      \   /
+      //             /   |            /
+      //     [extension] |     [instantiation]
+      //           /     |         /
       //      JSVApplet  |    MainFrame
       //           \     |        \
       //         [JavaScript]   [interface]
@@ -63,7 +63,7 @@ public class JSVAppletPro extends JSVApplet {
       //           JmolApplet       Jmol
       // 
    * 
-   * AwtAppletPro and JSpecView can create a MainFrame
+   * AwtAppletPro (formerly) and JSpecView can create a MainFrame
    * MainFrame can interface with Jmol via JmolSyncInterface and JSVInterface
    * AwtAppletPro and AwtApplet can interact with JmolApplet via JavaScript callbacks
    * 
@@ -100,17 +100,17 @@ public class JSVAppletPro extends JSVApplet {
     runScript(script);
   }
 
-  public void doAdvanced(String filePath) {
-    if (mainFrame == null) {
-      mainFrame = new MainFrame(null, (JSVAppPro) app);
-    }
-    mainFrame.setVisible(true);
-    if (app0 == null)
-      app0 = app;
-    app0.setVisible(false);
-    app = mainFrame;
-    mainFrame.runScript("load \"" + filePath + "\"");
-  }
+//  public void doAdvanced(String filePath) {
+//    if (mainFrame == null) {
+//      mainFrame = new MainFrame(null, (JSVAppPro) app);
+//    }
+//    mainFrame.setVisible(true);
+//    if (app0 == null)
+//      app0 = app;
+//    app0.setVisible(false);
+//    app = mainFrame;
+//    mainFrame.runScript("load \"" + filePath + "\"");
+//  }
 
   public void doExitJmol() {
     app0.setVisible(true);

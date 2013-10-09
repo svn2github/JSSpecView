@@ -48,23 +48,11 @@
 
 package jspecview.appletjs;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.dnd.DropTargetListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.net.URL;
 import java.util.Map;
 
-import javax.swing.JApplet;
-import javax.swing.JFrame;
-
-import netscape.javascript.JSObject;
-
 import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
-import org.jmol.util.Txt;
 
 import jspecview.api.AppletFrame;
 import jspecview.api.JSVAppInterface;
@@ -78,16 +66,6 @@ import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVersion;
 import jspecview.common.JSViewer;
 import jspecview.common.PrintLayout;
-import jspecview.java.AwtDialogOverlayLegend;
-import jspecview.java.AwtDialogPrint;
-import jspecview.java.AwtDialogView;
-import jspecview.java.AwtDropTargetListener;
-import jspecview.java.AwtFileHelper;
-import jspecview.java.AwtPanel;
-import jspecview.java.AwtParameters;
-import jspecview.java.AwtTree;
-import jspecview.java.AwtViewPanel;
-
 /**
  * 
  * Entry point for the web.
@@ -428,7 +406,7 @@ public class JVSAppletJS implements JSVAppletInterface,
 //		}
 	}
 
-	protected void windowClosingEvent(Dimension d) {
+//	protected void windowClosingEvent(Dimension d) {
 //		spectrumPanel.setSize(d);
 //		getContentPane().add(spectrumPanel);
 //		setVisible(true);
@@ -436,7 +414,7 @@ public class JVSAppletJS implements JSVAppletInterface,
 //		offWindowFrame.removeAll();
 //		offWindowFrame.dispose();
 //		app.newWindow(false, true);
-	}
+//	}
 
 	/**
 	 * Calls a javascript function given by the function name passing to it the
@@ -483,7 +461,7 @@ public class JVSAppletJS implements JSVAppletInterface,
 	}
 
 	public JSVPanel getJSVPanel(JSViewer viewer, JmolList<JDXSpectrum> specs,
-			int initialStartIndex, int initialEndIndex, JSVPopupMenu appletPopupMenu) {
+			int initialStartIndex, int initialEndIndex) {
 //		return JsPanel.getJSVPanel(viewer, specs, initialStartIndex,
 //				initialEndIndex, appletPopupMenu);
 		return null;
@@ -497,9 +475,8 @@ public class JVSAppletJS implements JSVAppletInterface,
 		return null;
 	}
 
-	public JSVPopupMenu newAppletPopupMenu(JSViewer viewer, boolean allowMenu,
-			boolean zoomEnabled) {
-//		return new JsAppletPopupMenu(viewer, allowMenu, zoomEnabled);
+	public JSVPopupMenu newAppletPopupMenu(JSViewer viewer) {
+//		return new JsAppletPopupMenu(viewer);
 		return null;
 	}
 
@@ -532,5 +509,9 @@ public class JVSAppletJS implements JSVAppletInterface,
 		
 	}
 
+	public void showWhat(JSViewer viewer, String what) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

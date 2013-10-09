@@ -84,6 +84,7 @@ import org.jmol.util.Logger;
 import org.jmol.util.SB;
 import org.jmol.util.Txt;
 
+import jspecview.api.JSVApiPlatform;
 import jspecview.api.JSVAppInterface;
 import jspecview.api.JSVDialog;
 import jspecview.api.JSVPanel;
@@ -91,6 +92,7 @@ import jspecview.api.JSVPopupMenu;
 import jspecview.api.JSVTreeNode;
 import jspecview.api.PanelListener;
 import jspecview.applet.JSVAppPro;
+import jspecview.awt.Platform;
 import jspecview.common.JSVPanelNode;
 import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
@@ -107,10 +109,10 @@ import jspecview.common.JDXSpectrum.IRMode;
 import jspecview.export.Exporter;
 import jspecview.java.AwtDialogOverlayLegend;
 import jspecview.java.AwtDialogPrint;
+import jspecview.java.AwtDialogText;
 import jspecview.java.AwtDialogView;
 import jspecview.java.AwtPanel;
 import jspecview.java.AwtParameters;
-import jspecview.java.AwtPopupMenuOld;
 import jspecview.java.AwtDropTargetListener;
 import jspecview.java.AwtTree;
 import jspecview.java.AwtViewPanel;
@@ -175,7 +177,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	private Container               jmolFrame;
 	private Dimension               jmolDimensionNew = new Dimension(250, 200);
 	private JSVInterface            jmolOrAdvancedApplet;
-	private AwtPopupMenuOld            jsvpPopupMenu;
+	private JSVPopupMenu            jsvpPopupMenu;
 	private JSVPanel                prevPanel;
 	private JmolList<String>        recentFilePaths = new JmolList<String>();
 	private JScrollPane             spectraTreeScrollPane;
@@ -261,10 +263,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		loadImaginary  = TF;
 	}
 
-	public JSVPopupMenu siGetPopupMenu() {
-		return jsvpPopupMenu;
-	}
-
 	public void siSetReturnFromJmolModel(String model) {
 		returnFromJmolModel = model;
 	}
@@ -281,6 +279,11 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		return nViews += n;
 	}
 
+	private JSVApiPlatform apiPlatform;
+	public JSVApiPlatform getApiPlatform() {
+		return apiPlatform;
+	}
+
 	/**
 	 * Constructor
 	 * @param jmolDisplay 
@@ -289,8 +292,13 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	 */
 	public MainFrame(Component jmolDisplay, JSVInterface jmolOrAdvancedApplet) {
 		viewer = new JSViewer(this, false, false);
+		apiPlatform = new Platform();
+		apiPlatform.setViewer(viewer, null);
+		
 		fileHelper = new AwtFileHelper(viewer);
-		jsvpPopupMenu = new AwtPopupMenuOld(viewer); 
+		jsvpPopupMenu = apiPlatform.getJSVMenuPopup("appMenu");//new AwtPopupMenuOld();
+		jsvpPopupMenu.initialize(viewer, "appMenu");
+		viewer.jsvpPopupMenu = jsvpPopupMenu; 
 		viewer.spectraTree = new AwtTree(viewer);
 		viewer.repaintManager = new RepaintManager(viewer);
 		this.jmolDisplay = jmolDisplay;
@@ -306,6 +314,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 private void initViewer() {
   viewer.panelNodes = new JmolList<JSVPanelNode>();  
 	viewer.parameters = new AwtParameters("applet");
+	viewer.fileHelper = new AwtFileHelper(viewer);
 }
 
 	void exitJSpecView(boolean withDialog) {
@@ -560,7 +569,7 @@ private void initViewer() {
 	 */
 	private void jbInit() throws Exception {
 		toolBar = new AppToolBar(this);
-		appMenu = new AppMenu(this, jsvpPopupMenu);
+		appMenu = new AppMenu(this);
 		appMenu.setRecentMenu(recentFilePaths);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setJMenuBar(appMenu);
@@ -1112,26 +1121,11 @@ private void initViewer() {
 		return Exporter.printPDF(viewer, fileName);
 	}
 	
-	public void toggleOverlayKey() {
-		JSVPanel jsvp = viewer.selectedPanel;
-		if (jsvp == null)
-			return;
-		// boolean showLegend = appMenu.toggleOverlayKeyMenuItem();
-		viewer.setOverlayLegendVisibility(jsvp, true);
-
-	}
-
 	public void siCheckCallbacks(String title) {
 		// setMainTitle(title);
 	}
 
 	// /// JSVPanelNode tree model methods (can be left unimplemented for Android)
-
-	public JSVPanelNode siSetOverlayVisibility(JSVPanelNode node) {
-		viewer.setOverlayLegendVisibility(node.jsvp,
-				appMenu.overlayKeyMenuItem.isSelected());
-		return node;
-	}
 
 	public void siSetNode(JSVPanelNode panelNode, boolean fromTree) {
 		if (panelNode.jsvp != viewer.selectedPanel)
@@ -1213,11 +1207,11 @@ private void initViewer() {
 	}
 
 	public JSVPanel siGetNewJSVPanel2(JmolList<JDXSpectrum> specs) {
-		return AwtPanel.getJSVPanel(viewer, specs, 0, 0, jsvpPopupMenu);
+		return AwtPanel.getAwtPanel(viewer, specs, 0, 0);
 	}
 
 	public JSVPanel siGetNewJSVPanel(JDXSpectrum spec) {
-		return (spec == null ? null : AwtPanel.getNewPanel(viewer, spec, jsvpPopupMenu));
+		return (spec == null ? null : AwtPanel.getAwtPanel(viewer, spec));
 	}
 
 	public JSVPanelNode siGetNewPanelNode(String id, String fileName,
@@ -1257,7 +1251,7 @@ private void initViewer() {
 		return viewer;
 	}
 
-	public void newWindow(boolean isSelected, boolean fromFrame) {
+	public void siNewWindow(boolean isSelected, boolean fromFrame) {
 		// not implemented for MainFrame
 	}
 
@@ -1272,6 +1266,23 @@ private void initViewer() {
 	public JmolList<String> getScriptQueue() {
   // applet only
 		return null;
+	}
+
+	public void siShow(String what) {
+		if (what.equals("properties")) {
+			AwtDialogText.showProperties(this, viewer.getPanelData().getSpectrum());
+		} else if (what.equals("errors")) {
+			AwtDialogText.showError(this, viewer.currentSource);
+		} else if (what.equals("source")) {
+			if (viewer.currentSource == null) {
+				if (viewer.panelNodes.size() > 0) {
+					JOptionPane.showMessageDialog(this, "Please Select a Spectrum",
+							"Select Spectrum", JOptionPane.ERROR_MESSAGE);
+				}
+				return;
+			}
+			AwtDialogText.showSource(this, viewer.currentSource);
+		}
 	}
 
 }

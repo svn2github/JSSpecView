@@ -58,6 +58,7 @@ import java.util.Map;
 
 import javax.swing.JApplet;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 import netscape.javascript.JSObject;
 
@@ -70,7 +71,6 @@ import jspecview.api.JSVAppInterface;
 import jspecview.api.JSVAppletInterface;
 import jspecview.api.JSVDialog;
 import jspecview.api.JSVPanel;
-import jspecview.api.JSVPopupMenu;
 import jspecview.app.JSVApp;
 import jspecview.awt.Platform;
 import jspecview.common.JDXSpectrum;
@@ -79,6 +79,7 @@ import jspecview.common.JSViewer;
 import jspecview.common.PrintLayout;
 import jspecview.java.AwtDialogOverlayLegend;
 import jspecview.java.AwtDialogPrint;
+import jspecview.java.AwtDialogText;
 import jspecview.java.AwtDialogView;
 import jspecview.java.AwtDropTargetListener;
 import jspecview.java.AwtFileHelper;
@@ -439,7 +440,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 		app.siValidateAndRepaint();
 		offWindowFrame.removeAll();
 		offWindowFrame.dispose();
-		app.newWindow(false, true);
+		app.siNewWindow(false, true);
 	}
 
 	/**
@@ -486,9 +487,9 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	}
 
 	public JSVPanel getJSVPanel(JSViewer viewer, JmolList<JDXSpectrum> specs,
-			int initialStartIndex, int initialEndIndex, JSVPopupMenu appletPopupMenu) {
-		return AwtPanel.getJSVPanel(viewer, specs, initialStartIndex,
-				initialEndIndex, appletPopupMenu);
+			int initialStartIndex, int initialEndIndex) {
+		return AwtPanel.getAwtPanel(viewer, specs, initialStartIndex,
+				initialEndIndex);
 	}
 
 	public JSVDialog newDialog(JSViewer viewer, String type) {
@@ -497,11 +498,6 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 		if (type.equals("view"))
 			return new AwtDialogView(viewer, spectrumPanel, false);
 		return null;
-	}
-
-	public JSVPopupMenu newAppletPopupMenu(JSViewer viewer, boolean allowMenu,
-			boolean zoomEnabled) {
-		return new AwtAppletPopupMenu(viewer, allowMenu, zoomEnabled);
 	}
 
 	// for the signed applet to load a remote file, it must
@@ -535,6 +531,23 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 				}
 			}
 			commandWatcherThread = null;
+		}
+	}
+
+	public void showWhat(JSViewer viewer, String what) {
+		if (what.equals("properties")) {
+			AwtDialogText.showProperties(null, viewer.getPanelData().getSpectrum());
+		} else if (what.equals("errors")) {
+			AwtDialogText.showError(null, viewer.currentSource);
+		} else if (what.equals("source")) {
+			if (viewer.currentSource == null) {
+				if (viewer.panelNodes.size() > 0) {
+					JOptionPane.showMessageDialog(this, "Please Select a Spectrum",
+							"Select Spectrum", JOptionPane.ERROR_MESSAGE);
+				}
+				return;
+			}
+			AwtDialogText.showSource(null, viewer.currentSource);
 		}
 	}
 

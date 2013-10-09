@@ -27,10 +27,11 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 
+import jspecview.api.JSVPanel;
+
 import org.jmol.api.EventManager;
 import org.jmol.api.JmolMouseInterface;
 import org.jmol.api.Event;
-import org.jmol.api.PlatformViewer;
 import org.jmol.util.J2SRequireImport;
 import org.jmol.util.Logger;
 
@@ -44,17 +45,13 @@ import org.jmol.util.Logger;
 @J2SRequireImport({org.jmol.api.Event.class})
 public class Mouse implements JmolMouseInterface {
 
-  //private double privateKey;
-
   private EventManager manager;
 
 	/**
-   * @param privateKey -- not used in JavaScript  
    * @param viewer -- not used in JavaScript
    */
-  public Mouse(double privateKey, PlatformViewer viewer) {
-    //this.privateKey = privateKey; could be used for clipboard access
-    //this.viewer = viewer;
+  public Mouse(JSVPanel viewer) {
+  	manager = (EventManager) viewer;
   }
 
   public void clear() {

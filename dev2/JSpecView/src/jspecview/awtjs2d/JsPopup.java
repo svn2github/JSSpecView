@@ -23,7 +23,6 @@
  */
 package jspecview.awtjs2d;
 
-import org.jmol.api.PlatformViewer;
 import org.jmol.util.SB;
 
 import jspecview.common.JSVGenericPopup;
@@ -47,11 +46,10 @@ public class JsPopup extends JSVGenericPopup {
     // required by reflection
   }
 
-  public void jpiInitialize(PlatformViewer viewer, String menu) {
+	public void initialize(JSViewer viewer, String menu) {
     PopupResource bundle = new JSVPopupResourceBundle();
-    initialize((JSViewer) viewer, bundle, bundle.getMenuName());
-  }
-
+    initialize(viewer, bundle, menu);
+	}
 
   //TODO: jQuery menu actions, entry, and exit need to come back here
   //      to execute checkMenuClick, checkMenuFocus, and checkBoxStateChanged
@@ -406,5 +404,9 @@ public class JsPopup extends JSVGenericPopup {
     {}    
   }
 
+	public boolean menuIsEnabled(Object item) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 
 }

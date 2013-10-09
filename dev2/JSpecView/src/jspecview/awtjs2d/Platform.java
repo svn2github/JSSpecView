@@ -2,10 +2,12 @@ package jspecview.awtjs2d;
 
 import java.net.URL;
 
+import jspecview.api.JSVApiPlatform;
+import jspecview.api.JSVPanel;
+import jspecview.api.JSVPopupMenu;
 import jspecview.common.JSVInterface;
 
 
-import org.jmol.api.ApiPlatform;
 import org.jmol.api.JmolFileInterface;
 import org.jmol.api.JmolMouseInterface;
 import org.jmol.api.JmolPopupInterface;
@@ -26,7 +28,7 @@ import org.jmol.api.PlatformViewer;
  * @author Bob Hanson
  *
  */
-public class Platform implements ApiPlatform {
+public class Platform implements JSVApiPlatform {
   Object canvas;
   PlatformViewer viewer;
   Object context;
@@ -76,7 +78,7 @@ public class Platform implements ApiPlatform {
   }
 
   public JmolMouseInterface getMouseManager(double privateKey) {
-    return new Mouse(privateKey, viewer);
+  	return null;
   }
 
   // /// Display
@@ -329,6 +331,15 @@ public class Platform implements ApiPlatform {
                                           String post) {
     return JsFile.getBufferedURLInputStream(url, outputBytes, post);
   }
+
+	public JSVPopupMenu getJSVMenuPopup(String menu) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public JmolMouseInterface getMouseManager(JSVPanel jsvp) {
+		return new Mouse(jsvp);
+	}
 
 
 }

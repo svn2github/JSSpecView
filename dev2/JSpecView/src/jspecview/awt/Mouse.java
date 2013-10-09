@@ -33,10 +33,11 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 
+import jspecview.api.JSVPanel;
+
 import org.jmol.api.EventManager;
 import org.jmol.api.JmolMouseInterface;
 import org.jmol.api.Event;
-import org.jmol.api.PlatformViewer;
 import org.jmol.util.Logger;
 
 /**
@@ -51,18 +52,16 @@ import org.jmol.util.Logger;
 class Mouse implements MouseWheelListener, MouseListener,
     MouseMotionListener, KeyListener, JmolMouseInterface {
 
-  private PlatformViewer viewer;
+  private JSVPanel viewer;
   private EventManager manager;
 
-	//double privateKey;
   /**
-   * @param privateKey  
-   * @param viewer 
+   * @param jsvp 
    */
-  Mouse(double privateKey, PlatformViewer viewer) {
-  	this.viewer = viewer;
-    manager = (EventManager) viewer;
-    Component display = (Component) viewer;
+  Mouse(JSVPanel jsvp) {
+  	this.viewer = jsvp;
+    manager = (EventManager) jsvp;
+    Component display = (Component) jsvp;
     display.addKeyListener(this);
     display.addMouseListener(this);
     display.addMouseMotionListener(this);
@@ -167,7 +166,7 @@ class Mouse implements MouseWheelListener, MouseListener,
     int modifiers = ke.getModifiers();
     // for whatever reason, CTRL may also drop the 6- and 7-bits,
     // so we are in the ASCII non-printable region 1-31
-    if (Logger.debuggingHigh || true)
+    if (Logger.debuggingHigh)
       Logger.info("MouseManager keyTyped: " + ch + " " + (0+ch) + " " + modifiers);
     if (manager.keyTyped(ch, modifiers))
   		ke.consume();

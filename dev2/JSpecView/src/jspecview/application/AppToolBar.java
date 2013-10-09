@@ -13,7 +13,6 @@ import jspecview.common.JSVPanelNode;
 import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
 import jspecview.common.ScriptToken;
-import jspecview.java.AwtDialogText;
 
 public class AppToolBar extends JToolBar {
 
@@ -100,11 +99,11 @@ public class AppToolBar extends JToolBar {
             viewer.runScript("zoom previous");
           }
         });
-    setButton(nextButton, "Next View", nextIcon, new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        viewer.runScript("zoom next");
-      }
-    });
+		setButton(nextButton, "Next View", nextIcon, new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				viewer.runScript("zoom next");
+			}
+		});
     setButton(resetButton, "Reset", resetIcon, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         viewer.runScript("zoom out");
@@ -115,67 +114,68 @@ public class AppToolBar extends JToolBar {
         viewer.runScript("zoom clear");
       }
     });
+    setButton(propertiesButton, "Properties", informationIcon,
+        new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            viewer.runScript("showProperties");
+          }
+        });
+    setButton(gridToggleButton, "Toggle Grid", gridIcon, new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        viewer.runScript("GRIDON TOGGLE");
+      }
+    });
+    setButton(coordsToggleButton, "Toggle Coordinates", coordinatesIcon,
+        new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            viewer.runScript("COORDINATESON TOGGLE");
+          }
+        });
+    setButton(revPlotToggleButton, "Reverse Plot", reverseIcon,
+        new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            viewer.runScript("REVERSEPLOT TOGGLE");
+          }
+        });
+
+    setButton(printButton, "Print", printIcon, new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        viewer.runScript("print");
+      }
+    });
+    
+    setButton(spectraButton, "Overlay Display", spectrumIcon,
+        new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            viewer.runScript("view");
+          }
+        });
+    setButton(overlayKeyButton, "Display Key for Overlaid Spectra",
+        overlayKeyIcon, new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            viewer.runScript("showKey TOGGLE");
+          }
+        });
+    overlayKeyButton.setEnabled(false);
+    
+    setButton(errorLogButton, "Error Log", errorLogIcon, new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        viewer.runScript("SHOWERRORS");
+      }
+    });
 
     setButton(openButton, "Open", openIcon, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         mainFrame.showFileOpenDialog();
       }
     });
-    setButton(propertiesButton, "Properties", informationIcon,
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            mainFrame.viewer.showProperties();
-          }
-        });
-    setButton(errorLogButton, "Error Log", errorLogIcon, new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        AwtDialogText.showError(mainFrame);
-      }
-    });
 
-    setButton(gridToggleButton, "Toggle Grid", gridIcon, new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        setBoolean(ScriptToken.GRIDON, e);
-        viewer.requestRepaint();
-      }
-    });
-    setButton(coordsToggleButton, "Toggle Coordinates", coordinatesIcon,
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            setBoolean(ScriptToken.COORDINATESON, e);
-            viewer.requestRepaint();
-          }
-        });
-    setButton(printButton, "Print", printIcon, new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        mainFrame.siPrintPDF("");
-      }
-    });
-    setButton(revPlotToggleButton, "Reverse Plot", reverseIcon,
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            setBoolean(ScriptToken.REVERSEPLOT, e);
-            viewer.requestRepaint();
-          }
-        });
     setButton(aboutButton, "About JSpecView", aboutIcon, new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         new AboutDialog(mainFrame);
       }
     });
-    setButton(spectraButton, "Overlay Display", spectrumIcon,
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            spectrumButton_actionPerformed(e);
-          }
-        });
-    setButton(overlayKeyButton, "Display Key for Overlaid Spectra",
-        overlayKeyIcon, new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            mainFrame.toggleOverlayKey();
-          }
-        });
-    overlayKeyButton.setEnabled(false);
+
 
     add(openButton, null);
     add(printButton, null);
@@ -214,11 +214,6 @@ public class AppToolBar extends JToolBar {
     errorLogButton.setEnabled(isError);
   }
 
-  protected void setBoolean(ScriptToken st, ActionEvent e) {
-    boolean isOn = ((JToggleButton) e.getSource()).isSelected();
-    viewer.runScript(st + " " + isOn);
-  }
-
   public void setMenuEnables(JSVPanelNode node) {
     if (node == null)
       return;
@@ -227,11 +222,4 @@ public class AppToolBar extends JToolBar {
     spectraButton.setToolTipText("View Spectra");
   }   
   
-  /**
-	 * @param e  
-	 */
-  protected void spectrumButton_actionPerformed(ActionEvent e) {
-    viewer.checkOverlay();
-  }
-
 }

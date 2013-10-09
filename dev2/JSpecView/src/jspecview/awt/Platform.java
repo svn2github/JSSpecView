@@ -10,12 +10,15 @@ import java.util.Date;
 
 import javax.swing.JDialog;
 
+import jspecview.api.JSVApiPlatform;
+import jspecview.api.JSVPanel;
+import jspecview.api.JSVPopupMenu;
 import jspecview.common.JSVInterface;
+import jspecview.common.JSViewer;
 
 
 import netscape.javascript.JSObject;
 
-import org.jmol.api.ApiPlatform;
 import org.jmol.api.JmolFileInterface;
 import org.jmol.api.JmolMouseInterface;
 import org.jmol.api.JmolPopupInterface;
@@ -23,7 +26,7 @@ import org.jmol.api.PlatformViewer;
 import org.jmol.util.JmolFont;
 import org.jmol.util.P3;
 
-public class Platform implements ApiPlatform {
+public class Platform implements JSVApiPlatform {
 
   PlatformViewer viewer;
   
@@ -41,11 +44,15 @@ public class Platform implements ApiPlatform {
     Display.getFullScreenDimensions(display, widthHeight);        
   }
   
-  public JmolPopupInterface getMenuPopup(String menuStructure, char type) {
-    JmolPopupInterface jsvpopup = (JmolPopupInterface) JSVInterface.getInterface("jspecview.awt.AwtPopup.java");
+	public JSVPopupMenu getJSVMenuPopup(String menu) {
+    JSVPopupMenu jsvpopup = (JSVPopupMenu) JSVInterface.getInterface("jspecview.awt.AwtPopup");
     if (jsvpopup != null)
-      jsvpopup.jpiInitialize(viewer, null);
+      jsvpopup.initialize((JSViewer) viewer, menu);
     return jsvpopup;
+	}
+
+  public JmolPopupInterface getMenuPopup(String menuStructure, char type) {
+  	return null;//
   }
 
   public boolean hasFocus(Object display) {
@@ -85,8 +92,8 @@ public class Platform implements ApiPlatform {
 
   ////// Mouse
 
-  public JmolMouseInterface getMouseManager(double privateKey) {
-    return new Mouse(privateKey, viewer);
+  public JmolMouseInterface getMouseManager(JSVPanel viewer) {
+    return new Mouse(viewer);
   }
 
   ////// Image 
@@ -243,6 +250,10 @@ public class Platform implements ApiPlatform {
                                           String post) {
     return AwtFile.getBufferedURLInputStream(url, outputBytes, post);
   }
+
+	public JmolMouseInterface getMouseManager(double privateKey) {
+		return null;
+	}
 
     
 }
