@@ -189,7 +189,7 @@ abstract public class JSVGenericPopup implements JmolPopupInterface,
     return null;
   }
 
-  protected void checkBoxStateChanged(Object source) {
+  public void checkBoxStateChanged(Object source) {
     restorePopupMenu();
     menuSetCheckBoxValue(source);
     String id = menuGetId(source);
@@ -597,12 +597,72 @@ abstract public class JSVGenericPopup implements JmolPopupInterface,
     return (info == null ? text : text.substring(0, pt) + " (" + info + ")");
   }
 
-  protected void checkMenuFocus(String name, String cmd, boolean isFocus) {
+  public void checkMenuFocus(String name, String cmd, boolean isFocus) {
     if (name.indexOf("Focus") < 0)
       return;
     if (isFocus)
       viewer.runScript(cmd);
   }
 
+//
+//    headerMenuItem.setText("Show Header...");
+//        app.showHeader();
+//
+//    windowMenuItem.setText("Window");
+//        app.newWindow(e.getStateChange() == ItemEvent.SELECTED, false);
+//
+//    overlayKeyMenuItem.setText("Show Overlay Key...");
+//        overlayKeyMenuItem_actionPerformed();
+//
+//    printMenuItem.setActionCommand("Print");
+//        app.print();
+//    
+//    versionMenuItem.setText("<html><h3>" + app.getAppletFrame().getAppletInfo() + "</h3></html>");
+//
+//    nextMenuItem.setText("Next View");
+//        viewer.getPanelData().nextView();
+//        reboot();
+//
+//    previousMenuItem.setText("Previous View");
+//        viewer.getPanelData().previousView();
+//        reboot();
+//
+//    clearMenuItem.setText("Clear Views");
+//        viewer.getPanelData().resetView();
+//
+//    resetMenuItem.setText("Reset View");
+//        viewer.getPanelData().clearAllView();
+//    
+//    setOverlayItems();
+//
+//
+//    spectraMenuItem.setText("Views...");
+//				overlay(thisJsvp, "DIALOG");
+//
+//    overlayStackOffsetMenuItem.setText("Overlay Offset...");
+//         overlay(thisJsvp, "OFFSETY");
+//    
+//    scriptMenuItem.setText("Script...");
+//         script(thisJsvp);
+//
+//    userZoomMenuItem.setText("Set Zoom...");
+//         userZoom(thisJsvp);
+//
+//    properties.setActionCommand("Properties");
+//    properties.setText("Properties");
+//        viewer.showProperties();
+//
+//    gridCheckBoxMenuItem.setText("Show Grid");
+//        runScript(scripter, "GRIDON " + (e.getStateChange() == ItemEvent.SELECTED));
+//        reboot();
+//
+//    coordsCheckBoxMenuItem.setText("Show Coordinates");
+//        runScript(scripter, "COORDINATESON " + (e.getStateChange() == ItemEvent.SELECTED));
+//        reboot();
+//
+//    reversePlotCheckBoxMenuItem.setText("Reverse Plot");
+//        runScript(scripter, "REVERSEPLOT " + (e.getStateChange() == ItemEvent.SELECTED));
+//        reboot();
+//    
 
 }
