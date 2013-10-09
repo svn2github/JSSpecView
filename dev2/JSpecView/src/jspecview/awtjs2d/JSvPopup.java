@@ -1,7 +1,7 @@
 /* $RCSfile$
  * $Author: hansonr $
- * $Date: 2010-05-11 15:47:18 -0500 (Tue, 11 May 2010) $
- * $Revision: 13064 $
+ * $Date: 2011-10-14 11:28:38 -0500 (Fri, 14 Oct 2011) $
+ * $Revision: 16354 $
  *
  * Copyright (C) 2000-2005  The Jmol Development Team
  *
@@ -23,16 +23,35 @@
  */
 package jspecview.awtjs2d;
 
-import jspecview.common.JSVGenericPopup;
-
+import org.jmol.api.PlatformViewer;
 import org.jmol.util.SB;
 
-/**
- * all popup-related awt/swing class references are in this file.
- * 
- * 
- */
-abstract public class JSPopup extends JSVGenericPopup {
+import jspecview.common.JSVGenericPopup;
+import jspecview.common.JSVPopupResourceBundle;
+import jspecview.common.JSViewer;
+import jspecview.common.PopupResource;
+
+public class JSvPopup extends JSVGenericPopup {
+  
+  /*
+   * If adding a custom popup menu to an application, simply subclass 
+   * initialize() and specify a different resource bundle. 
+   * 
+   * If you are not using Java awt/Swing, then you need to also overload 
+   * Swingpopup.java and extend it as desired. Or completely omit this package 
+   * 
+   * Note that changes here should also be reflected in org.jmol.modelkit.ModelKitPopup.
+   * 
+   */
+  public JSvPopup() {
+    // required by reflection
+  }
+
+  public void jpiInitialize(PlatformViewer viewer, String menu) {
+    PopupResource bundle = new JSVPopupResourceBundle();
+    initialize((JSViewer) viewer, bundle, bundle.getMenuName());
+  }
+
 
   //TODO: jQuery menu actions, entry, and exit need to come back here
   //      to execute checkMenuClick, checkMenuFocus, and checkBoxStateChanged
@@ -47,10 +66,6 @@ abstract public class JSPopup extends JSVGenericPopup {
   //     new Jmol.Menu.MenuItem(applet, entry, isCheckBox, isRadio)
   //     new Jmol.Menu.ButtonGroup(applet)
   // 
-
-  public JSPopup() {
-    // required by reflection
-  }
 
   /**
    * update the button depending upon its type

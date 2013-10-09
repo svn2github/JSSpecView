@@ -2,6 +2,8 @@ package jspecview.awtjs2d;
 
 import java.net.URL;
 
+import jspecview.common.JSVInterface;
+
 
 import org.jmol.api.ApiPlatform;
 import org.jmol.api.JmolFileInterface;
@@ -90,19 +92,18 @@ public class Platform implements ApiPlatform {
 
   public JmolPopupInterface getMenuPopup(String menuStructure,
                                          char type) {
-//    String c = (type == 'j' ? "awtjs2d.JSmolPopup" : "awtjs2d.JSModelKitPopup");
-//    JmolPopupInterface jmolpopup = (JmolPopupInterface) Interface
-//        .getOptionInterface(c);
-//    try {
-//      if (jmolpopup != null)
-//        jmolpopup.jpiInitialize(viewer, menuStructure);
-//    } catch (Exception e) {
-//      c = "Exception creating " + c + ":" + e;
-//      System.out.println(c);
-//      return null;
-//    }
-//    return jmolpopup;
-  	return null;
+    String c = "jspecview.awtjs2d.JsPopup";
+    JmolPopupInterface jsvpopup = (JmolPopupInterface) JSVInterface
+        .getInterface("jspecview.awtjs2d.JsPopup");
+    try {
+      if (jsvpopup != null)
+        jsvpopup.jpiInitialize(viewer, menuStructure);
+    } catch (Exception e) {
+      c = "Exception creating " + c + ":" + e;
+      System.out.println(c);
+      return null;
+    }
+    return jsvpopup;
   }
 
 	public boolean hasFocus(Object canvas) {
