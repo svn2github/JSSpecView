@@ -833,8 +833,8 @@ public abstract class JDXDataObject extends JDXHeader {
 		case Integration:
 			return new Object[] { null, new int[] { 1 }, null };
 		case Measurements:
-			s1 = (isNMR ? new String[] { "Hz", "ppm" } : null);
-			s2 = (s1 == null ? null : isHNMR() ? new int[] { 1, 4 }
+			s1 = (isNMR ? new String[] { "Hz", "ppm" } : new String[] {""});
+			s2 = (isHNMR() ? new int[] { 1, 4 }
 			: new int[] { 1, 3 });
 			return new Object[] { s1, s2, Integer.valueOf(0) };
 		case PeakList:

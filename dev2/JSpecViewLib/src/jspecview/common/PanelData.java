@@ -138,7 +138,7 @@ public class PanelData implements EventManager {
 	public String startupPinTip = "Click to set.";
 	public String title;
 
-	private int clickCount;
+	int clickCount;
 	private int nSpectra;
 	public int thisWidth;
 	private int thisHeight;
@@ -905,7 +905,7 @@ public class PanelData implements EventManager {
 		if (gs == null)
 			return;
 		setCurrentGraphSet(gs, yPixel, 0);
-		++clickCount;
+		clickCount = (++clickCount % 3);
 		gs.checkWidgetEvent(xPixel, yPixel, true);
 	}
 
@@ -918,18 +918,18 @@ public class PanelData implements EventManager {
 		currentGraphSet.mouseMovedEvent(xPixel, yPixel);
 	}
 
-	public void doMouseReleased(boolean isButton1) {
+	public void doMouseReleased(int xPixel, int yPixel, boolean isButton1) {
 		mouseState = Mouse.UP;
-		if (thisWidget == null || !isButton1)
+		if (thisWidget == null && currentGraphSet.pendingMeasurement == null || !isButton1)
 			return;
-		currentGraphSet.mouseReleasedEvent();
+		currentGraphSet.mouseReleasedEvent(xPixel, yPixel);
 		thisWidget = null;
 		isIntegralDrag = false;
 		integralShiftMode = 0;
 		// repaint();
 	}
 
-	public void doMouseClicked(int xPixel, int yPixel, int clickCount,
+	public void doMouseClicked(int xPixel, int yPixel,
 			boolean isControlDown) {
 		GraphSet gs = GraphSet.findGraphSet(graphSets, xPixel, yPixel);
 		if (gs == null)
@@ -1183,17 +1183,16 @@ public class PanelData implements EventManager {
 		checkKeyControl(keyCode, false);
 	}
 
-	public void mouseAction(int mode, long time, int x, int y, int count,
+	public void mouseAction(int mode, long time, int x, int y, int countIgnored,
 			int buttonMods) {
 		switch (mode) {
 		case Event.PRESSED:
-			// System.out.println("mousePressed " + e);
 			if (!checkMod(buttonMods, Event.MOUSE_LEFT))
 				return;
 			doMousePressed(x, y);
 			break;
 		case Event.RELEASED:
-			doMouseReleased(checkMod(buttonMods, Event.MOUSE_LEFT));
+			doMouseReleased(x, y, checkMod(buttonMods, Event.MOUSE_LEFT));
 			repaint();
 			break;
 		case Event.DRAGGED:
@@ -1211,8 +1210,8 @@ public class PanelData implements EventManager {
 				repaint();
 			break;
 		case Event.CLICKED:
-			// System.out.println("mouseClicked " + e);
-			doMouseClicked(x, y, count, updateControlPressed(buttonMods));
+			ctrlPressed = false;
+			doMouseClicked(x, y, updateControlPressed(buttonMods));
 			break;
 		}
 	}

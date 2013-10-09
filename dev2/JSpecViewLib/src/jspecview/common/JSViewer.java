@@ -68,6 +68,10 @@ public class JSViewer {
 	public JmolList<String>       scriptQueue;
 	public JSVFileHelper fileHelper;
 
+	public boolean isApplet;
+	public boolean isJS;
+	public boolean isSigned;
+
 	public void setProperty(String key, String value) {
 		if (properties != null)
 			properties.setProperty(key, value);
@@ -81,8 +85,9 @@ public class JSViewer {
 	 */
 	public JSViewer(ScriptInterface si, boolean isApplet, boolean isJS) {
 		this.si = si;
-		//this.isApplet = isApplet;
-		//this.isJS = isApplet && isJS;
+		this.isApplet = isApplet;
+		this.isJS = isApplet && isJS;
+		this.isSigned = si.isSigned();
 	}
 
 	public boolean runScriptNow(String script) {
@@ -1257,4 +1262,13 @@ public class JSViewer {
 	}
 
 
+	public Object getDisplay() {
+		return viewPanel;
+	}
+
+
+	public boolean getBooleanProperty(String name) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

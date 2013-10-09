@@ -41,7 +41,7 @@ public class GraphSet implements XYScaleConverter {
 	private MeasurementData selectedSpectrumMeasurements;
 	private MeasurementData selectedSpectrumIntegrals;
 	private Annotation lastAnnotation;
-	private Measurement pendingMeasurement;
+	Measurement pendingMeasurement;
 	private Integral pendingIntegral;
 	private JmolList<JDXSpectrum> graphsTemp = new JmolList<JDXSpectrum>();
 	private PlotWidget[] widgets;
@@ -2261,7 +2261,8 @@ public class GraphSet implements XYScaleConverter {
 		if (m.text.length() == 0 && m != pendingMeasurement)
 			return;
 		pd.setFont(g, xPixels, FONT_BOLD, 12, false);
-		jsvp.setGraphicsColor(g, pd.BLACK);
+		jsvp.setGraphicsColor(g, (m == pendingMeasurement ? pd
+				.getColor(ScriptToken.HIGHLIGHTCOLOR) : pd.BLACK));
 		int x1 = toPixelX(m.getXVal());
 		int y1 = toPixelY(m.getYVal());
 		int x2 = toPixelX(m.getXVal2());
@@ -2829,12 +2830,22 @@ public class GraphSet implements XYScaleConverter {
 	}
 
 	private boolean triggered = true;
-synchronized boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
+synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		if (!zoomEnabled || !triggered)
-			return false;
+			return;
 		triggered = false;
 		PlotWidget widget;
 		if (isPress) {
+			if (pd.clickCount == 2) {
+				if (pendingMeasurement == null) {
+					if (iSpectrumClicked == -1
+							&& iPreviousSpectrumClicked >= 0) {
+						setSpectrumClicked(iPreviousSpectrumClicked);
+					}
+					processPendingMeasurement(xPixel, yPixel, pd.clickCount);
+					return;
+				}
+			}
 			widget = getPinSelected(xPixel, yPixel);
 			if (widget == null) {
 				yPixel = fixY(yPixel);
@@ -2852,12 +2863,12 @@ synchronized boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 				}
 			}
 			pd.thisWidget = widget;
-			return true;
+			return;
 		}
 		nextClickForSetPeak = false;
 		widget = pd.thisWidget;
 		if (widget == null)
-			return false;
+			return;
 
 		// mouse drag with widget
 		if (widget == zoomBox1D) {
@@ -2865,18 +2876,18 @@ synchronized boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 			zoomBox1D.yPixel1 = fixY(yPixel);
 			if (pd.isIntegralDrag && zoomBox1D.xPixel0 != zoomBox1D.xPixel1)
 				checkIntegral(zoomBox1D.getXVal(), toX(zoomBox1D.xPixel1), false);
-			return true;
+			return;
 		}
 		if (widget == zoomBox2D) {
 			zoomBox2D.xPixel1 = imageView.fixX(xPixel);
 			zoomBox2D.yPixel1 = fixY(yPixel);
-			return true;
+			return;
 		}
 		if (widget == cur2Dy) {
 			yPixel = fixY(yPixel);
 			cur2Dy.yPixel0 = cur2Dy.yPixel1 = yPixel;
 			setCurrentSubSpectrum(imageView.toSubspectrumIndex(yPixel));
-			return true;
+			return;
 		}
 		if (widget == cur2Dx0 || widget == cur2Dx1) {
 			//xPixel = imageView.fixX(xPixel);
@@ -2884,7 +2895,7 @@ synchronized boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 			// 2D x zoom change
 			//doZoom(cur2Dx0.getXVal(), getScale().minY, cur2Dx1.getXVal(),
 			//		getScale().maxY, false, false, false, true);
-			return true;
+			return;
 		}
 		if (widget == pin1Dx0 || widget == pin1Dx1 || widget == pin1Dx01) {
 			xPixel = fixX(xPixel);
@@ -2896,7 +2907,7 @@ synchronized boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 				xPixel = pin1Dx0.xPixel0 + dp2;
 				int xPixel1 = pin1Dx1.xPixel0 + dp1;
 				if (dp == 0 || fixX(xPixel) != xPixel || fixX(xPixel1) != xPixel1)
-					return true;
+					return;
 				//System.out.println("pin1Dx01 drag x0 x1 " + toX0(xPixel) + " " + toX0(xPixel1));
 				//System.out.println("pin1Dx01 drag diff " + (toX0(xPixel) - toX0(xPixel1)));
 				pin1Dx0.setX(toX0(xPixel), xPixel);
@@ -2906,7 +2917,7 @@ synchronized boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 			// 1D x zoom change
 			doZoom(pin1Dx0.getXVal(), 0, pin1Dx1.getXVal(),
 					0, true, false, false, true, false);
-			return true;
+			return;
 		}
 		if (widget == pin1Dy0 || widget == pin1Dy1 || widget == pin1Dy01) {
 			yPixel = fixY(yPixel);
@@ -2919,7 +2930,7 @@ synchronized boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 				double y1 = toY0(yPixel1);
 				if (Math.min(y0, y1) == getScale().minY
 						|| Math.max(y0, y1) == getScale().maxY)
-					return true;
+					return;
 				pin1Dy0.setY(y0, yPixel);
 				pin1Dy1.setY(y1, yPixel1);
 			}
@@ -2927,7 +2938,7 @@ synchronized boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 			doZoom(0, pin1Dy0.getYVal(), 0,
 					pin1Dy1.getYVal(), imageView == null, imageView == null, 
 					false, false, false);
-			return true;
+			return;
 		}
 		if (widget == pin2Dx0 || widget == pin2Dx1 || widget == pin2Dx01) {
 			xPixel = imageView.fixX(xPixel);
@@ -2938,20 +2949,20 @@ synchronized boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 				int xPixel1 = pin2Dx1.xPixel0 + dp;
 				if (imageView.fixX(xPixel) != xPixel
 						|| imageView.fixX(xPixel1) != xPixel1)
-					return true;
+					return;
 				pin2Dx0.setX(imageView.toX0(xPixel), xPixel);
 				pin2Dx1.setX(imageView.toX0(xPixel1), xPixel1);
 			}
 			if (!isGoodEvent(pin2Dx0, pin2Dx1, true)) {
 				reset2D(true);
-				return false;
+				return;
 			}
 			imageView.setView0(pin2Dx0.xPixel0, pin2Dy0.yPixel0, pin2Dx1.xPixel0,
 					pin2Dy1.yPixel0);
 			// 2D x zoom
 			doZoom(pin2Dx0.getXVal(), getScale().minY, pin2Dx1.getXVal(),
 					getScale().maxY, false, false, false, true, false);
-			return true;
+			return;
 		}
 		if (widget == pin2Dy0 || widget == pin2Dy1 || widget == pin2Dy01) {
 			yPixel = fixY(yPixel);
@@ -2961,20 +2972,20 @@ synchronized boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 				yPixel = pin2Dy0.yPixel0 + dp;
 				int yPixel1 = pin2Dy1.yPixel0 + dp;
 				if (yPixel != fixY(yPixel) || yPixel1 != fixY(yPixel1))
-					return true;
+					return;
 				pin2Dy0.setY(imageView.toSubspectrumIndex(yPixel), yPixel);
 				pin2Dy1.setY(imageView.toSubspectrumIndex(yPixel1), yPixel1);
 			}
 			if (!isGoodEvent(pin2Dy0, pin2Dy1, false)) {
 				reset2D(false);
-				return false;
+				return;
 			}
 			imageView.setView0(pin2Dx0.xPixel0, pin2Dy0.yPixel0, pin2Dx1.xPixel1,
 					pin2Dy1.yPixel1);
 			update2dImage(false);
-			return true;
+			return;
 		}
-		return false;
+		return;
 	}
 
 	void clearAllViews() {
@@ -3248,7 +3259,16 @@ synchronized boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		return (ad instanceof AnnotationDialog && ad.isVisible());
 	}
 
-	synchronized void mouseReleasedEvent() {
+	/**
+	 * @param xPixel  
+	 * @param yPixel 
+	 */
+	synchronized void mouseReleasedEvent(int xPixel, int yPixel) {
+		if (pendingMeasurement != null) {
+			//processPendingMeasurement(xPixel, yPixel, 2);
+			//setToolTipForPixels(xPixel, yPixel);
+			return;
+		}
 		if (pd.integralShiftMode != 0) {
 			pd.integralShiftMode = 0;
 			zoomBox1D.xPixel1 = zoomBox1D.xPixel0;
