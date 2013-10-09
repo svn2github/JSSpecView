@@ -72,8 +72,6 @@ public interface ScriptInterface {
 	public JSVPanelNode siGetNewPanelNode(String id, String fileName,
 			JDXSource source, JSVPanel jsvp);
 
-	public JSVPopupMenu siGetPopupMenu();
-
 	public PrintLayout siGetPrintLayout(boolean isJob);
 
 	public String siGetReturnFromJmolModel();
@@ -115,8 +113,6 @@ public interface ScriptInterface {
 
 	public void siSetNode(JSVPanelNode node, boolean fromTree);
 
-	public JSVPanelNode siSetOverlayVisibility(JSVPanelNode node);
-
 	public void siSetPropertiesFromPreferences(JSVPanel jsvp, boolean b);
 
 	public void siSetRecentURL(String filePath);
@@ -134,6 +130,11 @@ public interface ScriptInterface {
 	public void siValidateAndRepaint();
 	
 	public JSVDialog siNewDialog(String type, JSVPanel jsvp);
+	
+	public void siNewWindow(boolean isSelected, boolean fromFrame);
+	public void siShow(String what);
+	
+	public JSVApiPlatform getApiPlatform();
 
 
 }

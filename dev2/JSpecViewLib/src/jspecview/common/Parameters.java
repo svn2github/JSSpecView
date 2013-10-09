@@ -54,7 +54,6 @@ public class Parameters {
 				: isTrue(value) ? Boolean.TRUE : Boolean.FALSE);
 	}
 
-	@SuppressWarnings("incomplete-switch")
 	public void setP(JSVPanel jsvp, ScriptToken st, String value) {
 		switch (st) {
 		default:
@@ -80,6 +79,8 @@ public class Parameters {
 				return;
 			boolean b = !jsvp.getPanelData().getBoolean(st);
 			switch (st) {
+			default:
+				break;
 			case XSCALEON:
 				setBoolean(ScriptToken.XUNITSON, b);
 				jsvp.getPanelData().setBoolean(ScriptToken.XUNITSON, b);

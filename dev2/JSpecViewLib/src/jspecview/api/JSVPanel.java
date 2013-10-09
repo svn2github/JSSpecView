@@ -9,7 +9,6 @@ import org.jmol.util.JmolList;
 import jspecview.common.Annotation;
 import jspecview.common.GraphSet;
 import jspecview.common.JDXSpectrum;
-import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
 import jspecview.common.PrintLayout;
 import jspecview.common.Annotation.AType;
@@ -27,14 +26,12 @@ public interface JSVPanel extends JSVViewPanel {
   void getFocusNow(boolean asThread);
   String getInput(String message, String title, String sval);
   GraphSet getNewGraphSet();
-  JSVPanel getNewPanel(JSViewer viewer, JDXSpectrum spectrum);
   PanelData getPanelData();
 
   boolean hasFocus();
 
   void setToolTipText(String s);
   void setupPlatform();
-	void showHeader(Object jsvApplet);
 	AnnotationDialog showDialog(AType type);
 	void showMessage(String msg, String title);
 
@@ -98,8 +95,6 @@ public interface JSVPanel extends JSVViewPanel {
   void saveImage(String type, Object file);
 
 	public void printPanel(PrintLayout pl, OutputStream os, String printJobTitle);
-
-	public void showProperties();
 
 	public String export(String type, int n);
 

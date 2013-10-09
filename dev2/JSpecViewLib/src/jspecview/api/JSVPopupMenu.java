@@ -1,6 +1,7 @@
 package jspecview.api;
 
 import jspecview.common.JSVPanelNode;
+import jspecview.common.JSViewer;
 
 import org.jmol.util.JmolList;
 
@@ -9,7 +10,7 @@ public interface JSVPopupMenu {
 
 	void dispose();
 
-	void show(JSVPanel jsvPanel, int x, int y);
+	void jpiShow(int x, int y);
 
 	void setSelected(String key, boolean b);
 
@@ -17,5 +18,9 @@ public interface JSVPopupMenu {
 
 	void setCompoundMenu(JmolList<JSVPanelNode> panelNodes,
 			boolean allowCompoundMenu);
+
+	void setEnabled(boolean allowMenu, boolean zoomEnabled);
+
+	void initialize(JSViewer viewer, String menu);
 
 }

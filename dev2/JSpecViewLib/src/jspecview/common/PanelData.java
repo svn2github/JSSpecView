@@ -51,7 +51,6 @@ import jspecview.util.JSVColor;
 import jspecview.util.JSVColorUtil;
 import jspecview.util.JSVFileManager;
 
-import org.jmol.api.ApiPlatform;
 import org.jmol.api.Event;
 import org.jmol.api.EventManager;
 import org.jmol.util.JmolFont;
@@ -70,8 +69,6 @@ import org.jmol.util.Logger;
  */
 
 public class PanelData implements EventManager {
-
-	public ApiPlatform apiPlatform;
 
 	public PanelData(JSVPanel panel) {
 		this.jsvp = panel;
@@ -371,7 +368,7 @@ public class PanelData implements EventManager {
 	 */
 	public void clearAllView() {
 		for (int i = graphSets.size(); --i >= 0;)
-			graphSets.get(i).clearAllViews();
+			graphSets.get(i).clearViews();
 	}
 
 	/*----------------------- JSVPanel PAINTING METHODS ---------------------*/
@@ -467,7 +464,7 @@ public class PanelData implements EventManager {
 	public void printVersion(Object g, int pageHeight) {
 		jsvp.setGraphicsColor(g, BLACK);
 		JmolFont font = setFont(g, 100, JmolFont.FONT_STYLE_PLAIN, 9, true);
-		String s = apiPlatform.getDateFormat() + " JSpecView "
+		String s = jsvp.getApiPlatform().getDateFormat() + " JSpecView "
 				+ JSVersion.VERSION_SHORT;
 		int w = font.stringWidth(s);
 		jsvp.drawString(g, s, (thisWidth - right) * scalingFactor - w, pageHeight
@@ -806,7 +803,7 @@ public class PanelData implements EventManager {
 		}
 		int face = jsvp.getFontFaceID(isPrinting ? printingFontName
 				: displayFontName);
-		return JmolFont.createFont3D(face, style, size, size, apiPlatform, g);
+		return JmolFont.createFont3D(face, style, size, size, jsvp.getApiPlatform(), g);
 	}
 
 	// listeners to handle various events, from GraphSet or AwtPanel

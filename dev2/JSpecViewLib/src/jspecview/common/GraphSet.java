@@ -2988,10 +2988,6 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		return;
 	}
 
-	void clearAllViews() {
-		clearViews();
-	}
-
 	void clearIntegrals() {
 		checkIntegral(Double.NaN, 0, false);
 		// pd.repaint();

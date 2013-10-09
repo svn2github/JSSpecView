@@ -1,6 +1,7 @@
 package jspecview.common;
 
 import org.jmol.api.ApiPlatform;
+import org.jmol.api.PlatformViewer;
 import org.jmol.util.JmolList;
 
 import java.io.File;
@@ -21,6 +22,7 @@ import jspecview.api.JSVDialog;
 import jspecview.api.JSVFileHelper;
 import jspecview.api.JSVMainPanel;
 import jspecview.api.JSVPanel;
+import jspecview.api.JSVPopupMenu;
 import jspecview.api.JSVTree;
 import jspecview.api.JSVTreeNode;
 import jspecview.api.ScriptInterface;
@@ -39,7 +41,7 @@ import jspecview.util.JSVFileManager;
  * @author Bob Hanson hansonr@stolaf.edu
  * 
  */
-public class JSViewer {
+public class JSViewer implements PlatformViewer {
 
   public final static String sourceLabel = "Original...";
 
@@ -66,7 +68,8 @@ public class JSViewer {
 	public JSVMainPanel           viewPanel; // alias for spectrumPanel
 	public Properties 						properties; // application only
 	public JmolList<String>       scriptQueue;
-	public JSVFileHelper fileHelper;
+	public JSVFileHelper          fileHelper;
+	public JSVPopupMenu           jsvpPopupMenu;
 
 	public boolean isApplet;
 	public boolean isJS;
@@ -98,11 +101,10 @@ public class JSViewer {
 		script = script.trim();
 		if (Logger.debugging)
 			Logger.info("RUNSCRIPT " + script);
-		JSVPanel jsvp = selectedPanel;
 		boolean isOK = true;
 		int nErrorsLeft = 10;
 		ScriptTokenizer commandTokens = new ScriptTokenizer(script, true);
-		while (commandTokens.hasMoreTokens() && nErrorsLeft > 0) {
+		while (commandTokens.hasMoreTokens() && nErrorsLeft > 0 && isOK) {
 			String token = commandTokens.nextToken();
 			// now split the key/value pair
 			ScriptTokenizer eachParam = new ScriptTokenizer(token, false);
@@ -119,7 +121,7 @@ public class JSViewer {
 					--nErrorsLeft;
 					break;
 				default:
-					parameters.set(jsvp, st, value);
+					parameters.set(selectedPanel, st, value);
 					si.siUpdateBoolean(st, Parameters.isTrue(value));
 					break;
 				case PEAKCALLBACKFUNCTIONNAME:
@@ -133,7 +135,6 @@ public class JSViewer {
 					break;
 				case CLOSE:
 					si.siExecClose(value, true);
-					jsvp = selectedPanel;
 					break;
 				case DEBUG:
 					Logger
@@ -142,46 +143,28 @@ public class JSViewer {
 											: Logger.LEVEL_INFO);
 					break;
 				case EXPORT:
-					msg = si.siExecExport(jsvp, value);
+					msg = si.siExecExport(selectedPanel, value);
 					return false;
-				case FINDX:
-					if (jsvp != null)
-						jsvp.getPanelData().findX(null, Double.parseDouble(value));
-					break;
 				case GETPROPERTY:
-					Map<String, Object> info = (jsvp == null ? null
+					Map<String, Object> info = (selectedPanel == null ? null
 							: getPropertyAsJavaObject(value));
 					if (info != null)
-						jsvp.showMessage(JSVEscape.toJSON(null, info, true), value);
-					break;
-				case GETSOLUTIONCOLOR:
-					if (jsvp != null)
-						showColorMessage();
+						selectedPanel.showMessage(JSVEscape.toJSON(null, info, true), value);
 					break;
 				case HIDDEN:
 					si.siExecHidden(Parameters.isTrue(value));
 					break;
-				case INTEGRALOFFSET:
-				case INTEGRALRANGE:
-					execSetIntegralParameter(st, Double.parseDouble(value));
-					break;
-				case INTEGRATION:
-				case INTEGRATE:
-					if (jsvp != null)
-						execIntegrate(value);
-					break;
 				case INTEGRATIONRATIOS:
 					si.siSetIntegrationRatios(value);
-					if (jsvp != null)
+					if (selectedPanel != null)
 						execIntegrate(null);
 					break;
 				case INTERFACE:
 					si.siExecSetInterface(value);
 					break;
-				case IRMODE:
-					if (jsvp == null)
-						continue;
-					execIRMode(value);
+				case INTEGRALOFFSET:
+				case INTEGRALRANGE:
+					execSetIntegralParameter(st, Double.parseDouble(value));
 					break;
 				case JMOL:
 					si.syncToJmol(value);
@@ -189,24 +172,11 @@ public class JSViewer {
 				case JSV:
 					syncScript(Txt.trimQuotes(value));
 					break;
-				case LABEL:
-					if (jsvp != null)
-						jsvp.getPanelData().addAnnotation(ScriptToken.getTokens(value));
-					break;
-				case LINK:
-					if (jsvp != null)
-						jsvp.getPanelData().linkSpectra(LinkMode.getMode(value));
-					break;
 				case LOAD:
 					msg = si.siExecLoad(value);
-					jsvp = selectedPanel;
 					break;
 				case LOADIMAGINARY:
 					si.siSetLoadImaginary(Parameters.isTrue(value));
-					break;
-				case OVERLAYSTACKED:
-					if (jsvp != null)
-						jsvp.getPanelData().splitStack(!Parameters.isTrue(value));
 					break;
 				case PEAK:
 					execPeak(value);
@@ -214,76 +184,28 @@ public class JSViewer {
 				case PEAKLIST:
 					execPeakList(value);
 					break;
-				case PRINT:
-					if (jsvp == null)
-						continue;
-					si.siPrintPDF(value);
-					break;
 				case SCALEBY:
 					scaleSelectedBy(panelNodes, value);
 					break;
 				case SCRIPT:
-					String s = si.siSetFileAsString(value);
-					if (s != null && si.siIncrementScriptLevelCount(0) < NLEVEL_MAX)
-						runScriptNow(s);
+					if (value.equals("") || value.toLowerCase().startsWith("inline")) {
+						execScriptInline(value);
+					} else {
+						String s = si.siSetFileAsString(value);
+						if (s != null && si.siIncrementScriptLevelCount(0) < NLEVEL_MAX)
+							runScriptNow(s);
+					}
 					break;
 				case SELECT:
 					execSelect(value);
 					break;
-				case SETPEAK:
-					// setpeak NONE Double.NaN, Double.MAX_VALUE
-					// shiftx NONE Double.MAX_VALUE, Double.NaN
-					// setpeak x.x Double.NaN, value
-					// setx x.x Double.MIN_VALUE, value
-					// shiftx x.x value, Double.NaN
-					// setpeak ? Double.NaN, Double.MIN_VALUE
-					if (jsvp != null)
-						jsvp.getPanelData().shiftSpectrum(
-								Double.NaN,
-								value.equalsIgnoreCase("NONE") ? Double.MAX_VALUE : value
-										.equalsIgnoreCase("?") ? Double.MIN_VALUE : Double
-										.parseDouble(value));
-					break;
-				case SETX:
-					if (jsvp != null)
-						jsvp.getPanelData().shiftSpectrum(Double.MIN_VALUE,
-								Double.parseDouble(value));
-					break;
-				case SHIFTX:
-					if (jsvp != null)
-						jsvp.getPanelData().shiftSpectrum(
-								value.equalsIgnoreCase("NONE") ? Double.MAX_VALUE : Double
-										.parseDouble(value), Double.NaN);
-					break;
-				case SHOWMEASUREMENTS:
-					if (jsvp == null)
-						break;
-					jsvp.getPanelData().showAnnotation(AType.Measurements,
-							Parameters.getTFToggle(value));
-					break;
-				case SHOWPEAKLIST:
-					if (jsvp == null)
-						break;
-					jsvp.getPanelData().showAnnotation(AType.PeakList,
-							Parameters.getTFToggle(value));
-					break;
-				case SHOWINTEGRATION:
-					if (jsvp == null)
-						break;
-					jsvp.getPanelData().showAnnotation(AType.Integration,
-							Parameters.getTFToggle(value));
-					// execIntegrate(null);
-					break;
 				case SPECTRUM:
 				case SPECTRUMNUMBER:
-					jsvp = setSpectrum(value);
-					if (jsvp == null)
-						return false;
+					if (!setSpectrum(value))
+						isOK = false;
 					break;
 				case STACKOFFSETY:
-					int offset = Parser.parseInt("" + Parser.parseFloat(value));
-					if (jsvp != null && offset != Integer.MIN_VALUE)
-						jsvp.getPanelData().setYStackOffsetPercent(offset);
+					execOverlayOffsetY(Parser.parseInt("" + Parser.parseFloat(value)));
 					break;
 				case TEST:
 					si.siExecTest(value);
@@ -291,15 +213,121 @@ public class JSViewer {
 				case OVERLAY: // deprecated
 				case VIEW:
 					execView(value, true);
-					jsvp = selectedPanel;
 					break;
+				case FINDX:
+				case GETSOLUTIONCOLOR:
+				case INTEGRATION:
+				case INTEGRATE:
+				case IRMODE:
+				case LABEL:
+				case LINK:
+				case OVERLAYSTACKED:
+				case PRINT:
+				case SETPEAK:
+				case SETX:
+				case SHIFTX:
+				case SHOWERRORS:
+				case SHOWMEASUREMENTS:
+				case SHOWMENU:
+				case SHOWKEY:
+				case SHOWPEAKLIST:
+				case SHOWINTEGRATION:
+				case SHOWPROPERTIES:
+				case SHOWSOURCE:
 				case YSCALE:
-					if (jsvp != null)
-						setYScale(value, jsvp);
-					break;
 				case ZOOM:
-					if (jsvp != null)
-						isOK = execZoom(value, jsvp);
+					if (selectedPanel == null) {
+						isOK = false;
+						break;
+					}
+						switch (st) {
+						default:
+							break;
+						case FINDX:
+							selectedPanel.getPanelData().findX(null, Double.parseDouble(value));
+						break;
+					case GETSOLUTIONCOLOR:
+							showColorMessage();
+						break;
+					case INTEGRATION:
+					case INTEGRATE:
+							execIntegrate(value);
+						break;
+					case IRMODE:
+							execIRMode(value);
+						break;
+					case LABEL:
+							selectedPanel.getPanelData().addAnnotation(ScriptToken.getTokens(value));
+						break;
+					case LINK:
+							selectedPanel.getPanelData().linkSpectra(LinkMode.getMode(value));
+						break;
+					case OVERLAYSTACKED:
+							selectedPanel.getPanelData().splitStack(!Parameters.isTrue(value));
+						break;
+					case PRINT:
+							si.siPrintPDF(value);
+						break;
+					case SETPEAK:
+						// setpeak NONE Double.NaN, Double.MAX_VALUE
+						// shiftx NONE Double.MAX_VALUE, Double.NaN
+						// setpeak x.x Double.NaN, value
+						// setx x.x Double.MIN_VALUE, value
+						// shiftx x.x value, Double.NaN
+						// setpeak ? Double.NaN, Double.MIN_VALUE
+							selectedPanel.getPanelData().shiftSpectrum(
+									Double.NaN,
+									value.equalsIgnoreCase("NONE") ? Double.MAX_VALUE : value
+											.equalsIgnoreCase("?") ? Double.MIN_VALUE : Double
+											.parseDouble(value));
+						break;
+					case SETX:
+							selectedPanel.getPanelData().shiftSpectrum(Double.MIN_VALUE,
+									Double.parseDouble(value));
+						break;
+					case SHIFTX:
+							selectedPanel.getPanelData().shiftSpectrum(
+									value.equalsIgnoreCase("NONE") ? Double.MAX_VALUE : Double
+											.parseDouble(value), Double.NaN);
+						break;
+					case SHOWERRORS:
+						si.siShow("errors");
+						break;
+					case SHOWMEASUREMENTS:
+						selectedPanel.getPanelData().showAnnotation(AType.Measurements,
+								Parameters.getTFToggle(value));
+						break;
+					case SHOWKEY:
+						setOverlayLegendVisibility(selectedPanel, Parameters.getTFToggle(value), true);
+						break;
+					case SHOWMENU:
+						showMenu(Integer.MIN_VALUE, 0);
+						break;
+					case SHOWPEAKLIST:
+						selectedPanel.getPanelData().showAnnotation(AType.PeakList,
+								Parameters.getTFToggle(value));
+						break;
+					case SHOWINTEGRATION:
+						selectedPanel.getPanelData().showAnnotation(AType.Integration,
+								Parameters.getTFToggle(value));
+						// execIntegrate(null);
+						break;
+					case SHOWPROPERTIES:
+						si.siShow("properties");
+						break;
+					case SHOWSOURCE:
+						si.siShow("source");
+						break;
+					case YSCALE:
+							setYScale(value, selectedPanel);
+						break;
+					case WINDOW:
+					  si.siNewWindow(Parameters.isTrue(value), false);
+					  break;
+					case ZOOM:
+							isOK = execZoom(value);
+						break;
+					}
 					break;
 				}
 			} catch (Exception e) {
@@ -363,7 +391,7 @@ public class JSViewer {
 
 	}
 
-	private boolean execZoom(String value, JSVPanel jsvp) {
+	private boolean execZoom(String value) {
 		double x1 = 0, x2 = 0, y1 = 0, y2 = 0;
 		JmolList<String> tokens;
 		tokens = ScriptToken.getTokens(value);
@@ -371,7 +399,7 @@ public class JSViewer {
 		default:
 			return false;
 		case 1:
-			zoomTo(jsvp, tokens.get(0));
+			zoomTo(tokens.get(0));
 			return true;
 		case 2:
 			x1 = Double.parseDouble(tokens.get(0));
@@ -383,8 +411,34 @@ public class JSViewer {
 			x2 = Double.parseDouble(tokens.get(2));
 			y2 = Double.parseDouble(tokens.get(3));
 		}
-		jsvp.getPanelData().setZoom(x1, y1, x2, y2);
+		selectedPanel.getPanelData().setZoom(x1, y1, x2, y2);
 		return true;
+	}
+
+//  private String recentZoom = "";
+//  doesn't work 
+
+	private void zoomTo(String value) {
+		PanelData pd = selectedPanel.getPanelData();
+//		if (value.equals("")) {
+//			value = selectedPanel.getInput("Enter zoom range y1 y2", "Zoom", recentZoom);
+//			if (value == null)
+//				return;
+//			recentZoom = value;
+//			runScriptNow("zoom " + value);
+//			return;
+//		}
+		if (value.equalsIgnoreCase("next")) {
+			pd.nextView();
+		} else if (value.toLowerCase().startsWith("prev")) {
+			pd.previousView();
+
+		} else if (value.equalsIgnoreCase("out")) {
+			pd.resetView();
+
+		} else if (value.equalsIgnoreCase("clear")) {
+			pd.clearAllView();
+		}
 	}
 
 	private void scaleSelectedBy(JmolList<JSVPanelNode> nodes, String value) {
@@ -405,6 +459,10 @@ public class JSViewer {
 	}
 
 	public void execView(String value, boolean fromScript) {
+		if (value.equals("")) {
+			checkOverlay();
+			return;
+		}
 		JmolList<JDXSpectrum> speclist = new JmolList<JDXSpectrum>();
 		String strlist = fillSpecList(value, speclist, true);
 		if (speclist.size() > 0)
@@ -480,11 +538,15 @@ public class JSViewer {
 		}
 	}
 
-	public void setOverlayLegendVisibility(JSVPanel jsvp, boolean showLegend) {
+	private boolean overlayLegendVisible;
+	
+	public void setOverlayLegendVisibility(JSVPanel jsvp, Boolean tftoggle, boolean doSet) {
+		if (doSet)
+			overlayLegendVisible = (tftoggle == null ? !overlayLegendVisible : tftoggle == Boolean.TRUE);	
 		JSVPanelNode node = JSVPanelNode.findNode(jsvp, panelNodes);
 		for (int i = panelNodes.size(); --i >= 0;)
 			showOverlayLegend(panelNodes.get(i), panelNodes.get(i) == node
-					&& showLegend);
+					&& overlayLegendVisible);
 	}
 
 	private void showOverlayLegend(JSVPanelNode node, boolean visible) {
@@ -903,21 +965,6 @@ public class JSViewer {
 		}
 	}
 
-	private void zoomTo(JSVPanel jsvp, String value) {
-		PanelData pd = jsvp.getPanelData();
-		if (value.equalsIgnoreCase("next")) {
-			pd.nextView();
-		} else if (value.toLowerCase().startsWith("prev")) {
-			pd.previousView();
-
-		} else if (value.equalsIgnoreCase("out")) {
-			pd.resetView();
-
-		} else if (value.equalsIgnoreCase("clear")) {
-			pd.clearAllView();
-		}
-	}
-
 	public void showColorMessage() {
 		JSVPanel jsvp = selectedPanel;
 		jsvp.showMessage(jsvp.getPanelData().getSolutionColorHtml(),
@@ -1156,26 +1203,26 @@ public class JSViewer {
 		JSVPanelNode node = JSVPanelNode.findNode(jsvp, panelNodes);
 		if (node == null)
 			return null;
-
 		spectraTree.setPath(spectraTree.newTreePath(node.treeNode.getPath()));
-		return si.siSetOverlayVisibility(node);
+		setOverlayLegendVisibility(node.jsvp, null, false);
+		return node;
 	}
 
-	public JSVPanel setSpectrum(String value) {
+	private boolean setSpectrum(String value) {
 		if (value.indexOf('.') >= 0) {
 			JSVPanelNode node = JSVPanelNode.findNodeById(value, panelNodes);
 			if (node == null)
-				return null;
+				return false;
 			si.siSetNode(node, false);
 		} else {
 			int n = Parser.parseInt(value);
 			if (n <= 0) {
 				checkOverlay();
-				return null;
+				return false;
 			}
 			setFrameAndTreeNode(n - 1);
 		}
-		return selectedPanel;
+		return true;
 	}
 
 	public void splitSpectra() {
@@ -1224,6 +1271,10 @@ public class JSViewer {
 
 	public void dispose() {
 		fileHelper = null;
+	  if (jsvpPopupMenu != null) {
+	  	jsvpPopupMenu.dispose();
+	  	jsvpPopupMenu = null;
+	  }
 		if (panelNodes != null)
 			for (int i = panelNodes.size(); --i >= 0;) {
 				panelNodes.get(i).dispose();
@@ -1251,8 +1302,8 @@ public class JSViewer {
 		return selectedPanel.getPanelData();
 	}
 
-	public void showProperties() {
-		selectedPanel.showProperties();
+	public Object getDisplay() {
+		return viewPanel;
 	}
 
 	public void checkOverlay() {
@@ -1261,14 +1312,40 @@ public class JSViewer {
 		si.siNewDialog("view", null);
 	}
 
-
-	public Object getDisplay() {
-		return viewPanel;
+  private int recentStackPercent = 5;
+  
+	private void execOverlayOffsetY(int offset) {
+		if (selectedPanel == null)
+			return;
+		if (offset == Integer.MIN_VALUE) {
+			String soffset = selectedPanel.getInput(
+					"Enter a vertical offset in percent for stacked plots", "Overlay",
+					"" + recentStackPercent);
+			float f = Parser.parseFloat(soffset);
+			if (Float.isNaN(f))
+				return;
+			offset = (int) f;
+		}
+		recentStackPercent = offset;
+		selectedPanel.getPanelData().setYStackOffsetPercent(offset);
 	}
+	
+  private String recentScript = "";
 
+  private void execScriptInline(String script) {
+  	if (script.length() > 0)
+  		script = script.substring(6).trim();
+  	if (script.length() == 0)
+  		script = selectedPanel.getInput("Enter a JSpecView script", 
+    		"Script", recentScript);
+    if (script == null)
+      return;
+    recentScript = script;
+    runScriptNow(script);
+  }
 
-	public boolean getBooleanProperty(String name) {
-		// TODO Auto-generated method stub
-		return false;
+	public void showMenu(int x, int y) {
+		if (jsvpPopupMenu != null)
+			jsvpPopupMenu.jpiShow(x, y);
 	}
 }
