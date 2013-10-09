@@ -9,9 +9,9 @@ import java.net.URLConnection;
  * A method to allow a JavaScript Ajax 
  * 
  */
-public class JSURLConnection extends URLConnection {
+public class JSvURLConnection extends URLConnection {
 
-	protected JSURLConnection(URL url) {
+	protected JSvURLConnection(URL url) {
 		super(url);
 	}
 

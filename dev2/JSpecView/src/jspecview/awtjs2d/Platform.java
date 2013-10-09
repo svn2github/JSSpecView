@@ -317,7 +317,7 @@ public class Platform implements ApiPlatform {
   }
 
   public JmolFileInterface newFile(String name) {
-    return new JSFile(name);
+    return new JSvFile(name);
   }
 
   public Object getBufferedFileInputStream(String name) {
@@ -327,7 +327,7 @@ public class Platform implements ApiPlatform {
 
   public Object getBufferedURLInputStream(URL url, byte[] outputBytes,
                                           String post) {
-    return JSFile.getBufferedURLInputStream(url, outputBytes, post);
+    return JSvFile.getBufferedURLInputStream(url, outputBytes, post);
   }
 
 

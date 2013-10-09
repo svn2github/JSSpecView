@@ -13,16 +13,16 @@ import org.jmol.util.Txt;
  * 
  */
 
-class JSFile implements JmolFileInterface {
+class JSvFile implements JmolFileInterface {
 
   private String name;
 	private String fullName;
 
   static JmolFileInterface newFile(String name) {
-    return new JSFile(name);
+    return new JSvFile(name);
   }
 
-	JSFile(String name) {
+	JSvFile(String name) {
   	this.name = name.replace('\\','/');
   	fullName = name;
   	if (!fullName.startsWith("/") && JSVFileManager.urlTypeIndex(name) < 0)
@@ -33,7 +33,7 @@ class JSFile implements JmolFileInterface {
 
   public JmolFileInterface getParentAsFile() {
   	int pt = fullName.lastIndexOf("/");
-  	return (pt < 0 ? null : new JSFile(fullName.substring(0, pt)));
+  	return (pt < 0 ? null : new JSvFile(fullName.substring(0, pt)));
   }
 
 	public String getAbsolutePath() {
@@ -55,7 +55,7 @@ class JSFile implements JmolFileInterface {
   static Object getBufferedURLInputStream(URL url, byte[] outputBytes,
       String post) {
     try {
-      JSURLConnection conn = (JSURLConnection) url.openConnection();
+      JSvURLConnection conn = (JSvURLConnection) url.openConnection();
       if (outputBytes != null)
         conn.outputBytes(outputBytes);
       else if (post != null)
