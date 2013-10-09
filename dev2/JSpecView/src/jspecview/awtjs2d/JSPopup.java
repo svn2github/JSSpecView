@@ -23,7 +23,8 @@
  */
 package jspecview.awtjs2d;
 
-import jspecview.util.JSVGenericPopup;
+import jspecview.common.JSVGenericPopup;
+
 import org.jmol.util.SB;
 
 /**

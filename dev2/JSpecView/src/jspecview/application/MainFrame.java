@@ -110,7 +110,7 @@ import jspecview.java.AwtDialogPrint;
 import jspecview.java.AwtDialogView;
 import jspecview.java.AwtPanel;
 import jspecview.java.AwtParameters;
-import jspecview.java.AwtPopupMenu;
+import jspecview.java.AwtPopupMenuOld;
 import jspecview.java.AwtDropTargetListener;
 import jspecview.java.AwtTree;
 import jspecview.java.AwtViewPanel;
@@ -175,7 +175,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	private Container               jmolFrame;
 	private Dimension               jmolDimensionNew = new Dimension(250, 200);
 	private JSVInterface            jmolOrAdvancedApplet;
-	private AwtPopupMenu            jsvpPopupMenu;
+	private AwtPopupMenuOld            jsvpPopupMenu;
 	private JSVPanel                prevPanel;
 	private JmolList<String>        recentFilePaths = new JmolList<String>();
 	private JScrollPane             spectraTreeScrollPane;
@@ -290,7 +290,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	public MainFrame(Component jmolDisplay, JSVInterface jmolOrAdvancedApplet) {
 		viewer = new JSViewer(this, false, false);
 		fileHelper = new AwtFileHelper(viewer);
-		jsvpPopupMenu = new AwtPopupMenu(viewer, true); 
+		jsvpPopupMenu = new AwtPopupMenuOld(viewer); 
 		viewer.spectraTree = new AwtTree(viewer);
 		viewer.repaintManager = new RepaintManager(viewer);
 		this.jmolDisplay = jmolDisplay;

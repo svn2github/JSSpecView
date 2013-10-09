@@ -47,8 +47,6 @@ public class DialogParams {
 	public Integer unitPtr;
 	public int precision = 1;
 
-	public boolean disposeOnDone;
-
 	public boolean isON = true;
 
 
@@ -180,14 +178,11 @@ public class DialogParams {
 	}
 
 	public void done() {
-		if (disposeOnDone) {
-			dialog.dispose();
-			return;
-		}
 		jsvp.getPanelData().removeDialog(dialog);
 		// setState(false);
 		if (xyData != null)
 			xyData.setState(isON);
+		dialog.saveDialogPosition(dialog.getPosXY());
 		dialog.dispose();
 		jsvp.doRepaint();
 	}

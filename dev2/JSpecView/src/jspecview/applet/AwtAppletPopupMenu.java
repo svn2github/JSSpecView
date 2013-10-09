@@ -11,15 +11,15 @@ import javax.swing.JMenuItem;
 
 import jspecview.app.JSVApp;
 import jspecview.common.JSViewer;
-import jspecview.java.AwtPopupMenu;
+import jspecview.java.AwtPopupMenuOld;
 
-class AwtAppletPopupMenu extends AwtPopupMenu {
+class AwtAppletPopupMenu extends AwtPopupMenuOld {
 
   JSVApp app;
 
   AwtAppletPopupMenu(JSViewer viewer, 
       boolean allowMenu, boolean enableZoom) {
-    super(viewer, false);
+    super(viewer);
     isApplet = true;
     app = (JSVApp) viewer.si;
     super.jbInit();
@@ -65,6 +65,7 @@ class AwtAppletPopupMenu extends AwtPopupMenu {
   @Override
   protected void setPopupMenu() {
     aboutMenu.setText("About");
+
     fileMenu.setText("File");
     //fileMenu.setEnabled(applet.isSigned()); ?
     fileMenu.add(saveAsMenu);
@@ -73,7 +74,7 @@ class AwtAppletPopupMenu extends AwtPopupMenu {
       fileMenu.add(appletExportAsMenu);
     }
     appletSaveAsJDXMenu = new JMenu();
-    AwtPopupMenu.setMenus(saveAsMenu, appletSaveAsJDXMenu, appletExportAsMenu, exportActionListener);
+    AwtPopupMenuOld.setMenus(saveAsMenu, appletSaveAsJDXMenu, appletExportAsMenu, exportActionListener);
 
     viewMenu.setText("View");
     zoomMenu.setText("Zoom");

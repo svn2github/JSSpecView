@@ -61,9 +61,8 @@ import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
 import jspecview.common.ScriptToken;
 import jspecview.common.JDXSpectrum;
-import jspecview.java.AwtPopupMenu;
+import jspecview.java.AwtPopupMenuOld;
 import jspecview.java.AwtDialogText;
-import jspecview.java.AwtPopupMenu.EnumOverlay;
 import jspecview.source.JDXSource;
 import jspecview.util.JSVFileManager;
 
@@ -79,57 +78,37 @@ public class AppMenu extends JMenuBar {
   private static final long serialVersionUID = 1L;
   protected MainFrame mainFrame;
   protected JSViewer viewer;
-  AwtPopupMenu jsvpPopupMenu;
+  AwtPopupMenuOld jsvpPopupMenu;
 
-  public AppMenu(MainFrame si, AwtPopupMenu popupMenu) throws Exception {
+  public AppMenu(MainFrame si, AwtPopupMenuOld popupMenu) throws Exception {
     this.mainFrame = si;
     viewer = si.viewer;
     jsvpPopupMenu = popupMenu;
     jbInit();
   }
 
-  private JMenu fileMenu = new JMenu();
-  private JMenuItem openMenuItem = new JMenuItem();
-  private JMenuItem openURLMenuItem = new JMenuItem();
-  private JMenuItem simulateMenuItem = new JMenuItem();
-  private JMenuItem printMenuItem = new JMenuItem();
-  private JMenuItem closeMenuItem = new JMenuItem();
-  private JMenuItem closeAllMenuItem = new JMenuItem();
-  private JMenu saveAsMenu = new JMenu();
-  private JMenu saveAsJDXMenu = new JMenu();
-  private JMenu exportAsMenu = new JMenu();
-  private JMenuItem exitMenuItem = new JMenuItem();
-  private JMenu helpMenu = new JMenu();
-  private JMenu optionsMenu = new JMenu();
-  private JMenu displayMenu = new JMenu();
-  private JMenu zoomMenu = new JMenu();
+  // the only really necessary as fields:
+  JMenu processingMenu = new JMenu();
+  JMenuItem overlayKeyMenuItem;
   JCheckBoxMenuItem gridCheckBoxMenuItem = new JCheckBoxMenuItem();
   JCheckBoxMenuItem coordsCheckBoxMenuItem = new JCheckBoxMenuItem();
   JCheckBoxMenuItem revPlotCheckBoxMenuItem = new JCheckBoxMenuItem();
+  private JMenuItem closeMenuItem = new JMenuItem();
+  private JMenu saveAsMenu = new JMenu();
+  private JMenu saveAsJDXMenu = new JMenu();
+  private JMenu exportAsMenu = new JMenu();
   private JCheckBoxMenuItem scaleXCheckBoxMenuItem = new JCheckBoxMenuItem();
   private JCheckBoxMenuItem scaleYCheckBoxMenuItem = new JCheckBoxMenuItem();
-  private JMenuItem nextZoomMenuItem = new JMenuItem();
-  private JMenuItem prevZoomMenuItem = new JMenuItem();
-  private JMenuItem fullZoomMenuItem = new JMenuItem();
-  private JMenuItem clearZoomMenuItem = new JMenuItem();
-  private JMenuItem userZoomMenuItem = new JMenuItem();
-  private JMenuItem preferencesMenuItem = new JMenuItem();
-  private JMenuItem contentsMenuItem = new JMenuItem();
-  private JMenuItem aboutMenuItem = new JMenuItem();
   private JMenu openRecentMenu = new JMenu();
   private JCheckBoxMenuItem toolbarCheckBoxMenuItem = new JCheckBoxMenuItem();
   private JCheckBoxMenuItem sidePanelCheckBoxMenuItem = new JCheckBoxMenuItem();
   private JCheckBoxMenuItem statusCheckBoxMenuItem = new JCheckBoxMenuItem();
-
-  private JMenuItem overlayStackOffsetYMenuItem = new JMenuItem();
-  private JMenuItem spectraMenuItem = new JMenuItem();
-  private JMenuItem sourceMenuItem = new JMenuItem();
-  private JMenuItem propertiesMenuItem = new JMenuItem();
-
-  private JMenuItem scriptMenuItem = new JMenuItem();
-  JMenu processingMenu = new JMenu();
   private JMenuItem errorLogMenuItem = new JMenuItem();
-  JMenuItem overlayKeyMenuItem;
+  private JMenuItem printMenuItem = new JMenuItem();
+  private JMenuItem closeAllMenuItem = new JMenuItem();
+  private JMenuItem sourceMenuItem = new JMenuItem();
+  private JMenu displayMenu = new JMenu();
+
 
   /**
    * Initializes GUI components
@@ -137,46 +116,70 @@ public class AppMenu extends JMenuBar {
    * @throws Exception
    */
   private void jbInit() throws Exception {
+  	
+    JMenu fileMenu = new JMenu();
+    JMenuItem openMenuItem = new JMenuItem();
+    JMenuItem openURLMenuItem = new JMenuItem();
+    JMenuItem simulateMenuItem = new JMenuItem();
+    JMenuItem exitMenuItem = new JMenuItem();
+    JMenu helpMenu = new JMenu();
+    JMenu optionsMenu = new JMenu();
+    JMenu zoomMenu = new JMenu();
+    JMenuItem nextZoomMenuItem = new JMenuItem();
+    JMenuItem prevZoomMenuItem = new JMenuItem();
+    JMenuItem fullZoomMenuItem = new JMenuItem();
+    JMenuItem clearZoomMenuItem = new JMenuItem();
+    JMenuItem userZoomMenuItem = new JMenuItem();
+    JMenuItem preferencesMenuItem = new JMenuItem();
+    JMenuItem contentsMenuItem = new JMenuItem();
+    JMenuItem aboutMenuItem = new JMenuItem();
+
+    JMenuItem overlayStackOffsetYMenuItem = new JMenuItem();
+    JMenuItem spectraMenuItem = new JMenuItem();
+    JMenuItem propertiesMenuItem = new JMenuItem();
+
+    JMenuItem scriptMenuItem = new JMenuItem();
+
     fileMenu.setMnemonic('F');
     fileMenu.setText("File");
 
-    AwtPopupMenu.setMenuItem(openMenuItem, 'O', "Open...", 79,
+    AwtPopupMenuOld.setMenuItem(openMenuItem, 'O', "Open...", 79,
         InputEvent.CTRL_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             mainFrame.showFileOpenDialog();
           }
         });
-    AwtPopupMenu.setMenuItem(openURLMenuItem, 'U', "Open URL...", 85,
+    AwtPopupMenuOld.setMenuItem(openURLMenuItem, 'U', "Open URL...", 85,
         InputEvent.CTRL_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             mainFrame.openURL();
           }
         });
-    AwtPopupMenu.setMenuItem(simulateMenuItem, 'I', "Simulate...", 73,
+    AwtPopupMenuOld.setMenuItem(simulateMenuItem, 'I', "Simulate...", 73,
         InputEvent.CTRL_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             mainFrame.simulate();
           }
         });
-    AwtPopupMenu.setMenuItem(printMenuItem, 'P', "Print...", 80,
+    AwtPopupMenuOld.setMenuItem(printMenuItem, 'P', "Print...", 80,
         InputEvent.CTRL_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             mainFrame.siPrintPDF("");
           }
         });
-    AwtPopupMenu.setMenuItem(closeMenuItem, 'C', "Close", 115,
+    AwtPopupMenuOld.setMenuItem(closeMenuItem, 'C', "Close", 115,
         InputEvent.CTRL_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             viewer.runScript("CLOSE");
           }
         });
-    AwtPopupMenu.setMenuItem(closeAllMenuItem, 'L', "Close All", 0,
+    AwtPopupMenuOld.setMenuItem(closeAllMenuItem, 'L', "Close All", 0,
         InputEvent.CTRL_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             viewer.runScript("CLOSE ALL");
           }
         });
-    AwtPopupMenu.setMenuItem(exitMenuItem, 'X', "Exit", 115,
+    AwtPopupMenuOld.setMenuItem(exitMenuItem, 'X', "Exit", 115,
         InputEvent.ALT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             mainFrame.exitJSpecView(false);
@@ -211,85 +214,85 @@ public class AppMenu extends JMenuBar {
     zoomMenu.setMnemonic('Z');
     zoomMenu.setText("Zoom");
 
-    AwtPopupMenu.setMenuItem(gridCheckBoxMenuItem, 'G', "Grid", 71,
+    AwtPopupMenuOld.setMenuItem(gridCheckBoxMenuItem, 'G', "Grid", 71,
         InputEvent.CTRL_MASK, new ItemListener() {
           public void itemStateChanged(ItemEvent e) {
             setBoolean(ScriptToken.GRIDON, e);
           }
         });
-    AwtPopupMenu.setMenuItem(coordsCheckBoxMenuItem, 'C', "Coordinates",
+    AwtPopupMenuOld.setMenuItem(coordsCheckBoxMenuItem, 'C', "Coordinates",
         67, InputEvent.CTRL_MASK, new ItemListener() {
           public void itemStateChanged(ItemEvent e) {
             setBoolean(ScriptToken.COORDINATESON, e);
           }
         });
-    AwtPopupMenu.setMenuItem(revPlotCheckBoxMenuItem, 'R', "Reverse Plot",
+    AwtPopupMenuOld.setMenuItem(revPlotCheckBoxMenuItem, 'R', "Reverse Plot",
         82, InputEvent.CTRL_MASK, new ItemListener() {
           public void itemStateChanged(ItemEvent e) {
             setBoolean(ScriptToken.REVERSEPLOT, e);
           }
         });
-    AwtPopupMenu.setMenuItem(scaleXCheckBoxMenuItem, 'X', "X Scale", 88,
+    AwtPopupMenuOld.setMenuItem(scaleXCheckBoxMenuItem, 'X', "X Scale", 88,
         InputEvent.CTRL_MASK, new ItemListener() {
           public void itemStateChanged(ItemEvent e) {
             setBoolean(ScriptToken.XSCALEON, e);
           }
         });
-    AwtPopupMenu.setMenuItem(scaleYCheckBoxMenuItem, 'Y', "Y Scale", 89,
+    AwtPopupMenuOld.setMenuItem(scaleYCheckBoxMenuItem, 'Y', "Y Scale", 89,
         InputEvent.CTRL_MASK, new ItemListener() {
           public void itemStateChanged(ItemEvent e) {
             setBoolean(ScriptToken.YSCALEON, e);
           }
         });
-    AwtPopupMenu.setMenuItem(nextZoomMenuItem, 'N', "Next View", 78,
+    AwtPopupMenuOld.setMenuItem(nextZoomMenuItem, 'N', "Next View", 78,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             viewer.runScript("zoom next");
           }
         });
-    AwtPopupMenu.setMenuItem(prevZoomMenuItem, 'P', "Previous View", 80,
+    AwtPopupMenuOld.setMenuItem(prevZoomMenuItem, 'P', "Previous View", 80,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             viewer.runScript("zoom previous");
           }
         });
-    AwtPopupMenu.setMenuItem(fullZoomMenuItem, 'F', "Full View", 70,
+    AwtPopupMenuOld.setMenuItem(fullZoomMenuItem, 'F', "Full View", 70,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             viewer.runScript("zoom out");
           }
         });
-    AwtPopupMenu.setMenuItem(clearZoomMenuItem, 'C', "Clear Views", 67,
+    AwtPopupMenuOld.setMenuItem(clearZoomMenuItem, 'C', "Clear Views", 67,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             viewer.runScript("zoom clear");
           }
         });
-    AwtPopupMenu.setMenuItem(userZoomMenuItem, 'Z', "Set Zoom...", 90,
+    AwtPopupMenuOld.setMenuItem(userZoomMenuItem, 'Z', "Set Zoom...", 90,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             jsvpPopupMenu.userZoom(mainFrame.viewer.selectedPanel);
           }
         });
-    AwtPopupMenu.setMenuItem(scriptMenuItem, 'T', "Script...", 83,
+    AwtPopupMenuOld.setMenuItem(scriptMenuItem, 'T', "Script...", 83,
         InputEvent.ALT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             jsvpPopupMenu.script(mainFrame.viewer.selectedPanel);
           }
         });
-    AwtPopupMenu.setMenuItem(preferencesMenuItem, 'P', "Preferences...",
+    AwtPopupMenuOld.setMenuItem(preferencesMenuItem, 'P', "Preferences...",
         0, 0, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             showPreferencesDialog();
           }
         });
-    AwtPopupMenu.setMenuItem(contentsMenuItem, 'C', "Contents...", 112, 0,
+    AwtPopupMenuOld.setMenuItem(contentsMenuItem, 'C', "Contents...", 112, 0,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             mainFrame.showNotImplementedOptionPane();
           }
         });
-    AwtPopupMenu.setMenuItem(aboutMenuItem, 'A', "About", 0, 0,
+    AwtPopupMenuOld.setMenuItem(aboutMenuItem, 'A', "About", 0, 0,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             new AboutDialog(mainFrame);
@@ -303,7 +306,7 @@ public class AppMenu extends JMenuBar {
     saveAsJDXMenu.setMnemonic('J');
     exportAsMenu.setMnemonic('E');
 
-    AwtPopupMenu.setMenuItem(toolbarCheckBoxMenuItem, 'T', "Toolbar", 84,
+    AwtPopupMenuOld.setMenuItem(toolbarCheckBoxMenuItem, 'T', "Toolbar", 84,
         InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, new ItemListener() {
           public void itemStateChanged(ItemEvent e) {
             mainFrame.enableToolbar(e.getStateChange() == ItemEvent.SELECTED);
@@ -311,7 +314,7 @@ public class AppMenu extends JMenuBar {
         });
     toolbarCheckBoxMenuItem.setSelected(true);
 
-    AwtPopupMenu.setMenuItem(sidePanelCheckBoxMenuItem, 'S', "Side Panel",
+    AwtPopupMenuOld.setMenuItem(sidePanelCheckBoxMenuItem, 'S', "Side Panel",
         83, InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, new ItemListener() {
           public void itemStateChanged(ItemEvent e) {
             mainFrame.setSplitPane(e.getStateChange() == ItemEvent.SELECTED);
@@ -319,7 +322,7 @@ public class AppMenu extends JMenuBar {
         });
     sidePanelCheckBoxMenuItem.setSelected(true);
 
-    AwtPopupMenu.setMenuItem(statusCheckBoxMenuItem, 'B', "Status Bar",
+    AwtPopupMenuOld.setMenuItem(statusCheckBoxMenuItem, 'B', "Status Bar",
         66, InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, new ItemListener() {
           public void itemStateChanged(ItemEvent e) {
             mainFrame.enableStatus(e.getStateChange() == ItemEvent.SELECTED);
@@ -327,39 +330,39 @@ public class AppMenu extends JMenuBar {
         });
     statusCheckBoxMenuItem.setSelected(true);
     
-    AwtPopupMenu.setMenuItem(spectraMenuItem, 'S', "Spectra...", 83,
+    AwtPopupMenuOld.setMenuItem(spectraMenuItem, 'S', "Spectra...", 83,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            jsvpPopupMenu.overlay(mainFrame.viewer.selectedPanel, AwtPopupMenu.EnumOverlay.DIALOG);
+            jsvpPopupMenu.overlay(mainFrame.viewer.selectedPanel, "DIALOG");
           }
         });
-    AwtPopupMenu.setMenuItem(overlayStackOffsetYMenuItem, 'y', "Overlay Offset...", 0,
+    AwtPopupMenuOld.setMenuItem(overlayStackOffsetYMenuItem, 'y', "Overlay Offset...", 0,
         0, new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            jsvpPopupMenu.overlay(mainFrame.viewer.selectedPanel, EnumOverlay.OFFSETY);
-          }
+					public void actionPerformed(ActionEvent e) {
+						jsvpPopupMenu.overlay(mainFrame.viewer.selectedPanel, "OFFSETY");
+					}
         });
-    AwtPopupMenu.setMenuItem(sourceMenuItem, 'S', "Source ...", 83,
+    AwtPopupMenuOld.setMenuItem(sourceMenuItem, 'S', "Source ...", 83,
         InputEvent.CTRL_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             AwtDialogText.showSource(mainFrame);
           }
         });
-    AwtPopupMenu.setMenuItem(propertiesMenuItem, 'P', "Properties", 72,
+    AwtPopupMenuOld.setMenuItem(propertiesMenuItem, 'P', "Properties", 72,
         InputEvent.CTRL_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             viewer.showProperties();
           }
         });
     overlayKeyMenuItem = jsvpPopupMenu.overlayKeyMenuItem;
-    AwtPopupMenu.setMenuItem(overlayKeyMenuItem, '\0', "Overlay Key", 0,
+    AwtPopupMenuOld.setMenuItem(overlayKeyMenuItem, '\0', "Overlay Key", 0,
         0, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             mainFrame.toggleOverlayKey();
           }
         });
 
-    AwtPopupMenu.setMenuItem(errorLogMenuItem, '\0', "Error Log ...", 0,
+    AwtPopupMenuOld.setMenuItem(errorLogMenuItem, '\0', "Error Log ...", 0,
         0, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             AwtDialogText.showError(mainFrame);
@@ -429,7 +432,7 @@ public class AppMenu extends JMenuBar {
     optionsMenu.add(sidePanelCheckBoxMenuItem);
     optionsMenu.add(statusCheckBoxMenuItem);
     helpMenu.add(aboutMenuItem);
-    AwtPopupMenu.setMenus(saveAsMenu, saveAsJDXMenu, exportAsMenu,
+    AwtPopupMenuOld.setMenus(saveAsMenu, saveAsJDXMenu, exportAsMenu,
         (new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             mainFrame.exportSpectrumViaMenu(e.getActionCommand());

@@ -293,17 +293,15 @@ public abstract class AwtDialogAnnotation extends AwtDialog implements
 	// ///// unused but required:
 
 	public void windowActivated(WindowEvent arg0) {
-		// TODO Auto-generated method stub
-
+		// n/a
 	}
 
 	public void windowClosed(WindowEvent arg0) {
-		params.done();
+		// n/a
 	}
 
 	public void windowClosing(WindowEvent arg0) {
-		// TODO Auto-generated method stub
-
+		params.done();
 	}
 
 	public void windowDeactivated(WindowEvent arg0) {

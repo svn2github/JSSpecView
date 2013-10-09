@@ -28,7 +28,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import org.jmol.util.JmolList;
 import java.util.Enumeration;
 
 
@@ -43,7 +42,9 @@ import jspecview.api.ScriptInterface;
 import jspecview.common.JSVPanelNode;
 import jspecview.common.JSViewer;
 
+import org.jmol.util.JmolList;
 import org.jmol.util.SB;
+
 
 
 /**
@@ -82,15 +83,10 @@ public class AwtDialogView extends AwtDialog implements WindowListener {
 	public AwtDialogView(JSViewer viewer, Component panel, boolean modal) {
 		super(null, "View/Combine/Close Spectra", modal);
 		this.viewer = viewer;
-		params.disposeOnDone = true;
-		restoreDialogPosition(panel, getPosXY());
+		restoreDialogPosition(panel, posXY);
 		setResizable(true);
 		addWindowListener(this);
 		setup();
-	}
-
-	public int[] getPosXY() {
-		return posXY;
 	}
 
 	private void setup() {
@@ -340,37 +336,30 @@ public class AwtDialogView extends AwtDialog implements WindowListener {
 	}
 
   protected void done() {
+  	saveDialogPosition(posXY);
   	dispose();
 	}
 
 	public void windowActivated(WindowEvent arg0) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void windowClosed(WindowEvent arg0) {
 	}
 
 	public void windowClosing(WindowEvent arg0) {
-		dispose();
+		done();
 	}
 
 	public void windowDeactivated(WindowEvent arg0) {
-		dispose();
 	}
 
 	public void windowDeiconified(WindowEvent arg0) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void windowIconified(WindowEvent arg0) {
-		dispose();
 	}
 
 	public void windowOpened(WindowEvent arg0) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

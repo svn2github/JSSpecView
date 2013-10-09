@@ -8,6 +8,7 @@ import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Hashtable;
 import java.util.Map;
 
 import javax.swing.JButton;
@@ -46,6 +47,8 @@ public class AwtDialogHelper {
 	public AwtDialogHelper set(String thisKey, Map<String, Object> options,
 			JPanel leftPanel, ActionListener eventListener) {
 		this.thisKey = thisKey;
+		if (options == null)
+			options = new Hashtable<String, Object>();
 		this.options = options;
 		this.leftPanel = leftPanel;
 		this.eventListener = eventListener;

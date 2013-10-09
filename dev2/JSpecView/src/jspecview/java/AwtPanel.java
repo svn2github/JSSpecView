@@ -246,7 +246,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
    * @return new panel
    */
   public static AwtPanel getNewPanel(JSViewer viewer, JDXSpectrum spec,
-                                     AwtPopupMenu jsvpPopupMenu) {
+                                     AwtPopupMenuOld jsvpPopupMenu) {
     return new AwtPanel().setOne(viewer, spec, jsvpPopupMenu);
   }
 
@@ -749,6 +749,10 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
 
 	public void showProperties() {
 		AwtDialogText.showProperties(this, pd.getSpectrum());
+	}
+
+	public Object getDisplay() {
+		return this;
 	}
 
 }

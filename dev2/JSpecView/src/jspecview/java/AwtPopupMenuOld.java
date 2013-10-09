@@ -52,12 +52,9 @@ import jspecview.common.Annotation.AType;
  * @author Prof Robert J. Lancashire
  * @see jspecview.api.JSVPanel
  */
-public class AwtPopupMenu extends JPopupMenu implements JSVPopupMenu {
+public class AwtPopupMenuOld extends JPopupMenu implements JSVPopupMenu {
 
   protected boolean isApplet;
-
-  public enum EnumOverlay { DIALOG, OFFSETY }
-  
 
   private static final long serialVersionUID = 1L;
 
@@ -115,11 +112,10 @@ public class AwtPopupMenu extends JPopupMenu implements JSVPopupMenu {
   public JMenuItem spectraMenuItem = new JMenuItem();
   public JMenuItem overlayKeyMenuItem = new JMenuItem();
   
-  public AwtPopupMenu(JSViewer viewer, boolean doInit) {
+  public AwtPopupMenuOld(JSViewer viewer) {
     super();
     this.viewer = viewer;
-    if (doInit)
-    	jbInit();
+    jbInit();
   }
 
   /**
@@ -203,22 +199,21 @@ public class AwtPopupMenu extends JPopupMenu implements JSVPopupMenu {
   protected void setOverlayItems() {
     spectraMenuItem.setText("Views...");
     spectraMenuItem.addActionListener(new ActionListener() {
-       public void actionPerformed(ActionEvent e) {
-         overlay(thisJsvp, EnumOverlay.DIALOG
-        		 );
-       }
+			public void actionPerformed(ActionEvent e) {
+				overlay(thisJsvp, "DIALOG");
+			}
      });
     overlayStackOffsetMenuItem.setEnabled(false);
     overlayStackOffsetMenuItem.setText("Overlay Offset...");
     overlayStackOffsetMenuItem.addActionListener(new ActionListener() {
        public void actionPerformed(ActionEvent e) {
-         overlay(thisJsvp, EnumOverlay.OFFSETY);
+         overlay(thisJsvp, "OFFSETY");
        }
      });
 	}
 
 	/**
-   * overridded in applet
+   * overridden in applet
    */
   protected void setPopupMenu() {
     add(gridCheckBoxMenuItem);
@@ -269,8 +264,10 @@ public class AwtPopupMenu extends JPopupMenu implements JSVPopupMenu {
     runScript(viewer, script);
   }
 
-  public static void setMenuItem(JMenuItem item, char c, String text,
+  public static JMenuItem setMenuItem(JMenuItem item, char c, String text,
                            int accel, int mask, EventListener el) {
+  	if (item == null)
+  		item = new JMenuItem();
     if (c != '\0')
       item.setMnemonic(c);
     item.setText(text);
@@ -281,6 +278,7 @@ public class AwtPopupMenu extends JPopupMenu implements JSVPopupMenu {
       item.addActionListener((ActionListener) el);
     else if (el instanceof ItemListener)
       item.addItemListener((ItemListener) el);
+    return item;
   }
 
   public void setProcessingMenu(JComponent menu) {
@@ -332,12 +330,10 @@ public class AwtPopupMenu extends JPopupMenu implements JSVPopupMenu {
 
   private PanelData pd;
 
-	public void overlay(JSVPanel jsvp, EnumOverlay overlay) {
-		switch (overlay) {
-		case DIALOG:
+	public void overlay(JSVPanel jsvp, String overlay) {
+		if (overlay.equals("DIALOG")) {
 			viewer.checkOverlay();
-			break;
-		case OFFSETY:
+		} else if (overlay.equals("OFFSETY")) {
 			if (jsvp == null)
 				return;
 			String offset = jsvp.getInput(
@@ -347,10 +343,8 @@ public class AwtPopupMenu extends JPopupMenu implements JSVPopupMenu {
 				return;
 			recentStackPercent = offset;
 			runScript(viewer, ScriptToken.STACKOFFSETY + " " + offset);
-			break;
 		}
 	}
-
 
   private int thisX, thisY;
   JSVPanel thisJsvp;
