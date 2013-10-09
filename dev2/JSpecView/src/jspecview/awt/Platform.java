@@ -10,6 +10,8 @@ import java.util.Date;
 
 import javax.swing.JDialog;
 
+import jspecview.common.JSVInterface;
+
 
 import netscape.javascript.JSObject;
 
@@ -40,12 +42,10 @@ public class Platform implements ApiPlatform {
   }
   
   public JmolPopupInterface getMenuPopup(String menuStructure, char type) {
-//    JmolPopupInterface jmolpopup = (JmolPopupInterface) Interface.getOptionInterface(
-//        type == 'j' ? "popup.JmolPopup" : "modelkit.ModelKitPopup");
-//    if (jmolpopup != null)
-//      jmolpopup.jpiInitialize(viewer, menuStructure);
-//    return jmolpopup;
-    return null; // for now
+    JmolPopupInterface jsvpopup = (JmolPopupInterface) JSVInterface.getInterface("jspecview.awt.AwtPopup.java");
+    if (jsvpopup != null)
+      jsvpopup.jpiInitialize(viewer, null);
+    return jsvpopup;
   }
 
   public boolean hasFocus(Object display) {
