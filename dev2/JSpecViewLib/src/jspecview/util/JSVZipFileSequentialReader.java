@@ -81,9 +81,9 @@ public class JSVZipFileSequentialReader extends BufferedReader {
   }
   
   @Override
-  public int read(char[] chars) {
-    int l = Math.min(len - pt, chars.length);
-    data.getChars(0, l, chars, 0);
+  public int read(char[] chars, int chPt, int chLen) {
+    int l = Math.min(len - pt, chLen);
+    data.getChars(0, l, chars, chPt);
     return l;
   }
   
@@ -157,7 +157,7 @@ public class JSVZipFileSequentialReader extends BufferedReader {
         line = new SB();
       if (pt != pt0)
         line.append(data.substring(pt0, pt + (ch == cr ? -1 : 0)));
-      if (ch == cr || zis.available() != 1 || (len = zis.read(buf)) < 0) {
+      if (ch == cr || zis.available() != 1 || (len = zis.read(buf, 0, 1024)) < 0) {
         if (lineCount++ == 0 && startCode != null && line.indexOf(startCode) < 0)
           return null;
        return line.toString();

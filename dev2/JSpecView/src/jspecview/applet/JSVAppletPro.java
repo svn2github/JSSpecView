@@ -122,5 +122,10 @@ public class JSVAppletPro extends JSVApplet {
     //mainFrame.setVisible(false);
     app = app0;
   }
+  
+	public JSVApp getApp() {
+		return app;
+	}
+
 
 }

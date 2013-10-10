@@ -162,5 +162,9 @@ public class G2D implements JSVGraphics {
 		((Graphics2D) g).setStroke(tf ? strokeBold : strokeBasic);
 	}
 
+	public void fillBackground(Object g, JSVColor bgcolor) {
+		// not necessary
+	}
+
 
 }

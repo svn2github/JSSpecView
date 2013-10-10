@@ -151,7 +151,7 @@ public class FileReader {
         br = JSVFileManager.getBufferedReaderFromName(filePath, appletDocumentBase, "##TITLE");
       br.mark(400);
       char[] chs = new char[400];
-      br.read(chs);
+      br.read(chs, 0, 400);
       br.reset();
       String header = new String(chs);
       int pt1 = header.indexOf('#');

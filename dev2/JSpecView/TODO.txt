@@ -16,6 +16,12 @@ in preparation for JavaScript version (add to top):
 -- 10/10/2013 BH
 Added g2d and g2djs packages
 Moved all graphics writing code to g2d.G2D and g2djs.G2D
+new InputStreamReader(stream) ---> new InputStreamReader(stream, "UTF-8")
+new GZIPInputStream(bis) ---> new GZIPInputStream(bis, 512)
+new URL(urlString) ---> new URL((URL) null, urlString, null);
+URLConnection.getContentLength() is not defined -- needs work in JSVFileManager
+BufferedInputStream.read(bytes) ---> BufferedInputStream.read(bytes, 0, bytes.length) 
+subclassed BufferedReader.read(char[] chars) --> BufferedReader.read(char[] chars, pt, len)
 
 -- 10/9/2013 BH
 Preliminary JsPanel; all AWT fully isolated; filling in of JsPanel will pretty much do it.

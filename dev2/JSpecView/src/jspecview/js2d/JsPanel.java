@@ -55,7 +55,6 @@ import jspecview.common.PrintLayout;
 import jspecview.common.ScriptToken;
 import jspecview.common.Annotation.AType;
 import jspecview.export.Exporter;
-import jspecview.java.AwtDialogAnnotation;
 import jspecview.util.JSVColor;
 
 
@@ -165,7 +164,8 @@ public class JsPanel implements JSVPanel {
   }
   
 	public AnnotationDialog getDialog(AType type, JDXSpectrum spec) {
-		return AwtDialogAnnotation.get(type, spec, viewer);
+		return null;
+		//return AwtDialogAnnotation.get(type, spec, viewer);
 	}
 
 	///// threading and focus

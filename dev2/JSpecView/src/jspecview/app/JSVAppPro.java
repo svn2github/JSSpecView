@@ -42,7 +42,6 @@ package jspecview.app;
 import java.util.Properties;
 
 import jspecview.api.AppletFrame;
-import jspecview.applet.JSVAppletPro;
 
 import org.jmol.api.JSVInterface;
 
@@ -73,12 +72,12 @@ public class JSVAppPro extends JSVApp implements
 //  }
 
   public void exitJSpecView(boolean withDialog, Object frame) {
-    ((JSVAppletPro) appletFrame).doExitJmol();
+    appletFrame.doExitJmol();
   }
 
   @Override
   public void siProcessCommand(String script) {
-    ((JSVAppletPro) appletFrame).app.runScriptNow(script);
+    appletFrame.getApp().runScriptNow(script);
   }
 
   public void saveProperties(Properties properties) {

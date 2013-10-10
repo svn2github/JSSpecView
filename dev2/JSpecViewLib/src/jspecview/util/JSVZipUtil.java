@@ -172,7 +172,7 @@ public class JSVZipUtil {
     SB sb = new SB();
     byte[] buf = new byte[1024];
     int len;
-    while (zis.available() == 1 && (len = zis.read(buf)) > 0)
+    while (zis.available() == 1 && (len = zis.read(buf, 0, 1024)) > 0)
       sb.append(new String(buf, 0, len));
     return sb.toString();
   }
@@ -185,7 +185,7 @@ public class JSVZipUtil {
     byte[] bytes = new byte[4096];
     int len = 0;
     int totalLen = 0;
-    while (zis.available() == 1 && (len = zis.read(buf)) > 0) {
+    while (zis.available() == 1 && (len = zis.read(buf, 0, 1024)) > 0) {
       totalLen += len;
       if (totalLen >= bytes.length)
         bytes = ArrayUtil.ensureLengthByte(bytes, totalLen * 2);
@@ -201,7 +201,7 @@ public class JSVZipUtil {
     byte[] bytes = new byte[4096];
     int len = 0;
     int totalLen = 0;
-    while ((len = bis.read(buf)) > 0) {
+    while ((len = bis.read(buf, 0, 1024)) > 0) {
       totalLen += len;
       if (totalLen >= bytes.length)
         bytes = ArrayUtil.ensureLengthByte(bytes, totalLen * 2);

@@ -566,5 +566,13 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 		return new G2D();
 	}
 
+	public void doExitJmol() {
+		// n/a
+	}
+
+	public JSVApp getApp() {
+		return app;
+	}
+
 
 }

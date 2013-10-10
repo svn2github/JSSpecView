@@ -530,4 +530,12 @@ public class JSVSAppletJS implements JSVAppletInterface,
 		return new G2D();
 	}
 
+	public void doExitJmol() {
+		// ignore
+	}
+
+	public JSVApp getApp() {
+		return app;
+	}
+
 }

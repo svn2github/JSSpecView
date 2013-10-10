@@ -1000,7 +1000,7 @@ public class JSViewer implements PlatformViewer {
 		} else if (url != null) {
 			try {
 				base = JSVFileManager.appletDocumentBase;
-				URL u = (base == null ? new URL(url) : new URL(base, url));
+				URL u = new URL(base, url, null);
 				filePath = u.toString();
 				si.siSetRecentURL(filePath);
 				fileName = JSVFileManager.getName(url);

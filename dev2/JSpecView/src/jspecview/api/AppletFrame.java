@@ -4,6 +4,7 @@ import java.net.URL;
 
 import org.jmol.util.JmolList;
 
+import jspecview.app.JSVApp;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSViewer;
 import jspecview.common.PrintLayout;
@@ -44,5 +45,9 @@ public interface AppletFrame {
 	JSVApiPlatform getApiPlatform();
 
 	JSVGraphics getG2D();
+
+	void doExitJmol();
+
+	JSVApp getApp();
 
 }
