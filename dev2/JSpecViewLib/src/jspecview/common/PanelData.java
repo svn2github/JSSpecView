@@ -37,6 +37,7 @@
 
 package jspecview.common;
 
+import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
@@ -880,7 +881,7 @@ public class PanelData implements EventManager {
 	}
 
 	public boolean isMouseUp() {
-		return (mouseState == PanelData.Mouse.UP);
+		return (mouseState == Mouse.UP);
 	}
 
 	public int mouseX, mouseY;
@@ -1438,5 +1439,79 @@ public class PanelData implements EventManager {
 		// TODO Auto-generated method stub
 		
 	}
+
+
+  public String export(String type, int n) {
+    if (type == null)
+      type = "XY";
+    if (n < -1 || getNumberOfSpectraInCurrentSet() <= n)
+      return "only " + getNumberOfSpectraInCurrentSet()
+          + " spectra available.";
+    try {
+      JDXSpectrum spec = (n < 0 ? getSpectrum() : getSpectrumAt(n));
+      return jsvp.exportTheSpectrum(type, null, spec, 0, spec.getXYCoords().length - 1);
+    } catch (IOException ioe) {
+      // not possible
+    }
+    return null;
+  }
+
+	public AnnotationDialog showDialog(AType type) {
+		AnnotationData ad = getDialog(type);
+		closeAllDialogsExcept(type);
+		if (ad != null && ad instanceof AnnotationDialog)
+			return ((AnnotationDialog) ad).reEnable();
+		int iSpec = getCurrentSpectrumIndex();
+		if (iSpec < 0) {
+			jsvp.showMessage("To enable " + type + " first select a spectrum by clicking on it.", "" + type);
+			return null;
+		}
+		JDXSpectrum spec = getSpectrum();
+		AnnotationDialog dialog = jsvp.getDialog(type, spec);
+		if (ad != null)
+			dialog.setData(ad);
+		addDialog(iSpec, type, dialog);
+		dialog.reEnable();
+		return dialog;
+	}
+
+	public int print(Object g, double height, double width,
+			double x, double y, double paperHeight, double paperWidth, 
+			boolean isPortrait, int pi) {
+    if (pi == 0) {
+      isPrinting = true;
+      boolean addFilePath = false;
+      if (printGraphPosition.equals("default")) {
+        if (isPortrait) {
+          height = defaultPrintHeight;
+          width = defaultPrintWidth;
+        } else {
+          height = defaultPrintWidth;
+          width = defaultPrintHeight;
+        }
+      } else if (printGraphPosition.equals("fit to page")) {
+        addFilePath = true;
+      } else { // center
+        if (isPortrait) {
+          height = defaultPrintHeight;
+          width = defaultPrintWidth;
+          x = (int) (paperWidth - width) / 2;
+          y = (int) (paperHeight - height) / 2;
+        } else {
+          height = defaultPrintWidth;
+          width = defaultPrintHeight;
+          y = (int) (paperWidth - defaultPrintWidth) / 2;
+          x = (int) (paperHeight - defaultPrintHeight) / 2;
+        }
+      }
+      jsvp.translateScale(g, x, y, 0.1);
+      drawGraph(g, (int) width, (int) height, addFilePath);
+      isPrinting = false;
+      return JSViewer.PAGE_EXISTS;
+    }
+    isPrinting = false;
+    return JSViewer.NO_SUCH_PAGE;
+	}
+
 
 }

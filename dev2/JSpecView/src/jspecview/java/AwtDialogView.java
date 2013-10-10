@@ -199,8 +199,8 @@ public class AwtDialogView extends AwtDialog implements WindowListener {
     cbInsets1 = new Insets(0, 0, 2, 2);
     cbInsets2 = new Insets(0, 20, 2, 2);
 		spectrumPanel = new JPanel(new GridBagLayout());
-    addCheckBoxes(((AwtTree) viewer.spectraTree).getRootNode(), 0, true);
-    addCheckBoxes(((AwtTree) viewer.spectraTree).getRootNode(), 0, false);
+    addCheckBoxes(viewer.spectraTree.getRootNode(), 0, true);
+    addCheckBoxes(viewer.spectraTree.getRootNode(), 0, false);
 	}
 
 	private void addCheckBoxes(JSVTreeNode rootNode, int level, boolean addViews) {
@@ -208,6 +208,7 @@ public class AwtDialogView extends AwtDialog implements WindowListener {
     while (enume.hasMoreElements()) {
       JSVTreeNode treeNode = enume.nextElement();
     	JSVPanelNode node = treeNode.getPanelNode();
+    	System.out.println(node);
     	if (node.isView != addViews)
     		continue;
     	JCheckBox cb = new JCheckBox();

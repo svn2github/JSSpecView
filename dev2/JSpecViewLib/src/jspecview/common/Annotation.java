@@ -167,11 +167,10 @@ public class Annotation extends Coordinate {
 				if (text.charAt(0) == '\"')
 					text = text.substring(1, text.length() - 1);
 			}
-			return jsvp.newAnnotation(x, y, spec, text, color, false, false, 0, 0);
+			return new ColoredAnnotation(x, y).set(spec, text, color, false, false, 0, 0);
 		} catch (Exception e) {
 			return null;
 		}
 	}
-
 
 }

@@ -55,13 +55,13 @@ import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
 
 import jspecview.api.AppletFrame;
-import jspecview.api.JSVAppInterface;
+import jspecview.api.JSVApiPlatform;
 import jspecview.api.JSVAppletInterface;
 import jspecview.api.JSVDialog;
 import jspecview.api.JSVPanel;
 import jspecview.api.JSVPopupMenu;
 import jspecview.app.JSVApp;
-import jspecview.awt.Platform;
+import jspecview.awtjs2d.Platform;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVersion;
 import jspecview.common.JSViewer;
@@ -84,10 +84,10 @@ import jspecview.common.PrintLayout;
  *         2012-07-23 11:10:30 -0500 (Mon, 23 Jul 2012) $
  */
 
-public class JVSAppletJS implements JSVAppletInterface,
+public class JSVSAppletJS implements JSVAppletInterface,
 		AppletFrame {
 
-	protected JSVAppInterface app;
+	protected JSVApp app;
 	private boolean isStandalone = false;
 
 	/**
@@ -97,12 +97,18 @@ public class JVSAppletJS implements JSVAppletInterface,
 	 * 
 	 */
 	public void init() {
-		app = new JSVApp(this, new Platform());
+		app = new JSVApp(this);
+		startCommandWatcher();
+		Logger.info(getAppletInfo());
+	}
+
+	protected void startCommandWatcher() {
+//	  app.viewer.scriptQueue = new JmolList<String>();
 //		commandWatcherThread = new Thread(new CommandWatcher());
 //		commandWatcherThread.setName("CommmandWatcherThread");
 //		commandWatcherThread.start();
-		Logger.info(getAppletInfo());
 	}
+
 
 	private static final long serialVersionUID = 1L;
 
@@ -136,7 +142,7 @@ public class JVSAppletJS implements JSVAppletInterface,
 //			commandWatcherThread.interrupt();
 //			commandWatcherThread = null;
 //		}
-		((JSVApp) app).dispose();
+		app.dispose();
 		app = null;
 	}
 
@@ -296,7 +302,7 @@ public class JVSAppletJS implements JSVAppletInterface,
 	 */
 	@Deprecated
 	public void script(String script) {
-		((JSVApp) app).initParams(script);
+		app.initParams(script);
 	}
 
 	/*
@@ -512,6 +518,10 @@ public class JVSAppletJS implements JSVAppletInterface,
 	public void showWhat(JSViewer viewer, String what) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public JSVApiPlatform getApiPlatform() {
+		return new Platform();
 	}
 
 }

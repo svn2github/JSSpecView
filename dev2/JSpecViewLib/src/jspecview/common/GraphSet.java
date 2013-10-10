@@ -3496,7 +3496,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 				return; // does not exist and "OFF" -- ignore
 			// does not exist, and TOGGLE or ON
 			if (type == AType.PeakList)
-				jsvp.showDialog(type);
+				pd.showDialog(type);
 			return;
 		}
 		if (tfToggle == null) {
@@ -3543,7 +3543,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 				((IntegralData) ad.getData()).autoIntegrate();
 			break;
 		case LIST:
-			jsvp.showDialog(AType.Integration);
+			pd.showDialog(AType.Integration);
 			break;
 		case MARK:
 			if (ad == null) {
@@ -3803,7 +3803,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		AnnotationDialog ad = (dialog instanceof AnnotationDialog ? (AnnotationDialog) dialog : null);
 		boolean isON = (tfToggle == null ? ad == null || !ad.isVisible() : tfToggle.booleanValue());
 		if (isON) {
-			jsvp.showDialog(AType.PeakList);
+			pd.showDialog(AType.PeakList);
 		} else {
 			if (dialog instanceof AnnotationDialog)
 				((AnnotationDialog) dialog).setVisible(false);
@@ -4081,16 +4081,20 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 	
 	private Annotation getAnnotation(double x, double y, String text,
 			boolean isPixels, boolean is2d, int offsetX, int offsetY) {
-		return jsvp.getColoredAnnotation(getSpectrum(), x, y, text, pd.BLACK,
+		return getColoredAnnotation(getSpectrum(), x, y, text, pd.BLACK,
 				isPixels, is2d, offsetX, offsetY);
 	}
 
-  
-	private
-  Annotation getAnnotation(JmolList<String> args, Annotation lastAnnotation) {
-    return jsvp.getNextAnnotation(getSpectrum(), args, lastAnnotation);
-  }
+	private Annotation getColoredAnnotation(JDXSpectrum spectrum, double x,
+			double y, String text, JSVColor c, boolean isPixels, boolean is2d,
+			int offsetX, int offsetY) {
+		return new ColoredAnnotation(x, y).set(spectrum, text, c, isPixels,
+				is2d, offsetX, offsetY);
+	}
 
+	private Annotation getAnnotation(JmolList<String> args, Annotation lastAnnotation) {
+		return Annotation.getColoredAnnotation(jsvp, getSpectrum(), args, lastAnnotation);
+  }
   
   private void fillBox(Object g, int x0, int y0, int x1, int y1,
                          ScriptToken whatColor) {

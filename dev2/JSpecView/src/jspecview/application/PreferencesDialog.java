@@ -59,12 +59,12 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import jspecview.awt.AwtColor;
+import jspecview.awt.AwtPanel;
+import jspecview.awt.AwtParameters;
 import jspecview.common.ColorParameters;
 import jspecview.common.ScriptToken;
 import jspecview.exception.JSpecViewException;
-import jspecview.java.AwtColor;
-import jspecview.java.AwtPanel;
-import jspecview.java.AwtParameters;
 import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
 import java.awt.Font;

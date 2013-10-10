@@ -37,12 +37,12 @@
 //          call. Changed behaviour to remove integration after reset
 //          view.
 
-package jspecview.applet;
+package jspecview.app;
 
 import java.util.Properties;
 
-import jspecview.app.JSVApp;
-import jspecview.awt.Platform;
+import jspecview.api.AppletFrame;
+import jspecview.applet.JSVAppletPro;
 
 import org.jmol.api.JSVInterface;
 
@@ -53,11 +53,11 @@ import org.jmol.api.JSVInterface;
 public class JSVAppPro extends JSVApp implements
     JSVInterface {
 
-  JSVAppPro(JSVApplet jsvApplet) {
-    super(jsvApplet, new Platform());
-  }
+  public JSVAppPro(AppletFrame appletFrame) {
+		super(appletFrame);
+	}
 
-  @Override
+	@Override
   public boolean isSigned() {
     return true;
   }

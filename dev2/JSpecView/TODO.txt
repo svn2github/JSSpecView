@@ -7,7 +7,7 @@ ___svnRev="$LastChangedRevision$"
 ___version="2.1.0"
 
 
-___JmolVersion="13.3.5_dev_2013.08.29"
+___JmolVersion="13.3.7_dev_2013.10.09"
 
 new feature: show NMR taps into NMRDB directly
  -- for now, application only
@@ -15,6 +15,8 @@ new feature: show NMR taps into NMRDB directly
 in preparation for JavaScript version (add to top):
 
 -- 10/9/2013 BH
+Preliminary JsPanel; all AWT fully isolated; filling in of JsPanel will pretty much do it.
+Added JsTree, JsTreeModel, JsTreeNode, JsTreePath (for testing; now used in Java applet)
 Removed AwtAppletPopupMenu, AwtPopupMenu
 Modified the popupMenus to all work through apiPlatform and JSViewer.runScript();
 Added commands: SHOWERRORS, SHOWKEY, SHOWMENU, SHOWPROPERTIES, SHOWSOURCE

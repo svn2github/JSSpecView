@@ -38,7 +38,9 @@ import java.io.OutputStream;
 
 import javax.print.attribute.standard.MediaSizeName;
 
+import jspecview.api.JSVPanel;
 import jspecview.api.PdfCreatorInterface;
+import jspecview.awt.AwtPanel;
 import jspecview.common.PrintLayout;
 
 public class AwtPdfCreator implements PdfCreatorInterface {
@@ -47,7 +49,7 @@ public class AwtPdfCreator implements PdfCreatorInterface {
    // for Class.forName  
   }
 
-	public void createPdfDocument(AwtPanel awtPanel, PrintLayout pl, OutputStream os) {
+	public void createPdfDocument(JSVPanel panel, PrintLayout pl, OutputStream os) {
   	boolean isLandscape = pl.layout.equals("landscape");
     Document document = new Document(isLandscape ? PageSize.LETTER.rotate() : PageSize.LETTER);
     Dimension d = getDimension(pl.paper);
@@ -68,11 +70,11 @@ public class AwtPdfCreator implements PdfCreatorInterface {
       g2.setStroke(new BasicStroke(0.1f));
       tp.setWidth(w);
       tp.setHeight(h);
-      awtPanel.print(g2, pf, 0);
+      ((AwtPanel) panel).print(g2, pf, 0);
       g2.dispose();
       cb.addTemplate(tp, 0, 0);
     } catch (Exception e) {
-      awtPanel.showMessage(e.getMessage(), "PDF Creation Error");
+      panel.showMessage(e.getMessage(), "PDF Creation Error");
     }
     document.close();
 	}

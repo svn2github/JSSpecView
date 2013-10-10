@@ -38,7 +38,9 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import jspecview.api.AnnotationData;
 import jspecview.api.AnnotationDialog;
+import jspecview.awt.AwtParameters;
 import jspecview.common.Coordinate;
 import jspecview.common.DialogParams;
 import jspecview.common.JDXSpectrum;
@@ -290,6 +292,15 @@ public abstract class AwtDialogAnnotation extends AwtDialog implements
 		params.tableCellSelect(iRow, iCol);
 	}
 
+	public AnnotationDialog reEnable() {
+		params.reEnable();
+		return this;
+	}
+	
+	public void setData(AnnotationData data) {
+		params.setData(data);
+	}
+	
 	// ///// unused but required:
 
 	public void windowActivated(WindowEvent arg0) {
@@ -318,6 +329,20 @@ public abstract class AwtDialogAnnotation extends AwtDialog implements
 
 	public void windowOpened(WindowEvent arg0) {
 		// n/a
+	}
+
+	public static AnnotationDialog get(AType type, JDXSpectrum spec,
+			JSViewer viewer) {
+		switch (type) {
+		case Integration:
+			return new AwtDialogIntegrals("Integration for " + spec, viewer, spec);
+		case Measurements:
+			return new AwtDialogMeasurements("Measurements for " + spec, viewer, spec);
+		case PeakList:
+			return new AwtDialogPeakList("Peak List for " + spec, viewer, spec);
+		default:
+			return null;
+		}
 	}
 
 }

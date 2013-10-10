@@ -1,12 +1,11 @@
 package jspecview.api;
 
+import java.io.IOException;
 import java.io.OutputStream;
 
 import org.jmol.api.ApiPlatform;
 import org.jmol.util.JmolFont;
-import org.jmol.util.JmolList;
 
-import jspecview.common.Annotation;
 import jspecview.common.GraphSet;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.PanelData;
@@ -32,7 +31,6 @@ public interface JSVPanel extends JSVViewPanel {
 
   void setToolTipText(String s);
   void setupPlatform();
-	AnnotationDialog showDialog(AType type);
 	void showMessage(String msg, String title);
 
 	ApiPlatform getApiPlatform();
@@ -47,16 +45,6 @@ public interface JSVPanel extends JSVViewPanel {
 	JSVColor getColor3(int red, int green, int blue);
 	
 	void draw2DImage(Object og, Object image2D, int destX, int destY, int destWidth, int destHeight, int srcX0, int srcY0, int srcX1, int srcY1);
-
-	Annotation getColoredAnnotation(JDXSpectrum spectrum, double x,
-			double y, String text, JSVColor bLACK, boolean isPixels, boolean is2d,
-			int offsetX, int offsetY);
-
-	Annotation getNextAnnotation(JDXSpectrum spectrum, JmolList<String> args, Annotation lastAnnotation);
-
-	Annotation newAnnotation(double x, double y,
-			JDXSpectrum spec, String text, JSVColor color, boolean isPixels, boolean is2D,
-			int offsetX, int offsetY);
 
 	Object newImage(int width, int height, int[] buffer);
 
@@ -90,12 +78,15 @@ public interface JSVPanel extends JSVViewPanel {
   int getOptionFromDialog(Object frame, String[] items,
 			String dialogName, String labelName);
 
-	Object[][] getOverlayLegendData();
-
   void saveImage(String type, Object file);
 
 	public void printPanel(PrintLayout pl, OutputStream os, String printJobTitle);
 
-	public String export(String type, int n);
+	public String exportTheSpectrum(String type, String path, JDXSpectrum spec,
+			int startIndex, int endIndex) throws IOException;
+
+	public AnnotationDialog getDialog(AType type, JDXSpectrum spec);
+
+	public void translateScale(Object g, double x, double y, double scale);
 
 }

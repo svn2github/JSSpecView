@@ -52,6 +52,10 @@ public class JSViewer implements PlatformViewer {
 	public final static int FILE_OPEN_NO_DATA = -4;
 	public static final int OVERLAY_DIALOG = -1;
 	public static final int OVERLAY_OFFSET = 99;
+	public static final int PORTRAIT = 1; // Printable
+	public static final int PAGE_EXISTS = 0;
+	public static final int NO_SUCH_PAGE = 1;
+
 
 	private static String testScript = "<PeakData  index=\"1\" title=\"\" model=\"~1.1\" type=\"1HNMR\" xMin=\"3.2915\" xMax=\"3.2965\" atoms=\"15,16,17,18,19,20\" multiplicity=\"\" integral=\"1\"> src=\"JPECVIEW\" file=\"http://SIMULATION/$caffeine\"";
 
@@ -121,7 +125,7 @@ public class JSViewer implements PlatformViewer {
 					--nErrorsLeft;
 					break;
 				default:
-					parameters.set(selectedPanel, st, value);
+					parameters.set(selectedPanel.getPanelData(), st, value);
 					si.siUpdateBoolean(st, Parameters.isTrue(value));
 					break;
 				case PEAKCALLBACKFUNCTIONNAME:
@@ -1249,6 +1253,8 @@ public class JSViewer implements PlatformViewer {
 		}
 		if (node.isLeaf()) {
 			si.siSetNode(node.getPanelNode(), true);
+		} else {
+			System.out.println("not a leaf");
 		}
 		si.siSetCurrentSource(node.getPanelNode().source);
 	}

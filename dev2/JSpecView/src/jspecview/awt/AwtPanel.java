@@ -35,7 +35,7 @@
 //					draw integration ratio annotations
 // 03-06-2012 rmh - Full overhaul; code simplification; added support for Jcamp 6 nD spectra
 
-package jspecview.java;
+package jspecview.awt;
 
 import jspecview.util.JSVColor;
 
@@ -54,7 +54,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
 import java.awt.print.PageFormat;
-import java.awt.print.Paper;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
@@ -87,13 +86,10 @@ import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
 import org.jmol.util.Txt;
 
-import jspecview.api.AnnotationData;
 import jspecview.api.AnnotationDialog;
 import jspecview.api.JSVApiPlatform;
 import jspecview.api.JSVPanel;
 import jspecview.api.PdfCreatorInterface;
-import jspecview.common.Annotation;
-import jspecview.common.ColoredAnnotation;
 import jspecview.common.GraphSet;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVInterface;
@@ -104,6 +100,7 @@ import jspecview.common.PrintLayout;
 import jspecview.common.ScriptToken;
 import jspecview.common.Annotation.AType;
 import jspecview.export.Exporter;
+import jspecview.java.AwtDialogAnnotation;
 
 /**
  * JSVPanel class represents a View combining one or more GraphSets, each with one or more JDXSpectra.
@@ -118,7 +115,7 @@ import jspecview.export.Exporter;
 public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManager {
 //, MouseListener,  MouseMotionListener, KeyListener
   private static final long serialVersionUID = 1L;
-
+  
   @Override
   public void finalize() {
     Logger.info("JSVPanel " + this + " finalized");
@@ -290,26 +287,6 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
     mouse = apiPlatform.getMouseManager(this);
   }
 
-  public String export(String type, int n) {
-    if (type == null)
-      type = "XY";
-    if (n < -1 || pd.getNumberOfSpectraInCurrentSet() <= n)
-      return "only " + pd.getNumberOfSpectraInCurrentSet()
-          + " spectra available.";
-    try {
-      JDXSpectrum spec = (n < 0 ? pd.getSpectrum() : pd.getSpectrumAt(n));
-      return Exporter.exportTheSpectrum(type, null, spec, 0, spec.getXYCoords().length - 1);
-    } catch (IOException ioe) {
-      // not possible
-    }
-    return null;
-  }
-  
-  @Override
-  public String toString() {
-    return pd.getSpectrumAt(0).toString();
-  }
-
   public String getInput(String message, String title, String sval) {
     String ret = (String) JOptionPane.showInputDialog(this, message, title,
         JOptionPane.QUESTION_MESSAGE, null, null, sval);
@@ -322,40 +299,6 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
 		JOptionPane.showMessageDialog(this, msg, title, (msg.startsWith("<html>") ? JOptionPane.INFORMATION_MESSAGE 
 				: JOptionPane.PLAIN_MESSAGE));	
 		getFocusNow(true);
-	}
-
-	public AnnotationDialog showDialog(AType type) {
-		AwtDialogAnnotation dialog = null; 
-		AnnotationData ad = pd.getDialog(type);
-		pd.closeAllDialogsExcept(type);
-		if (ad != null && ad instanceof AwtDialogAnnotation) {
-			((AwtDialogAnnotation) ad).params.reEnable();
-			return (AnnotationDialog) ad;
-		}
-		
-		int iSpec = pd.getCurrentSpectrumIndex();
-		if (iSpec < 0) {
-			showMessage("To enable " + type + " first select a spectrum by clicking on it.", "" + type);
-			return null;
-		}
-		JDXSpectrum spec = pd.getSpectrum();
-		switch (type) {
-		case Integration:
-			dialog = new AwtDialogIntegrals("Integration for " + spec, viewer, spec);
-			break;
-		case Measurements:
-			dialog = new AwtDialogMeasurements("Measurements for " + spec, viewer, spec);
-			break;
-		case PeakList:
-			dialog = new AwtDialogPeakList("Peak List for " + spec, viewer, spec);
-			break;
-		case NONE:
-		}
-		if (ad != null)
-			dialog.params.setData(ad);
-		pd.addDialog(iSpec, type, dialog);
-		dialog.params.reEnable();
-		return dialog;
 	}
 
 	public void getFocusNow(boolean asThread) {
@@ -431,10 +374,6 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
 	public void setGraphicsFont(Object g, JmolFont font) {
 		((Graphics) g).setFont((Font) font.font);
 	}
-
-  public void setPlotColors(JSVColor[] colors) {
-  	pd.setPlotColors(colors);
-  }
 
   /*----------------- METHODS IN INTERFACE Printable ---------------------- */
 
@@ -517,78 +456,15 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
    * @throws PrinterException
    */
   public int print(Graphics g, PageFormat pf, int pi) throws PrinterException {
-    if (pi == 0) {
-      Graphics2D g2D = (Graphics2D) g;
-      pd.isPrinting = true;
-
-      double height, width;
-      boolean addFilePath = false;
-      if (pd.printGraphPosition.equals("default")) {
-        g2D.translate(pf.getImageableX(), pf.getImageableY());
-        if (pf.getOrientation() == PageFormat.PORTRAIT) {
-          height = PanelData.defaultPrintHeight;
-          width = PanelData.defaultPrintWidth;
-        } else {
-          height = PanelData.defaultPrintWidth;
-          width = PanelData.defaultPrintHeight;
-        }
-      } else if (pd.printGraphPosition.equals("fit to page")) {
-        g2D.translate(pf.getImageableX(), pf.getImageableY());
-        addFilePath = true;
-        height = pf.getImageableHeight();
-        width = pf.getImageableWidth();
-      } else { // center
-        Paper paper = pf.getPaper();
-        double paperHeight = paper.getHeight();
-        double paperWidth = paper.getWidth();
-        int x, y;
-
-        if (pf.getOrientation() == PageFormat.PORTRAIT) {
-          height = PanelData.defaultPrintHeight;
-          width = PanelData.defaultPrintWidth;
-          x = (int) (paperWidth - width) / 2;
-          y = (int) (paperHeight - height) / 2;
-        } else {
-          height = PanelData.defaultPrintWidth;
-          width = PanelData.defaultPrintHeight;
-          y = (int) (paperWidth - PanelData.defaultPrintWidth) / 2;
-          x = (int) (paperHeight - PanelData.defaultPrintHeight) / 2;
-        }
-        g2D.translate(x, y);
-      }
-
-      g2D.scale(0.1, 0.1); // high resolution vector graphics for PDF
-      pd.drawGraph(g2D, (int) width, (int) height, addFilePath);
-
-      pd.isPrinting = false;
-      return Printable.PAGE_EXISTS;
-    }
-    pd.isPrinting = false;
-    return Printable.NO_SUCH_PAGE;
+  	return pd.print(g, pf.getImageableHeight(), pf.getImageableWidth(), 
+  			pf.getImageableX(), pf.getImageableY(),
+  			pf.getPaper().getHeight(), pf.getWidth(), 
+  			pf.getOrientation() == PageFormat.PORTRAIT, pi);
   }
 
 	public void draw2DImage(Object g, Object image2d, int destX, int destY,
 			int destWidth, int destHeight, int srcX0, int srcY0, int srcX1, int srcY1) {		
 		((Graphics) g).drawImage((Image) image2d, destX, destY, destWidth, destHeight, srcX0, srcY0, srcX1, srcY1, null);
-	}
-
-	public Annotation getColoredAnnotation(JDXSpectrum spectrum, double x,
-			double y, String text, JSVColor c, boolean isPixels, boolean is2d,
-			int offsetX, int offsetY) {
-		return new ColoredAnnotation(x, y).set(spectrum, text, c, isPixels,
-				is2d, offsetX, offsetY);
-	}
-
-	public Annotation getNextAnnotation(JDXSpectrum spectrum,
-			JmolList<String> args, Annotation lastAnnotation) {
-		return Annotation.getColoredAnnotation(this, spectrum, args, lastAnnotation);
-	}
-	
-	public Annotation newAnnotation(double x, double y, JDXSpectrum spec,
-			String text, JSVColor color, boolean isPixels, boolean is2D, int offsetX,
-			int offsetY) {
-		return new ColoredAnnotation(x, y).set(spec, text, color, isPixels,
-				is2D, offsetX, offsetY);
 	}
 
 	public Object newImage(int width, int height, int[] buffer) {
@@ -641,6 +517,10 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
   	((Graphics2D) g).rotate(Math.PI * angle / 180.0, x, y);
   }
 
+	public void translateScale(Object g, double x, double y, double scale) {
+		((Graphics2D) g).translate(x, y);
+		((Graphics2D) g).scale(scale, scale);
+	}
   
 	BasicStroke strokeBasic = new BasicStroke();
   BasicStroke strokeBold = new BasicStroke(2f);
@@ -688,10 +568,6 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
 		return ret[0];
 	}
 
-	public Object[][] getOverlayLegendData() {
-	  return pd.getOverlayLegendData();
-	}
-
 	public void saveImage(String type, Object file) {
     Image image = createImage(getWidth(), getHeight());
     paint(image.getGraphics());
@@ -702,8 +578,19 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable, EventManage
 		}
 	}
 
-	public Object getDisplay() {
-		return this;
+	public AnnotationDialog getDialog(AType type, JDXSpectrum spec) {
+		return AwtDialogAnnotation.get(type, spec, viewer);
 	}
+
+	public String exportTheSpectrum(String type, String path, JDXSpectrum spec,
+			int startIndex, int endIndex) throws IOException {
+		return Exporter.exportTheSpectrum(type, path, spec, startIndex, endIndex);
+	}
+
+  @Override
+  public String toString() {
+    return pd.getSpectrumAt(0).toString();
+  }
+
 
 }

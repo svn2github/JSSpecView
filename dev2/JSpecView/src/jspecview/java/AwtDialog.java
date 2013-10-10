@@ -56,4 +56,5 @@ abstract public class AwtDialog extends JDialog implements JSVDialog {
 			// ignore
 		}
 	}
+	
 }

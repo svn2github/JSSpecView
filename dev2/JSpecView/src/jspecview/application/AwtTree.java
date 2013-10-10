@@ -1,4 +1,4 @@
-package jspecview.java;
+package jspecview.application;
 
 import org.jmol.util.JmolList;
 

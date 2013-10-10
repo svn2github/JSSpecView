@@ -95,10 +95,10 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 		return apiPlatform;
 	}
 
-	public JSVApp(AppletFrame appletFrame, JSVApiPlatform apiPlatform) {
+	public JSVApp(AppletFrame appletFrame) {
 		this.appletFrame = appletFrame;
 		JSVFileManager.setDocumentBase(appletFrame.getDocumentBase());
-		this.apiPlatform = apiPlatform;
+		this.apiPlatform = appletFrame.getApiPlatform();
 		initViewer();
 		init();
 	}
@@ -108,7 +108,6 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 		apiPlatform.setViewer(viewer, null);
 		viewer.panelNodes = new JmolList<JSVPanelNode>();
 		viewer.jsvpPopupMenu = appletPopupMenu; 
-		viewer.scriptQueue = new JmolList<String>();
 		viewer.repaintManager = new RepaintManager(viewer);
 		appletFrame.setPlatformFields(isSigned(), viewer);
 	}
@@ -277,7 +276,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	 * 
 	 */
 	public String exportSpectrum(String type, int n) {
-		return viewer.selectedPanel.export(type, n);
+		return viewer.selectedPanel.getPanelData().export(type, n);
 	}
 
 	public void setFilePath(String tmpFilePath) {

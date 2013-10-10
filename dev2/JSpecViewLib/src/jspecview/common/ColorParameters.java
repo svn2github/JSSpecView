@@ -115,17 +115,17 @@ public abstract class ColorParameters extends Parameters {
     pd.setColorOrFont(ds, null);
  }
 
-	public void set(JSVPanel jsvp, ScriptToken st, String value) {
+	public void set(PanelData pd, ScriptToken st, String value) {
 		Object param = null;
 		switch (st) {
 		default:
-			setP(jsvp, st, value);
+			setP(pd, st, value);
 			return;
 		case PLOTCOLORS:
-			if (jsvp == null)
+			if (pd == null)
 				getPlotColors(value);
 			else
-				jsvp.getPanelData().setPlotColors(getPlotColors(value));
+				pd.setPlotColors(getPlotColors(value));
 			return;
 		case BACKGROUNDCOLOR:
 		case COORDINATESCOLOR:
@@ -145,10 +145,10 @@ public abstract class ColorParameters extends Parameters {
 			param = getFontName(st, value);
 			break;
 		}
-		if (jsvp == null)
+		if (pd == null)
 			return;
 		if (param != null)
-			jsvp.getPanelData().setColorOrFont(this, st);
+			pd.setColorOrFont(this, st);
 	}
 
 //////////////////////////// COLORS /////////////////////////

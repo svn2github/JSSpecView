@@ -3,8 +3,6 @@ package jspecview.common;
 import java.util.Hashtable;
 import java.util.Map;
 
-import jspecview.api.JSVPanel;
-
 public class Parameters {
 
 	public String name;
@@ -54,7 +52,7 @@ public class Parameters {
 				: isTrue(value) ? Boolean.TRUE : Boolean.FALSE);
 	}
 
-	public void setP(JSVPanel jsvp, ScriptToken st, String value) {
+	public void setP(PanelData pd, ScriptToken st, String value) {
 		switch (st) {
 		default:
 			return;
@@ -75,27 +73,27 @@ public class Parameters {
 				setBoolean(st, tfToggle.booleanValue());
 				break;
 			}
-			if (jsvp == null)
+			if (pd == null)
 				return;
-			boolean b = !jsvp.getPanelData().getBoolean(st);
+			boolean b = !pd.getBoolean(st);
 			switch (st) {
 			default:
 				break;
 			case XSCALEON:
 				setBoolean(ScriptToken.XUNITSON, b);
-				jsvp.getPanelData().setBoolean(ScriptToken.XUNITSON, b);
+				pd.setBoolean(ScriptToken.XUNITSON, b);
 				break;
 			case YSCALEON:
 				setBoolean(ScriptToken.YUNITSON, b);
-				jsvp.getPanelData().setBoolean(ScriptToken.YUNITSON, b);
+				pd.setBoolean(ScriptToken.YUNITSON, b);
 				break;
 			}
 			setBoolean(st, b);
 			break;
 		}
-		if (jsvp == null)
+		if (pd == null)
 			return;
-		jsvp.getPanelData().setBoolean(this, st);
+		pd.setBoolean(this, st);
 	}
 	
 	public static boolean isMatch(String match, String key) {

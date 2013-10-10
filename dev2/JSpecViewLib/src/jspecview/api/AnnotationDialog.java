@@ -26,5 +26,8 @@ public abstract interface AnnotationDialog extends AnnotationData {
 	void setTableSelectionEnabled(boolean enabled);
 	void setTableSelectionInterval(int i, int j);
 	void setThreshold(double nan);
-	void showMessage(String msg);
+	void showMessage(String msg);	
+	AnnotationDialog reEnable();
+	void setData(AnnotationData ad);
+
 }

@@ -72,7 +72,7 @@ public class AwtDialogOverlayLegend extends AwtDialog {
 
 	private void initDialog() {
 		AwtDialogTableModel tableModel = new AwtDialogTableModel(new String[] {
-				"No.", "Plot Color", "Title" }, jsvp.getOverlayLegendData(), false);
+				"No.", "Plot Color", "Title" }, jsvp.getPanelData().getOverlayLegendData(), false);
 		JTable table = new JTable(tableModel);
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		ListSelectionModel specSelection = table.getSelectionModel();

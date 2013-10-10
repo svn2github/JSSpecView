@@ -42,7 +42,7 @@ public class AwtDialogIntegrals extends AwtDialogAnnotation {
 	
 	private static int[] posXY = new int[] {Integer.MIN_VALUE, 0};
 	
-	protected AwtDialogIntegrals(String title, JSViewer viewer, JDXSpectrum spec) {
+	public AwtDialogIntegrals(String title, JSViewer viewer, JDXSpectrum spec) {
 		super(title, viewer, spec, AType.Integration);
 	}
 

@@ -67,25 +67,25 @@ import org.jmol.util.Logger;
 import org.jmol.util.Txt;
 
 import jspecview.api.AppletFrame;
-import jspecview.api.JSVAppInterface;
+import jspecview.api.JSVApiPlatform;
 import jspecview.api.JSVAppletInterface;
 import jspecview.api.JSVDialog;
 import jspecview.api.JSVPanel;
 import jspecview.app.JSVApp;
+import jspecview.awt.AwtPanel;
+import jspecview.awt.AwtParameters;
 import jspecview.awt.Platform;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVersion;
 import jspecview.common.JSViewer;
 import jspecview.common.PrintLayout;
+import jspecview.common.SimpleTree;
 import jspecview.java.AwtDialogOverlayLegend;
 import jspecview.java.AwtDialogPrint;
 import jspecview.java.AwtDialogText;
 import jspecview.java.AwtDialogView;
 import jspecview.java.AwtDropTargetListener;
 import jspecview.java.AwtFileHelper;
-import jspecview.java.AwtPanel;
-import jspecview.java.AwtParameters;
-import jspecview.java.AwtTree;
 import jspecview.java.AwtViewPanel;
 
 /**
@@ -111,7 +111,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 
 	protected Thread commandWatcherThread;
 
-	protected JSVAppInterface app;
+	public JSVApp app;
 	private boolean isStandalone = false;
 
 	/**
@@ -122,11 +122,16 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	 */
 	@Override
 	public void init() {
-		app = new JSVApp(this, new Platform());
+		app = new JSVApp(this);
+		startCommandWatcher();
+		Logger.info(getAppletInfo());
+	}
+
+	protected void startCommandWatcher() {
+		app.viewer.scriptQueue = new JmolList<String>();
 		commandWatcherThread = new Thread(new CommandWatcher());
 		commandWatcherThread.setName("CommmandWatcherThread");
 		commandWatcherThread.start();
-		Logger.info(getAppletInfo());
 	}
 
 	private static final long serialVersionUID = 1L;
@@ -162,7 +167,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 			commandWatcherThread.interrupt();
 			commandWatcherThread = null;
 		}
-		((JSVApp) app).dispose();
+		app.dispose();
 		app = null;
 	}
 
@@ -323,7 +328,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	 */
 	@Deprecated
 	public void script(String script) {
-		((JSVApp) app).initParams(script);
+		app.initParams(script);
 	}
 
 	/*
@@ -390,7 +395,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 		if (dtl == null && isSigned)
 			dtl = new AwtDropTargetListener(viewer);
 		viewer.parameters = new AwtParameters("applet");
-		viewer.spectraTree = new AwtTree(viewer);
+		viewer.spectraTree = new SimpleTree(viewer);
 		viewer.fileHelper = new AwtFileHelper(viewer);
 	}
 
@@ -511,7 +516,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 				try {
 					Thread.sleep(commandDelay);
 					if (commandWatcherThread != null) {
-						JmolList<String> q = app.getScriptQueue();
+						JmolList<String> q = app.viewer.scriptQueue;
 						if (q.size() > 0) {
 							String scriptItem = q.remove(0);
 							if (scriptItem != null)
@@ -549,6 +554,10 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 			}
 			AwtDialogText.showSource(null, viewer.currentSource);
 		}
+	}
+
+	public JSVApiPlatform getApiPlatform() {
+		return new Platform();
 	}
 
 

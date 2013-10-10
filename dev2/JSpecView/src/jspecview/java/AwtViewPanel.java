@@ -13,6 +13,7 @@ import org.jmol.util.JmolList;
 import jspecview.api.JSVMainPanel;
 import jspecview.api.JSVPanel;
 import jspecview.api.JSVViewPanel;
+import jspecview.awt.AwtPanel;
 import jspecview.common.JSVPanelNode;
 import jspecview.common.Annotation.AType;
 

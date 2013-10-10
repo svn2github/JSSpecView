@@ -37,13 +37,12 @@
 //					call. Changed behaviour to remove integration after reset
 //					view.
 
-package jspecview.applet;
+package jspecview.appletjs;
 
 import org.jmol.util.Logger;
 
 import jspecview.app.JSVApp;
 import jspecview.app.JSVAppPro;
-//import jspecview.application.MainFrame;
 
 /**
  * A signed applet that has an Advanced... menu item that pulls up a MainFrame
@@ -51,7 +50,7 @@ import jspecview.app.JSVAppPro;
  * @author Bob Hanson St. Olaf College hansonr@stolaf.edu
  */
 
-public class JSVAppletPro extends JSVApplet {
+public class JSVAppletProJS extends JSVSAppletJS {
 
   /*  class interactions:
    * 
@@ -74,7 +73,6 @@ public class JSVAppletPro extends JSVApplet {
 
   private static final long serialVersionUID = 1L;
 
-  //private MainFrame mainFrame;
   private JSVApp app0;
   
   @Override

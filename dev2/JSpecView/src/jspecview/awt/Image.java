@@ -46,7 +46,6 @@ import java.net.URL;
 
 import jspecview.util.JSVEscape;
 
-import jspecview.java.AwtColor;
 
 import org.jmol.api.PlatformViewer;
 import org.jmol.util.JmolFont;

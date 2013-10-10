@@ -41,4 +41,6 @@ public interface AppletFrame {
 
 	void showWhat(JSViewer viewer, String what);
 
+	JSVApiPlatform getApiPlatform();
+
 }
