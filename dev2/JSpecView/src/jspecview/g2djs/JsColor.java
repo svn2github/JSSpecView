@@ -1,4 +1,4 @@
-package jspecview.js2d;
+package jspecview.g2djs;
 
 import jspecview.util.JSVColor;
 import jspecview.util.JSVColorUtil;

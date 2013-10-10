@@ -1,4 +1,4 @@
-package jspecview.awt;
+package jspecview.g2d;
 
 import java.awt.Color;
 

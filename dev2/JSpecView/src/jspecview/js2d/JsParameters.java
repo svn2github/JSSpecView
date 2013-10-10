@@ -3,6 +3,7 @@ package jspecview.js2d;
 import jspecview.util.JSVColor;
 
 import jspecview.common.ColorParameters;
+import jspecview.g2djs.JsColor;
 
 public class JsParameters extends ColorParameters {
 

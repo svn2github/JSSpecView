@@ -44,6 +44,7 @@ import java.awt.image.Raster;
 import java.awt.image.SinglePixelPackedSampleModel;
 import java.net.URL;
 
+import jspecview.g2d.AwtColor;
 import jspecview.util.JSVEscape;
 
 

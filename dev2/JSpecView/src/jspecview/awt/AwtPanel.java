@@ -100,6 +100,7 @@ import jspecview.common.PrintLayout;
 import jspecview.common.ScriptToken;
 import jspecview.common.Annotation.AType;
 import jspecview.export.Exporter;
+import jspecview.g2d.AwtColor;
 import jspecview.java.AwtDialogAnnotation;
 
 /**

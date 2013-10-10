@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import jspecview.common.ColorParameters;
+import jspecview.g2d.AwtColor;
 
 public class AwtParameters extends ColorParameters {
 
