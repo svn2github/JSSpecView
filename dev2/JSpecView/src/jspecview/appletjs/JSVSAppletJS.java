@@ -58,6 +58,7 @@ import jspecview.api.AppletFrame;
 import jspecview.api.JSVApiPlatform;
 import jspecview.api.JSVAppletInterface;
 import jspecview.api.JSVDialog;
+import jspecview.api.JSVGraphics;
 import jspecview.api.JSVPanel;
 import jspecview.api.JSVPopupMenu;
 import jspecview.app.JSVApp;
@@ -66,6 +67,7 @@ import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVersion;
 import jspecview.common.JSViewer;
 import jspecview.common.PrintLayout;
+import jspecview.g2djs.G2D;
 /**
  * 
  * Entry point for the web.
@@ -522,6 +524,10 @@ public class JSVSAppletJS implements JSVAppletInterface,
 
 	public JSVApiPlatform getApiPlatform() {
 		return new Platform();
+	}
+
+	public JSVGraphics getG2D() {
+		return new G2D();
 	}
 
 }

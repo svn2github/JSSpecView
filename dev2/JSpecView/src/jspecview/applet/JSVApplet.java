@@ -70,6 +70,7 @@ import jspecview.api.AppletFrame;
 import jspecview.api.JSVApiPlatform;
 import jspecview.api.JSVAppletInterface;
 import jspecview.api.JSVDialog;
+import jspecview.api.JSVGraphics;
 import jspecview.api.JSVPanel;
 import jspecview.app.JSVApp;
 import jspecview.awt.AwtPanel;
@@ -80,6 +81,7 @@ import jspecview.common.JSVersion;
 import jspecview.common.JSViewer;
 import jspecview.common.PrintLayout;
 import jspecview.common.SimpleTree;
+import jspecview.g2d.G2D;
 import jspecview.java.AwtDialogOverlayLegend;
 import jspecview.java.AwtDialogPrint;
 import jspecview.java.AwtDialogText;
@@ -493,7 +495,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 
 	public JSVPanel getJSVPanel(JSViewer viewer, JmolList<JDXSpectrum> specs,
 			int initialStartIndex, int initialEndIndex) {
-		return AwtPanel.getAwtPanel(viewer, specs, initialStartIndex,
+		return AwtPanel.getPanelMany(viewer, specs, initialStartIndex,
 				initialEndIndex);
 	}
 
@@ -558,6 +560,10 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 
 	public JSVApiPlatform getApiPlatform() {
 		return new Platform();
+	}
+
+	public JSVGraphics getG2D() {
+		return new G2D();
 	}
 
 

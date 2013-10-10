@@ -20,6 +20,7 @@ import org.jmol.util.Txt;
 
 import jspecview.api.JSVDialog;
 import jspecview.api.JSVFileHelper;
+import jspecview.api.JSVGraphics;
 import jspecview.api.JSVMainPanel;
 import jspecview.api.JSVPanel;
 import jspecview.api.JSVPopupMenu;
@@ -62,8 +63,9 @@ public class JSViewer implements PlatformViewer {
 	private final static int NLEVEL_MAX = 100;
 
 
-	public ScriptInterface si;
-	public JSVTree spectraTree;
+	public ScriptInterface        si;
+	public JSVGraphics            g2d;
+	public JSVTree                spectraTree;
 	public JDXSource              currentSource;
   public JmolList<JSVPanelNode> panelNodes;  
 	public ColorParameters        parameters;
@@ -89,12 +91,14 @@ public class JSViewer implements PlatformViewer {
 	 * @param si 
 	 * @param isApplet  
 	 * @param isJS 
+	 * @param g2d 
 	 */
-	public JSViewer(ScriptInterface si, boolean isApplet, boolean isJS) {
+	public JSViewer(ScriptInterface si, boolean isApplet, boolean isJS, JSVGraphics g2d) {
 		this.si = si;
 		this.isApplet = isApplet;
 		this.isJS = isApplet && isJS;
 		this.isSigned = si.isSigned();
+		this.g2d = g2d;
 	}
 
 	public boolean runScriptNow(String script) {
@@ -1354,4 +1358,5 @@ public class JSViewer implements PlatformViewer {
 		if (jsvpPopupMenu != null)
 			jsvpPopupMenu.jpiShow(x, y);
 	}
+
 }

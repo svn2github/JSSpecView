@@ -104,7 +104,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	}
 
 	private void initViewer() {
-		viewer = new JSViewer(this, true, false);
+		viewer = new JSViewer(this, true, false, appletFrame.getG2D());
 		apiPlatform.setViewer(viewer, null);
 		viewer.panelNodes = new JmolList<JSVPanelNode>();
 		viewer.jsvpPopupMenu = appletPopupMenu; 

@@ -45,6 +45,7 @@ import java.util.Map.Entry;
 
 import jspecview.api.AnnotationData;
 import jspecview.api.AnnotationDialog;
+import jspecview.api.JSVGraphics;
 import jspecview.api.JSVPanel;
 import jspecview.api.PanelListener;
 import jspecview.common.Annotation.AType;
@@ -71,11 +72,17 @@ import org.jmol.util.Logger;
 
 public class PanelData implements EventManager {
 
-	public PanelData(JSVPanel panel) {
+	JSVGraphics g2d;
+	private JSViewer viewer;
+
+	public PanelData(JSVPanel panel, JSViewer viewer) {
+		this.viewer = viewer;
 		this.jsvp = panel;
-		highlightColor = panel.getColor4(255, 0, 0, 200);
-		zoomBoxColor = panel.getColor4(150, 150, 100, 130);
-		zoomBoxColor2 = panel.getColor4(150, 100, 100, 130);
+		this.g2d = viewer.g2d;
+    BLACK = g2d.getColor1(0);
+		highlightColor = g2d.getColor4(255, 0, 0, 200);
+		zoomBoxColor = g2d.getColor4(150, 150, 100, 130);
+		zoomBoxColor2 = g2d.getColor4(150, 100, 100, 130);
 	}
 
 	// Critical fields
@@ -244,10 +251,10 @@ public class PanelData implements EventManager {
 
 	public JmolList<JDXSpectrum> spectra;
 
-	public void initSingleSpectrum(JDXSpectrum spectrum) {
+	public void initOne(JDXSpectrum spectrum) {
 		spectra = new JmolList<JDXSpectrum>();
 		spectra.addLast(spectrum);
-		initJSVPanel(spectra, 0, 0);
+		initMany(spectra, 0, 0);
 	}
 
 	public enum LinkMode {
@@ -264,11 +271,10 @@ public class PanelData implements EventManager {
 		}
 	}
 
-	public void initJSVPanel(JmolList<JDXSpectrum> spectra, int startIndex,
+	public void initMany(JmolList<JDXSpectrum> spectra, int startIndex,
 			int endIndex) {
 		this.startIndex = startIndex;
 		this.endIndex = endIndex;
-		jsvp.setupPlatform();
 		nSpectra = spectra.size();
 		this.spectra = spectra;
 		commonFilePath = spectra.get(0).getFilePath();
@@ -435,16 +441,16 @@ public class PanelData implements EventManager {
 	 * @param y
 	 */
 	public void drawCoordinates(Object g, int top, int x, int y) {
-		jsvp.setGraphicsColor(g, coordinatesColor);
+		g2d.setGraphicsColor(g, coordinatesColor);
 		JmolFont font = setFont(g, jsvp.getWidth(), JmolFont.FONT_STYLE_PLAIN, 12,
 				true);
-		jsvp.drawString(g, coordStr, x - font.stringWidth(coordStr), y);
+		g2d.drawString(g, coordStr, x - font.stringWidth(coordStr), y);
 	}
 
 	public JmolFont setFont(Object g, int width, int style, float size,
 			boolean isLabel) {
 		JmolFont font = getFont(g, width, style, size, isLabel);
-		jsvp.setGraphicsFont(g, font);
+		g2d.setGraphicsFont(g, font);
 		return font;
 	}
 
@@ -455,20 +461,20 @@ public class PanelData implements EventManager {
 			s = s.substring(s.indexOf("?") + 1);
 		s = s.substring(s.lastIndexOf("/") + 1);
 		s = s.substring(s.lastIndexOf("\\") + 1);
-		jsvp.setGraphicsColor(g, BLACK);
+		g2d.setGraphicsColor(g, BLACK);
 		JmolFont font = setFont(g, 1000, JmolFont.FONT_STYLE_PLAIN, 9, true);
 		if (x != left * scalingFactor)
 			x -= font.stringWidth(s);
-		jsvp.drawString(g, s, x, y - font.getHeight());
+		g2d.drawString(g, s, x, y - font.getHeight());
 	}
 
 	public void printVersion(Object g, int pageHeight) {
-		jsvp.setGraphicsColor(g, BLACK);
+		g2d.setGraphicsColor(g, BLACK);
 		JmolFont font = setFont(g, 100, JmolFont.FONT_STYLE_PLAIN, 9, true);
 		String s = jsvp.getApiPlatform().getDateFormat() + " JSpecView "
 				+ JSVersion.VERSION_SHORT;
 		int w = font.stringWidth(s);
-		jsvp.drawString(g, s, (thisWidth - right) * scalingFactor - w, pageHeight
+		g2d.drawString(g, s, (thisWidth - right) * scalingFactor - w, pageHeight
 				* scalingFactor - font.getHeight());
 	}
 
@@ -497,9 +503,9 @@ public class PanelData implements EventManager {
 					|| getBoolean(ScriptToken.TITLEBOLDON) ? JmolFont.FONT_STYLE_BOLD
 					: JmolFont.FONT_STYLE_PLAIN, size, true);
 		}
-		jsvp.setGraphicsColor(g, titleColor);
-		jsvp.setGraphicsFont(g, font);
-		jsvp.drawString(g, title, (isPrinting ? left * scalingFactor : 5),
+		g2d.setGraphicsColor(g, titleColor);
+		g2d.setGraphicsFont(g, font);
+		g2d.drawString(g, title, (isPrinting ? left * scalingFactor : 5),
 				pageHeight - (int) (font.getHeight() * (isPrinting ? 2 : 0.5)));
 	}
 
@@ -643,7 +649,7 @@ public class PanelData implements EventManager {
 	 */
 	public void addHighlight(GraphSet gs, double x1, double x2, JDXSpectrum spec,
 			int r, int g, int b, int a) {
-		(gs == null ? currentGraphSet : gs).addHighlight(x1, x2, spec, jsvp
+		(gs == null ? currentGraphSet : gs).addHighlight(x1, x2, spec, g2d
 				.getColor4(r, g, b, a));
 	}
 
@@ -1113,163 +1119,6 @@ public class PanelData implements EventManager {
 		currentGraphSet.dialogsToFront();
 	}
 
-	public boolean keyPressed(int code, int modifiers) {
-		checkKeyControl(code, true);
-		// should be only in panel region, though.
-		switch (code) {
-		case Event.VK_ESCAPE:
-		case Event.VK_DELETE:
-		case Event.VK_BACK_SPACE: // Mac
-			escapeKeyPressed(code != Event.VK_ESCAPE);
-			isIntegralDrag = false;
-			repaint();
-			return true;
-		}
-		double scaleFactor = 0;
-		boolean doConsume = false;
-		if (modifiers == 0) {
-			switch (code) {
-			case Event.VK_LEFT:
-			case Event.VK_RIGHT:
-				doMouseMoved((code == Event.VK_RIGHT ? ++mouseX : --mouseX), mouseY);
-				repaint();
-				doConsume = true;
-				break;
-			case Event.VK_PAGE_UP:
-			case Event.VK_PAGE_DOWN:
-				scaleFactor = (code == Event.VK_PAGE_UP ? GraphSet.RT2
-						: 1 / GraphSet.RT2);
-				doConsume = true;
-				break;
-			case Event.VK_DOWN:
-			case Event.VK_UP:
-				int dir = (code == Event.VK_DOWN ? -1 : 1);
-				if (getSpectrumAt(0).getSubSpectra() == null) {
-					notifySubSpectrumChange(dir, null);
-				} else {
-					advanceSubSpectrum(dir);
-					repaint();
-				}
-				doConsume = true;
-				break;
-			}
-		} else if (checkMod(code, Event.CTRL_MASK)) {
-			switch (code) {
-			case Event.VK_DOWN:
-			case Event.VK_UP:
-			case 45: // '-'
-			case 61: // '=/+'
-				scaleFactor = (code == 61 || code == Event.VK_UP ? GraphSet.RT2
-						: 1 / GraphSet.RT2);
-				doConsume = true;
-				break;
-			case Event.VK_LEFT:
-			case Event.VK_RIGHT:
-				toPeak(code == Event.VK_RIGHT ? 1 : -1);
-				doConsume = true;
-				break;
-			}
-		}
-		if (scaleFactor != 0) {
-			scaleYBy(scaleFactor);
-			repaint();
-		}
-		return doConsume;
-	}
-
-	public void keyReleased(int keyCode) {
-		checkKeyControl(keyCode, false);
-	}
-
-	public void mouseAction(int mode, long time, int x, int y, int countIgnored,
-			int buttonMods) {
-		switch (mode) {
-		case Event.PRESSED:
-			if (!checkMod(buttonMods, Event.MOUSE_LEFT))
-				return;
-			doMousePressed(x, y);
-			break;
-		case Event.RELEASED:
-			doMouseReleased(x, y, checkMod(buttonMods, Event.MOUSE_LEFT));
-			repaint();
-			break;
-		case Event.DRAGGED:
-			doMouseDragged(x, y);
-			repaint();
-			break;
-		case Event.MOVED:
-			if ((buttonMods & Event.BUTTON_MASK) != 0) {
-				doMouseDragged(x, y);
-				repaint();
-				return;
-			}
-			doMouseMoved(x, y);
-			if (coordStr != null)
-				repaint();
-			break;
-		case Event.CLICKED:
-			ctrlPressed = false;
-			doMouseClicked(x, y, updateControlPressed(buttonMods));
-			break;
-		}
-	}
-
-	public void checkKeyControl(int keyCode, boolean isPressed) {
-		switch (keyCode) {
-		case Event.VK_CONTROL:
-		case Event.VK_META:
-			ctrlPressed = isPressed;
-			break;
-		case Event.VK_SHIFT:
-			shiftPressed = isPressed;
-			break;
-		default:
-			ctrlPressed = updateControlPressed(keyCode);
-			shiftPressed = checkMod(keyCode, Event.SHIFT_MASK);
-		}
-	}
-
-	public boolean updateControlPressed(int mods) {
-		// Mac does not allow Ctrl-drag. The CMD key is indicated using code 157
-		return (ctrlPressed |= checkMod(mods, Event.CTRL_MASK)
-				|| checkMod(mods, Event.MAC_COMMAND));
-	}
-
-	public boolean checkMod(int buttonMods, int mask) {
-		return ((buttonMods & mask) == mask);
-	}
-
-	public void mouseEnterExit(long time, int x, int y, boolean isExit) {
-		if (isExit) {
-			thisWidget = null;
-			isIntegralDrag = false;
-			integralShiftMode = 0;
-		}
-	}
-
-	public boolean keyTyped(int ch, int mods) {
-		switch (ch) {
-		case 'n':
-			if (mods != 0)
-				break;
-			normalizeIntegral();
-			return true;
-		case 26: // ctrl-Z
-			if (mods != Event.CTRL_MASK)
-				break;
-			previousView();
-			repaint();
-			return true;
-		case 25: // ctrl-y
-			if (mods != Event.CTRL_MASK)
-				break;
-			nextView();
-			repaint();
-			return true;
-		}
-		return false;
-	}
-
 	// //////// settable colors //////////
 
 	public JSVColor coordinatesColor;
@@ -1286,13 +1135,14 @@ public class PanelData implements EventManager {
 	public JSVColor zoomBoxColor;
 	public JSVColor zoomBoxColor2;
 	public JSVColor BLACK;
+	public JSVColor bgcolor;
 
 	public void setColor(ScriptToken st, JSVColor color) {
 		if (color != null)
 			options.put(st, JSVColorUtil.colorToHexString(color));
 		switch (st) {
 		case BACKGROUNDCOLOR:
-			jsvp.setBackgroundColor(color);
+			jsvp.setBackgroundColor(bgcolor = color);
 			break;
 		case COORDINATESCOLOR:
 			coordinatesColor = color;
@@ -1504,13 +1354,187 @@ public class PanelData implements EventManager {
           x = (int) (paperHeight - defaultPrintHeight) / 2;
         }
       }
-      jsvp.translateScale(g, x, y, 0.1);
+      g2d.translateScale(g, x, y, 0.1);
       drawGraph(g, (int) width, (int) height, addFilePath);
       isPrinting = false;
       return JSViewer.PAGE_EXISTS;
     }
     isPrinting = false;
     return JSViewer.NO_SUCH_PAGE;
+	}
+
+  /*--------------mouse and keyboard interface -----------------------*/
+
+	public boolean keyPressed(int code, int modifiers) {
+		if (isPrinting)
+			return false;
+		checkKeyControl(code, true);
+		// should be only in panel region, though.
+		switch (code) {
+		case Event.VK_ESCAPE:
+		case Event.VK_DELETE:
+		case Event.VK_BACK_SPACE: // Mac
+			escapeKeyPressed(code != Event.VK_ESCAPE);
+			isIntegralDrag = false;
+			repaint();
+			return true;
+		}
+		double scaleFactor = 0;
+		boolean doConsume = false;
+		if (modifiers == 0) {
+			switch (code) {
+			case Event.VK_LEFT:
+			case Event.VK_RIGHT:
+				doMouseMoved((code == Event.VK_RIGHT ? ++mouseX : --mouseX), mouseY);
+				repaint();
+				doConsume = true;
+				break;
+			case Event.VK_PAGE_UP:
+			case Event.VK_PAGE_DOWN:
+				scaleFactor = (code == Event.VK_PAGE_UP ? GraphSet.RT2
+						: 1 / GraphSet.RT2);
+				doConsume = true;
+				break;
+			case Event.VK_DOWN:
+			case Event.VK_UP:
+				int dir = (code == Event.VK_DOWN ? -1 : 1);
+				if (getSpectrumAt(0).getSubSpectra() == null) {
+					notifySubSpectrumChange(dir, null);
+				} else {
+					advanceSubSpectrum(dir);
+					repaint();
+				}
+				doConsume = true;
+				break;
+			}
+		} else if (checkMod(code, Event.CTRL_MASK)) {
+			switch (code) {
+			case Event.VK_DOWN:
+			case Event.VK_UP:
+			case 45: // '-'
+			case 61: // '=/+'
+				scaleFactor = (code == 61 || code == Event.VK_UP ? GraphSet.RT2
+						: 1 / GraphSet.RT2);
+				doConsume = true;
+				break;
+			case Event.VK_LEFT:
+			case Event.VK_RIGHT:
+				toPeak(code == Event.VK_RIGHT ? 1 : -1);
+				doConsume = true;
+				break;
+			}
+		}
+		if (scaleFactor != 0) {
+			scaleYBy(scaleFactor);
+			repaint();
+		}
+		return doConsume;
+	}
+
+	public void keyReleased(int keyCode) {
+		if (isPrinting)
+			return;
+		checkKeyControl(keyCode, false);
+	}
+
+	public boolean keyTyped(int ch, int mods) {
+		if (isPrinting)
+			return false;
+		switch (ch) {
+		case 'n':
+			if (mods != 0)
+				break;
+			normalizeIntegral();
+			return true;
+		case 26: // ctrl-Z
+			if (mods != Event.CTRL_MASK)
+				break;
+			previousView();
+			repaint();
+			return true;
+		case 25: // ctrl-y
+			if (mods != Event.CTRL_MASK)
+				break;
+			nextView();
+			repaint();
+			return true;
+		}
+		return false;
+	}
+
+	public void mouseAction(int mode, long time, int x, int y, int countIgnored,
+			int buttonMods) {
+		if (isPrinting)
+			return;
+		switch (mode) {
+		case Event.PRESSED:
+			if (!checkMod(buttonMods, Event.MOUSE_LEFT))
+				return;
+			doMousePressed(x, y);
+			break;
+		case Event.RELEASED:
+			doMouseReleased(x, y, checkMod(buttonMods, Event.MOUSE_LEFT));
+			repaint();
+			break;
+		case Event.DRAGGED:
+			doMouseDragged(x, y);
+			repaint();
+			break;
+		case Event.MOVED:
+	    jsvp.getFocusNow(false);
+			if ((buttonMods & Event.BUTTON_MASK) != 0) {
+				doMouseDragged(x, y);
+				repaint();
+				return;
+			}
+			doMouseMoved(x, y);
+			if (coordStr != null)
+				repaint();
+			break;
+		case Event.CLICKED:
+	    if (checkMod(buttonMods, Event.MOUSE_RIGHT)) {
+	    	viewer.showMenu(x, y);
+	      return;
+	    }
+			ctrlPressed = false;
+			doMouseClicked(x, y, updateControlPressed(buttonMods));
+			break;
+		}
+	}
+
+	public boolean checkMod(int buttonMods, int mask) {
+		return ((buttonMods & mask) == mask);
+	}
+
+	public void checkKeyControl(int keyCode, boolean isPressed) {
+		switch (keyCode) {
+		case Event.VK_CONTROL:
+		case Event.VK_META:
+			ctrlPressed = isPressed;
+			break;
+		case Event.VK_SHIFT:
+			shiftPressed = isPressed;
+			break;
+		default:
+			ctrlPressed = updateControlPressed(keyCode);
+			shiftPressed = checkMod(keyCode, Event.SHIFT_MASK);
+		}
+	}
+
+	public boolean updateControlPressed(int mods) {
+		// Mac does not allow Ctrl-drag. The CMD key is indicated using code 157
+		return (ctrlPressed |= checkMod(mods, Event.CTRL_MASK)
+				|| checkMod(mods, Event.MAC_COMMAND));
+	}
+
+	public void mouseEnterExit(long time, int x, int y, boolean isExit) {
+		if (isExit) {
+			thisWidget = null;
+			isIntegralDrag = false;
+			integralShiftMode = 0;
+		} else {
+	    jsvp.getFocusNow(false);
+		}			
 	}
 
 

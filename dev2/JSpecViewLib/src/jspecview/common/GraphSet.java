@@ -14,6 +14,7 @@ import org.jmol.util.Txt;
 
 import jspecview.api.AnnotationData;
 import jspecview.api.AnnotationDialog;
+import jspecview.api.JSVGraphics;
 import jspecview.api.JSVPanel;
 import jspecview.api.XYScaleConverter;
 import jspecview.common.Annotation.AType;
@@ -54,6 +55,7 @@ public class GraphSet implements XYScaleConverter {
   public GraphSet(PanelData pd) {
     this.pd = pd;
     jsvp = pd.jsvp;
+    g2d = pd.g2d;
   }
   
 	/**
@@ -397,7 +399,7 @@ public class GraphSet implements XYScaleConverter {
 
 	private void initGraphSet(int startIndex, int endIndex) {
 		if (veryLightGrey == null)
-			veryLightGrey =jsvp.getColor3(200, 200, 200);
+			veryLightGrey = g2d.getColor3(200, 200, 200);
 		setPlotColors(ColorParameters.defaultPlotColors);
 		xAxisLeftToRight = getSpectrumAt(0).shouldDisplayXAxisIncreasing();
 		setDrawXAxis();
@@ -1561,20 +1563,20 @@ public class GraphSet implements XYScaleConverter {
 			return;
 		}
 		if (ig != null)
-		  jsvp.setStrokeBold(g, true);
+		  g2d.setStrokeBold(g, true);
 		if (Double.isNaN(y0) || pendingMeasurement != null) {
-			jsvp.drawLine(g, xPixelMovedTo, yPixel0, xPixelMovedTo, yPixel1);
+			g2d.drawLine(g, xPixelMovedTo, yPixel0, xPixelMovedTo, yPixel1);
 			if (xPixelMovedTo2 >= 0)
-				jsvp.drawLine(g, xPixelMovedTo2, yPixel0, xPixelMovedTo2, yPixel1);
+				g2d.drawLine(g, xPixelMovedTo2, yPixel0, xPixelMovedTo2, yPixel1);
 			yValueMovedTo = Double.NaN;
 		} else {
 			int y = (ig == null ? toPixelY(yValueMovedTo)
 					: toPixelYint(yValueMovedTo / 100));
 			if (y == fixY(y))
-				jsvp.drawLine(g, xPixelMovedTo, y - 10, xPixelMovedTo, y + 10);
+				g2d.drawLine(g, xPixelMovedTo, y - 10, xPixelMovedTo, y + 10);
 		}
 		if (ig != null)
-			jsvp.setStrokeBold(g, false);
+			g2d.setStrokeBold(g, false);
 	}
 
 	public void setScale(int i) {
@@ -1594,7 +1596,7 @@ public class GraphSet implements XYScaleConverter {
 				.getPeakList() : null);
 		if (list != null && list.size() > 0) {
 			if (piMouseOver != null && piMouseOver.spectrum == spec && pd.isMouseUp()) {
-				jsvp.setGraphicsColor(g, jsvp.getColor3(240, 240, 240)); // very faint gray box
+				g2d.setGraphicsColor(g, g2d.getColor3(240, 240, 240)); // very faint gray box
 				drawPeak(g, piMouseOver, true);
 				spec.setHighlightedPeak(piMouseOver);
 			} else {
@@ -1687,7 +1689,7 @@ public class GraphSet implements XYScaleConverter {
 				continue;
 			if (pw.isPinOrCursor) {
 				setColorFromToken(g, pw.color);
-				jsvp.drawLine(g, pw.xPixel0, pw.yPixel0, pw.xPixel1, pw.yPixel1);
+				g2d.drawLine(g, pw.xPixel0, pw.yPixel0, pw.xPixel1, pw.yPixel1);
 				pw.isVisible = true;
 				if (pw.isPin)
 					drawHandle(g, pw.xPixel0, pw.yPixel0, !pw.isEnabled);
@@ -1821,7 +1823,7 @@ public class GraphSet implements XYScaleConverter {
 				if (fillPeaks
 						&& pendingIntegral.overlaps(point1.getXVal(), point2.getXVal())) {
 					setColorFromToken(g, ScriptToken.INTEGRALPLOTCOLOR);
-					jsvp.drawLine(g, x1, y0, x1, y1);
+					g2d.drawLine(g, x1, y0, x1, y1);
 					setPlotColor(g, iColor);
 					continue;
 				}
@@ -1838,7 +1840,7 @@ public class GraphSet implements XYScaleConverter {
 				}
 				if (pd.isPrinting && !plotOn)
 					continue;
-				jsvp.drawLine(g, x1, y1, x2, y2);
+				g2d.drawLine(g, x1, y1, x2, y2);
 			}
 		} else {
 			for (int i = iFirst; i <= iLast; i++) {
@@ -1852,12 +1854,12 @@ public class GraphSet implements XYScaleConverter {
 				y2 = fixY(yOffset + y2);
 				if (y1 == y2 && (y1 == yPixel0 || y1 == yPixel1))
 					continue;
-				jsvp.drawLine(g, x1, y1, x1, y2);
+				g2d.drawLine(g, x1, y1, x1, y2);
 			}
 			if (getScale().isYZeroOnScale()) {
 				int y = yOffset + toPixelY(getScale().spectrumYRef);
 				if (y == fixY(y))
-					jsvp.drawLine(g, xPixel1, y, xPixel0, y);
+					g2d.drawLine(g, xPixel1, y, xPixel0, y);
 			}
 		}
 	}
@@ -1874,7 +1876,7 @@ public class GraphSet implements XYScaleConverter {
 			boolean addCurrentBox, boolean addSplitBox, boolean drawUpDownArrows) {
 		if (!pd.gridOn || pd.isPrinting) {
 			setColorFromToken(g, ScriptToken.GRIDCOLOR);
-			jsvp.drawRect(g, xPixel0, yPixel0, xPixels, yPixels);
+			g2d.drawRect(g, xPixel0, yPixel0, xPixels, yPixels);
 			if (pd.isPrinting)
 				return;
 		}
@@ -1903,9 +1905,9 @@ public class GraphSet implements XYScaleConverter {
 			int y1 = yPixel00 + 1;
 			int y2 = yPixel11 - 2;
  
-			jsvp.drawLine(g, x1, y1, x2, y1); 
-			jsvp.drawLine(g, x2, y1, x2, y2); 
-			jsvp.drawLine(g, x1, y2, x2, y2); 
+			g2d.drawLine(g, x1, y1, x2, y1); 
+			g2d.drawLine(g, x2, y1, x2, y2); 
+			g2d.drawLine(g, x1, y2, x2, y2); 
 			if (addSplitBox) {
 				fillBox(g, xPixel11 - 20, yPixel00 + 1, xPixel11 - 10, yPixel00 + 11,
 						null);
@@ -1928,20 +1930,20 @@ public class GraphSet implements XYScaleConverter {
 			lastX = getScale().maxXOnScale + getScale().steps[0] / 2;
 			for (double val = getScale().minXOnScale; val < lastX; val += getScale().steps[0]) {
 				int x = toPixelX(val);
-				jsvp.drawLine(g, x, yPixel0, x, yPixel1);
+				g2d.drawLine(g, x, yPixel0, x, yPixel1);
 			}
 		} else {
 			lastX = getScale().maxXOnScale * 1.0001;
 			for (double val = getScale().firstX; val <= lastX; val += getScale().steps[0]) {
 				int x = toPixelX(val);
-				jsvp.drawLine(g, x, yPixel0, x, yPixel1);
+				g2d.drawLine(g, x, yPixel0, x, yPixel1);
 			}
 		}
 		for (double val = getScale().firstY; val < getScale().maxYOnScale
 				+ getScale().steps[1] / 2; val += getScale().steps[1]) {
 			int y = toPixelY(val);
 			if (y == fixY(y))
-				jsvp.drawLine(g, xPixel0, y, xPixel1, y);
+				g2d.drawLine(g, xPixel0, y, xPixel1, y);
 		}
 	}
 
@@ -1959,7 +1961,7 @@ public class GraphSet implements XYScaleConverter {
 
 		setColorFromToken(g, ScriptToken.SCALECOLOR);
 		if (pd.isPrinting)
-			jsvp.drawLine(g, c.getXPixel0(), yPixel1, c.getXPixel0() + c.getXPixels() - 1, yPixel1);
+			g2d.drawLine(g, c.getXPixel0(), yPixel1, c.getXPixel0() + c.getXPixels() - 1, yPixel1);
 		int precision = getScale().precision[0];
 		JmolFont font = pd.setFont(g, c.getXPixels(), FONT_PLAIN, pd.isPrinting ? 10 : 12, false);
 		int y1 = yPixel1;
@@ -2000,10 +2002,10 @@ public class GraphSet implements XYScaleConverter {
 					s = mapX.get(d);
 					if (s == null || x != c.fixX(x))
 						continue;
-					int w = jsvp.getStringWidth(g, s);
+					int w = g2d.getStringWidth(g, s);
 					int n = (x + w / 2 == c.fixX(x + w / 2) ? 2 : 0);
 					if (n > 0)
-						jsvp.drawString(g, s, x - w / n, y2 + h);
+						g2d.drawString(g, s, x - w / n, y2 + h);
 					val += Math.floor(w / maxWidth) * getScale().steps[0];
 					break;
 				}
@@ -2014,7 +2016,7 @@ public class GraphSet implements XYScaleConverter {
 
 	private void drawTick(Object g, int x, int y1, int y2, XYScaleConverter c) {
 		if (x == c.fixX(x))
-			jsvp.drawLine(g, x, y1, x, y2);
+			g2d.drawLine(g, x, y1, x, y2);
 	}
 
 	/**
@@ -2044,7 +2046,7 @@ public class GraphSet implements XYScaleConverter {
 					continue;
 				String s;
 				if (pass == 0)
-					jsvp.drawLine(g, x1, y, x1 - 3 * pd.scalingFactor, y);
+					g2d.drawLine(g, x1, y, x1 - 3 * pd.scalingFactor, y);
 				if (Math.abs(y - yLast) <= h)
 					continue;
 				yLast = y;
@@ -2059,7 +2061,7 @@ public class GraphSet implements XYScaleConverter {
 						continue;
 					if (s.startsWith("0") && s.contains("E"))
 						s = "0";
-					jsvp.drawString(g, s, (x1 - 4 * pd.scalingFactor - jsvp.getStringWidth(g, s)), y + h / 3);
+					g2d.drawString(g, s, (x1 - 4 * pd.scalingFactor - g2d.getStringWidth(g, s)), y + h / 3);
 					break;
 				}
 			}
@@ -2083,8 +2085,8 @@ public class GraphSet implements XYScaleConverter {
 			double vOff) {
 		setColorFromToken(g, ScriptToken.UNITSCOLOR);
 		pd.setFont(g, (imageView == null ? this : imageView).getXPixels(), FONT_ITALIC, 10, false);
-		jsvp.drawString(g, s, (int) (x - jsvp.getStringWidth(g, s) * hOff),
-				(int) (y + jsvp.getFontHeight(g) * vOff));
+		g2d.drawString(g, s, (int) (x - g2d.getStringWidth(g, s) * hOff),
+				(int) (y + g2d.getFontHeight(g) * vOff));
 
 	}
 
@@ -2127,12 +2129,12 @@ public class GraphSet implements XYScaleConverter {
 			for (int i = md.size(); --i >= 0;) {
 				Measurement m = md.get(i);
 				int x = toPixelX(m.getXVal());
-				jsvp.drawLine(g, x, y, x, y + 10 * pd.scalingFactor);
+				g2d.drawLine(g, x, y, x, y + 10 * pd.scalingFactor);
 			}
 			if (isVisible(getDialog(AType.PeakList, iSpec))) {
 				y = toPixelY(((PeakData) md).getThresh());
 				if (y == fixY(y) && !pd.isPrinting)
-					jsvp.drawLine(g, xPixel0, y, xPixel1, y);
+					g2d.drawLine(g, xPixel0, y, xPixel1, y);
 			}
 		}
 	}
@@ -2142,7 +2144,7 @@ public class GraphSet implements XYScaleConverter {
 		if (sdata.length == 0)
 			return;
 		pd.setFont(g, xPixels, FONT_PLAIN, 8, false);
-		int h = jsvp.getFontHeight(g);
+		int h = g2d.getFontHeight(g);
 		int[] xs = new int[data.size()];
 		int[] xs0 = new int[data.size()];
 		int dx = 0;
@@ -2166,17 +2168,17 @@ public class GraphSet implements XYScaleConverter {
 			xs[i] -= dx;
 
 		boolean inverted = spec.isInverted();
-		int y4 = jsvp.getStringWidth(g, "99.9999");
-		int y2 = (sdata[0].length >= 6 ? jsvp.getStringWidth(g, "99.99") : 0);
+		int y4 = g2d.getStringWidth(g, "99.9999");
+		int y2 = (sdata[0].length >= 6 ? g2d.getStringWidth(g, "99.99") : 0);
 		int f = (inverted ? -1 : 1);
 		
 		int y = (inverted ? yPixel1 : yPixel0) + f * (y2 + y4 + s15);
 		for (int i = 0; i < sdata.length; i++) {
-			jsvp.drawLine(g, xs[i], y, xs[i], y + s5 * f);
-			jsvp.drawLine(g, xs[i], y + s5 * f, xs0[i], y + s10 * f);
-			jsvp.drawLine(g, xs0[i], y + s10 * f, xs0[i], y + s15 * f);
+			g2d.drawLine(g, xs[i], y, xs[i], y + s5 * f);
+			g2d.drawLine(g, xs[i], y + s5 * f, xs0[i], y + s10 * f);
+			g2d.drawLine(g, xs0[i], y + s10 * f, xs0[i], y + s15 * f);
 			if (y2 > 0 && sdata[i][4].length() > 0)
-				jsvp.drawLine(g, (xs[i] + xs[i - 1]) / 2, y - y4 + s5,
+				g2d.drawLine(g, (xs[i] + xs[i - 1]) / 2, y - y4 + s5,
 						(xs[i] + xs[i - 1]) / 2, y - y4 - s5);
 		}
 
@@ -2196,9 +2198,9 @@ public class GraphSet implements XYScaleConverter {
 	}
 
 	private void drawStringRotated(Object g, int angle, int x, int y, String s) {
-		jsvp.rotatePlot(g, -angle, x, y);
-		jsvp.drawString(g, s, x, y);
-		jsvp.rotatePlot(g, angle, x, y);
+		g2d.rotatePlot(g, -angle, x, y);
+		g2d.drawString(g, s, x, y);
+		g2d.rotatePlot(g, angle, x, y);
 	}
 
 	// determine whether there are any ratio annotations to draw
@@ -2213,7 +2215,7 @@ public class GraphSet implements XYScaleConverter {
 			int y = (note.isPixels() ? (int) (yPixel0 + 10 * pd.scalingFactor - note.getYVal())
 					: note.is2D ? imageView.toPixelY((int) note.getYVal())
 							: toPixelY(note.getYVal()));
-			jsvp.drawString(g, note.text, x + note.offsetX * pd.scalingFactor, y - note.offsetY * pd.scalingFactor);
+			g2d.drawString(g, note.text, x + note.offsetX * pd.scalingFactor, y - note.offsetY * pd.scalingFactor);
 		}
 	}
 
@@ -2225,8 +2227,8 @@ public class GraphSet implements XYScaleConverter {
 			else
 				pd.setFont(g, xPixels, FONT_BOLD, 12, false);
 			setColorFromToken(g, ScriptToken.INTEGRALPLOTCOLOR);
-			int h = jsvp.getFontHeight(g);
-			jsvp.setStrokeBold(g, true);
+			int h = g2d.getFontHeight(g);
+			g2d.setStrokeBold(g, true);
 			for (int i = integrals.size(); --i >= 0;) {
 				Measurement in = integrals.get(i);
 				if (in.getValue() == 0)
@@ -2238,11 +2240,11 @@ public class GraphSet implements XYScaleConverter {
 					continue;
 
 				if (!pd.isPrinting)
-					jsvp.drawLine(g, x, y1, x, y2);
+					g2d.drawLine(g, x, y1, x, y2);
 				String s = "  " + in.text;
-				jsvp.drawString(g, s, x, (y1 + y2) / 2 + h / 3);
+				g2d.drawString(g, s, x, (y1 + y2) / 2 + h / 3);
 			}
-			jsvp.setStrokeBold(g, false);
+			g2d.setStrokeBold(g, false);
 		}
 		if (iSpec == getFixedSelectedSpectrumIndex())
 			selectedSpectrumIntegrals = integrals;
@@ -2261,7 +2263,7 @@ public class GraphSet implements XYScaleConverter {
 		if (m.text.length() == 0 && m != pendingMeasurement)
 			return;
 		pd.setFont(g, xPixels, FONT_BOLD, 12, false);
-		jsvp.setGraphicsColor(g, (m == pendingMeasurement ? pd
+		g2d.setGraphicsColor(g, (m == pendingMeasurement ? pd
 				.getColor(ScriptToken.HIGHLIGHTCOLOR) : pd.BLACK));
 		int x1 = toPixelX(m.getXVal());
 		int y1 = toPixelY(m.getYVal());
@@ -2271,17 +2273,17 @@ public class GraphSet implements XYScaleConverter {
 		boolean drawString = (Math.abs(x1 - x2) >= 2);
 		boolean drawBaseLine = getScale().isYZeroOnScale() && m.spec.isHNMR();
 		int x = (x1 + x2) / 2;
-		jsvp.setStrokeBold(g, true);
+		g2d.setStrokeBold(g, true);
 		if (drawString)
-			jsvp.drawLine(g, x1, y1, x2, y1);
+			g2d.drawLine(g, x1, y1, x2, y1);
 		if (drawBaseLine)
-			jsvp.drawLine(g, x1 + 1, yPixel1 - 1, x2, yPixel1 - 1);
-		jsvp.setStrokeBold(g, false);
+			g2d.drawLine(g, x1 + 1, yPixel1 - 1, x2, yPixel1 - 1);
+		g2d.setStrokeBold(g, false);
 		if (drawString)
-			jsvp.drawString(g, m.text, x + m.offsetX, y1 - m.offsetY);
+			g2d.drawString(g, m.text, x + m.offsetX, y1 - m.offsetY);
 		if (drawBaseLine) {
-			jsvp.drawLine(g, x1, yPixel1, x1, yPixel1 - 6 * pd.scalingFactor);
-			jsvp.drawLine(g, x2, yPixel1, x2, yPixel1 - 6 * pd.scalingFactor);
+			g2d.drawLine(g, x1, yPixel1, x1, yPixel1 - 6 * pd.scalingFactor);
+			g2d.drawLine(g, x2, yPixel1, x2, yPixel1 - 6 * pd.scalingFactor);
 		}
 	}
 
@@ -3004,7 +3006,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 			JDXSpectrum spec = spectra.get(i);
 			GraphSet graphSet = (linkMode == LinkMode.NONE ? findCompatibleGraphSet(graphSets, spec) : null);
 			if (graphSet == null)
-				graphSets.addLast(graphSet = jsvp.getNewGraphSet());
+				graphSets.addLast(graphSet = new GraphSet(jsvp.getPanelData()));
 			graphSet.addSpec(spec);
 		}
 		setFractionalPositions(pd, graphSets, linkMode);
@@ -3972,6 +3974,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
   private JSVPanel jsvp;
   private Object image2D;
   private JSVColor[] plotColors;
+	private JSVGraphics g2d;
 
   
   private void disposeImage() {
@@ -3988,7 +3991,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
       int red = (int) (Math.random() * 255);
       int green = (int) (Math.random() * 255);
       int blue = (int) (Math.random() * 255);
-      JSVColor randomColor = jsvp.getColor3(red, green, blue);
+      JSVColor randomColor = g2d.getColor3(red, green, blue);
       if (randomColor.getRGB() != 0)
         return randomColor;
     }
@@ -4014,7 +4017,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
   
 	private void setColorFromToken(Object og, ScriptToken whatColor) {
 		if (whatColor != null)
-			jsvp.setGraphicsColor(og,
+			g2d.setGraphicsColor(og,
 					whatColor == ScriptToken.PLOTCOLOR ? plotColors[0] : pd
 							.getColor(whatColor));
 	}
@@ -4035,7 +4038,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
     	c = plotColors[i];
   		break;
   	}
-  	jsvp.setGraphicsColor(og, c);
+  	g2d.setGraphicsColor(og, c);
   }
 
   /////////////// 2D image /////////////////
@@ -4043,7 +4046,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
   
 	private void draw2DImage(Object og) {
     if (imageView != null)
-    	jsvp.draw2DImage(og, image2D, imageView.xPixel0, imageView.yPixel0, // destination 
+    	g2d.draw2DImage(og, image2D, imageView.xPixel0, imageView.yPixel0, // destination 
           imageView.xPixel0 + imageView.xPixels - 1, // destination 
           imageView.yPixel0 + imageView.yPixels - 1, // destination 
           imageView.xView1, imageView.yView1, imageView.xView2, imageView.yView2); // source
@@ -4074,7 +4077,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 			buffer = imageView.adjustView(spec, viewData);
 			imageView.resetView();
 		}
-		image2D = jsvp.newImage(imageView.imageWidth, imageView.imageHeight, buffer);
+		image2D = g2d.newImage(imageView.imageWidth, imageView.imageHeight, buffer);
 		setImageWindow();
 		return true;
 	}
@@ -4093,26 +4096,26 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 	}
 
 	private Annotation getAnnotation(JmolList<String> args, Annotation lastAnnotation) {
-		return Annotation.getColoredAnnotation(jsvp, getSpectrum(), args, lastAnnotation);
+		return Annotation.getColoredAnnotation(g2d, getSpectrum(), args, lastAnnotation);
   }
   
   private void fillBox(Object g, int x0, int y0, int x1, int y1,
                          ScriptToken whatColor) {
     setColorFromToken(g, whatColor);
-    jsvp.fillRect(g, Math.min(x0, x1), Math.min(y0, y1), Math.abs(x0
+    g2d.fillRect(g, Math.min(x0, x1), Math.min(y0, y1), Math.abs(x0
 				    - x1), Math.abs(y0 - y1));
   }
 
   
   private void drawHandle(Object g, int x, int y, boolean outlineOnly) {
     if (outlineOnly)
-      jsvp.drawRect(g, x - 2, y - 2, 4, 4);
+      g2d.drawRect(g, x - 2, y - 2, 4, 4);
     else
-      jsvp.fillRect(g, x - 2, y - 2, 5, 5);
+      g2d.fillRect(g, x - 2, y - 2, 5, 5);
   }
 
    private void setCurrentBoxColor(Object g) {
-    jsvp.setGraphicsColor(g, pd.BLACK);
+    g2d.setGraphicsColor(g, pd.BLACK);
   }
   
 	@SuppressWarnings("incomplete-switch")
@@ -4131,25 +4134,25 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		case LEFT:
 		case RIGHT:
 			if (doFill)
-				jsvp.fillPolygon(g, ayPoints, axPoints, 7);
+				g2d.fillPolygon(g, ayPoints, axPoints, 7);
 			else
-				jsvp.drawPolygon(g, ayPoints, axPoints, 7);
+				g2d.drawPolygon(g, ayPoints, axPoints, 7);
 			break;
 		case UP:
 		case DOWN:
 			if (doFill)
-				jsvp.fillPolygon(g, axPoints, ayPoints, 7);
+				g2d.fillPolygon(g, axPoints, ayPoints, 7);
 			else
-				jsvp.drawPolygon(g, axPoints, ayPoints, 7);
+				g2d.drawPolygon(g, axPoints, ayPoints, 7);
 
 		}
 	}
 	
 	private void fillCircle(Object g, int x, int y, boolean doFill) {
 		if (doFill)
-  		jsvp.fillOval(g, x-4, y-4, 8, 8);
+  		g2d.fillOval(g, x-4, y-4, 8, 8);
 		else
-			jsvp.drawOval(g, x-4, y-4, 8, 8);
+			g2d.drawOval(g, x-4, y-4, 8, 8);
 	}
 
 	public void setAnnotationColor(Object g, Annotation note,
@@ -4163,7 +4166,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 			color = ((ColoredAnnotation) note).getColor();
 		if (color == null)
 			color = pd.BLACK;
-		jsvp.setGraphicsColor(g, color);
+		g2d.setGraphicsColor(g, color);
 	}
 
 

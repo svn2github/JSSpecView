@@ -6,13 +6,16 @@ ___date="$Date$"
 ___svnRev="$LastChangedRevision$"
 ___version="2.1.0"
 
-
 ___JmolVersion="13.3.7_dev_2013.10.09"
 
 new feature: show NMR taps into NMRDB directly
  -- for now, application only
 
 in preparation for JavaScript version (add to top):
+
+-- 10/10/2013 BH
+Added g2d and g2djs packages
+Moved all graphics writing code to g2d.G2D and g2dj.G2D
 
 -- 10/9/2013 BH
 Preliminary JsPanel; all AWT fully isolated; filling in of JsPanel will pretty much do it.

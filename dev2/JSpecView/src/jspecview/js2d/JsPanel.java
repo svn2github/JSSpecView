@@ -40,8 +40,6 @@ package jspecview.js2d;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.jmol.api.Event;
-import org.jmol.api.EventManager;
 import org.jmol.api.JmolMouseInterface;
 import org.jmol.util.JmolFont;
 import org.jmol.util.JmolList;
@@ -49,7 +47,6 @@ import org.jmol.util.Logger;
 import jspecview.api.AnnotationDialog;
 import jspecview.api.JSVApiPlatform;
 import jspecview.api.JSVPanel;
-import jspecview.common.GraphSet;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
@@ -58,7 +55,7 @@ import jspecview.common.PrintLayout;
 import jspecview.common.ScriptToken;
 import jspecview.common.Annotation.AType;
 import jspecview.export.Exporter;
-import jspecview.g2djs.JsColor;
+import jspecview.java.AwtDialogAnnotation;
 import jspecview.util.JSVColor;
 
 
@@ -72,7 +69,7 @@ import jspecview.util.JSVColor;
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-public class JsPanel implements JSVPanel, EventManager {
+public class JsPanel implements JSVPanel {
 //, MouseListener,  MouseMotionListener, KeyListener
   private static final long serialVersionUID = 1L;
 
@@ -81,15 +78,66 @@ public class JsPanel implements JSVPanel, EventManager {
     Logger.info("JSVPanel " + this + " finalized");
   }
 
-  public PanelData pd;
-	private JSVColor bgcolor;
-
-	private JSViewer viewer;
-  String name;
-
+	private JSVApiPlatform apiPlatform;
+	public JSVApiPlatform getApiPlatform() {
+		return apiPlatform;
+	}
+	
+  private PanelData pd;
   public PanelData getPanelData() {
     return pd;
   }
+
+	private JmolMouseInterface mouse;
+	private JSViewer viewer;
+
+	String name;
+
+  /**
+   * Constructs a new JSVPanel
+   * @param viewer 
+   * 
+   * @param spectrum
+   *        the spectrum
+   * @return this
+   */
+  public static JsPanel getPanelOne(JSViewer viewer, JDXSpectrum spectrum) {
+    // standard applet not overlaid and not showing range
+    // standard application split spectra
+    // removal of integration, taConvert
+    // Preferences Dialog sample.jdx
+//  	ToolTipManager.sharedInstance().setInitialDelay(0);
+  	JsPanel p = new JsPanel(viewer);
+    p.pd.initOne(spectrum);
+    return p;
+  }
+
+	/**
+   * Constructs a <code>JSVPanel</code> with List of spectra and corresponding
+   * start and end indices of data points that should be displayed
+   * @param viewer 
+   * 
+   * @param spectra
+   *        the List of <code>Graph</code> instances
+   * @param startIndex
+   *        the start index
+   * @param endIndex
+   *        the end index
+   * @return this
+   */
+  public static JsPanel getPanelMany(JSViewer viewer, JmolList<JDXSpectrum> spectra, int startIndex, int endIndex) {
+  	JsPanel p = new JsPanel(viewer);
+    p.pd.initMany(spectra, startIndex, endIndex);
+    return p;
+  }
+
+  private JsPanel(JSViewer viewer) {
+  	this.viewer = viewer;
+    this.pd = new PanelData(this, viewer);
+  	this.apiPlatform = viewer.si.getApiPlatform();
+    mouse = apiPlatform.getMouseManager(this);
+//  setBorder(BorderFactory.createLineBorder(Color.BLACK));
+	}
 
   public String getTitle() {
   	return pd.getTitle();
@@ -113,102 +161,53 @@ public class JsPanel implements JSVPanel, EventManager {
   }
 
   public void setBackgroundColor(JSVColor color) {
-  	bgcolor = color;
+  	// unnecessary
   }
   
-  public JSVColor getBackgroundColor() {
-  	return bgcolor;
-  }
-  
-  /**
-   * Constructs a new JSVPanel
-   * @param viewer 
-   * 
-   * @param spectrum
-   *        the spectrum
-   * @return this
-   */
-  public JsPanel setOne(JSViewer viewer, JDXSpectrum spectrum) {
-    // standard applet not overlaid and not showing range
-    // standard application split spectra
-    // removal of integration, taConvert
-    // Preferences Dialog sample.jdx
-//  	ToolTipManager.sharedInstance().setInitialDelay(0);
-  	//toolTip = new AwtToolTip(this);
-  	set(viewer);
-    pd.initSingleSpectrum(spectrum);
-    return this;
-  }
-
-  private void set(JSViewer viewer) {
-  	this.viewer = viewer;
-    pd = new PanelData(this);
-    pd.BLACK = getColor1(0);
+	public AnnotationDialog getDialog(AType type, JDXSpectrum spec) {
+		return AwtDialogAnnotation.get(type, spec, viewer);
 	}
 
-  public static JsPanel getAwtPanel(JSViewer viewer, JDXSpectrum spectrum) {
-    return new JsPanel().setOne(viewer, spectrum);
+	///// threading and focus
+	
+  public String getInput(String message, String title, String sval) {
+  	String ret = null;
+  	/**
+  	 * @j2sNative
+  	 * 
+  	 * ret = prompt(message, sval);
+  	 */
+  	{
+  	}
+    getFocusNow(true);
+    return ret;
   }
 
-  public static JsPanel getAwtPanel(JSViewer viewer, JmolList<JDXSpectrum> specs, int startIndex, int endIndex) {
-    return new JsPanel().setMany(viewer, specs, startIndex, endIndex);
-  }
-
-
-  public JsPanel() {
+	public void showMessage(String msg, String title) {
+		Logger.info(msg);
+		/**
+		 * @j2sNative
+		 * 
+		 * alert(msg);
+		 */
+		{			
+		}
+		getFocusNow(true);
 	}
 
-	/**
-   * Constructs a <code>JSVPanel</code> with List of spectra and corresponding
-   * start and end indices of data points that should be displayed
-   * @param viewer 
-   * 
-   * @param spectra
-   *        the List of <code>Graph</code> instances
-   * @param startIndex
-   *        the start index
-   * @param endIndex
-   *        the end index
-   * @return this
-   */
-  private JsPanel setMany(JSViewer viewer, JmolList<JDXSpectrum> spectra, int startIndex,
-      int endIndex) {
-    pd = new PanelData(this);
-    this.viewer = viewer;
-    apiPlatform = viewer.si.getApiPlatform();
-  	//toolTip = new AwtToolTip(this);
-    pd.initJSVPanel(spectra, startIndex, endIndex);
-    return this;
-  }
+	public void getFocusNow(boolean asThread) {
+    pd.dialogsToFront();
+	}
 
-	public void setupPlatform() {
-    //setBorder(BorderFactory.createLineBorder(Color.BLACK));
-    mouse = apiPlatform.getMouseManager(this);
-  }
+	public String exportTheSpectrum(String type, String path, JDXSpectrum spec,
+			int startIndex, int endIndex) throws IOException {
+		return Exporter.exportTheSpectrum(type, path, spec, startIndex, endIndex);
+	}
 
-	private JSVApiPlatform apiPlatform;
-	public JSVApiPlatform getApiPlatform() {
-		return apiPlatform;
+	public int getFontFaceID(String name) {
+		return JmolFont.getFontFaceID("SansSerif");
 	}
 	
-	private JmolMouseInterface mouse;
-
-  public GraphSet getNewGraphSet() {
-    return new GraphSet(this.pd);
-  }
-
-  public JSVColor getColor4(int r, int g, int b, int a) {
-    return JsColor.get4(r, g, b, a);
-  }
-  
-  public JSVColor getColor3(int r, int g, int b) {
-    return JsColor.get3(r, g, b);
-  }
-  
-  public JSVColor getColor1(int rgb) {
-    return JsColor.get1(rgb);
-  }
-  
   /*----------------------- JSVPanel PAINTING METHODS ---------------------*/
 
   public void doRepaint() {
@@ -245,111 +244,6 @@ public class JsPanel implements JSVPanel, EventManager {
 //    pd.drawGraph(g, getWidth(), getHeight(), false);
 //    viewer.repaintDone();
 //  }
-
-  
-  public String getInput(String message, String title, String sval) {
-  	String ret = null;
-  	/**
-  	 * @j2sNative
-  	 * 
-  	 * ret = prompt(message, sval);
-  	 */
-  	{
-  	}
-    getFocusNow(true);
-    return ret;
-  }
-
-	public void showMessage(String msg, String title) {
-		Logger.info(msg);
-		/**
-		 * @j2sNative
-		 * 
-		 * alert(msg);
-		 */
-		{
-			
-		}
-		getFocusNow(true);
-	}
-
-	public void getFocusNow(boolean asThread) {
-//		if (asThread)
-//			SwingUtilities.invokeLater(new RequestThread());
-//		else
-//  		requestFocusInWindow();
-    pd.dialogsToFront();
-	}
-
-//  public class RequestThread implements Runnable {
-//		public void run() {
-//			requestFocusInWindow();
-//		}
-//  }
-
-  /*--------------mouse and keyboard interface -----------------------*/
-
-	public boolean keyPressed(int keyCode, int modifiers) {
-		return (!pd.isPrinting && pd.keyPressed(keyCode, modifiers));
-	}
-
-	public void keyReleased(int keyCode) {
-		if (pd.isPrinting)
-			return;
-		pd.keyReleased(keyCode);
-	}
-
-  public boolean keyTyped(int ch, int modifiers) {
-		return (!pd.isPrinting && pd.keyTyped(ch, modifiers));
-  }
-
-	public void mouseAction(int mode, long time, int x, int y, int count,
-			int buttonMods) {
-		if (pd.isPrinting)
-			return;
-		switch (mode) {
-		case Event.PRESSED:
-		case Event.RELEASED:
-		case Event.DRAGGED:
-	    break;
-		case Event.MOVED:
-	    getFocusNow(false);
-	    break;
-		case Event.CLICKED:
-	    if (pd.checkMod(buttonMods, Event.MOUSE_RIGHT)) {
-	    	viewer.showMenu(x, y);
-	      return;
-	    }
-	    break;
-		}
-		pd.mouseAction(mode, time, x, y, count, buttonMods);
-	}
-
-	public void mouseEnterExit(long time, int x, int y, boolean isExit) {
-		if (isExit) {
-			pd.mouseEnterExit(time, x, y, isExit);
-		} else {
-	    getFocusNow(false);
-		}			
-	}
-
-  /*-----------------GRAPHICS METHODS----------------------------------- */
-	public void drawString(Object g, String text, int x, int y) {
-//		((Graphics) g).drawString(text, x, y);
-	}
-
-
-	public void setGraphicsColor(Object g, JSVColor c) {
-//		((Graphics) g).setColor((Color) c);
-	}
-
-	public void setGraphicsFont(Object g, JmolFont font) {
-//		((Graphics) g).setFont((Font) font.font);
-	}
-
-	public void translateScale(Object g, double x, double y, double scale) {
-		//??
-	}
 
   /*----------------- METHODS IN INTERFACE Printable ---------------------- */
 
@@ -481,73 +375,6 @@ public class JsPanel implements JSVPanel, EventManager {
 //    return Printable.NO_SUCH_PAGE;
 //  }
 
-	public void draw2DImage(Object g, Object image2d, int destX, int destY,
-			int destWidth, int destHeight, int srcX0, int srcY0, int srcX1, int srcY1) {		
-//		((Graphics) g).drawImage((Image) image2d, destX, destY, destWidth, destHeight, srcX0, srcY0, srcX1, srcY1, null);
-	}
-
-	public Object newImage(int width, int height, int[] buffer) {
-//		BufferedImage image2D = new BufferedImage(width, height,
-//				BufferedImage.TYPE_BYTE_GRAY);
-//		WritableRaster raster = image2D.getRaster();
-//		raster.setSamples(0, 0, width, height, 0,
-//				buffer);
-//		return image2D;
-		return null;
-	}
-
-	public void fillRect(Object g, int x, int y, int width, int height) {
-//		((Graphics) g).fillRect(x, y, width, height);	
-	}
-
-	public void drawLine(Object g, int x0, int y0, int x1, int y1) {
-//		((Graphics) g).drawLine(x0, y0, x1, y1);
-	}
-
-	public void drawRect(Object g, int x, int y, int xPixels,
-			int yPixels) {
-//		((Graphics) g).drawRect(x, y, xPixels, yPixels);
-	}
-
-	public int getFontHeight(Object g) {
-//    return ((Graphics) g).getFontMetrics().getHeight();
-		return 0;
-	}
-
-	public int getStringWidth(Object g, String s) {
-//  	return (s == null ? 0 : ((Graphics) g).getFontMetrics().stringWidth(s));
-		return 0;
-	}
-
-	public void drawOval(Object g, int x, int y, int width, int height) {
-//		((Graphics) g).drawOval(x, y, width, height);
-	}
-
-	public void drawPolygon(Object g, int[] ayPoints, int[] axPoints, int nPoints) {
-//		((Graphics) g).drawPolygon(ayPoints, axPoints, nPoints);
-	}
-
-	public void fillOval(Object g, int x, int y, int width, int height) {
-//		((Graphics) g).fillOval(x, y, width, height);
-	}
-
-	public void fillPolygon(Object g, int[] ayPoints, int[] axPoints, int nPoints) {
-//		((Graphics) g).fillPolygon(ayPoints, axPoints, nPoints);
-	}
-
-	public void rotatePlot(Object g, int angle, int x, int y) {
-//  	((Graphics2D) g).rotate(Math.PI * angle / 180.0, x, y);
-  }
-
-  
-//	BasicStroke strokeBasic = new BasicStroke();
-//  BasicStroke strokeBold = new BasicStroke(2f);
-
-	
-	public void setStrokeBold(Object g, boolean tf) {
-//		((Graphics2D) g).setStroke(tf ? strokeBold : strokeBasic);
-	}
-
 	public int getOptionFromDialog(Object frame, String[] items,
 			String dialogName, String labelName) {
 	final int ret[] = new int[] { Integer.MIN_VALUE };
@@ -592,15 +419,6 @@ public class JsPanel implements JSVPanel, EventManager {
 //		}
 	}
 
-	public String exportTheSpectrum(String type, String path, JDXSpectrum spec,
-			int startIndex, int endIndex) throws IOException {
-		return Exporter.exportTheSpectrum(type, path, spec, startIndex, endIndex);
-	}
-
-	public int getFontFaceID(String name) {
-		return JmolFont.getFontFaceID("SansSerif");
-	}
-	
 	public boolean hasFocus() {
 		// TODO Auto-generated method stub
 		return false;
@@ -649,21 +467,6 @@ public class JsPanel implements JSVPanel, EventManager {
 	public void setFocusable(boolean b) {
 		// TODO Auto-generated method stub
 		
-	}
-
-	public AnnotationDialog getDialog(AType type, JDXSpectrum spec) {
-		switch (type) {
-//		case Integration:
-//			return new JsDialogIntegrals("Integration for " + spec, viewer, spec);
-//		case Measurements:
-//			return new JsDialogMeasurements("Measurements for " + spec, viewer, spec);
-//			break;
-//		case PeakList:
-//			return new JsDialogPeakList("Peak List for " + spec, viewer, spec);
-//			break;
-		default:
-			return null;
-		}
 	}
 
   @Override

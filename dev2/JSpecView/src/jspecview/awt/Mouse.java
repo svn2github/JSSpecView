@@ -60,7 +60,7 @@ class Mouse implements MouseWheelListener, MouseListener,
    */
   Mouse(JSVPanel jsvp) {
   	this.viewer = jsvp;
-    manager = (EventManager) jsvp;
+    manager = jsvp.getPanelData();
     Component display = (Component) jsvp;
     display.addKeyListener(this);
     display.addMouseListener(this);

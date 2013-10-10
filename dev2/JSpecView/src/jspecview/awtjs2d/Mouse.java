@@ -47,11 +47,8 @@ public class Mouse implements JmolMouseInterface {
 
   private EventManager manager;
 
-	/**
-   * @param viewer -- not used in JavaScript
-   */
   public Mouse(JSVPanel viewer) {
-  	manager = (EventManager) viewer;
+  	manager = viewer.getPanelData();
   }
 
   public void clear() {

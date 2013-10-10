@@ -109,6 +109,7 @@ import jspecview.common.SubSpecChangeEvent;
 import jspecview.common.ZoomEvent;
 import jspecview.common.JDXSpectrum.IRMode;
 import jspecview.export.Exporter;
+import jspecview.g2d.G2D;
 import jspecview.java.AwtDialogOverlayLegend;
 import jspecview.java.AwtDialogPrint;
 import jspecview.java.AwtDialogText;
@@ -290,7 +291,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	 * @param jmolOrAdvancedApplet
 	 */
 	public MainFrame(Component jmolDisplay, JSVInterface jmolOrAdvancedApplet) {
-		viewer = new JSViewer(this, false, false);
+		viewer = new JSViewer(this, false, false, new G2D());
 		apiPlatform = new Platform();
 		apiPlatform.setViewer(viewer, null);
 		
@@ -799,8 +800,7 @@ private void initViewer() {
 	}
 
 	public void showPreferences() {
-		PreferencesDialog pd = new PreferencesDialog(this, "Preferences", true,
-				viewer.properties, dsp);
+		PreferencesDialog pd = new PreferencesDialog(this, viewer, "Preferences", true, dsp);
 		viewer.properties = pd.getPreferences();
 		boolean shouldApplySpectrumDisplaySetting = pd
 				.shouldApplySpectrumDisplaySettingsNow();
@@ -1206,11 +1206,11 @@ private void initViewer() {
 	}
 
 	public JSVPanel siGetNewJSVPanel2(JmolList<JDXSpectrum> specs) {
-		return AwtPanel.getAwtPanel(viewer, specs, 0, 0);
+		return AwtPanel.getPanelMany(viewer, specs, 0, 0);
 	}
 
 	public JSVPanel siGetNewJSVPanel(JDXSpectrum spec) {
-		return (spec == null ? null : AwtPanel.getAwtPanel(viewer, spec));
+		return (spec == null ? null : AwtPanel.getPanelOne(viewer, spec));
 	}
 
 	public JSVPanelNode siGetNewPanelNode(String id, String fileName,

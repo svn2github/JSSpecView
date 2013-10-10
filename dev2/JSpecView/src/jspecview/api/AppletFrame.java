@@ -43,4 +43,6 @@ public interface AppletFrame {
 
 	JSVApiPlatform getApiPlatform();
 
+	JSVGraphics getG2D();
+
 }

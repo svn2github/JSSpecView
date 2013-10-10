@@ -158,7 +158,7 @@ public class Exporter {
             spec.getTitle(), startIndex, endIndex, spec.getXUnits(), 
             spec.getYUnits(), spec.isContinuous(), spec.isXIncreasing(), spec.isInverted(), 
             pd.getColor(ScriptToken.PLOTAREACOLOR), 
-            jsvp.getBackgroundColor(), 
+            pd.bgcolor, 
             pd.getCurrentPlotColor(0),
             pd.getColor(ScriptToken.GRIDCOLOR),
             pd.getColor(ScriptToken.TITLECOLOR),

@@ -51,6 +51,7 @@ import java.awt.image.WritableRaster;
 import org.jmol.util.JmolFont;
 
 import jspecview.api.JSVGraphics;
+import jspecview.awt.AwtColor;
 
 /**
  * JSVPanel class represents a View combining one or more GraphSets, each with one or more JDXSpectra.

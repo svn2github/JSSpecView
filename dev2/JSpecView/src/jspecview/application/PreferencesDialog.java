@@ -59,12 +59,13 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import jspecview.awt.AwtColor;
 import jspecview.awt.AwtPanel;
 import jspecview.awt.AwtParameters;
 import jspecview.common.ColorParameters;
+import jspecview.common.JSViewer;
 import jspecview.common.ScriptToken;
 import jspecview.exception.JSpecViewException;
-import jspecview.g2d.AwtColor;
 import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
 import java.awt.Font;
@@ -198,19 +199,19 @@ public class PreferencesDialog extends JDialog {
   /**
    * Initialises the <code>PreferencesDialog</code>
    * @param frame the the parent frame
+   * @param viewer 
    * @param title the title
    * @param modal the modality
-   * @param prefs the initial preferences
    * @param dsp an instance of <code>DisplaySchemesProcessor</code>
    */
-  public PreferencesDialog(Frame frame, String title, boolean modal,
-                           Properties prefs, DisplaySchemesProcessor dsp) {
+  public PreferencesDialog(Frame frame, JSViewer viewer, String title, boolean modal,
+                           DisplaySchemesProcessor dsp) {
     super(frame, title, modal);
     setSize(new Dimension(480, 571));
     
     setLocationRelativeTo(frame);
 
-    preferences = prefs;
+    preferences = viewer.properties;
     this.dsp = dsp;
 
     elModel.addElement("Title");
@@ -227,7 +228,7 @@ public class PreferencesDialog extends JDialog {
     try {
       jbInit();      
       if(dsp != null){
-        initDisplayTab();
+        initDisplayTab(viewer);
       }
     }
     catch(Exception ex) {
@@ -637,8 +638,9 @@ public class PreferencesDialog extends JDialog {
 
   /**
    * Initialise the Display Tab, where display schemes are created or set
+   * @param viewer 
    */
-  private void initDisplayTab() {
+  private void initDisplayTab(JSViewer viewer) {
     TreeMap<String, ColorParameters> displaySchemes = dsp.getDisplaySchemes();
 
     defaultDSName = preferences.getProperty("defaultDisplaySchemeName");
@@ -660,7 +662,7 @@ public class PreferencesDialog extends JDialog {
       JDXSource source = FileReader.createJDXSource(getClass()
           .getResourceAsStream("resources/sample.jdx"), false, false);
 
-      previewPanel = new AwtPanel().setOne(null, source.getSpectra().get(0));
+      previewPanel = AwtPanel.getPanelOne(viewer, source.getSpectra().get(0));
       previewPanel.getPanelData().setBoolean(ScriptToken.ENABLEZOOM, false);
       previewPanel.getPanelData().setBoolean(ScriptToken.GRIDON, true);
       previewPanel.getPanelData().setBoolean(ScriptToken.COORDINATESON, true);
