@@ -15,7 +15,7 @@ in preparation for JavaScript version (add to top):
 
 -- 10/10/2013 BH
 Added g2d and g2djs packages
-Moved all graphics writing code to g2d.G2D and g2dj.G2D
+Moved all graphics writing code to g2d.G2D and g2djs.G2D
 
 -- 10/9/2013 BH
 Preliminary JsPanel; all AWT fully isolated; filling in of JsPanel will pretty much do it.
