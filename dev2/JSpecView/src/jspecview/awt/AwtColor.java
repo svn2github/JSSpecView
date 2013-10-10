@@ -3,6 +3,7 @@ package jspecview.awt;
 import java.awt.Color;
 
 import jspecview.util.JSVColor;
+import jspecview.util.JSVColorUtil;
 
 public class AwtColor extends Color implements JSVColor {
 
@@ -24,5 +25,9 @@ public class AwtColor extends Color implements JSVColor {
 
 	public AwtColor(int r, int g, int b, int a) {
 		super(r, g, b, a);
+	}
+	
+	public String getCSS() {
+		return "#" + JSVColorUtil.colorToHexString(this);
 	}
 }

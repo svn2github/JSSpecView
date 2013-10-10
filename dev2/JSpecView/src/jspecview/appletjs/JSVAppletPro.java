@@ -39,6 +39,8 @@
 
 package jspecview.appletjs;
 
+import java.util.Map;
+
 import org.jmol.util.Logger;
 
 import jspecview.app.JSVApp;
@@ -50,7 +52,7 @@ import jspecview.app.JSVAppPro;
  * @author Bob Hanson St. Olaf College hansonr@stolaf.edu
  */
 
-public class JSVAppletProJS extends JSVSAppletJS {
+public class JSVAppletPro extends JSVApplet {
 
   /*  class interactions:
    * 
@@ -71,15 +73,18 @@ public class JSVAppletProJS extends JSVSAppletJS {
    * 
    */
 
-  private static final long serialVersionUID = 1L;
+  public JSVAppletPro(Map<String, Object> viewerOptions) {
+		super(viewerOptions);
+	}
+
+	private static final long serialVersionUID = 1L;
 
   private JSVApp app0;
   
   @Override
   public void init() {
     app = new JSVAppPro(this);
-		startCommandWatcher();
-		Logger.info(getAppletInfo());
+		initViewer();
   }
 
   @Override

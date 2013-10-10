@@ -133,7 +133,7 @@ public class JsPanel implements JSVPanel {
   private JsPanel(JSViewer viewer) {
   	this.viewer = viewer;
     this.pd = new PanelData(this, viewer);
-  	this.apiPlatform = viewer.si.getApiPlatform();
+  	this.apiPlatform = viewer.apiPlatform;
     mouse = apiPlatform.getMouseManager(this);
 //  setBorder(BorderFactory.createLineBorder(Color.BLACK));
 	}
@@ -225,25 +225,21 @@ public class JsPanel implements JSVPanel {
 //  }
  
 
-//  /**
-//   * Overrides paintComponent in class JPanel in order to draw the spectrum
-//   * 
-//   * @param g
-//   *        the <code>Graphics</code> object
-//   */
-//  @Override
-//  public void paintComponent(Graphics g) {
-//  	
-//  	// from the system, via update or applet/app repaint
-//  	
-//    if (viewer == null || pd == null || pd.graphSets == null || pd.isPrinting)
-//      return;
-//    
-//    super.paintComponent(g); // paint background 
-//    
-//    pd.drawGraph(g, getWidth(), getHeight(), false);
-//    viewer.repaintDone();
-//  }
+  /**
+   * Overrides paintComponent in class JPanel in order to draw the spectrum
+   * 
+   * @param canvas
+   *        the <code>Graphics</code> object
+   */
+  public void paintComponent(Object canvas) {
+  	
+  	// from the system, via update or applet/app repaint
+  	
+    if (viewer == null || pd == null || pd.graphSets == null || pd.isPrinting)
+      return;
+    pd.drawGraph(canvas, getWidth(), getHeight(), false);
+    viewer.repaintDone();
+  }
 
   /*----------------- METHODS IN INTERFACE Printable ---------------------- */
 

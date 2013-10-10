@@ -51,7 +51,6 @@ import jspecview.api.JSVApiPlatform;
 import jspecview.api.JSVAppInterface;
 import jspecview.api.JSVDialog;
 import jspecview.api.JSVPanel;
-import jspecview.api.JSVPopupMenu;
 import jspecview.api.JSVTreeNode;
 import jspecview.api.PanelListener;
 
@@ -60,7 +59,6 @@ import jspecview.common.JSViewer;
 import jspecview.common.Parameters;
 import jspecview.common.PeakPickEvent;
 import jspecview.common.PrintLayout;
-import jspecview.common.RepaintManager;
 import jspecview.common.ScriptTokenizer;
 import jspecview.common.ScriptToken;
 import jspecview.common.Coordinate;
@@ -90,35 +88,23 @@ import jspecview.util.JSVFileManager;
 
 public class JSVApp implements PanelListener, JSVAppInterface {
 
-	private JSVApiPlatform apiPlatform;
-	public JSVApiPlatform getApiPlatform() {
-		return apiPlatform;
-	}
-
 	public JSVApp(AppletFrame appletFrame) {
 		this.appletFrame = appletFrame;
 		JSVFileManager.setDocumentBase(appletFrame.getDocumentBase());
-		this.apiPlatform = appletFrame.getApiPlatform();
 		initViewer();
 		init();
 	}
 
 	private void initViewer() {
-		viewer = new JSViewer(this, true, false, appletFrame.getG2D());
-		apiPlatform.setViewer(viewer, null);
-		viewer.panelNodes = new JmolList<JSVPanelNode>();
-		viewer.jsvpPopupMenu = appletPopupMenu; 
-		viewer.repaintManager = new RepaintManager(viewer);
+		JSVApiPlatform apiPlatform = appletFrame.getApiPlatform();
+		viewer = new JSViewer(this, true, false, appletFrame.getG2D(apiPlatform));
+		viewer.apiPlatform = apiPlatform;
+		apiPlatform.setViewer(viewer, viewer.display);
+    viewer.isSingleThreaded = apiPlatform.isSingleThreaded();
 		appletFrame.setPlatformFields(isSigned(), viewer);
 	}
 
-	private JSVPopupMenu appletPopupMenu;
-	
 	protected AppletFrame appletFrame;
-
-	private String appletID;
-	private String fullName;
-	private String syncID;
 
 	private int fileCount;
 	private int nViews;
@@ -403,9 +389,9 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	private void init() {
 
 		initParams(appletFrame.getParameter("script"));
-		if (appletReadyCallbackFunctionName != null && fullName != null)
+		if (appletReadyCallbackFunctionName != null && viewer.fullName != null)
 			appletFrame.callToJavaScript(appletReadyCallbackFunctionName, new Object[] {
-					appletID, fullName, Boolean.TRUE, appletFrame });
+					viewer.appletID, viewer.fullName, Boolean.TRUE, appletFrame });
 
 	}
 
@@ -427,10 +413,10 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	public void initParams(String params) {
 		parseInitScript(params);
 		newAppletPanel();
-		appletPopupMenu = apiPlatform.getJSVMenuPopup("appletMenu");//getPappletFrame.newAppletPopupMenu(viewer);
-		appletPopupMenu.setEnabled(allowMenu, viewer.parameters
-				.getBoolean(ScriptToken.ENABLEZOOM));
-		viewer.jsvpPopupMenu = appletPopupMenu;
+		viewer.jsvpPopupMenu = viewer.apiPlatform.getJSVMenuPopup("appletMenu");//getPappletFrame.newAppletPopupMenu(viewer);
+		if (viewer.jsvpPopupMenu != null)
+			viewer.jsvpPopupMenu.setEnabled(allowMenu, viewer.parameters
+					.getBoolean(ScriptToken.ENABLEZOOM));	
 		runScriptNow(params);
 	}
 
@@ -472,18 +458,45 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	public void siNewWindow(boolean isSelected, boolean fromFrame) {
 		isNewWindow = isSelected;
 		if (fromFrame)
-			this.appletPopupMenu.setSelected("Window", false);
+			viewer.jsvpPopupMenu.setSelected("Window", false);
 		else
 			appletFrame.newWindow(isSelected);
 	}
 
 	public void repaint() {
-		appletFrame.repaint();
+		
+    /**
+     * Jmol._repaint(applet,asNewThread)
+     * 
+     * should invoke 
+     * 
+     *   setTimeout(applet._applet.viewer.updateJS(width, height)) // may be 0,0
+     *   
+     * when it is ready to do so.
+     * 
+     * @j2sNative
+     * 
+     * if (typeof Jmol != "undefined" && Jmol._repaint && this.viewer.applet)
+     *   Jmol._repaint(this.viewer.applet,true);
+     * 
+     */
+		{
+			appletFrame.repaint();
+		}
+	}
+	
+	/**
+	 * 
+	 * @param width
+	 * @param height
+	 */
+	public void updateJS(int width, int height) {
+		
 	}
 
 	public void siValidateAndRepaint() {
 		appletFrame.validate();
-		appletFrame.repaint();
+		repaint();
 	}
 
 	/**
@@ -546,8 +559,19 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 				case UNKNOWN:
 					break;
 				case APPLETID:
-					appletID = value;
-					fullName = appletID + "__" + syncID + "__";
+					viewer.appletID = value;
+					viewer.fullName = viewer.appletID + "__" + viewer.syncID + "__";
+					/**
+					 * @j2sNative
+					 * 
+					 *            if(typeof Jmol != "undefined") this.viewer.applet =
+					 *            Jmol._applets[value];
+					 * 
+					 * 
+					 */
+					{
+					}
+
 					break;
 				case APPLETREADYCALLBACKFUNCTIONNAME:
 					appletReadyCallbackFunctionName = value;
@@ -587,8 +611,8 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 				// initialSpectrumNumber = Integer.parseInt(value);
 				// break;
 				case SYNCID:
-					syncID = value;
-					fullName = appletID + "__" + syncID + "__";
+					viewer.syncID = value;
+					viewer.fullName = viewer.appletID + "__" + viewer.syncID + "__";
 					break;
 				}
 			} catch (Exception e) {
@@ -612,7 +636,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 			return;
 		}
 
-		appletPopupMenu.setCompoundMenu(viewer.panelNodes, allowCompoundMenu);
+		viewer.jsvpPopupMenu.setCompoundMenu(viewer.panelNodes, allowCompoundMenu);
 
 		Logger.info(appletFrame.getAppletInfo() + " File "
 				+ viewer.currentSource.getFilePath() + " Loaded Successfully");
@@ -752,7 +776,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 		// probably unnecessary:
 		// setSpectrumIndex(nSpec, "execLoad");
 		if (loadFileCallbackFunctionName != null)
-			appletFrame.callToJavaScript(loadFileCallbackFunctionName, new Object[] { appletID,
+			appletFrame.callToJavaScript(loadFileCallbackFunctionName, new Object[] { viewer.appletID,
 					value });
 		return null;
 	}
@@ -781,7 +805,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 		if (syncCallbackFunctionName == null)
 			return;
 		Logger.info("JSV>Jmol " + msg);
-		appletFrame.callToJavaScript(syncCallbackFunctionName, new Object[] { fullName, msg });
+		appletFrame.callToJavaScript(syncCallbackFunctionName, new Object[] { viewer.fullName, msg });
 	}
 
 	public void setVisible(boolean b) {
@@ -815,7 +839,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	}
 
 	public void setCursor(int id) {
-		apiPlatform.setCursor(id, appletFrame);
+		viewer.apiPlatform.setCursor(id, appletFrame);
 	}
 
 	public boolean siGetAutoCombine() {

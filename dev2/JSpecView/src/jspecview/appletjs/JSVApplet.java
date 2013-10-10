@@ -49,6 +49,7 @@
 package jspecview.appletjs;
 
 import java.net.URL;
+import java.util.Hashtable;
 import java.util.Map;
 
 import org.jmol.util.JmolList;
@@ -59,6 +60,7 @@ import jspecview.api.JSVApiPlatform;
 import jspecview.api.JSVAppletInterface;
 import jspecview.api.JSVDialog;
 import jspecview.api.JSVGraphics;
+import jspecview.api.JSVMainPanel;
 import jspecview.api.JSVPanel;
 import jspecview.api.JSVPopupMenu;
 import jspecview.app.JSVApp;
@@ -67,7 +69,11 @@ import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVersion;
 import jspecview.common.JSViewer;
 import jspecview.common.PrintLayout;
+import jspecview.common.SimpleTree;
 import jspecview.g2djs.G2D;
+import jspecview.js2d.JsFileHelper;
+import jspecview.js2d.JsParameters;
+import jspecview.js2d.JsViewPanel;
 /**
  * 
  * Entry point for the web.
@@ -86,11 +92,26 @@ import jspecview.g2djs.G2D;
  *         2012-07-23 11:10:30 -0500 (Mon, 23 Jul 2012) $
  */
 
-public class JSVSAppletJS implements JSVAppletInterface,
+public class JSVApplet implements JSVAppletInterface,
 		AppletFrame {
 
 	protected JSVApp app;
+	public JSViewer viewer;
+
 	private boolean isStandalone = false;
+	protected Map<String, Object> viewerOptions;
+	private Map<String, Object> htParams;
+	private JSVMainPanel spectrumPanel;
+
+  public JSVApplet(Map<String, Object>viewerOptions) {
+  	if (viewerOptions == null)
+  		viewerOptions = new Hashtable<String, Object>();
+  	this.viewerOptions = viewerOptions;
+  	htParams = new Hashtable<String, Object>();
+  	for (Map.Entry<String, Object> entry : viewerOptions.entrySet())
+  		htParams.put(entry.getKey().toLowerCase(), entry.getValue());
+    init();
+  }
 
 	/**
 	 * 
@@ -100,17 +121,56 @@ public class JSVSAppletJS implements JSVAppletInterface,
 	 */
 	public void init() {
 		app = new JSVApp(this);
-		startCommandWatcher();
-		Logger.info(getAppletInfo());
+		initViewer();
 	}
 
-	protected void startCommandWatcher() {
+	protected void initViewer() {
+		viewer = app.viewer;
+    setLogging();
+    viewerOptions.remove("debug");
+    viewer.display = viewerOptions.get("display");
+    /**
+     * @j2sNative
+     * 
+     *            this.viewer.display =
+     *            document.getElementById(this.viewer.display);
+     */
+    {}
+     
 //	  app.viewer.scriptQueue = new JmolList<String>();
 //		commandWatcherThread = new Thread(new CommandWatcher());
 //		commandWatcherThread.setName("CommmandWatcherThread");
 //		commandWatcherThread.start();
+		Logger.info(getAppletInfo());
 	}
 
+  private void setLogging() {
+    int iLevel = (getValue("logLevel", (getBooleanValue("debug", false) ? "5"
+        : "4"))).charAt(0) - '0';
+    if (iLevel != 4)
+      System.out.println("setting logLevel=" + iLevel
+          + " -- To change, use script \"set logLevel [0-5]\"");
+    Logger.setLogLevel(iLevel);
+  }
+
+  public String getParameter(String paramName) {
+    Object o = htParams.get(paramName.toLowerCase());
+    return (o == null ? (String) null : new String(o.toString()));
+  }
+
+  private boolean getBooleanValue(String propertyName, boolean defaultValue) {
+    String value = getValue(propertyName, defaultValue ? "true" : "");
+    return (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("on") || value
+        .equalsIgnoreCase("yes"));
+  }
+
+  private String getValue(String propertyName, String defaultValue) {
+    String stringValue = getParameter(propertyName);
+    System.out.println("getValue " + propertyName + " = " + stringValue);
+    if (stringValue != null)
+      return stringValue;
+    return defaultValue;
+  }
 
 	private static final long serialVersionUID = 1L;
 
@@ -370,9 +430,9 @@ public class JSVSAppletJS implements JSVAppletInterface,
 	public void setPlatformFields(boolean isSigned, JSViewer viewer) {
 //		if (dtl == null && isSigned)
 //			dtl = new JsDropTargetListener(viewer);
-//		viewer.parameters = new JsParameters("applet");
-//		viewer.spectraTree = new JsTree(viewer);
-//		viewer.fileHelper = new JsFileHelper(viewer);
+		viewer.spectraTree = new SimpleTree(viewer);
+		viewer.parameters = new JsParameters("applet");
+		viewer.fileHelper = new JsFileHelper(viewer);
 	}
 
 	public void validateContent(int mode) {
@@ -383,11 +443,9 @@ public class JSVSAppletJS implements JSVAppletInterface,
 	}
 
 	public void addNewPanel(JSViewer viewer) {
-//		getContentPane().removeAll();
-//		spectrumPanel = (Component) (viewer.viewPanel = new AwtViewPanel(
-//				new BorderLayout()));
-//		getContentPane().add(spectrumPanel);
+		viewer.viewPanel = spectrumPanel = new JsViewPanel();
 	}
+
 
 	public void newWindow(boolean isSelected) {
 //		if (isSelected) {
@@ -502,11 +560,6 @@ public class JSVSAppletJS implements JSVAppletInterface,
 		return null;
 	}
 
-	public String getParameter(String name) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	public void repaint() {
 		// TODO Auto-generated method stub
 		
@@ -526,8 +579,8 @@ public class JSVSAppletJS implements JSVAppletInterface,
 		return new Platform();
 	}
 
-	public JSVGraphics getG2D() {
-		return new G2D();
+	public JSVGraphics getG2D(JSVApiPlatform apiPlatform) {
+		return new G2D(apiPlatform);
 	}
 
 	public void doExitJmol() {

@@ -50,6 +50,7 @@ import java.awt.image.WritableRaster;
 
 import org.jmol.util.JmolFont;
 
+import jspecview.api.JSVApiPlatform;
 import jspecview.api.JSVGraphics;
 import jspecview.awt.AwtColor;
 
@@ -69,7 +70,10 @@ public class G2D implements JSVGraphics {
 	BasicStroke strokeBasic = new BasicStroke();
   BasicStroke strokeBold = new BasicStroke(2f);
 
-  public G2D() {
+	private JSVApiPlatform apiPlatform;
+
+  public G2D(JSVApiPlatform apiPlatform) {
+  	this.apiPlatform = apiPlatform;
 	}
 
   public JSVColor getColor4(int r, int g, int b, int a) {
@@ -133,16 +137,16 @@ public class G2D implements JSVGraphics {
   	return (s == null ? 0 : ((Graphics) g).getFontMetrics().stringWidth(s));
 	}
 
-	public void drawOval(Object g, int x, int y, int width, int height) {
-		((Graphics) g).drawOval(x, y, width, height);
+	public void drawCircle(Object g, int x, int y, int diameter) {
+		((Graphics) g).drawOval(x, y, diameter, diameter);
 	}
 
 	public void drawPolygon(Object g, int[] ayPoints, int[] axPoints, int nPoints) {
 		((Graphics) g).drawPolygon(ayPoints, axPoints, nPoints);
 	}
 
-	public void fillOval(Object g, int x, int y, int width, int height) {
-		((Graphics) g).fillOval(x, y, width, height);
+	public void fillCircle(Object g, int x, int y, int diameter) {
+		((Graphics) g).fillOval(x, y, diameter, diameter);
 	}
 
 	public void fillPolygon(Object g, int[] ayPoints, int[] axPoints, int nPoints) {
@@ -163,6 +167,10 @@ public class G2D implements JSVGraphics {
 	}
 
 	public void fillBackground(Object g, JSVColor bgcolor) {
+		// not necessary
+	}
+
+	public void setWindowParameters(int width, int height) {
 		// not necessary
 	}
 

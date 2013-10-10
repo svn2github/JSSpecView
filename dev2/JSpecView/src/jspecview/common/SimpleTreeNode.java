@@ -23,7 +23,7 @@ public class SimpleTreeNode implements JSVTreeNode {
 	  	this.text = text;
 	    this.panelNode = panelNode;
 	    children = new JmolList<SimpleTreeNode>();
-	    System.out.println("adding " + text);
+	   // System.out.println("adding " + text);
 	  }
 
 		public JSVPanelNode getPanelNode() {

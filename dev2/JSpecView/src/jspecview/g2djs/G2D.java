@@ -39,17 +39,9 @@ package jspecview.g2djs;
 
 import jspecview.util.JSVColor;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.image.BufferedImage;
-import java.awt.image.WritableRaster;
-
 import org.jmol.util.JmolFont;
 
+import jspecview.api.JSVApiPlatform;
 import jspecview.api.JSVGraphics;
 import jspecview.awtjs2d.JsColor;
 
@@ -66,10 +58,18 @@ import jspecview.awtjs2d.JsColor;
 public class G2D implements JSVGraphics {
   private static final long serialVersionUID = 1L;
   
-	BasicStroke strokeBasic = new BasicStroke();
-  BasicStroke strokeBold = new BasicStroke(2f);
+	private JSVApiPlatform apiPlatform;
 
-  public G2D() {
+	private int windowWidth;
+
+	private int windowHeight;
+
+	private JmolFont currentFont;
+
+	private Object currentFontMetrics;
+
+  public G2D(JSVApiPlatform apiPlatform) {
+  	this.apiPlatform = apiPlatform;
 	}
 
   public JSVColor getColor4(int r, int g, int b, int a) {
@@ -84,87 +84,166 @@ public class G2D implements JSVGraphics {
     return JsColor.get1(rgb);
   }
 
-  /*-----------------GRAPHICS METHODS----------------------------------- */
-	public void drawString(Object g, String text, int x, int y) {
-		((Graphics) g).drawString(text, x, y);
-	}
-
-
-	public void setGraphicsColor(Object g, JSVColor c) {
-		((Graphics) g).setColor((Color) c);
-	}
-
-	public void setGraphicsFont(Object g, JmolFont font) {
-		((Graphics) g).setFont((Font) font.font);
-	}
-
 	public void draw2DImage(Object g, Object image2d, int destX, int destY,
-			int destWidth, int destHeight, int srcX0, int srcY0, int srcX1, int srcY1) {		
-		((Graphics) g).drawImage((Image) image2d, destX, destY, destWidth, destHeight, srcX0, srcY0, srcX1, srcY1, null);
-	}
-
-	public Object newImage(int width, int height, int[] buffer) {
-		BufferedImage image2D = new BufferedImage(width, height,
-				BufferedImage.TYPE_BYTE_GRAY);
-		WritableRaster raster = image2D.getRaster();
-		raster.setSamples(0, 0, width, height, 0,
-				buffer);
-		return image2D;
-	}
-
-	public void fillRect(Object g, int x, int y, int width, int height) {
-		((Graphics) g).fillRect(x, y, width, height);	
+			int destWidth, int destHeight, int srcX0, int srcY0, int srcX1, int srcY1) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	public void drawLine(Object g, int x0, int y0, int x1, int y1) {
-		((Graphics) g).drawLine(x0, y0, x1, y1);
+		/**
+		 * @j2sNative
+		 * 
+		 *     g.beginPath();
+		 *     g.moveTo(x0, y0);
+		 *     g.lineTo(x1, y1);
+     *	   g.fill(); 
+		 * 
+		 */
+		{}
 	}
 
-	public void drawRect(Object g, int x, int y, int xPixels,
-			int yPixels) {
-		((Graphics) g).drawRect(x, y, xPixels, yPixels);
-	}
-
-	public int getFontHeight(Object g) {
-    return ((Graphics) g).getFontMetrics().getHeight();
-	}
-
-	public int getStringWidth(Object g, String s) {
-  	return (s == null ? 0 : ((Graphics) g).getFontMetrics().stringWidth(s));
-	}
-
-	public void drawOval(Object g, int x, int y, int width, int height) {
-		((Graphics) g).drawOval(x, y, width, height);
+	public void drawCircle(Object g, int x, int y, int diameter) {
+		/**
+		 * @j2sNative
+		 * 
+		 * 		g.beginPath();
+		 *    g.arc(x, y, diameter/2, 0, 2 * Math.PI, false);
+		 *    g.stroke();
+		 */
+		{	
+		}
+		
 	}
 
 	public void drawPolygon(Object g, int[] ayPoints, int[] axPoints, int nPoints) {
-		((Graphics) g).drawPolygon(ayPoints, axPoints, nPoints);
+		// TODO Auto-generated method stub
+		
 	}
 
-	public void fillOval(Object g, int x, int y, int width, int height) {
-		((Graphics) g).fillOval(x, y, width, height);
+	public void drawRect(Object g, int xPixel, int yPixel, int xPixels,
+			int yPixels) {
+		/**
+		 * @j2sNative
+		 * 
+		 * g.drawRect(x, y, width, height);
+		 * 
+		 */
+		{
+		}
 	}
 
-	public void fillPolygon(Object g, int[] ayPoints, int[] axPoints, int nPoints) {
-		((Graphics) g).fillPolygon(ayPoints, axPoints, nPoints);
-	}
-
-	public void rotatePlot(Object g, int angle, int x, int y) {
-  	((Graphics2D) g).rotate(Math.PI * angle / 180.0, x, y);
-  }
-
-	public void translateScale(Object g, double x, double y, double scale) {
-		((Graphics2D) g).translate(x, y);
-		((Graphics2D) g).scale(scale, scale);
-	}
-  
-	public void setStrokeBold(Object g, boolean tf) {
-		((Graphics2D) g).setStroke(tf ? strokeBold : strokeBasic);
+	public void drawString(Object g, String s, int x, int y) {
+		/**
+		 * @j2sNative
+		 * 
+		 * g.fillText(s,x,y);
+		 */
+		{
+			
+		}
 	}
 
 	public void fillBackground(Object g, JSVColor bgcolor) {
-		// TODO Auto-generated method stub		
+		setGraphicsColor(g, bgcolor);
+		fillRect(g, 0, 0, windowWidth, windowHeight);
 	}
 
+	public void fillCircle(Object g, int x, int y, int diameter) {
+		/**
+		 * @j2sNative
+		 * 
+		 * 		g.beginPath();
+		 *    g.arc(x, y, diameter/2, 0, 2 * Math.PI, false);
+		 *    g.fill();
+		 */
+		{	
+		}
+		
+	}
+
+	public void fillPolygon(Object g, int[] ayPoints, int[] axPoints, int nPoints) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void fillRect(Object g, int x, int y, int width, int height) {
+		/**
+		 * @j2sNative
+		 * 
+		 * g.fillRect(x, y, width, height);
+		 * 
+		 */
+		{
+		}
+	}
+
+	public int getFontHeight(Object g) {
+		return currentFont.getAscent();
+	}
+
+	public int getStringWidth(Object g, String s) {
+		return currentFont.stringWidth(s);
+	}
+
+	public Object newImage(int width, int height, int[] buffer) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public void rotatePlot(Object g, int angle, int x, int y) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	JSVColor currentColor;
+	
+	public void setGraphicsColor(Object g, JSVColor c) {
+		/**
+		 * @j2sNative
+		 * 
+		 * g.fillStyLe = "#" + c.getCSS();
+		 */
+		{
+		}
+		currentColor = c;
+	}
+
+	public void setGraphicsFont(Object g, JmolFont font) {
+		currentFont = font;
+		String s = font.getInfo();
+		int pt = s.indexOf(" ");
+		s = s.substring(0, pt) + "px" + s.substring(pt);
+		/**
+		 * @j2sNative
+		 * 
+		 * g.font = s;
+		 */
+		{
+		}
+	}
+
+	public void setStrokeBold(Object g, boolean tf) {
+		/**
+		 * @j2sNative
+		 *
+		 * g.lineWidth = (tf ? 2 : 1);
+		 * 
+		 */
+		{
+
+		}
+
+	}
+
+	public void setWindowParameters(int width, int height) {
+		windowWidth = width;
+		windowHeight = height;
+	}
+
+	public void translateScale(Object g, double x, double y, double scale) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

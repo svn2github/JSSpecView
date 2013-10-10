@@ -169,7 +169,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
   private AwtPanel(JSViewer viewer) {
   	this.viewer = viewer;
     this.pd = new PanelData(this, viewer);
-  	this.apiPlatform = viewer.si.getApiPlatform();
+  	this.apiPlatform = viewer.apiPlatform;
     mouse = apiPlatform.getMouseManager(this);
     setBorder(BorderFactory.createLineBorder(Color.BLACK));
 	}

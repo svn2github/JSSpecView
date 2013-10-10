@@ -80,8 +80,7 @@ public class JSVAppletPro extends JSVApplet {
   @Override
   public void init() {
     app = new JSVAppPro(this);
-		startCommandWatcher();
-		Logger.info(getAppletInfo());
+		initViewer();
   }
 
   @Override

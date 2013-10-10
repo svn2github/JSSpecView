@@ -84,7 +84,6 @@ import org.jmol.util.Logger;
 import org.jmol.util.SB;
 import org.jmol.util.Txt;
 
-import jspecview.api.JSVApiPlatform;
 import jspecview.api.JSVAppInterface;
 import jspecview.api.JSVDialog;
 import jspecview.api.JSVPanel;
@@ -102,7 +101,6 @@ import jspecview.common.ColorParameters;
 import jspecview.common.Parameters;
 import jspecview.common.PeakPickEvent;
 import jspecview.common.PrintLayout;
-import jspecview.common.RepaintManager;
 import jspecview.common.ScriptToken;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.SubSpecChangeEvent;
@@ -169,7 +167,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	private JSVAppPro     					advancedApplet;
 	private CommandHistory          commandHistory;
-	private AwtFileHelper           fileHelper;
 	private DisplaySchemesProcessor dsp;
 	private JmolSyncInterface       jmol;
 	private Component               jmolDisplay;
@@ -279,11 +276,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		return nViews += n;
 	}
 
-	private JSVApiPlatform apiPlatform;
-	public JSVApiPlatform getApiPlatform() {
-		return apiPlatform;
-	}
-
 	/**
 	 * Constructor
 	 * @param jmolDisplay 
@@ -291,31 +283,28 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	 * @param jmolOrAdvancedApplet
 	 */
 	public MainFrame(Component jmolDisplay, JSVInterface jmolOrAdvancedApplet) {
-		viewer = new JSViewer(this, false, false, new G2D());
-		apiPlatform = new Platform();
-		apiPlatform.setViewer(viewer, null);
-		
-		fileHelper = new AwtFileHelper(viewer);
+		Platform apiPlatform = new Platform();
+		viewer = new JSViewer(this, false, false, new G2D(apiPlatform));
+		apiPlatform.setViewer(viewer, null);		
+		viewer.apiPlatform = apiPlatform;
 		jsvpPopupMenu = apiPlatform.getJSVMenuPopup("appMenu");//new AwtPopupMenuOld();
 		jsvpPopupMenu.initialize(viewer, "appMenu");
 		viewer.jsvpPopupMenu = jsvpPopupMenu; 
-		viewer.spectraTree = new AwtTree(viewer);
-		viewer.repaintManager = new RepaintManager(viewer);
+		setPlatformFields();
 		this.jmolDisplay = jmolDisplay;
 		if (jmolDisplay != null)
 			jmolFrame = jmolDisplay.getParent();
 		this.jmolOrAdvancedApplet = jmolOrAdvancedApplet;
 		advancedApplet = (jmolOrAdvancedApplet instanceof JSVAppPro ? (JSVAppPro) jmolOrAdvancedApplet
 				: null);
-		initViewer();
 		init();
 	}
 
-private void initViewer() {
-  viewer.panelNodes = new JmolList<JSVPanelNode>();  
-	viewer.parameters = new AwtParameters("applet");
-	viewer.fileHelper = new AwtFileHelper(viewer);
-}
+	private void setPlatformFields() {
+		viewer.spectraTree = new AwtTree(viewer);
+		viewer.parameters = new AwtParameters("applet");
+		viewer.fileHelper = new AwtFileHelper(viewer);
+	}
 
 	void exitJSpecView(boolean withDialog) {
 		jmolOrAdvancedApplet.saveProperties(viewer.properties);
@@ -504,13 +493,13 @@ private void initViewer() {
 				.getProperty("automaticallyOverlay"));
 		autoShowLegend = Boolean.parseBoolean(properties
 				.getProperty("automaticallyShowLegend"));
-
-		fileHelper.useDirLastOpened = Boolean.parseBoolean(properties
+		AwtFileHelper fh = (AwtFileHelper) viewer.fileHelper; 
+		fh.useDirLastOpened = Boolean.parseBoolean(properties
 				.getProperty("useDirectoryLastOpenedFile"));
-		fileHelper.useDirLastExported = Boolean.parseBoolean(properties
+		fh.useDirLastExported = Boolean.parseBoolean(properties
 				.getProperty("useDirectoryLastExportedFile"));
-		fileHelper.dirLastOpened = properties.getProperty("directoryLastOpenedFile");
-		fileHelper.dirLastExported = properties.getProperty("directoryLastExportedFile");
+		fh.dirLastOpened = properties.getProperty("directoryLastOpenedFile");
+		fh.dirLastExported = properties.getProperty("directoryLastExportedFile");
 
 		sidePanelOn = Boolean.parseBoolean(properties.getProperty("showSidePanel"));
 		toolbarOn = Boolean.parseBoolean(properties.getProperty("showToolBar"));
@@ -686,7 +675,7 @@ private void initViewer() {
 	 * Shows dialog to open a file
 	 */
 	void showFileOpenDialog() {
-		File file = fileHelper.showFileOpenDialog(this);
+		File file = ((AwtFileHelper) viewer.fileHelper).showFileOpenDialog(this);
 		if (file != null)
 			openFile(file.getAbsolutePath(), true);
 	}

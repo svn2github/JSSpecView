@@ -30,4 +30,7 @@ public class JsColor implements JSVColor {
 		return this;
 	}
 	
+	public String getCSS() {
+		return "#" + JSVColorUtil.colorToHexString(this);
+	}
 }

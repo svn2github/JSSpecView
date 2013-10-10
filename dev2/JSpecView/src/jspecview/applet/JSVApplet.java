@@ -116,6 +116,8 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	public JSVApp app;
 	private boolean isStandalone = false;
 
+	private JSViewer viewer;
+
 	/**
 	 * 
 	 * Initializes applet with parameters and load the <code>JDXSource</code>
@@ -125,15 +127,17 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	@Override
 	public void init() {
 		app = new JSVApp(this);
-		startCommandWatcher();
-		Logger.info(getAppletInfo());
+		initViewer();
 	}
 
-	protected void startCommandWatcher() {
-		app.viewer.scriptQueue = new JmolList<String>();
+	protected void initViewer() {
+		viewer = app.viewer;
+		viewer.display = getContentPane();
+		viewer.scriptQueue = new JmolList<String>();
 		commandWatcherThread = new Thread(new CommandWatcher());
 		commandWatcherThread.setName("CommmandWatcherThread");
 		commandWatcherThread.start();
+		Logger.info(getAppletInfo());
 	}
 
 	private static final long serialVersionUID = 1L;
@@ -562,8 +566,8 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 		return new Platform();
 	}
 
-	public JSVGraphics getG2D() {
-		return new G2D();
+	public JSVGraphics getG2D(JSVApiPlatform apiPlatform) {
+		return new G2D(apiPlatform);
 	}
 
 	public void doExitJmol() {

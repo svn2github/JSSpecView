@@ -44,7 +44,7 @@ public interface AppletFrame {
 
 	JSVApiPlatform getApiPlatform();
 
-	JSVGraphics getG2D();
+	JSVGraphics getG2D(JSVApiPlatform apiPlatform);
 
 	void doExitJmol();
 
