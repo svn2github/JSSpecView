@@ -38,6 +38,7 @@
 package jspecview.g2djs;
 
 import jspecview.util.JSVColor;
+import jspecview.util.JSVColorUtil;
 
 import org.jmol.util.JmolFont;
 
@@ -65,8 +66,6 @@ public class G2D implements JSVGraphics {
 	private int windowHeight;
 
 	private JmolFont currentFont;
-
-	private Object currentFontMetrics;
 
   public G2D(JSVApiPlatform apiPlatform) {
   	this.apiPlatform = apiPlatform;
@@ -97,7 +96,7 @@ public class G2D implements JSVGraphics {
 		 *     g.beginPath();
 		 *     g.moveTo(x0, y0);
 		 *     g.lineTo(x1, y1);
-     *	   g.fill(); 
+     *	   g.stroke(); 
 		 * 
 		 */
 		{}
@@ -121,12 +120,14 @@ public class G2D implements JSVGraphics {
 		
 	}
 
-	public void drawRect(Object g, int xPixel, int yPixel, int xPixels,
-			int yPixels) {
+	public void drawRect(Object g, int x, int y, int width,
+			int height) {
 		/**
 		 * @j2sNative
 		 * 
-		 * g.drawRect(x, y, width, height);
+		 * g.beginPath();
+     * g.rect(x ,y, width, height);
+     * g.stroke();
 		 * 
 		 */
 		{
@@ -196,17 +197,16 @@ public class G2D implements JSVGraphics {
 		
 	}
 
-	JSVColor currentColor;
-	
 	public void setGraphicsColor(Object g, JSVColor c) {
+		String s = "#" + JSVColorUtil.colorToHexString(c);
 		/**
 		 * @j2sNative
 		 * 
-		 * g.fillStyLe = "#" + c.getCSS();
+		 * g.fillStyle = s;
 		 */
 		{
+			System.out.println(s);
 		}
-		currentColor = c;
 	}
 
 	public void setGraphicsFont(Object g, JmolFont font) {

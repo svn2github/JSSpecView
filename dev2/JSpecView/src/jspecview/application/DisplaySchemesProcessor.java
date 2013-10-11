@@ -31,9 +31,9 @@ import org.jmol.util.SB;
 
 import jspecview.awt.AwtParameters;
 import jspecview.common.ColorParameters;
+import jspecview.common.JSVFileManager;
 import jspecview.common.ScriptToken;
 import jspecview.util.JSVColorUtil;
-import jspecview.util.JSVFileManager;
 import jspecview.util.JSVTxt;
 import jspecview.util.JXVXmlReader;
 

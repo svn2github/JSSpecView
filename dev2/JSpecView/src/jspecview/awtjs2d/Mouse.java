@@ -231,5 +231,10 @@ public class Mouse implements JmolMouseInterface {
         : modifiers;
   }
 
+	public void processTwoPointGesture(float[][][] touches) {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 }

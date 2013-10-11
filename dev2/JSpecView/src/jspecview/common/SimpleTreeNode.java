@@ -52,7 +52,7 @@ public class SimpleTreeNode implements JSVTreeNode {
 			o.addLast(node);
 			while ((node = node.prevNode) != null)
 				o.add(0, node);
-			return o.toArray();
+			return o.toArray();//new Object[o.size()]);
 		}
 
 		public boolean isLeaf() {

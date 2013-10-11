@@ -18,10 +18,10 @@ import jspecview.api.JSVTree;
 import jspecview.api.JSVTreeNode;
 import jspecview.api.JSVTreePath;
 import jspecview.api.ScriptInterface;
+import jspecview.common.JSVFileManager;
 import jspecview.common.JSVPanelNode;
 import jspecview.common.JSViewer;
 import jspecview.source.JDXSource;
-import jspecview.util.JSVFileManager;
 
 public class AwtTree extends JTree implements JSVTree {
 

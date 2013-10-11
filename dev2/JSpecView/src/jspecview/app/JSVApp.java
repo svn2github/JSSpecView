@@ -54,6 +54,7 @@ import jspecview.api.JSVPanel;
 import jspecview.api.JSVTreeNode;
 import jspecview.api.PanelListener;
 
+import jspecview.common.JSVFileManager;
 import jspecview.common.JSVPanelNode;
 import jspecview.common.JSViewer;
 import jspecview.common.Parameters;
@@ -72,7 +73,6 @@ import jspecview.export.Exporter;
 import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
 import jspecview.util.JSVEscape;
-import jspecview.util.JSVFileManager;
 
 
 /**
@@ -90,7 +90,6 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 
 	public JSVApp(AppletFrame appletFrame) {
 		this.appletFrame = appletFrame;
-		JSVFileManager.setDocumentBase(appletFrame.getDocumentBase());
 		initViewer();
 		init();
 	}
@@ -102,6 +101,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 		apiPlatform.setViewer(viewer, viewer.display);
     viewer.isSingleThreaded = apiPlatform.isSingleThreaded();
 		appletFrame.setPlatformFields(isSigned(), viewer);
+		JSVFileManager.setDocumentBase(viewer, appletFrame.getDocumentBase());
 	}
 
 	protected AppletFrame appletFrame;
@@ -457,10 +457,12 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	 */
 	public void siNewWindow(boolean isSelected, boolean fromFrame) {
 		isNewWindow = isSelected;
-		if (fromFrame)
-			viewer.jsvpPopupMenu.setSelected("Window", false);
-		else
+		if (fromFrame) {
+			if (viewer.jsvpPopupMenu != null)
+				viewer.jsvpPopupMenu.setSelected("Window", false);
+		} else {
 			appletFrame.newWindow(isSelected);
+		}
 	}
 
 	public void repaint() {
@@ -549,7 +551,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 			key = key.toUpperCase();
 			ScriptToken st = ScriptToken.getScriptToken(key);
 			String value = ScriptToken.getValue(st, eachParam, token);
-			if (Logger.debugging)
+			//if (Logger.debugging)
 				Logger.info("KEY-> " + key + " VALUE-> " + value + " : " + st);
 			try {
 				switch (st) {
@@ -636,7 +638,8 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 			return;
 		}
 
-		viewer.jsvpPopupMenu.setCompoundMenu(viewer.panelNodes, allowCompoundMenu);
+		if (viewer.jsvpPopupMenu != null)
+			viewer.jsvpPopupMenu.setCompoundMenu(viewer.panelNodes, allowCompoundMenu);
 
 		Logger.info(appletFrame.getAppletInfo() + " File "
 				+ viewer.currentSource.getFilePath() + " Loaded Successfully");

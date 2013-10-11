@@ -6,6 +6,7 @@ import jspecview.api.JSVApiPlatform;
 import jspecview.api.JSVPanel;
 import jspecview.api.JSVPopupMenu;
 import jspecview.common.JSVInterface;
+import jspecview.common.JSViewer;
 
 
 import org.jmol.api.JmolFileInterface;
@@ -94,18 +95,7 @@ public class Platform implements JSVApiPlatform {
 
   public JmolPopupInterface getMenuPopup(String menuStructure,
                                          char type) {
-    String c = "jspecview.awtjs2d.JsPopup";
-    JmolPopupInterface jsvpopup = (JmolPopupInterface) JSVInterface
-        .getInterface("jspecview.awtjs2d.JsPopup");
-    try {
-      if (jsvpopup != null)
-        jsvpopup.jpiInitialize(viewer, menuStructure);
-    } catch (Exception e) {
-      c = "Exception creating " + c + ":" + e;
-      System.out.println(c);
-      return null;
-    }
-    return jsvpopup;
+  	return null;
   }
 
 	public boolean hasFocus(Object canvas) {
@@ -333,8 +323,18 @@ public class Platform implements JSVApiPlatform {
   }
 
 	public JSVPopupMenu getJSVMenuPopup(String menu) {
-		// TODO Auto-generated method stub
-		return null;
+    String c = "jspecview.awtjs2d.JsPopup";
+    JSVPopupMenu jsvpopup = (JSVPopupMenu) JSVInterface
+        .getInterface(c);
+    try {
+      if (jsvpopup != null)
+        jsvpopup.initialize((JSViewer) viewer, menu);
+    } catch (Exception e) {
+      c = "Exception creating " + c + ":" + e;
+      System.out.println(c);
+      return null;
+    }
+    return null;//jsvpopup;
 	}
 
 	public JmolMouseInterface getMouseManager(JSVPanel jsvp) {

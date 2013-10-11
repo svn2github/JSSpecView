@@ -48,12 +48,14 @@
 
 package jspecview.appletjs;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Hashtable;
 import java.util.Map;
 
 import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
+import org.jmol.util.Txt;
 
 import jspecview.api.AppletFrame;
 import jspecview.api.JSVApiPlatform;
@@ -62,7 +64,6 @@ import jspecview.api.JSVDialog;
 import jspecview.api.JSVGraphics;
 import jspecview.api.JSVMainPanel;
 import jspecview.api.JSVPanel;
-import jspecview.api.JSVPopupMenu;
 import jspecview.app.JSVApp;
 import jspecview.awtjs2d.Platform;
 import jspecview.common.JDXSpectrum;
@@ -72,6 +73,7 @@ import jspecview.common.PrintLayout;
 import jspecview.common.SimpleTree;
 import jspecview.g2djs.G2D;
 import jspecview.js2d.JsFileHelper;
+import jspecview.js2d.JsPanel;
 import jspecview.js2d.JsParameters;
 import jspecview.js2d.JsViewPanel;
 /**
@@ -128,14 +130,14 @@ public class JSVApplet implements JSVAppletInterface,
 		viewer = app.viewer;
     setLogging();
     viewerOptions.remove("debug");
-    viewer.display = viewerOptions.get("display");
+    Object o = viewerOptions.get("display");
     /**
      * @j2sNative
      * 
-     *            this.viewer.display =
-     *            document.getElementById(this.viewer.display);
+     *            o = document.getElementById(o);
      */
     {}
+    viewer.setDisplay(o);
      
 //	  app.viewer.scriptQueue = new JmolList<String>();
 //		commandWatcherThread = new Thread(new CommandWatcher());
@@ -155,7 +157,7 @@ public class JSVApplet implements JSVAppletInterface,
 
   public String getParameter(String paramName) {
     Object o = htParams.get(paramName.toLowerCase());
-    return (o == null ? (String) null : new String(o.toString()));
+    return (o == null ? null : new String(o.toString()));
   }
 
   private boolean getBooleanValue(String propertyName, boolean defaultValue) {
@@ -487,28 +489,27 @@ public class JSVApplet implements JSVAppletInterface,
 	 * string parameters as arguments
 	 * 
 	 * @param callback
-	 * @param params
+	 * @param data
 	 * 
 	 */
-	public void callToJavaScript(String callback, Object[] params) {
-    // see org.jmol.appletjs
-//		try {
-//			JSObject jso = JSObject.getWindow(this);
-//			if (callback.length() > 0) {
-//				if (callback.indexOf(".") > 0) {
-//					String[] mods = Txt.split(callback, ".");
-//					for (int i = 0; i < mods.length - 1; i++) {
-//						jso = (JSObject) jso.getMember(mods[i]);
-//					}
-//					callback = mods[mods.length - 1];
-//				}
-//				Logger.info("JSVApplet calling " + jso + " " + callback);
-//				jso.call(callback, params);
-//			}
-//
-//		} catch (Exception npe) {
-//			Logger.warn("EXCEPTION-> " + npe.getMessage());
-//		}
+	public void callToJavaScript(String callback, Object[] data) {
+ 	 String[] tokens = Txt.split(callback, ".");
+	 	/**
+	 	 * @j2sNative
+	 	 * 
+	 	 * try{
+	 	 *   var o = window[tokens[0]]
+	 	 *   for (i = 1; i < tokens.length; i++){
+	 	 *     o = o[tokens[i]]
+	 	 *   }
+	 	 *   return o(data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9]);
+	 	 * } catch (e) {
+	 	 *	 System.out.println(callback + " failed " + e);
+	 	 * }
+	 	 */
+	 	{
+	 		System.out.println(tokens + " " + data);
+	 	}
 	}
 
 	public void setPanelVisible(boolean b) {
@@ -528,9 +529,8 @@ public class JSVApplet implements JSVAppletInterface,
 
 	public JSVPanel getJSVPanel(JSViewer viewer, JmolList<JDXSpectrum> specs,
 			int initialStartIndex, int initialEndIndex) {
-//		return JsPanel.getJSVPanel(viewer, specs, initialStartIndex,
-//				initialEndIndex, appletPopupMenu);
-		return null;
+		return JsPanel.getPanelMany(viewer, specs, initialStartIndex,
+				initialEndIndex);
 	}
 
 	public JSVDialog newDialog(JSViewer viewer, String type) {
@@ -538,11 +538,6 @@ public class JSVApplet implements JSVAppletInterface,
 //			return new AwtDialogOverlayLegend(null, viewer.selectedPanel);
 //		if (type.equals("view"))
 //			return new AwtDialogView(viewer, spectrumPanel, false);
-		return null;
-	}
-
-	public JSVPopupMenu newAppletPopupMenu(JSViewer viewer) {
-//		return new JsAppletPopupMenu(viewer);
 		return null;
 	}
 
@@ -556,8 +551,12 @@ public class JSVApplet implements JSVAppletInterface,
 	}
 
 	public URL getDocumentBase() {
-		// TODO Auto-generated method stub
-		return null;
+		String base = (String) viewerOptions.get("documentBase");
+		try {
+			return new URL((URL) null, base, null);
+		} catch (MalformedURLException e) {
+			return null;
+		}
 	}
 
 	public void repaint() {
@@ -571,8 +570,13 @@ public class JSVApplet implements JSVAppletInterface,
 	}
 
 	public void showWhat(JSViewer viewer, String what) {
-		// TODO Auto-generated method stub
-		
+		/**
+		 * @j2sNative
+		 * 
+		 * alert("JVApplet.showWhat: " + what);
+		 *
+		 */
+		{}
 	}
 
 	public JSVApiPlatform getApiPlatform() {

@@ -57,13 +57,13 @@ import javax.swing.event.MenuListener;
 import org.jmol.util.JmolList;
 
 import jspecview.api.JSVPanel;
+import jspecview.common.JSVFileManager;
 import jspecview.common.JSVPanelNode;
 import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
 import jspecview.common.ScriptToken;
 import jspecview.common.JDXSpectrum;
 import jspecview.source.JDXSource;
-import jspecview.util.JSVFileManager;
 
 /**
  * The Main Class or Entry point of the JSpecView Application.

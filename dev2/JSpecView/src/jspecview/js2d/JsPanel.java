@@ -432,12 +432,11 @@ public class JsPanel implements JSVPanel {
 
 	public int getHeight() {
 		// TODO Auto-generated method stub
-		return 0;
+		return viewer.getHeight();
 	}
 
 	public int getWidth() {
-		// TODO Auto-generated method stub
-		return 0;
+		return viewer.getWidth();
 	}
 
 	public boolean isEnabled() {
@@ -470,5 +469,22 @@ public class JsPanel implements JSVPanel {
     return pd.getSpectrumAt(0).toString();
   }
 
+  /**
+   * called only by JavaScript
+   * 
+   * @param id
+   * @param x
+   * @param y
+   * @param modifiers
+   * @param time
+   * @return t/f
+   */
+  public boolean handleOldJvm10Event(int id, int x, int y, int modifiers, long time) {
+  	return mouse.handleOldJvm10Event(id, x, y, modifiers, time);
+  }
+
+	public void processTwoPointGesture(float[][][] touches) {
+		mouse.processTwoPointGesture(touches);
+	}
 
 }

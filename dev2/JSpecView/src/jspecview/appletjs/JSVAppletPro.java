@@ -41,8 +41,6 @@ package jspecview.appletjs;
 
 import java.util.Map;
 
-import org.jmol.util.Logger;
-
 import jspecview.app.JSVApp;
 import jspecview.app.JSVAppPro;
 

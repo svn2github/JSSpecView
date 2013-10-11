@@ -423,4 +423,13 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
     return pd.getSpectrumAt(0).toString();
   }
 
+	public boolean handleOldJvm10Event(int id, int x, int y, int modifiers,
+			long time) {
+		return mouse.handleOldJvm10Event(id, x, y, modifiers, time);
+	}
+
+	public void processTwoPointGesture(float[][][] touches) {
+		// n/a
+	}
+
 }

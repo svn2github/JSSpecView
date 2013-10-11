@@ -94,6 +94,7 @@ import jspecview.app.JSVAppPro;
 import jspecview.awt.AwtPanel;
 import jspecview.awt.AwtParameters;
 import jspecview.awt.Platform;
+import jspecview.common.JSVFileManager;
 import jspecview.common.JSVPanelNode;
 import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
@@ -119,7 +120,6 @@ import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
 import jspecview.util.JSVColorUtil;
 import jspecview.util.JSVEscape;
-import jspecview.util.JSVFileManager;
 
 /**
  * The Main Class or Entry point of the JSpecView Application.
@@ -286,6 +286,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		Platform apiPlatform = new Platform();
 		viewer = new JSViewer(this, false, false, new G2D(apiPlatform));
 		apiPlatform.setViewer(viewer, null);		
+		JSVFileManager.setDocumentBase(viewer, null);
 		viewer.apiPlatform = apiPlatform;
 		jsvpPopupMenu = apiPlatform.getJSVMenuPopup("appMenu");//new AwtPopupMenuOld();
 		jsvpPopupMenu.initialize(viewer, "appMenu");

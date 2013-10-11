@@ -35,8 +35,8 @@ import javax.swing.JTable;
 import org.jmol.util.Logger;
 
 import jspecview.common.JDXSpectrum;
+import jspecview.common.JSVFileManager;
 import jspecview.source.JDXSource;
-import jspecview.util.JSVFileManager;
 
 /**
  * Dialog that displays String of text or contents of a file in a

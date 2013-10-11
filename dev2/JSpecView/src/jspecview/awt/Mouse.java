@@ -249,4 +249,9 @@ class Mouse implements MouseWheelListener, MouseListener,
 
   private int xWhenPressed, yWhenPressed, modifiersWhenPressed10;
 
+	public void processTwoPointGesture(float[][][] touches) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

@@ -8,7 +8,7 @@ public class JsColor implements JSVColor {
 	public int argb;
 	
 	public int getRGB() {
-		return argb & 0xFF000000;
+		return argb & 0x00FFFFFF;
 	}
 
 	public static JSVColor get1(int rgb) {
@@ -29,8 +29,4 @@ public class JsColor implements JSVColor {
 		argb = JSVColorUtil.rgb(r, g, b) | (a << 24) & 0xFF000000;
 		return this;
 	}
-	
-	public String getCSS() {
-		return "#" + JSVColorUtil.colorToHexString(this);
 	}
-}

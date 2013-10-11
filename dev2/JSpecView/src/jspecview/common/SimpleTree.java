@@ -10,7 +10,6 @@ import jspecview.api.ScriptInterface;
 import jspecview.common.JSVPanelNode;
 import jspecview.common.JSViewer;
 import jspecview.source.JDXSource;
-import jspecview.util.JSVFileManager;
 
 public class SimpleTree implements JSVTree {
 

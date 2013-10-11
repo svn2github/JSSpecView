@@ -2,7 +2,7 @@ package jspecview.awtjs2d;
 
 import java.net.URL;
 
-import jspecview.util.JSVFileManager;
+import jspecview.common.JSVFileManager;
 
 import org.jmol.api.JmolFileInterface;
 import org.jmol.util.Txt;

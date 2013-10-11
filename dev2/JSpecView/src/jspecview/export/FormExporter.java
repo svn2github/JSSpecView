@@ -26,7 +26,7 @@ import java.util.Calendar;
 
 import org.jmol.util.Logger;
 
-import jspecview.util.JSVFileManager;
+import jspecview.common.JSVFileManager;
 
 /**
  * The XMLExporter should be a totally generic exporter

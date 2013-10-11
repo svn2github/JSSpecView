@@ -13,13 +13,21 @@ new feature: show NMR taps into NMRDB directly
 
 in preparation for JavaScript version (add to top):
 
+-- 10/11/2013 BH
+[Visible spectra observable in HTML5]
+*Fields instantiated by super during static phase of loading are lost and re-initiated by subclass
+  (problem with ColorParameters nothaving booleans defined)
+*Can't use URL.getInputStream()
+List.toArray() was not implemented (fixed)
+*foo((JDXSpectrum) null) does not give "null" at the other end.
+
 -- 10/10/2013 BH
 Added g2d and g2djs packages
 Moved all graphics writing code to g2d.G2D and g2djs.G2D
 new InputStreamReader(stream) ---> new InputStreamReader(stream, "UTF-8")
 new GZIPInputStream(bis) ---> new GZIPInputStream(bis, 512)
 new URL(urlString) ---> new URL((URL) null, urlString, null);
-URLConnection.getContentLength() is not defined -- needs work in JSVFileManager
+*URLConnection.getContentLength() is not defined -- needs work in JSVFileManager
 BufferedInputStream.read(bytes) ---> BufferedInputStream.read(bytes, 0, bytes.length) 
 subclassed BufferedReader.read(char[] chars) --> BufferedReader.read(char[] chars, pt, len)
 Added buildfromjspecview.xml to JSmol project
@@ -28,6 +36,7 @@ Working on adjustments needed in JSmol.js, JSmolJSV.js, JSmolApi.js
 Adding JsViewPanel
 Bug fixes in JSVApplet, JSVApp, JSViewer
 [initial script is being processed]
+Added @j2sRequireImport for static references to "new java.util.Properties()" in JSVersion
 
 -- 10/9/2013 BH
 Preliminary JsPanel; all AWT fully isolated; filling in of JsPanel will pretty much do it.

@@ -27,7 +27,4 @@ public class AwtColor extends Color implements JSVColor {
 		super(r, g, b, a);
 	}
 	
-	public String getCSS() {
-		return "#" + JSVColorUtil.colorToHexString(this);
-	}
 }
