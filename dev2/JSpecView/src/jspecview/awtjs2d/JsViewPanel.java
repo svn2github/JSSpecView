@@ -1,57 +1,42 @@
 /**
  * 
  */
-package jspecview.java;
-
-import java.awt.BorderLayout;
-
-
-import javax.swing.JPanel;
+package jspecview.awtjs2d;
 
 import org.jmol.util.JmolList;
 
 import jspecview.api.JSVMainPanel;
 import jspecview.api.JSVPanel;
 import jspecview.api.JSVViewPanel;
-import jspecview.awt.AwtPanel;
 import jspecview.common.JSVPanelNode;
 import jspecview.common.Annotation.AType;
 
-public class AwtViewPanel extends JPanel implements JSVViewPanel, JSVMainPanel {
+public class JsViewPanel implements JSVViewPanel, JSVMainPanel {
 
 	private static final long serialVersionUID = 1L;
 	private JSVPanel selectedPanel;
 	private int currentPanelIndex;
+	private String title;
+	private boolean visible;
+	private boolean focusable;
+	private boolean enabled;
 	public int getCurrentPanelIndex() {
 		return currentPanelIndex;
-	}
-
-	public AwtViewPanel(BorderLayout borderLayout) {
-		super(borderLayout);
 	}
 
 	public void dispose() {
 	}
 
 	public String getTitle() {
-		// TODO Auto-generated method stub
-		return null;
+		return title;
 	}
 
 	public void setTitle(String title) {
-		// TODO Auto-generated method stub
-
+		this.title = title;
 	}
 
 	public void setSelectedPanel(JSVPanel jsvp, JmolList<JSVPanelNode> panelNodes) {
 		if (jsvp != selectedPanel) {
-			if (selectedPanel != null) {
-				remove((AwtPanel) selectedPanel);
-				//jsvApplet.removeKeyListener((AwtPanel) selectedPanel);
-			}
-			if (jsvp != null)
-  			add((AwtPanel) jsvp, BorderLayout.CENTER);
-			//jsvApplet.addKeyListener((AwtPanel) jsvp);
 			selectedPanel = jsvp;
 		}
 		for (int i = panelNodes.size(); --i >= 0;) {
@@ -65,12 +50,40 @@ public class AwtViewPanel extends JPanel implements JSVViewPanel, JSVMainPanel {
 			}
 		}
 		markSelectedPanels(panelNodes);
-		setVisible(jsvp != null);
+		visible = (jsvp != null);
 	}
 
 	public void markSelectedPanels(JmolList<JSVPanelNode> panelNodes) {
 		for (int i = panelNodes.size(); --i >= 0;)
 			panelNodes.get(i).isSelected = (currentPanelIndex == i);
+	}
+
+	public int getHeight() {
+		return (selectedPanel == null ? 0 : selectedPanel.getHeight());
+	}
+
+	public int getWidth() {
+		return (selectedPanel == null ? 0 : selectedPanel.getWidth());
+	}
+
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public boolean isFocusable() {
+		return focusable;
+	}
+
+	public boolean isVisible() {
+		return visible;
+	}
+
+	public void setEnabled(boolean b) {
+		enabled = b;
+	}
+
+	public void setFocusable(boolean b) {
+		focusable = b;
 	}
 
 }

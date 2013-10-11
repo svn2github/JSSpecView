@@ -65,6 +65,9 @@ import jspecview.api.JSVGraphics;
 import jspecview.api.JSVMainPanel;
 import jspecview.api.JSVPanel;
 import jspecview.app.JSVApp;
+import jspecview.awtjs2d.JsPanel;
+import jspecview.awtjs2d.JsParameters;
+import jspecview.awtjs2d.JsViewPanel;
 import jspecview.awtjs2d.Platform;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVersion;
@@ -73,9 +76,6 @@ import jspecview.common.PrintLayout;
 import jspecview.common.SimpleTree;
 import jspecview.g2djs.G2D;
 import jspecview.js2d.JsFileHelper;
-import jspecview.js2d.JsPanel;
-import jspecview.js2d.JsParameters;
-import jspecview.js2d.JsViewPanel;
 /**
  * 
  * Entry point for the web.

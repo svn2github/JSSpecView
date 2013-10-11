@@ -75,6 +75,7 @@ import jspecview.api.JSVPanel;
 import jspecview.app.JSVApp;
 import jspecview.awt.AwtPanel;
 import jspecview.awt.AwtParameters;
+import jspecview.awt.AwtViewPanel;
 import jspecview.awt.Platform;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVersion;
@@ -88,7 +89,6 @@ import jspecview.java.AwtDialogText;
 import jspecview.java.AwtDialogView;
 import jspecview.java.AwtDropTargetListener;
 import jspecview.java.AwtFileHelper;
-import jspecview.java.AwtViewPanel;
 
 /**
  * 

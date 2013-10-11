@@ -35,7 +35,7 @@
 //					draw integration ratio annotations
 // 03-06-2012 rmh - Full overhaul; code simplification; added support for Jcamp 6 nD spectra
 
-package jspecview.js2d;
+package jspecview.awtjs2d;
 
 import java.io.IOException;
 import java.io.OutputStream;
