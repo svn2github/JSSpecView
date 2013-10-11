@@ -17,6 +17,7 @@ public class Parameters {
 
 	public Parameters(String name) {
     this.name = name;
+    htBooleans = new Hashtable<ScriptToken, Boolean>();
     setBoolean(ScriptToken.TITLEON, true);
     setBoolean(ScriptToken.ENABLEZOOM, true);
     setBoolean(ScriptToken.DISPLAY2D, true);
@@ -28,7 +29,7 @@ public class Parameters {
     setBoolean(ScriptToken.YUNITSON, true);
 	}
 
-  protected Map<ScriptToken, Boolean> htBooleans = new Hashtable<ScriptToken, Boolean>();
+  protected Map<ScriptToken, Boolean> htBooleans;
 	
   public Map<ScriptToken, Boolean> getBooleans() {
     return htBooleans;

@@ -22,9 +22,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import org.jmol.util.J2SRequireImport;
 import org.jmol.util.Txt;
 
 
+import org.jmol.util.J2SRequireImport; // required
+
+@J2SRequireImport({java.util.Properties.class})
 public class JSVersion {
 
   public static final String VERSION;

@@ -134,7 +134,5 @@ public interface ScriptInterface {
 	public void siNewWindow(boolean isSelected, boolean fromFrame);
 	public void siShow(String what);
 	
-	public JSVApiPlatform getApiPlatform();
-
 
 }

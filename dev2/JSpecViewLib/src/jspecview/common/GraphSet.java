@@ -2621,8 +2621,7 @@ public class GraphSet implements XYScaleConverter {
 					gs.fX0 = 0.5;
 					gs.fY0 = 0;
 					gs.fracX = 0.5;
-					gs.fracY = 1;
-					
+					gs.fracY = 1;					
 				}
 			}
 		}
@@ -4150,9 +4149,9 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 	
 	private void fillCircle(Object g, int x, int y, boolean doFill) {
 		if (doFill)
-  		g2d.fillOval(g, x-4, y-4, 8, 8);
+  		g2d.fillCircle(g, x-4, y-4, 8);
 		else
-			g2d.drawOval(g, x-4, y-4, 8, 8);
+			g2d.drawCircle(g, x-4, y-4, 8);
 	}
 
 	public void setAnnotationColor(Object g, Annotation note,

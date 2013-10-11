@@ -18,7 +18,17 @@ public class RepaintManager {
       return false;
     }
     repaintPending = true;
+    
+    /**
+     * @j2sNative
+     * 
+     *  if (typeof Jmol != "undefined" && Jmol._repaint && this.viewer.applet) 
+     *    Jmol._repaint(this.viewer.applet, false);
+     *  this.repaintDone();
+     */
+    {
     	viewer.selectedPanel.repaint();
+    }
     return true;
   }
 

@@ -45,4 +45,8 @@ public interface JSVPanel extends JSVViewPanel {
 
 	public AnnotationDialog getDialog(AType type, JDXSpectrum spec);
 
+	public boolean handleOldJvm10Event(int id, int x, int y, int modifiers, long time);
+
+	public void processTwoPointGesture(float[][][] touches);
+	
 }

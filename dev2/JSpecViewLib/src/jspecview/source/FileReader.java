@@ -43,11 +43,11 @@ import jspecview.common.Coordinate;
 import jspecview.common.JDXDataObject;
 import jspecview.common.JDXHeader;
 import jspecview.common.JDXSpectrum;
+import jspecview.common.JSVFileManager;
 import jspecview.common.PeakInfo;
 import jspecview.exception.JDXSourceException;
 import jspecview.exception.JSpecViewException;
 import jspecview.util.JSVEscape;
-import jspecview.util.JSVFileManager;
 import jspecview.util.JSVZipFileSequentialReader;
 
 /**

@@ -51,7 +51,6 @@ import jspecview.api.PanelListener;
 import jspecview.common.Annotation.AType;
 import jspecview.util.JSVColor;
 import jspecview.util.JSVColorUtil;
-import jspecview.util.JSVFileManager;
 
 import org.jmol.api.Event;
 import org.jmol.api.EventManager;
@@ -206,6 +205,8 @@ public class PanelData implements EventManager {
 	public boolean getBoolean(ScriptToken st) {
 		if (st == ScriptToken.REVERSEPLOT)
 			return currentGraphSet.reversePlot;
+		if (options == null)
+			return false;
 		Object b = options.get(st);
 		return (b != null && (b instanceof Boolean) && ((Boolean) b) == Boolean.TRUE);
 	}
@@ -396,6 +397,7 @@ public class PanelData implements EventManager {
 		display1D = !isLinked && getBoolean(ScriptToken.DISPLAY1D);
 		int top = topMargin;
 		int bottom = bottomMargin;
+		g2d.fillBackground(g, bgcolor);
 		if (isPrinting) {
 			top *= 3; // for three-hole punching
 			bottom *= 3; // for file name

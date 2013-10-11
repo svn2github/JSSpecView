@@ -23,7 +23,7 @@ public interface JSVGraphics {
 
 	void drawLine(Object g, int x0, int y0, int x1, int y1);
 
-	void drawOval(Object g, int x, int y, int width, int height);
+	void drawCircle(Object g, int x, int y, int diameter);
 
 	void drawPolygon(Object g, int[] ayPoints, int[] axPoints, int nPoints);
 
@@ -32,7 +32,7 @@ public interface JSVGraphics {
 
 	void drawString(Object g, String s, int x, int y);
 
-	void fillOval(Object g, int x, int y, int width, int height);
+	void fillCircle(Object g, int x, int y, int diameter);
 
 	void fillPolygon(Object g, int[] ayPoints, int[] axPoints, int nPoints);
 
@@ -49,5 +49,7 @@ public interface JSVGraphics {
 	void setStrokeBold(Object g, boolean tf);
 
 	void translateScale(Object g, double x, double y, double scale);
+
+	void setWindowParameters(int width, int height);
 
 }

@@ -105,7 +105,7 @@ public abstract class ColorParameters extends Parameters {
     // measures -- not in displayScheme?
 
     if (includeMeasures)
-      jsvp.getPanelData().setBoolean(this, null);
+      jsvp.getPanelData().setBoolean(ds, null);
 
     // colors and fonts
 

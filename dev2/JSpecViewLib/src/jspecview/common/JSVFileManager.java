@@ -18,7 +18,7 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package jspecview.util;
+package jspecview.common;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -43,7 +43,10 @@ import org.jmol.util.Parser;
 import org.jmol.util.SB;
 import org.jmol.util.Txt;
 
-import jspecview.common.JSVersion;
+import jspecview.util.JSVEscape;
+import jspecview.util.JSVTxt;
+import jspecview.util.JSVZipFileSequentialReader;
+import jspecview.util.JSVZipUtil;
 
 public class JSVFileManager {
 
@@ -52,6 +55,8 @@ public class JSVFileManager {
 	public final static String SIMULATION_PROTOCOL = "http://SIMULATION/";
 
 	public static URL appletDocumentBase;
+
+	private static JSViewer viewer;
   
 	public boolean isApplet() {
 		return (appletDocumentBase != null);
@@ -177,6 +182,18 @@ public class JSVFileManager {
     }
 		if (name.startsWith(SIMULATION_PROTOCOL))
 			return getBufferedReaderForString(getSimulationJCampDX(name.substring(SIMULATION_PROTOCOL.length())));
+		
+		if (viewer.isApplet) {
+      Object ret = viewer.apiPlatform.getBufferedURLInputStream(new URL((URL) null, name, null), null, null);
+      if (ret instanceof SB || ret instanceof String) {
+      	return new BufferedReader(new StringReader(ret.toString()));
+      } else if (JSVEscape.isAB(ret)) {
+        return new BufferedReader(new StringReader(new String((byte[]) ret)));
+      } else {
+      	return new BufferedReader(new InputStreamReader((InputStream) ret, "UTF-8"));
+      }
+
+		}
     InputStream in = getInputStream(name, true, appletDocumentBase);
     BufferedInputStream bis = new BufferedInputStream(in);
     if (isGzip(bis)) {
@@ -380,7 +397,8 @@ public class JSVFileManager {
 		return (pt1 < 0 || pt2 < 0 ? null : Parser.getQuotedStringAt(json, pt2 + key2.length()));
 	}
 
-	public static void setDocumentBase(URL documentBase) {
+	public static void setDocumentBase(JSViewer v, URL documentBase) {
+		viewer = v;
 		appletDocumentBase = documentBase;
 	}
 
