@@ -13,6 +13,10 @@ new feature: show NMR taps into NMRDB directly
 
 in preparation for JavaScript version (add to top):
 
+-- 10/12/2013 BH
+character translation issues in decompressor
+
+
 -- 10/11/2013 BH
 [Visible spectra observable in HTML5]
 *Fields instantiated by super during static phase of loading are lost and re-initiated by subclass
@@ -20,6 +24,10 @@ in preparation for JavaScript version (add to top):
 *Can't use URL.getInputStream()
 List.toArray() was not implemented (fixed)
 *foo((JDXSpectrum) null) does not give "null" at the other end.
+The following two signatures cannot be distinguished in JavaScript:
+  public static int intoRangeInt(int i, int i0, int i1)
+  public static double intoRange(double x, double x0, double x1)
+
 
 -- 10/10/2013 BH
 Added g2d and g2djs packages
