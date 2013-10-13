@@ -1457,6 +1457,9 @@ public class GraphSet implements XYScaleConverter {
 					}
 					drawSpectrum(gMain, i, offset, isGrey, ig);
 				}
+				if (pendingMeasurement != null && pendingMeasurement.spec == spectra.get(i))
+					drawMeasurement(gTop, pendingMeasurement);
+
 				if ((nSplit > 1 ? i == iSpectrumMovedTo : isLinked
 						|| i == iSpectrumForScale)
 						&& !pd.isPrinting && xPixelMovedTo >= 0 && spec.isContinuous()) {
@@ -1783,10 +1786,7 @@ public class GraphSet implements XYScaleConverter {
 		if (getIntegrationRatios(index) != null)
 			drawAnnotations(g, getIntegrationRatios(index),
 					ScriptToken.INTEGRALPLOTCOLOR);
-		if (pendingMeasurement != null && pendingMeasurement.spec == spec)
-			drawMeasurement(g, pendingMeasurement);
 		drawMeasurements(g, index);
-
 	}
 
 	private MeasurementData getMeasurements(AType type, int iSpec) {
