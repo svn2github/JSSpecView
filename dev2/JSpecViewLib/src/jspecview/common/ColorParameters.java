@@ -226,9 +226,8 @@ public abstract class ColorParameters extends Parameters {
    * @param value 
    * @return color object
 	 */
-  protected Object setColorFromString(ScriptToken st, String value) {
-    // overridden in AwtParameters
-    return null;
+  protected JSVColor setColorFromString(ScriptToken st, String value) {
+    return setColor(st, getColorFromString(value));
   }
   
 ////////////////// fonts /////////////////  
