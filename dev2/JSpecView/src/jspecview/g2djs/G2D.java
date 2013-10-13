@@ -93,10 +93,10 @@ public class G2D implements JSVGraphics {
 		/**
 		 * @j2sNative
 		 * 
-		 *     g.beginPath();
-		 *     g.moveTo(x0, y0);
-		 *     g.lineTo(x1, y1);
-     *	   g.stroke(); 
+		 *            if (!this.inPath) g.beginPath(); 
+		 *            g.moveTo(x0, y0); 
+		 *            g.lineTo(x1, y1); 
+		 *            if (!this.inPath) g.stroke();
 		 * 
 		 */
 		{}
@@ -106,8 +106,9 @@ public class G2D implements JSVGraphics {
 		/**
 		 * @j2sNative
 		 * 
+		 *    var r = diameter/2;
 		 * 		g.beginPath();
-		 *    g.arc(x, y, diameter/2, 0, 2 * Math.PI, false);
+		 *    g.arc(x + r, y + r, r, 0, 2 * Math.PI, false);
 		 *    g.stroke();
 		 */
 		{	
@@ -116,8 +117,34 @@ public class G2D implements JSVGraphics {
 	}
 
 	public void drawPolygon(Object g, int[] ayPoints, int[] axPoints, int nPoints) {
-		// TODO Auto-generated method stub
-		
+		doPoly(g, ayPoints, axPoints, nPoints, false);
+	}
+
+	/**
+	 * @param g 
+	 * @param axPoints  
+	 * @param ayPoints 
+	 * @param nPoints 
+	 * @param doFill 
+	 */
+	private void doPoly(Object g, int[] axPoints, int[] ayPoints, int nPoints,
+			boolean doFill) {
+		/**
+		 * @j2sNative
+		 * 
+		 * g.beginPath();
+		 * g.moveTo(axPoints[0], ayPoints[0]);
+		 * 
+		 * for (var i = 1; i < nPoints; i++)
+		 *   g.lineTo(axPoints[i], ayPoints[i]);
+     * if (doFill)
+     *   g.fill();
+     * else
+     *   g.stroke();
+		 * 
+		 */
+		{
+		}
 	}
 
 	public void drawRect(Object g, int x, int y, int width,
@@ -146,6 +173,17 @@ public class G2D implements JSVGraphics {
 	}
 
 	public void fillBackground(Object g, JSVColor bgcolor) {
+		if (bgcolor == null) {
+			/**
+			 * @j2sNative
+			 * 
+			 * g.clearRect(0,0, this.windowWidth, this.windowHeight);
+			 * return;
+			 * 
+			 */
+			{				
+			}
+		}
 		setGraphicsColor(g, bgcolor);
 		fillRect(g, 0, 0, windowWidth, windowHeight);
 	}
@@ -164,8 +202,7 @@ public class G2D implements JSVGraphics {
 	}
 
 	public void fillPolygon(Object g, int[] ayPoints, int[] axPoints, int nPoints) {
-		// TODO Auto-generated method stub
-		
+		doPoly(g, ayPoints, axPoints, nPoints, true);
 	}
 
 	public void fillRect(Object g, int x, int y, int width, int height) {
@@ -198,11 +235,11 @@ public class G2D implements JSVGraphics {
 	}
 
 	public void setGraphicsColor(Object g, JSVColor c) {
-		String s = "#" + JSVColorUtil.colorToHexString(c);
+		String s = JSVColorUtil.colorToCssString(c);
 		/**
 		 * @j2sNative
 		 * 
-		 * g.fillStyle = s;
+		 * g.fillStyle = g.strokeStyle = s;
 		 */
 		{
 			System.out.println(s);
@@ -244,6 +281,36 @@ public class G2D implements JSVGraphics {
 	public void translateScale(Object g, double x, double y, double scale) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public boolean canDoLineTo() {
+		return true;
+	}
+
+	boolean inPath;
+	
+	public void doStroke(Object g, boolean isBegin) {
+		/**
+		 * @j2sNative
+		 * 
+		 * this.inPath = isBegin;
+		 * if (isBegin)
+		 * 	g.beginPath();
+		 * else
+		 *  g.stroke();
+		 * 
+		 */
+		{}
+	}
+
+	public void lineTo(Object g, int x2, int y2) {
+		/**
+		 * @j2sNative
+		 * 
+		 * g.lineTo(x2, y2);
+		 * 
+		 */
+		{}
 	}
 
 }

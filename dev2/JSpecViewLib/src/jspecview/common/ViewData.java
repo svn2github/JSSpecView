@@ -151,7 +151,7 @@ public class ViewData {
   public void setScale(int i, int xPixels, int yPixels, boolean isInverted) {
 		iThisScale = i % scaleData.length;
 		thisScale = scaleData[iThisScale];
-		thisScale.setScale(xPixels, yPixels, isInverted);
+		thisScale.setXYScale(xPixels, yPixels, isInverted);
 	}
 
   public void resetScaleFactors() {

@@ -243,7 +243,7 @@ public class IntegralData extends MeasurementData {
 	      double y = specXyCoords[i].getYVal();
 	      if (y > minYForIntegral)
 	        integral += (y - minY);
-	      xyCoords[i] = new Coordinate(specXyCoords[i].getXVal(), integral
+	      xyCoords[i] = new Coordinate().set(specXyCoords[i].getXVal(), integral
 	          * intRange + offset);
 	    }
 	    return xyCoords;

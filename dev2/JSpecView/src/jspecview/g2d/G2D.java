@@ -45,6 +45,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 
@@ -121,7 +122,12 @@ public class G2D implements JSVGraphics {
 	}
 
 	public void drawLine(Object g, int x0, int y0, int x1, int y1) {
-		((Graphics) g).drawLine(x0, y0, x1, y1);
+		if (path == null) {
+			((Graphics) g).drawLine(x0, y0, x1, y1);
+		} else {
+			path.moveTo(x0, y0);
+			path.lineTo(x1, y1);
+		}			
 	}
 
 	public void drawRect(Object g, int x, int y, int xPixels,
@@ -141,8 +147,8 @@ public class G2D implements JSVGraphics {
 		((Graphics) g).drawOval(x, y, diameter, diameter);
 	}
 
-	public void drawPolygon(Object g, int[] ayPoints, int[] axPoints, int nPoints) {
-		((Graphics) g).drawPolygon(ayPoints, axPoints, nPoints);
+	public void drawPolygon(Object g, int[] axPoints, int[] ayPoints, int nPoints) {
+		((Graphics) g).drawPolygon(axPoints, ayPoints, nPoints);
 	}
 
 	public void fillCircle(Object g, int x, int y, int diameter) {
@@ -172,6 +178,25 @@ public class G2D implements JSVGraphics {
 
 	public void setWindowParameters(int width, int height) {
 		// not necessary
+	}
+
+	public boolean canDoLineTo() {
+		return true;
+	}
+
+	private GeneralPath path;
+	
+	public void doStroke(Object g, boolean isBegin) {
+		if (isBegin) {
+			path = new GeneralPath();
+		} else {
+			((Graphics2D) g).draw(path);
+			path = null;
+		}
+	}
+
+	public void lineTo(Object g, int x2, int y2) {
+		path.lineTo(x2, y2);
 	}
 
 

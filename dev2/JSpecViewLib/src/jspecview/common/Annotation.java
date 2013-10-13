@@ -57,7 +57,7 @@ public class Annotation extends Coordinate {
    * 
    */
   protected Annotation(double x, double y) {
-    super(x, y);
+    set(x, y);
   }
   
   protected Annotation setAll(JDXSpectrum spec, String text, boolean isPixels, boolean is2D, int offsetX, int offsetY) {

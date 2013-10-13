@@ -1052,7 +1052,9 @@ public class FileReader {
         spec.xFactor, spec.yFactor, fileDeltaX, spec.nPointsFile);
 
     double[] firstLastX = new double[2];
+    long t = System.currentTimeMillis();
     Coordinate[] xyCoords = decompressor.decompressData(errorLog, firstLastX);
+    System.out.println("decompression time = " + (System.currentTimeMillis() - t) + " ms");
     spec.setXYCoords(xyCoords);
     double d = decompressor.getMinY();
     if (minMaxY != null) {

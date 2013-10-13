@@ -177,11 +177,11 @@ public class PanelData implements EventManager {
 		return info;
 	}
 
-	public void setBoolean(Parameters parameters, ScriptToken st) {
+	public void setBooleans(Parameters parameters, ScriptToken st) {
 		if (st == null) {
 			Map<ScriptToken, Boolean> booleans = parameters.getBooleans();
 			for (Map.Entry<ScriptToken, Boolean> entry : booleans.entrySet())
-				setBoolean(parameters, entry.getKey());
+				setBooleans(parameters, entry.getKey());
 			return;
 		}
 		setBoolean(st, parameters.getBoolean(st));
@@ -189,6 +189,7 @@ public class PanelData implements EventManager {
 
 	@SuppressWarnings("incomplete-switch")
 	public void setBoolean(ScriptToken st, boolean isTrue) {
+		taintedAll = true;
 		if (st == ScriptToken.REVERSEPLOT) {
 			currentGraphSet.setReversePlot(isTrue);
 			return;
@@ -251,6 +252,7 @@ public class PanelData implements EventManager {
 	// //// initialization - from AwtPanel
 
 	public JmolList<JDXSpectrum> spectra;
+	public boolean taintedAll = true;
 
 	public void initOne(JDXSpectrum spectrum) {
 		spectra = new JmolList<JDXSpectrum>();
@@ -383,21 +385,29 @@ public class PanelData implements EventManager {
 	/**
 	 * Draws the Spectrum to the panel
 	 * 
-	 * @param g
-	 *          the <code>Graphics</code> object
+	 * @param gMain
+	 *          the main <code>Graphics</code> object
+	 * @param gTop
+	 *          the <code>Graphics</code> object for top-object writing
 	 * @param width
 	 *          the width to be drawn in pixels
 	 * @param height
 	 *          the height to be drawn in pixels
 	 * @param addFilePath
 	 */
-	public synchronized void drawGraph(Object g, int width, int height,
+	public synchronized void drawGraph(Object gMain, Object gTop, int width, int height,
 			boolean addFilePath) {
 		boolean withCoords;
 		display1D = !isLinked && getBoolean(ScriptToken.DISPLAY1D);
 		int top = topMargin;
 		int bottom = bottomMargin;
-		g2d.fillBackground(g, bgcolor);
+		boolean isResized = (isPrinting || doReset || thisWidth != width || thisHeight != height);
+		if (isResized)
+			taintedAll = true;
+		if (taintedAll)
+			g2d.fillBackground(gMain, bgcolor);
+		if (gTop != gMain)
+			g2d.fillBackground(gTop, null);
 		if (isPrinting) {
 			top *= 3; // for three-hole punching
 			bottom *= 3; // for file name
@@ -409,31 +419,31 @@ public class PanelData implements EventManager {
 			titleOn = getBoolean(ScriptToken.TITLEON);
 			gridOn = getBoolean(ScriptToken.GRIDON);
 		}
-		boolean isResized = (isPrinting || doReset || thisWidth != width || thisHeight != height);
 		doReset = false;
 		titleDrawn = false;
 		thisWidth = width;
 		thisHeight = height;
 		for (int i = graphSets.size(); --i >= 0;)
-			graphSets.get(i).drawGraphSet(g, width, height, left, right, top, bottom,
-					isResized);
-		if (titleOn && !titleDrawn)
-			drawTitle(g, height * scalingFactor, width * scalingFactor,
+			graphSets.get(i).drawGraphSet(gMain, gTop, width, height, left, right, top, bottom,
+					isResized, taintedAll);
+		if (titleOn && !titleDrawn && taintedAll)
+			drawTitle(gMain, height * scalingFactor, width * scalingFactor,
 					getDrawTitle(isPrinting));
 		if (withCoords && coordStr != null)
-			drawCoordinates(g, top, thisWidth - right, top - 20);
-		if (addFilePath) {
+			drawCoordinates(gTop, top, thisWidth - right, top - 20);
+		if (addFilePath && taintedAll) {
 			String s = (commonFilePath != null ? commonFilePath
 					: graphSets.size() == 1 && currentGraphSet.getTitle(true) != null ? getSpectrum()
 							.getFilePath()
 							: null);
 			if (s != null) {
-				printFilePath(g, left, height, s);
+				printFilePath(gMain, left, height, s);
 			}
 		}
-		if (isPrinting)
-			printVersion(g, height);
-
+		if (isPrinting) {
+			printVersion(gMain, height);
+		}
+		taintedAll = (isPrinting || gMain == gTop);
 	}
 
 	/**
@@ -677,6 +687,7 @@ public class PanelData implements EventManager {
 	public void setZoom(double x1, double y1, double x2, double y2) {
 		currentGraphSet.setZoom(x1, y1, x2, y2);
 		doReset = true;
+		taintedAll = true;
 		notifyListeners(new ZoomEvent(x1, y1, x2, y2));
 	}
 
@@ -1154,6 +1165,8 @@ public class PanelData implements EventManager {
 			break;
 		case HIGHLIGHTCOLOR:
 			highlightColor = color;
+			if (highlightColor.getOpacity255() == 255)
+				highlightColor.setOpacity255(150);
 			break;
 		case INTEGRALPLOTCOLOR:
 			integralPlotColor = color;
@@ -1357,7 +1370,8 @@ public class PanelData implements EventManager {
         }
       }
       g2d.translateScale(g, x, y, 0.1);
-      drawGraph(g, (int) width, (int) height, addFilePath);
+      taintedAll = true;
+      drawGraph(g, g, (int) width, (int) height, addFilePath);
       isPrinting = false;
       return JSViewer.PAGE_EXISTS;
     }

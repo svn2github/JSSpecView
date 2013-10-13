@@ -151,7 +151,7 @@ abstract class XMLReader {
 
     //   for ease of plotting etc. all data is stored internally in increasing order
     for (int x = 0; x < npoints; x++)
-      xyCoords[x] = new Coordinate(xaxisData[x] / xScale, yaxisData[x]);
+      xyCoords[x] = new Coordinate().set(xaxisData[x] / xScale, yaxisData[x]);
 
     if (!increasing)
       xyCoords = Coordinate.reverse(xyCoords);

@@ -134,6 +134,7 @@ public class JDXDecompressor {
   private SB errorLog;
 
   private void addPoint(Coordinate pt) {
+    //System.out.println(pt);
     if (ipt == xyCoords.length) {
       Coordinate[] t = new Coordinate[ipt * 2];
       System.arraycopy(xyCoords, 0, t, 0, ipt);
@@ -194,13 +195,13 @@ public class JDXDecompressor {
           continue;
         ich = 0;
         boolean isCheckPoint = (lastDif != Integer.MIN_VALUE);
-        xval = getValue(allDelim) * xFactor;
+        xval = getValueDelim() * xFactor;
         if (ipt == 0) {
           firstLastX[0] = xval;
           dx = firstX - xval;
         }
         xval += dx;
-        Coordinate point = new Coordinate(xval, (yval = getYValue()) * yFactor);
+        Coordinate point = new Coordinate().set(xval, (yval = getYValue()) * yFactor);
         if (ipt == 0) {
           addPoint(point); // first data line only
         } else {
@@ -232,7 +233,7 @@ public class JDXDecompressor {
         while (ich < lineLen || difVal != Integer.MIN_VALUE || dupCount > 0) {
           xval += deltaX;
           if (!Double.isNaN(yval = getYValue()))
-            addPoint(new Coordinate(xval, yval * yFactor));
+            addPoint(new Coordinate().set(xval, yval * yFactor));
         }
         lastLine = line;
       }
@@ -363,8 +364,10 @@ public class JDXDecompressor {
   
   private int getDifDup(int i) {
     int ich0 = ich;
-    skipTo(allDelim);
-    return (ich0 == ich ? i : Integer.valueOf(i + line.substring(ich0, ich)).intValue());
+    next();
+    String s = i + line.substring(ich0, ich);
+    //System.out.println("skip " + ich0 + " " + this.ich + " " + s);
+    return (ich0 == ich ? i : Integer.valueOf(s).intValue());
   }
 
   private double getValue() {
@@ -387,7 +390,7 @@ public class JDXDecompressor {
     case '7':
     case '8':
     case '9':
-      return getValue(allDelim);
+      return getValueDelim();
     case '@':
     case 'A':
     case 'B':
@@ -418,16 +421,16 @@ public class JDXDecompressor {
       ich++;
       return getValue();
     }
-    skipTo(allDelim);
+    next();
     return Double.valueOf(leader + line.substring(ich0, ich)).doubleValue();
   }
   
-  private final static String whiteSpace = " ,\t\n";
+  private final static String WHITE_SPACE = " ,\t\n";
 
-  private double getValue(String delim) {
+  private double getValueDelim() {
     int ich0 = ich;
     char ch = '\0';
-    while (ich < lineLen && whiteSpace.indexOf(ch = line.charAt(ich)) >= 0)
+    while (ich < lineLen && WHITE_SPACE.indexOf(ch = line.charAt(ich)) >= 0)
       ich++;
     double factor = 1;
     switch (ch) {
@@ -438,7 +441,7 @@ public class JDXDecompressor {
       ich0 = ++ich;
       break;
     }
-    ch = skipTo(delim);
+    ch = next();
     if (ch == 'E' && ich + 3 < lineLen)
       switch (line.charAt(ich + 1)) {
       case '-':
@@ -451,15 +454,11 @@ public class JDXDecompressor {
     return factor * ((Double.valueOf(line.substring(ich0, ich))).doubleValue());
   }
 
-  private char skipTo(String delim) {
-    int pos = JDXDecompressor.findOneOf(line.substring(ich), delim);
-    if (pos < 0) {
-      ich = lineLen;
-      return '\0';
-    }
-    ich += pos;
-    return line.charAt(ich); 
-  }
+	private char next() {
+		while (ich < lineLen && allDelim.indexOf(line.charAt(ich)) < 0)
+			ich++;
+		return (ich == lineLen ? '\0' : line.charAt(ich));
+	}
 
   private void testAlgorithm() {
 /*     line = "4265A8431K85L83L71K55P5j05k35k84k51j63n5K4M1j2j10j97k28j88j01j7K4or4k04k89";
@@ -470,20 +469,4 @@ public class JDXDecompressor {
      ipt= 0;
 */  }
 
-	/**
-	 * Finds a character that is in one string in another and returns the index
-	 * 
-	 * @param str
-	 *        the string to search
-	 * @param delim
-	 *        the string from which to find the characters to search for
-	 * @return the index of the of the character found,
-	 */
-	public static int findOneOf(String str, String delim) {
-	  int n = str.length();
-	  for (int i = 0; i < n; i++)
-	    if (delim.indexOf(str.charAt(i)) >= 0)
-	      return i;
-	  return  -1;
-	}
 }

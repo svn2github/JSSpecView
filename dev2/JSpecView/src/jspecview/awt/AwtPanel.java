@@ -236,7 +236,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
     
     super.paintComponent(g); // paint background 
     
-    pd.drawGraph(g, getWidth(), getHeight(), false);
+    pd.drawGraph(g, g, getWidth(), getHeight(), false);
     viewer.repaintDone();
   }
   

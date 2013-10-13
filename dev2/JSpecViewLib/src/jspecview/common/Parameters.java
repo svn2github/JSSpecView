@@ -94,7 +94,7 @@ public class Parameters {
 		}
 		if (pd == null)
 			return;
-		pd.setBoolean(this, st);
+		pd.setBooleans(this, st);
 	}
 	
 	public static boolean isMatch(String match, String key) {

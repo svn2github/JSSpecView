@@ -456,5 +456,13 @@ import org.jmol.util.Txt;
     for (int i = colorNames.length; --i >= 0; )
       mapJavaScriptColors.put(colorNames[i], Integer.valueOf(colorArgbs[i]));
   }
+
+	public static String colorToCssString(JSVColor c) {
+		int opacity = c.getOpacity255();
+		if (opacity == 255)
+			return "#" + colorToHexString(c);
+		int rgb = c.getRGB();
+		return "rgba(" + ((rgb>>16)&0xFF) + "," + ((rgb>>8)&0xff) + "," + (rgb&0xff) + "," + opacity/255f	 + ")"; 
+	}
   
 }

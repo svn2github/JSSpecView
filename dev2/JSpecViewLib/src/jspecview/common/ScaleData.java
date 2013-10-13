@@ -329,15 +329,15 @@ public class ScaleData {
 	}
 	
   double toX(int xPixel, int xPixel1, boolean drawXAxisLeftToRight) {
-		return toX(xPixel, xPixel1, drawXAxisLeftToRight, xFactorForScale);
+		return toXScaled(xPixel, xPixel1, drawXAxisLeftToRight, xFactorForScale);
 	}
 
 	double toX0(int xPixel, int xPixel0, int xPixel1, boolean drawXAxisLeftToRight) {
-		return toX(xPixel, xPixel1, drawXAxisLeftToRight,
+		return toXScaled(xPixel, xPixel1, drawXAxisLeftToRight,
 				(maxXOnScale - minXOnScale) / (xPixel1 - xPixel0));
 	}
 
-	private double toX(int xPixel, int xPixel1, boolean drawXAxisLeftToRight,
+	private double toXScaled(int xPixel, int xPixel1, boolean drawXAxisLeftToRight,
 			double factor) {
 		return (
 				drawXAxisLeftToRight ? maxXOnScale - (xPixel1 - xPixel) * factor 
@@ -347,14 +347,14 @@ public class ScaleData {
 
 	int toPixelX(double dx, int xPixel0, int xPixel1,
 			boolean drawXAxisLeftToRight) {
-		return toPixelX(dx, xPixel0, xPixel1, drawXAxisLeftToRight, xFactorForScale);
+		return toPixelXScaled(dx, xPixel0, xPixel1, drawXAxisLeftToRight, xFactorForScale);
 	}
 
 	int toPixelX0(double dx, int xPixel0, int xPixel1, boolean drawXAxisLeftToRight) {
-		return toPixelX(dx, xPixel0, xPixel1, drawXAxisLeftToRight, (maxXOnScale - minXOnScale) / (xPixel1 - xPixel0));
+		return toPixelXScaled(dx, xPixel0, xPixel1, drawXAxisLeftToRight, (maxXOnScale - minXOnScale) / (xPixel1 - xPixel0));
 	}
 
-	private int toPixelX(double dx, int xPixel0, int xPixel1, boolean drawXAxisLeftToRight,
+	private int toPixelXScaled(double dx, int xPixel0, int xPixel1, boolean drawXAxisLeftToRight,
 			double factor) {
 		int x = (int) ((dx - minXOnScale) / factor);
 		return (drawXAxisLeftToRight ? xPixel0 + x : xPixel1 - x);
@@ -381,7 +381,7 @@ public class ScaleData {
 		return (int) (yPixel0 + (maxYOnScale - y) / factor);
 	}
 
-	void setScale(int xPixels, int yPixels, boolean isInverted) {
+	void setXYScale(int xPixels, int yPixels, boolean isInverted) {
 		double yRef = spectrumYRef;
 		double f = spectrumScaleFactor;
 		boolean useInit = (f != 1 || isShiftZoomedY); 

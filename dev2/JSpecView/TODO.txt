@@ -14,13 +14,16 @@ new feature: show NMR taps into NMRDB directly
 in preparation for JavaScript version (add to top):
 
 -- 10/12/2013 BH
-character translation issues in decompressor
-
+Fixed character translation issues in decompressor due to bug in Double.valueOf(String) in coretop.js
+*note: In Java ('-' == 45) but in JavaScript it does not. J2S does not necessarily take care of this. 
+Further disambiguation
+Added second top-level canvas with transparent highlights. Excellent speed now.
+[working well; still not fully tested; no popup menu, no dialogs]
 
 -- 10/11/2013 BH
 [Visible spectra observable in HTML5]
 *Fields instantiated by super during static phase of loading are lost and re-initiated by subclass
-  (problem with ColorParameters nothaving booleans defined)
+  (resulting in ColorParameters not having booleans defined)
 *Can't use URL.getInputStream()
 List.toArray() was not implemented (fixed)
 *foo((JDXSpectrum) null) does not give "null" at the other end.

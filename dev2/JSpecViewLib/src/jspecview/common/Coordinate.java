@@ -56,10 +56,12 @@ public class Coordinate {
    *        the x value
    * @param y
    *        the y value
+   * @return this
    */
-  public Coordinate(double x, double y) {
+  public Coordinate set(double x, double y) {
     xVal = x;
     yVal = y;
+    return this;
   }
 
   /**
@@ -130,7 +132,7 @@ public class Coordinate {
    *         coordinate
    */
   public Coordinate copy() {
-    return new Coordinate(xVal, yVal);
+    return new Coordinate().set(xVal, yVal);
   }
 
   /**
@@ -183,7 +185,7 @@ public class Coordinate {
     double maxY = getMaxY(xyCoords, 0, xyCoords.length);
     double factor = (maxY - minY) / (max - min); // range = 0-5
     for (int i = 0; i < xyCoords.length; i++)
-      newXYCoords[i] = new Coordinate(xyCoords[i].getXVal(), 
+      newXYCoords[i] = new Coordinate().set(xyCoords[i].getXVal(), 
           ((xyCoords[i].getYVal() - minY) / factor) - min);
     return newXYCoords;
   }
@@ -228,7 +230,7 @@ public class Coordinate {
   
       xval = Double.parseDouble(tmp1);
       yval = Double.parseDouble(tmp2);
-      point = new Coordinate((xval * xFactor), (yval * yFactor));
+      point = new Coordinate().set(xval * xFactor, yval * yFactor);
       xyCoords.addLast(point);
     }
     
@@ -530,7 +532,7 @@ public class Coordinate {
   }
 
   public static int getNearestIndexForX(Coordinate[] xyCoords, double xPt) {
-    Coordinate x = new Coordinate(xPt, 0);
+    Coordinate x = new Coordinate().set(xPt, 0);
     int i = Arrays.binarySearch(xyCoords, x, c);
     if (i < 0) i = -1 - i;
     if (i < 0)

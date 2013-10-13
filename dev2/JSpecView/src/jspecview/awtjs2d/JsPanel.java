@@ -228,16 +228,25 @@ public class JsPanel implements JSVPanel {
   /**
    * Overrides paintComponent in class JPanel in order to draw the spectrum
    * 
-   * @param canvas
-   *        the <code>Graphics</code> object
+   * @param context
+   *        the canvas's context
    */
-  public void paintComponent(Object canvas) {
+  public void paintComponent(Object context) {
   	
   	// from the system, via update or applet/app repaint
   	
     if (viewer == null || pd == null || pd.graphSets == null || pd.isPrinting)
       return;
-    pd.drawGraph(canvas, getWidth(), getHeight(), false);
+    Object context2 = null;
+    /**
+     * @j2sNative
+     * 
+     * 
+     * context2 = (context.canvas.topLayer || context.canvas).getContext("2d")
+     */
+    {}
+    
+    pd.drawGraph(context, context2, getWidth(), getHeight(), false);
     viewer.repaintDone();
   }
 

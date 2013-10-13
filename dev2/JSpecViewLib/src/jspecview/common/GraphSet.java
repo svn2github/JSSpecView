@@ -839,6 +839,7 @@ public class GraphSet implements XYScaleConverter {
 				update2dImage(false);
 				resetPinsFromView();
 			}
+			pd.taintedAll = true;
 			// pd.repaint();
 		}
 		return ok;
@@ -996,7 +997,7 @@ public class GraphSet implements XYScaleConverter {
 			pd.coordsClicked = null;
 			return null;
 		}
-		pd.coordClicked = new Coordinate(lastClickX = x, y);
+		pd.coordClicked = new Coordinate().set(lastClickX = x, y);
 		pd.coordsClicked = getSpectrum().getXYCoords();
 		pd.xPixelClicked = (lastPixelX = xPixel);
 		return pd.coordClicked;
@@ -1256,9 +1257,8 @@ public class GraphSet implements XYScaleConverter {
 		} else {
 			//viewData = viewList.get(0);
 		}
-		ScaleData[] viewScales = viewData.getScaleData();
-		
-		
+		pd.taintedAll = true;
+		ScaleData[] viewScales = viewData.getScaleData();		
 		int[] startIndices = new int[nSpectra];
 		int[] endIndices = new int[nSpectra];
 		graphsTemp.clear();
@@ -1356,24 +1356,24 @@ public class GraphSet implements XYScaleConverter {
 			viewList.remove(i);
 	}
 
-	private void drawAll(Object g, int iSplit, boolean needNewPins) {
+	private void drawAll(Object gMain, Object gTop, int iSplit,
+			boolean needNewPins, boolean doAll) {
 		int subIndex = getSpectrumAt(0).getSubIndex();
-		is2DSpectrum = (!getSpectrumAt(0).is1D() 
-				&& (isLinked || pd.getBoolean(ScriptToken.DISPLAY2D)) 
-				&& (imageView != null 
-						|| get2DImage()));
-		if (imageView != null) {
+		is2DSpectrum = (!getSpectrumAt(0).is1D()
+				&& (isLinked || pd.getBoolean(ScriptToken.DISPLAY2D)) && (imageView != null || get2DImage()));
+		if (imageView != null && doAll) {
 			if (is2DSpectrum)
-  			setPositionForFrame(iSplit);
-			draw2DImage(g);
+				setPositionForFrame(iSplit);
+			draw2DImage(gMain);
 		}
 		int iSelected = (stackSelected || !showAllStacked ? iSpectrumSelected : -1);
 		boolean doYScale = (!showAllStacked || nSpectra == 1 || iSelected >= 0);
 		boolean doDraw1DObjects = (imageView == null || pd.display1D);
 		int n = (iSelected >= 0 ? 1 : 0);
 		int iSpectrumForScale = getFixedSelectedSpectrumIndex();
-		if (doDraw1DObjects) {
-			fillBox(g, xPixel0, yPixel0, xPixel1, yPixel1, ScriptToken.PLOTAREACOLOR);
+		if (doDraw1DObjects && doAll) {
+			fillBox(gMain, xPixel0, yPixel0, xPixel1, yPixel1,
+					ScriptToken.PLOTAREACOLOR);
 			if (iSelected < 0) {
 				doYScale = true;
 				for (int i = 0; i < nSpectra; i++)
@@ -1386,13 +1386,16 @@ public class GraphSet implements XYScaleConverter {
 		}
 		int iSpecForFrame = (nSpectra == 1 ? 0 : !showAllStacked ? iSpectrumMovedTo
 				: iSpectrumSelected);
-		boolean addCurrentBox = (!isLinked && (isSplittable)
-				&& (!isSplittable || nSplit == 1 || pd.currentSplitPoint == iSplit));
-		boolean drawUpDownArrows = (pd.isCurrentGraphSet(this) && zoomEnabled
-				&& spectra.get(0).isScalable() && (addCurrentBox || nSpectra == 1)
-				&& (nSplit == 1 || pd.currentSplitPoint == iSpectrumMovedTo) && !isDrawNoSpectra());
-		boolean addSplitBox = isSplittable;
-		drawFrame(g, iSpecForFrame, addCurrentBox, addSplitBox, drawUpDownArrows);
+		if (doAll) {
+			boolean addCurrentBox = (!isLinked && (isSplittable) && (!isSplittable
+					|| nSplit == 1 || pd.currentSplitPoint == iSplit));
+			boolean drawUpDownArrows = (pd.isCurrentGraphSet(this) && zoomEnabled
+					&& spectra.get(0).isScalable() && (addCurrentBox || nSpectra == 1)
+					&& (nSplit == 1 || pd.currentSplitPoint == iSpectrumMovedTo) && !isDrawNoSpectra());
+			boolean addSplitBox = isSplittable;
+			drawFrame(gMain, iSpecForFrame, addCurrentBox, addSplitBox,
+					drawUpDownArrows);
+		}
 		if (pd.isCurrentGraphSet(this) // is current set
 				&& iSplit == pd.currentSplitPoint && (n < 2 // just one spectrum to show
 				|| iSpectrumSelected >= 0 // stacked and selected
@@ -1417,82 +1420,94 @@ public class GraphSet implements XYScaleConverter {
 				if (nSplit > 1) {
 					iSpectrumForScale = i;
 				}
-				boolean doDrawWidgets = !isGrey && (nSplit == 1 || showAllStacked || iSpectrumSelected == iSplit);
+				boolean doDrawWidgets = !isGrey
+						&& (nSplit == 1 || showAllStacked || iSpectrumSelected == iSplit);
 				boolean doDraw1DY = (doDrawWidgets && haveSelectedSpectrum && i == iSpectrumForScale);
 				if (doDrawWidgets) {
 					resetPinsFromView();
-					drawWidgets(g, subIndex, needNewPins, doDraw1DObjects, doDraw1DY, false);
+					drawWidgets(gTop, subIndex, needNewPins, doDraw1DObjects, doDraw1DY,
+							false);
 				}
-				if (haveSingleYScale && i == iSpectrumForScale) {
-					drawGrid(g);
+				if (haveSingleYScale && i == iSpectrumForScale && doAll) {
+					drawGrid(gMain);
 					if (pd.isPrinting && nSplit > 1)
-						drawSpectrumSource(g, i);
+						drawSpectrumSource(gMain, i);
 				}
 				if (doDrawWidgets)
-					drawWidgets(g, subIndex, false, doDraw1DObjects, doDraw1DY, true);
+					drawWidgets(gTop, subIndex, false, doDraw1DObjects, doDraw1DY, true);
 				if (haveSingleYScale && !isDrawNoSpectra() && i == iSpectrumForScale
 						&& (nSpectra == 1 || iSpectrumSelected >= 0))
-					drawHighlightsAndPeakTabs(g, i);
-				if (n == 1 && iSpectrumSelected < 0 || iSpectrumSelected == i
-						&& pd.isCurrentGraphSet(this)) {
-					if (pd.titleOn && !pd.titleDrawn) {
-						pd.drawTitle(g, height, width, pd.getDrawTitle(pd.isPrinting));
-						pd.titleDrawn = true;
+					drawHighlightsAndPeakTabs(gTop, i);
+
+				if (doAll) {
+					if (n == 1 && iSpectrumSelected < 0 || iSpectrumSelected == i
+							&& pd.isCurrentGraphSet(this)) {
+						if (pd.titleOn && !pd.titleDrawn) {
+							pd
+									.drawTitle(gMain, height, width, pd
+											.getDrawTitle(pd.isPrinting));
+							pd.titleDrawn = true;
+						}
 					}
+					if (haveSingleYScale && i == iSpectrumForScale) {
+						if (pd.getBoolean(ScriptToken.YSCALEON))
+							drawYScale(gMain, this);
+						if (pd.getBoolean(ScriptToken.YUNITSON))
+							drawYUnits(gMain);
+					}
+					drawSpectrum(gMain, i, offset, isGrey, ig);
 				}
-				if (haveSingleYScale && i == iSpectrumForScale) {
-					if (pd.getBoolean(ScriptToken.YSCALEON))
-						drawYScale(g, this);
-					if (pd.getBoolean(ScriptToken.YUNITSON))
-						drawYUnits(g);
-				}
-				drawSpectrum(g, i, offset, isGrey, ig);
-				if ((nSplit > 1 ? i == iSpectrumMovedTo : isLinked || i == iSpectrumForScale)
+				if ((nSplit > 1 ? i == iSpectrumMovedTo : isLinked
+						|| i == iSpectrumForScale)
 						&& !pd.isPrinting && xPixelMovedTo >= 0 && spec.isContinuous()) {
-					drawSpectrumPointer(g, spec, ig);
+					drawSpectrumPointer(gTop, spec, ig);
 				}
-				if (nSpectra > 1 && nSplit == 1 && pd.isCurrentGraphSet(this)) {
+				if (nSpectra > 1 && nSplit == 1 && pd.isCurrentGraphSet(this) && doAll) {
 					haveLeftRightArrows = true;
 					if (!pd.isPrinting) {
 						setScale(0);
 						iSpecForFrame = (iSpectrumSelected);
 						if (nSpectra != 2) {
-							setPlotColor(g, (iSpecForFrame + nSpectra - 1) % nSpectra);
-							fillArrow(g, ArrowType.LEFT, yHArrows, xHArrows - 9, true);
-							setCurrentBoxColor(g);
-							fillArrow(g, ArrowType.LEFT, yHArrows, xHArrows - 9, false);
+							setPlotColor(gMain, (iSpecForFrame + nSpectra - 1) % nSpectra);
+							fillArrow(gMain, ArrowType.LEFT, yHArrows, xHArrows - 9, true);
+							setCurrentBoxColor(gMain);
+							fillArrow(gMain, ArrowType.LEFT, yHArrows, xHArrows - 9, false);
 						}
 						if (iSpecForFrame >= 0) {
-							setPlotColor(g, iSpecForFrame);
-							fillCircle(g, xHArrows, yHArrows, true);
+							setPlotColor(gMain, iSpecForFrame);
+							fillCircle(gMain, xHArrows, yHArrows, true);
 						}
-						setCurrentBoxColor(g);
-						fillCircle(g, xHArrows, yHArrows, false);
-						setPlotColor(g, (iSpecForFrame + 1) % nSpectra);
-						fillArrow(g, ArrowType.RIGHT, yHArrows, xHArrows + 9, true);
-						setCurrentBoxColor(g);
-						fillArrow(g, ArrowType.RIGHT, yHArrows, xHArrows + 9, false);
+						setCurrentBoxColor(gMain);
+						fillCircle(gMain, xHArrows, yHArrows, false);
+						setPlotColor(gMain, (iSpecForFrame + 1) % nSpectra);
+						fillArrow(gMain, ArrowType.RIGHT, yHArrows, xHArrows + 9, true);
+						setCurrentBoxColor(gMain);
+						fillArrow(gMain, ArrowType.RIGHT, yHArrows, xHArrows + 9, false);
 					}
 				}
 				offset -= yOffsetPixels;
 			}
-			if (pd.getBoolean(ScriptToken.XSCALEON))
-				drawXScale(g, this);
-			if (pd.getBoolean(ScriptToken.XUNITSON))
-				drawXUnits(g);
+			if (doAll) {
+				if (pd.getBoolean(ScriptToken.XSCALEON))
+					drawXScale(gMain, this);
+				if (pd.getBoolean(ScriptToken.XUNITSON))
+					drawXUnits(gMain);
+			}
 		} else {
-			if (pd.getBoolean(ScriptToken.XSCALEON))
-				drawXScale(g, imageView);
-			if (pd.getBoolean(ScriptToken.YSCALEON))
-				drawYScale(g, imageView);
-			if (subIndex >= 0)
-				draw2DUnits(g);
-			drawWidgets(g, subIndex, needNewPins, doDraw1DObjects, true, false);
+			if (doAll) {
+				if (pd.getBoolean(ScriptToken.XSCALEON))
+					drawXScale(gMain, imageView);
+				if (pd.getBoolean(ScriptToken.YSCALEON))
+					drawYScale(gMain, imageView);
+				if (subIndex >= 0)
+					draw2DUnits(gMain);
+			}
+			drawWidgets(gTop, subIndex, needNewPins, doDraw1DObjects, true, false);
 			// no 2D grid?
-			drawWidgets(g, subIndex, needNewPins, doDraw1DObjects, true, true);
+			drawWidgets(gTop, subIndex, needNewPins, doDraw1DObjects, true, true);
 		}
 		if (annotations != null)
-			drawAnnotations(g, annotations, null);
+			drawAnnotations(gTop, annotations, null);
 	}
 
 	private void drawSpectrumSource(Object g, int i) {
@@ -1596,7 +1611,7 @@ public class GraphSet implements XYScaleConverter {
 				.getPeakList() : null);
 		if (list != null && list.size() > 0) {
 			if (piMouseOver != null && piMouseOver.spectrum == spec && pd.isMouseUp()) {
-				g2d.setGraphicsColor(g, g2d.getColor3(240, 240, 240)); // very faint gray box
+				g2d.setGraphicsColor(g, g2d.getColor4(240, 240, 240, 140)); // very faint gray box
 				drawPeak(g, piMouseOver, true);
 				spec.setHighlightedPeak(piMouseOver);
 			} else {
@@ -1783,7 +1798,7 @@ public class GraphSet implements XYScaleConverter {
 			boolean isContinuous, int yOffset, boolean isGrey, IntegralData ig) {
 		boolean isIntegral = (ig != null);
 		BS bsDraw = (ig == null ? null : ig.getBitSet());
-		boolean fillPeaks = (!isIntegral && !isGrey && !isIntegral
+		boolean fillPeaks = (!isIntegral && !isGrey
 				&& pendingIntegral != null && pendingIntegral.spec == spectra
 				.get(index));
 		int iColor = (isGrey ? -2 : isIntegral ? -1 : !allowStacking ? 0 : index);
@@ -1795,6 +1810,10 @@ public class GraphSet implements XYScaleConverter {
 		int iLast = viewData.getEndingPointIndex(index);
 		if (isContinuous) {
 			iLast--;
+			boolean doLineTo = g2d.canDoLineTo();
+			if (doLineTo)
+				g2d.doStroke(g, true);
+			boolean isDown = false;
 			for (int i = iFirst; i <= iLast; i++) {
 				Coordinate point1 = xyCoords[i];
 				Coordinate point2 = xyCoords[i + 1];
@@ -1840,8 +1859,15 @@ public class GraphSet implements XYScaleConverter {
 				}
 				if (pd.isPrinting && !plotOn)
 					continue;
-				g2d.drawLine(g, x1, y1, x2, y2);
+				if (isDown) {
+					g2d.lineTo(g, x2, y2);
+				} else {
+				  g2d.drawLine(g, x1, y1, x2, y2);
+				  isDown = doLineTo;
+				}
 			}
+			if (doLineTo)
+				g2d.doStroke(g, false);
 		} else {
 			for (int i = iFirst; i <= iLast; i++) {
 				Coordinate point = xyCoords[i];
@@ -2909,8 +2935,6 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 				int xPixel1 = pin1Dx1.xPixel0 + dp1;
 				if (dp == 0 || fixX(xPixel) != xPixel || fixX(xPixel1) != xPixel1)
 					return;
-				//System.out.println("pin1Dx01 drag x0 x1 " + toX0(xPixel) + " " + toX0(xPixel1));
-				//System.out.println("pin1Dx01 drag diff " + (toX0(xPixel) - toX0(xPixel1)));
 				pin1Dx0.setX(toX0(xPixel), xPixel);
 				pin1Dx1.setX(toX0(xPixel1), xPixel1);
 				
@@ -3021,7 +3045,8 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 	 * 
 	 * entry point for a repaint
 	 * 
-	 * @param og 
+	 * @param gMain
+	 * @param gTop
 	 * @param width
 	 * @param height
 	 * @param left 
@@ -3029,9 +3054,10 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 	 * @param top 
 	 * @param bottom 
 	 * @param isResized
+	 * @param taintedAll
 	 */
-	synchronized void drawGraphSet(Object og, int width, int height, int left, int right,
-			int top, int bottom, boolean isResized) {
+	synchronized void drawGraphSet(Object gMain, Object gTop, int width, int height, int left, int right,
+			int top, int bottom, boolean isResized, boolean taintedAll) {
 
 		zoomEnabled = pd.getBoolean(ScriptToken.ENABLEZOOM);
 		this.height = height * pd.scalingFactor;
@@ -3051,7 +3077,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		for (int iSplit = 0; iSplit < nSplit; iSplit++) {
 			// for now, at least, we only allow one 2D image
 			setPositionForFrame(iSplit);
-			drawAll(og, iSplit, isResized || nSplit > 1);
+			drawAll(gMain, gTop, iSplit, isResized || nSplit > 1, taintedAll);
 		}
 		setPositionForFrame(nSplit > 1 ? pd.currentSplitPoint : 0);
 		if (pd.isPrinting)
@@ -3210,7 +3236,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 
 		if (is2D) {
 			if (annotations != null) {
-				Coordinate xy = new Coordinate(imageView.toX(xPixel), imageView
+				Coordinate xy = new Coordinate().set(imageView.toX(xPixel), imageView
 						.toSubspectrumIndex(yPixel));
 				Annotation a = findAnnotation2D(xy);
 				if (a != null && setAnnotationText(a)) {

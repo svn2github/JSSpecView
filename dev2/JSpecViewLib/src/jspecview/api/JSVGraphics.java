@@ -19,13 +19,18 @@ public interface JSVGraphics {
 
 	int getStringWidth(Object g, String s);
 
-	void draw2DImage(Object g, Object image2D, int destX, int destY, int destWidth, int destHeight, int srcX0, int srcY0, int srcX1, int srcY1);
+
+	boolean canDoLineTo();
+
+	void doStroke(Object g, boolean isBegin);
+
+  void draw2DImage(Object g, Object image2D, int destX, int destY, int destWidth, int destHeight, int srcX0, int srcY0, int srcX1, int srcY1);
 
 	void drawLine(Object g, int x0, int y0, int x1, int y1);
 
 	void drawCircle(Object g, int x, int y, int diameter);
 
-	void drawPolygon(Object g, int[] ayPoints, int[] axPoints, int nPoints);
+	void drawPolygon(Object g, int[] axPoints, int[] ayPoints, int nPoints);
 
 	void drawRect(Object g, int xPixel, int yPixel,
 			int xPixels, int yPixels);
@@ -40,6 +45,8 @@ public interface JSVGraphics {
 	
 	void fillBackground(Object g, JSVColor bgcolor);
 
+	void lineTo(Object g, int x2, int y2);
+
 	void rotatePlot(Object g, int angle, int x, int y);
 
 	void setGraphicsColor(Object g, JSVColor c);
@@ -51,5 +58,6 @@ public interface JSVGraphics {
 	void translateScale(Object g, double x, double y, double scale);
 
 	void setWindowParameters(int width, int height);
+
 
 }

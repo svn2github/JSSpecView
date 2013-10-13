@@ -48,6 +48,7 @@ import java.awt.event.ItemListener;
 import java.util.EventListener;
 
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -105,6 +106,7 @@ public class AppMenu extends JMenuBar {
   private JMenuItem closeAllMenuItem = new JMenuItem();
   private JMenuItem sourceMenuItem = new JMenuItem();
   private JMenu displayMenu = new JMenu();
+	private JMenuItem integrationMenuItem;
 
 
   /**
@@ -382,7 +384,7 @@ public class AppMenu extends JMenuBar {
       public void menuCanceled(MenuEvent e) {
       }
     });
-    //jsvpPopupMenu.setProcessingMenu(processingMenu);
+    setProcessingMenu(processingMenu);
 
     add(fileMenu);
     add(displayMenu).setEnabled(false);
@@ -439,6 +441,39 @@ public class AppMenu extends JMenuBar {
           }
         }));
   }
+
+	public void setProcessingMenu(JComponent menu) {
+	AppMenu.setMenuItem(integrationMenuItem, 'I', "Integration", 0, 0,
+	    new ActionListener() {
+	      public void actionPerformed(ActionEvent e) {
+	        viewer.runScript("showIntegration");
+	      }
+	    });
+	menu.add(setMenuItem(null, 'M', "Measurements", 0, 0,
+	    new ActionListener() {
+	      public void actionPerformed(ActionEvent e) {
+	      	viewer.runScript("showMeasurements");
+	      }
+	    }));
+	menu.add(setMenuItem(null, 'P', "Peaks", 0, 0,
+	    new ActionListener() {
+	      public void actionPerformed(ActionEvent e) {
+	        viewer.runScript("showPeakList");
+	      }
+	    }));
+	menu.add(setMenuItem(null, '\0', "Transmittance/Absorbance", 0, 0,
+	    new ActionListener() {
+	      public void actionPerformed(ActionEvent e) {
+	        viewer.runScript("IRMODE IMPLIED");
+	      }
+	    }));
+	menu.add(setMenuItem(null, 'C', "Predicted Solution Colour", 0, 0,
+	    new ActionListener() {
+	      public void actionPerformed(ActionEvent e) {
+	        viewer.runScript("GETSOLUTIONCOLOR");
+	      }
+	    }));
+	}
 
   protected void setBoolean(ScriptToken st, ItemEvent e) {
     boolean isOn = (e.getStateChange() == ItemEvent.SELECTED);

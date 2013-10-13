@@ -344,7 +344,7 @@ public class JDXSpectrum extends JDXDataObject {
     if (!Coordinate.isYInRange(xyCoords, 0, MAXABS))
       xyCoords = Coordinate.normalise(xyCoords, 0, MAXABS);
     for (int i = 0; i < xyCoords.length; i++)
-      newXYCoords[i] = new Coordinate(xyCoords[i].getXVal(),
+      newXYCoords[i] = new Coordinate().set(xyCoords[i].getXVal(),
           toTransmittance(xyCoords[i].getYVal()));
     return newSpectrum(spectrum, newXYCoords, "TRANSMITTANCE");
   }
@@ -363,7 +363,7 @@ public class JDXSpectrum extends JDXDataObject {
     Coordinate[] newXYCoords = new Coordinate[xyCoords.length];
     boolean isPercent = Coordinate.isYInRange(xyCoords, -2, 2);
     for (int i = 0; i < xyCoords.length; i++)
-      newXYCoords[i] = new Coordinate(xyCoords[i].getXVal(), 
+      newXYCoords[i] = new Coordinate().set(xyCoords[i].getXVal(), 
           toAbsorbance(xyCoords[i].getYVal(), isPercent));
     return newSpectrum(spectrum, newXYCoords, "ABSORBANCE");
   }
