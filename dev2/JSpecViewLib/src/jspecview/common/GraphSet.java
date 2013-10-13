@@ -647,6 +647,7 @@ public class GraphSet implements XYScaleConverter {
 			pendingMeasurement = null;
 			return;
 		}
+		pd.taintedAll = true;
 		double x = toX(xPixel);
 		double y = toY(yPixel);
 		double x0 = x;
@@ -1457,9 +1458,8 @@ public class GraphSet implements XYScaleConverter {
 					}
 					drawSpectrum(gMain, i, offset, isGrey, ig);
 				}
-				if (pendingMeasurement != null && pendingMeasurement.spec == spectra.get(i))
+				if (pendingMeasurement != null && pendingMeasurement.spec == spec)
 					drawMeasurement(gTop, pendingMeasurement);
-
 				if ((nSplit > 1 ? i == iSpectrumMovedTo : isLinked
 						|| i == iSpectrumForScale)
 						&& !pd.isPrinting && xPixelMovedTo >= 0 && spec.isContinuous()) {
