@@ -28,7 +28,7 @@ import jspecview.common.Annotation.AType;
  */
 public class DialogParams {
 
-	public AnnotationDialog annDialog;
+	public JSVDialog annDialog;
 
 	public AType thisType;
 	public String subType;
@@ -58,7 +58,7 @@ public class DialogParams {
 	public boolean isON = true;
 
 
-	public DialogParams(AType type, AnnotationDialog dialog, JSViewer viewer,
+	public DialogParams(AType type, JSVDialog dialog, JSViewer viewer,
 			JDXSpectrum spec, Parameters myParams) {
 		this.thisType = type;
 		this.annDialog = dialog;

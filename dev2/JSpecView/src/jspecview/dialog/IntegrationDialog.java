@@ -26,7 +26,7 @@ package jspecview.dialog;
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-public class IntegrationDialog extends AnnotationDialog {
+public class IntegrationDialog extends JSVDialog {
 
 	private static final long serialVersionUID = 1L;
 

@@ -10,7 +10,7 @@ import org.jmol.util.SB;
 
 import jspecview.api.JSVPanel;
 import jspecview.api.JSVTreeNode;
-import jspecview.dialog.AnnotationDialog;
+import jspecview.dialog.JSVDialog;
 import jspecview.source.JDXSource;
 
 public class JSVPanelNode {
@@ -39,7 +39,7 @@ public class JSVPanelNode {
   public String fileName;
   public JSVPanel jsvp;
   public String id;
-  public AnnotationDialog legend;
+  public JSVDialog legend;
 	public boolean isSelected;
 	public boolean isView;
   public String frameTitle;
@@ -58,7 +58,7 @@ public class JSVPanelNode {
     return jsvp.getPanelData().getSpectrum();
   }
 
-  public AnnotationDialog setLegend(AnnotationDialog legend) {
+  public JSVDialog setLegend(JSVDialog legend) {
     if (this.legend != null)
       this.legend.dispose();
     this.legend = legend;

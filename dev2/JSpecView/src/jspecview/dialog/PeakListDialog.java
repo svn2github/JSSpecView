@@ -26,7 +26,7 @@ package jspecview.dialog;
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-public class PeakListDialog extends AnnotationDialog {
+public class PeakListDialog extends JSVDialog {
 
 	private static final long serialVersionUID = 1L;
 	private static int[] posXY = new int[] {Integer.MIN_VALUE, 0};

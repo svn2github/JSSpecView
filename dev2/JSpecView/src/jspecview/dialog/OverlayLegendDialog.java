@@ -19,14 +19,14 @@
 
 package jspecview.dialog;
 
-import jspecview.dialog.AnnotationDialog;
+import jspecview.dialog.JSVDialog;
 
 /**
  * Dialog for showing the legend or key for overlaid plots in a
  * <code>JSVPanel</code>.
  * 
  */
-public class OverlayLegendDialog extends AnnotationDialog {
+public class OverlayLegendDialog extends JSVDialog {
 
 	private static final long serialVersionUID = 1L;
 

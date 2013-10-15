@@ -18,7 +18,7 @@ import jspecview.api.JSVPanel;
 import jspecview.api.XYScaleConverter;
 import jspecview.common.Annotation.AType;
 import jspecview.common.PanelData.LinkMode;
-import jspecview.dialog.AnnotationDialog;
+import jspecview.dialog.JSVDialog;
 import jspecview.util.JSVColor;
 
 public class GraphSet implements XYScaleConverter {
@@ -197,8 +197,8 @@ public class GraphSet implements XYScaleConverter {
 		if (dialogs != null)
 			for (Map.Entry<String, AnnotationData> e : dialogs.entrySet()) {
 				AnnotationData ad = e.getValue();
-				if (ad instanceof AnnotationDialog && (type == AType.NONE || ad.getAType() != type))
-					((AnnotationDialog) ad).setVisible(false);
+				if (ad instanceof JSVDialog && (type == AType.NONE || ad.getAType() != type))
+					((JSVDialog) ad).setVisible(false);
 			}
 	}
 
@@ -218,8 +218,8 @@ public class GraphSet implements XYScaleConverter {
 		if (dialogs != null)
 			for (Map.Entry<String, AnnotationData> e : dialogs.entrySet()) {
 				AnnotationData ad = e.getValue();
-				if (ad instanceof AnnotationDialog)
-					((AnnotationDialog) ad).dispose();
+				if (ad instanceof JSVDialog)
+					((JSVDialog) ad).dispose();
 			}
 		dialogs = null;
 	}
@@ -2366,8 +2366,8 @@ public class GraphSet implements XYScaleConverter {
 		if (ad == null)
 			return;
 		Integral integral = ((IntegralData) ad.getData()).addIntegralRegion(x1, x2);
-		if (isFinal && ad instanceof AnnotationDialog)
-			((AnnotationDialog) ad).update(null);
+		if (isFinal && ad instanceof JSVDialog)
+			((JSVDialog) ad).update(null);
 		selectedSpectrumIntegrals = null;
 		pendingIntegral = (isFinal ? null : integral);
 	}
@@ -3275,11 +3275,11 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 	private void updateDialog(AType type, int iSpec) {
 		AnnotationData ad = getDialog(type, iSpec);
 		if (ad != null && ad.getState() && isVisible(ad))
-			((AnnotationDialog) ad).update(pd.coordClicked);
+			((JSVDialog) ad).update(pd.coordClicked);
 	}
 
 	private boolean isVisible(AnnotationData ad) {
-		return (ad instanceof AnnotationDialog && ad.isVisible());
+		return (ad instanceof JSVDialog && ad.isVisible());
 	}
 
 	/**
@@ -3528,8 +3528,8 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		}
 		if (tfToggle == null) {
 			// exists and "TOGGLE"
-			if (id instanceof AnnotationDialog)
-				((AnnotationDialog) id).setVisible(false); 
+			if (id instanceof JSVDialog)
+				((JSVDialog) id).setVisible(false); 
 				// was tfToggle != null && ((AnnotationDialog) id).isVisible());
 			else
 				id.setState(!id.getState());
@@ -3538,7 +3538,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		// exists and "ON" or "OFF"
 		boolean isON = tfToggle.booleanValue();
 		id.setState(isON);
-		if (id instanceof AnnotationDialog)
+		if (id instanceof JSVDialog)
 			pd.showDialog(type);
 
 		// if (type == AType.Integration)
@@ -3802,7 +3802,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		return dialog;
 	}
 
-	void removeDialog(AnnotationDialog dialog) {
+	void removeDialog(JSVDialog dialog) {
 		String key = dialog.getKey();
 		dialogs.remove(key);
 		AnnotationData data = dialog.getData();
@@ -3823,20 +3823,20 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 					getSpectrum()));
 		}
 		((PeakData) dialog.getData()).setPeakList(p, Integer.MIN_VALUE, viewData.getScale());
-		if (dialog instanceof AnnotationDialog)
-			((AnnotationDialog) dialog).setFields();
+		if (dialog instanceof JSVDialog)
+			((JSVDialog) dialog).setFields();
 		return dialog.getData();
 	}
 
 	public void setPeakListing(Boolean tfToggle) {
 		AnnotationData dialog = getDialog(AType.PeakList, -1);
-		AnnotationDialog ad = (dialog instanceof AnnotationDialog ? (AnnotationDialog) dialog : null);
+		JSVDialog ad = (dialog instanceof JSVDialog ? (JSVDialog) dialog : null);
 		boolean isON = (tfToggle == null ? ad == null || !ad.isVisible() : tfToggle.booleanValue());
 		if (isON) {
 			pd.showDialog(AType.PeakList);
 		} else {
-			if (dialog instanceof AnnotationDialog)
-				((AnnotationDialog) dialog).setVisible(false);
+			if (dialog instanceof JSVDialog)
+				((JSVDialog) dialog).setVisible(false);
 		}
 	}
 
@@ -3974,7 +3974,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		for (Map.Entry<String, AnnotationData> e : dialogs.entrySet()) {
 			AnnotationData ad = e.getValue();
 			if (isVisible(ad))
-				((AnnotationDialog) ad).setVisible(true);
+				((JSVDialog) ad).setVisible(true);
 		}
 	}
 

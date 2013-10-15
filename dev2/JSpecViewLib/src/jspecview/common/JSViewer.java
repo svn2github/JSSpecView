@@ -35,7 +35,7 @@ import jspecview.api.ScriptInterface;
 import jspecview.common.Annotation.AType;
 import jspecview.common.JDXSpectrum.IRMode;
 import jspecview.common.PanelData.LinkMode;
-import jspecview.dialog.AnnotationDialog;
+import jspecview.dialog.JSVDialog;
 import jspecview.dialog.DialogManager;
 import jspecview.source.JDXSource;
 import jspecview.tree.SimpleTree;
@@ -84,8 +84,8 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 	public JSVFileHelper          fileHelper;
 	public JSVPopupMenu           jsvpPopupMenu;
 	private DialogManager   			dialogManager;
-	private AnnotationDialog      viewDialog;
-	private AnnotationDialog      overlayLegendDialog;
+	private JSVDialog      viewDialog;
+	private JSVDialog      overlayLegendDialog;
 
 	private IRMode irMode = IRMode.NO_CONVERT;
 
@@ -622,7 +622,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 	}
 
 	private void showOverlayLegend(JSVPanelNode node, boolean visible) {
-		AnnotationDialog legend = node.legend;
+		JSVDialog legend = node.legend;
 		if (legend == null && visible) {
 			legend = node.setLegend(node.jsvp.getPanelData()
 					.getNumberOfSpectraInCurrentSet() > 1
@@ -1546,27 +1546,27 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		return (dialogManager == null ? (dialogManager = (DialogManager) getAwtInterface("DialogManager")).set(this) : dialogManager);
 	}
 	
-	public AnnotationDialog getDialog(AType type, JDXSpectrum spec) {
+	public JSVDialog getDialog(AType type, JDXSpectrum spec) {
 		String root = "jspecview.dialog.";
 		switch (type) {
 		case Integration:
-			return ((AnnotationDialog) Interface.getInterface(root
+			return ((JSVDialog) Interface.getInterface(root
 					+ "IntegrationDialog")).setParams("Integration for " + spec, this,
 					spec);
 		case Measurements:
-			return ((AnnotationDialog) Interface.getInterface(root
+			return ((JSVDialog) Interface.getInterface(root
 					+ "MeasurementsDialog")).setParams("Measurements for " + spec, this,
 					spec);
 		case PeakList:
-			return ((AnnotationDialog) Interface
+			return ((JSVDialog) Interface
 					.getInterface(root + "PeakListDialog")).setParams("Peak List for "
 					+ spec, this, spec);
 		case OverlayLegend:
-			return overlayLegendDialog = ((AnnotationDialog) Interface
+			return overlayLegendDialog = ((JSVDialog) Interface
 					.getInterface(root + "OverlayLegendDialog")).setParams(selectedPanel
 					.getPanelData().getViewTitle(), this, null);
 		case Views:
-			return viewDialog = ((AnnotationDialog) Interface.getInterface(root
+			return viewDialog = ((JSVDialog) Interface.getInterface(root
 					+ "ViewsDialog")).setParams("View/Combine/Close Spectra", this, null);
 		default:
 			return null;

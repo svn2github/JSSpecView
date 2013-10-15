@@ -10,7 +10,7 @@ import jspecview.common.JSViewer;
 import jspecview.common.MeasurementData;
 import jspecview.common.Parameters;
 
-abstract public class AnnotationDialog extends Annotation implements AnnotationData {
+abstract public class JSVDialog extends Annotation implements AnnotationData {
 
 	abstract public int[] getPosXY();
 
@@ -38,7 +38,7 @@ abstract public class AnnotationDialog extends Annotation implements AnnotationD
 
 	abstract public boolean callback(String id, String msg);
 
-	public AnnotationDialog setParams(String title, JSViewer viewer, JDXSpectrum spec) {
+	public JSVDialog setParams(String title, JSViewer viewer, JDXSpectrum spec) {
 		this.title = title;
 		this.viewer = viewer;
 		this.spec = spec;
@@ -256,7 +256,7 @@ abstract public class AnnotationDialog extends Annotation implements AnnotationD
 		dialogParams.loadData(null);
 	}
 
-	public AnnotationDialog reEnable() {
+	public JSVDialog reEnable() {
 		dialogParams.reEnable();
 		return this;
 	}

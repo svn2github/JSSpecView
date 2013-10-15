@@ -47,7 +47,7 @@ import jspecview.api.JSVGraphics;
 import jspecview.api.JSVPanel;
 import jspecview.api.PanelListener;
 import jspecview.common.Annotation.AType;
-import jspecview.dialog.AnnotationDialog;
+import jspecview.dialog.JSVDialog;
 import jspecview.util.JSVColor;
 import jspecview.util.JSVColorUtil;
 
@@ -997,7 +997,7 @@ public class PanelData implements EventManager {
 			graphSets.get(i).closeDialogsExcept(type);
 	}
 
-	public void removeDialog(AnnotationDialog dialog) {
+	public void removeDialog(JSVDialog dialog) {
 		currentGraphSet.removeDialog(dialog);
 	}
 
@@ -1315,18 +1315,18 @@ public class PanelData implements EventManager {
 				spec.getXYCoords().length - 1);
 	}
 
-	public AnnotationDialog showDialog(AType type) {
+	public JSVDialog showDialog(AType type) {
 		AnnotationData ad = getDialog(type);
 		closeAllDialogsExcept(type);
-		if (ad != null && ad instanceof AnnotationDialog)
-			return ((AnnotationDialog) ad).reEnable();
+		if (ad != null && ad instanceof JSVDialog)
+			return ((JSVDialog) ad).reEnable();
 		int iSpec = getCurrentSpectrumIndex();
 		if (iSpec < 0) {
 			jsvp.showMessage("To enable " + type + " first select a spectrum by clicking on it.", "" + type);
 			return null;
 		}
 		JDXSpectrum spec = getSpectrum();
-		AnnotationDialog dialog = viewer.getDialog(type, spec);
+		JSVDialog dialog = viewer.getDialog(type, spec);
 		if (ad != null)
 			dialog.setData(ad);
 		addDialog(iSpec, type, dialog);

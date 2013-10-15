@@ -13,13 +13,13 @@ abstract public class DialogManager {
 
 	protected JSViewer viewer;
 	private Map<Object, String> htSelectors;
-	private Map<String, AnnotationDialog> htDialogs;
+	private Map<String, JSVDialog> htDialogs;
 	private int dialogCount;
 
 	public DialogManager set(JSViewer viewer) {
 		this.viewer = viewer;
 		htSelectors = new Hashtable<Object, String>();
-		htDialogs = new Hashtable<String, AnnotationDialog>();
+		htDialogs = new Hashtable<String, JSVDialog>();
 		return this;
 	}
 
@@ -29,7 +29,7 @@ abstract public class DialogManager {
 	public final static int WARNING_MESSAGE     =  2; // JOptionPane.WARNING_MESSAGE
 	public final static int QUESTION_MESSAGE    =  3; // JOptionPane.QUESTION_MESSAGE
 
-	abstract public PlatformDialog getDialog(AnnotationDialog jsvDialog, DialogParams params);
+	abstract public PlatformDialog getDialog(JSVDialog jsvDialog, DialogParams params);
 
 	abstract public String getDialogInput(Object parentComponent, String phrase,
 			String title, int msgType, Object icon, Object[] objects,
@@ -54,7 +54,7 @@ abstract public class DialogManager {
 		return htSelectors.get(selector);
 	}
 
-	protected String registerDialog(AnnotationDialog jsvDialog, String key) {
+	protected String registerDialog(JSVDialog jsvDialog, String key) {
 		String id = key + " " + (++dialogCount); 
 		htDialogs.put(id, jsvDialog);
 		return id;
@@ -74,7 +74,7 @@ abstract public class DialogManager {
 
 	public boolean dialogCallback(String url) {
 		String dialogID = url.substring(8, url.indexOf("?"));
-		AnnotationDialog jsvDialog = htDialogs.get(dialogID);
+		JSVDialog jsvDialog = htDialogs.get(dialogID);
 		return (jsvDialog == null ? false : jsvDialog.callback(getField(url, "id"), url));		
 	}
 

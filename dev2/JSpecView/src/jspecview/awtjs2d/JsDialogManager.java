@@ -2,7 +2,7 @@ package jspecview.awtjs2d;
 
 import jspecview.api.JSVPanel;
 import jspecview.common.JDXSpectrum;
-import jspecview.dialog.AnnotationDialog;
+import jspecview.dialog.JSVDialog;
 import jspecview.dialog.DialogManager;
 import jspecview.dialog.DialogParams;
 import jspecview.dialog.PlatformDialog;
@@ -10,7 +10,7 @@ import jspecview.dialog.PlatformDialog;
 class JsDialogManager extends DialogManager {
 
 	@Override
-	public PlatformDialog getDialog(AnnotationDialog jsvDialog,
+	public PlatformDialog getDialog(JSVDialog jsvDialog,
 			DialogParams params) {
 		// TODO Auto-generated method stub
 		return null;

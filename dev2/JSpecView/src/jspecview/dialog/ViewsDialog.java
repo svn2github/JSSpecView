@@ -35,7 +35,7 @@ import org.jmol.util.SB;
  * 
  * @author Bob Hanson hansonr@stolaf.edu
  */
-public class ViewsDialog extends AnnotationDialog {
+public class ViewsDialog extends JSVDialog {
 
 	private static final long serialVersionUID = 1L;
 	private JmolList<JSVTreeNode> treeNodes;	

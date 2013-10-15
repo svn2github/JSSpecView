@@ -19,7 +19,7 @@
 
 package jspecview.dialog;
 
-import jspecview.dialog.AnnotationDialog;
+import jspecview.dialog.JSVDialog;
 
 /**
  * Dialog for managing the measurement list
@@ -28,7 +28,7 @@ import jspecview.dialog.AnnotationDialog;
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-public class MeasurementsDialog extends AnnotationDialog {
+public class MeasurementsDialog extends JSVDialog {
 
 	private static final long serialVersionUID = 1L;
 	private static int[] posXY = new int[] {Integer.MIN_VALUE, 0};

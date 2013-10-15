@@ -27,7 +27,7 @@ import javax.swing.event.ListSelectionListener;
 
 import jspecview.api.JSVPanel;
 import jspecview.common.JDXSpectrum;
-import jspecview.dialog.AnnotationDialog;
+import jspecview.dialog.JSVDialog;
 import jspecview.dialog.DialogManager;
 import jspecview.dialog.DialogParams;
 import jspecview.dialog.PlatformDialog;
@@ -46,7 +46,7 @@ public class AwtDialogManager extends DialogManager implements
 	}
 
 	@Override
-	public PlatformDialog getDialog(AnnotationDialog jsvDialog,
+	public PlatformDialog getDialog(JSVDialog jsvDialog,
 			DialogParams params) {
 		return new AwtDialog(this, params,
 				registerDialog(jsvDialog, params.thisKey));
