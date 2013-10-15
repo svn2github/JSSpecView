@@ -264,19 +264,21 @@ public class AwtDialog extends JDialog implements PlatformDialog {
 		repaint();
 	}
 
+  //// Table-related methods ////
+	
+	
 	public void setCellSelectionEnabled(boolean enabled) {
 		dataTable.setCellSelectionEnabled(enabled);
 	}
 
-	public void setSelectionInterval(int i, int j) {
-		dataTable.getSelectionModel();
+	protected int selectedRow = -1;
+	public void selectTableRow(int i) {
+		selectedRow = i;
+		dataTable.clearSelection();
 	}
-	
-  //// Table-related methods ////
-	
-	
+
 	private synchronized JTable getDataTable(Object[][] data, String[] columnNames, int[] columnWidths, int height) {
-		
+    selectedRow = -1;		
 		AwtDialogTableModel tableModel = new AwtDialogTableModel(columnNames, data, !haveColors);
 		JTable table = new JTable(tableModel);
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -286,7 +288,7 @@ public class AwtDialog extends JDialog implements PlatformDialog {
     table.setCellSelectionEnabled(true);
     ListSelectionModel selector = table.getSelectionModel();
     selector.addListSelectionListener((AwtDialogManager) manager);
-    manager.registerSelector(thisID + "/TABLE", selector);
+    manager.registerSelector(thisID + "/ROW", selector);
     selector = table.getColumnModel().getSelectionModel();
     selector.addListSelectionListener((AwtDialogManager) manager);
     manager.registerSelector(thisID + "/COLUMN", selector);
@@ -317,6 +319,8 @@ public class AwtDialog extends JDialog implements PlatformDialog {
 			setHorizontalAlignment(tableCellAlignLeft ? SwingConstants.LEFT : column == 0 ? SwingConstants.CENTER
 					: SwingConstants.RIGHT);
 			setText(title.toString());
+			// ignore selection model
+			isSelected = (row == selectedRow);
 			setBackground(isSelected ? table.getSelectionBackground() : table
 					.getBackground());
 			return this;
@@ -351,4 +355,15 @@ public class AwtDialog extends JDialog implements PlatformDialog {
 		}
 	}
 
+	@Override
+	public void repaint() {
+		if (dataTable != null) {
+			dataTable.clearSelection();
+			if (selectedRow >= 0) {
+				dataTable.setRowSelectionAllowed(true);
+				dataTable.setRowSelectionInterval(selectedRow, selectedRow + 1);
+			}
+		}
+		
+	}
 }

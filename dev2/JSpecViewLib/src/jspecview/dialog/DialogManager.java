@@ -13,7 +13,7 @@ abstract public class DialogManager {
 
 	protected JSViewer viewer;
 	private Map<Object, String> htSelectors;
-	private Map<String, JSVDialog> htDialogs;
+	protected Map<String, JSVDialog> htDialogs;
 	private int dialogCount;
 
 	public DialogManager set(JSViewer viewer) {

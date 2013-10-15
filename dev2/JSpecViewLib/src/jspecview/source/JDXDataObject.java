@@ -636,6 +636,8 @@ public abstract class JDXDataObject extends JDXHeader {
 
 	public String setMeasurementText(Measurement m) {
 		double dx = m.getValue();
+		if (Double.isNaN(dx))
+			return "";
 		int precision = 1;
 		String units = "";
 		if (isNMR()) {

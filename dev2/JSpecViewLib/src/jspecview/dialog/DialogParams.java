@@ -365,7 +365,8 @@ public class DialogParams {
 		}
 	}
 
-	public void update(Coordinate clicked) {
+	public void update(Coordinate clicked, double xRange, int yOffset) {
+		annDialog.selectTableRow(-1);
 		switch (thisType) {
 		case Integration:
 			annDialog.loadDataFromFields();
@@ -378,22 +379,25 @@ public class DialogParams {
 		case NONE:
 			break;
 		case PeakList:
-			annDialog.applyFromFields();
-			if (xyData == null || clicked == null)
+			if (yOffset > 20)
+				annDialog.applyFromFields();
+			if (xyData == null || clicked == null || yOffset > 20)
 				return;
 			int ipt = 0;
 			double dx0 = 1e100;
 			double xval = clicked.getXVal();
 			PeakData md = (PeakData) xyData;
+			double min = Math.abs(xRange / 20);
 			for (int i = md.size(); --i >= 0;) {
 				double dx = Math.abs(xval - md.get(i).getXVal());
 				if (dx < dx0) {
 					dx0 = dx;
 					ipt = i;
 				}
-				if (dx0 < 0.1)
-					annDialog.setTableSelectionInterval(md.size() - 2 - ipt,
-							md.size() - 1 - ipt);
+			}
+			if (dx0 < min) {
+				annDialog.selectTableRow(md.size() - 2 - ipt);
+				annDialog.repaint();
 			}
 			break;
 		case OverlayLegend:
@@ -547,6 +551,7 @@ public class DialogParams {
 				} else {
 					iRowSelected = index;
 					tableRCflag = 2;
+					annDialog.selectTableRow(index);
 				}
 				return;
 			}

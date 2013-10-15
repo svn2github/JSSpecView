@@ -30,7 +30,7 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 	private Object showHideButton; // text changeable
 	protected Object combo1; // measurement listing, peaks
 	
-	private boolean addClearBtn, addCombo1;
+	private boolean addClearBtn, addCombo1, addApplyBtn;
 	private boolean isNumeric; // not Views or OverlayLegend
 	private boolean defaultVisible; // not OverlayLegend
 
@@ -48,10 +48,12 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 			isNumeric = true;
 			addClearBtn = true;
 			defaultVisible = true;
+			addApplyBtn = true;
 			break;
 		case Measurements:
 			isNumeric = true;
 			addClearBtn = true;
+			// no apply button
 			addCombo1 = true;
 			defaultVisible = true;
 			break;
@@ -60,6 +62,7 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 		case PeakList:
 			isNumeric = true;
 			addClearBtn = true;
+			addApplyBtn = true;
 			defaultVisible = true;
 			break;
 		case Views:
@@ -126,8 +129,8 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 						dialogParams.addUnits);
 			// txtFontSize = ((DialogHelper dialogHelper)).addInputOption("FontSize",
 			// "Font Size", null, null, "10");
-
-			dialog.addButton("btnApply", "Apply");
+			if (addApplyBtn)
+				dialog.addButton("btnApply", "Apply");
 			showHideButton = dialog.addButton("btnShow", "Show");
 			if (addClearBtn)
 				dialog.addButton("btnClear", "Clear");
@@ -209,8 +212,8 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 		dialogParams.isON = b;
 	}
 
-	public void update(Coordinate clicked) {
-		dialogParams.update(clicked);
+	public void update(Coordinate clicked, double xRange, int yOffset) {
+		dialogParams.update(clicked, xRange, yOffset);
 	}
 
 	// ////// interface to DialogParams////////
@@ -227,10 +230,6 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 
 	public void setTableSelectionEnabled(boolean enabled) {
 		dialog.setCellSelectionEnabled(enabled);
-	}
-
-	public void setTableSelectionInterval(int i, int j) {
-		dialog.setSelectionInterval(i, j);
 	}
 
 	public Parameters getParameters() {
@@ -280,6 +279,14 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 
 	public boolean isVisible() {
 		return dialog.isVisible();
+	}
+
+	public void selectTableRow(int i) {
+		dialog.selectTableRow(i);
+	}
+
+	public void repaint() {
+		dialog.repaint();
 	}
 
 }

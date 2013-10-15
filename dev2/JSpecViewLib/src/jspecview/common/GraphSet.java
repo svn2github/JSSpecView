@@ -653,6 +653,7 @@ public class GraphSet implements XYScaleConverter {
 		double y = toY(yPixel);
 		double x0 = x;
 		Measurement m;
+		System.out.println("cc = " + clickCount);
 		switch (clickCount) {
 		case 0: // move
 			pendingMeasurement.setPt2(toX(xPixel), toY(yPixel));
@@ -688,14 +689,15 @@ public class GraphSet implements XYScaleConverter {
 			x = toX(xPixel);
 			y = toY(yPixel);
 			pendingMeasurement.setPt2(x, y);
+			System.out.println("pm = " + pendingMeasurement.text);
 			if (pendingMeasurement.text.length() == 0) {
 				pendingMeasurement = null;
 			} else {
 				setMeasurement(pendingMeasurement);
 				if (clickCount == 1) {
 					setSpectrumClicked(getSpectrumIndex(pendingMeasurement.spec));
-					pendingMeasurement = new Measurement()
-							.setM1(x, y, pendingMeasurement.spec);
+					pendingMeasurement = new Measurement().setM1(x, y,
+							pendingMeasurement.spec);
 				} else {
 					pendingMeasurement = null;
 				}
@@ -709,8 +711,8 @@ public class GraphSet implements XYScaleConverter {
 						|| pendingMeasurement == null) {
 					lastXMax = xValueMovedTo;
 					lastSpecClicked = iSpec;
-					pendingMeasurement = new Measurement()
-							.setM1(xValueMovedTo, yValueMovedTo, spectra.get(iSpec));
+					pendingMeasurement = new Measurement().setM1(xValueMovedTo,
+							yValueMovedTo, spectra.get(iSpec));
 				} else {
 					pendingMeasurement.setPt2(xValueMovedTo, yValueMovedTo);
 					if (pendingMeasurement.text.length() > 0)
@@ -2295,7 +2297,7 @@ public class GraphSet implements XYScaleConverter {
 		int x1 = toPixelX(m.getXVal());
 		int y1 = toPixelY(m.getYVal());
 		int x2 = toPixelX(m.getXVal2());
-		if (x1 != fixX(x1) || x2 != fixX(x2))
+		if (Double.isNaN(m.getXVal()) || x1 != fixX(x1) || x2 != fixX(x2))
 			return;
 		boolean drawString = (Math.abs(x1 - x2) >= 2);
 		boolean drawBaseLine = getScale().isYZeroOnScale() && m.spec.isHNMR();
@@ -2368,7 +2370,7 @@ public class GraphSet implements XYScaleConverter {
 			return;
 		Integral integral = ((IntegralData) ad.getData()).addIntegralRegion(x1, x2);
 		if (isFinal && ad instanceof JSVDialog)
-			((JSVDialog) ad).update(null);
+			((JSVDialog) ad).update(null, 0, 0);
 		selectedSpectrumIntegrals = null;
 		pendingIntegral = (isFinal ? null : integral);
 	}
@@ -3269,8 +3271,11 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 
 	private void updateDialog(AType type, int iSpec) {
 		AnnotationData ad = getDialog(type, iSpec);
-		if (ad != null && ad.getState() && isVisible(ad))
-			((JSVDialog) ad).update(pd.coordClicked);
+		if (ad == null || !isVisible(ad))
+			return;
+		double  xRange = toX(xPixel1) - toX(xPixel0);
+		int yOffset = (getSpectrum().isInverted() ? yPixel1 - pd.mouseY : pd.mouseY - yPixel0);
+		((JSVDialog) ad).update(pd.coordClicked, xRange, yOffset);
 	}
 
 	private boolean isVisible(AnnotationData ad) {
@@ -3517,7 +3522,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 			if (tfToggle != null && tfToggle != Boolean.TRUE)
 				return; // does not exist and "OFF" -- ignore
 			// does not exist, and TOGGLE or ON
-			if (type == AType.PeakList || type == AType.Integration)
+			if (type == AType.PeakList || type == AType.Integration || type == AType.Measurements)
 				pd.showDialog(type);
 			return;
 		}

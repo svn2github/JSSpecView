@@ -107,7 +107,7 @@ public class Measurement extends Annotation {
    */
   @Override
   public String toString() {
-    return "[" + getXVal() + "-" + pt2.getXVal() + "]";
+    return "[" + getXVal() + "," + pt2.getXVal() + "]";
   }
 
 

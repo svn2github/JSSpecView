@@ -110,6 +110,11 @@ public class JsDialog implements PlatformDialog {
 		
 	}
 
+	public void selectTableRow(int i) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	public void setCellSelectionEnabled(boolean enabled) {
 		// TODO Auto-generated method stub
 		
@@ -140,11 +145,6 @@ public class JsDialog implements PlatformDialog {
 		
 	}
 
-	public void setSelectionInterval(int i, int j) {
-		// TODO Auto-generated method stub
-		
-	}
-
 	public void setText(Object showHideButton, String label) {
 		// TODO Auto-generated method stub
 		
@@ -164,4 +164,10 @@ public class JsDialog implements PlatformDialog {
 		// TODO Auto-generated method stub
 		
 	}
+
+	public void repaint() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

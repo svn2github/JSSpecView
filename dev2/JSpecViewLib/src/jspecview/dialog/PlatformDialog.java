@@ -51,9 +51,11 @@ public interface PlatformDialog {
 
 	void setCellSelectionEnabled(boolean enabled);
 
-	void setSelectionInterval(int i, int j);
-
 	void setTitle(String title);
+
+	void selectTableRow(int i);
+
+	void repaint();
 
 	
 }

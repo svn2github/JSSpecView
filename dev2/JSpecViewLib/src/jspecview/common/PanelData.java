@@ -1306,6 +1306,8 @@ public class PanelData implements EventManager {
 		}
 		JDXSpectrum spec = getSpectrum();
 		JSVDialog dialog = viewer.getDialog(type, spec);
+		if (ad == null && type == AType.Measurements)
+			ad = new MeasurementData(AType.Measurements, spec);
 		if (ad != null)
 			dialog.setData(ad);
 		addDialog(iSpec, type, dialog);

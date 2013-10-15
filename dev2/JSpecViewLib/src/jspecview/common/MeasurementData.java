@@ -48,7 +48,7 @@ public class MeasurementData extends JmolList<Measurement> implements
 	private boolean isON = true;
 	private String key;
 
-	private final static String[] HEADER = new String[] { "peak", "start", "end",
+	private final static String[] HEADER = new String[] { "", "start", "end",
 			"value" };
 
 	MeasurementData(AType type, JDXSpectrum spec) {
