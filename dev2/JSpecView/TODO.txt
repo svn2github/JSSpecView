@@ -17,6 +17,7 @@ in preparation for JavaScript version (add to top):
 Complete rewrite of dialogs.
  -IntegrationDialog, MeasurementDialog, OverlayLegendDialog, PeakListDialog, ViewsDialog all AWT-free
  -DialogManager is AWT-free and coordinates all communication
+ -DialogHelper is used to create dialogs
  -Event communication even in AWT is via a URL passed to JSViewer.runScript: 
     "event://DIALOG_ID?&id=EVENT_ID&DATA..."
  -To implement in JavaScript we only need to create all methods in JsDialogManager and JsDialog
