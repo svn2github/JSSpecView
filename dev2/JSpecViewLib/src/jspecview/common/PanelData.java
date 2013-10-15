@@ -44,11 +44,11 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 import jspecview.api.AnnotationData;
-import jspecview.api.AnnotationDialog;
 import jspecview.api.JSVGraphics;
 import jspecview.api.JSVPanel;
 import jspecview.api.PanelListener;
 import jspecview.common.Annotation.AType;
+import jspecview.dialog.AnnotationDialog;
 import jspecview.util.JSVColor;
 import jspecview.util.JSVColorUtil;
 
@@ -1332,7 +1332,7 @@ public class PanelData implements EventManager {
 			return null;
 		}
 		JDXSpectrum spec = getSpectrum();
-		AnnotationDialog dialog = jsvp.getDialog(type, spec);
+		AnnotationDialog dialog = viewer.getDialog(type, spec);
 		if (ad != null)
 			dialog.setData(ad);
 		addDialog(iSpec, type, dialog);

@@ -13,12 +13,12 @@ import org.jmol.util.Parser;
 import org.jmol.util.Txt;
 
 import jspecview.api.AnnotationData;
-import jspecview.api.AnnotationDialog;
 import jspecview.api.JSVGraphics;
 import jspecview.api.JSVPanel;
 import jspecview.api.XYScaleConverter;
 import jspecview.common.Annotation.AType;
 import jspecview.common.PanelData.LinkMode;
+import jspecview.dialog.AnnotationDialog;
 import jspecview.util.JSVColor;
 
 public class GraphSet implements XYScaleConverter {
@@ -674,7 +674,7 @@ public class GraphSet implements XYScaleConverter {
 					x = getNearestPeak(spec, x, y);
 				}
 			}
-			pendingMeasurement = new Measurement(x, y).setM1(spec);
+			pendingMeasurement = new Measurement().setM1(x, y, spec);
 			pendingMeasurement.setPt2(x0, y);
 			break;
 		case 1: // single click -- save and continue
@@ -693,8 +693,8 @@ public class GraphSet implements XYScaleConverter {
 				setMeasurement(pendingMeasurement);
 				if (clickCount == 1) {
 					setSpectrumClicked(getSpectrumIndex(pendingMeasurement.spec));
-					pendingMeasurement = new Measurement(x, y)
-							.setM1(pendingMeasurement.spec);
+					pendingMeasurement = new Measurement()
+							.setM1(x, y, pendingMeasurement.spec);
 				} else {
 					pendingMeasurement = null;
 				}
@@ -708,8 +708,8 @@ public class GraphSet implements XYScaleConverter {
 						|| pendingMeasurement == null) {
 					lastXMax = xValueMovedTo;
 					lastSpecClicked = iSpec;
-					pendingMeasurement = new Measurement(xValueMovedTo, yValueMovedTo)
-							.setM1(spectra.get(iSpec));
+					pendingMeasurement = new Measurement()
+							.setM1(xValueMovedTo, yValueMovedTo, spectra.get(iSpec));
 				} else {
 					pendingMeasurement.setPt2(xValueMovedTo, yValueMovedTo);
 					if (pendingMeasurement.text.length() > 0)
@@ -3522,7 +3522,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 			if (tfToggle != null && tfToggle != Boolean.TRUE)
 				return; // does not exist and "OFF" -- ignore
 			// does not exist, and TOGGLE or ON
-			if (type == AType.PeakList)
+			if (type == AType.PeakList || type == AType.Integration)
 				pd.showDialog(type);
 			return;
 		}
@@ -3536,7 +3536,10 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 			return;
 		}
 		// exists and "ON" or "OFF"
-		id.setState(tfToggle.booleanValue());
+		boolean isON = tfToggle.booleanValue();
+		id.setState(isON);
+		if (id instanceof AnnotationDialog)
+			pd.showDialog(type);
 
 		// if (type == AType.Integration)
 		// checkIntegral(parameters, "UPDATE");
@@ -4109,15 +4112,8 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 	
 	private Annotation getAnnotation(double x, double y, String text,
 			boolean isPixels, boolean is2d, int offsetX, int offsetY) {
-		return getColoredAnnotation(getSpectrum(), x, y, text, pd.BLACK,
+		return new ColoredAnnotation().setCA(x, y, getSpectrum(), text, pd.BLACK,
 				isPixels, is2d, offsetX, offsetY);
-	}
-
-	private Annotation getColoredAnnotation(JDXSpectrum spectrum, double x,
-			double y, String text, JSVColor c, boolean isPixels, boolean is2d,
-			int offsetX, int offsetY) {
-		return new ColoredAnnotation(x, y).set(spectrum, text, c, isPixels,
-				is2d, offsetX, offsetY);
 	}
 
 	private Annotation getAnnotation(JmolList<String> args, Annotation lastAnnotation) {

@@ -2,7 +2,7 @@ package jspecview.awtjs2d;
 
 import jspecview.util.JSVColor;
 
-public class JsColor implements JSVColor {
+class JsColor implements JSVColor {
 
 	public int argb;
 

@@ -41,7 +41,6 @@ public abstract class ColorParameters extends Parameters {
   abstract protected JSVColor getColor1(int rgb);
 	abstract protected boolean isValidFontName(String value);
 
-
   public String titleFontName;
   public String displayFontName;
   public Map<ScriptToken, JSVColor> elementColors; 
@@ -71,8 +70,7 @@ public abstract class ColorParameters extends Parameters {
    * Intialises a DisplayScheme with the given name
    * @param name the name of the <code>DisplayScheme</code>
    */
-  public ColorParameters(String name){
-  	super(name);
+  public ColorParameters(){
     BLACK = getColor3(0, 0, 0);
     RED = getColor3(255, 0, 0);
     LIGHT_GRAY = getColor3(200, 200, 200);
@@ -190,7 +188,7 @@ public abstract class ColorParameters extends Parameters {
     return copy(name);
   }
 
-	protected ColorParameters setElementColors(ColorParameters p) {
+	public ColorParameters setElementColors(ColorParameters p) {
     displayFontName = p.displayFontName;
     for(Map.Entry<ScriptToken, JSVColor> entry: p.elementColors.entrySet())
       setColor(entry.getKey(), entry.getValue());
@@ -248,5 +246,5 @@ public abstract class ColorParameters extends Parameters {
     }
     return null;
   }
-
+	
 }

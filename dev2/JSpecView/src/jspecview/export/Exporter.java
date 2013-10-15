@@ -254,7 +254,7 @@ public class Exporter {
 			return null;
 		// this has been disabled:
     jsvp.getPanelData().closeAllDialogsExcept(AType.NONE);
-		PrintLayout pl = viewer.si.siGetPrintLayout(isJob);
+		PrintLayout pl = viewer.getDialogPrint(isJob);
 		if (pl == null)
 			return null;
 		if (isJob && pl.asPDF) {
@@ -310,7 +310,7 @@ public class Exporter {
 		viewer.fileHelper.setFileChooser(eType);
 		String[] items = getExportableItems(viewer, eType.equals(ExportType.SOURCE));
 		JSVPanel jsvp = viewer.selectedPanel;
-		int index = (items == null ? -1 : jsvp.getOptionFromDialog(viewer.si, items, "Export", "Choose a spectrum to export"));
+		int index = (items == null ? -1 : viewer.getOptionFromDialog(items, "Export", "Choose a spectrum to export"));
 		if (index == Integer.MIN_VALUE)
 			return null;
 		File file = viewer.fileHelper.getFile(getSuggestedFileName(viewer, eType), jsvp, true);

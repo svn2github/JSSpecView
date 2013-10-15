@@ -55,7 +55,7 @@ class JsFile implements JmolFileInterface {
   static Object getBufferedURLInputStream(URL url, byte[] outputBytes,
       String post) {
     try {
-      JsURLConnection conn = (JsURLConnection) url.openConnection();
+      AjaxURLConnection conn = (AjaxURLConnection) url.openConnection();
       if (outputBytes != null)
         conn.outputBytes(outputBytes);
       else if (post != null)

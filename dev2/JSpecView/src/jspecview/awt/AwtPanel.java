@@ -79,7 +79,6 @@ import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
 import org.jmol.util.Txt;
 
-import jspecview.api.AnnotationDialog;
 import jspecview.api.JSVApiPlatform;
 import jspecview.api.JSVPanel;
 import jspecview.api.PdfCreatorInterface;
@@ -90,9 +89,7 @@ import jspecview.common.PanelData;
 import jspecview.common.ColorParameters;
 import jspecview.common.PrintLayout;
 import jspecview.common.ScriptToken;
-import jspecview.common.Annotation.AType;
 import jspecview.export.Exporter;
-import jspecview.java.AwtDialogAnnotation;
 
 /**
  * JSVPanel class represents a View combining one or more GraphSets, each with one or more JDXSpectra.
@@ -240,10 +237,6 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
     viewer.repaintDone();
   }
   
-	public AnnotationDialog getDialog(AType type, JDXSpectrum spec) {
-		return AwtDialogAnnotation.get(type, spec, viewer);
-	}
-
   public String getInput(String message, String title, String sval) {
     String ret = (String) JOptionPane.showInputDialog(this, message, title,
         JOptionPane.QUESTION_MESSAGE, null, null, sval);
@@ -350,40 +343,6 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
 		return JmolFont.getFontFaceID("SansSerif");
 	}
 	
-	public int getOptionFromDialog(Object frame, String[] items,
-			String dialogName, String labelName) {
-		final JDialog dialog = new JDialog((JFrame) frame, dialogName, true);
-		dialog.setResizable(false);
-		dialog.setSize(200, 100);
-		dialog.setLocation(getLocation().x + getSize().width / 2,
-				getLocation().y + getSize().height / 2);
-		// Q: why (x + w)/2, (y + h)/2?? 
-		final JComboBox<Object> cb = new JComboBox<Object>(items);
-		Dimension d = new Dimension(120, 25);
-		cb.setPreferredSize(d);
-		cb.setMaximumSize(d);
-		cb.setMinimumSize(d);
-		JPanel p = new JPanel(new FlowLayout());
-		JButton button = new JButton("OK");
-		p.add(cb);
-		p.add(button);
-		dialog.getContentPane().setLayout(new BorderLayout());
-		dialog.getContentPane().add(
-				new JLabel(labelName, SwingConstants.CENTER),
-				BorderLayout.NORTH);
-		dialog.getContentPane().add(p);
-		final int ret[] = new int[] { Integer.MIN_VALUE };
-		button.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				ret[0] = cb.getSelectedIndex();
-				dialog.dispose();
-			}
-		});
-		dialog.setVisible(true);
-		dialog.dispose();
-		return ret[0];
-	}
-
 	public void saveImage(String type, Object file) {
     try {
 	    Image image = createImage(getWidth(), getHeight());

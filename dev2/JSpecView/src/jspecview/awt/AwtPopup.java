@@ -45,10 +45,10 @@ import javax.swing.JRadioButtonMenuItem;
 import org.jmol.util.Logger;
 import org.jmol.util.SB;
 
-import jspecview.common.JSVGenericPopup;
-import jspecview.common.JSVPopupResourceBundle;
 import jspecview.common.JSViewer;
-import jspecview.common.PopupResource;
+import jspecview.popup.JSVGenericPopup;
+import jspecview.popup.JSVPopupResourceBundle;
+import jspecview.popup.PopupResource;
 
 public class AwtPopup extends JSVGenericPopup {
   

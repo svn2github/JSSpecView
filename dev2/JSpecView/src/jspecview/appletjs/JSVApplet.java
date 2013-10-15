@@ -60,22 +60,15 @@ import org.jmol.util.Txt;
 import jspecview.api.AppletFrame;
 import jspecview.api.JSVApiPlatform;
 import jspecview.api.JSVAppletInterface;
-import jspecview.api.JSVDialog;
-import jspecview.api.JSVGraphics;
 import jspecview.api.JSVMainPanel;
 import jspecview.api.JSVPanel;
 import jspecview.app.JSVApp;
 import jspecview.awtjs2d.JsPanel;
-import jspecview.awtjs2d.JsParameters;
 import jspecview.awtjs2d.JsViewPanel;
-import jspecview.awtjs2d.Platform;
+import jspecview.awtjs2d.JsPlatform;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVersion;
 import jspecview.common.JSViewer;
-import jspecview.common.PrintLayout;
-import jspecview.common.SimpleTree;
-import jspecview.g2djs.G2D;
-import jspecview.js2d.JsFileHelper;
 /**
  * 
  * Entry point for the web.
@@ -429,12 +422,9 @@ public class JSVApplet implements JSVAppletInterface,
 //	private Component spectrumPanel;
 //	private JFrame offWindowFrame;
 
-	public void setPlatformFields(boolean isSigned, JSViewer viewer) {
+	public void setDropTargetListener(boolean isSigned, JSViewer viewer) {
 //		if (dtl == null && isSigned)
 //			dtl = new JsDropTargetListener(viewer);
-		viewer.spectraTree = new SimpleTree(viewer);
-		viewer.parameters = new JsParameters("applet");
-		viewer.fileHelper = new JsFileHelper(viewer);
 	}
 
 	public void validateContent(int mode) {
@@ -516,34 +506,11 @@ public class JSVApplet implements JSVAppletInterface,
 //		spectrumPanel.setVisible(b);
 	}
 
-//	private PrintLayout lastPrintLayout;
-	
-	public PrintLayout getDialogPrint(boolean isJob) {
-//		PrintLayout pl = new JsDialogPrint(offWindowFrame, lastPrintLayout, isJob)
-//				.getPrintLayout();
-//		if (pl != null)
-//			lastPrintLayout = pl;
-//		return pl;
-		return null;
-	}
-
 	public JSVPanel getJSVPanel(JSViewer viewer, JmolList<JDXSpectrum> specs,
 			int initialStartIndex, int initialEndIndex) {
 		return JsPanel.getPanelMany(viewer, specs, initialStartIndex,
 				initialEndIndex);
 	}
-
-	public JSVDialog newDialog(JSViewer viewer, String type) {
-//		if (type.equals("legend"))
-//			return new AwtDialogOverlayLegend(null, viewer.selectedPanel);
-//		if (type.equals("view"))
-//			return new AwtDialogView(viewer, spectrumPanel, false);
-		return null;
-	}
-
-	// for the signed applet to load a remote file, it must
-	// be using a thread started by the initiating thread;
-
 
 	public void setVisible(boolean b) {
 		// TODO Auto-generated method stub
@@ -569,22 +536,8 @@ public class JSVApplet implements JSVAppletInterface,
 		
 	}
 
-	public void showWhat(JSViewer viewer, String what) {
-		/**
-		 * @j2sNative
-		 * 
-		 * alert("JVApplet.showWhat: " + what);
-		 *
-		 */
-		{}
-	}
-
 	public JSVApiPlatform getApiPlatform() {
-		return new Platform();
-	}
-
-	public JSVGraphics getG2D(JSVApiPlatform apiPlatform) {
-		return new G2D(apiPlatform);
+		return new JsPlatform();
 	}
 
 	public void doExitJmol() {

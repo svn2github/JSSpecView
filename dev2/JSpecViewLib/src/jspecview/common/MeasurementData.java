@@ -33,53 +33,58 @@ import org.jmol.util.Txt;
 import jspecview.api.AnnotationData;
 import jspecview.common.Annotation.AType;
 
-public class MeasurementData extends JmolList<Measurement> implements AnnotationData {
+public class MeasurementData extends JmolList<Measurement> implements
+		AnnotationData {
 
 	private static final long serialVersionUID = 1L;
 
 	private AType type;
+	protected JDXSpectrum spec;
+	protected String units;
+	protected int precision;
+	protected Parameters myParams;
+
+	private boolean isON = true;
+	private String key;
+
+	private final static String[] HEADER = new String[] { "peak", "start", "end",
+			"value" };
+
+	MeasurementData(AType type, JDXSpectrum spec) {
+		this.type = type;
+		this.spec = spec;
+		myParams = new Parameters().setName("MeasurementData");
+	}
+
+	JmolList<Measurement> getMeasurements() {
+		return this;
+	}
+
 	public AType getAType() {
 		return type;
 	}
-	
-	protected JDXSpectrum spec;
-
-	private boolean isON = true;
 
 	public boolean getState() {
 		return isON;
 	}
-	
+
 	public void setState(boolean b) {
 		isON = b;
 	}
-	
-	MeasurementData(AType type, JDXSpectrum spec) {
-		this.type = type;
-		this.spec = spec;
-	}
-	JmolList<Measurement> getMeasurements() {
-		return this;
-	}
-	void setMeasurements(@SuppressWarnings("unused") JmolList<Measurement> measurements) {
+
+	void setMeasurements(
+			@SuppressWarnings("unused") JmolList<Measurement> measurements) {
 		// won't happen
 	}
 
-	protected Parameters myParams = new Parameters("MeasurementData");
-	
 	public Parameters getParameters() {
 		return myParams;
 	}
 
-	protected int precision;
-
-	private final static String[] HEADER = new String[] { "peak", "start", "end", "value" };
 	public String[] getDataHeader() {
 		return HEADER;
 	}
 
-	protected String units;
-	
 	public String[][] getMeasurementListArray(String units) {
 		this.units = units;
 		double[][] ddata = getMeasurementListArrayReal(units);
@@ -114,9 +119,7 @@ public class MeasurementData extends JmolList<Measurement> implements Annotation
 		case Integration:
 			break;
 		case PeakList:
-			return (
-					p.peakListInterpolation.equals(myParams.peakListInterpolation)
-					&& p.peakListThreshold == myParams.peakListThreshold);
+			return (p.peakListInterpolation.equals(myParams.peakListInterpolation) && p.peakListThreshold == myParams.peakListThreshold);
 		case Measurements:
 			break;
 		case NONE:
@@ -127,23 +130,23 @@ public class MeasurementData extends JmolList<Measurement> implements Annotation
 	public JDXSpectrum getSpectrum() {
 		return spec;
 	}
-	
+
 	public MeasurementData getData() {
 		return this;
 	}
 
-  protected void clear(double x1, double x2) {
-    // no overlapping regions. Ignore first, which is the temporary one
-    for (int i = size(); --i >= 0;) {
-      Measurement in = get(i);
-      if (in.text.length() == 0 || in.overlaps(x1, x2)) {      	
-        remove(i);
-      }
-    }
-    
-  }
+	protected void clear(double x1, double x2) {
+		// no overlapping regions. Ignore first, which is the temporary one
+		for (int i = size(); --i >= 0;) {
+			Measurement in = get(i);
+			if (in.text.length() == 0 || in.overlaps(x1, x2)) {
+				remove(i);
+			}
+		}
 
-  public void setSpecShift(double dx) {
+	}
+
+	public void setSpecShift(double dx) {
 		for (int i = size(); --i >= 0;) {
 			Measurement m = get(i);
 			double x = m.getXVal() + dx;
@@ -153,17 +156,15 @@ public class MeasurementData extends JmolList<Measurement> implements Annotation
 		}
 	}
 
-  private String key;
-	
-  public String getKey() {
+	public String getKey() {
 		return key;
 	}
 
-  public void setKey(String key) {
-		this.key = key;		
+	public void setKey(String key) {
+		this.key = key;
 	}
 
-  public boolean isVisible() {
+	public boolean isVisible() {
 		return true;
 	}
 
@@ -174,5 +175,4 @@ public class MeasurementData extends JmolList<Measurement> implements Annotation
 			info.put("units", units);
 	}
 
-	
 }

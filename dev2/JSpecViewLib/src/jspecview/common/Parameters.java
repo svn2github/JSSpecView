@@ -15,8 +15,7 @@ public class Parameters {
   public String peakListInterpolation = "parabolic";
   public int precision = 2;
 
-	public Parameters(String name) {
-    this.name = name;
+	public Parameters() {
     htBooleans = new Hashtable<ScriptToken, Boolean>();
     setBoolean(ScriptToken.TITLEON, true);
     setBoolean(ScriptToken.ENABLEZOOM, true);
@@ -29,6 +28,11 @@ public class Parameters {
     setBoolean(ScriptToken.YUNITSON, true);
 	}
 
+	public Parameters setName(String name) {
+		this.name = name;
+		return this;
+	}
+	
   protected Map<ScriptToken, Boolean> htBooleans;
 	
   public Map<ScriptToken, Boolean> getBooleans() {

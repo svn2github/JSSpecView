@@ -24,6 +24,7 @@
 
 package jspecview.common;
 
+
 /**
  * The <code>Measurement</code> class stores an annotation that is a measurement
  * 
@@ -34,19 +35,15 @@ public class Measurement extends Annotation {
 	private Coordinate pt2 = new Coordinate();
 	protected double value;
 
-	public Measurement(double x, double y) {
-		super(x, y);
-	}
-  
-	public Measurement setM1(JDXSpectrum spec) {
-		setAll(spec, "", false, false, 0, 6);
+	public Measurement setM1(double x, double y, JDXSpectrum spec) {
+		setA(x, y, spec, "", false, false, 0, 6);
 		setPt2(getXVal(), getYVal());
 		return this;
 	}
 
 	public Measurement copyM() {
-		Measurement m = new Measurement(getXVal(), getYVal());
-		m.setAll(spec, text, false, false, offsetX, offsetY);
+		Measurement m = new Measurement();
+		m.setA(getXVal(), getYVal(), spec, text, false, false, offsetX, offsetY);
   	m.setPt2(pt2.getXVal(), pt2.getYVal());
   	return m;
 	}

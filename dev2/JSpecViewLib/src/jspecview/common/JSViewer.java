@@ -1,6 +1,7 @@
 package jspecview.common;
 
 import org.jmol.api.ApiPlatform;
+import org.jmol.api.Interface;
 import org.jmol.api.JSmolInterface;
 import org.jmol.api.PlatformViewer;
 import org.jmol.util.JmolList;
@@ -21,19 +22,23 @@ import org.jmol.util.SB;
 import org.jmol.util.Txt;
 
 import jspecview.api.JSVApiPlatform;
-import jspecview.api.JSVDialog;
 import jspecview.api.JSVFileHelper;
 import jspecview.api.JSVGraphics;
 import jspecview.api.JSVMainPanel;
 import jspecview.api.JSVPanel;
 import jspecview.api.JSVPopupMenu;
+import jspecview.api.JSVPrintDialog;
 import jspecview.api.JSVTree;
 import jspecview.api.JSVTreeNode;
 import jspecview.api.ScriptInterface;
 import jspecview.common.Annotation.AType;
 import jspecview.common.JDXSpectrum.IRMode;
 import jspecview.common.PanelData.LinkMode;
+import jspecview.dialog.AnnotationDialog;
+import jspecview.dialog.DialogManager;
+import jspecview.dialog.GenericDialog;
 import jspecview.source.JDXSource;
+import jspecview.tree.SimpleTree;
 import jspecview.util.JSVEscape;
 
 /**
@@ -78,6 +83,11 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 	public JmolList<String>       scriptQueue;
 	public JSVFileHelper          fileHelper;
 	public JSVPopupMenu           jsvpPopupMenu;
+	private DialogManager   			dialogManager;
+	private AnnotationDialog      viewDialog;
+	private AnnotationDialog      overlayLegendDialog;
+
+	private IRMode irMode = IRMode.NO_CONVERT;
 
 	public boolean isSingleThreaded;
 	public boolean isApplet;
@@ -103,34 +113,56 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 			properties.setProperty(key, value);
 	}
 
+	public void setNode(JSVPanelNode node, boolean fromTree) {
+		si.siSetNode(node, fromTree);
+	}
 
 	/**
-	 * @param si 
-	 * @param isApplet  
-	 * @param isJS 
-	 * @param g2d 
+	 * @param si
+	 * @param isApplet
+	 * @param isJS
 	 */
-	public JSViewer(ScriptInterface si, boolean isApplet, boolean isJS, JSVGraphics g2d) {
+	public JSViewer(ScriptInterface si, boolean isApplet, boolean isJS) {
 		this.si = si;
 		this.isApplet = isApplet;
 		this.isJS = isApplet && isJS;
 		this.isSigned = si.isSigned();
-		this.g2d = g2d;
+		apiPlatform = (JSVApiPlatform) getAwtInterface("Platform");
+		apiPlatform.setViewer(this, this.display);
+		g2d = (JSVGraphics) getAwtInterface("G2D");
+		spectraTree = new SimpleTree(this);
+		parameters = (ColorParameters) getAwtInterface("Parameters");
+		parameters.setName("applet");
+		fileHelper = ((JSVFileHelper) getAwtInterface("FileHelper")).set(this);
+		isSingleThreaded = apiPlatform.isSingleThreaded();
 		panelNodes = new JmolList<JSVPanelNode>();
 		repaintManager = new RepaintManager(this);
+		if (!isApplet)
+			setPopupMenu(true, true);
+	}
+
+	public void setPopupMenu(boolean allowMenu, boolean zoomEnabled) {
+		try {
+			jsvpPopupMenu = (JSVPopupMenu) getAwtInterface("Popup");
+			jsvpPopupMenu.initialize(this, isApplet ? "appletMenu" : "appMenu");
+			jsvpPopupMenu.setEnabled(allowMenu, zoomEnabled);	
+		} catch (Exception e) {
+			System.out.println(e + " initializing popup menu");
+		}
 	}
 
 	public boolean runScriptNow(String script) {
 		si.siIncrementViewCount(1);
 		if (script == null)
 			script = "";
-		String msg = null;
-
 		script = script.trim();
 		System.out.println ("RUNSCRIPT " + script);
+		if (script.startsWith("event://"))
+			return getDialogManager().dialogCallback(script);
 		boolean isOK = true;
 		int nErrorsLeft = 10;
 		ScriptTokenizer commandTokens = new ScriptTokenizer(script, true);
+		String msg = null;
 		while (commandTokens.hasMoreTokens() && nErrorsLeft > 0 && isOK) {
 			String token = commandTokens.nextToken();
 			// now split the key/value pair
@@ -164,7 +196,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 					si.siExecSetAutoIntegrate(Parameters.isTrue(value));
 					break;
 				case CLOSE:
-					si.siExecClose(value, true);
+					si.siExecClose(value);
 					break;
 				case DEBUG:
 					Logger
@@ -323,7 +355,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 										.parseDouble(value), Double.NaN);
 						break;
 					case SHOWERRORS:
-						si.siShow("errors");
+						show("errors");
 						break;
 					case SHOWMEASUREMENTS:
 						selectedPanel.getPanelData().showAnnotation(AType.Measurements,
@@ -346,10 +378,10 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 						// execIntegrate(null);
 						break;
 					case SHOWPROPERTIES:
-						si.siShow("properties");
+						show("properties");
 						break;
 					case SHOWSOURCE:
-						si.siShow("source");
+						show("source");
 						break;
 					case YSCALE:
 						setYScale(value, selectedPanel);
@@ -521,7 +553,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		if (spec2 == spec)
 			return;
 		pd.setSpectrum(spec2);
-		si.siSetIRMode(mode);
+		setIRmode(value);
 		// jsvp.doRepaint();
 	}
 
@@ -581,7 +613,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 
 	private boolean overlayLegendVisible;
 	
-	public void setOverlayLegendVisibility(JSVPanel jsvp, Boolean tftoggle, boolean doSet) {
+	private void setOverlayLegendVisibility(JSVPanel jsvp, Boolean tftoggle, boolean doSet) {
 		if (doSet)
 			overlayLegendVisible = (tftoggle == null ? !overlayLegendVisible : tftoggle == Boolean.TRUE);	
 		JSVPanelNode node = JSVPanelNode.findNode(jsvp, panelNodes);
@@ -591,11 +623,11 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 	}
 
 	private void showOverlayLegend(JSVPanelNode node, boolean visible) {
-		JSVDialog legend = node.legend;
+		GenericDialog legend = node.legend;
 		if (legend == null && visible) {
 			legend = node.setLegend(node.jsvp.getPanelData()
 					.getNumberOfSpectraInCurrentSet() > 1
-					&& node.jsvp.getPanelData().getNumberOfGraphSets() == 1 ? si.siNewDialog("legend", node.jsvp) : null);
+					&& node.jsvp.getPanelData().getNumberOfGraphSets() == 1 ? getDialog(AType.OverlayLegend, null) : null);
 		}
 		if (legend != null)
 			legend.setVisible(visible);
@@ -729,7 +761,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 				+ "JSViewer selectPanelByPeak pi = " + pi);
 		if (pi != null) {
 			// found in current panel
-			si.siSetNode(JSVPanelNode.findNode(jsvp, panelNodes), false);
+			setNode(JSVPanelNode.findNode(jsvp, panelNodes), false);
 		} else {
 			// must look elsewhere
 			// System.out.println(Thread.currentThread() +
@@ -742,7 +774,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 				if ((pi = node.jsvp.getPanelData().selectPeakByFileIndex(file, index)) != null) {
 					// System.out.println(Thread.currentThread() +
 					// "JSViewer selectPanelByPeak setting node " + i + " pi=" + pi);
-					si.siSetNode(node, false);
+					setNode(node, false);
 					// System.out.println(Thread.currentThread() +
 					// "JSViewer selectPanelByPeak setting node " + i + " set node done");
 					break;
@@ -783,7 +815,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 					}
 				if (node == null)
 					return;
-				si.siSetNode(node, false);
+				setNode(node, false);
 			}
 			pi = pi2;
 		} else {
@@ -985,7 +1017,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		if (isView && speclist.size() == 1) {
 			JSVPanelNode node = JSVPanelNode.findNodeById(idLast, panelNodes);
 			if (node != null) {
-				si.siSetNode(node, true);
+				setNode(node, true);
 				// possibility of a problem here -- we are not communicating with Jmol
 				// our model changes.
 				speclist.clear();
@@ -1090,7 +1122,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		}
 
 		specs = currentSource.getSpectra();
-		JDXSpectrum.process(specs, si.siGetIRMode());
+		JDXSpectrum.process(specs, irMode);
 
 		boolean autoOverlay = si.siGetAutoCombine()
 				|| spec.isAutoOverlayFromJmolClick();
@@ -1188,7 +1220,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		node.isView = true;
 		if (si.siGetAutoShowLegend()
 				&& selectedPanel.getPanelData().getNumberOfGraphSets() == 1)
-			node.setLegend(si.siNewDialog("legend", jsvp));
+			node.setLegend(getDialog(AType.OverlayLegend, null));
 		si.siSetMenuEnables(node, false);
 	}
 
@@ -1243,7 +1275,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 	public void setFrameAndTreeNode(int i) {
 		if (panelNodes == null || i < 0 || i >= panelNodes.size())
 			return;
-		si.siSetNode(panelNodes.get(i), false);
+		setNode(panelNodes.get(i), false);
 	}
 
 	public JSVPanelNode selectFrameNode(JSVPanel jsvp) {
@@ -1261,7 +1293,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 			JSVPanelNode node = JSVPanelNode.findNodeById(value, panelNodes);
 			if (node == null)
 				return false;
-			si.siSetNode(node, false);
+			setNode(node, false);
 		} else {
 			int n = Parser.parseInt(value);
 			if (n <= 0) {
@@ -1296,7 +1328,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 			return;
 		}
 		if (node.isLeaf()) {
-			si.siSetNode(node.getPanelNode(), true);
+			setNode(node.getPanelNode(), true);
 		} else {
 			System.out.println("not a leaf");
 		}
@@ -1321,6 +1353,13 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 
 	public void dispose() {
 		fileHelper = null;
+		if (viewDialog != null)
+			viewDialog.dispose();
+		viewDialog = null;
+		if (overlayLegendDialog != null)
+			overlayLegendDialog.dispose();
+		overlayLegendDialog = null;
+
 	  if (jsvpPopupMenu != null) {
 	  	jsvpPopupMenu.dispose();
 	  	jsvpPopupMenu = null;
@@ -1359,14 +1398,12 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 	public void checkOverlay() {
 		if (viewPanel != null)
       viewPanel.markSelectedPanels(panelNodes);
-		si.siNewDialog("view", null);
+		viewDialog = getDialog(AType.Views, null);
 	}
 
   private int recentStackPercent = 5;
 
-	private boolean refreshing = true;
-  
-	private void execOverlayOffsetY		(int offset) {
+	private void execOverlayOffsetY(int offset) {
 		if (selectedPanel == null)
 			return;
 		if (offset == Integer.MIN_VALUE) {
@@ -1501,4 +1538,90 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 	public int getWidth() {
 		return dimScreen.width;
 	}
+	
+	public Object getAwtInterface(String type) {
+		return Interface.getInterface("jspecview.awt" + (isJS ? "js2d.Js" : ".Awt") + type);
+	}
+
+	public DialogManager getDialogManager() {
+		return (dialogManager == null ? (dialogManager = (DialogManager) getAwtInterface("DialogManager")).set(this) : dialogManager);
+	}
+	
+	public AnnotationDialog getDialog(AType type, JDXSpectrum spec) {
+		String root = "jspecview.dialog.";
+		switch (type) {
+		case Integration:
+			return ((AnnotationDialog) Interface.getInterface(root
+					+ "IntegrationDialog")).setParams("Integration for " + spec, this,
+					spec);
+		case Measurements:
+			return ((AnnotationDialog) Interface.getInterface(root
+					+ "MeasurementsDialog")).setParams("Measurements for " + spec, this,
+					spec);
+		case PeakList:
+			return ((AnnotationDialog) Interface
+					.getInterface(root + "PeakListDialog")).setParams("Peak List for "
+					+ spec, this, spec);
+		case OverlayLegend:
+			return overlayLegendDialog = ((AnnotationDialog) Interface
+					.getInterface(root + "OverlayLegendDialog")).setParams(selectedPanel
+					.getPanelData().getViewTitle(), this, null);
+		case Views:
+			return viewDialog = ((AnnotationDialog) Interface.getInterface(root
+					+ "ViewsDialog")).setParams("View/Combine/Close Spectra", this, null);
+		default:
+			return null;
+		}
+	}
+	
+	private void show(String what) {
+		getDialogManager();
+		if (what.equals("properties")) {
+			dialogManager.showProperties(null, getPanelData().getSpectrum());
+		} else if (what.equals("errors")) {
+			dialogManager.showSourceErrors(null, currentSource);
+		} else if (what.equals("source")) {
+			if (currentSource == null) {
+				if (panelNodes.size() > 0)
+					dialogManager.showMessageDialog(null, "Please Select a Spectrum",
+							"Select Spectrum", DialogManager.ERROR_MESSAGE);
+				return;
+			}
+			dialogManager.showSource(this, currentSource);
+		}
+	}
+
+	private PrintLayout lastPrintLayout;
+	private Object offWindowFrame;
+	
+	public PrintLayout getDialogPrint(boolean isJob) {
+		try {
+			PrintLayout pl = ((JSVPrintDialog) getAwtInterface("PrintDialog")).set(
+					offWindowFrame, lastPrintLayout, isJob).getPrintLayout();
+			if (pl != null)
+				lastPrintLayout = pl;
+			return pl;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	public void setIRmode(String mode) {
+		if (mode.equals("AtoT")) {
+			irMode = IRMode.TO_TRANS;
+		} else if (mode.equals("TtoA")) {
+			irMode = IRMode.TO_ABS;
+		} else {
+			irMode = IRMode.getMode(mode);
+		}
+	}
+
+	public int getOptionFromDialog(String[] items, String title, String label) {
+		getDialogManager().getOptionFromDialog(null, items, selectedPanel, title, label);
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }
+
+

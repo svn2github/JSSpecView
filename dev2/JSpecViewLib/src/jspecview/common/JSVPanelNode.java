@@ -8,9 +8,9 @@ import java.util.Map;
 import org.jmol.util.JmolList;
 import org.jmol.util.SB;
 
-import jspecview.api.JSVDialog;
 import jspecview.api.JSVPanel;
 import jspecview.api.JSVTreeNode;
+import jspecview.dialog.GenericDialog;
 import jspecview.source.JDXSource;
 
 public class JSVPanelNode {
@@ -39,7 +39,7 @@ public class JSVPanelNode {
   public String fileName;
   public JSVPanel jsvp;
   public String id;
-  public JSVDialog legend;
+  public GenericDialog legend;
 	public boolean isSelected;
 	public boolean isView;
   public String frameTitle;
@@ -58,7 +58,7 @@ public class JSVPanelNode {
     return jsvp.getPanelData().getSpectrum();
   }
 
-  public JSVDialog setLegend(JSVDialog legend) {
+  public GenericDialog setLegend(GenericDialog legend) {
     if (this.legend != null)
       this.legend.dispose();
     this.legend = legend;

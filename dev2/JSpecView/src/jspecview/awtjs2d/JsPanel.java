@@ -44,7 +44,6 @@ import org.jmol.api.JmolMouseInterface;
 import org.jmol.util.JmolFont;
 import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
-import jspecview.api.AnnotationDialog;
 import jspecview.api.JSVApiPlatform;
 import jspecview.api.JSVPanel;
 import jspecview.common.JDXSpectrum;
@@ -53,7 +52,6 @@ import jspecview.common.PanelData;
 import jspecview.common.ColorParameters;
 import jspecview.common.PrintLayout;
 import jspecview.common.ScriptToken;
-import jspecview.common.Annotation.AType;
 import jspecview.export.Exporter;
 import jspecview.util.JSVColor;
 
@@ -163,11 +161,6 @@ public class JsPanel implements JSVPanel {
   	// unnecessary
   }
   
-	public AnnotationDialog getDialog(AType type, JDXSpectrum spec) {
-		return null;
-		//return AwtDialogAnnotation.get(type, spec, viewer);
-	}
-
 	///// threading and focus
 	
   public String getInput(String message, String title, String sval) {

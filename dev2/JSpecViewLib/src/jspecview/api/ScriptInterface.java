@@ -8,9 +8,7 @@ import org.jmol.util.JmolList;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVPanelNode;
 import jspecview.common.JSViewer;
-import jspecview.common.PrintLayout;
 import jspecview.common.ScriptToken;
-import jspecview.common.JDXSpectrum.IRMode;
 import jspecview.source.JDXSource;
 
 public interface ScriptInterface {
@@ -37,7 +35,7 @@ public interface ScriptInterface {
 
 	public JSVTreeNode siCreateTree(JDXSource source, JSVPanel[] jsvPanels);
 
-	public void siExecClose(String value, boolean fromScript);
+	public void siExecClose(String value);
 
 	public String siExecExport(JSVPanel jsvp, String value);
 
@@ -63,16 +61,12 @@ public interface ScriptInterface {
 
 	public String siGetIntegrationRatios();
 
-	public IRMode siGetIRMode();
-	
 	public JSVPanel siGetNewJSVPanel(JDXSpectrum spec);
 
 	public JSVPanel siGetNewJSVPanel2(JmolList<JDXSpectrum> specs);
 
 	public JSVPanelNode siGetNewPanelNode(String id, String fileName,
 			JDXSource source, JSVPanel jsvp);
-
-	public PrintLayout siGetPrintLayout(boolean isJob);
 
 	public String siGetReturnFromJmolModel();
 
@@ -103,8 +97,6 @@ public interface ScriptInterface {
 
 	public void siSetIntegrationRatios(String value);
 
-	public void siSetIRMode(IRMode iMode);
-
 	public void siSetLoaded(String fileName, String filePath);
 
 	public void siSetLoadImaginary(boolean TF);
@@ -129,10 +121,7 @@ public interface ScriptInterface {
 
 	public void siValidateAndRepaint();
 	
-	public JSVDialog siNewDialog(String type, JSVPanel jsvp);
-	
 	public void siNewWindow(boolean isSelected, boolean fromFrame);
-	public void siShow(String what);
 	
 
 }

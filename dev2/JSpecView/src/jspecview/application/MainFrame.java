@@ -85,16 +85,13 @@ import org.jmol.util.SB;
 import org.jmol.util.Txt;
 
 import jspecview.api.JSVAppInterface;
-import jspecview.api.JSVDialog;
 import jspecview.api.JSVPanel;
-import jspecview.api.JSVPopupMenu;
 import jspecview.api.JSVTreeNode;
 import jspecview.api.PanelListener;
 import jspecview.app.JSVAppPro;
+import jspecview.awt.AwtFileHelper;
 import jspecview.awt.AwtPanel;
-import jspecview.awt.AwtParameters;
 import jspecview.awt.AwtViewPanel;
-import jspecview.awt.Platform;
 import jspecview.common.JSVFileManager;
 import jspecview.common.JSVPanelNode;
 import jspecview.common.JSViewer;
@@ -102,20 +99,11 @@ import jspecview.common.PanelData;
 import jspecview.common.ColorParameters;
 import jspecview.common.Parameters;
 import jspecview.common.PeakPickEvent;
-import jspecview.common.PrintLayout;
 import jspecview.common.ScriptToken;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.SubSpecChangeEvent;
 import jspecview.common.ZoomEvent;
-import jspecview.common.JDXSpectrum.IRMode;
 import jspecview.export.Exporter;
-import jspecview.g2d.G2D;
-import jspecview.java.AwtDialogOverlayLegend;
-import jspecview.java.AwtDialogPrint;
-import jspecview.java.AwtDialogText;
-import jspecview.java.AwtDialogView;
-import jspecview.java.AwtDropTargetListener;
-import jspecview.java.AwtFileHelper;
 import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
 import jspecview.util.JSVColorUtil;
@@ -162,9 +150,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 //	public JSVPanel               selectedPanel;
 //	public JSVMainPanel           viewPanel; // alias for spectrumPanel
 
-	public JSVDialog              viewDialog;
-	public JSVDialog              overlayLegendDialog;
-
 	private JSVAppPro     					advancedApplet;
 	private CommandHistory          commandHistory;
 	private DisplaySchemesProcessor dsp;
@@ -174,7 +159,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	private Container               jmolFrame;
 	private Dimension               jmolDimensionNew = new Dimension(250, 200);
 	private JSVInterface            jmolOrAdvancedApplet;
-	private JSVPopupMenu            jsvpPopupMenu;
 	private JSVPanel                prevPanel;
 	private JmolList<String>        recentFilePaths = new JmolList<String>();
 	private JScrollPane             spectraTreeScrollPane;
@@ -184,7 +168,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	private AwtTree tree; // alias for spectraTree, because here it is visible
 
-	private IRMode irMode = IRMode.NO_CONVERT;
 
 	private boolean autoIntegrate;
 	private boolean autoShowLegend;
@@ -248,14 +231,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		integrationRatios = value;
 	}
 	
-	public IRMode siGetIRMode() {
-		return irMode;
-	}
-	
-	public void siSetIRMode(IRMode mode) {
-		irMode = mode;
-	}
-	
 	public void siSetLoadImaginary(boolean TF) {
 		loadImaginary  = TF;
 	}
@@ -283,15 +258,8 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	 * @param jmolOrAdvancedApplet
 	 */
 	public MainFrame(Component jmolDisplay, JSVInterface jmolOrAdvancedApplet) {
-		Platform apiPlatform = new Platform();
-		viewer = new JSViewer(this, false, false, new G2D(apiPlatform));
-		apiPlatform.setViewer(viewer, null);		
+		viewer = new JSViewer(this, false, false);
 		JSVFileManager.setDocumentBase(viewer, null);
-		viewer.apiPlatform = apiPlatform;
-		jsvpPopupMenu = apiPlatform.getJSVMenuPopup("appMenu");//new AwtPopupMenuOld();
-		jsvpPopupMenu.initialize(viewer, "appMenu");
-		viewer.jsvpPopupMenu = jsvpPopupMenu; 
-		setPlatformFields();
 		this.jmolDisplay = jmolDisplay;
 		if (jmolDisplay != null)
 			jmolFrame = jmolDisplay.getParent();
@@ -299,12 +267,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		advancedApplet = (jmolOrAdvancedApplet instanceof JSVAppPro ? (JSVAppPro) jmolOrAdvancedApplet
 				: null);
 		init();
-	}
-
-	private void setPlatformFields() {
-		viewer.spectraTree = new AwtTree(viewer);
-		viewer.parameters = new AwtParameters("applet");
-		viewer.fileHelper = new AwtFileHelper(viewer);
 	}
 
 	void exitJSpecView(boolean withDialog) {
@@ -359,7 +321,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	private void init() {
 
 		// initialise MainFrame as a target for the drag-and-drop action
-		DropTargetListener dtl = new AwtDropTargetListener(viewer);
+		DropTargetListener dtl = (DropTargetListener) viewer.getAwtInterface("FileDropper");
 		new DropTarget(this, dtl);
 		Class<? extends MainFrame> cl = getClass();
 		URL iconURL = cl.getResource("icons/spec16.gif"); // imageIcon
@@ -525,13 +487,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		// and update coordinates and grid CheckBoxMenuItems
 
 		// Processing Properties
-		String autoATConversion = properties.getProperty("automaticTAConversion");
-		if (autoATConversion.equals("AtoT")) {
-			irMode = IRMode.TO_TRANS;
-		} else if (autoATConversion.equals("TtoA")) {
-			irMode = IRMode.TO_ABS;
-		}
-
+		viewer.setIRmode(properties.getProperty("automaticTAConversion"));
 		try {
 			autoIntegrate = Boolean.parseBoolean(properties
 					.getProperty("automaticallyIntegrate"));
@@ -922,7 +878,10 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		viewer.requestRepaint();
 	}
 
-	public void siExecClose(String value, boolean fromScript) {
+	public void siExecClose(String value) {
+		boolean fromScript = (!value.startsWith("!"));
+		if (!fromScript)
+			value = value.substring(1);		
 		viewer.close(Txt.trimQuotes(value));
 		if (!fromScript || viewer.panelNodes.size() == 0) {
 			validate();
@@ -1224,13 +1183,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		return JSVFileManager.getFileAsString(value, null);
 	}
 
-	private PrintLayout lastPrintLayout;
-  public PrintLayout siGetPrintLayout(boolean isJob) {
-		PrintLayout pl = new AwtDialogPrint(this, lastPrintLayout, isJob).getPrintLayout();
-		if (pl != null)
-			lastPrintLayout = pl;
-		return pl;
-	}
   
 	public JSVTreeNode siCreateTree(JDXSource source, JSVPanel[] jsvPanels) {
 		return tree.createTree(this, source, jsvPanels);
@@ -1244,34 +1196,10 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		// not implemented for MainFrame
 	}
 
-	public JSVDialog siNewDialog(String type, JSVPanel jsvp) {
-		if (type.equals("legend"))
-			return new AwtDialogOverlayLegend(this, jsvp);
-		if (type.equals("view"))
-			return new AwtDialogView(viewer, spectraTreeScrollPane, false);
-		return null;
-	}
 
 	public JmolList<String> getScriptQueue() {
   // applet only
 		return null;
-	}
-
-	public void siShow(String what) {
-		if (what.equals("properties")) {
-			AwtDialogText.showProperties(this, viewer.getPanelData().getSpectrum());
-		} else if (what.equals("errors")) {
-			AwtDialogText.showError(this, viewer.currentSource);
-		} else if (what.equals("source")) {
-			if (viewer.currentSource == null) {
-				if (viewer.panelNodes.size() > 0) {
-					JOptionPane.showMessageDialog(this, "Please Select a Spectrum",
-							"Select Spectrum", JOptionPane.ERROR_MESSAGE);
-				}
-				return;
-			}
-			AwtDialogText.showSource(this, viewer.currentSource);
-		}
 	}
 
 }

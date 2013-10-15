@@ -11,8 +11,7 @@ import jspecview.common.ColorParameters;
 
 public class AwtParameters extends ColorParameters {
 
-  public AwtParameters(String name) {
-		super(name);
+  public AwtParameters() {
 	}
 
 	@Override
@@ -37,7 +36,7 @@ public class AwtParameters extends ColorParameters {
 
   @Override
 	public ColorParameters copy(String newName){
-    return new AwtParameters(newName).setElementColors(this);
+    return ((ColorParameters) new AwtParameters().setName(newName)).setElementColors(this);
   }
 
 }

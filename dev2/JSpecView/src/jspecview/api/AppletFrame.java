@@ -7,13 +7,12 @@ import org.jmol.util.JmolList;
 import jspecview.app.JSVApp;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSViewer;
-import jspecview.common.PrintLayout;
 
 public interface AppletFrame {
 
 	URL getDocumentBase();
 
-	void setPlatformFields(boolean isSigned, JSViewer viewer);
+	void setDropTargetListener(boolean isSigned, JSViewer viewer);
 
 	String getAppletInfo();
 
@@ -31,20 +30,10 @@ public interface AppletFrame {
 
 	void setPanelVisible(boolean b);
 
-	PrintLayout getDialogPrint(boolean isJob);
-
 	void validateContent(int mode);
 
 	JSVPanel getJSVPanel(JSViewer viewer, JmolList<JDXSpectrum> specs,
 			int initialStartIndex, int initialEndIndex);
-
-	JSVDialog newDialog(JSViewer viewer, String type);
-
-	void showWhat(JSViewer viewer, String what);
-
-	JSVApiPlatform getApiPlatform();
-
-	JSVGraphics getG2D(JSVApiPlatform apiPlatform);
 
 	void doExitJmol();
 

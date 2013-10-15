@@ -47,20 +47,10 @@ public class Annotation extends Coordinate {
   int offsetY;
   JDXSpectrum spec;
   
-  public enum AType { Integration, PeakList, Measurements, NONE }
+  public enum AType { Integration, PeakList, Measurements, OverlayLegend, Views, NONE }
   
-  /**
-   * Constructor -- note that x is spectral X value, but y is pixels above
-   * baseline
-   * @param x 
-   * @param y 
-   * 
-   */
-  protected Annotation(double x, double y) {
-    set(x, y);
-  }
-  
-  protected Annotation setAll(JDXSpectrum spec, String text, boolean isPixels, boolean is2D, int offsetX, int offsetY) {
+  protected Annotation setA(double x, double y, JDXSpectrum spec, String text, boolean isPixels, boolean is2D, int offsetX, int offsetY) {
+  	set(x, y);
     this.spec = spec;
     this.text = text;
     this.isPixels = isPixels;
@@ -167,7 +157,7 @@ public class Annotation extends Coordinate {
 				if (text.charAt(0) == '\"')
 					text = text.substring(1, text.length() - 1);
 			}
-			return new ColoredAnnotation(x, y).set(spec, text, color, false, false, 0, 0);
+			return new ColoredAnnotation().setCA(x, y, spec, text, color, false, false, 0, 0);
 		} catch (Exception e) {
 			return null;
 		}

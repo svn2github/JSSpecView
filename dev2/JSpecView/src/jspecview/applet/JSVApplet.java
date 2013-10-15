@@ -58,7 +58,6 @@ import java.util.Map;
 
 import javax.swing.JApplet;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 
 import netscape.javascript.JSObject;
 
@@ -67,28 +66,15 @@ import org.jmol.util.Logger;
 import org.jmol.util.Txt;
 
 import jspecview.api.AppletFrame;
-import jspecview.api.JSVApiPlatform;
 import jspecview.api.JSVAppletInterface;
-import jspecview.api.JSVDialog;
-import jspecview.api.JSVGraphics;
+import jspecview.api.JSVFileDropper;
 import jspecview.api.JSVPanel;
 import jspecview.app.JSVApp;
 import jspecview.awt.AwtPanel;
-import jspecview.awt.AwtParameters;
 import jspecview.awt.AwtViewPanel;
-import jspecview.awt.Platform;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVersion;
 import jspecview.common.JSViewer;
-import jspecview.common.PrintLayout;
-import jspecview.common.SimpleTree;
-import jspecview.g2d.G2D;
-import jspecview.java.AwtDialogOverlayLegend;
-import jspecview.java.AwtDialogPrint;
-import jspecview.java.AwtDialogText;
-import jspecview.java.AwtDialogView;
-import jspecview.java.AwtDropTargetListener;
-import jspecview.java.AwtFileHelper;
 
 /**
  * 
@@ -397,12 +383,9 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	private Component spectrumPanel;
 	private JFrame offWindowFrame;
 
-	public void setPlatformFields(boolean isSigned, JSViewer viewer) {
+	public void setDropTargetListener(boolean isSigned, JSViewer viewer) {
 		if (dtl == null && isSigned)
-			dtl = new AwtDropTargetListener(viewer);
-		viewer.parameters = new AwtParameters("applet");
-		viewer.spectraTree = new SimpleTree(viewer);
-		viewer.fileHelper = new AwtFileHelper(viewer);
+			dtl = (DropTargetListener) ((JSVFileDropper) viewer.getAwtInterface("FileDropper")).set(viewer);
 	}
 
 	public void validateContent(int mode) {
@@ -486,29 +469,10 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 		spectrumPanel.setVisible(b);
 	}
 
-	private PrintLayout lastPrintLayout;
-	
-	public PrintLayout getDialogPrint(boolean isJob) {
-		PrintLayout pl = new AwtDialogPrint(offWindowFrame, lastPrintLayout, isJob)
-				.getPrintLayout();
-		if (pl != null)
-			lastPrintLayout = pl;
-		return pl;
-
-	}
-
 	public JSVPanel getJSVPanel(JSViewer viewer, JmolList<JDXSpectrum> specs,
 			int initialStartIndex, int initialEndIndex) {
 		return AwtPanel.getPanelMany(viewer, specs, initialStartIndex,
 				initialEndIndex);
-	}
-
-	public JSVDialog newDialog(JSViewer viewer, String type) {
-		if (type.equals("legend"))
-			return new AwtDialogOverlayLegend(null, viewer.selectedPanel);
-		if (type.equals("view"))
-			return new AwtDialogView(viewer, spectrumPanel, false);
-		return null;
 	}
 
 	// for the signed applet to load a remote file, it must
@@ -543,31 +507,6 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 			}
 			commandWatcherThread = null;
 		}
-	}
-
-	public void showWhat(JSViewer viewer, String what) {
-		if (what.equals("properties")) {
-			AwtDialogText.showProperties(null, viewer.getPanelData().getSpectrum());
-		} else if (what.equals("errors")) {
-			AwtDialogText.showError(null, viewer.currentSource);
-		} else if (what.equals("source")) {
-			if (viewer.currentSource == null) {
-				if (viewer.panelNodes.size() > 0) {
-					JOptionPane.showMessageDialog(this, "Please Select a Spectrum",
-							"Select Spectrum", JOptionPane.ERROR_MESSAGE);
-				}
-				return;
-			}
-			AwtDialogText.showSource(null, viewer.currentSource);
-		}
-	}
-
-	public JSVApiPlatform getApiPlatform() {
-		return new Platform();
-	}
-
-	public JSVGraphics getG2D(JSVApiPlatform apiPlatform) {
-		return new G2D(apiPlatform);
 	}
 
 	public void doExitJmol() {

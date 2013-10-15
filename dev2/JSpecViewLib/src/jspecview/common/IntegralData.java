@@ -148,7 +148,7 @@ public class IntegralData extends MeasurementData {
 		double y1 = getYValueAt(x1);
 		double y2 = getYValueAt(x2);
 		haveRegions = true;
-		Integral in = new Integral(x1, y1).setInt(spec, Math.abs(y2 - y1) * 100
+		Integral in = new Integral().setInt(x1, y1, spec, Math.abs(y2 - y1) * 100
 				* normalizationFactor, x2, y2);
 		clear(x1, x2);
 		//if (in.getValue() < 0.1) -- no, need this for tiny integrals with a water peak, for instance
@@ -271,8 +271,8 @@ public class IntegralData extends MeasurementData {
 			String token = allParamTokens.nextToken();
 			// now split the x-value/integral-value pair
 			StringTokenizer eachParam = new StringTokenizer(token, ":");
-			Annotation ratio = new Annotation(Double.parseDouble(eachParam
-					.nextToken()), 0.0).setAll(spec, eachParam.nextToken(), true, false, 0, 0);
+			Annotation ratio = new Annotation().setA(Double.parseDouble(eachParam
+					.nextToken()), 0.0, spec, eachParam.nextToken(), true, false, 0, 0);
 			ratios.addLast(ratio);
 		}
 		return ratios;

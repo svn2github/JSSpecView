@@ -159,7 +159,7 @@ public class PreferencesDialog extends JDialog {
   private JRadioButton AtoTRadioButton = new JRadioButton();
   private ButtonGroup conversionButtonGroup = new ButtonGroup();
 
-  ColorParameters currentDS = new AwtParameters("Current");
+  ColorParameters currentDS = (ColorParameters) new AwtParameters().setName("Current");
   private DisplaySchemesProcessor dsp;
   private AwtPanel previewPanel = null;
   private String defaultDSName = "";

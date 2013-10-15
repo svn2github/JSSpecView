@@ -68,7 +68,7 @@ public class DisplaySchemesProcessor {
    */
 
   public ColorParameters loadDefault() {
-    AwtParameters dsdef = new AwtParameters("Default");
+    AwtParameters dsdef = (AwtParameters) new AwtParameters().setName("Default");
     dsdef.displayFontName = "default";
     dsdef.setColor(ScriptToken.TITLECOLOR, ColorParameters.BLACK);
     dsdef.setColor(ScriptToken.UNITSCOLOR, ColorParameters.BLACK);
@@ -160,7 +160,7 @@ public class DisplaySchemesProcessor {
         }
         if (theTag.equals("displayscheme")) {
           String name = reader.getAttrValue("name");
-          ds = new AwtParameters(name);
+          ds = (ColorParameters) new AwtParameters().setName(name);
           if (name.equals(defaultDS))
             ds.isDefault = true;
           displaySchemes.put(name, ds);

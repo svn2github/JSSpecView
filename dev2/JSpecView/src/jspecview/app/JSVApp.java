@@ -47,9 +47,7 @@ import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
 
 import jspecview.api.AppletFrame;
-import jspecview.api.JSVApiPlatform;
 import jspecview.api.JSVAppInterface;
-import jspecview.api.JSVDialog;
 import jspecview.api.JSVPanel;
 import jspecview.api.JSVTreeNode;
 import jspecview.api.PanelListener;
@@ -59,14 +57,12 @@ import jspecview.common.JSVPanelNode;
 import jspecview.common.JSViewer;
 import jspecview.common.Parameters;
 import jspecview.common.PeakPickEvent;
-import jspecview.common.PrintLayout;
 import jspecview.common.ScriptTokenizer;
 import jspecview.common.ScriptToken;
 import jspecview.common.Coordinate;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.SubSpecChangeEvent;
 import jspecview.common.ZoomEvent;
-import jspecview.common.JDXSpectrum.IRMode;
 
 import jspecview.export.Exporter;
 
@@ -95,12 +91,8 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	}
 
 	private void initViewer() {
-		JSVApiPlatform apiPlatform = appletFrame.getApiPlatform();
-		viewer = new JSViewer(this, true, false, appletFrame.getG2D(apiPlatform));
-		viewer.apiPlatform = apiPlatform;
-		apiPlatform.setViewer(viewer, viewer.display);
-    viewer.isSingleThreaded = apiPlatform.isSingleThreaded();
-		appletFrame.setPlatformFields(isSigned(), viewer);
+		viewer = new JSViewer(this, true, false);
+		appletFrame.setDropTargetListener(isSigned(), viewer);
 		JSVFileManager.setDocumentBase(viewer, appletFrame.getDocumentBase());
 	}
 
@@ -114,7 +106,6 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 
 	// ------- settable parameters ------------
 
-	private IRMode irMode = IRMode.NO_CONVERT;
 	private boolean allowCompoundMenu = true;
 	private boolean allowMenu = true;
 	private boolean autoIntegrate;
@@ -134,8 +125,6 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	private String peakCallbackFunctionName;
 	private String syncCallbackFunctionName;
 	public JSViewer viewer;
-	private JSVDialog viewDialog;
-	private JSVDialog overlayLegendDialog;
 
 	// ///// parameter set/get methods
 
@@ -167,14 +156,6 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 		return integrationRatios;
 	}
 
-	public void siSetIRMode(IRMode mode) {
-		irMode = mode;
-	}
-
-	public IRMode siGetIRMode() {
-		return irMode;
-	}
-
 	public AppletFrame getAppletFrame() {
 		return appletFrame;
 	}
@@ -195,13 +176,6 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 
 	public void dispose() {
 		try {
-			if (viewDialog != null)
-				viewDialog.dispose();
-			viewDialog = null;
-			if (overlayLegendDialog != null)
-				overlayLegendDialog.dispose();
-			overlayLegendDialog = null;
-
 			viewer.dispose();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -413,10 +387,8 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	public void initParams(String params) {
 		parseInitScript(params);
 		newAppletPanel();
-		viewer.jsvpPopupMenu = viewer.apiPlatform.getJSVMenuPopup("appletMenu");//getPappletFrame.newAppletPopupMenu(viewer);
-		if (viewer.jsvpPopupMenu != null)
-			viewer.jsvpPopupMenu.setEnabled(allowMenu, viewer.parameters
-					.getBoolean(ScriptToken.ENABLEZOOM));	
+		viewer.setPopupMenu(allowMenu, viewer.parameters
+				.getBoolean(ScriptToken.ENABLEZOOM));
 		runScriptNow(params);
 	}
 
@@ -597,7 +569,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 					siExecSetInterface(value);
 					break;
 				case IRMODE:
-					irMode = IRMode.getMode(value);
+					viewer.setIRmode(value);
 					break;
 				case MENUON:
 					allowMenu = Boolean.parseBoolean(value);
@@ -765,7 +737,10 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 		return viewer.selectedPanel.getPanelData().getSolutionColor();
 	}
 
-	public void siExecClose(String value, boolean fromScript) {
+	public void siExecClose(String value) {
+		boolean fromScript = (!value.startsWith("!"));
+		if (fromScript)
+			value = value.substring(1);		
 		viewer.close(value);
 		if (!fromScript)
 			siValidateAndRepaint();
@@ -835,10 +810,6 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 
 	public void siCloseSource(JDXSource source) {
 		viewer.closeSource(source);
-	}
-
-	public void process(JmolList<JDXSpectrum> specs) {
-		JDXSpectrum.process(specs, irMode);
 	}
 
 	public void setCursor(int id) {
@@ -931,10 +902,6 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 		return JSVFileManager.getFileAsString(value, appletFrame.getDocumentBase());
 	}
 
-	public PrintLayout siGetPrintLayout(boolean isJob) {
-		return appletFrame.getDialogPrint(isJob);
-	}
-
 	public JSVTreeNode siCreateTree(JDXSource source, JSVPanel[] jsvPanels) {
 		return viewer.spectraTree.createTree(this, source, jsvPanels);
 	}
@@ -947,20 +914,8 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 		viewer.runScript(script);
 	}
 
-	public JSVDialog siNewDialog(String type, JSVPanel jsvp) {
-		if (type.equals("legend"))
-			return overlayLegendDialog = appletFrame.newDialog(viewer, "legend");
-		if (type.equals("view"))
-			return viewDialog = appletFrame.newDialog(viewer, "view");
-		return null;
-	}
-
 	public JmolList<String> getScriptQueue() {
 		return viewer.scriptQueue;
 	}
 	
-	public void siShow(String what) {
-		appletFrame.showWhat(viewer, what);
-	}
-
 }

@@ -6,8 +6,7 @@ import jspecview.common.ColorParameters;
 
 public class JsParameters extends ColorParameters {
 
-  public JsParameters(String name) {
-		super(name);
+  public JsParameters() {
 	}
 
 	@Override
@@ -28,7 +27,7 @@ public class JsParameters extends ColorParameters {
 
   @Override
 	public ColorParameters copy(String newName){
-    return new JsParameters(newName).setElementColors(this);
+    return ((ColorParameters) new JsParameters().setName(newName)).setElementColors(this);
   }
 
 }

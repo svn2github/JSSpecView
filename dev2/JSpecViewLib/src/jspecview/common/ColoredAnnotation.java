@@ -21,7 +21,6 @@ package jspecview.common;
 
 import jspecview.util.JSVColor;
 
-import jspecview.common.Annotation;
 import jspecview.common.JDXSpectrum;
 
 
@@ -39,14 +38,13 @@ public class ColoredAnnotation extends Annotation {
     return color;
   }
 
-  public ColoredAnnotation(double x, double y) {
-  	super(x, y);
+  public ColoredAnnotation() {
   }
   
-  public ColoredAnnotation set(
-	JDXSpectrum spec, String text, JSVColor color,
+  public ColoredAnnotation setCA(
+	double x, double y, JDXSpectrum spec, String text, JSVColor color,
       boolean isPixels, boolean is2D, int offsetX, int offsetY) {
-    setAll(spec, text, isPixels, is2D, offsetX, offsetY);
+    setA(x, y, spec, text, isPixels, is2D, offsetX, offsetY);
     this.color = color;
     return this;
   }
