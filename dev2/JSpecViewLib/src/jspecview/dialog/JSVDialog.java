@@ -31,8 +31,8 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 	protected Object combo1; // measurement listing, peaks
 	
 	private boolean addClearBtn, addCombo1;
-	private boolean isNumeric = true; // not Views or OverlayLegend
-	private boolean defaultVisible = true; // not OverlayLegend
+	private boolean isNumeric; // not Views or OverlayLegend
+	private boolean defaultVisible; // not OverlayLegend
 
 	abstract protected void addUniqueControls();
 
@@ -45,22 +45,27 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 		manager = viewer.getDialogManager();
 		switch (type) {
 		case Integration:
+			isNumeric = true;
 			addClearBtn = true;
+			defaultVisible = true;
 			break;
 		case Measurements:
+			isNumeric = true;
+			addClearBtn = true;
 			addCombo1 = true;
-			break;
-		case NONE:
+			defaultVisible = true;
 			break;
 		case OverlayLegend:
-			isNumeric = false;
-			defaultVisible = false;
 			break;
 		case PeakList:
+			isNumeric = true;
 			addClearBtn = true;
+			defaultVisible = true;
 			break;
 		case Views:
-			isNumeric = false;
+			defaultVisible = true;
+			break;
+		case NONE:
 			break;
 		}
 		dialogParams = new DialogParams(type, this, viewer, spec, ((Parameters) viewer

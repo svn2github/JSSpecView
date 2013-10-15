@@ -816,7 +816,7 @@ public abstract class JDXDataObject extends JDXHeader {
     newObj.nucleusY = nucleusY;
     newObj.freq2dX = freq2dX;
     newObj.freq2dY = freq2dY;
-    newObj.filePath = filePath;
+    newObj.setFilePath(filePath);
     newObj.nH = nH;
 
   }

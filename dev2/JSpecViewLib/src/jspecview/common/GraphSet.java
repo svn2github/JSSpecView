@@ -3538,7 +3538,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		// exists and "ON" or "OFF"
 		boolean isON = tfToggle.booleanValue();
 		id.setState(isON);
-		if (id instanceof JSVDialog)
+		if (isON || id instanceof JSVDialog)
 			pd.showDialog(type);
 
 		// if (type == AType.Integration)
