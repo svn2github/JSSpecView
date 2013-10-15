@@ -118,7 +118,8 @@ public class JSVAppletPro extends JSVApplet {
 //    mainFrame.runScript("load \"" + filePath + "\"");
 //  }
 
-  public void doExitJmol() {
+  @Override
+	public void doExitJmol() {
     app0.setVisible(true);
     //mainFrame.setVisible(false);
     app = app0;
