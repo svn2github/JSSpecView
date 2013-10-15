@@ -141,7 +141,7 @@ public class AppMenu extends JMenuBar {
     printMenuItem = setMenuItem(null, 'P', "Print...", 80,
         InputEvent.CTRL_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            mainFrame.siPrintPDF("");
+            viewer.printPDF("");
           }
         });
     closeMenuItem = setMenuItem(null, 'C', "Close", 115,
@@ -514,6 +514,8 @@ public class AppMenu extends JMenuBar {
       saveAsMenu.setEnabled(true);
       saveAsJDXMenu.setEnabled(spec.canSaveAsJDX());
       integrationMenuItem.setEnabled(spec.canIntegrate());
+      transmittanceMenuItem.setEnabled(spec.isAbsorbance() || spec.isTransmittance());
+      solutionColorMenuItem.setEnabled(spec.canShowSolutionColor());
     }
 
   }

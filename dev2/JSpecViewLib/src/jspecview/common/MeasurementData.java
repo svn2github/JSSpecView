@@ -111,6 +111,7 @@ public class MeasurementData extends JmolList<Measurement> implements
 		return data;
 	}
 
+	@SuppressWarnings("incomplete-switch")
 	static boolean checkParameters(MeasurementData md, ColorParameters p) {
 		if (md.size() == 0)
 			return false;

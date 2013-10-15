@@ -39,14 +39,9 @@ package jspecview.awt;
 
 import jspecview.util.JSVColor;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.RenderedImage;
 import java.awt.print.PageFormat;
 import java.awt.print.Printable;
@@ -62,14 +57,8 @@ import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet; //import javax.print.attribute.standard.MediaSize;
 import javax.print.attribute.standard.OrientationRequested;
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 
@@ -83,13 +72,11 @@ import jspecview.api.JSVApiPlatform;
 import jspecview.api.JSVPanel;
 import jspecview.api.PdfCreatorInterface;
 import jspecview.common.JDXSpectrum;
-import jspecview.common.JSVInterface;
 import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
 import jspecview.common.ColorParameters;
 import jspecview.common.PrintLayout;
 import jspecview.common.ScriptToken;
-import jspecview.export.Exporter;
 
 /**
  * JSVPanel class represents a View combining one or more GraphSets, each with one or more JDXSpectra.
@@ -260,7 +247,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
    * @param pl 
    */
   private void createPdfDocument(OutputStream os, PrintLayout pl) {
-  	PdfCreatorInterface pdfCreator = (PdfCreatorInterface) JSVInterface.getInterface("jspecview.java.AwtPdfCreator");
+  	PdfCreatorInterface pdfCreator = (PdfCreatorInterface) viewer.getAwtInterface("PdfCreator");
   	if (pdfCreator == null)
   		return;
   	pdfCreator.createPdfDocument(this, pl, os);
@@ -351,11 +338,6 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
 		} catch (IOException e) {
 			showMessage(e.getMessage(), "Error Saving Image");
 		}
-	}
-
-	public String exportTheSpectrum(String type, String path, JDXSpectrum spec,
-			int startIndex, int endIndex) throws IOException {
-		return Exporter.exportTheSpectrum(type, path, spec, startIndex, endIndex);
 	}
 
 	///// threading and focus

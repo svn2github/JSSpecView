@@ -375,10 +375,6 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 		return app.runScriptNow(script);
 	}
 
-	public String siPrintPDF(String pdfFileName) {
-		return app.siPrintPDF(pdfFileName);
-	}
-
 	private DropTargetListener dtl;
 	private Component spectrumPanel;
 	private JFrame offWindowFrame;

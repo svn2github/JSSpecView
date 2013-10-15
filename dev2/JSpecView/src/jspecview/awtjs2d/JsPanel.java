@@ -37,7 +37,6 @@
 
 package jspecview.awtjs2d;
 
-import java.io.IOException;
 import java.io.OutputStream;
 
 import org.jmol.api.JmolMouseInterface;
@@ -52,7 +51,6 @@ import jspecview.common.PanelData;
 import jspecview.common.ColorParameters;
 import jspecview.common.PrintLayout;
 import jspecview.common.ScriptToken;
-import jspecview.export.Exporter;
 import jspecview.util.JSVColor;
 
 
@@ -190,11 +188,6 @@ public class JsPanel implements JSVPanel {
 
 	public void getFocusNow(boolean asThread) {
     pd.dialogsToFront();
-	}
-
-	public String exportTheSpectrum(String type, String path, JDXSpectrum spec,
-			int startIndex, int endIndex) throws IOException {
-		return Exporter.exportTheSpectrum(type, path, spec, startIndex, endIndex);
 	}
 
 	public int getFontFaceID(String name) {

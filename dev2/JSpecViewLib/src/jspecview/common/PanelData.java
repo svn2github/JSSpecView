@@ -37,7 +37,6 @@
 
 package jspecview.common;
 
-import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
@@ -1306,20 +1305,15 @@ public class PanelData implements EventManager {
 	}
 
 
-  public String export(String type, int n) {
-    if (type == null)
-      type = "XY";
-    if (n < -1 || getNumberOfSpectraInCurrentSet() <= n)
-      return "only " + getNumberOfSpectraInCurrentSet()
-          + " spectra available.";
-    try {
-      JDXSpectrum spec = (n < 0 ? getSpectrum() : getSpectrumAt(n));
-      return jsvp.exportTheSpectrum(type, null, spec, 0, spec.getXYCoords().length - 1);
-    } catch (IOException ioe) {
-      // not possible
-    }
-    return null;
-  }
+	public String export(String type, int n) {
+		if (type == null)
+			type = "XY";
+		if (n < -1 || getNumberOfSpectraInCurrentSet() <= n)
+			return "only " + getNumberOfSpectraInCurrentSet() + " spectra available.";
+		JDXSpectrum spec = (n < 0 ? getSpectrum() : getSpectrumAt(n));
+		return viewer.exportTheSpectrum(type, null, spec, 0,
+				spec.getXYCoords().length - 1);
+	}
 
 	public AnnotationDialog showDialog(AType type) {
 		AnnotationData ad = getDialog(type);

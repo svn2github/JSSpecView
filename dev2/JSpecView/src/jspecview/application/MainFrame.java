@@ -772,7 +772,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	 *          the name of the format to export in
 	 */
 	void exportSpectrumViaMenu(String command) {
-		Exporter.exportSpectrum(viewer, command);
+		new Exporter().exportSpectrum(viewer, command);
 	}
 
 	protected void windowClosing_actionPerformed() {
@@ -905,7 +905,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	public String siExecExport(JSVPanel jsvp, String value) {
-		return Exporter.exportCmd(jsvp, ScriptToken.getTokens(value),
+		return new Exporter().exportCmd(jsvp, ScriptToken.getTokens(value),
 				svgForInkscape);
 	}
 
@@ -1066,7 +1066,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	public String siPrintPDF(String fileName) {
-		return Exporter.printPDF(viewer, fileName);
+		return new Exporter().printPDF(viewer, fileName);
 	}
 	
 	public void siCheckCallbacks(String title) {

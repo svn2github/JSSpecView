@@ -39,8 +39,6 @@
 
 package jspecview.applet;
 
-import org.jmol.util.Logger;
-
 import jspecview.app.JSVApp;
 import jspecview.app.JSVAppPro;
 //import jspecview.application.MainFrame;
@@ -116,15 +114,11 @@ public class JSVAppletPro extends JSVApplet {
 //    mainFrame.runScript("load \"" + filePath + "\"");
 //  }
 
-  public void doExitJmol() {
+  @Override
+	public void doExitJmol() {
     app0.setVisible(true);
     //mainFrame.setVisible(false);
     app = app0;
   }
   
-	public JSVApp getApp() {
-		return app;
-	}
-
-
 }

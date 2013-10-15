@@ -37,8 +37,6 @@ public interface ScriptInterface {
 
 	public void siExecClose(String value);
 
-	public String siExecExport(JSVPanel jsvp, String value);
-
 	public void siExecHidden(boolean b);
 
 	public String siExecLoad(String value);
@@ -78,12 +76,6 @@ public interface ScriptInterface {
 
 	public void siOpenDataOrFile(String data, String name, JmolList<JDXSpectrum> specs,
 			String url, int firstSpec, int lastSpec, boolean doCheck);
-
-	/**
-	 * @param fileName
-	 * @return "OK" if signedApplet or app; Base64-encoded string if unsigned applet or null if problem
-	 */
-	public String siPrintPDF(String fileName);
 
 	public void siProcessCommand(String script);
 	

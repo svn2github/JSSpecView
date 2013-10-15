@@ -21,6 +21,7 @@ import org.jmol.util.Parser;
 import org.jmol.util.SB;
 import org.jmol.util.Txt;
 
+import jspecview.api.ExportInterface;
 import jspecview.api.JSVApiPlatform;
 import jspecview.api.JSVFileHelper;
 import jspecview.api.JSVGraphics;
@@ -205,7 +206,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 											: Logger.LEVEL_INFO);
 					break;
 				case EXPORT:
-					msg = si.siExecExport(selectedPanel, value);
+					msg = execExport(value);
 					return false;
 				case GETPROPERTY:
 					Map<String, Object> info = (selectedPanel == null ? null
@@ -330,7 +331,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 						selectedPanel.getPanelData().splitStack(!Parameters.isTrue(value));
 						break;
 					case PRINT:
-						si.siPrintPDF(value);
+						msg = printPDF(value);
 						break;
 					case SETPEAK:
 						// setpeak NONE Double.NaN, Double.MAX_VALUE
@@ -414,7 +415,6 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		}
 		si.siIncrementViewCount(-1);
 		si.siExecScriptComplete(msg, true);
-		// si.getSelectedPanel().requestFocusInWindow(); // could be CLOSE ALL
 		return isOK;
 	}
 
@@ -1621,6 +1621,43 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		// TODO Auto-generated method stub
 		return 0;
 	}
+
+	public String exportTheSpectrum(String type, String path, JDXSpectrum spec,
+			int startIndex, int endIndex) {
+		try {
+			return ((ExportInterface) Interface
+					.getInterface("jspecview.export.Exporter")).exportTheSpectrum(type,
+					path, spec, startIndex, endIndex);
+		} catch (Exception e) {
+			System.out.println(e);
+			return null;
+		}
+	}
+
+	private String execExport(String value) {
+		String msg = ((ExportInterface) Interface
+				.getInterface("jspecview.export.Exporter")).exportCmd(selectedPanel,
+				ScriptToken.getTokens(value), false);
+		si.writeStatus(msg);
+		return msg;
+	}
+
+	/**
+	 * @param fileName
+	 * @return "OK" if signedApplet or app; Base64-encoded string if unsigned applet or null if problem
+	 */
+	public String printPDF(String fileName) {
+		boolean needWindow = false; // !isNewWindow;
+		// not sure what this is about. The applet prints fine
+		if (needWindow)
+			si.siNewWindow(true, false);
+		String s = ((ExportInterface) Interface
+				.getInterface("jspecview.export.Exporter")).printPDF(this, fileName);
+		if (needWindow)
+			si.siNewWindow(false, false);
+		return s;
+	}
+
 
 }
 

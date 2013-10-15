@@ -66,10 +66,6 @@ public abstract class ColorParameters extends Parameters {
       "darkGray"
   };
   
-  /**
-   * Intialises a DisplayScheme with the given name
-   * @param name the name of the <code>DisplayScheme</code>
-   */
   public ColorParameters(){
     BLACK = getColor3(0, 0, 0);
     RED = getColor3(255, 0, 0);

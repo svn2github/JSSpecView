@@ -64,8 +64,6 @@ import jspecview.common.JDXSpectrum;
 import jspecview.common.SubSpecChangeEvent;
 import jspecview.common.ZoomEvent;
 
-import jspecview.export.Exporter;
-
 import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
 import jspecview.util.JSVEscape;
@@ -409,20 +407,6 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	// //////////// JSVAppletPopupMenu calls
 
 	/**
-	 * Opens the print dialog to enable printing
-	 */
-	public String siPrintPDF(String pdfFileName) {
-		boolean needWindow = false; // !isNewWindow;
-		// not sure what this is about. The applet prints fine
-		if (needWindow)
-			siNewWindow(true, false);
-		String s = Exporter.printPDF(viewer, pdfFileName);
-		if (needWindow)
-			siNewWindow(false, false);
-		return s;
-	}
-
-	/**
 	 * Shows the applet in a Frame
 	 * 
 	 * @param isSelected
@@ -471,21 +455,6 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	public void siValidateAndRepaint() {
 		appletFrame.validate();
 		repaint();
-	}
-
-	/**
-	 * Export spectrum in a given format
-	 * 
-	 * @param type
-	 * 
-	 */
-	public void exportSpectrumViaMenu(String type) {
-		if (!isSigned()) {
-			Logger.info(exportSpectrum(type, -1));
-			return;
-		}
-		Exporter.exportSpectrum(viewer, type);
-		viewer.selectedPanel.getFocusNow(true);
 	}
 
 	/**
@@ -702,12 +671,6 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 
 	// ///////////// ScriptInterface execution from JSViewer.runScriptNow and
 	// menus
-
-	public String siExecExport(JSVPanel jsvp, String value) {
-		if (jsvp != null && isPro())
-			writeStatus(Exporter.exportCmd(jsvp, ScriptToken.getTokens(value), false));
-		return null;
-	}
 
 	@SuppressWarnings("incomplete-switch")
 	public void siExecSetCallback(ScriptToken st, String value) {

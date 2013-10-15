@@ -21,7 +21,7 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package jspecview.java;
+package jspecview.awt;
 
 import com.lowagie.text.Document;
 import com.lowagie.text.PageSize;
@@ -40,7 +40,6 @@ import javax.print.attribute.standard.MediaSizeName;
 
 import jspecview.api.JSVPanel;
 import jspecview.api.PdfCreatorInterface;
-import jspecview.awt.AwtPanel;
 import jspecview.common.PrintLayout;
 
 public class AwtPdfCreator implements PdfCreatorInterface {

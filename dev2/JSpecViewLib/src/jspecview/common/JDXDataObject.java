@@ -842,6 +842,10 @@ public abstract class JDXDataObject extends JDXHeader {
 			s2 = (isHNMR() ? new int[] { 1, 2 } : new int[] { 1, 1 });
 			return new Object[] { s1, s2, Integer.valueOf(isNMR ? 1 : 0) };
 		case NONE:
+		case OverlayLegend:
+			break;
+		case Views:
+			break;
 		}
 		return null;
 	}
