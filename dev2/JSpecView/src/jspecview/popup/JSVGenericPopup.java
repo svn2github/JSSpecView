@@ -31,13 +31,13 @@ import org.jmol.util.Txt;
 import jspecview.api.JSVAbstractMenu;
 import jspecview.api.JSVPanel;
 import jspecview.api.JSVPopupMenu;
-import jspecview.common.JDXSpectrum;
-import jspecview.common.JSVPanelNode;
+import jspecview.common.PanelNode;
 import jspecview.common.JSVersion;
 import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
 import jspecview.common.ScriptToken;
 import jspecview.common.Annotation.AType;
+import jspecview.source.JDXSpectrum;
 
 import org.jmol.util.JmolList;
 
@@ -661,7 +661,7 @@ abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
 		return false;
 	}
 
-	public void setCompoundMenu(JmolList<JSVPanelNode> panelNodes,
+	public void setCompoundMenu(JmolList<PanelNode> panelNodes,
 			boolean allowCompoundMenu) {
 		// TODO Auto-generated method stub
 		

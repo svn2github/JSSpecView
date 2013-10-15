@@ -25,6 +25,7 @@ import java.util.Comparator;
 
 import java.util.StringTokenizer;
 
+import jspecview.source.JDXSpectrum;
 import jspecview.util.JSVTxt;
 
 
@@ -588,7 +589,7 @@ public class Coordinate {
 		return true;
 	}
 
-	static void shiftX(Coordinate[] xyCoords, double dx) {
+	public static void shiftX(Coordinate[] xyCoords, double dx) {
   	for (int i = xyCoords.length; --i >= 0;)
   		xyCoords[i].xVal += dx;
 	}

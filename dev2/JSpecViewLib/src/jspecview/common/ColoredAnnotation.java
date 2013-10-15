@@ -19,9 +19,9 @@
 
 package jspecview.common;
 
+import jspecview.source.JDXSpectrum;
 import jspecview.util.JSVColor;
 
-import jspecview.common.JDXSpectrum;
 
 
 /**

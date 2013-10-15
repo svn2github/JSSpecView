@@ -48,6 +48,7 @@ import jspecview.api.JSVPanel;
 import jspecview.api.PanelListener;
 import jspecview.common.Annotation.AType;
 import jspecview.dialog.JSVDialog;
+import jspecview.source.JDXSpectrum;
 import jspecview.util.JSVColor;
 import jspecview.util.JSVColorUtil;
 
@@ -593,10 +594,6 @@ public class PanelData implements EventManager {
 		return currentGraphSet.viewData.getEndingPointIndex(index);
 	}
 
-	public String getSolutionColor() {
-		return currentGraphSet.getSolutionColor();
-	}
-
 	public boolean haveSelectedSpectrum() {
 		return currentGraphSet.haveSelectedSpectrum();
 	}
@@ -729,13 +726,6 @@ public class PanelData implements EventManager {
 
 	public void toPeak(int i) {
 		currentGraphSet.toPeak(i);
-	}
-
-	public String getSolutionColorHtml() {
-		String color = currentGraphSet.getSolutionColor();
-		return "<html><body bgcolor=rgb(" + color
-				+ ")><br />Predicted Solution Colour- RGB(" + color
-				+ ")<br /><br /></body></html>";
 	}
 
 	/*------------------------- Javascript call functions ---------------------*/
@@ -1302,17 +1292,6 @@ public class PanelData implements EventManager {
 
 		// TODO Auto-generated method stub
 		
-	}
-
-
-	public String export(String type, int n) {
-		if (type == null)
-			type = "XY";
-		if (n < -1 || getNumberOfSpectraInCurrentSet() <= n)
-			return "only " + getNumberOfSpectraInCurrentSet() + " spectra available.";
-		JDXSpectrum spec = (n < 0 ? getSpectrum() : getSpectrumAt(n));
-		return viewer.exportTheSpectrum(type, null, spec, 0,
-				spec.getXYCoords().length - 1);
 	}
 
 	public JSVDialog showDialog(AType type) {

@@ -3,7 +3,7 @@ package jspecview.application;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import jspecview.api.JSVTreeNode;
-import jspecview.common.JSVPanelNode;
+import jspecview.common.PanelNode;
 
 @SuppressWarnings("unchecked")
 public class AwtTreeNode extends
@@ -12,15 +12,15 @@ public class AwtTreeNode extends
 
 	  private static final long serialVersionUID = 1L;
 		
-	  public JSVPanelNode panelNode;
+	  public PanelNode panelNode;
 		public int index;
 
-	  public AwtTreeNode(String text, JSVPanelNode panelNode) {
+	  public AwtTreeNode(String text, PanelNode panelNode) {
 	    super(text);
 	    this.panelNode = panelNode;
 	  }
 
-		public JSVPanelNode getPanelNode() {
+		public PanelNode getPanelNode() {
 			return panelNode;
 		}
 		

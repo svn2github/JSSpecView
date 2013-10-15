@@ -71,10 +71,10 @@ import jspecview.api.JSVFileDropper;
 import jspecview.api.JSVPanel;
 import jspecview.app.JSVApp;
 import jspecview.awt.AwtPanel;
-import jspecview.awt.AwtViewPanel;
-import jspecview.common.JDXSpectrum;
+import jspecview.awt.ViewPanel;
 import jspecview.common.JSVersion;
 import jspecview.common.JSViewer;
+import jspecview.source.JDXSpectrum;
 
 /**
  * 
@@ -393,7 +393,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 
 	public void addNewPanel(JSViewer viewer) {
 		getContentPane().removeAll();
-		spectrumPanel = (Component) (viewer.viewPanel = new AwtViewPanel(
+		spectrumPanel = (Component) (viewer.viewPanel = new ViewPanel(
 				new BorderLayout()));
 		getContentPane().add(spectrumPanel);
 	}

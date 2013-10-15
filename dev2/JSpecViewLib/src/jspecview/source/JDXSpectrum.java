@@ -17,7 +17,7 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package jspecview.common;
+package jspecview.source;
 
 import org.jmol.util.JmolList;
 import java.util.Hashtable;
@@ -26,7 +26,9 @@ import java.util.Map;
 
 import org.jmol.util.Logger;
 
-import jspecview.source.JDXSourceStreamTokenizer;
+import jspecview.common.Coordinate;
+import jspecview.common.Parameters;
+import jspecview.common.PeakInfo;
 
 /**
  * <code>JDXSpectrum</code> implements the Interface Spectrum for the display of
@@ -573,7 +575,7 @@ public class JDXSpectrum extends JDXDataObject {
 		return Coordinate.findXForPeakNearest(xyCoords, x, isInverted());
 	}
 
-	double addSpecShift(double dx) {
+	public double addSpecShift(double dx) {
 		if (dx != 0) {
 			specShift += dx;
 			Coordinate.shiftX(xyCoords, dx);

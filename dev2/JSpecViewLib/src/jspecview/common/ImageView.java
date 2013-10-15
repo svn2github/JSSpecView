@@ -3,6 +3,7 @@ package jspecview.common;
 
 
 import jspecview.api.XYScaleConverter;
+import jspecview.source.JDXSpectrum;
 
 import org.jmol.util.JmolList;
 

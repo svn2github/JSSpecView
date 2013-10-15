@@ -53,19 +53,19 @@ import jspecview.api.JSVTreeNode;
 import jspecview.api.PanelListener;
 
 import jspecview.common.JSVFileManager;
-import jspecview.common.JSVPanelNode;
+import jspecview.common.PanelNode;
 import jspecview.common.JSViewer;
 import jspecview.common.Parameters;
 import jspecview.common.PeakPickEvent;
 import jspecview.common.ScriptTokenizer;
 import jspecview.common.ScriptToken;
 import jspecview.common.Coordinate;
-import jspecview.common.JDXSpectrum;
 import jspecview.common.SubSpecChangeEvent;
 import jspecview.common.ZoomEvent;
 
 import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
+import jspecview.source.JDXSpectrum;
 import jspecview.util.JSVEscape;
 
 
@@ -234,7 +234,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	 * 
 	 */
 	public String exportSpectrum(String type, int n) {
-		return viewer.selectedPanel.getPanelData().export(type, n);
+		return viewer.export(type, n);
 	}
 
 	public void setFilePath(String tmpFilePath) {
@@ -697,7 +697,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	 */
 
 	public String getSolnColour() {
-		return viewer.selectedPanel.getPanelData().getSolutionColor();
+		return viewer.getSolutionColor();
 	}
 
 	public void siExecClose(String value) {
@@ -763,7 +763,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 
 	// /////// multiple source changes ////////
 
-	public void siSetNode(JSVPanelNode panelNode, boolean fromTree) {
+	public void siSetNode(PanelNode panelNode, boolean fromTree) {
 		if (panelNode.jsvp != viewer.selectedPanel)
 			siSetSelectedPanel(panelNode.jsvp);
 		siSendPanelChange(panelNode.jsvp);
@@ -813,9 +813,9 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 		return jsvp;
 	}
 
-	public JSVPanelNode siGetNewPanelNode(String id, String fileName,
+	public PanelNode siGetNewPanelNode(String id, String fileName,
 			JDXSource source, JSVPanel jsvp) {
-		return new JSVPanelNode(id, fileName, source, jsvp);
+		return new PanelNode(id, fileName, source, jsvp);
 	}
 
 	// not implemented for applet
@@ -845,7 +845,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	public void siSetLoaded(String fileName, String filePath) {
 	}
 
-	public void siSetMenuEnables(JSVPanelNode node, boolean isSplit) {
+	public void siSetMenuEnables(PanelNode node, boolean isSplit) {
 	}
 
 	public void siSetRecentURL(String filePath) {

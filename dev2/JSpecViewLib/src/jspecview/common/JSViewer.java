@@ -32,12 +32,14 @@ import jspecview.api.JSVPrintDialog;
 import jspecview.api.JSVTree;
 import jspecview.api.JSVTreeNode;
 import jspecview.api.ScriptInterface;
+import jspecview.api.VisibleInterface;
 import jspecview.common.Annotation.AType;
-import jspecview.common.JDXSpectrum.IRMode;
 import jspecview.common.PanelData.LinkMode;
 import jspecview.dialog.JSVDialog;
 import jspecview.dialog.DialogManager;
 import jspecview.source.JDXSource;
+import jspecview.source.JDXSpectrum;
+import jspecview.source.JDXSpectrum.IRMode;
 import jspecview.tree.SimpleTree;
 import jspecview.util.JSVEscape;
 
@@ -51,9 +53,9 @@ import jspecview.util.JSVEscape;
  */
 public class JSViewer implements PlatformViewer, JSmolInterface {
 
-  public final static String sourceLabel = "Original...";
+	public final static String sourceLabel = "Original...";
 
-  public final static int FILE_OPEN_OK = 0;
+	public final static int FILE_OPEN_OK = 0;
 	public final static int FILE_OPEN_ALREADY = -1;
 	// private final static int FILE_OPEN_URLERROR = -2;
 	public final static int FILE_OPEN_ERROR = -3;
@@ -64,28 +66,28 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 	public static final int PAGE_EXISTS = 0;
 	public static final int NO_SUCH_PAGE = 1;
 
+	private final static String noColor = "255,255,255";
 
 	private static String testScript = "<PeakData  index=\"1\" title=\"\" model=\"~1.1\" type=\"1HNMR\" xMin=\"3.2915\" xMax=\"3.2965\" atoms=\"15,16,17,18,19,20\" multiplicity=\"\" integral=\"1\"> src=\"JPECVIEW\" file=\"http://SIMULATION/$caffeine\"";
 
 	private final static int NLEVEL_MAX = 100;
 
-
-	public ScriptInterface        si;
-	public JSVGraphics            g2d;
-	public JSVTree                spectraTree;
-	public JDXSource              currentSource;
-  public JmolList<JSVPanelNode> panelNodes;  
-	public ColorParameters        parameters;
-	public RepaintManager         repaintManager;
-	public JSVPanel               selectedPanel;
-	public JSVMainPanel           viewPanel; // alias for spectrumPanel
-	public Properties 						properties; // application only
-	public JmolList<String>       scriptQueue;
-	public JSVFileHelper          fileHelper;
-	public JSVPopupMenu           jsvpPopupMenu;
-	private DialogManager   			dialogManager;
-	private JSVDialog      viewDialog;
-	private JSVDialog      overlayLegendDialog;
+	public ScriptInterface si;
+	public JSVGraphics g2d;
+	public JSVTree spectraTree;
+	public JDXSource currentSource;
+	public JmolList<PanelNode> panelNodes;
+	public ColorParameters parameters;
+	public RepaintManager repaintManager;
+	public JSVPanel selectedPanel;
+	public JSVMainPanel viewPanel; // alias for spectrumPanel
+	public Properties properties; // application only
+	public JmolList<String> scriptQueue;
+	public JSVFileHelper fileHelper;
+	public JSVPopupMenu jsvpPopupMenu;
+	private DialogManager dialogManager;
+	private JSVDialog viewDialog;
+	private JSVDialog overlayLegendDialog;
 
 	private IRMode irMode = IRMode.NO_CONVERT;
 
@@ -102,18 +104,17 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 	public Object applet; // will be an JavaScript object if this is JavaScript
 
 	public Object display;
-  private int maximumSize = Integer.MAX_VALUE;
-  final Dimension dimScreen = new Dimension();
+	private int maximumSize = Integer.MAX_VALUE;
+	final Dimension dimScreen = new Dimension();
 
 	public JSVApiPlatform apiPlatform;
-
 
 	public void setProperty(String key, String value) {
 		if (properties != null)
 			properties.setProperty(key, value);
 	}
 
-	public void setNode(JSVPanelNode node, boolean fromTree) {
+	public void setNode(PanelNode node, boolean fromTree) {
 		si.siSetNode(node, fromTree);
 	}
 
@@ -135,7 +136,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		parameters.setName("applet");
 		fileHelper = ((JSVFileHelper) getAwtInterface("FileHelper")).set(this);
 		isSingleThreaded = apiPlatform.isSingleThreaded();
-		panelNodes = new JmolList<JSVPanelNode>();
+		panelNodes = new JmolList<PanelNode>();
 		repaintManager = new RepaintManager(this);
 		if (!isApplet)
 			setPopupMenu(true, true);
@@ -145,7 +146,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		try {
 			jsvpPopupMenu = (JSVPopupMenu) getAwtInterface("Popup");
 			jsvpPopupMenu.initialize(this, isApplet ? "appletMenu" : "appMenu");
-			jsvpPopupMenu.setEnabled(allowMenu, zoomEnabled);	
+			jsvpPopupMenu.setEnabled(allowMenu, zoomEnabled);
 		} catch (Exception e) {
 			System.out.println(e + " initializing popup menu");
 		}
@@ -156,7 +157,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		if (script == null)
 			script = "";
 		script = script.trim();
-		System.out.println ("RUNSCRIPT " + script);
+		System.out.println("RUNSCRIPT " + script);
 		if (script.startsWith("event://"))
 			return getDialogManager().dialogCallback(script);
 		boolean isOK = true;
@@ -173,7 +174,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 				continue;
 			ScriptToken st = ScriptToken.getScriptToken(key);
 			String value = ScriptToken.getValue(st, eachParam, token);
-			System.out.println ("KEY-> " + key + " VALUE-> " + value + " : " + st);
+			System.out.println("KEY-> " + key + " VALUE-> " + value + " : " + st);
 			try {
 				switch (st) {
 				case UNKNOWN:
@@ -183,7 +184,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 				default:
 					if (selectedPanel == null)
 						break;// probably a startup option for the applet
-					parameters.set(selectedPanel.getPanelData(), st, value);
+					parameters.set(pd(), st, value);
 					si.siUpdateBoolean(st, Parameters.isTrue(value));
 					break;
 				case PEAKCALLBACKFUNCTIONNAME:
@@ -307,10 +308,11 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 					default:
 						break;
 					case FINDX:
-						selectedPanel.getPanelData().findX(null, Double.parseDouble(value));
+						pd().findX(null, Double.parseDouble(value));
 						break;
 					case GETSOLUTIONCOLOR:
-						showColorMessage();
+						selectedPanel.showMessage(getSolutionColorHtml(),
+								"Predicted Colour");
 						break;
 					case INTEGRATION:
 					case INTEGRATE:
@@ -320,14 +322,13 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 						execIRMode(value);
 						break;
 					case LABEL:
-						selectedPanel.getPanelData().addAnnotation(
-								ScriptToken.getTokens(value));
+						pd().addAnnotation(ScriptToken.getTokens(value));
 						break;
 					case LINK:
-						selectedPanel.getPanelData().linkSpectra(LinkMode.getMode(value));
+						pd().linkSpectra(LinkMode.getMode(value));
 						break;
 					case OVERLAYSTACKED:
-						selectedPanel.getPanelData().splitStack(!Parameters.isTrue(value));
+						pd().splitStack(!Parameters.isTrue(value));
 						break;
 					case PRINT:
 						msg = printPDF(value);
@@ -339,18 +340,17 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 						// setx x.x Double.MIN_VALUE, value
 						// shiftx x.x value, Double.NaN
 						// setpeak ? Double.NaN, Double.MIN_VALUE
-						selectedPanel.getPanelData().shiftSpectrum(
+						pd().shiftSpectrum(
 								Double.NaN,
 								value.equalsIgnoreCase("NONE") ? Double.MAX_VALUE : value
 										.equalsIgnoreCase("?") ? Double.MIN_VALUE : Double
 										.parseDouble(value));
 						break;
 					case SETX:
-						selectedPanel.getPanelData().shiftSpectrum(Double.MIN_VALUE,
-								Double.parseDouble(value));
+						pd().shiftSpectrum(Double.MIN_VALUE, Double.parseDouble(value));
 						break;
 					case SHIFTX:
-						selectedPanel.getPanelData().shiftSpectrum(
+						pd().shiftSpectrum(
 								value.equalsIgnoreCase("NONE") ? Double.MAX_VALUE : Double
 										.parseDouble(value), Double.NaN);
 						break;
@@ -358,24 +358,22 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 						show("errors");
 						break;
 					case SHOWINTEGRATION:
-						selectedPanel.getPanelData().showAnnotation(AType.Integration,
+						pd().showAnnotation(AType.Integration,
 								Parameters.getTFToggle(value));
 						// execIntegrate(null);
 						break;
 					case SHOWKEY:
-						setOverlayLegendVisibility(selectedPanel, Parameters
-								.getTFToggle(value), true);
+						setOverlayLegendVisibility(Parameters.getTFToggle(value), true);
 						break;
 					case SHOWMEASUREMENTS:
-						selectedPanel.getPanelData().showAnnotation(AType.Measurements,
+						pd().showAnnotation(AType.Measurements,
 								Parameters.getTFToggle(value));
 						break;
 					case SHOWMENU:
 						showMenu(Integer.MIN_VALUE, 0);
 						break;
 					case SHOWPEAKLIST:
-						selectedPanel.getPanelData().showAnnotation(AType.PeakList,
-								Parameters.getTFToggle(value));
+						pd().showAnnotation(AType.PeakList, Parameters.getTFToggle(value));
 						break;
 					case SHOWPROPERTIES:
 						show("properties");
@@ -384,7 +382,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 						show("source");
 						break;
 					case YSCALE:
-						setYScale(value, selectedPanel);
+						setYScale(value);
 						break;
 					case WINDOW:
 						si.siNewWindow(Parameters.isTrue(value), false);
@@ -415,6 +413,10 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		si.siIncrementViewCount(-1);
 		si.siExecScriptComplete(msg, true);
 		return isOK;
+	}
+
+	private PanelData pd() {
+		return selectedPanel.getPanelData();
 	}
 
 	private void execPeak(String value) {
@@ -483,23 +485,24 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 			x2 = Double.parseDouble(tokens.get(2));
 			y2 = Double.parseDouble(tokens.get(3));
 		}
-		selectedPanel.getPanelData().setZoom(x1, y1, x2, y2);
+		pd().setZoom(x1, y1, x2, y2);
 		return true;
 	}
 
-//  private String recentZoom = "";
-//  doesn't work 
+	// private String recentZoom = "";
+	// doesn't work
 
 	private void zoomTo(String value) {
-		PanelData pd = selectedPanel.getPanelData();
-//		if (value.equals("")) {
-//			value = selectedPanel.getInput("Enter zoom range y1 y2", "Zoom", recentZoom);
-//			if (value == null)
-//				return;
-//			recentZoom = value;
-//			runScriptNow("zoom " + value);
-//			return;
-//		}
+		PanelData pd = pd();
+		// if (value.equals("")) {
+		// value = selectedPanel.getInput("Enter zoom range y1 y2", "Zoom",
+		// recentZoom);
+		// if (value == null)
+		// return;
+		// recentZoom = value;
+		// runScriptNow("zoom " + value);
+		// return;
+		// }
 		if (value.equalsIgnoreCase("next")) {
 			pd.nextView();
 		} else if (value.toLowerCase().startsWith("prev")) {
@@ -513,7 +516,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		}
 	}
 
-	private void scaleSelectedBy(JmolList<JSVPanelNode> nodes, String value) {
+	private void scaleSelectedBy(JmolList<PanelNode> nodes, String value) {
 		try {
 			double f = Double.parseDouble(value);
 			for (int i = nodes.size(); --i >= 0;)
@@ -523,7 +526,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 	}
 
 	private void execSelect(String value) {
-		JmolList<JSVPanelNode> nodes = panelNodes;
+		JmolList<PanelNode> nodes = panelNodes;
 		for (int i = nodes.size(); --i >= 0;)
 			nodes.get(i).jsvp.getPanelData().selectFromEntireSet(Integer.MIN_VALUE);
 		JmolList<JDXSpectrum> speclist = new JmolList<JDXSpectrum>();
@@ -546,7 +549,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 
 	private void execIRMode(String value) {
 		IRMode mode = IRMode.getMode(value); // T, A, or TOGGLE
-		PanelData pd = selectedPanel.getPanelData();
+		PanelData pd = pd();
 		JDXSpectrum spec = pd.getSpectrum();
 		JDXSpectrum spec2 = JDXSpectrum.taConvert(spec, mode);
 		if (spec2 == spec)
@@ -585,7 +588,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		jsvp.getPanelData().checkIntegral(parameters, "update");
 	}
 
-	private void setYScale(String value, JSVPanel jsvp) {
+	private void setYScale(String value) {
 		JmolList<String> tokens = ScriptToken.getTokens(value);
 		int pt = 0;
 		boolean isAll = false;
@@ -596,9 +599,9 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		double y1 = Double.parseDouble(tokens.get(pt++));
 		double y2 = Double.parseDouble(tokens.get(pt));
 		if (isAll) {
-			JDXSpectrum spec = jsvp.getPanelData().getSpectrum();
+			JDXSpectrum spec = pd().getSpectrum();
 			for (int i = panelNodes.size(); --i >= 0;) {
-				JSVPanelNode node = panelNodes.get(i);
+				PanelNode node = panelNodes.get(i);
 				if (node.source != currentSource)
 					continue;
 				if (JDXSpectrum.areXScalesCompatible(spec, node.getSpectrum(), false,
@@ -606,27 +609,30 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 					node.jsvp.getPanelData().setZoom(0, y1, 0, y2);
 			}
 		} else {
-			jsvp.getPanelData().setZoom(0, y1, 0, y2);
+			pd().setZoom(0, y1, 0, y2);
 		}
 	}
 
 	private boolean overlayLegendVisible;
-	
-	private void setOverlayLegendVisibility(JSVPanel jsvp, Boolean tftoggle, boolean doSet) {
+
+	private void setOverlayLegendVisibility(Boolean tftoggle,
+			boolean doSet) {
 		if (doSet)
-			overlayLegendVisible = (tftoggle == null ? !overlayLegendVisible : tftoggle == Boolean.TRUE);	
-		JSVPanelNode node = JSVPanelNode.findNode(jsvp, panelNodes);
+			overlayLegendVisible = (tftoggle == null ? !overlayLegendVisible
+					: tftoggle == Boolean.TRUE);
+		PanelNode node = PanelNode.findNode(selectedPanel, panelNodes);
 		for (int i = panelNodes.size(); --i >= 0;)
 			showOverlayLegend(panelNodes.get(i), panelNodes.get(i) == node
 					&& overlayLegendVisible);
 	}
 
-	private void showOverlayLegend(JSVPanelNode node, boolean visible) {
+	private void showOverlayLegend(PanelNode node, boolean visible) {
 		JSVDialog legend = node.legend;
 		if (legend == null && visible) {
 			legend = node.setLegend(node.jsvp.getPanelData()
 					.getNumberOfSpectraInCurrentSet() > 1
-					&& node.jsvp.getPanelData().getNumberOfGraphSets() == 1 ? getDialog(AType.OverlayLegend, null) : null);
+					&& node.jsvp.getPanelData().getNumberOfGraphSets() == 1 ? getDialog(
+					AType.OverlayLegend, null) : null);
 		}
 		if (legend != null)
 			legend.setVisible(visible);
@@ -760,13 +766,13 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 				+ "JSViewer selectPanelByPeak pi = " + pi);
 		if (pi != null) {
 			// found in current panel
-			setNode(JSVPanelNode.findNode(jsvp, panelNodes), false);
+			setNode(PanelNode.findNode(jsvp, panelNodes), false);
 		} else {
 			// must look elsewhere
 			// System.out.println(Thread.currentThread() +
 			// "JSViewer selectPanelByPeak did not find it");
 			for (int i = panelNodes.size(); --i >= 0;) {
-				JSVPanelNode node = panelNodes.get(i);
+				PanelNode node = panelNodes.get(i);
 				// System.out.println(Thread.currentThread() +
 				// "JSViewer selectPanelByPeak looking at node " + i + " " +
 				// node.fileName);
@@ -805,7 +811,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 			if (pi2 == null) {
 				if (!"ALL".equals(pi.getTitle()))
 					return;
-				JSVPanelNode node = null;
+				PanelNode node = null;
 				for (int i = 0; i < panelNodes.size(); i++)
 					if ((pi2 = panelNodes.get(i).jsvp.getPanelData()
 							.findMatchingPeakInfo(pi)) != null) {
@@ -822,7 +828,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 			si.siSetSelectedPanel((JSVPanel) e.getSource());
 			pi = e.getPeakInfo();
 		}
-		selectedPanel.getPanelData().addPeakHighlight(pi);
+		pd().addPeakHighlight(pi);
 		// the above line is what caused problems with GC/MS selection
 		syncToJmol(pi);
 		// System.out.println(Thread.currentThread() +
@@ -830,8 +836,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		if (pi.isClearAll()) // was not in app version??
 			selectedPanel.doRepaint();
 		else
-			selectedPanel.getPanelData().selectSpectrum(pi.getFilePath(),
-					pi.getType(), pi.getModel(), true);
+			pd().selectSpectrum(pi.getFilePath(), pi.getType(), pi.getModel(), true);
 		si.siCheckCallbacks(pi.getTitle());
 
 	}
@@ -878,8 +883,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		if ("".equals(key))
 			key = null;
 		Map<String, Object> map = new Hashtable<String, Object>();
-		Map<String, Object> map0 = selectedPanel.getPanelData().getInfo(
-				true, key);
+		Map<String, Object> map0 = pd().getInfo(true, key);
 		if (!isAll && map0 != null)
 			return map0;
 		if (map0 != null)
@@ -899,8 +903,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		// important to use getSelectedPanel() here because it may be from MainFrame
 		// in PRO
 		if (selectedPanel != null) {
-			Coordinate coord = selectedPanel.getPanelData()
-					.getClickedCoordinate();
+			Coordinate coord = pd().getClickedCoordinate();
 			if (coord != null)
 				return coord.getXVal() + " " + coord.getYVal();
 		}
@@ -939,7 +942,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 			value = sb.toString().trim();
 		}
 		if (value.equals("*")) {
-			list = ScriptToken.getTokens(JSVPanelNode
+			list = ScriptToken.getTokens(PanelNode
 					.getSpectrumListAsString(panelNodes));
 		} else if (value.startsWith("\"")) {
 			list = ScriptToken.getTokens(value);
@@ -947,13 +950,13 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 			value = Txt.simpleReplace(value, "_", " _ ");
 			value = Txt.simpleReplace(value, "-", " - ");
 			list = ScriptToken.getTokens(value);
-			list0 = ScriptToken.getTokens(JSVPanelNode
+			list0 = ScriptToken.getTokens(PanelNode
 					.getSpectrumListAsString(panelNodes));
 			if (list0.size() == 0)
 				return null;
 		}
 
-		String id0 = (selectedPanel == null ? prefix : JSVPanelNode.findNode(
+		String id0 = (selectedPanel == null ? prefix : PanelNode.findNode(
 				selectedPanel, panelNodes).id);
 		id0 = id0.substring(0, id0.indexOf(".") + 1);
 		SB sb = new SB();
@@ -981,13 +984,13 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 					pt++;
 				pt++;
 				while (pt < list0.size() && !idLast.equals(id)) {
-					speclist.addLast(JSVPanelNode.findNodeById(idLast = list0.get(pt++),
+					speclist.addLast(PanelNode.findNodeById(idLast = list0.get(pt++),
 							panelNodes).jsvp.getPanelData().getSpectrumAt(0));
 					sb.append(",").append(idLast);
 				}
 				continue;
 			}
-			JSVPanelNode node;
+			PanelNode node;
 			if (id.startsWith("\"")) {
 				id = Txt.trim(id, "\"");
 				for (int j = 0; j < panelNodes.size(); j++) {
@@ -1003,7 +1006,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 			}
 			if (!id.contains("."))
 				id = id0 + id;
-			node = JSVPanelNode.findNodeById(id, panelNodes);
+			node = PanelNode.findNodeById(id, panelNodes);
 			if (node == null)
 				continue;
 			idLast = id;
@@ -1014,7 +1017,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 				sb.append(".").appendI(isubspec);
 		}
 		if (isView && speclist.size() == 1) {
-			JSVPanelNode node = JSVPanelNode.findNodeById(idLast, panelNodes);
+			PanelNode node = PanelNode.findNodeById(idLast, panelNodes);
 			if (node != null) {
 				setNode(node, true);
 				// possibility of a problem here -- we are not communicating with Jmol
@@ -1037,10 +1040,18 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		}
 	}
 
-	public void showColorMessage() {
-		JSVPanel jsvp = selectedPanel;
-		jsvp.showMessage(jsvp.getPanelData().getSolutionColorHtml(),
-				"Predicted Colour");
+	public String getSolutionColor() {
+		JDXSpectrum spectrum = pd().getSpectrum();
+		return (spectrum.canShowSolutionColor() ? ((VisibleInterface) Interface
+				.getInterface("jspecview.common.Visible")).getColour(spectrum
+				.getXYCoords(), spectrum.getYUnits()) : noColor);
+	}
+
+	public String getSolutionColorHtml() {
+		String color = getSolutionColor();
+		return "<html><body style='background-color:rgb(" + color
+				+ ")'><br />Predicted Solution Colour- RGB(" + color
+				+ ")<br /><br /></body></html>";
 	}
 
 	public int openDataOrFile(String data, String name,
@@ -1080,8 +1091,8 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		}
 		// TODO could check here for already-open view
 		if (!isView)
-			if (JSVPanelNode.isOpen(panelNodes, filePath)
-					|| JSVPanelNode.isOpen(panelNodes, url)) {
+			if (PanelNode.isOpen(panelNodes, filePath)
+					|| PanelNode.isOpen(panelNodes, url)) {
 				si.writeStatus(filePath + " is already open");
 				return FILE_OPEN_ALREADY;
 			}
@@ -1091,15 +1102,15 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		try {
 			si.siSetCurrentSource(isView ? JDXSource.createView(specs) : si
 					.siCreateSource(data, filePath, base, firstSpec, lastSpec));
-		} catch (Exception e) {	
+		} catch (Exception e) {
 			/**
 			 * @j2sNative
 			 * 
-			 * alert(e + "\n" + Clazz.getStackTrace())
+			 *            alert(e + "\n" + Clazz.getStackTrace())
 			 */
 			{
-			Logger.error(e.getMessage());
-			si.writeStatus(e.getMessage());
+				Logger.error(e.getMessage());
+				si.writeStatus(e.getMessage());
 			}
 			si.setCursor(ApiPlatform.CURSOR_DEFAULT);
 			return FILE_OPEN_ERROR;
@@ -1162,14 +1173,14 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 			for (int i = list.size(); --i >= 0;)
 				si.siCloseSource(list.get(i));
 		} else {
-			JDXSource source = (value.length() == 0 ? currentSource
-					: JSVPanelNode.findSourceByNameOrId(value, panelNodes));
+			JDXSource source = (value.length() == 0 ? currentSource : PanelNode
+					.findSourceByNameOrId(value, panelNodes));
 			if (source == null)
 				return;
 			si.siCloseSource(source);
 		}
 		if (selectedPanel == null && panelNodes.size() > 0)
-			si.siSetSelectedPanel(JSVPanelNode.getLastFileFirstNode(panelNodes));
+			si.siSetSelectedPanel(PanelNode.getLastFileFirstNode(panelNodes));
 	}
 
 	public void load(String value) {
@@ -1198,9 +1209,8 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 				.intValue() : -1);
 		int lastSpec = (pt + 1 < tokens.size() ? Integer.valueOf(tokens.get(++pt))
 				.intValue() : firstSpec);
-		si
-				.siOpenDataOrFile(null, null, null, filename, firstSpec, lastSpec,
-						isAppend);
+		si.siOpenDataOrFile(null, null, null, filename, firstSpec, lastSpec,
+				isAppend);
 	}
 
 	public void combineSpectra(String name) {
@@ -1214,11 +1224,10 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		}
 		si.siSetPropertiesFromPreferences(jsvp, true);
 		si.siCreateTree(source, new JSVPanel[] { jsvp }).getPanelNode().isView = true;
-		JSVPanelNode node = JSVPanelNode.findNode(selectedPanel, panelNodes);
+		PanelNode node = PanelNode.findNode(selectedPanel, panelNodes);
 		node.setFrameTitle(name);
 		node.isView = true;
-		if (si.siGetAutoShowLegend()
-				&& selectedPanel.getPanelData().getNumberOfGraphSets() == 1)
+		if (si.siGetAutoShowLegend() && pd().getNumberOfGraphSets() == 1)
 			node.setLegend(getDialog(AType.OverlayLegend, null));
 		si.siSetMenuEnables(node, false);
 	}
@@ -1277,19 +1286,19 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		setNode(panelNodes.get(i), false);
 	}
 
-	public JSVPanelNode selectFrameNode(JSVPanel jsvp) {
+	public PanelNode selectFrameNode(JSVPanel jsvp) {
 		// Find Node in SpectraTree and select it
-		JSVPanelNode node = JSVPanelNode.findNode(jsvp, panelNodes);
+		PanelNode node = PanelNode.findNode(jsvp, panelNodes);
 		if (node == null)
 			return null;
 		spectraTree.setPath(spectraTree.newTreePath(node.treeNode.getPath()));
-		setOverlayLegendVisibility(node.jsvp, null, false);
+		setOverlayLegendVisibility(null, false);
 		return node;
 	}
 
 	private boolean setSpectrum(String value) {
 		if (value.indexOf('.') >= 0) {
-			JSVPanelNode node = JSVPanelNode.findNodeById(value, panelNodes);
+			PanelNode node = PanelNode.findNodeById(value, panelNodes);
 			if (node == null)
 				return false;
 			setNode(node, false);
@@ -1318,7 +1327,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		// arrange windows in ascending order
 		si.siCreateTree(source, panels);
 		si.siGetNewJSVPanel(null); // end of operation
-		JSVPanelNode node = JSVPanelNode.findNode(selectedPanel, panelNodes);
+		PanelNode node = PanelNode.findNode(selectedPanel, panelNodes);
 		si.siSetMenuEnables(node, true);
 	}
 
@@ -1359,10 +1368,10 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 			overlayLegendDialog.dispose();
 		overlayLegendDialog = null;
 
-	  if (jsvpPopupMenu != null) {
-	  	jsvpPopupMenu.dispose();
-	  	jsvpPopupMenu = null;
-	  }
+		if (jsvpPopupMenu != null) {
+			jsvpPopupMenu.dispose();
+			jsvpPopupMenu = null;
+		}
 		if (panelNodes != null)
 			for (int i = panelNodes.size(); --i >= 0;) {
 				panelNodes.get(i).dispose();
@@ -1376,7 +1385,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		else
 			scriptQueue.addLast(script);
 	}
-	
+
 	public void requestRepaint() {
 		if (selectedPanel != null)
 			repaintManager.refresh();
@@ -1386,75 +1395,67 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		repaintManager.repaintDone();
 	}
 
-	public PanelData getPanelData() {
-		return selectedPanel.getPanelData();
-	}
-
-	public Object getDisplay() {
-		return viewPanel;
-	}
-
 	public void checkOverlay() {
 		if (viewPanel != null)
-      viewPanel.markSelectedPanels(panelNodes);
+			viewPanel.markSelectedPanels(panelNodes);
 		viewDialog = getDialog(AType.Views, null);
 	}
 
-  private int recentStackPercent = 5;
+	private int recentStackPercent = 5;
 
 	private void execOverlayOffsetY(int offset) {
 		if (selectedPanel == null)
 			return;
 		if (offset == Integer.MIN_VALUE) {
 			String soffset = selectedPanel.getInput(
-					"Enter a vertical offset in percent for stacked plots", "Overlay",
-					"" + recentStackPercent);
+					"Enter a vertical offset in percent for stacked plots", "Overlay", ""
+							+ recentStackPercent);
 			float f = Parser.parseFloat(soffset);
 			if (Float.isNaN(f))
 				return;
 			offset = (int) f;
 		}
 		recentStackPercent = offset;
-		selectedPanel.getPanelData().setYStackOffsetPercent(offset);
+		pd().setYStackOffsetPercent(offset);
 	}
-	
-  private void execScriptInline(String script) {
-  	if (script.length() > 0)
-  		script = script.substring(6).trim();
-  	if (script.length() == 0)
-  		script = selectedPanel.getInput("Enter a JSpecView script", 
-    		"Script", recentScript);
-    if (script == null)
-      return;
-    recentScript = script;
-    runScriptNow(script);
-  }
+
+	private void execScriptInline(String script) {
+		if (script.length() > 0)
+			script = script.substring(6).trim();
+		if (script.length() == 0)
+			script = selectedPanel.getInput("Enter a JSpecView script", "Script",
+					recentScript);
+		if (script == null)
+			return;
+		recentScript = script;
+		runScriptNow(script);
+	}
 
 	public void showMenu(int x, int y) {
 		if (jsvpPopupMenu != null)
 			jsvpPopupMenu.jpiShow(x, y);
 	}
 
-	/// called by JSmol JavaScript
-	
-  public void setDisplay(Object canvas) {
-    // used by JSmol/HTML5 when a canvas is resized
-    apiPlatform.setViewer(this, display = canvas);
-    int[] wh = new int[2];
-    apiPlatform.getFullScreenDimensions(canvas, wh);
-    setScreenDimension(wh[0], wh[1]);
-  }
+	// / called by JSmol JavaScript
 
-  public void setScreenDimension(int width, int height) {
-    // There is a bug in Netscape 4.7*+MacOS 9 when comparing dimension objects
-    // so don't try dim1.equals(dim2)
-    height = Math.min(height, maximumSize);
-    width = Math.min(width, maximumSize);
-    if (dimScreen.width == width && dimScreen.height == height)
-      return;
-    //System.out.println("HMM " + width +  " " + height + " " + maximumSize);
-    resizeImage(width, height);
-  }
+	public void setDisplay(Object canvas) {
+		// used by JSmol/HTML5 when a canvas is resized
+		apiPlatform.setViewer(this, display = canvas);
+		int[] wh = new int[2];
+		apiPlatform.getFullScreenDimensions(canvas, wh);
+		setScreenDimension(wh[0], wh[1]);
+	}
+
+	public void setScreenDimension(int width, int height) {
+		// There is a bug in Netscape 4.7*+MacOS 9 when comparing dimension objects
+		// so don't try dim1.equals(dim2)
+		height = Math.min(height, maximumSize);
+		width = Math.min(width, maximumSize);
+		if (dimScreen.width == width && dimScreen.height == height)
+			return;
+		// System.out.println("HMM " + width + " " + height + " " + maximumSize);
+		resizeImage(width, height);
+	}
 
 	void resizeImage(int width, int height) {
 		if (width > 0) {
@@ -1468,51 +1469,53 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		g2d.setWindowParameters(width, height);
 	}
 
-  /**
-   * for JavaScript only; this is the call to draw the spectrum
-   * 
-   * @param width
-   * @param height
-   */
-  public void updateJS(int width, int height) {
-  	if (selectedPanel == null)
-  		return;
-    /**
-     * @j2sNative
-     * 
-     * this.selectedPanel.paintComponent(this.apiPlatform.context); 
-     *            
-     */
-    {
-    }
-  }
+	/**
+	 * for JavaScript only; this is the call to draw the spectrum
+	 * 
+	 * @param width
+	 * @param height
+	 */
+	public void updateJS(int width, int height) {
+		if (selectedPanel == null)
+			return;
+		/**
+		 * @j2sNative
+		 * 
+		 *            this.selectedPanel.paintComponent(this.apiPlatform.context);
+		 * 
+		 */
+		{
+		}
+	}
 
-  /**
-   * called by JSmol.js mouse event
-   * 
-   * @param id
-   * @param x
-   * @param y
-   * @param modifiers
-   * @param time
-   * @return t/f
-   */
-  public boolean handleOldJvm10Event(int id, int x, int y, int modifiers, long time) {
-  	return (selectedPanel != null &&  selectedPanel.handleOldJvm10Event(id, x, y, modifiers, time));
-  }
+	/**
+	 * called by JSmol.js mouse event
+	 * 
+	 * @param id
+	 * @param x
+	 * @param y
+	 * @param modifiers
+	 * @param time
+	 * @return t/f
+	 */
+	public boolean handleOldJvm10Event(int id, int x, int y, int modifiers,
+			long time) {
+		return (selectedPanel != null && selectedPanel.handleOldJvm10Event(id, x,
+				y, modifiers, time));
+	}
 
 	public void processTwoPointGesture(float[][][] touches) {
 		if (selectedPanel != null)
 			selectedPanel.processTwoPointGesture(touches);
 	}
-	
+
 	public Object getApplet() {
 		return applet;
 	}
 
-  public void startHoverWatcher(boolean enable) {
-  	// n/a?
-  }
+	public void startHoverWatcher(boolean enable) {
+		// n/a?
+	}
 
 	public int cacheFileByName(String fileName, boolean isAdd) {
 		// n/a
@@ -1523,48 +1526,44 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		// n/a
 	}
 
-
 	public void openFileAsyncPDB(String fileName, boolean pdbCartoons) {
 		// n/a
 	}
-
 
 	public int getHeight() {
 		return dimScreen.height;
 	}
 
-
 	public int getWidth() {
 		return dimScreen.width;
 	}
-	
+
 	public Object getAwtInterface(String type) {
-		return Interface.getInterface("jspecview.awt" + (isJS ? "js2d.Js" : ".Awt") + type);
+		return Interface.getInterface("jspecview.awt" + (isJS ? "js2d.Js" : ".Awt")
+				+ type);
 	}
 
 	public DialogManager getDialogManager() {
-		return (dialogManager == null ? (dialogManager = (DialogManager) getAwtInterface("DialogManager")).set(this) : dialogManager);
+		return (dialogManager == null ? (dialogManager = (DialogManager) getAwtInterface("DialogManager"))
+				.set(this)
+				: dialogManager);
 	}
-	
+
 	public JSVDialog getDialog(AType type, JDXSpectrum spec) {
 		String root = "jspecview.dialog.";
 		switch (type) {
 		case Integration:
-			return ((JSVDialog) Interface.getInterface(root
-					+ "IntegrationDialog")).setParams("Integration for " + spec, this,
-					spec);
+			return ((JSVDialog) Interface.getInterface(root + "IntegrationDialog"))
+					.setParams("Integration for " + spec, this, spec);
 		case Measurements:
-			return ((JSVDialog) Interface.getInterface(root
-					+ "MeasurementsDialog")).setParams("Measurements for " + spec, this,
-					spec);
+			return ((JSVDialog) Interface.getInterface(root + "MeasurementsDialog"))
+					.setParams("Measurements for " + spec, this, spec);
 		case PeakList:
-			return ((JSVDialog) Interface
-					.getInterface(root + "PeakListDialog")).setParams("Peak List for "
-					+ spec, this, spec);
+			return ((JSVDialog) Interface.getInterface(root + "PeakListDialog"))
+					.setParams("Peak List for " + spec, this, spec);
 		case OverlayLegend:
-			return overlayLegendDialog = ((JSVDialog) Interface
-					.getInterface(root + "OverlayLegendDialog")).setParams(selectedPanel
-					.getPanelData().getViewTitle(), this, null);
+			return overlayLegendDialog = ((JSVDialog) Interface.getInterface(root
+					+ "OverlayLegendDialog")).setParams(pd().getViewTitle(), this, null);
 		case Views:
 			return viewDialog = ((JSVDialog) Interface.getInterface(root
 					+ "ViewsDialog")).setParams("View/Combine/Close Spectra", this, null);
@@ -1572,11 +1571,11 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 			return null;
 		}
 	}
-	
+
 	private void show(String what) {
 		getDialogManager();
 		if (what.equals("properties")) {
-			dialogManager.showProperties(null, getPanelData().getSpectrum());
+			dialogManager.showProperties(null, pd().getSpectrum());
 		} else if (what.equals("errors")) {
 			dialogManager.showSourceErrors(null, currentSource);
 		} else if (what.equals("source")) {
@@ -1592,7 +1591,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 
 	private PrintLayout lastPrintLayout;
 	private Object offWindowFrame;
-	
+
 	public PrintLayout getDialogPrint(boolean isJob) {
 		try {
 			PrintLayout pl = ((JSVPrintDialog) getAwtInterface("PrintDialog")).set(
@@ -1616,21 +1615,10 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 	}
 
 	public int getOptionFromDialog(String[] items, String title, String label) {
-		getDialogManager().getOptionFromDialog(null, items, selectedPanel, title, label);
+		getDialogManager().getOptionFromDialog(null, items, selectedPanel, title,
+				label);
 		// TODO Auto-generated method stub
 		return 0;
-	}
-
-	public String exportTheSpectrum(String type, String path, JDXSpectrum spec,
-			int startIndex, int endIndex) {
-		try {
-			return ((ExportInterface) Interface
-					.getInterface("jspecview.export.Exporter")).exportTheSpectrum(type,
-					path, spec, startIndex, endIndex);
-		} catch (Exception e) {
-			System.out.println(e);
-			return null;
-		}
 	}
 
 	private String execExport(String value) {
@@ -1643,7 +1631,8 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 
 	/**
 	 * @param fileName
-	 * @return "OK" if signedApplet or app; Base64-encoded string if unsigned applet or null if problem
+	 * @return "OK" if signedApplet or app; Base64-encoded string if unsigned
+	 *         applet or null if problem
 	 */
 	public String printPDF(String fileName) {
 		boolean needWindow = false; // !isNewWindow;
@@ -1657,7 +1646,22 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		return s;
 	}
 
+	public String export(String type, int n) {
+		if (type == null)
+			type = "XY";
+		PanelData pd = pd();
+		int nMax = pd.getNumberOfSpectraInCurrentSet();
+		if (n < -1 || n >= nMax)
+			return "Maximum spectrum index (0-based) is " + (nMax - 1) + ".";
+		JDXSpectrum spec = (n < 0 ? pd.getSpectrum() : pd.getSpectrumAt(n));
+		try {
+			return ((ExportInterface) Interface
+					.getInterface("jspecview.export.Exporter")).exportTheSpectrum(type,
+					null, spec, 0, spec.getXYCoords().length - 1);
+		} catch (Exception e) {
+			System.out.println(e);
+			return null;
+		}
+	}
 
 }
-
-

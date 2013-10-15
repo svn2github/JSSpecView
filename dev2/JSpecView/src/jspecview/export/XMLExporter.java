@@ -24,7 +24,7 @@ import java.io.IOException;
 import org.jmol.util.JmolList;
 
 import jspecview.common.Coordinate;
-import jspecview.common.JDXSpectrum;
+import jspecview.source.JDXSpectrum;
 
 /**
  * The XMLExporter should be a totally generic exporter

@@ -1,13 +1,13 @@
 package jspecview.api;
 
-import jspecview.common.JSVPanelNode;
+import jspecview.common.PanelNode;
 
 import org.jmol.util.JmolList;
 
 public interface JSVMainPanel {
 
-	void setSelectedPanel(JSVPanel jsvp, JmolList<JSVPanelNode> panelNodes);
-	void markSelectedPanels(JmolList<JSVPanelNode> panelNodes);
+	void setSelectedPanel(JSVPanel jsvp, JmolList<PanelNode> panelNodes);
+	void markSelectedPanels(JmolList<PanelNode> panelNodes);
 	int getCurrentPanelIndex();
 
 }

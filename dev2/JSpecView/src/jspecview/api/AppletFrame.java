@@ -5,8 +5,8 @@ import java.net.URL;
 import org.jmol.util.JmolList;
 
 import jspecview.app.JSVApp;
-import jspecview.common.JDXSpectrum;
 import jspecview.common.JSViewer;
+import jspecview.source.JDXSpectrum;
 
 public interface AppletFrame {
 

@@ -3,6 +3,8 @@ package jspecview.common;
 
 import java.util.Map;
 
+import jspecview.source.JDXSpectrum;
+
 import org.jmol.util.JmolList;
 
 /**

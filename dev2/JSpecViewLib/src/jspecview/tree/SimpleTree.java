@@ -8,7 +8,7 @@ import jspecview.api.JSVTreeNode;
 import jspecview.api.JSVTreePath;
 import jspecview.api.ScriptInterface;
 import jspecview.common.JSVFileManager;
-import jspecview.common.JSVPanelNode;
+import jspecview.common.PanelNode;
 import jspecview.common.JSViewer;
 import jspecview.source.JDXSource;
 
@@ -41,7 +41,7 @@ public class SimpleTree implements JSVTree {
 
 	public void setSelectedPanel(ScriptInterface si, JSVPanel jsvp) {
 		if (jsvp != null) {
-			JSVTreeNode treeNode = JSVPanelNode.findNode(jsvp, viewer.panelNodes).treeNode;
+			JSVTreeNode treeNode = PanelNode.findNode(jsvp, viewer.panelNodes).treeNode;
 			setSelectionPath(viewer.spectraTree.newTreePath(treeNode.getPath()));
 		}
 	}
@@ -55,10 +55,10 @@ public class SimpleTree implements JSVTree {
 			JDXSource source, JSVPanel[] panels) {
   	SimpleTree tree = (SimpleTree) viewer.spectraTree;
 		JSVTreeNode rootNode = tree.getRootNode();
-    JmolList<JSVPanelNode> panelNodes = viewer.panelNodes;
+    JmolList<PanelNode> panelNodes = viewer.panelNodes;
 
     String fileName = JSVFileManager.getName(source.getFilePath());
-    JSVPanelNode panelNode = new JSVPanelNode(null, fileName, source, null);
+    PanelNode panelNode = new PanelNode(null, fileName, source, null);
     JSVTreeNode fileNode = new SimpleTreeNode(fileName, panelNode);
     panelNode.setTreeNode(fileNode);
 		tree.spectraTreeModel.insertNodeInto(fileNode, rootNode, rootNode

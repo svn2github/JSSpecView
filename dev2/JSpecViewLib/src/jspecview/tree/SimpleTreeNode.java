@@ -5,28 +5,28 @@ import java.util.Enumeration;
 import org.jmol.util.JmolList;
 
 import jspecview.api.JSVTreeNode;
-import jspecview.common.JSVPanelNode;
+import jspecview.common.PanelNode;
 
 public class SimpleTreeNode implements JSVTreeNode {
 
 
 	  private static final long serialVersionUID = 1L;
 		
-	  public JSVPanelNode panelNode;
+	  public PanelNode panelNode;
 		public int index;
 	  SimpleTreeNode prevNode;
 	  JmolList<SimpleTreeNode> children;
 
 		private String text;
 
-	  public SimpleTreeNode(String text, JSVPanelNode panelNode) {
+	  public SimpleTreeNode(String text, PanelNode panelNode) {
 	  	this.text = text;
 	    this.panelNode = panelNode;
 	    children = new JmolList<SimpleTreeNode>();
 	   // System.out.println("adding " + text);
 	  }
 
-		public JSVPanelNode getPanelNode() {
+		public PanelNode getPanelNode() {
 			return panelNode;
 		}
 		

@@ -1,6 +1,6 @@
 package jspecview.api;
 
-import jspecview.common.JSVPanelNode;
+import jspecview.common.PanelNode;
 import jspecview.common.JSViewer;
 
 import org.jmol.util.JmolList;
@@ -16,7 +16,7 @@ public interface JSVPopupMenu {
 
 	boolean getSelected(String key);
 
-	void setCompoundMenu(JmolList<JSVPanelNode> panelNodes,
+	void setCompoundMenu(JmolList<PanelNode> panelNodes,
 			boolean allowCompoundMenu);
 
 	void setEnabled(boolean allowMenu, boolean zoomEnabled);

@@ -30,6 +30,8 @@ package jspecview.common;
 
 import java.lang.Math;
 
+import jspecview.api.VisibleInterface;
+
 /**
  * Visible class - for prediction of colour from visible spectrum
  * 
@@ -37,11 +39,13 @@ import java.lang.Math;
  * @author Prof Robert J. Lancashire
  */
 
-public class Visible {
+public class Visible implements VisibleInterface {
 
-  public final static String noColor = "255,255,255"; 
-
-  public static String Colour(Coordinate xyCoords[], String Yunits) {
+  public Visible() {
+  	// for reflection
+  }
+  
+  public String getColour(Coordinate xyCoords[], String Yunits) {
     int ind400 = 0, ind437 = 0, ind499 = 0, ind700 = 0;
     for (int i = 0; i < xyCoords.length; i++) {
       if (xyCoords[i].getXVal() < 401) {

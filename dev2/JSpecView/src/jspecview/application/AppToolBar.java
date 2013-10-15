@@ -9,7 +9,7 @@ import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 
 import jspecview.api.JSVPanel;
-import jspecview.common.JSVPanelNode;
+import jspecview.common.PanelNode;
 import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
 import jspecview.common.ScriptToken;
@@ -214,7 +214,7 @@ public class AppToolBar extends JToolBar {
     errorLogButton.setEnabled(isError);
   }
 
-  public void setMenuEnables(JSVPanelNode node) {
+  public void setMenuEnables(PanelNode node) {
     if (node == null)
       return;
     setSelections(node.jsvp);

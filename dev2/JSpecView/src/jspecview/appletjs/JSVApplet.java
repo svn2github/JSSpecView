@@ -60,15 +60,14 @@ import org.jmol.util.Txt;
 import jspecview.api.AppletFrame;
 import jspecview.api.JSVApiPlatform;
 import jspecview.api.JSVAppletInterface;
-import jspecview.api.JSVMainPanel;
 import jspecview.api.JSVPanel;
 import jspecview.app.JSVApp;
 import jspecview.awtjs2d.JsPanel;
 import jspecview.awtjs2d.JsViewPanel;
 import jspecview.awtjs2d.JsPlatform;
-import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVersion;
 import jspecview.common.JSViewer;
+import jspecview.source.JDXSpectrum;
 /**
  * 
  * Entry point for the web.
@@ -96,7 +95,6 @@ public class JSVApplet implements JSVAppletInterface,
 	private boolean isStandalone = false;
 	protected Map<String, Object> viewerOptions;
 	private Map<String, Object> htParams;
-	private JSVMainPanel spectrumPanel;
 
   public JSVApplet(Map<String, Object>viewerOptions) {
   	if (viewerOptions == null)
@@ -431,7 +429,7 @@ public class JSVApplet implements JSVAppletInterface,
 	}
 
 	public void addNewPanel(JSViewer viewer) {
-		viewer.viewPanel = spectrumPanel = new JsViewPanel();
+		viewer.viewPanel = new JsViewPanel();
 	}
 
 

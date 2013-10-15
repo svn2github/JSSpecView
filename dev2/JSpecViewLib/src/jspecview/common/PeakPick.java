@@ -1,5 +1,7 @@
 package jspecview.common;
 
+import jspecview.source.JDXSpectrum;
+
 
 class PeakPick extends Measurement {
 

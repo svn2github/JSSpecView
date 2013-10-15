@@ -40,9 +40,6 @@ import org.jmol.util.SB;
 import org.jmol.util.Txt;
 
 import jspecview.common.Coordinate;
-import jspecview.common.JDXDataObject;
-import jspecview.common.JDXHeader;
-import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVFileManager;
 import jspecview.common.PeakInfo;
 import jspecview.exception.JDXSourceException;

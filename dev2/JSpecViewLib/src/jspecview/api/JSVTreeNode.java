@@ -5,7 +5,7 @@ package jspecview.api;
 
 import java.util.Enumeration;
 
-import jspecview.common.JSVPanelNode;
+import jspecview.common.PanelNode;
 
 public interface JSVTreeNode {
 
@@ -15,7 +15,7 @@ public interface JSVTreeNode {
 
 	boolean isLeaf();
 
-	JSVPanelNode getPanelNode();
+	PanelNode getPanelNode();
 
 	Enumeration<JSVTreeNode> children();
 

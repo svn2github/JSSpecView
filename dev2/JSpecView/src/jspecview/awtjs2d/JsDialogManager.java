@@ -1,11 +1,11 @@
 package jspecview.awtjs2d;
 
 import jspecview.api.JSVPanel;
-import jspecview.common.JDXSpectrum;
 import jspecview.dialog.JSVDialog;
 import jspecview.dialog.DialogManager;
 import jspecview.dialog.DialogParams;
 import jspecview.dialog.PlatformDialog;
+import jspecview.source.JDXSpectrum;
 
 class JsDialogManager extends DialogManager {
 

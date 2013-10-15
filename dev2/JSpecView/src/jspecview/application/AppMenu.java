@@ -59,12 +59,12 @@ import org.jmol.util.JmolList;
 
 import jspecview.api.JSVPanel;
 import jspecview.common.JSVFileManager;
-import jspecview.common.JSVPanelNode;
+import jspecview.common.PanelNode;
 import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
 import jspecview.common.ScriptToken;
-import jspecview.common.JDXSpectrum;
 import jspecview.source.JDXSource;
+import jspecview.source.JDXSpectrum;
 
 /**
  * The Main Class or Entry point of the JSpecView Application.
@@ -499,7 +499,7 @@ public class AppMenu extends JMenuBar {
     errorLogMenuItem.setEnabled(isError);
   }
 
-  public void setMenuEnables(JSVPanelNode node) {
+  public void setMenuEnables(PanelNode node) {
     if (node == null) {
       setCloseMenuItem(null);
       setSourceEnabled(false);

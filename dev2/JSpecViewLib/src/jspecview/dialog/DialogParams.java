@@ -10,13 +10,13 @@ import jspecview.api.AnnotationData;
 import jspecview.api.JSVPanel;
 import jspecview.common.Coordinate;
 import jspecview.common.IntegralData;
-import jspecview.common.JDXSpectrum;
 import jspecview.common.JSViewer;
 import jspecview.common.MeasurementData;
 import jspecview.common.PanelData;
 import jspecview.common.Parameters;
 import jspecview.common.PeakData;
 import jspecview.common.Annotation.AType;
+import jspecview.source.JDXSpectrum;
 
 /**
  * DialogParams handles all the platform-independent 

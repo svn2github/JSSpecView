@@ -20,7 +20,8 @@
 package jspecview.export;
 
 import java.io.IOException;
-import jspecview.common.JDXSpectrum;
+
+import jspecview.source.JDXSpectrum;
 
 /**
  * class <code>CMLExporter</code> contains static methods to export a Graph as

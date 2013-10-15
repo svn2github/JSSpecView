@@ -24,6 +24,8 @@
 
 package jspecview.common;
 
+import jspecview.source.JDXSpectrum;
+
 
 /**
  * The <code>Measurement</code> class stores an annotation that is a measurement

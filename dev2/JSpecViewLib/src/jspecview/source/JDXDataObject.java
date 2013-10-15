@@ -1,9 +1,13 @@
-package jspecview.common;
+package jspecview.source;
 
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
 import org.jmol.util.Txt;
 
+import jspecview.common.Annotation;
+import jspecview.common.Coordinate;
+import jspecview.common.Integral;
+import jspecview.common.Measurement;
 import jspecview.common.Annotation.AType;
 import jspecview.exception.JSpecViewException;
 
@@ -678,7 +682,7 @@ public abstract class JDXDataObject extends JDXHeader {
   /**
    * array of x,y coordinates
    */
-  protected Coordinate[] xyCoords;
+  public Coordinate[] xyCoords;
 
   /**
    * Returns the first X value

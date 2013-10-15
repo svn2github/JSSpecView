@@ -22,8 +22,6 @@ package jspecview.source;
 import org.jmol.util.JmolList;
 
 
-import jspecview.common.JDXHeader;
-import jspecview.common.JDXSpectrum;
 
 /**
  * <code>JDXSource</code> is representation of all the data in the JCAMP-DX file

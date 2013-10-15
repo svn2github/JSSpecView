@@ -1,8 +1,8 @@
 package jspecview.export;
 
 import jspecview.api.JSVPanel;
-import jspecview.common.JDXSpectrum;
 import jspecview.common.JSViewer;
+import jspecview.source.JDXSpectrum;
 
 import org.jmol.util.JmolList;
 

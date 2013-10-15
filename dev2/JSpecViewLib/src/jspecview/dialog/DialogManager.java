@@ -4,10 +4,10 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import jspecview.api.JSVPanel;
-import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVFileManager;
 import jspecview.common.JSViewer;
 import jspecview.source.JDXSource;
+import jspecview.source.JDXSpectrum;
 
 abstract public class DialogManager {
 

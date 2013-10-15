@@ -26,11 +26,11 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import jspecview.api.JSVPanel;
-import jspecview.common.JDXSpectrum;
 import jspecview.dialog.JSVDialog;
 import jspecview.dialog.DialogManager;
 import jspecview.dialog.DialogParams;
 import jspecview.dialog.PlatformDialog;
+import jspecview.source.JDXSpectrum;
 
 /**
  * just a class I made to separate the construction of the AnnotationDialogs

@@ -29,8 +29,6 @@ import org.jmol.util.Logger;
 import org.jmol.util.SB;
 
 import jspecview.common.Coordinate;
-import jspecview.common.JDXDataObject;
-import jspecview.common.JDXSpectrum;
 import jspecview.util.JXVXmlReader;
 
 /**

@@ -91,21 +91,21 @@ import jspecview.api.PanelListener;
 import jspecview.app.JSVAppPro;
 import jspecview.awt.AwtFileHelper;
 import jspecview.awt.AwtPanel;
-import jspecview.awt.AwtViewPanel;
+import jspecview.awt.ViewPanel;
 import jspecview.common.JSVFileManager;
-import jspecview.common.JSVPanelNode;
+import jspecview.common.PanelNode;
 import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
 import jspecview.common.ColorParameters;
 import jspecview.common.Parameters;
 import jspecview.common.PeakPickEvent;
 import jspecview.common.ScriptToken;
-import jspecview.common.JDXSpectrum;
 import jspecview.common.SubSpecChangeEvent;
 import jspecview.common.ZoomEvent;
 import jspecview.export.Exporter;
 import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
+import jspecview.source.JDXSpectrum;
 import jspecview.util.JSVColorUtil;
 import jspecview.util.JSVEscape;
 
@@ -570,7 +570,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		} else {
 			mainSplitPane.setLeftComponent(spectraTreeScrollPane);
 		}
-		spectrumPanel = (Component) (viewer.viewPanel = new AwtViewPanel(new BorderLayout()));
+		spectrumPanel = (Component) (viewer.viewPanel = new ViewPanel(new BorderLayout()));
 		mainSplitPane.setRightComponent(spectrumPanel);
 	}
 
@@ -1012,7 +1012,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	 */
 	public void openFile(String fileName, boolean closeFirst) {
 		if (closeFirst) { // drag/drop
-			JDXSource source = JSVPanelNode.findSourceByNameOrId((new File(fileName))
+			JDXSource source = PanelNode.findSourceByNameOrId((new File(fileName))
 					.getAbsolutePath(), viewer.panelNodes);
 			if (source != null)
 				siCloseSource(source);
@@ -1075,7 +1075,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	// /// JSVPanelNode tree model methods (can be left unimplemented for Android)
 
-	public void siSetNode(JSVPanelNode panelNode, boolean fromTree) {
+	public void siSetNode(PanelNode panelNode, boolean fromTree) {
 		if (panelNode.jsvp != viewer.selectedPanel)
 			siSetSelectedPanel(panelNode.jsvp);
 		siSendPanelChange(panelNode.jsvp);
@@ -1140,7 +1140,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		appMenu.updateRecentMenus(recentFilePaths);
 	}
 
-	public void siSetMenuEnables(JSVPanelNode node, boolean isSplit) {
+	public void siSetMenuEnables(PanelNode node, boolean isSplit) {
 		appMenu.setMenuEnables(node);
 		toolBar.setMenuEnables(node);
 		// if (isSplit) // not sure why we care...
@@ -1162,9 +1162,9 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		return (spec == null ? null : AwtPanel.getPanelOne(viewer, spec));
 	}
 
-	public JSVPanelNode siGetNewPanelNode(String id, String fileName,
+	public PanelNode siGetNewPanelNode(String id, String fileName,
 			JDXSource source, JSVPanel jsvp) {
-		return new JSVPanelNode(id, fileName, source, jsvp);
+		return new PanelNode(id, fileName, source, jsvp);
 	}
 
 	public void setCursorObject(Object c) {

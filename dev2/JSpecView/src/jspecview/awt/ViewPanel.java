@@ -13,10 +13,10 @@ import org.jmol.util.JmolList;
 import jspecview.api.JSVMainPanel;
 import jspecview.api.JSVPanel;
 import jspecview.api.JSVViewPanel;
-import jspecview.common.JSVPanelNode;
+import jspecview.common.PanelNode;
 import jspecview.common.Annotation.AType;
 
-public class AwtViewPanel extends JPanel implements JSVViewPanel, JSVMainPanel {
+public class ViewPanel extends JPanel implements JSVViewPanel, JSVMainPanel {
 
 	private static final long serialVersionUID = 1L;
 	private JSVPanel selectedPanel;
@@ -25,7 +25,7 @@ public class AwtViewPanel extends JPanel implements JSVViewPanel, JSVMainPanel {
 		return currentPanelIndex;
 	}
 
-	public AwtViewPanel(BorderLayout borderLayout) {
+	public ViewPanel(BorderLayout borderLayout) {
 		super(borderLayout);
 	}
 
@@ -42,7 +42,7 @@ public class AwtViewPanel extends JPanel implements JSVViewPanel, JSVMainPanel {
 
 	}
 
-	public void setSelectedPanel(JSVPanel jsvp, JmolList<JSVPanelNode> panelNodes) {
+	public void setSelectedPanel(JSVPanel jsvp, JmolList<PanelNode> panelNodes) {
 		if (jsvp != selectedPanel) {
 			if (selectedPanel != null) {
 				remove((AwtPanel) selectedPanel);
@@ -67,7 +67,7 @@ public class AwtViewPanel extends JPanel implements JSVViewPanel, JSVMainPanel {
 		setVisible(jsvp != null);
 	}
 
-	public void markSelectedPanels(JmolList<JSVPanelNode> panelNodes) {
+	public void markSelectedPanels(JmolList<PanelNode> panelNodes) {
 		for (int i = panelNodes.size(); --i >= 0;)
 			panelNodes.get(i).isSelected = (currentPanelIndex == i);
 	}

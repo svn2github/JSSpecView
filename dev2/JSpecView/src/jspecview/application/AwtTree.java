@@ -19,7 +19,7 @@ import jspecview.api.JSVTreeNode;
 import jspecview.api.JSVTreePath;
 import jspecview.api.ScriptInterface;
 import jspecview.common.JSVFileManager;
-import jspecview.common.JSVPanelNode;
+import jspecview.common.PanelNode;
 import jspecview.common.JSViewer;
 import jspecview.source.JDXSource;
 
@@ -54,7 +54,7 @@ public class AwtTree extends JTree implements JSVTree {
 	
 	public void setSelectedPanel(ScriptInterface si, JSVPanel jsvp) {
 		if (jsvp != null) {
-			JSVTreeNode treeNode = JSVPanelNode.findNode(jsvp, viewer.panelNodes).treeNode;
+			JSVTreeNode treeNode = PanelNode.findNode(jsvp, viewer.panelNodes).treeNode;
 			scrollPathToVisible((TreePath) viewer.spectraTree.newTreePath(treeNode.getPath()));
 			setSelectionPath((TreePath) viewer.spectraTree.newTreePath(treeNode.getPath()));
 		}
@@ -64,10 +64,10 @@ public class AwtTree extends JTree implements JSVTree {
 			JDXSource source, JSVPanel[] panels) {
   	AwtTree tree = (AwtTree) viewer.spectraTree;
 		JSVTreeNode rootNode = tree.getRootNode();
-    JmolList<JSVPanelNode> panelNodes = viewer.panelNodes;
+    JmolList<PanelNode> panelNodes = viewer.panelNodes;
 
     String fileName = JSVFileManager.getName(source.getFilePath());
-    JSVPanelNode panelNode = new JSVPanelNode(null, fileName, source, null);
+    PanelNode panelNode = new PanelNode(null, fileName, source, null);
     JSVTreeNode fileNode = new AwtTreeNode(fileName, panelNode);
     panelNode.setTreeNode(fileNode);
 		tree.spectraTreeModel.insertNodeInto((MutableTreeNode) fileNode, (MutableTreeNode) rootNode, rootNode

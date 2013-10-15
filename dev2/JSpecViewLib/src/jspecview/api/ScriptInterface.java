@@ -5,11 +5,11 @@ import java.net.URL;
 import org.jmol.util.JmolList;
 
 
-import jspecview.common.JDXSpectrum;
-import jspecview.common.JSVPanelNode;
+import jspecview.common.PanelNode;
 import jspecview.common.JSViewer;
 import jspecview.common.ScriptToken;
 import jspecview.source.JDXSource;
+import jspecview.source.JDXSpectrum;
 
 public interface ScriptInterface {
 
@@ -63,7 +63,7 @@ public interface ScriptInterface {
 
 	public JSVPanel siGetNewJSVPanel2(JmolList<JDXSpectrum> specs);
 
-	public JSVPanelNode siGetNewPanelNode(String id, String fileName,
+	public PanelNode siGetNewPanelNode(String id, String fileName,
 			JDXSource source, JSVPanel jsvp);
 
 	public String siGetReturnFromJmolModel();
@@ -93,9 +93,9 @@ public interface ScriptInterface {
 
 	public void siSetLoadImaginary(boolean TF);
 
-	public void siSetMenuEnables(JSVPanelNode node, boolean isSplit);
+	public void siSetMenuEnables(PanelNode node, boolean isSplit);
 
-	public void siSetNode(JSVPanelNode node, boolean fromTree);
+	public void siSetNode(PanelNode node, boolean fromTree);
 
 	public void siSetPropertiesFromPreferences(JSVPanel jsvp, boolean b);
 

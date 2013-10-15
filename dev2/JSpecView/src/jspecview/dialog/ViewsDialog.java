@@ -22,7 +22,7 @@ package jspecview.dialog;
 import java.util.Enumeration;
 
 import jspecview.api.JSVTreeNode;
-import jspecview.common.JSVPanelNode;
+import jspecview.common.PanelNode;
 
 import org.jmol.util.JmolList;
 import org.jmol.util.Parser;
@@ -76,7 +76,7 @@ public class ViewsDialog extends JSVDialog {
 		Enumeration<JSVTreeNode> enume = rootNode.children();
     while (enume.hasMoreElements()) {
       JSVTreeNode treeNode = enume.nextElement();
-    	JSVPanelNode node = treeNode.getPanelNode();
+    	PanelNode node = treeNode.getPanelNode();
     	if (node.isView != isViews)
     		continue;
     	String title = node.toString();
@@ -151,7 +151,7 @@ public class ViewsDialog extends JSVDialog {
 		SB sb = new SB();
 		for (int i = 0; i < checkBoxes.size(); i++) {
 			Object cb = checkBoxes.get(i);
-			JSVPanelNode node = treeNodes.get(i).getPanelNode();
+			PanelNode node = treeNodes.get(i).getPanelNode();
 			if (dialog.isSelected(cb) && node.jsvp != null) {
 				if (node.isView) {
 					viewer.setNode(node, true);
@@ -169,7 +169,7 @@ public class ViewsDialog extends JSVDialog {
 		SB sb = new SB();
 		for (int i = 0; i < checkBoxes.size(); i++) {
 			Object cb = checkBoxes.get(i);
-			JSVPanelNode node = treeNodes.get(i).getPanelNode();
+			PanelNode node = treeNodes.get(i).getPanelNode();
 			if (dialog.isSelected(cb) && node.jsvp != null) {
 				if (node.isView) {
 					viewer.setNode(node, true);

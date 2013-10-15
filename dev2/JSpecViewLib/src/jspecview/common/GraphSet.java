@@ -19,6 +19,7 @@ import jspecview.api.XYScaleConverter;
 import jspecview.common.Annotation.AType;
 import jspecview.common.PanelData.LinkMode;
 import jspecview.dialog.JSVDialog;
+import jspecview.source.JDXSpectrum;
 import jspecview.util.JSVColor;
 
 public class GraphSet implements XYScaleConverter {
@@ -3143,12 +3144,6 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 	boolean getShowAnnotation(AType type, int i) {
 		AnnotationData id = getDialog(type, i);
 		return (id != null && id.getState());
-	}
-
-	String getSolutionColor() {
-		JDXSpectrum spectrum = getSpectrum();
-		return (spectrum.canShowSolutionColor() ? Visible.Colour(spectrum
-				.getXYCoords(), spectrum.getYUnits()) : Visible.noColor);
 	}
 
 	boolean hasFileLoaded(String filePath) {
