@@ -357,13 +357,18 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 					case SHOWERRORS:
 						show("errors");
 						break;
-					case SHOWMEASUREMENTS:
-						selectedPanel.getPanelData().showAnnotation(AType.Measurements,
+					case SHOWINTEGRATION:
+						selectedPanel.getPanelData().showAnnotation(AType.Integration,
 								Parameters.getTFToggle(value));
+						// execIntegrate(null);
 						break;
 					case SHOWKEY:
 						setOverlayLegendVisibility(selectedPanel, Parameters
 								.getTFToggle(value), true);
+						break;
+					case SHOWMEASUREMENTS:
+						selectedPanel.getPanelData().showAnnotation(AType.Measurements,
+								Parameters.getTFToggle(value));
 						break;
 					case SHOWMENU:
 						showMenu(Integer.MIN_VALUE, 0);
@@ -371,11 +376,6 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 					case SHOWPEAKLIST:
 						selectedPanel.getPanelData().showAnnotation(AType.PeakList,
 								Parameters.getTFToggle(value));
-						break;
-					case SHOWINTEGRATION:
-						selectedPanel.getPanelData().showAnnotation(AType.Integration,
-								Parameters.getTFToggle(value));
-						// execIntegrate(null);
 						break;
 					case SHOWPROPERTIES:
 						show("properties");
