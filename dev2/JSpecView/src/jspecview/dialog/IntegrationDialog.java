@@ -33,6 +33,7 @@ public class IntegrationDialog extends AnnotationDialog {
 	private static int[] posXY = new int[] { Integer.MIN_VALUE, 0 };
 
 	public IntegrationDialog() {
+		// called by reflection in JSViewer
 		this.type = AType.Integration;
 	}
 

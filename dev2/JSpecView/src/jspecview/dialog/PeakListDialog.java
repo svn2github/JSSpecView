@@ -32,6 +32,7 @@ public class PeakListDialog extends AnnotationDialog {
 	private static int[] posXY = new int[] {Integer.MIN_VALUE, 0};
 
 	public PeakListDialog() {
+		// called by reflection in JSViewer
 		type = AType.PeakList;
 	}
 

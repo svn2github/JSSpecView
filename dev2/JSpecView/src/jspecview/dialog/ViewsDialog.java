@@ -47,6 +47,7 @@ public class ViewsDialog extends AnnotationDialog {
 	private static int[] posXY = new int[] {Integer.MIN_VALUE, 0};
   
 	public ViewsDialog() {
+		// called by reflection in JSViewer
 		type = AType.Views;
 	}
 

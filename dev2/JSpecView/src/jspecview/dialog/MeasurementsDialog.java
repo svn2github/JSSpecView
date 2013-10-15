@@ -34,6 +34,7 @@ public class MeasurementsDialog extends AnnotationDialog {
 	private static int[] posXY = new int[] {Integer.MIN_VALUE, 0};
 
 	public MeasurementsDialog() {
+		// called by reflection in JSViewer
 		type = AType.Measurements;
 	}
 
