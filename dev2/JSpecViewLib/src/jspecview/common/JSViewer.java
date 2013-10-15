@@ -37,7 +37,6 @@ import jspecview.common.JDXSpectrum.IRMode;
 import jspecview.common.PanelData.LinkMode;
 import jspecview.dialog.AnnotationDialog;
 import jspecview.dialog.DialogManager;
-import jspecview.dialog.GenericDialog;
 import jspecview.source.JDXSource;
 import jspecview.tree.SimpleTree;
 import jspecview.util.JSVEscape;
@@ -623,7 +622,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 	}
 
 	private void showOverlayLegend(JSVPanelNode node, boolean visible) {
-		GenericDialog legend = node.legend;
+		AnnotationDialog legend = node.legend;
 		if (legend == null && visible) {
 			legend = node.setLegend(node.jsvp.getPanelData()
 					.getNumberOfSpectraInCurrentSet() > 1

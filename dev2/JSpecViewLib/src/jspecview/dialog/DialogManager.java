@@ -74,7 +74,7 @@ abstract public class DialogManager {
 
 	public boolean dialogCallback(String url) {
 		String dialogID = url.substring(8, url.indexOf("?"));
-		GenericDialog jsvDialog = htDialogs.get(dialogID);
+		AnnotationDialog jsvDialog = htDialogs.get(dialogID);
 		return (jsvDialog == null ? false : jsvDialog.callback(getField(url, "id"), url));		
 	}
 

@@ -1,38 +1,48 @@
 package jspecview.dialog;
 
 import jspecview.api.AnnotationData;
+import jspecview.api.JSVPanel;
 import jspecview.dialog.DialogParams;
+import jspecview.common.Annotation;
 import jspecview.common.Coordinate;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSViewer;
 import jspecview.common.MeasurementData;
 import jspecview.common.Parameters;
 
-abstract public class AnnotationDialog extends GenericDialog implements AnnotationData {
+abstract public class AnnotationDialog extends Annotation implements AnnotationData {
 
 	abstract public int[] getPosXY();
+
+	protected AType type;
+	protected String title;
+	protected JSViewer viewer;
+	protected JDXSpectrum spec;
+
+	protected DialogManager manager;
+	protected DialogParams dialogParams;
+	protected PlatformDialog dialog;
+
+	private int[] loc;
 
 	protected Object txt1;
 	protected Object txt2;
 	private Object showHideButton; // text changeable
 	protected Object combo1; // measurement listing, peaks
 	
-//	protected JComboBox<String> combo1; // measurement listing
-//	protected JComboBox<String> chkbox1; // peaks
-
 	private boolean addClearBtn, addCombo1;
 	private boolean isNumeric = true; // not Views or OverlayLegend
 	private boolean defaultVisible = true; // not OverlayLegend
 
 	abstract protected void addUniqueControls();
 
-	protected AnnotationDialog() {
-		super();
-	}
-	
-	@Override
+	abstract public boolean callback(String id, String msg);
+
 	public AnnotationDialog setParams(String title, JSViewer viewer, JDXSpectrum spec) {
-		super.setParams(title, viewer, spec);
+		this.title = title;
+		this.viewer = viewer;
+		this.spec = spec;
+		manager = viewer.getDialogManager();
 		switch (type) {
 		case Integration:
 			addClearBtn = true;
@@ -58,6 +68,37 @@ abstract public class AnnotationDialog extends GenericDialog implements Annotati
 		dialogParams.setup();
 		initDialog();
 		return this;
+	}
+	
+	/**
+	 * 
+	 * @param panel
+	 *          a PPanel (Applet) or a JScrollPane (MainFrame)
+	 * 
+	 * @param posXY
+	 *          static for a given dialog
+	 */
+	public void restoreDialogPosition(JSVPanel panel, int[] posXY) {
+		if (panel != null) {
+			if (posXY[0] == Integer.MIN_VALUE) {
+				posXY[0] = 0;
+				posXY[1] = -20;
+			}
+			int[] pt = manager.getLocationOnScreen(panel);
+			int height = panel.getHeight();
+			loc = new int[] { Math.max(0, pt[0] + posXY[0]), Math.max(0, pt[1] + height + posXY[1]) };
+			dialog.setIntLocation(loc);
+		}
+	}
+	
+	public void saveDialogPosition(int[] posXY) {
+		try {
+			int[] pt = manager.getLocationOnScreen(dialog);
+			posXY[0] += pt[0] - loc[0];
+			posXY[1] += pt[1] - loc[1];
+		} catch (Exception e) {
+			// ignore
+		}
 	}
 	
 	// //// frame construction ////////
@@ -94,7 +135,7 @@ abstract public class AnnotationDialog extends GenericDialog implements Annotati
 	/**
 	 * @param id
 	 * @param msg
-	 * @return false
+	 * @return true if consumed
 	 */
 	public boolean callbackAD(String id, String msg) {
 		if (id.equals("tableSelect")) {
@@ -110,9 +151,11 @@ abstract public class AnnotationDialog extends GenericDialog implements Annotati
 			dialogParams.setPrecision(dialog.getSelectedIndex(combo1));
 		} else if (id.startsWith("txt")) {
 			dialogParams.eventApply();
-		} else {
-			return callbackGD(id, msg);
+		} else if (id.equals("windowClosing")) {
+			dialogParams.done();
+			return true;
 		}
+
 		return true;
 	}
 
@@ -220,6 +263,18 @@ abstract public class AnnotationDialog extends GenericDialog implements Annotati
 	
 	public void setData(AnnotationData data) {
 		dialogParams.setData(data);
+	}
+
+	public void dispose() {
+		dialog.dispose();		
+	}
+
+	public void setVisible(boolean visible) {
+		dialog.setVisible(visible);		
+	}
+
+	public boolean isVisible() {
+		return dialog.isVisible();
 	}
 
 }
