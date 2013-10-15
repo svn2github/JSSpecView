@@ -1,0 +1,38 @@
+package jspecview.awtjs2d.swing;
+
+public class GridBagConstraints {
+
+	public static final int NONE = 0;
+	public static final int CENTER = 10;
+	public static final int WEST = 17;
+	public static final int EAST = 13;
+
+	int gridx;
+	int gridy;
+	int gridwidth;
+	int gridheight;
+	double weightx;
+	double weighty;
+	int anchor;
+	int fill;
+	Insets insets;
+	int ipadx;
+	int ipady;
+	
+	public GridBagConstraints(int gridx, int gridy, int gridwidth,
+			int gridheight, double weightx, double weighty, int anchor, int fill,
+			Insets insets, int ipadx, int ipady) {
+		this.gridx = gridx;
+		this.gridy = gridy;
+		this.gridwidth = gridwidth;
+		this.gridheight = gridheight;
+		this.weightx = weightx;
+		this.weighty = weighty;
+		this.anchor = anchor;
+		this.fill = fill;
+		this.insets = insets;
+		this.ipadx = ipadx;
+		this.ipady = ipady;
+	}
+
+}

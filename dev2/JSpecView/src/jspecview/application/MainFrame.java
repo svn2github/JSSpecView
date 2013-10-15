@@ -288,7 +288,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		try {
       isAwake = visible;
 			if (visible) {
-				jmolDimensionOld = new Dimension();
+				jmolDimensionOld = new Dimension(0, 0);
 				jmolDisplay.getSize(jmolDimensionOld);
 				jmolDisplay.setSize(jmolDimensionNew);
 				jmolFrame.remove(jmolDisplay);

@@ -113,7 +113,7 @@ public class JSVApplet implements JSVAppletInterface,
 	 * 
 	 */
 	public void init() {
-		app = new JSVApp(this);
+		app = new JSVApp(this, true);
 		initViewer();
 	}
 

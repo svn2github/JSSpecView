@@ -5,7 +5,7 @@ import javax.swing.table.AbstractTableModel;
 /**
  * The Table Model for Legend
  */
-class AwtDialogTableModel extends AbstractTableModel {
+class DialogTableModel extends AbstractTableModel {
 	/**
    * 
    */
@@ -14,7 +14,7 @@ class AwtDialogTableModel extends AbstractTableModel {
 	Object[][] data;
 	boolean asString;
 
-	public AwtDialogTableModel(String[] columnNames, Object[][] data, boolean asString) {
+	DialogTableModel(String[] columnNames, Object[][] data, boolean asString) {
 		this.columnNames = columnNames;
 		this.data = data;
 		this.asString = asString;

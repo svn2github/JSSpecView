@@ -7,13 +7,16 @@ import jspecview.dialog.DialogParams;
 import jspecview.dialog.PlatformDialog;
 import jspecview.source.JDXSpectrum;
 
-class JsDialogManager extends DialogManager {
+public class JsDialogManager extends DialogManager {
 
+	public JsDialogManager() {
+		// for reflection
+	}
 	@Override
 	public PlatformDialog getDialog(JSVDialog jsvDialog,
 			DialogParams params) {
-		// TODO Auto-generated method stub
-		return null;
+		return new JsDialog(this, params,
+				registerDialog(jsvDialog, params.thisKey));
 	}
 
 	@Override
@@ -27,7 +30,7 @@ class JsDialogManager extends DialogManager {
 	@Override
 	public int[] getLocationOnScreen(Object component) {
 		// TODO Auto-generated method stub
-		return null;
+		return new int[2];
 	}
 
 	@Override

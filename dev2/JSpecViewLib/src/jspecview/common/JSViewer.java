@@ -1544,9 +1544,11 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 	}
 
 	public DialogManager getDialogManager() {
-		return (dialogManager == null ? (dialogManager = (DialogManager) getAwtInterface("DialogManager"))
-				.set(this)
-				: dialogManager);
+		if (dialogManager != null)
+			return dialogManager;
+		dialogManager = (DialogManager) Interface.getInterface("jspecview.awtjs2d.JsDialogManager");
+		//  getAwtInterface("DialogManager");
+		return dialogManager.set(this);
 	}
 
 	public JSVDialog getDialog(AType type, JDXSpectrum spec) {

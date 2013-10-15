@@ -82,14 +82,14 @@ import jspecview.util.JSVEscape;
 
 public class JSVApp implements PanelListener, JSVAppInterface {
 
-	public JSVApp(AppletFrame appletFrame) {
+	public JSVApp(AppletFrame appletFrame, boolean isJS) {
 		this.appletFrame = appletFrame;
-		initViewer();
+		initViewer(isJS);
 		init();
 	}
 
-	private void initViewer() {
-		viewer = new JSViewer(this, true, false);
+	private void initViewer(boolean isJS) {
+		viewer = new JSViewer(this, true, isJS);
 		appletFrame.setDropTargetListener(isSigned(), viewer);
 		JSVFileManager.setDocumentBase(viewer, appletFrame.getDocumentBase());
 	}

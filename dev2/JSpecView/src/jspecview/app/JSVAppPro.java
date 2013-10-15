@@ -52,8 +52,8 @@ import org.jmol.api.JSVInterface;
 public class JSVAppPro extends JSVApp implements
     JSVInterface {
 
-  public JSVAppPro(AppletFrame appletFrame) {
-		super(appletFrame);
+  public JSVAppPro(AppletFrame appletFrame, boolean isJS) {
+		super(appletFrame, isJS);
 	}
 
 	@Override

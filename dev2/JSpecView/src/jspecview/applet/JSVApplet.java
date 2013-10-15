@@ -112,7 +112,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	 */
 	@Override
 	public void init() {
-		app = new JSVApp(this);
+		app = new JSVApp(this, false);
 		initViewer();
 	}
 
