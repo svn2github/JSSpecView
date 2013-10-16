@@ -84,6 +84,14 @@ abstract public class JComponent {
 		return width;
 	}
 
+	protected int minWidth = 30;
+	protected int minHeight = 30;
+
+	public void setMinimumSize(Dimension d) {
+		minWidth = d.width;
+		minHeight = d.height;
+	}
+
 	protected int getSubcomponentWidth() {
 		return width;
 	}

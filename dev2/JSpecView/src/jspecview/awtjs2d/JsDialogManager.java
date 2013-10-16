@@ -2,9 +2,11 @@ package jspecview.awtjs2d;
 
 import org.jmol.util.Parser;
 
-import jspecview.awtjs2d.swing.JTextPane;
+import jspecview.awtjs2d.swing.BorderLayout;
+import jspecview.awtjs2d.swing.JEditorPane;
 import jspecview.awtjs2d.swing.Dimension;
 import jspecview.awtjs2d.swing.JDialog;
+import jspecview.awtjs2d.swing.JPanel;
 import jspecview.awtjs2d.swing.JScrollPane;
 import jspecview.awtjs2d.swing.JTable;
 
@@ -94,9 +96,22 @@ public class JsDialogManager extends DialogManager {
 	@Override
 	protected void showScrollingText(Object frame, String title, String text) {
 		JDialog dialog = new JDialog();
+		JEditorPane sourcePane = new JEditorPane();
+		sourcePane.setText(text);
+		//sourcePane.setEditable(false);
+		//sourcePane.setFont(new Font(null, Font.BOLD, 12));
+		JScrollPane scrollPane = new JScrollPane(sourcePane);
+		scrollPane.setPreferredSize(new Dimension(500, 400));
+		scrollPane.setMinimumSize(new Dimension(500, 400));
+		JPanel contentPanel = new JPanel(new BorderLayout());
+		contentPanel.add(scrollPane, BorderLayout.CENTER);
+		dialog.getContentPane().add(contentPanel);
+		dialog.pack();
+		dialog.setVisible(true);
+
 		dialog.setTitle(title);
-		JTextPane pane = new JTextPane();
-		pane.getDocument().insertString(0, text, null);
+		JEditorPane pane = new JEditorPane();
+		pane.setText(text);
 		dialog.getContentPane().add(pane);
 		dialog.pack();
 		dialog.setVisible(true);

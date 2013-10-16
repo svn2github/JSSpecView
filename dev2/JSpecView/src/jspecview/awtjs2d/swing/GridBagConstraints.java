@@ -30,6 +30,8 @@ public class GridBagConstraints {
 		this.weighty = weighty;
 		this.anchor = anchor;
 		this.fill = fill;
+		if (insets == null)
+			insets = new Insets(0, 0, 0, 0);
 		this.insets = insets;
 		this.ipadx = ipadx;
 		this.ipady = ipady;

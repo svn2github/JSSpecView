@@ -11,7 +11,7 @@ public class Grid {
 	private Cell[][] grid;
 	private String renderer;
 	
-	
+
 	Grid(int rows, int cols) {
 		grid = new Cell[0][0];
 	}
