@@ -4,6 +4,7 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import jspecview.api.JSVPanel;
+import jspecview.api.PlatformDialog;
 import jspecview.common.JSVFileManager;
 import jspecview.common.JSViewer;
 import jspecview.source.JDXSource;
@@ -60,22 +61,12 @@ abstract public class DialogManager {
 		return id;
 	}
 
-	protected void runScript(String dialog, String id) {
-		viewer.runScript("event://" + dialog + "?&id=" + id);
-	}
-
 	public String getField(String url, String name) {
 		url += "&";
 		String key = "&" + name + "=";
 		int pt = url.indexOf(key);
 		return (pt < 0 ? null : url.substring(pt + key.length(), url.indexOf("&",
 				pt + 1)));
-	}
-
-	public boolean dialogCallback(String url) {
-		String dialogID = url.substring(8, url.indexOf("?"));
-		JSVDialog jsvDialog = htDialogs.get(dialogID);
-		return (jsvDialog == null ? false : jsvDialog.callback(getField(url, "id"), url));		
 	}
 
 	public void showSourceErrors(Object frame, JDXSource currentSource) {
@@ -106,5 +97,61 @@ abstract public class DialogManager {
 		}
 	}
 
+	/**
+	 * processing click event from platform DialogManager
+	 * 
+	 * @param eventId   dialogId/buttonId starting with "btn", "chk", "cmb", or "txt"
+	 */
+	
+	protected void processClick(String eventId) {
+		int pt = eventId.lastIndexOf("/");
+		String id = eventId.substring(pt + 1);
+		String dialog = eventId.substring(0, pt);
+		dialogCallback(dialog, id, null);
+	}
+
+	/**
+	 * processing table cell click event from platform DialogManager; takes two
+	 * hits in AWT -- one a row, the other a column
+	 * 
+	 * @param eventId
+	 *          dialogId/[ROW|COL] or just dialogId
+	 * @param index1
+	 *          row if just dialogId or (row or col if AWT)
+	 * @param index2
+	 *          column if just dialogId or -1 if AWT
+	 * @param adjusting
+	 */
+	protected void processTableEvent(String eventId, int index1, int index2,
+			boolean adjusting) {
+		int pt = eventId.lastIndexOf("/");
+		String dialog = eventId.substring(0, pt);
+		String selector = eventId.substring(pt + 1);
+		String msg = "&selector=" + selector + "&index=" + index1
+				+ (index2 < 0 ? "&adjusting=" + adjusting : "&index2=" + index2);
+		dialogCallback(dialog, "tableSelect", msg);
+	}
+
+	/**
+	 * processing window closing event from platform DialogManager
+	 * 
+	 * @param dialog
+	 */
+	protected void processWindowClosing(String dialog) {
+		dialogCallback(dialog, "windowClosing", null);
+	}
+
+	/**
+	 * Send the callback to the appropriate dialog
+	 * 
+	 * @param dialogId
+	 * @param id
+	 * @param msg
+	 */
+	private void dialogCallback(String dialogId, String id, String msg) {
+		JSVDialog jsvDialog = htDialogs.get(dialogId);
+		if (jsvDialog != null)
+			jsvDialog.callback(id, msg);		
+	}
 
 }

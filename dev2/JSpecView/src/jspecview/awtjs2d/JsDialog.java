@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.swing.SwingConstants;
 
+import jspecview.api.PlatformDialog;
 import jspecview.awtjs2d.swing.Dimension;
 import jspecview.awtjs2d.swing.FlowLayout;
 import jspecview.awtjs2d.swing.GridBagConstraints;
@@ -26,7 +27,6 @@ import jspecview.awtjs2d.swing.TableCellRenderer;
 import jspecview.common.Annotation.AType;
 import jspecview.dialog.DialogManager;
 import jspecview.dialog.DialogParams;
-import jspecview.dialog.PlatformDialog;
 
 /**
  * just a class I made to separate the construction of the AnnotationDialogs

@@ -2,6 +2,7 @@ package jspecview.dialog;
 
 import jspecview.api.AnnotationData;
 import jspecview.api.JSVPanel;
+import jspecview.api.PlatformDialog;
 import jspecview.dialog.DialogParams;
 import jspecview.source.JDXSpectrum;
 import jspecview.common.Annotation;
@@ -61,7 +62,6 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 			break;
 		case PeakList:
 			isNumeric = true;
-			addClearBtn = true;
 			addApplyBtn = true;
 			defaultVisible = true;
 			break;

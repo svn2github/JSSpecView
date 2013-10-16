@@ -26,10 +26,10 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import jspecview.api.JSVPanel;
+import jspecview.api.PlatformDialog;
 import jspecview.dialog.JSVDialog;
 import jspecview.dialog.DialogManager;
 import jspecview.dialog.DialogParams;
-import jspecview.dialog.PlatformDialog;
 import jspecview.source.JDXSpectrum;
 
 /**
@@ -122,33 +122,38 @@ public class AwtDialogManager extends DialogManager implements
 	public void showText(Object frame, String title, String text) {
 		new TextDialog(null, title, true, text);
 	}
-
+	
+		
+	/**
+	 * ListSelectionListener callback
+	 */
 	synchronized public void valueChanged(ListSelectionEvent e) {
 		boolean adjusting = e.getValueIsAdjusting();
 		ListSelectionModel lsm = (ListSelectionModel) e.getSource();
 		String selector = getSelectorName(lsm);
 		if (selector == null)
 			return;
-		int pt = selector.lastIndexOf("/");
-		String dialog = selector.substring(0, pt);
-		selector = selector.substring(pt + 1);
-		runScript(dialog, "tableSelect&adjusting=" + adjusting + "&selector="
-				+ selector + "&index=" + lsm.getLeadSelectionIndex());
+		int index = lsm.getLeadSelectionIndex();
+		processTableEvent(selector, index, -1, adjusting);
 	}
 
+	/**
+	 * ActionListener callback
+	 */
 	public void actionPerformed(ActionEvent e) {
-		String dialog = ((Component) e.getSource()).getName();
-		int pt = dialog.lastIndexOf("/");
-		String id = dialog.substring(pt + 1);
-		dialog = dialog.substring(0, pt);
-		runScript(dialog, id);
+		processClick(((Component) e.getSource()).getName());
 	}
 
+
+	/**
+	 * WindowListener callback
+	 */
 	public void windowClosing(WindowEvent e) {
-		String dialog = ((Component) e.getSource()).getName();
-		runScript(dialog, "windowClosing");
+		processWindowClosing(((Component) e.getSource()).getName());
 	}
 
+	//// required but unused
+	
 	public void windowActivated(WindowEvent arg0) {
 	}
 

@@ -19,7 +19,7 @@
 
 package jspecview.application;
 
-import jspecview.util.JSVColor;
+import jspecview.source.JSVXmlReader;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -29,13 +29,13 @@ import java.util.TreeMap;
 
 import org.jmol.util.SB;
 
+import jspecview.api.JSVColor;
 import jspecview.awt.AwtParameters;
 import jspecview.common.ColorParameters;
 import jspecview.common.JSVFileManager;
 import jspecview.common.ScriptToken;
 import jspecview.util.JSVColorUtil;
 import jspecview.util.JSVTxt;
-import jspecview.util.JXVXmlReader;
 
 /**
  * <code>DisplaySchemesProcessor</code> loads and saves the display schemes of
@@ -53,7 +53,7 @@ public class DisplaySchemesProcessor {
   /** The list of displaySchemes that is loaded from file */
   private TreeMap<String, ColorParameters> displaySchemes;
 
-  private JXVXmlReader reader;
+  private JSVXmlReader reader;
 
   /**
    * Initialises the <code>DisplaySchemesProcessor</code>
@@ -146,13 +146,13 @@ public class DisplaySchemesProcessor {
    */
   public boolean load(BufferedReader br) throws Exception {
 
-    reader = new JXVXmlReader(br);
+    reader = new JSVXmlReader(br);
     String defaultDS = "Default";
     ColorParameters ds = null;
     String attr;
     try {
       while (reader.hasNext()) {
-        if (reader.nextEvent() != JXVXmlReader.START_ELEMENT)
+        if (reader.nextEvent() != JSVXmlReader.START_ELEMENT)
           continue;
         String theTag = reader.getTagName();
         if (theTag.equals("displayschemes")) {

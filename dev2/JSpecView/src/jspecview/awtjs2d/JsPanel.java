@@ -44,6 +44,7 @@ import org.jmol.util.JmolFont;
 import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
 import jspecview.api.JSVApiPlatform;
+import jspecview.api.JSVColor;
 import jspecview.api.JSVPanel;
 import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
@@ -51,7 +52,6 @@ import jspecview.common.ColorParameters;
 import jspecview.common.PrintLayout;
 import jspecview.common.ScriptToken;
 import jspecview.source.JDXSpectrum;
-import jspecview.util.JSVColor;
 
 
 /**

@@ -13,6 +13,7 @@ import org.jmol.util.Parser;
 import org.jmol.util.Txt;
 
 import jspecview.api.AnnotationData;
+import jspecview.api.JSVColor;
 import jspecview.api.JSVGraphics;
 import jspecview.api.JSVPanel;
 import jspecview.api.XYScaleConverter;
@@ -20,7 +21,6 @@ import jspecview.common.Annotation.AType;
 import jspecview.common.PanelData.LinkMode;
 import jspecview.dialog.JSVDialog;
 import jspecview.source.JDXSpectrum;
-import jspecview.util.JSVColor;
 
 public class GraphSet implements XYScaleConverter {
 

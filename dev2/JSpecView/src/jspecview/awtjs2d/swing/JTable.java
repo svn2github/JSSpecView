@@ -64,7 +64,7 @@ public class JTable extends JComponent implements ListSelectionModel, ColumnSele
 		SB sb = new SB();
 		String id = registerMe("JT");
 		sb.append("\n<table id='" + id + "_table' class='JTable' style='width:100%;height:100%'>");
-		tableModel.toHTML(sb, id);
+		tableModel.toHTML(sb, id, bsSelectedRows);
 		sb.append("\n</table>\n");
 		return sb.toString();
 	}

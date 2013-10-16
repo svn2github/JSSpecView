@@ -37,7 +37,6 @@
 
 package jspecview.awt;
 
-import jspecview.util.JSVColor;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -51,6 +50,7 @@ import java.awt.image.WritableRaster;
 
 import org.jmol.util.JmolFont;
 
+import jspecview.api.JSVColor;
 import jspecview.api.JSVGraphics;
 
 /**

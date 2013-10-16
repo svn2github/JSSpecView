@@ -30,11 +30,11 @@ import javax.swing.border.Border;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.text.JTextComponent;
 
+import jspecview.api.JSVColor;
+import jspecview.api.PlatformDialog;
 import jspecview.common.Annotation.AType;
 import jspecview.dialog.DialogManager;
 import jspecview.dialog.DialogParams;
-import jspecview.dialog.PlatformDialog;
-import jspecview.util.JSVColor;
 
 /**
  * just a class I made to separate the construction of the AnnotationDialogs
@@ -254,7 +254,7 @@ public class AwtDialog extends JDialog implements PlatformDialog {
     manager.registerSelector(thisID + "/ROW", selector);
     selector = table.getColumnModel().getSelectionModel();
     selector.addListSelectionListener((AwtDialogManager) manager);
-    manager.registerSelector(thisID + "/COLUMN", selector);
+    manager.registerSelector(thisID + "/COL", selector);
 		int n = 0;
 		for (int i = 0; i < columnNames.length; i++) {
 			table.getColumnModel().getColumn(i).setPreferredWidth(columnWidths[i]);

@@ -45,7 +45,6 @@ import jspecview.common.PeakInfo;
 import jspecview.exception.JDXSourceException;
 import jspecview.exception.JSpecViewException;
 import jspecview.util.JSVEscape;
-import jspecview.util.JSVZipFileSequentialReader;
 
 /**
  * <code>JDXFileReader</code> reads JDX data, including complex BLOCK files that

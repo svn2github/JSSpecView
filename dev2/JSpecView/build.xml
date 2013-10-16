@@ -95,7 +95,11 @@
             	<attribute name="Class-Path" value="."/>
                 <attribute name="Main-Class" value="${main-class}"/>
             </manifest>
-        	<fileset dir="${bin.dir}" />
+		   	<fileset dir="${bin.dir}">
+		      <include name="**/*"/>
+			  <exclude name="jspecview/*js*/*"/>
+		      <exclude name="jspecview/unused/*"/>
+		   	</fileset>
         	<fileset dir="${jsvlib.dir}" />
         </jar>
 		<copy overwrite="true" file="${build.app.dir}/${ant.project.name}.app.${build.number}.jar"
@@ -128,8 +132,10 @@
             	<attribute name="Class-Path" value=". netscape.jar"/>
             </manifest>
         	<fileset dir="${bin.dir}">
-        		<exclude name="jspecview/application/**"/>
         		<exclude name="com/lowagie/**"/>
+        		<exclude name="jspecview/application/**"/>
+  			    <exclude name="jspecview/*js*/*"/>
+  		        <exclude name="jspecview/unused/*"/>
         	</fileset>
         	<fileset dir="${jsvlib.dir}"/>
         </jar>		

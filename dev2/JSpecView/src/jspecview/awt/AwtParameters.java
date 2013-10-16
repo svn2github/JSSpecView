@@ -1,12 +1,12 @@
 package jspecview.awt;
 
-import jspecview.util.JSVColor;
 
 import java.awt.GraphicsEnvironment;
 import java.util.Arrays;
 
 import java.util.List;
 
+import jspecview.api.JSVColor;
 import jspecview.common.ColorParameters;
 
 public class AwtParameters extends ColorParameters {

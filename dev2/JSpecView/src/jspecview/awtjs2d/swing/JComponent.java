@@ -1,7 +1,7 @@
 package jspecview.awtjs2d.swing;
 
+import jspecview.api.JSVColor;
 import jspecview.dialog.DialogManager;
-import jspecview.util.JSVColor;
 import jspecview.util.JSVColorUtil;
 
 abstract public class JComponent {

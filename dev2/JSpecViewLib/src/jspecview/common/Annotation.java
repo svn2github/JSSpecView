@@ -24,9 +24,9 @@
 
 package jspecview.common;
 
+import jspecview.api.JSVColor;
 import jspecview.api.JSVGraphics;
 import jspecview.source.JDXSpectrum;
-import jspecview.util.JSVColor;
 import jspecview.util.JSVColorUtil;
 
 import org.jmol.util.JmolList;

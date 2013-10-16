@@ -1,4 +1,4 @@
-package jspecview.util;
+package jspecview.api;
 
 public interface JSVColor {
 

@@ -158,8 +158,6 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 			script = "";
 		script = script.trim();
 		System.out.println("RUNSCRIPT " + script);
-		if (script.startsWith("event://"))
-			return getDialogManager().dialogCallback(script);
 		boolean isOK = true;
 		int nErrorsLeft = 10;
 		ScriptTokenizer commandTokens = new ScriptTokenizer(script, true);
@@ -1546,8 +1544,8 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 	public DialogManager getDialogManager() {
 		if (dialogManager != null)
 			return dialogManager;
-		dialogManager = (DialogManager) Interface.getInterface("jspecview.awtjs2d.JsDialogManager");
-		//  getAwtInterface("DialogManager");
+		dialogManager = (DialogManager) //Interface.getInterface("jspecview.awtjs2d.JsDialogManager");
+		    getAwtInterface("DialogManager");
 		return dialogManager.set(this);
 	}
 

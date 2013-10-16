@@ -6,7 +6,6 @@ import org.jmol.api.ApiPlatform;
 
 import jspecview.common.PanelData;
 import jspecview.common.PrintLayout;
-import jspecview.util.JSVColor;
 
 public interface JSVPanel extends JSVViewPanel {
 

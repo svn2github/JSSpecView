@@ -1,4 +1,4 @@
-package jspecview.dialog;
+package jspecview.api;
 
 public interface PlatformDialog {
 

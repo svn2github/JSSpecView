@@ -274,6 +274,7 @@ public class DialogParams {
 		if (icolrow == iRowColSelected)
 			return;
 		iRowColSelected = icolrow;
+		annDialog.selectTableRow(iRowSelected);
 		try {
 			switch (thisType) {
 			case Integration:
@@ -536,31 +537,26 @@ public class DialogParams {
 		return true;
 	}
 
-	private int tableRCflag = 0;
-
 	public void tableSelect(DialogManager manager, String url) {
 		boolean isAdjusting = "true".equals(manager.getField(url, "adjusting"));
-		boolean isColumn = "COLUMN".equals(manager.getField(url, "selector"));
+		if (isAdjusting) {
+			iColSelected = iRowSelected = -1;
+			return;
+		}
 		int index = Parser.parseInt(manager.getField(url, "index"));
-		
-		try {
-			if (isAdjusting) {
-				if (isColumn) {
-					iColSelected = index;
-					tableRCflag = 1;
-				} else {
-					iRowSelected = index;
-					tableRCflag = 2;
-					annDialog.selectTableRow(index);
-				}
-				return;
-			}
-			if (isColumn != (tableRCflag == 1))
-				return;
+		switch ("ROW COL ROWCOL".indexOf(manager.getField(url, "selector"))) {
+		case 8:
+			iColSelected = Parser.parseInt(manager.getField(url, "index2"));
+			//$FALL-THROUGH$
+		case 0:
+			iRowSelected = index;
+			break;
+		case 4:
+			iColSelected = index;
+			break;
+		}
+		if (iColSelected >= 0 && iRowSelected >= 0) {
 			tableCellSelect(iRowSelected, iColSelected);
-		} catch (Exception ee) {
-			// ignore
 		}
 	}
-
 }

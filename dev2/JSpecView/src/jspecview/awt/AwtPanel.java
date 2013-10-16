@@ -38,7 +38,6 @@
 package jspecview.awt;
 
 import jspecview.source.JDXSpectrum;
-import jspecview.util.JSVColor;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -70,6 +69,7 @@ import org.jmol.util.Logger;
 import org.jmol.util.Txt;
 
 import jspecview.api.JSVApiPlatform;
+import jspecview.api.JSVColor;
 import jspecview.api.JSVPanel;
 import jspecview.api.PdfCreatorInterface;
 import jspecview.common.JSViewer;

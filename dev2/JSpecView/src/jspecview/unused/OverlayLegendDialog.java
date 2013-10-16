@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2008 The University of the West Indies
+/* Copyright (c) 2002-2012 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -17,36 +17,41 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package jspecview.common;
-
-import jspecview.api.JSVColor;
-import jspecview.source.JDXSpectrum;
-
-
+package jspecview.unused;
+//
+//import jspecview.dialog.JSVDialog;
 
 /**
- * ColoredAnnotation is a label on the spectrum; not an integralRegion
+ * Dialog for showing the legend or key for overlaid plots in a
+ * <code>JSVPanel</code>.
  * 
- * @author Bob Hanson hansonr@stolaf.edu
  */
+public class OverlayLegendDialog {//extends JSVDialog {
 
-public class ColoredAnnotation extends Annotation {
-
-  private JSVColor color;
-
-  public JSVColor getColor() {
-    return color;
-  }
-
-  public ColoredAnnotation() {
-  }
-  
-  public ColoredAnnotation setCA(
-	double x, double y, JDXSpectrum spec, String text, JSVColor color,
-      boolean isPixels, boolean is2D, int offsetX, int offsetY) {
-    setA(x, y, spec, text, isPixels, is2D, offsetX, offsetY);
-    this.color = color;
-    return this;
-  }
+//	private static final long serialVersionUID = 1L;
+//
+//	private static int[] posXY = new int[] { Integer.MIN_VALUE, 0 };
+//
+//	public OverlayLegendDialog() {
+//		// called by reflection in JSViewer
+//		this.type = AType.OverlayLegend;
+//	}
+//
+//	@Override
+//	public int[] getPosXY() {
+//		return posXY;
+//	}
+//
+//	@Override
+//	protected void addUniqueControls() {
+//		// n/a
+//	}
+//
+//
+//	@Override
+//	public boolean callback(String id, String msg) {
+//		// TODO Auto-generated method stub
+//		return false;
+//	}
 
 }

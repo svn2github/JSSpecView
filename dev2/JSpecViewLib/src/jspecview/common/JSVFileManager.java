@@ -43,10 +43,10 @@ import org.jmol.util.Parser;
 import org.jmol.util.SB;
 import org.jmol.util.Txt;
 
+import jspecview.source.JSVZipFileSequentialReader;
+import jspecview.source.JSVZipUtil;
 import jspecview.util.JSVEscape;
 import jspecview.util.JSVTxt;
-import jspecview.util.JSVZipFileSequentialReader;
-import jspecview.util.JSVZipUtil;
 
 public class JSVFileManager {
 

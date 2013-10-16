@@ -26,7 +26,6 @@ import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 
-import jspecview.util.JXVXmlReader;
 
 import org.jmol.io.Base64;
 
@@ -245,7 +244,7 @@ class AnIMLReader extends XMLReader {
 
   private void nextStartTag() throws Exception {
     reader.nextStartTag();
-    while (reader.getTagType() == JXVXmlReader.COMMENT) {
+    while (reader.getTagType() == JSVXmlReader.COMMENT) {
       reader.nextStartTag();
     }
   }

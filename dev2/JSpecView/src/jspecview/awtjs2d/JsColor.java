@@ -1,6 +1,6 @@
 package jspecview.awtjs2d;
 
-import jspecview.util.JSVColor;
+import jspecview.api.JSVColor;
 
 class JsColor implements JSVColor {
 

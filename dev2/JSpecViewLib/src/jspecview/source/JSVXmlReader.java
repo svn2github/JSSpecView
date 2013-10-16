@@ -17,7 +17,7 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package jspecview.util;
+package jspecview.source;
 
 import java.io.BufferedReader;
 import java.util.Hashtable;
@@ -25,7 +25,7 @@ import java.util.Hashtable;
 import org.jmol.util.SB;
 
 
-public class JXVXmlReader {
+public class JSVXmlReader {
 
   /*
    * A simple very light-weight XML reader
@@ -48,7 +48,7 @@ public class JXVXmlReader {
   public final static int EOF = 8;
 
 
-  public JXVXmlReader(BufferedReader br) {
+  public JSVXmlReader(BufferedReader br) {
     buffer = new DataBuffer(br);
   }
 
@@ -89,7 +89,7 @@ public class JXVXmlReader {
   }
 
   public void nextTag() throws Exception {
-    while ((thisEvent = buffer.nextTag()).eventType == JXVXmlReader.COMMENT) {
+    while ((thisEvent = buffer.nextTag()).eventType == JSVXmlReader.COMMENT) {
     }
   }
 

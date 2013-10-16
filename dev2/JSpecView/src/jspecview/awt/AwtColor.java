@@ -2,7 +2,7 @@ package jspecview.awt;
 
 import java.awt.Color;
 
-import jspecview.util.JSVColor;
+import jspecview.api.JSVColor;
 
 public class AwtColor extends Color implements JSVColor {
 

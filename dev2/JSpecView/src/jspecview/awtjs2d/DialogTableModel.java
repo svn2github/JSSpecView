@@ -1,10 +1,11 @@
 package jspecview.awtjs2d;
 
+import org.jmol.util.BS;
 import org.jmol.util.SB;
 
+import jspecview.api.JSVColor;
 import jspecview.awtjs2d.swing.AbstractTableModel;
 import jspecview.awtjs2d.swing.TableColumn;
-import jspecview.util.JSVColor;
 import jspecview.util.JSVColorUtil;
 
 
@@ -52,52 +53,55 @@ class DialogTableModel implements AbstractTableModel {
 		widths[thisCol] = n;
 	}
 
-	public void toHTML(SB sb, String id) {
+	public void toHTML(SB sb, String id, BS selectedRows) {
 		if (data == null || data[0].length == 0)
 			return;
 		int nrows = data.length;
 		int ncols = data[0].length;
 		for (int j = 0; j < ncols; j++) 
-			getCellHtml(sb, id + "_h" + j, -1, j, columnNames[j]);		
+			getCellHtml(sb, id + "_h" + j, -1, j, columnNames[j], false);		
 		for (int i = 0; i < nrows; i++) {
 			String rowid = id + "_" + i;
 			sb.append("\n<tr id='" + rowid + "'>");
 			for (int j = 0; j < ncols; j++) 
-				getCellHtml(sb, rowid + "_" + j, i, j, data[i][j]);
+				getCellHtml(sb, rowid + "_" + j, i, j, data[i][j], selectedRows.get(i));
 			sb.append("</tr>");
 		}
 	}
 	
-	private void getCellHtml(SB sb, String id, int iRow, int iCol, Object o) {
-		String style = getCellStyle(id, iRow, iCol, o);
-		sb.append("<td cellpadding=0 cellspacing=0 id='" + id + "'" + style
+	private void getCellHtml(SB sb, String id, int iRow, int iCol, Object o, boolean isSelected) {
+		String style = getCellStyle(id, iRow, iCol, o, isSelected);
+		sb.append("<td id='" + id + "'" + style
 				+ " onclick=Jmol.Dialog.click(this)>" + o + "</td>");
 	}
 
 	/**
-	 * @param id  
-	 * @param iRow 
-	 * @param iCol 
-	 * @param o 
+	 * @param id
+	 * @param iRow
+	 * @param iCol
+	 * @param o
 	 * @return CSS style attribute
 	 */
-	private String getCellStyle(String id, int iRow, int iCol, Object o) {
-		String style;
+	private String getCellStyle(String id, int iRow, int iCol, Object o, boolean isSelected) {
+		String style = ";padding:1px 1px 1px 1px;";
 		if (iRow < 0) {
-			style = ";font-weight:bold;";
-		} else if (o instanceof JSVColor) {
-			style = ";background-color:"
-					+ JSVColorUtil.colorToCssString((JSVColor) o);
+			style += ";font-weight:bold;";
 		} else {
-			if (asString)
-				o = " " + o + " ";
-			style = "text-align:";
-			if (tableCellAlignLeft)
-				style += "left";
-			else if (iCol == 0)
-				style += "center";
-			else
-				style += "right";
+			if (o instanceof JSVColor) {
+				style += "background-color:"
+						+ JSVColorUtil.colorToCssString((JSVColor) o);
+			} else {
+				if (asString)
+					o = " " + o + " ";
+				style += "text-align:";
+				if (tableCellAlignLeft)
+					style += "left";
+				else if (iCol == 0)
+					style += "center";
+				else
+					style += "right";
+				style += ";border:" + (isSelected ? 3 : 1) + "px solid #000";
+			}
 		}
 		return " style='" + style + "'";
 	}

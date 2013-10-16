@@ -43,13 +43,13 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 import jspecview.api.AnnotationData;
+import jspecview.api.JSVColor;
 import jspecview.api.JSVGraphics;
 import jspecview.api.JSVPanel;
 import jspecview.api.PanelListener;
 import jspecview.common.Annotation.AType;
 import jspecview.dialog.JSVDialog;
 import jspecview.source.JDXSpectrum;
-import jspecview.util.JSVColor;
 import jspecview.util.JSVColorUtil;
 
 import org.jmol.api.Event;

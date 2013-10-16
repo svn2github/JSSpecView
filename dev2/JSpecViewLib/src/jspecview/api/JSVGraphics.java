@@ -2,7 +2,6 @@ package jspecview.api;
 
 import org.jmol.util.JmolFont;
 
-import jspecview.util.JSVColor;
 
 public interface JSVGraphics {
 
