@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Frame;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,6 +16,7 @@ import javax.swing.JButton; //import javax.swing.JCheckBox;
 import javax.swing.Icon;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
+import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -24,6 +27,8 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+
+import org.jmol.util.Logger;
 
 import jspecview.api.JSVPanel;
 import jspecview.api.PlatformDialog;
@@ -118,8 +123,20 @@ public class AwtDialogManager extends DialogManager implements
 
 	@Override
 	protected void showScrollingText(Object frame, String title, String text) {
-		
-		new TextDialog(null, title, true, text);
+		JDialog dialog = new JDialog((Frame) null, title, true);
+		dialog.setLayout(new BorderLayout());
+		JEditorPane sourcePane = new JEditorPane();
+		sourcePane.setText(text);
+		sourcePane.setEditable(false);
+		sourcePane.setFont(new Font(null, Font.BOLD, 12));
+		JScrollPane scrollPane = new JScrollPane(sourcePane);
+		scrollPane.setPreferredSize(new Dimension(500, 400));
+		scrollPane.setMinimumSize(new Dimension(500, 400));
+		JPanel contentPanel = new JPanel();
+		contentPanel.add(scrollPane, BorderLayout.CENTER);
+		dialog.getContentPane().add(contentPanel);
+		dialog.pack();
+		dialog.setVisible(true);
 	}
 	
 		
