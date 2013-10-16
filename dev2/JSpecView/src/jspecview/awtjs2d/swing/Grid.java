@@ -9,6 +9,7 @@ public class Grid {
 	private int ncols;
 
 	private Cell[][] grid;
+	private String renderer;
 	
 	
 	Grid(int rows, int cols) {
@@ -16,7 +17,6 @@ public class Grid {
 	}
 
 	public void add(JComponent btn, GridBagConstraints c) {
-		System.out.println(c.gridx + " " + ncols + " " + c.gridy + " " + nrows);
 		if (c.gridx >= ncols) {
 			ncols = c.gridx + 1;
 			for (int i = 0; i < nrows; i++) {
@@ -32,22 +32,22 @@ public class Grid {
 			grid = g;
 			nrows = c.gridy + 1;
 		}
-		Cell cell = grid[c.gridy][c.gridx] = new Cell(btn, c);
+		grid[c.gridy][c.gridx] = new Cell(btn, c);
 	}
 
 	public String toHTML(String id) {
 		SB sb = new SB();
 		id += "_grid";
-		sb.append("\n<table id='" + id + "_grid' class='Grid' style='width:100%;height:100%'>");		
+		sb.append("\n<table id='" + id + "' class='Grid' style='width:100%;height:100%'><tr><td style='height:20%;width:20%'></td></tr>");		
 		for (int i = 0; i < nrows; i++) {
 			String rowid = id + "_" + i;
-			sb.append("\n<tr id='" + rowid + "' style='height:100%'>");
+			sb.append("\n<tr id='" + rowid + "'><td></td>");
 			for (int j = 0; j < ncols; j++)
 				if (grid[i][j] != null)
 					sb.append(grid[i][j].toHTML(rowid + "_" + j));
 			sb.append("</tr>");
 		}
-		sb.append("\n</table>\n");
+		sb.append("\n<tr><td style='height:20%;width:20%'></td></tr></table>\n");
 		return sb.toString();
 	}
 }

@@ -16,9 +16,10 @@ public class Cell {
 	}
 
 	public String toHTML(String id) {
-		String style = c.insets.getStyle(c.ipadx, c.ipady);
-		return "<td><span id='" + id +"' " + (colspan < 2 ? "" : " colspan='" + colspan + "' style='") 
-			+ style + "'>" + component.toHTML() + "</span></td>";
+		String style = c.getStyle(false); 
+		return "<td id='" + id +"' " + (colspan < 2 ? "" : "colspan='" + colspan + "' ") 
+		+ "style='" + style + "'><span " + c.getStyle(true) + ">" + component.toHTML() + "</span></td>";
 	}
+
 
 }

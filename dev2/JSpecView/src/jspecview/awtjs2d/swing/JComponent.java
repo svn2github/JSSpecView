@@ -1,11 +1,15 @@
 package jspecview.awtjs2d.swing;
 
 import jspecview.dialog.DialogManager;
+import jspecview.util.JSVColor;
+import jspecview.util.JSVColorUtil;
 
 abstract public class JComponent {
 
 	static int nComponents;
 	
+	public JSVColor bgcolor;
+
 	protected boolean visible;	
 	protected boolean enabled;
 	protected String text;
@@ -64,8 +68,9 @@ abstract public class JComponent {
 	}
 
 	protected String getCSSstyle(boolean default100) {		
-		return (width > 0 ? "width:" + width +"px;" : default100 ? "width:100%" : "")
-		+ (height > 0 ?";height:" + height + "px" : default100 ? ";height:100%" : "");
+		return (width > 0 ? ";width:" + width +"px;" : default100 ? "width:100%" : "")
+		+ (height > 0 ?";height:" + height + "px" : default100 ? ";height:100%" : "")
+		+ (bgcolor == null ? "" : ";background-color:" + JSVColorUtil.colorToCssString(bgcolor));
 	}
 	
 	protected String registerMe(String type) {

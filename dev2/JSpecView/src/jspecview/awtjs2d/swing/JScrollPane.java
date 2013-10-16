@@ -14,7 +14,7 @@ public class JScrollPane extends JComponent {
 	public String toHTML() {
 		String id = registerMe("JScP");
 		SB sb = new SB();
-		sb.append("\n<div id='" + id + "' class='JScrollPane' style='" + getCSSstyle(true) + ";background-color:green;overflow:auto'>\n");
+		sb.append("\n<div id='" + id + "' class='JScrollPane' style='" + getCSSstyle(true) + ";overflow:auto'>\n");
 		sb.append(component.toHTML());
 		sb.append("\n</div>\n");
 		return sb.toString();

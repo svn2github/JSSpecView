@@ -87,8 +87,7 @@ public class AwtDialog extends JDialog implements PlatformDialog {
 
 		public Component getTableCellRendererComponent(JTable table, Object title,
 				boolean isSelected, boolean hasFocus, int row, int column) {
-			setHorizontalAlignment(tableCellAlignLeft ? SwingConstants.LEFT : column == 0 ? SwingConstants.CENTER
-					: SwingConstants.RIGHT);
+			setHorizontalAlignment(getColumnCentering(column));
 			setText(title.toString());
 			// ignore selection model
 			isSelected = (row == selectedRow);
@@ -131,6 +130,11 @@ public class AwtDialog extends JDialog implements PlatformDialog {
 		this.thisKey = params.thisKey;
 		this.type = params.thisType;
 		this.thisID = thisID;
+	}
+
+	protected int getColumnCentering(int column) {
+		return tableCellAlignLeft ? SwingConstants.LEFT : column == 0 ? SwingConstants.CENTER
+				: SwingConstants.RIGHT;
 	}
 
 	public Object addButton(String name, String text) {

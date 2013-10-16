@@ -7,17 +7,17 @@ public class GridBagConstraints {
 	public static final int WEST = 17;
 	public static final int EAST = 13;
 
-	int gridx;
-	int gridy;
-	int gridwidth;
-	int gridheight;
+	public int gridx;
+	public int gridy;
+	public int gridwidth;
+	public int gridheight;
 	double weightx;
 	double weighty;
-	int anchor;
-	int fill;
+	public int anchor;
+	public int fill;
 	Insets insets;
-	int ipadx;
-	int ipady;
+	public int ipadx;
+	public int ipady;
 	
 	public GridBagConstraints(int gridx, int gridy, int gridwidth,
 			int gridheight, double weightx, double weighty, int anchor, int fill,
@@ -33,6 +33,14 @@ public class GridBagConstraints {
 		this.insets = insets;
 		this.ipadx = ipadx;
 		this.ipady = ipady;
+	}
+
+	String getStyle(boolean margins) {
+		return (margins ? 
+				"margin:" + insets.top + "px " + (ipadx + insets.left) + "px "
+				+ insets.bottom + "px " + (ipady + insets.right)
+				+ "px;"
+				: "text-align:" + (anchor == EAST ? "right" : anchor == WEST? "left" : "center"));
 	}
 
 }

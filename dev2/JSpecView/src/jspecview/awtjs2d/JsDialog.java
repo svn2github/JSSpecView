@@ -3,6 +3,8 @@ package jspecview.awtjs2d;
 import java.util.Hashtable;
 import java.util.Map;
 
+import javax.swing.SwingConstants;
+
 import jspecview.awtjs2d.swing.Dimension;
 import jspecview.awtjs2d.swing.FlowLayout;
 import jspecview.awtjs2d.swing.GridBagConstraints;
@@ -20,6 +22,7 @@ import jspecview.awtjs2d.swing.JSplitPane;
 import jspecview.awtjs2d.swing.JTable;
 import jspecview.awtjs2d.swing.JTextField;
 import jspecview.awtjs2d.swing.ListSelectionModel;
+import jspecview.awtjs2d.swing.TableCellRenderer;
 import jspecview.common.Annotation.AType;
 import jspecview.dialog.DialogManager;
 import jspecview.dialog.DialogParams;
@@ -33,7 +36,6 @@ import jspecview.dialog.PlatformDialog;
  * 
  */
 public class JsDialog extends JDialog implements PlatformDialog {
-
 
 	protected String thisKey;
 	protected String thisID;
@@ -69,6 +71,7 @@ public class JsDialog extends JDialog implements PlatformDialog {
 		this.thisKey = params.thisKey;
 		this.type = params.thisType;
 		this.thisID = thisID;
+		bgcolor = JsColor.get3(230, 230, 230);
 	}
 
 	public Object addButton(String name, String text) {
@@ -175,21 +178,23 @@ public class JsDialog extends JDialog implements PlatformDialog {
 		pack();
 	}
 
-	private synchronized JTable getDataTable(Object[][] data, String[] columnNames, int[] columnWidths, int height) {
-    selectedRow = -1;		
-		DialogTableModel tableModel = new DialogTableModel(columnNames, data, !haveColors);
+	private synchronized JTable getDataTable(Object[][] data,
+			String[] columnNames, int[] columnWidths, int height) {
+		selectedRow = -1;
+		DialogTableModel tableModel = new DialogTableModel(columnNames, data,
+				!haveColors, tableCellAlignLeft);
 		JTable table = new JTable(tableModel);
-		//table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		//if (haveColors)
-		//	table.setDefaultRenderer(JSVColor.class, new ColorRenderer());
-    //table.setDefaultRenderer(String.class, new TitleRenderer());
-    //table.setCellSelectionEnabled(true);
-    ListSelectionModel selector = table.getSelectionModel();
-    selector.addListSelectionListener(manager);
-    manager.registerSelector(thisID + "/ROW", selector);
-    selector = table.getColumnModel().getSelectionModel();
-    selector.addListSelectionListener(manager);
-    manager.registerSelector(thisID + "/COLUMN", selector);
+		// table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		// if (haveColors)
+		// table.setDefaultRenderer(JSVColor.class, new ColorRenderer());
+		// table.setDefaultRenderer(String.class, new TitleRenderer());
+		// table.setCellSelectionEnabled(true);
+		ListSelectionModel selector = table.getSelectionModel();
+		selector.addListSelectionListener(manager);
+		manager.registerSelector(thisID + "/ROW", selector);
+		selector = table.getColumnModel().getSelectionModel();
+		selector.addListSelectionListener(manager);
+		manager.registerSelector(thisID + "/COLUMN", selector);
 		int n = 0;
 		for (int i = 0; i < columnNames.length; i++) {
 			table.getColumnModel().getColumn(i).setPreferredWidth(columnWidths[i]);
@@ -312,5 +317,11 @@ public class JsDialog extends JDialog implements PlatformDialog {
 		}
 			
 	}
+
+	protected int getColumnCentering(int column) {
+		return tableCellAlignLeft ? SwingConstants.LEFT : column == 0 ? SwingConstants.CENTER
+				: SwingConstants.RIGHT;
+	}
+
 
 }

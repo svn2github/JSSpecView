@@ -26,12 +26,18 @@ public class JSplitPane extends JComponent {
 		String id = registerMe("JSpP");
 		SB sb = new SB();
 		boolean isH = (split == HORIZONTAL_SPLIT); 
-		sb.append("<div id='" + id + "' class='JSplitPane' style='" + getCSSstyle(true) + "'><table border=1 style='width:100%;height:100%'>"
-				+"<tr><td style='width:"+(isH?"50%" : "100%")+"'>");
+		sb.append("<div id='" + id + "' class='JSplitPane' style='" + getCSSstyle(true) + "'>");
+		if (isH) 
+			sb.append("<div id='" + id + "_left' style='width:50%;height:100%;position:absolute;top:0%;left:0%'>");
+		else
+			sb.append("<div id='" + id + "_top' style='width:100%;height:50%;position:absolute;top:0%;left:0%'>");
 		sb.append(left.toHTML());
-		sb.append(isH ? "</td><td style='width:50%'>" : "</td></tr><tr><td style='width:100%'>");
+		if (isH) 
+			sb.append("</div><div id='" + id + "_right' style='width:50%;height:100%;position:absolute;top:0%;left:50%'>");
+		else
+			sb.append("</div><div id='" + id + "_bottom' style='width:100%;height:50%;position:absolute;top:50%;left:0%'>");
 		sb.append(right.toHTML());
-		sb.append("</td></tr></table>\n</div>\n");
+		sb.append("</div></div>\n");
 		return sb.toString();
 	}
 

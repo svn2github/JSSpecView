@@ -156,6 +156,7 @@ public class JsPanel implements JSVPanel {
   }
 
   public void setBackgroundColor(JSVColor color) {
+  
   	// unnecessary
   }
   

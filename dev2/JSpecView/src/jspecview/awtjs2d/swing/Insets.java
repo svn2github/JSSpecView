@@ -11,8 +11,4 @@ public class Insets {
 		this.right = right;
 	}
 
-	public String getStyle(int ipadx, int ipady) {
-		return "margin:" + top + "px " + (ipadx + left) + "px " + bottom + "px " + (ipady + right) + "px;height:100%";
-	}
-
 }
