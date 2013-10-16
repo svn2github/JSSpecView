@@ -18,6 +18,8 @@ abstract public class JComponent {
 	private JSVColor bgcolor;
 
 	protected JComponent(String type) {
+		if (type == null)
+			return;
 		/**
 		 * @j2sNative
 		 *            
@@ -82,9 +84,20 @@ abstract public class JComponent {
 		return width;
 	}
 
-	protected String getCSSstyle(int defaultPercent) {		
-		if (width == 155)
-			System.out.println("hmm");
+	protected int getSubcomponentWidth() {
+		return width;
+	}
+	
+	protected int getSubcomponentHeight() {
+		return height;
+	}
+	
+	protected int renderWidth;
+	protected int renderHeight;
+
+	protected String getCSSstyle(int defaultPercent) {
+		int width = (renderWidth > 0 ? renderWidth : getSubcomponentWidth());
+		int height = (renderHeight > 0 ? renderHeight : getSubcomponentHeight());
 		return (width > 0 ? "width:" + width +"px;" : defaultPercent > 0 ? "width:"+defaultPercent+"%;" : "")
 		+ (height > 0 ?"height:" + height + "px;" : defaultPercent > 0 ? "height:"+defaultPercent+"%;" : "")
 		+ (bgcolor == null ? "" : "background-color:" + JSVColorUtil.colorToCssString(bgcolor) + ";");
