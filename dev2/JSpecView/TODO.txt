@@ -13,6 +13,10 @@ new feature: show NMR taps into NMRDB directly
 
 in preparation for JavaScript version (add to top):
 
+-- 10/15/2013 BH
+Dialog JavaScript Swing replacement first try (note, Java dialogs are being sent to the console as JavaScript for testing
+
+
 -- 10/14/2013 BH
 Complete rewrite of dialogs.
  -IntegrationDialog, MeasurementDialog, OverlayLegendDialog, PeakListDialog, ViewsDialog all AWT-free
