@@ -90,7 +90,7 @@ public class JDialog extends JContainer {
 		renderHeight = contentPane.getSubcomponentHeight();
 		if (renderHeight == 0)
 			renderHeight = defaultHeight;
-		int h = height - headerHeight;
+		int h = renderHeight - headerHeight;
 		SB sb = new SB();
 		sb.append("\n<div id='" + id + "' class='JDialog' style='" + getCSSstyle(0) + "position:relative;top:0px;left:0px;reize:both;'>\n");
 	  sb.append("\n<div id='" + id + "_title' class='JDialogTitle' style='width:100%;height:25px;padding:5px 5px 5px 5px;height:"+headerHeight+"px'>"
