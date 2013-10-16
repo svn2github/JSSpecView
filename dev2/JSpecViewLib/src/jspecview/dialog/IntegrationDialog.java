@@ -44,9 +44,9 @@ public class IntegrationDialog extends JSVDialog {
 
 	@Override
 	public void addUniqueControls() {
-		txt1 = dialog.addTextField("Baseline Offset", "BaselineOffset", null, "%", ""
+		txt1 = dialog.addTextField("txtBaselineOffset", "Baseline Offset", null, "%", ""
 				+ viewer.parameters.integralOffset, true);
-		txt2 = dialog.addTextField("Scale", "Scale", null, "%", ""
+		txt2 = dialog.addTextField("txtScale", "Scale", null, "%", ""
 				+ viewer.parameters.integralRange, true);
 		dialog.addButton("btnApply", "Apply");
 		addApplyBtn = false;

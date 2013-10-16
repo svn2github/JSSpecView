@@ -13,15 +13,14 @@ public class JComboBox<T>  extends JComponent {
 	}
 
 	public void setSelectedIndex(int i) {
-		this.selectedIndex = i;
+		selectedIndex = i;
 		/**
 		 * @j2sNative
 		 * 
-		 * Jmol.Dialog.setSelectedIndex(id, i, false);
+		 * Jmol.Dialog.setSelectedIndex(this);
 		 * 
 		 */
 		{
-			System.out.println(id + "  " + selectedIndex);
 		}
 	}
 

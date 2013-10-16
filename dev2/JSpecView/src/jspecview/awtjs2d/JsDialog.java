@@ -256,7 +256,7 @@ public class JsDialog extends JDialog implements PlatformDialog {
 		/**
 		 * @j2sNative
 		 * 
-		 * d = Jmol.Dialog.getScreenDimensions();
+		 * Jmol.Dialog.getScreenDimensions(d);
 		 * 
 		 * 
 		 */

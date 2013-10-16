@@ -117,7 +117,8 @@ public class AwtDialogManager extends DialogManager implements
 	}
 
 	@Override
-	public void showScrollingText(Object frame, String title, String text) {
+	protected void showScrollingText(Object frame, String title, String text) {
+		
 		new TextDialog(null, title, true, text);
 	}
 	

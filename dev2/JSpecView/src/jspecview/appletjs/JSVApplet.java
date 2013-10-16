@@ -58,13 +58,11 @@ import org.jmol.util.Logger;
 import org.jmol.util.Txt;
 
 import jspecview.api.AppletFrame;
-import jspecview.api.JSVApiPlatform;
 import jspecview.api.JSVAppletInterface;
 import jspecview.api.JSVPanel;
 import jspecview.app.JSVApp;
 import jspecview.awtjs2d.JsPanel;
 import jspecview.awtjs2d.JsViewPanel;
-import jspecview.awtjs2d.JsPlatform;
 import jspecview.common.JSVersion;
 import jspecview.common.JSViewer;
 import jspecview.source.JDXSpectrum;
@@ -528,10 +526,6 @@ public class JSVApplet implements JSVAppletInterface,
 	public void validate() {
 		// TODO Auto-generated method stub
 		
-	}
-
-	public JSVApiPlatform getApiPlatform() {
-		return new JsPlatform();
 	}
 
 	public void doExitJmol() {

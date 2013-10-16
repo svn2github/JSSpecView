@@ -62,13 +62,13 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 
+import org.jmol.api.ApiPlatform;
 import org.jmol.api.JmolMouseInterface;
 import org.jmol.util.JmolFont;
 import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
 import org.jmol.util.Txt;
 
-import jspecview.api.JSVApiPlatform;
 import jspecview.api.JSVColor;
 import jspecview.api.JSVPanel;
 import jspecview.api.PdfCreatorInterface;
@@ -97,8 +97,8 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
     Logger.info("JSVPanel " + this + " finalized");
   }
 
-	private JSVApiPlatform apiPlatform;
-	public JSVApiPlatform getApiPlatform() {
+	private ApiPlatform apiPlatform;
+	public ApiPlatform getApiPlatform() {
 		return apiPlatform;
 	}
 	
@@ -154,7 +154,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
   	this.viewer = viewer;
     this.pd = new PanelData(this, viewer);
   	this.apiPlatform = viewer.apiPlatform;
-    mouse = apiPlatform.getMouseManager(this);
+    mouse = apiPlatform.getMouseManager(0, this);
     setBorder(BorderFactory.createLineBorder(Color.BLACK));
 	}
 

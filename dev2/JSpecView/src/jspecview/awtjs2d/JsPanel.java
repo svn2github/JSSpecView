@@ -39,11 +39,11 @@ package jspecview.awtjs2d;
 
 import java.io.OutputStream;
 
+import org.jmol.api.ApiPlatform;
 import org.jmol.api.JmolMouseInterface;
 import org.jmol.util.JmolFont;
 import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
-import jspecview.api.JSVApiPlatform;
 import jspecview.api.JSVColor;
 import jspecview.api.JSVPanel;
 import jspecview.common.JSViewer;
@@ -73,8 +73,8 @@ public class JsPanel implements JSVPanel {
     Logger.info("JSVPanel " + this + " finalized");
   }
 
-	private JSVApiPlatform apiPlatform;
-	public JSVApiPlatform getApiPlatform() {
+	private ApiPlatform apiPlatform;
+	public ApiPlatform getApiPlatform() {
 		return apiPlatform;
 	}
 	
@@ -129,8 +129,8 @@ public class JsPanel implements JSVPanel {
   private JsPanel(JSViewer viewer) {
   	this.viewer = viewer;
     this.pd = new PanelData(this, viewer);
-  	this.apiPlatform = viewer.apiPlatform;
-    mouse = apiPlatform.getMouseManager(this);
+  	apiPlatform = viewer.apiPlatform;
+    mouse = apiPlatform.getMouseManager(0, this);
 //  setBorder(BorderFactory.createLineBorder(Color.BLACK));
 	}
 
@@ -366,40 +366,6 @@ public class JsPanel implements JSVPanel {
 //    pd.isPrinting = false;
 //    return Printable.NO_SUCH_PAGE;
 //  }
-
-	public int getOptionFromDialog(Object frame, String[] items,
-			String dialogName, String labelName) {
-	final int ret[] = new int[] { Integer.MIN_VALUE };
-//		final JDialog dialog = new JDialog((JFrame) frame, dialogName, true);
-//		dialog.setResizable(false);
-//		dialog.setSize(200, 100);
-//		dialog.setLocation(getLocation().x + getSize().width / 2,
-//				getLocation().y + getSize().height / 2);
-//		// Q: why (x + w)/2, (y + h)/2?? 
-//		final JComboBox<Object> cb = new JComboBox<Object>(items);
-//		Dimension d = new Dimension(120, 25);
-//		cb.setPreferredSize(d);
-//		cb.setMaximumSize(d);
-//		cb.setMinimumSize(d);
-//		JPanel p = new JPanel(new FlowLayout());
-//		JButton button = new JButton("OK");
-//		p.add(cb);
-//		p.add(button);
-//		dialog.getContentPane().setLayout(new BorderLayout());
-//		dialog.getContentPane().add(
-//				new JLabel(labelName, SwingConstants.CENTER),
-//				BorderLayout.NORTH);
-//		dialog.getContentPane().add(p);
-//		button.addActionListener(new ActionListener() {
-//			public void actionPerformed(ActionEvent e) {
-//				ret[0] = cb.getSelectedIndex();
-//				dialog.dispose();
-//			}
-//		});
-//		dialog.setVisible(true);
-//		dialog.dispose();
-		return ret[0];
-	}
 
 	public void saveImage(String type, Object file) {
 //    Image image = createImage(getWidth(), getHeight());

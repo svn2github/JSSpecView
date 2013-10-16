@@ -15,7 +15,7 @@ public class JCheckBox extends JComponent {
 		/**
 		 * @j2sNative
 		 * 
-		 * Jmol.Dialog.setSelected(id, selected, false);
+		 * Jmol.Dialog.setSelected(this);
 		 * 
 		 */
 		{

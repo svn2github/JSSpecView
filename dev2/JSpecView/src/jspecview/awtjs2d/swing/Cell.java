@@ -18,7 +18,7 @@ public class Cell {
 	public String toHTML(String id) {
 		String style = c.getStyle(false); 
 		return "<td id='" + id +"' " + (colspan < 2 ? "" : "colspan='" + colspan + "' ") 
-		+ "style='" + style + "'><span " + c.getStyle(true) + ">" + component.toHTML() + "</span></td>";
+		+ style + "><span " + c.getStyle(true) + ">" + component.toHTML() + "</span></td>";
 	}
 
 

@@ -10,12 +10,12 @@ import java.util.Date;
 
 import javax.swing.JDialog;
 
-import jspecview.api.JSVApiPlatform;
 import jspecview.api.JSVPanel;
 
 
 import netscape.javascript.JSObject;
 
+import org.jmol.api.ApiPlatform;
 import org.jmol.api.JmolFileInterface;
 import org.jmol.api.JmolMouseInterface;
 import org.jmol.api.JmolPopupInterface;
@@ -23,7 +23,7 @@ import org.jmol.api.PlatformViewer;
 import org.jmol.util.JmolFont;
 import org.jmol.util.P3;
 
-public class AwtPlatform implements JSVApiPlatform {
+public class AwtPlatform implements ApiPlatform {
 
   PlatformViewer viewer;
   
@@ -82,8 +82,8 @@ public class AwtPlatform implements JSVApiPlatform {
 
   ////// Mouse
 
-  public JmolMouseInterface getMouseManager(JSVPanel viewer) {
-    return new Mouse(viewer);
+  public JmolMouseInterface getMouseManager(double ignored, Object jsvp) {
+    return new Mouse((JSVPanel) jsvp);
   }
 
   ////// Image 
@@ -241,9 +241,4 @@ public class AwtPlatform implements JSVApiPlatform {
     return AwtFile.getBufferedURLInputStream(url, outputBytes, post);
   }
 
-	public JmolMouseInterface getMouseManager(double privateKey) {
-		return null;
-	}
-
-    
 }

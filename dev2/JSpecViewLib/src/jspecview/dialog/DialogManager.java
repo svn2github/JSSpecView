@@ -59,7 +59,7 @@ abstract public class DialogManager {
 
   abstract public void showProperties(Object frame, JDXSpectrum spectrum);
   
-  abstract public void showScrollingText(Object frame, String title, String text);
+  abstract protected void showScrollingText(Object frame, String title, String text);
 
   
   /**

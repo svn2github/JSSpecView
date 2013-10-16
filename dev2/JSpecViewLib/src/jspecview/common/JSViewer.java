@@ -22,7 +22,6 @@ import org.jmol.util.SB;
 import org.jmol.util.Txt;
 
 import jspecview.api.ExportInterface;
-import jspecview.api.JSVApiPlatform;
 import jspecview.api.JSVFileHelper;
 import jspecview.api.JSVGraphics;
 import jspecview.api.JSVMainPanel;
@@ -107,7 +106,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 	private int maximumSize = Integer.MAX_VALUE;
 	final Dimension dimScreen = new Dimension();
 
-	public JSVApiPlatform apiPlatform;
+	public ApiPlatform apiPlatform;
 
 	public void setProperty(String key, String value) {
 		if (properties != null)
@@ -128,7 +127,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		this.isApplet = isApplet;
 		this.isJS = isApplet && isJS;
 		this.isSigned = si.isSigned();
-		apiPlatform = (JSVApiPlatform) getAwtInterface("Platform");
+		apiPlatform = (ApiPlatform) getAwtInterface("Platform");
 		apiPlatform.setViewer(this, this.display);
 		g2d = (JSVGraphics) getAwtInterface("G2D");
 		spectraTree = new SimpleTree(this);
@@ -1544,8 +1543,8 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 	public DialogManager getDialogManager() {
 		if (dialogManager != null)
 			return dialogManager;
-		dialogManager = (DialogManager) Interface.getInterface("jspecview.awtjs2d.JsDialogManager");
-		//    getAwtInterface("DialogManager");
+		dialogManager = (DialogManager)  getAwtInterface("DialogManager");
+			//Interface.getInterface("jspecview.awtjs2d.JsDialogManager");
 		return dialogManager.set(this);
 	}
 

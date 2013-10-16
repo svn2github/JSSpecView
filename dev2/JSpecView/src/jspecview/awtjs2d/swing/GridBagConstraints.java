@@ -36,11 +36,11 @@ public class GridBagConstraints {
 	}
 
 	String getStyle(boolean margins) {
-		return (margins ? 
+		return "style='" + (margins ? 
 				"margin:" + insets.top + "px " + (ipadx + insets.left) + "px "
 				+ insets.bottom + "px " + (ipady + insets.right)
 				+ "px;"
-				: "text-align:" + (anchor == EAST ? "right" : anchor == WEST? "left" : "center"));
+				: "text-align:" + (anchor == EAST ? "right" : anchor == WEST? "left" : "center")) + "'";
 	}
 
 }

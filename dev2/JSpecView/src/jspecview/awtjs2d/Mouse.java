@@ -45,10 +45,10 @@ import org.jmol.util.Logger;
 @J2SRequireImport({org.jmol.api.Event.class})
 public class Mouse implements JmolMouseInterface {
 
-  private EventManager manager;
+  private EventManager pd;
 
   public Mouse(JSVPanel viewer) {
-  	manager = viewer.getPanelData();
+  	pd = viewer.getPanelData();
   }
 
   public void clear() {
@@ -152,26 +152,26 @@ public class Mouse implements JmolMouseInterface {
     // so we are in the ASCII non-printable region 1-31
     if (Logger.debuggingHigh || true)
       Logger.info("MouseManager keyTyped: " + ch + " " + (0+ch) + " " + modifiers);
-    if (manager.keyTyped(ch, modifiers))
+    if (pd.keyTyped(ch, modifiers))
   		ke.consume();
   }
 
   public void keyPressed(KeyEvent ke) {
-    if (manager.keyPressed(ke.getKeyCode(), ke.getModifiers()))
+    if (pd.keyPressed(ke.getKeyCode(), ke.getModifiers()))
     	ke.consume();
   }
 
   public void keyReleased(KeyEvent ke) {
-    manager.keyReleased(ke.getKeyCode());
+    pd.keyReleased(ke.getKeyCode());
   }
 
 
   private void entered(long time, int x, int y) {
-    manager.mouseEnterExit(time, x, y, false);
+    pd.mouseEnterExit(time, x, y, false);
   }
 
   private void exited(long time, int x, int y) {
-    manager.mouseEnterExit(time, x, y, true);
+    pd.mouseEnterExit(time, x, y, true);
   }
   /**
    * 
@@ -184,20 +184,20 @@ public class Mouse implements JmolMouseInterface {
   private void clicked(long time, int x, int y, int modifiers, int clickCount) {
     // clickedCount is not reliable on some platforms
     // so we will just deal with it ourselves
-    manager.mouseAction(Event.CLICKED, time, x, y, 1, modifiers);
+    pd.mouseAction(Event.CLICKED, time, x, y, 1, modifiers);
   }
 
   private boolean isMouseDown; // Macintosh may not recognize CTRL-SHIFT-LEFT as drag, only move
   
   private void moved(long time, int x, int y, int modifiers) {
     if (isMouseDown)
-      manager.mouseAction(Event.DRAGGED, time, x, y, 0, applyLeftMouse(modifiers));
+      pd.mouseAction(Event.DRAGGED, time, x, y, 0, applyLeftMouse(modifiers));
     else
-      manager.mouseAction(Event.MOVED, time, x, y, 0, modifiers);
+      pd.mouseAction(Event.MOVED, time, x, y, 0, modifiers);
   }
 
   private void wheeled(long time, int rotation, int modifiers) {
-    manager.mouseAction(Event.WHEELED, time, 0, rotation, 0, modifiers);
+    pd.mouseAction(Event.WHEELED, time, 0, rotation, 0, modifiers);
   }
 
   /**
@@ -211,18 +211,18 @@ public class Mouse implements JmolMouseInterface {
   private void pressed(long time, int x, int y, int modifiers,
                     boolean isPopupTrigger) {
     isMouseDown = true;
-    manager.mouseAction(Event.PRESSED, time, x, y, 0, modifiers);
+    pd.mouseAction(Event.PRESSED, time, x, y, 0, modifiers);
   }
 
   private void released(long time, int x, int y, int modifiers) {
     isMouseDown = false;
-    manager.mouseAction(Event.RELEASED, time, x, y, 0, modifiers);
+    pd.mouseAction(Event.RELEASED, time, x, y, 0, modifiers);
   }
 
   private void dragged(long time, int x, int y, int modifiers) {
     if ((modifiers & Event.MAC_COMMAND) == Event.MAC_COMMAND)
       modifiers = modifiers & ~Event.MOUSE_RIGHT | Event.CTRL_MASK; 
-    manager.mouseAction(Event.DRAGGED, time, x, y, 0, modifiers);
+    pd.mouseAction(Event.DRAGGED, time, x, y, 0, modifiers);
   }
 
   private static int applyLeftMouse(int modifiers) {

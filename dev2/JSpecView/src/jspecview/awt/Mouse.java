@@ -53,14 +53,14 @@ class Mouse implements MouseWheelListener, MouseListener,
     MouseMotionListener, KeyListener, JmolMouseInterface {
 
   private JSVPanel viewer;
-  private EventManager manager;
+  private EventManager pd;
 
   /**
    * @param jsvp 
    */
   Mouse(JSVPanel jsvp) {
   	this.viewer = jsvp;
-    manager = jsvp.getPanelData();
+    pd = jsvp.getPanelData();
     Component display = (Component) jsvp;
     display.addKeyListener(this);
     display.addMouseListener(this);
@@ -168,25 +168,25 @@ class Mouse implements MouseWheelListener, MouseListener,
     // so we are in the ASCII non-printable region 1-31
     if (Logger.debuggingHigh)
       Logger.info("MouseManager keyTyped: " + ch + " " + (0+ch) + " " + modifiers);
-    if (manager.keyTyped(ch, modifiers))
+    if (pd.keyTyped(ch, modifiers))
   		ke.consume();
   }
 
   public void keyPressed(KeyEvent ke) {
-    if (manager.keyPressed(ke.getKeyCode(), ke.getModifiers()))
+    if (pd.keyPressed(ke.getKeyCode(), ke.getModifiers()))
     	ke.consume();
   }
 
   public void keyReleased(KeyEvent ke) {
-    manager.keyReleased(ke.getKeyCode());
+    pd.keyReleased(ke.getKeyCode());
   }
 
   private void mouseEntered(long time, int x, int y) {
-    manager.mouseEnterExit(time, x, y, false);
+    pd.mouseEnterExit(time, x, y, false);
   }
 
   private void mouseExited(long time, int x, int y) {
-    manager.mouseEnterExit(time, x, y, true);
+    pd.mouseEnterExit(time, x, y, true);
   }
 
   /**
@@ -200,20 +200,20 @@ class Mouse implements MouseWheelListener, MouseListener,
   private void mouseClicked(long time, int x, int y, int modifiers, int clickCount) {
     // clickedCount is not reliable on some platforms
     // so we will just deal with it ourselves
-    manager.mouseAction(Event.CLICKED, time, x, y, 1, modifiers);
+    pd.mouseAction(Event.CLICKED, time, x, y, 1, modifiers);
   }
 
   private boolean isMouseDown; // Macintosh may not recognize CTRL-SHIFT-LEFT as drag, only move
   
   private void mouseMoved(long time, int x, int y, int modifiers) {
     if (isMouseDown)
-      manager.mouseAction(Event.DRAGGED, time, x, y, 0, applyLeftMouse(modifiers));
+      pd.mouseAction(Event.DRAGGED, time, x, y, 0, applyLeftMouse(modifiers));
     else
-      manager.mouseAction(Event.MOVED, time, x, y, 0, modifiers);
+      pd.mouseAction(Event.MOVED, time, x, y, 0, modifiers);
   }
 
   private void mouseWheel(long time, int rotation, int modifiers) {
-     manager.mouseAction(Event.WHEELED, time, 0, rotation, 0, modifiers);
+     pd.mouseAction(Event.WHEELED, time, 0, rotation, 0, modifiers);
   }
 
   /**
@@ -227,18 +227,18 @@ class Mouse implements MouseWheelListener, MouseListener,
   private void mousePressed(long time, int x, int y, int modifiers,
                     boolean isPopupTrigger) {
     isMouseDown = true;
-    manager.mouseAction(Event.PRESSED, time, x, y, 0, modifiers);
+    pd.mouseAction(Event.PRESSED, time, x, y, 0, modifiers);
   }
 
   private void mouseReleased(long time, int x, int y, int modifiers) {
     isMouseDown = false;
-    manager.mouseAction(Event.RELEASED, time, x, y, 0, modifiers);
+    pd.mouseAction(Event.RELEASED, time, x, y, 0, modifiers);
   }
 
   private void mouseDragged(long time, int x, int y, int modifiers) {
     if ((modifiers & Event.MAC_COMMAND) == Event.MAC_COMMAND)
       modifiers = modifiers & ~Event.MOUSE_RIGHT | Event.CTRL_MASK; 
-    manager.mouseAction(Event.DRAGGED, time, x, y, 0, modifiers);
+    pd.mouseAction(Event.DRAGGED, time, x, y, 0, modifiers);
   }
 
   private static int applyLeftMouse(int modifiers) {

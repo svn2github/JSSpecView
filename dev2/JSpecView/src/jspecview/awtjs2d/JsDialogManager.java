@@ -1,5 +1,7 @@
 package jspecview.awtjs2d;
 
+import org.jmol.util.Parser;
+
 import jspecview.awtjs2d.swing.JTextPane;
 import jspecview.awtjs2d.swing.Dimension;
 import jspecview.awtjs2d.swing.JDialog;
@@ -90,7 +92,7 @@ public class JsDialogManager extends DialogManager {
 	}
 
 	@Override
-	public void showScrollingText(Object frame, String title, String text) {
+	protected void showScrollingText(Object frame, String title, String text) {
 		JDialog dialog = new JDialog();
 		dialog.setTitle(title);
 		JTextPane pane = new JTextPane();
@@ -99,4 +101,20 @@ public class JsDialogManager extends DialogManager {
 		dialog.pack();
 		dialog.setVisible(true);
 	}
+	
+	/**
+	 * Jmol.Dialog.click() callback
+	 * @param eventId 
+	 */
+	public void actionPerformed(String eventId) {
+		if (eventId.indexOf("/JT") >= 0) {
+			int pt = eventId.indexOf("_");
+			int irow = Parser.parseInt(eventId.substring(pt + 1));
+			int icol = Parser.parseInt(eventId.substring(eventId.indexOf("_", pt + 1) + 1));
+			processTableEvent(eventId, irow, icol, false);
+			return;
+		}
+		processClick(eventId);
+	}
+
 }
