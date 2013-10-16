@@ -28,8 +28,6 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import org.jmol.util.Logger;
-
 import jspecview.api.JSVPanel;
 import jspecview.api.PlatformDialog;
 import jspecview.dialog.JSVDialog;
