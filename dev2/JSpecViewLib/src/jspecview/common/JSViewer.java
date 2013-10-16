@@ -1544,8 +1544,8 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 	public DialogManager getDialogManager() {
 		if (dialogManager != null)
 			return dialogManager;
-		dialogManager = (DialogManager) //Interface.getInterface("jspecview.awtjs2d.JsDialogManager");
-		    getAwtInterface("DialogManager");
+		dialogManager = (DialogManager) Interface.getInterface("jspecview.awtjs2d.JsDialogManager");
+		//    getAwtInterface("DialogManager");
 		return dialogManager.set(this);
 	}
 

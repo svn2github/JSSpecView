@@ -11,14 +11,14 @@ public interface AnnotationData {
 
 	AType getAType();
 	MeasurementData getData();
-	String getKey();
+	String getGraphSetKey();
 	Parameters getParameters();
 	JDXSpectrum getSpectrum();
 	boolean getState();
 
 	boolean isVisible();
 
-	void setKey(String key);
+	void setGraphSetKey(String key);
 	void setState(boolean b);
 
 }

@@ -9,6 +9,7 @@ public class JPanel extends JComponent {
 	private Grid grid;
 
 	public JPanel(LayoutManager manager) {
+		super("JP");
 		this.layoutManager = manager;
 		grid = new Grid(10,10);
 	}
@@ -18,15 +19,13 @@ public class JPanel extends JComponent {
 	}
 
 	public void setMinimumSize(Dimension d) {
-		width = d.width;
-		height = d.height;
+		//width = d.width;
+		//height = d.height;
 	}
 	@Override
 	public String toHTML() {
-		String id = registerMe("JP");
 		SB sb = new SB();
-		String style = getCSSstyle(true);
-		sb.append("\n<div id='" + id + "' class='JPanel' style='" + style + "'>\n");
+		sb.append("\n<div id='" + id + "' class='JPanel' style='" + getCSSstyle(100) + "'>\n");
 		sb.append("\n<span id='" + id + "_minimizer' style='width:30px;height:30px;'>");
 		sb.append(grid.toHTML(id));
 		sb.append("</span>");

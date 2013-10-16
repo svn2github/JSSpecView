@@ -10,6 +10,7 @@ public class JSplitPane extends JComponent {
 	private JComponent left;
 
 	public JSplitPane(int split) {
+		super("JSpP");
 		this.split = split;
 	}
 
@@ -23,10 +24,9 @@ public class JSplitPane extends JComponent {
 
 	@Override
 	public String toHTML() {
-		String id = registerMe("JSpP");
 		SB sb = new SB();
 		boolean isH = (split == HORIZONTAL_SPLIT); 
-		sb.append("<div id='" + id + "' class='JSplitPane' style='" + getCSSstyle(true) + "'>");
+		sb.append("<div id='" + id + "' class='JSplitPane' style='" + getCSSstyle(100) + "'>");
 		if (isH) 
 			sb.append("<div id='" + id + "_left' style='width:50%;height:100%;position:absolute;top:0%;left:0%'>");
 		else

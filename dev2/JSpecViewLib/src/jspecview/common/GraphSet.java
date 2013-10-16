@@ -3797,13 +3797,13 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		if (dialogs == null)
 			dialogs = new Hashtable<String, AnnotationData>();
 		String key = type + "_" + iSpec;
-		dialog.setKey(key);
+		dialog.setGraphSetKey(key);
 		dialogs.put(key, dialog);
 		return dialog;
 	}
 
 	void removeDialog(JSVDialog dialog) {
-		String key = dialog.getKey();
+		String key = dialog.getGraphSetKey();
 		dialogs.remove(key);
 		AnnotationData data = dialog.getData();
 		if (data != null)

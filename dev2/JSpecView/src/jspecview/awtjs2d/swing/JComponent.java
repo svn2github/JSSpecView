@@ -5,11 +5,7 @@ import jspecview.dialog.DialogManager;
 import jspecview.util.JSVColorUtil;
 
 abstract public class JComponent {
-
-	static int nComponents;
 	
-	public JSVColor bgcolor;
-
 	protected boolean visible;	
 	protected boolean enabled;
 	protected String text;
@@ -17,15 +13,28 @@ abstract public class JComponent {
 	protected int width;
 	protected int height;
 	protected DialogManager dialogManager;
-	private int id;
-	private boolean registered;
+	protected String id;
+	
+	private JSVColor bgcolor;
 
-	public JComponent() {
-		id = ++nComponents;
+	protected JComponent(String type) {
+		/**
+		 * @j2sNative
+		 *            
+		 *            Jmol.Dialog.register(this, type);
+		 */
+		{
+			id = type + ("" + Math.random()).substring(3);
+		}
+
 	}
 	
 	abstract public String toHTML();
 	
+	public void setBackground(JSVColor color) {
+		bgcolor = color;
+	}
+
 	public void setText(String text) {
 		this.text = text;
 	}
@@ -57,6 +66,12 @@ abstract public class JComponent {
 
 	public void setVisible(boolean visible) {
 		this.visible = visible;
+		/**
+		 * @j2sNative
+		 * 
+		 * Jmol.Dialog.setVisible(this);
+		 * 
+		 */
 	}
 
 	public int getHeight() {
@@ -67,27 +82,11 @@ abstract public class JComponent {
 		return width;
 	}
 
-	protected String getCSSstyle(boolean default100) {		
-		return (width > 0 ? ";width:" + width +"px;" : default100 ? "width:100%" : "")
-		+ (height > 0 ?";height:" + height + "px" : default100 ? ";height:100%" : "")
-		+ (bgcolor == null ? "" : ";background-color:" + JSVColorUtil.colorToCssString(bgcolor));
+	protected String getCSSstyle(int defaultPercent) {		
+		if (width == 155)
+			System.out.println("hmm");
+		return (width > 0 ? "width:" + width +"px;" : defaultPercent > 0 ? "width:"+defaultPercent+"%;" : "")
+		+ (height > 0 ?"height:" + height + "px;" : defaultPercent > 0 ? "height:"+defaultPercent+"%;" : "")
+		+ (bgcolor == null ? "" : "background-color:" + JSVColorUtil.colorToCssString(bgcolor) + ";");
 	}
-	
-	protected String registerMe(String type) {
-		/**
-		 * @j2sNative
-		 * 
-		 * if (!this.registered) {
-		 * Jmol.Dialog.register(this, type);
-		 * this.regitered = true;
-		 * }
-		 */
-		{
-		}
-		return type + id;
-	}
-
-
-
-
 }

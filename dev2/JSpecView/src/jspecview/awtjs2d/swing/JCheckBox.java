@@ -4,11 +4,14 @@ import org.jmol.util.SB;
 
 public class JCheckBox extends JComponent {
 
+	public JCheckBox() {
+		super("chkJCB");
+	}
+
 	private boolean selected;
 
 	public void setSelected(boolean selected) {
 		this.selected = selected;
-		String id = registerMe("JCkB");
 		/**
 		 * @j2sNative
 		 * 
@@ -26,9 +29,8 @@ public class JCheckBox extends JComponent {
 
 	@Override
 	public String toHTML() {
-		String id = registerMe("JCkB");
 		SB sb = new SB();
-		sb.append("<input type=checkbox id='" + id + "' class='JCheckBox' style='" + getCSSstyle(false) + "' onclick='Jmol.Dialog.click(this)'>");
+		sb.append("<input type=checkbox id='" + id + "' class='JCheckBox' style='" + getCSSstyle(0) + "' onclick='Jmol.Dialog.click(this)'>");
 		return sb.toString();
 	}
 

@@ -34,11 +34,11 @@ import jspecview.api.JSVColor;
 import jspecview.api.PlatformDialog;
 import jspecview.common.Annotation.AType;
 import jspecview.dialog.DialogManager;
-import jspecview.dialog.DialogParams;
+import jspecview.dialog.JSVDialog;
 
 /**
- * just a class I made to separate the construction of the AnnotationDialogs
- * from their use
+ * AwtDialog extends JDialog, interpreting DialogManager's requests in terms of Swing and AWT.
+ *  
  * 
  * @author Bob Hanson hansonr@stolaf.edu
  * 
@@ -96,14 +96,13 @@ public class AwtDialog extends JDialog implements PlatformDialog {
 			return this;
 		}
 	}
-	protected String thisKey;
-	protected String thisID;
+	protected String optionKey;
+	protected String registryKey;
 
 	protected Map<String, Object> options;
 	protected DialogManager manager;
 
   private AType type;
-	private DialogParams params;
 	protected JPanel leftPanel;
 	private JSplitPane mainSplitPane;
 
@@ -124,12 +123,14 @@ public class AwtDialog extends JDialog implements PlatformDialog {
 	private int defaultHeight = 350;
 	protected int selectedRow = -1;
 	
-	public AwtDialog(DialogManager manager, DialogParams params, String thisID) {
+	public AwtDialog(DialogManager manager, JSVDialog jsvDialog, String registryKey) {
   	this.manager = manager;
-  	this.params = params;
-		this.thisKey = params.thisKey;
-		this.type = params.thisType;
-		this.thisID = thisID;
+		this.registryKey = registryKey;
+		type = jsvDialog.getAType();
+		optionKey = jsvDialog.optionKey;
+		options = jsvDialog.options;
+		if (options == null)
+			options = new Hashtable<String, Object>();
 	}
 
 	protected int getColumnCentering(int column) {
@@ -141,7 +142,7 @@ public class AwtDialog extends JDialog implements PlatformDialog {
 		JButton	btn = new JButton();
 		btn.setPreferredSize(new Dimension(120, 25));
 		btn.setText(text);
-		btn.setName(thisID + "/" + name);
+		btn.setName(registryKey + "/" + name);
 		btn.addActionListener((AwtDialogManager) manager);
 		thisPanel.add(btn, new GridBagConstraints(0, iRow++, 3, 1, 0.0,
 				0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, buttonInsets,
@@ -201,14 +202,14 @@ public class AwtDialog extends JDialog implements PlatformDialog {
 	
 	public Object addTextField(String name, String label, String value,
 			String units, String defaultValue, boolean visible) {
-		String key = thisKey + "_" + name;
+		String key = optionKey + "_" + name;
 		if (value == null) {
 			value = (String) options.get(key);
 			if (value == null)
 				options.put(key, (value = defaultValue));
 		}
 		JTextField obj = new JTextField(value);
-		obj.setName(thisID + "/" + name);
+		obj.setName(registryKey + "/" + name);
 		if (visible) {
 			obj.setPreferredSize(new Dimension(75, 25));
 			obj.addActionListener((AwtDialogManager)manager);
@@ -251,10 +252,10 @@ public class AwtDialog extends JDialog implements PlatformDialog {
     table.setCellSelectionEnabled(true);
     ListSelectionModel selector = table.getSelectionModel();
     selector.addListSelectionListener((AwtDialogManager) manager);
-    manager.registerSelector(thisID + "/ROW", selector);
+    manager.registerSelector(registryKey + "/ROW", selector);
     selector = table.getColumnModel().getSelectionModel();
     selector.addListSelectionListener((AwtDialogManager) manager);
-    manager.registerSelector(thisID + "/COL", selector);
+    manager.registerSelector(registryKey + "/COL", selector);
 		int n = 0;
 		for (int i = 0; i < columnNames.length; i++) {
 			table.getColumnModel().getColumn(i).setPreferredWidth(columnWidths[i]);
@@ -344,10 +345,6 @@ public class AwtDialog extends JDialog implements PlatformDialog {
 		case Integration:
 		case Measurements:
 		case PeakList:
-			options = params.options;
-			if (options == null)
-				options = new Hashtable<String, Object>();
-			break;
 		case NONE:
 			break;
 		case OverlayLegend:

@@ -45,10 +45,11 @@ public class IntegrationDialog extends JSVDialog {
 	@Override
 	public void addUniqueControls() {
 		txt1 = dialog.addTextField("Baseline Offset", "BaselineOffset", null, "%", ""
-				+ dialogParams.viewer.parameters.integralOffset, true);
+				+ viewer.parameters.integralOffset, true);
 		txt2 = dialog.addTextField("Scale", "Scale", null, "%", ""
-				+ dialogParams.viewer.parameters.integralRange, true);
-
+				+ viewer.parameters.integralRange, true);
+		dialog.addButton("btnApply", "Apply");
+		addApplyBtn = false;
 		dialog.addButton("btnAuto", "Auto");
 		dialog.addButton("btnDelete", "Delete");
 		dialog.addButton("btnNormalize", "Normalize");
@@ -57,19 +58,18 @@ public class IntegrationDialog extends JSVDialog {
 	@Override
 	public boolean callback(String id, String msg) {
 		if (id.equals("btnAuto")) {
-			dialogParams.runScript("integrate auto");
+			viewer.runScript("integrate auto");
 		} else if (id.equals("BaselineOffset")) {
-		} else if (id.equals("btnScale")) {
-			// TODO
 		} else if (id.equals("btnDelete")) {
-			dialogParams.deleteIntegral();
+			deleteIntegral();
 		} else if (id.equals("btnNormalize")) {
 			try {
-				if (!dialogParams.checkSelectedIntegral())
+				if (!checkSelectedIntegral())
 					return true;
-				String ret = manager.getDialogInput(dialog, "Enter a normalization factor", "Normalize",
-						DialogManager.QUESTION_MESSAGE, null, null, "" + dialogParams.lastNorm);
-				dialogParams.processEvent("int", Double.parseDouble(ret));
+				String ret = manager.getDialogInput(dialog,
+						"Enter a normalization factor", "Normalize",
+						DialogManager.QUESTION_MESSAGE, null, null, "" + lastNorm);
+				processEvent("int", Double.parseDouble(ret));
 			} catch (Exception ex) {
 				// for parseDouble
 			}
@@ -77,8 +77,8 @@ public class IntegrationDialog extends JSVDialog {
 			try {
 				String ret = manager.getDialogInput(dialog, "Minimum value?",
 						"Set Minimum Value", DialogManager.QUESTION_MESSAGE, null, null, ""
-								+ dialogParams.lastMin);
-				dialogParams.processEvent("min", Double.parseDouble(ret));
+								+ lastMin);
+				processEvent("min", Double.parseDouble(ret));
 			} catch (Exception ex) {
 				// for parseDouble
 			}
@@ -92,7 +92,28 @@ public class IntegrationDialog extends JSVDialog {
 
 	@Override
 	public void applyFromFields() {
-		dialogParams.apply(new Object[] {dialog.getText(txt1), dialog.getText(txt2)});
+		apply(new Object[] {dialog.getText(txt1), dialog.getText(txt2)});
 	}
+
+	private boolean checkSelectedIntegral() {
+		if (iSelected < 0) {
+			showMessage(
+					"Select a line on the table first, then click this button.",
+					"Integration", DialogManager.INFORMATION_MESSAGE);
+			return false;
+		}
+		return true;
+	}
+
+	private void deleteIntegral() {
+		if (!checkSelectedIntegral())
+			return;
+		xyData.remove(iSelected);
+		iSelected = -1;
+		iRowColSelected = -1;
+		applyFromFields();
+		jsvp.doRepaint();
+	}
+
 
 }

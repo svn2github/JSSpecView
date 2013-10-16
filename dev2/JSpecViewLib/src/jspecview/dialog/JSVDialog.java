@@ -1,49 +1,92 @@
 package jspecview.dialog;
 
+import java.util.Map;
+
+import org.jmol.util.Parser;
+import org.jmol.util.Txt;
+
 import jspecview.api.AnnotationData;
 import jspecview.api.JSVPanel;
 import jspecview.api.PlatformDialog;
-import jspecview.dialog.DialogParams;
 import jspecview.source.JDXSpectrum;
 import jspecview.common.Annotation;
 import jspecview.common.Coordinate;
+import jspecview.common.IntegralData;
 import jspecview.common.JSViewer;
 import jspecview.common.MeasurementData;
+import jspecview.common.PanelData;
 import jspecview.common.Parameters;
+import jspecview.common.PeakData;
 
 abstract public class JSVDialog extends Annotation implements AnnotationData {
 
 	abstract public int[] getPosXY();
 
+	public String optionKey;
+	public Map<String, Object> options;
+	
 	protected AType type;
 	protected String title;
 	protected JSViewer viewer;
 	protected JDXSpectrum spec;
-
 	protected DialogManager manager;
-	protected DialogParams dialogParams;
 	protected PlatformDialog dialog;
-
-	private int[] loc;
-
+	protected JSVPanel jsvp;
 	protected Object txt1;
 	protected Object txt2;
-	private Object showHideButton; // text changeable
 	protected Object combo1; // measurement listing, peaks
-	
-	private boolean addClearBtn, addCombo1, addApplyBtn;
+	protected MeasurementData xyData;
+
+	private int[] loc;
+	private Object showHideButton; // text changeable
+	private boolean addClearBtn, addCombo1;
+	protected boolean addApplyBtn;
 	private boolean isNumeric; // not Views or OverlayLegend
 	private boolean defaultVisible; // not OverlayLegend
+	private String subType;
+	private Parameters myParams;
+	private String graphSetKey;
+	private Object[][] tableData;
+	private boolean addUnits;
+	private String[] unitOptions;
+	private int[] formatOptions;
+	private Integer unitPtr;
+	private int precision = 1;
+	private boolean isON = true;
 
 	abstract protected void addUniqueControls();
 
 	abstract public boolean callback(String id, String msg);
 
+	/**
+	 * 
+	 * required initializer; from JSViewer
+	 * 
+	 * @param title
+	 * @param viewer
+	 * @param spec
+	 * @return this
+	 */
 	public JSVDialog setParams(String title, JSViewer viewer, JDXSpectrum spec) {
 		this.title = title;
 		this.viewer = viewer;
 		this.spec = spec;
 		manager = viewer.getDialogManager();
+		jsvp = viewer.selectedPanel;
+		myParams = ((Parameters) viewer.getAwtInterface("Parameters"))
+				.setName("dialogParams");
+		subType = (spec == null ? "" : spec.getTypeLabel());
+		optionKey = type + "_" + subType;
+		options = manager.getDialogOptions();
+		if (spec != null) {
+			Object[] specOptions = spec.getDefaultAnnotationInfo(type);
+			options.put(optionKey, specOptions);
+			unitOptions = (String[]) specOptions[0];
+			formatOptions = (int[]) specOptions[1];
+			unitPtr = (Integer) options.get(optionKey + "_unitPtr");
+			if (unitPtr == null)
+				unitPtr = (Integer) specOptions[2];
+		}
 		switch (type) {
 		case Integration:
 			isNumeric = true;
@@ -71,49 +114,16 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 		case NONE:
 			break;
 		}
-		dialogParams = new DialogParams(type, this, viewer, spec, ((Parameters) viewer
-				.getAwtInterface("Parameters")).setName("dialogParams"));
-		dialogParams.setup();
 		initDialog();
 		return this;
 	}
-	
-	/**
-	 * 
-	 * @param panel
-	 *          a PPanel (Applet) or a JScrollPane (MainFrame)
-	 * 
-	 * @param posXY
-	 *          static for a given dialog
-	 */
-	public void restoreDialogPosition(JSVPanel panel, int[] posXY) {
-		if (panel != null) {
-			if (posXY[0] == Integer.MIN_VALUE) {
-				posXY[0] = 0;
-				posXY[1] = -20;
-			}
-			int[] pt = manager.getLocationOnScreen(panel);
-			int height = panel.getHeight();
-			loc = new int[] { Math.max(0, pt[0] + posXY[0]), Math.max(0, pt[1] + height + posXY[1]) };
-			dialog.setIntLocation(loc);
-		}
-	}
-	
-	public void saveDialogPosition(int[] posXY) {
-		try {
-			int[] pt = manager.getLocationOnScreen(dialog);
-			posXY[0] += pt[0] - loc[0];
-			posXY[1] += pt[1] - loc[1];
-		} catch (Exception e) {
-			// ignore
-		}
-	}
-	
+
+
 	// //// frame construction ////////
 
 	private void initDialog() {
-		dialog = manager.getDialog(this, dialogParams);
-		restoreDialogPosition(dialogParams.jsvp, getPosXY());
+		dialog = manager.getDialog(this);
+		restoreDialogPosition(jsvp, getPosXY());
 		dialog.setTitle(title);
 		layoutDialog();
 	}
@@ -121,12 +131,11 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 	protected void layoutDialog() {
 		dialog.startLayout();
 		addUniqueControls();
-		if (isNumeric ) {
-			dialogParams.getUnitOptions();
+		if (isNumeric) {
+			getUnitOptions();
 			if (addCombo1)
-				combo1 = dialog.addSelectOption("cmbUnits", "Units", 
-						dialogParams.unitOptions, dialogParams.unitPtr.intValue(),
-						dialogParams.addUnits);
+				combo1 = dialog.addSelectOption("cmbUnits", "Units", unitOptions,
+						unitPtr.intValue(), addUnits);
 			// txtFontSize = ((DialogHelper dialogHelper)).addInputOption("FontSize",
 			// "Font Size", null, null, "10");
 			if (addApplyBtn)
@@ -145,22 +154,22 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 	 * @param msg
 	 * @return true if consumed
 	 */
-	public boolean callbackAD(String id, String msg) {
+	protected boolean callbackAD(String id, String msg) {
 		if (id.equals("tableSelect")) {
-			dialogParams.tableSelect(manager, msg);
+			tableSelect(msg);
 		} else if (id.equals("btnClear")) {
-			dialogParams.clear();
+			clear();
 		} else if (id.equals("btnApply")) {
-			dialogParams.eventApply();
+			eventApply();
 		} else if (id.equals("btnShow")) {
 			String label = dialog.getText(showHideButton);
-			dialogParams.eventShowHide(label.equals("Show"));
-		} else if (id.equals("btnUnits")) {
-			dialogParams.setPrecision(dialog.getSelectedIndex(combo1));
+			eventShowHide(label.equals("Show"));
+		} else if (id.equals("cmbUnits")) {
+			setPrecision(dialog.getSelectedIndex(combo1));
 		} else if (id.startsWith("txt")) {
-			dialogParams.eventApply();
+			eventApply();
 		} else if (id.equals("windowClosing")) {
-			dialogParams.done();
+			done();
 			return true;
 		}
 
@@ -177,54 +186,38 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 	// /////// general interface to the outside world ////////
 
 	public AType getAType() {
-		return dialogParams.thisType;
+		return type;
 	}
 
-	public void setSpecShift(double dx) {
-		dialogParams.setSpecShift(dx);
+	public String getGraphSetKey() {
+		return graphSetKey;
 	}
 
-	public MeasurementData getData() {
-		return dialogParams.getData();
-	}
-
-	public void setFields() {
-		dialogParams.setFields();
-	}
-
-	public String getKey() {
-		return dialogParams.key;
-	}
-
-	public void setKey(String key) {
-		dialogParams.key = key;
+	public void setGraphSetKey(String key) {
+		this.graphSetKey = key;
 	}
 
 	public JDXSpectrum getSpectrum() {
-		return dialogParams.spec;
+		return spec;
 	}
 
 	public boolean getState() {
-		return dialogParams.isON;
+		return isON;
 	}
 
 	public void setState(boolean b) {
-		dialogParams.isON = b;
-	}
-
-	public void update(Coordinate clicked, double xRange, int yOffset) {
-		dialogParams.update(clicked, xRange, yOffset);
+		isON = b;
 	}
 
 	// ////// interface to DialogParams////////
 
 	public void checkEnables() {
-		boolean isShow = dialogParams.checkVisible();
-			dialog.setText(showHideButton, isShow ? "Hide" : "Show");
+		boolean isShow = checkVisible();
+		dialog.setText(showHideButton, isShow ? "Hide" : "Show");
 	}
 
 	public void createTable(Object[][] data, String[] header, int[] widths) {
-		dialogParams.tableData = data;
+		tableData = data;
 		dialog.createTable(data, header, widths);
 	}
 
@@ -233,15 +226,15 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 	}
 
 	public Parameters getParameters() {
-		return dialogParams.myParams;
+		return myParams;
 	}
 
 	public void showMessage(String msg, String title, int msgType) {
 		manager.showMessageDialog(dialog, msg, title, msgType);
 	}
 
-	public void setThreshold(double y) {
-		dialog.setText(txt1, dialogParams.getThreasholdText(y));
+	protected void setThreshold(double y) {
+		dialog.setText(txt1, getThreasholdText(y));
 	}
 
 	public void setComboSelected(int i) {
@@ -249,32 +242,28 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 	}
 
 	public void applyFromFields() {
-		dialogParams.apply(null);
+		apply(null);
 	}
 
 	public void setParamsFromFields() {
-		dialogParams.setParams(null);
+		setParams(null);
 	}
 
 	public void loadDataFromFields() {
-		dialogParams.loadData(null);
+		loadData(null);
 	}
 
 	public JSVDialog reEnable() {
-		dialogParams.reEnable();
+		paramsReEnable();
 		return this;
-	}
-	
-	public void setData(AnnotationData data) {
-		dialogParams.setData(data);
 	}
 
 	public void dispose() {
-		dialog.dispose();		
+		dialog.dispose();
 	}
 
 	public void setVisible(boolean visible) {
-		dialog.setVisible(visible);		
+		dialog.setVisible(visible);
 	}
 
 	public boolean isVisible() {
@@ -288,5 +277,504 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 	public void repaint() {
 		dialog.repaint();
 	}
+
+	public void setFields() {
+		switch (type) {
+		case Integration:
+			break;
+		case Measurements:
+			break;
+		case NONE:
+			break;
+		case PeakList:
+			myParams = xyData.getParameters();
+			setThreshold(myParams.peakListThreshold);
+			setComboSelected(myParams.peakListInterpolation.equals("none") ? 1
+							: 0);
+			createData();
+			break;
+		case OverlayLegend:
+			break;
+		case Views:
+			break;
+		}
+	}
+
+	public void update(Coordinate clicked, double xRange, int yOffset) {
+		selectTableRow(-1);
+		switch (type) {
+		case Integration:
+			loadDataFromFields();
+			checkEnables();
+			break;
+		case Measurements:
+			loadDataFromFields();
+			checkEnables();
+			break;
+		case NONE:
+			break;
+		case PeakList:
+			if (yOffset > 20)
+				applyFromFields();
+			if (xyData == null || clicked == null || yOffset > 20)
+				return;
+			int ipt = 0;
+			double dx0 = 1e100;
+			double xval = clicked.getXVal();
+			PeakData md = (PeakData) xyData;
+			double min = Math.abs(xRange / 20);
+			for (int i = md.size(); --i >= 0;) {
+				double dx = Math.abs(xval - md.get(i).getXVal());
+				if (dx < dx0) {
+					dx0 = dx;
+					ipt = i;
+				}
+			}
+			if (dx0 < min) {
+				selectTableRow(md.size() - 2 - ipt);
+				repaint();
+			}
+			break;
+		case OverlayLegend:
+			break;
+		case Views:
+			break;
+		}
+	}
+
+	protected double lastNorm = 1;
+	protected double lastMin = 0;
+
+	public void processEvent(String what, double val) {
+		switch (type) {
+		case Integration:
+			if (what.equals("min")) {
+				((IntegralData) xyData).setMinimumIntegral(lastMin = val);
+			} else if (what.equals("int")) {
+				if (val < 0)
+					return;
+				((IntegralData) xyData).setSelectedIntegral(xyData.get(iSelected),
+						lastNorm = val);
+			}
+			break;
+		case Measurements:
+			break;
+		case NONE:
+			break;
+		case PeakList:
+			break;
+		case OverlayLegend:
+			break;
+		case Views:
+			break;
+		}
+		applyFromFields();
+		jsvp.doRepaint();
+	}
+
+	public MeasurementData getPeakData() {
+		PeakData md = new PeakData(AType.PeakList, spec);
+		md.setPeakList(myParams, precision, jsvp.getPanelData().getView());
+		xyData = md;
+		return null;
+	}
+
+	public MeasurementData getData() {
+		if (xyData == null)
+			createData();
+		return xyData;
+	}
+
+	public void setData(AnnotationData data) {
+		myParams = data.getParameters();
+		xyData = (MeasurementData) data;
+	}
+
+	public void setSpecShift(double dx) {
+		if (xyData != null)
+			xyData.setSpecShift(dx);
+	}
+
+	public void setType(AType type) {
+		this.type = type;
+		switch (type) {
+		case Measurements:
+			addUnits = true;
+			break;
+		case Integration:
+			break;
+		case PeakList:
+			break;
+		case OverlayLegend:
+			break;
+		case Views:
+			break;
+		case NONE:
+			break;
+
+		}
+	}
+
+	////////////// protected methods
+	
+	protected int iRowColSelected = -1;
+	protected int iSelected = -1;
+
+	protected void apply(Object[] objects) {
+		try {
+			switch (type) {
+			case Integration:
+				double offset = Double.parseDouble((String) objects[0]);
+				double scale = Double.parseDouble((String) objects[1]);
+				myParams.integralOffset = offset;
+				myParams.integralRange = scale;
+				myParams.integralDrawAll = false;// chkResets.isSelected();
+				((IntegralData) getData()).update(myParams);
+				jsvp.doRepaint();
+				break;
+			case Measurements:
+				// n/a
+				break;
+			case NONE:
+				return;
+			case PeakList:
+				if (!skipCreate) {
+					setThreshold(Double.NaN);
+					createData();
+				}
+				skipCreate = false;
+				break;
+			case OverlayLegend:
+				break;
+			case Views:
+				break;
+			}
+			loadDataFromFields();
+			checkEnables();
+			jsvp.doRepaint();
+		} catch (Exception e) {
+			// ignore
+		}
+	}
+
+	protected void done() {
+		if (jsvp != null && spec != null)
+			jsvp.getPanelData().removeDialog(this);
+		// setState(false);
+		if (xyData != null)
+			xyData.setState(isON);
+		saveDialogPosition(getPosXY());
+		dispose();
+		jsvp.doRepaint();
+	}
+
+	
+	// /////////// private methods
+
+	/**
+	 * 
+	 * @param panel
+	 *          a PPanel (Applet) or a JScrollPane (MainFrame)
+	 * 
+	 * @param posXY
+	 *          static for a given dialog
+	 */
+	private void restoreDialogPosition(JSVPanel panel, int[] posXY) {
+		if (panel != null) {
+			if (posXY[0] == Integer.MIN_VALUE) {
+				posXY[0] = 0;
+				posXY[1] = -20;
+			}
+			int[] pt = manager.getLocationOnScreen(panel);
+			int height = panel.getHeight();
+			loc = new int[] { Math.max(0, pt[0] + posXY[0]),
+					Math.max(0, pt[1] + height + posXY[1]) };
+			dialog.setIntLocation(loc);
+		}
+	}
+
+	private void saveDialogPosition(int[] posXY) {
+		try {
+			int[] pt = manager.getLocationOnScreen(dialog);
+			posXY[0] += pt[0] - loc[0];
+			posXY[1] += pt[1] - loc[1];
+		} catch (Exception e) {
+			// ignore
+		}
+	}
+	
+	private String getThreasholdText(double y) {
+		if (Double.isNaN(y)) {
+			PanelData pd = jsvp.getPanelData();
+			double f = (pd.getSpectrum().isInverted() ? 0.1 : 0.9);
+			Coordinate c = pd.getClickedCoordinate();
+			y = (c == null ? (pd.getView().minYOnScale * f + pd.getView().maxYOnScale)
+					* (1 - f)
+					: c.getYVal());
+		}
+		String sy = Txt.formatDecimalDbl(y, y < 1000 ? 2 : -2); // "#0.00" :
+		// "0.00E0"
+		return " " + sy;
+	}
+
+	private boolean checkVisible() {
+		return viewer.selectedPanel.getPanelData().getShowAnnotation(type);
+	}
+
+	private void getUnitOptions() {
+		String key = optionKey + "_format";
+		Integer format = (Integer) options.get(key);
+		if (format == null)
+			options.put(key, format = Integer
+					.valueOf(formatOptions[unitPtr == null ? 0 : unitPtr.intValue()]));
+		// txtFormat = dialogHelper.addInputOption("numberFormat", "Number Format",
+		// format, null, null, false);
+	}
+
+	private boolean skipCreate;
+
+	private void eventApply() {
+		switch (type) {
+		case Integration:
+			break;
+		case Measurements:
+			break;
+		case NONE:
+			break;
+		case PeakList:
+			createData();
+			skipCreate = true;
+			break;
+		case OverlayLegend:
+			break;
+		case Views:
+			break;
+		}
+		applyFromFields();
+	}
+
+	private void eventShowHide(boolean isShow) {
+		isON = isShow;
+		if (isShow)
+			eventApply();
+		jsvp.doRepaint();
+		checkEnables();
+	}
+
+	private void clear() {
+		if (xyData != null) {
+			xyData.clear();
+			applyFromFields();
+		}
+	}
+
+	private void paramsReEnable() {
+		switch (type) {
+		case Integration:
+			break;
+		case Measurements:
+			break;
+		case NONE:
+			break;
+		case PeakList:
+			skipCreate = true;
+			break;
+		case OverlayLegend:
+			break;
+		case Views:
+			break;
+		}
+		setVisible(true);
+		isON = true;
+		applyFromFields();
+	}
+
+	private int iRowSelected = -1;
+	private int iColSelected = -1;
+
+	private void tableCellSelect(int iRow, int iCol) {
+		Object value = tableData[iRow][1];
+		int icolrow = iRowSelected * 1000 + iColSelected;
+		if (icolrow == iRowColSelected)
+			return;
+		iRowColSelected = icolrow;
+		selectTableRow(iRowSelected);
+		try {
+			switch (type) {
+			case Integration:
+				for (int i = 0; i < xyData.size(); i++)
+					if (Txt.formatDecimalDbl(xyData.get(i).getXVal(), 2).equals(value)) {
+						iSelected = i;
+						jsvp.getPanelData().setXPointers(spec, xyData.get(i).getXVal(),
+								spec, xyData.get(i).getXVal2());
+						jsvp.doRepaint();
+						break;
+					}
+				checkEnables();
+				break;
+			case Measurements:
+				break;
+			case NONE:
+				break;
+			case PeakList:
+				try {
+					switch (iCol) {
+					case 6:
+					case 5:
+					case 4:
+						double x1 = Double.parseDouble((String) value);
+						double x2 = Double
+								.parseDouble((String) tableData[iRow + 3 - iCol][1]);
+						jsvp.getPanelData().setXPointers(spec, x1, spec, x2);
+						break;
+					default:
+						jsvp.getPanelData().findX(spec, Double.parseDouble((String) value));
+					}
+				} catch (Exception e) {
+					jsvp.getPanelData().findX(spec, 1E100);
+				}
+				jsvp.doRepaint();
+				break;
+			case OverlayLegend:
+				jsvp.getPanelData().setSpectrum(iRow, false);
+				break;
+			case Views:
+				break;
+			}
+		} catch (Exception e) {
+			// for parseDouble
+		}
+	}
+
+	protected void loadData(Object param) {
+		Object[][] data;
+		String[] header;
+		int[] widths;
+		switch (type) {
+		case Integration:
+			if (xyData == null)
+				createData();
+			iSelected = -1;
+			data = ((IntegralData) xyData).getMeasurementListArray(null);
+			header = xyData.getDataHeader();
+			widths = new int[] { 40, 65, 65, 50 };
+			createTable(data, header, widths);
+			break;
+		case Measurements:
+			if (xyData == null)
+				return;
+			data = xyData.getMeasurementListArray(param.toString());
+			header = xyData.getDataHeader();
+			widths = new int[] { 40, 65, 65, 50 };
+			createTable(data, header, widths);
+			break;
+		case NONE:
+			break;
+		case PeakList:
+			if (xyData == null)
+				createData();
+			data = ((PeakData) xyData).getMeasurementListArray(null);
+			header = ((PeakData) xyData).getDataHeader();
+			widths = new int[] { 40, 65, 50, 50, 50, 50, 50 };
+			createTable(data, header, widths);
+			setTableSelectionEnabled(true);
+			break;
+		case OverlayLegend:
+			header = new String[] { "No.", "Plot Color", "Title" };
+			data = viewer.selectedPanel.getPanelData().getOverlayLegendData();
+			widths = new int[] { 30, 60, 250 };
+			createTable(data, header, widths);
+			setTableSelectionEnabled(true);
+			break;
+		case Views:
+			break;
+		}
+	}
+
+	private void createData() {
+		switch (type) {
+		case Integration:
+			xyData = new IntegralData(spec, myParams);
+			iSelected = -1;
+			break;
+		case Measurements:
+			// n/a
+			break;
+		case NONE:
+			break;
+		case PeakList:
+			setParamsFromFields();
+			PeakData md = new PeakData(AType.PeakList, spec);
+			md.setPeakList(myParams, precision, jsvp.getPanelData().getView());
+			xyData = md;
+			loadDataFromFields();
+			break;
+		case OverlayLegend:
+			break;
+		case Views:
+			break;
+		}
+	}
+
+	protected void setParams(Object[] objects) {
+		try {
+			switch (type) {
+			case Integration:
+				break;
+			case Measurements:
+				break;
+			case NONE:
+				break;
+			case PeakList:
+				double thresh = Double.parseDouble((String) objects[0]);
+				myParams.peakListThreshold = thresh;
+				myParams.peakListInterpolation = (String) objects[1];
+				myParams.precision = precision;
+				break;
+			case OverlayLegend:
+				break;
+			case Views:
+				break;
+			}
+		} catch (Exception e) {
+			// for parseDouble
+		}
+	}
+
+	private void setPrecision(int i) {
+		precision = formatOptions[i];
+	}
+
+	private void tableSelect(String url) {
+		boolean isAdjusting = "true".equals(getField(url, "adjusting"));
+		if (isAdjusting) {
+			iColSelected = iRowSelected = -1;
+			return;
+		}
+		int index = Parser.parseInt(getField(url, "index"));
+		switch ("ROW COL ROWCOL".indexOf(getField(url, "selector"))) {
+		case 8:
+			iColSelected = Parser.parseInt(getField(url, "index2"));
+			//$FALL-THROUGH$
+		case 0:
+			iRowSelected = index;
+			break;
+		case 4:
+			iColSelected = index;
+			break;
+		}
+		if (iColSelected >= 0 && iRowSelected >= 0) {
+			tableCellSelect(iRowSelected, iColSelected);
+		}
+	}
+
+	private String getField(String url, String name) {
+		url += "&";
+		String key = "&" + name + "=";
+		int pt = url.indexOf(key);
+		return (pt < 0 ? null : url.substring(pt + key.length(), url.indexOf("&",
+				pt + 1)));
+	}
+
 
 }

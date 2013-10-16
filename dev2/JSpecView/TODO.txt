@@ -13,6 +13,9 @@ new feature: show NMR taps into NMRDB directly
 
 in preparation for JavaScript version (add to top):
 
+-- 10/16/2013 BH
+Dialog JavaScript Swing development complete
+
 -- 10/15/2013 BH
 Dialog JavaScript Swing replacement first try (note, Java dialogs are being sent to the console as JavaScript for testing
 

@@ -8,12 +8,12 @@ public class JComboBox<T>  extends JComponent {
 	private int selectedIndex;
 
 	public JComboBox(String[] info){
+		super("cmbJCB");
 		this.info = info;
 	}
 
 	public void setSelectedIndex(int i) {
 		this.selectedIndex = i;
-		String id = registerMe("JCmB");
 		/**
 		 * @j2sNative
 		 * 
@@ -35,7 +35,6 @@ public class JComboBox<T>  extends JComponent {
 
 	@Override
 	public String toHTML() {
-		String id = registerMe("JCmB");
 		SB sb = new SB();
 		sb.append("\n<select id='JCmB" + id + "' class='JComboBox' onchange='Jmol.Dialog.click(this)'>\n");		
 		for (int i = 0; i < info.length; i++)

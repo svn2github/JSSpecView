@@ -54,7 +54,7 @@ public class PeakListDialog extends JSVDialog {
 
 	@Override
 	public void setParamsFromFields() {
-		dialogParams.setParams(new Object[] {dialog.getText(txt1), dialog.getSelectedItem(combo1).toString()});
+		setParams(new Object[] {dialog.getText(txt1), dialog.getSelectedItem(combo1).toString()});
 	}
 
 	@Override

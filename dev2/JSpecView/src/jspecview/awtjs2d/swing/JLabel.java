@@ -5,14 +5,14 @@ import org.jmol.util.SB;
 public class JLabel extends JComponent {
 
 	public JLabel(String text) {
+		super("lblJL");
 		this.text = text;
 	}
 
 	@Override
 	public String toHTML() {
-		String id = registerMe("JL");
 		SB sb = new SB();
-		sb.append("<span id='" + id + "' class='JLabel' style='" + getCSSstyle(false) + "'>");
+		sb.append("<span id='" + id + "' class='JLabel' style='" + getCSSstyle(0) + "'>");
 		sb.append(text);
 		sb.append("</span>");
 		return sb.toString();

@@ -202,7 +202,7 @@ public class ViewsDialog extends JSVDialog {
       closeSelected();
 		} else if (id.equals("btnDone")) {
 			dispose();
-			dialogParams.done();
+			done();
 		} else {
 			return callbackAD(id, msg);
 		}

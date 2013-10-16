@@ -29,7 +29,6 @@ import jspecview.api.JSVPanel;
 import jspecview.api.PlatformDialog;
 import jspecview.dialog.JSVDialog;
 import jspecview.dialog.DialogManager;
-import jspecview.dialog.DialogParams;
 import jspecview.source.JDXSpectrum;
 
 /**
@@ -46,10 +45,9 @@ public class AwtDialogManager extends DialogManager implements
 	}
 
 	@Override
-	public PlatformDialog getDialog(JSVDialog jsvDialog,
-			DialogParams params) {
-		return new AwtDialog(this, params,
-				registerDialog(jsvDialog, params.thisKey));
+	public PlatformDialog getDialog(JSVDialog jsvDialog) {
+		return new AwtDialog(this, jsvDialog,
+				registerDialog(jsvDialog));
 	}
 
 	@Override
@@ -119,7 +117,7 @@ public class AwtDialogManager extends DialogManager implements
 	}
 
 	@Override
-	public void showText(Object frame, String title, String text) {
+	public void showScrollingText(Object frame, String title, String text) {
 		new TextDialog(null, title, true, text);
 	}
 	

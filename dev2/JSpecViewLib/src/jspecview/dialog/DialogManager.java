@@ -10,12 +10,26 @@ import jspecview.common.JSViewer;
 import jspecview.source.JDXSource;
 import jspecview.source.JDXSpectrum;
 
+/**
+ * Dialogs include Integration, PeakListing, Views, OverlayLegend, and Measurements
+ * These dialogs have been generalized for platform independence.'
+ * 
+ * This manager is subclassed as AwtDialogManager and JsDialogManager, which apply their
+ * own interpretation of how to create the dialog and get its event callbacks. For any
+ * one session, there will be only one DialogManager, created in JSViewer. 
+ * 
+ * AwtDialogManager will create instances of AwtDialog extends javax.swing.JDialog; 
+ * JsDialogManager will create instances of JsDialog extends jspecview.awtj2d.swing.JDialog.
+ * 
+ * @author hansonr
+ *
+ */
 abstract public class DialogManager {
 
 	protected JSViewer viewer;
 	private Map<Object, String> htSelectors;
 	protected Map<String, JSVDialog> htDialogs;
-	private int dialogCount;
+	private Map<String, Object> options;
 
 	public DialogManager set(JSViewer viewer) {
 		this.viewer = viewer;
@@ -30,7 +44,7 @@ abstract public class DialogManager {
 	public final static int WARNING_MESSAGE     =  2; // JOptionPane.WARNING_MESSAGE
 	public final static int QUESTION_MESSAGE    =  3; // JOptionPane.QUESTION_MESSAGE
 
-	abstract public PlatformDialog getDialog(JSVDialog jsvDialog, DialogParams params);
+	abstract public PlatformDialog getDialog(JSVDialog jsvDialog);
 
 	abstract public String getDialogInput(Object parentComponent, String phrase,
 			String title, int msgType, Object icon, Object[] objects,
@@ -45,7 +59,20 @@ abstract public class DialogManager {
 
   abstract public void showProperties(Object frame, JDXSpectrum spectrum);
   
-  abstract public void showText(Object frame, String title, String text);
+  abstract public void showScrollingText(Object frame, String title, String text);
+
+  
+  /**
+   * register the JSV dialog with a unique key to be used as an ID in callbacks
+   * 
+   * @param jsvDialog
+   * @return id
+   */
+	protected String registerDialog(JSVDialog jsvDialog) {
+		String id = jsvDialog.optionKey + " " + ("" + Math.random()).substring(3); 
+		htDialogs.put(id, jsvDialog);
+		return id;
+	}
 
   public void registerSelector(String selectorName, Object columnSelector) {
 		htSelectors.put(columnSelector, selectorName);
@@ -53,20 +80,6 @@ abstract public class DialogManager {
 
 	protected String getSelectorName(Object selector) {
 		return htSelectors.get(selector);
-	}
-
-	protected String registerDialog(JSVDialog jsvDialog, String key) {
-		String id = key + " " + (++dialogCount); 
-		htDialogs.put(id, jsvDialog);
-		return id;
-	}
-
-	public String getField(String url, String name) {
-		url += "&";
-		String key = "&" + name + "=";
-		int pt = url.indexOf(key);
-		return (pt < 0 ? null : url.substring(pt + key.length(), url.indexOf("&",
-				pt + 1)));
 	}
 
 	public void showSourceErrors(Object frame, JDXSource currentSource) {
@@ -77,7 +90,7 @@ abstract public class DialogManager {
 		}
 		String errorLog = currentSource.getErrorLog();
 		if (errorLog != null && errorLog.length() > 0)
-			showText(frame, currentSource.getFilePath(), errorLog);
+			showScrollingText(frame, currentSource.getFilePath(), errorLog);
 		else
 			showMessageDialog(frame, "No errors found.",
 					"Error Log", INFORMATION_MESSAGE);
@@ -91,7 +104,7 @@ abstract public class DialogManager {
 		}
 		try {
 			String f = currentSource.getFilePath();
-			showText(null, f, JSVFileManager.getFileAsString(f, null));
+			showScrollingText(null, f, JSVFileManager.getFileAsString(f, null));
 		} catch (Exception ex) {
 			showMessageDialog(frame, "File Not Found", "SHOWSOURCE", ERROR_MESSAGE);
 		}
@@ -152,6 +165,17 @@ abstract public class DialogManager {
 		JSVDialog jsvDialog = htDialogs.get(dialogId);
 		if (jsvDialog != null)
 			jsvDialog.callback(id, msg);		
+	}
+
+	/**
+	 * persistent options such as units 
+	 * 
+	 * @return options
+	 */
+	Map<String, Object> getDialogOptions() {
+		if (options == null)
+			options = new Hashtable<String, Object>();
+		return options;
 	}
 
 }

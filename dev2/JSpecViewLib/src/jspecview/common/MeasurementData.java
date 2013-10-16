@@ -158,11 +158,11 @@ public class MeasurementData extends JmolList<Measurement> implements
 		}
 	}
 
-	public String getKey() {
+	public String getGraphSetKey() {
 		return key;
 	}
 
-	public void setKey(String key) {
+	public void setGraphSetKey(String key) {
 		this.key = key;
 	}
 

@@ -57,7 +57,7 @@ public class MeasurementsDialog extends JSVDialog {
 
 	@Override
 	public void loadDataFromFields() {
-		dialogParams.loadData(dialog.getSelectedItem(combo1));
+		loadData(dialog.getSelectedItem(combo1));
 	}
 
 }
