@@ -1,6 +1,6 @@
 package javajs.awt;
 
-import jspecview.api.GenericColor;
+import javajs.api.GenericColor;
 
 public class Color implements GenericColor {
 
