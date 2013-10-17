@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Map;
 
+import javajs.util.P3;
 
 
 
@@ -362,11 +363,11 @@ final public class ArrayUtil {
   }
 
   /**
-   * Helper method for creating a JmolList<Tx>[] without warnings.
+   * Helper method for creating a List<Tx>[] without warnings.
    * 
    * @param <type> Type of objects in the list.
    * @param size Array size.
-   * @return Array of JmolList<type>
+   * @return Array of List<type>
    */
   @SuppressWarnings("unchecked")
   public static <type> List<type>[] createArrayOfArrayList(int size) {

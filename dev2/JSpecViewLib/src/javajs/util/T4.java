@@ -20,7 +20,6 @@ import java.io.Serializable;
 
 
 
-
 /**
  * A generic 4 element tuple that is represented by single precision floating
  * point x,y,z and w coordinates.
