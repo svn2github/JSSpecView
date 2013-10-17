@@ -12,7 +12,7 @@ package javajs.lang;
 
 public class StringBuffer {
   
-  private java.lang.StringBuilder sb;
+  private StringBuilder sb;
   String s;
   
   //TODO: JS experiment with using array and .push() here
@@ -25,7 +25,7 @@ public class StringBuffer {
      * 
      */
     {
-      sb = new java.lang.StringBuilder();
+      sb = new StringBuilder();
     }
   }
 
@@ -38,7 +38,7 @@ public class StringBuffer {
       // not perfect, because it requires defining sb twice. 
       // We can do better...
       StringBuffer sb = new StringBuffer();
-      sb.sb = new java.lang.StringBuilder(n);
+      sb.sb = new StringBuilder(n);
       return sb;
     }
   }
@@ -54,7 +54,7 @@ public class StringBuffer {
      */
     {
     StringBuffer sb = new StringBuffer();
-    sb.sb = new java.lang.StringBuilder(s);
+    sb.sb = new StringBuilder(s);
     return sb;
     }
   }

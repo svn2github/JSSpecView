@@ -24,9 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URL;
-import org.jmol.util.JmolList;
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.Hashtable;
 
 import java.util.Map;
@@ -36,6 +34,7 @@ import java.util.StringTokenizer;
 import javajs.lang.StringBuffer;
 import javajs.util.BitSet;
 
+import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
 import org.jmol.util.Txt;
@@ -687,7 +686,7 @@ public class FileReader {
 	}
 
 
-	private BitSet unescapeBitSet(String s) {
+	private javajs.util.BitSet unescapeBitSet(String s) {
 		return JSVEscape.unescapeBitSet(s);
 	}
 
