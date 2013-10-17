@@ -1,12 +1,13 @@
 package jspecview.common;
 
-import org.jmol.util.BS;
 import org.jmol.util.JmolList;
 import java.util.Collections;
 import java.util.Comparator;
 
 import java.util.Map;
 import java.util.StringTokenizer;
+
+import javajs.util.BitSet;
 
 import org.jmol.util.Txt;
 
@@ -320,8 +321,8 @@ public class IntegralData extends MeasurementData {
 		return super.remove(i);
 	}
 
-	public BS getBitSet() {
-		BS bs = BS.newN(xyCoords.length);
+	public BitSet getBitSet() {
+		BitSet bs = BitSet.newN(xyCoords.length);
 		if (size() == 0) {
   		bs.setBits(0, xyCoords.length);
   		return bs;

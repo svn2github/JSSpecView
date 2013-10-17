@@ -22,11 +22,12 @@ package jspecview.source;
 import java.io.BufferedReader;
 import java.io.IOException;
 
+import javajs.lang.StringBuffer;
+
 import org.jmol.util.JmolList;
 
 
 import org.jmol.util.Logger;
-import org.jmol.util.SB;
 
 import jspecview.common.Coordinate;
 
@@ -75,7 +76,7 @@ abstract class XMLReader {
   protected double refPoint = JDXDataObject.ERROR;
   protected String casRN = "";
   protected String sampleID;
-  protected SB errorLog = new SB();
+  protected StringBuffer errorLog = new StringBuffer();
 
   public XMLReader(String filePath) {
     this.filePath = filePath;

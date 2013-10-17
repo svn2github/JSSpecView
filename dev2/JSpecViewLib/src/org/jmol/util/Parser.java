@@ -25,6 +25,8 @@
 
 package org.jmol.util;
 
+import javajs.util.BitSet;
+
 
 
 public class Parser {
@@ -48,7 +50,7 @@ public class Parser {
    *  @param data    the (sparce) array to fill
    * @return  number of floats
    */
-  public static int parseStringInfestedFloatArray(String str, BS bs, float[] data) {
+  public static int parseStringInfestedFloatArray(String str, BitSet bs, float[] data) {
     return parseFloatArrayBsData(getTokens(str), bs, data);
   }
 
@@ -94,7 +96,7 @@ public class Parser {
     return f;
   }
   
-  public static int parseFloatArrayBsData(String[] tokens, BS bs, float[] data) {
+  public static int parseFloatArrayBsData(String[] tokens, BitSet bs, float[] data) {
     int len = data.length;
     int nTokens = tokens.length;
     int n = 0;
@@ -171,7 +173,7 @@ public class Parser {
    * @param bs
    * @param data
    */
-  public static void setSelectedFloats(float f, BS bs, float[] data) {
+  public static void setSelectedFloats(float f, BitSet bs, float[] data) {
     boolean isAll = (bs == null);
     int i0 = (isAll ? 0 : bs.nextSetBit(0));
     for (int i = i0; i >= 0 && i < data.length; i = (isAll ? i + 1 : bs.nextSetBit(i + 1)))
@@ -200,7 +202,7 @@ public class Parser {
    */
 	public static float[] parseFloatArrayFromMatchAndField(
                                                          String str,
-                                                         BS bs,
+                                                         BitSet bs,
                                                          int fieldMatch,
                                                          int fieldMatchColumnCount,
                                                          int[] matchData,

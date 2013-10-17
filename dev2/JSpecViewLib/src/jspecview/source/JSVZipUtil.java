@@ -34,9 +34,10 @@ import org.jmol.util.JmolList;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import javajs.lang.StringBuffer;
+
 import org.jmol.util.ArrayUtil;
 import org.jmol.util.Logger;
-import org.jmol.util.SB;
 
 public class JSVZipUtil {
 
@@ -68,7 +69,7 @@ public class JSVZipUtil {
    */
   static public Object getZipFileContents(InputStream is, String[] list,
                                           int listPtr) {
-    SB ret = new SB();
+    StringBuffer ret = new StringBuffer();
     if (list == null || listPtr >= list.length)
       return getZipDirectoryAsStringAndClose(is);
     String fileName = list[listPtr];
@@ -122,7 +123,7 @@ public class JSVZipUtil {
   }
   
   static public String getZipDirectoryAsStringAndClose(InputStream is) {
-    SB sb = new SB();
+    StringBuffer sb = new StringBuffer();
     String[] s = new String[0];
     try {
       s = getZipDirectoryOrErrorAndClose(is, false);
@@ -169,7 +170,7 @@ public class JSVZipUtil {
   }
   
   public static String getZipEntryAsString(ZipInputStream zis) throws IOException {
-    SB sb = new SB();
+    StringBuffer sb = new StringBuffer();
     byte[] buf = new byte[1024];
     int len;
     while (zis.available() == 1 && (len = zis.read(buf, 0, 1024)) > 0)

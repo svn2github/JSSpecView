@@ -21,12 +21,13 @@ package jspecview.dialog;
 
 import java.util.Enumeration;
 
+import javajs.lang.StringBuffer;
+
 import jspecview.api.JSVTreeNode;
 import jspecview.common.PanelNode;
 
 import org.jmol.util.JmolList;
 import org.jmol.util.Parser;
-import org.jmol.util.SB;
 
 
 
@@ -148,7 +149,7 @@ public class ViewsDialog extends JSVDialog {
 	}
 	
 	protected void combineSelected() {
-		SB sb = new SB();
+		StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < checkBoxes.size(); i++) {
 			Object cb = checkBoxes.get(i);
 			PanelNode node = treeNodes.get(i).getPanelNode();
@@ -166,7 +167,7 @@ public class ViewsDialog extends JSVDialog {
 	}
 
 	protected void viewSelected() {
-		SB sb = new SB();
+		StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < checkBoxes.size(); i++) {
 			Object cb = checkBoxes.get(i);
 			PanelNode node = treeNodes.get(i).getPanelNode();

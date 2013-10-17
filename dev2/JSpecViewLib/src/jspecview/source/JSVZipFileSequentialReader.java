@@ -27,8 +27,9 @@ import java.io.StringReader;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import javajs.lang.StringBuffer;
+
 import org.jmol.util.Logger;
-import org.jmol.util.SB;
 
 /**
  * Reads the entire contents of a ZIP file as though it were one straight file
@@ -133,7 +134,7 @@ public class JSVZipFileSequentialReader extends BufferedReader {
   private char cr = '\0';
 
   private String getEntryLine() throws IOException {
-    SB line = null;
+    StringBuffer line = null;
     while (len >= 0 && (pt < len || zis.available() == 1)) {
       int pt0 = pt;
       char ch = ' ';
@@ -154,7 +155,7 @@ public class JSVZipFileSequentialReader extends BufferedReader {
         }
       }
       if (line == null)
-        line = new SB();
+        line = new StringBuffer();
       if (pt != pt0)
         line.append(data.substring(pt0, pt + (ch == cr ? -1 : 0)));
       if (ch == cr || zis.available() != 1 || (len = zis.read(buf, 0, 1024)) < 0) {

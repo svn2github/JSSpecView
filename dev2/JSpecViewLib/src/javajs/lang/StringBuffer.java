@@ -1,5 +1,5 @@
 
-package org.jmol.util;
+package javajs.lang;
 
 /**
  * Interesting thing here is that JavaScript is 3x faster than Java in handling strings.
@@ -10,14 +10,14 @@ package org.jmol.util;
  * 
  */
 
-public class SB {
+public class StringBuffer {
   
   private java.lang.StringBuilder sb;
   String s;
   
   //TODO: JS experiment with using array and .push() here
 
-  public SB() {
+  public StringBuffer() {
     /**
      * @j2sNative
      * 
@@ -29,7 +29,7 @@ public class SB {
     }
   }
 
-  public static SB newN(int n) {
+  public static StringBuffer newN(int n) {
     /**
      * @j2sNative
      *            return new org.jmol.util.SB(); 
@@ -37,13 +37,13 @@ public class SB {
     {
       // not perfect, because it requires defining sb twice. 
       // We can do better...
-      SB sb = new SB();
+      StringBuffer sb = new StringBuffer();
       sb.sb = new java.lang.StringBuilder(n);
       return sb;
     }
   }
 
-  public static SB newS(String s) {
+  public static StringBuffer newS(String s) {
     /**
      * @j2sNative 
      * 
@@ -53,13 +53,13 @@ public class SB {
      * 
      */
     {
-    SB sb = new SB();
+    StringBuffer sb = new StringBuffer();
     sb.sb = new java.lang.StringBuilder(s);
     return sb;
     }
   }
 
-  public SB append(String s) {
+  public StringBuffer append(String s) {
     /**
      * @j2sNative
      * 
@@ -72,7 +72,7 @@ public class SB {
     return this;
   }
   
-  public SB appendC(char c) {
+  public StringBuffer appendC(char c) {
     /**
      * @j2sNative
      * 
@@ -85,7 +85,7 @@ public class SB {
     
   }
 
-  public SB appendI(int i) {
+  public StringBuffer appendI(int i) {
     /**
      * @j2sNative
      * 
@@ -98,7 +98,7 @@ public class SB {
     return this;
   }
 
-  public SB appendB(boolean b) {
+  public StringBuffer appendB(boolean b) {
     /**
      * @j2sNative
      * 
@@ -116,7 +116,7 @@ public class SB {
    * @param f
    * @return this
    */
-  public SB appendF(float f) {
+  public StringBuffer appendF(float f) {
     /**
      * @j2sNative
      * 
@@ -132,7 +132,7 @@ public class SB {
     return this;
   }
 
-  public SB appendD(double d) {
+  public StringBuffer appendD(double d) {
     /**
      * @j2sNative
      * 
@@ -148,7 +148,7 @@ public class SB {
     return this;
   }
 
-  public SB appendSB(SB buf) {
+  public StringBuffer appendSB(StringBuffer buf) {
     /**
      * @j2sNative
      * 
@@ -161,7 +161,7 @@ public class SB {
     return this;
   }
 
-  public SB appendO(Object data) {
+  public StringBuffer appendO(Object data) {
     /**
      * @j2sNative
      * 

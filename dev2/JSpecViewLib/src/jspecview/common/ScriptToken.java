@@ -25,7 +25,8 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.jmol.util.SB;
+import javajs.lang.StringBuffer;
+
 
 
 
@@ -249,7 +250,7 @@ public enum ScriptToken {
   public static String getNameList(JmolList<ScriptToken> list) {
     if (list.size() == 0)
       return "";
-    SB sb = new SB();
+    StringBuffer sb = new StringBuffer();
     for (int i = 0; i < list.size(); i++)
       sb.append(",").append(list.get(i).toString());
     return sb.toString().substring(1);

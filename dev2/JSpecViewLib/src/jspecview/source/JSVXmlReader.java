@@ -22,7 +22,8 @@ package jspecview.source;
 import java.io.BufferedReader;
 import java.util.Hashtable;
 
-import org.jmol.util.SB;
+import javajs.lang.StringBuffer;
+
 
 
 public class JSVXmlReader {
@@ -135,7 +136,7 @@ public class JSVXmlReader {
   }
 
   public String getCharacters() throws Exception {
-    SB sb = new SB();
+    StringBuffer sb = new StringBuffer();
     thisEvent = buffer.peek();
     int eventType = thisEvent.getEventType();
 
@@ -207,16 +208,16 @@ public class JSVXmlReader {
 
   private class DataString {
 
-    SB data;
+    StringBuffer data;
     protected BufferedReader reader;
     int ptr;
     int ptEnd;
 
     DataString() {
-      this.data = new SB();
+      this.data = new StringBuffer();
     }
 
-    DataString(SB data) {
+    DataString(StringBuffer data) {
       this.data = data;
       ptEnd = data.length();
     }
@@ -228,7 +229,7 @@ public class JSVXmlReader {
     protected void flush() {
       if (data.length() < 1000 || ptEnd - ptr > 100)
         return;
-      data = new SB().append(data.substring(ptr));
+      data = new StringBuffer().append(data.substring(ptr));
       //System.out.println(data);
       ptr = 0;
       ptEnd = data.length();
@@ -380,7 +381,7 @@ public class JSVXmlReader {
     private void getAttributes() {
       attributes = new Hashtable<String, String>();
       DataString d = new DataString(
-          new SB().append(text));
+          new StringBuffer().append(text));
       try {
         if (d.skipTo(' ', false) < 0)
           return;

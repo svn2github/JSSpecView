@@ -25,6 +25,8 @@
 
 package org.jmol.util;
 
+import javajs.lang.StringBuffer;
+
 
 /**
  * 
@@ -769,7 +771,7 @@ public class BitSet32 implements Cloneable {
 
     int numBits = (wordsInUse > 128) ? cardinality() : wordsInUse
         * BITS_PER_WORD;
-    SB b = SB.newN(6 * numBits + 2);
+    StringBuffer b = StringBuffer.newN(6 * numBits + 2);
     b.appendC('{');
 
     int i = nextSetBit(0);

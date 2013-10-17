@@ -22,8 +22,9 @@ package jspecview.source;
 import java.io.BufferedReader;
 import java.io.IOException;
 
+import javajs.lang.StringBuffer;
+
 import org.jmol.util.Logger;
-import org.jmol.util.SB;
 
 
 /**
@@ -113,7 +114,7 @@ public class JDXSourceStreamTokenizer {
     if (label == null)
       return null;
     int i;
-    SB str = new SB();
+    StringBuffer str = new StringBuffer();
 
     for (i = 0; i < label.length(); i++) {
       switch (label.charAt(i)) {
@@ -142,7 +143,7 @@ public class JDXSourceStreamTokenizer {
   public String getValue() {
     if (value != null)
       return value;
-    SB sb = new SB().append(line);
+    StringBuffer sb = new StringBuffer().append(line);
     if (sb.length() > 0)
       sb.appendC('\n');
     try {
@@ -167,12 +168,12 @@ public class JDXSourceStreamTokenizer {
       return null;
     if (line.indexOf("$$") < 0)
       return line.trim();
-    SB sb = new SB().append(line);
+    StringBuffer sb = new StringBuffer().append(line);
     return trimLines(sb);
   }
 
   String flushLine() {
-    SB sb = new SB().append(line);
+    StringBuffer sb = new StringBuffer().append(line);
     line = null;
     return trimLines(sb);
   }
@@ -183,7 +184,7 @@ public class JDXSourceStreamTokenizer {
     return line;
   }
 
-  private static String trimLines(SB v) {
+  private static String trimLines(StringBuffer v) {
     int n = v.length();
     int ilast = n - 1;
     int vpt = ptNonWhite(v, 0, n);
@@ -230,19 +231,19 @@ public class JDXSourceStreamTokenizer {
     return (new String(buffer)).substring(0, pt).trim();
   }
 
-  private static int ptNonWhite(SB v, int pt, int n) {
+  private static int ptNonWhite(StringBuffer v, int pt, int n) {
     while (pt < n && Character.isWhitespace(v.charAt(pt))) 
       pt++;
     return pt;
   }
 
-  private static int ptNonSpace(SB v, int pt, int n) {
+  private static int ptNonSpace(StringBuffer v, int pt, int n) {
     while (pt < n && (v.charAt(pt) == ' ' || v.charAt(pt) == '\t'))
       pt++;
     return pt;
   }
 
-  private static int ptNonSpaceRev(SB v, int pt) {
+  private static int ptNonSpaceRev(StringBuffer v, int pt) {
     while (--pt >= 0 && (v.charAt(pt) == ' ' || v.charAt(pt) == '\t')) {
       // move on back one character
     }

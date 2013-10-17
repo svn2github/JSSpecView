@@ -29,8 +29,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.jmol.util.BS;
-import org.jmol.util.SB;
+import javajs.lang.StringBuffer;
+import javajs.util.BitSet;
+
 import org.jmol.util.Txt;
 
 
@@ -53,7 +54,7 @@ public class JSVEscape {
         int pt = -1;
         char ch = escapable.charAt(i++);
         char ch2 = escapable.charAt(i++);
-        SB sb = new SB();
+        StringBuffer sb = new StringBuffer();
         int pt0 = 0;
         while ((pt = str.indexOf(ch, pt + 1)) >= 0) {
           sb.append(str.substring(pt0, pt)).appendC('\\').appendC(ch2);
@@ -91,7 +92,7 @@ public class JSVEscape {
 
     //Logger.debug(infoType+" -- "+info);
 
-    SB sb = new SB();
+    StringBuffer sb = new StringBuffer();
     String sep = "";
     if (info == null)
       return packageJSON(infoType, (String) null, addCR);
@@ -236,7 +237,7 @@ public class JSVEscape {
     return "\"" + s + "\"";
   }
 
-  private static String packageJSON(String infoType, SB sb, boolean addCR) {
+  private static String packageJSON(String infoType, StringBuffer sb, boolean addCR) {
     return packageJSON(infoType, sb.toString(), addCR);
   }
 
@@ -256,7 +257,7 @@ public class JSVEscape {
     return url;
   }
 
-	public static BS unescapeBitSet(String str) {
+	public static BitSet unescapeBitSet(String str) {
     char ch;
     int len;
     if (str == null || (len = (str = str.trim()).length()) < 4
@@ -282,7 +283,7 @@ public class JSVEscape {
       } catch (NumberFormatException e) {
         return null;
       }
-    BS bs = BS.newN(lastN);
+    BitSet bs = BitSet.newN(lastN);
     lastN = -1;
     int iPrev = -1;
     int iThis = -2;

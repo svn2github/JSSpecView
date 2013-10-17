@@ -6,7 +6,8 @@ import java.util.Hashtable;
 
 import java.util.Map;
 
-import org.jmol.util.BS;
+import javajs.util.BitSet;
+
 import org.jmol.util.JmolFont;
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
@@ -171,7 +172,7 @@ public class GraphSet implements XYScaleConverter {
 	}
 
 	private boolean stackSelected = false;
-	private BS bsSelected = new BS();
+	private BitSet bsSelected = new BitSet();
 
 	// needed by PanelData
 
@@ -1800,7 +1801,7 @@ public class GraphSet implements XYScaleConverter {
 	private void drawPlot(Object g, int index, Coordinate[] xyCoords,
 			boolean isContinuous, int yOffset, boolean isGrey, IntegralData ig) {
 		boolean isIntegral = (ig != null);
-		BS bsDraw = (ig == null ? null : ig.getBitSet());
+		BitSet bsDraw = (ig == null ? null : ig.getBitSet());
 		boolean fillPeaks = (!isIntegral && !isGrey
 				&& pendingIntegral != null && pendingIntegral.spec == spectra
 				.get(index));

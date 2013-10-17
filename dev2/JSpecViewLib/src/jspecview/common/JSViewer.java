@@ -15,10 +15,11 @@ import java.util.Properties;
 
 import java.util.Map;
 
+import javajs.lang.StringBuffer;
+
 import org.jmol.util.Dimension;
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
-import org.jmol.util.SB;
 import org.jmol.util.Txt;
 
 import jspecview.api.ExportInterface;
@@ -665,7 +666,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 				try {
 					String file = "file=" + JSVEscape.eS(source.getFilePath());
 					JmolList<PeakInfo> peaks = source.getSpectra().get(0).getPeakList();
-					SB sb = new SB();
+					StringBuffer sb = new StringBuffer();
 					sb.append("[");
 					int n = peaks.size();
 					for (int i = 0; i < n; i++) {
@@ -928,7 +929,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		if (value.indexOf("*") < 0) {
 			// replace "3.1.1" with "3.1*1"
 			String[] tokens = value.split(" ");
-			SB sb = new SB();
+			StringBuffer sb = new StringBuffer();
 			for (int i = 0; i < tokens.length; i++) {
 				int pt = tokens[i].indexOf('.');
 				if (pt != tokens[i].lastIndexOf('.'))
@@ -956,7 +957,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		String id0 = (selectedPanel == null ? prefix : PanelNode.findNode(
 				selectedPanel, panelNodes).id);
 		id0 = id0.substring(0, id0.indexOf(".") + 1);
-		SB sb = new SB();
+		StringBuffer sb = new StringBuffer();
 		int n = list.size();
 		String idLast = null;
 		for (int i = 0; i < n; i++) {

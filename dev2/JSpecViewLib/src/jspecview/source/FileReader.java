@@ -33,10 +33,11 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
-import org.jmol.util.BS;
+import javajs.lang.StringBuffer;
+import javajs.util.BitSet;
+
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
-import org.jmol.util.SB;
 import org.jmol.util.Txt;
 
 import jspecview.common.Coordinate;
@@ -81,7 +82,7 @@ public class FileReader {
   }
   private JDXSource source;
   private JDXSourceStreamTokenizer t;
-  private SB errorLog;
+  private StringBuffer errorLog;
   private boolean obscure;
 
   private boolean done;
@@ -189,7 +190,7 @@ public class FileReader {
     source = new JDXSource(JDXSource.TYPE_SIMPLE, filePath);
     isZipFile = (br instanceof JSVZipFileSequentialReader);
     t = new JDXSourceStreamTokenizer(br);
-    errorLog = new SB();
+    errorLog = new StringBuffer();
 
     String label = null;
 
@@ -633,11 +634,11 @@ public class FileReader {
 					Object[] o = htSets.get(key);
 					if (o == null) {
 						o = new Object[] { stringInfo,
-								(atoms == null ? null : new BS()) };
+								(atoms == null ? null : new BitSet()) };
 						htSets.put(key, o);
 						list.addLast(o);
 					}
-					BS bs = (BS) o[1];
+					BitSet bs = (BitSet) o[1];
 					if (atoms != null && bs != null) {
 						atoms = atoms.replace(',', ' ');
 						bs.or(unescapeBitSet("({" + atoms + "})"));
@@ -686,7 +687,7 @@ public class FileReader {
 	}
 
 
-	private BS unescapeBitSet(String s) {
+	private BitSet unescapeBitSet(String s) {
 		return JSVEscape.unescapeBitSet(s);
 	}
 
@@ -740,7 +741,7 @@ public class FileReader {
    */
   private static boolean readDataLabel(JDXDataObject spectrum, String label,
                                        JDXSourceStreamTokenizer t,
-                                       SB errorLog, boolean obscure) {
+                                       StringBuffer errorLog, boolean obscure) {
 
     if (readHeaderLabel(spectrum, label, t, errorLog, obscure))
       return true;
@@ -868,7 +869,7 @@ public class FileReader {
   }
 
   private static boolean readHeaderLabel(JDXHeader jdxHeader, String label,
-                                         JDXSourceStreamTokenizer t, SB errorLog,
+                                         JDXSourceStreamTokenizer t, StringBuffer errorLog,
                                          boolean obscure) {
     if (label.equals("##TITLE")) {
       String value = t.getValue();

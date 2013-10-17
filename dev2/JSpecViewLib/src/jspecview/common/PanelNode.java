@@ -5,8 +5,9 @@ package jspecview.common;
 
 import java.util.Map;
 
+import javajs.lang.StringBuffer;
+
 import org.jmol.util.JmolList;
-import org.jmol.util.SB;
 
 import jspecview.api.JSVPanel;
 import jspecview.api.JSVTreeNode;
@@ -107,7 +108,7 @@ public class PanelNode {
   }
 
 	static public String getSpectrumListAsString(JmolList<PanelNode> panelNodes) {
-      SB sb = new SB();
+      StringBuffer sb = new StringBuffer();
       for (int i = 0; i < panelNodes.size(); i++) {
       	String id = panelNodes.get(i).id;
         sb.append(" ").append(id);
