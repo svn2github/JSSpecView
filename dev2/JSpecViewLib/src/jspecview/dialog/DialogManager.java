@@ -148,10 +148,11 @@ abstract public class DialogManager {
 	/**
 	 * processing window closing event from platform DialogManager
 	 * 
-	 * @param dialog
+	 * @param dialogId
 	 */
-	protected void processWindowClosing(String dialog) {
-		dialogCallback(dialog, "windowClosing", null);
+	protected void processWindowClosing(String dialogId) {
+		dialogCallback(dialogId, "windowClosing", null);
+		htDialogs.remove(dialogId);
 	}
 
 	/**
