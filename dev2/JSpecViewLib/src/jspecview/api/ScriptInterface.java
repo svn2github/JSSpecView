@@ -2,7 +2,8 @@ package jspecview.api;
 
 import java.net.URL;
 
-import org.jmol.util.JmolList;
+import javajs.util.List;
+
 
 
 import jspecview.common.PanelNode;
@@ -61,7 +62,7 @@ public interface ScriptInterface {
 
 	public JSVPanel siGetNewJSVPanel(JDXSpectrum spec);
 
-	public JSVPanel siGetNewJSVPanel2(JmolList<JDXSpectrum> specs);
+	public JSVPanel siGetNewJSVPanel2(List<JDXSpectrum> specs);
 
 	public PanelNode siGetNewPanelNode(String id, String fileName,
 			JDXSource source, JSVPanel jsvp);
@@ -74,7 +75,7 @@ public interface ScriptInterface {
 
 	public int siIncrementScriptLevelCount(int i);
 
-	public void siOpenDataOrFile(String data, String name, JmolList<JDXSpectrum> specs,
+	public void siOpenDataOrFile(String data, String name, List<JDXSpectrum> specs,
 			String url, int firstSpec, int lastSpec, boolean doCheck);
 
 	public void siProcessCommand(String script);

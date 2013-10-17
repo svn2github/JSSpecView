@@ -22,7 +22,7 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package org.jmol.util;
+package javajs.util;
 
 import java.util.ArrayList;
 
@@ -31,10 +31,10 @@ import java.util.ArrayList;
  * 
  * @param <V>
  */
-public class JmolList<V> extends ArrayList<V> {
+public class List<V> extends ArrayList<V> {
 
   //needed?
-  public JmolList() {
+  public List() {
     super();  
   }
   

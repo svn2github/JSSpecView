@@ -1,10 +1,10 @@
 package jspecview.export;
 
+import javajs.util.List;
 import jspecview.api.JSVPanel;
 import jspecview.common.JSViewer;
 import jspecview.source.JDXSpectrum;
 
-import org.jmol.util.JmolList;
 
 public interface ExportInterface {
 
@@ -16,7 +16,7 @@ public interface ExportInterface {
 	 * 
 	 * @return message for status line
 	 */
-	String exportCmd(JSVPanel jsvp, JmolList<String> tokens,
+	String exportCmd(JSVPanel jsvp, List<String> tokens,
 			boolean forInkscape);
 
 	void exportSpectrum(JSViewer viewer, String type);

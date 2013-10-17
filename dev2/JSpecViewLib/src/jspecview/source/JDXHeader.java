@@ -1,6 +1,6 @@
 package jspecview.source;
 
-import org.jmol.util.JmolList;
+import javajs.util.List;
 
 /**
  * could be a spectrum or a source
@@ -218,7 +218,7 @@ public class JDXHeader {
   }
 
   // Table of header variables specific to the jdx source or spectrum
-  protected JmolList<String[]> headerTable = new JmolList<String[]>();
+  protected List<String[]> headerTable = new List<String[]>();
   
   /**
    * Sets the headerTable for this Source or spectrum
@@ -226,7 +226,7 @@ public class JDXHeader {
    * @param table
    *        the header table
    */
-  public void setHeaderTable(JmolList<String[]> table) {
+  public void setHeaderTable(List<String[]> table) {
     headerTable = table;
   }
 
@@ -235,7 +235,7 @@ public class JDXHeader {
    * 
    * @return the table of headers
    */
-  public JmolList<String[]> getHeaderTable() {
+  public List<String[]> getHeaderTable() {
     return headerTable;
   }
 

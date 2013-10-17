@@ -53,7 +53,8 @@ import java.net.URL;
 import java.util.Hashtable;
 import java.util.Map;
 
-import org.jmol.util.JmolList;
+import javajs.util.List;
+
 import org.jmol.util.Logger;
 import org.jmol.util.Txt;
 
@@ -498,7 +499,7 @@ public class JSVApplet implements JSVAppletInterface,
 //		spectrumPanel.setVisible(b);
 	}
 
-	public JSVPanel getJSVPanel(JSViewer viewer, JmolList<JDXSpectrum> specs,
+	public JSVPanel getJSVPanel(JSViewer viewer, List<JDXSpectrum> specs,
 			int initialStartIndex, int initialEndIndex) {
 		return JsPanel.getPanelMany(viewer, specs, initialStartIndex,
 				initialEndIndex);

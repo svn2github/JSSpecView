@@ -23,10 +23,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Hashtable;
 
-import org.jmol.util.JmolList;
 import java.util.Map;
 
 import javajs.lang.StringBuffer;
+import javajs.util.List;
 
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
@@ -47,7 +47,7 @@ class FormContext {
 
   String[] tokens;
   Hashtable<String, Object> context = new Hashtable<String, Object>();
-  JmolList<FormToken> formTokens;
+  List<FormToken> formTokens;
 
   FormContext() {
   }
@@ -66,7 +66,7 @@ class FormContext {
   }
 
   int commandLevel;
-  JmolList<Integer> cmds = new JmolList<Integer>();
+  List<Integer> cmds = new List<Integer>();
   String strError;
 
   final static int VT_DATA = 0;
@@ -85,7 +85,7 @@ class FormContext {
     int endPtr = -1;
     int ptr;
     String var;
-    JmolList<Object> vc;
+    List<Object> vc;
     int pointCount;
     String data;
 
@@ -163,7 +163,7 @@ class FormContext {
   }
 
   private String getFormTokens(String template) {
-    formTokens = new JmolList<FormToken>();
+    formTokens = new List<FormToken>();
     if (template.indexOf("\r\n") >= 0)
       template = Txt.replaceAllCharacters(template, "\r\n", "\n");
     template = template.replace('\r', '\n');
@@ -284,8 +284,8 @@ class FormContext {
     // #foreach  $xxx in XXX
     vt.var = tokens[1].substring(1);
     Object vc = context.get(tokens[3].substring(1));
-    if (vc instanceof JmolList)
-      vt.vc = (JmolList<Object>) vc;
+    if (vc instanceof List)
+      vt.vc = (List<Object>) vc;
     vt.cmdPtr = vt.ptr;
     vt.pointCount = -1;
   }

@@ -29,13 +29,13 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import org.jmol.util.JmolList;
 
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import javajs.array.ArrayUtil;
 import javajs.lang.StringBuffer;
+import javajs.util.List;
 
 import org.jmol.util.Logger;
 
@@ -148,7 +148,7 @@ public class JSVZipUtil {
   }
   
   private static String[] getZipDirectoryOrErrorAndClose(InputStream is, boolean addManifest) throws IOException {
-    JmolList<String> v = new JmolList<String>();
+    List<String> v = new List<String>();
     ZipInputStream zis = new ZipInputStream(is);
     ZipEntry ze;
     String manifest = null;

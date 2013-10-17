@@ -20,8 +20,9 @@
 package jspecview.application;
 
 import java.awt.event.KeyEvent;
-import org.jmol.util.JmolList;
 
+
+import javajs.util.List;
 
 import javax.swing.JTextField;
 
@@ -37,7 +38,7 @@ public class CommandHistory {
 
   private JSViewer viewer;
   private JTextField input;
-  private JmolList<String> cmdList = new JmolList<String>();
+  private List<String> cmdList = new List<String>();
   private int cmdPt = -1;
   private int cmdOffset = 0;
 

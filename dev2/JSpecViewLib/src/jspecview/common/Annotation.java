@@ -25,11 +25,11 @@
 package jspecview.common;
 
 import javajs.api.GenericColor;
+import javajs.util.List;
 import jspecview.api.JSVGraphics;
 import jspecview.source.JDXSpectrum;
 import jspecview.util.JSVColorUtil;
 
-import org.jmol.util.JmolList;
 
 /**
  * The <code>Annotation</code> class stores the spectral x and pixel y values of an
@@ -86,7 +86,7 @@ public class Annotation extends Coordinate {
 
 
 	public static Annotation getColoredAnnotation(JSVGraphics g2d,
-			JDXSpectrum spec, JmolList<String> args, Annotation lastAnnotation) {
+			JDXSpectrum spec, List<String> args, Annotation lastAnnotation) {
 		String arg;
 		int xPt = 0;
 		int yPt = 1;

@@ -38,7 +38,6 @@ import jspecview.common.ScriptToken;
 import jspecview.common.Annotation.AType;
 import jspecview.source.JDXSpectrum;
 
-import org.jmol.util.JmolList;
 
 import java.util.Map;
 import java.util.Properties;
@@ -46,6 +45,7 @@ import java.util.StringTokenizer;
 import java.util.Hashtable;
 
 import javajs.lang.StringBuffer;
+import javajs.util.List;
 
 
 abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
@@ -76,16 +76,16 @@ abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
 //	private int titleWidthMax = 20;
 
 	private Map<String, Object> htMenus = new Hashtable<String, Object>();
-	private JmolList<Object> SignedOnly = new JmolList<Object>();
-	private JmolList<Object> AppletOnly = new JmolList<Object>();
+	private List<Object> SignedOnly = new List<Object>();
+	private List<Object> AppletOnly = new List<Object>();
 
 	private boolean allowSignedFeatures;
 	private boolean isJS;
 	private boolean isApplet;
 	private boolean isSigned;
 
-	private JmolList<String> cnmrPeaks;
-	private JmolList<String> hnmrPeaks;
+	private List<String> cnmrPeaks;
+	private List<String> hnmrPeaks;
 	private int aboutComputedMenuBaseCount;
 
 	public JSVGenericPopup() {
@@ -456,7 +456,7 @@ abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
 		menuEnable(menu, isOK);
 	}
 
-	private boolean setSpectraMenu(Object menu, JmolList<String> peaks) {
+	private boolean setSpectraMenu(Object menu, List<String> peaks) {
 		if (menu == null)
 			return false;
 		menuEnable(menu, false);
@@ -662,7 +662,7 @@ abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
 		return false;
 	}
 
-	public void setCompoundMenu(JmolList<PanelNode> panelNodes,
+	public void setCompoundMenu(List<PanelNode> panelNodes,
 			boolean allowCompoundMenu) {
 		// TODO Auto-generated method stub
 		

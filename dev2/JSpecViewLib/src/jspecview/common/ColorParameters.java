@@ -24,8 +24,8 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import javajs.api.GenericColor;
+import javajs.util.List;
 
-import org.jmol.util.JmolList;
 
 import jspecview.api.JSVPanel;
 import jspecview.util.JSVColorUtil;
@@ -206,7 +206,7 @@ public abstract class ColorParameters extends Parameters {
       return plotColors;
     }
     StringTokenizer st = new StringTokenizer(plotColorsStr, ",;.- ");
-    JmolList<GenericColor> colors = new JmolList<GenericColor>();
+    List<GenericColor> colors = new List<GenericColor>();
     try {
       while (st.hasMoreTokens())
         colors.addLast(getColorFromString(st.nextToken()));

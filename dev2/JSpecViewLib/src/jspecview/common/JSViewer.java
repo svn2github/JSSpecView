@@ -4,7 +4,6 @@ import org.jmol.api.ApiPlatform;
 import org.jmol.api.Interface;
 import org.jmol.api.JSmolInterface;
 import org.jmol.api.PlatformViewer;
-import org.jmol.util.JmolList;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -16,6 +15,7 @@ import java.util.Properties;
 import java.util.Map;
 
 import javajs.lang.StringBuffer;
+import javajs.util.List;
 import javajs.awt.Dimension;
 
 import org.jmol.util.Logger;
@@ -76,13 +76,13 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 	public JSVGraphics g2d;
 	public JSVTree spectraTree;
 	public JDXSource currentSource;
-	public JmolList<PanelNode> panelNodes;
+	public List<PanelNode> panelNodes;
 	public ColorParameters parameters;
 	public RepaintManager repaintManager;
 	public JSVPanel selectedPanel;
 	public JSVMainPanel viewPanel; // alias for spectrumPanel
 	public Properties properties; // application only
-	public JmolList<String> scriptQueue;
+	public List<String> scriptQueue;
 	public JSVFileHelper fileHelper;
 	public JSVPopupMenu jsvpPopupMenu;
 	private DialogManager dialogManager;
@@ -136,7 +136,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		parameters.setName("applet");
 		fileHelper = ((JSVFileHelper) getAwtInterface("FileHelper")).set(this);
 		isSingleThreaded = apiPlatform.isSingleThreaded();
-		panelNodes = new JmolList<PanelNode>();
+		panelNodes = new List<PanelNode>();
 		repaintManager = new RepaintManager(this);
 		if (!isApplet)
 			setPopupMenu(true, true);
@@ -419,7 +419,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 
 	private void execPeak(String value) {
 		try {
-			JmolList<String> tokens = ScriptToken.getTokens(value);
+			List<String> tokens = ScriptToken.getTokens(value);
 			value = " type=\"" + tokens.get(0).toUpperCase() + "\" _match=\""
 					+ Txt.trimQuotes(tokens.get(1).toUpperCase()) + "\"";
 			if (tokens.size() > 2 && tokens.get(2).equalsIgnoreCase("all"))
@@ -438,7 +438,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 			if (jsvp != null)
 				jsvp.getPanelData().getPeakListing(null, b);
 		} else {
-			JmolList<String> tokens = ScriptToken.getTokens(value);
+			List<String> tokens = ScriptToken.getTokens(value);
 			for (int i = tokens.size(); --i >= 0;) {
 				String token = tokens.get(i);
 				int pt = token.indexOf("=");
@@ -465,7 +465,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 
 	private boolean execZoom(String value) {
 		double x1 = 0, x2 = 0, y1 = 0, y2 = 0;
-		JmolList<String> tokens;
+		List<String> tokens;
 		tokens = ScriptToken.getTokens(value);
 		switch (tokens.size()) {
 		default:
@@ -514,7 +514,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		}
 	}
 
-	private void scaleSelectedBy(JmolList<PanelNode> nodes, String value) {
+	private void scaleSelectedBy(List<PanelNode> nodes, String value) {
 		try {
 			double f = Double.parseDouble(value);
 			for (int i = nodes.size(); --i >= 0;)
@@ -524,10 +524,10 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 	}
 
 	private void execSelect(String value) {
-		JmolList<PanelNode> nodes = panelNodes;
+		List<PanelNode> nodes = panelNodes;
 		for (int i = nodes.size(); --i >= 0;)
 			nodes.get(i).jsvp.getPanelData().selectFromEntireSet(Integer.MIN_VALUE);
-		JmolList<JDXSpectrum> speclist = new JmolList<JDXSpectrum>();
+		List<JDXSpectrum> speclist = new List<JDXSpectrum>();
 		fillSpecList(value, speclist, false);
 	}
 
@@ -536,7 +536,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 			checkOverlay();
 			return;
 		}
-		JmolList<JDXSpectrum> speclist = new JmolList<JDXSpectrum>();
+		List<JDXSpectrum> speclist = new List<JDXSpectrum>();
 		String strlist = fillSpecList(value, speclist, true);
 		if (speclist.size() > 0)
 			si.siOpenDataOrFile(null, strlist, speclist, strlist, -1, -1, false);
@@ -587,7 +587,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 	}
 
 	private void setYScale(String value) {
-		JmolList<String> tokens = ScriptToken.getTokens(value);
+		List<String> tokens = ScriptToken.getTokens(value);
 		int pt = 0;
 		boolean isAll = false;
 		if (tokens.size() > 1 && tokens.get(0).equalsIgnoreCase("ALL")) {
@@ -665,7 +665,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 					return;
 				try {
 					String file = "file=" + JSVEscape.eS(source.getFilePath());
-					JmolList<PeakInfo> peaks = source.getSpectra().get(0).getPeakList();
+					List<PeakInfo> peaks = source.getSpectra().get(0).getPeakList();
 					StringBuffer sb = new StringBuffer();
 					sb.append("[");
 					int n = peaks.size();
@@ -886,7 +886,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 			return map0;
 		if (map0 != null)
 			map.put("current", map0);
-		JmolList<Map<String, Object>> info = new JmolList<Map<String, Object>>();
+		List<Map<String, Object>> info = new List<Map<String, Object>>();
 		for (int i = 0; i < panelNodes.size(); i++) {
 			JSVPanel jsvp = panelNodes.get(i).jsvp;
 			if (jsvp == null)
@@ -917,12 +917,12 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 	 * @param isView
 	 * @return comma-separated list, for the title
 	 */
-	private String fillSpecList(String value, JmolList<JDXSpectrum> speclist,
+	private String fillSpecList(String value, List<JDXSpectrum> speclist,
 			boolean isView) {
 
 		String prefix = "1.";
-		JmolList<String> list;
-		JmolList<String> list0 = null;
+		List<String> list;
+		List<String> list0 = null;
 		boolean isNone = (value.equalsIgnoreCase("NONE"));
 		if (isNone || value.equalsIgnoreCase("all"))
 			value = "*";
@@ -1028,7 +1028,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 	}
 
 	private void addSpecToList(PanelData pd, double userYFactor, int isubspec,
-			JmolList<JDXSpectrum> list, boolean isView) {
+			List<JDXSpectrum> list, boolean isView) {
 		if (isView) {
 			JDXSpectrum spec = pd.getSpectrumAt(0);
 			spec.setUserYFactor(Double.isNaN(userYFactor) ? 1 : userYFactor);
@@ -1053,7 +1053,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 	}
 
 	public int openDataOrFile(String data, String name,
-			JmolList<JDXSpectrum> specs, String url, int firstSpec, int lastSpec,
+			List<JDXSpectrum> specs, String url, int firstSpec, int lastSpec,
 			boolean isAppend) {
 		if ("NONE".equals(name)) {
 			close("View*");
@@ -1159,7 +1159,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 						&& panelNodes.get(i).fileName.startsWith(value))
 					si.siCloseSource(panelNodes.get(i).source);
 		} else if (value.equals("selected")) {
-			JmolList<JDXSource> list = new JmolList<JDXSource>();
+			List<JDXSource> list = new List<JDXSource>();
 			JDXSource lastSource = null;
 			for (int i = panelNodes.size(); --i >= 0;) {
 				JDXSource source = panelNodes.get(i).source;
@@ -1182,7 +1182,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 	}
 
 	public void load(String value) {
-		JmolList<String> tokens = ScriptToken.getTokens(value);
+		List<String> tokens = ScriptToken.getTokens(value);
 		String filename = tokens.get(0);
 		int pt = 0;
 		boolean isAppend = filename.equalsIgnoreCase("APPEND");
@@ -1213,7 +1213,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 
 	public void combineSpectra(String name) {
 		JDXSource source = currentSource;
-		JmolList<JDXSpectrum> specs = source.getSpectra();
+		List<JDXSpectrum> specs = source.getSpectra();
 		JSVPanel jsvp = si.siGetNewJSVPanel2(specs);
 		jsvp.setTitle(source.getTitle());
 		if (jsvp.getTitle().equals("")) {
@@ -1234,7 +1234,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		// Remove nodes and dispose of frames
 		JSVTreeNode rootNode = spectraTree.getRootNode();
 		String fileName = (source == null ? null : source.getFilePath());
-		JmolList<JSVTreeNode> toDelete = new JmolList<JSVTreeNode>();
+		List<JSVTreeNode> toDelete = new List<JSVTreeNode>();
 		Enumeration<JSVTreeNode> enume = rootNode.children();
 		while (enume.hasMoreElements()) {
 			JSVTreeNode node = enume.nextElement();
@@ -1313,7 +1313,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 
 	public void splitSpectra() {
 		JDXSource source = currentSource;
-		JmolList<JDXSpectrum> specs = source.getSpectra();
+		List<JDXSpectrum> specs = source.getSpectra();
 		JSVPanel[] panels = new JSVPanel[specs.size()];
 		JSVPanel jsvp = null;
 		for (int i = 0; i < specs.size(); i++) {

@@ -52,6 +52,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import javajs.api.GenericColor;
+import javajs.util.List;
 
 import javax.imageio.ImageIO;
 import javax.print.attribute.Attribute;
@@ -67,7 +68,6 @@ import javax.swing.ToolTipManager;
 import org.jmol.api.ApiPlatform;
 import org.jmol.api.JmolMouseInterface;
 import org.jmol.util.JmolFont;
-import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
 import org.jmol.util.Txt;
 
@@ -145,7 +145,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
    *        the end index
    * @return this
    */
-  public static AwtPanel getPanelMany(JSViewer viewer, JmolList<JDXSpectrum> spectra, int startIndex, int endIndex) {
+  public static AwtPanel getPanelMany(JSViewer viewer, List<JDXSpectrum> spectra, int startIndex, int endIndex) {
   	AwtPanel p = new AwtPanel(viewer);
     p.pd.initMany(spectra, startIndex, endIndex);
     return p;

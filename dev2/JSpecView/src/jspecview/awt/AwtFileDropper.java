@@ -10,6 +10,7 @@ import java.awt.dnd.DropTargetListener;
 import java.io.File;
 
 import javajs.lang.StringBuffer;
+import javajs.util.List;
 
 import javax.swing.JOptionPane;
 
@@ -17,7 +18,6 @@ import jspecview.api.JSVFileDropper;
 import jspecview.common.JSViewer;
 import jspecview.util.JSVEscape;
 
-import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
 
 
@@ -84,8 +84,8 @@ public class AwtFileDropper implements JSVFileDropper, DropTargetListener {
 				Logger.error("transfer failed");
 			}
 			// if o is still null we had an exception
-			if (o instanceof JmolList) {
-				JmolList<File> list = (JmolList<File>) o;
+			if (o instanceof List) {
+				List<File> list = (List<File>) o;
 				dtde.getDropTargetContext().dropComplete(true);
 				dtde = null;
 				StringBuffer sb = new StringBuffer();

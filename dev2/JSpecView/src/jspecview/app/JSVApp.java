@@ -43,7 +43,8 @@ import java.net.URL;
 
 import java.util.Map;
 
-import org.jmol.util.JmolList;
+import javajs.util.List;
+
 import org.jmol.util.Logger;
 
 import jspecview.api.AppletFrame;
@@ -568,7 +569,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	 * commandWatcherThread.interrupt(); }
 	 */
 	public void siOpenDataOrFile(String data, String name,
-			JmolList<JDXSpectrum> specs, String url, int firstSpec, int lastSpec,
+			List<JDXSpectrum> specs, String url, int firstSpec, int lastSpec,
 			boolean isAppend) {
 		int status = viewer.openDataOrFile(data, name, specs, url, firstSpec,
 				lastSpec, isAppend);
@@ -790,7 +791,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 				obscureTitleFromUser == Boolean.TRUE, loadImaginary, -1, -1);
 	}
 
-	public JSVPanel siGetNewJSVPanel2(JmolList<JDXSpectrum> specs) {
+	public JSVPanel siGetNewJSVPanel2(List<JDXSpectrum> specs) {
 		JSVPanel jsvp = appletFrame.getJSVPanel(viewer, specs, initialStartIndex,
 				initialEndIndex);
 		initialEndIndex = initialStartIndex = -1;
@@ -804,7 +805,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 			initialEndIndex = initialStartIndex = -1;
 			return null;
 		}
-		JmolList<JDXSpectrum> specs = new JmolList<JDXSpectrum>();
+		List<JDXSpectrum> specs = new List<JDXSpectrum>();
 		specs.addLast(spec);
 		JSVPanel jsvp = appletFrame.getJSVPanel(viewer, specs, initialStartIndex,
 				initialEndIndex);
@@ -877,7 +878,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 		viewer.runScript(script);
 	}
 
-	public JmolList<String> getScriptQueue() {
+	public List<String> getScriptQueue() {
 		return viewer.scriptQueue;
 	}
 	

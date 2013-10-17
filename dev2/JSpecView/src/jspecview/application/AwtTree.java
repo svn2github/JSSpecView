@@ -1,7 +1,8 @@
 package jspecview.application;
 
-import org.jmol.util.JmolList;
 
+
+import javajs.util.List;
 
 import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
@@ -64,7 +65,7 @@ public class AwtTree extends JTree implements JSVTree {
 			JDXSource source, JSVPanel[] panels) {
   	AwtTree tree = (AwtTree) viewer.spectraTree;
 		JSVTreeNode rootNode = tree.getRootNode();
-    JmolList<PanelNode> panelNodes = viewer.panelNodes;
+    List<PanelNode> panelNodes = viewer.panelNodes;
 
     String fileName = JSVFileManager.getName(source.getFilePath());
     PanelNode panelNode = new PanelNode(null, fileName, source, null);
@@ -99,7 +100,7 @@ public class AwtTree extends JTree implements JSVTree {
 		return new AwtTreePath(path);
 	}
 
-	public void deleteNodes(JmolList<JSVTreeNode> toDelete) {
+	public void deleteNodes(List<JSVTreeNode> toDelete) {
 	  for (int i = 0; i < toDelete.size(); i++) {
 	  	spectraTreeModel.removeNodeFromParent((MutableTreeNode) toDelete.get(i));
 	  }

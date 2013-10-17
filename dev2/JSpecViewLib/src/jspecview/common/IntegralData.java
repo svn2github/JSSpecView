@@ -1,6 +1,5 @@
 package jspecview.common;
 
-import org.jmol.util.JmolList;
 import java.util.Collections;
 import java.util.Comparator;
 
@@ -8,6 +7,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import javajs.util.BitSet;
+import javajs.util.List;
 
 import org.jmol.util.Txt;
 
@@ -184,7 +184,7 @@ public class IntegralData extends MeasurementData {
     ppms = Txt.simpleReplace(ppms, "--","-#");
     ppms = ppms.replace('-','^');
     ppms = ppms.replace('#','-');
-    JmolList<String> tokens = ScriptToken.getTokens(ppms);
+    List<String> tokens = ScriptToken.getTokens(ppms);
     for (int i = 0; i < tokens.size(); i++) {
       try {
         String s = tokens.get(i);
@@ -264,9 +264,9 @@ public class IntegralData extends MeasurementData {
 	 * @param value
 	 * @return JmolList<IntegrationRatio> object representing integration ratios
 	 */
-	public static JmolList<Annotation> getIntegrationRatiosFromString(
+	public static List<Annotation> getIntegrationRatiosFromString(
 			JDXSpectrum spec, String value) {
-		JmolList<Annotation> ratios = new JmolList<Annotation>();
+		List<Annotation> ratios = new List<Annotation>();
 		// split input into x-value/integral-value pairs
 		StringTokenizer allParamTokens = new StringTokenizer(value, ",");
 		while (allParamTokens.hasMoreTokens()) {

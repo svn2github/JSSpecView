@@ -24,9 +24,10 @@
 
 package jspecview.common;
 
-import org.jmol.util.JmolList;
 
 import java.util.Map;
+
+import javajs.util.List;
 
 import org.jmol.util.Txt;
 
@@ -34,7 +35,7 @@ import jspecview.api.AnnotationData;
 import jspecview.common.Annotation.AType;
 import jspecview.source.JDXSpectrum;
 
-public class MeasurementData extends JmolList<Measurement> implements
+public class MeasurementData extends List<Measurement> implements
 		AnnotationData {
 
 	private static final long serialVersionUID = 1L;
@@ -57,7 +58,7 @@ public class MeasurementData extends JmolList<Measurement> implements
 		myParams = new Parameters().setName("MeasurementData");
 	}
 
-	JmolList<Measurement> getMeasurements() {
+	List<Measurement> getMeasurements() {
 		return this;
 	}
 
@@ -74,7 +75,7 @@ public class MeasurementData extends JmolList<Measurement> implements
 	}
 
 	void setMeasurements(
-			@SuppressWarnings("unused") JmolList<Measurement> measurements) {
+			@SuppressWarnings("unused") List<Measurement> measurements) {
 		// won't happen
 	}
 

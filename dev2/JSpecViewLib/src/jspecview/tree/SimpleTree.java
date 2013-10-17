@@ -1,6 +1,6 @@
 package jspecview.tree;
 
-import org.jmol.util.JmolList;
+import javajs.util.List;
 
 import jspecview.api.JSVPanel;
 import jspecview.api.JSVTree;
@@ -55,7 +55,7 @@ public class SimpleTree implements JSVTree {
 			JDXSource source, JSVPanel[] panels) {
   	SimpleTree tree = (SimpleTree) viewer.spectraTree;
 		JSVTreeNode rootNode = tree.getRootNode();
-    JmolList<PanelNode> panelNodes = viewer.panelNodes;
+    List<PanelNode> panelNodes = viewer.panelNodes;
 
     String fileName = JSVFileManager.getName(source.getFilePath());
     PanelNode panelNode = new PanelNode(null, fileName, source, null);
@@ -90,7 +90,7 @@ public class SimpleTree implements JSVTree {
 		return new SimpleTreePath(path);
 	}
 
-	public void deleteNodes(JmolList<JSVTreeNode> toDelete) {
+	public void deleteNodes(List<JSVTreeNode> toDelete) {
 	  for (int i = 0; i < toDelete.size(); i++) {
 	  	spectraTreeModel.removeNodeFromParent(toDelete.get(i));
 	  }

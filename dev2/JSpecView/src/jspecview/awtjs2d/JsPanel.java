@@ -40,11 +40,11 @@ package jspecview.awtjs2d;
 import java.io.OutputStream;
 
 import javajs.api.GenericColor;
+import javajs.util.List;
 
 import org.jmol.api.ApiPlatform;
 import org.jmol.api.JmolMouseInterface;
 import org.jmol.util.JmolFont;
-import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
 import jspecview.api.JSVPanel;
 import jspecview.common.JSViewer;
@@ -121,7 +121,7 @@ public class JsPanel implements JSVPanel {
    *        the end index
    * @return this
    */
-  public static JsPanel getPanelMany(JSViewer viewer, JmolList<JDXSpectrum> spectra, int startIndex, int endIndex) {
+  public static JsPanel getPanelMany(JSViewer viewer, List<JDXSpectrum> spectra, int startIndex, int endIndex) {
   	JsPanel p = new JsPanel(viewer);
     p.pd.initMany(spectra, startIndex, endIndex);
     return p;

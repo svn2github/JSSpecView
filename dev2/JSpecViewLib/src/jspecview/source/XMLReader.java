@@ -23,8 +23,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 
 import javajs.lang.StringBuffer;
+import javajs.util.List;
 
-import org.jmol.util.JmolList;
 
 
 import org.jmol.util.Logger;
@@ -98,7 +98,7 @@ abstract class XMLReader {
     // end of import of CML document
     // now populate all the JSpecView spectrum variables.....
 
-    JmolList<String[]> LDRTable = new JmolList<String[]>();
+    List<String[]> LDRTable = new List<String[]>();
     JDXSpectrum spectrum = new JDXSpectrum();
 
     spectrum.setTitle(title);

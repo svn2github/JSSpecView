@@ -19,13 +19,13 @@
 
 package jspecview.common;
 
-import org.jmol.util.JmolList;
 import java.util.Hashtable;
 
 import java.util.Map;
 import java.util.Map.Entry;
 
 import javajs.lang.StringBuffer;
+import javajs.util.List;
 
 
 
@@ -158,10 +158,10 @@ public enum ScriptToken {
     return (st == null ? UNKNOWN : st);
   }
 
-  public static JmolList<ScriptToken> getScriptTokenList(String name,
+  public static List<ScriptToken> getScriptTokenList(String name,
                                                      boolean isExact) {
     name = name.toUpperCase();
-    JmolList<ScriptToken> list = new JmolList<ScriptToken>();
+    List<ScriptToken> list = new List<ScriptToken>();
     ScriptToken st = getScriptToken(name);
     if (isExact) {
       if (st != null)
@@ -235,8 +235,8 @@ public enum ScriptToken {
    * @param value
    * @return list of tokens
    */
-  public static JmolList<String> getTokens(String value) {
-    JmolList<String> tokens = new JmolList<String>();
+  public static List<String> getTokens(String value) {
+    List<String> tokens = new List<String>();
     ScriptTokenizer st = new ScriptTokenizer(value, false);
     while (st.hasMoreTokens()) {
       String s = ScriptTokenizer.nextStringToken(st, false);
@@ -247,7 +247,7 @@ public enum ScriptToken {
     return tokens;
   }
 
-  public static String getNameList(JmolList<ScriptToken> list) {
+  public static String getNameList(List<ScriptToken> list) {
     if (list.size() == 0)
       return "";
     StringBuffer sb = new StringBuffer();

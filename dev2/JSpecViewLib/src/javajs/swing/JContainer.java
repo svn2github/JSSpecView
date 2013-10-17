@@ -1,14 +1,14 @@
 package javajs.swing;
 
-import org.jmol.util.JmolList;
+import javajs.util.List;
 
 public class JContainer extends JComponent {
 
-	protected JmolList<JComponent> list;
+	protected List<JComponent> list;
 	
 	public JContainer(String type) {
 		super(type);
-		list = new JmolList<JComponent>();
+		list = new List<JComponent>();
 	}
 	public void removeAll() {
 		list.clear();

@@ -56,12 +56,13 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Map;
 
+import javajs.util.List;
+
 import javax.swing.JApplet;
 import javax.swing.JFrame;
 
 import netscape.javascript.JSObject;
 
-import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
 import org.jmol.util.Txt;
 
@@ -119,7 +120,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	protected void initViewer() {
 		viewer = app.viewer;
 		viewer.display = getContentPane();
-		viewer.scriptQueue = new JmolList<String>();
+		viewer.scriptQueue = new List<String>();
 		commandWatcherThread = new Thread(new CommandWatcher());
 		commandWatcherThread.setName("CommmandWatcherThread");
 		commandWatcherThread.start();
@@ -465,7 +466,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 		spectrumPanel.setVisible(b);
 	}
 
-	public JSVPanel getJSVPanel(JSViewer viewer, JmolList<JDXSpectrum> specs,
+	public JSVPanel getJSVPanel(JSViewer viewer, List<JDXSpectrum> specs,
 			int initialStartIndex, int initialEndIndex) {
 		return AwtPanel.getPanelMany(viewer, specs, initialStartIndex,
 				initialEndIndex);
@@ -482,7 +483,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 				try {
 					Thread.sleep(commandDelay);
 					if (commandWatcherThread != null) {
-						JmolList<String> q = app.viewer.scriptQueue;
+						List<String> q = app.viewer.scriptQueue;
 						if (q.size() > 0) {
 							String scriptItem = q.remove(0);
 							if (scriptItem != null)

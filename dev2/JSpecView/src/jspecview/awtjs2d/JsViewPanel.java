@@ -3,7 +3,7 @@
  */
 package jspecview.awtjs2d;
 
-import org.jmol.util.JmolList;
+import javajs.util.List;
 
 import jspecview.api.JSVMainPanel;
 import jspecview.api.JSVPanel;
@@ -35,7 +35,7 @@ public class JsViewPanel implements JSVViewPanel, JSVMainPanel {
 		this.title = title;
 	}
 
-	public void setSelectedPanel(JSVPanel jsvp, JmolList<PanelNode> panelNodes) {
+	public void setSelectedPanel(JSVPanel jsvp, List<PanelNode> panelNodes) {
 		if (jsvp != selectedPanel) {
 			selectedPanel = jsvp;
 		}
@@ -53,7 +53,7 @@ public class JsViewPanel implements JSVViewPanel, JSVMainPanel {
 		visible = (jsvp != null);
 	}
 
-	public void markSelectedPanels(JmolList<PanelNode> panelNodes) {
+	public void markSelectedPanels(List<PanelNode> panelNodes) {
 		for (int i = panelNodes.size(); --i >= 0;)
 			panelNodes.get(i).isSelected = (currentPanelIndex == i);
 	}

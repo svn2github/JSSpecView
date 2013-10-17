@@ -19,9 +19,10 @@
 
 package jspecview.source;
 
-import org.jmol.util.JmolList;
 import java.util.Hashtable;
 import java.util.Map;
+
+import javajs.util.List;
 
 
 import org.jmol.util.Logger;
@@ -66,8 +67,8 @@ public class JDXSpectrum extends JDXDataObject {
    * spectra that can never be displayed independently, or at least not by default
    * 2D slices, for example.
    */
-  private JmolList<JDXSpectrum> subSpectra;
-  private JmolList<PeakInfo> peakList = new JmolList<PeakInfo>();
+  private List<JDXSpectrum> subSpectra;
+  private List<PeakInfo> peakList = new List<PeakInfo>();
   private String piUnitsX, piUnitsY;
   private PeakInfo selectedPeak, highlightedPeak;
   private double specShift = 0;
@@ -104,7 +105,7 @@ public class JDXSpectrum extends JDXDataObject {
    */
   public JDXSpectrum() {
     //System.out.println("initialize JDXSpectrum " + this);
-    headerTable = new JmolList<String[]>();
+    headerTable = new List<String[]>();
     xyCoords = new Coordinate[0];
     parent = this;
   }
@@ -131,11 +132,11 @@ public class JDXSpectrum extends JDXDataObject {
   }
 
   
-  public JmolList<PeakInfo> getPeakList() {
+  public List<PeakInfo> getPeakList() {
     return peakList;
   }
 
-  public int setPeakList(JmolList<PeakInfo> list, String piUnitsX, String piUnitsY) {
+  public int setPeakList(List<PeakInfo> list, String piUnitsX, String piUnitsY) {
     peakList = list;
     System.out.println("setting peaklist for " + this + " to " + list);
     if (peakList == null)
@@ -424,14 +425,14 @@ public class JDXSpectrum extends JDXDataObject {
     return Math.log(value) / Math.log(10);
   }
 
-  public static boolean process(JmolList<JDXSpectrum> specs, IRMode irMode) {
+  public static boolean process(List<JDXSpectrum> specs, IRMode irMode) {
     if (irMode == IRMode.TO_ABS || irMode == IRMode.TO_TRANS)
       for (int i = 0; i < specs.size(); i++)
         specs.set(i, taConvert(specs.get(i), irMode));
     return true;
   }
 
-  public JmolList<JDXSpectrum> getSubSpectra() {
+  public List<JDXSpectrum> getSubSpectra() {
     return subSpectra;
   }
   
@@ -461,7 +462,7 @@ public class JDXSpectrum extends JDXDataObject {
       return false;
     isForcedSubset = forceSub; // too many blocks (>100)
     if (subSpectra == null) {
-      subSpectra = new JmolList<JDXSpectrum>();
+      subSpectra = new List<JDXSpectrum>();
       addSubSpectrum(this, true);
     }
     subSpectra.addLast(spectrum);

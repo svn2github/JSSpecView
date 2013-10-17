@@ -1,6 +1,6 @@
 package jspecview.api;
 
-import org.jmol.util.JmolList;
+import javajs.util.List;
 
 import jspecview.api.ScriptInterface;
 import jspecview.source.JDXSource;
@@ -15,7 +15,7 @@ public interface JSVTree {
 
 	public JSVTreePath newTreePath(Object[] path);
 
-	public void deleteNodes(JmolList<JSVTreeNode> toDelete);
+	public void deleteNodes(List<JSVTreeNode> toDelete);
 
 	public JSVTreeNode createTree(ScriptInterface si, JDXSource source,
 			JSVPanel[] jsvPanels);

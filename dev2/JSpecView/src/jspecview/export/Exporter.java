@@ -6,8 +6,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import javajs.util.List;
+
 import org.jmol.io.Base64;
-import org.jmol.util.JmolList;
 import org.jmol.util.Txt;
 
 import jspecview.api.ExportInterface;
@@ -31,7 +32,7 @@ public class Exporter implements ExportInterface {
   /* (non-Javadoc)
 	 * @see jspecview.export.ExportInterface#exportCmd(jspecview.api.JSVPanel, org.jmol.util.JmolList, boolean)
 	 */
-  public String exportCmd(JSVPanel jsvp, JmolList<String> tokens, boolean forInkscape) {
+  public String exportCmd(JSVPanel jsvp, List<String> tokens, boolean forInkscape) {
     // MainFrame or applet EXPORT command
     String mode = "XY";
     String fileName = null;

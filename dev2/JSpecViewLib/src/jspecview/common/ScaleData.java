@@ -3,9 +3,10 @@ package jspecview.common;
 
 import java.util.Map;
 
+import javajs.util.List;
+
 import jspecview.source.JDXSpectrum;
 
-import org.jmol.util.JmolList;
 
 /**
  * Stores information
@@ -433,7 +434,7 @@ public class ScaleData {
    * @param endIndices    to fill
    * @return true if OK
    */
-	static boolean setDataPointIndices(JmolList<JDXSpectrum> graphsTemp,
+	static boolean setDataPointIndices(List<JDXSpectrum> graphsTemp,
 			double initX, double finalX, int minPoints, int[] startIndices,
 			int[] endIndices) {
 		int nSpectraOK = 0;

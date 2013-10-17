@@ -22,11 +22,11 @@ package jspecview.dialog;
 import java.util.Enumeration;
 
 import javajs.lang.StringBuffer;
+import javajs.util.List;
 
 import jspecview.api.JSVTreeNode;
 import jspecview.common.PanelNode;
 
-import org.jmol.util.JmolList;
 import org.jmol.util.Parser;
 
 
@@ -39,8 +39,8 @@ import org.jmol.util.Parser;
 public class ViewsDialog extends JSVDialog {
 
 	private static final long serialVersionUID = 1L;
-	private JmolList<JSVTreeNode> treeNodes;	
-	private JmolList<Object> checkBoxes;
+	private List<JSVTreeNode> treeNodes;	
+	private List<Object> checkBoxes;
 	private Object closeSelectedButton;
 	private Object combineSelectedButton;
 	private Object viewSelectedButton;
@@ -59,8 +59,8 @@ public class ViewsDialog extends JSVDialog {
 
 	@Override
 	protected void addUniqueControls() {
-    checkBoxes = new JmolList<Object>();
-    treeNodes = new JmolList<JSVTreeNode>();
+    checkBoxes = new List<Object>();
+    treeNodes = new List<JSVTreeNode>();
     dialog.addButton("btnSelectAll", "Select All");
     dialog.addButton("btnSelectNone", "Select None");
     viewSelectedButton = dialog.addButton("btnViewSelected", "View Selected");

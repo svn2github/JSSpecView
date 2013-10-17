@@ -2,10 +2,10 @@ package jspecview.common;
 
 
 
+import javajs.util.List;
 import jspecview.api.XYScaleConverter;
 import jspecview.source.JDXSpectrum;
 
-import org.jmol.util.JmolList;
 
 public class ImageView implements XYScaleConverter {
   
@@ -206,7 +206,7 @@ public class ImageView implements XYScaleConverter {
    * @return image buffer
    */
   public synchronized int[] get2dBuffer(JDXSpectrum spec, boolean forceNew) {
-    JmolList<JDXSpectrum> subSpectra = spec.getSubSpectra();
+    List<JDXSpectrum> subSpectra = spec.getSubSpectra();
     if (subSpectra == null || !subSpectra.get(0).isContinuous())
       return null;
     Coordinate[] xyCoords = spec.getXYCoords();
@@ -254,7 +254,7 @@ public class ImageView implements XYScaleConverter {
   }
 
 	public void setMinMaxY(JDXSpectrum spec) {
-    JmolList<JDXSpectrum> subSpectra = spec.getSubSpectra();
+    List<JDXSpectrum> subSpectra = spec.getSubSpectra();
     JDXSpectrum spec0 = subSpectra.get(0); 
     maxY = spec0.getY2D();
     minY = subSpectra.get(subSpectra.size() - 1).getY2D();

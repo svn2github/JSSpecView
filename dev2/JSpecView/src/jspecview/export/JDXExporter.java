@@ -26,9 +26,9 @@ import java.util.Arrays;
 import java.util.Calendar;
 
 import javajs.lang.StringBuffer;
+import javajs.util.List;
 
 
-import org.jmol.util.JmolList;
 
 
 import jspecview.common.Coordinate;
@@ -226,7 +226,7 @@ public class JDXExporter {
     buffer.append("##LONGDATE= ").append(longdate).append(JSVTxt.newLine);
 
     // optional header
-    JmolList<String[]> headerTable = spec.getHeaderTable();
+    List<String[]> headerTable = spec.getHeaderTable();
     for (int i = 0; i < headerTable.size(); i++) {
       String[] entry = headerTable.get(i);
       String label = entry[0];

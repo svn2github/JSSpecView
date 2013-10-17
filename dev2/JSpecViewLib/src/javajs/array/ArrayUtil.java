@@ -30,9 +30,9 @@ import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Map;
 
+import javajs.util.List;
 import javajs.vec.P3;
 
-import org.jmol.util.JmolList;
 
 
 final public class ArrayUtil {
@@ -353,7 +353,7 @@ final public class ArrayUtil {
     return str;
   }
 
-  public static String sortedItem(JmolList<String> v, int n) {
+  public static String sortedItem(List<String> v, int n) {
     if (v.size() == 0)
       return null;
     if (v.size() == 1)
@@ -371,8 +371,8 @@ final public class ArrayUtil {
    * @return Array of JmolList<type>
    */
   @SuppressWarnings("unchecked")
-  public static <type> JmolList<type>[] createArrayOfArrayList(int size) {
-    return new JmolList[size];
+  public static <type> List<type>[] createArrayOfArrayList(int size) {
+    return new List[size];
   }
 
   /**
@@ -497,7 +497,7 @@ final public class ArrayUtil {
    * @return number removed
    */
   public static int removeMapKeys(Map<String, ?> map, String root) {
-    JmolList<String> list = new JmolList<String>();
+    List<String> list = new List<String>();
     for (String key: map.keySet())
       if (key.startsWith(root))
         list.addLast(key);

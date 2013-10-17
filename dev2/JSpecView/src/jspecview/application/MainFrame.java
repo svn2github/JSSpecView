@@ -59,13 +59,13 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.net.URL;
-import org.jmol.util.JmolList;
 
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
 import javajs.lang.StringBuffer;
+import javajs.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
@@ -161,7 +161,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	private Dimension               jmolDimensionNew = new Dimension(250, 200);
 	private JSVInterface            jmolOrAdvancedApplet;
 	private JSVPanel                prevPanel;
-	private JmolList<String>        recentFilePaths = new JmolList<String>();
+	private List<String>        recentFilePaths = new List<String>();
 	private JScrollPane             spectraTreeScrollPane;
 	private Component               spectrumPanel;
 	private JPanel                  statusPanel = new JPanel();
@@ -594,11 +594,11 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		if (cmd.length() == 0) {
 			tip = "Enter a command:";
 		} else {
-			JmolList<String> tokens = ScriptToken.getTokens(cmd);
+			List<String> tokens = ScriptToken.getTokens(cmd);
 			if (tokens.size() == 0)
 				return;
 			boolean isExact = (cmd.endsWith(" ") || tokens.size() > 1);
-			JmolList<ScriptToken> list = ScriptToken.getScriptTokenList(tokens.get(0),
+			List<ScriptToken> list = ScriptToken.getScriptTokenList(tokens.get(0),
 					isExact);
 			switch (list.size()) {
 			case 0:
@@ -638,7 +638,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 			openFile(file.getAbsolutePath(), true);
 	}
 
-	public void siOpenDataOrFile(String data, String name, JmolList<JDXSpectrum> specs,
+	public void siOpenDataOrFile(String data, String name, List<JDXSpectrum> specs,
 			String url, int firstSpec, int lastSpec, boolean isAppend) {
 		viewer.openDataOrFile(data, name, specs, url,
 				firstSpec, lastSpec, isAppend);
@@ -1155,7 +1155,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 				lastSpec);
 	}
 
-	public JSVPanel siGetNewJSVPanel2(JmolList<JDXSpectrum> specs) {
+	public JSVPanel siGetNewJSVPanel2(List<JDXSpectrum> specs) {
 		return AwtPanel.getPanelMany(viewer, specs, 0, 0);
 	}
 
@@ -1198,7 +1198,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 
-	public JmolList<String> getScriptQueue() {
+	public List<String> getScriptQueue() {
   // applet only
 		return null;
 	}

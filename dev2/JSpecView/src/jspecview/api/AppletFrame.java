@@ -2,7 +2,8 @@ package jspecview.api;
 
 import java.net.URL;
 
-import org.jmol.util.JmolList;
+import javajs.util.List;
+
 
 import jspecview.app.JSVApp;
 import jspecview.common.JSViewer;
@@ -32,7 +33,7 @@ public interface AppletFrame {
 
 	void validateContent(int mode);
 
-	JSVPanel getJSVPanel(JSViewer viewer, JmolList<JDXSpectrum> specs,
+	JSVPanel getJSVPanel(JSViewer viewer, List<JDXSpectrum> specs,
 			int initialStartIndex, int initialEndIndex);
 
 	void doExitJmol();
