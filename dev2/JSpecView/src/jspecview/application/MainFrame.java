@@ -64,7 +64,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-import javajs.lang.StringBuffer;
+import javajs.lang.SB;
 import javajs.util.List;
 
 import javax.swing.BorderFactory;
@@ -1132,7 +1132,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		if (recentFilePaths.contains(filePath))
 			recentFilePaths.remove(filePath);
 		recentFilePaths.add(0, filePath);
-		StringBuffer filePaths = new StringBuffer();
+		SB filePaths = new SB();
 		int n = recentFilePaths.size();
 		for (int index = 0; index < n; index++)
 			filePaths.append(", ").append(recentFilePaths.get(index));

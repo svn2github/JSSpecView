@@ -28,7 +28,7 @@ import java.io.Writer;
 import java.util.TreeMap;
 
 import javajs.api.GenericColor;
-import javajs.lang.StringBuffer;
+import javajs.lang.SB;
 
 
 import jspecview.awt.AwtParameters;
@@ -255,7 +255,7 @@ public class DisplaySchemesProcessor {
 
 		// find the default scheme
 		// set default attr
-		StringBuffer buffer = new StringBuffer();
+		SB buffer = new SB();
 		String defaultDSName = "";
 
 		for (ColorParameters ds : displaySchemes.values()) {
@@ -277,7 +277,7 @@ public class DisplaySchemesProcessor {
 		}
 		buffer.append("</displaySchemes>");
 
-		StringBuffer outBuffer = new StringBuffer();
+		SB outBuffer = new SB();
 		outBuffer.append("<?xml version=\"1.0\"?>" + JSVTxt.newLine);
 		outBuffer.append("<displaySchemes default=\"" + defaultDSName + "\">"
 				+ JSVTxt.newLine);
@@ -287,7 +287,7 @@ public class DisplaySchemesProcessor {
 		writer.close();
 	}
 
-	private void writeColor(StringBuffer buffer, ColorParameters ds, String name,
+	private void writeColor(SB buffer, ColorParameters ds, String name,
 			ScriptToken t) {
 		buffer.append(
 				"\t\t<" + name + " hex=\""

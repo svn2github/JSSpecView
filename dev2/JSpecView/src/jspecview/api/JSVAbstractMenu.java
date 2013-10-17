@@ -1,6 +1,6 @@
 package jspecview.api;
 
-import javajs.lang.StringBuffer;
+import javajs.lang.SB;
 
 public interface JSVAbstractMenu {
 
@@ -19,7 +19,7 @@ public interface JSVAbstractMenu {
   boolean menuIsEnabled(Object item);
   
   String menuGetId(Object menu);
-  void   menuGetAsText(StringBuffer sb, int level, Object menu, String menuName);
+  void   menuGetAsText(SB sb, int level, Object menu, String menuName);
   int    menuGetItemCount(Object menu);
   Object menuGetParent(Object menu);
   int    menuGetPosition(Object menu);

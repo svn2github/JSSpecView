@@ -1,6 +1,6 @@
 package javajs.swing;
 
-import javajs.lang.StringBuilder;
+import javajs.lang.SB;
 
 public class JComboBox<T>  extends JComponent {
 
@@ -34,7 +34,7 @@ public class JComboBox<T>  extends JComponent {
 
 	@Override
 	public String toHTML() {
-		StringBuilder sb = new StringBuilder();
+		SB sb = new SB();
 		sb.append("\n<select id='JCmB" + id + "' class='JComboBox' onchange='Jmol.Dialog.click(this)'>\n");		
 		for (int i = 0; i < info.length; i++)
 			sb.append("\n<option class='JComboBox_option'" + (i == selectedIndex ? "selected":"") + ">" + info[i] + "</option>");

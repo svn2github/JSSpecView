@@ -23,7 +23,7 @@
  */
 package jspecview.awtjs2d;
 
-import javajs.lang.StringBuffer;
+import javajs.lang.SB;
 
 import jspecview.common.JSViewer;
 import jspecview.popup.JSVGenericPopup;
@@ -231,7 +231,7 @@ public class JsPopup extends JSVGenericPopup {
     }
   }
 
-  public void menuGetAsText(StringBuffer sb, int level, Object menu,
+  public void menuGetAsText(SB sb, int level, Object menu,
                             String menuName) {
     /**
      * @j2sNative

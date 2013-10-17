@@ -10,14 +10,14 @@ package javajs.lang;
  * 
  */
 
-public class StringBuilder {
+public class SB {
   
   private java.lang.StringBuilder sb;
   String s; // used by JavaScript only; no Java references
   
   //TODO: JS experiment with using array and .push() here
 
-  public StringBuilder() {
+  public SB() {
     /**
      * @j2sNative
      * 
@@ -29,37 +29,37 @@ public class StringBuilder {
     }
   }
 
-  public static StringBuilder newN(int n) {
+  public static SB newN(int n) {
     /**
      * @j2sNative
-     *            return new org.jmol.util.SB(); 
+     *            return new javajs.util.SB(); 
      */
     {
       // not perfect, because it requires defining sb twice. 
       // We can do better...
-      StringBuilder sb = new StringBuilder();
+      SB sb = new SB();
       sb.sb = new java.lang.StringBuilder(n);
       return sb;
     }
   }
 
-  public static StringBuilder newS(String s) {
+  public static SB newS(String s) {
     /**
      * @j2sNative 
      * 
-     * var sb = new org.jmol.util.SB();
+     * var sb = new javajs.util.SB();
      * sb.s = s;
      * return sb; 
      * 
      */
     {
-    StringBuilder sb = new StringBuilder();
+    SB sb = new SB();
     sb.sb = new java.lang.StringBuilder(s);
     return sb;
     }
   }
 
-  public StringBuilder append(String s) {
+  public SB append(String s) {
     /**
      * @j2sNative
      * 
@@ -72,7 +72,7 @@ public class StringBuilder {
     return this;
   }
   
-  public StringBuilder appendC(char c) {
+  public SB appendC(char c) {
     /**
      * @j2sNative
      * 
@@ -85,7 +85,7 @@ public class StringBuilder {
     
   }
 
-  public StringBuilder appendI(int i) {
+  public SB appendI(int i) {
     /**
      * @j2sNative
      * 
@@ -98,7 +98,7 @@ public class StringBuilder {
     return this;
   }
 
-  public StringBuilder appendB(boolean b) {
+  public SB appendB(boolean b) {
     /**
      * @j2sNative
      * 
@@ -116,7 +116,7 @@ public class StringBuilder {
    * @param f
    * @return this
    */
-  public StringBuilder appendF(float f) {
+  public SB appendF(float f) {
     /**
      * @j2sNative
      * 
@@ -132,7 +132,7 @@ public class StringBuilder {
     return this;
   }
 
-  public StringBuilder appendD(double d) {
+  public SB appendD(double d) {
     /**
      * @j2sNative
      * 
@@ -148,7 +148,7 @@ public class StringBuilder {
     return this;
   }
 
-  public StringBuilder appendSB(StringBuilder buf) {
+  public SB appendSB(SB buf) {
     /**
      * @j2sNative
      * 
@@ -161,7 +161,7 @@ public class StringBuilder {
     return this;
   }
 
-  public StringBuilder appendO(Object data) {
+  public SB appendO(Object data) {
     /**
      * @j2sNative
      * 

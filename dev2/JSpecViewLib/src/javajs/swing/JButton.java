@@ -1,6 +1,6 @@
 package javajs.swing;
 
-import javajs.lang.StringBuilder;
+import javajs.lang.SB;
 
 public class JButton extends JComponent {
 
@@ -9,7 +9,7 @@ public class JButton extends JComponent {
   }
 	@Override
 	public String toHTML() {
-		StringBuilder sb = new StringBuilder();
+		SB sb = new SB();
 		sb.append("<input type=button id='" + id + "' class='JButton' style='" + getCSSstyle(0) + "' onclick='Jmol.Dialog.click(this)' value='"+ text + "'/>");
 		return sb.toString();
 	}

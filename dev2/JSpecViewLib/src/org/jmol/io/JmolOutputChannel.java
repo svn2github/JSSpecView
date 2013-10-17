@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
-import javajs.lang.StringBuilder;
+import javajs.lang.SB;
 
 import org.jmol.api.BytePoster;
 
@@ -47,7 +47,7 @@ public class JmolOutputChannel extends OutputStream {
   private boolean isCanceled;
   private boolean closed;
   private OutputStream os;
-  private StringBuilder sb;
+  private SB sb;
   private String type;
   
   public JmolOutputChannel setParams(BytePoster bytePoster, String fileName,
@@ -95,7 +95,7 @@ public class JmolOutputChannel extends OutputStream {
         bw.write(s);
       } else if (os == null) {
         if (sb == null)
-          sb = new StringBuilder();
+          sb = new SB();
         sb.append(s);
       } else {
         byte[] b = s.getBytes();

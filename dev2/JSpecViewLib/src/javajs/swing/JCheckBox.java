@@ -1,6 +1,6 @@
 package javajs.swing;
 
-import javajs.lang.StringBuilder;
+import javajs.lang.SB;
 
 public class JCheckBox extends JComponent {
 
@@ -29,7 +29,7 @@ public class JCheckBox extends JComponent {
 
 	@Override
 	public String toHTML() {
-		StringBuilder sb = new StringBuilder();
+		SB sb = new SB();
 		sb.append("<input type=checkbox id='" + id + "' class='JCheckBox' style='" + getCSSstyle(0) + "' onclick='Jmol.Dialog.click(this)'>");
 		return sb.toString();
 	}

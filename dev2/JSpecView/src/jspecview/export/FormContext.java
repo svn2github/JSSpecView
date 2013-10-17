@@ -25,7 +25,7 @@ import java.util.Hashtable;
 
 import java.util.Map;
 
-import javajs.lang.StringBuffer;
+import javajs.lang.SB;
 import javajs.util.List;
 
 import org.jmol.util.Logger;
@@ -197,7 +197,7 @@ class FormContext {
 
    @SuppressWarnings("unchecked")
 	public String merge(FileWriter writer) {
-    StringBuffer sb = (writer == null ? new StringBuffer() : null);
+    SB sb = (writer == null ? new SB() : null);
     int ptr;
     for (int i = 0; i < formTokens.size() && strError == null; i++) {
       FormToken vt = formTokens.get(i);

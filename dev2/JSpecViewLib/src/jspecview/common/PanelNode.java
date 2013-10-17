@@ -5,7 +5,7 @@ package jspecview.common;
 
 import java.util.Map;
 
-import javajs.lang.StringBuilder;
+import javajs.lang.SB;
 import javajs.util.List;
 
 
@@ -108,7 +108,7 @@ public class PanelNode {
   }
 
 	static public String getSpectrumListAsString(List<PanelNode> panelNodes) {
-      StringBuilder sb = new StringBuilder();
+      SB sb = new SB();
       for (int i = 0; i < panelNodes.size(); i++) {
       	String id = panelNodes.get(i).id;
         sb.append(" ").append(id);

@@ -44,7 +44,7 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Hashtable;
 
-import javajs.lang.StringBuffer;
+import javajs.lang.SB;
 import javajs.util.List;
 
 
@@ -131,7 +131,7 @@ abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
 			String type = title.substring(pt);
 			title = title.substring(0, pt);
 			if (type.indexOf("current") >= 0) {
-				StringBuffer sb = new StringBuffer();
+				SB sb = new SB();
 				Object menu = htMenus.get(menuName);
 				menuGetAsText(sb, 0, menu, "PopupMenu");
 				return sb.toString();
@@ -198,7 +198,7 @@ abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
 		}
 	}
 
-	static protected void addItemText(StringBuffer sb, char type, int level, String name,
+	static protected void addItemText(SB sb, char type, int level, String name,
 			String label, String script, String flags) {
 		sb.appendC(type).appendI(level).appendC('\t').append(name);
 		if (label == null) {

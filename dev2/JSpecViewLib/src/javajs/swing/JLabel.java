@@ -1,6 +1,6 @@
 package javajs.swing;
 
-import javajs.lang.StringBuilder;
+import javajs.lang.SB;
 
 public class JLabel extends JComponent {
 
@@ -11,7 +11,7 @@ public class JLabel extends JComponent {
 
 	@Override
 	public String toHTML() {
-		StringBuilder sb = new StringBuilder();
+		SB sb = new SB();
 		sb.append("<span id='" + id + "' class='JLabel' style='" + getCSSstyle(0) + "'>");
 		sb.append(text);
 		sb.append("</span>");

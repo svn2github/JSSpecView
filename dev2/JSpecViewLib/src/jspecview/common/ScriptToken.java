@@ -24,7 +24,7 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javajs.lang.StringBuilder;
+import javajs.lang.SB;
 import javajs.util.List;
 
 
@@ -250,7 +250,7 @@ public enum ScriptToken {
   public static String getNameList(List<ScriptToken> list) {
     if (list.size() == 0)
       return "";
-    StringBuilder sb = new StringBuilder();
+    SB sb = new SB();
     for (int i = 0; i < list.size(); i++)
       sb.append(",").append(list.get(i).toString());
     return sb.toString().substring(1);

@@ -38,7 +38,7 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
-import javajs.lang.StringBuilder;
+import javajs.lang.SB;
 
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
@@ -75,7 +75,7 @@ public class JSVFileManager {
 		if (name == null)
 			return null;
 		BufferedReader br;
-		StringBuilder sb = new StringBuilder();
+		SB sb = new SB();
 		try {
 			br = getBufferedReaderFromName(name, appletDocumentBase, null);
 			String line;
@@ -186,7 +186,7 @@ public class JSVFileManager {
 		
 		if (viewer.isApplet) {
       Object ret = viewer.apiPlatform.getBufferedURLInputStream(new URL((URL) null, name, null), null, null);
-      if (ret instanceof StringBuilder || ret instanceof String) {
+      if (ret instanceof SB || ret instanceof String) {
       	return new BufferedReader(new StringReader(ret.toString()));
       } else if (JSVEscape.isAB(ret)) {
         return new BufferedReader(new StringReader(new String((byte[]) ret)));
@@ -325,7 +325,7 @@ public class JSVFileManager {
       error[0] = "Error loading resource " + name;
       return null;
     }
-    StringBuilder sb = new StringBuilder();
+    SB sb = new SB();
     try {
       //  turns out from the Jar file
       //   it's a sun.net.www.protocol.jar.JarURLConnection$JarURLInputStream

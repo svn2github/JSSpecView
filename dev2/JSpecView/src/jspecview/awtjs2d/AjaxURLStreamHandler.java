@@ -5,7 +5,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
-import javajs.lang.StringBuffer;
+import javajs.lang.SB;
 
 
 /**
@@ -30,7 +30,7 @@ public class AjaxURLStreamHandler extends URLStreamHandler {
 
   @Override
   protected String toExternalForm(URL u) {
-    StringBuffer result = new StringBuffer();
+    SB result = new SB();
     result.append(u.getProtocol());
     result.append(":");
     if (u.getAuthority() != null && u.getAuthority().length() > 0) {

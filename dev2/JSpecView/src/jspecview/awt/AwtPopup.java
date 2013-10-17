@@ -32,7 +32,7 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
-import javajs.lang.StringBuffer;
+import javajs.lang.SB;
 
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
@@ -266,7 +266,7 @@ public class AwtPopup extends JSVGenericPopup {
     }
   }
 
-  public void menuGetAsText(StringBuffer sb, int level, Object menu,
+  public void menuGetAsText(SB sb, int level, Object menu,
                             String menuName) {
     String name = menuName;
     Component[] subMenus = (menu instanceof JPopupMenu ? ((JPopupMenu) menu)

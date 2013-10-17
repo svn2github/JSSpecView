@@ -2,7 +2,7 @@ package jspecview.awtjs2d;
 
 
 import javajs.api.GenericColor;
-import javajs.lang.StringBuffer;
+import javajs.lang.SB;
 import javajs.swing.AbstractTableModel;
 import javajs.swing.TableColumn;
 import javajs.util.BitSet;
@@ -53,7 +53,7 @@ class DialogTableModel implements AbstractTableModel {
 		widths[thisCol] = n;
 	}
 
-	public void toHTML(StringBuffer sb, String id, BitSet selectedRows) {
+	public void toHTML(SB sb, String id, BitSet selectedRows) {
 		if (data == null || data[0].length == 0)
 			return;
 		int nrows = data.length;
@@ -69,7 +69,7 @@ class DialogTableModel implements AbstractTableModel {
 		}
 	}
 	
-	private void getCellHtml(StringBuffer sb, String id, int iRow, int iCol, Object o, boolean isSelected) {
+	private void getCellHtml(SB sb, String id, int iRow, int iCol, Object o, boolean isSelected) {
 		String style = getCellStyle(id, iRow, iCol, o, isSelected);
 		sb.append("<td id='" + id + "'" + style
 				+ " onclick=Jmol.Dialog.click(this)>" + o + "</td>");

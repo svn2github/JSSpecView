@@ -1,7 +1,7 @@
 package javajs.swing;
 
 import javajs.array.ArrayUtil;
-import javajs.lang.StringBuilder;
+import javajs.lang.SB;
 
 
 public class Grid {
@@ -37,7 +37,7 @@ public class Grid {
 	}
 
 	public String toHTML(String id) {
-		StringBuilder sb = new StringBuilder();
+		SB sb = new SB();
 		id += "_grid";
 		sb.append("\n<table id='" + id + "' class='Grid' style='width:100%;height:100%'><tr><td style='height:20%;width:20%'></td></tr>");		
 		for (int i = 0; i < nrows; i++) {

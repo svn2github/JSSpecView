@@ -9,7 +9,7 @@ import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.io.File;
 
-import javajs.lang.StringBuffer;
+import javajs.lang.SB;
 import javajs.util.List;
 
 import javax.swing.JOptionPane;
@@ -88,7 +88,7 @@ public class AwtFileDropper implements JSVFileDropper, DropTargetListener {
 				List<File> list = (List<File>) o;
 				dtde.getDropTargetContext().dropComplete(true);
 				dtde = null;
-				StringBuffer sb = new StringBuffer();
+				SB sb = new SB();
 				sb.append(prefix);
 				for (int i = 0; i < list.size(); i++)
 					sb.append(cmd + JSVEscape.eS(list.get(i).getAbsolutePath()) + ";");

@@ -1,6 +1,6 @@
 package javajs.swing;
 
-import javajs.lang.StringBuilder;
+import javajs.lang.SB;
 
 /**
  * A simple implementation of a Swing JTextPane. 
@@ -18,7 +18,7 @@ public class JEditorPane extends JComponent {
 	
 	@Override
 	public String toHTML() {
-		StringBuilder sb = new StringBuilder();
+		SB sb = new SB();
 		sb.append("<textarea type=text id='" + id + "' class='JEditorPane' style='" + getCSSstyle(98) + "'>"+ text + "</textarea>");
 		return sb.toString();
 	}

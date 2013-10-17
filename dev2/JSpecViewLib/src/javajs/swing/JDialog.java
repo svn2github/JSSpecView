@@ -1,7 +1,7 @@
 package javajs.swing;
 
 import javajs.awt.Color;
-import javajs.lang.StringBuilder;
+import javajs.lang.SB;
 
 
 public class JDialog extends JContainer {
@@ -91,7 +91,7 @@ public class JDialog extends JContainer {
 		if (renderHeight == 0)
 			renderHeight = defaultHeight;
 		int h = renderHeight - headerHeight;
-		StringBuilder sb = new StringBuilder();
+		SB sb = new SB();
 		sb.append("\n<div id='" + id + "' class='JDialog' style='" + getCSSstyle(0) + "position:relative;top:0px;left:0px;reize:both;'>\n");
 	  sb.append("\n<div id='" + id + "_title' class='JDialogTitle' style='width:100%;height:25px;padding:5px 5px 5px 5px;height:"+headerHeight+"px'>"
 	  		+"<span style='text-align:center;'>" + title + "</span><span style='position:absolute;text-align:right;right:1px;>"

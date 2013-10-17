@@ -21,7 +21,7 @@ package jspecview.dialog;
 
 import java.util.Enumeration;
 
-import javajs.lang.StringBuilder;
+import javajs.lang.SB;
 import javajs.util.List;
 
 import jspecview.api.JSVTreeNode;
@@ -149,7 +149,7 @@ public class ViewsDialog extends JSVDialog {
 	}
 	
 	protected void combineSelected() {
-		StringBuilder sb = new StringBuilder();
+		SB sb = new SB();
 		for (int i = 0; i < checkBoxes.size(); i++) {
 			Object cb = checkBoxes.get(i);
 			PanelNode node = treeNodes.get(i).getPanelNode();
@@ -167,7 +167,7 @@ public class ViewsDialog extends JSVDialog {
 	}
 
 	protected void viewSelected() {
-		StringBuilder sb = new StringBuilder();
+		SB sb = new SB();
 		for (int i = 0; i < checkBoxes.size(); i++) {
 			Object cb = checkBoxes.get(i);
 			PanelNode node = treeNodes.get(i).getPanelNode();

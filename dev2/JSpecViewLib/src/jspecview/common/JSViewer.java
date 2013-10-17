@@ -14,7 +14,7 @@ import java.util.Properties;
 
 import java.util.Map;
 
-import javajs.lang.StringBuilder;
+import javajs.lang.SB;
 import javajs.util.List;
 import javajs.awt.Dimension;
 
@@ -666,7 +666,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 				try {
 					String file = "file=" + JSVEscape.eS(source.getFilePath());
 					List<PeakInfo> peaks = source.getSpectra().get(0).getPeakList();
-					StringBuilder sb = new StringBuilder();
+					SB sb = new SB();
 					sb.append("[");
 					int n = peaks.size();
 					for (int i = 0; i < n; i++) {
@@ -929,7 +929,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		if (value.indexOf("*") < 0) {
 			// replace "3.1.1" with "3.1*1"
 			String[] tokens = value.split(" ");
-			StringBuilder sb = new StringBuilder();
+			SB sb = new SB();
 			for (int i = 0; i < tokens.length; i++) {
 				int pt = tokens[i].indexOf('.');
 				if (pt != tokens[i].lastIndexOf('.'))
@@ -957,7 +957,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		String id0 = (selectedPanel == null ? prefix : PanelNode.findNode(
 				selectedPanel, panelNodes).id);
 		id0 = id0.substring(0, id0.indexOf(".") + 1);
-		StringBuilder sb = new StringBuilder();
+		SB sb = new SB();
 		int n = list.size();
 		String idLast = null;
 		for (int i = 0; i < n; i++) {
