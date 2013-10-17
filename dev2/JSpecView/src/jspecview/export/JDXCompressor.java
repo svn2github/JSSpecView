@@ -19,7 +19,7 @@
 
 package jspecview.export;
 
-import javajs.lang.SB;
+import javajs.util.SB;
 
 import org.jmol.util.Logger;
 import org.jmol.util.Txt;

@@ -28,7 +28,7 @@ import java.io.Writer;
 import java.util.TreeMap;
 
 import javajs.api.GenericColor;
-import javajs.lang.SB;
+import javajs.util.SB;
 
 
 import jspecview.awt.AwtParameters;

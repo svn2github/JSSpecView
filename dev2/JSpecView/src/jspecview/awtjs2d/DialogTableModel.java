@@ -2,10 +2,10 @@ package jspecview.awtjs2d;
 
 
 import javajs.api.GenericColor;
-import javajs.lang.SB;
 import javajs.swing.AbstractTableModel;
 import javajs.swing.TableColumn;
 import javajs.util.BS;
+import javajs.util.SB;
 import jspecview.util.JSVColorUtil;
 
 

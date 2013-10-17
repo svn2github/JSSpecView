@@ -1,6 +1,6 @@
 package jspecview.api;
 
-import javajs.lang.SB;
+import javajs.util.SB;
 
 public interface JSVAbstractMenu {
 

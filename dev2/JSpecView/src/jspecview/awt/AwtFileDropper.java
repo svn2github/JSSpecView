@@ -9,8 +9,8 @@ import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.io.File;
 
-import javajs.lang.SB;
 import javajs.util.List;
+import javajs.util.SB;
 
 import javax.swing.JOptionPane;
 

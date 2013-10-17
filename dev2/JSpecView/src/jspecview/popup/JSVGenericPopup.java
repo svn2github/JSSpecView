@@ -44,8 +44,8 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Hashtable;
 
-import javajs.lang.SB;
 import javajs.util.List;
+import javajs.util.SB;
 
 
 abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {

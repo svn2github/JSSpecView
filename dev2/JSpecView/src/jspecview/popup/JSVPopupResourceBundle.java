@@ -25,7 +25,7 @@ package jspecview.popup;
 
 
 
-import javajs.lang.SB;
+import javajs.util.SB;
 
 public class JSVPopupResourceBundle extends PopupResource {
 

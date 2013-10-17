@@ -32,7 +32,7 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
-import javajs.lang.SB;
+import javajs.util.SB;
 
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;

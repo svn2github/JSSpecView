@@ -25,8 +25,8 @@ import java.util.Hashtable;
 
 import java.util.Map;
 
-import javajs.lang.SB;
 import javajs.util.List;
+import javajs.util.SB;
 
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;

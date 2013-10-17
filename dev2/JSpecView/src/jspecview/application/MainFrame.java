@@ -64,8 +64,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-import javajs.lang.SB;
 import javajs.util.List;
+import javajs.util.SB;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
