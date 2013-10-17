@@ -21,8 +21,8 @@ package jspecview.dialog;
 
 import java.util.Enumeration;
 
-import javajs.lang.SB;
 import javajs.util.List;
+import javajs.util.SB;
 
 import jspecview.api.JSVTreeNode;
 import jspecview.common.PanelNode;

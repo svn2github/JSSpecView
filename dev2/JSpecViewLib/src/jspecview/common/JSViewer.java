@@ -14,8 +14,8 @@ import java.util.Properties;
 
 import java.util.Map;
 
-import javajs.lang.SB;
 import javajs.util.List;
+import javajs.util.SB;
 import javajs.awt.Dimension;
 
 import org.jmol.util.Logger;

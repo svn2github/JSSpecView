@@ -26,7 +26,7 @@ package jspecview.source;
 
 import java.io.IOException;
 
-import javajs.lang.SB;
+import javajs.util.SB;
 
 import org.jmol.util.Logger;
 

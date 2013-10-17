@@ -31,9 +31,9 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
-import javajs.lang.SB;
 import javajs.util.BS;
 import javajs.util.List;
+import javajs.util.SB;
 
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;

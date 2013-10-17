@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
-import javajs.lang.SB;
+import javajs.util.SB;
 
 import org.jmol.api.BytePoster;
 

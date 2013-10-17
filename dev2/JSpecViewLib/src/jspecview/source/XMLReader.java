@@ -22,8 +22,8 @@ package jspecview.source;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-import javajs.lang.SB;
 import javajs.util.List;
+import javajs.util.SB;
 
 
 

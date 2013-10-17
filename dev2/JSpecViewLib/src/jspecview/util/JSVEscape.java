@@ -29,8 +29,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javajs.lang.SB;
 import javajs.util.BS;
+import javajs.util.SB;
 
 import org.jmol.util.Txt;
 

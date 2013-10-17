@@ -38,7 +38,7 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
-import javajs.lang.SB;
+import javajs.util.SB;
 
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;

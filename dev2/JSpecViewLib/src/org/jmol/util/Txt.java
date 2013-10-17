@@ -27,7 +27,7 @@ package org.jmol.util;
 
 import java.util.List;
 
-import javajs.lang.SB;
+import javajs.util.SB;
 import javajs.util.T3;
 import javajs.util.T4;
 

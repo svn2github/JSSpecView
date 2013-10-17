@@ -5,8 +5,8 @@ package jspecview.common;
 
 import java.util.Map;
 
-import javajs.lang.SB;
 import javajs.util.List;
+import javajs.util.SB;
 
 
 import jspecview.api.JSVPanel;

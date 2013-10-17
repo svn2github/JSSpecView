@@ -22,7 +22,7 @@ package jspecview.source;
 import java.io.BufferedReader;
 import java.util.Hashtable;
 
-import javajs.lang.SB;
+import javajs.util.SB;
 
 
 

@@ -27,7 +27,7 @@ import java.io.StringReader;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import javajs.lang.SB;
+import javajs.util.SB;
 
 import org.jmol.util.Logger;
 
