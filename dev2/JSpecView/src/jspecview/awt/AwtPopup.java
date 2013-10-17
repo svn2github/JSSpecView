@@ -32,6 +32,8 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
+import javajs.lang.StringBuffer;
+
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
@@ -43,7 +45,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 
 import org.jmol.util.Logger;
-import org.jmol.util.SB;
 
 import jspecview.common.JSViewer;
 import jspecview.popup.JSVGenericPopup;
@@ -265,7 +266,7 @@ public class AwtPopup extends JSVGenericPopup {
     }
   }
 
-  public void menuGetAsText(SB sb, int level, Object menu,
+  public void menuGetAsText(StringBuffer sb, int level, Object menu,
                             String menuName) {
     String name = menuName;
     Component[] subMenus = (menu instanceof JPopupMenu ? ((JPopupMenu) menu)

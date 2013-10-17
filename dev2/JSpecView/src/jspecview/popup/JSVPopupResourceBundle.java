@@ -25,7 +25,7 @@ package jspecview.popup;
 
 
 
-import org.jmol.util.SB;
+import javajs.lang.StringBuffer;
 
 public class JSVPopupResourceBundle extends PopupResource {
 
@@ -140,7 +140,7 @@ public class JSVPopupResourceBundle extends PopupResource {
 
   private String dumpWords() {
     String[] wordContents = getWordContents();
-    SB s = new SB();
+    StringBuffer s = new StringBuffer();
     for (int i = 0; i < wordContents.length; i++) {
       String key = wordContents[i++];
       if (structure.getProperty(key) == null)
@@ -151,7 +151,7 @@ public class JSVPopupResourceBundle extends PopupResource {
   
   private String dumpStructure(String[][] items) {
     String previous = "";
-    SB s = new SB();
+    StringBuffer s = new StringBuffer();
     for (int i = 0; i < items.length; i++) {
       String key = items[i][0];
       String label = words.getProperty(key);

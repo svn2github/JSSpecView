@@ -25,7 +25,7 @@
 
 package javajs.util;
 
-import javajs.lang.StringBuffer; 
+import javajs.lang.StringBuffer;
 
 
 /**

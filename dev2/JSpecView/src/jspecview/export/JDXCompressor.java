@@ -19,8 +19,9 @@
 
 package jspecview.export;
 
+import javajs.lang.StringBuffer;
+
 import org.jmol.util.Logger;
-import org.jmol.util.SB;
 import org.jmol.util.Txt;
 
 import jspecview.common.Coordinate;
@@ -62,8 +63,8 @@ class JDXCompressor {
   static String compressDIF(Coordinate[] xyCoords, int startIndex,
                             int endIndex, int step, double xFactor,
                             double yFactor, boolean isDIFDUP) {
-    SB yStr = new SB();
-    SB buffer = new SB();
+    StringBuffer yStr = new StringBuffer();
+    StringBuffer buffer = new StringBuffer();
     for (int i = startIndex; i != endIndex;) {
       buffer.append(JSVTxt
           .fixIntNoExponent(xyCoords[i].getXVal() / xFactor));
@@ -140,7 +141,7 @@ class JDXCompressor {
 	static String compressFIX(Coordinate[] xyCoords, int startIndex,
 			int endIndex, int step, double xFactor, double yFactor) {
 		endIndex += step;
-		SB buffer = new SB();
+		StringBuffer buffer = new StringBuffer();
 		for (int i = startIndex; i != endIndex;) {
 			Txt.leftJustify(buffer, "              ", JSVTxt
 					.fixIntNoExponent(xyCoords[i].getXVal() / xFactor)); // 14 spaces
@@ -176,9 +177,9 @@ class JDXCompressor {
   static String compressSQZ(Coordinate[] xyCoords, int startIndex,
                             int endIndex, int step, double xFactor,
                             double yFactor) {
-    SB yStr = new SB();
+    StringBuffer yStr = new StringBuffer();
     endIndex += step;
-    SB buffer = new SB();
+    StringBuffer buffer = new StringBuffer();
     for (int i = startIndex; i == startIndex || i != endIndex;) {
       buffer.append(JSVTxt
           .fixIntNoExponent(xyCoords[i].getXVal() / xFactor));
@@ -214,7 +215,7 @@ class JDXCompressor {
   static String compressPAC(Coordinate[] xyCoords, int startIndex,
                             int endIndex, int step, double xFactor,
                             double yFactor) {
-    SB buffer = new SB();
+    StringBuffer buffer = new StringBuffer();
     endIndex += step;
     for (int i = startIndex; i != endIndex;) {
       buffer.append(
@@ -316,7 +317,7 @@ class JDXCompressor {
   static String getXYList(Coordinate[] xyCoords, int startIndex, int endIndex,
                           int step) {
     endIndex += step;
-    SB buffer = new SB();
+    StringBuffer buffer = new StringBuffer();
     for (int i = startIndex; i != endIndex; i += step) {
       Coordinate point = xyCoords[i];
       buffer.append(JSVTxt.fixIntNoExponent(point.getXVal())).append(", ")

@@ -25,7 +25,6 @@ package jspecview.popup;
 
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
-import org.jmol.util.SB;
 import org.jmol.util.Txt;
 
 import jspecview.api.JSVAbstractMenu;
@@ -45,6 +44,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Hashtable;
+
+import javajs.lang.StringBuffer;
 
 
 abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
@@ -130,7 +131,7 @@ abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
 			String type = title.substring(pt);
 			title = title.substring(0, pt);
 			if (type.indexOf("current") >= 0) {
-				SB sb = new SB();
+				StringBuffer sb = new StringBuffer();
 				Object menu = htMenus.get(menuName);
 				menuGetAsText(sb, 0, menu, "PopupMenu");
 				return sb.toString();
@@ -197,7 +198,7 @@ abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
 		}
 	}
 
-	static protected void addItemText(SB sb, char type, int level, String name,
+	static protected void addItemText(StringBuffer sb, char type, int level, String name,
 			String label, String script, String flags) {
 		sb.appendC(type).appendI(level).appendC('\t').append(name);
 		if (label == null) {

@@ -25,9 +25,10 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 
+import javajs.lang.StringBuffer;
+
 
 import org.jmol.util.JmolList;
-import org.jmol.util.SB;
 
 
 import jspecview.common.Coordinate;
@@ -92,7 +93,7 @@ public class JDXExporter {
                                     int startIndex, int endIndex) {
 
     //String dataType = spectrum.getDataType();
-    SB buffer = new SB();
+    StringBuffer buffer = new StringBuffer();
     Coordinate[] newXYCoords = spectrum.getXYCoords();
     String tabDataSet = "", tmpDataClass = "XYDATA";
 
@@ -198,7 +199,7 @@ public class JDXExporter {
 
     //final String CORE_STR = "TITLE,ORIGIN,OWNER,DATE,TIME,DATATYPE,JCAMPDX";
 
-    SB buffer = new SB();
+    StringBuffer buffer = new StringBuffer();
     // start of header
     buffer.append("##TITLE= ").append(spec.getTitle()).append(
         JSVTxt.newLine);

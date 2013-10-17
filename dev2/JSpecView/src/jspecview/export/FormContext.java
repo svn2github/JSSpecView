@@ -26,9 +26,10 @@ import java.util.Hashtable;
 import org.jmol.util.JmolList;
 import java.util.Map;
 
+import javajs.lang.StringBuffer;
+
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
-import org.jmol.util.SB;
 import org.jmol.util.Txt;
 
 import jspecview.common.Coordinate;
@@ -196,7 +197,7 @@ class FormContext {
 
    @SuppressWarnings("unchecked")
 	public String merge(FileWriter writer) {
-    SB sb = (writer == null ? new SB() : null);
+    StringBuffer sb = (writer == null ? new StringBuffer() : null);
     int ptr;
     for (int i = 0; i < formTokens.size() && strError == null; i++) {
       FormToken vt = formTokens.get(i);

@@ -65,6 +65,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import javajs.lang.StringBuffer;
+
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -81,7 +83,6 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import org.jmol.api.JSVInterface;
 import org.jmol.api.JmolSyncInterface;
 import org.jmol.util.Logger;
-import org.jmol.util.SB;
 import org.jmol.util.Txt;
 
 import jspecview.api.JSVAppInterface;
@@ -1131,7 +1132,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		if (recentFilePaths.contains(filePath))
 			recentFilePaths.remove(filePath);
 		recentFilePaths.add(0, filePath);
-		SB filePaths = new SB();
+		StringBuffer filePaths = new StringBuffer();
 		int n = recentFilePaths.size();
 		for (int index = 0; index < n; index++)
 			filePaths.append(", ").append(recentFilePaths.get(index));

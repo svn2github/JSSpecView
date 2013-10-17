@@ -9,6 +9,8 @@ import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.io.File;
 
+import javajs.lang.StringBuffer;
+
 import javax.swing.JOptionPane;
 
 import jspecview.api.JSVFileDropper;
@@ -17,7 +19,6 @@ import jspecview.util.JSVEscape;
 
 import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
-import org.jmol.util.SB;
 
 
 public class AwtFileDropper implements JSVFileDropper, DropTargetListener {
@@ -87,7 +88,7 @@ public class AwtFileDropper implements JSVFileDropper, DropTargetListener {
 				JmolList<File> list = (JmolList<File>) o;
 				dtde.getDropTargetContext().dropComplete(true);
 				dtde = null;
-				SB sb = new SB();
+				StringBuffer sb = new StringBuffer();
 				sb.append(prefix);
 				for (int i = 0; i < list.size(); i++)
 					sb.append(cmd + JSVEscape.eS(list.get(i).getAbsolutePath()) + ";");
