@@ -6,6 +6,7 @@
               as the first entry and export the buildfile again. -->
 <project basedir="." default="build" name="JSpecViewLib">
     <property environment="env"/>
+    <property name="jmol.path" value="../Jmol"/>
     <property name="JspecView.location" value="../JspecView"/>
     <property name="JspecViewAndroid.location" value="../JspecViewAndroid"/>
     <property name="ECLIPSE_HOME" value="../../../eclipse"/>
@@ -26,6 +27,11 @@
     </target>
     <target name="clean">
         <delete dir="bin"/>
+        <copy overwrite="true" todir="src" >
+          <fileset dir="${jmol.path}/src">
+            <include name="javajs/**/*" />
+          </fileset>
+        </copy>
     </target>
     <target name="cleanall" depends="clean" />
     <target name="build" depends="build-subprojects,build-project" />
