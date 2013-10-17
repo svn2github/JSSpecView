@@ -12,7 +12,7 @@ package javajs.lang;
 
 public class StringBuffer {
   
-  private java.lang.StringBuilder StringBuffer;
+  private java.lang.StringBuilder sb;
   String s;
   
   //TODO: JS experiment with using array and .push() here
@@ -25,21 +25,21 @@ public class StringBuffer {
      * 
      */
     {
-      StringBuffer = new java.lang.StringBuilder();
+      sb = new java.lang.StringBuilder();
     }
   }
 
   public static StringBuffer newN(int n) {
     /**
      * @j2sNative
-     *            return new org.jmol.util.StringBuffer(); 
+     *            return new javajs.lang.StringBuffer(); 
      */
     {
       // not perfect, because it requires defining StringBuffer twice. 
       // We can do better...
-      StringBuffer StringBuffer = new StringBuffer();
-      StringBuffer.StringBuffer = new java.lang.StringBuilder(n);
-      return StringBuffer;
+      StringBuffer sb = new StringBuffer();
+      sb.sb = new StringBuilder(n);
+      return sb;
     }
   }
 
@@ -47,14 +47,14 @@ public class StringBuffer {
     /**
      * @j2sNative 
      * 
-     * var StringBuffer = new org.jmol.util.StringBuffer();
-     * StringBuffer.s = s;
-     * return StringBuffer; 
+     * var sb = new javajs.lang.StringBuffer();
+     * sb.s = s;
+     * return sb; 
      * 
      */
     {
     StringBuffer StringBuffer = new StringBuffer();
-    StringBuffer.StringBuffer = new java.lang.StringBuilder(s);
+    StringBuffer.sb = new StringBuilder(s);
     return StringBuffer;
     }
   }
@@ -67,7 +67,7 @@ public class StringBuffer {
      * 
      */
     {
-      StringBuffer.append(s);
+      sb.append(s);
     }
     return this;
   }
@@ -79,7 +79,7 @@ public class StringBuffer {
      *            this.s += c;
      */
     {
-      StringBuffer.append(c);
+      sb.append(c);
     }
     return this;
     
@@ -93,7 +93,7 @@ public class StringBuffer {
      * 
      */
     {
-      StringBuffer.append(i);
+      sb.append(i);
     }
     return this;
   }
@@ -106,7 +106,7 @@ public class StringBuffer {
      * 
      */
     {
-      StringBuffer.append(b);
+      sb.append(b);
     }
     return this;
   }
@@ -127,7 +127,7 @@ public class StringBuffer {
      * 
      */
     {
-      StringBuffer.append(f);
+      sb.append(f);
     }
     return this;
   }
@@ -143,7 +143,7 @@ public class StringBuffer {
      * 
      */
     {
-      StringBuffer.append(d);
+      sb.append(d);
     }
     return this;
   }
@@ -156,7 +156,7 @@ public class StringBuffer {
      * 
      */
     {
-      StringBuffer.append(buf.StringBuffer);
+      sb.append(buf.sb);
     }
     return this;
   }
@@ -169,7 +169,7 @@ public class StringBuffer {
      * 
      */
     {
-      StringBuffer.append(data);
+      sb.append(data);
     }
     return this;
   }
@@ -183,7 +183,7 @@ public class StringBuffer {
      * 
      */
     {
-       StringBuffer.append(cb, off, len);
+       sb.append(cb, off, len);
     }
   }
 
@@ -196,7 +196,7 @@ public class StringBuffer {
      * 
      */
     {
-      return StringBuffer.toString();
+      return sb.toString();
     }
   }
 
@@ -208,7 +208,7 @@ public class StringBuffer {
      * 
      */
     {
-      return StringBuffer.length();
+      return sb.length();
     }
   }
 
@@ -220,7 +220,7 @@ public class StringBuffer {
      * 
      */
     {
-      return StringBuffer.indexOf(s);
+      return sb.indexOf(s);
     }
   }
 
@@ -232,7 +232,7 @@ public class StringBuffer {
      * 
      */
     {
-      return StringBuffer.charAt(i);
+      return sb.charAt(i);
     }
   }
 
@@ -243,7 +243,7 @@ public class StringBuffer {
      *            this.s = this.s.substring(0, n);
      */
     {
-      StringBuffer.setLength(n);
+      sb.setLength(n);
     }
   }
 
@@ -254,7 +254,7 @@ public class StringBuffer {
      *            return this.s.lastIndexOf(s);
      */
     {
-      return StringBuffer.lastIndexOf(s);
+      return sb.lastIndexOf(s);
     }
   }
 
@@ -265,7 +265,7 @@ public class StringBuffer {
      *            return this.s.indexOf(s, i);
      */
     {
-      return StringBuffer.lastIndexOf(s, i);
+      return sb.lastIndexOf(s, i);
     }
   }
 
@@ -276,7 +276,7 @@ public class StringBuffer {
      *            return this.s.substring(i);
      */
     {
-      return StringBuffer.substring(i);
+      return sb.substring(i);
     }
   }
 
@@ -287,7 +287,7 @@ public class StringBuffer {
      *            return this.s.substring(i, j);
      */
     {
-      return StringBuffer.substring(i, j);
+      return sb.substring(i, j);
     }
   }
 
