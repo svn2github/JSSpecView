@@ -42,9 +42,19 @@ public class JSVersion {
 		// Reading version from resource inside jar
 		BufferedInputStream bis = null;
 		InputStream is = null;
+		String s = "jspecview/common/TODO.txt"; 
 		try {
-			is = JSVersion.class.getClassLoader().getResourceAsStream(
-					"jspecview/common/TODO.txt");
+			/**
+			 * @j2sNative
+			 * 
+			 * s = "JSV/common/TODO.txt";
+			 * 
+			 */
+			{
+				
+			}
+			is = JSVersion.class.getClassLoader().getResourceAsStream(s);
+					
 			bis = new BufferedInputStream(is);
 			props.load(bis);
 			tmpVersion = Txt.trimQuotes(props.getProperty("___version", tmpVersion));
