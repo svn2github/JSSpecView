@@ -27,10 +27,10 @@ import java.io.InputStream;
 import java.io.Writer;
 import java.util.TreeMap;
 
+import javajs.api.GenericColor;
 import javajs.lang.StringBuffer;
 
 
-import jspecview.api.JSVColor;
 import jspecview.awt.AwtParameters;
 import jspecview.common.ColorParameters;
 import jspecview.common.JSVFileManager;
@@ -177,7 +177,7 @@ public class DisplaySchemesProcessor {
             theTag = "coordinatesColor";
           ScriptToken st = ScriptToken.getScriptToken(theTag);
           if (st != ScriptToken.UNKNOWN) {
-            JSVColor color = getColor(ds);
+            GenericColor color = getColor(ds);
             if (color == null) {
               String def;
               switch (st) {
@@ -235,7 +235,7 @@ public class DisplaySchemesProcessor {
    * @param p 
    * @return Returns a <code>Color</code> from the attribute
    */
-  private JSVColor getColor(ColorParameters p){
+  private GenericColor getColor(ColorParameters p){
     String value = reader.getAttrValueLC("hex");
     return (value.length() == 0 || value.equals("default") ? null
         : p.getColorFromString(value));

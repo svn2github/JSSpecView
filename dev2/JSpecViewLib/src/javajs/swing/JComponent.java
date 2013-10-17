@@ -1,8 +1,7 @@
 package javajs.swing;
 
+import javajs.api.GenericColor;
 import javajs.awt.Dimension;
-import jspecview.api.JSVColor;
-import jspecview.dialog.DialogManager;
 import jspecview.util.JSVColorUtil;
 
 abstract public class JComponent {
@@ -13,10 +12,11 @@ abstract public class JComponent {
 	protected String name;
 	protected int width;
 	protected int height;
-	protected DialogManager dialogManager;
 	protected String id;
-	
-	private JSVColor bgcolor;
+
+	Object actionListener;
+
+	private GenericColor bgcolor;
 
 	protected JComponent(String type) {
 		if (type == null)
@@ -34,7 +34,7 @@ abstract public class JComponent {
 	
 	abstract public String toHTML();
 	
-	public void setBackground(JSVColor color) {
+	public void setBackground(GenericColor color) {
 		bgcolor = color;
 	}
 
@@ -51,8 +51,14 @@ abstract public class JComponent {
 		this.height = dimension.height;		
 	}
 
-	public void addActionListener(DialogManager manager) {
-		this.dialogManager = manager;
+	/** 
+	 * It will be the function of the JavaScript on the 
+	 * page to do with selectionListener what is desired.
+	 * @param listener 
+	 * 
+	 */
+	public void addActionListener(Object listener) {
+		actionListener = listener;
 	}
 
 	public String getText() {

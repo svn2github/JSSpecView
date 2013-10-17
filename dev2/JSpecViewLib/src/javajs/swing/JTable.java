@@ -3,7 +3,6 @@ package javajs.swing;
 import javajs.awt.Dimension;
 import javajs.lang.StringBuffer;
 import javajs.util.BitSet;
-import jspecview.dialog.DialogManager;
 
 
 public class JTable extends JComponent implements ListSelectionModel, ColumnSelectionModel {
@@ -11,8 +10,10 @@ public class JTable extends JComponent implements ListSelectionModel, ColumnSele
 	private AbstractTableModel tableModel;
 	private BitSet bsSelectedCells;
 	private BitSet bsSelectedRows;
-	private boolean rowSelectionAllowed;
-	private boolean cellSelectionEnabled;
+	
+	boolean rowSelectionAllowed;
+	boolean cellSelectionEnabled;
+  Object selectionListener;
 
 	public JTable(AbstractTableModel tableModel) {
 		super("JT");
@@ -53,8 +54,13 @@ public class JTable extends JComponent implements ListSelectionModel, ColumnSele
 		cellSelectionEnabled = enabled;
 	}
 
-	public void addListSelectionListener(DialogManager manager) {
-		dialogManager = manager;
+	/** 
+	 * It will be the function of the JavaScript on the 
+	 * page to do with selectionListener what is desired.
+	 * 
+	 */
+	public void addListSelectionListener(Object listener) {
+		selectionListener = listener;
 	}
 
 	public TableColumn getColumn(int i) {

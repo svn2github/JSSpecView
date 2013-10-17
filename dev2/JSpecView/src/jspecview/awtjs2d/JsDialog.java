@@ -7,7 +7,7 @@ import javax.swing.SwingConstants;
 
 import jspecview.api.PlatformDialog;
 import javajs.awt.Dimension;
-import javajs.awt.JsColor;
+import javajs.awt.Color;
 import javajs.swing.FlowLayout;
 import javajs.swing.GridBagConstraints;
 import javajs.swing.GridBagLayout;
@@ -73,7 +73,7 @@ public class JsDialog extends JDialog implements PlatformDialog {
 		options = jsvDialog.options;
 		if (options == null)
 			options = new Hashtable<String, Object>();
-		getContentPane().setBackground(JsColor.get3(230, 230, 230));
+		getContentPane().setBackground(Color.get3(230, 230, 230));
 	}
 
 	public Object addButton(String name, String text) {

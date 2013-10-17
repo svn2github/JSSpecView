@@ -26,12 +26,13 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Hashtable;
 
+import javajs.api.GenericColor;
+
 import org.jmol.util.JmolList;
 
 import org.jmol.util.Logger;
 import org.jmol.util.Txt;
 
-import jspecview.api.JSVColor;
 import jspecview.common.ColorParameters;
 import jspecview.common.Coordinate;
 import jspecview.common.ScaleData;
@@ -104,10 +105,10 @@ public class SVGExporter extends FormExporter {
   public String exportAsSVG(String fileName, Coordinate[] xyCoords, String title,
                            int startDataPointIndex, int endDataPointIndex,
                            String xUnits, String yUnits, boolean isContinuous,
-                           boolean increasing, boolean isInverted, JSVColor plotAreaColor,
-                           JSVColor backgroundColor, JSVColor plotColor,
-                           JSVColor gridColor, JSVColor titleColor, JSVColor scaleColor,
-                           JSVColor unitsColor, boolean exportForInkscape) throws IOException {
+                           boolean increasing, boolean isInverted, GenericColor plotAreaColor,
+                           GenericColor backgroundColor, GenericColor plotColor,
+                           GenericColor gridColor, GenericColor titleColor, GenericColor scaleColor,
+                           GenericColor unitsColor, boolean exportForInkscape) throws IOException {
 
     initForm(fileName);
 

@@ -2,6 +2,8 @@ package jspecview.api;
 
 import java.io.OutputStream;
 
+import javajs.api.GenericColor;
+
 import org.jmol.api.ApiPlatform;
 
 import jspecview.common.PanelData;
@@ -25,7 +27,7 @@ public interface JSVPanel extends JSVViewPanel {
 
 	ApiPlatform getApiPlatform();
 
-	void setBackgroundColor(JSVColor color);
+	void setBackgroundColor(GenericColor color);
 
 	int getFontFaceID(String name);
 

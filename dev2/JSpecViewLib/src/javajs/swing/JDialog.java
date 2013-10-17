@@ -1,6 +1,6 @@
 package javajs.swing;
 
-import javajs.awt.JsColor;
+import javajs.awt.Color;
 import javajs.lang.StringBuffer;
 
 
@@ -19,8 +19,8 @@ public class JDialog extends JContainer {
 	public JDialog() {
 		super("JD");
 		add(contentPane = new JContentPane());
-		setBackground(JsColor.get3(210, 210, 240));
-		contentPane.setBackground(JsColor.get3(230, 230, 230));
+		setBackground(Color.get3(210, 210, 240));
+		contentPane.setBackground(Color.get3(230, 230, 230));
 	}
 	
 	public void setLocation(int[] loc) {

@@ -1,15 +1,17 @@
 package jspecview.api;
 
+import javajs.api.GenericColor;
+
 import org.jmol.util.JmolFont;
 
 
 public interface JSVGraphics {
 
-	JSVColor getColor1(int argb);
+	GenericColor getColor1(int argb);
 
-	JSVColor getColor3(int red, int green, int blue);
+	GenericColor getColor3(int red, int green, int blue);
 	
-	JSVColor getColor4(int r, int g, int b, int a);
+	GenericColor getColor4(int r, int g, int b, int a);
 
 	Object newImage(int width, int height, int[] buffer);
 
@@ -42,13 +44,13 @@ public interface JSVGraphics {
 
 	void fillRect(Object g, int x, int y, int width, int height);
 	
-	void fillBackground(Object g, JSVColor bgcolor);
+	void fillBackground(Object g, GenericColor bgcolor);
 
 	void lineTo(Object g, int x2, int y2);
 
 	void rotatePlot(Object g, int angle, int x, int y);
 
-	void setGraphicsColor(Object g, JSVColor c);
+	void setGraphicsColor(Object g, GenericColor c);
 
 	void setGraphicsFont(Object g, JmolFont font);
 	

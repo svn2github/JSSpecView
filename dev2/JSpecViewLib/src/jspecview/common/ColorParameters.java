@@ -23,9 +23,10 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import javajs.api.GenericColor;
+
 import org.jmol.util.JmolList;
 
-import jspecview.api.JSVColor;
 import jspecview.api.JSVPanel;
 import jspecview.util.JSVColorUtil;
 
@@ -37,24 +38,24 @@ import jspecview.util.JSVColorUtil;
  */
 public abstract class ColorParameters extends Parameters {
 
-  abstract protected JSVColor getColor3(int r, int g, int b);
-  abstract protected JSVColor getColor1(int rgb);
+  abstract protected GenericColor getColor3(int r, int g, int b);
+  abstract protected GenericColor getColor1(int rgb);
 	abstract protected boolean isValidFontName(String value);
 
   public String titleFontName;
   public String displayFontName;
-  public Map<ScriptToken, JSVColor> elementColors; 
-  public JSVColor[] plotColors;    
+  public Map<ScriptToken, GenericColor> elementColors; 
+  public GenericColor[] plotColors;    
   public boolean isDefault;
 
-  public static JSVColor BLACK;
-	public static JSVColor RED;
-	public static JSVColor LIGHT_GRAY;
-	public static JSVColor DARK_GRAY;
-	public static JSVColor BLUE;
-	public static JSVColor WHITE;
+  public static GenericColor BLACK;
+	public static GenericColor RED;
+	public static GenericColor LIGHT_GRAY;
+	public static GenericColor DARK_GRAY;
+	public static GenericColor BLUE;
+	public static GenericColor WHITE;
 
-  public final static JSVColor[] defaultPlotColors = new JSVColor[8];  
+  public final static GenericColor[] defaultPlotColors = new GenericColor[8];  
   public final static String[] defaultPlotColorNames = new String[] {
       "black",                                                      
       "darkGreen",
@@ -73,7 +74,7 @@ public abstract class ColorParameters extends Parameters {
     DARK_GRAY = getColor3(80, 80, 80);
     BLUE = getColor3(0, 0, 255);
     WHITE = getColor3(255, 255, 255);
-    elementColors = new Hashtable<ScriptToken, JSVColor>();
+    elementColors = new Hashtable<ScriptToken, GenericColor>();
     setColor(ScriptToken.TITLECOLOR, BLACK);
     setColor(ScriptToken.UNITSCOLOR, RED);
     setColor(ScriptToken.SCALECOLOR, BLACK);
@@ -87,7 +88,7 @@ public abstract class ColorParameters extends Parameters {
     setColor(ScriptToken.HIGHLIGHTCOLOR, DARK_GRAY);
     for (int i = 0; i < 8; i++)
     	defaultPlotColors[i] = getColorFromString(defaultPlotColorNames[i]);
-    plotColors = new JSVColor[8];
+    plotColors = new GenericColor[8];
     System.arraycopy(defaultPlotColors, 0, plotColors, 0, 8);
   }
     
@@ -152,7 +153,7 @@ public abstract class ColorParameters extends Parameters {
    * @param st 
    * @return the <code>Color</code> of the element
    */
-  public JSVColor getElementColor(ScriptToken st){
+  public GenericColor getElementColor(ScriptToken st){
     return elementColors.get(st);
   }
 
@@ -163,7 +164,7 @@ public abstract class ColorParameters extends Parameters {
    * @param color the color the element should have
    * @return color object 
    */
-  public JSVColor setColor(ScriptToken st, JSVColor color){
+  public GenericColor setColor(ScriptToken st, GenericColor color){
     if (color != null)
       elementColors.put(st, color);
     return color;
@@ -186,12 +187,12 @@ public abstract class ColorParameters extends Parameters {
 
 	public ColorParameters setElementColors(ColorParameters p) {
     displayFontName = p.displayFontName;
-    for(Map.Entry<ScriptToken, JSVColor> entry: p.elementColors.entrySet())
+    for(Map.Entry<ScriptToken, GenericColor> entry: p.elementColors.entrySet())
       setColor(entry.getKey(), entry.getValue());
     return this;
 	}
 
-  public JSVColor getColorFromString(String name) {
+  public GenericColor getColorFromString(String name) {
   	return getColor1(JSVColorUtil.getArgbFromString(name));
 	}
   
@@ -199,20 +200,20 @@ public abstract class ColorParameters extends Parameters {
 	 * @param plotColorsStr  
    * @return Color[]
 	 */
-  protected JSVColor[] getPlotColors(String plotColorsStr) {
+  protected GenericColor[] getPlotColors(String plotColorsStr) {
     if (plotColorsStr == null) {
       plotColors[0] = getElementColor(ScriptToken.PLOTCOLOR);
       return plotColors;
     }
     StringTokenizer st = new StringTokenizer(plotColorsStr, ",;.- ");
-    JmolList<JSVColor> colors = new JmolList<JSVColor>();
+    JmolList<GenericColor> colors = new JmolList<GenericColor>();
     try {
       while (st.hasMoreTokens())
         colors.addLast(getColorFromString(st.nextToken()));
     } catch (Exception e) {
       return null;
     }
-    return colors.toArray(new JSVColor[colors.size()]);
+    return colors.toArray(new GenericColor[colors.size()]);
   }
 
   /**
@@ -220,7 +221,7 @@ public abstract class ColorParameters extends Parameters {
    * @param value 
    * @return color object
 	 */
-  protected JSVColor setColorFromString(ScriptToken st, String value) {
+  protected GenericColor setColorFromString(ScriptToken st, String value) {
     return setColor(st, getColorFromString(value));
   }
   

@@ -48,9 +48,10 @@ import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 
+import javajs.api.GenericColor;
+
 import org.jmol.util.JmolFont;
 
-import jspecview.api.JSVColor;
 import jspecview.api.JSVGraphics;
 
 /**
@@ -72,15 +73,15 @@ public class AwtG2D implements JSVGraphics {
   public AwtG2D() {
 	}
 
-  public JSVColor getColor4(int r, int g, int b, int a) {
+  public GenericColor getColor4(int r, int g, int b, int a) {
     return new AwtColor(r, g, b, a);
   }
   
-  public JSVColor getColor3(int r, int g, int b) {
+  public GenericColor getColor3(int r, int g, int b) {
     return new AwtColor(r, g, b);
   }
   
-  public JSVColor getColor1(int rgb) {
+  public GenericColor getColor1(int rgb) {
     return new AwtColor(rgb);
   }
   
@@ -90,7 +91,7 @@ public class AwtG2D implements JSVGraphics {
 	}
 
 
-	public void setGraphicsColor(Object g, JSVColor c) {
+	public void setGraphicsColor(Object g, GenericColor c) {
 		((Graphics) g).setColor((Color) c);
 	}
 
@@ -167,7 +168,7 @@ public class AwtG2D implements JSVGraphics {
 		((Graphics2D) g).setStroke(tf ? strokeBold : strokeBasic);
 	}
 
-	public void fillBackground(Object g, JSVColor bgcolor) {
+	public void fillBackground(Object g, GenericColor bgcolor) {
 		// not necessary
 	}
 

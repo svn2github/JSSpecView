@@ -2,17 +2,18 @@ package jspecview.awt;
 
 import java.awt.Color;
 
-import jspecview.api.JSVColor;
+import javajs.api.GenericColor;
 
-public class AwtColor extends Color implements JSVColor {
+
+public class AwtColor extends Color implements GenericColor {
 
 	private int opacity;
 
-	public JSVColor get4(int r, int g, int b, int a) {
+	public GenericColor get4(int r, int g, int b, int a) {
 		return new AwtColor(r, g, b, a);
 	}
 
-	public JSVColor get3(int r, int g, int b) {
+	public GenericColor get3(int r, int g, int b) {
 		return new AwtColor(r, g, b);
 	}
 

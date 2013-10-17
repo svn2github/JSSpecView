@@ -37,12 +37,12 @@
 
 package jspecview.awtjs2d;
 
-import javajs.awt.JsColor;
+import javajs.api.GenericColor;
+import javajs.awt.Color;
 import jspecview.util.JSVColorUtil;
 
 import org.jmol.util.JmolFont;
 
-import jspecview.api.JSVColor;
 import jspecview.api.JSVGraphics;
 
 /**
@@ -67,16 +67,16 @@ public class JsG2D implements JSVGraphics {
   public JsG2D() {
 	}
 
-  public JSVColor getColor4(int r, int g, int b, int a) {
-    return JsColor.get4(r, g, b, a);
+  public GenericColor getColor4(int r, int g, int b, int a) {
+    return Color.get4(r, g, b, a);
   }
   
-  public JSVColor getColor3(int r, int g, int b) {
-    return JsColor.get3(r, g, b);
+  public GenericColor getColor3(int r, int g, int b) {
+    return Color.get3(r, g, b);
   }
   
-  public JSVColor getColor1(int rgb) {
-    return JsColor.get1(rgb);
+  public GenericColor getColor1(int rgb) {
+    return Color.get1(rgb);
   }
 
 	public void draw2DImage(Object g, Object image2d, int destX, int destY,
@@ -168,7 +168,7 @@ public class JsG2D implements JSVGraphics {
 		}
 	}
 
-	public void fillBackground(Object g, JSVColor bgcolor) {
+	public void fillBackground(Object g, GenericColor bgcolor) {
 		if (bgcolor == null) {
 			/**
 			 * @j2sNative
@@ -230,7 +230,7 @@ public class JsG2D implements JSVGraphics {
 		
 	}
 
-	public void setGraphicsColor(Object g, JSVColor c) {
+	public void setGraphicsColor(Object g, GenericColor c) {
 		String s = JSVColorUtil.colorToCssString(c);
 		/**
 		 * @j2sNative

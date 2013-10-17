@@ -1,6 +1,6 @@
-package jspecview.api;
+package javajs.api;
 
-public interface JSVColor {
+public interface GenericColor {
 
 	int getRGB();
 

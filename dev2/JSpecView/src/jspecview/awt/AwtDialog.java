@@ -11,6 +11,8 @@ import java.awt.Toolkit;
 import java.util.Hashtable;
 import java.util.Map;
 
+import javajs.api.GenericColor;
+
 import javax.swing.JButton;
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
@@ -30,7 +32,6 @@ import javax.swing.border.Border;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.text.JTextComponent;
 
-import jspecview.api.JSVColor;
 import jspecview.api.PlatformDialog;
 import jspecview.common.Annotation.AType;
 import jspecview.dialog.DialogManager;
@@ -247,7 +248,7 @@ public class AwtDialog extends JDialog implements PlatformDialog {
 		JTable table = new JTable(tableModel);
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		if (haveColors)
-			table.setDefaultRenderer(JSVColor.class, new ColorRenderer());
+			table.setDefaultRenderer(GenericColor.class, new ColorRenderer());
     table.setDefaultRenderer(String.class, new TitleRenderer());
     table.setCellSelectionEnabled(true);
     ListSelectionModel selector = table.getSelectionModel();

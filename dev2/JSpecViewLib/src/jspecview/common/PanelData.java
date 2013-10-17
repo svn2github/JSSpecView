@@ -42,8 +42,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import javajs.api.GenericColor;
+
 import jspecview.api.AnnotationData;
-import jspecview.api.JSVColor;
 import jspecview.api.JSVGraphics;
 import jspecview.api.JSVPanel;
 import jspecview.api.PanelListener;
@@ -352,7 +353,7 @@ public class PanelData implements EventManager {
 		return pi;
 	}
 
-	public void setPlotColors(JSVColor[] colors) {
+	public void setPlotColors(GenericColor[] colors) {
 		for (int i = graphSets.size(); --i >= 0;)
 			graphSets.get(i).setPlotColors(colors);
 	}
@@ -792,7 +793,7 @@ public class PanelData implements EventManager {
 		jsvp.setToolTipText(s);
 	}
 
-	public void setHighlightColor(JSVColor color) {
+	public void setHighlightColor(GenericColor color) {
 		jsvp.getPanelData().setColor(ScriptToken.HIGHLIGHTCOLOR, color);
 	}
 
@@ -1123,23 +1124,23 @@ public class PanelData implements EventManager {
 
 	// //////// settable colors //////////
 
-	public JSVColor coordinatesColor;
-	public JSVColor gridColor;
-	public JSVColor integralPlotColor;
-	public JSVColor peakTabColor;
-	public JSVColor plotAreaColor;
-	public JSVColor scaleColor;
-	public JSVColor titleColor;
-	public JSVColor unitsColor;
+	public GenericColor coordinatesColor;
+	public GenericColor gridColor;
+	public GenericColor integralPlotColor;
+	public GenericColor peakTabColor;
+	public GenericColor plotAreaColor;
+	public GenericColor scaleColor;
+	public GenericColor titleColor;
+	public GenericColor unitsColor;
 	// potentially settable;
 
-	public JSVColor highlightColor;
-	public JSVColor zoomBoxColor;
-	public JSVColor zoomBoxColor2;
-	public JSVColor BLACK;
-	public JSVColor bgcolor;
+	public GenericColor highlightColor;
+	public GenericColor zoomBoxColor;
+	public GenericColor zoomBoxColor2;
+	public GenericColor BLACK;
+	public GenericColor bgcolor;
 
-	public void setColor(ScriptToken st, JSVColor color) {
+	public void setColor(ScriptToken st, GenericColor color) {
 		if (color != null)
 			options.put(st, JSVColorUtil.colorToHexString(color));
 		switch (st) {
@@ -1191,7 +1192,7 @@ public class PanelData implements EventManager {
 		}
 	}
 
-	public JSVColor getColor(ScriptToken whatColor) {
+	public GenericColor getColor(ScriptToken whatColor) {
 		switch (whatColor) {
 		default:
 			Logger.error("awtgraphset missing color " + whatColor);
@@ -1232,7 +1233,7 @@ public class PanelData implements EventManager {
 			title = spectrum.getTitle();
 			if (useFileName)
 				title = JSVFileManager.getName(spectrum.getFilePath()) + " - " + title;
-			JSVColor plotColor = getCurrentPlotColor(index);
+			GenericColor plotColor = getCurrentPlotColor(index);
 			cols[0] = new Integer(index + 1);
 			cols[1] = plotColor;
 			cols[2] = " " + title;
@@ -1244,8 +1245,8 @@ public class PanelData implements EventManager {
 	@SuppressWarnings("incomplete-switch")
 	public void setColorOrFont(ColorParameters ds, ScriptToken st) {
 		if (st == null) {
-			Map<ScriptToken, JSVColor> colors = ds.elementColors;
-			for (Map.Entry<ScriptToken, JSVColor> entry : colors.entrySet())
+			Map<ScriptToken, GenericColor> colors = ds.elementColors;
+			for (Map.Entry<ScriptToken, GenericColor> entry : colors.entrySet())
 				setColorOrFont(ds, entry.getKey());
 			setColorOrFont(ds, ScriptToken.DISPLAYFONTNAME);
 			setColorOrFont(ds, ScriptToken.TITLEFONTNAME);
@@ -1262,7 +1263,7 @@ public class PanelData implements EventManager {
 		setColor(st, ds.getElementColor(st));
 	}
 
-	public JSVColor getCurrentPlotColor(int i) {
+	public GenericColor getCurrentPlotColor(int i) {
 		return currentGraphSet.getPlotColor(i);
 	}
 

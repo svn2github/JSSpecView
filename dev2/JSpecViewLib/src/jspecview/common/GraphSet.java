@@ -6,6 +6,7 @@ import java.util.Hashtable;
 
 import java.util.Map;
 
+import javajs.api.GenericColor;
 import javajs.util.BitSet;
 
 import org.jmol.util.JmolFont;
@@ -14,7 +15,6 @@ import org.jmol.util.Parser;
 import org.jmol.util.Txt;
 
 import jspecview.api.AnnotationData;
-import jspecview.api.JSVColor;
 import jspecview.api.JSVGraphics;
 import jspecview.api.JSVPanel;
 import jspecview.api.XYScaleConverter;
@@ -52,7 +52,7 @@ public class GraphSet implements XYScaleConverter {
 	private boolean haveSingleYScale;
 
 	public final static double RT2 = Math.sqrt(2.0);
-  private static JSVColor veryLightGrey;
+  private static GenericColor veryLightGrey;
 
   public GraphSet(PanelData pd) {
     this.pd = pd;
@@ -2684,7 +2684,7 @@ public class GraphSet implements XYScaleConverter {
 	private class Highlight {
 		double x1;
 		double x2;
-		JSVColor color;
+		GenericColor color;
 		JDXSpectrum spectrum;
 
 		
@@ -2693,7 +2693,7 @@ public class GraphSet implements XYScaleConverter {
 			return "highlight " + x1 + " " + x2 + " " + spectrum;
 		}
 
-		Highlight(double x1, double x2, JDXSpectrum spec, JSVColor color) {
+		Highlight(double x1, double x2, JDXSpectrum spec, GenericColor color) {
 			this.x1 = x1;
 			this.x2 = x2;
 			this.color = color;
@@ -2756,7 +2756,7 @@ public class GraphSet implements XYScaleConverter {
 	 * @param color 
 	 *          the color of the highlight
 	 */
-	void addHighlight(double x1, double x2, JDXSpectrum spec, JSVColor color) {
+	void addHighlight(double x1, double x2, JDXSpectrum spec, GenericColor color) {
 		if (spec == null)
 			spec = getSpectrumAt(0);
 		Highlight hl = new Highlight(x1, x2, spec, (color == null ? pd
@@ -3984,13 +3984,13 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 	
 
   public void setPlotColors(Object oColors) {
-    JSVColor[] colors = (JSVColor[]) oColors;
+    GenericColor[] colors = (GenericColor[]) oColors;
     if (colors.length > nSpectra) {
-      JSVColor[] tmpPlotColors = new JSVColor[nSpectra];
+      GenericColor[] tmpPlotColors = new GenericColor[nSpectra];
       System.arraycopy(colors, 0, tmpPlotColors, 0, nSpectra);
       colors = tmpPlotColors;
     } else if (nSpectra > colors.length) {
-      JSVColor[] tmpPlotColors = new JSVColor[nSpectra];
+      GenericColor[] tmpPlotColors = new GenericColor[nSpectra];
       int numAdditionColors = nSpectra - colors.length;
       System.arraycopy(colors, 0, tmpPlotColors, 0, colors.length);
       for (int i = 0, j = colors.length; i < numAdditionColors; i++, j++)
@@ -4002,7 +4002,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 
   private JSVPanel jsvp;
   private Object image2D;
-  private JSVColor[] plotColors;
+  private GenericColor[] plotColors;
 	private JSVGraphics g2d;
 
   
@@ -4015,19 +4015,19 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
   }
 
 
-  private JSVColor generateRandomColor() {
+  private GenericColor generateRandomColor() {
     while (true) {
       int red = (int) (Math.random() * 255);
       int green = (int) (Math.random() * 255);
       int blue = (int) (Math.random() * 255);
-      JSVColor randomColor = g2d.getColor3(red, green, blue);
+      GenericColor randomColor = g2d.getColor3(red, green, blue);
       if (randomColor.getRGB() != 0)
         return randomColor;
     }
   }
 
 	public void setPlotColor0(Object oColor) {
-    plotColors[0] = (JSVColor) oColor;
+    plotColors[0] = (GenericColor) oColor;
   }
 
   /**
@@ -4037,7 +4037,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
    *        the index
    * @return the color of the plot
    */
-  public JSVColor getPlotColor(int index) {
+  public GenericColor getPlotColor(int index) {
     if (index >= plotColors.length)
       return null;
     return plotColors[index];
@@ -4052,7 +4052,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 	}
 
   private void setPlotColor(Object og, int i) {
-  	JSVColor c;
+  	GenericColor c;
   	switch (i) {
   	case -3:
   		c = veryLightGrey;
@@ -4183,7 +4183,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 			setColorFromToken(g, whatColor);
 			return;
 		}
-		JSVColor color = null;
+		GenericColor color = null;
 		if (note instanceof ColoredAnnotation)
 			color = ((ColoredAnnotation) note).getColor();
 		if (color == null)

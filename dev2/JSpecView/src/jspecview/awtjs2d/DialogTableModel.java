@@ -1,7 +1,7 @@
 package jspecview.awtjs2d;
 
 
-import jspecview.api.JSVColor;
+import javajs.api.GenericColor;
 import javajs.lang.StringBuffer;
 import javajs.swing.AbstractTableModel;
 import javajs.swing.TableColumn;
@@ -87,9 +87,9 @@ class DialogTableModel implements AbstractTableModel {
 		if (iRow < 0) {
 			style += ";font-weight:bold;";
 		} else {
-			if (o instanceof JSVColor) {
+			if (o instanceof GenericColor) {
 				style += "background-color:"
-						+ JSVColorUtil.colorToCssString((JSVColor) o);
+						+ JSVColorUtil.colorToCssString((GenericColor) o);
 			} else {
 				if (asString)
 					o = " " + o + " ";

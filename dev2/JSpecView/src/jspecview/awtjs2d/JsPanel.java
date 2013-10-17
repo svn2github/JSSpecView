@@ -39,12 +39,13 @@ package jspecview.awtjs2d;
 
 import java.io.OutputStream;
 
+import javajs.api.GenericColor;
+
 import org.jmol.api.ApiPlatform;
 import org.jmol.api.JmolMouseInterface;
 import org.jmol.util.JmolFont;
 import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
-import jspecview.api.JSVColor;
 import jspecview.api.JSVPanel;
 import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
@@ -155,7 +156,7 @@ public class JsPanel implements JSVPanel {
   	pd.setColorOrFont(ds, st);
   }
 
-  public void setBackgroundColor(JSVColor color) {
+  public void setBackgroundColor(GenericColor color) {
   
   	// unnecessary
   }

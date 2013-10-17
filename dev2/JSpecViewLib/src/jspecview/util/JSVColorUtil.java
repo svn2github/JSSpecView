@@ -26,7 +26,8 @@ package jspecview.util;
 import java.util.Hashtable;
 import java.util.Map;
 
-import jspecview.api.JSVColor;
+import javajs.api.GenericColor;
+
 
 import org.jmol.util.Parser;
 import org.jmol.util.Txt;
@@ -39,7 +40,7 @@ import org.jmol.util.Txt;
    * @param color
    * @return a hex string representation of a <code>Color</color> object
    */
-  public static String colorToHexString(JSVColor color) {
+  public static String colorToHexString(GenericColor color) {
     return (color == null ? "" : JSVEscape.getHexColorFromRGB(color.getRGB()));
   }
 	  
@@ -459,7 +460,7 @@ import org.jmol.util.Txt;
       mapJavaScriptColors.put(colorNames[i], Integer.valueOf(colorArgbs[i]));
   }
 
-	public static String colorToCssString(JSVColor c) {
+	public static String colorToCssString(GenericColor c) {
 		int opacity = c.getOpacity255();
 		if (opacity == 255)
 			return "#" + colorToHexString(c);

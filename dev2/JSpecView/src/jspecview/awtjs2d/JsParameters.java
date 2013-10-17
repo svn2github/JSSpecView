@@ -1,8 +1,8 @@
 package jspecview.awtjs2d;
 
 
-import javajs.awt.JsColor;
-import jspecview.api.JSVColor;
+import javajs.api.GenericColor;
+import javajs.awt.Color;
 import jspecview.common.ColorParameters;
 
 public class JsParameters extends ColorParameters {
@@ -17,13 +17,13 @@ public class JsParameters extends ColorParameters {
 	}
   
   @Override
-	public JSVColor getColor1(int rgb) {
-    return JsColor.get1(rgb);
+	public GenericColor getColor1(int rgb) {
+    return Color.get1(rgb);
   }
 
 	@Override
-	protected JSVColor getColor3(int r, int g, int b) {
-		return JsColor.get3(r, g, b);
+	protected GenericColor getColor3(int r, int g, int b) {
+		return Color.get3(r, g, b);
 	}
 
   @Override

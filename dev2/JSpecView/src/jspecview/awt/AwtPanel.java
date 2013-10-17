@@ -51,6 +51,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import javajs.api.GenericColor;
+
 import javax.imageio.ImageIO;
 import javax.print.attribute.Attribute;
 import javax.print.attribute.HashPrintRequestAttributeSet;
@@ -69,7 +71,6 @@ import org.jmol.util.JmolList;
 import org.jmol.util.Logger;
 import org.jmol.util.Txt;
 
-import jspecview.api.JSVColor;
 import jspecview.api.JSVPanel;
 import jspecview.api.PdfCreatorInterface;
 import jspecview.common.JSViewer;
@@ -110,7 +111,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
 	private JSViewer viewer;
 	private JmolMouseInterface mouse;
 
-  private JSVColor bgcolor;
+  private GenericColor bgcolor;
 	
   /**
    * Constructs a new JSVPanel
@@ -179,11 +180,11 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
   	pd.setColorOrFont(ds, st);
   }
 
-  public void setBackgroundColor(JSVColor color) {
+  public void setBackgroundColor(GenericColor color) {
   	setBackground((Color) (bgcolor = color));
   }
   
-  public JSVColor getBackgroundColor() {
+  public GenericColor getBackgroundColor() {
   	return bgcolor;
   }
   

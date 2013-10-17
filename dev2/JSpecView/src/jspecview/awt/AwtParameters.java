@@ -6,7 +6,8 @@ import java.util.Arrays;
 
 import java.util.List;
 
-import jspecview.api.JSVColor;
+import javajs.api.GenericColor;
+
 import jspecview.common.ColorParameters;
 
 public class AwtParameters extends ColorParameters {
@@ -25,12 +26,12 @@ public class AwtParameters extends ColorParameters {
 	}
   
   @Override
-	public JSVColor getColor1(int rgb) {
+	public GenericColor getColor1(int rgb) {
     return new AwtColor(rgb);
   }
 
 	@Override
-	protected JSVColor getColor3(int r, int g, int b) {
+	protected GenericColor getColor3(int r, int g, int b) {
 		return new AwtColor(r, g, b);
 	}
 

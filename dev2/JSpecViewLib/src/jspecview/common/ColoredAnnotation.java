@@ -19,7 +19,7 @@
 
 package jspecview.common;
 
-import jspecview.api.JSVColor;
+import javajs.api.GenericColor;
 import jspecview.source.JDXSpectrum;
 
 
@@ -32,9 +32,9 @@ import jspecview.source.JDXSpectrum;
 
 public class ColoredAnnotation extends Annotation {
 
-  private JSVColor color;
+  private GenericColor color;
 
-  public JSVColor getColor() {
+  public GenericColor getColor() {
     return color;
   }
 
@@ -42,7 +42,7 @@ public class ColoredAnnotation extends Annotation {
   }
   
   public ColoredAnnotation setCA(
-	double x, double y, JDXSpectrum spec, String text, JSVColor color,
+	double x, double y, JDXSpectrum spec, String text, GenericColor color,
       boolean isPixels, boolean is2D, int offsetX, int offsetY) {
     setA(x, y, spec, text, isPixels, is2D, offsetX, offsetY);
     this.color = color;

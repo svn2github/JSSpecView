@@ -1,8 +1,8 @@
 package javajs.awt;
 
-import jspecview.api.JSVColor;
+import javajs.api.GenericColor;
 
-public class JsColor implements JSVColor {
+public class Color implements GenericColor {
 
 	public int argb;
 
@@ -18,21 +18,21 @@ public class JsColor implements JSVColor {
 		argb = argb & 0xFFFFFF | ((a & 0xFF) << 24);
 	}
 
-	public static JSVColor get1(int rgb) {
-		JsColor c = new JsColor();
+	public static GenericColor get1(int rgb) {
+		Color c = new Color();
 		c.argb = rgb | 0xFF000000;
 		return c;
 	}
 
-	public static JSVColor get3(int r, int g, int b) {
-		return new JsColor().set4(r, g, b, 0xFF);
+	public static GenericColor get3(int r, int g, int b) {
+		return new Color().set4(r, g, b, 0xFF);
 	}
 
-	public static JSVColor get4(int r, int g, int b, int a) {
-		return new JsColor().set4(r, g, b, a);
+	public static GenericColor get4(int r, int g, int b, int a) {
+		return new Color().set4(r, g, b, a);
 	}
 
-	private JSVColor set4(int r, int g, int b, int a) {
+	private GenericColor set4(int r, int g, int b, int a) {
 		argb = ((a << 24) | (r << 16) | (g << 8) | b) & 0xFFFFFFFF;
 		return this;
 	}
