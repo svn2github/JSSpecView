@@ -1,6 +1,7 @@
 package jspecview.awtjs2d;
 
 
+import javajs.awt.JsColor;
 import jspecview.api.JSVColor;
 import jspecview.common.ColorParameters;
 

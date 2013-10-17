@@ -4,8 +4,8 @@ import org.jmol.util.BS;
 import org.jmol.util.SB;
 
 import jspecview.api.JSVColor;
-import jspecview.awtjs2d.swing.AbstractTableModel;
-import jspecview.awtjs2d.swing.TableColumn;
+import javajs.swing.AbstractTableModel;
+import javajs.swing.TableColumn;
 import jspecview.util.JSVColorUtil;
 
 

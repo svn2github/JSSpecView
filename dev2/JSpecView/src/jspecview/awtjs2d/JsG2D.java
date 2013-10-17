@@ -37,6 +37,7 @@
 
 package jspecview.awtjs2d;
 
+import javajs.awt.JsColor;
 import jspecview.util.JSVColorUtil;
 
 import org.jmol.util.JmolFont;

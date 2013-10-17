@@ -2,13 +2,13 @@ package jspecview.awtjs2d;
 
 import org.jmol.util.Parser;
 
-import jspecview.awtjs2d.swing.BorderLayout;
-import jspecview.awtjs2d.swing.JEditorPane;
-import jspecview.awtjs2d.swing.Dimension;
-import jspecview.awtjs2d.swing.JDialog;
-import jspecview.awtjs2d.swing.JPanel;
-import jspecview.awtjs2d.swing.JScrollPane;
-import jspecview.awtjs2d.swing.JTable;
+import javajs.swing.BorderLayout;
+import javajs.swing.JEditorPane;
+import javajs.swing.Dimension;
+import javajs.swing.JDialog;
+import javajs.swing.JPanel;
+import javajs.swing.JScrollPane;
+import javajs.swing.JTable;
 
 import jspecview.api.JSVPanel;
 import jspecview.api.PlatformDialog;
