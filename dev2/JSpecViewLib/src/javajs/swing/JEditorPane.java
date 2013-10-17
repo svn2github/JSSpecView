@@ -1,6 +1,6 @@
 package javajs.swing;
 
-import javajs.lang.SB;
+import javajs.util.SB;
 
 /**
  * A simple implementation of a Swing JTextPane. 

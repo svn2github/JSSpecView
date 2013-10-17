@@ -1,7 +1,7 @@
 package javajs.swing;
 
-import javajs.lang.SB;
 import javajs.util.BS;
+import javajs.util.SB;
 
 
 abstract public interface AbstractTableModel extends TableColumn {

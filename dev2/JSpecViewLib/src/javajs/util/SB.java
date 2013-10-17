@@ -1,5 +1,5 @@
 
-package javajs.lang;
+package javajs.util;
 
 /**
  * Interesting thing here is that JavaScript is 3x faster than Java in handling strings.

@@ -1,7 +1,7 @@
 package javajs.swing;
 
 import javajs.awt.Dimension;
-import javajs.lang.SB;
+import javajs.util.SB;
 
 public class JScrollPane extends JContainer {
 

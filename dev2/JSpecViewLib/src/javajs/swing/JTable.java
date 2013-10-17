@@ -1,8 +1,8 @@
 package javajs.swing;
 
 import javajs.awt.Dimension;
-import javajs.lang.SB;
 import javajs.util.BS;
+import javajs.util.SB;
 
 
 public class JTable extends JComponent implements ListSelectionModel, ColumnSelectionModel {

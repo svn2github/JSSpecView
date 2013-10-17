@@ -1,7 +1,7 @@
 
 package javajs.swing;
 
-import javajs.lang.SB;
+import javajs.util.SB;
 
 public class JTextField extends JComponent {
 

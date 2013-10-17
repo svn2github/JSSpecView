@@ -1,7 +1,7 @@
 package javajs.swing;
 
 import javajs.awt.Color;
-import javajs.lang.SB;
+import javajs.util.SB;
 
 
 public class JDialog extends JContainer {
