@@ -2,9 +2,9 @@ package jspecview.awtjs2d;
 
 import org.jmol.util.Parser;
 
+import javajs.awt.Dimension;
 import javajs.swing.BorderLayout;
 import javajs.swing.JEditorPane;
-import javajs.swing.Dimension;
 import javajs.swing.JDialog;
 import javajs.swing.JPanel;
 import javajs.swing.JScrollPane;

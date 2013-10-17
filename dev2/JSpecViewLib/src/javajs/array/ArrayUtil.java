@@ -21,7 +21,7 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package org.jmol.util;
+package javajs.array;
 
 
 import java.lang.reflect.Array;
@@ -29,6 +29,8 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Map;
+
+import javajs.vec.P3;
 
 import org.jmol.util.JmolList;
 

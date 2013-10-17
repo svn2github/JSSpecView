@@ -16,8 +16,8 @@ import java.util.Properties;
 import java.util.Map;
 
 import javajs.lang.StringBuffer;
+import javajs.awt.Dimension;
 
-import org.jmol.util.Dimension;
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
 import org.jmol.util.Txt;
@@ -105,7 +105,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 
 	public Object display;
 	private int maximumSize = Integer.MAX_VALUE;
-	final Dimension dimScreen = new Dimension();
+	final Dimension dimScreen = new Dimension(0,0);
 
 	public ApiPlatform apiPlatform;
 

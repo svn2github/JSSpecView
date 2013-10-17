@@ -14,9 +14,10 @@
    makes no representations about the suitability of this software for any
    purpose.  It is provided "AS IS" with NO WARRANTY.
 */
-package org.jmol.util;
+package javajs.vec;
 
 import java.io.Serializable;
+
 
 
 /**

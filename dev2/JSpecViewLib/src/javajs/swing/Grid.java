@@ -1,8 +1,8 @@
 package javajs.swing;
 
+import javajs.array.ArrayUtil;
 import javajs.lang.StringBuffer;
 
-import org.jmol.util.ArrayUtil;
 
 public class Grid {
 

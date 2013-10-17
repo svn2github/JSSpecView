@@ -24,6 +24,8 @@
 package org.jmol.util;
 
 
+import javajs.array.ArrayUtil;
+
 import org.jmol.api.ApiPlatform;
 
 /**

@@ -8,12 +8,13 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.image.MemoryImageSource;
 
+import javajs.vec.P3;
+
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import org.jmol.api.ApiPlatform;
 import org.jmol.api.PlatformViewer;
-import org.jmol.util.P3;
 import org.jmol.util.Txt;
 
 /**

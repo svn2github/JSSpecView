@@ -1,5 +1,6 @@
 package javajs.swing;
 
+import javajs.awt.Dimension;
 import jspecview.api.JSVColor;
 import jspecview.dialog.DialogManager;
 import jspecview.util.JSVColorUtil;

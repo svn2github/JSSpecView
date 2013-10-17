@@ -8,6 +8,8 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import javajs.vec.P3;
+
 import javax.swing.JDialog;
 
 import jspecview.api.JSVPanel;
@@ -21,7 +23,6 @@ import org.jmol.api.JmolMouseInterface;
 import org.jmol.api.JmolPopupInterface;
 import org.jmol.api.PlatformViewer;
 import org.jmol.util.JmolFont;
-import org.jmol.util.P3;
 
 public class AwtPlatform implements ApiPlatform {
 

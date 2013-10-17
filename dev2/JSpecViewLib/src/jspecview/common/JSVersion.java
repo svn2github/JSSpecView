@@ -22,10 +22,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import org.jmol.util.J2SRequireImport;
+import javajs.J2SRequireImport;
+
 import org.jmol.util.Txt;
 
-import org.jmol.util.J2SRequireImport; // required
 
 @J2SRequireImport({java.util.Properties.class, java.io.BufferedInputStream.class})
 public class JSVersion {

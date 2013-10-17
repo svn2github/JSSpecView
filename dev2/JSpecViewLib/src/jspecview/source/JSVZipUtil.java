@@ -34,9 +34,9 @@ import org.jmol.util.JmolList;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import javajs.array.ArrayUtil;
 import javajs.lang.StringBuffer;
 
-import org.jmol.util.ArrayUtil;
 import org.jmol.util.Logger;
 
 public class JSVZipUtil {

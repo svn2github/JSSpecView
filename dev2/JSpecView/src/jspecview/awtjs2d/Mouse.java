@@ -27,12 +27,13 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 
+import javajs.J2SRequireImport;
+
 import jspecview.api.JSVPanel;
 
 import org.jmol.api.EventManager;
 import org.jmol.api.JmolMouseInterface;
 import org.jmol.api.Event;
-import org.jmol.util.J2SRequireImport;
 import org.jmol.util.Logger;
 
 /**

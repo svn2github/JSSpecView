@@ -1,8 +1,9 @@
 package jspecview.awtjs2d;
 
 
+import javajs.vec.P3;
+
 import org.jmol.api.PlatformViewer;
-import org.jmol.util.P3;
 
 /**
  * methods required by Jmol that access java.awt.Component

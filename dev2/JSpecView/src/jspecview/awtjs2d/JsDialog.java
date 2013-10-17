@@ -6,8 +6,8 @@ import java.util.Map;
 import javax.swing.SwingConstants;
 
 import jspecview.api.PlatformDialog;
+import javajs.awt.Dimension;
 import javajs.awt.JsColor;
-import javajs.swing.Dimension;
 import javajs.swing.FlowLayout;
 import javajs.swing.GridBagConstraints;
 import javajs.swing.GridBagLayout;

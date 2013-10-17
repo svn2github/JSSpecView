@@ -28,6 +28,8 @@ package org.jmol.util;
 import java.util.List;
 
 import javajs.lang.StringBuffer;
+import javajs.vec.P3;
+import javajs.vec.P4;
 
 public class Txt {
 

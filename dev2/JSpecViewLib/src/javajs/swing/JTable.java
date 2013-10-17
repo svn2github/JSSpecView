@@ -1,5 +1,6 @@
 package javajs.swing;
 
+import javajs.awt.Dimension;
 import javajs.lang.StringBuffer;
 import javajs.util.BitSet;
 import jspecview.dialog.DialogManager;
