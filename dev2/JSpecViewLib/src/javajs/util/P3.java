@@ -14,7 +14,8 @@
    makes no representations about the suitability of this software for any
    purpose.  It is provided "AS IS" with NO WARRANTY.
 */
-package javajs.vec;
+package javajs.util;
+
 
 
 
@@ -31,9 +32,9 @@ package javajs.vec;
  * for the optimization of compiled JavaScript using Java2Script
  * 
  */
-public class P3 extends Tuple3f {
+public class P3 extends T3 {
 
-  public static P3 newP(Tuple3f t) {
+  public static P3 newP(T3 t) {
     P3 p = new P3();
     p.x = t.x;
     p.y = t.y;
@@ -56,7 +57,7 @@ public class P3 extends Tuple3f {
    *        the other point
    * @return the square of distance between these two points as a float
    */
-  public final float distanceSquared(Tuple3f p1) {
+  public final float distanceSquared(T3 p1) {
     double dx = x - p1.x;
     double dy = y - p1.y;
     double dz = z - p1.z;
@@ -70,7 +71,7 @@ public class P3 extends Tuple3f {
    *        the other point
    * @return the distance between these two points
    */
-  public final float distance(Tuple3f p1) {
+  public final float distance(T3 p1) {
     return (float) Math.sqrt(distanceSquared(p1));
   }
 

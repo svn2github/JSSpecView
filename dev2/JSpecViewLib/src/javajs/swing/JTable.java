@@ -2,14 +2,14 @@ package javajs.swing;
 
 import javajs.awt.Dimension;
 import javajs.lang.SB;
-import javajs.util.BitSet;
+import javajs.util.BS;
 
 
 public class JTable extends JComponent implements ListSelectionModel, ColumnSelectionModel {
 
 	private AbstractTableModel tableModel;
-	private BitSet bsSelectedCells;
-	private BitSet bsSelectedRows;
+	private BS bsSelectedCells;
+	private BS bsSelectedRows;
 	
 	boolean rowSelectionAllowed;
 	boolean cellSelectionEnabled;
@@ -18,8 +18,8 @@ public class JTable extends JComponent implements ListSelectionModel, ColumnSele
 	public JTable(AbstractTableModel tableModel) {
 		super("JT");
 		this.tableModel = tableModel;
-		this.bsSelectedCells = new BitSet();
-		this.bsSelectedRows = new BitSet();
+		this.bsSelectedCells = new BS();
+		this.bsSelectedRows = new BS();
 	}
 
 	public ListSelectionModel getSelectionModel() {

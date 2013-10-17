@@ -8,7 +8,7 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.image.MemoryImageSource;
 
-import javajs.vec.P3;
+import javajs.util.P3;
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;

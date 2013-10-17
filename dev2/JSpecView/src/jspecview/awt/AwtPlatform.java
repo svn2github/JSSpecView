@@ -8,7 +8,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import javajs.vec.P3;
+import javajs.util.P3;
 
 import javax.swing.JDialog;
 

@@ -2,7 +2,7 @@ package jspecview.awtjs2d;
 
 import java.net.URL;
 
-import javajs.vec.P3;
+import javajs.util.P3;
 
 import jspecview.api.JSVPanel;
 

@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import javajs.lang.SB;
-import javajs.util.BitSet;
+import javajs.util.BS;
 
 import org.jmol.util.Txt;
 
@@ -257,7 +257,7 @@ public class JSVEscape {
     return url;
   }
 
-	public static BitSet unescapeBitSet(String str) {
+	public static BS unescapeBitSet(String str) {
     char ch;
     int len;
     if (str == null || (len = (str = str.trim()).length()) < 4
@@ -283,7 +283,7 @@ public class JSVEscape {
       } catch (NumberFormatException e) {
         return null;
       }
-    BitSet bs = BitSet.newN(lastN);
+    BS bs = BS.newN(lastN);
     lastN = -1;
     int iPrev = -1;
     int iThis = -2;

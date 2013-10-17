@@ -3,7 +3,7 @@ package org.jmol.api;
 
 import java.net.URL;
 
-import javajs.vec.P3;
+import javajs.util.P3;
 
 import org.jmol.util.JmolFont;
 

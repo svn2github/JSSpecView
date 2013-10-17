@@ -14,9 +14,10 @@
    makes no representations about the suitability of this software for any
    purpose.  It is provided "AS IS" with NO WARRANTY.
 */
-package javajs.vec;
+package javajs.util;
 
 import java.io.Serializable;
+
 
 
 
@@ -32,7 +33,7 @@ import java.io.Serializable;
  * for unique constructor and method names
  * for the optimization of compiled JavaScript using Java2Script
  */
-public abstract class Tuple4f implements Serializable {
+public abstract class T4 implements Serializable {
 
   /**
    * The x coordinate.
@@ -57,7 +58,7 @@ public abstract class Tuple4f implements Serializable {
   /**
    * Constructs and initializes a Tuple4f to (0,0,0,0).
    */
-  public Tuple4f() {
+  public T4() {
   }
 
   /**
@@ -101,8 +102,8 @@ public abstract class Tuple4f implements Serializable {
    */
   @Override
   public int hashCode() {
-    return Tuple3f.floatToIntBits0(x) ^ Tuple3f.floatToIntBits0(y)
-        ^ Tuple3f.floatToIntBits0(z) ^ Tuple3f.floatToIntBits0(w);
+    return T3.floatToIntBits0(x) ^ T3.floatToIntBits0(y)
+        ^ T3.floatToIntBits0(z) ^ T3.floatToIntBits0(w);
   }
 
   /**
@@ -114,9 +115,9 @@ public abstract class Tuple4f implements Serializable {
    */
   @Override
   public boolean equals(Object o) {
-    if (!(o instanceof Tuple4f))
+    if (!(o instanceof T4))
       return false;
-    Tuple4f t = (Tuple4f) o;
+    T4 t = (T4) o;
     return (this.x == t.x && this.y == t.y && this.z == t.z && this.w == t.w);
   }
 

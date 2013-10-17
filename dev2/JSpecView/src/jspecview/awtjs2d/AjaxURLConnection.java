@@ -61,7 +61,7 @@ public class AjaxURLConnection extends URLConnection {
   	//     type = "application/x-www-form-urlencoded";
   }
 
-	public Object getStringXBuilder() {
+	public Object getSB() {
 		return doAjax();
 	}
 

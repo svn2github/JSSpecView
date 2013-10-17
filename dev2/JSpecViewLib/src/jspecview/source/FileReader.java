@@ -32,7 +32,7 @@ import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
 import javajs.lang.SB;
-import javajs.util.BitSet;
+import javajs.util.BS;
 import javajs.util.List;
 
 import org.jmol.util.Logger;
@@ -633,11 +633,11 @@ public class FileReader {
 					Object[] o = htSets.get(key);
 					if (o == null) {
 						o = new Object[] { stringInfo,
-								(atoms == null ? null : new BitSet()) };
+								(atoms == null ? null : new BS()) };
 						htSets.put(key, o);
 						list.addLast(o);
 					}
-					BitSet bs = (BitSet) o[1];
+					BS bs = (BS) o[1];
 					if (atoms != null && bs != null) {
 						atoms = atoms.replace(',', ' ');
 						bs.or(unescapeBitSet("({" + atoms + "})"));
@@ -652,7 +652,7 @@ public class FileReader {
 				String stringInfo = (String) o[0];
 				stringInfo = simpleReplace(stringInfo, "%INDEX%", ""
 						+ getPeakIndex());
-				BitSet bs = (BitSet) o[1];
+				BS bs = (BS) o[1];
 				if (bs != null) {
 					System.out.println("bs " + i + " is " + bs);
 					String s = "";
@@ -686,7 +686,7 @@ public class FileReader {
 	}
 
 
-	private javajs.util.BitSet unescapeBitSet(String s) {
+	private javajs.util.BS unescapeBitSet(String s) {
 		return JSVEscape.unescapeBitSet(s);
 	}
 

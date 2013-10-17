@@ -1,7 +1,7 @@
 package javajs.swing;
 
-import javajs.array.ArrayUtil;
 import javajs.lang.SB;
+import javajs.util.ArrayUtil;
 
 
 public class Grid {

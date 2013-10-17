@@ -33,8 +33,8 @@ import java.io.InputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import javajs.array.ArrayUtil;
 import javajs.lang.SB;
+import javajs.util.ArrayUtil;
 import javajs.util.List;
 
 import org.jmol.util.Logger;

@@ -14,7 +14,7 @@
    makes no representations about the suitability of this software for any
    purpose.  It is provided "AS IS" with NO WARRANTY.
 */
-package javajs.vec;
+package javajs.util;
 
 import java.io.Serializable;
 
@@ -30,7 +30,7 @@ import java.io.Serializable;
  * for unique constructor and method names
  * for the optimization of compiled JavaScript using Java2Script
  */
-public abstract class Tuple3f implements Serializable {
+public abstract class T3 implements Serializable {
 
   /**
    * The x coordinate.
@@ -47,7 +47,7 @@ public abstract class Tuple3f implements Serializable {
    */
   public float z;
 
-  public Tuple3f() {
+  public T3() {
   }
 
   /**
@@ -85,7 +85,7 @@ public abstract class Tuple3f implements Serializable {
    * @param t1
    *        the tuple to be copied
    */
-  public final void setT(Tuple3f t1) {
+  public final void setT(T3 t1) {
     x = t1.x;
     y = t1.y;
     z = t1.z;
@@ -99,7 +99,7 @@ public abstract class Tuple3f implements Serializable {
    * @param t2
    *        the second tuple
    */
-  public final void add2(Tuple3f t1, Tuple3f t2) {
+  public final void add2(T3 t1, T3 t2) {
     x = t1.x + t2.x;
     y = t1.y + t2.y;
     z = t1.z + t2.z;
@@ -111,7 +111,7 @@ public abstract class Tuple3f implements Serializable {
    * @param t1
    *        the other tuple
    */
-  public final void add(Tuple3f t1) {
+  public final void add(T3 t1) {
     x += t1.x;
     y += t1.y;
     z += t1.z;
@@ -126,7 +126,7 @@ public abstract class Tuple3f implements Serializable {
    * @param t2
    *        the second tuple
    */
-  public final void sub2(Tuple3f t1, Tuple3f t2) {
+  public final void sub2(T3 t1, T3 t2) {
     x = t1.x - t2.x;
     y = t1.y - t2.y;
     z = t1.z - t2.z;
@@ -139,7 +139,7 @@ public abstract class Tuple3f implements Serializable {
    * @param t1
    *        the other tuple
    */
-  public final void sub(Tuple3f t1) {
+  public final void sub(T3 t1) {
     x -= t1.x;
     y -= t1.y;
     z -= t1.z;
@@ -168,7 +168,7 @@ public abstract class Tuple3f implements Serializable {
    * @param t2
    *        the tuple to be added
    */
-  public final void scaleAdd2(float s, Tuple3f t1, Tuple3f t2) {
+  public final void scaleAdd2(float s, T3 t1, T3 t2) {
     x = s * t1.x + t2.x;
     y = s * t1.y + t2.y;
     z = s * t1.z + t2.z;
@@ -183,7 +183,7 @@ public abstract class Tuple3f implements Serializable {
    * @param t1
    *        the tuple to be added
    */
-  public final void scaleAdd(float s, Tuple3f t1) {
+  public final void scaleAdd(float s, T3 t1) {
     x = s * x + t1.x;
     y = s * y + t1.y;
     z = s * z + t1.z;
@@ -196,7 +196,7 @@ public abstract class Tuple3f implements Serializable {
    *        the other vector
    * @return this.dot.v
    */
-  public final float dot(Tuple3f v) {
+  public final float dot(T3 v) {
     return x * v.x + y * v.y + z * v.z;
   }
 
@@ -262,9 +262,9 @@ public abstract class Tuple3f implements Serializable {
    */
   @Override
   public boolean equals(Object t1) {
-    if (!(t1 instanceof Tuple3f))
+    if (!(t1 instanceof T3))
       return false;
-    Tuple3f t2 = (Tuple3f) t1;
+    T3 t2 = (T3) t1;
     return (this.x == t2.x && this.y == t2.y && this.z == t2.z);
   }
 

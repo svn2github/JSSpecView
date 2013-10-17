@@ -60,7 +60,7 @@ class JsFile implements JmolFileInterface {
         conn.outputBytes(outputBytes);
       else if (post != null)
         conn.outputString(post);
-      return conn.getStringXBuilder();
+      return conn.getSB();
     } catch (Exception e) {
       return e.toString();
     }

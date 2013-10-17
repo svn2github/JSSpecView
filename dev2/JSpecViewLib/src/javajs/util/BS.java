@@ -73,7 +73,7 @@ import javajs.lang.SB;
  * @author Martin Buchholz
  * @since JDK1.0
  */
-public class BitSet implements Cloneable {
+public class BS implements Cloneable {
   /*
    * BitSets are packed into arrays of "words."
    * 
@@ -133,7 +133,7 @@ public class BitSet implements Cloneable {
   /**
    * Creates a new bit set. All bits are initially {@code false}.
    */
-  public BitSet() {
+  public BS() {
     initWords(BITS_PER_WORD);
     sizeIsSticky = false;
   }
@@ -149,8 +149,8 @@ public class BitSet implements Cloneable {
    * @throws NegativeArraySizeException
    *           if the specified initial size is negative
    */
-  public static BitSet newN(int nbits) {
-    BitSet bs = new BitSet();
+  public static BS newN(int nbits) {
+    BS bs = new BS();
     bs.init(nbits);
     return bs;
   }
@@ -491,7 +491,7 @@ public class BitSet implements Cloneable {
    *         specified {@code BitSet}
    * @since 1.4
    */
-  public boolean intersects(BitSet set) {
+  public boolean intersects(BS set) {
     for (int i = Math.min(wordsInUse, set.wordsInUse) - 1; i >= 0; i--)
       if ((words[i] & set.words[i]) != 0)
         return true;
@@ -520,7 +520,7 @@ public class BitSet implements Cloneable {
    * @param set
    *          a bit set
    */
-  public void and(BitSet set) {
+  public void and(BS set) {
     if (this == set)
       return;
 
@@ -543,7 +543,7 @@ public class BitSet implements Cloneable {
    * @param set
    *          a bit set
    */
-  public void or(BitSet set) {
+  public void or(BS set) {
     if (this == set)
       return;
 
@@ -579,7 +579,7 @@ public class BitSet implements Cloneable {
    * @param set
    *          a bit set
    */
-  public void xor(BitSet set) {
+  public void xor(BS set) {
     int wordsInCommon = Math.min(wordsInUse, set.wordsInUse);
 
     if (wordsInUse < set.wordsInUse) {
@@ -607,7 +607,7 @@ public class BitSet implements Cloneable {
    *          the {@code BitSet} with which to mask this {@code BitSet}
    * @since 1.2
    */
-  public void andNot(BitSet set) {
+  public void andNot(BS set) {
     // Perform logical (a & !b) on words in common
     for (int i = Math.min(wordsInUse, set.wordsInUse) - 1; i >= 0; i--)
       words[i] &= ~set.words[i];
@@ -687,12 +687,12 @@ public class BitSet implements Cloneable {
    */
   @Override
   public boolean equals(Object obj) {
-    if (!(obj instanceof BitSet))
+    if (!(obj instanceof BS))
       return false;
     if (this == obj)
       return true;
 
-    BitSet set = (BitSet) obj;
+    BS set = (BS) obj;
 
     if (wordsInUse != set.wordsInUse)
       return false;
@@ -797,8 +797,8 @@ public class BitSet implements Cloneable {
    * @param bitsetToCopy
    * @return bs
    */
-  public static BitSet copy(BitSet bitsetToCopy) {
-    BitSet bs = null;
+  public static BS copy(BS bitsetToCopy) {
+    BS bs = null;
     /**
      * @j2sNative
      * 
@@ -806,7 +806,7 @@ public class BitSet implements Cloneable {
      * 
      */
     {
-      bs = new BitSet();
+      bs = new BS();
     }
     int wordCount = bitsetToCopy.wordsInUse;
     if (wordCount == 0) {

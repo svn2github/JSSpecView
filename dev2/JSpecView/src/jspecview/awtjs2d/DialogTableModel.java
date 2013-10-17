@@ -5,7 +5,7 @@ import javajs.api.GenericColor;
 import javajs.lang.SB;
 import javajs.swing.AbstractTableModel;
 import javajs.swing.TableColumn;
-import javajs.util.BitSet;
+import javajs.util.BS;
 import jspecview.util.JSVColorUtil;
 
 
@@ -53,7 +53,7 @@ class DialogTableModel implements AbstractTableModel {
 		widths[thisCol] = n;
 	}
 
-	public void toHTML(SB sb, String id, BitSet selectedRows) {
+	public void toHTML(SB sb, String id, BS selectedRows) {
 		if (data == null || data[0].length == 0)
 			return;
 		int nrows = data.length;

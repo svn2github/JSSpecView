@@ -1,7 +1,7 @@
 package jspecview.awtjs2d;
 
 
-import javajs.vec.P3;
+import javajs.util.P3;
 
 import org.jmol.api.PlatformViewer;
 
