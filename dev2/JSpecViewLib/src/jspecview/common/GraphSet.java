@@ -661,6 +661,8 @@ public class GraphSet implements XYScaleConverter {
 			break;
 		case 3: // ctrl-click
 		case 2: // 1st double-click
+			if (iSpectrumClicked < 0)
+				return;
 			JDXSpectrum spec = spectra.get(iSpectrumClicked);
 			setScale(iSpectrumClicked);
 			if (clickCount == 3) {
@@ -679,10 +681,13 @@ public class GraphSet implements XYScaleConverter {
 			}
 			pendingMeasurement = new Measurement().setM1(x, y, spec);
 			pendingMeasurement.setPt2(x0, y);
+			pd.repaint();
 			break;
 		case 1: // single click -- save and continue
 		case -2: // second double-click -- save and quit
 		case -3: // second ctrl-click
+			if (pendingMeasurement == null)
+				return;
 			setScale(getSpectrumIndex(pendingMeasurement.spec));
 			if (clickCount != 3 && findNearestMaxMin()) {
 				xPixel = xPixelMovedTo;
@@ -703,7 +708,7 @@ public class GraphSet implements XYScaleConverter {
 					pendingMeasurement = null;
 				}
 			}
-			// pd.repaint();
+			pd.repaint();
 			break;
 		case 5: // (old) control-click
 			if (findNearestMaxMin()) {
@@ -2877,6 +2882,9 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 					return;
 				}
 			}
+			if (pendingMeasurement != null)
+				return;
+
 			widget = getPinSelected(xPixel, yPixel);
 			if (widget == null) {
 				yPixel = fixY(yPixel);
@@ -3289,8 +3297,11 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 	 */
 	synchronized void mouseReleasedEvent(int xPixel, int yPixel) {
 		if (pendingMeasurement != null) {
-			//processPendingMeasurement(xPixel, yPixel, 2);
-			//setToolTipForPixels(xPixel, yPixel);
+			if (Math.abs(toPixelX(pendingMeasurement.getXVal()) - xPixel) < 2)
+				pendingMeasurement = null;
+			processPendingMeasurement(xPixel, yPixel, 1);
+			setToolTipForPixels(xPixel, yPixel);	
+			pd.repaint();
 			return;
 		}
 		if (pd.integralShiftMode != 0) {
