@@ -1,6 +1,6 @@
 package javajs.swing;
 
-import javajs.lang.StringBuffer;
+import javajs.lang.StringBuilder;
 import javajs.util.BitSet;
 
 
@@ -8,6 +8,6 @@ abstract public interface AbstractTableModel extends TableColumn {
 
 	TableColumn getColumn(int i);
 
-	void toHTML(StringBuffer sb, String id, BitSet bsSelectedRows);
+	void toHTML(StringBuilder sb, String id, BitSet bsSelectedRows);
 
 }

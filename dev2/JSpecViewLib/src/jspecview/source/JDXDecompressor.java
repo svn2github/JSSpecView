@@ -26,7 +26,7 @@ package jspecview.source;
 
 import java.io.IOException;
 
-import javajs.lang.StringBuffer;
+import javajs.lang.StringBuilder;
 
 import org.jmol.util.Logger;
 
@@ -132,7 +132,7 @@ public class JDXDecompressor {
   private int ipt;
   private String line, lastLine;
   private int lineLen;
-  private StringBuffer errorLog;
+  private StringBuilder errorLog;
 
   private void addPoint(Coordinate pt) {
     //System.out.println(pt);
@@ -171,7 +171,7 @@ public class JDXDecompressor {
    * @param firstLastX 
    * @return the array of <code>Coordinate</code>s
    */
-  public Coordinate[] decompressData(StringBuffer errorLog, double[] firstLastX) {
+  public Coordinate[] decompressData(StringBuilder errorLog, double[] firstLastX) {
 
     this.errorLog = errorLog;
     this.firstLastX = firstLastX;

@@ -14,7 +14,7 @@
 
 package org.jmol.io;
 
-import javajs.lang.StringBuffer;
+import javajs.lang.StringBuilder;
 
 public class Base64 {
 
@@ -53,9 +53,9 @@ public class Base64 {
     return getBase64(bytes).toBytes(0, -1);
   }
 
-  public static StringBuffer getBase64(byte[] bytes) {
+  public static StringBuilder getBase64(byte[] bytes) {
     long nBytes = bytes.length;
-    StringBuffer sout = new StringBuffer();
+    StringBuilder sout = new StringBuilder();
     if (nBytes == 0)
       return sout;
     for (int i = 0, nPad = 0; i < nBytes && nPad == 0;) {

@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
-import javajs.lang.StringBuffer;
+import javajs.lang.StringBuilder;
 import javajs.util.BitSet;
 import javajs.util.List;
 
@@ -81,7 +81,7 @@ public class FileReader {
   }
   private JDXSource source;
   private JDXSourceStreamTokenizer t;
-  private StringBuffer errorLog;
+  private StringBuilder errorLog;
   private boolean obscure;
 
   private boolean done;
@@ -189,7 +189,7 @@ public class FileReader {
     source = new JDXSource(JDXSource.TYPE_SIMPLE, filePath);
     isZipFile = (br instanceof JSVZipFileSequentialReader);
     t = new JDXSourceStreamTokenizer(br);
-    errorLog = new StringBuffer();
+    errorLog = new StringBuilder();
 
     String label = null;
 
@@ -740,7 +740,7 @@ public class FileReader {
    */
   private static boolean readDataLabel(JDXDataObject spectrum, String label,
                                        JDXSourceStreamTokenizer t,
-                                       StringBuffer errorLog, boolean obscure) {
+                                       StringBuilder errorLog, boolean obscure) {
 
     if (readHeaderLabel(spectrum, label, t, errorLog, obscure))
       return true;
@@ -868,7 +868,7 @@ public class FileReader {
   }
 
   private static boolean readHeaderLabel(JDXHeader jdxHeader, String label,
-                                         JDXSourceStreamTokenizer t, StringBuffer errorLog,
+                                         JDXSourceStreamTokenizer t, StringBuilder errorLog,
                                          boolean obscure) {
     if (label.equals("##TITLE")) {
       String value = t.getValue();

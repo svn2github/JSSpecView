@@ -22,7 +22,7 @@ package jspecview.source;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-import javajs.lang.StringBuffer;
+import javajs.lang.StringBuilder;
 import javajs.util.List;
 
 
@@ -76,7 +76,7 @@ abstract class XMLReader {
   protected double refPoint = JDXDataObject.ERROR;
   protected String casRN = "";
   protected String sampleID;
-  protected StringBuffer errorLog = new StringBuffer();
+  protected StringBuilder errorLog = new StringBuilder();
 
   public XMLReader(String filePath) {
     this.filePath = filePath;

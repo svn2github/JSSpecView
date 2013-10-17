@@ -25,7 +25,7 @@
 
 package javajs.util;
 
-import javajs.lang.StringBuffer;
+import javajs.lang.StringBuilder;
 
 
 /**
@@ -771,7 +771,7 @@ public class BitSet implements Cloneable {
 
     int numBits = (wordsInUse > 128) ? cardinality() : wordsInUse
         * BITS_PER_WORD;
-    StringBuffer b = StringBuffer.newN(6 * numBits + 2);
+    StringBuilder b = StringBuilder.newN(6 * numBits + 2);
     b.appendC('{');
 
     int i = nextSetBit(0);

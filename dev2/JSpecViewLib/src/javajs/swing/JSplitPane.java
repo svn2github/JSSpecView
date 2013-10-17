@@ -1,6 +1,6 @@
 package javajs.swing;
 
-import javajs.lang.StringBuffer;
+import javajs.lang.StringBuilder;
 
 public class JSplitPane extends JComponent {
 
@@ -67,7 +67,7 @@ public class JSplitPane extends JComponent {
 		  width = getSubcomponentWidth();
 		if (height == 0)
 		  height = getSubcomponentHeight();
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("<div id='" + id + "' class='JSplitPane' style='" + getCSSstyle(100) + "'>");
 		if (isH) 
 			sb.append("<div id='" + id + "_left' style='width:50%;height:100%;position:absolute;top:0%;left:0%'>");

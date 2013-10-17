@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
-import javajs.lang.StringBuffer;
+import javajs.lang.StringBuilder;
 
 import org.jmol.api.BytePoster;
 
@@ -14,7 +14,7 @@ import org.jmol.api.BytePoster;
  * 
  * A generic output method. JmolOutputChannel can be used to:
  * 
- * add characters to a StringBuffer 
+ * add characters to a StringBuilder 
  *   using fileName==null, append() and toString()
  *   
  * add bytes utilizing ByteArrayOutputStream 
@@ -47,7 +47,7 @@ public class JmolOutputChannel extends OutputStream {
   private boolean isCanceled;
   private boolean closed;
   private OutputStream os;
-  private StringBuffer sb;
+  private StringBuilder sb;
   private String type;
   
   public JmolOutputChannel setParams(BytePoster bytePoster, String fileName,
@@ -86,7 +86,7 @@ public class JmolOutputChannel extends OutputStream {
    * will go to string buffer if bw == null and os == null
    * 
    * @param s
-   * @return this, for chaining like a standard StringBuffer
+   * @return this, for chaining like a standard StringBuilder
    * 
    */
   public JmolOutputChannel append(String s) {
@@ -95,7 +95,7 @@ public class JmolOutputChannel extends OutputStream {
         bw.write(s);
       } else if (os == null) {
         if (sb == null)
-          sb = new StringBuffer();
+          sb = new StringBuilder();
         sb.append(s);
       } else {
         byte[] b = s.getBytes();

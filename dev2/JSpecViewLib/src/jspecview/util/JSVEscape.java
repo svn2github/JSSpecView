@@ -29,7 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javajs.lang.StringBuffer;
+import javajs.lang.StringBuilder;
 import javajs.util.BitSet;
 
 import org.jmol.util.Txt;
@@ -54,7 +54,7 @@ public class JSVEscape {
         int pt = -1;
         char ch = escapable.charAt(i++);
         char ch2 = escapable.charAt(i++);
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         int pt0 = 0;
         while ((pt = str.indexOf(ch, pt + 1)) >= 0) {
           sb.append(str.substring(pt0, pt)).appendC('\\').appendC(ch2);
@@ -92,7 +92,7 @@ public class JSVEscape {
 
     //Logger.debug(infoType+" -- "+info);
 
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     String sep = "";
     if (info == null)
       return packageJSON(infoType, (String) null, addCR);
@@ -237,7 +237,7 @@ public class JSVEscape {
     return "\"" + s + "\"";
   }
 
-  private static String packageJSON(String infoType, StringBuffer sb, boolean addCR) {
+  private static String packageJSON(String infoType, StringBuilder sb, boolean addCR) {
     return packageJSON(infoType, sb.toString(), addCR);
   }
 

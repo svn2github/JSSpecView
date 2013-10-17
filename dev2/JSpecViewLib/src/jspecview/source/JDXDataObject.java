@@ -4,7 +4,6 @@ import org.jmol.util.Logger;
 import org.jmol.util.Parser;
 import org.jmol.util.Txt;
 
-import jspecview.common.Annotation;
 import jspecview.common.Coordinate;
 import jspecview.common.Integral;
 import jspecview.common.Measurement;

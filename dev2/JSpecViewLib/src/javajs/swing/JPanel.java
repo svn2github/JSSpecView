@@ -1,6 +1,6 @@
 package javajs.swing;
 
-import javajs.lang.StringBuffer;
+import javajs.lang.StringBuilder;
 
 public class JPanel extends JComponent {
 
@@ -52,7 +52,7 @@ public class JPanel extends JComponent {
 					GridBagConstraints.CENTER, 0, null, 0, 0));
 			last = null;
 		}
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("\n<div id='" + id + "' class='JPanel' style='"
 				+ getCSSstyle(100) + "'>\n");
 		sb.append("\n<span id='" + id + "_minimizer' style='width:" + minWidth

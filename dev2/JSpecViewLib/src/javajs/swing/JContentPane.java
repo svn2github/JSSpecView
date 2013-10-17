@@ -1,6 +1,6 @@
 package javajs.swing;
 
-import javajs.lang.StringBuffer;
+import javajs.lang.StringBuilder;
 
 public class JContentPane extends JContainer {
 
@@ -10,7 +10,7 @@ public class JContentPane extends JContainer {
 
 	@Override
 	public String toHTML() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("\n<div id='" + id + "' class='JContentPane' style='" + getCSSstyle(100) + "'>\n");		
 		for (int i = 0; i < list.size(); i++)
 			sb.append(list.get(i).toHTML());

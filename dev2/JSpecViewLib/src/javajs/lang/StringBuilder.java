@@ -10,14 +10,14 @@ package javajs.lang;
  * 
  */
 
-public class StringBuffer {
+public class StringBuilder {
   
-  private StringBuilder sb;
-  String s;
+  private java.lang.StringBuilder sb;
+  String s; // used by JavaScript only; no Java references
   
   //TODO: JS experiment with using array and .push() here
 
-  public StringBuffer() {
+  public StringBuilder() {
     /**
      * @j2sNative
      * 
@@ -25,11 +25,11 @@ public class StringBuffer {
      * 
      */
     {
-      sb = new StringBuilder();
+      sb = new java.lang.StringBuilder();
     }
   }
 
-  public static StringBuffer newN(int n) {
+  public static StringBuilder newN(int n) {
     /**
      * @j2sNative
      *            return new org.jmol.util.SB(); 
@@ -37,13 +37,13 @@ public class StringBuffer {
     {
       // not perfect, because it requires defining sb twice. 
       // We can do better...
-      StringBuffer sb = new StringBuffer();
-      sb.sb = new StringBuilder(n);
+      StringBuilder sb = new StringBuilder();
+      sb.sb = new java.lang.StringBuilder(n);
       return sb;
     }
   }
 
-  public static StringBuffer newS(String s) {
+  public static StringBuilder newS(String s) {
     /**
      * @j2sNative 
      * 
@@ -53,13 +53,13 @@ public class StringBuffer {
      * 
      */
     {
-    StringBuffer sb = new StringBuffer();
-    sb.sb = new StringBuilder(s);
+    StringBuilder sb = new StringBuilder();
+    sb.sb = new java.lang.StringBuilder(s);
     return sb;
     }
   }
 
-  public StringBuffer append(String s) {
+  public StringBuilder append(String s) {
     /**
      * @j2sNative
      * 
@@ -72,7 +72,7 @@ public class StringBuffer {
     return this;
   }
   
-  public StringBuffer appendC(char c) {
+  public StringBuilder appendC(char c) {
     /**
      * @j2sNative
      * 
@@ -85,7 +85,7 @@ public class StringBuffer {
     
   }
 
-  public StringBuffer appendI(int i) {
+  public StringBuilder appendI(int i) {
     /**
      * @j2sNative
      * 
@@ -98,7 +98,7 @@ public class StringBuffer {
     return this;
   }
 
-  public StringBuffer appendB(boolean b) {
+  public StringBuilder appendB(boolean b) {
     /**
      * @j2sNative
      * 
@@ -116,7 +116,7 @@ public class StringBuffer {
    * @param f
    * @return this
    */
-  public StringBuffer appendF(float f) {
+  public StringBuilder appendF(float f) {
     /**
      * @j2sNative
      * 
@@ -132,7 +132,7 @@ public class StringBuffer {
     return this;
   }
 
-  public StringBuffer appendD(double d) {
+  public StringBuilder appendD(double d) {
     /**
      * @j2sNative
      * 
@@ -148,7 +148,7 @@ public class StringBuffer {
     return this;
   }
 
-  public StringBuffer appendSB(StringBuffer buf) {
+  public StringBuilder appendSB(StringBuilder buf) {
     /**
      * @j2sNative
      * 
@@ -161,7 +161,7 @@ public class StringBuffer {
     return this;
   }
 
-  public StringBuffer appendO(Object data) {
+  public StringBuilder appendO(Object data) {
     /**
      * @j2sNative
      * 

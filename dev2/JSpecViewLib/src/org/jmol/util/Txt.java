@@ -27,7 +27,7 @@ package org.jmol.util;
 
 import java.util.List;
 
-import javajs.lang.StringBuffer;
+import javajs.lang.StringBuilder;
 import javajs.vec.P3;
 import javajs.vec.P4;
 
@@ -135,7 +135,7 @@ public class Txt {
           value + (isNeg ? -1 : 1) * formatAdds[decimalDigits], decimalDigits);
     }
 
-    StringBuffer sb = StringBuffer.newS(s1.substring(0, (decimalDigits == 0 ? pt
+    StringBuilder sb = StringBuilder.newS(s1.substring(0, (decimalDigits == 0 ? pt
         : ++pt)));
     for (int i = 0; i < decimalDigits; i++, pt++) {
       if (pt < len)
@@ -196,7 +196,7 @@ public class Txt {
     char padChar = (zeroPad ? '0' : ' ');
     char padChar0 = (isNeg ? '-' : padChar);
 
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     if (alignLeft)
       sb.append(value);
     sb.appendC(padChar0);
@@ -425,7 +425,7 @@ public class Txt {
     strFormat = simpleReplace(strFormat, "%p", "%6.2p");
     strFormat = simpleReplace(strFormat, "%q", "%6.2q");
     String[] format = split(strFormat, "%");
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     sb.append(format[0]);
     for (int i = 1; i < format.length; i++) {
       String f = "%" + format[i];
@@ -471,7 +471,7 @@ public class Txt {
       }
     }
     String s = f.substring(0, pt + 1);
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     for (int i = 0; i < n; i++)
       sb.append(s);
     sb.append(f.substring(pt + 1));
@@ -601,14 +601,14 @@ public class Txt {
     return str.substring(k, m + 1);
   }
 
-  public static void leftJustify(StringBuffer s, String s1, String s2) {
+  public static void leftJustify(StringBuilder s, String s1, String s2) {
     s.append(s2);
     int n = s1.length() - s2.length();
     if (n > 0)
       s.append(s1.substring(0, n));
   }
   
-  public static void rightJustify(StringBuffer s, String s1, String s2) {
+  public static void rightJustify(StringBuilder s, String s1, String s2) {
     int n = s1.length() - s2.length();
     if (n > 0)
       s.append(s1.substring(0, n));
@@ -685,7 +685,7 @@ public class Txt {
   public static String join(String[] s, char c, int i0) {
     if (s.length < i0)
       return null;
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     sb.append(s[i0++]);
     for (int i = i0; i < s.length; i++)
       sb.appendC(c).append(s[i]);
