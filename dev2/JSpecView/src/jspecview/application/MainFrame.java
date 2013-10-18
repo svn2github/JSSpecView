@@ -1130,7 +1130,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		if (recentFilePaths.size() >= MAX_RECENT)
 			recentFilePaths.remove(MAX_RECENT - 1);
 		if (recentFilePaths.contains(filePath))
-			recentFilePaths.remove(filePath);
+			recentFilePaths.removeObj(filePath);
 		recentFilePaths.add(0, filePath);
 		SB filePaths = new SB();
 		int n = recentFilePaths.size();

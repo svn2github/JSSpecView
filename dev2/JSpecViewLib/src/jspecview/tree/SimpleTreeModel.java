@@ -17,7 +17,7 @@ public class SimpleTreeModel {
 	}
 
 	public void removeNodeFromParent(JSVTreeNode node) {
-		((SimpleTreeNode) node).prevNode.children.remove(node);
+		((SimpleTreeNode) node).prevNode.children.removeObj(node);
 	}
 
 }

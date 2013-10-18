@@ -1243,7 +1243,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 				for (Enumeration<JSVTreeNode> e = node.children(); e.hasMoreElements();) {
 					JSVTreeNode childNode = e.nextElement();
 					toDelete.addLast(childNode);
-					panelNodes.remove(childNode.getPanelNode());
+					panelNodes.removeObj(childNode.getPanelNode());
 				}
 				toDelete.addLast(node);
 				if (fileName != null)

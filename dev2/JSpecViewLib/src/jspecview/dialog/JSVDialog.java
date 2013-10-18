@@ -32,10 +32,11 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 	protected DialogManager manager;
 	protected PlatformDialog dialog;
 	protected JSVPanel jsvp;
-	protected Object txt1;
-	protected Object txt2;
+	protected Object txt1, txt2, txt3;
 	protected Object combo1; // measurement listing, peaks
 	protected MeasurementData xyData;
+	protected Parameters myParams;
+	protected int precision = 1;
 
 	private int[] loc;
 	private Object showHideButton; // text changeable
@@ -44,14 +45,12 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 	private boolean isNumeric; // not Views or OverlayLegend
 	private boolean defaultVisible; // not OverlayLegend
 	private String subType;
-	private Parameters myParams;
 	private String graphSetKey;
 	private Object[][] tableData;
 	private boolean addUnits;
 	private String[] unitOptions;
 	private int[] formatOptions;
 	private Integer unitPtr;
-	private int precision = 1;
 	private boolean isON = true;
 
 	abstract protected void addUniqueControls();
@@ -172,7 +171,8 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 			done();
 			return true;
 		}
-
+		if (jsvp != null)
+			jsvp.doRepaint();
 		return true;
 	}
 
@@ -245,14 +245,6 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 		apply(null);
 	}
 
-	public void setParamsFromFields() {
-		setParams(null);
-	}
-
-	public void loadDataFromFields() {
-		loadData(null);
-	}
-
 	public JSVDialog reEnable() {
 		paramsReEnable();
 		return this;
@@ -304,11 +296,11 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 		selectTableRow(-1);
 		switch (type) {
 		case Integration:
-			loadDataFromFields();
+			loadData();
 			checkEnables();
 			break;
 		case Measurements:
-			loadDataFromFields();
+			loadData();
 			checkEnables();
 			break;
 		case NONE:
@@ -343,36 +335,9 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 	}
 
 	protected double lastNorm = 1;
-	protected double lastMin = 0;
-
-	public void processEvent(String what, double val) {
-		switch (type) {
-		case Integration:
-			if (what.equals("min")) {
-				((IntegralData) xyData).setMinimumIntegral(lastMin = val);
-			} else if (what.equals("int")) {
-				if (val < 0)
-					return;
-				((IntegralData) xyData).setSelectedIntegral(xyData.get(iSelected),
-						lastNorm = val);
-			}
-			break;
-		case Measurements:
-			break;
-		case NONE:
-			break;
-		case PeakList:
-			break;
-		case OverlayLegend:
-			break;
-		case Views:
-			break;
-		}
-		applyFromFields();
-		jsvp.doRepaint();
-	}
 
 	public MeasurementData getPeakData() {
+		// could be called by outside, but isn't. 
 		PeakData md = new PeakData(AType.PeakList, spec);
 		md.setPeakList(myParams, precision, jsvp.getPanelData().getView());
 		xyData = md;
@@ -426,11 +391,12 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 			case Integration:
 				double offset = Double.parseDouble((String) objects[0]);
 				double scale = Double.parseDouble((String) objects[1]);
+				//double minval = Double.parseDouble((String) objects[2]);
 				myParams.integralOffset = offset;
 				myParams.integralRange = scale;
-				myParams.integralDrawAll = false;// chkResets.isSelected();
+				//myParams.integralMinY = minval;
+				myParams.integralDrawAll = false;
 				((IntegralData) getData()).update(myParams);
-				jsvp.doRepaint();
 				break;
 			case Measurements:
 				// n/a
@@ -449,7 +415,7 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 			case Views:
 				break;
 			}
-			loadDataFromFields();
+			loadData();
 			checkEnables();
 			jsvp.doRepaint();
 		} catch (Exception e) {
@@ -533,7 +499,7 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 
 	private boolean skipCreate;
 
-	private void eventApply() {
+	protected void eventApply() {
 		switch (type) {
 		case Integration:
 			break;
@@ -646,7 +612,7 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 		}
 	}
 
-	protected void loadData(Object param) {
+	protected void loadData() {
 		Object[][] data;
 		String[] header;
 		int[] widths;
@@ -663,7 +629,7 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 		case Measurements:
 			if (xyData == null)
 				return;
-			data = xyData.getMeasurementListArray(param.toString());
+			data = xyData.getMeasurementListArray(dialog.getSelectedItem(combo1).toString());
 			header = xyData.getDataHeader();
 			widths = new int[] { 40, 65, 65, 50 };
 			createTable(data, header, widths);
@@ -703,41 +669,24 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 		case NONE:
 			break;
 		case PeakList:
-			setParamsFromFields();
-			PeakData md = new PeakData(AType.PeakList, spec);
-			md.setPeakList(myParams, precision, jsvp.getPanelData().getView());
-			xyData = md;
-			loadDataFromFields();
+			try {
+				double thresh = Double.parseDouble(dialog.getText(txt1));
+				myParams.peakListThreshold = thresh;
+				myParams.peakListInterpolation = dialog.getSelectedItem(combo1)
+						.toString();
+				myParams.precision = precision;
+				PeakData md = new PeakData(AType.PeakList, spec);
+				md.setPeakList(myParams, precision, jsvp.getPanelData().getView());
+				xyData = md;
+				loadData();
+			} catch (Exception e) {
+				// for parseDouble
+			}
 			break;
 		case OverlayLegend:
 			break;
 		case Views:
 			break;
-		}
-	}
-
-	protected void setParams(Object[] objects) {
-		try {
-			switch (type) {
-			case Integration:
-				break;
-			case Measurements:
-				break;
-			case NONE:
-				break;
-			case PeakList:
-				double thresh = Double.parseDouble((String) objects[0]);
-				myParams.peakListThreshold = thresh;
-				myParams.peakListInterpolation = (String) objects[1];
-				myParams.precision = precision;
-				break;
-			case OverlayLegend:
-				break;
-			case Views:
-				break;
-			}
-		} catch (Exception e) {
-			// for parseDouble
 		}
 	}
 

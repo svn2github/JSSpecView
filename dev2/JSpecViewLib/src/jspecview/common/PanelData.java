@@ -926,11 +926,9 @@ public class PanelData implements EventManager {
 	}
 
 	public void doMouseReleased(int xPixel, int yPixel, boolean isButton1) {
-		System.out.println("mouse released " + isButton1);
 		mouseState = Mouse.UP;
 		if (thisWidget == null && currentGraphSet.pendingMeasurement == null || !isButton1)
 			return;
-		System.out.println("mouse releasedok");
 		currentGraphSet.mouseReleasedEvent(xPixel, yPixel);
 		thisWidget = null;
 		isIntegralDrag = false;

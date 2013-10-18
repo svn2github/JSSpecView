@@ -99,7 +99,7 @@ public class JsDialog extends JDialog implements PlatformDialog {
   	JCheckBox cb = new JCheckBox();
   	cb.setSelected(isSelected);
   	cb.setText(title);
-  	cb.setName(name);
+  	cb.setName(registryKey + "/" + name);
     Insets insets = new Insets(0, 20 * level, 2, 2);
     thisPanel.add(cb, new GridBagConstraints(0, iRow++, 1, 1, 0.0, 0.0,
     		GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));
@@ -128,7 +128,7 @@ public class JsDialog extends JDialog implements PlatformDialog {
 			String[] info, int iPt, boolean visible) {
 		JComboBox<String> combo = new JComboBox<String>(info);
 		combo.setSelectedIndex(iPt);
-		combo.setName(name);
+		combo.setName(registryKey + "/" + name);
 		if (visible) {
 			combo.addActionListener(manager);
 			addPanelLine(name, label, combo, null);
@@ -149,7 +149,7 @@ public class JsDialog extends JDialog implements PlatformDialog {
 		JTextField obj = new JTextField(value);
 		obj.setName(registryKey + "/" + name);
 		if (visible) {
-			obj.setPreferredSize(new Dimension(75, 25));
+			obj.setPreferredSize(new Dimension(45, 15));
 			obj.addActionListener(manager);
   		addPanelLine(name, label, obj, units);
 		}
@@ -233,7 +233,7 @@ public class JsDialog extends JDialog implements PlatformDialog {
 			}
 			
 		}
-		super.repaint();
+		//super.repaint();
 	}
 
 	public void selectTableRow(int i) {

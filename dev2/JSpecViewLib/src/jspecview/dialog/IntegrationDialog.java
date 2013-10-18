@@ -19,6 +19,8 @@
 
 package jspecview.dialog;
 
+import jspecview.common.IntegralData;
+
 
 /**
  * Dialog for managing the integral listing for a Spectrum within a GraphSet
@@ -48,6 +50,8 @@ public class IntegrationDialog extends JSVDialog {
 				+ viewer.parameters.integralOffset, true);
 		txt2 = dialog.addTextField("txtScale", "Scale", null, "%", ""
 				+ viewer.parameters.integralRange, true);
+		// no luck getting this to work.
+		//txt3 = dialog.addTextField("txtMinimum", "Minimum", null, "", "" + viewer.parameters.integralMinY, true);
 		dialog.addButton("btnApply", "Apply");
 		addApplyBtn = false;
 		dialog.addButton("btnAuto", "Auto");
@@ -55,46 +59,44 @@ public class IntegrationDialog extends JSVDialog {
 		dialog.addButton("btnNormalize", "Normalize");
 	}
 
+	// from DialogParams:
+
+	@Override
+	public void applyFromFields() {
+		apply(new Object[] {dialog.getText(txt1), dialog.getText(txt2)});//, dialog.getText(txt3)});
+	}
+
+
 	@Override
 	public boolean callback(String id, String msg) {
-		if (id.equals("btnAuto")) {
-			viewer.runScript("integrate auto");
-		} else if (id.equals("BaselineOffset")) {
-		} else if (id.equals("btnDelete")) {
-			deleteIntegral();
-		} else if (id.equals("btnNormalize")) {
-			try {
+		double val;
+		try {
+			if (id.equals("btnAuto") || xyData == null || xyData.size() == 0) {
+				viewer.runScript("integrate auto");
+			} else if (id.equals("BaselineOffset")) {
+			} else if (id.equals("btnDelete")) {
+				deleteIntegral();
+			} else if (id.equals("btnNormalize")) {
 				if (!checkSelectedIntegral())
 					return true;
 				String ret = manager.getDialogInput(dialog,
 						"Enter a normalization factor", "Normalize",
 						DialogManager.QUESTION_MESSAGE, null, null, "" + lastNorm);
-				processEvent("int", Double.parseDouble(ret));
-			} catch (Exception ex) {
-				// for parseDouble
+				val = Double.parseDouble(ret);
+				if (val > 0)
+					((IntegralData) xyData).setSelectedIntegral(xyData.get(iSelected),
+							lastNorm = val);
+				eventApply();
+			} else {
+				return callbackAD(id, msg);
 			}
-		} else if (id.equals("Minimum")) {
-			try {
-				String ret = manager.getDialogInput(dialog, "Minimum value?",
-						"Set Minimum Value", DialogManager.QUESTION_MESSAGE, null, null, ""
-								+ lastMin);
-				processEvent("min", Double.parseDouble(ret));
-			} catch (Exception ex) {
-				// for parseDouble
-			}
-		} else {
-			return callbackAD(id, msg);
+		} catch (Exception ex) {
+			// for parseDouble
 		}
 		return true;
 	}
 
-	// from DialogParams:
-
-	@Override
-	public void applyFromFields() {
-		apply(new Object[] {dialog.getText(txt1), dialog.getText(txt2)});
-	}
-
+	
 	private boolean checkSelectedIntegral() {
 		if (iSelected < 0) {
 			showMessage(
@@ -112,7 +114,6 @@ public class IntegrationDialog extends JSVDialog {
 		iSelected = -1;
 		iRowColSelected = -1;
 		applyFromFields();
-		jsvp.doRepaint();
 	}
 
 

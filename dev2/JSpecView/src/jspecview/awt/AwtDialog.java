@@ -123,6 +123,7 @@ public class AwtDialog extends JDialog implements PlatformDialog {
 	private Insets panelInsets = new Insets(0, 0, 2, 2);
 	private int defaultHeight = 350;
 	protected int selectedRow = -1;
+	private DialogTableModel tableModel;
 	
 	public AwtDialog(DialogManager manager, JSVDialog jsvDialog, String registryKey) {
   	this.manager = manager;
@@ -162,7 +163,7 @@ public class AwtDialog extends JDialog implements PlatformDialog {
   	JCheckBox cb = new JCheckBox();
   	cb.setSelected(isSelected);
   	cb.setText(title);
-  	cb.setName(name);
+  	cb.setName(registryKey + "/" + name);
     Insets insets = new Insets(0, 20 * level, 2, 2);
     thisPanel.add(cb, new GridBagConstraints(0, iRow++, 1, 1, 0.0, 0.0,
     		GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));
@@ -191,7 +192,7 @@ public class AwtDialog extends JDialog implements PlatformDialog {
 			String[] info, int iPt, boolean visible) {
 		JComboBox<String> combo = new JComboBox<String>(info);
 		combo.setSelectedIndex(iPt);
-		combo.setName(name);
+		combo.setName(registryKey + "/" + name);
 		if (visible) {
 			combo.addActionListener((AwtDialogManager) manager);
 			addPanelLine(name, label, combo, null);
@@ -244,7 +245,7 @@ public class AwtDialog extends JDialog implements PlatformDialog {
 
 	private synchronized JTable getDataTable(Object[][] data, String[] columnNames, int[] columnWidths, int height) {
     selectedRow = -1;		
-		DialogTableModel tableModel = new DialogTableModel(columnNames, data, !haveColors);
+		tableModel = new DialogTableModel(columnNames, data, !haveColors);
 		JTable table = new JTable(tableModel);
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		if (haveColors)
@@ -284,21 +285,11 @@ public class AwtDialog extends JDialog implements PlatformDialog {
 		return ((JCheckBox) chkbox).isSelected();
 	}
 	
-	@Override
-	public void repaint() {
-		if (dataTable != null) {
-			dataTable.clearSelection();
-			if (selectedRow >= 0) {
-				dataTable.setRowSelectionAllowed(true);
-				dataTable.setRowSelectionInterval(selectedRow, selectedRow + 1);
-			}
-		}
-		
-	}
-
 	public void selectTableRow(int i) {
 		selectedRow = i;
 		dataTable.clearSelection();
+		tableModel.fireTableDataChanged();
+		
 	}
 
 	public void setCellSelectionEnabled(boolean enabled) {

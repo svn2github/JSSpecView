@@ -222,7 +222,7 @@ public class JSVFileManager {
 			URL appletDocumentBase) throws IOException, MalformedURLException {
 		boolean isURL = isURL(name);
 		boolean isApplet = (appletDocumentBase != null);
-		InputStream in;
+		InputStream in = null;
 		//int length;
 		String post = null;
 		int iurl;
@@ -232,28 +232,20 @@ public class JSVFileManager {
 		}
 		if (isApplet || isURL) {
 			URL url = new URL(appletDocumentBase, name, null);
-			name = url.toString();
-			if (showMsg)
-				Logger.info("JSVFileManager opening URL " + url.toString());
-			URLConnection conn = url.openConnection();
-			if (post != null) {
-				conn.setRequestProperty("Content-Type",
-						"application/x-www-form-urlencoded");
-				conn.setDoOutput(true);
-				OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
-				wr.write(post);
-				wr.flush();
+			Logger.info("JSVFileManager opening URL " + url + (post == null ? "" : " with POST of " + post.length() + " bytes"));
+			Object ret = viewer.apiPlatform.getBufferedURLInputStream(url, null, post);
+			if (ret instanceof String) {
+				Logger.info("JSVFielManager could not get this URL:" + ret);
+			} else { 
+				in = (InputStream) ret;
 			}
-			//length = conn.getContentLength();
-			in = conn.getInputStream();
 		} else {
 			if (showMsg)
 				Logger.info("JSVFileManager opening file " + name);
 			File file = new File(name);
-			//length = (int) file.length();
 			in = new FileInputStream(file);
 		}
-		return in;//new InputStream(in, length);
+		return in;
 	}
 
 	private static String nciResolver = "http://cactus.nci.nih.gov/chemical/structure/%FILE/file?format=sdf&get3d=True";

@@ -5,6 +5,7 @@ import java.util.Hashtable;
 
 import java.util.Map;
 
+import javajs.J2SRequireImport;
 import javajs.api.GenericColor;
 import javajs.util.BS;
 import javajs.util.List;
@@ -23,6 +24,9 @@ import jspecview.common.PanelData.LinkMode;
 import jspecview.dialog.JSVDialog;
 import jspecview.source.JDXSpectrum;
 
+// should not be necessary, but "x instanceof JSVDialog" is requiring it.
+
+@J2SRequireImport(jspecview.dialog.JSVDialog.class)
 public class GraphSet implements XYScaleConverter {
 
 	public enum ArrowType {
@@ -649,12 +653,11 @@ public class GraphSet implements XYScaleConverter {
 			pendingMeasurement = null;
 			return;
 		}
-		pd.taintedAll = true;
+		System.out.println("Processing PendING clickcount = " + clickCount);
 		double x = toX(xPixel);
 		double y = toY(yPixel);
 		double x0 = x;
 		Measurement m;
-		System.out.println("cc = " + clickCount);
 		switch (clickCount) {
 		case 0: // move
 			pendingMeasurement.setPt2(toX(xPixel), toY(yPixel));
@@ -1467,6 +1470,7 @@ public class GraphSet implements XYScaleConverter {
 					}
 					drawSpectrum(gMain, i, offset, isGrey, ig);
 				}
+				drawMeasurements(gTop, i);
 				if (pendingMeasurement != null && pendingMeasurement.spec == spec)
 					drawMeasurement(gTop, pendingMeasurement);
 				if ((nSplit > 1 ? i == iSpectrumMovedTo : isLinked
@@ -1795,7 +1799,6 @@ public class GraphSet implements XYScaleConverter {
 		if (getIntegrationRatios(index) != null)
 			drawAnnotations(g, getIntegrationRatios(index),
 					ScriptToken.INTEGRALPLOTCOLOR);
-		drawMeasurements(g, index);
 	}
 
 	private MeasurementData getMeasurements(AType type, int iSpec) {
@@ -1819,7 +1822,7 @@ public class GraphSet implements XYScaleConverter {
 		int iLast = viewData.getEndingPointIndex(index);
 		if (isContinuous) {
 			iLast--;
-			boolean doLineTo = g2d.canDoLineTo();
+			boolean doLineTo = !fillPeaks && g2d.canDoLineTo();
 			if (doLineTo)
 				g2d.doStroke(g, true);
 			boolean isDown = false;
@@ -2364,7 +2367,7 @@ public class GraphSet implements XYScaleConverter {
 		if (sval == null)
 			return false;
 		if (sval.length() == 0)
-			annotations.remove(a);
+			annotations.removeObj(a);
 		else
 			a.text = sval;
 		return true;
@@ -2878,7 +2881,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 							&& iPreviousSpectrumClicked >= 0) {
 						setSpectrumClicked(iPreviousSpectrumClicked);
 					}
-					processPendingMeasurement(xPixel, yPixel, pd.clickCount);
+					processPendingMeasurement(xPixel, yPixel, 2);
 					return;
 				}
 			}
@@ -3114,7 +3117,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 				selectedSpectrumMeasurements.clear(getScale().minXOnScale,
 						getScale().maxXOnScale);
 			else
-				selectedSpectrumMeasurements.remove(selectedMeasurement);
+				selectedSpectrumMeasurements.removeObj(selectedMeasurement);
 			selectedMeasurement = null;
 			updateDialog(AType.Measurements, -1);
 		}
@@ -3123,7 +3126,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 				selectedSpectrumIntegrals.clear(getScale().minXOnScale,
 						getScale().maxXOnScale);
 			else
-				selectedSpectrumIntegrals.remove(selectedIntegral);
+				selectedSpectrumIntegrals.removeObj(selectedIntegral);
 			selectedIntegral = null;
 			updateDialog(AType.Integration, -1);
 		}
@@ -3299,9 +3302,8 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		if (pendingMeasurement != null) {
 			if (Math.abs(toPixelX(pendingMeasurement.getXVal()) - xPixel) < 2)
 				pendingMeasurement = null;
-			processPendingMeasurement(xPixel, yPixel, 1);
+			processPendingMeasurement(xPixel, yPixel, -2);
 			setToolTipForPixels(xPixel, yPixel);	
-			pd.repaint();
 			return;
 		}
 		if (pd.integralShiftMode != 0) {

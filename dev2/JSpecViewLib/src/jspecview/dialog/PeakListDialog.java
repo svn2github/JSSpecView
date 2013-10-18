@@ -50,15 +50,10 @@ public class PeakListDialog extends JSVDialog {
 				new String[] { "parabolic", "none" }, 0, true);
 	}
 
-	// from DialogParams:
-
-	@Override
-	public void setParamsFromFields() {
-		setParams(new Object[] {dialog.getText(txt1), dialog.getSelectedItem(combo1).toString()});
-	}
-
 	@Override
 	public boolean callback(String id, String msg) {
+		if (id.equals("cmbInterpolation") || id.equals("txtThreshold"))
+			id = "btnApply";
 		return callbackAD(id, msg);
 	}
 

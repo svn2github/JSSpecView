@@ -44,20 +44,14 @@ public class MeasurementsDialog extends JSVDialog {
 	}
 
 	@Override
+	public int[] getPosXY() {
+		return posXY;
+	}
+
+	@Override
 	public boolean callback(String id, String msg) {
 		return callbackAD(id, msg);
 	}
 
-	@Override
-	public int[] getPosXY() {
-		return posXY;
-	}
-	
-	// from DialogParams:
-
-	@Override
-	public void loadDataFromFields() {
-		loadData(dialog.getSelectedItem(combo1));
-	}
 
 }

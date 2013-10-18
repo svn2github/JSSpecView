@@ -58,13 +58,15 @@ class DialogTableModel implements AbstractTableModel {
 			return;
 		int nrows = data.length;
 		int ncols = data[0].length;
-		for (int j = 0; j < ncols; j++) 
-			getCellHtml(sb, id + "_h" + j, -1, j, columnNames[j], false);		
-		for (int i = 0; i < nrows; i++) {
+		for (int i = -1; i < nrows; i++) {
 			String rowid = id + "_" + i;
-			sb.append("\n<tr id='" + rowid + "'>");
-			for (int j = 0; j < ncols; j++) 
-				getCellHtml(sb, rowid + "_" + j, i, j, data[i][j], selectedRows.get(i));
+			sb.append("\n<tr id='" + rowid + "' class='JTable_" + (i == -1 ? "header" : "row") + " style='height:25px'>");
+			for (int j = 0; j < ncols; j++) {
+				if (i == -1)
+					getCellHtml(sb, id + "_h" + j, i, j, columnNames[j], false);		
+				else
+					getCellHtml(sb, rowid + "_" + j, i, j, data[i][j], selectedRows.get(i));
+			}
 			sb.append("</tr>");
 		}
 	}
@@ -83,17 +85,17 @@ class DialogTableModel implements AbstractTableModel {
 	 * @return CSS style attribute
 	 */
 	private String getCellStyle(String id, int iRow, int iCol, Object o, boolean isSelected) {
-		String style = ";padding:1px 1px 1px 1px;";
+		String style = "padding:1px 1px 1px 1px";
 		if (iRow < 0) {
-			style += ";font-weight:bold;";
+			style += ";font-weight:bold";
 		} else {
 			if (o instanceof GenericColor) {
-				style += "background-color:"
+				style += ";background-color:"
 						+ JSVColorUtil.colorToCssString((GenericColor) o);
 			} else {
 				if (asString)
 					o = " " + o + " ";
-				style += "text-align:";
+				style += ";text-align:";
 				if (tableCellAlignLeft)
 					style += "left";
 				else if (iCol == 0)
@@ -105,5 +107,4 @@ class DialogTableModel implements AbstractTableModel {
 		}
 		return " style='" + style + "'";
 	}
-
 }
