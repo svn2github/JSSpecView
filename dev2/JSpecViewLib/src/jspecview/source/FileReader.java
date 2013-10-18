@@ -96,7 +96,7 @@ public class FileReader {
   		int iSpecFirst, int iSpecLast) {
   	System.out.println("FileReader filePath=" + filePath + "<<");
   	filePath = Txt.trimQuotes(filePath);
-    this.filePath = (filePath.startsWith(JSVFileManager.SIMULATION_PROTOCOL + "MOL=") ? 
+    this.filePath = (filePath != null && filePath.startsWith(JSVFileManager.SIMULATION_PROTOCOL + "MOL=") ? 
     		JSVFileManager.SIMULATION_PROTOCOL + "MOL=" + Math.abs(filePath.hashCode()) : filePath);
     this.obscure = obscure;
     firstSpec = iSpecFirst;

@@ -653,7 +653,6 @@ public class GraphSet implements XYScaleConverter {
 			pendingMeasurement = null;
 			return;
 		}
-		System.out.println("Processing PendING clickcount = " + clickCount);
 		double x = toX(xPixel);
 		double y = toY(yPixel);
 		double x0 = x;
@@ -698,7 +697,7 @@ public class GraphSet implements XYScaleConverter {
 			x = toX(xPixel);
 			y = toY(yPixel);
 			pendingMeasurement.setPt2(x, y);
-			System.out.println("pm = " + pendingMeasurement.text);
+			//System.out.println("pm = " + pendingMeasurement.text);
 			if (pendingMeasurement.text.length() == 0) {
 				pendingMeasurement = null;
 			} else {
