@@ -39,11 +39,11 @@ package jspecview.js2d;
 
 import javajs.api.GenericColor;
 import javajs.awt.Color;
+import javajs.awt.ColorUtil;
 
 import org.jmol.util.JmolFont;
 
 import jspecview.api.JSVGraphics;
-import jspecview.util.JSVColorUtil;
 
 /**
  * JSVPanel class represents a View combining one or more GraphSets, each with one or more JDXSpectra.
@@ -231,7 +231,7 @@ public class JsG2D implements JSVGraphics {
 	}
 
 	public void setGraphicsColor(Object g, GenericColor c) {
-		String s = JSVColorUtil.colorToCssString(c);
+		String s = ColorUtil.toCSSString(c);
 		/**
 		 * @j2sNative
 		 * 
