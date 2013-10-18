@@ -35,11 +35,14 @@ import javajs.util.BS;
 import javajs.util.List;
 import javajs.util.SB;
 
+import org.jmol.api.Interface;
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
 import org.jmol.util.Txt;
 
+import jspecview.api.SourceReader;
 import jspecview.common.Coordinate;
+import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVFileManager;
 import jspecview.common.PeakInfo;
 import jspecview.exception.JDXSourceException;
@@ -118,64 +121,61 @@ public class FileReader {
   public static JDXSource createJDXSourceFromStream(InputStream in, boolean obscure, boolean loadImaginary)
       throws IOException, JSpecViewException {
     return createJDXSource(JSVFileManager.getBufferedReaderForInputStream(in),
-        "stream", null, obscure, loadImaginary, -1, -1);
+        null, null, obscure, loadImaginary, -1, -1);
   }
 
-  /**
-   * general entrance method
-   * 
-   * @param br
-   * @param filePath
-   * @param appletDocumentBase
-   * @param obscure
-   * @param loadImaginary 
-   * @param iSpecFirst TODO
-   * @param iSpecLast TODO
-   * @return source
-   * @throws IOException
-   * @throws JSpecViewException
-   */
-  public static JDXSource createJDXSource(BufferedReader br,
-                                          String filePath,
-                                          URL appletDocumentBase,
-                                          boolean obscure, boolean loadImaginary,
-                                          int iSpecFirst, int iSpecLast) throws IOException,
-      JSpecViewException {
-    
-    try {
-      if (br == null)
-        br = JSVFileManager.getBufferedReaderFromName(filePath, appletDocumentBase, "##TITLE");
-      br.mark(400);
-      char[] chs = new char[400];
-      br.read(chs, 0, 400);
-      br.reset();
-      String header = new String(chs);
-      int pt1 = header.indexOf('#');
-      int pt2 = header.indexOf('<');
-      if (pt1 < 0 || pt2 >= 0 && pt2 < pt1) {
-        JDXSource xmlSource = getXMLSource(filePath, header, br);
-        br.close();
-        if (xmlSource != null)
-          return xmlSource;
-        throw new JSpecViewException("File type not recognized");
-      }
-      return (new FileReader(filePath, obscure, loadImaginary, iSpecFirst, iSpecLast)).getJDXSource(br);
-    } catch (JSpecViewException e) {
-      br.close();
-      throw new JSpecViewException("Error reading JDX format: "
-          + e.getMessage());
-    }
-  }
+	/**
+	 * general entrance method
+	 * 
+	 * @param br
+	 * @param filePath
+	 * @param appletDocumentBase
+	 * @param obscure
+	 * @param loadImaginary
+	 * @param iSpecFirst
+	 *          TODO
+	 * @param iSpecLast
+	 *          TODO
+	 * @return source
+	 * @throws IOException
+	 * @throws JSpecViewException
+	 */
+	public static JDXSource createJDXSource(BufferedReader br, String filePath,
+			URL appletDocumentBase, boolean obscure, boolean loadImaginary,
+			int iSpecFirst, int iSpecLast) throws IOException, JSpecViewException {
 
-  private static JDXSource getXMLSource(String filePath, String header, BufferedReader br) {
-    String xmlType = header.toLowerCase();
-    if (xmlType.contains("<animl") || xmlType.contains("<!doctype technique")) {
-      return AnIMLReader.getAniMLInstance(filePath, br);
-    } else if (xmlType.contains("xml-cml")) {
-      return CMLReader.getCMLInstance(filePath, br);
-    }
-    return null;
-  }
+		try {
+			if (br == null)
+				br = JSVFileManager.getBufferedReaderFromName(filePath,
+						appletDocumentBase, "##TITLE");
+			br.mark(400);
+			char[] chs = new char[400];
+			br.read(chs, 0, 400);
+			br.reset();
+			String header = new String(chs);
+			int pt1 = header.indexOf('#');
+			int pt2 = header.indexOf('<');
+			if (pt1 < 0 || pt2 >= 0 && pt2 < pt1) {
+				String xmlType = header.toLowerCase();
+				xmlType = (xmlType.contains("<animl")
+						|| xmlType.contains("<!doctype technique") ? "AnIML" : xmlType
+						.contains("xml-cml") ? "CML" : null);
+				JDXSource xmlSource = ((SourceReader) Interface
+						.getInterface("jspecview.source." + xmlType + "Reader")).getSource(
+						filePath, br);
+				br.close();
+				if (xmlSource == null)
+					throw new JSpecViewException("File type not recognized");
+				return xmlSource;
+			}
+			return (new FileReader(filePath, obscure, loadImaginary, iSpecFirst,
+					iSpecLast)).getJDXSource(br);
+		} catch (JSpecViewException e) {
+			br.close();
+			throw new JSpecViewException("Error reading JDX format: "
+					+ e.getMessage());
+		}
+	}
 
   /**
    * starting point for reading all data

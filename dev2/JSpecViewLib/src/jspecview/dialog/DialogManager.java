@@ -5,10 +5,10 @@ import java.util.Map;
 
 import jspecview.api.JSVPanel;
 import jspecview.api.PlatformDialog;
+import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVFileManager;
 import jspecview.common.JSViewer;
 import jspecview.source.JDXSource;
-import jspecview.source.JDXSpectrum;
 
 /**
  * Dialogs include Integration, PeakListing, Views, OverlayLegend, and Measurements

@@ -26,7 +26,6 @@ import java.util.StringTokenizer;
 
 import javajs.util.List;
 
-import jspecview.source.JDXSpectrum;
 import jspecview.util.JSVTxt;
 
 

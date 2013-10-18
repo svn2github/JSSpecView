@@ -6,6 +6,7 @@ import org.jmol.util.Txt;
 
 import jspecview.common.Coordinate;
 import jspecview.common.Integral;
+import jspecview.common.JDXSpectrum;
 import jspecview.common.Measurement;
 import jspecview.common.Annotation.AType;
 import jspecview.exception.JSpecViewException;

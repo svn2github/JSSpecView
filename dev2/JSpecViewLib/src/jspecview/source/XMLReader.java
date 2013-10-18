@@ -29,7 +29,9 @@ import javajs.util.SB;
 
 import org.jmol.util.Logger;
 
+import jspecview.api.SourceReader;
 import jspecview.common.Coordinate;
+import jspecview.common.JDXSpectrum;
 
 /**
  * Representation of a XML Source.
@@ -37,12 +39,10 @@ import jspecview.common.Coordinate;
  * @author Prof. Robert J. Lancashire
  */
 
-abstract class XMLReader {
+abstract class XMLReader implements SourceReader {
 
-  //  protected XMLInputFactory factory;
-  //  private XMLEventReader fer;
-  //  private XMLEvent e;
-
+  abstract protected JDXSource getXML(BufferedReader br);
+  
   abstract protected boolean processTag(int tagId) throws Exception;
   abstract protected void processEndTag(int tagId) throws Exception;
 
@@ -78,9 +78,14 @@ abstract class XMLReader {
   protected String sampleID;
   protected SB errorLog = new SB();
 
-  public XMLReader(String filePath) {
-    this.filePath = filePath;
+  public XMLReader() {
+  	// for reflection
   }
+  
+	public JDXSource getSource(String filePath, BufferedReader br) {
+		this.filePath = filePath;
+		return getXML(br);
+	}
 
   protected void getSimpleXmlReader(BufferedReader br) {
     reader = new JSVXmlReader(br);

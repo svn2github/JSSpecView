@@ -1,7 +1,6 @@
 package jspecview.common;
 
 //import jspecview.util.Logger;
-import jspecview.source.JDXSpectrum;
 
 import org.jmol.util.Parser;
 

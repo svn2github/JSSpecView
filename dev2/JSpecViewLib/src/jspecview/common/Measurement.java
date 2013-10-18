@@ -24,7 +24,6 @@
 
 package jspecview.common;
 
-import jspecview.source.JDXSpectrum;
 
 
 /**

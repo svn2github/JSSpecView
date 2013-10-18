@@ -51,7 +51,6 @@ import jspecview.api.JSVPanel;
 import jspecview.api.PanelListener;
 import jspecview.common.Annotation.AType;
 import jspecview.dialog.JSVDialog;
-import jspecview.source.JDXSpectrum;
 import jspecview.util.JSVColorUtil;
 
 import org.jmol.api.Event;

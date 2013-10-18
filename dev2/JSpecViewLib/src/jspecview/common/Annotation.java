@@ -27,7 +27,6 @@ package jspecview.common;
 import javajs.api.GenericColor;
 import javajs.util.List;
 import jspecview.api.JSVGraphics;
-import jspecview.source.JDXSpectrum;
 import jspecview.util.JSVColorUtil;
 
 

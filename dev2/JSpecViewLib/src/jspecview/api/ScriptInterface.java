@@ -6,11 +6,11 @@ import javajs.util.List;
 
 
 
+import jspecview.common.JDXSpectrum;
 import jspecview.common.PanelNode;
 import jspecview.common.JSViewer;
 import jspecview.common.ScriptToken;
 import jspecview.source.JDXSource;
-import jspecview.source.JDXSpectrum;
 
 public interface ScriptInterface {
 

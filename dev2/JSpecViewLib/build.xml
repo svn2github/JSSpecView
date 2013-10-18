@@ -27,6 +27,7 @@
     </target>
     <target name="clean">
         <delete dir="bin"/>
+        <echo message="copying files from ${jmol.path}/javajs"/>
         <copy overwrite="true" todir="src" >
           <fileset dir="${jmol.path}/src">
             <include name="javajs/**/*" />

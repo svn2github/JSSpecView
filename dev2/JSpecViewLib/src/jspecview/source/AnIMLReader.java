@@ -21,11 +21,8 @@ package jspecview.source;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.DoubleBuffer;
-import java.nio.FloatBuffer;
 
+import javajs.util.ByteConverter;
 
 import org.jmol.io.Base64;
 
@@ -37,24 +34,14 @@ import org.jmol.io.Base64;
  * @author Prof. Robert J. Lancashire
  */
 
-class AnIMLReader extends XMLReader {
+public class AnIMLReader extends XMLReader {
 
-  /**
-   * Does the actual work of initializing the XMLSource
-   * @param filePath 
-   * @param br 
-   * @return an instance of a AnIMLSource
-   */
-  static JDXSource getAniMLInstance(String filePath, BufferedReader br) {
-    return (new AnIMLReader(filePath)).getXML(br);
-  }
-  
-  AnIMLReader(String filePath) {
-    super(filePath);
-  }
-
+	public AnIMLReader() {
+		// called by reflection from FileReader
+	}
    
-  private JDXSource getXML(BufferedReader br) {
+  @Override
+	protected JDXSource getXML(BufferedReader br) {
     try {
 
       source = new JDXSource(JDXSource.TYPE_SIMPLE, filePath);
@@ -250,6 +237,7 @@ class AnIMLReader extends XMLReader {
   }
 
   private void getYValues() throws Exception {
+  	ByteConverter bc = new ByteConverter();
     String vectorType = reader.getAttrValueLC("type");
     if (vectorType.length() == 0)
       vectorType = reader.getAttrValueLC("vectorType");
@@ -262,21 +250,13 @@ class AnIMLReader extends XMLReader {
     } else if (tagName.equals("encodedvalueset")) {
       attrList = reader.getCharacters();
       byte[] dataArray = Base64.decodeBase64(attrList);
-      int ij = 0;
-      if (dataArray.length != 0) {
-        ByteBuffer byte_buffer = ByteBuffer.wrap(dataArray).order(
-            ByteOrder.LITTLE_ENDIAN);
-        // float64
+      if (dataArray.length != 0) {       
         if (vectorType.equals("float64")) {
-          DoubleBuffer double_buffer = byte_buffer.asDoubleBuffer();
-          for (ij = 0; double_buffer.remaining() > 0; ij++)
-            yaxisData[ij] = double_buffer.get();
-        }
-        // float32
-        else if (vectorType.equals("float32")) {
-          FloatBuffer float_buffer = byte_buffer.asFloatBuffer();
-          for (ij = 0; float_buffer.remaining() > 0; ij++)
-            yaxisData[ij] = float_buffer.get();
+        	for (int i = 0, pt = 0; i  < npoints; i++, pt += 8)
+        		yaxisData[i] = bc.bytesToDoubleToFloat(dataArray, pt, false);
+        } else {
+        	for (int i = 0, pt = 0; i  < npoints; i++, pt += 4)
+        		yaxisData[i] = bc.bytesToFloat(dataArray, pt, false);
         }
       }
     }
@@ -292,6 +272,5 @@ class AnIMLReader extends XMLReader {
     else if (tagName.contains("location"))
       origin = reader.thisValue();
   }
-
 
 }

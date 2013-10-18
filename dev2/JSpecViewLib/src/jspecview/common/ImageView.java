@@ -4,7 +4,6 @@ package jspecview.common;
 
 import javajs.util.List;
 import jspecview.api.XYScaleConverter;
-import jspecview.source.JDXSpectrum;
 
 
 public class ImageView implements XYScaleConverter {

@@ -1,9 +1,9 @@
 package jspecview.api;
 
+import jspecview.common.JDXSpectrum;
 import jspecview.common.MeasurementData;
 import jspecview.common.Parameters;
 import jspecview.common.Annotation.AType;
-import jspecview.source.JDXSpectrum;
 
 public interface AnnotationData {
 

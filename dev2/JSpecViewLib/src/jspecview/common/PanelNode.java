@@ -13,7 +13,6 @@ import jspecview.api.JSVPanel;
 import jspecview.api.JSVTreeNode;
 import jspecview.dialog.JSVDialog;
 import jspecview.source.JDXSource;
-import jspecview.source.JDXSpectrum;
 
 public class PanelNode {
 

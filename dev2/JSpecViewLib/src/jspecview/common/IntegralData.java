@@ -12,7 +12,6 @@ import javajs.util.List;
 import org.jmol.util.Txt;
 
 import jspecview.common.Annotation.AType;
-import jspecview.source.JDXSpectrum;
 
 /**
  * 

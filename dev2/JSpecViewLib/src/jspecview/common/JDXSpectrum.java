@@ -17,7 +17,7 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package jspecview.source;
+package jspecview.common;
 
 import java.util.Hashtable;
 import java.util.Map;
@@ -27,9 +27,8 @@ import javajs.util.List;
 
 import org.jmol.util.Logger;
 
-import jspecview.common.Coordinate;
-import jspecview.common.Parameters;
-import jspecview.common.PeakInfo;
+import jspecview.source.JDXDataObject;
+import jspecview.source.JDXSourceStreamTokenizer;
 
 /**
  * <code>JDXSpectrum</code> implements the Interface Spectrum for the display of

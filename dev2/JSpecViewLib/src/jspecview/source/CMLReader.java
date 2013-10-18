@@ -34,23 +34,14 @@ import org.jmol.util.Parser;
 
 class CMLReader extends XMLReader {
 
-  public CMLReader(String filePath) {
-    super(filePath);
+  public CMLReader() {
+  	// for reflection
   }
 
   private boolean specfound = false;
   
-  /**
-   * Does the actual work of initializing the CMLSource
-   * @param filePath 
-   * @param br 
-   * @return an instance of a CMLSource
-   */
-  static JDXSource getCMLInstance(String filePath, BufferedReader br) {
-    return (new CMLReader(filePath)).getXML(br);
-  }
-
-  private JDXSource getXML(BufferedReader br) {
+  @Override
+	protected JDXSource getXML(BufferedReader br) {
     try {
 
       source = new JDXSource(JDXSource.TYPE_SIMPLE, filePath);

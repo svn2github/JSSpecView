@@ -20,6 +20,7 @@
 package jspecview.source;
 
 import javajs.util.List;
+import jspecview.common.JDXSpectrum;
 
 
 
@@ -109,6 +110,15 @@ public class JDXSource extends JDXHeader {
    */
   public List<JDXSpectrum> getSpectra() {
     return jdxSpectra;
+  }
+
+  /**
+   * Used in Android 
+   * 
+   * @return array of JDXpectrum
+   */
+  public JDXSpectrum[] getSpectraAsArray() {
+    return (JDXSpectrum[]) (jdxSpectra == null ? null : jdxSpectra.toArray());
   }
 
   /**

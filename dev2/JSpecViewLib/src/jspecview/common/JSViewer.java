@@ -34,12 +34,11 @@ import jspecview.api.JSVTreeNode;
 import jspecview.api.ScriptInterface;
 import jspecview.api.VisibleInterface;
 import jspecview.common.Annotation.AType;
+import jspecview.common.JDXSpectrum.IRMode;
 import jspecview.common.PanelData.LinkMode;
 import jspecview.dialog.JSVDialog;
 import jspecview.dialog.DialogManager;
 import jspecview.source.JDXSource;
-import jspecview.source.JDXSpectrum;
-import jspecview.source.JDXSpectrum.IRMode;
 import jspecview.tree.SimpleTree;
 import jspecview.util.JSVEscape;
 

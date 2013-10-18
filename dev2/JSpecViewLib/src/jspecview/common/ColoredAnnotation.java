@@ -20,7 +20,6 @@
 package jspecview.common;
 
 import javajs.api.GenericColor;
-import jspecview.source.JDXSpectrum;
 
 
 

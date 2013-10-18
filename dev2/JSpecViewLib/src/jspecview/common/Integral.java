@@ -3,7 +3,6 @@
  */
 package jspecview.common;
 
-import jspecview.source.JDXSpectrum;
 
 public class Integral extends Measurement {
 

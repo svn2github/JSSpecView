@@ -5,7 +5,6 @@ import java.util.Map;
 
 import javajs.util.List;
 
-import jspecview.source.JDXSpectrum;
 
 
 /**

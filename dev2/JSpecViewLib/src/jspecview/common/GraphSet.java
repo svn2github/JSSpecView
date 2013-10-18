@@ -22,7 +22,6 @@ import jspecview.api.XYScaleConverter;
 import jspecview.common.Annotation.AType;
 import jspecview.common.PanelData.LinkMode;
 import jspecview.dialog.JSVDialog;
-import jspecview.source.JDXSpectrum;
 
 // should not be necessary, but "x instanceof JSVDialog" is requiring it.
 

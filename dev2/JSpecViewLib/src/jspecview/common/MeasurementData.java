@@ -33,7 +33,6 @@ import org.jmol.util.Txt;
 
 import jspecview.api.AnnotationData;
 import jspecview.common.Annotation.AType;
-import jspecview.source.JDXSpectrum;
 
 public class MeasurementData extends List<Measurement> implements
 		AnnotationData {

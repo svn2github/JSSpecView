@@ -1,7 +1,6 @@
 package jspecview.common;
 
 import javajs.util.List;
-import jspecview.source.JDXSpectrum;
 
 
 
