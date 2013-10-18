@@ -9,7 +9,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 
 
 import jspecview.android.R;
@@ -66,7 +65,7 @@ public class MainActivity extends Activity{
 	PreferencesManager prefMan;
 		    
     // Collection of Loaded JDXSpectrum objects
-    List<JDXSpectrum> mSpectra;     
+    JDXSpectrum[] mSpectra;     
     // The current visible spectrum
     JDXSpectrum mCurrentSpectrum;   
     // The index of the current visible spectrum
@@ -176,7 +175,7 @@ public class MainActivity extends Activity{
 				XYMultipleSeriesRenderer multiRenderer = createMultipleSeriesRenderer(dataset.getSeriesCount());
 				mRenderers[i] = multiRenderer;
 								
-				multiRenderer.setXAxisDecreasing(!mSpectra.get(i).shouldDisplayXAxisIncreasing());
+				multiRenderer.setXAxisDecreasing(!mSpectra[i].shouldDisplayXAxisIncreasing());
 				
 				GraphicalView view = ChartFactory.getLineChartView(getApplicationContext(), dataset, multiRenderer);
 				view.setId(i);	
@@ -188,7 +187,7 @@ public class MainActivity extends Activity{
 					// set the current spectrum, view and renderer to be for the first spectrum
 					mCurrentRenderer = multiRenderer;
 					mCurrentView = view;					
-					mCurrentSpectrum = mSpectra.get(mCurrentSpectrumIndex);
+					mCurrentSpectrum = mSpectra[mCurrentSpectrumIndex];
 					
 					if(mIsIntegrated){
 						addIntegrationSeries(mCurrentSpectrumIndex, dataset, multiRenderer, mIntegrationMinY, mIntegrationOffset, mIntegrationFactor);
@@ -354,7 +353,7 @@ public class MainActivity extends Activity{
     				}
     			}
 	    	}
-	    	if(!mIsOverlayEnabled && mSpectra.get(0).isHNMR()){
+	    	if(!mIsOverlayEnabled && mSpectra[0].isHNMR()){
 	    		MenuItem miIntegrateSpectra = menu.findItem(MenuItemID.ADD_REMOVE_INTEGRATION);	    		
 	    		String integrationTitle = mIsIntegrated ? "Remove Integration" : "Integrate";
     			if(miIntegrateSpectra == null){    					
@@ -492,7 +491,7 @@ public class MainActivity extends Activity{
 	    	int numSpectra = mSpectra.size();
 	    	final CharSequence[] items = new CharSequence[numSpectra];
 	    	for(int i = 0; i < items.length; i++){
-	    		items[i] = mSpectra.get(i).getTitle();
+	    		items[i] = mSpectra[i].getTitle();
 	    	}
 	    	
 	    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -506,7 +505,7 @@ public class MainActivity extends Activity{
 		    		view.setVisibility(View.VISIBLE);
 		    		mCurrentView = view;
 		    		mCurrentRenderer = mRenderers[itemId];
-		    		mCurrentSpectrum = mSpectra.get(itemId);
+		    		mCurrentSpectrum = mSpectra[itemId];
 		    		mCurrentSpectrumIndex = itemId;
 		    		dialog.dismiss();
 	    	    }
@@ -627,12 +626,12 @@ public class MainActivity extends Activity{
      * @return
      * @throws IOException
      */
-	private List<JDXSpectrum> readSpectrum(InputStream stream) throws IOException, JSpecViewException {
+	private JDXSpectrum[] readSpectrum(InputStream stream) throws IOException, JSpecViewException {
 		boolean loadImaginary = false;
 		boolean obscureTitle = false;
-		JDXSource source = FileReader.createJDXSource(stream, obscureTitle, loadImaginary);             	
+		JDXSource source = FileReader.createJDXSourceFromStream(stream, obscureTitle, loadImaginary);             	
     	JDXSource jdxSource = (JDXSource)source;
-    	List<JDXSpectrum> jdxSpectra = jdxSource.getSpectra();        	
+    	JDXSpectrum[] jdxSpectra = jdxSource.getSpectraAsArray();        	
     	return jdxSpectra;   
 	}
     
@@ -644,9 +643,9 @@ public class MainActivity extends Activity{
 	 * For multiple spectra, if overlay is enabled then the array will have one dataset with multiple series
 	 * If overlay is disabled then the array will have a dataset with a single series for each spectrum
      */
-    private XYMultipleSeriesDataset[] createDatasets(List<JDXSpectrum> spectra) {   	
+    private XYMultipleSeriesDataset[] createDatasets(JDXSpectrum[] spectra) {   	
     	    	    	
-    	int numSpectra = spectra.size();
+    	int numSpectra = spectra.length;
     	XYMultipleSeriesDataset[] datasets; 
     	boolean shouldOverlay = shouldOverlay();
        	
@@ -655,7 +654,7 @@ public class MainActivity extends Activity{
     	XYMultipleSeriesDataset overlayDataset = new XYMultipleSeriesDataset();
     	
     	for(int j = 0; j < numSpectra; j++){
-    		JDXSpectrum spectrum = spectra.get(j);
+    		JDXSpectrum spectrum = spectra[j];
     		Coordinate[] xyCoords = spectrum.getXYCoords();  	
     		XYSeries series = new XYSeries(spectrum.getTitle());
     		     	
@@ -721,10 +720,10 @@ public class MainActivity extends Activity{
     private void addIntegrationSeries(int spectrumIndex, XYMultipleSeriesDataset dataset, XYMultipleSeriesRenderer multiRenderer,
     		double minY, double offset, double factor){
     	IntegralData integGraph = mIntegralGraphs[spectrumIndex];
-    	JDXSpectrum spectrum = mSpectra.get(spectrumIndex);
+    	JDXSpectrum spectrum = mSpectra[spectrumIndex];
 		
 		if(integGraph == null){
-		  Parameters params = new Parameters("android");
+		  Parameters params = new Parameters().setName("android");
 		  params.integralMinY = minY;
 		  params.integralOffset = offset;
 		  params.integralRange = factor;
