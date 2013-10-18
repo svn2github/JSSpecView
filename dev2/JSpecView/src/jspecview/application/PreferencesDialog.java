@@ -661,7 +661,7 @@ public class PreferencesDialog extends JDialog {
 
     // init preview panel
     try {
-      JDXSource source = FileReader.createJDXSource(getClass()
+      JDXSource source = FileReader.createJDXSourceFromStream(getClass()
           .getResourceAsStream("resources/sample.jdx"), false, false);
 
       previewPanel = AwtPanel.getPanelOne(viewer, source.getSpectra().get(0));

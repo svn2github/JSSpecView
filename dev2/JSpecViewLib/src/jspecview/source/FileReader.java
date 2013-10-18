@@ -115,10 +115,10 @@ public class FileReader {
    * @throws IOException
    * @throws JSpecViewException
    */
-  public static JDXSource createJDXSource(InputStream in, boolean obscure, boolean loadImaginary)
+  public static JDXSource createJDXSourceFromStream(InputStream in, boolean obscure, boolean loadImaginary)
       throws IOException, JSpecViewException {
     return createJDXSource(JSVFileManager.getBufferedReaderForInputStream(in),
-        null, null, obscure, loadImaginary, -1, -1);
+        "stream", null, obscure, loadImaginary, -1, -1);
   }
 
   /**
@@ -143,7 +143,7 @@ public class FileReader {
       JSpecViewException {
     
     try {
-      if (filePath != null)
+      if (br == null)
         br = JSVFileManager.getBufferedReaderFromName(filePath, appletDocumentBase, "##TITLE");
       br.mark(400);
       char[] chs = new char[400];
