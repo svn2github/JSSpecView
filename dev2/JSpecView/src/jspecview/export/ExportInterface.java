@@ -2,8 +2,8 @@ package jspecview.export;
 
 import javajs.util.List;
 import jspecview.api.JSVPanel;
+import jspecview.common.JDXSpectrum;
 import jspecview.common.JSViewer;
-import jspecview.source.JDXSpectrum;
 
 
 public interface ExportInterface {

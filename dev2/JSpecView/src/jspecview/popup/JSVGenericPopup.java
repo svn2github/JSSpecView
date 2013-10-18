@@ -30,13 +30,13 @@ import org.jmol.util.Txt;
 import jspecview.api.JSVAbstractMenu;
 import jspecview.api.JSVPanel;
 import jspecview.api.JSVPopupMenu;
+import jspecview.common.JDXSpectrum;
 import jspecview.common.PanelNode;
 import jspecview.common.JSVersion;
 import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
 import jspecview.common.ScriptToken;
 import jspecview.common.Annotation.AType;
-import jspecview.source.JDXSpectrum;
 
 
 import java.util.Map;

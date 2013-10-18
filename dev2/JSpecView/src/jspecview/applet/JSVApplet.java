@@ -71,11 +71,11 @@ import jspecview.api.JSVAppletInterface;
 import jspecview.api.JSVFileDropper;
 import jspecview.api.JSVPanel;
 import jspecview.app.JSVApp;
+import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVersion;
 import jspecview.common.JSViewer;
 import jspecview.java.AwtPanel;
 import jspecview.java.ViewPanel;
-import jspecview.source.JDXSpectrum;
 
 /**
  * 

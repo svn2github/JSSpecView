@@ -33,9 +33,9 @@ import javajs.util.SB;
 
 import jspecview.common.Coordinate;
 import jspecview.common.ExportType;
+import jspecview.common.JDXSpectrum;
 import jspecview.source.FileReader;
 import jspecview.source.JDXDataObject;
-import jspecview.source.JDXSpectrum;
 import jspecview.util.JSVTxt;
 
 /**

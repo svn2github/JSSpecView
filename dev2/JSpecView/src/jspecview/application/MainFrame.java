@@ -90,6 +90,7 @@ import jspecview.api.JSVPanel;
 import jspecview.api.JSVTreeNode;
 import jspecview.api.PanelListener;
 import jspecview.app.JSVAppPro;
+import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVFileManager;
 import jspecview.common.PanelNode;
 import jspecview.common.JSViewer;
@@ -106,7 +107,6 @@ import jspecview.java.AwtPanel;
 import jspecview.java.ViewPanel;
 import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
-import jspecview.source.JDXSpectrum;
 import jspecview.util.JSVColorUtil;
 import jspecview.util.JSVEscape;
 

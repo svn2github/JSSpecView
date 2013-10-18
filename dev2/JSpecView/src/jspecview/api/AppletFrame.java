@@ -6,8 +6,8 @@ import javajs.util.List;
 
 
 import jspecview.app.JSVApp;
+import jspecview.common.JDXSpectrum;
 import jspecview.common.JSViewer;
-import jspecview.source.JDXSpectrum;
 
 public interface AppletFrame {
 

@@ -21,7 +21,7 @@ package jspecview.export;
 
 import java.io.IOException;
 
-import jspecview.source.JDXSpectrum;
+import jspecview.common.JDXSpectrum;
 
 /**
  * class <code>AnIMLExporter</code> contains static methods to export a Graph as

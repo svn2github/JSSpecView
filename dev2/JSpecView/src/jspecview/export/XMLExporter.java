@@ -25,7 +25,7 @@ import javajs.util.List;
 
 
 import jspecview.common.Coordinate;
-import jspecview.source.JDXSpectrum;
+import jspecview.common.JDXSpectrum;
 
 /**
  * The XMLExporter should be a totally generic exporter

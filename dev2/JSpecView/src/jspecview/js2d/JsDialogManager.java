@@ -12,9 +12,9 @@ import javajs.swing.JTable;
 
 import jspecview.api.JSVPanel;
 import jspecview.api.PlatformDialog;
+import jspecview.common.JDXSpectrum;
 import jspecview.dialog.JSVDialog;
 import jspecview.dialog.DialogManager;
-import jspecview.source.JDXSpectrum;
 
 /**
  * A DialogManager for JavaScript. 
