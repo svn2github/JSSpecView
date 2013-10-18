@@ -128,13 +128,13 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		this.isApplet = isApplet;
 		this.isJS = isApplet && isJS;
 		this.isSigned = si.isSigned();
-		apiPlatform = (ApiPlatform) getAwtInterface("Platform");
+		apiPlatform = (ApiPlatform) getPlatformInterface("Platform");
 		apiPlatform.setViewer(this, this.display);
-		g2d = (JSVGraphics) getAwtInterface("G2D");
+		g2d = (JSVGraphics) getPlatformInterface("G2D");
 		spectraTree = new SimpleTree(this);
-		parameters = (ColorParameters) getAwtInterface("Parameters");
+		parameters = (ColorParameters) getPlatformInterface("Parameters");
 		parameters.setName("applet");
-		fileHelper = ((JSVFileHelper) getAwtInterface("FileHelper")).set(this);
+		fileHelper = ((JSVFileHelper) getPlatformInterface("FileHelper")).set(this);
 		isSingleThreaded = apiPlatform.isSingleThreaded();
 		panelNodes = new List<PanelNode>();
 		repaintManager = new RepaintManager(this);
@@ -144,7 +144,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 
 	public void setPopupMenu(boolean allowMenu, boolean zoomEnabled) {
 		try {
-			jsvpPopupMenu = (JSVPopupMenu) getAwtInterface("Popup");
+			jsvpPopupMenu = (JSVPopupMenu) getPlatformInterface("Popup");
 			jsvpPopupMenu.initialize(this, isApplet ? "appletMenu" : "appMenu");
 			jsvpPopupMenu.setEnabled(allowMenu, zoomEnabled);
 		} catch (Exception e) {
@@ -1536,15 +1536,15 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		return dimScreen.width;
 	}
 
-	public Object getAwtInterface(String type) {
-		return Interface.getInterface("jspecview.awt" + (isJS ? "js2d.Js" : ".Awt")
+	public Object getPlatformInterface(String type) {
+		return Interface.getInterface("jspecview." + (isJS ? "js2d.Js" : "java.Awt")
 				+ type);
 	}
 
 	public DialogManager getDialogManager() {
 		if (dialogManager != null)
 			return dialogManager;
-		dialogManager = (DialogManager)  getAwtInterface("DialogManager");
+		dialogManager = (DialogManager)  getPlatformInterface("DialogManager");
 			//Interface.getInterface("jspecview.awtjs2d.JsDialogManager");
 		return dialogManager.set(this);
 	}
@@ -1594,7 +1594,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 
 	public PrintLayout getDialogPrint(boolean isJob) {
 		try {
-			PrintLayout pl = ((JSVPrintDialog) getAwtInterface("PrintDialog")).set(
+			PrintLayout pl = ((JSVPrintDialog) getPlatformInterface("PrintDialog")).set(
 					offWindowFrame, lastPrintLayout, isJob).getPrintLayout();
 			if (pl != null)
 				lastPrintLayout = pl;

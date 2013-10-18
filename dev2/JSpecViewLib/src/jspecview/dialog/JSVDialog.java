@@ -72,7 +72,7 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 		this.spec = spec;
 		manager = viewer.getDialogManager();
 		jsvp = viewer.selectedPanel;
-		myParams = ((Parameters) viewer.getAwtInterface("Parameters"))
+		myParams = ((Parameters) viewer.getPlatformInterface("Parameters"))
 				.setName("dialogParams");
 		subType = (spec == null ? "" : spec.getTypeLabel());
 		optionKey = type + "_" + subType;
