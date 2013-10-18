@@ -27,6 +27,7 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import javajs.api.GenericColor;
+import javajs.awt.ColorUtil;
 
 
 import org.jmol.util.Parser;
@@ -41,9 +42,10 @@ import org.jmol.util.Txt;
    * @return a hex string representation of a <code>Color</color> object
    */
   public static String colorToHexString(GenericColor color) {
-    return (color == null ? "" : JSVEscape.getHexColorFromRGB(color.getRGB()));
+    return (color == null ? "" : ColorUtil.toRGBHexString(color));
   }
 	  
+  
   /**
    * accepts [xRRGGBB] or [0xRRGGBB] or [0xFFRRGGBB] or #RRGGBB or
    * [red,green,blue] or a valid JavaScript color
@@ -460,12 +462,4 @@ import org.jmol.util.Txt;
       mapJavaScriptColors.put(colorNames[i], Integer.valueOf(colorArgbs[i]));
   }
 
-	public static String colorToCssString(GenericColor c) {
-		int opacity = c.getOpacity255();
-		if (opacity == 255)
-			return "#" + colorToHexString(c);
-		int rgb = c.getRGB();
-		return "rgba(" + ((rgb>>16)&0xFF) + "," + ((rgb>>8)&0xff) + "," + (rgb&0xff) + "," + opacity/255f	 + ")"; 
-	}
-  
 }

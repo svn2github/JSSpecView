@@ -31,10 +31,10 @@ import javajs.api.GenericColor;
 import javajs.util.SB;
 
 
-import jspecview.awt.AwtParameters;
 import jspecview.common.ColorParameters;
 import jspecview.common.JSVFileManager;
 import jspecview.common.ScriptToken;
+import jspecview.java.AwtParameters;
 import jspecview.util.JSVColorUtil;
 import jspecview.util.JSVTxt;
 

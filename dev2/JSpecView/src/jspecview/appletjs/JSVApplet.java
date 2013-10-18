@@ -62,10 +62,10 @@ import jspecview.api.AppletFrame;
 import jspecview.api.JSVAppletInterface;
 import jspecview.api.JSVPanel;
 import jspecview.app.JSVApp;
-import jspecview.awtjs2d.JsPanel;
-import jspecview.awtjs2d.JsViewPanel;
 import jspecview.common.JSVersion;
 import jspecview.common.JSViewer;
+import jspecview.js2d.JsPanel;
+import jspecview.js2d.JsViewPanel;
 import jspecview.source.JDXSpectrum;
 /**
  * 

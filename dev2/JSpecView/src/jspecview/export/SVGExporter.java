@@ -20,7 +20,6 @@
 package jspecview.export;
 
 import jspecview.source.JDXSpectrum;
-import jspecview.util.JSVColorUtil;
 
 import java.io.IOException;
 import java.util.Map;
@@ -36,6 +35,7 @@ import org.jmol.util.Txt;
 import jspecview.common.ColorParameters;
 import jspecview.common.Coordinate;
 import jspecview.common.ScaleData;
+import jspecview.util.JSVColorUtil;
 import jspecview.util.JSVTxt;
 
 /**
