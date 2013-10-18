@@ -322,7 +322,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	private void init() {
 
 		// initialise MainFrame as a target for the drag-and-drop action
-		DropTargetListener dtl = (DropTargetListener) viewer.getAwtInterface("FileDropper");
+		DropTargetListener dtl = (DropTargetListener) viewer.getPlatformInterface("FileDropper");
 		new DropTarget(this, dtl);
 		Class<? extends MainFrame> cl = getClass();
 		URL iconURL = cl.getResource("icons/spec16.gif"); // imageIcon

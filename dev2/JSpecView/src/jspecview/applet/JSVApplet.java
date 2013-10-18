@@ -382,7 +382,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 
 	public void setDropTargetListener(boolean isSigned, JSViewer viewer) {
 		if (dtl == null && isSigned)
-			dtl = (DropTargetListener) ((JSVFileDropper) viewer.getAwtInterface("FileDropper")).set(viewer);
+			dtl = (DropTargetListener) ((JSVFileDropper) viewer.getPlatformInterface("FileDropper")).set(viewer);
 	}
 
 	public void validateContent(int mode) {

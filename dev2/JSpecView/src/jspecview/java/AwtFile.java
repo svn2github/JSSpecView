@@ -13,7 +13,7 @@ import org.jmol.api.JmolFileInterface;
 /**
  * a subclass of File allowing extension to JavaScript
  * 
- * private to jspecview.awt
+ * private to jspecview.java
  * 
  */
 

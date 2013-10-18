@@ -12,7 +12,7 @@ import org.jmol.util.JmolFont;
 /**
  * methods required by Jmol that access java.awt.Font
  * 
- * private to jspecview.awt
+ * private to jspecview.java
  * 
  */
 

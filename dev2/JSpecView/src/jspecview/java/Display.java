@@ -20,7 +20,7 @@ import org.jmol.util.Txt;
 /**
  * methods required by Jmol that access java.awt.Component
  * 
- * private to jspecview.awt
+ * private to jspecview.java
  * 
  */
 

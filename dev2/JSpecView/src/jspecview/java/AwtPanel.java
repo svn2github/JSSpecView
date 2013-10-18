@@ -248,7 +248,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
    * @param pl 
    */
   private void createPdfDocument(OutputStream os, PrintLayout pl) {
-  	PdfCreatorInterface pdfCreator = (PdfCreatorInterface) viewer.getAwtInterface("PdfCreator");
+  	PdfCreatorInterface pdfCreator = (PdfCreatorInterface) viewer.getPlatformInterface("PdfCreator");
   	if (pdfCreator == null)
   		return;
   	pdfCreator.createPdfDocument(this, pl, os);

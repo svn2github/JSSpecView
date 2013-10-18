@@ -45,7 +45,7 @@ import org.jmol.util.Logger;
  * 
  * methods required by Jmol that access java.awt.event
  * 
- * private to jspecview.awt
+ * private to jspecview.java
  * 
  */
 

@@ -53,7 +53,7 @@ import org.jmol.util.JmolFont;
 /**
  * methods required by Jmol that access java.awt.Image
  * 
- * private to jspecview.awt
+ * private to jspecview.java
  * 
  */
 class Image {
