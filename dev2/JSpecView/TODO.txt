@@ -13,6 +13,17 @@ new feature: show NMR taps into NMRDB directly
 
 in preparation for JavaScript version (add to top):
 
+-- 10/18/2013 BH
+bug fix in coretop.js: Float.valueOf(Float.NaN).valueOf() === Float.NaN, not an error
+javajs methods added to core.z.js
+bug found in J.api.Interface.getInterface:
+  return x.instanceOf();
+returns an object, but 
+  return (x == null ? null : x.instanceOf()); 
+returns a string, but only when compiled within Eclipse 4.2 on Robert Lancashire's machine, 
+not on mine, with 3.6. No idea how to fix that!
+
+
 -- 10/17/2013 BH
 javajs created, incorporating awt, swing, and util
 dialogs working, mouse callbacks working; draggable placement working
