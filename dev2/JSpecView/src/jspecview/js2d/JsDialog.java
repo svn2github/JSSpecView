@@ -223,22 +223,14 @@ public class JsDialog extends JDialog implements PlatformDialog {
 		return ((JCheckBox) chkbox).isSelected();
 	}
 	
-	@Override
-	public void repaint() {
-		if (dataTable != null) {
-			dataTable.clearSelection();
-			if (selectedRow >= 0) {
-				dataTable.setRowSelectionAllowed(true);
-				dataTable.setRowSelectionInterval(selectedRow, selectedRow + 1);
-			}
-			
-		}
-		//super.repaint();
-	}
-
 	public void selectTableRow(int i) {
 		selectedRow = i;
 		dataTable.clearSelection();
+		if (selectedRow >= 0) {
+			dataTable.setRowSelectionAllowed(true);
+			dataTable.setRowSelectionInterval(selectedRow, selectedRow + 1);
+			repaint();
+		}
 	}
 
 	public void setCellSelectionEnabled(boolean enabled) {

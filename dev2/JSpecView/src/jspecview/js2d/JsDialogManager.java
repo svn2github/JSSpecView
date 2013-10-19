@@ -122,11 +122,13 @@ public class JsDialogManager extends DialogManager {
 	 * @param eventId 
 	 */
 	public void actionPerformed(String eventId) {
-		if (eventId.indexOf("/JT") >= 0) {
-			int pt = eventId.indexOf("_");
-			int irow = Parser.parseInt(eventId.substring(pt + 1));
-			int icol = Parser.parseInt(eventId.substring(eventId.indexOf("_", pt + 1) + 1));
-			processTableEvent(eventId, irow, icol, false);
+		int pt = eventId.indexOf("/JT");
+		if (pt >= 0) {
+			int pt2 = eventId.lastIndexOf ("_");
+			int pt1 = eventId.lastIndexOf ("_", pt2 - 1);
+			int irow = Parser.parseInt(eventId.substring(pt1 + 1, pt2));
+			int icol = Parser.parseInt(eventId.substring(pt2 + 1));
+			processTableEvent(eventId.substring(0, pt) + "/ROWCOL", irow, icol, false);
 			return;
 		}
 		processClick(eventId);

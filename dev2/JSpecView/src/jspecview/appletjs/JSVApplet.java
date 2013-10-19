@@ -482,7 +482,7 @@ public class JSVApplet implements JSVAppletInterface,
 	 	 * 
 	 	 * try{
 	 	 *   var o = window[tokens[0]]
-	 	 *   for (i = 1; i < tokens.length; i++){
+	 	 *   for (var i = 1; i < tokens.length; i++){
 	 	 *     o = o[tokens[i]]
 	 	 *   }
 	 	 *   return o(data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9]);

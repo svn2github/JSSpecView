@@ -15,6 +15,7 @@ in preparation for JavaScript version (add to top):
 
 -- 10/19/2013 BH  --  3 weeks!
 JSpecView/HTML5 preliminary development complete
+ -- (modifications in Jmol, JSmol, JSpecView, JSpecViewLib)
  -- functional as HTML5-only application
  -- pop-up menu enabled
  -- dialogs enabled
@@ -24,10 +25,18 @@ JSpecView/HTML5 preliminary development complete
  -- no toolbar
  -- no PDF creation
  -- buildtojs.xml working
+ -- measurements are still messed up
  -- ready for testing
+ * double[][] data = new double[size()][];  not allowed. Use double[][] data = ArrayUtil.
+ *   private final static Boolean[] useNumberLocalization = new Boolean[];
+ * {
+ *   useNumberLocalization[0] = Boolean.TRUE;
+ * }
+ * needs to be recast to
+ *    private final static Boolean[] useNumberLocalization = new Boolean[] { Boolean.TRUE };
  
 -- 10/18/2013 BH
-bug fix in coretop.js: Float.valueOf(Float.NaN).valueOf() === Float.NaN, not an error
+bug fix in 		coretop.js: Float.valueOf(Float.NaN).valueOf() === Float.NaN, not an error
 javajs methods added to core.z.js
 bug found in J.api.Interface.getInterface:
   return x.instanceOf();
@@ -110,7 +119,6 @@ Moved all AWT references of JSVApp into JSVApplet
 Moved JSVApp into jspecview/app
 Cleaned jspecview/java directory -- all AWT-dependent classes here
 Fixed Build.xml
-
 -- 10/5/2013 BH
 Refactored dialogs
 Added JSVMainPanel, JSVTree interfaces
@@ -118,13 +126,11 @@ Added DialogParams, FileHelper
 Moved AWT printing/saving operations to AwtPanel
 Created AwtTree, AwtTreeNode, AwtTreePath, JSVTree, JSVTreeNode, JSVTreePath
 Made JSViewer non-static
-
 -- 10/4/2013 BH
 Removed need for AwtGraphSet
 AwtPanel slimmed down to only the essentials for drawing -- rest left in GraphSet or PanelData
 Clean up of Measurement, Integral, Peak constructors
 Removed need for AwtExportDialog
-
 -- 10/3/2013 BH
 Disambiguated Parser
 Replaced BitSet with org.jmol.util.BS
@@ -138,12 +144,10 @@ Created jspecview.awt, jspecview.awtjs2d; populated with template methods
 Created EventManager
 Implemented jspecview.awt.Mouse and jspecview.awtjs2d.Mouse
   - note that in JSpecView, each panel is its own PlatformViewer and EventManager and display Component
-  
 -- 10/2/2013 BH
 Replaced all List and ArrayList with  JmolList to avoid overloaded .add(x)
 Moved and renamed methods from jspecview/util to org/jmol/util (applets can share this code)
 Replaced Hashmap with Hashtable
-
 -- 10/1/2013 BH
 Replaced all references to DecimalFormat with JSVTextFormat.formatDecimal or JSVTextFormat.formatDecimalTrimmed
 Replaced all references to StringBuilder and StringBuffer with JSVSB
@@ -180,9 +184,6 @@ changes and analyses can be made without altering the saved view
 
 =====DONE========
 
--from Jmol, using Tools/JSpecView gives a String out of bounds error
--opened acetophenone, links from IR, NMR did not seem to work
--tried MS and clicked lowest annotated peak, display changed then all menus greyed out and could only close app.
 
 version and revision number have stopped showing in About Dialog Box
 

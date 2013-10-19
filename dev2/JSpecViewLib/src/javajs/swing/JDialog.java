@@ -36,7 +36,7 @@ public class JDialog extends JContainer {
   }
 
   public void validate() {
-    setDialog();
+    //unnecessary here, or could set renderWidth and renderHeight
   }
 
   public void dispose() {
@@ -60,7 +60,7 @@ public class JDialog extends JContainer {
 
   @Override
   public void repaint() {
-//    setDialog();
+    setDialog();
   }
   
   /**
