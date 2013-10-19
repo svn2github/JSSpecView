@@ -34,6 +34,10 @@ JSpecView/HTML5 preliminary development complete
  * }
  * needs to be recast to
  *    private final static Boolean[] useNumberLocalization = new Boolean[] { Boolean.TRUE };
+ *
+ *  c =  Integer.parseInt(s, 16) ==> Parser.parseIntRadix(s, 16);
+ *
+ 
  
 -- 10/18/2013 BH
 bug fix in 		coretop.js: Float.valueOf(Float.NaN).valueOf() === Float.NaN, not an error
