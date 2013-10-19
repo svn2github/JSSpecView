@@ -23,6 +23,7 @@ JSpecView/HTML5 preliminary development complete
  -- no 2D NMR
  -- no toolbar
  -- no PDF creation
+ -- buildtojs.xml working
  -- ready for testing
  
 -- 10/18/2013 BH
