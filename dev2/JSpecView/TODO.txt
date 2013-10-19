@@ -41,7 +41,6 @@ JSpecView/HTML5 preliminary development complete
  -- search box allows !command entry, as for Jmol
  -- command BACKGROUND #xxxxxx fixed
  
- 
 -- 10/18/2013 BH
 bug fix in 		coretop.js: Float.valueOf(Float.NaN).valueOf() === Float.NaN, not an error
 javajs methods added to core.z.js
@@ -50,8 +49,15 @@ bug found in J.api.Interface.getInterface:
 returns an object, but 
   return (x == null ? null : x.instanceOf()); 
 returns a string, but only when compiled within Eclipse 4.2 on Robert Lancashire's machine, 
-not on mine, with 3.6. No idea how to fix that!
+not on mine, with 3.6. 
 
+Update needed for more recent Eclipse java2script compilers. They are available from:
+http://dev.zhourenjian.com/j2s/j2s-2.0.0-20131019-eclipse-4.3.zip
+http://dev.zhourenjian.com/j2s/j2s-2.0.0-20131019-eclipse-4.2.zip
+http://dev.zhourenjian.com/j2s/j2s-2.0.0-20131019-eclipse-3.8.zip
+http://dev.zhourenjian.com/j2s/j2s-2.0.0-20131019-eclipse-3.7.zip
+http://dev.zhourenjian.com/j2s/j2s-2.0.0-20131019-eclipse-3.6.zip
+http://dev.zhourenjian.com/j2s/j2s-2.0.0-20131019-eclipse-3.5.zip
 
 -- 10/17/2013 BH
 javajs created, incorporating awt, swing, and util
@@ -63,7 +69,6 @@ Dialog JavaScript Swing development complete
 
 -- 10/15/2013 BH
 Dialog JavaScript Swing replacement first try (note, Java dialogs are being sent to the console as JavaScript for testing
-
 
 -- 10/14/2013 BH
 Complete rewrite of dialogs.
@@ -126,6 +131,7 @@ Moved all AWT references of JSVApp into JSVApplet
 Moved JSVApp into jspecview/app
 Cleaned jspecview/java directory -- all AWT-dependent classes here
 Fixed Build.xml
+
 -- 10/5/2013 BH
 Refactored dialogs
 Added JSVMainPanel, JSVTree interfaces
@@ -133,11 +139,13 @@ Added DialogParams, FileHelper
 Moved AWT printing/saving operations to AwtPanel
 Created AwtTree, AwtTreeNode, AwtTreePath, JSVTree, JSVTreeNode, JSVTreePath
 Made JSViewer non-static
+
 -- 10/4/2013 BH
 Removed need for AwtGraphSet
 AwtPanel slimmed down to only the essentials for drawing -- rest left in GraphSet or PanelData
 Clean up of Measurement, Integral, Peak constructors
 Removed need for AwtExportDialog
+
 -- 10/3/2013 BH
 Disambiguated Parser
 Replaced BitSet with org.jmol.util.BS
@@ -151,10 +159,12 @@ Created jspecview.awt, jspecview.awtjs2d; populated with template methods
 Created EventManager
 Implemented jspecview.awt.Mouse and jspecview.awtjs2d.Mouse
   - note that in JSpecView, each panel is its own PlatformViewer and EventManager and display Component
+  
 -- 10/2/2013 BH
 Replaced all List and ArrayList with  JmolList to avoid overloaded .add(x)
 Moved and renamed methods from jspecview/util to org/jmol/util (applets can share this code)
 Replaced Hashmap with Hashtable
+
 -- 10/1/2013 BH
 Replaced all references to DecimalFormat with JSVTextFormat.formatDecimal or JSVTextFormat.formatDecimalTrimmed
 Replaced all references to StringBuilder and StringBuffer with JSVSB
