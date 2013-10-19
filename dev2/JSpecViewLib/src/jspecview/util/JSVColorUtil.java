@@ -92,9 +92,9 @@ import org.jmol.util.Txt;
     }
     if (len == 7 && strColor.charAt(0) == '#') {
       try {
-        red = Integer.parseInt(strColor.substring(1, 3), 16);
-        grn = Integer.parseInt(strColor.substring(3, 5), 16);
-        blu = Integer.parseInt(strColor.substring(5, 7), 16);
+        red = Parser.parseIntRadix(strColor.substring(1, 3), 16);
+        grn = Parser.parseIntRadix(strColor.substring(3, 5), 16);
+        blu = Parser.parseIntRadix(strColor.substring(5, 7), 16);
         return JSVColorUtil.colorTriadToInt(red, grn, blu);
       } catch (NumberFormatException e) {
         return 0;

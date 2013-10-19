@@ -406,8 +406,10 @@ public class PanelData implements EventManager {
 			taintedAll = true;
 		if (taintedAll)
 			g2d.fillBackground(gMain, bgcolor);
-		if (gTop != gMain)
+		if (gTop != gMain) {
 			g2d.fillBackground(gTop, null);
+			g2d.setStrokeBold(gMain, false);
+		}
 		if (isPrinting) {
 			top *= 3; // for three-hole punching
 			bottom *= 3; // for file name
@@ -1145,12 +1147,14 @@ public class PanelData implements EventManager {
 		switch (st) {
 		case BACKGROUNDCOLOR:
 			jsvp.setBackgroundColor(bgcolor = color);
+			taintedAll = true;
 			break;
 		case COORDINATESCOLOR:
 			coordinatesColor = color;
 			break;
 		case GRIDCOLOR:
 			gridColor = color;
+			taintedAll = true;
 			break;
 		case HIGHLIGHTCOLOR:
 			highlightColor = color;
@@ -1159,25 +1163,31 @@ public class PanelData implements EventManager {
 			break;
 		case INTEGRALPLOTCOLOR:
 			integralPlotColor = color;
+			taintedAll = true;
 			break;
 		case PEAKTABCOLOR:
-			peakTabColor = color;
+			taintedAll = true;
 			break;
 		case PLOTCOLOR:
 			for (int i = graphSets.size(); --i >= 0;)
 				graphSets.get(i).setPlotColor0(color);
+			taintedAll = true;
 			break;
 		case PLOTAREACOLOR:
 			plotAreaColor = color;
+			taintedAll = true;
 			break;
 		case SCALECOLOR:
 			scaleColor = color;
+			taintedAll = true;
 			break;
 		case TITLECOLOR:
 			titleColor = color;
+			taintedAll = true;
 			break;
 		case UNITSCOLOR:
 			unitsColor = color;
+			taintedAll = true;
 			break;
 		case ZOOMBOXCOLOR:
 			zoomBoxColor = color;
@@ -1242,24 +1252,24 @@ public class PanelData implements EventManager {
 	}
 
 	@SuppressWarnings("incomplete-switch")
-	public void setColorOrFont(ColorParameters ds, ScriptToken st) {
+	public void setColorOrFont(ColorParameters params, ScriptToken st) {
 		if (st == null) {
-			Map<ScriptToken, GenericColor> colors = ds.elementColors;
+			Map<ScriptToken, GenericColor> colors = params.elementColors;
 			for (Map.Entry<ScriptToken, GenericColor> entry : colors.entrySet())
-				setColorOrFont(ds, entry.getKey());
-			setColorOrFont(ds, ScriptToken.DISPLAYFONTNAME);
-			setColorOrFont(ds, ScriptToken.TITLEFONTNAME);
+				setColorOrFont(params, entry.getKey());
+			setColorOrFont(params, ScriptToken.DISPLAYFONTNAME);
+			setColorOrFont(params, ScriptToken.TITLEFONTNAME);
 			return;
 		}
 		switch (st) {
 		case DISPLAYFONTNAME:
-			setFontName(st, ds.displayFontName);
+			setFontName(st, params.displayFontName);
 			return;
 		case TITLEFONTNAME:
-			setFontName(st, ds.titleFontName);
+			setFontName(st, params.titleFontName);
 			return;
 		}
-		setColor(st, ds.getElementColor(st));
+		setColor(st, params.getElementColor(st));
 	}
 
 	public GenericColor getCurrentPlotColor(int i) {

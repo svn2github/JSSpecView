@@ -287,11 +287,16 @@ public class JsG2D implements JSVGraphics {
 	
 	public void doStroke(Object g, boolean isBegin) {
 		/**
+		 * 
+		 *  reduce antialiasing, thank you, http://www.rgraph.net/docs/howto-get-crisp-lines-with-no-antialias.html
+		 *  
 		 * @j2sNative
 		 * 
 		 * this.inPath = isBegin;
-		 * if (isBegin)
+		 * if (isBegin) {
+		 * g.translate(0.5, 0.5);
 		 * 	g.beginPath();
+		 * }
 		 * else
 		 *  g.stroke();
 		 * 

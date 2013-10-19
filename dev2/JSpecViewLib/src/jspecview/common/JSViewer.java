@@ -167,6 +167,8 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		if (script == null)
 			script = "";
 		script = script.trim();
+		if (script.startsWith("!"))
+			script = script.substring(1).trim();
 		System.out.println("RUNSCRIPT " + script);
 		boolean isOK = true;
 		int nErrorsLeft = 10;
