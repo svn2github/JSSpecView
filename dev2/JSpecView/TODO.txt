@@ -13,6 +13,18 @@ new feature: show NMR taps into NMRDB directly
 
 in preparation for JavaScript version (add to top):
 
+-- 10/19/2013 BH  --  3 weeks!
+JSpecView/HTML5 preliminary development complete
+ -- functional as HTML5-only application
+ -- pop-up menu enabled
+ -- dialogs enabled
+ -- can simulate 1H spectra in the applet
+ -- see http://chemapps.stolaf.edu/jmol/jsmol/jsv.htm
+ -- no 2D NMR
+ -- no toolbar
+ -- no PDF creation
+ -- ready for testing
+ 
 -- 10/18/2013 BH
 bug fix in coretop.js: Float.valueOf(Float.NaN).valueOf() === Float.NaN, not an error
 javajs methods added to core.z.js
