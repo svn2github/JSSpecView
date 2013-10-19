@@ -23,6 +23,8 @@
  */
 package jspecview.js2d;
 
+import org.jmol.api.PlatformViewer;
+
 import javajs.util.SB;
 
 import jspecview.common.JSViewer;
@@ -46,9 +48,9 @@ public class JsPopup extends JSVGenericPopup {
     // required by reflection
   }
 
-	public void initialize(JSViewer viewer, String menu) {
+	public void jpiInitialize(PlatformViewer viewer, String menu) {
     PopupResource bundle = new JSVPopupResourceBundle();
-    initialize(viewer, bundle, menu);
+    initialize((JSViewer) viewer, bundle, menu);
 	}
 
   //TODO: jQuery menu actions, entry, and exit need to come back here
@@ -76,6 +78,7 @@ public class JsPopup extends JSVGenericPopup {
   protected void updateButton(Object b, String entry, String script) {
     String[] ret = new String[] { entry };
     entry = ret[0];
+    Object icon = getEntryIcon(ret);
     /**
      * @j2sNative
      * 
@@ -86,7 +89,7 @@ public class JsPopup extends JSVGenericPopup {
      * 
      */
     {
-      //JS only
+      System.out.println(icon);
     }
   }
 
@@ -405,7 +408,12 @@ public class JsPopup extends JSVGenericPopup {
   }
 
 	public boolean menuIsEnabled(Object item) {
-		// TODO Auto-generated method stub
+    /**
+     * @j2sNative
+     * 
+     *          return item.isEnabled();
+     */
+    {}    
 		return false;
 	}
 

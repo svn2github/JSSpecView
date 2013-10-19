@@ -141,14 +141,25 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 			setPopupMenu(true, true);
 	}
 
+	private boolean popupAllowMenu = true;
+	private boolean popupZoomEnabled = true;
 	public void setPopupMenu(boolean allowMenu, boolean zoomEnabled) {
-		try {
-			jsvpPopupMenu = (JSVPopupMenu) getPlatformInterface("Popup");
-			jsvpPopupMenu.initialize(this, isApplet ? "appletMenu" : "appMenu");
-			jsvpPopupMenu.setEnabled(allowMenu, zoomEnabled);
-		} catch (Exception e) {
-			System.out.println(e + " initializing popup menu");
+		popupAllowMenu = allowMenu;
+		popupZoomEnabled = zoomEnabled;		
+	}
+
+	public void showMenu(int x, int y) {
+		if (jsvpPopupMenu == null) {
+			try {
+				jsvpPopupMenu = (JSVPopupMenu) getPlatformInterface("Popup");
+				jsvpPopupMenu.jpiInitialize(this, isApplet ? "appletMenu" : "appMenu");
+				jsvpPopupMenu.setEnabled(popupAllowMenu, popupZoomEnabled);
+			} catch (Exception e) {
+				System.out.println(e + " initializing popup menu");
+				return;
+			}
 		}
+		jsvpPopupMenu.jpiShow(x, y);
 	}
 
 	public boolean runScriptNow(String script) {
@@ -1366,7 +1377,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		overlayLegendDialog = null;
 
 		if (jsvpPopupMenu != null) {
-			jsvpPopupMenu.dispose();
+			jsvpPopupMenu.jpiDispose();
 			jsvpPopupMenu = null;
 		}
 		if (panelNodes != null)
@@ -1426,11 +1437,6 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 			return;
 		recentScript = script;
 		runScriptNow(script);
-	}
-
-	public void showMenu(int x, int y) {
-		if (jsvpPopupMenu != null)
-			jsvpPopupMenu.jpiShow(x, y);
 	}
 
 	// / called by JSmol JavaScript

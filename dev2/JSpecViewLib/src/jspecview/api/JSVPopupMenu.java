@@ -1,14 +1,12 @@
 package jspecview.api;
 
+import org.jmol.api.JmolPopupInterface;
+
 import javajs.util.List;
 import jspecview.common.PanelNode;
-import jspecview.common.JSViewer;
 
 
-
-public interface JSVPopupMenu {
-
-	void dispose();
+public interface JSVPopupMenu extends JmolPopupInterface {
 
 	void jpiShow(int x, int y);
 
@@ -20,7 +18,5 @@ public interface JSVPopupMenu {
 			boolean allowCompoundMenu);
 
 	void setEnabled(boolean allowMenu, boolean zoomEnabled);
-
-	void initialize(JSViewer viewer, String menu);
 
 }

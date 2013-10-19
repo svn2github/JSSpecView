@@ -8,6 +8,5 @@ public interface JmolPopupInterface {
   public void jpiInitialize(PlatformViewer viewer, String menu);
   public void jpiShow(int x, int y);
   public void jpiUpdateComputedMenus();
-
  
 }

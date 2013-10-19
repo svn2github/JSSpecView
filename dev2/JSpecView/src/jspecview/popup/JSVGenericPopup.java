@@ -652,11 +652,6 @@ abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
 	// reboot();
 	//    
 
-	public void dispose() {
-		// TODO Auto-generated method stub
-		
-	}
-
 	public boolean getSelected(String key) {
 		// TODO Auto-generated method stub
 		return false;
@@ -689,11 +684,11 @@ abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
   private void setEnables(JSVPanel jsvp) {
     pd = jsvp.getPanelData();
     JDXSpectrum spec0 = pd.getSpectrum();
-    setSelected("Show_GridCB", pd.getBoolean(ScriptToken.GRIDON));
-    setSelected("Show_CoordinatesCB", pd.getBoolean(ScriptToken.COORDINATESON));
-    setSelected("Show_X_AxisCB", pd.getBoolean(ScriptToken.XSCALEON));
-    setSelected("Show_Y_AxisCB", pd.getBoolean(ScriptToken.YSCALEON));
-    setSelected("Reverse_PlotCB", pd.getBoolean(ScriptToken.REVERSEPLOT));
+    //setSelected("Show_GridCB", pd.getBoolean(ScriptToken.GRIDON));
+    //setSelected("Show_CoordinatesCB", pd.getBoolean(ScriptToken.COORDINATESON));
+    //setSelected("Show_X_AxisCB", pd.getBoolean(ScriptToken.XSCALEON));
+    //setSelected("Show_Y_AxisCB", pd.getBoolean(ScriptToken.YSCALEON));
+    //setSelected("Reverse_PlotCB", pd.getBoolean(ScriptToken.REVERSEPLOT));
 
     boolean isOverlaid = pd.isShowAllStacked();
     boolean isSingle = pd.haveSelectedSpectrum();
@@ -703,7 +698,7 @@ abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
     setItemEnabled("Peaks", pd.getSpectrum().is1D());
     
     setItemEnabled("Predicted_Solution_Colour", isSingle && spec0.canShowSolutionColor());
-    setItemEnabled("Transmittance/Absorbance", isSingle && spec0.canConvertTransAbs());
+    setItemEnabled("Toggle_Trans/Abs", isSingle && spec0.canConvertTransAbs());
     setItemEnabled("Show_Overlay_Key", isOverlaid && pd.getNumberOfGraphSets() == 1);
     setItemEnabled("Overlay_Offset...", isOverlaid);
     setItemEnabled("JDXMenu", spec0.canSaveAsJDX());

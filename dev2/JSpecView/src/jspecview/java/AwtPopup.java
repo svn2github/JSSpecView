@@ -44,6 +44,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 
+import org.jmol.api.PlatformViewer;
 import org.jmol.util.Logger;
 
 import jspecview.common.JSViewer;
@@ -67,10 +68,10 @@ public class AwtPopup extends JSVGenericPopup {
     // required by reflection
   }
 
-  public void initialize(JSViewer viewer, String menu) {
+	public void jpiInitialize(PlatformViewer viewer, String menu) {
     //boolean doTranslate = GT.setDoTranslate(true);
     PopupResource bundle = new JSVPopupResourceBundle();
-    initialize(viewer, bundle, menu);
+    initialize((JSViewer) viewer, bundle, menu);
     //GT.setDoTranslate(doTranslate);
   }
 

@@ -46,14 +46,14 @@ public class JSVPopupResourceBundle extends PopupResource {
     
   private static String[][] menuContents = {
     
-      {  "appMenu", "Show_GridCB Show_X_AxisCB Show_Y_AxisCB Show_CoordinatesCB Reverse_PlotCB" +
+      {  "appMenu", "Toggle_Grid Toggle_X_Axis Toggle_Y_Axis Toggle_Coordinates Reverse_Plot" +
         " - Next_View Previous_View Clear_Views Reset_View Set_Zoom..." +
         " - Views... Overlay_Offset... Script..." +
         " - Properties" },
 
       { "appletMenu",
           "_SIGNED_FileMenu ViewMenu ZoomMenu Views... Overlay_Offset..." +
-          " - Measurements Peaks Integration Transmittance/Absorbance Predicted_Solution_Colour" +
+          " - Measurements Peaks Integration Toggle_Trans/Abs Predicted_Solution_Colour" +
           " - Script... - Print... - AboutMenu" },
 
       {   "_SIGNED_FileMenu", "SaveAsMenu ExportAsMenu" },
@@ -65,7 +65,7 @@ public class JSVPopupResourceBundle extends PopupResource {
       {   "ExportAsMenu", "JPG PNG SVG PDF" },
               
       {   "ViewMenu",
-          "Show_GridCB Show_X_AxisCB Show_Y_AxisCB Show_CoordinatesCB Reverse_PlotCB Show_Header... Show_Overlay_Key... Window" },
+          "Toggle_Grid Toggle_X_Axis Toggle_Y_Axis Toggle_Coordinates Reverse_Plot Show_Header... Show_Overlay_Key... Window" },
 
       {   "ZoomMenu", "Next_View Previous_View Reset_View Clear_Views Set_Zoom..." },
 
@@ -87,16 +87,16 @@ public class JSVPopupResourceBundle extends PopupResource {
   	{"Script...","script INLINE"},
   	{"Set_Zoom...","zoom"},
   	{"Properties","showProperties"},
-  	{"Show_X_AxisCB","XSCALEON toggle;showMenu"},
-  	{"Show_Y_AxisCB","YSCALEON toggle;showMenu"},
-  	{"Show_GridCB","GRIDON toggle;showMenu"},
-  	{"Show_CoordinatesCB","COORDINATESON toggle;showMenu"},
-  	{"Reverse_PlotCB","REVERSEPLOT toggle;showMenu"},
-  	{"Measurements",""},
-  	{"Peaks",""},
-  	{"Integration",""},
-  	{"Tranmittance/Absorbance","IRMODE TOGGLE"},
-  	{"Predicted_Solution_Colour",""},
+  	{"Toggle_X_Axis","XSCALEON toggle;showMenu"},
+  	{"Toggle_Y_Axis","YSCALEON toggle;showMenu"},
+  	{"Toggle_Grid","GRIDON toggle;showMenu"},
+  	{"Toggle_Coordinates","COORDINATESON toggle;showMenu"},
+  	{"Reverse_Plot","REVERSEPLOT toggle;showMenu"},
+  	{"Measurements","SHOWMEASUREMENTS"},
+  	{"Peaks","SHOWPEAKLIST"},
+  	{"Integration","SHOWINTEGRATION"},
+  	{"Toggle_Trans/Abs","IRMODE TOGGLE"},
+  	{"Predicted_Solution_Colour","GETSOLUTIONCOLOR"},
   	{"Print...","print"},
   	{"Original...","export SOURCE"},
   	{"CML","export CML"},
