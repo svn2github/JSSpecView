@@ -13,6 +13,10 @@ new feature: show NMR taps into NMRDB directly
 
 in preparation for JavaScript version (add to top):
 
+-- 10/20/2013 BH
+ measurements fixed
+ integration fixed
+ 
 -- 10/19/2013 BH  --  3 weeks!
 JSpecView/HTML5 preliminary development complete
  -- (modifications in Jmol, JSmol, JSpecView, JSpecViewLib)
@@ -148,10 +152,10 @@ Removed need for AwtExportDialog
 
 -- 10/3/2013 BH
 Disambiguated Parser
-Replaced BitSet with org.jmol.util.BS
+* Replaced BitSet with org.jmol.util.BS (later moved to javajs.util)
 Added org.jmol.util.J2SIgnoreImport, J2SRequireImport
 Base64 moved to org.jmol.io
-Added org.jmol.util.P3 and Tuple3f (required for Jmol's ArrayUtil)
+Added org.jmol.util.P3 and Tuple3f (required for Jmol's ArrayUtil; later refactored as javajs.uti.P3 and .T3)
 XMLReader moved to org.jmol.io
 Replaced org.jmol.util.ArrayUtil, Base64, Escape, Parser, Txt with Jmol's.
 Replaced org.jmol.util.DefaultLogger, Logger, LoggerInterface, with Jmol's.
@@ -159,39 +163,36 @@ Created jspecview.awt, jspecview.awtjs2d; populated with template methods
 Created EventManager
 Implemented jspecview.awt.Mouse and jspecview.awtjs2d.Mouse
   - note that in JSpecView, each panel is its own PlatformViewer and EventManager and display Component
+    (but I think there is only one panel ever now)
   
 -- 10/2/2013 BH
-Replaced all List and ArrayList with  JmolList to avoid overloaded .add(x)
-Moved and renamed methods from jspecview/util to org/jmol/util (applets can share this code)
-Replaced Hashmap with Hashtable
+* Replaced all List and ArrayList with  JmolList to avoid overloaded .add(x) (later refactor as javajs.util.List)
+Moved and renamed methods from jspecview/util to org/jmol/util (applets can share this code; later to javajs)
+* Replaced Hashmap with Hashtable
 
 -- 10/1/2013 BH
-Replaced all references to DecimalFormat with JSVTextFormat.formatDecimal or JSVTextFormat.formatDecimalTrimmed
-Replaced all references to StringBuilder and StringBuffer with JSVSB
+* Replaced all references to DecimalFormat with JSVTextFormat.formatDecimal or 
+	JSVTextFormat.formatDecimalTrimmed (later refactored as javajs.util.DecimalFormat)
+* Replaced all references to StringBuilder and StringBuffer with JSVSB (later refactored as javajs.util.SB)
 
 ====TODO=========
--Preferences for Application no longer showing sample.jdx spectrum with colour schemes
--sample.jdx is in Application/resources folder
--default colours changed
-
-in the HTML5/JS version. Integration dialog box opened but would not close
-
--fix for Block files of same data type that can be overlaid
-
--double-clicking 1HNMR is not starting a measurement
-
--in the jsvtest.htm page, when there is a CNMR and IR overlay shown
+-HTML5? for Block files of same data type that can be overlaid
+-HTML5 views... menu item not implemented
+-HTML5 2D NMR not implemented 
+-HTML5 create PDF not implemented
+ 
+-feature: in the jsvtest.htm page, when there is a CNMR and IR overlay shown
 nothing happens when a proton is clicked on a molecule in the Jmol
 applet. The viewer should have the option to either add H-NMR with
 current overlay or to load only H-NMR (in this case the viewer could
 have already saved the C-NMR and IR changes as a "view" to return to
 later--could be done through a pop up box
 
--when in the split overlay version: addition of two boxes next to the
+-feature: when in the split overlay version: addition of two boxes next to the
 one to toggle between stacked and split, one to clear the selected
 spectrum (X), and one to minimize it only (-)
 
--a save "view" (overlay) option: writes a jdx file that will be able
+-feature: a save "view" (overlay) option: writes a jdx file that will be able
 to call up changes to a current overlay similar to "save as," so that
 if one of the used spectra is used in a different file, separate
 changes and analyses can be made without altering the saved view
@@ -200,6 +201,14 @@ changes and analyses can be made without altering the saved view
 
 
 =====DONE========
+
+-Preferences for Application no longer showing sample.jdx spectrum with colour schemes
+-sample.jdx is in Application/resources folder
+-default colours changed
+
+-in the HTML5/JS version. Integration dialog box opened but would not close
+
+-double-clicking 1HNMR is not starting a measurement
 
 
 version and revision number have stopped showing in About Dialog Box
