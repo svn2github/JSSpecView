@@ -1166,6 +1166,7 @@ public class PanelData implements EventManager {
 			taintedAll = true;
 			break;
 		case PEAKTABCOLOR:
+			peakTabColor = color;
 			taintedAll = true;
 			break;
 		case PLOTCOLOR:
