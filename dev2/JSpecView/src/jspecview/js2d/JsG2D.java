@@ -294,11 +294,12 @@ public class JsG2D implements JSVGraphics {
 		 * 
 		 * this.inPath = isBegin;
 		 * if (isBegin) {
-		 * g.translate(0.5, 0.5);
-		 * 	g.beginPath();
+		 *   g.translate(0.5, 0.5);
+		 * 	 g.beginPath();
+		 * } else {
+		 *   g.translate(-0.5, -0.5);
+		 *   g.stroke();
 		 * }
-		 * else
-		 *  g.stroke();
 		 * 
 		 */
 		{}
