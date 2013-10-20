@@ -5,25 +5,25 @@ public class ByteConverter {
   public ByteConverter() {
     // for reflection
   }
-
-	public float bytesToFloat(byte[] bytes, int j, boolean isBigEndian) throws Exception {
-		return intToFloat(bytesToInt(bytes, j, isBigEndian));
-	}
+  
+  public float bytesToFloat(byte[] bytes, int j, boolean isBigEndian) throws Exception {
+    return intToFloat(bytesToInt(bytes, j, isBigEndian));
+  }
 
   protected int bytesToInt(byte[] bytes, int j, boolean isBigEndian) {
-  	if (isBigEndian) {
+    if (isBigEndian) {
       return ((bytes[j+3] & 0xff)
           | (bytes[j+2] & 0xff) << 8
           | (bytes[j+1] & 0xff) << 16 
           | (bytes[j] & 0xff) << 24);
-  	}
+    }
     return ((bytes[j++] & 0xff)
         | (bytes[j++] & 0xff) << 8
         | (bytes[j++] & 0xff) << 16 
         | (bytes[j++] & 0xff) << 24);
-	}
+  }
 
-	public float intToFloat(int x) throws Exception {
+  public float intToFloat(int x) throws Exception {
     /**
      * see http://en.wikipedia.org/wiki/Binary32
      * 
@@ -142,7 +142,6 @@ public class ByteConverter {
       return Float.MAX_VALUE;
     return f * fracIEEE[i + 140];
   }
-
 
 //  static {
 //    setFracIEEE();

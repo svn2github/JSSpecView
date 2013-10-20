@@ -6,15 +6,15 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
-import javajs.util.SB;
-
 import org.jmol.api.BytePoster;
+
+import javajs.util.SB;
 
 /**
  * 
  * A generic output method. JmolOutputChannel can be used to:
  * 
- * add characters to a StringBuilder 
+ * add characters to a StringBuffer 
  *   using fileName==null, append() and toString()
  *   
  * add bytes utilizing ByteArrayOutputStream 
@@ -86,7 +86,7 @@ public class JmolOutputChannel extends OutputStream {
    * will go to string buffer if bw == null and os == null
    * 
    * @param s
-   * @return this, for chaining like a standard StringBuilder
+   * @return this, for chaining like a standard StringBuffer
    * 
    */
   public JmolOutputChannel append(String s) {

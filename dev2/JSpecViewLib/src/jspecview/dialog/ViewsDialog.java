@@ -27,7 +27,7 @@ import javajs.util.SB;
 import jspecview.api.JSVTreeNode;
 import jspecview.common.PanelNode;
 
-import org.jmol.util.Parser;
+import javajs.util.ParserJS;
 
 
 
@@ -108,7 +108,7 @@ public class ViewsDialog extends JSVDialog {
 	private boolean checking = false; 
 	
 	protected void check(String name) {
-		int i = Parser.parseInt(name.substring(name.indexOf("_") + 1));
+		int i = ParserJS.parseInt(name.substring(name.indexOf("_") + 1));
 		JSVTreeNode node = treeNodes.get(i);
 		Object cb = checkBoxes.get(i);
 		boolean isSelected = dialog.isSelected(cb);

@@ -29,9 +29,9 @@ import org.jmol.util.Logger;
 
 public class Interface {
 
-//  public static Object getOptionInterface(String name) {
-//    return getInterface(JC.CLASSBASE_OPTIONS + name);
-//  }
+  public static Object getOptionInterface(String name) {
+    return getInterface("org.jmol." + name);
+  }
 
   public static Object getApplicationInterface(String name) {
     return getInterface("org.openscience.jmol.app." + name);

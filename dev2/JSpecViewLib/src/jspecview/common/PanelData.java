@@ -787,7 +787,7 @@ public class PanelData implements EventManager {
 	}
 
 	public void repaint() {
-		jsvp.doRepaint();
+		jsvp.doRepaint(false);
 	}
 
 	public void setToolTipText(String s) {

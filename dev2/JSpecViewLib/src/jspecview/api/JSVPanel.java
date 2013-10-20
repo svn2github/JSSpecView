@@ -13,7 +13,7 @@ public interface JSVPanel extends JSVViewPanel {
 
 	public void repaint();
 
-	public void doRepaint();
+	public void doRepaint(boolean andTaintAll);
   
   void getFocusNow(boolean asThread);
   String getInput(String message, String title, String sval);

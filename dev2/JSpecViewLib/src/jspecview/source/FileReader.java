@@ -38,6 +38,8 @@ import javajs.util.SB;
 import org.jmol.api.Interface;
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
+
+import javajs.util.ParserJS;
 import org.jmol.util.Txt;
 
 import jspecview.api.SourceReader;
@@ -115,13 +117,12 @@ public class FileReader {
    * @param obscure
    * @param loadImaginary 
    * @return source
-   * @throws IOException
-   * @throws JSpecViewException
+   * @throws Exception
    */
   public static JDXSource createJDXSourceFromStream(InputStream in, boolean obscure, boolean loadImaginary)
-      throws IOException, JSpecViewException {
+      throws Exception {
     return createJDXSource(JSVFileManager.getBufferedReaderForInputStream(in),
-        null, null, obscure, loadImaginary, -1, -1);
+        "stream", null, obscure, loadImaginary, -1, -1);
   }
 
 	/**
@@ -137,12 +138,11 @@ public class FileReader {
 	 * @param iSpecLast
 	 *          TODO
 	 * @return source
-	 * @throws IOException
-	 * @throws JSpecViewException
+	 * @throws Exception
 	 */
 	public static JDXSource createJDXSource(BufferedReader br, String filePath,
 			URL appletDocumentBase, boolean obscure, boolean loadImaginary,
-			int iSpecFirst, int iSpecLast) throws IOException, JSpecViewException {
+			int iSpecFirst, int iSpecLast) throws Exception {
 
 		try {
 			if (br == null)
@@ -157,6 +157,8 @@ public class FileReader {
 			int pt2 = header.indexOf('<');
 			if (pt1 < 0 || pt2 >= 0 && pt2 < pt1) {
 				String xmlType = header.toLowerCase();
+				if (xmlType.contains("404"))
+					System.out.println(xmlType);
 				xmlType = (xmlType.contains("<animl")
 						|| xmlType.contains("<!doctype technique") ? "AnIML" : xmlType
 						.contains("xml-cml") ? "CML" : null);
@@ -172,8 +174,7 @@ public class FileReader {
 					iSpecLast)).getJDXSource(br);
 		} catch (JSpecViewException e) {
 			br.close();
-			throw new JSpecViewException("Error reading JDX format: "
-					+ e.getMessage());
+			throw new Exception("Error reading JDX format: " + e);
 		}
 	}
 
@@ -292,7 +293,7 @@ public class FileReader {
 				t.getValue();
 			}
 			if (label.equals("##BLOCKS")) {
-				int nBlocks = Parser.parseInt(t.getValue());
+				int nBlocks = ParserJS.parseInt(t.getValue());
 				if (nBlocks > 100 && firstSpec <= 0)
 					forceSub = true;
 			}
@@ -691,7 +692,7 @@ public class FileReader {
 	}
 
 	private float parseFloatStr(String s) {
-  	return Parser.parseFloat(s);
+  	return ParserJS.parseFloat(s);
   }
 
 	private String simpleReplace(String s, String sfrom, String sto) {
@@ -879,7 +880,7 @@ public class FileReader {
     if (label.equals("##JCAMPDX")) {
       String value = t.getValue();
       jdxHeader.jcampdx = value;
-      float version = Parser.parseFloat(value);
+      float version = ParserJS.parseFloat(value);
       if (version >= 6.0 || Float.isNaN(version)) {
         if (errorLog != null)
           errorLog

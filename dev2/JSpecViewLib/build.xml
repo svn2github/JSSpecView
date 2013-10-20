@@ -26,13 +26,40 @@
         </copy>
     </target>
     <target name="clean">
-        <delete dir="bin"/>
-        <echo message="copying files from ${jmol.path}/javajs"/>
-        <copy overwrite="true" todir="src" >
-          <fileset dir="${jmol.path}/src">
-            <include name="javajs/**/*" />
+        <delete quiet="true">
+          <fileset dir="bin" includes="**/*"/>
+          <fileset dir="src/javajs" includes="**/*.java"/>
+          <fileset dir="src/org/jmol" includes="**/*.java"/>
+        </delete>
+        <echo message="copying files from ${jmol.path}/src/javajs"/>
+        <copy overwrite="true" todir="src/javajs" >
+          <fileset dir="${jmol.path}/src/javajs">
+            <include name="**/*.java" />
           </fileset>
         </copy>
+        <echo message="copying files from ${jmol.path}/src/org/jmol/api,io,util"/>
+        <copy overwrite="true" todir="src/org/jmol" >
+          <fileset dir="${jmol.path}/src/org/jmol">
+            <include name="api/ApiPlatform.java" />
+            <include name="api/BytePoster.java" />
+            <include name="api/Event.java" />
+	        <include name="api/EventManager.java" />
+	        <include name="api/Interface.java" />
+	        <include name="api/JmolFileInterface.java" />
+	        <include name="api/JmolMouseInterface.java" />
+	        <include name="api/JmolPopupInterface.java" />
+            <include name="api/JSmolInterface.java" />
+        	<include name="api/PlatformViewer.java" />
+            <include name="io/Base64.java" />
+	        <include name="io/JmolOutputChannel.java" />
+            <include name="util/DefaultLogger.java" />
+            <include name="util/JmolFont.java" />
+	        <include name="util/Logger*.java" />
+	        <include name="util/Parser.java" />
+	        <include name="util/Txt.java" />
+          </fileset>
+        </copy>
+
     </target>
     <target name="cleanall" depends="clean" />
     <target name="build" depends="build-subprojects,build-project" />

@@ -27,7 +27,7 @@ import javajs.J2SRequireImport;
 import org.jmol.util.Txt;
 
 
-@J2SRequireImport({java.util.Properties.class, java.io.BufferedInputStream.class})
+@J2SRequireImport({java.util.Properties.class, java.io.BufferedInputStream.class, org.jmol.util.Txt.class})
 public class JSVersion {
 
   public static final String VERSION;

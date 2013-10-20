@@ -28,9 +28,9 @@ package jspecview.common;
 import java.util.Map;
 
 import javajs.util.ArrayUtil;
+import javajs.util.DecimalFormat;
 import javajs.util.List;
 
-import org.jmol.util.Txt;
 
 import jspecview.api.AnnotationData;
 import jspecview.common.Annotation.AType;
@@ -95,9 +95,9 @@ public class MeasurementData extends List<Measurement> implements
 		String[][] data = new String[size()][];
 		for (int i = size(); --i >= 0;)
 			data[i] = new String[] { "" + (i + 1),
-					Txt.formatDecimalDbl(ddata[i][0], precisionX),
-					Txt.formatDecimalDbl(ddata[i][1], precisionX),
-					Txt.formatDecimalDbl(ddata[i][2], precisionDX) };
+					DecimalFormat.formatDecimalDbl(ddata[i][0], precisionX),
+					DecimalFormat.formatDecimalDbl(ddata[i][1], precisionX),
+					DecimalFormat.formatDecimalDbl(ddata[i][2], precisionDX) };
 		return data;
 	}
 
@@ -155,7 +155,7 @@ public class MeasurementData extends List<Measurement> implements
 			double x = m.getXVal() + dx;
 			m.setXVal(x);
 			m.setValue(x);
-			m.text = Txt.formatDecimalDbl(x, precision);
+			m.text = DecimalFormat.formatDecimalDbl(x, precision);
 		}
 	}
 

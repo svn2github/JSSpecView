@@ -8,6 +8,7 @@ import java.util.StringTokenizer;
 
 import javajs.util.ArrayUtil;
 import javajs.util.BS;
+import javajs.util.DecimalFormat;
 import javajs.util.List;
 
 import org.jmol.util.Txt;
@@ -340,8 +341,8 @@ public class IntegralData extends MeasurementData {
 	public String[][] getMeasurementListArray(String units) {
 		String[][] data = new String[size()][];
 		for (int pt = 0, i = size(); --i >= 0;)
-			data[pt++] = new String[] { "" + pt, Txt.formatDecimalDbl(get(i).getXVal(), 2), 
-				Txt.formatDecimalDbl(get(i).getXVal2(), 2), get(i).text };
+			data[pt++] = new String[] { "" + pt, DecimalFormat.formatDecimalDbl(get(i).getXVal(), 2), 
+				DecimalFormat.formatDecimalDbl(get(i).getXVal2(), 2), get(i).text };
 		return data;
 	}
 

@@ -4,7 +4,7 @@ public interface EventManager {
 
   boolean keyPressed(int keyCode, int modifiers);
 
-	boolean keyTyped(int keyChar, int modifiers);
+  boolean keyTyped(int keyChar, int modifiers);
 
   void keyReleased(int keyCode);
 

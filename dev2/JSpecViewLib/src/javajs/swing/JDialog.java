@@ -55,7 +55,7 @@ public class JDialog extends JContainer {
   }
 
   public void pack() {
-    setDialog();
+    //setDialog();
   }
 
   @Override

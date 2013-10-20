@@ -4,6 +4,8 @@ package jspecview.common;
 
 import org.jmol.util.Parser;
 
+import javajs.util.ParserJS;
+
 public class PeakInfo {
   public final static PeakInfo nullPeakInfo = new PeakInfo();
 
@@ -52,10 +54,10 @@ public class PeakInfo {
       atoms = Parser.getQuotedAttribute(s, "atoms");
     title = Parser.getQuotedAttribute(s, "title");
     _match = Parser.getQuotedAttribute(s, "_match"); // PEAK command creates this
-    xMax = Parser.parseFloat(Parser.getQuotedAttribute(s, "xMax"));
-    xMin = Parser.parseFloat(Parser.getQuotedAttribute(s, "xMin"));
-    yMax = Parser.parseFloat(Parser.getQuotedAttribute(s, "yMax"));
-    yMin = Parser.parseFloat(Parser.getQuotedAttribute(s, "yMin"));
+    xMax = ParserJS.parseFloat(Parser.getQuotedAttribute(s, "xMax"));
+    xMin = ParserJS.parseFloat(Parser.getQuotedAttribute(s, "xMin"));
+    yMax = ParserJS.parseFloat(Parser.getQuotedAttribute(s, "yMax"));
+    yMin = ParserJS.parseFloat(Parser.getQuotedAttribute(s, "yMin"));
   }
 
   public boolean isClearAll() {

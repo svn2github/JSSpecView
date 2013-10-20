@@ -30,7 +30,7 @@ import javajs.api.GenericColor;
 import javajs.awt.ColorUtil;
 
 
-import org.jmol.util.Parser;
+import javajs.util.ParserJS;
 import org.jmol.util.Txt;
 
  public class JSVColorUtil {
@@ -70,9 +70,9 @@ import org.jmol.util.Txt;
             .length() - 1), ",");
         if (tokens.length != 3)
           return 0;
-        red = Parser.parseFloat(tokens[0]);
-        grn = Parser.parseFloat(tokens[1]);
-        blu = Parser.parseFloat(tokens[2]);
+        red = ParserJS.parseFloat(tokens[0]);
+        grn = ParserJS.parseFloat(tokens[1]);
+        blu = ParserJS.parseFloat(tokens[2]);
         return JSVColorUtil.colorTriadToInt(red, grn, blu);
       }
       switch (len) {
@@ -92,9 +92,9 @@ import org.jmol.util.Txt;
     }
     if (len == 7 && strColor.charAt(0) == '#') {
       try {
-        red = Parser.parseIntRadix(strColor.substring(1, 3), 16);
-        grn = Parser.parseIntRadix(strColor.substring(3, 5), 16);
-        blu = Parser.parseIntRadix(strColor.substring(5, 7), 16);
+        red = ParserJS.parseIntRadix(strColor.substring(1, 3), 16);
+        grn = ParserJS.parseIntRadix(strColor.substring(3, 5), 16);
+        blu = ParserJS.parseIntRadix(strColor.substring(5, 7), 16);
         return JSVColorUtil.colorTriadToInt(red, grn, blu);
       } catch (NumberFormatException e) {
         return 0;

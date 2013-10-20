@@ -20,6 +20,8 @@ import javajs.awt.Dimension;
 
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
+
+import javajs.util.ParserJS;
 import org.jmol.util.Txt;
 
 import jspecview.api.ExportInterface;
@@ -279,7 +281,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 						isOK = false;
 					break;
 				case STACKOFFSETY:
-					execOverlayOffsetY(Parser.parseInt("" + Parser.parseFloat(value)));
+					execOverlayOffsetY(ParserJS.parseInt("" + ParserJS.parseFloat(value)));
 					break;
 				case TEST:
 					si.siExecTest(value);
@@ -578,7 +580,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		if (integrationRatios != null)
 			jsvp.getPanelData().setIntegrationRatios(integrationRatios);
 		si.siSetIntegrationRatios(null); // one time only
-		jsvp.doRepaint();
+		jsvp.doRepaint(true);
 	}
 
 	@SuppressWarnings("incomplete-switch")
@@ -654,7 +656,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		JSVPanel jsvp = selectedPanel;
 		if (jsvp != null) {
 			jsvp.getPanelData().addHighlight(null, x1, x2, null, r, g, b, a);
-			jsvp.doRepaint();
+			jsvp.doRepaint(false);
 		}
 	}
 
@@ -740,7 +742,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		// System.out.println(Thread.currentThread() +
 		// "syncscript --selectSpectrum5 " + pi + " " + type + " " + model + " s=" +
 		// jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
-		jsvp.doRepaint();
+		jsvp.doRepaint(true);
 		// round trip this so that Jmol highlights all equivalent atoms
 		// and appropriately starts or clears vibration
 		if (jmolSource == null || (pi != null && pi.getAtoms() != null))
@@ -844,7 +846,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		// System.out.println(Thread.currentThread() +
 		// "processPeakEvent --selectSpectrum " + pi);
 		if (pi.isClearAll()) // was not in app version??
-			selectedPanel.doRepaint();
+			selectedPanel.doRepaint(false);
 		else
 			pd().selectSpectrum(pi.getFilePath(), pi.getType(), pi.getModel(), true);
 		si.siCheckCallbacks(pi.getTitle());
@@ -1281,7 +1283,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 
 		int max = 0;
 		for (int i = 0; i < panelNodes.size(); i++) {
-			float f = Parser.parseFloat(panelNodes.get(i).id);
+			float f = ParserJS.parseFloat(panelNodes.get(i).id);
 			if (f >= max + 1)
 				max = (int) Math.floor(f);
 		}
@@ -1313,7 +1315,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 				return false;
 			setNode(node, false);
 		} else {
-			int n = Parser.parseInt(value);
+			int n = ParserJS.parseInt(value);
 			if (n <= 0) {
 				checkOverlay();
 				return false;
@@ -1357,7 +1359,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		JSVPanel jsvp = selectedPanel;
 		if (jsvp != null) {
 			jsvp.getPanelData().removeAllHighlights();
-			jsvp.doRepaint();
+			jsvp.doRepaint(false);
 		}
 	}
 
@@ -1365,7 +1367,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		JSVPanel jsvp = selectedPanel;
 		if (jsvp != null) {
 			jsvp.getPanelData().removeHighlight(x1, x2);
-			jsvp.doRepaint();
+			jsvp.doRepaint(false);
 		}
 	}
 
@@ -1420,7 +1422,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 			String soffset = selectedPanel.getInput(
 					"Enter a vertical offset in percent for stacked plots", "Overlay", ""
 							+ recentStackPercent);
-			float f = Parser.parseFloat(soffset);
+			float f = ParserJS.parseFloat(soffset);
 			if (Float.isNaN(f))
 				return;
 			offset = (int) f;

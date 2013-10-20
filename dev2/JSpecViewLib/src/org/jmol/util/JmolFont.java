@@ -1,7 +1,7 @@
 /* $RCSfile$
  * $Author: hansonr $
- * $Date: 2013-05-23 18:45:04 -0500 (Thu, 23 May 2013) $
- * $Revision: 18245 $
+ * $Date: 2013-10-17 12:05:38 -0500 (Thu, 17 Oct 2013) $
+ * $Revision: 18805 $
  *
  * Copyright (C) 2003-2005  Miguel, Jmol Development, www.jmol.org
  *
@@ -50,7 +50,7 @@ final public class JmolFont {
   public final float fontSize;
   public final Object font;
   private final Object fontMetrics;
-  private ApiPlatform apiPlatform; 
+  private ApiPlatform apiPlatform;
   private int ascent;
   private int descent;
   private boolean isBold;

@@ -61,9 +61,9 @@ public class Event {
   public static final int VK_SPACE   = 32;//KeyEvent.VK_SPACE;
   public static final int VK_DOWN    = 40;//KeyEvent.VK_DOWN;
   public static final int VK_UP      = 38;//KeyEvent.VK_UP;
-	public static final int VK_ESCAPE  = 27;//KeyEvent.VK_ESCAPE;
-	public static final int VK_DELETE  = 127;//KeyEvent.VK_DELETE;
-	public static final int VK_BACK_SPACE = 8;//KeyEvent.VK_BACK_SPACE;
+  public static final int VK_ESCAPE  = 27;//KeyEvent.VK_ESCAPE;
+  public static final int VK_DELETE  = 127;//KeyEvent.VK_DELETE;
+  public static final int VK_BACK_SPACE = 8;//KeyEvent.VK_BACK_SPACE;
   public static final int VK_PAGE_DOWN = 34;//KeyEvent.VK_PAGE_DOWN;
   public static final int VK_PAGE_UP   = 33;//KeyEvent.VK_PAGE_UP;
 

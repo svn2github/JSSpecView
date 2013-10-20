@@ -2,6 +2,6 @@ package org.jmol.api;
 
 public interface PlatformViewer {
 
-	// for JSpecView use of apiPlatform
+// an idea for more generic use of apiPlatform
   
 }

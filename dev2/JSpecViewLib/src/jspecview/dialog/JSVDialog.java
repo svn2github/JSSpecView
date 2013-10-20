@@ -2,8 +2,9 @@ package jspecview.dialog;
 
 import java.util.Map;
 
-import org.jmol.util.Parser;
-import org.jmol.util.Txt;
+import javajs.util.DecimalFormat;
+
+import javajs.util.ParserJS;
 
 import jspecview.api.AnnotationData;
 import jspecview.api.JSVPanel;
@@ -172,7 +173,7 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 			return true;
 		}
 		if (jsvp != null)
-			jsvp.doRepaint();
+			jsvp.doRepaint(true);
 		return true;
 	}
 
@@ -417,7 +418,7 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 			}
 			loadData();
 			checkEnables();
-			jsvp.doRepaint();
+			jsvp.doRepaint(true);
 		} catch (Exception e) {
 			// ignore
 		}
@@ -431,7 +432,7 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 			xyData.setState(isON);
 		saveDialogPosition(getPosXY());
 		dispose();
-		jsvp.doRepaint();
+		jsvp.doRepaint(true);
 	}
 
 	
@@ -478,7 +479,7 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 					* (1 - f)
 					: c.getYVal());
 		}
-		String sy = Txt.formatDecimalDbl(y, y < 1000 ? 2 : -2); // "#0.00" :
+		String sy = DecimalFormat.formatDecimalDbl(y, y < 1000 ? 2 : -2); // "#0.00" :
 		// "0.00E0"
 		return " " + sy;
 	}
@@ -523,11 +524,12 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 		isON = isShow;
 		if (isShow)
 			eventApply();
-		jsvp.doRepaint();
+		jsvp.doRepaint(true);
 		checkEnables();
 	}
 
 	private void clear() {
+		setState(true);
 		if (xyData != null) {
 			xyData.clear();
 			applyFromFields();
@@ -569,11 +571,11 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 			switch (type) {
 			case Integration:
 				for (int i = 0; i < xyData.size(); i++)
-					if (Txt.formatDecimalDbl(xyData.get(i).getXVal(), 2).equals(value)) {
+					if (DecimalFormat.formatDecimalDbl(xyData.get(i).getXVal(), 2).equals(value)) {
 						iSelected = i;
 						jsvp.getPanelData().setXPointers(spec, xyData.get(i).getXVal(),
 								spec, xyData.get(i).getXVal2());
-						jsvp.doRepaint();
+						jsvp.doRepaint(true);
 						break;
 					}
 				checkEnables();
@@ -599,7 +601,7 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 				} catch (Exception e) {
 					jsvp.getPanelData().findX(spec, 1E100);
 				}
-				jsvp.doRepaint();
+				jsvp.doRepaint(false);
 				break;
 			case OverlayLegend:
 				jsvp.getPanelData().setSpectrum(iRow, false);
@@ -700,10 +702,10 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 			iColSelected = iRowSelected = -1;
 			return;
 		}
-		int index = Parser.parseInt(getField(url, "index"));
+		int index = ParserJS.parseInt(getField(url, "index"));
 		switch ("ROW COL ROWCOL".indexOf(getField(url, "selector"))) {
 		case 8:
-			iColSelected = Parser.parseInt(getField(url, "index2"));
+			iColSelected = ParserJS.parseInt(getField(url, "index2"));
 			//$FALL-THROUGH$
 		case 0:
 			iRowSelected = index;
