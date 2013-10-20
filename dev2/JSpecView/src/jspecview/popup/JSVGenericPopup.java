@@ -35,7 +35,6 @@ import jspecview.common.PanelNode;
 import jspecview.common.JSVersion;
 import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
-import jspecview.common.ScriptToken;
 import jspecview.common.Annotation.AType;
 
 

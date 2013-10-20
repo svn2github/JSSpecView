@@ -673,7 +673,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 				includeMeasures);
 		if (autoIntegrate)
 			jsvp.getPanelData().integrateAll(viewer.parameters);
-		jsvp.doRepaint();
+		jsvp.doRepaint(true);
 	}
 
 

@@ -62,6 +62,16 @@
 -->
 
 	<target name="build">
+        <echo message="copying files from ${jmol.path}/org/jmol/api,io,util"/>
+	    <delete quiet="true">
+	      <fileset dir="src/org/jmol" includes="**/*.java"/>
+	    </delete>
+        <copy overwrite="true" todir="src/org/jmol" >
+          <fileset dir="${jmol.path}/src/org/jmol">
+            <include name="api/JmolSyncInterface.java" />
+            <include name="api/JSVInterface.java" />
+          </fileset>
+        </copy>
           <mkdir dir="${bin.dir}"/>
           <javac srcdir="${src.dir}" destdir="${bin.dir}" includeantruntime="false" classpathref="jspecview.classpath"/>
         <copy todir="${bin.dir}/jspecview/application/icons">

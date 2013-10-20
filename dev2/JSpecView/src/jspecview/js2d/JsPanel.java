@@ -198,8 +198,9 @@ public class JsPanel implements JSVPanel {
 	
   /*----------------------- JSVPanel PAINTING METHODS ---------------------*/
 
-  public void doRepaint() {
-  	// to the system
+  public void doRepaint(boolean andTaintAll) {
+  	pd.taintedAll |= andTaintAll;
+  	// from dialogs, to the system
   	if (!pd.isPrinting)
       viewer.requestRepaint();
   }

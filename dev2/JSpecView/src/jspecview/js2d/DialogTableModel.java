@@ -53,7 +53,7 @@ class DialogTableModel implements AbstractTableModel {
 	}
 
 	public void toHTML(SB sb, String id, BS selectedRows) {
-		if (data == null || data[0].length == 0)
+		if (data == null || data[0] == null || data[0].length == 0)
 			return;
 		int nrows = data.length;
 		int ncols = data[0].length;
@@ -81,6 +81,7 @@ class DialogTableModel implements AbstractTableModel {
 	 * @param iRow
 	 * @param iCol
 	 * @param o
+	 * @param isSelected 
 	 * @return CSS style attribute
 	 */
 	private String getCellStyle(String id, int iRow, int iCol, Object o, boolean isSelected) {

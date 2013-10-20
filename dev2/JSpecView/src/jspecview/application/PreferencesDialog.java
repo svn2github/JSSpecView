@@ -34,7 +34,6 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
@@ -668,11 +667,11 @@ public class PreferencesDialog extends JDialog {
       previewPanel.getPanelData().setBoolean(ScriptToken.ENABLEZOOM, false);
       previewPanel.getPanelData().setBoolean(ScriptToken.GRIDON, true);
       previewPanel.getPanelData().setBoolean(ScriptToken.COORDINATESON, true);
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-      return;
     } catch (JSpecViewException ex) {
       ex.printStackTrace();
+    } catch (Exception ioe) {
+      ioe.printStackTrace();
+      return;
     }
 
     if (previewPanel != null)

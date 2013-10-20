@@ -194,7 +194,7 @@ public class Mouse implements JmolMouseInterface {
     if (isMouseDown)
       pd.mouseAction(Event.DRAGGED, time, x, y, 0, applyLeftMouse(modifiers));
     else
-      pd.mouseAction(Event.MOVED, time, x, y, 0, modifiers);
+      pd.mouseAction(Event.MOVED, time, x, y, 0, modifiers & ~Event.BUTTON_MASK);
   }
 
   private void wheeled(long time, int rotation, int modifiers) {

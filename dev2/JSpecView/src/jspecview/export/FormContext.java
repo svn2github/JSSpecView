@@ -26,14 +26,13 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import javajs.util.List;
+import javajs.util.ParserJS;
 import javajs.util.SB;
 
 import org.jmol.util.Logger;
-import org.jmol.util.Parser;
 import org.jmol.util.Txt;
 
 import jspecview.common.Coordinate;
-import jspecview.util.JSVTxt;
 
 /**
  * A simple Velocity-like template form filler
@@ -170,7 +169,12 @@ class FormContext {
     String[] lines = template.split("\n");
     String token = "";
     for (int i = 0; i < lines.length && strError == null; i++) {
-      String line = JSVTxt.rtrim(lines[i], " \n");
+      String line = lines[i];
+  	  int m = line.length();
+  	  // right-trim line of whitespace
+  	  char ch;
+  	  while (--m >= 0 && ((ch = line.charAt(m)) == ' ' || ch == '\t')) {}
+  	  line = line.substring(0, m + 1);
       if (line.length() == 0)
         continue;
       int firstChar = -1;
@@ -277,7 +281,7 @@ class FormContext {
     String data = vt.data;
     data = data.replace('(', ' ');
     data = data.replace(')', ' ');
-    String[] tokens = Parser.getTokens(data);
+    String[] tokens = ParserJS.getTokens(data);
     if (tokens.length != 4) {
       return;
     }
@@ -328,7 +332,7 @@ class FormContext {
     data = Txt.simpleReplace(data, "<  =", "<=");
     data = Txt.simpleReplace(data, ">  =", ">=");
     data = Txt.simpleReplace(data, "!  =", "!=");
-    String[] tokens = Parser.getTokens(data);
+    String[] tokens = ParserJS.getTokens(data);
     String key = tokens[0].substring(1);
     boolean isNot = false;
     boolean x = false;

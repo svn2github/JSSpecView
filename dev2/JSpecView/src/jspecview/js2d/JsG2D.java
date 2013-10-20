@@ -168,11 +168,20 @@ public class JsG2D implements JSVGraphics {
 		}
 	}
 
+	boolean isShifted;// private, but only JavaScript
+	
 	public void fillBackground(Object g, GenericColor bgcolor) {
 		if (bgcolor == null) {
 			/**
+			 *
+			 *  reduce antialiasing, thank you, http://www.rgraph.net/docs/howto-get-crisp-lines-with-no-antialias.html
+			 *  
 			 * @j2sNative
 			 * 
+			 * if (!this.isShifted) {
+			 *   g.translate(-0.5, -0.5);
+			 *   this.isShifted = true;
+			 * }  
 			 * g.clearRect(0,0, this.windowWidth, this.windowHeight);
 			 * return;
 			 * 
@@ -287,17 +296,13 @@ public class JsG2D implements JSVGraphics {
 	
 	public void doStroke(Object g, boolean isBegin) {
 		/**
-		 * 
-		 *  reduce antialiasing, thank you, http://www.rgraph.net/docs/howto-get-crisp-lines-with-no-antialias.html
 		 *  
 		 * @j2sNative
 		 * 
 		 * this.inPath = isBegin;
 		 * if (isBegin) {
-		 *   g.translate(0.5, 0.5);
 		 * 	 g.beginPath();
 		 * } else {
-		 *   g.translate(-0.5, -0.5);
 		 *   g.stroke();
 		 * }
 		 * 
