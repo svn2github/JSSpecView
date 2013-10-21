@@ -176,6 +176,8 @@ Moved and renamed methods from jspecview/util to org/jmol/util (applets can shar
 * Replaced all references to StringBuilder and StringBuffer with JSVSB (later refactored as javajs.util.SB)
 
 ====TODO=========
+Transmission to Absorbance conversion
+
 -HTML5? for Block files of same data type that can be overlaid
 -HTML5 views... menu item not implemented
 -HTML5 2D NMR not implemented 
