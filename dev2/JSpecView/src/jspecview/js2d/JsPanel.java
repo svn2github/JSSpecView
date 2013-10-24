@@ -231,7 +231,8 @@ public class JsPanel implements JSVPanel {
      * @j2sNative
      * 
      * 
-     * context2 = (context.canvas.topLayer || context.canvas).getContext("2d")
+     * context2 = context.canvas.topLayer.getContext("2d");
+     * 
      */
     {}
     

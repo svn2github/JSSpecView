@@ -46,7 +46,6 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
-import java.awt.image.WritableRaster;
 
 import javajs.api.GenericColor;
 
@@ -99,16 +98,15 @@ public class AwtG2D implements JSVGraphics {
 		((Graphics) g).setFont((Font) font.font);
 	}
 
-	public void draw2DImage(Object g, Object image2d, int destX, int destY,
-			int destWidth, int destHeight, int srcX0, int srcY0, int srcX1, int srcY1) {		
-		((Graphics) g).drawImage((Image) image2d, destX, destY, destWidth, destHeight, srcX0, srcY0, srcX1, srcY1, null);
+	public void draw2DImage(Object g, Object image2d, int destX0, int destY0,
+			int destX1, int destY1, int srcX0, int srcY0, int srcX1, int srcY1) {		
+		((Graphics) g).drawImage((Image) image2d, destX0, destY0, destX1, destY1, srcX0, srcY0, srcX1, srcY1, null);
 	}
 
-	public Object newImage(int width, int height, int[] buffer) {
+	public Object newImage(Object gMain, Object image, int width, int height, int[] buffer) {
 		BufferedImage image2D = new BufferedImage(width, height,
 				BufferedImage.TYPE_BYTE_GRAY);
-		WritableRaster raster = image2D.getRaster();
-		raster.setSamples(0, 0, width, height, 0,
+		image2D.getRaster().setSamples(0, 0, width, height, 0,
 				buffer);
 		return image2D;
 	}

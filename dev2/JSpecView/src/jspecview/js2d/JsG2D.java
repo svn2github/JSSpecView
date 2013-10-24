@@ -59,7 +59,6 @@ public class JsG2D implements JSVGraphics {
   private static final long serialVersionUID = 1L;
   
 	private int windowWidth;
-
 	private int windowHeight;
 
 	private JmolFont currentFont;
@@ -79,10 +78,102 @@ public class JsG2D implements JSVGraphics {
     return Color.get1(rgb);
   }
 
-	public void draw2DImage(Object g, Object image2d, int destX, int destY,
-			int destWidth, int destHeight, int srcX0, int srcY0, int srcX1, int srcY1) {
-		// TODO Auto-generated method stub
+	public Object newImage(Object context, Object image, int width, int height, int[] grayBuffer) {
 		
+		/**
+		 * @j2sNative
+		 * 
+		 *		var id, canvas;
+		 *		if (image == null) {
+		 *			id = ("" + Math.random()).substring(3);
+		 *			canvas = document.createElement("canvas");
+		 *			canvas.id = id;
+		 *			canvas.style.width = width + "px";
+		 *			canvas.style.height = height + "px";
+		 *			canvas.width = width;
+		 *			canvas.height = height;
+		 *			var appId = context.canvas.applet._id;
+		 *			var layer = document.getElementById(appId + "_imagelayer");
+		 *			image = new Image();
+		 *			image.canvas = canvas;
+		 *			image.appId = appId;
+		 *			image.id = appId + "_image";
+		 *			image.layer = layer;
+		 *			image.w = width;
+		 *			image.h = height;
+		 *			image.onload = function(e) {
+		 *		 	 try {
+		 *		 	   URL.revokeObjectURL(image.src);
+		 *			  } catch (e) {}
+		 *			};
+		 *			var div = document.createElement("div");
+		 *			image.div = div;
+		 *			div.style.position="relative";
+		 *			layer.appendChild(div);
+		 *			div.appendChild(image);
+		 *		} else {
+		 *			canvas = image.canvas;
+		 *		}
+		 *		var c = canvas.getContext("2d");
+		 *		var imageData = c.getImageData(0, 0, width, height);
+		 *		var buf = imageData.data;
+		 *		var ng = grayBuffer.length;
+		 *		var pt = 0;
+		 *		for (var i = 0; i < ng; i++) {
+		 *			buf[pt++] = buf[pt++] = buf[pt++] = grayBuffer[i];
+		 *			buf[pt++] = 0xFF;
+		 *		}
+		 *		c.putImageData(imageData, 0, 0);
+		 *		canvas.toBlob(function(blob){image.src = URL.createObjectURL(blob)});
+		 */
+		{
+		}
+		return image;
+	}
+
+	public void draw2DImage(Object g, Object image, int destX0, int destY0,
+			int destX1, int destY1, int srcX0, int srcY0, int srcX1, int srcY1) {
+
+		float iw, ih;
+		/**
+		 * @j2sNative
+		 * 
+		 * iw = image.w;
+		 * ih = image.h;
+		 * 
+		 */ 
+		{
+			ih = iw = 0;
+		}
+
+		float dw = (destX1 - destX0 + 1);
+		float dh  = (destY1 - destY0 + 1);
+		float sw = (srcX1 - srcX0 + 1);
+		float sh = (srcY1 - srcY0 + 1);
+		float x = -srcX0 * dw / sw;
+		float w = iw * dw / sw;
+		float y = -srcY0* dh / sh;
+		float h = ih * dh / sh;
+
+		/**
+		 * @j2sNative
+		 * 
+		 * image.width = w;
+		 * image.height = h;
+		 * var div = image.div;
+		 * var layer = image.layer;
+		 * layer.style.left = destX0 + "px";
+		 * layer.style.top = destY0 + "px";
+		 * layer.style.width = dw + "px";
+		 * layer.style.height = dh+ "px";
+		 * div.style.left= x + "px";
+		 * div.style.top = y + "px";
+		 * div.style.width = w + "px";
+		 * div.style.height = h + "px";
+		 */
+		{
+			System.out.println(x + y + h + w);
+		}
 	}
 
 	public void drawLine(Object g, int x0, int y0, int x1, int y1) {
@@ -227,11 +318,6 @@ public class JsG2D implements JSVGraphics {
 
 	public int getStringWidth(Object g, String s) {
 		return currentFont.stringWidth(s);
-	}
-
-	public Object newImage(int width, int height, int[] buffer) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	public void rotatePlot(Object g, int angle, int x, int y) {

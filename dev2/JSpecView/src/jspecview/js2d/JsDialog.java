@@ -74,6 +74,25 @@ public class JsDialog extends JDialog implements PlatformDialog {
 		if (options == null)
 			options = new Hashtable<String, Object>();
 		getContentPane().setBackground(Color.get3(230, 230, 230));
+		setFront(); 
+	}
+	
+	public void onFocus() {
+		 // TODO: implement onFocus() in Jmol.Dialog			
+		setFront();
+		}
+		
+	private void setFront() {
+		/**
+		 * @j2sNative
+		 * 
+		 * if (this.zIndex != Jmol._z.dialog)
+		 *   this.zIndex = ++Jmol._z.dialog;
+		 * if (this.container)
+		 *   this.container.style.zIndex = this.zIndex;
+		 * 
+		 */
+		{}
 	}
 
 	public Object addButton(String name, String text) {
