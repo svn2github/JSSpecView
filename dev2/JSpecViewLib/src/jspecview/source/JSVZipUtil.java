@@ -26,29 +26,38 @@
 package jspecview.source;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import javajs.util.ArrayUtil;
 import javajs.util.List;
 import javajs.util.SB;
+import jspecview.api.JSVZipInterface;
+import jspecview.api.JSVZipReader;
 
+import org.jmol.api.Interface;
 import org.jmol.util.Logger;
 
-public class JSVZipUtil {
+public class JSVZipUtil implements JSVZipInterface {
 
-  public static boolean isZipFile(InputStream is) throws IOException {
-    byte[] abMagic = new byte[4];
-    is.mark(5);
-    int countRead = is.read(abMagic, 0, 4);
-    is.reset();
-    return (countRead == 4 && abMagic[0] == (byte) 0x50 && abMagic[1] == (byte) 0x4B
-        && abMagic[2] == (byte) 0x03 && abMagic[3] == (byte) 0x04);
-  }
+	public JSVZipUtil() {
+		// for reflection
+	}
+	public InputStream newGZIPInputStream(InputStream bis)
+			throws IOException {
+		return new GZIPInputStream(bis, 512);
+	}
+
+	public BufferedReader newJSVZipFileSequentialReader(InputStream in,
+			String[] subFileList, String startCode) {
+		return ((JSVZipReader) Interface.getInterface("jspecview.source.JSVZipFileSequentialReader")).set(in, subFileList, startCode);
+	}
 
   public static boolean isZipFile(byte[] bytes) throws Exception {
     return (bytes.length > 4 

@@ -24,7 +24,6 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -34,19 +33,17 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.zip.GZIPInputStream;
 
 import javajs.util.SB;
 
+import org.jmol.api.Interface;
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
 
 import org.jmol.util.Txt;
 
-import jspecview.source.JSVZipFileSequentialReader;
-import jspecview.source.JSVZipUtil;
+import jspecview.api.JSVZipInterface;
 import jspecview.util.JSVEscape;
-import jspecview.util.JSVTxt;
 
 public class JSVFileManager {
 
@@ -172,41 +169,51 @@ public class JSVFileManager {
   }
 
 
-  private static BufferedReader getUnzippedBufferedReaderFromName(String name, URL appletDocumentBase, String startCode)
-      throws IOException {
-    String[] subFileList = null;
-    if (name.indexOf("|") >= 0) {
-      subFileList = Txt.split(name, "|");
-      if (subFileList != null && subFileList.length > 0)
-        name = subFileList[0];
-    }
+	private static BufferedReader getUnzippedBufferedReaderFromName(String name,
+			URL appletDocumentBase, String startCode) throws IOException {
+		String[] subFileList = null;
+		if (name.indexOf("|") >= 0) {
+			subFileList = Txt.split(name, "|");
+			if (subFileList != null && subFileList.length > 0)
+				name = subFileList[0];
+		}
 		if (name.startsWith(SIMULATION_PROTOCOL))
-			return getBufferedReaderForString(getSimulationJCampDX(name.substring(SIMULATION_PROTOCOL.length())));
-		
+			return getBufferedReaderForString(getSimulationJCampDX(name
+					.substring(SIMULATION_PROTOCOL.length())));
+
 		if (viewer.isApplet) {
-      Object ret = viewer.apiPlatform.getBufferedURLInputStream(new URL((URL) null, name, null), null, null);
-      if (ret instanceof SB || ret instanceof String) {
-      	return new BufferedReader(new StringReader(ret.toString()));
-      } else if (JSVEscape.isAB(ret)) {
-        return new BufferedReader(new StringReader(new String((byte[]) ret)));
-      } else {
-      	return new BufferedReader(new InputStreamReader((InputStream) ret, "UTF-8"));
-      }
+			Object ret = viewer.apiPlatform.getBufferedURLInputStream(new URL(
+					(URL) null, name, null), null, null);
+			if (ret instanceof SB || ret instanceof String) {
+				return new BufferedReader(new StringReader(ret.toString()));
+			} else if (JSVEscape.isAB(ret)) {
+				return new BufferedReader(new StringReader(new String((byte[]) ret)));
+			} else {
+				return new BufferedReader(new InputStreamReader((InputStream) ret,
+						"UTF-8"));
+			}
 
 		}
-    InputStream in = getInputStream(name, true, appletDocumentBase);
-    BufferedInputStream bis = new BufferedInputStream(in);
-    if (isGzip(bis)) {
-      return new BufferedReader(new InputStreamReader(new GZIPInputStream(bis, 512), "UTF-8"));
-    } else if (JSVZipUtil.isZipFile(bis)) {
-      return new JSVZipFileSequentialReader(bis, subFileList, startCode);
-      //danger -- converting bytes to String here.
-      //we lose 128-156 or so.
-      //String s = (String) ZipUtil.getZipFileContents(bis, subFileList, 1);
-      //bis.close();
-      //return new BufferedReader(new StringReader(s));
-    }
-    return new BufferedReader(new InputStreamReader(bis, "UTF-8"));
+		InputStream in = getInputStream(name, true, appletDocumentBase);
+		BufferedInputStream bis = new BufferedInputStream(in);
+		in = bis;
+		if (isZipFile(bis))
+			return ((JSVZipInterface) Interface
+					.getInterface("jspecview.util.JSVZipUtil"))
+					.newJSVZipFileSequentialReader(in, subFileList, startCode);
+		if (isGzip(bis))
+			in = ((JSVZipInterface) Interface
+					.getInterface("jspecview.util.JSVZipUtil")).newGZIPInputStream(in);
+		return new BufferedReader(new InputStreamReader(in, "UTF-8"));
+	}
+
+  public static boolean isZipFile(InputStream is) throws IOException {
+    byte[] abMagic = new byte[4];
+    is.mark(5);
+    int countRead = is.read(abMagic, 0, 4);
+    is.reset();
+    return (countRead == 4 && abMagic[0] == (byte) 0x50 && abMagic[1] == (byte) 0x4B
+        && abMagic[2] == (byte) 0x03 && abMagic[3] == (byte) 0x04);
   }
 
   private static boolean isGzip(InputStream is) throws IOException {
@@ -359,22 +366,6 @@ public class JSVFileManager {
       return (new File(file)).getName();
     } catch (MalformedURLException e) {
       return null;
-    }
-  }
-
-  public static void fileCopy(String name, File file) {
-    try {
-      BufferedReader br = JSVFileManager.getBufferedReaderFromName(name, null,
-          null);
-      FileWriter writer = new FileWriter(file.getAbsolutePath());
-      String line = null;
-      while ((line = br.readLine()) != null) {
-        writer.write(line);
-        writer.write(JSVTxt.newLine);
-      }
-      writer.close();
-    } catch (Exception e) {
-    	Logger.error(e.getMessage());
     }
   }
 

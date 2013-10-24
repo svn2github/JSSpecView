@@ -20,14 +20,15 @@
 
 package jspecview.source;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import javajs.util.SB;
+import jspecview.api.JSVZipReader;
 
 import org.jmol.util.Logger;
 
@@ -39,7 +40,7 @@ import org.jmol.util.Logger;
  * @author Bob Hanson hansonr@stolaf.edu
  *
  */
-public class JSVZipFileSequentialReader extends BufferedReader {
+public class JSVZipFileSequentialReader extends BufferedReader implements JSVZipReader {
 
   private String[] subFileList;
   private ZipInputStream zis;
@@ -49,12 +50,16 @@ public class JSVZipFileSequentialReader extends BufferedReader {
   private String startCode;
   private int lineCount;
   
-  public JSVZipFileSequentialReader(BufferedInputStream bis, String[] subFileList, String startCode) {
+  public JSVZipFileSequentialReader()  {
     super(new StringReader(""));
+  }
+  
+  public JSVZipFileSequentialReader set(InputStream bis, String[] subFileList, String startCode) {
     this.subFileList = subFileList;
     zis = new ZipInputStream(bis);
     this.startCode = startCode;
     nextEntry();
+    return this;
   }
 
   @Override
