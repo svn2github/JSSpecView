@@ -1121,7 +1121,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 			 *            alert(e + "\n" + Clazz.getStackTrace())
 			 */
 			{
-				Logger.error(e.getMessage());
+				e.printStackTrace();
 				si.writeStatus(e.getMessage());
 			}
 			si.setCursor(ApiPlatform.CURSOR_DEFAULT);

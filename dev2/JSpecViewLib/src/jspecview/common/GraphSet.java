@@ -978,7 +978,7 @@ public class GraphSet implements XYScaleConverter {
 					// pd.repaint();
 				} else if (pw == pin2Dy0 || pw == pin2Dy1) {
 					int val2 = (pw == pin2Dy0 ? pin2Dy1.yPixel0 : pin2Dy0.yPixel0);
-					imageView.setView0(pin2Dx0.xPixel0, imageView.toPixelY((int) val),
+					imageView.setView0(pin2Dx0.xPixel0, imageView.subIndexToPixelY((int) val),
 							pin2Dx1.xPixel0, val2);
 					// pd.repaint();
 				} else {
@@ -1202,7 +1202,7 @@ public class GraphSet implements XYScaleConverter {
 		pin2Dy1.setY(y, imageView.toPixelY0(y));
 		pin2Dy01.setY(0, (pin2Dy0.yPixel0 + pin2Dy1.yPixel0) / 2);
 
-		cur2Dy.yPixel0 = cur2Dy.yPixel1 = imageView.toPixelY(subIndex);
+		cur2Dy.yPixel0 = cur2Dy.yPixel1 = imageView.subIndexToPixelY(subIndex);
 
 		pin2Dx01
 				.setEnabled(Math.min(pin2Dx0.xPixel0, pin2Dx1.xPixel0) != imageView.xPixel0
@@ -1370,13 +1370,14 @@ public class GraphSet implements XYScaleConverter {
 
 	private void drawAll(Object gMain, Object gTop, int iSplit,
 			boolean needNewPins, boolean doAll) {
+		this.gMain = gMain;
 		int subIndex = getSpectrumAt(0).getSubIndex();
 		is2DSpectrum = (!getSpectrumAt(0).is1D()
 				&& (isLinked || pd.getBoolean(ScriptToken.DISPLAY2D)) && (imageView != null || get2DImage()));
 		if (imageView != null && doAll) {
 			if (is2DSpectrum)
 				setPositionForFrame(iSplit);
-			draw2DImage(gMain);
+			draw2DImage();
 		}
 		int iSelected = (stackSelected || !showAllStacked ? iSpectrumSelected : -1);
 		boolean doYScale = (!showAllStacked || nSpectra == 1 || iSelected >= 0);
@@ -2250,7 +2251,7 @@ public class GraphSet implements XYScaleConverter {
 			XYScaleConverter c = (note.is2D ? imageView : this);
 			int x = c.toPixelX(note.getXVal());
 			int y = (note.isPixels() ? (int) (yPixel0 + 10 * pd.scalingFactor - note.getYVal())
-					: note.is2D ? imageView.toPixelY((int) note.getYVal())
+					: note.is2D ? imageView.subIndexToPixelY((int) note.getYVal())
 							: toPixelY(note.getYVal()));
 			g2d.drawString(g, note.text, x + note.offsetX * pd.scalingFactor, y - note.offsetY * pd.scalingFactor);
 		}
@@ -3021,7 +3022,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 			}
 			imageView.setView0(pin2Dx0.xPixel0, pin2Dy0.yPixel0, pin2Dx1.xPixel1,
 					pin2Dy1.yPixel1);
-			update2dImage(false);
+			//update2dImage(false);
 			return;
 		}
 		return;
@@ -4016,9 +4017,18 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
   private Object image2D;
   private GenericColor[] plotColors;
 	private JSVGraphics g2d;
+	private Object gMain;
 
   
   private void disposeImage() {
+    /**
+     * @j2sNative
+     *
+     * if (this.image2D != null)
+     *   this.image2D.parentNode.removeChild(this.image2D);
+     * 
+     */
+    {}
     image2D = null;
     jsvp = null;
     pd = null;
@@ -4085,9 +4095,9 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
   /////////////// 2D image /////////////////
 
   
-	private void draw2DImage(Object og) {
+	private void draw2DImage() {
     if (imageView != null)
-    	g2d.draw2DImage(og, image2D, imageView.xPixel0, imageView.yPixel0, // destination 
+    	g2d.draw2DImage(gMain, image2D, imageView.xPixel0, imageView.yPixel0, // destination 
           imageView.xPixel0 + imageView.xPixels - 1, // destination 
           imageView.yPixel0 + imageView.yPixels - 1, // destination 
           imageView.xView1, imageView.yView1, imageView.xView2, imageView.yView2); // source
@@ -4118,7 +4128,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 			buffer = imageView.adjustView(spec, viewData);
 			imageView.resetView();
 		}
-		image2D = g2d.newImage(imageView.imageWidth, imageView.imageHeight, buffer);
+		image2D = g2d.newImage(gMain, image2D, imageView.imageWidth, imageView.imageHeight, buffer);
 		setImageWindow();
 		return true;
 	}

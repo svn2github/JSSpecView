@@ -13,7 +13,7 @@ public interface JSVGraphics {
 	
 	GenericColor getColor4(int r, int g, int b, int a);
 
-	Object newImage(int width, int height, int[] buffer);
+	Object newImage(Object g, Object image, int width, int height, int[] buffer);
 
 
 	int getFontHeight(Object g);
@@ -25,7 +25,7 @@ public interface JSVGraphics {
 
 	void doStroke(Object g, boolean isBegin);
 
-  void draw2DImage(Object g, Object image2D, int destX, int destY, int destWidth, int destHeight, int srcX0, int srcY0, int srcX1, int srcY1);
+  void draw2DImage(Object g, Object image2D, int destX0, int destY0, int destX1, int destY1, int srcX0, int srcY0, int srcX1, int srcY1);
 
 	void drawLine(Object g, int x0, int y0, int x1, int y1);
 

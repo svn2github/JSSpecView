@@ -48,7 +48,7 @@ public class JDXSpectrum extends JDXDataObject {
     	case 'A':
     		return TO_ABS;
     	case 'T':
-    		return TO_TRANS;
+    		return (value.equalsIgnoreCase("TOGGLE") ? TOGGLE : TO_TRANS);
     	case 'N':
     		return NO_CONVERT;
     	default:

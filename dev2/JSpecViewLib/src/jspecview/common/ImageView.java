@@ -155,12 +155,12 @@ public class ImageView implements XYScaleConverter {
 	public int toPixelY0(double ysub) {
     return yPixel1 - (int) (ysub / (imageHeight - 1) * (yPixels - 1));
   }
+//
+//	public int toPixelX(int imageX) {
+//    return xPixel0 + (int) ((xPixels - 1) *(1 - 1.0 *  imageX / (imageWidth - 1))); 
+//  }
 
-	public int toPixelX(int imageX) {
-    return xPixel0 + (int) ((xPixels - 1) *(1 - 1.0 *  imageX / (imageWidth - 1))); 
-  }
-
-	public int toPixelY(int subIndex) {
+	public int subIndexToPixelY(int subIndex) {
     // yView2 > yView1, but these are imageHeight - 1 - subIndex
     
     double f = 1.0 * (imageHeight - 1 - subIndex - yView1) / (yView2 - yView1);

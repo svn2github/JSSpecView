@@ -622,6 +622,7 @@ public class PanelData implements EventManager {
 	}
 
 	public void setSpectrum(JDXSpectrum spec) {
+		taintedAll = true;
 		JDXSpectrum spec0 = currentGraphSet.getSpectrum();
 		currentGraphSet.setSpectrumJDX(spec);
 		for (int i = 0; i < spectra.size(); i++)

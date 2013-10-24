@@ -71,9 +71,9 @@ public class IntegrationDialog extends JSVDialog {
 	public boolean callback(String id, String msg) {
 		double val;
 		try {
-			if (id.equals("btnAuto") || xyData == null || xyData.size() == 0) {
+			if (!id.equals("windowClosing") && (id.equals("btnAuto") || xyData == null || xyData.size() == 0)) {
 				viewer.runScript("integrate auto");
-			} else if (id.equals("BaselineOffset")) {
+				eventApply();
 			} else if (id.equals("btnDelete")) {
 				deleteIntegral();
 			} else if (id.equals("btnNormalize")) {

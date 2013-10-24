@@ -30,6 +30,8 @@ public abstract class JDXDataObject extends JDXHeader {
   private String filePathForwardSlash;
   
   public void setFilePath(String filePath) {
+  	if (filePath == null)
+  		return;
     this.filePath = filePath.trim();
     filePathForwardSlash = this.filePath.replace('\\','/');
   }
