@@ -3,6 +3,7 @@ package jspecview.js2d;
 import java.net.URL;
 
 import javajs.util.P3;
+import javajs.util.AjaxURLStreamHandlerFactory;
 
 import jspecview.api.JSVPanel;
 

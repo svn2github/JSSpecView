@@ -1,11 +1,10 @@
-package jspecview.js2d;
+package javajs.util;
 
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
-import javajs.util.SB;
 
 
 /**

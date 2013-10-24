@@ -117,7 +117,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 
 	private String integrationRatios;
 
-	private String appletReadyCallbackFunctionName;
+	public String appletReadyCallbackFunctionName;
 
 	private String coordCallbackFunctionName;
 	private String loadFileCallbackFunctionName;
@@ -362,10 +362,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	private void init() {
 
 		initParams(appletFrame.getParameter("script"));
-		if (appletReadyCallbackFunctionName != null && viewer.fullName != null)
-			appletFrame.callToJavaScript(appletReadyCallbackFunctionName, new Object[] {
-					viewer.appletID, viewer.fullName, Boolean.TRUE, appletFrame });
-
+		
 	}
 
 	/**
@@ -746,7 +743,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	public synchronized void syncToJmol(String msg) {
 		if (syncCallbackFunctionName == null)
 			return;
-		Logger.info("JSV>Jmol " + msg);
+		Logger.info("JSVApp.syncToJmol JSV>Jmol " + msg);
 		appletFrame.callToJavaScript(syncCallbackFunctionName, new Object[] { viewer.fullName, msg });
 	}
 

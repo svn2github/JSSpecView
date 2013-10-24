@@ -670,7 +670,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 	public void syncScript(String peakScript) {
 		if (peakScript.equals("TEST"))
 			peakScript = testScript;
-		Logger.info(Thread.currentThread() + "Jmol>JSV " + peakScript);
+		Logger.info("JSViewer.syncScript Jmol>JSV " + peakScript);
 		if (peakScript.indexOf("<PeakData") < 0) {
 			runScriptNow(peakScript);
 			if (peakScript.indexOf("#SYNC_PEAKS") >= 0) {
@@ -881,7 +881,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 			script = "vibration OFF; selectionhalos OFF;";
 		}
 		script = "Select: " + pi + " script=\"" + script;
-		System.out.println("JSpecView jmolSelect " + script);
+		System.out.println("JSViewer.jmolSelect " + script);
 		return script;
 	}
 

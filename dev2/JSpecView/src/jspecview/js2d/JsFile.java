@@ -3,6 +3,7 @@ package jspecview.js2d;
 import java.net.URL;
 
 import jspecview.common.JSVFileManager;
+import javajs.util.AjaxURLConnection;
 
 import org.jmol.api.JmolFileInterface;
 import org.jmol.util.Txt;

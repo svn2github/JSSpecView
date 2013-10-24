@@ -115,6 +115,9 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	public void init() {
 		app = new JSVApp(this, false);
 		initViewer();
+		if (app.appletReadyCallbackFunctionName != null && viewer.fullName != null)
+			callToJavaScript(app.appletReadyCallbackFunctionName, new Object[] {
+					viewer.appletID, viewer.fullName, Boolean.TRUE, this });
 	}
 
 	protected void initViewer() {

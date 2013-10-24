@@ -1,4 +1,4 @@
-package jspecview.js2d;
+package jspecview.unused;
 
 import java.io.IOException;
 import java.net.URL;

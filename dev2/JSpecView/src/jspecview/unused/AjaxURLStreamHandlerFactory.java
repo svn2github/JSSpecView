@@ -1,9 +1,10 @@
-package jspecview.js2d;
+package jspecview.unused;
 
 import java.net.URLStreamHandler;
 import java.net.URLStreamHandlerFactory;
 import java.util.Hashtable;
 import java.util.Map;
+
 
 
 /**
