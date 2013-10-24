@@ -42,6 +42,7 @@ import org.jmol.util.Parser;
 import javajs.util.ParserJS;
 import org.jmol.util.Txt;
 
+import jspecview.api.JSVZipReader;
 import jspecview.api.SourceReader;
 import jspecview.common.Coordinate;
 import jspecview.common.JDXSpectrum;
@@ -179,17 +180,18 @@ public class FileReader {
 	}
 
   /**
-   * starting point for reading all data
-   * @param br 
+   * The starting point for reading all data.
+   * 
+   * @param reader  a BufferedReader or a JSVZipFileSequentialReader
    * 
    * @return source
    * @throws JSpecViewException
    */
-  private JDXSource getJDXSource(BufferedReader br) throws JSpecViewException {
+  private JDXSource getJDXSource(Object reader) throws JSpecViewException {
 
     source = new JDXSource(JDXSource.TYPE_SIMPLE, filePath);
-    isZipFile = (br instanceof JSVZipFileSequentialReader);
-    t = new JDXSourceStreamTokenizer(br);
+    isZipFile = (reader instanceof JSVZipReader);
+    t = new JDXSourceStreamTokenizer((BufferedReader) reader);
     errorLog = new SB();
 
     String label = null;
