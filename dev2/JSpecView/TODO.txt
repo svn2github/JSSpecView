@@ -14,6 +14,7 @@ new feature: show NMR taps into NMRDB directly
 in preparation for JavaScript version (add to top):
 
 -- 10/24/2013 BH
+ -- removes load depedence on ZIP classes
  -- testjsv_mol.htm working
  -- 2D NMR added
  -- no toolbar

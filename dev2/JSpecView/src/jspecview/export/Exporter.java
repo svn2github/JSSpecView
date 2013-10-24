@@ -1,14 +1,17 @@
 package jspecview.export;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.FileWriter;
 
 import javajs.util.List;
 
 import org.jmol.io.Base64;
+import org.jmol.util.Logger;
 import org.jmol.util.Txt;
 
 import jspecview.api.ExportInterface;
@@ -22,6 +25,7 @@ import jspecview.common.PanelData;
 import jspecview.common.PrintLayout;
 import jspecview.common.ScriptToken;
 import jspecview.common.Annotation.AType;
+import jspecview.util.JSVTxt;
 
 public class Exporter implements ExportInterface {
 
@@ -239,7 +243,7 @@ public class Exporter implements ExportInterface {
 			return null;
     String msg = "OK";
     if (eType == ExportType.SOURCE)
-      JSVFileManager.fileCopy(jsvp.getPanelData().getSpectrum().getFilePath(), file);
+      fileCopy(jsvp.getPanelData().getSpectrum().getFilePath(), file);
     else
       msg = exportSpectrumOrImage(jsvp, eType, index, file
           .getAbsolutePath());
@@ -301,6 +305,22 @@ public class Exporter implements ExportInterface {
     name += ext;
     return name;
 	}
+
+  private static void fileCopy(String name, File file) {
+    try {
+      BufferedReader br = JSVFileManager.getBufferedReaderFromName(name, null,
+          null);
+      FileWriter writer = new FileWriter(file.getAbsolutePath());
+      String line = null;
+      while ((line = br.readLine()) != null) {
+        writer.write(line);
+        writer.write(JSVTxt.newLine);
+      }
+      writer.close();
+    } catch (Exception e) {
+      Logger.error(e.getMessage());
+    }
+  }
 
 
 }
