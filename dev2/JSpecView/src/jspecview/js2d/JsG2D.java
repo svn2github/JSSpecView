@@ -288,13 +288,14 @@ public class JsG2D implements JSVGraphics {
 		/**
 		 * @j2sNative
 		 * 
+		 *    var r = diameter/2;
 		 * 		g.beginPath();
-		 *    g.arc(x, y, diameter/2, 0, 2 * Math.PI, false);
+		 *    g.arc(x + r, y + r, r, 0, 2 * Math.PI, false);
 		 *    g.fill();
 		 */
 		{	
 		}
-		
+	
 	}
 
 	public void fillPolygon(Object g, int[] ayPoints, int[] axPoints, int nPoints) {

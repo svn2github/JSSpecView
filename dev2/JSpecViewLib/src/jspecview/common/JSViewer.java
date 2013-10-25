@@ -316,7 +316,6 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 						isOK = false;
 						break;
 					}
-					selectedPanel.getPanelData().taintedAll = true;
 					switch (st) {
 					default:
 						break;

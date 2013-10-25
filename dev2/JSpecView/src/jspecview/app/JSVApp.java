@@ -451,6 +451,8 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	}
 
 	public void siValidateAndRepaint() {
+		if (viewer.selectedPanel != null)
+			viewer.selectedPanel.getPanelData().taintedAll = true;
 		appletFrame.validate();
 		repaint();
 	}
