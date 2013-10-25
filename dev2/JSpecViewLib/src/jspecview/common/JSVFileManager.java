@@ -353,21 +353,21 @@ public class JSVFileManager {
 
   private static int stringCount;
 
-  public static String getName(String file) {
-  	if (file == null)
-  		return "String" + (++stringCount);
-    try {
-      if (isURL(file)) {
-      	if (file.startsWith(SIMULATION_PROTOCOL) && file.length() > 100)
-      		return file.substring(0, Math.min(file.length(), 30)) + "...";
-        String name = (new URL((URL) null, file, null)).getFile();
-        return name.substring(name.lastIndexOf('/') + 1);
-      }
-      return (new File(file)).getName();
-    } catch (MalformedURLException e) {
-      return null;
-    }
-  }
+	public static String getName(String fileName) {
+		if (fileName == null)
+			return "String" + (++stringCount);
+		if (isURL(fileName)) {
+			try {
+				if (fileName.startsWith(SIMULATION_PROTOCOL) && fileName.length() > 100)
+					return fileName.substring(0, Math.min(fileName.length(), 30)) + "...";
+				String name = (new URL((URL) null, fileName, null)).getFile();
+				return name.substring(name.lastIndexOf('/') + 1);
+			} catch (MalformedURLException e) {
+				return null;
+			}
+		}
+		return (viewer.isApplet ? fileName : (new File(fileName)).getName());
+	}
 
 	public static String getQuotedJSONAttribute(String json, String key1,
 			String key2) {
