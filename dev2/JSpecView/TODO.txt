@@ -14,7 +14,7 @@ new feature: show NMR taps into NMRDB directly
 in preparation for JavaScript version (add to top):
 
 -- 10/24/2013 BH
- -- removes load depedence on ZIP classes
+ -- removes load dependence on ZIP classes
  -- testjsv_mol.htm working
  -- 2D NMR added
  -- no toolbar
@@ -185,6 +185,7 @@ Moved and renamed methods from jspecview/util to org/jmol/util (applets can shar
 * Replaced all references to StringBuilder and StringBuffer with JSVSB (later refactored as javajs.util.SB)
 
 ====TODO=========
+-JSmol :overlay working but close overlay isn't
 -JSmol interactions working from spectrum to Mol but not from Mol to spectrum
 
 -NMR peak list is too wide; dialog not adjusting
