@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javajs.api.GenericColor;
 import javajs.awt.Font;
@@ -38,11 +39,11 @@ import javajs.util.SB;
 import jspecview.api.JSVGraphics;
 import jspecview.api.JSVPanel;
 import jspecview.api.PdfCreatorInterface;
+import jspecview.common.JSVersion;
 import jspecview.common.PrintLayout;
 
 public class PDFCreator implements PdfCreatorInterface, JSVGraphics {
-  
-	private PrintLayout pl;
+ 
 	private OutputStream os;
 	private List<PDFObject> indirectObjects;
 	private PDFObject root;
@@ -53,7 +54,6 @@ public class PDFCreator implements PdfCreatorInterface, JSVGraphics {
 	private int pt;
 	private int xrefPt;
 	private int count;
-  private boolean isLandscape;
 
 	private int height;
 	private int width;
@@ -61,21 +61,20 @@ public class PDFCreator implements PdfCreatorInterface, JSVGraphics {
 	private Map<String, PDFObject>fonts;
 	private JSVGraphics g2d;
 	private Font currentFont;
+	private String date;
 
 	public PDFCreator() {
    // for Class.forName  
   }
 
 	public void createPdfDocument(JSVPanel panel, PrintLayout pl, OutputStream os) {
-		isLandscape = pl.layout.equals("landscape");
-		this.pl = pl;
+		boolean isLandscape = pl.layout.equals("landscape");
+		date = pl.date;
+		
 		this.os = os;
 		g2d = panel.getPanelData().g2d;
 		try {
-			width = (isLandscape ? pl.paperHeight : pl.paperWidth);
-			height = (isLandscape ? pl.paperWidth : pl.paperHeight);
-			System.out.println("Creating PDF with width=" + width + " and height=" + height);
-			newDocument();
+			newDocument(pl.paperWidth, pl.paperHeight, isLandscape);
 			panel.printPdf(this, pl);
 			closeDocument();
 		} catch (Exception e) {
@@ -84,7 +83,10 @@ public class PDFCreator implements PdfCreatorInterface, JSVGraphics {
 		}
 	}
 
-	private void newDocument() {
+	private void newDocument(int paperWidth, int paperHeight, boolean isLandscape) {
+		width = (isLandscape ? paperHeight : paperWidth);
+		height = (isLandscape ? paperWidth : paperHeight);
+		System.out.println("Creating PDF with width=" + width + " and height=" + height);
 		fonts = new Hashtable<String, PDFObject>();
 		indirectObjects = new List<PDFObject>();
 		//graphicsResources = newObject(null);
@@ -99,12 +101,12 @@ public class PDFCreator implements PdfCreatorInterface, JSVGraphics {
 		pages.addDef("Count", "1");
 		pages.addDef("Kids", "[ " + page.getRef() +" ]");
 		page.addDef("Parent", pages.getRef());
-		page.addDef("MediaBox", "[ 0 0 " + pl.paperWidth + " " + pl.paperHeight + " ]");
+		page.addDef("MediaBox", "[ 0 0 " + paperWidth + " " + paperHeight + " ]");
 		if (isLandscape)
 			page.addDef("Rotate", "90");
 
 		pageContents.addDef("Length", "?");
-		pageContents.append((isLandscape ? "q 0 1 1 0 0 0 " : "q 1 0 0 -1 0 "+(pl.paperHeight))+" cm /" + graphics.getID() + " Do Q");
+		pageContents.append((isLandscape ? "q 0 1 1 0 0 0 " : "q 1 0 0 -1 0 "+(paperHeight))+" cm /" + graphics.getID() + " Do Q");
 		page.addDef("Contents", pageContents.getRef());		
 		addProcSet(page);
 		addProcSet(graphics);
@@ -114,10 +116,17 @@ public class PDFCreator implements PdfCreatorInterface, JSVGraphics {
 		graphics.addDef("BBox", "[0 0 " + width + " " + height + "]");
 		graphics.addDef("Matrix", "[1 0 0 1 0 0]");
 		graphics.addDef("Length", "?");
-		page.addResource("XObject", graphics.getID(), graphics.getRef());
-		
+		page.addResource("XObject", graphics.getID(), graphics.getRef());		
 		g("q 1 w 1 J 1 j 10 M []0 d q "); // line width 1, line cap circle, line join circle, miter limit 10, solid
 		clip(0, 0, width, height);
+		
+    Map<String, String> ht = new Hashtable<String, String>();
+    ht.put("Producer", JSVersion.VERSION);
+    ht.put("Creator", "JSpecView " + JSVersion.VERSION);
+    ht.put("Author", "JSpecView");
+    if (date != null)
+    	ht.put("CreationDate", date);
+    addInfo(ht);
 	}		
 
 	private void addProcSet(PDFObject o) {
@@ -147,6 +156,15 @@ public class PDFCreator implements PdfCreatorInterface, JSVGraphics {
 		indirectObjects.addLast(o);
 		return o;
 	}
+
+  public void addInfo(Map<String, String> data) {
+    Hashtable<String, Object> info = new Hashtable<String, Object>();
+    for (Entry<String, String> e: data.entrySet()) {
+      String value = "(" + e.getValue().replace(')','_').replace('(','_')+ ")";
+      info.put(e.getKey(), value);      
+    }
+    root.addDef("Info", info);
+  }
 
 	private PDFObject addFont(String fname) {
 		PDFObject f = newObject("Font");

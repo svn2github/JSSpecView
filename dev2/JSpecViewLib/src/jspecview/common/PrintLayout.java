@@ -51,5 +51,6 @@ public class PrintLayout {
 	public boolean asPDF = true;
 	
 	public String title;
+	public String date;
 
 }

@@ -224,9 +224,11 @@ public class AwtPlatform implements ApiPlatform {
     return null;
   }
 
-  public String getDateFormat() {
-    return (new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z"))
-        .format(new Date());
+  public String getDateFormat(boolean isoiec8824) {
+    return (isoiec8824 ? "D:"
+        + new SimpleDateFormat("YYYYMMddHHmmssX").format(new Date()) + "'00'"
+        : (new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z"))
+            .format(new Date()));
   }
   
   public JmolFileInterface newFile(String name) {

@@ -258,6 +258,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
 		// MediaSize size = MediaSize.getMediaSizeForName(pl.paper);
 
 		pl.title = title;
+		pl.date = apiPlatform.getDateFormat(true);
 		pd.setPrint(pl, os == null ? pl.font : "Helvetica");
 
 		/* Create a print job */

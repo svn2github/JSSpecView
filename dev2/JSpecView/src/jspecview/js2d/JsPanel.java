@@ -255,6 +255,7 @@ public class JsPanel implements JSVPanel {
 	 */
 	public void printPanel(PrintLayout pl, OutputStream os, String title) {
 		pl.title = title;
+		pl.date = apiPlatform.getDateFormat(true);
 		try {
 			createPdfDocument(os, pl);
   	} catch (Exception ex) {
