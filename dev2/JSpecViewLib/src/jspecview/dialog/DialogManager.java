@@ -104,7 +104,7 @@ abstract public class DialogManager {
 		}
 		try {
 			String f = currentSource.getFilePath();
-			showScrollingText(null, f, JSVFileManager.getFileAsString(f, null));
+			showScrollingText(null, f, JSVFileManager.getFileAsString(f));
 		} catch (Exception ex) {
 			showMessageDialog(frame, "File Not Found", "SHOWSOURCE", ERROR_MESSAGE);
 		}

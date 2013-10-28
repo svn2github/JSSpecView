@@ -40,7 +40,6 @@ package jspecview.java;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -49,7 +48,6 @@ import java.awt.image.BufferedImage;
 
 import javajs.api.GenericColor;
 
-import org.jmol.util.JmolFont;
 
 import jspecview.api.JSVGraphics;
 
@@ -86,24 +84,32 @@ public class AwtG2D implements JSVGraphics {
   
   /*-----------------GRAPHICS METHODS----------------------------------- */
 	public void drawString(Object g, String text, int x, int y) {
+		//System.out.println("Awtg2d.drawString " + text + " " + x + " " + y);
 		((Graphics) g).drawString(text, x, y);
 	}
-
+	
+	public void drawStringRotated(Object g, String text, int x, int y, double angle) {
+		angle = angle / 180.0 * Math.PI;
+  	((Graphics2D) g).rotate(angle, x, y);
+		((Graphics) g).drawString(text, x, y);
+  	((Graphics2D) g).rotate(-angle, x, y);
+	}
 
 	public void setGraphicsColor(Object g, GenericColor c) {
 		((Graphics) g).setColor((Color) c);
 	}
 
-	public void setGraphicsFont(Object g, JmolFont font) {
-		((Graphics) g).setFont((Font) font.font);
+	public void setGraphicsFont(Object g, javajs.awt.Font font) {
+		//System.out.println("AwtG2D.setGraphicsFont " + font.getInfo());
+		((Graphics) g).setFont((java.awt.Font) font.font);
 	}
 
-	public void draw2DImage(Object g, Object image2d, int destX0, int destY0,
+	public void drawGrayScaleImage(Object g, Object image2d, int destX0, int destY0,
 			int destX1, int destY1, int srcX0, int srcY0, int srcX1, int srcY1) {		
 		((Graphics) g).drawImage((Image) image2d, destX0, destY0, destX1, destY1, srcX0, srcY0, srcX1, srcY1, null);
 	}
 
-	public Object newImage(Object gMain, Object image, int width, int height, int[] buffer) {
+	public Object newGrayScaleImage(Object gMain, Object image, int width, int height, int[] buffer) {
 		BufferedImage image2D = new BufferedImage(width, height,
 				BufferedImage.TYPE_BYTE_GRAY);
 		image2D.getRaster().setSamples(0, 0, width, height, 0,
@@ -126,6 +132,7 @@ public class AwtG2D implements JSVGraphics {
 
 	public void drawRect(Object g, int x, int y, int xPixels,
 			int yPixels) {
+		//System.out.println("Awtg2s.drawRect " + x + " " + y + " " + xPixels + " " + yPixels);
 		((Graphics) g).drawRect(x, y, xPixels, yPixels);
 	}
 
@@ -153,11 +160,8 @@ public class AwtG2D implements JSVGraphics {
 		((Graphics) g).fillPolygon(ayPoints, axPoints, nPoints);
 	}
 
-	public void rotatePlot(Object g, int angle, int x, int y) {
-  	((Graphics2D) g).rotate(Math.PI * angle / 180.0, x, y);
-  }
-
 	public void translateScale(Object g, double x, double y, double scale) {
+		//System.out.println("Awtg2d.translateScale " + x + " " + y + " " + scale);
 		((Graphics2D) g).translate(x, y);
 		((Graphics2D) g).scale(scale, scale);
 	}

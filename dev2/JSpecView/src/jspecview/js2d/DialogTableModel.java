@@ -2,7 +2,7 @@ package jspecview.js2d;
 
 
 import javajs.api.GenericColor;
-import javajs.awt.ColorUtil;
+import javajs.util.ColorUtil;
 import javajs.swing.AbstractTableModel;
 import javajs.swing.TableColumn;
 import javajs.util.BS;

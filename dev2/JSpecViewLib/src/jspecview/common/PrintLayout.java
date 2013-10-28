@@ -6,6 +6,14 @@ package jspecview.common;
  */
 
 public class PrintLayout {
+	
+	public int imageableX = 0;
+	public int imageableY = 0;
+	public int paperHeight = (int) (Math.min(11f, 11.69f) * 72);
+	public int paperWidth = (int) (Math.min(8.5f, 8.27f) * 72);
+	public int imageableHeight = paperHeight;
+	public int imageableWidth = paperWidth;
+
 	/**
 	 * The paper orientation ("portrait" or "landscape")
 	 */
@@ -34,13 +42,13 @@ public class PrintLayout {
 	/**
 	 * The font of the elements
 	 */
-	public String font;
+	public String font = "Helvetica";
 	/**
 	 * The size of the paper to be printed on
 	 */
 	public Object paper;
 	
-	public boolean asPDF;
+	public boolean asPDF = true;
 	
 	public String title;
 

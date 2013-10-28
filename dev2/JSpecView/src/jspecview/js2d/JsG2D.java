@@ -39,9 +39,9 @@ package jspecview.js2d;
 
 import javajs.api.GenericColor;
 import javajs.awt.Color;
-import javajs.awt.ColorUtil;
+import javajs.awt.Font;
+import javajs.util.ColorUtil;
 
-import org.jmol.util.JmolFont;
 
 import jspecview.api.JSVGraphics;
 
@@ -61,7 +61,7 @@ public class JsG2D implements JSVGraphics {
 	private int windowWidth;
 	private int windowHeight;
 
-	private JmolFont currentFont;
+	private Font currentFont;
 
   public JsG2D() {
 	}
@@ -78,7 +78,7 @@ public class JsG2D implements JSVGraphics {
     return Color.get1(rgb);
   }
 
-	public Object newImage(Object context, Object image, int width, int height, int[] grayBuffer) {
+	public Object newGrayScaleImage(Object context, Object image, int width, int height, int[] grayBuffer) {
 		
 		/**
 		 * @j2sNative
@@ -131,7 +131,7 @@ public class JsG2D implements JSVGraphics {
 		return image;
 	}
 
-	public void draw2DImage(Object g, Object image, int destX0, int destY0,
+	public void drawGrayScaleImage(Object g, Object image, int destX0, int destY0,
 			int destX1, int destY1, int srcX0, int srcY0, int srcX1, int srcY1) {
 
 		float iw, ih;
@@ -259,6 +259,10 @@ public class JsG2D implements JSVGraphics {
 		}
 	}
 
+	public void drawStringRotated(Object g, String s, int x, int y, double angle) {
+		// n/a (printing only)
+	}
+
 	boolean isShifted;// private, but only JavaScript
 	
 	public void fillBackground(Object g, GenericColor bgcolor) {
@@ -321,11 +325,6 @@ public class JsG2D implements JSVGraphics {
 		return currentFont.stringWidth(s);
 	}
 
-	public void rotatePlot(Object g, int angle, int x, int y) {
-		// TODO Auto-generated method stub
-		
-	}
-
 	public void setGraphicsColor(Object g, GenericColor c) {
 		String s = ColorUtil.toCSSString(c);
 		/**
@@ -338,7 +337,7 @@ public class JsG2D implements JSVGraphics {
 		}
 	}
 
-	public void setGraphicsFont(Object g, JmolFont font) {
+	public void setGraphicsFont(Object g, Font font) {
 		currentFont = font;
 		String s = font.getInfo();
 		int pt = s.indexOf(" ");

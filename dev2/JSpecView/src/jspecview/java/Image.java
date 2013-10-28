@@ -29,7 +29,6 @@ import java.awt.AlphaComposite;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.MediaTracker;
@@ -48,7 +47,6 @@ import jspecview.util.JSVEscape;
 
 
 import org.jmol.api.PlatformViewer;
-import org.jmol.util.JmolFont;
 
 /**
  * methods required by Jmol that access java.awt.Image
@@ -126,14 +124,14 @@ class Image {
     return grabPixels(imageOffscreen, width, height, null, 0, 0);
   }
 
-  public static int[] getTextPixels(String text, JmolFont font3d, Object gObj,
+  public static int[] getTextPixels(String text, javajs.awt.Font font3d, Object gObj,
                                     Object image, int width, int height,
                                     int ascent) {
     Graphics g = (Graphics) gObj;
     g.setColor(Color.black);
     g.fillRect(0, 0, width, height);
     g.setColor(Color.white);
-    g.setFont((Font) font3d.font);
+    g.setFont((java.awt.Font) font3d.font);
     g.drawString(text, 0, ascent);
     return grabPixels(image, width, height, null, 0, 0);
   }

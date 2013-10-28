@@ -21,13 +21,11 @@ package jspecview.java;
 
 import java.awt.BorderLayout;
 import java.awt.Frame;
-import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 
-//import javax.print.PrintService;
 import javax.print.attribute.standard.MediaSizeName;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
@@ -37,7 +35,6 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-//import javax.swing.SpinnerNumberModel;
 import javax.swing.border.TitledBorder;
 
 import jspecview.api.JSVPrintDialog;
@@ -53,15 +50,6 @@ import jspecview.common.PrintLayout;
 public class AwtPrintDialog extends JDialog implements JSVPrintDialog {
 
 	private static final long serialVersionUID = 1L;
-  private TitledBorder titledBorder1;
-  private TitledBorder titledBorder2;
-  private TitledBorder titledBorder3;
-  private TitledBorder titledBorder4;
-  private TitledBorder titledBorder5;
-  private TitledBorder titledBorder6;
-  private TitledBorder titledBorder7;
-  private TitledBorder titledBorder8;
-  private TitledBorder titledBorder9;
   
   private ButtonGroup layoutButtonGroup = new ButtonGroup();
   private ButtonGroup fontButtonGroup = new ButtonGroup();
@@ -70,43 +58,26 @@ public class AwtPrintDialog extends JDialog implements JSVPrintDialog {
   private PrintLayout pl;
 	private PrintLayout plNew;
 
-  private JPanel jPanel1 = new JPanel();
-  private JPanel layoutPanel = new JPanel();
-  private JPanel positionPanel = new JPanel();
-  private JPanel layoutContentPanel = new JPanel();
-  private JPanel previewPanel = new JPanel();
-  private JPanel fontPanel = new JPanel();
-  private JPanel elementsPanel = new JPanel();
-  private JPanel jPanel2 = new JPanel();
-
-  private JButton layoutButton = new JButton();
+  //private JButton layoutButton = new JButton();
   private JButton previewButton = new JButton();
   private JButton cancelButton = new JButton();
   private JButton printButton = new JButton();
   private JButton pdfButton = new JButton();
   
-  private GridBagLayout gridBagLayout7 = new GridBagLayout();
-  private GridBagLayout gridBagLayout6 = new GridBagLayout();
-  private GridBagLayout gridBagLayout5 = new GridBagLayout();
-  private GridBagLayout gridBagLayout4 = new GridBagLayout();
-  private GridBagLayout gridBagLayout3 = new GridBagLayout();
-  private GridBagLayout gridBagLayout2 = new GridBagLayout();
-  private GridBagLayout gridBagLayout1 = new GridBagLayout();
-
   private JCheckBox scaleXCheckBox = new JCheckBox();
   private JCheckBox scaleYCheckBox = new JCheckBox();
   private JCheckBox gridCheckBox = new JCheckBox();
   private JCheckBox titleCheckBox = new JCheckBox();
   
   private JRadioButton landscapeRadioButton = new JRadioButton();
-  private JRadioButton defaultPosRadioButton = new JRadioButton();
+  private JRadioButton topLeftRadioButton = new JRadioButton();
   private JRadioButton centerRadioButton = new JRadioButton();
   private JRadioButton portraitRadioButton = new JRadioButton();
   private JRadioButton fitToPageRadioButton = new JRadioButton();
   private JRadioButton chooseFontRadioButton = new JRadioButton();
   private JRadioButton defaultFontRadioButton = new JRadioButton();
 
-  private static JComboBox<String> fontComboBox = new JComboBox<String>();
+  //private static JComboBox<String> fontComboBox = new JComboBox<String>();
   private static JComboBox<MediaSizeName> paperComboBox = new JComboBox<MediaSizeName>();
   //private JComboBox printerNameComboBox = new JComboBox();
 
@@ -127,7 +98,7 @@ public class AwtPrintDialog extends JDialog implements JSVPrintDialog {
     this.pl = pl;
     try {
       jbInit(isJob);
-      setSize(320, 400);
+      setSize(320, 250);
       setResizable(false);
       setVisible(true);
       return this;
@@ -137,8 +108,8 @@ public class AwtPrintDialog extends JDialog implements JSVPrintDialog {
       return null;
     }
   }
-  private static ImageIcon portraitIcon;
-  private static ImageIcon landscapeIcon;
+  //private static ImageIcon portraitIcon;
+  //private static ImageIcon landscapeIcon;
   private static ImageIcon previewPortraitCenterIcon;
   private static ImageIcon previewPortraitDefaultIcon;
   private static ImageIcon previewPortraitFitIcon;
@@ -155,14 +126,14 @@ public class AwtPrintDialog extends JDialog implements JSVPrintDialog {
     paperComboBox.addItem(MediaSizeName.ISO_A4);
     paperComboBox.addItem(MediaSizeName.ISO_B4);
 
-    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-    String allFontNames[] = ge.getAvailableFontFamilyNames();
-    for(int i = 0; i < allFontNames.length; i++)
-      fontComboBox.addItem(allFontNames[i]);
+    //GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    //String allFontNames[] = ge.getAvailableFontFamilyNames();
+    //for(int i = 0; i < allFontNames.length; i++)
+      //fontComboBox.addItem(allFontNames[i]);
  		ClassLoader cl = AwtPrintDialog.class.getClassLoader();
 		String path = "jspecview/application/icons/";
-		portraitIcon = new ImageIcon(cl.getResource(path + "portrait.gif"));
-		landscapeIcon = new ImageIcon(cl.getResource(path + "landscape.gif"));
+		//portraitIcon = new ImageIcon(cl.getResource(path + "portrait.gif"));
+		//landscapeIcon = new ImageIcon(cl.getResource(path + "landscape.gif"));
 		previewPortraitCenterIcon = new ImageIcon(cl.getResource(path
 				+ "portraitCenter.gif"));
 		previewPortraitDefaultIcon = new ImageIcon(cl.getResource(path
@@ -184,27 +155,39 @@ public class AwtPrintDialog extends JDialog implements JSVPrintDialog {
    */
   private void jbInit(boolean isJob) throws Exception {
 
+    layoutButtonGroup.add(portraitRadioButton);
+    layoutButtonGroup.add(landscapeRadioButton);
+    positionButtonGroup.add(centerRadioButton);
+    positionButtonGroup.add(fitToPageRadioButton);
+    positionButtonGroup.add(topLeftRadioButton);
+    fontButtonGroup.add(defaultFontRadioButton);
+    fontButtonGroup.add(chooseFontRadioButton);
+
     setStaticElements();
     
-    titledBorder1 = new TitledBorder("");
-    titledBorder2 = new TitledBorder("");
-    titledBorder3 = new TitledBorder("");
-    titledBorder4 = new TitledBorder("");
-    titledBorder5 = new TitledBorder("");
-    titledBorder6 = new TitledBorder("");
-    titledBorder7 = new TitledBorder("");
-    titledBorder8 = new TitledBorder("");
-    titledBorder9 = new TitledBorder("");
-    titledBorder1.setTitle("Layout");
-    titledBorder1.setTitleJustification(2);
-    titledBorder2.setTitle("Position");
-    titledBorder2.setTitleJustification(2);
-    titledBorder3.setTitle("Elements");
-    titledBorder3.setTitleJustification(2);
-    titledBorder4.setTitle("Font");
-    titledBorder4.setTitleJustification(2);
-    titledBorder5.setTitle("Preview");
-    titledBorder5.setTitleJustification(2);
+    TitledBorder layoutBorder = new TitledBorder("Layout");
+    layoutBorder.setTitleJustification(TitledBorder.TOP);
+    //TitledBorder elementsBorder = new TitledBorder("");
+    //elementsBorder.setTitle("Elements");
+    //elementsBorder.setTitleJustification(2);
+    //TitledBorder titledBorder2 = new TitledBorder("");
+    //TitledBorder titledBorder4 = new TitledBorder("");
+    //TitledBorder titledBorder5 = new TitledBorder("");
+    //TitledBorder titledBorder6 = new TitledBorder("");
+    //TitledBorder titledBorder7 = new TitledBorder("");
+    //TitledBorder titledBorder8 = new TitledBorder("");
+    //TitledBorder titledBorder9 = new TitledBorder("");
+    //titledBorder9.setTitle("Paper");
+    //titledBorder9.setTitleJustification(2);
+    //titledBorder2.setTitle("Position");
+    //titledBorder2.setTitleJustification(2);
+    //titledBorder4.setTitle("Font");
+    //titledBorder4.setTitleJustification(2);
+    //titledBorder5.setTitle("Preview");
+    //titledBorder5.setTitleJustification(2);
+    //titledBorder6.setTitle("Printers");
+    //titledBorder7.setTitle("Paper");
+    //titledBorder8.setTitle("Copies");
     cancelButton.setText("Cancel");
     cancelButton.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -225,11 +208,31 @@ public class AwtPrintDialog extends JDialog implements JSVPrintDialog {
         printButton_actionPerformed(true);
       }
     });
-    titledBorder6.setTitle("Printers");
-    titledBorder7.setTitle("Paper");
-    titledBorder8.setTitle("Copies");
-    layoutPanel.setBorder(titledBorder1);
-    layoutPanel.setLayout(gridBagLayout2);
+    
+    
+    JPanel layoutContentPanel = new JPanel();
+    JPanel layoutPanel = new JPanel();
+    JPanel buttonPanel = new JPanel();
+    //JPanel positionPanel = new JPanel();
+    //JPanel previewPanel = new JPanel();
+    //JPanel fontPanel = new JPanel();
+    //JPanel elementsPanel = new JPanel();
+    //JPanel paperPanel = new JPanel();
+    //positionPanel.setBorder(titledBorder2);
+    //positionPanel.setLayout(new GridBagLayout());
+    //previewPanel.setBorder(titledBorder5);
+    //previewPanel.setLayout(new GridBagLayout());
+    //layoutButton.setBorder(null);
+    //layoutButton.setIcon(portraitIcon);
+    //fontPanel.setBorder(titledBorder4);
+    //fontPanel.setLayout(gridBagLayout5);
+    //elementsPanel.setBorder(elementsBorder);
+    //elementsPanel.setLayout(new GridBagLayout());
+    //paperPanel.setBorder(titledBorder9);
+    //paperPanel.setLayout(new GridBagLayout());
+
+    layoutPanel.setBorder(layoutBorder);
+    layoutPanel.setLayout(new GridBagLayout());
     landscapeRadioButton.setActionCommand("Landscape");
     landscapeRadioButton.setText("Landscape");
     landscapeRadioButton.addActionListener(new java.awt.event.ActionListener() {
@@ -237,19 +240,15 @@ public class AwtPrintDialog extends JDialog implements JSVPrintDialog {
         landscapeRadioButton_actionPerformed(e);
       }
     });
-    positionPanel.setBorder(titledBorder2);
-    positionPanel.setLayout(gridBagLayout3);
-    layoutContentPanel.setLayout(gridBagLayout1);
+    layoutContentPanel.setLayout(new GridBagLayout());
     scaleXCheckBox.setText("X-Scale");
     scaleYCheckBox.setText("Y-Scale");
-    previewPanel.setBorder(titledBorder5);
-    previewPanel.setLayout(gridBagLayout6);
     previewButton.setBorder(null);
     previewButton.setIcon(previewLandscapeDefaultIcon);
     gridCheckBox.setText("Grid");
-    defaultPosRadioButton.setActionCommand("Default");
-    defaultPosRadioButton.setText("Default");
-    defaultPosRadioButton.addActionListener(new java.awt.event.ActionListener() {
+    topLeftRadioButton.setActionCommand("Default");
+    topLeftRadioButton.setText("Top Left");
+    topLeftRadioButton.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
         defaultPosRadioButton_actionPerformed(e);
       }
@@ -275,74 +274,55 @@ public class AwtPrintDialog extends JDialog implements JSVPrintDialog {
         fitToPageRadioButton_actionPerformed(e);
       }
     });
-    layoutButton.setBorder(null);
-    layoutButton.setIcon(portraitIcon);
     chooseFontRadioButton.setText("Choose font");
     defaultFontRadioButton.setText("Use default");
-    fontPanel.setBorder(titledBorder4);
-    fontPanel.setLayout(gridBagLayout5);
     titleCheckBox.setText("Title");
-    elementsPanel.setBorder(titledBorder3);
-    elementsPanel.setLayout(gridBagLayout4);
-    jPanel2.setBorder(titledBorder9);
-    jPanel2.setLayout(gridBagLayout7);
-    titledBorder9.setTitle("Paper");
-    titledBorder9.setTitleJustification(2);
-    this.getContentPane().add(jPanel1,  BorderLayout.SOUTH);
+    this.getContentPane().add(buttonPanel,  BorderLayout.SOUTH);
     if (isJob)
-      jPanel1.add(printButton, null);
-    jPanel1.add(pdfButton, null);
-    jPanel1.add(cancelButton, null);
+      buttonPanel.add(printButton, null);
+    buttonPanel.add(pdfButton, null);
+    buttonPanel.add(cancelButton, null);
+    Insets insets = new Insets(0, 0, 0, 0);
     this.getContentPane().add(layoutContentPanel,  BorderLayout.CENTER);
-    layoutContentPanel.add(previewPanel,   new GridBagConstraints(0, 2, 2, 1, 0.0, 1.0
-            ,GridBagConstraints.NORTH, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-    previewPanel.add(previewButton, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0
-            ,GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-    layoutContentPanel.add(layoutPanel,  new GridBagConstraints(0, 0, 1, 1, 0.5, 0.0
-            ,GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-    layoutPanel.add(portraitRadioButton, new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0
-            ,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-    layoutPanel.add(landscapeRadioButton, new GridBagConstraints(0, 1, 1, 1, 0.0, 1.0
-            ,GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-    layoutPanel.add(layoutButton, new GridBagConstraints(1, 0, 1, 2, 0.0, 0.0
-            ,GridBagConstraints.NORTH, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-    layoutContentPanel.add(positionPanel,  new GridBagConstraints(1, 0, 2, 1, 0.5, 0.0
-            ,GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-    positionPanel.add(centerRadioButton, new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0
-            ,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-    positionPanel.add(fitToPageRadioButton, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0
-            ,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-    positionPanel.add(defaultPosRadioButton, new GridBagConstraints(0, 2, 1, 1, 0.0, 1.0
-            ,GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-    layoutContentPanel.add(elementsPanel,            new GridBagConstraints(0, 1, 1, 1, 0.5, 1.0
-            ,GridBagConstraints.NORTH, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-    elementsPanel.add(gridCheckBox, new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0
-            ,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-    elementsPanel.add(scaleXCheckBox, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0
-            ,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-    elementsPanel.add(scaleYCheckBox, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0
-        ,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-    elementsPanel.add(titleCheckBox, new GridBagConstraints(0, 3, 1, 1, 0.0, 1.0
-            ,GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-    layoutContentPanel.add(fontPanel,          new GridBagConstraints(1, 1, 2, 1, 0.0, 0.0
-            ,GridBagConstraints.NORTH, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-    fontPanel.add(defaultFontRadioButton, new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0
-            ,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-    fontPanel.add(chooseFontRadioButton, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0
-            ,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-    fontPanel.add(fontComboBox, new GridBagConstraints(0, 2, 1, 1, 0.0, 1.0
-            ,GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-    layoutContentPanel.add(jPanel2,  new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0
-            ,GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-    jPanel2.add(paperComboBox,      new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0
-            ,GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, new Insets(0, 5, 0, 5), 0, 0));
-    layoutButtonGroup.add(portraitRadioButton);
-    layoutButtonGroup.add(landscapeRadioButton);
-    positionButtonGroup.add(centerRadioButton);
-    positionButtonGroup.add(fitToPageRadioButton);
-    positionButtonGroup.add(defaultPosRadioButton);
-    fontButtonGroup.add(defaultFontRadioButton);
-    fontButtonGroup.add(chooseFontRadioButton);
+    
+    layoutContentPanel.add(layoutPanel, new GridBagConstraints(0, 0, 1, 1, 0.5, 0.0, 
+    		GridBagConstraints.CENTER, GridBagConstraints.BOTH, insets, 0, 0));
+    
+    
+    //layoutContentPanel.add(positionPanel,  new GridBagConstraints(1, 0, 2, 1, 0.5, 0.0
+      //      ,GridBagConstraints.CENTER, GridBagConstraints.BOTH, insets, 0, 0));
+    //layoutContentPanel.add(paperPanel, new GridBagConstraints(1, 1, 2, 1, 0.0, 0.0
+    //    ,GridBagConstraints.NORTH, GridBagConstraints.BOTH, insets, 0, 0));
+    //layoutPanel.add(layoutButton,          new GridBagConstraints(1, 0, 1, 2, 0.0, 0.0, GridBagConstraints.NORTH, GridBagConstraints.NONE, insets, 0, 0));
+    //layoutContentPanel.add(elementsPanel, new GridBagConstraints(0, 1, 1, 1, 0.5, 1.0
+    //      ,GridBagConstraints.NORTH, GridBagConstraints.BOTH, insets, 0, 0));
+    //layoutContentPanel.add(fontPanel,          new GridBagConstraints(1, 1, 2, 1, 0.0, 0.0
+    //        ,GridBagConstraints.NORTH, GridBagConstraints.BOTH, insets, 0, 0));
+    //fontPanel.add(defaultFontRadioButton, new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0
+    //        ,GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));
+    //fontPanel.add(chooseFontRadioButton, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0
+    //        ,GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));
+    //fontPanel.add(fontComboBox, new GridBagConstraints(0, 2, 1, 1, 0.0, 1.0
+    //        ,GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, insets, 0, 0));
+    //layoutContentPanel.add(paperPanel, new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0
+    //        ,GridBagConstraints.CENTER, GridBagConstraints.BOTH, insets, 0, 0));
+      
+
+    layoutPanel.add(landscapeRadioButton,  new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, insets, 0, 0));
+    layoutPanel.add(portraitRadioButton,   new GridBagConstraints(0, 1, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, insets, 0, 0));
+
+    layoutPanel.add(titleCheckBox,         new GridBagConstraints(0, 4, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, insets, 0, 0));
+    layoutPanel.add(gridCheckBox,          new GridBagConstraints(0, 5, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, insets, 0, 0));
+
+    layoutPanel.add(fitToPageRadioButton,  new GridBagConstraints(1, 0, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, insets, 0, 0));
+    layoutPanel.add(topLeftRadioButton,    new GridBagConstraints(1, 1, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, insets, 0, 0));
+    layoutPanel.add(centerRadioButton,     new GridBagConstraints(1, 2, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, insets, 0, 0));
+    
+    layoutPanel.add(scaleXCheckBox,        new GridBagConstraints(1, 4, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, insets, 0, 0));
+    layoutPanel.add(scaleYCheckBox,        new GridBagConstraints(1, 5, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, insets, 0, 0));
+    
+    layoutPanel.add(previewButton,         new GridBagConstraints(2, 0, 1, 5, 0.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, insets, 0, 0));
+    layoutPanel.add(paperComboBox,         new GridBagConstraints(2, 5, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, insets, 0, 0));
     
     setDefaults();
   }
@@ -385,7 +365,7 @@ public class AwtPrintDialog extends JDialog implements JSVPrintDialog {
 
   private void setPreview() {
     int layout = " PL".indexOf(layoutButtonGroup.getSelection().getActionCommand().charAt(0));
-    layoutButton.setIcon(layout == 1 ? portraitIcon : landscapeIcon);
+    //layoutButton.setIcon(layout == 1 ? portraitIcon : landscapeIcon);
     int position = " DCF".indexOf(positionButtonGroup.getSelection().getActionCommand().charAt(0));
     ImageIcon icon = null; 
     switch ((layout << 4) + position) {
@@ -423,20 +403,21 @@ public class AwtPrintDialog extends JDialog implements JSVPrintDialog {
 
   private void setDefaults() {
     landscapeRadioButton.setSelected(pl.layout.equals("landscape"));
+    portraitRadioButton.setSelected(!landscapeRadioButton.isSelected());
     scaleXCheckBox.setSelected(pl.showXScale);
     scaleYCheckBox.setSelected(pl.showYScale);
     gridCheckBox.setSelected(pl.showGrid);
     titleCheckBox.setSelected(pl.showTitle);    
-    defaultPosRadioButton.setSelected(pl.position.equals("default"));
-    centerRadioButton.setSelected(pl.position.equals("center"));
     fitToPageRadioButton.setSelected(pl.position.equals("fit to page"));
+    centerRadioButton.setSelected(pl.position.equals("center"));
+    topLeftRadioButton.setSelected(pl.position.equals("default"));
     defaultFontRadioButton.setSelected(pl.font == null);
-    if (pl.font != null)
-    	for (int i = fontComboBox.getItemCount(); --i >= 0;) 
-    		if (fontComboBox.getItemAt(i).equals(pl.font)) {
-    			fontComboBox.setSelectedIndex(i);
-    			break;
-    		}
+//    if (pl.font != null)
+//    	for (int i = fontComboBox.getItemCount(); --i >= 0;) 
+//    		if (fontComboBox.getItemAt(i).equals(pl.font)) {
+//    			fontComboBox.setSelectedIndex(i);
+//    			break;
+//    		}
   	for (int i = 0; i < paperComboBox.getItemCount(); i++) 
   		if (pl.paper == null || paperComboBox.getItemAt(i).equals(pl.paper)) {
   		  paperComboBox.setSelectedIndex(i);
@@ -455,8 +436,9 @@ public class AwtPrintDialog extends JDialog implements JSVPrintDialog {
 		plNew = new PrintLayout();
 		plNew.layout = layoutButtonGroup.getSelection().getActionCommand()
 				.toLowerCase();
-		plNew.font = (defaultFontRadioButton.isSelected() ? null
-				: (String) fontComboBox.getSelectedItem());
+		plNew.font = null;
+		//(defaultFontRadioButton.isSelected() ? null
+		//		: (String) fontComboBox.getSelectedItem());
 		plNew.position = positionButtonGroup.getSelection().getActionCommand()
 				.toLowerCase();
 		plNew.showGrid = gridCheckBox.isSelected();

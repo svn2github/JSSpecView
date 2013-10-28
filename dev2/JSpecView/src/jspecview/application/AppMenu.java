@@ -142,7 +142,7 @@ public class AppMenu extends JMenuBar {
     printMenuItem = setMenuItem(null, 'P', "Print...", 80,
         InputEvent.CTRL_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            viewer.printPDF("");
+            viewer.runScript("print");
           }
         });
     closeMenuItem = setMenuItem(null, 'C', "Close", 115,
@@ -249,6 +249,14 @@ public class AppMenu extends JMenuBar {
             viewer.runScript("showSource");
           }
         });
+    errorLogMenuItem = setMenuItem(null, '\0', "Error Log ...", 0,
+        0, new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            viewer.runScript("showErrors");
+          }
+        });
+
+
     JMenuItem propertiesMenuItem = setMenuItem(null, 'P', "Properties", 72,
         InputEvent.CTRL_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
@@ -261,14 +269,6 @@ public class AppMenu extends JMenuBar {
             viewer.runScript("showKey toggle");
           }
         });
-
-    errorLogMenuItem = setMenuItem(null, '\0', "Error Log ...", 0,
-        0, new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            viewer.runScript("showErrors");
-          }
-        });
-
 
     JMenuItem preferencesMenuItem = setMenuItem(null, 'P', "Preferences...",
         0, 0, new ActionListener() {
@@ -379,10 +379,9 @@ public class AppMenu extends JMenuBar {
     fileMenu.addSeparator();
     fileMenu.add(printMenuItem).setEnabled(false);
     fileMenu.addSeparator();
-    fileMenu.add(sourceMenuItem).setEnabled(false);
-    fileMenu.add(errorLogMenuItem).setEnabled(false);
-    fileMenu.addSeparator();
     fileMenu.add(exitMenuItem);
+    displayMenu.add(sourceMenuItem).setEnabled(false);
+    displayMenu.add(errorLogMenuItem).setEnabled(false);
     displayMenu.add(spectraMenuItem);
     displayMenu.add(overlayStackOffsetYMenuItem);
     displayMenu.add(overlayKeyMenuItem).setEnabled(false);

@@ -1,123 +1,37 @@
-/* $RCSfile$
- * $Author: nicove $
- * $Date: 2007-03-25 06:09:49 -0500 (Sun, 25 Mar 2007) $
- * $Revision: 7221 $
- *
- * Copyright (C) 2000-2005  The Jmol Development Team
- *
- * Contact: jmol-developers@lists.sf.net
- *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
- *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
- *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
- */
-package jspecview.util;
+package javajs.util;
 
 import java.util.Hashtable;
 import java.util.Map;
 
 import javajs.api.GenericColor;
-import javajs.util.ColorUtil;
 
+public class ColorUtil {
 
-import javajs.util.ParserJS;
-import org.jmol.util.Txt;
-
- public class JSVColorUtil {
-
-  /**
-   * Returns a hex string representation of a <code>Color</color> object
-   * 
-   * @param color
-   * @return a hex string representation of a <code>Color</color> object
-   */
-  public static String colorToHexString(GenericColor color) {
-    return (color == null ? "" : ColorUtil.toRGBHexString(color));
+  public static String toRGBHexString(GenericColor c) {
+    int rgb = c.getRGB();    
+    if (rgb == 0)
+      return "000000";
+    String r  = "00" + Integer.toHexString((rgb >> 16) & 0xFF);
+    r = r.substring(r.length() - 2);
+    String g  = "00" + Integer.toHexString((rgb >> 8) & 0xFF);
+    g = g.substring(g.length() - 2);
+    String b  = "00" + Integer.toHexString(rgb & 0xFF);
+    b = b.substring(b.length() - 2);
+    return r + g + b;
   }
-	  
+
+  public static String toCSSString(GenericColor c) {
+    int opacity = c.getOpacity255();
+    if (opacity == 255)
+      return "#" + toRGBHexString(c);
+    int rgb = c.getRGB();
+    return "rgba(" + ((rgb>>16)&0xFF) + "," + ((rgb>>8)&0xff) + "," + (rgb&0xff) + "," + opacity/255f  + ")"; 
+  }
   
-  /**
-   * accepts [xRRGGBB] or [0xRRGGBB] or [0xFFRRGGBB] or #RRGGBB or
-   * [red,green,blue] or a valid JavaScript color
-   * 
-   * @param strColor
-   * @return 0 if invalid or integer color
-   */
-  public static int getArgbFromString(String strColor) {
-    int len = 0;
-    if (strColor == null || (len = strColor.length()) == 0)
-      return 0;
-    float red, grn, blu;
-    strColor = Txt.replaceAllCharacters(strColor, " ;", ",");
-    if (strColor.indexOf(',') >= 0) {
-      strColor = "[" + strColor + "]";
-      len += 2;
-    }
-    if (strColor.charAt(0) == '[' && strColor.charAt(len - 1) == ']') {
-      String check;
-      if (strColor.indexOf(",") >= 0) {
-        String[] tokens = ParserJS.split(strColor.substring(1, strColor
-            .length() - 1), ",");
-        if (tokens.length != 3)
-          return 0;
-        red = ParserJS.parseFloat(tokens[0]);
-        grn = ParserJS.parseFloat(tokens[1]);
-        blu = ParserJS.parseFloat(tokens[2]);
-        return JSVColorUtil.colorTriadToInt(red, grn, blu);
-      }
-      switch (len) {
-      case 9:
-        check = "x";
-        break;
-      case 10:
-        check = "0x";
-        break;
-      default:
-        return 0;
-      }
-      if (strColor.indexOf(check) != 1)
-        return 0;
-      strColor = "#" + strColor.substring(len - 7, len - 1);
-      len = 7;
-    }
-    if (len == 7 && strColor.charAt(0) == '#') {
-      try {
-        red = ParserJS.parseIntRadix(strColor.substring(1, 3), 16);
-        grn = ParserJS.parseIntRadix(strColor.substring(3, 5), 16);
-        blu = ParserJS.parseIntRadix(strColor.substring(5, 7), 16);
-        return JSVColorUtil.colorTriadToInt(red, grn, blu);
-      } catch (NumberFormatException e) {
-        return 0;
-      }
-    }
-    Integer boxedArgb = mapJavaScriptColors.get(strColor.toLowerCase());
-    return (boxedArgb == null ? 0 : boxedArgb.intValue());
-  }
-
-  public static int colorTriadToInt(float x, float y, float z) {
-    if (x <= 1 && y <= 1 && z <= 1) {
-      if (x > 0)
-        x = x * 256 - 1;
-      if (y > 0)
-        y = y * 256 - 1;
-      if (z > 0)
-        z = z * 256 - 1;
-    }
-    return rgb((int) x, (int) y, (int) z);
-  }
-
-  public static int rgb(int red, int grn, int blu) {
-    return 0xFF000000 | (red << 16) | (grn << 8) | blu;
+  public static void toRGBf(int c, float[] f) {
+    f[0] = ((c >> 16) & 0xFF) / 255f; // red
+    f[1] = ((c >> 8) & 0xFF) / 255f;
+    f[2] = (c & 0xFF) / 255f;
   }
 
   private final static String[] colorNames = {
@@ -462,4 +376,107 @@ import org.jmol.util.Txt;
       mapJavaScriptColors.put(colorNames[i], Integer.valueOf(colorArgbs[i]));
   }
 
+  /**
+   * accepts [xRRGGBB] or [0xRRGGBB] or [0xFFRRGGBB] or #RRGGBB or
+   * [red,green,blue] or a valid JavaScript color
+   * 
+   * @param strColor
+   * @return 0 if invalid or integer color
+   */
+  public static int getArgbFromString(String strColor) {
+    int len = 0;
+    if (strColor == null || (len = strColor.length()) == 0)
+      return 0;
+    if (strColor.charAt(0) == '[' && strColor.charAt(len - 1) == ']') {
+      String check;
+      if (strColor.indexOf(",") >= 0) {
+        String[] tokens = ParserJS.split(strColor.substring(1, strColor
+            .length() - 1), ",");
+        if (tokens.length != 3)
+          return 0;
+        float red = ParserJS.parseFloat(tokens[0]);
+        float grn = ParserJS.parseFloat(tokens[1]);
+        float blu = ParserJS.parseFloat(tokens[2]);
+        return colorTriadToInt(red, grn, blu);
+      }
+      switch (len) {
+      case 9:
+        check = "x";
+        break;
+      case 10:
+        check = "0x";
+        break;
+      default:
+        return 0;
+      }
+      if (strColor.indexOf(check) != 1)
+        return 0;
+      strColor = "#" + strColor.substring(len - 7, len - 1);
+      len = 7;
+    }
+    if (len == 7 && strColor.charAt(0) == '#') {
+      try {
+        return ParserJS.parseIntRadix(strColor.substring(1, 7), 16) | 0xFF000000;
+      } catch (Exception e) {
+        return 0;
+      }
+    }
+    Integer boxedArgb = mapJavaScriptColors.get(strColor.toLowerCase());
+    return (boxedArgb == null ? 0 : boxedArgb.intValue());
+  }
+
+  public static int colorTriadToInt(float x, float y, float z) {
+    if (x <= 1 && y <= 1 && z <= 1) {
+      if (x > 0)
+        x = x * 256 - 1;
+      if (y > 0)
+        y = y * 256 - 1;
+      if (z > 0)
+        z = z * 256 - 1;
+    }
+    return rgb((int) x, (int) y, (int) z);
+  }
+
+  public static int rgb(int red, int grn, int blu) {
+    return 0xFF000000 | (red << 16) | (grn << 8) | blu;
+  }
+
+  public final static P3 colorPointFromString(String colorName, P3 pt) {
+    return colorPointFromInt(getArgbFromString(colorName), pt);
+  }
+
+  public final static P3 colorPointFromInt2(int color) {
+    return P3.new3((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF);
+  }
+
+  public static int colorPtToInt(T3 pt) {
+    return colorTriadToInt(pt.x, pt.y, pt.z);
+  }
+
+  public final static P3 colorPointFromInt(int color, P3 pt) {
+    pt.z = color & 0xFF;
+    pt.y = (color >> 8) & 0xFF;
+    pt.x = (color >> 16) & 0xFF;
+    return pt;
+  }
+
+  /**
+   * Return a greyscale rgb value 0-FF using NTSC color luminance algorithm
+   *<p>
+   * the alpha component is set to 0xFF. If you want a value in the
+   * range 0-255 then & the result with 0xFF;
+   *
+   * @param rgb the rgb value
+   * @return a grayscale value in the range 0 - 255 decimal
+   */
+  public static int calcGreyscaleRgbFromRgb(int rgb) {
+    int grey = (((2989 * ((rgb >> 16) & 0xFF)) +
+                (5870 * ((rgb >> 8) & 0xFF)) +
+                (1140 * (rgb & 0xFF)) + 5000) / 10000) & 0xFFFFFF;
+    return rgb(grey, grey, grey);
+  }
+
+  
 }
+
+

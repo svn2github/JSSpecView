@@ -7,11 +7,11 @@ import java.util.Map;
 
 import javajs.J2SRequireImport;
 import javajs.api.GenericColor;
+import javajs.awt.Font;
 import javajs.util.BS;
 import javajs.util.DecimalFormat;
 import javajs.util.List;
 
-import org.jmol.util.JmolFont;
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
 
@@ -1370,11 +1370,14 @@ public class GraphSet implements XYScaleConverter {
 
 	private void drawAll(Object gMain, Object gTop, int iSplit,
 			boolean needNewPins, boolean doAll) {
+    g2d = pd.g2d; // may change when printing and testing JsPdfCreator
 		this.gMain = gMain;
 		int subIndex = getSpectrumAt(0).getSubIndex();
 		is2DSpectrum = (!getSpectrumAt(0).is1D()
 				&& (isLinked || pd.getBoolean(ScriptToken.DISPLAY2D)) && (imageView != null || get2DImage()));
 		if (imageView != null && doAll) {
+			if (pd.isPrinting && g2d != pd.g2d0)
+				g2d.newGrayScaleImage(gMain, image2D, imageView.imageWidth, imageView.imageHeight, imageView.getBuffer());
 			if (is2DSpectrum)
 				setPositionForFrame(iSplit);
 			draw2DImage();
@@ -2001,7 +2004,7 @@ public class GraphSet implements XYScaleConverter {
 		if (pd.isPrinting)
 			g2d.drawLine(g, c.getXPixel0(), yPixel1, c.getXPixel0() + c.getXPixels() - 1, yPixel1);
 		int precision = getScale().precision[0];
-		JmolFont font = pd.setFont(g, c.getXPixels(), FONT_PLAIN, pd.isPrinting ? 10 : 12, false);
+		Font font = pd.setFont(g, c.getXPixels(), FONT_PLAIN, pd.isPrinting ? 10 : 12, false);
 		int y1 = yPixel1;
 		int y2 = yPixel1 + 4 * pd.scalingFactor;
 		int y3 = yPixel1 + 2 * pd.scalingFactor;
@@ -2068,7 +2071,7 @@ public class GraphSet implements XYScaleConverter {
 
 		ScaleData sd = c.getScale();
 		int precision = sd.precision[1];
-		JmolFont font = pd.setFont(g, c.getXPixels(), FONT_PLAIN, pd.isPrinting ? 10 : 12, false);
+		Font font = pd.setFont(g, c.getXPixels(), FONT_PLAIN, pd.isPrinting ? 10 : 12, false);
 		int h = font.getHeight();
 		double max = sd.maxYOnScale + sd.steps[1] / 2;
 		int yLast = Integer.MIN_VALUE;
@@ -2223,22 +2226,20 @@ public class GraphSet implements XYScaleConverter {
 		y -= f * 2 * pd.scalingFactor;
 
 		if (y2 > 0) {
-  		drawStringRotated(g, 90, xs[0] - s15, y, "  ppm");
-	  	drawStringRotated(g, 90, xs[0] - s15, y - y4 - s5, " Hz");
+  		drawStringRotated(g, -90, xs[0] - s15, y, "  ppm");
+	  	drawStringRotated(g, -90, xs[0] - s15, y - y4 - s5, " Hz");
 		}
 		for (int i = data.size(); --i >= 0;) {
-			drawStringRotated(g, 90 * f, xs[i] + f * h / 3, y, sdata[i][1]);
+			drawStringRotated(g, -90 * f, xs[i] + f * h / 3, y, sdata[i][1]);
 			if (y2 > 0 && sdata[i][4].length() > 0) {
 				int x = (xs[i] + xs[i - 1]) / 2 + h / 3;
-				drawStringRotated(g, 90, x, y - y4 - s5, sdata[i][4]);
+				drawStringRotated(g, -90, x, y - y4 - s5, sdata[i][4]);
 			}
 		}
 	}
 
 	private void drawStringRotated(Object g, int angle, int x, int y, String s) {
-		g2d.rotatePlot(g, -angle, x, y);
-		g2d.drawString(g, s, x, y);
-		g2d.rotatePlot(g, angle, x, y);
+		g2d.drawStringRotated(g, s, x, y, angle);
 	}
 
 	// determine whether there are any ratio annotations to draw
@@ -2829,6 +2830,7 @@ public class GraphSet implements XYScaleConverter {
 			pd.integralShiftMode = (isOnIntegral ? getShiftMode(xPixel, yPixel) : 0);
 			pd.isIntegralDrag = (pd.integralShiftMode == 0 && (isOnIntegral || haveIntegralDisplayed(-1)
 					&& findMeasurement(getIntegrationGraph(-1), xPixel, yPixel, 0) != null));
+			System.out.println("pd.isIntegralDrag set in checkSPelick " + pd.isIntegralDrag);
 			if (pd.integralShiftMode != 0)
 				// pd.repaint();
 				return false;
@@ -4097,7 +4099,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
   
 	private void draw2DImage() {
     if (imageView != null)
-    	g2d.draw2DImage(gMain, image2D, imageView.xPixel0, imageView.yPixel0, // destination 
+    	g2d.drawGrayScaleImage(gMain, image2D, imageView.xPixel0, imageView.yPixel0, // destination 
           imageView.xPixel0 + imageView.xPixels - 1, // destination 
           imageView.yPixel0 + imageView.yPixels - 1, // destination 
           imageView.xView1, imageView.yView1, imageView.xView2, imageView.yView2); // source
@@ -4128,7 +4130,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 			buffer = imageView.adjustView(spec, viewData);
 			imageView.resetView();
 		}
-		image2D = g2d.newImage(gMain, image2D, imageView.imageWidth, imageView.imageHeight, buffer);
+		image2D = g2d.newGrayScaleImage(gMain, image2D, imageView.imageWidth, imageView.imageHeight, buffer);
 		setImageWindow();
 		return true;
 	}

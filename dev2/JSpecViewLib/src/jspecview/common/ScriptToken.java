@@ -55,7 +55,6 @@ public enum ScriptToken {
   DISPLAY2D("T"), 
   ENABLEZOOM("T"), 
   ENDINDEX, 
-  EXPORT("[XY,DIF,DIFDUP,PAC,FIX,SQZ,AML,CML,JPG,PNG,SVG] \"filename\""),
   FINDX("x-value"),
   GETPROPERTY("[ALL] [propertyName]"),
   GETSOLUTIONCOLOR,  
@@ -125,6 +124,7 @@ public enum ScriptToken {
   YSCALE("[ALL] lowValue highValue"), 
   YSCALEON("T"), YUNITSON("T"),
   WINDOW,
+  WRITE("[XY,DIF,DIFDUP,PAC,FIX,SQZ,AML,CML,JPG,PDF,PNG,SVG] \"filename\""),
   ZOOM("OUT or x1,x2 or x1,y1 x2,y2"),
   ZOOMBOXCOLOR, ZOOMBOXCOLOR2; // not implemented
 
@@ -191,7 +191,7 @@ public enum ScriptToken {
     default:
       return ScriptTokenizer.nextStringToken(params, true);
     case CLOSE:
-    case EXPORT:
+    case GETPROPERTY:
     case INTEGRATION:
     case INTEGRATE:
     case JMOL:
@@ -200,7 +200,7 @@ public enum ScriptToken {
     case PEAK:
     case PLOTCOLORS:
     case YSCALE:
-    case GETPROPERTY:
+    case WRITE:
       // take full command
       return removeCommandName(cmd);
     case SELECT:

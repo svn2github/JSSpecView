@@ -54,9 +54,9 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import javajs.util.List;
+import javajs.util.ParserJS;
 
 import org.jmol.util.Logger;
-import org.jmol.util.Txt;
 
 import jspecview.api.AppletFrame;
 import jspecview.api.JSVAppletInterface;
@@ -480,7 +480,7 @@ public class JSVApplet implements JSVAppletInterface,
 	 * 
 	 */
 	public void callToJavaScript(String callback, Object[] data) {
- 	 String[] tokens = Txt.split(callback, ".");
+ 	 String[] tokens = ParserJS.split(callback, ".");
 	 	/**
 	 	 * @j2sNative
 	 	 * 

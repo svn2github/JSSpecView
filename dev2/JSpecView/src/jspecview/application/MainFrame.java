@@ -179,7 +179,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	private boolean sidePanelOn;
 	private boolean showExitDialog;
 	private boolean statusbarOn;
-	private boolean svgForInkscape = false;
+	//private boolean svgForInkscape = false;
 	private boolean toolbarOn;
 
 
@@ -504,8 +504,8 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 			// bad property value
 		}
 
-		svgForInkscape = Boolean.parseBoolean(properties
-				.getProperty("svgForInkscape"));
+  //		svgForInkscape = Boolean.parseBoolean(properties
+	//			.getProperty("svgForInkscape"));
 
 	}
 
@@ -773,7 +773,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	 *          the name of the format to export in
 	 */
 	void exportSpectrumViaMenu(String command) {
-		new Exporter().exportSpectrum(viewer, command);
+		new Exporter().write(viewer, ScriptToken.getTokens(command), false);
 	}
 
 	protected void windowClosing_actionPerformed() {
@@ -905,10 +905,10 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		return null;
 	}
 
-	public String siExecExport(JSVPanel jsvp, String value) {
-		return new Exporter().exportCmd(jsvp, ScriptToken.getTokens(value),
-				svgForInkscape);
-	}
+//	public String siExecExport(JSVPanel jsvp, String value) {
+//		return new Exporter().write(viewer, jsvp, ScriptToken.getTokens(value),
+//				svgForInkscape);
+//	}
 
 	public void siExecSetInterface(String value) {
 		interfaceOverlaid = (value.equalsIgnoreCase("overlay"));
@@ -1066,10 +1066,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		siOpenDataOrFile(null, null, null, JSVFileManager.SIMULATION_PROTOCOL + "$" + name, -1, -1, true);
 	}
 
-	public String siPrintPDF(String fileName) {
-		return new Exporter().printPDF(viewer, fileName);
-	}
-	
 	public void siCheckCallbacks(String title) {
 		// setMainTitle(title);
 	}
@@ -1148,10 +1144,10 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		// commandInput.requestFocusInWindow();
 	}
 
-	public JDXSource siCreateSource(String data, String filePath, URL base,
+	public JDXSource siCreateSource(String data, String filePath, 
 			int firstSpec, int lastSpec) throws Exception {
 		return FileReader.createJDXSource(JSVFileManager
-				.getBufferedReaderForString(data), filePath, null, false, loadImaginary , firstSpec,
+				.getBufferedReaderForString(data), filePath, false, loadImaginary , firstSpec,
 				lastSpec);
 	}
 
@@ -1181,7 +1177,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	public String siSetFileAsString(String value) {
-		return JSVFileManager.getFileAsString(value, null);
+		return JSVFileManager.getFileAsString(value);
 	}
 
   

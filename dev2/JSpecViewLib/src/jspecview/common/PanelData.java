@@ -43,6 +43,7 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 import javajs.api.GenericColor;
+import javajs.awt.Font;
 import javajs.util.List;
 
 import jspecview.api.AnnotationData;
@@ -55,7 +56,6 @@ import jspecview.util.JSVColorUtil;
 
 import org.jmol.api.Event;
 import org.jmol.api.EventManager;
-import org.jmol.util.JmolFont;
 import org.jmol.util.Logger;
 
 /**
@@ -71,13 +71,13 @@ import org.jmol.util.Logger;
 
 public class PanelData implements EventManager {
 
-	JSVGraphics g2d;
+	public JSVGraphics g2d, g2d0;
 	private JSViewer viewer;
 
 	public PanelData(JSVPanel panel, JSViewer viewer) {
 		this.viewer = viewer;
 		this.jsvp = panel;
-		this.g2d = viewer.g2d;
+		this.g2d = this.g2d0 = viewer.g2d;
     BLACK = g2d.getColor1(0);
 		highlightColor = g2d.getColor4(255, 0, 0, 200);
 		zoomBoxColor = g2d.getColor4(150, 150, 100, 130);
@@ -398,6 +398,8 @@ public class PanelData implements EventManager {
 	public synchronized void drawGraph(Object gMain, Object gTop, int width, int height,
 			boolean addFilePath) {
 		boolean withCoords;
+		//System.out.println("PanelData.drawGraph " + width  + " " + height);
+		this.gMain = gMain;
 		display1D = !isLinked && getBoolean(ScriptToken.DISPLAY1D);
 		int top = topMargin;
 		int bottom = bottomMargin;
@@ -456,14 +458,14 @@ public class PanelData implements EventManager {
 	 */
 	public void drawCoordinates(Object g, int top, int x, int y) {
 		g2d.setGraphicsColor(g, coordinatesColor);
-		JmolFont font = setFont(g, jsvp.getWidth(), JmolFont.FONT_STYLE_PLAIN, 12,
+		Font font = setFont(g, jsvp.getWidth(), Font.FONT_STYLE_PLAIN, 12,
 				true);
 		g2d.drawString(g, coordStr, x - font.stringWidth(coordStr), y);
 	}
 
-	public JmolFont setFont(Object g, int width, int style, float size,
+	public Font setFont(Object g, int width, int style, float size,
 			boolean isLabel) {
-		JmolFont font = getFont(g, width, style, size, isLabel);
+		Font font = getFont(g, width, style, size, isLabel);
 		g2d.setGraphicsFont(g, font);
 		return font;
 	}
@@ -476,7 +478,7 @@ public class PanelData implements EventManager {
 		s = s.substring(s.lastIndexOf("/") + 1);
 		s = s.substring(s.lastIndexOf("\\") + 1);
 		g2d.setGraphicsColor(g, BLACK);
-		JmolFont font = setFont(g, 1000, JmolFont.FONT_STYLE_PLAIN, 9, true);
+		Font font = setFont(g, 1000, Font.FONT_STYLE_PLAIN, 9, true);
 		if (x != left * scalingFactor)
 			x -= font.stringWidth(s);
 		g2d.drawString(g, s, x, y - font.getHeight());
@@ -484,12 +486,12 @@ public class PanelData implements EventManager {
 
 	public void printVersion(Object g, int pageHeight) {
 		g2d.setGraphicsColor(g, BLACK);
-		JmolFont font = setFont(g, 100, JmolFont.FONT_STYLE_PLAIN, 9, true);
+		Font font = setFont(g, 100, Font.FONT_STYLE_PLAIN, 12, true);
 		String s = jsvp.getApiPlatform().getDateFormat() + " JSpecView "
 				+ JSVersion.VERSION_SHORT;
 		int w = font.stringWidth(s);
 		g2d.drawString(g, s, (thisWidth - right) * scalingFactor - w, pageHeight
-				* scalingFactor - font.getHeight());
+				* scalingFactor - font.getHeight()*3);
 	}
 
 	/**
@@ -505,17 +507,17 @@ public class PanelData implements EventManager {
 	 */
 	public void drawTitle(Object g, int pageHeight, int pageWidth, String title) {
 		title = title.replace('\n', ' ');
-		JmolFont font = getFont(g, pageWidth, isPrinting
-				|| getBoolean(ScriptToken.TITLEBOLDON) ? JmolFont.FONT_STYLE_BOLD
-				: JmolFont.FONT_STYLE_PLAIN, 14, true);
+		Font font = getFont(g, pageWidth, isPrinting
+				|| getBoolean(ScriptToken.TITLEBOLDON) ? Font.FONT_STYLE_BOLD
+				: Font.FONT_STYLE_PLAIN, 14, true);
 		int nPixels = font.stringWidth(title);
 		if (nPixels > pageWidth) {
 			int size = (int) (14.0 * pageWidth / nPixels);
 			if (size < 10)
 				size = 10;
 			font = getFont(g, pageWidth, isPrinting
-					|| getBoolean(ScriptToken.TITLEBOLDON) ? JmolFont.FONT_STYLE_BOLD
-					: JmolFont.FONT_STYLE_PLAIN, size, true);
+					|| getBoolean(ScriptToken.TITLEBOLDON) ? Font.FONT_STYLE_BOLD
+					: Font.FONT_STYLE_PLAIN, size, true);
 		}
 		g2d.setGraphicsColor(g, titleColor);
 		g2d.setGraphicsFont(g, font);
@@ -803,7 +805,7 @@ public class PanelData implements EventManager {
 		return jsvp.getInput(message, title, sval);
 	}
 
-	private JmolFont getFont(Object g, int width, int style, float size,
+	private Font getFont(Object g, int width, int style, float size,
 			boolean isLabel) {
 		size *= scalingFactor;
 		if (isLabel) {
@@ -815,7 +817,7 @@ public class PanelData implements EventManager {
 		}
 		int face = jsvp.getFontFaceID(isPrinting ? printingFontName
 				: displayFontName);
-		return JmolFont.createFont3D(face, style, size, size, jsvp.getApiPlatform(), g);
+		return Font.createFont3D(face, style, size, size, jsvp.getApiPlatform(), g);
 	}
 
 	// listeners to handle various events, from GraphSet or AwtPanel
@@ -1279,6 +1281,7 @@ public class PanelData implements EventManager {
 	}
 
 	public Hashtable<ScriptToken, Object> optionsSaved;
+	private Object gMain;
 
 	public void setPrint(PrintLayout pl, String fontName) {
 		if (pl == null) {
@@ -1330,9 +1333,14 @@ public class PanelData implements EventManager {
 	public int print(Object g, double height, double width,
 			double x, double y, double paperHeight, double paperWidth, 
 			boolean isPortrait, int pi) {
+    g2d = g2d0;
     if (pi == 0) {
       isPrinting = true;
       boolean addFilePath = false;
+      if (g instanceof JSVGraphics) {// JsPdfCreator
+      	g2d = (JSVGraphics) g;
+      	g = gMain;
+      }
       if (printGraphPosition.equals("default")) {
         if (isPortrait) {
           height = defaultPrintHeight;
@@ -1518,9 +1526,9 @@ public class PanelData implements EventManager {
 		case Event.VK_SHIFT:
 			shiftPressed = isPressed;
 			break;
-		default:
-			ctrlPressed = updateControlPressed(keyCode);
-			shiftPressed = checkMod(keyCode, Event.SHIFT_MASK);
+		//default:
+			//ctrlPressed = updateControlPressed(keyCode);
+			//shiftPressed = checkMod(keyCode, Event.SHIFT_MASK);
 		}
 	}
 

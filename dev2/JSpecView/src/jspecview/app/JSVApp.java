@@ -39,8 +39,6 @@
 
 package jspecview.app;
 
-import java.net.URL;
-
 import java.util.Map;
 
 import javajs.util.List;
@@ -783,10 +781,10 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 		return interfaceOverlaid;
 	}
 
-	public JDXSource siCreateSource(String data, String filePath, URL base,
+	public JDXSource siCreateSource(String data, String filePath, 
 			int firstSpec, int lastSpec) throws Exception {
 		return FileReader.createJDXSource(JSVFileManager
-				.getBufferedReaderForString(data), filePath, base,
+				.getBufferedReaderForString(data), filePath, 
 				obscureTitleFromUser == Boolean.TRUE, loadImaginary, -1, -1);
 	}
 
@@ -862,7 +860,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	}
 
 	public String siSetFileAsString(String value) {
-		return JSVFileManager.getFileAsString(value, appletFrame.getDocumentBase());
+		return JSVFileManager.getFileAsString(value);
 	}
 
 	public JSVTreeNode siCreateTree(JDXSource source, JSVPanel[] jsvPanels) {

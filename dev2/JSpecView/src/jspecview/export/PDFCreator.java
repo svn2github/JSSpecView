@@ -40,7 +40,7 @@ import jspecview.api.JSVPanel;
 import jspecview.api.PdfCreatorInterface;
 import jspecview.common.PrintLayout;
 
-public class PDFCreator1 implements PdfCreatorInterface, JSVGraphics {
+public class PDFCreator implements PdfCreatorInterface, JSVGraphics {
   
 	private PrintLayout pl;
 	private OutputStream os;
@@ -62,7 +62,7 @@ public class PDFCreator1 implements PdfCreatorInterface, JSVGraphics {
 	private JSVGraphics g2d;
 	private Font currentFont;
 
-	public PDFCreator1() {
+	public PDFCreator() {
    // for Class.forName  
   }
 
@@ -74,6 +74,7 @@ public class PDFCreator1 implements PdfCreatorInterface, JSVGraphics {
 		try {
 			width = (isLandscape ? pl.paperHeight : pl.paperWidth);
 			height = (isLandscape ? pl.paperWidth : pl.paperHeight);
+			System.out.println("Creating PDF with width=" + width + " and height=" + height);
 			newDocument();
 			panel.printPdf(this, pl);
 			closeDocument();

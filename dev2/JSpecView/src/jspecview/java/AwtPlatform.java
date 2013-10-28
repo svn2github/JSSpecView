@@ -8,6 +8,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import javajs.awt.Font;
 import javajs.util.P3;
 
 import javax.swing.JDialog;
@@ -22,7 +23,6 @@ import org.jmol.api.JmolFileInterface;
 import org.jmol.api.JmolMouseInterface;
 import org.jmol.api.JmolPopupInterface;
 import org.jmol.api.PlatformViewer;
-import org.jmol.util.JmolFont;
 
 public class AwtPlatform implements ApiPlatform {
 
@@ -122,7 +122,7 @@ public class AwtPlatform implements ApiPlatform {
     return Image.drawImageToBuffer(gOffscreen, imageOffscreen, imageobj, width, height, bgcolor);
   }
 
-  public int[] getTextPixels(String text, JmolFont font3d, Object gObj,
+  public int[] getTextPixels(String text, Font font3d, Object gObj,
                              Object image, int width, int height, int ascent) {
     return Image.getTextPixels(text, font3d, gObj, image, width, height, ascent);
   }
@@ -163,24 +163,24 @@ public class AwtPlatform implements ApiPlatform {
   
   ///// FONT
   
-  public int fontStringWidth(JmolFont font, Object fontMetrics, String text) {
-    return Font.stringWidth(fontMetrics, text);
+  public int fontStringWidth(Font font, String text) {
+    return AwtFont.stringWidth(font.getFontMetrics(), text);
   }
 
   public int getFontAscent(Object fontMetrics) {
-    return Font.getAscent(fontMetrics);
+    return AwtFont.getAscent(fontMetrics);
   }
 
   public int getFontDescent(Object fontMetrics) {
-    return Font.getDescent(fontMetrics);
+    return AwtFont.getDescent(fontMetrics);
   }
 
-  public Object getFontMetrics(JmolFont font, Object graphics) {
-    return Font.getFontMetrics(font, graphics);
+  public Object getFontMetrics(Font font, Object graphics) {
+    return AwtFont.getFontMetrics(font, graphics);
   }
 
   public Object newFont(String fontFace, boolean isBold, boolean isItalic, float fontSize) {
-    return Font.newFont(fontFace, isBold, isItalic, fontSize);
+    return AwtFont.newFont(fontFace, isBold, isItalic, fontSize);
   }
 
   /// misc

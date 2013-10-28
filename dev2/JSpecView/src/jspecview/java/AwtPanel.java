@@ -39,6 +39,7 @@ package jspecview.java;
 
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.image.RenderedImage;
@@ -51,12 +52,14 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import javajs.api.GenericColor;
+import javajs.awt.Font;
 import javajs.util.List;
 
 import javax.imageio.ImageIO;
 import javax.print.attribute.Attribute;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet; //import javax.print.attribute.standard.MediaSize;
+import javax.print.attribute.standard.MediaSizeName;
 import javax.print.attribute.standard.OrientationRequested;
 import javax.swing.BorderFactory;
 import javax.swing.JOptionPane;
@@ -66,12 +69,11 @@ import javax.swing.ToolTipManager;
 
 import org.jmol.api.ApiPlatform;
 import org.jmol.api.JmolMouseInterface;
-import org.jmol.util.JmolFont;
 import org.jmol.util.Logger;
 import org.jmol.util.Txt;
 
+import jspecview.api.JSVGraphics;
 import jspecview.api.JSVPanel;
-import jspecview.api.PdfCreatorInterface;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
@@ -221,7 +223,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
       return;
     
     super.paintComponent(g); // paint background 
-    
+    pd.g2d = pd.g2d0;
     pd.drawGraph(g, g, getWidth(), getHeight(), false);
     viewer.repaintDone();
   }
@@ -241,19 +243,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
 	}
 
 
-  /*----------------- METHODS IN INTERFACE Printable ---------------------- */
-
-  /**
-   * uses itext to create the document, either to a file or a byte stream
-   * @param os 
-   * @param pl 
-   */
-  private void createPdfDocument(OutputStream os, PrintLayout pl) {
-  	PdfCreatorInterface pdfCreator = (PdfCreatorInterface) viewer.getPlatformInterface("PdfCreator");
-  	if (pdfCreator == null)
-  		return;
-  	pdfCreator.createPdfDocument(this, pl, os);
-  }
+	/*----------------- METHODS IN INTERFACE Printable ---------------------- */
 
 	/**
 	 * Send a print job of the spectrum to the default printer on the system
@@ -283,7 +273,11 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
 			if (pj == null || pj.printDialog()) {
 				try {
 					if (pj == null) {
-						createPdfDocument(os, pl);
+						Dimension d = getDimension((MediaSizeName) pl.paper);
+						pl.paperWidth = d.width;
+						pl.paperHeight = d.height;
+						System.out.println(d);
+						viewer.createPdfDocument(os, pl);
 					} else {
 						PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
 						aset
@@ -308,6 +302,21 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
 		}
 	}
 
+	private Dimension getDimension(MediaSizeName paper) {
+		// ftp://ftp.pwg.org/pub/pwg/media-sizes/pwg-media-size-03.pdf
+		// at 72 dpi we have...
+		if (paper == MediaSizeName.NA_LETTER) {
+			return new Dimension((int) (8.5 * 72), 11 * 72);
+		}
+		if (paper == MediaSizeName.NA_LEGAL) {
+			return new Dimension((int) (8.5 * 72), 14 * 72);
+		}
+		if (paper == MediaSizeName.ISO_A4) {
+			return new Dimension((int) (210 / 25.4 * 72), (int) (297 / 25.4 * 72));
+		}
+		// if (paper == MediaSizeName.ISO_B4) {
+		return new Dimension((int) (250 / 25.4 * 72), (int) (353 / 25.4 * 72));
+	}
 
   /**
    * Implements method print in interface printable
@@ -324,22 +333,38 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
   public int print(Graphics g, PageFormat pf, int pi) throws PrinterException {
   	return pd.print(g, pf.getImageableHeight(), pf.getImageableWidth(), 
   			pf.getImageableX(), pf.getImageableY(),
-  			pf.getPaper().getHeight(), pf.getWidth(), 
+  			pf.getPaper().getHeight(), pf.getPaper().getWidth(), 
   			pf.getOrientation() == PageFormat.PORTRAIT, pi);
   }
 
+	/**
+	 * alternative used in JavaScript -- just for testing here
+	 * @param pdfCreator
+	 * @param pl 
+	 */
+	public void printPdf(JSVGraphics pdfCreator, PrintLayout pl) {
+		boolean isPortrait = !pl.layout.equals("landscape");
+		pd.print(pdfCreator, (isPortrait ? pl.imageableHeight : pl.imageableWidth), 
+				(isPortrait ? pl.imageableWidth : pl.imageableHeight), 
+				pl.imageableX, pl.imageableY,
+				pl.paperHeight, pl.paperWidth, isPortrait, 0);
+	}
+
 	public int getFontFaceID(String name) {
-		return JmolFont.getFontFaceID("SansSerif");
+		return Font.getFontFaceID("SansSerif");
 	}
 	
-	public void saveImage(String type, Object file) {
+	public String saveImage(String type, Object file) {
+		String msg = "OK";
     try {
 	    Image image = createImage(getWidth(), getHeight());
 	    paint(image.getGraphics());
 			ImageIO.write((RenderedImage) image, type, (File) file);
 		} catch (IOException e) {
-			showMessage(e.getMessage(), "Error Saving Image");
+			msg = e.toString();
+			showMessage(msg, "Error Saving Image");
 		}
+		return null;
 	}
 
 	///// threading and focus

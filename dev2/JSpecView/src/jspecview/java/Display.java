@@ -9,13 +9,13 @@ import java.awt.Toolkit;
 import java.awt.image.MemoryImageSource;
 
 import javajs.util.P3;
+import javajs.util.ParserJS;
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import org.jmol.api.ApiPlatform;
 import org.jmol.api.PlatformViewer;
-import org.jmol.util.Txt;
 
 /**
  * methods required by Jmol that access java.awt.Component
@@ -100,7 +100,7 @@ class Display {
       if (!asButtons)
         return JOptionPane.showInputDialog(label, data);
       if (data != null)
-        list = Txt.split(data, "|");
+        list = ParserJS.split(data, "|");
       int i = JOptionPane.showOptionDialog(null, label, "Jmol prompt",
           JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null,
           list, list[0]);

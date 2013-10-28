@@ -49,6 +49,7 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 import jspecview.common.JSVersion;
+//import jspecview.unused.Test;
 
 import org.jmol.api.JSVInterface;
 import org.jmol.util.Logger;
@@ -74,6 +75,8 @@ public class JSpecView implements JSVInterface {
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     } catch (Exception e) {
     }
+
+		//new Test();
 
 		Logger.info("JSpecView Application " + JSVersion.VERSION);
     JSpecView jsv = new JSpecView();

@@ -31,12 +31,14 @@ public interface JSVPanel extends JSVViewPanel {
 
 	int getFontFaceID(String name);
 
-  void saveImage(String type, Object file);
+  String saveImage(String type, Object file);
 
 	public void printPanel(PrintLayout pl, OutputStream os, String printJobTitle);
 
 	public boolean handleOldJvm10Event(int id, int x, int y, int modifiers, long time);
 
 	public void processTwoPointGesture(float[][][] touches);
+
+	public void printPdf(JSVGraphics jsvGraphics, PrintLayout pl);
 
 }

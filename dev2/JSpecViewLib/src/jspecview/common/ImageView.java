@@ -251,6 +251,10 @@ public class ImageView implements XYScaleConverter {
   	} 
   	return buf2d;
   }
+	
+	public int[] getBuffer() {
+		return buf2d;
+	}
 
 	public void setMinMaxY(JDXSpectrum spec) {
     List<JDXSpectrum> subSpectra = spec.getSubSpectra();

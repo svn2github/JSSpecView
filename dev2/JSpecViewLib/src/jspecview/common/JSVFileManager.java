@@ -34,6 +34,7 @@ import java.net.URL;
 import java.util.Hashtable;
 import java.util.Map;
 
+import javajs.util.ParserJS;
 import javajs.util.SB;
 
 import org.jmol.api.Interface;
@@ -62,18 +63,17 @@ public class JSVFileManager {
   public static String jsDocumentBase = "";
 	/**
 	 * @param name 
-	 * @param appletDocumentBase
 	 * @return file as string
 	 * 
 	 */
 
-	public static String getFileAsString(String name, URL appletDocumentBase) {
+	public static String getFileAsString(String name) {
 		if (name == null)
 			return null;
 		BufferedReader br;
 		SB sb = new SB();
 		try {
-			br = getBufferedReaderFromName(name, appletDocumentBase, null);
+			br = getBufferedReaderFromName(name, null);
 			String line;
 			while ((line = br.readLine()) != null) {
 				sb.append(line);
@@ -98,12 +98,12 @@ public class JSVFileManager {
     return (data == null ? null : new BufferedReader(new StringReader(data)));
   }
 
-  public static BufferedReader getBufferedReaderFromName(String name, URL appletDocumentBase, String startCode)
+  public static BufferedReader getBufferedReaderFromName(String name, String startCode)
       throws MalformedURLException, IOException {
     if (name == null)
       throw new IOException("Cannot find " + name);
-    String path = classifyName(name, appletDocumentBase);
-    return getUnzippedBufferedReaderFromName(path, appletDocumentBase, startCode);
+    String path = classifyName(name);
+    return getUnzippedBufferedReaderFromName(path, startCode);
   }
 
   /**
@@ -114,11 +114,10 @@ public class JSVFileManager {
    * file name in <PeakData file="...">
    * 
    * @param name
-   * @param appletDocumentBase
    * @return name
    * @throws MalformedURLException
    */
-  public static String classifyName(String name, URL appletDocumentBase)
+  public static String classifyName(String name)
       throws MalformedURLException {
     if (appletDocumentBase != null) {
       // This code is only for the applet
@@ -170,10 +169,10 @@ public class JSVFileManager {
 
 
 	private static BufferedReader getUnzippedBufferedReaderFromName(String name,
-			URL appletDocumentBase, String startCode) throws IOException {
+			String startCode) throws IOException {
 		String[] subFileList = null;
 		if (name.indexOf("|") >= 0) {
-			subFileList = Txt.split(name, "|");
+			subFileList = ParserJS.split(name, "|");
 			if (subFileList != null && subFileList.length > 0)
 				name = subFileList[0];
 		}
@@ -194,7 +193,7 @@ public class JSVFileManager {
 			}
 
 		}
-		InputStream in = getInputStream(name, true, appletDocumentBase);
+		InputStream in = getInputStream(name, true);
 		BufferedInputStream bis = new BufferedInputStream(in);
 		in = bis;
 		if (isZipFile(bis))
@@ -224,8 +223,7 @@ public class JSVFileManager {
     return (countRead == 4 && abMagic[0] == (byte) 0x1F && abMagic[1] == (byte) 0x8B);
   }
 
-	public static InputStream getInputStream(String name, boolean showMsg,
-			URL appletDocumentBase) throws IOException, MalformedURLException {
+	public static InputStream getInputStream(String name, boolean showMsg) throws IOException, MalformedURLException {
 		boolean isURL = isURL(name);
 		boolean isApplet = (appletDocumentBase != null);
 		InputStream in = null;
@@ -270,11 +268,11 @@ public class JSVFileManager {
 			String molFile = (isInline ? Txt.simpleReplace(name
 					.substring(4), "\\n", "\n")
 					: getFileAsString(Txt.simpleReplace(nciResolver, "%FILE",
-							JSVEscape.escapeUrl(name.substring(1))), null));
+							JSVEscape.escapeUrl(name.substring(1)))));
 			int pt = molFile.indexOf("\n");
 			molFile = "/JSpecView " + JSVersion.VERSION + molFile.substring(pt);
 			molFile = Txt.simpleReplace(molFile, "?", "_");
-			String json = getFileAsString(nmrdbServer + molFile, null);
+			String json = getFileAsString(nmrdbServer + molFile);
 			System.out.println(json);
 			json = Txt.simpleReplace(json, "\\r\\n", "\n");
 			json = Txt.simpleReplace(json, "\\t", "\t");
@@ -342,9 +340,9 @@ public class JSVFileManager {
     return str;
   }
 
-  public static String getJmolFilePath(String filePath, URL appletDocumentBase) {
+  public static String getJmolFilePath(String filePath) {
     try {
-      filePath = classifyName(filePath, appletDocumentBase);
+      filePath = classifyName(filePath);
     } catch (MalformedURLException e) {
       return null;
     }

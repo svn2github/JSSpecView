@@ -23,7 +23,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Hashtable;
 
@@ -123,7 +122,7 @@ public class FileReader {
   public static JDXSource createJDXSourceFromStream(InputStream in, boolean obscure, boolean loadImaginary)
       throws Exception {
     return createJDXSource(JSVFileManager.getBufferedReaderForInputStream(in),
-        "stream", null, obscure, loadImaginary, -1, -1);
+        "stream", obscure, loadImaginary, -1, -1);
   }
 
 	/**
@@ -131,7 +130,6 @@ public class FileReader {
 	 * 
 	 * @param br
 	 * @param filePath
-	 * @param appletDocumentBase
 	 * @param obscure
 	 * @param loadImaginary
 	 * @param iSpecFirst
@@ -142,13 +140,12 @@ public class FileReader {
 	 * @throws Exception
 	 */
 	public static JDXSource createJDXSource(BufferedReader br, String filePath,
-			URL appletDocumentBase, boolean obscure, boolean loadImaginary,
+			boolean obscure, boolean loadImaginary,
 			int iSpecFirst, int iSpecLast) throws Exception {
 
 		try {
 			if (br == null)
-				br = JSVFileManager.getBufferedReaderFromName(filePath,
-						appletDocumentBase, "##TITLE");
+				br = JSVFileManager.getBufferedReaderFromName(filePath, "##TITLE");
 			br.mark(400);
 			char[] chs = new char[400];
 			br.read(chs, 0, 400);

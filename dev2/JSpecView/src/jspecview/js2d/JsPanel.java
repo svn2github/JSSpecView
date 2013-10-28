@@ -40,13 +40,16 @@ package jspecview.js2d;
 import java.io.OutputStream;
 
 import javajs.api.GenericColor;
+import javajs.awt.Font;
 import javajs.util.List;
 
 import org.jmol.api.ApiPlatform;
 import org.jmol.api.JmolMouseInterface;
-import org.jmol.util.JmolFont;
 import org.jmol.util.Logger;
+
+import jspecview.api.JSVGraphics;
 import jspecview.api.JSVPanel;
+import jspecview.api.PdfCreatorInterface;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
@@ -193,7 +196,7 @@ public class JsPanel implements JSVPanel {
 	}
 
 	public int getFontFaceID(String name) {
-		return JmolFont.getFontFaceID("SansSerif");
+		return Font.getFontFaceID("SansSerif");
 	}
 	
   /*----------------------- JSVPanel PAINTING METHODS ---------------------*/
@@ -235,24 +238,12 @@ public class JsPanel implements JSVPanel {
      * 
      */
     {}
-    
+    pd.g2d = pd.g2d0;
     pd.drawGraph(context, context2, getWidth(), getHeight(), false);
     viewer.repaintDone();
   }
 
   /*----------------- METHODS IN INTERFACE Printable ---------------------- */
-
-//  /**
-//   * uses itext to create the document, either to a file or a byte stream
-//   * @param os 
-//   * @param pl 
-//   */
-//  private void createPdfDocument(OutputStream os, PrintLayout pl) {
-//    PdfCreatorInterface pdfCreator = (PdfCreatorInterface) JSVInterface.getInterface("jspecview.java.AwtPdfCreator");
-//  	if (pdfCreator == null)
-//  		return;
-//  	pdfCreator.createPdfDocument(this, pl, os);
-//  }
 
 	/**
 	 * Send a print job of the spectrum to the default printer on the system
@@ -263,114 +254,32 @@ public class JsPanel implements JSVPanel {
 	 * @param title
 	 */
 	public void printPanel(PrintLayout pl, OutputStream os, String title) {
-
-		// MediaSize size = MediaSize.getMediaSizeForName(pl.paper);
-
 		pl.title = title;
-//		pd.setPrint(pl, os == null ? pl.font : "Helvetica");
-
-		/* Create a print job */
-//	try {
-//			PrinterJob pj = (os == null ? PrinterJob.getPrinterJob() : null);
-//			if (pj != null) {
-//				if (title.length() > 30)
-//					title = title.substring(0, 30);
-//				pj.setJobName(title);
-//				pj.setPrintable(this);
-//			}
-//			if (pj == null || pj.printDialog()) {
-//				try {
-////					if (pj == null) {
-////						createPdfDocument(os, pl);
-////					} else {
-////						PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
-////						aset
-////								.add(pl.layout.equals("landscape") ? OrientationRequested.LANDSCAPE
-////										: OrientationRequested.PORTRAIT);
-////						aset.add((Attribute) pl.paper);
-////						pj.print(aset);
-////					}
-////				} catch (PrinterException ex) {
-////					String s = ex.getMessage();
-////					if (s == null)
-////						return;
-////					s = Txt.simpleReplace(s, "not accepting job.", "not accepting jobs.");
-////					// not my fault -- Windows grammar error!
-////					showMessage(s, "Printer Error");
-////				}
-////			}
-//		} catch (Exception e) {
-//			// too bad
-//		} finally {
-//			pd.setPrint(null, null);
-//		}
+		try {
+			createPdfDocument(os, pl);
+  	} catch (Exception ex) {
+  		showMessage(ex.toString(), "creating PDF");
+  	}
 	}
 
+  private void createPdfDocument(OutputStream os, PrintLayout pl) {
+  	PdfCreatorInterface pdfCreator = (PdfCreatorInterface) viewer.getPlatformInterface("PdfCreator");
+  	if (pdfCreator == null)
+  		return;
+  	pdfCreator.createPdfDocument(this, pl, os);
+  }
 
-//  /**
-//   * Implements method print in interface printable
-//   * 
-//   * @param g
-//   *        the <code>Graphics</code> object
-//   * @param pf
-//   *        the <code>PageFormat</code> object
-//   * @param pi
-//   *        the page index -- -1 for PDF creation
-//   * @return an int that depends on whether a print was successful
-//   * @throws PrinterException
-//   */
-//  public int print(Graphics g, PageFormat pf, int pi) throws PrinterException {
-//    if (pi == 0) {
-//      Graphics2D g2D = (Graphics2D) g;
-//      pd.isPrinting = true;
-//
-//      double height, width;
-//      boolean addFilePath = false;
-//      if (pd.printGraphPosition.equals("default")) {
-//        g2D.translate(pf.getImageableX(), pf.getImageableY());
-//        if (pf.getOrientation() == PageFormat.PORTRAIT) {
-//          height = PanelData.defaultPrintHeight;
-//          width = PanelData.defaultPrintWidth;
-//        } else {
-//          height = PanelData.defaultPrintWidth;
-//          width = PanelData.defaultPrintHeight;
-//        }
-//      } else if (pd.printGraphPosition.equals("fit to page")) {
-//        g2D.translate(pf.getImageableX(), pf.getImageableY());
-//        addFilePath = true;
-//        height = pf.getImageableHeight();
-//        width = pf.getImageableWidth();
-//      } else { // center
-//        Paper paper = pf.getPaper();
-//        double paperHeight = paper.getHeight();
-//        double paperWidth = paper.getWidth();
-//        int x, y;
-//
-//        if (pf.getOrientation() == PageFormat.PORTRAIT) {
-//          height = PanelData.defaultPrintHeight;
-//          width = PanelData.defaultPrintWidth;
-//          x = (int) (paperWidth - width) / 2;
-//          y = (int) (paperHeight - height) / 2;
-//        } else {
-//          height = PanelData.defaultPrintWidth;
-//          width = PanelData.defaultPrintHeight;
-//          y = (int) (paperWidth - PanelData.defaultPrintWidth) / 2;
-//          x = (int) (paperHeight - PanelData.defaultPrintHeight) / 2;
-//        }
-//        g2D.translate(x, y);
-//      }
-//
-//      g2D.scale(0.1, 0.1); // high resolution vector graphics for PDF
-//      pd.drawGraph(g2D, (int) width, (int) height, addFilePath);
-//
-//      pd.isPrinting = false;
-//      return Printable.PAGE_EXISTS;
-//    }
-//    pd.isPrinting = false;
-//    return Printable.NO_SUCH_PAGE;
-//  }
+	/**
+	 * @param pdfCreator
+	 * @param pl 
+	 */
+	public void printPdf(JSVGraphics pdfCreator, PrintLayout pl) {
+		pd.print(pdfCreator, pl.imageableHeight, pl.imageableWidth, 
+				pl.imageableX, pl.imageableY,
+				pl.paperHeight, pl.paperWidth, !pl.layout.equals("landscape"), 0);
+	}
 
-	public void saveImage(String type, Object file) {
+	public String saveImage(String type, Object file) {
 //    Image image = createImage(getWidth(), getHeight());
 //    paint(image.getGraphics());
 //    try {
@@ -378,6 +287,7 @@ public class JsPanel implements JSVPanel {
 //		} catch (IOException e) {
 //			showMessage(e.getMessage(), "Error Saving Image");
 //		}
+		return null;
 	}
 
 	public boolean hasFocus() {

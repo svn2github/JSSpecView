@@ -32,7 +32,9 @@
     <property name="dist.dir"           value="dist" />
     <property name="dist.zip"           value="${dist.dir}/jspecview.zip" />
     <property name="applet.jar"         value="${build.dir}/jspecview.jar" />
-	<property name="itext.jar" 			value="itext-1.4.5-min.jar" />
+	<!-- property name="itext.jar" 			value="itext-1.4.5-min.jar" / 
+		replaced with Bob's jspecview.export.PdfCreator 10/2013
+	 -->
 
     <path id="jspecviewlib.classpath">
         <pathelement location="${jsvlib.dir}"/>
@@ -40,7 +42,7 @@
     <path id="jspecview.classpath">
         <pathelement location="bin"/>
         <pathelement location="${lib.dir}/netscape.jar"/>
-    	<pathelement location="${lib.dir}/${itext.jar}"/>
+    	<!-- pathelement location="${lib.dir}/${itext.jar}"/ -->
         <path refid="jspecviewlib.classpath"/>
     </path>
 
@@ -99,7 +101,7 @@
 			    </linecontains>
 			  </filterchain>
 	    </copy>
-	    <unjar dest="${bin.dir}" src="${lib.dir}/${itext.jar}"/>
+	    <!-- unjar dest="${bin.dir}" src="${lib.dir}/${itext.jar}"/   -->
         <jar destfile="${build.app.dir}/${ant.project.name}.app.${build.number}.jar">
             <manifest>
             	<attribute name="Class-Path" value="."/>
@@ -107,6 +109,7 @@
             </manifest>
 		   	<fileset dir="${bin.dir}">
 		      <include name="**/*"/>
+  		      <exclude name="javajs/swing/**/*"/>
 			  <exclude name="jspecview/*js*/*"/>
 		      <exclude name="jspecview/unused/*"/>
 		   	</fileset>
@@ -142,8 +145,9 @@
             	<attribute name="Class-Path" value=". netscape.jar"/>
             </manifest>
         	<fileset dir="${bin.dir}">
-        		<exclude name="com/lowagie/**"/>
-        		<exclude name="jspecview/application/**"/>
+        		<exclude name="com/lowagie/**/*"/>
+  		        <exclude name="javajs/swing/**/*"/>
+        		<exclude name="jspecview/application/**/*"/>
   			    <exclude name="jspecview/*js*/*"/>
   		        <exclude name="jspecview/unused/*"/>
         	</fileset>
@@ -159,12 +163,17 @@
 	<target name="make-signed-applet-jar" depends="make-applet-jar" description="Make signed JSpecView applet jar">
     <antcall target="revision" />
         <mkdir dir="${build.applet.dir}"/>
-	    <unjar dest="${bin.dir}" src="${lib.dir}/${itext.jar}"/>
+	    <!-- unjar dest="${bin.dir}" src="${lib.dir}/${itext.jar}"/ -->
         <jar destfile="${build.applet.dir}/temp.jar">
             <manifest>
               <attribute name="Class-Path" value=". netscape.jar"/>
             </manifest>
-          <fileset dir="${bin.dir}" />
+        	<fileset dir="${bin.dir}">
+        		<exclude name="com/lowagie/**/*"/>
+  		        <exclude name="javajs/swing/**/*"/>
+  		        <exclude name="jspecview/unused/*"/>
+  		        <exclude name="jspecview/application/**/*"/>
+        	</fileset>
           <fileset dir="${jsvlib.dir}" />
         </jar>    
       <signjar jar="${build.applet.dir}/temp.jar"

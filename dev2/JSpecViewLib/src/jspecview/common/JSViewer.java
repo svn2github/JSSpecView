@@ -6,6 +6,7 @@ import org.jmol.api.JSmolInterface;
 import org.jmol.api.PlatformViewer;
 
 import java.io.File;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
@@ -33,6 +34,7 @@ import jspecview.api.JSVPopupMenu;
 import jspecview.api.JSVPrintDialog;
 import jspecview.api.JSVTree;
 import jspecview.api.JSVTreeNode;
+import jspecview.api.PdfCreatorInterface;
 import jspecview.api.ScriptInterface;
 import jspecview.api.VisibleInterface;
 import jspecview.common.Annotation.AType;
@@ -217,9 +219,6 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 									: Parameters.isTrue(value) ? Logger.LEVEL_DEBUG
 											: Logger.LEVEL_INFO);
 					break;
-				case EXPORT:
-					msg = execExport(value);
-					return false;
 				case GETPROPERTY:
 					Map<String, Object> info = (selectedPanel == null ? null
 							: getPropertyAsJavaObject(value));
@@ -311,6 +310,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 				case SHOWPROPERTIES:
 				case SHOWSOURCE:
 				case YSCALE:
+				case WRITE:
 				case ZOOM:
 					if (selectedPanel == null) {
 						isOK = false;
@@ -343,7 +343,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 						pd().splitStack(!Parameters.isTrue(value));
 						break;
 					case PRINT:
-						msg = printPDF(value);
+						msg = execWrite(null);
 						break;
 					case SETPEAK:
 						// setpeak NONE Double.NaN, Double.MAX_VALUE
@@ -398,6 +398,9 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 						break;
 					case WINDOW:
 						si.siNewWindow(Parameters.isTrue(value), false);
+						break;
+					case WRITE:
+						msg = execWrite(value);
 						break;
 					case ZOOM:
 						isOK = execZoom(value);
@@ -1078,7 +1081,6 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		String newPath = null;
 		String fileName = null;
 		File file = null;
-		URL base = null;
 		boolean isView = false;
 		if (data != null) {
 		} else if (specs != null) {
@@ -1086,8 +1088,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 			newPath = fileName = filePath = "View" + si.siIncrementViewCount(1);
 		} else if (url != null) {
 			try {
-				base = JSVFileManager.appletDocumentBase;
-				URL u = new URL(base, url, null);
+				URL u = new URL(JSVFileManager.appletDocumentBase, url, null);
 				filePath = u.toString();
 				si.siSetRecentURL(filePath);
 				fileName = JSVFileManager.getName(filePath);
@@ -1113,7 +1114,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		si.setCursor(ApiPlatform.CURSOR_WAIT);
 		try {
 			si.siSetCurrentSource(isView ? JDXSource.createView(specs) : si
-					.siCreateSource(data, filePath, base, firstSpec, lastSpec));
+					.siCreateSource(data, filePath, firstSpec, lastSpec));
 		} catch (Exception e) {
 			/**
 			 * @j2sNative
@@ -1603,15 +1604,16 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 	private Object offWindowFrame;
 
 	public PrintLayout getDialogPrint(boolean isJob) {
-		try {
-			PrintLayout pl = ((JSVPrintDialog) getPlatformInterface("PrintDialog")).set(
-					offWindowFrame, lastPrintLayout, isJob).getPrintLayout();
-			if (pl != null)
-				lastPrintLayout = pl;
-			return pl;
-		} catch (Exception e) {
-			return null;
-		}
+		if (!isJS)
+			try {
+				PrintLayout pl = ((JSVPrintDialog) getPlatformInterface("PrintDialog"))
+						.set(offWindowFrame, lastPrintLayout, isJob).getPrintLayout();
+				if (pl != null)
+					lastPrintLayout = pl;
+				return pl;
+			} catch (Exception e) {
+			}
+		return new PrintLayout();
 	}
 
 	public void setIRmode(String mode) {
@@ -1631,29 +1633,14 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		return 0;
 	}
 
-	private String execExport(String value) {
+	private String execWrite(String value) {
+		if (isJS && value == null)
+			value = "PDF";
 		String msg = ((ExportInterface) Interface
-				.getInterface("jspecview.export.Exporter")).exportCmd(selectedPanel,
-				ScriptToken.getTokens(value), false);
+				.getInterface("jspecview.export.Exporter")).write(this,
+				value == null ? null : ScriptToken.getTokens(value), false);
 		si.writeStatus(msg);
 		return msg;
-	}
-
-	/**
-	 * @param fileName
-	 * @return "OK" if signedApplet or app; Base64-encoded string if unsigned
-	 *         applet or null if problem
-	 */
-	public String printPDF(String fileName) {
-		boolean needWindow = false; // !isNewWindow;
-		// not sure what this is about. The applet prints fine
-		if (needWindow)
-			si.siNewWindow(true, false);
-		String s = ((ExportInterface) Interface
-				.getInterface("jspecview.export.Exporter")).printPDF(this, fileName);
-		if (needWindow)
-			si.siNewWindow(false, false);
-		return s;
 	}
 
 	public String export(String type, int n) {
@@ -1666,12 +1653,26 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
 		JDXSpectrum spec = (n < 0 ? pd.getSpectrum() : pd.getSpectrumAt(n));
 		try {
 			return ((ExportInterface) Interface
-					.getInterface("jspecview.export.Exporter")).exportTheSpectrum(type,
-					null, spec, 0, spec.getXYCoords().length - 1);
+					.getInterface("jspecview.export.Exporter")).exportTheSpectrum(this,
+					ExportType.getType(type), null, spec, 0, spec.getXYCoords().length - 1, null);
 		} catch (Exception e) {
 			System.out.println(e);
 			return null;
 		}
 	}
+
+  /**
+   * uses simplified custom classes to create the document, either to a file or a byte stream
+   * @param os 
+   * @param pl 
+   */
+  public void createPdfDocument(OutputStream os, PrintLayout pl) {
+  	PdfCreatorInterface pdfCreator = (PdfCreatorInterface) 
+  	Interface.getInterface("jspecview.export.PDFCreator");
+  	//or to check with iText, Interface.getInterface("jspecview.unused.AwtPdfCreator");
+  	if (pdfCreator != null)
+  		pdfCreator.createPdfDocument(selectedPanel, pl, os);
+  }
+
 
 }

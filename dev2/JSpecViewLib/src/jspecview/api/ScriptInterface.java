@@ -1,10 +1,6 @@
 package jspecview.api;
 
-import java.net.URL;
-
 import javajs.util.List;
-
-
 
 import jspecview.common.JDXSpectrum;
 import jspecview.common.PanelNode;
@@ -31,7 +27,7 @@ public interface ScriptInterface {
 
 	public void siCloseSource(JDXSource source);
 
-	public JDXSource siCreateSource(String data, String filePath, URL base,
+	public JDXSource siCreateSource(String data, String filePath, 
 			int firstSpec, int lastSpec) throws Exception;
 
 	public JSVTreeNode siCreateTree(JDXSource source, JSVPanel[] jsvPanels);

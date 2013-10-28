@@ -129,7 +129,7 @@ public class DisplaySchemesProcessor {
   public boolean load(String dispSchemeFileName){
     fileName = dispSchemeFileName;        
     try{
-      BufferedReader br = JSVFileManager.getBufferedReaderFromName(fileName, null, "##TITLE");
+      BufferedReader br = JSVFileManager.getBufferedReaderFromName(fileName, "##TITLE");
     	return load(br);
     }
     catch(Exception e){
