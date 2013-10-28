@@ -31,10 +31,15 @@ import javajs.util.List;
 
 import org.jmol.util.Logger;
 
+import jspecview.api.JSVExporter;
 import jspecview.common.ColorParameters;
 import jspecview.common.Coordinate;
+import jspecview.common.ExportType;
 import jspecview.common.JDXSpectrum;
+import jspecview.common.JSViewer;
+import jspecview.common.PanelData;
 import jspecview.common.ScaleData;
+import jspecview.common.ScriptToken;
 import jspecview.util.JSVColorUtil;
 
 /**
@@ -50,7 +55,7 @@ import jspecview.util.JSVColorUtil;
  * @author Craig A.D. Walters
  * @author Prof Robert J. Lancashire
  */
-public class SVGExporter extends FormExporter {
+public class SVGExporter extends FormExporter implements JSVExporter {
 
   private static int svgWidth = 850;
   private static int svgHeight = 400;
@@ -59,265 +64,256 @@ public class SVGExporter extends FormExporter {
   private static int bottomInset = 80;
   private static int topInset = 20;
 
+  public SVGExporter() {
+  	
+  }
   
-  /**
-   * Export a Graph as SVG to a file given by fileName
-   * @param path the file path
-   * @param graph the Graph
-   * @param startIndex
-   * @param endIndex
-   * @param forInkscape 
-   * @return data if fileName is null
-   * @throws IOException
-   */
-  public String exportAsSVG(String path, JDXSpectrum graph, int startIndex, int endIndex, boolean forInkscape)
-      throws IOException {
-    return exportAsSVG(path, graph.getXYCoords(), "", startIndex,
-        endIndex, graph.getXUnits(), graph.getYUnits(), graph.isContinuous(),
-        graph.isXIncreasing(), graph.isInverted(), ColorParameters.BLACK, ColorParameters.BLACK, ColorParameters.BLACK,
-        ColorParameters.BLACK, ColorParameters.BLACK, ColorParameters.BLACK, ColorParameters.BLACK, forInkscape);
-  }
+	/**
+	 * Export a Graph as SVG to a file given by fileName
+	 * 
+	 * @param path
+	 *          the file path
+	 * @param spec
+	 *          the Graph
+	 * @param startIndex
+	 * @param endIndex
+	 * @param mode
+	 *          TODO
+	 * @return data if fileName is null
+	 * @throws IOException
+	 */
+	public String exportTheSpectrum(JSViewer viewer, ExportType mode,
+			String path, JDXSpectrum spec, int startIndex, int endIndex, PanelData pd)
+			throws IOException {
+		initForm(path);
 
-  /**
-   * Export a graph as SVG with specified Coordinates and Colors
-   * @param fileName
-   * @param xyCoords an array of Coordinates
-   * @param title the title of the graph
-   * @param startDataPointIndex the start index of the coordinates
-   * @param endDataPointIndex the end index of the coordinates
-   * @param xUnits the units of the x axis
-   * @param yUnits the units of the y axis
-   * @param isContinuous true if the graph is continuous, otherwise false
-   * @param increasing true is the graph is increasing, otherwise false
-   * @param isInverted 
-   * @param plotAreaColor the color of the plot area
-   * @param backgroundColor the color of the background
-   * @param plotColor the color of the plot
-   * @param gridColor the color of the grid
-   * @param titleColor the color of the title
-   * @param scaleColor the color of the scales
-   * @param unitsColor the color of the units
-   * @param exportForInkscape 
-   * @return data if fileName is null
-   * @throws IOException
-   */
-  public String exportAsSVG(String fileName, Coordinate[] xyCoords, String title,
-                           int startDataPointIndex, int endDataPointIndex,
-                           String xUnits, String yUnits, boolean isContinuous,
-                           boolean increasing, boolean isInverted, GenericColor plotAreaColor,
-                           GenericColor backgroundColor, GenericColor plotColor,
-                           GenericColor gridColor, GenericColor titleColor, GenericColor scaleColor,
-                           GenericColor unitsColor, boolean exportForInkscape) throws IOException {
+		GenericColor plotAreaColor, backgroundColor, plotColor, gridColor, titleColor, scaleColor, unitsColor;
 
-    initForm(fileName);
+		if (pd == null) {
+			plotAreaColor = backgroundColor = plotColor = gridColor = titleColor = scaleColor = unitsColor = ColorParameters.BLACK;
+		} else {
+			plotAreaColor = pd.getColor(ScriptToken.PLOTAREACOLOR);
+			backgroundColor = pd.bgcolor;
+			plotColor = pd.getCurrentPlotColor(0);
+			gridColor = pd.getColor(ScriptToken.GRIDCOLOR);
+			titleColor = pd.getColor(ScriptToken.TITLECOLOR);
+			scaleColor = pd.getColor(ScriptToken.SCALECOLOR);
+			unitsColor = pd.getColor(ScriptToken.UNITSCOLOR);
+		}
 
-    ScaleData scaleData = new ScaleData(xyCoords, startDataPointIndex, endDataPointIndex, isContinuous, isInverted);
+		Coordinate[] xyCoords = spec.getXYCoords();
 
-    double maxXOnScale = scaleData.maxXOnScale;
-    double minXOnScale = scaleData.minXOnScale;
-    double maxYOnScale = scaleData.maxYOnScale;
-    double minYOnScale = scaleData.minYOnScale;
-    double xStep = scaleData.steps[0];
-    double yStep = scaleData.steps[1];
-    int plotAreaWidth = svgWidth - leftInset - rightInset;
-    int plotAreaHeight = svgHeight - topInset - bottomInset;
-    double xScaleFactor = (plotAreaWidth / (maxXOnScale - minXOnScale));
-    double yScaleFactor = (plotAreaHeight / (maxYOnScale - minYOnScale));
-    int leftPlotArea = leftInset;
-    int rightPlotArea = leftInset + plotAreaWidth;
-    int topPlotArea = topInset;
-    int bottomPlotArea = topInset + plotAreaHeight;
-    int titlePosition = bottomPlotArea + 60;
-    context.put("titlePosition", new Integer(titlePosition));
+		ScaleData scaleData = new ScaleData(xyCoords, startIndex, endIndex, spec
+				.isContinuous(), spec.isInverted());
 
-    double xPt, yPt;
-    String xStr, yStr;
+		double maxXOnScale = scaleData.maxXOnScale;
+		double minXOnScale = scaleData.minXOnScale;
+		double maxYOnScale = scaleData.maxYOnScale;
+		double minYOnScale = scaleData.minYOnScale;
+		double xStep = scaleData.steps[0];
+		double yStep = scaleData.steps[1];
+		int plotAreaWidth = svgWidth - leftInset - rightInset;
+		int plotAreaHeight = svgHeight - topInset - bottomInset;
+		double xScaleFactor = (plotAreaWidth / (maxXOnScale - minXOnScale));
+		double yScaleFactor = (plotAreaHeight / (maxYOnScale - minYOnScale));
+		int leftPlotArea = leftInset;
+		int rightPlotArea = leftInset + plotAreaWidth;
+		int topPlotArea = topInset;
+		int bottomPlotArea = topInset + plotAreaHeight;
+		int titlePosition = bottomPlotArea + 60;
+		context.put("titlePosition", new Integer(titlePosition));
 
-    //Grid
-    List<Map<String, String>> vertGridCoords = new List<Map<String, String>>();
-    List<Map<String, String>> horizGridCoords = new List<Map<String, String>>();
+		double xPt, yPt;
+		String xStr, yStr;
 
-    for (double i = minXOnScale; i < maxXOnScale + xStep / 2; i += xStep) {
-      xPt = leftPlotArea + ((i - minXOnScale) * xScaleFactor);
-      yPt = topPlotArea;
-      xStr = DecimalFormat.formatDecimalTrimmed(xPt, 6);
-      yStr = DecimalFormat.formatDecimalTrimmed(yPt, 6);
-      Map<String, String> hash = new Hashtable<String, String>();
-      hash.put("xVal", xStr);
-      hash.put("yVal", yStr);
-      vertGridCoords.addLast(hash);
-    }
+		// Grid
+		List<Map<String, String>> vertGridCoords = new List<Map<String, String>>();
+		List<Map<String, String>> horizGridCoords = new List<Map<String, String>>();
 
-    for (double i = minYOnScale; i < maxYOnScale + yStep / 2; i += yStep) {
-      xPt = leftPlotArea;
-      yPt = topPlotArea + ((i - minYOnScale) * yScaleFactor);
-      xStr = DecimalFormat.formatDecimalTrimmed(xPt, 6);
-      yStr = DecimalFormat.formatDecimalTrimmed(yPt, 6);
-      Map<String, String> hash = new Hashtable<String, String>();
-      hash.put("xVal", xStr);
-      hash.put("yVal", yStr);
-      horizGridCoords.addLast(hash);
-    }
+		for (double i = minXOnScale; i < maxXOnScale + xStep / 2; i += xStep) {
+			xPt = leftPlotArea + ((i - minXOnScale) * xScaleFactor);
+			yPt = topPlotArea;
+			xStr = DecimalFormat.formatDecimalTrimmed(xPt, 6);
+			yStr = DecimalFormat.formatDecimalTrimmed(yPt, 6);
+			Map<String, String> hash = new Hashtable<String, String>();
+			hash.put("xVal", xStr);
+			hash.put("yVal", yStr);
+			vertGridCoords.addLast(hash);
+		}
 
-    // Scale
+		for (double i = minYOnScale; i < maxYOnScale + yStep / 2; i += yStep) {
+			xPt = leftPlotArea;
+			yPt = topPlotArea + ((i - minYOnScale) * yScaleFactor);
+			xStr = DecimalFormat.formatDecimalTrimmed(xPt, 6);
+			yStr = DecimalFormat.formatDecimalTrimmed(yPt, 6);
+			Map<String, String> hash = new Hashtable<String, String>();
+			hash.put("xVal", xStr);
+			hash.put("yVal", yStr);
+			horizGridCoords.addLast(hash);
+		}
 
-    List<Map<String, String>> xScaleList = new List<Map<String, String>>();
-    List<Map<String, String>> xScaleListReversed = new List<Map<String, String>>();
-    List<Map<String, String>> yScaleList = new List<Map<String, String>>();
-    int precisionX = scaleData.precision[0];
-    int precisionY = scaleData.precision[1];
-    for (double i = minXOnScale; i < (maxXOnScale + xStep / 2); i += xStep) {
-      xPt = leftPlotArea + ((i - minXOnScale) * xScaleFactor);
-      xPt -= 10; // shift to left by 10
-      yPt = bottomPlotArea + 15; // shift down by 15
-      xStr = DecimalFormat.formatDecimalTrimmed(xPt, 6);
-      yStr = DecimalFormat.formatDecimalTrimmed(yPt, 6);
-      String iStr = DecimalFormat.formatDecimalDbl(i, precisionX);
-      Map<String, String> hash = new Hashtable<String, String>();
-      hash.put("xVal", xStr);
-      hash.put("yVal", yStr);
-      hash.put("number", iStr);
-      xScaleList.addLast(hash);
-    }
-    for (double i = minXOnScale, j = maxXOnScale; i < (maxXOnScale + xStep / 2); i += xStep, j -= xStep) {
-      xPt = leftPlotArea + ((j - minXOnScale) * xScaleFactor);
-      xPt -= 10;
-      yPt = bottomPlotArea + 15; // shift down by 15
-      xStr = DecimalFormat.formatDecimalTrimmed(xPt, 6);
-      yStr = DecimalFormat.formatDecimalTrimmed(yPt, 6);
-      String iStr = DecimalFormat.formatDecimalDbl(i, precisionX);
+		// Scale
 
-      Map<String, String> hash = new Hashtable<String, String>();
-      hash.put("xVal", xStr);
-      hash.put("yVal", yStr);
-      hash.put("number", iStr);
-      xScaleListReversed.addLast(hash);
+		List<Map<String, String>> xScaleList = new List<Map<String, String>>();
+		List<Map<String, String>> xScaleListReversed = new List<Map<String, String>>();
+		List<Map<String, String>> yScaleList = new List<Map<String, String>>();
+		int precisionX = scaleData.precision[0];
+		int precisionY = scaleData.precision[1];
+		for (double i = minXOnScale; i < (maxXOnScale + xStep / 2); i += xStep) {
+			xPt = leftPlotArea + ((i - minXOnScale) * xScaleFactor);
+			xPt -= 10; // shift to left by 10
+			yPt = bottomPlotArea + 15; // shift down by 15
+			xStr = DecimalFormat.formatDecimalTrimmed(xPt, 6);
+			yStr = DecimalFormat.formatDecimalTrimmed(yPt, 6);
+			String iStr = DecimalFormat.formatDecimalDbl(i, precisionX);
+			Map<String, String> hash = new Hashtable<String, String>();
+			hash.put("xVal", xStr);
+			hash.put("yVal", yStr);
+			hash.put("number", iStr);
+			xScaleList.addLast(hash);
+		}
+		for (double i = minXOnScale, j = maxXOnScale; i < (maxXOnScale + xStep / 2); i += xStep, j -= xStep) {
+			xPt = leftPlotArea + ((j - minXOnScale) * xScaleFactor);
+			xPt -= 10;
+			yPt = bottomPlotArea + 15; // shift down by 15
+			xStr = DecimalFormat.formatDecimalTrimmed(xPt, 6);
+			yStr = DecimalFormat.formatDecimalTrimmed(yPt, 6);
+			String iStr = DecimalFormat.formatDecimalDbl(i, precisionX);
 
-    }
+			Map<String, String> hash = new Hashtable<String, String>();
+			hash.put("xVal", xStr);
+			hash.put("yVal", yStr);
+			hash.put("number", iStr);
+			xScaleListReversed.addLast(hash);
 
-    for (double i = minYOnScale; (i < maxYOnScale + yStep / 2); i += yStep) {
-      xPt = leftPlotArea - 55;
-      yPt = bottomPlotArea - ((i - minYOnScale) * yScaleFactor);
-      yPt += 3; // shift down by three
-      xStr = DecimalFormat.formatDecimalTrimmed(xPt, 6);
-      yStr = DecimalFormat.formatDecimalTrimmed(yPt, 6);
-      String iStr = DecimalFormat.formatDecimalDbl(i, precisionY);
+		}
 
-      Map<String, String> hash = new Hashtable<String, String>();
-      hash.put("xVal", xStr);
-      hash.put("yVal", yStr);
-      hash.put("number", iStr);
-      yScaleList.addLast(hash);
-    }
+		for (double i = minYOnScale; (i < maxYOnScale + yStep / 2); i += yStep) {
+			xPt = leftPlotArea - 55;
+			yPt = bottomPlotArea - ((i - minYOnScale) * yScaleFactor);
+			yPt += 3; // shift down by three
+			xStr = DecimalFormat.formatDecimalTrimmed(xPt, 6);
+			yStr = DecimalFormat.formatDecimalTrimmed(yPt, 6);
+			String iStr = DecimalFormat.formatDecimalDbl(i, precisionY);
 
-    double firstTranslateX, firstTranslateY, secondTranslateX, secondTranslateY;
-    double scaleX, scaleY;
+			Map<String, String> hash = new Hashtable<String, String>();
+			hash.put("xVal", xStr);
+			hash.put("yVal", yStr);
+			hash.put("number", iStr);
+			yScaleList.addLast(hash);
+		}
 
-    if (increasing) {
-      firstTranslateX = leftPlotArea;
-      firstTranslateY = bottomPlotArea;
-      scaleX = xScaleFactor;
-      scaleY = -yScaleFactor;
-      secondTranslateX = -1 * minXOnScale;
-      secondTranslateY = -1 * minYOnScale;
-    } else {
-      firstTranslateX = rightPlotArea;
-      firstTranslateY = bottomPlotArea;
-      scaleX = -xScaleFactor;
-      scaleY = -yScaleFactor;
-      secondTranslateX = -minXOnScale;
-      secondTranslateY = -minYOnScale;
-    }
+		double firstTranslateX, firstTranslateY, secondTranslateX, secondTranslateY;
+		double scaleX, scaleY;
 
- double yTickA= minYOnScale -(yStep/2);
- double yTickB= yStep/5;
- 
-    context
-        .put("plotAreaColor", JSVColorUtil.colorToHexString(plotAreaColor));
-    context.put("backgroundColor", JSVColorUtil
-        .colorToHexString(backgroundColor));
-    context.put("plotColor", JSVColorUtil.colorToHexString(plotColor));
-    context.put("gridColor", JSVColorUtil.colorToHexString(gridColor));
-    context.put("titleColor", JSVColorUtil.colorToHexString(titleColor));
-    context.put("scaleColor", JSVColorUtil.colorToHexString(scaleColor));
-    context.put("unitsColor", JSVColorUtil.colorToHexString(unitsColor));
+		boolean increasing = spec.isXIncreasing();
 
-    context.put("svgHeight", new Integer(svgHeight));
-    context.put("svgWidth", new Integer(svgWidth));
-    context.put("leftPlotArea", new Integer(leftPlotArea));
-    context.put("rightPlotArea", new Integer(rightPlotArea));
-    context.put("topPlotArea", new Integer(topPlotArea));
-    context.put("bottomPlotArea", new Integer(bottomPlotArea));
-    context.put("plotAreaHeight", new Integer(plotAreaHeight));
-    context.put("plotAreaWidth", new Integer(plotAreaWidth));
+		if (increasing) {
+			firstTranslateX = leftPlotArea;
+			firstTranslateY = bottomPlotArea;
+			scaleX = xScaleFactor;
+			scaleY = -yScaleFactor;
+			secondTranslateX = -1 * minXOnScale;
+			secondTranslateY = -1 * minYOnScale;
+		} else {
+			firstTranslateX = rightPlotArea;
+			firstTranslateY = bottomPlotArea;
+			scaleX = -xScaleFactor;
+			scaleY = -yScaleFactor;
+			secondTranslateX = -minXOnScale;
+			secondTranslateY = -minYOnScale;
+		}
 
-    context.put("minXOnScale", new Double(minXOnScale));
-    context.put("maxXOnScale", new Double(maxXOnScale));
-    context.put("minYOnScale", new Double(minYOnScale));
-    context.put("maxYOnScale", new Double(maxYOnScale));
-    context.put("yTickA", new Double(yTickA));
-    context.put("yTickB", new Double(yTickB));
-    context.put("xScaleFactor", new Double(xScaleFactor));
-    context.put("yScaleFactor", new Double(yScaleFactor));
+		double yTickA = minYOnScale - (yStep / 2);
+		double yTickB = yStep / 5;
 
-    context.put("increasing", new Boolean(increasing));
+		context.put("plotAreaColor", JSVColorUtil.colorToHexString(plotAreaColor));
+		context.put("backgroundColor", JSVColorUtil
+				.colorToHexString(backgroundColor));
+		context.put("plotColor", JSVColorUtil.colorToHexString(plotColor));
+		context.put("gridColor", JSVColorUtil.colorToHexString(gridColor));
+		context.put("titleColor", JSVColorUtil.colorToHexString(titleColor));
+		context.put("scaleColor", JSVColorUtil.colorToHexString(scaleColor));
+		context.put("unitsColor", JSVColorUtil.colorToHexString(unitsColor));
 
-    context.put("verticalGridCoords", vertGridCoords);
-    context.put("horizontalGridCoords", horizGridCoords);
+		context.put("svgHeight", new Integer(svgHeight));
+		context.put("svgWidth", new Integer(svgWidth));
+		context.put("leftPlotArea", new Integer(leftPlotArea));
+		context.put("rightPlotArea", new Integer(rightPlotArea));
+		context.put("topPlotArea", new Integer(topPlotArea));
+		context.put("bottomPlotArea", new Integer(bottomPlotArea));
+		context.put("plotAreaHeight", new Integer(plotAreaHeight));
+		context.put("plotAreaWidth", new Integer(plotAreaWidth));
 
-    List<Coordinate> newXYCoords = new List<Coordinate>();
-    for (int i = startDataPointIndex; i <= endDataPointIndex; i++)
-      newXYCoords.addLast(xyCoords[i]);
+		context.put("minXOnScale", new Double(minXOnScale));
+		context.put("maxXOnScale", new Double(maxXOnScale));
+		context.put("minYOnScale", new Double(minYOnScale));
+		context.put("maxYOnScale", new Double(maxYOnScale));
+		context.put("yTickA", new Double(yTickA));
+		context.put("yTickB", new Double(yTickB));
+		context.put("xScaleFactor", new Double(xScaleFactor));
+		context.put("yScaleFactor", new Double(yScaleFactor));
 
-    double firstX, firstY, lastX;
-    firstX=xyCoords[startDataPointIndex].getXVal();
-    firstY=xyCoords[startDataPointIndex].getYVal();
-    lastX=xyCoords[endDataPointIndex].getXVal();
-    
-    context.put("title", title);
-    context.put("xyCoords", newXYCoords);
-    context.put("continuous", new Boolean(isContinuous));
-    context.put("firstTranslateX", new Double(firstTranslateX));
-    context.put("firstTranslateY", new Double(firstTranslateY));
-    context.put("scaleX", new Double(scaleX));
-    context.put("scaleY", new Double(scaleY));
-    context.put("secondTranslateX", new Double(secondTranslateX));
-    context.put("secondTranslateY", new Double(secondTranslateY));
+		context.put("increasing", new Boolean(increasing));
 
-    if (increasing) {
-      context.put("xScaleList", xScaleList);
-      context.put("xScaleListReversed", xScaleListReversed);
-    } else {
-      context.put("xScaleList", xScaleListReversed);
-      context.put("xScaleListReversed", xScaleList);
-    }
-    context.put("yScaleList", yScaleList);
+		context.put("verticalGridCoords", vertGridCoords);
+		context.put("horizontalGridCoords", horizGridCoords);
 
-    context.put("xUnits", xUnits);
-    context.put("yUnits", yUnits);
-    context.put("firstX", Double.valueOf(firstX));
-    context.put("firstY", Double.valueOf(firstY));
-    context.put("lastX", Double.valueOf(lastX));
+		List<Coordinate> newXYCoords = new List<Coordinate>();
+		for (int i = startIndex; i <= endIndex; i++)
+			newXYCoords.addLast(xyCoords[i]);
 
-    int xUnitLabelX = rightPlotArea - 50;
-    int xUnitLabelY = bottomPlotArea + 30;
-    int yUnitLabelX = leftPlotArea - 80;
-    int yUnitLabelY = bottomPlotArea / 2;
-    int tempX = yUnitLabelX;
-    yUnitLabelX = -yUnitLabelY;
-    yUnitLabelY = tempX;
-    context.put("xUnitLabelX", "" + xUnitLabelX);
-    context.put("xUnitLabelY", "" + xUnitLabelY);
-    context.put("yUnitLabelX", "" + yUnitLabelX);
-    context.put("yUnitLabelY", "" + yUnitLabelY);
+		double firstX, firstY, lastX;
+		firstX = xyCoords[startIndex].getXVal();
+		firstY = xyCoords[startIndex].getYVal();
+		lastX = xyCoords[endIndex].getXVal();
 
-    context.put("numDecimalPlacesX", new Integer(Math.abs(scaleData.exportPrecision[0])));
-    context.put("numDecimalPlacesY", new Integer(Math.abs(scaleData.exportPrecision[1])));
+		context.put("title", titleColor);
+		context.put("xyCoords", newXYCoords);
+		context.put("continuous", new Boolean(spec.isContinuous()));
+		context.put("firstTranslateX", new Double(firstTranslateX));
+		context.put("firstTranslateY", new Double(firstTranslateY));
+		context.put("scaleX", new Double(scaleX));
+		context.put("scaleY", new Double(scaleY));
+		context.put("secondTranslateX", new Double(secondTranslateX));
+		context.put("secondTranslateY", new Double(secondTranslateY));
 
-    String vm = (exportForInkscape ? "plot_ink.vm" : "plot.vm");
-    Logger.info("SVGExporter using " + vm);
-    return writeForm(vm);
-  }
+		if (increasing) {
+			context.put("xScaleList", xScaleList);
+			context.put("xScaleListReversed", xScaleListReversed);
+		} else {
+			context.put("xScaleList", xScaleListReversed);
+			context.put("xScaleListReversed", xScaleList);
+		}
+		context.put("yScaleList", yScaleList);
+
+		context.put("xUnits", spec.getXUnits());
+		context.put("yUnits", spec.getYUnits());
+		context.put("firstX", Double.valueOf(firstX));
+		context.put("firstY", Double.valueOf(firstY));
+		context.put("lastX", Double.valueOf(lastX));
+
+		int xUnitLabelX = rightPlotArea - 50;
+		int xUnitLabelY = bottomPlotArea + 30;
+		int yUnitLabelX = leftPlotArea - 80;
+		int yUnitLabelY = bottomPlotArea / 2;
+		int tempX = yUnitLabelX;
+		yUnitLabelX = -yUnitLabelY;
+		yUnitLabelY = tempX;
+		context.put("xUnitLabelX", "" + xUnitLabelX);
+		context.put("xUnitLabelY", "" + xUnitLabelY);
+		context.put("yUnitLabelX", "" + yUnitLabelX);
+		context.put("yUnitLabelY", "" + yUnitLabelY);
+
+		context.put("numDecimalPlacesX", new Integer(Math
+				.abs(scaleData.exportPrecision[0])));
+		context.put("numDecimalPlacesY", new Integer(Math
+				.abs(scaleData.exportPrecision[1])));
+
+		String vm = (mode == ExportType.SVGI ? "plot_ink.vm" : "plot.vm");
+		Logger.info("SVGExporter using " + vm);
+		return writeForm(vm);
+	}
 
   /**
    * Export an overlaid graph as SVG with specified Coordinates and Colors

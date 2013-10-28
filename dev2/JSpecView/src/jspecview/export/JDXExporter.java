@@ -50,6 +50,11 @@ import jspecview.util.JSVTxt;
 
 public class JDXExporter {
 
+	public static final String newLine = System.getProperty("line.separator");
+
+	public JDXExporter() {
+		
+	}
   /**
    * The factor divisor used in compressing spectral data in one of DIF, SQZ,
    * PAC and FIX formats
@@ -66,7 +71,7 @@ public class JDXExporter {
    * @return data if path is null
    * @throws IOException
    */
-  public static String export(ExportType type, String path, JDXSpectrum spectrum, int startIndex, int endIndex) throws IOException{
+  public String export(ExportType type, String path, JDXSpectrum spectrum, int startIndex, int endIndex) throws IOException{
     String data = toStringAux(type, spectrum, startIndex, endIndex);
     if (path == null)
       return data;
@@ -167,7 +172,7 @@ public class JDXExporter {
     String varList = FileReader.VAR_LIST_TABLE[1][index];
     buffer.append(getHeaderString(spectrum, tmpDataClass, minY, maxY,
         xCompFactor, yCompFactor, startIndex, endIndex));
-    buffer.append("##" + tmpDataClass + "= " + varList + JSVTxt.newLine);
+    buffer.append("##" + tmpDataClass + "= " + varList + newLine);
     buffer.append(tabDataSet);
     buffer.append("##END=");
 
@@ -202,16 +207,16 @@ public class JDXExporter {
     SB buffer = new SB();
     // start of header
     buffer.append("##TITLE= ").append(spec.getTitle()).append(
-        JSVTxt.newLine);
-    buffer.append("##JCAMP-DX= 5.01").append(JSVTxt.newLine); /*+ getJcampdx()*/
+        newLine);
+    buffer.append("##JCAMP-DX= 5.01").append(newLine); /*+ getJcampdx()*/
     buffer.append("##DATA TYPE= ").append(spec.getDataType()).append(
-        JSVTxt.newLine);
+        newLine);
     buffer.append("##DATA CLASS= ").append(tmpDataClass).append(
-        JSVTxt.newLine);
+        newLine);
     buffer.append("##ORIGIN= ").append(spec.getOrigin()).append(
-        JSVTxt.newLine);
+        newLine);
     buffer.append("##OWNER= ").append(spec.getOwner()).append(
-        JSVTxt.newLine);
+        newLine);
     String d = spec.getDate();
     String longdate = "";
     String currentTime = (new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSSS ZZZZ"))
@@ -223,7 +228,7 @@ public class JDXExporter {
     } else {
       longdate = spec.getLongDate();
     }
-    buffer.append("##LONGDATE= ").append(longdate).append(JSVTxt.newLine);
+    buffer.append("##LONGDATE= ").append(longdate).append(newLine);
 
     // optional header
     List<String[]> headerTable = spec.getHeaderTable();
@@ -231,21 +236,21 @@ public class JDXExporter {
       String[] entry = headerTable.get(i);
       String label = entry[0];
       String dataSet = entry[1];
-      String nl = (dataSet.startsWith("<") && dataSet.contains("</") ? JSVTxt.newLine
+      String nl = (dataSet.startsWith("<") && dataSet.contains("</") ? newLine
           : "");
       buffer.append(label).append("= ").append(nl).append(dataSet).append(
-          JSVTxt.newLine);
+          newLine);
     }
     double observedFreq = spec.getObservedFreq();
     if (!spec.is1D())
       buffer.append("##NUM DIM= ").appendI(spec.numDim).append(
-          JSVTxt.newLine);
+          newLine);
     if (observedFreq != JDXDataObject.ERROR)
       buffer.append("##.OBSERVE FREQUENCY= ").appendD(observedFreq).append(
-          JSVTxt.newLine);
+          newLine);
     if (spec.observedNucl != "")
       buffer.append("##.OBSERVE NUCLEUS= ").append(spec.observedNucl).append(
-          JSVTxt.newLine);
+          newLine);
     //now need to put pathlength here
 
     // last part of header
@@ -253,30 +258,30 @@ public class JDXExporter {
     //boolean toHz = (observedFreq != JDXSpectrum.ERROR && !spec.getDataType()
       //  .toUpperCase().contains("FID"));
     buffer.append("##XUNITS= ").append(spec.isHZtoPPM() ? "HZ" : spec.getXUnits()).append(
-        JSVTxt.newLine);
+        newLine);
     buffer.append("##YUNITS= ").append(spec.getYUnits()).append(
-        JSVTxt.newLine);
+        newLine);
     buffer.append("##XFACTOR= ").append(JSVTxt.fixExponentInt(tmpXFactor))
-        .append(JSVTxt.newLine);
+        .append(newLine);
     buffer.append("##YFACTOR= ").append(JSVTxt.fixExponentInt(tmpYFactor))
-        .append(JSVTxt.newLine);
+        .append(newLine);
     double f = (spec.isHZtoPPM() ? observedFreq : 1);
     Coordinate[] xyCoords = spec.getXYCoords();
     buffer.append("##FIRSTX= ").append(
         JSVTxt.fixExponentInt(xyCoords[startIndex].getXVal() * f)).append(
-        JSVTxt.newLine);
+        newLine);
     buffer.append("##FIRSTY= ").append(
         JSVTxt.fixExponentInt(xyCoords[startIndex].getYVal())).append(
-        JSVTxt.newLine);
+        newLine);
     buffer.append("##LASTX= ").append(
         JSVTxt.fixExponentInt(xyCoords[endIndex].getXVal() * f)).append(
-        JSVTxt.newLine);
+        newLine);
     buffer.append("##NPOINTS= ").appendI((Math.abs(endIndex - startIndex) + 1))
-        .append(JSVTxt.newLine);
+        .append(newLine);
     buffer.append("##MINY= ").append(JSVTxt.fixExponentInt(minY)).append(
-        JSVTxt.newLine);
+        newLine);
     buffer.append("##MAXY= ").append(JSVTxt.fixExponentInt(maxY)).append(
-        JSVTxt.newLine);
+        newLine);
     return buffer.toString();
   }
 
