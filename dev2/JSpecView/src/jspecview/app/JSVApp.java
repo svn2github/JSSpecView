@@ -130,7 +130,14 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	}
 
 	public boolean isSigned() {
+		/**
+		 * @j2sNative
+		 * 
+		 * return true;
+		 */
+		{
 		return false;
+		}
 	}
 
 	public void siSetCurrentSource(JDXSource source) {

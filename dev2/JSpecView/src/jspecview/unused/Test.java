@@ -46,7 +46,7 @@ public class Test {
 
 	private void checkStream(String fname, int ptStream, int len) throws Exception {
 		fname = "C:/temp/" + fname;
-		InputStream is = JSVFileManager.getInputStream(fname, false);
+		InputStream is = JSVFileManager.getInputStream(fname, false, null);
 		is.skip(ptStream + 6);
 		byte[] b = new byte[len];
 		is.read(b);

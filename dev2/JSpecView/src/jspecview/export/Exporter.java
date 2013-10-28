@@ -1,16 +1,16 @@
 package jspecview.export;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.io.FileWriter;
+import java.io.OutputStream;
 
 import javajs.util.List;
 
 import org.jmol.api.Interface;
 import org.jmol.io.Base64;
+import org.jmol.io.JmolOutputChannel;
 import org.jmol.util.Txt;
 
 import jspecview.api.ExportInterface;
@@ -164,47 +164,66 @@ public class Exporter implements ExportInterface {
 		return ((ExportInterface) Interface.getInterface("jspecview.export." + type.toUpperCase() + "Exporter")).exportTheSpectrum(viewer, mode, path, spec, startIndex, endIndex, null);
 	}
 
-	private String printPDF(JSViewer viewer, String pdfFileName) {		
+	private String printPDF(JSViewer viewer, String pdfFileName) {
 		if (!viewer.si.isSigned())
 			return "Error: Applet must be signed for the PRINT command.";
 		boolean isJob = (pdfFileName == null || pdfFileName.length() == 0);
-		boolean isBase64 = (!isJob && pdfFileName.toLowerCase().startsWith("base64"));
+		boolean isBase64 = (!isJob && pdfFileName.toLowerCase()
+				.startsWith("base64"));
 		JSVPanel jsvp = viewer.selectedPanel;
 		if (jsvp == null)
 			return null;
-		// this has been disabled:
-    jsvp.getPanelData().closeAllDialogsExcept(AType.NONE);
-		PrintLayout pl = viewer.getDialogPrint(isJob);
-		if (pl == null)
-			return null;
+		jsvp.getPanelData().closeAllDialogsExcept(AType.NONE);
+		PrintLayout pl;
+		/**
+		 * @j2sNative
+		 * 
+		 *    pl = new jspecview.common.PrintLayout();
+		 *    pl.asPDF = true;
+		 */
+		{
+			pl = viewer.getDialogPrint(isJob);
+	    if (pl == null)
+	      return null;
+		}
 		if (isJob && pl.asPDF) {
 			isJob = false;
 			pdfFileName = "PDF";
-		}		
+		}
 		if (!isBase64 && !isJob) {
 			JSVFileHelper helper = viewer.fileHelper;
 			helper.setFileChooser(ExportType.PDF);
 			if (pdfFileName.equals("?") || pdfFileName.equalsIgnoreCase("PDF"))
-  			pdfFileName = getSuggestedFileName(viewer, ExportType.PDF);
+				pdfFileName = getSuggestedFileName(viewer, ExportType.PDF);
 			File file = helper.getFile(pdfFileName, jsvp, true);
 			if (file == null)
 				return null;
-			viewer.setProperty("directoryLastExporteFile", helper.setDirLastExported(file.getParent()));
+			viewer.setProperty("directoryLastExporteFile", helper
+					.setDirLastExported(file.getParent()));
 			pdfFileName = file.getAbsolutePath();
 		}
 		String s = null;
 		try {
-			OutputStream os = (isJob ? null : isBase64 ? new ByteArrayOutputStream() 
-			    : new FileOutputStream(pdfFileName));
+			OutputStream os = null;
+			/**
+			 * @j2sNative
+			 * 
+			 * 
+			 */
+			{
+				os = (isBase64 ? null : new FileOutputStream(pdfFileName, false));
+			}
+			JmolOutputChannel out = (isJob ? null : new JmolOutputChannel()
+					.setParams(null, isBase64 ? null : pdfFileName, false, os));
 			String printJobTitle = jsvp.getPanelData().getPrintJobTitle(true);
 			if (pl.showTitle) {
-				printJobTitle = jsvp.getInput("Title?", "Title for Printing", printJobTitle);
+				printJobTitle = jsvp.getInput("Title?", "Title for Printing",
+						printJobTitle);
 				if (printJobTitle == null)
 					return null;
 			}
-			jsvp.printPanel(pl, os, printJobTitle);
-			s = (isBase64 ? Base64.getBase64(
-					((ByteArrayOutputStream) os).toByteArray()).toString() : "OK");
+			jsvp.printPanel(pl, out, printJobTitle);
+			s = (isBase64 ? Base64.getBase64(out.toByteArray()).toString() : out.toString());
 		} catch (Exception e) {
 			jsvp.showMessage(e.getMessage(), "File Error");
 		}

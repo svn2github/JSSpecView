@@ -34,10 +34,13 @@ import java.net.URL;
 import java.util.Hashtable;
 import java.util.Map;
 
+import javajs.util.ArrayUtil;
 import javajs.util.ParserJS;
 import javajs.util.SB;
 
 import org.jmol.api.Interface;
+import org.jmol.io.Encoding;
+import org.jmol.io.JmolOutputChannel;
 import org.jmol.util.Logger;
 import org.jmol.util.Parser;
 
@@ -193,7 +196,7 @@ public class JSVFileManager {
 			}
 
 		}
-		InputStream in = getInputStream(name, true);
+		InputStream in = getInputStream(name, true, null);
 		BufferedInputStream bis = new BufferedInputStream(in);
 		in = bis;
 		if (isZipFile(bis))
@@ -222,8 +225,93 @@ public class JSVFileManager {
     is.reset();
     return (countRead == 4 && abMagic[0] == (byte) 0x1F && abMagic[1] == (byte) 0x8B);
   }
+  
+	public static Object getStreamAsBytes(BufferedInputStream bis,
+			JmolOutputChannel out) throws IOException {
+		byte[] buf = new byte[1024];
+		byte[] bytes = (out == null ? new byte[4096] : null);
+		int len = 0;
+		int totalLen = 0;
+		while ((len = bis.read(buf, 0, 1024)) > 0) {
+			totalLen += len;
+			if (out == null) {
+				if (totalLen >= bytes.length)
+					bytes = ArrayUtil.ensureLengthByte(bytes, totalLen * 2);
+				System.arraycopy(buf, 0, bytes, totalLen - len, len);
+			} else {
+				out.write(buf, 0, len);
+			}
+		}
+		bis.close();
+		if (out == null) {
+			return ArrayUtil.arrayCopyByte(bytes, totalLen);
+		}
+		return totalLen + " bytes";
+	}
 
-	public static InputStream getInputStream(String name, boolean showMsg) throws IOException, MalformedURLException {
+  public String postByteArray(String fileName, byte[] bytes) {
+    Object ret = null;    
+    try {
+			ret = getInputStream(fileName, false, bytes);
+		} catch (Exception e) {
+			return e.toString();
+		}
+    if (ret instanceof String)
+      return (String) ret;
+    try {
+      ret = getStreamAsBytes((BufferedInputStream) ret, null);
+    } catch (IOException e) {
+      try {
+        ((BufferedInputStream) ret).close();
+      } catch (IOException e1) {
+        // ignore
+      }
+    }
+    return (ret == null ? "" : fixUTF((byte[]) ret));
+  }
+
+  private static Encoding getUTFEncoding(byte[] bytes) {
+    if (bytes.length >= 3 && bytes[0] == (byte) 0xEF && bytes[1] == (byte) 0xBB && bytes[2] == (byte) 0xBF)
+      return Encoding.UTF8;
+    if (bytes.length >= 4 && bytes[0] == (byte) 0 && bytes[1] == (byte) 0 
+        && bytes[2] == (byte) 0xFE && bytes[3] == (byte) 0xFF)
+      return Encoding.UTF_32BE;
+    if (bytes.length >= 4 && bytes[0] == (byte) 0xFF && bytes[1] == (byte) 0xFE 
+        && bytes[2] == (byte) 0 && bytes[3] == (byte) 0)
+      return Encoding.UTF_32LE;
+    if (bytes.length >= 2 && bytes[0] == (byte) 0xFF && bytes[1] == (byte) 0xFE)
+      return Encoding.UTF_16LE;
+    if (bytes.length >= 2 && bytes[0] == (byte) 0xFE && bytes[1] == (byte) 0xFF)
+      return Encoding.UTF_16BE;
+    return Encoding.NONE;
+
+  }
+
+  public static String fixUTF(byte[] bytes) {
+    
+    Encoding encoding = getUTFEncoding(bytes);
+    if (encoding != Encoding.NONE)
+    try {
+      String s = new String(bytes, encoding.name().replace('_', '-'));
+      switch (encoding) {
+      case UTF8:
+      case UTF_16BE:
+      case UTF_16LE:
+        // extra byte at beginning removed
+        s = s.substring(1);
+        break;
+      default:
+        break;        
+      }
+      return s;
+    } catch (UnsupportedEncodingException e) {
+      System.out.println(e);
+    }
+    return new String(bytes);
+  }
+
+
+	public static InputStream getInputStream(String name, boolean showMsg, byte[] postBytes) throws IOException, MalformedURLException {
 		boolean isURL = isURL(name);
 		boolean isApplet = (appletDocumentBase != null);
 		InputStream in = null;
@@ -237,7 +325,7 @@ public class JSVFileManager {
 		if (isApplet || isURL) {
 			URL url = new URL(appletDocumentBase, name, null);
 			Logger.info("JSVFileManager opening URL " + url + (post == null ? "" : " with POST of " + post.length() + " bytes"));
-			Object ret = viewer.apiPlatform.getBufferedURLInputStream(url, null, post);
+			Object ret = viewer.apiPlatform.getBufferedURLInputStream(url, postBytes, post);
 			if (ret instanceof String) {
 				Logger.info("JSVFielManager could not get this URL:" + ret);
 			} else { 

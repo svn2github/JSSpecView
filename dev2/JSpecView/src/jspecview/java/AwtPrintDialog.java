@@ -100,6 +100,8 @@ public class AwtPrintDialog extends JDialog implements JSVPrintDialog {
       jbInit(isJob);
       setSize(320, 250);
       setResizable(false);
+      pack();
+      pdfButton.requestFocusInWindow();
       setVisible(true);
       return this;
     }
