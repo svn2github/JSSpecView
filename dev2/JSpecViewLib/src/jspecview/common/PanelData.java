@@ -1330,6 +1330,23 @@ public class PanelData implements EventManager {
 		return dialog;
 	}
 
+	/**
+	 * from jspecview.export.PDFCreator 
+	 * 
+	 * -- does not use iText --
+	 *  
+	 * 
+	 * @param pdfCreator
+	 * @param pl 
+	 */
+	public void printPdf(JSVGraphics pdfCreator, PrintLayout pl) {
+		boolean isPortrait = !pl.layout.equals("landscape");
+		print(pdfCreator, (isPortrait ? pl.imageableHeight : pl.imageableWidth), 
+				(isPortrait ? pl.imageableWidth : pl.imageableHeight), 
+				pl.imageableX, pl.imageableY,
+				pl.paperHeight, pl.paperWidth, isPortrait, 0);
+	}
+
 	public int print(Object g, double height, double width,
 			double x, double y, double paperHeight, double paperWidth, 
 			boolean isPortrait, int pi) {
@@ -1547,6 +1564,5 @@ public class PanelData implements EventManager {
 	    jsvp.getFocusNow(false);
 		}			
 	}
-
 
 }
