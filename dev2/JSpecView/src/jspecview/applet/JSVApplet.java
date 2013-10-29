@@ -57,7 +57,7 @@ import java.awt.event.WindowEvent;
 import java.util.Map;
 
 import javajs.util.List;
-import javajs.util.ParserJS;
+import javajs.util.Parser;
 
 import javax.swing.JApplet;
 import javax.swing.JFrame;
@@ -450,7 +450,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 			JSObject jso = JSObject.getWindow(this);
 			if (callback.length() > 0) {
 				if (callback.indexOf(".") > 0) {
-					String[] mods = ParserJS.split(callback, ".");
+					String[] mods = Parser.split(callback, ".");
 					for (int i = 0; i < mods.length - 1; i++) {
 						jso = (JSObject) jso.getMember(mods[i]);
 					}

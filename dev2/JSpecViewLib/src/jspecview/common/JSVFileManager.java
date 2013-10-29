@@ -33,7 +33,7 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import javajs.util.ArrayUtil;
-import javajs.util.ParserJS;
+import javajs.util.Parser;
 import javajs.util.SB;
 
 import org.jmol.api.Interface;
@@ -41,7 +41,7 @@ import org.jmol.api.JmolFileInterface;
 import org.jmol.io.Encoding;
 import org.jmol.io.JmolOutputChannel;
 import org.jmol.util.Logger;
-import org.jmol.util.Parser;
+import javajs.util.Parser;
 
 import org.jmol.util.Txt;
 
@@ -174,7 +174,7 @@ public class JSVFileManager {
 			String startCode) throws IOException {
 		String[] subFileList = null;
 		if (name.indexOf("|") >= 0) {
-			subFileList = ParserJS.split(name, "|");
+			subFileList = Parser.split(name, "|");
 			if (subFileList != null && subFileList.length > 0)
 				name = subFileList[0];
 		}

@@ -4,7 +4,7 @@ import java.util.Map;
 
 import javajs.util.DecimalFormat;
 
-import javajs.util.ParserJS;
+import javajs.util.Parser;
 
 import jspecview.api.AnnotationData;
 import jspecview.api.JSVPanel;
@@ -702,10 +702,10 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 			iColSelected = iRowSelected = -1;
 			return;
 		}
-		int index = ParserJS.parseInt(getField(url, "index"));
+		int index = Parser.parseInt(getField(url, "index"));
 		switch ("ROW COL ROWCOL".indexOf(getField(url, "selector"))) {
 		case 8:
-			iColSelected = ParserJS.parseInt(getField(url, "index2"));
+			iColSelected = Parser.parseInt(getField(url, "index2"));
 			//$FALL-THROUGH$
 		case 0:
 			iRowSelected = index;

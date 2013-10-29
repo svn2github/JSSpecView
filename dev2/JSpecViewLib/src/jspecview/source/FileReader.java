@@ -36,9 +36,8 @@ import javajs.util.SB;
 
 import org.jmol.api.Interface;
 import org.jmol.util.Logger;
-import org.jmol.util.Parser;
+import javajs.util.Parser;
 
-import javajs.util.ParserJS;
 import org.jmol.util.Txt;
 
 import jspecview.api.JSVZipReader;
@@ -292,7 +291,7 @@ public class FileReader {
 				t.getValue();
 			}
 			if (label.equals("##BLOCKS")) {
-				int nBlocks = ParserJS.parseInt(t.getValue());
+				int nBlocks = Parser.parseInt(t.getValue());
 				if (nBlocks > 100 && firstSpec <= 0)
 					forceSub = true;
 			}
@@ -691,7 +690,7 @@ public class FileReader {
 	}
 
 	private float parseFloatStr(String s) {
-  	return ParserJS.parseFloat(s);
+  	return Parser.parseFloat(s);
   }
 
 	private String simpleReplace(String s, String sfrom, String sto) {
@@ -879,7 +878,7 @@ public class FileReader {
     if (label.equals("##JCAMPDX")) {
       String value = t.getValue();
       jdxHeader.jcampdx = value;
-      float version = ParserJS.parseFloat(value);
+      float version = Parser.parseFloat(value);
       if (version >= 6.0 || Float.isNaN(version)) {
         if (errorLog != null)
           errorLog

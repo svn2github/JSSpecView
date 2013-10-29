@@ -23,7 +23,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Vector;
 
-import javajs.util.ParserJS;
+import javajs.util.Parser;
 
 
 /**
@@ -393,7 +393,7 @@ class CMLReader extends XMLReader {
         if (attrList.contains("yunits"))
           yUnits = checkUnits(reader.getAttrValue("yUnits"));
         if (attrList.contains("atomrefs"))
-          xy[1] = 49 * ParserJS.getTokens(reader.getAttrValue("atomRefs")).length;
+          xy[1] = 49 * Parser.getTokens(reader.getAttrValue("atomRefs")).length;
         peakData.add(xy);
       }
     }

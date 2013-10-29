@@ -26,7 +26,7 @@ package jspecview.unused;
 //import jspecview.dialog.JSVDialog;
 //
 //import org.jmol.util.JmolList;
-//import org.jmol.util.Parser;
+//import javajs.util.Parser;
 //import org.jmol.util.SB;
 //
 //

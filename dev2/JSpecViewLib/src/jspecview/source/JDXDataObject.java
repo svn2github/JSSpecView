@@ -3,7 +3,7 @@ package jspecview.source;
 import javajs.util.DecimalFormat;
 
 import org.jmol.util.Logger;
-import javajs.util.ParserJS;
+import javajs.util.Parser;
 import org.jmol.util.Txt;
 
 import jspecview.common.Coordinate;
@@ -434,7 +434,7 @@ public abstract class JDXDataObject extends JDXHeader {
     int pt = 0;
     while (pt < nuc.length() && !Character.isDigit(nuc.charAt(pt)))
       pt++;
-    pt = ParserJS.parseInt(nuc.substring(pt));
+    pt = Parser.parseInt(nuc.substring(pt));
     int i = 0;
     for (; i < gyroData.length; i += 2)
       if (gyroData[i] >= pt)

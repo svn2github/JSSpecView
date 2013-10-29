@@ -21,9 +21,9 @@ import javajs.util.SB;
 import javajs.awt.Dimension;
 
 import org.jmol.util.Logger;
-import org.jmol.util.Parser;
+import javajs.util.Parser;
 
-import javajs.util.ParserJS;
+import javajs.util.Parser;
 import org.jmol.util.Txt;
 
 import jspecview.api.ExportInterface;
@@ -281,7 +281,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface, BytePoster  {
 						isOK = false;
 					break;
 				case STACKOFFSETY:
-					execOverlayOffsetY(ParserJS.parseInt("" + ParserJS.parseFloat(value)));
+					execOverlayOffsetY(Parser.parseInt("" + Parser.parseFloat(value)));
 					break;
 				case TEST:
 					si.siExecTest(value);
@@ -1281,7 +1281,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface, BytePoster  {
 
 		int max = 0;
 		for (int i = 0; i < panelNodes.size(); i++) {
-			float f = ParserJS.parseFloat(panelNodes.get(i).id);
+			float f = Parser.parseFloat(panelNodes.get(i).id);
 			if (f >= max + 1)
 				max = (int) Math.floor(f);
 		}
@@ -1313,7 +1313,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface, BytePoster  {
 				return false;
 			setNode(node, false);
 		} else {
-			int n = ParserJS.parseInt(value);
+			int n = Parser.parseInt(value);
 			if (n <= 0) {
 				checkOverlay();
 				return false;
@@ -1420,7 +1420,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface, BytePoster  {
 			String soffset = selectedPanel.getInput(
 					"Enter a vertical offset in percent for stacked plots", "Overlay", ""
 							+ recentStackPercent);
-			float f = ParserJS.parseFloat(soffset);
+			float f = Parser.parseFloat(soffset);
 			if (Float.isNaN(f))
 				return;
 			offset = (int) f;

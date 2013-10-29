@@ -24,7 +24,7 @@
 package jspecview.popup;
 
 import org.jmol.util.Logger;
-import org.jmol.util.Parser;
+import javajs.util.Parser;
 import org.jmol.util.Txt;
 
 import jspecview.api.JSVAbstractMenu;

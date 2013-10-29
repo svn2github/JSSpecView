@@ -3,7 +3,7 @@ package jspecview.dialog;
 //import java.util.Hashtable;
 //import java.util.Map;
 //
-//import javajs.util.ParserJS;
+//import javajs.util.Parser;
 //import org.jmol.util.Txt;
 //
 //import jspecview.api.AnnotationData;
@@ -502,10 +502,10 @@ public class DialogParams {
 //			iColSelected = iRowSelected = -1;
 //			return;
 //		}
-//		int index = ParserJS.parseInt(manager.getField(url, "index"));
+//		int index = Parser.parseInt(manager.getField(url, "index"));
 //		switch ("ROW COL ROWCOL".indexOf(manager.getField(url, "selector"))) {
 //		case 8:
-//			iColSelected = ParserJS.parseInt(manager.getField(url, "index2"));
+//			iColSelected = Parser.parseInt(manager.getField(url, "index2"));
 //			//$FALL-THROUGH$
 //		case 0:
 //			iRowSelected = index;

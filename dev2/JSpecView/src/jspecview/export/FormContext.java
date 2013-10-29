@@ -26,7 +26,7 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import javajs.util.List;
-import javajs.util.ParserJS;
+import javajs.util.Parser;
 import javajs.util.SB;
 
 import org.jmol.util.Logger;
@@ -281,7 +281,7 @@ class FormContext {
     String data = vt.data;
     data = data.replace('(', ' ');
     data = data.replace(')', ' ');
-    String[] tokens = ParserJS.getTokens(data);
+    String[] tokens = Parser.getTokens(data);
     if (tokens.length != 4) {
       return;
     }
@@ -332,7 +332,7 @@ class FormContext {
     data = Txt.simpleReplace(data, "<  =", "<=");
     data = Txt.simpleReplace(data, ">  =", ">=");
     data = Txt.simpleReplace(data, "!  =", "!=");
-    String[] tokens = ParserJS.getTokens(data);
+    String[] tokens = Parser.getTokens(data);
     String key = tokens[0].substring(1);
     boolean isNot = false;
     boolean x = false;

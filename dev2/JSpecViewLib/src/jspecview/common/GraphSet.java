@@ -13,9 +13,9 @@ import javajs.util.DecimalFormat;
 import javajs.util.List;
 
 import org.jmol.util.Logger;
-import org.jmol.util.Parser;
+import javajs.util.Parser;
 
-import javajs.util.ParserJS;
+import javajs.util.Parser;
 
 import jspecview.api.AnnotationData;
 import jspecview.api.JSVGraphics;
@@ -2789,8 +2789,8 @@ public class GraphSet implements XYScaleConverter {
 			String xMax = Parser.getQuotedAttribute(peak, "xMax");
 			if (xMin == null || xMax == null)
 				return;
-			float x1 = ParserJS.parseFloat(xMin);
-			float x2 = ParserJS.parseFloat(xMax);
+			float x1 = Parser.parseFloat(xMin);
+			float x2 = Parser.parseFloat(xMax);
 			if (Float.isNaN(x1) || Float.isNaN(x2))
 				return;
 			pd.addHighlight(this, x1, x2, spec, 200, 200, 200, 200);
