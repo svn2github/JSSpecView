@@ -1094,7 +1094,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface, BytePoster  {
 			} catch (MalformedURLException e) {
 				JmolFileInterface file = apiPlatform.newFile(strUrl);
 				fileName = file.getName();
-				newPath = filePath = file.getAbsolutePath();
+				newPath = filePath = file.getFullPath();
 				si.siSetRecentURL(null);
 			}
 		}

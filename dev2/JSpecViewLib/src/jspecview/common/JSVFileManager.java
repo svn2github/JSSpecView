@@ -137,7 +137,7 @@ public class JSVFileManager {
       return url.toString();
     }
     JmolFileInterface file = viewer.apiPlatform.newFile(name);
-    return file.getAbsolutePath();
+    return file.getFullPath();
   }
 
   private final static String[] urlPrefixes = { "http:", "https:", "ftp:", 
