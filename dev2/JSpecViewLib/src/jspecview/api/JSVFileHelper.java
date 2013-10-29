@@ -1,6 +1,6 @@
 package jspecview.api;
 
-import java.io.File;
+import org.jmol.api.JmolFileInterface;
 
 import jspecview.common.ExportType;
 import jspecview.common.JSViewer;
@@ -9,7 +9,7 @@ public interface JSVFileHelper {
 
 	void setFileChooser(ExportType pdf);
 
-	File getFile(String fileName, Object panelOrFrame, boolean b);
+	JmolFileInterface getFile(String fileName, Object panelOrFrame, boolean b);
 
 	String setDirLastExported(String name);
 

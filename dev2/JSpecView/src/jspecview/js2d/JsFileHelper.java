@@ -1,6 +1,6 @@
 package jspecview.js2d;
 
-import java.io.File;
+import org.jmol.api.JmolFileInterface;
 
 import jspecview.api.JSVFileHelper;
 import jspecview.common.ExportType;
@@ -18,14 +18,21 @@ public class JsFileHelper implements JSVFileHelper {
 		return this;
 	}
 
-	public File getFile(String fileName, Object panelOrFrame, boolean b) {
-		// TODO Auto-generated method stub
-		return null;
+	public JmolFileInterface getFile(String fileName, Object panelOrFrame, boolean isSave) {
+		String f = null;
+		/**
+		 * @j2sNative
+		 * 
+		 * f = prompt("Enter a file name.", fileName);
+		 * 
+		 */
+		{
+			return (f == null ? null : new JsFile(f));
+		}
 	}
 
 	public String setDirLastExported(String name) {
-		// TODO Auto-generated method stub
-		return null;
+		return name;
 	}
 
 	public void setFileChooser(ExportType pdf) {

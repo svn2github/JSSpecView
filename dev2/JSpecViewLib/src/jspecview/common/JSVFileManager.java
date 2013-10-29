@@ -22,8 +22,6 @@ package jspecview.common;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -39,6 +37,7 @@ import javajs.util.ParserJS;
 import javajs.util.SB;
 
 import org.jmol.api.Interface;
+import org.jmol.api.JmolFileInterface;
 import org.jmol.io.Encoding;
 import org.jmol.io.JmolOutputChannel;
 import org.jmol.util.Logger;
@@ -137,7 +136,7 @@ public class JSVFileManager {
       URL url = new URL((URL) null, name, null);
       return url.toString();
     }
-    File file = new File(name);
+    JmolFileInterface file = viewer.apiPlatform.newFile(name);
     return file.getAbsolutePath();
   }
 
@@ -314,7 +313,7 @@ public class JSVFileManager {
 	public static InputStream getInputStream(String name, boolean showMsg, byte[] postBytes) throws IOException, MalformedURLException {
 		boolean isURL = isURL(name);
 		boolean isApplet = (appletDocumentBase != null);
-		InputStream in = null;
+		Object in = null;
 		//int length;
 		String post = null;
 		int iurl;
@@ -325,19 +324,17 @@ public class JSVFileManager {
 		if (isApplet || isURL) {
 			URL url = new URL(appletDocumentBase, name, null);
 			Logger.info("JSVFileManager opening URL " + url + (post == null ? "" : " with POST of " + post.length() + " bytes"));
-			Object ret = viewer.apiPlatform.getBufferedURLInputStream(url, postBytes, post);
-			if (ret instanceof String) {
-				Logger.info("JSVFielManager could not get this URL:" + ret);
-			} else { 
-				in = (InputStream) ret;
+			in = viewer.apiPlatform.getBufferedURLInputStream(url, postBytes, post);
+			if (in instanceof String) {
+				Logger.info("JSVFileManager could not get this URL:" + in);
+				return null;
 			}
 		} else {
 			if (showMsg)
 				Logger.info("JSVFileManager opening file " + name);
-			File file = new File(name);
-			in = new FileInputStream(file);
+			in = viewer.apiPlatform.getBufferedFileInputStream(name);
 		}
-		return in;
+		return (InputStream) in;
 	}
 
 	private static String nciResolver = "http://cactus.nci.nih.gov/chemical/structure/%FILE/file?format=sdf&get3d=True";
@@ -452,7 +449,7 @@ public class JSVFileManager {
 				return null;
 			}
 		}
-		return (viewer.isApplet ? fileName : (new File(fileName)).getName());
+		return viewer.apiPlatform.newFile(fileName).getName();
 	}
 
 	public static String getQuotedJSONAttribute(String json, String key1,

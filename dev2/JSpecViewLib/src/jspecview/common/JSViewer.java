@@ -4,9 +4,9 @@ import org.jmol.api.ApiPlatform;
 import org.jmol.api.BytePoster;
 import org.jmol.api.Interface;
 import org.jmol.api.JSmolInterface;
+import org.jmol.api.JmolFileInterface;
 import org.jmol.api.PlatformViewer;
 
-import java.io.File;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -1070,9 +1070,8 @@ public class JSViewer implements PlatformViewer, JSmolInterface, BytePoster  {
 				+ ")<br /><br /></body></html>";
 	}
 
-	public int openDataOrFile(String data, String name,
-			List<JDXSpectrum> specs, String url, int firstSpec, int lastSpec,
-			boolean isAppend) {
+	public int openDataOrFile(String data, String name, List<JDXSpectrum> specs,
+			String strUrl, int firstSpec, int lastSpec, boolean isAppend) {
 		if ("NONE".equals(name)) {
 			close("View*");
 			return FILE_OPEN_OK;
@@ -1081,32 +1080,28 @@ public class JSViewer implements PlatformViewer, JSmolInterface, BytePoster  {
 		String filePath = null;
 		String newPath = null;
 		String fileName = null;
-		File file = null;
 		boolean isView = false;
 		if (data != null) {
 		} else if (specs != null) {
 			isView = true;
 			newPath = fileName = filePath = "View" + si.siIncrementViewCount(1);
-		} else if (url != null) {
+		} else if (strUrl != null) {
 			try {
-				URL u = new URL(JSVFileManager.appletDocumentBase, url, null);
+				URL u = new URL(JSVFileManager.appletDocumentBase, strUrl, null);
 				filePath = u.toString();
 				si.siSetRecentURL(filePath);
 				fileName = JSVFileManager.getName(filePath);
 			} catch (MalformedURLException e) {
-				file = new File(url);
+				JmolFileInterface file = apiPlatform.newFile(strUrl);
+				fileName = file.getName();
+				newPath = filePath = file.getAbsolutePath();
+				si.siSetRecentURL(null);
 			}
-		}
-		if (file != null) {
-			fileName = file.getName();
-			newPath = filePath = file.getAbsolutePath();
-			// recentJmolName = (url == null ? filePath.replace('\\', '/') : url);
-			si.siSetRecentURL(null);
 		}
 		// TODO could check here for already-open view
 		if (!isView)
 			if (PanelNode.isOpen(panelNodes, filePath)
-					|| PanelNode.isOpen(panelNodes, url)) {
+					|| PanelNode.isOpen(panelNodes, strUrl)) {
 				si.writeStatus(filePath + " is already open");
 				return FILE_OPEN_ALREADY;
 			}
@@ -1153,7 +1148,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface, BytePoster  {
 
 		boolean combine = isView || autoOverlay && currentSource.isCompoundSource;
 		if (combine) {
-			combineSpectra((isView ? url : null));
+			combineSpectra((isView ? strUrl : null));
 		} else {
 			splitSpectra();
 		}

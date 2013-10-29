@@ -1,7 +1,6 @@
 package jspecview.export;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.OutputStream;
@@ -9,6 +8,7 @@ import java.io.OutputStream;
 import javajs.util.List;
 
 import org.jmol.api.Interface;
+import org.jmol.api.JmolFileInterface;
 import org.jmol.io.Base64;
 import org.jmol.io.JmolOutputChannel;
 import org.jmol.util.Txt;
@@ -64,7 +64,7 @@ public class Exporter implements ExportInterface {
 					int index = (items == null ? -1 : viewer.getOptionFromDialog(items, "Export", "Choose a spectrum to export"));
 					if (index == Integer.MIN_VALUE)
 						return null;
-					File file = viewer.fileHelper.getFile(getSuggestedFileName(viewer, eType), jsvp, true);
+					JmolFileInterface file = viewer.fileHelper.getFile(getSuggestedFileName(viewer, eType), jsvp, true);
 					if (file == null)
 						return null;
 			    String msg = exportSpectrumOrImage(viewer, eType, index, file
@@ -195,11 +195,12 @@ public class Exporter implements ExportInterface {
 			helper.setFileChooser(ExportType.PDF);
 			if (pdfFileName.equals("?") || pdfFileName.equalsIgnoreCase("PDF"))
 				pdfFileName = getSuggestedFileName(viewer, ExportType.PDF);
-			File file = helper.getFile(pdfFileName, jsvp, true);
+			JmolFileInterface file = helper.getFile(pdfFileName, jsvp, true);
 			if (file == null)
 				return null;
-			viewer.setProperty("directoryLastExporteFile", helper
-					.setDirLastExported(file.getParent()));
+			if (!viewer.isJS)
+				viewer.setProperty("directoryLastExportedFile", helper
+						.setDirLastExported(file.getParentAsFile().getAbsolutePath()));
 			pdfFileName = file.getAbsolutePath();
 		}
 		String s = null;

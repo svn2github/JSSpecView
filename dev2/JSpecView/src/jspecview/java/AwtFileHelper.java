@@ -7,6 +7,8 @@ import java.io.File;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
+import org.jmol.api.JmolFileInterface;
+
 import jspecview.api.JSVFileHelper;
 import jspecview.common.ExportType;
 import jspecview.common.JSViewer;
@@ -63,12 +65,12 @@ public class AwtFileHelper implements JSVFileHelper {
     fc.setFileFilter(filter);    
 	}
 
-	public File showFileOpenDialog(Frame frame) {
+	public JmolFileInterface showFileOpenDialog(Frame frame) {
 		setFileChooser(ExportType.UNK);
 		return getFile("", frame, false);
 	}
 
-	public File getFile(String name, Object panelOrFrame, boolean isSave) {
+	public JmolFileInterface getFile(String name, Object panelOrFrame, boolean isSave) {
 		Component c = (Component) panelOrFrame;
 		fc.setSelectedFile(new File(name));
 		if (isSave) {
@@ -81,7 +83,7 @@ public class AwtFileHelper implements JSVFileHelper {
 		int returnVal = (isSave ? fc.showSaveDialog(c) : fc.showOpenDialog(c));
 		if (returnVal != JFileChooser.APPROVE_OPTION)
 			return null;
-		File file = fc.getSelectedFile();
+		AwtFile file = new AwtFile(fc.getSelectedFile().getAbsolutePath());
 		if (isSave) {
 			viewer.setProperty("directoryLastExportedFile", dirLastExported = file.getParent());
 	    if (file.exists()) {
