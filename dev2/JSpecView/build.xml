@@ -27,7 +27,6 @@
 	<property name="build.app.dir"   	value="${build.dir}"/>
 	<property name="build.applet.dir"  	value="${build.dir}"/>
 	<property name="jsvlib.dir" 		value="../JSpecViewLib/bin"/>
-	<property name="main-class"  		value="jspecview.application.MainFrame"/>
     <property name="extras.dir"         value="extras" />
     <property name="dist.dir"           value="dist" />
     <property name="dist.zip"           value="${dist.dir}/jspecview.zip" />
@@ -101,12 +100,8 @@
 			    </linecontains>
 			  </filterchain>
 	    </copy>
-	    <!-- unjar dest="${bin.dir}" src="${lib.dir}/${itext.jar}"/   -->
-        <jar destfile="${build.app.dir}/${ant.project.name}.app.${build.number}.jar">
-            <manifest>
-            	<attribute name="Class-Path" value="."/>
-                <attribute name="Main-Class" value="${main-class}"/>
-            </manifest>
+	    <unjar dest="${bin.dir}" src="${lib.dir}/netscape.jar"/>
+        <jar destfile="${build.app.dir}/${ant.project.name}.app.${build.number}.jar" manifest="manifests/application.txt">
 		   	<fileset dir="${bin.dir}">
 		      <include name="**/*"/>
   		      <exclude name="javajs/swing/**/*"/>
@@ -139,11 +134,8 @@
 			  </filterchain>
 	    </copy>
 
-		<!--unjar dest="${bin.dir}" src="${lib.dir}/${itext.jar}"/ -->
-        <jar destfile="${build.applet.dir}/${ant.project.name}.applet.${build.number}.jar">
-            <manifest>
-            	<attribute name="Class-Path" value=". netscape.jar"/>
-            </manifest>
+	    <unjar dest="${bin.dir}" src="${lib.dir}/netscape.jar"/>
+        <jar destfile="${build.applet.dir}/${ant.project.name}.applet.${build.number}.jar" manifest="manifests/applet.txt">
         	<fileset dir="${bin.dir}">
         		<exclude name="com/lowagie/**/*"/>
   		        <exclude name="javajs/swing/**/*"/>
@@ -163,11 +155,8 @@
 	<target name="make-signed-applet-jar" depends="make-applet-jar" description="Make signed JSpecView applet jar">
     <antcall target="revision" />
         <mkdir dir="${build.applet.dir}"/>
-	    <!-- unjar dest="${bin.dir}" src="${lib.dir}/${itext.jar}"/ -->
-        <jar destfile="${build.applet.dir}/temp.jar">
-            <manifest>
-              <attribute name="Class-Path" value=". netscape.jar"/>
-            </manifest>
+	    <unjar dest="${bin.dir}" src="${lib.dir}/netscape.jar"/>
+        <jar destfile="${build.applet.dir}/temp.jar" manifest="manifests/appletSigned.txt">
         	<fileset dir="${bin.dir}">
         		<exclude name="com/lowagie/**/*"/>
   		        <exclude name="javajs/swing/**/*"/>

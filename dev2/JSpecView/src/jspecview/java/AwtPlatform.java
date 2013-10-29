@@ -244,4 +244,9 @@ public class AwtPlatform implements ApiPlatform {
     return AwtFile.getBufferedURLInputStream(url, outputBytes, post);
   }
 
+	public String getLocalUrl(String fileName) {
+		// not used in JSpecView
+		return null;
+	}
+
 }

@@ -65,4 +65,8 @@ class AwtFile extends File implements JmolFileInterface {
 		}
 	}
 
+	public String getFullPath() {
+		return getAbsolutePath();
+	}
+
 }

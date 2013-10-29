@@ -81,6 +81,7 @@ import javax.swing.WindowConstants;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
 import org.jmol.api.JSVInterface;
+import org.jmol.api.JmolFileInterface;
 import org.jmol.api.JmolSyncInterface;
 import org.jmol.util.Logger;
 import org.jmol.util.Txt;
@@ -633,9 +634,9 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	 * Shows dialog to open a file
 	 */
 	void showFileOpenDialog() {
-		File file = ((AwtFileHelper) viewer.fileHelper).showFileOpenDialog(this);
+		JmolFileInterface file = ((AwtFileHelper) viewer.fileHelper).showFileOpenDialog(this);
 		if (file != null)
-			openFile(file.getAbsolutePath(), true);
+			openFile(file.getFullPath(), true);
 	}
 
 	public void siOpenDataOrFile(String data, String name, List<JDXSpectrum> specs,

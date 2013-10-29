@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Sealed: true
+Codebase: *
+Application-Name: JSpecView
+Application-Library-Allowable-Codebase: *
+Permissions: all-permissions

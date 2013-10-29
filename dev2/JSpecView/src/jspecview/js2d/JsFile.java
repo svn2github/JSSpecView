@@ -37,7 +37,7 @@ class JsFile implements JmolFileInterface {
   	return (pt < 0 ? null : new JsFile(fullName.substring(0, pt)));
   }
 
-	public String getAbsolutePath() {
+	public String getFullPath() {
 		return fullName;
 	}
 

@@ -333,4 +333,8 @@ public class JsPlatform implements ApiPlatform {
 		return new Mouse(jsvp);
 	}
 
+	public String getLocalUrl(String fileName) {
+		// not used in JSpecView
+		return null;
+	}
 }

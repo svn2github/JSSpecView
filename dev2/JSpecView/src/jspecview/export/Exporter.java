@@ -68,10 +68,10 @@ public class Exporter implements ExportInterface {
 					if (file == null)
 						return null;
 			    String msg = exportSpectrumOrImage(viewer, eType, index, file
-			          .getAbsolutePath());
+			          .getFullPath());
 			    boolean isOK = msg.startsWith("OK");
 			    if (isOK)
-			    	viewer.si.siUpdateRecentMenus(file.getAbsolutePath());
+			    	viewer.si.siUpdateRecentMenus(file.getFullPath());
 			    return msg;
 				}
 			case 2:
@@ -200,8 +200,8 @@ public class Exporter implements ExportInterface {
 				return null;
 			if (!viewer.isJS)
 				viewer.setProperty("directoryLastExportedFile", helper
-						.setDirLastExported(file.getParentAsFile().getAbsolutePath()));
-			pdfFileName = file.getAbsolutePath();
+						.setDirLastExported(file.getParentAsFile().getFullPath()));
+			pdfFileName = file.getFullPath();
 		}
 		String s = null;
 		try {
