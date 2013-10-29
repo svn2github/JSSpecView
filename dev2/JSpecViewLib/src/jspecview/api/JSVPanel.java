@@ -39,6 +39,4 @@ public interface JSVPanel extends JSVViewPanel {
 
 	public void processTwoPointGesture(float[][][] touches);
 
-	public void printPdf(JSVGraphics jsvGraphics, PrintLayout pl);
-
 }
