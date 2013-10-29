@@ -13,6 +13,10 @@ new feature: show NMR taps into NMRDB directly
 
 in preparation for JavaScript version (add to top):
 
+-- 10/29/2013 BH
+ -- PRINT PDF working in JavaScript HTML5-only version of JSpecView
+ -- !!!MISSION ACCOMPLISHED!!!!
+ 
 -- 10/28/2013 BH
  -- adds PRINT PDF command
  -- iText PDF creation classes (1.2M) replaced with simplified custom classes (17K) :)

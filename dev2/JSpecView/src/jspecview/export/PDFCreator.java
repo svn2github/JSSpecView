@@ -75,7 +75,7 @@ public class PDFCreator implements PdfCreatorInterface, JSVGraphics {
 		g2d = panel.getPanelData().g2d;
 		try {
 			newDocument(pl.paperWidth, pl.paperHeight, isLandscape);
-			panel.printPdf(this, pl);
+			panel.getPanelData().printPdf(this, pl);
 			closeDocument();
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -18,17 +18,18 @@ public class JsFileHelper implements JSVFileHelper {
 		return this;
 	}
 
+	@SuppressWarnings("null")
 	public JmolFileInterface getFile(String fileName, Object panelOrFrame, boolean isSave) {
 		String f = null;
 		/**
 		 * @j2sNative
 		 * 
-		 * f = prompt("Enter a file name.", fileName);
+		 * f = prompt("Enter a file name:", fileName);
 		 * 
 		 */
 		{
-			return (f == null ? null : new JsFile(f));
 		}
+		return (f == null ? null : new JsFile(f));
 	}
 
 	public String setDirLastExported(String name) {

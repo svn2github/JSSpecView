@@ -338,19 +338,6 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
   			pf.getOrientation() == PageFormat.PORTRAIT, pi);
   }
 
-	/**
-	 * alternative used in JavaScript -- just for testing here
-	 * @param pdfCreator
-	 * @param pl 
-	 */
-	public void printPdf(JSVGraphics pdfCreator, PrintLayout pl) {
-		boolean isPortrait = !pl.layout.equals("landscape");
-		pd.print(pdfCreator, (isPortrait ? pl.imageableHeight : pl.imageableWidth), 
-				(isPortrait ? pl.imageableWidth : pl.imageableHeight), 
-				pl.imageableX, pl.imageableY,
-				pl.paperHeight, pl.paperWidth, isPortrait, 0);
-	}
-
 	public int getFontFaceID(String name) {
 		return Font.getFontFaceID("SansSerif");
 	}

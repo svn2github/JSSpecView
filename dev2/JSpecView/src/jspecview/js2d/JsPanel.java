@@ -49,7 +49,6 @@ import org.jmol.util.Logger;
 
 import jspecview.api.JSVGraphics;
 import jspecview.api.JSVPanel;
-import jspecview.api.PdfCreatorInterface;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
@@ -256,28 +255,12 @@ public class JsPanel implements JSVPanel {
 	public void printPanel(PrintLayout pl, OutputStream os, String title) {
 		pl.title = title;
 		pl.date = apiPlatform.getDateFormat(true);
+		pd.setPrint(pl, "Helvetica");
 		try {
-			createPdfDocument(os, pl);
+			viewer.createPdfDocument(os, pl);
   	} catch (Exception ex) {
   		showMessage(ex.toString(), "creating PDF");
   	}
-	}
-
-  private void createPdfDocument(OutputStream os, PrintLayout pl) {
-  	PdfCreatorInterface pdfCreator = (PdfCreatorInterface) viewer.getPlatformInterface("PdfCreator");
-  	if (pdfCreator == null)
-  		return;
-  	pdfCreator.createPdfDocument(this, pl, os);
-  }
-
-	/**
-	 * @param pdfCreator
-	 * @param pl 
-	 */
-	public void printPdf(JSVGraphics pdfCreator, PrintLayout pl) {
-		pd.print(pdfCreator, pl.imageableHeight, pl.imageableWidth, 
-				pl.imageableX, pl.imageableY,
-				pl.paperHeight, pl.paperWidth, !pl.layout.equals("landscape"), 0);
 	}
 
 	public String saveImage(String type, Object file) {
