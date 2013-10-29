@@ -23,7 +23,6 @@ import javajs.awt.Dimension;
 import org.jmol.util.Logger;
 import javajs.util.Parser;
 
-import javajs.util.Parser;
 import org.jmol.util.Txt;
 
 import jspecview.api.ExportInterface;

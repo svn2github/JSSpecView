@@ -4,8 +4,6 @@ package jspecview.common;
 
 import javajs.util.Parser;
 
-import javajs.util.Parser;
-
 public class PeakInfo {
   public final static PeakInfo nullPeakInfo = new PeakInfo();
 

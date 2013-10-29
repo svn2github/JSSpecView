@@ -41,7 +41,6 @@ import org.jmol.api.JmolFileInterface;
 import org.jmol.io.Encoding;
 import org.jmol.io.JmolOutputChannel;
 import org.jmol.util.Logger;
-import javajs.util.Parser;
 
 import org.jmol.util.Txt;
 

@@ -15,8 +15,6 @@ import javajs.util.List;
 import org.jmol.util.Logger;
 import javajs.util.Parser;
 
-import javajs.util.Parser;
-
 import jspecview.api.AnnotationData;
 import jspecview.api.JSVGraphics;
 import jspecview.api.JSVPanel;
