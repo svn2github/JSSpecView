@@ -214,7 +214,7 @@ public class Exporter implements ExportInterface {
 				os = (isBase64 ? null : new FileOutputStream(pdfFileName, false));
 			}
 			JmolOutputChannel out = (isJob ? null : new JmolOutputChannel()
-					.setParams(null, isBase64 ? null : pdfFileName, false, os));
+					.setParams(viewer, isBase64 ? null : pdfFileName, false, os));
 			String printJobTitle = jsvp.getPanelData().getPrintJobTitle(true);
 			if (pl.showTitle) {
 				printJobTitle = jsvp.getInput("Title?", "Title for Printing",

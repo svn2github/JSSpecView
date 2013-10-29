@@ -249,7 +249,7 @@ public class JSVFileManager {
 		return totalLen + " bytes";
 	}
 
-  public String postByteArray(String fileName, byte[] bytes) {
+  public static String postByteArray(String fileName, byte[] bytes) {
     Object ret = null;    
     try {
 			ret = getInputStream(fileName, false, bytes);

@@ -1,6 +1,7 @@
 package jspecview.common;
 
 import org.jmol.api.ApiPlatform;
+import org.jmol.api.BytePoster;
 import org.jmol.api.Interface;
 import org.jmol.api.JSmolInterface;
 import org.jmol.api.PlatformViewer;
@@ -54,7 +55,7 @@ import jspecview.util.JSVEscape;
  * @author Bob Hanson hansonr@stolaf.edu
  * 
  */
-public class JSViewer implements PlatformViewer, JSmolInterface {
+public class JSViewer implements PlatformViewer, JSmolInterface, BytePoster  {
 
 	public final static String sourceLabel = "Original...";
 
@@ -1674,5 +1675,8 @@ public class JSViewer implements PlatformViewer, JSmolInterface {
   		pdfCreator.createPdfDocument(selectedPanel, pl, os);
   }
 
+	public String postByteArray(String fileName, byte[] bytes) {
+		return JSVFileManager.postByteArray(fileName, bytes);
+	}
 
 }
