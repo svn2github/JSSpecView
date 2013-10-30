@@ -3,7 +3,7 @@
  * $Date$
  * $Revision$
  *
- * Copyright (C) 2006  The Jmol Development Team
+ * Copyright (C) 2011  The Jmol Development Team
  *
  * Contact: jmol-developers@lists.sf.net
  *
@@ -23,28 +23,8 @@
  *  02110-1301, USA.
  */
 
-package org.jmol.api;
+package javajs.util;
 
-import org.jmol.util.Logger;
-
-public class Interface {
-
-  public static Object getOptionInterface(String name) {
-    return getInterface("org.jmol." + name);
-  }
-
-  public static Object getApplicationInterface(String name) {
-    return getInterface("org.openscience.jmol.app." + name);
-  }
-
-  public static Object getInterface(String name) {
-    try {
-      Class<?> x = Class.forName(name);
-      return (x == null ? null : x.newInstance());
-    } catch (Exception e) {
-      Logger.error("Interface.java Error creating instance for " + name + ": \n" + e);
-      return null;
-    }
-  }
-
+public enum Encoding {
+  NONE, UTF8, UTF_16BE, UTF_16LE, UTF_32BE, UTF_32LE
 }
