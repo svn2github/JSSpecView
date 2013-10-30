@@ -21,7 +21,8 @@ package jspecview.export;
 
 import java.io.IOException;
 
-import org.jmol.io.JmolOutputChannel;
+import javajs.util.OutputChannel;
+
 
 import jspecview.common.ExportType;
 import jspecview.common.JDXSpectrum;
@@ -48,11 +49,9 @@ public class AMLExporter extends XMLExporter {
    * @return data if fileName is null
    * @throws IOException
    */
-  public String exportTheSpectrum(JSViewer viewer, ExportType mode, JmolOutputChannel out, JDXSpectrum spec,
+  public String exportTheSpectrum(JSViewer viewer, ExportType mode, OutputChannel out, JDXSpectrum spec,
                      int startIndex, int endIndex, PanelData pd) throws IOException {
-  	this.viewer = viewer;
-
-    if (!setup(spec, out, startIndex, endIndex))
+    if (!setup(viewer, spec, out, startIndex, endIndex))
       return null;
 
     if (solvName == null || solvName.equals(""))

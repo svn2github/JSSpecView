@@ -26,10 +26,10 @@ import java.util.Hashtable;
 
 import javajs.api.GenericColor;
 import javajs.util.DecimalFormat;
+import javajs.util.OutputChannel;
 import javajs.util.List;
 
 
-import org.jmol.io.JmolOutputChannel;
 import org.jmol.util.Logger;
 
 import jspecview.common.ColorParameters;
@@ -83,13 +83,10 @@ public class SVGExporter extends FormExporter {
 	 * @throws IOException
 	 */
 	public String exportTheSpectrum(JSViewer viewer, ExportType mode,
-			JmolOutputChannel out, JDXSpectrum spec, int startIndex, int endIndex, PanelData pd)
+			OutputChannel out, JDXSpectrum spec, int startIndex, int endIndex, PanelData pd)
 			throws IOException {
-		this.viewer = viewer;
-		initForm(out);
-
+		initForm(viewer, out);
 		GenericColor plotAreaColor, backgroundColor, plotColor, gridColor, titleColor, scaleColor, unitsColor;
-
 		if (pd == null) {
 			plotAreaColor = backgroundColor = plotColor = gridColor = titleColor = scaleColor = unitsColor = ColorParameters.BLACK;
 		} else {

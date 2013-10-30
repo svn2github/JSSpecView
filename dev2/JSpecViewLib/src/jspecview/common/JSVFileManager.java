@@ -33,13 +33,13 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import javajs.util.ArrayUtil;
+import javajs.util.OutputChannel;
 import javajs.util.Parser;
 import javajs.util.SB;
 
 import org.jmol.api.Interface;
 import org.jmol.api.JmolFileInterface;
 import org.jmol.io.Encoding;
-import org.jmol.io.JmolOutputChannel;
 import org.jmol.util.Logger;
 
 import org.jmol.util.Txt;
@@ -225,7 +225,7 @@ public class JSVFileManager {
   }
   
 	public static Object getStreamAsBytes(BufferedInputStream bis,
-			JmolOutputChannel out) throws IOException {
+			OutputChannel out) throws IOException {
 		byte[] buf = new byte[1024];
 		byte[] bytes = (out == null ? new byte[4096] : null);
 		int len = 0;
@@ -389,7 +389,7 @@ public class JSVFileManager {
 	private static URL getResource(Object object, String fileName, String[] error) {
     URL url = null;
     try {
-      if ((url = object.getClass().getResource("resources/" + fileName)) == null)
+      if ((url = object.getClass().getResource(fileName)) == null)
         error[0] = "Couldn't find file: " + fileName;
     } catch (Exception e) {
     	
@@ -400,19 +400,19 @@ public class JSVFileManager {
   }
 
   public static String getResourceString(Object object, String name, String[] error) {
-    URL url = getResource(object, name, error);
+    Object url = getResource(object, name, error);
     if (url == null) {
       error[0] = "Error loading resource " + name;
       return null;
     }
+    if (url instanceof String) {
+    	// JavaScript does this -- all resources are just files on the site somewhere
+    	return getFileAsString((String) url);
+    }
     SB sb = new SB();
     try {
-      //  turns out from the Jar file
-      //   it's a sun.net.www.protocol.jar.JarURLConnection$JarURLInputStream
-      //   and within Eclipse it's a BufferedInputStream
-      //  LogPanel.log(name + " : " + url.getContent().toString());
       BufferedReader br = new BufferedReader(new InputStreamReader(
-          (InputStream) url.getContent(), "UTF-8"));
+          (InputStream) ((URL) url).getContent(), "UTF-8"));
       String line;
       while ((line = br.readLine()) != null)
         sb.append(line).append("\n");
@@ -420,8 +420,7 @@ public class JSVFileManager {
     } catch (Exception e) {
       error[0] = e.getMessage();
     }
-    String str = sb.toString();
-    return str;
+    return sb.toString();
   }
 
   public static String getJmolFilePath(String filePath) {

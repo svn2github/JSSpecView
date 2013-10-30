@@ -1,12 +1,10 @@
 package jspecview.common;
 
 import org.jmol.api.ApiPlatform;
-import org.jmol.api.BytePoster;
 import org.jmol.api.Interface;
 import org.jmol.api.JSmolInterface;
 import org.jmol.api.JmolFileInterface;
 import org.jmol.api.PlatformViewer;
-import org.jmol.io.JmolOutputChannel;
 
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -18,6 +16,7 @@ import java.util.Properties;
 
 import java.util.Map;
 
+import javajs.util.OutputChannel;
 import javajs.util.List;
 import javajs.util.SB;
 import javajs.awt.Dimension;
@@ -55,7 +54,7 @@ import jspecview.util.JSVEscape;
  * @author Bob Hanson hansonr@stolaf.edu
  * 
  */
-public class JSViewer implements PlatformViewer, JSmolInterface, BytePoster  {
+public class JSViewer implements PlatformViewer, JSmolInterface, javajs.api.BytePoster  {
 
 	public final static String sourceLabel = "Original...";
 
@@ -1267,6 +1266,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface, BytePoster  {
 			// jsvpPopupMenu.dispose();
 			if (currentSource != null)
 				currentSource.dispose();
+			currentSource = null;
 			// jsvpPopupMenu.dispose();
 			if (selectedPanel != null)
 				selectedPanel.dispose();
@@ -1661,19 +1661,22 @@ public class JSViewer implements PlatformViewer, JSmolInterface, BytePoster  {
 		return JSVFileManager.postByteArray(fileName, bytes);
 	}
 
-	public JmolOutputChannel getOutputChannel(String fileName, boolean isBinary) throws Exception {
+	public OutputChannel getOutputChannel(String fileName, boolean isBinary) throws Exception {
 		OutputStream os = null;
 		/**
 		 * in JavaScript, this will be a string buffer or byte array
 		 * 
 		 * @j2sNative
 		 * 
+		 * while (fileName.startsWith("/"))
+		 *   fileName = fileName.substring(1);
+		 * 
 		 * 
 		 */
 		{
 			os = (fileName == null ? null : new FileOutputStream(fileName));
 		}
-		return new JmolOutputChannel().setParams(this, fileName, !isBinary, os);
+		return new OutputChannel().setParams(this, fileName, !isBinary, os);
 	}
 
 }

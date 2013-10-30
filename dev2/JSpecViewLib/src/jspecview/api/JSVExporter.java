@@ -1,6 +1,6 @@
 package jspecview.api;
 
-import org.jmol.io.JmolOutputChannel;
+import javajs.util.OutputChannel;
 
 import jspecview.common.ExportType;
 import jspecview.common.JDXSpectrum;
@@ -22,6 +22,6 @@ public interface JSVExporter {
 	 * @throws Exception
 	 */
 	String exportTheSpectrum(JSViewer viewer, ExportType type,
-			JmolOutputChannel out, JDXSpectrum spec, int startIndex, int endIndex, PanelData pd) throws Exception;
+			OutputChannel out, JDXSpectrum spec, int startIndex, int endIndex, PanelData pd) throws Exception;
 
 }

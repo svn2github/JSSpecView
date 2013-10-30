@@ -13,6 +13,12 @@ new feature: show NMR taps into NMRDB directly
 
 in preparation for JavaScript version (add to top):
 
+-- 10/30/2013 BH
+ * exception.getMessage() --> exception.toString();
+ * Object.getClass().getResource() returns a simple relative filename, not a URL
+ -- all exports, including CML, AML, JDX, PNG, JPG (as PNG), and PDF working
+ -- CLOSE ALL fixed
+ 
 -- 10/29/2013 BH
  -- PRINT PDF working in JavaScript HTML5-only version of JSpecView
  -- !!!MISSION ACCOMPLISHED!!!!

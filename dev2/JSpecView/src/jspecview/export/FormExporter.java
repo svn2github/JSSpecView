@@ -21,7 +21,8 @@ package jspecview.export;
 
 import java.io.IOException;
 
-import org.jmol.io.JmolOutputChannel;
+import javajs.util.OutputChannel;
+
 import org.jmol.util.Logger;
 
 import jspecview.api.JSVExporter;
@@ -43,18 +44,19 @@ abstract class FormExporter implements JSVExporter {
   FormContext context = new FormContext();
   String errMsg;
   String currentTime;
-  protected JmolOutputChannel out;
+  protected OutputChannel out;
   protected JSViewer viewer;
 
 
-  protected void initForm(JmolOutputChannel out) {
+  protected void initForm(JSViewer viewer, OutputChannel out) {
+  	this.viewer = viewer;
   	this.out = out;
     currentTime = viewer.apiPlatform.getDateFormat(false);
   }
 
   protected String writeForm(String templateFile) throws IOException {
     String[] error = new String[1];
-    String template = JSVFileManager.getResourceString(this, templateFile, error);
+    String template = JSVFileManager.getResourceString(this, "resources/" + templateFile, error);
     if (template == null) {
       Logger.error(error[0]);
       return error[0];
@@ -74,6 +76,6 @@ abstract class FormExporter implements JSVExporter {
     }
 
     out.closeChannel();
-    return " OK";
+    return "OK " + out.getByteCount() + " bytes";
   }
 }

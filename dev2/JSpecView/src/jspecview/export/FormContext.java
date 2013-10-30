@@ -23,10 +23,10 @@ import java.util.Hashtable;
 
 import java.util.Map;
 
+import javajs.util.OutputChannel;
 import javajs.util.List;
 import javajs.util.Parser;
 
-import org.jmol.io.JmolOutputChannel;
 import org.jmol.util.Logger;
 import org.jmol.util.Txt;
 
@@ -198,7 +198,7 @@ class FormContext {
   }
 
 	@SuppressWarnings("unchecked")
-	public String merge(JmolOutputChannel out) {
+	public String merge(OutputChannel out) {
 		int ptr;
 		for (int i = 0; i < formTokens.size() && strError == null; i++) {
 			FormToken vt = formTokens.get(i);

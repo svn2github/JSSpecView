@@ -22,8 +22,8 @@ package jspecview.export;
 import java.io.IOException;
 import java.util.Arrays;
 
-import org.jmol.io.JmolOutputChannel;
 
+import javajs.util.OutputChannel;
 import javajs.util.List;
 
 import jspecview.api.JSVExporter;
@@ -37,7 +37,7 @@ import jspecview.source.JDXDataObject;
 import jspecview.util.JSVTxt;
 
 /**
- * class <code>JDXExporter</code> contains static methods for exporting a
+ * class <code>JDXExporter</code> contains methods for exporting a
  * JCAMP-DX Spectrum in one of the compression formats DIF, FIX, PAC, SQZ or
  * as x, y values.
  * @author Debbie-Ann Facey
@@ -49,7 +49,7 @@ import jspecview.util.JSVTxt;
 public class JDXExporter implements JSVExporter {
 
 	public static final String newLine = System.getProperty("line.separator");
-	private JmolOutputChannel out;
+	private OutputChannel out;
 	private ExportType type;
 	private JDXSpectrum spectrum;
 	private JSViewer viewer;
@@ -73,14 +73,14 @@ public class JDXExporter implements JSVExporter {
    * @return data if path is null
    * @throws IOException
    */
-  public String exportTheSpectrum(JSViewer viewer, ExportType type, JmolOutputChannel out, JDXSpectrum spectrum, int startIndex, int endIndex, PanelData pd) throws IOException{
+  public String exportTheSpectrum(JSViewer viewer, ExportType type, OutputChannel out, JDXSpectrum spectrum, int startIndex, int endIndex, PanelData pd) throws IOException{
   	this.out = out;
   	this.type = type;
   	this.spectrum = spectrum;
   	this.viewer = viewer;
     toStringAux(startIndex, endIndex);
     out.closeChannel();
-    return " (" + out.getByteCount() + " bytes)";
+    return "OK " + out.getByteCount() + " bytes";
   }
 
   /**
@@ -164,8 +164,8 @@ public class JDXExporter implements JSVExporter {
     int index = Arrays.binarySearch(FileReader.VAR_LIST_TABLE[0],
         tmpDataClass);
     String varList = FileReader.VAR_LIST_TABLE[1][index];
-    out.append(getHeaderString(tmpDataClass, minY, maxY,
-        xCompFactor, yCompFactor, startIndex, endIndex));
+    getHeaderString(tmpDataClass, minY, maxY,
+        xCompFactor, yCompFactor, startIndex, endIndex);
     out.append("##" + tmpDataClass + "= " + varList + newLine);
     out.append(tabDataSet);
     out.append("##END=");
@@ -185,9 +185,8 @@ public class JDXExporter implements JSVExporter {
    *        the index of the starting coordinate
    * @param endIndex
    *        the index of the ending coordinate
-   * @return the String for the header of the spectrum
    */
-  private String getHeaderString(String tmpDataClass,
+  private void getHeaderString(String tmpDataClass,
                                         double minY, double maxY,
                                         double tmpXFactor, double tmpYFactor,
                                         int startIndex, int endIndex) {
@@ -270,7 +269,6 @@ public class JDXExporter implements JSVExporter {
         newLine);
     out.append("##MAXY= ").append(JSVTxt.fixExponentInt(maxY)).append(
         newLine);
-    return out.toString();
   }
 
   private static boolean areIntegers(Coordinate[] xyCoords, int startIndex,

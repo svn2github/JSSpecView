@@ -21,12 +21,13 @@ package jspecview.export;
 
 import java.io.IOException;
 
-import org.jmol.io.JmolOutputChannel;
 
+import javajs.util.OutputChannel;
 import javajs.util.List;
 
 import jspecview.common.Coordinate;
 import jspecview.common.JDXSpectrum;
+import jspecview.common.JSViewer;
 
 /**
  * The XMLExporter should be a totally generic exporter
@@ -82,11 +83,11 @@ abstract class XMLExporter extends FormExporter {
 
   protected List<Coordinate> newXYCoords = new List<Coordinate>();
 
-  protected boolean setup(JDXSpectrum spec, JmolOutputChannel out, int startIndex,
+  protected boolean setup(JSViewer viewer, JDXSpectrum spec, OutputChannel out, int startIndex,
                              int endIndex) {
     this.startIndex = startIndex;
     this.endIndex = endIndex;
-    initForm(out);
+    initForm(viewer, out);
     return setParameters(spec);
   }
 
