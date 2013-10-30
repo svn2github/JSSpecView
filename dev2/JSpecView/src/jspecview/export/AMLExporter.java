@@ -51,9 +51,8 @@ public class AMLExporter extends XMLExporter {
   public String exportTheSpectrum(JSViewer viewer, ExportType mode, JmolOutputChannel out, JDXSpectrum spec,
                      int startIndex, int endIndex, PanelData pd) throws IOException {
   	this.viewer = viewer;
-  	this.spectrum = spec;
 
-    if (!setup(startIndex, endIndex))
+    if (!setup(spec, out, startIndex, endIndex))
       return null;
 
     if (solvName == null || solvName.equals(""))
