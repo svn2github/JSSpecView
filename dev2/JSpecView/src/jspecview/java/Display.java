@@ -8,14 +8,14 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.image.MemoryImageSource;
 
+import javajs.api.GenericPlatform;
+import javajs.api.PlatformViewer;
 import javajs.util.P3;
 import javajs.util.Parser;
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
-import org.jmol.api.ApiPlatform;
-import org.jmol.api.PlatformViewer;
 
 /**
  * methods required by Jmol that access java.awt.Component
@@ -72,19 +72,19 @@ class Display {
   static void setCursor(int c, Object display) {
     Container d = (Container) display;
     switch (c) {
-    case ApiPlatform.CURSOR_HAND:
+    case GenericPlatform.CURSOR_HAND:
       c = Cursor.HAND_CURSOR;
       break;
-    case ApiPlatform.CURSOR_MOVE:
+    case GenericPlatform.CURSOR_MOVE:
       c = Cursor.MOVE_CURSOR;
       break;
-    case ApiPlatform.CURSOR_ZOOM:
+    case GenericPlatform.CURSOR_ZOOM:
       c = Cursor.N_RESIZE_CURSOR;
       break;
-    case ApiPlatform.CURSOR_CROSSHAIR:
+    case GenericPlatform.CURSOR_CROSSHAIR:
       c = Cursor.CROSSHAIR_CURSOR;
       break;
-    case ApiPlatform.CURSOR_WAIT:
+    case GenericPlatform.CURSOR_WAIT:
       c = Cursor.WAIT_CURSOR;
       break;
     default:

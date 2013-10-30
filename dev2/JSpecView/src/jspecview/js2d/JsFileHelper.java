@@ -1,6 +1,6 @@
 package jspecview.js2d;
 
-import org.jmol.api.JmolFileInterface;
+import javajs.api.GenericFileInterface;
 
 import jspecview.api.JSVFileHelper;
 import jspecview.common.ExportType;
@@ -19,7 +19,7 @@ public class JsFileHelper implements JSVFileHelper {
 	}
 
 	@SuppressWarnings("null")
-	public JmolFileInterface getFile(String fileName, Object panelOrFrame, boolean isSave) {
+	public GenericFileInterface getFile(String fileName, Object panelOrFrame, boolean isSave) {
 		String f = null;
 		/**
 		 * @j2sNative

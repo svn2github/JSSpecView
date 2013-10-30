@@ -2,13 +2,12 @@ package jspecview.export;
 
 import java.io.BufferedReader;
 
+import javajs.api.GenericFileInterface;
+import javajs.util.Base64;
 import javajs.util.OutputChannel;
 import javajs.util.List;
+import javajs.util.Txt;
 
-import org.jmol.api.Interface;
-import org.jmol.api.JmolFileInterface;
-import org.jmol.io.Base64;
-import org.jmol.util.Txt;
 
 import jspecview.api.ExportInterface;
 import jspecview.api.JSVExporter;
@@ -62,7 +61,7 @@ public class Exporter implements ExportInterface {
 					int index = (items == null ? -1 : viewer.getOptionFromDialog(items, "Export", "Choose a spectrum to export"));
 					if (index == Integer.MIN_VALUE)
 						return null;
-					JmolFileInterface file = viewer.fileHelper.getFile(getSuggestedFileName(viewer, eType), jsvp, true);
+					GenericFileInterface file = viewer.fileHelper.getFile(getSuggestedFileName(viewer, eType), jsvp, true);
 					if (file == null)
 						return null;
 					out = viewer.getOutputChannel(file.getFullPath(), false);
@@ -154,7 +153,7 @@ public class Exporter implements ExportInterface {
 				return null;
 			viewer.fileHelper.setFileChooser(mode);
 			String name = getSuggestedFileName(viewer, mode);
-			JmolFileInterface file = viewer.fileHelper.getFile(name, jsvp, true);
+			GenericFileInterface file = viewer.fileHelper.getFile(name, jsvp, true);
 			if (file == null)
 				return null;
 			if (viewer.isJS) {
@@ -193,7 +192,7 @@ public class Exporter implements ExportInterface {
 		case UNK:
 			return null;
 		}
-		return ((JSVExporter) Interface.getInterface("jspecview.export."
+		return ((JSVExporter) JSViewer.getInterface("jspecview.export."
 				+ type.toUpperCase() + "Exporter")).exportTheSpectrum(viewer, mode,
 				out, spec, startIndex, endIndex, null);
 	}
@@ -228,7 +227,7 @@ public class Exporter implements ExportInterface {
 			helper.setFileChooser(ExportType.PDF);
 			if (pdfFileName.equals("?") || pdfFileName.equalsIgnoreCase("PDF"))
 				pdfFileName = getSuggestedFileName(viewer, ExportType.PDF);
-			JmolFileInterface file = helper.getFile(pdfFileName, jsvp, true);
+			GenericFileInterface file = helper.getFile(pdfFileName, jsvp, true);
 			if (file == null)
 				return null;
 			if (!viewer.isJS)

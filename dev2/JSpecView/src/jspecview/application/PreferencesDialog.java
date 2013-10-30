@@ -21,7 +21,7 @@ package jspecview.application;
 
 import java.awt.BorderLayout;
 
-import jspecview.util.JSVColorUtil;
+
 import jspecview.util.JSVEscape;
 
 import java.awt.Color;
@@ -38,6 +38,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
 
+
+import javajs.util.ColorUtil;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -667,7 +669,7 @@ public class PreferencesDialog extends JDialog implements ActionListener {
     integFactorTextField.setText(preferences.getProperty("integralFactor"));
     integOffsetTextField.setText(preferences.getProperty("integralOffset"));
     plotColorButton.setBackground(
-        new Color(JSVColorUtil.getArgbFromString(preferences.getProperty("integralPlotColor"))));
+        new Color(ColorUtil.getArgbFromString(preferences.getProperty("integralPlotColor"))));
     autoIntegrateCheckBox.setSelected(
        Boolean.parseBoolean(preferences.getProperty("automaticallyIntegrate")));
     String autoConvert =

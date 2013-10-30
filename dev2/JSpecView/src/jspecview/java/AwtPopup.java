@@ -32,6 +32,7 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
+import javajs.api.PlatformViewer;
 import javajs.util.SB;
 
 import javax.swing.AbstractButton;
@@ -44,7 +45,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 
-import org.jmol.api.PlatformViewer;
 import org.jmol.util.Logger;
 
 import jspecview.common.JSViewer;

@@ -43,10 +43,11 @@ import java.awt.image.Raster;
 import java.awt.image.SinglePixelPackedSampleModel;
 import java.net.URL;
 
+import javajs.api.PlatformViewer;
+
 import jspecview.util.JSVEscape;
 
 
-import org.jmol.api.PlatformViewer;
 
 /**
  * methods required by Jmol that access java.awt.Image
@@ -61,7 +62,7 @@ class Image {
       return Toolkit.getDefaultToolkit().createImage((URL) data);
     if (data instanceof String)
       return Toolkit.getDefaultToolkit().createImage((String) data);
-    if (JSVEscape.isAB(data))
+    if (data instanceof byte[])
       return Toolkit.getDefaultToolkit().createImage((byte[]) data);
     return null;
   }

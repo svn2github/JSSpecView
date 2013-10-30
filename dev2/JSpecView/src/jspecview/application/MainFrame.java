@@ -64,8 +64,11 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import javajs.api.GenericFileInterface;
+import javajs.util.ColorUtil;
 import javajs.util.List;
 import javajs.util.SB;
+import javajs.util.Txt;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
@@ -81,10 +84,8 @@ import javax.swing.WindowConstants;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
 import org.jmol.api.JSVInterface;
-import org.jmol.api.JmolFileInterface;
 import org.jmol.api.JmolSyncInterface;
 import org.jmol.util.Logger;
-import org.jmol.util.Txt;
 
 import jspecview.api.JSVAppInterface;
 import jspecview.api.JSVPanel;
@@ -108,7 +109,7 @@ import jspecview.java.AwtPanel;
 import jspecview.java.ViewPanel;
 import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
-import jspecview.util.JSVColorUtil;
+
 import jspecview.util.JSVEscape;
 
 /**
@@ -611,7 +612,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 				if (tip.indexOf("TRUE") >= 0)
 					tip = " (" + viewer.parameters.getBoolean(st) + ")";
 				else if (st.name().indexOf("COLOR") >= 0)
-					tip = " (" + JSVColorUtil.colorToHexString(viewer.parameters.getElementColor(st))
+					tip = " (" + ColorUtil.toRGBHexString(viewer.parameters.getElementColor(st))
 							+ ")";
 				else
 					tip = "";
@@ -634,7 +635,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	 * Shows dialog to open a file
 	 */
 	void showFileOpenDialog() {
-		JmolFileInterface file = ((AwtFileHelper) viewer.fileHelper).showFileOpenDialog(this);
+		GenericFileInterface file = ((AwtFileHelper) viewer.fileHelper).showFileOpenDialog(this);
 		if (file != null)
 			openFile(file.getFullPath(), true);
 	}

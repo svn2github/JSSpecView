@@ -28,6 +28,7 @@ import java.io.Writer;
 import java.util.TreeMap;
 
 import javajs.api.GenericColor;
+import javajs.util.ColorUtil;
 import javajs.util.SB;
 
 
@@ -35,7 +36,7 @@ import jspecview.common.ColorParameters;
 import jspecview.common.JSVFileManager;
 import jspecview.common.ScriptToken;
 import jspecview.java.AwtParameters;
-import jspecview.util.JSVColorUtil;
+
 import jspecview.util.JSVTxt;
 
 /**
@@ -291,7 +292,7 @@ public class DisplaySchemesProcessor {
 			ScriptToken t) {
 		buffer.append(
 				"\t\t<" + name + " hex=\""
-						+ JSVColorUtil.colorToHexString(ds.getElementColor(t)) + "\"/>")
+						+ ColorUtil.toRGBHexString(ds.getElementColor(t)) + "\"/>")
 				.append(JSVTxt.newLine);
 	}
 

@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Hashtable;
 
 import javajs.api.GenericColor;
+import javajs.util.ColorUtil;
 import javajs.util.DecimalFormat;
 import javajs.util.OutputChannel;
 import javajs.util.List;
@@ -40,7 +41,6 @@ import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
 import jspecview.common.ScaleData;
 import jspecview.common.ScriptToken;
-import jspecview.util.JSVColorUtil;
 
 /**
  * class <code>SVGExporter</code> contains static methods to export a Graph as
@@ -83,8 +83,8 @@ public class SVGExporter extends FormExporter {
 	 * @throws IOException
 	 */
 	public String exportTheSpectrum(JSViewer viewer, ExportType mode,
-			OutputChannel out, JDXSpectrum spec, int startIndex, int endIndex, PanelData pd)
-			throws IOException {
+			OutputChannel out, JDXSpectrum spec, int startIndex, int endIndex,
+			PanelData pd) throws IOException {
 		initForm(viewer, out);
 		GenericColor plotAreaColor, backgroundColor, plotColor, gridColor, titleColor, scaleColor, unitsColor;
 		if (pd == null) {
@@ -225,14 +225,13 @@ public class SVGExporter extends FormExporter {
 		double yTickA = minYOnScale - (yStep / 2);
 		double yTickB = yStep / 5;
 
-		context.put("plotAreaColor", JSVColorUtil.colorToHexString(plotAreaColor));
-		context.put("backgroundColor", JSVColorUtil
-				.colorToHexString(backgroundColor));
-		context.put("plotColor", JSVColorUtil.colorToHexString(plotColor));
-		context.put("gridColor", JSVColorUtil.colorToHexString(gridColor));
-		context.put("titleColor", JSVColorUtil.colorToHexString(titleColor));
-		context.put("scaleColor", JSVColorUtil.colorToHexString(scaleColor));
-		context.put("unitsColor", JSVColorUtil.colorToHexString(unitsColor));
+		context.put("plotAreaColor", ColorUtil.toRGBHexString(plotAreaColor));
+		context.put("backgroundColor", ColorUtil.toRGBHexString(backgroundColor));
+		context.put("plotColor", ColorUtil.toRGBHexString(plotColor));
+		context.put("gridColor", ColorUtil.toRGBHexString(gridColor));
+		context.put("titleColor", ColorUtil.toRGBHexString(titleColor));
+		context.put("scaleColor", ColorUtil.toRGBHexString(scaleColor));
+		context.put("unitsColor", ColorUtil.toRGBHexString(unitsColor));
 
 		context.put("svgHeight", new Integer(svgHeight));
 		context.put("svgWidth", new Integer(svgWidth));

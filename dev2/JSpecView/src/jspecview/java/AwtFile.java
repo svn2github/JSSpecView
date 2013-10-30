@@ -8,7 +8,8 @@ import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.net.URLConnection;
 
-import org.jmol.api.JmolFileInterface;
+import javajs.api.GenericFileInterface;
+
 
 /**
  * a subclass of File allowing extension to JavaScript
@@ -17,13 +18,13 @@ import org.jmol.api.JmolFileInterface;
  * 
  */
 
-class AwtFile extends File implements JmolFileInterface {
+class AwtFile extends File implements GenericFileInterface {
 
 	AwtFile(String name) {
 		super(name);
 	}
 
-	public JmolFileInterface getParentAsFile() {
+	public GenericFileInterface getParentAsFile() {
 		File file = getParentFile();
 		return (file == null ? null : new AwtFile(file.getAbsolutePath()));
 	}

@@ -23,8 +23,8 @@
  */
 package jspecview.js2d;
 
-import org.jmol.api.PlatformViewer;
 
+import javajs.api.PlatformViewer;
 import javajs.util.SB;
 
 import jspecview.common.JSViewer;

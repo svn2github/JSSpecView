@@ -8,6 +8,11 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import javajs.api.GenericFileInterface;
+import javajs.api.GenericMenuInterface;
+import javajs.api.GenericMouseInterface;
+import javajs.api.GenericPlatform;
+import javajs.api.PlatformViewer;
 import javajs.awt.Font;
 import javajs.util.P3;
 
@@ -18,13 +23,8 @@ import jspecview.api.JSVPanel;
 
 import netscape.javascript.JSObject;
 
-import org.jmol.api.ApiPlatform;
-import org.jmol.api.JmolFileInterface;
-import org.jmol.api.JmolMouseInterface;
-import org.jmol.api.JmolPopupInterface;
-import org.jmol.api.PlatformViewer;
 
-public class AwtPlatform implements ApiPlatform {
+public class AwtPlatform implements GenericPlatform {
 
   PlatformViewer viewer;
   
@@ -42,7 +42,7 @@ public class AwtPlatform implements ApiPlatform {
     Display.getFullScreenDimensions(display, widthHeight);        
   }
   
-  public JmolPopupInterface getMenuPopup(String menuStructure, char type) {
+  public GenericMenuInterface getMenuPopup(String menuStructure, char type) {
   	return null;//
   }
 
@@ -83,7 +83,7 @@ public class AwtPlatform implements ApiPlatform {
 
   ////// Mouse
 
-  public JmolMouseInterface getMouseManager(double ignored, Object jsvp) {
+  public GenericMouseInterface getMouseManager(double ignored, Object jsvp) {
     return new Mouse((JSVPanel) jsvp);
   }
 
@@ -231,7 +231,7 @@ public class AwtPlatform implements ApiPlatform {
             .format(new Date()));
   }
   
-  public JmolFileInterface newFile(String name) {
+  public GenericFileInterface newFile(String name) {
     return new AwtFile(name);
   }
 

@@ -3,10 +3,10 @@ package jspecview.js2d;
 import java.net.URL;
 
 import jspecview.common.JSVFileManager;
+import javajs.api.GenericFileInterface;
 import javajs.util.AjaxURLConnection;
+import javajs.util.Txt;
 
-import org.jmol.api.JmolFileInterface;
-import org.jmol.util.Txt;
 
 /**
  * 
@@ -14,12 +14,12 @@ import org.jmol.util.Txt;
  * 
  */
 
-class JsFile implements JmolFileInterface {
+class JsFile implements GenericFileInterface {
 
   private String name;
 	private String fullName;
 
-  static JmolFileInterface newFile(String name) {
+  static GenericFileInterface newFile(String name) {
     return new JsFile(name);
   }
 
@@ -32,7 +32,7 @@ class JsFile implements JmolFileInterface {
   	name = name.substring(name.lastIndexOf("/") + 1);
   }
 
-  public JmolFileInterface getParentAsFile() {
+  public GenericFileInterface getParentAsFile() {
   	int pt = fullName.lastIndexOf("/");
   	return (pt < 0 ? null : new JsFile(fullName.substring(0, pt)));
   }

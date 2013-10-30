@@ -4,10 +4,11 @@ import java.awt.Component;
 import java.awt.Frame;
 import java.io.File;
 
+import javajs.api.GenericFileInterface;
+
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
-import org.jmol.api.JmolFileInterface;
 
 import jspecview.api.JSVFileHelper;
 import jspecview.common.ExportType;
@@ -65,12 +66,12 @@ public class AwtFileHelper implements JSVFileHelper {
     fc.setFileFilter(filter);    
 	}
 
-	public JmolFileInterface showFileOpenDialog(Frame frame) {
+	public GenericFileInterface showFileOpenDialog(Frame frame) {
 		setFileChooser(ExportType.UNK);
 		return getFile("", frame, false);
 	}
 
-	public JmolFileInterface getFile(String name, Object panelOrFrame, boolean isSave) {
+	public GenericFileInterface getFile(String name, Object panelOrFrame, boolean isSave) {
 		Component c = (Component) panelOrFrame;
 		fc.setSelectedFile(new File(name));
 		if (isSave) {

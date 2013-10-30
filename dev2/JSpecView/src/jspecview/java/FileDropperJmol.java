@@ -39,9 +39,10 @@ import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.util.List;
 
+import javajs.api.PlatformViewer;
+
 import jspecview.util.JSVEscape;
 
-import org.jmol.api.PlatformViewer;
 import org.jmol.util.Logger;
 
 /**

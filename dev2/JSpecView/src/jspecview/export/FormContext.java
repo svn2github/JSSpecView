@@ -26,9 +26,9 @@ import java.util.Map;
 import javajs.util.OutputChannel;
 import javajs.util.List;
 import javajs.util.Parser;
+import javajs.util.Txt;
 
 import org.jmol.util.Logger;
-import org.jmol.util.Txt;
 
 import jspecview.common.Coordinate;
 

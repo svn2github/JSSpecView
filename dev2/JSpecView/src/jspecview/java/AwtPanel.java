@@ -52,8 +52,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import javajs.api.GenericColor;
+import javajs.api.GenericFileInterface;
+import javajs.api.GenericMouseInterface;
+import javajs.api.GenericPlatform;
 import javajs.awt.Font;
 import javajs.util.List;
+import javajs.util.Txt;
 
 import javax.imageio.ImageIO;
 import javax.print.attribute.Attribute;
@@ -67,11 +71,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 
-import org.jmol.api.ApiPlatform;
-import org.jmol.api.JmolFileInterface;
-import org.jmol.api.JmolMouseInterface;
 import org.jmol.util.Logger;
-import org.jmol.util.Txt;
 
 import jspecview.api.JSVPanel;
 import jspecview.common.JDXSpectrum;
@@ -101,8 +101,8 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
     Logger.info("JSVPanel " + this + " finalized");
   }
 
-	private ApiPlatform apiPlatform;
-	public ApiPlatform getApiPlatform() {
+	private GenericPlatform apiPlatform;
+	public GenericPlatform getApiPlatform() {
 		return apiPlatform;
 	}
 	
@@ -112,7 +112,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
   }
 
 	private JSViewer viewer;
-	private JmolMouseInterface mouse;
+	private GenericMouseInterface mouse;
 
   private GenericColor bgcolor;
 	
@@ -342,7 +342,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
 		return Font.getFontFaceID("SansSerif");
 	}
 	
-	public String saveImage(String type, JmolFileInterface file) {
+	public String saveImage(String type, GenericFileInterface file) {
 		String msg = "OK";
     try {
 	    Image image = createImage(getWidth(), getHeight());
@@ -381,7 +381,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
 
 	public boolean handleOldJvm10Event(int id, int x, int y, int modifiers,
 			long time) {
-		return mouse.handleOldJvm10Event(id, x, y, modifiers, time);
+		return mouse.processEvent(id, x, y, modifiers, time);
 	}
 
 	public void processTwoPointGesture(float[][][] touches) {

@@ -33,11 +33,12 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 
+import javajs.api.GenericMouseInterface;
+import javajs.awt.event.Event;
+import javajs.api.EventManager;
+
 import jspecview.api.JSVPanel;
 
-import org.jmol.api.EventManager;
-import org.jmol.api.JmolMouseInterface;
-import org.jmol.api.Event;
 import org.jmol.util.Logger;
 
 /**
@@ -50,7 +51,7 @@ import org.jmol.util.Logger;
  */
 
 class Mouse implements MouseWheelListener, MouseListener,
-    MouseMotionListener, KeyListener, JmolMouseInterface {
+    MouseMotionListener, KeyListener, GenericMouseInterface {
 
   private JSVPanel viewer;
   private EventManager pd;
@@ -80,7 +81,7 @@ class Mouse implements MouseWheelListener, MouseListener,
     display.removeKeyListener(this);
   }
 
-  public boolean handleOldJvm10Event(int id, int x, int y, int modifiers, long time) {
+  public boolean processEvent(int id, int x, int y, int modifiers, long time) {
     modifiers = applyLeftMouse(modifiers);
     switch (id) {
     case Event.MOUSE_DOWN:

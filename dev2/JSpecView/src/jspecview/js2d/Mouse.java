@@ -28,12 +28,12 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 
 import javajs.J2SRequireImport;
+import javajs.api.GenericMouseInterface;
+import javajs.awt.event.Event;
+import javajs.api.EventManager;
 
 import jspecview.api.JSVPanel;
 
-import org.jmol.api.EventManager;
-import org.jmol.api.JmolMouseInterface;
-import org.jmol.api.Event;
 import org.jmol.util.Logger;
 
 /**
@@ -43,8 +43,8 @@ import org.jmol.util.Logger;
  * 
  */
 
-@J2SRequireImport({org.jmol.api.Event.class})
-public class Mouse implements JmolMouseInterface {
+@J2SRequireImport({javajs.awt.event.Event.class})
+public class Mouse implements GenericMouseInterface {
 
   private EventManager pd;
 
@@ -62,7 +62,7 @@ public class Mouse implements JmolMouseInterface {
 
   private int xWhenPressed, yWhenPressed, modifiersWhenPressed10;
 
-  public boolean handleOldJvm10Event(int id, int x, int y, int modifiers, long time) {
+  public boolean processEvent(int id, int x, int y, int modifiers, long time) {
     if (id != -1)
       modifiers = applyLeftMouse(modifiers);
     switch (id) {

@@ -2,6 +2,11 @@ package jspecview.js2d;
 
 import java.net.URL;
 
+import javajs.api.GenericFileInterface;
+import javajs.api.GenericMenuInterface;
+import javajs.api.GenericMouseInterface;
+import javajs.api.GenericPlatform;
+import javajs.api.PlatformViewer;
 import javajs.awt.Font;
 import javajs.util.P3;
 import javajs.util.AjaxURLStreamHandlerFactory;
@@ -9,11 +14,6 @@ import javajs.util.AjaxURLStreamHandlerFactory;
 import jspecview.api.JSVPanel;
 
 
-import org.jmol.api.ApiPlatform;
-import org.jmol.api.JmolFileInterface;
-import org.jmol.api.JmolMouseInterface;
-import org.jmol.api.JmolPopupInterface;
-import org.jmol.api.PlatformViewer;
 
 /**
  * JavaScript 2D canvas version requires Ajax-based URL stream processing.
@@ -28,7 +28,7 @@ import org.jmol.api.PlatformViewer;
  * @author Bob Hanson
  *
  */
-public class JsPlatform implements ApiPlatform {
+public class JsPlatform implements GenericPlatform {
   Object canvas;
   PlatformViewer viewer;
   Object context;
@@ -77,7 +77,7 @@ public class JsPlatform implements ApiPlatform {
     return false;
   }
 
-  public JmolMouseInterface getMouseManager(double privateKey, Object jsvp) {
+  public GenericMouseInterface getMouseManager(double privateKey, Object jsvp) {
   	return new Mouse((JSVPanel) jsvp);
   }
 
@@ -92,7 +92,7 @@ public class JsPlatform implements ApiPlatform {
 		Display.getFullScreenDimensions(canvas, widthHeight);
 	}
 
-  public JmolPopupInterface getMenuPopup(String menuStructure,
+  public GenericMenuInterface getMenuPopup(String menuStructure,
                                          char type) {
   	return null;
   }
@@ -315,7 +315,7 @@ public class JsPlatform implements ApiPlatform {
     }
   }
 
-  public JmolFileInterface newFile(String name) {
+  public GenericFileInterface newFile(String name) {
     return new JsFile(name);
   }
 
@@ -329,7 +329,7 @@ public class JsPlatform implements ApiPlatform {
     return JsFile.getBufferedURLInputStream(url, outputBytes, post);
   }
 
-	public JmolMouseInterface getMouseManager(JSVPanel jsvp) {
+	public GenericMouseInterface getMouseManager(JSVPanel jsvp) {
 		return new Mouse(jsvp);
 	}
 

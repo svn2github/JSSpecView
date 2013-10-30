@@ -22,7 +22,6 @@ package jspecview.export;
 import javajs.util.SB;
 
 import org.jmol.util.Logger;
-import org.jmol.util.Txt;
 
 import jspecview.common.Coordinate;
 import jspecview.util.JSVTxt;
@@ -143,10 +142,10 @@ class JDXCompressor {
 		endIndex += step;
 		SB buffer = new SB();
 		for (int i = startIndex; i != endIndex;) {
-			Txt.leftJustify(buffer, "              ", JSVTxt
+			leftJustify(buffer, "              ", JSVTxt
 					.fixIntNoExponent(xyCoords[i].getXVal() / xFactor)); // 14 spaces
 			for (int j = 0; j < 6 && i != endIndex; j++) {
-				Txt.rightJustify(buffer, "          ", ""
+			  rightJustify(buffer, "          ", ""
 						+ Math.round(xyCoords[i].getYVal() / yFactor));
 				buffer.append(" ");
 				i += step;
@@ -157,6 +156,20 @@ class JDXCompressor {
 		return buffer.toString();
 	}
 
+  public static void leftJustify(SB s, String s1, String s2) {
+    s.append(s2);
+    int n = s1.length() - s2.length();
+    if (n > 0)
+      s.append(s1.substring(0, n));
+  }
+  
+  public static void rightJustify(SB s, String s1, String s2) {
+    int n = s1.length() - s2.length();
+    if (n > 0)
+      s.append(s1.substring(0, n));
+    s.append(s2);
+  }
+  
   /**
    * Compresses the <code>Coordinate<code>s into SQZ format
    * 

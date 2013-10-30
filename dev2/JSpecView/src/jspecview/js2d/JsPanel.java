@@ -40,12 +40,12 @@ package jspecview.js2d;
 import java.io.OutputStream;
 
 import javajs.api.GenericColor;
+import javajs.api.GenericFileInterface;
+import javajs.api.GenericMouseInterface;
+import javajs.api.GenericPlatform;
 import javajs.awt.Font;
 import javajs.util.List;
 
-import org.jmol.api.ApiPlatform;
-import org.jmol.api.JmolFileInterface;
-import org.jmol.api.JmolMouseInterface;
 import org.jmol.util.Logger;
 
 import jspecview.api.JSVPanel;
@@ -77,8 +77,8 @@ public class JsPanel implements JSVPanel {
     Logger.info("JSVPanel " + this + " finalized");
   }
 
-	private ApiPlatform apiPlatform;
-	public ApiPlatform getApiPlatform() {
+	private GenericPlatform apiPlatform;
+	public GenericPlatform getApiPlatform() {
 		return apiPlatform;
 	}
 	
@@ -87,7 +87,7 @@ public class JsPanel implements JSVPanel {
     return pd;
   }
 
-	private JmolMouseInterface mouse;
+	private GenericMouseInterface mouse;
 	private JSViewer viewer;
 
 	String name;
@@ -266,7 +266,7 @@ public class JsPanel implements JSVPanel {
   	}
 	}
 
-	public String saveImage(String type, JmolFileInterface file) {
+	public String saveImage(String type, GenericFileInterface file) {
 		// handled in Export
 		return null;
 	}
@@ -336,7 +336,7 @@ public class JsPanel implements JSVPanel {
    * @return t/f
    */
   public boolean handleOldJvm10Event(int id, int x, int y, int modifiers, long time) {
-  	return mouse.handleOldJvm10Event(id, x, y, modifiers, time);
+  	return mouse.processEvent(id, x, y, modifiers, time);
   }
 
 	public void processTwoPointGesture(float[][][] touches) {

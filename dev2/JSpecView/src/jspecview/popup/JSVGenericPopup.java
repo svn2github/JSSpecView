@@ -25,7 +25,6 @@ package jspecview.popup;
 
 import org.jmol.util.Logger;
 import javajs.util.Parser;
-import org.jmol.util.Txt;
 
 import jspecview.api.JSVAbstractMenu;
 import jspecview.api.JSVPanel;
@@ -45,6 +44,7 @@ import java.util.Hashtable;
 
 import javajs.util.List;
 import javajs.util.SB;
+import javajs.util.Txt;
 
 
 abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
