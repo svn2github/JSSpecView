@@ -46,7 +46,7 @@ import javajs.api.GenericColor;
 import javajs.awt.Font;
 import javajs.awt.event.Event;
 import javajs.api.EventManager;
-import javajs.util.ColorUtil;
+import javajs.util.CU;
 import javajs.util.List;
 
 import jspecview.api.AnnotationData;
@@ -1160,7 +1160,7 @@ public class PanelData implements EventManager {
 
 	public void setColor(ScriptToken st, GenericColor color) {
 		if (color != null)
-			options.put(st, ColorUtil.toRGBHexString(color));
+			options.put(st, CU.toRGBHexString(color));
 		switch (st) {
 		case BACKGROUNDCOLOR:
 			jsvp.setBackgroundColor(bgcolor = color);

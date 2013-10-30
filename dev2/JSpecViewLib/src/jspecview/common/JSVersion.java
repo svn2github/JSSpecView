@@ -23,9 +23,9 @@ import java.util.Properties;
 
 
 import javajs.J2SIgnoreImport;
-import javajs.util.Txt;
+import javajs.util.PT;
 
-@J2SIgnoreImport({java.util.Properties.class, java.io.InputStream.class, java.io.BufferedInputStream.class, javajs.util.Txt.class})
+@J2SIgnoreImport({java.util.Properties.class, java.io.InputStream.class, java.io.BufferedInputStream.class, javajs.util.PT.class})
 public class JSVersion {
 
   public static final String VERSION;
@@ -53,10 +53,10 @@ public class JSVersion {
 				bis = new BufferedInputStream(is);
 				Properties props = new Properties();
 				props.load(bis);
-				tmpVersion = Txt
+				tmpVersion = PT
 						.trimQuotes(props.getProperty("___version", tmpVersion));
-				tmpDate = Txt.trimQuotes(props.getProperty("___date", tmpDate));
-				tmpSVN = Txt.trimQuotes(props.getProperty("___svnRev", tmpSVN));
+				tmpDate = PT.trimQuotes(props.getProperty("___date", tmpDate));
+				tmpSVN = PT.trimQuotes(props.getProperty("___svnRev", tmpSVN));
 			} catch (Exception e) {
 				// Nothing to do
 			} finally {

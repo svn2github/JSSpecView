@@ -1,10 +1,9 @@
 package jspecview.source;
 
-import javajs.util.DecimalFormat;
-import javajs.util.Txt;
+import javajs.util.DF;
 
 import org.jmol.util.Logger;
-import javajs.util.Parser;
+import javajs.util.PT;
 
 import jspecview.common.Coordinate;
 import jspecview.common.Integral;
@@ -184,7 +183,7 @@ public abstract class JDXDataObject extends JDXHeader {
 	public void setObservedNucleus(String value) {
 		observedNucl = value;
 		if (numDim == 1)
-  		parent.nucleusX = nucleusX = Txt.trim(value,"[]^<>");
+  		parent.nucleusX = nucleusX = PT.trim(value,"[]^<>");
 	}
 
   /**
@@ -434,7 +433,7 @@ public abstract class JDXDataObject extends JDXHeader {
     int pt = 0;
     while (pt < nuc.length() && !Character.isDigit(nuc.charAt(pt)))
       pt++;
-    pt = Parser.parseInt(nuc.substring(pt));
+    pt = PT.parseInt(nuc.substring(pt));
     int i = 0;
     for (; i < gyroData.length; i += 2)
       if (gyroData[i] >= pt)
@@ -661,7 +660,7 @@ public abstract class JDXDataObject extends JDXHeader {
 				// 2D?
 			}
 		}
-		return (dx < 0.1 ? "" : DecimalFormat.formatDecimalDbl(dx, precision) + units);
+		return (dx < 0.1 ? "" : DF.formatDecimalDbl(dx, precision) + units);
 	}
 
   public boolean isNMR() {

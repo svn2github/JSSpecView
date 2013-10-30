@@ -30,7 +30,7 @@ import java.util.Map;
 import javajs.api.GenericColor;
 import javajs.awt.Font;
 import javajs.export.PDFCreator;
-import javajs.util.ColorUtil;
+import javajs.util.CU;
 
 import jspecview.api.JSVGraphics;
 import jspecview.api.JSVPanel;
@@ -135,7 +135,7 @@ public class PDFWriter implements JSVGraphics {
   private float[] rgb = new float[3];
 
   public void setGraphicsColor(Object g, GenericColor c) {
-	  ColorUtil.toRGB3f(c.getRGB(), rgb);
+	  CU.toRGB3f(c.getRGB(), rgb);
 		pdf.setColor(rgb, true);
 		pdf.setColor(rgb, false);
 	}

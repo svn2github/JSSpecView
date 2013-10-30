@@ -36,7 +36,7 @@ public interface JSVPanel extends JSVViewPanel {
 
 	public void printPanel(PrintLayout pl, OutputStream os, String printJobTitle);
 
-	public boolean handleOldJvm10Event(int id, int x, int y, int modifiers, long time);
+	public boolean processMouseEvent(int id, int x, int y, int modifiers, long time);
 
 	public void processTwoPointGesture(float[][][] touches);
 

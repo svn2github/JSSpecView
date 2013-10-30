@@ -29,8 +29,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javajs.util.PT;
 import javajs.util.SB;
-import javajs.util.Txt;
 
 
 
@@ -241,18 +241,18 @@ public class JSVEscape {
   private static String fixString(String s) {
     if (s == null || s.indexOf("{\"") == 0) //don't doubly fix JSON strings when retrieving status
       return s;
-    s = Txt.simpleReplace(s, "\"", "''");
-    s = Txt.simpleReplace(s, "\n", " | ");
+    s = PT.simpleReplace(s, "\"", "''");
+    s = PT.simpleReplace(s, "\n", " | ");
     return "\"" + s + "\"";
   }
 
   public static String escapeUrl(String url) {
-    url = Txt.simpleReplace(url, "\n", "");
-    url = Txt.simpleReplace(url, "%", "%25");
-    url = Txt.simpleReplace(url, "[", "%5B");
-    url = Txt.simpleReplace(url, "]", "%5D");
-    url = Txt.simpleReplace(url, " ", "%20");
-    url = Txt.simpleReplace(url, "?", "%3F");
+    url = PT.simpleReplace(url, "\n", "");
+    url = PT.simpleReplace(url, "%", "%25");
+    url = PT.simpleReplace(url, "[", "%5B");
+    url = PT.simpleReplace(url, "]", "%5D");
+    url = PT.simpleReplace(url, " ", "%20");
+    url = PT.simpleReplace(url, "?", "%3F");
     return url;
   }
 

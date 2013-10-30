@@ -35,10 +35,9 @@ import java.util.Map;
 import javajs.api.GenericFileInterface;
 import javajs.util.ArrayUtil;
 import javajs.util.Encoding;
-import javajs.util.OutputChannel;
-import javajs.util.Parser;
+import javajs.util.OC;
+import javajs.util.PT;
 import javajs.util.SB;
-import javajs.util.Txt;
 
 import org.jmol.util.Logger;
 
@@ -172,7 +171,7 @@ public class JSVFileManager {
 			String startCode) throws IOException {
 		String[] subFileList = null;
 		if (name.indexOf("|") >= 0) {
-			subFileList = Parser.split(name, "|");
+			subFileList = PT.split(name, "|");
 			if (subFileList != null && subFileList.length > 0)
 				name = subFileList[0];
 		}
@@ -234,7 +233,7 @@ public class JSVFileManager {
   }
   
 	public static Object getStreamAsBytes(BufferedInputStream bis,
-			OutputChannel out) throws IOException {
+			OC out) throws IOException {
 		byte[] buf = new byte[1024];
 		byte[] bytes = (out == null ? new byte[4096] : null);
 		int len = 0;
@@ -358,23 +357,23 @@ public class JSVFileManager {
 		if (jcamp == null) {
 			System.out.println("creating " + name);
 			boolean isInline = name.startsWith("MOL=");
-			String molFile = (isInline ? Txt.simpleReplace(name
+			String molFile = (isInline ? PT.simpleReplace(name
 					.substring(4), "\\n", "\n")
-					: getFileAsString(Txt.simpleReplace(nciResolver, "%FILE",
+					: getFileAsString(PT.simpleReplace(nciResolver, "%FILE",
 							JSVEscape.escapeUrl(name.substring(1)))));
 			int pt = molFile.indexOf("\n");
 			molFile = "/JSpecView " + JSVersion.VERSION + molFile.substring(pt);
-			molFile = Txt.simpleReplace(molFile, "?", "_");
+			molFile = PT.simpleReplace(molFile, "?", "_");
 			String json = getFileAsString(nmrdbServer + molFile);
 			System.out.println(json);
-			json = Txt.simpleReplace(json, "\\r\\n", "\n");
-			json = Txt.simpleReplace(json, "\\t", "\t");
-			json = Txt.simpleReplace(json, "\\n", "\n");
+			json = PT.simpleReplace(json, "\\r\\n", "\n");
+			json = PT.simpleReplace(json, "\\t", "\t");
+			json = PT.simpleReplace(json, "\\n", "\n");
 			molFile = JSVFileManager.getQuotedJSONAttribute(json, "molfile", null);
 			String xml = JSVFileManager.getQuotedJSONAttribute(json, "xml", null);
-			xml = Txt.simpleReplace(xml, "</", "\n</");
-			xml = Txt.simpleReplace(xml, "><", ">\n<");
-			xml = Txt.simpleReplace(xml, "\\\"", "\"");
+			xml = PT.simpleReplace(xml, "</", "\n</");
+			xml = PT.simpleReplace(xml, "><", ">\n<");
+			xml = PT.simpleReplace(xml, "\\\"", "\"");
 			jcamp = JSVFileManager.getQuotedJSONAttribute(json, "jcamp", null);
 			jcamp = "##TITLE=" + (isInline ? "JMOL SIMULATION" : name) + "\n"
 					+ jcamp.substring(jcamp.indexOf("\n##") + 1);
@@ -467,7 +466,7 @@ public class JSVFileManager {
 		key2 = "\"" + key2 + "\":";
 		int pt1 = json.indexOf(key1);
 		int pt2 = json.indexOf(key2, pt1);
-		return (pt1 < 0 || pt2 < 0 ? null : Parser.getQuotedStringAt(json, pt2 + key2.length()));
+		return (pt1 < 0 || pt2 < 0 ? null : PT.getQuotedStringAt(json, pt2 + key2.length()));
 	}
 
 	public static void setDocumentBase(JSViewer v, URL documentBase) {

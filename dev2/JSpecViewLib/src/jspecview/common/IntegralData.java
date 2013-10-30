@@ -8,9 +8,9 @@ import java.util.StringTokenizer;
 
 import javajs.util.ArrayUtil;
 import javajs.util.BS;
-import javajs.util.DecimalFormat;
+import javajs.util.DF;
 import javajs.util.List;
-import javajs.util.Txt;
+import javajs.util.PT;
 
 
 import jspecview.common.Annotation.AType;
@@ -180,9 +180,9 @@ public class IntegralData extends MeasurementData {
 	 */
 	public void addMarks(String ppms) {
     //2-3,4-5,6-7...
-    ppms = Txt.simpleReplace(" " + ppms, ",", " ");
-    ppms = Txt.simpleReplace(ppms, " -"," #");
-    ppms = Txt.simpleReplace(ppms, "--","-#");
+    ppms = PT.simpleReplace(" " + ppms, ",", " ");
+    ppms = PT.simpleReplace(ppms, " -"," #");
+    ppms = PT.simpleReplace(ppms, "--","-#");
     ppms = ppms.replace('-','^');
     ppms = ppms.replace('#','-');
     List<String> tokens = ScriptToken.getTokens(ppms);
@@ -341,8 +341,8 @@ public class IntegralData extends MeasurementData {
 	public String[][] getMeasurementListArray(String units) {
 		String[][] data = new String[size()][];
 		for (int pt = 0, i = size(); --i >= 0;)
-			data[pt++] = new String[] { "" + pt, DecimalFormat.formatDecimalDbl(get(i).getXVal(), 2), 
-				DecimalFormat.formatDecimalDbl(get(i).getXVal2(), 2), get(i).text };
+			data[pt++] = new String[] { "" + pt, DF.formatDecimalDbl(get(i).getXVal(), 2), 
+				DF.formatDecimalDbl(get(i).getXVal2(), 2), get(i).text };
 		return data;
 	}
 

@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import javajs.api.GenericColor;
-import javajs.util.ColorUtil;
+import javajs.util.CU;
 import javajs.util.List;
 
 
@@ -194,7 +194,7 @@ public abstract class ColorParameters extends Parameters {
 	}
 
   public GenericColor getColorFromString(String name) {
-  	return getColor1(ColorUtil.getArgbFromString(name));
+  	return getColor1(CU.getArgbFromString(name));
 	}
   
 	/**

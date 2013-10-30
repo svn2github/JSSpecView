@@ -24,7 +24,7 @@ import java.util.Comparator;
 
 import java.util.StringTokenizer;
 
-import javajs.util.DecimalFormat;
+import javajs.util.DF;
 import javajs.util.List;
 
 
@@ -91,7 +91,7 @@ public class Coordinate {
    *         eight decimal places
    */
   public String getXString() {
-    return DecimalFormat.formatDecimalTrimmed(xVal, 8);
+    return DF.formatDecimalTrimmed(xVal, 8);
   }
 
   /**
@@ -102,7 +102,7 @@ public class Coordinate {
    *         eight decimal places
    */
   public String getYString() {
-    return DecimalFormat.formatDecimalTrimmed(yVal, 8);
+    return DF.formatDecimalTrimmed(yVal, 8);
   }
 
   /**

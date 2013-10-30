@@ -1,6 +1,5 @@
 package jspecview.common;
 
-import org.jmol.api.JSmolInterface;
 
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -12,17 +11,18 @@ import java.util.Properties;
 
 import java.util.Map;
 
-import javajs.util.OutputChannel;
+import javajs.util.OC;
 import javajs.util.List;
 import javajs.util.SB;
-import javajs.util.Txt;
+import javajs.api.BytePoster;
 import javajs.api.GenericFileInterface;
 import javajs.api.GenericPlatform;
+import javajs.api.JSInterface;
 import javajs.api.PlatformViewer;
 import javajs.awt.Dimension;
 
 import org.jmol.util.Logger;
-import javajs.util.Parser;
+import javajs.util.PT;
 
 
 import jspecview.api.ExportInterface;
@@ -53,7 +53,7 @@ import jspecview.util.JSVEscape;
  * @author Bob Hanson hansonr@stolaf.edu
  * 
  */
-public class JSViewer implements PlatformViewer, JSmolInterface, javajs.api.BytePoster  {
+public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 
 	public final static String sourceLabel = "Original...";
 
@@ -244,7 +244,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface, javajs.api.Byte
 					si.syncToJmol(value);
 					break;
 				case JSV:
-					syncScript(Txt.trimQuotes(value));
+					syncScript(PT.trimQuotes(value));
 					break;
 				case LOAD:
 					msg = si.siExecLoad(value);
@@ -279,7 +279,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface, javajs.api.Byte
 						isOK = false;
 					break;
 				case STACKOFFSETY:
-					execOverlayOffsetY(Parser.parseInt("" + Parser.parseFloat(value)));
+					execOverlayOffsetY(PT.parseInt("" + PT.parseFloat(value)));
 					break;
 				case TEST:
 					si.siExecTest(value);
@@ -437,7 +437,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface, javajs.api.Byte
 		try {
 			List<String> tokens = ScriptToken.getTokens(value);
 			value = " type=\"" + tokens.get(0).toUpperCase() + "\" _match=\""
-					+ Txt.trimQuotes(tokens.get(1).toUpperCase()) + "\"";
+					+ PT.trimQuotes(tokens.get(1).toUpperCase()) + "\"";
 			if (tokens.size() > 2 && tokens.get(2).equalsIgnoreCase("all"))
 				value += " title=\"ALL\"";
 			processPeakPickEvent(new PeakInfo(value), false); // false == true here
@@ -701,14 +701,14 @@ public class JSViewer implements PlatformViewer, JSmolInterface, javajs.api.Byte
 			return;
 		}
 		// todo: why the quotes??
-		peakScript = Txt.simpleReplace(peakScript, "\\\"", "");
-		String file = Parser.getQuotedAttribute(peakScript, "file");
+		peakScript = PT.simpleReplace(peakScript, "\\\"", "");
+		String file = PT.getQuotedAttribute(peakScript, "file");
 		System.out.println("file2=" + file);
-		String index = Parser.getQuotedAttribute(peakScript, "index");
+		String index = PT.getQuotedAttribute(peakScript, "index");
 		if (file == null || index == null)
 			return;
-		String model = Parser.getQuotedAttribute(peakScript, "model");
-		String jmolSource = Parser.getQuotedAttribute(peakScript, "src");
+		String model = PT.getQuotedAttribute(peakScript, "model");
+		String jmolSource = PT.getQuotedAttribute(peakScript, "src");
 		String modelSent = (jmolSource != null && jmolSource.startsWith("Jmol") ? null
 				: si.siGetReturnFromJmolModel());
 
@@ -728,7 +728,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface, javajs.api.Byte
 		// System.out.println(Thread.currentThread() + "syncscript pi=" + pi);
 		JSVPanel jsvp = selectedPanel;
 		// System.out.println(Thread.currentThread() + "syncscript jsvp=" + jsvp);
-		String type = Parser.getQuotedAttribute(peakScript, "type");
+		String type = PT.getQuotedAttribute(peakScript, "type");
 		// System.out.println(Thread.currentThread() +
 		// "syncscript --selectSpectrum2 " + pi + " " + type + " " + model + " s=" +
 		// jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
@@ -766,8 +766,8 @@ public class JSViewer implements PlatformViewer, JSmolInterface, javajs.api.Byte
 	private PeakInfo selectPanelByPeak(String peakScript) {
 		if (panelNodes == null)
 			return null;
-		String file = Parser.getQuotedAttribute(peakScript, "file");
-		String index = Parser.getQuotedAttribute(peakScript, "index");
+		String file = PT.getQuotedAttribute(peakScript, "file");
+		String index = PT.getQuotedAttribute(peakScript, "index");
 		PeakInfo pi = null;
 		for (int i = panelNodes.size(); --i >= 0;)
 			panelNodes.get(i).jsvp.getPanelData().addPeakHighlight(null);
@@ -961,8 +961,8 @@ public class JSViewer implements PlatformViewer, JSmolInterface, javajs.api.Byte
 		} else if (value.startsWith("\"")) {
 			list = ScriptToken.getTokens(value);
 		} else {
-			value = Txt.simpleReplace(value, "_", " _ ");
-			value = Txt.simpleReplace(value, "-", " - ");
+			value = PT.simpleReplace(value, "_", " _ ");
+			value = PT.simpleReplace(value, "-", " - ");
 			list = ScriptToken.getTokens(value);
 			list0 = ScriptToken.getTokens(PanelNode
 					.getSpectrumListAsString(panelNodes));
@@ -1006,7 +1006,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface, javajs.api.Byte
 			}
 			PanelNode node;
 			if (id.startsWith("\"")) {
-				id = Txt.trim(id, "\"");
+				id = PT.trim(id, "\"");
 				for (int j = 0; j < panelNodes.size(); j++) {
 					node = panelNodes.get(j);
 					if (node.fileName != null && node.fileName.startsWith(id)
@@ -1202,13 +1202,13 @@ public class JSViewer implements PlatformViewer, JSmolInterface, javajs.api.Byte
 		boolean isSimulation = filename.equalsIgnoreCase("MOL");
 		if (isSimulation)
 			filename = JSVFileManager.SIMULATION_PROTOCOL + "MOL="
-					+ Txt.trimQuotes(tokens.get(++pt));
+					+ PT.trimQuotes(tokens.get(++pt));
 		if (!isCheck && !isAppend) {
 			if (filename.equals("\"\"") && currentSource != null)
 				filename = currentSource.getFilePath();
 			close("all");
 		}
-		filename = Txt.trimQuotes(filename);
+		filename = PT.trimQuotes(filename);
 		if (filename.startsWith("$")) {
 			isSimulation = true;
 			filename = JSVFileManager.SIMULATION_PROTOCOL + filename;
@@ -1280,7 +1280,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface, javajs.api.Byte
 
 		int max = 0;
 		for (int i = 0; i < panelNodes.size(); i++) {
-			float f = Parser.parseFloat(panelNodes.get(i).id);
+			float f = PT.parseFloat(panelNodes.get(i).id);
 			if (f >= max + 1)
 				max = (int) Math.floor(f);
 		}
@@ -1312,7 +1312,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface, javajs.api.Byte
 				return false;
 			setNode(node, false);
 		} else {
-			int n = Parser.parseInt(value);
+			int n = PT.parseInt(value);
 			if (n <= 0) {
 				checkOverlay();
 				return false;
@@ -1419,7 +1419,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface, javajs.api.Byte
 			String soffset = selectedPanel.getInput(
 					"Enter a vertical offset in percent for stacked plots", "Overlay", ""
 							+ recentStackPercent);
-			float f = Parser.parseFloat(soffset);
+			float f = PT.parseFloat(soffset);
 			if (Float.isNaN(f))
 				return;
 			offset = (int) f;
@@ -1502,9 +1502,9 @@ public class JSViewer implements PlatformViewer, JSmolInterface, javajs.api.Byte
 	 * @param time
 	 * @return t/f
 	 */
-	public boolean handleOldJvm10Event(int id, int x, int y, int modifiers,
+	public boolean processMouseEvent(int id, int x, int y, int modifiers,
 			long time) {
-		return (selectedPanel != null && selectedPanel.handleOldJvm10Event(id, x,
+		return (selectedPanel != null && selectedPanel.processMouseEvent(id, x,
 				y, modifiers, time));
 	}
 
@@ -1530,7 +1530,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface, javajs.api.Byte
 		// n/a
 	}
 
-	public void openFileAsyncPDB(String fileName, boolean pdbCartoons) {
+	public void openFileAsyncSpecial(String fileName, int flags) {
 		// n/a
 	}
 
@@ -1660,7 +1660,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface, javajs.api.Byte
 		return JSVFileManager.postByteArray(fileName, bytes);
 	}
 
-	public OutputChannel getOutputChannel(String fileName, boolean isBinary) throws Exception {
+	public OC getOutputChannel(String fileName, boolean isBinary) throws Exception {
 		OutputStream os = null;
 		/**
 		 * in JavaScript, this will be a string buffer or byte array
@@ -1675,7 +1675,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface, javajs.api.Byte
 		{
 			os = (fileName == null ? null : new FileOutputStream(fileName));
 		}
-		return new OutputChannel().setParams(this, fileName, !isBinary, os);
+		return new OC().setParams(this, fileName, !isBinary, os);
 	}
 
 	public static Object getInterface(String name) {

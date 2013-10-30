@@ -25,8 +25,8 @@
 
 package jspecview.util;
 
-import javajs.util.DecimalFormat;
-import javajs.util.Txt;
+import javajs.util.DF;
+import javajs.util.PT;
 
 
 
@@ -35,11 +35,11 @@ public class JSVTxt {
 	public static final String newLine = System.getProperty("line.separator");
 
 	public static String fixExponentInt(double x) {
-	  return (x == Math.floor(x) ? String.valueOf((int) x) : Txt.simpleReplace(fixExponent(x), "E+00", ""));
+	  return (x == Math.floor(x) ? String.valueOf((int) x) : PT.simpleReplace(fixExponent(x), "E+00", ""));
 	}
 
 	public static String fixIntNoExponent(double x) {
-	  return (x == Math.floor(x) ? String.valueOf((int) x) : DecimalFormat.formatDecimalTrimmed(x, 10));
+	  return (x == Math.floor(x) ? String.valueOf((int) x) : DF.formatDecimalTrimmed(x, 10));
 	}
 
 	public static boolean isAlmostInteger(double x) {
@@ -54,7 +54,7 @@ public class JSVTxt {
 	 * @return exponent fixed
 	 */
 	private static String fixExponent(double x) {
-	  String s = DecimalFormat.formatDecimalDbl(x, -7); // "0.000000"
+	  String s = DF.formatDecimalDbl(x, -7); // "0.000000"
 	  int pt = s.indexOf("E");
 	  if (pt < 0) {
 	    return s;

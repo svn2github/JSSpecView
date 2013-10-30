@@ -23,7 +23,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 
 import javajs.util.Base64;
-import javajs.util.ByteConverter;
+import javajs.util.BC;
 
 
 
@@ -237,7 +237,7 @@ public class AnIMLReader extends XMLReader {
   }
 
   private void getYValues() throws Exception {
-  	ByteConverter bc = new ByteConverter();
+  	BC bc = new BC();
     String vectorType = reader.getAttrValueLC("type");
     if (vectorType.length() == 0)
       vectorType = reader.getAttrValueLC("vectorType");

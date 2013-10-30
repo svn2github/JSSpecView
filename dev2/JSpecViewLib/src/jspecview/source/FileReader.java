@@ -33,10 +33,9 @@ import java.util.StringTokenizer;
 import javajs.util.BS;
 import javajs.util.List;
 import javajs.util.SB;
-import javajs.util.Txt;
 
 import org.jmol.util.Logger;
-import javajs.util.Parser;
+import javajs.util.PT;
 
 
 import jspecview.api.JSVZipReader;
@@ -99,7 +98,7 @@ public class FileReader {
   private FileReader(String filePath, boolean obscure, boolean loadImaginary,
   		int iSpecFirst, int iSpecLast) {
   	System.out.println("FileReader filePath=" + filePath + "<<");
-  	filePath = Txt.trimQuotes(filePath);
+  	filePath = PT.trimQuotes(filePath);
     this.filePath = (filePath != null && filePath.startsWith(JSVFileManager.SIMULATION_PROTOCOL + "MOL=") ? 
     		JSVFileManager.SIMULATION_PROTOCOL + "MOL=" + Math.abs(filePath.hashCode()) : filePath);
     this.obscure = obscure;
@@ -291,7 +290,7 @@ public class FileReader {
 				t.getValue();
 			}
 			if (label.equals("##BLOCKS")) {
-				int nBlocks = Parser.parseInt(t.getValue());
+				int nBlocks = PT.parseInt(t.getValue());
 				if (nBlocks > 100 && firstSpec <= 0)
 					forceSub = true;
 			}
@@ -394,7 +393,7 @@ public class FileReader {
 		default:
 			return false;
 		case 0:
-			thisModelID = Parser.getQuotedAttribute(value, "id");
+			thisModelID = PT.getQuotedAttribute(value, "id");
 			return true;
 		case 10:
 		case 20:
@@ -746,11 +745,11 @@ public class FileReader {
 	}
 
 	private float parseFloatStr(String s) {
-  	return Parser.parseFloat(s);
+  	return PT.parseFloat(s);
   }
 
 	private String simpleReplace(String s, String sfrom, String sto) {
-		return Txt.simpleReplace(s, sfrom, sto);
+		return PT.simpleReplace(s, sfrom, sto);
 	}
 
 	private String escape(String s) {
@@ -758,11 +757,11 @@ public class FileReader {
 	}
 
 	private String getQuotedAttribute(String s, String attr) {
-		return Parser.getQuotedAttribute(s, attr);
+		return PT.getQuotedAttribute(s, attr);
 	}
 
 	private String getPeakFilePath() {
-				return " file=" + JSVEscape.eS(Txt.trimQuotes(filePath).replace('\\', '/'));
+				return " file=" + JSVEscape.eS(PT.trimQuotes(filePath).replace('\\', '/'));
 	}
 
 
@@ -934,7 +933,7 @@ public class FileReader {
     if (label.equals("##JCAMPDX")) {
       String value = t.getValue();
       jdxHeader.jcampdx = value;
-      float version = Parser.parseFloat(value);
+      float version = PT.parseFloat(value);
       if (version >= 6.0 || Float.isNaN(version)) {
         if (errorLog != null)
           errorLog

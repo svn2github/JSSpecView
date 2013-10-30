@@ -2,9 +2,9 @@ package jspecview.dialog;
 
 import java.util.Map;
 
-import javajs.util.DecimalFormat;
+import javajs.util.DF;
 
-import javajs.util.Parser;
+import javajs.util.PT;
 
 import jspecview.api.AnnotationData;
 import jspecview.api.JSVPanel;
@@ -479,7 +479,7 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 					* (1 - f)
 					: c.getYVal());
 		}
-		String sy = DecimalFormat.formatDecimalDbl(y, y < 1000 ? 2 : -2); // "#0.00" :
+		String sy = DF.formatDecimalDbl(y, y < 1000 ? 2 : -2); // "#0.00" :
 		// "0.00E0"
 		return " " + sy;
 	}
@@ -571,7 +571,7 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 			switch (type) {
 			case Integration:
 				for (int i = 0; i < xyData.size(); i++)
-					if (DecimalFormat.formatDecimalDbl(xyData.get(i).getXVal(), 2).equals(value)) {
+					if (DF.formatDecimalDbl(xyData.get(i).getXVal(), 2).equals(value)) {
 						iSelected = i;
 						jsvp.getPanelData().setXPointers(spec, xyData.get(i).getXVal(),
 								spec, xyData.get(i).getXVal2());
@@ -702,10 +702,10 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 			iColSelected = iRowSelected = -1;
 			return;
 		}
-		int index = Parser.parseInt(getField(url, "index"));
+		int index = PT.parseInt(getField(url, "index"));
 		switch ("ROW COL ROWCOL".indexOf(getField(url, "selector"))) {
 		case 8:
-			iColSelected = Parser.parseInt(getField(url, "index2"));
+			iColSelected = PT.parseInt(getField(url, "index2"));
 			//$FALL-THROUGH$
 		case 0:
 			iRowSelected = index;
