@@ -68,6 +68,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 
 import org.jmol.api.ApiPlatform;
+import org.jmol.api.JmolFileInterface;
 import org.jmol.api.JmolMouseInterface;
 import org.jmol.util.Logger;
 import org.jmol.util.Txt;
@@ -341,7 +342,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
 		return Font.getFontFaceID("SansSerif");
 	}
 	
-	public String saveImage(String type, Object file) {
+	public String saveImage(String type, JmolFileInterface file) {
 		String msg = "OK";
     try {
 	    Image image = createImage(getWidth(), getHeight());

@@ -44,6 +44,7 @@ import javajs.awt.Font;
 import javajs.util.List;
 
 import org.jmol.api.ApiPlatform;
+import org.jmol.api.JmolFileInterface;
 import org.jmol.api.JmolMouseInterface;
 import org.jmol.util.Logger;
 
@@ -265,14 +266,8 @@ public class JsPanel implements JSVPanel {
   	}
 	}
 
-	public String saveImage(String type, Object file) {
-//    Image image = createImage(getWidth(), getHeight());
-//    paint(image.getGraphics());
-//    try {
-//			ImageIO.write((RenderedImage) image, type, (File) file);
-//		} catch (IOException e) {
-//			showMessage(e.getMessage(), "Error Saving Image");
-//		}
+	public String saveImage(String type, JmolFileInterface file) {
+		// handled in Export
 		return null;
 	}
 

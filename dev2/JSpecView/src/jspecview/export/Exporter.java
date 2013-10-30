@@ -129,8 +129,8 @@ public class Exporter implements ExportInterface {
   }
   
 	public String exportTheSpectrum(JSViewer viewer, ExportType mode,
-			JmolOutputChannel out, JDXSpectrum spec, int startIndex, int endIndex, PanelData pd)
-			throws Exception {
+			JmolOutputChannel out, JDXSpectrum spec, int startIndex, int endIndex,
+			PanelData pd) throws Exception {
 		JSVPanel jsvp = viewer.selectedPanel;
 		String type = mode.name();
 		switch (mode) {
@@ -153,8 +153,33 @@ public class Exporter implements ExportInterface {
 				return null;
 			viewer.fileHelper.setFileChooser(mode);
 			String name = getSuggestedFileName(viewer, mode);
-			Object file = viewer.fileHelper.getFile(name, jsvp, true);
-			return (file == null ? null : jsvp.saveImage(type.toLowerCase(), file));
+			JmolFileInterface file = viewer.fileHelper.getFile(name, jsvp, true);
+			if (file == null)
+				return null;
+			if (viewer.isJS) {
+				String s = (type.equals(ExportType.JPG) ? "jpeg" : "png");
+				/**
+				 * this will probably be png even if jpeg is requested
+				 * 
+				 * @j2sNative
+				 * 
+				 *            s = viewer.display.toDataURL(s);
+				 * 
+				 * 
+				 */
+				{
+				}
+				try {
+					out = viewer.getOutputChannel(file.getName(), true);
+					byte[] data = Base64.decodeBase64(s);
+					out.write(data, 0, data.length);
+					out.closeChannel();
+				} catch (Exception e) {
+					return e.toString();
+				}
+				return "OK";
+			}
+			return jsvp.saveImage(type.toLowerCase(), file);
 		case PDF:
 			return printPDF(viewer, "PDF");
 		case SOURCE:
