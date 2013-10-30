@@ -40,7 +40,6 @@
         <echo message="copying files from ${jmol.path}/src/org/jmol/api,io,util"/>
         <copy overwrite="true" todir="src/org/jmol" >
           <fileset dir="${jmol.path}/src/org/jmol">
-            <include name="api/JSmolInterface.java" />
             <include name="util/DefaultLogger.java" />
             <include name="util/JmolFont.java" />
 	        <include name="util/Logger*.java" />
