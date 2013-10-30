@@ -20,14 +20,11 @@
 package jspecview.export;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Calendar;
 
 import org.jmol.io.JmolOutputChannel;
 
 import javajs.util.List;
-import javajs.util.SB;
 
 import jspecview.api.JSVExporter;
 import jspecview.common.Coordinate;
@@ -53,6 +50,9 @@ public class JDXExporter implements JSVExporter {
 
 	public static final String newLine = System.getProperty("line.separator");
 	private JmolOutputChannel out;
+	private ExportType type;
+	private JDXSpectrum spectrum;
+	private JSViewer viewer;
 
 	public JDXExporter() {
 		
@@ -75,7 +75,10 @@ public class JDXExporter implements JSVExporter {
    */
   public String exportTheSpectrum(JSViewer viewer, ExportType type, JmolOutputChannel out, JDXSpectrum spectrum, int startIndex, int endIndex, PanelData pd) throws IOException{
   	this.out = out;
-    toStringAux(type, spectrum, startIndex, endIndex);
+  	this.type = type;
+  	this.spectrum = spectrum;
+  	this.viewer = viewer;
+    toStringAux(startIndex, endIndex);
     out.closeChannel();
     return " (" + out.getByteCount() + " bytes)";
   }
@@ -83,16 +86,12 @@ public class JDXExporter implements JSVExporter {
   /**
    * Auxiliary function for the toString functions
    * 
-   * @param type
-   *        the type of compression
-   * @param spectrum
    * @param startIndex
    *        the start Coordinate Index
    * @param endIndex
    *        the end Coordinate Index
    */
-  private void toStringAux(ExportType type, JDXSpectrum spectrum,
-                                    int startIndex, int endIndex) {
+  private void toStringAux(int startIndex, int endIndex) {
 
     Coordinate[] newXYCoords = spectrum.getXYCoords();
     String tabDataSet = "", tmpDataClass = "XYDATA";
@@ -165,7 +164,7 @@ public class JDXExporter implements JSVExporter {
     int index = Arrays.binarySearch(FileReader.VAR_LIST_TABLE[0],
         tmpDataClass);
     String varList = FileReader.VAR_LIST_TABLE[1][index];
-    out.append(getHeaderString(spectrum, tmpDataClass, minY, maxY,
+    out.append(getHeaderString(tmpDataClass, minY, maxY,
         xCompFactor, yCompFactor, startIndex, endIndex));
     out.append("##" + tmpDataClass + "= " + varList + newLine);
     out.append(tabDataSet);
@@ -174,8 +173,6 @@ public class JDXExporter implements JSVExporter {
 
   /**
    * Returns the String for the header of the spectrum
-   * @param spec 
-   * 
    * @param tmpDataClass
    *        the dataclass
    * @param minY 
@@ -190,7 +187,7 @@ public class JDXExporter implements JSVExporter {
    *        the index of the ending coordinate
    * @return the String for the header of the spectrum
    */
-  private String getHeaderString(JDXSpectrum spec, String tmpDataClass,
+  private String getHeaderString(String tmpDataClass,
                                         double minY, double maxY,
                                         double tmpXFactor, double tmpYFactor,
                                         int startIndex, int endIndex) {
@@ -198,32 +195,31 @@ public class JDXExporter implements JSVExporter {
     //final String CORE_STR = "TITLE,ORIGIN,OWNER,DATE,TIME,DATATYPE,JCAMPDX";
 
     // start of header
-    out.append("##TITLE= ").append(spec.getTitle()).append(
+    out.append("##TITLE= ").append(spectrum.getTitle()).append(
         newLine);
     out.append("##JCAMP-DX= 5.01").append(newLine); /*+ getJcampdx()*/
-    out.append("##DATA TYPE= ").append(spec.getDataType()).append(
+    out.append("##DATA TYPE= ").append(spectrum.getDataType()).append(
         newLine);
     out.append("##DATA CLASS= ").append(tmpDataClass).append(
         newLine);
-    out.append("##ORIGIN= ").append(spec.getOrigin()).append(
+    out.append("##ORIGIN= ").append(spectrum.getOrigin()).append(
         newLine);
-    out.append("##OWNER= ").append(spec.getOwner()).append(
+    out.append("##OWNER= ").append(spectrum.getOwner()).append(
         newLine);
-    String d = spec.getDate();
+    String d = spectrum.getDate();
     String longdate = "";
-    String currentTime = (new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSSS ZZZZ"))
-        .format(Calendar.getInstance().getTime());
-    if (spec.getLongDate().equals("") || d.length() != 8) {
+    String currentTime = viewer.apiPlatform.getDateFormat(false);
+    if (spectrum.getLongDate().equals("") || d.length() != 8) {
       longdate = currentTime + " $$ export date from JSpecView";
     } else if (d.length() == 8) { // give a 50 year window; Y2K compliant
-      longdate = (d.charAt(0) < '5' ? "20" : "19") + d + " " + spec.getTime();
+      longdate = (d.charAt(0) < '5' ? "20" : "19") + d + " " + spectrum.getTime();
     } else {
-      longdate = spec.getLongDate();
+      longdate = spectrum.getLongDate();
     }
     out.append("##LONGDATE= ").append(longdate).append(newLine);
 
     // optional header
-    List<String[]> headerTable = spec.getHeaderTable();
+    List<String[]> headerTable = spectrum.getHeaderTable();
     for (int i = 0; i < headerTable.size(); i++) {
       String[] entry = headerTable.get(i);
       String label = entry[0];
@@ -233,15 +229,15 @@ public class JDXExporter implements JSVExporter {
       out.append(label).append("= ").append(nl).append(dataSet).append(
           newLine);
     }
-    double observedFreq = spec.getObservedFreq();
-    if (!spec.is1D())
-      out.append("##NUM DIM= ").append("" + spec.numDim).append(
+    double observedFreq = spectrum.getObservedFreq();
+    if (!spectrum.is1D())
+      out.append("##NUM DIM= ").append("" + spectrum.numDim).append(
           newLine);
     if (observedFreq != JDXDataObject.ERROR)
       out.append("##.OBSERVE FREQUENCY= ").append("" + observedFreq).append(
           newLine);
-    if (spec.observedNucl != "")
-      out.append("##.OBSERVE NUCLEUS= ").append(spec.observedNucl).append(
+    if (spectrum.observedNucl != "")
+      out.append("##.OBSERVE NUCLEUS= ").append(spectrum.observedNucl).append(
           newLine);
     //now need to put pathlength here
 
@@ -249,16 +245,16 @@ public class JDXExporter implements JSVExporter {
 
     //boolean toHz = (observedFreq != JDXSpectrum.ERROR && !spec.getDataType()
       //  .toUpperCase().contains("FID"));
-    out.append("##XUNITS= ").append(spec.isHZtoPPM() ? "HZ" : spec.getXUnits()).append(
+    out.append("##XUNITS= ").append(spectrum.isHZtoPPM() ? "HZ" : spectrum.getXUnits()).append(
         newLine);
-    out.append("##YUNITS= ").append(spec.getYUnits()).append(
+    out.append("##YUNITS= ").append(spectrum.getYUnits()).append(
         newLine);
     out.append("##XFACTOR= ").append(JSVTxt.fixExponentInt(tmpXFactor))
         .append(newLine);
     out.append("##YFACTOR= ").append(JSVTxt.fixExponentInt(tmpYFactor))
         .append(newLine);
-    double f = (spec.isHZtoPPM() ? observedFreq : 1);
-    Coordinate[] xyCoords = spec.getXYCoords();
+    double f = (spectrum.isHZtoPPM() ? observedFreq : 1);
+    Coordinate[] xyCoords = spectrum.getXYCoords();
     out.append("##FIRSTX= ").append(
         JSVTxt.fixExponentInt(xyCoords[startIndex].getXVal() * f)).append(
         newLine);

@@ -37,7 +37,7 @@ import jspecview.common.PanelData;
  */
 public class AMLExporter extends XMLExporter {
 
-  /**
+	/**
    * Exports the Spectrum that is displayed by JSVPanel to a file given by fileName
    * If display is zoomed then export the current view
    * @param mode TODO
@@ -50,8 +50,10 @@ public class AMLExporter extends XMLExporter {
    */
   public String exportTheSpectrum(JSViewer viewer, ExportType mode, JmolOutputChannel out, JDXSpectrum spec,
                      int startIndex, int endIndex, PanelData pd) throws IOException {
+  	this.viewer = viewer;
+  	this.spectrum = spec;
 
-    if (!setup(spec, out, startIndex, endIndex))
+    if (!setup(startIndex, endIndex))
       return null;
 
     if (solvName == null || solvName.equals(""))

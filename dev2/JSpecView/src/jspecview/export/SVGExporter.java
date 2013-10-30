@@ -85,7 +85,7 @@ public class SVGExporter extends FormExporter {
 	public String exportTheSpectrum(JSViewer viewer, ExportType mode,
 			JmolOutputChannel out, JDXSpectrum spec, int startIndex, int endIndex, PanelData pd)
 			throws IOException {
-		initForm(out);
+		initForm(viewer, out);
 
 		GenericColor plotAreaColor, backgroundColor, plotColor, gridColor, titleColor, scaleColor, unitsColor;
 

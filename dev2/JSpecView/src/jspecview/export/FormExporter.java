@@ -19,16 +19,14 @@
 
 package jspecview.export;
 
-import java.io.FileWriter;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 
 import org.jmol.io.JmolOutputChannel;
 import org.jmol.util.Logger;
 
 import jspecview.api.JSVExporter;
 import jspecview.common.JSVFileManager;
+import jspecview.common.JSViewer;
 
 /**
  * The XMLExporter should be a totally generic exporter
@@ -44,17 +42,14 @@ abstract class FormExporter implements JSVExporter {
 
   FormContext context = new FormContext();
   String errMsg;
-  Calendar now;
-  SimpleDateFormat formatter;
   String currentTime;
   protected JmolOutputChannel out;
+  protected JSViewer viewer;
+
 
   protected void initForm(JmolOutputChannel out) {
   	this.out = out;
-    Calendar now = Calendar.getInstance();
-    SimpleDateFormat formatter = new SimpleDateFormat(
-        "yyyy/MM/dd HH:mm:ss.SSSS ZZZZ");
-    currentTime = formatter.format(now.getTime());
+    currentTime = viewer.apiPlatform.getDateFormat(false);
   }
 
   protected String writeForm(String templateFile) throws IOException {
