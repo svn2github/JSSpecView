@@ -22,9 +22,9 @@ package jspecview.source;
 import java.io.BufferedReader;
 import java.io.IOException;
 
+import javajs.util.Base64;
 import javajs.util.ByteConverter;
 
-import org.jmol.io.Base64;
 
 
 

@@ -25,9 +25,10 @@
 package jspecview.common;
 
 import javajs.api.GenericColor;
+import javajs.util.ColorUtil;
 import javajs.util.List;
 import jspecview.api.JSVGraphics;
-import jspecview.util.JSVColorUtil;
+
 
 
 /**
@@ -147,7 +148,7 @@ public class Annotation extends Coordinate {
 			double y = (yPt < 0 ? lastAnnotation.getYVal() : Double.valueOf(
 					args.get(yPt)).doubleValue());
 			GenericColor color = (colorPt < 0 ? ((ColoredAnnotation) lastAnnotation)
-					.getColor() : g2d.getColor1(JSVColorUtil.getArgbFromString(args
+					.getColor() : g2d.getColor1(ColorUtil.getArgbFromString(args
 					.get(colorPt))));
 			String text;
 			if (textPt < 0) {

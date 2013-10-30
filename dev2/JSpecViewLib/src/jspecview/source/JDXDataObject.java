@@ -1,10 +1,10 @@
 package jspecview.source;
 
 import javajs.util.DecimalFormat;
+import javajs.util.Txt;
 
 import org.jmol.util.Logger;
 import javajs.util.Parser;
-import org.jmol.util.Txt;
 
 import jspecview.common.Coordinate;
 import jspecview.common.Integral;

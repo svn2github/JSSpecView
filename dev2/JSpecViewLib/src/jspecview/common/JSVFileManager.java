@@ -32,17 +32,16 @@ import java.net.URL;
 import java.util.Hashtable;
 import java.util.Map;
 
+import javajs.api.GenericFileInterface;
 import javajs.util.ArrayUtil;
+import javajs.util.Encoding;
 import javajs.util.OutputChannel;
 import javajs.util.Parser;
 import javajs.util.SB;
+import javajs.util.Txt;
 
-import org.jmol.api.Interface;
-import org.jmol.api.JmolFileInterface;
-import org.jmol.io.Encoding;
 import org.jmol.util.Logger;
 
-import org.jmol.util.Txt;
 
 import jspecview.api.JSVZipInterface;
 import jspecview.util.JSVEscape;
@@ -135,7 +134,7 @@ public class JSVFileManager {
       URL url = new URL((URL) null, name, null);
       return url.toString();
     }
-    JmolFileInterface file = viewer.apiPlatform.newFile(name);
+    GenericFileInterface file = viewer.apiPlatform.newFile(name);
     return file.getFullPath();
   }
 
@@ -186,7 +185,7 @@ public class JSVFileManager {
 					(URL) null, name, null), null, null);
 			if (ret instanceof SB || ret instanceof String) {
 				return new BufferedReader(new StringReader(ret.toString()));
-			} else if (JSVEscape.isAB(ret)) {
+			} else if (isAB(ret)) {
 				return new BufferedReader(new StringReader(new String((byte[]) ret)));
 			} else {
 				return new BufferedReader(new InputStreamReader((InputStream) ret,
@@ -198,15 +197,25 @@ public class JSVFileManager {
 		BufferedInputStream bis = new BufferedInputStream(in);
 		in = bis;
 		if (isZipFile(bis))
-			return ((JSVZipInterface) Interface
+			return ((JSVZipInterface) JSViewer
 					.getInterface("jspecview.util.JSVZipUtil"))
 					.newJSVZipFileSequentialReader(in, subFileList, startCode);
 		if (isGzip(bis))
-			in = ((JSVZipInterface) Interface
+			in = ((JSVZipInterface) JSViewer
 					.getInterface("jspecview.util.JSVZipUtil")).newGZIPInputStream(in);
 		return new BufferedReader(new InputStreamReader(in, "UTF-8"));
 	}
 
+  public static boolean isAB(Object x) {
+    /**
+     * @j2sNative
+     *  return Clazz.isAI(x);
+     */
+    {
+    return x instanceof byte[];
+    }
+  }
+  
   public static boolean isZipFile(InputStream is) throws IOException {
     byte[] abMagic = new byte[4];
     is.mark(5);

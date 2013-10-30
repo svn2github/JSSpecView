@@ -26,8 +26,8 @@
 package jspecview.util;
 
 import javajs.util.DecimalFormat;
+import javajs.util.Txt;
 
-import org.jmol.util.Txt;
 
 
 public class JSVTxt {

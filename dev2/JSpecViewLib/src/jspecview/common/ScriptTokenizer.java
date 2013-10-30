@@ -1,6 +1,6 @@
 package jspecview.common;
 
-import org.jmol.util.Txt;
+import javajs.util.Txt;
 
 public class ScriptTokenizer {
 

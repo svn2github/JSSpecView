@@ -1,12 +1,12 @@
 package jspecview.api;
 
-import org.jmol.api.JmolPopupInterface;
 
+import javajs.api.GenericMenuInterface;
 import javajs.util.List;
 import jspecview.common.PanelNode;
 
 
-public interface JSVPopupMenu extends JmolPopupInterface {
+public interface JSVPopupMenu extends GenericMenuInterface {
 
 	void jpiShow(int x, int y);
 

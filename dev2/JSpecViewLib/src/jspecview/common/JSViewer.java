@@ -1,10 +1,6 @@
 package jspecview.common;
 
-import org.jmol.api.ApiPlatform;
-import org.jmol.api.Interface;
 import org.jmol.api.JSmolInterface;
-import org.jmol.api.JmolFileInterface;
-import org.jmol.api.PlatformViewer;
 
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -19,12 +15,15 @@ import java.util.Map;
 import javajs.util.OutputChannel;
 import javajs.util.List;
 import javajs.util.SB;
+import javajs.util.Txt;
+import javajs.api.GenericFileInterface;
+import javajs.api.GenericPlatform;
+import javajs.api.PlatformViewer;
 import javajs.awt.Dimension;
 
 import org.jmol.util.Logger;
 import javajs.util.Parser;
 
-import org.jmol.util.Txt;
 
 import jspecview.api.ExportInterface;
 import jspecview.api.JSVFileHelper;
@@ -110,7 +109,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface, javajs.api.Byte
 	private int maximumSize = Integer.MAX_VALUE;
 	final Dimension dimScreen = new Dimension(0,0);
 
-	public ApiPlatform apiPlatform;
+	public GenericPlatform apiPlatform;
 
 	public void setProperty(String key, String value) {
 		if (properties != null)
@@ -131,7 +130,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface, javajs.api.Byte
 		this.isApplet = isApplet;
 		this.isJS = isApplet && isJS;
 		this.isSigned = si.isSigned();
-		apiPlatform = (ApiPlatform) getPlatformInterface("Platform");
+		apiPlatform = (GenericPlatform) getPlatformInterface("Platform");
 		apiPlatform.setViewer(this, this.display);
 		g2d = (JSVGraphics) getPlatformInterface("G2D");
 		spectraTree = new SimpleTree(this);
@@ -1057,7 +1056,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface, javajs.api.Byte
 
 	public String getSolutionColor() {
 		JDXSpectrum spectrum = pd().getSpectrum();
-		return (spectrum.canShowSolutionColor() ? ((VisibleInterface) Interface
+		return (spectrum.canShowSolutionColor() ? ((VisibleInterface) JSViewer
 				.getInterface("jspecview.common.Visible")).getColour(spectrum
 				.getXYCoords(), spectrum.getYUnits()) : noColor);
 	}
@@ -1091,7 +1090,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface, javajs.api.Byte
 				si.siSetRecentURL(filePath);
 				fileName = JSVFileManager.getName(filePath);
 			} catch (MalformedURLException e) {
-				JmolFileInterface file = apiPlatform.newFile(strUrl);
+				GenericFileInterface file = apiPlatform.newFile(strUrl);
 				fileName = file.getName();
 				newPath = filePath = file.getFullPath();
 				si.siSetRecentURL(null);
@@ -1106,7 +1105,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface, javajs.api.Byte
 			}
 		if (!isAppend && !isView)
 			close("all"); // with CHECK we may still need to do this
-		si.setCursor(ApiPlatform.CURSOR_WAIT);
+		si.setCursor(GenericPlatform.CURSOR_WAIT);
 		try {
 			si.siSetCurrentSource(isView ? JDXSource.createView(specs) : si
 					.siCreateSource(data, filePath, firstSpec, lastSpec));
@@ -1120,10 +1119,10 @@ public class JSViewer implements PlatformViewer, JSmolInterface, javajs.api.Byte
 				e.printStackTrace();
 				si.writeStatus(e.getMessage());
 			}
-			si.setCursor(ApiPlatform.CURSOR_DEFAULT);
+			si.setCursor(GenericPlatform.CURSOR_DEFAULT);
 			return FILE_OPEN_ERROR;
 		}
-		si.setCursor(ApiPlatform.CURSOR_DEFAULT);
+		si.setCursor(GenericPlatform.CURSOR_DEFAULT);
 		System.gc();
 		if (newPath == null) {
 			newPath = currentSource.getFilePath();
@@ -1544,7 +1543,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface, javajs.api.Byte
 	}
 
 	public Object getPlatformInterface(String type) {
-		return Interface.getInterface("jspecview." + (isJS ? "js2d.Js" : "java.Awt")
+		return JSViewer.getInterface("jspecview." + (isJS ? "js2d.Js" : "java.Awt")
 				+ type);
 	}
 
@@ -1560,19 +1559,19 @@ public class JSViewer implements PlatformViewer, JSmolInterface, javajs.api.Byte
 		String root = "jspecview.dialog.";
 		switch (type) {
 		case Integration:
-			return ((JSVDialog) Interface.getInterface(root + "IntegrationDialog"))
+			return ((JSVDialog) JSViewer.getInterface(root + "IntegrationDialog"))
 					.setParams("Integration for " + spec, this, spec);
 		case Measurements:
-			return ((JSVDialog) Interface.getInterface(root + "MeasurementsDialog"))
+			return ((JSVDialog) JSViewer.getInterface(root + "MeasurementsDialog"))
 					.setParams("Measurements for " + spec, this, spec);
 		case PeakList:
-			return ((JSVDialog) Interface.getInterface(root + "PeakListDialog"))
+			return ((JSVDialog) JSViewer.getInterface(root + "PeakListDialog"))
 					.setParams("Peak List for " + spec, this, spec);
 		case OverlayLegend:
-			return overlayLegendDialog = ((JSVDialog) Interface.getInterface(root
+			return overlayLegendDialog = ((JSVDialog) JSViewer.getInterface(root
 					+ "OverlayLegendDialog")).setParams(pd().getViewTitle(), this, null);
 		case Views:
-			return viewDialog = ((JSVDialog) Interface.getInterface(root
+			return viewDialog = ((JSVDialog) JSViewer.getInterface(root
 					+ "ViewsDialog")).setParams("View/Combine/Close Spectra", this, null);
 		default:
 			return null;
@@ -1632,7 +1631,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface, javajs.api.Byte
 	private String execWrite(String value) {
 		if (isJS && value == null)
 			value = "PDF";
-		String msg = ((ExportInterface) Interface
+		String msg = ((ExportInterface) JSViewer
 				.getInterface("jspecview.export.Exporter")).write(this,
 				value == null ? null : ScriptToken.getTokens(value), false);
 		si.writeStatus(msg);
@@ -1648,7 +1647,7 @@ public class JSViewer implements PlatformViewer, JSmolInterface, javajs.api.Byte
 			return "Maximum spectrum index (0-based) is " + (nMax - 1) + ".";
 		JDXSpectrum spec = (n < 0 ? pd.getSpectrum() : pd.getSpectrumAt(n));
 		try {
-			return ((ExportInterface) Interface
+			return ((ExportInterface) JSViewer
 					.getInterface("jspecview.export.Exporter")).exportTheSpectrum(this,
 					ExportType.getType(type), null, spec, 0, spec.getXYCoords().length - 1, null);
 		} catch (Exception e) {
@@ -1677,6 +1676,16 @@ public class JSViewer implements PlatformViewer, JSmolInterface, javajs.api.Byte
 			os = (fileName == null ? null : new FileOutputStream(fileName));
 		}
 		return new OutputChannel().setParams(this, fileName, !isBinary, os);
+	}
+
+	public static Object getInterface(String name) {
+	  try {
+	    Class<?> x = Class.forName(name);
+	    return (x == null ? null : x.newInstance());
+	  } catch (Exception e) {
+	    Logger.error("Interface.java Error creating instance for " + name + ": \n" + e);
+	    return null;
+	  }
 	}
 
 }

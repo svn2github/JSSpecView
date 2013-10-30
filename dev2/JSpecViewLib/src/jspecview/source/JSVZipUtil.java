@@ -40,8 +40,8 @@ import javajs.util.List;
 import javajs.util.SB;
 import jspecview.api.JSVZipInterface;
 import jspecview.api.JSVZipReader;
+import jspecview.common.JSViewer;
 
-import org.jmol.api.Interface;
 import org.jmol.util.Logger;
 
 public class JSVZipUtil implements JSVZipInterface {
@@ -56,7 +56,7 @@ public class JSVZipUtil implements JSVZipInterface {
 
 	public BufferedReader newJSVZipFileSequentialReader(InputStream in,
 			String[] subFileList, String startCode) {
-		return ((JSVZipReader) Interface.getInterface("jspecview.source.JSVZipFileSequentialReader")).set(in, subFileList, startCode);
+		return ((JSVZipReader) JSViewer.getInterface("jspecview.source.JSVZipFileSequentialReader")).set(in, subFileList, startCode);
 	}
 
   public static boolean isZipFile(byte[] bytes) throws Exception {

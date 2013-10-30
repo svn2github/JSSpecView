@@ -24,11 +24,12 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import javajs.api.GenericColor;
+import javajs.util.ColorUtil;
 import javajs.util.List;
 
 
 import jspecview.api.JSVPanel;
-import jspecview.util.JSVColorUtil;
+
 
 /**
  * This a representation of the Display Scheme for the spectral display.
@@ -193,7 +194,7 @@ public abstract class ColorParameters extends Parameters {
 	}
 
   public GenericColor getColorFromString(String name) {
-  	return getColor1(JSVColorUtil.getArgbFromString(name));
+  	return getColor1(ColorUtil.getArgbFromString(name));
 	}
   
 	/**

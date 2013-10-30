@@ -10,8 +10,8 @@ import javajs.util.ArrayUtil;
 import javajs.util.BS;
 import javajs.util.DecimalFormat;
 import javajs.util.List;
+import javajs.util.Txt;
 
-import org.jmol.util.Txt;
 
 import jspecview.common.Annotation.AType;
 

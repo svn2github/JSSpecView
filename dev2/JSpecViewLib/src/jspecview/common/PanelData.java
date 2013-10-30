@@ -44,6 +44,9 @@ import java.util.Map.Entry;
 
 import javajs.api.GenericColor;
 import javajs.awt.Font;
+import javajs.awt.event.Event;
+import javajs.api.EventManager;
+import javajs.util.ColorUtil;
 import javajs.util.List;
 
 import jspecview.api.AnnotationData;
@@ -52,10 +55,8 @@ import jspecview.api.JSVPanel;
 import jspecview.api.PanelListener;
 import jspecview.common.Annotation.AType;
 import jspecview.dialog.JSVDialog;
-import jspecview.util.JSVColorUtil;
 
-import org.jmol.api.Event;
-import org.jmol.api.EventManager;
+
 import org.jmol.util.Logger;
 
 /**
@@ -1159,7 +1160,7 @@ public class PanelData implements EventManager {
 
 	public void setColor(ScriptToken st, GenericColor color) {
 		if (color != null)
-			options.put(st, JSVColorUtil.colorToHexString(color));
+			options.put(st, ColorUtil.toRGBHexString(color));
 		switch (st) {
 		case BACKGROUNDCOLOR:
 			jsvp.setBackgroundColor(bgcolor = color);

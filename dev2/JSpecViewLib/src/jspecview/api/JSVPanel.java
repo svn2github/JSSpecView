@@ -3,9 +3,9 @@ package jspecview.api;
 import java.io.OutputStream;
 
 import javajs.api.GenericColor;
+import javajs.api.GenericFileInterface;
+import javajs.api.GenericPlatform;
 
-import org.jmol.api.ApiPlatform;
-import org.jmol.api.JmolFileInterface;
 
 import jspecview.common.PanelData;
 import jspecview.common.PrintLayout;
@@ -26,13 +26,13 @@ public interface JSVPanel extends JSVViewPanel {
 
   void showMessage(String msg, String title);
 
-	ApiPlatform getApiPlatform();
+	GenericPlatform getApiPlatform();
 
 	void setBackgroundColor(GenericColor color);
 
 	int getFontFaceID(String name);
 
-  String saveImage(String type, JmolFileInterface file);
+  String saveImage(String type, GenericFileInterface file);
 
 	public void printPanel(PrintLayout pl, OutputStream os, String printJobTitle);
 
