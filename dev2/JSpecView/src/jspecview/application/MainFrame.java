@@ -65,10 +65,10 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 
 import javajs.api.GenericFileInterface;
-import javajs.util.ColorUtil;
+import javajs.util.CU;
 import javajs.util.List;
+import javajs.util.PT;
 import javajs.util.SB;
-import javajs.util.Txt;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
@@ -612,7 +612,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 				if (tip.indexOf("TRUE") >= 0)
 					tip = " (" + viewer.parameters.getBoolean(st) + ")";
 				else if (st.name().indexOf("COLOR") >= 0)
-					tip = " (" + ColorUtil.toRGBHexString(viewer.parameters.getElementColor(st))
+					tip = " (" + CU.toRGBHexString(viewer.parameters.getElementColor(st))
 							+ ")";
 				else
 					tip = "";
@@ -885,7 +885,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		boolean fromScript = (!value.startsWith("!"));
 		if (!fromScript)
 			value = value.substring(1);		
-		viewer.close(Txt.trimQuotes(value));
+		viewer.close(PT.trimQuotes(value));
 		if (!fromScript || viewer.panelNodes.size() == 0) {
 			validate();
 			repaint();

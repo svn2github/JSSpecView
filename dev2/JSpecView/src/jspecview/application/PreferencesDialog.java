@@ -39,7 +39,7 @@ import java.util.Properties;
 import java.util.TreeMap;
 
 
-import javajs.util.ColorUtil;
+import javajs.util.CU;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -669,7 +669,7 @@ public class PreferencesDialog extends JDialog implements ActionListener {
     integFactorTextField.setText(preferences.getProperty("integralFactor"));
     integOffsetTextField.setText(preferences.getProperty("integralOffset"));
     plotColorButton.setBackground(
-        new Color(ColorUtil.getArgbFromString(preferences.getProperty("integralPlotColor"))));
+        new Color(CU.getArgbFromString(preferences.getProperty("integralPlotColor"))));
     autoIntegrateCheckBox.setSelected(
        Boolean.parseBoolean(preferences.getProperty("automaticallyIntegrate")));
     String autoConvert =

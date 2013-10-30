@@ -21,7 +21,7 @@ package jspecview.export;
 
 import java.io.IOException;
 
-import javajs.util.OutputChannel;
+import javajs.util.OC;
 
 import org.jmol.util.Logger;
 
@@ -44,11 +44,11 @@ abstract class FormExporter implements JSVExporter {
   FormContext context = new FormContext();
   String errMsg;
   String currentTime;
-  protected OutputChannel out;
+  protected OC out;
   protected JSViewer viewer;
 
 
-  protected void initForm(JSViewer viewer, OutputChannel out) {
+  protected void initForm(JSViewer viewer, OC out) {
   	this.viewer = viewer;
   	this.out = out;
     currentTime = viewer.apiPlatform.getDateFormat(false);

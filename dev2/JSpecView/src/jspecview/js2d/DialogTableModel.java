@@ -2,7 +2,7 @@ package jspecview.js2d;
 
 
 import javajs.api.GenericColor;
-import javajs.util.ColorUtil;
+import javajs.util.CU;
 import javajs.swing.AbstractTableModel;
 import javajs.swing.TableColumn;
 import javajs.util.BS;
@@ -91,7 +91,7 @@ class DialogTableModel implements AbstractTableModel {
 		} else {
 			if (o instanceof GenericColor) {
 				style += ";background-color:"
-						+ ColorUtil.toCSSString((GenericColor) o);
+						+ CU.toCSSString((GenericColor) o);
 			} else {
 				if (asString)
 					o = " " + o + " ";

@@ -11,7 +11,7 @@ import java.awt.image.MemoryImageSource;
 import javajs.api.GenericPlatform;
 import javajs.api.PlatformViewer;
 import javajs.util.P3;
-import javajs.util.Parser;
+import javajs.util.PT;
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -100,7 +100,7 @@ class Display {
       if (!asButtons)
         return JOptionPane.showInputDialog(label, data);
       if (data != null)
-        list = Parser.split(data, "|");
+        list = PT.split(data, "|");
       int i = JOptionPane.showOptionDialog(null, label, "Jmol prompt",
           JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null,
           list, list[0]);

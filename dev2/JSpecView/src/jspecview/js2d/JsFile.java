@@ -5,7 +5,7 @@ import java.net.URL;
 import jspecview.common.JSVFileManager;
 import javajs.api.GenericFileInterface;
 import javajs.util.AjaxURLConnection;
-import javajs.util.Txt;
+import javajs.util.PT;
 
 
 /**
@@ -28,7 +28,7 @@ class JsFile implements GenericFileInterface {
   	fullName = name;
   	if (!fullName.startsWith("/") && JSVFileManager.urlTypeIndex(name) < 0)
   		fullName = JSVFileManager.jsDocumentBase + "/" + fullName;
-  	fullName = Txt.simpleReplace(fullName, "/./", "/");
+  	fullName = PT.simpleReplace(fullName, "/./", "/");
   	name = name.substring(name.lastIndexOf("/") + 1);
   }
 

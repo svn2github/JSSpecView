@@ -22,7 +22,7 @@ package jspecview.export;
 import java.io.IOException;
 
 
-import javajs.util.OutputChannel;
+import javajs.util.OC;
 import javajs.util.List;
 
 import jspecview.common.Coordinate;
@@ -83,7 +83,7 @@ abstract class XMLExporter extends FormExporter {
 
   protected List<Coordinate> newXYCoords = new List<Coordinate>();
 
-  protected boolean setup(JSViewer viewer, JDXSpectrum spec, OutputChannel out, int startIndex,
+  protected boolean setup(JSViewer viewer, JDXSpectrum spec, OC out, int startIndex,
                              int endIndex) {
     this.startIndex = startIndex;
     this.endIndex = endIndex;

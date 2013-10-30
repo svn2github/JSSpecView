@@ -25,9 +25,9 @@ import java.util.Map;
 import java.util.Hashtable;
 
 import javajs.api.GenericColor;
-import javajs.util.ColorUtil;
-import javajs.util.DecimalFormat;
-import javajs.util.OutputChannel;
+import javajs.util.CU;
+import javajs.util.DF;
+import javajs.util.OC;
 import javajs.util.List;
 
 
@@ -83,7 +83,7 @@ public class SVGExporter extends FormExporter {
 	 * @throws IOException
 	 */
 	public String exportTheSpectrum(JSViewer viewer, ExportType mode,
-			OutputChannel out, JDXSpectrum spec, int startIndex, int endIndex,
+			OC out, JDXSpectrum spec, int startIndex, int endIndex,
 			PanelData pd) throws IOException {
 		initForm(viewer, out);
 		GenericColor plotAreaColor, backgroundColor, plotColor, gridColor, titleColor, scaleColor, unitsColor;
@@ -131,8 +131,8 @@ public class SVGExporter extends FormExporter {
 		for (double i = minXOnScale; i < maxXOnScale + xStep / 2; i += xStep) {
 			xPt = leftPlotArea + ((i - minXOnScale) * xScaleFactor);
 			yPt = topPlotArea;
-			xStr = DecimalFormat.formatDecimalTrimmed(xPt, 6);
-			yStr = DecimalFormat.formatDecimalTrimmed(yPt, 6);
+			xStr = DF.formatDecimalTrimmed(xPt, 6);
+			yStr = DF.formatDecimalTrimmed(yPt, 6);
 			Map<String, String> hash = new Hashtable<String, String>();
 			hash.put("xVal", xStr);
 			hash.put("yVal", yStr);
@@ -142,8 +142,8 @@ public class SVGExporter extends FormExporter {
 		for (double i = minYOnScale; i < maxYOnScale + yStep / 2; i += yStep) {
 			xPt = leftPlotArea;
 			yPt = topPlotArea + ((i - minYOnScale) * yScaleFactor);
-			xStr = DecimalFormat.formatDecimalTrimmed(xPt, 6);
-			yStr = DecimalFormat.formatDecimalTrimmed(yPt, 6);
+			xStr = DF.formatDecimalTrimmed(xPt, 6);
+			yStr = DF.formatDecimalTrimmed(yPt, 6);
 			Map<String, String> hash = new Hashtable<String, String>();
 			hash.put("xVal", xStr);
 			hash.put("yVal", yStr);
@@ -161,9 +161,9 @@ public class SVGExporter extends FormExporter {
 			xPt = leftPlotArea + ((i - minXOnScale) * xScaleFactor);
 			xPt -= 10; // shift to left by 10
 			yPt = bottomPlotArea + 15; // shift down by 15
-			xStr = DecimalFormat.formatDecimalTrimmed(xPt, 6);
-			yStr = DecimalFormat.formatDecimalTrimmed(yPt, 6);
-			String iStr = DecimalFormat.formatDecimalDbl(i, precisionX);
+			xStr = DF.formatDecimalTrimmed(xPt, 6);
+			yStr = DF.formatDecimalTrimmed(yPt, 6);
+			String iStr = DF.formatDecimalDbl(i, precisionX);
 			Map<String, String> hash = new Hashtable<String, String>();
 			hash.put("xVal", xStr);
 			hash.put("yVal", yStr);
@@ -174,9 +174,9 @@ public class SVGExporter extends FormExporter {
 			xPt = leftPlotArea + ((j - minXOnScale) * xScaleFactor);
 			xPt -= 10;
 			yPt = bottomPlotArea + 15; // shift down by 15
-			xStr = DecimalFormat.formatDecimalTrimmed(xPt, 6);
-			yStr = DecimalFormat.formatDecimalTrimmed(yPt, 6);
-			String iStr = DecimalFormat.formatDecimalDbl(i, precisionX);
+			xStr = DF.formatDecimalTrimmed(xPt, 6);
+			yStr = DF.formatDecimalTrimmed(yPt, 6);
+			String iStr = DF.formatDecimalDbl(i, precisionX);
 
 			Map<String, String> hash = new Hashtable<String, String>();
 			hash.put("xVal", xStr);
@@ -190,9 +190,9 @@ public class SVGExporter extends FormExporter {
 			xPt = leftPlotArea - 55;
 			yPt = bottomPlotArea - ((i - minYOnScale) * yScaleFactor);
 			yPt += 3; // shift down by three
-			xStr = DecimalFormat.formatDecimalTrimmed(xPt, 6);
-			yStr = DecimalFormat.formatDecimalTrimmed(yPt, 6);
-			String iStr = DecimalFormat.formatDecimalDbl(i, precisionY);
+			xStr = DF.formatDecimalTrimmed(xPt, 6);
+			yStr = DF.formatDecimalTrimmed(yPt, 6);
+			String iStr = DF.formatDecimalDbl(i, precisionY);
 
 			Map<String, String> hash = new Hashtable<String, String>();
 			hash.put("xVal", xStr);
@@ -225,13 +225,13 @@ public class SVGExporter extends FormExporter {
 		double yTickA = minYOnScale - (yStep / 2);
 		double yTickB = yStep / 5;
 
-		context.put("plotAreaColor", ColorUtil.toRGBHexString(plotAreaColor));
-		context.put("backgroundColor", ColorUtil.toRGBHexString(backgroundColor));
-		context.put("plotColor", ColorUtil.toRGBHexString(plotColor));
-		context.put("gridColor", ColorUtil.toRGBHexString(gridColor));
-		context.put("titleColor", ColorUtil.toRGBHexString(titleColor));
-		context.put("scaleColor", ColorUtil.toRGBHexString(scaleColor));
-		context.put("unitsColor", ColorUtil.toRGBHexString(unitsColor));
+		context.put("plotAreaColor", CU.toRGBHexString(plotAreaColor));
+		context.put("backgroundColor", CU.toRGBHexString(backgroundColor));
+		context.put("plotColor", CU.toRGBHexString(plotColor));
+		context.put("gridColor", CU.toRGBHexString(gridColor));
+		context.put("titleColor", CU.toRGBHexString(titleColor));
+		context.put("scaleColor", CU.toRGBHexString(scaleColor));
+		context.put("unitsColor", CU.toRGBHexString(unitsColor));
 
 		context.put("svgHeight", new Integer(svgHeight));
 		context.put("svgWidth", new Integer(svgWidth));

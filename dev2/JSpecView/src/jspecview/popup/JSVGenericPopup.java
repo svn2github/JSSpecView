@@ -24,7 +24,7 @@
 package jspecview.popup;
 
 import org.jmol.util.Logger;
-import javajs.util.Parser;
+import javajs.util.PT;
 
 import jspecview.api.JSVAbstractMenu;
 import jspecview.api.JSVPanel;
@@ -44,7 +44,6 @@ import java.util.Hashtable;
 
 import javajs.util.List;
 import javajs.util.SB;
-import javajs.util.Txt;
 
 
 abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
@@ -344,9 +343,9 @@ abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
 			label = label.substring(label.indexOf("_", 2) + 1);
 		else if (label.equals("VERSION"))
 			label = JSVersion.VERSION;
-		label = Txt.simpleReplace(label, "CB", "");
-		label = Txt.simpleReplace(label, "Menu", "");
-		label = Txt.simpleReplace(label, "_", " ");
+		label = PT.simpleReplace(label, "CB", "");
+		label = PT.simpleReplace(label, "Menu", "");
+		label = PT.simpleReplace(label, "_", " ");
 		return label;
 	}
 
@@ -394,7 +393,7 @@ abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
 				what = what.substring(pt + 1);
 				if ((pt = what.indexOf("|")) >= 0)
 					what = (TF ? what.substring(0, pt) : what.substring(pt + 1)).trim();
-				what = Txt.simpleReplace(what, "T/F", (TF ? " TRUE" : " FALSE"));
+				what = PT.simpleReplace(what, "T/F", (TF ? " TRUE" : " FALSE"));
 			}
 		}
 		viewer.runScript(what);
@@ -464,11 +463,11 @@ abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
 			return false;
 		for (int i = 0; i < n; i++) {
 			String peak = peaks.get(i);
-			String title = Parser.getQuotedAttribute(peak, "title");
-			String atoms = Parser.getQuotedAttribute(peak, "atoms");
+			String title = PT.getQuotedAttribute(peak, "title");
+			String atoms = PT.getQuotedAttribute(peak, "atoms");
 			if (atoms != null)
 				menuCreateItem(menu, title, "select visible & (@"
-						+ Txt.simpleReplace(atoms, ",", " or @") + ")", "Focus" + i);
+						+ PT.simpleReplace(atoms, ",", " or @") + ")", "Focus" + i);
 		}
 		menuEnable(menu, true);
 		return true;

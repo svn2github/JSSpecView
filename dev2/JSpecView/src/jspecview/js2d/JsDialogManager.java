@@ -7,7 +7,7 @@ import javajs.swing.JDialog;
 import javajs.swing.JPanel;
 import javajs.swing.JScrollPane;
 import javajs.swing.JTable;
-import javajs.util.Parser;
+import javajs.util.PT;
 
 import jspecview.api.JSVPanel;
 import jspecview.api.PlatformDialog;
@@ -125,8 +125,8 @@ public class JsDialogManager extends DialogManager {
 		if (pt >= 0) {
 			int pt2 = eventId.lastIndexOf ("_");
 			int pt1 = eventId.lastIndexOf ("_", pt2 - 1);
-			int irow = Parser.parseInt(eventId.substring(pt1 + 1, pt2));
-			int icol = Parser.parseInt(eventId.substring(pt2 + 1));
+			int irow = PT.parseInt(eventId.substring(pt1 + 1, pt2));
+			int icol = PT.parseInt(eventId.substring(pt2 + 1));
 			processTableEvent(eventId.substring(0, pt) + "/ROWCOL", irow, icol, false);
 			return;
 		}

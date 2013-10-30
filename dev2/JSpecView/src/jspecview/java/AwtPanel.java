@@ -57,7 +57,7 @@ import javajs.api.GenericMouseInterface;
 import javajs.api.GenericPlatform;
 import javajs.awt.Font;
 import javajs.util.List;
-import javajs.util.Txt;
+import javajs.util.PT;
 
 import javax.imageio.ImageIO;
 import javax.print.attribute.Attribute;
@@ -291,7 +291,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
 					String s = ex.getMessage();
 					if (s == null)
 						return;
-					s = Txt.simpleReplace(s, "not accepting job.", "not accepting jobs.");
+					s = PT.simpleReplace(s, "not accepting job.", "not accepting jobs.");
 					// not my fault -- Windows grammar error!
 					showMessage(s, "Printer Error");
 				}
@@ -379,7 +379,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
     return pd.getSpectrumAt(0).toString();
   }
 
-	public boolean handleOldJvm10Event(int id, int x, int y, int modifiers,
+	public boolean processMouseEvent(int id, int x, int y, int modifiers,
 			long time) {
 		return mouse.processEvent(id, x, y, modifiers, time);
 	}

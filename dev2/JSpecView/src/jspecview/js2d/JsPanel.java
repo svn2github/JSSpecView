@@ -335,7 +335,7 @@ public class JsPanel implements JSVPanel {
    * @param time
    * @return t/f
    */
-  public boolean handleOldJvm10Event(int id, int x, int y, int modifiers, long time) {
+  public boolean processMouseEvent(int id, int x, int y, int modifiers, long time) {
   	return mouse.processEvent(id, x, y, modifiers, time);
   }
 

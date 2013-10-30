@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 
-import javajs.util.OutputChannel;
+import javajs.util.OC;
 import javajs.util.List;
 
 import jspecview.api.JSVExporter;
@@ -49,7 +49,7 @@ import jspecview.util.JSVTxt;
 public class JDXExporter implements JSVExporter {
 
 	public static final String newLine = System.getProperty("line.separator");
-	private OutputChannel out;
+	private OC out;
 	private ExportType type;
 	private JDXSpectrum spectrum;
 	private JSViewer viewer;
@@ -73,7 +73,7 @@ public class JDXExporter implements JSVExporter {
    * @return data if path is null
    * @throws IOException
    */
-  public String exportTheSpectrum(JSViewer viewer, ExportType type, OutputChannel out, JDXSpectrum spectrum, int startIndex, int endIndex, PanelData pd) throws IOException{
+  public String exportTheSpectrum(JSViewer viewer, ExportType type, OC out, JDXSpectrum spectrum, int startIndex, int endIndex, PanelData pd) throws IOException{
   	this.out = out;
   	this.type = type;
   	this.spectrum = spectrum;

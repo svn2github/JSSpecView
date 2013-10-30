@@ -40,7 +40,7 @@ package jspecview.js2d;
 import javajs.api.GenericColor;
 import javajs.awt.Color;
 import javajs.awt.Font;
-import javajs.util.ColorUtil;
+import javajs.util.CU;
 
 
 import jspecview.api.JSVGraphics;
@@ -316,7 +316,7 @@ public class JsG2D implements JSVGraphics {
 	}
 
 	public void setGraphicsColor(Object g, GenericColor c) {
-		String s = ColorUtil.toCSSString(c);
+		String s = CU.toCSSString(c);
 		/**
 		 * @j2sNative
 		 * 

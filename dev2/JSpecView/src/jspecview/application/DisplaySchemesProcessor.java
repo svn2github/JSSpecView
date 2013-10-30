@@ -28,7 +28,7 @@ import java.io.Writer;
 import java.util.TreeMap;
 
 import javajs.api.GenericColor;
-import javajs.util.ColorUtil;
+import javajs.util.CU;
 import javajs.util.SB;
 
 
@@ -292,7 +292,7 @@ public class DisplaySchemesProcessor {
 			ScriptToken t) {
 		buffer.append(
 				"\t\t<" + name + " hex=\""
-						+ ColorUtil.toRGBHexString(ds.getElementColor(t)) + "\"/>")
+						+ CU.toRGBHexString(ds.getElementColor(t)) + "\"/>")
 				.append(JSVTxt.newLine);
 	}
 

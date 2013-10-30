@@ -21,7 +21,7 @@ package jspecview.export;
 
 import java.io.IOException;
 
-import javajs.util.OutputChannel;
+import javajs.util.OC;
 
 
 import jspecview.common.ExportType;
@@ -49,7 +49,7 @@ public class CMLExporter extends XMLExporter {
    * @return data if fileName is null
    * @throws IOException
    */
-  public String exportTheSpectrum(JSViewer viewer, ExportType mode, OutputChannel out, JDXSpectrum spec,
+  public String exportTheSpectrum(JSViewer viewer, ExportType mode, OC out, JDXSpectrum spec,
                    int startIndex, int endIndex, PanelData pd) throws IOException {
 
     if (!setup(viewer, spec, out, startIndex, endIndex))

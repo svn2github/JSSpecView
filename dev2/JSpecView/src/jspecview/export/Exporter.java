@@ -4,9 +4,9 @@ import java.io.BufferedReader;
 
 import javajs.api.GenericFileInterface;
 import javajs.util.Base64;
-import javajs.util.OutputChannel;
+import javajs.util.OC;
 import javajs.util.List;
-import javajs.util.Txt;
+import javajs.util.PT;
 
 
 import jspecview.api.ExportInterface;
@@ -36,14 +36,14 @@ public class Exporter implements ExportInterface {
 		String type = null;
 		String fileName = null;
 		ExportType eType;
-		OutputChannel out;
+		OC out;
 		JSVPanel jsvp = viewer.selectedPanel;
 		try {
 			switch (tokens.size()) {
 			default:
 				return "WRITE what?";
 			case 1:
-				fileName = Txt.trimQuotes(tokens.get(0));
+				fileName = PT.trimQuotes(tokens.get(0));
 				if (fileName.indexOf(".") >= 0)
 					type = "XY";
 				if (jsvp == null)
@@ -73,7 +73,7 @@ public class Exporter implements ExportInterface {
 				}
 			case 2:
 				type = tokens.get(0).toUpperCase();
-				fileName = Txt.trimQuotes(tokens.get(1));
+				fileName = PT.trimQuotes(tokens.get(1));
 				break;
 			}
 			String ext = fileName.substring(fileName.lastIndexOf(".") + 1)
@@ -109,7 +109,7 @@ public class Exporter implements ExportInterface {
    * @return  status line message
    */
   private String exportSpectrumOrImage(JSViewer viewer, ExportType eType,
-                                              int index, OutputChannel out) {
+                                              int index, OC out) {
     JDXSpectrum spec;
     PanelData pd = viewer.selectedPanel.getPanelData();    
     if (index < 0 && (index = pd.getCurrentSpectrumIndex()) < 0)
@@ -129,7 +129,7 @@ public class Exporter implements ExportInterface {
   }
   
 	public String exportTheSpectrum(JSViewer viewer, ExportType mode,
-			OutputChannel out, JDXSpectrum spec, int startIndex, int endIndex,
+			OC out, JDXSpectrum spec, int startIndex, int endIndex,
 			PanelData pd) throws Exception {
 		JSVPanel jsvp = viewer.selectedPanel;
 		String type = mode.name();
@@ -237,7 +237,7 @@ public class Exporter implements ExportInterface {
 		}
 		String s = null;
 		try {
-			OutputChannel out = (isJob ? null : viewer.getOutputChannel(isBase64 ? null : pdfFileName, true));
+			OC out = (isJob ? null : viewer.getOutputChannel(isBase64 ? null : pdfFileName, true));
 			String printJobTitle = jsvp.getPanelData().getPrintJobTitle(true);
 			if (pl.showTitle) {
 				printJobTitle = jsvp.getInput("Title?", "Title for Printing",
@@ -307,7 +307,7 @@ public class Exporter implements ExportInterface {
     return name;
 	}
 
-  private static String fileCopy(String name, OutputChannel out) {
+  private static String fileCopy(String name, OC out) {
     try {
       BufferedReader br = JSVFileManager.getBufferedReaderFromName(name,
           null);

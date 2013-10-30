@@ -23,10 +23,9 @@ import java.util.Hashtable;
 
 import java.util.Map;
 
-import javajs.util.OutputChannel;
+import javajs.util.OC;
 import javajs.util.List;
-import javajs.util.Parser;
-import javajs.util.Txt;
+import javajs.util.PT;
 
 import org.jmol.util.Logger;
 
@@ -162,7 +161,7 @@ class FormContext {
   private String getFormTokens(String template) {
     formTokens = new List<FormToken>();
     if (template.indexOf("\r\n") >= 0)
-      template = Txt.replaceAllCharacters(template, "\r\n", "\n");
+      template = PT.replaceAllCharacters(template, "\r\n", "\n");
     template = template.replace('\r', '\n');
     String[] lines = template.split("\n");
     String token = "";
@@ -198,7 +197,7 @@ class FormContext {
   }
 
 	@SuppressWarnings("unchecked")
-	public String merge(OutputChannel out) {
+	public String merge(OC out) {
 		int ptr;
 		for (int i = 0; i < formTokens.size() && strError == null; i++) {
 			FormToken vt = formTokens.get(i);
@@ -273,7 +272,7 @@ class FormContext {
     String data = vt.data;
     data = data.replace('(', ' ');
     data = data.replace(')', ' ');
-    String[] tokens = Parser.getTokens(data);
+    String[] tokens = PT.getTokens(data);
     if (tokens.length != 4) {
       return;
     }
@@ -316,15 +315,15 @@ class FormContext {
       return false;
     }
     data = data.substring(0, pt);
-    data = Txt.simpleReplace(data, "=", " = ");
-    data = Txt.simpleReplace(data, "!", " ! ");
-    data = Txt.simpleReplace(data, "<", " < ");
-    data = Txt.simpleReplace(data, ">", " > ");
-    data = Txt.simpleReplace(data, "=  =", "==");
-    data = Txt.simpleReplace(data, "<  =", "<=");
-    data = Txt.simpleReplace(data, ">  =", ">=");
-    data = Txt.simpleReplace(data, "!  =", "!=");
-    String[] tokens = Parser.getTokens(data);
+    data = PT.simpleReplace(data, "=", " = ");
+    data = PT.simpleReplace(data, "!", " ! ");
+    data = PT.simpleReplace(data, "<", " < ");
+    data = PT.simpleReplace(data, ">", " > ");
+    data = PT.simpleReplace(data, "=  =", "==");
+    data = PT.simpleReplace(data, "<  =", "<=");
+    data = PT.simpleReplace(data, ">  =", ">=");
+    data = PT.simpleReplace(data, "!  =", "!=");
+    String[] tokens = PT.getTokens(data);
     String key = tokens[0].substring(1);
     boolean isNot = false;
     boolean x = false;
@@ -339,16 +338,16 @@ class FormContext {
     case 2:
       // #if(!$x)
       if (key.equals("!")) {
-        key = Txt.trim(tokens[1], "$ ");
+        key = PT.trim(tokens[1], "$ ");
         value = getValue(key);
         return (value.equals("false") || value.equals(""));
       }
       break;
     case 3:
       // #if($x op "y")
-      key = Txt.trim(tokens[0], "$ ");
+      key = PT.trim(tokens[0], "$ ");
       value = getValue(key);
-      compare = Txt.trim(tokens[2], " \"");
+      compare = PT.trim(tokens[2], " \"");
       switch (findOp(tokens[1])) {
       case OP_EQ:
       case OP_EEQ:
