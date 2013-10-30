@@ -885,5 +885,6 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	public List<String> getScriptQueue() {
 		return viewer.scriptQueue;
 	}
+
 	
 }

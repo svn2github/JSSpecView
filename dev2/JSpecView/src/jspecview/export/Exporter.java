@@ -1,9 +1,6 @@
 package jspecview.export;
 
 import java.io.BufferedReader;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.OutputStream;
 
 import javajs.util.List;
 
@@ -14,6 +11,7 @@ import org.jmol.io.JmolOutputChannel;
 import org.jmol.util.Txt;
 
 import jspecview.api.ExportInterface;
+import jspecview.api.JSVExporter;
 import jspecview.api.JSVFileHelper;
 import jspecview.api.JSVPanel;
 import jspecview.common.ExportType;
@@ -33,12 +31,14 @@ public class Exporter implements ExportInterface {
 
 	public String write(JSViewer viewer, List<String> tokens, boolean forInkscape) {
 		// MainFrame or applet WRITE command
-		String type = null;
-		String fileName = null;
-		JSVPanel jsvp = viewer.selectedPanel;
-		ExportType eType;
 		if (tokens == null)
 			return printPDF(viewer, null);
+		
+		String type = null;
+		String fileName = null;
+		ExportType eType;
+		JmolOutputChannel out;
+		JSVPanel jsvp = viewer.selectedPanel;
 		try {
 			switch (tokens.size()) {
 			default:
@@ -67,8 +67,8 @@ public class Exporter implements ExportInterface {
 					JmolFileInterface file = viewer.fileHelper.getFile(getSuggestedFileName(viewer, eType), jsvp, true);
 					if (file == null)
 						return null;
-			    String msg = exportSpectrumOrImage(viewer, eType, index, file
-			          .getFullPath());
+					out = viewer.getOutputChannel(file.getFullPath(), false);
+			    String msg = exportSpectrumOrImage(viewer, eType, index, out);
 			    boolean isOK = msg.startsWith("OK");
 			    if (isOK)
 			    	viewer.si.siUpdateRecentMenus(file.getFullPath());
@@ -92,7 +92,9 @@ public class Exporter implements ExportInterface {
 			eType = ExportType.getType(type);
 			if (forInkscape && eType == ExportType.SVG)
 				eType = ExportType.SVGI;
-			return exportSpectrumOrImage(viewer, eType, -1, fileName);
+			
+			out = viewer.getOutputChannel(fileName, false);
+			return exportSpectrumOrImage(viewer, eType, -1, out);
 		} catch (Exception e) {
 			System.out.println(e);
 			return null;
@@ -106,11 +108,11 @@ public class Exporter implements ExportInterface {
    * @param viewer 
    * @param eType
    * @param index
-   * @param path
+   * @param out
    * @return  status line message
    */
   private String exportSpectrumOrImage(JSViewer viewer, ExportType eType,
-                                              int index, String path) {
+                                              int index, JmolOutputChannel out) {
     JDXSpectrum spec;
     PanelData pd = viewer.selectedPanel.getPanelData();    
     if (index < 0 && (index = pd.getCurrentSpectrumIndex()) < 0)
@@ -119,17 +121,18 @@ public class Exporter implements ExportInterface {
     int startIndex = pd.getStartingPointIndex(index);
     int endIndex = pd.getEndingPointIndex(index);
     try {
-    	String  msg = exportTheSpectrum(viewer, eType, path, spec, startIndex, endIndex, pd);
-      return "OK - Exported " + eType.name() + ": " + path + msg;
+    	String  msg = exportTheSpectrum(viewer, eType, out, spec, startIndex, endIndex, pd);
+      return "OK - Exported " + eType.name() + ": " + out.getFileName() + msg;
     } catch (Exception ioe) {
-      return "Error exporting " + path + ": " + ioe;
+      return "Error exporting " + out.getFileName() + ": " + ioe;
     }
   }
   
-	public String exportTheSpectrum(JSViewer viewer, ExportType mode, String path,
-			JDXSpectrum spec, int startIndex, int endIndex, PanelData pd) throws Exception {
-  	JSVPanel jsvp = viewer.selectedPanel;
-  	String type = mode.name();
+	public String exportTheSpectrum(JSViewer viewer, ExportType mode,
+			JmolOutputChannel out, JDXSpectrum spec, int startIndex, int endIndex, PanelData pd)
+			throws Exception {
+		JSVPanel jsvp = viewer.selectedPanel;
+		String type = mode.name();
 		switch (mode) {
 		case AML:
 		case CML:
@@ -146,8 +149,8 @@ public class Exporter implements ExportInterface {
 			break;
 		case JPG:
 		case PNG:
-	  	if (jsvp == null)
-	  		return null;
+			if (jsvp == null)
+				return null;
 			viewer.fileHelper.setFileChooser(mode);
 			String name = getSuggestedFileName(viewer, mode);
 			Object file = viewer.fileHelper.getFile(name, jsvp, true);
@@ -155,13 +158,15 @@ public class Exporter implements ExportInterface {
 		case PDF:
 			return printPDF(viewer, "PDF");
 		case SOURCE:
-	  	if (jsvp == null)
-	  		return null;
-	    return fileCopy(jsvp.getPanelData().getSpectrum().getFilePath(), path);
+			if (jsvp == null)
+				return null;
+			return fileCopy(jsvp.getPanelData().getSpectrum().getFilePath(), out);
 		case UNK:
 			return null;
 		}
-		return ((ExportInterface) Interface.getInterface("jspecview.export." + type.toUpperCase() + "Exporter")).exportTheSpectrum(viewer, mode, path, spec, startIndex, endIndex, null);
+		return ((JSVExporter) Interface.getInterface("jspecview.export."
+				+ type.toUpperCase() + "Exporter")).exportTheSpectrum(viewer, mode,
+				out, spec, startIndex, endIndex, null);
 	}
 
 	private String printPDF(JSViewer viewer, String pdfFileName) {
@@ -178,13 +183,12 @@ public class Exporter implements ExportInterface {
 		/**
 		 * @j2sNative
 		 * 
-		 *    pl = new jspecview.common.PrintLayout();
-		 *    pl.asPDF = true;
+		 *            pl = new jspecview.common.PrintLayout(); pl.asPDF = true;
 		 */
 		{
 			pl = viewer.getDialogPrint(isJob);
-	    if (pl == null)
-	      return null;
+			if (pl == null)
+				return null;
 		}
 		if (isJob && pl.asPDF) {
 			isJob = false;
@@ -205,17 +209,7 @@ public class Exporter implements ExportInterface {
 		}
 		String s = null;
 		try {
-			OutputStream os = null;
-			/**
-			 * @j2sNative
-			 * 
-			 * 
-			 */
-			{
-				os = (isBase64 ? null : new FileOutputStream(pdfFileName, false));
-			}
-			JmolOutputChannel out = (isJob ? null : new JmolOutputChannel()
-					.setParams(viewer, isBase64 ? null : pdfFileName, false, os));
+			JmolOutputChannel out = (isJob ? null : viewer.getOutputChannel(isBase64 ? null : pdfFileName, true));
 			String printJobTitle = jsvp.getPanelData().getPrintJobTitle(true);
 			if (pl.showTitle) {
 				printJobTitle = jsvp.getInput("Title?", "Title for Printing",
@@ -224,7 +218,8 @@ public class Exporter implements ExportInterface {
 					return null;
 			}
 			jsvp.printPanel(pl, out, printJobTitle);
-			s = (isBase64 ? Base64.getBase64(out.toByteArray()).toString() : out.toString());
+			s = (isBase64 ? Base64.getBase64(out.toByteArray()).toString() : out
+					.toString());
 		} catch (Exception e) {
 			jsvp.showMessage(e.getMessage(), "File Error");
 		}
@@ -284,17 +279,16 @@ public class Exporter implements ExportInterface {
     return name;
 	}
 
-  private static String fileCopy(String name, String path) {
+  private static String fileCopy(String name, JmolOutputChannel out) {
     try {
       BufferedReader br = JSVFileManager.getBufferedReaderFromName(name,
           null);
-      FileWriter writer = new FileWriter(path);
       String line = null;
       while ((line = br.readLine()) != null) {
-        writer.write(line);
-        writer.write(JSVTxt.newLine);
+        out.append(line);
+        out.append(JSVTxt.newLine);
       }
-      writer.close();
+      out.closeChannel();
       return "OK";
     } catch (Exception e) {
       return e.toString();

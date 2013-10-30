@@ -21,8 +21,12 @@ package jspecview.export;
 
 import java.io.IOException;
 
+import org.jmol.io.JmolOutputChannel;
+
 import jspecview.common.ExportType;
 import jspecview.common.JDXSpectrum;
+import jspecview.common.JSViewer;
+import jspecview.common.PanelData;
 
 /**
  * class <code>CMLExporter</code> contains static methods to export a Graph as
@@ -37,17 +41,17 @@ public class CMLExporter extends XMLExporter {
    * Exports the Spectrum that is displayed by JSVPanel to a file given by fileName
    * If display is zoomed then export the current view
    * @param mode TODO
-   * @param fileName the name of the file
+   * @param out
    * @param spec the spectrum to export
    * @param startIndex the starting point of the spectrum
    * @param endIndex the end point
    * @return data if fileName is null
    * @throws IOException
    */
-  public String export(ExportType mode, String fileName, JDXSpectrum spec,
-                   int startIndex, int endIndex) throws IOException {
+  public String exportTheSpectrum(JSViewer viewer, ExportType mode, JmolOutputChannel out, JDXSpectrum spec,
+                   int startIndex, int endIndex, PanelData pd) throws IOException {
 
-    if (!setup(spec, fileName, startIndex, endIndex))
+    if (!setup(spec, out, startIndex, endIndex))
       return null;
 
     if (model == null || model.equals(""))

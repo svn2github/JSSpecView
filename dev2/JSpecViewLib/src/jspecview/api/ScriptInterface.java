@@ -112,5 +112,4 @@ public interface ScriptInterface {
 	
 	public void siNewWindow(boolean isSelected, boolean fromFrame);
 	
-
 }

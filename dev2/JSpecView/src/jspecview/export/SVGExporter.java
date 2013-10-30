@@ -29,9 +29,9 @@ import javajs.util.DecimalFormat;
 import javajs.util.List;
 
 
+import org.jmol.io.JmolOutputChannel;
 import org.jmol.util.Logger;
 
-import jspecview.api.JSVExporter;
 import jspecview.common.ColorParameters;
 import jspecview.common.Coordinate;
 import jspecview.common.ExportType;
@@ -55,7 +55,7 @@ import jspecview.util.JSVColorUtil;
  * @author Craig A.D. Walters
  * @author Prof Robert J. Lancashire
  */
-public class SVGExporter extends FormExporter implements JSVExporter {
+public class SVGExporter extends FormExporter {
 
   private static int svgWidth = 850;
   private static int svgHeight = 400;
@@ -71,7 +71,7 @@ public class SVGExporter extends FormExporter implements JSVExporter {
 	/**
 	 * Export a Graph as SVG to a file given by fileName
 	 * 
-	 * @param path
+	 * @param out
 	 *          the file path
 	 * @param spec
 	 *          the Graph
@@ -83,9 +83,9 @@ public class SVGExporter extends FormExporter implements JSVExporter {
 	 * @throws IOException
 	 */
 	public String exportTheSpectrum(JSViewer viewer, ExportType mode,
-			String path, JDXSpectrum spec, int startIndex, int endIndex, PanelData pd)
+			JmolOutputChannel out, JDXSpectrum spec, int startIndex, int endIndex, PanelData pd)
 			throws IOException {
-		initForm(path);
+		initForm(out);
 
 		GenericColor plotAreaColor, backgroundColor, plotColor, gridColor, titleColor, scaleColor, unitsColor;
 

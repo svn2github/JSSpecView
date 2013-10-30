@@ -1,5 +1,7 @@
 package jspecview.api;
 
+import org.jmol.io.JmolOutputChannel;
+
 import jspecview.common.ExportType;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSViewer;
@@ -11,7 +13,7 @@ public interface JSVExporter {
 	 * 
 	 * @param viewer
 	 * @param type 
-	 * @param path
+	 * @param out
 	 * @param spec  not relevant for PDF, JPG, PNG
 	 * @param startIndex  not relevant for PDF, JPG, PNG
 	 * @param endIndex  not relevant for PDF, JPG, PNG
@@ -20,6 +22,6 @@ public interface JSVExporter {
 	 * @throws Exception
 	 */
 	String exportTheSpectrum(JSViewer viewer, ExportType type,
-			String path, JDXSpectrum spec, int startIndex, int endIndex, PanelData pd) throws Exception;
+			JmolOutputChannel out, JDXSpectrum spec, int startIndex, int endIndex, PanelData pd) throws Exception;
 
 }

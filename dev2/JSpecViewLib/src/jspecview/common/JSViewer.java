@@ -6,7 +6,10 @@ import org.jmol.api.Interface;
 import org.jmol.api.JSmolInterface;
 import org.jmol.api.JmolFileInterface;
 import org.jmol.api.PlatformViewer;
+import org.jmol.io.JmolOutputChannel;
 
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
@@ -1656,6 +1659,21 @@ public class JSViewer implements PlatformViewer, JSmolInterface, BytePoster  {
 
 	public String postByteArray(String fileName, byte[] bytes) {
 		return JSVFileManager.postByteArray(fileName, bytes);
+	}
+
+	public JmolOutputChannel getOutputChannel(String fileName, boolean isBinary) throws Exception {
+		OutputStream os = null;
+		/**
+		 * in JavaScript, this will be a string buffer or byte array
+		 * 
+		 * @j2sNative
+		 * 
+		 * 
+		 */
+		{
+			os = (fileName == null ? null : new FileOutputStream(fileName));
+		}
+		return new JmolOutputChannel().setParams(this, fileName, !isBinary, os);
 	}
 
 }

@@ -24,30 +24,33 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+import org.jmol.io.JmolOutputChannel;
 import org.jmol.util.Logger;
 
+import jspecview.api.JSVExporter;
 import jspecview.common.JSVFileManager;
 
 /**
  * The XMLExporter should be a totally generic exporter
  *
  * no longer uses Velocity.
+ * 
+ * Implemented as AML, CML, and SVG
  *
  * @author Bob Hanson, hansonr@stolaf.edu
  *
  */
-abstract class FormExporter {
+abstract class FormExporter implements JSVExporter {
 
   FormContext context = new FormContext();
   String errMsg;
-  String outputFile;
-  FileWriter writer;
   Calendar now;
   SimpleDateFormat formatter;
   String currentTime;
+  protected JmolOutputChannel out;
 
-  protected void initForm(String fileName) {
-    outputFile = fileName;
+  protected void initForm(JmolOutputChannel out) {
+  	this.out = out;
     Calendar now = Calendar.getInstance();
     SimpleDateFormat formatter = new SimpleDateFormat(
         "yyyy/MM/dd HH:mm:ss.SSSS ZZZZ");
@@ -67,22 +70,15 @@ abstract class FormExporter {
       return errMsg;
     }
 
-    FileWriter writer = (outputFile == null ? null : new FileWriter(outputFile));
-
-    errMsg = context.merge(writer);
-    if (writer == null)
+    errMsg = context.merge(out);
+    if (out == null)
       return errMsg;
     if (errMsg != null) {
       Logger.error(errMsg);
       throw new IOException(errMsg);
     }
 
-    try {
-      writer.flush();
-      writer.close();
-    } catch (IOException ioe) {
-    }
-
+    out.closeChannel();
     return " OK";
   }
 }

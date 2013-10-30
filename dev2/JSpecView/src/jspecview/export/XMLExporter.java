@@ -21,14 +21,16 @@ package jspecview.export;
 
 import java.io.IOException;
 
-import javajs.util.List;
+import org.jmol.io.JmolOutputChannel;
 
+import javajs.util.List;
 
 import jspecview.common.Coordinate;
 import jspecview.common.JDXSpectrum;
 
 /**
  * The XMLExporter should be a totally generic exporter
+ * Subclassed by AML and CML
  *
  * no longer uses Velocity.
  *
@@ -80,11 +82,11 @@ abstract class XMLExporter extends FormExporter {
 
   protected List<Coordinate> newXYCoords = new List<Coordinate>();
 
-  protected boolean setup(JDXSpectrum spec, String fileName, int startIndex,
+  protected boolean setup(JDXSpectrum spec, JmolOutputChannel out, int startIndex,
                              int endIndex) {
     this.startIndex = startIndex;
     this.endIndex = endIndex;
-    initForm(fileName);
+    initForm(out);
     return setParameters(spec);
   }
 
@@ -248,7 +250,7 @@ abstract class XMLExporter extends FormExporter {
 
   protected void setContext() {
     context.put("continuous", Boolean.valueOf(continuous));
-    context.put("file", outputFile);
+    context.put("file", out.getFileName() + "");
     context.put("title", title);
     context.put("ident", ident);
     context.put("state", state);

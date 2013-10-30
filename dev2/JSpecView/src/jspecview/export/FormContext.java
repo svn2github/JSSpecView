@@ -19,16 +19,14 @@
 
 package jspecview.export;
 
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Hashtable;
 
 import java.util.Map;
 
 import javajs.util.List;
 import javajs.util.Parser;
-import javajs.util.SB;
 
+import org.jmol.io.JmolOutputChannel;
 import org.jmol.util.Logger;
 import org.jmol.util.Txt;
 
@@ -199,82 +197,76 @@ class FormContext {
     return strError;
   }
 
-   @SuppressWarnings("unchecked")
-	public String merge(FileWriter writer) {
-    SB sb = (writer == null ? new SB() : null);
-    int ptr;
-    for (int i = 0; i < formTokens.size() && strError == null; i++) {
-      FormToken vt = formTokens.get(i);
-      //System.out.println(i + " " + vt.ptr + " " + vt.cmdType + " " + vt.cmdPtr + " "
-      //  + vt.endPtr  + vt.data);
-      try {
-        switch (vt.cmdType) {
-        case VT_DATA:
-          String data = fillData(vt.data);
-          if (writer == null)
-            sb.append(data);
-          else
-            writer.write(data);
-          continue;
-        case VT_IF:
-          if (evaluate(vt.data, true)) {
-            vt.endPtr = -vt.endPtr;
-          } else {
-            i = vt.endPtr - 1;
-          }
-          continue;
-        case VT_ELSE:
-        case VT_ELSEIF:
-          if ((ptr = formTokens.get(vt.cmdPtr).endPtr) < 0) {
-            // previous block was executed -- skip to end
-            formTokens.get(vt.cmdPtr).endPtr = -ptr;
-            while ((vt = formTokens.get(vt.endPtr)).cmdType != VT_END) {
-              // skip
-            }
-            i = vt.ptr;
-            continue;
-          }
-          if (vt.cmdType == VT_ELSEIF) {
-            if (evaluate(vt.data, true)) {
-              vt.endPtr = -vt.endPtr;
-            } else {
-              i = vt.endPtr - 1;
-            }
-          }
-          continue;
-        case VT_FOREACH:
-          foreach(vt);
-        //$FALL-THROUGH$
-        case VT_END:
-          if ((vt = formTokens.get(vt.cmdPtr)).cmdType != VT_FOREACH)
-            continue;
-          if (vt.vc == null)
-            continue;
-          if (++vt.pointCount == vt.vc.size()) {
-            i = vt.endPtr;
-            continue;
-          }
-          Object varData = vt.vc.get(vt.pointCount);
-          if (varData instanceof Coordinate) {
-            Coordinate c = (Coordinate) varData;
-            context.put("pointCount", new Integer(vt.pointCount));
-            context.put(vt.var + ".xVal", new Double(c.getXVal()));
-            context.put(vt.var + ".yVal", new Double(c.getYVal()));
-            context.put(vt.var + ".getXString()", c.getXString());
-            context.put(vt.var + ".getYString()", c.getYString());
-          } else if (varData instanceof Map<?,?>) {
-            for (Map.Entry<String, String> entry: ((Map<String, String>) varData).entrySet())
-              context.put(vt.var + "." + entry.getKey(), entry.getValue());
-          }
-          i = vt.cmdPtr;
-          continue;
-        }
-      } catch (IOException e) {
-        return e.getMessage();
-      }
-    }
-    return (strError != null ? strError : sb != null ? sb.toString() : null);
-  }
+	@SuppressWarnings("unchecked")
+	public String merge(JmolOutputChannel out) {
+		int ptr;
+		for (int i = 0; i < formTokens.size() && strError == null; i++) {
+			FormToken vt = formTokens.get(i);
+			// System.out.println(i + " " + vt.ptr + " " + vt.cmdType + " " +
+			// vt.cmdPtr + " "
+			// + vt.endPtr + vt.data);
+			switch (vt.cmdType) {
+			case VT_DATA:
+				String data = fillData(vt.data);
+				out.append(data);
+				continue;
+			case VT_IF:
+				if (evaluate(vt.data, true)) {
+					vt.endPtr = -vt.endPtr;
+				} else {
+					i = vt.endPtr - 1;
+				}
+				continue;
+			case VT_ELSE:
+			case VT_ELSEIF:
+				if ((ptr = formTokens.get(vt.cmdPtr).endPtr) < 0) {
+					// previous block was executed -- skip to end
+					formTokens.get(vt.cmdPtr).endPtr = -ptr;
+					while ((vt = formTokens.get(vt.endPtr)).cmdType != VT_END) {
+						// skip
+					}
+					i = vt.ptr;
+					continue;
+				}
+				if (vt.cmdType == VT_ELSEIF) {
+					if (evaluate(vt.data, true)) {
+						vt.endPtr = -vt.endPtr;
+					} else {
+						i = vt.endPtr - 1;
+					}
+				}
+				continue;
+			case VT_FOREACH:
+				foreach(vt);
+				//$FALL-THROUGH$
+			case VT_END:
+				if ((vt = formTokens.get(vt.cmdPtr)).cmdType != VT_FOREACH)
+					continue;
+				if (vt.vc == null)
+					continue;
+				if (++vt.pointCount == vt.vc.size()) {
+					i = vt.endPtr;
+					continue;
+				}
+				Object varData = vt.vc.get(vt.pointCount);
+				if (varData instanceof Coordinate) {
+					Coordinate c = (Coordinate) varData;
+					context.put("pointCount", new Integer(vt.pointCount));
+					context.put(vt.var + ".xVal", new Double(c.getXVal()));
+					context.put(vt.var + ".yVal", new Double(c.getYVal()));
+					context.put(vt.var + ".getXString()", c.getXString());
+					context.put(vt.var + ".getYString()", c.getYString());
+				} else if (varData instanceof Map<?, ?>) {
+					for (Map.Entry<String, String> entry : ((Map<String, String>) varData)
+							.entrySet())
+						context.put(vt.var + "." + entry.getKey(), entry.getValue());
+				}
+				i = vt.cmdPtr;
+				continue;
+			}
+		}
+		return (strError != null ? strError : out != null ? out.toString() : null);
+	}
 
   @SuppressWarnings("unchecked")
   private void foreach(FormToken vt) {
