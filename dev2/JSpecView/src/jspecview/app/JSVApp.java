@@ -42,6 +42,7 @@ package jspecview.app;
 import java.util.Map;
 
 import javajs.util.List;
+import javajs.util.PT;
 
 import org.jmol.util.Logger;
 
@@ -204,7 +205,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	}
 
 	public String getPropertyAsJSON(String key) {
-		return JSVEscape.toJSON(null, getPropertyAsJavaObject(key), false);
+		return PT.toJSON(null, getPropertyAsJavaObject(key));
 	}
 
 	/**

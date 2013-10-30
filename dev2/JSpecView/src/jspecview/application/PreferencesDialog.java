@@ -22,8 +22,6 @@ package jspecview.application;
 import java.awt.BorderLayout;
 
 
-import jspecview.util.JSVEscape;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
@@ -836,7 +834,7 @@ public class PreferencesDialog extends JDialog implements ActionListener {
     preferences.setProperty("integralFactor", integFactorTextField.getText());
     preferences.setProperty("integralOffset", integOffsetTextField.getText());
     preferences.setProperty("integralPlotColor",
-    		JSVEscape.getHexColorFromRGB(plotColorButton.getBackground().getRGB()));
+    		CU.toRGBHexString(new AwtColor(plotColorButton.getBackground().getRGB())));
 
     // Display Schemes Tab
     preferences.setProperty("defaultDisplaySchemeName", currentDS.name);

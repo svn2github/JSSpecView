@@ -45,8 +45,6 @@ import java.net.URL;
 
 import javajs.api.PlatformViewer;
 
-import jspecview.util.JSVEscape;
-
 
 
 /**

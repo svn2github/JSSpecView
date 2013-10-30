@@ -223,7 +223,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 							: getPropertyAsJavaObject(value));
 					if (info != null)
 						selectedPanel
-								.showMessage(JSVEscape.toJSON(null, info, true), value);
+								.showMessage(PT.toJSON(null, info), value);
 					break;
 				case HIDDEN:
 					si.siExecHidden(Parameters.isTrue(value));
