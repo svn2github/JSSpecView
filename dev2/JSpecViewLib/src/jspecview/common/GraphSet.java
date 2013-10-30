@@ -2041,7 +2041,7 @@ public class GraphSet implements XYScaleConverter {
 					s = mapX.get(d);
 					if (s == null || x != c.fixX(x))
 						continue;
-					int w = g2d.getStringWidth(g, s);
+					int w = pd.getStringWidth(s);
 					int n = (x + w / 2 == c.fixX(x + w / 2) ? 2 : 0);
 					if (n > 0)
 						g2d.drawString(g, s, x - w / n, y2 + h);
@@ -2100,7 +2100,7 @@ public class GraphSet implements XYScaleConverter {
 						continue;
 					if (s.startsWith("0") && s.contains("E"))
 						s = "0";
-					g2d.drawString(g, s, (x1 - 4 * pd.scalingFactor - g2d.getStringWidth(g, s)), y + h / 3);
+					g2d.drawString(g, s, (x1 - 4 * pd.scalingFactor - pd.getStringWidth(s)), y + h / 3);
 					break;
 				}
 			}
@@ -2124,8 +2124,8 @@ public class GraphSet implements XYScaleConverter {
 			double vOff) {
 		setColorFromToken(g, ScriptToken.UNITSCOLOR);
 		pd.setFont(g, (imageView == null ? this : imageView).getXPixels(), FONT_ITALIC, 10, false);
-		g2d.drawString(g, s, (int) (x - g2d.getStringWidth(g, s) * hOff),
-				(int) (y + g2d.getFontHeight(g) * vOff));
+		g2d.drawString(g, s, (int) (x - pd.getStringWidth(s) * hOff),
+				(int) (y + pd.getFontHeight() * vOff));
 
 	}
 
@@ -2183,7 +2183,7 @@ public class GraphSet implements XYScaleConverter {
 		if (sdata.length == 0)
 			return;
 		pd.setFont(g, xPixels, FONT_PLAIN, 8, false);
-		int h = g2d.getFontHeight(g);
+		int h = pd.getFontHeight();
 		int[] xs = new int[data.size()];
 		int[] xs0 = new int[data.size()];
 		int dx = 0;
@@ -2207,8 +2207,8 @@ public class GraphSet implements XYScaleConverter {
 			xs[i] -= dx;
 
 		boolean inverted = spec.isInverted();
-		int y4 = g2d.getStringWidth(g, "99.9999");
-		int y2 = (sdata[0].length >= 6 ? g2d.getStringWidth(g, "99.99") : 0);
+		int y4 = pd.getStringWidth("99.9999");
+		int y2 = (sdata[0].length >= 6 ? pd.getStringWidth("99.99") : 0);
 		int f = (inverted ? -1 : 1);
 		
 		int y = (inverted ? yPixel1 : yPixel0) + f * (y2 + y4 + s15);
@@ -2264,7 +2264,7 @@ public class GraphSet implements XYScaleConverter {
 			else
 				pd.setFont(g, xPixels, FONT_BOLD, 12, false);
 			setColorFromToken(g, ScriptToken.INTEGRALPLOTCOLOR);
-			int h = g2d.getFontHeight(g);
+			int h = pd.getFontHeight();
 			g2d.setStrokeBold(g, true);
 			for (int i = integrals.size(); --i >= 0;) {
 				Measurement in = integrals.get(i);

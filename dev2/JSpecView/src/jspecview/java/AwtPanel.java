@@ -72,10 +72,10 @@ import org.jmol.api.JmolMouseInterface;
 import org.jmol.util.Logger;
 import org.jmol.util.Txt;
 
-import jspecview.api.JSVGraphics;
 import jspecview.api.JSVPanel;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSViewer;
+import jspecview.common.PDFWriter;
 import jspecview.common.PanelData;
 import jspecview.common.ColorParameters;
 import jspecview.common.PrintLayout;
@@ -277,8 +277,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
 						Dimension d = getDimension((MediaSizeName) pl.paper);
 						pl.paperWidth = d.width;
 						pl.paperHeight = d.height;
-						System.out.println(d);
-						viewer.createPdfDocument(os, pl);
+						(new PDFWriter()).createPdfDocument(this, pl, os);
 					} else {
 						PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
 						aset

@@ -16,11 +16,6 @@ public interface JSVGraphics {
 	Object newGrayScaleImage(Object g, Object image, int width, int height, int[] buffer);
 
 
-	int getFontHeight(Object g);
-
-	int getStringWidth(Object g, String s);
-
-
 	boolean canDoLineTo();
 
 	void doStroke(Object g, boolean isBegin);
@@ -52,7 +47,7 @@ public interface JSVGraphics {
 
 	void setGraphicsColor(Object g, GenericColor c);
 
-	void setGraphicsFont(Object g, Font font);
+	Font setFont(Object g, Font font);
 	
 	void setStrokeBold(Object g, boolean tf);
 

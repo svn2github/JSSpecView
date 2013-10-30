@@ -7,7 +7,6 @@ import org.jmol.api.JSmolInterface;
 import org.jmol.api.JmolFileInterface;
 import org.jmol.api.PlatformViewer;
 
-import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
@@ -34,7 +33,6 @@ import jspecview.api.JSVPopupMenu;
 import jspecview.api.JSVPrintDialog;
 import jspecview.api.JSVTree;
 import jspecview.api.JSVTreeNode;
-import jspecview.api.PdfCreatorInterface;
 import jspecview.api.ScriptInterface;
 import jspecview.api.VisibleInterface;
 import jspecview.common.Annotation.AType;
@@ -1655,19 +1653,6 @@ public class JSViewer implements PlatformViewer, JSmolInterface, BytePoster  {
 			return null;
 		}
 	}
-
-  /**
-   * uses simplified custom classes to create the document, either to a file or a byte stream
-   * @param os 
-   * @param pl 
-   */
-  public void createPdfDocument(OutputStream os, PrintLayout pl) {
-  	PdfCreatorInterface pdfCreator = (PdfCreatorInterface) 
-  	Interface.getInterface("jspecview.export.PDFCreator");
-  	//or to check with iText, Interface.getInterface("jspecview.unused.AwtPdfCreator");
-  	if (pdfCreator != null)
-  		pdfCreator.createPdfDocument(selectedPanel, pl, os);
-  }
 
 	public String postByteArray(String fileName, byte[] bytes) {
 		return JSVFileManager.postByteArray(fileName, bytes);

@@ -80,7 +80,7 @@ import javax.swing.JSeparator;
  * @author Prof Robert J. Lancashire
  */
 
-public class PreferencesDialog extends JDialog {
+public class PreferencesDialog extends JDialog implements ActionListener {
   /**
    * 
    */
@@ -239,24 +239,6 @@ public class PreferencesDialog extends JDialog {
     initProcessingTab();
     initGeneralTab();
 
-    colorButton1.addActionListener(new ColorPanelActionListener());
-    colorButton2.addActionListener(new ColorPanelActionListener());
-    colorButton3.addActionListener(new ColorPanelActionListener());
-    colorButton4.addActionListener(new ColorPanelActionListener());
-    colorButton5.addActionListener(new ColorPanelActionListener());
-    colorButton6.addActionListener(new ColorPanelActionListener());
-    colorButton7.addActionListener(new ColorPanelActionListener());
-    colorButton8.addActionListener(new ColorPanelActionListener());
-
-    procColorButton1.addActionListener(new ProcColorPanelActionListener());
-    procColorButton2.addActionListener(new ProcColorPanelActionListener());
-    procColorButton3.addActionListener(new ProcColorPanelActionListener());
-    procColorButton4.addActionListener(new ProcColorPanelActionListener());
-    procColorButton5.addActionListener(new ProcColorPanelActionListener());
-    procColorButton6.addActionListener(new ProcColorPanelActionListener());
-    procColorButton7.addActionListener(new ProcColorPanelActionListener());
-    procColorButton8.addActionListener(new ProcColorPanelActionListener());
-
     elementList.addListSelectionListener(new ElementListSelectionListener());
     elementList.getSelectionModel().setSelectionInterval(0, 0);
 
@@ -395,24 +377,16 @@ public class PreferencesDialog extends JDialog {
     elementList.setVisibleRowCount(4);
     listScrollPane.setMinimumSize(new Dimension(125, 110));
     listScrollPane.setPreferredSize(new Dimension(125, 110));
-    colorButton8.setBackground(Color.BLACK);
-    colorButton8.setBorder(BorderFactory.createLoweredBevelBorder());
-    colorButton7.setBackground(new Color(0, 92, 0));
-    colorButton7.setBorder(BorderFactory.createLoweredBevelBorder());
-    colorButton6.setBackground(new Color(0, 0, 64));
-    colorButton6.setBorder(BorderFactory.createLoweredBevelBorder());
-    colorButton5.setBackground(Color.BLACK);
-    colorButton5.setBorder(BorderFactory.createLoweredBevelBorder());
-    colorButton4.setBackground(Color.BLACK);
-    colorButton4.setBorder(BorderFactory.createLoweredBevelBorder());
-    colorButton3.setBackground(Color.BLACK);
-    colorButton3.setBorder(BorderFactory.createLoweredBevelBorder());
+    addColorButton(colorButton1, Color.black);
+    addColorButton(colorButton2, Color.white);
+    addColorButton(colorButton3, Color.gray);
+    addColorButton(colorButton4, Color.blue);
+    addColorButton(colorButton5, Color.red);
+    addColorButton(colorButton6, new Color(0, 0, 64));
+    addColorButton(colorButton7, new Color(0, 92, 0));
+    addColorButton(colorButton8, Color.magenta);
     colorButton3.setText(" ");
-    colorButton2.setBackground(Color.BLACK);
-    colorButton2.setBorder(BorderFactory.createLoweredBevelBorder());
-    colorButton1.setBackground(Color.BLACK);
-    colorButton1.setBorder(BorderFactory.createLoweredBevelBorder());
-    currentColorButton.setBorder(BorderFactory.createLoweredBevelBorder());
+        currentColorButton.setBorder(BorderFactory.createLoweredBevelBorder());
     currentColorButton.setMaximumSize(new Dimension(50, 11));
     currentColorButton.setMinimumSize(new Dimension(50, 11));
     currentColorButton.setPreferredSize(new Dimension(50, 11));
@@ -462,35 +436,25 @@ public class PreferencesDialog extends JDialog {
     });
     AutoConvertCheckBox.setToolTipText("");
     AutoConvertCheckBox.setText("Automatically Convert");
-    plotColorButton.setBackground(Color.BLACK);
+    plotColorButton.setBackground(Color.green);
     plotColorButton.setBorder(null);
     plotColorButton.setPreferredSize(new Dimension(30, 21));
     colorPanel1.setBorder(BorderFactory.createRaisedBevelBorder());
     colorPanel1.setLayout(gridLayout2);
-    procColorButton8.setBackground(Color.BLACK);
-    procColorButton8.setBorder(BorderFactory.createLoweredBevelBorder());
-    procColorButton7.setBackground(new Color(0, 92, 0));
-    procColorButton7.setBorder(BorderFactory.createLoweredBevelBorder());
-    procColorButton6.setBackground(new Color(0, 0, 64));
-    procColorButton6.setBorder(BorderFactory.createLoweredBevelBorder());
-    procColorButton5.setBackground(Color.BLACK);
-    procColorButton5.setBorder(BorderFactory.createLoweredBevelBorder());
-    procColorButton4.setBackground(Color.BLACK);
-    procColorButton4.setBorder(BorderFactory.createLoweredBevelBorder());
-    procColorButton3.setBackground(Color.BLACK);
-    procColorButton3.setBorder(BorderFactory.createLoweredBevelBorder());
-    procColorButton3.setText(" ");
-    procColorButton2.setBackground(Color.BLACK);
-    procColorButton2.setBorder(BorderFactory.createLoweredBevelBorder());
+    
+    addProcColorButton(procColorButton1, Color.black);
+    addProcColorButton(procColorButton2, Color.white);
+    addProcColorButton(procColorButton3, Color.gray);
+    addProcColorButton(procColorButton4, Color.blue);
+    addProcColorButton(procColorButton5, Color.red);
+    addProcColorButton(procColorButton6, new Color(0, 0, 64));
+    addProcColorButton(procColorButton7, new Color(0, 92, 0));
+    addProcColorButton(procColorButton8, Color.magenta);
+    
     gridLayout2.setHgap(2);
     gridLayout2.setRows(2);
     gridLayout2.setVgap(2);
-    procColorButton1.setBackground(Color.BLACK);
-    procColorButton1.setBorder(BorderFactory.createLoweredBevelBorder());
-    procColorButton1.setMaximumSize(new Dimension(20, 20));
-    procColorButton1.setMinimumSize(new Dimension(20, 20));
-    procColorButton1.setPreferredSize(new Dimension(20, 20));
-    
+
     displayFontPanel.add(fontComboBox,                    new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0
             ,GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, new Insets(0, 5, 0, 0), 0, 0));
     displayFontPanel.add(defaultFontCheckBox,                  new GridBagConstraints(0, 2, 1, 1, 0.0, 1.0
@@ -517,14 +481,6 @@ public class PreferencesDialog extends JDialog {
             ,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 5, 0, 0), 0, 0));
     colorSchemePanel.add(colorPanel,         new GridBagConstraints(0, 2, 2, 1, 1.0, 1.0
             ,GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 5, 0, 5), 0, 0));
-    colorPanel.add(colorButton1, null);
-    colorPanel.add(colorButton2, null);
-    colorPanel.add(colorButton3, null);
-    colorPanel.add(colorButton4, null);
-    colorPanel.add(colorButton5, null);
-    colorPanel.add(colorButton6, null);
-    colorPanel.add(colorButton7, null);
-    colorPanel.add(colorButton8, null);
     colorSchemePanel.add(currentColorButton,        new GridBagConstraints(1, 3, 1, 1, 0.0, 0.0
             ,GridBagConstraints.CENTER, GridBagConstraints.VERTICAL, new Insets(0, 0, 0, 0), -16, 0));
     colorSchemePanel.add(jLabel8,    new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0
@@ -549,11 +505,11 @@ public class PreferencesDialog extends JDialog {
     
     JLabel lblTheFollowingProperties = new JLabel("The spectrum display properties above will apply for new spectra");
     lblTheFollowingProperties.setFont(new Font("Tahoma", Font.ITALIC, 11));
-    lblTheFollowingProperties.setForeground(Color.BLACK);
+    lblTheFollowingProperties.setForeground(Color.DARK_GRAY);
     lblTheFollowingProperties.setBounds(6, 74, 389, 14);
     spectrumPanel.add(lblTheFollowingProperties);
     spectrumDisplayApplyNowCheckBox.setFont(new Font("Tahoma", Font.ITALIC, 11));
-    spectrumDisplayApplyNowCheckBox.setForeground(Color.BLACK);
+    spectrumDisplayApplyNowCheckBox.setForeground(Color.DARK_GRAY);
     spectrumDisplayApplyNowCheckBox.setBounds(6, 87, 220, 23);
     
     spectrumPanel.add(spectrumDisplayApplyNowCheckBox);
@@ -611,14 +567,6 @@ public class PreferencesDialog extends JDialog {
             ,GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 5, 0, 0), 0, 0));
     integrationPanel.add(colorPanel1,            new GridBagConstraints(2, 3, 1, 1, 1.0, 0.0
             ,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
-    colorPanel1.add(procColorButton1, null);
-    colorPanel1.add(procColorButton2, null);
-    colorPanel1.add(procColorButton3, null);
-    colorPanel1.add(procColorButton4, null);
-    colorPanel1.add(procColorButton5, null);
-    colorPanel1.add(procColorButton6, null);
-    colorPanel1.add(procColorButton7, null);
-    colorPanel1.add(procColorButton8, null);
     integrationPanel.add(jLabel4,    new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0
             ,GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(5, 5, 0, 0), 0, 0));
     integrationPanel.add(processingCustomButton,        new GridBagConstraints(2, 4, 1, 1, 0.0, 0.0
@@ -637,7 +585,28 @@ public class PreferencesDialog extends JDialog {
     conversionButtonGroup.add(AtoTRadioButton);
   }
 
-  /**
+  private void addProcColorButton(JButton btn, Color c) {
+    colorPanel1.add(btn, null);
+    btn.setBackground(c);
+    btn.setBorder(BorderFactory.createLoweredBevelBorder());
+    btn.setName("pcb");
+    btn.addActionListener(this);
+    btn.setText(" ");
+    btn.setMaximumSize(new Dimension(20, 20));
+    btn.setMinimumSize(new Dimension(20, 20));
+    btn.setPreferredSize(new Dimension(20, 20));
+	}
+
+	private void addColorButton(JButton btn, Color c) {    
+    colorPanel.add(btn, null);
+    btn.setBackground(c);
+    btn.setBorder(BorderFactory.createLoweredBevelBorder());
+    btn.setName("cb");
+    btn.addActionListener(this);
+	}
+	
+
+	/**
    * Initialise the Display Tab, where display schemes are created or set
    * @param viewer 
    */
@@ -666,6 +635,7 @@ public class PreferencesDialog extends JDialog {
       previewPanel = AwtPanel.getPanelOne(viewer, source.getSpectra().get(0));
       previewPanel.getPanelData().setBoolean(ScriptToken.ENABLEZOOM, false);
       previewPanel.getPanelData().setBoolean(ScriptToken.GRIDON, true);
+      previewPanel.getPanelData().setBoolean(ScriptToken.TITLEON, true);
       previewPanel.getPanelData().setBoolean(ScriptToken.COORDINATESON, true);
     } catch (JSpecViewException ex) {
       ex.printStackTrace();
@@ -755,27 +725,6 @@ public class PreferencesDialog extends JDialog {
   }
 
   /**
-   * class <code>ColorPanelActionListener</code> is the <code>ActionListener</code>
-   * for the panel of color buttons
-   */
-  class ColorPanelActionListener implements ActionListener{
-
-    /**
-     * Sets the color of the selected element on the current color button
-     * @param ae the ActionEvent
-     */
-    public void actionPerformed(ActionEvent ae){
-      JButton button = (JButton)ae.getSource();
-      Color color = button.getBackground();
-      currentColorButton.setBackground(color);
-      String element = elementList.getSelectedValue();
-      setCurrentColor(element, color);
-      currentDS.name = "Current";
-      updatePreviewPanel();
-    }
-  }
-
-  /**
    * Listener for the element list
    */
   class ElementListSelectionListener implements ListSelectionListener{
@@ -795,7 +744,25 @@ public class PreferencesDialog extends JDialog {
     }
   }
 
-
+	/**
+	 * Sets the color of the selected element on the current color button
+	 * 
+	 * @param ae
+	 *          the ActionEvent
+	 */
+	public void actionPerformed(ActionEvent ae) {
+		JButton button = (JButton) ae.getSource();
+		Color color = button.getBackground();
+		if (button.getName().equals("cb")) {
+			currentColorButton.setBackground(color);
+			String element = elementList.getSelectedValue();
+			setCurrentColor(element, color);
+			currentDS.name = "Current";
+			updatePreviewPanel();
+		} else {
+			plotColorButton.setBackground(color);
+		}
+	}
   /**
    * disposes the dialog when the cancel button is pressed
    * @param e the ActionEvent
@@ -805,7 +772,7 @@ public class PreferencesDialog extends JDialog {
   }
 
   public void setCurrentColor(String element, Color color) {
-    currentDS.setColor(ScriptToken.getScriptToken(element), new AwtColor(color.getRGB()));
+    currentDS.setColor(ScriptToken.getScriptToken(element + "COLOR"), new AwtColor(color.getRGB()));
 	}
 
 	/**
@@ -1122,19 +1089,4 @@ public class PreferencesDialog extends JDialog {
 		return isSpectrumDisplayApplyNowEnabled;
 	}
 
-/**
-   * Listener for the Panel of Color button of the processing tab
-   */
-  class ProcColorPanelActionListener implements ActionListener{
-
-    /**
-     * Sets the color plotColorButton to the color of the button pressed
-     * @param ae the ActionEvent
-     */
-    public void actionPerformed(ActionEvent ae){
-      JButton button = (JButton)ae.getSource();
-      Color color = button.getBackground();
-      plotColorButton.setBackground(color);
-    }
-  }
 }

@@ -47,6 +47,7 @@ import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
 
 import javajs.api.GenericColor;
+import javajs.awt.Font;
 
 
 import jspecview.api.JSVGraphics;
@@ -99,9 +100,10 @@ public class AwtG2D implements JSVGraphics {
 		((Graphics) g).setColor((Color) c);
 	}
 
-	public void setGraphicsFont(Object g, javajs.awt.Font font) {
+	public Font setFont(Object g, javajs.awt.Font font) {
 		//System.out.println("AwtG2D.setGraphicsFont " + font.getInfo());
 		((Graphics) g).setFont((java.awt.Font) font.font);
+		return font;
 	}
 
 	public void drawGrayScaleImage(Object g, Object image2d, int destX0, int destY0,
@@ -136,13 +138,13 @@ public class AwtG2D implements JSVGraphics {
 		((Graphics) g).drawRect(x, y, xPixels, yPixels);
 	}
 
-	public int getFontHeight(Object g) {
-    return ((Graphics) g).getFontMetrics().getHeight();
-	}
-
-	public int getStringWidth(Object g, String s) {
-  	return (s == null ? 0 : ((Graphics) g).getFontMetrics().stringWidth(s));
-	}
+//	public int getFontHeight(Object g) {
+//    return ((Graphics) g).getFontMetrics().getHeight();
+//	}
+//
+//	public int getStringWidth(Object g, String s) {
+//  	return (s == null ? 0 : ((Graphics) g).getFontMetrics().stringWidth(s));
+//	}
 
 	public void drawCircle(Object g, int x, int y, int diameter) {
 		((Graphics) g).drawOval(x, y, diameter, diameter);

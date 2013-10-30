@@ -104,13 +104,13 @@ public class JSVPopupResourceBundle extends PopupResource {
   	{"XY","export XY"},
   	{"DIF","export DIF"},
   	{"DIFDUP","export DIFDUP"},
-  	{"FIX","export FIX"},
-  	{"PAC","export PAC"},
-  	{"SQZ","export SQZ"},
-  	{"JPG","export JPG"},
-  	{"SVG","export SVG"},
-  	{"PNG","export PNG"},
-  	{"PDF","export PDF"},
+  	{"FIX","write FIX"},
+  	{"PAC","write PAC"},
+  	{"SQZ","write SQZ"},
+  	{"JPG","write JPG"},
+  	{"SVG","write SVG"},
+  	{"PNG","write PNG"},
+  	{"PDF","write PDF"},
   };
 
   @Override

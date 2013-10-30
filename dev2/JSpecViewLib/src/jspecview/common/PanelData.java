@@ -113,6 +113,7 @@ public class PanelData implements EventManager {
 		for (int i = 0; i < graphSets.size(); i++)
 			graphSets.get(i).dispose();
 		graphSets = null;
+		currentFont = null;
 		currentGraphSet = null;
 		coordClicked = null;
 		coordsClicked = null;
@@ -465,9 +466,7 @@ public class PanelData implements EventManager {
 
 	public Font setFont(Object g, int width, int style, float size,
 			boolean isLabel) {
-		Font font = getFont(g, width, style, size, isLabel);
-		g2d.setGraphicsFont(g, font);
-		return font;
+		return g2d.setFont(g, getFont(g, width, style, size, isLabel));
 	}
 
 	public void printFilePath(Object g, int x, int y, String s) {
@@ -520,9 +519,23 @@ public class PanelData implements EventManager {
 					: Font.FONT_STYLE_PLAIN, size, true);
 		}
 		g2d.setGraphicsColor(g, titleColor);
-		g2d.setGraphicsFont(g, font);
+		setCurrentFont(g2d.setFont(g, font));
 		g2d.drawString(g, title, (isPrinting ? left * scalingFactor : 5),
 				pageHeight - (int) (font.getHeight() * (isPrinting ? 2 : 0.5)));
+	}
+
+	private Font currentFont;
+
+	private void setCurrentFont(Font font) {
+		currentFont = font;
+	}
+
+	int getFontHeight() {
+		return currentFont.getAscent();
+	}
+
+	int getStringWidth(String s) {
+		return currentFont.stringWidth(s);
 	}
 
 	/**

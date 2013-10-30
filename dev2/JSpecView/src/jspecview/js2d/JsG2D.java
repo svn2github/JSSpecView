@@ -61,8 +61,6 @@ public class JsG2D implements JSVGraphics {
 	private int windowWidth;
 	private int windowHeight;
 
-	private Font currentFont;
-
   public JsG2D() {
 	}
 
@@ -317,14 +315,6 @@ public class JsG2D implements JSVGraphics {
 		}
 	}
 
-	public int getFontHeight(Object g) {
-		return currentFont.getAscent();
-	}
-
-	public int getStringWidth(Object g, String s) {
-		return currentFont.stringWidth(s);
-	}
-
 	public void setGraphicsColor(Object g, GenericColor c) {
 		String s = ColorUtil.toCSSString(c);
 		/**
@@ -337,8 +327,7 @@ public class JsG2D implements JSVGraphics {
 		}
 	}
 
-	public void setGraphicsFont(Object g, Font font) {
-		currentFont = font;
+	public Font setFont(Object g, Font font) {
 		String s = font.getInfo();
 		int pt = s.indexOf(" ");
 		s = s.substring(0, pt) + "px" + s.substring(pt);
@@ -349,6 +338,7 @@ public class JsG2D implements JSVGraphics {
 		 */
 		{
 		}
+		return  font;
 	}
 
 	public void setStrokeBold(Object g, boolean tf) {
