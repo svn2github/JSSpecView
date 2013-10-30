@@ -43,8 +43,6 @@
             <include name="util/DefaultLogger.java" />
             <include name="util/JmolFont.java" />
 	        <include name="util/Logger*.java" />
-	        <include name="util/Parser.java" />
-	        <include name="util/Txt.java" />
           </fileset>
         </copy>
 
