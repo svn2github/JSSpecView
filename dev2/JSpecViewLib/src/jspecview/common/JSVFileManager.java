@@ -33,7 +33,7 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import javajs.api.GenericFileInterface;
-import javajs.util.ArrayUtil;
+import javajs.util.AU;
 import javajs.util.Encoding;
 import javajs.util.OC;
 import javajs.util.PT;
@@ -242,7 +242,7 @@ public class JSVFileManager {
 			totalLen += len;
 			if (out == null) {
 				if (totalLen >= bytes.length)
-					bytes = ArrayUtil.ensureLengthByte(bytes, totalLen * 2);
+					bytes = AU.ensureLengthByte(bytes, totalLen * 2);
 				System.arraycopy(buf, 0, bytes, totalLen - len, len);
 			} else {
 				out.write(buf, 0, len);
@@ -250,7 +250,7 @@ public class JSVFileManager {
 		}
 		bis.close();
 		if (out == null) {
-			return ArrayUtil.arrayCopyByte(bytes, totalLen);
+			return AU.arrayCopyByte(bytes, totalLen);
 		}
 		return totalLen + " bytes";
 	}

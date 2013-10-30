@@ -35,7 +35,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import javajs.util.ArrayUtil;
+import javajs.util.AU;
 import javajs.util.List;
 import javajs.util.SB;
 import jspecview.api.JSVZipInterface;
@@ -198,7 +198,7 @@ public class JSVZipUtil implements JSVZipInterface {
     while (zis.available() == 1 && (len = zis.read(buf, 0, 1024)) > 0) {
       totalLen += len;
       if (totalLen >= bytes.length)
-        bytes = ArrayUtil.ensureLengthByte(bytes, totalLen * 2);
+        bytes = AU.ensureLengthByte(bytes, totalLen * 2);
       System.arraycopy(buf, 0, bytes, totalLen - len, len);
     }
     buf = new byte[totalLen];
@@ -214,7 +214,7 @@ public class JSVZipUtil implements JSVZipInterface {
     while ((len = bis.read(buf, 0, 1024)) > 0) {
       totalLen += len;
       if (totalLen >= bytes.length)
-        bytes = ArrayUtil.ensureLengthByte(bytes, totalLen * 2);
+        bytes = AU.ensureLengthByte(bytes, totalLen * 2);
       System.arraycopy(buf, 0, bytes, totalLen - len, len);
     }
     buf = new byte[totalLen];

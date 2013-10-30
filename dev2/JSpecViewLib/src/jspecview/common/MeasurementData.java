@@ -27,7 +27,7 @@ package jspecview.common;
 
 import java.util.Map;
 
-import javajs.util.ArrayUtil;
+import javajs.util.AU;
 import javajs.util.DF;
 import javajs.util.List;
 
@@ -103,7 +103,7 @@ public class MeasurementData extends List<Measurement> implements
 
 	double[][] getMeasurementListArrayReal(String units) {
 		boolean toHz = spec.isNMR() && units.equalsIgnoreCase("HZ");
-		double[][] data = ArrayUtil.newDouble2(size());
+		double[][] data = AU.newDouble2(size());
 		for (int pt = 0, i = size(); --i >= 0;) {
 			double y = get(i).getValue();
 			if (toHz)

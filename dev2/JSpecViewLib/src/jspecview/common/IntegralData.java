@@ -6,7 +6,7 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import javajs.util.ArrayUtil;
+import javajs.util.AU;
 import javajs.util.BS;
 import javajs.util.DF;
 import javajs.util.List;
@@ -348,7 +348,7 @@ public class IntegralData extends MeasurementData {
 
 	@Override
 	public double[][] getMeasurementListArrayReal(String units) {
-		double[][] data = ArrayUtil.newDouble2(size());
+		double[][] data = AU.newDouble2(size());
 		for (int pt = 0, i = size(); --i >= 0; pt++)
 			data[pt] = new double[] { get(i).getXVal(), get(i).getXVal2(), get(i).getValue() };
 		return data;
