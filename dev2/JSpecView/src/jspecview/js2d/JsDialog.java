@@ -107,6 +107,11 @@ public class JsDialog extends JDialog implements PlatformDialog {
 		return btn;
 	}
 
+	@Override
+	public void dispose() {
+		// just identifying when this happens. 
+		super.dispose();
+	}
 	public Object addCheckBox(String name, String title, int level,
 			boolean isSelected) {
 		if (name == null) {

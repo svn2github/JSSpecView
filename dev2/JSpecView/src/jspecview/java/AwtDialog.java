@@ -135,6 +135,18 @@ public class AwtDialog extends JDialog implements PlatformDialog {
 			options = new Hashtable<String, Object>();
 	}
 
+	@Override
+	public void setVisible(boolean tf) {
+		// just identifying when this happens. 
+		// called from JSVDialog.layoutDialog() and JSVDialog.setVisible()
+		super.setVisible(tf);
+	}
+	
+	@Override
+	public void dispose() {
+		// just identifying when this happens. 
+		super.dispose();
+	}
 	protected int getColumnCentering(int column) {
 		return tableCellAlignLeft ? SwingConstants.LEFT : column == 0 ? SwingConstants.CENTER
 				: SwingConstants.RIGHT;

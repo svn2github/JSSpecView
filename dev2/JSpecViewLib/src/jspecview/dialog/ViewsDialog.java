@@ -113,6 +113,7 @@ public class ViewsDialog extends JSVDialog {
 		Object cb = checkBoxes.get(i);
 		boolean isSelected = dialog.isSelected(cb);
 		if (node.getPanelNode().jsvp == null) {
+			// a root node
 			if (!checking && isSelected && dialog.getText(cb).startsWith("Overlay")) {
 				checking = true;
 				selectAll(false);

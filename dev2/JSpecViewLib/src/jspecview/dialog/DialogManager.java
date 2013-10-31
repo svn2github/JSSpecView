@@ -64,12 +64,17 @@ abstract public class DialogManager {
   
   /**
    * register the JSV dialog with a unique key to be used as an ID in callbacks
+   * optionKeys ending with "!" are one-of-a-kind, such as "views"
    * 
    * @param jsvDialog
    * @return id
    */
 	protected String registerDialog(JSVDialog jsvDialog) {
-		String id = jsvDialog.optionKey + " " + ("" + Math.random()).substring(3); 
+		String id = jsvDialog.optionKey;
+		if (!id.endsWith("!"))	
+			id += " " + ("" + Math.random()).substring(3);
+		if (htDialogs.containsKey(id))
+			htDialogs.get(id).dispose();
 		htDialogs.put(id, jsvDialog);
 		return id;
 	}
