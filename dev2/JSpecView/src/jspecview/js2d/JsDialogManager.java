@@ -117,7 +117,7 @@ public class JsDialogManager extends DialogManager {
 	}
 	
 	/**
-	 * Jmol.Dialog.click() callback
+	 * Jmol.Dialog.click() callback (via SwingController)
 	 * @param eventId 
 	 */
 	public void actionPerformed(String eventId) {

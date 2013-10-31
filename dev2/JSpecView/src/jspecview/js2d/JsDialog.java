@@ -269,20 +269,19 @@ public class JsDialog extends JDialog implements PlatformDialog {
 	}
 
 	public void setIntLocation(int[] loc) {
-		int[] d = new int[2];
+		Dimension d = new Dimension(0, 0);
 		/**
 		 * @j2sNative
 		 * 
-		 * Jmol.Dialog.getScreenDimensions(d);
+		 * SwingController.getScreenDimensions(d);
 		 * 
 		 * 
 		 */
 		{
-			d[0] =1400; d[1] = 800;
 		}
 		
-		loc[0] = Math.min(d[0] - 50, loc[0]);
-		loc[1] = Math.min(d[1] - 50, loc[1]);
+		loc[0] = Math.min(d.width - 50, loc[0]);
+		loc[1] = Math.min(d.height - 50, loc[1]);
 		setLocation(loc);
 	}
 

@@ -15,7 +15,7 @@ public class JCheckBox extends JComponent {
 		/**
 		 * @j2sNative
 		 * 
-		 * Jmol.Dialog.setSelected(this);
+		 * SwingController.setSelected(this);
 		 * 
 		 */
 		{
@@ -29,9 +29,10 @@ public class JCheckBox extends JComponent {
 
 	@Override
 	public String toHTML() {
-		SB sb = new SB();
-		sb.append("<input type=checkbox id='" + id + "' class='JCheckBox' style='" + getCSSstyle(0) + "' onclick='Jmol.Dialog.click(this)'>");
-		return sb.toString();
+		String s = "<input type=checkbox id='" + id + "' class='JCheckBox' style='" + getCSSstyle(0) 
+    + "' " + (selected ? "checked='checked' " : "") + "onclick='SwingController.click(this)'>"
+    + "<label for='" + id + "'>" + text + "</label>";
+		return s;
 	}
 
 

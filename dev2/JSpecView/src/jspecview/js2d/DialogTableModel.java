@@ -59,7 +59,7 @@ class DialogTableModel implements AbstractTableModel {
 		int ncols = data[0].length;
 		for (int i = -1; i < nrows; i++) {
 			String rowid = id + "_" + i;
-			sb.append("\n<tr id='" + rowid + "' class='JTable_" + (i == -1 ? "header" : "row") + " style='height:25px'>");
+			sb.append("\n<tr id='" + rowid + "' class='JTable_" + (i == -1 ? "header" : "row") + "' style='height:25px'>");
 			for (int j = 0; j < ncols; j++) {
 				if (i == -1)
 					getCellHtml(sb, id + "_h" + j, i, j, columnNames[j], false);		
@@ -73,7 +73,7 @@ class DialogTableModel implements AbstractTableModel {
 	private void getCellHtml(SB sb, String id, int iRow, int iCol, Object o, boolean isSelected) {
 		String style = getCellStyle(id, iRow, iCol, o, isSelected);
 		sb.append("<td id='" + id + "'" + style
-				+ " onclick=Jmol.Dialog.click(this)>" + o + "</td>");
+				+ " onclick=SwingController.click(this)>" + o + "</td>");
 	}
 
 	/**
