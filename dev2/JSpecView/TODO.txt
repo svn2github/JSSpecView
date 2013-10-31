@@ -202,8 +202,8 @@ Moved and renamed methods from jspecview/util to org/jmol/util (applets can shar
 * Replaced all references to StringBuilder and StringBuffer with JSVSB (later refactored as javajs.util.SB)
 
 ====TODO=========
--JSmol :overlay working but close overlay isn't
--JSmol interactions working from spectrum to Mol but not from Mol to spectrum
+-JSmol CLOSE OVERLAY not working
+-JSmol 2-way interaction NOT working; OK from spectrum to Mol but not from Mol to spectrum
 
 -NMR peak list is too wide; dialog not adjusting
 
