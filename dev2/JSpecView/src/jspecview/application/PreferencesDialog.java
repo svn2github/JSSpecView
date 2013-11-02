@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2012 The University of the West Indies
+/* Copyright (c) 2002-2013 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -320,7 +320,7 @@ public class PreferencesDialog extends JDialog implements ActionListener {
     uiPanel.add(toolbarCheckBox);
     statusBarCheckBox.setBounds(6, 73, 114, 23);
     uiPanel.add(statusBarCheckBox);
-    cancelButton.setText("CANCEL");
+    cancelButton.setText("Cancel");
     cancelButton.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
         cancelButton_actionPerformed(e);
