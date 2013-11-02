@@ -26,7 +26,6 @@
 package jspecview.util;
 
 
-import javajs.util.PT;
 import javajs.util.SB;
 
 
@@ -71,15 +70,4 @@ public class JSVEscape {
     return "\\u" + s.substring(s.length() - 4);
   }
   
-  public static String escapeUrl(String url) {
-    url = PT.simpleReplace(url, "\n", "");
-    url = PT.simpleReplace(url, "%", "%25");
-    url = PT.simpleReplace(url, "[", "%5B");
-    url = PT.simpleReplace(url, "]", "%5D");
-    url = PT.simpleReplace(url, " ", "%20");
-    url = PT.simpleReplace(url, "?", "%3F");
-    return url;
-  }
-
-
 }

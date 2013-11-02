@@ -360,7 +360,7 @@ public class JSVFileManager {
 			String molFile = (isInline ? PT.simpleReplace(name
 					.substring(4), "\\n", "\n")
 					: getFileAsString(PT.simpleReplace(nciResolver, "%FILE",
-							JSVEscape.escapeUrl(name.substring(1)))));
+							PT.escapeUrl(name.substring(1)))));
 			int pt = molFile.indexOf("\n");
 			molFile = "/JSpecView " + JSVersion.VERSION + molFile.substring(pt);
 			molFile = PT.simpleReplace(molFile, "?", "_");
