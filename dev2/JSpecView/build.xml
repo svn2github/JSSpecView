@@ -116,7 +116,7 @@
     </target>
 <!---
 -->
-	<target name="make-applet-jar" description="Make unsigned JSpecView applet jar" depends="build">
+	<target name="make-applet-jar" description="Make (untrusted) signed JSpecView applet jar" depends="build">
 		<antcall target="revision" />
         <mkdir dir="${build.applet.dir}"/>
 		
@@ -146,7 +146,10 @@
         	<fileset dir="${jsvlib.dir}"/>
         </jar>		
 		<copy overwrite="true" file="${build.applet.dir}/${ant.project.name}.applet.${build.number}.jar"
-			tofile="${jmol.path}/appletweb/JSpecViewApplet.jar">
+			tofile="${jmol.path}/ca-temp/JSpecViewApplet.jar">
+		</copy>
+		<copy overwrite="true" file="${build.applet.dir}/${ant.project.name}.applet.${build.number}.jar"
+			tofile="build/JSpecViewApplet.jar">
 		</copy>
     </target>
 <!---
@@ -170,7 +173,10 @@
                keystore="certificate/JSVcertificate.store"
                storepass="JSV2013" alias="JSVcertificate" />
 		<copy overwrite="true" file="${build.applet.dir}/${ant.project.name}.applet.signed.${build.number}.jar"
-			tofile="${jmol.path}/appletweb/JSpecViewAppletSigned.jar">
+			tofile="${jmol.path}/ca-temp/JSpecViewAppletSigned.jar">
+		</copy>
+		<copy overwrite="true" file="${build.applet.dir}/${ant.project.name}.applet.signed.${build.number}.jar"
+			tofile="build/JSpecViewAppletSigned.jar">
 		</copy>
     <delete>
       <fileset dir="${build.applet.dir}" includes = "temp.jar" />
