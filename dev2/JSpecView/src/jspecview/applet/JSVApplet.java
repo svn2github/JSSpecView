@@ -114,13 +114,10 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	@Override
 	public void init() {
 		app = new JSVApp(this, false);
-		initViewer();
-		if (app.appletReadyCallbackFunctionName != null && viewer.fullName != null)
-			callToJavaScript(app.appletReadyCallbackFunctionName, new Object[] {
-					viewer.appletID, viewer.fullName, Boolean.TRUE, this });
+		init2();
 	}
 
-	protected void initViewer() {
+	protected void init2() {
 		viewer = app.viewer;
 		viewer.display = getContentPane();
 		viewer.scriptQueue = new List<String>();
@@ -128,6 +125,9 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 		commandWatcherThread.setName("CommmandWatcherThread");
 		commandWatcherThread.start();
 		Logger.info(getAppletInfo());
+		if (app.appletReadyCallbackFunctionName != null && viewer.fullName != null)
+			callToJavaScript(app.appletReadyCallbackFunctionName, new Object[] {
+					viewer.appletID, viewer.fullName, Boolean.TRUE, this });
 	}
 
 	private static final long serialVersionUID = 1L;
