@@ -159,9 +159,15 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 
 	@Override
 	public void destroy() {
+		System.out.println("destroy called on " + this);
 		if (commandWatcherThread != null) {
 			commandWatcherThread.interrupt();
 			commandWatcherThread = null;
+		}
+		try {
+			throw new NullPointerException();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		app.dispose();
 		app = null;
@@ -447,7 +453,9 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	 */
 	public void callToJavaScript(String callback, Object[] params) {
 		try {
+
 			JSObject jso = JSObject.getWindow(this);
+			
 			if (callback.length() > 0) {
 				if (callback.indexOf(".") > 0) {
 					String[] mods = PT.split(callback, ".");
@@ -459,7 +467,6 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 				Logger.info("JSVApplet calling " + jso + " " + callback);
 				jso.call(callback, params);
 			}
-
 		} catch (Exception npe) {
 			Logger.warn("EXCEPTION-> " + npe.getMessage());
 		}

@@ -77,6 +77,12 @@ public class JSVAppletPro extends JSVApplet {
   
   @Override
   public void init() {
+		System.out.println("jsvappletpro init");
+  	try {
+  		throw new NullPointerException("jsvappletpro init");
+  	} catch (Exception e) {
+  		e.printStackTrace();
+  	}
     app = new JSVAppPro(this, false);
 		init2();
   }
