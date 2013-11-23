@@ -265,7 +265,7 @@
 		                 storepass="${selfsign.pass}"
 		                 alias="${selfsign.alias}">
 		            <fileset dir="${sign-jar-file-dir}" >
-		              <include name="${sign-jar-file}" />
+		              <include name="${sign-jar-file-name}" />
 		            </fileset>
 		        </signjar>
 		</else></if>
