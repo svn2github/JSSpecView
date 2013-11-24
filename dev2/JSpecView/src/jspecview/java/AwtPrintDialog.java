@@ -134,8 +134,6 @@ public class AwtPrintDialog extends JDialog implements JSVPrintDialog {
       //fontComboBox.addItem(allFontNames[i]);
  		ClassLoader cl = AwtPrintDialog.class.getClassLoader();
 		String path = "jspecview/java/icons/";
-		//portraitIcon = new ImageIcon(cl.getResource(path + "portrait.gif"));
-		//landscapeIcon = new ImageIcon(cl.getResource(path + "landscape.gif"));
 		previewPortraitCenterIcon = new ImageIcon(cl.getResource(path
 				+ "portraitCenter.gif"));
 		previewPortraitDefaultIcon = new ImageIcon(cl.getResource(path
