@@ -70,7 +70,6 @@ import jspecview.common.ScriptToken;
 
 public class JsPanel implements JSVPanel {
 //, MouseListener,  MouseMotionListener, KeyListener
-  private static final long serialVersionUID = 1L;
 
   @Override
   public void finalize() {

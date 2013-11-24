@@ -10,7 +10,6 @@ import javajs.util.SB;
 
 class DialogTableModel implements AbstractTableModel {
 
-	private static final long serialVersionUID = 1L;
 	String[] columnNames;
 	Object[][] data;
 	boolean asString;

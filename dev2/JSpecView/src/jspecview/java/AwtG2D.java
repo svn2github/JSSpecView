@@ -63,7 +63,6 @@ import jspecview.api.JSVGraphics;
  */
 
 public class AwtG2D implements JSVGraphics {
-  private static final long serialVersionUID = 1L;
   
 	BasicStroke strokeBasic = new BasicStroke();
   BasicStroke strokeBold = new BasicStroke(2f);

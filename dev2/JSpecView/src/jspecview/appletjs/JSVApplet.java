@@ -168,8 +168,6 @@ public class JSVApplet implements JSVAppletInterface,
     return defaultValue;
   }
 
-	private static final long serialVersionUID = 1L;
-
 	public boolean isPro() {
 		return app.isPro();
 	}
@@ -515,9 +513,8 @@ public class JSVApplet implements JSVAppletInterface,
 	}
 
 	public URL getDocumentBase() {
-		String base = (String) viewerOptions.get("documentBase");
 		try {
-			return new URL((URL) null, base, null);
+			return new URL((URL) null, (String) viewerOptions.get("documentBase"), null);
 		} catch (MalformedURLException e) {
 			return null;
 		}

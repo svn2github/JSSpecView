@@ -75,8 +75,6 @@ public class JSVAppletPro extends JSVApplet {
 		super(viewerOptions);
 	}
 
-	private static final long serialVersionUID = 1L;
-
   private JSVApp app0;
   
   @Override

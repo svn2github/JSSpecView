@@ -39,6 +39,7 @@
 
 package jspecview.app;
 
+import java.net.URL;
 import java.util.Map;
 
 import javajs.util.List;
@@ -91,7 +92,8 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	private void initViewer(boolean isJS) {
 		viewer = new JSViewer(this, true, isJS);
 		appletFrame.setDropTargetListener(isSigned(), viewer);
-		JSVFileManager.setDocumentBase(viewer, appletFrame.getDocumentBase());
+		URL path = appletFrame.getDocumentBase();
+		JSVFileManager.setDocumentBase(viewer, path);
 	}
 
 	protected AppletFrame appletFrame;

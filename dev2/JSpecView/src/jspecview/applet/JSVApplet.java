@@ -524,5 +524,4 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 		return app;
 	}
 
-
 }

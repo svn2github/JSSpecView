@@ -197,6 +197,7 @@ public class Exporter implements ExportInterface {
 				out, spec, startIndex, endIndex, null);
 	}
 
+	@SuppressWarnings("resource")
 	private String printPDF(JSViewer viewer, String pdfFileName) {
 		if (!viewer.si.isSigned())
 			return "Error: Applet must be signed for the PRINT command.";

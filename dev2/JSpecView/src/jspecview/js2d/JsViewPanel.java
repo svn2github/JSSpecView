@@ -13,7 +13,6 @@ import jspecview.common.Annotation.AType;
 
 public class JsViewPanel implements JSVViewPanel, JSVMainPanel {
 
-	private static final long serialVersionUID = 1L;
 	private JSVPanel selectedPanel;
 	private int currentPanelIndex;
 	private String title;

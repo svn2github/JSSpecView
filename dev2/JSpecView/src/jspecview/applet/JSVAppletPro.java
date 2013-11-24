@@ -39,6 +39,9 @@
 
 package jspecview.applet;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import jspecview.app.JSVApp;
 import jspecview.app.JSVAppPro;
 //import jspecview.application.MainFrame;
@@ -126,5 +129,14 @@ public class JSVAppletPro extends JSVApplet {
     //mainFrame.setVisible(false);
     app = app0;
   }
-  
+
+	@Override
+	public URL getDocumentBase() {
+		try {
+			return new URL((URL) null, getParameter("documentBase"), null);
+		} catch (MalformedURLException e) {
+			return null;
+		}
+	}
+
 }

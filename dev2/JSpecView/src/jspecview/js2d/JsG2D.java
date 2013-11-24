@@ -56,8 +56,7 @@ import jspecview.api.JSVGraphics;
  */
 
 public class JsG2D implements JSVGraphics {
-  private static final long serialVersionUID = 1L;
-  
+
 	private int windowWidth;
 	private int windowHeight;
 

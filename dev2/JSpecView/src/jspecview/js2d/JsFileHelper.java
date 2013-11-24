@@ -8,13 +8,13 @@ import jspecview.common.JSViewer;
 
 public class JsFileHelper implements JSVFileHelper {
 
-	private JSViewer viewer;
+	//private JSViewer viewer;
 
 	public JsFileHelper() {
 	}
 
 	public JSVFileHelper set(JSViewer viewer) {
-		this.viewer = viewer;
+		//this.viewer = viewer;
 		return this;
 	}
 

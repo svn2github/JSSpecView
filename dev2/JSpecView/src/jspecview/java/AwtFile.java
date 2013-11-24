@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.net.URLConnection;
+import java.security.AccessControlException;
 
 import javajs.api.GenericFileInterface;
 
@@ -25,8 +26,15 @@ class AwtFile extends File implements GenericFileInterface {
 	}
 
 	public GenericFileInterface getParentAsFile() {
-		File file = getParentFile();
-		return (file == null ? null : new AwtFile(file.getAbsolutePath()));
+		// used in printPDF only
+    AwtFile f = null;
+    try {
+      File file = getParentFile();
+      f = new AwtFile(file.getAbsolutePath());
+    } catch (AccessControlException e) {
+      //
+    }
+    return f;
 	}
 
 	static Object getBufferedFileInputStream(String name) {
@@ -67,7 +75,12 @@ class AwtFile extends File implements GenericFileInterface {
 	}
 
 	public String getFullPath() {
-		return getAbsolutePath();
+    try {
+      return getAbsolutePath();
+    } catch (Exception e) {
+      // Unsigned applet cannot do this.
+    	return null;
+    }
 	}
 
 }
