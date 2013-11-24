@@ -38,7 +38,6 @@ import javajs.util.PT;
  */
 public class ViewsDialog extends JSVDialog {
 
-	private static final long serialVersionUID = 1L;
 	private List<JSVTreeNode> treeNodes;	
 	private List<Object> checkBoxes;
 	private Object closeSelectedButton;

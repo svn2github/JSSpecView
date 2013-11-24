@@ -76,7 +76,8 @@ public class JSVZipUtil implements JSVZipInterface {
    * @param listPtr
    * @return  directory listing or subfile contents
    */
-  static public Object getZipFileContents(InputStream is, String[] list,
+  @SuppressWarnings("resource")
+	static public Object getZipFileContents(InputStream is, String[] list,
                                           int listPtr) {
     SB ret = new SB();
     if (list == null || listPtr >= list.length)
@@ -108,7 +109,8 @@ public class JSVZipUtil implements JSVZipInterface {
     return "";
   }
   
-  static public byte[] getZipFileContentsAsBytes(InputStream is, String[] list,
+  @SuppressWarnings("resource")
+	static public byte[] getZipFileContentsAsBytes(InputStream is, String[] list,
                                           int listPtr) {
     byte[] ret = new byte[0];
     String fileName = list[listPtr];

@@ -28,7 +28,6 @@ package jspecview.dialog;
 
 public class PeakListDialog extends JSVDialog {
 
-	private static final long serialVersionUID = 1L;
 	private static int[] posXY = new int[] {Integer.MIN_VALUE, 0};
 
 	public PeakListDialog() {

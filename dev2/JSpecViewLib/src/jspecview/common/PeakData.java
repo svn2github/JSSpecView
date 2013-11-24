@@ -108,7 +108,6 @@ public class PeakData extends MeasurementData {
 		double[] y3 = new double[] { xyCoords[0].getYVal(),
 				yLast = xyCoords[1].getYVal(), 0 };
 		int n = 0;
-		int n2 = 0;
 		if (isInverted)
 			for (int i = 2; i < xyCoords.length; i++) {
 				double y = y3[i % 3] = xyCoords[i].getYVal();
@@ -128,7 +127,6 @@ public class PeakData extends MeasurementData {
 			for (int i = 2; i < xyCoords.length; i++) {
 				double y = y3[i % 3] = xyCoords[i].getYVal();
 				if (yLast > thresh && y3[(i - 2) % 3] < yLast && yLast > y) {
-					n2++;
 					double x = (doInterpolate ? Coordinate.parabolicInterpolation(
 							xyCoords, i - 1) : xyCoords[i - 1].getXVal());
 					if (x >= minX && x <= maxX) {

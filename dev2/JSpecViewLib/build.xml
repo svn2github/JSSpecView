@@ -10,7 +10,10 @@
     <property name="JspecView.location" value="../JspecView"/>
     <property name="JspecViewAndroid.location" value="../JspecViewAndroid"/>
     <property name="ECLIPSE_HOME" value="../../../eclipse"/>
-    <property name="debuglevel" value="source,lines,vars"/>
+    <!-- <property name="debuglevel" value="source,lines,vars"/> -->
+
+	<property name="debug" value="off" />
+	
     <property name="target" value="1.6"/>
     <property name="source" value="1.6"/>
     <path id="JSpecViewLib.classpath">
@@ -52,7 +55,7 @@
     <target name="build-subprojects"/>
     <target depends="init" name="build-project">
         <echo message="${ant.project.name}: ${ant.file}"/>
-        <javac debug="true" debuglevel="${debuglevel}" includeantruntime="false" destdir="bin" source="${source}" target="${target}">
+        <javac debug="${debug}"  includeantruntime="false" destdir="bin" source="${source}" target="${target}">
             <src path="src"/>
             <classpath refid="JSpecViewLib.classpath"/>
         </javac>

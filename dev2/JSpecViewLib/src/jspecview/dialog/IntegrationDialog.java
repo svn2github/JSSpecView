@@ -30,8 +30,6 @@ import jspecview.common.IntegralData;
 
 public class IntegrationDialog extends JSVDialog {
 
-	private static final long serialVersionUID = 1L;
-
 	private static int[] posXY = new int[] { Integer.MIN_VALUE, 0 };
 
 	public IntegrationDialog() {

@@ -32,7 +32,6 @@ import java.net.URL;
 import java.util.Hashtable;
 import java.util.Map;
 
-import javajs.api.GenericFileInterface;
 import javajs.util.AU;
 import javajs.util.Encoding;
 import javajs.util.OC;
@@ -101,41 +100,39 @@ public class JSVFileManager {
       throws MalformedURLException, IOException {
     if (name == null)
       throw new IOException("Cannot find " + name);
-    String path = classifyName(name);
+    String path = getFullPathName(name);
     return getUnzippedBufferedReaderFromName(path, startCode);
   }
 
-  /**
-   * 
-   * FileManager.classifyName
-   * 
-   * follow this with .replace('\\','/') and Escape.escape() to match Jmol's
-   * file name in <PeakData file="...">
-   * 
-   * @param name
-   * @return name
-   * @throws MalformedURLException
-   */
-  public static String classifyName(String name)
-      throws MalformedURLException {
-    if (appletDocumentBase != null) {
-      // This code is only for the applet
-      if (name.indexOf(":\\") == 1 || name.indexOf(":/") == 1)
-        name = "file:///" + name;
-      //System.out.println("filemanager name " + name);
-      //System.out.println("filemanager adb " + appletDocumentBase);
-      URL url = new URL(appletDocumentBase, name, null);
-      return url.toString();
-    }
-
-    // This code is for the app
-    if (isURL(name)) {
-      URL url = new URL((URL) null, name, null);
-      return url.toString();
-    }
-    GenericFileInterface file = viewer.apiPlatform.newFile(name);
-    return file.getFullPath();
-  }
+	/**
+	 * 
+	 * FileManager.classifyName
+	 * 
+	 * follow this with .replace('\\','/') and Escape.escape() to match Jmol's
+	 * file name in <PeakData file="...">
+	 * 
+	 * @param name
+	 * @return name
+	 * @throws MalformedURLException
+	 */
+	public static String getFullPathName(String name)
+			throws MalformedURLException {
+		if (appletDocumentBase == null) {
+			// This code is for the app
+			if (isURL(name)) {
+				URL url = new URL((URL) null, name, null);
+				return url.toString();
+			}
+			return viewer.apiPlatform.newFile(name).getFullPath();
+		}
+		// This code is only for the applet
+		if (name.indexOf(":\\") == 1 || name.indexOf(":/") == 1)
+			name = "file:///" + name;
+		// System.out.println("filemanager name " + name);
+		// System.out.println("filemanager adb " + appletDocumentBase);
+		URL url = new URL(appletDocumentBase, name, null);
+		return url.toString();
+	}
 
   private final static String[] urlPrefixes = { "http:", "https:", "ftp:", 
   	SIMULATION_PROTOCOL, "file:" };
@@ -433,7 +430,7 @@ public class JSVFileManager {
 
   public static String getJmolFilePath(String filePath) {
     try {
-      filePath = classifyName(filePath);
+      filePath = getFullPathName(filePath);
     } catch (MalformedURLException e) {
       return null;
     }

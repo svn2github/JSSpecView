@@ -14,7 +14,6 @@ import jspecview.source.JDXSource;
 
 public class SimpleTree implements JSVTree {
 
-  private static final long serialVersionUID = 1L;
 	protected ScriptInterface si;
   private JSVTreeNode rootNode;
   private SimpleTreeModel spectraTreeModel;

@@ -11,8 +11,6 @@ import jspecview.common.PanelNode;
 public class SimpleTreeNode implements JSVTreeNode {
 
 
-	  private static final long serialVersionUID = 1L;
-		
 	  public PanelNode panelNode;
 		public int index;
 	  SimpleTreeNode prevNode;

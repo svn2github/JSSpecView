@@ -1660,6 +1660,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		return JSVFileManager.postByteArray(fileName, bytes);
 	}
 
+	@SuppressWarnings("resource")
 	public OC getOutputChannel(String fileName, boolean isBinary) throws Exception {
 		OutputStream os = null;
 		/**

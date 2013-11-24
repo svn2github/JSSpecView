@@ -274,7 +274,6 @@ public class FileReader {
 	 * @return source
 	 * @throws JSpecViewException
 	 */
-	@SuppressWarnings("null")
 	private JDXSource getBlockSpectra(List<String[]> sourceLDRTable)
 			throws JSpecViewException {
 
