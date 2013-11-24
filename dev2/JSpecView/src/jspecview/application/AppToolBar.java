@@ -20,69 +20,18 @@ public class AppToolBar extends JToolBar {
   protected MainFrame mainFrame;
   protected JSViewer viewer;
 
+  JToggleButton gridToggleButton, coordsToggleButton, revPlotToggleButton;
+  
+  private JButton spectraButton, errorLogButton;
+	private ImageIcon errorLogIcon, errorLogYellowIcon, errorLogRedIcon;
+
   public AppToolBar(MainFrame mainFrame) {
     this.mainFrame = mainFrame;
     this.viewer = mainFrame.viewer;
     jbInit();
   }
 
-  private JButton previousButton = new JButton();
-  private JButton nextButton = new JButton();
-  private JButton resetButton = new JButton();
-  private JButton clearButton = new JButton();
-  private JButton openButton = new JButton();
-  private JButton propertiesButton = new JButton();
-  private JButton errorLogButton = new JButton();
-  JToggleButton gridToggleButton = new JToggleButton();
-  JToggleButton coordsToggleButton = new JToggleButton();
-  private JButton printButton = new JButton();
-  private JToggleButton revPlotToggleButton = new JToggleButton();
-  private JButton aboutButton = new JButton();
-  private JButton spectraButton = new JButton();
-  private JButton overlayKeyButton = new JButton();
-
-  private ImageIcon openIcon;
-  private ImageIcon printIcon;
-  private ImageIcon gridIcon;
-  private ImageIcon coordinatesIcon;
-  private ImageIcon reverseIcon;
-  private ImageIcon previousIcon;
-  private ImageIcon nextIcon;
-  private ImageIcon resetIcon;
-  private ImageIcon clearIcon;
-  private ImageIcon informationIcon;
-  private ImageIcon aboutIcon;
-  private ImageIcon spectrumIcon;
-  //private ImageIcon splitIcon;
-  private ImageIcon overlayKeyIcon;
-  private ImageIcon errorLogIcon;
-  private ImageIcon errorLogYellowIcon;
-  private ImageIcon errorLogRedIcon;
-
-  private void getIcons() {
-    Class<? extends AppToolBar> cl = getClass();
-    openIcon = new ImageIcon(cl.getResource("icons/open24.gif"));
-    printIcon = new ImageIcon(cl.getResource("icons/print24.gif"));
-    gridIcon = new ImageIcon(cl.getResource("icons/grid24.gif"));
-    coordinatesIcon = new ImageIcon(cl.getResource("icons/coords24.gif"));
-    reverseIcon = new ImageIcon(cl.getResource("icons/reverse24.gif"));
-    previousIcon = new ImageIcon(cl.getResource("icons/previous24.gif"));
-    nextIcon = new ImageIcon(cl.getResource("icons/next24.gif"));
-    resetIcon = new ImageIcon(cl.getResource("icons/reset24.gif"));
-    clearIcon = new ImageIcon(cl.getResource("icons/clear24.gif"));
-    informationIcon = new ImageIcon(cl.getResource("icons/information24.gif"));
-    aboutIcon = new ImageIcon(cl.getResource("icons/about24.gif"));
-    spectrumIcon = new ImageIcon(cl.getResource("icons/overlay24.gif"));
-    //splitIcon = new ImageIcon(cl.getResource("icons/split24.gif"));
-    overlayKeyIcon = new ImageIcon(cl.getResource("icons/overlayKey24.gif"));
-    errorLogIcon = new ImageIcon(cl.getResource("icons/errorLog24.gif"));
-    errorLogRedIcon = new ImageIcon(cl.getResource("icons/errorLogRed24.gif"));
-    errorLogYellowIcon = new ImageIcon(cl
-        .getResource("icons/errorLogYellow24.gif"));
-  }
-
-
-  public void setSelections(JSVPanel jsvp) {
+  void setSelections(JSVPanel jsvp) {
     if (jsvp != null) {   
       PanelData pd = jsvp.getPanelData();
       gridToggleButton.setSelected(pd.getBoolean(ScriptToken.GRIDON));
@@ -91,135 +40,88 @@ public class AppToolBar extends JToolBar {
     }
   }
 
-  private void jbInit() {
-    getIcons();
-    setButton(previousButton, "Previous View", previousIcon,
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            viewer.runScript("zoom previous");
-          }
-        });
-		setButton(nextButton, "Next View", nextIcon, new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				viewer.runScript("zoom next");
-			}
-		});
-    setButton(resetButton, "Reset", resetIcon, new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        viewer.runScript("zoom out");
-      }
-    });
-    setButton(clearButton, "Clear Views", clearIcon, new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        viewer.runScript("zoom clear");
-      }
-    });
-    setButton(propertiesButton, "Properties", informationIcon,
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            viewer.runScript("showProperties");
-          }
-        });
-    setButton(gridToggleButton, "Toggle Grid", gridIcon, new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        viewer.runScript("GRIDON TOGGLE");
-      }
-    });
-    setButton(coordsToggleButton, "Toggle Coordinates", coordinatesIcon,
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            viewer.runScript("COORDINATESON TOGGLE");
-          }
-        });
-    setButton(revPlotToggleButton, "Reverse Plot", reverseIcon,
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            viewer.runScript("REVERSEPLOT TOGGLE");
-          }
-        });
-
-    setButton(printButton, "Print", printIcon, new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        viewer.runScript("print");
-      }
-    });
-    
-    setButton(spectraButton, "Overlay Display", spectrumIcon,
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            viewer.runScript("view");
-          }
-        });
-    setButton(overlayKeyButton, "Display Key for Overlaid Spectra",
-        overlayKeyIcon, new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            viewer.runScript("showKey TOGGLE");
-          }
-        });
-    overlayKeyButton.setEnabled(false);
-    
-    setButton(errorLogButton, "Error Log", errorLogIcon, new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        viewer.runScript("SHOWERRORS");
-      }
-    });
-
-    setButton(openButton, "Open", openIcon, new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        mainFrame.showFileOpenDialog();
-      }
-    });
-
-    setButton(aboutButton, "About JSpecView", aboutIcon, new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        new AboutDialog(mainFrame);
-      }
-    });
-
-
-    add(openButton, null);
-    add(printButton, null);
-    addSeparator();
-    add(gridToggleButton, null);
-    add(coordsToggleButton, null);
-    add(revPlotToggleButton, null);
-    addSeparator();
-    add(previousButton, null);
-    add(nextButton, null);
-    add(resetButton, null);
-    add(clearButton, null);
-    addSeparator();
-    add(spectraButton, null);
-    add(overlayKeyButton, null);
-    addSeparator();
-    add(propertiesButton, null);
-    add(errorLogButton, null);
-    errorLogButton.setVisible(true);
-    addSeparator();
-    add(aboutButton, null);
-
-  }
-
-  private static void setButton(AbstractButton button, String tip,
-                                ImageIcon icon, ActionListener actionListener) {
-    button.setBorder(null);
-    button.setToolTipText(tip);
-    button.setIcon(icon);
-    button.addActionListener(actionListener);
-  }
-
+  void setMenuEnables(PanelNode node) {
+    if (node == null)
+      return;
+    setSelections(node.jsvp);
+    spectraButton.setToolTipText("View Spectra");
+  }   
+  
   void setError(boolean isError, boolean isWarningOnly) {
     errorLogButton.setIcon(isWarningOnly ? errorLogYellowIcon
         : isError ? errorLogRedIcon : errorLogIcon);
     errorLogButton.setEnabled(isError);
   }
 
-  public void setMenuEnables(PanelNode node) {
-    if (node == null)
-      return;
-    setSelections(node.jsvp);
-    spectraButton.setIcon(spectrumIcon);
-    spectraButton.setToolTipText("View Spectra");
-  }   
-  
+	private void jbInit() {
+
+		addButton(null, "Open", "open24", "open");
+		addButton(null, "Print", "print24", "print");
+
+		addSeparator();
+
+		addButton(gridToggleButton = new JToggleButton(), "Toggle Grid",
+				"grid24", "GRIDON TOGGLE");
+		addButton(coordsToggleButton = new JToggleButton(), "Toggle Coordinates",
+				"coords24", "COORDINATESON TOGGLE");
+		addButton(revPlotToggleButton = new JToggleButton(), "Reverse Plot",
+				"reverse24", "REVERSEPLOT TOGGLE");
+
+		addSeparator();
+
+		addButton(null, "Previous View", "previous24", "zoom previous");
+		addButton(null, "Next View", "next24", "zoom next");
+		addButton(null, "Reset", "reset24", "zoom out");
+		addButton(null, "Clear Views", "clear24", "zoom clear");
+
+		addSeparator();
+
+		addButton(spectraButton = new JButton(), "Overlay Display",
+				"overlay24", "view");
+		addButton(null, "Display Key for Overlaid Spectra",
+				"overlayKey24", "showKey TOGGLE");
+
+		addSeparator();
+
+    errorLogIcon = getIcon("errorLog24");
+    errorLogRedIcon = getIcon("errorLogRed24");
+    errorLogYellowIcon = getIcon("errorLogYellow24");
+
+		addButton(null, "Properties", "information24", "showProperties");
+		addButton(errorLogButton = new JButton(), "Error Log", errorLogIcon,
+				"SHOWERRORS");
+
+		addSeparator();
+
+		addButton(null, "About JSpecView", "about24", "about");
+	}
+
+	private static ImageIcon getIcon(Object name) {
+		return new ImageIcon(AppToolBar.class.getResource(
+				"icons/" + name + ".gif"));
+	}
+	
+  private AbstractButton addButton(AbstractButton button, String tip,
+			Object icon, final String script) {
+  	if (button == null)
+  		button = new JButton();
+  	if (icon instanceof String)
+  		icon = getIcon(icon);
+    button.setBorder(null);
+    button.setToolTipText(tip);
+    button.setIcon((ImageIcon) icon);
+		button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (script.equals("open"))
+	        mainFrame.showFileOpenDialog();
+				else if (script.equals("about"))
+	        new AboutDialog(mainFrame);
+				else
+					viewer.runScript(script);
+			}
+    });
+    add(button, null);
+    return button;
+	}
+
 }

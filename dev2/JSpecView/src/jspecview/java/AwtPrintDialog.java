@@ -132,22 +132,19 @@ public class AwtPrintDialog extends JDialog implements JSVPrintDialog {
     //String allFontNames[] = ge.getAvailableFontFamilyNames();
     //for(int i = 0; i < allFontNames.length; i++)
       //fontComboBox.addItem(allFontNames[i]);
- 		ClassLoader cl = AwtPrintDialog.class.getClassLoader();
-		String path = "jspecview/java/icons/";
-		previewPortraitCenterIcon = new ImageIcon(cl.getResource(path
-				+ "portraitCenter.gif"));
-		previewPortraitDefaultIcon = new ImageIcon(cl.getResource(path
-				+ "portraitDefault.gif"));
-		previewPortraitFitIcon = new ImageIcon(cl.getResource(path
-				+ "portraitFit.gif"));
-		previewLandscapeCenterIcon = new ImageIcon(cl.getResource(path
-				+ "landscapeCenter.gif"));
-		previewLandscapeDefaultIcon = new ImageIcon(cl.getResource(path
-				+ "landscapeDefault.gif"));
-		previewLandscapeFitIcon = new ImageIcon(cl.getResource(path
-				+ "landscapeFit.gif"));
+		previewPortraitCenterIcon = getIcon("portraitCenter");
+		previewPortraitDefaultIcon = getIcon("portraitDefault");
+		previewPortraitFitIcon = getIcon("portraitFit");
+		previewLandscapeCenterIcon = getIcon("landscapeCenter");
+		previewLandscapeDefaultIcon = getIcon("landscapeDefault");
+		previewLandscapeFitIcon = getIcon("landscapeFit");
 	}
 
+	private static ImageIcon getIcon(String name) {
+		return new ImageIcon(AwtPrintDialog.class.getResource(
+				"icons/" + name + ".gif"));
+	}
+	
 	/**
    * Initalises the GUI components
 	 * @param isJob 
