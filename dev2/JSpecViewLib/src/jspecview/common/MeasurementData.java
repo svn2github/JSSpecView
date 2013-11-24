@@ -62,14 +62,17 @@ public class MeasurementData extends List<Measurement> implements
 		return this;
 	}
 
+	@Override
 	public AType getAType() {
 		return type;
 	}
 
+	@Override
 	public boolean getState() {
 		return isON;
 	}
 
+	@Override
 	public void setState(boolean b) {
 		isON = b;
 	}
@@ -79,6 +82,7 @@ public class MeasurementData extends List<Measurement> implements
 		// won't happen
 	}
 
+	@Override
 	public Parameters getParameters() {
 		return myParams;
 	}
@@ -130,10 +134,12 @@ public class MeasurementData extends List<Measurement> implements
 		return false;
 	}
 
+	@Override
 	public JDXSpectrum getSpectrum() {
 		return spec;
 	}
 
+	@Override
 	public MeasurementData getData() {
 		return this;
 	}
@@ -149,6 +155,7 @@ public class MeasurementData extends List<Measurement> implements
 
 	}
 
+	@Override
 	public void setSpecShift(double dx) {
 		for (int i = size(); --i >= 0;) {
 			Measurement m = get(i);
@@ -159,14 +166,17 @@ public class MeasurementData extends List<Measurement> implements
 		}
 	}
 
+	@Override
 	public String getGraphSetKey() {
 		return key;
 	}
 
+	@Override
 	public void setGraphSetKey(String key) {
 		this.key = key;
 	}
 
+	@Override
 	public boolean isVisible() {
 		return true;
 	}

@@ -49,11 +49,13 @@ public class JSVZipUtil implements JSVZipInterface {
 	public JSVZipUtil() {
 		// for reflection
 	}
+	@Override
 	public InputStream newGZIPInputStream(InputStream bis)
 			throws IOException {
 		return new GZIPInputStream(bis, 512);
 	}
 
+	@Override
 	public BufferedReader newJSVZipFileSequentialReader(InputStream in,
 			String[] subFileList, String startCode) {
 		return ((JSVZipReader) JSViewer.getInterface("jspecview.source.JSVZipFileSequentialReader")).set(in, subFileList, startCode);

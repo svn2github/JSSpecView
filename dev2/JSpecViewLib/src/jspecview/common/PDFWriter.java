@@ -75,20 +75,24 @@ public class PDFWriter implements JSVGraphics {
 		}		
 	}
 	
+	@Override
 	public boolean canDoLineTo() {
 		return true;
 	}
 
+	@Override
 	public void doStroke(Object g, boolean isBegin) {
 		inPath = isBegin;
 		if (!inPath)
 			pdf.stroke();
 	}
 	
+	@Override
 	public void drawCircle(Object g, int x, int y, int diameter) {
 		pdf.doCircle(x, y, (int) (diameter/2.0), false);		
 	}
 
+	@Override
 	public void drawLine(Object g, int x0, int y0, int x1, int y1) {
 		pdf.moveto(x0, y0);
 		pdf.lineto(x1, y1);
@@ -96,50 +100,61 @@ public class PDFWriter implements JSVGraphics {
 			pdf.stroke();	
 	}
 
+	@Override
 	public void drawPolygon(Object g, int[] axPoints, int[] ayPoints, int nPoints) {
 		pdf.doPolygon(axPoints, ayPoints, nPoints, false);
 	}
 
+	@Override
 	public void drawRect(Object g, int x, int y, int width, int height) {
 		pdf.doRect(x, y, width, height, false);
 	}
 
+	@Override
 	public void drawString(Object g, String s, int x, int y) {
 		pdf.drawStringRotated(s, x, y, 0);
 	}
 
+	@Override
 	public void drawStringRotated(Object g, String s, int x, int y, double angle) {
 		pdf.drawStringRotated(s, x, y, (int) angle);
 	}
 
+	@Override
 	public void fillBackground(Object g, GenericColor bgcolor) {
 		// n/a?
 	}
 
+	@Override
 	public void fillCircle(Object g, int x, int y, int diameter) {
 		pdf.doCircle(x, y, (int) (diameter/2.0), true);				
 	}
 
+	@Override
 	public void fillPolygon(Object g, int[] ayPoints, int[] axPoints, int nPoints) {
 		pdf.doPolygon(axPoints, ayPoints, nPoints, true);
 	}
 
+	@Override
 	public void fillRect(Object g, int x, int y, int width, int height) {
 		pdf.doRect(x, y, width, height, true);
 	}
 
+	@Override
 	public void lineTo(Object g, int x, int y) {
 		pdf.lineto(x, y);
 	}
 
   private float[] rgb = new float[3];
 
-  public void setGraphicsColor(Object g, GenericColor c) {
+  @Override
+	public void setGraphicsColor(Object g, GenericColor c) {
 	  CU.toRGB3f(c.getRGB(), rgb);
 		pdf.setColor(rgb, true);
 		pdf.setColor(rgb, false);
 	}
 
+	@Override
 	public Font setFont(Object g, Font font) {
 		String fname = "/Helvetica";// + font.fontFace;
 		switch (font.idFontStyle) {
@@ -157,20 +172,24 @@ public class PDFWriter implements JSVGraphics {
 		return font;
 	}
 
+	@Override
 	public void setStrokeBold(Object g, boolean tf) {
 		pdf.setLineWidth(tf ? 2 : 1);		
 	}
 
+	@Override
 	public void translateScale(Object g, double x, double y, double scale) {
 		pdf.translateScale((float) x, (float) y, (float) scale);
 	}
 
+	@Override
 	public Object newGrayScaleImage(Object g, Object image, int width,
 			int height, int[] buffer) {
 		pdf.addImageResource(image, width, height, buffer, false);
 		return image;
 	}
 
+	@Override
 	public void drawGrayScaleImage(Object g, Object image, int destX0, int destY0,
 			int destX1, int destY1, int srcX0, int srcY0, int srcX1, int srcY1) {
 		pdf.drawImage(image, destX0, destY0, destX1, destY1, srcX0, srcY0, srcX1, srcY1);
@@ -178,18 +197,22 @@ public class PDFWriter implements JSVGraphics {
 
 	////////// defer to JsG2D ///////
 	
+	@Override
 	public void setWindowParameters(int width, int height) {
 		// n/a
 	}
 
+	@Override
 	public GenericColor getColor1(int argb) {
 		return g2d.getColor1(argb);
 	}
 
+	@Override
 	public GenericColor getColor3(int red, int green, int blue) {
 		return g2d.getColor3(red, green, blue);
 	}
 
+	@Override
 	public GenericColor getColor4(int r, int g, int b, int a) {
 		return g2d.getColor4(r, g, b, a);
 	}

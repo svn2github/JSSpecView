@@ -1450,6 +1450,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		setScreenDimension(wh[0], wh[1]);
 	}
 
+	@Override
 	public void setScreenDimension(int width, int height) {
 		// There is a bug in Netscape 4.7*+MacOS 9 when comparing dimension objects
 		// so don't try dim1.equals(dim2)
@@ -1479,6 +1480,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 	 * @param width
 	 * @param height
 	 */
+	@Override
 	public void updateJS(int width, int height) {
 		if (selectedPanel == null)
 			return;
@@ -1502,34 +1504,41 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 	 * @param time
 	 * @return t/f
 	 */
+	@Override
 	public boolean processMouseEvent(int id, int x, int y, int modifiers,
 			long time) {
 		return (selectedPanel != null && selectedPanel.processMouseEvent(id, x,
 				y, modifiers, time));
 	}
 
+	@Override
 	public void processTwoPointGesture(float[][][] touches) {
 		if (selectedPanel != null)
 			selectedPanel.processTwoPointGesture(touches);
 	}
 
+	@Override
 	public Object getApplet() {
 		return applet;
 	}
 
+	@Override
 	public void startHoverWatcher(boolean enable) {
 		// n/a?
 	}
 
+	@Override
 	public int cacheFileByName(String fileName, boolean isAdd) {
 		// n/a
 		return 0;
 	}
 
+	@Override
 	public void cachePut(String key, Object data) {
 		// n/a
 	}
 
+	@Override
 	public void openFileAsyncSpecial(String fileName, int flags) {
 		// n/a
 	}
@@ -1656,6 +1665,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		}
 	}
 
+	@Override
 	public String postByteArray(String fileName, byte[] bytes) {
 		return JSVFileManager.postByteArray(fileName, bytes);
 	}

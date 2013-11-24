@@ -45,7 +45,8 @@ public class Visible implements VisibleInterface {
   	// for reflection
   }
   
-  public String getColour(Coordinate xyCoords[], String Yunits) {
+  @Override
+	public String getColour(Coordinate xyCoords[], String Yunits) {
     int ind400 = 0, ind437 = 0, ind499 = 0, ind700 = 0;
     for (int i = 0; i < xyCoords.length; i++) {
       if (xyCoords[i].getXVal() < 401) {

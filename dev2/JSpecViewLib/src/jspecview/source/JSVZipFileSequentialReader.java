@@ -54,7 +54,8 @@ public class JSVZipFileSequentialReader extends BufferedReader implements JSVZip
     super(new StringReader(""));
   }
   
-  public JSVZipFileSequentialReader set(InputStream bis, String[] subFileList, String startCode) {
+  @Override
+	public JSVZipFileSequentialReader set(InputStream bis, String[] subFileList, String startCode) {
     this.subFileList = subFileList;
     zis = new ZipInputStream(bis);
     this.startCode = startCode;

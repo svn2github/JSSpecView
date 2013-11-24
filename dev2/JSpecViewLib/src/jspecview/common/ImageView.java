@@ -172,15 +172,18 @@ public class ImageView implements XYScaleConverter {
     return Coordinate.intoRange(subIndex, imageHeight - 1 - yView2, imageHeight - 1 - yView1);
   }
 
-  public int fixX(int xPixel) {
+	@Override
+	public int fixX(int xPixel) {
     return (xPixel < xPixel0 ? xPixel0 : xPixel > xPixel1 ? xPixel1 : xPixel);
   }
 
-  public double toX(int xPixel) {
+  @Override
+	public double toX(int xPixel) {
     return maxX + (minX - maxX) * toImageX(fixX(xPixel)) / (imageWidth - 1);
   }
   
-  public int toPixelX(double x) {
+  @Override
+	public int toPixelX(double x) {
     double x0 = toX(xPixel0);
     double x1 = toX(xPixel1);
     return xPixel0 + (int) ((x - x0) / (x1 - x0) * (xPixels - 1));
@@ -277,31 +280,38 @@ public class ImageView implements XYScaleConverter {
 
 	// XYScaleConverter interface
 	
+	@Override
 	public ScaleData getScale() {
 		return scaleData;
 	}
 	
+	@Override
 	public int getYPixels() {
   	return yPixels;
   }
   
+	@Override
 	public int getXPixels() {
   	return xPixels;
   }
   
-  public int getXPixel0() {
+  @Override
+	public int getXPixel0() {
   	return xPixel0;
   }
   
+	@Override
 	public double toY(int yPixel) {
 		int isub = toSubspectrumIndex(yPixel);
     return maxY + (minY - maxY) * isub / (imageWidth - 1);
 	}
 
+	@Override
 	public int fixY(int yPixel) {
 		return Coordinate.intoRange(yPixel, yPixel0, yPixel1);
 	}
 
+	@Override
 	public int toPixelY(double y) {
 		double f = (y - scaleData.minYOnScale) / (scaleData.maxYOnScale - scaleData.minYOnScale); 
 		return (int) (yPixel0 + f * yPixels);

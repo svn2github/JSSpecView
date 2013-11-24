@@ -8,6 +8,7 @@ import jspecview.common.PanelNode;
 
 public interface JSVPopupMenu extends GenericMenuInterface {
 
+	@Override
 	void jpiShow(int x, int y);
 
 	void setSelected(String key, boolean b);

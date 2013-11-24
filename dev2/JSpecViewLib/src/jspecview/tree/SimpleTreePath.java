@@ -10,6 +10,7 @@ public class SimpleTreePath implements JSVTreePath {
 		this.path = path;
 	}
 
+	@Override
 	public Object getLastPathComponent() {
 		return (path == null || path.length == 0 ? null : path[path.length - 1]);
 	}

@@ -82,6 +82,7 @@ abstract class XMLReader implements SourceReader {
   	// for reflection
   }
   
+	@Override
 	public JDXSource getSource(String filePath, BufferedReader br) {
 		this.filePath = filePath;
 		return getXML(br);

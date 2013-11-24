@@ -13,10 +13,12 @@ public class SimpleTreeEnumeration implements Enumeration<JSVTreeNode> {
 		node = jsTreeNode;
 	}
 
+	@Override
 	public boolean hasMoreElements() {
 		return (pt < node.children.size());
 	}
 
+	@Override
 	public JSVTreeNode nextElement() {
 		return node.children.get(pt++);
 	}

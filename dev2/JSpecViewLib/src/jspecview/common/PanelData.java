@@ -1407,6 +1407,7 @@ public class PanelData implements EventManager {
 
   /*--------------mouse and keyboard interface -----------------------*/
 
+	@Override
 	public boolean keyPressed(int code, int modifiers) {
 		if (isPrinting)
 			return false;
@@ -1473,12 +1474,14 @@ public class PanelData implements EventManager {
 		return doConsume;
 	}
 
+	@Override
 	public void keyReleased(int keyCode) {
 		if (isPrinting)
 			return;
 		checkKeyControl(keyCode, false);
 	}
 
+	@Override
 	public boolean keyTyped(int ch, int mods) {
 		if (isPrinting)
 			return false;
@@ -1504,6 +1507,7 @@ public class PanelData implements EventManager {
 		return false;
 	}
 
+	@Override
 	public void mouseAction(int mode, long time, int x, int y, int countIgnored,
 			int buttonMods) {
 		if (isPrinting)
@@ -1569,6 +1573,7 @@ public class PanelData implements EventManager {
 				|| checkMod(mods, Event.MAC_COMMAND));
 	}
 
+	@Override
 	public void mouseEnterExit(long time, int x, int y, boolean isExit) {
 		if (isExit) {
 			thisWidget = null;

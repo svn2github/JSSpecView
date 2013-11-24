@@ -494,6 +494,7 @@ public class GraphSet implements XYScaleConverter {
 			(spectra.get(i)).setExportXAxisDirection(drawXAxisLeftToRight);
 	}
 
+	@Override
 	public int fixX(int xPixel) {
 		return Coordinate.intoRange(xPixel, xPixel0, xPixel1);
 	}
@@ -517,23 +518,28 @@ public class GraphSet implements XYScaleConverter {
 				&& xPixel > pin2Dy0.xPixel1 && xPixel < pin2Dy0.xPixel0 + 2);
 	}
 
+	@Override
 	public ScaleData getScale() {
 		return viewData.getScale();
 	}
 	
-  public int getXPixels() {
+  @Override
+	public int getXPixels() {
   	return xPixels;
   }
   
-  public int getXPixel0() {
+  @Override
+	public int getXPixel0() {
   	return xPixel0;
   }
   
-  public int getYPixels() {
+  @Override
+	public int getYPixels() {
   	return yPixels;
   }
   
-  public double toX(int xPixel) {
+  @Override
+	public double toX(int xPixel) {
 		if (imageView != null && imageView.isXWithinRange(xPixel))
 			return imageView.toX(xPixel);
 		return getScale().toX(fixX(xPixel), xPixel1, drawXAxisLeftToRight);
@@ -543,7 +549,8 @@ public class GraphSet implements XYScaleConverter {
 		return viewList.get(0).getScale().toX0(fixX(xPixel), xPixel0, xPixel1, drawXAxisLeftToRight);
 	}
 
-  public int toPixelX(double dx) {
+  @Override
+	public int toPixelX(double dx) {
   	return getScale().toPixelX(dx, xPixel0, xPixel1, drawXAxisLeftToRight);
 	}
 
@@ -551,10 +558,12 @@ public class GraphSet implements XYScaleConverter {
 		return viewList.get(0).getScale().toPixelX0(x, xPixel0, xPixel1, drawXAxisLeftToRight);
 	}
 
+	@Override
 	public double toY(int yPixel) {
 		return getScale().toY(yPixel, yPixel0);
 	}
 
+	@Override
 	public int toPixelY(double yVal) {
 		return getScale().toPixelY(yVal, yPixel1);
 	}
@@ -567,6 +576,7 @@ public class GraphSet implements XYScaleConverter {
 		return fixY(viewList.get(0).getScale().toPixelY0(y, yPixel0, yPixel1));
 	}
 
+	@Override
 	public int fixY(int yPixel) {
 		return Coordinate.intoRange(yPixel, yPixel0, yPixel1);
 	}

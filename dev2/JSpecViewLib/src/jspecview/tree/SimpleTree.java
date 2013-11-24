@@ -20,6 +20,7 @@ public class SimpleTree implements JSVTree {
 	protected JSViewer viewer;
 	private SimpleTreePath selectedPath;
 
+	@Override
 	public JSVTreeNode getRootNode() {
 		return rootNode;
 	}
@@ -38,6 +39,7 @@ public class SimpleTree implements JSVTree {
   	return (JSVTreeNode) (selectedPath == null ? null : selectedPath.getLastPathComponent());
 	}
 
+	@Override
 	public void setSelectedPanel(ScriptInterface si, JSVPanel jsvp) {
 		if (jsvp != null) {
 			JSVTreeNode treeNode = PanelNode.findNode(jsvp, viewer.panelNodes).treeNode;
@@ -50,6 +52,7 @@ public class SimpleTree implements JSVTree {
 		valueChanged();
 	}
 
+	@Override
 	public JSVTreeNode createTree(ScriptInterface si,
 			JDXSource source, JSVPanel[] panels) {
   	SimpleTree tree = (SimpleTree) viewer.spectraTree;
@@ -81,14 +84,17 @@ public class SimpleTree implements JSVTree {
     return fileNode;
 	}
 
+	@Override
 	public void setPath(JSVTreePath path) {
 		setSelectionPath(path);
 	}
 
+	@Override
 	public JSVTreePath newTreePath(Object[] path) {
 		return new SimpleTreePath(path);
 	}
 
+	@Override
 	public void deleteNodes(List<JSVTreeNode> toDelete) {
 	  for (int i = 0; i < toDelete.size(); i++) {
 	  	spectraTreeModel.removeNodeFromParent(toDelete.get(i));

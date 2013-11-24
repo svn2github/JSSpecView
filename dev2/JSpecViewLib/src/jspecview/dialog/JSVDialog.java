@@ -186,26 +186,32 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 
 	// /////// general interface to the outside world ////////
 
+	@Override
 	public AType getAType() {
 		return type;
 	}
 
+	@Override
 	public String getGraphSetKey() {
 		return graphSetKey;
 	}
 
+	@Override
 	public void setGraphSetKey(String key) {
 		this.graphSetKey = key;
 	}
 
+	@Override
 	public JDXSpectrum getSpectrum() {
 		return spec;
 	}
 
+	@Override
 	public boolean getState() {
 		return isON;
 	}
 
+	@Override
 	public void setState(boolean b) {
 		isON = b;
 	}
@@ -226,6 +232,7 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 		dialog.setCellSelectionEnabled(enabled);
 	}
 
+	@Override
 	public Parameters getParameters() {
 		return myParams;
 	}
@@ -259,6 +266,7 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 		dialog.setVisible(visible);
 	}
 
+	@Override
 	public boolean isVisible() {
 		return dialog.isVisible();
 	}
@@ -345,6 +353,7 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 		return null;
 	}
 
+	@Override
 	public MeasurementData getData() {
 		if (xyData == null)
 			createData();
@@ -356,6 +365,7 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 		xyData = (MeasurementData) data;
 	}
 
+	@Override
 	public void setSpecShift(double dx) {
 		if (xyData != null)
 			xyData.setSpecShift(dx);
