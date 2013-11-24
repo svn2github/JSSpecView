@@ -29,6 +29,7 @@
 		<echo>using ${Private.propertyFile}  ${Private.keystore} ${Private.storetype}</echo>
 	  </then></if>
 
+	<property name="debug" value="off" />
 	<property file="TODO.txt" prefix="TODO.txt" />
 	<property file="build_info.properties"/>
 	<property name="build.number" 		value="${build.major.number}.${build.minor.number}.${build.revision.number}"/>	
@@ -42,7 +43,8 @@
     <property name="dist.zip"           value="${dist.dir}/jspecview.zip" />
 
 	<property name="selfsign.store" value="certificate/JSVcertificate.store" />
-	<property name="selfsign.pass" value="JSV2013" />
+	<property name="selfsign.storetype" value="jks" />
+	<property name="selfsign.storepass" value="JSV2013" />
 	<property name="selfsign.alias" value="JSVcertificate" />
 
 	<path id="jspecviewlib.classpath">
@@ -86,7 +88,12 @@
 		
         <echo message="getting application icons and resources"/>
         <mkdir dir="${bin.dir}"/>
-        <javac srcdir="${src.dir}" destdir="${bin.dir}" includeantruntime="false" classpathref="jspecview.classpath"/>
+        <javac srcdir="${src.dir}" destdir="${bin.dir}" 
+        	debug="${debug}" includeantruntime="false" 
+        	classpathref="jspecview.classpath"/>
+        <copy todir="${bin.dir}/jspecview/java/icons">
+          <fileset dir="${src.dir}/jspecview/java/icons"/>
+        </copy>
         <copy todir="${bin.dir}/jspecview/application/icons">
           <fileset dir="${src.dir}/jspecview/application/icons"/>
         </copy>
@@ -120,7 +127,10 @@
 			  <exclude name="jspecview/*js*/*"/>
 		      <exclude name="jspecview/unused/*"/>
 		   	</fileset>
-        	<fileset dir="${jsvlib.dir}" />
+        	<fileset dir="${jsvlib.dir}">
+  		      <include name="**/*"/>
+    		  <exclude name="javajs/swing/**/*"/>
+            </fileset>
         </jar>
 		<copy overwrite="true" file="${build.dir}/${ant.project.name}.app.${build.number}_unsigned.jar"
 			tofile="${build.dir}/JSpecView.jar">
@@ -160,13 +170,15 @@
 	    <unjar dest="${bin.dir}" src="${lib.dir}/netscape.jar"/>
         <jar destfile="${build.dir}/${ant.project.name}.applet.${build.number}_unsigned.jar" manifest="manifests/applet.txt">
         	<fileset dir="${bin.dir}">
-        		<exclude name="com/lowagie/**/*"/>
-  		        <exclude name="javajs/swing/**/*"/>
         		<exclude name="jspecview/application/**/*"/>
+  		        <exclude name="javajs/swing/**/*"/>
   			    <exclude name="jspecview/*js*/*"/>
   		        <exclude name="jspecview/unused/*"/>
         	</fileset>
-        	<fileset dir="${jsvlib.dir}"/>
+        	<fileset dir="${jsvlib.dir}">
+  		      <include name="**/*"/>
+    		  <exclude name="javajs/swing/**/*"/>
+            </fileset>
         </jar>		
 		<copy overwrite="true" file="${build.dir}/${ant.project.name}.applet.${build.number}_unsigned.jar"
 			tofile="build/JSpecViewApplet.jar">
@@ -194,12 +206,15 @@
 	    <unjar dest="${bin.dir}" src="${lib.dir}/netscape.jar"/>
         <jar destfile="${build.dir}/JSpecViewAppletSigned.jar" manifest="manifests/appletSigned.txt">
         	<fileset dir="${bin.dir}">
-        		<exclude name="com/lowagie/**/*"/>
-  		        <exclude name="javajs/swing/**/*"/>
-  		        <exclude name="jspecview/unused/*"/>
-  		        <exclude name="jspecview/application/**/*"/>
+  		      <exclude name="jspecview/application/**/*"/>
+  		      <exclude name="javajs/swing/**/*"/>
+  			  <exclude name="jspecview/*js*/*"/>
+  		      <exclude name="jspecview/unused/*"/>
         	</fileset>
-          <fileset dir="${jsvlib.dir}" />
+        	<fileset dir="${jsvlib.dir}">
+  		      <include name="**/*"/>
+    		  <exclude name="javajs/swing/**/*"/>
+            </fileset>
         </jar>    
 		
 	    <antcall target="sign-jar-file">
@@ -212,7 +227,11 @@
 		<copy overwrite="true" file="${build.dir}/JSpecViewAppletSigned.jar"
 			tofile="${jmol.path}/appletfiles/JSpecViewAppletSigned.jar">
 		</copy>
-		
+
+  	    <delete quiet="true">
+	    	<fileset dir="${build.dir}" includes = "*_unsigned.jar" />
+	    </delete>
+
   </target>
 <!---
 -->
@@ -262,7 +281,8 @@
 	        </signjar>
 	    </then><else>
 		        <signjar keystore="${selfsign.store}"
-		                 storepass="${selfsign.pass}"
+	                     storetype="${selfsign.storetype}"
+		                 storepass="${selfsign.storepass}"
 		                 alias="${selfsign.alias}">
 		            <fileset dir="${sign-jar-file-dir}" >
 		              <include name="${sign-jar-file-name}" />
