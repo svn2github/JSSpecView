@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2012 The University of the West Indies
+/* Copyright (c) 2002-2013 The University of the West Indies
  *
  * Contact: robert.lancashire@uwimona.edu.jm
  *
@@ -43,6 +43,7 @@ import jspecview.common.PrintLayout;
 
 /**
  * Dialog to set print preferences for JSpecview.
+ * @author Bob Hanson hansonr@stolaf.edu
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
@@ -343,7 +344,7 @@ public class AwtPrintDialog extends JDialog implements JSVPrintDialog {
   }
 
   /**
-   * Sets the positon to center and changes the preview icon according to the
+   * Sets the position to center and changes the preview icon according to the
    * layout selected
    * @param e the ActionEvent
    */
@@ -352,7 +353,7 @@ public class AwtPrintDialog extends JDialog implements JSVPrintDialog {
   }
 
   /**
-   * Sets the positon to "fit to page" and changes the preview icon according to the
+   * Sets the position to "fit to page" and changes the preview icon according to the
    * layout selected
    * @param e the ActionEvent
    */

@@ -202,6 +202,7 @@ Moved and renamed methods from jspecview/util to org/jmol/util (applets can shar
 * Replaced all references to StringBuilder and StringBuffer with JSVSB (later refactored as javajs.util.SB)
 
 ====TODO=========
+-fix for Printing with Signed Applet
 
 -feature: in the jsvtest.htm page, when there is a CNMR and IR overlay shown
 nothing happens when a proton is clicked on a molecule in the Jmol
