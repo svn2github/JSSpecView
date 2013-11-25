@@ -105,6 +105,8 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 
 	private JSViewer viewer;
 
+	private boolean isJNLP;
+
 	/**
 	 * 
 	 * Initializes applet with parameters and load the <code>JDXSource</code>
@@ -118,6 +120,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	}
 
 	protected void init2() {
+		isJNLP = (getParameter("syncId") == null);
 		viewer = app.viewer;
 		viewer.display = getContentPane();
 		viewer.scriptQueue = new List<String>();
@@ -171,6 +174,8 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 		}
 		app.dispose();
 		app = null;
+    if (isJNLP)
+      System.exit(0);
 	}
 
 	/*
