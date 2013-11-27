@@ -188,13 +188,14 @@
 	      <param name="sign-jar-file-dir" value="${build.dir}" />
 	      <param name="sign-jar-file-name"  value="JSpecViewApplet.jar" />
 	    </antcall>
-		
+
+		<!--
         <echo message="copying applet to ${jmol.path}/appletfiles/JSpecViewApplet.jar"/>
 		
 		<copy overwrite="true" file="${build.dir}/JSpecViewApplet.jar"
 			tofile="${jmol.path}/appletfiles/JSpecViewApplet.jar">
 		</copy>
-
+		-->
 
     </target>
 <!---
@@ -222,11 +223,14 @@
 	      <param name="sign-jar-file-name"  value="JSpecViewAppletSigned.jar" />
 	    </antcall>
 
+		<!--
         <echo message="copying applet to ${jmol.path}/appletfiles/JSpecViewAppletSigned.jar"/>
 		
 		<copy overwrite="true" file="${build.dir}/JSpecViewAppletSigned.jar"
 			tofile="${jmol.path}/appletfiles/JSpecViewAppletSigned.jar">
 		</copy>
+
+		-->
 
   	    <delete quiet="true">
 	    	<fileset dir="${build.dir}" includes = "*_unsigned.jar" />
