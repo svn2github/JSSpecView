@@ -49,6 +49,7 @@ public class JSVFileManager {
 	// ALL STATIC METHODS
 	
 	public final static String SIMULATION_PROTOCOL = "http://SIMULATION/";
+	  // possibly http://SIMULATION/MOL=...\n....\n....\n....
 
 	public static URL appletDocumentBase;
 
@@ -100,7 +101,9 @@ public class JSVFileManager {
       throws MalformedURLException, IOException {
     if (name == null)
       throw new IOException("Cannot find " + name);
+    Logger.info("JSVFileManager getBufferedReaderFromName " + name);
     String path = getFullPathName(name);
+    Logger.info("JSVFileManager getBufferedReaderFromName " + path);
     return getUnzippedBufferedReaderFromName(path, startCode);
   }
 
@@ -354,10 +357,17 @@ public class JSVFileManager {
 		if (jcamp == null) {
 			System.out.println("creating " + name);
 			boolean isInline = name.startsWith("MOL=");
-			String molFile = (isInline ? PT.simpleReplace(name
-					.substring(4), "\\n", "\n")
-					: getFileAsString(PT.simpleReplace(nciResolver, "%FILE",
-							PT.escapeUrl(name.substring(1)))));
+			String molFile;
+			if (isInline)
+				molFile = PT.simpleReplace(name.substring(4), "\\n", "\n");
+			else
+				molFile = PT.simpleReplace(nciResolver, "%FILE",
+						PT.escapeUrl(name.substring(1)));
+			Logger.info("JSVFileManager using \n" + molFile);
+			molFile = getFileAsString(molFile);
+			if (molFile == null)
+				Logger.info("no data returned");
+			// null here throws an exception
 			int pt = molFile.indexOf("\n");
 			molFile = "/JSpecView " + JSVersion.VERSION + molFile.substring(pt);
 			molFile = PT.simpleReplace(molFile, "?", "_");
@@ -374,8 +384,7 @@ public class JSVFileManager {
 			jcamp = JSVFileManager.getQuotedJSONAttribute(json, "jcamp", null);
 			jcamp = "##TITLE=" + (isInline ? "JMOL SIMULATION" : name) + "\n"
 					+ jcamp.substring(jcamp.indexOf("\n##") + 1);
-			Logger
-					.info(jcamp.substring(0, jcamp.indexOf("##XYDATA") + 40) + "...");
+			Logger.info(jcamp.substring(0, jcamp.indexOf("##XYDATA") + 40) + "...");
 			pt = 0;
 			pt = jcamp.indexOf("##.");
 			String id = name;
