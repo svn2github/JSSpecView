@@ -13,6 +13,13 @@ new feature: show NMR taps into NMRDB directly
 
 in preparation for JavaScript version (add to top):
 
+-- 11/26/2013 BH 
+ Secure code signing working smoothly
+
+ *JavaScript J2S compiler error does not coerce int += float to integer
+
+
+
 -- 10/30/2013 BH
  * exception.getMessage() --> exception.toString();
  * Object.getClass().getResource() returns a simple relative filename, not a URL
@@ -202,7 +209,7 @@ Moved and renamed methods from jspecview/util to org/jmol/util (applets can shar
 * Replaced all references to StringBuilder and StringBuffer with JSVSB (later refactored as javajs.util.SB)
 
 ====TODO=========
--fix for Printing with Signed Applet
+
 
 -feature: in the jsvtest.htm page, when there is a CNMR and IR overlay shown
 nothing happens when a proton is clicked on a molecule in the Jmol
@@ -224,18 +231,9 @@ changes and analyses can be made without altering the saved view
 
 
 =====DONE========
--JSmol 2-way interaction NOW working; from spectrum to Mol and from Mol to spectrum
+-fix for Printing with Signed Applet
 
--JSmol CLOSE OVERLAY not working, overlay NONE works though.
-
--NMR peak list is too wide; dialog not adjusting
-
--HTML5? for Block files of same data type that can be overlaid
--HTML5 views... menu item now implemented
--HTML5 2D NMR now implemented 
--HTML5 create PDF now implemented
-
--Transmission to Absorbance conversion broken - fixed
+-Transmission to Absorbance conversion broken
 
 -Preferences for Application no longer showing sample.jdx spectrum with colour schemes
 -sample.jdx is in Application/resources folder
