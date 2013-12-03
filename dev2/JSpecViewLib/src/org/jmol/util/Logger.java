@@ -298,10 +298,10 @@ public final class Logger {
     }
   }
 
-  static Map<String,Long>htTiming = new Hashtable<String, Long>();
+  static Map<String, Integer>htTiming = new Hashtable<String, Integer>();
   public static void startTimer(String msg) {
     if (msg != null)
-      htTiming.put(msg, Long.valueOf(System.currentTimeMillis()));
+      htTiming.put(msg, Integer.valueOf((int) System.currentTimeMillis()));
   }
 
   public static String getTimerMsg(String msg, long time) {
@@ -311,9 +311,9 @@ public final class Logger {
   }
   
   private static int getTimeFrom(String msg) {
-    Long t;
+    Integer t;
     return (msg == null || (t = htTiming.get(msg)) == null ? -1 : (int) (System
-        .currentTimeMillis() - t.longValue()));
+        .currentTimeMillis() - t.intValue()));
   }
 
   public static int checkTimer(String msg, boolean andReset) {
