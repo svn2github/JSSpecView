@@ -827,7 +827,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		viewer.selectedPanel.getFocusNow(false);
 	}
 
-	public Map<String, Object> getProperty(String key) {
+	public Map<String, Object> getJSpecViewProperty(String key) {
 		return viewer.getPropertyAsJavaObject(key);
 	}
 
