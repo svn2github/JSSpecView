@@ -13,6 +13,12 @@ new feature: show NMR taps into NMRDB directly
 
 in preparation for JavaScript version:
 
+-- 12/05/2013 BH
+ 
+ Generating corejsv.js
+  -- using build_test.xml
+  -- incrementally adding classes to see where the problems are.
+
 -- 11/29/2013 BH
  *Boolean.toString(boolean) removed -- disambigifying 
 
