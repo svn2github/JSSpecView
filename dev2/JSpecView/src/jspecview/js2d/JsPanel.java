@@ -49,9 +49,9 @@ import javajs.util.List;
 import org.jmol.util.Logger;
 
 import jspecview.api.JSVPanel;
+import jspecview.api.JSVPdfWriter;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSViewer;
-import jspecview.common.PDFWriter;
 import jspecview.common.PanelData;
 import jspecview.common.ColorParameters;
 import jspecview.common.PrintLayout;
@@ -257,7 +257,7 @@ public class JsPanel implements JSVPanel {
 		pl.date = apiPlatform.getDateFormat(true);
 		pd.setPrint(pl, "Helvetica");
 		try {
-			(new PDFWriter()).createPdfDocument(this, pl, os);
+			((JSVPdfWriter) JSViewer.getInterface("jspecview.common.PDFWriter")).createPdfDocument(this, pl, os);
   	} catch (Exception ex) {
   		showMessage(ex.toString(), "creating PDF");
   	} finally {

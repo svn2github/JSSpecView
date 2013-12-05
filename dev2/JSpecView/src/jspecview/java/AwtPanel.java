@@ -74,6 +74,7 @@ import javax.swing.ToolTipManager;
 import org.jmol.util.Logger;
 
 import jspecview.api.JSVPanel;
+import jspecview.api.JSVPdfWriter;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSViewer;
 import jspecview.common.PDFWriter;
@@ -278,7 +279,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
 						Dimension d = getDimension((MediaSizeName) pl.paper);
 						pl.paperWidth = d.width;
 						pl.paperHeight = d.height;
-						(new PDFWriter()).createPdfDocument(this, pl, os);
+						((JSVPdfWriter) JSViewer.getInterface("jspecview.common.PDFWriter")).createPdfDocument(this, pl, os);
 					} else {
 						PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
 						aset
