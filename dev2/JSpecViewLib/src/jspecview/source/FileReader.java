@@ -77,11 +77,11 @@ public class FileReader {
 
   final static String ERROR_SEPARATOR = "=====================\n";
   
-  private final static String[] TABULAR_DATA_LABELS = { "##XYDATA",
-      "##XYPOINTS", "##PEAKTABLE", "##DATATABLE", "##PEAKASSIGNMENTS" };
-  static {
-    Arrays.sort(TABULAR_DATA_LABELS);
-  }
+  private final static String[] TABULAR_DATA_LABELS = { "##DATATABLE", 
+  	"##PEAKASSIGNMENTS", "##PEAKTABLE", "##XYDATA", "##XYPOINTS" };
+//  static {
+//    Arrays.sort(TABULAR_DATA_LABELS);
+//  }
   private JDXSource source;
   private JDXSourceStreamTokenizer t;
   private SB errorLog;
