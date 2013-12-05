@@ -350,8 +350,8 @@ public class JSVFileManager {
 	private static Map<String, String> htSimulate;
 
 	/**
-	 * Accepts either $chemicalname or MOL=molfiledata Queries NMRDB or NIH+NMRDB
-	 * to get predicted spetrum
+	 * Accepts either $chemicalname or MOL=molfiledata 
+	 * Queries NMRDB or NIH+NMRDB to get predicted spetrum
 	 * 
 	 * TODO: how about adding spectrometer frequency?
 	 * TODO: options for other data types? 2D? IR?
