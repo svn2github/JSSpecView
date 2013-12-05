@@ -360,7 +360,7 @@ class FormContext {
       break;
     }
     } catch (Exception e) {
-      Logger.warn(e.getMessage() + " in VelocityContext.merge");
+      Logger.warn(e.toString() + " in VelocityContext.merge");
     }
 //    if (value != null) {
   //    x = !value.equalsIgnoreCase("false") && !value.equalsIgnoreCase("0");

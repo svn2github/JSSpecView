@@ -142,7 +142,7 @@ public class JSVZipUtil implements JSVZipInterface {
       s = getZipDirectoryOrErrorAndClose(is, false);
       is.close();
     } catch (Exception e) { 
-      Logger.error(e.getMessage());
+      Logger.error(e.toString());
     }
     for (int i = 0; i < s.length; i++)
       sb.append(s[i]).appendC('\n');
@@ -155,7 +155,7 @@ public class JSVZipUtil implements JSVZipInterface {
       s = getZipDirectoryOrErrorAndClose(is, addManifest);
       is.close();
     } catch (Exception e) { 
-      Logger.error(e.getMessage());
+      Logger.error(e.toString());
     }
     return s;
   }

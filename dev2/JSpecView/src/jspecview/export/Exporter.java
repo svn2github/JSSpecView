@@ -250,7 +250,7 @@ public class Exporter implements ExportInterface {
 			s = (isBase64 ? Base64.getBase64(out.toByteArray()).toString() : out
 					.toString());
 		} catch (Exception e) {
-			jsvp.showMessage(e.getMessage(), "File Error");
+			jsvp.showMessage(e.toString(), "File Error");
 		}
 		return s;
 	}

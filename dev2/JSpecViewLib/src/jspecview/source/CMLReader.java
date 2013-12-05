@@ -56,7 +56,7 @@ class CMLReader extends XMLReader {
 
     } catch (Exception pe) {
       //System.out.println(getBufferData());
-      System.err.println("Error: " + pe.getMessage());
+      System.err.println("Error: " + pe);
       pe.printStackTrace();
     }
 

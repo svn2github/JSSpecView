@@ -281,7 +281,7 @@ abstract class XMLReader implements SourceReader {
           return;
       }
     } catch (Exception e) {
-      String msg = "error reading " + tagName + " section: " + e.getMessage() + "\n" + e.getStackTrace();
+      String msg = "error reading " + tagName + " section: " + e + "\n" + e.getStackTrace();
       Logger.error(msg);
       errorLog.append(msg + "\n");
     }

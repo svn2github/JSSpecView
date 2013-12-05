@@ -411,7 +411,7 @@ public class JSVFileManager {
         error[0] = "Couldn't find file: " + fileName;
     } catch (Exception e) {
     	
-      error[0] = "Exception " + e.getMessage() + " in getResource "
+      error[0] = "Exception " + e + " in getResource "
           + fileName;
     }
     return url;
@@ -436,7 +436,7 @@ public class JSVFileManager {
         sb.append(line).append("\n");
       br.close();
     } catch (Exception e) {
-      error[0] = e.getMessage();
+      error[0] = e.toString();
     }
     return sb.toString();
   }

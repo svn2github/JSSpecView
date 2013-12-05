@@ -473,7 +473,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 				jso.call(callback, params);
 			}
 		} catch (Exception npe) {
-			Logger.warn("EXCEPTION-> " + npe.getMessage());
+			Logger.warn("EXCEPTION-> " + npe);
 		}
 	}
 

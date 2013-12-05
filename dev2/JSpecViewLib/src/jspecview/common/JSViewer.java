@@ -414,8 +414,8 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 				 *            alert(e + "\n" + Clazz.getStackTrace())
 				 */
 				{
-					System.out.println(e.getMessage());
-					Logger.error(e.getMessage());
+					System.out.println(e.toString());
+					Logger.error(e.toString());
 
 					if (Logger.debugging)
 						e.printStackTrace();
@@ -1117,7 +1117,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			 */
 			{
 				e.printStackTrace();
-				si.writeStatus(e.getMessage());
+				si.writeStatus(e.toString());
 			}
 			si.setCursor(GenericPlatform.CURSOR_DEFAULT);
 			return FILE_OPEN_ERROR;
