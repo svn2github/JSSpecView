@@ -176,7 +176,7 @@ public class JSVFileManager {
 				name = subFileList[0];
 		}
 		if (name.startsWith(SIMULATION_PROTOCOL))
-			return getBufferedReaderForString(getSimulationJCampDX(name
+			return getBufferedReaderForString(getNMRSimulationJCampDX(name
 					.substring(SIMULATION_PROTOCOL.length())));
 
 		if (viewer.isApplet) {
@@ -344,59 +344,63 @@ public class JSVFileManager {
 		return (InputStream) in;
 	}
 
-	private static String nciResolver = "http://cactus.nci.nih.gov/chemical/structure/%FILE/file?format=sdf&get3d=True";
+	private static String nciResolver = "http://cactus.nci.nih.gov/chemical/structure/%FILE/file?format=sdf";
 	private static String nmrdbServer = "http://www.nmrdb.org/tools/jmol/predict.php?POST?molfile=";
 
 	private static Map<String, String> htSimulate;
-	
-	private static String getSimulationJCampDX(String name) {
+
+	/**
+	 * Accepts either $chemicalname or MOL=molfiledata Queries NMRDB or NIH+NMRDB
+	 * to get predicted spetrum
+	 * 
+	 * TODO: how about adding spectrometer frequency?
+	 * TODO: options for other data types? 2D? IR?
+	 * 
+	 * @param name
+	 * @return jcamp data
+	 */
+	private static String getNMRSimulationJCampDX(String name) {
 		if (htSimulate == null)
 			htSimulate = new Hashtable<String, String>();
 		String key = "" + name.substring(name.indexOf("V2000") + 1).hashCode();
 		String jcamp = htSimulate.get(key);
-		if (jcamp == null) {
-			System.out.println("creating " + name);
-			boolean isInline = name.startsWith("MOL=");
-			String molFile;
-			if (isInline)
-				molFile = PT.simpleReplace(name.substring(4), "\\n", "\n");
-			else
-				molFile = PT.simpleReplace(nciResolver, "%FILE",
-						PT.escapeUrl(name.substring(1)));
-			Logger.info("JSVFileManager using \n" + molFile);
-			molFile = getFileAsString(molFile);
-			if (molFile == null)
-				Logger.info("no data returned");
-			// null here throws an exception
-			int pt = molFile.indexOf("\n");
-			molFile = "/JSpecView " + JSVersion.VERSION + molFile.substring(pt);
-			molFile = PT.simpleReplace(molFile, "?", "_");
-			String json = getFileAsString(nmrdbServer + molFile);
-			System.out.println(json);
-			json = PT.simpleReplace(json, "\\r\\n", "\n");
-			json = PT.simpleReplace(json, "\\t", "\t");
-			json = PT.simpleReplace(json, "\\n", "\n");
-			molFile = JSVFileManager.getQuotedJSONAttribute(json, "molfile", null);
-			String xml = JSVFileManager.getQuotedJSONAttribute(json, "xml", null);
-			xml = PT.simpleReplace(xml, "</", "\n</");
-			xml = PT.simpleReplace(xml, "><", ">\n<");
-			xml = PT.simpleReplace(xml, "\\\"", "\"");
-			jcamp = JSVFileManager.getQuotedJSONAttribute(json, "jcamp", null);
-			jcamp = "##TITLE=" + (isInline ? "JMOL SIMULATION" : name) + "\n"
-					+ jcamp.substring(jcamp.indexOf("\n##") + 1);
-			Logger.info(jcamp.substring(0, jcamp.indexOf("##XYDATA") + 40) + "...");
-			pt = 0;
-			pt = jcamp.indexOf("##.");
-			String id = name;
-			int pt1 = id.indexOf("id='");
-			if (isInline && pt1 > 0)
-				id = id.substring(pt1 + 4, (id + "'").indexOf("'", pt1 + 4));
-			jcamp = jcamp.substring(0, pt) + "##$MODELS=\n<Models>\n"
-					+ "<ModelData id=" + JSVEscape.eS(id) + "\n type=\"MOL\">\n"
-					+ molFile + "</ModelData>\n</Models>\n" + "##$SIGNALS=\n" + xml
-					+ "\n" + jcamp.substring(pt);
-			htSimulate.put(key, jcamp);
-		}
+		if (jcamp != null)
+			return jcamp;
+		boolean isInline = name.startsWith("MOL=");
+		String molFile;
+		if ((molFile = (isInline ? PT.simpleReplace(name.substring(4), "\\n", "\n")
+				: getFileAsString(PT.simpleReplace(nciResolver, "%FILE",
+						PT.escapeUrl(name.substring(1)))))) == null)
+			Logger.info("no data returned");
+		// null here throws an exception
+		int pt = molFile.indexOf("\n");
+		molFile = "/JSpecView " + JSVersion.VERSION + molFile.substring(pt);
+		molFile = PT.simpleReplace(molFile, "?", "_");
+		String json = getFileAsString(nmrdbServer + molFile);
+		System.out.println(json);
+		json = PT.simpleReplace(json, "\\r\\n", "\n");
+		json = PT.simpleReplace(json, "\\t", "\t");
+		json = PT.simpleReplace(json, "\\n", "\n");
+		molFile = JSVFileManager.getQuotedJSONAttribute(json, "molfile", null);
+		String xml = JSVFileManager.getQuotedJSONAttribute(json, "xml", null);
+		xml = PT.simpleReplace(xml, "</", "\n</");
+		xml = PT.simpleReplace(xml, "><", ">\n<");
+		xml = PT.simpleReplace(xml, "\\\"", "\"");
+		jcamp = JSVFileManager.getQuotedJSONAttribute(json, "jcamp", null);
+		jcamp = "##TITLE=" + (isInline ? "JMOL SIMULATION" : name) + "\n"
+				+ jcamp.substring(jcamp.indexOf("\n##") + 1);
+		Logger.info(jcamp.substring(0, jcamp.indexOf("##XYDATA") + 40) + "...");
+		pt = 0;
+		pt = jcamp.indexOf("##.");
+		String id = name;
+		int pt1 = id.indexOf("id='");
+		if (isInline && pt1 > 0)
+			id = id.substring(pt1 + 4, (id + "'").indexOf("'", pt1 + 4));
+		jcamp = jcamp.substring(0, pt) + "##$MODELS=\n<Models>\n"
+				+ "<ModelData id=" + JSVEscape.eS(id) + "\n type=\"MOL\">\n" + molFile
+				+ "</ModelData>\n</Models>\n" + "##$SIGNALS=\n" + xml + "\n"
+				+ jcamp.substring(pt);
+		htSimulate.put(key, jcamp);
 		return jcamp;
 	}
 
