@@ -80,7 +80,7 @@ public class FileReader {
   private final static String[] TABULAR_DATA_LABELS = { "##DATATABLE", 
   	"##PEAKASSIGNMENTS", "##PEAKTABLE", "##XYDATA", "##XYPOINTS" };
 //  static {
-//    Arrays.sort(TABULAR_DATA_LABELS);
+//    Arrays.sort(TABULAR_DATA_LABELS);  OUCH! - Breaks J2S
 //  }
   private JDXSource source;
   private JDXSourceStreamTokenizer t;
