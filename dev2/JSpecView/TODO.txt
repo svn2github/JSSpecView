@@ -4,12 +4,15 @@ Put new items at top, please.
 
 ___date="$Date$"
 ___svnRev="$LastChangedRevision$"
-___version="2.1.0"
+___version="2.1.1"
 
-todo: NMR spectra in JavaScript are dropping baseline in some cases
+BH 1/13/2014 8:24:33 PM 
+-fix for baseline dropping below bottom pixel
+-fix for file-not-found or file-not-recognized error message not understandable.
+-fix for PDF file creation broken
+
 
 todo: JSpecView/Java + JSME crashed Firefox during applet loading.
-
 
 new feature: show NMR taps into NMRDB directly
  -- for now, application only
@@ -244,6 +247,9 @@ changes and analyses can be made without altering the saved view
 
 
 =====DONE========
+
+-fix for NMR spectra in JavaScript are dropping baseline in some cases
+
 -fix for Printing with Signed Applet
 
 -Transmission to Absorbance conversion broken
