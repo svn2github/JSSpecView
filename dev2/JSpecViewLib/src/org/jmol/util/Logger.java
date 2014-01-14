@@ -55,6 +55,9 @@ public final class Logger {
   public static boolean debuggingHigh;
   
   static {
+    
+    // OK for J2S because this is a final class
+    
     _activeLevels[LEVEL_DEBUGHIGH] = getProperty("debugHigh",    false);
     _activeLevels[LEVEL_DEBUG] = getProperty("debug",    false);
     _activeLevels[LEVEL_INFO]  = getProperty("info",     true);
@@ -298,22 +301,22 @@ public final class Logger {
     }
   }
 
-  static Map<String, Integer>htTiming = new Hashtable<String, Integer>();
+  static Map<String, Long>htTiming = new Hashtable<String, Long>();
   public static void startTimer(String msg) {
     if (msg != null)
-      htTiming.put(msg, Integer.valueOf((int) System.currentTimeMillis()));
+      htTiming.put(msg, Long.valueOf(System.currentTimeMillis()));
   }
 
-  public static String getTimerMsg(String msg, long time) {
+  public static String getTimerMsg(String msg, int time) {
     if (time == 0)
       time = getTimeFrom(msg);
     return "Time for " + msg + ": " + (time) + " ms";
   }
   
   private static int getTimeFrom(String msg) {
-    Integer t;
-    return (msg == null || (t = htTiming.get(msg)) == null ? -1 : (int) (System
-        .currentTimeMillis() - t.intValue()));
+    Long t;
+    return (int) (msg == null || (t = htTiming.get(msg)) == null ? -1 : System
+        .currentTimeMillis() - t.longValue());
   }
 
   public static int checkTimer(String msg, boolean andReset) {

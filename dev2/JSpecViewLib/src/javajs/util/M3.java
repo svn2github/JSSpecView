@@ -99,7 +99,7 @@ public class M3 implements Serializable {
     m.setA(v);
     return m;
   }
-
+  
   /**
    * Constructs a new matrix with the same values as the Matrix3f parameter.
    * 
@@ -159,45 +159,55 @@ public class M3 implements Serializable {
    * 
    * @param row
    *        the row number to be modified (zero indexed)
-   * @param column
+   * @param col
    *        the column number to be modified (zero indexed)
-   * @param value
+   * @param v
    *        the new value
    */
-  public final void setElement(int row, int column, float value) {
-    if (row == 0)
-      if (column == 0)
-        m00 = value;
-      else if (column == 1)
-        m01 = value;
-      else if (column == 2)
-        m02 = value;
-      else
-        throw new ArrayIndexOutOfBoundsException(
-            "column must be 0 to 2 and is " + column);
-    else if (row == 1)
-      if (column == 0)
-        m10 = value;
-      else if (column == 1)
-        m11 = value;
-      else if (column == 2)
-        m12 = value;
-      else
-        throw new ArrayIndexOutOfBoundsException(
-            "column must be 0 to 2 and is " + column);
-    else if (row == 2)
-      if (column == 0)
-        m20 = value;
-      else if (column == 1)
-        m21 = value;
-      else if (column == 2)
-        m22 = value;
-      else
-        throw new ArrayIndexOutOfBoundsException(
-            "column must be 0 to 2 and is " + column);
-    else
-      throw new ArrayIndexOutOfBoundsException("row must be 0 to 2 and is "
-          + row);
+  public final void setElement(int row, int col, float v) {
+    switch (row) {
+    case 0:
+      switch (col) {
+      case 0:
+        m00 = v;
+        return;
+      case 1:
+        m01 = v;
+        return;
+      case 2: 
+        m02 = v;
+        return;
+      }
+      break;
+    case 1:
+      switch (col) {
+      case 0:
+        m10 = v;
+        return;
+      case 1:
+        m11 = v;
+        return;
+      case 2: 
+        m12 = v;
+        return;
+      }
+      break;
+    case 2: 
+      switch (col) {
+      case 0:
+        m20 = v;
+        return;
+      case 1:
+        m21 = v;
+        return;
+      case 2: 
+        m22 = v;
+        return;
+      }
+      break;
+    }
+    throw new ArrayIndexOutOfBoundsException(
+        "matrix column/row out of bounds");
   }
 
   /**
@@ -205,45 +215,45 @@ public class M3 implements Serializable {
    * 
    * @param row
    *        the row number to be retrieved (zero indexed)
-   * @param column
+   * @param col
    *        the column number to be retrieved (zero indexed)
    * @return the value at the indexed element
    */
-  public final float getElement(int row, int column) {
-    if (row == 0)
-      if (column == 0)
+  public final float getElement(int row, int col) {
+    switch (row) {
+    case 0:
+      switch (col) {
+      case 0:
         return m00;
-      else if (column == 1)
+      case 1:
         return m01;
-      else if (column == 2)
+      case 2:
         return m02;
-      else
-        throw new ArrayIndexOutOfBoundsException(
-            "column must be 0 to 2 and is " + column);
-    else if (row == 1)
-      if (column == 0)
+      }
+      break;
+    case 1:
+      switch (col) {
+      case 0:
         return m10;
-      else if (column == 1)
+      case 1:
         return m11;
-      else if (column == 2)
+      case 2:
         return m12;
-      else
-        throw new ArrayIndexOutOfBoundsException(
-            "column must be 0 to 2 and is " + column);
-
-    else if (row == 2)
-      if (column == 0)
+      }
+      break;
+    case 2:
+      switch (col) {
+      case 0:
         return m20;
-      else if (column == 1)
+      case 1:
         return m21;
-      else if (column == 2)
+      case 2:
         return m22;
-      else
-        throw new ArrayIndexOutOfBoundsException(
-            "column must be 0 to 2 and is " + column);
-    else
-      throw new ArrayIndexOutOfBoundsException("row must be 0 to 2 and is "
-          + row);
+      }
+      break;
+    }
+    throw new ArrayIndexOutOfBoundsException(
+        "matrix column/row out of bounds");
   }
 
   /**
@@ -313,22 +323,24 @@ public class M3 implements Serializable {
    *        The array into which the matrix row values will be copied
    */
   public final void getRow(int row, float v[]) {
-    if (row == 0) {
+    switch (row) {
+    case 0:
       v[0] = m00;
       v[1] = m01;
       v[2] = m02;
-    } else if (row == 1) {
+      return;
+    case 1:
       v[0] = m10;
       v[1] = m11;
       v[2] = m12;
-    } else if (row == 2) {
+      return;
+    case 2:
       v[0] = m20;
       v[1] = m21;
       v[2] = m22;
-    } else {
-      throw new ArrayIndexOutOfBoundsException("row must be 0 to 2 and is "
-          + row);
+      return;
     }
+    throw new ArrayIndexOutOfBoundsException("row must be 0 to 2 and is " + row);
   }
 
   /**
@@ -885,6 +897,20 @@ public class M3 implements Serializable {
     // alias-safe
     result.set(m00 * t.x + m01 * t.y + m02 * t.z, m10 * t.x + m11 * t.y + m12
         * t.z, m20 * t.x + m21 * t.y + m22 * t.z);
+  }
+
+  public void transformAdd(T3 t, float scale, T3 t2) {
+    t2.x += scale * (m00 * t.x + m01 * t.y + m02 * t.z); 
+    t2.y += scale * (m10 * t.x + m11 * t.y + m12 * t.z);
+    t2.z += scale * (m20 * t.x + m21 * t.y + m22 * t.z);
+  }
+
+  public double[][] toArrayD() {
+    return new double[][] {
+        new double[] { m00, m01, m02 },
+        new double[] { m10, m11, m12 },
+        new double[] { m20, m21, m22 }
+    };
   }
 
   /**

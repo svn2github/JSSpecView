@@ -25,6 +25,8 @@
 
 package javajs.util;
 
+import javajs.api.JSONEncodable;
+
 
 
 /**
@@ -72,7 +74,7 @@ package javajs.util;
  * @author Martin Buchholz
  * @since JDK1.0
  */
-public class BS implements Cloneable {
+public class BS implements Cloneable, JSONEncodable {
   /*
    * BitSets are packed into arrays of "words."
    * 
@@ -771,7 +773,7 @@ public class BS implements Cloneable {
     int numBits = (wordsInUse > 128) ? cardinality() : wordsInUse
         * BITS_PER_WORD;
     SB b = SB.newN(6 * numBits + 2);
-    b.appendC('{');
+    b.appendC('[');
 
     int i = nextSetBit(0);
     if (i != -1) {
@@ -784,7 +786,7 @@ public class BS implements Cloneable {
       }
     }
 
-    b.appendC('}');
+    b.appendC(']');
     return b.toString();
   }
   
@@ -830,5 +832,9 @@ public class BS implements Cloneable {
     return n;
   }
 
+  @Override
+  public String toJSON() {
+    return toString();
+  }
 
 }

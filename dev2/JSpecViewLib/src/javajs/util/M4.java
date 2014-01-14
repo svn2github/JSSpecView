@@ -380,62 +380,63 @@ public class M4 implements Serializable {
    * 
    * @param row
    *        the row number to be retrieved (zero indexed)
-   * @param column
+   * @param col
    *        the column number to be retrieved (zero indexed)
    * @return the value at the indexed element
    */
-  public final float getElement(int row, int column) {
-    if (row == 0)
-      if (column == 0)
+  public final float getElement(int row, int col) {
+    switch (row) {
+    case 0:
+      switch (col) {
+      case 0:
         return m00;
-      else if (column == 1)
+      case 1:
         return m01;
-      else if (column == 2)
+      case 2:
         return m02;
-      else if (column == 3)
+      case 3:
         return m03;
-      else
-        throw new ArrayIndexOutOfBoundsException(
-            "column must be 0 to 3 and is " + column);
-    else if (row == 1)
-      if (column == 0)
+      }
+      break;
+    case 1:
+      switch (col) {
+      case 0:
         return m10;
-      else if (column == 1)
+      case 1:
         return m11;
-      else if (column == 2)
+      case 2:
         return m12;
-      else if (column == 3)
+      case 3:
         return m13;
-      else
-        throw new ArrayIndexOutOfBoundsException(
-            "column must be 0 to 3 and is " + column);
-    else if (row == 2)
-      if (column == 0)
+      }
+      break;
+    case 2:
+      switch (col) {
+      case 0:
         return m20;
-      else if (column == 1)
+      case 1:
         return m21;
-      else if (column == 2)
+      case 2:
         return m22;
-      else if (column == 3)
+      case 3:
         return m23;
-      else
-        throw new ArrayIndexOutOfBoundsException(
-            "column must be 0 to 3 and is " + column);
-    else if (row == 3)
-      if (column == 0)
+      }
+      break;
+    case 3:
+      switch (col) {
+      case 0:
         return m30;
-      else if (column == 1)
+      case 1:
         return m31;
-      else if (column == 2)
+      case 2:
         return m32;
-      else if (column == 3)
+      case 3:
         return m33;
-      else
-        throw new ArrayIndexOutOfBoundsException(
-            "column must be 0 to 3 and is " + column);
-    else
-      throw new ArrayIndexOutOfBoundsException("row must be 0 to 3 and is "
-          + row);
+      }
+      break;
+    }
+    throw new ArrayIndexOutOfBoundsException(
+        "matrix column/row out of bounds");
   }
 
   /**
@@ -1102,6 +1103,33 @@ public class M4 implements Serializable {
 
   /**
    * Transforms the point parameter with this Matrix4f and places the result
+   * back into point. The fourth element of the point input paramter is assumed
+   * to be one.
+   * 
+   * @param point
+   *        the input point to be transformed.
+   */
+  public final void transform(T3 point) {
+    transform2(point, point);
+  }
+
+  /**
+   * Transforms the point parameter by this Matrix4f and places the value into
+   * pointOut. The fourth element of the point is assumed to be zero.
+   * 
+   * @param point
+   *        the input point to be transformed.
+   * @param pointOut
+   *        the transformed point
+   */
+  public final void rotate(T3 point, T3 pointOut) {
+    pointOut.set(m00 * point.x + m01 * point.y + m02 * point.z, m10
+        * point.x + m11 * point.y + m12 * point.z, m20 * point.x + m21
+        * point.y + m22 * point.z);
+  }
+
+  /**
+   * Transforms the point parameter with this Matrix4f and places the result
    * into pointOut. The fourth element of the point input paramter is assumed to
    * be one.
    * 
@@ -1117,44 +1145,6 @@ public class M4 implements Serializable {
           * point.y + m22 * point.z + m23);
     } catch (NullPointerException e) {
     }
-  }
-
-  /**
-   * Transforms the point parameter with this Matrix4f and places the result
-   * back into point. The fourth element of the point input paramter is assumed
-   * to be one.
-   * 
-   * @param point
-   *        the input point to be transformed.
-   */
-  public final void transform(T3 point) {
-    transform2(point, point);
-  }
-
-  /**
-   * Transforms the normal parameter by this Matrix4f and places the value into
-   * normalOut. The fourth element of the normal is assumed to be zero.
-   * 
-   * @param normal
-   *        the input normal to be transformed.
-   * @param normalOut
-   *        the transformed normal
-   */
-  public final void transformV2(V3 normal, V3 normalOut) {
-    normalOut.set(m00 * normal.x + m01 * normal.y + m02 * normal.z, m10
-        * normal.x + m11 * normal.y + m12 * normal.z, m20 * normal.x + m21
-        * normal.y + m22 * normal.z);
-  }
-
-  /**
-   * Transforms the normal parameter by this transform and places the value back
-   * into normal. The fourth element of the normal is assumed to be zero.
-   * 
-   * @param normal
-   *        the input normal to be transformed.
-   */
-  public final void transformV(V3 normal) {
-    transformV2(normal, normal);
   }
 
   /**
