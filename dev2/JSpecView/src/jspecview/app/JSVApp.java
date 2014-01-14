@@ -510,8 +510,8 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 				case UNKNOWN:
 					break;
 				case APPLETID:
-					viewer.appletID = value;
-					viewer.fullName = viewer.appletID + "__" + viewer.syncID + "__";
+					viewer.fullName = viewer.appletID + "__" 
+				      + (viewer.appletID = value) + "__";
 					/**
 					 * @j2sNative
 					 * 
@@ -562,8 +562,8 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 				// initialSpectrumNumber = Integer.parseInt(value);
 				// break;
 				case SYNCID:
-					viewer.syncID = value;
-					viewer.fullName = viewer.appletID + "__" + viewer.syncID + "__";
+					viewer.fullName = viewer.appletID + "__" 
+							+ (viewer.syncID = value) + "__";
 					break;
 				}
 			} catch (Exception e) {
@@ -578,17 +578,27 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	public void siOpenDataOrFile(String data, String name,
 			List<JDXSpectrum> specs, String url, int firstSpec, int lastSpec,
 			boolean isAppend) {
-		int status = viewer.openDataOrFile(data, name, specs, url, firstSpec,
-				lastSpec, isAppend);
-		if (status == JSViewer.FILE_OPEN_ALREADY)
+		switch (viewer.openDataOrFile(data, name, specs, url, firstSpec, lastSpec,
+				isAppend)) {
+		case JSViewer.FILE_OPEN_OK:
+			break;
+		case JSViewer.FILE_OPEN_ALREADY:
 			return;
-		if (status != JSViewer.FILE_OPEN_OK) {
+		default:	
 			siSetSelectedPanel(null);
+			/*
+			 * @j2sNative
+			 *
+			 * alert("Cannot read file: " + url);
+			 * 
+			 */
+			{}
 			return;
 		}
 
 		if (viewer.jsvpPopupMenu != null)
-			viewer.jsvpPopupMenu.setCompoundMenu(viewer.panelNodes, allowCompoundMenu);
+			viewer.jsvpPopupMenu
+					.setCompoundMenu(viewer.panelNodes, allowCompoundMenu);
 
 		Logger.info(appletFrame.getAppletInfo() + " File "
 				+ viewer.currentSource.getFilePath() + " Loaded Successfully");

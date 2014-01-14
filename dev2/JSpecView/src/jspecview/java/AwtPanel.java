@@ -298,7 +298,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
 				}
 			}
 		} catch (Exception e) {
-			// too bad
+			System.out.println(e);
 		} finally {
 			pd.setPrint(null, null);
 		}

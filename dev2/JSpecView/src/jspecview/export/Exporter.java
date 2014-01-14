@@ -275,6 +275,8 @@ public class Exporter implements ExportInterface {
 		PanelData pd = viewer.selectedPanel.getPanelData();
     String sourcePath = pd.getSpectrum().getFilePath();
     String newName = JSVFileManager.getName(sourcePath);
+    if (newName.startsWith("$"))
+    	newName = newName.substring(1);
     int pt = newName.lastIndexOf(".");
     String name = (pt < 0 ? newName : newName.substring(0, pt));
     String ext = ".jdx";
