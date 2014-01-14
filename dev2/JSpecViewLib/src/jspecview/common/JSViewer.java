@@ -411,12 +411,10 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 				/**
 				 * @j2sNative
 				 * 
-				 *            alert(e + "\n" + Clazz.getStackTrace())
+				 *            alert("" + e);
 				 */
 				{
-					System.out.println(e.toString());
 					Logger.error(e.toString());
-
 					if (Logger.debugging)
 						e.printStackTrace();
 				}

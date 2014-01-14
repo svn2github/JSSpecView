@@ -34,6 +34,7 @@ import javajs.util.CU;
 
 import jspecview.api.JSVGraphics;
 import jspecview.api.JSVPanel;
+import jspecview.api.JSVPdfWriter;
 import jspecview.common.JSVersion;
 import jspecview.common.PrintLayout;
 
@@ -42,7 +43,7 @@ import jspecview.common.PrintLayout;
  * javajs.export.PDFCreator.
  * 
  */
-public class PDFWriter implements JSVGraphics {
+public class PDFWriter implements JSVGraphics, JSVPdfWriter {
  
 	private JSVGraphics g2d;
 	private String date;
@@ -53,6 +54,7 @@ public class PDFWriter implements JSVGraphics {
 		pdf = new PDFCreator();
   }
 
+	@Override
 	public void createPdfDocument(JSVPanel panel, PrintLayout pl, OutputStream os) {
 		boolean isLandscape = pl.layout.equals("landscape");
 		date = pl.date;

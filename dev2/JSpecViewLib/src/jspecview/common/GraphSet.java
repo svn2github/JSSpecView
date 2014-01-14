@@ -1837,6 +1837,7 @@ public class GraphSet implements XYScaleConverter {
 			if (doLineTo)
 				g2d.doStroke(g, true);
 			boolean isDown = false;
+			boolean isScaledY = getScale().isShiftZoomedY;
 			for (int i = iFirst; i <= iLast; i++) {
 				Coordinate point1 = xyCoords[i];
 				Coordinate point2 = xyCoords[i + 1];
@@ -1869,8 +1870,9 @@ public class GraphSet implements XYScaleConverter {
 					setPlotColor(g, iColor);
 					continue;
 				}
-				if (y1 == y2 && (y1 == yPixel0 || y1 == yPixel1))
-					continue;
+				if (y1 == y2 && (y1 == yPixel0)) {
+						continue;					
+				}
 				if (bsDraw != null && bsDraw.get(i) != plotOn) {
 					plotOn = bsDraw.get(i);
 					if (!pd.isPrinting && pd.integralShiftMode != 0)

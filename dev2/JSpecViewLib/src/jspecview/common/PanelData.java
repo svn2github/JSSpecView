@@ -1058,6 +1058,8 @@ public class PanelData implements EventManager {
 		}
 		if (title.indexOf("\n") >= 0)
 			title = title.substring(0, title.indexOf("\n")).trim();
+		else if (title.startsWith("$"))
+			title = title.substring(1);
 		return title;
 	}
 

@@ -22,6 +22,7 @@ package jspecview.common;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -260,7 +261,7 @@ public class JSVFileManager {
     try {
 			ret = getInputStream(fileName, false, bytes);
 		} catch (Exception e) {
-			return e.toString();
+			ret = e.toString();
 		}
     if (ret instanceof String)
       return (String) ret;
@@ -332,16 +333,15 @@ public class JSVFileManager {
 			URL url = new URL(appletDocumentBase, name, null);
 			Logger.info("JSVFileManager opening URL " + url + (post == null ? "" : " with POST of " + post.length() + " bytes"));
 			in = viewer.apiPlatform.getBufferedURLInputStream(url, postBytes, post);
-			if (in instanceof String) {
-				Logger.info("JSVFileManager could not get this URL:" + in);
-				return null;
-			}
 		} else {
 			if (showMsg)
 				Logger.info("JSVFileManager opening file " + name);
 			in = viewer.apiPlatform.getBufferedFileInputStream(name);
 		}
+		if (in instanceof String) 
+			throw new IOException((String) in);
 		return (InputStream) in;
+		
 	}
 
 	private static String nciResolver = "http://cactus.nci.nih.gov/chemical/structure/%FILE/file?format=sdf";
