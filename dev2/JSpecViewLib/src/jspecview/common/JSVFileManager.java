@@ -22,13 +22,10 @@ package jspecview.common;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Hashtable;
 import java.util.Map;
@@ -41,28 +38,28 @@ import javajs.util.SB;
 
 import org.jmol.util.Logger;
 
-
 import jspecview.api.JSVZipInterface;
-import jspecview.util.JSVEscape;
+import jspecview.exception.JSVException;
 
 public class JSVFileManager {
 
 	// ALL STATIC METHODS
-	
+
 	public final static String SIMULATION_PROTOCOL = "http://SIMULATION/";
-	  // possibly http://SIMULATION/MOL=...\n....\n....\n....
+	// possibly http://SIMULATION/MOL=...\n....\n....\n....
 
 	public static URL appletDocumentBase;
 
 	private static JSViewer viewer;
-  
+
 	public boolean isApplet() {
 		return (appletDocumentBase != null);
 	}
 
-  public static String jsDocumentBase = "";
+	public static String jsDocumentBase = "";
+
 	/**
-	 * @param name 
+	 * @param name
 	 * @return file as string
 	 * 
 	 */
@@ -86,27 +83,28 @@ public class JSVFileManager {
 		return sb.toString();
 	}
 
-  public static BufferedReader getBufferedReaderForInputStream(InputStream in) {
-    try {
+	public static BufferedReader getBufferedReaderForInputStream(InputStream in) {
+		try {
 			return new BufferedReader(new InputStreamReader(in, "UTF-8"));
-		} catch (UnsupportedEncodingException e) {
+		} catch (Exception e) {
 			return null;
 		}
-  }
-  
-  public static BufferedReader getBufferedReaderForString(String data) {
-    return (data == null ? null : new BufferedReader(new StringReader(data)));
-  }
+	}
 
-  public static BufferedReader getBufferedReaderFromName(String name, String startCode)
-      throws MalformedURLException, IOException {
-    if (name == null)
-      throw new IOException("Cannot find " + name);
-    Logger.info("JSVFileManager getBufferedReaderFromName " + name);
-    String path = getFullPathName(name);
-    Logger.info("JSVFileManager getBufferedReaderFromName " + path);
-    return getUnzippedBufferedReaderFromName(path, startCode);
-  }
+	public static BufferedReader getBufferedReaderForString(String data) {
+		return (data == null ? null : new BufferedReader(new StringReader(data)));
+	}
+
+	public static BufferedReader getBufferedReaderFromName(String name,
+			String startCode) throws JSVException {
+		if (name == null)
+			throw new JSVException("Cannot find " + name);
+		Logger.info("JSVFileManager getBufferedReaderFromName " + name);
+		String path = getFullPathName(name);
+		if (!path.equals(name))
+			Logger.info("JSVFileManager getBufferedReaderFromName " + path);
+		return getUnzippedBufferedReaderFromName(path, startCode);
+	}
 
 	/**
 	 * 
@@ -117,59 +115,60 @@ public class JSVFileManager {
 	 * 
 	 * @param name
 	 * @return name
-	 * @throws MalformedURLException
+	 * @throws JSVException
 	 */
-	public static String getFullPathName(String name)
-			throws MalformedURLException {
-		if (appletDocumentBase == null) {
-			// This code is for the app
-			if (isURL(name)) {
-				URL url = new URL((URL) null, name, null);
-				return url.toString();
+	public static String getFullPathName(String name) throws JSVException {
+		try {
+			if (appletDocumentBase == null) {
+				// This code is for the app
+				if (isURL(name)) {
+					URL url = new URL((URL) null, name, null);
+					return url.toString();
+				}
+				return viewer.apiPlatform.newFile(name).getFullPath();
 			}
-			return viewer.apiPlatform.newFile(name).getFullPath();
+			// This code is only for the applet
+			if (name.indexOf(":\\") == 1 || name.indexOf(":/") == 1)
+				name = "file:///" + name;
+			// System.out.println("filemanager name " + name);
+			// System.out.println("filemanager adb " + appletDocumentBase);
+			URL url = new URL(appletDocumentBase, name, null);
+			return url.toString();
+		} catch (Exception e) {
+			throw new JSVException("Cannot create path for " + name);
 		}
-		// This code is only for the applet
-		if (name.indexOf(":\\") == 1 || name.indexOf(":/") == 1)
-			name = "file:///" + name;
-		// System.out.println("filemanager name " + name);
-		// System.out.println("filemanager adb " + appletDocumentBase);
-		URL url = new URL(appletDocumentBase, name, null);
-		return url.toString();
 	}
 
-  private final static String[] urlPrefixes = { "http:", "https:", "ftp:", 
-  	SIMULATION_PROTOCOL, "file:" };
+	private final static String[] urlPrefixes = { "http:", "https:", "ftp:",
+			SIMULATION_PROTOCOL, "file:" };
 
-  public final static int URL_LOCAL = 4;
+	public final static int URL_LOCAL = 4;
 
+	public static boolean isURL(String name) {
+		for (int i = urlPrefixes.length; --i >= 0;)
+			if (name.startsWith(urlPrefixes[i]))
+				return true;
+		return false;
+	}
 
-  public static boolean isURL(String name) {
-  	for (int i = urlPrefixes.length; --i >= 0;)
-  		if (name.startsWith(urlPrefixes[i]))
-  			return true;
-    return false;
-  }
-  
-  public static int urlTypeIndex(String name) {
-    for (int i = 0; i < urlPrefixes.length; ++i) {
-      if (name.startsWith(urlPrefixes[i])) {
-        return i;
-      }
-    }
-    return -1;
-  }
-  
-  public static boolean isLocal(String fileName) {
-    if (fileName == null)
-      return false;
-    int itype = urlTypeIndex(fileName);
-    return (itype < 0 || itype == URL_LOCAL);
-  }
+	public static int urlTypeIndex(String name) {
+		for (int i = 0; i < urlPrefixes.length; ++i) {
+			if (name.startsWith(urlPrefixes[i])) {
+				return i;
+			}
+		}
+		return -1;
+	}
 
+	public static boolean isLocal(String fileName) {
+		if (fileName == null)
+			return false;
+		int itype = urlTypeIndex(fileName);
+		return (itype < 0 || itype == URL_LOCAL);
+	}
 
 	private static BufferedReader getUnzippedBufferedReaderFromName(String name,
-			String startCode) throws IOException {
+			String startCode) throws JSVException {
 		String[] subFileList = null;
 		if (name.indexOf("|") >= 0) {
 			subFileList = PT.split(name, "|");
@@ -180,61 +179,76 @@ public class JSVFileManager {
 			return getBufferedReaderForString(getNMRSimulationJCampDX(name
 					.substring(SIMULATION_PROTOCOL.length())));
 
-		if (viewer.isApplet) {
-			Object ret = viewer.apiPlatform.getBufferedURLInputStream(new URL(
-					(URL) null, name, null), null, null);
-			if (ret instanceof SB || ret instanceof String) {
-				return new BufferedReader(new StringReader(ret.toString()));
-			} else if (isAB(ret)) {
-				return new BufferedReader(new StringReader(new String((byte[]) ret)));
-			} else {
-				return new BufferedReader(new InputStreamReader((InputStream) ret,
-						"UTF-8"));
+		if (viewer.isApplet && appletDocumentBase != null) {
+			try {
+				Object ret = viewer.apiPlatform.getBufferedURLInputStream(new URL(
+						(URL) null, name, null), null, null);
+				if (ret instanceof SB || ret instanceof String) {
+					return new BufferedReader(new StringReader(ret.toString()));
+				} else if (isAB(ret)) {
+					return new BufferedReader(new StringReader(new String((byte[]) ret)));
+				} else {
+					return new BufferedReader(new InputStreamReader((InputStream) ret,
+							"UTF-8"));
+				}
+			} catch (Exception e) {
+				throw new JSVException(e.toString());
 			}
-
 		}
-		InputStream in = getInputStream(name, true, null);
-		BufferedInputStream bis = new BufferedInputStream(in);
-		in = bis;
-		if (isZipFile(bis))
-			return ((JSVZipInterface) JSViewer
-					.getInterface("jspecview.util.JSVZipUtil"))
-					.newJSVZipFileSequentialReader(in, subFileList, startCode);
-		if (isGzip(bis))
-			in = ((JSVZipInterface) JSViewer
-					.getInterface("jspecview.util.JSVZipUtil")).newGZIPInputStream(in);
-		return new BufferedReader(new InputStreamReader(in, "UTF-8"));
+		try {
+			InputStream in = getInputStream(name, true, null);
+			BufferedInputStream bis = new BufferedInputStream(in);
+			in = bis;
+			if (isZipFile(bis))
+				return ((JSVZipInterface) JSViewer
+						.getInterface("jspecview.util.JSVZipUtil"))
+						.newJSVZipFileSequentialReader(in, subFileList, startCode);
+			if (isGzip(bis))
+				in = ((JSVZipInterface) JSViewer
+						.getInterface("jspecview.util.JSVZipUtil")).newGZIPInputStream(in);
+			return new BufferedReader(new InputStreamReader(in, "UTF-8"));
+		} catch (Exception e) {
+			throw new JSVException("Cannot read file " + name);
+		}
 	}
 
-  public static boolean isAB(Object x) {
-    /**
-     * @j2sNative
-     *  return Clazz.isAI(x);
-     */
-    {
-    return x instanceof byte[];
-    }
-  }
-  
-  public static boolean isZipFile(InputStream is) throws IOException {
-    byte[] abMagic = new byte[4];
-    is.mark(5);
-    int countRead = is.read(abMagic, 0, 4);
-    is.reset();
-    return (countRead == 4 && abMagic[0] == (byte) 0x50 && abMagic[1] == (byte) 0x4B
-        && abMagic[2] == (byte) 0x03 && abMagic[3] == (byte) 0x04);
-  }
+	public static boolean isAB(Object x) {
+		/**
+		 * @j2sNative return Clazz.isAI(x);
+		 */
+		{
+			return x instanceof byte[];
+		}
+	}
 
-  private static boolean isGzip(InputStream is) throws IOException {
-    byte[] abMagic = new byte[4];
-    is.mark(5);
-    int countRead = is.read(abMagic, 0, 4);
-    is.reset();
-    return (countRead == 4 && abMagic[0] == (byte) 0x1F && abMagic[1] == (byte) 0x8B);
-  }
-  
-	public static Object getStreamAsBytes(BufferedInputStream bis,
-			OC out) throws IOException {
+	public static boolean isZipFile(InputStream is) throws JSVException {
+		try {
+			byte[] abMagic = new byte[4];
+			is.mark(5);
+			int countRead = is.read(abMagic, 0, 4);
+			is.reset();
+			return (countRead == 4 && abMagic[0] == (byte) 0x50
+					&& abMagic[1] == (byte) 0x4B && abMagic[2] == (byte) 0x03 && abMagic[3] == (byte) 0x04);
+		} catch (Exception e) {
+			throw new JSVException(e.toString());
+		}
+	}
+
+	private static boolean isGzip(InputStream is) throws JSVException {
+		try {
+			byte[] abMagic = new byte[4];
+			is.mark(5);
+			int countRead = is.read(abMagic, 0, 4);
+			is.reset();
+			return (countRead == 4 && abMagic[0] == (byte) 0x1F && abMagic[1] == (byte) 0x8B);
+		} catch (Exception e) {
+			throw new JSVException(e.toString());
+		}
+	}
+
+	public static Object getStreamAsBytes(BufferedInputStream bis, OC out)
+			throws JSVException {
+		try {
 		byte[] buf = new byte[1024];
 		byte[] bytes = (out == null ? new byte[4096] : null);
 		int len = 0;
@@ -254,75 +268,80 @@ public class JSVFileManager {
 			return AU.arrayCopyByte(bytes, totalLen);
 		}
 		return totalLen + " bytes";
+		} catch (Exception e) {
+			throw new JSVException(e.toString());
+		}
+
 	}
 
-  public static String postByteArray(String fileName, byte[] bytes) {
-    Object ret = null;    
-    try {
+	public static String postByteArray(String fileName, byte[] bytes) {
+		Object ret = null;
+		try {
 			ret = getInputStream(fileName, false, bytes);
 		} catch (Exception e) {
 			ret = e.toString();
 		}
-    if (ret instanceof String)
-      return (String) ret;
-    try {
-      ret = getStreamAsBytes((BufferedInputStream) ret, null);
-    } catch (IOException e) {
-      try {
-        ((BufferedInputStream) ret).close();
-      } catch (IOException e1) {
-        // ignore
-      }
-    }
-    return (ret == null ? "" : fixUTF((byte[]) ret));
-  }
+		if (ret instanceof String)
+			return (String) ret;
+		try {
+			ret = getStreamAsBytes((BufferedInputStream) ret, null);
+		} catch (JSVException e) {
+			try {
+				((BufferedInputStream) ret).close();
+			} catch (Exception e1) {
+				// ignore
+			}
+		}
+		return (ret == null ? "" : fixUTF((byte[]) ret));
+	}
 
-  private static Encoding getUTFEncoding(byte[] bytes) {
-    if (bytes.length >= 3 && bytes[0] == (byte) 0xEF && bytes[1] == (byte) 0xBB && bytes[2] == (byte) 0xBF)
-      return Encoding.UTF8;
-    if (bytes.length >= 4 && bytes[0] == (byte) 0 && bytes[1] == (byte) 0 
-        && bytes[2] == (byte) 0xFE && bytes[3] == (byte) 0xFF)
-      return Encoding.UTF_32BE;
-    if (bytes.length >= 4 && bytes[0] == (byte) 0xFF && bytes[1] == (byte) 0xFE 
-        && bytes[2] == (byte) 0 && bytes[3] == (byte) 0)
-      return Encoding.UTF_32LE;
-    if (bytes.length >= 2 && bytes[0] == (byte) 0xFF && bytes[1] == (byte) 0xFE)
-      return Encoding.UTF_16LE;
-    if (bytes.length >= 2 && bytes[0] == (byte) 0xFE && bytes[1] == (byte) 0xFF)
-      return Encoding.UTF_16BE;
-    return Encoding.NONE;
+	private static Encoding getUTFEncoding(byte[] bytes) {
+		if (bytes.length >= 3 && bytes[0] == (byte) 0xEF && bytes[1] == (byte) 0xBB
+				&& bytes[2] == (byte) 0xBF)
+			return Encoding.UTF8;
+		if (bytes.length >= 4 && bytes[0] == (byte) 0 && bytes[1] == (byte) 0
+				&& bytes[2] == (byte) 0xFE && bytes[3] == (byte) 0xFF)
+			return Encoding.UTF_32BE;
+		if (bytes.length >= 4 && bytes[0] == (byte) 0xFF && bytes[1] == (byte) 0xFE
+				&& bytes[2] == (byte) 0 && bytes[3] == (byte) 0)
+			return Encoding.UTF_32LE;
+		if (bytes.length >= 2 && bytes[0] == (byte) 0xFF && bytes[1] == (byte) 0xFE)
+			return Encoding.UTF_16LE;
+		if (bytes.length >= 2 && bytes[0] == (byte) 0xFE && bytes[1] == (byte) 0xFF)
+			return Encoding.UTF_16BE;
+		return Encoding.NONE;
 
-  }
+	}
 
-  public static String fixUTF(byte[] bytes) {
-    
-    Encoding encoding = getUTFEncoding(bytes);
-    if (encoding != Encoding.NONE)
-    try {
-      String s = new String(bytes, encoding.name().replace('_', '-'));
-      switch (encoding) {
-      case UTF8:
-      case UTF_16BE:
-      case UTF_16LE:
-        // extra byte at beginning removed
-        s = s.substring(1);
-        break;
-      default:
-        break;        
-      }
-      return s;
-    } catch (UnsupportedEncodingException e) {
-      System.out.println(e);
-    }
-    return new String(bytes);
-  }
+	public static String fixUTF(byte[] bytes) {
 
+		Encoding encoding = getUTFEncoding(bytes);
+		if (encoding != Encoding.NONE)
+			try {
+				String s = new String(bytes, encoding.name().replace('_', '-'));
+				switch (encoding) {
+				case UTF8:
+				case UTF_16BE:
+				case UTF_16LE:
+					// extra byte at beginning removed
+					s = s.substring(1);
+					break;
+				default:
+					break;
+				}
+				return s;
+			} catch (IOException e) {
+				System.out.println(e);
+			}
+		return new String(bytes);
+	}
 
-	public static InputStream getInputStream(String name, boolean showMsg, byte[] postBytes) throws IOException, MalformedURLException {
+	public static InputStream getInputStream(String name, boolean showMsg,
+			byte[] postBytes) throws JSVException {
 		boolean isURL = isURL(name);
 		boolean isApplet = (appletDocumentBase != null);
 		Object in = null;
-		//int length;
+		// int length;
 		String post = null;
 		int iurl;
 		if (isURL && (iurl = name.indexOf("?POST?")) >= 0) {
@@ -330,18 +349,24 @@ public class JSVFileManager {
 			name = name.substring(0, iurl);
 		}
 		if (isApplet || isURL) {
-			URL url = new URL(appletDocumentBase, name, null);
-			Logger.info("JSVFileManager opening URL " + url + (post == null ? "" : " with POST of " + post.length() + " bytes"));
+			URL url;
+			try {
+				url = new URL(appletDocumentBase, name, null);
+			} catch (Exception e) {
+				throw new JSVException("Cannot read " + name);
+			}
+			Logger.info("JSVFileManager opening URL " + url
+					+ (post == null ? "" : " with POST of " + post.length() + " bytes"));
 			in = viewer.apiPlatform.getBufferedURLInputStream(url, postBytes, post);
 		} else {
 			if (showMsg)
 				Logger.info("JSVFileManager opening file " + name);
 			in = viewer.apiPlatform.getBufferedFileInputStream(name);
 		}
-		if (in instanceof String) 
-			throw new IOException((String) in);
+		if (in instanceof String)
+			throw new JSVException((String) in);
 		return (InputStream) in;
-		
+
 	}
 
 	private static String nciResolver = "http://cactus.nci.nih.gov/chemical/structure/%FILE/file?format=sdf";
@@ -350,11 +375,11 @@ public class JSVFileManager {
 	private static Map<String, String> htSimulate;
 
 	/**
-	 * Accepts either $chemicalname or MOL=molfiledata 
-	 * Queries NMRDB or NIH+NMRDB to get predicted spetrum
+	 * Accepts either $chemicalname or MOL=molfiledata Queries NMRDB or NIH+NMRDB
+	 * to get predicted spetrum
 	 * 
-	 * TODO: how about adding spectrometer frequency?
-	 * TODO: options for other data types? 2D? IR?
+	 * TODO: how about adding spectrometer frequency? TODO: options for other data
+	 * types? 2D? IR?
 	 * 
 	 * @param name
 	 * @return jcamp data
@@ -368,24 +393,24 @@ public class JSVFileManager {
 			return jcamp;
 		boolean isInline = name.startsWith("MOL=");
 		String molFile;
-		if ((molFile = (isInline ? PT.simpleReplace(name.substring(4), "\\n", "\n")
-				: getFileAsString(PT.simpleReplace(nciResolver, "%FILE",
+		if ((molFile = (isInline ? PT.rep(name.substring(4), "\\n", "\n")
+				: getFileAsString(PT.rep(nciResolver, "%FILE",
 						PT.escapeUrl(name.substring(1)))))) == null)
 			Logger.info("no data returned");
 		// null here throws an exception
 		int pt = molFile.indexOf("\n");
 		molFile = "/JSpecView " + JSVersion.VERSION + molFile.substring(pt);
-		molFile = PT.simpleReplace(molFile, "?", "_");
+		molFile = PT.rep(molFile, "?", "_");
 		String json = getFileAsString(nmrdbServer + molFile);
 		System.out.println(json);
-		json = PT.simpleReplace(json, "\\r\\n", "\n");
-		json = PT.simpleReplace(json, "\\t", "\t");
-		json = PT.simpleReplace(json, "\\n", "\n");
+		json = PT.rep(json, "\\r\\n", "\n");
+		json = PT.rep(json, "\\t", "\t");
+		json = PT.rep(json, "\\n", "\n");
 		molFile = JSVFileManager.getQuotedJSONAttribute(json, "molfile", null);
 		String xml = JSVFileManager.getQuotedJSONAttribute(json, "xml", null);
-		xml = PT.simpleReplace(xml, "</", "\n</");
-		xml = PT.simpleReplace(xml, "><", ">\n<");
-		xml = PT.simpleReplace(xml, "\\\"", "\"");
+		xml = PT.rep(xml, "</", "\n</");
+		xml = PT.rep(xml, "><", ">\n<");
+		xml = PT.rep(xml, "\\\"", "\"");
 		jcamp = JSVFileManager.getQuotedJSONAttribute(json, "jcamp", null);
 		jcamp = "##TITLE=" + (isInline ? "JMOL SIMULATION" : name) + "\n"
 				+ jcamp.substring(jcamp.indexOf("\n##") + 1);
@@ -397,7 +422,7 @@ public class JSVFileManager {
 		if (isInline && pt1 > 0)
 			id = id.substring(pt1 + 4, (id + "'").indexOf("'", pt1 + 4));
 		jcamp = jcamp.substring(0, pt) + "##$MODELS=\n<Models>\n"
-				+ "<ModelData id=" + JSVEscape.eS(id) + "\n type=\"MOL\">\n" + molFile
+				+ "<ModelData id=" + PT.esc(id) + "\n type=\"MOL\">\n" + molFile
 				+ "</ModelData>\n</Models>\n" + "##$SIGNALS=\n" + xml + "\n"
 				+ jcamp.substring(pt);
 		htSimulate.put(key, jcamp);
@@ -405,52 +430,53 @@ public class JSVFileManager {
 	}
 
 	private static URL getResource(Object object, String fileName, String[] error) {
-    URL url = null;
-    try {
-      if ((url = object.getClass().getResource(fileName)) == null)
-        error[0] = "Couldn't find file: " + fileName;
-    } catch (Exception e) {
-    	
-      error[0] = "Exception " + e + " in getResource "
-          + fileName;
-    }
-    return url;
-  }
+		URL url = null;
+		try {
+			if ((url = object.getClass().getResource(fileName)) == null)
+				error[0] = "Couldn't find file: " + fileName;
+		} catch (Exception e) {
 
-  public static String getResourceString(Object object, String name, String[] error) {
-    Object url = getResource(object, name, error);
-    if (url == null) {
-      error[0] = "Error loading resource " + name;
-      return null;
-    }
-    if (url instanceof String) {
-    	// JavaScript does this -- all resources are just files on the site somewhere
-    	return getFileAsString((String) url);
-    }
-    SB sb = new SB();
-    try {
-      BufferedReader br = new BufferedReader(new InputStreamReader(
-          (InputStream) ((URL) url).getContent(), "UTF-8"));
-      String line;
-      while ((line = br.readLine()) != null)
-        sb.append(line).append("\n");
-      br.close();
-    } catch (Exception e) {
-      error[0] = e.toString();
-    }
-    return sb.toString();
-  }
+			error[0] = "Exception " + e + " in getResource " + fileName;
+		}
+		return url;
+	}
 
-  public static String getJmolFilePath(String filePath) {
-    try {
-      filePath = getFullPathName(filePath);
-    } catch (MalformedURLException e) {
-      return null;
-    }
-    return (appletDocumentBase == null ? filePath.replace('\\', '/') : filePath);
-  }
+	public static String getResourceString(Object object, String name,
+			String[] error) {
+		Object url = getResource(object, name, error);
+		if (url == null) {
+			error[0] = "Error loading resource " + name;
+			return null;
+		}
+		if (url instanceof String) {
+			// JavaScript does this -- all resources are just files on the site
+			// somewhere
+			return getFileAsString((String) url);
+		}
+		SB sb = new SB();
+		try {
+			BufferedReader br = new BufferedReader(new InputStreamReader(
+					(InputStream) ((URL) url).getContent(), "UTF-8"));
+			String line;
+			while ((line = br.readLine()) != null)
+				sb.append(line).append("\n");
+			br.close();
+		} catch (Exception e) {
+			error[0] = e.toString();
+		}
+		return sb.toString();
+	}
 
-  private static int stringCount;
+	public static String getJmolFilePath(String filePath) {
+		try {
+			filePath = getFullPathName(filePath);
+		} catch (JSVException e) {
+			return null;
+		}
+		return (appletDocumentBase == null ? filePath.replace('\\', '/') : filePath);
+	}
+
+	private static int stringCount;
 
 	public static String getName(String fileName) {
 		if (fileName == null)
@@ -461,7 +487,7 @@ public class JSVFileManager {
 					return fileName.substring(0, Math.min(fileName.length(), 30)) + "...";
 				String name = (new URL((URL) null, fileName, null)).getFile();
 				return name.substring(name.lastIndexOf('/') + 1);
-			} catch (MalformedURLException e) {
+			} catch (IOException e) {
 				return null;
 			}
 		}
@@ -476,7 +502,8 @@ public class JSVFileManager {
 		key2 = "\"" + key2 + "\":";
 		int pt1 = json.indexOf(key1);
 		int pt2 = json.indexOf(key2, pt1);
-		return (pt1 < 0 || pt2 < 0 ? null : PT.getQuotedStringAt(json, pt2 + key2.length()));
+		return (pt1 < 0 || pt2 < 0 ? null : PT.getQuotedStringAt(json,
+				pt2 + key2.length()));
 	}
 
 	public static void setDocumentBase(JSViewer v, URL documentBase) {
@@ -488,81 +515,81 @@ public class JSVFileManager {
 
 // a nice idea, but never implemented; not relevant to JavaScript
 //
-//class JSVMonitorInputStream extends FilterInputStream {
-//  int length;
-//  int position;
-//  int markPosition;
-//  int readEventCount;
+// class JSVMonitorInputStream extends FilterInputStream {
+// int length;
+// int position;
+// int markPosition;
+// int readEventCount;
 //
-//  JSVMonitorInputStream(InputStream in, int length) {
-//    super(in);
-//    this.length = length;
-//    this.position = 0;
-//  }
+// JSVMonitorInputStream(InputStream in, int length) {
+// super(in);
+// this.length = length;
+// this.position = 0;
+// }
 //
-//  /**
-//   * purposely leaving off "Override" here for JavaScript
-//   * 
-//   * @j2sIgnore
-//   */
-//	public int read() throws IOException {
-//    ++readEventCount;
-//    int nextByte = super.read();
-//    if (nextByte >= 0)
-//      ++position;
-//    return nextByte;
-//  }
-//  /**
-//   * purposely leaving off "Override" here for JavaScript
-//   * 
-//   * @j2sIgnore
-//   */
-//  public int read(byte[] b) throws IOException {
-//    ++readEventCount;
-//    int cb = super.read(b);
-//    if (cb > 0)
-//      position += cb;
-//    return cb;
-//  }
+// /**
+// * purposely leaving off "Override" here for JavaScript
+// *
+// * @j2sIgnore
+// */
+// public int read() throws IOException {
+// ++readEventCount;
+// int nextByte = super.read();
+// if (nextByte >= 0)
+// ++position;
+// return nextByte;
+// }
+// /**
+// * purposely leaving off "Override" here for JavaScript
+// *
+// * @j2sIgnore
+// */
+// public int read(byte[] b) throws IOException {
+// ++readEventCount;
+// int cb = super.read(b);
+// if (cb > 0)
+// position += cb;
+// return cb;
+// }
 //
-//  @Override
-//  public int read(byte[] b, int off, int len) throws IOException {
-//    ++readEventCount;
-//    int cb = super.read(b, off, len);
-//    if (cb > 0)
-//      position += cb;
-//    return cb;
-//  }
+// @Override
+// public int read(byte[] b, int off, int len) throws IOException {
+// ++readEventCount;
+// int cb = super.read(b, off, len);
+// if (cb > 0)
+// position += cb;
+// return cb;
+// }
 //
-//  @Override
-//  public long skip(long n) throws IOException {
-//    long cb = super.skip(n);
-//    // this will only work in relatively small files ... 2Gb
-//    position = (int) (position + cb);
-//    return cb;
-//  }
+// @Override
+// public long skip(long n) throws IOException {
+// long cb = super.skip(n);
+// // this will only work in relatively small files ... 2Gb
+// position = (int) (position + cb);
+// return cb;
+// }
 //
-//  @Override
-//  public synchronized void mark(int readlimit) {
-//    super.mark(readlimit);
-//    markPosition = position;
-//  }
+// @Override
+// public synchronized void mark(int readlimit) {
+// super.mark(readlimit);
+// markPosition = position;
+// }
 //
-//  @Override
-//  public synchronized void reset() throws IOException {
-//    position = markPosition;
-//    super.reset();
-//  }
+// @Override
+// public synchronized void reset() throws IOException {
+// position = markPosition;
+// super.reset();
+// }
 //
-//  int getPosition() {
-//    return position;
-//  }
+// int getPosition() {
+// return position;
+// }
 //
-//  int getLength() {
-//    return length;
-//  }
+// int getLength() {
+// return length;
+// }
 //
-//  int getPercentageRead() {
-//    return position * 100 / length;
-//  }
-//}
+// int getPercentageRead() {
+// return position * 100 / length;
+// }
+// }

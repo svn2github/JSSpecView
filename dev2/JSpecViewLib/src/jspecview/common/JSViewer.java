@@ -1,6 +1,7 @@
 package jspecview.common;
 
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
@@ -43,7 +44,6 @@ import jspecview.dialog.JSVDialog;
 import jspecview.dialog.DialogManager;
 import jspecview.source.JDXSource;
 import jspecview.tree.SimpleTree;
-import jspecview.util.JSVEscape;
 
 /**
  * This class encapsulates all general functionality of applet and app. Most
@@ -82,7 +82,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 	public ColorParameters parameters;
 	public RepaintManager repaintManager;
 	public JSVPanel selectedPanel;
-	public JSVMainPanel viewPanel; // alias for spectrumPanel
+	public JSVMainPanel mainPanel;
 	public Properties properties; // application only
 	public List<String> scriptQueue;
 	public JSVFileHelper fileHelper;
@@ -152,6 +152,8 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 	}
 
 	public void showMenu(int x, int y) {
+		if (!popupAllowMenu)
+			return;
 		if (jsvpPopupMenu == null) {
 			try {
 				jsvpPopupMenu = (JSVPopupMenu) getPlatformInterface("Popup");
@@ -408,14 +410,13 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 					break;
 				}
 			} catch (Exception e) {
+				msg = e.getMessage();
+				Logger.error(e.toString());
 				/**
 				 * @j2sNative
-				 * 
-				 *            alert("" + e);
 				 */
 				{
-					Logger.error(e.toString());
-					if (Logger.debugging)
+					if (Logger.debugging || e.toString().indexOf("Null") >= 0)
 						e.printStackTrace();
 				}
 				isOK = false;
@@ -678,7 +679,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 				if (source == null)
 					return;
 				try {
-					String file = "file=" + JSVEscape.eS(source.getFilePath());
+					String file = "file=" + PT.esc(source.getFilePath());
 					List<PeakInfo> peaks = source.getSpectra().get(0).getPeakList();
 					SB sb = new SB();
 					sb.append("[");
@@ -686,7 +687,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 					for (int i = 0; i < n; i++) {
 						String s = peaks.get(i).toString();
 						s = s + " " + file;
-						sb.append(JSVEscape.eS(s));
+						sb.append(PT.esc(s));
 						if (i > 0)
 							sb.append(",");
 					}
@@ -699,7 +700,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			return;
 		}
 		// todo: why the quotes??
-		peakScript = PT.simpleReplace(peakScript, "\\\"", "");
+		peakScript = PT.rep(peakScript, "\\\"", "");
 		String file = PT.getQuotedAttribute(peakScript, "file");
 		System.out.println("file2=" + file);
 		String index = PT.getQuotedAttribute(peakScript, "index");
@@ -959,8 +960,8 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		} else if (value.startsWith("\"")) {
 			list = ScriptToken.getTokens(value);
 		} else {
-			value = PT.simpleReplace(value, "_", " _ ");
-			value = PT.simpleReplace(value, "-", " - ");
+			value = PT.rep(value, "_", " _ ");
+			value = PT.rep(value, "-", " - ");
 			list = ScriptToken.getTokens(value);
 			list0 = ScriptToken.getTokens(PanelNode
 					.getSpectrumListAsString(panelNodes));
@@ -1085,13 +1086,13 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			try {
 				URL u = new URL(JSVFileManager.appletDocumentBase, strUrl, null);
 				filePath = u.toString();
-				si.siSetRecentURL(filePath);
+				recentURL = filePath;
 				fileName = JSVFileManager.getName(filePath);
 			} catch (MalformedURLException e) {
 				GenericFileInterface file = apiPlatform.newFile(strUrl);
 				fileName = file.getName();
 				newPath = filePath = file.getFullPath();
-				si.siSetRecentURL(null);
+				recentURL = null;
 			}
 		}
 		// TODO could check here for already-open view
@@ -1110,14 +1111,18 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		} catch (Exception e) {
 			/**
 			 * @j2sNative
-			 * 
-			 *            alert(e + "\n" + Clazz.getStackTrace())
+			 *   alert(e.getMessage())
 			 */
 			{
-				e.printStackTrace();
-				si.writeStatus(e.toString());
+				Logger.error(e.toString());
+				if (Logger.debugging)
+					e.printStackTrace();
+				si.writeStatus(e.getMessage());
 			}
 			si.setCursor(GenericPlatform.CURSOR_DEFAULT);
+			if (isApplet) {
+				selectedPanel.showMessage(e.getMessage(), "Error Opening File");				
+			}
 			return FILE_OPEN_ERROR;
 		}
 		si.setCursor(GenericPlatform.CURSOR_DEFAULT);
@@ -1197,6 +1202,18 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		boolean isCheck = filename.equalsIgnoreCase("CHECK");
 		if (isAppend || isCheck)
 			filename = tokens.get(++pt);
+		if (filename.equals("?")) {
+			openFileFromDialog(isAppend, false, false);
+			return;
+		}
+		if (filename.equals("http://?")) {
+			openFileFromDialog(isAppend, true, false);
+			return;
+		}
+		if (filename.equals("$?")) {
+			openFileFromDialog(isAppend, true, true);
+			return;
+		}
 		boolean isSimulation = filename.equalsIgnoreCase("MOL");
 		if (isSimulation)
 			filename = JSVFileManager.SIMULATION_PROTOCOL + "MOL="
@@ -1403,9 +1420,14 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 	}
 
 	public void checkOverlay() {
-		if (viewPanel != null)
-			viewPanel.markSelectedPanels(panelNodes);
+		if (mainPanel != null)
+			markSelectedPanels(panelNodes, mainPanel.getCurrentPanelIndex());
 		viewDialog = getDialog(AType.Views, null);
+	}
+
+	private void markSelectedPanels(List<PanelNode> panelNodes, int ip) {
+		for (int i = panelNodes.size(); --i >= 0;)
+			panelNodes.get(i).isSelected = (ip == i);
 	}
 
 	private int recentStackPercent = 5;
@@ -1696,5 +1718,75 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 	    return null;
 	  }
 	}
+
+	public void showMessage(String msg) {
+		if (selectedPanel != null && msg != null)
+			selectedPanel.showMessage(msg, null);
+	}
+
+	public void openFileFromDialog(boolean isAppend, boolean isURL,
+			boolean isSimulation) {
+		String url = null;
+		if (isSimulation) {
+			url = fileHelper.getUrlFromDialog(
+					"Enter the name or identifier of a compound", recentSimulation);
+			if (url == null)
+				return;
+			recentSimulation = url;
+			load((isAppend ? "APPEND " : "") + "\"$" + url + "\"");
+		} else if (isURL) {
+			url = fileHelper.getUrlFromDialog("Enter the URL of a JCAMP-DX File",
+					recentURL == null ? recentOpenURL : recentURL);
+			if (url == null)
+				return;
+			recentOpenURL = url;
+			load((isAppend ? "APPEND " : "") + "\"" + url + "\"");
+		} else {
+			GenericFileInterface file = fileHelper.showFileOpenDialog(mainPanel,
+					isAppend);
+			// note that in JavaScript this will be asynchronous and file will be null.
+			if (file != null)
+				openFile(file.getFullPath(), !isAppend);
+		}
+	}
+
+	private String recentOpenURL = "http://";
+	private String recentURL;
+	private String recentSimulation = "tylenol";
+	
+	/**
+	 * Opens and displays a file
+	 * @param fileName 
+	 * @param closeFirst 
+	 * 
+	 */
+	public void openFile(String fileName, boolean closeFirst) {
+		if (closeFirst && panelNodes != null) {
+			JDXSource source = PanelNode.findSourceByNameOrId((new File(fileName))
+					.getAbsolutePath(), panelNodes);
+			if (source != null)
+				si.siCloseSource(source);
+		}
+		si.siOpenDataOrFile(null, null, null, fileName, -1, -1, true);
+	}
+
+	public int selectPanel(JSVPanel jsvp, List<PanelNode> panelNodes) {
+		int iPanel = -1;
+		if (panelNodes != null) {
+			for (int i = panelNodes.size(); --i >= 0;) {
+				JSVPanel j = panelNodes.get(i).jsvp;
+				if (j == jsvp) {
+					iPanel = i;
+				} else {
+					j.setEnabled(false);
+					j.setFocusable(false);
+					j.getPanelData().closeAllDialogsExcept(AType.NONE);
+				}
+			}
+			markSelectedPanels(panelNodes, iPanel);
+		}
+		return iPanel;
+	}
+
 
 }

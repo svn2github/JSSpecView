@@ -45,9 +45,7 @@ import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVFileManager;
 import jspecview.common.JSViewer;
 import jspecview.common.PeakInfo;
-import jspecview.exception.JDXSourceException;
-import jspecview.exception.JSpecViewException;
-import jspecview.util.JSVEscape;
+import jspecview.exception.JSVException;
 
 /**
  * <code>JDXFileReader</code> reads JDX data, including complex BLOCK files that
@@ -140,7 +138,7 @@ public class FileReader {
 	public static JDXSource createJDXSource(BufferedReader br, String filePath,
 			boolean obscure, boolean loadImaginary,
 			int iSpecFirst, int iSpecLast) throws Exception {
-
+		String header = null;
 		try {
 			if (br == null)
 				br = JSVFileManager.getBufferedReaderFromName(filePath, "##TITLE");
@@ -148,29 +146,42 @@ public class FileReader {
 			char[] chs = new char[400];
 			br.read(chs, 0, 400);
 			br.reset();
-			String header = new String(chs);
+			header = new String(chs);
 			int pt1 = header.indexOf('#');
 			int pt2 = header.indexOf('<');
 			if (pt1 < 0 || pt2 >= 0 && pt2 < pt1) {
 				String xmlType = header.toLowerCase();
-				if (xmlType.contains("404"))
-					System.out.println(xmlType);
 				xmlType = (xmlType.contains("<animl")
 						|| xmlType.contains("<!doctype technique") ? "AnIML" : xmlType
 						.contains("xml-cml") ? "CML" : null);
-				JDXSource xmlSource = ((SourceReader) JSViewer
+				JDXSource xmlSource = null;
+				if (xmlType != null)
+					xmlSource = ((SourceReader) JSViewer
 						.getInterface("jspecview.source." + xmlType + "Reader")).getSource(
 						filePath, br);
 				br.close();
-				if (xmlSource == null)
-					throw new JSpecViewException("File type not recognized");
+				if (xmlSource == null) {
+					Logger.error(header + "...");
+					throw new JSVException("File type not recognized");
+				}
 				return xmlSource;
 			}
 			return (new FileReader(filePath, obscure, loadImaginary, iSpecFirst,
 					iSpecLast)).getJDXSource(br);
-		} catch (JSpecViewException e) {
-			br.close();
-			throw new Exception("Error reading JDX format: " + e);
+		} catch (Exception e) {
+			if (br != null)
+				br.close();
+			if (header != null)
+				Logger.error(header + "...");
+			String s = e.getMessage();
+			/*
+			 * @j2sNative
+			 *
+			 * if (header != null)s += "\n\n" + header;
+			 * 
+			 */
+			{}
+			throw new JSVException("Error reading data: " + s);
 		}
 	}
 
@@ -180,9 +191,9 @@ public class FileReader {
    * @param reader  a BufferedReader or a JSVZipFileSequentialReader
    * 
    * @return source
-   * @throws JSpecViewException
+   * @throws JSVException
    */
-  private JDXSource getJDXSource(Object reader) throws JSpecViewException {
+  private JDXSource getJDXSource(Object reader) throws JSVException {
 
     source = new JDXSource(JDXSource.TYPE_SIMPLE, filePath);
     isZipFile = (reader instanceof JSVZipReader);
@@ -190,8 +201,9 @@ public class FileReader {
     errorLog = new SB();
 
     String label = null;
-
+    boolean isOK = false;
     while (!done && "##TITLE".equals(t.peakLabel())) {
+    	isOK = true;
       if (label != null && !isZipFile)
         errorLog.append("Warning - file is a concatenation without LINK record -- does not conform to IUPAC standards!\n");
       JDXSpectrum spectrum = new JDXSpectrum();
@@ -211,7 +223,7 @@ public class FileReader {
         if (Arrays.binarySearch(TABULAR_DATA_LABELS, label) > 0) {
           setTabularDataType(spectrum, label);
           if (!processTabularData(spectrum, dataLDRTable))
-            throw new JDXSourceException("Unable to read JDX file");
+            throw new JSVException("Unable to read JDX file");
           addSpectrum(spectrum, false);
           spectrum = null;
           continue;
@@ -226,6 +238,8 @@ public class FileReader {
         	continue;
       }
     }
+    if (!isOK)
+    	throw new JSVException("##TITLE record not found");
     source.setErrorLog(errorLog.toString());
     return source;
   }
@@ -272,10 +286,10 @@ public class FileReader {
 	 * 
 	 * @param sourceLDRTable
 	 * @return source
-	 * @throws JSpecViewException
+	 * @throws JSVException
 	 */
 	private JDXSource getBlockSpectra(List<String[]> sourceLDRTable)
-			throws JSpecViewException {
+			throws JSVException {
 
 		Logger.debug("--JDX block start--");
 		String label = "";
@@ -297,7 +311,7 @@ public class FileReader {
 
 		// If ##TITLE not found throw Exception
 		if (!"##TITLE".equals(label))
-			throw new JSpecViewException("Unable to read block source");
+			throw new JSVException("Unable to read block source");
 
 		if (isNew)
 			source.setHeaderTable(sourceLDRTable);
@@ -319,7 +333,7 @@ public class FileReader {
 				if (Arrays.binarySearch(TABULAR_DATA_LABELS, label) > 0) {
 					setTabularDataType(spectrum, label);
 					if (!processTabularData(spectrum, dataLDRTable))
-						throw new JDXSourceException("Unable to read Block Source");
+						throw new JSVException("Unable to read Block Source");
 					continue;
 				}
 
@@ -375,8 +389,8 @@ public class FileReader {
 					continue;
 			} // End Source File
 		} catch (NoSuchElementException nsee) {
-			throw new JSpecViewException("Unable to Read Block Source");
-		} catch (JSpecViewException jsve) {
+			throw new JSVException("Unable to Read Block Source");
+		} catch (JSVException jsve) {
 			throw jsve;
 		}
 		addErrorLogSeparator();
@@ -418,13 +432,13 @@ public class FileReader {
    * @param spectrum0
    * @param label 
    * 
-   * @throws JSpecViewException
+   * @throws JSVException
    * @return source
    */
   @SuppressWarnings("null")
 	private JDXSource getNTupleSpectra(List<String[]> sourceLDRTable,
                                      JDXDataObject spectrum0, String label)
-      throws JSpecViewException {
+      throws JSVException {
     double[] minMaxY = new double[] { Double.MAX_VALUE, Double.MIN_VALUE };
     blockID = Math.random();
     boolean isOK = true;//(spectrum0.is1D() || firstSpec > 0);
@@ -457,7 +471,7 @@ public class FileReader {
     }//Finished With Page Data
     List<String> symbols = nTupleTable.get("##SYMBOL");
     if (!label.equals("##PAGE"))
-      throw new JSpecViewException("Error Reading NTuple Source");
+      throw new JSVException("Error Reading NTuple Source");
     String page = t.getValue();
     /*
      * 7.3.1 ##PAGE= (STRING).
@@ -522,7 +536,7 @@ public class FileReader {
       int index1 = line.indexOf('(');
       int index2 = line.lastIndexOf(')');
       if (index1 == -1 || index2 == -1)
-        throw new JDXSourceException("Variable List not Found");
+        throw new JSVException("Variable List not Found");
       String varList = line.substring(index1, index2 + 1);
 
       int countSyms = 0;
@@ -538,7 +552,7 @@ public class FileReader {
       setTabularDataType(spectrum, "##" + (continuous ? "XYDATA" : "PEAKTABLE"));
 
       if (!readNTUPLECoords(spectrum, nTupleTable, plotSymbols, minMaxY))
-        throw new JDXSourceException("Unable to read Ntuple Source");
+        throw new JSVException("Unable to read Ntuple Source");
       if (!spectrum.nucleusX.equals("?"))
         spectrum0.nucleusX = spectrum.nucleusX;
       spectrum0.nucleusY = spectrum.nucleusY;
@@ -621,7 +635,7 @@ public class FileReader {
 									: "") + " " + line.substring(tag2.length()).trim();
 					String atoms = getQuotedAttribute(stringInfo, "atoms");
 					if (atoms != null)
-						stringInfo = simpleReplace(stringInfo, "atoms=\""
+						stringInfo = rep(stringInfo, "atoms=\""
 								+ atoms + "\"", "atoms=\"%ATOMS%\"");
 					String key = ((int) (parseFloatStr(getQuotedAttribute(line, "xMin")) * 100))
 							+ "_"
@@ -647,7 +661,7 @@ public class FileReader {
 			for (int i = 0; i < n; i++) {
 				Object[] o = list.get(i);
 				String stringInfo = (String) o[0];
-				stringInfo = simpleReplace(stringInfo, "%INDEX%", ""
+				stringInfo = rep(stringInfo, "%INDEX%", ""
 						+ getPeakIndex());
 				BS bs = (BS) o[1];
 				if (bs != null) {
@@ -657,11 +671,11 @@ public class FileReader {
 						s += "," + (j + offset);
 					int na = bs.cardinality();
 					nH += na;
-					stringInfo = simpleReplace(stringInfo, "%ATOMS%", s
+					stringInfo = rep(stringInfo, "%ATOMS%", s
 							.substring(1));
-					stringInfo = simpleReplace(stringInfo, "%S%",
+					stringInfo = rep(stringInfo, "%S%",
 							(na == 1 ? "" : "s"));
-					stringInfo = simpleReplace(stringInfo, "%NATOMS%", ""
+					stringInfo = rep(stringInfo, "%NATOMS%", ""
 							+ na);
 				}
 				info("JSpecView using " + stringInfo);
@@ -747,12 +761,12 @@ public class FileReader {
   	return PT.parseFloat(s);
   }
 
-	private String simpleReplace(String s, String sfrom, String sto) {
-		return PT.simpleReplace(s, sfrom, sto);
+	private String rep(String s, String sfrom, String sto) {
+		return PT.rep(s, sfrom, sto);
 	}
 
 	private String escape(String s) {
-		return JSVEscape.eS(s);
+		return PT.esc(s);
 	}
 
 	private String getQuotedAttribute(String s, String attr) {
@@ -760,7 +774,7 @@ public class FileReader {
 	}
 
 	private String getPeakFilePath() {
-				return " file=" + JSVEscape.eS(PT.trimQuotes(filePath).replace('\\', '/'));
+				return " file=" + PT.esc(PT.trimQuotes(filePath).replace('\\', '/'));
 	}
 
 
@@ -996,7 +1010,7 @@ public class FileReader {
 
   private boolean processTabularData(JDXDataObject spec, 
                                             List<String[]> table)
-      throws JSpecViewException {
+      throws JSVException {
     if (spec.dataClass.equals("PEAKASSIGNMENTS"))
       return true;
 

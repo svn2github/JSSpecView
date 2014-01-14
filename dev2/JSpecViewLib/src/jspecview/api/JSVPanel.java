@@ -40,4 +40,6 @@ public interface JSVPanel extends JSVViewPanel {
 
 	public void processTwoPointGesture(float[][][] touches);
 
+	public void showMenu(int x, int y);
+
 }

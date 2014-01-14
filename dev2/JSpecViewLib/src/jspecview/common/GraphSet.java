@@ -1837,7 +1837,6 @@ public class GraphSet implements XYScaleConverter {
 			if (doLineTo)
 				g2d.doStroke(g, true);
 			boolean isDown = false;
-			boolean isScaledY = getScale().isShiftZoomedY;
 			for (int i = iFirst; i <= iLast; i++) {
 				Coordinate point1 = xyCoords[i];
 				Coordinate point2 = xyCoords[i + 1];

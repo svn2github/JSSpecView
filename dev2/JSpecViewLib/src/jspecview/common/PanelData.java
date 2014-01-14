@@ -1541,7 +1541,7 @@ public class PanelData implements EventManager {
 			break;
 		case Event.CLICKED:
 	    if (checkMod(buttonMods, Event.MOUSE_RIGHT)) {
-	    	viewer.showMenu(x, y);
+	    	jsvp.showMenu(x, y);
 	      return;
 	    }
 			ctrlPressed = false;
@@ -1582,7 +1582,11 @@ public class PanelData implements EventManager {
 			isIntegralDrag = false;
 			integralShiftMode = 0;
 		} else {
-	    jsvp.getFocusNow(false);
+			try {
+				jsvp.getFocusNow(false);
+			} catch (Exception e) {
+				System.out.println("pd " + this + " cannot focus");
+			}
 		}			
 	}
 

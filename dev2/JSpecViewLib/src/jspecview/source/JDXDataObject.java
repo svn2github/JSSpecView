@@ -10,7 +10,7 @@ import jspecview.common.Integral;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.Measurement;
 import jspecview.common.Annotation.AType;
-import jspecview.exception.JSpecViewException;
+import jspecview.exception.JSVException;
 
 /**
  * spectrum data AS READ FROM FILE
@@ -100,19 +100,19 @@ public abstract class JDXDataObject extends JDXHeader {
     return yFactor;
   }
 
-  public void checkRequiredTokens() throws JSpecViewException {
+  public void checkRequiredTokens() throws JSVException {
     if (fileFirstX == ERROR)
-      throw new JSpecViewException("Error Reading Data Set: ##FIRST not found");
+      throw new JSVException("Error Reading Data Set: ##FIRST not found");
     if (fileLastX == ERROR)
-      throw new JSpecViewException("Error Reading Data Set: ##LASTX not found");
+      throw new JSVException("Error Reading Data Set: ##LASTX not found");
     if (nPointsFile == -1)
-      throw new JSpecViewException(
+      throw new JSVException(
           "Error Reading Data Set: ##NPOINTS not found");
     if (xFactor == ERROR)
-      throw new JSpecViewException(
+      throw new JSVException(
           "Error Reading Data Set: ##XFACTOR not found");
     if (yFactor == ERROR)
-      throw new JSpecViewException(
+      throw new JSVException(
           "Error Reading Data Set: ##YFACTOR not found");
   }
 

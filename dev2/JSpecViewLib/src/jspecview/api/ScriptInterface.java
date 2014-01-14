@@ -96,8 +96,6 @@ public interface ScriptInterface {
 
 	public void siSetPropertiesFromPreferences(JSVPanel jsvp, boolean b);
 
-	public void siSetRecentURL(String filePath);
-
 	public void siSetReturnFromJmolModel(String model);
 
 	public void siSetSelectedPanel(JSVPanel jsvp);

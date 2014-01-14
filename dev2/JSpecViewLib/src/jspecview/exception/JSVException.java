@@ -20,31 +20,19 @@
 package jspecview.exception;
 
 /**
- * <code>LDRNotFoundException</code> is thrown when a labled Data Record required
- * to display spectrum is not found.
+ * JSpecViewException is the base class from which all exceptions in JSpecView
+ * is inherited.
  * @author Debbie-Ann Facey
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
  */
-public class LDRNotFoundException extends JDXSourceException {
+public class JSVException extends Exception {
 
-  /**
-   * 
+	/**
+   * Constructor that takes a string specifying exception details
+   * @param message the error message
    */
-  private static final long serialVersionUID = 1L;
-
-  /**
-   * Constructor
-   */
-  public LDRNotFoundException() {
-    super();
-  }
-
-  /**
-   * Constructor
-   * @param label the name of the label
-   */
-  public LDRNotFoundException(String label) {
-    super("Label Data Record for " + label + " Not Found");
+  public JSVException(String message) {
+    super(message);
   }
 }
