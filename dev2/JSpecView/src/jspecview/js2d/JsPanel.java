@@ -69,7 +69,6 @@ import jspecview.common.ScriptToken;
  */
 
 public class JsPanel implements JSVPanel {
-//, MouseListener,  MouseMotionListener, KeyListener
 
   @Override
   public void finalize() {
@@ -95,21 +94,15 @@ public class JsPanel implements JSVPanel {
    * Constructs a new JSVPanel
    * @param viewer 
    * 
-   * @param spectrum
-   *        the spectrum
    * @return this
    */
-  public static JsPanel getPanelOne(JSViewer viewer, JDXSpectrum spectrum) {
-    // standard applet not overlaid and not showing range
-    // standard application split spectra
-    // removal of integration, taConvert
-    // Preferences Dialog sample.jdx
-//  	ToolTipManager.sharedInstance().setInitialDelay(0);
+  public static JsPanel getEmptyPanel(JSViewer viewer) {
+    // initial applet with no spectrum but with pop-up capability
   	JsPanel p = new JsPanel(viewer);
-    p.pd.initOne(spectrum);
+  	p.pd = null;
     return p;
   }
-
+ 
 	/**
    * Constructs a <code>JSVPanel</code> with List of spectra and corresponding
    * start and end indices of data points that should be displayed
@@ -183,9 +176,14 @@ public class JsPanel implements JSVPanel {
 		/**
 		 * @j2sNative
 		 * 
-		 * alert(msg);
+		 * if (msg != null) {
+		 *   if (title == null)
+		 *     Jmol._showStatus(msg);
+		 *   else
+		 *     alert(msg);
+		 * }
 		 */
-		{			
+		{
 		}
 		getFocusNow(true);
 	}
@@ -342,4 +340,7 @@ public class JsPanel implements JSVPanel {
 		mouse.processTwoPointGesture(touches);
 	}
 
+	public void showMenu(int x, int y) {
+  	viewer.showMenu(x, y);
+	}
 }

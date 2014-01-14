@@ -55,6 +55,7 @@ import jspecview.api.PanelListener;
 
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVFileManager;
+import jspecview.common.PanelData;
 import jspecview.common.PanelNode;
 import jspecview.common.JSViewer;
 import jspecview.common.Parameters;
@@ -67,8 +68,6 @@ import jspecview.common.ZoomEvent;
 
 import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
-import jspecview.util.JSVEscape;
-
 
 /**
  * JSpecView Applet class. For a list of parameters and scripting functionality
@@ -86,7 +85,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	public JSVApp(AppletFrame appletFrame, boolean isJS) {
 		this.appletFrame = appletFrame;
 		initViewer(isJS);
-		init();
+		initParams(appletFrame.getParameter("script"));
 	}
 
 	private void initViewer(boolean isJS) {
@@ -247,7 +246,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	}
 
 	public void setFilePath(String tmpFilePath) {
-		runScript("load " + JSVEscape.eS(tmpFilePath));
+		runScript("load " + PT.esc(tmpFilePath));
 	}
 
 	/**
@@ -355,23 +354,6 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	}
 
 	// //////////////////////// PRIVATE or SEMIPRIVATE METHODS
-	// ////////////////////
-	// ///////////
-	// ///////////
-	// ///////////
-	// ///////////
-	// ///////////
-
-	/**
-	 * Initializes applet with parameters and load the <code>JDXSource</code>
-	 * called by the browser
-	 * 
-	 */
-	private void init() {
-
-		initParams(appletFrame.getParameter("script"));
-		
-	}
 
 	/**
 	 * starts or restarts applet display from scratch or from a JSVApplet.script()
@@ -393,12 +375,15 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 		newAppletPanel();
 		viewer.setPopupMenu(allowMenu, viewer.parameters
 				.getBoolean(ScriptToken.ENABLEZOOM));
+		if (allowMenu) {
+			viewer.closeSource(null);
+		}
 		runScriptNow(params);
 	}
 
 	private void newAppletPanel() {
 		Logger.info("newAppletPanel");
-		appletFrame.addNewPanel(viewer);
+		appletFrame.createMainPanel(viewer);
 	}
 
 	private JSVPanel prevPanel;
@@ -459,8 +444,9 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	}
 
 	public void siValidateAndRepaint() {
-		if (viewer.selectedPanel != null)
-			viewer.selectedPanel.getPanelData().taintedAll = true;
+		PanelData pd;
+		if (viewer.selectedPanel != null && (pd = viewer.selectedPanel.getPanelData()) != null)
+			pd.taintedAll = true;
 		appletFrame.validate();
 		repaint();
 	}
@@ -586,13 +572,6 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 			return;
 		default:	
 			siSetSelectedPanel(null);
-			/*
-			 * @j2sNative
-			 *
-			 * alert("Cannot read file: " + url);
-			 * 
-			 */
-			{}
 			return;
 		}
 
@@ -640,7 +619,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 		if (!viewer.selectedPanel.getPanelData().getPickedCoordinates(coord,
 				actualCoord))
 			return;
-		int iSpec = viewer.viewPanel.getCurrentPanelIndex();
+		int iSpec = viewer.mainPanel.getCurrentPanelIndex();
 		if (actualCoord == null)
 			appletFrame.callToJavaScript(coordCallbackFunctionName, new Object[] {
 					Double.valueOf(coord.getXVal()), Double.valueOf(coord.getYVal()),
@@ -653,9 +632,13 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	}
 
 	public void siSetSelectedPanel(JSVPanel jsvp) {
-		viewer.viewPanel.setSelectedPanel(jsvp, viewer.panelNodes);
+		viewer.mainPanel.setSelectedPanel(viewer, jsvp, viewer.panelNodes);
 		viewer.selectedPanel = jsvp;
 		viewer.spectraTree.setSelectedPanel(this, jsvp);
+		if (jsvp == null) {
+			viewer.selectedPanel = jsvp = appletFrame.getJSVPanel(viewer, null, -1, -1);
+			viewer.mainPanel.setSelectedPanel(viewer, jsvp, null);
+		}
 		appletFrame.validate();
 		if (jsvp != null) {
 			jsvp.setEnabled(true);
@@ -728,12 +711,9 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	}
 
 	public String siExecLoad(String value) {
-		// int nSpec = panelNodes.size();
 		viewer.load(value);
 		if (viewer.selectedPanel == null)
 			return null;
-		// probably unnecessary:
-		// setSpectrumIndex(nSpec, "execLoad");
 		if (loadFileCallbackFunctionName != null)
 			appletFrame.callToJavaScript(loadFileCallbackFunctionName, new Object[] { viewer.appletID,
 					value });
@@ -750,6 +730,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	}
 
 	public void siExecScriptComplete(String msg, boolean isOK) {
+		viewer.showMessage(msg);
 		siValidateAndRepaint();
 	}
 
@@ -809,6 +790,10 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	}
 
 	public JSVPanel siGetNewJSVPanel2(List<JDXSpectrum> specs) {
+		if (specs == null) {
+			initialEndIndex = initialStartIndex = -1;
+			return appletFrame.getJSVPanel(viewer, null, -1, -1);
+		}
 		JSVPanel jsvp = appletFrame.getJSVPanel(viewer, specs, initialStartIndex,
 				initialEndIndex);
 		initialEndIndex = initialStartIndex = -1;

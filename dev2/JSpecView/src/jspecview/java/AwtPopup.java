@@ -61,8 +61,6 @@ public class AwtPopup extends JSVGenericPopup {
    * If you are not using Java awt/Swing, then you need to also overload 
    * Swingpopup.java and extend it as desired. Or completely omit this package 
    * 
-   * Note that changes here should also be reflected in jspecview.modelkit.ModelKitPopup.
-   * 
    */
   public AwtPopup() {
     // required by reflection

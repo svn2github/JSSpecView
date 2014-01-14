@@ -7,11 +7,10 @@ import javajs.util.List;
 
 import jspecview.api.JSVMainPanel;
 import jspecview.api.JSVPanel;
-import jspecview.api.JSVViewPanel;
+import jspecview.common.JSViewer;
 import jspecview.common.PanelNode;
-import jspecview.common.Annotation.AType;
 
-public class JsViewPanel implements JSVViewPanel, JSVMainPanel {
+public class JsMainPanel implements JSVMainPanel {
 
 	private JSVPanel selectedPanel;
 	private int currentPanelIndex;
@@ -34,27 +33,13 @@ public class JsViewPanel implements JSVViewPanel, JSVMainPanel {
 		this.title = title;
 	}
 
-	public void setSelectedPanel(JSVPanel jsvp, List<PanelNode> panelNodes) {
-		if (jsvp != selectedPanel) {
+	public void setSelectedPanel(JSViewer viewer, JSVPanel jsvp, List<PanelNode> panelNodes) {
+		if (jsvp != selectedPanel)
 			selectedPanel = jsvp;
-		}
-		for (int i = panelNodes.size(); --i >= 0;) {
-			JSVPanel j = panelNodes.get(i).jsvp;
-			if (j == jsvp) {
-				currentPanelIndex = i;
-			} else {
-				j.setEnabled(false);
-				j.setFocusable(false);
-				j.getPanelData().closeAllDialogsExcept(AType.NONE);
-			}
-		}
-		markSelectedPanels(panelNodes);
-		visible = (jsvp != null);
-	}
-
-	public void markSelectedPanels(List<PanelNode> panelNodes) {
-		for (int i = panelNodes.size(); --i >= 0;)
-			panelNodes.get(i).isSelected = (currentPanelIndex == i);
+    int i = viewer.selectPanel(jsvp, panelNodes);
+    if (i >= 0)
+      currentPanelIndex = i;    
+		visible = true;
 	}
 
 	public int getHeight() {

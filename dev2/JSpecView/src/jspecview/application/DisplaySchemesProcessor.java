@@ -37,8 +37,6 @@ import jspecview.common.JSVFileManager;
 import jspecview.common.ScriptToken;
 import jspecview.java.AwtParameters;
 
-import jspecview.util.JSVTxt;
-
 /**
  * <code>DisplaySchemesProcessor</code> loads and saves the display schemes of
  * Jspecview. The Schemes are loaded from an XML file and saved in a TreeMap.
@@ -48,6 +46,8 @@ import jspecview.util.JSVTxt;
  * @author Prof Robert J. Lancashire
  */
 public class DisplaySchemesProcessor {
+
+	private final String newLine = System.getProperty("line.separator");
 
   /** The Name of the XML file that contains the display schemes */
   private String fileName = "displaySchemes.xml";
@@ -262,8 +262,8 @@ public class DisplaySchemesProcessor {
 		for (ColorParameters ds : displaySchemes.values()) {
 			if (ds.isDefault)
 				defaultDSName = ds.name;
-			buffer.append("\t<displayScheme name=\"" + ds.name + "\">").append(JSVTxt.newLine);
-			buffer.append("\t\t<font face=\"" + ds.displayFontName + "\"/>").append(JSVTxt.newLine);
+			buffer.append("\t<displayScheme name=\"" + ds.name + "\">").append(newLine);
+			buffer.append("\t\t<font face=\"" + ds.displayFontName + "\"/>").append(newLine);
 			writeColor(buffer, ds, "titleColor", ScriptToken.TITLECOLOR);
 			writeColor(buffer, ds, "scaleColor", ScriptToken.SCALECOLOR);
 			writeColor(buffer, ds, "unitsColor", ScriptToken.UNITSCOLOR);
@@ -274,14 +274,14 @@ public class DisplaySchemesProcessor {
 			writeColor(buffer, ds, "plotColor", ScriptToken.PLOTCOLOR);
 			writeColor(buffer, ds, "plotAreaColor", ScriptToken.PLOTAREACOLOR);
 			writeColor(buffer, ds, "backgroundColor", ScriptToken.BACKGROUNDCOLOR);
-			buffer.append("\t</displayScheme>").append(JSVTxt.newLine);
+			buffer.append("\t</displayScheme>").append(newLine);
 		}
 		buffer.append("</displaySchemes>");
 
 		SB outBuffer = new SB();
-		outBuffer.append("<?xml version=\"1.0\"?>" + JSVTxt.newLine);
+		outBuffer.append("<?xml version=\"1.0\"?>" + newLine);
 		outBuffer.append("<displaySchemes default=\"" + defaultDSName + "\">"
-				+ JSVTxt.newLine);
+				+ newLine);
 		outBuffer.append(buffer.toString());
 		writer.write(outBuffer.toString());
 		writer.flush();
@@ -293,7 +293,7 @@ public class DisplaySchemesProcessor {
 		buffer.append(
 				"\t\t<" + name + " hex=\""
 						+ CU.toRGBHexString(ds.getElementColor(t)) + "\"/>")
-				.append(JSVTxt.newLine);
+				.append(newLine);
 	}
 
 }

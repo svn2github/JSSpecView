@@ -315,14 +315,14 @@ class FormContext {
       return false;
     }
     data = data.substring(0, pt);
-    data = PT.simpleReplace(data, "=", " = ");
-    data = PT.simpleReplace(data, "!", " ! ");
-    data = PT.simpleReplace(data, "<", " < ");
-    data = PT.simpleReplace(data, ">", " > ");
-    data = PT.simpleReplace(data, "=  =", "==");
-    data = PT.simpleReplace(data, "<  =", "<=");
-    data = PT.simpleReplace(data, ">  =", ">=");
-    data = PT.simpleReplace(data, "!  =", "!=");
+    data = PT.rep(data, "=", " = ");
+    data = PT.rep(data, "!", " ! ");
+    data = PT.rep(data, "<", " < ");
+    data = PT.rep(data, ">", " > ");
+    data = PT.rep(data, "=  =", "==");
+    data = PT.rep(data, "<  =", "<=");
+    data = PT.rep(data, ">  =", ">=");
+    data = PT.rep(data, "!  =", "!=");
     String[] tokens = PT.getTokens(data);
     String key = tokens[0].substring(1);
     boolean isNot = false;

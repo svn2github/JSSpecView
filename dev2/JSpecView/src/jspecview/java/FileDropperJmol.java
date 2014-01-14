@@ -40,8 +40,7 @@ import java.io.File;
 import java.util.List;
 
 import javajs.api.PlatformViewer;
-
-import jspecview.util.JSVEscape;
+import javajs.util.PT;
 
 import org.jmol.util.Logger;
 
@@ -65,6 +64,9 @@ public class FileDropperJmol implements DropTargetListener {
   PropertyChangeListener pcl;
   //JmolStatusListener statusListener;
 
+  /**
+	 * @param viewer  
+	 */
   public FileDropperJmol(PlatformViewer viewer) {
     fd_oldFileName = "";
     fd_propSupport = new PropertyChangeSupport(this);
@@ -99,7 +101,7 @@ public class FileDropperJmol implements DropTargetListener {
       fname = fname.replace('\\', '/').trim();
       fname = (fname.startsWith("/") ? "file://" : "file:///") + fname;
       sb.append("load ").append(i == 0 ? "" : "APPEND ").append(
-          JSVEscape.eS(fname)).append(";\n");
+          PT.esc(fname)).append(";\n");
     }
     sb.append("frame *;reset;");
     //viewer.script(sb.toString());

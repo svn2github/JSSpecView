@@ -36,7 +36,6 @@ import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
 import jspecview.common.Annotation.AType;
 
-
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -85,6 +84,8 @@ abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
 	private List<String> cnmrPeaks;
 	private List<String> hnmrPeaks;
 	private int aboutComputedMenuBaseCount;
+	private boolean allowMenu;
+	private boolean zoomEnabled;
 
 	public JSVGenericPopup() {
 		// required by reflection
@@ -237,13 +238,6 @@ abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
 
 	// /////// private methods /////////
 
-//	private static boolean checkBoolean(Map<String, Object> info, String key) {
-//		return (info != null && info.get(key) == Boolean.TRUE); // not
-//																														// "Boolean.TRUE.equals(...)"
-//																														// (not working in
-//																														// Java2Script yet)
-//	}
-
 	private void getViewerData() {
 		isApplet = viewer.isApplet;
 		isSigned = viewer.isSigned;
@@ -343,9 +337,9 @@ abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
 			label = label.substring(label.indexOf("_", 2) + 1);
 		else if (label.equals("VERSION"))
 			label = JSVersion.VERSION;
-		label = PT.simpleReplace(label, "CB", "");
-		label = PT.simpleReplace(label, "Menu", "");
-		label = PT.simpleReplace(label, "_", " ");
+		label = PT.rep(label, "CB", "");
+		label = PT.rep(label, "Menu", "");
+		label = PT.rep(label, "_", " ");
 		return label;
 	}
 
@@ -393,7 +387,7 @@ abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
 				what = what.substring(pt + 1);
 				if ((pt = what.indexOf("|")) >= 0)
 					what = (TF ? what.substring(0, pt) : what.substring(pt + 1)).trim();
-				what = PT.simpleReplace(what, "T/F", (TF ? " TRUE" : " FALSE"));
+				what = PT.rep(what, "T/F", (TF ? " TRUE" : " FALSE"));
 			}
 		}
 		viewer.runScript(what);
@@ -415,21 +409,11 @@ abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
 		viewer.runScript(script);
 	}
 
-//	private Object addMenuItem(Object menuItem, String entry) {
-//		return menuCreateItem(menuItem, entry, "", null);
-//	}
-
-	
 	private void updateFileMenu() {
 		Object menu = htMenus.get("fileMenu");
 		if (menu == null)
 			return;
 	}
-
-//	private String getMenuText(String key) {
-//		String str = menuText.getProperty(key);
-//		return (str == null ? key : str);
-//	}
 
 	private void updateSpectraMenu() {
 		Object menuh = htMenus.get("hnmrMenu");
@@ -467,7 +451,7 @@ abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
 			String atoms = PT.getQuotedAttribute(peak, "atoms");
 			if (atoms != null)
 				menuCreateItem(menu, title, "select visible & (@"
-						+ PT.simpleReplace(atoms, ",", " or @") + ")", "Focus" + i);
+						+ PT.rep(atoms, ",", " or @") + ")", "Focus" + i);
 		}
 		menuEnable(menu, true);
 		return true;
@@ -478,64 +462,7 @@ abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
 		if (menu == null)
 			return;
 		menuRemoveAll(menu, aboutComputedMenuBaseCount);
-		// subMenu = menuNewSubMenu("Jmol " + JC.version
-		// + (isSigned ? " (signed)" : ""), "aboutJmolMenu");
-		// menuAddSubMenu(menu, subMenu);
-		// htMenus.put("aboutJmolMenu", subMenu);
-		// addMenuItem(subMenu, JC.date);
-		// menuCreateItem(subMenu, "http://www.jmol.org",
-		// "show url \"http://www.jmol.org\"", null);
-		// menuCreateItem(subMenu, GT._("Mouse Manual"),
-		// "show url \"http://wiki.jmol.org/index.php/Mouse_Manual\"", null);
-		// menuCreateItem(subMenu, GT._("Translations"),
-		// "show url \"http://wiki.jmol.org/index.php/Internationalisation\"",
-		// null);
-		//
-		// subMenu = menuNewSubMenu(GT._("System"), "systemMenu");
-		// menuAddSubMenu(menu, subMenu);
-		// htMenus.put("systemMenu", subMenu);
-		// addMenuItem(subMenu, viewer.getOperatingSystemName());
-		// menuAddSeparator(subMenu);
-		// addMenuItem(subMenu, GT._("Java version:"));
-		// addMenuItem(subMenu, viewer.getJavaVendor());
-		// addMenuItem(subMenu, viewer.getJavaVersion());
-		// Runtime runtime = null;
-		// /**
-		// * @j2sNative
-		// *
-		// */
-		// {
-		// runtime = Runtime.getRuntime();
-		// }
-		// if (runtime != null) {
-		// int availableProcessors = runtime.availableProcessors();
-		// if (availableProcessors > 0)
-		// addMenuItem(subMenu, (availableProcessors == 1) ? GT._("1 processor")
-		// : GT._("{0} processors", availableProcessors));
-		// else
-		// addMenuItem(subMenu, GT._("unknown processor count"));
-		// addMenuItem(subMenu, GT._("Java memory usage:"));
-		// //runtime.gc();
-		// long mbTotal = convertToMegabytes(runtime.totalMemory());
-		// long mbFree = convertToMegabytes(runtime.freeMemory());
-		// long mbMax = convertToMegabytes(runtime.maxMemory());
-		// addMenuItem(subMenu, GT._("{0} MB total",
-		// new Object[] { new Long(mbTotal) }));
-		// addMenuItem(subMenu, GT._("{0} MB free",
-		// new Object[] { new Long(mbFree) }));
-		// if (mbMax > 0)
-		// addMenuItem(subMenu, GT._("{0} MB maximum", new Object[] { new Long(
-		// mbMax) }));
-		// else
-		// addMenuItem(subMenu, GT._("unknown maximum"));
-		// }
 	}
-
-//	private long convertToMegabytes(long num) {
-//		if (num <= Long.MAX_VALUE - 512 * 1024)
-//			num += 512 * 1024;
-//		return num / (1024 * 1024);
-//	}
 
 	private void updateForShow() {
 		if (updateMode == UPDATE_NEVER)
@@ -562,93 +489,12 @@ abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
 			menuShowPopup(popupMenu, thisX, thisY);
 	}
 
-//	/**
-//	 * menus or menu items with SPECIAL in their name are sent here for on-the-fly
-//	 * labeling
-//	 * 
-//	 * @param name
-//	 * @param text
-//	 * @return revised text
-//	 */
-//	protected String getSpecialLabel(String name, String text) {
-//		int pt = text.indexOf(" (");
-//		if (pt < 0)
-//			pt = text.length();
-//		String info = null;
-//		return (info == null ? text : text.substring(0, pt) + " (" + info + ")");
-//	}
-
 	public void checkMenuFocus(String name, String cmd, boolean isFocus) {
 		if (name.indexOf("Focus") < 0)
 			return;
 		if (isFocus)
 			viewer.runScript(cmd);
 	}
-
-	//
-	// headerMenuItem.setText("Show Header...");
-	// app.showHeader();
-	//
-	// windowMenuItem.setText("Window");
-	// app.newWindow(e.getStateChange() == ItemEvent.SELECTED, false);
-	//
-	// overlayKeyMenuItem.setText("Show Overlay Key...");
-	// overlayKeyMenuItem_actionPerformed();
-	//
-	// printMenuItem.setActionCommand("Print");
-	// app.print();
-	//    
-	// versionMenuItem.setText("<html><h3>" + app.getAppletFrame().getAppletInfo()
-	// + "</h3></html>");
-	//
-	// nextMenuItem.setText("Next View");
-	// viewer.getPanelData().nextView();
-	// reboot();
-	//
-	// previousMenuItem.setText("Previous View");
-	// viewer.getPanelData().previousView();
-	// reboot();
-	//
-	// clearMenuItem.setText("Clear Views");
-	// viewer.getPanelData().resetView();
-	//
-	// resetMenuItem.setText("Reset View");
-	// viewer.getPanelData().clearAllView();
-	//    
-	// setOverlayItems();
-	//
-	//
-	// spectraMenuItem.setText("Views...");
-	// overlay(thisJsvp, "DIALOG");
-	//
-	// overlayStackOffsetMenuItem.setText("Overlay Offset...");
-	// overlay(thisJsvp, "OFFSETY");
-	//    
-	// scriptMenuItem.setText("Script...");
-	// script(thisJsvp);
-	//
-	// userZoomMenuItem.setText("Set Zoom...");
-	// userZoom(thisJsvp);
-	//
-	// properties.setActionCommand("Properties");
-	// properties.setText("Properties");
-	// viewer.showProperties();
-	//
-	// gridCheckBoxMenuItem.setText("Show Grid");
-	// runScript(scripter, "GRIDON " + (e.getStateChange() ==
-	// ItemEvent.SELECTED));
-	// reboot();
-	//
-	// coordsCheckBoxMenuItem.setText("Show Coordinates");
-	// runScript(scripter, "COORDINATESON " + (e.getStateChange() ==
-	// ItemEvent.SELECTED));
-	// reboot();
-	//
-	// reversePlotCheckBoxMenuItem.setText("Reverse Plot");
-	// runScript(scripter, "REVERSEPLOT " + (e.getStateChange() ==
-	// ItemEvent.SELECTED));
-	// reboot();
-	//    
 
 	public boolean getSelected(String key) {
 		// TODO Auto-generated method stub
@@ -662,47 +508,51 @@ abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
 	}
 
 	public void setEnabled(boolean allowMenu, boolean zoomEnabled) {
-    if (!allowMenu) {
-    	// all except About and Zoom disabled
-      setItemEnabled("_SIGNED_FileMenu", false);
-      setItemEnabled("ViewMenu", false);
-      setItemEnabled("Views", false);
-      setItemEnabled("Script", false);
-      setItemEnabled("Print", false);
-      //appletAdvancedMenuItem.setEnabled(false);
-    	// about still allowed
-    }
-    setItemEnabled("ZoomMenu", zoomEnabled);  	
+		this.allowMenu = allowMenu;
+		this.zoomEnabled = zoomEnabled;
+		enableMenus();
+	}
+	
+  private void enableMenus() {
+		// all except About and Zoom disabled
+		setItemEnabled("_SIGNED_FileMenu", allowMenu);
+		setItemEnabled("ViewMenu", pd != null && allowMenu);
+		setItemEnabled("Open_File...", allowMenu);
+		setItemEnabled("Open_Simulation...", allowMenu);
+		setItemEnabled("Open_URL...", allowMenu);
+		setItemEnabled("Save_AsMenu", pd != null && allowMenu);
+		setItemEnabled("Export_AsMenu", pd != null && allowMenu);
+		setItemEnabled("Append_File...", pd != null && allowMenu);
+		setItemEnabled("Append_Simulation...", pd != null && allowMenu);
+		setItemEnabled("Append_URL...", pd != null && allowMenu);
+		setItemEnabled("Views...", pd != null && allowMenu);
+		setItemEnabled("Script", allowMenu);
+		setItemEnabled("Print...", pd != null && allowMenu);
+		setItemEnabled("ZoomMenu", pd != null && zoomEnabled);
 	}
 
-  private PanelData pd;
+
+	private PanelData pd;
   private int thisX, thisY;
   protected JSVPanel thisJsvp;
   
   private void setEnables(JSVPanel jsvp) {
-    pd = jsvp.getPanelData();
-    JDXSpectrum spec0 = pd.getSpectrum();
-    //setSelected("Show_GridCB", pd.getBoolean(ScriptToken.GRIDON));
-    //setSelected("Show_CoordinatesCB", pd.getBoolean(ScriptToken.COORDINATESON));
-    //setSelected("Show_X_AxisCB", pd.getBoolean(ScriptToken.XSCALEON));
-    //setSelected("Show_Y_AxisCB", pd.getBoolean(ScriptToken.YSCALEON));
-    //setSelected("Reverse_PlotCB", pd.getBoolean(ScriptToken.REVERSEPLOT));
-
-    boolean isOverlaid = pd.isShowAllStacked();
-    boolean isSingle = pd.haveSelectedSpectrum();
+    pd = (jsvp == null ? null : jsvp.getPanelData());
+    JDXSpectrum spec0 = (pd == null ? null : pd.getSpectrum());
+    boolean isOverlaid = pd != null && pd.isShowAllStacked();
+    boolean isSingle = pd != null && pd.haveSelectedSpectrum();
     
-    setItemEnabled("Integration", pd.getSpectrum().canIntegrate());
-    setItemEnabled("Measurements", pd.hasCurrentMeasurements(AType.Measurements));
-    setItemEnabled("Peaks", pd.getSpectrum().is1D());
+    setItemEnabled("Integration", pd != null && pd.getSpectrum().canIntegrate());
+    setItemEnabled("Measurements", pd != null && pd.hasCurrentMeasurements(AType.Measurements));
+    setItemEnabled("Peaks", pd != null && pd.getSpectrum().is1D());
     
     setItemEnabled("Predicted_Solution_Colour", isSingle && spec0.canShowSolutionColor());
     setItemEnabled("Toggle_Trans/Abs", isSingle && spec0.canConvertTransAbs());
     setItemEnabled("Show_Overlay_Key", isOverlaid && pd.getNumberOfGraphSets() == 1);
     setItemEnabled("Overlay_Offset...", isOverlaid);
-    setItemEnabled("JDXMenu", spec0.canSaveAsJDX());
-    setItemEnabled("ExportAsMenu", true);
-    //if (appletAdvancedMenuItem != null)
-      //appletAdvancedMenuItem.setEnabled(!isOverlaid);
+    setItemEnabled("JDXMenu", pd != null && spec0.canSaveAsJDX());
+    setItemEnabled("Export_AsMenu", pd != null);
+  	enableMenus();
   }
 
   private void setItemEnabled(String key, boolean TF) {

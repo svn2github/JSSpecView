@@ -28,7 +28,7 @@ class JsFile implements GenericFileInterface {
   	fullName = name;
   	if (!fullName.startsWith("/") && JSVFileManager.urlTypeIndex(name) < 0)
   		fullName = JSVFileManager.jsDocumentBase + "/" + fullName;
-  	fullName = PT.simpleReplace(fullName, "/./", "/");
+  	fullName = PT.rep(fullName, "/./", "/");
   	name = name.substring(name.lastIndexOf("/") + 1);
   }
 

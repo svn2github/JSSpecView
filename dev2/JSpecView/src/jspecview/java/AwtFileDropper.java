@@ -10,13 +10,13 @@ import java.awt.dnd.DropTargetListener;
 import java.io.File;
 
 import javajs.util.List;
+import javajs.util.PT;
 import javajs.util.SB;
 
 import javax.swing.JOptionPane;
 
 import jspecview.api.JSVFileDropper;
 import jspecview.common.JSViewer;
-import jspecview.util.JSVEscape;
 
 import org.jmol.util.Logger;
 
@@ -91,7 +91,7 @@ public class AwtFileDropper implements JSVFileDropper, DropTargetListener {
 				SB sb = new SB();
 				sb.append(prefix);
 				for (int i = 0; i < list.size(); i++)
-					sb.append(cmd + JSVEscape.eS(list.get(i).getAbsolutePath()) + ";");
+					sb.append(cmd + PT.esc(list.get(i).getAbsolutePath()) + ";");
 				sb.append(postfix);
 				cmd = sb.toString();
 				Logger.info("Drop command = " + cmd);
@@ -192,7 +192,7 @@ public class AwtFileDropper implements JSVFileDropper, DropTargetListener {
 		if (!isAccepted)
 			dtde.rejectDrop();
 		if (fileToLoad != null) {
-			cmd = prefix + cmd + JSVEscape.eS(fileToLoad) + "\";" + postfix;
+			cmd = prefix + cmd + PT.esc(fileToLoad) + "\";" + postfix;
 			Logger.info("Drop command = " + cmd);
 			viewer.runScriptNow(cmd);
 		}

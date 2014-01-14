@@ -20,9 +20,10 @@ import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
 import jspecview.common.PrintLayout;
 import jspecview.common.Annotation.AType;
-import jspecview.util.JSVTxt;
 
 public class Exporter implements ExportInterface {
+
+	static final String newLine = System.getProperty("line.separator");
 
 	public Exporter() {
 		// for reflection; called directly only from MainFrame
@@ -317,7 +318,7 @@ public class Exporter implements ExportInterface {
       String line = null;
       while ((line = br.readLine()) != null) {
         out.append(line);
-        out.append(JSVTxt.newLine);
+        out.append(newLine);
       }
       out.closeChannel();
       return "OK " + out.getByteCount() + " bytes";

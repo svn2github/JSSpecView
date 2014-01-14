@@ -74,13 +74,13 @@ import jspecview.source.JDXSource;
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
  */
-public class AppMenu extends JMenuBar {
+public class ApplicationMenu extends JMenuBar {
 
   private static final long serialVersionUID = 1L;
   protected MainFrame mainFrame;
   protected JSViewer viewer;
 
-  public AppMenu(MainFrame si) throws Exception {
+  public ApplicationMenu(MainFrame si) throws Exception {
     this.mainFrame = si;
     viewer = si.viewer;
     jbInit();
@@ -121,24 +121,25 @@ public class AppMenu extends JMenuBar {
    */
   private void jbInit() throws Exception {
   	
-    JMenuItem openMenuItem = setMenuItem(null, 'O', "Open...", 79,
+    JMenuItem openFileMenuItem = setMenuItem(null, 'O', "Open File...", 79,
         InputEvent.CTRL_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            mainFrame.showFileOpenDialog();
+            viewer.openFileFromDialog(false, false, false);
+          }
+        });
+    JMenuItem openSimulationMenuItem = setMenuItem(null, 'I', "Open Simulation...", 79,
+        InputEvent.CTRL_MASK, new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            viewer.openFileFromDialog(false, false, true);
           }
         });
     JMenuItem openURLMenuItem = setMenuItem(null, 'U', "Open URL...", 85,
         InputEvent.CTRL_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            mainFrame.openURL();
+            viewer.openFileFromDialog(false, true, false);
           }
         });
-    JMenuItem simulateMenuItem = setMenuItem(null, 'I', "Simulate...", 73,
-        InputEvent.CTRL_MASK, new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            mainFrame.simulate();
-          }
-        });
+    
     printMenuItem = setMenuItem(null, 'P', "Print...", 80,
         InputEvent.CTRL_MASK, new ActionListener() {
           public void actionPerformed(ActionEvent e) {
@@ -276,7 +277,7 @@ public class AppMenu extends JMenuBar {
             showPreferencesDialog();
           }
         });
-    JMenuItem aboutMenuItem = setMenuItem(null, 'A', "About", 0, 0,
+    JMenuItem aboutMenuItem = setMenuItem(null, '\0', "About", 0, 0,
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             new AboutDialog(mainFrame);
@@ -364,10 +365,11 @@ public class AppMenu extends JMenuBar {
     });
     setProcessingMenu(processingMenu);
 
-    fileMenu.add(openMenuItem);
+    fileMenu.add(openFileMenuItem);
+    fileMenu.add(openSimulationMenuItem);
     fileMenu.add(openURLMenuItem);
     fileMenu.add(openRecentMenu);
-    fileMenu.add(simulateMenuItem);
+    // application does not need append
     fileMenu.addSeparator();
     fileMenu.add(closeMenuItem).setEnabled(false);
     fileMenu.add(closeAllMenuItem).setEnabled(false);
@@ -562,7 +564,7 @@ public class AppMenu extends JMenuBar {
       openRecentMenu.add(menuItem);
       menuItem.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          mainFrame.openFile(((JMenuItem) e.getSource()).getText(), true);
+          viewer.openFile(((JMenuItem) e.getSource()).getText(), true);
         }
       });
     }
@@ -577,7 +579,7 @@ public class AppMenu extends JMenuBar {
       openRecentMenu.add(menuItem);
       menuItem.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          mainFrame.openFile(((JMenuItem) e.getSource()).getText(), true);
+          viewer.openFile(((JMenuItem) e.getSource()).getText(), true);
         }
       });
     }

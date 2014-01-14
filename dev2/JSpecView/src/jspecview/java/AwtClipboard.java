@@ -35,8 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import jspecview.util.JSVEscape;
-
+import javajs.util.PT;
 
 
 /**
@@ -125,14 +124,14 @@ public class AwtClipboard implements Transferable {
           return null;
         if (length == 1) {
           result = "LoAd "
-              + JSVEscape.eS(fileList.get(0).getAbsolutePath().replace('\\', '/'));
+              + PT.esc(fileList.get(0).getAbsolutePath().replace('\\', '/'));
           if (result.endsWith(".pse\""))
             result += " filter 'DORESIZE'";
         } else {
           result = "LoAd files ";
           for (int i = 0; i < length; i++)
             result += " "
-                + JSVEscape.eS(fileList.get(i).getAbsolutePath()
+                + PT.esc(fileList.get(i).getAbsolutePath()
                     .replace('\\', '/'));
         }
       }

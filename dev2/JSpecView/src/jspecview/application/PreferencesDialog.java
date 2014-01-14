@@ -63,7 +63,7 @@ import javax.swing.event.ListSelectionListener;
 import jspecview.common.ColorParameters;
 import jspecview.common.JSViewer;
 import jspecview.common.ScriptToken;
-import jspecview.exception.JSpecViewException;
+import jspecview.exception.JSVException;
 import jspecview.java.AwtColor;
 import jspecview.java.AwtPanel;
 import jspecview.java.AwtParameters;
@@ -637,7 +637,7 @@ public class PreferencesDialog extends JDialog implements ActionListener {
       previewPanel.getPanelData().setBoolean(ScriptToken.GRIDON, true);
       previewPanel.getPanelData().setBoolean(ScriptToken.TITLEON, true);
       previewPanel.getPanelData().setBoolean(ScriptToken.COORDINATESON, true);
-    } catch (JSpecViewException ex) {
+    } catch (JSVException ex) {
       ex.printStackTrace();
     } catch (Exception ioe) {
       ioe.printStackTrace();

@@ -113,7 +113,7 @@ public class AppToolBar extends JToolBar {
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (script.equals("open"))
-	        mainFrame.showFileOpenDialog();
+	        viewer.openFileFromDialog(false, false, false);
 				else if (script.equals("about"))
 	        new AboutDialog(mainFrame);
 				else

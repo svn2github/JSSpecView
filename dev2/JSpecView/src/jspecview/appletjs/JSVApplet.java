@@ -66,7 +66,7 @@ import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVersion;
 import jspecview.common.JSViewer;
 import jspecview.js2d.JsPanel;
-import jspecview.js2d.JsViewPanel;
+import jspecview.js2d.JsMainPanel;
 /**
  * 
  * Entry point for the web.
@@ -429,8 +429,8 @@ public class JSVApplet implements JSVAppletInterface,
 //			spectrumPanel.validate();
 	}
 
-	public void addNewPanel(JSViewer viewer) {
-		viewer.viewPanel = new JsViewPanel();
+	public void createMainPanel(JSViewer viewer) {
+		viewer.mainPanel = new JsMainPanel();
 	}
 
 
@@ -503,8 +503,8 @@ public class JSVApplet implements JSVAppletInterface,
 
 	public JSVPanel getJSVPanel(JSViewer viewer, List<JDXSpectrum> specs,
 			int initialStartIndex, int initialEndIndex) {
-		return JsPanel.getPanelMany(viewer, specs, initialStartIndex,
-				initialEndIndex);
+		return (specs == null ? JsPanel.getEmptyPanel(viewer) 
+			  : JsPanel.getPanelMany(viewer, specs, initialStartIndex, initialEndIndex));
 	}
 
 	public void setVisible(boolean b) {

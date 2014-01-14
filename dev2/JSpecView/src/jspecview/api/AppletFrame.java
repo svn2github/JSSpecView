@@ -11,33 +11,33 @@ import jspecview.common.JSViewer;
 
 public interface AppletFrame {
 
-	URL getDocumentBase();
+	void callToJavaScript(String callbackName, Object[] data);
 
-	void setDropTargetListener(boolean isSigned, JSViewer viewer);
+	void createMainPanel(JSViewer viewer);
+
+	void doExitJmol();
+
+	JSVApp getApp();
 
 	String getAppletInfo();
 
-	void addNewPanel(JSViewer viewer);
+	URL getDocumentBase();
+
+	JSVPanel getJSVPanel(JSViewer viewer, List<JDXSpectrum> specs,
+			int initialStartIndex, int initialEndIndex);
+
+	String getParameter(String name);
 
 	void newWindow(boolean isSelected);
 
 	void repaint();
 
-	void validate();
-
-	String getParameter(String name);
-
-	void callToJavaScript(String callbackName, Object[] data);
+	void setDropTargetListener(boolean isSigned, JSViewer viewer);
 
 	void setPanelVisible(boolean b);
 
+	void validate();
+
 	void validateContent(int mode);
-
-	JSVPanel getJSVPanel(JSViewer viewer, List<JDXSpectrum> specs,
-			int initialStartIndex, int initialEndIndex);
-
-	void doExitJmol();
-
-	JSVApp getApp();
 
 }

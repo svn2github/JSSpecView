@@ -23,8 +23,10 @@ import java.io.IOException;
 import java.util.Arrays;
 
 
+import javajs.util.DF;
 import javajs.util.OC;
 import javajs.util.List;
+import javajs.util.PT;
 
 import jspecview.api.JSVExporter;
 import jspecview.common.Coordinate;
@@ -34,7 +36,6 @@ import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
 import jspecview.source.FileReader;
 import jspecview.source.JDXDataObject;
-import jspecview.util.JSVTxt;
 
 /**
  * class <code>JDXExporter</code> contains methods for exporting a
@@ -248,26 +249,26 @@ public class JDXExporter implements JSVExporter {
         newLine);
     out.append("##YUNITS= ").append(spectrum.getYUnits()).append(
         newLine);
-    out.append("##XFACTOR= ").append(JSVTxt.fixExponentInt(tmpXFactor))
+    out.append("##XFACTOR= ").append(fixExponentInt(tmpXFactor))
         .append(newLine);
-    out.append("##YFACTOR= ").append(JSVTxt.fixExponentInt(tmpYFactor))
+    out.append("##YFACTOR= ").append(fixExponentInt(tmpYFactor))
         .append(newLine);
     double f = (spectrum.isHZtoPPM() ? observedFreq : 1);
     Coordinate[] xyCoords = spectrum.getXYCoords();
     out.append("##FIRSTX= ").append(
-        JSVTxt.fixExponentInt(xyCoords[startIndex].getXVal() * f)).append(
+        fixExponentInt(xyCoords[startIndex].getXVal() * f)).append(
         newLine);
     out.append("##FIRSTY= ").append(
-        JSVTxt.fixExponentInt(xyCoords[startIndex].getYVal())).append(
+        fixExponentInt(xyCoords[startIndex].getYVal())).append(
         newLine);
     out.append("##LASTX= ").append(
-        JSVTxt.fixExponentInt(xyCoords[endIndex].getXVal() * f)).append(
+        fixExponentInt(xyCoords[endIndex].getXVal() * f)).append(
         newLine);
     out.append("##NPOINTS= ").append("" + (Math.abs(endIndex - startIndex) + 1))
         .append(newLine);
-    out.append("##MINY= ").append(JSVTxt.fixExponentInt(minY)).append(
+    out.append("##MINY= ").append(fixExponentInt(minY)).append(
         newLine);
-    out.append("##MAXY= ").append(JSVTxt.fixExponentInt(maxY)).append(
+    out.append("##MAXY= ").append(fixExponentInt(maxY)).append(
         newLine);
   }
 
@@ -275,10 +276,39 @@ public class JDXExporter implements JSVExporter {
                                      int endIndex, double factor, boolean isX) {
     for (int i = startIndex; i <= endIndex; i++) {
       double x = (isX ? xyCoords[i].getXVal() : xyCoords[i].getYVal()) / factor;
-      if (JSVTxt.isAlmostInteger(x))
+      if (isAlmostInteger(x))
           return false;
     }
     return true;
   }
+
+	private static boolean isAlmostInteger(double x) {
+	  return (x != 0 && Math.abs(x - Math.floor(x)) / x > 1e-8);
+	}
+
+	private static String fixExponentInt(double x) {
+	  return (x == Math.floor(x) ? String.valueOf((int) x) : PT.rep(fixExponent(x), "E+00", ""));
+	}
+
+	/**
+	 * JCAMP-DX requires 1.5E[+|-]nn or 1.5E[+|-]nnn only
+	 * not Java's 1.5E3 or 1.5E-2
+	 * 
+	 * @param x
+	 * @return exponent fixed
+	 */
+	private static String fixExponent(double x) {
+	  String s = DF.formatDecimalDbl(x, -7); // "0.000000"
+	  int pt = s.indexOf("E");
+	  if (pt < 0) {
+	    return s;
+	  }
+	  // 4.3E+3
+	  // 4.3E-3
+	  if (s.length() == pt + 3) 
+	    s = s.substring(0, pt + 2) + "0" + s.substring(pt + 2);
+	  return s;
+	}
+
 
 }

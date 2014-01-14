@@ -75,7 +75,7 @@ import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVersion;
 import jspecview.common.JSViewer;
 import jspecview.java.AwtPanel;
-import jspecview.java.ViewPanel;
+import jspecview.java.AwtMainPanel;
 
 /**
  * 
@@ -166,11 +166,6 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 		if (commandWatcherThread != null) {
 			commandWatcherThread.interrupt();
 			commandWatcherThread = null;
-		}
-		try {
-			throw new NullPointerException();
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 		app.dispose();
 		app = null;
@@ -391,7 +386,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	}
 
 	private DropTargetListener dtl;
-	private Component spectrumPanel;
+	private Component mainPanel;
 	private JFrame offWindowFrame;
 
 	public void setDropTargetListener(boolean isSigned, JSViewer viewer) {
@@ -403,25 +398,25 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 		if ((mode & 1) == 1)
 			getContentPane().validate();
 		if ((mode & 2) == 2)
-			spectrumPanel.validate();
+			mainPanel.validate();
 	}
 
-	public void addNewPanel(JSViewer viewer) {
+	public void createMainPanel(JSViewer viewer) {
 		getContentPane().removeAll();
-		spectrumPanel = (Component) (viewer.viewPanel = new ViewPanel(
+		mainPanel = (Component) (viewer.mainPanel = new AwtMainPanel(
 				new BorderLayout()));
-		getContentPane().add(spectrumPanel);
+		getContentPane().add(mainPanel);
 	}
 
 	public void newWindow(boolean isSelected) {
 		if (isSelected) {
 			offWindowFrame = new JFrame("JSpecView");
 			offWindowFrame.setSize(getSize());
-			final Dimension d = spectrumPanel.getSize();
-			offWindowFrame.add(spectrumPanel);
+			final Dimension d = mainPanel.getSize();
+			offWindowFrame.add(mainPanel);
 			offWindowFrame.validate();
 			offWindowFrame.setVisible(true);
-			remove(spectrumPanel);
+			remove(mainPanel);
 			app.siValidateAndRepaint();
 			offWindowFrame.addWindowListener(new WindowAdapter() {
 				@Override
@@ -430,7 +425,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 				}
 			});
 		} else {
-			getContentPane().add(spectrumPanel);
+			getContentPane().add(mainPanel);
 			app.siValidateAndRepaint();
 			offWindowFrame.removeAll();
 			offWindowFrame.dispose();
@@ -439,8 +434,8 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	}
 
 	protected void windowClosingEvent(Dimension d) {
-		spectrumPanel.setSize(d);
-		getContentPane().add(spectrumPanel);
+		mainPanel.setSize(d);
+		getContentPane().add(mainPanel);
 		setVisible(true);
 		app.siValidateAndRepaint();
 		offWindowFrame.removeAll();
@@ -478,13 +473,14 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	}
 
 	public void setPanelVisible(boolean b) {
-		spectrumPanel.setVisible(b);
+		mainPanel.setVisible(b);
 	}
 
 	public JSVPanel getJSVPanel(JSViewer viewer, List<JDXSpectrum> specs,
 			int initialStartIndex, int initialEndIndex) {
-		return AwtPanel.getPanelMany(viewer, specs, initialStartIndex,
-				initialEndIndex);
+		return (specs == null ? AwtPanel.getEmptyPanel(viewer)
+				: AwtPanel.getPanelMany(viewer, specs, initialStartIndex,
+				initialEndIndex));
 	}
 
 	// for the signed applet to load a remote file, it must

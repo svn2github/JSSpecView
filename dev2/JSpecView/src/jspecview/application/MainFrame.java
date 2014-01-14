@@ -57,14 +57,12 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
 import java.net.URL;
 
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-import javajs.api.GenericFileInterface;
 import javajs.util.CU;
 import javajs.util.List;
 import javajs.util.PT;
@@ -106,7 +104,7 @@ import jspecview.common.ZoomEvent;
 import jspecview.export.Exporter;
 import jspecview.java.AwtFileHelper;
 import jspecview.java.AwtPanel;
-import jspecview.java.ViewPanel;
+import jspecview.java.AwtMainPanel;
 import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
 
@@ -136,7 +134,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	// ----------------------------------------------------------------------
 
 	public JSViewer      viewer;
-	private AppMenu         appMenu;
+	private ApplicationMenu         appMenu;
 	private AppToolBar      toolBar;
 	private JTextField      commandInput = new JTextField();
 	private BorderLayout    mainborderLayout = new BorderLayout();
@@ -164,7 +162,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	private JSVPanel                prevPanel;
 	private List<String>        recentFilePaths = new List<String>();
 	private JScrollPane             spectraTreeScrollPane;
-	private Component               spectrumPanel;
+	private Component               mainPanel;
 	private JPanel                  statusPanel = new JPanel();
 	private JLabel                  statusLabel = new JLabel();
 
@@ -192,13 +190,10 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	private String tempDS;
 	private String returnFromJmolModel;
-	private String recentOpenURL = "http://";
 	private String defaultDisplaySchemeName;
-	private String recentURL;
 	private String integrationRatios;
 	
-	
-	
+
 	////////////////////// get/set methods
 	
 	public boolean isPro() {
@@ -517,7 +512,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	 */
 	private void jbInit() throws Exception {
 		toolBar = new AppToolBar(this);
-		appMenu = new AppMenu(this);
+		appMenu = new ApplicationMenu(this);
 		appMenu.setRecentMenu(recentFilePaths);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setJMenuBar(appMenu);
@@ -572,8 +567,8 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		} else {
 			mainSplitPane.setLeftComponent(spectraTreeScrollPane);
 		}
-		spectrumPanel = (Component) (viewer.viewPanel = new ViewPanel(new BorderLayout()));
-		mainSplitPane.setRightComponent(spectrumPanel);
+		mainPanel = (Component) (viewer.mainPanel = new AwtMainPanel(new BorderLayout()));
+		mainSplitPane.setRightComponent(mainPanel);
 	}
 
 	protected void keyPressedEvent(int keyCode, char keyChar) {
@@ -628,15 +623,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 			}
 		}
 		writeStatus(tip);
-	}
-
-	/**
-	 * Shows dialog to open a file
-	 */
-	void showFileOpenDialog() {
-		GenericFileInterface file = ((AwtFileHelper) viewer.fileHelper).showFileOpenDialog(this);
-		if (file != null)
-			openFile(file.getFullPath(), true);
 	}
 
 	public void siOpenDataOrFile(String data, String name, List<JDXSpectrum> specs,
@@ -710,7 +696,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	public void siSetSelectedPanel(JSVPanel jsvp) {
 		if (viewer.selectedPanel != null)
       mainSplitPosition = mainSplitPane.getDividerLocation();
-		viewer.viewPanel.setSelectedPanel(jsvp, viewer.panelNodes);
+		viewer.mainPanel.setSelectedPanel(viewer, jsvp, viewer.panelNodes);
 		viewer.selectedPanel = jsvp;
 		viewer.spectraTree.setSelectedPanel(this, jsvp);
 		validate();
@@ -1006,22 +992,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 			advancedApplet.siExecSetCallback(st, value);
 	}
 
-	/**
-	 * Opens and displays a file
-	 * @param fileName 
-	 * @param closeFirst 
-	 * 
-	 */
-	public void openFile(String fileName, boolean closeFirst) {
-		if (closeFirst) { // drag/drop
-			JDXSource source = PanelNode.findSourceByNameOrId((new File(fileName))
-					.getAbsolutePath(), viewer.panelNodes);
-			if (source != null)
-				siCloseSource(source);
-		}
-		siOpenDataOrFile(null, null, null, fileName, -1, -1, true);
-	}
-
 	@SuppressWarnings("incomplete-switch")
 	public void siUpdateBoolean(ScriptToken st, boolean TF) {
 		JSVPanel jsvp = viewer.selectedPanel;
@@ -1043,28 +1013,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		else
 			getContentPane().remove(statusPanel);
 		validate();
-	}
-
-	public void openURL() {
-		String msg = (recentURL == null ? recentOpenURL : recentURL);
-		String url = (String) JOptionPane.showInputDialog(null,
-				"Enter the URL of a JCAMP-DX File", "Open URL",
-				JOptionPane.PLAIN_MESSAGE, null, null, msg);
-		if (url == null)
-			return;
-		recentOpenURL = url;
-		siOpenDataOrFile(null, null, null, url, -1, -1, false);
-	}
-
-	public void simulate() {
-		String msg = "";
-		String name = (String) JOptionPane.showInputDialog(null,
-				"Enter the name of a compound", "Simulate",
-				JOptionPane.PLAIN_MESSAGE, null, null, msg);
-		if (name == null)
-			return;
-		//recentOpenURL = url;
-		siOpenDataOrFile(null, null, null, JSVFileManager.SIMULATION_PROTOCOL + "$" + name, -1, -1, true);
 	}
 
 	public void siCheckCallbacks(String title) {
@@ -1093,10 +1041,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		setError(false, false);
 		setTitle("JSpecView");
 		siValidateAndRepaint();			
-	}
-
-	public void siSetRecentURL(String filePath) {
-		recentURL = filePath;
 	}
 
 	/**

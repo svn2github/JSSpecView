@@ -46,7 +46,7 @@ public class JSVPopupResourceBundle extends PopupResource {
     
   private static String[][] menuContents = {
     
-      {  "appMenu", "Toggle_Grid Toggle_X_Axis Toggle_Y_Axis Toggle_Coordinates Reverse_Plot" +
+      {  "appMenu", "_SIGNED_FileMenu Toggle_Grid Toggle_X_Axis Toggle_Y_Axis Toggle_Coordinates Reverse_Plot" +
         " - Next_View Previous_View Clear_Views Reset_View Set_Zoom..." +
         " - Views... Overlay_Offset... Script..." +
         " - Properties" },
@@ -56,13 +56,13 @@ public class JSVPopupResourceBundle extends PopupResource {
           " - Measurements Peaks Integration Toggle_Trans/Abs Predicted_Solution_Colour" +
           " - Script... - Print... - AboutMenu" },
 
-      {   "_SIGNED_FileMenu", "SaveAsMenu ExportAsMenu" },
+      {   "_SIGNED_FileMenu", "Open_File... Open_Simulation... Open_URL... Append_File... Append_Simulation... Append_URL... Save_AsMenu Export_AsMenu" },
 
-      {   "SaveAsMenu", "Original... JDXMenu CML XML(AnIML)" },
+      {   "Save_AsMenu", "Original... JDXMenu CML XML(AnIML)" },
               
       {   "JDXMenu", "XY DIF DIFDUP FIX PAC SQZ" },
 
-      {   "ExportAsMenu", "JPG PNG SVG PDF" },
+      {   "Export_AsMenu", "JPG PNG SVG PDF" },
               
       {   "ViewMenu",
           "Toggle_Grid Toggle_X_Axis Toggle_Y_Axis Toggle_Coordinates Reverse_Plot Show_Header... Show_Overlay_Key... Window" },
@@ -75,6 +75,12 @@ public class JSVPopupResourceBundle extends PopupResource {
   
   
   private static String[][] structureContents = {
+  	{"Open_File...","load ?"},
+  	{"Open_URL...","load http://?"},
+  	{"Open_Simulation...","load $?"},
+  	{"Append_File...","load append ?"},
+  	{"Append_URL...","load append http://?"},
+  	{"Append_Simulation...","load append $?"},
   	{"Show_Header...", "showProperties"},
   	{"Window","window"},
   	{"Show_Overlay_Key...","showKey"},

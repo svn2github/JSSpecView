@@ -77,7 +77,6 @@ import jspecview.api.JSVPanel;
 import jspecview.api.JSVPdfWriter;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSViewer;
-import jspecview.common.PDFWriter;
 import jspecview.common.PanelData;
 import jspecview.common.ColorParameters;
 import jspecview.common.PrintLayout;
@@ -94,7 +93,6 @@ import jspecview.common.ScriptToken;
  */
 
 public class AwtPanel extends JPanel implements JSVPanel, Printable {
-//, MouseListener,  MouseMotionListener, KeyListener
   private static final long serialVersionUID = 1L;
   
   @Override
@@ -121,6 +119,17 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
    * Constructs a new JSVPanel
    * @param viewer 
    * 
+   * @return this
+   */
+  public static AwtPanel getEmptyPanel(JSViewer viewer) {
+    // initial applet with no spectrum but with pop-up capability
+  	return new AwtPanel(viewer, false);
+  }
+ 
+  /**
+   * Constructs a new JSVPanel
+   * @param viewer 
+   * 
    * @param spectrum
    *        the spectrum
    * @return this
@@ -131,7 +140,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
     // removal of integration, taConvert
     // Preferences Dialog sample.jdx
   	ToolTipManager.sharedInstance().setInitialDelay(0);
-  	AwtPanel p = new AwtPanel(viewer);
+  	AwtPanel p = new AwtPanel(viewer, true);
     p.pd.initOne(spectrum);
     return p;
   }
@@ -150,14 +159,14 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
    * @return this
    */
   public static AwtPanel getPanelMany(JSViewer viewer, List<JDXSpectrum> spectra, int startIndex, int endIndex) {
-  	AwtPanel p = new AwtPanel(viewer);
+  	AwtPanel p = new AwtPanel(viewer, true);
     p.pd.initMany(spectra, startIndex, endIndex);
     return p;
   }
 
-  private AwtPanel(JSViewer viewer) {
+  private AwtPanel(JSViewer viewer, boolean withPD) {
   	this.viewer = viewer;
-    this.pd = new PanelData(this, viewer);
+    this.pd = (withPD ? new PanelData(this, viewer) : null);
   	this.apiPlatform = viewer.apiPlatform;
     mouse = apiPlatform.getMouseManager(0, this);
     setBorder(BorderFactory.createLineBorder(Color.BLACK));
@@ -239,8 +248,9 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
 
 	public void showMessage(String msg, String title) {
 		Logger.info(msg);
-		JOptionPane.showMessageDialog(this, msg, title, (msg.startsWith("<html>") ? JOptionPane.INFORMATION_MESSAGE 
-				: JOptionPane.PLAIN_MESSAGE));	
+		if (title != null)
+			JOptionPane.showMessageDialog(this, msg, title, (msg.startsWith("<html>") ? JOptionPane.INFORMATION_MESSAGE 
+					: JOptionPane.PLAIN_MESSAGE));	
 		getFocusNow(true);
 	}
 
@@ -292,7 +302,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
 					String s = ex.getMessage();
 					if (s == null)
 						return;
-					s = PT.simpleReplace(s, "not accepting job.", "not accepting jobs.");
+					s = PT.rep(s, "not accepting job.", "not accepting jobs.");
 					// not my fault -- Windows grammar error!
 					showMessage(s, "Printer Error");
 				}
@@ -363,7 +373,8 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
 			SwingUtilities.invokeLater(new RequestThread());
 		else
   		requestFocusInWindow();
-    pd.dialogsToFront();
+		if (pd != null)
+			pd.dialogsToFront();
 	}
 
   public class RequestThread implements Runnable {
@@ -387,6 +398,10 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
 
 	public void processTwoPointGesture(float[][][] touches) {
 		// n/a
+	}
+
+	public void showMenu(int x, int y) {
+  	viewer.showMenu(x, y);
 	}
 
 }

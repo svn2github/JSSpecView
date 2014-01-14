@@ -82,13 +82,19 @@ class Mouse implements MouseWheelListener, MouseListener,
   }
 
   public boolean processEvent(int id, int x, int y, int modifiers, long time) {
+    if (pd == null) {
+      if (id == Event.MOUSE_DOWN) {
+        viewer.showMenu(x, y);        
+      }      
+      return true;
+    }
     modifiers = applyLeftMouse(modifiers);
     switch (id) {
     case Event.MOUSE_DOWN:
       xWhenPressed = x;
       yWhenPressed = y;
       modifiersWhenPressed10 = modifiers;
-      mousePressed(time, x, y, modifiers, false);
+      mousePressed(time, x, y, modifiers);
       break;
     case Event.MOUSE_DRAG:
       mouseDragged(time, x, y, modifiers);
@@ -118,28 +124,37 @@ class Mouse implements MouseWheelListener, MouseListener,
   }
 
   public void mouseClicked(MouseEvent e) {
-    mouseClicked(e.getWhen(), e.getX(), e.getY(), e.getModifiers(), e
+    if (pd != null)
+      mouseClicked(e.getWhen(), e.getX(), e.getY(), e.getModifiers(), e
         .getClickCount());
   }
 
   public void mouseEntered(MouseEvent e) {
-    mouseEntered(e.getWhen(), e.getX(), e.getY());
+    if (pd != null)
+      mouseEntered(e.getWhen(), e.getX(), e.getY());
   }
 
   public void mouseExited(MouseEvent e) {
-    mouseExited(e.getWhen(), e.getX(), e.getY());
+    if (pd != null)
+    	mouseExited(e.getWhen(), e.getX(), e.getY());
   }
 
   public void mousePressed(MouseEvent e) {
-    mousePressed(e.getWhen(), e.getX(), e.getY(), e.getModifiers(), e
-        .isPopupTrigger());
+    if (pd == null) {
+      viewer.showMenu(e.getX(), e.getY());        
+      return;
+    }
+    mousePressed(e.getWhen(), e.getX(), e.getY(), e.getModifiers());
   }
 
   public void mouseReleased(MouseEvent e) {
-    mouseReleased(e.getWhen(), e.getX(), e.getY(), e.getModifiers());
+    if (pd != null)
+    	mouseReleased(e.getWhen(), e.getX(), e.getY(), e.getModifiers());
   }
 
   public void mouseDragged(MouseEvent e) {
+    if (pd == null)
+      return;
     int modifiers = e.getModifiers();
     /****************************************************************
      * Netscape 4.* Win32 has a problem with mouseDragged if you left-drag then
@@ -153,16 +168,21 @@ class Mouse implements MouseWheelListener, MouseListener,
   }
 
   public void mouseMoved(MouseEvent e) {
-    mouseMoved(e.getWhen(), e.getX(), e.getY(), e.getModifiers());
+    if (pd != null)
+    	mouseMoved(e.getWhen(), e.getX(), e.getY(), e.getModifiers());
   }
 
   public void mouseWheelMoved(MouseWheelEvent e) {
+    if (pd == null)
+      return;
     e.consume();
     mouseWheel(e.getWhen(), e.getWheelRotation(), e.getModifiers()
         | Event.MOUSE_WHEEL);
   }
 
   public void keyTyped(KeyEvent ke) {
+    if (pd == null)
+      return;
     char ch = ke.getKeyChar();
     int modifiers = ke.getModifiers();
     // for whatever reason, CTRL may also drop the 6- and 7-bits,
@@ -174,12 +194,13 @@ class Mouse implements MouseWheelListener, MouseListener,
   }
 
   public void keyPressed(KeyEvent ke) {
-    if (pd.keyPressed(ke.getKeyCode(), ke.getModifiers()))
+    if (pd != null && pd.keyPressed(ke.getKeyCode(), ke.getModifiers()))
     	ke.consume();
   }
 
   public void keyReleased(KeyEvent ke) {
-    pd.keyReleased(ke.getKeyCode());
+    if (pd != null)
+      pd.keyReleased(ke.getKeyCode());
   }
 
   private void mouseEntered(long time, int x, int y) {
@@ -214,7 +235,7 @@ class Mouse implements MouseWheelListener, MouseListener,
   }
 
   private void mouseWheel(long time, int rotation, int modifiers) {
-     pd.mouseAction(Event.WHEELED, time, 0, rotation, 0, modifiers);
+    pd.mouseAction(Event.WHEELED, time, 0, rotation, 0, modifiers);
   }
 
   /**
@@ -223,10 +244,8 @@ class Mouse implements MouseWheelListener, MouseListener,
    * @param x
    * @param y
    * @param modifiers
-   * @param isPopupTrigger
    */
-  private void mousePressed(long time, int x, int y, int modifiers,
-                    boolean isPopupTrigger) {
+  private void mousePressed(long time, int x, int y, int modifiers) {
     isMouseDown = true;
     pd.mouseAction(Event.PRESSED, time, x, y, 0, modifiers);
   }

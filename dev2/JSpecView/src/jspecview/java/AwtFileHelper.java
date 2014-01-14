@@ -1,7 +1,6 @@
 package jspecview.java;
 
 import java.awt.Component;
-import java.awt.Frame;
 import java.io.File;
 
 import javajs.api.GenericFileInterface;
@@ -66,9 +65,9 @@ public class AwtFileHelper implements JSVFileHelper {
     fc.setFileFilter(filter);    
 	}
 
-	public GenericFileInterface showFileOpenDialog(Frame frame) {
+	public GenericFileInterface showFileOpenDialog(Object panelOrFrame, boolean isAppend) {
 		setFileChooser(ExportType.UNK);
-		return getFile("", frame, false);
+		return getFile("", panelOrFrame, false);
 	}
 
 	public GenericFileInterface getFile(String name, Object panelOrFrame, boolean isSave) {
@@ -102,6 +101,12 @@ public class AwtFileHelper implements JSVFileHelper {
 
 	public String setDirLastExported(String name) {
 		return dirLastExported = name;
+	}
+
+	public String getUrlFromDialog(String info, String msg) {
+		return (String) JOptionPane.showInputDialog(null,
+				info, "Open URL",
+				JOptionPane.PLAIN_MESSAGE, null, null, msg);
 	}
 
 
