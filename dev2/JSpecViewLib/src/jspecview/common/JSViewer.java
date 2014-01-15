@@ -1084,10 +1084,14 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			newPath = fileName = filePath = "View" + si.siIncrementViewCount(1);
 		} else if (strUrl != null) {
 			try {
+				System.out.println("strURL=" + strUrl);
+				System.out.println("JSVFileManager.appletDocumentBase=" + JSVFileManager.appletDocumentBase);				
 				URL u = new URL(JSVFileManager.appletDocumentBase, strUrl, null);
+				System.out.println("u=" + u);
 				filePath = u.toString();
 				recentURL = filePath;
 				fileName = JSVFileManager.getName(filePath);
+				System.out.println("fileName=" + fileName);
 			} catch (MalformedURLException e) {
 				GenericFileInterface file = apiPlatform.newFile(strUrl);
 				fileName = file.getName();

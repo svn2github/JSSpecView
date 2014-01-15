@@ -69,11 +69,13 @@ class Mouse implements MouseWheelListener, MouseListener,
     display.addMouseWheelListener(this);
   }
 
-  public void clear() {
+  @Override
+	public void clear() {
     // nothing to do here now -- see ActionManager
   }
 
-  public void dispose() {
+  @Override
+	public void dispose() {
     Component display = (Component) viewer;
     display.removeMouseListener(this);
     display.removeMouseMotionListener(this);
@@ -81,7 +83,8 @@ class Mouse implements MouseWheelListener, MouseListener,
     display.removeKeyListener(this);
   }
 
-  public boolean processEvent(int id, int x, int y, int modifiers, long time) {
+  @Override
+	public boolean processEvent(int id, int x, int y, int modifiers, long time) {
     if (pd == null) {
       if (id == Event.MOUSE_DOWN) {
         viewer.showMenu(x, y);        
@@ -123,23 +126,27 @@ class Mouse implements MouseWheelListener, MouseListener,
     return true;
   }
 
-  public void mouseClicked(MouseEvent e) {
+  @Override
+	public void mouseClicked(MouseEvent e) {
     if (pd != null)
       mouseClicked(e.getWhen(), e.getX(), e.getY(), e.getModifiers(), e
         .getClickCount());
   }
 
-  public void mouseEntered(MouseEvent e) {
+  @Override
+	public void mouseEntered(MouseEvent e) {
     if (pd != null)
       mouseEntered(e.getWhen(), e.getX(), e.getY());
   }
 
-  public void mouseExited(MouseEvent e) {
+  @Override
+	public void mouseExited(MouseEvent e) {
     if (pd != null)
     	mouseExited(e.getWhen(), e.getX(), e.getY());
   }
 
-  public void mousePressed(MouseEvent e) {
+  @Override
+	public void mousePressed(MouseEvent e) {
     if (pd == null) {
       viewer.showMenu(e.getX(), e.getY());        
       return;
@@ -147,12 +154,14 @@ class Mouse implements MouseWheelListener, MouseListener,
     mousePressed(e.getWhen(), e.getX(), e.getY(), e.getModifiers());
   }
 
-  public void mouseReleased(MouseEvent e) {
+  @Override
+	public void mouseReleased(MouseEvent e) {
     if (pd != null)
     	mouseReleased(e.getWhen(), e.getX(), e.getY(), e.getModifiers());
   }
 
-  public void mouseDragged(MouseEvent e) {
+  @Override
+	public void mouseDragged(MouseEvent e) {
     if (pd == null)
       return;
     int modifiers = e.getModifiers();
@@ -167,12 +176,14 @@ class Mouse implements MouseWheelListener, MouseListener,
     mouseDragged(e.getWhen(), e.getX(), e.getY(), modifiers);
   }
 
-  public void mouseMoved(MouseEvent e) {
+  @Override
+	public void mouseMoved(MouseEvent e) {
     if (pd != null)
     	mouseMoved(e.getWhen(), e.getX(), e.getY(), e.getModifiers());
   }
 
-  public void mouseWheelMoved(MouseWheelEvent e) {
+  @Override
+	public void mouseWheelMoved(MouseWheelEvent e) {
     if (pd == null)
       return;
     e.consume();
@@ -180,7 +191,8 @@ class Mouse implements MouseWheelListener, MouseListener,
         | Event.MOUSE_WHEEL);
   }
 
-  public void keyTyped(KeyEvent ke) {
+  @Override
+	public void keyTyped(KeyEvent ke) {
     if (pd == null)
       return;
     char ch = ke.getKeyChar();
@@ -193,12 +205,14 @@ class Mouse implements MouseWheelListener, MouseListener,
   		ke.consume();
   }
 
-  public void keyPressed(KeyEvent ke) {
+  @Override
+	public void keyPressed(KeyEvent ke) {
     if (pd != null && pd.keyPressed(ke.getKeyCode(), ke.getModifiers()))
     	ke.consume();
   }
 
-  public void keyReleased(KeyEvent ke) {
+  @Override
+	public void keyReleased(KeyEvent ke) {
     if (pd != null)
       pd.keyReleased(ke.getKeyCode());
   }
@@ -269,6 +283,7 @@ class Mouse implements MouseWheelListener, MouseListener,
 
   private int xWhenPressed, yWhenPressed, modifiersWhenPressed10;
 
+	@Override
 	public void processTwoPointGesture(float[][][] touches) {
 		// TODO Auto-generated method stub
 		

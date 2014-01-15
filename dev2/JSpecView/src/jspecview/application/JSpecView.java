@@ -103,11 +103,13 @@ public class JSpecView implements JSVInterface {
   /**
    * for the applet, this is queued
    */
-  public void runScript(String script) {
+  @Override
+	public void runScript(String script) {
     mainFrame.runScriptNow(script);
   }
 
-  public void setProperties(Properties properties) {
+  @Override
+	public void setProperties(Properties properties) {
     try {
       FileInputStream fileIn = new FileInputStream(propertiesFileName);
       properties.load(fileIn);
@@ -115,7 +117,8 @@ public class JSpecView implements JSVInterface {
     }
   }
 
-  public void saveProperties(Properties properties) {
+  @Override
+	public void saveProperties(Properties properties) {
     // Write out current properties
     try {
       FileOutputStream fileOut = new FileOutputStream(propertiesFileName);
@@ -124,7 +127,8 @@ public class JSpecView implements JSVInterface {
     }
   }
 
-  public void exitJSpecView(boolean withDialog, Object frame) {
+  @Override
+	public void exitJSpecView(boolean withDialog, Object frame) {
     if (withDialog
         && JOptionPane.showConfirmDialog((Component)frame, "Exit JSpecView?",
             "Exit", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) != JOptionPane.YES_OPTION)
@@ -132,7 +136,8 @@ public class JSpecView implements JSVInterface {
     System.exit(0);
   }
 
-  public void syncToJmol(String peak) {
+  @Override
+	public void syncToJmol(String peak) {
     // ignore -- this is the stand-alone app
     // will use JmolSyncInterface.syncScript() instead
   }

@@ -20,10 +20,12 @@ class DialogTableModel extends AbstractTableModel {
 		this.asString = asString;
 	}
 
+	@Override
 	public int getColumnCount() {
 		return columnNames.length;
 	}
 
+	@Override
 	public int getRowCount() {
 		return data.length;
 	}
@@ -33,6 +35,7 @@ class DialogTableModel extends AbstractTableModel {
 		return columnNames[col];
 	}
 
+	@Override
 	public Object getValueAt(int row, int col) {
 		Object o = data[row][col];
 		return (asString ? " " + o + " " : o);

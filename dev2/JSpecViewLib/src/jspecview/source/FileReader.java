@@ -95,7 +95,6 @@ public class FileReader {
   
   private FileReader(String filePath, boolean obscure, boolean loadImaginary,
   		int iSpecFirst, int iSpecLast) {
-  	System.out.println("FileReader filePath=" + filePath + "<<");
   	filePath = PT.trimQuotes(filePath);
     this.filePath = (filePath != null && filePath.startsWith(JSVFileManager.SIMULATION_PROTOCOL + "MOL=") ? 
     		JSVFileManager.SIMULATION_PROTOCOL + "MOL=" + Math.abs(filePath.hashCode()) : filePath);
@@ -277,7 +276,6 @@ public class FileReader {
       return !(done = true);
     spectrum.setBlockID(blockID);
     source.addJDXSpectrum(null, spectrum, forceSub);
-    //System.out.println("Spectrum " + nSpec + " XYDATA: " + spectrum.getXYCoords().length);
     return true;
   }
 
@@ -593,7 +591,6 @@ public class FileReader {
 		BufferedReader reader = new BufferedReader(new StringReader(peakList));
 		try {
 			int offset = (isSignals ? 1 : 0);
-			System.out.println("offset is " + offset + " isSignals=" + isSignals);
 			String tag1 = (isSignals ? "Signals" : "Peaks");
 			String tag2 = (isSignals ? "<Signal" : "<PeakData");
 			String line = discardUntil(reader, tag1);
@@ -652,7 +649,6 @@ public class FileReader {
 					if (atoms != null && bs != null) {
 						atoms = atoms.replace(',', ' ');
 						bs.or(unescapeBitSet("({" + atoms + "})"));
-						System.out.println("bs is  " + bs);
 					}
 				}
 			}
@@ -665,7 +661,6 @@ public class FileReader {
 						+ getPeakIndex());
 				BS bs = (BS) o[1];
 				if (bs != null) {
-					System.out.println("bs " + i + " is " + bs);
 					String s = "";
 					for (int j = bs.nextSetBit(0); j >= 0; j = bs.nextSetBit(j + 1))
 						s += "," + (j + offset);
@@ -1117,7 +1112,8 @@ public class FileReader {
     double[] firstLastX = new double[2];
     long t = System.currentTimeMillis();
     Coordinate[] xyCoords = decompressor.decompressData(errorLog, firstLastX);
-    System.out.println("decompression time = " + (System.currentTimeMillis() - t) + " ms");
+    if (Logger.debugging)
+    	Logger.debug("decompression time = " + (System.currentTimeMillis() - t) + " ms");
     spec.setXYCoords(xyCoords);
     double d = decompressor.getMinY();
     if (minMaxY != null) {

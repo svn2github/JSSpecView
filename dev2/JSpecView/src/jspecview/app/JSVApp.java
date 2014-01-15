@@ -127,10 +127,12 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 
 	// ///// parameter set/get methods
 
+	@Override
 	public boolean isPro() {
 		return isSigned();
 	}
 
+	@Override
 	public boolean isSigned() {
 		/**
 		 * @j2sNative
@@ -142,22 +144,27 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 		}
 	}
 
+	@Override
 	public void siSetCurrentSource(JDXSource source) {
 		viewer.currentSource = source;
 	}
 
+	@Override
 	public int siGetFileCount() {
 		return fileCount;
 	}
 
+	@Override
 	public void siSetFileCount(int n) {
 		fileCount = n;
 	}
 
+	@Override
 	public void siSetIntegrationRatios(String value) {
 		integrationRatios = value;
 	}
 
+	@Override
 	public String siGetIntegrationRatios() {
 		return integrationRatios;
 	}
@@ -166,14 +173,17 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 		return appletFrame;
 	}
 
+	@Override
 	public void siSetLoadImaginary(boolean TF) {
 		loadImaginary = TF;
 	}
 
+	@Override
 	public int siIncrementScriptLevelCount(int n) {
 		return scriptLevelCount += n;
 	}
 
+	@Override
 	public int siIncrementViewCount(int n) {
 		return nViews += n;
 	}
@@ -201,10 +211,12 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	//
 	// BH - 8.3.2012
 
+	@Override
 	public Map<String, Object> getPropertyAsJavaObject(String key) {
 		return viewer.getPropertyAsJavaObject(key);
 	}
 
+	@Override
 	public String getPropertyAsJSON(String key) {
 		return PT.toJSON(null, getPropertyAsJavaObject(key));
 	}
@@ -216,6 +228,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	 * 
 	 * @return A String representation of the coordinate
 	 */
+	@Override
 	public String getCoordinate() {
 		return viewer.getCoordinate();
 	}
@@ -226,6 +239,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	 * @param data
 	 *          String
 	 */
+	@Override
 	public void loadInline(String data) {
 		// newAppletPanel();
 		siOpenDataOrFile(data, null, null, null, -1, -1, true);
@@ -241,10 +255,12 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	 * @return data
 	 * 
 	 */
+	@Override
 	public String exportSpectrum(String type, int n) {
 		return viewer.export(type, n);
 	}
 
+	@Override
 	public void setFilePath(String tmpFilePath) {
 		runScript("load " + PT.esc(tmpFilePath));
 	}
@@ -254,6 +270,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	 * 
 	 * @param n
 	 */
+	@Override
 	public void setSpectrumNumber(int n) {
 		runScript(ScriptToken.SPECTRUMNUMBER + " " + n);
 	}
@@ -262,6 +279,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	 * Method that can be called from another applet or from javascript that
 	 * toggles reversing the plot on a <code>JSVPanel</code>
 	 */
+	@Override
 	public void reversePlot() {
 		toggle(ScriptToken.REVERSEPLOT);
 	}
@@ -270,6 +288,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	 * Method that can be called from another applet or from javascript that
 	 * toggles the grid on a <code>JSVPanel</code>
 	 */
+	@Override
 	public void toggleGrid() {
 		toggle(ScriptToken.GRIDON);
 	}
@@ -278,6 +297,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	 * Method that can be called from another applet or from javascript that
 	 * toggles the coordinate on a <code>JSVPanel</code>
 	 */
+	@Override
 	public void toggleCoordinate() {
 		toggle(ScriptToken.COORDINATESON);
 	}
@@ -286,6 +306,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	 * Method that can be called from another applet or from javascript that
 	 * toggles the integration graph of a <code>JSVPanel</code>.
 	 */
+	@Override
 	public void toggleIntegration() {
 		toggle(ScriptToken.INTEGRATE);
 	}
@@ -313,6 +334,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	 * @param a
 	 *          the alpha portion of the highlight color
 	 */
+	@Override
 	public void addHighlight(double x1, double x2, int r, int g, int b, int a) {
 		viewer.addHighLight(x1, x2, r, g, b, a);
 	}
@@ -321,6 +343,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	 * Method that can be called from another applet or from javascript that
 	 * removes all highlights from the plot area of a <code>JSVPanel</code>
 	 */
+	@Override
 	public void removeAllHighlights() {
 		viewer.removeAllHighlights();
 	}
@@ -334,10 +357,12 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	 * @param x2
 	 *          the ending x value
 	 */
+	@Override
 	public void removeHighlight(double x1, double x2) {
 		viewer.removeHighlight(x1, x2);
 	}
 
+	@Override
 	public void syncScript(String peakScript) {
 		viewer.syncScript(peakScript);
 	}
@@ -348,6 +373,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	 * @param msg
 	 *          the message
 	 */
+	@Override
 	public void writeStatus(String msg) {
 		Logger.info(msg);
 		// statusTextLabel.setText(msg);
@@ -388,6 +414,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 
 	private JSVPanel prevPanel;
 
+	@Override
 	public void siSendPanelChange(JSVPanel jsvp) {
 		if (jsvp == prevPanel)
 			return;
@@ -402,6 +429,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	 * 
 	 * @param isSelected
 	 */
+	@Override
 	public void siNewWindow(boolean isSelected, boolean fromFrame) {
 		isNewWindow = isSelected;
 		if (fromFrame) {
@@ -412,6 +440,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 		}
 	}
 
+	@Override
 	public void repaint() {
 		
     /**
@@ -443,6 +472,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 		
 	}
 
+	@Override
 	public void siValidateAndRepaint() {
 		PanelData pd;
 		if (viewer.selectedPanel != null && (pd = viewer.selectedPanel.getPanelData()) != null)
@@ -456,6 +486,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	 * 
 	 * @param filePath
 	 */
+	@Override
 	public void siSyncLoad(String filePath) {
 		newAppletPanel();
 		Logger.info("JSVP syncLoad reading " + filePath);
@@ -561,6 +592,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	 * private void interruptQueueThreads() { if (commandWatcherThread != null)
 	 * commandWatcherThread.interrupt(); }
 	 */
+	@Override
 	public void siOpenDataOrFile(String data, String name,
 			List<JDXSpectrum> specs, String url, int firstSpec, int lastSpec,
 			boolean isAppend) {
@@ -591,10 +623,12 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	 * 
 	 * @param scriptItem
 	 */
+	@Override
 	public void siProcessCommand(String scriptItem) {
 		viewer.runScriptNow(scriptItem);
 	}
 
+	@Override
 	public boolean runScriptNow(String params) {
 		return viewer.runScriptNow(params);
 	}
@@ -631,6 +665,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 					Double.valueOf(actualCoord.getYVal()), Integer.valueOf(iSpec + 1) });
 	}
 
+	@Override
 	public void siSetSelectedPanel(JSVPanel jsvp) {
 		viewer.mainPanel.setSelectedPanel(viewer, jsvp, viewer.panelNodes);
 		viewer.selectedPanel = jsvp;
@@ -662,6 +697,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	/**
 	 * called by notifyPeakPickedListeners in JSVPanel
 	 */
+	@Override
 	public void panelEvent(Object eventObj) {
 		if (eventObj instanceof PeakPickEvent) {
 			viewer.processPeakPickEvent(eventObj, false);
@@ -673,6 +709,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	// ///////////// ScriptInterface execution from JSViewer.runScriptNow and
 	// menus
 
+	@Override
 	@SuppressWarnings("incomplete-switch")
 	public void siExecSetCallback(ScriptToken st, String value) {
 		switch (st) {
@@ -697,10 +734,12 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	 * @return Color
 	 */
 
+	@Override
 	public String getSolnColour() {
 		return viewer.getSolutionColor();
 	}
 
+	@Override
 	public void siExecClose(String value) {
 		boolean fromScript = (!value.startsWith("!"));
 		if (fromScript)
@@ -710,6 +749,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 			siValidateAndRepaint();
 	}
 
+	@Override
 	public String siExecLoad(String value) {
 		viewer.load(value);
 		if (viewer.selectedPanel == null)
@@ -720,20 +760,24 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 		return null;
 	}
 
+	@Override
 	public void siExecHidden(boolean b) {
 		// ignored
 	}
 
+	@Override
 	public void siExecSetInterface(String value) {
 		interfaceOverlaid = (value.equalsIgnoreCase("single") || value
 				.equalsIgnoreCase("overlay"));
 	}
 
+	@Override
 	public void siExecScriptComplete(String msg, boolean isOK) {
 		viewer.showMessage(msg);
 		siValidateAndRepaint();
 	}
 
+	@Override
 	public void siExecSetAutoIntegrate(boolean b) {
 		autoIntegrate = b;
 	}
@@ -741,6 +785,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	/**
 	 * @param msg
 	 */
+	@Override
 	public synchronized void syncToJmol(String msg) {
 		if (syncCallbackFunctionName == null)
 			return;
@@ -748,20 +793,24 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 		appletFrame.callToJavaScript(syncCallbackFunctionName, new Object[] { viewer.fullName, msg });
 	}
 
+	@Override
 	public void setVisible(boolean b) {
 		appletFrame.setPanelVisible(b);
 	}
 
+	@Override
 	public void siUpdateBoolean(ScriptToken st, boolean TF) {
 		// ignored -- this is for setting buttons and menu items
 	}
 
+	@Override
 	public void siCheckCallbacks(String title) {
 		checkCallbacks();
 	}
 
 	// /////// multiple source changes ////////
 
+	@Override
 	public void siSetNode(PanelNode panelNode, boolean fromTree) {
 		if (panelNode.jsvp != viewer.selectedPanel)
 			siSetSelectedPanel(panelNode.jsvp);
@@ -770,18 +819,22 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 		siValidateAndRepaint(); // app does not do repaint here
 	}
 
+	@Override
 	public void siCloseSource(JDXSource source) {
 		viewer.closeSource(source);
 	}
 
+	@Override
 	public void setCursor(int id) {
 		viewer.apiPlatform.setCursor(id, appletFrame);
 	}
 
+	@Override
 	public boolean siGetAutoCombine() {
 		return interfaceOverlaid;
 	}
 
+	@Override
 	public JDXSource siCreateSource(String data, String filePath, 
 			int firstSpec, int lastSpec) throws Exception {
 		return FileReader.createJDXSource(JSVFileManager
@@ -789,6 +842,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 				obscureTitleFromUser == Boolean.TRUE, loadImaginary, -1, -1);
 	}
 
+	@Override
 	public JSVPanel siGetNewJSVPanel2(List<JDXSpectrum> specs) {
 		if (specs == null) {
 			initialEndIndex = initialStartIndex = -1;
@@ -802,6 +856,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 		return jsvp;
 	}
 
+	@Override
 	public JSVPanel siGetNewJSVPanel(JDXSpectrum spec) {
 		if (spec == null) {
 			initialEndIndex = initialStartIndex = -1;
@@ -816,6 +871,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 		return jsvp;
 	}
 
+	@Override
 	public PanelNode siGetNewPanelNode(String id, String fileName,
 			JDXSource source, JSVPanel jsvp) {
 		return new PanelNode(id, fileName, source, jsvp);
@@ -823,20 +879,24 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 
 	// not implemented for applet
 
+	@Override
 	public boolean siGetAutoShowLegend() {
 		return false; // option?
 	}
 
 	private String returnFromJmolModel;
 
+	@Override
 	public void siSetReturnFromJmolModel(String model) {
 		returnFromJmolModel = model;
 	}
 
+	@Override
 	public String siGetReturnFromJmolModel() {
 		return returnFromJmolModel;
 	}
 
+	@Override
 	public void siSetPropertiesFromPreferences(JSVPanel jsvp,
 			boolean includeMeasures) {
 		if (autoIntegrate)
@@ -845,41 +905,47 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 
 	// not applicable to applet:
 
+	@Override
 	public void siSetLoaded(String fileName, String filePath) {
 	}
 
+	@Override
 	public void siSetMenuEnables(PanelNode node, boolean isSplit) {
 	}
 
-	public void siSetRecentURL(String filePath) {
-	}
-
+	@Override
 	public void siUpdateRecentMenus(String filePath) {
 	}
 
 	// debugging
 
+	@Override
 	public void siExecTest(String value) {
 		String data = "##TITLE= Acetophenone\n##JCAMP-DX= 5.01\n##DATA TYPE= MASS SPECTRUM\n##DATA CLASS= XYPOINTS\n##ORIGIN= UWI, Mona, JAMAICA\n##OWNER= public domain\n##LONGDATE= 2012/02/19 22:20:06.0416 -0600 $$ export date from JSpecView\n##BLOCK_ID= 4\n##$URL= http://wwwchem.uwimona.edu.jm/spectra\n##SPECTROMETER/DATA SYSTEM= Finnigan\n##.INSTRUMENT PARAMETERS= LOW RESOLUTION\n##.SPECTROMETER TYPE= TRAP\n##.INLET= GC\n##.IONIZATION MODE= EI+\n##MOLFORM= C 8 H 8 O\n##$MODELS= \n<Models>\n<ModelData id=\"acetophenone\" type=\"MOL\">\nacetophenone\nDSViewer          3D                             0\n\n17 17  0  0  0  0  0  0  0  0999 V2000\n-1.6931    0.0078    0.0000 C   0  0  0  0  0  0  0  0  0  1\n-0.2141    0.0078    0.0000 C   0  0  0  0  0  0  0  0  0  2\n2.5839    0.0872    0.0000 C   0  0  0  0  0  0  0  0  0  3\n0.4615    1.2373   -0.0005 C   0  0  0  0  0  0  0  0  0  4\n0.5257   -1.1809    0.0001 C   0  0  0  0  0  0  0  0  0  5\n1.9188   -1.1393    0.0005 C   0  0  0  0  0  0  0  0  0  6\n1.8539    1.2756   -0.0001 C   0  0  0  0  0  0  0  0  0  7\n-0.1262    2.1703   -0.0009 H   0  0  0  0  0  0  0  0  0  8\n0.0144   -2.1556    0.0002 H   0  0  0  0  0  0  0  0  0  9\n2.4947   -2.0764    0.0009 H   0  0  0  0  0  0  0  0  0 10\n2.3756    2.2439   -0.0001 H   0  0  0  0  0  0  0  0  0 11\n3.6838    0.1161    0.0003 H   0  0  0  0  0  0  0  0  0 12\n-2.3403    1.0639    0.0008 O   0  0  0  0  0  0  0  0  0 13\n-2.3832   -1.3197   -0.0010 C   0  0  0  0  0  0  0  0  0 14\n-2.0973   -1.8988    0.9105 H   0  0  0  0  0  0  0  0  0 15\n-2.0899   -1.9018   -0.9082 H   0  0  0  0  0  0  0  0  0 16\n-3.4920   -1.1799   -0.0059 H   0  0  0  0  0  0  0  0  0 17\n1  2  1  0  0  0\n2  5  4  0  0  0\n2  4  4  0  0  0\n3 12  1  0  0  0\n4  7  4  0  0  0\n5  6  4  0  0  0\n6 10  1  0  0  0\n6  3  4  0  0  0\n7  3  4  0  0  0\n7 11  1  0  0  0\n8  4  1  0  0  0\n9  5  1  0  0  0\n13  1  2  0  0  0\n14 16  1  0  0  0\n14  1  1  0  0  0\n14 15  1  0  0  0\n17 14  1  0  0  0\nM  END\n</ModelData>\n<ModelData id=\"2\" type=\"MOL\">\nacetophenone m/z 120\nDSViewer          3D                             0\n\n17 17  0  0  0  0  0  0  0  0999 V2000\n-1.6931    0.0078    0.0000 C   0  0  0  0  0  0  0  0  0  1\n-0.2141    0.0078    0.0000 C   0  0  0  0  0  0  0  0  0  2\n2.5839    0.0872    0.0000 C   0  0  0  0  0  0  0  0  0  3\n0.4615    1.2373   -0.0005 C   0  0  0  0  0  0  0  0  0  4\n0.5257   -1.1809    0.0001 C   0  0  0  0  0  0  0  0  0  5\n1.9188   -1.1393    0.0005 C   0  0  0  0  0  0  0  0  0  6\n1.8539    1.2756   -0.0001 C   0  0  0  0  0  0  0  0  0  7\n-0.1262    2.1703   -0.0009 H   0  0  0  0  0  0  0  0  0  8\n0.0144   -2.1556    0.0002 H   0  0  0  0  0  0  0  0  0  9\n2.4947   -2.0764    0.0009 H   0  0  0  0  0  0  0  0  0 10\n2.3756    2.2439   -0.0001 H   0  0  0  0  0  0  0  0  0 11\n3.6838    0.1161    0.0003 H   0  0  0  0  0  0  0  0  0 12\n-2.3403    1.0639    0.0008 O   0  0  0  0  0  0  0  0  0 13\n-2.3832   -1.3197   -0.0010 C   0  0  0  0  0  0  0  0  0 14\n-2.0973   -1.8988    0.9105 H   0  0  0  0  0  0  0  0  0 15\n-2.0899   -1.9018   -0.9082 H   0  0  0  0  0  0  0  0  0 16\n-3.4920   -1.1799   -0.0059 H   0  0  0  0  0  0  0  0  0 17\n1  2  1  0  0  0\n2  5  4  0  0  0\n2  4  4  0  0  0\n3 12  1  0  0  0\n4  7  4  0  0  0\n5  6  4  0  0  0\n6 10  1  0  0  0\n6  3  4  0  0  0\n7  3  4  0  0  0\n7 11  1  0  0  0\n8  4  1  0  0  0\n9  5  1  0  0  0\n13  1  2  0  0  0\n14 16  1  0  0  0\n14  1  1  0  0  0\n14 15  1  0  0  0\n17 14  1  0  0  0\nM  END\nacetophenone m/z 105\n\ncreated with ArgusLab version 4.0.1\n13 13  0  0  0  0  0  0  0  0  0 V2000\n-1.6931    0.0078    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n-0.2141    0.0078    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n2.5839    0.0872    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n0.4615    1.2373   -0.0005 C   0  0  0  0  0  0  0  0  0  0  0  0\n0.5257   -1.1809    0.0001 C   0  0  0  0  0  0  0  0  0  0  0  0\n1.9188   -1.1393    0.0005 C   0  0  0  0  0  0  0  0  0  0  0  0\n1.8539    1.2756   -0.0001 C   0  0  0  0  0  0  0  0  0  0  0  0\n-2.3403    1.0639    0.0008 O   0  0  0  0  0  0  0  0  0  0  0  0\n-0.1262    2.1703   -0.0009 H   0  0  0  0  0  0  0  0  0  0  0  0\n0.0144   -2.1556    0.0002 H   0  0  0  0  0  0  0  0  0  0  0  0\n2.4947   -2.0764    0.0009 H   0  0  0  0  0  0  0  0  0  0  0  0\n2.3756    2.2439   -0.0001 H   0  0  0  0  0  0  0  0  0  0  0  0\n3.6838    0.1161    0.0003 H   0  0  0  0  0  0  0  0  0  0  0  0\n1  2  1  0  0  0  0\n1  8  2  0  0  0  0\n2  4  4  0  0  0  0\n2  5  4  0  0  0  0\n3  6  4  0  0  0  0\n3  7  4  0  0  0  0\n3 13  1  0  0  0  0\n4  7  4  0  0  0  0\n4  9  1  0  0  0  0\n5  6  4  0  0  0  0\n5 10  1  0  0  0  0\n6 11  1  0  0  0  0\n7 12  1  0  0  0  0\nM  END\nacetophenone m/z 77\n\ncreated with ArgusLab version 4.0.1\n11 11  0  0  0  0  0  0  0  0  0 V2000\n-0.2141    0.0078    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n2.5839    0.0872    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n0.4615    1.2373   -0.0005 C   0  0  0  0  0  0  0  0  0  0  0  0\n0.5257   -1.1809    0.0001 C   0  0  0  0  0  0  0  0  0  0  0  0\n1.9188   -1.1393    0.0005 C   0  0  0  0  0  0  0  0  0  0  0  0\n1.8539    1.2756   -0.0001 C   0  0  0  0  0  0  0  0  0  0  0  0\n-0.1262    2.1703   -0.0009 H   0  0  0  0  0  0  0  0  0  0  0  0\n0.0144   -2.1556    0.0002 H   0  0  0  0  0  0  0  0  0  0  0  0\n2.4947   -2.0764    0.0009 H   0  0  0  0  0  0  0  0  0  0  0  0\n2.3756    2.2439   -0.0001 H   0  0  0  0  0  0  0  0  0  0  0  0\n3.6838    0.1161    0.0003 H   0  0  0  0  0  0  0  0  0  0  0  0\n1  3  4  0  0  0  0\n1  4  4  0  0  0  0\n2  5  4  0  0  0  0\n2  6  4  0  0  0  0\n2 11  1  0  0  0  0\n3  6  4  0  0  0  0\n3  7  1  0  0  0  0\n4  5  4  0  0  0  0\n4  8  1  0  0  0  0\n5  9  1  0  0  0  0\n6 10  1  0  0  0  0\nM  END\n</ModelData>\n</Models>\n##$PEAKS= \n<Peaks type=\"MS\" xUnits=\"M/Z\" yUnits=\"RELATIVE ABUNDANCE\" >\n<PeakData id=\"1\" title=\"molecular ion (~120)\" peakShape=\"sharp\" model=\"2.1\"  xMax=\"121\" xMin=\"119\"  yMax=\"100\" yMin=\"0\" />\n<PeakData id=\"2\" title=\"fragment 1 (~105)\" peakShape=\"sharp\" model=\"2.2\"  xMax=\"106\" xMin=\"104\"  yMax=\"100\" yMin=\"0\" />\n<PeakData id=\"3\" title=\"fragment 2 (~77)\" peakShape=\"sharp\" model=\"2.3\"  xMax=\"78\" xMin=\"76\"  yMax=\"100\" yMin=\"0\" />\n</Peaks>\n##XUNITS= M/Z\n##YUNITS= RELATIVE ABUNDANCE\n##XFACTOR= 1E0\n##YFACTOR= 1E0\n##FIRSTX= 0\n##FIRSTY= 0\n##LASTX= 121\n##NPOINTS= 19\n##XYPOINTS= (XY..XY)\n0.000000, 0.000000 \n38.000000, 5.200000 \n39.000000, 8.000000 \n43.000000, 21.900000 \n50.000000, 20.200000 \n51.000000, 41.900000 \n52.000000, 4.000000 \n63.000000, 3.800000 \n74.000000, 6.600000 \n75.000000, 3.700000 \n76.000000, 4.600000 \n77.000000, 100.000000 \n78.000000, 10.400000 \n89.000000, 1.000000 \n91.000000, 1.000000 \n105.000000, 80.800000 \n106.000000, 6.000000 \n120.000000, 23.100000 \n121.000000, 2.000000 \n##END=";
 		loadInline(data);
 	}
 
+	@Override
 	public String siSetFileAsString(String value) {
 		return JSVFileManager.getFileAsString(value);
 	}
 
+	@Override
 	public JSVTreeNode siCreateTree(JDXSource source, JSVPanel[] jsvPanels) {
 		return viewer.spectraTree.createTree(this, source, jsvPanels);
 	}
 
+	@Override
 	public JSViewer siGetViewer() {
 		return viewer;
 	}
 
+	@Override
 	public void runScript(String script) {
 		viewer.runScript(script);
 	}
 
+	@Override
 	public List<String> getScriptQueue() {
 		return viewer.scriptQueue;
 	}

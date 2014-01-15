@@ -20,14 +20,17 @@ public class AwtTreeNode extends
 	    this.panelNode = panelNode;
 	  }
 
+		@Override
 		public PanelNode getPanelNode() {
 			return panelNode;
 		}
 		
+		@Override
 		public int getIndex() {
 			return index;
 		}
 		
+		@Override
 		public void setIndex(int index) {
 			this.index = index;
 		}

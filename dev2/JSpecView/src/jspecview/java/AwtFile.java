@@ -25,6 +25,7 @@ class AwtFile extends File implements GenericFileInterface {
 		super(name);
 	}
 
+	@Override
 	public GenericFileInterface getParentAsFile() {
 		// used in printPDF only
     AwtFile f = null;
@@ -74,6 +75,7 @@ class AwtFile extends File implements GenericFileInterface {
 		}
 	}
 
+	@Override
 	public String getFullPath() {
     try {
       return getAbsolutePath();

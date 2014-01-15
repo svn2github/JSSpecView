@@ -42,15 +42,18 @@ class DialogTableModel implements AbstractTableModel {
 		return (asString ? " " + o + " " : o);
 	}
 
+	@Override
 	public TableColumn getColumn(int i) {
 		thisCol = i;
 		return this;		
 	}
 	
+	@Override
 	public void setPreferredWidth(int n) {
 		widths[thisCol] = n;
 	}
 
+	@Override
 	public void toHTML(SB sb, String id, BS selectedRows) {
 		if (data == null || data[0] == null || data[0].length == 0)
 			return;

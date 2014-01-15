@@ -76,12 +76,14 @@ public class JsPanel implements JSVPanel {
   }
 
 	private GenericPlatform apiPlatform;
+	@Override
 	public GenericPlatform getApiPlatform() {
 		return apiPlatform;
 	}
 	
   private PanelData pd;
-  public PanelData getPanelData() {
+  @Override
+	public PanelData getPanelData() {
     return pd;
   }
 
@@ -130,11 +132,13 @@ public class JsPanel implements JSVPanel {
 //  setBorder(BorderFactory.createLineBorder(Color.BLACK));
 	}
 
-  public String getTitle() {
+  @Override
+	public String getTitle() {
   	return pd.getTitle();
   }
   
-  public void dispose() {
+  @Override
+	public void dispose() {
     //toolTip = null;
     if (pd != null)
       pd.dispose();
@@ -142,7 +146,8 @@ public class JsPanel implements JSVPanel {
     mouse.dispose();
   }
 
-  public void setTitle(String title) {
+  @Override
+	public void setTitle(String title) {
     pd.title = title;
     this.name = title;
   }
@@ -151,14 +156,16 @@ public class JsPanel implements JSVPanel {
   	pd.setColorOrFont(ds, st);
   }
 
-  public void setBackgroundColor(GenericColor color) {
+  @Override
+	public void setBackgroundColor(GenericColor color) {
   
   	// unnecessary
   }
   
 	///// threading and focus
 	
-  public String getInput(String message, String title, String sval) {
+  @Override
+	public String getInput(String message, String title, String sval) {
   	String ret = null;
   	/**
   	 * @j2sNative
@@ -171,6 +178,7 @@ public class JsPanel implements JSVPanel {
     return ret;
   }
 
+	@Override
 	public void showMessage(String msg, String title) {
 		Logger.info(msg);
 		/**
@@ -188,17 +196,20 @@ public class JsPanel implements JSVPanel {
 		getFocusNow(true);
 	}
 
+	@Override
 	public void getFocusNow(boolean asThread) {
     pd.dialogsToFront();
 	}
 
+	@Override
 	public int getFontFaceID(String name) {
 		return Font.getFontFaceID("SansSerif");
 	}
 	
   /*----------------------- JSVPanel PAINTING METHODS ---------------------*/
 
-  public void doRepaint(boolean andTaintAll) {
+  @Override
+	public void doRepaint(boolean andTaintAll) {
   	pd.taintedAll |= andTaintAll;
   	// from dialogs, to the system
   	if (!pd.isPrinting)
@@ -250,6 +261,7 @@ public class JsPanel implements JSVPanel {
 	 * @param os
 	 * @param title
 	 */
+	@Override
 	public void printPanel(PrintLayout pl, OutputStream os, String title) {
 		pl.title = title;
 		pl.date = apiPlatform.getDateFormat(true);
@@ -263,55 +275,66 @@ public class JsPanel implements JSVPanel {
   	}
 	}
 
+	@Override
 	public String saveImage(String type, GenericFileInterface file) {
 		// handled in Export
 		return null;
 	}
 
+	@Override
 	public boolean hasFocus() {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
+	@Override
 	public void repaint() {
 		// TODO Auto-generated method stub
 		
 	}
 
+	@Override
 	public void setToolTipText(String s) {
 		// TODO Auto-generated method stub
 		
 	}
 
+	@Override
 	public int getHeight() {
 		// TODO Auto-generated method stub
 		return viewer.getHeight();
 	}
 
+	@Override
 	public int getWidth() {
 		return viewer.getWidth();
 	}
 
+	@Override
 	public boolean isEnabled() {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
+	@Override
 	public boolean isFocusable() {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
+	@Override
 	public boolean isVisible() {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
+	@Override
 	public void setEnabled(boolean b) {
 		// TODO Auto-generated method stub
 		
 	}
 
+	@Override
 	public void setFocusable(boolean b) {
 		// TODO Auto-generated method stub
 		
@@ -332,14 +355,17 @@ public class JsPanel implements JSVPanel {
    * @param time
    * @return t/f
    */
-  public boolean processMouseEvent(int id, int x, int y, int modifiers, long time) {
+  @Override
+	public boolean processMouseEvent(int id, int x, int y, int modifiers, long time) {
   	return mouse.processEvent(id, x, y, modifiers, time);
   }
 
+	@Override
 	public void processTwoPointGesture(float[][][] touches) {
 		mouse.processTwoPointGesture(touches);
 	}
 
+	@Override
 	public void showMenu(int x, int y) {
   	viewer.showMenu(x, y);
 	}

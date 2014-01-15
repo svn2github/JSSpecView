@@ -52,17 +52,20 @@ public class Mouse implements GenericMouseInterface {
   	pd = viewer.getPanelData();
   }
 
-  public void clear() {
+  @Override
+	public void clear() {
     // nothing to do here now -- see ActionManager
   }
 
-  public void dispose() {
+  @Override
+	public void dispose() {
     // nothing to do here
   }
 
   private int xWhenPressed, yWhenPressed, modifiersWhenPressed10;
 
-  public boolean processEvent(int id, int x, int y, int modifiers, long time) {
+  @Override
+	public boolean processEvent(int id, int x, int y, int modifiers, long time) {
     if (id != -1)
       modifiers = applyLeftMouse(modifiers);
     switch (id) {
@@ -232,6 +235,7 @@ public class Mouse implements GenericMouseInterface {
         : modifiers;
   }
 
+	@Override
 	public void processTwoPointGesture(float[][][] touches) {
 		// TODO Auto-generated method stub
 		

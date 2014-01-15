@@ -29,6 +29,7 @@ public class Exporter implements ExportInterface {
 		// for reflection; called directly only from MainFrame
 	}
 
+	@Override
 	public String write(JSViewer viewer, List<String> tokens, boolean forInkscape) {
 		// MainFrame or applet WRITE command
 		if (tokens == null)
@@ -129,6 +130,7 @@ public class Exporter implements ExportInterface {
     return "Error exporting " + out.getFileName() + ": " + msg;
   }
   
+	@Override
 	public String exportTheSpectrum(JSViewer viewer, ExportType mode,
 			OC out, JDXSpectrum spec, int startIndex, int endIndex,
 			PanelData pd) throws Exception {

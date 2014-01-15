@@ -196,54 +196,67 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	////////////////////// get/set methods
 	
+	@Override
 	public boolean isPro() {
 		return true;
 	}
 
+	@Override
 	public boolean isSigned() {
 		return true;
 	}
 
+	@Override
 	public boolean siGetAutoCombine() {
 		return interfaceOverlaid;
 	}
 
+	@Override
 	public boolean siGetAutoShowLegend() {
 		return autoShowLegend;
 	}
 
+	@Override
 	public int siGetFileCount() {
 		return fileCount;
 	}
 
+	@Override
 	public void siSetFileCount(int n) {
 		fileCount = n;
 	}
 
+	@Override
 	public String siGetIntegrationRatios() {
 		return integrationRatios;
 	}
 
+	@Override
 	public void siSetIntegrationRatios(String value) {
 		integrationRatios = value;
 	}
 	
+	@Override
 	public void siSetLoadImaginary(boolean TF) {
 		loadImaginary  = TF;
 	}
 
+	@Override
 	public void siSetReturnFromJmolModel(String model) {
 		returnFromJmolModel = model;
 	}
 
+	@Override
 	public String siGetReturnFromJmolModel() {
 		return returnFromJmolModel;
 	}
 
+	@Override
 	public int siIncrementScriptLevelCount(int n) {
 		return scriptLevelCount += n;
 	}
 	
+	@Override
 	public int siIncrementViewCount(int n) {
 		return nViews += n;
 	}
@@ -375,6 +388,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		tree.setShowsRootHandles(true);
 		tree.setEditable(false);
 		tree.addMouseListener(new MouseListener() {
+			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() == 2 && viewer.selectedPanel != null) {
 					viewer.selectedPanel.getPanelData().setZoom(0, 0, 0, 0);
@@ -382,15 +396,19 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 				}
 			}
 
+			@Override
 			public void mouseEntered(MouseEvent e) {
 			}
 
+			@Override
 			public void mouseExited(MouseEvent e) {
 			}
 
+			@Override
 			public void mousePressed(MouseEvent e) {
 			}
 
+			@Override
 			public void mouseReleased(MouseEvent e) {
 			}
 
@@ -536,13 +554,16 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		commandHistory = new CommandHistory(viewer, commandInput);
 		commandInput.setFocusTraversalKeysEnabled(false);
 		commandInput.addKeyListener(new KeyListener() {
+			@Override
 			public void keyPressed(KeyEvent e) {
 				keyPressedEvent(e.getKeyCode(), e.getKeyChar());
 			}
 
+			@Override
 			public void keyReleased(KeyEvent e) {
 			}
 
+			@Override
 			public void keyTyped(KeyEvent e) {
 			}
 
@@ -625,6 +646,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		writeStatus(tip);
 	}
 
+	@Override
 	public void siOpenDataOrFile(String data, String name, List<JDXSpectrum> specs,
 			String url, int firstSpec, int lastSpec, boolean isAppend) {
 		viewer.openDataOrFile(data, name, specs, url,
@@ -632,6 +654,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		siValidateAndRepaint();
 	}
 
+	@Override
 	public void siSetCurrentSource(JDXSource source) {
 		viewer.currentSource = source;
 		if (source != null)
@@ -652,6 +675,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	 * @param jsvp
 	 *          the display panel
 	 */
+	@Override
 	public void siSetPropertiesFromPreferences(JSVPanel jsvp,
 			boolean includeMeasures) {
 		ColorParameters ds = dsp.getDisplaySchemes().get(defaultDisplaySchemeName);
@@ -672,14 +696,17 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 				"Not Yet Implemented", JOptionPane.INFORMATION_MESSAGE);
 	}
 
+	@Override
 	public void siProcessCommand(String script) {
 		runScriptNow(script);
 	}
 
+	@Override
 	public boolean runScriptNow(String peakScript) {
 		return viewer.runScriptNow(peakScript);
 	}
 
+	@Override
 	public void panelEvent(Object eventObj) {
 		if (eventObj instanceof PeakPickEvent) {
 			viewer.processPeakPickEvent(eventObj, true);
@@ -693,6 +720,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 
+	@Override
 	public void siSetSelectedPanel(JSVPanel jsvp) {
 		if (viewer.selectedPanel != null)
       mainSplitPosition = mainSplitPane.getDividerLocation();
@@ -709,6 +737,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 
+	@Override
 	public void siSendPanelChange(JSVPanel jsvp) {
 		if (jsvp == prevPanel)
 			return;
@@ -813,6 +842,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		viewer.selectedPanel.getFocusNow(false);
 	}
 
+	@Override
 	public Map<String, Object> getJSpecViewProperty(String key) {
 		return viewer.getPropertyAsJavaObject(key);
 	}
@@ -821,11 +851,13 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	 * called by Jmol's StatusListener to register itself, indicating to JSpecView
 	 * that it needs to synchronize with it
 	 */
+	@Override
 	public void register(String appletID, JmolSyncInterface jmolStatusListener) {
 		jmol = jmolStatusListener;
 		isEmbedded = true;
 	}
 
+	@Override
 	public synchronized void syncToJmol(String msg) {
 		Logger.info("JSV>Jmol " + msg);
 		//System.out.println(Thread.currentThread() + "MainFrame sync JSV>Jmol 21"
@@ -840,6 +872,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 			jmolOrAdvancedApplet.syncToJmol(msg);
 	}
 
+	@Override
 	public synchronized void syncScript(String peakScript) {
 		//System.out.println(Thread.currentThread() + "MainFrame Jmol>JSV sync 11"
 			//	+ Thread.currentThread());
@@ -850,6 +883,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 			//	+ Thread.currentThread());
 	}
 
+	@Override
 	public void siSyncLoad(String filePath) {
 		siCloseSource(null);
 		siOpenDataOrFile(null, null, null, filePath, -1, -1, false);
@@ -861,11 +895,13 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	// //////////////////////// script commands from JSViewer /////////////////
 
+	@Override
 	public void siValidateAndRepaint() {
 		validate();
 		viewer.requestRepaint();
 	}
 
+	@Override
 	public void siExecClose(String value) {
 		boolean fromScript = (!value.startsWith("!"));
 		if (!fromScript)
@@ -877,11 +913,13 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		}
 	}
 
+	@Override
 	public void siExecHidden(boolean b) {
 		isHidden = (jmol != null && b);
 		setVisible(!isHidden);
 	}
 
+	@Override
 	public String siExecLoad(String value) {
 		viewer.load(value);
 		if (viewer.selectedPanel == null)
@@ -897,10 +935,12 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 //				svgForInkscape);
 //	}
 
+	@Override
 	public void siExecSetInterface(String value) {
 		interfaceOverlaid = (value.equalsIgnoreCase("overlay"));
 	}
 
+	@Override
 	public void siExecScriptComplete(String msg, boolean isOK) {
 		viewer.requestRepaint();
 		if (msg != null) {
@@ -913,38 +953,47 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		// }
 	}
 
+	@Override
 	public void siExecSetAutoIntegrate(boolean b) {
 		autoIntegrate = b;
 	}
 
+	@Override
 	public void addHighlight(double x1, double x2, int r, int g, int b, int a) {
 		advancedApplet.addHighlight(x1, x2, r, g, b, a);
 	}
 
+	@Override
 	public String exportSpectrum(String type, int n) {
 		return advancedApplet.exportSpectrum(type, n);
 	}
 
+	@Override
 	public String getCoordinate() {
 		return advancedApplet.getCoordinate();
 	}
 
+	@Override
 	public String getPropertyAsJSON(String key) {
 		return advancedApplet.getPropertyAsJSON(key);
 	}
 
+	@Override
 	public Map<String, Object> getPropertyAsJavaObject(String key) {
 		return advancedApplet.getPropertyAsJavaObject(key);
 	}
 
+	@Override
 	public String getSolnColour() {
 		return advancedApplet.getSolnColour();
 	}
 
+	@Override
 	public void loadInline(String data) {
 		siOpenDataOrFile(data, null, null, null, -1, -1, true);
 	}
 
+	@Override
 	public void setFilePath(String tmpFilePath) {
 		siProcessCommand("load " + tmpFilePath);
 	}
@@ -952,6 +1001,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	/**
 	 * ScriptInterface requires this. In the applet, this would be queued
 	 */
+	@Override
 	public void runScript(String script) {
 		// if (advancedApplet != null)
 		// advancedApplet.runScript(script);
@@ -959,39 +1009,48 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		runScriptNow(script);
 	}
 
+	@Override
 	public void removeAllHighlights() {
 		advancedApplet.removeAllHighlights();
 	}
 
+	@Override
 	public void removeHighlight(double x1, double x2) {
 		advancedApplet.removeHighlight(x1, x2);
 	}
 
+	@Override
 	public void reversePlot() {
 		advancedApplet.reversePlot();
 	}
 
+	@Override
 	public void setSpectrumNumber(int i) {
 		advancedApplet.setSpectrumNumber(i);
 	}
 
+	@Override
 	public void toggleCoordinate() {
 		advancedApplet.toggleCoordinate();
 	}
 
+	@Override
 	public void toggleGrid() {
 		advancedApplet.toggleGrid();
 	}
 
+	@Override
 	public void toggleIntegration() {
 		advancedApplet.toggleIntegration();
 	}
 
+	@Override
 	public void siExecSetCallback(ScriptToken st, String value) {
 		if (advancedApplet != null)
 			advancedApplet.siExecSetCallback(st, value);
 	}
 
+	@Override
 	@SuppressWarnings("incomplete-switch")
 	public void siUpdateBoolean(ScriptToken st, boolean TF) {
 		JSVPanel jsvp = viewer.selectedPanel;
@@ -1015,12 +1074,14 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		validate();
 	}
 
+	@Override
 	public void siCheckCallbacks(String title) {
 		// setMainTitle(title);
 	}
 
 	// /// JSVPanelNode tree model methods (can be left unimplemented for Android)
 
+	@Override
 	public void siSetNode(PanelNode panelNode, boolean fromTree) {
 		if (panelNode.jsvp != viewer.selectedPanel)
 			siSetSelectedPanel(panelNode.jsvp);
@@ -1035,6 +1096,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	 * @param source
 	 *          the <code>JDXSource</code>
 	 */
+	@Override
 	public void siCloseSource(JDXSource source) {
 		viewer.closeSource(source);
 		appMenu.clearSourceMenu(source);
@@ -1049,6 +1111,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	 * @param msg
 	 *          the message
 	 */
+	@Override
 	public void writeStatus(String msg) {
 		if (msg == null)
 			msg = "Unexpected Error";
@@ -1057,12 +1120,14 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		statusLabel.setText(msg);
 	}
 
+	@Override
 	public void siSetLoaded(String fileName, String filePath) {
 		appMenu.setCloseMenuItem(fileName);
 		setTitle("JSpecView - " + (filePath.startsWith(JSVFileManager.SIMULATION_PROTOCOL) ? "SIMULATION" : filePath));
 		appMenu.setSourceEnabled(true);
 	}
 
+	@Override
 	public void siUpdateRecentMenus(String filePath) {
 
 		// ADD TO RECENT FILE PATHS
@@ -1082,6 +1147,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		appMenu.updateRecentMenus(recentFilePaths);
 	}
 
+	@Override
 	public void siSetMenuEnables(PanelNode node, boolean isSplit) {
 		appMenu.setMenuEnables(node);
 		toolBar.setMenuEnables(node);
@@ -1089,6 +1155,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		// commandInput.requestFocusInWindow();
 	}
 
+	@Override
 	public JDXSource siCreateSource(String data, String filePath, 
 			int firstSpec, int lastSpec) throws Exception {
 		return FileReader.createJDXSource(JSVFileManager
@@ -1096,14 +1163,17 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 				lastSpec);
 	}
 
+	@Override
 	public JSVPanel siGetNewJSVPanel2(List<JDXSpectrum> specs) {
 		return AwtPanel.getPanelMany(viewer, specs, 0, 0);
 	}
 
+	@Override
 	public JSVPanel siGetNewJSVPanel(JDXSpectrum spec) {
 		return (spec == null ? null : AwtPanel.getPanelOne(viewer, spec));
 	}
 
+	@Override
 	public PanelNode siGetNewPanelNode(String id, String fileName,
 			JDXSource source, JSVPanel jsvp) {
 		return new PanelNode(id, fileName, source, jsvp);
@@ -1116,29 +1186,35 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	// debugging
 
+	@Override
 	public void siExecTest(String value) {
 		System.out.println(PT.toJSON(null, viewer.getPropertyAsJavaObject(value)));
 		//syncScript("Jmol sending to JSpecView: jmolApplet_object__5768809713073075__JSpecView: <PeakData file=\"file:/C:/jmol-dev/workspace/Jmol-documentation/script_documentation/examples-12/jspecview/acetophenone.jdx\" index=\"31\" type=\"13CNMR\" id=\"6\" title=\"carbonyl ~200\" peakShape=\"multiplet\" model=\"acetophenone\" atoms=\"1\" xMax=\"199\" xMin=\"197\"  yMax=\"10000\" yMin=\"0\" />");
 	}
 
+	@Override
 	public String siSetFileAsString(String value) {
 		return JSVFileManager.getFileAsString(value);
 	}
 
   
+	@Override
 	public JSVTreeNode siCreateTree(JDXSource source, JSVPanel[] jsvPanels) {
 		return tree.createTree(this, source, jsvPanels);
 	}
 
+	@Override
 	public JSViewer siGetViewer() {
 		return viewer;
 	}
 
+	@Override
 	public void siNewWindow(boolean isSelected, boolean fromFrame) {
 		// not implemented for MainFrame
 	}
 
 
+	@Override
 	public List<String> getScriptQueue() {
   // applet only
 		return null;

@@ -135,10 +135,12 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 
 	private static final long serialVersionUID = 1L;
 
+	@Override
 	public boolean isPro() {
 		return app.isPro();
 	}
 
+	@Override
 	public boolean isSigned() {
 		return app.isSigned();
 	}
@@ -204,6 +206,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	 * @see jspecview.applet.JSVAppletInterface#getSolnColour()
 	 */
 
+	@Override
 	public String getSolnColour() {
 		return app.getSolnColour();
 	}
@@ -213,6 +216,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	 * 
 	 * @see jspecview.applet.JSVAppletInterface#getCoordinate()
 	 */
+	@Override
 	public String getCoordinate() {
 		return app.getCoordinate();
 	}
@@ -222,6 +226,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	 * 
 	 * @see jspecview.applet.JSVAppletInterface#loadInline(java.lang.String)
 	 */
+	@Override
 	public void loadInline(String data) {
 		app.loadInline(data);
 	}
@@ -237,6 +242,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	 * @see jspecview.applet.JSVAppletInterface#exportSpectrum(java.lang.String,
 	 * int)
 	 */
+	@Override
 	public String exportSpectrum(String type, int n) {
 		return app.exportSpectrum(type, n);
 	}
@@ -246,6 +252,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	 * 
 	 * @see jspecview.applet.JSVAppletInterface#setFilePath(java.lang.String)
 	 */
+	@Override
 	public void setFilePath(String tmpFilePath) {
 		app.setFilePath(tmpFilePath);
 	}
@@ -255,6 +262,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	 * 
 	 * @see jspecview.applet.JSVAppletInterface#setSpectrumNumber(int)
 	 */
+	@Override
 	public void setSpectrumNumber(int i) {
 		app.setSpectrumNumber(i);
 	}
@@ -264,6 +272,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	 * 
 	 * @see jspecview.applet.JSVAppletInterface#toggleGrid()
 	 */
+	@Override
 	public void toggleGrid() {
 		app.toggleGrid();
 	}
@@ -273,6 +282,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	 * 
 	 * @see jspecview.applet.JSVAppletInterface#toggleCoordinate()
 	 */
+	@Override
 	public void toggleCoordinate() {
 		app.toggleCoordinate();
 	}
@@ -282,6 +292,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	 * 
 	 * @see jspecview.applet.JSVAppletInterface#toggleIntegration()
 	 */
+	@Override
 	public void toggleIntegration() {
 		app.toggleIntegration();
 	}
@@ -292,6 +303,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	 * @see jspecview.applet.JSVAppletInterface#addHighlight(double, double, int,
 	 * int, int, int)
 	 */
+	@Override
 	public void addHighlight(double x1, double x2, int r, int g, int b, int a) {
 		app.addHighlight(x1, x2, r, g, b, a);
 	}
@@ -301,6 +313,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	 * 
 	 * @see jspecview.applet.JSVAppletInterface#removeAllHighlights()
 	 */
+	@Override
 	public void removeAllHighlights() {
 		app.removeAllHighlights();
 	}
@@ -310,6 +323,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	 * 
 	 * @see jspecview.applet.JSVAppletInterface#removeHighlight(double, double)
 	 */
+	@Override
 	public void removeHighlight(double x1, double x2) {
 		app.removeHighlight(x1, x2);
 	}
@@ -319,6 +333,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	 * 
 	 * @see jspecview.applet.JSVAppletInterface#reversePlot()
 	 */
+	@Override
 	public void reversePlot() {
 		app.reversePlot();
 	}
@@ -338,6 +353,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	 * 
 	 * @see jspecview.applet.JSVAppletInterface#runScript(java.lang.String)
 	 */
+	@Override
 	public void runScript(String script) {
 		app.runScript(script);
 	}
@@ -347,6 +363,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	 * 
 	 * @see jspecview.applet.JSVAppletInterface#syncScript(java.lang.String)
 	 */
+	@Override
 	public void syncScript(String peakScript) {
 		app.syncScript(peakScript);
 	}
@@ -356,6 +373,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	 * 
 	 * @see jspecview.applet.JSVAppletInterface#writeStatus(java.lang.String)
 	 */
+	@Override
 	public void writeStatus(String msg) {
 		app.writeStatus(msg);
 	}
@@ -367,6 +385,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	 * jspecview.applet.JSVAppletInterface#getPropertyAsJavaObject(java.lang.String
 	 * )
 	 */
+	@Override
 	public Map<String, Object> getPropertyAsJavaObject(String key) {
 		return app.getPropertyAsJavaObject(key);
 	}
@@ -377,10 +396,12 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	 * @see
 	 * jspecview.applet.JSVAppletInterface#getPropertyAsJSON(java.lang.String)
 	 */
+	@Override
 	public String getPropertyAsJSON(String key) {
 		return app.getPropertyAsJSON(key);
 	}
 
+	@Override
 	public boolean runScriptNow(String script) {
 		return app.runScriptNow(script);
 	}
@@ -389,11 +410,13 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	private Component mainPanel;
 	private JFrame offWindowFrame;
 
+	@Override
 	public void setDropTargetListener(boolean isSigned, JSViewer viewer) {
 		if (dtl == null && isSigned)
 			dtl = (DropTargetListener) ((JSVFileDropper) viewer.getPlatformInterface("FileDropper")).set(viewer);
 	}
 
+	@Override
 	public void validateContent(int mode) {
 		if ((mode & 1) == 1)
 			getContentPane().validate();
@@ -401,6 +424,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 			mainPanel.validate();
 	}
 
+	@Override
 	public void createMainPanel(JSViewer viewer) {
 		getContentPane().removeAll();
 		mainPanel = (Component) (viewer.mainPanel = new AwtMainPanel(
@@ -408,6 +432,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 		getContentPane().add(mainPanel);
 	}
 
+	@Override
 	public void newWindow(boolean isSelected) {
 		if (isSelected) {
 			offWindowFrame = new JFrame("JSpecView");
@@ -451,6 +476,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	 * @param params
 	 * 
 	 */
+	@Override
 	public void callToJavaScript(String callback, Object[] params) {
 		try {
 
@@ -472,10 +498,12 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 		}
 	}
 
+	@Override
 	public void setPanelVisible(boolean b) {
 		mainPanel.setVisible(b);
 	}
 
+	@Override
 	public JSVPanel getJSVPanel(JSViewer viewer, List<JDXSpectrum> specs,
 			int initialStartIndex, int initialEndIndex) {
 		return (specs == null ? AwtPanel.getEmptyPanel(viewer)
@@ -487,6 +515,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	// be using a thread started by the initiating thread;
 
 	class CommandWatcher implements Runnable {
+		@Override
 		public void run() {
 			Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
 			int commandDelay = 200;
@@ -517,10 +546,12 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 		}
 	}
 
+	@Override
 	public void doExitJmol() {
 		// n/a
 	}
 
+	@Override
 	public JSVApp getApp() {
 		return app;
 	}

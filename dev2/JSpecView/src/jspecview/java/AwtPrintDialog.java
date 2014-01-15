@@ -93,7 +93,8 @@ public class AwtPrintDialog extends JDialog implements JSVPrintDialog {
    * @param isJob 
    * @return this
    */
-  public AwtPrintDialog set(Object frame, PrintLayout pl, boolean isJob) {
+  @Override
+	public AwtPrintDialog set(Object frame, PrintLayout pl, boolean isJob) {
     if (pl == null)
       pl = new PrintLayout();
     this.pl = pl;
@@ -188,21 +189,24 @@ public class AwtPrintDialog extends JDialog implements JSVPrintDialog {
     //titledBorder8.setTitle("Copies");
     cancelButton.setText("Cancel");
     cancelButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
+      @Override
+			public void actionPerformed(ActionEvent e) {
         cancelButton_actionPerformed(e);
       }
     });
     printButton.setToolTipText("");
     printButton.setText("Print");
     printButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
+      @Override
+			public void actionPerformed(ActionEvent e) {
         printButton_actionPerformed(false);
       }
     });
     pdfButton.setToolTipText("");
     pdfButton.setText("Create PDF");
     pdfButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
+      @Override
+			public void actionPerformed(ActionEvent e) {
         printButton_actionPerformed(true);
       }
     });
@@ -234,7 +238,8 @@ public class AwtPrintDialog extends JDialog implements JSVPrintDialog {
     landscapeRadioButton.setActionCommand("Landscape");
     landscapeRadioButton.setText("Landscape");
     landscapeRadioButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
+      @Override
+			public void actionPerformed(ActionEvent e) {
         landscapeRadioButton_actionPerformed(e);
       }
     });
@@ -247,28 +252,32 @@ public class AwtPrintDialog extends JDialog implements JSVPrintDialog {
     topLeftRadioButton.setActionCommand("Default");
     topLeftRadioButton.setText("Top Left");
     topLeftRadioButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
+      @Override
+			public void actionPerformed(ActionEvent e) {
         defaultPosRadioButton_actionPerformed(e);
       }
     });
     centerRadioButton.setActionCommand("Center");
     centerRadioButton.setText("Center");
     centerRadioButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
+      @Override
+			public void actionPerformed(ActionEvent e) {
         centerRadioButton_actionPerformed(e);
       }
     });
     portraitRadioButton.setActionCommand("Portrait");
     portraitRadioButton.setText("Portrait");
     portraitRadioButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
+      @Override
+			public void actionPerformed(ActionEvent e) {
         portraitRadioButton_actionPerformed(e);
       }
     });
     fitToPageRadioButton.setActionCommand("Fit To Page");
     fitToPageRadioButton.setText("Fit to Page");
     fitToPageRadioButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
+      @Override
+			public void actionPerformed(ActionEvent e) {
         fitToPageRadioButton_actionPerformed(e);
       }
     });
@@ -455,7 +464,8 @@ public class AwtPrintDialog extends JDialog implements JSVPrintDialog {
    * Returns the PrintLayout object
    * @return the PrintLayout object
    */
-  public PrintLayout getPrintLayout(){
+  @Override
+	public PrintLayout getPrintLayout(){
     return plNew;
   }
 

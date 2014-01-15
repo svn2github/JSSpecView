@@ -32,6 +32,7 @@ public class AwtTree extends JTree implements JSVTree {
   private DefaultTreeModel spectraTreeModel;
 	protected JSViewer viewer;
 
+	@Override
 	public JSVTreeNode getRootNode() {
 		return rootNode;
 	}
@@ -45,7 +46,8 @@ public class AwtTree extends JTree implements JSVTree {
     getSelectionModel().setSelectionMode(
         TreeSelectionModel.SINGLE_TREE_SELECTION);
     addTreeSelectionListener(new TreeSelectionListener() {
-      public void valueChanged(TreeSelectionEvent e) {
+      @Override
+			public void valueChanged(TreeSelectionEvent e) {
       	v.selectedTreeNode((JSVTreeNode) getLastSelectedPathComponent());
       }
     });
@@ -53,6 +55,7 @@ public class AwtTree extends JTree implements JSVTree {
 
 	}
 	
+	@Override
 	public void setSelectedPanel(ScriptInterface si, JSVPanel jsvp) {
 		if (jsvp != null) {
 			JSVTreeNode treeNode = PanelNode.findNode(jsvp, viewer.panelNodes).treeNode;
@@ -61,6 +64,7 @@ public class AwtTree extends JTree implements JSVTree {
 		}
 	}
 	
+	@Override
 	public JSVTreeNode createTree(ScriptInterface si,
 			JDXSource source, JSVPanel[] panels) {
   	AwtTree tree = (AwtTree) viewer.spectraTree;
@@ -92,14 +96,17 @@ public class AwtTree extends JTree implements JSVTree {
     return fileNode;
 	}
 
+	@Override
 	public void setPath(JSVTreePath path) {
 		setSelectionPath((TreePath) path);
 	}
 
+	@Override
 	public JSVTreePath newTreePath(Object[] path) {
 		return new AwtTreePath(path);
 	}
 
+	@Override
 	public void deleteNodes(List<JSVTreeNode> toDelete) {
 	  for (int i = 0; i < toDelete.size(); i++) {
 	  	spectraTreeModel.removeNodeFromParent((MutableTreeNode) toDelete.get(i));

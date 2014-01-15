@@ -101,12 +101,14 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
   }
 
 	private GenericPlatform apiPlatform;
+	@Override
 	public GenericPlatform getApiPlatform() {
 		return apiPlatform;
 	}
 	
   private PanelData pd;
-  public PanelData getPanelData() {
+  @Override
+	public PanelData getPanelData() {
     return pd;
   }
 
@@ -172,11 +174,13 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
     setBorder(BorderFactory.createLineBorder(Color.BLACK));
 	}
 
-  public String getTitle() {
+  @Override
+	public String getTitle() {
   	return pd.getTitle();
   }
   
-  public void dispose() {
+  @Override
+	public void dispose() {
     //toolTip = null;
     if (pd != null)
       pd.dispose();
@@ -184,7 +188,8 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
     mouse.dispose();
   }
 
-  public void setTitle(String title) {
+  @Override
+	public void setTitle(String title) {
     pd.title = title;
     setName(title);
   }
@@ -193,7 +198,8 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
   	pd.setColorOrFont(ds, st);
   }
 
-  public void setBackgroundColor(GenericColor color) {
+  @Override
+	public void setBackgroundColor(GenericColor color) {
   	setBackground((Color) (bgcolor = color));
   }
   
@@ -203,7 +209,8 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
   
   /*----------------------- JSVPanel PAINTING METHODS ---------------------*/
 
-  public void doRepaint(boolean andTaintAll) {
+  @Override
+	public void doRepaint(boolean andTaintAll) {
   	pd.taintedAll |= andTaintAll;
   	// to the system
   	if (!pd.isPrinting)
@@ -239,13 +246,15 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
     viewer.repaintDone();
   }
   
-  public String getInput(String message, String title, String sval) {
+  @Override
+	public String getInput(String message, String title, String sval) {
     String ret = (String) JOptionPane.showInputDialog(this, message, title,
         JOptionPane.QUESTION_MESSAGE, null, null, sval);
     getFocusNow(true);
     return ret;
   }
 
+	@Override
 	public void showMessage(String msg, String title) {
 		Logger.info(msg);
 		if (title != null)
@@ -265,6 +274,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
 	 * @param os
 	 * @param title
 	 */
+	@Override
 	public void printPanel(PrintLayout pl, OutputStream os, String title) {
 
 		// MediaSize size = MediaSize.getMediaSizeForName(pl.paper);
@@ -342,17 +352,20 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
    * @return an int that depends on whether a print was successful
    * @throws PrinterException
    */
-  public int print(Graphics g, PageFormat pf, int pi) throws PrinterException {
+  @Override
+	public int print(Graphics g, PageFormat pf, int pi) throws PrinterException {
   	return pd.print(g, pf.getImageableHeight(), pf.getImageableWidth(), 
   			pf.getImageableX(), pf.getImageableY(),
   			pf.getPaper().getHeight(), pf.getPaper().getWidth(), 
   			pf.getOrientation() == PageFormat.PORTRAIT, pi);
   }
 
+	@Override
 	public int getFontFaceID(String name) {
 		return Font.getFontFaceID("SansSerif");
 	}
 	
+	@Override
 	public String saveImage(String type, GenericFileInterface file) {
 		String msg = "OK";
     try {
@@ -368,6 +381,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
 
 	///// threading and focus
 	
+	@Override
 	public void getFocusNow(boolean asThread) {
 		if (asThread)
 			SwingUtilities.invokeLater(new RequestThread());
@@ -378,6 +392,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
 	}
 
   public class RequestThread implements Runnable {
+		@Override
 		public void run() {
 			requestFocusInWindow();
 		}
@@ -391,15 +406,18 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
     return pd.getSpectrumAt(0).toString();
   }
 
+	@Override
 	public boolean processMouseEvent(int id, int x, int y, int modifiers,
 			long time) {
 		return mouse.processEvent(id, x, y, modifiers, time);
 	}
 
+	@Override
 	public void processTwoPointGesture(float[][][] touches) {
 		// n/a
 	}
 
+	@Override
 	public void showMenu(int x, int y) {
   	viewer.showMenu(x, y);
 	}

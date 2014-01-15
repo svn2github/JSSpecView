@@ -123,136 +123,158 @@ public class ApplicationMenu extends JMenuBar {
   	
     JMenuItem openFileMenuItem = setMenuItem(null, 'O', "Open File...", 79,
         InputEvent.CTRL_MASK, new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
+          @Override
+					public void actionPerformed(ActionEvent e) {
             viewer.openFileFromDialog(false, false, false);
           }
         });
     JMenuItem openSimulationMenuItem = setMenuItem(null, 'I', "Open Simulation...", 79,
         InputEvent.CTRL_MASK, new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
+          @Override
+					public void actionPerformed(ActionEvent e) {
             viewer.openFileFromDialog(false, false, true);
           }
         });
     JMenuItem openURLMenuItem = setMenuItem(null, 'U', "Open URL...", 85,
         InputEvent.CTRL_MASK, new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
+          @Override
+					public void actionPerformed(ActionEvent e) {
             viewer.openFileFromDialog(false, true, false);
           }
         });
     
     printMenuItem = setMenuItem(null, 'P', "Print...", 80,
         InputEvent.CTRL_MASK, new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
+          @Override
+					public void actionPerformed(ActionEvent e) {
             viewer.runScript("print");
           }
         });
     closeMenuItem = setMenuItem(null, 'C', "Close", 115,
         InputEvent.CTRL_MASK, new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
+          @Override
+					public void actionPerformed(ActionEvent e) {
             viewer.runScript("CLOSE");
           }
         });
     closeAllMenuItem = setMenuItem(null, 'L', "Close All", 0,
         InputEvent.CTRL_MASK, new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
+          @Override
+					public void actionPerformed(ActionEvent e) {
             viewer.runScript("CLOSE ALL");
           }
         });
     JMenuItem exitMenuItem = setMenuItem(null, 'X', "Exit", 115,
         InputEvent.ALT_MASK, new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
+          @Override
+					public void actionPerformed(ActionEvent e) {
             mainFrame.exitJSpecView(false);
           }
         });
 
     setMenuItem(gridCheckBoxMenuItem, 'G', "Grid", 71,
         InputEvent.CTRL_MASK, new ItemListener() {
-          public void itemStateChanged(ItemEvent e) {
+          @Override
+					public void itemStateChanged(ItemEvent e) {
             setBoolean(ScriptToken.GRIDON, e);
           }
         });
     setMenuItem(coordsCheckBoxMenuItem, 'C', "Coordinates",
         67, InputEvent.CTRL_MASK, new ItemListener() {
-          public void itemStateChanged(ItemEvent e) {
+          @Override
+					public void itemStateChanged(ItemEvent e) {
             setBoolean(ScriptToken.COORDINATESON, e);
           }
         });
     setMenuItem(revPlotCheckBoxMenuItem, 'R', "Reverse Plot",
         82, InputEvent.CTRL_MASK, new ItemListener() {
-          public void itemStateChanged(ItemEvent e) {
+          @Override
+					public void itemStateChanged(ItemEvent e) {
             setBoolean(ScriptToken.REVERSEPLOT, e);
           }
         });
     setMenuItem(scaleXCheckBoxMenuItem, 'X', "X Scale", 88,
         InputEvent.CTRL_MASK, new ItemListener() {
-          public void itemStateChanged(ItemEvent e) {
+          @Override
+					public void itemStateChanged(ItemEvent e) {
             setBoolean(ScriptToken.XSCALEON, e);
           }
         });
     setMenuItem(scaleYCheckBoxMenuItem, 'Y', "Y Scale", 89,
         InputEvent.CTRL_MASK, new ItemListener() {
-          public void itemStateChanged(ItemEvent e) {
+          @Override
+					public void itemStateChanged(ItemEvent e) {
             setBoolean(ScriptToken.YSCALEON, e);
           }
         });
     JMenuItem nextZoomMenuItem = setMenuItem(null, 'N', "Next View", 78,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
+          @Override
+					public void actionPerformed(ActionEvent e) {
             viewer.runScript("zoom next");
           }
         });
     JMenuItem prevZoomMenuItem = setMenuItem(null, 'P', "Previous View", 80,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
+          @Override
+					public void actionPerformed(ActionEvent e) {
             viewer.runScript("zoom previous");
           }
         });
     JMenuItem fullZoomMenuItem = setMenuItem(null, 'F', "Full View", 70,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
+          @Override
+					public void actionPerformed(ActionEvent e) {
             viewer.runScript("zoom out");
           }
         });
     JMenuItem clearZoomMenuItem = setMenuItem(null, 'C', "Clear Views", 67,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
+          @Override
+					public void actionPerformed(ActionEvent e) {
             viewer.runScript("zoom clear");
           }
         });
     JMenuItem userZoomMenuItem = setMenuItem(null, 'Z', "Set Zoom...", 90,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
+          @Override
+					public void actionPerformed(ActionEvent e) {
             viewer.runScript("zoom ?");
           }
         });
     JMenuItem scriptMenuItem = setMenuItem(null, 'T', "Script...", 83,
         InputEvent.ALT_MASK, new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
+          @Override
+					public void actionPerformed(ActionEvent e) {
             viewer.runScript("script INLINE");
           }
         });
     
     JMenuItem spectraMenuItem = setMenuItem(null, 'S', "Spectra...", 83,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
+          @Override
+					public void actionPerformed(ActionEvent e) {
             viewer.runScript("view");
           }
         });
     JMenuItem overlayStackOffsetYMenuItem = setMenuItem(null, 'y', "Overlay Offset...", 0,
         0, new ActionListener() {
+					@Override
 					public void actionPerformed(ActionEvent e) {
 						viewer.runScript("stackOffsetY ?");
 					}
         });
     sourceMenuItem = setMenuItem(null, 'S', "Source ...", 83,
         InputEvent.CTRL_MASK, new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
+          @Override
+					public void actionPerformed(ActionEvent e) {
             viewer.runScript("showSource");
           }
         });
     errorLogMenuItem = setMenuItem(null, '\0', "Error Log ...", 0,
         0, new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
+          @Override
+					public void actionPerformed(ActionEvent e) {
             viewer.runScript("showErrors");
           }
         });
@@ -260,46 +282,53 @@ public class ApplicationMenu extends JMenuBar {
 
     JMenuItem propertiesMenuItem = setMenuItem(null, 'P', "Properties", 72,
         InputEvent.CTRL_MASK, new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
+          @Override
+					public void actionPerformed(ActionEvent e) {
             viewer.runScript("showProperties");
           }
         });
     overlayKeyMenuItem = setMenuItem(null, '\0', "Overlay Key", 0,
         0, new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
+          @Override
+					public void actionPerformed(ActionEvent e) {
             viewer.runScript("showKey toggle");
           }
         });
 
     JMenuItem preferencesMenuItem = setMenuItem(null, 'P', "Preferences...",
         0, 0, new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
+          @Override
+					public void actionPerformed(ActionEvent e) {
             showPreferencesDialog();
           }
         });
     JMenuItem aboutMenuItem = setMenuItem(null, '\0', "About", 0, 0,
         new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
+          @Override
+					public void actionPerformed(ActionEvent e) {
             new AboutDialog(mainFrame);
           }
         });
     setMenuItem(toolbarCheckBoxMenuItem, 'T', "Toolbar", 84,
         InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, new ItemListener() {
-          public void itemStateChanged(ItemEvent e) {
+          @Override
+					public void itemStateChanged(ItemEvent e) {
             mainFrame.enableToolbar(e.getStateChange() == ItemEvent.SELECTED);
           }
         });
 
     setMenuItem(sidePanelCheckBoxMenuItem, 'S', "Side Panel",
         83, InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, new ItemListener() {
-          public void itemStateChanged(ItemEvent e) {
+          @Override
+					public void itemStateChanged(ItemEvent e) {
             mainFrame.setSplitPane(e.getStateChange() == ItemEvent.SELECTED);
           }
         });
 
     setMenuItem(statusCheckBoxMenuItem, 'B', "Status Bar",
         66, InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, new ItemListener() {
-          public void itemStateChanged(ItemEvent e) {
+          @Override
+					public void itemStateChanged(ItemEvent e) {
             mainFrame.enableStatus(e.getStateChange() == ItemEvent.SELECTED);
           }
         });
@@ -320,14 +349,17 @@ public class ApplicationMenu extends JMenuBar {
     displayMenu.setMnemonic('D');
     displayMenu.setText("Display");
     displayMenu.addMenuListener(new MenuListener() {
-      public void menuSelected(MenuEvent e) {
+      @Override
+			public void menuSelected(MenuEvent e) {
         doMenuSelected();
       }
 
-      public void menuDeselected(MenuEvent e) {
+      @Override
+			public void menuDeselected(MenuEvent e) {
       }
 
-      public void menuCanceled(MenuEvent e) {
+      @Override
+			public void menuCanceled(MenuEvent e) {
       }
     });
 
@@ -353,14 +385,17 @@ public class ApplicationMenu extends JMenuBar {
     processingMenu.setMnemonic('P');
     processingMenu.setText("Processing");
     processingMenu.addMenuListener(new MenuListener() {
-      public void menuSelected(MenuEvent e) {
+      @Override
+			public void menuSelected(MenuEvent e) {
         //jsvpPopupMenu.setEnables(mainFrame.viewer.selectedPanel);
       }
 
-      public void menuDeselected(MenuEvent e) {
+      @Override
+			public void menuDeselected(MenuEvent e) {
       }
 
-      public void menuCanceled(MenuEvent e) {
+      @Override
+			public void menuCanceled(MenuEvent e) {
       }
     });
     setProcessingMenu(processingMenu);
@@ -417,7 +452,8 @@ public class ApplicationMenu extends JMenuBar {
 
     setMenus(saveAsMenu, saveAsJDXMenu, exportAsMenu,
         (new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
+          @Override
+					public void actionPerformed(ActionEvent e) {
             mainFrame.exportSpectrumViaMenu(e.getActionCommand());
           }
         }));
@@ -441,31 +477,36 @@ public class ApplicationMenu extends JMenuBar {
 	public void setProcessingMenu(JComponent menu) {
 		menu.add(integrationMenuItem = setMenuItem(null, 'I', "Integration", 0, 0,
 	    new ActionListener() {
-	      public void actionPerformed(ActionEvent e) {
+	      @Override
+				public void actionPerformed(ActionEvent e) {
 	        viewer.runScript("showIntegration");
 	      }
 	    }));
 	menu.add(setMenuItem(null, 'M', "Measurements", 0, 0,
 	    new ActionListener() {
-	      public void actionPerformed(ActionEvent e) {
+	      @Override
+				public void actionPerformed(ActionEvent e) {
 	      	viewer.runScript("showMeasurements");
 	      }
 	    }));
 	menu.add(setMenuItem(null, 'P', "Peaks", 0, 0,
 	    new ActionListener() {
-	      public void actionPerformed(ActionEvent e) {
+	      @Override
+				public void actionPerformed(ActionEvent e) {
 	        viewer.runScript("showPeakList");
 	      }
 	    }));
 	menu.add(transmittanceMenuItem = setMenuItem(null, '\0', "Transmittance/Absorbance", 0, 0,
 	    new ActionListener() {
-	      public void actionPerformed(ActionEvent e) {
+	      @Override
+				public void actionPerformed(ActionEvent e) {
 	        viewer.runScript("IRMODE IMPLIED");
 	      }
 	    }));
 	menu.add(solutionColorMenuItem = setMenuItem(null, 'C', "Predicted Solution Colour", 0, 0,
 	    new ActionListener() {
-	      public void actionPerformed(ActionEvent e) {
+	      @Override
+				public void actionPerformed(ActionEvent e) {
 	        viewer.runScript("GETSOLUTIONCOLOR");
 	      }
 	    }));
@@ -563,7 +604,8 @@ public class ApplicationMenu extends JMenuBar {
       menuItem = new JMenuItem(path);
       openRecentMenu.add(menuItem);
       menuItem.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
+        @Override
+				public void actionPerformed(ActionEvent e) {
           viewer.openFile(((JMenuItem) e.getSource()).getText(), true);
         }
       });
@@ -578,7 +620,8 @@ public class ApplicationMenu extends JMenuBar {
       menuItem = new JMenuItem(path);
       openRecentMenu.add(menuItem);
       menuItem.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
+        @Override
+				public void actionPerformed(ActionEvent e) {
           viewer.openFile(((JMenuItem) e.getSource()).getText(), true);
         }
       });

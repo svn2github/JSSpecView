@@ -72,7 +72,8 @@ public class AwtClipboard implements Transferable {
   /* (non-Javadoc)
    * @see java.awt.datatransfer.Transferable#getTransferDataFlavors()
    */
-  public DataFlavor[] getTransferDataFlavors() {
+  @Override
+	public DataFlavor[] getTransferDataFlavors() {
     return (text == null ? 
         new DataFlavor[]{ DataFlavor.imageFlavor }
       : new DataFlavor[]{ DataFlavor.stringFlavor });
@@ -81,14 +82,16 @@ public class AwtClipboard implements Transferable {
   /* (non-Javadoc)
    * @see java.awt.datatransfer.Transferable#isDataFlavorSupported(java.awt.datatransfer.DataFlavor)
    */
-  public boolean isDataFlavorSupported(DataFlavor flavor) {
+  @Override
+	public boolean isDataFlavorSupported(DataFlavor flavor) {
     return DataFlavor.imageFlavor.equals(flavor);
   }
 
   /* (non-Javadoc)
    * @see java.awt.datatransfer.Transferable#getTransferData(java.awt.datatransfer.DataFlavor)
    */
-  public Object getTransferData(DataFlavor flavor)
+  @Override
+	public Object getTransferData(DataFlavor flavor)
       throws UnsupportedFlavorException, IOException {
     if (DataFlavor.imageFlavor.equals(flavor)) {
       return image;

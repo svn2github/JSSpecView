@@ -114,15 +114,18 @@ abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
 
 //	private final static int MENUITEM_HEIGHT = 20;
 
+	@Override
 	public void jpiDispose() {
 		menuClearListeners(popupMenu);
 		popupMenu = thisPopup = null;
 	}
 
+	@Override
 	public Object jpiGetMenuAsObject() {
 		return popupMenu;
 	}
 
+	@Override
 	public String jpiGetMenuAsString(String title) {
 		updateForShow();
 		int pt = title.indexOf("|");
@@ -139,6 +142,7 @@ abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
 		return (new JSVPopupResourceBundle()).getMenuAsText(title);
 	}
 
+	@Override
 	public void jpiShow(int x, int y) {
 		// main entry point from Viewer
 		// called via JmolPopupInterface
@@ -147,6 +151,7 @@ abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
 		menuShowPopup(popupMenu, thisX, thisY);
 	}
 
+	@Override
 	public void jpiUpdateComputedMenus() {
 		if (updateMode == UPDATE_NEVER)
 			return;
@@ -393,6 +398,7 @@ abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
 		viewer.runScript(what);
 	}
 
+	@Override
 	public void checkMenuClick(Object source, String script) {
 		checkMenuClickGP(source, script);
 	}
@@ -496,17 +502,20 @@ abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
 			viewer.runScript(cmd);
 	}
 
+	@Override
 	public boolean getSelected(String key) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
+	@Override
 	public void setCompoundMenu(List<PanelNode> panelNodes,
 			boolean allowCompoundMenu) {
 		// TODO Auto-generated method stub
 		
 	}
 
+	@Override
 	public void setEnabled(boolean allowMenu, boolean zoomEnabled) {
 		this.allowMenu = allowMenu;
 		this.zoomEnabled = zoomEnabled;
@@ -562,6 +571,7 @@ abstract public class JSVGenericPopup implements JSVPopupMenu, JSVAbstractMenu {
     menuEnable(item, TF);
 	}
 
+	@Override
 	public void setSelected(String key, boolean TF) {
   	Object item = htMenus.get(key);
   	if (item == null)

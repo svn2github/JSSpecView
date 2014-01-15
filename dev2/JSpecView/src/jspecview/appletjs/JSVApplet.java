@@ -149,7 +149,8 @@ public class JSVApplet implements JSVAppletInterface,
     Logger.setLogLevel(iLevel);
   }
 
-  public String getParameter(String paramName) {
+  @Override
+	public String getParameter(String paramName) {
     Object o = htParams.get(paramName.toLowerCase());
     return (o == null ? null : new String(o.toString()));
   }
@@ -168,10 +169,12 @@ public class JSVApplet implements JSVAppletInterface,
     return defaultValue;
   }
 
+	@Override
 	public boolean isPro() {
 		return app.isPro();
 	}
 
+	@Override
 	public boolean isSigned() {
 		return app.isSigned();
 	}
@@ -220,6 +223,7 @@ public class JSVApplet implements JSVAppletInterface,
 	 * 
 	 * @return the String "JSpecView Applet"
 	 */
+	@Override
 	public String getAppletInfo() {
 		return "JSpecView Applet " + JSVersion.VERSION;
 	}
@@ -232,6 +236,7 @@ public class JSVApplet implements JSVAppletInterface,
 	 * @see jspecview.applet.JSVAppletInterface#getSolnColour()
 	 */
 
+	@Override
 	public String getSolnColour() {
 		return app.getSolnColour();
 	}
@@ -241,6 +246,7 @@ public class JSVApplet implements JSVAppletInterface,
 	 * 
 	 * @see jspecview.applet.JSVAppletInterface#getCoordinate()
 	 */
+	@Override
 	public String getCoordinate() {
 		return app.getCoordinate();
 	}
@@ -250,6 +256,7 @@ public class JSVApplet implements JSVAppletInterface,
 	 * 
 	 * @see jspecview.applet.JSVAppletInterface#loadInline(java.lang.String)
 	 */
+	@Override
 	public void loadInline(String data) {
 		app.loadInline(data);
 	}
@@ -265,6 +272,7 @@ public class JSVApplet implements JSVAppletInterface,
 	 * @see jspecview.applet.JSVAppletInterface#exportSpectrum(java.lang.String,
 	 * int)
 	 */
+	@Override
 	public String exportSpectrum(String type, int n) {
 		return app.exportSpectrum(type, n);
 	}
@@ -274,6 +282,7 @@ public class JSVApplet implements JSVAppletInterface,
 	 * 
 	 * @see jspecview.applet.JSVAppletInterface#setFilePath(java.lang.String)
 	 */
+	@Override
 	public void setFilePath(String tmpFilePath) {
 		app.setFilePath(tmpFilePath);
 	}
@@ -283,6 +292,7 @@ public class JSVApplet implements JSVAppletInterface,
 	 * 
 	 * @see jspecview.applet.JSVAppletInterface#setSpectrumNumber(int)
 	 */
+	@Override
 	public void setSpectrumNumber(int i) {
 		app.setSpectrumNumber(i);
 	}
@@ -292,6 +302,7 @@ public class JSVApplet implements JSVAppletInterface,
 	 * 
 	 * @see jspecview.applet.JSVAppletInterface#toggleGrid()
 	 */
+	@Override
 	public void toggleGrid() {
 		app.toggleGrid();
 	}
@@ -301,6 +312,7 @@ public class JSVApplet implements JSVAppletInterface,
 	 * 
 	 * @see jspecview.applet.JSVAppletInterface#toggleCoordinate()
 	 */
+	@Override
 	public void toggleCoordinate() {
 		app.toggleCoordinate();
 	}
@@ -310,6 +322,7 @@ public class JSVApplet implements JSVAppletInterface,
 	 * 
 	 * @see jspecview.applet.JSVAppletInterface#toggleIntegration()
 	 */
+	@Override
 	public void toggleIntegration() {
 		app.toggleIntegration();
 	}
@@ -320,6 +333,7 @@ public class JSVApplet implements JSVAppletInterface,
 	 * @see jspecview.applet.JSVAppletInterface#addHighlight(double, double, int,
 	 * int, int, int)
 	 */
+	@Override
 	public void addHighlight(double x1, double x2, int r, int g, int b, int a) {
 		app.addHighlight(x1, x2, r, g, b, a);
 	}
@@ -329,6 +343,7 @@ public class JSVApplet implements JSVAppletInterface,
 	 * 
 	 * @see jspecview.applet.JSVAppletInterface#removeAllHighlights()
 	 */
+	@Override
 	public void removeAllHighlights() {
 		app.removeAllHighlights();
 	}
@@ -338,6 +353,7 @@ public class JSVApplet implements JSVAppletInterface,
 	 * 
 	 * @see jspecview.applet.JSVAppletInterface#removeHighlight(double, double)
 	 */
+	@Override
 	public void removeHighlight(double x1, double x2) {
 		app.removeHighlight(x1, x2);
 	}
@@ -347,6 +363,7 @@ public class JSVApplet implements JSVAppletInterface,
 	 * 
 	 * @see jspecview.applet.JSVAppletInterface#reversePlot()
 	 */
+	@Override
 	public void reversePlot() {
 		app.reversePlot();
 	}
@@ -366,6 +383,7 @@ public class JSVApplet implements JSVAppletInterface,
 	 * 
 	 * @see jspecview.applet.JSVAppletInterface#runScript(java.lang.String)
 	 */
+	@Override
 	public void runScript(String script) {
 		app.runScript(script);
 	}
@@ -375,6 +393,7 @@ public class JSVApplet implements JSVAppletInterface,
 	 * 
 	 * @see jspecview.applet.JSVAppletInterface#syncScript(java.lang.String)
 	 */
+	@Override
 	public void syncScript(String peakScript) {
 		app.syncScript(peakScript);
 	}
@@ -384,6 +403,7 @@ public class JSVApplet implements JSVAppletInterface,
 	 * 
 	 * @see jspecview.applet.JSVAppletInterface#writeStatus(java.lang.String)
 	 */
+	@Override
 	public void writeStatus(String msg) {
 		app.writeStatus(msg);
 	}
@@ -395,6 +415,7 @@ public class JSVApplet implements JSVAppletInterface,
 	 * jspecview.applet.JSVAppletInterface#getPropertyAsJavaObject(java.lang.String
 	 * )
 	 */
+	@Override
 	public Map<String, Object> getPropertyAsJavaObject(String key) {
 		return app.getPropertyAsJavaObject(key);
 	}
@@ -405,10 +426,12 @@ public class JSVApplet implements JSVAppletInterface,
 	 * @see
 	 * jspecview.applet.JSVAppletInterface#getPropertyAsJSON(java.lang.String)
 	 */
+	@Override
 	public String getPropertyAsJSON(String key) {
 		return app.getPropertyAsJSON(key);
 	}
 
+	@Override
 	public boolean runScriptNow(String script) {
 		return app.runScriptNow(script);
 	}
@@ -417,11 +440,13 @@ public class JSVApplet implements JSVAppletInterface,
 //	private Component spectrumPanel;
 //	private JFrame offWindowFrame;
 
+	@Override
 	public void setDropTargetListener(boolean isSigned, JSViewer viewer) {
 //		if (dtl == null && isSigned)
 //			dtl = new JsDropTargetListener(viewer);
 	}
 
+	@Override
 	public void validateContent(int mode) {
 //		if ((mode & 1) == 1)
 //			getContentPane().validate();
@@ -429,11 +454,13 @@ public class JSVApplet implements JSVAppletInterface,
 //			spectrumPanel.validate();
 	}
 
+	@Override
 	public void createMainPanel(JSViewer viewer) {
 		viewer.mainPanel = new JsMainPanel();
 	}
 
 
+	@Override
 	public void newWindow(boolean isSelected) {
 //		if (isSelected) {
 //			offWindowFrame = new JFrame("JSpecView");
@@ -477,6 +504,7 @@ public class JSVApplet implements JSVAppletInterface,
 	 * @param data
 	 * 
 	 */
+	@Override
 	public void callToJavaScript(String callback, Object[] data) {
  	 String[] tokens = PT.split(callback, ".");
 	 	/**
@@ -497,21 +525,25 @@ public class JSVApplet implements JSVAppletInterface,
 	 	}
 	}
 
+	@Override
 	public void setPanelVisible(boolean b) {
 //		spectrumPanel.setVisible(b);
 	}
 
+	@Override
 	public JSVPanel getJSVPanel(JSViewer viewer, List<JDXSpectrum> specs,
 			int initialStartIndex, int initialEndIndex) {
 		return (specs == null ? JsPanel.getEmptyPanel(viewer) 
 			  : JsPanel.getPanelMany(viewer, specs, initialStartIndex, initialEndIndex));
 	}
 
+	@Override
 	public void setVisible(boolean b) {
 		// TODO Auto-generated method stub
 		
 	}
 
+	@Override
 	public URL getDocumentBase() {
 		try {
 			return new URL((URL) null, (String) viewerOptions.get("documentBase"), null);
@@ -520,20 +552,24 @@ public class JSVApplet implements JSVAppletInterface,
 		}
 	}
 
+	@Override
 	public void repaint() {
 		// TODO Auto-generated method stub
 		
 	}
 
+	@Override
 	public void validate() {
 		// TODO Auto-generated method stub
 		
 	}
 
+	@Override
 	public void doExitJmol() {
 		// ignore
 	}
 
+	@Override
 	public JSVApp getApp() {
 		return app;
 	}

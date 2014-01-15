@@ -21,6 +21,7 @@ public class AwtMainPanel extends JPanel implements JSVMainPanel {
 	private static final long serialVersionUID = 1L;
 	private JSVPanel selectedPanel;
 	private int currentPanelIndex;
+	@Override
 	public int getCurrentPanelIndex() {
 		return currentPanelIndex;
 	}
@@ -29,16 +30,20 @@ public class AwtMainPanel extends JPanel implements JSVMainPanel {
 		super(borderLayout);
 	}
 
+	@Override
 	public void dispose() {
 	}
 
+	@Override
 	public String getTitle() {
 		return null;
 	}
 
+	@Override
 	public void setTitle(String title) {
 	}
 
+	@Override
 	public void setSelectedPanel(JSViewer viewer, JSVPanel jsvp, List<PanelNode> panelNodes) {
 		if (jsvp != selectedPanel) {
 			if (selectedPanel != null)

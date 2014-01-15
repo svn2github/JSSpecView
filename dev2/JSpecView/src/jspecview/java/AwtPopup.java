@@ -66,6 +66,7 @@ public class AwtPopup extends JSVGenericPopup {
     // required by reflection
   }
 
+	@Override
 	public void jpiInitialize(PlatformViewer viewer, String menu) {
     //boolean doTranslate = GT.setDoTranslate(true);
     PopupResource bundle = new JSVPopupResourceBundle();
@@ -102,7 +103,8 @@ public class AwtPopup extends JSVGenericPopup {
       b.setActionCommand(script);
   }
 
-  public void updateSpecialMenuItem(Object menuItem) {
+  @Override
+	public void updateSpecialMenuItem(Object menuItem) {
 //    AbstractButton m = (AbstractButton) menuItem;
 //    m.setText(getSpecialLabel(m.getName(), m.getText()));
   }
@@ -123,7 +125,8 @@ public class AwtPopup extends JSVGenericPopup {
     
     protected MenuItemListener(){}
     
-    public void actionPerformed(ActionEvent e) {
+    @Override
+		public void actionPerformed(ActionEvent e) {
       checkMenuClick(e.getSource(), e.getActionCommand());
     }
   }
@@ -132,27 +135,32 @@ public class AwtPopup extends JSVGenericPopup {
 
     protected MenuMouseListener(){}
 
-    public void mouseClicked(MouseEvent e) {
+    @Override
+		public void mouseClicked(MouseEvent e) {
     }
 
-    public void mouseEntered(MouseEvent e) {
+    @Override
+		public void mouseEntered(MouseEvent e) {
       if (e.getSource() instanceof JMenuItem) {
         JMenuItem jmi = (JMenuItem) e.getSource();
         checkMenuFocus(jmi.getName(), jmi.getActionCommand(), true);
       }
     }
 
-    public void mouseExited(MouseEvent e) {
+    @Override
+		public void mouseExited(MouseEvent e) {
       if (e.getSource() instanceof JMenuItem) {
         JMenuItem jmi = (JMenuItem) e.getSource();
         checkMenuFocus(jmi.getName(), jmi.getActionCommand(), false);
       }
     }
 
-    public void mousePressed(MouseEvent e) {
+    @Override
+		public void mousePressed(MouseEvent e) {
     }
 
-    public void mouseReleased(MouseEvent e) {
+    @Override
+		public void mouseReleased(MouseEvent e) {
     }
 
   }
@@ -161,20 +169,23 @@ public class AwtPopup extends JSVGenericPopup {
 
     protected CheckboxMenuItemListener(){}
 
-    public void itemStateChanged(ItemEvent e) {
+    @Override
+		public void itemStateChanged(ItemEvent e) {
       checkBoxStateChanged(e.getSource());
     }
   }
 
   /// JmolAbstractMenu ///
 
-  public void menuAddButtonGroup(Object newMenu) {
+  @Override
+	public void menuAddButtonGroup(Object newMenu) {
     if (buttonGroup == null)
       buttonGroup = new ButtonGroup();
     ((ButtonGroup) buttonGroup).add((JMenuItem) newMenu);
   }
 
-  public void menuAddItem(Object menu, Object item) {
+  @Override
+	public void menuAddItem(Object menu, Object item) {
     if (menu instanceof JPopupMenu) {
       ((JPopupMenu) menu).add((JComponent) item);
     } else if (menu instanceof JMenu) {
@@ -184,18 +195,21 @@ public class AwtPopup extends JSVGenericPopup {
     }
   }
 
-  public void menuAddSeparator(Object menu) {
+  @Override
+	public void menuAddSeparator(Object menu) {
     if (menu instanceof JPopupMenu)
       ((JPopupMenu) menu).addSeparator();
     else
       ((JMenu) menu).addSeparator();
   }
 
-  public void menuAddSubMenu(Object menu, Object subMenu) {
+  @Override
+	public void menuAddSubMenu(Object menu, Object subMenu) {
     menuAddItem(menu, subMenu);
   }
 
-  public void menuClearListeners(Object menu) {
+  @Override
+	public void menuClearListeners(Object menu) {
     if (menu == null)
       return;
     Component[] subMenus = (menu instanceof JPopupMenu ? ((JPopupMenu) menu)
@@ -216,7 +230,8 @@ public class AwtPopup extends JSVGenericPopup {
     }
   }
 
-  public Object menuCreateCheckboxItem(Object menu, String entry,
+  @Override
+	public Object menuCreateCheckboxItem(Object menu, String entry,
                                        String basename, String id,
                                        boolean state, boolean isRadio) {
     JMenuItem jmi;
@@ -234,18 +249,21 @@ public class AwtPopup extends JSVGenericPopup {
     return newMenuItem(jmi, menu, entry, basename, id);
   }
 
-  public Object menuCreateItem(Object menu, String entry, String script,
+  @Override
+	public Object menuCreateItem(Object menu, String entry, String script,
                                String id) {
     JMenuItem jmi = new JMenuItem(entry);
     jmi.addActionListener(mil);
     return newMenuItem(jmi, menu, entry, script, id);
   }
 
-  public Object menuCreatePopup(String title) {
+  @Override
+	public Object menuCreatePopup(String title) {
     return new JPopupMenu(title);
   }
 
-  public void menuEnable(Object menu, boolean enable) {
+  @Override
+	public void menuEnable(Object menu, boolean enable) {
     if (menu instanceof JMenuItem) {
       menuEnableItem(menu, enable);
       return;
@@ -257,7 +275,8 @@ public class AwtPopup extends JSVGenericPopup {
     }
   }
 
-  public void menuEnableItem(Object item, boolean enable) {
+  @Override
+	public void menuEnableItem(Object item, boolean enable) {
     try {
       ((JMenuItem) item).setEnabled(enable);
     } catch (Exception e) {
@@ -265,7 +284,8 @@ public class AwtPopup extends JSVGenericPopup {
     }
   }
 
-  public void menuGetAsText(SB sb, int level, Object menu,
+  @Override
+	public void menuGetAsText(SB sb, int level, Object menu,
                             String menuName) {
     String name = menuName;
     Component[] subMenus = (menu instanceof JPopupMenu ? ((JPopupMenu) menu)
@@ -292,6 +312,7 @@ public class AwtPopup extends JSVGenericPopup {
     }
   }
 
+	@Override
 	public boolean menuIsEnabled(Object m) {
     if (m instanceof JMenu)
     	return ((JMenu) m).isEnabled();
@@ -301,19 +322,23 @@ public class AwtPopup extends JSVGenericPopup {
 	}
 
  
-  public String menuGetId(Object menu) {
+  @Override
+	public String menuGetId(Object menu) {
     return ((Component) menu).getName();
   }
 
-  public int menuGetItemCount(Object menu) {
+  @Override
+	public int menuGetItemCount(Object menu) {
     return ((JMenu) menu).getItemCount();
   }
 
-  public Object menuGetParent(Object menu) {
+  @Override
+	public Object menuGetParent(Object menu) {
     return ((JMenu) menu).getParent();
   }
 
-  public int menuGetPosition(Object menu) {
+  @Override
+	public int menuGetPosition(Object menu) {
     Object p = menuGetParent(menu);
     if (p instanceof JPopupMenu) {
       for (int i = ((JPopupMenu) p).getComponentCount(); --i >= 0;)
@@ -327,14 +352,16 @@ public class AwtPopup extends JSVGenericPopup {
     return -1;
   }
 
-  public void menuInsertSubMenu(Object menu, Object subMenu, int index) {
+  @Override
+	public void menuInsertSubMenu(Object menu, Object subMenu, int index) {
     if (menu instanceof JPopupMenu)
       ((JPopupMenu) menu).insert((JMenu) subMenu, index);
     else
       ((JMenu) menu).insert((JMenu) subMenu, index);
   }
 
-  public Object menuNewSubMenu(String entry, String id) {
+  @Override
+	public Object menuNewSubMenu(String entry, String id) {
     JMenu jm = new JMenu(entry);
     updateButton(jm, entry, null);
     jm.setName(id);
@@ -342,7 +369,8 @@ public class AwtPopup extends JSVGenericPopup {
     return jm;
   }
 
-  public void menuRemoveAll(Object menu, int indexFrom) {
+  @Override
+	public void menuRemoveAll(Object menu, int indexFrom) {
     if (indexFrom > 0) {
       for (int i = menuGetItemCount(menu); --i >= indexFrom;)
         ((JMenu) menu).remove(i);
@@ -354,11 +382,13 @@ public class AwtPopup extends JSVGenericPopup {
       ((JPopupMenu)menu).removeAll();
   }
 
-  public void menuSetAutoscrolls(Object menu) {
+  @Override
+	public void menuSetAutoscrolls(Object menu) {
     ((JMenu) menu).setAutoscrolls(true);
   }
 
-  public void menuSetCheckBoxState(Object item, boolean state) {
+  @Override
+	public void menuSetCheckBoxState(Object item, boolean state) {
     if (item instanceof JCheckBoxMenuItem)
       ((JCheckBoxMenuItem) item).setState(state);
     else
@@ -366,28 +396,33 @@ public class AwtPopup extends JSVGenericPopup {
     ((JMenuItem) item).setSelected(state);
   }
 
-  public String menuSetCheckBoxOption(Object item, String name, String what) {
+  @Override
+	public String menuSetCheckBoxOption(Object item, String name, String what) {
     return null;
   }
 
-  public void menuSetCheckBoxValue(Object source) {
+  @Override
+	public void menuSetCheckBoxValue(Object source) {
     JMenuItem jcmi = (JMenuItem) source;
     setCheckBoxValue(jcmi, jcmi.getActionCommand(), jcmi.isSelected());
   }
 
-  public void menuSetLabel(Object menu, String entry) {
+  @Override
+	public void menuSetLabel(Object menu, String entry) {
     if (menu instanceof JMenuItem)
       ((JMenuItem) menu).setText(entry);
     else
       ((JMenu) menu).setText(entry);
   }
 
-  public void menuSetListeners() {
+  @Override
+	public void menuSetListeners() {
     mil = new MenuItemListener();
     cmil = new CheckboxMenuItemListener();
     mfl = new MenuMouseListener();
   }
   
+	@Override
 	public void menuShowPopup(Object popup, int x, int y) {
 		((JPopupMenu) popup).show((Container) thisJsvp, x, y);
 	}

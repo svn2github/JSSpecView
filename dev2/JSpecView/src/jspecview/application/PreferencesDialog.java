@@ -309,7 +309,8 @@ public class PreferencesDialog extends JDialog implements ActionListener {
     
    
     clearRecentButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
+      @Override
+			public void actionPerformed(ActionEvent e) {
         clearRecentButton_actionPerformed(e);
       }
     });
@@ -322,13 +323,15 @@ public class PreferencesDialog extends JDialog implements ActionListener {
     uiPanel.add(statusBarCheckBox);
     cancelButton.setText("Cancel");
     cancelButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
+      @Override
+			public void actionPerformed(ActionEvent e) {
         cancelButton_actionPerformed(e);
       }
     });
     okButton.setText("OK");
     okButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
+      @Override
+			public void actionPerformed(ActionEvent e) {
         okButton_actionPerformed(e);
       }
     });
@@ -345,14 +348,16 @@ public class PreferencesDialog extends JDialog implements ActionListener {
     elementLabel.setText("Element:");
     defaultFontCheckBox.setText("Use Default");
     defaultFontCheckBox.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
+      @Override
+			public void actionPerformed(ActionEvent e) {
         defaultFontCheckBox_actionPerformed(e);
       }
     });
     colorPanel.setLayout(gridLayout1);
     schemeComboBox.setMaximumSize(new Dimension(200, 21));
     schemeComboBox.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
+      @Override
+			public void actionPerformed(ActionEvent e) {
         schemeComboBox_actionPerformed(e);
       }
     });
@@ -361,13 +366,15 @@ public class PreferencesDialog extends JDialog implements ActionListener {
     gridLayout1.setVgap(2);
     defaultColorCheckBox.setText("Use Default");
     defaultColorCheckBox.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
+      @Override
+			public void actionPerformed(ActionEvent e) {
         defaultColorCheckBox_actionPerformed(e);
       }
     });
     customButton.setText("Custom...");
     customButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
+      @Override
+			public void actionPerformed(ActionEvent e) {
         customButton_actionPerformed(e);
       }
     });
@@ -403,7 +410,8 @@ public class PreferencesDialog extends JDialog implements ActionListener {
     processingCustomButton.setPreferredSize(new Dimension(87, 21));
     processingCustomButton.setText("Custom...");
     processingCustomButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
+      @Override
+			public void actionPerformed(ActionEvent e) {
         processingCustomButton_actionPerformed(e);
       }
     });
@@ -430,7 +438,8 @@ public class PreferencesDialog extends JDialog implements ActionListener {
     jLabel8.setText("Color Scheme:");
     jLabel9.setText("Font:");
     fontComboBox.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
+      @Override
+			public void actionPerformed(ActionEvent e) {
         fontComboBox_actionPerformed(e);
       }
     });
@@ -532,14 +541,16 @@ public class PreferencesDialog extends JDialog implements ActionListener {
     panel.add(saveButton);
     saveButton.setText("Save Scheme");
     deleteButton.addActionListener(new ActionListener() {
-    	public void actionPerformed(ActionEvent arg0) {
+    	@Override
+			public void actionPerformed(ActionEvent arg0) {
     		deleteButton_actionPerformed(arg0);
     	}
     });
     
     panel.add(deleteButton);
     saveButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
+      @Override
+			public void actionPerformed(ActionEvent e) {
         saveButton_actionPerformed(e);
       }
     });
@@ -736,7 +747,8 @@ public class PreferencesDialog extends JDialog implements ActionListener {
      * @param lse
      *        the ListSelectionEvent
      */
-    @SuppressWarnings("unchecked")
+    @Override
+		@SuppressWarnings("unchecked")
 		public void valueChanged(ListSelectionEvent lse) {
       currentColorButton.setBackground((Color) currentDS
           .getElementColor(ScriptToken.getScriptToken(
@@ -750,6 +762,7 @@ public class PreferencesDialog extends JDialog implements ActionListener {
 	 * @param ae
 	 *          the ActionEvent
 	 */
+	@Override
 	public void actionPerformed(ActionEvent ae) {
 		JButton button = (JButton) ae.getSource();
 		Color color = button.getBackground();

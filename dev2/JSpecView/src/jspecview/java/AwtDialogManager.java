@@ -85,6 +85,7 @@ public class AwtDialogManager extends DialogManager implements
 		dialog.getContentPane().add(p);
 		final int ret[] = new int[] { Integer.MIN_VALUE };
 		button.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				ret[0] = cb.getSelectedIndex();
 				dialog.dispose();
@@ -141,6 +142,7 @@ public class AwtDialogManager extends DialogManager implements
 	/**
 	 * ListSelectionListener callback
 	 */
+	@Override
 	synchronized public void valueChanged(ListSelectionEvent e) {
 		boolean adjusting = e.getValueIsAdjusting();
 		ListSelectionModel lsm = (ListSelectionModel) e.getSource();
@@ -154,6 +156,7 @@ public class AwtDialogManager extends DialogManager implements
 	/**
 	 * ActionListener callback
 	 */
+	@Override
 	public void actionPerformed(ActionEvent e) {
 		processClick(((Component) e.getSource()).getName());
 	}
@@ -162,27 +165,34 @@ public class AwtDialogManager extends DialogManager implements
 	/**
 	 * WindowListener callback
 	 */
+	@Override
 	public void windowClosing(WindowEvent e) {
 		processWindowClosing(((Component) e.getSource()).getName());
 	}
 
 	//// required but unused
 	
+	@Override
 	public void windowActivated(WindowEvent arg0) {
 	}
 
+	@Override
 	public void windowClosed(WindowEvent arg0) {
 	}
 
+	@Override
 	public void windowDeactivated(WindowEvent arg0) {
 	}
 
+	@Override
 	public void windowDeiconified(WindowEvent arg0) {
 	}
 
+	@Override
 	public void windowIconified(WindowEvent arg0) {
 	}
 
+	@Override
 	public void windowOpened(WindowEvent arg0) {
 	}
 

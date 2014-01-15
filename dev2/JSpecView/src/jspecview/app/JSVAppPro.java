@@ -71,7 +71,8 @@ public class JSVAppPro extends JSVApp implements
 //    ((JSVAppletPro) appletFrame).doAdvanced(filePath);
 //  }
 
-  public void exitJSpecView(boolean withDialog, Object frame) {
+  @Override
+	public void exitJSpecView(boolean withDialog, Object frame) {
     appletFrame.doExitJmol();
   }
 
@@ -80,10 +81,12 @@ public class JSVAppPro extends JSVApp implements
     appletFrame.getApp().runScriptNow(script);
   }
 
-  public void saveProperties(Properties properties) {
+  @Override
+	public void saveProperties(Properties properties) {
   }
 
-  public void setProperties(Properties properties) {
+  @Override
+	public void setProperties(Properties properties) {
   }
 
 }

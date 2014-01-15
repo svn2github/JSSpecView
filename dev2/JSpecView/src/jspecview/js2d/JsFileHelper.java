@@ -13,11 +13,13 @@ public class JsFileHelper implements JSVFileHelper {
 	public JsFileHelper() {
 	}
 
+	@Override
 	public JSVFileHelper set(JSViewer viewer) {
 		this.viewer = viewer;
 		return this;
 	}
 
+	@Override
 	@SuppressWarnings("null")
 	public GenericFileInterface getFile(String fileName, Object panelOrFrame, boolean isSave) {
 		String f = null;
@@ -32,15 +34,18 @@ public class JsFileHelper implements JSVFileHelper {
 		return (f == null ? null : new JsFile(f));
 	}
 
+	@Override
 	public String setDirLastExported(String name) {
 		return name;
 	}
 
+	@Override
 	public void setFileChooser(ExportType pdf) {
 		// TODO Auto-generated method stub
 
 	}
 
+	@Override
 	public GenericFileInterface showFileOpenDialog(Object panelOrFrame, boolean isAppend) {
 		
 		Object applet = viewer.applet;
@@ -75,7 +80,8 @@ public class JsFileHelper implements JSVFileHelper {
     viewer.openDataOrFile(new String((byte[]) data), fileName, null, null, -1, -1, isAppend != null);
   }   
 
-  public String getUrlFromDialog(String info, String msg) {
+  @Override
+	public String getUrlFromDialog(String info, String msg) {
 		/**
 		 * @j2sNative
 		 * 

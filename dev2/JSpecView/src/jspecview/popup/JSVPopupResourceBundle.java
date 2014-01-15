@@ -52,7 +52,7 @@ public class JSVPopupResourceBundle extends PopupResource {
         " - Properties" },
 
       { "appletMenu",
-          "_SIGNED_FileMenu ViewMenu ZoomMenu Views... Overlay_Offset..." +
+          "_SIGNED_FileMenu OptionsMenu ZoomMenu Views... Overlay_Offset..." +
           " - Measurements Peaks Integration Toggle_Trans/Abs Predicted_Solution_Colour" +
           " - Script... - Print... - AboutMenu" },
 
@@ -64,8 +64,8 @@ public class JSVPopupResourceBundle extends PopupResource {
 
       {   "Export_AsMenu", "JPG PNG SVG PDF" },
               
-      {   "ViewMenu",
-          "Toggle_Grid Toggle_X_Axis Toggle_Y_Axis Toggle_Coordinates Reverse_Plot Show_Header... Show_Overlay_Key... Window" },
+      {   "OptionsMenu",
+          "Toggle_Grid Toggle_X_Axis Toggle_Y_Axis Toggle_Coordinates Reverse_Plot Show_Header... Show_Overlay_Key..." }, //Window?
 
       {   "ZoomMenu", "Next_View Previous_View Reset_View Clear_Views Set_Zoom..." },
 

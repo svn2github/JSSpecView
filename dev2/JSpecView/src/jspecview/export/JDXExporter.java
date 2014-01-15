@@ -74,7 +74,8 @@ public class JDXExporter implements JSVExporter {
    * @return data if path is null
    * @throws IOException
    */
-  public String exportTheSpectrum(JSViewer viewer, ExportType type, OC out, JDXSpectrum spectrum, int startIndex, int endIndex, PanelData pd) throws IOException{
+  @Override
+	public String exportTheSpectrum(JSViewer viewer, ExportType type, OC out, JDXSpectrum spectrum, int startIndex, int endIndex, PanelData pd) throws IOException{
   	this.out = out;
   	this.type = type;
   	this.spectrum = spectrum;

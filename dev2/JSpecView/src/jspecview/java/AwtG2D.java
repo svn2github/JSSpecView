@@ -70,24 +70,29 @@ public class AwtG2D implements JSVGraphics {
   public AwtG2D() {
 	}
 
-  public GenericColor getColor4(int r, int g, int b, int a) {
+  @Override
+	public GenericColor getColor4(int r, int g, int b, int a) {
     return new AwtColor(r, g, b, a);
   }
   
-  public GenericColor getColor3(int r, int g, int b) {
+  @Override
+	public GenericColor getColor3(int r, int g, int b) {
     return new AwtColor(r, g, b);
   }
   
-  public GenericColor getColor1(int rgb) {
+  @Override
+	public GenericColor getColor1(int rgb) {
     return new AwtColor(rgb);
   }
   
   /*-----------------GRAPHICS METHODS----------------------------------- */
+	@Override
 	public void drawString(Object g, String text, int x, int y) {
 		//System.out.println("Awtg2d.drawString " + text + " " + x + " " + y);
 		((Graphics) g).drawString(text, x, y);
 	}
 	
+	@Override
 	public void drawStringRotated(Object g, String text, int x, int y, double angle) {
 		angle = angle / 180.0 * Math.PI;
   	((Graphics2D) g).rotate(angle, x, y);
@@ -95,21 +100,25 @@ public class AwtG2D implements JSVGraphics {
   	((Graphics2D) g).rotate(-angle, x, y);
 	}
 
+	@Override
 	public void setGraphicsColor(Object g, GenericColor c) {
 		((Graphics) g).setColor((Color) c);
 	}
 
+	@Override
 	public Font setFont(Object g, javajs.awt.Font font) {
 		//System.out.println("AwtG2D.setGraphicsFont " + font.getInfo());
 		((Graphics) g).setFont((java.awt.Font) font.font);
 		return font;
 	}
 
+	@Override
 	public void drawGrayScaleImage(Object g, Object image2d, int destX0, int destY0,
 			int destX1, int destY1, int srcX0, int srcY0, int srcX1, int srcY1) {		
 		((Graphics) g).drawImage((Image) image2d, destX0, destY0, destX1, destY1, srcX0, srcY0, srcX1, srcY1, null);
 	}
 
+	@Override
 	public Object newGrayScaleImage(Object gMain, Object image, int width, int height, int[] buffer) {
 		BufferedImage image2D = new BufferedImage(width, height,
 				BufferedImage.TYPE_BYTE_GRAY);
@@ -118,10 +127,12 @@ public class AwtG2D implements JSVGraphics {
 		return image2D;
 	}
 
+	@Override
 	public void fillRect(Object g, int x, int y, int width, int height) {
 		((Graphics) g).fillRect(x, y, width, height);	
 	}
 
+	@Override
 	public void drawLine(Object g, int x0, int y0, int x1, int y1) {
 		if (path == null) {
 			((Graphics) g).drawLine(x0, y0, x1, y1);
@@ -131,6 +142,7 @@ public class AwtG2D implements JSVGraphics {
 		}			
 	}
 
+	@Override
 	public void drawRect(Object g, int x, int y, int xPixels,
 			int yPixels) {
 		//System.out.println("Awtg2s.drawRect " + x + " " + y + " " + xPixels + " " + yPixels);
@@ -145,46 +157,56 @@ public class AwtG2D implements JSVGraphics {
 //  	return (s == null ? 0 : ((Graphics) g).getFontMetrics().stringWidth(s));
 //	}
 
+	@Override
 	public void drawCircle(Object g, int x, int y, int diameter) {
 		((Graphics) g).drawOval(x, y, diameter, diameter);
 	}
 
+	@Override
 	public void drawPolygon(Object g, int[] axPoints, int[] ayPoints, int nPoints) {
 		((Graphics) g).drawPolygon(axPoints, ayPoints, nPoints);
 	}
 
+	@Override
 	public void fillCircle(Object g, int x, int y, int diameter) {
 		((Graphics) g).fillOval(x, y, diameter, diameter);
 	}
 
+	@Override
 	public void fillPolygon(Object g, int[] ayPoints, int[] axPoints, int nPoints) {
 		((Graphics) g).fillPolygon(ayPoints, axPoints, nPoints);
 	}
 
+	@Override
 	public void translateScale(Object g, double x, double y, double scale) {
 		//System.out.println("Awtg2d.translateScale " + x + " " + y + " " + scale);
 		((Graphics2D) g).translate(x, y);
 		((Graphics2D) g).scale(scale, scale);
 	}
   
+	@Override
 	public void setStrokeBold(Object g, boolean tf) {
 		((Graphics2D) g).setStroke(tf ? strokeBold : strokeBasic);
 	}
 
+	@Override
 	public void fillBackground(Object g, GenericColor bgcolor) {
 		// not necessary
 	}
 
+	@Override
 	public void setWindowParameters(int width, int height) {
 		// not necessary
 	}
 
+	@Override
 	public boolean canDoLineTo() {
 		return true;
 	}
 
 	private GeneralPath path;
 	
+	@Override
 	public void doStroke(Object g, boolean isBegin) {
 		if (isBegin) {
 			path = new GeneralPath();
@@ -194,6 +216,7 @@ public class AwtG2D implements JSVGraphics {
 		}
 	}
 
+	@Override
 	public void lineTo(Object g, int x2, int y2) {
 		path.lineTo(x2, y2);
 	}

@@ -31,10 +31,12 @@ public class AwtColor extends Color implements GenericColor {
 		opacity = a;
 	}
 
+	@Override
 	public int getOpacity255() {
 		return opacity;
 	}
 	
+	@Override
 	public void setOpacity255(int a) {
 		opacity = a % 256;
 	}

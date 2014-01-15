@@ -111,6 +111,7 @@ public class AppToolBar extends JToolBar {
     button.setToolTipText(tip);
     button.setIcon((ImageIcon) icon);
 		button.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (script.equals("open"))
 	        viewer.openFileFromDialog(false, false, false);

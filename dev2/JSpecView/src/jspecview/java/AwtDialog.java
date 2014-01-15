@@ -57,6 +57,7 @@ public class AwtDialog extends JDialog implements PlatformDialog {
 			setOpaque(true);
 		}
 
+		@Override
 		public Component getTableCellRendererComponent(JTable table, Object color,
 				boolean isSelected, boolean hasFocus, int row, int column) {
 			Border border;
@@ -86,6 +87,7 @@ public class AwtDialog extends JDialog implements PlatformDialog {
 			setOpaque(true);
 		}
 
+		@Override
 		public Component getTableCellRendererComponent(JTable table, Object title,
 				boolean isSelected, boolean hasFocus, int row, int column) {
 			setHorizontalAlignment(getColumnCentering(column));
@@ -152,6 +154,7 @@ public class AwtDialog extends JDialog implements PlatformDialog {
 				: SwingConstants.RIGHT;
 	}
 
+	@Override
 	public Object addButton(String name, String text) {
 		JButton	btn = new JButton();
 		btn.setPreferredSize(new Dimension(120, 25));
@@ -164,6 +167,7 @@ public class AwtDialog extends JDialog implements PlatformDialog {
 		return btn;
 	}
 
+	@Override
 	public Object addCheckBox(String name, String title, int level,
 			boolean isSelected) {
 		if (name == null) {
@@ -200,6 +204,7 @@ public class AwtDialog extends JDialog implements PlatformDialog {
 		iRow++;
 	}
 
+	@Override
 	public Object addSelectOption(String name, String label,
 			String[] info, int iPt, boolean visible) {
 		JComboBox<String> combo = new JComboBox<String>(info);
@@ -214,6 +219,7 @@ public class AwtDialog extends JDialog implements PlatformDialog {
 
 	//// get/set methods ////
 	
+	@Override
 	public Object addTextField(String name, String label, String value,
 			String units, String defaultValue, boolean visible) {
 		String key = optionKey + "_" + name;
@@ -232,6 +238,7 @@ public class AwtDialog extends JDialog implements PlatformDialog {
 		return obj;
 	}
 
+	@Override
 	public void createTable(Object[][] data, String[] header, int[] widths) {
 		try {
 			JScrollPane scrollPane = new JScrollPane(
@@ -249,6 +256,7 @@ public class AwtDialog extends JDialog implements PlatformDialog {
 		repaint();
 	}
 
+	@Override
 	public void endLayout() {
 		getContentPane().removeAll();
 		getContentPane().add(mainSplitPane);
@@ -279,24 +287,29 @@ public class AwtDialog extends JDialog implements PlatformDialog {
 		return table;
 	}
 
+	@Override
 	public int getSelectedIndex(Object c) {
 		return ((JComboBox<?>) c).getSelectedIndex();
 	}
 
+	@Override
 	public Object getSelectedItem(Object combo) {
 		return ((JComboBox<?>)combo).getSelectedItem();
 	}
 
+	@Override
 	public String getText(Object o) {
 		return (o instanceof JTextComponent ? ((JTextComponent) o).getText()
 				: ((AbstractButton) o).getText());	
 	}
 
 	
+	@Override
 	public boolean isSelected(Object chkbox) {
 		return ((JCheckBox) chkbox).isSelected();
 	}
 	
+	@Override
 	public void selectTableRow(int i) {
 		selectedRow = i;
 		dataTable.clearSelection();
@@ -304,6 +317,7 @@ public class AwtDialog extends JDialog implements PlatformDialog {
 		
 	}
 
+	@Override
 	public void setCellSelectionEnabled(boolean enabled) {
 		dataTable.setCellSelectionEnabled(enabled);
 	}
@@ -311,10 +325,12 @@ public class AwtDialog extends JDialog implements PlatformDialog {
   //// Table-related methods ////
 	
 	
+	@Override
 	public void setEnabled(Object btn, boolean b) {
 		((Component) btn).setEnabled(b);
 	}
 
+	@Override
 	public void setIntLocation(int[] loc) {
 		Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
 		loc[0] = Math.min(d.width - 50, loc[0]);
@@ -322,18 +338,22 @@ public class AwtDialog extends JDialog implements PlatformDialog {
 		Point pt = new Point(loc[0], loc[1]);
 		setLocation(pt);
 	}
+	@Override
 	public void setPreferredSize(int width, int height) {
 		setPreferredSize(new Dimension(width, height));
 	}
 
+	@Override
 	public void setSelected(Object chkbox, boolean b) {
 		((JCheckBox) chkbox).setSelected(b);
 	}
 
+	@Override
 	public void setSelectedIndex(Object combo, int i) {
 		((JComboBox<?>) combo).setSelectedIndex(i);
 	}
 
+	@Override
 	public void setText(Object o, String text) {
 	  if (o instanceof JTextComponent)
 	  	((JTextComponent) o).setText(text);
@@ -341,6 +361,7 @@ public class AwtDialog extends JDialog implements PlatformDialog {
 	  	((AbstractButton) o).setText(text);
 	}
 
+	@Override
 	public void startLayout() {
 		setPreferredSize(new Dimension(600, 370)); // golden ratio
     getContentPane().removeAll();

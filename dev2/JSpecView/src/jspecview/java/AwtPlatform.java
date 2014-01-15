@@ -28,29 +28,35 @@ public class AwtPlatform implements GenericPlatform {
 
   PlatformViewer viewer;
   
-  public void setViewer(PlatformViewer viewer, Object display) {
+  @Override
+	public void setViewer(PlatformViewer viewer, Object display) {
     this.viewer = viewer;
   }
   
   ///// Display 
 
-  public void convertPointFromScreen(Object display, P3 ptTemp) {
+  @Override
+	public void convertPointFromScreen(Object display, P3 ptTemp) {
     Display.convertPointFromScreen(display, ptTemp);
   }
 
-  public void getFullScreenDimensions(Object display, int[] widthHeight) {
+  @Override
+	public void getFullScreenDimensions(Object display, int[] widthHeight) {
     Display.getFullScreenDimensions(display, widthHeight);        
   }
   
-  public GenericMenuInterface getMenuPopup(String menuStructure, char type) {
+  @Override
+	public GenericMenuInterface getMenuPopup(String menuStructure, char type) {
   	return null;//
   }
 
-  public boolean hasFocus(Object display) {
+  @Override
+	public boolean hasFocus(Object display) {
     return Display.hasFocus(display);
   }
 
-  public String prompt(String label, String data, String[] list,
+  @Override
+	public String prompt(String label, String data, String[] list,
                        boolean asButtons) {
     return Display.prompt(label, data, list, asButtons);
   }
@@ -61,35 +67,42 @@ public class AwtPlatform implements GenericPlatform {
    * @param g
    * @param size
    */
-  public void renderScreenImage(Object g, Object size) {
+  @Override
+	public void renderScreenImage(Object g, Object size) {
     Display.renderScreenImage(viewer, g, size);
   }
 
-  public void requestFocusInWindow(Object display) {
+  @Override
+	public void requestFocusInWindow(Object display) {
     Display.requestFocusInWindow(display);
   }
 
-  public void repaint(Object display) {
+  @Override
+	public void repaint(Object display) {
     Display.repaint(display);
   }
 
-  public void setTransparentCursor(Object display) {
+  @Override
+	public void setTransparentCursor(Object display) {
     Display.setTransparentCursor(display);
   }
 
-  public void setCursor(int c, Object display) {
+  @Override
+	public void setCursor(int c, Object display) {
     Display.setCursor(c, display);
   }
 
   ////// Mouse
 
-  public GenericMouseInterface getMouseManager(double ignored, Object jsvp) {
+  @Override
+	public GenericMouseInterface getMouseManager(double ignored, Object jsvp) {
     return new Mouse((JSVPanel) jsvp);
   }
 
   ////// Image 
 
-  public Object allocateRgbImage(int windowWidth, int windowHeight,
+  @Override
+	public Object allocateRgbImage(int windowWidth, int windowHeight,
                                  int[] pBuffer, int windowSize,
                                  boolean backgroundTransparent, boolean isImageWrite) {
     return Image.allocateRgbImage(windowWidth, windowHeight, pBuffer, windowSize, backgroundTransparent);
@@ -101,61 +114,75 @@ public class AwtPlatform implements GenericPlatform {
    * @return image object
    * 
    */
-  public Object createImage(Object data) {
+  @Override
+	public Object createImage(Object data) {
     return Image.createImage(data);
   }
 
-  public void disposeGraphics(Object gOffscreen) {
+  @Override
+	public void disposeGraphics(Object gOffscreen) {
     Image.disposeGraphics(gOffscreen);
   }
 
-  public void drawImage(Object g, Object img, int x, int y, int width, int height) {
+  @Override
+	public void drawImage(Object g, Object img, int x, int y, int width, int height) {
     Image.drawImage(g, img, x, y, width, height);
   }
 
-  public int[] grabPixels(Object imageobj, int width, int height, int[] pixels, int startRow, int nRows) {
+  @Override
+	public int[] grabPixels(Object imageobj, int width, int height, int[] pixels, int startRow, int nRows) {
     return Image.grabPixels(imageobj, width, height, pixels, startRow, nRows); 
   }
 
-  public int[] drawImageToBuffer(Object gOffscreen, Object imageOffscreen,
+  @Override
+	public int[] drawImageToBuffer(Object gOffscreen, Object imageOffscreen,
                                  Object imageobj, int width, int height, int bgcolor) {
     return Image.drawImageToBuffer(gOffscreen, imageOffscreen, imageobj, width, height, bgcolor);
   }
 
-  public int[] getTextPixels(String text, Font font3d, Object gObj,
+  @Override
+	public int[] getTextPixels(String text, Font font3d, Object gObj,
                              Object image, int width, int height, int ascent) {
     return Image.getTextPixels(text, font3d, gObj, image, width, height, ascent);
   }
 
-  public void flushImage(Object imagePixelBuffer) {
+  @Override
+	public void flushImage(Object imagePixelBuffer) {
     Image.flush(imagePixelBuffer);
   }
 
-  public Object getGraphics(Object image) {
+  @Override
+	public Object getGraphics(Object image) {
     return Image.getGraphics(image);
   }
 
-  public int getImageHeight(Object image) {
+  @Override
+	public int getImageHeight(Object image) {
     return (image == null ? -1 : Image.getHeight(image));
   }
 
-  public int getImageWidth(Object image) {
+  @Override
+	public int getImageWidth(Object image) {
     return (image == null ? -1 : Image.getWidth(image));
   }
 
-  public Object getStaticGraphics(Object image, boolean backgroundTransparent) {
+  @Override
+	public Object getStaticGraphics(Object image, boolean backgroundTransparent) {
     return Image.getStaticGraphics(image, backgroundTransparent);
   }
 
-  public Object newBufferedImage(Object image, int w, int h) {
+  @Override
+	public Object newBufferedImage(Object image, int w, int h) {
     return Image.newBufferedImage(image, w, h);
   }
 
-  public Object newOffScreenImage(int w, int h) {
+  @Override
+	public Object newOffScreenImage(int w, int h) {
     return Image.newBufferedImage(w, h);
   }
 
-  public boolean waitForDisplay(Object ignored, Object image) throws InterruptedException {
+  @Override
+	public boolean waitForDisplay(Object ignored, Object image) throws InterruptedException {
     Image.waitForDisplay(viewer, image);
     return true;
   }
@@ -163,29 +190,35 @@ public class AwtPlatform implements GenericPlatform {
   
   ///// FONT
   
-  public int fontStringWidth(Font font, String text) {
+  @Override
+	public int fontStringWidth(Font font, String text) {
     return AwtFont.stringWidth(font.getFontMetrics(), text);
   }
 
-  public int getFontAscent(Object fontMetrics) {
+  @Override
+	public int getFontAscent(Object fontMetrics) {
     return AwtFont.getAscent(fontMetrics);
   }
 
-  public int getFontDescent(Object fontMetrics) {
+  @Override
+	public int getFontDescent(Object fontMetrics) {
     return AwtFont.getDescent(fontMetrics);
   }
 
-  public Object getFontMetrics(Font font, Object graphics) {
+  @Override
+	public Object getFontMetrics(Font font, Object graphics) {
     return AwtFont.getFontMetrics(font, graphics);
   }
 
-  public Object newFont(String fontFace, boolean isBold, boolean isItalic, float fontSize) {
+  @Override
+	public Object newFont(String fontFace, boolean isBold, boolean isItalic, float fontSize) {
     return AwtFont.newFont(fontFace, isBold, isItalic, fontSize);
   }
 
   /// misc
 
-  public Object getJsObjectInfo(Object[] jsObject, String method, Object[] args) {
+  @Override
+	public Object getJsObjectInfo(Object[] jsObject, String method, Object[] args) {
     JSObject DOMNode = (JSObject) jsObject[0];
     if (method == null) {
       String namespaceURI = (String) DOMNode.getMember("namespaceURI");
@@ -195,15 +228,18 @@ public class AwtPlatform implements GenericPlatform {
     return (args == null ? DOMNode.getMember(method) : DOMNode.call(method, args));
   }
 
-  public boolean isHeadless() {
+  @Override
+	public boolean isHeadless() {
     return GraphicsEnvironment.isHeadless();
   }
 
-  public boolean isSingleThreaded() {
+  @Override
+	public boolean isSingleThreaded() {
     return false;
   }
 
-  public void notifyEndOfRendering() {
+  @Override
+	public void notifyEndOfRendering() {
     // N/A
   }
 
@@ -224,26 +260,31 @@ public class AwtPlatform implements GenericPlatform {
     return null;
   }
 
-  public String getDateFormat(boolean isoiec8824) {
+  @Override
+	public String getDateFormat(boolean isoiec8824) {
     return (isoiec8824 ? "D:"
         + new SimpleDateFormat("YYYYMMddHHmmssX").format(new Date()) + "'00'"
         : (new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z"))
             .format(new Date()));
   }
   
-  public GenericFileInterface newFile(String name) {
+  @Override
+	public GenericFileInterface newFile(String name) {
     return new AwtFile(name);
   }
 
-  public Object getBufferedFileInputStream(String name) {
+  @Override
+	public Object getBufferedFileInputStream(String name) {
     return AwtFile.getBufferedFileInputStream(name);
   }
 
-  public Object getBufferedURLInputStream(URL url, byte[] outputBytes,
+  @Override
+	public Object getBufferedURLInputStream(URL url, byte[] outputBytes,
                                           String post) {
     return AwtFile.getBufferedURLInputStream(url, outputBytes, post);
   }
 
+	@Override
 	public String getLocalUrl(String fileName) {
 		// not used in JSpecView
 		return null;

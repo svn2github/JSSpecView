@@ -63,18 +63,22 @@ public class JsG2D implements JSVGraphics {
   public JsG2D() {
 	}
 
-  public GenericColor getColor4(int r, int g, int b, int a) {
+  @Override
+	public GenericColor getColor4(int r, int g, int b, int a) {
     return Color.get4(r, g, b, a);
   }
   
-  public GenericColor getColor3(int r, int g, int b) {
+  @Override
+	public GenericColor getColor3(int r, int g, int b) {
     return Color.get3(r, g, b);
   }
   
-  public GenericColor getColor1(int rgb) {
+  @Override
+	public GenericColor getColor1(int rgb) {
     return Color.get1(rgb);
   }
 
+	@Override
 	public Object newGrayScaleImage(Object context, Object image, int width, int height, int[] grayBuffer) {
 		
 		/**
@@ -128,6 +132,7 @@ public class JsG2D implements JSVGraphics {
 		return image;
 	}
 
+	@Override
 	public void drawGrayScaleImage(Object g, Object image, int destX0, int destY0,
 			int destX1, int destY1, int srcX0, int srcY0, int srcX1, int srcY1) {
 
@@ -173,6 +178,7 @@ public class JsG2D implements JSVGraphics {
 		}
 	}
 
+	@Override
 	public void drawLine(Object g, int x0, int y0, int x1, int y1) {
 		/**
 		 * @j2sNative
@@ -186,6 +192,7 @@ public class JsG2D implements JSVGraphics {
 		{}
 	}
 
+	@Override
 	public void drawCircle(Object g, int x, int y, int diameter) {
 		/**
 		 * @j2sNative
@@ -200,6 +207,7 @@ public class JsG2D implements JSVGraphics {
 		
 	}
 
+	@Override
 	public void drawPolygon(Object g, int[] ayPoints, int[] axPoints, int nPoints) {
 		doPoly(g, ayPoints, axPoints, nPoints, false);
 	}
@@ -231,6 +239,7 @@ public class JsG2D implements JSVGraphics {
 		}
 	}
 
+	@Override
 	public void drawRect(Object g, int x, int y, int width,
 			int height) {
 		/**
@@ -245,6 +254,7 @@ public class JsG2D implements JSVGraphics {
 		}
 	}
 
+	@Override
 	public void drawString(Object g, String s, int x, int y) {
 		/**
 		 * @j2sNative
@@ -256,12 +266,14 @@ public class JsG2D implements JSVGraphics {
 		}
 	}
 
+	@Override
 	public void drawStringRotated(Object g, String s, int x, int y, double angle) {
 		// n/a (printing only)
 	}
 
 	boolean isShifted;// private, but only JavaScript
 	
+	@Override
 	public void fillBackground(Object g, GenericColor bgcolor) {
 		if (bgcolor == null) {
 			/**
@@ -285,6 +297,7 @@ public class JsG2D implements JSVGraphics {
 		fillRect(g, 0, 0, windowWidth, windowHeight);
 	}
 
+	@Override
 	public void fillCircle(Object g, int x, int y, int diameter) {
 		/**
 		 * @j2sNative
@@ -299,10 +312,12 @@ public class JsG2D implements JSVGraphics {
 	
 	}
 
+	@Override
 	public void fillPolygon(Object g, int[] ayPoints, int[] axPoints, int nPoints) {
 		doPoly(g, ayPoints, axPoints, nPoints, true);
 	}
 
+	@Override
 	public void fillRect(Object g, int x, int y, int width, int height) {
 		/**
 		 * @j2sNative
@@ -314,6 +329,7 @@ public class JsG2D implements JSVGraphics {
 		}
 	}
 
+	@Override
 	public void setGraphicsColor(Object g, GenericColor c) {
 		String s = CU.toCSSString(c);
 		/**
@@ -326,6 +342,7 @@ public class JsG2D implements JSVGraphics {
 		}
 	}
 
+	@Override
 	public Font setFont(Object g, Font font) {
 		String s = font.getInfo();
 		int pt = s.indexOf(" ");
@@ -340,6 +357,7 @@ public class JsG2D implements JSVGraphics {
 		return  font;
 	}
 
+	@Override
 	public void setStrokeBold(Object g, boolean tf) {
 		/**
 		 * @j2sNative
@@ -353,22 +371,26 @@ public class JsG2D implements JSVGraphics {
 
 	}
 
+	@Override
 	public void setWindowParameters(int width, int height) {
 		windowWidth = width;
 		windowHeight = height;
 	}
 
+	@Override
 	public void translateScale(Object g, double x, double y, double scale) {
 		// TODO Auto-generated method stub
 		
 	}
 
+	@Override
 	public boolean canDoLineTo() {
 		return true;
 	}
 
 	boolean inPath;
 	
+	@Override
 	public void doStroke(Object g, boolean isBegin) {
 		/**
 		 *  
@@ -385,6 +407,7 @@ public class JsG2D implements JSVGraphics {
 		{}
 	}
 
+	@Override
 	public void lineTo(Object g, int x2, int y2) {
 		/**
 		 * @j2sNative

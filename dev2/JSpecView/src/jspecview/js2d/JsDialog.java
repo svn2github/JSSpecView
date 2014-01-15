@@ -95,6 +95,7 @@ public class JsDialog extends JDialog implements PlatformDialog {
 		{}
 	}
 
+	@Override
 	public Object addButton(String name, String text) {
 		JButton	btn = new JButton();
 		btn.setPreferredSize(new Dimension(120, 25));
@@ -112,6 +113,7 @@ public class JsDialog extends JDialog implements PlatformDialog {
 		// just identifying when this happens. 
 		super.dispose();
 	}
+	@Override
 	public Object addCheckBox(String name, String title, int level,
 			boolean isSelected) {
 		if (name == null) {
@@ -148,6 +150,7 @@ public class JsDialog extends JDialog implements PlatformDialog {
 		iRow++;
 	}
 
+	@Override
 	public Object addSelectOption(String name, String label,
 			String[] info, int iPt, boolean visible) {
 		JComboBox<String> combo = new JComboBox<String>(info);
@@ -162,6 +165,7 @@ public class JsDialog extends JDialog implements PlatformDialog {
 
 	//// get/set methods ////
 	
+	@Override
 	public Object addTextField(String name, String label, String value,
 			String units, String defaultValue, boolean visible) {
 		String key = optionKey + "_" + name;
@@ -180,6 +184,7 @@ public class JsDialog extends JDialog implements PlatformDialog {
 		return obj;
 	}
 
+	@Override
 	public void createTable(Object[][] data, String[] header, int[] widths) {
 		try {
 			JScrollPane scrollPane = new JScrollPane(
@@ -198,6 +203,7 @@ public class JsDialog extends JDialog implements PlatformDialog {
 	}
 
 
+	@Override
 	public void endLayout() {
 		getContentPane().removeAll();
 		getContentPane().add(mainSplitPane);
@@ -230,23 +236,28 @@ public class JsDialog extends JDialog implements PlatformDialog {
 		return table;
 	}
 
+	@Override
 	public int getSelectedIndex(Object c) {
 		return ((JComboBox<?>) c).getSelectedIndex();
 	}
 
+	@Override
 	public Object getSelectedItem(Object combo) {
 		return ((JComboBox<?>)combo).getSelectedItem();
 	}
 
+	@Override
 	public String getText(Object o) {
 		return ((JComponent) o).getText();	
 	}
 
 	
+	@Override
 	public boolean isSelected(Object chkbox) {
 		return ((JCheckBox) chkbox).isSelected();
 	}
 	
+	@Override
 	public void selectTableRow(int i) {
 		selectedRow = i;
 		dataTable.clearSelection();
@@ -257,6 +268,7 @@ public class JsDialog extends JDialog implements PlatformDialog {
 		}
 	}
 
+	@Override
 	public void setCellSelectionEnabled(boolean enabled) {
 		dataTable.setCellSelectionEnabled(enabled);
 	}
@@ -264,10 +276,12 @@ public class JsDialog extends JDialog implements PlatformDialog {
   //// Table-related methods ////
 	
 	
+	@Override
 	public void setEnabled(Object btn, boolean b) {
 		((JComponent) btn).setEnabled(b);
 	}
 
+	@Override
 	public void setIntLocation(int[] loc) {
 		Dimension d = new Dimension(0, 0);
 		/**
@@ -285,22 +299,27 @@ public class JsDialog extends JDialog implements PlatformDialog {
 		setLocation(loc);
 	}
 
+	@Override
 	public void setPreferredSize(int width, int height) {
 		setPreferredSize(new Dimension(width, height));
 	}
 
+	@Override
 	public void setSelected(Object chkbox, boolean b) {
 		((JCheckBox) chkbox).setSelected(b);
 	}
 
+	@Override
 	public void setSelectedIndex(Object combo, int i) {
 		((JComboBox<?>) combo).setSelectedIndex(i);
 	}
 
+	@Override
 	public void setText(Object o, String text) {
 		((JComponent) o).setText(text);
 	}
 
+	@Override
 	public void startLayout() {
 		setPreferredSize(new Dimension(600, 370)); // golden ratio
     getContentPane().removeAll();

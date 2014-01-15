@@ -25,6 +25,7 @@ public class AwtFileDropper implements JSVFileDropper, DropTargetListener {
 
   private JSViewer viewer;
 
+	@Override
 	public AwtFileDropper set(JSViewer viewer) {
     this.viewer = viewer;
     return this;
@@ -34,25 +35,30 @@ public class AwtFileDropper implements JSVFileDropper, DropTargetListener {
   //   Abstract methods that are used to perform drag and drop operations
   //
 
-  public void dragEnter(DropTargetDragEvent dtde) {
+  @Override
+	public void dragEnter(DropTargetDragEvent dtde) {
     // Called when the user is dragging and enters this drop target.
     // accept all drags
     dtde.acceptDrag(dtde.getSourceActions());
   }
 
-  public void dragOver(DropTargetDragEvent dtde) {
+  @Override
+	public void dragOver(DropTargetDragEvent dtde) {
   }
 
-  public void dragExit(DropTargetEvent dtde) {
+  @Override
+	public void dragExit(DropTargetEvent dtde) {
   }
 
-  public void dropActionChanged(DropTargetDragEvent dtde) {
+  @Override
+	public void dropActionChanged(DropTargetDragEvent dtde) {
     // Called when the user changes the drag action between copy or move
   }
 
   static int lastSelection = 0;
   
 	// Called when the user finishes or cancels the drag operation.
+	@Override
 	@SuppressWarnings("unchecked")
 	public void drop(DropTargetDropEvent dtde) {
 		Logger.debug("Drop detected...");

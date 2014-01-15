@@ -72,7 +72,8 @@ public class FileDropperJmol implements DropTargetListener {
     fd_propSupport = new PropertyChangeSupport(this);
     //this.viewer = viewer;
     addPropertyChangeListener((pcl = new PropertyChangeListener() {
-      public void propertyChange(PropertyChangeEvent evt) {
+      @Override
+			public void propertyChange(PropertyChangeEvent evt) {
         doDrop(evt);
       }
     }));
@@ -122,26 +123,31 @@ public class FileDropperJmol implements DropTargetListener {
     fd_propSupport.removePropertyChangeListener(l);
   }
 
-  public void dragOver(DropTargetDragEvent dtde) {
+  @Override
+	public void dragOver(DropTargetDragEvent dtde) {
     if (Logger.debugging)
       Logger.debug("DropOver detected...");
   }
 
-  public void dragEnter(DropTargetDragEvent dtde) {
+  @Override
+	public void dragEnter(DropTargetDragEvent dtde) {
     if (Logger.debugging)
       Logger.debug("DropEnter detected...");
     dtde.acceptDrag(DnDConstants.ACTION_COPY_OR_MOVE);
   }
 
-  public void dragExit(DropTargetEvent dtde) {
+  @Override
+	public void dragExit(DropTargetEvent dtde) {
     if (Logger.debugging)
       Logger.debug("DropExit detected...");
   }
 
-  public void dropActionChanged(DropTargetDragEvent dtde) {
+  @Override
+	public void dropActionChanged(DropTargetDragEvent dtde) {
   }
 
-  @SuppressWarnings("unchecked")
+  @Override
+	@SuppressWarnings("unchecked")
   public void drop(DropTargetDropEvent dtde) {
     if (Logger.debugging)
       Logger.debug("Drop detected...");

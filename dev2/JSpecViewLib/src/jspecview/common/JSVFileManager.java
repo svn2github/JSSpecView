@@ -130,8 +130,6 @@ public class JSVFileManager {
 			// This code is only for the applet
 			if (name.indexOf(":\\") == 1 || name.indexOf(":/") == 1)
 				name = "file:///" + name;
-			// System.out.println("filemanager name " + name);
-			// System.out.println("filemanager adb " + appletDocumentBase);
 			URL url = new URL(appletDocumentBase, name, null);
 			return url.toString();
 		} catch (Exception e) {
@@ -178,23 +176,6 @@ public class JSVFileManager {
 		if (name.startsWith(SIMULATION_PROTOCOL))
 			return getBufferedReaderForString(getNMRSimulationJCampDX(name
 					.substring(SIMULATION_PROTOCOL.length())));
-
-		if (viewer.isApplet && appletDocumentBase != null) {
-			try {
-				Object ret = viewer.apiPlatform.getBufferedURLInputStream(new URL(
-						(URL) null, name, null), null, null);
-				if (ret instanceof SB || ret instanceof String) {
-					return new BufferedReader(new StringReader(ret.toString()));
-				} else if (isAB(ret)) {
-					return new BufferedReader(new StringReader(new String((byte[]) ret)));
-				} else {
-					return new BufferedReader(new InputStreamReader((InputStream) ret,
-							"UTF-8"));
-				}
-			} catch (Exception e) {
-				throw new JSVException(e.toString());
-			}
-		}
 		try {
 			InputStream in = getInputStream(name, true, null);
 			BufferedInputStream bis = new BufferedInputStream(in);
@@ -208,7 +189,7 @@ public class JSVFileManager {
 						.getInterface("jspecview.util.JSVZipUtil")).newGZIPInputStream(in);
 			return new BufferedReader(new InputStreamReader(in, "UTF-8"));
 		} catch (Exception e) {
-			throw new JSVException("Cannot read file " + name);
+			throw new JSVException("Cannot read file " + name + " " + e.getMessage());
 		}
 	}
 
@@ -331,7 +312,7 @@ public class JSVFileManager {
 				}
 				return s;
 			} catch (IOException e) {
-				System.out.println(e);
+				Logger.error("fixUTF error " + e);
 			}
 		return new String(bytes);
 	}
@@ -402,7 +383,7 @@ public class JSVFileManager {
 		molFile = "/JSpecView " + JSVersion.VERSION + molFile.substring(pt);
 		molFile = PT.rep(molFile, "?", "_");
 		String json = getFileAsString(nmrdbServer + molFile);
-		System.out.println(json);
+		Logger.debug(json);
 		json = PT.rep(json, "\\r\\n", "\n");
 		json = PT.rep(json, "\\t", "\t");
 		json = PT.rep(json, "\\n", "\n");

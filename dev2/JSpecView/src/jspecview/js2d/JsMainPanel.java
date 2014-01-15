@@ -18,21 +18,26 @@ public class JsMainPanel implements JSVMainPanel {
 	private boolean visible;
 	private boolean focusable;
 	private boolean enabled;
+	@Override
 	public int getCurrentPanelIndex() {
 		return currentPanelIndex;
 	}
 
+	@Override
 	public void dispose() {
 	}
 
+	@Override
 	public String getTitle() {
 		return title;
 	}
 
+	@Override
 	public void setTitle(String title) {
 		this.title = title;
 	}
 
+	@Override
 	public void setSelectedPanel(JSViewer viewer, JSVPanel jsvp, List<PanelNode> panelNodes) {
 		if (jsvp != selectedPanel)
 			selectedPanel = jsvp;
@@ -42,30 +47,37 @@ public class JsMainPanel implements JSVMainPanel {
 		visible = true;
 	}
 
+	@Override
 	public int getHeight() {
 		return (selectedPanel == null ? 0 : selectedPanel.getHeight());
 	}
 
+	@Override
 	public int getWidth() {
 		return (selectedPanel == null ? 0 : selectedPanel.getWidth());
 	}
 
+	@Override
 	public boolean isEnabled() {
 		return enabled;
 	}
 
+	@Override
 	public boolean isFocusable() {
 		return focusable;
 	}
 
+	@Override
 	public boolean isVisible() {
 		return visible;
 	}
 
+	@Override
 	public void setEnabled(boolean b) {
 		enabled = b;
 	}
 
+	@Override
 	public void setFocusable(boolean b) {
 		focusable = b;
 	}
