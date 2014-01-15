@@ -4,6 +4,7 @@ import javajs.api.GenericFileInterface;
 
 import jspecview.api.JSVFileHelper;
 import jspecview.common.ExportType;
+import jspecview.common.JSVFileManager;
 import jspecview.common.JSViewer;
 
 public class JsFileHelper implements JSVFileHelper {
@@ -77,7 +78,8 @@ public class JsFileHelper implements JSVFileHelper {
     	viewer.selectedPanel.showMessage(fileName, "File Open Error");
     	return;
     }
-    viewer.openDataOrFile(new String((byte[]) data), fileName, null, null, -1, -1, isAppend != null);
+    // this file name
+    viewer.si.siOpenDataOrFile(new String((byte[]) data), fileName, null, null, -1, -1, isAppend != null);
   }   
 
   @Override

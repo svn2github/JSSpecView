@@ -177,9 +177,13 @@ public class JSVFileManager {
 			return getBufferedReaderForString(getNMRSimulationJCampDX(name
 					.substring(SIMULATION_PROTOCOL.length())));
 		try {
-			InputStream in = getInputStream(name, true, null);
-			BufferedInputStream bis = new BufferedInputStream(in);
-			in = bis;
+			Object ret = getInputStream(name, true, null);
+			if (ret instanceof SB || ret instanceof String)
+				return new BufferedReader(new StringReader(ret.toString()));			
+			if (isAB(ret))
+				return new BufferedReader(new StringReader(new String((byte[]) ret)));
+			BufferedInputStream bis = new BufferedInputStream((InputStream) ret);
+			InputStream in = bis;
 			if (isZipFile(bis))
 				return ((JSVZipInterface) JSViewer
 						.getInterface("jspecview.util.JSVZipUtil"))

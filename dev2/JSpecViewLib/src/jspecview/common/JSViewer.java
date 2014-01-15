@@ -42,6 +42,7 @@ import jspecview.common.JDXSpectrum.IRMode;
 import jspecview.common.PanelData.LinkMode;
 import jspecview.dialog.JSVDialog;
 import jspecview.dialog.DialogManager;
+import jspecview.exception.JSVException;
 import jspecview.source.JDXSource;
 import jspecview.tree.SimpleTree;
 
@@ -160,7 +161,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 				jsvpPopupMenu.jpiInitialize(this, isApplet ? "appletMenu" : "appMenu");
 				jsvpPopupMenu.setEnabled(popupAllowMenu, popupZoomEnabled);
 			} catch (Exception e) {
-				System.out.println(e + " initializing popup menu");
+				Logger.error(e + " initializing popup menu");
 				return;
 			}
 		}
@@ -174,7 +175,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		script = script.trim();
 		if (script.startsWith("!"))
 			script = script.substring(1).trim();
-		System.out.println("RUNSCRIPT " + script);
+		Logger.info("RUNSCRIPT " + script);
 		boolean isOK = true;
 		int nErrorsLeft = 10;
 		ScriptTokenizer commandTokens = new ScriptTokenizer(script, true);
@@ -189,7 +190,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 				continue;
 			ScriptToken st = ScriptToken.getScriptToken(key);
 			String value = ScriptToken.getValue(st, eachParam, token);
-			System.out.println("KEY-> " + key + " VALUE-> " + value + " : " + st);
+			//System.out.println("KEY-> " + key + " VALUE-> " + value + " : " + st);
 			try {
 				switch (st) {
 				case UNKNOWN:
@@ -702,7 +703,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		// todo: why the quotes??
 		peakScript = PT.rep(peakScript, "\\\"", "");
 		String file = PT.getQuotedAttribute(peakScript, "file");
-		System.out.println("file2=" + file);
+		//System.out.println("file2=" + file);
 		String index = PT.getQuotedAttribute(peakScript, "index");
 		if (file == null || index == null)
 			return;
@@ -775,8 +776,8 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		// "JSViewer selectPanelByPeak looking for " + index + " " + file + " in " +
 		// jsvp);
 		pi = jsvp.getPanelData().selectPeakByFileIndex(file, index);
-		System.out.println(Thread.currentThread()
-				+ "JSViewer selectPanelByPeak pi = " + pi);
+		//System.out.println(Thread.currentThread()
+			//	+ "JSViewer selectPanelByPeak pi = " + pi);
 		if (pi != null) {
 			// found in current panel
 			setNode(PanelNode.findNode(jsvp, panelNodes), false);
@@ -882,7 +883,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			script = "vibration OFF; selectionhalos OFF;";
 		}
 		script = "Select: " + pi + " script=\"" + script;
-		System.out.println("JSViewer.jmolSelect " + script);
+		//System.out.println("JSViewer.jmolSelect " + script);
 		return script;
 	}
 
@@ -1079,19 +1080,25 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		String fileName = null;
 		boolean isView = false;
 		if (data != null) {
+			try {
+				fileName = name;
+				newPath = filePath  = JSVFileManager.getFullPathName(name);
+			} catch (JSVException e) {
+				// ok...
+			}
 		} else if (specs != null) {
 			isView = true;
 			newPath = fileName = filePath = "View" + si.siIncrementViewCount(1);
 		} else if (strUrl != null) {
 			try {
-				System.out.println("strURL=" + strUrl);
-				System.out.println("JSVFileManager.appletDocumentBase=" + JSVFileManager.appletDocumentBase);				
+				//System.out.println("strURL=" + strUrl);
+				//System.out.println("JSVFileManager.appletDocumentBase=" + JSVFileManager.appletDocumentBase);				
 				URL u = new URL(JSVFileManager.appletDocumentBase, strUrl, null);
-				System.out.println("u=" + u);
+				//System.out.println("u=" + u);
 				filePath = u.toString();
 				recentURL = filePath;
 				fileName = JSVFileManager.getName(filePath);
-				System.out.println("fileName=" + fileName);
+				//System.out.println("fileName=" + fileName);
 			} catch (MalformedURLException e) {
 				GenericFileInterface file = apiPlatform.newFile(strUrl);
 				fileName = file.getName();
@@ -1684,7 +1691,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 					.getInterface("jspecview.export.Exporter")).exportTheSpectrum(this,
 					ExportType.getType(type), null, spec, 0, spec.getXYCoords().length - 1, null);
 		} catch (Exception e) {
-			System.out.println(e);
+			Logger.error(e.toString());
 			return null;
 		}
 	}
