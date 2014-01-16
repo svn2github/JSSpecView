@@ -125,21 +125,21 @@ public class ApplicationMenu extends JMenuBar {
         InputEvent.CTRL_MASK, new ActionListener() {
           @Override
 					public void actionPerformed(ActionEvent e) {
-            viewer.openFileFromDialog(false, false, false);
+            viewer.openFileFromDialog(true, false, false);
           }
         });
     JMenuItem openSimulationMenuItem = setMenuItem(null, 'I', "Open Simulation...", 79,
         InputEvent.CTRL_MASK, new ActionListener() {
           @Override
 					public void actionPerformed(ActionEvent e) {
-            viewer.openFileFromDialog(false, false, true);
+            viewer.openFileFromDialog(true, false, true);
           }
         });
     JMenuItem openURLMenuItem = setMenuItem(null, 'U', "Open URL...", 85,
         InputEvent.CTRL_MASK, new ActionListener() {
           @Override
 					public void actionPerformed(ActionEvent e) {
-            viewer.openFileFromDialog(false, true, false);
+            viewer.openFileFromDialog(true, true, false);
           }
         });
     
