@@ -77,6 +77,9 @@ public class FileReader {
   
   private final static String[] TABULAR_DATA_LABELS = { "##DATATABLE", 
   	"##PEAKASSIGNMENTS", "##PEAKTABLE", "##XYDATA", "##XYPOINTS" };
+
+	private boolean normalizeY;
+	
 //  static {
 //    Arrays.sort(TABULAR_DATA_LABELS);  OUCH! - Breaks J2S
 //  }
@@ -96,6 +99,8 @@ public class FileReader {
   private FileReader(String filePath, boolean obscure, boolean loadImaginary,
   		int iSpecFirst, int iSpecLast) {
   	filePath = PT.trimQuotes(filePath);
+  	if (filePath != null && filePath.startsWith(JSVFileManager.SIMULATION_PROTOCOL))
+  	  normalizeY = true;
     this.filePath = (filePath != null && filePath.startsWith(JSVFileManager.SIMULATION_PROTOCOL + "MOL=") ? 
     		JSVFileManager.SIMULATION_PROTOCOL + "MOL=" + Math.abs(filePath.hashCode()) : filePath);
     this.obscure = obscure;
@@ -240,6 +245,8 @@ public class FileReader {
     if (!isOK)
     	throw new JSVException("##TITLE record not found");
     source.setErrorLog(errorLog.toString());
+    if (normalizeY && !source.isCompoundSource)
+    	source.getJDXSpectrum(0).doNormalize();
     return source;
   }
 
@@ -800,7 +807,7 @@ public class FileReader {
    * @param obscure
    * @return  true to skip saving this key in the spectrum headerTable
    */
-  private static boolean readDataLabel(JDXDataObject spectrum, String label,
+  private boolean readDataLabel(JDXDataObject spectrum, String label,
                                        JDXSourceStreamTokenizer t,
                                        SB errorLog, boolean obscure) {
 
