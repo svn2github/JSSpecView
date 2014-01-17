@@ -24,8 +24,10 @@
 
 package javajs.util;
 
+import java.lang.reflect.Array;
 import java.util.Map;
 
+import javajs.J2SIgnoreImport;
 import javajs.api.JSONEncodable;
 
 /**
@@ -34,6 +36,8 @@ import javajs.api.JSONEncodable;
  * @author hansonr
  * 
  */
+
+@J2SIgnoreImport(value = { java.lang.reflect.Array.class })
 public class PT {
 
   public static int parseInt(String str) {
@@ -425,9 +429,8 @@ public class PT {
     /**
      * @j2sNative
      * 
-     * if(s==null){
+     * if(s==null)
      *   throw new NumberFormatException("null");
-     * }
      * var d=parseFloat(s);
      * if(isNaN(d))
      *  throw new NumberFormatException("Not a Number : "+s);
@@ -659,6 +662,25 @@ public class PT {
   }
 
   /**
+   * Does a clean replace of any of the characters in str with chrTo
+   * If strTo contains strFrom, then only a single pass is done.
+   * Otherwise, multiple passes are made until no more replacements can be made.
+   * 
+   * @param str
+   * @param strFrom
+   * @param chTo
+   * @return  replaced string
+   */
+  public static String replaceWithCharacter(String str, String strFrom,
+                                            char chTo) {
+    if (str == null)
+      return null;
+    for (int i = strFrom.length(); --i >= 0;)
+      str = str.replace(strFrom.charAt(i), chTo);
+    return str;
+  }
+
+  /**
    * Does a clean replace of any of the characters in str with strTo
    * If strTo contains strFrom, then only a single pass is done.
    * Otherwise, multiple passes are made until no more replacements can be made.
@@ -696,182 +718,133 @@ public class PT {
         : value);
   }
 
-  /**
-   * Does a clean replace of any of the characters in str with chrTo
-   * If strTo contains strFrom, then only a single pass is done.
-   * Otherwise, multiple passes are made until no more replacements can be made.
-   * 
-   * @param str
-   * @param strFrom
-   * @param chTo
-   * @return  replaced string
-   */
-  public static String replaceAllCharacter(String str, String strFrom,
-                                            char chTo) {
-    if (str == null)
-      return null;
-    for (int i = strFrom.length(); --i >= 0;)
-      str = str.replace(strFrom.charAt(i), chTo);
-    return str;
+  public static boolean isNonStringPrimitive(Object info) {
+    // note that we don't use Double, Float, or Integer here
+    // because in JavaScript those would be false for unwrapped primitives
+    // coming from equivalent of Array.get()
+    // Strings will need their own escaped processing
+    
+    return info instanceof Number || info instanceof Boolean;
   }
 
+  private static Object arrayGet(Object info, int i) {
+    /**
+     * 
+     * Note that info will be a primitive in JavaScript
+     * but a wrapped primitive in Java.
+     * 
+     * @j2sNative
+     * 
+     *            return info[i];
+     */
+    {
+      return Array.get(info, i);
+    }
+  }
+  
   @SuppressWarnings("unchecked")
   public static String toJSON(String infoType, Object info) {
-
-    //Logger.debug(infoType+" -- "+info);
-
-    SB sb = new SB();
-    String sep = "";
     if (info == null)
       return packageJSON(infoType, null);
-    if (info instanceof Integer || info instanceof Float
-        || info instanceof Double) {
+    if (isNonStringPrimitive(info))
       return packageJSON(infoType, info.toString());
-    } 
-    if (info instanceof String) {
-      sb.append(fixString((String) info));
-    } else if (info instanceof JSONEncodable) {
-      sb.append(((JSONEncodable) info).toJSON());
-    } else if (isAS(info)) {
-      sb.append("[");
-      int imax = ((String[]) info).length;
-      for (int i = 0; i < imax; i++) {
-        sb.append(sep).append(fixString(((String[]) info)[i]));
-        sep = ",";
+    String s = null;
+    SB sb = null;
+    while (true) {
+      if (info instanceof String) {
+        s = fixString((String) info);
+        break;
       }
-      sb.append("]");
-    } else if (isAI(info)) {
-      sb.append("[");
-      int imax = ((int[]) info).length;
-      for (int i = 0; i < imax; i++) {
-        sb.append(sep).appendI(((int[]) info)[i]);
-        sep = ",";
+      if (info instanceof JSONEncodable) {
+        // includes javajs.util.BS, org.jmol.script.SV
+        s = ((JSONEncodable) info).toJSON();
+        break;
       }
-      sb.append("]");
-    } else if (isAF(info)) {
-      sb.append("[");
-      int imax = ((float[]) info).length;
-      for (int i = 0; i < imax; i++) {
-        sb.append(sep).appendF(((float[]) info)[i]);
-        sep = ",";
+      sb = new SB();
+      if (info instanceof Map) {
+        sb.append("{ ");
+        String sep = "";
+        for (String key : ((Map<String, ?>) info).keySet()) {
+          sb.append(sep).append(
+              packageJSON(key, toJSON(null, ((Map<?, ?>) info).get(key))));
+          sep = ",";
+        }
+        sb.append(" }");
+        break;
       }
-      sb.append("]");
-    } else if (isAD(info)) {
-      sb.append("[");
-      int imax = ((double[]) info).length;
-      for (int i = 0; i < imax; i++) {
-        sb.append(sep).appendD(((double[]) info)[i]);
-        sep = ",";
+      if (info instanceof List) {
+        sb.append("[ ");
+        int n = ((List<?>) info).size();
+        for (int i = 0; i < n; i++) {
+          if (i > 0)
+            sb.appendC(',');
+          sb.append(toJSON(null, ((List<?>) info).get(i)));
+        }
+        sb.append(" ]");
+        break;
       }
-      sb.append("]");
-    } else if (isAP(info)) {
-      sb.append("[");
-      int imax = ((P3[]) info).length;
-      for (int i = 0; i < imax; i++) {
-        sb.append(sep);
-        addJsonTuple(sb, ((P3[]) info)[i]);
-        sep = ",";
+      if (info instanceof M3) {
+      	// M4 extends M3
+      	int len = (info instanceof M4 ? 4 : 3);
+        float[] x = new float[len];
+        M3 m = (M3) info;
+        sb.appendC('[');
+        for (int i = 0; i < len; i++) {
+          if (i > 0)
+            sb.appendC(',');
+          m.getRow(i, x);
+          sb.append(toJSON(null, x));
+        }
+        sb.appendC(']');
+        break;
       }
-      sb.append("]");
-    } else if (isASS(info)) {
-      sb.append("[");
-      int imax = ((String[][]) info).length;
-      for (int i = 0; i < imax; i++) {
-        sb.append(sep).append(toJSON(null, ((String[][]) info)[i]));
-        sep = ",";
+      s = nonArrayString(info);
+      if (s == null) {
+        sb.append("[");
+        int n = AU.getLength(info);
+        for (int i = 0; i < n; i++) {
+          if (i > 0)
+            sb.appendC(',');
+          sb.append(toJSON(null, arrayGet(info, i)));
+        }
+        sb.append("]");
+        break;
       }
-      sb.append("]");
-    } else if (isAII(info)) {
-      sb.append("[");
-      int imax = ((int[][]) info).length;
-      for (int i = 0; i < imax; i++) {
-        sb.append(sep).append(toJSON(null, ((int[][]) info)[i]));
-        sep = ",";
-      }
-      sb.append("]");
-    } else if (isAFF(info)) {
-      sb.append("[");
-      int imax = ((float[][]) info).length;
-      for (int i = 0; i < imax; i++) {
-        sb.append(sep).append(toJSON(null, ((float[][]) info)[i]));
-        sep = ",";
-      }
-      sb.append("]");
-    } else if (isADD(info)) {
-      sb.append("[");
-      int imax = ((double[][]) info).length;
-      for (int i = 0; i < imax; i++) {
-        sb.append(sep).append(toJSON(null, ((double[][]) info)[i]));
-        sep = ",";
-      }
-      sb.append("]");
-    } else if (isAFFF(info)) {
-      sb.append("[");
-      int imax = ((float[][][]) info).length;
-      for (int i = 0; i < imax; i++) {
-        sb.append(sep).append(toJSON(null, ((float[][][]) info)[i]));
-        sep = ",";
-      }
-      sb.append("]");
-    } else if (info instanceof List) {
-      sb.append("[ ");
-      int imax = ((List<?>) info).size();
-      for (int i = 0; i < imax; i++) {
-        sb.append(sep).append(toJSON(null, ((List<?>) info).get(i)));
-        sep = ",";
-      }
-      sb.append(" ]");
-    } else if (info instanceof M4) {
-      float[] x = new float[4];
-      M4 m4 = (M4) info;
-      sb.appendC('[');
-      for (int i = 0; i < 4; i++) {
-        if (i > 0)
-          sb.appendC(',');
-        m4.getRow(i, x);
-        sb.append(toJSON(null, x));
-      }
-      sb.appendC(']');
-    } else if (info instanceof M3) {
-      float[] x = new float[3];
-      M3 m3 = (M3) info;
-      sb.appendC('[');
-      for (int i = 0; i < 3; i++) {
-        if (i > 0)
-          sb.appendC(',');
-        m3.getRow(i, x);
-        sb.append(toJSON(null, x));
-      }
-      sb.appendC(']');
-    } else if (info instanceof T3) {
-      addJsonTuple(sb, (T3) info);
-    } else if (info instanceof A4) {
-      sb.append("[").appendF(((A4) info).x).append(",").appendF(((A4) info).y)
-          .append(",").appendF(((A4) info).z).append(",")
-          .appendF((float) (((A4) info).angle * 180d / Math.PI)).append("]");
-    } else if (info instanceof P4) {
-      sb.append("[").appendF(((P4) info).x).append(",").appendF(((P4) info).y)
-          .append(",").appendF(((P4) info).z).append(",")
-          .appendF(((P4) info).w).append("]");
-    } else if (info instanceof Map) {
-      sb.append("{ ");
-      for (String key : ((Map<String, ?>) info).keySet()) {
-        sb.append(sep).append(
-            packageJSON(key, toJSON(null, ((Map<?, ?>) info).get(key))));
-        sep = ",";
-      }
-      sb.append(" }");
-    } else {
-      sb.append(fixString(info.toString()));
+      info = info.toString();
     }
-    return packageJSON(infoType, sb.toString());
+    return packageJSON(infoType, (s == null ? sb.toString() : s));
   }
 
+  /**
+   * Checks to see if an object is an array, and if it is, returns null;
+   * otherwise it returns the string equivalent of that object.
+   * 
+   * @param x
+   * @return String or null
+   */
+  public static String nonArrayString(Object x) {
+    /**
+     * @j2sNative
+     * 
+     *            var s = info.toString(); return (s.startsWith("[object") &&
+     *            s.endsWith("Array]") ? null : s);
+     * 
+     */
+    {
+      try {
+        Array.getLength(x);
+        return null;
+      } catch (Exception e) {
+        return x.toString();
+      }
+    }
+  }
+  
   public static String packageJSON(String infoType, String info) {
     return (infoType == null ? info : "\"" + infoType + "\": " + info);
   }
 
-  public static String fixString(String s) {
+  private static String fixString(String s) {
     /**
      * @j2sNative
      * 
@@ -884,13 +857,6 @@ public class PT {
     s = rep(s, "\"", "\\\"");
     s = rep(s, "\n", "\\n");
     return "\"" + s + "\"";
-  }
-
-  public static void addJsonTuple(SB sb, T3 pt) {
-    sb.append("[")
-    .appendF(pt.x).append(",")
-    .appendF(pt.y).append(",")
-    .appendF(pt.z).append("]");
   }
 
   public static boolean isAS(Object x) {
