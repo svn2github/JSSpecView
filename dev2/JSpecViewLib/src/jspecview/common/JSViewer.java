@@ -250,7 +250,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 					syncScript(PT.trimQuotes(value));
 					break;
 				case LOAD:
-					msg = si.siExecLoad(value);
+					msg = si.siExecLoad(value, commandTokens.getRemainingScript());
 					break;
 				case LOADIMAGINARY:
 					si.siSetLoadImaginary(Parameters.isTrue(value));
@@ -1205,7 +1205,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			si.siSetSelectedPanel(PanelNode.getLastFileFirstNode(panelNodes));
 	}
 
-	public void load(String value) {
+	public void load(String value, String script) {
 		List<String> tokens = ScriptToken.getTokens(value);
 		String filename = tokens.get(0);
 		int pt = 0;
@@ -1214,15 +1214,15 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		if (isAppend || isCheck)
 			filename = tokens.get(++pt);
 		if (filename.equals("?")) {
-			openFileFromDialog(isAppend, false, false);
+			openFileFromDialog(isAppend, false, false, script);
 			return;
 		}
 		if (filename.equals("http://?")) {
-			openFileFromDialog(isAppend, true, false);
+			openFileFromDialog(isAppend, true, false, null);
 			return;
 		}
 		if (filename.equals("$?")) {
-			openFileFromDialog(isAppend, true, true);
+			openFileFromDialog(isAppend, true, true, null);
 			return;
 		}
 		boolean isSimulation = filename.equalsIgnoreCase("MOL");
@@ -1736,7 +1736,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 	}
 
 	public void openFileFromDialog(boolean isAppend, boolean isURL,
-			boolean isSimulation) {
+			boolean isSimulation, String script) {
 		String url = null;
 		if (isSimulation) {
 			url = fileHelper.getUrlFromDialog(
@@ -1744,20 +1744,22 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			if (url == null)
 				return;
 			recentSimulation = url;
-			load((isAppend ? "APPEND " : "") + "\"$" + url + "\"");
+			load((isAppend ? "APPEND " : "") + "\"$" + url + "\"", script);
 		} else if (isURL) {
 			url = fileHelper.getUrlFromDialog("Enter the URL of a JCAMP-DX File",
 					recentURL == null ? recentOpenURL : recentURL);
 			if (url == null)
 				return;
 			recentOpenURL = url;
-			load((isAppend ? "APPEND " : "") + "\"" + url + "\"");
+			load((isAppend ? "APPEND " : "") + "\"" + url + "\"", script);
 		} else {
+			Object[] userData = new Object[] { Boolean.valueOf(isAppend), script }; 
 			GenericFileInterface file = fileHelper.showFileOpenDialog(mainPanel,
-					isAppend);
+					userData);
 			// note that in JavaScript this will be asynchronous and file will be null.
 			if (file != null)
 				openFile(file.getFullPath(), !isAppend);
+			// it is not necessary to run the script in Java; we are not loading asynchronously
 		}
 	}
 

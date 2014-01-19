@@ -150,6 +150,8 @@ public abstract class JDXDataObject extends JDXHeader {
    *        the y units
    */
   public void setYUnits(String yUnits) {
+  	if (yUnits.equals("PPM"))
+  		yUnits = "ARBITRARY UNITS"; // EPFL bug
     this.yUnits = yUnits;
   }
 
@@ -183,7 +185,7 @@ public abstract class JDXDataObject extends JDXHeader {
 	public void setObservedNucleus(String value) {
 		observedNucl = value;
 		if (numDim == 1)
-  		parent.nucleusX = nucleusX = PT.trim(value,"[]^<>");
+			parent.nucleusX = nucleusX = fixNucleus(value);
 	}
 
   /**
@@ -244,7 +246,8 @@ public abstract class JDXDataObject extends JDXHeader {
   }
 
 
-  public void setNucleus(String nuc, boolean isX) {
+  public void setNucleusAndFreq(String nuc, boolean isX) {
+  	nuc = fixNucleus(nuc);
     if (isX)
       nucleusX = nuc;
     else
@@ -265,7 +268,12 @@ public abstract class JDXDataObject extends JDXHeader {
   }
 
 
-  /**
+  private String fixNucleus(String nuc) {
+  	return PT.rep(PT.trim(nuc,"[]^<>"), "NUC_", "");
+		// TODO Auto-generated method stub
+	}
+
+	/**
    * source: http://www.mathworks.com/matlabcentral/fileexchange/11722-nmr-properties/content/isotopes.m
    * % REFERENCES 
 % 1. "Nuclear spins, moments, and other data related to NMR spectroscopy" (9-93)

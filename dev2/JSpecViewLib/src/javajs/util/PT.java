@@ -783,9 +783,9 @@ public class PT {
         sb.append(" ]");
         break;
       }
-      if (info instanceof M3) {
-      	// M4 extends M3
-      	int len = (info instanceof M4 ? 4 : 3);
+      if (info instanceof M34) {
+        // M4 extends M3
+        int len = (info instanceof M4 ? 4 : 3);
         float[] x = new float[len];
         M3 m = (M3) info;
         sb.appendC('[');

@@ -15,7 +15,7 @@ public interface JSVFileHelper {
 
 	JSVFileHelper set(JSViewer jsViewer);
 
-	GenericFileInterface showFileOpenDialog(Object panelOrFrame, boolean isAppend);
+	GenericFileInterface showFileOpenDialog(Object panelOrFrame, Object[] userData);
 
 	String getUrlFromDialog(String info, String msg);
 

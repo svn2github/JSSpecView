@@ -1081,8 +1081,8 @@ public class FileReader {
       spec.setYUnits(list.get(index2));
 
       if (spec.nucleusX == null && (list = nTupleTable.get("##.NUCLEUS")) != null) {
-        spec.setNucleus(list.get(0), false);
-        spec.setNucleus(list.get(index1), true);
+        spec.setNucleusAndFreq(list.get(0), false);
+        spec.setNucleusAndFreq(list.get(index1), true);
       } else {
       	if (spec.nucleusX == null)
           spec.nucleusX = "?";

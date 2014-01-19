@@ -85,12 +85,13 @@ public class PanelNode {
     return null;
   }
   
-  public static PanelNode findNodeById(String id, List<PanelNode> panelNodes) {
-    for (int i = panelNodes.size(); --i >= 0;)
-      if (id.equals(panelNodes.get(i).id))
-        return panelNodes.get(i);
-    return null;
-  }
+	public static PanelNode findNodeById(String id, List<PanelNode> panelNodes) {
+		if (id != null)
+			for (int i = panelNodes.size(); --i >= 0;)
+				if (id.equals(panelNodes.get(i).id))
+					return panelNodes.get(i);
+		return null;
+	}
 
   /**
    * Returns the tree node that is associated with a panel

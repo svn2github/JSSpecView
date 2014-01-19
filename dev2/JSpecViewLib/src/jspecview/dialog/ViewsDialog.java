@@ -99,6 +99,7 @@ public class ViewsDialog extends JSVDialog {
 				n++;
 			}
 		}
+		System.out.println("viewsdialog n=" + n);
 		dialog.setEnabled(closeSelectedButton, n > 0);
 		dialog.setEnabled(combineSelectedButton, n > 1);
 		dialog.setEnabled(viewSelectedButton, n == 1);
@@ -204,6 +205,8 @@ public class ViewsDialog extends JSVDialog {
 		} else if (id.equals("btnDone")) {
 			dispose();
 			done();
+		} else if (id.startsWith("chk")) {
+			checkEnables();
 		} else {
 			return callbackAD(id, msg);
 		}

@@ -36,7 +36,7 @@ public interface ScriptInterface {
 
 	public void siExecHidden(boolean b);
 
-	public String siExecLoad(String value);
+	public String siExecLoad(String value, String script);
 
 	public void siExecScriptComplete(String msg, boolean isOK);
 

@@ -73,4 +73,8 @@ public class ScriptTokenizer {
 		return (pt < len);
 	}
 
+	public String getRemainingScript() {
+		return str.substring(pt);
+	}
+
 }

@@ -602,7 +602,7 @@ public class JDXSpectrum extends JDXDataObject {
 		if (isNMR1 != s2.isNMR())
 			return false;
 		// must have same xUnits if not a link check
-		if (!isLinkCheck && !s1.xUnits.equalsIgnoreCase(s2.xUnits))
+		if (!isLinkCheck && !areUnitsCompatible(s1.xUnits, s2.xUnits))
 			return false;
 		if (isSubspecCheck) {
 			// must both be 1D (or both be 2D?) for adding subspectra
@@ -619,6 +619,15 @@ public class JDXSpectrum extends JDXDataObject {
 		// done if this is not NMR comparison
 		// or check same nuclei // for now not going 1D-->2D
 		return (!isNMR1 || s2.is1D() && s1.parent.nucleusX.equals(s2.parent.nucleusX));
+	}
+
+	private static boolean areUnitsCompatible(String u1, String u2) {
+		if (u1.equalsIgnoreCase(u2))
+			return true;
+		u1 = u1.toUpperCase();
+		u2 = u2.toUpperCase();
+		return (u1.equals("HZ") && u2.equals("PPM") 
+				|| u1.equals("PPM") && u2.equals("HZ"));
 	}
 
 	public static boolean areLinkableX(JDXSpectrum s1, JDXSpectrum s2) {
