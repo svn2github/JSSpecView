@@ -126,6 +126,7 @@ public class JsDialog extends JDialog implements PlatformDialog {
   	cb.setSelected(isSelected);
   	cb.setText(title);
   	cb.setName(registryKey + "/" + name);
+		cb.addActionListener(manager);
     Insets insets = new Insets(0, 20 * level, 2, 2);
     thisPanel.add(cb, new GridBagConstraints(0, iRow++, 1, 1, 0.0, 0.0,
     		GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));

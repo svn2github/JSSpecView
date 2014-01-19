@@ -114,7 +114,7 @@ public class AppToolBar extends JToolBar {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (script.equals("open"))
-	        viewer.openFileFromDialog(false, false, false);
+	        viewer.openFileFromDialog(false, false, false, null);
 				else if (script.equals("about"))
 	        new AboutDialog(mainFrame);
 				else

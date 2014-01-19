@@ -68,7 +68,7 @@ public class AwtFileHelper implements JSVFileHelper {
 	}
 
 	@Override
-	public GenericFileInterface showFileOpenDialog(Object panelOrFrame, boolean isAppend) {
+	public GenericFileInterface showFileOpenDialog(Object panelOrFrame, Object[] userData) {
 		setFileChooser(ExportType.UNK);
 		return getFile("", panelOrFrame, false);
 	}

@@ -920,8 +920,8 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	@Override
-	public String siExecLoad(String value) {
-		viewer.load(value);
+	public String siExecLoad(String value, String script) {
+		viewer.load(value, script);
 		if (viewer.selectedPanel == null)
 			return null;
 		PanelData pd = viewer.selectedPanel.getPanelData();

@@ -121,25 +121,25 @@ public class ApplicationMenu extends JMenuBar {
    */
   private void jbInit() throws Exception {
   	
-    JMenuItem openFileMenuItem = setMenuItem(null, 'O', "Open File...", 79,
+    JMenuItem openFileMenuItem = setMenuItem(null, 'F', "Append File...", 70,
         InputEvent.CTRL_MASK, new ActionListener() {
           @Override
 					public void actionPerformed(ActionEvent e) {
-            viewer.openFileFromDialog(true, false, false);
+            viewer.openFileFromDialog(true, false, false, null);
           }
         });
-    JMenuItem openSimulationMenuItem = setMenuItem(null, 'I', "Open Simulation...", 79,
+    JMenuItem openSimulationMenuItem = setMenuItem(null, 'I', "Append Simulation...", 73,
         InputEvent.CTRL_MASK, new ActionListener() {
           @Override
 					public void actionPerformed(ActionEvent e) {
-            viewer.openFileFromDialog(true, false, true);
+            viewer.openFileFromDialog(true, false, true, null);
           }
         });
-    JMenuItem openURLMenuItem = setMenuItem(null, 'U', "Open URL...", 85,
+    JMenuItem openURLMenuItem = setMenuItem(null, 'U', "Append URL...", 85,
         InputEvent.CTRL_MASK, new ActionListener() {
           @Override
 					public void actionPerformed(ActionEvent e) {
-            viewer.openFileFromDialog(true, true, false);
+            viewer.openFileFromDialog(true, true, false, null);
           }
         });
     
@@ -164,6 +164,14 @@ public class ApplicationMenu extends JMenuBar {
             viewer.runScript("CLOSE ALL");
           }
         });
+    JMenuItem scriptMenuItem = setMenuItem(null, 'T', "Script...", 83,
+        InputEvent.ALT_MASK, new ActionListener() {
+          @Override
+					public void actionPerformed(ActionEvent e) {
+            viewer.runScript("script INLINE");
+          }
+        });
+    
     JMenuItem exitMenuItem = setMenuItem(null, 'X', "Exit", 115,
         InputEvent.ALT_MASK, new ActionListener() {
           @Override
@@ -242,14 +250,6 @@ public class ApplicationMenu extends JMenuBar {
             viewer.runScript("zoom ?");
           }
         });
-    JMenuItem scriptMenuItem = setMenuItem(null, 'T', "Script...", 83,
-        InputEvent.ALT_MASK, new ActionListener() {
-          @Override
-					public void actionPerformed(ActionEvent e) {
-            viewer.runScript("script INLINE");
-          }
-        });
-    
     JMenuItem spectraMenuItem = setMenuItem(null, 'S', "Spectra...", 83,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
           @Override
@@ -370,7 +370,7 @@ public class ApplicationMenu extends JMenuBar {
     openRecentMenu = new JMenu();
     openRecentMenu.setActionCommand("OpenRecent");
     openRecentMenu.setMnemonic('R');
-    openRecentMenu.setText("Open Recent");
+    openRecentMenu.setText("Append Recent");
 
     saveAsMenu = new JMenu();
     saveAsMenu.setMnemonic('A');

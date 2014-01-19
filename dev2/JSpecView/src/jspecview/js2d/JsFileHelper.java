@@ -47,13 +47,15 @@ public class JsFileHelper implements JSVFileHelper {
 	}
 
 	@Override
-	public GenericFileInterface showFileOpenDialog(Object panelOrFrame, boolean isAppend) {
+	public GenericFileInterface showFileOpenDialog(Object panelOrFrame, Object[] userData) {
+	  // userData[0]: isAppend
+	  // userData[1]: script
 		
 		Object applet = viewer.applet;
 		/**
 		 * @j2sNative
 		 * 
-		 * 	Jmol._loadFileAsynchronously(this, applet, "", isAppend);
+		 * 	Jmol._loadFileAsynchronously(this, applet, "", userData);
 		 * 
 		 */
 		{
@@ -68,18 +70,30 @@ public class JsFileHelper implements JSVFileHelper {
    * 
    * @param fileName
    * @param data
-   * @param isAppend
+   * @param userInfo   [0] isAppend; [1] script 
    * @throws InterruptedException
    */
-  void setData(String fileName, Object data, Object isAppend) throws InterruptedException {
+  void setData(String fileName, Object data, Object[] userInfo) throws InterruptedException {
     if (fileName == null)
     	return;
     if (data == null) {
     	viewer.selectedPanel.showMessage(fileName, "File Open Error");
     	return;
     }
+    String script = (userInfo == null ? null : "");
+    boolean isAppend = false;
+    /**
+     * @j2sNative
+     * 
+     * isAppend = userInfo[0];
+     * script = userInfo[1];
+     */
+    {
+    }
     // this file name
-    viewer.si.siOpenDataOrFile(new String((byte[]) data), fileName, null, null, -1, -1, isAppend != null);
+    viewer.si.siOpenDataOrFile(new String((byte[]) data), fileName, null, null, -1, -1, isAppend);
+    if (script != null)
+      viewer.runScript(script);
   }   
 
   @Override

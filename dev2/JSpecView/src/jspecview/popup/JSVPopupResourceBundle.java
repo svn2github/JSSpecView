@@ -80,7 +80,7 @@ public class JSVPopupResourceBundle extends PopupResource {
   	{"Open_Simulation...","load $?"},
   	{"Append_File...","load append ?"},
   	{"Append_URL...","load append http://?"},
-  	{"Append_Simulation...","load append $?"},
+  	{"Append_Simulation...","load append $?; view \"1HNMR\""},
   	{"Show_Header...", "showProperties"},
   	{"Window","window"},
   	{"Show_Overlay_Key...","showKey"},

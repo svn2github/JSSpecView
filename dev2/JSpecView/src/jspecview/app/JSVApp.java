@@ -750,8 +750,8 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	}
 
 	@Override
-	public String siExecLoad(String value) {
-		viewer.load(value);
+	public String siExecLoad(String value, String script) {
+		viewer.load(value, script);
 		if (viewer.selectedPanel == null)
 			return null;
 		if (loadFileCallbackFunctionName != null)
