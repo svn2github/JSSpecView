@@ -62,12 +62,13 @@ public class ViewsDialog extends JSVDialog {
     treeNodes = new List<JSVTreeNode>();
     dialog.addButton("btnSelectAll", "Select All");
     dialog.addButton("btnSelectNone", "Select None");
+    txt2 = dialog.addTextField("txtOffset", "Offset", "" + viewer.parameters.viewOffset, "%", null, true);
     viewSelectedButton = dialog.addButton("btnViewSelected", "View Selected");
     combineSelectedButton = dialog.addButton("btnCombineSelected", "Combine Selected");
     closeSelectedButton = dialog.addButton("btnCloseSelected", "Close Selected");
     dialog.addButton("btnDone", "Done");
     dialog.setPreferredSize(500, 350);
-    dialog.addCheckBox(null, null, 0, false); // resets iRow; sets to rightPanel
+    txt1 = dialog.addCheckBox(null, null, 0, false); // resets iRow; sets to rightPanel
     addCheckBoxes(viewer.spectraTree.getRootNode(), 0, true);
     addCheckBoxes(viewer.spectraTree.getRootNode(), 0, false);
   }
@@ -150,39 +151,54 @@ public class ViewsDialog extends JSVDialog {
 	}
 	
 	protected void combineSelected() {
-		SB sb = new SB();
-		for (int i = 0; i < checkBoxes.size(); i++) {
-			Object cb = checkBoxes.get(i);
-			PanelNode node = treeNodes.get(i).getPanelNode();
-			if (dialog.isSelected(cb) && node.jsvp != null) {
-				if (node.isView) {
-					viewer.setNode(node, true);
-					return;
-				}
-				String label = dialog.getText(cb);
-				sb.append(" ").append(label.substring(0, label.indexOf(":")));
-			}
-		}
-		viewer.execView(sb.toString().trim(), false);
-		layoutDialog();
+//		SB sb = new SB();
+//		for (int i = 0; i < checkBoxes.size(); i++) {
+//			Object cb = checkBoxes.get(i);
+//			PanelNode node = treeNodes.get(i).getPanelNode();
+//			if (dialog.isSelected(cb) && node.jsvp != null) {
+//				if (node.isView) {
+//					viewer.setNode(node, true);
+//					return;
+//				}
+//				String label = dialog.getText(cb);
+//				sb.append(" ").append(label.substring(0, label.indexOf(":")));
+//			}
+//		}
+//		viewer.execView(sb.toString().trim(), false);
+//		layoutDialog();
 	}
 
 	protected void viewSelected() {
 		SB sb = new SB();
+		PanelNode thisNode = null;
+		int n = 0;
 		for (int i = 0; i < checkBoxes.size(); i++) {
 			Object cb = checkBoxes.get(i);
 			PanelNode node = treeNodes.get(i).getPanelNode();
 			if (dialog.isSelected(cb) && node.jsvp != null) {
 				if (node.isView) {
-					viewer.setNode(node, true);
-					return;
+					thisNode = node;
+					n = 2;
+					break;
 				}
+				n++;
 				String label = dialog.getText(cb);
 				sb.append(" ").append(label.substring(0, label.indexOf(":")));
 			}
 		}
-		viewer.execView(sb.toString().trim(), false);
-		layoutDialog();
+		String script = null;
+		if (n > 1) {
+			eventApply();
+			script = "STACKOFFSETY " + viewer.parameters.viewOffset;
+		}
+		if (thisNode == null) {
+			viewer.execView(sb.toString().trim(), false);
+			layoutDialog();
+		} else {
+			viewer.setNode(thisNode, true);
+		}
+		if (script != null)
+			viewer.runScript(script);
 	}
 
 	protected void closeSelected() {
@@ -199,12 +215,15 @@ public class ViewsDialog extends JSVDialog {
 		} else if (id.equals("btnViewSelected")) {
       viewSelected();
 		} else if (id.equals("btnCombineSelected")) {
-      combineSelected();
+      viewSelected();
 		} else if (id.equals("btnCloseSelected")) {
       closeSelected();
 		} else if (id.equals("btnDone")) {
+      viewSelected();
 			dispose();
 			done();
+		} else if (id.equals("txtOffset")) {
+			eventApply();
 		} else if (id.startsWith("chk")) {
 			checkEnables();
 		} else {
@@ -215,7 +234,7 @@ public class ViewsDialog extends JSVDialog {
 
 	@Override
 	public void applyFromFields() {
-		// n/a
+		apply(new Object[] { dialog.getText(txt2) });
 	}
 
 }

@@ -424,6 +424,7 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 			case OverlayLegend:
 				break;
 			case Views:
+				viewer.parameters.viewOffset = Double.parseDouble((String) objects[0]);
 				break;
 			}
 			loadData();

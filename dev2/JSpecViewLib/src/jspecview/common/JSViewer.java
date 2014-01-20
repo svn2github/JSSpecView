@@ -1456,6 +1456,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			offset = (int) f;
 		}
 		recentStackPercent = offset;
+		parameters.viewOffset = offset;
 		pd().setYStackOffsetPercent(offset);
 	}
 

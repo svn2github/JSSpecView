@@ -10,6 +10,7 @@ public class Parameters {
   public double integralRange = IntegralData.DEFAULT_RANGE;
   public double integralOffset = IntegralData.DEFAULT_OFFSET;
 	public boolean integralDrawAll = false;
+	public double viewOffset = 0;
 
   public double peakListThreshold = Double.NaN; // <= 0 disables these
   public String peakListInterpolation = "parabolic";
