@@ -10,11 +10,11 @@ public class RepaintManager {
   boolean repaintPending;
 	private JSViewer viewer;
 
-  private int n;
+//  private int n;
   public boolean refresh() {
-  	n++;
+  	//n++;
     if (repaintPending) {
-    	System.out.println("Repaint " + n + " skipped");
+    	//System.out.println("Repaint " + n + " skipped");
       return false;
     }
     repaintPending = true;
