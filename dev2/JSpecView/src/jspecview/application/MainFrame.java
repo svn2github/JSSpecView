@@ -647,10 +647,16 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	@Override
-	public void siOpenDataOrFile(String data, String name, List<JDXSpectrum> specs,
-			String url, int firstSpec, int lastSpec, boolean isAppend) {
-		viewer.openDataOrFile(data, name, specs, url,
-				firstSpec, lastSpec, isAppend);
+	public void siOpenDataOrFile(String data, String name,
+			List<JDXSpectrum> specs, String url, int firstSpec, int lastSpec,
+			boolean isAppend, String script) {
+		switch (viewer.openDataOrFile(data, name, specs, url, firstSpec, lastSpec,
+				isAppend)) {
+		case JSViewer.FILE_OPEN_OK:
+			if (script != null)
+				runScript(script);
+			break;
+		}
 		siValidateAndRepaint();
 	}
 
@@ -886,7 +892,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	@Override
 	public void siSyncLoad(String filePath) {
 		siCloseSource(null);
-		siOpenDataOrFile(null, null, null, filePath, -1, -1, false);
+		siOpenDataOrFile(null, null, null, filePath, -1, -1, false, null);
 		if (viewer.currentSource == null)
 			return;
 		if (viewer.panelNodes.get(0).getSpectrum().isAutoOverlayFromJmolClick())
@@ -990,7 +996,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	@Override
 	public void loadInline(String data) {
-		siOpenDataOrFile(data, null, null, null, -1, -1, true);
+		siOpenDataOrFile(data, null, null, null, -1, -1, true, null);
 	}
 
 	@Override
@@ -1160,7 +1166,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 			int firstSpec, int lastSpec) throws Exception {
 		return FileReader.createJDXSource(JSVFileManager
 				.getBufferedReaderForString(data), filePath, false, loadImaginary , firstSpec,
-				lastSpec);
+				lastSpec, viewer.nmrMaxY);
 	}
 
 	@Override

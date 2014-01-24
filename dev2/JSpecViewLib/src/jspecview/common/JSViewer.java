@@ -147,6 +147,11 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 
 	private boolean popupAllowMenu = true;
 	private boolean popupZoomEnabled = true;
+
+	private String defaultLoadScript;
+
+	public float nmrMaxY = Float.NaN;
+	
 	public void setPopupMenu(boolean allowMenu, boolean zoomEnabled) {
 		popupAllowMenu = allowMenu;
 		popupZoomEnabled = zoomEnabled;		
@@ -209,6 +214,12 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 				case LOADFILECALLBACKFUNCTIONNAME:
 					si.siExecSetCallback(st, value);
 					break;
+				case DEFAULTLOADSCRIPT:
+					defaultLoadScript = (value.length() > 0 ? value : null);
+					break;
+				case DEFAULTNMRNORMALIZATION:
+					nmrMaxY = PT.parseFloat(value);
+					break;
 				case AUTOINTEGRATE:
 					si.siExecSetAutoIntegrate(Parameters.isTrue(value));
 					break;
@@ -250,7 +261,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 					syncScript(PT.trimQuotes(value));
 					break;
 				case LOAD:
-					msg = si.siExecLoad(value, commandTokens.getRemainingScript());
+					msg = si.siExecLoad(value, (defaultLoadScript == null ? "" : defaultLoadScript + ";") + commandTokens.getRemainingScript());
 					break;
 				case LOADIMAGINARY:
 					si.siSetLoadImaginary(Parameters.isTrue(value));
@@ -555,7 +566,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		List<JDXSpectrum> speclist = new List<JDXSpectrum>();
 		String strlist = fillSpecList(value, speclist, true);
 		if (speclist.size() > 0)
-			si.siOpenDataOrFile(null, strlist, speclist, strlist, -1, -1, false);
+			si.siOpenDataOrFile(null, strlist, speclist, strlist, -1, -1, false, null);
 		if (!fromScript) {
 			si.siValidateAndRepaint();
 		}
@@ -1171,36 +1182,56 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 	}
 
 	public void close(String value) {
-		if (value == null || value.equalsIgnoreCase("all") || value.equals("*")) {
+		// close * > 1 "close all except one spectrum."
+		// close SIMULATION > 1 "close simulations until no more than one spectrum is present,
+		// or all simulations if that is not possible."
+		int n0 = 0;
+		int pt = (value == null ? -2 : value.indexOf(">"));
+		if (pt > 0) {
+			n0 = PT.parseInt(value.substring(pt + 1).trim());
+			value = value.substring(0, pt).trim();
+		}
+		if ("*".equals(value))
+			value = "all";
+		boolean isAll = (value == "all");
+		if (value == null || n0 == 0 && value.equalsIgnoreCase("all")) {
 			si.siCloseSource(null);
 			return;
 		}
+		List<JDXSource> list = new List<JDXSource>();
+		JDXSource source;
 		value = value.replace('\\', '/');
+		int n = panelNodes.size();
+		int nMax = n - n0;
 		if (value.endsWith("*")) {
 			value = value.substring(0, value.length() - 1);
-			for (int i = panelNodes.size(); --i >= 0;)
-				if (i < panelNodes.size()
-						&& panelNodes.get(i).fileName.startsWith(value))
-					si.siCloseSource(panelNodes.get(i).source);
+			for (int i = n; --i >= 0;)
+				if (panelNodes.get(i).fileName.startsWith(value))
+					list.addLast(panelNodes.get(i).source);
 		} else if (value.equals("selected")) {
-			List<JDXSource> list = new List<JDXSource>();
 			JDXSource lastSource = null;
-			for (int i = panelNodes.size(); --i >= 0;) {
-				JDXSource source = panelNodes.get(i).source;
+			for (int i = n; --i >= 0;) {
+				source = panelNodes.get(i).source;
 				if (panelNodes.get(i).isSelected
 						&& (lastSource == null || lastSource != source))
 					list.addLast(source);
 				lastSource = source;
 			}
-			for (int i = list.size(); --i >= 0;)
-				si.siCloseSource(list.get(i));
+		} else if (isAll || value.equals("views") || value.equals("simulations")) {
+			boolean isViews = value.equals("views");
+			for (int n1 = 0, i = n; --i >= 0 && n1 < nMax;)
+				if (isAll ? true : isViews ? panelNodes.get(i).isView : panelNodes.get(i).isSimulation) {
+					list.addLast(panelNodes.get(i).source);
+					n1++;
+				}
 		} else {
-			JDXSource source = (value.length() == 0 ? currentSource : PanelNode
+			source = (value.length() == 0 ? currentSource : PanelNode
 					.findSourceByNameOrId(value, panelNodes));
-			if (source == null)
-				return;
-			si.siCloseSource(source);
+			if (source != null)
+				list.addLast(source);
 		}
+		for (int i = list.size(); --i >= 0;)
+			si.siCloseSource(list.get(i));
 		if (selectedPanel == null && panelNodes.size() > 0)
 			si.siSetSelectedPanel(PanelNode.getLastFileFirstNode(panelNodes));
 	}
@@ -1211,6 +1242,8 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		int pt = 0;
 		boolean isAppend = filename.equalsIgnoreCase("APPEND");
 		boolean isCheck = filename.equalsIgnoreCase("CHECK");
+		if (script == null)
+			script = defaultLoadScript;
 		if (isAppend || isCheck)
 			filename = tokens.get(++pt);
 		if (filename.equals("?")) {
@@ -1244,7 +1277,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		int lastSpec = (pt + 1 < tokens.size() ? Integer.valueOf(tokens.get(++pt))
 				.intValue() : firstSpec);
 		si.siOpenDataOrFile(null, null, null, filename, firstSpec, lastSpec,
-				isAppend);
+				isAppend, script);
 	}
 
 	public void combineSpectra(String name) {
@@ -1781,7 +1814,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			if (source != null)
 				si.siCloseSource(source);
 		}
-		si.siOpenDataOrFile(null, null, null, fileName, -1, -1, true);
+		si.siOpenDataOrFile(null, null, null, fileName, -1, -1, true, defaultLoadScript);
 	}
 
 	public int selectPanel(JSVPanel jsvp, List<PanelNode> panelNodes) {

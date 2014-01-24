@@ -642,10 +642,4 @@ public class JDXSpectrum extends JDXDataObject {
 		this.nH = nH;
 	}
 
-	public void doNormalize() {
-		System.out.println("OK");
-		// TODO Auto-generated method stub
-		
-	}
-
 }

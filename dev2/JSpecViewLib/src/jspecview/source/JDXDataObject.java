@@ -792,6 +792,18 @@ public abstract class JDXDataObject extends JDXHeader {
     return (Double.isNaN(maxY) ? (maxY = Coordinate.getMaxY(xyCoords, 0, xyCoords.length)) : maxY);
   }
 
+	double normalizationFactor = 1;
+	
+	public void doNormalize(double max) {
+		// for simulations
+		if (!isNMR() || !is1D())
+			return;
+		normalizationFactor = max / getMaxY();
+		maxY = Double.NaN;
+		Coordinate.applyScale(xyCoords, 1, normalizationFactor);
+		Logger.info("Y values have been scaled by a factor of " + normalizationFactor);		
+	}
+
   /**
    * Returns the delta X
    * 
@@ -884,4 +896,5 @@ public abstract class JDXDataObject extends JDXHeader {
 		return new double[] { x, y };
 	}
 
+	
 }

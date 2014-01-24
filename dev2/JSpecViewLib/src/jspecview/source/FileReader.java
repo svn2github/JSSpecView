@@ -78,7 +78,7 @@ public class FileReader {
   private final static String[] TABULAR_DATA_LABELS = { "##DATATABLE", 
   	"##PEAKASSIGNMENTS", "##PEAKTABLE", "##XYDATA", "##XYPOINTS" };
 
-	private boolean normalizeY;
+	private float nmrMaxY = Float.NaN;
 	
 //  static {
 //    Arrays.sort(TABULAR_DATA_LABELS);  OUCH! - Breaks J2S
@@ -97,10 +97,12 @@ public class FileReader {
   private boolean loadImaginary = true;
   
   private FileReader(String filePath, boolean obscure, boolean loadImaginary,
-  		int iSpecFirst, int iSpecLast) {
+  		int iSpecFirst, int iSpecLast, float nmrNormalization) {
   	filePath = PT.trimQuotes(filePath);
   	if (filePath != null && filePath.startsWith(JSVFileManager.SIMULATION_PROTOCOL))
-  	  normalizeY = true;
+  	  nmrMaxY = 10000;
+  	if(!Float.isNaN(nmrNormalization))
+  	 nmrMaxY = nmrNormalization;
     this.filePath = (filePath != null && filePath.startsWith(JSVFileManager.SIMULATION_PROTOCOL + "MOL=") ? 
     		JSVFileManager.SIMULATION_PROTOCOL + "MOL=" + Math.abs(filePath.hashCode()) : filePath);
     this.obscure = obscure;
@@ -116,13 +118,14 @@ public class FileReader {
    * @param in
    * @param obscure
    * @param loadImaginary 
+   * @param nmrMaxY 
    * @return source
    * @throws Exception
    */
-  public static JDXSource createJDXSourceFromStream(InputStream in, boolean obscure, boolean loadImaginary)
+  public static JDXSource createJDXSourceFromStream(InputStream in, boolean obscure, boolean loadImaginary, float nmrMaxY)
       throws Exception {
     return createJDXSource(JSVFileManager.getBufferedReaderForInputStream(in),
-        "stream", obscure, loadImaginary, -1, -1);
+        "stream", obscure, loadImaginary, -1, -1, nmrMaxY);
   }
 
 	/**
@@ -136,12 +139,13 @@ public class FileReader {
 	 *          TODO
 	 * @param iSpecLast
 	 *          TODO
+	 * @param nmrMaxY 
 	 * @return source
 	 * @throws Exception
 	 */
 	public static JDXSource createJDXSource(BufferedReader br, String filePath,
 			boolean obscure, boolean loadImaginary,
-			int iSpecFirst, int iSpecLast) throws Exception {
+			int iSpecFirst, int iSpecLast, float nmrMaxY) throws Exception {
 		String header = null;
 		try {
 			if (br == null)
@@ -171,7 +175,7 @@ public class FileReader {
 				return xmlSource;
 			}
 			return (new FileReader(filePath, obscure, loadImaginary, iSpecFirst,
-					iSpecLast)).getJDXSource(br);
+					iSpecLast, nmrMaxY)).getJDXSource(br);
 		} catch (Exception e) {
 			if (br != null)
 				br.close();
@@ -245,8 +249,9 @@ public class FileReader {
     if (!isOK)
     	throw new JSVException("##TITLE record not found");
     source.setErrorLog(errorLog.toString());
-    if (normalizeY && !source.isCompoundSource)
-    	source.getJDXSpectrum(0).doNormalize();
+    if (!Float.isNaN(nmrMaxY))
+    	for (int i = source.getNumberOfSpectra(); --i >= 0;)
+    		source.getJDXSpectrum(i).doNormalize(nmrMaxY);
     return source;
   }
 

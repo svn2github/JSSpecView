@@ -641,7 +641,7 @@ public class PreferencesDialog extends JDialog implements ActionListener {
     // init preview panel
     try {
       JDXSource source = FileReader.createJDXSourceFromStream(getClass()
-          .getResourceAsStream("resources/sample.jdx"), false, false);
+          .getResourceAsStream("resources/sample.jdx"), false, false, Float.NaN);
 
       previewPanel = AwtPanel.getPanelOne(viewer, source.getSpectra().get(0));
       previewPanel.getPanelData().setBoolean(ScriptToken.ENABLEZOOM, false);

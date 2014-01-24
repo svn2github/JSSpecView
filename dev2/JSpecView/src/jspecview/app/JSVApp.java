@@ -242,7 +242,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	@Override
 	public void loadInline(String data) {
 		// newAppletPanel();
-		siOpenDataOrFile(data, null, null, null, -1, -1, true);
+		siOpenDataOrFile(data, null, null, null, -1, -1, true, null);
 		appletFrame.validateContent(3);
 	}
 
@@ -490,7 +490,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	public void siSyncLoad(String filePath) {
 		newAppletPanel();
 		Logger.info("JSVP syncLoad reading " + filePath);
-		siOpenDataOrFile(null, null, null, filePath, -1, -1, false);
+		siOpenDataOrFile(null, null, null, filePath, -1, -1, false, null);
 		appletFrame.validateContent(3);
 	}
 
@@ -595,10 +595,12 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	@Override
 	public void siOpenDataOrFile(String data, String name,
 			List<JDXSpectrum> specs, String url, int firstSpec, int lastSpec,
-			boolean isAppend) {
+			boolean isAppend, String script) {
 		switch (viewer.openDataOrFile(data, name, specs, url, firstSpec, lastSpec,
 				isAppend)) {
 		case JSViewer.FILE_OPEN_OK:
+			if (script != null)
+				runScript(script);
 			break;
 		case JSViewer.FILE_OPEN_ALREADY:
 			return;
@@ -839,7 +841,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 			int firstSpec, int lastSpec) throws Exception {
 		return FileReader.createJDXSource(JSVFileManager
 				.getBufferedReaderForString(data), filePath, 
-				obscureTitleFromUser == Boolean.TRUE, loadImaginary, -1, -1);
+				obscureTitleFromUser == Boolean.TRUE, loadImaginary, -1, -1, viewer.nmrMaxY);
 	}
 
 	@Override

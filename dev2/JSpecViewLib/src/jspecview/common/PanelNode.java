@@ -20,6 +20,7 @@ public class PanelNode {
     this.id = id;
     this.source = source;
     this.fileName = fileName;
+    isSimulation = (source.getFilePath().indexOf(JSVFileManager.SIMULATION_PROTOCOL) >= 0);
     this.jsvp = jsvp;
     if (jsvp != null) {
       jsvp.getPanelData().getSpectrumAt(0).setId(id);
@@ -43,6 +44,7 @@ public class PanelNode {
   public JSVDialog legend;
 	public boolean isSelected;
 	public boolean isView;
+	public boolean isSimulation;
   public String frameTitle;
   
 
