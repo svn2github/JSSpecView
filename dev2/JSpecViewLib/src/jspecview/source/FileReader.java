@@ -103,8 +103,9 @@ public class FileReader {
   	  nmrMaxY = 10000;
   	if(!Float.isNaN(nmrNormalization))
   	 nmrMaxY = nmrNormalization;
-    this.filePath = (filePath != null && filePath.startsWith(JSVFileManager.SIMULATION_PROTOCOL + "MOL=") ? 
-    		JSVFileManager.SIMULATION_PROTOCOL + "MOL=" + Math.abs(filePath.hashCode()) : filePath);
+    this.filePath = filePath;
+    if (filePath != null && filePath.startsWith(JSVFileManager.SIMULATION_PROTOCOL))
+    	filePath = JSVFileManager.getSimulationFileName(filePath);
     this.obscure = obscure;
     firstSpec = iSpecFirst;
     lastSpec = iSpecLast;

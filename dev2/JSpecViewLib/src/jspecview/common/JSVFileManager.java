@@ -57,6 +57,7 @@ public class JSVFileManager {
 	}
 
 	public static String jsDocumentBase = "";
+	private static Map<String, String> htSimulationCache;
 
 	/**
 	 * @param name
@@ -174,8 +175,7 @@ public class JSVFileManager {
 				name = subFileList[0];
 		}
 		if (name.startsWith(SIMULATION_PROTOCOL))
-			return getBufferedReaderForString(getNMRSimulationJCampDX(name
-					.substring(SIMULATION_PROTOCOL.length())));
+			return getSimulationReader(name);
 		try {
 			Object ret = getInputStream(name, true, null);
 			if (ret instanceof SB || ret instanceof String)
@@ -195,6 +195,27 @@ public class JSVFileManager {
 		} catch (Exception e) {
 			throw new JSVException("Cannot read file " + name + " " + e.getMessage());
 		}
+	}
+
+	public static String getSimulationFileName(String name) {
+		String filename = name;
+		if (name.indexOf("MOL=") >= 0) {
+			filename = JSVFileManager.SIMULATION_PROTOCOL + "MOL=" + Math.abs(name.hashCode());
+      htSimulationCache.put(filename, htSimulationCache.get(name));
+		}
+		return filename;
+	}
+	
+	private static BufferedReader getSimulationReader(String name) {
+		if (htSimulationCache == null)
+			htSimulationCache = new Hashtable<String, String>();
+		String data = htSimulationCache.get(name);
+		if (data == null) {
+			data = getNMRSimulationJCampDX(name.substring(SIMULATION_PROTOCOL.length()));
+			if (data != null)
+				htSimulationCache.put(name, data);
+		}
+		return getBufferedReaderForString(data);
 	}
 
 	public static boolean isAB(Object x) {
