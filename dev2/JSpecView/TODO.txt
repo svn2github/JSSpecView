@@ -6,6 +6,12 @@ ___date="$Date$"
 ___svnRev="$LastChangedRevision$"
 ___version="2.1.1"
 
+BH 1/23/2014 5:12:00 PM 
+-added close SIMULATIONS
+-added close VIEWS
+-added DEFAULTLOADSCRIPT "script..." 
+-added DEFAULTNMRNORMALIZATION x.x
+
 BH 1/13/2014 8:24:33 PM 
 -fix for baseline dropping below bottom pixel
 -fix for file-not-found or file-not-recognized error message not understandable.
