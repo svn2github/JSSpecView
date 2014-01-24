@@ -183,13 +183,7 @@ public class JsPanel implements JSVPanel {
 		Logger.info(msg);
 		/**
 		 * @j2sNative
-		 * 
-		 * if (msg != null) {
-		 *   if (title == null)
-		 *     Jmol._showStatus(msg);
-		 *   else
-		 *     alert(msg);
-		 * }
+		 * this.viewer.applet._showStatus(msg, title);
 		 */
 		{
 		}

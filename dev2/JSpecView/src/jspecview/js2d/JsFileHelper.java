@@ -1,10 +1,10 @@
 package jspecview.js2d;
 
 import javajs.api.GenericFileInterface;
+import javajs.util.PT;
 
 import jspecview.api.JSVFileHelper;
 import jspecview.common.ExportType;
-import jspecview.common.JSVFileManager;
 import jspecview.common.JSViewer;
 
 public class JsFileHelper implements JSVFileHelper {
@@ -24,6 +24,7 @@ public class JsFileHelper implements JSVFileHelper {
 	@SuppressWarnings("null")
 	public GenericFileInterface getFile(String fileName, Object panelOrFrame, boolean isSave) {
 		String f = null;
+		fileName = PT.rep(fileName,  "=",  "_");
 		/**
 		 * @j2sNative
 		 * 

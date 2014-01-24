@@ -759,8 +759,27 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 		if (loadFileCallbackFunctionName != null)
 			appletFrame.callToJavaScript(loadFileCallbackFunctionName, new Object[] { viewer.appletID,
 					value });
+		updateJSView(null);
 		return null;
 	}
+	
+  /**
+   * File has been loaded or model has been changed or atom picked.
+   * This is a call to Jmol.View for view sets (new in Jmol 14.1.8)
+   * 
+   * @param msg  
+   * 
+   */
+  private void updateJSView(String msg) {
+    /**
+     * @j2sNative
+     * 
+     * this.viewer.applet && this.viewer.applet._viewSet != null && Jmol.updateView(this.viewer.applet, this.viewer.seletedPanel, msg);
+     * 
+     */
+    {}
+  }
+
 
 	@Override
 	public void siExecHidden(boolean b) {
@@ -789,6 +808,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	 */
 	@Override
 	public synchronized void syncToJmol(String msg) {
+		updateJSView(msg);
 		if (syncCallbackFunctionName == null)
 			return;
 		Logger.info("JSVApp.syncToJmol JSV>Jmol " + msg);
