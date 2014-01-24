@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javajs.util.List;
+import javajs.util.PT;
 import javajs.util.SB;
 
 
@@ -238,6 +239,8 @@ public enum ScriptToken {
    * @return list of tokens
    */
   public static List<String> getTokens(String value) {
+		if (value.startsWith("'") && value.endsWith("'"))
+			value = "\"" + PT.trim(value, "'") + "\"";
     List<String> tokens = new List<String>();
     ScriptTokenizer st = new ScriptTokenizer(value, false);
     while (st.hasMoreTokens()) {

@@ -969,7 +969,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		if (value.equals("*")) {
 			list = ScriptToken.getTokens(PanelNode
 					.getSpectrumListAsString(panelNodes));
-		} else if (value.startsWith("\"")) {
+		} else if (value.startsWith("\"") || value.startsWith("'")) {
 			list = ScriptToken.getTokens(value);
 		} else {
 			value = PT.rep(value, "_", " _ ");
@@ -1009,16 +1009,19 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 					pt++;
 				pt++;
 				while (pt < list0.size() && !idLast.equals(id)) {
-					speclist.addLast(PanelNode.findNodeById(idLast = list0.get(pt++),
-							panelNodes).jsvp.getPanelData().getSpectrumAt(0));
+					PanelNode node = PanelNode.findNodeById((idLast = list0.get(pt++)), panelNodes);
+					speclist.addLast(node.jsvp.getPanelData().getSpectrumAt(0));
 					sb.append(",").append(idLast);
 				}
 				continue;
 			}
 			PanelNode node;
+			if (id.startsWith("'") && id.endsWith("'"))
+				id = "\"" + PT.trim(id, "'") + "\"";
 			if (id.startsWith("\"")) {
 				id = PT.trim(id, "\"");
-				for (int j = 0; j < panelNodes.size(); j++) {
+				int pn = panelNodes.size();
+				for (int j = 0; j < pn; j++) {
 					node = panelNodes.get(j);
 					if (node.fileName != null && node.fileName.startsWith(id)
 							|| node.frameTitle != null && node.frameTitle.startsWith(id)) {
@@ -1198,8 +1201,10 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			si.siCloseSource(null);
 			return;
 		}
+		boolean isViews = value.equalsIgnoreCase("views");
 		List<JDXSource> list = new List<JDXSource>();
 		JDXSource source;
+		System.out.println("close  " + value);
 		value = value.replace('\\', '/');
 		int n = panelNodes.size();
 		int nMax = n - n0;
@@ -1208,7 +1213,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			for (int i = n; --i >= 0;)
 				if (panelNodes.get(i).fileName.startsWith(value))
 					list.addLast(panelNodes.get(i).source);
-		} else if (value.equals("selected")) {
+		} else if (value.equalsIgnoreCase("selected")) {
 			JDXSource lastSource = null;
 			for (int i = n; --i >= 0;) {
 				source = panelNodes.get(i).source;
@@ -1217,8 +1222,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 					list.addLast(source);
 				lastSource = source;
 			}
-		} else if (isAll || value.equals("views") || value.equals("simulations")) {
-			boolean isViews = value.equals("views");
+		} else if (isAll || isViews || value.equalsIgnoreCase("simulations")) {
 			for (int n1 = 0, i = n; --i >= 0 && n1 < nMax;)
 				if (isAll ? true : isViews ? panelNodes.get(i).isView : panelNodes.get(i).isSimulation) {
 					list.addLast(panelNodes.get(i).source);

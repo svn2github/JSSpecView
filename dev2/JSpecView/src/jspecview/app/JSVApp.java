@@ -744,7 +744,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	@Override
 	public void siExecClose(String value) {
 		boolean fromScript = (!value.startsWith("!"));
-		if (fromScript)
+		if (!fromScript)
 			value = value.substring(1);		
 		viewer.close(value);
 		if (!fromScript)
