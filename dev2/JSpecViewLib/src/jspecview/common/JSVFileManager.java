@@ -193,7 +193,7 @@ public class JSVFileManager {
 						.getInterface("jspecview.util.JSVZipUtil")).newGZIPInputStream(in);
 			return new BufferedReader(new InputStreamReader(in, "UTF-8"));
 		} catch (Exception e) {
-			throw new JSVException("Cannot read file " + name + " " + e.getMessage());
+			throw new JSVException("Cannot read file " + name + " " + e);
 		}
 	}
 
@@ -201,6 +201,8 @@ public class JSVFileManager {
 		String filename = name;
 		if (name.indexOf("MOL=") >= 0) {
 			filename = JSVFileManager.SIMULATION_PROTOCOL + "MOL=" + Math.abs(name.hashCode());
+			if (htSimulationCache == null)
+				htSimulationCache = new Hashtable<String, String>();
 			String data = htSimulationCache.get(name);
 			if (data != null)
 				htSimulationCache.put(filename, data);

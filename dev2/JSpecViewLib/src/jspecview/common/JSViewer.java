@@ -422,7 +422,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 					break;
 				}
 			} catch (Exception e) {
-				msg = e.getMessage();
+				msg = e.toString();
 				Logger.error(e.toString());
 				/**
 				 * @j2sNative
@@ -1136,7 +1136,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		} catch (Exception e) {
 			/**
 			 * @j2sNative
-			 *   alert(e.getMessage())
+			 *   alert(e.toString())
 			 */
 			{
 				Logger.error(e.toString());
@@ -1146,7 +1146,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			}
 			si.setCursor(GenericPlatform.CURSOR_DEFAULT);
 			if (isApplet) {
-				selectedPanel.showMessage(e.getMessage(), "Error Opening File");				
+				selectedPanel.showMessage(e.toString(), "Error Opening File");				
 			}
 			return FILE_OPEN_ERROR;
 		}
