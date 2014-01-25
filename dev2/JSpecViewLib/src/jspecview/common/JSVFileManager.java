@@ -201,7 +201,9 @@ public class JSVFileManager {
 		String filename = name;
 		if (name.indexOf("MOL=") >= 0) {
 			filename = JSVFileManager.SIMULATION_PROTOCOL + "MOL=" + Math.abs(name.hashCode());
-      htSimulationCache.put(filename, htSimulationCache.get(name));
+			String data = htSimulationCache.get(name);
+			if (data != null)
+				htSimulationCache.put(filename, data);
 		}
 		return filename;
 	}
@@ -489,8 +491,8 @@ public class JSVFileManager {
 			return "String" + (++stringCount);
 		if (isURL(fileName)) {
 			try {
-				if (fileName.startsWith(SIMULATION_PROTOCOL) && fileName.length() > 100)
-					return fileName.substring(0, Math.min(fileName.length(), 30)) + "...";
+				if (fileName.startsWith(SIMULATION_PROTOCOL))
+					return JSVFileManager.getSimulationFileName(fileName);
 				String name = (new URL((URL) null, fileName, null)).getFile();
 				return name.substring(name.lastIndexOf('/') + 1);
 			} catch (IOException e) {
