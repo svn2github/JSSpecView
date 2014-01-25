@@ -18,7 +18,10 @@ BH 1/13/2014 8:24:33 PM
 -fix for PDF file creation broken
 
 
-todo: JSpecView/Java + JSME crashed Firefox during applet loading.
+todo: 
+ -for a BLOCK file view 2 spectra eg IR and MS 1.1 and 1.4 then try close selected (gone from dialog but not display)
+ then try to open an H NMR spectrum 1.2 - nothing happens
+ -JSpecView/Java + JSME crashed Firefox during applet loading.
 
 new feature: show NMR taps into NMRDB directly
  -- for now, application only
