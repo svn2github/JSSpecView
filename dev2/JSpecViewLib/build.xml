@@ -44,9 +44,9 @@
         <copy overwrite="true" todir="src/org/jmol" >
           <fileset dir="${jmol.path}/src/org/jmol">
             <include name="java/BS.java" />
-            <include name="adapter/smarter/JmolJDXModelPeakLoader.java" />
-            <include name="adapter/smarter/JmolJDXModelPeakReader.java" />
-            <include name="jsv/JDXModelPeakReader.java" />
+            <include name="adapter/smarter/JmolJDXMOLParser.java" />
+            <include name="adapter/smarter/JmolJDXMOLReader.java" />
+            <include name="jsv/JDXMOLParser.java" />
             <include name="util/DefaultLogger.java" />
             <include name="util/LoggerInterface.java" />
 	        <include name="util/Logger*.java" />
