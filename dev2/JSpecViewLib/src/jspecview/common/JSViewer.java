@@ -1262,8 +1262,8 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			openFileFromDialog(isAppend, true, true, null);
 			return;
 		}
-		boolean isSimulation = filename.equalsIgnoreCase("MOL");
-		if (isSimulation)
+		boolean isMOL = filename.equalsIgnoreCase("MOL");
+		if (isMOL)
 			filename = JSVFileManager.SIMULATION_PROTOCOL + "MOL="
 					+ PT.trimQuotes(tokens.get(++pt));
 		if (!isCheck && !isAppend) {
@@ -1273,8 +1273,8 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		}
 		filename = PT.trimQuotes(filename);
 		if (filename.startsWith("$")) {
-			isSimulation = true;
-			filename = JSVFileManager.SIMULATION_PROTOCOL + filename;
+			isMOL = true;
+			filename = JSVFileManager.SIMULATION_PROTOCOL + filename.substring(1);
 		}
 		int firstSpec = (pt + 1 < tokens.size() ? Integer.valueOf(tokens.get(++pt))
 				.intValue() : -1);
@@ -1621,7 +1621,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 	}
 
 	public Object getPlatformInterface(String type) {
-		return JSViewer.getInterface("jspecview." + (isJS ? "js2d.Js" : "java.Awt")
+		return getInterface("jspecview." + (isJS ? "js2d.Js" : "java.Awt")
 				+ type);
 	}
 
@@ -1637,19 +1637,19 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		String root = "jspecview.dialog.";
 		switch (type) {
 		case Integration:
-			return ((JSVDialog) JSViewer.getInterface(root + "IntegrationDialog"))
+			return ((JSVDialog) getInterface(root + "IntegrationDialog"))
 					.setParams("Integration for " + spec, this, spec);
 		case Measurements:
-			return ((JSVDialog) JSViewer.getInterface(root + "MeasurementsDialog"))
+			return ((JSVDialog) getInterface(root + "MeasurementsDialog"))
 					.setParams("Measurements for " + spec, this, spec);
 		case PeakList:
-			return ((JSVDialog) JSViewer.getInterface(root + "PeakListDialog"))
+			return ((JSVDialog) getInterface(root + "PeakListDialog"))
 					.setParams("Peak List for " + spec, this, spec);
 		case OverlayLegend:
-			return overlayLegendDialog = ((JSVDialog) JSViewer.getInterface(root
+			return overlayLegendDialog = ((JSVDialog) getInterface(root
 					+ "OverlayLegendDialog")).setParams(pd().getViewTitle(), this, null);
 		case Views:
-			return viewDialog = ((JSVDialog) JSViewer.getInterface(root
+			return viewDialog = ((JSVDialog) getInterface(root
 					+ "ViewsDialog")).setParams("View/Combine/Close Spectra", this, null);
 		default:
 			return null;

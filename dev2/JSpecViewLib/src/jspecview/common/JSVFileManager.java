@@ -198,9 +198,8 @@ public class JSVFileManager {
 	}
 
 	public static String getSimulationFileName(String name) {
-		String filename = name;
+		String filename = getAbbreviatedSimulationName(name, true);
 		if (name.indexOf("MOL=") >= 0) {
-			filename = JSVFileManager.SIMULATION_PROTOCOL + "MOL=" + Math.abs(name.hashCode());
 			if (htSimulationCache == null)
 				htSimulationCache = new Hashtable<String, String>();
 			String data = htSimulationCache.get(name);
@@ -210,6 +209,11 @@ public class JSVFileManager {
 		return filename;
 	}
 	
+	private static String getAbbreviatedSimulationName(String name, boolean addProtocol) {
+		return (name.indexOf("MOL=") >= 0 ? (addProtocol ? SIMULATION_PROTOCOL : "") + "MOL=" 
+				+ Math.abs(name.hashCode()) : name);
+	}
+
 	private static BufferedReader getSimulationReader(String name) {
 		if (htSimulationCache == null)
 			htSimulationCache = new Hashtable<String, String>();
@@ -379,7 +383,7 @@ public class JSVFileManager {
 
 	}
 
-	private static String nciResolver = "http://cactus.nci.nih.gov/chemical/structure/%FILE/file?format=sdf";
+	private static String nciResolver = "http://cactus.nci.nih.gov/chemical/structure/%FILE/file?format=sdf&get3d=True";
 	private static String nmrdbServer = "http://www.nmrdb.org/tools/jmol/predict.php?POST?molfile=";
 
 	private static Map<String, String> htSimulate;
@@ -403,38 +407,43 @@ public class JSVFileManager {
 			return jcamp;
 		boolean isInline = name.startsWith("MOL=");
 		String molFile;
+		String src = (isInline ? null : PT.rep(nciResolver, "%FILE",
+				PT.escapeUrl(name)));
 		if ((molFile = (isInline ? PT.rep(name.substring(4), "\\n", "\n")
-				: getFileAsString(PT.rep(nciResolver, "%FILE",
-						PT.escapeUrl(name.substring(1)))))) == null)
+				: getFileAsString(src))) == null)
 			Logger.info("no data returned");
-		// null here throws an exception
-		int pt = molFile.indexOf("\n");
-		molFile = "/JSpecView " + JSVersion.VERSION + molFile.substring(pt);
-		molFile = PT.rep(molFile, "?", "_");
 		String json = getFileAsString(nmrdbServer + molFile);
 		Logger.debug(json);
+		if (json.indexOf("\"error\":") >= 0)
+			return null;
 		json = PT.rep(json, "\\r\\n", "\n");
 		json = PT.rep(json, "\\t", "\t");
 		json = PT.rep(json, "\\n", "\n");
-		molFile = JSVFileManager.getQuotedJSONAttribute(json, "molfile", null);
-		String xml = JSVFileManager.getQuotedJSONAttribute(json, "xml", null);
+		// String jsonMolFile = getQuotedJSONAttribute(json, "molfile", null);
+		String xml = getQuotedJSONAttribute(json, "xml", null);
+		xml = PT.rep(xml, "<Signals>",  "<Signals src=" + PT.esc(PT.rep(nmrdbServer,"?POST?molfile=","")) + ">");
 		xml = PT.rep(xml, "</", "\n</");
 		xml = PT.rep(xml, "><", ">\n<");
 		xml = PT.rep(xml, "\\\"", "\"");
-		jcamp = JSVFileManager.getQuotedJSONAttribute(json, "jcamp", null);
+		jcamp = getQuotedJSONAttribute(json, "jcamp", null);
 		jcamp = "##TITLE=" + (isInline ? "JMOL SIMULATION" : name) + "\n"
 				+ jcamp.substring(jcamp.indexOf("\n##") + 1);
 		Logger.info(jcamp.substring(0, jcamp.indexOf("##XYDATA") + 40) + "...");
+		int pt = molFile.indexOf("\n");
+		pt = molFile.indexOf("\n", pt + 1);
+		if (pt > 0 && pt == molFile.indexOf("\n \n"))
+			molFile = molFile.substring(0, pt + 1) + "Created " + viewer.apiPlatform.getDateFormat(true) + " by JSpecView " + JSVersion.VERSION
+					+ molFile.substring(pt + 1);
 		pt = 0;
 		pt = jcamp.indexOf("##.");
-		String id = name;
+		String id = getAbbreviatedSimulationName(name, false);
 		int pt1 = id.indexOf("id='");
 		if (isInline && pt1 > 0)
 			id = id.substring(pt1 + 4, (id + "'").indexOf("'", pt1 + 4));
 		jcamp = jcamp.substring(0, pt) + "##$MODELS=\n<Models>\n"
-				+ "<ModelData id=" + PT.esc(id) + "\n type=\"MOL\">\n" + molFile
-				+ "</ModelData>\n</Models>\n" + "##$SIGNALS=\n" + xml + "\n"
-				+ jcamp.substring(pt);
+				+ "<ModelData id=" + PT.esc(id) + " type=\"MOL\" src=" + PT.esc(src)
+				+ ">\n" + molFile + "</ModelData>\n</Models>\n" + "##$SIGNALS=\n" + xml
+				+ "\n" + jcamp.substring(pt);
 		htSimulate.put(key, jcamp);
 		return jcamp;
 	}
@@ -494,7 +503,7 @@ public class JSVFileManager {
 		if (isURL(fileName)) {
 			try {
 				if (fileName.startsWith(SIMULATION_PROTOCOL))
-					return JSVFileManager.getSimulationFileName(fileName);
+					return getSimulationFileName(fileName);
 				String name = (new URL((URL) null, fileName, null)).getFile();
 				return name.substring(name.lastIndexOf('/') + 1);
 			} catch (IOException e) {

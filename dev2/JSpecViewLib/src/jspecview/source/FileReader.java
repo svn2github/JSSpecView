@@ -27,15 +27,15 @@ import java.util.Arrays;
 import java.util.Hashtable;
 
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
-import javajs.util.BS;
 import javajs.util.List;
+import javajs.util.PT;
 import javajs.util.SB;
 
+import org.jmol.adapter.smarter.JmolJDXModelPeakLoader;
+import org.jmol.adapter.smarter.JmolJDXModelPeakReader;
 import org.jmol.util.Logger;
-import javajs.util.PT;
 
 
 import jspecview.api.JSVZipReader;
@@ -62,7 +62,7 @@ import jspecview.exception.JSVException;
  * @author Prof. Robert J. Lancashire
  * @author Bob Hanson, hansonr@stolaf.edu
  */
-public class FileReader {
+public class FileReader implements JmolJDXModelPeakLoader {
 
   /**
    * Labels for the exporter
@@ -137,9 +137,7 @@ public class FileReader {
 	 * @param obscure
 	 * @param loadImaginary
 	 * @param iSpecFirst
-	 *          TODO
 	 * @param iSpecLast
-	 *          TODO
 	 * @param nmrMaxY 
 	 * @return source
 	 * @throws Exception
@@ -269,13 +267,11 @@ public class FileReader {
 
   private double blockID;
 
-  private String piUnitsX;
+	private JmolJDXModelPeakReader mpr;
 
-  private String piUnitsY;
+	private BufferedReader reader;
 
-	private String thisModelID;
-
-	private int peakIndex;
+	private JDXSpectrum modelSpectrum;
 
   private boolean addSpectrum(JDXSpectrum spectrum, boolean forceSub) {
   	if (!loadImaginary && spectrum.isImaginary()) {
@@ -399,10 +395,8 @@ public class FileReader {
 				if (checkCustomTags(spectrum, label, value))
 					continue;
 			} // End Source File
-		} catch (NoSuchElementException nsee) {
-			throw new JSVException("Unable to Read Block Source");
-		} catch (JSVException jsve) {
-			throw jsve;
+		} catch (Exception e) {
+			throw new JSVException(e.getMessage());
 		}
 		addErrorLogSeparator();
 		source.setErrorLog(errorLog.toString());
@@ -411,22 +405,29 @@ public class FileReader {
 	}
 
 	private boolean checkCustomTags(JDXSpectrum spectrum, String label,
-			String value) {
+			String value) throws JSVException {
+		modelSpectrum = spectrum;
 		int pt = "##$MODELS ##$PEAKS  ##$SIGNALS".indexOf(label);
-		switch (pt) {
-		default:
+		if (pt < 0)
 			return false;
-		case 0:
-			thisModelID = PT.getQuotedAttribute(value, "id");
-			return true;
-		case 10:
-		case 20:
-			peakIndex = source.peakCount;
-			source.peakCount += readPeaks(spectrum, value, pt == 20);
-			return true;
+		if (mpr == null)
+			mpr = ((JmolJDXModelPeakReader) JSViewer.getInterface("org.jmol.jsv.JDXModelPeakReader")).set(this, filePath, null);
+		try {
+			reader = new BufferedReader(new StringReader(value));
+			switch (pt) {
+			case 0:
+				mpr.readModels();
+				break;
+			case 10:
+			case 20:
+				source.peakCount += mpr.readPeaks(pt == 20, source.peakCount);
+				break;
+			}
+		} catch (Exception e) {
+			throw new JSVException(e.getMessage());
 		}
+		return true;
 	}
-
 
 	private void addErrorLogSeparator() {
     if (errorLog.length() > 0
@@ -589,222 +590,6 @@ public class FileReader {
   }
 
 	/**
-	 * * read a <Peaks> or <Signals> block See similar method in
-	 * Jmol/src/adapter/more/JcampdxReader.java
-	 * 
-	 * @param spectrum
-	 * 
-	 * 
-	 * @param peakList
-	 * @param isSignals
-	 * @return new # of peaks
-	 */
-	private int readPeaks(JDXSpectrum spectrum, String peakList, boolean isSignals) {
-		List<PeakInfo> peakData = new List<PeakInfo>();
-		BufferedReader reader = new BufferedReader(new StringReader(peakList));
-		try {
-			int offset = (isSignals ? 1 : 0);
-			String tag1 = (isSignals ? "Signals" : "Peaks");
-			String tag2 = (isSignals ? "<Signal" : "<PeakData");
-			String line = discardUntil(reader, tag1);
-			if (line.indexOf("<" + tag1) < 0)
-				line = discardUntil(reader, "<" + tag1);
-			if (line.indexOf("<" + tag1) < 0)
-				return 0;
-
-			String file = getPeakFilePath();
-			String model = getQuotedAttribute(line, "model");
-			model = " model=" + escape(model == null ? thisModelID : model);
-			String type = getQuotedAttribute(line, "type");
-			if ("HNMR".equals(type))
-				type = "1HNMR";
-			else if ("CNMR".equals(type))
-				type = "13CNMR";
-			type = (type == null ? "" : " type=" + escape(type));
-			piUnitsX = getQuotedAttribute(line, "xLabel");
-			piUnitsY = getQuotedAttribute(line, "yLabel");
-			Map<String, Object[]> htSets = new Hashtable<String, Object[]>();
-			List<Object[]> list = new List<Object[]>();
-			while ((line = reader.readLine()) != null
-					&& !(line = line.trim()).startsWith("</" + tag1)) {
-				if (line.startsWith(tag2)) {
-					info(line);
-					String title = getQuotedAttribute(line, "title");
-          if (title == null) {
-            title = (type == "1HNMR" ? "atom%S%: %ATOMS%; integration: %NATOMS%" : "");
-            title = " title=" + escape(title);
-          } else {
-            title = "";
-          }
-					String stringInfo = "<PeakData "
-							+ file
-							+ " index=\"%INDEX%\""
-							+ title
-							+ type
-							+ (getQuotedAttribute(line, "model") == null ? model
-									: "") + " " + line.substring(tag2.length()).trim();
-					String atoms = getQuotedAttribute(stringInfo, "atoms");
-					if (atoms != null)
-						stringInfo = rep(stringInfo, "atoms=\""
-								+ atoms + "\"", "atoms=\"%ATOMS%\"");
-					String key = ((int) (parseFloatStr(getQuotedAttribute(line, "xMin")) * 100))
-							+ "_"
-							+ ((int) (parseFloatStr(getQuotedAttribute(line,
-									"xMax")) * 100));
-					Object[] o = htSets.get(key);
-					if (o == null) {
-						o = new Object[] { stringInfo,
-								(atoms == null ? null : new BS()) };
-						htSets.put(key, o);
-						list.addLast(o);
-					}
-					BS bs = (BS) o[1];
-					if (atoms != null && bs != null) {
-						atoms = atoms.replace(',', ' ');
-						bs.or(unescapeBitSet("({" + atoms + "})"));
-					}
-				}
-			}
-			int nH = 0;
-			int n = list.size();
-			for (int i = 0; i < n; i++) {
-				Object[] o = list.get(i);
-				String stringInfo = (String) o[0];
-				stringInfo = rep(stringInfo, "%INDEX%", ""
-						+ getPeakIndex());
-				BS bs = (BS) o[1];
-				if (bs != null) {
-					String s = "";
-					for (int j = bs.nextSetBit(0); j >= 0; j = bs.nextSetBit(j + 1))
-						s += "," + (j + offset);
-					int na = bs.cardinality();
-					nH += na;
-					stringInfo = rep(stringInfo, "%ATOMS%", s
-							.substring(1));
-					stringInfo = rep(stringInfo, "%S%",
-							(na == 1 ? "" : "s"));
-					stringInfo = rep(stringInfo, "%NATOMS%", ""
-							+ na);
-				}
-				info("JSpecView using " + stringInfo);
-				add(peakData, stringInfo);
-			}
-			setSpectrumPeaks(spectrum, peakData, nH);
-			return n;
-		} catch (Exception e) {
-			return 0;
-		}
-	}
-
-  private void add(List<PeakInfo> peakData, String info) {
-  	peakData.addLast(new PeakInfo(info));
-	}
-
-	private void info(String s) {
-  	Logger.info(s);
-	}
-
-	private javajs.util.BS unescapeBitSet(String str) {
-    char ch;
-    int len;
-    if (str == null || (len = (str = str.trim()).length()) < 4
-        || str.equalsIgnoreCase("({null})") 
-        || (ch = str.charAt(0)) != '(' && ch != '[' 
-        || str.charAt(len - 1) != (ch == '(' ? ')' : ']')
-        || str.charAt(1) != '{' || str.indexOf('}') != len - 2)
-      return null;
-    len -= 2;
-    for (int i = len; --i >= 2;)
-      if (!Character.isDigit(ch = str.charAt(i)) && ch != ' ' && ch != '\t'
-          && ch != ':')
-        return null;
-    int lastN = len;
-    while (Character.isDigit(str.charAt(--lastN))) {
-      // loop
-    }
-    if (++lastN == len)
-      lastN = 0;
-    else
-      try {
-        lastN = Integer.parseInt(str.substring(lastN, len));
-      } catch (NumberFormatException e) {
-        return null;
-      }
-    BS bs = BS.newN(lastN);
-    lastN = -1;
-    int iPrev = -1;
-    int iThis = -2;
-    for (int i = 2; i <= len; i++) {
-      switch (ch = str.charAt(i)) {
-      case '\t':
-      case ' ':
-      case '}':
-        if (iThis < 0)
-          break;
-        if (iThis < lastN)
-          return null;
-        lastN = iThis;
-        if (iPrev < 0)
-          iPrev = iThis;
-        bs.setBits(iPrev, iThis + 1);
-        iPrev = -1;
-        iThis = -2;
-        break;
-      case ':':
-        iPrev = lastN = iThis;
-        iThis = -2;
-        break;
-      default:
-        if (Character.isDigit(ch)) {
-          if (iThis < 0)
-            iThis = 0;
-          iThis = (iThis * 10) + (ch - 48);
-        }
-      }
-    }
-    return (iPrev >= 0 ? null : bs);
-	}
-
-	private float parseFloatStr(String s) {
-  	return PT.parseFloat(s);
-  }
-
-	private String rep(String s, String sfrom, String sto) {
-		return PT.rep(s, sfrom, sto);
-	}
-
-	private String escape(String s) {
-		return PT.esc(s);
-	}
-
-	private String getQuotedAttribute(String s, String attr) {
-		return PT.getQuotedAttribute(s, attr);
-	}
-
-	private String getPeakFilePath() {
-				return " file=" + PT.esc(PT.trimQuotes(filePath).replace('\\', '/'));
-	}
-
-
-	private void setSpectrumPeaks(JDXSpectrum spectrum,
-			List<PeakInfo> peakData, int nH) {
-		spectrum.setPeakList(peakData, piUnitsX, piUnitsY);
-		spectrum.setNHydrogens(nH);
-	}
-
-	private String discardUntil(BufferedReader reader, String tag) 
-    throws Exception {
-      String line;
-      while ((line = reader.readLine()) != null && line.indexOf("<" + tag) < 0 && line.indexOf("##") < 0) {
-      }
-      return line;
-	}
-  
-	private int getPeakIndex() {
-  	return ++peakIndex;
-	}
-
-  /**
    * 
    * @param spectrum
    * @param label
@@ -929,9 +714,7 @@ public class FileReader {
         srt.nextToken();
         spectrum.dataPointNum = Integer.parseInt(srt.nextToken().trim());
         spectrum.offset = Double.parseDouble(srt.nextToken().trim());
-      } catch (NumberFormatException nfe) {
-        return true;
-      } catch (NoSuchElementException nsee) {
+      } catch (Exception e) {
         return true;
       }
       if (spectrum.dataPointNum <= 0)
@@ -1035,8 +818,7 @@ public class FileReader {
       try {
         t.readLineTrimmed();
       } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+      	// ignore
       }
       Coordinate[] xyCoords;
       
@@ -1180,5 +962,61 @@ public class FileReader {
       }
     table.addLast(new String[] { label, value, JDXSourceStreamTokenizer.cleanLabel(label) });
   }
+
+
+	@Override
+	public String readLine() throws Exception {
+	return reader.readLine();
+	}
+
+  @Override
+	public String discardLinesUntilContains(String containsMatch)
+      throws Exception {
+  	String line;
+    while ((line = readLine()) != null && line.indexOf(containsMatch) < 0) {
+    }
+    return line;
+  }
+
+  @Override
+  public String discardLinesUntilContains2(String s1, String s2)
+      throws Exception {
+  	String line;
+    while ((line = readLine()) != null && line.indexOf(s1) < 0 && line.indexOf(s2) < 0) {
+    }
+    return line;
+  }
+
+	@Override
+	public String discardLinesUntilNonBlank() throws Exception {
+		String line;
+		while ((line = readLine()) != null && line.trim().length() == 0) {
+		}
+		return line;
+	}
+
+	@Override
+	public void setSpectrumPeaks(int nH, String piUnitsX, String piUnitsY) {
+		modelSpectrum.setPeakList(peakData, piUnitsX, piUnitsY);
+		modelSpectrum.setNHydrogens(nH);		
+	}
+
+	List<PeakInfo> peakData;
+
+	@Override
+  public void addPeakData(String info) {
+		if (peakData == null)
+			peakData = new List<PeakInfo>();
+  	peakData.addLast(new PeakInfo(info));
+	}
+
+
+	@Override
+	public void processModelData(String id, String data, String type,
+			String base, String last, float vibScale, boolean isFirst)
+			throws Exception {
+		// Jmol only
+	}
+
 
 }

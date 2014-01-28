@@ -56,7 +56,7 @@ public class JSVPopupResourceBundle extends PopupResource {
           " - Measurements Peaks Integration Toggle_Trans/Abs Predicted_Solution_Colour" +
           " - Script... - Print... - AboutMenu" },
 
-      {   "_SIGNED_FileMenu", "Open_File... Open_Simulation... Open_URL... Append_File... Append_Simulation... Append_URL... Close_All Close_Views Close_Simulations Save_AsMenu Export_AsMenu" },
+      {   "_SIGNED_FileMenu", "Open_File... Open_Simulation... Open_URL... - Append_File... Append_Simulation... Append_URL... - Save_AsMenu Export_AsMenu - Close_Views Close_Simulations Close_All" },
 
       {   "Save_AsMenu", "Original... JDXMenu CML XML(AnIML)" },
               
