@@ -137,9 +137,6 @@ public class JDXSpectrum extends JDXDataObject {
 
   public int setPeakList(List<PeakInfo> list, String piUnitsX, String piUnitsY) {
     peakList = list;
-    System.out.println("setting peaklist for " + this + " to " + list);
-    if (peakList == null)
-    	System.out.println("ohoh");
     this.piUnitsX = piUnitsX;
     this.piUnitsY = piUnitsY;
     for (int i = list.size(); --i >= 0; )
@@ -153,7 +150,7 @@ public class JDXSpectrum extends JDXDataObject {
     if (peakList != null && peakList.size() > 0)
       for (int i = 0; i < peakList.size(); i++)
         if (peakList.get(i).checkFileIndex(filePath, index)) {
-          System.out.println("selecting peak in " + this + " " + peakList.get(i));
+          System.out.println("selecting peak by FileIndex " + this + " " + peakList.get(i));
           return (selectedPeak = peakList.get(i));
         }
     return null;
@@ -163,7 +160,7 @@ public class JDXSpectrum extends JDXDataObject {
     if (peakList != null && peakList.size() > 0)
       for (int i = 0; i < peakList.size(); i++)
         if (peakList.get(i).checkFileTypeModel(filePath, type, model)) {
-          System.out.println("selecting peak in " + this + " " + peakList.get(i));
+          System.out.println("selecting peak byFilePathTypeModel " + this + " " + peakList.get(i));
           return (selectedPeak = peakList.get(i));
         }
     return null;
@@ -228,7 +225,8 @@ public class JDXSpectrum extends JDXDataObject {
 
   public String getTitleLabel() {
     String type = (peakList == null || peakList.size() == 0 ? 
-    		getQualifiedDataType() : peakList.get(0).getType());
+    		getQualifiedDataType() : 
+    			peakList.get(0).getType());
     return (type != null && type.length() > 0 ? type + " " : "") 
     + getTitle();
   }

@@ -3,9 +3,9 @@ package org.jmol.adapter.smarter;
 import java.util.Map;
 
 
-public interface JmolJDXModelPeakReader {
+public interface JmolJDXMOLParser {
 
-  public abstract JmolJDXModelPeakReader set(JmolJDXModelPeakLoader loader,
+  public abstract JmolJDXMOLParser set(JmolJDXMOLReader loader,
                                              String filePath,
                                              Map<String, Object> htParams);
 

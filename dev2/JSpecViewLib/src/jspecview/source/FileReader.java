@@ -33,8 +33,8 @@ import javajs.util.List;
 import javajs.util.PT;
 import javajs.util.SB;
 
-import org.jmol.adapter.smarter.JmolJDXModelPeakLoader;
-import org.jmol.adapter.smarter.JmolJDXModelPeakReader;
+import org.jmol.adapter.smarter.JmolJDXMOLReader;
+import org.jmol.adapter.smarter.JmolJDXMOLParser;
 import org.jmol.util.Logger;
 
 
@@ -62,7 +62,7 @@ import jspecview.exception.JSVException;
  * @author Prof. Robert J. Lancashire
  * @author Bob Hanson, hansonr@stolaf.edu
  */
-public class FileReader implements JmolJDXModelPeakLoader {
+public class FileReader implements JmolJDXMOLReader {
 
   /**
    * Labels for the exporter
@@ -267,7 +267,7 @@ public class FileReader implements JmolJDXModelPeakLoader {
 
   private double blockID;
 
-	private JmolJDXModelPeakReader mpr;
+	private JmolJDXMOLParser mpr;
 
 	private BufferedReader reader;
 
@@ -402,31 +402,6 @@ public class FileReader implements JmolJDXModelPeakLoader {
 		source.setErrorLog(errorLog.toString());
 		Logger.debug("--JDX block end--");
 		return source;
-	}
-
-	private boolean checkCustomTags(JDXSpectrum spectrum, String label,
-			String value) throws JSVException {
-		modelSpectrum = spectrum;
-		int pt = "##$MODELS ##$PEAKS  ##$SIGNALS".indexOf(label);
-		if (pt < 0)
-			return false;
-		if (mpr == null)
-			mpr = ((JmolJDXModelPeakReader) JSViewer.getInterface("org.jmol.jsv.JDXModelPeakReader")).set(this, filePath, null);
-		try {
-			reader = new BufferedReader(new StringReader(value));
-			switch (pt) {
-			case 0:
-				mpr.readModels();
-				break;
-			case 10:
-			case 20:
-				source.peakCount += mpr.readPeaks(pt == 20, source.peakCount);
-				break;
-			}
-		} catch (Exception e) {
-			throw new JSVException(e.getMessage());
-		}
-		return true;
 	}
 
 	private void addErrorLogSeparator() {
@@ -964,10 +939,67 @@ public class FileReader implements JmolJDXModelPeakLoader {
   }
 
 
+	////// JCAMP-DX/MOL reading //////
+	
+	private boolean checkCustomTags(JDXSpectrum spectrum, String label,
+			String value) throws JSVException {
+		modelSpectrum = spectrum;
+		int pt = "##$MODELS ##$PEAKS  ##$SIGNALS".indexOf(label);
+		if (pt < 0)
+			return false;
+		if (mpr == null)
+			mpr = ((JmolJDXMOLParser) JSViewer.getInterface("org.jmol.jsv.JDXMOLParser")).set(this, filePath, null);
+		try {
+			reader = new BufferedReader(new StringReader(value));
+			switch (pt) {
+			case 0:
+				mpr.readModels();
+				break;
+			case 10:
+			case 20:
+				peakData = new List<PeakInfo>();
+				source.peakCount += mpr.readPeaks(pt == 20, source.peakCount);
+				break;
+			}
+		} catch (Exception e) {
+			throw new JSVException(e.getMessage());
+		} finally {
+			reader = null;
+			modelSpectrum = null;
+		}
+		return true;
+	}
+
+	// methods called by JDXModelPeakParser()
+	
 	@Override
 	public String readLine() throws Exception {
 	return reader.readLine();
 	}
+
+	private List<PeakInfo> peakData;
+
+	@Override
+	public void setSpectrumPeaks(int nH, String piUnitsX, String piUnitsY) {
+		modelSpectrum.setPeakList(peakData, piUnitsX, piUnitsY);
+		modelSpectrum.setNHydrogens(nH);		
+	}
+
+	@Override
+  public void addPeakData(String info) {
+		if (peakData == null)
+			peakData = new List<PeakInfo>();
+  	peakData.addLast(new PeakInfo(info));
+	}
+
+
+	@Override
+	public void processModelData(String id, String data, String type,
+			String base, String last, float vibScale, boolean isFirst)
+			throws Exception {
+		// Jmol only
+	}
+
 
   @Override
 	public String discardLinesUntilContains(String containsMatch)
@@ -994,29 +1026,5 @@ public class FileReader implements JmolJDXModelPeakLoader {
 		}
 		return line;
 	}
-
-	@Override
-	public void setSpectrumPeaks(int nH, String piUnitsX, String piUnitsY) {
-		modelSpectrum.setPeakList(peakData, piUnitsX, piUnitsY);
-		modelSpectrum.setNHydrogens(nH);		
-	}
-
-	List<PeakInfo> peakData;
-
-	@Override
-  public void addPeakData(String info) {
-		if (peakData == null)
-			peakData = new List<PeakInfo>();
-  	peakData.addLast(new PeakInfo(info));
-	}
-
-
-	@Override
-	public void processModelData(String id, String data, String type,
-			String base, String last, float vibScale, boolean isFirst)
-			throws Exception {
-		// Jmol only
-	}
-
 
 }
