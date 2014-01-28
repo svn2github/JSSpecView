@@ -40,11 +40,15 @@
             <include name="**/*.java" />
           </fileset>
         </copy>
-        <echo message="copying files from ${jmol.path}/src/org/jmol/api,io,util"/>
+        <echo message="copying files from ${jmol.path}/src/org/jmol/ java,jsv, and util"/>
         <copy overwrite="true" todir="src/org/jmol" >
           <fileset dir="${jmol.path}/src/org/jmol">
+            <include name="java/BS.java" />
+            <include name="adapter/smarter/JmolJDXModelPeakLoader.java" />
+            <include name="adapter/smarter/JmolJDXModelPeakReader.java" />
+            <include name="jsv/JDXModelPeakReader.java" />
             <include name="util/DefaultLogger.java" />
-            <include name="util/JmolFont.java" />
+            <include name="util/LoggerInterface.java" />
 	        <include name="util/Logger*.java" />
           </fileset>
         </copy>
