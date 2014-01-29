@@ -58,7 +58,7 @@ class DialogTableModel implements AbstractTableModel {
 		if (data == null || data[0] == null || data[0].length == 0)
 			return;
 		int nrows = data.length;
-		int ncols = data[0].length;
+		int ncols = columnNames.length;
 		for (int i = -1; i < nrows; i++) {
 			String rowid = id + "_" + i;
 			sb.append("\n<tr id='" + rowid + "' class='JTable_" + (i == -1 ? "header" : "row") + "' style='height:25px'>");
