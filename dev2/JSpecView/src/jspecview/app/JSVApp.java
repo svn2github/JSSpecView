@@ -242,7 +242,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	@Override
 	public void loadInline(String data) {
 		// newAppletPanel();
-		siOpenDataOrFile(data, null, null, null, -1, -1, true, null);
+		siOpenDataOrFile(data, null, null, null, -1, -1, true, null, null);
 		appletFrame.validateContent(3);
 	}
 
@@ -490,7 +490,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	public void siSyncLoad(String filePath) {
 		newAppletPanel();
 		Logger.info("JSVP syncLoad reading " + filePath);
-		siOpenDataOrFile(null, null, null, filePath, -1, -1, false, null);
+		siOpenDataOrFile(null, null, null, filePath, -1, -1, false, null, null);
 		appletFrame.validateContent(3);
 	}
 
@@ -595,9 +595,9 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	@Override
 	public void siOpenDataOrFile(String data, String name,
 			List<JDXSpectrum> specs, String url, int firstSpec, int lastSpec,
-			boolean isAppend, String script) {
+			boolean isAppend, String script, String id) {
 		switch (viewer.openDataOrFile(data, name, specs, url, firstSpec, lastSpec,
-				isAppend)) {
+				isAppend, id)) {
 		case JSViewer.FILE_OPEN_OK:
 			if (script != null)
 				runScript(script);
@@ -774,7 +774,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
     /**
      * @j2sNative
      * 
-     * this.viewer.applet && this.viewer.applet._viewSet != null && Jmol.updateView(this.viewer.applet, this.viewer.seletedPanel, msg);
+     * this.viewer.applet && this.viewer.applet._viewSet != null && this.viewer.applet._updateView(this.viewer.seletedPanel, msg);
      * 
      */
     {}

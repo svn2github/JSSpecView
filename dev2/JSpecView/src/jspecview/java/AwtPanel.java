@@ -240,9 +240,15 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
     if (viewer == null || pd == null || pd.graphSets == null || pd.isPrinting)
       return;
     
-    super.paintComponent(g); // paint background 
-    pd.g2d = pd.g2d0;
-    pd.drawGraph(g, g, getWidth(), getHeight(), false);
+    super.paintComponent(g); // paint background
+    try {
+    	// despite the above catch for pd == null, it can still get here 
+    	pd.g2d = pd.g2d0;
+    	pd.drawGraph(g, g, getWidth(), getHeight(), false);
+    } catch (Exception e) {
+    	// tough luck
+    }
+    
     viewer.repaintDone();
   }
   

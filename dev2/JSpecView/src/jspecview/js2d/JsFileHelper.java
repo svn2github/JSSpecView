@@ -92,7 +92,7 @@ public class JsFileHelper implements JSVFileHelper {
     {
     }
     // this file name
-    viewer.si.siOpenDataOrFile(new String((byte[]) data), fileName, null, null, -1, -1, isAppend, null);
+    viewer.si.siOpenDataOrFile(new String((byte[]) data), fileName, null, null, -1, -1, isAppend, null, null);
     if (script != null)
       viewer.runScript(script);
   }   

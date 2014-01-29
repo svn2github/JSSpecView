@@ -649,9 +649,9 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	@Override
 	public void siOpenDataOrFile(String data, String name,
 			List<JDXSpectrum> specs, String url, int firstSpec, int lastSpec,
-			boolean isAppend, String script) {
+			boolean isAppend, String script, String id) {
 		switch (viewer.openDataOrFile(data, name, specs, url, firstSpec, lastSpec,
-				isAppend)) {
+				isAppend, id)) {
 		case JSViewer.FILE_OPEN_OK:
 			if (script != null)
 				runScript(script);
@@ -892,7 +892,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	@Override
 	public void siSyncLoad(String filePath) {
 		siCloseSource(null);
-		siOpenDataOrFile(null, null, null, filePath, -1, -1, false, null);
+		siOpenDataOrFile(null, null, null, filePath, -1, -1, false, null, null);
 		if (viewer.currentSource == null)
 			return;
 		if (viewer.panelNodes.get(0).getSpectrum().isAutoOverlayFromJmolClick())
@@ -996,7 +996,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	@Override
 	public void loadInline(String data) {
-		siOpenDataOrFile(data, null, null, null, -1, -1, true, null);
+		siOpenDataOrFile(data, null, null, null, -1, -1, true, null, null);
 	}
 
 	@Override
