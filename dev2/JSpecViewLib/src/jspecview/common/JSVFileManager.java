@@ -209,9 +209,18 @@ public class JSVFileManager {
 		return filename;
 	}
 	
-	private static String getAbbreviatedSimulationName(String name, boolean addProtocol) {
+	static String getAbbreviatedSimulationName(String name, boolean addProtocol) {
 		return (name.indexOf("MOL=") >= 0 ? (addProtocol ? SIMULATION_PROTOCOL : "") + "MOL=" 
-				+ Math.abs(name.hashCode()) : name);
+				+ getSimulationHash(name) : name);
+	}
+
+	private static String getSimulationHash(String name) {
+		return "" + Math.abs(name.substring(name.indexOf("V2000") + 1).hashCode());
+	}
+	
+	public static String getSimulationFileData(String name) {
+    return htSimulationCache.get(name.startsWith("MOL=") ? name.substring(4) : 
+    	  getAbbreviatedSimulationName(name, false));
 	}
 
 	private static BufferedReader getSimulationReader(String name) {
@@ -401,7 +410,7 @@ public class JSVFileManager {
 	private static String getNMRSimulationJCampDX(String name) {
 		if (htSimulate == null)
 			htSimulate = new Hashtable<String, String>();
-		String key = "" + name.substring(name.indexOf("V2000") + 1).hashCode();
+		String key = "" + getSimulationHash(name);
 		String jcamp = htSimulate.get(key);
 		if (jcamp != null)
 			return jcamp;

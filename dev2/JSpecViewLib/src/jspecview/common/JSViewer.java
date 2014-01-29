@@ -899,6 +899,20 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 	}
 
 	public Map<String, Object> getPropertyAsJavaObject(String key) {
+
+		Map<String, Object> map = new Hashtable<String, Object>();
+		
+		if (key != null && key.startsWith("MOL=")) {
+			map.put(key, JSVFileManager.getSimulationFileData(key));
+			return map;
+		}
+		if ("SIMCODE".equals(key)) {
+			// get simulation hash code
+			String fname = selectedPanel.getPanelData().getSpectrum().getFilePath();
+			map.put(key,  "" + JSVFileManager.getAbbreviatedSimulationName(fname, false));
+			return map;
+		}
+		
 		boolean isAll = false;
 		if (key != null && key.toUpperCase().startsWith("ALL ")
 				|| "all".equalsIgnoreCase(key)) {
@@ -907,7 +921,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		}
 		if ("".equals(key))
 			key = null;
-		Map<String, Object> map = new Hashtable<String, Object>();
+		
 		Map<String, Object> map0 = pd().getInfo(true, key);
 		if (!isAll && map0 != null)
 			return map0;
