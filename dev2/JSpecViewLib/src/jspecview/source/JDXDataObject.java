@@ -8,6 +8,7 @@ import javajs.util.PT;
 import jspecview.common.Coordinate;
 import jspecview.common.Integral;
 import jspecview.common.JDXSpectrum;
+import jspecview.common.JSVFileManager;
 import jspecview.common.Measurement;
 import jspecview.common.Annotation.AType;
 import jspecview.exception.JSVException;
@@ -27,7 +28,9 @@ public abstract class JDXDataObject extends JDXHeader {
 
   private String filePath;
   private String filePathForwardSlash;
-  
+
+  public String sourceID = "";
+
   public void setFilePath(String filePath) {
   	if (filePath == null)
   		return;
@@ -796,6 +799,10 @@ public abstract class JDXDataObject extends JDXHeader {
 	
 	public void doNormalize(double max) {
 		// for simulations
+		String s = sourceID;
+		if (s.length() == 0)
+			s = PT.rep(filePath, JSVFileManager.SIMULATION_PROTOCOL, "");
+		title = "SIMULATED " + PT.rep(s, "$", "");
 		if (!isNMR() || !is1D())
 			return;
 		normalizationFactor = max / getMaxY();

@@ -57,7 +57,7 @@ public class JDXSource extends JDXHeader {
   public int peakCount;
 
 	public boolean isView;
-  
+
   public JDXSource(int type, String filePath) {
     this.type = type;
     setFilePath(filePath);
@@ -165,5 +165,9 @@ public class JDXSource extends JDXHeader {
       data[data.length - rowData.length + i] = rowData[i];
     return data;
   }
+
+	public void setID(String id) {
+		jdxSpectra.get(0).sourceID = id;
+	}
 
 }

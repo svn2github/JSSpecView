@@ -566,7 +566,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		List<JDXSpectrum> speclist = new List<JDXSpectrum>();
 		String strlist = fillSpecList(value, speclist, true);
 		if (speclist.size() > 0)
-			si.siOpenDataOrFile(null, strlist, speclist, strlist, -1, -1, false, null);
+			si.siOpenDataOrFile(null, strlist, speclist, strlist, -1, -1, false, null, null);
 		if (!fromScript) {
 			si.siValidateAndRepaint();
 		}
@@ -711,8 +711,12 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			}
 			return;
 		}
+		String sourceID = PT.getQuotedAttribute(peakScript, "sourceID");
+		// sourceID files are single-component files. Just go to it.
+		
+		
 		// todo: why the quotes??
-		peakScript = PT.rep(peakScript, "\\\"", "");
+		//peakScript = PT.rep(peakScript, "\\\"", "");
 		String file = PT.getQuotedAttribute(peakScript, "file");
 		//System.out.println("file2=" + file);
 		String index = PT.getQuotedAttribute(peakScript, "index");
@@ -885,16 +889,13 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 	}
 
 	private String jmolSelect(PeakInfo pi) {
-		String script = null;
-		if ("IR".equals(pi.getType()) || "RAMAN".equals(pi.getType())) {
-			script = "vibration ON; selectionHalos OFF;";
-		} else if (pi.getAtoms() != null) {
-			script = "vibration OFF; selectionhalos ON;";
-		} else {
-			script = "vibration OFF; selectionhalos OFF;";
-		}
-		script = "Select: " + pi + " script=\"" + script;
-		//System.out.println("JSViewer.jmolSelect " + script);
+		String script = ("IR".equals(pi.getType()) || "RAMAN".equals(pi.getType()) 
+				? "vibration ON; selectionHalos OFF;"
+				: "vibration OFF; selectionhalos "
+						+ (pi.getAtoms() == null ? "OFF" : "ON"));
+
+		script = "Select: " + pi + " script=\"" + script + " \" sourceID=\"" + this.selectedPanel.getPanelData().getSpectrum().sourceID + "\"";
+		// System.out.println("JSViewer.jmolSelect " + script);
 		return script;
 	}
 
@@ -906,10 +907,9 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			map.put(key, JSVFileManager.getSimulationFileData(key));
 			return map;
 		}
-		if ("SIMCODE".equals(key)) {
-			// get simulation hash code
-			String fname = selectedPanel.getPanelData().getSpectrum().getFilePath();
-			map.put(key,  "" + JSVFileManager.getAbbreviatedSimulationName(fname, false));
+		if ("SOURCEID".equalsIgnoreCase(key)) {
+			// get current spectrum ID
+			map.put(key,  "" + selectedPanel.getPanelData().getSpectrum().sourceID);
 			return map;
 		}
 		
@@ -1097,7 +1097,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 	}
 
 	public int openDataOrFile(String data, String name, List<JDXSpectrum> specs,
-			String strUrl, int firstSpec, int lastSpec, boolean isAppend) {
+			String strUrl, int firstSpec, int lastSpec, boolean isAppend, String id) {
 		if ("NONE".equals(name)) {
 			close("View*");
 			return FILE_OPEN_OK;
@@ -1173,6 +1173,8 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		} else {
 			currentSource.setFilePath(newPath);
 		}
+		if (id != null)
+			currentSource.setID(id);
 		si.siSetLoaded(fileName, newPath);
 
 		JDXSpectrum spec = currentSource.getJDXSpectrum(0);
@@ -1255,15 +1257,34 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 	}
 
 	public void load(String value, String script) {
+		/**
+		 * When part of a view set, route all internal 
+		 * database requests through this.applet._search.  
+		 * 
+		 * @j2sNative
+		 * 
+		 * if (this.applet._viewSet != null && !value.startsWith("ID"))
+		 *    return this.applet._search(value);
+		 *    
+		 */
+		// load ID "xx"...
 		List<String> tokens = ScriptToken.getTokens(value);
 		String filename = tokens.get(0);
+		String id = null;
 		int pt = 0;
+		if (filename.equalsIgnoreCase("ID")) {
+			id = PT.trimQuotes(tokens.get(1));
+			filename = tokens.get(2);
+			pt = 2;
+		}
 		boolean isAppend = filename.equalsIgnoreCase("APPEND");
 		boolean isCheck = filename.equalsIgnoreCase("CHECK");
+		if (isAppend || isCheck)
+			pt++;
+		if (pt > 0)
+			filename = tokens.get(pt);
 		if (script == null)
 			script = defaultLoadScript;
-		if (isAppend || isCheck)
-			filename = tokens.get(++pt);
 		if (filename.equals("?")) {
 			openFileFromDialog(isAppend, false, false, script);
 			return;
@@ -1295,7 +1316,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		int lastSpec = (pt + 1 < tokens.size() ? Integer.valueOf(tokens.get(++pt))
 				.intValue() : firstSpec);
 		si.siOpenDataOrFile(null, null, null, filename, firstSpec, lastSpec,
-				isAppend, script);
+				isAppend, script, id);
 	}
 
 	public void combineSpectra(String name) {
@@ -1832,7 +1853,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			if (source != null)
 				si.siCloseSource(source);
 		}
-		si.siOpenDataOrFile(null, null, null, fileName, -1, -1, true, defaultLoadScript);
+		si.siOpenDataOrFile(null, null, null, fileName, -1, -1, true, defaultLoadScript, null);
 	}
 
 	public int selectPanel(JSVPanel jsvp, List<PanelNode> panelNodes) {

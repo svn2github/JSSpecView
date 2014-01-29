@@ -604,6 +604,10 @@ public class PanelData implements EventManager {
 		return currentGraphSet.nSpectra;
 	}
 
+	public String getSourceID() {
+		return getSpectrumAt(0).sourceID;
+	}
+	
 	public int getStartingPointIndex(int index) {
 		return currentGraphSet.viewData.getStartingPointIndex(index);
 	}

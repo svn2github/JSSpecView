@@ -72,7 +72,7 @@ public interface ScriptInterface {
 	public int siIncrementScriptLevelCount(int i);
 
 	public void siOpenDataOrFile(String data, String name, List<JDXSpectrum> specs,
-			String url, int firstSpec, int lastSpec, boolean doCheck, String script);
+			String url, int firstSpec, int lastSpec, boolean doCheck, String script, String id);
 
 	public void siProcessCommand(String script);
 	

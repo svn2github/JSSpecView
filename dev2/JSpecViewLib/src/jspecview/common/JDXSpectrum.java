@@ -94,7 +94,7 @@ public class JDXSpectrum extends JDXDataObject {
     return isForcedSubset;
   }
 
-  private String id = "";
+  public String id = "";
   public void setId(String id) {
     this.id = id;
   }
