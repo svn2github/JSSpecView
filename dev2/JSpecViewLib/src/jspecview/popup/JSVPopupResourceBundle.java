@@ -46,10 +46,10 @@ public class JSVPopupResourceBundle extends PopupResource {
     
   private static String[][] menuContents = {
     
-      {  "appMenu", "_SIGNED_FileMenu - Toggle_Grid Toggle_X_Axis Toggle_Y_Axis Toggle_Coordinates Reverse_Plot" +
+      {  "appMenu", "_SIGNED_FileMenu Views..." +
+      		" - Toggle_Grid Toggle_X_Axis Toggle_Y_Axis Toggle_Coordinates Reverse_Plot" +
         " - Next_View Previous_View Clear_Views Reset_View Set_Zoom..." +
-        " - Views... Overlay_Offset... Script..." +
-        " - Properties" },
+        " -  Script... Properties" },
 
       { "appletMenu",
           "_SIGNED_FileMenu Views... - OptionsMenu ZoomMenu" +

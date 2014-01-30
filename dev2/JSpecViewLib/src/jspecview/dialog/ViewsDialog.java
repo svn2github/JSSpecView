@@ -224,6 +224,7 @@ public class ViewsDialog extends JSVDialog {
 			done();
 		} else if (id.equals("txtOffset")) {
 			eventApply();
+      viewSelected();
 		} else if (id.startsWith("chk")) {
 			checkEnables();
 		} else {

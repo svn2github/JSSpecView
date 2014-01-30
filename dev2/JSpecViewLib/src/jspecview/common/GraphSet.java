@@ -1487,7 +1487,7 @@ public class GraphSet implements XYScaleConverter {
 				if ((nSplit > 1 ? i == iSpectrumMovedTo : isLinked
 						|| i == iSpectrumForScale)
 						&& !pd.isPrinting && xPixelMovedTo >= 0 && spec.isContinuous()) {
-					drawSpectrumPointer(gTop, spec, ig);
+					drawSpectrumPointer(gTop, spec, offset, ig);
 				}
 				if (nSpectra > 1 && nSplit == 1 && pd.isCurrentGraphSet(this) && doAll) {
 					haveLeftRightArrows = true;
@@ -1583,7 +1583,7 @@ public class GraphSet implements XYScaleConverter {
 //	}
 
 	private void drawSpectrumPointer(Object g, JDXSpectrum spec,
-			IntegralData ig) {
+			int yOffset, IntegralData ig) {
 		setColorFromToken(g, ScriptToken.PEAKTABCOLOR);
 		int iHandle = pd.integralShiftMode;
 		if (ig != null) {
@@ -1606,13 +1606,14 @@ public class GraphSet implements XYScaleConverter {
 		}
 		if (ig != null)
 		  g2d.setStrokeBold(g, true);
+		
 		if (Double.isNaN(y0) || pendingMeasurement != null) {
 			g2d.drawLine(g, xPixelMovedTo, yPixel0, xPixelMovedTo, yPixel1);
 			if (xPixelMovedTo2 >= 0)
 				g2d.drawLine(g, xPixelMovedTo2, yPixel0, xPixelMovedTo2, yPixel1);
 			yValueMovedTo = Double.NaN;
 		} else {
-			int y = (ig == null ? toPixelY(yValueMovedTo)
+			int y = (ig == null ? yOffset + toPixelY(yValueMovedTo)
 					: toPixelYint(yValueMovedTo / 100));
 			if (y == fixY(y))
 				g2d.drawLine(g, xPixelMovedTo, y - 10, xPixelMovedTo, y + 10);
@@ -2482,6 +2483,9 @@ public class GraphSet implements XYScaleConverter {
 				+ xx
 				+ (haveSingleYScale || iSpectrumSelected >= 0 ? ", "
 						+ DF.formatDecimalDbl(yPt, getScale().precision[1]) : "") + ")";
+	
+		//pd.coordStr = pd.mouseX + " " + pd.mouseY;
+		
 		return xx;
 	}
 
@@ -2534,8 +2538,8 @@ public class GraphSet implements XYScaleConverter {
 						.getYVal()));
 				if (y1 == Integer.MIN_VALUE || y2 == Integer.MIN_VALUE)
 					continue;
-				y1 = yOffset + fixY(y1);
-				y2 = yOffset + fixY(y2);
+				y1 = fixY(y1) - yOffset;
+				y2 = fixY(y2) - yOffset;
 				if (isOnLine(xPixel, yPixel, x1, y1, x2, y2))
 					return true;
 			}
@@ -3220,9 +3224,10 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		if (clickCount == 2) {
 			if (is2D) {
 				if (sticky2Dcursor) {
-					addAnnotation(getAnnotation(imageView.toX(xPixel), imageView
-							.toSubspectrumIndex(yPixel), pd.coordStr, false, true, 5, 5),
-							true);
+					addAnnotation(
+							getAnnotation(imageView.toX(xPixel),
+									imageView.toSubspectrumIndex(yPixel), pd.coordStr, false,
+									true, 5, 5), true);
 				}
 				sticky2Dcursor = !sticky2Dcursor;
 				set2DCrossHairs(xPixel, yPixel);
@@ -3236,10 +3241,10 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 				// 1D x zoom reset to original
 				doZoom(toX0(xPixel0), 0, toX0(xPixel1), 0, true, false, false, true,
 						true);
-				} else if (isInRightBar(xPixel, yPixel)) {
-				  doZoom(getScale().minXOnScale, viewList.get(0).getScale().minYOnScale,
-				  		getScale().maxXOnScale, viewList.get(0).getScale().maxYOnScale, 
-				  		true, true, false, false, false);
+			} else if (isInRightBar(xPixel, yPixel)) {
+				doZoom(getScale().minXOnScale, viewList.get(0).getScale().minYOnScale,
+						getScale().maxXOnScale, viewList.get(0).getScale().maxYOnScale,
+						true, true, false, false, false);
 			} else if (isInTopBar2D(xPixel, yPixel)) {
 				reset2D(true);
 			} else if (isInRightBar2D(xPixel, yPixel)) {
@@ -3256,8 +3261,8 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 
 		if (is2D) {
 			if (annotations != null) {
-				Coordinate xy = new Coordinate().set(imageView.toX(xPixel), imageView
-						.toSubspectrumIndex(yPixel));
+				Coordinate xy = new Coordinate().set(imageView.toX(xPixel),
+						imageView.toSubspectrumIndex(yPixel));
 				Annotation a = findAnnotation2D(xy);
 				if (a != null && setAnnotationText(a)) {
 					// pd.repaint();
@@ -3280,12 +3285,15 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 				processPendingMeasurement(xPixel, yPixel, 1);
 				return;
 			}
+			
 			setCoordClicked(xPixel, toX(xPixel), toY(yPixel));
 			updateDialog(AType.PeakList, -1);
 			if (isNextClick) {
 				shiftSpectrum(Double.NaN, Double.NaN);
 				return;
 			}
+			
+			
 		} else {
 			setCoordClicked(0, Double.NaN, 0);
 		}
