@@ -12,6 +12,7 @@ import javajs.util.P3;
 import javajs.util.AjaxURLStreamHandlerFactory;
 
 import jspecview.api.JSVPanel;
+import jspecview.app.GenericMouse;
 
 
 
@@ -83,7 +84,7 @@ public class JsPlatform implements GenericPlatform {
 
   @Override
 	public GenericMouseInterface getMouseManager(double privateKey, Object jsvp) {
-  	return new Mouse((JSVPanel) jsvp);
+  	return new GenericMouse((JSVPanel) jsvp);
   }
 
   // /// Display
@@ -368,10 +369,6 @@ public class JsPlatform implements GenericPlatform {
                                           String post) {
     return JsFile.getBufferedURLInputStream(url, outputBytes, post);
   }
-
-	public GenericMouseInterface getMouseManager(JSVPanel jsvp) {
-		return new Mouse(jsvp);
-	}
 
 	@Override
 	public String getLocalUrl(String fileName) {

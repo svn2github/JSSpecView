@@ -802,6 +802,8 @@ public abstract class JDXDataObject extends JDXHeader {
 		String s = sourceID;
 		if (s.length() == 0)
 			s = PT.rep(filePath, JSVFileManager.SIMULATION_PROTOCOL, "");
+		if (s.indexOf("MOL=") >= 0)
+			s = "";
 		title = "SIMULATED " + PT.rep(s, "$", "");
 		if (!isNMR() || !is1D())
 			return;

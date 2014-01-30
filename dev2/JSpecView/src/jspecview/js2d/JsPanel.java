@@ -91,6 +91,7 @@ public class JsPanel implements JSVPanel {
 	private JSViewer viewer;
 
 	String name;
+	private GenericColor bgcolor;
 
   /**
    * Constructs a new JSVPanel
@@ -100,7 +101,7 @@ public class JsPanel implements JSVPanel {
    */
   public static JsPanel getEmptyPanel(JSViewer viewer) {
     // initial applet with no spectrum but with pop-up capability
-  	JsPanel p = new JsPanel(viewer);
+  	JsPanel p = new JsPanel(viewer, false);
   	p.pd = null;
     return p;
   }
@@ -119,14 +120,14 @@ public class JsPanel implements JSVPanel {
    * @return this
    */
   public static JsPanel getPanelMany(JSViewer viewer, List<JDXSpectrum> spectra, int startIndex, int endIndex) {
-  	JsPanel p = new JsPanel(viewer);
+  	JsPanel p = new JsPanel(viewer, true);
     p.pd.initMany(spectra, startIndex, endIndex);
     return p;
   }
 
-  private JsPanel(JSViewer viewer) {
+  private JsPanel(JSViewer viewer, boolean withPd) {
   	this.viewer = viewer;
-    this.pd = new PanelData(this, viewer);
+    this.pd = (withPd ? new PanelData(this, viewer) : null);
   	apiPlatform = viewer.apiPlatform;
     mouse = apiPlatform.getMouseManager(0, this);
 //  setBorder(BorderFactory.createLineBorder(Color.BLACK));
@@ -144,6 +145,7 @@ public class JsPanel implements JSVPanel {
       pd.dispose();
     pd = null;
     mouse.dispose();
+    mouse = null;
   }
 
   @Override
@@ -158,8 +160,7 @@ public class JsPanel implements JSVPanel {
 
   @Override
 	public void setBackgroundColor(GenericColor color) {
-  
-  	// unnecessary
+  	bgcolor = color;
   }
   
 	///// threading and focus
@@ -192,7 +193,8 @@ public class JsPanel implements JSVPanel {
 
 	@Override
 	public void getFocusNow(boolean asThread) {
-    pd.dialogsToFront();
+		if (pd != null)
+			pd.dialogsToFront();
 	}
 
 	@Override
@@ -204,6 +206,8 @@ public class JsPanel implements JSVPanel {
 
   @Override
 	public void doRepaint(boolean andTaintAll) {
+  	if (pd == null)
+  		return;
   	pd.taintedAll |= andTaintAll;
   	// from dialogs, to the system
   	if (!pd.isPrinting)
@@ -226,11 +230,11 @@ public class JsPanel implements JSVPanel {
    *        the canvas's context
    */
   public void paintComponent(Object context) {
+
+  	
   	
   	// from the system, via update or applet/app repaint
   	
-    if (viewer == null || pd == null || pd.graphSets == null || pd.isPrinting)
-      return;
     Object context2 = null;
     /**
      * @j2sNative
@@ -240,6 +244,20 @@ public class JsPanel implements JSVPanel {
      * 
      */
     {}
+
+    if (viewer == null)
+      return;
+
+    if (pd == null) {
+    	if (bgcolor == null)
+    		bgcolor = viewer.g2d.getColor1(-1);
+			viewer.g2d.fillBackground(context, bgcolor);
+			viewer.g2d.fillBackground(context2, bgcolor);
+			return;
+  	}
+  	
+    if (pd.graphSets == null || pd.isPrinting)
+      return;
     pd.g2d = pd.g2d0;
     pd.drawGraph(context, context2, getWidth(), getHeight(), false);
     viewer.repaintDone();
@@ -336,7 +354,7 @@ public class JsPanel implements JSVPanel {
 
   @Override
   public String toString() {
-    return pd.getSpectrumAt(0).toString();
+    return (pd == null ? "<closed>" : "" + pd.getSpectrumAt(0));
   }
 
   /**
@@ -351,12 +369,13 @@ public class JsPanel implements JSVPanel {
    */
   @Override
 	public boolean processMouseEvent(int id, int x, int y, int modifiers, long time) {
-  	return mouse.processEvent(id, x, y, modifiers, time);
+  	return mouse != null && mouse.processEvent(id, x, y, modifiers, time);
   }
 
 	@Override
 	public void processTwoPointGesture(float[][][] touches) {
-		mouse.processTwoPointGesture(touches);
+		if (mouse != null)
+			mouse.processTwoPointGesture(touches);
 	}
 
 	@Override
@@ -364,3 +383,4 @@ public class JsPanel implements JSVPanel {
   	viewer.showMenu(x, y);
 	}
 }
+	

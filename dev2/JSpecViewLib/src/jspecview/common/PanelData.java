@@ -659,6 +659,8 @@ public class PanelData implements EventManager {
 	}
 
 	public JDXSpectrum getSpectrumAt(int index) {
+		if (currentGraphSet == null)
+			return null;
 		return currentGraphSet.getSpectrumAt(index);
 	}
 

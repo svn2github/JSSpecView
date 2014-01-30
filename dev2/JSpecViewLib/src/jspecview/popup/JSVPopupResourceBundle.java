@@ -52,8 +52,8 @@ public class JSVPopupResourceBundle extends PopupResource {
         " - Properties" },
 
       { "appletMenu",
-          "_SIGNED_FileMenu OptionsMenu ZoomMenu Views... Overlay_Offset..." +
-          " - Measurements Peaks Integration Toggle_Trans/Abs Predicted_Solution_Colour" +
+          "_SIGNED_FileMenu Views... - OptionsMenu ZoomMenu" +
+          " - Measurements Peaks Integration - Toggle_Trans/Abs Predicted_Solution_Colour" +
           " - Script... - Print... - AboutMenu" },
 
       {   "_SIGNED_FileMenu", "Open_File... Open_Simulation... Open_URL... - Append_File... Append_Simulation... Append_URL... - Save_AsMenu Export_AsMenu - Close_Views Close_Simulations Close_All" },
