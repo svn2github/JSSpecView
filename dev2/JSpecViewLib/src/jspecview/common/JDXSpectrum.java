@@ -166,7 +166,16 @@ public class JDXSpectrum extends JDXDataObject {
     return null;
   }
 
+  /**
+   * Find a matching spectrum by type (IR, 1HNMR,...) and model name
+   * 
+   * @param type if null, then model is a sourceID to match
+   * @param model
+   * @return true for match
+   */
   public boolean matchesPeakTypeModel(String type, String model) {
+  	if (type.equals("ID"))
+  		return (sourceID.equalsIgnoreCase(model));
     if (peakList != null && peakList.size() > 0)
       for (int i = 0; i < peakList.size(); i++)
         if (peakList.get(i).checkTypeModel(type, model))
