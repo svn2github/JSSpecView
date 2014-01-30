@@ -244,7 +244,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 					break;
 				case INTEGRATIONRATIOS:
 					si.siSetIntegrationRatios(value);
-					if (selectedPanel != null)
+					if (!isClosed())
 						execIntegrate(null);
 					break;
 				case INTERFACE:
@@ -462,7 +462,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		ColorParameters p = parameters;
 		Boolean b = Parameters.getTFToggle(value);
 		if (value.indexOf("=") < 0) {
-			if (jsvp != null)
+			if (!isClosed())
 				jsvp.getPanelData().getPeakListing(null, b);
 		} else {
 			List<String> tokens = ScriptToken.getTokens(value);
@@ -480,7 +480,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 						p.peakListInterpolation = (value.equalsIgnoreCase("none") ? "NONE"
 								: "parabolic");
 					}
-					if (jsvp != null)
+					if (!isClosed())
 						jsvp.getPanelData().getPeakListing(p, Boolean.TRUE);
 				} catch (Exception e) {
 					// ignore
@@ -550,12 +550,28 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		}
 	}
 
+	private boolean isClosed() {
+		return (selectedPanel == null || selectedPanel.getPanelData() == null);
+	}
+	
 	private void execSelect(String value) {
+		if (value.startsWith("ID ")) {
+			if (!isClosed())
+				try {
+					selectedPanel.getPanelData().selectSpectrum(null, "ID",
+							PT.trimQuotes(value.substring(3)), true);
+				} catch (Exception e) {
+					//
+				}
+			return;
+
+		}
 		List<PanelNode> nodes = panelNodes;
 		for (int i = nodes.size(); --i >= 0;)
 			nodes.get(i).jsvp.getPanelData().selectFromEntireSet(Integer.MIN_VALUE);
 		List<JDXSpectrum> speclist = new List<JDXSpectrum>();
 		fillSpecList(value, speclist, false);
+		// not sure where this is going...
 	}
 
 	public void execView(String value, boolean fromScript) {
@@ -667,7 +683,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 
 	public void addHighLight(double x1, double x2, int r, int g, int b, int a) {
 		JSVPanel jsvp = selectedPanel;
-		if (jsvp != null) {
+		if (!isClosed()) {
 			jsvp.getPanelData().addHighlight(null, x1, x2, null, r, g, b, a);
 			jsvp.doRepaint(false);
 		}
@@ -711,7 +727,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			}
 			return;
 		}
-		String sourceID = PT.getQuotedAttribute(peakScript, "sourceID");
+		//String sourceID = PT.getQuotedAttribute(peakScript, "sourceID");
 		// sourceID files are single-component files. Just go to it.
 		
 		
@@ -768,7 +784,9 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 
 	private boolean checkFileAlreadyLoaded(String fileName) {
 		JSVPanel jsvp = selectedPanel;
-		if (jsvp != null && jsvp.getPanelData().hasFileLoaded(fileName))
+		if (isClosed())
+			return false;
+		if (jsvp.getPanelData().hasFileLoaded(fileName))
 			return true;
 		for (int i = panelNodes.size(); --i >= 0;)
 			if (panelNodes.get(i).jsvp.getPanelData().hasFileLoaded(fileName)) {
@@ -902,17 +920,18 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 	public Map<String, Object> getPropertyAsJavaObject(String key) {
 
 		Map<String, Object> map = new Hashtable<String, Object>();
-		
+
 		if (key != null && key.startsWith("MOL=")) {
 			map.put(key, JSVFileManager.getSimulationFileData(key));
 			return map;
 		}
 		if ("SOURCEID".equalsIgnoreCase(key)) {
 			// get current spectrum ID
-			map.put(key,  "" + selectedPanel.getPanelData().getSpectrum().sourceID);
+			map.put(key, (selectedPanel.getPanelData() == null ? "" : 
+				selectedPanel.getPanelData().getSpectrum().sourceID));
 			return map;
 		}
-		
+
 		boolean isAll = false;
 		if (key != null && key.toUpperCase().startsWith("ALL ")
 				|| "all".equalsIgnoreCase(key)) {
@@ -921,7 +940,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		}
 		if ("".equals(key))
 			key = null;
-		
+
 		Map<String, Object> map0 = pd().getInfo(true, key);
 		if (!isAll && map0 != null)
 			return map0;
@@ -995,7 +1014,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 				return null;
 		}
 
-		String id0 = (selectedPanel == null ? prefix : PanelNode.findNode(
+		String id0 = (isClosed() ? prefix : PanelNode.findNode(
 				selectedPanel, panelNodes).id);
 		id0 = id0.substring(0, id0.indexOf(".") + 1);
 		SB sb = new SB();
@@ -1202,7 +1221,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 
 	public void close(String value) {
 		// close * > 1 "close all except one spectrum."
-		// close SIMULATION > 1 "close simulations until no more than one spectrum is present,
+		// close SIMULATIONS > 1 "close simulations until no more than one spectrum is present,
 		// or all simulations if that is not possible."
 		int n0 = 0;
 		int pt = (value == null ? -2 : value.indexOf(">"));
@@ -1220,7 +1239,6 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		boolean isViews = value.equalsIgnoreCase("views");
 		List<JDXSource> list = new List<JDXSource>();
 		JDXSource source;
-		System.out.println("close  " + value);
 		value = value.replace('\\', '/');
 		int n = panelNodes.size();
 		int nMax = n - n0;
@@ -1358,6 +1376,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 					break;
 			}
 		}
+		
 		spectraTree.deleteNodes(toDelete);
 		if (source == null) {
 			// jsvpPopupMenu.dispose();
@@ -1452,7 +1471,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 
 	public void removeAllHighlights() {
 		JSVPanel jsvp = selectedPanel;
-		if (jsvp != null) {
+		if (!isClosed()) {
 			jsvp.getPanelData().removeAllHighlights();
 			jsvp.doRepaint(false);
 		}
@@ -1460,7 +1479,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 
 	public void removeHighlight(double x1, double x2) {
 		JSVPanel jsvp = selectedPanel;
-		if (jsvp != null) {
+		if (!isClosed()) {
 			jsvp.getPanelData().removeHighlight(x1, x2);
 			jsvp.doRepaint(false);
 		}
@@ -1617,7 +1636,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 
 	@Override
 	public void processTwoPointGesture(float[][][] touches) {
-		if (selectedPanel != null)
+		if (!isClosed())
 			selectedPanel.processTwoPointGesture(touches);
 	}
 
