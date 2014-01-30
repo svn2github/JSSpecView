@@ -344,12 +344,12 @@ public class PanelData implements EventManager {
 			graphSets.get(i).addPeakHighlight(peakInfo);
 	}
 
-	public PeakInfo selectPeakByFileIndex(String filePath, String index) {
-		PeakInfo pi = currentGraphSet.selectPeakByFileIndex(filePath, index);
+	public PeakInfo selectPeakByFileIndex(String filePath, String index, String atomKey) {
+		PeakInfo pi = currentGraphSet.selectPeakByFileIndex(filePath, index, atomKey);
 		if (pi == null)
 			for (int i = graphSets.size(); --i >= 0;)
 				if (graphSets.get(i) != currentGraphSet
-						&& (pi = graphSets.get(i).selectPeakByFileIndex(filePath, index)) != null)
+						&& (pi = graphSets.get(i).selectPeakByFileIndex(filePath, index, atomKey)) != null)
 					break;
 		return pi;
 	}

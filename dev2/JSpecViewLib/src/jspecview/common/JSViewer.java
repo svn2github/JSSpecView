@@ -732,54 +732,46 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			}
 			return;
 		}
-		//String sourceID = PT.getQuotedAttribute(peakScript, "sourceID");
-		// sourceID files are single-component files. Just go to it.
 		
+		String sourceID = PT.getQuotedAttribute(peakScript, "sourceID");
+		String type, model, file, jmolSource, index, atomKey;
+		if (sourceID == null) {
+			// todo: why the quotes??
+			//peakScript = PT.rep(peakScript, "\\\"", "");
+			file = PT.getQuotedAttribute(peakScript, "file");
+			index = PT.getQuotedAttribute(peakScript, "index");
+			if (file == null || index == null)
+				return;
+			model = PT.getQuotedAttribute(peakScript, "model");
+			jmolSource = PT.getQuotedAttribute(peakScript, "src");
+			String modelSent = (jmolSource != null && jmolSource.startsWith("Jmol") ? null
+					: si.siGetReturnFromJmolModel());
+			if (model != null && modelSent != null && !model.equals(modelSent)) {
+				Logger.info("JSV ignoring model " + model + "; should be " + modelSent);
+				return;
+			}
+			si.siSetReturnFromJmolModel(null);
+			if (panelNodes.size() == 0 || !checkFileAlreadyLoaded(file)) {
+				Logger.info("file " + file
+						+ " not found -- JSViewer closing all and reopening");
+				si.siSyncLoad(file);
+			}
+			type = PT.getQuotedAttribute(peakScript, "type");
+			atomKey = null;
+		} else {
+			file = null;
+			index = sourceID;
+			atomKey = "," + PT.getQuotedAttribute(peakScript, "atom") + ",";
+			type = "ID";
+			model = sourceID;
+			jmolSource = sourceID; //??
+		}
 		
-		// todo: why the quotes??
-		//peakScript = PT.rep(peakScript, "\\\"", "");
-		String file = PT.getQuotedAttribute(peakScript, "file");
-		//System.out.println("file2=" + file);
-		String index = PT.getQuotedAttribute(peakScript, "index");
-		if (file == null || index == null)
-			return;
-		String model = PT.getQuotedAttribute(peakScript, "model");
-		String jmolSource = PT.getQuotedAttribute(peakScript, "src");
-		String modelSent = (jmolSource != null && jmolSource.startsWith("Jmol") ? null
-				: si.siGetReturnFromJmolModel());
-
-		if (model != null && modelSent != null && !model.equals(modelSent)) {
-			Logger.info("JSV ignoring model " + model + "; should be " + modelSent);
-			return;
-		}
-		si.siSetReturnFromJmolModel(null);
-		if (panelNodes.size() == 0 || !checkFileAlreadyLoaded(file)) {
-			Logger.info("file " + file
-					+ " not found -- JSViewer closing all and reopening");
-			si.siSyncLoad(file);
-		}
-		// System.out.println(Thread.currentThread() + "syncscript jsvp=" +
-		// si.getSelectedPanel() + " s0=" + si.getSelectedPanel().getSpectrum());
-		PeakInfo pi = selectPanelByPeak(peakScript);
-		// System.out.println(Thread.currentThread() + "syncscript pi=" + pi);
+		PeakInfo pi = selectPanelByPeak(file, index, atomKey);
 		JSVPanel jsvp = selectedPanel;
-		// System.out.println(Thread.currentThread() + "syncscript jsvp=" + jsvp);
-		String type = PT.getQuotedAttribute(peakScript, "type");
-		// System.out.println(Thread.currentThread() +
-		// "syncscript --selectSpectrum2 " + pi + " " + type + " " + model + " s=" +
-		// jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
 		jsvp.getPanelData().selectSpectrum(file, type, model, true);
-		// System.out.println(Thread.currentThread() +
-		// "syncscript --selectSpectrum3 " + pi + " " + type + " " + model + " s=" +
-		// jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
 		si.siSendPanelChange(jsvp);
-		// System.out.println(Thread.currentThread() +
-		// "syncscript --selectSpectrum4 " + pi + " " + type + " " + model + " s=" +
-		// jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
 		jsvp.getPanelData().addPeakHighlight(pi);
-		// System.out.println(Thread.currentThread() +
-		// "syncscript --selectSpectrum5 " + pi + " " + type + " " + model + " s=" +
-		// jsvp.getSpectrum() + " s0=" + jsvp.getSpectrumAt(0));
 		jsvp.doRepaint(true);
 		// round trip this so that Jmol highlights all equivalent atoms
 		// and appropriately starts or clears vibration
@@ -801,45 +793,33 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		return false;
 	}
 
-	private PeakInfo selectPanelByPeak(String peakScript) {
+	/**
+	 * @param file 
+	 * @param index 
+	 * @param atomKey 
+	 * @return  PeakInfo entry if appropriate
+	 */
+	private PeakInfo selectPanelByPeak(String file, String index, String atomKey) {
 		if (panelNodes == null)
 			return null;
-		String file = PT.getQuotedAttribute(peakScript, "file");
-		String index = PT.getQuotedAttribute(peakScript, "index");
 		PeakInfo pi = null;
 		for (int i = panelNodes.size(); --i >= 0;)
 			panelNodes.get(i).jsvp.getPanelData().addPeakHighlight(null);
 		JSVPanel jsvp = selectedPanel;
-		// System.out.println(Thread.currentThread() +
-		// "JSViewer selectPanelByPeak looking for " + index + " " + file + " in " +
-		// jsvp);
-		pi = jsvp.getPanelData().selectPeakByFileIndex(file, index);
-		//System.out.println(Thread.currentThread()
-			//	+ "JSViewer selectPanelByPeak pi = " + pi);
+		pi = jsvp.getPanelData().selectPeakByFileIndex(file, index, atomKey);
 		if (pi != null) {
 			// found in current panel
 			setNode(PanelNode.findNode(jsvp, panelNodes), false);
 		} else {
 			// must look elsewhere
-			// System.out.println(Thread.currentThread() +
-			// "JSViewer selectPanelByPeak did not find it");
 			for (int i = panelNodes.size(); --i >= 0;) {
 				PanelNode node = panelNodes.get(i);
-				// System.out.println(Thread.currentThread() +
-				// "JSViewer selectPanelByPeak looking at node " + i + " " +
-				// node.fileName);
-				if ((pi = node.jsvp.getPanelData().selectPeakByFileIndex(file, index)) != null) {
-					// System.out.println(Thread.currentThread() +
-					// "JSViewer selectPanelByPeak setting node " + i + " pi=" + pi);
+				if ((pi = node.jsvp.getPanelData().selectPeakByFileIndex(file, index, atomKey)) != null) {
 					setNode(node, false);
-					// System.out.println(Thread.currentThread() +
-					// "JSViewer selectPanelByPeak setting node " + i + " set node done");
 					break;
 				}
 			}
 		}
-		// System.out.println(Thread.currentThread() +
-		// "JSViewer selectPanelByPeak finally pi = " + pi);
 		return pi;
 	}
 

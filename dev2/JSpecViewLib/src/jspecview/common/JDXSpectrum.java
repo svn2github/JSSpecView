@@ -146,15 +146,18 @@ public class JDXSpectrum extends JDXDataObject {
     return list.size();
   }
 
-  public PeakInfo selectPeakByFileIndex(String filePath, String index) {
-    if (peakList != null && peakList.size() > 0)
-      for (int i = 0; i < peakList.size(); i++)
-        if (peakList.get(i).checkFileIndex(filePath, index)) {
-          System.out.println("selecting peak by FileIndex " + this + " " + peakList.get(i));
-          return (selectedPeak = peakList.get(i));
-        }
-    return null;
-  }
+	public PeakInfo selectPeakByFileIndex(String filePath, String index,
+			String atomKey) {
+		if (peakList != null && peakList.size() > 0
+				&& (atomKey == null || sourceID.equals(index)))
+			for (int i = 0; i < peakList.size(); i++)
+				if (peakList.get(i).checkFileIndex(filePath, index, atomKey)) {
+					System.out.println("selecting peak by FileIndex " + this + " "
+							+ peakList.get(i));
+					return (selectedPeak = peakList.get(i));
+				}
+		return null;
+	}
 
   public PeakInfo selectPeakByFilePathTypeModel(String filePath, String type, String model) {
     if (peakList != null && peakList.size() > 0)

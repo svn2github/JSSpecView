@@ -24,6 +24,8 @@ public class PeakInfo {
 
   private String _match;
 
+	private String atomKey;
+
 
   public PeakInfo() {
   }
@@ -50,6 +52,7 @@ public class PeakInfo {
     boolean isBaseModel = s.contains("baseModel=\"\"");
     if (!isBaseModel)
       atoms = PT.getQuotedAttribute(s, "atoms");
+    atomKey = "," + atoms + ",";
     title = PT.getQuotedAttribute(s, "title");
     _match = PT.getQuotedAttribute(s, "_match"); // PEAK command creates this
     xMax = PT.parseFloat(PT.getQuotedAttribute(s, "xMax"));
@@ -112,8 +115,9 @@ public class PeakInfo {
     return title;
   }
 
-	public boolean checkFileIndex(String filePath, String sIndex) {
-		return (sIndex.equals(index) && (filePath.equals(file) || filePath
+	public boolean checkFileIndex(String filePath, String sIndex, String sAtomKey) {
+		return (sAtomKey != null ? atomKey.indexOf(sAtomKey) >= 0
+				: sIndex.equals(index) && (filePath.equals(file) || filePath
 				.equals(filePathForwardSlash)));
 	}
 

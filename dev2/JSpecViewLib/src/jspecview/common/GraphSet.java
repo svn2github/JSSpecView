@@ -3523,10 +3523,10 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		return haveFound;
 	}
 
-	PeakInfo selectPeakByFileIndex(String filePath, String index) {
+	PeakInfo selectPeakByFileIndex(String filePath, String index, String atomKey) {
 		PeakInfo pi;
 		for (int i = spectra.size(); --i >= 0;)
-			if ((pi = getSpectrumAt(i).selectPeakByFileIndex(filePath, index)) != null)
+			if ((pi = getSpectrumAt(i).selectPeakByFileIndex(filePath, index, atomKey)) != null)
 				return pi;
 		return null;
 	}
