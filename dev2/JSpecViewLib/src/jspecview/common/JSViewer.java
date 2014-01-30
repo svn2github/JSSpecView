@@ -215,6 +215,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 					si.siExecSetCallback(st, value);
 					break;
 				case DEFAULTLOADSCRIPT:
+					value = PT.rep(value, "''", "\"");
 					defaultLoadScript = (value.length() > 0 ? value : null);
 					break;
 				case DEFAULTNMRNORMALIZATION:
@@ -261,6 +262,11 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 					syncScript(PT.trimQuotes(value));
 					break;
 				case LOAD:
+					if (value.length() == 0) {
+						if (defaultLoadScript != null)
+							runScriptNow(defaultLoadScript);
+					  break;
+					}
 					msg = si.siExecLoad(value, (defaultLoadScript == null ? "" : defaultLoadScript + ";") + commandTokens.getRemainingScript());
 					break;
 				case LOADIMAGINARY:
@@ -564,7 +570,6 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 					//
 				}
 			return;
-
 		}
 		List<PanelNode> nodes = panelNodes;
 		for (int i = nodes.size(); --i >= 0;)
@@ -1285,6 +1290,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		 *    return this.applet._search(value);
 		 *    
 		 */
+		// load   (alone) just runs defaultLoadScript
 		// load ID "xx"...
 		List<String> tokens = ScriptToken.getTokens(value);
 		String filename = tokens.get(0);

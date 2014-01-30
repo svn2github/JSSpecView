@@ -334,12 +334,12 @@ public class GraphSet implements XYScaleConverter {
 			// }
 			nSplit = nSpectra;
 			showAllStacked = false;
-			setSpectrumClicked(0);
+			setSpectrumClicked(iSpectrumSelected);
 		} else {
 			nSplit = 1;
 			splitPointers[0] = 0;
 			showAllStacked = allowStacking && !doSplit;
-			setSpectrumClicked(-1);
+			setSpectrumClicked(iSpectrumSelected);
 		}
 		stackSelected = false;
 		setFractionalPositions(pd, graphSets, LinkMode.NONE);

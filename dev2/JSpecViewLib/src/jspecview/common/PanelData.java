@@ -363,6 +363,11 @@ public class PanelData implements EventManager {
 			boolean andCurrent) {
 		if (andCurrent)
 			currentGraphSet.selectSpectrum(filePath, type, model);
+		if ("ID".equals(type) ) {
+			jumpToSpectrum(getCurrentSpectrumIndex(), true);
+			return;
+		}
+		
 		for (int i = 0; i < graphSets.size(); i += 1)
 			if (graphSets.get(i) != currentGraphSet)
 				graphSets.get(i).selectSpectrum(filePath, type, model);
@@ -572,7 +577,7 @@ public class PanelData implements EventManager {
 
 	// //// currentGraphSet methods
 
-	public void setCurrentGraphSet(GraphSet gs, int yPixel, int clickCount) {
+	private void setCurrentGraphSet(GraphSet gs, int yPixel, int clickCount) {
 		int splitPoint = gs.getSplitPoint(yPixel);
 		boolean isNewSet = (currentGraphSet != gs);
 		boolean isNewSplitPoint = (isNewSet || currentSplitPoint != splitPoint);
@@ -590,12 +595,19 @@ public class PanelData implements EventManager {
 		// or nSplit > 1 and new split point
 		// or nSplit == 1 and showAllStacked and isClick and is a spectrum click)
 
-		if (isNewSet || gs.nSplit > 1 && isNewSplitPoint)
-			setSpectrum(currentSplitPoint, true);
-		JDXSpectrum spec = gs.getSpectrum();
-		notifySubSpectrumChange(spec.getSubIndex(), spec);
+		jumpToSpectrum(splitPoint, isNewSet || gs.nSplit > 1 && isNewSplitPoint);
 	}
-
+	
+	public void jumpToSpectrum(int index, boolean doSetSpec) {
+		if (index < 0 || index >= currentGraphSet.nSpectra)
+			return;
+		currentSplitPoint = index;
+		if (doSetSpec)
+			setSpectrum(currentSplitPoint, true);
+		JDXSpectrum spec = getSpectrum();
+		notifySubSpectrumChange(spec.getSubIndex(), spec);
+		
+	}
 	public void splitStack(boolean doSplit) {
 		currentGraphSet.splitStack(graphSets, doSplit);
 	}
