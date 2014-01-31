@@ -59,6 +59,10 @@ public class JSVFileManager {
 	public static String jsDocumentBase = "";
 	private static Map<String, String> htSimulationCache;
 
+	public static Object getSimulationData(String key) {
+		return "" + htSimulationCache.get(key);
+	}
+
 	/**
 	 * @param name
 	 * @return file as string
@@ -395,8 +399,6 @@ public class JSVFileManager {
 	private static String nciResolver = "http://cactus.nci.nih.gov/chemical/structure/%FILE/file?format=sdf&get3d=True";
 	private static String nmrdbServer = "http://www.nmrdb.org/tools/jmol/predict.php?POST?molfile=";
 
-	private static Map<String, String> htSimulate;
-
 	/**
 	 * Accepts either $chemicalname or MOL=molfiledata Queries NMRDB or NIH+NMRDB
 	 * to get predicted spetrum
@@ -408,10 +410,10 @@ public class JSVFileManager {
 	 * @return jcamp data
 	 */
 	private static String getNMRSimulationJCampDX(String name) {
-		if (htSimulate == null)
-			htSimulate = new Hashtable<String, String>();
+		if (htSimulationCache == null)
+			htSimulationCache = new Hashtable<String, String>();
 		String key = "" + getSimulationHash(name);
-		String jcamp = htSimulate.get(key);
+		String jcamp = htSimulationCache.get(key);
 		if (jcamp != null)
 			return jcamp;
 		boolean isInline = name.startsWith("MOL=");
@@ -422,22 +424,24 @@ public class JSVFileManager {
 				: getFileAsString(src))) == null)
 			Logger.info("no data returned");
 		String json = getFileAsString(nmrdbServer + molFile);
+		htSimulationCache.put("json", json);
 		Logger.debug(json);
 		if (json.indexOf("\"error\":") >= 0)
 			return null;
 		json = PT.rep(json, "\\r\\n", "\n");
 		json = PT.rep(json, "\\t", "\t");
 		json = PT.rep(json, "\\n", "\n");
-		// String jsonMolFile = getQuotedJSONAttribute(json, "molfile", null);
+		String jsonMolFile = getQuotedJSONAttribute(json, "molfile", null);
+		htSimulationCache.put("mol", jsonMolFile);
 		String xml = getQuotedJSONAttribute(json, "xml", null);
 		xml = PT.rep(xml, "<Signals>",  "<Signals src=" + PT.esc(PT.rep(nmrdbServer,"?POST?molfile=","")) + ">");
 		xml = PT.rep(xml, "</", "\n</");
 		xml = PT.rep(xml, "><", ">\n<");
 		xml = PT.rep(xml, "\\\"", "\"");
+		htSimulationCache.put("xml", xml);
 		jcamp = getQuotedJSONAttribute(json, "jcamp", null);
 		jcamp = "##TITLE=" + (isInline ? "JMOL SIMULATION" : name) + "\n"
 				+ jcamp.substring(jcamp.indexOf("\n##") + 1);
-		Logger.info(jcamp.substring(0, jcamp.indexOf("##XYDATA") + 40) + "...");
 		int pt = molFile.indexOf("\n");
 		pt = molFile.indexOf("\n", pt + 1);
 		if (pt > 0 && pt == molFile.indexOf("\n \n"))
@@ -453,7 +457,8 @@ public class JSVFileManager {
 				+ "<ModelData id=" + PT.esc(id) + " type=\"MOL\" src=" + PT.esc(src)
 				+ ">\n" + molFile + "</ModelData>\n</Models>\n" + "##$SIGNALS=\n" + xml
 				+ "\n" + jcamp.substring(pt);
-		htSimulate.put(key, jcamp);
+		htSimulationCache.put("jcamp", jcamp);
+		htSimulationCache.put(key, jcamp);
 		return jcamp;
 	}
 

@@ -906,14 +906,15 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 
 		Map<String, Object> map = new Hashtable<String, Object>();
 
-		if (key != null && key.startsWith("MOL=")) {
-			map.put(key, JSVFileManager.getSimulationFileData(key));
-			return map;
-		}
 		if ("SOURCEID".equalsIgnoreCase(key)) {
 			// get current spectrum ID
 			map.put(key, (selectedPanel.getPanelData() == null ? "" : 
 				selectedPanel.getPanelData().getSpectrum().sourceID));
+			return map;
+		}
+		if (key != null && key.startsWith("DATA_")) {
+		  // mol, json, xml, jcamp -- most recent only
+			map.put(key, JSVFileManager.getSimulationData(key.substring(5)));
 			return map;
 		}
 
