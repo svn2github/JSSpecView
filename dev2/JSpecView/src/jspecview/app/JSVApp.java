@@ -415,11 +415,11 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	private JSVPanel prevPanel;
 
 	@Override
-	public void siSendPanelChange(JSVPanel jsvp) {
-		if (jsvp == prevPanel)
+	public void siSendPanelChange() {
+		if (viewer.selectedPanel == prevPanel)
 			return;
-		prevPanel = jsvp;
-		viewer.sendPanelChange(jsvp);
+		prevPanel = viewer.selectedPanel;
+		viewer.sendPanelChange();
 	}
 
 	// //////////// JSVAppletPopupMenu calls
@@ -836,7 +836,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	public void siSetNode(PanelNode panelNode, boolean fromTree) {
 		if (panelNode.jsvp != viewer.selectedPanel)
 			siSetSelectedPanel(panelNode.jsvp);
-		siSendPanelChange(panelNode.jsvp);
+		siSendPanelChange();
 		appletFrame.validateContent(2);
 		siValidateAndRepaint(); // app does not do repaint here
 	}

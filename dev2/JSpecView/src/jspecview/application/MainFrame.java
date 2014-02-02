@@ -744,11 +744,11 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 
 	@Override
-	public void siSendPanelChange(JSVPanel jsvp) {
-		if (jsvp == prevPanel)
+	public void siSendPanelChange() {
+		if (viewer.selectedPanel == prevPanel)
 			return;
-		prevPanel = jsvp;
-		viewer.sendPanelChange(jsvp);
+		prevPanel = viewer.selectedPanel;
+		viewer.sendPanelChange();
 	}
 
 	// //////// MENU ACTIONS ///////////
@@ -1091,7 +1091,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	public void siSetNode(PanelNode panelNode, boolean fromTree) {
 		if (panelNode.jsvp != viewer.selectedPanel)
 			siSetSelectedPanel(panelNode.jsvp);
-		siSendPanelChange(panelNode.jsvp);
+		siSendPanelChange();
 		siSetMenuEnables(panelNode, false);
 		writeStatus("");
 	}
