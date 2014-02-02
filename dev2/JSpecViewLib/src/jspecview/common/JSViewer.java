@@ -707,29 +707,8 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		Logger.info("JSViewer.syncScript Jmol>JSV " + peakScript);
 		if (peakScript.indexOf("<PeakData") < 0) {
 			runScriptNow(peakScript);
-			if (peakScript.indexOf("#SYNC_PEAKS") >= 0) {
-				JDXSource source = currentSource;
-				if (source == null)
-					return;
-				try {
-					String file = "file=" + PT.esc(source.getFilePath());
-					List<PeakInfo> peaks = source.getSpectra().get(0).getPeakList();
-					SB sb = new SB();
-					sb.append("[");
-					int n = peaks.size();
-					for (int i = 0; i < n; i++) {
-						String s = peaks.get(i).toString();
-						s = s + " " + file;
-						sb.append(PT.esc(s));
-						if (i > 0)
-							sb.append(",");
-					}
-					sb.append("]");
-					si.syncToJmol("Peaks: " + sb);
-				} catch (Exception e) {
-					// ignore bad structures -- no spectrum
-				}
-			}
+			if (peakScript.indexOf("#SYNC_PEAKS") >= 0)
+			  syncPeaksAfterSyncScript();
 			return;
 		}
 		
@@ -760,23 +739,46 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			atomKey = null;
 		} else {
 			file = null;
-			index = sourceID;
+			index = model = sourceID;
 			atomKey = "," + PT.getQuotedAttribute(peakScript, "atom") + ",";
 			type = "ID";
-			model = sourceID;
 			jmolSource = sourceID; //??
 		}
 		
 		PeakInfo pi = selectPanelByPeak(file, index, atomKey);
-		JSVPanel jsvp = selectedPanel;
-		jsvp.getPanelData().selectSpectrum(file, type, model, true);
-		si.siSendPanelChange(jsvp);
-		jsvp.getPanelData().addPeakHighlight(pi);
-		jsvp.doRepaint(true);
+		PanelData pd = selectedPanel.getPanelData();
+		pd.selectSpectrum(file, type, model, true);
+		si.siSendPanelChange();
+		pd.addPeakHighlight(pi);
+		selectedPanel.doRepaint(true);
 		// round trip this so that Jmol highlights all equivalent atoms
 		// and appropriately starts or clears vibration
 		if (jmolSource == null || (pi != null && pi.getAtoms() != null))
 			si.syncToJmol(jmolSelect(pi));
+	}
+
+	private void syncPeaksAfterSyncScript() {
+		JDXSource source = currentSource;
+		if (source == null)
+			return;
+		try {
+			String file = "file=" + PT.esc(source.getFilePath());
+			List<PeakInfo> peaks = source.getSpectra().get(0).getPeakList();
+			SB sb = new SB();
+			sb.append("[");
+			int n = peaks.size();
+			for (int i = 0; i < n; i++) {
+				String s = peaks.get(i).toString();
+				s = s + " " + file;
+				sb.append(PT.esc(s));
+				if (i > 0)
+					sb.append(",");
+			}
+			sb.append("]");
+			si.syncToJmol("Peaks: " + sb);
+		} catch (Exception e) {
+			// ignore bad structures -- no spectrum
+		}
 	}
 
 	private boolean checkFileAlreadyLoaded(String fileName) {
@@ -874,12 +876,13 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 	}
 
 	private void syncToJmol(PeakInfo pi) {
+		selectedPanel.doRepaint(true);
 		si.siSetReturnFromJmolModel(pi.getModel());
 		si.syncToJmol(jmolSelect(pi));
 	}
 
-	public void sendPanelChange(JSVPanel jsvp) {
-		PanelData pd = jsvp.getPanelData();
+	public void sendPanelChange() {
+		PanelData pd = selectedPanel.getPanelData();
 		JDXSpectrum spec = pd.getSpectrum();
 		PeakInfo pi = spec.getSelectedPeak();
 		if (pi == null)
@@ -887,7 +890,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		if (pi == null)
 			pi = spec.getBasePeakInfo();
 		pd.addPeakHighlight(pi);
-		Logger.info(Thread.currentThread() + "JSViewer sendFrameChange " + jsvp);
+		Logger.info(Thread.currentThread() + "JSViewer sendFrameChange " + selectedPanel);
 		syncToJmol(pi);
 	}
 
@@ -896,10 +899,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 				? "vibration ON; selectionHalos OFF;"
 				: "vibration OFF; selectionhalos "
 						+ (pi.getAtoms() == null ? "OFF" : "ON"));
-
-		script = "Select: " + pi + " script=\"" + script + " \" sourceID=\"" + this.selectedPanel.getPanelData().getSpectrum().sourceID + "\"";
-		// System.out.println("JSViewer.jmolSelect " + script);
-		return script;
+		return "Select: " + pi + " script=\"" + script + " \" sourceID=\"" + this.selectedPanel.getPanelData().getSpectrum().sourceID + "\"";
 	}
 
 	public Map<String, Object> getPropertyAsJavaObject(String key) {

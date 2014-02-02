@@ -76,7 +76,7 @@ public interface ScriptInterface {
 
 	public void siProcessCommand(String script);
 	
-	public void siSendPanelChange(JSVPanel jsvp);
+	public void siSendPanelChange();
 
 	public void siSetCurrentSource(JDXSource source);
 
