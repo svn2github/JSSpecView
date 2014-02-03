@@ -19,8 +19,11 @@ BH 1/13/2014 8:24:33 PM
 
 
 todo: 
+ - enhancement: when displaying peaks for a spectrum that has links available suggest that from the peak dialog box 
+ that clicking on a peak will highlight appropriately in JSmol/JSME
+
  -for a BLOCK file view 2 spectra eg IR and MS 1.1 and 1.4 then try close selected (gone from dialog but not display)
- then try to open an H NMR spectrum 1.2 - nothing happens
+ then try to open an H NMR spectrum 1.2 - nothing happens - FIXED 24 Jan 2014
  -JSpecView/Java + JSME crashed Firefox during applet loading.
 
 new feature: show NMR taps into NMRDB directly
