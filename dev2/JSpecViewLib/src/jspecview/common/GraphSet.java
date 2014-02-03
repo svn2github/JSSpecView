@@ -1376,7 +1376,7 @@ public class GraphSet implements XYScaleConverter {
 			viewList.remove(i);
 	}
 
-	private void drawAll(Object gMain, Object gTop, int iSplit,
+	private void drawAll(Object gMain, Object gFront, Object gRear, int iSplit,
 			boolean needNewPins, boolean doAll) {
     g2d = pd.g2d; // may change when printing and testing JsPdfCreator
 		this.gMain = gMain;
@@ -1410,6 +1410,7 @@ public class GraphSet implements XYScaleConverter {
 		}
 		int iSpecForFrame = (nSpectra == 1 ? 0 : !showAllStacked ? iSpectrumMovedTo
 				: iSpectrumSelected);
+		Object g2 = (gRear == gMain? gFront : gRear);
 		if (doAll) {
 			boolean addCurrentBox = (!isLinked && (isSplittable) && (!isSplittable
 					|| nSplit == 1 || pd.currentSplitPoint == iSplit));
@@ -1449,7 +1450,7 @@ public class GraphSet implements XYScaleConverter {
 				boolean doDraw1DY = (doDrawWidgets && haveSelectedSpectrum && i == iSpectrumForScale);
 				if (doDrawWidgets) {
 					resetPinsFromView();
-					drawWidgets(gTop, subIndex, needNewPins, doDraw1DObjects, doDraw1DY,
+					drawWidgets(gFront, g2, subIndex, needNewPins, doDraw1DObjects, doDraw1DY,
 							false);
 				}
 				if (haveSingleYScale && i == iSpectrumForScale && doAll) {
@@ -1458,10 +1459,10 @@ public class GraphSet implements XYScaleConverter {
 						drawSpectrumSource(gMain, i);
 				}
 				if (doDrawWidgets)
-					drawWidgets(gTop, subIndex, false, doDraw1DObjects, doDraw1DY, true);
+					drawWidgets(gFront, g2, subIndex, false, doDraw1DObjects, doDraw1DY, true);
 				if (haveSingleYScale && !isDrawNoSpectra() && i == iSpectrumForScale
 						&& (nSpectra == 1 || iSpectrumSelected >= 0))
-					drawHighlightsAndPeakTabs(gTop, i);
+					drawHighlightsAndPeakTabs(gFront, g2, i);
 
 				if (doAll) {
 					if (n == 1 && iSpectrumSelected < 0 || iSpectrumSelected == i
@@ -1481,13 +1482,13 @@ public class GraphSet implements XYScaleConverter {
 					}
 					drawSpectrum(gMain, i, offset, isGrey, ig);
 				}
-				drawMeasurements(gTop, i);
+				drawMeasurements(gFront, i);
 				if (pendingMeasurement != null && pendingMeasurement.spec == spec)
-					drawMeasurement(gTop, pendingMeasurement);
+					drawMeasurement(gFront, pendingMeasurement);
 				if ((nSplit > 1 ? i == iSpectrumMovedTo : isLinked
 						|| i == iSpectrumForScale)
 						&& !pd.isPrinting && xPixelMovedTo >= 0 && spec.isContinuous()) {
-					drawSpectrumPointer(gTop, spec, offset, ig);
+					drawSpectrumPointer(gFront, spec, offset, ig);
 				}
 				if (nSpectra > 1 && nSplit == 1 && pd.isCurrentGraphSet(this) && doAll) {
 					haveLeftRightArrows = true;
@@ -1529,12 +1530,12 @@ public class GraphSet implements XYScaleConverter {
 				if (subIndex >= 0)
 					draw2DUnits(gMain);
 			}
-			drawWidgets(gTop, subIndex, needNewPins, doDraw1DObjects, true, false);
+			drawWidgets(gFront, g2, subIndex, needNewPins, doDraw1DObjects, true, false);
 			// no 2D grid?
-			drawWidgets(gTop, subIndex, needNewPins, doDraw1DObjects, true, true);
+			drawWidgets(gFront, g2, subIndex, needNewPins, doDraw1DObjects, true, true);
 		}
 		if (annotations != null)
-			drawAnnotations(gTop, annotations, null);
+			drawAnnotations(gFront, annotations, null);
 	}
 
 	private void drawSpectrumSource(Object g, int i) {
@@ -1634,20 +1635,20 @@ public class GraphSet implements XYScaleConverter {
 		drawUnits(g, nucleusY, imageView.xPixel0 - 5 * pd.scalingFactor, yPixel0, 1, 0);
 	}
 
-	private void drawPeakTabs(Object g, JDXSpectrum spec) {
+	private void drawPeakTabs(Object gFront, Object g2, JDXSpectrum spec) {
 		List<PeakInfo> list = (nSpectra == 1 || iSpectrumSelected >= 0 ? spec
 				.getPeakList() : null);
 		if (list != null && list.size() > 0) {
 			if (piMouseOver != null && piMouseOver.spectrum == spec && pd.isMouseUp()) {
-				g2d.setGraphicsColor(g, g2d.getColor4(240, 240, 240, 140)); // very faint gray box
-				drawPeak(g, piMouseOver, true);
+				g2d.setGraphicsColor(g2, g2d.getColor4(240, 240, 240, 140)); // very faint gray box
+				drawPeak(g2, piMouseOver, true);
 				spec.setHighlightedPeak(piMouseOver);
 			} else {
 			  spec.setHighlightedPeak(null);
 			}
-			setColorFromToken(g, ScriptToken.PEAKTABCOLOR);
+			setColorFromToken(gFront, ScriptToken.PEAKTABCOLOR);
 			for (int i = list.size(); --i >= 0;) {
-				drawPeak(g, list.get(i), false);
+				drawPeak(gFront, list.get(i), false);
 			}
 		}
 	}
@@ -1666,7 +1667,8 @@ public class GraphSet implements XYScaleConverter {
 	 * 
 	 * Draw sliders, pins, and zoom boxes (only one of which would ever be drawn)
 	 * 
-	 * @param g
+	 * @param gFront
+	 * @param g2
 	 * @param subIndex
 	 * @param needNewPins
 	 * @param doDraw1DObjects
@@ -1674,7 +1676,7 @@ public class GraphSet implements XYScaleConverter {
 	 *          TODO
 	 * @param postGrid
 	 */
-	private void drawWidgets(Object g, int subIndex, boolean needNewPins,
+	private void drawWidgets(Object gFront, Object g2, int subIndex, boolean needNewPins,
 			boolean doDraw1DObjects, boolean doDraw1DY, boolean postGrid) {
 		setWidgets(needNewPins, subIndex, doDraw1DObjects);
 		if (pd.isPrinting && (imageView == null ? !cur1D2Locked : sticky2Dcursor))
@@ -1684,25 +1686,25 @@ public class GraphSet implements XYScaleConverter {
 		if (!pd.isPrinting && !postGrid) {
 			// top/side slider bar backgrounds
 			if (doDraw1DObjects) {
-				fillBox(g, xPixel0, pin1Dx0.yPixel1, xPixel1, pin1Dx1.yPixel1 + 2,
+				fillBox(gFront, xPixel0, pin1Dx0.yPixel1, xPixel1, pin1Dx1.yPixel1 + 2,
 						ScriptToken.GRIDCOLOR);
-				fillBox(g, pin1Dx0.xPixel0, pin1Dx0.yPixel1, pin1Dx1.xPixel0,
+				fillBox(gFront, pin1Dx0.xPixel0, pin1Dx0.yPixel1, pin1Dx1.xPixel0,
 						pin1Dx1.yPixel1 + 2, ScriptToken.PLOTCOLOR);
 			} else {
 
-				fillBox(g, imageView.xPixel0, pin2Dx0.yPixel1, imageView.xPixel1,
+				fillBox(gFront, imageView.xPixel0, pin2Dx0.yPixel1, imageView.xPixel1,
 						pin2Dx0.yPixel1 + 2, ScriptToken.GRIDCOLOR);
-				fillBox(g, pin2Dx0.xPixel0, pin2Dx0.yPixel1, pin2Dx1.xPixel0,
+				fillBox(gFront, pin2Dx0.xPixel0, pin2Dx0.yPixel1, pin2Dx1.xPixel0,
 						pin2Dx1.yPixel1 + 2, ScriptToken.PLOTCOLOR);
-				fillBox(g, pin2Dy0.xPixel1, yPixel1, pin2Dy1.xPixel1 + 2, yPixel0,
+				fillBox(gFront, pin2Dy0.xPixel1, yPixel1, pin2Dy1.xPixel1 + 2, yPixel0,
 						ScriptToken.GRIDCOLOR);
-				fillBox(g, pin2Dy0.xPixel1, pin2Dy0.yPixel1, pin2Dy1.xPixel1 + 2,
+				fillBox(gFront, pin2Dy0.xPixel1, pin2Dy0.yPixel1, pin2Dy1.xPixel1 + 2,
 						pin2Dy1.yPixel0, ScriptToken.PLOTCOLOR);
 			}
-			fillBox(g, pin1Dy0.xPixel1, yPixel1, pin1Dy1.xPixel1 + 2, yPixel0,
+			fillBox(gFront, pin1Dy0.xPixel1, yPixel1, pin1Dy1.xPixel1 + 2, yPixel0,
 					ScriptToken.GRIDCOLOR);
 			if (doDraw1DY)
-				fillBox(g, pin1Dy0.xPixel1, pin1Dy0.yPixel1, pin1Dy1.xPixel1 + 2,
+				fillBox(gFront, pin1Dy0.xPixel1, pin1Dy0.yPixel1, pin1Dy1.xPixel1 + 2,
 						pin1Dy1.yPixel0, ScriptToken.PLOTCOLOR);
 		}
 		for (int i = 0; i < widgets.length; i++) {
@@ -1731,13 +1733,13 @@ public class GraphSet implements XYScaleConverter {
 			if (pd.isPrinting && !isLockedCursor)
 				continue;
 			if (pw.isPinOrCursor) {
-				setColorFromToken(g, pw.color);
-				g2d.drawLine(g, pw.xPixel0, pw.yPixel0, pw.xPixel1, pw.yPixel1);
+				setColorFromToken(gFront, pw.color);
+				g2d.drawLine(gFront, pw.xPixel0, pw.yPixel0, pw.xPixel1, pw.yPixel1);
 				pw.isVisible = true;
 				if (pw.isPin)
-					drawHandle(g, pw.xPixel0, pw.yPixel0, !pw.isEnabled);
+					drawHandle(gFront, pw.xPixel0, pw.yPixel0, !pw.isEnabled);
 			} else if (pw.xPixel1 != pw.xPixel0) {
-				fillBox(g, pw.xPixel0, pw.yPixel0, pw.xPixel1, pw.yPixel1, 
+				fillBox(g2, pw.xPixel0, pw.yPixel0, pw.xPixel1, pw.yPixel1, 
 						pw == zoomBox1D && pd.shiftPressed ? ScriptToken.ZOOMBOXCOLOR2 : ScriptToken.ZOOMBOXCOLOR);
 			}
 		}
@@ -1748,12 +1750,12 @@ public class GraphSet implements XYScaleConverter {
 	 * draw a bar, but not necessarily full height
 	 * 
 	 * @param g
-	 * @param pi 
+	 * @param pi
 	 * @param startX
 	 *          units
 	 * @param endX
 	 *          units
-	 * @param whatColor 
+	 * @param whatColor
 	 * @param isFullHeight
 	 */
 
@@ -1775,14 +1777,16 @@ public class GraphSet implements XYScaleConverter {
 		}
 		if (pi != null)
 			pi.setPixelRange(x1, x2);
-		fillBox(g, x1, yPixel0, x2, yPixel0 + (isFullHeight ? yPixels : 5),
-				whatColor);
-		if (pi != null && !isFullHeight) {
-			x1 = (x1 + x2) / 2;
-			fillBox(g, x1-1, yPixel0, x1+1, yPixel0 + 7,
-					whatColor);
+		if (isFullHeight) {
+			fillBox(g, x1, yPixel0, x2, yPixel0 + yPixels, whatColor);
+		} else {
+			fillBox(g, x1, yPixel0, x2, yPixel0 + 5, whatColor);
+			if (pi != null) {
+				x1 = (x1 + x2) / 2;
+				fillBox(g, x1 - 1, yPixel0, x1 + 1, yPixel0 + 7, whatColor);
+			}
 		}
-			
+
 	}
 
 	/**
@@ -2153,13 +2157,13 @@ public class GraphSet implements XYScaleConverter {
 			drawUnits(g, units, (pd.isPrinting ? 30 : 5) * pd.scalingFactor, yPixel0 + (pd.isPrinting ? 0 : 5)  * pd.scalingFactor, 0, -1);
 	}
 
-	private void drawHighlightsAndPeakTabs(Object g, int iSpec) {
+	private void drawHighlightsAndPeakTabs(Object gFront, Object gRear, int iSpec) {
 		MeasurementData md = getMeasurements(AType.PeakList, iSpec);
 		JDXSpectrum spec = spectra.get(iSpec);
 		if (pd.isPrinting) {
 			if (md != null) {
-				setColorFromToken(g, ScriptToken.PEAKTABCOLOR);
-				printPeakList(g, spec, (PeakData) md);
+				setColorFromToken(gFront, ScriptToken.PEAKTABCOLOR);
+				printPeakList(gFront, spec, (PeakData) md);
 			}
 			return;
 		}
@@ -2168,24 +2172,24 @@ public class GraphSet implements XYScaleConverter {
 				Highlight hl = highlights.get(i);
 				if (hl.spectrum == spec) {
 					pd.setHighlightColor(hl.color);
-					drawBar(g, null, hl.x1, hl.x2, ScriptToken.HIGHLIGHTCOLOR, true);
+					drawBar(gRear, null, hl.x1, hl.x2, ScriptToken.HIGHLIGHTCOLOR, true);
 				}
 			}
-			drawPeakTabs(g, spec);
+			drawPeakTabs(gFront, gRear, spec);
 		}
 		int y;
 		if (md != null) {
 			y = (spec.isInverted() ? yPixel1 - 10 * pd.scalingFactor : yPixel0);
-			setColorFromToken(g, ScriptToken.PEAKTABCOLOR);
+			setColorFromToken(gFront, ScriptToken.PEAKTABCOLOR);
 			for (int i = md.size(); --i >= 0;) {
 				Measurement m = md.get(i);
 				int x = toPixelX(m.getXVal());
-				g2d.drawLine(g, x, y, x, y + 10 * pd.scalingFactor);
+				g2d.drawLine(gFront, x, y, x, y + 10 * pd.scalingFactor);
 			}
 			if (isVisible(getDialog(AType.PeakList, iSpec))) {
 				y = toPixelY(((PeakData) md).getThresh());
 				if (y == fixY(y) && !pd.isPrinting)
-					g2d.drawLine(g, xPixel0, y, xPixel1, y);
+					g2d.drawLine(gFront, xPixel0, y, xPixel1, y);
 			}
 		}
 	}
@@ -2806,7 +2810,7 @@ public class GraphSet implements XYScaleConverter {
 			float x2 = PT.parseFloat(xMax);
 			if (Float.isNaN(x1) || Float.isNaN(x2))
 				return;
-			pd.addHighlight(this, x1, x2, spec, 200, 200, 200, 200);
+			pd.addHighlight(this, x1, x2, spec, 200, 200, 200, 100);
 			spec.setSelectedPeak(peakInfo);
 			if (getScale().isInRangeX(x1)
 					|| getScale().isInRangeX(x2) || x1 < getScale().minX
@@ -3076,18 +3080,20 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 	 * entry point for a repaint
 	 * 
 	 * @param gMain
-	 * @param gTop
+	 * @param gFront
+	 * @param gRear
 	 * @param width
 	 * @param height
-	 * @param left 
-	 * @param right 
-	 * @param top 
-	 * @param bottom 
+	 * @param left
+	 * @param right
+	 * @param top
+	 * @param bottom
 	 * @param isResized
 	 * @param taintedAll
 	 */
-	synchronized void drawGraphSet(Object gMain, Object gTop, int width, int height, int left, int right,
-			int top, int bottom, boolean isResized, boolean taintedAll) {
+	synchronized void drawGraphSet(Object gMain, Object gFront, Object gRear,
+			int width, int height, int left, int right, int top, int bottom,
+			boolean isResized, boolean taintedAll) {
 
 		zoomEnabled = pd.getBoolean(ScriptToken.ENABLEZOOM);
 		this.height = height * pd.scalingFactor;
@@ -3103,11 +3109,11 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		if (!pd.isPrinting && widgets != null)
 			for (int j = 0; j < widgets.length; j++)
 				if (widgets[j] != null)
-  				widgets[j].isVisible = false;
+					widgets[j].isVisible = false;
 		for (int iSplit = 0; iSplit < nSplit; iSplit++) {
 			// for now, at least, we only allow one 2D image
 			setPositionForFrame(iSplit);
-			drawAll(gMain, gTop, iSplit, isResized || nSplit > 1, taintedAll);
+			drawAll(gMain, gFront, gRear, iSplit, isResized || nSplit > 1, taintedAll);
 		}
 		setPositionForFrame(nSplit > 1 ? pd.currentSplitPoint : 0);
 		if (pd.isPrinting)
@@ -4169,7 +4175,13 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 				    - x1), Math.abs(y0 - y1));
   }
 
-  
+	private void drawBox(Object g, int x0, int y0, int x1, int y1,
+			ScriptToken whatColor) {
+		setColorFromToken(g, whatColor);
+		g2d.drawRect(g, Math.min(x0, x1), Math.min(y0, y1), Math.abs(x0 - x1),
+				Math.abs(y0 - y1));
+	}
+
   private void drawHandle(Object g, int x, int y, boolean outlineOnly) {
     if (outlineOnly)
       g2d.drawRect(g, x - 2, y - 2, 4, 4);

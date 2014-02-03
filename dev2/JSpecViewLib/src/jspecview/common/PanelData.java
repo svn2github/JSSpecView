@@ -394,18 +394,19 @@ public class PanelData implements EventManager {
 	 * 
 	 * @param gMain
 	 *          the main <code>Graphics</code> object
-	 * @param gTop
+	 * @param gFront
 	 *          the <code>Graphics</code> object for top-object writing
+	 * @param gRear
 	 * @param width
 	 *          the width to be drawn in pixels
 	 * @param height
 	 *          the height to be drawn in pixels
 	 * @param addFilePath
 	 */
-	public synchronized void drawGraph(Object gMain, Object gTop, int width, int height,
-			boolean addFilePath) {
+	public synchronized void drawGraph(Object gMain, Object gFront, Object gRear,
+			int width, int height, boolean addFilePath) {
 		boolean withCoords;
-		//System.out.println("PanelData.drawGraph " + width  + " " + height);
+		// System.out.println("PanelData.drawGraph " + width + " " + height);
 		this.gMain = gMain;
 		display1D = !isLinked && getBoolean(ScriptToken.DISPLAY1D);
 		int top = topMargin;
@@ -414,9 +415,11 @@ public class PanelData implements EventManager {
 		if (isResized)
 			taintedAll = true;
 		if (taintedAll)
-			g2d.fillBackground(gMain, bgcolor);
-		if (gTop != gMain) {
-			g2d.fillBackground(gTop, null);
+			g2d.fillBackground(gRear, bgcolor);
+		if (gFront != gMain) {
+			g2d.fillBackground(gFront, null);
+			if (gMain != gRear)
+				g2d.fillBackground(gMain, null);
 			g2d.setStrokeBold(gMain, false);
 		}
 		if (isPrinting) {
@@ -435,18 +438,17 @@ public class PanelData implements EventManager {
 		thisWidth = width;
 		thisHeight = height;
 		for (int i = graphSets.size(); --i >= 0;)
-			graphSets.get(i).drawGraphSet(gMain, gTop, width, height, left, right, top, bottom,
-					isResized, taintedAll);
+			graphSets.get(i).drawGraphSet(gMain, gFront, gRear, width, height, left,
+					right, top, bottom, isResized, taintedAll);
 		if (titleOn && !titleDrawn && taintedAll)
 			drawTitle(gMain, height * scalingFactor, width * scalingFactor,
 					getDrawTitle(isPrinting));
 		if (withCoords && coordStr != null)
-			drawCoordinates(gTop, top, thisWidth - right, top - 20);
+			drawCoordinates(gFront, top, thisWidth - right, top - 20);
 		if (addFilePath && taintedAll) {
 			String s = (commonFilePath != null ? commonFilePath
 					: graphSets.size() == 1 && currentGraphSet.getTitle(true) != null ? getSpectrum()
-							.getFilePath()
-							: null);
+							.getFilePath() : null);
 			if (s != null) {
 				printFilePath(gMain, left, height, s);
 			}
@@ -454,7 +456,7 @@ public class PanelData implements EventManager {
 		if (isPrinting) {
 			printVersion(gMain, height);
 		}
-		taintedAll = (isPrinting || gMain == gTop);
+		taintedAll = (isPrinting || gMain == gFront);
 	}
 
 	/**
@@ -1417,7 +1419,7 @@ public class PanelData implements EventManager {
       }
       g2d.translateScale(g, x, y, 0.1);
       taintedAll = true;
-      drawGraph(g, g, (int) width, (int) height, addFilePath);
+      drawGraph(g, g, g, (int) width, (int) height, addFilePath);
       isPrinting = false;
       return JSViewer.PAGE_EXISTS;
     }

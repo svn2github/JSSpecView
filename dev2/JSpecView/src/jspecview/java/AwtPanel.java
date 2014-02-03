@@ -244,7 +244,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
     try {
     	// despite the above catch for pd == null, it can still get here 
     	pd.g2d = pd.g2d0;
-    	pd.drawGraph(g, g, getWidth(), getHeight(), false);
+    	pd.drawGraph(g, g, g, getWidth(), getHeight(), false);
     } catch (Exception e) {
     	// tough luck
     }

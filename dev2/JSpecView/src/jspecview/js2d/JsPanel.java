@@ -235,12 +235,14 @@ public class JsPanel implements JSVPanel {
   	
   	// from the system, via update or applet/app repaint
   	
-    Object context2 = null;
+    Object contextFront = null;
+    Object contextRear = null;
     /**
      * @j2sNative
      * 
      * 
-     * context2 = context.canvas.topLayer.getContext("2d");
+     * contextFront = context.canvas.frontLayer.getContext("2d");
+     * contextRear = context;
      * 
      */
     {}
@@ -252,14 +254,15 @@ public class JsPanel implements JSVPanel {
     	if (bgcolor == null)
     		bgcolor = viewer.g2d.getColor1(-1);
 			viewer.g2d.fillBackground(context, bgcolor);
-			viewer.g2d.fillBackground(context2, bgcolor);
+			viewer.g2d.fillBackground(contextRear, bgcolor);
+			viewer.g2d.fillBackground(contextFront, bgcolor);
 			return;
   	}
   	
     if (pd.graphSets == null || pd.isPrinting)
       return;
     pd.g2d = pd.g2d0;
-    pd.drawGraph(context, context2, getWidth(), getHeight(), false);
+    pd.drawGraph(context, contextFront, contextRear, getWidth(), getHeight(), false);
     viewer.repaintDone();
   }
 
