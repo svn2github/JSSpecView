@@ -78,7 +78,7 @@ public class JsDialog extends JDialog implements PlatformDialog {
 	}
 	
 	public void onFocus() {
-		 // TODO: implement onFocus() in Jmol.Dialog			
+		 // TODO: implement onFocus() in Jmol.Swing			
 		setFront();
 		}
 		

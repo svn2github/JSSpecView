@@ -23,28 +23,27 @@
  */
 package jspecview.js2d;
 
+import org.jmol.popup.JSSwingPopupHelper;
+import org.jmol.popup.PopupResource;
 
 import javajs.api.PlatformViewer;
-import javajs.util.SB;
+import javajs.api.SC;
+import javajs.awt.Component;
+import javajs.swing.JPopupMenu;
 
 import jspecview.common.JSViewer;
 import jspecview.popup.JSVGenericPopup;
 import jspecview.popup.JSVPopupResourceBundle;
-import jspecview.popup.PopupResource;
 
 public class JsPopup extends JSVGenericPopup {
-  
-  /*
-   * If adding a custom popup menu to an application, simply subclass 
-   * initialize() and specify a different resource bundle. 
-   * 
-   * If you are not using Java awt/Swing, then you need to also overload 
-   * Swingpopup.java and extend it as desired. Or completely omit this package 
-   * 
-   * Note that changes here should also be reflected in org.jmol.modelkit.ModelKitPopup.
-   * 
-   */
+
+  //  (on mouse up)       checkMenuClick(e.getSource(), e.getSource().getActionCommand());
+  //  (on entry)          checkMenuFocus(item.getName(), item.getActionCommand(), true);
+  //  (on exit)           checkMenuFocus(item.getName(), item.getActionCommand(), false);
+  //  (on checkbox click) checkBoxStateChanged(e.getSource());   
+
   public JsPopup() {
+  	helper = new JSSwingPopupHelper(this);
     // required by reflection
   }
 
@@ -54,395 +53,31 @@ public class JsPopup extends JSVGenericPopup {
     initialize((JSViewer) viewer, bundle, menu);
 	}
 
-  //TODO: jQuery menu actions, entry, and exit need to come back here
-  //      to execute checkMenuClick, checkMenuFocus, and checkBoxStateChanged
-
-  //  (on mouse up)       checkMenuClick(e.getSource(), e.getSource().getActionCommand());
-  //  (on entry)          checkMenuFocus(item.getName(), item.getActionCommand(), true);
-  //  (on exit)           checkMenuFocus(item.getName(), item.getActionCommand(), false);
-  //  (on checkbox click) checkBoxStateChanged(e.getSource());   
-
-  //     new Jmol.Menu.PopupMenu(applet, name)
-  //     new Jmol.Menu.SubMenu(applet, entry)
-  //     new Jmol.Menu.MenuItem(applet, entry, isCheckBox, isRadio)
-  //     new Jmol.Menu.ButtonGroup(applet)
-  // 
-
   /**
-   * update the button depending upon its type
+   * could be frank menu or regular context menu
    * 
-   * @param b
-   * @param entry
-   * @param script
    */
+  @Override
+  public void menuShowPopup(SC popup, int x, int y) {
 
-  protected void updateButton(Object b, String entry, String script) {
-    String[] ret = new String[] { entry };
-    entry = ret[0];
-    Object icon = getEntryIcon(ret);
-    /**
-     * @j2sNative
-     * 
-     *            if (icon != null) b.setIcon(icon); 
-     *            if (entry != null) b.setText(entry); 
-     *            if (script != null) b.setActionCommand(script); 
-     *            this.thisPopup.tainted = true;
-     * 
-     */
-    {
-      System.out.println(icon);
+    try {
+      ((JPopupMenu) popup).show((Component) viewer.getApplet(), x, y);
+    } catch (Exception e) {
+      // ignore
     }
-  }
-
-  private Object newMenuItem(Object menu, Object item, String text,
-                             String script, String id) {
-    updateButton(item, text, script);
-    /**
-     * @j2sNative if (id != null && id.startsWith("Focus")) {
-     *            item.addMouseListener(this); id = menu.getName() + "." + id; }
-     *            item.setName(id == null ? menu.getName() + "." : id);
-     */
-    {
-      System.out.println(id);
-    }
-    menuAddItem(menu, item);
-    return item;
-  }
-
-  ////////////////////////////////////////////////////////////////
-
-  /// JmolAbstractMenu ///
-
-  @Override
-	public void menuAddButtonGroup(Object newMenu) {
-    /**
-     * @j2sNative
-     * 
-     *            if (this.buttonGroup == null) this.buttonGroup = new
-     *            Jmol.Menu.ButtonGroup(this.thisPopup);
-     *            this.buttonGroup.add(newMenu);
-     * 
-     */
-    {
-    }
-  }
-
-  @Override
-	public void menuAddItem(Object menu, Object item) {
-    /**
-     * @j2sNative
-     * 
-     *            menu.add(item); this.thisPopup.tainted = true;
-     * 
-     */
-    {
-    }
-  }
-
-  @Override
-	public void menuAddSeparator(Object menu) {
-    /**
-     * @j2sNative
-     * 
-     *            menu.add(new Jmol.Menu.MenuItem(this.thisPopup, null, false,
-     *            false)); this.thisPopup.tainted = true;
-     * 
-     */
-    {
-    }
-  }
-
-  @Override
-	public void menuAddSubMenu(Object menu, Object subMenu) {
-    menuAddItem(menu, subMenu);
-  }
-
-  @Override
-	public void menuClearListeners(Object menu) {
-    /**
-     * @j2sNative
-     * 
-     *            menu.dispose();
-     */
-    {
-      
-    }
-  }
-
-  @Override
-	public Object menuCreateCheckboxItem(Object menu, String entry,
-                                       String basename, String id,
-                                       boolean state, boolean isRadio) {
-    Object item = null;
-
-    /**
-     * @j2sNative
-     * 
-     *            item = new Jmol.Menu.MenuItem(this.thisPopup, entry, !isRadio,
-     *            isRadio); item.setSelected(state); item.addItemListener(this);
-     * 
-     */
-    {
-    }
-    return newMenuItem(menu, item, entry, basename, id);
-  }
-
-  @Override
-	public Object menuCreateItem(Object menu, String entry, String script,
-                               String id) {
-    Object item = null;
-
-    /**
-     * @j2sNative
-     * 
-     *            item = new Jmol.Menu.MenuItem(this.thisPopup, entry);
-     *            item.addActionListener(this);
-     * 
-     */
-    {
-    }
-    return newMenuItem(menu, item, entry, script, id);
-  }
-
-  @Override
-	public Object menuCreatePopup(String name) {
-    /**
-     * @j2sNative
-     * 
-     *            return new Jmol.Menu.PopupMenu(this.viewer.applet, name);
-     * 
-     */
-    {
-      return null;
-    }
-  }
-
-  @Override
-	public void menuEnable(Object menu, boolean enable) {
-    /**
-     * @j2sNative
-     * 
-     *            if (menu.isItem) { this.menuEnableItem(menu, enable); return;
-     *            } try { menu.setEnabled(enable); } catch (e) { 
-     *            }
-     *            this.thisPopup.tainted = true;
-     * 
-     */
-    {
-    }
-  }
-
-  @Override
-	public void menuEnableItem(Object item, boolean enable) {
-    /**
-     * @j2sNative
-     * 
-     *            try { item.setEnabled(enable); } catch (e) { }
-     *            this.thisPopup.tainted = true;
-     * 
-     */
-    {
-    }
-  }
-
-  @Override
-	public void menuGetAsText(SB sb, int level, Object menu,
-                            String menuName) {
-    /**
-     * @j2sNative
-     * 
-     *            var name = menuName; var subMenus = menu.getComponents(); for
-     *            (var i = 0; i < subMenus.length; i++) { var m = subMenus[i];
-     *            var flags = null; if (m.isMenu) { name = m.getName(); flags =
-     *            "enabled:" + m.isEnabled(); this.addItemText(sb, 'M', level,
-     *            name, m.getText(), null, flags); this.menuGetAsText(sb, level
-     *            + 1, m.getPopupMenu(), name); } else if (m.isItem) { flags =
-     *            "enabled:" + m.isEnabled(); if (m.isCheckBox) flags +=
-     *            ";checked:" + m.getState(); var script =
-     *            this.fixScript(m.getName(), m.getActionCommand());
-     *            this.addItemText(sb, 'I', level, m.getName(), m.getText(),
-     *            script, flags); } else { this.addItemText(sb, 'S', level,
-     *            name, null, null, null); } }
-     */
-    {
-    }
-  }
-
-  @Override
-	public String menuGetId(Object menu) {
-    /**
-     * @j2sNative
-     * 
-     *            return menu.getName();
-     * 
-     */
-    {
-      return null;
-    }
-  }
-
-  @Override
-	public int menuGetItemCount(Object menu) {
-    /**
-     * @j2sNative
-     * 
-     *            return menu.getItemCount();
-     * 
-     */
-    {
-      return 0;
-    }
-  }
-
-  @Override
-	public Object menuGetParent(Object menu) {
-    /**
-     * @j2sNative
-     * 
-     *            return menu.getParent();
-     * 
-     */
-    {
-      return null;
-    }
-  }
-
-  @Override
-	public int menuGetPosition(Object menu) {
-    /**
-     * @j2sNative
-     * 
-     *            var p = menuGetParent(menu); if (p != null) for (var i =
-     *            p.getItemCount(); --i >= 0;) if (p.getItem(i) == menu) return
-     *            i;
-     */
-    {
-    }
-    return -1;
-  }
-
-  @Override
-	public void menuInsertSubMenu(Object menu, Object subMenu, int index) {
-    // not applicable
-  }
-
-  @Override
-	public Object menuNewSubMenu(String entry, String id) {
-    /**
-     * @j2sNative
-     * 
-     *            var menu = new Jmol.Menu.SubMenu(this.thisPopup, entry);
-     *            this.updateButton(menu, entry, null); menu.setName(id);
-     *            menu.setAutoscrolls(true); return menu;
-     */
-    {
-      return null;
-    }
-  }
-
-  @Override
-	public void menuRemoveAll(Object menu, int indexFrom) {
-    /**
-     * @j2sNative
-     * 
-     *            menu.removeAll(indexFrom); this.thisPopup.tainted = true;
-     * 
-     */
-    {
-    }
-  }
-
-  @Override
-	public void menuSetAutoscrolls(Object menu) {
-    /**
-     * @j2sNative
-     * 
-     *            menu.setAutoscrolls(true); this.thisPopup.tainted = true;
-     * 
-     */
-    {
-    }
-  }
-
-  @Override
-	public void menuSetCheckBoxState(Object item, boolean state) {
-    /**
-     * @j2sNative
-     * 
-     *            item.setSelected(state); this.thisPopup.tainted = true;
-     * 
-     */
-    {
-    }
-  }
-
-  @Override
-	public String menuSetCheckBoxOption(Object item, String name, String what) {
-    return null;
-  }
-
-  @Override
-	public void menuSetCheckBoxValue(Object source) {
-    /**
-     * @j2sNative
-     * 
-     *            this.setCheckBoxValue(source, source.getActionCommand(),
-     *            source.isSelected()); if(this.thisPopup)this.thisPopup.tainted = true;
-     * 
-     */
-    {
-    }
-  }
-
-  @Override
-	public void menuSetLabel(Object menu, String entry) {
-    /**
-     * @j2sNative
-     * 
-     *            menu.setText(entry); this.thisPopup.tainted = true;
-     * 
-     */
-    {
-    }
-  }
-
-  @Override
-	public void menuSetListeners() {
-    // ignored
-  }
-
-  @Override
-	public void menuShowPopup(Object popup, int x, int y) {
-    /**
-     * @j2sNative
-     * 
-     *            popup.menuShowPopup(x, y);
-     * 
-     */
-    {
-    }
-    
-  }
-
-  @Override
-	public void updateSpecialMenuItem(Object m) {
-    /**
-     * @j2sNative
-     * 
-     *          m.setText(this.getSpecialLabel(m.getName(), m.getText()));
-     */
-    {}    
   }
 
 	@Override
-	public boolean menuIsEnabled(Object item) {
-    /**
-     * @j2sNative
-     * 
-     *          return item.isEnabled();
-     */
-    {}    
-		return false;
+	protected Object getImageIcon(String fileName) {
+		// not used in JSV
+		return null;
 	}
+
+	@Override
+	public void menuFocusCallback(String name, String actionCommand, boolean b) {
+		// not used in JSV?
+		
+	}
+
 
 }
