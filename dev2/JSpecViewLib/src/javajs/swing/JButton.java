@@ -1,8 +1,9 @@
 package javajs.swing;
 
+import javajs.api.SC;
 import javajs.util.SB;
 
-public class JButton extends JComponent {
+public class JButton extends AbstractButton {
 
   public JButton() {
     super("btnJB");
@@ -13,6 +14,4 @@ public class JButton extends JComponent {
 		sb.append("<input type=button id='" + id + "' class='JButton' style='" + getCSSstyle(0) + "' onclick='SwingController.click(this)' value='"+ text + "'/>");
 		return sb.toString();
 	}
-
-
 }

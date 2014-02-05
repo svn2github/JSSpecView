@@ -1,7 +1,6 @@
 package javajs.awt;
 
 import javajs.api.GenericColor;
-import javajs.api.SwingController;
 import javajs.util.CU;
 
 abstract public class Component {
@@ -13,9 +12,11 @@ abstract public class Component {
   protected int width;
   protected int height;
   protected String id;
-  protected SwingController controller;
 
-  Object actionListener;
+  protected Object parent;
+
+  protected Object actionListener;
+  protected Object mouseListener;
 
   private GenericColor bgcolor;
 
@@ -24,7 +25,6 @@ abstract public class Component {
       return;
     /**
      * @j2sNative
-     *            
      *            SwingController.register(this, type);
      */
     {
@@ -55,6 +55,14 @@ abstract public class Component {
     this.name = name;
   }
 
+  public String getName() {
+    return name;
+  }
+  
+  public Object getParent() {
+    return parent;
+  }
+  
   public void setPreferredSize(Dimension dimension) {
     this.width = dimension.width;
     this.height = dimension.height;   
@@ -70,10 +78,18 @@ abstract public class Component {
     actionListener = listener;
   }
 
+  public void addMouseListener(Object listener) {
+    mouseListener = listener;
+  }
+
   public String getText() {
     return text;
   }
 
+  public boolean isEnabled() {
+    return enabled;
+  }
+  
   public void setEnabled(boolean enabled) {
     this.enabled = enabled;
   }
@@ -130,6 +146,5 @@ abstract public class Component {
   public void repaint() {
     // for inheritance
   }
-
 
 }

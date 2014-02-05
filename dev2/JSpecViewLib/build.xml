@@ -46,7 +46,11 @@
             <include name="java/BS.java" />
             <include name="adapter/smarter/JmolJDXMOLParser.java" />
             <include name="adapter/smarter/JmolJDXMOLReader.java" />
+	        <include name="api/Translator.java" />
             <include name="jsv/JDXMOLParser.java" />
+	        <include name="popup/GenericSwingPopup.java" />
+	        <include name="popup/PopupHelper.java" />
+		    <include name="popup/PopupResource.java" />
             <include name="util/DefaultLogger.java" />
             <include name="util/LoggerInterface.java" />
 	        <include name="util/Logger*.java" />
