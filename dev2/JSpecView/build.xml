@@ -83,6 +83,8 @@
           <fileset dir="${jmol.path}/src/org/jmol">
             <include name="api/JmolSyncInterface.java" />
             <include name="api/JSVInterface.java" />
+            <include name="popup/AwtSwing*.java" />
+            <include name="popup/JSSwing*.java" />
           </fileset>
         </copy>
 		
