@@ -195,7 +195,7 @@ public abstract class GenericSwingPopup implements GenericMenuInterface {
     String[] ret = new String[] { entry };    
     Object icon = getEntryIcon(ret);
     entry = ret[0];
-    b.init(entry, icon, script, null);
+    b.init(entry, icon, script, thisPopup);
     helper.taint();
   }
 
@@ -294,7 +294,7 @@ public abstract class GenericSwingPopup implements GenericMenuInterface {
   }
 
   protected void menuAddSeparator(SC menu) {
-    menu.add(null);
+    menu.add(helper.getMenuItem(null));
     helper.taint();
   }
 

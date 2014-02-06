@@ -7,7 +7,7 @@ abstract public class Component {
 
   protected boolean visible;  
   protected boolean enabled;
-  protected String text;
+  protected String text;    
   protected String name;
   protected int width;
   protected int height;
@@ -15,12 +15,12 @@ abstract public class Component {
 
   protected Object parent;
 
-  protected Object actionListener;
   protected Object mouseListener;
 
   private GenericColor bgcolor;
 
   protected Component(String type) {
+    id = type + ("" + Math.random()).substring(3, 10);
     if (type == null)
       return;
     /**
@@ -28,7 +28,6 @@ abstract public class Component {
      *            SwingController.register(this, type);
      */
     {
-      id = type + ("" + Math.random()).substring(3);
     }
 
   }
@@ -66,16 +65,6 @@ abstract public class Component {
   public void setPreferredSize(Dimension dimension) {
     this.width = dimension.width;
     this.height = dimension.height;   
-  }
-
-  /** 
-   * It will be the function of the JavaScript on the 
-   * page to do with selectionListener what is desired.
-   * @param listener 
-   * 
-   */
-  public void addActionListener(Object listener) {
-    actionListener = listener;
   }
 
   public void addMouseListener(Object listener) {

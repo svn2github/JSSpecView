@@ -5,7 +5,7 @@ import javajs.awt.Component;
 public class JMenu extends JMenuItem {
 
   public JMenu() {
-    super("mnu");
+    super("mnu",3);
   }
 
   public int getItemCount() {

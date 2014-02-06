@@ -1,6 +1,5 @@
 package javajs.swing;
 
-import javajs.api.SC;
 import javajs.util.SB;
 
 public class JButton extends AbstractButton {

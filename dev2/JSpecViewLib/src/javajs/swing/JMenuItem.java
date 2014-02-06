@@ -4,8 +4,16 @@ import javajs.util.PT;
 
 public class JMenuItem extends AbstractButton {
 
-  public JMenuItem(String type) {
-    super(type == null ? null : type + "JMI");
+  int btnType;
+
+  public JMenuItem(String text) {
+    super("btn");
+    setText(text);
+  }
+
+  public JMenuItem(String type, int i) {
+    super(type);
+    btnType = i;
   }
 
   @Override
@@ -24,5 +32,5 @@ public class JMenuItem extends AbstractButton {
   protected String htmlLabel() {
     return (this.text != null ? "TeXt" : "");
   }
-  
+
 }

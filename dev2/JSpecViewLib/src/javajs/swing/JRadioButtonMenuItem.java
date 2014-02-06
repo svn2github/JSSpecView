@@ -3,7 +3,7 @@ package javajs.swing;
 public class JRadioButtonMenuItem extends JMenuItem {
 
   public JRadioButtonMenuItem() {
-    super("rad");
+    super("rad",2);
   }
 
   @Override
