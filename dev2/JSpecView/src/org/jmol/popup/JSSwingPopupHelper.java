@@ -34,11 +34,14 @@ import javajs.swing.JMenu;
 import javajs.swing.JMenuItem;
 
 /**
- * all popup-related awt/swing class references are in this file.
+ * For menus, popup-related awt/swing class references are in this file.
+ * We can ignore all the event/listener references because JSmol will create a
+ * simple object with just the elements getSource and getActionCommand.
+ * No need to have the entire classes fleshed out. 
  * 
  * 
  */
-public class JSSwingPopupHelper implements PopupHelper {
+  public class JSSwingPopupHelper implements PopupHelper {
 
   //  (on mouse up)       checkMenuClick(e.getSource(), e.getSource().getActionCommand());
   //  (on entry)          checkMenuFocus(item.getName(), item.getActionCommand(), true);
@@ -144,9 +147,34 @@ public class JSSwingPopupHelper implements PopupHelper {
       ((JPopupMenu) menu).disposeMenu();
   }
 
+  public void itemStateChanged(Object e) {
+     /**
+      * @j2sNative
+      * 
+      * this.popup.menuCheckBoxCallback(e.getSource());
+      * 
+      */
+    {
+      System.out.println(e);
+    }
+  }
+
+  public void actionPerformed(Object e) {
+    /**
+     * @j2sNative
+     * 
+     * this.popup.menuClickCallback(e.getSource(), e.getActionCommand());
+     * 
+     */
+   {
+     System.out.println(e);
+   }
+  }
+
   @Override
   public Object getButtonGroup() {
     return buttonGroup;
   }
 
+  
 }
