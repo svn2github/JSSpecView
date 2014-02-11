@@ -138,6 +138,15 @@ public class AwtDialog extends JDialog implements PlatformDialog {
 	}
 
 	@Override
+	public void setFocus(boolean tf) {
+		//setBackground(tf ? Color.BLUE : Color.GRAY);
+		if (tf) {
+			requestFocus();
+			toFront();
+		}
+	}
+	
+	@Override
 	public void setVisible(boolean tf) {
 		// just identifying when this happens. 
 		// called from JSVDialog.layoutDialog() and JSVDialog.setVisible()

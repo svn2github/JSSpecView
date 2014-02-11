@@ -1,10 +1,19 @@
 package javajs.swing;
 
 import javajs.awt.Color;
+import javajs.awt.Container;
 import javajs.util.SB;
 
 
-public class JDialog extends JComponent {
+/**
+ * Skipping awt.Dialog here; no real reason to have that in a pure Swing app
+ * as we handle file dialogs a different way, and that is the only other class
+ * that subclasses it.
+ * 
+ * @author hansonr
+ *
+ */
+public class JDialog extends Container {
 
   private static final int headerHeight = 25;
   private int defaultWidth = 600;

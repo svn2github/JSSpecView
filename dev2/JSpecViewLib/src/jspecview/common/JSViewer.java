@@ -600,7 +600,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		JDXSpectrum spec2 = JDXSpectrum.taConvert(spec, mode);
 		if (spec2 == spec)
 			return;
-		pd.setSpectrum(spec2);
+		pd.setSpecForIRMode(spec2);
 		setIRmode(value);
 		// jsvp.doRepaint();
 	}

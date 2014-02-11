@@ -394,7 +394,7 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
 		else
   		requestFocusInWindow();
 		if (pd != null)
-			pd.dialogsToFront();
+			pd.dialogsToFront(null);
 	}
 
   public class RequestThread implements Runnable {

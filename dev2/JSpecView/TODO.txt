@@ -6,6 +6,20 @@ ___date="$Date$"
 ___svnRev="$LastChangedRevision$"
 ___version="2.1.1"
 
+todo: 
+ - enhancement: when displaying peaks for a spectrum that has links available suggest that from the peak dialog box 
+ that clicking on a peak will highlight appropriately in JSmol/JSME
+
+ - get integrations to stay in view sets.
+
+BH 2/11/2014 7:26:00 AM
+-cleaned up dialog synchronization in Java
+-set so that measurements only lock in when measurements dialog is open
+
+-fix for a BLOCK file view 2 spectra eg IR and MS 1.1 and 1.4 then try close selected (gone from dialog but not display)
+ then try to open an H NMR spectrum 1.2 - nothing happens - FIXED 24 Jan 2014
+-fix for JSpecView/Java + JSME crashed Firefox during applet loading. (just went away??)
+
 BH 1/23/2014 5:12:00 PM 
 -added close SIMULATIONS
 -added close VIEWS
@@ -16,15 +30,6 @@ BH 1/13/2014 8:24:33 PM
 -fix for baseline dropping below bottom pixel
 -fix for file-not-found or file-not-recognized error message not understandable.
 -fix for PDF file creation broken
-
-
-todo: 
- - enhancement: when displaying peaks for a spectrum that has links available suggest that from the peak dialog box 
- that clicking on a peak will highlight appropriately in JSmol/JSME
-
- -for a BLOCK file view 2 spectra eg IR and MS 1.1 and 1.4 then try close selected (gone from dialog but not display)
- then try to open an H NMR spectrum 1.2 - nothing happens - FIXED 24 Jan 2014
- -JSpecView/Java + JSME crashed Firefox during applet loading.
 
 new feature: show NMR taps into NMRDB directly
  -- for now, application only

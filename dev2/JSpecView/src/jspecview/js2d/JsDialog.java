@@ -82,6 +82,15 @@ public class JsDialog extends JDialog implements PlatformDialog {
 		setFront();
 		}
 		
+	@Override
+	public void setFocus(boolean tf) {
+		//setBackground(tf ? Color.BLUE : Color.GRAY);
+		if (tf) {
+			//requestFocus();
+			setFront();
+		}
+	}
+		
 	private void setFront() {
 		/**
 		 * @j2sNative

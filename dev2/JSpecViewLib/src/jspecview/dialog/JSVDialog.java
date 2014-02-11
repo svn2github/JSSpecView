@@ -301,6 +301,10 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 		}
 	}
 
+	public void setFocus(boolean tf) {
+		dialog.setFocus(tf);		
+	}
+
 	public void update(Coordinate clicked, double xRange, int yOffset) {
 		selectTableRow(-1);
 		switch (type) {

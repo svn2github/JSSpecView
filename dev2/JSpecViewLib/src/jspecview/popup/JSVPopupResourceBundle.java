@@ -46,14 +46,14 @@ public class JSVPopupResourceBundle extends PopupResource {
     
   private static String[][] menuContents = {
     
-      {  "appMenu", "_SIGNED_FileMenu Spectra... OptionsMenu ZoomMenu - Script... Properties" },
-
+      {  "appMenu", "_SIGNED_FileMenu Spectra... OptionsMenu ZoomMenu - " +
+      		"Integration Peaks Measurements - Script... Properties" },
       { "appletMenu",
           "_SIGNED_FileMenu Spectra... - OptionsMenu ZoomMenu" +
-          " - Measurements Peaks Integration" +
+          " - Integration Peaks Measurements" +
           " - Script... - Print... - AboutMenu" },
 
-      {   "_SIGNED_FileMenu", "Open_File... Open_Simulation... Open_URL... - Append_File... Append_Simulation... Append_URL... - Save_AsMenu Export_AsMenu - Close_Views Close_Simulations Close_All" },
+      {   "_SIGNED_FileMenu", "Open_File... Open_Simulation... Open_URL... - Add_File... Add_Simulation... Add_URL... - Save_AsMenu Export_AsMenu - Close_Views Close_Simulations Close_All" },
 
       {   "Save_AsMenu", "Original... JDXMenu CML XML(AnIML)" },
               
@@ -75,9 +75,9 @@ public class JSVPopupResourceBundle extends PopupResource {
   	{"Open_File...","load ?"},
   	{"Open_URL...","load http://?"},
   	{"Open_Simulation...","load $?"},
-  	{"Append_File...","load append ?"},
-  	{"Append_URL...","load append http://?"},
-  	{"Append_Simulation...","load append $?; view \"1HNMR\""},
+  	{"Add_File...","load append ?"},
+  	{"Add_URL...","load append http://?"},
+  	{"Add_Simulation...","load append $?; view \"1HNMR\""},
   	{"Close_All", "close all"},
   	{"Close_Views", "close views"},
   	{"Close Simulations", "close simulations"},

@@ -121,21 +121,21 @@ public class ApplicationMenu extends JMenuBar {
    */
   private void jbInit() throws Exception {
   	
-    JMenuItem openFileMenuItem = setMenuItem(null, 'F', "Append File...", 70,
+    JMenuItem openFileMenuItem = setMenuItem(null, 'F', "Add File...", 70,
         InputEvent.CTRL_MASK, new ActionListener() {
           @Override
 					public void actionPerformed(ActionEvent e) {
             viewer.openFileFromDialog(true, false, false, null);
           }
         });
-    JMenuItem openSimulationMenuItem = setMenuItem(null, 'I', "Append Simulation...", 73,
+    JMenuItem openSimulationMenuItem = setMenuItem(null, 'I', "Add Simulation...", 73,
         InputEvent.CTRL_MASK, new ActionListener() {
           @Override
 					public void actionPerformed(ActionEvent e) {
             viewer.openFileFromDialog(true, false, true, null);
           }
         });
-    JMenuItem openURLMenuItem = setMenuItem(null, 'U', "Append URL...", 85,
+    JMenuItem openURLMenuItem = setMenuItem(null, 'U', "Add URL...", 85,
         InputEvent.CTRL_MASK, new ActionListener() {
           @Override
 					public void actionPerformed(ActionEvent e) {
@@ -370,7 +370,7 @@ public class ApplicationMenu extends JMenuBar {
     openRecentMenu = new JMenu();
     openRecentMenu.setActionCommand("OpenRecent");
     openRecentMenu.setMnemonic('R');
-    openRecentMenu.setText("Append Recent");
+    openRecentMenu.setText("Add Recent");
 
     saveAsMenu = new JMenu();
     saveAsMenu.setMnemonic('A');
@@ -606,7 +606,7 @@ public class ApplicationMenu extends JMenuBar {
       menuItem.addActionListener(new ActionListener() {
         @Override
 				public void actionPerformed(ActionEvent e) {
-          viewer.openFile(((JMenuItem) e.getSource()).getText(), true);
+          viewer.openFile(((JMenuItem) e.getSource()).getText(), false);
         }
       });
     }

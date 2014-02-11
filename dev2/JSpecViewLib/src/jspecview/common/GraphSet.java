@@ -312,7 +312,7 @@ public class GraphSet implements XYScaleConverter {
 		return spectra.get(index);
 	}
 
-	private int getSpectrumIndex(JDXSpectrum spec) {
+	int getSpectrumIndex(JDXSpectrum spec) {
 		for (int i = spectra.size(); --i >= 0;)
 			if (spectra.get(i) == spec)
 				return i;
@@ -632,7 +632,7 @@ public class GraphSet implements XYScaleConverter {
 			return false;
 		xValueMovedTo = getSpectrum().findXForPeakNearest(xValueMovedTo);
 		setXPixelMovedTo(xValueMovedTo, Double.MAX_VALUE, 0, 0);
-		return true;
+		return !Double.isNaN(xValueMovedTo);
 	}
 
 	void setXPixelMovedTo(double x1, double x2, int xPixel1, int xPixel2) {
@@ -697,27 +697,35 @@ public class GraphSet implements XYScaleConverter {
 		case 1: // single click -- save and continue
 		case -2: // second double-click -- save and quit
 		case -3: // second ctrl-click
-			if (pendingMeasurement == null)
-				return;
-			setScale(getSpectrumIndex(pendingMeasurement.spec));
-			if (clickCount != 3 && findNearestMaxMin()) {
-				xPixel = xPixelMovedTo;
-			}
-			x = toX(xPixel);
-			y = toY(yPixel);
-			pendingMeasurement.setPt2(x, y);
-			if (pendingMeasurement.text.length() == 0) {
-				pendingMeasurement = null;
-			} else {
-				setMeasurement(pendingMeasurement);
-				if (clickCount == 1) {
-					setSpectrumClicked(getSpectrumIndex(pendingMeasurement.spec));
-					pendingMeasurement = new Measurement().setM1(x, y,
-							pendingMeasurement.spec);
-				} else {
-					pendingMeasurement = null;
+			boolean isOK = (pendingMeasurement != null && isVisible(getDialog(AType.Measurements, -1)));
+			while (isOK) {
+				setScale(getSpectrumIndex(pendingMeasurement.spec));
+				if (clickCount != 3) {
+					if (!findNearestMaxMin()) {
+						isOK = false;
+						break;
+					}
+					xPixel = xPixelMovedTo;
 				}
+				x = toX(xPixel);
+				y = toY(yPixel);
+				pendingMeasurement.setPt2(x, y);
+				if (pendingMeasurement.text.length() == 0) {
+					isOK = false;
+					break;
+				}
+				setMeasurement(pendingMeasurement);
+				if (clickCount != 1) {
+					isOK = false;
+					break;
+				}
+				setSpectrumClicked(getSpectrumIndex(pendingMeasurement.spec));
+				pendingMeasurement = new Measurement().setM1(x, y,
+						pendingMeasurement.spec);
+				break;
 			}
+			if (!isOK)
+				pendingMeasurement = null;
 			pd.repaint();
 			break;
 		case 5: // (old) control-click
@@ -1412,8 +1420,8 @@ public class GraphSet implements XYScaleConverter {
 				: iSpectrumSelected);
 		Object g2 = (gRear == gMain? gFront : gRear);
 		if (doAll) {
-			boolean addCurrentBox = (!isLinked && (isSplittable) && (!isSplittable
-					|| nSplit == 1 || pd.currentSplitPoint == iSplit));
+			boolean addCurrentBox = (!isLinked && isSplittable && 
+					(nSplit == 1 || pd.currentSplitPoint == iSplit));
 			boolean drawUpDownArrows = (pd.isCurrentGraphSet(this) && zoomEnabled
 					&& spectra.get(0).isScalable() && (addCurrentBox || nSpectra == 1)
 					&& (nSplit == 1 || pd.currentSplitPoint == iSpectrumMovedTo) && !isDrawNoSpectra());
@@ -3649,6 +3657,8 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 			stackSelected = false;
 			showAllStacked = false;
 		}
+		if (iSpec >= 0)
+			dialogsToFront(getSpectrum());
 	}
 
 	void setSpectrumJDX(JDXSpectrum spec) {
@@ -4007,13 +4017,19 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		cur1D2Locked = isLocked;
 	}
 
-	public void dialogsToFront() {
+	public void dialogsToFront(JDXSpectrum spec) {
 		if (dialogs == null)
 			return;
+		if (spec == null)
+			spec = getSpectrum();
 		for (Map.Entry<String, AnnotationData> e : dialogs.entrySet()) {
 			AnnotationData ad = e.getValue();
-			if (isVisible(ad))
+			if (isVisible(ad)) {
+				if (spec == null)
 				((JSVDialog) ad).setVisible(true);
+				else
+					((JSVDialog) ad).setFocus(ad.getSpectrum() == spec);
+			}
 		}
 	}
 

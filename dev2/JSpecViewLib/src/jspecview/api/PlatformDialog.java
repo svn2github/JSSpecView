@@ -44,6 +44,8 @@ public interface PlatformDialog {
 	boolean isVisible();
 
 	void setVisible(boolean visible);
+	
+	void setFocus(boolean tf);
 
 	boolean isSelected(Object chkbox);
 

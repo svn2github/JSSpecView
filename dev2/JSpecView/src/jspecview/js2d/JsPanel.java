@@ -194,7 +194,7 @@ public class JsPanel implements JSVPanel {
 	@Override
 	public void getFocusNow(boolean asThread) {
 		if (pd != null)
-			pd.dialogsToFront();
+			pd.dialogsToFront(null);
 	}
 
 	@Override

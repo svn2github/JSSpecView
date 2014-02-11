@@ -364,7 +364,7 @@ public class PanelData implements EventManager {
 		if (andCurrent)
 			currentGraphSet.selectSpectrum(filePath, type, model);
 		if ("ID".equals(type) ) {
-			jumpToSpectrum(getCurrentSpectrumIndex(), true);
+			jumpToSpectrumIndex(getCurrentSpectrumIndex(), true);
 			return;
 		}
 		
@@ -597,10 +597,15 @@ public class PanelData implements EventManager {
 		// or nSplit > 1 and new split point
 		// or nSplit == 1 and showAllStacked and isClick and is a spectrum click)
 
-		jumpToSpectrum(splitPoint, isNewSet || gs.nSplit > 1 && isNewSplitPoint);
+		jumpToSpectrumIndex(splitPoint, isNewSet || gs.nSplit > 1 && isNewSplitPoint);
 	}
 	
-	public void jumpToSpectrum(int index, boolean doSetSpec) {
+	public void jumpToSpectrum(JDXSpectrum spec) {
+		int index = currentGraphSet.getSpectrumIndex(spec);
+		jumpToSpectrumIndex(index, false);
+	}
+	
+	public void jumpToSpectrumIndex(int index, boolean doSetSpec) {
 		if (index < 0 || index >= currentGraphSet.nSpectra)
 			return;
 		currentSplitPoint = index;
@@ -648,6 +653,7 @@ public class PanelData implements EventManager {
 
 	public void setSpectrum(int iSpec, boolean isSplit) {
 		currentGraphSet.setSpectrum(iSpec, isSplit);
+		
 		// repaint();
 	}
 
@@ -655,7 +661,7 @@ public class PanelData implements EventManager {
 		return currentGraphSet.getSpectrum();
 	}
 
-	public void setSpectrum(JDXSpectrum spec) {
+	public void setSpecForIRMode(JDXSpectrum spec) {
 		taintedAll = true;
 		JDXSpectrum spec0 = currentGraphSet.getSpectrum();
 		currentGraphSet.setSpectrumJDX(spec);
@@ -1158,8 +1164,8 @@ public class PanelData implements EventManager {
 		}
 	}
 
-	public void dialogsToFront() {
-		currentGraphSet.dialogsToFront();
+	public void dialogsToFront(JDXSpectrum spec) {
+		currentGraphSet.dialogsToFront(spec);
 	}
 
 	// //////// settable colors //////////

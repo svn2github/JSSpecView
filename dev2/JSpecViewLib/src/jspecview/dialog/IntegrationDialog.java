@@ -72,7 +72,11 @@ public class IntegrationDialog extends JSVDialog {
 			if (!id.equals("windowClosing") && (id.equals("btnAuto") || xyData == null || xyData.size() == 0)) {
 				viewer.runScript("integrate auto");
 				eventApply();
-			} else if (id.equals("btnDelete")) {
+				return true;
+			}
+			jsvp.getPanelData().jumpToSpectrum(spec);
+			setFocus(true);
+			if (id.equals("btnDelete")) {
 				deleteIntegral();
 			} else if (id.equals("btnNormalize")) {
 				if (!checkSelectedIntegral())
