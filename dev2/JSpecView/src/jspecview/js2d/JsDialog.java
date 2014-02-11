@@ -78,7 +78,6 @@ public class JsDialog extends JDialog implements PlatformDialog {
 	}
 	
 	public void onFocus() {
-		 // TODO: implement onFocus() in Jmol.Swing			
 		setFront();
 		}
 		
@@ -95,10 +94,7 @@ public class JsDialog extends JDialog implements PlatformDialog {
 		/**
 		 * @j2sNative
 		 * 
-		 * if (this.zIndex != Jmol._z.dialog)
-		 *   this.zIndex = ++Jmol._z.dialog;
-		 * if (this.container)
-		 *   this.container.style.zIndex = this.zIndex;
+		 * SwingController.setFront(this);
 		 * 
 		 */
 		{}
