@@ -135,6 +135,7 @@ public class AwtDialog extends JDialog implements PlatformDialog {
 		options = jsvDialog.options;
 		if (options == null)
 			options = new Hashtable<String, Object>();
+		addFocusListener((AwtDialogManager) manager);
 	}
 
 	@Override
@@ -398,7 +399,6 @@ public class AwtDialog extends JDialog implements PlatformDialog {
 			mainSplitPane.setResizeWeight(0);
 			mainSplitPane.setLeftComponent(leftPanel);
 			mainSplitPane.setRightComponent(new JScrollPane(rightPanel));
-		}
-			
+		}	
 	}
 }

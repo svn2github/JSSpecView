@@ -602,7 +602,7 @@ public class PanelData implements EventManager {
 	
 	public void jumpToSpectrum(JDXSpectrum spec) {
 		int index = currentGraphSet.getSpectrumIndex(spec);
-		jumpToSpectrumIndex(index, false);
+		jumpToSpectrumIndex(index, true);
 	}
 	
 	public void jumpToSpectrumIndex(int index, boolean doSetSpec) {

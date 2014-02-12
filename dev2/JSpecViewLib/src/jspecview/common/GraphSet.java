@@ -1421,10 +1421,10 @@ public class GraphSet implements XYScaleConverter {
 		Object g2 = (gRear == gMain? gFront : gRear);
 		if (doAll) {
 			boolean addCurrentBox = (!isLinked && isSplittable && 
-					(nSplit == 1 || pd.currentSplitPoint == iSplit));
-			boolean drawUpDownArrows = (pd.isCurrentGraphSet(this) && zoomEnabled
+					(nSplit == 1 || pd.currentSplitPoint == iSplit && iSplit == iSpectrumSelected));
+			boolean drawUpDownArrows = addCurrentBox;/*(pd.isCurrentGraphSet(this) && zoomEnabled
 					&& spectra.get(0).isScalable() && (addCurrentBox || nSpectra == 1)
-					&& (nSplit == 1 || pd.currentSplitPoint == iSpectrumMovedTo) && !isDrawNoSpectra());
+					&& (nSplit == 1 || pd.currentSplitPoint == iSpectrumMovedTo) && !isDrawNoSpectra());*/
 			boolean addSplitBox = isSplittable;
 			drawFrame(gMain, iSpecForFrame, addCurrentBox, addSplitBox,
 					drawUpDownArrows);
@@ -1622,7 +1622,6 @@ public class GraphSet implements XYScaleConverter {
 				g2d.drawLine(g, xPixelMovedTo2, yPixel0, xPixelMovedTo2, yPixel1);
 			yValueMovedTo = Double.NaN;
 		} else {
-			System.out.println("gs yvmt=" + yValueMovedTo);
 			int y = (ig == null ? yOffset + toPixelY(yValueMovedTo)
 					: toPixelYint(yValueMovedTo / 100));
 			if (y == fixY(y))
@@ -2856,7 +2855,6 @@ public class GraphSet implements XYScaleConverter {
 			pd.integralShiftMode = (isOnIntegral ? getShiftMode(xPixel, yPixel) : 0);
 			pd.isIntegralDrag = (pd.integralShiftMode == 0 && (isOnIntegral || haveIntegralDisplayed(-1)
 					&& findMeasurement(getIntegrationGraph(-1), xPixel, yPixel, 0) != null));
-			System.out.println("pd.isIntegralDrag set in checkSPelick " + pd.isIntegralDrag);
 			if (pd.integralShiftMode != 0)
 				// pd.repaint();
 				return false;

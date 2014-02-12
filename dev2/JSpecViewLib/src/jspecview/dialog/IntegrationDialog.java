@@ -19,6 +19,7 @@
 
 package jspecview.dialog;
 
+import javajs.util.DF;
 import jspecview.common.IntegralData;
 
 
@@ -69,13 +70,25 @@ public class IntegrationDialog extends JSVDialog {
 	public boolean callback(String id, String msg) {
 		double val;
 		try {
-			if (!id.equals("windowClosing") && (id.equals("btnAuto") || xyData == null || xyData.size() == 0)) {
-				viewer.runScript("integrate auto");
-				eventApply();
+			if (id.equals("SHOWSELECTION")) {
+				for (int i = 0; i < xyData.size(); i++)
+					if (DF.formatDecimalDbl(xyData.get(i).getXVal(), 2).equals(msg)) {
+						iSelected = i;
+						jsvp.getPanelData().setXPointers(spec, xyData.get(i).getXVal(),
+								spec, xyData.get(i).getXVal2());
+						jsvp.doRepaint(true);
+						break;
+					}
 				return true;
 			}
-			jsvp.getPanelData().jumpToSpectrum(spec);
-			setFocus(true);
+			if (!id.equals("windowClosing") && !id.equals("FOCUS")) {
+				if (id.equals("btnAuto") || xyData == null || xyData.size() == 0) {
+					viewer.runScript("integrate auto");
+					eventApply();
+					return true;
+				}
+				setFocus(true);
+			}
 			if (id.equals("btnDelete")) {
 				deleteIntegral();
 			} else if (id.equals("btnNormalize")) {

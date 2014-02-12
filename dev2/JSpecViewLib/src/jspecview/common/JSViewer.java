@@ -1080,8 +1080,8 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			if (isubspec > 0)
 				sb.append(".").appendI(isubspec);
 		}
-		if (isView && speclist.size() == 1) {
-			PanelNode node = PanelNode.findNodeById(idLast, panelNodes);
+		if (isView && speclist.size() > 0) {
+			PanelNode node = PanelNode.findNodeById(sb.substring(1), panelNodes);
 			if (node != null) {
 				setNode(node); // was "fromTree true"
 				// possibility of a problem here -- we are not communicating with Jmol

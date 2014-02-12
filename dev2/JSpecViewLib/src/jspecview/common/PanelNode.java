@@ -90,7 +90,7 @@ public class PanelNode {
 	public static PanelNode findNodeById(String id, List<PanelNode> panelNodes) {
 		if (id != null)
 			for (int i = panelNodes.size(); --i >= 0;)
-				if (id.equals(panelNodes.get(i).id))
+				if (id.equals(panelNodes.get(i).id) || id.equals(panelNodes.get(i).frameTitle))
 					return panelNodes.get(i);
 		return null;
 	}
@@ -112,8 +112,9 @@ public class PanelNode {
 	static public String getSpectrumListAsString(List<PanelNode> panelNodes) {
       SB sb = new SB();
       for (int i = 0; i < panelNodes.size(); i++) {
-      	String id = panelNodes.get(i).id;
-        sb.append(" ").append(id);
+      	PanelNode node = panelNodes.get(i);
+      	if (!node.isView)
+      		sb.append(" ").append(node.id);
       }
       return sb.toString().trim();
   }

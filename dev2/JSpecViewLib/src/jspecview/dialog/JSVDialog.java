@@ -155,7 +155,9 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 	 * @return true if consumed
 	 */
 	protected boolean callbackAD(String id, String msg) {
-		if (id.equals("tableSelect")) {
+		if (id.equals("FOCUS")) {
+			eventFocus();
+		} else if (id.equals("tableSelect")) {
 			tableSelect(msg);
 		} else if (id.equals("btnClear")) {
 			clear();
@@ -302,6 +304,7 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 	}
 
 	public void setFocus(boolean tf) {
+		System.out.println("setFocus " + this.spec);
 		dialog.setFocus(tf);		
 	}
 
@@ -514,6 +517,32 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 	}
 
 	private boolean skipCreate;
+	
+	protected void eventFocus() {
+		System.out.println("eventFocus on " + spec);
+		if (spec != null)
+			jsvp.getPanelData().jumpToSpectrum(spec);
+		switch (type) {
+		case Integration:
+			if (iRowSelected >= 0) {
+				int i = iRowSelected++;
+				tableCellSelect(-1, -1);
+			}
+			break;
+		case Measurements:
+			break;
+		case NONE:
+			break;
+		case PeakList:
+			createData();
+			skipCreate = true;
+			break;
+		case OverlayLegend:
+			break;
+		case Views:
+			break;
+		}
+	}
 
 	protected void eventApply() {
 		switch (type) {
@@ -576,23 +605,23 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 	private int iColSelected = -1;
 
 	private void tableCellSelect(int iRow, int iCol) {
+		System.out.println(iRow + " jSVDial " + iCol);
+		if (iRow < 0) {
+			iRow = iRowColSelected / 1000;
+			iCol = iRowColSelected % 1000;
+			iRowColSelected = -1;
+		}
 		Object value = tableData[iRow][1];
-		int icolrow = iRowSelected * 1000 + iColSelected;
+		int icolrow = iRow * 1000 + iCol;
 		if (icolrow == iRowColSelected)
 			return;
 		iRowColSelected = icolrow;
+		System.out.println("Setting rc = " + iRowColSelected + " " + spec);
 		selectTableRow(iRowSelected);
 		try {
 			switch (type) {
 			case Integration:
-				for (int i = 0; i < xyData.size(); i++)
-					if (DF.formatDecimalDbl(xyData.get(i).getXVal(), 2).equals(value)) {
-						iSelected = i;
-						jsvp.getPanelData().setXPointers(spec, xyData.get(i).getXVal(),
-								spec, xyData.get(i).getXVal2());
-						jsvp.doRepaint(true);
-						break;
-					}
+				callback("SHOWSELECTION", value.toString());
 				checkEnables();
 				break;
 			case Measurements:
@@ -715,6 +744,7 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 		boolean isAdjusting = "true".equals(getField(url, "adjusting"));
 		if (isAdjusting) {
 			iColSelected = iRowSelected = -1;
+			System.out.println("adjusting" + url);
 			return;
 		}
 		int index = PT.parseInt(getField(url, "index"));
@@ -724,9 +754,11 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 			//$FALL-THROUGH$
 		case 0:
 			iRowSelected = index;
+			System.out.println("r set to " + index);
 			break;
 		case 4:
 			iColSelected = index;
+			System.out.println("c set to " + index);
 			break;
 		}
 		if (iColSelected >= 0 && iRowSelected >= 0) {

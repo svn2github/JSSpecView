@@ -250,7 +250,14 @@ public class ApplicationMenu extends JMenuBar {
             viewer.runScript("zoom ?");
           }
         });
-    JMenuItem spectraMenuItem = setMenuItem(null, 'S', "Spectra...", 83,
+    JMenuItem viewAllMenuItem = setMenuItem(null, 'A', "All Spectra", 65,
+        InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
+          @Override
+					public void actionPerformed(ActionEvent e) {
+            viewer.runScript("view all");
+          }
+        });
+    JMenuItem spectraMenuItem = setMenuItem(null, 'S', "Selected Spectra...", 83,
         InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, new ActionListener() {
           @Override
 					public void actionPerformed(ActionEvent e) {
@@ -417,8 +424,7 @@ public class ApplicationMenu extends JMenuBar {
     fileMenu.add(printMenuItem).setEnabled(false);
     fileMenu.addSeparator();
     fileMenu.add(exitMenuItem);
-    displayMenu.add(sourceMenuItem).setEnabled(false);
-    displayMenu.add(errorLogMenuItem).setEnabled(false);
+    displayMenu.add(viewAllMenuItem);
     displayMenu.add(spectraMenuItem);
     displayMenu.add(overlayStackOffsetYMenuItem);
     displayMenu.add(overlayKeyMenuItem).setEnabled(false);
@@ -431,6 +437,8 @@ public class ApplicationMenu extends JMenuBar {
     displayMenu.addSeparator();
     displayMenu.add(zoomMenu);
     displayMenu.addSeparator();
+    displayMenu.add(sourceMenuItem).setEnabled(false);
+    displayMenu.add(errorLogMenuItem).setEnabled(false);
     displayMenu.add(propertiesMenuItem);
     zoomMenu.add(nextZoomMenuItem);
     zoomMenu.add(prevZoomMenuItem);
