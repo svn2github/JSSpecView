@@ -1622,6 +1622,7 @@ public class GraphSet implements XYScaleConverter {
 				g2d.drawLine(g, xPixelMovedTo2, yPixel0, xPixelMovedTo2, yPixel1);
 			yValueMovedTo = Double.NaN;
 		} else {
+			System.out.println("gs yvmt=" + yValueMovedTo);
 			int y = (ig == null ? yOffset + toPixelY(yValueMovedTo)
 					: toPixelYint(yValueMovedTo / 100));
 			if (y == fixY(y))

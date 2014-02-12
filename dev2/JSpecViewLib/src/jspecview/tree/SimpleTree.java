@@ -53,35 +53,32 @@ public class SimpleTree implements JSVTree {
 	}
 
 	@Override
-	public JSVTreeNode createTree(ScriptInterface si,
-			JDXSource source, JSVPanel[] panels) {
-  	SimpleTree tree = (SimpleTree) viewer.spectraTree;
+	public JSVTreeNode createTree(int fileCount, JDXSource source, JSVPanel[] panels) {
+		SimpleTree tree = (SimpleTree) viewer.spectraTree;
 		JSVTreeNode rootNode = tree.getRootNode();
-    List<PanelNode> panelNodes = viewer.panelNodes;
+		List<PanelNode> panelNodes = viewer.panelNodes;
 
-    String fileName = JSVFileManager.getName(source.getFilePath());
-    PanelNode panelNode = new PanelNode(null, fileName, source, null);
-    JSVTreeNode fileNode = new SimpleTreeNode(fileName, panelNode);
-    panelNode.setTreeNode(fileNode);
-		tree.spectraTreeModel.insertNodeInto(fileNode, rootNode, rootNode
-        .getChildCount());
-		//tree.scrollPathToVisible(new JsTreePath(fileNode.getPath()));
+		String fileName = JSVFileManager.getName(source.getFilePath());
+		PanelNode panelNode = new PanelNode(null, fileName, source, null);
+		JSVTreeNode fileNode = new SimpleTreeNode(fileName, panelNode);
+		panelNode.setTreeNode(fileNode);
+		tree.spectraTreeModel.insertNodeInto(fileNode, rootNode,
+				rootNode.getChildCount());
+		// tree.scrollPathToVisible(new JsTreePath(fileNode.getPath()));
 
-		int fileCount = si.siGetFileCount() + 1;
-    si.siSetFileCount(fileCount);
-    for (int i = 0; i < panels.length; i++) {
-      JSVPanel jsvp = panels[i];
-      String id = fileCount + "." + (i + 1);
-      panelNode = si.siGetNewPanelNode(id, fileName, source, jsvp);
-      JSVTreeNode treeNode = new SimpleTreeNode(panelNode.toString(), panelNode);
-      panelNode.setTreeNode(treeNode);
+		for (int i = 0; i < panels.length; i++) {
+			JSVPanel jsvp = panels[i];
+			String id = fileCount + "." + (i + 1);
+      panelNode = new PanelNode(id, fileName, source, jsvp);
+			JSVTreeNode treeNode = new SimpleTreeNode(panelNode.toString(), panelNode);
+			panelNode.setTreeNode(treeNode);
 			panelNodes.addLast(panelNode);
-      tree.spectraTreeModel.insertNodeInto(treeNode, fileNode, fileNode
-          .getChildCount());
-      //tree.scrollPathToVisible(new TreePath(treeNode.getPath()));
-    }
-    viewer.selectFrameNode(panels[0]);
-    return fileNode;
+			tree.spectraTreeModel.insertNodeInto(treeNode, fileNode,
+					fileNode.getChildCount());
+			// tree.scrollPathToVisible(new TreePath(treeNode.getPath()));
+		}
+		viewer.selectFrameNode(panels[0]);
+		return fileNode;
 	}
 
 	@Override

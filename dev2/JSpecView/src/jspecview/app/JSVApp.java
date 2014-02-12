@@ -50,7 +50,6 @@ import org.jmol.util.Logger;
 import jspecview.api.AppletFrame;
 import jspecview.api.JSVAppInterface;
 import jspecview.api.JSVPanel;
-import jspecview.api.JSVTreeNode;
 import jspecview.api.PanelListener;
 
 import jspecview.common.JDXSpectrum;
@@ -66,7 +65,6 @@ import jspecview.common.Coordinate;
 import jspecview.common.SubSpecChangeEvent;
 import jspecview.common.ZoomEvent;
 
-import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
 
 /**
@@ -97,25 +95,15 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 
 	protected AppletFrame appletFrame;
 
-	private int fileCount;
-	private int nViews;
-	private int scriptLevelCount;
-
 	boolean isNewWindow;
 
 	// ------- settable parameters ------------
 
 	private boolean allowCompoundMenu = true;
 	private boolean allowMenu = true;
-	private boolean autoIntegrate;
-	private boolean interfaceOverlaid;
-	private boolean loadImaginary = false;
-	private Boolean obscureTitleFromUser;
 
 	private int initialStartIndex = -1;
 	private int initialEndIndex = -1;
-
-	private String integrationRatios;
 
 	public String appletReadyCallbackFunctionName;
 
@@ -144,48 +132,8 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 		}
 	}
 
-	@Override
-	public void siSetCurrentSource(JDXSource source) {
-		viewer.currentSource = source;
-	}
-
-	@Override
-	public int siGetFileCount() {
-		return fileCount;
-	}
-
-	@Override
-	public void siSetFileCount(int n) {
-		fileCount = n;
-	}
-
-	@Override
-	public void siSetIntegrationRatios(String value) {
-		integrationRatios = value;
-	}
-
-	@Override
-	public String siGetIntegrationRatios() {
-		return integrationRatios;
-	}
-
 	public AppletFrame getAppletFrame() {
 		return appletFrame;
-	}
-
-	@Override
-	public void siSetLoadImaginary(boolean TF) {
-		loadImaginary = TF;
-	}
-
-	@Override
-	public int siIncrementScriptLevelCount(int n) {
-		return scriptLevelCount += n;
-	}
-
-	@Override
-	public int siIncrementViewCount(int n) {
-		return nViews += n;
 	}
 
 	// ///////////////////////////////////////
@@ -414,31 +362,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 
 	private JSVPanel prevPanel;
 
-	@Override
-	public void siSendPanelChange() {
-		if (viewer.selectedPanel == prevPanel)
-			return;
-		prevPanel = viewer.selectedPanel;
-		viewer.sendPanelChange();
-	}
-
 	// //////////// JSVAppletPopupMenu calls
-
-	/**
-	 * Shows the applet in a Frame
-	 * 
-	 * @param isSelected
-	 */
-	@Override
-	public void siNewWindow(boolean isSelected, boolean fromFrame) {
-		isNewWindow = isSelected;
-		if (fromFrame) {
-			if (viewer.jsvpPopupMenu != null)
-				viewer.jsvpPopupMenu.setSelected("Window", false);
-		} else {
-			appletFrame.newWindow(isSelected);
-		}
-	}
 
 	@Override
 	public void repaint() {
@@ -470,28 +394,6 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	 */
 	public void updateJS(int width, int height) {
 		
-	}
-
-	@Override
-	public void siValidateAndRepaint() {
-		PanelData pd;
-		if (viewer.selectedPanel != null && (pd = viewer.selectedPanel.getPanelData()) != null)
-			pd.taintedAll = true;
-		appletFrame.validate();
-		repaint();
-	}
-
-	/**
-	 * Loads a new file into the existing applet window
-	 * 
-	 * @param filePath
-	 */
-	@Override
-	public void siSyncLoad(String filePath) {
-		newAppletPanel();
-		Logger.info("JSVP syncLoad reading " + filePath);
-		siOpenDataOrFile(null, null, null, filePath, -1, -1, false, null, null);
-		appletFrame.validateContent(3);
 	}
 
 	/**
@@ -545,7 +447,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 					appletReadyCallbackFunctionName = value;
 					break;
 				case AUTOINTEGRATE:
-					autoIntegrate = Parameters.isTrue(value);
+					viewer.autoIntegrate = Parameters.isTrue(value);
 					break;
 				case COMPOUNDMENUON:
 					allowCompoundMenu = Boolean.parseBoolean(value);
@@ -560,7 +462,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 					initialEndIndex = Integer.parseInt(value);
 					break;
 				case INTERFACE:
-					siExecSetInterface(value);
+					viewer.checkOvelayInterface(value);
 					break;
 				case IRMODE:
 					viewer.setIRmode(value);
@@ -569,8 +471,8 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 					allowMenu = Boolean.parseBoolean(value);
 					break;
 				case OBSCURE:
-					if (obscureTitleFromUser == null) // once only
-						obscureTitleFromUser = Boolean.valueOf(value);
+					if (viewer.obscureTitleFromUser == null) // once only
+						viewer.obscureTitleFromUser = Boolean.valueOf(value);
 					break;
 				case STARTINDEX:
 					initialStartIndex = Integer.parseInt(value);
@@ -586,48 +488,6 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 			} catch (Exception e) {
 			}
 		}
-	}
-
-	/*
-	 * private void interruptQueueThreads() { if (commandWatcherThread != null)
-	 * commandWatcherThread.interrupt(); }
-	 */
-	@Override
-	public void siOpenDataOrFile(String data, String name,
-			List<JDXSpectrum> specs, String url, int firstSpec, int lastSpec,
-			boolean isAppend, String script, String id) {
-		switch (viewer.openDataOrFile(data, name, specs, url, firstSpec, lastSpec,
-				isAppend, id)) {
-		case JSViewer.FILE_OPEN_OK:
-			if (script != null)
-				runScript(script);
-			break;
-		case JSViewer.FILE_OPEN_ALREADY:
-			return;
-		default:	
-			siSetSelectedPanel(null);
-			return;
-		}
-
-		if (viewer.jsvpPopupMenu != null)
-			viewer.jsvpPopupMenu
-					.setCompoundMenu(viewer.panelNodes, allowCompoundMenu);
-
-		Logger.info(appletFrame.getAppletInfo() + " File "
-				+ viewer.currentSource.getFilePath() + " Loaded Successfully");
-
-	}
-
-	// ///////// simple sync functionality //////////
-
-	/**
-	 * overloaded in JSVAppletPro
-	 * 
-	 * @param scriptItem
-	 */
-	@Override
-	public void siProcessCommand(String scriptItem) {
-		viewer.runScriptNow(scriptItem);
 	}
 
 	@Override
@@ -667,22 +527,6 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 					Double.valueOf(actualCoord.getYVal()), Integer.valueOf(iSpec + 1) });
 	}
 
-	@Override
-	public void siSetSelectedPanel(JSVPanel jsvp) {
-		viewer.mainPanel.setSelectedPanel(viewer, jsvp, viewer.panelNodes);
-		viewer.selectedPanel = jsvp;
-		viewer.spectraTree.setSelectedPanel(this, jsvp);
-		if (jsvp == null) {
-			viewer.selectedPanel = jsvp = appletFrame.getJSVPanel(viewer, null, -1, -1);
-			viewer.mainPanel.setSelectedPanel(viewer, jsvp, null);
-		}
-		appletFrame.validate();
-		if (jsvp != null) {
-			jsvp.setEnabled(true);
-			jsvp.setFocusable(true);
-		}
-	}
-
 	// /////////// MISC methods from interfaces /////////////
 
 	/**
@@ -708,8 +552,175 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 		}
 	}
 
-	// ///////////// ScriptInterface execution from JSViewer.runScriptNow and
-	// menus
+	/**
+	 * Returns the calculated colour of a visible spectrum (Transmittance)
+	 * 
+	 * @return Color
+	 */
+
+	@Override
+	public String getSolnColour() {
+		return viewer.getSolutionColor();
+	}
+	
+  /**
+   * File has been loaded or model has been changed or atom picked.
+   * This is a call to Jmol.View for view sets (new in Jmol 14.1.8)
+   * 
+   * @param msg  
+   * 
+   */
+  private void updateJSView(String msg) {
+    /**
+     * @j2sNative
+     * 
+     * this.viewer.applet && this.viewer.applet._viewSet != null && this.viewer.applet._updateView(this.viewer.seletedPanel, msg);
+     * 
+     */
+    {}
+  }
+
+	/**
+	 * @param msg
+	 */
+	@Override
+	public synchronized void syncToJmol(String msg) {
+		updateJSView(msg);
+		if (syncCallbackFunctionName == null)
+			return;
+		Logger.info("JSVApp.syncToJmol JSV>Jmol " + msg);
+		appletFrame.callToJavaScript(syncCallbackFunctionName, new Object[] { viewer.fullName, msg });
+	}
+
+	@Override
+	public void setVisible(boolean b) {
+		appletFrame.setPanelVisible(b);
+	}
+
+	@Override
+	public void setCursor(int id) {
+		viewer.apiPlatform.setCursor(id, appletFrame);
+	}
+
+	@Override
+	public void runScript(String script) {
+		viewer.runScript(script);
+	}
+
+	@Override
+	public List<String> getScriptQueue() {
+		return viewer.scriptQueue;
+	}
+
+	
+	// ///////////// JSApp/MainFrame ScriptInterface /////////////
+
+	@Override
+	public void siSetCurrentSource(JDXSource source) {
+		viewer.currentSource = source;
+	}
+
+	@Override
+	public void siSendPanelChange() {
+		if (viewer.selectedPanel == prevPanel)
+			return;
+		prevPanel = viewer.selectedPanel;
+		viewer.sendPanelChange();
+	}
+
+	/**
+	 * Shows the applet in a Frame
+	 * 
+	 * @param isSelected
+	 */
+	@Override
+	public void siNewWindow(boolean isSelected, boolean fromFrame) {
+		isNewWindow = isSelected;
+		if (fromFrame) {
+			if (viewer.jsvpPopupMenu != null)
+				viewer.jsvpPopupMenu.setSelected("Window", false);
+		} else {
+			appletFrame.newWindow(isSelected);
+		}
+	}
+
+	@Override
+	public void siValidateAndRepaint(boolean isAll) {
+		PanelData pd;
+		if (viewer.selectedPanel != null && (pd = viewer.selectedPanel.getPanelData()) != null)
+			pd.taintedAll = true;
+		appletFrame.validate();
+		repaint();
+	}
+
+	/**
+	 * Loads a new file into the existing applet window
+	 * 
+	 * @param filePath
+	 */
+	@Override
+	public void siSyncLoad(String filePath) {
+		newAppletPanel();
+		Logger.info("JSVP syncLoad reading " + filePath);
+		siOpenDataOrFile(null, null, null, filePath, -1, -1, false, null, null);
+		appletFrame.validateContent(3);
+	}
+
+	/*
+	 * private void interruptQueueThreads() { if (commandWatcherThread != null)
+	 * commandWatcherThread.interrupt(); }
+	 */
+	@Override
+	public void siOpenDataOrFile(String data, String name,
+			List<JDXSpectrum> specs, String url, int firstSpec, int lastSpec,
+			boolean isAppend, String script, String id) {
+		switch (viewer.openDataOrFile(data, name, specs, url, firstSpec, lastSpec,
+				isAppend, id)) {
+		case JSViewer.FILE_OPEN_OK:
+			if (script != null)
+				runScript(script);
+			break;
+		case JSViewer.FILE_OPEN_ALREADY:
+			return;
+		default:	
+			siSetSelectedPanel(null);
+			return;
+		}
+
+		if (viewer.jsvpPopupMenu != null)
+			viewer.jsvpPopupMenu
+					.setCompoundMenu(viewer.panelNodes, allowCompoundMenu);
+
+		Logger.info(appletFrame.getAppletInfo() + " File "
+				+ viewer.currentSource.getFilePath() + " Loaded Successfully");
+
+	}
+
+	/**
+	 * overloaded in JSVAppletPro
+	 * 
+	 * @param scriptItem
+	 */
+	@Override
+	public void siProcessCommand(String scriptItem) {
+		viewer.runScriptNow(scriptItem);
+	}
+
+	@Override
+	public void siSetSelectedPanel(JSVPanel jsvp) {
+		viewer.mainPanel.setSelectedPanel(viewer, jsvp, viewer.panelNodes);
+		viewer.selectedPanel = jsvp;
+		viewer.spectraTree.setSelectedPanel(this, jsvp);
+		if (jsvp == null) {
+			viewer.selectedPanel = jsvp = appletFrame.getJSVPanel(viewer, null, -1, -1);
+			viewer.mainPanel.setSelectedPanel(viewer, jsvp, null);
+		}
+		appletFrame.validate();
+		if (jsvp != null) {
+			jsvp.setEnabled(true);
+			jsvp.setFocusable(true);
+		}
+	}
 
 	@Override
 	@SuppressWarnings("incomplete-switch")
@@ -730,56 +741,15 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 		}
 	}
 
-	/**
-	 * Returns the calculated colour of a visible spectrum (Transmittance)
-	 * 
-	 * @return Color
-	 */
-
 	@Override
-	public String getSolnColour() {
-		return viewer.getSolutionColor();
-	}
-
-	@Override
-	public void siExecClose(String value) {
-		boolean fromScript = (!value.startsWith("!"));
-		if (!fromScript)
-			value = value.substring(1);		
-		viewer.close(value);
-		if (!fromScript)
-			siValidateAndRepaint();
-	}
-
-	@Override
-	public String siExecLoad(String value, String script) {
-		viewer.load(value, script);
-		if (viewer.selectedPanel == null)
-			return null;
+	public String siLoaded(String value) {
 		if (loadFileCallbackFunctionName != null)
 			appletFrame.callToJavaScript(loadFileCallbackFunctionName, new Object[] { viewer.appletID,
 					value });
 		updateJSView(null);
 		return null;
 	}
-	
-  /**
-   * File has been loaded or model has been changed or atom picked.
-   * This is a call to Jmol.View for view sets (new in Jmol 14.1.8)
-   * 
-   * @param msg  
-   * 
-   */
-  private void updateJSView(String msg) {
-    /**
-     * @j2sNative
-     * 
-     * this.viewer.applet && this.viewer.applet._viewSet != null && this.viewer.applet._updateView(this.viewer.seletedPanel, msg);
-     * 
-     */
-    {}
-  }
-
+		
 
 	@Override
 	public void siExecHidden(boolean b) {
@@ -787,37 +757,9 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	}
 
 	@Override
-	public void siExecSetInterface(String value) {
-		interfaceOverlaid = (value.equalsIgnoreCase("single") || value
-				.equalsIgnoreCase("overlay"));
-	}
-
-	@Override
 	public void siExecScriptComplete(String msg, boolean isOK) {
 		viewer.showMessage(msg);
-		siValidateAndRepaint();
-	}
-
-	@Override
-	public void siExecSetAutoIntegrate(boolean b) {
-		autoIntegrate = b;
-	}
-
-	/**
-	 * @param msg
-	 */
-	@Override
-	public synchronized void syncToJmol(String msg) {
-		updateJSView(msg);
-		if (syncCallbackFunctionName == null)
-			return;
-		Logger.info("JSVApp.syncToJmol JSV>Jmol " + msg);
-		appletFrame.callToJavaScript(syncCallbackFunctionName, new Object[] { viewer.fullName, msg });
-	}
-
-	@Override
-	public void setVisible(boolean b) {
-		appletFrame.setPanelVisible(b);
+		siValidateAndRepaint(false);
 	}
 
 	@Override
@@ -833,35 +775,14 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	// /////// multiple source changes ////////
 
 	@Override
-	public void siSetNode(PanelNode panelNode, boolean fromTree) {
-		if (panelNode.jsvp != viewer.selectedPanel)
-			siSetSelectedPanel(panelNode.jsvp);
-		siSendPanelChange();
+	public void siNodeSet(PanelNode panelNode) {
 		appletFrame.validateContent(2);
-		siValidateAndRepaint(); // app does not do repaint here
+		siValidateAndRepaint(false); // app does not do repaint here
 	}
 
 	@Override
-	public void siCloseSource(JDXSource source) {
-		viewer.closeSource(source);
-	}
-
-	@Override
-	public void setCursor(int id) {
-		viewer.apiPlatform.setCursor(id, appletFrame);
-	}
-
-	@Override
-	public boolean siGetAutoCombine() {
-		return interfaceOverlaid;
-	}
-
-	@Override
-	public JDXSource siCreateSource(String data, String filePath, 
-			int firstSpec, int lastSpec) throws Exception {
-		return FileReader.createJDXSource(JSVFileManager
-				.getBufferedReaderForString(data), filePath, 
-				obscureTitleFromUser == Boolean.TRUE, loadImaginary, -1, -1, viewer.nmrMaxY);
+	public void siSourceClosed(JDXSource source) {
+		// n/a;
 	}
 
 	@Override
@@ -894,41 +815,16 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	}
 
 	@Override
-	public PanelNode siGetNewPanelNode(String id, String fileName,
-			JDXSource source, JSVPanel jsvp) {
-		return new PanelNode(id, fileName, source, jsvp);
-	}
-
-	// not implemented for applet
-
-	@Override
-	public boolean siGetAutoShowLegend() {
-		return false; // option?
-	}
-
-	private String returnFromJmolModel;
-
-	@Override
-	public void siSetReturnFromJmolModel(String model) {
-		returnFromJmolModel = model;
-	}
-
-	@Override
-	public String siGetReturnFromJmolModel() {
-		return returnFromJmolModel;
-	}
-
-	@Override
 	public void siSetPropertiesFromPreferences(JSVPanel jsvp,
 			boolean includeMeasures) {
-		if (autoIntegrate)
-			jsvp.getPanelData().integrateAll(viewer.parameters);
+		viewer.checkAutoIntegrate();
 	}
 
 	// not applicable to applet:
 
 	@Override
 	public void siSetLoaded(String fileName, String filePath) {
+		//n/a
 	}
 
 	@Override
@@ -939,38 +835,10 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	public void siUpdateRecentMenus(String filePath) {
 	}
 
-	// debugging
-
 	@Override
 	public void siExecTest(String value) {
 		String data = "##TITLE= Acetophenone\n##JCAMP-DX= 5.01\n##DATA TYPE= MASS SPECTRUM\n##DATA CLASS= XYPOINTS\n##ORIGIN= UWI, Mona, JAMAICA\n##OWNER= public domain\n##LONGDATE= 2012/02/19 22:20:06.0416 -0600 $$ export date from JSpecView\n##BLOCK_ID= 4\n##$URL= http://wwwchem.uwimona.edu.jm/spectra\n##SPECTROMETER/DATA SYSTEM= Finnigan\n##.INSTRUMENT PARAMETERS= LOW RESOLUTION\n##.SPECTROMETER TYPE= TRAP\n##.INLET= GC\n##.IONIZATION MODE= EI+\n##MOLFORM= C 8 H 8 O\n##$MODELS= \n<Models>\n<ModelData id=\"acetophenone\" type=\"MOL\">\nacetophenone\nDSViewer          3D                             0\n\n17 17  0  0  0  0  0  0  0  0999 V2000\n-1.6931    0.0078    0.0000 C   0  0  0  0  0  0  0  0  0  1\n-0.2141    0.0078    0.0000 C   0  0  0  0  0  0  0  0  0  2\n2.5839    0.0872    0.0000 C   0  0  0  0  0  0  0  0  0  3\n0.4615    1.2373   -0.0005 C   0  0  0  0  0  0  0  0  0  4\n0.5257   -1.1809    0.0001 C   0  0  0  0  0  0  0  0  0  5\n1.9188   -1.1393    0.0005 C   0  0  0  0  0  0  0  0  0  6\n1.8539    1.2756   -0.0001 C   0  0  0  0  0  0  0  0  0  7\n-0.1262    2.1703   -0.0009 H   0  0  0  0  0  0  0  0  0  8\n0.0144   -2.1556    0.0002 H   0  0  0  0  0  0  0  0  0  9\n2.4947   -2.0764    0.0009 H   0  0  0  0  0  0  0  0  0 10\n2.3756    2.2439   -0.0001 H   0  0  0  0  0  0  0  0  0 11\n3.6838    0.1161    0.0003 H   0  0  0  0  0  0  0  0  0 12\n-2.3403    1.0639    0.0008 O   0  0  0  0  0  0  0  0  0 13\n-2.3832   -1.3197   -0.0010 C   0  0  0  0  0  0  0  0  0 14\n-2.0973   -1.8988    0.9105 H   0  0  0  0  0  0  0  0  0 15\n-2.0899   -1.9018   -0.9082 H   0  0  0  0  0  0  0  0  0 16\n-3.4920   -1.1799   -0.0059 H   0  0  0  0  0  0  0  0  0 17\n1  2  1  0  0  0\n2  5  4  0  0  0\n2  4  4  0  0  0\n3 12  1  0  0  0\n4  7  4  0  0  0\n5  6  4  0  0  0\n6 10  1  0  0  0\n6  3  4  0  0  0\n7  3  4  0  0  0\n7 11  1  0  0  0\n8  4  1  0  0  0\n9  5  1  0  0  0\n13  1  2  0  0  0\n14 16  1  0  0  0\n14  1  1  0  0  0\n14 15  1  0  0  0\n17 14  1  0  0  0\nM  END\n</ModelData>\n<ModelData id=\"2\" type=\"MOL\">\nacetophenone m/z 120\nDSViewer          3D                             0\n\n17 17  0  0  0  0  0  0  0  0999 V2000\n-1.6931    0.0078    0.0000 C   0  0  0  0  0  0  0  0  0  1\n-0.2141    0.0078    0.0000 C   0  0  0  0  0  0  0  0  0  2\n2.5839    0.0872    0.0000 C   0  0  0  0  0  0  0  0  0  3\n0.4615    1.2373   -0.0005 C   0  0  0  0  0  0  0  0  0  4\n0.5257   -1.1809    0.0001 C   0  0  0  0  0  0  0  0  0  5\n1.9188   -1.1393    0.0005 C   0  0  0  0  0  0  0  0  0  6\n1.8539    1.2756   -0.0001 C   0  0  0  0  0  0  0  0  0  7\n-0.1262    2.1703   -0.0009 H   0  0  0  0  0  0  0  0  0  8\n0.0144   -2.1556    0.0002 H   0  0  0  0  0  0  0  0  0  9\n2.4947   -2.0764    0.0009 H   0  0  0  0  0  0  0  0  0 10\n2.3756    2.2439   -0.0001 H   0  0  0  0  0  0  0  0  0 11\n3.6838    0.1161    0.0003 H   0  0  0  0  0  0  0  0  0 12\n-2.3403    1.0639    0.0008 O   0  0  0  0  0  0  0  0  0 13\n-2.3832   -1.3197   -0.0010 C   0  0  0  0  0  0  0  0  0 14\n-2.0973   -1.8988    0.9105 H   0  0  0  0  0  0  0  0  0 15\n-2.0899   -1.9018   -0.9082 H   0  0  0  0  0  0  0  0  0 16\n-3.4920   -1.1799   -0.0059 H   0  0  0  0  0  0  0  0  0 17\n1  2  1  0  0  0\n2  5  4  0  0  0\n2  4  4  0  0  0\n3 12  1  0  0  0\n4  7  4  0  0  0\n5  6  4  0  0  0\n6 10  1  0  0  0\n6  3  4  0  0  0\n7  3  4  0  0  0\n7 11  1  0  0  0\n8  4  1  0  0  0\n9  5  1  0  0  0\n13  1  2  0  0  0\n14 16  1  0  0  0\n14  1  1  0  0  0\n14 15  1  0  0  0\n17 14  1  0  0  0\nM  END\nacetophenone m/z 105\n\ncreated with ArgusLab version 4.0.1\n13 13  0  0  0  0  0  0  0  0  0 V2000\n-1.6931    0.0078    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n-0.2141    0.0078    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n2.5839    0.0872    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n0.4615    1.2373   -0.0005 C   0  0  0  0  0  0  0  0  0  0  0  0\n0.5257   -1.1809    0.0001 C   0  0  0  0  0  0  0  0  0  0  0  0\n1.9188   -1.1393    0.0005 C   0  0  0  0  0  0  0  0  0  0  0  0\n1.8539    1.2756   -0.0001 C   0  0  0  0  0  0  0  0  0  0  0  0\n-2.3403    1.0639    0.0008 O   0  0  0  0  0  0  0  0  0  0  0  0\n-0.1262    2.1703   -0.0009 H   0  0  0  0  0  0  0  0  0  0  0  0\n0.0144   -2.1556    0.0002 H   0  0  0  0  0  0  0  0  0  0  0  0\n2.4947   -2.0764    0.0009 H   0  0  0  0  0  0  0  0  0  0  0  0\n2.3756    2.2439   -0.0001 H   0  0  0  0  0  0  0  0  0  0  0  0\n3.6838    0.1161    0.0003 H   0  0  0  0  0  0  0  0  0  0  0  0\n1  2  1  0  0  0  0\n1  8  2  0  0  0  0\n2  4  4  0  0  0  0\n2  5  4  0  0  0  0\n3  6  4  0  0  0  0\n3  7  4  0  0  0  0\n3 13  1  0  0  0  0\n4  7  4  0  0  0  0\n4  9  1  0  0  0  0\n5  6  4  0  0  0  0\n5 10  1  0  0  0  0\n6 11  1  0  0  0  0\n7 12  1  0  0  0  0\nM  END\nacetophenone m/z 77\n\ncreated with ArgusLab version 4.0.1\n11 11  0  0  0  0  0  0  0  0  0 V2000\n-0.2141    0.0078    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n2.5839    0.0872    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n0.4615    1.2373   -0.0005 C   0  0  0  0  0  0  0  0  0  0  0  0\n0.5257   -1.1809    0.0001 C   0  0  0  0  0  0  0  0  0  0  0  0\n1.9188   -1.1393    0.0005 C   0  0  0  0  0  0  0  0  0  0  0  0\n1.8539    1.2756   -0.0001 C   0  0  0  0  0  0  0  0  0  0  0  0\n-0.1262    2.1703   -0.0009 H   0  0  0  0  0  0  0  0  0  0  0  0\n0.0144   -2.1556    0.0002 H   0  0  0  0  0  0  0  0  0  0  0  0\n2.4947   -2.0764    0.0009 H   0  0  0  0  0  0  0  0  0  0  0  0\n2.3756    2.2439   -0.0001 H   0  0  0  0  0  0  0  0  0  0  0  0\n3.6838    0.1161    0.0003 H   0  0  0  0  0  0  0  0  0  0  0  0\n1  3  4  0  0  0  0\n1  4  4  0  0  0  0\n2  5  4  0  0  0  0\n2  6  4  0  0  0  0\n2 11  1  0  0  0  0\n3  6  4  0  0  0  0\n3  7  1  0  0  0  0\n4  5  4  0  0  0  0\n4  8  1  0  0  0  0\n5  9  1  0  0  0  0\n6 10  1  0  0  0  0\nM  END\n</ModelData>\n</Models>\n##$PEAKS= \n<Peaks type=\"MS\" xUnits=\"M/Z\" yUnits=\"RELATIVE ABUNDANCE\" >\n<PeakData id=\"1\" title=\"molecular ion (~120)\" peakShape=\"sharp\" model=\"2.1\"  xMax=\"121\" xMin=\"119\"  yMax=\"100\" yMin=\"0\" />\n<PeakData id=\"2\" title=\"fragment 1 (~105)\" peakShape=\"sharp\" model=\"2.2\"  xMax=\"106\" xMin=\"104\"  yMax=\"100\" yMin=\"0\" />\n<PeakData id=\"3\" title=\"fragment 2 (~77)\" peakShape=\"sharp\" model=\"2.3\"  xMax=\"78\" xMin=\"76\"  yMax=\"100\" yMin=\"0\" />\n</Peaks>\n##XUNITS= M/Z\n##YUNITS= RELATIVE ABUNDANCE\n##XFACTOR= 1E0\n##YFACTOR= 1E0\n##FIRSTX= 0\n##FIRSTY= 0\n##LASTX= 121\n##NPOINTS= 19\n##XYPOINTS= (XY..XY)\n0.000000, 0.000000 \n38.000000, 5.200000 \n39.000000, 8.000000 \n43.000000, 21.900000 \n50.000000, 20.200000 \n51.000000, 41.900000 \n52.000000, 4.000000 \n63.000000, 3.800000 \n74.000000, 6.600000 \n75.000000, 3.700000 \n76.000000, 4.600000 \n77.000000, 100.000000 \n78.000000, 10.400000 \n89.000000, 1.000000 \n91.000000, 1.000000 \n105.000000, 80.800000 \n106.000000, 6.000000 \n120.000000, 23.100000 \n121.000000, 2.000000 \n##END=";
 		loadInline(data);
 	}
 
-	@Override
-	public String siSetFileAsString(String value) {
-		return JSVFileManager.getFileAsString(value);
-	}
-
-	@Override
-	public JSVTreeNode siCreateTree(JDXSource source, JSVPanel[] jsvPanels) {
-		return viewer.spectraTree.createTree(this, source, jsvPanels);
-	}
-
-	@Override
-	public JSViewer siGetViewer() {
-		return viewer;
-	}
-
-	@Override
-	public void runScript(String script) {
-		viewer.runScript(script);
-	}
-
-	@Override
-	public List<String> getScriptQueue() {
-		return viewer.scriptQueue;
-	}
-
-	
 }

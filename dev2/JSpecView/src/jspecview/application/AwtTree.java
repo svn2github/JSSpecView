@@ -65,7 +65,7 @@ public class AwtTree extends JTree implements JSVTree {
 	}
 	
 	@Override
-	public JSVTreeNode createTree(ScriptInterface si,
+	public JSVTreeNode createTree(int fileCount,
 			JDXSource source, JSVPanel[] panels) {
   	AwtTree tree = (AwtTree) viewer.spectraTree;
 		JSVTreeNode rootNode = tree.getRootNode();
@@ -79,12 +79,10 @@ public class AwtTree extends JTree implements JSVTree {
         .getChildCount());
 		tree.scrollPathToVisible(new TreePath(fileNode.getPath()));
 
-		int fileCount = si.siGetFileCount() + 1;
-    si.siSetFileCount(fileCount);
     for (int i = 0; i < panels.length; i++) {
       JSVPanel jsvp = panels[i];
       String id = fileCount + "." + (i + 1);
-      panelNode = si.siGetNewPanelNode(id, fileName, source, jsvp);
+      panelNode = new PanelNode(id, fileName, source, jsvp);
       JSVTreeNode treeNode = new AwtTreeNode(panelNode.toString(), panelNode);
       panelNode.setTreeNode(treeNode);
 			panelNodes.addLast(panelNode);

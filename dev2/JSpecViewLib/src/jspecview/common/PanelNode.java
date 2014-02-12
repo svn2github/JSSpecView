@@ -127,15 +127,16 @@ public class PanelNode {
 //    return specList;
 //  }
  
-	public static boolean isOpen(List<PanelNode> panelNodes, String filePath) {
+	public static int isOpen(List<PanelNode> panelNodes, String filePath) {
+		int pt = -1;
     if (filePath != null)
       for (int i = panelNodes.size(); --i >= 0;) {
       	//System.out.println("JSVPanelNode " + filePath + " " + panelNodes.get(i).source.getFilePath());
         if (filePath.equals(panelNodes.get(i).source.getFilePath())
         		|| filePath.equals(panelNodes.get(i).frameTitle))
-          return true;
+          return pt;
       }
-    return false;
+    return -1;
   }
   
 //  static int getNodeIndex(JmolList<JSVPanelNode> panelNodes, JSVPanelNode node) {

@@ -442,7 +442,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 			offWindowFrame.validate();
 			offWindowFrame.setVisible(true);
 			remove(mainPanel);
-			app.siValidateAndRepaint();
+			app.siValidateAndRepaint(false);
 			offWindowFrame.addWindowListener(new WindowAdapter() {
 				@Override
 				public void windowClosing(WindowEvent e) {
@@ -451,7 +451,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 			});
 		} else {
 			getContentPane().add(mainPanel);
-			app.siValidateAndRepaint();
+			app.siValidateAndRepaint(false);
 			offWindowFrame.removeAll();
 			offWindowFrame.dispose();
 			offWindowFrame = null;
@@ -462,7 +462,7 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 		mainPanel.setSize(d);
 		getContentPane().add(mainPanel);
 		setVisible(true);
-		app.siValidateAndRepaint();
+		app.siValidateAndRepaint(false);
 		offWindowFrame.removeAll();
 		offWindowFrame.dispose();
 		app.siNewWindow(false, true);

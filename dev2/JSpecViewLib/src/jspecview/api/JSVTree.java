@@ -17,7 +17,7 @@ public interface JSVTree {
 
 	public void deleteNodes(List<JSVTreeNode> toDelete);
 
-	public JSVTreeNode createTree(ScriptInterface si, JDXSource source,
+	public JSVTreeNode createTree(int fileCount, JDXSource source,
 			JSVPanel[] jsvPanels);
 
 }

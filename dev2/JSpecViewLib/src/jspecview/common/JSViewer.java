@@ -43,6 +43,7 @@ import jspecview.common.PanelData.LinkMode;
 import jspecview.dialog.JSVDialog;
 import jspecview.dialog.DialogManager;
 import jspecview.exception.JSVException;
+import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
 import jspecview.tree.SimpleTree;
 
@@ -117,8 +118,11 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			properties.setProperty(key, value);
 	}
 
-	public void setNode(PanelNode node, boolean fromTree) {
-		si.siSetNode(node, fromTree);
+	public void setNode(PanelNode node) {
+		if (node.jsvp != selectedPanel)
+			si.siSetSelectedPanel(node.jsvp);
+		si.siSendPanelChange();
+		si.siNodeSet(node);
 	}
 
 	/**
@@ -174,7 +178,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 	}
 
 	public boolean runScriptNow(String script) {
-		si.siIncrementViewCount(1);
+		scriptLevelCount++;
 		if (script == null)
 			script = "";
 		script = script.trim();
@@ -222,10 +226,10 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 					nmrMaxY = PT.parseFloat(value);
 					break;
 				case AUTOINTEGRATE:
-					si.siExecSetAutoIntegrate(Parameters.isTrue(value));
+					autoIntegrate = Parameters.isTrue(value);
 					break;
 				case CLOSE:
-					si.siExecClose(value);
+					execClose(value);
 					break;
 				case DEBUG:
 					Logger
@@ -244,12 +248,12 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 					si.siExecHidden(Parameters.isTrue(value));
 					break;
 				case INTEGRATIONRATIOS:
-					si.siSetIntegrationRatios(value);
+					integrationRatios = value;
 					if (!isClosed())
 						execIntegrate(null);
 					break;
 				case INTERFACE:
-					si.siExecSetInterface(value);
+					interfaceOverlaid = checkOvelayInterface(value);
 					break;
 				case INTEGRALOFFSET:
 				case INTEGRALRANGE:
@@ -267,10 +271,11 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 							runScriptNow(defaultLoadScript);
 					  break;
 					}
-					msg = si.siExecLoad(value, (defaultLoadScript == null ? "" : defaultLoadScript + ";") + commandTokens.getRemainingScript());
+					load(value, (defaultLoadScript == null ? "" : defaultLoadScript + ";") + commandTokens.getRemainingScript());
+					msg = (selectedPanel == null ? null : si.siLoaded(value));
 					break;
 				case LOADIMAGINARY:
-					si.siSetLoadImaginary(Parameters.isTrue(value));
+					loadImaginary = Parameters.isTrue(value);
 					break;
 				case PEAK:
 					execPeak(value);
@@ -285,8 +290,8 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 					if (value.equals("") || value.toLowerCase().startsWith("inline")) {
 						execScriptInline(value);
 					} else {
-						String s = si.siSetFileAsString(value);
-						if (s != null && si.siIncrementScriptLevelCount(0) < NLEVEL_MAX)
+						String s = JSVFileManager.getFileAsString(value);
+						if (s != null && scriptLevelCount < NLEVEL_MAX)
 							runScriptNow(s);
 					}
 					break;
@@ -441,9 +446,22 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 				--nErrorsLeft;
 			}
 		}
-		si.siIncrementViewCount(-1);
+		scriptLevelCount--;
 		si.siExecScriptComplete(msg, true);
 		return isOK;
+	}
+
+	private void execClose(String value) {
+		boolean fromScript = (!value.startsWith("!"));
+		if (!fromScript)
+			value = value.substring(1);
+		close(PT.trimQuotes(value));
+		if (!fromScript || panelNodes.size() == 0)
+			si.siValidateAndRepaint(true);
+	}
+
+	public boolean checkOvelayInterface(String value) {
+		return (value.equalsIgnoreCase("single") || value.equalsIgnoreCase("overlay"));
 	}
 
 	private PanelData pd() {
@@ -589,7 +607,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		if (speclist.size() > 0)
 			si.siOpenDataOrFile(null, strlist, speclist, strlist, -1, -1, false, null, null);
 		if (!fromScript) {
-			si.siValidateAndRepaint();
+			si.siValidateAndRepaint(false);
 		}
 	}
 
@@ -610,10 +628,9 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		if (jsvp == null)
 			return;
 		jsvp.getPanelData().checkIntegral(parameters, value);
-		String integrationRatios = si.siGetIntegrationRatios();
 		if (integrationRatios != null)
 			jsvp.getPanelData().setIntegrationRatios(integrationRatios);
-		si.siSetIntegrationRatios(null); // one time only
+		integrationRatios = null; // one time only
 		jsvp.doRepaint(true);
 	}
 
@@ -724,12 +741,12 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			model = PT.getQuotedAttribute(peakScript, "model");
 			jmolSource = PT.getQuotedAttribute(peakScript, "src");
 			String modelSent = (jmolSource != null && jmolSource.startsWith("Jmol") ? null
-					: si.siGetReturnFromJmolModel());
+					: returnFromJmolModel);
 			if (model != null && modelSent != null && !model.equals(modelSent)) {
 				Logger.info("JSV ignoring model " + model + "; should be " + modelSent);
 				return;
 			}
-			si.siSetReturnFromJmolModel(null);
+			returnFromJmolModel = null;
 			if (panelNodes.size() == 0 || !checkFileAlreadyLoaded(file)) {
 				Logger.info("file " + file
 						+ " not found -- JSViewer closing all and reopening");
@@ -811,13 +828,13 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		pi = jsvp.getPanelData().selectPeakByFileIndex(file, index, atomKey);
 		if (pi != null) {
 			// found in current panel
-			setNode(PanelNode.findNode(jsvp, panelNodes), false);
+			setNode(PanelNode.findNode(jsvp, panelNodes));
 		} else {
 			// must look elsewhere
 			for (int i = panelNodes.size(); --i >= 0;) {
 				PanelNode node = panelNodes.get(i);
 				if ((pi = node.jsvp.getPanelData().selectPeakByFileIndex(file, index, atomKey)) != null) {
-					setNode(node, false);
+					setNode(node);
 					break;
 				}
 			}
@@ -854,7 +871,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 					}
 				if (node == null)
 					return;
-				setNode(node, false);
+				setNode(node);
 			}
 			pi = pi2;
 		} else {
@@ -877,7 +894,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 
 	private void syncToJmol(PeakInfo pi) {
 		selectedPanel.doRepaint(true);
-		si.siSetReturnFromJmolModel(pi.getModel());
+		returnFromJmolModel = pi.getModel();
 		si.syncToJmol(jmolSelect(pi));
 	}
 
@@ -1066,7 +1083,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		if (isView && speclist.size() == 1) {
 			PanelNode node = PanelNode.findNodeById(idLast, panelNodes);
 			if (node != null) {
-				setNode(node, true);
+				setNode(node); // was "fromTree true"
 				// possibility of a problem here -- we are not communicating with Jmol
 				// our model changes.
 				speclist.clear();
@@ -1115,23 +1132,24 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		if (data != null) {
 			try {
 				fileName = name;
-				newPath = filePath  = JSVFileManager.getFullPathName(name);
+				newPath = filePath = JSVFileManager.getFullPathName(name);
 			} catch (JSVException e) {
 				// ok...
 			}
 		} else if (specs != null) {
 			isView = true;
-			newPath = fileName = filePath = "View" + si.siIncrementViewCount(1);
+			newPath = fileName = filePath = "View" + (++nViews);
 		} else if (strUrl != null) {
 			try {
-				//System.out.println("strURL=" + strUrl);
-				//System.out.println("JSVFileManager.appletDocumentBase=" + JSVFileManager.appletDocumentBase);				
+				// System.out.println("strURL=" + strUrl);
+				// System.out.println("JSVFileManager.appletDocumentBase=" +
+				// JSVFileManager.appletDocumentBase);
 				URL u = new URL(JSVFileManager.appletDocumentBase, strUrl, null);
-				//System.out.println("u=" + u);
+				// System.out.println("u=" + u);
 				filePath = u.toString();
 				recentURL = filePath;
 				fileName = JSVFileManager.getName(filePath);
-				//System.out.println("fileName=" + fileName);
+				// System.out.println("fileName=" + fileName);
 			} catch (MalformedURLException e) {
 				GenericFileInterface file = apiPlatform.newFile(strUrl);
 				fileName = file.getName();
@@ -1139,23 +1157,29 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 				recentURL = null;
 			}
 		}
-		// TODO could check here for already-open view
-		if (!isView)
-			if (PanelNode.isOpen(panelNodes, filePath)
-					|| PanelNode.isOpen(panelNodes, strUrl)) {
+		// if (!isView)
+		int pt = -1;
+		if ((pt = PanelNode.isOpen(panelNodes, filePath)) >= 0
+				|| (pt = PanelNode.isOpen(panelNodes, strUrl)) >= 0) {
+			if (isView) {
+				--nViews;
+				setNode(panelNodes.get(pt)); // was fromTree true
+			} else {
 				si.writeStatus(filePath + " is already open");
-				return FILE_OPEN_ALREADY;
 			}
+			return FILE_OPEN_ALREADY;
+		}
 		if (!isAppend && !isView)
 			close("all"); // with CHECK we may still need to do this
 		si.setCursor(GenericPlatform.CURSOR_WAIT);
 		try {
-			si.siSetCurrentSource(isView ? JDXSource.createView(specs) : si
-					.siCreateSource(data, filePath, firstSpec, lastSpec));
+			si.siSetCurrentSource(isView ? JDXSource.createView(specs) : FileReader
+					.createJDXSource(JSVFileManager.getBufferedReaderForString(data),
+							filePath, obscureTitleFromUser == Boolean.TRUE, loadImaginary,
+							firstSpec, lastSpec, nmrMaxY));
 		} catch (Exception e) {
 			/**
-			 * @j2sNative
-			 *   alert(e.toString())
+			 * @j2sNative alert(e.toString())
 			 */
 			{
 				Logger.error(e.toString());
@@ -1165,7 +1189,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			}
 			si.setCursor(GenericPlatform.CURSOR_DEFAULT);
 			if (isApplet) {
-				selectedPanel.showMessage(e.toString(), "Error Opening File");				
+				selectedPanel.showMessage(e.toString(), "Error Opening File");
 			}
 			return FILE_OPEN_ERROR;
 		}
@@ -1190,7 +1214,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		specs = currentSource.getSpectra();
 		JDXSpectrum.process(specs, irMode);
 
-		boolean autoOverlay = si.siGetAutoCombine()
+		boolean autoOverlay = interfaceOverlaid
 				|| spec.isAutoOverlayFromJmolClick();
 
 		boolean combine = isView || autoOverlay && currentSource.isCompoundSource;
@@ -1219,7 +1243,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			value = "all";
 		boolean isAll = (value == "all");
 		if (value == null || n0 == 0 && value.equalsIgnoreCase("all")) {
-			si.siCloseSource(null);
+			closeSource(null);
 			return;
 		}
 		boolean isViews = value.equalsIgnoreCase("views");
@@ -1255,7 +1279,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 				list.addLast(source);
 		}
 		for (int i = list.size(); --i >= 0;)
-			si.siCloseSource(list.get(i));
+			closeSource(list.get(i));
 		if (selectedPanel == null && panelNodes.size() > 0)
 			si.siSetSelectedPanel(PanelNode.getLastFileFirstNode(panelNodes));
 	}
@@ -1334,11 +1358,11 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			jsvp.setTitle(name);
 		}
 		si.siSetPropertiesFromPreferences(jsvp, true);
-		si.siCreateTree(source, new JSVPanel[] { jsvp }).getPanelNode().isView = true;
+		spectraTree.createTree(++fileCount, source, new JSVPanel[] { jsvp }).getPanelNode().isView = true;
 		PanelNode node = PanelNode.findNode(selectedPanel, panelNodes);
 		node.setFrameTitle(name);
 		node.isView = true;
-		if (si.siGetAutoShowLegend() && pd().getNumberOfGraphSets() == 1)
+		if (autoShowLegend && pd().getNumberOfGraphSets() == 1)
 			node.setLegend(getDialog(AType.OverlayLegend, null));
 		si.siSetMenuEnables(node, false);
 	}
@@ -1388,15 +1412,16 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			if (f >= max + 1)
 				max = (int) Math.floor(f);
 		}
-		si.siSetFileCount(max);
+		fileCount = max;
 		System.gc();
 		Logger.checkMemory();
+		si.siSourceClosed(source);
 	}
 
 	public void setFrameAndTreeNode(int i) {
 		if (panelNodes == null || i < 0 || i >= panelNodes.size())
 			return;
-		setNode(panelNodes.get(i), false);
+		setNode(panelNodes.get(i));
 	}
 
 	public PanelNode selectFrameNode(JSVPanel jsvp) {
@@ -1414,7 +1439,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			PanelNode node = PanelNode.findNodeById(value, panelNodes);
 			if (node == null)
 				return false;
-			setNode(node, false);
+			setNode(node);
 		} else {
 			int n = PT.parseInt(value);
 			if (n <= 0) {
@@ -1438,7 +1463,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			panels[i] = jsvp;
 		}
 		// arrange windows in ascending order
-		si.siCreateTree(source, panels);
+		spectraTree.createTree(++fileCount, source, panels);
 		si.siGetNewJSVPanel(null); // end of operation
 		PanelNode node = PanelNode.findNode(selectedPanel, panelNodes);
 		si.siSetMenuEnables(node, true);
@@ -1449,7 +1474,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			return;
 		}
 		if (node.isLeaf()) {
-			setNode(node.getPanelNode(), true);
+			setNode(node.getPanelNode());
 		} else {
 			System.out.println("not a leaf");
 		}
@@ -1857,7 +1882,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			JDXSource source = PanelNode.findSourceByNameOrId((new File(fileName))
 					.getAbsolutePath(), panelNodes);
 			if (source != null)
-				si.siCloseSource(source);
+				closeSource(source);
 		}
 		si.siOpenDataOrFile(null, null, null, fileName, -1, -1, true, defaultLoadScript, null);
 	}
@@ -1879,6 +1904,25 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		}
 		return iPanel;
 	}
+
+	
+	private int fileCount;
+	private int nViews;
+	private int scriptLevelCount;
+	private String returnFromJmolModel;
+	private String integrationRatios;
+
+	public boolean loadImaginary;
+	public boolean interfaceOverlaid;
+	public boolean autoIntegrate;
+	public boolean autoShowLegend;
+	public Boolean obscureTitleFromUser;
+
+	public void checkAutoIntegrate() {
+		if (autoIntegrate)
+			selectedPanel.getPanelData().integrateAll(parameters);
+	}
+	
 
 
 }

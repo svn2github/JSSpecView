@@ -6,12 +6,9 @@ import javajs.util.SB;
 
 
 /**
- * Skipping awt.Dialog here; no real reason to have that in a pure Swing app
- * as we handle file dialogs a different way, and that is the only other class
- * that subclasses it.
+ * There is really no need here for awt.Dialog.
+ * We would not use FileDialog in an HTML5 context anyway.
  * 
- * @author hansonr
- *
  */
 public class JDialog extends Container {
 

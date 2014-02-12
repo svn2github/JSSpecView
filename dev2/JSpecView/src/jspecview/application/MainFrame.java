@@ -105,7 +105,6 @@ import jspecview.export.Exporter;
 import jspecview.java.AwtFileHelper;
 import jspecview.java.AwtPanel;
 import jspecview.java.AwtMainPanel;
-import jspecview.source.FileReader;
 import jspecview.source.JDXSource;
 
 
@@ -168,13 +167,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	private AwtTree tree; // alias for spectraTree, because here it is visible
 
-
-	private boolean autoIntegrate;
-	private boolean autoShowLegend;
-	private boolean isEmbedded;
-	private boolean isHidden;
-	private boolean interfaceOverlaid;
-	private boolean loadImaginary = false;
 	private boolean sidePanelOn;
 	private boolean showExitDialog;
 	private boolean statusbarOn;
@@ -183,15 +175,14 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 
   private int mainSplitPosition = 200;
-	private int fileCount;
-	private int nViews;
-	private int scriptLevelCount;
 	private int splitPosition;
+	private boolean isEmbedded;
+	private boolean isHidden;
 
 	private String tempDS;
-	private String returnFromJmolModel;
 	private String defaultDisplaySchemeName;
-	private String integrationRatios;
+	
+	
 	
 
 	////////////////////// get/set methods
@@ -204,61 +195,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	@Override
 	public boolean isSigned() {
 		return true;
-	}
-
-	@Override
-	public boolean siGetAutoCombine() {
-		return interfaceOverlaid;
-	}
-
-	@Override
-	public boolean siGetAutoShowLegend() {
-		return autoShowLegend;
-	}
-
-	@Override
-	public int siGetFileCount() {
-		return fileCount;
-	}
-
-	@Override
-	public void siSetFileCount(int n) {
-		fileCount = n;
-	}
-
-	@Override
-	public String siGetIntegrationRatios() {
-		return integrationRatios;
-	}
-
-	@Override
-	public void siSetIntegrationRatios(String value) {
-		integrationRatios = value;
-	}
-	
-	@Override
-	public void siSetLoadImaginary(boolean TF) {
-		loadImaginary  = TF;
-	}
-
-	@Override
-	public void siSetReturnFromJmolModel(String model) {
-		returnFromJmolModel = model;
-	}
-
-	@Override
-	public String siGetReturnFromJmolModel() {
-		return returnFromJmolModel;
-	}
-
-	@Override
-	public int siIncrementScriptLevelCount(int n) {
-		return scriptLevelCount += n;
-	}
-	
-	@Override
-	public int siIncrementViewCount(int n) {
-		return nViews += n;
 	}
 
 	/**
@@ -467,9 +403,9 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		showExitDialog = Boolean.parseBoolean(properties
 				.getProperty("confirmBeforeExit"));
 
-		interfaceOverlaid = Boolean.parseBoolean(properties
+		viewer.interfaceOverlaid = Boolean.parseBoolean(properties
 				.getProperty("automaticallyOverlay"));
-		autoShowLegend = Boolean.parseBoolean(properties
+		viewer.autoShowLegend = Boolean.parseBoolean(properties
 				.getProperty("automaticallyShowLegend"));
 		AwtFileHelper fh = (AwtFileHelper) viewer.fileHelper; 
 		fh.useDirLastOpened = Boolean.parseBoolean(properties
@@ -504,7 +440,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		// Processing Properties
 		viewer.setIRmode(properties.getProperty("automaticTAConversion"));
 		try {
-			autoIntegrate = Boolean.parseBoolean(properties
+			viewer.autoIntegrate = Boolean.parseBoolean(properties
 					.getProperty("automaticallyIntegrate"));
 			viewer.parameters.integralMinY = Double.parseDouble(properties
 					.getProperty("integralMinY"));
@@ -646,53 +582,10 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		writeStatus(tip);
 	}
 
-	@Override
-	public void siOpenDataOrFile(String data, String name,
-			List<JDXSpectrum> specs, String url, int firstSpec, int lastSpec,
-			boolean isAppend, String script, String id) {
-		switch (viewer.openDataOrFile(data, name, specs, url, firstSpec, lastSpec,
-				isAppend, id)) {
-		case JSViewer.FILE_OPEN_OK:
-			if (script != null)
-				runScript(script);
-			break;
-		}
-		siValidateAndRepaint();
-	}
-
-	@Override
-	public void siSetCurrentSource(JDXSource source) {
-		viewer.currentSource = source;
-		if (source != null)
-		  appMenu.setCloseMenuItem(JSVFileManager.getName(source.getFilePath()));
-		boolean isError = (source != null && source.getErrorLog().length() > 0);
-		setError(isError, (isError && source.getErrorLog().indexOf("Warning") >= 0));
-	}
-
 	private void setError(boolean isError, boolean isWarningOnly) {
 		appMenu.setError(isError, isWarningOnly);
 		toolBar.setError(isError, isWarningOnly);
 	}
-
-	/**
-	 * Sets the display properties as specified from the preferences dialog or the
-	 * properties file
-	 * 
-	 * @param jsvp
-	 *          the display panel
-	 */
-	@Override
-	public void siSetPropertiesFromPreferences(JSVPanel jsvp,
-			boolean includeMeasures) {
-		ColorParameters ds = dsp.getDisplaySchemes().get(defaultDisplaySchemeName);
-		jsvp.getPanelData().addListener(this);
-		viewer.parameters.setFor(jsvp, (ds == null ? dsp.getDefaultScheme() : ds),
-				includeMeasures);
-		if (autoIntegrate)
-			jsvp.getPanelData().integrateAll(viewer.parameters);
-		jsvp.doRepaint(true);
-	}
-
 
 	/**
 	 * Shows a dialog with the message "Not Yet Implemented"
@@ -700,11 +593,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	public void showNotImplementedOptionPane() {
 		JOptionPane.showMessageDialog(this, "Not Yet Implemented",
 				"Not Yet Implemented", JOptionPane.INFORMATION_MESSAGE);
-	}
-
-	@Override
-	public void siProcessCommand(String script) {
-		runScriptNow(script);
 	}
 
 	@Override
@@ -725,32 +613,21 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		}
 	}
 
-
-	@Override
-	public void siSetSelectedPanel(JSVPanel jsvp) {
-		if (viewer.selectedPanel != null)
-      mainSplitPosition = mainSplitPane.getDividerLocation();
-		viewer.mainPanel.setSelectedPanel(viewer, jsvp, viewer.panelNodes);
-		viewer.selectedPanel = jsvp;
-		viewer.spectraTree.setSelectedPanel(this, jsvp);
-		validate();
-		if (jsvp != null) {
-      jsvp.setEnabled(true);
-      jsvp.setFocusable(true);
-		}
-		if (mainSplitPosition != 0)
-  		mainSplitPane.setDividerLocation(mainSplitPosition);
+	private void advanceSpectrumBy(int n) {
+		int i = viewer.panelNodes.size();
+		for (; --i >= 0;)
+			if (viewer.panelNodes.get(i).jsvp == viewer.selectedPanel)
+				break;
+		viewer.setFrameAndTreeNode(i + n);
+		viewer.selectedPanel.getFocusNow(false);
 	}
 
-
 	@Override
-	public void siSendPanelChange() {
-		if (viewer.selectedPanel == prevPanel)
-			return;
-		prevPanel = viewer.selectedPanel;
-		viewer.sendPanelChange();
+	public List<String> getScriptQueue() {
+  // applet only
+		return null;
 	}
-
+	
 	// //////// MENU ACTIONS ///////////
 
 	public void setSplitPane(boolean TF) {
@@ -798,6 +675,14 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		new Exporter().write(viewer, ScriptToken.getTokens(command), false);
 	}
 
+	public void enableStatus(boolean TF) {
+		if (TF)
+			getContentPane().add(statusPanel, BorderLayout.SOUTH);
+		else
+			getContentPane().remove(statusPanel);
+		validate();
+	}
+
 	protected void windowClosing_actionPerformed() {
 		exitJSpecView(true);
 	}
@@ -837,15 +722,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 					|| node.getPanelNode().jsvp == null ? Font.BOLD : Font.ITALIC), 12);
 		}
 
-	}
-
-	private void advanceSpectrumBy(int n) {
-		int i = viewer.panelNodes.size();
-		for (; --i >= 0;)
-			if (viewer.panelNodes.get(i).jsvp == viewer.selectedPanel)
-				break;
-		viewer.setFrameAndTreeNode(i + n);
-		viewer.selectedPanel.getFocusNow(false);
 	}
 
 	@Override
@@ -889,80 +765,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 			//	+ Thread.currentThread());
 	}
 
-	@Override
-	public void siSyncLoad(String filePath) {
-		siCloseSource(null);
-		siOpenDataOrFile(null, null, null, filePath, -1, -1, false, null, null);
-		if (viewer.currentSource == null)
-			return;
-		if (viewer.panelNodes.get(0).getSpectrum().isAutoOverlayFromJmolClick())
-			viewer.execView("*", false);
-	}
-
 	// //////////////////////// script commands from JSViewer /////////////////
-
-	@Override
-	public void siValidateAndRepaint() {
-		validate();
-		viewer.requestRepaint();
-	}
-
-	@Override
-	public void siExecClose(String value) {
-		boolean fromScript = (!value.startsWith("!"));
-		if (!fromScript)
-			value = value.substring(1);		
-		viewer.close(PT.trimQuotes(value));
-		if (!fromScript || viewer.panelNodes.size() == 0) {
-			validate();
-			repaint();
-		}
-	}
-
-	@Override
-	public void siExecHidden(boolean b) {
-		isHidden = (jmol != null && b);
-		setVisible(!isHidden);
-	}
-
-	@Override
-	public String siExecLoad(String value, String script) {
-		viewer.load(value, script);
-		if (viewer.selectedPanel == null)
-			return null;
-		PanelData pd = viewer.selectedPanel.getPanelData();
-		if (!pd.getSpectrum().is1D() && pd.getDisplay1D())
-			return "Click on the spectrum and use UP or DOWN keys to see subspectra.";
-		return null;
-	}
-
-//	public String siExecExport(JSVPanel jsvp, String value) {
-//		return new Exporter().write(viewer, jsvp, ScriptToken.getTokens(value),
-//				svgForInkscape);
-//	}
-
-	@Override
-	public void siExecSetInterface(String value) {
-		interfaceOverlaid = (value.equalsIgnoreCase("overlay"));
-	}
-
-	@Override
-	public void siExecScriptComplete(String msg, boolean isOK) {
-		viewer.requestRepaint();
-		if (msg != null) {
-			writeStatus(msg);
-			if (msg.length() == 0)
-				msg = null;
-		}
-		// if (msg == null) {
-		// commandInput.requestFocus();
-		// }
-	}
-
-	@Override
-	public void siExecSetAutoIntegrate(boolean b) {
-		autoIntegrate = b;
-	}
 
 	@Override
 	public void addHighlight(double x1, double x2, int r, int g, int b, int a) {
@@ -1030,6 +833,11 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		advancedApplet.reversePlot();
 	}
 
+	public void setCursorObject(Object c) {
+		setCursor((Cursor) c);
+	}
+
+
 	@Override
 	public void setSpectrumNumber(int i) {
 		advancedApplet.setSpectrumNumber(i);
@@ -1048,6 +856,142 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	@Override
 	public void toggleIntegration() {
 		advancedApplet.toggleIntegration();
+	}
+
+
+	/**
+	 * Writes a message to the status bar
+	 * 
+	 * @param msg
+	 *          the message
+	 */
+	@Override
+	public void writeStatus(String msg) {
+		if (msg == null)
+			msg = "Unexpected Error";
+		if (msg.length() == 0)
+			msg = "Enter a command:";
+		statusLabel.setText(msg);
+	}
+
+	///////////// JSApp/MainFrame ScriptInterface ////////////
+	
+
+	@Override
+	public void siOpenDataOrFile(String data, String name,
+			List<JDXSpectrum> specs, String url, int firstSpec, int lastSpec,
+			boolean isAppend, String script, String id) {
+		switch (viewer.openDataOrFile(data, name, specs, url, firstSpec, lastSpec,
+				isAppend, id)) {
+		case JSViewer.FILE_OPEN_OK:
+			if (script != null)
+				runScript(script);
+			break;
+		}
+		siValidateAndRepaint(false);
+	}
+
+	@Override
+	public void siSetCurrentSource(JDXSource source) {
+		viewer.currentSource = source;
+		if (source != null)
+		  appMenu.setCloseMenuItem(JSVFileManager.getName(source.getFilePath()));
+		boolean isError = (source != null && source.getErrorLog().length() > 0);
+		setError(isError, (isError && source.getErrorLog().indexOf("Warning") >= 0));
+	}
+
+	/**
+	 * Sets the display properties as specified from the preferences dialog or the
+	 * properties file
+	 * 
+	 * @param jsvp
+	 *          the display panel
+	 */
+	@Override
+	public void siSetPropertiesFromPreferences(JSVPanel jsvp,
+			boolean includeMeasures) {
+		ColorParameters ds = dsp.getDisplaySchemes().get(defaultDisplaySchemeName);
+		jsvp.getPanelData().addListener(this);
+		viewer.parameters.setFor(jsvp, (ds == null ? dsp.getDefaultScheme() : ds),
+				includeMeasures);
+		viewer.checkAutoIntegrate();
+		jsvp.doRepaint(true);
+	}
+
+
+	@Override
+	public void siProcessCommand(String script) {
+		runScriptNow(script);
+	}
+
+	@Override
+	public void siSetSelectedPanel(JSVPanel jsvp) {
+		if (viewer.selectedPanel != null)
+      mainSplitPosition = mainSplitPane.getDividerLocation();
+		viewer.mainPanel.setSelectedPanel(viewer, jsvp, viewer.panelNodes);
+		viewer.selectedPanel = jsvp;
+		viewer.spectraTree.setSelectedPanel(this, jsvp);
+		validate();
+		if (jsvp != null) {
+      jsvp.setEnabled(true);
+      jsvp.setFocusable(true);
+		}
+		if (mainSplitPosition != 0)
+  		mainSplitPane.setDividerLocation(mainSplitPosition);
+	}
+
+
+	@Override
+	public void siSendPanelChange() {
+		if (viewer.selectedPanel == prevPanel)
+			return;
+		prevPanel = viewer.selectedPanel;
+		viewer.sendPanelChange();
+	}
+
+	@Override
+	public void siSyncLoad(String filePath) {
+		viewer.closeSource(null);
+		siOpenDataOrFile(null, null, null, filePath, -1, -1, false, null, null);
+		if (viewer.currentSource == null)
+			return;
+		if (viewer.panelNodes.get(0).getSpectrum().isAutoOverlayFromJmolClick())
+			viewer.execView("*", false);
+	}
+
+	@Override
+	public void siValidateAndRepaint(boolean isAll) {
+		validate();
+		if (isAll)
+			repaint();
+		else
+			viewer.requestRepaint();
+	}
+
+	@Override
+	public void siExecHidden(boolean b) {
+		isHidden = (jmol != null && b);
+		setVisible(!isHidden);
+	}
+
+	@Override
+	public String siLoaded(String value) {
+		PanelData pd = viewer.selectedPanel.getPanelData();
+		return (!pd.getSpectrum().is1D() && pd.getDisplay1D() ?
+				"Click on the spectrum and use UP or DOWN keys to see subspectra." : null);
+	}
+
+	@Override
+	public void siExecScriptComplete(String msg, boolean isOK) {
+		viewer.requestRepaint();
+		if (msg != null) {
+			writeStatus(msg);
+			if (msg.length() == 0)
+				msg = null;
+		}
+		// if (msg == null) {
+		// commandInput.requestFocus();
+		// }
 	}
 
 	@Override
@@ -1072,26 +1016,13 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		}
 	}
 
-	public void enableStatus(boolean TF) {
-		if (TF)
-			getContentPane().add(statusPanel, BorderLayout.SOUTH);
-		else
-			getContentPane().remove(statusPanel);
-		validate();
-	}
-
 	@Override
 	public void siCheckCallbacks(String title) {
 		// setMainTitle(title);
 	}
 
-	// /// JSVPanelNode tree model methods (can be left unimplemented for Android)
-
 	@Override
-	public void siSetNode(PanelNode panelNode, boolean fromTree) {
-		if (panelNode.jsvp != viewer.selectedPanel)
-			siSetSelectedPanel(panelNode.jsvp);
-		siSendPanelChange();
+	public void siNodeSet(PanelNode panelNode) {
 		siSetMenuEnables(panelNode, false);
 		writeStatus("");
 	}
@@ -1103,27 +1034,11 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	 *          the <code>JDXSource</code>
 	 */
 	@Override
-	public void siCloseSource(JDXSource source) {
-		viewer.closeSource(source);
+	public void siSourceClosed(JDXSource source) {
 		appMenu.clearSourceMenu(source);
 		setError(false, false);
 		setTitle("JSpecView");
-		siValidateAndRepaint();			
-	}
-
-	/**
-	 * Writes a message to the status bar
-	 * 
-	 * @param msg
-	 *          the message
-	 */
-	@Override
-	public void writeStatus(String msg) {
-		if (msg == null)
-			msg = "Unexpected Error";
-		if (msg.length() == 0)
-			msg = "Enter a command:";
-		statusLabel.setText(msg);
+		siValidateAndRepaint(false);			
 	}
 
 	@Override
@@ -1162,14 +1077,6 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	@Override
-	public JDXSource siCreateSource(String data, String filePath, 
-			int firstSpec, int lastSpec) throws Exception {
-		return FileReader.createJDXSource(JSVFileManager
-				.getBufferedReaderForString(data), filePath, false, loadImaginary , firstSpec,
-				lastSpec, viewer.nmrMaxY);
-	}
-
-	@Override
 	public JSVPanel siGetNewJSVPanel2(List<JDXSpectrum> specs) {
 		return AwtPanel.getPanelMany(viewer, specs, 0, 0);
 	}
@@ -1180,50 +1087,14 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	@Override
-	public PanelNode siGetNewPanelNode(String id, String fileName,
-			JDXSource source, JSVPanel jsvp) {
-		return new PanelNode(id, fileName, source, jsvp);
-	}
-
-	public void setCursorObject(Object c) {
-		setCursor((Cursor) c);
-	}
-
-
-	// debugging
-
-	@Override
 	public void siExecTest(String value) {
 		System.out.println(PT.toJSON(null, viewer.getPropertyAsJavaObject(value)));
 		//syncScript("Jmol sending to JSpecView: jmolApplet_object__5768809713073075__JSpecView: <PeakData file=\"file:/C:/jmol-dev/workspace/Jmol-documentation/script_documentation/examples-12/jspecview/acetophenone.jdx\" index=\"31\" type=\"13CNMR\" id=\"6\" title=\"carbonyl ~200\" peakShape=\"multiplet\" model=\"acetophenone\" atoms=\"1\" xMax=\"199\" xMin=\"197\"  yMax=\"10000\" yMin=\"0\" />");
 	}
 
 	@Override
-	public String siSetFileAsString(String value) {
-		return JSVFileManager.getFileAsString(value);
-	}
-
-  
-	@Override
-	public JSVTreeNode siCreateTree(JDXSource source, JSVPanel[] jsvPanels) {
-		return tree.createTree(this, source, jsvPanels);
-	}
-
-	@Override
-	public JSViewer siGetViewer() {
-		return viewer;
-	}
-
-	@Override
 	public void siNewWindow(boolean isSelected, boolean fromFrame) {
 		// not implemented for MainFrame
-	}
-
-
-	@Override
-	public List<String> getScriptQueue() {
-  // applet only
-		return null;
 	}
 
 }

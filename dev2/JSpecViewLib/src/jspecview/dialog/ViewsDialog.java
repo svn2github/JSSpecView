@@ -195,7 +195,7 @@ public class ViewsDialog extends JSVDialog {
 			viewer.execView(sb.toString().trim(), false);
 			layoutDialog();
 		} else {
-			viewer.setNode(thisNode, true);
+			viewer.setNode(thisNode); // was fromTree TRUE
 		}
 		if (script != null)
 			viewer.runScript(script);
