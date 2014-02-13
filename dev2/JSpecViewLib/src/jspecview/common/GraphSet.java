@@ -1420,11 +1420,18 @@ public class GraphSet implements XYScaleConverter {
 				: iSpectrumSelected);
 		Object g2 = (gRear == gMain? gFront : gRear);
 		if (doAll) {
-			boolean addCurrentBox = (!isLinked && isSplittable && 
-					(nSplit == 1 || pd.currentSplitPoint == iSplit && iSplit == iSpectrumSelected));
-			boolean drawUpDownArrows = addCurrentBox;/*(pd.isCurrentGraphSet(this) && zoomEnabled
-					&& spectra.get(0).isScalable() && (addCurrentBox || nSpectra == 1)
-					&& (nSplit == 1 || pd.currentSplitPoint == iSpectrumMovedTo) && !isDrawNoSpectra());*/
+			boolean addCurrentBox = (
+					!isLinked  // not if this is linked 
+					&& isSplittable 
+					&& (nSplit == 1 || pd.currentSplitPoint == iSplit));
+			boolean drawUpDownArrows = 
+					(zoomEnabled  // must have zoom enabled
+				  && !isDrawNoSpectra() // must be drawing spectrum
+					&& pd.isCurrentGraphSet(this) // must be current 
+					&& spectra.get(0).isScalable() // must be scalable
+					&& (addCurrentBox || nSpectra == 1) // must have a box or be just one spectrum
+					&& (nSplit == 1 || pd.currentSplitPoint == iSpectrumMovedTo) // must have one panel or be the spectrum moved to
+					);
 			boolean addSplitBox = isSplittable;
 			drawFrame(gMain, iSpecForFrame, addCurrentBox, addSplitBox,
 					drawUpDownArrows);
@@ -2619,6 +2626,16 @@ public class GraphSet implements XYScaleConverter {
 				+ ONLINE_CUTOFF);
 	}
 
+	/**
+	 * 
+	 * @param pd
+	 * @param graphSets
+	 * @param linkMode  
+	 *            NONE   -   a vertical stack
+	 *            AB     -   a COSY, with 1H on left and 2D on right
+	 *            ABC    -   a HETCOR, with 1H and 13C on left, 2D on right
+	 *              
+	 */
 	private static void setFractionalPositions(PanelData pd, List<GraphSet> graphSets,
 			LinkMode linkMode) {
 
