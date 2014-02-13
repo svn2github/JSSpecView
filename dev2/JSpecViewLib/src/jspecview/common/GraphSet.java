@@ -91,7 +91,7 @@ public class GraphSet implements XYScaleConverter {
 	 * iSpectrumClicked
 	 * 
 	 * -- indicates spectrum clicked on by user -- when set T/F, also sets
-	 * iSpectrumSelected T/F
+	 *    iSpectrumSelected T/F
 	 * 
 	 * -- initially 0
 	 * 
@@ -2332,7 +2332,7 @@ public class GraphSet implements XYScaleConverter {
 			return;
 		pd.setFont(g, xPixels, FONT_BOLD, 12, false);
 		g2d.setGraphicsColor(g, (m == pendingMeasurement ? pd
-				.getColor(ScriptToken.HIGHLIGHTCOLOR) : pd.BLACK));
+				.getColor(ScriptToken.PEAKTABCOLOR) : pd.BLACK));
 		int x1 = toPixelX(m.getXVal());
 		int y1 = toPixelY(m.getYVal());
 		int x2 = toPixelX(m.getXVal2());
@@ -3665,7 +3665,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 	}
 
 	void setSpectrum(int iSpec, boolean fromSplit) {
-		if (fromSplit) {
+		if (fromSplit && nSplit > 1) {
 			if (nSplit > 1)
 				setSpectrumClicked(iSpec);
 		} else {

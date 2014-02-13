@@ -610,7 +610,7 @@ public class PanelData implements EventManager {
 			return;
 		currentSplitPoint = index;
 		if (doSetSpec)
-			setSpectrum(currentSplitPoint, true);
+			setSpectrum(currentSplitPoint, currentGraphSet.nSplit > 1);
 		JDXSpectrum spec = getSpectrum();
 		notifySubSpectrumChange(spec.getSubIndex(), spec);
 		
