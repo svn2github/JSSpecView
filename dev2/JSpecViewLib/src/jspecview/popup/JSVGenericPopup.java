@@ -299,8 +299,8 @@ abstract public class JSVGenericPopup extends GenericSwingPopup implements
 		boolean isSingle = pd != null && pd.haveSelectedSpectrum();
 
 		setItemEnabled("Integration", pd != null && pd.getSpectrum().canIntegrate());
-		setItemEnabled("Measurements",
-				pd != null && pd.hasCurrentMeasurements(AType.Measurements));
+		setItemEnabled("Measurements", true);
+				//pd != null && pd.hasCurrentMeasurements(AType.Measurements));
 		setItemEnabled("Peaks", pd != null && pd.getSpectrum().is1D());
 
 		setItemEnabled("Predicted_Solution_Colour",
