@@ -36,8 +36,6 @@ import jspecview.common.JSVersion;
 import jspecview.common.PanelNode;
 import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
-import jspecview.common.Annotation.AType;
-
 import javajs.util.List;
 
 abstract public class JSVGenericPopup extends GenericSwingPopup implements
@@ -56,6 +54,7 @@ abstract public class JSVGenericPopup extends GenericSwingPopup implements
 
 	protected JSViewer viewer;
 	protected int updateMode;
+	
 
 	// private int itemMax = 25;
 	// private int titleWidthMax = 20;
@@ -114,7 +113,7 @@ abstract public class JSVGenericPopup extends GenericSwingPopup implements
 	// /////// protected methods //////////
 
 	@Override
-	protected void appCheckItems(String item, SC newMenu) {
+	protected void appCheckItem(String item, SC newMenu) {
     // no special items in JSV menu
 	}
 
