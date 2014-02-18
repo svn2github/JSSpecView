@@ -473,12 +473,10 @@ public class ApplicationMenu extends JMenuBar {
   }
 
 	protected void doMenuSelected() {
-    JSVPanel jsvp = mainFrame.viewer.selectedPanel;
-    if (jsvp == null)
-      return;
-    gridCheckBoxMenuItem.setSelected(jsvp.getPanelData().getBoolean(ScriptToken.GRIDON));
-    coordsCheckBoxMenuItem.setSelected(jsvp.getPanelData().getBoolean(ScriptToken.COORDINATESON));
-    revPlotCheckBoxMenuItem.setSelected(jsvp.getPanelData().getBoolean(ScriptToken.REVERSEPLOT));
+		PanelData pd = mainFrame.viewer.pd();
+    gridCheckBoxMenuItem.setSelected(pd.getBoolean(ScriptToken.GRIDON));
+    coordsCheckBoxMenuItem.setSelected(pd.getBoolean(ScriptToken.COORDINATESON));
+    revPlotCheckBoxMenuItem.setSelected(pd.getBoolean(ScriptToken.REVERSEPLOT));
     //jsvpPopupMenu.setEnables(mainFrame.viewer.selectedPanel);
 	}
 
@@ -556,7 +554,7 @@ public class ApplicationMenu extends JMenuBar {
       setSourceEnabled(false);
     } else {
       setSourceEnabled(true);
-      PanelData pd = node.jsvp.getPanelData();
+      PanelData pd = node.pd();
       JDXSpectrum spec = pd.getSpectrum();
       setCheckBoxes(pd);
       overlayKeyMenuItem.setEnabled(pd.getNumberOfGraphSets() > 1);

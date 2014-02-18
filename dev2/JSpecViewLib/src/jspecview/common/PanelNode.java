@@ -23,7 +23,7 @@ public class PanelNode {
     isSimulation = (source.getFilePath().indexOf(JSVFileManager.SIMULATION_PROTOCOL) >= 0);
     this.jsvp = jsvp;
     if (jsvp != null) {
-      jsvp.getPanelData().getSpectrumAt(0).setId(id);
+      pd().getSpectrumAt(0).setId(id);
       frameTitle = jsvp.getTitle();
     }
 
@@ -57,8 +57,12 @@ public class PanelNode {
     legend = null;
   }
   
+	public PanelData pd() {
+		return jsvp.getPanelData();
+	}
+	
   public JDXSpectrum getSpectrum() {
-    return jsvp.getPanelData().getSpectrum();
+    return pd().getSpectrum();
   }
 
   public JSVDialog setLegend(JSVDialog legend) {
@@ -163,11 +167,10 @@ public class PanelNode {
 	}
 	
   Map<String, Object> getInfo(String key) {
-    Map<String, Object> info = jsvp.getPanelData().getInfo(false, key);
+    Map<String, Object> info = pd().getInfo(false, key);
 		Parameters.putInfo(key, info, "panelId", id);
 		Parameters.putInfo(key, info, "panelFileName", fileName);
 		Parameters.putInfo(key, info, "panelSource", source.getFilePath());
 	  return info;
 	}
-	
 }

@@ -253,10 +253,23 @@ public class JDXHeader {
     rowData[i++] = new String[] { "##OWNER", owner };
     
     for(int j = 0; j < headerTable.size(); j++)
-      rowData[i++] = headerTable.get(j);
+      rowData[i++] = getRow(j);
     
     return rowData;
   }
+
+	private String[] getRow(int j) {
+		String[] s = headerTable.get(j);
+		/**
+		 * @j2sNative
+		 * 
+		 * return [s[0], javajs.util.PT.rep(s[1], "<", "&lt;")];
+		 * 
+		 */
+		{
+			return s;
+		}
+	}
 
   
   

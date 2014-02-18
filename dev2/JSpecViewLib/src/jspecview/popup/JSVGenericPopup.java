@@ -71,7 +71,7 @@ abstract public class JSVGenericPopup extends GenericSwingPopup implements
 
 	protected void initialize(JSViewer viewer, PopupResource bundle, String title) {
 		this.viewer = viewer;
-		initSwing(title, bundle, viewer.isJS, viewer.isApplet, viewer.isSigned);
+		initSwing(title, bundle, viewer.getApplet(), viewer.isJS, viewer.isSigned);
 	}
 
 	// //// JmolPopupInterface methods //////
@@ -314,19 +314,16 @@ abstract public class JSVGenericPopup extends GenericSwingPopup implements
 	}
 
 	private void setItemEnabled(String key, boolean TF) {
-		SC item = htMenus.get(key);
-		if (item == null)
-			return;
-		menuEnable(item, TF);
+		menuEnable(htMenus.get(key), TF);
 	}
 
 	@Override
 	public void setSelected(String key, boolean TF) {
 		SC item = htMenus.get(key);
-		if (item == null)
+		if (item == null || item.isSelected() == TF)
 			return;
 		menuEnable(item, false);
-		item.setEnabled(TF);
+		item.setSelected(TF);
 		menuEnable(item, true);
 	}
 

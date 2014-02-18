@@ -464,7 +464,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		return (value.equalsIgnoreCase("single") || value.equalsIgnoreCase("overlay"));
 	}
 
-	private PanelData pd() {
+	public PanelData pd() {
 		return selectedPanel.getPanelData();
 	}
 
@@ -482,12 +482,11 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 	}
 
 	private void execPeakList(String value) {
-		JSVPanel jsvp = selectedPanel;
 		ColorParameters p = parameters;
 		Boolean b = Parameters.getTFToggle(value);
 		if (value.indexOf("=") < 0) {
 			if (!isClosed())
-				jsvp.getPanelData().getPeakListing(null, b);
+				pd().getPeakListing(null, b);
 		} else {
 			List<String> tokens = ScriptToken.getTokens(value);
 			for (int i = tokens.size(); --i >= 0;) {
@@ -505,7 +504,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 								: "parabolic");
 					}
 					if (!isClosed())
-						jsvp.getPanelData().getPeakListing(p, Boolean.TRUE);
+						pd().getPeakListing(p, Boolean.TRUE);
 				} catch (Exception e) {
 					// ignore
 				}
@@ -569,20 +568,20 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		try {
 			double f = Double.parseDouble(value);
 			for (int i = nodes.size(); --i >= 0;)
-				nodes.get(i).jsvp.getPanelData().scaleSelectedBy(f);
+				nodes.get(i).pd().scaleSelectedBy(f);
 		} catch (Exception e) {
 		}
 	}
 
 	private boolean isClosed() {
-		return (selectedPanel == null || selectedPanel.getPanelData() == null);
+		return (selectedPanel == null || pd() == null);
 	}
 	
 	private void execSelect(String value) {
 		if (value.startsWith("ID ")) {
 			if (!isClosed())
 				try {
-					selectedPanel.getPanelData().selectSpectrum(null, "ID",
+				  pd().selectSpectrum(null, "ID",
 							PT.trimQuotes(value.substring(3)), true);
 				} catch (Exception e) {
 					//
@@ -591,7 +590,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		}
 		List<PanelNode> nodes = panelNodes;
 		for (int i = nodes.size(); --i >= 0;)
-			nodes.get(i).jsvp.getPanelData().selectFromEntireSet(Integer.MIN_VALUE);
+			nodes.get(i).pd().selectFromEntireSet(Integer.MIN_VALUE);
 		List<JDXSpectrum> speclist = new List<JDXSpectrum>();
 		fillSpecList(value, speclist, false);
 		// not sure where this is going...
@@ -624,14 +623,17 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 	}
 
 	private void execIntegrate(String value) {
-		JSVPanel jsvp = selectedPanel;
-		if (jsvp == null)
+		if (selectedPanel == null)
 			return;
-		jsvp.getPanelData().checkIntegral(parameters, value);
+		pd().checkIntegral(parameters, value);
 		if (integrationRatios != null)
-			jsvp.getPanelData().setIntegrationRatios(integrationRatios);
+			pd().setIntegrationRatios(integrationRatios);
 		integrationRatios = null; // one time only
-		jsvp.doRepaint(true);
+		repaint(true);
+	}
+
+	private void repaint(boolean andTaintAll) {
+		selectedPanel.doRepaint(andTaintAll);
 	}
 
 	@SuppressWarnings("incomplete-switch")
@@ -645,10 +647,8 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			p.integralOffset = value;
 			break;
 		}
-		JSVPanel jsvp = selectedPanel;
-		if (jsvp == null)
-			return;
-		jsvp.getPanelData().checkIntegral(parameters, "update");
+		if (selectedPanel != null)
+			pd().checkIntegral(parameters, "update");
 	}
 
 	private void setYScale(String value) {
@@ -669,7 +669,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 					continue;
 				if (JDXSpectrum.areXScalesCompatible(spec, node.getSpectrum(), false,
 						false))
-					node.jsvp.getPanelData().setZoom(0, y1, 0, y2);
+					node.pd().setZoom(0, y1, 0, y2);
 			}
 		} else {
 			pd().setZoom(0, y1, 0, y2);
@@ -692,9 +692,8 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 	private void showOverlayLegend(PanelNode node, boolean visible) {
 		JSVDialog legend = node.legend;
 		if (legend == null && visible) {
-			legend = node.setLegend(node.jsvp.getPanelData()
-					.getNumberOfSpectraInCurrentSet() > 1
-					&& node.jsvp.getPanelData().getNumberOfGraphSets() == 1 ? getDialog(
+			legend = node.setLegend(node.pd().getNumberOfSpectraInCurrentSet() > 1
+					&& node.pd().getNumberOfGraphSets() == 1 ? getDialog(
 					AType.OverlayLegend, null) : null);
 		}
 		if (legend != null)
@@ -704,10 +703,9 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 	// / from JavaScript
 
 	public void addHighLight(double x1, double x2, int r, int g, int b, int a) {
-		JSVPanel jsvp = selectedPanel;
 		if (!isClosed()) {
-			jsvp.getPanelData().addHighlight(null, x1, x2, null, r, g, b, a);
-			jsvp.doRepaint(false);
+			pd().addHighlight(null, x1, x2, null, r, g, b, a);
+			repaint(false);
 		}
 	}
 
@@ -763,11 +761,11 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		}
 		
 		PeakInfo pi = selectPanelByPeak(file, index, atomKey);
-		PanelData pd = selectedPanel.getPanelData();
+		PanelData pd = pd();
 		pd.selectSpectrum(file, type, model, true);
 		si.siSendPanelChange();
 		pd.addPeakHighlight(pi);
-		selectedPanel.doRepaint(true);
+		repaint(true);
 		// round trip this so that Jmol highlights all equivalent atoms
 		// and appropriately starts or clears vibration
 		if (jmolSource == null || (pi != null && pi.getAtoms() != null))
@@ -799,13 +797,12 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 	}
 
 	private boolean checkFileAlreadyLoaded(String fileName) {
-		JSVPanel jsvp = selectedPanel;
 		if (isClosed())
 			return false;
-		if (jsvp.getPanelData().hasFileLoaded(fileName))
+		if (pd().hasFileLoaded(fileName))
 			return true;
 		for (int i = panelNodes.size(); --i >= 0;)
-			if (panelNodes.get(i).jsvp.getPanelData().hasFileLoaded(fileName)) {
+			if (panelNodes.get(i).pd().hasFileLoaded(fileName)) {
 				si.siSetSelectedPanel(panelNodes.get(i).jsvp);
 				return true;
 			}
@@ -823,17 +820,16 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			return null;
 		PeakInfo pi = null;
 		for (int i = panelNodes.size(); --i >= 0;)
-			panelNodes.get(i).jsvp.getPanelData().addPeakHighlight(null);
-		JSVPanel jsvp = selectedPanel;
-		pi = jsvp.getPanelData().selectPeakByFileIndex(file, index, atomKey);
+			panelNodes.get(i).pd().addPeakHighlight(null);
+		pi = pd().selectPeakByFileIndex(file, index, atomKey);
 		if (pi != null) {
 			// found in current panel
-			setNode(PanelNode.findNode(jsvp, panelNodes));
+			setNode(PanelNode.findNode(selectedPanel, panelNodes));
 		} else {
 			// must look elsewhere
 			for (int i = panelNodes.size(); --i >= 0;) {
 				PanelNode node = panelNodes.get(i);
-				if ((pi = node.jsvp.getPanelData().selectPeakByFileIndex(file, index, atomKey)) != null) {
+				if ((pi = node.pd().selectPeakByFileIndex(file, index, atomKey)) != null) {
 					setNode(node);
 					break;
 				}
@@ -857,14 +853,13 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		if (eventObj instanceof PeakInfo) {
 			// this is a call from the PEAK command, above.
 			pi = (PeakInfo) eventObj;
-			JSVPanel jsvp = selectedPanel;
-			PeakInfo pi2 = jsvp.getPanelData().findMatchingPeakInfo(pi);
+			PeakInfo pi2 = pd().findMatchingPeakInfo(pi);
 			if (pi2 == null) {
 				if (!"ALL".equals(pi.getTitle()))
 					return;
 				PanelNode node = null;
 				for (int i = 0; i < panelNodes.size(); i++)
-					if ((pi2 = panelNodes.get(i).jsvp.getPanelData()
+					if ((pi2 = panelNodes.get(i).pd()
 							.findMatchingPeakInfo(pi)) != null) {
 						node = panelNodes.get(i);
 						break;
@@ -885,21 +880,20 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		// System.out.println(Thread.currentThread() +
 		// "processPeakEvent --selectSpectrum " + pi);
 		if (pi.isClearAll()) // was not in app version??
-			selectedPanel.doRepaint(false);
+			repaint(false);
 		else
 			pd().selectSpectrum(pi.getFilePath(), pi.getType(), pi.getModel(), true);
 		si.siCheckCallbacks(pi.getTitle());
-
 	}
 
 	private void syncToJmol(PeakInfo pi) {
-		selectedPanel.doRepaint(true);
+		repaint(true);
 		returnFromJmolModel = pi.getModel();
 		si.syncToJmol(jmolSelect(pi));
 	}
 
 	public void sendPanelChange() {
-		PanelData pd = selectedPanel.getPanelData();
+		PanelData pd = pd();
 		JDXSpectrum spec = pd.getSpectrum();
 		PeakInfo pi = spec.getSelectedPeak();
 		if (pi == null)
@@ -916,7 +910,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 				? "vibration ON; selectionHalos OFF;"
 				: "vibration OFF; selectionhalos "
 						+ (pi.getAtoms() == null ? "OFF" : "ON"));
-		return "Select: " + pi + " script=\"" + script + " \" sourceID=\"" + this.selectedPanel.getPanelData().getSpectrum().sourceID + "\"";
+		return "Select: " + pi + " script=\"" + script + " \" sourceID=\"" + pd().getSpectrum().sourceID + "\"";
 	}
 
 	public Map<String, Object> getPropertyAsJavaObject(String key) {
@@ -925,8 +919,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 
 		if ("SOURCEID".equalsIgnoreCase(key)) {
 			// get current spectrum ID
-			map.put(key, (selectedPanel.getPanelData() == null ? "" : 
-				selectedPanel.getPanelData().getSpectrum().sourceID));
+			map.put(key, (pd() == null ? "" : pd().getSpectrum().sourceID));
 			return map;
 		}
 		if (key != null && key.startsWith("DATA_")) {
@@ -1046,7 +1039,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 				pt++;
 				while (pt < list0.size() && !idLast.equals(id)) {
 					PanelNode node = PanelNode.findNodeById((idLast = list0.get(pt++)), panelNodes);
-					speclist.addLast(node.jsvp.getPanelData().getSpectrumAt(0));
+					speclist.addLast(node.pd().getSpectrumAt(0));
 					sb.append(",").append(idLast);
 				}
 				continue;
@@ -1061,7 +1054,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 					node = panelNodes.get(j);
 					if (node.fileName != null && node.fileName.startsWith(id)
 							|| node.frameTitle != null && node.frameTitle.startsWith(id)) {
-						addSpecToList(node.jsvp.getPanelData(), userYFactor, -1, speclist,
+						addSpecToList(node.pd(), userYFactor, -1, speclist,
 								isView);
 						sb.append(",").append(node.id);
 					}
@@ -1074,7 +1067,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			if (node == null)
 				continue;
 			idLast = id;
-			addSpecToList(node.jsvp.getPanelData(), userYFactor, isubspec, speclist,
+			addSpecToList(node.pd(), userYFactor, isubspec, speclist,
 					isView);
 			sb.append(",").append(id);
 			if (isubspec > 0)
@@ -1223,7 +1216,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		} else {
 			splitSpectra();
 		}
-		selectedPanel.getPanelData().taintedAll = true;
+		pd().taintedAll = true;
 		if (!isView)
 			si.siUpdateRecentMenus(filePath);
 		return FILE_OPEN_OK;
@@ -1482,18 +1475,16 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 	}
 
 	public void removeAllHighlights() {
-		JSVPanel jsvp = selectedPanel;
 		if (!isClosed()) {
-			jsvp.getPanelData().removeAllHighlights();
-			jsvp.doRepaint(false);
+			pd().removeAllHighlights();
+			repaint(false);
 		}
 	}
 
 	public void removeHighlight(double x1, double x2) {
-		JSVPanel jsvp = selectedPanel;
 		if (!isClosed()) {
-			jsvp.getPanelData().removeHighlight(x1, x2);
-			jsvp.doRepaint(false);
+			pd().removeHighlight(x1, x2);
+			repaint(false);
 		}
 	}
 
@@ -1735,7 +1726,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 							"Select Spectrum", DialogManager.ERROR_MESSAGE);
 				return;
 			}
-			dialogManager.showSource(this, currentSource);
+			dialogManager.showSource(this, pd().getSpectrum().getFilePath());
 		}
 	}
 
@@ -1920,7 +1911,8 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 
 	public void checkAutoIntegrate() {
 		if (autoIntegrate)
-			selectedPanel.getPanelData().integrateAll(parameters);
+			pd
+			().integrateAll(parameters);
 	}
 	
 

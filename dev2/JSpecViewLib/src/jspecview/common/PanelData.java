@@ -591,6 +591,8 @@ public class PanelData implements EventManager {
 			isNewSet = gs.checkSpectrumClickedEvent(mouseX, mouseY, clickCount);
 			if (!isNewSet)
 				return;
+			currentSplitPoint = splitPoint = gs.getCurrentSpectrumIndex();
+			setSpectrum(splitPoint, true);
 		}
 
 		// new set (so also new split point)
@@ -838,7 +840,7 @@ public class PanelData implements EventManager {
 	}
 
 	public void setHighlightColor(GenericColor color) {
-		jsvp.getPanelData().setColor(ScriptToken.HIGHLIGHTCOLOR, color);
+		setColor(ScriptToken.HIGHLIGHTCOLOR, color);
 	}
 
 	String getInput(String message, String title, String sval) {
@@ -871,6 +873,7 @@ public class PanelData implements EventManager {
 	 *          null indicates no subspectra
 	 */
 	public void notifySubSpectrumChange(int isub, JDXSpectrum spec) {
+		System.out.println("notify " + isub + " " + spec);
 		notifyListeners(new SubSpecChangeEvent(isub, (spec == null ? null : spec
 				.getTitleLabel())));
 	}

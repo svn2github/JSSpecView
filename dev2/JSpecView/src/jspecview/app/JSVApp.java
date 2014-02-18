@@ -512,7 +512,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 		Coordinate actualCoord = (peakCallbackFunctionName == null ? null
 				: new Coordinate());
 		// will return true if actualcoord is null (just doing coordCallback)
-		if (!viewer.selectedPanel.getPanelData().getPickedCoordinates(coord,
+		if (!viewer.pd().getPickedCoordinates(coord,
 				actualCoord))
 			return;
 		int iSpec = viewer.mainPanel.getCurrentPanelIndex();
@@ -647,7 +647,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	@Override
 	public void siValidateAndRepaint(boolean isAll) {
 		PanelData pd;
-		if (viewer.selectedPanel != null && (pd = viewer.selectedPanel.getPanelData()) != null)
+		if (viewer.selectedPanel != null && (pd = viewer.pd()) != null)
 			pd.taintedAll = true;
 		appletFrame.validate();
 		repaint();

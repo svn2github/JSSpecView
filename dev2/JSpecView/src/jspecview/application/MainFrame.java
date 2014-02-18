@@ -976,7 +976,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 	@Override
 	public String siLoaded(String value) {
-		PanelData pd = viewer.selectedPanel.getPanelData();
+		PanelData pd = viewer.pd();
 		return (!pd.getSpectrum().is1D() && pd.getDisplay1D() ?
 				"Click on the spectrum and use UP or DOWN keys to see subspectra." : null);
 	}

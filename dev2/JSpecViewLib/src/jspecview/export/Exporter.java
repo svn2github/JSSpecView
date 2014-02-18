@@ -113,7 +113,7 @@ public class Exporter implements ExportInterface {
   private String exportSpectrumOrImage(JSViewer viewer, ExportType eType,
                                               int index, OC out) {
     JDXSpectrum spec;
-    PanelData pd = viewer.selectedPanel.getPanelData();    
+    PanelData pd = viewer.pd();    
     if (index < 0 && (index = pd.getCurrentSpectrumIndex()) < 0)
       return "Error exporting spectrum: No spectrum selected";
     spec = pd.getSpectrumAt(index);
@@ -207,10 +207,10 @@ public class Exporter implements ExportInterface {
 		boolean isJob = (pdfFileName == null || pdfFileName.length() == 0);
 		boolean isBase64 = (!isJob && pdfFileName.toLowerCase()
 				.startsWith("base64"));
-		JSVPanel jsvp = viewer.selectedPanel;
-		if (jsvp == null)
+		PanelData pd = viewer.pd();
+		if (pd == null)
 			return null;
-		jsvp.getPanelData().closeAllDialogsExcept(AType.NONE);
+		pd.closeAllDialogsExcept(AType.NONE);
 		PrintLayout pl;
 		/**
 		 * @j2sNative
@@ -226,6 +226,7 @@ public class Exporter implements ExportInterface {
 			isJob = false;
 			pdfFileName = "PDF";
 		}
+		JSVPanel jsvp = viewer.selectedPanel;
 		if (!isBase64 && !isJob) {
 			JSVFileHelper helper = viewer.fileHelper;
 			helper.setFileChooser(ExportType.PDF);
@@ -242,7 +243,7 @@ public class Exporter implements ExportInterface {
 		String s = null;
 		try {
 			OC out = (isJob ? null : viewer.getOutputChannel(isBase64 ? null : pdfFileName, true));
-			String printJobTitle = jsvp.getPanelData().getPrintJobTitle(true);
+			String printJobTitle = pd.getPrintJobTitle(true);
 			if (pl.showTitle) {
 				printJobTitle = jsvp.getInput("Title?", "Title for Printing",
 						printJobTitle);
@@ -260,22 +261,22 @@ public class Exporter implements ExportInterface {
 	
 	private String[] getExportableItems(JSViewer viewer,
 			boolean isSameType) {
-		JSVPanel jsvp = viewer.selectedPanel;
+		PanelData pd = viewer.pd();
 		boolean isView = viewer.currentSource.isView;
 		// From popup menu click SaveAs or Export
 		// if JSVPanel has more than one spectrum...Choose which one to export
-		int nSpectra = jsvp.getPanelData().getNumberOfSpectraInCurrentSet();
+		int nSpectra = pd.getNumberOfSpectraInCurrentSet();
 		if (nSpectra == 1 || !isView && isSameType
-				|| jsvp.getPanelData().getCurrentSpectrumIndex() >= 0)
+				|| pd.getCurrentSpectrumIndex() >= 0)
 			return null;
 		String[] items = new String[nSpectra];
 		for (int i = 0; i < nSpectra; i++)
-			items[i] = jsvp.getPanelData().getSpectrumAt(i).getTitle();
+			items[i] = pd.getSpectrumAt(i).getTitle();
 		return items;
 	}
 
 	private String getSuggestedFileName(JSViewer viewer, ExportType imode) {
-		PanelData pd = viewer.selectedPanel.getPanelData();
+		PanelData pd = viewer.pd();
     String sourcePath = pd.getSpectrum().getFilePath();
     String newName = JSVFileManager.getName(sourcePath);
     if (newName.startsWith("$"))

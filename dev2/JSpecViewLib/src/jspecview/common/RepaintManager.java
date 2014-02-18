@@ -18,7 +18,7 @@ public class RepaintManager {
       return false;
     }
     repaintPending = true;
-    viewer.selectedPanel.getPanelData().taintedAll = true;
+    viewer.pd().taintedAll = true;
     /**
      * @j2sNative
      * 

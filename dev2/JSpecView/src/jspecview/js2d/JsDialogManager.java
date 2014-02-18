@@ -78,7 +78,7 @@ public class JsDialogManager extends DialogManager {
 	 */
 	@Override
 	public void showProperties(Object frame, JDXSpectrum spectrum) {
-		JDialog dialog = new JDialog();
+		JDialog dialog = new JDialog();// no manager needed here
 		dialog.setTitle("Header Information");
 		Object[][] rowData = spectrum.getHeaderRowDataAsArray();
 		String[] columnNames = { "Label", "Description" };
@@ -94,7 +94,7 @@ public class JsDialogManager extends DialogManager {
 
 	@Override
 	protected void showScrollingText(Object frame, String title, String text) {
-		JDialog dialog = new JDialog();
+		JDialog dialog = new JDialog();// no manager needed here
 		JEditorPane sourcePane = new JEditorPane();
 		sourcePane.setText(text);
 		//sourcePane.setEditable(false);

@@ -3,6 +3,8 @@ package jspecview.dialog;
 import java.util.Hashtable;
 import java.util.Map;
 
+import javajs.util.PT;
+
 import jspecview.api.JSVPanel;
 import jspecview.api.PlatformDialog;
 import jspecview.common.JDXSpectrum;
@@ -101,15 +103,17 @@ abstract public class DialogManager {
 					"Error Log", INFORMATION_MESSAGE);
 	}
 
-	public void showSource(Object frame, JDXSource currentSource) {
-		if (currentSource == null) {
+	public void showSource(Object frame, String f) {
+		if (f == null) {
 			showMessageDialog(frame, "Please Select a Spectrum", "Select Spectrum",
 					WARNING_MESSAGE);
 			return;
 		}
 		try {
-			String f = currentSource.getFilePath();
-			showScrollingText(null, f, JSVFileManager.getFileAsString(f));
+			String s = JSVFileManager.getFileAsString(f);
+			if (viewer.isJS)
+				s = PT.rep(s, "<", "&lt;");
+			showScrollingText(null, f, s);
 		} catch (Exception ex) {
 			showMessageDialog(frame, "File Not Found", "SHOWSOURCE", ERROR_MESSAGE);
 		}

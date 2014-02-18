@@ -46,7 +46,7 @@ public class JSVPopupResourceBundle extends PopupResource {
     
   private static String[][] menuContents = {
     
-      {  "appMenu", "_SIGNED_FileMenu Spectra... OptionsMenu ZoomMenu - " +
+      {  "appMenu", "_SIGNED_FileMenu Spectra... ShowMenu OptionsMenu ZoomMenu - " +
       		"Integration Peaks Measurements - Script... Properties" },
       { "appletMenu",
           "_SIGNED_FileMenu Spectra... - OptionsMenu ZoomMenu" +
@@ -61,8 +61,11 @@ public class JSVPopupResourceBundle extends PopupResource {
 
       {   "Export_AsMenu", "JPG PNG SVG PDF" },
               
+      {   "ShowMenu",
+      "Show_Header Show_Source Show_Overlay_Key" }, //Window?
+
       {   "OptionsMenu",
-          "Toggle_Grid Toggle_X_Axis Toggle_Y_Axis Toggle_Coordinates Toggle_Trans/Abs Reverse_Plot Show_Header... Show_Overlay_Key... Predicted_Solution_Colour" }, //Window?
+          "Toggle_Grid Toggle_X_Axis Toggle_Y_Axis Toggle_Coordinates Toggle_Trans/Abs Reverse_Plot Predicted_Solution_Colour" }, //Window?
 
       {   "ZoomMenu", "Next_Zoom Previous_Zoom Reset_Zoom Clear_Zooms Set_Zoom..." },
 
@@ -81,8 +84,9 @@ public class JSVPopupResourceBundle extends PopupResource {
   	{"Close_All", "close all"},
   	{"Close_Views", "close views"},
   	{"Close Simulations", "close simulations"},
-  	{"Show_Header...", "showProperties"},
-  	{"Window","window"},
+  	{"Show_Header", "showProperties"},
+//  	{"Window","window"},
+  	{"Show_Source","showSource"},
   	{"Show_Overlay_Key...","showKey"},
   	{"Next_Zoom","zoom next;showMenu"},
   	{"Previous_Zoom","zoom prev;showMenu"},

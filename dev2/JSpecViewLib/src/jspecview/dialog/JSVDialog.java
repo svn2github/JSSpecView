@@ -503,7 +503,7 @@ abstract public class JSVDialog extends Annotation implements AnnotationData {
 	}
 
 	private boolean checkVisible() {
-		return viewer.selectedPanel.getPanelData().getShowAnnotation(type);
+		return viewer.pd().getShowAnnotation(type);
 	}
 
 	private void getUnitOptions() {
