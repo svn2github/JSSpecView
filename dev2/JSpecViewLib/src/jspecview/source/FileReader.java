@@ -95,16 +95,17 @@ public class FileReader implements JmolJDXMOLReader {
   private String filePath;
 
   private boolean loadImaginary = true;
+
+	private boolean isSimulation;
   
   private FileReader(String filePath, boolean obscure, boolean loadImaginary,
   		int iSpecFirst, int iSpecLast, float nmrNormalization) {
   	filePath = PT.trimQuotes(filePath);
-  	if (filePath != null && filePath.startsWith(JSVFileManager.SIMULATION_PROTOCOL))
-  	  nmrMaxY = 10000;
-  	if(!Float.isNaN(nmrNormalization))
-  	 nmrMaxY = nmrNormalization;
+  	isSimulation = (filePath != null && filePath.startsWith(JSVFileManager.SIMULATION_PROTOCOL)); 
+  	if (isSimulation)
+  	  nmrMaxY = (Float.isNaN(nmrNormalization) ? 10000 : nmrNormalization);
     this.filePath = filePath;
-    if (filePath != null && filePath.startsWith(JSVFileManager.SIMULATION_PROTOCOL))
+    if (isSimulation)
     	filePath = JSVFileManager.getSimulationFileName(filePath);
     this.obscure = obscure;
     firstSpec = iSpecFirst;
