@@ -347,7 +347,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 						pd().findX(null, Double.parseDouble(value));
 						break;
 					case GETSOLUTIONCOLOR:
-						show("solutionncolor");
+						show("solutioncolor");
 						break;
 					case INTEGRATION:
 					case INTEGRATE:
@@ -1721,15 +1721,14 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			dialogManager.showSource(this, pd().getSpectrum().getFilePath());
 		} else if (what.equals("solutioncolor")) {
 			String msg = getSolutionColor();
-			msg = " style='background-color:rgb(" + msg
-					+ ")'><br />Predicted Solution Colour- RGB(" + msg
-					+ ")<br /><br /></";
+			msg = "background-color:rgb(" + msg
+					+ ")'><br />Predicted Solution Colour- RGB(" + msg + ")<br /><br />";
 			if (isJS) {
-				msg = "<div" + msg + "div>";
-				dialogManager.showMessage(this, msg, "Predicted Colour");
+				dialogManager.showMessage(this, "<div style='width:100%;height:100%;"
+						+ msg + "</div>", "Predicted Colour");
 			} else {
-				msg = "<html><body" + msg + "body></html>";
-				selectedPanel.showMessage(msg, "Predicted Colour");
+				selectedPanel.showMessage("<html><body style='" + msg
+						+ "</body></html>", "Predicted Colour");
 			}
 		}
 	}

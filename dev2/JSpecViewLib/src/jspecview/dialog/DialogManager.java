@@ -61,7 +61,7 @@ abstract public class DialogManager {
 
   abstract public void showProperties(Object frame, JDXSpectrum spectrum);
   
-  abstract public void showMessage(Object frame, String title, String text);
+  abstract public void showMessage(Object frame, String text, String title);
 
   
   /**
@@ -97,7 +97,7 @@ abstract public class DialogManager {
 		}
 		String errorLog = currentSource.getErrorLog();
 		if (errorLog != null && errorLog.length() > 0)
-			showMessage(frame, currentSource.getFilePath(), errorLog);
+			showMessage(frame, errorLog, currentSource.getFilePath());
 		else
 			showMessageDialog(frame, "No errors found.",
 					"Error Log", INFORMATION_MESSAGE);
@@ -113,7 +113,7 @@ abstract public class DialogManager {
 			String s = JSVFileManager.getFileAsString(f);
 			if (viewer.isJS)
 				s = PT.rep(s, "<", "&lt;");
-			showMessage(null, f, s);
+			showMessage(null, s, f);
 		} catch (Exception ex) {
 			showMessageDialog(frame, "File Not Found", "SHOWSOURCE", ERROR_MESSAGE);
 		}
