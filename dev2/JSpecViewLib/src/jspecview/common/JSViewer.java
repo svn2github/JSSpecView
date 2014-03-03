@@ -347,8 +347,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 						pd().findX(null, Double.parseDouble(value));
 						break;
 					case GETSOLUTIONCOLOR:
-						selectedPanel.showMessage(getSolutionColorHtml(),
-								"Predicted Colour");
+						show("solutionncolor");
 						break;
 					case INTEGRATION:
 					case INTEGRATE:
@@ -1104,13 +1103,6 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 				.getXYCoords(), spectrum.getYUnits()) : noColor);
 	}
 
-	public String getSolutionColorHtml() {
-		String color = getSolutionColor();
-		return "<html><body style='background-color:rgb(" + color
-				+ ")'><br />Predicted Solution Colour- RGB(" + color
-				+ ")<br /><br /></body></html>";
-	}
-
 	public int openDataOrFile(String data, String name, List<JDXSpectrum> specs,
 			String strUrl, int firstSpec, int lastSpec, boolean isAppend, String id) {
 		if ("NONE".equals(name)) {
@@ -1727,6 +1719,18 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 				return;
 			}
 			dialogManager.showSource(this, pd().getSpectrum().getFilePath());
+		} else if (what.equals("solutioncolor")) {
+			String msg = getSolutionColor();
+			msg = " style='background-color:rgb(" + msg
+					+ ")'><br />Predicted Solution Colour- RGB(" + msg
+					+ ")<br /><br /></";
+			if (isJS) {
+				msg = "<div" + msg + "div>";
+				dialogManager.showMessage(this, msg, "Predicted Colour");
+			} else {
+				msg = "<html><body" + msg + "body></html>";
+				selectedPanel.showMessage(msg, "Predicted Colour");
+			}
 		}
 	}
 

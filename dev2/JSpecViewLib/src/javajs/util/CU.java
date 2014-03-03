@@ -466,7 +466,7 @@ public class CU {
   }
 
   /**
-   * Return a greyscale rgb value 0-FF using NTSC color luminance algorithm
+   * Return a greyscale rgb value 0-FF using NTSC color lightness algorithm
    *<p>
    * the alpha component is set to 0xFF. If you want a value in the
    * range 0-255 then & the result with 0xFF;
@@ -480,8 +480,76 @@ public class CU {
                 (1140 * (rgb & 0xFF)) + 5000) / 10000) & 0xFFFFFF;
     return rgb(grey, grey, grey);
   }
-
   
+  
+  /**
+   * Convert RGB values to HSL (hue/saturation/lightness)
+   * 
+   * @param rgb
+   *        range 255 255 255
+   * @param doRound
+   *        set to false when just using this for 
+   *        for RGB -- HSL -- HSL' -- RGB' conversion
+   * 
+   * @return the HSL as P3 range 360 100 100
+   * @author hansonr
+   */
+
+  public static P3 rgbToHSL(P3 rgb, boolean doRound) {
+    // adapted from http://tips4java.wordpress.com/2009/07/05/hsl-color/
+    // see http://en.wikipedia.org/wiki/HSL_color_space
+
+    float r = rgb.x / 255;
+    float g = rgb.y / 255;
+    float b = rgb.z / 255;
+    float min = Math.min(r, Math.min(g, b));
+    float max = Math.max(r, Math.max(g, b));
+
+    //  lightness is just p * 50
+
+    float p = (max + min);
+    float q = (max - min);
+
+    float h = (60 * ((q == 0 ? 0 : max == r ? ((g - b) / q + 6)
+        : max == g ? (b - r) / q + 2 : (r - g) / q + 4))) % 360;
+
+    float s = q / (q == 0 ? 1 : p <= 1 ? p : 2 - p);
+
+    // we round to tenths for HSL so that we can  return enough
+    // precision to get back 1-255 in RGB
+    return (doRound ? P3.new3(Math.round(h*10)/10f, Math.round(s * 1000)/10f,
+        Math.round(p * 500)/10f) : P3.new3(h, s * 100, p * 50));
+  }
+
+  /**
+   * Convert HSL (hue/saturation/luninance) values to RGB
+   *
+   * @param hsl in the range 360, 100, 100
+   * @return the RGB as P3 range 0 to 255
+   * @author hansonr
+   */
+  public static P3 hslToRGB(P3 hsl) {
+    // adapted from http://tips4java.wordpress.com/2009/07/05/hsl-color/
+    // see http://en.wikipedia.org/wiki/HSL_color_space
+    
+    // highly condensed
+    
+    float h = hsl.x / 60;
+    float s = hsl.y / 100;
+    float l = hsl.z / 100;
+    
+    float p = l - (l < 0.5 ? l : 1 - l) * s;    
+    float q = 2 * (l - p); 
+        
+    float r = toRGB(p, q, h + 2);
+    float g = toRGB(p, q, h);
+    float b = toRGB(p, q, h - 2);
+    return P3.new3(Math.round(r * 255), Math.round(g * 255), Math.round(b * 255));
+  }
+
+  private static float toRGB(float p, float q, float h) {
+    return ((h = (h + (h < 0 ? 6 : h > 6 ? -6 : 0))) < 1 ? p + q * h
+        : h < 3 ? p + q : h < 4 ? p + q * (4 - h) : p);
+  }
+
 }
-
-

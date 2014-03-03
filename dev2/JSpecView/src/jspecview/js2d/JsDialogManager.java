@@ -93,7 +93,7 @@ public class JsDialogManager extends DialogManager {
 	}
 
 	@Override
-	protected void showScrollingText(Object frame, String title, String text) {
+	public void showMessage(Object frame, String title, String text) {
 		JDialog dialog = new JDialog();// no manager needed here
 		JEditorPane sourcePane = new JEditorPane();
 		sourcePane.setText(text);
