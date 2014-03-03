@@ -1,10 +1,10 @@
 package jspecview.js2d;
 
-import javajs.awt.BorderLayout;
 import javajs.awt.Dimension;
+import javajs.swing.JComponent;
 import javajs.swing.JEditorPane;
 import javajs.swing.JDialog;
-import javajs.swing.JPanel;
+import javajs.swing.JLabel;
 import javajs.swing.JScrollPane;
 import javajs.swing.JTable;
 import javajs.util.PT;
@@ -93,24 +93,27 @@ public class JsDialogManager extends DialogManager {
 	}
 
 	@Override
-	public void showMessage(Object frame, String title, String text) {
+	public void showMessage(Object frame, String text, String title) {
 		JDialog dialog = new JDialog();// no manager needed here
-		JEditorPane sourcePane = new JEditorPane();
-		sourcePane.setText(text);
-		//sourcePane.setEditable(false);
-		//sourcePane.setFont(new Font(null, Font.BOLD, 12));
-		JScrollPane scrollPane = new JScrollPane(sourcePane);
-		scrollPane.setPreferredSize(new Dimension(500, 400));
-		scrollPane.setMinimumSize(new Dimension(500, 400));
-		JPanel contentPanel = new JPanel(new BorderLayout());
-		contentPanel.add(scrollPane, BorderLayout.CENTER);
-		dialog.getContentPane().add(contentPanel);
-		dialog.pack();
-		dialog.setVisible(true);
-
 		dialog.setTitle(title);
-		JEditorPane pane = new JEditorPane();
-		pane.setText(text);
+		JComponent pane;
+		if (text.indexOf("</div>") >= 0) {
+			pane = new JLabel(text);
+		} else {
+			// JEditorPane sourcePane = new JEditorPane();
+			// sourcePane.setText(text);
+			// sourcePane.setEditable(false);
+			// sourcePane.setFont(new Font(null, Font.BOLD, 12));
+			// JScrollPane scrollPane = new JScrollPane(sourcePane);
+			// scrollPane.setPreferredSize(new Dimension(500, 400));
+			// scrollPane.setMinimumSize(new Dimension(500, 400));
+			// JPanel contentPanel = new JPanel(new BorderLayout());
+			// contentPanel.add(scrollPane, BorderLayout.CENTER);
+			// dialog.getContentPane().add(contentPanel);
+
+			pane = new JEditorPane();
+			pane.setText(text);
+		}
 		dialog.getContentPane().add(pane);
 		dialog.pack();
 		dialog.setVisible(true);

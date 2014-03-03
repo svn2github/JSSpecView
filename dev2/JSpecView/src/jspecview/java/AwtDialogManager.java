@@ -123,7 +123,7 @@ public class AwtDialogManager extends DialogManager implements
 	}
 
 	@Override
-	public void showMessage(Object frame, String title, String text) {
+	public void showMessage(Object frame, String text, String title) {
 		JDialog dialog = new JDialog((Frame) null, title, true);
 		dialog.setLayout(new BorderLayout());
 		JTextArea t = new JTextArea();
