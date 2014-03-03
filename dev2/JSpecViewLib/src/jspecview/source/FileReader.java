@@ -102,11 +102,11 @@ public class FileReader implements JmolJDXMOLReader {
   		int iSpecFirst, int iSpecLast, float nmrNormalization) {
   	filePath = PT.trimQuotes(filePath);
   	isSimulation = (filePath != null && filePath.startsWith(JSVFileManager.SIMULATION_PROTOCOL)); 
-  	if (isSimulation)
-  	  nmrMaxY = (Float.isNaN(nmrNormalization) ? 10000 : nmrNormalization);
     this.filePath = filePath;
-    if (isSimulation)
+  	if (isSimulation) {
+  	  nmrMaxY = (Float.isNaN(nmrNormalization) ? 10000 : nmrNormalization);
     	filePath = JSVFileManager.getSimulationFileName(filePath);
+  	}
     this.obscure = obscure;
     firstSpec = iSpecFirst;
     lastSpec = iSpecLast;
