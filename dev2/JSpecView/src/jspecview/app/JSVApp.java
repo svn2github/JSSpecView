@@ -671,7 +671,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	 * commandWatcherThread.interrupt(); }
 	 */
 	@Override
-	public void siOpenDataOrFile(String data, String name,
+	public void siOpenDataOrFile(Object data, String name,
 			List<JDXSpectrum> specs, String url, int firstSpec, int lastSpec,
 			boolean isAppend, String script, String id) {
 		switch (viewer.openDataOrFile(data, name, specs, url, firstSpec, lastSpec,

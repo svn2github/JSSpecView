@@ -1290,7 +1290,7 @@ public class PanelData implements EventManager {
 			JDXSpectrum spectrum = getSpectrumAt(index);
 			title = spectrum.getTitle();
 			if (useFileName)
-				title = JSVFileManager.getName(spectrum.getFilePath()) + " - " + title;
+				title = JSVFileManager.getTagName(spectrum.getFilePath()) + " - " + title;
 			GenericColor plotColor = getCurrentPlotColor(index);
 			cols[0] = new Integer(index + 1);
 			cols[1] = plotColor;

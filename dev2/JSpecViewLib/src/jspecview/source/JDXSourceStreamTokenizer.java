@@ -44,7 +44,7 @@ public class JDXSourceStreamTokenizer {
   /**
    * The Label part of the next token
    */
-  private String label;
+  String rawLabel;
   /**
    * The value part of the next token
    */
@@ -53,8 +53,8 @@ public class JDXSourceStreamTokenizer {
   /**
    * The line number of the label
    */
-  private int labelLineNo = 0;
-  private String line;
+  int labelLineNo = 0;
+  String line;
 
   private int lineNo;
 
@@ -67,9 +67,9 @@ public class JDXSourceStreamTokenizer {
   }
   
   private String nextLabel(boolean isGet) {
-    label = null;
+    rawLabel = null;
     value = null;
-    while (line == null) {
+    while (line == null || line.length() == 0) {
       try {
         readLine();
         if (line == null) {
@@ -89,18 +89,18 @@ public class JDXSourceStreamTokenizer {
     if (pt < 0) {
       if (isGet)
         Logger.info("BAD JDX LINE -- no '=' (line " + lineNo + "): " + line);
-      label = line;
+      rawLabel = line;
       if (!isGet)
         line = ""; 
     } else {
-      label = line.substring(0, pt).trim();
+      rawLabel = line.substring(0, pt).trim();
       if (isGet)
         line = line.substring(pt + 1);
     }
     labelLineNo = lineNo;
     if (Logger.debugging)
-      Logger.info(label);
-    return cleanLabel(label);
+      Logger.info(rawLabel);
+    return cleanLabel(rawLabel);
   }
   
   /**
@@ -132,14 +132,6 @@ public class JDXSourceStreamTokenizer {
     return str.toString().toUpperCase();
   }
 
-  String getRawLabel() {
-    return label;
-  }
-
-  int getLabelLineNo() {
-    return labelLineNo;
-  }
-
   public String getValue() {
     if (value != null)
       return value;
@@ -153,8 +145,7 @@ public class JDXSourceStreamTokenizer {
         sb.append(line).appendC('\n');
       }
     } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+    	Logger.info(e.toString());
     }
     value = trimLines(sb);
     if (Logger.debugging)

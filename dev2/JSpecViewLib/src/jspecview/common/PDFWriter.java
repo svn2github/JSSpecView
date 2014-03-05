@@ -72,7 +72,6 @@ public class PDFWriter implements JSVGraphics, JSVPdfWriter {
 			panel.getPanelData().printPdf(this, pl);
 			pdf.closeDocument();
 		} catch (Exception e) {
-			e.printStackTrace();
 			panel.showMessage(e.toString(), "PDF Creation Error");
 		}		
 	}

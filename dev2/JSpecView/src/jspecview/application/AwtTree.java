@@ -71,7 +71,7 @@ public class AwtTree extends JTree implements JSVTree {
 		JSVTreeNode rootNode = tree.getRootNode();
     List<PanelNode> panelNodes = viewer.panelNodes;
 
-    String fileName = JSVFileManager.getName(source.getFilePath());
+    String fileName = JSVFileManager.getTagName(source.getFilePath());
     PanelNode panelNode = new PanelNode(null, fileName, source, null);
     JSVTreeNode fileNode = new AwtTreeNode(fileName, panelNode);
     panelNode.setTreeNode(fileNode);

@@ -122,7 +122,7 @@ public class JDXDecompressor {
     this.yFactor = yFactor;
     this.deltaX = deltaX;
     this.nPoints = nPoints;
-    this.lineNumber = t.getLabelLineNo();
+    this.lineNumber = t.labelLineNo;
     debugging = Logger.isActiveLevel(Logger.LEVEL_DEBUGHIGH);
 
     //Logger.checkMemory();

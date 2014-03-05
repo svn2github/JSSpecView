@@ -163,9 +163,7 @@ public class JDXExporter implements JSVExporter {
 			break;
     }
 
-    int index = Arrays.binarySearch(FileReader.VAR_LIST_TABLE[0],
-        tmpDataClass);
-    String varList = FileReader.VAR_LIST_TABLE[1][index];
+    String varList = FileReader.getVarList(tmpDataClass);
     getHeaderString(tmpDataClass, minY, maxY,
         xCompFactor, yCompFactor, startIndex, endIndex);
     out.append("##" + tmpDataClass + "= " + varList + newLine);

@@ -434,13 +434,6 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			} catch (Exception e) {
 				msg = e.toString();
 				Logger.error(e.toString());
-				/**
-				 * @j2sNative
-				 */
-				{
-					if (Logger.debugging || e.toString().indexOf("Null") >= 0)
-						e.printStackTrace();
-				}
 				isOK = false;
 				--nErrorsLeft;
 			}
@@ -464,7 +457,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 	}
 
 	public PanelData pd() {
-		return selectedPanel.getPanelData();
+		return (selectedPanel == null ? null : selectedPanel.getPanelData());
 	}
 
 	private void execPeak(String value) {
@@ -923,7 +916,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		}
 		if (key != null && key.startsWith("DATA_")) {
 		  // mol, json, xml, jcamp -- most recent only
-			map.put(key, JSVFileManager.getSimulationData(key.substring(5)));
+			map.put(key, "" + JSVFileManager.htCorrelationCache.get(key.substring(5)));
 			return map;
 		}
 
@@ -1103,7 +1096,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 				.getXYCoords(), spectrum.getYUnits()) : noColor);
 	}
 
-	public int openDataOrFile(String data, String name, List<JDXSpectrum> specs,
+	public int openDataOrFile(Object data, String name, List<JDXSpectrum> specs,
 			String strUrl, int firstSpec, int lastSpec, boolean isAppend, String id) {
 		if ("NONE".equals(name)) {
 			close("View*");
@@ -1114,6 +1107,15 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		String newPath = null;
 		String fileName = null;
 		boolean isView = false;
+		if (strUrl != null && strUrl.startsWith("cache://")) {
+			/**
+			 * @j2sNative
+			 * 
+			 *  data = Jmol.Cache.get(name = strUrl);
+			 *  
+			 */
+			{}
+		}
 		if (data != null) {
 			try {
 				fileName = name;
@@ -1133,7 +1135,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 				// System.out.println("u=" + u);
 				filePath = u.toString();
 				recentURL = filePath;
-				fileName = JSVFileManager.getName(filePath);
+				fileName = JSVFileManager.getTagName(filePath);
 				// System.out.println("fileName=" + fileName);
 			} catch (MalformedURLException e) {
 				GenericFileInterface file = apiPlatform.newFile(strUrl);
@@ -1159,7 +1161,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		si.setCursor(GenericPlatform.CURSOR_WAIT);
 		try {
 			si.siSetCurrentSource(isView ? JDXSource.createView(specs) : FileReader
-					.createJDXSource(JSVFileManager.getBufferedReaderForString(data),
+					.createJDXSource(JSVFileManager.getBufferedReaderForData(data),
 							filePath, obscureTitleFromUser == Boolean.TRUE, loadImaginary,
 							firstSpec, lastSpec, nmrMaxY));
 		} catch (Exception e) {
@@ -1658,7 +1660,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 
 	@Override
 	public void openFileAsyncSpecial(String fileName, int flags) {
-		// n/a
+		runScript("load \"" +fileName + "\"");
 	}
 
 	public int getHeight() {

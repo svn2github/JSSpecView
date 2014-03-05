@@ -40,7 +40,7 @@ public interface ScriptInterface {
 
 	public JSVPanel siGetNewJSVPanel2(List<JDXSpectrum> specs);
 
-	public void siOpenDataOrFile(String data, String name, List<JDXSpectrum> specs,
+	public void siOpenDataOrFile(Object data, String name, List<JDXSpectrum> specs,
 			String url, int firstSpec, int lastSpec, boolean doCheck, String script, String id);
 
 	public void siProcessCommand(String script);

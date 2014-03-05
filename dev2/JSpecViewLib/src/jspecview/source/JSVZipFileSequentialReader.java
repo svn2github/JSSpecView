@@ -69,8 +69,6 @@ public class JSVZipFileSequentialReader extends BufferedReader implements JSVZip
       close();
       zis.close();
     } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
     }
   }
   @Override

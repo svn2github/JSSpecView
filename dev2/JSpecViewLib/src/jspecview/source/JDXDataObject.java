@@ -28,6 +28,8 @@ public abstract class JDXDataObject extends JDXHeader {
 
   private String filePath;
   private String filePathForwardSlash;
+  public boolean isSimulation;
+  
 
   public String sourceID = "";
 
@@ -41,7 +43,7 @@ public abstract class JDXDataObject extends JDXHeader {
   public String getFilePath() {
     return filePath;
   }
-  
+
   public String getFilePathForwardSlash() {
     return filePathForwardSlash;
   }
@@ -103,21 +105,14 @@ public abstract class JDXDataObject extends JDXHeader {
     return yFactor;
   }
 
-  public void checkRequiredTokens() throws JSVException {
-    if (fileFirstX == ERROR)
-      throw new JSVException("Error Reading Data Set: ##FIRST not found");
-    if (fileLastX == ERROR)
-      throw new JSVException("Error Reading Data Set: ##LASTX not found");
-    if (nPointsFile == -1)
-      throw new JSVException(
-          "Error Reading Data Set: ##NPOINTS not found");
-    if (xFactor == ERROR)
-      throw new JSVException(
-          "Error Reading Data Set: ##XFACTOR not found");
-    if (yFactor == ERROR)
-      throw new JSVException(
-          "Error Reading Data Set: ##YFACTOR not found");
-  }
+	public void checkRequiredTokens() throws JSVException {
+		String err = (fileFirstX == ERROR ? "##FIRSTX"
+				: fileLastX == ERROR ? "##LASTX" : nPointsFile == -1 ? "##NPOINTS"
+						: xFactor == ERROR ? "##XFACTOR" : yFactor == ERROR ? "##YFACTOR"
+								: null);
+		if (err != null)
+			throw new JSVException("Error Reading Data Set: " + err + " not found");
+	}
 
   // --------------------Optional Spectral Parameters ------------------------------//
 
@@ -799,12 +794,6 @@ public abstract class JDXDataObject extends JDXHeader {
 	
 	public void doNormalize(double max) {
 		// for simulations
-		String s = sourceID;
-		if (s.length() == 0)
-			s = PT.rep(filePath, JSVFileManager.SIMULATION_PROTOCOL, "");
-		if (s.indexOf("MOL=") >= 0)
-			s = "";
-		title = "SIMULATED " + PT.rep(s, "$", "");
 		if (!isNMR() || !is1D())
 			return;
 		normalizationFactor = max / getMaxY();

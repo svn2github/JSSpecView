@@ -278,7 +278,7 @@ public class Exporter implements ExportInterface {
 	private String getSuggestedFileName(JSViewer viewer, ExportType imode) {
 		PanelData pd = viewer.pd();
     String sourcePath = pd.getSpectrum().getFilePath();
-    String newName = JSVFileManager.getName(sourcePath);
+    String newName = JSVFileManager.getTagName(sourcePath);
     if (newName.startsWith("$"))
     	newName = newName.substring(1);
     int pt = newName.lastIndexOf(".");

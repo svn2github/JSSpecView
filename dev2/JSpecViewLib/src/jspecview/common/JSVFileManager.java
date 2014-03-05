@@ -57,12 +57,9 @@ public class JSVFileManager {
 	}
 
 	public static String jsDocumentBase = "";
-	private static Map<String, String> htSimulationCache;
+	public static Map<String, String> htCorrelationCache = new Hashtable<String, String>();
 
-	public static Object getSimulationData(String key) {
-		return "" + htSimulationCache.get(key);
-	}
-
+	
 	/**
 	 * @param name
 	 * @return file as string
@@ -96,8 +93,9 @@ public class JSVFileManager {
 		}
 	}
 
-	public static BufferedReader getBufferedReaderForString(String data) {
-		return (data == null ? null : new BufferedReader(new StringReader(data)));
+	public static BufferedReader getBufferedReaderForData(Object data) {
+		return (data == null ? null : new BufferedReader(new StringReader(
+				data instanceof String ? (String) data : new String((byte[]) data))));
 	}
 
 	public static BufferedReader getBufferedReaderFromName(String name,
@@ -135,6 +133,8 @@ public class JSVFileManager {
 			// This code is only for the applet
 			if (name.indexOf(":\\") == 1 || name.indexOf(":/") == 1)
 				name = "file:///" + name;
+			else if (name.startsWith("cache://"))
+				return name;
 			URL url = new URL(appletDocumentBase, name, null);
 			return url.toString();
 		} catch (Exception e) {
@@ -201,14 +201,19 @@ public class JSVFileManager {
 		}
 	}
 
-	public static String getSimulationFileName(String name) {
+	/**
+	 * In the case of applet-based simulations with file names that 
+	 * involve mol=..., we want to abbreviate those names for display
+	 * 
+	 * @param name  actual path name to simulation
+	 * @return actual name or hashed name
+	 */
+	public static String getAbbrSimulationFileName(String name) {
 		String filename = getAbbreviatedSimulationName(name, true);
 		if (name.indexOf("MOL=") >= 0) {
-			if (htSimulationCache == null)
-				htSimulationCache = new Hashtable<String, String>();
-			String data = htSimulationCache.get(name);
+			String data = htCorrelationCache.get(name);
 			if (data != null)
-				htSimulationCache.put(filename, data);
+				htCorrelationCache.put(filename, data);
 		}
 		return filename;
 	}
@@ -223,20 +228,18 @@ public class JSVFileManager {
 	}
 	
 	public static String getSimulationFileData(String name) {
-    return htSimulationCache.get(name.startsWith("MOL=") ? name.substring(4) : 
+    return htCorrelationCache.get(name.startsWith("MOL=") ? name.substring(4) : 
     	  getAbbreviatedSimulationName(name, false));
 	}
 
 	private static BufferedReader getSimulationReader(String name) {
-		if (htSimulationCache == null)
-			htSimulationCache = new Hashtable<String, String>();
-		String data = htSimulationCache.get(name);
+		String data = htCorrelationCache.get(name);
 		if (data == null) {
 			data = getNMRSimulationJCampDX(name.substring(SIMULATION_PROTOCOL.length()));
 			if (data != null)
-				htSimulationCache.put(name, data);
+				htCorrelationCache.put(name, data);
 		}
-		return getBufferedReaderForString(data);
+		return getBufferedReaderForData(data);
 	}
 
 	public static boolean isAB(Object x) {
@@ -401,7 +404,7 @@ public class JSVFileManager {
 
 	/**
 	 * Accepts either $chemicalname or MOL=molfiledata Queries NMRDB or NIH+NMRDB
-	 * to get predicted spetrum
+	 * to get predicted spectrum
 	 * 
 	 * TODO: how about adding spectrometer frequency? TODO: options for other data
 	 * types? 2D? IR?
@@ -410,10 +413,8 @@ public class JSVFileManager {
 	 * @return jcamp data
 	 */
 	private static String getNMRSimulationJCampDX(String name) {
-		if (htSimulationCache == null)
-			htSimulationCache = new Hashtable<String, String>();
 		String key = "" + getSimulationHash(name);
-		String jcamp = htSimulationCache.get(key);
+		String jcamp = htCorrelationCache.get(key);
 		if (jcamp != null)
 			return jcamp;
 		boolean isInline = name.startsWith("MOL=");
@@ -424,7 +425,7 @@ public class JSVFileManager {
 				: getFileAsString(src))) == null)
 			Logger.info("no data returned");
 		String json = getFileAsString(nmrdbServer + molFile);
-		htSimulationCache.put("json", json);
+		htCorrelationCache.put("json", json);
 		Logger.debug(json);
 		if (json.indexOf("\"error\":") >= 0)
 			return null;
@@ -432,13 +433,13 @@ public class JSVFileManager {
 		json = PT.rep(json, "\\t", "\t");
 		json = PT.rep(json, "\\n", "\n");
 		String jsonMolFile = getQuotedJSONAttribute(json, "molfile", null);
-		htSimulationCache.put("mol", jsonMolFile);
+		htCorrelationCache.put("mol", jsonMolFile);
 		String xml = getQuotedJSONAttribute(json, "xml", null);
 		xml = PT.rep(xml, "<Signals>",  "<Signals src=" + PT.esc(PT.rep(nmrdbServer,"?POST?molfile=","")) + ">");
 		xml = PT.rep(xml, "</", "\n</");
 		xml = PT.rep(xml, "><", ">\n<");
 		xml = PT.rep(xml, "\\\"", "\"");
-		htSimulationCache.put("xml", xml);
+		htCorrelationCache.put("xml", xml);
 		jcamp = getQuotedJSONAttribute(json, "jcamp", null);
 		jcamp = "##TITLE=" + (isInline ? "JMOL SIMULATION" : name) + "\n"
 				+ jcamp.substring(jcamp.indexOf("\n##") + 1);
@@ -457,8 +458,8 @@ public class JSVFileManager {
 				+ "<ModelData id=" + PT.esc(id) + " type=\"MOL\" src=" + PT.esc(src)
 				+ ">\n" + molFile + "</ModelData>\n</Models>\n" + "##$SIGNALS=\n" + xml
 				+ "\n" + jcamp.substring(pt);
-		htSimulationCache.put("jcamp", jcamp);
-		htSimulationCache.put(key, jcamp);
+		htCorrelationCache.put("jcamp", jcamp);
+		htCorrelationCache.put(key, jcamp);
 		return jcamp;
 	}
 
@@ -511,13 +512,20 @@ public class JSVFileManager {
 
 	private static int stringCount;
 
-	public static String getName(String fileName) {
+	/**
+	 * Returns a name that can be used as a tag, possibly
+	 * abbreviated. 
+	 * 
+	 * @param fileName
+	 * @return actual or abbreviated file name
+	 */
+	public static String getTagName(String fileName) {
 		if (fileName == null)
 			return "String" + (++stringCount);
 		if (isURL(fileName)) {
 			try {
 				if (fileName.startsWith(SIMULATION_PROTOCOL))
-					return getSimulationFileName(fileName);
+					return getAbbrSimulationFileName(fileName);
 				String name = (new URL((URL) null, fileName, null)).getFile();
 				return name.substring(name.lastIndexOf('/') + 1);
 			} catch (IOException e) {

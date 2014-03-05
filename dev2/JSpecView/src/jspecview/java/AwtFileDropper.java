@@ -8,8 +8,8 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.io.File;
+import java.util.List;
 
-import javajs.util.List;
 import javajs.util.PT;
 import javajs.util.SB;
 
@@ -120,6 +120,7 @@ public class AwtFileDropper implements JSVFileDropper, DropTargetListener {
 				Logger.info("  mime : " + flavor.getMimeType());
 			}
 
+			
 			if (flavor.getMimeType().startsWith("text/uri-list")
 					&& flavor.getRepresentationClass().getName().equals(
 							"java.lang.String")) {

@@ -474,10 +474,9 @@ public class ApplicationMenu extends JMenuBar {
 
 	protected void doMenuSelected() {
 		PanelData pd = mainFrame.viewer.pd();
-    gridCheckBoxMenuItem.setSelected(pd.getBoolean(ScriptToken.GRIDON));
-    coordsCheckBoxMenuItem.setSelected(pd.getBoolean(ScriptToken.COORDINATESON));
-    revPlotCheckBoxMenuItem.setSelected(pd.getBoolean(ScriptToken.REVERSEPLOT));
-    //jsvpPopupMenu.setEnables(mainFrame.viewer.selectedPanel);
+    gridCheckBoxMenuItem.setSelected(pd != null && pd.getBoolean(ScriptToken.GRIDON));
+    coordsCheckBoxMenuItem.setSelected(pd != null && pd.getBoolean(ScriptToken.COORDINATESON));
+    revPlotCheckBoxMenuItem.setSelected(pd != null && pd.getBoolean(ScriptToken.REVERSEPLOT));
 	}
 
 	public void setProcessingMenu(JComponent menu) {
@@ -558,7 +557,7 @@ public class ApplicationMenu extends JMenuBar {
       JDXSpectrum spec = pd.getSpectrum();
       setCheckBoxes(pd);
       overlayKeyMenuItem.setEnabled(pd.getNumberOfGraphSets() > 1);
-      setCloseMenuItem(JSVFileManager.getName(node.source.getFilePath()));
+      setCloseMenuItem(JSVFileManager.getTagName(node.source.getFilePath()));
       exportAsMenu.setEnabled(true);
       saveAsMenu.setEnabled(true);
       saveAsJDXMenu.setEnabled(spec.canSaveAsJDX());

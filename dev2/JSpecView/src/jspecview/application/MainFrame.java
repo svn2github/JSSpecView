@@ -89,6 +89,7 @@ import jspecview.api.JSVAppInterface;
 import jspecview.api.JSVPanel;
 import jspecview.api.JSVTreeNode;
 import jspecview.api.PanelListener;
+import jspecview.api.JSVFileDropper;
 import jspecview.app.JSVAppPro;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSVFileManager;
@@ -268,6 +269,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 
 		// initialise MainFrame as a target for the drag-and-drop action
 		DropTargetListener dtl = (DropTargetListener) viewer.getPlatformInterface("FileDropper");
+		((JSVFileDropper) dtl).set(viewer);
 		new DropTarget(this, dtl);
 		Class<? extends MainFrame> cl = getClass();
 		URL iconURL = cl.getResource("icons/spec16.gif"); // imageIcon
@@ -878,7 +880,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	
 
 	@Override
-	public void siOpenDataOrFile(String data, String name,
+	public void siOpenDataOrFile(Object data, String name,
 			List<JDXSpectrum> specs, String url, int firstSpec, int lastSpec,
 			boolean isAppend, String script, String id) {
 		switch (viewer.openDataOrFile(data, name, specs, url, firstSpec, lastSpec,
@@ -895,7 +897,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	public void siSetCurrentSource(JDXSource source) {
 		viewer.currentSource = source;
 		if (source != null)
-		  appMenu.setCloseMenuItem(JSVFileManager.getName(source.getFilePath()));
+		  appMenu.setCloseMenuItem(JSVFileManager.getTagName(source.getFilePath()));
 		boolean isError = (source != null && source.getErrorLog().length() > 0);
 		setError(isError, (isError && source.getErrorLog().indexOf("Warning") >= 0));
 	}

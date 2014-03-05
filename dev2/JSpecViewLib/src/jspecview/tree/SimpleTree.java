@@ -58,7 +58,7 @@ public class SimpleTree implements JSVTree {
 		JSVTreeNode rootNode = tree.getRootNode();
 		List<PanelNode> panelNodes = viewer.panelNodes;
 
-		String fileName = JSVFileManager.getName(source.getFilePath());
+		String fileName = JSVFileManager.getTagName(source.getFilePath());
 		PanelNode panelNode = new PanelNode(null, fileName, source, null);
 		JSVTreeNode fileNode = new SimpleTreeNode(fileName, panelNode);
 		panelNode.setTreeNode(fileNode);

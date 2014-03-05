@@ -23,6 +23,7 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import javajs.util.List;
+import javajs.util.PT;
 
 
 import org.jmol.util.Logger;
@@ -608,11 +609,12 @@ public class JDXSpectrum extends JDXDataObject {
 	public static boolean areXScalesCompatible(JDXSpectrum s1, JDXSpectrum s2,
 			boolean isSubspecCheck, boolean isLinkCheck) {
 		boolean isNMR1 = s1.isNMR();
-		// must be both NMR or both not NMR
-		if (isNMR1 != s2.isNMR())
-			return false;
-		// must have same xUnits if not a link check
-		if (!isLinkCheck && !areUnitsCompatible(s1.xUnits, s2.xUnits))
+		// must be both NMR or both not NMR, 
+		// and both must be continuous (because of X scaling)
+		// and must have same xUnits if not a link check
+		if (isNMR1 != s2.isNMR() 
+				|| !s1.isContinuous() || !s2.isContinuous()
+				|| !isLinkCheck && !areUnitsCompatible(s1.xUnits, s2.xUnits))
 			return false;
 		if (isSubspecCheck) {
 			// must both be 1D (or both be 2D?) for adding subspectra
@@ -650,6 +652,22 @@ public class JDXSpectrum extends JDXDataObject {
 
 	public void setNHydrogens(int nH) {
 		this.nH = nH;
+	}
+
+	public float getPeakWidth() {
+		double w = getLastX() - getFirstX();
+		return (float) (w/100);
+	}
+
+	public void setSimulated(String filePath) {
+		this.isSimulation = true;
+		String s = sourceID;
+		if (s.length() == 0)
+			s = PT.rep(filePath, JSVFileManager.SIMULATION_PROTOCOL, "");
+		if (s.indexOf("MOL=") >= 0)
+			s = "";
+		title = "SIMULATED " + PT.rep(s, "$", "");
+
 	}
 
 }
