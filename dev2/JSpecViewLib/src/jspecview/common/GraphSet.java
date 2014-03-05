@@ -1673,9 +1673,9 @@ public class GraphSet implements XYScaleConverter {
 			return;
 		double xMin = pi.getXMin();
 		double xMax = pi.getXMax();
-		if (xMin != xMax) {
-			drawBar(g, pi, xMin, xMax, null, isFull);
-		}
+		if (xMin == xMax)
+			return;
+		drawBar(g, pi, xMin, xMax, null, isFull);
 	}
 
 	/**
@@ -1766,18 +1766,28 @@ public class GraphSet implements XYScaleConverter {
 	 * 
 	 * @param g
 	 * @param pi
-	 * @param startX
+	 * @param xMin
 	 *          units
-	 * @param endX
+	 * @param xMax
 	 *          units
 	 * @param whatColor
 	 * @param isFullHeight
 	 */
 
-	private void drawBar(Object g, PeakInfo pi, double startX, double endX,
+	private void drawBar(Object g, PeakInfo pi, double xMin, double xMax,
 			ScriptToken whatColor, boolean isFullHeight) {
-		int x1 = toPixelX(startX);
-		int x2 = toPixelX(endX);
+		
+		double r = xMax + xMin;
+		double d = Math.abs(xMax - xMin);
+		double range = Math.abs(toX(xPixel1) - toX(xPixel0));
+		if (d > range / 20) {
+			d = range / 20;
+			xMin = r / 2 - d;
+			xMax = r / 2 + d;
+		}
+
+		int x1 = toPixelX(xMin);
+		int x2 = toPixelX(xMax);
 		if (x1 > x2) {
 			int tmp = x1;
 			x1 = x2;

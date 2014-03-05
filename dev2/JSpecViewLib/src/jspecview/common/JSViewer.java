@@ -196,6 +196,10 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		script = script.trim();
 		if (script.startsWith("!"))
 			script = script.substring(1).trim();
+		if (script.indexOf("<PeakData") >= 0) {
+			syncScript(script);
+			return true;
+		}
 		Logger.info("RUNSCRIPT " + script);
 		boolean isOK = true;
 		int nErrorsLeft = 10;
@@ -730,7 +734,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			  syncPeaksAfterSyncScript();
 			return;
 		}
-		
+		Logger.info(">>toJSV>> " + peakScript);
 		String sourceID = PT.getQuotedAttribute(peakScript, "sourceID");
 		String type, model, file, jmolSource, index, atomKey;
 		if (sourceID == null) {
