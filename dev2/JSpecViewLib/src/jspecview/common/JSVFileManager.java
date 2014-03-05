@@ -434,6 +434,13 @@ public class JSVFileManager {
 		json = PT.rep(json, "\\n", "\n");
 		String jsonMolFile = getQuotedJSONAttribute(json, "molfile", null);
 		htCorrelationCache.put("mol", jsonMolFile);
+		/**
+		 * @j2sNative
+		 * 
+		 * 		if (!isInline) Jmol.Cache.put("http://SIMULATION/" + name + "#molfile", jsonMolFile.getBytes());
+	   *
+		 */
+		{}
 		String xml = getQuotedJSONAttribute(json, "xml", null);
 		xml = PT.rep(xml, "<Signals>",  "<Signals src=" + PT.esc(PT.rep(nmrdbServer,"?POST?molfile=","")) + ">");
 		xml = PT.rep(xml, "</", "\n</");

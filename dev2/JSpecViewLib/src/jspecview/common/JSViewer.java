@@ -728,6 +728,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			index = PT.getQuotedAttribute(peakScript, "index");
 			if (file == null || index == null)
 				return;
+			file = PT.rep(file, "#molfile", "");// Jmol has loaded the model from the cache
 			model = PT.getQuotedAttribute(peakScript, "model");
 			jmolSource = PT.getQuotedAttribute(peakScript, "src");
 			String modelSent = (jmolSource != null && jmolSource.startsWith("Jmol") ? null
