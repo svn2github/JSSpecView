@@ -43,7 +43,7 @@ import jspecview.common.PanelData.LinkMode;
 import jspecview.dialog.JSVDialog;
 import jspecview.dialog.DialogManager;
 import jspecview.exception.JSVException;
-import jspecview.source.FileReader;
+import jspecview.source.JDXReader;
 import jspecview.source.JDXSource;
 import jspecview.tree.SimpleTree;
 
@@ -95,6 +95,12 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 
 	private IRMode irMode = IRMode.NO_CONVERT;
 
+	public boolean loadImaginary;
+	public boolean interfaceOverlaid;
+	public boolean autoIntegrate;
+	public boolean autoShowLegend;
+	public Boolean obscureTitleFromUser;
+
 	public boolean isSingleThreaded;
 	public boolean isApplet;
 	public boolean isJS;
@@ -108,8 +114,14 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 	public Object applet; // will be an JavaScript object if this is JavaScript
 
 	public Object display;
+	
 	private int maximumSize = Integer.MAX_VALUE;
-	final Dimension dimScreen = new Dimension(0,0);
+	private final Dimension dimScreen = new Dimension(0,0);
+	private int fileCount;
+	private int nViews;
+	private int scriptLevelCount;
+	private String returnFromJmolModel;
+	private String integrationRatios;
 
 	public GenericPlatform apiPlatform;
 
@@ -1161,7 +1173,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			close("all"); // with CHECK we may still need to do this
 		si.setCursor(GenericPlatform.CURSOR_WAIT);
 		try {
-			si.siSetCurrentSource(isView ? JDXSource.createView(specs) : FileReader
+			si.siSetCurrentSource(isView ? JDXSource.createView(specs) : JDXReader
 					.createJDXSource(JSVFileManager.getBufferedReaderForData(data),
 							filePath, obscureTitleFromUser == Boolean.TRUE, loadImaginary,
 							firstSpec, lastSpec, nmrMaxY));
@@ -1902,25 +1914,9 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		return iPanel;
 	}
 
-	
-	private int fileCount;
-	private int nViews;
-	private int scriptLevelCount;
-	private String returnFromJmolModel;
-	private String integrationRatios;
-
-	public boolean loadImaginary;
-	public boolean interfaceOverlaid;
-	public boolean autoIntegrate;
-	public boolean autoShowLegend;
-	public Boolean obscureTitleFromUser;
-
 	public void checkAutoIntegrate() {
 		if (autoIntegrate)
-			pd
-			().integrateAll(parameters);
+			pd().integrateAll(parameters);
 	}
-	
-
 
 }

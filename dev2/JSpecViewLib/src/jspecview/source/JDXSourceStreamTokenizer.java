@@ -147,7 +147,7 @@ public class JDXSourceStreamTokenizer {
     } catch (IOException e) {
     	Logger.info(e.toString());
     }
-    value = trimLines(sb);
+    value = (rawLabel.startsWith("##$") ? sb.toString().trim() : trimLines(sb));
     if (Logger.debugging)
       Logger.info(value);
     return value;
@@ -179,15 +179,15 @@ public class JDXSourceStreamTokenizer {
     int n = v.length();
     int ilast = n - 1;
     int vpt = ptNonWhite(v, 0, n);
-    // no line trimming for XML or <....> data
     if (vpt >= n)
       return "";
-    if (v.charAt(vpt) == '<') {
-      n = v.lastIndexOf(">") + 1;
-      if (n == 0)
-        n = v.length();
-      return v.toString().substring(vpt, n);
-    }
+    // no line trimming for XML or <....> data
+//    if (v.charAt(vpt) == '<') {
+//      n = v.lastIndexOf(">") + 1;
+//      if (n == 0)
+//        n = v.length();
+//      return v.toString().substring(vpt, n);
+//    }
     char[] buffer = new char[n - vpt];
     int pt = 0;
     for (;vpt < n; vpt++) {

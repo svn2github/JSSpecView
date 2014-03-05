@@ -4207,12 +4207,12 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 				    - x1), Math.abs(y0 - y1));
   }
 
-	private void drawBox(Object g, int x0, int y0, int x1, int y1,
-			ScriptToken whatColor) {
-		setColorFromToken(g, whatColor);
-		g2d.drawRect(g, Math.min(x0, x1), Math.min(y0, y1), Math.abs(x0 - x1),
-				Math.abs(y0 - y1));
-	}
+//	private void drawBox(Object g, int x0, int y0, int x1, int y1,
+//			ScriptToken whatColor) {
+//		setColorFromToken(g, whatColor);
+//		g2d.drawRect(g, Math.min(x0, x1), Math.min(y0, y1), Math.abs(x0 - x1),
+//				Math.abs(y0 - y1));
+//	}
 
   private void drawHandle(Object g, int x, int y, boolean outlineOnly) {
     if (outlineOnly)

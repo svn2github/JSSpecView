@@ -8,7 +8,6 @@ import javajs.util.PT;
 import jspecview.common.Coordinate;
 import jspecview.common.Integral;
 import jspecview.common.JDXSpectrum;
-import jspecview.common.JSVFileManager;
 import jspecview.common.Measurement;
 import jspecview.common.Annotation.AType;
 import jspecview.exception.JSVException;
@@ -27,7 +26,7 @@ public abstract class JDXDataObject extends JDXHeader {
   public static final double ERROR = Double.MAX_VALUE;
 
   private String filePath;
-  private String filePathForwardSlash;
+  protected String filePathForwardSlash;
   public boolean isSimulation;
   
 

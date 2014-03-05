@@ -67,7 +67,7 @@ import jspecview.exception.JSVException;
 import jspecview.java.AwtColor;
 import jspecview.java.AwtPanel;
 import jspecview.java.AwtParameters;
-import jspecview.source.FileReader;
+import jspecview.source.JDXReader;
 import jspecview.source.JDXSource;
 import java.awt.Font;
 import javax.swing.UIManager;
@@ -640,7 +640,7 @@ public class PreferencesDialog extends JDialog implements ActionListener {
 
     // init preview panel
     try {
-      JDXSource source = FileReader.createJDXSourceFromStream(getClass()
+      JDXSource source = JDXReader.createJDXSourceFromStream(getClass()
           .getResourceAsStream("resources/sample.jdx"), false, false, Float.NaN);
 
       previewPanel = AwtPanel.getPanelOne(viewer, source.getSpectra().get(0));

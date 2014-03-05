@@ -61,7 +61,7 @@ import jspecview.exception.JSVException;
  * @author Prof. Robert J. Lancashire
  * @author Bob Hanson, hansonr@stolaf.edu
  */
-public class FileReader implements JmolJDXMOLReader {
+public class JDXReader implements JmolJDXMOLReader {
 
   /**
    * Labels for the exporter
@@ -98,7 +98,7 @@ public class FileReader implements JmolJDXMOLReader {
 
 	private boolean isSimulation;
 
-  private FileReader(String filePath, boolean obscure, boolean loadImaginary,
+  private JDXReader(String filePath, boolean obscure, boolean loadImaginary,
   		int iSpecFirst, int iSpecLast, float nmrNormalization) {
   	filePath = PT.trimQuotes(filePath);
   	isSimulation = (filePath != null && filePath.startsWith(JSVFileManager.SIMULATION_PROTOCOL)); 
@@ -176,7 +176,7 @@ public class FileReader implements JmolJDXMOLReader {
 				}
 				return xmlSource;
 			}
-			return (new FileReader(filePath, obscure, loadImaginary, iSpecFirst,
+			return (new JDXReader(filePath, obscure, loadImaginary, iSpecFirst,
 					iSpecLast, nmrMaxY)).getJDXSource(br);
 		} catch (Exception e) {
 			if (br != null)
@@ -963,7 +963,7 @@ public class FileReader implements JmolJDXMOLReader {
 			case 30:
 				// moldata - skip
 				acdAssignments = new List<float[]>();
-				acdMolFile = value;
+				acdMolFile = PT.rep(value, "$$ Empty String", "");
 				break;
 	    case 40:
 	      acdAssignments = mpr.readACDAssignments(spectrum.nPointsFile);

@@ -124,19 +124,19 @@ abstract class XMLReader implements SourceReader {
     //  syntax is:
     //      JDXFileReader.addHeader(LDRTable, )
     //      Key kk = new Key;
-    FileReader.addHeader(LDRTable, "##PATHLENGTH", pathlength);
-    FileReader.addHeader(LDRTable, "##RESOLUTION", resolution);
+    JDXReader.addHeader(LDRTable, "##PATHLENGTH", pathlength);
+    JDXReader.addHeader(LDRTable, "##RESOLUTION", resolution);
     if (!StrObFreq.equals(""))
-      FileReader.addHeader(LDRTable, "##.OBSERVEFREQUENCY", StrObFreq);
+      JDXReader.addHeader(LDRTable, "##.OBSERVEFREQUENCY", StrObFreq);
     if (!obNucleus.equals(""))
-      FileReader.addHeader(LDRTable, "##.OBSERVENUCLEUS", obNucleus);
-    FileReader.addHeader(LDRTable, "##$MANUFACTURER", vendor);
+      JDXReader.addHeader(LDRTable, "##.OBSERVENUCLEUS", obNucleus);
+    JDXReader.addHeader(LDRTable, "##$MANUFACTURER", vendor);
     if (!casRN.equals(""))
-      FileReader.addHeader(LDRTable, "##CASREGISTRYNO", casRN);
+      JDXReader.addHeader(LDRTable, "##CASREGISTRYNO", casRN);
     if (!molForm.equals(""))
-      FileReader.addHeader(LDRTable, "##MOLFORM", molForm);
+      JDXReader.addHeader(LDRTable, "##MOLFORM", molForm);
     if (!modelType.equals(""))
-      FileReader.addHeader(LDRTable, "##SPECTROMETER/DATA SYSTEM", modelType);
+      JDXReader.addHeader(LDRTable, "##SPECTROMETER/DATA SYSTEM", modelType);
 
     //etc etc.
     spectrum.setHeaderTable(LDRTable);
@@ -187,7 +187,7 @@ abstract class XMLReader implements SourceReader {
     reader = null;
     if (errorLog.length() > 0) {
       errorLog.append("these errors were found in " + type + " \n");
-      errorLog.append(FileReader.ERROR_SEPARATOR);
+      errorLog.append(JDXReader.ERROR_SEPARATOR);
     }
     source.setErrorLog(errorLog.toString());
   }

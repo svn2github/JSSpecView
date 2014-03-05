@@ -34,7 +34,7 @@ import jspecview.common.ExportType;
 import jspecview.common.JDXSpectrum;
 import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
-import jspecview.source.FileReader;
+import jspecview.source.JDXReader;
 import jspecview.source.JDXDataObject;
 
 /**
@@ -163,7 +163,7 @@ public class JDXExporter implements JSVExporter {
 			break;
     }
 
-    String varList = FileReader.getVarList(tmpDataClass);
+    String varList = JDXReader.getVarList(tmpDataClass);
     getHeaderString(tmpDataClass, minY, maxY,
         xCompFactor, yCompFactor, startIndex, endIndex);
     out.append("##" + tmpDataClass + "= " + varList + newLine);
