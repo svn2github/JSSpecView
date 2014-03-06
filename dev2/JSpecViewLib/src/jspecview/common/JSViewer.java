@@ -196,6 +196,10 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		script = script.trim();
 		if (script.startsWith("!"))
 			script = script.substring(1).trim();
+		else if (script.startsWith(">")) {
+			Logger.error(script);
+			return true;
+		}
 		if (script.indexOf("<PeakData") >= 0) {
 			syncScript(script);
 			return true;
@@ -1128,10 +1132,11 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			/**
 			 * @j2sNative
 			 * 
-			 *  data = Jmol.Cache.get(name = strUrl);
-			 *  
+			 *            data = Jmol.Cache.get(name = strUrl);
+			 * 
 			 */
-			{}
+			{
+			}
 		}
 		if (data != null) {
 			try {
@@ -1206,6 +1211,8 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		} else {
 			currentSource.setFilePath(newPath);
 		}
+		if (id == null && !isView)
+			id = newPath;
 		if (id != null)
 			currentSource.setID(id);
 		si.siSetLoaded(fileName, newPath);

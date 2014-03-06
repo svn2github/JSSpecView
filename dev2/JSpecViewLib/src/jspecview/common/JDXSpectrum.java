@@ -150,7 +150,7 @@ public class JDXSpectrum extends JDXDataObject {
 	public PeakInfo selectPeakByFileIndex(String filePath, String index,
 			String atomKey) {
 		if (peakList != null && peakList.size() > 0
-				&& (atomKey == null || sourceID.equals(index) || filePathForwardSlash.equals(index)))
+				&& (atomKey == null || sourceID.equals(index)))
 			for (int i = 0; i < peakList.size(); i++)
 				if (peakList.get(i).checkFileIndex(filePath, index, atomKey)) {
 					System.out.println("selecting peak by FileIndex " + this + " "
@@ -179,7 +179,7 @@ public class JDXSpectrum extends JDXDataObject {
    */
   public boolean matchesPeakTypeModel(String type, String model) {
   	if (type.equals("ID"))
-  		return (sourceID.equalsIgnoreCase(model) || filePathForwardSlash.equalsIgnoreCase(model));
+  		return (sourceID.equalsIgnoreCase(model));
     if (peakList != null && peakList.size() > 0)
       for (int i = 0; i < peakList.size(); i++)
         if (peakList.get(i).checkTypeModel(type, model))
