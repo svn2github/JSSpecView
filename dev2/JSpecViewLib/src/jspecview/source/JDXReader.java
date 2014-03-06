@@ -286,8 +286,8 @@ public class JDXReader implements JmolJDXMOLReader {
 			return true;
 		}
 		if (acdAssignments != null) {
-			if (spectrum.isNMR() && !spectrum.isContinuous()) {
-				Logger.info("Skipping ACD Labs line spectrum");
+			if (!spectrum.dataType.equals("MASS SPECTRUM") && !spectrum.isContinuous()) {
+				Logger.info("Skipping ACD Labs line spectrum for " + spectrum);
 				return true;
 			}
 			if (acdAssignments.size() > 0) {

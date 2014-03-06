@@ -1495,7 +1495,11 @@ public class GraphSet implements XYScaleConverter {
 						if (pd.getBoolean(ScriptToken.YUNITSON))
 							drawYUnits(gMain);
 					}
-					drawSpectrum(gMain, i, offset, isGrey, ig);
+				}
+				boolean isContinuous = spec.isContinuous();
+				if (!isContinuous || doAll) {
+				// discrete lines need not be covered
+					drawSpectrum((isContinuous ? gMain : gFront), i, offset, isGrey, ig, isContinuous);
 				}
 				drawMeasurements(gFront, i);
 				if (pendingMeasurement != null && pendingMeasurement.spec == spec)
@@ -1825,12 +1829,13 @@ public class GraphSet implements XYScaleConverter {
 	 * @param yOffset 
 	 * @param isGrey 
 	 * @param ig 
+	 * @param isContinuous 
 	 */
 	private void drawSpectrum(Object g, int index, int yOffset, boolean isGrey,
-			IntegralData ig) {
+			IntegralData ig, boolean isContinuous) {
 		// Check if specInfo in null or xyCoords is null
 		JDXSpectrum spec = spectra.get(index);
-		drawPlot(g, index, spec.getXYCoords(), spec.isContinuous(), yOffset,
+		drawPlot(g, index, spec.getXYCoords(), isContinuous, yOffset,
 				isGrey, null);
 		if (ig != null) {
 			if (haveIntegralDisplayed(index))
@@ -2846,7 +2851,7 @@ public class GraphSet implements XYScaleConverter {
 			float x2 = PT.parseFloat(xMax);
 			if (Float.isNaN(x1) || Float.isNaN(x2))
 				return;
-			pd.addHighlight(this, x1, x2, spec, 200, 200, 200, 100);
+			pd.addHighlight(this, x1, x2, spec, 200, 140, 140, 100);
 			spec.setSelectedPeak(peakInfo);
 			if (getScale().isInRangeX(x1)
 					|| getScale().isInRangeX(x2) || x1 < getScale().minX
