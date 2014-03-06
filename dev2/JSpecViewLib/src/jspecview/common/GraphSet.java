@@ -1656,26 +1656,27 @@ public class GraphSet implements XYScaleConverter {
 		if (list != null && list.size() > 0) {
 			if (piMouseOver != null && piMouseOver.spectrum == spec && pd.isMouseUp()) {
 				g2d.setGraphicsColor(g2, g2d.getColor4(240, 240, 240, 140)); // very faint gray box
-				drawPeak(g2, piMouseOver, true);
+				drawPeak(g2, piMouseOver, 0);
 				spec.setHighlightedPeak(piMouseOver);
 			} else {
 			  spec.setHighlightedPeak(null);
 			}
 			setColorFromToken(gFront, ScriptToken.PEAKTABCOLOR);
 			for (int i = list.size(); --i >= 0;) {
-				drawPeak(gFront, list.get(i), false);
+				PeakInfo p = list.get(i);
+				drawPeak(gFront, p, p == spec.getSelectedPeak() ? 14 : 1);
 			}
 		}
 	}
 
-	private void drawPeak(Object g, PeakInfo pi, boolean isFull) {
+	private void drawPeak(Object g, PeakInfo pi, int tickSize) {
 		if (pd.isPrinting)
 			return;
 		double xMin = pi.getXMin();
 		double xMax = pi.getXMax();
 		if (xMin == xMax)
 			return;
-		drawBar(g, pi, xMin, xMax, null, isFull);
+		drawBar(g, pi, xMin, xMax, null, tickSize);
 	}
 
 	/**
@@ -1771,11 +1772,11 @@ public class GraphSet implements XYScaleConverter {
 	 * @param xMax
 	 *          units
 	 * @param whatColor
-	 * @param isFullHeight
+	 * @param tickSize
 	 */
 
 	private void drawBar(Object g, PeakInfo pi, double xMin, double xMax,
-			ScriptToken whatColor, boolean isFullHeight) {
+			ScriptToken whatColor, int tickSize) {
 		
 		double r = xMax + xMin;
 		double d = Math.abs(xMax - xMin);
@@ -1802,13 +1803,13 @@ public class GraphSet implements XYScaleConverter {
 		}
 		if (pi != null)
 			pi.setPixelRange(x1, x2);
-		if (isFullHeight) {
+		if (tickSize == 0) {
 			fillBox(g, x1, yPixel0, x2, yPixel0 + yPixels, whatColor);
 		} else {
 			fillBox(g, x1, yPixel0, x2, yPixel0 + 5, whatColor);
 			if (pi != null) {
 				x1 = (x1 + x2) / 2;
-				fillBox(g, x1 - 1, yPixel0, x1 + 1, yPixel0 + 7, whatColor);
+				fillBox(g, x1 - 1, yPixel0, x1 + 1, yPixel0 + tickSize, whatColor);
 			}
 		}
 
@@ -2197,7 +2198,7 @@ public class GraphSet implements XYScaleConverter {
 				Highlight hl = highlights.get(i);
 				if (hl.spectrum == spec) {
 					pd.setHighlightColor(hl.color);
-					drawBar(gRear, null, hl.x1, hl.x2, ScriptToken.HIGHLIGHTCOLOR, true);
+					drawBar(gRear, null, hl.x1, hl.x2, ScriptToken.HIGHLIGHTCOLOR, 0);
 				}
 			}
 			drawPeakTabs(gFront, gRear, spec);

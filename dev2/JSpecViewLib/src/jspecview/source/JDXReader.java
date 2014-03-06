@@ -276,7 +276,7 @@ public class JDXReader implements JmolJDXMOLReader {
 
 	private JDXSpectrum modelSpectrum;
 
-	private List<float[]> acdAssignments;
+	private List<String[]> acdAssignments;
 	private String acdMolFile;
 
 	private boolean addSpectrum(JDXSpectrum spectrum, boolean forceSub) {
@@ -293,7 +293,7 @@ public class JDXReader implements JmolJDXMOLReader {
 			if (acdAssignments.size() > 0) {
 				try {
 					mpr.setACDAssignments(spectrum.title, spectrum.getTypeLabel(), 
-							source.peakCount, acdAssignments);
+							source.peakCount, acdAssignments, acdMolFile);
 				} catch (Exception e) {
 					Logger.info("Failed to create peak data: " + e);
 				}
@@ -944,8 +944,13 @@ public class JDXReader implements JmolJDXMOLReader {
 	
 	private boolean checkCustomTags(JDXSpectrum spectrum, String label,
 			String value) throws JSVException {
-		modelSpectrum = spectrum;
-    int pt = "##$MODELS ##$PEAKS  ##$SIGNALS##$MOLFILE##PEAKASSIGNMENTS".indexOf(label);
+		if (label.length() > 10)
+			label = label.substring(0, 10);
+		if (spectrum == null)
+			System.out.println(label);
+		else
+			modelSpectrum = spectrum;
+    int pt = "##$MODELS ##$PEAKS  ##$SIGNALS##$MOLFILE##PEAKASSI##$UVIRASS##$MSFRAGM".indexOf(label);
 		if (pt < 0)
 			return false;
 		getMpr().set(this, filePath, null);
@@ -962,10 +967,12 @@ public class JDXReader implements JmolJDXMOLReader {
 				break;
 			case 30:
 				// moldata - skip
-				acdAssignments = new List<float[]>();
+				acdAssignments = new List<String[]>();
 				acdMolFile = PT.rep(value, "$$ Empty String", "");
 				break;
 	    case 40:
+	    case 50:
+	    case 60:
 	      acdAssignments = mpr.readACDAssignments(spectrum.nPointsFile);
 	      break;
 			}				
@@ -973,7 +980,6 @@ public class JDXReader implements JmolJDXMOLReader {
 			throw new JSVException(e.getMessage());
 		} finally {
 			reader = null;
-			modelSpectrum = null;
 		}
 		return true;
 	}
@@ -995,7 +1001,8 @@ public class JDXReader implements JmolJDXMOLReader {
 	@Override
 	public void setSpectrumPeaks(int nH, String piUnitsX, String piUnitsY) {
 		modelSpectrum.setPeakList(peakData, piUnitsX, piUnitsY);
-		modelSpectrum.setNHydrogens(nH);		
+		if (modelSpectrum.isNMR())
+			modelSpectrum.setNHydrogens(nH);		
 	}
 
 	@Override
