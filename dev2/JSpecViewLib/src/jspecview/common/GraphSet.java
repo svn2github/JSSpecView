@@ -1497,10 +1497,10 @@ public class GraphSet implements XYScaleConverter {
 					}
 				}
 				boolean isContinuous = spec.isContinuous();
-				if (!isContinuous || doAll) {
-				// discrete lines need not be covered
-					drawSpectrum((isContinuous ? gMain : gFront), i, offset, isGrey, ig, isContinuous);
+				if (doAll) {
+					drawSpectrum(gMain, i, offset, isGrey, ig, isContinuous);
 				}
+				//drawSpectrum(gFront, i, offset, isGrey, ig, isContinuous);
 				drawMeasurements(gFront, i);
 				if (pendingMeasurement != null && pendingMeasurement.spec == spec)
 					drawMeasurement(gFront, pendingMeasurement);
