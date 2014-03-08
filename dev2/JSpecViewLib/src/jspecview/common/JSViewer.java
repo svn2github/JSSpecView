@@ -1684,7 +1684,15 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 
 	@Override
 	public void openFileAsyncSpecial(String fileName, int flags) {
-		runScript("load \"" +fileName + "\"");
+		String ans = (currentSource == null ? "NO" : getDialogManager()
+				.getDialogInput(this,
+						"Do you want to append this file? (Answer NO to replace.)",
+						"Drag/Drop Action", DialogManager.QUESTION_MESSAGE, null, null,
+						"YES"));
+		if (ans == null)
+			return;
+		String pre = (ans.toLowerCase().startsWith("y") ? "append" : "");
+		runScript("load " + pre + " \"" + fileName + "\"");
 	}
 
 	public int getHeight() {
@@ -1786,10 +1794,8 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 	}
 
 	public int getOptionFromDialog(String[] items, String title, String label) {
-		getDialogManager().getOptionFromDialog(null, items, selectedPanel, title,
+		return getDialogManager().getOptionFromDialog(null, items, selectedPanel, title,
 				label);
-		// TODO Auto-generated method stub
-		return 0;
 	}
 
 	private String execWrite(String value) {
