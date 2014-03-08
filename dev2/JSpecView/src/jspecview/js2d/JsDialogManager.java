@@ -68,8 +68,18 @@ public class JsDialogManager extends DialogManager {
 	@Override
 	public int getOptionFromDialog(Object frame, String[] items, JSVPanel jsvp,
 			String dialogName, String labelName) {
-		// for export only
-		return 0;
+		int i = -1;
+		/**
+		 * @j2sNative
+		 * 
+		 * return this.viewer.applet.getOption(items, dialogName, labelName);
+		 * 
+		 * 
+		 */{
+			 
+		 }
+		// for export and others
+		return i;
 	}
 
 	/**
