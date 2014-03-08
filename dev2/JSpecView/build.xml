@@ -37,6 +37,7 @@
 	<property name="lib.dir"     		value="libs"/>
 	<property name="bin.dir" 			value="bin"/>
     <property name="build.dir"   		value="build"/>
+	<property name="jsvlibsrc.dir" 		value="../JSpecViewLib/src"/>
 	<property name="jsvlib.dir" 		value="../JSpecViewLib/bin"/>
     <property name="extras.dir"         value="extras" />
     <property name="dist.dir"           value="dist" />
@@ -75,7 +76,7 @@
 -->
 
 	<target name="build">
-        <echo message="copying files from ${jmol.path}/src/org/jmol/api"/>
+        <echo message="copying files from ${jmol.path}/src/org/jmol"/>
 	    <delete quiet="true">
 	      <fileset dir="src/org/jmol" includes="**/*.java"/>
 	    </delete>
@@ -88,7 +89,21 @@
           </fileset>
         </copy>
 		
-        <echo message="getting application icons and resources"/>
+		<if><available file="${Private.propertyFile}" /><then>
+	       <echo message="copying files to ${jmol.path}/srcjsv/jspecview"/>
+	        <copy overwrite="true" todir="${jmol.path}/srcjsv/jspecview" >
+	          <fileset dir="src/jspecview">
+	            <include name="**/*" />
+	            <exclude name="unused/*" />
+	          </fileset>
+	        <fileset dir="${jsvlibsrc.dir}/jspecview">
+	          <include name="**/*" />
+	          <exclude name="unused/*" />
+	        </fileset>
+	        </copy>
+		</then></if>
+
+		<echo message="getting application icons and resources"/>
         <mkdir dir="${bin.dir}"/>
         <javac srcdir="${src.dir}" destdir="${bin.dir}" 
         	debug="${debug}" includeantruntime="false" 
