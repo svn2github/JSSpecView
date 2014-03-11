@@ -67,7 +67,7 @@ public class JSVPopupResourceBundle extends PopupResource {
       {   "OptionsMenu",
           "Toggle_Grid Toggle_X_Axis Toggle_Y_Axis Toggle_Coordinates Toggle_Trans/Abs Reverse_Plot Predicted_Solution_Colour" }, //Window?
 
-      {   "ZoomMenu", "Next_Zoom Previous_Zoom Reset_Zoom - Reset_X_Scale Set_X_Scale..." },
+      {   "ZoomMenu", "Next_Zoom Previous_Zoom Reset_Zoom - Set_X_Scale... Reset_X_Scale" },
 
       {   "AboutMenu", "VERSION" }
   };
