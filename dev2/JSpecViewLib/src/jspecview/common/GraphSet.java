@@ -1673,7 +1673,7 @@ public class GraphSet implements XYScaleConverter {
 			setColorFromToken(gFront, ScriptToken.PEAKTABCOLOR);
 			for (int i = list.size(); --i >= 0;) {
 				PeakInfo p = list.get(i);
-				drawPeak(gFront, p, p == spec.getSelectedPeak() ? 14 : 1);
+				drawPeak(gFront, p, p == spec.getSelectedPeak() ? 14 : 7);
 			}
 		}
 	}
@@ -1815,7 +1815,7 @@ public class GraphSet implements XYScaleConverter {
 		if (tickSize == 0) {
 			fillBox(g, x1, yPixel0, x2, yPixel0 + yPixels, whatColor);
 		} else {
-			fillBox(g, x1, yPixel0, x2, yPixel0 + 5, whatColor);
+			fillBox(g, x1, yPixel0, x2, yPixel0 + 3, whatColor);
 			if (pi != null) {
 				x1 = (x1 + x2) / 2;
 				fillBox(g, x1 - 1, yPixel0, x1 + 1, yPixel0 + tickSize, whatColor);
