@@ -167,7 +167,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 	private String defaultLoadScript;
 
 	public float nmrMaxY = Float.NaN;
-	
+
 	public void setPopupMenu(boolean allowMenu, boolean zoomEnabled) {
 		popupAllowMenu = allowMenu;
 		popupZoomEnabled = zoomEnabled;		
@@ -528,12 +528,27 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 	private boolean execZoom(String value) {
 		double x1 = 0, x2 = 0, y1 = 0, y2 = 0;
 		List<String> tokens;
+		value = PT.rep(value, " - ", " ").replace(',',' ');
 		tokens = ScriptToken.getTokens(value);
 		switch (tokens.size()) {
 		default:
 			return false;
+		case 0:
+			ScaleData v = pd().getCurrentGraphSet().getCurrentView();
+			value = Math.round(v.minXOnScale * 100) / 100f + "," + Math.round(v.maxXOnScale * 100) / 100f;
+			value = selectedPanel.getInput("Enter zoom range x1 x2", "Zoom", value);
+			return (value == null || execZoom(value));
 		case 1:
-			zoomTo(tokens.get(0));
+			value = tokens.get(0);
+			if (value.equalsIgnoreCase("next")) {
+				pd().nextView();
+			} else if (value.toLowerCase().startsWith("prev")) {
+				pd().previousView();
+			} else if (value.equalsIgnoreCase("out")) {
+				pd().resetView();
+			} else if (value.equalsIgnoreCase("clear")) {
+				pd().clearAllView();
+			}
 			return true;
 		case 2:
 			x1 = Double.parseDouble(tokens.get(0));
@@ -547,33 +562,6 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		}
 		pd().setZoom(x1, y1, x2, y2);
 		return true;
-	}
-
-	// private String recentZoom = "";
-	// doesn't work
-
-	private void zoomTo(String value) {
-		PanelData pd = pd();
-		// if (value.equals("")) {
-		// value = selectedPanel.getInput("Enter zoom range y1 y2", "Zoom",
-		// recentZoom);
-		// if (value == null)
-		// return;
-		// recentZoom = value;
-		// runScriptNow("zoom " + value);
-		// return;
-		// }
-		if (value.equalsIgnoreCase("next")) {
-			pd.nextView();
-		} else if (value.toLowerCase().startsWith("prev")) {
-			pd.previousView();
-
-		} else if (value.equalsIgnoreCase("out")) {
-			pd.resetView();
-
-		} else if (value.equalsIgnoreCase("clear")) {
-			pd.clearAllView();
-		}
 	}
 
 	private void scaleSelectedBy(List<PanelNode> nodes, String value) {

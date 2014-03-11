@@ -385,7 +385,7 @@ public class PanelData implements EventManager {
 	 */
 	public void clearAllView() {
 		for (int i = graphSets.size(); --i >= 0;)
-			graphSets.get(i).clearViews();
+			graphSets.get(i).resetViewCompletely();//.clearViews();
 	}
 
 	/*----------------------- JSVPanel PAINTING METHODS ---------------------*/

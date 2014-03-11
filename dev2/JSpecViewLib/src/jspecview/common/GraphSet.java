@@ -853,12 +853,7 @@ public class GraphSet implements XYScaleConverter {
 			viewData.scaleSpectrum(imageView == null ? iSpectrumSelected : -2, f);
 			ok = true;
 		} else if (isArrowClick(xPixel, yPixel, ArrowType.RESET)) {
-			clearViews();
-			if (showAllStacked && !stackSelected)
-  			closeDialogsExcept(AType.NONE);
-			viewData.resetScaleFactors();
-			// did not work: view.setScaleFactor(iSpectrumSelected, 1);
-			updateDialogs();
+			resetViewCompletely();
 			ok = true;
 		}
 
@@ -871,6 +866,16 @@ public class GraphSet implements XYScaleConverter {
 			// pd.repaint();
 		}
 		return ok;
+	}
+
+	void resetViewCompletely() {
+		// reset button between up/down arrows;
+		clearViews();
+		if (showAllStacked && !stackSelected)
+			closeDialogsExcept(AType.NONE);
+		viewData.resetScaleFactors();
+		// did not work: view.setScaleFactor(iSpectrumSelected, 1);
+		updateDialogs();
 	}
 
 	private boolean checkArrowLeftRightClick(int xPixel, int yPixel) {
