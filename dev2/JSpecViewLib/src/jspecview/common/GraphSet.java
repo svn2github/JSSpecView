@@ -41,7 +41,6 @@ public class GraphSet implements XYScaleConverter {
 
 	private boolean isSplittable = true;
 	private boolean allowStacking = true; // not MS
-	private int[] splitPointers = new int[] { 0 };
 
 	private List<Annotation> annotations;
 	private MeasurementData selectedSpectrumMeasurements;
@@ -326,18 +325,12 @@ public class GraphSet implements XYScaleConverter {
 
 	void splitStack(List<GraphSet> graphSets, boolean doSplit) {
 		if (doSplit && isSplittable) {
-			// nSplit = 0;
-			// splitPointers = new int[nSpectra];
-			// for (int i = 0; i < nSpectra; i++) {
-			// splitPointers[nSplit] = i;
-			// nSplit++;
-			// }
 			nSplit = nSpectra;
 			showAllStacked = false;
 			setSpectrumClicked(iSpectrumSelected);
+			pd.currentSplitPoint = iSpectrumSelected;
 		} else {
 			nSplit = 1;
-			splitPointers[0] = 0;
 			showAllStacked = allowStacking && !doSplit;
 			setSpectrumClicked(iSpectrumSelected);
 		}
@@ -1994,15 +1987,12 @@ public class GraphSet implements XYScaleConverter {
 			int x1 = xPixel00 + 10;
 			int x2 = xPixel11 - 10;
 			int y1 = yPixel00 + 1;
-			int y2 = yPixel11 - 2;
- 
+			int y2 = yPixel11 - 2; 
 			g2d.drawLine(g, x1, y1, x2, y1); 
 			g2d.drawLine(g, x2, y1, x2, y2); 
 			g2d.drawLine(g, x1, y2, x2, y2); 
-			if (addSplitBox) {
-				fillBox(g, xPixel11 - 20, yPixel00 + 1, xPixel11 - 10, yPixel00 + 11,
-						null);
-			}
+			if (addSplitBox)
+				fillBox(g, x2 - 10, y1, x2, y1 + 10, null);
 		}
 	}
 
