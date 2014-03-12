@@ -37,7 +37,7 @@ public class GraphSet implements XYScaleConverter {
 	private boolean cur1D2Locked;
 
 	private List<Highlight> highlights = new List<Highlight>();
-	List<JDXSpectrum> spectra = new List<JDXSpectrum>();
+	List<Spectrum> spectra = new List<Spectrum>();
 
 	private boolean isSplittable = true;
 	private boolean allowStacking = true; // not MS
@@ -48,7 +48,7 @@ public class GraphSet implements XYScaleConverter {
 	private Annotation lastAnnotation;
 	Measurement pendingMeasurement;
 	private Integral pendingIntegral;
-	private List<JDXSpectrum> graphsTemp = new List<JDXSpectrum>();
+	private List<Spectrum> graphsTemp = new List<Spectrum>();
 	private PlotWidget[] widgets;
 	private boolean isLinked;
 	private boolean haveSingleYScale;
@@ -294,7 +294,7 @@ public class GraphSet implements XYScaleConverter {
 
 	private boolean is2DSpectrum;
 
-	JDXSpectrum getSpectrum() {
+	Spectrum getSpectrum() {
 		// could be a 2D spectrum or a set of mass spectra
 		return getSpectrumAt(getFixedSelectedSpectrumIndex())
 				.getCurrentSubSpectrum();
@@ -307,18 +307,18 @@ public class GraphSet implements XYScaleConverter {
 	 *          the index of the <code>Spectrum</code>
 	 * @return the <code>Spectrum</code> at the specified index
 	 */
-	public JDXSpectrum getSpectrumAt(int index) {
+	public Spectrum getSpectrumAt(int index) {
 		return spectra.get(index);
 	}
 
-	int getSpectrumIndex(JDXSpectrum spec) {
+	int getSpectrumIndex(Spectrum spec) {
 		for (int i = spectra.size(); --i >= 0;)
 			if (spectra.get(i) == spec)
 				return i;
 		return -1;
 	}
 
-	private void addSpec(JDXSpectrum spec) {
+	private void addSpec(Spectrum spec) {
 		spectra.addLast(spec);
 		nSpectra++;
 	}
@@ -428,8 +428,8 @@ public class GraphSet implements XYScaleConverter {
 
 	private synchronized void getView(double x1, double x2, double y1, double y2,
 			int[] startIndices, int[] endIndices, ScaleData[] viewScales, ScaleData[] yScales) {
-		List<JDXSpectrum> graphs = (graphsTemp.size() == 0 ? spectra : graphsTemp);
-		List<JDXSpectrum> subspecs = getSpectrumAt(0).getSubSpectra();
+		List<Spectrum> graphs = (graphsTemp.size() == 0 ? spectra : graphsTemp);
+		List<Spectrum> subspecs = getSpectrumAt(0).getSubSpectra();
 		boolean dontUseSubspecs = (subspecs == null || subspecs.size() == 2
 				&& subspecs.get(1).isImaginary());
 		// NMR real/imaginary
@@ -667,7 +667,7 @@ public class GraphSet implements XYScaleConverter {
 		case 2: // 1st double-click
 			if (iSpectrumClicked < 0)
 				return;
-			JDXSpectrum spec = spectra.get(iSpectrumClicked);
+			Spectrum spec = spectra.get(iSpectrumClicked);
 			setScale(iSpectrumClicked);
 			if (clickCount == 3) {
 			} else {
@@ -768,7 +768,7 @@ public class GraphSet implements XYScaleConverter {
 	 * @param y
 	 * @return  nearest x value
 	 */
-	private double getNearestPeak(JDXSpectrum spec, double x, double y) {
+	private double getNearestPeak(Spectrum spec, double x, double y) {
 		double x0 = Coordinate.getNearestXWithYAbove(spec.getXYCoords(), x, y, spec
 				.isInverted(), false);
 		double x1 = Coordinate.getNearestXWithYAbove(spec.getXYCoords(), x, y, spec
@@ -1006,7 +1006,7 @@ public class GraphSet implements XYScaleConverter {
 		}
 	}
 
-	private void removeAllHighlights(JDXSpectrum spec) {
+	private void removeAllHighlights(Spectrum spec) {
 		if (spec == null)
 			highlights.clear();
 		else
@@ -1288,7 +1288,7 @@ public class GraphSet implements XYScaleConverter {
 		int[] startIndices = new int[nSpectra];
 		int[] endIndices = new int[nSpectra];
 		graphsTemp.clear();
-		List<JDXSpectrum> subspecs = getSpectrumAt(0).getSubSpectra();
+		List<Spectrum> subspecs = getSpectrumAt(0).getSubSpectra();
 		boolean dontUseSubspecs = (subspecs == null || subspecs.size() == 2);
 		// NMR real/imaginary
 		boolean is2D = !getSpectrumAt(0).is1D();
@@ -1345,7 +1345,7 @@ public class GraphSet implements XYScaleConverter {
 	}
 
 	private void setCurrentSubSpectrum(int i) {
-		JDXSpectrum spec0 = getSpectrumAt(0);
+		Spectrum spec0 = getSpectrumAt(0);
 		i = spec0.setCurrentSubSpectrum(i);
 		if (spec0.isForcedSubset())
 			viewData.setXRangeForSubSpectrum(getSpectrum().getXYCoords());
@@ -1454,7 +1454,7 @@ public class GraphSet implements XYScaleConverter {
 						AType.Integration, i).getData()
 						: null);
 				setScale(i);
-				JDXSpectrum spec = spectra.get(i);
+				Spectrum spec = spectra.get(i);
 				if (nSplit > 1) {
 					iSpectrumForScale = i;
 				}
@@ -1600,7 +1600,7 @@ public class GraphSet implements XYScaleConverter {
 //
 //	}
 
-	private void drawSpectrumPointer(Object g, JDXSpectrum spec,
+	private void drawSpectrumPointer(Object g, Spectrum spec,
 			int yOffset, IntegralData ig) {
 		setColorFromToken(g, ScriptToken.PEAKTABCOLOR);
 		int iHandle = pd.integralShiftMode;
@@ -1652,7 +1652,7 @@ public class GraphSet implements XYScaleConverter {
 		drawUnits(g, nucleusY, imageView.xPixel0 - 5 * pd.scalingFactor, yPixel0, 1, 0);
 	}
 
-	private void drawPeakTabs(Object gFront, Object g2, JDXSpectrum spec) {
+	private void drawPeakTabs(Object gFront, Object g2, Spectrum spec) {
 		List<PeakInfo> list = (nSpectra == 1 || iSpectrumSelected >= 0 ? spec
 				.getPeakList() : null);
 		if (list != null && list.size() > 0) {
@@ -1832,7 +1832,7 @@ public class GraphSet implements XYScaleConverter {
 	private void drawSpectrum(Object g, int index, int yOffset, boolean isGrey,
 			IntegralData ig, boolean isContinuous) {
 		// Check if specInfo in null or xyCoords is null
-		JDXSpectrum spec = spectra.get(index);
+		Spectrum spec = spectra.get(index);
 		drawPlot(g, index, spec.getXYCoords(), isContinuous, yOffset,
 				isGrey, null);
 		if (ig != null) {
@@ -2185,7 +2185,7 @@ public class GraphSet implements XYScaleConverter {
 
 	private void drawHighlightsAndPeakTabs(Object gFront, Object gRear, int iSpec) {
 		MeasurementData md = getMeasurements(AType.PeakList, iSpec);
-		JDXSpectrum spec = spectra.get(iSpec);
+		Spectrum spec = spectra.get(iSpec);
 		if (pd.isPrinting) {
 			if (md != null) {
 				setColorFromToken(gFront, ScriptToken.PEAKTABCOLOR);
@@ -2220,7 +2220,7 @@ public class GraphSet implements XYScaleConverter {
 		}
 	}
 
-	private void printPeakList(Object g, JDXSpectrum spec, PeakData data) {
+	private void printPeakList(Object g, Spectrum spec, PeakData data) {
 		String[][] sdata = data.getMeasurementListArray(null);
 		if (sdata.length == 0)
 			return;
@@ -2528,7 +2528,7 @@ public class GraphSet implements XYScaleConverter {
 	}
 
 	private String get2DYLabel(int isub, int precision) {
-		JDXSpectrum spec = getSpectrumAt(0).getSubSpectra().get(isub);
+		Spectrum spec = getSpectrumAt(0).getSubSpectra().get(isub);
 		return DF.formatDecimalDbl(spec.getY2D(), precision)
 				+ (spec.y2DUnits.equals("HZ") ? " HZ ("
 						+ DF.formatDecimalDbl(spec.getY2DPPM(), precision) + " PPM)" : "");
@@ -2548,7 +2548,7 @@ public class GraphSet implements XYScaleConverter {
 			index = getFixedSelectedSpectrumIndex();
 		} else {
 			setScale(index);
-			JDXSpectrum spec = spectra.get(index);
+			Spectrum spec = spectra.get(index);
 			xyCoords = spec.xyCoords;
 			isContinuous = spec.isContinuous();
 		}
@@ -2599,9 +2599,9 @@ public class GraphSet implements XYScaleConverter {
 	}
 
 	private static GraphSet findCompatibleGraphSet(List<GraphSet> graphSets,
-			JDXSpectrum spec) {
+			Spectrum spec) {
 		for (int i = 0; i < graphSets.size(); i++)
-			if (JDXSpectrum.areXScalesCompatible(spec, graphSets.get(i).getSpectrum(),
+			if (Spectrum.areXScalesCompatible(spec, graphSets.get(i).getSpectrum(),
 					false, false))
 				return graphSets.get(i);
 		return null;
@@ -2694,14 +2694,14 @@ public class GraphSet implements XYScaleConverter {
 			for (int i = 0; i < n; i++) {
 				gs = graphSets.get(i);
 				gs.isLinked = true;
-				JDXSpectrum s1 = gs.getSpectrumAt(0);
+				Spectrum s1 = gs.getSpectrumAt(0);
 				boolean is1D = s1.is1D();
 				if (is1D) {
 					if (gs2d != null) {
-						JDXSpectrum s2 = gs2d.getSpectrumAt(0);					
-						if (JDXSpectrum.areLinkableX(s1, s2))
+						Spectrum s2 = gs2d.getSpectrumAt(0);					
+						if (Spectrum.areLinkableX(s1, s2))
   					  gs.gs2dLinkedX = gs2d;
-						if (JDXSpectrum.areLinkableY(s1, s2))
+						if (Spectrum.areLinkableY(s1, s2))
 							gs.gs2dLinkedY = gs2d;
 					}
 					gs.fX0 = 0;
@@ -2747,7 +2747,7 @@ public class GraphSet implements XYScaleConverter {
 		double x1;
 		double x2;
 		GenericColor color;
-		JDXSpectrum spectrum;
+		Spectrum spectrum;
 
 		
 		@Override
@@ -2755,7 +2755,7 @@ public class GraphSet implements XYScaleConverter {
 			return "highlight " + x1 + " " + x2 + " " + spectrum;
 		}
 
-		Highlight(double x1, double x2, JDXSpectrum spec, GenericColor color) {
+		Highlight(double x1, double x2, Spectrum spec, GenericColor color) {
 			this.x1 = x1;
 			this.x2 = x2;
 			this.color = color;
@@ -2818,7 +2818,7 @@ public class GraphSet implements XYScaleConverter {
 	 * @param color 
 	 *          the color of the highlight
 	 */
-	void addHighlight(double x1, double x2, JDXSpectrum spec, GenericColor color) {
+	void addHighlight(double x1, double x2, Spectrum spec, GenericColor color) {
 		if (spec == null)
 			spec = getSpectrumAt(0);
 		Highlight hl = new Highlight(x1, x2, spec, (color == null ? pd
@@ -2829,7 +2829,7 @@ public class GraphSet implements XYScaleConverter {
 
 	void addPeakHighlight(PeakInfo peakInfo) {
 		for (int i = spectra.size(); --i >= 0;) {
-			JDXSpectrum spec = spectra.get(i);
+			Spectrum spec = spectra.get(i);
 			removeAllHighlights(spec);
 			if (peakInfo == null || peakInfo.isClearAll()
 					|| spec != peakInfo.spectrum)
@@ -2859,7 +2859,7 @@ public class GraphSet implements XYScaleConverter {
 	}
 
 	void advanceSubSpectrum(int dir) {
-		JDXSpectrum spec0 = getSpectrumAt(0);
+		Spectrum spec0 = getSpectrumAt(0);
 		int i = spec0.advanceSubSpectrum(dir);
 		if (spec0.isForcedSubset())
 			viewData.setXRangeForSubSpectrum(getSpectrum().getXYCoords());
@@ -3092,10 +3092,10 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 	}
 
 	static List<GraphSet> createGraphSetsAndSetLinkMode(PanelData pd, JSVPanel jsvp,
-		List<JDXSpectrum> spectra, int startIndex, int endIndex, LinkMode linkMode) {
+		List<Spectrum> spectra, int startIndex, int endIndex, LinkMode linkMode) {
 		List<GraphSet> graphSets = new List<GraphSet>();
 		for (int i = 0; i < spectra.size(); i++) {
-			JDXSpectrum spec = spectra.get(i);
+			Spectrum spec = spectra.get(i);
 			GraphSet graphSet = (linkMode == LinkMode.NONE ? findCompatibleGraphSet(graphSets, spec) : null);
 			if (graphSet == null)
 				graphSets.addLast(graphSet = new GraphSet(jsvp.getPanelData()));
@@ -3455,7 +3455,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 				piMouseOver = null;
 				int iSpec = (nSplit > 1 ? iSpectrumMovedTo : iSpectrumClicked);
 				if (!isDrawNoSpectra() && iSpec >= 0) {
-					JDXSpectrum spec = spectra.get(iSpec);
+					Spectrum spec = spectra.get(iSpec);
 					if (spec.getPeakList() != null) {
 						coordTemp.setXVal(toX(xPixel));
 						coordTemp.setYVal(toY(yPixel));
@@ -3585,7 +3585,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 	}
 
 	void setSelectedIntegral(double val) {
-		JDXSpectrum spec = selectedIntegral.getSpectrum();
+		Spectrum spec = selectedIntegral.getSpectrum();
 		getIntegrationGraph(getSpectrumIndex(spec)).setSelectedIntegral(
 				selectedIntegral, val);
 	}
@@ -3621,7 +3621,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 	}
 
 	boolean checkIntegral(Parameters parameters, String value) {
-		JDXSpectrum spec = getSpectrum();
+		Spectrum spec = getSpectrum();
 		if (!spec.canIntegrate() || reversePlot)
 			return false;
 		int iSpec = getFixedSelectedSpectrumIndex();
@@ -3688,7 +3688,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 			dialogsToFront(getSpectrum());
 	}
 
-	void setSpectrumJDX(JDXSpectrum spec) {
+	void setSpectrumJDX(Spectrum spec) {
 		// T/A conversion for IR
 		int pt = getFixedSelectedSpectrumIndex();
 		spectra.remove(pt);
@@ -3743,7 +3743,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 
 		// shiftx  x.x      value,            Double.NaN
 
-		JDXSpectrum spec = getSpectrum();
+		Spectrum spec = getSpectrum();
 		if (!spec.isNMR() || !spec.is1D())
 			return false;
 		if (x1 == Double.MAX_VALUE || dx == Double.MAX_VALUE) {
@@ -3802,7 +3802,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		istep *= (drawXAxisLeftToRight ? 1 : -1);
 		if (Double.isNaN(lastClickX))
 			lastClickX = lastPixelX = 0;
-		JDXSpectrum spec = getSpectrum();
+		Spectrum spec = getSpectrum();
 		Coordinate coord = setCoordClicked(lastPixelX, lastClickX, 0);
 		int iPeak = spec.setNextPeak(coord, istep);
 		if (iPeak < 0)
@@ -3831,7 +3831,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 				+ spectra.get(0).getFilePath();
 	}
 
-	void setXPointer(JDXSpectrum spec, double x) {
+	void setXPointer(Spectrum spec, double x) {
 		if (spec != null)
 			setSpectrumClicked(getSpectrumIndex(spec));
 		xValueMovedTo = lastClickX = x;
@@ -3840,7 +3840,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		yValueMovedTo = Double.NaN;
 	}
 
-	void setXPointer2(JDXSpectrum spec, double x) {
+	void setXPointer2(Spectrum spec, double x) {
 		if (spec != null)
 			setSpectrumClicked(getSpectrumIndex(spec));
 		setXPixelMovedTo(Double.MAX_VALUE, x, 0, 0);
@@ -3947,7 +3947,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 	}
 
 	boolean integrate(int iSpec, Parameters parameters) {
-		JDXSpectrum spec = getSpectrumAt(iSpec);
+		Spectrum spec = getSpectrumAt(iSpec);
 		if (parameters == null || !spec.canIntegrate()) {
 			removeDialog(iSpec, AType.Integration);
 			return false;
@@ -3998,7 +3998,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		for (int i = 0; i < nSpectra; i++) {
 			if (iSpec >= 0 && i != iSpec)
 				continue;
-			JDXSpectrum spec = spectra.get(i);
+			Spectrum spec = spectra.get(i);
 			Map<String, Object> info = spec.getInfo(key);
 			if (iSpec >= 0 && key != null 
 					&& (info.size() == 2 || key.equalsIgnoreCase("id"))) {
@@ -4044,7 +4044,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		cur1D2Locked = isLocked;
 	}
 
-	public void dialogsToFront(JDXSpectrum spec) {
+	public void dialogsToFront(Spectrum spec) {
 		if (dialogs == null)
 			return;
 		if (spec == null)
@@ -4185,7 +4185,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 	
 	private boolean update2dImage(boolean isCreation) {
 		imageView.set(viewData.getScale());
-		JDXSpectrum spec = getSpectrumAt(0);
+		Spectrum spec = getSpectrumAt(0);
 		int[] buffer = imageView.get2dBuffer(spec, !isCreation);
 		if (buffer == null) {
 			image2D = null;

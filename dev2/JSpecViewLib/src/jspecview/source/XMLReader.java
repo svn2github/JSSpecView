@@ -31,7 +31,7 @@ import org.jmol.util.Logger;
 
 import jspecview.api.SourceReader;
 import jspecview.common.Coordinate;
-import jspecview.common.JDXSpectrum;
+import jspecview.common.Spectrum;
 
 /**
  * Representation of a XML Source.
@@ -105,7 +105,7 @@ abstract class XMLReader implements SourceReader {
     // now populate all the JSpecView spectrum variables.....
 
     List<String[]> LDRTable = new List<String[]>();
-    JDXSpectrum spectrum = new JDXSpectrum();
+    Spectrum spectrum = new Spectrum();
 
     spectrum.setTitle(title);
     spectrum.setJcampdx("5.01");

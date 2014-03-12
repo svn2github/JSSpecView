@@ -40,7 +40,7 @@ import jspecview.source.JDXSourceStreamTokenizer;
  * @author Khari A. Bryan
  * @author Prof Robert J. Lancashire
  */
-public class JDXSpectrum extends JDXDataObject {
+public class Spectrum extends JDXDataObject {
 
   public enum IRMode {
     NO_CONVERT, TO_TRANS, TO_ABS, TOGGLE;
@@ -67,7 +67,7 @@ public class JDXSpectrum extends JDXDataObject {
    * spectra that can never be displayed independently, or at least not by default
    * 2D slices, for example.
    */
-  private List<JDXSpectrum> subSpectra;
+  private List<Spectrum> subSpectra;
   private List<PeakInfo> peakList = new List<PeakInfo>();
   private String piUnitsX, piUnitsY;
   private PeakInfo selectedPeak, highlightedPeak;
@@ -103,7 +103,7 @@ public class JDXSpectrum extends JDXDataObject {
   /**
    * Constructor
    */
-  public JDXSpectrum() {
+  public Spectrum() {
     //System.out.println("initialize JDXSpectrum " + this);
     headerTable = new List<String[]>();
     xyCoords = new Coordinate[0];
@@ -115,8 +115,8 @@ public class JDXSpectrum extends JDXDataObject {
    * 
    * @return a copy of this <code>JDXSpectrum</code>
    */
-  public JDXSpectrum copy() {
-    JDXSpectrum newSpectrum = new JDXSpectrum();
+  public Spectrum copy() {
+    Spectrum newSpectrum = new Spectrum();
     copyTo(newSpectrum);
     newSpectrum.setPeakList(peakList, piUnitsX, null);
     return newSpectrum;
@@ -295,7 +295,7 @@ public class JDXSpectrum extends JDXDataObject {
     return Coordinate.getYValueAt(xyCoords, x);
   }
 
-  private JDXSpectrum convertedSpectrum;
+  private Spectrum convertedSpectrum;
 
   /**
    * based YFactor used in View command
@@ -312,15 +312,15 @@ public class JDXSpectrum extends JDXDataObject {
 
   public static final double MAXABS = 4; // maximum absorbance allowed
 
-  public JDXSpectrum getConvertedSpectrum() {
+  public Spectrum getConvertedSpectrum() {
     return convertedSpectrum;
   }
   
-  public void setConvertedSpectrum(JDXSpectrum spectrum) {
+  public void setConvertedSpectrum(Spectrum spectrum) {
     convertedSpectrum = spectrum;
   }
 
-  public static JDXSpectrum taConvert(JDXSpectrum spectrum, IRMode mode) {
+  public static Spectrum taConvert(Spectrum spectrum, IRMode mode) {
     if (!spectrum.isContinuous())
       return spectrum;
     switch (mode) {
@@ -337,7 +337,7 @@ public class JDXSpectrum extends JDXDataObject {
     case TOGGLE:
       break;
     }
-    JDXSpectrum spec = spectrum.getConvertedSpectrum();
+    Spectrum spec = spectrum.getConvertedSpectrum();
     return (spec != null ? spec : spectrum.isAbsorbance() ? toT(spectrum) : toA(spectrum));
   }
 
@@ -349,7 +349,7 @@ public class JDXSpectrum extends JDXDataObject {
    * @return the converted spectrum
    */
   
-  private static JDXSpectrum toT(JDXSpectrum spectrum) {
+  private static Spectrum toT(Spectrum spectrum) {
     if (!spectrum.isAbsorbance())
       return null;
     Coordinate[] xyCoords = spectrum.getXYCoords();
@@ -369,7 +369,7 @@ public class JDXSpectrum extends JDXDataObject {
    *        the JDXSpectrum
    * @return the converted spectrum
    */
-  private static JDXSpectrum toA(JDXSpectrum spectrum) {
+  private static Spectrum toA(Spectrum spectrum) {
     if (!spectrum.isTransmittance())
       return null;
     Coordinate[] xyCoords = spectrum.getXYCoords();
@@ -389,10 +389,10 @@ public class JDXSpectrum extends JDXDataObject {
    * @param units
    * @return new spectrum
    */
-  public static JDXSpectrum newSpectrum(JDXSpectrum spectrum,
+  public static Spectrum newSpectrum(Spectrum spectrum,
                                          Coordinate[] newXYCoords,
                                          String units) {
-    JDXSpectrum specNew = spectrum.copy();
+    Spectrum specNew = spectrum.copy();
     specNew.setOrigin("JSpecView Converted");
     specNew.setOwner("JSpecView Generated");
     specNew.setXYCoords(newXYCoords);
@@ -435,18 +435,18 @@ public class JDXSpectrum extends JDXDataObject {
     return Math.log(value) / Math.log(10);
   }
 
-  public static boolean process(List<JDXSpectrum> specs, IRMode irMode) {
+  public static boolean process(List<Spectrum> specs, IRMode irMode) {
     if (irMode == IRMode.TO_ABS || irMode == IRMode.TO_TRANS)
       for (int i = 0; i < specs.size(); i++)
         specs.set(i, taConvert(specs.get(i), irMode));
     return true;
   }
 
-  public List<JDXSpectrum> getSubSpectra() {
+  public List<Spectrum> getSubSpectra() {
     return subSpectra;
   }
   
-  public JDXSpectrum getCurrentSubSpectrum() {
+  public Spectrum getCurrentSubSpectrum() {
     return (subSpectra == null ? this : subSpectra.get(currentSubSpectrumIndex));
   }
 
@@ -466,13 +466,13 @@ public class JDXSpectrum extends JDXDataObject {
    * @param forceSub 
    * @return true if was possible
    */
-  public boolean addSubSpectrum(JDXSpectrum spectrum, boolean forceSub) {
+  public boolean addSubSpectrum(Spectrum spectrum, boolean forceSub) {
     if (!forceSub && (numDim < 2 || blockID != spectrum.blockID)
         || !allowSubSpec(this, spectrum))
       return false;
     isForcedSubset = forceSub; // too many blocks (>100)
     if (subSpectra == null) {
-      subSpectra = new List<JDXSpectrum>();
+      subSpectra = new List<Spectrum>();
       addSubSpectrum(this, true);
     }
     subSpectra.addLast(spectrum);
@@ -592,7 +592,7 @@ public class JDXSpectrum extends JDXDataObject {
 			Coordinate.shiftX(xyCoords, dx);
 			if (subSpectra != null)
 				for (int i = subSpectra.size(); --i >= 0;) {
-					JDXSpectrum spec = subSpectra.get(i); 
+					Spectrum spec = subSpectra.get(i); 
 					if (spec != this && spec != parent)
 						spec.addSpecShift(dx);
 				}
@@ -600,13 +600,13 @@ public class JDXSpectrum extends JDXDataObject {
 		return specShift;
 	}
 
-	public static boolean allowSubSpec(JDXSpectrum s1, JDXSpectrum s2) {
+	public static boolean allowSubSpec(Spectrum s1, Spectrum s2) {
 		return (s1.is1D() == s2.is1D() 
 				&& s1.xUnits.equalsIgnoreCase(s2.xUnits)
 				&& s1.isHNMR() == s2.isHNMR());
 	}
 
-	public static boolean areXScalesCompatible(JDXSpectrum s1, JDXSpectrum s2,
+	public static boolean areXScalesCompatible(Spectrum s1, Spectrum s2,
 			boolean isSubspecCheck, boolean isLinkCheck) {
 		boolean isNMR1 = s1.isNMR();
 		// must be both NMR or both not NMR, 
@@ -642,11 +642,11 @@ public class JDXSpectrum extends JDXDataObject {
 				|| u1.equals("PPM") && u2.equals("HZ"));
 	}
 
-	public static boolean areLinkableX(JDXSpectrum s1, JDXSpectrum s2) {
+	public static boolean areLinkableX(Spectrum s1, Spectrum s2) {
 		return (s1.isNMR() && s2.isNMR() && s1.nucleusX.equals(s2.nucleusX));
 	}
 
-	public static boolean areLinkableY(JDXSpectrum s1, JDXSpectrum s2) {
+	public static boolean areLinkableY(Spectrum s1, Spectrum s2) {
 		return (s1.isNMR() && s2.isNMR() && s1.nucleusX.equals(s2.nucleusY));
 	}
 
