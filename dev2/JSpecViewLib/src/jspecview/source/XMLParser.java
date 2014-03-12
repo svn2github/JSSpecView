@@ -26,7 +26,7 @@ import javajs.util.SB;
 
 
 
-public class JSVXmlReader {
+public class XMLParser {
 
   /*
    * A simple very light-weight XML reader
@@ -49,7 +49,7 @@ public class JSVXmlReader {
   public final static int EOF = 8;
 
 
-  public JSVXmlReader(BufferedReader br) {
+  public XMLParser(BufferedReader br) {
     buffer = new DataBuffer(br);
   }
 
@@ -90,7 +90,7 @@ public class JSVXmlReader {
   }
 
   public void nextTag() throws Exception {
-    while ((thisEvent = buffer.nextTag()).eventType == JSVXmlReader.COMMENT) {
+    while ((thisEvent = buffer.nextTag()).eventType == XMLParser.COMMENT) {
     }
   }
 

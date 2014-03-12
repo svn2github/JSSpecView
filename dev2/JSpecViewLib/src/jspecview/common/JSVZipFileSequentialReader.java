@@ -18,7 +18,7 @@
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package jspecview.source;
+package jspecview.common;
 
 import java.io.BufferedReader;
 import java.io.IOException;
