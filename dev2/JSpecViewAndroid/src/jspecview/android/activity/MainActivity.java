@@ -15,10 +15,10 @@ import jspecview.android.R;
 import jspecview.android.PreferencesManager;
 import jspecview.common.Coordinate;
 import jspecview.common.IntegralData;
-import jspecview.common.JDXSpectrum;
+import jspecview.common.Spectrum;
 import jspecview.common.Parameters;
-import jspecview.exception.JSpecViewException;
-import jspecview.source.FileReader;
+import jspecview.exception.JSVException;
+import jspecview.source.JDXReader;
 import jspecview.source.JDXSource;
 
 import org.achartengine.ChartFactory;
@@ -64,10 +64,10 @@ public class MainActivity extends Activity{
 	// Preferences Manager
 	PreferencesManager prefMan;
 		    
-    // Collection of Loaded JDXSpectrum objects
-    JDXSpectrum[] mSpectra;     
+    // Collection of Loaded Spectrum objects
+    Spectrum[] mSpectra;     
     // The current visible spectrum
-    JDXSpectrum mCurrentSpectrum;   
+    Spectrum mCurrentSpectrum;   
     // The index of the current visible spectrum
     int mCurrentSpectrumIndex = 0;
     // series of all spectra loaded
@@ -598,7 +598,7 @@ public class MainActivity extends Activity{
 	}
 	    
 	/*
-	 * Reloads a spectrum from the JDXSpectrum object
+	 * Reloads a spectrum from the Spectrum object
 	 */
     private Thread reloadSpectrum(){
     	mIsLoadingComplete = false;
@@ -626,12 +626,12 @@ public class MainActivity extends Activity{
      * @return
      * @throws IOException
      */
-	private JDXSpectrum[] readSpectrum(InputStream stream) throws IOException, JSpecViewException {
+	private Spectrum[] readSpectrum(InputStream stream) throws IOException, JSVException {
 		boolean loadImaginary = false;
 		boolean obscureTitle = false;
-		JDXSource source = FileReader.createJDXSourceFromStream(stream, obscureTitle, loadImaginary);             	
+		JDXSource source = JDXReader.createJDXSourceFromStream(stream, obscureTitle, loadImaginary);             	
     	JDXSource jdxSource = (JDXSource)source;
-    	JDXSpectrum[] jdxSpectra = jdxSource.getSpectraAsArray();        	
+    	Spectrum[] jdxSpectra = jdxSource.getSpectraAsArray();        	
     	return jdxSpectra;   
 	}
     
@@ -643,7 +643,7 @@ public class MainActivity extends Activity{
 	 * For multiple spectra, if overlay is enabled then the array will have one dataset with multiple series
 	 * If overlay is disabled then the array will have a dataset with a single series for each spectrum
      */
-    private XYMultipleSeriesDataset[] createDatasets(JDXSpectrum[] spectra) {   	
+    private XYMultipleSeriesDataset[] createDatasets(Spectrum[] spectra) {   	
     	    	    	
     	int numSpectra = spectra.length;
     	XYMultipleSeriesDataset[] datasets; 
@@ -654,7 +654,7 @@ public class MainActivity extends Activity{
     	XYMultipleSeriesDataset overlayDataset = new XYMultipleSeriesDataset();
     	
     	for(int j = 0; j < numSpectra; j++){
-    		JDXSpectrum spectrum = spectra[j];
+    		Spectrum spectrum = spectra[j];
     		Coordinate[] xyCoords = spectrum.getXYCoords();  	
     		XYSeries series = new XYSeries(spectrum.getTitle());
     		     	
@@ -720,7 +720,7 @@ public class MainActivity extends Activity{
     private void addIntegrationSeries(int spectrumIndex, XYMultipleSeriesDataset dataset, XYMultipleSeriesRenderer multiRenderer,
     		double minY, double offset, double factor){
     	IntegralData integGraph = mIntegralGraphs[spectrumIndex];
-    	JDXSpectrum spectrum = mSpectra[spectrumIndex];
+    	Spectrum spectrum = mSpectra[spectrumIndex];
 		
 		if(integGraph == null){
 		  Parameters params = new Parameters().setName("android");
