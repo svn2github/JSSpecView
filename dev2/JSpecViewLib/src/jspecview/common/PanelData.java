@@ -581,12 +581,14 @@ public class PanelData implements EventManager {
 
 	private void setCurrentGraphSet(GraphSet gs, int yPixel, int clickCount) {
 		int splitPoint = gs.getSplitPoint(yPixel);
+		System.out.println("cs=" + currentGraphSet);
+		System.out.println("gs=" + gs);
 		boolean isNewSet = (currentGraphSet != gs);
 		boolean isNewSplitPoint = (isNewSet || currentSplitPoint != splitPoint);
 		currentGraphSet = gs;
 		currentSplitPoint = splitPoint;
 		if (isNewSet || gs.nSplit > 1 && isNewSplitPoint)
-			setSpectrum(currentSplitPoint, true);
+			setSpectrum(splitPoint, true);
 		if (!isNewSet) {
 			isNewSet = gs.checkSpectrumClickedEvent(mouseX, mouseY, clickCount);
 			if (!isNewSet)
