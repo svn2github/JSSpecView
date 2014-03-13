@@ -406,7 +406,6 @@ public class PanelData implements EventManager {
 	public synchronized void drawGraph(Object gMain, Object gFront, Object gRear,
 			int width, int height, boolean addFilePath) {
 		boolean withCoords;
-		// System.out.println("PanelData.drawGraph " + width + " " + height);
 		this.gMain = gMain;
 		display1D = !isLinked && getBoolean(ScriptToken.DISPLAY1D);
 		int top = topMargin;
@@ -581,8 +580,6 @@ public class PanelData implements EventManager {
 
 	private void setCurrentGraphSet(GraphSet gs, int yPixel, int clickCount) {
 		int splitPoint = gs.getSplitPoint(yPixel);
-		System.out.println("cs=" + currentGraphSet);
-		System.out.println("gs=" + gs);
 		boolean isNewSet = (currentGraphSet != gs);
 		boolean isNewSplitPoint = (isNewSet || currentSplitPoint != splitPoint);
 		currentGraphSet = gs;
@@ -875,7 +872,6 @@ public class PanelData implements EventManager {
 	 *          null indicates no subspectra
 	 */
 	public void notifySubSpectrumChange(int isub, Spectrum spec) {
-		System.out.println("notify " + isub + " " + spec);
 		notifyListeners(new SubSpecChangeEvent(isub, (spec == null ? null : spec
 				.getTitleLabel())));
 	}

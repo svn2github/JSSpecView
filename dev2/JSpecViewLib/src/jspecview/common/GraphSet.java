@@ -339,6 +339,8 @@ public class GraphSet implements XYScaleConverter {
 	}
 
 	private void setPositionForFrame(int iSplit) {
+		if (iSplit < 0)
+			iSplit = 0;
 		int marginalHeight = height - 50;
 		xPixel00 = (int) (width * fX0);
 		xPixel11 = (int) (xPixel00 + width * fracX - 1);
@@ -380,8 +382,8 @@ public class GraphSet implements XYScaleConverter {
 	}
 
 	int getSplitPoint(int yPixel) {
-		return Math.min(((yPixel - yPixel000) / (yPixel11 - yPixel00)),
-				nSplit - 1);
+		return Math.max(0, Math.min(((yPixel - yPixel000) / (yPixel11 - yPixel00)),
+				nSplit - 1));
 	}
 
 	private boolean isSplitWidget(int xPixel, int yPixel) {
@@ -1476,7 +1478,8 @@ public class GraphSet implements XYScaleConverter {
 							true);
 				if (!isDrawNoSpectra()
 						&& (nSpectra == 1 || iSpectrumSelected >= 0)
-						&& (haveSingleYScale && i == iSpectrumForScale || showAllStacked
+						&& (haveSingleYScale && i == iSpectrumForScale 
+						|| showAllStacked
 								&& stackSelected && i == iSpectrumSelected))
 					drawHighlightsAndPeakTabs(gFront, g2, i);
 				if (doAll) {
