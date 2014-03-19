@@ -7,16 +7,17 @@ ___svnRev="$LastChangedRevision$"
 ___version="2.1.1"
 
 todo: 
+ - enhancement: for  BLOCK files generate a page for each spectrum when exporting PDF
+
  - enhancement: when displaying peaks for a spectrum that has links available suggest that from the peak dialog box 
  that clicking on a peak will highlight appropriately in JSmol/JSME
 
  - get integrations to stay in view sets.
  
 BH 3/5/2014  1:11:00 AM
-
-bug fix: JSpecView loading simulation now compatible with synced applets
-new feature: JSpecView and Jmol read ACD/Labs assigned spectra block JDX files.
-bug fix: drag/drop not working for JSV applet
+-fix: JSpecView loading simulation now compatible with synced applets
+-new feature: JSpecView and Jmol read ACD/Labs assigned spectra block JDX files.
+-fix: drag/drop not working for JSV applet
  
 
 BH 2/11/2014 7:26:00 AM
@@ -44,8 +45,7 @@ new feature: show NMR taps into NMRDB directly
 in preparation for JavaScript version:
 
 -- 12/05/2013 BH
- 
- Generating corejsv.js
+Generating corejsv.js
   -- using build_test.xml
   -- incrementally adding classes to see where the problems are.
 
