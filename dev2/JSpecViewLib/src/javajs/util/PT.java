@@ -839,6 +839,19 @@ public class PT {
       }
     }
   }
+
+  public static String byteArrayToJSON(byte[] data) {
+    SB sb = new SB();
+    sb.append("[");
+    int n = data.length;
+    for (int i = 0; i < n; i++) {
+      if (i > 0)
+        sb.appendC(',');
+      sb.appendI(data[i] & 0xFF);
+    }
+    sb.append("]");
+    return sb.toString();
+  }
   
   public static String packageJSON(String infoType, String info) {
     return (infoType == null ? info : "\"" + infoType + "\": " + info);
@@ -1027,6 +1040,16 @@ public class PT {
             + str.substring(i + 1);
       }
     return "\"" + str + "\"";
+  }
+
+  public static String join(String[] s, char c, int i0) {
+    if (s.length < i0)
+      return null;
+    SB sb = new SB();
+    sb.append(s[i0++]);
+    for (int i = i0; i < s.length; i++)
+      sb.appendC(c).append(s[i]);
+    return sb.toString();
   }
 
 
