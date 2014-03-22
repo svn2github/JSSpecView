@@ -76,9 +76,10 @@ public class JsDialogManager extends DialogManager {
 		 * return this.viewer.applet.getOption(items, dialogName, labelName);
 		 * 
 		 * 
-		 */{
-		    return i;
-		 }
+		 */
+		{
+		  return i;
+		}
 	}
 
 	/**
