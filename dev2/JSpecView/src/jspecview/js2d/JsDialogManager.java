@@ -68,6 +68,7 @@ public class JsDialogManager extends DialogManager {
 	@Override
 	public int getOptionFromDialog(Object frame, String[] items, JSVPanel jsvp,
 			String dialogName, String labelName) {
+    // for export and others
 		int i = -1;
 		/**
 		 * @j2sNative
@@ -76,10 +77,8 @@ public class JsDialogManager extends DialogManager {
 		 * 
 		 * 
 		 */{
-			 
+		    return i;
 		 }
-		// for export and others
-		return i;
 	}
 
 	/**
