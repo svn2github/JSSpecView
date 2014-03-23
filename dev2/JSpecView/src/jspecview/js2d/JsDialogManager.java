@@ -73,7 +73,7 @@ public class JsDialogManager extends DialogManager {
 		/**
 		 * @j2sNative
 		 * 
-		 * return this.viewer.applet.getOption(items, dialogName, labelName);
+		 * return this.vwr.applet.getOption(items, dialogName, labelName);
 		 * 
 		 * 
 		 */
