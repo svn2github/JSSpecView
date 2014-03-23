@@ -52,7 +52,7 @@ abstract public class JSVGenericPopup extends GenericSwingPopup implements
 	// System.out.println("JmolPopup " + this + " finalize");
 	// }
 
-	protected JSViewer vwr;
+	protected JSViewer viewer;
 	protected int updateMode;
 	
 
@@ -70,8 +70,8 @@ abstract public class JSVGenericPopup extends GenericSwingPopup implements
 	}
 
 	protected void initialize(JSViewer viewer, PopupResource bundle, String title) {
-		this.vwr = viewer;
-		initSwing(title, bundle, viewer.getApplet(), viewer.isJS, viewer.isSigned);
+		this.viewer = viewer;
+		initSwing(title, bundle, viewer.getApplet(), viewer.isJS, viewer.isSigned, false);
 	}
 
 	// //// JmolPopupInterface methods //////
@@ -163,12 +163,12 @@ abstract public class JSVGenericPopup extends GenericSwingPopup implements
 
 	@Override
 	protected void appRunScript(String script) {
-		vwr.runScript(script);
+		viewer.runScript(script);
 	}
 
 	@Override
 	protected void appUpdateForShow() {
-		thisJsvp = vwr.selectedPanel;
+		thisJsvp = viewer.selectedPanel;
 		setEnables(thisJsvp);
 		if (updateMode == UPDATE_NEVER)
 			return;
