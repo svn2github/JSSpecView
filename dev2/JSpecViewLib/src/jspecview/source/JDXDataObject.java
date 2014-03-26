@@ -463,15 +463,15 @@ public abstract class JDXDataObject extends JDXHeader {
   }
   
   public boolean canIntegrate() {
-    return (continuous && (isHNMR() || isGC()) && is1D());
+    return (continuous && (isHNMR() || isGC(false)) && is1D());
   }
 
   public boolean isAutoOverlayFromJmolClick() {
-    return (isGC());// || isUVVis());
+    return (isGC(false));// || isUVVis());
   }
 
-  public boolean isGC() {
-    return dataType.startsWith("GC") || dataType.startsWith("GAS");
+  public boolean isGC(boolean allowGAS) {
+    return dataType.startsWith("GC") || allowGAS && dataType.startsWith("GAS");
   }
 
   public boolean isMS() {

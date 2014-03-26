@@ -887,7 +887,7 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 				isAppend, id)) {
 		case JSViewer.FILE_OPEN_OK:
 			if (script == null && isOne && vwr.currentSource.isCompoundSource
-					&& vwr.pd().getSpectrum().isGC())
+					&& vwr.pd().getSpectrum().isGC(true))
 				script = "VIEW ALL;PEAK GC/MS ID=#1";
 			if (script != null)
 				runScript(script);
