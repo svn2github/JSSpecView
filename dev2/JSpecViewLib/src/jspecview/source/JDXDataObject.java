@@ -470,11 +470,11 @@ public abstract class JDXDataObject extends JDXHeader {
     return (isGC());// || isUVVis());
   }
 
-  private boolean isGC() {
-    return dataType.startsWith("GC");
+  public boolean isGC() {
+    return dataType.startsWith("GC") || dataType.startsWith("GAS");
   }
 
-  private boolean isMS() {
+  public boolean isMS() {
     return dataType.startsWith("MASS") || dataType.startsWith("MS");
   }
 
