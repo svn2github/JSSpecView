@@ -47,6 +47,7 @@
 	<property name="selfsign.storetype" value="jks" />
 	<property name="selfsign.storepass" value="JSV2013" />
 	<property name="selfsign.alias" value="JSVcertificate" />
+	<property name="tsa.url" value="http://timestamp.globalsign.com/scripts/timestamp.dll" />
 
 	<path id="jspecviewlib.classpath">
         <pathelement location="${jsvlib.dir}"/>
@@ -295,7 +296,7 @@
 	                 storepass="${Private.storepass}"
 	                 keypass="${Private.keypass}"
 	                 alias="${Private.alias}"
-	                 tsaurl="http://tsa.starfieldtech.com/">
+	                 tsaurl="${tsa.url}">
 	          <fileset dir="${sign-jar-file-dir}" >
 	            <include name="${sign-jar-file-name}" />
 	          </fileset>
