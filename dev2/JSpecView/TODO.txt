@@ -14,6 +14,9 @@ todo:
 
  - get integrations to stay in view sets.
  
+BH 3/27/2014  9AM
+peak picking shown as % of max appropriate only for NMR not UV/Vis etc.
+ 
 BH 3/5/2014  1:11:00 AM
 -fix: JSpecView loading simulation now compatible with synced applets
 -new feature: JSpecView and Jmol read ACD/Labs assigned spectra block JDX files.
