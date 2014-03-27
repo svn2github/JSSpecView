@@ -34,7 +34,9 @@ import javajs.api.BytePoster;
  * send characters or bytes to a JavaScript function
  *  when JavaScript and (typeof fileName == "function")
  *  
- *  
+ * if fileName equals ";base64,", then the data are base64-encoded
+ * prior to writing, and closeChannel() returns the data.
+ * 
  *  @author hansonr  Bob Hanson hansonr@stolaf.edu  9/2013
  *  
  *  
