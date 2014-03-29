@@ -106,7 +106,7 @@ public class Visible implements VisibleInterface {
 	}
 
 	private static void getXYZinterpolated(Coordinate[] xyCoords, boolean isAbsorbance, double[] xyz) {
-		// original method from 
+		// Williams method -- using 5-nm interpolations and actual CIE data
 		double d = 0;
 		for (int i = cie1931_D65.length / 5; --i >= 0;) {
 			int pt = i * 5;
@@ -132,6 +132,7 @@ public class Visible implements VisibleInterface {
 
 	private static void getXYZfitted(Coordinate[] xyCoords, boolean isAbsorbance,
 			double[] xyz) {
+		// Lancashire method -- using actual data and curve-fit CIE data
 		int ind400 = -1, ind437 = -1, ind499 = -1, ind700 = -1;
 		for (int i = 0; i < xyCoords.length; i++) {
 			double x = xyCoords[i].getXVal();
