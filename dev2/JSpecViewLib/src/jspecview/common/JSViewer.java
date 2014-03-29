@@ -209,7 +209,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		int nErrorsLeft = 10;
 		ScriptTokenizer commandTokens = new ScriptTokenizer(script, true);
 		String msg = null;
-		while (commandTokens.hasMoreTokens() && nErrorsLeft > 0 && isOK) {
+		while (commandTokens != null && commandTokens.hasMoreTokens() && nErrorsLeft > 0 && isOK) {
 			String token = commandTokens.nextToken();
 			// now split the key/value pair
 
@@ -293,6 +293,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 					}
 					load(value, (defaultLoadScript == null ? "" : defaultLoadScript + ";") + commandTokens.getRemainingScript());
 					msg = (selectedPanel == null ? null : si.siLoaded(value));
+					commandTokens = null;
 					break;
 				case LOADIMAGINARY:
 					loadImaginary = Parameters.isTrue(value);
