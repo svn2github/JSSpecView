@@ -4042,10 +4042,23 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 	}
 
 	public void set2DXY(double x, double y, boolean isLocked) {
-		if (gs2dLinkedX != null)
-  		cur1D2x1.setX(x, toPixelX(x));
-		if (gs2dLinkedY != null)
-  		cur1D2x2.setX(y, toPixelX(y));
+		int p;
+		if (gs2dLinkedX != null) {
+			p = toPixelX(x);
+			if(p != fixX(p)) {
+				p = Integer.MIN_VALUE;
+				x = Double.MAX_VALUE;
+			}
+			cur1D2x1.setX(x, p);
+		}
+		if (gs2dLinkedY != null) {
+			p = toPixelX(y);
+			if(p != fixX(p)) {
+				p = Integer.MIN_VALUE;
+				y = Double.MAX_VALUE;
+			}
+			cur1D2x2.setX(y, p);
+		}
 		cur1D2Locked = isLocked;
 	}
 
