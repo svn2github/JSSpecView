@@ -99,7 +99,11 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 	public boolean interfaceOverlaid;
 	public boolean autoIntegrate;
 	public boolean autoShowLegend;
-	public Boolean obscureTitleFromUser;
+	public Boolean obscureTitleFromUser;	
+	public boolean allowCompoundMenu = true;
+	public boolean allowMenu = true;
+	public int initialStartIndex = -1;
+	public int initialEndIndex = -1;
 
 	public boolean isSingleThreaded;
 	public boolean isApplet;
@@ -368,7 +372,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 						pd().findX(null, Double.parseDouble(value));
 						break;
 					case GETSOLUTIONCOLOR:
-						show("solutioncolor");
+						show("solutioncolor" + value);
 						break;
 					case INTEGRATION:
 					case INTEGRATE:
@@ -1099,11 +1103,11 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		}
 	}
 
-	public String getSolutionColor() {
+	public String getSolutionColor(boolean asFitted) {
 		Spectrum spectrum = pd().getSpectrum();
 		return (spectrum.canShowSolutionColor() ? ((VisibleInterface) JSViewer
 				.getInterface("jspecview.common.Visible")).getColour(spectrum
-				.getXYCoords(), spectrum.getYUnits()) : noColor);
+				.getXYCoords(), spectrum.isAbsorbance(), asFitted) : noColor);
 	}
 
 	public int openDataOrFile(Object data, String name, List<Spectrum> specs,
@@ -1742,8 +1746,8 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 				return;
 			}
 			dialogManager.showSource(this, pd().getSpectrum().getFilePath());
-		} else if (what.equals("solutioncolor")) {
-			String msg = getSolutionColor();
+		} else if (what.startsWith("solutioncolor")) {
+			String msg = getSolutionColor(what.indexOf("false") < 0);
 			msg = "background-color:rgb(" + msg
 					+ ")'><br />Predicted Solution Colour- RGB(" + msg + ")<br /><br />";
 			if (isJS) {
@@ -1928,6 +1932,97 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 	public void checkAutoIntegrate() {
 		if (autoIntegrate)
 			pd().integrateAll(parameters);
+	}
+
+	/**
+	 * Parses the JavaScript call parameters and executes them accordingly
+	 * 
+	 * @param params
+	 *          String
+	 */
+	public void parseInitScript(String params) {
+		if (params == null)
+			params = "";
+		ScriptTokenizer allParamTokens = new ScriptTokenizer(params, true);
+		if (Logger.debugging) {
+			Logger.info("Running in DEBUG mode");
+		}
+		while (allParamTokens.hasMoreTokens()) {
+			String token = allParamTokens.nextToken();
+			// now split the key/value pair
+			ScriptTokenizer eachParam = new ScriptTokenizer(token, false);
+			String key = eachParam.nextToken();
+			if (key.equalsIgnoreCase("SET"))
+				key = eachParam.nextToken();
+			key = key.toUpperCase();
+			ScriptToken st = ScriptToken.getScriptToken(key);
+			String value = ScriptToken.getValue(st, eachParam, token);
+			//if (Logger.debugging)
+				Logger.info("KEY-> " + key + " VALUE-> " + value + " : " + st);
+			try {
+				switch (st) {
+				default:
+					parameters.set(null, st, value);
+					break;
+				case UNKNOWN:
+					break;
+				case APPLETID:
+					fullName = appletID + "__" 
+				      + (appletID = value) + "__";
+					/**
+					 * @j2sNative
+					 * 
+					 *            if(typeof Jmol != "undefined") this.si.applet =
+					 *            Jmol._applets[value];
+					 * 
+					 * 
+					 */
+					{
+					}
+					break;
+				case AUTOINTEGRATE:
+					autoIntegrate = Parameters.isTrue(value);
+					break;
+				case COMPOUNDMENUON:
+					allowCompoundMenu = Boolean.parseBoolean(value);
+					break;
+				case APPLETREADYCALLBACKFUNCTIONNAME:
+				case COORDCALLBACKFUNCTIONNAME:
+				case LOADFILECALLBACKFUNCTIONNAME:
+				case PEAKCALLBACKFUNCTIONNAME:
+				case SYNCCALLBACKFUNCTIONNAME:
+					si.siExecSetCallback(st, value);
+					break;
+				case ENDINDEX:
+					initialEndIndex = Integer.parseInt(value);
+					break;
+				case INTERFACE:
+					checkOvelayInterface(value);
+					break;
+				case IRMODE:
+					setIRmode(value);
+					break;
+				case MENUON:
+					allowMenu = Boolean.parseBoolean(value);
+					break;
+				case OBSCURE:
+					if (obscureTitleFromUser == null) // once only
+						obscureTitleFromUser = Boolean.valueOf(value);
+					break;
+				case STARTINDEX:
+					initialStartIndex = Integer.parseInt(value);
+					break;
+				// case SPECTRUMNUMBER:
+				// initialSpectrumNumber = Integer.parseInt(value);
+				// break;
+				case SYNCID:
+					fullName = appletID + "__" 
+							+ (syncID = value) + "__";
+					break;
+				}
+			} catch (Exception e) {
+			}
+		}
 	}
 
 }

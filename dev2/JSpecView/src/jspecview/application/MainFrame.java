@@ -1082,13 +1082,13 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 	}
 
 	@Override
-	public JSVPanel siGetNewJSVPanel2(List<Spectrum> specs) {
-		return AwtPanel.getPanelMany(vwr, specs, 0, 0);
+	public JSVPanel siGetNewJSVPanel(Spectrum spec) {
+		return (spec == null ? null : AwtPanel.getPanelOne(vwr, spec));
 	}
 
 	@Override
-	public JSVPanel siGetNewJSVPanel(Spectrum spec) {
-		return (spec == null ? null : AwtPanel.getPanelOne(vwr, spec));
+	public JSVPanel siGetNewJSVPanel2(List<Spectrum> specs) {
+		return AwtPanel.getPanelMany(vwr, specs);
 	}
 
 	@Override

@@ -734,7 +734,7 @@ public class PanelData implements EventManager {
 		currentGraphSet.setZoom(x1, y1, x2, y2);
 		doReset = true;
 		taintedAll = true;
-		notifyListeners(new ZoomEvent(x1, y1, x2, y2));
+		notifyListeners(new ZoomEvent());//x1, y1, x2, y2));
 	}
 
 	/**
@@ -1160,8 +1160,8 @@ public class PanelData implements EventManager {
 
 	public void set2DCrossHairsLinked(GraphSet graphSet, double x, double y,
 			boolean isLocked) {
-		if (Math.abs(x - y) < 0.1)
-			x = y = Double.MAX_VALUE;
+		//if (Math.abs(x - y) < 0.1)
+			//x = y = Double.MAX_VALUE;
 		for (int i = graphSets.size(); --i >= 0;) {
 			GraphSet gs = graphSets.get(i);
 			if (gs != graphSet)

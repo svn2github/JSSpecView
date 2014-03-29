@@ -4,6 +4,6 @@ import jspecview.common.Coordinate;
 
 public interface VisibleInterface {
 
-	String getColour(Coordinate[] xyCoords, String yUnits);
+	String getColour(Coordinate[] xyCoords, boolean isAbsorbance, boolean useFitted);
 
 }
