@@ -1619,14 +1619,16 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 	public void updateJS(int width, int height) {
 		if (selectedPanel == null)
 			return;
+    Object display = null;
 		/**
 		 * @j2sNative
 		 * 
-		 *            this.selectedPanel.paintComponent(this.apiPlatform.context);
+		 *   display = this.apiPlatform.context;
 		 * 
 		 */
 		{
 		}
+		selectedPanel.paintComponent(display);
 	}
 
 	/**
@@ -1974,16 +1976,18 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 				case APPLETID:
 					fullName = appletID + "__" 
 				      + (appletID = value) + "__";
+					Object applet = null;
 					/**
 					 * @j2sNative
 					 * 
-					 *            if(typeof Jmol != "undefined") this.si.applet =
+					 *            if(typeof Jmol != "undefined") applet =
 					 *            Jmol._applets[value];
 					 * 
 					 * 
 					 */
 					{
 					}
+					this.applet = applet;
 					break;
 				case AUTOINTEGRATE:
 					autoIntegrate = Parameters.isTrue(value);
