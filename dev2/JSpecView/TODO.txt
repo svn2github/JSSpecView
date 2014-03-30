@@ -14,8 +14,11 @@ todo:
 
  - get integrations to stay in view sets.
  
+BH and RJL  3/31/2014 3:30
+-fix for colour prediction from visible spectrum - new equations to CIE lines generated from Fityk 
+
 BH 3/27/2014  9AM
-peak picking shown as % of max appropriate only for NMR not UV/Vis etc.
+-peak picking shown as % of max appropriate only for NMR not UV/Vis etc.
  
 BH 3/5/2014  1:11:00 AM
 -fix: JSpecView loading simulation now compatible with synced applets
