@@ -39,16 +39,26 @@ import jspecview.api.VisibleInterface;
  * 
  * see 
  * 
- * Colour prediction with JSpecView
  * Robert J. Lancashire and Craig A.D. Walters
+ * Colour prediction with JSpecView
  * http://www.chemmantis.com/Article.aspx?id=850
+ * 
  * 
  * and
  * 
- * Darren L. Williams , Thomas J. Flaherty , Casie L. Jupe , Stephanie A. Coleman , Kara A. Marquez and Jamie J. Stanton
- * Department of Chemistry, Sam Houston State University, Huntsville, TX 77340
+ * Darren L. Williams, Thomas J. Flaherty, Casie L. Jupe, 
+ * Stephanie A. Coleman, Kara A. Marquez, and Jamie J. Stanton
+ * Beyond [lambda]max: Transforming Visible Spectra into 24-Bit Color Values
  * J. Chem. Educ., 2007, 84 (11), p 1873 DOI: 10.1021/ed084p1873
  * http://pubs.acs.org/doi/abs/10.1021/ed084p1873
+ * 
+ * and
+ * 
+ * Michael Stokes (Hewlett-Packard), Matthew Anderson (Microsoft),
+ * Srinivasan Chandrasekar (Microsoft), Ricardo Motta (Hewlett-Packard)
+ * A Standard Default Color Space for the Internet: sRGB
+ * Version 1.10, November 5, 1996 
+ * http://www.color.org/sRGB.xalter
  * 
  * @author Craig Walters
  * @author Prof Robert J. Lancashire
