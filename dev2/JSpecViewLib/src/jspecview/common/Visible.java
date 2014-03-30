@@ -119,6 +119,7 @@ public class Visible implements VisibleInterface {
 			double v = Coordinate.getYValueAt(xyCoords, xx);
 			if (isAbsorbance)
 				v = Math.pow(10, -Math.max(v, 0));
+			//v = 1;
 			xyz[0] += v * xb * cie;
 			xyz[1] += v * yc;
 			xyz[2] += v * zb * cie;
@@ -169,7 +170,7 @@ public class Visible implements VisibleInterface {
 			d += (ybar[ind] = cie * 1.01832
 					* Math.exp(-0.00028466 * (Math.pow((x - 559.04), 2))));
 			zbar[ind] = cie
-					* 1.63045
+					* 1.63045// better: 1.71
 					* Math.exp((i < ind437 ? -0.001586000 : -0.00043647)
 							* (Math.pow((x - 437.406), 2)));
 		}
@@ -178,6 +179,7 @@ public class Visible implements VisibleInterface {
 			double v = xyCoords[i + ind400].getYVal();
 			if (isAbsorbance)
 				v = Math.pow(10, -Math.max(v, 0));
+			//v = 1;
 			xyz[0] += v * xbar[i];
 			xyz[1] += v * ybar[i];
 			xyz[2] += v * zbar[i];
