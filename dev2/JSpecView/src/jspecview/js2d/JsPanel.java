@@ -178,9 +178,11 @@ public class JsPanel implements JSVPanel {
 	@Override
 	public void showMessage(String msg, String title) {
 		Logger.info(msg);
+		@SuppressWarnings("unused")
+		Object applet = vwr.applet;
 		/**
 		 * @j2sNative
-		 * this.vwr.applet._showStatus(msg, title);
+		 * applet._showStatus(msg, title);
 		 */
 		{
 		}

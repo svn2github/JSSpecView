@@ -37,11 +37,11 @@ public class JsPlatform implements GenericPlatform {
 	@Override
 	public void setViewer(PlatformViewer viewer, Object canvas) {
 		Object context = "";
+		this.viewer = viewer;
+		this.canvas = canvas;
 	  /**
 	   * @j2sNative
 	   * 
-     *     this.vwr = viewer;
-     *     this.canvas = canvas;
      *     if (canvas != null) {
 	   *       context = canvas.getContext("2d");
 	   *       canvas.imgdata = context.getImageData(0, 0, canvas.width, canvas.height);
@@ -258,7 +258,7 @@ public class JsPlatform implements GenericPlatform {
     /**
      * @j2sNative
      * 
-     *  if (typeof Jmol != "undefined" && Jmol._getHiddenCanvas)
+     *  if (self.Jmol && Jmol._getHiddenCanvas)
      *    return Jmol._getHiddenCanvas(this.vwr.applet, "stereoImage", w, h); 
      */
     {}
@@ -270,7 +270,7 @@ public class JsPlatform implements GenericPlatform {
     /**
      * @j2sNative
      * 
-     *  if (typeof Jmol != "undefined" && Jmol._getHiddenCanvas)
+     *  if (self.Jmol && Jmol._getHiddenCanvas)
      *    return Jmol._getHiddenCanvas(this.vwr.applet, "textImage", w, h); 
      */
     {}

@@ -372,8 +372,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
      * 
      * @j2sNative
      * 
-     * if (typeof Jmol != "undefined" && Jmol._repaint && applet)
-     *   Jmol._repaint(applet,true);
+     * applet && self.Jmol && Jmol._repaint &&(Jmol._repaint(applet,true));
      * 
      */
 		{
@@ -471,6 +470,9 @@ public class JSVApp implements PanelListener, JSVAppInterface {
    * 
    */
   private void updateJSView(String msg) {
+  	
+  	// actually, this is not implemented in JSmolJSV.js
+  	
   	Object applet = this.vwr.applet;
   	@SuppressWarnings("unused")
 		JSVPanel panel = (applet == null ? null : vwr.selectedPanel);
