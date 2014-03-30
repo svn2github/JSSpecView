@@ -164,14 +164,14 @@ public class Visible implements VisibleInterface {
 					* (Math.pow((x - 472.727), 2))) : 208.375 - (0.195278 * x));
 			double xb = cie
 					* (x < 499 ? 0.335681 * Math.exp(-0.000998224
-							* (Math.pow((x - 441.96), 2))) : 1.05583 * Math.exp(-0.00044156
-							* (Math.pow((x - 596.124), 2))));
+					* (Math.pow((x - 441.96), 2))) : 1.05583 * Math.exp(-0.00044156
+					* (Math.pow((x - 596.124), 2))));
 			double yb = cie * 1.01832
 					* Math.exp(-0.00028466 * (Math.pow((x - 559.04), 2)));
 			double zb = cie
 					* 1.71//1.63045// better: 1.71
 					* Math.exp((x < 437 ? -0.001586000 : -0.00043647)
-							* (Math.pow((x - 437.406), 2)));
+					* (Math.pow((x - 437.406), 2)));
 			double y = xyCoords[i].getYVal();
 			if (isAbsorbance)
 				y = Math.pow(10, -Math.max(y, 0));
