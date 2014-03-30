@@ -1617,18 +1617,8 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 	 */
 	@Override
 	public void updateJS(int width, int height) {
-		if (selectedPanel == null)
-			return;
-    Object display = null;
-		/**
-		 * @j2sNative
-		 * 
-		 *   display = this.apiPlatform.context;
-		 * 
-		 */
-		{
-		}
-		selectedPanel.paintComponent(display);
+		if (selectedPanel != null)
+			selectedPanel.paintComponent(apiPlatform.getGraphics(null));
 	}
 
 	/**
