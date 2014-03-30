@@ -359,6 +359,8 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	@Override
 	public void repaint() {
 		
+		@SuppressWarnings("unused")
+		Object applet = (vwr == null ? null : vwr.applet);
     /**
      * Jmol._repaint(applet,asNewThread)
      * 
@@ -370,8 +372,8 @@ public class JSVApp implements PanelListener, JSVAppInterface {
      * 
      * @j2sNative
      * 
-     * if (typeof Jmol != "undefined" && Jmol._repaint && this.vwr.applet)
-     *   Jmol._repaint(this.vwr.applet,true);
+     * if (typeof Jmol != "undefined" && Jmol._repaint && applet)
+     *   Jmol._repaint(applet,true);
      * 
      */
 		{
@@ -469,10 +471,13 @@ public class JSVApp implements PanelListener, JSVAppInterface {
    * 
    */
   private void updateJSView(String msg) {
+  	Object applet = this.vwr.applet;
+  	@SuppressWarnings("unused")
+		JSVPanel panel = (applet == null ? null : vwr.selectedPanel);
     /**
      * @j2sNative
      * 
-     * this.vwr.applet && this.vwr.applet._viewSet != null && this.vwr.applet._updateView(this.vwr.seletedPanel, msg);
+     * applet && applet._viewSet != null && applet._updateView(panel, msg);
      * 
      */
     {}
