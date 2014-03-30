@@ -18,6 +18,7 @@ import javajs.util.PT;
 import jspecview.api.AnnotationData;
 import jspecview.api.JSVGraphics;
 import jspecview.api.JSVPanel;
+import jspecview.api.VisibleInterface;
 import jspecview.common.Annotation.AType;
 import jspecview.common.PanelData.LinkMode;
 import jspecview.dialog.JSVDialog;
@@ -1501,16 +1502,17 @@ class GraphSet implements XYScaleConverter {
 					}
 				}
 				boolean isContinuous = spec.isContinuous();
+				boolean onSpectrum = ((nSplit > 1 ? i == iSpectrumMovedTo : isLinked
+						|| i == iSpectrumForScale)
+						&& !pd.isPrinting && spec.isContinuous());
 				if (doAll) {
-					drawSpectrum(gMain, i, offset, isGrey, ig, isContinuous);
+					drawSpectrum(gMain, i, offset, isGrey, ig, isContinuous, onSpectrum);
 				}
 				// drawSpectrum(gFront, i, offset, isGrey, ig, isContinuous);
 				drawMeasurements(gFront, i);
 				if (pendingMeasurement != null && pendingMeasurement.spec == spec)
 					drawMeasurement(gFront, pendingMeasurement);
-				if ((nSplit > 1 ? i == iSpectrumMovedTo : isLinked
-						|| i == iSpectrumForScale)
-						&& !pd.isPrinting && xPixelMovedTo >= 0 && spec.isContinuous()) {
+				if (onSpectrum && xPixelMovedTo >= 0) {
 					drawSpectrumPointer(gFront, spec, offset, ig);
 				}
 				if (nSpectra > 1 && nSplit == 1 && pd.isCurrentGraphSet(this) && doAll) {
@@ -1832,21 +1834,20 @@ class GraphSet implements XYScaleConverter {
 	 *          the <code>Graphics</code> object
 	 * @param index
 	 *          the index of the Spectrum to draw
-	 * @param yOffset 
-	 * @param isGrey 
-	 * @param ig 
-	 * @param isContinuous 
+	 * @param yOffset
+	 * @param isGrey
+	 * @param ig
+	 * @param isContinuous
+	 * @param isSelected 
 	 */
 	private void drawSpectrum(Object g, int index, int yOffset, boolean isGrey,
-			IntegralData ig, boolean isContinuous) {
+			IntegralData ig, boolean isContinuous, boolean isSelected) {
 		// Check if specInfo in null or xyCoords is null
 		Spectrum spec = spectra.get(index);
-		drawPlot(g, index, spec.getXYCoords(), isContinuous, yOffset,
-				isGrey, null);
+		drawPlot(g, index, spec, isContinuous, yOffset, isGrey, null, isSelected);
 		if (ig != null) {
 			if (haveIntegralDisplayed(index))
-				drawPlot(g, index, getIntegrationGraph(index).getXYCoords(), true,
-						yOffset, false, ig);
+				drawPlot(g, index, spec, true, yOffset, false, ig, true);
 			drawIntegralValues(g, index, yOffset);
 		}
 		if (getIntegrationRatios(index) != null)
@@ -1859,18 +1860,20 @@ class GraphSet implements XYScaleConverter {
 		return (ad == null || ad.getData().size() == 0 || !ad.getState() ? null : ad.getData());
 	}
 
-	private void drawPlot(Object g, int index, Coordinate[] xyCoords,
-			boolean isContinuous, int yOffset, boolean isGrey, IntegralData ig) {
+	private void drawPlot(Object g, int index, Spectrum spec,
+			boolean isContinuous, int yOffset, boolean isGrey, IntegralData ig, boolean isSelected) {
+		Coordinate[] xyCoords = (ig == null ? spec.getXYCoords() : getIntegrationGraph(index).getXYCoords());
 		boolean isIntegral = (ig != null);
 		BS bsDraw = (ig == null ? null : ig.getBitSet());
 		boolean fillPeaks = (!isIntegral && !isGrey
 				&& pendingIntegral != null && pendingIntegral.spec == spectra
-				.get(index));
+				.get(index) || spec.fillColor != null && isSelected);
 		int iColor = (isGrey ? -2 : isIntegral ? -1 : !allowStacking ? 0 : index);
 		setPlotColor(g, iColor);
 		boolean plotOn = true;
 		int y0 = toPixelY(0);
-		fillPeaks &= (y0 == fixY(y0));
+		if (ig != null)
+			fillPeaks &= (y0 == fixY(y0));
 		int iFirst = viewData.getStartingPointIndex(index);
 		int iLast = viewData.getEndingPointIndex(index);
 		if (isContinuous) {
@@ -1905,9 +1908,14 @@ class GraphSet implements XYScaleConverter {
 				if (x2 == x1 && y1 == y2)
 					continue;
 				if (fillPeaks
-						&& pendingIntegral.overlaps(point1.getXVal(), point2.getXVal())) {
-					setColorFromToken(g, ScriptToken.INTEGRALPLOTCOLOR);
-					g2d.drawLine(g, x1, y0, x1, y1);
+						&& (ig == null || pendingIntegral.overlaps(point1.getXVal(), point2.getXVal()))) {
+					if (ig == null) {
+						g2d.setGraphicsColor(g, spec.fillColor);
+					} else {
+						g2d.setGraphicsColor(g,
+								pd.getColor(ScriptToken.INTEGRALPLOTCOLOR));
+					}
+					g2d.drawLine(g, x1, fixY(y0), x1, y1);
 					setPlotColor(g, iColor);
 					continue;
 				}
@@ -4304,6 +4312,18 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		if (color == null)
 			color = pd.BLACK;
 		g2d.setGraphicsColor(g, color);
+	}
+
+	public void setSolutionColor(VisibleInterface vi, boolean isNone, boolean asFitted) {
+		for (int i = 0; i < nSpectra; i++) {
+			Spectrum spec = spectra.get(i);
+			int color = (isNone || !spec.canShowSolutionColor() ? -1 : vi.getColour(spec, asFitted));
+			getSpectrum().setFillColor(color == -1 ? null : pd.vwr.parameters.getColor1(color));
+			
+		}
+
+		// TODO Auto-generated method stub
+		
 	}
 
 

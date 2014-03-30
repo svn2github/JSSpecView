@@ -30,6 +30,8 @@ package jspecview.common;
 
 import java.lang.Math;
 
+import javajs.util.CU;
+
 import jspecview.api.VisibleInterface;
 
 /**
@@ -59,14 +61,19 @@ public class Visible implements VisibleInterface {
 	}
 
 	/**
-	 * @param xyCoords
-	 * @param isAbsorbance
-	 * @return r255 + "," + g255 + "," + b255
+	 * Returns the integer color of a solution based on its visible spectrum.
+	 * 
+	 * @param spec
+	 * @param useFitted
+	 *          if true, use approximate CIE curves and every point; if false, use
+	 *          exact CIE 5-nm data and interpolated values
+	 * @return 0xFFRRGGBB
 	 * 
 	 */
 	@Override
-	public String getColour(Coordinate xyCoords[], boolean isAbsorbance, boolean useFitted) {
-
+	public int getColour(Spectrum spec, boolean useFitted) {
+		Coordinate xyCoords[] = spec.getXYCoords();
+		boolean isAbsorbance = spec.isAbsorbance();
 		double[] xyz = new double[3];
 
 		// the spectrum has been checked to ensure that
@@ -95,13 +102,10 @@ public class Visible implements VisibleInterface {
 		// Step 4. Convert gamma-corrected sRGB' to 8-bit (0-255) values.
 		// Step 5. Package as "r,g,b"
 
-		String s = "";
 		for (int i = 0; i < 3; i++)
-			s += ","
-					+ fix(srgb[i] > 0.00304 ? 1.055 * Math.pow(srgb[i], 1 / 2.4) - 0.055
+			srgb[i] = fix(srgb[i] > 0.00304 ? 1.055 * Math.pow(srgb[i], 1 / 2.4) - 0.055
 							: 12.92 * srgb[i]);
-
-		return s.substring(1);
+		return CU.rgb((int) srgb[0], (int) srgb[1], (int) srgb[2]);
 
 	}
 
@@ -170,7 +174,7 @@ public class Visible implements VisibleInterface {
 			d += (ybar[ind] = cie * 1.01832
 					* Math.exp(-0.00028466 * (Math.pow((x - 559.04), 2))));
 			zbar[ind] = cie
-					* 1.63045// better: 1.71
+					* 1.71//1.63045// better: 1.71
 					* Math.exp((i < ind437 ? -0.001586000 : -0.00043647)
 							* (Math.pow((x - 437.406), 2)));
 		}

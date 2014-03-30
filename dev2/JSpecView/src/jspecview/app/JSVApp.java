@@ -458,7 +458,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 
 	@Override
 	public String getSolnColour() {
-		return vwr.getSolutionColor(true);
+		return vwr.getSolutionColorStr(true);
 	}
 	
   /**

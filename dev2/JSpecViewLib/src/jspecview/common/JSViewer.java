@@ -12,8 +12,10 @@ import java.util.Properties;
 
 import java.util.Map;
 
+import javajs.util.CU;
 import javajs.util.OC;
 import javajs.util.List;
+import javajs.util.P3;
 import javajs.util.SB;
 import javajs.api.BytePoster;
 import javajs.api.GenericFileInterface;
@@ -23,6 +25,7 @@ import javajs.api.PlatformViewer;
 import javajs.awt.Dimension;
 
 import org.jmol.util.Logger;
+
 import javajs.util.PT;
 
 
@@ -69,8 +72,6 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 	public static final int PORTRAIT = 1; // Printable
 	public static final int PAGE_EXISTS = 0;
 	public static final int NO_SUCH_PAGE = 1;
-
-	private final static String noColor = "255,255,255";
 
 	private static String testScript = "<PeakData  index=\"1\" title=\"\" model=\"~1.1\" type=\"1HNMR\" xMin=\"3.2915\" xMax=\"3.2965\" atoms=\"15,16,17,18,19,20\" multiplicity=\"\" integral=\"1\"> src=\"JPECVIEW\" file=\"http://SIMULATION/$caffeine\"";
 
@@ -372,7 +373,7 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 						pd().findX(null, Double.parseDouble(value));
 						break;
 					case GETSOLUTIONCOLOR:
-						show("solutioncolor" + value);
+						show("solutioncolor" + value.toLowerCase());
 						break;
 					case INTEGRATION:
 					case INTEGRATE:
@@ -1103,11 +1104,11 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 		}
 	}
 
-	public String getSolutionColor(boolean asFitted) {
+	public int getSolutionColor(boolean asFitted) {
 		Spectrum spectrum = pd().getSpectrum();
-		return (spectrum.canShowSolutionColor() ? ((VisibleInterface) JSViewer
-				.getInterface("jspecview.common.Visible")).getColour(spectrum
-				.getXYCoords(), spectrum.isAbsorbance(), asFitted) : noColor);
+		VisibleInterface vi = (spectrum.canShowSolutionColor() ? (VisibleInterface) JSViewer
+				.getInterface("jspecview.common.Visible") : null);
+		return (vi == null ? -1 : vi.getColour(spectrum, asFitted));
 	}
 
 	public int openDataOrFile(Object data, String name, List<Spectrum> specs,
@@ -1746,8 +1747,15 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 				return;
 			}
 			dialogManager.showSource(this, pd().getSpectrum().getFilePath());
+		} else if (what.startsWith("solutioncolorfill")) {
+			if (what.indexOf("all") >= 0) {
+				for (int i = panelNodes.size(); --i >= 0;)
+					panelNodes.get(i).pd().setSolutionColor(what);
+			} else {
+				pd().setSolutionColor(what);
+			}
 		} else if (what.startsWith("solutioncolor")) {
-			String msg = getSolutionColor(what.indexOf("false") < 0);
+			String msg = getSolutionColorStr(what.indexOf("false") < 0);
 			msg = "background-color:rgb(" + msg
 					+ ")'><br />Predicted Solution Colour- RGB(" + msg + ")<br /><br />";
 			if (isJS) {
@@ -2023,6 +2031,11 @@ public class JSViewer implements PlatformViewer, JSInterface, BytePoster  {
 			} catch (Exception e) {
 			}
 		}
+	}
+
+	public String getSolutionColorStr(boolean asFit) {
+		P3 pt = CU.colorPtFromInt2(getSolutionColor(asFit));
+		return (int) pt.x + "," + (int) pt.y + "," + (int) pt.z;
 	}
 
 }
