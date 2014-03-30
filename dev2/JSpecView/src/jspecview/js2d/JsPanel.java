@@ -225,7 +225,8 @@ public class JsPanel implements JSVPanel {
    * @param context
    *        the canvas's context
    */
-  public void paintComponent(Object context) {
+  @Override
+	public void paintComponent(Object context) {
 
   	
   	

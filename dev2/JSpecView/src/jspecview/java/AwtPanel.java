@@ -424,4 +424,9 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
   	vwr.showMenu(x, y);
 	}
 
+	@Override
+	public void paintComponent(Object display) {
+		super.paintComponent((Graphics) display);
+	}
+
 }

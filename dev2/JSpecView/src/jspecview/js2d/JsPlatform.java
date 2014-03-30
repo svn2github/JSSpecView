@@ -36,18 +36,21 @@ public class JsPlatform implements GenericPlatform {
   
 	@Override
 	public void setViewer(PlatformViewer viewer, Object canvas) {
+		Object context = "";
 	  /**
 	   * @j2sNative
 	   * 
      *     this.vwr = viewer;
      *     this.canvas = canvas;
      *     if (canvas != null) {
-	   *       this.context = canvas.getContext("2d");
-	   *       canvas.imgdata = this.context.getImageData(0, 0, canvas.width, canvas.height);
+	   *       context = canvas.getContext("2d");
+	   *       canvas.imgdata = context.getImageData(0, 0, canvas.width, canvas.height);
 	   *       canvas.buf8 = canvas.imgdata.data;
 	   *     }
 	   */
 	  {}
+	  if (context != "")
+	  	this.context = context;
 		//
 		try {
 		  URL.setURLStreamHandlerFactory(new AjaxURLStreamHandlerFactory());
