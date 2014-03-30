@@ -84,7 +84,7 @@ public class Visible implements VisibleInterface {
 	public int getColour(Spectrum spec, boolean useFitted) {
 		Coordinate xyCoords[] = spec.getXYCoords();
 		boolean isAbsorbance = spec.isAbsorbance();
-		double[] xyz = new double[3];
+		double[] xyzd = new double[4];
 
 		// the spectrum has been checked to ensure that
 		// (a) it has a nm axis
@@ -96,17 +96,21 @@ public class Visible implements VisibleInterface {
 		// Step 1. Determine the CIE tristimulus values
 
 		if (useFitted) {
-			getXYZfitted(xyCoords, isAbsorbance, xyz);
+			getXYZfitted(xyCoords, isAbsorbance, xyzd);
 		} else {
-			getXYZinterpolated(xyCoords, isAbsorbance, xyz);
+			getXYZinterpolated(xyCoords, isAbsorbance, xyzd);
 		}
+		xyzd[0] /= xyzd[3];
+		xyzd[1] /= xyzd[3];
+		xyzd[2] /= xyzd[3];
+		System.out.println(xyzd[0] + " " + xyzd[1] + " " + xyzd[2]);
 
 		// Step 2. Transform XYZ to ICC standard RGB values.
 
 		double srgb[] = new double[] { 
-				xyz[0] *  3.2410 + xyz[1] * -1.5374 + xyz[2] * -0.4986,
-				xyz[0] * -0.9692 + xyz[1] *  1.8760 + xyz[2] *  0.0416,
-				xyz[0] *  0.0556 + xyz[1] * -0.2040 + xyz[2] *  1.0570 };
+				xyzd[0] *  3.2410 + xyzd[1] * -1.5374 + xyzd[2] * -0.4986,
+				xyzd[0] * -0.9692 + xyzd[1] *  1.8760 + xyzd[2] *  0.0416,
+				xyzd[0] *  0.0556 + xyzd[1] * -0.2040 + xyzd[2] *  1.0570 };
 
 		// Step 3. For CRT monitors, add gamma correction to the sRGB values.
 		// Step 4. Convert gamma-corrected sRGB' to 8-bit (0-255) values.
@@ -119,93 +123,64 @@ public class Visible implements VisibleInterface {
 
 	}
 
-	private static void getXYZinterpolated(Coordinate[] xyCoords, boolean isAbsorbance, double[] xyz) {
+	private static int fix(double d) {
+		return (d <= 0 ? 0 : d >= 1 ? 255 : (int) Math.round(255 * d));
+	}
+
+	private static void getXYZinterpolated(Coordinate[] xyCoords, boolean isAbsorbance, double[] xyzd) {
 		// Williams method -- using 5-nm interpolations and actual CIE data
-		double d = 0;
 		for (int i = cie1931_D65.length / 5; --i >= 0;) {
-			int pt = i * 5;
-			double xx = cie1931_D65[pt++];
-			double xb = cie1931_D65[pt++];
-			double yb = cie1931_D65[pt++];
-			double zb = cie1931_D65[pt++];
-			double cie = cie1931_D65[pt++];
-			double yc = yb * cie;
-			double v = Coordinate.getYValueAt(xyCoords, xx);
+			int pt = (i + 1) * 5;
+			double cie = cie1931_D65[--pt];
+			double zb = cie1931_D65[--pt] * cie;
+			double yb = cie1931_D65[--pt] * cie;
+			double xb = cie1931_D65[--pt] * cie;
+			double x = cie1931_D65[--pt];
+			double y = Coordinate.getYValueAt(xyCoords, x);
 			if (isAbsorbance)
-				v = Math.pow(10, -Math.max(v, 0));
+				y = Math.pow(10, -Math.max(y, 0));
 			//v = 1;
-			xyz[0] += v * xb * cie;
-			xyz[1] += v * yc;
-			xyz[2] += v * zb * cie;
-			d += yc;
+			xyzd[0] += y * xb;
+			xyzd[1] += y * yb;
+			xyzd[2] += y * zb;
+			xyzd[3] += yb;
 		}
-		xyz[0] /= d;
-		xyz[1] /= d;
-		xyz[2] /= d;
-		System.out.println(xyz[0] + " " + xyz[1] + " " + xyz[2]);
 	}
 
 	private static void getXYZfitted(Coordinate[] xyCoords, boolean isAbsorbance,
-			double[] xyz) {
+			double[] xyzd) {
 		// Lancashire method -- using actual data and curve-fit CIE data
-		int ind400 = -1, ind437 = -1, ind499 = -1, ind700 = -1;
-		for (int i = 0; i < xyCoords.length; i++) {
-			double x = xyCoords[i].getXVal();
-			if (x < 401)
-				ind400 = i;
-			else if (x < 438)
-				ind437 = i;
-			else if (x < 500)
-				ind499 = i;
-			else if (x < 701)
-				ind700 = i;
-		}
 
-		int n = ind700 - ind400 + 1;
-		double xbar[] = new double[n];
-		double ybar[] = new double[n];
-		double zbar[] = new double[n];
-
-		// Step 0. Approximate x-bar, y-bar, z-bar, and CIE D65 curves.
-
+		// Approximate x-bar, y-bar, z-bar, and CIE D65 curves.
 		// We treat the x-bar and CIE D65 curves in two parts
 		// with the changeover at 499 nm, and z-bar in two
 		// parts with changeover at 437 nm.
-
-		double d = 0;
-		for (int i = ind400, ind = 0; i <= ind700; i++, ind++) {
+		
+		for (int i = xyCoords.length; --i >= 0;) {
 			double x = xyCoords[i].getXVal();
-			double cie = (i < ind499 ? 115.195 * Math.exp(-8.33988E-05
+			if (x < 400 || x > 700)
+				continue;
+			double cie = (x < 499 ? 115.195 * Math.exp(-8.33988E-05
 					* (Math.pow((x - 472.727), 2))) : 208.375 - (0.195278 * x));
-			xbar[ind] = cie
-					* (i < ind499 ? 0.335681 * Math.exp(-0.000998224
+			double xb = cie
+					* (x < 499 ? 0.335681 * Math.exp(-0.000998224
 							* (Math.pow((x - 441.96), 2))) : 1.05583 * Math.exp(-0.00044156
 							* (Math.pow((x - 596.124), 2))));
-			d += (ybar[ind] = cie * 1.01832
-					* Math.exp(-0.00028466 * (Math.pow((x - 559.04), 2))));
-			zbar[ind] = cie
+			double yb = cie * 1.01832
+					* Math.exp(-0.00028466 * (Math.pow((x - 559.04), 2)));
+			double zb = cie
 					* 1.71//1.63045// better: 1.71
-					* Math.exp((i < ind437 ? -0.001586000 : -0.00043647)
+					* Math.exp((x < 437 ? -0.001586000 : -0.00043647)
 							* (Math.pow((x - 437.406), 2)));
-		}
-
-		for (int i = n; --i >= 0;) {
-			double v = xyCoords[i + ind400].getYVal();
+			double y = xyCoords[i].getYVal();
 			if (isAbsorbance)
-				v = Math.pow(10, -Math.max(v, 0));
-			//v = 1;
-			xyz[0] += v * xbar[i];
-			xyz[1] += v * ybar[i];
-			xyz[2] += v * zbar[i];
+				y = Math.pow(10, -Math.max(y, 0));
+			//y = 1; // test for 255 255 255
+			xyzd[0] += y * xb;
+			xyzd[1] += y * yb;
+			xyzd[2] += y * zb;
+			xyzd[3] += yb;
 		}		
-		xyz[0] /= d;
-		xyz[1] /= d;
-		xyz[2] /= d;
-		System.out.println(xyz[0] + " " + xyz[1] + " " + xyz[2]);
-	}
-
-	private static int fix(double d) {
-		return (d <= 0 ? 0 : d >= 1 ? 255 : (int) Math.round(255 * d));
 	}
 
 	private static double[] cie1931_D65 = {
