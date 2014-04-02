@@ -42,7 +42,7 @@ package jspecview.app;
 import java.net.URL;
 import java.util.Map;
 
-import javajs.util.List;
+import javajs.util.Lst;
 import javajs.util.PT;
 
 import org.jmol.util.Logger;
@@ -513,7 +513,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	}
 
 	@Override
-	public List<String> getScriptQueue() {
+	public Lst<String> getScriptQueue() {
 		return vwr.scriptQueue;
 	}
 
@@ -577,7 +577,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	 */
 	@Override
 	public void siOpenDataOrFile(Object data, String name,
-			List<Spectrum> specs, String url, int firstSpec, int lastSpec,
+			Lst<Spectrum> specs, String url, int firstSpec, int lastSpec,
 			boolean isAppend, String script, String id) {
 		switch (vwr.openDataOrFile(data, name, specs, url, firstSpec, lastSpec,
 				isAppend, id)) {
@@ -699,7 +699,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 			vwr.initialEndIndex = vwr.initialStartIndex = -1;
 			return null;
 		}
-		List<Spectrum> specs = new List<Spectrum>();
+		Lst<Spectrum> specs = new Lst<Spectrum>();
 		specs.addLast(spec);
 		JSVPanel jsvp = appletFrame.getJSVPanel(vwr, specs);
 		jsvp.getPanelData().addListener(this);
@@ -708,7 +708,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	}
 
 	@Override
-	public JSVPanel siGetNewJSVPanel2(List<Spectrum> specs) {
+	public JSVPanel siGetNewJSVPanel2(Lst<Spectrum> specs) {
 		if (specs == null) {
 			vwr.initialEndIndex = vwr.initialStartIndex = -1;
 			return appletFrame.getJSVPanel(vwr, null);

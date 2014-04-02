@@ -44,7 +44,7 @@ import javajs.api.GenericFileInterface;
 import javajs.api.GenericMouseInterface;
 import javajs.api.GenericPlatform;
 import javajs.awt.Font;
-import javajs.util.List;
+import javajs.util.Lst;
 
 import org.jmol.util.Logger;
 
@@ -115,7 +115,7 @@ public class JsPanel implements JSVPanel {
    *        the List of <code>Graph</code> instances
    * @return this
    */
-  public static JsPanel getPanelMany(JSViewer viewer, List<Spectrum> spectra) {
+  public static JsPanel getPanelMany(JSViewer viewer, Lst<Spectrum> spectra) {
   	JsPanel p = new JsPanel(viewer, true);
     p.pd.initMany(spectra, viewer.initialStartIndex, viewer.initialEndIndex);
     return p;
