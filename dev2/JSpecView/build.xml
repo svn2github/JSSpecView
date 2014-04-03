@@ -92,6 +92,9 @@
 		
 		<if><available file="${Private.propertyFile}" /><then>
 	       <echo message="copying files to ${jmol.path}/srcjsv/jspecview"/>
+		    <delete quiet="true">
+		      <fileset dir="${jmol.path}/srcjsv" includes="**/*"/>
+		    </delete>
 	        <copy overwrite="true" todir="${jmol.path}/srcjsv/jspecview" >
 	          <fileset dir="src/jspecview">
 	            <include name="**/*" />
