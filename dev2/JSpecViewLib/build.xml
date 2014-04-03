@@ -44,8 +44,8 @@
         <copy overwrite="true" todir="src/org/jmol" >
           <fileset dir="${jmol.path}/src/org/jmol">
             <include name="java/BS.java" />
-            <include name="adapter/smarter/JmolJDXMOLParser.java" />
-            <include name="adapter/smarter/JmolJDXMOLReader.java" />
+            <include name="api/JmolJDXMOLParser.java" />
+            <include name="api/JmolJDXMOLReader.java" />
 	        <include name="api/Translator.java" />
             <include name="jsv/JDXMOLParser.java" />
 	        <include name="popup/GenericSwingPopup.java" />
