@@ -951,6 +951,7 @@ public class JDXReader implements JmolJDXMOLReader {
 		else
 			modelSpectrum = spectrum;
     int pt = "##$MODELS ##$PEAKS  ##$SIGNALS##$MOLFILE##PEAKASSI##$UVIRASS##$MSFRAGM".indexOf(label);
+    //        0         10        20        30        40        50        60        
 		if (pt < 0)
 			return false;
 		getMpr().set(this, filePath, null);
@@ -973,7 +974,7 @@ public class JDXReader implements JmolJDXMOLReader {
 	    case 40:
 	    case 50:
 	    case 60:
-	      acdAssignments = mpr.readACDAssignments(spectrum.nPointsFile);
+	    	acdAssignments = mpr.readACDAssignments(spectrum.nPointsFile, pt == 40);
 	      break;
 			}				
 		} catch (Exception e) {
