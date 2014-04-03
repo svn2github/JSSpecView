@@ -32,8 +32,8 @@ import javajs.util.Lst;
 import javajs.util.PT;
 import javajs.util.SB;
 
-import org.jmol.adapter.smarter.JmolJDXMOLReader;
-import org.jmol.adapter.smarter.JmolJDXMOLParser;
+import org.jmol.api.JmolJDXMOLReader;
+import org.jmol.api.JmolJDXMOLParser;
 import org.jmol.util.Logger;
 
 
