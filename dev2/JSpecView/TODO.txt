@@ -13,9 +13,12 @@ todo:
  that clicking on a peak will highlight appropriately in JSmol/JSME
 
  - get integrations to stay in view sets.
+
+BH 4/4/2014
+-fix: JDX reading of older Chime-related ##PEAKASSIGNMENTS records
  
 BH and RJL  3/31/2014 3:30
--fix for colour prediction from visible spectrum - new equations to CIE lines generated from Fityk 
+-fix: colour prediction from visible spectrum - new equations to CIE lines generated from Fityk 
 
 BH 3/27/2014  9AM
 -peak picking shown as % of max appropriate only for NMR not UV/Vis etc.
@@ -25,7 +28,6 @@ BH 3/5/2014  1:11:00 AM
 -new feature: JSpecView and Jmol read ACD/Labs assigned spectra block JDX files.
 -fix: drag/drop not working for JSV applet
  
-
 BH 2/11/2014 7:26:00 AM
 -cleaned up dialog synchronization in Java
 -set so that measurements only lock in when measurements dialog is open
