@@ -26,6 +26,7 @@ package javajs.util;
 
 import java.lang.reflect.Array;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javajs.J2SIgnoreImport;
 import javajs.api.JSONEncodable;
@@ -752,12 +753,26 @@ public class PT {
     SB sb = null;
     while (true) {
       if (info instanceof String) {
-        s = fixString((String) info);
+        s = (String) info;
+        /**
+         * @j2sNative
+         * 
+         * if (typeof s == "undefined") s = "null"
+         * 
+         */
+        {}
+        if (s.indexOf("{\"") != 0) {
+          //don't doubly fix JSON strings when retrieving status
+          s = rep(s, "\"", "\\\"");
+          s = rep(s, "\n", "\\n");
+          s = "\"" + s + "\"";
+        }
         break;
       }
       if (info instanceof JSONEncodable) {
         // includes javajs.util.BS, org.jmol.script.SV
-        s = ((JSONEncodable) info).toJSON();
+        if ((s = ((JSONEncodable) info).toJSON()) == null)
+          s = "null"; // perhaps a list has a null value (group3List, for example)
         break;
       }
       sb = new SB();
@@ -855,21 +870,6 @@ public class PT {
   
   public static String packageJSON(String infoType, String info) {
     return (infoType == null ? info : "\"" + infoType + "\": " + info);
-  }
-
-  private static String fixString(String s) {
-    /**
-     * @j2sNative
-     * 
-     * if (typeof s == "undefined") return "null"
-     * 
-     */
-    {}
-    if (s == null || s.indexOf("{\"") == 0) //don't doubly fix JSON strings when retrieving status
-      return s;
-    s = rep(s, "\"", "\\\"");
-    s = rep(s, "\n", "\\n");
-    return "\"" + s + "\"";
   }
 
   public static boolean isAS(Object x) {
@@ -1052,5 +1052,51 @@ public class PT {
     return sb.toString();
   }
 
+  /**
+   * a LIKE "x"    a is a string and equals x
+   * 
+   * a LIKE "*x"   a is a string and ends with x
+   * 
+   * a LIKE "x*"   a is a string and starts with x
+   * 
+   * a LIKE "*x*"  a is a string and contains x
+   *  
+   * @param a
+   * @param b
+   * @return  a LIKE b
+   */
+  public static boolean isLike(String a, String b) {
+    boolean areEqual = a.equals(b);
+    if (areEqual)
+      return true;
+    boolean isStart = b.startsWith("*");
+    boolean isEnd = b.endsWith("*");
+    return (!isStart && !isEnd) ? areEqual
+        : isStart && isEnd ? b.length() == 1 || a.contains(b.substring(1, b.length() - 1))
+        : isStart ? a.endsWith(b.substring(1))
+        : a.startsWith(b.substring(0, b.length() - 1));
+  }
 
+  public static Object getMapValueNoCase(Map<String, ?> h, String key) {
+    Object val = h.get(key);
+    if (val == null)
+      for (Entry<String, ?> e : h.entrySet())
+        if (e.getKey().equalsIgnoreCase(key))
+          return e.getValue();
+    return val;
+  }
+
+  public static void getMapSubset(Map<String, ?> h, String key,
+                                      Map<String, Object> h2) {
+    Object val = h.get(key);
+    if (val != null) {
+      h2.put(key, val);
+      return;
+    }
+    for (Entry<String, ?> e : h.entrySet()) {
+      String k = e.getKey();
+      if (isLike(k, key))
+        h2.put(k, e.getValue());
+    }
+  }
 }
