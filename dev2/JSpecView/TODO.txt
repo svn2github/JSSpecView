@@ -7,6 +7,7 @@ ___svnRev="$LastChangedRevision$"
 ___version="2.1.1"
 
 todo: 
+ - Jmol Application Tools...Spectrum menu issue with EPFL returning a new 2D structure and links now not synched
  - enhancement: for  BLOCK files generate a page for each spectrum when exporting PDF
 
  - enhancement: when displaying peaks for a spectrum that has links available suggest that from the peak dialog box 
