@@ -407,7 +407,7 @@ public class M3 extends M34 implements Serializable {
    * Sets the value of this matrix to its inverse.
    */
   public void invert() {
-    double s = determinant();
+    double s = determinant3();
     if (s == 0.0)
       return;
     s = 1 / s;
@@ -416,17 +416,6 @@ public class M3 extends M34 implements Serializable {
         m12 * m20 - m10 * m22, m00 * m22 - m02 * m20, m02 * m10 - m00 * m12,
         m10 * m21 - m11 * m20, m01 * m20 - m00 * m21, m00 * m11 - m01 * m10);
     scale((float) s);
-  }
-
-  /**
-   * Computes the determinant of this matrix.
-   * 
-   * @return the determinant of the matrix
-   */
-  public float determinant() {
-    // less *,+,- calculation than expanded expression.
-    return m00 * (m11 * m22 - m21 * m12) - m01 * (m10 * m22 - m20 * m12) + m02
-        * (m10 * m21 - m20 * m11);
   }
 
   /**
@@ -618,12 +607,15 @@ public class M3 extends M34 implements Serializable {
    * @param responseFactor Jmol uses 0.02 here
    * @param dx
    * @param dy
+   * @return true if successful; false if not;
    */
-  public void setAsBallRotation(float responseFactor, float dx, float dy) {
+  public boolean setAsBallRotation(float responseFactor, float dx, float dy) {
     float r = (float) Math.sqrt(dx * dx + dy * dy);
     float th =  r * responseFactor;
-    if (th == 0)
-      return;
+    if (th == 0) {
+      setScale(1);
+      return false;
+    }
     float c = (float) Math.cos(th);
     float s = (float) Math.sin(th);
     float nx = -dy / r;
@@ -635,6 +627,11 @@ public class M3 extends M34 implements Serializable {
     m11 = 1 + c1 * ny * ny;
     m21 = -(m12 = s * ny);
     m22 = c;
+    return true;
+  }
+
+  public boolean isRotation() {
+    return (Math.abs(determinant3() - 1) < 0.001f);
   }
 
 }

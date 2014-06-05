@@ -603,7 +603,7 @@ public class M4 extends M34 {
    * Sets the value of this matrix to its inverse.
    */
   public void invert() {
-    float s = determinant();
+    float s = determinant4();
     if (s == 0.0)
       return;
     s = 1 / s;
@@ -685,7 +685,7 @@ public class M4 extends M34 {
    * 
    * @return the determinant of the matrix
    */
-  public float determinant() {
+  public float determinant4() {
     // less *,+,- calculation than expanded expression.
     return (m00 * m11 - m01 * m10) * (m22 * m33 - m23 * m32)
         - (m00 * m12 - m02 * m10) * (m21 * m33 - m23 * m31)
@@ -807,9 +807,10 @@ public class M4 extends M34 {
    *        the transformed point
    */
   public void rotTrans2(T3 point, T3 pointOut) {
-      pointOut.set(m00 * point.x + m01 * point.y + m02 * point.z + m03, m10
-          * point.x + m11 * point.y + m12 * point.z + m13, m20 * point.x + m21
-          * point.y + m22 * point.z + m23);
+      pointOut.set(
+          m00 * point.x + m01 * point.y + m02 * point.z + m03, 
+          m10 * point.x + m11 * point.y + m12 * point.z + m13, 
+          m20 * point.x + m21 * point.y + m22 * point.z + m23);
   }
 
   /**

@@ -1,6 +1,8 @@
 
 package javajs.util;
 
+import javajs.J2SIgnoreImport;
+
 /**
  * Interesting thing here is that JavaScript is 3x faster than Java in handling strings.
  * 
@@ -10,6 +12,7 @@ package javajs.util;
  * 
  */
 
+@J2SIgnoreImport({java.lang.StringBuilder.class})
 public class SB {
   
   private java.lang.StringBuilder sb;
@@ -169,9 +172,9 @@ public class SB {
        *            this.s += data.toString();
        * 
        */
-    {
-      sb.append(data);
-    }
+      {
+        sb.append(data);
+      }
     }
     return this;
   }

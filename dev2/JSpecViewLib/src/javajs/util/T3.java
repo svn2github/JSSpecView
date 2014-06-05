@@ -36,6 +36,10 @@ public abstract class T3 implements JSONEncodable, Serializable {
 
   public float x, y, z;
 
+  /**
+   * @j2sIgnore
+   * 
+   */
   public T3() {
   }
 
@@ -182,6 +186,18 @@ public abstract class T3 implements JSONEncodable, Serializable {
     x += a;
     y += b;
     z += c;
+  }
+
+  
+  /**
+   * {x*p.x, y*p.y, z*p.z)  used for three-way scaling
+   * 
+   * @param p
+   */
+  public final void scaleT(T3 p) {
+    x *= p.x;
+    y *= p.y;
+    z *= p.z;
   }
 
   
