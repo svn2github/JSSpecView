@@ -4,7 +4,7 @@ Put new items at top, please.
 
 ___date="$Date$"
 ___svnRev="$LastChangedRevision$"
-___version="2.1.1"
+___version="14.2.1"
 
 todo: 
  - Jmol Application Tools...Spectrum menu issue with EPFL returning a new 2D structure and links now not synched
@@ -14,6 +14,16 @@ todo:
  that clicking on a peak will highlight appropriately in JSmol/JSME
 
  - get integrations to stay in view sets.
+
+BH 6/27/2014
+-fix: JavaScript addHighlight  not working properly
+-new feature: HIGHLIGHT OFF
+-new feature: HIGHLIGHT x1 x2
+-new feature: HIGHLIGHT x1 x2 OFF
+-new feature: HIGHLIGHT x1 x2 r g b
+-new feature: HIGHLIGHT x1 x2 r g b a
+  - max for a is 150
+  - r g b a may be fractional [0,1] or in the range (1,256)
 
 BH 4/4/2014
 -fix: JDX reading of older Chime-related ##PEAKASSIGNMENTS records
