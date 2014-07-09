@@ -290,4 +290,10 @@ public class AwtPlatform implements GenericPlatform {
 		return null;
 	}
 
+	@Override
+	public String postBytesOrData(URL url, byte[] outputBytes, String data) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

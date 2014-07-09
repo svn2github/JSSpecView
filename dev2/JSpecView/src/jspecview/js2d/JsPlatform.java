@@ -357,4 +357,10 @@ public class JsPlatform implements GenericPlatform {
 		// not used in JSpecView
 		return null;
 	}
+
+	@Override
+	public String postBytesOrData(URL url, byte[] outputBytes, String data) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
