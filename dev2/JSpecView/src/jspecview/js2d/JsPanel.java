@@ -278,7 +278,7 @@ public class JsPanel implements JSVPanel {
 	@Override
 	public void printPanel(PrintLayout pl, OutputStream os, String title) {
 		pl.title = title;
-		pl.date = apiPlatform.getDateFormat(true);
+		pl.date = apiPlatform.getDateFormat("8824");
 		pd.setPrint(pl, "Helvetica");
 		try {
 			((JSVPdfWriter) JSViewer.getInterface("jspecview.common.PDFWriter")).createPdfDocument(this, pl, os);

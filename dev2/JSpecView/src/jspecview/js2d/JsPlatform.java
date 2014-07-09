@@ -313,7 +313,7 @@ public class JsPlatform implements GenericPlatform {
 	}
 
   @Override
-	public String getDateFormat(boolean isoiec8824) {
+  public String getDateFormat(String isoType) {
     /**
      * 
      * Mon Jan 07 2013 19:54:39 GMT-0600 (Central Standard Time)
@@ -321,7 +321,14 @@ public class JsPlatform implements GenericPlatform {
      * 
      * @j2sNative
      * 
-     * if (isoiec8824) {
+     * if (isoType == null) {
+     * } else if (isoType.indexOf("8824") >= 0) {
+     *   var d = new Date();
+     *   var x = d.toString().split(" ");
+     *   var MM = "0" + d.getMonth(); MM = MM.substring(MM.length - 2);
+     *   var dd = "0" + d.getDate(); dd = dd.substring(dd.length - 2);
+     *   return x[3] + MM + dd + x[4].replace(/\:/g,"") + x[5].substring(3,6) + "'" + x[5].substring(6,8) + "'"   
+     * } else if (isoType.indexOf("8601") >= 0){
      *   var d = new Date();
      *   var x = d.toString().split(" ");
      *   var MM = "0" + d.getMonth(); MM = MM.substring(MM.length - 2);
