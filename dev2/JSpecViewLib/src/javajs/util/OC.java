@@ -2,6 +2,7 @@ package javajs.util;
 
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -56,6 +57,7 @@ public class OC extends OutputStream {
   private String type;
 	private boolean isBase64;
 	private OutputStream os0;
+	private byte[] bytes; // preset bytes; output only
   
   public OC setParams(BytePoster bytePoster, String fileName,
                                      boolean asWriter, OutputStream os) {
@@ -75,6 +77,11 @@ public class OC extends OutputStream {
     return this;
   }
 
+  public OC setBytes(byte[] b) {
+  	bytes = b;
+  	return this;
+  }
+  
   public String getFileName() {
     return fileName;
   }
@@ -126,6 +133,27 @@ public class OC extends OutputStream {
     byteCount += s.length(); // not necessarily exactly correct if unicode
     return this;
   }
+
+  public void reset() {
+    sb = null;
+    try {
+      if (os instanceof FileOutputStream) {
+          os.close();
+          os = new FileOutputStream(fileName);
+      } else {
+        os = new ByteArrayOutputStream();
+      }
+      if (bw != null) {
+        bw.close();
+        bw = new BufferedWriter(new OutputStreamWriter(os));
+      }
+    } catch (Exception e) {
+      // not perfect here.
+      System.out.println(e.toString());
+    }
+    byteCount = 0;
+  }
+
 
   /**
    * @j2sOverride
@@ -277,7 +305,7 @@ public class OC extends OutputStream {
 	}
 	
   public byte[] toByteArray() {
-    return (os instanceof ByteArrayOutputStream ? ((ByteArrayOutputStream)os).toByteArray() : null);
+    return (bytes != null ? bytes : os instanceof ByteArrayOutputStream ? ((ByteArrayOutputStream)os).toByteArray() : null);
   }
 
   @Override
