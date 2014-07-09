@@ -1,13 +1,15 @@
 package javajs.api;
 
-import javajs.util.Lst;
-import javajs.util.P3;
-import javajs.util.Quat;
+import javajs.util.V3;
 
 public interface EigenInterface {
 
-  float getRmsd(P3[][] centerAndPoints, Quat q);
+  EigenInterface setM(double[][] n);
 
-  P3[] getCenterAndPoints(Lst<P3> pts);
+  double[] getEigenvalues();
+
+  void fillFloatArrays(V3[] eigenVectors, float[] eigenValues);
+
+  float[][] getEigenvectorsFloatTransposed();
 
 }
