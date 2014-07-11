@@ -387,7 +387,7 @@ public class JSVFileManager {
 			}
 			Logger.info("JSVFileManager opening URL " + url
 					+ (post == null ? "" : " with POST of " + post.length() + " bytes"));
-			in = viewer.apiPlatform.getBufferedURLInputStream(url, postBytes, post);
+			in = viewer.apiPlatform.getURLContents(url, postBytes, post, false);
 		} else {
 			if (showMsg)
 				Logger.info("JSVFileManager opening file " + name);
