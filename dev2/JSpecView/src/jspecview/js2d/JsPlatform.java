@@ -1,5 +1,6 @@
 package jspecview.js2d;
 
+import java.io.BufferedInputStream;
 import java.net.URL;
 
 import javajs.api.GenericFileInterface;
@@ -10,6 +11,8 @@ import javajs.api.PlatformViewer;
 import javajs.awt.Font;
 import javajs.util.P3;
 import javajs.util.AjaxURLStreamHandlerFactory;
+import javajs.util.Rdr;
+import javajs.util.SB;
 
 import jspecview.api.JSVPanel;
 import jspecview.app.GenericMouse;
@@ -353,11 +356,20 @@ public class JsPlatform implements GenericPlatform {
     return null; 
   }
 
-  @Override
-	public Object getBufferedURLInputStream(URL url, byte[] outputBytes,
-                                          String post) {
-    return JsFile.getBufferedURLInputStream(url, outputBytes, post);
-  }
+	@Override
+	public Object getURLContents(URL url, byte[] outputBytes, String post,
+			boolean asString) {
+		Object ret = JsFile.getURLContents(url, outputBytes, post);
+		// check for error
+		try {
+			return (!asString ? ret : ret instanceof String ? ret : ret instanceof SB ? ((SB) ret)
+					.toString() : ret instanceof byte[] ? new String((byte[]) ret)
+					: new String((byte[]) Rdr.getStreamAsBytes((BufferedInputStream) ret,
+							null)));
+		} catch (Exception e) {
+			return "" + e;
+		}
+	}
 
 	@Override
 	public String getLocalUrl(String fileName) {
@@ -365,9 +377,4 @@ public class JsPlatform implements GenericPlatform {
 		return null;
 	}
 
-	@Override
-	public String postBytesOrData(URL url, byte[] outputBytes, String data) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }

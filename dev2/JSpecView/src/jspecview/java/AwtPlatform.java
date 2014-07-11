@@ -4,6 +4,8 @@ import java.awt.Container;
 import java.awt.Frame;
 import java.awt.GraphicsEnvironment;
 import java.awt.Window;
+import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -15,6 +17,7 @@ import javajs.api.GenericPlatform;
 import javajs.api.PlatformViewer;
 import javajs.awt.Font;
 import javajs.util.P3;
+import javajs.util.Rdr;
 
 import javax.swing.JDialog;
 
@@ -284,20 +287,20 @@ public class AwtPlatform implements GenericPlatform {
   }
 
   @Override
-	public Object getBufferedURLInputStream(URL url, byte[] outputBytes,
-                                          String post) {
-    return AwtFile.getBufferedURLInputStream(url, outputBytes, post);
+  public Object getURLContents(URL url, byte[] outputBytes, String post,
+      boolean asString) {
+    Object ret = AwtFile.getURLContents(url, outputBytes, post);
+    try {
+      return (!asString ? ret : ret instanceof String ? ret : new String(
+          (byte[]) Rdr.getStreamAsBytes((BufferedInputStream) ret, null)));
+    } catch (IOException e) {
+      return "" + e;
+    }
   }
 
 	@Override
 	public String getLocalUrl(String fileName) {
 		// not used in JSpecView
-		return null;
-	}
-
-	@Override
-	public String postBytesOrData(URL url, byte[] outputBytes, String data) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
