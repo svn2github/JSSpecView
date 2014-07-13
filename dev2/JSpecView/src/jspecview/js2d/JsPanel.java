@@ -179,7 +179,7 @@ public class JsPanel implements JSVPanel {
 	public void showMessage(String msg, String title) {
 		Logger.info(msg);
 		@SuppressWarnings("unused")
-		Object applet = vwr.applet;
+		Object applet = vwr.html5Applet;
 		/**
 		 * @j2sNative
 		 * applet._showStatus(msg, title);

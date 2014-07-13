@@ -237,8 +237,8 @@ public class JsPlatform implements GenericPlatform {
 	}
 
 	@Override
-	public Object getGraphics(Object image) {
-		return (image == null ? context : Image.getGraphics(image));
+	public Object getGraphics(Object canvas) {
+		return (canvas == null ? context : (context = Image.getGraphics(this.canvas = canvas)));
 	}
 
   @Override
