@@ -15,6 +15,12 @@ todo:
 
  - get integrations to stay in view sets.
 
+BH 7/13/2014
+-code: refactoring of HTML5 Jmol, JSpecView, and AstexViewer for cleaner
+ interaction with web-page based JavaScript. All interations now 
+ go directly through JS
+
+
 BH 6/27/2014
 -fix: JavaScript addHighlight  not working properly
 -new feature: HIGHLIGHT OFF
