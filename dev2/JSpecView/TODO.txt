@@ -17,7 +17,7 @@ todo:
 
 BH 7/13/2014
 -code: refactoring of HTML5 Jmol, JSpecView, and AstexViewer for cleaner
- interaction with web-page based JavaScript. All interations now 
+ interaction with web-page based JavaScript. All interactions now 
  go directly through JS
 
 
