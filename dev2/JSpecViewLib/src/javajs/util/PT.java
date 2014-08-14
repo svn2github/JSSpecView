@@ -220,7 +220,7 @@ public class PT {
   public static boolean checkTrailingText(String str, int ich, int ichMax) {
     //number must be pure -- no additional characters other than white space or ;
     char ch;
-    while (ich < ichMax && (Character.isWhitespace(ch = str.charAt(ich)) || ch == ';'))
+    while (ich < ichMax && (isWhitespace(ch = str.charAt(ich)) || ch == ';'))
       ++ich;
     return (ich == ichMax);
   }
@@ -1138,7 +1138,7 @@ public class PT {
     char ch;
     int count = 0;
     for (int i = pt; --i >= 1; ) {
-      if (Character.isDigit(ch = f.charAt(i)))
+      if (isDigit(ch = f.charAt(i)))
         continue;
       switch (ch) {
       case '.':
@@ -1269,13 +1269,19 @@ public class PT {
   }
 
   /**
-   * sprintf emulation uses (almost) c++ standard string formats 's' string 'i'
-   * or 'd' integer 'f' float/decimal 'p' point3f 'q' quaternion/plane/axisangle
-   * ' with added "i" in addition to the insipid "d" (digits?)
+   * sprintf emulation uses (almost) c++ standard string formats
+   * 
+   * 's' string 'i' or 'd' integer, 'e' double, 'f' float, 'p' point3f 'q'
+   * quaternion/plane/axisangle with added "i" (equal to the insipid "d" --
+   * digits?)
    * 
    * @param strFormat
    * @param list
+   *        a listing of what sort of data will be found in Object[] values, in
+   *        order: s string, f float, i integer, d double, p point3f, q
+   *        quaternion/point4f, S String[], F float[], I int[], and D double[]
    * @param values
+   *        Object[] containing above types
    * @return formatted string
    */
   public static String sprintf(String strFormat, String list, Object[] values) {
@@ -1537,4 +1543,86 @@ public class PT {
     return s;
   }
 
+  public static boolean isDigit(char ch) {
+    // just way simpler code than  Character.isDigit(ch);
+    int c = ch;
+    return (48 <= c && c <= 57);
+  }
+
+  public static boolean isUpperCase(char ch) {
+    int c = ch;
+    return (65 <= c && c <= 90);
+  }
+
+  public static boolean isLowerCase(char ch) {
+    int c = ch;
+    return (97 <= c && c <= 122);
+  }
+
+  public static boolean isLetter(char ch) {
+    // just way simpler code than     Character.isLetter(ch);
+    int c = ch;
+    return (65 <= c && c <= 90 || 97 <= c && c <= 122);
+  }
+
+  public static boolean isLetterOrDigit(char ch) {
+    // just way simpler code than     Character.isLetterOrDigit(ch);
+    int c = ch;
+    return (65 <= c && c <= 90 || 97 <= c && c <= 122 || 48 <= c && c <= 57);
+  }
+
+  public static boolean isWhitespace(char ch) {
+    int c = ch;
+    return (c >= 0x1c && c <= 0x20 || c >= 0x9 && c <= 0xd);
+  }
+
+  public static final float FRACTIONAL_PRECISION = 100000f;
+  public static final float CARTESIAN_PRECISION =  10000f;
+
+  public static void fixPtFloats(T3 pt, float f) {
+    //this will equate float and double as long as -256 <= x <= 256
+    pt.x = Math.round(pt.x * f) / f;
+    pt.y = Math.round(pt.y * f) / f;
+    pt.z = Math.round(pt.z * f) / f;
+  }
+
+//static {
+//    
+//  double d = 790.8999998888;
+//  float x  = 790.8999998888f;
+//  for (int i = 0; i < 50; i++) {
+//  System.out.println(x + " " + d);
+//  System.out.println(Math.round(x * 100000) / 100000f);
+//  System.out.println(Math.round(d * 100000) / 100000.);
+//  System.out.println(Math.round(x * 10000) / 10000f);
+//  System.out.println(Math.round(d * 10000) / 10000.);
+//  x+=1; 
+//  d+=1;
+//  }
+//  System.out.println(100.123456789f);
+//}
+
+//  static {
+//    long t;
+//    char c = '0';
+//    t = System.currentTimeMillis();
+//    for (int i = 0; i < 10000000; i++) {
+//      boolean b = PT.isUpperCase(c);
+//    }
+//    System.out.println(System.currentTimeMillis() - t);
+//
+//    t = System.currentTimeMillis();
+//    for (int i = 0; i < 10000000; i++) {
+//      boolean b = Character.isUpperCase(c);
+//    }
+//    System.out.println(System.currentTimeMillis() - t);
+//    
+//    t = System.currentTimeMillis();
+//    for (int i = 0; i < 10000000; i++) {
+//      boolean b = PT.isUpperCase(c);
+//    }
+//    System.out.println(System.currentTimeMillis() - t);
+//
+//    System.out.println("PT test");
+//  }
 }
