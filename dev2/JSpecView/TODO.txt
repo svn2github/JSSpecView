@@ -33,6 +33,9 @@ todo:
  that clicking on a peak will highlight appropriately in JSmol/JSME
 
  - get integrations to stay in view sets.
+ 
+BH 11/9/2014
+-update to GIFencoder 
 
 BH 7/13/2014
 -code: refactoring of HTML5 Jmol, JSpecView, and AstexViewer for cleaner
