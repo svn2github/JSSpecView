@@ -1032,14 +1032,18 @@ public class PT {
         }
         sb.append(str.substring(pt0, str.length()));
         str = sb.toString();
-      }
-    for (i = str.length(); --i >= 0;)
+      }    
+    return "\"" + escUnicode(str) + "\"";
+  }
+
+  public static String escUnicode(String str) {
+    for (int i = str.length(); --i >= 0;)
       if (str.charAt(i) > 0x7F) {
         String s = "0000" + Integer.toHexString(str.charAt(i));
         str = str.substring(0, i) + "\\u" + s.substring(s.length() - 4)
             + str.substring(i + 1);
       }
-    return "\"" + str + "\"";
+    return str;
   }
 
   /**
@@ -1588,6 +1592,17 @@ public class PT {
   
   public static double fixDouble(double d, double f) {
     return Math.round(d * f) / f;
+  }
+
+  /**
+   * parse a float or "float/float"
+   * @param s
+   * @return a/b
+   */
+  public static float parseFloatFraction(String s) {
+      int pt = s.indexOf("/");
+      return (pt < 0 ? parseFloat(s) : parseFloat(s.substring(0, pt))
+          / parseFloat(s.substring(pt + 1)));
   }
 
 //static {

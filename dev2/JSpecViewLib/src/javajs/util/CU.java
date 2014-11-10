@@ -440,8 +440,8 @@ public class CU {
     return 0xFF000000 | (red << 16) | (grn << 8) | blu;
   }
 
-  public final static P3 colorPtFromString(String colorName, P3 pt) {
-    return toRGBpt(getArgbFromString(colorName), pt);
+  public final static P3 colorPtFromString(String colorName) {
+    return colorPtFromInt(getArgbFromString(colorName), null);
   }
 
   public final static P3 colorPtFromInt(int color, P3 pt) {
@@ -453,13 +453,6 @@ public class CU {
 
   public static int colorPtToFFRGB(T3 pt) {
     return colorTriadToFFRGB(pt.x, pt.y, pt.z);
-  }
-
-  public final static P3 toRGBpt(int color, P3 pt) {
-    pt.x = (color >> 16) & 0xFF;
-    pt.y = (color >> 8) & 0xFF;
-    pt.z = color & 0xFF;
-    return pt;
   }
 
   public static void toRGB3f(int c, float[] f) {
@@ -501,7 +494,6 @@ public class CU {
   public static P3 rgbToHSL(P3 rgb, boolean doRound) {
     // adapted from http://tips4java.wordpress.com/2009/07/05/hsl-color/
     // see http://en.wikipedia.org/wiki/HSL_color_space
-
     float r = rgb.x / 255;
     float g = rgb.y / 255;
     float b = rgb.z / 255;
@@ -537,10 +529,10 @@ public class CU {
     
     // highly condensed
     
-    float h = hsl.x / 60;
-    float s = hsl.y / 100;
-    float l = hsl.z / 100;
-    
+    float h = Math.max(0,  Math.min(360, hsl.x)) / 60;
+    float s = Math.max(0,  Math.min(100, hsl.y)) / 100;
+    float l = Math.max(0,  Math.min(100, hsl.z)) / 100;
+
     float p = l - (l < 0.5 ? l : 1 - l) * s;    
     float q = 2 * (l - p); 
         
