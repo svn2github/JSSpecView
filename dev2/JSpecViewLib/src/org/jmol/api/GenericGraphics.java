@@ -1,11 +1,11 @@
-package jspecview.api;
+package org.jmol.api;
 
 import javajs.api.GenericColor;
 import javajs.awt.Font;
 
 
 
-public interface JSVGraphics {
+public interface GenericGraphics {
 
 	GenericColor getColor1(int argb);
 
