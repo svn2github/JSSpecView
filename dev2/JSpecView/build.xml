@@ -136,7 +136,7 @@
 			      <comment value="#" />
 			    </striplinecomments>
 			    <linecontains>
-			      <contains value="___" />
+			      <contains value="Jmol.___" />
 			    </linecontains>
 			  </filterchain>
 	    </copy>
