@@ -34,6 +34,9 @@ todo:
 
  - get integrations to stay in view sets.
  
+BH 2/24/2015
+-GenericPlatform update 
+ 
 BH 11/9/2014
 -update to GIFencoder 
 
