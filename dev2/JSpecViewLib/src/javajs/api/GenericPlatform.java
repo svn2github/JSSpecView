@@ -2,6 +2,8 @@ package javajs.api;
 
 
 import java.net.URL;
+import java.util.Map;
+
 
 import javajs.awt.Font;
 import javajs.util.P3;
@@ -132,5 +134,8 @@ public interface GenericPlatform extends FontManager {
   Object getURLContents(URL url, byte[] outputBytes, String post, boolean asString);
 
   String getLocalUrl(String fileName);
+
+  GenericImageDialog getImageDialog(String title,
+                                 Map<String, GenericImageDialog> imageMap);
 
 }
