@@ -23,7 +23,7 @@ If you do development with local files and need to be able to retrieve other loc
 you will need to set this preference to false. Otherwise, leaving it set to true offers the most security.
 
 To set for Firefox, type about:config as the address then search for security.fileuri.strict_origin_policy
-For Chrome, add the --allow-file-access-from-files command line switch to make it work
+For Chrome, add the --allow-file-access-from-files command line switch to enable it work
 
 todo: 
  - Jmol Application Tools...Spectrum menu issue with EPFL returning a new 2D structure and links now not synched
@@ -33,6 +33,9 @@ todo:
  that clicking on a peak will highlight appropriately in JSmol/JSME
 
  - get integrations to stay in view sets.
+
+BH 3/31/2015
+-modification to JSInterface 
  
 BH 2/24/2015
 -GenericPlatform update 
