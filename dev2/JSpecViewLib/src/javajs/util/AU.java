@@ -163,16 +163,18 @@ final public class AU {
    * @return array
    */
   private static Object newInstanceO(Object array, int n) {
+    if (isAI(array)) 
+      return new int[n];
     /**
      * @j2sNative
      * 
-     * if (!array.getClass().getComponentType)
+     * if (!array.getClass || !array.getClass().getComponentType)
      * 	 return new Array(n);
      * 
      */
     {
-      return Array.newInstance(array.getClass().getComponentType(), n);
     }
+    return Array.newInstance(array.getClass().getComponentType(), n);
   }
 
   public static int getLength(Object array) {
@@ -627,6 +629,27 @@ final public class AU {
 	  {
 	  return x instanceof float[][][];
 	  }
+	}
+	
+	/**
+	 * Ensure that we have signed and not unsigned bytes coming out of any
+	 * process, but particularly out of file reading.
+	 * 
+	 * @param b
+	 */
+	public static byte[] ensureSignedBytes(byte[] b) {
+		if (b != null) {
+	  /**
+	   * @j2sNative
+	   * 
+			 *            for (var i = b.length; --i >= 0;) { var j = b[i] & 0xFF; if
+			 *            (j >= 0x80) j -= 0x100; b[i] = j; }
+	   * 
+	   */
+	  {
+	  }
+	}
+		return b;
 	}
 
 
