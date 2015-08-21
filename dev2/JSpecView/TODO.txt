@@ -34,6 +34,9 @@ todo:
 
  - get integrations to stay in view sets.
 
+BH 8/21/2015
+-set spectrum.setHZtoPPM(true) for simulations from NMRDB
+
 BH 3/31/2015
 -modification to JSInterface 
  
