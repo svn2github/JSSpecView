@@ -367,11 +367,11 @@ public class PT {
   }
 
   public static int countChar(String line, char c) {
-    int tokenCount = 0;
-    int pt = -1;
-    while ((pt = line.indexOf(c, pt + 1)) >= 0)
-      tokenCount++;
-    return  tokenCount;
+    int n = 0;
+    for (int i = line.lastIndexOf(c) + 1; --i >= 0;)
+      if (line.charAt(i) == c)
+        n++;
+    return n;
   }
   
   public static int countTokens(String line, int ich) {
@@ -863,7 +863,7 @@ public class PT {
   }
 
   /**
-   * Checks to see if an object is an array, and if it is, returns null;
+   * Checks to see if an object is an array (including typed arrays), and if it is, returns null;
    * otherwise it returns the string equivalent of that object.
    * 
    * @param x
@@ -873,8 +873,7 @@ public class PT {
     /**
      * @j2sNative
      * 
-     *            var s = x.toString(); return (s.startsWith("[object") &&
-     *            s.endsWith("Array]") ? null : s);
+     * return (x.constructor == Array || x.BYTES_PER_ELEMENT ? null : x.toString());
      * 
      */
     {
@@ -1122,7 +1121,7 @@ public class PT {
             ++ich;
           }
           if (isExponential)
-            precision = -precision - 1;
+            precision = -precision;
         }
         String st = strFormat.substring(ich, ich + len);
         if (!st.equals(key)) {
@@ -1131,14 +1130,14 @@ public class PT {
           continue;
         }
         ich += len;
-        if (!Float.isNaN(floatT))
+        if (!Float.isNaN(floatT)) // 'f'
           strLabel += formatF(floatT, width, precision, alignLeft,
               zeroPad);
-        else if (strT != null)
+        else if (strT != null)  // 'd' 'i' or 's'
           strLabel += formatS(strT, width, precision, alignLeft,
               zeroPad);
-        else if (!Double.isNaN(doubleT))
-          strLabel += formatD(doubleT, width, precision, alignLeft,
+        else if (!Double.isNaN(doubleT)) // 'e'
+          strLabel += formatD(doubleT, width, precision - 1, alignLeft,
               zeroPad, true);
         if (doOne)
           break;
