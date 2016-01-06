@@ -33,6 +33,9 @@ todo:
  that clicking on a peak will highlight appropriately in JSmol/JSME
 
  - get integrations to stay in view sets.
+   
+RL 01/06/2016
+ -update About Dialog Box for 2016
  
 BH 12/21/2015
  -bug fix: for inefficient array handling for labels 
