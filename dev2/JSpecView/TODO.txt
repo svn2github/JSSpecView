@@ -33,7 +33,10 @@ todo:
  that clicking on a peak will highlight appropriately in JSmol/JSME
 
  - get integrations to stay in view sets.
-   
+
+BH
+ - update for 13C NMR simulation from NMRDB
+    
 RL 01/06/2016
  -update About Dialog Box for 2016
  
