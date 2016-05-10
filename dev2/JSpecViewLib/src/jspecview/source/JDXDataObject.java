@@ -26,20 +26,15 @@ public abstract class JDXDataObject extends JDXHeader {
   public static final double ERROR = Double.MAX_VALUE;
 
   private String filePath;
-  private String filePathForwardSlash;
+  protected String filePathForwardSlash;
   public boolean isSimulation;
   
 
   public String sourceID = "";
 
   public void setFilePath(String filePath) {
-  	if (filePath == null)
-  		return;
-  	String s = this.filePath = filePath.trim();
-//    int pt = s.indexOf("___Jmol");
-//    if (pt > 5)
-//    	s = s.substring(0, pt - 5) + PT.rep(s.substring(pt - 5), "\\n", "//n");
-    filePathForwardSlash = s.replace('\\','/');
+  	if (filePath != null)
+  		filePathForwardSlash = (this.filePath = filePath.trim()).replace('\\','/');
   }
 
   public String getFilePath() {
