@@ -34,7 +34,7 @@ todo:
 
  - get integrations to stay in view sets.
 
-BH
+BH  05/10/2016
  - update for 13C NMR simulation from NMRDB
     
 RL 01/06/2016
