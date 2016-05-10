@@ -26,7 +26,7 @@ public abstract class JDXDataObject extends JDXHeader {
   public static final double ERROR = Double.MAX_VALUE;
 
   private String filePath;
-  protected String filePathForwardSlash;
+  private String filePathForwardSlash;
   public boolean isSimulation;
   
 
@@ -35,8 +35,11 @@ public abstract class JDXDataObject extends JDXHeader {
   public void setFilePath(String filePath) {
   	if (filePath == null)
   		return;
-    this.filePath = filePath.trim();
-    filePathForwardSlash = this.filePath.replace('\\','/');
+  	String s = this.filePath = filePath.trim();
+//    int pt = s.indexOf("___Jmol");
+//    if (pt > 5)
+//    	s = s.substring(0, pt - 5) + PT.rep(s.substring(pt - 5), "\\n", "//n");
+    filePathForwardSlash = s.replace('\\','/');
   }
 
   public String getFilePath() {
