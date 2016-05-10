@@ -262,6 +262,7 @@
 -->
 
 	<target name="make-distribution-zip-file" depends="make-application-jar,make-applet-jar,make-signed-applet-jar" description="Create jspecview.zip for distribution">
+        <echo message="JSpecView make-distribution-zip-file"/>
     	<dirname property="dist.dir" file="${applet.jar}" />
         <mkdir dir="${dist.dir}"/>
   	    <delete quiet="true">
@@ -273,6 +274,11 @@
 		      <include name="*.jar"/>
 		   	</fileset>
 	    </jar>
+        <echo message="NOTE! Application has been copied to ${jmol.path}/jars/JSpecView.jar,"/>
+        <echo message="but if you have additional Jmol versions checked out, "/>
+        <echo message="you will need to copy that to those projects as well."/>
+		
+		
 	</target>
 
 
