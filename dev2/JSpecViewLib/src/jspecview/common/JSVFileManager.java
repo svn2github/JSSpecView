@@ -438,15 +438,16 @@ public class JSVFileManager {
 			name = name.substring(type.length() + 1);
 		boolean isInline = name.startsWith("MOL=");
 		if (isInline) {
-			molFile = name = name.substring(4);
-			pt = molFile.indexOf("/n__Jmol");
+			name = name.substring(4);
+			pt = name.indexOf("/n__Jmol");
 			if (pt > 0)
-				molFile = molFile.substring(0, pt) + PT.rep(molFile.substring(pt), "/n", "\n");
-			molFile = PT.rep(molFile,  "\\n", "\n");
+				name = name.substring(0, pt) + PT.rep(name.substring(pt), "/n", "\n");
+			molFile = name = PT.rep(name, "\\n", "\n");
 		}
 		String key = "" + getSimulationHash(name, type);
-		System.out.println("JSVFileManager type=" + type + " key=" + key + " name="
-				+ name);
+		if (Logger.debugging)
+			Logger.info("JSVFileManager type=" + type + " key=" + key + " name="
+					+ name);
 		String jcamp = cacheGet(key);
 		if (jcamp != null)
 			return jcamp;
