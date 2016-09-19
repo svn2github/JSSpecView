@@ -33,6 +33,9 @@ todo:
  that clicking on a peak will highlight appropriately in JSmol/JSME
 
  - get integrations to stay in view sets.
+ 
+BH  09/19/2016
+ - fix for UTF-8 strings to byte[]
 
 BH  05/10/2016
  - update for 13C NMR simulation from NMRDB
