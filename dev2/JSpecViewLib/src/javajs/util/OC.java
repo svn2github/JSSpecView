@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
-
-
 import javajs.J2SIgnoreImport;
 import javajs.api.BytePoster;
 import javajs.api.GenericOutputChannel;
@@ -64,7 +62,7 @@ public class OC extends OutputStream implements GenericOutputChannel {
 	private OutputStream os0;
 	private byte[] bytes; // preset bytes; output only
   
-	private boolean bigEndian = true;
+	public boolean bigEndian = true;
   
   @Override
   public boolean isBigEndian() {
@@ -191,20 +189,6 @@ public class OC extends OutputStream implements GenericOutputChannel {
   }
 
   /**
-   * @j2sOverride
-   */
-  @Override
-  public void write(byte[] buf, int i, int len) {
-    if (os == null)
-      initOS();
-    try {
-      os.write(buf, i, len);
-    } catch (IOException e) {
-    }
-    byteCount += len;
-  }
-  
-  /**
    * @param b  
    */
   @Override
@@ -227,6 +211,48 @@ public class OC extends OutputStream implements GenericOutputChannel {
   }
   
   /**
+   * @j2sOverride
+   */
+  @Override
+  public void write(byte[] buf, int i, int len) {
+    if (os == null)
+      initOS();
+    try {
+      os.write(buf, i, len);
+    } catch (IOException e) {
+    }
+    byteCount += len;
+  }
+  
+  @Override
+  public void writeShort(short i) {
+    if (isBigEndian()) {
+      writeByteAsInt(i >> 8);
+      writeByteAsInt(i);
+    } else {
+      writeByteAsInt(i);
+      writeByteAsInt(i >> 8);
+    }
+  }
+
+  @Override
+  public void writeLong(long b) {
+    if (isBigEndian()) {
+      writeInt((int) ((b >> 32) & 0xFFFFFFFFl));
+      writeInt((int) (b & 0xFFFFFFFFl));
+    } else {
+      writeByteAsInt((int) (b >> 56));
+      writeByteAsInt((int) (b >> 48));
+      writeByteAsInt((int) (b >> 40));
+      writeByteAsInt((int) (b >> 32));
+      writeByteAsInt((int) (b >> 24));
+      writeByteAsInt((int) (b >> 16));
+      writeByteAsInt((int) (b >> 8));
+      writeByteAsInt((int) b);
+    }
+  }
+
+  /**
    * Will break JavaScript if used.
    * 
    * @j2sIgnore
@@ -246,6 +272,7 @@ public class OC extends OutputStream implements GenericOutputChannel {
     byteCount++;
   }
 
+// not in JSmol's OutputStream class, so not overriding  
 //  /**
 //   * Will break if used; no equivalent in JavaScript.
 //   * 
@@ -310,7 +337,7 @@ public class OC extends OutputStream implements GenericOutputChannel {
     /**
      * @j2sNative
      * 
-     *            jmol = Jmol; self.J2S || Jmol; _function = (typeof this.fileName == "function" ?
+     *            jmol = self.J2S || Jmol; _function = (typeof this.fileName == "function" ?
      *            this.fileName : null);
      * 
      */
@@ -396,6 +423,21 @@ public class OC extends OutputStream implements GenericOutputChannel {
       }
     }
     return -1;
+  }
+
+  @Override
+  public void writeInt(int i) {
+    if (bigEndian) {
+      writeByteAsInt(i >> 24);
+      writeByteAsInt(i >> 16);
+      writeByteAsInt(i >> 8);
+      writeByteAsInt(i);
+    } else {
+      writeByteAsInt(i);
+      writeByteAsInt(i >> 8);
+      writeByteAsInt(i >> 16);
+      writeByteAsInt(i >> 24);
+    }
   }
 
 }
