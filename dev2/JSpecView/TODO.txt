@@ -34,6 +34,9 @@ todo:
 
  - get integrations to stay in view sets.
  
+RL 01/13/2017
+  - update to About dialog box
+ 
 BH  09/19/2016
  - fix for UTF-8 strings to byte[]
 
