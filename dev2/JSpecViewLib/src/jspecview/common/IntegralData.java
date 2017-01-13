@@ -144,10 +144,19 @@ public class IntegralData extends MeasurementData {
 		if (Double.isNaN(x1)) {
 			haveRegions = false;
 			clear();
-			return null;
+  			return null;
+  		}
+  		if (Double.isNaN(x2)) {
+  		  return splitIntegral(x1);
 		}
 		if(x1 == x2)
 			return null;
+		if (x1 < x2) {
+	    clear(x1, x2);
+	    return null;
+		  // should delete here
+		  
+		}
 		double y1 = getYValueAt(x1);
 		double y2 = getYValueAt(x2);
 		haveRegions = true;
@@ -161,7 +170,18 @@ public class IntegralData extends MeasurementData {
 		return in;
 	}
 
-  private static Comparator<Measurement> c = new IntegralComparator();
+  private Integral splitIntegral(double x) {
+		int i = find(x);
+		if (i < 0)
+		  return null;
+		Integral integral = (Integral) removeItemAt(i);
+		double x0 = integral.getXVal();
+		double x2 = integral.getXVal2();
+		addIntegralRegion(x0, x);
+		return addIntegralRegion(x, x2);
+	}
+
+	private static Comparator<Measurement> c = new IntegralComparator();
 
 	@Override
 	public void setSpecShift(double dx) {

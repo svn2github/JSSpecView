@@ -4,7 +4,7 @@ Put new items at top, please.
 
 Jmol.___JSVDate="$Date$"
 Jmol.___JSVSvnRev="$LastChangedRevision$"
-Jmol.___JSVVersion="14.2.7"
+Jmol.___JSVVersion="14.2.8"
 
 Note:
 security.fileuri.strict_origin_policy
@@ -33,16 +33,18 @@ todo:
  that clicking on a peak will highlight appropriately in JSmol/JSME
 
  - get integrations to stay in view sets.
- 
+   
 RL 01/13/2017
   - update to About dialog box
- 
-BH  09/19/2016
- - fix for UTF-8 strings to byte[]
+  
+BH 01/13/2017 
+ -feature: integral handles on left and right ends should be visible when pointing at the integral
+ -feature: integral handles should be a bit larger
+ -feature: integral swiping from the  right should DELETE the integral, not make it.
+ -feature: integral should split when clicked
+ -bug fix: dialog titles should be truncated if too long
+ -update About dialog for 2017
 
-BH  05/10/2016
- - update for 13C NMR simulation from NMRDB
-    
 RL 01/06/2016
  -update About Dialog Box for 2016
  
@@ -672,4 +674,3 @@ and every time I open another file it seems to add another jcamp-dx to
 the drop down file type list.
 
 done 8.3.12
- 

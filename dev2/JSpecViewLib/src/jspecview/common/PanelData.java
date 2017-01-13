@@ -964,7 +964,7 @@ public class PanelData implements EventManager {
 			return;
 		setCurrentGraphSet(gs, yPixel, 0);
 		clickCount = (++clickCount % 3);
-		gs.checkWidgetEvent(xPixel, yPixel, true);
+		currentGraphSet.mousePressedEvent(xPixel, yPixel, clickCount);
 	}
 
 	public void doMouseDragged(int xPixel, int yPixel) {

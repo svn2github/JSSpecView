@@ -1613,25 +1613,33 @@ class GraphSet implements XYScaleConverter {
 
 	private void drawSpectrumPointer(Object g, Spectrum spec,
 			int yOffset, IntegralData ig) {
+	  // short vertical cursor 
 		setColorFromToken(g, ScriptToken.PEAKTABCOLOR);
 		int iHandle = pd.integralShiftMode;
 		if (ig != null) {
 			if ((!pd.ctrlPressed || pd.isIntegralDrag)
-					&& !isOnSpectrum(pd.mouseX, pd.mouseY, -1))
+					&& !isOnSpectrum(pd.mouseX, pd.mouseY, -1)) {
 				ig = null;
-			else if (iHandle == 0)
+			} else if (iHandle == 0) {
 				iHandle = getShiftMode(pd.mouseX, pd.mouseY);
+				if (iHandle == 0)
+				  iHandle = Integer.MAX_VALUE;
+			}
 		}
 		double y0 = yValueMovedTo;
 		yValueMovedTo = (ig == null ? spec.getYValueAt(xValueMovedTo) : ig
 				.getPercentYValueAt(xValueMovedTo));
 		setCoordStr(xValueMovedTo, yValueMovedTo);
 		if (iHandle != 0) {
-			setPlotColor(g, 0);
-			int x = (iHandle < 0 ? xPixelPlot1 : xPixelPlot0);
-			int y = (iHandle < 0 ? yPixelPlot0 : yPixelPlot1);
-			drawHandle(g, x, y, false);
-			return;
+      setPlotColor(g, iHandle == Integer.MAX_VALUE ? -1 : 0);
+		  if (iHandle < 0 || iHandle == Integer.MAX_VALUE) {
+		     drawHandle(g, xPixelPlot1, yPixelPlot0, 3, false);
+		  }
+		  if (iHandle > 0) {
+        drawHandle(g, xPixelPlot0, yPixelPlot1, 3, false);
+		  } 
+		  if (iHandle != Integer.MAX_VALUE)
+		  	return;
 		}
 		if (ig != null)
 		  g2d.setStrokeBold(g, true);
@@ -1766,7 +1774,7 @@ class GraphSet implements XYScaleConverter {
 				g2d.drawLine(gFront, pw.xPixel0, pw.yPixel0, pw.xPixel1, pw.yPixel1);
 				pw.isVisible = true;
 				if (pw.isPin)
-					drawHandle(gFront, pw.xPixel0, pw.yPixel0, !pw.isEnabled);
+					drawHandle(gFront, pw.xPixel0, pw.yPixel0, 2, !pw.isEnabled);
 			} else if (pw.xPixel1 != pw.xPixel0) {
 				fillBox(g2, pw.xPixel0, pw.yPixel0, pw.xPixel1, pw.yPixel1, 
 						pw == zoomBox1D && pd.shiftPressed ? ScriptToken.ZOOMBOXCOLOR2 : ScriptToken.ZOOMBOXCOLOR);
@@ -2454,15 +2462,19 @@ class GraphSet implements XYScaleConverter {
 		return true;
 	}
 
-	private void checkIntegral(double x1, double x2, boolean isFinal) {
+	private boolean checkIntegral(double x1, double x2, boolean isFinal, boolean isPressOnly) {
+
 		AnnotationData ad = getDialog(AType.Integration, -1);
 		if (ad == null)
-			return;
+			return false;
 		Integral integral = ((IntegralData) ad.getData()).addIntegralRegion(x1, x2);
 		if (isFinal && ad instanceof JSVDialog)
 			((JSVDialog) ad).update(null, 0, 0);
+		if (Double.isNaN(x2))
+		  return false;
 		selectedSpectrumIntegrals = null;
 		pendingIntegral = (isFinal ? null : integral);
+		return true;
 	}
 
 	private void setToolTipForPixels(int xPixel, int yPixel) {
@@ -2963,21 +2975,26 @@ class GraphSet implements XYScaleConverter {
 	}
 
 	private boolean triggered = true;
-synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
-		if (!zoomEnabled || !triggered)
+	private int lastIntDragX;
+
+	synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
+		if (!triggered)
 			return;
 		triggered = false;
 		PlotWidget widget;
 		if (isPress) {
+			lastIntDragX = xPixel;
 			if (pd.clickCount == 2) {
 				if (pendingMeasurement == null) {
-					if (iSpectrumClicked == -1
-							&& iPreviousSpectrumClicked >= 0) {
+					if (iSpectrumClicked == -1 && iPreviousSpectrumClicked >= 0) {
 						setSpectrumClicked(iPreviousSpectrumClicked);
 					}
 					processPendingMeasurement(xPixel, yPixel, 2);
 					return;
 				}
+			} else {
+			  if (checkIntegral(toX(xPixel), Double.NaN, false, true))
+			    return;
 			}
 			if (pendingMeasurement != null)
 				return;
@@ -2987,7 +3004,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 				yPixel = fixY(yPixel);
 				if (xPixel < xPixel1) {
 					if (pd.shiftPressed)
-  					setSpectrumClicked(iPreviousSpectrumClicked);
+						setSpectrumClicked(iPreviousSpectrumClicked);
 					xPixel = fixX(xPixel);
 					zoomBox1D.setX(toX(xPixel), xPixel);
 					zoomBox1D.yPixel0 = yPixel;
@@ -3005,15 +3022,24 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		widget = pd.thisWidget;
 		if (widget == null)
 			return;
-
 		// mouse drag with widget
 		if (widget == zoomBox1D) {
 			zoomBox1D.xPixel1 = fixX(xPixel);
 			zoomBox1D.yPixel1 = fixY(yPixel);
-			if (pd.isIntegralDrag && zoomBox1D.xPixel0 != zoomBox1D.xPixel1)
-				checkIntegral(zoomBox1D.getXVal(), toX(zoomBox1D.xPixel1), false);
+			if (pd.isIntegralDrag && zoomBox1D.xPixel0 != zoomBox1D.xPixel1) {
+				if ((lastIntDragX < xPixel) != (zoomBox1D.xPixel0 < xPixel)) {
+					// switched direction of integral drag
+					zoomBox1D.xPixel0 = lastIntDragX;
+					zoomBox1D.xPixel1 = xPixel;
+					zoomBox1D.setXVal(toX(zoomBox1D.xPixel0));
+				}
+				lastIntDragX = xPixel;
+				checkIntegral(zoomBox1D.getXVal(), toX(zoomBox1D.xPixel1), false, false);
+			}
 			return;
 		}
+		if (!zoomEnabled)
+			return;
 		if (widget == zoomBox2D) {
 			zoomBox2D.xPixel1 = imageView.fixX(xPixel);
 			zoomBox2D.yPixel1 = fixY(yPixel);
@@ -3026,11 +3052,11 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 			return;
 		}
 		if (widget == cur2Dx0 || widget == cur2Dx1) {
-			//xPixel = imageView.fixX(xPixel);
-			//widget.setX(imageView.toX(xPixel), xPixel);
+			// xPixel = imageView.fixX(xPixel);
+			// widget.setX(imageView.toX(xPixel), xPixel);
 			// 2D x zoom change
-			//doZoom(cur2Dx0.getXVal(), getScale().minY, cur2Dx1.getXVal(),
-			//		getScale().maxY, false, false, false, true);
+			// doZoom(cur2Dx0.getXVal(), getScale().minY, cur2Dx1.getXVal(),
+			// getScale().maxY, false, false, false, true);
 			return;
 		}
 		if (widget == pin1Dx0 || widget == pin1Dx1 || widget == pin1Dx01) {
@@ -3046,11 +3072,11 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 					return;
 				pin1Dx0.setX(toX0(xPixel), xPixel);
 				pin1Dx1.setX(toX0(xPixel1), xPixel1);
-				
+
 			}
 			// 1D x zoom change
-			doZoom(pin1Dx0.getXVal(), 0, pin1Dx1.getXVal(),
-					0, true, false, false, true, false);
+			doZoom(pin1Dx0.getXVal(), 0, pin1Dx1.getXVal(), 0, true, false, false,
+					true, false);
 			return;
 		}
 		if (widget == pin1Dy0 || widget == pin1Dy1 || widget == pin1Dy01) {
@@ -3069,9 +3095,8 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 				pin1Dy1.setY(y1, yPixel1);
 			}
 			// y-only zoom
-			doZoom(0, pin1Dy0.getYVal(), 0,
-					pin1Dy1.getYVal(), imageView == null, imageView == null, 
-					false, false, false);
+			doZoom(0, pin1Dy0.getYVal(), 0, pin1Dy1.getYVal(), imageView == null,
+					imageView == null, false, false, false);
 			return;
 		}
 		if (widget == pin2Dx0 || widget == pin2Dx1 || widget == pin2Dx01) {
@@ -3116,14 +3141,14 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 			}
 			imageView.setView0(pin2Dx0.xPixel0, pin2Dy0.yPixel0, pin2Dx1.xPixel1,
 					pin2Dy1.yPixel1);
-			//update2dImage(false);
+			// update2dImage(false);
 			return;
 		}
 		return;
 	}
 
 	void clearIntegrals() {
-		checkIntegral(Double.NaN, 0, false);
+		checkIntegral(Double.NaN, 0, false, false);
 		// pd.repaint();
 	}
 
@@ -3273,6 +3298,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		selectedIntegral = null;
 		boolean isNextClick = nextClickForSetPeak;
 		nextClickForSetPeak = false;
+		System.out.println("mouseclick");
 		if (checkArrowUpDownClick(xPixel, yPixel))
 			return;
 		lastClickX = Double.NaN;
@@ -3394,7 +3420,12 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		return (ad instanceof JSVDialog && ad.isVisible());
 	}
 
-	/**
+
+  public void mousePressedEvent(int xPixel, int yPixel, int clickCount) {
+    checkWidgetEvent(xPixel, yPixel, true);   
+  }
+  
+  /**
 	 * @param xPixel  
 	 * @param yPixel 
 	 */
@@ -3417,7 +3448,7 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		PlotWidget thisWidget = pd.thisWidget;
 		if (pd.isIntegralDrag) {
 			if (isGoodEvent(zoomBox1D, null, true)) {
-				checkIntegral(toX(zoomBox1D.xPixel0), toX(zoomBox1D.xPixel1), true);
+				checkIntegral(toX(zoomBox1D.xPixel0), toX(zoomBox1D.xPixel1), true, false);
 			}
 			zoomBox1D.xPixel1 = zoomBox1D.xPixel0 = 0;
 			pendingIntegral = null;
@@ -4278,11 +4309,11 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 //				Math.abs(y0 - y1));
 //	}
 
-  private void drawHandle(Object g, int x, int y, boolean outlineOnly) {
+  private void drawHandle(Object g, int x, int y, int size, boolean outlineOnly) {
     if (outlineOnly)
-      g2d.drawRect(g, x - 2, y - 2, 4, 4);
+      g2d.drawRect(g, x - size, y - size, size*2, size*2);
     else
-      g2d.fillRect(g, x - 2, y - 2, 5, 5);
+      g2d.fillRect(g, x - size, y - size, size*2 + 1, size*2+1);
   }
 
    private void setCurrentBoxColor(Object g) {
@@ -4356,4 +4387,5 @@ synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 				pd.setSpecForIRMode(spec2);
 		}
 	}
+
 }
