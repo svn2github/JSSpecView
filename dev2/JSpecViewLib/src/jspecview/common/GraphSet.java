@@ -328,7 +328,7 @@ class GraphSet implements XYScaleConverter {
 		nSpectra++;
 	}
 
-	void splitStack(Lst<GraphSet> graphSets, boolean doSplit) {
+	void splitStack(boolean doSplit) {
 		if (doSplit && isSplittable) {
 			nSplit = nSpectra;
 			showAllStacked = false;
@@ -340,7 +340,7 @@ class GraphSet implements XYScaleConverter {
 			setSpectrumClicked(iSpectrumSelected);
 		}
 		stackSelected = false;
-		setFractionalPositions(pd, graphSets, LinkMode.NONE);
+		setFractionalPositions(pd, pd.graphSets, LinkMode.NONE);
 	}
 
 	private void setPositionForFrame(int iSplit) {
@@ -392,10 +392,17 @@ class GraphSet implements XYScaleConverter {
 	}
 
 	private boolean isSplitWidget(int xPixel, int yPixel) {
-		return (isSplittable && xPixel >= xPixel11 - 20 && yPixel >= yPixel00 + 1
-				&& xPixel <= xPixel11 - 10 && yPixel <= yPixel00 + 11);
+		return isFrameBox(xPixel,  yPixel, splitterX, splitterY);
+	//	return (isSplittable && xPixel >= xPixel11 - 20 && yPixel >= yPixel00 + 1
+				////&& xPixel <= xPixel11 - 10 && yPixel <= yPixel00 + 11);
 	}
 
+	private boolean isCloseWidget(int xPixel, int yPixel) {
+		return isFrameBox(xPixel, yPixel, closerX, closerY);
+	}
+
+	
+	
 	/**
 	 * Initializes the graph set
 	 * @param startIndex 
@@ -678,12 +685,12 @@ class GraphSet implements XYScaleConverter {
 			setScale(iSpectrumClicked);
 			if (clickCount == 3) {
 			} else {
-				m = findMeasurement(selectedSpectrumMeasurements, xPixel, yPixel, 1);
+				m = findMeasurement(selectedSpectrumMeasurements, xPixel, yPixel, Measurement.PT_XY1);
 				if (m != null) {
 					x = m.getXVal();
 					y = m.getYVal();
 				} else if ((m = findMeasurement(selectedSpectrumMeasurements, xPixel,
-						yPixel, 2)) != null) {
+						yPixel, Measurement.PT_XY2)) != null) {
 					x = m.getXVal2();
 					y = m.getYVal2();
 				} else {
@@ -756,7 +763,7 @@ class GraphSet implements XYScaleConverter {
 		if (selectedSpectrumIntegrals == null)
 			return false;
 		Integral integral = (Integral) findMeasurement(selectedSpectrumIntegrals,
-				xPixel, yPixel, -5);
+				xPixel, yPixel, Measurement.PT_INT_LABEL);
 		if (integral == null)
 			return false;
 		selectedIntegral = integral;
@@ -788,11 +795,11 @@ class GraphSet implements XYScaleConverter {
 			int yPixel, int iPt) {
 		if (measurements == null || measurements.size() == 0)
 			return null;
-		if (iPt == 0) {
-			Measurement m = findMeasurement(measurements, xPixel, yPixel, -1);
+		if (iPt == Measurement.PT_ON_LINE) {
+			Measurement m = findMeasurement(measurements, xPixel, yPixel, Measurement.PT_ON_LINE1);
 			if (m != null || measurements.get(0) instanceof Integral)
 				return m;
-			return findMeasurement(measurements, xPixel, yPixel, -2); // lower bar,
+			return findMeasurement(measurements, xPixel, yPixel, Measurement.PT_ON_LINE2); // lower bar,
 			// near baseline
 		}
 		for (int i = measurements.size(); --i >= 0;) {
@@ -808,19 +815,21 @@ class GraphSet implements XYScaleConverter {
 				y1 = y2 = (iPt == -2 ? yPixel1 - 2 : toPixelY(m.getYVal()));
 			}
 			switch (iPt) {
-			case 1:
+			case Measurement.PT_XY1:
 				if (Math.abs(xPixel - x1) + Math.abs(yPixel - y1) < 4)
 					return m;
 				break;
-			case 2:
+			case Measurement.PT_XY2:
 				if (Math.abs(xPixel - x2) + Math.abs(yPixel - y2) < 4)
 					return m;
 				break;
-			case -5: // label for integral
+			case Measurement.PT_INT_LABEL: // label for integral
 				y1 = y2 = (y1 + y2) / 2;
 				x2 = x1 + 20; // estimate only
 				//$FALL-THROUGH$
 			default:
+			case Measurement.PT_ON_LINE1:
+			case Measurement.PT_ON_LINE2:
 				if (isOnLine(xPixel, yPixel, x1, y1, x2, y2))
 					return m;
 				break;
@@ -933,7 +942,9 @@ class GraphSet implements XYScaleConverter {
 	private int xPixelPlot0;
 	private int yPixelPlot0;
 	private int yPixelPlot1;
-	private boolean nextClickForSetPeak;
+	private Double nextClickForSetPeak;
+	private double nextClickXValue;
+	private int closerX, closerY, splitterX, splitterY;
 
 	private void setWidgetValueByUser(PlotWidget pw) {
 		String sval;
@@ -1021,7 +1032,7 @@ class GraphSet implements XYScaleConverter {
 
 	private Coordinate setCoordClicked(int xPixel, double x, double y) {
 		if (y == 0)
-			nextClickForSetPeak = false;
+			nextClickForSetPeak = null;
 		if (Double.isNaN(x)) {
 			pd.coordClicked = null;
 			pd.coordsClicked = null;
@@ -1423,8 +1434,8 @@ class GraphSet implements XYScaleConverter {
 				: iSpectrumSelected);
 		Object g2 = (gRear == gMain ? gFront : gRear);
 		if (doAll) {
-			boolean addCurrentBox = (!isLinked // not if this is linked
-					&& isSplittable && (nSplit == 1 || pd.currentSplitPoint == iSplit));
+			boolean addCurrentBox = (pd.getCurrentGraphSet() == this && !isLinked // not if this is linked
+					&& (!isSplittable || (nSplit == 1 || pd.currentSplitPoint == iSplit)));
 			boolean drawUpDownArrows = (zoomEnabled // must have zoom enabled
 					&& !isDrawNoSpectra() // must be drawing spectrum
 					&& pd.isCurrentGraphSet(this) // must be current
@@ -1859,8 +1870,9 @@ class GraphSet implements XYScaleConverter {
 				drawPlot(g, index, spec, true, yOffset, false, ig, true);
 			drawIntegralValues(g, index, yOffset);
 		}
-		if (getIntegrationRatios(index) != null)
-			drawAnnotations(g, getIntegrationRatios(index),
+		Lst<Annotation> ratios = getIntegrationRatios(index);
+		if (ratios!= null)
+			drawAnnotations(g, ratios,
 					ScriptToken.INTEGRALPLOTCOLOR);
 	}
 
@@ -2011,7 +2023,9 @@ class GraphSet implements XYScaleConverter {
 			g2d.drawRect(g, xPixel0, yPixel0, xPixels, yPixels);
 			if (pd.isPrinting)
 				return;
-		}
+		}  
+		
+		
 		setCurrentBoxColor(g);
 		if (drawUpDownArrows) {
 			if (iSpec >= 0) {
@@ -2039,8 +2053,20 @@ class GraphSet implements XYScaleConverter {
 			g2d.drawLine(g, x1, y1, x2, y1); 
 			g2d.drawLine(g, x2, y1, x2, y2); 
 			g2d.drawLine(g, x1, y2, x2, y2); 
-			if (addSplitBox)
+			splitterX = closerX = Integer.MIN_VALUE;
+			drawBox(g, x2 - 10, y1, x2, y1 + 10, null);
+			g2d.drawLine(g, x2 - 10, y1 + 10, x2, y1);
+			g2d.drawLine(g, x2, y1 + 10, x2 - 10, y1);
+			closerX = x2 - 10;
+			closerY = y1;
+			if (addSplitBox) {
+				x2 -= 10;		
 				fillBox(g, x2 - 10, y1, x2, y1 + 10, null);
+				splitterX = x2 - 10;
+				splitterY = y1;	
+
+			}
+
 		}
 	}
 
@@ -2213,7 +2239,7 @@ class GraphSet implements XYScaleConverter {
 	private void drawUnits(Object g, String s, int x, int y, double hOff,
 			double vOff) {
 		setColorFromToken(g, ScriptToken.UNITSCOLOR);
-		pd.setFont(g, (imageView == null ? this : imageView).getXPixels(), FONT_ITALIC, 10, false);
+		pd.setFont(g, (imageView == null ? this : imageView).getXPixels(), FONT_ITALIC | FONT_BOLD, 10, false);
 		g2d.drawString(g, s, (int) (x - pd.getStringWidth(s) * hOff),
 				(int) (y + pd.getFontHeight() * vOff));
 
@@ -2333,13 +2359,13 @@ class GraphSet implements XYScaleConverter {
 	// determine whether there are any ratio annotations to draw
 	private void drawAnnotations(Object g, Lst<Annotation> annotations,
 			ScriptToken whatColor) {
-		pd.setFont(g, xPixels, FONT_BOLD, 12, false);
+		pd.setFont(g, xPixels, FONT_BOLD, 18, false);
 		for (int i = annotations.size(); --i >= 0;) {
 			Annotation note = annotations.get(i);
 			setAnnotationColor(g, note, whatColor);
 			XYScaleConverter c = (note.is2D ? imageView : this);
 			int x = c.toPixelX(note.getXVal());
-			int y = (note.isPixels() ? (int) (yPixel0 + 10 * pd.scalingFactor - note.getYVal())
+			int y = (note.isPixels() ? (int) (yPixel0 + 10 + 10 * pd.scalingFactor - note.getYVal())
 					: note.is2D ? imageView.subIndexToPixelY((int) note.getYVal())
 							: toPixelY(note.getYVal()));
 			g2d.drawString(g, note.text, x + note.offsetX * pd.scalingFactor, y - note.offsetY * pd.scalingFactor);
@@ -2461,9 +2487,8 @@ class GraphSet implements XYScaleConverter {
 			a.text = sval;
 		return true;
 	}
-
+	
 	private boolean checkIntegral(double x1, double x2, boolean isFinal, boolean isPressOnly) {
-
 		AnnotationData ad = getDialog(AType.Integration, -1);
 		if (ad == null)
 			return false;
@@ -2478,9 +2503,25 @@ class GraphSet implements XYScaleConverter {
 	}
 
 	private void setToolTipForPixels(int xPixel, int yPixel) {
+	
+			
+		if (iSpectrumMovedTo != iSpectrumClicked || pd.getCurrentGraphSet() != this) {
+			pd.setToolTipText("click spectrum to activate");
+			return;
+		}
+		if (isSplitWidget(xPixel, yPixel)) {
+			pd.setToolTipText("click to " + (nSplit > 1 ? "combine" : "split"));
+			return;
+		}
+		if (isCloseWidget(xPixel, yPixel)) {
+			pd.setToolTipText("click to close");
+			return;
+		}
+		
 		PlotWidget pw = getPinSelected(xPixel, yPixel);
 		int precisionX = getScale().precision[0];
 	  int precisionY = getScale().precision[1];
+	 	
 		if (pw != null) {
 			if (setStartupPinTip())
 				return;
@@ -2546,7 +2587,8 @@ class GraphSet implements XYScaleConverter {
 			xx += ", " + DF.formatDecimalDbl(yPt, 1);
 		}
 		pd.setToolTipText(
-						(pendingMeasurement != null || selectedMeasurement != null || selectedIntegral != null ? 
+						(selectedIntegral != null  ? "click to set value" : 
+							pendingMeasurement != null || selectedMeasurement != null ? 
 								(pd.hasFocus() ? "Press ESC to delete "	
 										+ (selectedIntegral != null ? "integral, DEL to delete all visible, or N to normalize" 
 													: pendingMeasurement == null ? "\"" + selectedMeasurement.text + "\" or DEL to delete all visible" 
@@ -2557,6 +2599,10 @@ class GraphSet implements XYScaleConverter {
 				// + " :" + iSpectrumSelected + " :" + iSpectrumMovedTo
 
 				);
+	}
+
+	private boolean isFrameBox(int xPixel, int yPixel, int boxX, int boxY) {
+		return Math.abs(xPixel - (boxX + 5)) < 5 && Math.abs(yPixel - (boxY + 5)) < 5;
 	}
 
 	private String setCoordStr(double xPt, double yPt) {
@@ -2919,7 +2965,7 @@ class GraphSet implements XYScaleConverter {
 	}
 
 	synchronized boolean checkSpectrumClickedEvent(int xPixel, int yPixel, int clickCount) {
-		if (nextClickForSetPeak)
+		if (nextClickForSetPeak != null)
 			return false;
 		if (clickCount > 0 && checkArrowLeftRightClick(xPixel, yPixel))
 			return true;
@@ -2934,7 +2980,7 @@ class GraphSet implements XYScaleConverter {
 			boolean isOnIntegral = isOnSpectrum(xPixel, yPixel, -1);
 			pd.integralShiftMode = (isOnIntegral ? getShiftMode(xPixel, yPixel) : 0);
 			pd.isIntegralDrag = (pd.integralShiftMode == 0 && (isOnIntegral || haveIntegralDisplayed(-1)
-					&& findMeasurement(getIntegrationGraph(-1), xPixel, yPixel, 0) != null));
+					&& findMeasurement(getIntegrationGraph(-1), xPixel, yPixel, Measurement.PT_ON_LINE) != null));
 			if (pd.integralShiftMode != 0)
 				// pd.repaint();
 				return false;
@@ -2976,6 +3022,7 @@ class GraphSet implements XYScaleConverter {
 
 	private boolean triggered = true;
 	private int lastIntDragX;
+	private int nextClickMode;
 
 	synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		if (!triggered)
@@ -2983,8 +3030,7 @@ class GraphSet implements XYScaleConverter {
 		triggered = false;
 		PlotWidget widget;
 		if (isPress) {
-			lastIntDragX = xPixel;
-			if (pd.clickCount == 2) {
+			if (pd.clickCount == 2 && lastIntDragX != xPixel) {
 				if (pendingMeasurement == null) {
 					if (iSpectrumClicked == -1 && iPreviousSpectrumClicked >= 0) {
 						setSpectrumClicked(iPreviousSpectrumClicked);
@@ -2993,6 +3039,7 @@ class GraphSet implements XYScaleConverter {
 					return;
 				}
 			} else {
+				lastIntDragX = xPixel;
 			  if (checkIntegral(toX(xPixel), Double.NaN, false, true))
 			    return;
 			}
@@ -3006,6 +3053,8 @@ class GraphSet implements XYScaleConverter {
 					if (pd.shiftPressed)
 						setSpectrumClicked(iPreviousSpectrumClicked);
 					xPixel = fixX(xPixel);
+					if (zoomBox1D == null)
+						newPins();
 					zoomBox1D.setX(toX(xPixel), xPixel);
 					zoomBox1D.yPixel0 = yPixel;
 					widget = zoomBox1D;
@@ -3018,7 +3067,7 @@ class GraphSet implements XYScaleConverter {
 			pd.thisWidget = widget;
 			return;
 		}
-		nextClickForSetPeak = false;
+		nextClickForSetPeak = null;
 		widget = pd.thisWidget;
 		if (widget == null)
 			return;
@@ -3027,7 +3076,7 @@ class GraphSet implements XYScaleConverter {
 			zoomBox1D.xPixel1 = fixX(xPixel);
 			zoomBox1D.yPixel1 = fixY(yPixel);
 			if (pd.isIntegralDrag && zoomBox1D.xPixel0 != zoomBox1D.xPixel1) {
-				if ((lastIntDragX < xPixel) != (zoomBox1D.xPixel0 < xPixel)) {
+				if ((lastIntDragX <= xPixel) != (zoomBox1D.xPixel0 <= xPixel)) {
 					// switched direction of integral drag
 					zoomBox1D.xPixel0 = lastIntDragX;
 					zoomBox1D.xPixel1 = xPixel;
@@ -3296,16 +3345,19 @@ class GraphSet implements XYScaleConverter {
 			boolean isControlDown) {
 		selectedMeasurement = null;
 		selectedIntegral = null;
-		boolean isNextClick = nextClickForSetPeak;
-		nextClickForSetPeak = false;
+		Double isNextClick = nextClickForSetPeak;
+		nextClickForSetPeak = null;
 		System.out.println("mouseclick");
 		if (checkArrowUpDownClick(xPixel, yPixel))
 			return;
 		lastClickX = Double.NaN;
 		lastPixelX = Integer.MAX_VALUE;
 		if (isSplitWidget(xPixel, yPixel)) {
-			splitStack(pd.graphSets, nSplit == 1);
-			// pd.repaint();
+			splitStack(nSplit == 1);
+			return;
+		}
+		if (isCloseWidget(xPixel, yPixel)) {
+			pd.closeSpectrum();
 			return;
 		}
 		PlotWidget pw = getPinSelected(xPixel, yPixel);
@@ -3395,8 +3447,10 @@ class GraphSet implements XYScaleConverter {
 			
 			setCoordClicked(xPixel, toX(xPixel), toY(yPixel));
 			updateDialog(AType.PeakList, -1);
-			if (isNextClick) {
-				shiftSpectrum(Double.NaN, Double.NaN);
+			if (isNextClick != null) {
+				nextClickForSetPeak = isNextClick;
+				shiftSpectrum(SHIFT_CLICKED, Double.NaN);
+				nextClickForSetPeak = null;
 				return;
 			}
 			
@@ -3484,6 +3538,7 @@ class GraphSet implements XYScaleConverter {
 
 	synchronized void mouseMovedEvent(int xPixel, int yPixel) {
 		if (nSpectra > 1) {
+
 			int iFrame = getSplitPoint(yPixel);
 			setPositionForFrame(iFrame);
 			setSpectrumMovedTo(nSplit > 1 ? iFrame : iSpectrumSelected);
@@ -3510,16 +3565,16 @@ class GraphSet implements XYScaleConverter {
 			setToolTipForPixels(xPixel, yPixel);
 		} else {
 			selectedMeasurement = (inPlotMove && selectedSpectrumMeasurements != null ? findMeasurement(
-					selectedSpectrumMeasurements, xPixel, yPixel, 0)
+					selectedSpectrumMeasurements, xPixel, yPixel,Measurement.PT_ON_LINE)
 					: null);
 			selectedIntegral = null;
 			if (inPlotMove && selectedSpectrumIntegrals != null
 					&& selectedMeasurement == null) {
 				selectedIntegral = (Integral) findMeasurement(
-						selectedSpectrumIntegrals, xPixel, yPixel, 0);
+						selectedSpectrumIntegrals, xPixel, yPixel, Measurement.PT_ON_LINE);
 				if (selectedIntegral == null)
 					selectedIntegral = (Integral) findMeasurement(
-							selectedSpectrumIntegrals, xPixel, yPixel, -5);
+							selectedSpectrumIntegrals, xPixel, yPixel, Measurement.PT_INT_LABEL);
 			}
 			setToolTipForPixels(xPixel, yPixel);
 			if (imageView == null) {
@@ -3626,7 +3681,7 @@ class GraphSet implements XYScaleConverter {
 					&& (getSpectrumAt(i).matchesPeakTypeModel(type, model))) {
 				setSpectrumSelected(i);
 				if (nSplit > 1)
-					splitStack(pd.graphSets, true);
+					splitStack(true);
 				haveFound = true;
 			}
 		if (nSpectra > 1 && !haveFound && iSpectrumSelected >= 0
@@ -3789,60 +3844,70 @@ class GraphSet implements XYScaleConverter {
 		} else {
 			doZoom(x1, y1, x2, y2, true, (y1 != y2), false, true, true);
 		}
-	}
+	}	
+	static final int SHIFT_PEAK = 1;
+  static final int SHIFT_SETX = 2;
+  static final int SHIFT_X = 3;
+  static final int SHIFT_CLICKED = 4;
+
 
 	/**
-	 * result depends upon the values of dx and x1: x1 NaN --> just use dx dx NaN
-	 * --> use value as x1 and nearest peak to last click as x0 dx MIN_VALUE -->
-	 * use value as x1 and last click exactly as x0 dx or x1 MAX_VALUE --> reset
-	 * to original (apply dx = -specShift)
+	 * apply a shift to the x-axis based on the next click or a specified value
 	 * 
-	 * @param dx
-	 * @param x1
+	 * @param mode
+	 *          one of PEAK(1), SETX(2), X(3), CLICKED(4)
+	 * @param x
+	 *          DOUBLE_MAX_VALUE - reset, DOUBLE.MIN_VALUE - ask, value
 	 * @return true if accomplished
 	 */
-	boolean shiftSpectrum(double dx, double x1) {
-  	// setpeak NONE     Double.NaN,       Double.MAX_VALUE
-  	// shiftx  NONE     Double.MAX_VALUE, Double.NaN
-
-		// setpeak  ?       Double.NaN,       Double.MIN_VALUE
-
-		// setpeak x.x      Double.NaN,       value
-  	// setx    x.x			Double.MIN_VALUE, value
-		// setpeak          Double.NaN,       Double.NaN
-    // setx       			Double.MIN_VALUE, Double.NaN
-
-		// shiftx  x.x      value,            Double.NaN
+	boolean shiftSpectrum(int mode, double x) {
 
 		Spectrum spec = getSpectrum();
 		if (!spec.isNMR() || !spec.is1D())
 			return false;
-		if (x1 == Double.MAX_VALUE || dx == Double.MAX_VALUE) {
+		String ok = null;
+		double dx = 0;
+		if (x == Double.MAX_VALUE) {
 			// setPeak NONE or setX NONE
 			dx = -spec.addSpecShift(0);
-		} else if (x1 == Double.MIN_VALUE) {
-			// setpeak ? -- set for setpeak Double.NaN,       Double.NaN after click
-			nextClickForSetPeak = true;
-			jsvp.showMessage("Click on or beside a peak to set its chemical shift.", "Set Reference");
-			return false;
-		} else if (Double.isNaN(dx) || dx == Double.MIN_VALUE) {
-			// setpeak     or setx
-			// setpeak x.x or setx x.x
-			double x0 = (dx == Double.MIN_VALUE ? lastClickX : getNearestPeak(spec, lastClickX, toY(pd.mouseY)));
- 			if (Double.isNaN(x0))
+		} else {
+			switch (mode) {
+			case SHIFT_X:
+				dx = x;
+				break;
+			case SHIFT_PEAK:
+			case SHIFT_SETX:
+				ok = pd
+						.getInput(
+								"Click on "
+										+ (mode == SHIFT_PEAK ? "or beside a peak to set its chemical shift"
+												: "the spectrum set the chemical shift at that point")
+										+ (x == Integer.MIN_VALUE ? "" : " to " + x) + ".",
+								"Set Reference "
+										+ (mode == SHIFT_PEAK ? "for Peak" : "at Point"), "OK");
+				nextClickForSetPeak = ("OK".equals(ok) ? Double.valueOf(x) : null);
+				nextClickMode = mode;
 				return false;
-			if (Double.isNaN(x1))
-				try {
-					String s = pd.getInput("New chemical shift (set blank to reset)",
-							"Set Reference", "" + x0).trim();
-					if (s.length() == 0)
-						x1 = x0 - spec.addSpecShift(0);
-					else		
-					  x1 = Double.parseDouble(s);
-				} catch (Exception e) {
-					return false;
-				}
-			dx = x1 - x0;
+			case SHIFT_CLICKED:
+				x = nextClickForSetPeak.doubleValue();
+				nextClickForSetPeak = null;
+				double x0 = (nextClickMode == SHIFT_PEAK ? getNearestPeak(spec,
+						lastClickX, toY(pd.mouseY)) : lastClickX);
+				if (x == Double.MIN_VALUE)
+					try {
+						String s = pd.getInput("New chemical shift (set blank to reset)",
+								"Set Reference",
+								DF.formatDecimalDbl(x0, getScale().precision[0])).trim();
+						if (s.length() == 0)
+							x = x0 - spec.addSpecShift(0);
+						else
+							x = Double.parseDouble(s);
+					} catch (Exception e) {
+						return false;
+					}
+				dx = x - x0;
+				break;
+			}
 		}
 		if (dx == 0)
 			return false;
@@ -3855,16 +3920,16 @@ class GraphSet implements XYScaleConverter {
 			for (Map.Entry<String, AnnotationData> e : dialogs.entrySet())
 				if (e.getValue().getSpectrum() == spec)
 					e.getValue().setSpecShift(dx);
-		//double dx0 = getScale().specShift;
-		//for (int i = viewList.size(); --i >= 0;)
-			//viewList.get(i).addSpecShift(dx);
-		//if (getScale().specShift == dx0)
-			getScale().addSpecShift(dx);
+		// double dx0 = getScale().specShift;
+		// for (int i = viewList.size(); --i >= 0;)
+		// viewList.get(i).addSpecShift(dx);
+		// if (getScale().specShift == dx0)
+		getScale().addSpecShift(dx);
 		if (!Double.isNaN(lastClickX))
 			lastClickX += dx;
 		updateDialogs();
-		doZoom(0, getScale().minYOnScale, 0,
-				getScale().maxYOnScale, true, true, false, true, false);
+		doZoom(0, getScale().minYOnScale, 0, getScale().maxYOnScale, true, true,
+				false, true, false);
 		pd.repaint();
 		return true;
 	}
@@ -4062,7 +4127,9 @@ class GraphSet implements XYScaleConverter {
 	
 	Map<String, Object> getInfo(String key, int iSpec) {
 		Map<String, Object> spectraInfo = new Hashtable<String, Object>();
-		if ("viewInfo".equalsIgnoreCase(key))
+		if ("".equals(key)) {
+			spectraInfo.put("KEYS", "viewInfo spectra");
+		} else if ("viewInfo".equalsIgnoreCase(key))
 			return getScale().getInfo(spectraInfo);
 		Lst<Map<String, Object>> specInfo = new Lst<Map<String, Object>>();		
 		spectraInfo.put("spectra", specInfo);
@@ -4302,12 +4369,12 @@ class GraphSet implements XYScaleConverter {
 				    - x1), Math.abs(y0 - y1));
   }
 
-//	private void drawBox(Object g, int x0, int y0, int x1, int y1,
-//			ScriptToken whatColor) {
-//		setColorFromToken(g, whatColor);
-//		g2d.drawRect(g, Math.min(x0, x1), Math.min(y0, y1), Math.abs(x0 - x1),
-//				Math.abs(y0 - y1));
-//	}
+	private void drawBox(Object g, int x0, int y0, int x1, int y1,
+			ScriptToken whatColor) {
+		setColorFromToken(g, whatColor);
+		g2d.drawRect(g, Math.min(x0, x1), Math.min(y0, y1), Math.abs(x0 - x1) - 1,
+				Math.abs(y0 - y1) - 1);
+	}
 
   private void drawHandle(Object g, int x, int y, int size, boolean outlineOnly) {
     if (outlineOnly)
@@ -4386,6 +4453,11 @@ class GraphSet implements XYScaleConverter {
 			if (spec2 != spec)
 				pd.setSpecForIRMode(spec2);
 		}
+	}
+
+	public int getSpectrumCount() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }

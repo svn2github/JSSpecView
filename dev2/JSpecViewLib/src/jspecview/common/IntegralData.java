@@ -278,18 +278,18 @@ public class IntegralData extends MeasurementData {
 	}
 
 	/**
-	 * Parses integration ratios and x values from a string and returns them as
+	 * Parses x-coordinates and values from a string and returns them as
 	 * <code>IntegrationRatio</code> objects
 	 * @param spec 
 	 * 
-	 * @param value
+	 * @param key_values  "x:value,x:value,x:value..."
 	 * @return JmolList<IntegrationRatio> object representing integration ratios
 	 */
 	public static Lst<Annotation> getIntegrationRatiosFromString(
-			Spectrum spec, String value) {
+			Spectrum spec, String key_values) {
 		Lst<Annotation> ratios = new Lst<Annotation>();
 		// split input into x-value/integral-value pairs
-		StringTokenizer allParamTokens = new StringTokenizer(value, ",");
+		StringTokenizer allParamTokens = new StringTokenizer(key_values, ",");
 		while (allParamTokens.hasMoreTokens()) {
 			String token = allParamTokens.nextToken();
 			// now split the x-value/integral-value pair

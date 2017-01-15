@@ -307,9 +307,19 @@ public class JsPanel implements JSVPanel {
 		
 	}
 
+	@SuppressWarnings("unused")
 	@Override
 	public void setToolTipText(String s) {
-		// TODO Auto-generated method stub
+		int x = pd.mouseX;
+		int y = pd.mouseY;
+		Object applet = vwr.html5Applet;
+		/**
+		 * @j2sNative
+		 * 
+		 * applet._showTooltip && applet._showTooltip(s, x, y);
+		 * 
+		 */
+		{}
 		
 	}
 

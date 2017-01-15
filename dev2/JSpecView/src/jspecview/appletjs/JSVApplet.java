@@ -644,5 +644,13 @@ public class JSVApplet implements JSVAppletInterface,
 	public void setScreenDimension(int width, int height) {
 		app.vwr.setScreenDimension(width, height);		
 	}
+	
+	@Override
+	public String checkScript(String script) {
+		String s = app.checkScript(script);
+		if (s != null)
+			System.out.println(s);
+		return s;
+	}
 
 }

@@ -169,15 +169,22 @@ public class PanelData implements EventManager {
 		if (selectedOnly)
 			return currentGraphSet.getInfo(key, getCurrentSpectrumIndex());
 		Set<Entry<ScriptToken, Object>> entries = options.entrySet();
-		for (Entry<ScriptToken, Object> entry : entries)
-			Parameters.putInfo(key, info, entry.getKey().name(), entry.getValue());
-		Parameters.putInfo(key, info, "type", getSpectrumAt(0).getDataType());
-		Parameters.putInfo(key, info, "title", title);
-		Parameters.putInfo(key, info, "nSets", Integer.valueOf(graphSets.size()));
-		sets = new Lst<Map<String, Object>>();
-		for (int i = graphSets.size(); --i >= 0;)
-			sets.addLast(graphSets.get(i).getInfo(key, -1));
-		info.put("sets", sets);
+		if ("".equals(key)) {
+			String val = "type title nSets ";
+			for (Entry<ScriptToken, Object> entry : entries)
+				val += entry.getKey().name() + " ";
+			info.put("KEYS", val);
+		} else {
+			for (Entry<ScriptToken, Object> entry : entries)
+				Parameters.putInfo(key, info, entry.getKey().name(), entry.getValue());
+			Parameters.putInfo(key, info, "type", getSpectrumAt(0).getDataType());
+			Parameters.putInfo(key, info, "title", title);
+			Parameters.putInfo(key, info, "nSets", Integer.valueOf(graphSets.size()));
+		}
+			sets = new Lst<Map<String, Object>>();
+			for (int i = graphSets.size(); --i >= 0;)
+				sets.addLast(graphSets.get(i).getInfo(key, -1));
+			info.put("sets", sets);
 		return info;
 	}
 
@@ -468,7 +475,7 @@ public class PanelData implements EventManager {
 	 */
 	public void drawCoordinates(Object g, int top, int x, int y) {
 		g2d.setGraphicsColor(g, coordinatesColor);
-		Font font = setFont(g, jsvp.getWidth(), Font.FONT_STYLE_PLAIN, 12,
+		Font font = setFont(g, jsvp.getWidth(), Font.FONT_STYLE_BOLD, 14,
 				true);
 		g2d.drawString(g, coordStr, x - font.stringWidth(coordStr), y);
 	}
@@ -580,7 +587,7 @@ public class PanelData implements EventManager {
 
 	// //// currentGraphSet methods
 
-	private void setCurrentGraphSet(GraphSet gs, int yPixel, int clickCount) {
+	private boolean setCurrentGraphSet(GraphSet gs, int yPixel, int clickCount) {
 		// Need to check for nSplit > 1 here because this could be a 
 		// mass spec that has been selected by clicking on a GC peak.
 		// In that case, there is no split, and we should not be changing
@@ -595,7 +602,7 @@ public class PanelData implements EventManager {
 		if (!isNewSet) {
 			isNewSet = gs.checkSpectrumClickedEvent(mouseX, mouseY, clickCount);
 			if (!isNewSet)
-				return;
+				return false;
 			currentSplitPoint = splitPoint = gs.getCurrentSpectrumIndex();
 			setSpectrum(splitPoint, true);
 		}
@@ -605,6 +612,7 @@ public class PanelData implements EventManager {
 		// or nSplit == 1 and showAllStacked and isClick and is a spectrum click)
 
 		jumpToSpectrumIndex(splitPoint, isNewSet || gs.nSplit > 1 && isNewSplitPoint);
+		return isNewSet;
 	}
 	
 	public void jumpToSpectrum(Spectrum spec) {
@@ -623,7 +631,7 @@ public class PanelData implements EventManager {
 		
 	}
 	public void splitStack(boolean doSplit) {
-		currentGraphSet.splitStack(graphSets, doSplit);
+		currentGraphSet.splitStack(doSplit);
 	}
 
 	public int getNumberOfSpectraInCurrentSet() {
@@ -808,14 +816,26 @@ public class PanelData implements EventManager {
 	/**
 	 * shifts xyCoords for a spectrum by the specified amount
 	 * 
+	 * setpeak NONE Double.NaN, Double.MAX_VALUE
+	 * 
+	 * setpeak ? Double.NaN, Double.MIN_VALUE
+	 * 
+	 * setpeak x.x Double.NaN, value
+	 * 
+	 * shiftx NONE Double.MAX_VALUE, Double.NaN
+	 * 
+	 * shiftx x.x value, Double.NaN
+	 * 
+	 * setx x.x Double.MIN_VALUE, value
+	 * 
 	 * @param dx
 	 *          NaN to determine from x0, x1
 	 * @param x1
 	 *          NaN to query for new value
 	 * @return true if successful
 	 */
-	public boolean shiftSpectrum(double dx, double x1) {
-		return currentGraphSet.shiftSpectrum(dx, x1);
+	public boolean shiftSpectrum(int mode, double x) {
+		return currentGraphSet.shiftSpectrum(mode, x);
 
 	}
 
@@ -954,6 +974,7 @@ public class PanelData implements EventManager {
 		GraphSet gs = GraphSet.findGraphSet(graphSets, xPixel, yPixel);
 		if (gs == null)
 			return;
+//		setCurrentGraphSet(gs, yPixel, 0);
 		gs.mouseMovedEvent(xPixel, yPixel);
 	}
 
@@ -1651,6 +1672,12 @@ public class PanelData implements EventManager {
 	public void setIRMode(IRMode mode, String type) {
 		for (int i = graphSets.size(); --i >= 0;)
 			graphSets.get(i).setIRMode(mode, type);
+	}
+
+	public void closeSpectrum() {
+		vwr.close("views");
+		vwr.close(getSourceID());
+		vwr.execView("*", true);		
 	}
 
 }

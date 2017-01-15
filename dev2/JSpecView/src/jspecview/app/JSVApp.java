@@ -754,4 +754,8 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 		return vwr.print(fileName);
 	}
 
+	public String checkScript(String script) {
+		return vwr.checkScript(script);
+	}
+
 }

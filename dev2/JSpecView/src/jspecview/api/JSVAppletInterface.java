@@ -157,4 +157,6 @@ public interface JSVAppletInterface {
   
   public abstract String print(String fileName);
 
+	public abstract String checkScript(String script);
+
 }
