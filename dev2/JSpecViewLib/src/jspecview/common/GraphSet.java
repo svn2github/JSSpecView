@@ -2572,7 +2572,7 @@ class GraphSet implements XYScaleConverter {
 				String s = DF.formatDecimalDbl(imageView.toX(xPixel), precisionX) + " "
 						+ getSpectrum().getAxisLabel(true) + ",  "
 						+ get2DYLabel(isub, precisionX);
-				pd.setToolTipText(pd.display1D ? s : "");
+				pd.setToolTipText(s);
 				pd.coordStr = s;
 				return;
 			}
