@@ -943,7 +943,6 @@ class GraphSet implements XYScaleConverter {
 	private int yPixelPlot0;
 	private int yPixelPlot1;
 	private Double nextClickForSetPeak;
-	private double nextClickXValue;
 	private int closerX, closerY, splitterX, splitterY;
 
 	private void setWidgetValueByUser(PlotWidget pw) {
@@ -2488,17 +2487,31 @@ class GraphSet implements XYScaleConverter {
 		return true;
 	}
 	
-	private boolean checkIntegral(double x1, double x2, boolean isFinal, boolean isPressOnly) {
+	/**
+	 * @param x1 start of integral or NaN to clear
+	 * @param x2 end of (pending) integral or NaN to split 
+	 * @param isFinal 
+	 * @return 
+	 * 
+	 * 
+	 * 
+	 */
+	private boolean checkIntegral(double x1, double x2, boolean isFinal) {
 		AnnotationData ad = getDialog(AType.Integration, -1);
 		if (ad == null)
 			return false;
 		Integral integral = ((IntegralData) ad.getData()).addIntegralRegion(x1, x2);
 		if (isFinal && ad instanceof JSVDialog)
 			((JSVDialog) ad).update(null, 0, 0);
+
 		if (Double.isNaN(x2))
 		  return false;
-		selectedSpectrumIntegrals = null;
 		pendingIntegral = (isFinal ? null : integral);
+		pd.isIntegralDrag = !isFinal;
+
+
+		selectedSpectrumIntegrals = null;
+		//System.out.println("checkINtegral isFinal" + x1 + " " + x2 + " " + isFinal + " " + pendingIntegral);
 		return true;
 	}
 
@@ -2967,8 +2980,8 @@ class GraphSet implements XYScaleConverter {
 	synchronized boolean checkSpectrumClickedEvent(int xPixel, int yPixel, int clickCount) {
 		if (nextClickForSetPeak != null)
 			return false;
-		if (clickCount > 0 && checkArrowLeftRightClick(xPixel, yPixel))
-			return true;
+		//if (clickCount > 0 && checkArrowLeftRightClick(xPixel, yPixel))
+			//return true;
 		if (clickCount > 1 || pendingMeasurement != null
 				|| !isInPlotRegion(xPixel, yPixel))
 			return false;
@@ -2981,8 +2994,9 @@ class GraphSet implements XYScaleConverter {
 			pd.integralShiftMode = (isOnIntegral ? getShiftMode(xPixel, yPixel) : 0);
 			pd.isIntegralDrag = (pd.integralShiftMode == 0 && (isOnIntegral || haveIntegralDisplayed(-1)
 					&& findMeasurement(getIntegrationGraph(-1), xPixel, yPixel, Measurement.PT_ON_LINE) != null));
+			
+
 			if (pd.integralShiftMode != 0)
-				// pd.repaint();
 				return false;
 		}
 
@@ -3039,9 +3053,16 @@ class GraphSet implements XYScaleConverter {
 					return;
 				}
 			} else {
+				checkIntegral(toX(xPixel), Double.NaN, false);
+
+				if (lastIntDragX == xPixel) {
+					// split integral
+					pd.isIntegralDrag = true;
+					//System.out.println("checkWidgetEvent STARTING INTEGRAL");
+					if (!checkIntegral(toX(xPixel), toX(xPixel), false))
+						return;
+				} 
 				lastIntDragX = xPixel;
-			  if (checkIntegral(toX(xPixel), Double.NaN, false, true))
-			    return;
 			}
 			if (pendingMeasurement != null)
 				return;
@@ -3083,7 +3104,8 @@ class GraphSet implements XYScaleConverter {
 					zoomBox1D.setXVal(toX(zoomBox1D.xPixel0));
 				}
 				lastIntDragX = xPixel;
-				checkIntegral(zoomBox1D.getXVal(), toX(zoomBox1D.xPixel1), false, false);
+				//System.out.println("checkingEvent2 - final");
+				checkIntegral(zoomBox1D.getXVal(), toX(zoomBox1D.xPixel1), false);
 			}
 			return;
 		}
@@ -3197,7 +3219,7 @@ class GraphSet implements XYScaleConverter {
 	}
 
 	void clearIntegrals() {
-		checkIntegral(Double.NaN, 0, false, false);
+		checkIntegral(Double.NaN, 0, false);
 		// pd.repaint();
 	}
 
@@ -3343,12 +3365,16 @@ class GraphSet implements XYScaleConverter {
 
 	synchronized void mouseClickedEvent(int xPixel, int yPixel, int clickCount,
 			boolean isControlDown) {
+		
+		//System.out.println("now pd.isIntegralClick1 = " + pd.isIntegralDrag);
+		
 		selectedMeasurement = null;
 		selectedIntegral = null;
 		Double isNextClick = nextClickForSetPeak;
 		nextClickForSetPeak = null;
-		System.out.println("mouseclick");
-		if (checkArrowUpDownClick(xPixel, yPixel))
+		//System.out.println("mouseclick" + clickCount);
+		if (checkArrowUpDownClick(xPixel, yPixel)
+				|| checkArrowLeftRightClick(xPixel, yPixel))
 			return;
 		lastClickX = Double.NaN;
 		lastPixelX = Integer.MAX_VALUE;
@@ -3433,6 +3459,8 @@ class GraphSet implements XYScaleConverter {
 			// pd.repaint();
 			return;
 		}
+		
+		//System.out.println("now pd.isIntegralClick1 = " + pd.isIntegralDrag);
 
 		// 1D single click
 
@@ -3449,7 +3477,7 @@ class GraphSet implements XYScaleConverter {
 			updateDialog(AType.PeakList, -1);
 			if (isNextClick != null) {
 				nextClickForSetPeak = isNextClick;
-				shiftSpectrum(SHIFT_CLICKED, Double.NaN);
+				shiftSpectrum(SHIFT_CLICKED, Double.NaN, Double.NaN);
 				nextClickForSetPeak = null;
 				return;
 			}
@@ -3459,6 +3487,8 @@ class GraphSet implements XYScaleConverter {
 			setCoordClicked(0, Double.NaN, 0);
 		}
 		pd.notifyPeakPickedListeners(null);
+		
+		//System.out.println("now pd.isIntegralClick2 = " + pd.isIntegralDrag);
 	}
 
 	private void updateDialog(AType type, int iSpec) {
@@ -3476,7 +3506,13 @@ class GraphSet implements XYScaleConverter {
 
 
   public void mousePressedEvent(int xPixel, int yPixel, int clickCount) {
-    checkWidgetEvent(xPixel, yPixel, true);   
+		
+		//System.out.println("now pd.isIntegralDragPress1 = " + pd.isIntegralDrag);
+		
+    checkWidgetEvent(xPixel, yPixel, true);
+    
+
+		//System.out.println("now pd.isIntegralPress2 = " + pd.isIntegralDrag);
   }
   
   /**
@@ -3484,6 +3520,10 @@ class GraphSet implements XYScaleConverter {
 	 * @param yPixel 
 	 */
 	synchronized void mouseReleasedEvent(int xPixel, int yPixel) {
+		
+
+		//System.out.println("now pd.isIntegralDragRel1 = " + pd.isIntegralDrag);
+		
 		if (pendingMeasurement != null) {
 			if (Math.abs(toPixelX(pendingMeasurement.getXVal()) - xPixel) < 2)
 				pendingMeasurement = null;
@@ -3502,7 +3542,7 @@ class GraphSet implements XYScaleConverter {
 		PlotWidget thisWidget = pd.thisWidget;
 		if (pd.isIntegralDrag) {
 			if (isGoodEvent(zoomBox1D, null, true)) {
-				checkIntegral(toX(zoomBox1D.xPixel0), toX(zoomBox1D.xPixel1), true, false);
+				checkIntegral(toX(zoomBox1D.xPixel0), toX(zoomBox1D.xPixel1), true);
 			}
 			zoomBox1D.xPixel1 = zoomBox1D.xPixel0 = 0;
 			pendingIntegral = null;
@@ -3519,6 +3559,8 @@ class GraphSet implements XYScaleConverter {
 					.toX(imageView.xPixel0 + imageView.xPixels - 1), getScale().maxY, false,
 					false, false, true, true);
 		} else if (thisWidget == zoomBox1D) {
+
+			//System.out.println("now pd.isIntegralDrag3 zoombox");
 			if (!isGoodEvent(zoomBox1D, null, true))
 				return;
 			int x1 = zoomBox1D.xPixel1;
@@ -3534,9 +3576,16 @@ class GraphSet implements XYScaleConverter {
 				|| thisWidget == cur2Dx0 || thisWidget == cur2Dx1) {
 			addCurrentZoom();
 		}
+		
+
+		//System.out.println("now pd.isIntegralDragrel2 = " + pd.isIntegralDrag);
 	}
 
 	synchronized void mouseMovedEvent(int xPixel, int yPixel) {
+		
+
+		//System.out.println("now pd.isIntegralDragMove = " + pd.isIntegralDrag);
+		
 		if (nSpectra > 1) {
 
 			int iFrame = getSplitPoint(yPixel);
@@ -3746,7 +3795,7 @@ class GraphSet implements XYScaleConverter {
 		// id.setState(tfToggle == null ? !id.getState() : tfToggle.booleanValue());
 	}
 
-	boolean checkIntegral(Parameters parameters, String value) {
+	boolean checkIntegralParams(Parameters parameters, String value) {
 		Spectrum spec = getSpectrum();
 		if (!spec.canIntegrate() || reversePlot)
 			return false;
@@ -3766,7 +3815,7 @@ class GraphSet implements XYScaleConverter {
 			break;
 		case AUTO:
 			if (ad == null) {
-				checkIntegral(parameters, "ON");
+				checkIntegralParams(parameters, "ON");
 				ad = getDialog(AType.Integration, -1);
 			}
 			if (ad != null)
@@ -3777,7 +3826,7 @@ class GraphSet implements XYScaleConverter {
 			break;
 		case MARK:
 			if (ad == null) {
-				checkIntegral(parameters, "ON");
+				checkIntegralParams(parameters, "ON");
 				ad = getDialog(AType.Integration, -1);
 			}
 			if (ad != null)
@@ -3849,63 +3898,72 @@ class GraphSet implements XYScaleConverter {
   static final int SHIFT_SETX = 2;
   static final int SHIFT_X = 3;
   static final int SHIFT_CLICKED = 4;
-
-
+  
 	/**
 	 * apply a shift to the x-axis based on the next click or a specified value
 	 * 
 	 * @param mode
 	 *          one of PEAK(1), SETX(2), X(3), CLICKED(4)
-	 * @param x
-	 *          DOUBLE_MAX_VALUE - reset, DOUBLE.MIN_VALUE - ask, value
+	 * @param xOld
+	 *          initial position or NaN to ask, or value
+	 * @param xNew
+	 *          DOUBLE_MAX_VALUE - reset, NaN - ask, or value
 	 * @return true if accomplished
 	 */
-	boolean shiftSpectrum(int mode, double x) {
+	boolean shiftSpectrum(int mode, double xOld, double xNew) {
 
 		Spectrum spec = getSpectrum();
 		if (!spec.isNMR() || !spec.is1D())
 			return false;
 		String ok = null;
 		double dx = 0;
-		if (x == Double.MAX_VALUE) {
+		if (xNew == Double.MAX_VALUE) {
 			// setPeak NONE or setX NONE
 			dx = -spec.addSpecShift(0);
 		} else {
 			switch (mode) {
 			case SHIFT_X:
-				dx = x;
+				dx = xNew;
 				break;
 			case SHIFT_PEAK:
 			case SHIFT_SETX:
-				ok = pd
-						.getInput(
-								"Click on "
-										+ (mode == SHIFT_PEAK ? "or beside a peak to set its chemical shift"
-												: "the spectrum set the chemical shift at that point")
-										+ (x == Integer.MIN_VALUE ? "" : " to " + x) + ".",
-								"Set Reference "
-										+ (mode == SHIFT_PEAK ? "for Peak" : "at Point"), "OK");
-				nextClickForSetPeak = ("OK".equals(ok) ? Double.valueOf(x) : null);
 				nextClickMode = mode;
-				return false;
-			case SHIFT_CLICKED:
-				x = nextClickForSetPeak.doubleValue();
+				if (Double.isNaN(xOld)) {
+					ok = pd
+							.getInput(
+									"Click on "
+											+ (mode == SHIFT_PEAK ? "or beside a peak to set its chemical shift"
+													: "the spectrum set the chemical shift at that point")
+											+ (xNew == Integer.MIN_VALUE ? "" : " to " + xNew) + ".",
+									"Set Reference "
+											+ (mode == SHIFT_PEAK ? "for Peak" : "at Point"), "OK");
+					nextClickForSetPeak = ("OK".equals(ok) ? Double.valueOf(xNew) : null);
+					return false;
+				}
 				nextClickForSetPeak = null;
-				double x0 = (nextClickMode == SHIFT_PEAK ? getNearestPeak(spec,
-						lastClickX, toY(pd.mouseY)) : lastClickX);
-				if (x == Double.MIN_VALUE)
+				//$FALL-THROUGH$
+			case SHIFT_CLICKED:
+				if (nextClickForSetPeak != null) {
+					xNew = nextClickForSetPeak.doubleValue();
+					nextClickForSetPeak = null;
+				}
+				if (Double.isNaN(xOld))
+					xOld = lastClickX;
+				if (nextClickMode == SHIFT_PEAK)
+					xOld = getNearestPeak(spec, xOld, toY(pd.mouseY));
+				if (Double.isNaN(xNew))
 					try {
 						String s = pd.getInput("New chemical shift (set blank to reset)",
 								"Set Reference",
-								DF.formatDecimalDbl(x0, getScale().precision[0])).trim();
+								DF.formatDecimalDbl(xOld, getScale().precision[0])).trim();
 						if (s.length() == 0)
-							x = x0 - spec.addSpecShift(0);
+							xNew = xOld - spec.addSpecShift(0);
 						else
-							x = Double.parseDouble(s);
+							xNew = Double.parseDouble(s);
 					} catch (Exception e) {
 						return false;
 					}
-				dx = x - x0;
+				dx = xNew - xOld;
 				break;
 			}
 		}

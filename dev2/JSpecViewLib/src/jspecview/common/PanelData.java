@@ -587,7 +587,7 @@ public class PanelData implements EventManager {
 
 	// //// currentGraphSet methods
 
-	private boolean setCurrentGraphSet(GraphSet gs, int yPixel, int clickCount) {
+	private boolean setCurrentGraphSet(GraphSet gs, int yPixel) {
 		// Need to check for nSplit > 1 here because this could be a 
 		// mass spec that has been selected by clicking on a GC peak.
 		// In that case, there is no split, and we should not be changing
@@ -815,27 +815,15 @@ public class PanelData implements EventManager {
 
 	/**
 	 * shifts xyCoords for a spectrum by the specified amount
+
+	 * @param mode 
+	 * @param xOld old position or NaN
+	 * @param xNew NaN or new position
 	 * 
-	 * setpeak NONE Double.NaN, Double.MAX_VALUE
-	 * 
-	 * setpeak ? Double.NaN, Double.MIN_VALUE
-	 * 
-	 * setpeak x.x Double.NaN, value
-	 * 
-	 * shiftx NONE Double.MAX_VALUE, Double.NaN
-	 * 
-	 * shiftx x.x value, Double.NaN
-	 * 
-	 * setx x.x Double.MIN_VALUE, value
-	 * 
-	 * @param dx
-	 *          NaN to determine from x0, x1
-	 * @param x1
-	 *          NaN to query for new value
 	 * @return true if successful
 	 */
-	public boolean shiftSpectrum(int mode, double x) {
-		return currentGraphSet.shiftSpectrum(mode, x);
+	public boolean shiftSpectrum(int mode, double xOld, double xNew) {
+		return currentGraphSet.shiftSpectrum(mode, xOld, xNew);
 
 	}
 
@@ -983,7 +971,7 @@ public class PanelData implements EventManager {
 		GraphSet gs = GraphSet.findGraphSet(graphSets, xPixel, yPixel);
 		if (gs == null)
 			return;
-		setCurrentGraphSet(gs, yPixel, 0);
+		setCurrentGraphSet(gs, yPixel);
 		clickCount = (++clickCount % 3);
 		currentGraphSet.mousePressedEvent(xPixel, yPixel, clickCount);
 	}
@@ -1013,7 +1001,7 @@ public class PanelData implements EventManager {
 		GraphSet gs = GraphSet.findGraphSet(graphSets, xPixel, yPixel);
 		if (gs == null)
 			return;
-		setCurrentGraphSet(gs, yPixel, clickCount);
+		setCurrentGraphSet(gs, yPixel);
 		gs.mouseClickedEvent(xPixel, yPixel, clickCount, isControlDown);
 		repaint();
 	}
@@ -1037,7 +1025,7 @@ public class PanelData implements EventManager {
 	}
 
 	public void checkIntegral(Parameters parameters, String value) {
-		currentGraphSet.checkIntegral(parameters, value);
+		currentGraphSet.checkIntegralParams(parameters, value);
 	}
 
 	/**

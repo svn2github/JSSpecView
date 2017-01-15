@@ -403,32 +403,9 @@ public class JSViewer implements PlatformViewer, BytePoster  {
 						msg = execWrite(null);
 						break;
 					case SETPEAK:
-						// setpeak NONE 0, Double.MAX_VALUE
-						// setpeak ? 0, Double.MIN_VALUE
-						// setpeak x.x 0, value
-						// shiftx NONE 1, Double.MAX_VALUE
-						// shiftx x.x DOuble.MAX_VALUE,
-						// setx x.x Double.MIN_VALUE, value
-						if (value.equals(""))
-							value = "?";
-						pd().shiftSpectrum(
-								GraphSet.SHIFT_PEAK,
-								value.equalsIgnoreCase("NONE") ? Double.MAX_VALUE : value
-										.equalsIgnoreCase("?") ? Double.MIN_VALUE : Double
-										.parseDouble(value));
-						break;
 					case SETX:
-						pd().shiftSpectrum(
-								GraphSet.SHIFT_SETX,
-								value.equalsIgnoreCase("NONE") ? Double.MAX_VALUE : value
-										.equalsIgnoreCase("?") ? Double.MIN_VALUE : Double
-										.parseDouble(value));
-						break;
 					case SHIFTX:
-						pd().shiftSpectrum(
-								GraphSet.SHIFT_X,
-								value.equalsIgnoreCase("NONE") ? Double.MAX_VALUE :  Double
-										.parseDouble(value));
+						execShiftSpectrum(st, script);
 						break;
 					case SHOWERRORS:
 						show("errors");
@@ -484,6 +461,45 @@ public class JSViewer implements PlatformViewer, BytePoster  {
 		return isOK;
 	}
 
+
+	private void execShiftSpectrum(ScriptToken st, String script) {
+		Lst<String> tokens = ScriptToken.getTokens(script);
+		double xOld = Double.NaN;
+		double xNew = Double.NaN;
+		switch (tokens.size()) {
+		case 2:
+			String value = tokens.get(1);
+			if (value.equals(""))
+				value = "?";
+			xNew = value.equalsIgnoreCase("NONE") ? Double.MAX_VALUE : value
+					.equalsIgnoreCase("?") ? Double.NaN : Double.parseDouble(value);
+			break;
+		case 3:
+			xOld = Double.parseDouble(tokens.get(1));
+			xNew = Double.parseDouble(tokens.get(2));
+			break;
+		default:
+			Double.parseDouble(""); // throw an exception
+		}
+		int mode = 0;
+		switch (st) {
+		case SETPEAK:
+			mode = GraphSet.SHIFT_PEAK;
+			break;
+		case SETX:
+			mode = GraphSet.SHIFT_SETX;
+			break;
+		case SHIFTX:
+			mode = GraphSet.SHIFT_X;
+			if (Double.isNaN(xNew))
+				Double.parseDouble(""); // throw an exception -- SHIFT by itself not
+																// allowed
+			break;
+		default:
+			return;
+		}
+		pd().shiftSpectrum(mode, xOld, xNew);
+	}
 
 	private void execClose(String value) {
 		boolean fromScript = (!value.startsWith("!"));

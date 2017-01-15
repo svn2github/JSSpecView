@@ -139,6 +139,13 @@ public class IntegralData extends MeasurementData {
   double getYValueAt(double x) {
     return Coordinate.getYValueAt(xyCoords, x);
   }
+  
+  /**
+   * 
+   * @param x1 NaN to clear
+   * @param x2 NaN to split
+   * @return new integral region or null
+   */
 
 	public Integral addIntegralRegion(double x1, double x2) {
 		if (Double.isNaN(x1)) {
@@ -154,8 +161,6 @@ public class IntegralData extends MeasurementData {
 		if (x1 < x2) {
 	    clear(x1, x2);
 	    return null;
-		  // should delete here
-		  
 		}
 		double y1 = getYValueAt(x1);
 		double y2 = getYValueAt(x2);
