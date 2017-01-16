@@ -288,7 +288,7 @@ class ImageView implements XYScaleConverter {
 	@Override
 	public double toY(int yPixel) {
 		int isub = toSubspectrumIndex(yPixel);
-    return maxY + (minY - maxY) * isub / (imageWidth - 1);
+    return maxY + (minY - maxY) * isub / (imageHeight - 1);
 	}
 
   @Override
