@@ -3809,7 +3809,7 @@ class GraphSet implements XYScaleConverter {
 		if (tfToggle == null) {
 			// exists and "TOGGLE"
 			if (id instanceof JSVDialog)
-				((JSVDialog) id).setVisible(false); 
+				((JSVDialog) id).setVisible(!((JSVDialog) id).isVisible()); 
 				// was tfToggle != null && ((AnnotationDialog) id).isVisible());
 			else
 				id.setState(!id.getState());
@@ -3817,9 +3817,12 @@ class GraphSet implements XYScaleConverter {
 		}
 		// exists and "ON" or "OFF"
 		boolean isON = tfToggle.booleanValue();
-		id.setState(isON);
+		if (isON)
+			id.setState(isON);
 		if (isON || id instanceof JSVDialog)
 			pd.showDialog(type);
+		if (!isON && id instanceof JSVDialog)
+			((JSVDialog) id).setVisible(false);
 
 		// if (type == AType.Integration)
 		// checkIntegral(parameters, "UPDATE");
@@ -3835,14 +3838,29 @@ class GraphSet implements XYScaleConverter {
 		if (value == null)// && ad != null)
 			return true;
 		switch (IntegralData.IntMode.getMode(value.toUpperCase())) {
-		case ON:
+		case NA:
+			return false;
+		case CLEAR:
+			integrate(iSpec, null);
 			integrate(iSpec, parameters);
 			break;
+		case ON:
+			if (ad == null)
+				integrate(iSpec, parameters);
+			else
+				ad.setState(true);
+			break;
 		case OFF:
-			integrate(iSpec, null);
+			if (ad != null)
+				ad.setState(false);
+//			integrate(iSpec, null);
 			break;
 		case TOGGLE:
-			integrate(iSpec, ad == null ? parameters : null);
+			if (ad == null)
+				integrate(iSpec, parameters);
+			else
+				ad.setState(!ad.getState());
+//			integrate(iSpec, ad == null ? parameters : null);
 			break;
 		case AUTO:
 			if (ad == null) {

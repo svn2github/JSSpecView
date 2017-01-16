@@ -26,12 +26,12 @@ import jspecview.common.Annotation.AType;
 public class IntegralData extends MeasurementData {
 
 	public enum IntMode {
-	  OFF, ON, TOGGLE, AUTO, LIST, MARK, MIN, UPDATE;
+	  OFF, ON, TOGGLE, AUTO, LIST, MARK, MIN, UPDATE, CLEAR, NA;
 	  static IntMode getMode(String value) {
 	    for (IntMode mode: values())
 	      if (value.startsWith(mode.name()))
 	        return mode;
-	    return ON;
+	    return NA;
 	  }
 	}
 

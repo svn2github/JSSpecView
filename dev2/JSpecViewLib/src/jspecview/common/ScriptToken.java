@@ -70,7 +70,7 @@ public enum ScriptToken {
   INTEGRALOFFSET("percent", "sets the integral offset from baseline"),
   INTEGRALRANGE("percent", "sets the height of the total integration"),
   INTEGRATE("", "see INTEGRATION"), // same as INTEGRATION
-  INTEGRATION("ON/OFF/AUTO/TOGGLE/MIN value/MARK ppm1-ppm2:norm,ppm3-ppm4,... (start with 0-0 to clear)", "integrates an NMR spectrum"), 
+  INTEGRATION("ON/OFF/TOGGLE/AUTO/CLEAR/MIN value/MARK ppm1-ppm2:norm,ppm3-ppm4,...", "show/hide integration or set integrals (1D 1H NMR only)"), 
   INTEGRALPLOTCOLOR("C", "color of the integration line"), 
   INTEGRATIONRATIOS("'x:value,x:value,..'","annotate the spectrum with numbers or text at specific x values"), 
   INTERFACE("SINGLE or OVERLAY", "set how multiple spectra are displayed"), 
