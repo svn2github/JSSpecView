@@ -264,6 +264,7 @@ public class PanelData implements EventManager {
 
 	public Lst<Spectrum> spectra;
 	private boolean taintedAll = true;
+	private boolean testingJavaScript; // set TRUE to see taintedAll the way it will be in JavaScript
 	
 	public void setTaintedAll() {
 		taintedAll = true;		
@@ -469,7 +470,7 @@ public class PanelData implements EventManager {
 		if (isPrinting) {
 			printVersion(gMain, height);
 		}
-		if ((isPrinting || gMain == gFront))
+		if (!testingJavaScript && (isPrinting || gMain == gFront))
 			setTaintedAll();
 		else
 			taintedAll = false;
@@ -989,7 +990,8 @@ public class PanelData implements EventManager {
 		mouseState = Mouse.DOWN;
 		if (GraphSet.findGraphSet(graphSets, xPixel, yPixel) != currentGraphSet)
 			return;
-		currentGraphSet.checkWidgetEvent(xPixel, yPixel, false);
+		if (currentGraphSet.checkWidgetEvent(xPixel, yPixel, false))
+			setTaintedAll();
 		currentGraphSet.mouseMovedEvent(xPixel, yPixel);
 	}
 
@@ -1011,6 +1013,7 @@ public class PanelData implements EventManager {
 			return;
 		setCurrentGraphSet(gs, yPixel);
 		gs.mouseClickedEvent(xPixel, yPixel, clickCount, isControlDown);
+		setTaintedAll();
 		repaint();
 	}
 
@@ -1473,6 +1476,7 @@ public class PanelData implements EventManager {
 		case Event.VK_BACK_SPACE: // Mac
 			escapeKeyPressed(code != Event.VK_ESCAPE);
 			isIntegralDrag = false;
+			setTaintedAll();
 			repaint();
 			return true;
 		}
@@ -1499,6 +1503,7 @@ public class PanelData implements EventManager {
 					notifySubSpectrumChange(dir, null);
 				} else {
 					advanceSubSpectrum(dir);
+					setTaintedAll();
 					repaint();
 				}
 				doConsume = true;
@@ -1523,6 +1528,7 @@ public class PanelData implements EventManager {
 		}
 		if (scaleFactor != 0) {
 			scaleYBy(scaleFactor);
+			setTaintedAll();
 			repaint();
 		}
 		return doConsume;
@@ -1549,12 +1555,14 @@ public class PanelData implements EventManager {
 			if (mods != Event.CTRL_MASK)
 				break;
 			previousView();
+			setTaintedAll();
 			repaint();
 			return true;
 		case 25: // ctrl-y
 			if (mods != Event.CTRL_MASK)
 				break;
 			nextView();
+			setTaintedAll();
 			repaint();
 			return true;
 		}
@@ -1574,6 +1582,7 @@ public class PanelData implements EventManager {
 			break;
 		case Event.RELEASED:
 			doMouseReleased(x, y, checkMod(buttonMods, Event.MOUSE_LEFT));
+			setTaintedAll();
 			repaint();
 			break;
 		case Event.DRAGGED:

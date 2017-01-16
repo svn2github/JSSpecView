@@ -341,6 +341,7 @@ class GraphSet implements XYScaleConverter {
 		}
 		stackSelected = false;
 		setFractionalPositions(pd, pd.graphSets, LinkMode.NONE);
+		pd.setTaintedAll();
 	}
 
 	private void setPositionForFrame(int iSplit) {
@@ -699,6 +700,7 @@ class GraphSet implements XYScaleConverter {
 			}
 			pendingMeasurement = new Measurement().setM1(x, y, spec);
 			pendingMeasurement.setPt2(x0, y);
+			pd.setTaintedAll();
 			pd.repaint();
 			break;
 		case 1: // single click -- save and continue
@@ -733,6 +735,7 @@ class GraphSet implements XYScaleConverter {
 			}
 			if (!isOK)
 				pendingMeasurement = null;
+			pd.setTaintedAll();
 			pd.repaint();
 			break;
 		case 5: // (old) control-click
@@ -3051,9 +3054,9 @@ class GraphSet implements XYScaleConverter {
 	private int lastIntDragX;
 	private int nextClickMode;
 
-	synchronized void checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
+	synchronized boolean checkWidgetEvent(int xPixel, int yPixel, boolean isPress) {
 		if (!triggered)
-			return;
+			return false;
 		triggered = false;
 		PlotWidget widget;
 		if (isPress) {
@@ -3063,7 +3066,7 @@ class GraphSet implements XYScaleConverter {
 						setSpectrumClicked(iPreviousSpectrumClicked);
 					}
 					processPendingMeasurement(xPixel, yPixel, 2);
-					return;
+					return true;
 				}
 			} else if (!is2dClick(xPixel, yPixel)){
 				if (isOnSpectrum(xPixel, yPixel, -1)) {
@@ -3076,11 +3079,11 @@ class GraphSet implements XYScaleConverter {
 					pd.isIntegralDrag = true;
 					////System.out.println("checkWidgetEvent STARTING INTEGRAL");
 					if (!checkIntegral(toX(xPixel), toX(xPixel), false))
-						return;
+						return false;
 				} 
 			}
 			if (pendingMeasurement != null)
-				return;
+				return true;
 
 			widget = getPinSelected(xPixel, yPixel);
 			if (widget == null) {
@@ -3101,12 +3104,12 @@ class GraphSet implements XYScaleConverter {
 				}
 			}
 			pd.thisWidget = widget;
-			return;
+			return false;
 		}
 		nextClickForSetPeak = null;
 		widget = pd.thisWidget;
 		if (widget == null)
-			return;
+			return false;
 		// mouse drag with widget
 		if (widget == zoomBox1D) {
 			zoomBox1D.xPixel1 = fixX(xPixel);
@@ -3122,20 +3125,20 @@ class GraphSet implements XYScaleConverter {
 				////System.out.println("checkingEvent2 - final");
 				checkIntegral(zoomBox1D.getXVal(), toX(zoomBox1D.xPixel1), false);
 			}
-			return;
+			return false;
 		}
 		if (!zoomEnabled)
-			return;
+			return false;
 		if (widget == zoomBox2D) {
 			zoomBox2D.xPixel1 = imageView.fixX(xPixel);
 			zoomBox2D.yPixel1 = fixY(yPixel);
-			return;
+			return true;
 		}
 		if (widget == cur2Dy) {
 			yPixel = fixY(yPixel);
 			cur2Dy.yPixel0 = cur2Dy.yPixel1 = yPixel;
 			setCurrentSubSpectrum(imageView.toSubspectrumIndex(yPixel));
-			return;
+			return true;
 		}
 		if (widget == cur2Dx0 || widget == cur2Dx1) {
 			// xPixel = imageView.fixX(xPixel);
@@ -3143,7 +3146,7 @@ class GraphSet implements XYScaleConverter {
 			// 2D x zoom change
 			// doZoom(cur2Dx0.getXVal(), getScale().minY, cur2Dx1.getXVal(),
 			// getScale().maxY, false, false, false, true);
-			return;
+			return false;
 		}
 		if (widget == pin1Dx0 || widget == pin1Dx1 || widget == pin1Dx01) {
 			xPixel = fixX(xPixel);
@@ -3155,7 +3158,7 @@ class GraphSet implements XYScaleConverter {
 				xPixel = pin1Dx0.xPixel0 + dp2;
 				int xPixel1 = pin1Dx1.xPixel0 + dp1;
 				if (dp == 0 || fixX(xPixel) != xPixel || fixX(xPixel1) != xPixel1)
-					return;
+					return true;
 				pin1Dx0.setX(toX0(xPixel), xPixel);
 				pin1Dx1.setX(toX0(xPixel1), xPixel1);
 
@@ -3163,7 +3166,7 @@ class GraphSet implements XYScaleConverter {
 			// 1D x zoom change
 			doZoom(pin1Dx0.getXVal(), 0, pin1Dx1.getXVal(), 0, true, false, false,
 					true, false);
-			return;
+			return true;
 		}
 		if (widget == pin1Dy0 || widget == pin1Dy1 || widget == pin1Dy01) {
 			yPixel = fixY(yPixel);
@@ -3176,14 +3179,14 @@ class GraphSet implements XYScaleConverter {
 				double y1 = toY0(yPixel1);
 				if (Math.min(y0, y1) == getScale().minY
 						|| Math.max(y0, y1) == getScale().maxY)
-					return;
+					return true;
 				pin1Dy0.setY(y0, yPixel);
 				pin1Dy1.setY(y1, yPixel1);
 			}
 			// y-only zoom
 			doZoom(0, pin1Dy0.getYVal(), 0, pin1Dy1.getYVal(), imageView == null,
 					imageView == null, false, false, false);
-			return;
+			return true;
 		}
 		if (widget == pin2Dx0 || widget == pin2Dx1 || widget == pin2Dx01) {
 			xPixel = imageView.fixX(xPixel);
@@ -3194,20 +3197,20 @@ class GraphSet implements XYScaleConverter {
 				int xPixel1 = pin2Dx1.xPixel0 + dp;
 				if (imageView.fixX(xPixel) != xPixel
 						|| imageView.fixX(xPixel1) != xPixel1)
-					return;
+					return true;
 				pin2Dx0.setX(imageView.toX0(xPixel), xPixel);
 				pin2Dx1.setX(imageView.toX0(xPixel1), xPixel1);
 			}
 			if (!isGoodEvent(pin2Dx0, pin2Dx1, true)) {
 				reset2D(true);
-				return;
+				return true;
 			}
 			imageView.setView0(pin2Dx0.xPixel0, pin2Dy0.yPixel0, pin2Dx1.xPixel0,
 					pin2Dy1.yPixel0);
 			// 2D x zoom
 			doZoom(pin2Dx0.getXVal(), getScale().minY, pin2Dx1.getXVal(),
 					getScale().maxY, false, false, false, true, false);
-			return;
+			return true;
 		}
 		if (widget == pin2Dy0 || widget == pin2Dy1 || widget == pin2Dy01) {
 			yPixel = fixY(yPixel);
@@ -3217,20 +3220,20 @@ class GraphSet implements XYScaleConverter {
 				yPixel = pin2Dy0.yPixel0 + dp;
 				int yPixel1 = pin2Dy1.yPixel0 + dp;
 				if (yPixel != fixY(yPixel) || yPixel1 != fixY(yPixel1))
-					return;
+					return true;
 				pin2Dy0.setY(imageView.toSubspectrumIndex(yPixel), yPixel);
 				pin2Dy1.setY(imageView.toSubspectrumIndex(yPixel1), yPixel1);
 			}
 			if (!isGoodEvent(pin2Dy0, pin2Dy1, false)) {
 				reset2D(false);
-				return;
+				return true;
 			}
 			imageView.setView0(pin2Dx0.xPixel0, pin2Dy0.yPixel0, pin2Dx1.xPixel1,
 					pin2Dy1.yPixel1);
 			// update2dImage(false);
-			return;
+			return true;
 		}
-		return;
+		return false;
 	}
 
 	void clearIntegrals() {
@@ -4037,6 +4040,7 @@ class GraphSet implements XYScaleConverter {
 		updateDialogs();
 		doZoom(0, getScale().minYOnScale, 0, getScale().maxYOnScale, true, true,
 				false, true, false);
+		pd.setTaintedAll();
 		pd.repaint();
 		return true;
 	}
