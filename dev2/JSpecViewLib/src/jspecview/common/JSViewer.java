@@ -1303,7 +1303,7 @@ public class JSViewer implements PlatformViewer, BytePoster  {
 		} else {
 			splitSpectra();
 		}
-		pd().taintedAll = true;
+		pd().setTaintedAll();
 		if (!isView)
 			si.siUpdateRecentMenus(filePath);
 		return FILE_OPEN_OK;

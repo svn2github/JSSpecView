@@ -871,8 +871,7 @@ class GraphSet implements XYScaleConverter {
 				update2dImage(false);
 				resetPinsFromView();
 			}
-			pd.taintedAll = true;
-			// pd.repaint();
+			pd.setTaintedAll();
 		}
 		return ok;
 	}
@@ -1297,7 +1296,7 @@ class GraphSet implements XYScaleConverter {
 		} else {
 			//viewData = viewList.get(0);
 		}
-		pd.taintedAll = true;
+		pd.setTaintedAll();
 		ScaleData[] viewScales = viewData.getScaleData();		
 		int[] startIndices = new int[nSpectra];
 		int[] endIndices = new int[nSpectra];

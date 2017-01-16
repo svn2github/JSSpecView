@@ -200,7 +200,7 @@ public class PanelData implements EventManager {
 
 	@SuppressWarnings("incomplete-switch")
 	public void setBoolean(ScriptToken st, boolean isTrue) {
-		taintedAll = true;
+		setTaintedAll();
 		if (st == ScriptToken.REVERSEPLOT) {
 			currentGraphSet.setReversePlot(isTrue);
 			return;
@@ -263,7 +263,12 @@ public class PanelData implements EventManager {
 	// //// initialization - from AwtPanel
 
 	public Lst<Spectrum> spectra;
-	public boolean taintedAll = true;
+	private boolean taintedAll = true;
+	
+	public void setTaintedAll() {
+		taintedAll = true;		
+	}
+
 
 	public void initOne(Spectrum spectrum) {
 		spectra = new Lst<Spectrum>();
@@ -421,7 +426,7 @@ public class PanelData implements EventManager {
 		int bottom = bottomMargin;
 		boolean isResized = (isPrinting || doReset || thisWidth != width || thisHeight != height);
 		if (isResized)
-			taintedAll = true;
+			setTaintedAll();
 		if (taintedAll)
 			g2d.fillBackground(gRear, bgcolor);
 		if (gFront != gMain) {
@@ -464,7 +469,10 @@ public class PanelData implements EventManager {
 		if (isPrinting) {
 			printVersion(gMain, height);
 		}
-		taintedAll = (isPrinting || gMain == gFront);
+		if (isPrinting || gMain == gFront)
+			setTaintedAll();
+		else
+			taintedAll = false;
 	}
 
 	/**
@@ -677,7 +685,7 @@ public class PanelData implements EventManager {
 	}
 
 	public void setSpecForIRMode(Spectrum spec) {
-		taintedAll = true;
+		setTaintedAll();
 		Spectrum spec0 = currentGraphSet.getSpectrum();
 		currentGraphSet.setSpectrumJDX(spec);
 		for (int i = 0; i < spectra.size(); i++)
@@ -743,7 +751,7 @@ public class PanelData implements EventManager {
 	public void setZoom(double x1, double y1, double x2, double y2) {
 		currentGraphSet.setZoom(x1, y1, x2, y2);
 		doReset = true;
-		taintedAll = true;
+		setTaintedAll();
 		notifyListeners(new ZoomEvent());//x1, y1, x2, y2));
 	}
 
@@ -1205,62 +1213,55 @@ public class PanelData implements EventManager {
 	public void setColor(ScriptToken st, GenericColor color) {
 		if (color != null)
 			options.put(st, CU.toRGBHexString(color));
+		// "return" is because these are front/back pane operations
 		switch (st) {
-		case BACKGROUNDCOLOR:
-			jsvp.setBackgroundColor(bgcolor = color);
-			taintedAll = true;
-			break;
 		case COORDINATESCOLOR:
 			coordinatesColor = color;
-			break;
-		case GRIDCOLOR:
-			gridColor = color;
-			taintedAll = true;
-			break;
+			return;
 		case HIGHLIGHTCOLOR:
 			highlightColor = color;
 			if (highlightColor.getOpacity255() == 255)
 				highlightColor.setOpacity255(150);
+			return;
+		case ZOOMBOXCOLOR:
+			zoomBoxColor = color;
+			return;
+		case ZOOMBOXCOLOR2:
+			zoomBoxColor2 = color;
+			return;
+		case BACKGROUNDCOLOR:
+			jsvp.setBackgroundColor(bgcolor = color);
+			break;
+		case GRIDCOLOR:
+			gridColor = color;
 			break;
 		case INTEGRALPLOTCOLOR:
 			integralPlotColor = color;
-			taintedAll = true;
 			break;
 		case PEAKTABCOLOR:
 			peakTabColor = color;
-			taintedAll = true;
 			break;
 		case PLOTCOLOR:
 			for (int i = graphSets.size(); --i >= 0;)
 				graphSets.get(i).setPlotColor0(color);
-			taintedAll = true;
 			break;
 		case PLOTAREACOLOR:
 			plotAreaColor = color;
-			taintedAll = true;
 			break;
 		case SCALECOLOR:
 			scaleColor = color;
-			taintedAll = true;
 			break;
 		case TITLECOLOR:
 			titleColor = color;
-			taintedAll = true;
 			break;
 		case UNITSCOLOR:
 			unitsColor = color;
-			taintedAll = true;
-			break;
-		case ZOOMBOXCOLOR:
-			zoomBoxColor = color;
-			break;
-		case ZOOMBOXCOLOR2:
-			zoomBoxColor2 = color;
 			break;
 		default:
 			Logger.warn("AwtPanel --- unrecognized color: " + st);
-			break;
+			return;
 		}
+		taintedAll = true;
 	}
 
 	public GenericColor getColor(ScriptToken whatColor) {
@@ -1449,7 +1450,7 @@ public class PanelData implements EventManager {
         }
       }
       g2d.translateScale(g, x, y, 0.1);
-      taintedAll = true;
+      setTaintedAll();
       drawGraph(g, g, g, (int) width, (int) height, addFilePath);
       isPrinting = false;
       return JSViewer.PAGE_EXISTS;
@@ -1667,5 +1668,6 @@ public class PanelData implements EventManager {
 		vwr.close(getSourceID());
 		vwr.execView("*", true);		
 	}
+
 
 }
