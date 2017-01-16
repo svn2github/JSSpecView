@@ -469,7 +469,7 @@ public class PanelData implements EventManager {
 		if (isPrinting) {
 			printVersion(gMain, height);
 		}
-		if (isPrinting || gMain == gFront)
+		if ((isPrinting || gMain == gFront))
 			setTaintedAll();
 		else
 			taintedAll = false;

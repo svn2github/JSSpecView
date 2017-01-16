@@ -1395,7 +1395,17 @@ class GraphSet implements XYScaleConverter {
 			viewList.removeItemAt(i);
 	}
 
-	private void drawAll(Object gMain, Object gFront, Object gRear, int iSplit,
+	/**
+	 * Principal drawing method
+	 * 
+	 * @param gMain
+	 * @param gFront
+	 * @param gBack
+	 * @param iSplit
+	 * @param needNewPins
+	 * @param doAll
+	 */
+	private void drawAll(Object gMain, Object gFront, Object gBack, int iSplit,
 			boolean needNewPins, boolean doAll) {
 		g2d = pd.g2d; // may change when printing and testing JsPdfCreator
 		this.gMain = gMain;
@@ -1431,7 +1441,7 @@ class GraphSet implements XYScaleConverter {
 		}
 		int iSpecForFrame = (nSpectra == 1 ? 0 : !showAllStacked ? iSpectrumMovedTo
 				: iSpectrumSelected);
-		Object g2 = (gRear == gMain ? gFront : gRear);
+		Object g2 = (gBack == gMain ? gFront : gBack);
 		if (doAll) {
 			boolean addCurrentBox = (pd.getCurrentGraphSet() == this && !isLinked // not if this is linked
 					&& (!isSplittable || (nSplit == 1 || pd.currentSplitPoint == iSplit)));
@@ -1516,10 +1526,11 @@ class GraphSet implements XYScaleConverter {
 				boolean onSpectrum = ((nSplit > 1 ? i == iSpectrumMovedTo : isLinked
 						|| i == iSpectrumForScale)
 						&& !pd.isPrinting && spec.isContinuous());
-				if (doAll) {
-					drawSpectrum(gMain, i, offset, isGrey, ig, isContinuous, onSpectrum);
+				boolean hasPendingIntegral = (!isGrey && pendingIntegral != null && spec == pendingIntegral.spec);
+				if (doAll || hasPendingIntegral) {
+					drawPlot(hasPendingIntegral && !doAll ? gFront : gMain, i, spec, isContinuous, offset, isGrey, null, onSpectrum, hasPendingIntegral);
 				}
-				// drawSpectrum(gFront, i, offset, isGrey, ig, isContinuous);
+				drawIntegration(gFront, i, offset, isGrey, ig, isContinuous, onSpectrum);
 				drawMeasurements(gFront, i);
 				if (pendingMeasurement != null && pendingMeasurement.spec == spec)
 					drawMeasurement(gFront, pendingMeasurement);
@@ -1621,10 +1632,10 @@ class GraphSet implements XYScaleConverter {
 //
 //	}
 
-	private void drawSpectrumPointer(Object g, Spectrum spec,
+	private void drawSpectrumPointer(Object gFront, Spectrum spec,
 			int yOffset, IntegralData ig) {
 	  // short vertical cursor 
-		setColorFromToken(g, ScriptToken.PEAKTABCOLOR);
+		setColorFromToken(gFront, ScriptToken.PEAKTABCOLOR);
 		int iHandle = pd.integralShiftMode;
 		if (ig != null) {
 			if ((!pd.ctrlPressed || pd.isIntegralDrag)
@@ -1641,32 +1652,32 @@ class GraphSet implements XYScaleConverter {
 				.getPercentYValueAt(xValueMovedTo));
 		setCoordStr(xValueMovedTo, yValueMovedTo);
 		if (iHandle != 0) {
-      setPlotColor(g, iHandle == Integer.MAX_VALUE ? -1 : 0);
+      setPlotColor(gFront, iHandle == Integer.MAX_VALUE ? -1 : 0);
 		  if (iHandle < 0 || iHandle == Integer.MAX_VALUE) {
-		     drawHandle(g, xPixelPlot1, yPixelPlot0, 3, false);
+		     drawHandle(gFront, xPixelPlot1, yPixelPlot0, 3, false);
 		  }
 		  if (iHandle > 0) {
-        drawHandle(g, xPixelPlot0, yPixelPlot1, 3, false);
+        drawHandle(gFront, xPixelPlot0, yPixelPlot1, 3, false);
 		  } 
 		  if (iHandle != Integer.MAX_VALUE)
 		  	return;
 		}
 		if (ig != null)
-		  g2d.setStrokeBold(g, true);
+		  g2d.setStrokeBold(gFront, true);
 		
 		if (Double.isNaN(y0) || pendingMeasurement != null) {
-			g2d.drawLine(g, xPixelMovedTo, yPixel0, xPixelMovedTo, yPixel1);
+			g2d.drawLine(gFront, xPixelMovedTo, yPixel0, xPixelMovedTo, yPixel1);
 			if (xPixelMovedTo2 >= 0)
-				g2d.drawLine(g, xPixelMovedTo2, yPixel0, xPixelMovedTo2, yPixel1);
+				g2d.drawLine(gFront, xPixelMovedTo2, yPixel0, xPixelMovedTo2, yPixel1);
 			yValueMovedTo = Double.NaN;
 		} else {
 			int y = (ig == null ? yOffset + toPixelY(yValueMovedTo)
 					: toPixelYint(yValueMovedTo / 100));
 			if (y == fixY(y))
-				g2d.drawLine(g, xPixelMovedTo, y - 10, xPixelMovedTo, y + 10);
+				g2d.drawLine(gFront, xPixelMovedTo, y - 10, xPixelMovedTo, y + 10);
 		}
 		if (ig != null)
-			g2d.setStrokeBold(g, false);
+			g2d.setStrokeBold(gFront, false);
 	}
 
 	void setScale(int i) {
@@ -1715,7 +1726,7 @@ class GraphSet implements XYScaleConverter {
 	 * Draw sliders, pins, and zoom boxes (only one of which would ever be drawn)
 	 * 
 	 * @param gFront
-	 * @param g2
+	 * @param gBack
 	 * @param subIndex
 	 * @param needNewPins
 	 * @param doDraw1DObjects
@@ -1723,7 +1734,7 @@ class GraphSet implements XYScaleConverter {
 	 *          TODO
 	 * @param postGrid
 	 */
-	private void drawWidgets(Object gFront, Object g2, int subIndex, boolean needNewPins,
+	private void drawWidgets(Object gFront, Object gBack, int subIndex, boolean needNewPins,
 			boolean doDraw1DObjects, boolean doDraw1DY, boolean postGrid) {
 		setWidgets(needNewPins, subIndex, doDraw1DObjects);
 		if (pd.isPrinting && (imageView == null ? !cur1D2Locked : sticky2Dcursor))
@@ -1786,7 +1797,7 @@ class GraphSet implements XYScaleConverter {
 				if (pw.isPin)
 					drawHandle(gFront, pw.xPixel0, pw.yPixel0, 2, !pw.isEnabled);
 			} else if (pw.xPixel1 != pw.xPixel0) {
-				fillBox(g2, pw.xPixel0, pw.yPixel0, pw.xPixel1, pw.yPixel1, 
+				fillBox(gBack, pw.xPixel0, pw.yPixel0, pw.xPixel1, pw.yPixel1, 
 						pw == zoomBox1D && pd.shiftPressed ? ScriptToken.ZOOMBOXCOLOR2 : ScriptToken.ZOOMBOXCOLOR);
 			}
 		}
@@ -1837,10 +1848,10 @@ class GraphSet implements XYScaleConverter {
 		if (tickSize == 0) {
 			fillBox(g, x1, yPixel0, x2, yPixel0 + yPixels, whatColor);
 		} else {
-			fillBox(g, x1, yPixel0, x2, yPixel0 + 3, whatColor);
+			fillBox(g, x1, yPixel0+2, x2, yPixel0 + 5, whatColor);
 			if (pi != null) {
 				x1 = (x1 + x2) / 2;
-				fillBox(g, x1 - 1, yPixel0, x1 + 1, yPixel0 + tickSize, whatColor);
+				fillBox(g, x1 - 1, yPixel0 + 2, x1 + 1, yPixel0 + 2 + tickSize, whatColor);
 			}
 		}
 
@@ -1849,29 +1860,27 @@ class GraphSet implements XYScaleConverter {
 	/**
 	 * Draws the plot on the Panel
 	 * 
-	 * @param g
+	 * @param gFront
 	 *          the <code>Graphics</code> object
 	 * @param index
 	 *          the index of the Spectrum to draw
 	 * @param yOffset
 	 * @param isGrey
-	 * @param ig
+	 * @param iData
 	 * @param isContinuous
 	 * @param isSelected 
 	 */
-	private void drawSpectrum(Object g, int index, int yOffset, boolean isGrey,
-			IntegralData ig, boolean isContinuous, boolean isSelected) {
+	private void drawIntegration(Object gFront, int index, int yOffset, boolean isGrey,
+			IntegralData iData, boolean isContinuous, boolean isSelected) {
 		// Check if specInfo in null or xyCoords is null
-		Spectrum spec = spectra.get(index);
-		drawPlot(g, index, spec, isContinuous, yOffset, isGrey, null, isSelected);
-		if (ig != null) {
+		if (iData != null) {
 			if (haveIntegralDisplayed(index))
-				drawPlot(g, index, spec, true, yOffset, false, ig, true);
-			drawIntegralValues(g, index, yOffset);
+				drawPlot(gFront, index, spectra.get(index), true, yOffset, false, iData, true, false);
+			drawIntegralValues(gFront, index, yOffset);
 		}
 		Lst<Annotation> ratios = getIntegrationRatios(index);
 		if (ratios!= null)
-			drawAnnotations(g, ratios,
+			drawAnnotations(gFront, ratios,
 					ScriptToken.INTEGRALPLOTCOLOR);
 	}
 
@@ -1882,17 +1891,14 @@ class GraphSet implements XYScaleConverter {
 
 	private void drawPlot(Object g, int index, Spectrum spec,
 			boolean isContinuous, int yOffset, boolean isGrey, IntegralData ig,
-			boolean isSelected) {
+			boolean isSelected, boolean hasPendingIntegral) {
 		Coordinate[] xyCoords = (ig == null ? spec.getXYCoords()
 				: getIntegrationGraph(index).getXYCoords());
 		boolean isIntegral = (ig != null);
 		BS bsDraw = (isIntegral ? ig.getBitSet() : null);
-		boolean hasPendingIntegral = (!isIntegral && !isGrey
-				&& pendingIntegral != null && pendingIntegral.spec == spectra
-				.get(index));
 		boolean fillPeaks = (hasPendingIntegral || spec.fillColor != null
 				&& isSelected);
-		int iColor = (isGrey ? -2 : isIntegral ? -1 : !allowStacking ? 0 : index);
+		int iColor = (isGrey ? COLOR_BLACK : isIntegral ? COLOR_INTEGRAL : !allowStacking ? 0 : index);
 		setPlotColor(g, iColor);
 		boolean plotOn = true;
 		int y0 = toPixelY(0);
@@ -1972,7 +1978,7 @@ class GraphSet implements XYScaleConverter {
 					else if (plotOn)
 						setColorFromToken(g, ScriptToken.INTEGRALPLOTCOLOR);
 					else
-						setPlotColor(g, -3);
+						setPlotColor(g, COLOR_GREY);
 				}
 				if (pd.isPrinting && !plotOn)
 					continue;
@@ -2256,7 +2262,13 @@ class GraphSet implements XYScaleConverter {
 			drawUnits(g, units, (pd.isPrinting ? 30 : 5) * pd.scalingFactor, yPixel0 + (pd.isPrinting ? 0 : 5)  * pd.scalingFactor, 0, -1);
 	}
 
-	private void drawHighlightsAndPeakTabs(Object gFront, Object gRear, int iSpec) {
+	/**
+	 * 
+	 * @param gFront graphics for peak tabs
+	 * @param gBack  graphics for highlight boxes
+	 * @param iSpec
+	 */
+	private void drawHighlightsAndPeakTabs(Object gFront, Object gBack, int iSpec) {
 		MeasurementData md = getMeasurements(AType.PeakList, iSpec);
 		Spectrum spec = spectra.get(iSpec);
 		if (pd.isPrinting) {
@@ -2271,10 +2283,10 @@ class GraphSet implements XYScaleConverter {
 				Highlight hl = highlights.get(i);
 				if (hl.spectrum == spec) {
 					pd.setHighlightColor(hl.color);
-					drawBar(gRear, null, hl.x1, hl.x2, ScriptToken.HIGHLIGHTCOLOR, 0);
+					drawBar(gBack, null, hl.x1, hl.x2, ScriptToken.HIGHLIGHTCOLOR, 0);
 				}
 			}
-			drawPeakTabs(gFront, gRear, spec);
+			drawPeakTabs(gFront, gBack, spec);
 		}
 		int y;
 		if (md != null) {
@@ -3054,11 +3066,13 @@ class GraphSet implements XYScaleConverter {
 					return;
 				}
 			} else if (!is2dClick(xPixel, yPixel)){
-				if (isOnSpectrum(xPixel, yPixel, -1))
+				if (isOnSpectrum(xPixel, yPixel, -1)) {
+					// split
 					checkIntegral(toX(xPixel), Double.NaN, false);
+				}
 
 				if (lastIntDragX == xPixel) {
-					// split integral
+					// restart
 					pd.isIntegralDrag = true;
 					////System.out.println("checkWidgetEvent STARTING INTEGRAL");
 					if (!checkIntegral(toX(xPixel), toX(xPixel), false))
@@ -3251,9 +3265,9 @@ class GraphSet implements XYScaleConverter {
 	 * 
 	 * entry point for a repaint
 	 * 
-	 * @param gMain
-	 * @param gFront
-	 * @param gRear
+	 * @param gMain primary canvas	
+	 * @param gFront  front-pane (glass pane) canvas
+	 * @param gBack   back-pane canvas
 	 * @param width
 	 * @param height
 	 * @param left
@@ -3263,7 +3277,7 @@ class GraphSet implements XYScaleConverter {
 	 * @param isResized
 	 * @param taintedAll
 	 */
-	synchronized void drawGraphSet(Object gMain, Object gFront, Object gRear,
+	synchronized void drawGraphSet(Object gMain, Object gFront, Object gBack,
 			int width, int height, int left, int right, int top, int bottom,
 			boolean isResized, boolean taintedAll) {
 
@@ -3285,7 +3299,7 @@ class GraphSet implements XYScaleConverter {
 		for (int iSplit = 0; iSplit < nSplit; iSplit++) {
 			// for now, at least, we only allow one 2D image
 			setPositionForFrame(iSplit);
-			drawAll(gMain, gFront, gRear, iSplit, isResized || nSplit > 1, taintedAll);
+			drawAll(gMain, gFront, gBack, iSplit, isResized || nSplit > 1, taintedAll);
 		}
 		setPositionForFrame(nSplit > 1 ? pd.currentSplitPoint : 0);
 		if (pd.isPrinting)
@@ -4367,16 +4381,20 @@ class GraphSet implements XYScaleConverter {
 							.getColor(whatColor));
 	}
 
+	private final int COLOR_GREY = -3;
+	private final int COLOR_BLACK = -2;
+	private final int COLOR_INTEGRAL = -1;
+	
   private void setPlotColor(Object og, int i) {
   	GenericColor c;
   	switch (i) {
-  	case -3:
+  	case COLOR_GREY:
   		c = veryLightGrey;
   		break;
-  	case -2:
+  	case COLOR_BLACK:
   		c = pd.BLACK;
   		break;
-  	case -1:
+  	case COLOR_INTEGRAL:
   		c = pd.getColor(ScriptToken.INTEGRALPLOTCOLOR);
   		break;
     default:
