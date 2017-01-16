@@ -32,16 +32,28 @@ todo:
  - enhancement: when displaying peaks for a spectrum that has links available suggest that from the peak dialog box 
  that clicking on a peak will highlight appropriately in JSmol/JSME
 
- - get integrations to stay in view sets.
+add JSME to St. Olaf 24/7 OleNMR system portal for comparisons.
+
+BH 01/14/2017 
+ -feature: easier spectrum closing with [x] box
+ -feature: SINGLE VIEW! multiple views are just too complicated!
+ -feature: more and better tool tips, including for applet
+ -feature: integral splits when clicked
+ -feature: integration swiping allows press-release for starting new integral during swipe
+ -feature: HELP command displays full list of commands
+ -feature: ScriptTokens now include this.description field
+ -revised SETPEAK, SETX more sensible, more intuitive
+   - work the same except SETPEAK uses the nearest peak; SETX uses the clicked position itself
+   - work always from NEXT-clicked peak or position on spectrum, not previous
+   - dialogs clearer about what is happening
+ -feature: integral handles on left and right ends visible when pointing at the integral
+ -feature: integral handles a bit larger and change color when "armed"
+ -feature: integral swiping from the right deletes the integral. 
    
 RL 01/13/2017
   - update to About dialog box
   
-BH 01/13/2017 
- -feature: integral handles on left and right ends should be visible when pointing at the integral
- -feature: integral handles should be a bit larger
- -feature: integral swiping from the  right should DELETE the integral, not make it.
- -feature: integral should split when clicked
+
  -bug fix: dialog titles should be truncated if too long
  -update About dialog for 2017
 

@@ -308,7 +308,9 @@ public class Spectrum extends JDXDataObject {
   private Spectrum convertedSpectrum;
 
   /**
-   * based YFactor used in View command
+   * based YFactor used in View command 
+   * 
+   * ?? BH not documented? Not used?
    * 
    */
   private double userYFactor = 1;
@@ -319,7 +321,7 @@ public class Spectrum extends JDXDataObject {
   public double getUserYFactor() {
     return userYFactor;
   }
-
+  
   public static final double MAXABS = 4; // maximum absorbance allowed
 
   public Spectrum getConvertedSpectrum() {
@@ -698,10 +700,14 @@ public class Spectrum extends JDXDataObject {
 
 	GenericColor fillColor;
 
+
 	public void setFillColor(GenericColor color) {
 		fillColor = color;
 		if (convertedSpectrum != null)
 			convertedSpectrum.fillColor = color;
 	}
+
+  ImageView imageView; // 2D image view
+	
 
 }

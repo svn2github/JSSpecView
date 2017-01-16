@@ -665,7 +665,7 @@ class GraphSet implements XYScaleConverter {
 	}
 
 	private void processPendingMeasurement(int xPixel, int yPixel, int clickCount) {
-		if (!isInPlotRegion(xPixel, yPixel)) {
+		if (!isInPlotRegion(xPixel, yPixel) || is2dClick(xPixel, yPixel)) {
 			pendingMeasurement = null;
 			return;
 		}
@@ -1400,9 +1400,10 @@ class GraphSet implements XYScaleConverter {
 			boolean needNewPins, boolean doAll) {
 		g2d = pd.g2d; // may change when printing and testing JsPdfCreator
 		this.gMain = gMain;
-		int subIndex = getSpectrumAt(0).getSubIndex();
-		is2DSpectrum = (!getSpectrumAt(0).is1D()
-				&& (isLinked || pd.getBoolean(ScriptToken.DISPLAY2D)) && (imageView != null || get2DImage()));
+		Spectrum spec0 = getSpectrumAt(0);
+		int subIndex = spec0.getSubIndex();
+		is2DSpectrum = (!spec0.is1D()
+				&& (isLinked || pd.getBoolean(ScriptToken.DISPLAY2D)) && (imageView != null || get2DImage(spec0)));
 		if (imageView != null && doAll) {
 			if (pd.isPrinting && g2d != pd.g2d0)
 				g2d.newGrayScaleImage(gMain, image2D, imageView.imageWidth,
@@ -2511,7 +2512,7 @@ class GraphSet implements XYScaleConverter {
 
 
 		selectedSpectrumIntegrals = null;
-		//System.out.println("checkINtegral isFinal" + x1 + " " + x2 + " " + isFinal + " " + pendingIntegral);
+		////System.out.println("checkINtegral isFinal" + x1 + " " + x2 + " " + isFinal + " " + pendingIntegral);
 		return true;
 	}
 
@@ -2569,9 +2570,9 @@ class GraphSet implements XYScaleConverter {
 			if (imageView.fixX(xPixel) == xPixel && fixY(yPixel) == yPixel) {
 
 				int isub = imageView.toSubspectrumIndex(yPixel);
-				String s = DF.formatDecimalDbl(imageView.toX(xPixel), precisionX) + " "
-						+ getSpectrum().getAxisLabel(true) + ",  "
-						+ get2DYLabel(isub, precisionX);
+				String s = "y=" + get2DYLabel(isub, precisionX) + 
+							" / x=" + DF.formatDecimalDbl(imageView.toX(xPixel), precisionX) + " "
+						+ getSpectrum().getAxisLabel(true);
 				pd.setToolTipText(s);
 				pd.coordStr = s;
 				return;
@@ -2640,9 +2641,9 @@ class GraphSet implements XYScaleConverter {
 
 	private String get2DYLabel(int isub, int precision) {
 		Spectrum spec = getSpectrumAt(0).getSubSpectra().get(isub);
-		return DF.formatDecimalDbl(spec.getY2D(), precision)
-				+ (spec.y2DUnits.equals("HZ") ? " HZ ("
-						+ DF.formatDecimalDbl(spec.getY2DPPM(), precision) + " PPM)" : "");
+			return DF.formatDecimalDbl(spec.getY2DPPM(), precision) + " PPM" + 
+					(spec.y2DUnits.equals("HZ") ? " (" + DF.formatDecimalDbl(spec.getY2D(), precision)
+							+ " HZ) " : "");
 	}
 
 	private boolean isOnSpectrum(int xPixel, int yPixel, int index) {
@@ -2994,6 +2995,7 @@ class GraphSet implements XYScaleConverter {
 			pd.integralShiftMode = (isOnIntegral ? getShiftMode(xPixel, yPixel) : 0);
 			pd.isIntegralDrag = (pd.integralShiftMode == 0 && (isOnIntegral || haveIntegralDisplayed(-1)
 					&& findMeasurement(getIntegrationGraph(-1), xPixel, yPixel, Measurement.PT_ON_LINE) != null));
+			//System.out.println("pd.isIntegralDrag=" + pd.isIntegralDrag);
 			
 
 			if (pd.integralShiftMode != 0)
@@ -3044,7 +3046,7 @@ class GraphSet implements XYScaleConverter {
 		triggered = false;
 		PlotWidget widget;
 		if (isPress) {
-			if (pd.clickCount == 2 && lastIntDragX != xPixel) {
+			if (pd.clickCount == 2 && lastIntDragX != xPixel && !is2dClick(xPixel, yPixel)) {
 				if (pendingMeasurement == null) {
 					if (iSpectrumClicked == -1 && iPreviousSpectrumClicked >= 0) {
 						setSpectrumClicked(iPreviousSpectrumClicked);
@@ -3052,17 +3054,17 @@ class GraphSet implements XYScaleConverter {
 					processPendingMeasurement(xPixel, yPixel, 2);
 					return;
 				}
-			} else {
-				checkIntegral(toX(xPixel), Double.NaN, false);
+			} else if (!is2dClick(xPixel, yPixel)){
+				if (isOnSpectrum(xPixel, yPixel, -1))
+					checkIntegral(toX(xPixel), Double.NaN, false);
 
 				if (lastIntDragX == xPixel) {
 					// split integral
 					pd.isIntegralDrag = true;
-					//System.out.println("checkWidgetEvent STARTING INTEGRAL");
+					////System.out.println("checkWidgetEvent STARTING INTEGRAL");
 					if (!checkIntegral(toX(xPixel), toX(xPixel), false))
 						return;
 				} 
-				lastIntDragX = xPixel;
 			}
 			if (pendingMeasurement != null)
 				return;
@@ -3104,7 +3106,7 @@ class GraphSet implements XYScaleConverter {
 					zoomBox1D.setXVal(toX(zoomBox1D.xPixel0));
 				}
 				lastIntDragX = xPixel;
-				//System.out.println("checkingEvent2 - final");
+				////System.out.println("checkingEvent2 - final");
 				checkIntegral(zoomBox1D.getXVal(), toX(zoomBox1D.xPixel1), false);
 			}
 			return;
@@ -3366,13 +3368,13 @@ class GraphSet implements XYScaleConverter {
 	synchronized void mouseClickedEvent(int xPixel, int yPixel, int clickCount,
 			boolean isControlDown) {
 		
-		//System.out.println("now pd.isIntegralClick1 = " + pd.isIntegralDrag);
+		////System.out.println("now pd.isIntegralClick1 = " + pd.isIntegralDrag);
 		
 		selectedMeasurement = null;
 		selectedIntegral = null;
 		Double isNextClick = nextClickForSetPeak;
 		nextClickForSetPeak = null;
-		//System.out.println("mouseclick" + clickCount);
+		////System.out.println("mouseclick" + clickCount);
 		if (checkArrowUpDownClick(xPixel, yPixel)
 				|| checkArrowLeftRightClick(xPixel, yPixel))
 			return;
@@ -3391,7 +3393,7 @@ class GraphSet implements XYScaleConverter {
 			setWidgetValueByUser(pw);
 			return;
 		}
-		boolean is2D = (imageView != null && xPixel == imageView.fixX(xPixel) && yPixel == fixY(yPixel));
+		boolean is2D = is2dClick(xPixel, yPixel);
 		if (clickCount == 2 && iSpectrumClicked == -1
 				&& iPreviousSpectrumClicked >= 0) {
 			setSpectrumClicked(iPreviousSpectrumClicked);
@@ -3408,14 +3410,17 @@ class GraphSet implements XYScaleConverter {
 		lastXMax = Double.NaN; // TODO: was for "is2D || !isControlDown
 		if (clickCount == 2) {
 			if (is2D) {
+				//System.out.println("GS sticky2d " + sticky2Dcursor);
 				if (sticky2Dcursor) {
 					addAnnotation(
 							getAnnotation(imageView.toX(xPixel),
 									imageView.toSubspectrumIndex(yPixel), pd.coordStr, false,
 									true, 5, 5), true);
 				}
-				sticky2Dcursor = !sticky2Dcursor;
-				set2DCrossHairs(xPixel, yPixel);
+				
+				//System.out.println("Setting true");
+					sticky2Dcursor = true;//!sticky2Dcursor;
+					set2DCrossHairs(xPixel, yPixel);
 				// pd.repaint();
 				return;
 			}
@@ -3445,6 +3450,7 @@ class GraphSet implements XYScaleConverter {
 		// single click
 
 		if (is2D) {
+			//System.out.println("mouseclick " + clickCount + " " + sticky2Dcursor);
 			if (annotations != null) {
 				Coordinate xy = new Coordinate().set(imageView.toX(xPixel),
 						imageView.toSubspectrumIndex(yPixel));
@@ -3454,13 +3460,14 @@ class GraphSet implements XYScaleConverter {
 					return;
 				}
 			}
-			sticky2Dcursor = false;
+			if (clickCount == 1)
+				sticky2Dcursor = false;
 			set2DCrossHairs(xPixel, yPixel);
 			// pd.repaint();
 			return;
 		}
 		
-		//System.out.println("now pd.isIntegralClick1 = " + pd.isIntegralDrag);
+		////System.out.println("now pd.isIntegralClick1 = " + pd.isIntegralDrag);
 
 		// 1D single click
 
@@ -3488,7 +3495,11 @@ class GraphSet implements XYScaleConverter {
 		}
 		pd.notifyPeakPickedListeners(null);
 		
-		//System.out.println("now pd.isIntegralClick2 = " + pd.isIntegralDrag);
+		////System.out.println("now pd.isIntegralClick2 = " + pd.isIntegralDrag);
+	}
+
+	private boolean is2dClick(int xPixel, int yPixel) {
+		return (imageView != null && xPixel == imageView.fixX(xPixel) && yPixel == fixY(yPixel));
 	}
 
 	private void updateDialog(AType type, int iSpec) {
@@ -3507,12 +3518,12 @@ class GraphSet implements XYScaleConverter {
 
   public void mousePressedEvent(int xPixel, int yPixel, int clickCount) {
 		
-		//System.out.println("now pd.isIntegralDragPress1 = " + pd.isIntegralDrag);
+		////System.out.println("now pd.isIntegralDragPress1 = " + pd.isIntegralDrag);
 		
     checkWidgetEvent(xPixel, yPixel, true);
     
 
-		//System.out.println("now pd.isIntegralPress2 = " + pd.isIntegralDrag);
+		////System.out.println("now pd.isIntegralPress2 = " + pd.isIntegralDrag);
   }
   
   /**
@@ -3522,7 +3533,7 @@ class GraphSet implements XYScaleConverter {
 	synchronized void mouseReleasedEvent(int xPixel, int yPixel) {
 		
 
-		//System.out.println("now pd.isIntegralDragRel1 = " + pd.isIntegralDrag);
+		////System.out.println("now pd.isIntegralDragRel1 = " + pd.isIntegralDrag);
 		
 		if (pendingMeasurement != null) {
 			if (Math.abs(toPixelX(pendingMeasurement.getXVal()) - xPixel) < 2)
@@ -3560,7 +3571,7 @@ class GraphSet implements XYScaleConverter {
 					false, false, true, true);
 		} else if (thisWidget == zoomBox1D) {
 
-			//System.out.println("now pd.isIntegralDrag3 zoombox");
+			////System.out.println("now pd.isIntegralDrag3 zoombox");
 			if (!isGoodEvent(zoomBox1D, null, true))
 				return;
 			int x1 = zoomBox1D.xPixel1;
@@ -3578,13 +3589,13 @@ class GraphSet implements XYScaleConverter {
 		}
 		
 
-		//System.out.println("now pd.isIntegralDragrel2 = " + pd.isIntegralDrag);
+		////System.out.println("now pd.isIntegralDragrel2 = " + pd.isIntegralDrag);
 	}
 
 	synchronized void mouseMovedEvent(int xPixel, int yPixel) {
 		
 
-		//System.out.println("now pd.isIntegralDragMove = " + pd.isIntegralDrag);
+//System.out.println("sticky  " + sticky2Dcursor);
 		
 		if (nSpectra > 1) {
 
@@ -3600,6 +3611,7 @@ class GraphSet implements XYScaleConverter {
 			xValueMovedTo = toX(xPixelMovedTo);
 			yValueMovedTo = getSpectrum().getYValueAt(xValueMovedTo);
 		}
+		//System.out.println("p1");
 		if (pd.integralShiftMode != 0) {
 			AnnotationData ad = getDialog(AType.Integration, -1);
 			Coordinate[] xy = ((IntegralData) ad.getData()).getXYCoords();
@@ -3609,10 +3621,13 @@ class GraphSet implements XYScaleConverter {
 					- (pd.integralShiftMode > 0 ? yPixelPlot1 : yPixelPlot0), yPixel0,
 					yPixels);
 		} else if (pd.isIntegralDrag) {
+			//System.out.println("p3");
 		} else if (pendingMeasurement != null) {
+			//System.out.println("p4");
 			processPendingMeasurement(xPixel, yPixel, 0);
 			setToolTipForPixels(xPixel, yPixel);
 		} else {
+			//System.out.println("p2");
 			selectedMeasurement = (inPlotMove && selectedSpectrumMeasurements != null ? findMeasurement(
 					selectedSpectrumMeasurements, xPixel, yPixel,Measurement.PT_ON_LINE)
 					: null);
@@ -3627,6 +3642,7 @@ class GraphSet implements XYScaleConverter {
 			}
 			setToolTipForPixels(xPixel, yPixel);
 			if (imageView == null) {
+				//System.out.println("no imageview");
 				piMouseOver = null;
 				int iSpec = (nSplit > 1 ? iSpectrumMovedTo : iSpectrumClicked);
 				if (!isDrawNoSpectra() && iSpec >= 0) {
@@ -3638,8 +3654,10 @@ class GraphSet implements XYScaleConverter {
 					}
 				}
 			} else {
-				if (!pd.display1D && sticky2Dcursor)
+				if (!pd.display1D && sticky2Dcursor) {
+					//System.out.println("settingxhair " + xPixel + " " + yPixel);
 					set2DCrossHairs(xPixel, yPixel);
+				}
 			}
 		}
 		// pd.repaint();
@@ -4381,7 +4399,7 @@ class GraphSet implements XYScaleConverter {
   }
 
   
-  private boolean get2DImage() {
+  private boolean get2DImage(Spectrum spec0) {
     imageView = new ImageView();
     imageView.set(viewList.get(0).getScale());
     if (!update2dImage(true))
