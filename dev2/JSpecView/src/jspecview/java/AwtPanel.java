@@ -207,7 +207,8 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
 
   @Override
 	public void doRepaint(boolean andTaintAll) {
-  	pd.taintedAll |= andTaintAll;
+  	if (andTaintAll)
+  		pd.setTaintedAll();
   	// to the system
   	if (!pd.isPrinting)
       vwr.requestRepaint();

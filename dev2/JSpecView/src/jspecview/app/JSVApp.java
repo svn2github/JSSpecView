@@ -555,7 +555,7 @@ public class JSVApp implements PanelListener, JSVAppInterface {
 	public void siValidateAndRepaint(boolean isAll) {
 		PanelData pd = vwr.pd();
 		if (pd != null)
-			pd.taintedAll = true;
+			pd.setTaintedAll();
 		appletFrame.validate();
 		repaint();
 	}

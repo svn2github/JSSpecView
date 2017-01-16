@@ -206,7 +206,8 @@ public class JsPanel implements JSVPanel {
 	public void doRepaint(boolean andTaintAll) {
   	if (pd == null)
   		return;
-  	pd.taintedAll |= andTaintAll;
+  	if (andTaintAll)
+  		pd.setTaintedAll();
   	// from dialogs, to the system
   	if (!pd.isPrinting)
       vwr.requestRepaint();
