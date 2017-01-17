@@ -3799,6 +3799,12 @@ class GraphSet implements XYScaleConverter {
 				selectedIntegral, val);
 	}
 
+	/**
+	 * turn on or off a PeakList, Integration, or Measurement dialog
+	 * 
+	 * @param type
+	 * @param tfToggle
+	 */
 	void setShowAnnotation(AType type, Boolean tfToggle) {
 		AnnotationData id = getDialog(type, -1);
 		if (id == null) {
@@ -3810,12 +3816,12 @@ class GraphSet implements XYScaleConverter {
 			return;
 		}
 		if (tfToggle == null) {
-			// exists and "TOGGLE"
+			// exists and "TOGGLE", but id could be an AnnotationData, not a JDialog
 			if (id instanceof JSVDialog)
 				((JSVDialog) id).setVisible(!((JSVDialog) id).isVisible()); 
 				// was tfToggle != null && ((AnnotationDialog) id).isVisible());
 			else
-				id.setState(!id.getState());
+				pd.showDialog(type);  //	was			id.setState(!id.getState());
 			return;
 		}
 		// exists and "ON" or "OFF"
