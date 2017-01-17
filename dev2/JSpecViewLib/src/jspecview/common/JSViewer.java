@@ -405,7 +405,7 @@ public class JSViewer implements PlatformViewer, BytePoster  {
 					case SETPEAK:
 					case SETX:
 					case SHIFTX:
-						execShiftSpectrum(st, script);
+						execShiftSpectrum(st, token);
 						break;
 					case SHOWERRORS:
 						show("errors");
@@ -1878,7 +1878,7 @@ public class JSViewer implements PlatformViewer, BytePoster  {
 		try {
 			return ((ExportInterface) JSViewer
 					.getInterface("jspecview.export.Exporter")).exportTheSpectrum(this,
-					ExportType.getType(type), null, spec, 0, spec.getXYCoords().length - 1, null, false);
+					ExportType.getType(type), null, spec, 0, spec.getXYCoords().length - 1, null, type.equalsIgnoreCase("PDF"));
 		} catch (Exception e) {
 			Logger.error(e.toString());
 			return null;

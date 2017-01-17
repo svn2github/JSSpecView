@@ -251,8 +251,9 @@ public class Exporter implements ExportInterface {
 		}
 		String s = null;
 		try {
-			OC out = (isJob ? null : viewer.getOutputChannel(isBase64 ? null
-					: pdfFileName, true));
+			OC out = (isJob ? null : 
+				isBase64 ? new OC().setParams(null,  ";base64,", false, null)
+						: viewer.getOutputChannel(pdfFileName, true));
 			String printJobTitle = pd.getPrintJobTitle(true);
 			if (pl.showTitle) {
 				printJobTitle = jsvp.getInput("Title?", "Title for Printing",
@@ -261,8 +262,7 @@ public class Exporter implements ExportInterface {
 					return null;
 			}
 			jsvp.printPanel(pl, out, printJobTitle);
-			s = (isBase64 ? Base64.getBase64(out.toByteArray()).toString() : out
-					.toString());
+			s = out.toString();
 		} catch (Exception e) {
 			jsvp.showMessage(e.toString(), "File Error");
 		}
