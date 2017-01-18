@@ -1678,5 +1678,4 @@ public class PanelData implements EventManager {
 		vwr.execView("*", true);		
 	}
 
-
 }

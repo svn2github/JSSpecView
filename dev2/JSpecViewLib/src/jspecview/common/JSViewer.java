@@ -1478,7 +1478,7 @@ public class JSViewer implements PlatformViewer, BytePoster  {
 		while (enume.hasMoreElements()) {
 			JSVTreeNode node = enume.nextElement();
 			if (fileName == null
-					|| node.getPanelNode().source.getFilePath().equals(fileName)) {
+					|| node.getPanelNode().source.matchesFilePath(fileName)) {
 				for (Enumeration<JSVTreeNode> e = node.children(); e.hasMoreElements();) {
 					JSVTreeNode childNode = e.nextElement();
 					toDelete.addLast(childNode);

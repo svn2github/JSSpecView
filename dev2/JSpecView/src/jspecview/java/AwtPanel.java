@@ -57,6 +57,7 @@ import javajs.api.GenericMouseInterface;
 import javajs.api.GenericPlatform;
 import javajs.awt.Font;
 import javajs.util.Lst;
+import javajs.util.OC;
 import javajs.util.PT;
 
 import javax.imageio.ImageIO;
@@ -369,8 +370,9 @@ public class AwtPanel extends JPanel implements JSVPanel, Printable {
 		return Font.getFontFaceID("SansSerif");
 	}
 	
+
 	@Override
-	public String saveImage(String type, GenericFileInterface file) {
+	public String saveImage(String type, GenericFileInterface file, OC out) {
 		String msg = "OK";
     try {
 	    Image image = createImage(getWidth(), getHeight());

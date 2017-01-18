@@ -44,12 +44,15 @@ import javajs.api.GenericFileInterface;
 import javajs.api.GenericMouseInterface;
 import javajs.api.GenericPlatform;
 import javajs.awt.Font;
+import javajs.util.Base64;
 import javajs.util.Lst;
+import javajs.util.OC;
 
 import org.jmol.util.Logger;
 
 import jspecview.api.JSVPanel;
 import jspecview.api.JSVPdfWriter;
+import jspecview.common.ExportType;
 import jspecview.common.Spectrum;
 import jspecview.common.JSViewer;
 import jspecview.common.PanelData;
@@ -291,9 +294,33 @@ public class JsPanel implements JSVPanel {
 	}
 
 	@Override
-	public String saveImage(String type, GenericFileInterface file) {
-		// handled in Export
-		return null;
+	public String saveImage(String type, GenericFileInterface file, OC out) {
+	
+			String fname = file.getName();
+			boolean isPNG = type.equals(ExportType.PNG);				
+			String s = (isPNG ? "png" : "jpeg");
+			//pd.graphToMain(); TODO
+			/**
+			 * this will probably be png even if jpeg is requested
+			 * 
+			 * @j2sNative
+			 * 
+			 *            s = viewer.display.toDataURL(s);
+			 *	if (!isPNG && s.contains("/png"))
+			 *		fname = fname.split('.jp')[0] + ".png";
+			 * 
+			 */
+			{
+			}
+			try {
+				out = vwr.getOutputChannel(fname, true);
+				byte[] data = Base64.decodeBase64(s);
+				out.write(data, 0, data.length);
+				out.closeChannel();
+				return "OK " + out.getByteCount() + " bytes";
+			} catch (Exception e) {
+				return e.toString();
+			}
 	}
 
 	@Override
