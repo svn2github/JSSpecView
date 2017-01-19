@@ -2289,7 +2289,8 @@ class GraphSet implements XYScaleConverter {
 					drawBar(gBack, null, hl.x1, hl.x2, ScriptToken.HIGHLIGHTCOLOR, 0);
 				}
 			}
-			drawPeakTabs(gFront, gBack, spec);
+			if (pd.peakTabsOn)
+				drawPeakTabs(gFront, gBack, spec);
 		}
 		int y;
 		if (md != null) {

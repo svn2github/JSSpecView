@@ -91,6 +91,7 @@ public enum ScriptToken {
   PEAKCALLBACKFUNCTIONNAME,
   PEAKLIST("[THRESHOLD=n] [INTERPOLATE=PARABOLIC or NONE]", "creates a peak list based on a threshold value and parabolic or no interpolation"),
   PEAKTABCOLOR("C", "sets the color of peak marks for a peak listing"),
+  PEAKTABSON("T", "show peak tabs for simulated spectra"),
   PLOTAREACOLOR("C", "sets the color of the plot background"), 
   PLOTCOLOR("C", "sets the color of the graph line"), 
   PLOTCOLORS("color,color,color,...", "sets the colors of multiple plots"), 

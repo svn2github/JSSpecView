@@ -446,6 +446,8 @@ public class PanelData implements EventManager {
 			withCoords = getBoolean(ScriptToken.COORDINATESON);
 			titleOn = getBoolean(ScriptToken.TITLEON);
 			gridOn = getBoolean(ScriptToken.GRIDON);
+			peakTabsOn = getBoolean(ScriptToken.PEAKTABSON);
+			
 		}
 		doReset = false;
 		titleDrawn = false;
@@ -952,6 +954,7 @@ public class PanelData implements EventManager {
 	private Mouse mouseState;
 	public boolean gridOn;
 	public boolean titleOn;
+	public boolean peakTabsOn;
 
 	public boolean hasFocus() {
 		return jsvp.hasFocus();
