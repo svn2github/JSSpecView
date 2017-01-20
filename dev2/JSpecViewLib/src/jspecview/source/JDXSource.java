@@ -171,7 +171,8 @@ public class JDXSource extends JDXHeader {
 	}
 
 	public boolean matchesFilePath(String filePath) {
-		return this.filePath.equals(filePath) || this.filePath.replace('\\', '/').equals(filePath);
+		return this.filePath.equals(filePath) 
+				|| this.filePath.replace('\\', '/').equals(filePath);
 	}
 
 }

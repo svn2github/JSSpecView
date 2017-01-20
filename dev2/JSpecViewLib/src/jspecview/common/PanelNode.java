@@ -79,7 +79,9 @@ public class PanelNode {
   public static JDXSource findSourceByNameOrId(String id, Lst<PanelNode> panelNodes) {
     for (int i = panelNodes.size(); --i >= 0;) {
       PanelNode node = panelNodes.get(i);
-      if (id.equals(node.id) || node.source.matchesFilePath(id)) // had "IgnoreCase" here, but for a file path??
+      if (id.equals(node.id) 
+      		|| id.equals(node.source.getSpectra().get(0).sourceID) // needed for simulated spectra 
+  				|| node.source.matchesFilePath(id)) // had "IgnoreCase" here, but for a file path??
         return node.source;
     }
     // only if that doesn't work -- check file name for exact case
