@@ -2116,7 +2116,7 @@ public class JSViewer implements PlatformViewer, BytePoster  {
 				return "";
 			boolean isExact = (cmd.endsWith(" ") || tokens.size() > 1 && oneLineOnly);
 			Lst<ScriptToken> list = ScriptToken.getScriptTokenList(tokens.size()== 0 ? null : tokens.get(0),
-					isExact || isHelp && tokens.size() > 0);
+					isExact);// || isHelp && tokens.size() > 0);
 			switch (list.size()) {
 			case 0:
 				tip = "?";

@@ -398,7 +398,7 @@ class GraphSet implements XYScaleConverter {
 				////&& xPixel <= xPixel11 - 10 && yPixel <= yPixel00 + 11);
 	}
 
-	private boolean isCloseWidget(int xPixel, int yPixel) {
+	private boolean isCloserWidget(int xPixel, int yPixel) {
 		return isFrameBox(xPixel, yPixel, closerX, closerY);
 	}
 
@@ -2542,7 +2542,7 @@ class GraphSet implements XYScaleConverter {
 			pd.setToolTipText("click to " + (nSplit > 1 ? "combine" : "split"));
 			return;
 		}
-		if (isCloseWidget(xPixel, yPixel)) {
+		if (isCloserWidget(xPixel, yPixel)) {
 			pd.setToolTipText("click to close");
 			return;
 		}
@@ -3401,7 +3401,7 @@ class GraphSet implements XYScaleConverter {
 			splitStack(nSplit == 1);
 			return;
 		}
-		if (isCloseWidget(xPixel, yPixel)) {
+		if (isCloserWidget(xPixel, yPixel)) {
 			pd.closeSpectrum();
 			return;
 		}

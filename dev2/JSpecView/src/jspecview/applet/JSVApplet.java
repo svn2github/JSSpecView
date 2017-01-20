@@ -197,9 +197,9 @@ public class JSVApplet extends JApplet implements JSVAppletInterface,
 	 */
 	@Override
 	public String getAppletInfo() {
-		return "JSpecView Applet " + JSVersion.VERSION;
+		return JSVApp.getAppletInfo();
 	}
-
+	
 	// /////////////// JSpecView JavaScript calls ///////////////////
 
 	/*

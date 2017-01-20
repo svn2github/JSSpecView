@@ -78,7 +78,7 @@ public enum ScriptToken {
   JMOL("...Jmol command...", "send a command to Jmol (if present)"),
   JSV,
   LABEL("x y [color and/or \"text\"]", "add a text label"),
-  LINK("AB or ABC or NONE or ALL", "link spectra to be overlaid"),
+  LINK("AB or ABC or NONE or ALL", "synchronize the crosshair of a 2D spectrum with 1D cursors"),
   LOAD("[APPEND] \"fileName\" [first] [last]; use \"\" for current file; $H1/name or $C13/name for simulation", "load a specturm"),
   LOADFILECALLBACKFUNCTIONNAME,
   LOADIMAGINARY("TF","set TRUE to load imaginary NMR component"),

@@ -650,7 +650,8 @@ public class PanelData implements EventManager {
 	}
 
 	public String getSourceID() {
-		return getSpectrumAt(0).sourceID;
+		String id = getSpectrum().sourceID;
+		return (id == null ? getSpectrumAt(0).sourceID : id);
 	}
 	
 	public int getStartingPointIndex(int index) {
