@@ -232,10 +232,14 @@ public class MainFrame extends JFrame implements JmolSyncInterface,
 		if (!isEmbedded)
 			return;
 		System.out.println("MAINFRAME visible/awake" + visible + " " + isAwake + " " + jmolDisplay);
-		if (jmolDisplay == null || isAwake == visible)
+		if (isAwake == visible)
 			return;
+    isAwake = visible;
+		if (jmolDisplay == null) {
+			setVisible(visible);
+			return;
+		}
 		try {
-      isAwake = visible;
 			Container top = jmolPanel.getTopLevelAncestor(); 
 			if (visible) {
 				jmolDimensionOld = new Dimension(0, 0);
