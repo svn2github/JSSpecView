@@ -34,9 +34,14 @@ todo:
 
 add JSME to St. Olaf 24/7 OleNMR system portal for comparisons.
 
+
 BH 04/13/2017
  -feature: Allow JSpecView to close when embedded
  -feature: Allows Jmol to have JSpecView embedded but not have Jmol embedded in it. 
+
+BH 01/16/2017 
+ -bug fix: integration on/off/toggle should not clear integrals
+ -bug fix: showIntegration on/off/toggle should not clear integrals
 
 BH 01/14/2017 
  -feature: easier spectrum closing with [x] box
