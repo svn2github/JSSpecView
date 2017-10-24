@@ -217,6 +217,8 @@ public class OC extends OutputStream implements GenericOutputChannel {
   public void write(byte[] buf, int i, int len) {
     if (os == null)
       initOS();
+    if (len < 0)
+      len = buf.length - i;
     try {
       os.write(buf, i, len);
     } catch (IOException e) {
@@ -438,6 +440,10 @@ public class OC extends OutputStream implements GenericOutputChannel {
       writeByteAsInt(i >> 16);
       writeByteAsInt(i >> 24);
     }
+  }
+
+  public void writeFloat(float x) {
+    writeInt(x == 0 ? 0 : Float.floatToIntBits(x));
   }
 
 }
