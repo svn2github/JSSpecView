@@ -144,13 +144,12 @@
         <jar destfile="${build.dir}/${ant.project.name}.app.${build.number}_unsigned.jar" manifest="manifests/application.txt">
 		   	<fileset dir="${bin.dir}">
 		      <include name="**/*"/>
-  		      <exclude name="javajs/swing/**/*"/>
 			  <exclude name="jspecview/*js*/*"/>
 		      <exclude name="jspecview/unused/*"/>
 		   	</fileset>
         	<fileset dir="${jsvlib.dir}">
   		      <include name="**/*"/>
-    		  <exclude name="javajs/swing/**/*"/>
+    		  <exclude name="org/jmol/awtjs/swing/**/*"/>
             </fileset>
         </jar>
 		<copy overwrite="true" file="${build.dir}/${ant.project.name}.app.${build.number}_unsigned.jar"
