@@ -10,7 +10,7 @@ import java.io.OutputStreamWriter;
 import javajs.J2SIgnoreImport;
 import javajs.api.BytePoster;
 import javajs.api.GenericOutputChannel;
-import javajs.api.JmolObjectInterface;
+import javajs.api.js.J2SObjectInterface;
 
 /**
  * 
@@ -334,7 +334,7 @@ public class OC extends OutputStream implements GenericOutputChannel {
       return (sb == null ? null : sb.toString());
     }
     closed = true;
-    JmolObjectInterface jmol = null;
+    J2SObjectInterface jmol = null;
     Object _function = null;
     /**
      * @j2sNative
@@ -398,9 +398,9 @@ public class OC extends OutputStream implements GenericOutputChannel {
   }
 
   public final static String[] urlPrefixes = { "http:", "https:", "sftp:", "ftp:",
-  "file:" };
+  "cache://", "file:" };
   // note that SFTP is not supported
-  public final static int URL_LOCAL = 4;
+  public final static int URL_LOCAL = 5;
 
   public static boolean isRemote(String fileName) {
     if (fileName == null)

@@ -1,7 +1,7 @@
 /* $RCSfile$
  * $Author: hansonr $
- * $Date: 2013-10-30 13:47:37 -0500 (Wed, 30 Oct 2013) $
- * $Revision: 18874 $
+ * $Date: 2018-03-22 13:33:13 -0500 (Thu, 22 Mar 2018) $
+ * $Revision: 21873 $
  *
  * Copyright (C) 2003-2005  Miguel, Jmol Development, www.jmol.org
  *
@@ -24,7 +24,6 @@
 package javajs.awt;
 
 
-import javajs.api.FontManager;
 import javajs.util.AU;
 
 

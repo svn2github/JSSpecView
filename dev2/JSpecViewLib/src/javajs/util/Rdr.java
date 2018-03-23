@@ -55,6 +55,26 @@ import javajs.api.GenericZipTools;
  */
 public class Rdr implements GenericLineReader {
 
+  public static class StreamReader extends BufferedReader {
+
+    private BufferedInputStream stream;
+
+    public StreamReader(BufferedInputStream bis, String charSet) throws UnsupportedEncodingException {
+      super(new InputStreamReader(bis, (charSet == null ? "UTF-8" : charSet)));
+      stream = bis;
+    }
+    
+    public BufferedInputStream getStream() {
+      try {
+        stream.reset();
+      } catch (IOException e) {
+        // ignore
+      }
+      return stream;
+    }
+
+  }
+
   BufferedReader reader;
 
   public Rdr(BufferedReader reader) {
@@ -180,12 +200,16 @@ public class Rdr implements GenericLineReader {
   }
 
   public static boolean isMessagePackS(InputStream is) {
-    return isMessagePackB(getMagic(is, 1));
+    return isMessagePackB(getMagic(is, 2));
   }
 
   public static boolean isMessagePackB(byte[] bytes) {
-    // look for 'map' start
-    return (bytes != null && bytes.length >= 1 && (bytes[0] & 0xFF) == 0xDE);
+    // look for 'map' start, but PNG files start with 0x89, which is
+    // the MessagePack start for a 9-member map, so in that case we have
+    // to check that the next byte is not "P" as in <89>PNG
+    int b;
+    
+    return (bytes != null && bytes.length >= 1 && (((b = bytes[0] & 0xFF)) == 0xDE || (b & 0xE0) == 0x80 && bytes[1] != 0x50));
   }
 
   public static boolean isPngZipStream(InputStream is) {
@@ -342,7 +366,7 @@ public class Rdr implements GenericLineReader {
       throws IOException {
     // could also just make sure we have a buffered input stream here.
     if (getUTFEncodingForStream(bis) == Encoding.NONE)
-      return new BufferedReader(new InputStreamReader(bis, (charSet == null ? "UTF-8" : charSet)));
+      return new Rdr.StreamReader(bis, charSet);
     byte[] bytes = getLimitedStreamBytes(bis, -1);
     bis.close();
     return getBR(charSet == null ? fixUTF(bytes) : new String(bytes, charSet));
@@ -395,7 +419,7 @@ public class Rdr implements GenericLineReader {
    * @param bis
    * @return a UTF-8 string
    */
-  public static String StreamToUTF8String(BufferedInputStream bis) {
+  public static String streamToUTF8String(BufferedInputStream bis) {
     String[] data = new String[1];
     try {
       readAllAsString(getBufferedReader(bis, "UTF-8"), -1, true, data, 0);

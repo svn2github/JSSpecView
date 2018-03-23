@@ -59,11 +59,13 @@ public class JSJSONParser {
    * Could return Integer, Float, Boolean, String, Map<String, Object>, Lst<Object>, or null
    * 
    * @param str
+   * @param asHashTable 
    * @return a object equivalent to the JSON string str
    * 
    */
-  public Object parse(String str) {
+  public Object parse(String str, boolean asHashTable) {
     index = 0;
+    this.asHashTable = asHashTable;
     this.str = str;
     len = str.length();
     return getValue(false);
@@ -143,7 +145,7 @@ public class JSJSONParser {
     if (isKey && c == 0)
       throw new JSONException("invalid key");
 
-    String string = str.substring(i, index);
+    String string = str.substring(i, index).trim();
 
     // check for the only valid simple words: true, false, null (lower case)
     // and in this case, only for 
@@ -160,7 +162,6 @@ public class JSJSONParser {
       }
     }
     //  only numbers from here on:
-
     c = string.charAt(0);
     if (c >= '0' && c <= '9' || c == '-')
       try {
@@ -280,7 +281,7 @@ public class JSJSONParser {
     switch (getChar()) {
     case ']':
       return l;
-    case 0:
+    case '\0':
       throw new JSONException("invalid array");
     }
     returnChar();
