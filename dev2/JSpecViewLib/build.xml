@@ -48,6 +48,7 @@
             <include name="api/JmolJDXMOLParser.java" />
             <include name="api/JmolJDXMOLReader.java" />
 	        <include name="api/Translator.java" />
+            <include name="awtjs/swing/*.java" />
             <include name="jsv/JDXMOLParser.java" />
 	        <include name="popup/GenericSwingPopup.java" />
 	        <include name="popup/PopupHelper.java" />
