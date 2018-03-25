@@ -34,6 +34,8 @@ todo:
 
 add JSME to St. Olaf 24/7 OleNMR system portal for comparisons.
 
+BH 03/23/2018
+ -feature: generate SwingJS-ready jar files
 
 BH 04/13/2017
  -feature: Allow JSpecView to close when embedded
